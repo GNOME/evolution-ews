@@ -569,7 +569,7 @@ do_flags_diff (flags_diff_t *diff, guint32 old, guint32 _new)
 }
 
 gchar *
-gw_concat ( const gchar *prefix, const gchar *suffix)
+ews_concat ( const gchar *prefix, const gchar *suffix)
 {
 	gsize len;
 

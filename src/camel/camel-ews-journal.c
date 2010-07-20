@@ -145,7 +145,7 @@ ews_entry_write (CamelOfflineJournal *journal, CamelDListNode *entry, FILE *out)
 }
 
 static void
-gw_message_info_dup_to (CamelMessageInfoBase *dest, CamelMessageInfoBase *src)
+ews_message_info_dup_to (CamelMessageInfoBase *dest, CamelMessageInfoBase *src)
 {
 	camel_flag_list_copy (&dest->user_flags, &src->user_flags);
 	camel_tag_list_copy (&dest->user_tags, &src->user_tags);
@@ -158,7 +158,7 @@ gw_message_info_dup_to (CamelMessageInfoBase *dest, CamelMessageInfoBase *src)
 static gint
 ews_entry_play_append (CamelOfflineJournal *journal, CamelEwsJournalEntry *entry, GError **error)
 {
-	CamelEwsFolder *gw_folder = (CamelEwsFolder *) journal->folder;
+	CamelEwsFolder *ews_folder = (CamelEwsFolder *) journal->folder;
 	CamelFolder *folder = journal->folder;
 	CamelMimeMessage *message;
 	CamelMessageInfo *info;
@@ -166,7 +166,7 @@ ews_entry_play_append (CamelOfflineJournal *journal, CamelEwsJournalEntry *entry
 	gboolean success = FALSE;
 
 	/* if the message isn't in the cache, the user went behind our backs so "not our problem" */
-	if (!gw_folder->cache || !(stream = camel_data_cache_get (gw_folder->cache, "cache", entry->uid, error))) {
+	if (!ews_folder->cache || !(stream = camel_data_cache_get (ews_folder->cache, "cache", entry->uid, error))) {
 		success = TRUE;
 		goto done;
 	}
@@ -192,7 +192,7 @@ ews_entry_play_append (CamelOfflineJournal *journal, CamelEwsJournalEntry *entry
 done:
 
 	camel_folder_summary_remove_uid (folder->summary, entry->uid);
-	camel_data_cache_remove (gw_folder->cache, "cache", entry->uid, NULL);
+	camel_data_cache_remove (ews_folder->cache, "cache", entry->uid, NULL);
 
 	return (success == 0);
 }
@@ -200,7 +200,7 @@ done:
 static gint
 ews_entry_play_transfer (CamelOfflineJournal *journal, CamelEwsJournalEntry *entry, GError **error)
 {
-	CamelEwsFolder *gw_folder = (CamelEwsFolder *) journal->folder;
+	CamelEwsFolder *ews_folder = (CamelEwsFolder *) journal->folder;
 	CamelFolder *folder = journal->folder;
 	CamelEwsMessageInfo *real;
 	CamelMessageInfoBase *info;
@@ -225,7 +225,7 @@ ews_entry_play_transfer (CamelOfflineJournal *journal, CamelEwsJournalEntry *ent
 			real = (CamelEwsMessageInfo *) camel_folder_summary_uid (folder->summary, xuids->pdata[0]);
 
 			/* transfer all the system flags, user flags/tags, etc */
-			gw_message_info_dup_to ((CamelMessageInfoBase *) real, (CamelMessageInfoBase *) info);
+			ews_message_info_dup_to ((CamelMessageInfoBase *) real, (CamelMessageInfoBase *) info);
 			camel_message_info_free (real);
 		} else {
 			goto exception;
@@ -244,7 +244,7 @@ ews_entry_play_transfer (CamelOfflineJournal *journal, CamelEwsJournalEntry *ent
 
 	/* message was successfully transferred, remove the fake item from the cache/summary */
 	camel_folder_summary_remove_uid (folder->summary, entry->uid);
-	camel_data_cache_remove (gw_folder->cache, "cache", entry->uid, NULL);
+	camel_data_cache_remove (ews_folder->cache, "cache", entry->uid, NULL);
 	camel_message_info_free (info);
 
 	return 0;
@@ -331,7 +331,7 @@ update_cache (CamelEwsJournal *ews_journal, CamelMimeMessage *message,
 	camel_pstring_free(info->uid);
 	info->uid = camel_pstring_strdup (uid);
 
-	gw_message_info_dup_to ((CamelMessageInfoBase *) info, (CamelMessageInfoBase *) mi);
+	ews_message_info_dup_to ((CamelMessageInfoBase *) info, (CamelMessageInfoBase *) mi);
 
 	camel_folder_summary_add (folder->summary, info);
 
@@ -373,13 +373,13 @@ camel_ews_journal_transfer (CamelEwsJournal *ews_journal, CamelEwsFolder *source
 				  GError **error)
 {
 	CamelOfflineJournal *journal = (CamelOfflineJournal *) ews_journal;
-	CamelEwsStore *gw_store;
+	CamelEwsStore *ews_store;
 	CamelEwsJournalEntry *entry;
 	CamelStore *parent_store;
 	gchar *uid;
 
 	parent_store = camel_folder_get_parent_store (journal->folder);
-	gw_store = CAMEL_EWS_STORE (parent_store);
+	ews_store = CAMEL_EWS_STORE (parent_store);
 
 	if (!update_cache (ews_journal, message, mi, &uid, error))
 		return FALSE;
@@ -388,7 +388,7 @@ camel_ews_journal_transfer (CamelEwsJournal *ews_journal, CamelEwsFolder *source
 	entry->type = CAMEL_EWS_JOURNAL_ENTRY_APPEND;
 	entry->uid = uid;
 	entry->original_uid = g_strdup (original_uid);
-	entry->source_container = g_strdup (camel_ews_store_container_id_lookup (gw_store, camel_folder_get_name (((CamelFolder *)source_folder))));
+	entry->source_container = g_strdup (camel_ews_store_container_id_lookup (ews_store, camel_folder_get_name (((CamelFolder *)source_folder))));
 
 	camel_dlist_addtail (&journal->queue, (CamelDListNode *) entry);
 

@@ -73,7 +73,7 @@ gint      e_path_rmdir        (const gchar *prefix, const gchar *vpath);
 EEwsItem *camel_ews_util_item_from_message (EEwsConnection *cnc, CamelMimeMessage *message, CamelAddress *from);
 
 void do_flags_diff (flags_diff_t *diff, guint32 old, guint32 _new);
-gchar *gw_concat ( const gchar *prefix, const gchar *suffix);
+gchar *ews_concat ( const gchar *prefix, const gchar *suffix);
 void strip_lt_gt (gchar **string, gint s_offset, gint e_offset);
 
 G_END_DECLS

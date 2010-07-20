@@ -846,9 +846,9 @@ set_members_in_ews_item (EEwsItem  *item, EContact *contact, EBookBackendEws *eg
 				GList *v = e_vcard_attribute_param_get_values (param);
 				id = v ? v->data : NULL;
 				if (id) {
-					EEwsItem *gw_item = NULL;
-					e_ews_connection_get_item (egwb->priv->cnc, egwb->priv->container_id,id, "name email", &gw_item);
-					if (!gw_item) {
+					EEwsItem *ews_item = NULL;
+					e_ews_connection_get_item (egwb->priv->cnc, egwb->priv->container_id,id, "name email", &ews_item);
+					if (!ews_item) {
 						/* The item corresponding to this id is not found. This happens in case of
 						 * importing, in imported file the stored id is corresponding to the address
 						 * book from which the contact list was exported.
@@ -856,7 +856,7 @@ set_members_in_ews_item (EEwsItem  *item, EContact *contact, EBookBackendEws *eg
 						id = NULL;
 					}
 					else
-						g_object_unref (gw_item);
+						g_object_unref (ews_item);
 				}
 			} else if (!g_ascii_strcasecmp (param_name,
 							EVC_X_DEST_EMAIL)) {
@@ -1579,7 +1579,7 @@ func_contains (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer
 	    && argv[1]->type == ESEXP_RES_STRING) {
 		gchar *propname = argv[0]->value.string;
 		gchar *str = argv[1]->value.string;
-		const gchar *gw_field_name;
+		const gchar *ews_field_name;
 
 		if (g_str_equal (propname, "x-evolution-any-field")) {
 			if (!sexp_data->is_personal_book && str && strlen(str) == 0) {
@@ -1590,16 +1590,16 @@ func_contains (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer
 				return r;
 			}
 		}
-		gw_field_name = NULL;
+		ews_field_name = NULL;
 		if (g_str_equal (propname, "full_name"))
-			gw_field_name = "fullName";
+			ews_field_name = "fullName";
 		else if (g_str_equal (propname, "email"))
-			gw_field_name = "emailList/email";
+			ews_field_name = "emailList/email";
 		else if (g_str_equal (propname, "file_as") || g_str_equal (propname, "nickname"))
-			 gw_field_name = "name";
+			 ews_field_name = "name";
 
-		if (gw_field_name) {
-			if (g_str_equal (gw_field_name, "fullName")) {
+		if (ews_field_name) {
+			if (g_str_equal (ews_field_name, "fullName")) {
 				e_ews_filter_add_filter_component (filter, E_EWS_FILTER_OP_CONTAINS, "fullName/firstName", str);
 				e_ews_filter_add_filter_component (filter, E_EWS_FILTER_OP_CONTAINS, "fullName/lastName", str);
 				if (sexp_data->is_personal_book) {
@@ -1611,7 +1611,7 @@ func_contains (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer
 				}
 			}
 			else {
-				e_ews_filter_add_filter_component (filter, E_EWS_FILTER_OP_CONTAINS, gw_field_name, str);
+				e_ews_filter_add_filter_component (filter, E_EWS_FILTER_OP_CONTAINS, ews_field_name, str);
 			}
 		}
 		else {
@@ -1640,18 +1640,18 @@ func_is(struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer data)
 	    && argv[1]->type == ESEXP_RES_STRING) {
 		gchar *propname = argv[0]->value.string;
 		gchar *str = argv[1]->value.string;
-		const gchar *gw_field_name;
+		const gchar *ews_field_name;
 
-		gw_field_name = NULL;
+		ews_field_name = NULL;
 		if (g_str_equal (propname, "full_name"))
-			gw_field_name = "fullName";
+			ews_field_name = "fullName";
 		else if (g_str_equal (propname, "email"))
-			gw_field_name = "emailList/email";
+			ews_field_name = "emailList/email";
 		else if (g_str_equal (propname, "file_as") || g_str_equal (propname, "nickname"))
-			gw_field_name = "name";
+			ews_field_name = "name";
 
-		if (gw_field_name) {
-			if (g_str_equal (gw_field_name, "fullName")) {
+		if (ews_field_name) {
+			if (g_str_equal (ews_field_name, "fullName")) {
 				e_ews_filter_add_filter_component (filter, E_EWS_FILTER_OP_EQUAL, "fullName/firstName", str);
 				e_ews_filter_add_filter_component (filter, E_EWS_FILTER_OP_EQUAL, "fullName/lastName", str);
 				if (sexp_data->is_personal_book) {
@@ -1663,7 +1663,7 @@ func_is(struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer data)
 				}
 			}
 			else {
-				e_ews_filter_add_filter_component (filter, E_EWS_FILTER_OP_EQUAL, gw_field_name, str);
+				e_ews_filter_add_filter_component (filter, E_EWS_FILTER_OP_EQUAL, ews_field_name, str);
 			}
 		}
 		else {
@@ -1698,7 +1698,7 @@ func_beginswith(struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointe
 	    && argv[1]->type == ESEXP_RES_STRING) {
 		gchar *propname = argv[0]->value.string;
 		gchar *str = argv[1]->value.string;
-		const gchar *gw_field_name;
+		const gchar *ews_field_name;
 
 		if (!sexp_data->is_personal_book && str && strlen(str) == 0) {
 			/* ignore the NULL query */
@@ -1708,27 +1708,27 @@ func_beginswith(struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointe
 			return r;
 		}
 
-		gw_field_name = NULL;
+		ews_field_name = NULL;
 		if (g_str_equal (propname, "full_name")) {
-			gw_field_name = "fullName";
+			ews_field_name = "fullName";
 			sexp_data->auto_completion |= BEGINS_WITH_NAME;
 			sexp_data->search_string = g_strdup (str);
 		}
 		else if (g_str_equal (propname, "email")) {
-			gw_field_name = "emailList/email";
+			ews_field_name = "emailList/email";
 			sexp_data->auto_completion |= BEGINS_WITH_EMAIL;
 		}
 		else if (g_str_equal (propname, "file_as")) {
-			 gw_field_name = "name";
+			 ews_field_name = "name";
 			 sexp_data->auto_completion |= BEGINS_WITH_FILE_AS;
 		} else if (g_str_equal (propname, "nickname")) {
-			 gw_field_name = "name";
+			 ews_field_name = "name";
 			 sexp_data->auto_completion |= BEGINS_WITH_NICK_NAME;
 		}
 
-		if (gw_field_name) {
+		if (ews_field_name) {
 
-			if (g_str_equal (gw_field_name, "fullName")) {
+			if (g_str_equal (ews_field_name, "fullName")) {
 				e_ews_filter_add_filter_component (filter, E_EWS_FILTER_OP_BEGINS, "fullName/firstName", str);
 				e_ews_filter_add_filter_component (filter, E_EWS_FILTER_OP_BEGINS, "fullName/lastName", str);
 				if (sexp_data->is_personal_book) {
@@ -1740,7 +1740,7 @@ func_beginswith(struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointe
 				}
 			}
 			else {
-				e_ews_filter_add_filter_component (filter, E_EWS_FILTER_OP_BEGINS, gw_field_name, str);
+				e_ews_filter_add_filter_component (filter, E_EWS_FILTER_OP_BEGINS, ews_field_name, str);
 			}
 		}
 		else {
@@ -1784,20 +1784,20 @@ func_exists(struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer da
 	    && argv[0]->type == ESEXP_RES_STRING) {
 		gchar *propname = argv[0]->value.string;
 		const gchar *str = "";
-		const gchar *gw_field_name;
+		const gchar *ews_field_name;
 
-		gw_field_name = NULL;
+		ews_field_name = NULL;
 		if (g_str_equal (propname, "full_name"))
-			gw_field_name = "fullName";
+			ews_field_name = "fullName";
 		else if (g_str_equal (propname, "email"))
-			gw_field_name = "emailList/email";
+			ews_field_name = "emailList/email";
 		else if (g_str_equal (propname, "file_as") || g_str_equal (propname, "nickname"))
-			 gw_field_name = "name";
+			 ews_field_name = "name";
 
 		/* FIXME the whole function looks useless. Why does one need str argument to the filter here ?*/
-		if (gw_field_name) {
+		if (ews_field_name) {
 
-			if (g_str_equal (gw_field_name, "fullName")) {
+			if (g_str_equal (ews_field_name, "fullName")) {
 				e_ews_filter_add_filter_component (filter, E_EWS_FILTER_OP_EXISTS, "fullName/firstName", str);
 				e_ews_filter_add_filter_component (filter, E_EWS_FILTER_OP_EXISTS, "fullName/lastName", str);
 				if (sexp_data->is_personal_book) {
@@ -1809,7 +1809,7 @@ func_exists(struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer da
 				}
 			}
 			else {
-				e_ews_filter_add_filter_component (filter, E_EWS_FILTER_OP_EXISTS, gw_field_name, str);
+				e_ews_filter_add_filter_component (filter, E_EWS_FILTER_OP_EXISTS, ews_field_name, str);
 			}
 		}
 		else {
@@ -1898,7 +1898,7 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 {
 	GList *vcard_list;
 	gint status;
-	GList *gw_items, *contacts = NULL, *temp;
+	GList *ews_items, *contacts = NULL, *temp;
 	EContact *contact;
 	EBookBackendEws *egwb;
 	gboolean match_needed;
@@ -1909,7 +1909,7 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 
 	egwb = E_BOOK_BACKEND_GROUPWISE (backend);
 	vcard_list = NULL;
-	gw_items = NULL;
+	ews_items = NULL;
 
 	if (enable_debug)
 		printf ("\ne_book_backend_ews_get_contact_list...\n");
@@ -1995,12 +1995,12 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 				status = e_ews_connection_get_items_from_ids (egwb->priv->cnc,
 									egwb->priv->container_id,
 									"name email default members",
-									ids, &gw_items);
+									ids, &ews_items);
 				if (status == E_EWS_CONNECTION_STATUS_INVALID_CONNECTION)
 				status = e_ews_connection_get_items_from_ids (egwb->priv->cnc,
 									egwb->priv->container_id,
 									"name email default members",
-									ids, &gw_items);
+									ids, &ews_items);
 			}
 			if (ids)
 				g_ptr_array_free (ids, TRUE);
@@ -2016,21 +2016,21 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 			status = e_ews_connection_get_items (egwb->priv->cnc,
 							    egwb->priv->container_id,
 							    "name email default members",
-							    filter, &gw_items);
+							    filter, &ews_items);
 			if (status == E_EWS_CONNECTION_STATUS_INVALID_CONNECTION)
 				status = e_ews_connection_get_items (egwb->priv->cnc,
 								    egwb->priv->container_id,
 								    "name email default members",
-								    filter, &gw_items);
+								    filter, &ews_items);
 		}
 
 		if (status != E_EWS_CONNECTION_STATUS_OK) {
 			e_data_book_respond_get_contact_list (book, opid, EDB_ERROR_FAILED_STATUS (OTHER_ERROR, status), NULL);
 			return;
 		}
-		for (; gw_items != NULL; gw_items = g_list_next(gw_items)) {
+		for (; ews_items != NULL; ews_items = g_list_next(ews_items)) {
 			contact = e_contact_new ();
-			fill_contact_from_ews_item (contact, E_EWS_ITEM (gw_items->data), egwb->priv->categories_by_id);
+			fill_contact_from_ews_item (contact, E_EWS_ITEM (ews_items->data), egwb->priv->categories_by_id);
 			e_contact_set (contact, E_CONTACT_BOOK_URI, egwb->priv->original_uri);
 			if (match_needed &&  e_book_backend_sexp_match_contact (card_sexp, contact))
 				vcard_list = g_list_append (vcard_list,
@@ -2041,10 +2041,10 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 							    e_vcard_to_string (E_VCARD (contact),
 							    EVC_FORMAT_VCARD_30));
 			g_object_unref (contact);
-			g_object_unref (gw_items->data);
+			g_object_unref (ews_items->data);
 		}
-		if (gw_items)
-			g_list_free (gw_items);
+		if (ews_items)
+			g_list_free (ews_items);
 		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (SUCCESS), vcard_list);
 		if (filter)
 			g_object_unref (filter);
@@ -2122,7 +2122,7 @@ static gpointer
 book_view_thread (gpointer data)
 {
 	gint status, count = 0;
-	GList *gw_items, *temp_list, *contacts;
+	GList *ews_items, *temp_list, *contacts;
 	EContact *contact;
 	EBookBackendEws *gwb;
 	const gchar *query = NULL;
@@ -2137,7 +2137,7 @@ book_view_thread (gpointer data)
 	gulong diff;
 
 	gwb  = closure->bg;
-	gw_items = NULL;
+	ews_items = NULL;
 
 	if (enable_debug)
 		printf ("start book view for %s \n", gwb->priv->book_name);
@@ -2283,11 +2283,11 @@ book_view_thread (gpointer data)
 										_("Searching..."));
 				status = e_ews_connection_get_items_from_ids (gwb->priv->cnc,
 									     gwb->priv->container_id,
-									     view, ids, &gw_items);
+									     view, ids, &ews_items);
 				if (status == E_EWS_CONNECTION_STATUS_INVALID_CONNECTION)
 					status = e_ews_connection_get_items_from_ids (gwb->priv->cnc,
 										     gwb->priv->container_id,
-										     view, ids, &gw_items);
+										     view, ids, &ews_items);
 				if (enable_debug && status == E_EWS_CONNECTION_STATUS_OK)
 					printf ("read contacts from server \n");
 			}
@@ -2331,11 +2331,11 @@ book_view_thread (gpointer data)
 			}
 			status = e_ews_connection_get_items (gwb->priv->cnc,
 							    gwb->priv->container_id,
-							    view, filter, &gw_items);
+							    view, filter, &ews_items);
 			if (status == E_EWS_CONNECTION_STATUS_INVALID_CONNECTION)
 				status = e_ews_connection_get_items (gwb->priv->cnc,
 								    gwb->priv->container_id,
-								    view, filter, &gw_items);
+								    view, filter, &ews_items);
 		}
 
 		if (ids)
@@ -2351,19 +2351,19 @@ book_view_thread (gpointer data)
 			return NULL;
 		}
 
-		temp_list = gw_items;
-		for (; gw_items != NULL; gw_items = g_list_next(gw_items)) {
+		temp_list = ews_items;
+		for (; ews_items != NULL; ews_items = g_list_next(ews_items)) {
 
 			if (!e_flag_is_set (closure->running)) {
-				for (;gw_items != NULL; gw_items = g_list_next (gw_items))
-					g_object_unref (gw_items->data);
+				for (;ews_items != NULL; ews_items = g_list_next (ews_items))
+					g_object_unref (ews_items->data);
 				break;
 			}
 
 			count++;
 			contact = e_contact_new ();
 			fill_contact_from_ews_item (contact,
-						   E_EWS_ITEM (gw_items->data),
+						   E_EWS_ITEM (ews_items->data),
 						   gwb->priv->categories_by_id);
 			e_contact_set (contact, E_CONTACT_BOOK_URI, gwb->priv->original_uri);
 			if (e_contact_get_const (contact, E_CONTACT_UID))
@@ -2371,7 +2371,7 @@ book_view_thread (gpointer data)
 			else
 				g_critical ("Id missing for item %s\n", (gchar *)e_contact_get_const (contact, E_CONTACT_FILE_AS));
 			g_object_unref(contact);
-			g_object_unref (gw_items->data);
+			g_object_unref (ews_items->data);
 		}
 		if (temp_list)
 			g_list_free (temp_list);
@@ -2584,20 +2584,20 @@ static gpointer
 build_cache (EBookBackendEws *ebgw)
 {
 	gint status, contact_num = 0;
-	GList *gw_items = NULL;
+	GList *ews_items = NULL;
 	EContact *contact;
 	EDataBookView *book_view;
 	EBookBackendEwsPrivate *priv = ebgw->priv;
 	gchar *status_msg;
 
-	status = e_ews_connection_get_items (ebgw->priv->cnc, ebgw->priv->container_id, "name email default members", NULL, &gw_items);
+	status = e_ews_connection_get_items (ebgw->priv->cnc, ebgw->priv->container_id, "name email default members", NULL, &ews_items);
 	if (status != E_EWS_CONNECTION_STATUS_OK)
 		return NULL;
 
-	for (; gw_items != NULL; gw_items = g_list_next(gw_items)) {
+	for (; ews_items != NULL; ews_items = g_list_next(ews_items)) {
 		contact_num++;
 		contact = e_contact_new ();
-		fill_contact_from_ews_item (contact, E_EWS_ITEM (gw_items->data), ebgw->priv->categories_by_id);
+		fill_contact_from_ews_item (contact, E_EWS_ITEM (ews_items->data), ebgw->priv->categories_by_id);
 		e_book_backend_cache_add_contact (ebgw->priv->cache, contact);
 		if (book_view) {
 			status_msg = g_strdup_printf (_("Downloading contacts (%d)... "),
@@ -2606,14 +2606,14 @@ build_cache (EBookBackendEws *ebgw)
 			g_free (status_msg);
 		}
 		g_object_unref(contact);
-		g_object_unref (gw_items->data);
+		g_object_unref (ews_items->data);
 
 	}
 
 	e_book_backend_cache_set_populated (priv->cache);
 	priv->is_cache_ready=TRUE;
 
-	g_list_free (gw_items);
+	g_list_free (ews_items);
 
 	return NULL;
 }*/
@@ -2625,7 +2625,7 @@ static gpointer
 build_cache (EBookBackendEws *ebgw)
 {
 	gint status;
-	GList *gw_items = NULL, *l;
+	GList *ews_items = NULL, *l;
 	EContact *contact;
 	gint cursor, contact_num = 0;
 	gboolean done = FALSE;
@@ -2668,7 +2668,7 @@ build_cache (EBookBackendEws *ebgw)
 			g_get_current_time(&tstart);
 		status = e_ews_connection_read_cursor (priv->cnc, priv->container_id,
 						      cursor, TRUE, CURSOR_ITEM_LIMIT,
-						      position, &gw_items);
+						      position, &ews_items);
 		if (enable_debug) {
 			g_get_current_time(&tend);
 			diff = tend.tv_sec * 1000 + tend.tv_usec/1000;
@@ -2679,7 +2679,7 @@ build_cache (EBookBackendEws *ebgw)
 		if (status != E_EWS_CONNECTION_STATUS_OK)
 			 break;
 
-		for (l = gw_items; l != NULL; l = g_list_next (l)) {
+		for (l = ews_items; l != NULL; l = g_list_next (l)) {
 			contact_num++;
 
 			contact = e_contact_new ();
@@ -2705,15 +2705,15 @@ build_cache (EBookBackendEws *ebgw)
 			g_object_unref (l->data);
 
 		}
-		if (!gw_items) {
+		if (!ews_items) {
 			e_book_backend_db_cache_set_populated (ebgw->priv->file_db);
 			done = TRUE;
 			priv->is_cache_ready=TRUE;
 			priv->is_summary_ready = TRUE;
 		}
 
-		g_list_free (gw_items);
-		gw_items = NULL;
+		g_list_free (ews_items);
+		ews_items = NULL;
 		position = E_EWS_CURSOR_POSITION_CURRENT;
 	}
 
@@ -2779,7 +2779,7 @@ static gboolean
 update_cache (EBookBackendEws *ebgw)
 {
 	gint status, contact_num = 0;
-	GList *gw_items = NULL;
+	GList *ews_items = NULL;
 	EContact *contact;
 	EEwsFilter *filter;
 	time_t mod_time;
@@ -2821,7 +2821,7 @@ update_cache (EBookBackendEws *ebgw)
 	e_ews_filter_add_filter_component (filter, E_EWS_FILTER_OP_GREATERTHAN,
 					  "modified", cache_time_string);
 	status = e_ews_connection_get_items (ebgw->priv->cnc, ebgw->priv->container_id,
-					    "name email default members", filter, &gw_items);
+					    "name email default members", filter, &ews_items);
 	if (status != E_EWS_CONNECTION_STATUS_OK) {
 		if (book_view)
 			e_data_book_view_unref (book_view);
@@ -2831,11 +2831,11 @@ update_cache (EBookBackendEws *ebgw)
 		return FALSE;
 	}
 
-	for (; gw_items != NULL; gw_items = g_list_next(gw_items)) {
+	for (; ews_items != NULL; ews_items = g_list_next(ews_items)) {
 		const gchar *id;
 
 		contact = e_contact_new ();
-		fill_contact_from_ews_item (contact, E_EWS_ITEM (gw_items->data),
+		fill_contact_from_ews_item (contact, E_EWS_ITEM (ews_items->data),
 					   ebgw->priv->categories_by_id);
 
 		e_contact_set (contact, E_CONTACT_BOOK_URI, ebgw->priv->original_uri);
@@ -2859,7 +2859,7 @@ update_cache (EBookBackendEws *ebgw)
 		}
 
 		g_object_unref(contact);
-		g_object_unref (gw_items->data);
+		g_object_unref (ews_items->data);
 	}
 	ebgw->priv->is_cache_ready = TRUE;
 	ebgw->priv->is_summary_ready = TRUE;
@@ -2871,7 +2871,7 @@ update_cache (EBookBackendEws *ebgw)
 		e_data_book_view_unref (book_view);
 	}
 	g_object_unref (filter);
-	g_list_free (gw_items);
+	g_list_free (ews_items);
 
 	if (enable_debug) {
 		g_get_current_time(&end);

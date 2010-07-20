@@ -81,11 +81,11 @@ static gboolean ews_transfer_messages_to (CamelFolder *source, GPtrArray *uids, 
 void convert_to_calendar (EEwsItem *item, gchar **str, gint *len);
 static void convert_to_task (EEwsItem *item, gchar **str, gint *len);
 static void convert_to_note (EEwsItem *item, gchar **str, gint *len);
-static void gw_update_all_items ( CamelFolder *folder, GList *item_list, GError **error);
+static void ews_update_all_items ( CamelFolder *folder, GList *item_list, GError **error);
 static void ews_populate_details_from_item (CamelMimeMessage *msg, EEwsItem *item);
 static void ews_populate_msg_body_from_item (EEwsConnection *cnc, CamelMultipart *multipart, EEwsItem *item, gchar *body);
 static void ews_msg_set_recipient_list (CamelMimeMessage *msg, EEwsItem *item);
-static void gw_update_cache ( CamelFolder *folder, GList *item_list, GError **error, gboolean uid_flag);
+static void ews_update_cache ( CamelFolder *folder, GList *item_list, GError **error, gboolean uid_flag);
 static CamelMimeMessage *ews_folder_item_to_msg ( CamelFolder *folder, EEwsItem *item, GError **error );
 static gchar * ews_get_filename (CamelFolder *folder, const gchar *uid, GError **error);
 static const gchar *get_from_from_org (EEwsItemOrganizer *org);
@@ -102,9 +102,9 @@ G_DEFINE_TYPE (CamelEwsFolder, camel_ews_folder, CAMEL_TYPE_OFFLINE_FOLDER)
 static gchar *
 ews_get_filename (CamelFolder *folder, const gchar *uid, GError **error)
 {
-	CamelEwsFolder *gw_folder = CAMEL_EWS_FOLDER(folder);
+	CamelEwsFolder *ews_folder = CAMEL_EWS_FOLDER(folder);
 
-	return camel_data_cache_get_filename (gw_folder->cache, "cache", uid, error);
+	return camel_data_cache_get_filename (ews_folder->cache, "cache", uid, error);
 }
 
 /* Get a message from cache if available otherwise get it from server */
@@ -112,8 +112,8 @@ static CamelMimeMessage *
 ews_folder_get_message( CamelFolder *folder, const gchar *uid, GError **error )
 {
 	CamelMimeMessage *msg = NULL;
-	CamelEwsFolder *gw_folder;
-	CamelEwsStore *gw_store;
+	CamelEwsFolder *ews_folder;
+	CamelEwsStore *ews_store;
 	CamelEwsMessageInfo *mi = NULL;
 	CamelStore *parent_store;
 	gchar *container_id;
@@ -126,8 +126,8 @@ ews_folder_get_message( CamelFolder *folder, const gchar *uid, GError **error )
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
 
-	gw_folder = CAMEL_EWS_FOLDER (folder);
-	gw_store = CAMEL_EWS_STORE (parent_store);
+	ews_folder = CAMEL_EWS_FOLDER (folder);
+	ews_store = CAMEL_EWS_STORE (parent_store);
 
 	/* see if it is there in cache */
 
@@ -139,7 +139,7 @@ ews_folder_get_message( CamelFolder *folder, const gchar *uid, GError **error )
 			_("Cannot get message: %s\n  %s"), uid, _("No such message"));
 		return NULL;
 	}
-	cache_stream  = camel_data_cache_get (gw_folder->cache, "cache", uid, NULL);
+	cache_stream  = camel_data_cache_get (ews_folder->cache, "cache", uid, NULL);
 	stream = camel_stream_mem_new ();
 	if (cache_stream) {
 		msg = camel_mime_message_new ();
@@ -169,7 +169,7 @@ ews_folder_get_message( CamelFolder *folder, const gchar *uid, GError **error )
 		return msg;
 	}
 
-	if (((CamelOfflineStore *) gw_store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL) {
+	if (((CamelOfflineStore *) ews_store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL) {
 		g_set_error (
 			error, CAMEL_SERVICE_ERROR,
 			CAMEL_SERVICE_ERROR_UNAVAILABLE,
@@ -179,7 +179,7 @@ ews_folder_get_message( CamelFolder *folder, const gchar *uid, GError **error )
 	}
 
 	/* Check if we are really offline */
-	if (!camel_ews_store_connected (gw_store, NULL)) {
+	if (!camel_ews_store_connected (ews_store, NULL)) {
 		g_set_error (
 			error, CAMEL_SERVICE_ERROR,
 			CAMEL_SERVICE_ERROR_UNAVAILABLE,
@@ -188,9 +188,9 @@ ews_folder_get_message( CamelFolder *folder, const gchar *uid, GError **error )
 		return NULL;
 	}
 
-	container_id =  g_strdup (camel_ews_store_container_id_lookup (gw_store, full_name));
+	container_id =  g_strdup (camel_ews_store_container_id_lookup (ews_store, full_name));
 
-	cnc = cnc_lookup (gw_store->priv);
+	cnc = cnc_lookup (ews_store->priv);
 
 	status = e_ews_connection_get_item (cnc, container_id, uid, GET_ITEM_VIEW_WITH_CACHE, &item);
 	if (status == E_EWS_CONNECTION_STATUS_INVALID_CONNECTION)
@@ -218,17 +218,17 @@ ews_folder_get_message( CamelFolder *folder, const gchar *uid, GError **error )
 	}
 
 	if (msg) {
-		camel_medium_set_header (CAMEL_MEDIUM (msg), "X-Evolution-Source", ews_base_url_lookup (gw_store->priv));
+		camel_medium_set_header (CAMEL_MEDIUM (msg), "X-Evolution-Source", ews_base_url_lookup (ews_store->priv));
 		mi->info.dirty = TRUE;
 		camel_folder_summary_touch (folder->summary);
 	}
 
 	/* add to cache */
 	CAMEL_EWS_FOLDER_REC_LOCK (folder, cache_lock);
-	if ((cache_stream = camel_data_cache_add (gw_folder->cache, "cache", uid, NULL))) {
+	if ((cache_stream = camel_data_cache_add (ews_folder->cache, "cache", uid, NULL))) {
 		if (camel_data_wrapper_write_to_stream ((CamelDataWrapper *) msg, cache_stream, NULL) == -1
 				|| camel_stream_flush (cache_stream, NULL) == -1)
-			camel_data_cache_remove (gw_folder->cache, "cache", uid, NULL);
+			camel_data_cache_remove (ews_folder->cache, "cache", uid, NULL);
 		g_object_unref (cache_stream);
 	}
 
@@ -459,18 +459,18 @@ ews_msg_set_recipient_list (CamelMimeMessage *msg, EEwsItem *item)
 static void
 ews_folder_rename (CamelFolder *folder, const gchar *new)
 {
-	CamelEwsFolder *gw_folder;
-	CamelEwsStore *gw_store;
+	CamelEwsFolder *ews_folder;
+	CamelEwsStore *ews_store;
 	CamelStore *parent_store;
 	gchar *folder_dir, *summary_path, *state_file, *storage_path;
 	gchar *folders;
 
 	parent_store = camel_folder_get_parent_store (folder);
 
-	gw_folder = CAMEL_EWS_FOLDER (folder);
-	gw_store = CAMEL_EWS_STORE (parent_store);
+	ews_folder = CAMEL_EWS_FOLDER (folder);
+	ews_store = CAMEL_EWS_STORE (parent_store);
 
-	storage_path = storage_path_lookup (gw_store->priv);
+	storage_path = storage_path_lookup (ews_store->priv);
 
 	folders = g_strconcat (storage_path, "/folders", NULL);
 	folder_dir = e_path_to_physical (folders, new);
@@ -479,7 +479,7 @@ ews_folder_rename (CamelFolder *folder, const gchar *new)
 	summary_path = g_strdup_printf ("%s/summary", folder_dir);
 
 	CAMEL_EWS_FOLDER_REC_LOCK (folder, cache_lock);
-	camel_data_cache_set_path (gw_folder->cache, folder_dir);
+	camel_data_cache_set_path (ews_folder->cache, folder_dir);
 	CAMEL_EWS_FOLDER_REC_UNLOCK (folder, cache_lock);
 
 	((CamelFolderClass *)camel_ews_folder_parent_class)->rename(folder, new);
@@ -496,13 +496,13 @@ ews_folder_rename (CamelFolder *folder, const gchar *new)
 static GPtrArray *
 ews_folder_search_by_expression (CamelFolder *folder, const gchar *expression, GError **error)
 {
-	CamelEwsFolder *gw_folder = CAMEL_EWS_FOLDER(folder);
+	CamelEwsFolder *ews_folder = CAMEL_EWS_FOLDER(folder);
 	GPtrArray *matches;
 
-	CAMEL_EWS_FOLDER_LOCK(gw_folder, search_lock);
-	camel_folder_search_set_folder (gw_folder->search, folder);
-	matches = camel_folder_search_search(gw_folder->search, expression, NULL, error);
-	CAMEL_EWS_FOLDER_UNLOCK(gw_folder, search_lock);
+	CAMEL_EWS_FOLDER_LOCK(ews_folder, search_lock);
+	camel_folder_search_set_folder (ews_folder->search, folder);
+	matches = camel_folder_search_search(ews_folder->search, expression, NULL, error);
+	CAMEL_EWS_FOLDER_UNLOCK(ews_folder, search_lock);
 
 	return matches;
 }
@@ -510,13 +510,13 @@ ews_folder_search_by_expression (CamelFolder *folder, const gchar *expression, G
 static guint32
 ews_folder_count_by_expression (CamelFolder *folder, const gchar *expression, GError **error)
 {
-	CamelEwsFolder *gw_folder = CAMEL_EWS_FOLDER(folder);
+	CamelEwsFolder *ews_folder = CAMEL_EWS_FOLDER(folder);
 	guint32 matches;
 
-	CAMEL_EWS_FOLDER_LOCK(gw_folder, search_lock);
-	camel_folder_search_set_folder (gw_folder->search, folder);
-	matches = camel_folder_search_count (gw_folder->search, expression, error);
-	CAMEL_EWS_FOLDER_UNLOCK(gw_folder, search_lock);
+	CAMEL_EWS_FOLDER_LOCK(ews_folder, search_lock);
+	camel_folder_search_set_folder (ews_folder->search, folder);
+	matches = camel_folder_search_count (ews_folder->search, expression, error);
+	CAMEL_EWS_FOLDER_UNLOCK(ews_folder, search_lock);
 
 	return matches;
 }
@@ -524,18 +524,18 @@ ews_folder_count_by_expression (CamelFolder *folder, const gchar *expression, GE
 static GPtrArray *
 ews_folder_search_by_uids(CamelFolder *folder, const gchar *expression, GPtrArray *uids, GError **error)
 {
-	CamelEwsFolder *gw_folder = CAMEL_EWS_FOLDER(folder);
+	CamelEwsFolder *ews_folder = CAMEL_EWS_FOLDER(folder);
 	GPtrArray *matches;
 
 	if (uids->len == 0)
 		return g_ptr_array_new();
 
-	CAMEL_EWS_FOLDER_LOCK(gw_folder, search_lock);
+	CAMEL_EWS_FOLDER_LOCK(ews_folder, search_lock);
 
-	camel_folder_search_set_folder(gw_folder->search, folder);
-	matches = camel_folder_search_search(gw_folder->search, expression, uids, error);
+	camel_folder_search_set_folder(ews_folder->search, folder);
+	matches = camel_folder_search_search(ews_folder->search, expression, uids, error);
 
-	CAMEL_EWS_FOLDER_UNLOCK(gw_folder, search_lock);
+	CAMEL_EWS_FOLDER_UNLOCK(ews_folder, search_lock);
 
 	return matches;
 }
@@ -543,15 +543,15 @@ ews_folder_search_by_uids(CamelFolder *folder, const gchar *expression, GPtrArra
 static void
 ews_folder_search_free (CamelFolder *folder, GPtrArray *uids)
 {
-	CamelEwsFolder *gw_folder = CAMEL_EWS_FOLDER(folder);
+	CamelEwsFolder *ews_folder = CAMEL_EWS_FOLDER(folder);
 
-	g_return_if_fail (gw_folder->search);
+	g_return_if_fail (ews_folder->search);
 
-	CAMEL_EWS_FOLDER_LOCK(gw_folder, search_lock);
+	CAMEL_EWS_FOLDER_LOCK(ews_folder, search_lock);
 
-	camel_folder_search_free_result (gw_folder->search, uids);
+	camel_folder_search_free_result (ews_folder->search, uids);
 
-	CAMEL_EWS_FOLDER_UNLOCK(gw_folder, search_lock);
+	CAMEL_EWS_FOLDER_UNLOCK(ews_folder, search_lock);
 
 }
 
@@ -576,8 +576,8 @@ update_junk_list (CamelStore *store, CamelMessageInfo *info, gint flag)
 {
 	gchar **email = NULL, *from = NULL;
 	gint index = 0;
-	CamelEwsStore *gw_store= CAMEL_EWS_STORE(store);
-	CamelEwsStorePrivate  *priv = gw_store->priv;
+	CamelEwsStore *ews_store= CAMEL_EWS_STORE(store);
+	CamelEwsStorePrivate  *priv = ews_store->priv;
 	EEwsConnection *cnc = cnc_lookup (priv);
 	EEwsConnectionStatus status;
 
@@ -713,19 +713,19 @@ sync_flags (CamelFolder *folder, GList *uids)
 {
 	GList *l;
 	CamelMessageInfo *info = NULL;
-	CamelEwsMessageInfo *gw_info;
+	CamelEwsMessageInfo *ews_info;
 
 	for (l = uids; l != NULL; l = g_list_next (l))
 	{
 		info = camel_folder_summary_uid (folder->summary, l->data);
-		gw_info = (CamelEwsMessageInfo *) info;
+		ews_info = (CamelEwsMessageInfo *) info;
 
 		if (!info)
 			continue;
 
-		gw_info->info.flags &= ~CAMEL_MESSAGE_FOLDER_FLAGGED;
-		gw_info->info.dirty = 1;
-		gw_info->server_flags = gw_info->info.flags;
+		ews_info->info.flags &= ~CAMEL_MESSAGE_FOLDER_FLAGGED;
+		ews_info->info.dirty = 1;
+		ews_info->server_flags = ews_info->info.flags;
 		camel_folder_summary_touch (folder->summary);
 
 		camel_message_info_free (info);
@@ -766,10 +766,10 @@ ews_sync_all (CamelFolder *folder, gboolean expunge, GError **error)
 static gboolean
 ews_sync (CamelFolder *folder, gboolean expunge, CamelMessageInfo *update_single, GError **error)
 {
-	CamelEwsStore *gw_store;
-	CamelEwsFolder *gw_folder;
+	CamelEwsStore *ews_store;
+	CamelEwsFolder *ews_folder;
 	CamelMessageInfo *info = NULL;
-	CamelEwsMessageInfo *gw_info;
+	CamelEwsMessageInfo *ews_info;
 	CamelStore *parent_store;
 	GList *read_items = NULL, *deleted_read_items = NULL, *unread_items = NULL;
 	flags_diff_t diff, unset_flags;
@@ -785,23 +785,23 @@ ews_sync (CamelFolder *folder, gboolean expunge, CamelMessageInfo *update_single
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
 
-	gw_folder = CAMEL_EWS_FOLDER (folder);
-	gw_store = CAMEL_EWS_STORE (parent_store);
+	ews_folder = CAMEL_EWS_FOLDER (folder);
+	ews_store = CAMEL_EWS_STORE (parent_store);
 
 	deleted_items = deleted_head = NULL;
 
-	if (((CamelOfflineStore *) gw_store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL)
+	if (((CamelOfflineStore *) ews_store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL)
 		return ews_sync_summary (folder, error);
 
-	camel_service_lock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-	if (!camel_ews_store_connected (gw_store, NULL)) {
-		camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+	camel_service_lock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+	if (!camel_ews_store_connected (ews_store, NULL)) {
+		camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		return TRUE;
 	}
-	camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+	camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
-	cnc = cnc_lookup (gw_store->priv);
-	container_id =  camel_ews_store_container_id_lookup (gw_store, full_name);
+	cnc = cnc_lookup (ews_store->priv);
+	container_id =  camel_ews_store_container_id_lookup (ews_store, full_name);
 
 	if (folder->folder_flags & CAMEL_FOLDER_HAS_BEEN_DELETED)
 		return TRUE;
@@ -820,7 +820,7 @@ ews_sync (CamelFolder *folder, gboolean expunge, CamelMessageInfo *update_single
 		} else
 			info = camel_folder_summary_index (folder->summary, i);
 
-		gw_info = (CamelEwsMessageInfo *) info;
+		ews_info = (CamelEwsMessageInfo *) info;
 
 		/**Junk Mail handling**/
 		if (!info)
@@ -836,7 +836,7 @@ ews_sync (CamelFolder *folder, gboolean expunge, CamelMessageInfo *update_single
 			/*marked a message junk*/
 			move_to_junk (folder, info, error);
 			camel_folder_summary_remove_uid (folder->summary, camel_message_info_uid(info));
-			camel_data_cache_remove (gw_folder->cache, "cache", camel_message_info_uid(info), NULL);
+			camel_data_cache_remove (ews_folder->cache, "cache", camel_message_info_uid(info), NULL);
 			continue;
 		}
 
@@ -844,13 +844,13 @@ ews_sync (CamelFolder *folder, gboolean expunge, CamelMessageInfo *update_single
 			/*message was marked as junk, now unjunk*/
 			move_to_mailbox (folder, info, error);
 			camel_folder_summary_remove_uid (folder->summary, camel_message_info_uid(info));
-			camel_data_cache_remove (gw_folder->cache, "cache", camel_message_info_uid(info), NULL);
+			camel_data_cache_remove (ews_folder->cache, "cache", camel_message_info_uid(info), NULL);
 			continue;
 		}
 
-		if (gw_info && (gw_info->info.flags & CAMEL_MESSAGE_FOLDER_FLAGGED)) {
-			do_flags_diff (&diff, gw_info->server_flags, gw_info->info.flags);
-			do_flags_diff (&unset_flags, flags, gw_info->server_flags);
+		if (ews_info && (ews_info->info.flags & CAMEL_MESSAGE_FOLDER_FLAGGED)) {
+			do_flags_diff (&diff, ews_info->server_flags, ews_info->info.flags);
+			do_flags_diff (&unset_flags, flags, ews_info->server_flags);
 
 			diff.changed &= folder->permanent_flags;
 
@@ -877,7 +877,7 @@ ews_sync (CamelFolder *folder, gboolean expunge, CamelMessageInfo *update_single
 					}
 
 					if (g_list_length (deleted_items) == GROUPWISE_BULK_DELETE_LIMIT ) {
-						camel_service_lock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+						camel_service_lock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 						/*
 							Sync up the READ changes before deleting the message.
@@ -902,14 +902,14 @@ ews_sync (CamelFolder *folder, gboolean expunge, CamelMessageInfo *update_single
 						status = e_ews_connection_remove_items (cnc, container_id, deleted_items);
 						if (status == E_EWS_CONNECTION_STATUS_INVALID_CONNECTION)
 							status = e_ews_connection_remove_items (cnc, container_id, deleted_items);
-						camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+						camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 						if (status == E_EWS_CONNECTION_STATUS_OK) {
 							gchar *uid;
 							while (deleted_items) {
 								uid = (gchar *)deleted_items->data;
 								CAMEL_EWS_FOLDER_REC_LOCK (folder, cache_lock);
 								camel_folder_summary_remove_uid (folder->summary, uid);
-								camel_data_cache_remove(gw_folder->cache, "cache", uid, NULL);
+								camel_data_cache_remove(ews_folder->cache, "cache", uid, NULL);
 								camel_folder_change_info_remove_uid (changes, uid);
 								CAMEL_EWS_FOLDER_REC_UNLOCK (folder, cache_lock);
 								deleted_items = g_list_next (deleted_items);
@@ -936,7 +936,7 @@ ews_sync (CamelFolder *folder, gboolean expunge, CamelMessageInfo *update_single
 		read_items = g_list_concat (read_items, deleted_read_items);
 
 	if (read_items) {
-		camel_service_lock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+		camel_service_lock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		status = e_ews_connection_mark_read (cnc, read_items);
 		if (status == E_EWS_CONNECTION_STATUS_INVALID_CONNECTION)
 			status = e_ews_connection_mark_read (cnc, read_items);
@@ -945,11 +945,11 @@ ews_sync (CamelFolder *folder, gboolean expunge, CamelMessageInfo *update_single
 			sync_flags (folder, read_items);
 
 		g_list_free (read_items);
-		camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+		camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	}
 
 	if (deleted_items) {
-		camel_service_lock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+		camel_service_lock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		if (!strcmp (full_name, "Trash")) {
 			status = e_ews_connection_purge_selected_items (cnc, deleted_items);
 			if (status == E_EWS_CONNECTION_STATUS_INVALID_CONNECTION)
@@ -965,18 +965,18 @@ ews_sync (CamelFolder *folder, gboolean expunge, CamelMessageInfo *update_single
 				uid = (gchar *)deleted_items->data;
 				CAMEL_EWS_FOLDER_REC_LOCK (folder, cache_lock);
 				camel_folder_summary_remove_uid (folder->summary, uid);
-				camel_data_cache_remove(gw_folder->cache, "cache", uid, NULL);
+				camel_data_cache_remove(ews_folder->cache, "cache", uid, NULL);
 				camel_folder_change_info_remove_uid (changes, uid);
 				CAMEL_EWS_FOLDER_REC_UNLOCK (folder, cache_lock);
 				deleted_items = g_list_next (deleted_items);
 			}
 		}
 		g_list_free (deleted_items);
-		camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+		camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	}
 
 	if (unread_items) {
-		camel_service_lock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+		camel_service_lock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		status = e_ews_connection_mark_unread (cnc, unread_items);
 		if (status == E_EWS_CONNECTION_STATUS_INVALID_CONNECTION)
 			status = e_ews_connection_mark_unread (cnc, unread_items);
@@ -985,21 +985,21 @@ ews_sync (CamelFolder *folder, gboolean expunge, CamelMessageInfo *update_single
 			sync_flags (folder, unread_items);
 
 		g_list_free (unread_items);
-		camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+		camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	}
 
 	if (expunge) {
-		camel_service_lock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+		camel_service_lock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		status = e_ews_connection_purge_deleted_items (cnc);
 		if (status == E_EWS_CONNECTION_STATUS_OK) {
 			g_message ("Purged deleted items in %s", camel_folder_get_name (folder));
 		}
-		camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+		camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	}
 
-	camel_service_lock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+	camel_service_lock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	success = ews_sync_summary (folder, error);
-	camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+	camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	camel_folder_changed (folder, changes);
 	camel_folder_change_info_free (changes);
@@ -1011,7 +1011,7 @@ CamelFolder *
 camel_ews_folder_new(CamelStore *store, const gchar *folder_name, const gchar *folder_dir, GError **error)
 {
 	CamelFolder *folder;
-	CamelEwsFolder *gw_folder;
+	CamelEwsFolder *ews_folder;
 	gchar *summary_file, *state_file, *journal_file;
 	gchar *short_name;
 
@@ -1026,7 +1026,7 @@ camel_ews_folder_new(CamelStore *store, const gchar *folder_name, const gchar *f
 		"name", short_name, "full-name", folder_name,
 		"parent_store", store, NULL);
 
-	gw_folder = CAMEL_EWS_FOLDER(folder);
+	ews_folder = CAMEL_EWS_FOLDER(folder);
 
 	summary_file = g_strdup_printf ("%s/summary",folder_dir);
 	folder->summary = camel_ews_summary_new(folder, summary_file);
@@ -1045,16 +1045,16 @@ camel_ews_folder_new(CamelStore *store, const gchar *folder_name, const gchar *f
 	g_free(state_file);
 	camel_object_state_read (CAMEL_OBJECT (folder));
 
-	gw_folder->cache = camel_data_cache_new (folder_dir, error);
-	if (!gw_folder->cache) {
+	ews_folder->cache = camel_data_cache_new (folder_dir, error);
+	if (!ews_folder->cache) {
 		g_object_unref (folder);
 		return NULL;
 	}
 
 	journal_file = g_strdup_printf ("%s/journal",folder_dir);
-	gw_folder->journal = camel_ews_journal_new (gw_folder, journal_file);
+	ews_folder->journal = camel_ews_journal_new (ews_folder, journal_file);
 	g_free (journal_file);
-	if (!gw_folder->journal) {
+	if (!ews_folder->journal) {
 		g_object_unref (folder);
 		return NULL;
 	}
@@ -1064,8 +1064,8 @@ camel_ews_folder_new(CamelStore *store, const gchar *folder_name, const gchar *f
 			folder->folder_flags |= CAMEL_FOLDER_FILTER_RECENT;
 	}
 
-	gw_folder->search = camel_folder_search_new ();
-	if (!gw_folder->search) {
+	ews_folder->search = camel_folder_search_new ();
+	if (!ews_folder->search) {
 		g_object_unref (folder);
 		return NULL;
 	}
@@ -1088,7 +1088,7 @@ update_update (CamelSession *session, CamelSessionThreadMsg *msg)
 {
 	struct _folder_update_msg *m = (struct _folder_update_msg *)msg;
 	EEwsConnectionStatus status;
-	CamelEwsStore *gw_store;
+	CamelEwsStore *ews_store;
 	CamelStore *parent_store;
 	GList *item_list, *items_full_list = NULL, *last_element=NULL;
 	gint cursor = 0;
@@ -1096,15 +1096,15 @@ update_update (CamelSession *session, CamelSessionThreadMsg *msg)
 	gboolean done;
 
 	parent_store = camel_folder_get_parent_store (m->folder);
-	gw_store = CAMEL_EWS_STORE (parent_store);
+	ews_store = CAMEL_EWS_STORE (parent_store);
 
 	/* Hold the connect_lock.
 	   In case if user went offline, don't do anything.
 	   m->cnc would have become invalid, as the store disconnect unrefs it.
 	 */
-	camel_service_lock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-	if (((CamelOfflineStore *) gw_store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL ||
-			((CamelService *)gw_store)->status == CAMEL_SERVICE_DISCONNECTED) {
+	camel_service_lock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+	if (((CamelOfflineStore *) ews_store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL ||
+			((CamelService *)ews_store)->status == CAMEL_SERVICE_DISCONNECTED) {
 		goto end1;
 	}
 
@@ -1126,7 +1126,7 @@ update_update (CamelSession *session, CamelSessionThreadMsg *msg)
 	while (!done) {
 
 		if (camel_application_is_exiting) {
-				camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+				camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 				return;
 		}
 
@@ -1158,7 +1158,7 @@ update_update (CamelSession *session, CamelSessionThreadMsg *msg)
 	}
 	e_ews_connection_destroy_cursor (m->cnc, m->container_id, cursor);
 
-	camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+	camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	/* Take out only the first part in the list until the @ since it is guaranteed
 	   to be unique only until that symbol */
 
@@ -1179,12 +1179,12 @@ update_update (CamelSession *session, CamelSessionThreadMsg *msg)
 	  }*/
 
 	g_print ("\nNumber of items in the folder: %d \n", g_list_length(items_full_list));
-	gw_update_all_items (m->folder, items_full_list, NULL);
+	ews_update_all_items (m->folder, items_full_list, NULL);
 	camel_operation_end (NULL);
 
 	return;
  end1:
-	camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+	camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	camel_operation_end (NULL);
 	if (items_full_list) {
 		g_list_foreach (items_full_list, (GFunc)g_free, NULL);
@@ -1216,14 +1216,14 @@ ews_refresh_info(CamelFolder *folder, GError **error)
 {
 	CamelEwsSummary *summary = (CamelEwsSummary *) folder->summary;
 	CamelStoreInfo *si;
-	CamelEwsStore *gw_store;
+	CamelEwsStore *ews_store;
 	CamelStore *parent_store;
 	const gchar *full_name;
 
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
 
-	gw_store = CAMEL_EWS_STORE (parent_store);
+	ews_store = CAMEL_EWS_STORE (parent_store);
 
 	/*
 	 * Checking for the summary->time_string here since the first the a
@@ -1253,16 +1253,16 @@ ews_refresh_info(CamelFolder *folder, GError **error)
 		 * so do a get_folder again. And hope that it works
 		 */
 		g_print("Reloading folder...something wrong with the summary....\n");
-		gw_store_reload_folder (gw_store, folder, 0, error);
+		ews_store_reload_folder (ews_store, folder, 0, error);
 	}
 
 	return TRUE;
 }
 
 static gint
-check_for_new_mails_count (CamelEwsSummary *gw_summary, GSList *ids)
+check_for_new_mails_count (CamelEwsSummary *ews_summary, GSList *ids)
 {
-	CamelFolderSummary *summary = (CamelFolderSummary *) gw_summary;
+	CamelFolderSummary *summary = (CamelFolderSummary *) ews_summary;
 	GSList *l = NULL;
 	gint count = 0;
 
@@ -1345,8 +1345,8 @@ update_summary_string (CamelFolder *folder, const gchar *time_string)
 static void
 ews_refresh_folder(CamelFolder *folder, GError **error)
 {
-	CamelEwsStore *gw_store;
-	CamelEwsFolder *gw_folder;
+	CamelEwsStore *ews_store;
+	CamelEwsFolder *ews_folder;
 	CamelEwsSummary *summary = (CamelEwsSummary *)folder->summary;
 	EEwsConnection *cnc;
 	CamelSession *session;
@@ -1370,21 +1370,21 @@ ews_refresh_folder(CamelFolder *folder, GError **error)
 	session = CAMEL_SERVICE (parent_store)->session;
 	is_proxy = (parent_store->flags & CAMEL_STORE_PROXY);
 
-	gw_folder = CAMEL_EWS_FOLDER (folder);
-	gw_store = CAMEL_EWS_STORE (parent_store);
+	ews_folder = CAMEL_EWS_FOLDER (folder);
+	ews_store = CAMEL_EWS_STORE (parent_store);
 
-	cnc = cnc_lookup (gw_store->priv);
+	cnc = cnc_lookup (ews_store->priv);
 
 	/* Sync-up the (un)read changes before getting updates,
 	so that the getFolderList will reflect the most recent changes too */
 	ews_sync_all (folder, FALSE, error);
 
-	if (((CamelOfflineStore *) gw_store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL) {
+	if (((CamelOfflineStore *) ews_store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL) {
 		g_warning ("In offline mode. Cannot refresh!!!\n");
 		return;
 	}
 
-	container_id = g_strdup (camel_ews_store_container_id_lookup (gw_store, full_name));
+	container_id = g_strdup (camel_ews_store_container_id_lookup (ews_store, full_name));
 
 	if (!container_id) {
 		d (printf ("\nERROR - Container id not present. Cannot refresh info for %s\n", full_name));
@@ -1395,12 +1395,12 @@ ews_refresh_folder(CamelFolder *folder, GError **error)
 		return;
 
 	if (camel_folder_is_frozen (folder) ) {
-		gw_folder->need_refresh = TRUE;
+		ews_folder->need_refresh = TRUE;
 	}
 
-	camel_service_lock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+	camel_service_lock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
-	if (!camel_ews_store_connected (gw_store, error))
+	if (!camel_ews_store_connected (ews_store, error))
 		goto end1;
 
 	if (!strcmp (full_name, "Trash")) {
@@ -1453,8 +1453,8 @@ ews_refresh_folder(CamelFolder *folder, GError **error)
 			goto end3;
 		}
 
-		if (gw_store->current_folder != folder)
-			ews_store_set_current_folder (gw_store, folder);
+		if (ews_store->current_folder != folder)
+			ews_store_set_current_folder (ews_store, folder);
 
 		new_item_count = get_merge_lists_new_count (summary, new_items, modified_items, &merged);
 
@@ -1481,13 +1481,13 @@ ews_refresh_folder(CamelFolder *folder, GError **error)
 		g_object_unref (container);
 
 		if (list)
-			gw_update_cache (folder, list, error, FALSE);
+			ews_update_cache (folder, list, error, FALSE);
 
 		/* update the new_sync_time to summary */
 		update_summary_string (folder, new_sync_time);
 	}
 
-	camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+	camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	is_locked = FALSE;
 
 	/*
@@ -1518,7 +1518,7 @@ end2:
 	g_free (container_id);
 end1:
 	if (is_locked)
-		camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+		camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	return;
 }
 
@@ -1584,12 +1584,12 @@ ews_folder_set_threading_data (CamelEwsMessageInfo *mi, EEwsItem *item)
 
 /* Update the GroupWise cache with the list of items passed. should happen in thread. */
 static void
-gw_update_cache (CamelFolder *folder, GList *list, GError **error, gboolean uid_flag)
+ews_update_cache (CamelFolder *folder, GList *list, GError **error, gboolean uid_flag)
 {
 	CamelEwsMessageInfo *mi = NULL;
 	CamelMessageInfo *pmi = NULL;
-	CamelEwsStore *gw_store;
-	CamelEwsFolder *gw_folder;
+	CamelEwsStore *ews_store;
+	CamelEwsFolder *ews_folder;
 	CamelOfflineFolder *offline_folder;
 	CamelStore *parent_store;
 	EEwsConnection *cnc;
@@ -1613,16 +1613,16 @@ gw_update_cache (CamelFolder *folder, GList *list, GError **error, gboolean uid_
 
 	is_proxy = (parent_store->flags & CAMEL_STORE_WRITE);
 
-	gw_folder = CAMEL_EWS_FOLDER (folder);
-	gw_store = CAMEL_EWS_STORE (parent_store);
+	ews_folder = CAMEL_EWS_FOLDER (folder);
+	ews_store = CAMEL_EWS_STORE (parent_store);
 
-	cnc = cnc_lookup (gw_store->priv);
+	cnc = cnc_lookup (ews_store->priv);
 
 	offline_folder = CAMEL_OFFLINE_FOLDER (folder);
 	folder_needs_caching = camel_offline_folder_get_offline_sync (offline_folder);
 
 	changes = camel_folder_change_info_new ();
-	container_id = g_strdup (camel_ews_store_container_id_lookup (gw_store, full_name));
+	container_id = g_strdup (camel_ews_store_container_id_lookup (ews_store, full_name));
 	if (!container_id) {
 		d (printf("\nERROR - Container id not present. Cannot refresh info\n"));
 		camel_folder_change_info_free (changes);
@@ -1810,18 +1810,18 @@ gw_update_cache (CamelFolder *folder, GList *list, GError **error, gboolean uid_
 		if (folder_needs_caching) {
 				/******************** Begine Caching ************************/
 				/* add to cache if its a new message*/
-				t_cache_stream  = camel_data_cache_get (gw_folder->cache, "cache", id, error);
+				t_cache_stream  = camel_data_cache_get (ews_folder->cache, "cache", id, error);
 				if (t_cache_stream) {
 						g_object_unref (t_cache_stream);
 
 						mail_msg = ews_folder_item_to_msg (folder, item, error);
 						if (mail_msg)
-								camel_medium_set_header (CAMEL_MEDIUM (mail_msg), "X-Evolution-Source", ews_base_url_lookup (gw_store->priv));
+								camel_medium_set_header (CAMEL_MEDIUM (mail_msg), "X-Evolution-Source", ews_base_url_lookup (ews_store->priv));
 
 						CAMEL_EWS_FOLDER_REC_LOCK (folder, cache_lock);
-						if ((cache_stream = camel_data_cache_add (gw_folder->cache, "cache", id, NULL))) {
+						if ((cache_stream = camel_data_cache_add (ews_folder->cache, "cache", id, NULL))) {
 								if (camel_data_wrapper_write_to_stream ((CamelDataWrapper *) mail_msg,	cache_stream, NULL) == -1 || camel_stream_flush (cache_stream, NULL) == -1)
-										camel_data_cache_remove (gw_folder->cache, "cache", id, NULL);
+										camel_data_cache_remove (ews_folder->cache, "cache", id, NULL);
 								g_object_unref (cache_stream);
 						}
 
@@ -1876,10 +1876,10 @@ get_from_from_org (EEwsItemOrganizer *org)
 
 /* Update summary, if there is none existing, create one */
 void
-gw_update_summary (CamelFolder *folder, GList *list,GError **error)
+ews_update_summary (CamelFolder *folder, GList *list,GError **error)
 {
 	CamelEwsMessageInfo *mi = NULL;
-	CamelEwsStore *gw_store;
+	CamelEwsStore *ews_store;
 	guint32 item_status, status_flags = 0;
 	CamelFolderChangeInfo *changes = NULL;
 	CamelStore *parent_store;
@@ -1897,11 +1897,11 @@ gw_update_summary (CamelFolder *folder, GList *list,GError **error)
 
 	is_proxy = (parent_store->flags & CAMEL_STORE_WRITE);
 
-	gw_store = CAMEL_EWS_STORE (parent_store);
+	ews_store = CAMEL_EWS_STORE (parent_store);
 
 	/*Assert lock???*/
 	changes = camel_folder_change_info_new ();
-	container_id = g_strdup (camel_ews_store_container_id_lookup (gw_store, full_name));
+	container_id = g_strdup (camel_ews_store_container_id_lookup (ews_store, full_name));
 	if (!container_id) {
 		d (printf("\nERROR - Container id not present. Cannot refresh info\n"));
 		camel_folder_change_info_free (changes);
@@ -2055,7 +2055,7 @@ ews_folder_item_to_msg( CamelFolder *folder,
 		GError **error )
 {
 	CamelMimeMessage *msg = NULL;
-	CamelEwsStore *gw_store;
+	CamelEwsStore *ews_store;
 	const gchar *container_id = NULL;
 	GSList *attach_list = NULL;
 	EEwsItemType type;
@@ -2076,11 +2076,11 @@ ews_folder_item_to_msg( CamelFolder *folder,
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
 
-	gw_store = CAMEL_EWS_STORE (parent_store);
+	ews_store = CAMEL_EWS_STORE (parent_store);
 
 	uid = e_ews_item_get_id(item);
-	cnc = cnc_lookup (gw_store->priv);
-	container_id = camel_ews_store_container_id_lookup (gw_store, full_name);
+	cnc = cnc_lookup (ews_store->priv);
+	container_id = camel_ews_store_container_id_lookup (ews_store, full_name);
 
 	/* The item is already in calendar. We need to ignore the mime 822 since it would not have the item id of the appointmnet
 	   in calendar */
@@ -2388,9 +2388,9 @@ end:
 }
 
 static void
-gw_update_all_items (CamelFolder *folder, GList *item_list, GError **error)
+ews_update_all_items (CamelFolder *folder, GList *item_list, GError **error)
 {
-	CamelEwsFolder *gw_folder = CAMEL_EWS_FOLDER (folder);
+	CamelEwsFolder *ews_folder = CAMEL_EWS_FOLDER (folder);
 	GPtrArray *summary = NULL;
 	gint index = 0;
 	GList *temp;
@@ -2414,7 +2414,7 @@ gw_update_all_items (CamelFolder *folder, GList *item_list, GError **error)
 		if (!temp) {
 			CAMEL_EWS_FOLDER_REC_LOCK (folder, cache_lock);
 			camel_folder_summary_remove_uid (folder->summary, uid);
-			camel_data_cache_remove (gw_folder->cache, "cache", uid, NULL);
+			camel_data_cache_remove (ews_folder->cache, "cache", uid, NULL);
 			camel_folder_change_info_remove_uid (changes, uid);
 			CAMEL_EWS_FOLDER_REC_UNLOCK (folder, cache_lock);
 		} else {
@@ -2432,7 +2432,7 @@ gw_update_all_items (CamelFolder *folder, GList *item_list, GError **error)
 		parent_store = camel_folder_get_parent_store (folder);
 
 		camel_service_lock (CAMEL_SERVICE (parent_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-		gw_update_cache (folder, item_list, error, TRUE);
+		ews_update_cache (folder, item_list, error, TRUE);
 		camel_service_unlock (CAMEL_SERVICE (parent_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 		g_list_foreach (item_list, (GFunc)g_free, NULL);
@@ -2448,7 +2448,7 @@ ews_append_message (CamelFolder *folder, CamelMimeMessage *message,
 		GError **error)
 {
 	const gchar *container_id = NULL;
-	CamelEwsStore *gw_store;
+	CamelEwsStore *ews_store;
 	CamelOfflineStore *offline;
 	CamelStore *parent_store;
 	EEwsConnectionStatus status = { 0, };
@@ -2476,18 +2476,18 @@ ews_append_message (CamelFolder *folder, CamelMimeMessage *message,
 		return FALSE;
 	}
 
-	gw_store = CAMEL_EWS_STORE (parent_store);
+	ews_store = CAMEL_EWS_STORE (parent_store);
 	offline = CAMEL_OFFLINE_STORE (parent_store);
 
 	if (offline->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL) {
 		camel_ews_journal_append ((CamelEwsJournal *) ((CamelEwsFolder *)folder)->journal, message, info, appended_uid, error);
 		return FALSE;
 	}
-	cnc = cnc_lookup (gw_store->priv);
+	cnc = cnc_lookup (ews_store->priv);
 
 	camel_service_lock (CAMEL_SERVICE (parent_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	/*Get the container id*/
-	container_id = camel_ews_store_container_id_lookup (gw_store, full_name);
+	container_id = camel_ews_store_container_id_lookup (ews_store, full_name);
 
 	item = camel_ews_util_item_from_message (cnc, message, CAMEL_ADDRESS (message->from));
 	/*Set the source*/
@@ -2566,7 +2566,7 @@ ews_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 	gint count, index = 0;
 	GList *item_ids = NULL;
 	const gchar *source_container_id = NULL, *dest_container_id = NULL;
-	CamelEwsStore *gw_store;
+	CamelEwsStore *ews_store;
 	CamelOfflineStore *offline;
 	CamelStore *source_parent_store;
 	CamelStore *destination_parent_store;
@@ -2583,7 +2583,7 @@ ews_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 	destination_full_name = camel_folder_get_full_name (destination);
 	destination_parent_store = camel_folder_get_parent_store (destination);
 
-	gw_store = CAMEL_EWS_STORE (source_parent_store);
+	ews_store = CAMEL_EWS_STORE (source_parent_store);
 	offline = CAMEL_OFFLINE_STORE (destination_parent_store);
 
 	if (destination == camel_store_get_trash (source_parent_store, NULL))
@@ -2604,10 +2604,10 @@ ews_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 		*transferred_uids = NULL;
 
 	if (delete_originals)
-		source_container_id = camel_ews_store_container_id_lookup (gw_store, source_full_name);
+		source_container_id = camel_ews_store_container_id_lookup (ews_store, source_full_name);
 	else
 		source_container_id = NULL;
-	dest_container_id = camel_ews_store_container_id_lookup (gw_store, destination_full_name);
+	dest_container_id = camel_ews_store_container_id_lookup (ews_store, destination_full_name);
 
 	camel_service_lock (CAMEL_SERVICE (source_parent_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	/* check for offline operation */
@@ -2654,11 +2654,11 @@ ews_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 		return TRUE;
 	}
 
-	cnc = cnc_lookup (gw_store->priv);
+	cnc = cnc_lookup (ews_store->priv);
 	index = 0;
 	while (index < uids->len) {
 		CamelMessageInfo *info = NULL;
-		CamelEwsMessageInfo *gw_info = NULL;
+		CamelEwsMessageInfo *ews_info = NULL;
 		flags_diff_t diff, unset_flags;
 		gint count;
 		count = camel_folder_summary_count (destination->summary);
@@ -2670,18 +2670,18 @@ ews_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 			continue;
 		}
 
-		gw_info = (CamelEwsMessageInfo *) info;
-		if (gw_info && (gw_info->info.flags & CAMEL_MESSAGE_FOLDER_FLAGGED)) {
-			do_flags_diff (&diff, gw_info->server_flags, gw_info->info.flags);
-			do_flags_diff (&unset_flags, gw_info->info.flags, gw_info->server_flags);
+		ews_info = (CamelEwsMessageInfo *) info;
+		if (ews_info && (ews_info->info.flags & CAMEL_MESSAGE_FOLDER_FLAGGED)) {
+			do_flags_diff (&diff, ews_info->server_flags, ews_info->info.flags);
+			do_flags_diff (&unset_flags, ews_info->info.flags, ews_info->server_flags);
 			diff.changed &= source->permanent_flags;
 
 			/* sync the read changes */
 			if (diff.changed) {
 				const gchar *uid = camel_message_info_uid (info);
 				GList *wrapper = NULL;
-				gw_info->info.flags &= ~CAMEL_MESSAGE_FOLDER_FLAGGED;
-				gw_info->server_flags = gw_info->info.flags;
+				ews_info->info.flags &= ~CAMEL_MESSAGE_FOLDER_FLAGGED;
+				ews_info->server_flags = ews_info->info.flags;
 
 				if (diff.bits & CAMEL_MESSAGE_SEEN) {
 
@@ -2740,7 +2740,7 @@ ews_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 
 				if (status == E_EWS_CONNECTION_STATUS_OK) {
 						if (delete_originals) {
-								if (!(gw_info->info.flags & CAMEL_MESSAGE_SEEN))
+								if (!(ews_info->info.flags & CAMEL_MESSAGE_SEEN))
 										source->summary->unread_count--;
 
 								camel_folder_summary_remove_uid (source->summary, uids->pdata[index]);
@@ -2759,13 +2759,13 @@ ews_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 	camel_folder_change_info_free (changes);
 
 	/* Refresh the destination folder, if its not refreshed already */
-	if (gw_store->current_folder != destination )
+	if (ews_store->current_folder != destination )
 		camel_folder_refresh_info (destination, error);
 
 	camel_folder_summary_touch (source->summary);
 	camel_folder_summary_touch (destination->summary);
 
-	ews_store_set_current_folder (gw_store, source);
+	ews_store_set_current_folder (ews_store, source);
 
 	camel_service_unlock (CAMEL_SERVICE (source_parent_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
@@ -2775,8 +2775,8 @@ ews_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 static gboolean
 ews_expunge (CamelFolder *folder, GError **error)
 {
-	CamelEwsStore *gw_store;
-	CamelEwsFolder *gw_folder;
+	CamelEwsStore *ews_store;
+	CamelEwsFolder *ews_folder;
 	CamelEwsMessageInfo *ginfo;
 	CamelMessageInfo *info;
 	CamelStore *parent_store;
@@ -2792,11 +2792,11 @@ ews_expunge (CamelFolder *folder, GError **error)
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
 
-	gw_folder = CAMEL_EWS_FOLDER (folder);
-	gw_store = CAMEL_EWS_STORE (parent_store);
+	ews_folder = CAMEL_EWS_FOLDER (folder);
+	ews_store = CAMEL_EWS_STORE (parent_store);
 
 	deleted_items = deleted_head = NULL;
-	cnc = cnc_lookup (gw_store->priv);
+	cnc = cnc_lookup (ews_store->priv);
 	if (!cnc)
 		return TRUE;
 
@@ -2815,7 +2815,7 @@ ews_expunge (CamelFolder *folder, GError **error)
 
 	changes = camel_folder_change_info_new ();
 
-	container_id =  g_strdup (camel_ews_store_container_id_lookup (gw_store, full_name));
+	container_id =  g_strdup (camel_ews_store_container_id_lookup (ews_store, full_name));
 
 	camel_folder_summary_prepare_fetch_all (folder->summary, error);
 	max = camel_folder_summary_count (folder->summary);
@@ -2843,7 +2843,7 @@ ews_expunge (CamelFolder *folder, GError **error)
 						CAMEL_EWS_FOLDER_REC_LOCK (folder, cache_lock);
 						camel_folder_change_info_remove_uid (changes, uid);
 						camel_folder_summary_remove_uid (folder->summary, uid);
-						camel_data_cache_remove(gw_folder->cache, "cache", uid, NULL);
+						camel_data_cache_remove(ews_folder->cache, "cache", uid, NULL);
 						CAMEL_EWS_FOLDER_REC_UNLOCK (folder, cache_lock);
 						deleted_items = g_list_next (deleted_items);
 						max -= GROUPWISE_BULK_DELETE_LIMIT;
@@ -2868,7 +2868,7 @@ ews_expunge (CamelFolder *folder, GError **error)
 				CAMEL_EWS_FOLDER_REC_LOCK (folder, cache_lock);
 				camel_folder_change_info_remove_uid (changes, uid);
 				camel_folder_summary_remove_uid (folder->summary, uid);
-				camel_data_cache_remove(gw_folder->cache, "cache", uid, NULL);
+				camel_data_cache_remove(ews_folder->cache, "cache", uid, NULL);
 				CAMEL_EWS_FOLDER_REC_UNLOCK (folder, cache_lock);
 				deleted_items = g_list_next (deleted_items);
 			}
@@ -2898,16 +2898,16 @@ ews_cmp_uids (CamelFolder *folder, const gchar *uid1, const gchar *uid2)
 static void
 ews_folder_dispose (GObject *object)
 {
-	CamelEwsFolder *gw_folder = CAMEL_EWS_FOLDER (object);
+	CamelEwsFolder *ews_folder = CAMEL_EWS_FOLDER (object);
 
-	if (gw_folder->cache != NULL) {
-		g_object_unref (gw_folder->cache);
-		gw_folder->cache = NULL;
+	if (ews_folder->cache != NULL) {
+		g_object_unref (ews_folder->cache);
+		ews_folder->cache = NULL;
 	}
 
-	if (gw_folder->search != NULL) {
-		g_object_unref (gw_folder->search);
-		gw_folder->search = NULL;
+	if (ews_folder->search != NULL) {
+		g_object_unref (ews_folder->search);
+		ews_folder->search = NULL;
 	}
 
 	/* Chain up to parent's dispose() method. */
@@ -2964,11 +2964,11 @@ camel_ews_folder_class_init (CamelEwsFolderClass *class)
 }
 
 static void
-camel_ews_folder_init (CamelEwsFolder *gw_folder)
+camel_ews_folder_init (CamelEwsFolder *ews_folder)
 {
-	CamelFolder *folder = CAMEL_FOLDER (gw_folder);
+	CamelFolder *folder = CAMEL_FOLDER (ews_folder);
 
-	gw_folder->priv = CAMEL_EWS_FOLDER_GET_PRIVATE (gw_folder);
+	ews_folder->priv = CAMEL_EWS_FOLDER_GET_PRIVATE (ews_folder);
 
 	folder->permanent_flags = CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_DELETED |
 		CAMEL_MESSAGE_DRAFT | CAMEL_MESSAGE_FLAGGED | CAMEL_MESSAGE_SEEN;
@@ -2976,11 +2976,11 @@ camel_ews_folder_init (CamelEwsFolder *gw_folder)
 	folder->folder_flags = CAMEL_FOLDER_HAS_SUMMARY_CAPABILITY | CAMEL_FOLDER_HAS_SEARCH_CAPABILITY;
 
 #ifdef ENABLE_THREADS
-	g_static_mutex_init(&gw_folder->priv->search_lock);
-	g_static_rec_mutex_init(&gw_folder->priv->cache_lock);
+	g_static_mutex_init(&ews_folder->priv->search_lock);
+	g_static_rec_mutex_init(&ews_folder->priv->cache_lock);
 #endif
 
-	gw_folder->need_rescan = TRUE;
+	ews_folder->need_rescan = TRUE;
 }
 
 void

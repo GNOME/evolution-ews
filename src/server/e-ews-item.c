@@ -2901,7 +2901,7 @@ add_return_notification (SoupSoapMessage *msg, const gchar *option, EEwsItemRetu
 }
 
 static void
-append_gw_item_options (SoupSoapMessage *msg, EEwsItem *item)
+append_ews_item_options (SoupSoapMessage *msg, EEwsItem *item)
 {
 	EEwsItemPrivate *priv;
 
@@ -3105,7 +3105,7 @@ e_ews_item_set_calendar_item_elements (EEwsItem *item, SoupSoapMessage *msg)
 	if (priv->recipient_list != NULL) {
 		e_ews_item_add_distribution_to_soap_message (item, msg);
 		if (priv->set_sendoptions)
-			append_gw_item_options (msg, item);
+			append_ews_item_options (msg, item);
 	}
 
 	soup_soap_message_start_element (msg, "message", NULL, NULL);
@@ -3286,7 +3286,7 @@ e_ews_item_append_to_soap_message (EEwsItem *item, SoupSoapMessage *msg)
 
 		if (priv->set_sendoptions) {
 			/* item options */
-			append_gw_item_options (msg, item);
+			append_ews_item_options (msg, item);
 		}
 		/*container*/
 		if (item->priv->container)

@@ -68,12 +68,12 @@ camel_ews_store_summary_class_init (CamelEwsStoreSummaryClass *class)
 }
 
 static void
-camel_ews_store_summary_init (CamelEwsStoreSummary *gw_summary)
+camel_ews_store_summary_init (CamelEwsStoreSummary *ews_summary)
 {
-	CamelStoreSummary *summary = CAMEL_STORE_SUMMARY (gw_summary);
+	CamelStoreSummary *summary = CAMEL_STORE_SUMMARY (ews_summary);
 
 	summary->store_info_size = sizeof (CamelEwsStoreInfo);
-	gw_summary->version = CAMEL_GW_STORE_SUMMARY_VERSION;
+	ews_summary->version = CAMEL_GW_STORE_SUMMARY_VERSION;
 }
 
 CamelEwsStoreSummary *

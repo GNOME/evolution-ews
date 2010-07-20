@@ -80,14 +80,14 @@ GType camel_ews_store_get_type (void);
 gchar * ews_get_name(CamelService *service, gboolean brief);
 
 /*IMplemented*/
-const gchar *camel_ews_store_container_id_lookup (CamelEwsStore *gw_store, const gchar *folder_name);
-const gchar *camel_ews_store_folder_lookup (CamelEwsStore *gw_store, const gchar *container_id);
+const gchar *camel_ews_store_container_id_lookup (CamelEwsStore *ews_store, const gchar *folder_name);
+const gchar *camel_ews_store_folder_lookup (CamelEwsStore *ews_store, const gchar *container_id);
 EEwsConnection *cnc_lookup (CamelEwsStorePrivate *priv);
 gchar *storage_path_lookup (CamelEwsStorePrivate *priv);
 const gchar *ews_base_url_lookup (CamelEwsStorePrivate *priv);
 CamelFolderInfo * create_junk_folder (CamelStore *store);
 gboolean camel_ews_store_connected (CamelEwsStore *store, GError **error);
-gboolean gw_store_reload_folder (CamelEwsStore *store, CamelFolder *folder, guint32 flags, GError **error);
+gboolean ews_store_reload_folder (CamelEwsStore *store, CamelFolder *folder, guint32 flags, GError **error);
 void ews_store_set_current_folder (CamelEwsStore *ews_store, CamelFolder *folder);
 
 G_END_DECLS

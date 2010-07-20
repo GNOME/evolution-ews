@@ -450,12 +450,12 @@ ews_is_system_folder (const gchar *folder_name)
 
 /*Build/populate CamelFolderInfo structure based on the imap_build_folder_info function*/
 static CamelFolderInfo *
-ews_build_folder_info(CamelEwsStore *gw_store, const gchar *parent_name, const gchar *folder_name)
+ews_build_folder_info(CamelEwsStore *ews_store, const gchar *parent_name, const gchar *folder_name)
 {
 	CamelURL *url;
 	const gchar *name;
 	CamelFolderInfo *fi;
-	CamelEwsStorePrivate *priv = gw_store->priv;
+	CamelEwsStorePrivate *priv = ews_store->priv;
 
 	fi = camel_folder_info_new();
 
@@ -498,9 +498,9 @@ ews_build_folder_info(CamelEwsStore *gw_store, const gchar *parent_name, const g
 }
 
 static void
-ews_forget_folder (CamelEwsStore *gw_store, const gchar *folder_name, GError **error)
+ews_forget_folder (CamelEwsStore *ews_store, const gchar *folder_name, GError **error)
 {
-	CamelEwsStorePrivate *priv = gw_store->priv;
+	CamelEwsStorePrivate *priv = ews_store->priv;
 	gchar *state_file;
 	gchar *folder_dir, *storage_path;
 	CamelFolderInfo *fi;
@@ -523,19 +523,19 @@ ews_forget_folder (CamelEwsStore *gw_store, const gchar *folder_name, GError **e
 	g_rmdir (folder_dir);
 	g_free (folder_dir);
 
-	camel_store_summary_remove_path ( (CamelStoreSummary *)gw_store->summary, folder_name);
-	camel_store_summary_save ( (CamelStoreSummary *)gw_store->summary);
+	camel_store_summary_remove_path ( (CamelStoreSummary *)ews_store->summary, folder_name);
+	camel_store_summary_save ( (CamelStoreSummary *)ews_store->summary);
 
-	fi = ews_build_folder_info(gw_store, NULL, folder_name);
-	camel_store_folder_deleted (CAMEL_STORE (gw_store), fi);
+	fi = ews_build_folder_info(ews_store, NULL, folder_name);
+	camel_store_folder_deleted (CAMEL_STORE (ews_store), fi);
 	camel_folder_info_free (fi);
 }
 
 static CamelFolder *
 ews_get_folder_from_disk (CamelStore *store, const gchar *folder_name, guint32 flags, GError **error)
 {
-	CamelEwsStore *gw_store = CAMEL_EWS_STORE (store);
-	CamelEwsStorePrivate *priv = gw_store->priv;
+	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
+	CamelEwsStorePrivate *priv = ews_store->priv;
 	CamelFolder *folder;
 	gchar *folder_dir, *storage_path;
 
@@ -560,8 +560,8 @@ ews_get_folder_from_disk (CamelStore *store, const gchar *folder_name, guint32 f
 static CamelFolder *
 ews_get_folder (CamelStore *store, const gchar *folder_name, guint32 flags, GError **error)
 {
-	CamelEwsStore *gw_store = CAMEL_EWS_STORE (store);
-	CamelEwsStorePrivate *priv = gw_store->priv;
+	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
+	CamelEwsStorePrivate *priv = ews_store->priv;
 	CamelFolder *folder;
 	CamelEwsSummary *summary;
 	gchar *container_id, *folder_dir, *storage_path;
@@ -577,7 +577,7 @@ ews_get_folder (CamelStore *store, const gchar *folder_name, guint32 flags, GErr
 	folder = ews_get_folder_from_disk (
 		store, folder_name, flags, &local_error);
 	if (folder) {
-		ews_store_set_current_folder (gw_store, folder);
+		ews_store_set_current_folder (ews_store, folder);
 		return folder;
 
 	/* Ignore "no such folder" errors, fail on any other error. */
@@ -588,18 +588,18 @@ ews_get_folder (CamelStore *store, const gchar *folder_name, guint32 flags, GErr
 	} else
 		g_clear_error (&local_error);
 
-	camel_service_lock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+	camel_service_lock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
-	ews_store_set_current_folder (gw_store, NULL);
+	ews_store_set_current_folder (ews_store, NULL);
 
-	if (!camel_ews_store_connected (gw_store, error)) {
-		camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+	if (!camel_ews_store_connected (ews_store, error)) {
+		camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		return NULL;
 	}
 
 	if (!E_IS_GW_CONNECTION( priv->cnc)) {
 		if (!ews_connect (CAMEL_SERVICE(store), error)) {
-			camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+			camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 			return NULL;
 		}
 	}
@@ -611,7 +611,7 @@ ews_get_folder (CamelStore *store, const gchar *folder_name, guint32 flags, GErr
 	g_free(storage_path);
 	folder = camel_ews_folder_new (store, folder_name, folder_dir, NULL);
 	if (!folder) {
-		camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+		camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		g_set_error (
 			error, CAMEL_SERVICE_ERROR,
 			CAMEL_SERVICE_ERROR_INVALID,
@@ -622,10 +622,10 @@ ews_get_folder (CamelStore *store, const gchar *folder_name, guint32 flags, GErr
 	}
 	g_free (folder_dir);
 
-	si = camel_store_summary_path ((CamelStoreSummary *)gw_store->summary, folder_name);
+	si = camel_store_summary_path ((CamelStoreSummary *)ews_store->summary, folder_name);
 	if (si) {
 		total = si->total;
-		camel_store_summary_info_free ((CamelStoreSummary *)(gw_store)->summary, si);
+		camel_store_summary_info_free ((CamelStoreSummary *)(ews_store)->summary, si);
 	}
 
 	summary = (CamelEwsSummary *) folder->summary;
@@ -645,7 +645,7 @@ ews_get_folder (CamelStore *store, const gchar *folder_name, guint32 flags, GErr
 				&cursor);
 
 		if (status != E_EWS_CONNECTION_STATUS_OK) {
-			camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+			camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 			g_free (container_id);
 			return NULL;
 		}
@@ -677,7 +677,7 @@ ews_get_folder (CamelStore *store, const gchar *folder_name, guint32 flags, GErr
 						camel_operation_progress (NULL, (100*count)/total);
 				}
 
-				gw_update_summary (folder, list,  error);
+				ews_update_summary (folder, list,  error);
 
 				/* For shared-folders created by the user, we don't get the total number of messages,
 				in the getFolderList call. So, we need to wait until an empty list is returned in the
@@ -703,18 +703,18 @@ ews_get_folder (CamelStore *store, const gchar *folder_name, guint32 flags, GErr
 
 	camel_folder_summary_save_to_db (folder->summary, NULL);
 
-	ews_store_set_current_folder (gw_store, folder);
+	ews_store_set_current_folder (ews_store, folder);
 
 	g_free (container_id);
-	camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+	camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	return folder;
 }
 
 gboolean
-gw_store_reload_folder (CamelEwsStore *gw_store, CamelFolder *folder, guint32 flags, GError **error)
+ews_store_reload_folder (CamelEwsStore *ews_store, CamelFolder *folder, guint32 flags, GError **error)
 {
-	CamelEwsStorePrivate *priv = gw_store->priv;
+	CamelEwsStorePrivate *priv = ews_store->priv;
 	CamelEwsSummary *summary;
 	gchar *container_id;
 	EEwsConnectionStatus status;
@@ -730,26 +730,26 @@ gw_store_reload_folder (CamelEwsStore *gw_store, CamelFolder *folder, guint32 fl
 	name = camel_folder_get_name (folder);
 	full_name = camel_folder_get_full_name (folder);
 
-	camel_service_lock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+	camel_service_lock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
-	if (!camel_ews_store_connected (gw_store, error)) {
-		camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+	if (!camel_ews_store_connected (ews_store, error)) {
+		camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		return FALSE;
 	}
 
 	if (!E_IS_GW_CONNECTION( priv->cnc)) {
-		if (!ews_connect (CAMEL_SERVICE((CamelStore*)gw_store), error)) {
-			camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+		if (!ews_connect (CAMEL_SERVICE((CamelStore*)ews_store), error)) {
+			camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 			return FALSE;
 		}
 	}
 
 	container_id =	g_strdup (g_hash_table_lookup (priv->name_hash, full_name));
 
-	si = camel_store_summary_path ((CamelStoreSummary *)gw_store->summary, name);
+	si = camel_store_summary_path ((CamelStoreSummary *)ews_store->summary, name);
 	if (si) {
 		total = si->total;
-		camel_store_summary_info_free ((CamelStoreSummary *)(gw_store)->summary, si);
+		camel_store_summary_info_free ((CamelStoreSummary *)(ews_store)->summary, si);
 	}
 
 	summary = (CamelEwsSummary *) folder->summary;
@@ -770,7 +770,7 @@ gw_store_reload_folder (CamelEwsStore *gw_store, CamelFolder *folder, guint32 fl
 									NULL,
 									&cursor);
 			if (status != E_EWS_CONNECTION_STATUS_OK) {
-					camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+					camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 					g_free (container_id);
 					return FALSE;
 			}
@@ -784,7 +784,7 @@ gw_store_reload_folder (CamelEwsStore *gw_store, CamelFolder *folder, guint32 fl
 									cursor, FALSE,
 									CURSOR_ITEM_LIMIT, position, &list);
 					if (status != E_EWS_CONNECTION_STATUS_OK) {
-							camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+							camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 							e_ews_connection_destroy_cursor (priv->cnc, container_id, cursor);
 							camel_folder_summary_save_to_db (folder->summary, NULL);
 							g_set_error (
@@ -808,7 +808,7 @@ gw_store_reload_folder (CamelEwsStore *gw_store, CamelFolder *folder, guint32 fl
 							camel_operation_progress (NULL, (100*count)/total);
 					}
 
-					gw_update_summary (folder, list,  error);
+					ews_update_summary (folder, list,  error);
 
 					/* For shared-folders created by the user, we don't get the total number of messages,
 					   in the getFolderList call. So, we need to wait until an empty list is returned in the
@@ -835,10 +835,10 @@ gw_store_reload_folder (CamelEwsStore *gw_store, CamelFolder *folder, guint32 fl
 
 	camel_folder_summary_save_to_db (folder->summary, NULL);
 
-	ews_store_set_current_folder (gw_store, NULL);
+	ews_store_set_current_folder (ews_store, NULL);
 
 	g_free (container_id);
-	camel_service_unlock (CAMEL_SERVICE (gw_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+	camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	return TRUE;
 }
 
@@ -1076,7 +1076,7 @@ ews_get_folder_info_offline (CamelStore *store, const gchar *top,
 			name = camel_ews_store_summary_path_to_full(ews_store->summary, top, '/');
 	}
 
-	path = gw_concat (name, "*");
+	path = ews_concat (name, "*");
 
 	for (i=0;i<camel_store_summary_count((CamelStoreSummary *)ews_store->summary);i++) {
 		CamelStoreInfo *si = camel_store_summary_index((CamelStoreSummary *)ews_store->summary, i);
@@ -1352,17 +1352,17 @@ ews_get_name(CamelService *service, gboolean brief)
 }
 
 const gchar *
-camel_ews_store_container_id_lookup (CamelEwsStore *gw_store, const gchar *folder_name)
+camel_ews_store_container_id_lookup (CamelEwsStore *ews_store, const gchar *folder_name)
 {
-	CamelEwsStorePrivate *priv = gw_store->priv;
+	CamelEwsStorePrivate *priv = ews_store->priv;
 
 	return g_hash_table_lookup (priv->name_hash, folder_name);
 }
 
 const gchar *
-camel_ews_store_folder_lookup (CamelEwsStore *gw_store, const gchar *container_id)
+camel_ews_store_folder_lookup (CamelEwsStore *ews_store, const gchar *container_id)
 {
-	CamelEwsStorePrivate *priv = gw_store->priv;
+	CamelEwsStorePrivate *priv = ews_store->priv;
 
 	return g_hash_table_lookup (priv->id_hash, container_id);
 }
@@ -1422,11 +1422,11 @@ camel_ews_store_connected (CamelEwsStore *store, GError **error)
 {
 	if (((CamelOfflineStore *) store)->state == CAMEL_OFFLINE_STORE_NETWORK_AVAIL
 	    && camel_service_connect ((CamelService *)store, error)) {
-		CamelEwsStore *gw_store = (CamelEwsStore *) store;
-		CamelEwsStorePrivate *priv = gw_store->priv;
+		CamelEwsStore *ews_store = (CamelEwsStore *) store;
+		CamelEwsStorePrivate *priv = ews_store->priv;
 
 		if (g_hash_table_size (priv->name_hash) == 0)
-			return ews_folders_sync ((CamelEwsStore *) gw_store, error);
+			return ews_folders_sync ((CamelEwsStore *) ews_store, error);
 
 		return TRUE;
 	}
