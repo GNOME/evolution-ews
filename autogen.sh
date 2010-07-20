@@ -11,6 +11,7 @@ REQUIRED_LIBTOOL_VERSION=2.2
 REQUIRED_INTLTOOL_VERSION=0.35.5
 
 (test -f $srcdir/configure.ac \
+  && test -f $srcdir/ChangeLog \
   && test -d $srcdir/src/camel) || {
     echo -n "**Error**: Directory "\`$srcdir\'" does not look like the" >&2
     echo " top-level $PKG_NAME directory" >&2
