@@ -33,9 +33,9 @@
 #include <libedataserver/e-source.h>
 #include <libedataserver/e-source-list.h>
 
-#include <exchange-ews-folder.h>
-#include <exchange-ews-connection.h>
-#include <exchange-ews-utils.h>
+#include <camel-ews-folder.h>
+#include <e-ews-connection.h>
+#include <camel-ews-utils.h>
 
 #define d(x) x
 
@@ -178,7 +178,7 @@ find_source_by_fid (GSList *sources, const gchar *fid)
 #define ADDRESSBOOK_SOURCES     "/apps/evolution/addressbook/sources"
 
 static void
-add_cal_esource (EAccount *account, GSList *folders, ExchangeEWSFolderType folder_type, CamelURL *url, ews_id_t trash_fid)
+add_cal_esource (EAccount *account, GSList *folders, CamelEwsFolderType folder_type, CamelURL *url, ews_id_t trash_fid)
 {
 	ESourceList *source_list = NULL;
 	ESourceGroup *group = NULL;
@@ -189,17 +189,17 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeEWSFolderType folde
 	gboolean is_new_group = FALSE;
 	
 
-	if (folder_type == EWS_FOLDER_TYPE_APPOINTMENT) {
+	if (folder_type == CAMEL_FOLDER_TYPE_APPOINTMENT) {
 		conf_key = CALENDAR_SOURCES;
 		source_selection_key = SELECTED_CALENDARS;
-	} else if (folder_type == EWS_FOLDER_TYPE_TASK) {
+	} else if (folder_type == CAMEL_FOLDER_TYPE_TASK) {
 		conf_key = TASK_SOURCES;
 		source_selection_key = SELECTED_TASKS;
-	} else if (folder_type == EWS_FOLDER_TYPE_MEMO) {
+	} else if (folder_type == CAMEL_FOLDER_TYPE_MEMO) {
 		conf_key = JOURNAL_SOURCES;
 		source_selection_key = SELECTED_JOURNALS;
 	} else {
-		g_warning ("%s: %s: Unknown ExchangeEWSFolderType\n", G_STRLOC, G_STRFUNC);
+		g_warning ("%s: %s: Unknown CamelEwsFolderType\n", G_STRLOC, G_STRFUNC);
 		return;
 	}
 
@@ -234,15 +234,15 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeEWSFolderType folde
 	e_source_group_set_property (group, "acl-owner-email", account->id->address);
 
 	for (temp_list = folders; temp_list != NULL; temp_list = g_slist_next (temp_list)) {
-		ExchangeEWSFolder *folder = temp_list->data;
+		CamelEwsFolder *folder = temp_list->data;
 		ESource *source = NULL;
 		gchar *relative_uri = NULL, *fid = NULL;
 		gboolean is_new_source = FALSE;
 
-		if (folder->container_class != folder_type || trash_fid == exchange_ews_folder_get_parent_id (folder))
+		if (folder->container_class != folder_type || trash_fid == camel_ews_folder_get_parent_id (folder))
 			continue;
 
-		fid = exchange_ews_util_ews_id_to_string (folder->folder_id);
+		fid = camel_ews_util_ews_id_to_string (folder->folder_id);
 		relative_uri = g_strconcat (";", fid, NULL);
 		source = find_source_by_fid (old_sources, fid);
 		if (source) {
@@ -271,7 +271,7 @@ add_cal_esource (EAccount *account, GSList *folders, ExchangeEWSFolderType folde
 			e_source_set_property (source, "delete", "no");
 
 		if (folder->parent_folder_id) {
-			gchar *tmp = exchange_ews_util_ews_id_to_string (folder->parent_folder_id);
+			gchar *tmp = camel_ews_util_ews_id_to_string (folder->parent_folder_id);
 			e_source_set_property (source, "parent-fid", tmp);
 			g_free (tmp);
 		}
@@ -338,18 +338,18 @@ void exchange_ews_add_esource (CamelURL *url, const gchar *folder_name, const gc
 	if (url == NULL)
 		return;
 	
-	if (folder_type == EWS_FOLDER_TYPE_APPOINTMENT) 
+	if (folder_type == CAMEL_FOLDER_TYPE_APPOINTMENT) 
 		conf_key = CALENDAR_SOURCES;
-	else if (folder_type == EWS_FOLDER_TYPE_TASK) 
+	else if (folder_type == CAMEL_FOLDER_TYPE_TASK) 
 		conf_key = TASK_SOURCES;
-	else if (folder_type == EWS_FOLDER_TYPE_MEMO) 
+	else if (folder_type == CAMEL_FOLDER_TYPE_MEMO) 
 		conf_key = JOURNAL_SOURCES;
-	else if (folder_type == EWS_FOLDER_TYPE_JOURNAL)
+	else if (folder_type == CAMEL_FOLDER_TYPE_JOURNAL)
 		conf_key = JOURNAL_SOURCES;
-	else if (folder_type == EWS_FOLDER_TYPE_CONTACT)
+	else if (folder_type == CAMEL_FOLDER_TYPE_CONTACT)
 		conf_key = ADDRESSBOOK_SOURCES;
 	else {
-		g_warning ("%s: %s: Unknown ExchangeEWSFolderType\n", G_STRLOC, G_STRFUNC);
+		g_warning ("%s: %s: Unknown CamelEwsFolderType\n", G_STRLOC, G_STRFUNC);
 		return;
 	}
 
@@ -416,18 +416,18 @@ void exchange_ews_remove_esource (CamelURL *url, const gchar* folder_name, const
 	if (url == NULL)
 		return;
 
-	if (folder_type == EWS_FOLDER_TYPE_APPOINTMENT) 
+	if (folder_type == CAMEL_FOLDER_TYPE_APPOINTMENT) 
 		conf_key = CALENDAR_SOURCES;
-	else if (folder_type == EWS_FOLDER_TYPE_TASK) 
+	else if (folder_type == CAMEL_FOLDER_TYPE_TASK) 
 		conf_key = TASK_SOURCES;
-	else if (folder_type == EWS_FOLDER_TYPE_MEMO) 
+	else if (folder_type == CAMEL_FOLDER_TYPE_MEMO) 
 		conf_key = JOURNAL_SOURCES;
-	else if (folder_type == EWS_FOLDER_TYPE_JOURNAL)
+	else if (folder_type == CAMEL_FOLDER_TYPE_JOURNAL)
 		conf_key = JOURNAL_SOURCES;
-	else if (folder_type == EWS_FOLDER_TYPE_CONTACT)
+	else if (folder_type == CAMEL_FOLDER_TYPE_CONTACT)
 		conf_key = ADDRESSBOOK_SOURCES;
 	else {
-		g_warning ("%s: %s: Unknown ExchangeEWSFolderType\n", G_STRLOC, G_STRFUNC);
+		g_warning ("%s: %s: Unknown CamelEwsFolderType\n", G_STRLOC, G_STRFUNC);
 		return;
 	}
 
@@ -455,7 +455,7 @@ void exchange_ews_remove_esource (CamelURL *url, const gchar* folder_name, const
 
 
 static void
-remove_cal_esource (EAccount *existing_account_info, ExchangeEWSFolderType folder_type, CamelURL *url)
+remove_cal_esource (EAccount *existing_account_info, CamelEwsFolderType folder_type, CamelURL *url)
 {
 	ESourceList *list;
 	const gchar *conf_key = NULL, *source_selection_key = NULL;
@@ -466,17 +466,17 @@ remove_cal_esource (EAccount *existing_account_info, ExchangeEWSFolderType folde
 	GSList *node_tobe_deleted;
 	gchar *base_uri;
 
-	if (folder_type == EWS_FOLDER_TYPE_APPOINTMENT) {
+	if (folder_type == CAMEL_FOLDER_TYPE_APPOINTMENT) {
 		conf_key = CALENDAR_SOURCES;
 		source_selection_key = SELECTED_CALENDARS;
-	} else if (folder_type == EWS_FOLDER_TYPE_TASK) {
+	} else if (folder_type == CAMEL_FOLDER_TYPE_TASK) {
 		conf_key = TASK_SOURCES;
 		source_selection_key = SELECTED_TASKS;
-	} else if (folder_type == EWS_FOLDER_TYPE_MEMO) {
+	} else if (folder_type == CAMEL_FOLDER_TYPE_MEMO) {
 		conf_key = JOURNAL_SOURCES;
 		source_selection_key = SELECTED_JOURNALS;
 	} else {
-		g_warning ("%s: %s: Unknown ExchangeEWSFolderType\n", G_STRLOC, G_STRFUNC);
+		g_warning ("%s: %s: Unknown CamelEwsFolderType\n", G_STRLOC, G_STRFUNC);
 		return;
 	}
 
@@ -533,9 +533,9 @@ add_calendar_sources (EAccount *account, GSList *folders, ews_id_t trash_fid)
 	url = camel_url_new (account->source->url, NULL);
 
 	if (url) {
-		add_cal_esource (account, folders, EWS_FOLDER_TYPE_APPOINTMENT, url, trash_fid);
-		add_cal_esource (account, folders, EWS_FOLDER_TYPE_TASK, url, trash_fid);
-		add_cal_esource (account, folders, EWS_FOLDER_TYPE_MEMO, url, trash_fid);
+		add_cal_esource (account, folders, CAMEL_FOLDER_TYPE_APPOINTMENT, url, trash_fid);
+		add_cal_esource (account, folders, CAMEL_FOLDER_TYPE_TASK, url, trash_fid);
+		add_cal_esource (account, folders, CAMEL_FOLDER_TYPE_MEMO, url, trash_fid);
 	}
 
 	camel_url_free (url);
@@ -552,9 +552,9 @@ remove_calendar_sources (EAccount *account)
 	url = camel_url_new (account->source->url, NULL);
 
 	if (url) {
-		remove_cal_esource (account, EWS_FOLDER_TYPE_APPOINTMENT, url);
-		remove_cal_esource (account, EWS_FOLDER_TYPE_TASK, url);
-		remove_cal_esource (account, EWS_FOLDER_TYPE_MEMO, url);
+		remove_cal_esource (account, CAMEL_FOLDER_TYPE_APPOINTMENT, url);
+		remove_cal_esource (account, CAMEL_FOLDER_TYPE_TASK, url);
+		remove_cal_esource (account, CAMEL_FOLDER_TYPE_MEMO, url);
 	}
 
 	camel_url_free (url);
@@ -600,14 +600,14 @@ add_addressbook_sources (EAccount *account, GSList *folders, ews_id_t trash_fid)
 	e_source_group_set_property (group, "domain", camel_url_get_param (url, "domain"));
 
 	for (temp_list = folders; temp_list != NULL; temp_list = g_slist_next (temp_list)) {
-		ExchangeEWSFolder *folder = temp_list->data;
+		CamelEwsFolder *folder = temp_list->data;
 		gchar *fid, *relative_uri;
 		gboolean is_new_source = FALSE;
 
-		if (folder->container_class != EWS_FOLDER_TYPE_CONTACT || trash_fid == exchange_ews_folder_get_parent_id (folder))
+		if (folder->container_class != CAMEL_FOLDER_TYPE_CONTACT || trash_fid == camel_ews_folder_get_parent_id (folder))
 			continue;
 
-		fid = exchange_ews_util_ews_id_to_string (folder->folder_id);
+		fid = camel_ews_util_ews_id_to_string (folder->folder_id);
 		relative_uri = g_strconcat (";", folder->folder_name, NULL);
 		source = find_source_by_fid (old_sources, fid);
 		if (source) {
@@ -634,7 +634,7 @@ add_addressbook_sources (EAccount *account, GSList *folders, ews_id_t trash_fid)
 		if (folder->is_default)
 			e_source_set_property (source, "delete", "no");
 		if (folder->parent_folder_id) {
-			gchar *tmp = exchange_ews_util_ews_id_to_string (folder->parent_folder_id);
+			gchar *tmp = camel_ews_util_ews_id_to_string (folder->parent_folder_id);
 			e_source_set_property (source, "parent-fid", tmp);
 			g_free (tmp);
 		}
@@ -761,7 +761,7 @@ remove_addressbook_sources (ExchangeEWSAccountInfo *existing_account_info)
 static gboolean
 update_sources_idle_cb (gpointer data)
 {
-	ExchangeMapiConnection *conn = data;
+	EEwsConnection *conn = data;
 	EAccount *account;
 	GSList *folders_list;
 
@@ -776,10 +776,10 @@ update_sources_idle_cb (gpointer data)
 
 	g_object_set_data (G_OBJECT (conn), "EAccount", NULL);
 
-	folders_list = exchange_ews_connection_peek_folders_list (conn);
+	folders_list = e_ews_connection_peek_folders_list (conn);
 
 	if (account->enabled && lookup_account_info (account->uid)) {
-		ews_id_t trash_fid = exchange_ews_connection_get_default_folder_id (conn, olFolderDeletedItems, NULL);
+		ews_id_t trash_fid = e_ews_connection_get_default_folder_id (conn, olFolderDeletedItems, NULL);
 
 		add_addressbook_sources (account, folders_list, trash_fid);
 		add_calendar_sources (account, folders_list, trash_fid);
@@ -794,20 +794,20 @@ update_sources_idle_cb (gpointer data)
 static void
 update_sources_fn (gpointer data, gpointer user_data)
 {
-	ExchangeMapiConnection *conn = data;
+	EEwsConnection *conn = data;
 
 	g_return_if_fail (conn != NULL);
 
 	/* this fetches folder_list to the connection cache,
 	   thus next call will be quick as much as possible */
-	exchange_ews_connection_peek_folders_list (conn);
+	e_ews_connection_peek_folders_list (conn);
 
 	/* run a job in a main thread */
 	g_idle_add (update_sources_idle_cb, conn);
 }
 
 static void
-run_update_sources_thread (ExchangeMapiConnection *conn, EAccount *account)
+run_update_sources_thread (EEwsConnection *conn, EAccount *account)
 {
 	static GThreadPool *thread_pool = NULL;
 
@@ -842,9 +842,9 @@ check_for_account_conn_cb (gpointer data)
 	g_return_val_if_fail (csd->account != NULL, FALSE);
 
 	if (csd->account->enabled && lookup_account_info (csd->account->uid)) {
-		ExchangeMapiConnection *conn;
+		EEwsConnection *conn;
 
-		conn = exchange_ews_connection_find (csd->profile_name);
+		conn = e_ews_connection_find (csd->profile_name);
 		if (!conn) {
 			/* try later, it's still trying to connect */
 			return TRUE;
@@ -864,12 +864,12 @@ static void
 update_account_sources (EAccount *account, gboolean can_create_profile)
 {
 	CamelURL *url;
-	ExchangeMapiConnection *conn;
+	EEwsConnection *conn;
 
 	url = camel_url_new (account->source->url, NULL);
 	g_return_if_fail (url != NULL);
 
-	conn = exchange_ews_connection_find (camel_url_get_param (url, "profile"));
+	conn = e_ews_connection_find (camel_url_get_param (url, "profile"));
 	if (!conn && can_create_profile) {
 		/* connect to the server when not connected yet */
 		if (!create_profile_entry (url, account)) {
@@ -878,7 +878,7 @@ update_account_sources (EAccount *account, gboolean can_create_profile)
 			return;
 		}
 
-		conn = exchange_ews_connection_find (camel_url_get_param (url, "profile"));
+		conn = e_ews_connection_find (camel_url_get_param (url, "profile"));
 	}
 
 	if (conn) {
@@ -995,15 +995,15 @@ create_profile_entry (CamelURL *url, EAccount *account)
 			status = exchange_ews_create_profile (url->user, password, camel_url_get_param (url, "domain"), url->host, cp_flags, NULL, NULL, &error);
 			if (status) {
 				/* profile was created, try to connect to the server */
-				ExchangeMapiConnection *conn;
+				EEwsConnection *conn;
 				gchar *profname;
 
 				status = FALSE;
-				profname = exchange_ews_util_profile_name (url->user, camel_url_get_param (url, "domain"), url->host, FALSE);
+				profname = camel_ews_util_profile_name (url->user, camel_url_get_param (url, "domain"), url->host, FALSE);
 
-				conn = exchange_ews_connection_new (profname, password, &error);
+				conn = e_ews_connection_new (profname, password, &error);
 				if (conn) {
-					status = exchange_ews_connection_connected (conn);
+					status = e_ews_connection_connected (conn);
 					g_object_unref (conn);
 				}
 
@@ -1070,7 +1070,7 @@ ews_account_changed (EAccountList *account_listener, EAccount *account)
 			gchar *profname = NULL, *uri = NULL;
 			ExchangeEWSAccountListener *config_listener = exchange_ews_accounts_peek_config_listener();
 
-			profname = exchange_ews_util_profile_name (new_url->user, camel_url_get_param (new_url, "domain"), new_url->host, FALSE);
+			profname = camel_ews_util_profile_name (new_url->user, camel_url_get_param (new_url, "domain"), new_url->host, FALSE);
 			camel_url_set_param(new_url, "profile", profname);
 			g_free (profname);
 
@@ -1103,7 +1103,7 @@ ews_account_changed (EAccountList *account_listener, EAccount *account)
 				gchar *profname = NULL, *uri = NULL;
 				ExchangeEWSAccountListener *config_listener = exchange_ews_accounts_peek_config_listener();
 
-				profname = exchange_ews_util_profile_name (new_url->user, camel_url_get_param (new_url, "domain"), new_url->host, FALSE);
+				profname = camel_ews_util_profile_name (new_url->user, camel_url_get_param (new_url, "domain"), new_url->host, FALSE);
 				camel_url_set_param(new_url, "profile", profname);
 				g_free (profname);
 

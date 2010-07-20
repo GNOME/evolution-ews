@@ -36,9 +36,9 @@
 #include <addressbook/gui/widgets/eab-config.h>
 #include <calendar/gui/e-cal-config.h>
 
-#include <exchange-ews-folder.h>
-#include <exchange-ews-connection.h>
-#include <exchange-ews-utils.h>
+#include <camel-ews-folder.h>
+#include <e-ews-connection.h>
+#include <camel-ews-utils.h>
 
 #define d(x) x
 
@@ -96,7 +96,7 @@ enum {
 
 /* Callback for ProcessNetworkProfile. If we have more than one username,
  we need to let the user select. */
-static uint32_t
+static unsigned int
 create_profile_callback (struct SRowSet *rowset, gpointer data)
 {
 	struct SPropValue *lpProp_fullname, *lpProp_account;
@@ -238,15 +238,15 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 								&error);
 		if (status) {
 			/* profile was created, try to connect to the server */
-			ExchangeMapiConnection *conn;
+			EEwsConnection *conn;
 			gchar *profname;
 
 			status = FALSE;
-			profname = exchange_ews_util_profile_name (url->user, domain_name, url->host, FALSE);
+			profname = camel_ews_util_profile_name (url->user, domain_name, url->host, FALSE);
 
-			conn = exchange_ews_connection_new (profname, password, &error);
+			conn = e_ews_connection_new (profname, password, &error);
 			if (conn) {
-				status = exchange_ews_connection_connected (conn);
+				status = e_ews_connection_connected (conn);
 				g_object_unref (conn);
 			}
 
@@ -257,7 +257,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 			/* Things are successful */
 			gchar *profname = NULL, *uri = NULL;
 
-			profname = exchange_ews_util_profile_name (url->user, domain_name, url->host, FALSE);
+			profname = camel_ews_util_profile_name (url->user, domain_name, url->host, FALSE);
 			camel_url_set_param (url, "profile", profname);
 			g_free (profname);
 
@@ -428,7 +428,7 @@ enum {
 };
 
 static gboolean
-check_node (GtkTreeStore *ts, ExchangeEWSFolder *folder, GtkTreeIter iter)
+check_node (GtkTreeStore *ts, CamelEwsFolder *folder, GtkTreeIter iter)
 {
 	GtkTreeModel *ts_model;
 	ews_id_t fid;
@@ -459,7 +459,7 @@ check_node (GtkTreeStore *ts, ExchangeEWSFolder *folder, GtkTreeIter iter)
 }
 
 static void
-add_to_store (GtkTreeStore *ts, ExchangeEWSFolder *folder)
+add_to_store (GtkTreeStore *ts, CamelEwsFolder *folder)
 {
 	GtkTreeModel *ts_model;
 	GtkTreeIter iter;
@@ -475,7 +475,7 @@ add_to_store (GtkTreeStore *ts, ExchangeEWSFolder *folder)
 }
 
 static void
-traverse_tree (GtkTreeModel *model, GtkTreeIter iter, ExchangeEWSFolderType folder_type, gboolean *pany_sub_used)
+traverse_tree (GtkTreeModel *model, GtkTreeIter iter, CamelEwsFolderType folder_type, gboolean *pany_sub_used)
 {
 	gboolean any_sub_used = FALSE;
 	gboolean has_next = TRUE;
@@ -483,7 +483,7 @@ traverse_tree (GtkTreeModel *model, GtkTreeIter iter, ExchangeEWSFolderType fold
 	do {
 		gboolean sub_used = FALSE;
 		GtkTreeIter next = iter;
-		ExchangeEWSFolder *folder = NULL;
+		CamelEwsFolder *folder = NULL;
 
 		has_next = gtk_tree_model_iter_next (model, &next);
 
@@ -495,7 +495,7 @@ traverse_tree (GtkTreeModel *model, GtkTreeIter iter, ExchangeEWSFolderType fold
 		}
 
 		gtk_tree_model_get (model, &iter, FOLDER_COL, &folder, -1);
-		if (folder && (exchange_ews_folder_get_type (folder) == folder_type || (folder_type == EWS_FOLDER_TYPE_MEMO && exchange_ews_folder_get_type (folder) == EWS_FOLDER_TYPE_JOURNAL))) {
+		if (folder && (camel_ews_folder_get_type (folder) == folder_type || (folder_type == CAMEL_FOLDER_TYPE_MEMO && camel_ews_folder_get_type (folder) == CAMEL_FOLDER_TYPE_JOURNAL))) {
 			sub_used = TRUE;
 		}
 
@@ -512,7 +512,7 @@ traverse_tree (GtkTreeModel *model, GtkTreeIter iter, ExchangeEWSFolderType fold
 }
 
 static void
-add_folders (GSList *folders, GtkTreeStore *ts, ExchangeEWSFolderType folder_type)
+add_folders (GSList *folders, GtkTreeStore *ts, CamelEwsFolderType folder_type)
 {
 	GSList *tmp = folders;
 	GtkTreeIter iter;
@@ -522,7 +522,7 @@ add_folders (GSList *folders, GtkTreeStore *ts, ExchangeEWSFolderType folder_typ
 	gtk_tree_store_append (ts, &iter, NULL);
 	gtk_tree_store_set (ts, &iter, NAME_COL, node, -1);
 	while (tmp) {
-		ExchangeEWSFolder *folder = tmp->data;
+		CamelEwsFolder *folder = tmp->data;
 		add_to_store (ts, folder);
 		tmp = tmp->next;
 	}
@@ -546,11 +546,11 @@ select_folder (GtkTreeModel *model, ews_id_t fid, GtkWidget *tree_view)
 		return;
 
 	while (!found && can) {
-		ExchangeEWSFolder *folder = NULL;
+		CamelEwsFolder *folder = NULL;
 
 		gtk_tree_model_get (model, &iter, FOLDER_COL, &folder, -1);
 
-		if (folder && exchange_ews_folder_get_fid (folder) == fid) {
+		if (folder && camel_ews_folder_get_fid (folder) == fid) {
 			gtk_tree_selection_select_iter (gtk_tree_view_get_selection (GTK_TREE_VIEW (tree_view)), &iter);
 			found = TRUE;
 			break;
@@ -598,13 +598,13 @@ exchange_ews_cursor_change (GtkTreeView *treeview, ESource *source)
 	gtk_tree_selection_get_selected(selection, &model, &iter);
 
 	gtk_tree_model_get (model, &iter, FID_COL, &pfid, -1);
-	sfid = exchange_ews_util_ews_id_to_string (pfid);
+	sfid = camel_ews_util_ews_id_to_string (pfid);
 	e_source_set_property (source, "parent-fid", sfid);
 	g_free (sfid);
 }
 
 static GtkWidget *
-exchange_ews_create (GtkWidget *parent, ESource *source, ExchangeEWSFolderType folder_type)
+exchange_ews_create (GtkWidget *parent, ESource *source, CamelEwsFolderType folder_type)
 {
 	GtkWidget *vbox, *label, *scroll, *tv;
 	gchar *uri_text, *profile = NULL;
@@ -615,7 +615,7 @@ exchange_ews_create (GtkWidget *parent, ESource *source, ExchangeEWSFolderType f
 	GtkTreeViewColumn *tvc;
 	const gchar *acc;
 	GSList *folders;
-	ExchangeMapiConnection *conn;
+	EEwsConnection *conn;
 	ews_id_t fid = 0;
 
 	uri_text = e_source_get_uri (source);
@@ -630,10 +630,10 @@ exchange_ews_create (GtkWidget *parent, ESource *source, ExchangeEWSFolderType f
 		profile = e_source_group_get_property (group, "profile");
 		e_source_set_property (source, "profile", profile);
 	}
-	conn = exchange_ews_connection_find (profile);
+	conn = e_ews_connection_find (profile);
 	g_free (profile);
-	if (conn && exchange_ews_connection_connected (conn))
-		folders = exchange_ews_connection_peek_folders_list (conn);
+	if (conn && e_ews_connection_connected (conn))
+		folders = e_ews_connection_peek_folders_list (conn);
 	acc = e_source_group_peek_name (group);
 	ts = gtk_tree_store_new (NUM_COLS, G_TYPE_STRING, G_TYPE_INT64, G_TYPE_POINTER);
 
@@ -644,7 +644,7 @@ exchange_ews_create (GtkWidget *parent, ESource *source, ExchangeEWSFolderType f
 
 	vbox = gtk_vbox_new (FALSE, 6);
 
-	if (folder_type == EWS_FOLDER_TYPE_CONTACT) {
+	if (folder_type == CAMEL_FOLDER_TYPE_CONTACT) {
 		gtk_container_add (GTK_CONTAINER (parent), vbox);
 	} else {
 		g_object_get (parent, "n-rows", &row, NULL);
@@ -664,7 +664,7 @@ exchange_ews_create (GtkWidget *parent, ESource *source, ExchangeEWSFolderType f
 	gtk_tree_view_expand_all (GTK_TREE_VIEW (tv));
 
 	if (e_source_get_property (source, "folder-id")) {
-		exchange_ews_util_ews_id_from_string (e_source_get_property (source, "folder-id"), &fid);
+		camel_ews_util_ews_id_from_string (e_source_get_property (source, "folder-id"), &fid);
 		select_folder (GTK_TREE_MODEL (ts), fid, tv);
 	}
 
@@ -688,24 +688,24 @@ exchange_ews_create_addressbook (EPlugin *epl, EConfigHookItemFactoryData *data)
 {
 	EABConfigTargetSource *t = (EABConfigTargetSource *) data->target;
 
-	return exchange_ews_create (data->parent, t->source, EWS_FOLDER_TYPE_CONTACT);
+	return exchange_ews_create (data->parent, t->source, CAMEL_FOLDER_TYPE_CONTACT);
 }
 
 GtkWidget *
 exchange_ews_create_calendar (EPlugin *epl, EConfigHookItemFactoryData *data)
 {
 	ECalConfigTargetSource *t = (ECalConfigTargetSource *) data->target;
-	ExchangeEWSFolderType folder_type;
+	CamelEwsFolderType folder_type;
 
 	switch (t->source_type) {
 	case E_CAL_SOURCE_TYPE_EVENT:
-		folder_type = EWS_FOLDER_TYPE_APPOINTMENT;
+		folder_type = CAMEL_FOLDER_TYPE_APPOINTMENT;
 		break;
 	case E_CAL_SOURCE_TYPE_TODO:
-		folder_type = EWS_FOLDER_TYPE_TASK;
+		folder_type = CAMEL_FOLDER_TYPE_TASK;
 		break;
 	case E_CAL_SOURCE_TYPE_JOURNAL:
-		folder_type = EWS_FOLDER_TYPE_MEMO;
+		folder_type = CAMEL_FOLDER_TYPE_MEMO;
 		break;
 	default:
 		g_return_val_if_reached (NULL);
@@ -749,7 +749,7 @@ exchange_ews_book_commit (EPlugin *epl, EConfigTarget *target)
 	ESource *source = t->source;
 	gchar *uri_text, *r_uri, *sfid;
 	ESourceGroup *grp;
-	ExchangeMapiConnection *conn;
+	EEwsConnection *conn;
 	ews_id_t fid, pfid;
 	GError *ews_error = NULL;
 
@@ -757,13 +757,13 @@ exchange_ews_book_commit (EPlugin *epl, EConfigTarget *target)
 	if (uri_text && g_ascii_strncasecmp (uri_text, EWS_URI_PREFIX, EWS_PREFIX_LENGTH))
 		return;
 	
-	exchange_ews_util_ews_id_from_string (e_source_get_property (source, "parent-fid"), &pfid);
+	camel_ews_util_ews_id_from_string (e_source_get_property (source, "parent-fid"), &pfid);
 
 	/* the profile should be already connected */
-	conn = exchange_ews_connection_find (e_source_get_property (source, "profile"));
+	conn = e_ews_connection_find (e_source_get_property (source, "profile"));
 	g_return_if_fail (conn != NULL);
 
-	fid = exchange_ews_connection_create_folder (conn, olFolderContacts, pfid, 0, e_source_peek_name (source), &ews_error);
+	fid = e_ews_connection_create_folder (conn, olFolderContacts, pfid, 0, e_source_peek_name (source), &ews_error);
 	g_object_unref (conn);
 
 	if (!fid) {
@@ -777,7 +777,7 @@ exchange_ews_book_commit (EPlugin *epl, EConfigTarget *target)
 		return;
 	}
 
-	sfid = exchange_ews_util_ews_id_to_string (fid);
+	sfid = camel_ews_util_ews_id_to_string (fid);
 	r_uri = g_strconcat (";", sfid, NULL);
 	e_source_set_relative_uri (source, r_uri);
 
@@ -793,7 +793,7 @@ exchange_ews_book_commit (EPlugin *epl, EConfigTarget *target)
 
 	e_source_set_property (source, "completion", "true");
 	e_source_set_property (source, "public", "no");
-	// Update the folder list in the plugin and ExchangeEWSFolder
+	// Update the folder list in the plugin and CamelEwsFolder
 	g_free (r_uri);
 	g_free (sfid);
 
@@ -833,13 +833,13 @@ exchange_ews_cal_check (EPlugin *epl, EConfigHookPageCheckData *data)
 void
 exchange_ews_cal_commit (EPlugin *epl, EConfigTarget *target)
 {
-	ExchangeMapiConnection *conn;
+	EEwsConnection *conn;
 	ECalConfigTargetSource *t = (ECalConfigTargetSource *) target;
 	ESourceGroup *group;
 	ESource *source = t->source;
 	gchar *tmp, *sfid;
 	ews_id_t fid, pfid;
-	uint32_t type;
+	unsigned int type;
 	gchar *uri_text = e_source_get_uri (source);
 	GError *ews_error = NULL;
 
@@ -858,19 +858,19 @@ exchange_ews_cal_commit (EPlugin *epl, EConfigTarget *target)
 			type = olFolderNotes;
 			break;
 		default:
-			g_warning ("%s: %s: Unknown ExchangeEWSFolderType\n", G_STRLOC, G_STRFUNC);
+			g_warning ("%s: %s: Unknown CamelEwsFolderType\n", G_STRLOC, G_STRFUNC);
 			return;
 	}
 
 	/* FIXME: Offline handling */
 
-	exchange_ews_util_ews_id_from_string (e_source_get_property (source, "parent-fid"), &pfid);
+	camel_ews_util_ews_id_from_string (e_source_get_property (source, "parent-fid"), &pfid);
 
 	/* the profile should be already connected */
-	conn = exchange_ews_connection_find (e_source_get_property (source, "profile"));
+	conn = e_ews_connection_find (e_source_get_property (source, "profile"));
 	g_return_if_fail (conn != NULL);
 
-	fid = exchange_ews_connection_create_folder (conn, type, pfid, 0, e_source_peek_name (source), &ews_error);
+	fid = e_ews_connection_create_folder (conn, type, pfid, 0, e_source_peek_name (source), &ews_error);
 	g_object_unref (conn);
 
 	if (!fid) {
@@ -884,7 +884,7 @@ exchange_ews_cal_commit (EPlugin *epl, EConfigTarget *target)
 		return;
 	}
 
-	sfid = exchange_ews_util_ews_id_to_string (fid);
+	sfid = camel_ews_util_ews_id_to_string (fid);
 	tmp = g_strconcat (";", sfid, NULL);
 	e_source_set_relative_uri (source, tmp);
 	g_free (tmp);
@@ -913,7 +913,7 @@ exchange_ews_cal_commit (EPlugin *epl, EConfigTarget *target)
 	e_source_set_property (source, "domain", tmp);
 	g_free (tmp);
 
-	tmp = exchange_ews_util_ews_id_to_string (fid);
+	tmp = camel_ews_util_ews_id_to_string (fid);
 	e_source_set_property (source, "folder-id", tmp);
 	g_free (tmp);
 
@@ -933,6 +933,6 @@ exchange_ews_cal_commit (EPlugin *epl, EConfigTarget *target)
 	e_source_set_property (source, "acl-owner-email", tmp);
 	g_free (tmp);
 
-	// Update the folder list in the plugin and ExchangeEWSFolder
+	// Update the folder list in the plugin and CamelEwsFolder
 	return;
 }

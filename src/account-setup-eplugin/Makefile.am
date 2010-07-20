@@ -5,7 +5,21 @@ AM_CPPFLAGS = -I .					\
 	$(CAMEL_CFLAGS)				\
 	$(LIBECAL_CFLAGS)
 
-@EVO_PLUGIN_RULE@
+### EVO_PLUGIN_RULE ### begin ###
+
+%.eplug: %.eplug.in
+	sed -e 's|\@PLUGINDIR\@|$(plugindir)|'		\
+	-e 's|\@SOEXT\@|$(SOEXT)|'			\
+	-e 's|\@GETTEXT_PACKAGE\@|$(GETTEXT_PACKAGE)|'	\
+	-e 's|\@LOCALEDIR\@|$(localedir)|' $< > $@
+
+%.eplug.in: %.eplug.xml
+	LC_ALL=C $(INTLTOOL_MERGE) -x -u /tmp $< $@
+
+%.error: %.error.xml
+	LC_ALL=C $(INTLTOOL_MERGE) -x -u /tmp $< $@
+
+### EVO_PLUGIN_RULE ### end ###
 
 plugin_DATA = org-gnome-exchange-ews.eplug 	
 
@@ -24,7 +38,15 @@ liborg_gnome_exchange_ews_la_LIBADD = 			\
 	$(LIBECAL_LIBS)
 
 liborg_gnome_exchange_ews_la_LDFLAGS = -module -avoid-version -no-undefined
-liborg_gnome_exchange_ews_la_CFLAGS = $(LIBEWS_CFLAGS)
+liborg_gnome_exchange_ews_la_CFLAGS = \
+	$(AM_CPPFLAGS)					\
+	-I$(top_srcdir)					\
+	-I$(top_builddir)				\
+	-I$(top_srcdir)/src/camel			\
+	-I$(top_builddir)/src/camel			\
+	-I$(top_srcdir)/src/server		\
+	-I$(top_builddir)/src/server		\
+	$(LIBEWS_CFLAGS)
 
 EXTRA_DIST = 						\
 	org-gnome-exchange-ews.eplug.xml
