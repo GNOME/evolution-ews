@@ -27,7 +27,7 @@
 #include "e-ews-message.h"
 
 SoupSoapMessage *
-e_ews_message_new_with_header (const gchar *uri, const gchar *session_id, const gchar *method_name)
+e_ews_message_new_with_header (const gchar *uri, const gchar *method_name)
 {
 	SoupSoapMessage *msg;
 
@@ -41,24 +41,15 @@ e_ews_message_new_with_header (const gchar *uri, const gchar *session_id, const 
 	soup_message_headers_append (SOUP_MESSAGE (msg)->request_headers, "User-Agent",
 				     "Evolution/" VERSION);
 	soup_message_headers_append (SOUP_MESSAGE (msg)->request_headers,"Connection",  "Keep-Alive");
-	soup_message_headers_append (SOUP_MESSAGE (msg)->request_headers, "SOAPAction", method_name);
 
 	soup_soap_message_start_envelope (msg);
-	if (session_id && *session_id) {
-		soup_soap_message_start_element (msg, "Header","SOAP-ENV", NULL);
-		soup_soap_message_add_attribute (msg, "encodingStyle", "", "SOAP-ENV", NULL);
-		/* FIXME: cannot use e_ews_message_write_string_parameter as it sets prefix -types*/
-		soup_soap_message_start_element (msg, "session", NULL, NULL);
-		soup_soap_message_write_string (msg, session_id);
-		soup_soap_message_end_element (msg);
-		soup_soap_message_end_element (msg);
-	}
-	soup_soap_message_start_body (msg);
-	soup_soap_message_add_attribute (msg, "encodingStyle", "", "SOAP-ENV", NULL);
-	soup_soap_message_add_namespace (msg, "types", "http://schemas.novell.com/2003/10/NCSP/types.xsd");
-
-	soup_soap_message_start_element (msg, method_name, NULL, NULL);
-
+	
+	soup_soap_message_start_body(msg);
+	soup_soap_message_add_namespace(msg, "types", 
+				       "http://schemas.microsoft.com/exchange/services/2006/types");
+	soup_soap_message_start_element(msg, method_name, NULL, NULL);
+	soup_soap_message_set_default_namespace(msg,
+						"http://schemas.microsoft.com/exchange/services/2006/messages");
 	return msg;
 }
 
@@ -109,37 +100,11 @@ e_ews_message_write_footer (SoupSoapMessage *msg)
 
 	soup_soap_message_persist (msg);
 
-	if (g_getenv ("GROUPWISE_DEBUG") && (atoi (g_getenv ("GROUPWISE_DEBUG")) == 1)) {
-		const gchar *header = soup_message_headers_get (SOUP_MESSAGE (msg)->request_headers, "SOAPAction");
-
+	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) == 1)) {
 		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->request_body));
-		if (header && g_str_equal (header, "loginRequest")) {
-			gchar *body;
-			gchar *begin = NULL;
-			gchar *end = NULL;
-
-			body = g_strdup (SOUP_MESSAGE (msg)->request_body->data);
-			begin = g_strrstr (body, "<types:password>");
-			if (begin)
-				begin = begin + strlen ("<types:password>");
-			end = g_strrstr (body , "</types:password>");
-			if (begin && end) {
-				gchar *tmp;
-				for (tmp = begin; tmp < end; tmp++)
-					*tmp='X';
-
-			}
-			fputc ('\n', stdout);
-			fputs (body, stdout);
-			fputc ('\n', stdout);
-			g_free (body);
-		}
-		else {
-
-			/* print request's body */
-			fputc ('\n', stdout);
-			fputs (SOUP_MESSAGE (msg)->request_body->data, stdout);
-			fputc ('\n', stdout);
-		}
+		/* print request's body */
+		fputc ('\n', stdout);
+		fputs (SOUP_MESSAGE (msg)->request_body->data, stdout);
+		fputc ('\n', stdout);
 	}
 }

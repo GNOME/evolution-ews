@@ -28,7 +28,7 @@
 
 G_BEGIN_DECLS
 
-SoupSoapMessage *e_ews_message_new_with_header (const gchar *uri, const gchar *session_id, const gchar *method_name);
+SoupSoapMessage *e_ews_message_new_with_header (const gchar *uri, const gchar *method_name);
 void             e_ews_message_write_string_parameter (SoupSoapMessage *msg, const gchar *name,
 						      const gchar *prefix, const gchar *value);
 void             e_ews_message_write_string_parameter_with_attribute (SoupSoapMessage *msg,

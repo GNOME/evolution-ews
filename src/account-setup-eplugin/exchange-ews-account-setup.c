@@ -93,7 +93,7 @@ enum {
   COL_EWS_INDEX,
   COLS_MAX
 };
-
+#if 0
 /* Callback for ProcessNetworkProfile. If we have more than one username,
  we need to let the user select. */
 static unsigned int
@@ -186,7 +186,7 @@ create_profile_callback (struct SRowSet *rowset, gpointer data)
 
 	return index;
 }
-
+#endif
 static void
 validate_credentials (GtkWidget *widget, EConfig *config)
 {
@@ -231,27 +231,20 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 
 	/*Can there be a account without password ?*/
 	if (password && *password && domain_name && *domain_name && *url->user && *url->host) {
-		guint32 cp_flags = (camel_url_get_param (url, "ssl") && g_str_equal (camel_url_get_param (url, "ssl"), "1")) ? CREATE_PROFILE_FLAG_USE_SSL : CREATE_PROFILE_FLAG_NONE;
 		GError *error = NULL;
-		gboolean status = exchange_ews_create_profile (url->user, password, domain_name, url->host, cp_flags,
-								(ews_profile_callback_t) create_profile_callback, url->user,
-								&error);
-		if (status) {
-			/* profile was created, try to connect to the server */
-			EEwsConnection *conn;
-			gchar *profname;
+		EEwsConnection *conn;
+		gchar *profname;
 
-			status = FALSE;
-			profname = camel_ews_util_profile_name (url->user, domain_name, url->host, FALSE);
+		status = FALSE;
+		profname = camel_ews_util_profile_name (url->user, domain_name, url->host, FALSE);
 
-			conn = e_ews_connection_new (profname, password, &error);
-			if (conn) {
-				status = e_ews_connection_connected (conn);
-				g_object_unref (conn);
-			}
-
-			g_free (profname);
+		conn = e_ews_connection_new (profname, password, &error);
+		if (conn) {
+			status = e_ews_connection_connected (conn);
+			g_object_unref (conn);
 		}
+
+		g_free (profname);
 
 		if (status) {
 			/* Things are successful */
@@ -419,6 +412,8 @@ org_gnome_exchange_ews_check_options(EPlugin *epl, EConfigHookPageCheckData *dat
 
 	return status;
 }
+
+#if 0 /* Folder creation... not yet */
 
 enum {
 	NAME_COL,
@@ -713,7 +708,7 @@ exchange_ews_create_calendar (EPlugin *epl, EConfigHookItemFactoryData *data)
 
 	return exchange_ews_create (data->parent, t->source, folder_type);
 }
-
+#endif
 gboolean
 exchange_ews_book_check (EPlugin *epl, EConfigHookPageCheckData *data)
 {
