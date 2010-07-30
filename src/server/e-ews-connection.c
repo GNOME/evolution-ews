@@ -61,7 +61,6 @@ struct _EEwsConnectionPrivate {
 	GHashTable *categories_by_name;
 	GHashTable *categories_by_id;
 	GList *book_list;
-	EEwsSendOptions *opts;
 	GMutex *reauth_mutex;
 	GMutex *msg_lock;
 	EProxy *proxy;
@@ -95,6 +94,7 @@ proxy_settings_changed (EProxy *proxy, gpointer user_data)
 					    conn->priv->uri);
 }
 
+#if 0
 static EEwsConnectionStatus
 reauthenticate (EEwsConnection *cnc)
 {
@@ -110,7 +110,7 @@ reauthenticate (EEwsConnection *cnc)
 		return E_EWS_CONNECTION_STATUS_INVALID_CONNECTION;
 
 	g_mutex_lock (priv->reauth_mutex);
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->session_id, "getCategoryListRequest");
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "getCategoryListRequest");
 	e_ews_message_write_footer (msg);
 
         /* just to make sure we still have invlaid session
@@ -130,7 +130,7 @@ reauthenticate (EEwsConnection *cnc)
 		return status;
 	}
 	/* build the SOAP message */
-	msg = e_ews_message_new_with_header (priv->uri, NULL, "loginRequest");
+	msg = e_ews_message_new_with_header (priv->uri, "loginRequest");
 	soup_soap_message_start_element (msg, "auth", "types", NULL);
 	soup_soap_message_add_attribute (msg, "type", "types:PlainText", "xsi",
 					 "http://www.w3.org/2001/XMLSchema-instance");
@@ -162,7 +162,7 @@ reauthenticate (EEwsConnection *cnc)
 	return status;
 
 }
-
+#endif
 static gboolean
 e_ews_connection_response_parse_status_and_description (SoupSoapResponse *response, gint *status, gchar **description)
 {
@@ -256,7 +256,7 @@ logout (EEwsConnection *cnc)
 	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), E_EWS_CONNECTION_STATUS_INVALID_OBJECT);
 
 	/* build the SOAP message */
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->session_id, "logoutRequest");
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "logoutRequest");
 	e_ews_message_write_string_parameter (msg, "session", "types", cnc->priv->session_id);
 	e_ews_message_write_footer (msg);
 
@@ -369,14 +369,8 @@ e_ews_connection_dispose (GObject *object)
 			priv->book_list = NULL;
 		}
 
-		if (priv->opts) {
-			g_object_unref (priv->opts);
-			priv->opts = NULL;
-		}
-
 		if (priv->version) {
 			g_free (priv->version);
-			priv->opts = NULL;
 		}
 
 		if (priv->server_time) {
@@ -451,7 +445,6 @@ e_ews_connection_init (EEwsConnection *cnc)
 	priv->categories_by_id = NULL;
 	priv->categories_by_name = NULL;
 	priv->book_list = NULL;
-	priv->opts = NULL;
 
 	/* README: We do not use libsoup logger and use our own as we need formatted output etc. */
 	/*
@@ -472,7 +465,7 @@ form_login_request (const gchar *uri, const gchar * username, const gchar * pass
 {
 	SoupSoapMessage *msg;
 	/* build the SOAP message */
-	msg = e_ews_message_new_with_header (uri, NULL, "loginRequest");
+	msg = e_ews_message_new_with_header (uri, "loginRequest");
 	e_ews_message_write_string_parameter (msg, "application", "types", build_timestamp);
 	e_ews_message_write_string_parameter (msg, "version", NULL, "1.02");
 	soup_soap_message_start_element (msg, "auth", "types", NULL);
