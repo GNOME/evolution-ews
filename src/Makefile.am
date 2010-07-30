@@ -1,4 +1,6 @@
-SUBDIRS = server calendar addressbook camel
+SUBDIRS = server
+# TODO : 
+# calendar addressbook camel
 DIST_SUBDIRS = server calendar addressbook camel
 
 changelogs =			\

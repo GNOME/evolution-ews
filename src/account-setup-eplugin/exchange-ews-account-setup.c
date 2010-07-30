@@ -187,6 +187,7 @@ create_profile_callback (struct SRowSet *rowset, gpointer data)
 	return index;
 }
 #endif
+
 static void
 validate_credentials (GtkWidget *widget, EConfig *config)
 {
@@ -194,6 +195,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 	CamelURL *url = NULL;
 	gchar *key = NULL, *password = NULL;
 	const gchar *domain_name = NULL;
+	gboolean status = TRUE;
 
 	url = camel_url_new (e_account_get_string (target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
 	domain_name = camel_url_get_param (url, "domain");
