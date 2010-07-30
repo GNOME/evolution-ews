@@ -20,7 +20,7 @@ idle_cb (gpointer data)
 	EEwsConnection *cnc;
 
 	cnc = e_ews_connection_new (arg_hostname, arg_username, arg_password);
-	if (E_IS_GW_CONNECTION (cnc)) {
+	if (E_IS_EWS_CONNECTION (cnc)) {
 		GList *container_list = NULL;
 
 		g_print ("Connected to %s!\n", arg_hostname);

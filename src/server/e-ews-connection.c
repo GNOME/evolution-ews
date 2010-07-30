@@ -253,7 +253,7 @@ logout (EEwsConnection *cnc)
 	SoupSoapResponse *response;
 	EEwsConnectionStatus status;
 
-	g_return_val_if_fail (E_IS_GW_CONNECTION (cnc), E_EWS_CONNECTION_STATUS_INVALID_OBJECT);
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), E_EWS_CONNECTION_STATUS_INVALID_OBJECT);
 
 	/* build the SOAP message */
 	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->session_id, "logoutRequest");
@@ -283,10 +283,10 @@ e_ews_connection_dispose (GObject *object)
 	EEwsConnectionPrivate *priv;
 	gchar *hash_key;
 
-	g_return_if_fail (E_IS_GW_CONNECTION (cnc));
+	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
 	priv = cnc->priv;
-	printf ("gw connection dispose \n");
+	printf ("ews connection dispose \n");
 
 	/* removed the connection from the hash table */
 	if (loaded_connections_permissions != NULL) {
@@ -400,10 +400,10 @@ e_ews_connection_finalize (GObject *object)
 	EEwsConnection *cnc = (EEwsConnection *) object;
 	EEwsConnectionPrivate *priv;
 
-	g_return_if_fail (E_IS_GW_CONNECTION (cnc));
+	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
 	priv = cnc->priv;
-	printf ("gw connection finalize\n");
+	printf ("ews connection finalize\n");
 	/* clean up */
 	g_free (priv);
 	cnc->priv = NULL;
@@ -455,8 +455,8 @@ e_ews_connection_init (EEwsConnection *cnc)
 
 	/* README: We do not use libsoup logger and use our own as we need formatted output etc. */
 	/*
-	   if (g_getenv ("GROUPWISE_DEBUG")) {
-		if (atoi (g_getenv ("GROUPWISE_DEBUG")) == 1) {
+	   if (g_getenv ("EWS_DEBUG")) {
+		if (atoi (g_getenv ("EWS_DEBUG")) == 1) {
 			SoupLogger *logger;
 
 			logger = soup_logger_new (SOUP_LOGGER_LOG_BODY, -1);
@@ -512,7 +512,7 @@ e_ews_connection_new_with_error_handler (const gchar *uri, const gchar *username
 		cnc = g_hash_table_lookup (loaded_connections_permissions, hash_key);
 		g_free (hash_key);
 
-		if (E_IS_GW_CONNECTION (cnc)) {
+		if (E_IS_EWS_CONNECTION (cnc)) {
 			g_object_ref (cnc);
 			g_static_mutex_unlock (&connecting);
 			return cnc;
@@ -656,7 +656,7 @@ e_ews_connection_send_message (EEwsConnection *cnc, SoupSoapMessage *msg)
 	SoupSoapResponse *response;
 	guint status;
 
-	g_return_val_if_fail (E_IS_GW_CONNECTION (cnc), NULL);
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
 	g_return_val_if_fail (SOUP_IS_SOAP_MESSAGE (msg), NULL);
 
 	g_mutex_lock (cnc->priv->msg_lock);
@@ -664,7 +664,7 @@ e_ews_connection_send_message (EEwsConnection *cnc, SoupSoapMessage *msg)
 	g_mutex_unlock (cnc->priv->msg_lock);
 
 	if (!SOUP_STATUS_IS_SUCCESSFUL (status)) {
-		if (g_getenv ("GROUPWISE_DEBUG")) {
+		if (g_getenv ("EWS_DEBUG")) {
 			const gchar *error = soup_status_get_phrase (status);
 
 			if (!error)
@@ -678,7 +678,7 @@ e_ews_connection_send_message (EEwsConnection *cnc, SoupSoapMessage *msg)
 	/* process response */
 	response = soup_soap_message_parse_response (msg);
 
-	if (response && g_getenv ("GROUPWISE_DEBUG")) {
+	if (response && g_getenv ("EWS_DEBUG")) {
 
 		/* README: The stdout can be replaced with Evolution's
 		Logging framework also */
@@ -693,7 +693,7 @@ e_ews_connection_send_message (EEwsConnection *cnc, SoupSoapMessage *msg)
 EEwsConnectionStatus
 e_ews_connection_logout (EEwsConnection *cnc)
 {
-	g_return_val_if_fail (E_IS_GW_CONNECTION (cnc), E_EWS_CONNECTION_STATUS_INVALID_OBJECT);
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), E_EWS_CONNECTION_STATUS_INVALID_OBJECT);
 
 	g_object_unref (cnc);
 
