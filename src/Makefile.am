@@ -1,4 +1,4 @@
-SUBDIRS = server
+SUBDIRS = server server/tests
 # TODO : 
 # calendar addressbook camel
 DIST_SUBDIRS = server calendar addressbook camel
