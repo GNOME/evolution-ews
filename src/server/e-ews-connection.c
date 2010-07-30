@@ -32,11 +32,11 @@
 #include "soup-soap-message.h"
 #include "e-ews-connection.h"
 #include "e-ews-message.h"
-#include "e-ews-filter.h"
+/* #include "e-ews-filter.h" */
 #include "build-timestamp.h"
 
 /* For soup sync session timeout */
-#define GW_SOUP_SESSION_TIMEOUT 30
+#define EWS_SOUP_SESSION_TIMEOUT 30
 
 /* Soup session proxy-uri property */
 #define SOUP_SESSION_PROXY_URI "proxy-uri"
@@ -427,7 +427,7 @@ static void
 e_ews_connection_init (EEwsConnection *cnc)
 {
 	EEwsConnectionPrivate *priv;
-	guint timeout = GW_SOUP_SESSION_TIMEOUT;
+	guint timeout = EWS_SOUP_SESSION_TIMEOUT;
 
 	/* allocate internal structure */
 	priv = g_new0 (EEwsConnectionPrivate, 1);

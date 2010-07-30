@@ -1,4 +1,4 @@
-noinst_PROGRAMS = create-account soap-test
+#noinst_PROGRAMS = create-account
 
 SERVERS_EWS_CPPFLAGS= \
 	-DG_LOG_DOMAIN=\"libeews\"		\
@@ -10,19 +10,12 @@ SERVERS_EWS_CPPFLAGS= \
 	$(LIBEDATASERVER_CFLAGS)			\
 	$(E_DATA_SERVER_CFLAGS)
 
-create_account_CPPFLAGS = $(SERVERS_EWS_CPPFLAGS)
-create_account_SOURCES = create-account.c
-create_account_LDADD = 						\
+#create_account_CPPFLAGS = $(SERVERS_EWS_CPPFLAGS)
+#create_account_SOURCES = create-account.c
+#create_account_LDADD = 						\
 	$(SOUP_LIBS)						\
 	$(LIBEBACKEND_LIBS)	\
 	$(LIBEDATASERVER_LIBS)	\
-	$(E_DATA_SERVER_LIBS)
-
-soap_test_CPPFLAGS = $(SERVERS_EWS_CPPFLAGS)
-soap_test_SOURCES = soap-test.c
-soap_test_LDADD = 						\
-	$(SOUP_LIBS)						\
-	libeews-1.2.la					\
 	$(E_DATA_SERVER_LIBS)
 
 build-timestamp.h : $(top_builddir)/config.h
@@ -46,26 +39,13 @@ libeews_1_2_la_CPPFLAGS = \
 	$(E_DATA_SERVER_CFLAGS)				\
 	$(DEBUG_CFLAGS)
 
-libeews_1_2_la_SOURCES =			\
-	e-ews-connection.c			\
-	e-ews-connection.h			\
-	e-ews-container.c			\
-	e-ews-container.h			\
-	e-ews-item.c				\
-	e-ews-item.h				\
-	e-ews-sendoptions.h			\
-	e-ews-sendoptions.c			\
-	e-ews-message.c				\
-	e-ews-message.h                          \
-	e-ews-filter.c                           \
-	e-ews-filter.h                           \
-	e-ews-recur-utils.c                      \
-	e-ews-recur-utils.h			\
-	e-ews-proxy.h				\
-	e-ews-proxy.c				\
-	soup-soap-message.c			\
-	soup-soap-response.c			\
-	build-timestamp.h
+libeews_1_2_la_SOURCES =		\
+	build-timestamp.h		\
+	e-ews-connection.c		\
+	e-ews-connection.h		\
+	e-ews-message.c			\
+	soup-soap-message.c		\
+	soup-soap-response.c
 
 libeews_1_2_la_LIBADD =						\
 	$(LIBEBACKEND_LIBS)						\
@@ -77,16 +57,10 @@ libeews_1_2_la_LDFLAGS = -no-undefined
 
 libeewsincludedir = $(privincludedir)/ews
 
-libeewsinclude_HEADERS =                  \
-        e-ews-connection.h                       \
-	e-ews-container.h                        \
-	e-ews-message.h                          \
-	e-ews-item.h                             \
-	e-ews-sendoptions.h			\
-	e-ews-filter.h                        	\
-	e-ews-recur-utils.h			\
-	e-ews-proxy.h				\
-	soup-soap-message.h			\
+libeewsinclude_HEADERS =		\
+        e-ews-connection.h		\
+	e-ews-message.h			\
+	soup-soap-message.h		\
 	soup-soap-response.h
 
 %-$(API_VERSION).pc: %.pc

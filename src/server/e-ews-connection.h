@@ -26,12 +26,12 @@
 
 #include <glib-object.h>
 #include "soup-soap-message.h"
-#include "e-ews-proxy.h"
-#include "e-ews-container.h"
-#include "e-ews-item.h"
-#include "e-ews-filter.h"
-#include "e-ews-sendoptions.h"
-#include "e-ews-recur-utils.h"
+/* #include "e-ews-proxy.h" */
+/* #include "e-ews-container.h" */
+/* #include "e-ews-item.h" */
+/* #include "e-ews-filter.h" */
+/* #include "e-ews-sendoptions.h" */
+/* #include "e-ews-recur-utils.h" */
 
 G_BEGIN_DECLS
 
