@@ -9,6 +9,8 @@ SERVERS_EWS_CPPFLAGS= \
 	$(LIBEDATASERVER_CFLAGS)			\
 	$(E_DATA_SERVER_CFLAGS)
 
+libeews = $(top_builddir)/src/server/libeews-1.2.la
+
 noinst_PROGRAMS = $(TEST_PROGS)
 
 TESTS = testews
@@ -16,7 +18,8 @@ check_PROGRAMS = testews
 testews_SOURCES = \
 		test_libews.c \
 		test_connection.c
-testews_LDADD = -lglib-2.0
-testews_CPPFLAGS = $(SERVERS_EWS_CPPFLAGS)
+#Fixme: Ugly. Kill me later
+testews_LDADD = -lglib-2.0 $(libeews)
+testews_CPPFLAGS = $(SERVERS_EWS_CPPFLAGS) -I$(top_srcdir)/src/server/
 
 DISTCLEANFILES = $(TEST_PROGS)
