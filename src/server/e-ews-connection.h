@@ -74,7 +74,7 @@ EEwsConnection *e_ews_connection_new (const gchar *uri, const gchar *username, c
 
 EEwsConnection * e_ews_connection_new_with_error_handler (const gchar *uri, const gchar *username, const gchar *password, EEwsConnectionErrors *errors);
 
-gchar* e_ews_autodiscover (const gchar *username, const gchar *password, const gchar *domain);
+gchar* e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const gchar *domain);
 
 
 typedef enum {

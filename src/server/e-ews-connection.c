@@ -439,7 +439,6 @@ e_ews_connection_init (EEwsConnection *cnc)
         g_signal_connect (priv->proxy, "changed", G_CALLBACK (proxy_settings_changed), cnc);
 
 	/* create the SoupSession for this connection */
-	//priv->soup_session = soup_session_sync_new_with_options (SOUP_SESSION_TIMEOUT, timeout, NULL);
 	priv->soup_session = soup_session_sync_new_with_options (SOUP_SESSION_USE_NTLM, TRUE, NULL);
 	priv->reauth_mutex = g_mutex_new ();
 	priv->msg_lock = g_mutex_new ();
@@ -466,8 +465,12 @@ static void ews_connection_authenticate(SoupSession *sess, SoupMessage *msg,
 					gpointer data)
 {
 	EEwsConnection *cnc = *(EEwsConnection **)data;
-	/* EEwsConnectionPrivate *priv = *cnc->priv; */
-	g_print("%s %s : u : %s, p : %s \n", G_STRLOC, G_STRFUNC, cnc->priv->username, cnc->priv->password);
+	g_print("%s %s : \n\t username : %s\n\t pass : %s\n", G_STRLOC, G_STRFUNC,
+		cnc->priv->username, cnc->priv->password);
+	if (retrying) {
+		g_print ("Authentication failed.");
+		return;
+	}
 	soup_auth_authenticate (auth, cnc->priv->username, cnc->priv->password);
 }
 
@@ -475,8 +478,6 @@ EEwsConnection *
 e_ews_connection_new_with_error_handler (const gchar *uri, const gchar *username, const gchar *password, EEwsConnectionErrors *errors)
 {
 	EEwsConnection *cnc;
-	//SoupSoapParameter *param;
-	//EEwsConnectionStatus status;
 	gchar *hash_key;
 	gchar *redirected_uri = NULL;
 
@@ -504,16 +505,11 @@ e_ews_connection_new_with_error_handler (const gchar *uri, const gchar *username
 	cnc = g_object_new (E_TYPE_EWS_CONNECTION, NULL);
 	cnc->priv->username = username;
 	cnc->priv->password = password;
-	/* Set proxy details for the Soup session before any
-	   communication. */
-	update_soup_session_proxy_settings (cnc->priv->proxy,
-					    cnc->priv->soup_session,
-					    uri);
 
 	g_signal_connect (cnc->priv->soup_session, "authenticate",
 			  G_CALLBACK(ews_connection_authenticate), &cnc);
 
-	/*TODO :Issue a lightweight dummy call to check authentication*/
+	/*TODO :Issue a lightweight dummy call to check authentication - optional*/
 
 	/* add the connection to the loaded_connections_permissions hash table */
 	hash_key = g_strdup_printf ("%s:%s@%s",
@@ -540,7 +536,7 @@ e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *pass
 	return e_ews_connection_new_with_error_handler (uri, username, password, NULL);
 }
 
-static int
+static gchar*
 autodiscover_parse_protocol(xmlNode *node)
 {
 	for (node = node->children; node; node = node->next) {
@@ -549,18 +545,20 @@ autodiscover_parse_protocol(xmlNode *node)
 			char *asurl = (char *)xmlNodeGetContent(node);
 			if (asurl) {
 				printf("Got ASUrl %s\n", asurl);
-				return 1;
+				return asurl;
 			}
 		}
 	}
-	return 0;
+	return NULL;
 }
 
 gchar*
-e_ews_autodiscover (const gchar *username, const gchar *password, const gchar *email)
+e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const gchar *email)
 {
+	/*TODO : Add a GError*/
 	gchar *url;
 	gchar *domain;
+	gchar *asurl = NULL;
 	SoupSession *sess;
 	SoupMessage *msg;
 	xmlDoc *doc;
@@ -575,13 +573,14 @@ e_ews_autodiscover (const gchar *username, const gchar *password, const gchar *e
 	g_return_val_if_fail (*email != NULL, NULL);
 
 	domain = strchr(email, '@');
-	g_return_val_if_fail (*domain != NULL, NULL);
+	if (!(domain && *domain)) 
+		return NULL;
 	domain++;
 
 	url = g_strdup_printf("https://autodiscover.%s/autodiscover/autodiscover.xml", domain);
 
+	/*Fixme : We should be using CNC - Sleepy to fix this crash for now*/
 	cnc = e_ews_connection_new (url, username, password);
-	sess = cnc->priv->soup_session;
 
 	sess = soup_session_sync_new_with_options(SOUP_SESSION_USE_NTLM, TRUE, NULL);
 	g_signal_connect (sess, "authenticate",
@@ -618,19 +617,19 @@ e_ews_autodiscover (const gchar *username, const gchar *password, const gchar *e
 
 	if (status != 200) {
 		fprintf(stderr, "Unexpected response from server: %d\n", status);
-		exit(1);
+		goto failed;
 	}
 	
 	doc = xmlReadMemory (msg->response_body->data, msg->response_body->length,
 			     "autodiscover.xml", NULL, 0);
 	if (!doc) {
 		fprintf(stderr, "Failed to parse autodiscover response XML\n");
-		exit(1);
+		goto failed;
 	}
 	node = xmlDocGetRootElement(doc);
 	if (strcmp((char *)node->name, "Autodiscover")) {
 		fprintf(stderr, "Failed to find <Autodiscover> element\n");
-		exit (1);
+		goto failed;
 	}
 	for (node = node->children; node; node = node->next) {
 		if (node->type == XML_ELEMENT_NODE &&
@@ -639,7 +638,7 @@ e_ews_autodiscover (const gchar *username, const gchar *password, const gchar *e
 	}
 	if (!node) {
 		fprintf(stderr, "Failed to find <Response> element\n");
-		exit (1);
+		goto failed;
 	}
 	for (node = node->children; node; node = node->next) {
 		if (node->type == XML_ELEMENT_NODE &&
@@ -648,15 +647,16 @@ e_ews_autodiscover (const gchar *username, const gchar *password, const gchar *e
 	}
 	if (!node) {
 		fprintf(stderr, "Failed to find <Account> element\n");
-		exit (1);
+		goto failed;
 	}
 	for (node = node->children; node; node = node->next) {
 		if (node->type == XML_ELEMENT_NODE &&
 		    !strcmp((char *)node->name, "Protocol") &&
-		    autodiscover_parse_protocol(node))
+		    (asurl = autodiscover_parse_protocol(node)))
 			break;
 	}
-	return NULL;	
+failed:
+	return asurl;
 }
 
 SoupSoapResponse *

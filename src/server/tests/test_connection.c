@@ -52,6 +52,8 @@ con_test_autodiscover()
 	const gchar *email;
 	EEwsConnection *cnc;
 
+	g_print ("Testing Autodiscovery... \n");
+
 	util_get_login_info_from_env (&username, &password, &uri);
 	g_assert_cmpstr (username, !=, NULL);
 	g_assert_cmpstr (password, !=, NULL);
@@ -61,7 +63,26 @@ con_test_autodiscover()
 	g_print("%s %s : username : %s \n", G_STRLOC, G_STRFUNC, username);
 	g_print("%s %s : password : %s \n", G_STRLOC, G_STRFUNC, password);
 	g_print("%s %s : email : %s \n", G_STRLOC, G_STRFUNC, email);
-	e_ews_autodiscover (username, password, email);
+
+	g_print ("Testing postive case... \n");
+	uri = e_ews_autodiscover_ws_url (username, password, email);
+	g_assert_cmpstr (uri, !=, NULL);
+
+	g_print ("Testing wrong password... \n");
+	uri = e_ews_autodiscover_ws_url (username, "wrongpassword", email);
+	g_assert_cmpstr (uri, ==, NULL);
+
+	g_print ("Testing wrong username... \n");
+	uri = e_ews_autodiscover_ws_url ("wrongusername", password, email);
+	g_assert_cmpstr (uri, ==, NULL);
+
+	g_print ("Testing wrong username and password... \n");
+	uri = e_ews_autodiscover_ws_url ("wrongusername", "wrongpassword", email);
+	g_assert_cmpstr (uri, ==, NULL);
+
+	g_print ("Testing malformed email address... \n");
+	uri = e_ews_autodiscover_ws_url (username, password, "emailnoatserver");
+	g_assert_cmpstr (uri, ==, NULL);
 }
 
 /*Run tests*/
