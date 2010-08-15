@@ -44,6 +44,43 @@ libeews_1_2_la_SOURCES =		\
 	e-ews-connection.c		\
 	e-ews-connection.h		\
 	e-ews-message.c			\
+	e2k-action.c			\
+	e2k-action.h			\
+	e2k-autoconfig.c		\
+	e2k-autoconfig.h		\
+	e2k-context.c			\
+	e2k-context.h			\
+	e2k-http-utils.c		\
+	e2k-http-utils.h		\
+	e2k-marshal.c			\
+	e2k-marshal.h			\
+	e2k-operation.c			\
+	e2k-operation.h			\
+	e2k-properties.c		\
+	e2k-properties.h		\
+	e2k-propnames.c			\
+	e2k-propnames.h			\
+	e2k-restriction.c		\
+	e2k-restriction.h		\
+	e2k-result.c			\
+	e2k-result.h			\
+	e2k-rule.c			\
+	e2k-rule.h			\
+	e2k-types.h			\
+	e2k-uri.c			\
+	e2k-uri.h			\
+	e2k-utils.c			\
+	e2k-utils.h			\
+	e2k-validate.h			\
+	e2k-xml-utils.c			\
+	e2k-xml-utils.h			\
+	mapi.h				\
+	xntlm.c				\
+	xntlm.h				\
+	xntlm-des.c			\
+	xntlm-des.h			\
+	xntlm-md4.c			\
+	xntlm-md4.h			\
 	soup-soap-message.c		\
 	soup-soap-response.c
 
