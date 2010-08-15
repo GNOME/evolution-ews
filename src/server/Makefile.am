@@ -1,4 +1,5 @@
 #noinst_PROGRAMS = create-account
+noinst_PROGRAMS = soap-test ews-test
 
 SERVERS_EWS_CPPFLAGS= \
 	-DG_LOG_DOMAIN=\"libeews\"		\
@@ -17,6 +18,21 @@ SERVERS_EWS_CPPFLAGS= \
 	$(LIBEBACKEND_LIBS)	\
 	$(LIBEDATASERVER_LIBS)	\
 	$(E_DATA_SERVER_LIBS)
+
+soap_test_CPPFLAGS = $(SERVERS_EWS_CPPFLAGS)
+soap_test_SOURCES = soap-test.c
+soap_test_LDADD = 						\
+	$(SOUP_LIBS)						\
+	libeews-1.2.la					\
+	$(E_DATA_SERVER_LIBS)
+
+ews_test_CPPFLAGS = $(SERVERS_EWS_CPPFLAGS)
+ews_test_SOURCES = ews-test.c
+ews_test_LDADD = 						\
+	$(SOUP_LIBS)						\
+	libeews-1.2.la					\
+	$(E_DATA_SERVER_LIBS)				\
+	$(GNOME_PLATFORM_LIBS)
 
 build-timestamp.h : $(top_builddir)/config.h
 	echo "const char *build_timestamp = \"Evolution-Data-Server-@BASE_VERSION@-`date +%F`\";" > $@

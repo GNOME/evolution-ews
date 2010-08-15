@@ -1,6 +1,7 @@
 #include <config.h>
 #include <glib.h>
 #include "e-ews-connection.h"
+#include "e-ews-container.h"
 
 static GMainLoop *main_loop;
 static gchar *arg_hostname, *arg_username, *arg_password;
@@ -27,7 +28,7 @@ idle_cb (gpointer data)
 
 		/* get list of containers */
 		g_print ("Getting list of containers...\n");
-		if (e_ews_connection_get_container_list (cnc, "folders", &container_list) == E_EWS_CONNECTION_STATUS_OK) {
+/*		if (e_ews_connection_get_container_list (cnc, "folders", &container_list) == E_EWS_CONNECTION_STATUS_OK) {
 			GList *container;
 
 			for (container = container_list; container != NULL; container = container->next)
@@ -36,7 +37,7 @@ idle_cb (gpointer data)
 			e_ews_connection_free_container_list (container_list);
 		}
 
-		g_object_unref (cnc);
+*/		g_object_unref (cnc);
 	} else
 		g_print ("ERROR: Could not connect to %s\n", arg_hostname);
 
