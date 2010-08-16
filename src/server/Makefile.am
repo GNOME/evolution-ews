@@ -52,7 +52,6 @@ libeews_1_2_la_SOURCES =		\
 	e-ews-connection.h		\
 	e-ews-context.c			\
 	e-ews-context.h			\
-	e-ews-http-utils.c		\
 	e-ews-http-utils.h		\
 	e-ews-message.c			\
 	e-ews-operation.c		\
@@ -60,6 +59,8 @@ libeews_1_2_la_SOURCES =		\
 	e-ews-types.h			\
 	e-ews-uri.c			\
 	e-ews-uri.h			\
+	e-ews-utils.c			\
+	e-ews-utils.h			\
 	e-ews-xml-utils.c		\
 	e-ews-xml-utils.h		\
 	soup-soap-message.c		\

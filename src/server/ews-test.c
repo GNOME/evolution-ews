@@ -3,13 +3,13 @@
 #include <glib/gmain.h>
 #include "e-ews-connection.h"
 #include "e-ews-message.h"
-#include "e2k-context.h"
-#include "e2k-uri.h"
-#include "e2k-http-utils.h"
+#include "e-ews-context.h"
+#include "e-ews-uri.h"
+#include "e-ews-http-utils.h"
 
 static GMainLoop *main_loop;
 static char *arg_hostname, *arg_username, *arg_password, *arg_domain;
-E2kContext *ctx = NULL;
+EWSContext *ctx = NULL;
 
 SoupMessage *
 e2k_ews_message_new_with_header (const char *uri, const char *auth_nego, 
@@ -36,23 +36,23 @@ e2k_ews_message_new_with_header (const char *uri, const char *auth_nego,
 	return soup_msg;
 }
 
-E2kContext *
+EWSContext *
 e2k_ews_test_get_context (const char *uri)
 {
-	E2kContext *ctx;
-	E2kUri *euri;
+	EWSContext *ctx;
+//	E2kUri *euri;
 
-	ctx = e2k_context_new (uri);
+	ctx = ews_context_new (uri);
 	if (!ctx) {
 		fprintf (stderr, "Could not parse %s as URI\n", uri);
 		exit (1);
 	}
 
-	euri = e2k_uri_new (uri);
-	e2k_context_set_auth (ctx, arg_username, arg_domain,
+//	euri = ews_uri_new (uri);
+	ews_context_set_auth (ctx, arg_username, arg_domain,
 			"NTLM", arg_password);
 
-	e2k_uri_free (euri);
+//	ews_uri_free (euri);
 	return ctx;
 
 }
@@ -70,7 +70,7 @@ idle_cb (gpointer data)
 	static int i = 0;
 
 	char *url = NULL;
-	E2kHTTPStatus status = 0;
+	EWSHTTPStatus status = 0;
 
 	url = g_strdup_printf ("https://%s/EWS/Exchange.asmx", arg_hostname);
 	g_print ("\n The Url is:%s", url);
@@ -87,7 +87,7 @@ idle_cb (gpointer data)
 	e_ews_message_write_footer (msg);
 
 	/* Send the request */
-	status = e2k_context_send_message (ctx, NULL, msg);
+	status = ews_context_send_message (ctx, NULL, msg);
 
 	/* Print the response */
 	e_ews_message_write_response (msg);
@@ -109,7 +109,7 @@ idle_cb (gpointer data)
 	soup_soap_message_end_element (msg);
 
 	e_ews_message_write_footer (msg);
-	status = e2k_context_send_message (ctx, NULL, msg);
+	status = ews_context_send_message (ctx, NULL, msg);
 
 	e_ews_message_write_response (msg);
 
@@ -129,7 +129,7 @@ idle_cb (gpointer data)
 	soup_soap_message_end_element (msg);
 
 	e_ews_message_write_footer (msg);
-	status = e2k_context_send_message (ctx, NULL, msg);
+	status = ews_context_send_message (ctx, NULL, msg);
 
 	e_ews_message_write_response (msg);
 

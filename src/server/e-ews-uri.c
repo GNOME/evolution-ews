@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "e2k-uri.h"
+#include "e-ews-uri.h"
 
 /**
  * e2k_uri_new:
