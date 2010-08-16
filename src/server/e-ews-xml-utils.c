@@ -21,7 +21,7 @@
 #include "config.h"
 #endif
 
-#include "e2k-xml-utils.h"
+#include "e-ews-xml-utils.h"
 #include <stdlib.h>
 #include <libxml/HTMLparser.h>
 #include <libxml/parserInternals.h>
@@ -34,7 +34,7 @@ my_xml_parser_error_handler (gpointer ctx, const gchar *msg, ...)
 }
 
 /**
- * e2k_parse_xml:
+ * ews_parse_xml:
  * @buf: the data to parse
  * @len: the length of the buffer, or -1 if it is '\0'-terminated
  *
@@ -43,7 +43,7 @@ my_xml_parser_error_handler (gpointer ctx, const gchar *msg, ...)
  * Return value: a pointer to an #xmlDoc
  **/
 xmlDoc *
-e2k_parse_xml (const gchar *buf, gint len)
+ews_parse_xml (const gchar *buf, gint len)
 {
 	static xmlSAXHandler *sax;
 	xmlParserCtxtPtr ctxt;
@@ -96,7 +96,7 @@ e2k_parse_xml (const gchar *buf, gint len)
 }
 
 /**
- * e2k_parse_html:
+ * ews_parse_html:
  * @buf: the data to parse
  * @len: the length of the buffer, or -1 if it is '\0'-terminated
  *
@@ -105,7 +105,7 @@ e2k_parse_xml (const gchar *buf, gint len)
  * Return value: a pointer to an #xmlDoc
  **/
 xmlDoc *
-e2k_parse_html (const gchar *buf, gint len)
+ews_parse_html (const gchar *buf, gint len)
 {
 	xmlDoc *doc;
 #if LIBXML_VERSION > 20600
@@ -150,7 +150,7 @@ e2k_parse_html (const gchar *buf, gint len)
 }
 
 /**
- * e2k_g_string_append_xml_escaped:
+ * ews_g_string_append_xml_escaped:
  * @string: a %GString containing XML data
  * @value: data to append to @string
  *
@@ -158,7 +158,7 @@ e2k_parse_html (const gchar *buf, gint len)
  * unencoded in XML text (eg, "<").
  **/
 void
-e2k_g_string_append_xml_escaped (GString *string, const gchar *value)
+ews_g_string_append_xml_escaped (GString *string, const gchar *value)
 {
 	while (*value) {
 		switch (*value) {
@@ -184,7 +184,7 @@ e2k_g_string_append_xml_escaped (GString *string, const gchar *value)
 }
 
 /**
- * e2k_xml_find:
+ * ews_xml_find:
  * @node: a node of an xml document
  * @name: the name of the element to find
  *
@@ -200,13 +200,13 @@ e2k_g_string_append_xml_escaped (GString *string, const gchar *value)
  * there are no more matches.
  **/
 xmlNode *
-e2k_xml_find (xmlNode *node, const gchar *name)
+ews_xml_find (xmlNode *node, const gchar *name)
 {
-	return e2k_xml_find_in (node, NULL, name);
+	return ews_xml_find_in (node, NULL, name);
 }
 
 /**
- * e2k_xml_find_in:
+ * ews_xml_find_in:
  * @node: a node of an xml document
  * @top: top of the search space
  * @name: the name of the element to find
@@ -225,7 +225,7 @@ e2k_xml_find (xmlNode *node, const gchar *name)
  * there are no more matches.
  **/
 xmlNode *
-e2k_xml_find_in (xmlNode *node, xmlNode *top, const gchar *name)
+ews_xml_find_in (xmlNode *node, xmlNode *top, const gchar *name)
 {
 	g_return_val_if_fail (name != NULL, NULL);
 

@@ -1,37 +1,37 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 /* Copyright (C) 2001-2004 Novell, Inc. */
 
-#ifndef __E2K_TYPES_H__
-#define __E2K_TYPES_H__
+#ifndef __EWS_TYPES_H__
+#define __EWS_TYPES_H__
 
 #include <glib.h>
 #include <glib/gi18n.h>
 
-typedef struct _E2kAction                     E2kAction;
-typedef struct _E2kAddrEntry                  E2kAddrEntry;
-typedef struct _E2kAddrList                   E2kAddrList;
+typedef struct _EWSAction                     EWSAction;
+typedef struct _EWSAddrEntry                  EWSAddrEntry;
+typedef struct _EWSAddrList                   EWSAddrList;
 
-typedef struct _E2kContext                    E2kContext;
-typedef struct _E2kContextPrivate             E2kContextPrivate;
-typedef struct _E2kContextClass               E2kContextClass;
+typedef struct _EWSContext                    EWSContext;
+typedef struct _EWSContextPrivate             EWSContextPrivate;
+typedef struct _EWSContextClass               EWSContextClass;
 
-typedef struct _E2kGlobalCatalog              E2kGlobalCatalog;
-typedef struct _E2kGlobalCatalogPrivate       E2kGlobalCatalogPrivate;
-typedef struct _E2kGlobalCatalogClass         E2kGlobalCatalogClass;
+typedef struct _EWSGlobalCatalog              EWSGlobalCatalog;
+typedef struct _EWSGlobalCatalogPrivate       EWSGlobalCatalogPrivate;
+typedef struct _EWSGlobalCatalogClass         EWSGlobalCatalogClass;
 
-typedef struct _E2kOperation                  E2kOperation;
+typedef struct _EWSOperation                  EWSOperation;
 
-typedef struct _E2kRestriction                E2kRestriction;
+typedef struct _EWSRestriction                EWSRestriction;
 
-typedef struct _E2kSecurityDescriptor         E2kSecurityDescriptor;
-typedef struct _E2kSecurityDescriptorPrivate  E2kSecurityDescriptorPrivate;
-typedef struct _E2kSecurityDescriptorClass    E2kSecurityDescriptorClass;
+typedef struct _EWSSecurityDescriptor         EWSSecurityDescriptor;
+typedef struct _EWSSecurityDescriptorPrivate  EWSSecurityDescriptorPrivate;
+typedef struct _EWSSecurityDescriptorClass    EWSSecurityDescriptorClass;
 
-typedef struct _E2kSid                        E2kSid;
-typedef struct _E2kSidPrivate                 E2kSidPrivate;
-typedef struct _E2kSidClass                   E2kSidClass;
+typedef struct _EWSSid                        EWSSid;
+typedef struct _EWSSidPrivate                 EWSSidPrivate;
+typedef struct _EWSSidClass                   EWSSidClass;
 
-#define E2K_MAKE_TYPE(type_name,TypeName,class_init,init,parent) \
+#define EWS_MAKE_TYPE(type_name,TypeName,class_init,init,parent) \
 GType type_name##_get_type(void)			\
 {							\
 	static volatile gsize type_id__volatile = 0;	\
@@ -56,7 +56,7 @@ GType type_name##_get_type(void)			\
 	return type_id__volatile;			\
 }
 
-#define E2K_MAKE_TYPE_WITH_IFACE(type_name,TypeName,class_init,init,parent,iface_init,iparent) \
+#define EWS_MAKE_TYPE_WITH_IFACE(type_name,TypeName,class_init,init,parent,iface_init,iparent) \
 GType type_name##_get_type(void)			\
 {							\
 	static volatile gsize type_id__volatile = 0;	\
@@ -87,9 +87,9 @@ GType type_name##_get_type(void)			\
 	return type_id__volatile;					\
 }
 
-/* Put "E2K_KEEP_PRECEDING_COMMENT_OUT_OF_PO_FILES;" on a line to
+/* Put "EWS_KEEP_PRECEDING_COMMENT_OUT_OF_PO_FILES;" on a line to
  * separate a _() from a comment that doesn't go with it.
  */
-#define E2K_KEEP_PRECEDING_COMMENT_OUT_OF_PO_FILES
+#define EWS_KEEP_PRECEDING_COMMENT_OUT_OF_PO_FILES
 
 #endif

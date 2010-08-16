@@ -17,7 +17,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-/* e2k-operation.c: Cancellable operations */
+/* ews-operation.c: Cancellable operations */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -25,24 +25,24 @@
 
 #include <string.h>
 
-#include "e2k-operation.h"
+#include "e-ews-operation.h"
 
 static GStaticMutex op_mutex = G_STATIC_MUTEX_INIT;
 static GHashTable *active_ops = NULL;
 
 /**
- * e2k_operation_init:
- * @op: an #E2kOperation
+ * ews_operation_init:
+ * @op: an #EWSOperation
  *
- * This initializes the #E2kOperation pointed to by @op.
+ * This initializes the #EWSOperation pointed to by @op.
  * This should be called before passing @op to a cancellable function.
  **/
 void
-e2k_operation_init (E2kOperation *op)
+ews_operation_init (EWSOperation *op)
 {
 	g_return_if_fail (op != NULL);
 
-	memset (op, 0, sizeof (E2kOperation));
+	memset (op, 0, sizeof (EWSOperation));
 
 	g_static_mutex_lock (&op_mutex);
 	if (!active_ops)
@@ -52,14 +52,14 @@ e2k_operation_init (E2kOperation *op)
 }
 
 /**
- * e2k_operation_free:
- * @op: an #E2kOperation
+ * ews_operation_free:
+ * @op: an #EWSOperation
  *
  * This frees @op and removes it from the list of active operations.
  * It should be called after the function it was passed to returns.
  **/
 void
-e2k_operation_free (E2kOperation *op)
+ews_operation_free (EWSOperation *op)
 {
 	g_return_if_fail (op != NULL);
 
@@ -69,8 +69,8 @@ e2k_operation_free (E2kOperation *op)
 }
 
 /**
- * e2k_operation_start:
- * @op: an #E2kOperation, or %NULL
+ * ews_operation_start:
+ * @op: an #EWSOperation, or %NULL
  * @canceller: the callback to invoke if @op is cancelled
  * @owner: object that owns the operation
  * @data: data to pass to @canceller
@@ -78,11 +78,11 @@ e2k_operation_free (E2kOperation *op)
  * This starts a single cancellable operation using @op. If @op has
  * already been cancelled, this will invoke @canceller immediately.
  *
- * (If @op is %NULL, e2k_operation_start() is a no-op.)
+ * (If @op is %NULL, ews_operation_start() is a no-op.)
  **/
 void
-e2k_operation_start (E2kOperation *op,
-		     E2kOperationCancelFunc canceller,
+ews_operation_start (EWSOperation *op,
+		     EWSOperationCancelFunc canceller,
 		     gpointer owner,
 		     gpointer data)
 {
@@ -105,17 +105,17 @@ e2k_operation_start (E2kOperation *op,
 }
 
 /**
- * e2k_operation_finish:
- * @op: an #E2kOperation, or %NULL
+ * ews_operation_finish:
+ * @op: an #EWSOperation, or %NULL
  *
  * This finishes the current cancellable operation on @op. Attempting
  * to cancel @op after this point will have no effect until another
  * operation is started on it.
  *
- * (If @op is %NULL, e2k_operation_finish() is a no-op.)
+ * (If @op is %NULL, ews_operation_finish() is a no-op.)
  **/
 void
-e2k_operation_finish (E2kOperation *op)
+ews_operation_finish (EWSOperation *op)
 {
 	if (!op)
 		return;
@@ -128,15 +128,15 @@ e2k_operation_finish (E2kOperation *op)
 }
 
 /**
- * e2k_operation_cancel:
- * @op: an #E2kOperation
+ * ews_operation_cancel:
+ * @op: an #EWSOperation
  *
  * This cancels @op, invoking its cancellation callback. If @op is not
  * an active operation, or has already been cancelled, this has no
  * effect.
  **/
 void
-e2k_operation_cancel (E2kOperation *op)
+ews_operation_cancel (EWSOperation *op)
 {
 	g_return_if_fail (op != NULL);
 
@@ -156,8 +156,8 @@ e2k_operation_cancel (E2kOperation *op)
 }
 
 /**
- * e2k_operation_is_cancelled:
- * @op: an #E2kOperation (or %NULL)
+ * ews_operation_is_cancelled:
+ * @op: an #EWSOperation (or %NULL)
  *
  * Checks if @op has been cancelled. Should only be called while @op
  * is active.
@@ -165,7 +165,7 @@ e2k_operation_cancel (E2kOperation *op)
  * Return value: whether or not @op has been cancelled.
  **/
 gboolean
-e2k_operation_is_cancelled (E2kOperation *op)
+ews_operation_is_cancelled (EWSOperation *op)
 {
 	return op && op->cancelled;
 }
