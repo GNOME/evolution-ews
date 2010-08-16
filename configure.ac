@@ -215,6 +215,7 @@ src/addressbook/Makefile
 src/calendar/Makefile
 src/camel/Makefile
 src/server/Makefile
+src/server/tests/Makefile
 src/server/libeews.pc
 po/Makefile.in
 ])

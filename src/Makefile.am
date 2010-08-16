@@ -1,8 +1,4 @@
-# Commenting out the other components. Lets fix server first.
-#SUBDIRS = server calendar addressbook camel
-#DIST_SUBDIRS = server calendar addressbook camel
-
-SUBDIRS = server
+SUBDIRS = server server/tests
 DIST_SUBDIRS = server
 
 changelogs =			\

@@ -439,7 +439,7 @@ e_ews_connection_init (EEwsConnection *cnc)
         g_signal_connect (priv->proxy, "changed", G_CALLBACK (proxy_settings_changed), cnc);
 
 	/* create the SoupSession for this connection */
-	priv->soup_session = soup_session_sync_new_with_options (SOUP_SESSION_TIMEOUT, timeout, NULL);
+	priv->soup_session = soup_session_sync_new_with_options (SOUP_SESSION_USE_NTLM, TRUE, NULL);
 	priv->reauth_mutex = g_mutex_new ();
 	priv->msg_lock = g_mutex_new ();
 	priv->categories_by_id = NULL;
@@ -460,37 +460,26 @@ e_ews_connection_init (EEwsConnection *cnc)
 	*/
 }
 
-static SoupSoapMessage*
-form_login_request (const gchar *uri, const gchar * username, const gchar * password)
+static void ews_connection_authenticate(SoupSession *sess, SoupMessage *msg,
+					SoupAuth *auth, gboolean retrying, 
+					gpointer data)
 {
-	SoupSoapMessage *msg;
-	/* build the SOAP message */
-	msg = e_ews_message_new_with_header (uri, "loginRequest");
-	e_ews_message_write_string_parameter (msg, "application", "types", build_timestamp);
-	e_ews_message_write_string_parameter (msg, "version", NULL, "1.02");
-	soup_soap_message_start_element (msg, "auth", "types", NULL);
-	soup_soap_message_add_attribute (msg, "type", "types:PlainText", "xsi",
-					 "http://www.w3.org/2001/XMLSchema-instance");
-	e_ews_message_write_string_parameter (msg, "username", "types", username);
-	if (password && *password)
-		e_ews_message_write_string_parameter (msg, "password", "types", password);
-	soup_soap_message_end_element (msg);
-	e_ews_message_write_footer (msg);
-	return msg;
+	EEwsConnection *cnc = *(EEwsConnection **)data;
+	g_print("%s %s : \n\t username : %s\n\t pass : %s\n", G_STRLOC, G_STRFUNC,
+		cnc->priv->username, cnc->priv->password);
+	if (retrying) {
+		g_print ("Authentication failed.");
+		return;
+	}
+	soup_auth_authenticate (auth, cnc->priv->username, cnc->priv->password);
 }
 
 EEwsConnection *
 e_ews_connection_new_with_error_handler (const gchar *uri, const gchar *username, const gchar *password, EEwsConnectionErrors *errors)
 {
 	EEwsConnection *cnc;
-	SoupSoapMessage *msg;
-	SoupSoapResponse *response;
-	SoupSoapParameter *param;
-	EEwsConnectionStatus status;
 	gchar *hash_key;
 	gchar *redirected_uri = NULL;
-	gint code;
-	gchar *description = NULL;
 
 	static GStaticMutex connecting = G_STATIC_MUTEX_INIT;
 
@@ -514,107 +503,13 @@ e_ews_connection_new_with_error_handler (const gchar *uri, const gchar *username
 
 	/* not found, so create a new connection */
 	cnc = g_object_new (E_TYPE_EWS_CONNECTION, NULL);
+	cnc->priv->username = username;
+	cnc->priv->password = password;
 
-	/* Set proxy details for the Soup session before any
-	   communication. */
-	update_soup_session_proxy_settings (cnc->priv->proxy,
-					    cnc->priv->soup_session,
-					    uri);
+	g_signal_connect (cnc->priv->soup_session, "authenticate",
+			  G_CALLBACK(ews_connection_authenticate), &cnc);
 
-	msg = form_login_request (uri, username, password);
-
-	/* send message to server */
-	response = e_ews_connection_send_message (cnc, msg);
-
-	if (!response) {
-		g_object_unref (cnc);
-		g_static_mutex_unlock (&connecting);
-		g_object_unref (msg);
-		return NULL;
-	}
-
-	status = e_ews_connection_parse_response_status (response);
-	if (status == E_EWS_CONNECTION_STATUS_REDIRECT) {
-		gchar *host, *port;
-		gchar **tokens;
-		SoupSoapParameter *subparam;
-
-		param = soup_soap_response_get_first_parameter_by_name (response, "redirectToHost");
-		subparam = soup_soap_parameter_get_first_child_by_name (param, "ipAddress");
-		host = soup_soap_parameter_get_string_value (subparam);
-		subparam = soup_soap_parameter_get_first_child_by_name (param, "port");
-		port = soup_soap_parameter_get_string_value (subparam);
-		if (host && port) {
-			tokens = g_strsplit (uri, "://", 2);
-			redirected_uri = g_strconcat (tokens[0], "://", host, ":", port, "/soap", NULL);
-			g_object_unref (msg);
-			g_object_unref (response);
-			msg = form_login_request (redirected_uri, username, password);
-			uri = redirected_uri;
-			response = e_ews_connection_send_message (cnc, msg);
-			status = e_ews_connection_parse_response_status (response);
-			g_strfreev (tokens);
-		}
-
-		g_free (host);
-		g_free (port);
-	}
-	param = soup_soap_response_get_first_parameter_by_name (response, "session");
-	if (!param) {
-		if (errors && e_ews_connection_response_parse_status_and_description (response, &code, &description) ) {
-			errors->status = code;
-			errors->description = description;
-		}
-		g_object_unref (response);
-		g_object_unref (msg);
-		g_object_unref (cnc);
-		g_static_mutex_unlock (&connecting);
-
-		return NULL;
-	}
-
-	cnc->priv->uri = g_strdup (uri);
-	cnc->priv->username = g_strdup (username);
-	cnc->priv->password = g_strdup (password);
-	cnc->priv->session_id = soup_soap_parameter_get_string_value (param);
-
-	/* retrieve user information */
-	param = soup_soap_response_get_first_parameter_by_name (response, "userinfo");
-
-	if (param) {
-		SoupSoapParameter *subparam;
-		gchar *param_value;
-
-		subparam = soup_soap_parameter_get_first_child_by_name (param, "email");
-		if (subparam) {
-			param_value = soup_soap_parameter_get_string_value (subparam);
-			cnc->priv->user_email  = param_value;
-		}
-
-		subparam = soup_soap_parameter_get_first_child_by_name (param, "name");
-		if (subparam) {
-			param_value = soup_soap_parameter_get_string_value (subparam);
-			cnc->priv->user_name = param_value;
-		}
-
-		subparam = soup_soap_parameter_get_first_child_by_name (param, "uuid");
-		if (subparam) {
-			param_value = soup_soap_parameter_get_string_value (subparam);
-			cnc->priv->user_uuid = param_value;
-		}
-	}
-
-	param = soup_soap_response_get_first_parameter_by_name (response, "gwVersion");
-	if (param) {
-		gchar *param_value;
-		param_value = soup_soap_parameter_get_string_value (param);
-		cnc->priv->version = param_value;
-	} else
-		cnc->priv->version = NULL;
-
-	param = soup_soap_response_get_first_parameter_by_name (response, "serverUTCTime");
-	if (param)
-		cnc->priv->server_time = soup_soap_parameter_get_string_value (param);
+	/*TODO :Issue a lightweight dummy call to check authentication - optional*/
 
 	/* add the connection to the loaded_connections_permissions hash table */
 	hash_key = g_strdup_printf ("%s:%s@%s",
@@ -627,8 +522,6 @@ e_ews_connection_new_with_error_handler (const gchar *uri, const gchar *username
 	g_hash_table_insert (loaded_connections_permissions, hash_key, cnc);
 
 	/* free memory */
-	g_object_unref (response);
-	g_object_unref (msg);
 	g_static_mutex_unlock (&connecting);
 	g_free (redirected_uri);
 	return cnc;
@@ -641,6 +534,129 @@ e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *pass
 	/* This is where I miss function-overloading and default-parameters */
 
 	return e_ews_connection_new_with_error_handler (uri, username, password, NULL);
+}
+
+static gchar*
+autodiscover_parse_protocol(xmlNode *node)
+{
+	for (node = node->children; node; node = node->next) {
+		if (node->type == XML_ELEMENT_NODE &&
+		    !strcmp((char *)node->name, "ASUrl")) {
+			char *asurl = (char *)xmlNodeGetContent(node);
+			if (asurl) {
+				printf("Got ASUrl %s\n", asurl);
+				return asurl;
+			}
+		}
+	}
+	return NULL;
+}
+
+gchar*
+e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const gchar *email)
+{
+	/*TODO : Add a GError*/
+	gchar *url;
+	gchar *domain;
+	gchar *asurl = NULL;
+	SoupSession *sess;
+	SoupMessage *msg;
+	xmlDoc *doc;
+	xmlNode *node, *child;
+	xmlNs *ns;
+	guint status;
+	xmlOutputBuffer *buf;
+	EEwsConnection *cnc;
+
+	g_return_val_if_fail (*username != NULL, NULL);
+	g_return_val_if_fail (*password != NULL, NULL);
+	g_return_val_if_fail (*email != NULL, NULL);
+
+	domain = strchr(email, '@');
+	if (!(domain && *domain)) 
+		return NULL;
+	domain++;
+
+	url = g_strdup_printf("https://autodiscover.%s/autodiscover/autodiscover.xml", domain);
+
+	/*Fixme : We should be using CNC - Sleepy to fix this crash for now*/
+	cnc = e_ews_connection_new (url, username, password);
+
+	sess = soup_session_sync_new_with_options(SOUP_SESSION_USE_NTLM, TRUE, NULL);
+	g_signal_connect (sess, "authenticate",
+			  G_CALLBACK(ews_connection_authenticate), &cnc);
+
+	msg = soup_message_new("GET", url);
+	soup_message_headers_append (msg->request_headers,
+				     "User-Agent", "libews/0.1");
+
+	doc = xmlNewDoc((xmlChar *) "1.0");
+	node = xmlNewDocNode(doc, NULL, (xmlChar *)"Autodiscover", NULL);
+	xmlDocSetRootElement(doc, node);
+	ns = xmlNewNs (node,
+		       (xmlChar *)"http://schemas.microsoft.com/exchange/autodiscover/outlook/requestschema/2006", NULL);
+
+	node = xmlNewChild(node, ns, (xmlChar *)"Request", NULL);
+	child = xmlNewChild(node, ns, (xmlChar *)"EMailAddress",
+			    (xmlChar *)email);
+	child = xmlNewChild(node, ns, (xmlChar *)"AcceptableResponseSchema", 
+			    (xmlChar *)"http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a");
+	
+	buf = xmlAllocOutputBuffer(NULL);
+	xmlNodeDumpOutput(buf, doc, xmlDocGetRootElement(doc), 0, 1, NULL);
+	xmlOutputBufferFlush(buf);
+
+	soup_message_set_request(msg, "application/xml", SOUP_MEMORY_COPY,
+				 (gchar *)buf->buffer->content,
+				 buf->buffer->use);
+				 
+	status = soup_session_send_message(sess, msg);
+
+	xmlOutputBufferClose (buf);
+	xmlFreeDoc (doc);
+
+	if (status != 200) {
+		fprintf(stderr, "Unexpected response from server: %d\n", status);
+		goto failed;
+	}
+	
+	doc = xmlReadMemory (msg->response_body->data, msg->response_body->length,
+			     "autodiscover.xml", NULL, 0);
+	if (!doc) {
+		fprintf(stderr, "Failed to parse autodiscover response XML\n");
+		goto failed;
+	}
+	node = xmlDocGetRootElement(doc);
+	if (strcmp((char *)node->name, "Autodiscover")) {
+		fprintf(stderr, "Failed to find <Autodiscover> element\n");
+		goto failed;
+	}
+	for (node = node->children; node; node = node->next) {
+		if (node->type == XML_ELEMENT_NODE &&
+		    !strcmp((char *)node->name, "Response"))
+			break;
+	}
+	if (!node) {
+		fprintf(stderr, "Failed to find <Response> element\n");
+		goto failed;
+	}
+	for (node = node->children; node; node = node->next) {
+		if (node->type == XML_ELEMENT_NODE &&
+		    !strcmp((char *)node->name, "Account"))
+			break;
+	}
+	if (!node) {
+		fprintf(stderr, "Failed to find <Account> element\n");
+		goto failed;
+	}
+	for (node = node->children; node; node = node->next) {
+		if (node->type == XML_ELEMENT_NODE &&
+		    !strcmp((char *)node->name, "Protocol") &&
+		    (asurl = autodiscover_parse_protocol(node)))
+			break;
+	}
+failed:
+	return asurl;
 }
 
 SoupSoapResponse *
