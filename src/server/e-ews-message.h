@@ -44,6 +44,7 @@ void             e_ews_message_write_base64_parameter (SoupSoapMessage *msg,
 void e_ews_message_write_int_parameter (SoupSoapMessage *msg, const gchar *name, const gchar *prefix, glong value);
 
 void             e_ews_message_write_footer (SoupSoapMessage *msg);
+void		 e_ews_message_write_response (SoupSoapMessage *msg);
 
 G_END_DECLS
 

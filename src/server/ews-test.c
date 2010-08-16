@@ -77,12 +77,21 @@ idle_cb (gpointer data)
 
 	ctx = e2k_ews_test_get_context (url);
 
+	/* Sync Folder hierarchy request */
 	msg = e_ews_message_new_with_header (url, "SyncFolderHierarchy");
 	soup_soap_message_start_element (msg, "FolderShape", NULL, NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", "types", "AllProperties");
 	soup_soap_message_end_element (msg);
 
+	/* Complete the footer and print the request */
 	e_ews_message_write_footer (msg);
+
+	/* Send the request */
+	status = e2k_context_send_message (ctx, NULL, msg);
+
+	/* Print the response */
+	e_ews_message_write_response (msg);
+
 	g_print ("\n\nReturned %d\n", status);
 
 	/* Create folder operation. Create a folder by name TestBharath */
@@ -102,6 +111,10 @@ idle_cb (gpointer data)
 	e_ews_message_write_footer (msg);
 	status = e2k_context_send_message (ctx, NULL, msg);
 
+	e_ews_message_write_response (msg);
+
+	g_print ("\n\nReturned %d\n", status);
+
 	/* Create folder operation. Create a folder by name Test123 */
 	msg = e_ews_message_new_with_header (url, "CreateFolder");
 
@@ -118,8 +131,10 @@ idle_cb (gpointer data)
 	e_ews_message_write_footer (msg);
 	status = e2k_context_send_message (ctx, NULL, msg);
 
+	e_ews_message_write_response (msg);
+
 	g_print ("\n\nReturned %d\n", status);
-	soup_message_headers_foreach (msg->response_headers, print_header, NULL);
+//	soup_message_headers_foreach (msg->response_headers, print_header, NULL);
 
 	g_main_loop_quit (main_loop);
 

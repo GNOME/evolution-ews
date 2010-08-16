@@ -103,8 +103,24 @@ e_ews_message_write_footer (SoupSoapMessage *msg)
 	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) == 1)) {
 		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->request_body));
 		/* print request's body */
+		g_print ("\n The request headers follow");
+		g_print ("\n ==========================================");
 		fputc ('\n', stdout);
 		fputs (SOUP_MESSAGE (msg)->request_body->data, stdout);
+		fputc ('\n', stdout);
+	}
+}
+
+void
+e_ews_message_write_response (SoupSoapMessage *msg)
+{
+	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) == 1)){
+		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->response_body));
+		/* print response body */
+		g_print ("\n The response headers follow");
+		g_print ("\n ==========================================");
+		fputc ('\n', stdout);
+		fputs (SOUP_MESSAGE (msg)->response_body->data, stdout);
 		fputc ('\n', stdout);
 	}
 }
