@@ -122,7 +122,7 @@ ews_folder_get_message( CamelFolder *folder, const gchar *uid, GError **error )
 	EEwsItem *item;
 	CamelStream *stream, *cache_stream;
 	const gchar *full_name;
-
+#if 0
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
 
@@ -238,6 +238,8 @@ ews_folder_get_message( CamelFolder *folder, const gchar *uid, GError **error )
 	g_free (container_id);
 	g_object_unref (item);
 	return msg;
+#endif
+	return NULL;
 }
 
 /* create a mime message out of an gwitem */
@@ -247,7 +249,7 @@ ews_populate_details_from_item (CamelMimeMessage *msg, EEwsItem *item)
 	EEwsItemType type;
 	gchar *dtstring = NULL;
 	gchar *temp_str = NULL;
-
+#if 0
 	temp_str = (gchar *)e_ews_item_get_subject(item);
 	if (temp_str)
 		camel_mime_message_set_subject (msg, temp_str);
@@ -277,6 +279,7 @@ ews_populate_details_from_item (CamelMimeMessage *msg, EEwsItem *item)
 				actual_time = (time_t) 0;
 		camel_mime_message_set_date (msg, actual_time, offset);
 	}
+#endif
 }
 
 /* convert an item to a msg body. set content type etc. */
@@ -286,7 +289,7 @@ ews_populate_msg_body_from_item (EEwsConnection *cnc, CamelMultipart *multipart,
 	CamelMimePart *part;
 	EEwsItemType type;
 	const gchar *temp_body = NULL;
-
+#if 0
 	part = camel_mime_part_new ();
 	camel_mime_part_set_encoding(part, CAMEL_TRANSFER_ENCODING_8BIT);
 
@@ -346,6 +349,7 @@ ews_populate_msg_body_from_item (EEwsConnection *cnc, CamelMultipart *multipart,
 	camel_multipart_set_boundary (multipart, NULL);
 	camel_multipart_add_part (multipart, part);
 	g_object_unref (part);
+#endif
 }
 
 /* Set the recipients list in the message from the item */
@@ -580,7 +584,7 @@ update_junk_list (CamelStore *store, CamelMessageInfo *info, gint flag)
 	CamelEwsStorePrivate  *priv = ews_store->priv;
 	EEwsConnection *cnc = cnc_lookup (priv);
 	EEwsConnectionStatus status;
-
+#if 0
 	if (!(from = g_strdup (camel_message_info_from (info))))
 		goto error;
 
@@ -623,6 +627,7 @@ update_junk_list (CamelStore *store, CamelMessageInfo *info, gint flag)
 error:
 	g_free (from);
 	g_strfreev (email);
+#endif
 }
 
 static void
@@ -782,6 +787,8 @@ ews_sync (CamelFolder *folder, gboolean expunge, CamelMessageInfo *update_single
 	gboolean success;
 	GList *deleted_items, *deleted_head;
 
+	g_print ("\n You better write a good sync for EWS :)");
+#if 0
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
 
@@ -1005,6 +1012,8 @@ ews_sync (CamelFolder *folder, gboolean expunge, CamelMessageInfo *update_single
 	camel_folder_change_info_free (changes);
 
 	return success;
+#endif
+	return TRUE;
 }
 
 CamelFolder *
@@ -1094,7 +1103,7 @@ update_update (CamelSession *session, CamelSessionThreadMsg *msg)
 	gint cursor = 0;
 	const gchar *position = E_EWS_CURSOR_POSITION_END;
 	gboolean done;
-
+#if 0
 	parent_store = camel_folder_get_parent_store (m->folder);
 	ews_store = CAMEL_EWS_STORE (parent_store);
 
@@ -1190,6 +1199,8 @@ update_update (CamelSession *session, CamelSessionThreadMsg *msg)
 		g_list_foreach (items_full_list, (GFunc)g_free, NULL);
 		g_list_free (items_full_list);
 	}
+	return;
+#endif
 	return;
 }
 
@@ -1364,6 +1375,8 @@ ews_refresh_folder(CamelFolder *folder, GError **error)
 	EEwsContainer *container;
 	gint new_item_count = 0;
 
+	g_print ("\n Refresh folder");
+#if 0
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
 
@@ -1519,6 +1532,7 @@ end2:
 end1:
 	if (is_locked)
 		camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+#endif
 	return;
 }
 
@@ -1607,7 +1621,7 @@ ews_update_cache (CamelFolder *folder, GList *list, GError **error, gboolean uid
 	const gchar *full_name;
 
 	gboolean folder_needs_caching;
-
+#if 0
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
 
@@ -1841,6 +1855,7 @@ ews_update_cache (CamelFolder *folder, GList *list, GError **error, gboolean uid
 
 	camel_folder_changed (folder, changes);
 	camel_folder_change_info_free (changes);
+#endif
 }
 
 static const gchar *
@@ -1891,7 +1906,7 @@ ews_update_summary (CamelFolder *folder, GList *list,GError **error)
 	GList *item_list = list;
 	const gchar *full_name;
 	gboolean is_proxy;
-
+#if 0
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
 
@@ -2047,6 +2062,7 @@ ews_update_summary (CamelFolder *folder, GList *list,GError **error)
 
 	camel_folder_changed (folder, changes);
 	camel_folder_change_info_free (changes);
+#endif
 }
 
 static CamelMimeMessage *
@@ -2072,7 +2088,7 @@ ews_folder_item_to_msg( CamelFolder *folder,
 	gboolean is_base64_encoded = FALSE;
 	CamelStream *temp_stream;
 	const gchar *full_name;
-
+#if 0
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
 
@@ -2385,6 +2401,8 @@ end:
 		g_free (body);
 
 	return msg;
+#endif
+	return NULL;
 }
 
 static void
@@ -2458,7 +2476,7 @@ ews_append_message (CamelFolder *folder, CamelMimeMessage *message,
 	const gchar *name;
 	gchar *id;
 	gboolean is_ok = FALSE;
-
+#if 0
 	name = camel_folder_get_name (folder);
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
@@ -2535,7 +2553,7 @@ ews_append_message (CamelFolder *folder, CamelMimeMessage *message,
 		*appended_uid = g_strdup (id);
 	g_free (id);
 	camel_service_unlock (CAMEL_SERVICE (parent_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-
+#endif
 	return TRUE;
 }
 
@@ -2576,7 +2594,7 @@ ews_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 	gboolean destination_is_trash;
 	const gchar *source_full_name;
 	const gchar *destination_full_name;
-
+#if 0
 	source_full_name = camel_folder_get_full_name (source);
 	source_parent_store = camel_folder_get_parent_store (source);
 
@@ -2768,7 +2786,7 @@ ews_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 	ews_store_set_current_folder (ews_store, source);
 
 	camel_service_unlock (CAMEL_SERVICE (source_parent_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-
+#endif
 	return TRUE;
 }
 
@@ -2788,7 +2806,7 @@ ews_expunge (CamelFolder *folder, GError **error)
 	gboolean delete = FALSE;
 	GList *deleted_items, *deleted_head;
 	const gchar *full_name;
-
+#if 0
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
 
@@ -2882,7 +2900,7 @@ ews_expunge (CamelFolder *folder, GError **error)
 
 	g_free (container_id);
 	camel_folder_change_info_free (changes);
-
+#endif
 	return TRUE;
 }
 

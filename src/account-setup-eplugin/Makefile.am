@@ -32,7 +32,6 @@ liborg_gnome_exchange_ews_la_SOURCES = 		\
 	exchange-ews-account-listener.h
 
 liborg_gnome_exchange_ews_la_LIBADD = 			\
-	$(top_builddir)/src/libexchangeews/libexchangeews-1.0.la \
 	$(EVOLUTION_PLUGIN_LIBS)			\
 	$(CAMEL_LIBS) 					\
 	$(LIBECAL_LIBS)

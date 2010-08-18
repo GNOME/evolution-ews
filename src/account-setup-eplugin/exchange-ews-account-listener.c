@@ -177,6 +177,7 @@ find_source_by_fid (GSList *sources, const gchar *fid)
 #define SELECTED_JOURNALS	"/apps/evolution/calendar/memos/selected_memos"
 #define ADDRESSBOOK_SOURCES     "/apps/evolution/addressbook/sources"
 
+#if 0
 static void
 add_cal_esource (EAccount *account, GSList *folders, CamelEwsFolderType folder_type, CamelURL *url, ews_id_t trash_fid)
 {
@@ -1127,6 +1128,7 @@ ews_account_changed (EAccountList *account_listener, EAccount *account)
 
 	camel_url_free (new_url);
 }
+#endif
 
 static void
 exchange_ews_account_listener_construct (ExchangeEWSAccountListener *config_listener)
@@ -1135,6 +1137,7 @@ exchange_ews_account_listener_construct (ExchangeEWSAccountListener *config_list
 
 	config_listener->priv->account_list = e_account_list_new (config_listener->priv->gconf_client);
 
+	g_print ("\n Construct the listener");
 	for (iter = e_list_get_iterator (E_LIST(config_listener->priv->account_list)); e_iterator_is_valid (iter); e_iterator_next (iter)) {
 		EAccount *account = E_ACCOUNT (e_iterator_get (iter));
 		if (is_ews_account (account)) {
@@ -1145,7 +1148,11 @@ exchange_ews_account_listener_construct (ExchangeEWSAccountListener *config_list
 			info->enabled = account->enabled;
 
 			ews_accounts = g_list_append (ews_accounts, info);
+			}
+	}
+}
 
+#if 0
 			if (!account->enabled) {
 				remove_addressbook_sources (info);
 				remove_calendar_sources (account);
@@ -1161,8 +1168,9 @@ exchange_ews_account_listener_construct (ExchangeEWSAccountListener *config_list
 	g_signal_connect (config_listener->priv->account_list, "account_added", G_CALLBACK (ews_account_added), NULL);
 	g_signal_connect (config_listener->priv->account_list, "account_changed", G_CALLBACK (ews_account_changed), NULL);
 	g_signal_connect (config_listener->priv->account_list, "account_removed", G_CALLBACK (ews_account_removed), NULL);
-}
 
+}
+#endif
 ExchangeEWSAccountListener *
 exchange_ews_account_listener_new (void)
 {

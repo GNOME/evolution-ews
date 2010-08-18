@@ -51,11 +51,11 @@ ews_transport_get_name (CamelService *service,
 {
 	if (brief)
 		return g_strdup_printf (
-			_("GroupWise server %s"),
+			_("Exchange server %s"),
 			service->url->host);
 	else
 		return g_strdup_printf (
-			_("GroupWise mail delivery via %s"),
+			_("Exchange mail delivery via %s"),
 			service->url->host);
 }
 
@@ -77,7 +77,7 @@ ews_send_to (CamelTransport *transport,
 	gchar *url = NULL;
 	gchar *reply_request = NULL;
 	EEwsItemLinkInfo *info = NULL;
-
+#if 0
 	if (!transport) {
 		g_set_error (
 			error, CAMEL_SERVICE_ERROR,
@@ -168,7 +168,7 @@ ews_send_to (CamelTransport *transport,
 	g_object_unref (item);
 
 	camel_operation_end (NULL);
-
+#endif
 	return TRUE;
 }
 

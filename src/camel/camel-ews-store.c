@@ -48,7 +48,7 @@
 #include <ws2tcpip.h>
 #endif
 
-#define d(x)
+#define d(x) x
 #define CURSOR_ITEM_LIMIT 100
 #define JUNK_ENABLE 1
 #define JUNK_PERSISTENCE 14
@@ -173,6 +173,7 @@ ews_compare_folder_name (gconstpointer a, gconstpointer b)
 static gboolean
 ews_auth_loop (CamelService *service, GError **error)
 {
+#if 0
 	CamelSession *session = camel_service_get_session (service);
 	CamelStore *store = CAMEL_STORE (service);
 	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
@@ -234,6 +235,7 @@ ews_auth_loop (CamelService *service, GError **error)
 			authenticated = TRUE;
 
 	}
+#endif
 
 	return TRUE;
 }
@@ -292,7 +294,9 @@ ews_connect (CamelService *service, GError **error)
 	CamelEwsStoreNamespace *ns;
 	CamelSession *session = service->session;
 
-	d("in groupwise store connect\n");
+	d("in ews store connect\n");
+
+#if 0
 
 /*	if (((CamelOfflineStore *) store)->state == CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL ||
 	     (service->status == CAMEL_SERVICE_DISCONNECTED))
@@ -344,7 +348,7 @@ ews_connect (CamelService *service, GError **error)
 	if (E_IS_GW_CONNECTION (priv->cnc)) {
 		return TRUE;
 	}
-
+#endif
 	return FALSE;
 
 }
@@ -574,6 +578,7 @@ ews_get_folder (CamelStore *store, const gchar *folder_name, guint32 flags, GErr
 	guint total = 0;
 	GError *local_error = NULL;
 
+#if 0
 	folder = ews_get_folder_from_disk (
 		store, folder_name, flags, &local_error);
 	if (folder) {
@@ -709,11 +714,14 @@ ews_get_folder (CamelStore *store, const gchar *folder_name, guint32 flags, GErr
 	camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	return folder;
+#endif
+	return NULL;
 }
 
 gboolean
 ews_store_reload_folder (CamelEwsStore *ews_store, CamelFolder *folder, guint32 flags, GError **error)
 {
+#if 0
 	CamelEwsStorePrivate *priv = ews_store->priv;
 	CamelEwsSummary *summary;
 	gchar *container_id;
@@ -839,6 +847,7 @@ ews_store_reload_folder (CamelEwsStore *ews_store, CamelFolder *folder, guint32 
 
 	g_free (container_id);
 	camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+#endif
 	return TRUE;
 }
 
@@ -958,6 +967,7 @@ ews_folders_sync (CamelEwsStore *store, GError **error)
 	CamelStoreInfo *si = NULL;
 	gint count, i;
 
+#if 0
 	status = e_ews_connection_get_container_list (priv->cnc, "folders", &folder_list);
 	if (status == E_EWS_CONNECTION_STATUS_INVALID_CONNECTION)
 		status = e_ews_connection_get_container_list (priv->cnc, "folders", &folder_list);
@@ -1048,7 +1058,7 @@ ews_folders_sync (CamelEwsStore *store, GError **error)
 
 	g_hash_table_foreach (present, get_folders_free, NULL);
 	g_hash_table_destroy (present);
-
+#endif
 	return TRUE;
 }
 
@@ -1145,7 +1155,7 @@ create_junk_folder (CamelStore *store)
 	folder_name = "Junk Mail";
 	parent_id = "";
 	/* TODO: check for offlining*/
-
+#if 0
 	camel_service_lock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	status = e_ews_connection_modify_junk_settings (priv->cnc, JUNK_ENABLE, 0, 0,  JUNK_PERSISTENCE);
 	if (status == E_EWS_CONNECTION_STATUS_INVALID_CONNECTION)
@@ -1166,6 +1176,8 @@ create_junk_folder (CamelStore *store)
 	camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	return root;
+#endif
+	return NULL;
 }
 
 static CamelFolderInfo*
@@ -1174,6 +1186,7 @@ ews_create_folder(CamelStore *store,
 		const gchar *folder_name,
 		GError **error)
 {
+#if 0
 	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
 	CamelEwsStorePrivate  *priv = ews_store->priv;
 	CamelFolderInfo *root = NULL;
@@ -1231,6 +1244,8 @@ ews_create_folder(CamelStore *store,
 	}
 	camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	return root;
+#endif
+	return NULL;
 }
 
 static gboolean
@@ -1238,6 +1253,7 @@ ews_delete_folder(CamelStore *store,
 				   const gchar *folder_name,
 				   GError **error)
 {
+#if 0	
 	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
 	CamelEwsStorePrivate  *priv = ews_store->priv;
 	EEwsConnectionStatus status;
@@ -1267,7 +1283,7 @@ ews_delete_folder(CamelStore *store,
 		g_hash_table_remove (priv->parent_hash, container);
 	}
 	camel_service_unlock (CAMEL_SERVICE (store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-
+#endif
 	return TRUE;
 }
 
@@ -1277,6 +1293,7 @@ ews_rename_folder(CamelStore *store,
 			const gchar *new_name,
 			GError **error)
 {
+#if 0
 	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
 	CamelEwsStorePrivate  *priv = ews_store->priv;
 	gchar *oldpath, *newpath, *storepath;
@@ -1337,17 +1354,19 @@ ews_rename_folder(CamelStore *store,
 	g_free (oldpath);
 	g_free (newpath);
 	camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-
+#endif
+	g_print ("Rename not implemented yet");
 	return TRUE;
+
 }
 
 gchar *
 ews_get_name(CamelService *service, gboolean brief)
 {
 	if (brief)
-		return g_strdup_printf(_("GroupWise server %s"), service->url->host);
+		return g_strdup_printf(_("Exchange server %s"), service->url->host);
 	else
-		return g_strdup_printf(_("GroupWise service for %s on %s"),
+		return g_strdup_printf(_("Exchange service for %s on %s"),
 				       service->url->user, service->url->host);
 }
 
@@ -1420,6 +1439,9 @@ ews_can_refresh_folder (CamelStore *store, CamelFolderInfo *info, GError **error
 gboolean
 camel_ews_store_connected (CamelEwsStore *store, GError **error)
 {
+	return TRUE;
+}
+#if 0
 	if (((CamelOfflineStore *) store)->state == CAMEL_OFFLINE_STORE_NETWORK_AVAIL
 	    && camel_service_connect ((CamelService *)store, error)) {
 		CamelEwsStore *ews_store = (CamelEwsStore *) store;
@@ -1459,7 +1481,7 @@ match_path(const gchar *path, const gchar *name)
 
 	return n == 0 && (p == '%' || p == 0);
 }
-
+#endif
 static void
 ews_store_dispose (GObject *object)
 {
@@ -1550,7 +1572,7 @@ camel_ews_store_init (CamelEwsStore *ews_store)
 	ews_store->priv =
 		CAMEL_EWS_STORE_GET_PRIVATE (ews_store);
 
-	d("in groupwise store init\n");
+	d("in ews store init\n");
 	ews_store->priv->server_name = NULL;
 	ews_store->priv->port = NULL;
 	ews_store->priv->use_ssl = NULL;

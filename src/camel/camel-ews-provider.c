@@ -77,10 +77,10 @@ static CamelProviderConfEntry ews_conf_entries[] = {
 };
 
 static CamelProvider ews_provider = {
-	"groupwise",
-	N_("Novell GroupWise"),
+	"ews",
+	N_("Exchange Web Services"),
 
-	N_("For accessing Novell GroupWise servers"),
+	N_("For accessing Exchange servers using EWS"),
 
 	"mail",
 
@@ -97,7 +97,7 @@ static CamelProvider ews_provider = {
 CamelServiceAuthType camel_ews_password_authtype = {
 	N_("Password"),
 
-	N_("This option will connect to the GroupWise server using a "
+	N_("This option will connect to the Exchange server using a "
 	   "plaintext password."),
 
 	"",
@@ -125,6 +125,7 @@ camel_provider_module_init(void)
 	if (use_imap)
 		imap_provider = camel_provider_get("imapx://", NULL);
 
+	g_print ("\n EWS camel provider init");
 	ews_provider.url_hash = ews_url_hash;
 	ews_provider.url_equal = ews_url_equal;
 	ews_provider.auto_detect = ews_auto_detect_cb;

@@ -191,6 +191,9 @@ create_profile_callback (struct SRowSet *rowset, gpointer data)
 static void
 validate_credentials (GtkWidget *widget, EConfig *config)
 {
+	g_print ("\n Validate_credentials not implemented yet");
+
+#if 0
 	EMConfigTargetAccount *target_account = (EMConfigTargetAccount *)(config->target);
 	CamelURL *url = NULL;
 	gchar *key = NULL, *password = NULL;
@@ -284,6 +287,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 	g_free (password);
 	g_free (key);
 	camel_url_free (url);
+#endif
 }
 
 static void
@@ -710,7 +714,7 @@ exchange_ews_create_calendar (EPlugin *epl, EConfigHookItemFactoryData *data)
 
 	return exchange_ews_create (data->parent, t->source, folder_type);
 }
-#endif
+
 gboolean
 exchange_ews_book_check (EPlugin *epl, EConfigHookPageCheckData *data)
 {
@@ -933,3 +937,4 @@ exchange_ews_cal_commit (EPlugin *epl, EConfigTarget *target)
 	// Update the folder list in the plugin and CamelEwsFolder
 	return;
 }
+#endif

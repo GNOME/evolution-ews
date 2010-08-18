@@ -283,7 +283,7 @@ send_as_attachment (EEwsConnection *cnc, EEwsItem *item, CamelStream *content, C
 	EEwsItemAttachment *attachment;
 	EEwsItem *temp_item;
 	GByteArray *byte_array;
-
+#if 0
 	attachment = g_new0 (EEwsItemAttachment, 1);
 	attachment->contentType = camel_content_type_simple (type);
 
@@ -372,6 +372,7 @@ send_as_attachment (EEwsConnection *cnc, EEwsItem *item, CamelStream *content, C
 	}
 
 	*attach_list = g_slist_append (*attach_list, attachment);
+#endif
 }
 
 EEwsItem *
@@ -384,7 +385,7 @@ camel_ews_util_item_from_message (EEwsConnection *cnc, CamelMimeMessage *message
 	CamelMultipart *mp;
 	GSList *recipient_list = NULL, *attach_list = NULL;
 	CamelAddress *recipients;
-
+#if 0
 	/*Egroupwise item*/
 	item = e_ews_item_new_empty ();
 
@@ -559,6 +560,8 @@ camel_ews_util_item_from_message (EEwsConnection *cnc, CamelMimeMessage *message
 		}
 	}
 	return item;
+#endif
+	return NULL;
 }
 
 void

@@ -39,7 +39,6 @@ noinst_HEADERS =         			\
 libcamelews_la_LDFLAGS = -avoid-version -module -no-undefined
 
 libcamelews_la_LIBADD =                                   \
-	$(top_builddir)/src/server/libeews-1.2.la		\
 	$(CAMEL_LIBS)                                           \
 	$(EVOLUTION_PLUGIN_LIBS)		\
 	$(LIBEDATASERVER_LIBS)			\
