@@ -1455,7 +1455,7 @@ camel_ews_store_connected (CamelEwsStore *store, GError **error)
 	/*Not online, so return FALSE*/
 	return FALSE;
 }
-
+#endif
 static gint
 match_path(const gchar *path, const gchar *name)
 {
@@ -1481,7 +1481,7 @@ match_path(const gchar *path, const gchar *name)
 
 	return n == 0 && (p == '%' || p == 0);
 }
-#endif
+
 static void
 ews_store_dispose (GObject *object)
 {

@@ -53,9 +53,13 @@ libeews_1_2_la_SOURCES =		\
 	e-ews-context.c			\
 	e-ews-context.h			\
 	e-ews-http-utils.h		\
+	e-ews-item.c		\
+	e-ews-item.h		\
 	e-ews-message.c			\
 	e-ews-operation.c		\
 	e-ews-operation.h		\
+	e-ews-recur-utils.c		\
+	e-ews-recur-utils.h		\
 	e-ews-types.h			\
 	e-ews-uri.c			\
 	e-ews-uri.h			\
@@ -70,9 +74,10 @@ libeews_1_2_la_LIBADD =						\
 	$(LIBEBACKEND_LIBS)						\
 	$(LIBEDATASERVER_LIBS)						\
 	$(E_DATA_SERVER_LIBS)						\
-	$(SOUP_LIBS)
+	$(SOUP_LIBS)						\
+	$(SOCKET_LIBS)
 
-libeews_1_2_la_LDFLAGS = -no-undefined
+libeews_1_2_la_LDFLAGS = $(NO_UNDEFINED)
 
 libeewsincludedir = $(privincludedir)/ews
 

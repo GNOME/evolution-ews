@@ -32,6 +32,6 @@ libecalbackendews_la_LIBADD =					\
 	$(SOUP_LIBS)
 
 libecalbackendews_la_LDFLAGS =		\
-	-module -avoid-version -no-undefined
+	-module -avoid-version $(NO_UNDEFINED)
 
 -include $(top_srcdir)/git.mk

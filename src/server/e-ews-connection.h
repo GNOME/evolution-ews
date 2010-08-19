@@ -102,6 +102,8 @@ SoupSoapResponse   *e_ews_connection_send_message (EEwsConnection *cnc, SoupSoap
 EEwsConnectionStatus e_ews_connection_parse_response_status (SoupSoapResponse *response);
 const gchar         *e_ews_connection_get_error_message (EEwsConnectionStatus status);
 
+gchar               *e_ews_connection_format_date_string (const gchar *dtstring);
+
 EEwsConnectionStatus e_ews_connection_logout (EEwsConnection *cnc);
 
 G_END_DECLS

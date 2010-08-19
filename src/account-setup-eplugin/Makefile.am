@@ -36,7 +36,7 @@ liborg_gnome_exchange_ews_la_LIBADD = 			\
 	$(CAMEL_LIBS) 					\
 	$(LIBECAL_LIBS)
 
-liborg_gnome_exchange_ews_la_LDFLAGS = -module -avoid-version -no-undefined
+liborg_gnome_exchange_ews_la_LDFLAGS = -module -avoid-version $(NO_UNDEFINED)
 liborg_gnome_exchange_ews_la_CFLAGS = \
 	$(AM_CPPFLAGS)					\
 	-I$(top_srcdir)					\

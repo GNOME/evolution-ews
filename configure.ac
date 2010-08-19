@@ -73,6 +73,29 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 
+dnl ******************************
+dnl Check for Win32
+dnl ******************************
+
+AC_MSG_CHECKING([for Win32])
+case "$host" in
+*-mingw*)
+	os_win32=yes
+	NO_UNDEFINED='-no-undefined'
+	SOCKET_LIBS='-lws2_32'
+	;;
+*)
+	os_win32=no
+	NO_UNDEFINED='-no-undefined'
+	SOCKET_LIBS=''
+	;;
+esac
+
+AC_MSG_RESULT([$os_win32])
+AM_CONDITIONAL(OS_WIN32, [test "x$os_win32" = "xyes"])
+AC_SUBST(NO_UNDEFINED)
+AC_SUBST(SOCKET_LIBS)
+
 dnl ***********************
 dnl Compiler Warning Flags
 dnl ***********************

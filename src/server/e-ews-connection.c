@@ -699,6 +699,27 @@ e_ews_connection_send_message (EEwsConnection *cnc, SoupSoapMessage *msg)
 	return response;
 }
 
+gchar *
+e_ews_connection_format_date_string (const gchar *dtstring)
+{
+        gchar *str2;
+        gint i, j, len = strlen (dtstring);
+
+        str2 = g_malloc0 (len);
+	if (len <= 0)
+		return str2;
+
+        for (i = 0,j = 0; i < len; i++) {
+                if ((dtstring[i] != '-') && (dtstring[i] != ':')) {
+			str2[j] = dtstring[i];
+			j++;
+                }
+        }
+
+	str2[j] = '\0';
+        return str2;
+}
+
 EEwsConnectionStatus
 e_ews_connection_logout (EEwsConnection *cnc)
 {
