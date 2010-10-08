@@ -388,7 +388,6 @@ camel_ews_journal_transfer (CamelEwsJournal *ews_journal, CamelEwsFolder *source
 	entry->type = CAMEL_EWS_JOURNAL_ENTRY_APPEND;
 	entry->uid = uid;
 	entry->original_uid = g_strdup (original_uid);
-	entry->source_container = g_strdup (camel_ews_store_container_id_lookup (ews_store, camel_folder_get_name (((CamelFolder *)source_folder))));
 
 	camel_dlist_addtail (&journal->queue, (CamelDListNode *) entry);
 

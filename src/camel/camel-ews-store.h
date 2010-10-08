@@ -29,7 +29,6 @@
 #include "camel-ews-store-summary.h"
 
 #include <e-ews-connection.h>
-#include <e-ews-container.h>
 
 /* Standard GObject macros */
 #define CAMEL_TYPE_EWS_STORE \
@@ -80,7 +79,6 @@ GType camel_ews_store_get_type (void);
 gchar * ews_get_name(CamelService *service, gboolean brief);
 
 /*IMplemented*/
-const gchar *camel_ews_store_container_id_lookup (CamelEwsStore *ews_store, const gchar *folder_name);
 const gchar *camel_ews_store_folder_lookup (CamelEwsStore *ews_store, const gchar *container_id);
 EEwsConnection *cnc_lookup (CamelEwsStorePrivate *priv);
 gchar *storage_path_lookup (CamelEwsStorePrivate *priv);

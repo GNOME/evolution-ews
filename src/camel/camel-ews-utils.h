@@ -22,8 +22,6 @@
 
 #include <camel/camel.h>
 #include <e-ews-connection.h>
-#include <e-ews-container.h>
-#include <e-ews-item.h>
 
 /*Headers for send options*/
 #define X_SEND_OPTIONS        "X-ews-send-options"
@@ -69,8 +67,6 @@ gboolean e_path_find_folders (const gchar *prefix,
 			      gpointer data);
 
 gint      e_path_rmdir        (const gchar *prefix, const gchar *vpath);
-
-EEwsItem *camel_ews_util_item_from_message (EEwsConnection *cnc, CamelMimeMessage *message, CamelAddress *from);
 
 void do_flags_diff (flags_diff_t *diff, guint32 old, guint32 _new);
 gchar *ews_concat ( const gchar *prefix, const gchar *suffix);

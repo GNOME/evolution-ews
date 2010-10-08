@@ -1,19 +1,9 @@
 #include <config.h>
 #include <glib.h>
 #include "e-ews-connection.h"
-#include "e-ews-container.h"
 
 static GMainLoop *main_loop;
 static gchar *arg_hostname, *arg_username, *arg_password;
-
-static void
-display_container (EEwsContainer *container)
-{
-	g_print (" Container: %s\n", e_ews_container_get_name (container));
-	g_print ("\tID: %s\n", e_ews_container_get_id (container));
-
-	g_print ("\n");
-}
 
 static gboolean
 idle_cb (gpointer data)

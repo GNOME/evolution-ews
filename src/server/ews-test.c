@@ -4,7 +4,6 @@
 #include "e-ews-connection.h"
 #include "e-ews-message.h"
 #include "e-ews-context.h"
-#include "e-ews-uri.h"
 #include "e-ews-http-utils.h"
 
 static GMainLoop *main_loop;

@@ -53,20 +53,10 @@ libeews_1_2_la_SOURCES =		\
 	e-ews-context.c			\
 	e-ews-context.h			\
 	e-ews-http-utils.h		\
-	e-ews-item.c		\
-	e-ews-item.h		\
 	e-ews-message.c			\
 	e-ews-operation.c		\
 	e-ews-operation.h		\
-	e-ews-recur-utils.c		\
-	e-ews-recur-utils.h		\
 	e-ews-types.h			\
-	e-ews-uri.c			\
-	e-ews-uri.h			\
-	e-ews-utils.c			\
-	e-ews-utils.h			\
-	e-ews-xml-utils.c		\
-	e-ews-xml-utils.h		\
 	soup-soap-message.c		\
 	soup-soap-response.c
 

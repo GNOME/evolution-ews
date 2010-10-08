@@ -41,9 +41,6 @@
 #endif
 
 #include "e-ews-context.h"
-#include "e-ews-uri.h"
-#include "e-ews-utils.h"
-#include "e-ews-xml-utils.h"
 
 #include <libedataserver/e-proxy.h>
 #include <libsoup/soup.h>
@@ -574,19 +571,19 @@ ews_soup_message_new (EWSContext *ctx, const gchar *uri, const gchar *method)
 {
 	SoupMessage *msg;
 
-	if (method[0] == 'B') {
+/*	if (method[0] == 'B') {
 		gchar *slash_uri = ews_strdup_with_trailing_slash (uri);
 		msg = soup_message_new (method, slash_uri);
 		if (!msg)
 			g_warning ("Invalid uri '%s'", slash_uri ? slash_uri : "[null]");
 		g_free (slash_uri);
 	} else {
-		msg = soup_message_new (method, uri);
+*/		msg = soup_message_new (method, uri);
 		if (!msg)
 			g_warning ("Invalid uri '%s'", uri ? uri : "[null]");
-	}
+//	}
 
-	return msg;
+//	return msg;
 }
 
 /**
