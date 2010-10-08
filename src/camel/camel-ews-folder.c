@@ -91,14 +91,13 @@ static gchar * ews_get_filename (CamelFolder *folder, const gchar *uid, GError *
 static const gchar *get_from_from_org (EEwsItemOrganizer *org);
 */
 
-static void ews_refresh_folder(CamelFolder *folder, GError **error);
-static gboolean ews_sync (CamelFolder *folder, gboolean expunge, CamelMessageInfo *update_single, GError **error);
+static void ews_refresh_folder_sync (CamelFolder *folder, GCancellable *cancellable, GError **error);
 #define d(x)
 
 G_DEFINE_TYPE (CamelEwsFolder, camel_ews_folder, CAMEL_TYPE_OFFLINE_FOLDER)
 
 static gchar *
-ews_get_filename (CamelFolder *folder, const gchar *uid, GError **error)
+ews_get_filename (CamelFolder *folder, const gchar *uid, GCancellable *cancellable, GError **error)
 {
 	CamelEwsFolder *ews_folder = CAMEL_EWS_FOLDER(folder);
 
@@ -107,7 +106,7 @@ ews_get_filename (CamelFolder *folder, const gchar *uid, GError **error)
 
 /* Get a message from cache if available otherwise get it from server */
 static CamelMimeMessage *
-ews_folder_get_message( CamelFolder *folder, const gchar *uid, GError **error )
+ews_folder_get_message_sync ( CamelFolder *folder, const gchar *uid, GCancellable *cancellable, GError **error )
 {
 	g_print ("\n Get message not implemented");
 	
@@ -123,7 +122,7 @@ ews_folder_rename (CamelFolder *folder, const gchar *new)
 }
 
 static GPtrArray *
-ews_folder_search_by_expression (CamelFolder *folder, const gchar *expression, GError **error)
+ews_folder_search_by_expression (CamelFolder *folder, const gchar *expression, GCancellable *cancellable, GError **error)
 {
 	g_print ("\n Folder Search by Expression not implemented");
 	
@@ -131,7 +130,7 @@ ews_folder_search_by_expression (CamelFolder *folder, const gchar *expression, G
 }
 
 static guint32
-ews_folder_count_by_expression (CamelFolder *folder, const gchar *expression, GError **error)
+ews_folder_count_by_expression (CamelFolder *folder, const gchar *expression, GCancellable *cancellable, GError **error)
 {
 	g_print ("\n Folder count by Expression not implemented");
 	
@@ -139,7 +138,7 @@ ews_folder_count_by_expression (CamelFolder *folder, const gchar *expression, GE
 }
 
 static GPtrArray *
-ews_folder_search_by_uids(CamelFolder *folder, const gchar *expression, GPtrArray *uids, GError **error)
+ews_folder_search_by_uids(CamelFolder *folder, const gchar *expression, GPtrArray *uids, GCancellable *cancellable, GError **error)
 {
 	g_print ("\n Folder search by uids not implemented");
 	
@@ -165,14 +164,7 @@ ews_set_message_flags (CamelFolder *folder, const gchar *uid, guint32 flags, gui
 }
 
 static gboolean
-ews_sync_all (CamelFolder *folder, gboolean expunge, GError **error)
-{
-	return ews_sync (folder, expunge, NULL, error);
-}
-
-/* This may need to be reorganized. */
-static gboolean
-ews_sync (CamelFolder *folder, gboolean expunge, CamelMessageInfo *update_single, GError **error)
+ews_synchronize_sync (CamelFolder *folder, gboolean expunge, GCancellable *cancellable, GError **error)
 {
 	g_print ("\n You better write a good sync for EWS :)");
 	
@@ -180,7 +172,7 @@ ews_sync (CamelFolder *folder, gboolean expunge, CamelMessageInfo *update_single
 }
 
 CamelFolder *
-camel_ews_folder_new(CamelStore *store, const gchar *folder_name, const gchar *folder_dir, GError **error)
+camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *folder_dir, GCancellable *cancellable, GError **error)
 {
 	CamelFolder *folder;
 	CamelEwsFolder *ews_folder;
@@ -256,7 +248,7 @@ struct _folder_update_msg {
 };
 
 static gboolean
-ews_refresh_info(CamelFolder *folder, GError **error)
+ews_refresh_info_sync (CamelFolder *folder, GCancellable *cancellable, GError **error)
 {
 	CamelEwsSummary *summary = (CamelEwsSummary *) folder->summary;
 	CamelStoreInfo *si;
@@ -275,7 +267,7 @@ ews_refresh_info(CamelFolder *folder, GError **error)
 	 * should not interfere with the process
 	 */
 	if (summary->time_string && (strlen (summary->time_string) > 0))  {
-		ews_refresh_folder(folder, error);
+		ews_refresh_folder_sync (folder, cancellable, error);
 		si = camel_store_summary_path ((CamelStoreSummary *)((CamelEwsStore *)parent_store)->summary, full_name);
 		if (si) {
 			guint32 unread, total;
@@ -297,14 +289,14 @@ ews_refresh_info(CamelFolder *folder, GError **error)
 		 * so do a get_folder again. And hope that it works
 		 */
 		g_print("Reloading folder...something wrong with the summary....\n");
-		ews_store_reload_folder (ews_store, folder, 0, error);
+		ews_store_reload_folder (ews_store, folder, 0, cancellable, error);
 	}
 
 	return TRUE;
 }
 
 static void
-ews_refresh_folder(CamelFolder *folder, GError **error)
+ews_refresh_folder_sync (CamelFolder *folder, GCancellable *cancellable, GError **error)
 {
 	g_print ("\n Refresh folder");
 	
@@ -312,9 +304,9 @@ ews_refresh_folder(CamelFolder *folder, GError **error)
 }
 
 static gboolean
-ews_append_message (CamelFolder *folder, CamelMimeMessage *message,
+ews_append_message_sync (CamelFolder *folder, CamelMimeMessage *message,
 		const CamelMessageInfo *info, gchar **appended_uid,
-		GError **error)
+		GCancellable *cancellable, GError **error)
 {
 	g_print ("\n append_message not implemented");
 
@@ -323,9 +315,9 @@ ews_append_message (CamelFolder *folder, CamelMimeMessage *message,
 
 /* move messages */
 static gboolean
-ews_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
+ews_transfer_messages_to_sync (CamelFolder *source, GPtrArray *uids,
 		CamelFolder *destination, GPtrArray **transferred_uids,
-		gboolean delete_originals, GError **error)
+		gboolean delete_originals, GCancellable *cancellable, GError **error)
 {
 
 	g_print ("\n transfer_messages_to not implemented");
@@ -334,7 +326,7 @@ ews_transfer_messages_to (CamelFolder *source, GPtrArray *uids,
 }
 
 static gboolean
-ews_expunge (CamelFolder *folder, GError **error)
+ews_expunge_sync (CamelFolder *folder, GCancellable *cancellable, GError **error)
 {
 	g_print ("\n expunge not implemented");
 
@@ -402,19 +394,19 @@ camel_ews_folder_class_init (CamelEwsFolderClass *class)
 	object_class->constructed = ews_folder_constructed;
 
 	folder_class = CAMEL_FOLDER_CLASS (class);
-	folder_class->get_message = ews_folder_get_message;
+	folder_class->get_message_sync = ews_folder_get_message_sync;
 	folder_class->rename = ews_folder_rename;
 	folder_class->search_by_expression = ews_folder_search_by_expression;
 	folder_class->count_by_expression = ews_folder_count_by_expression;
 	folder_class->cmp_uids = ews_cmp_uids;
 	folder_class->search_by_uids = ews_folder_search_by_uids;
 	folder_class->search_free = ews_folder_search_free;
-	folder_class->append_message = ews_append_message;
-	folder_class->refresh_info = ews_refresh_info;
-	folder_class->sync = ews_sync_all;
+	folder_class->append_message_sync = ews_append_message_sync;
+	folder_class->refresh_info_sync = ews_refresh_info_sync;
+	folder_class->synchronize_sync = ews_synchronize_sync;
 	folder_class->set_message_flags = ews_set_message_flags;
-	folder_class->expunge = ews_expunge;
-	folder_class->transfer_messages_to = ews_transfer_messages_to;
+	folder_class->expunge_sync = ews_expunge_sync;
+	folder_class->transfer_messages_to_sync = ews_transfer_messages_to_sync;
 	folder_class->get_filename = ews_get_filename;
 }
 

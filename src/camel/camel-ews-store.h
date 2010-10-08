@@ -84,8 +84,8 @@ EEwsConnection *cnc_lookup (CamelEwsStorePrivate *priv);
 gchar *storage_path_lookup (CamelEwsStorePrivate *priv);
 const gchar *ews_base_url_lookup (CamelEwsStorePrivate *priv);
 CamelFolderInfo * create_junk_folder (CamelStore *store);
-gboolean camel_ews_store_connected (CamelEwsStore *store, GError **error);
-gboolean ews_store_reload_folder (CamelEwsStore *store, CamelFolder *folder, guint32 flags, GError **error);
+gboolean camel_ews_store_connected (CamelEwsStore *store, GCancellable *cancellable, GError **error);
+gboolean ews_store_reload_folder (CamelEwsStore *store, CamelFolder *folder, guint32 flags, GCancellable *cancellable, GError **error);
 void ews_store_set_current_folder (CamelEwsStore *ews_store, CamelFolder *folder);
 
 G_END_DECLS

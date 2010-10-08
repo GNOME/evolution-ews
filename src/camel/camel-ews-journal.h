@@ -84,9 +84,9 @@ CamelOfflineJournal *camel_ews_journal_new (struct _CamelEwsFolder *folder, cons
 
 /* interfaces for adding a journal entry */
 gboolean camel_ews_journal_append (CamelEwsJournal *journal, CamelMimeMessage *message, const CamelMessageInfo *mi,
-				     gchar **appended_uid, GError **error);
+				     gchar **appended_uid, GCancellable *cancellable, GError **error);
 gboolean camel_ews_journal_transfer (CamelEwsJournal *journal, CamelEwsFolder *source_folder, CamelMimeMessage *message,
-				       const CamelMessageInfo *mi, const gchar *orginal_uid, gchar **transferred_uid, GError **error);
+				       const CamelMessageInfo *mi, const gchar *orginal_uid, gchar **transferred_uid, GCancellable *cancellable, GError **error);
 
 G_END_DECLS
 

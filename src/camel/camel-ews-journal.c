@@ -44,7 +44,7 @@
 static void ews_entry_free (CamelOfflineJournal *journal, CamelDListNode *entry);
 static CamelDListNode *ews_entry_load (CamelOfflineJournal *journal, FILE *in);
 static gint ews_entry_write (CamelOfflineJournal *journal, CamelDListNode *entry, FILE *out);
-static gint ews_entry_play (CamelOfflineJournal *journal, CamelDListNode *entry, GError **error);
+static gint ews_entry_play (CamelOfflineJournal *journal, CamelDListNode *entry, GCancellable *cancellable, GError **error);
 
 G_DEFINE_TYPE (CamelEwsJournal, camel_ews_journal, CAMEL_TYPE_OFFLINE_JOURNAL)
 
@@ -156,7 +156,7 @@ ews_message_info_dup_to (CamelMessageInfoBase *dest, CamelMessageInfoBase *src)
 }
 
 static gint
-ews_entry_play_append (CamelOfflineJournal *journal, CamelEwsJournalEntry *entry, GError **error)
+ews_entry_play_append (CamelOfflineJournal *journal, CamelEwsJournalEntry *entry, GCancellable *cancellable, GError **error)
 {
 	CamelEwsFolder *ews_folder = (CamelEwsFolder *) journal->folder;
 	CamelFolder *folder = journal->folder;
@@ -172,7 +172,7 @@ ews_entry_play_append (CamelOfflineJournal *journal, CamelEwsJournalEntry *entry
 	}
 
 	message = camel_mime_message_new ();
-	if (camel_data_wrapper_construct_from_stream ((CamelDataWrapper *) message, stream, error) == -1) {
+	if (camel_data_wrapper_construct_from_stream_sync ((CamelDataWrapper *) message, stream, cancellable, error)) {
 		g_object_unref (message);
 		g_object_unref (stream);
 		goto done;
@@ -185,7 +185,7 @@ ews_entry_play_append (CamelOfflineJournal *journal, CamelEwsJournalEntry *entry
 		info = camel_message_info_new (NULL);
 	}
 
-	success = camel_folder_append_message (folder, message, info, NULL, error);
+	success = camel_folder_append_message_sync (folder, message, info, NULL, cancellable, error);
 	camel_message_info_free (info);
 	g_object_unref (message);
 
@@ -198,7 +198,7 @@ done:
 }
 
 static gint
-ews_entry_play_transfer (CamelOfflineJournal *journal, CamelEwsJournalEntry *entry, GError **error)
+ews_entry_play_transfer (CamelOfflineJournal *journal, CamelEwsJournalEntry *entry, GCancellable *cancellable, GError **error)
 {
 	CamelEwsFolder *ews_folder = (CamelEwsFolder *) journal->folder;
 	CamelFolder *folder = journal->folder;
@@ -217,11 +217,11 @@ ews_entry_play_transfer (CamelOfflineJournal *journal, CamelEwsJournalEntry *ent
 	}
 
 	name = camel_ews_store_folder_lookup ((CamelEwsStore *) parent_store, entry->source_container);
-	if (name && (src = camel_store_get_folder (parent_store, name, 0, error))) {
+	if (name && (src = camel_store_get_folder_sync (parent_store, name, 0, cancellable, error))) {
 		uids = g_ptr_array_sized_new (1);
 		g_ptr_array_add (uids, entry->original_uid);
 
-		if (camel_folder_transfer_messages_to (src, uids, folder, &xuids, FALSE, error)) {
+		if (camel_folder_transfer_messages_to_sync (src, uids, folder, FALSE, &xuids, cancellable, error)) {
 			real = (CamelEwsMessageInfo *) camel_folder_summary_uid (folder->summary, xuids->pdata[0]);
 
 			/* transfer all the system flags, user flags/tags, etc */
@@ -257,15 +257,15 @@ ews_entry_play_transfer (CamelOfflineJournal *journal, CamelEwsJournalEntry *ent
 }
 
 static gint
-ews_entry_play (CamelOfflineJournal *journal, CamelDListNode *entry, GError **error)
+ews_entry_play (CamelOfflineJournal *journal, CamelDListNode *entry, GCancellable *cancellable, GError **error)
 {
 	CamelEwsJournalEntry *ews_entry = (CamelEwsJournalEntry *) entry;
 
 	switch (ews_entry->type) {
 	case CAMEL_EWS_JOURNAL_ENTRY_APPEND:
-		return ews_entry_play_append (journal, ews_entry, error);
+		return ews_entry_play_append (journal, ews_entry, cancellable, error);
 	case CAMEL_EWS_JOURNAL_ENTRY_TRANSFER:
-		return ews_entry_play_transfer (journal, ews_entry, error);
+		return ews_entry_play_transfer (journal, ews_entry, cancellable, error);
 	default:
 		g_assert_not_reached ();
 		return -1;
@@ -287,7 +287,7 @@ camel_ews_journal_new (CamelEwsFolder *folder, const gchar *filename)
 
 static gboolean
 update_cache (CamelEwsJournal *ews_journal, CamelMimeMessage *message,
-	      const CamelMessageInfo *mi, gchar **updated_uid, GError **error)
+	      const CamelMessageInfo *mi, gchar **updated_uid, GCancellable *cancellable, GError **error)
 {
 	CamelOfflineJournal *journal = (CamelOfflineJournal *) ews_journal;
 	CamelEwsFolder *ews_folder = (CamelEwsFolder *) journal->folder;
@@ -313,9 +313,9 @@ update_cache (CamelEwsJournal *ews_journal, CamelMimeMessage *message,
 		return FALSE;
 	}
 
-	if (camel_data_wrapper_write_to_stream (
-		(CamelDataWrapper *) message, cache, error) == -1
-	    || camel_stream_flush (cache, error) == -1) {
+	if (camel_data_wrapper_write_to_stream_sync (
+		(CamelDataWrapper *) message, cache, cancellable, error) == -1
+	    || camel_stream_flush (cache, cancellable, error) == -1) {
 		g_prefix_error (
 			error, _("Cannot append message in offline mode: "));
 		camel_data_cache_remove (ews_folder->cache, "cache", uid, NULL);
@@ -345,13 +345,13 @@ update_cache (CamelEwsJournal *ews_journal, CamelMimeMessage *message,
 
 gboolean
 camel_ews_journal_append (CamelEwsJournal *ews_journal, CamelMimeMessage *message,
-				const CamelMessageInfo *mi, gchar **appended_uid, GError **error)
+				const CamelMessageInfo *mi, gchar **appended_uid, GCancellable *cancellable, GError **error)
 {
 	CamelOfflineJournal *journal = (CamelOfflineJournal *) ews_journal;
 	CamelEwsJournalEntry *entry;
 	gchar *uid;
 
-	if (!update_cache (ews_journal, message, mi, &uid, error))
+	if (!update_cache (ews_journal, message, mi, &uid, cancellable, error))
 		return FALSE;
 
 	entry = g_new (CamelEwsJournalEntry, 1);
@@ -370,7 +370,7 @@ gboolean
 camel_ews_journal_transfer (CamelEwsJournal *ews_journal, CamelEwsFolder *source_folder,
 				  CamelMimeMessage *message,  const CamelMessageInfo *mi,
 				  const gchar *original_uid, gchar **transferred_uid,
-				  GError **error)
+				  GCancellable *cancellable, GError **error)
 {
 	CamelOfflineJournal *journal = (CamelOfflineJournal *) ews_journal;
 	CamelEwsStore *ews_store;
@@ -381,7 +381,7 @@ camel_ews_journal_transfer (CamelEwsJournal *ews_journal, CamelEwsFolder *source
 	parent_store = camel_folder_get_parent_store (journal->folder);
 	ews_store = CAMEL_EWS_STORE (parent_store);
 
-	if (!update_cache (ews_journal, message, mi, &uid, error))
+	if (!update_cache (ews_journal, message, mi, &uid, cancellable, error))
 		return FALSE;
 
 	entry = g_new (CamelEwsJournalEntry, 1);

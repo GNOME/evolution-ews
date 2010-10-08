@@ -77,7 +77,7 @@ G_DEFINE_TYPE (CamelEwsStore, camel_ews_store, CAMEL_TYPE_OFFLINE_STORE)
 static gboolean
 ews_store_construct (CamelService *service, CamelSession *session,
 			   CamelProvider *provider, CamelURL *url,
-			   GError **error)
+			   GCancellable *cancellable, GError **error)
 {
 	d(printf ("\nin ews store constrcut\n"));
 
@@ -99,7 +99,7 @@ ews_compare_folder_name (gconstpointer a, gconstpointer b)
 }
 
 static gboolean
-ews_connect (CamelService *service, GError **error)
+ews_connect_sync (CamelService *service, GCancellable *cancellable, GError **error)
 {
 	d(printf("in ews store connect\n"));
 
@@ -107,7 +107,7 @@ ews_connect (CamelService *service, GError **error)
 }
 
 static gboolean
-ews_disconnect (CamelService *service, gboolean clean, GError **error)
+ews_disconnect_sync (CamelService *service, gboolean clean, GCancellable *cancellable, GError **error)
 {
 	d(printf("in ews store disconnect\n"));
 
@@ -115,7 +115,7 @@ ews_disconnect (CamelService *service, gboolean clean, GError **error)
 }
 
 static  GList*
-ews_store_query_auth_types (CamelService *service, GError **error)
+ews_store_query_auth_types_sync (CamelService *service, GCancellable *cancellable, GError **error)
 {
 	GList *auth_types = NULL;
 
@@ -125,45 +125,48 @@ ews_store_query_auth_types (CamelService *service, GError **error)
 }
 
 static CamelFolder *
-ews_get_folder (CamelStore *store, const gchar *folder_name, guint32 flags, GError **error)
+ews_get_folder_sync (CamelStore *store, const gchar *folder_name, guint32 flags, GCancellable *cancellable, GError **error)
 {
 	return NULL;
 }
 
 gboolean
-ews_store_reload_folder (CamelEwsStore *ews_store, CamelFolder *folder, guint32 flags, GError **error)
+ews_store_reload_folder (CamelEwsStore *ews_store, CamelFolder *folder, guint32 flags, GCancellable *cancellable, GError **error)
 {
 	return TRUE;
 }
 
 static CamelFolderInfo *
-ews_get_folder_info (CamelStore *store, const gchar *top, guint32 flags, GError **error)
+ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, GCancellable *cancellable, GError **error)
 {
 	return NULL;
 }
 
 
 static CamelFolderInfo*
-ews_create_folder(CamelStore *store,
+ews_create_folder_sync (CamelStore *store,
 		const gchar *parent_name,
 		const gchar *folder_name,
+		GCancellable *cancellable,
 		GError **error)
 {
 	return NULL;
 }
 
 static gboolean
-ews_delete_folder(CamelStore *store,
-				   const gchar *folder_name,
-				   GError **error)
+ews_delete_folder_sync	(CamelStore *store,
+			 const gchar *folder_name,
+			 GCancellable *cancellable,
+			 GError **error)
 {
 	return TRUE;
 }
 
 static gboolean
-ews_rename_folder(CamelStore *store,
+ews_rename_folder_sync	(CamelStore *store,
 			const gchar *old_name,
 			const gchar *new_name,
+			GCancellable *cancellable,
 			GError **error)
 {
 	g_print ("Rename not implemented yet");
@@ -172,7 +175,7 @@ ews_rename_folder(CamelStore *store,
 }
 
 gchar *
-ews_get_name(CamelService *service, gboolean brief)
+ews_get_name (CamelService *service, gboolean brief)
 {
 	if (brief)
 		return g_strdup_printf(_("Exchange server %s"), service->url->host);
@@ -194,13 +197,13 @@ storage_path_lookup (CamelEwsStorePrivate *priv)
 }
 
 static CamelFolder *
-ews_get_trash (CamelStore *store, GError **error)
+ews_get_trash_folder_sync (CamelStore *store, GCancellable *cancellable, GError **error)
 {
 	return NULL;
 }
 
 static gboolean
-ews_can_refresh_folder (CamelStore *store, CamelFolderInfo *info, GError **error)
+ews_can_refresh_folder (CamelStore *store, CamelFolderInfo *info, GCancellable *cancellable, GError **error)
 {
 	return TRUE;
 }
@@ -210,7 +213,7 @@ ews_can_refresh_folder (CamelStore *store, CamelFolderInfo *info, GError **error
  * online. Based on an equivalient function in IMAP
  */
 gboolean
-camel_ews_store_connected (CamelEwsStore *store, GError **error)
+camel_ews_store_connected (CamelEwsStore *store, GCancellable *cancellable, GError **error)
 {
 	return TRUE;
 }
@@ -281,21 +284,21 @@ camel_ews_store_class_init (CamelEwsStoreClass *class)
 
 	service_class = CAMEL_SERVICE_CLASS (class);
 	service_class->construct = ews_store_construct;
-	service_class->query_auth_types = ews_store_query_auth_types;
+	service_class->query_auth_types_sync = ews_store_query_auth_types_sync;
 	service_class->get_name = ews_get_name;
-	service_class->connect = ews_connect;
-	service_class->disconnect = ews_disconnect;
+	service_class->connect_sync = ews_connect_sync;
+	service_class->disconnect_sync = ews_disconnect_sync;
 
 	store_class = CAMEL_STORE_CLASS (class);
 	store_class->hash_folder_name = ews_hash_folder_name;
 	store_class->compare_folder_name = ews_compare_folder_name;
-	store_class->get_folder = ews_get_folder;
-	store_class->create_folder = ews_create_folder;
-	store_class->delete_folder = ews_delete_folder;
-	store_class->rename_folder = ews_rename_folder;
-	store_class->get_folder_info = ews_get_folder_info;
+	store_class->get_folder_sync = ews_get_folder_sync;
+	store_class->create_folder_sync = ews_create_folder_sync;
+	store_class->delete_folder_sync = ews_delete_folder_sync;
+	store_class->rename_folder_sync = ews_rename_folder_sync;
+	store_class->get_folder_info_sync = ews_get_folder_info_sync;
 	store_class->free_folder_info = camel_store_free_folder_info_full;
-	store_class->get_trash = ews_get_trash;
+	store_class->get_trash_folder_sync = ews_get_trash_folder_sync;
 	store_class->can_refresh_folder = ews_can_refresh_folder;
 }
 
