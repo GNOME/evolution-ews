@@ -1,6 +1,3 @@
-#noinst_PROGRAMS = create-account
-noinst_PROGRAMS = soap-test ews-test
-
 SERVERS_EWS_CPPFLAGS= \
 	-DG_LOG_DOMAIN=\"libeews\"		\
 	-I$(top_srcdir)					\
@@ -9,28 +6,6 @@ SERVERS_EWS_CPPFLAGS= \
 	$(EVOLUTION_DATA_SERVER_CFLAGS)					\
 	$(LIBEDATASERVER_CFLAGS)			\
 	$(E_DATA_SERVER_CFLAGS)
-
-soap_test_CPPFLAGS = $(SERVERS_EWS_CPPFLAGS)
-soap_test_SOURCES = soap-test.c
-soap_test_LDADD = 						\
-	$(SOUP_LIBS)						\
-	libeews-1.2.la					\
-	$(E_DATA_SERVER_LIBS)
-
-ews_test_CPPFLAGS = $(SERVERS_EWS_CPPFLAGS)
-ews_test_SOURCES = ews-test.c
-ews_test_LDADD = 						\
-	$(SOUP_LIBS)						\
-	libeews-1.2.la					\
-	$(E_DATA_SERVER_LIBS)				\
-	$(GNOME_PLATFORM_LIBS)
-
-build-timestamp.h : $(top_builddir)/config.h
-	echo "const char *build_timestamp = \"Evolution-Data-Server-@BASE_VERSION@-`date +%F`\";" > $@
-
-BUILT_SOURCES = build-timestamp.h
-NODIST_FILES = build-timestamp.h
-CLEANFILES = build-timestamp.h
 
 lib_LTLIBRARIES = libeews-1.2.la
 
@@ -50,13 +25,7 @@ libeews_1_2_la_SOURCES =		\
 	build-timestamp.h		\
 	e-ews-connection.c		\
 	e-ews-connection.h		\
-	e-ews-context.c			\
-	e-ews-context.h			\
-	e-ews-http-utils.h		\
 	e-ews-message.c			\
-	e-ews-operation.c		\
-	e-ews-operation.h		\
-	e-ews-types.h			\
 	soup-soap-message.c		\
 	soup-soap-response.c
 

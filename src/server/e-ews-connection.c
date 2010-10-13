@@ -162,7 +162,7 @@ reauthenticate (EEwsConnection *cnc)
 	return status;
 
 }
-#endif
+
 static gboolean
 e_ews_connection_response_parse_status_and_description (SoupSoapResponse *response, gint *status, gchar **description)
 {
@@ -186,6 +186,7 @@ e_ews_connection_response_parse_status_and_description (SoupSoapResponse *respon
 
 	return TRUE;
 }
+#endif
 
 EEwsConnectionStatus
 e_ews_connection_parse_response_status (SoupSoapResponse *response)
@@ -503,8 +504,11 @@ e_ews_connection_new_with_error_handler (const gchar *uri, const gchar *username
 
 	/* not found, so create a new connection */
 	cnc = g_object_new (E_TYPE_EWS_CONNECTION, NULL);
-	cnc->priv->username = username;
-	cnc->priv->password = password;
+	
+	g_free (cnc->priv->username);
+	g_free (cnc->priv->password);
+	cnc->priv->username = g_strdup (username);
+	cnc->priv->password = g_strdup (password);
 
 	g_signal_connect (cnc->priv->soup_session, "authenticate",
 			  G_CALLBACK(ews_connection_authenticate), &cnc);
@@ -568,9 +572,9 @@ e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const g
 	xmlOutputBuffer *buf;
 	EEwsConnection *cnc;
 
-	g_return_val_if_fail (*username != NULL, NULL);
-	g_return_val_if_fail (*password != NULL, NULL);
-	g_return_val_if_fail (*email != NULL, NULL);
+	g_return_val_if_fail (username != NULL, NULL);
+	g_return_val_if_fail (password != NULL, NULL);
+	g_return_val_if_fail (email != NULL, NULL);
 
 	domain = strchr(email, '@');
 	if (!(domain && *domain)) 
