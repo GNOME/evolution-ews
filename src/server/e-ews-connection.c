@@ -29,11 +29,10 @@
 #include <glib/gi18n-lib.h>
 #include <libedataserver/e-proxy.h>
 #include <libsoup/soup.h>
-#include "soup-soap-message.h"
+#include <libedataserver/e-soap-message.h>
 #include "e-ews-connection.h"
 #include "e-ews-message.h"
 /* #include "e-ews-filter.h" */
-#include "build-timestamp.h"
 
 /* For soup sync session timeout */
 #define EWS_SOUP_SESSION_TIMEOUT 30
@@ -99,8 +98,8 @@ static EEwsConnectionStatus
 reauthenticate (EEwsConnection *cnc)
 {
 	EEwsConnectionPrivate  *priv;
-	SoupSoapMessage *msg;
-	SoupSoapResponse *response;
+	ESoapMessage *msg;
+	ESoapResponse *response;
 	SoupSoapParameter *param;
 	EEwsConnectionStatus status = -1;
 	gchar *session = NULL;
@@ -131,12 +130,12 @@ reauthenticate (EEwsConnection *cnc)
 	}
 	/* build the SOAP message */
 	msg = e_ews_message_new_with_header (priv->uri, "loginRequest");
-	soup_soap_message_start_element (msg, "auth", "types", NULL);
-	soup_soap_message_add_attribute (msg, "type", "types:PlainText", "xsi",
+	e_soap_message_start_element (msg, "auth", "types", NULL);
+	e_soap_message_add_attribute (msg, "type", "types:PlainText", "xsi",
 					 "http://www.w3.org/2001/XMLSchema-instance");
 	e_ews_message_write_string_parameter (msg, "username", "types", priv->username);
 	e_ews_message_write_string_parameter (msg, "password", "types", priv->password);
-	soup_soap_message_end_element (msg);
+	e_soap_message_end_element (msg);
 	e_ews_message_write_footer (msg);
 
 	/* send message to server */
@@ -145,9 +144,9 @@ reauthenticate (EEwsConnection *cnc)
 		status = e_ews_connection_parse_response_status (response);
 
 	if (status == E_EWS_CONNECTION_STATUS_OK) {
-		param = soup_soap_response_get_first_parameter_by_name (response, "session");
+		param = e_soap_response_get_first_parameter_by_name (response, "session");
 		if (param)
-			session = soup_soap_parameter_get_string_value (param);
+			session = e_soap_parameter_get_string_value (param);
 
 	}
 
@@ -164,44 +163,44 @@ reauthenticate (EEwsConnection *cnc)
 }
 
 static gboolean
-e_ews_connection_response_parse_status_and_description (SoupSoapResponse *response, gint *status, gchar **description)
+e_ews_connection_response_parse_status_and_description (ESoapResponse *response, gint *status, gchar **description)
 {
 	SoupSoapParameter *param, *subparam;
 
-	param = soup_soap_response_get_first_parameter_by_name (response, "status");
+	param = e_soap_response_get_first_parameter_by_name (response, "status");
 	if (!param)
 		return FALSE;
 
-	subparam = soup_soap_parameter_get_first_child_by_name (param, "code");
+	subparam = e_soap_parameter_get_first_child_by_name (param, "code");
 	if (!subparam)
 		return FALSE;
 
-	*status = soup_soap_parameter_get_int_value (subparam);
+	*status = e_soap_parameter_get_int_value (subparam);
 
-	subparam = soup_soap_parameter_get_first_child_by_name (param, "description");
+	subparam = e_soap_parameter_get_first_child_by_name (param, "description");
 	if (!subparam)
 		return FALSE;
 
-	*description =  soup_soap_parameter_get_string_value (subparam);
+	*description =  e_soap_parameter_get_string_value (subparam);
 
 	return TRUE;
 }
 #endif
 
 EEwsConnectionStatus
-e_ews_connection_parse_response_status (SoupSoapResponse *response)
+e_ews_connection_parse_response_status (ESoapResponse *response)
 {
-	SoupSoapParameter *param, *subparam;
+	ESoapParameter *param, *subparam;
 
-	param = soup_soap_response_get_first_parameter_by_name (response, "status");
+	param = e_soap_response_get_first_parameter_by_name (response, "status");
 	if (!param)
 		return E_EWS_CONNECTION_STATUS_UNKNOWN;
 
-	subparam = soup_soap_parameter_get_first_child_by_name (param, "code");
+	subparam = e_soap_parameter_get_first_child_by_name (param, "code");
 	if (!subparam)
 		return E_EWS_CONNECTION_STATUS_UNKNOWN;
 
-	switch (soup_soap_parameter_get_int_value (subparam)) {
+	switch (e_soap_parameter_get_int_value (subparam)) {
 	case 0 : return E_EWS_CONNECTION_STATUS_OK;
 	case 59905 : return E_EWS_CONNECTION_STATUS_BAD_PARAMETER;
 	case 53505 : return E_EWS_CONNECTION_STATUS_UNKNOWN_USER;
@@ -250,8 +249,8 @@ e_ews_connection_get_error_message (EEwsConnectionStatus status)
 static EEwsConnectionStatus
 logout (EEwsConnection *cnc)
 {
-	SoupSoapMessage *msg;
-	SoupSoapResponse *response;
+	ESoapMessage *msg;
+	ESoapResponse *response;
 	EEwsConnectionStatus status;
 
 	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), E_EWS_CONNECTION_STATUS_INVALID_OBJECT);
@@ -663,14 +662,14 @@ failed:
 	return asurl;
 }
 
-SoupSoapResponse *
-e_ews_connection_send_message (EEwsConnection *cnc, SoupSoapMessage *msg)
+ESoapResponse *
+e_ews_connection_send_message (EEwsConnection *cnc, ESoapMessage *msg)
 {
-	SoupSoapResponse *response;
+	ESoapResponse *response;
 	guint status;
 
 	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
-	g_return_val_if_fail (SOUP_IS_SOAP_MESSAGE (msg), NULL);
+	g_return_val_if_fail (E_IS_SOAP_MESSAGE (msg), NULL);
 
 	g_mutex_lock (cnc->priv->msg_lock);
 	status = soup_session_send_message (cnc->priv->soup_session, SOUP_MESSAGE (msg));
@@ -689,14 +688,14 @@ e_ews_connection_send_message (EEwsConnection *cnc, SoupSoapMessage *msg)
 	}
 
 	/* process response */
-	response = soup_soap_message_parse_response (msg);
+	response = e_soap_message_parse_response (msg);
 
 	if (response && g_getenv ("EWS_DEBUG")) {
 
 		/* README: The stdout can be replaced with Evolution's
 		Logging framework also */
 
-		soup_soap_response_dump_response (response, stdout);
+		e_soap_response_dump_response (response, stdout);
 		g_print ("\n------\n");
 	}
 

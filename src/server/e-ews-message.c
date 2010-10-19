@@ -26,12 +26,12 @@
 #include <libsoup/soup-uri.h>
 #include "e-ews-message.h"
 
-SoupSoapMessage *
+ESoapMessage *
 e_ews_message_new_with_header (const gchar *uri, const gchar *method_name)
 {
-	SoupSoapMessage *msg;
+	ESoapMessage *msg;
 
-	msg = soup_soap_message_new (SOUP_METHOD_POST, uri, FALSE, NULL, NULL, NULL);
+	msg = e_soap_message_new (SOUP_METHOD_POST, uri, FALSE, NULL, NULL, NULL);
 	if (!msg) {
 		g_warning (G_STRLOC ": Could not build SOAP message");
 		return NULL;
@@ -42,63 +42,63 @@ e_ews_message_new_with_header (const gchar *uri, const gchar *method_name)
 				     "Evolution/" VERSION);
 	soup_message_headers_append (SOUP_MESSAGE (msg)->request_headers,"Connection",  "Keep-Alive");
 
-	soup_soap_message_start_envelope (msg);
+	e_soap_message_start_envelope (msg);
 	
-	soup_soap_message_start_body(msg);
-	soup_soap_message_add_namespace(msg, "types", 
+	e_soap_message_start_body(msg);
+	e_soap_message_add_namespace(msg, "types", 
 				       "http://schemas.microsoft.com/exchange/services/2006/types");
-	soup_soap_message_start_element(msg, method_name, NULL, NULL);
-	soup_soap_message_set_default_namespace(msg,
+	e_soap_message_start_element(msg, method_name, NULL, NULL);
+	e_soap_message_set_default_namespace(msg,
 						"http://schemas.microsoft.com/exchange/services/2006/messages");
 	return msg;
 }
 
 void
-e_ews_message_write_string_parameter (SoupSoapMessage *msg, const gchar *name, const gchar *prefix, const gchar *value)
+e_ews_message_write_string_parameter (ESoapMessage *msg, const gchar *name, const gchar *prefix, const gchar *value)
 {
-	soup_soap_message_start_element (msg, name, prefix, NULL);
-	soup_soap_message_write_string (msg, value);
-	soup_soap_message_end_element (msg);
+	e_soap_message_start_element (msg, name, prefix, NULL);
+	e_soap_message_write_string (msg, value);
+	e_soap_message_end_element (msg);
 }
 
 void
-e_ews_message_write_string_parameter_with_attribute (SoupSoapMessage *msg,
+e_ews_message_write_string_parameter_with_attribute (ESoapMessage *msg,
 						    const gchar *name,
 						    const gchar *prefix,
 						    const gchar *value,
 						    const gchar *attribute_name,
 						    const gchar *attribute_value)
 {
-	soup_soap_message_start_element (msg, name, prefix, NULL);
-	soup_soap_message_add_attribute (msg, attribute_name, attribute_value, NULL, NULL);
-	soup_soap_message_write_string (msg, value);
-	soup_soap_message_end_element (msg);
+	e_soap_message_start_element (msg, name, prefix, NULL);
+	e_soap_message_add_attribute (msg, attribute_name, attribute_value, NULL, NULL);
+	e_soap_message_write_string (msg, value);
+	e_soap_message_end_element (msg);
 }
 
 void
-e_ews_message_write_base64_parameter (SoupSoapMessage *msg, const gchar *name, const gchar *prefix, const gchar *value)
+e_ews_message_write_base64_parameter (ESoapMessage *msg, const gchar *name, const gchar *prefix, const gchar *value)
 {
-	soup_soap_message_start_element (msg, name, prefix, NULL);
-	soup_soap_message_write_base64 (msg, value, strlen (value));
-	soup_soap_message_end_element (msg);
+	e_soap_message_start_element (msg, name, prefix, NULL);
+	e_soap_message_write_base64 (msg, value, strlen (value));
+	e_soap_message_end_element (msg);
 }
 
 void
-e_ews_message_write_int_parameter (SoupSoapMessage *msg, const gchar *name, const gchar *prefix, glong value)
+e_ews_message_write_int_parameter (ESoapMessage *msg, const gchar *name, const gchar *prefix, glong value)
 {
-	soup_soap_message_start_element (msg, name, prefix, NULL);
-	soup_soap_message_write_int (msg, value);
-	soup_soap_message_end_element (msg);
+	e_soap_message_start_element (msg, name, prefix, NULL);
+	e_soap_message_write_int (msg, value);
+	e_soap_message_end_element (msg);
 }
 
 void
-e_ews_message_write_footer (SoupSoapMessage *msg)
+e_ews_message_write_footer (ESoapMessage *msg)
 {
-	soup_soap_message_end_element (msg);
-	soup_soap_message_end_body (msg);
-	soup_soap_message_end_envelope (msg);
+	e_soap_message_end_element (msg);
+	e_soap_message_end_body (msg);
+	e_soap_message_end_envelope (msg);
 
-	soup_soap_message_persist (msg);
+	e_soap_message_persist (msg);
 
 	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) == 1)) {
 		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->request_body));
@@ -112,7 +112,7 @@ e_ews_message_write_footer (SoupSoapMessage *msg)
 }
 
 void
-e_ews_message_write_response (SoupSoapMessage *msg)
+e_ews_message_write_response (ESoapMessage *msg)
 {
 	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) == 1)){
 		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->response_body));

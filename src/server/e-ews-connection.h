@@ -25,7 +25,7 @@
 #define E_EWS_CONNECTION_H
 
 #include <glib-object.h>
-#include "soup-soap-message.h"
+#include <libedataserver/e-soap-message.h>
 /* #include "e-ews-proxy.h" */
 /* #include "e-ews-container.h" */
 /* #include "e-ews-item.h" */
@@ -98,8 +98,8 @@ typedef enum {
 #define E_EWS_CURSOR_POSITION_START "start"
 #define E_EWS_CURSOR_POSITION_END "end"
 
-SoupSoapResponse   *e_ews_connection_send_message (EEwsConnection *cnc, SoupSoapMessage *msg);
-EEwsConnectionStatus e_ews_connection_parse_response_status (SoupSoapResponse *response);
+ESoapResponse   *e_ews_connection_send_message (EEwsConnection *cnc, ESoapMessage *msg);
+EEwsConnectionStatus e_ews_connection_parse_response_status (ESoapResponse *response);
 const gchar         *e_ews_connection_get_error_message (EEwsConnectionStatus status);
 
 gchar               *e_ews_connection_format_date_string (const gchar *dtstring);

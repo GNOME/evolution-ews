@@ -22,12 +22,9 @@ libeews_1_2_la_CPPFLAGS = \
 	$(DEBUG_CFLAGS)
 
 libeews_1_2_la_SOURCES =		\
-	build-timestamp.h		\
 	e-ews-connection.c		\
 	e-ews-connection.h		\
-	e-ews-message.c			\
-	soup-soap-message.c		\
-	soup-soap-response.c
+	e-ews-message.c			
 
 libeews_1_2_la_LIBADD =						\
 	$(LIBEBACKEND_LIBS)						\
@@ -42,9 +39,7 @@ libeewsincludedir = $(privincludedir)/ews
 
 libeewsinclude_HEADERS =		\
         e-ews-connection.h		\
-	e-ews-message.h			\
-	soup-soap-message.h		\
-	soup-soap-response.h
+	e-ews-message.h			
 
 %-$(API_VERSION).pc: %.pc
 	 cp $< $@

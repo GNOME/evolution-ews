@@ -24,27 +24,27 @@
 #ifndef E_EWS_MESSAGE_H
 #define E_EWS_MESSAGE_H
 
-#include "soup-soap-message.h"
+#include <libedataserver/e-soap-message.h>
 
 G_BEGIN_DECLS
 
-SoupSoapMessage *e_ews_message_new_with_header (const gchar *uri, const gchar *method_name);
-void             e_ews_message_write_string_parameter (SoupSoapMessage *msg, const gchar *name,
+ESoapMessage *e_ews_message_new_with_header (const gchar *uri, const gchar *method_name);
+void             e_ews_message_write_string_parameter (ESoapMessage *msg, const gchar *name,
 						      const gchar *prefix, const gchar *value);
-void             e_ews_message_write_string_parameter_with_attribute (SoupSoapMessage *msg,
+void             e_ews_message_write_string_parameter_with_attribute (ESoapMessage *msg,
 								     const gchar *name,
 								     const gchar *prefix,
 								     const gchar *value,
 								     const gchar *attrubute_name,
 								     const gchar *attribute_value);
-void             e_ews_message_write_base64_parameter (SoupSoapMessage *msg,
+void             e_ews_message_write_base64_parameter (ESoapMessage *msg,
 						      const gchar *name,
 						      const gchar *prefix,
 						      const gchar *value);
-void e_ews_message_write_int_parameter (SoupSoapMessage *msg, const gchar *name, const gchar *prefix, glong value);
+void e_ews_message_write_int_parameter (ESoapMessage *msg, const gchar *name, const gchar *prefix, glong value);
 
-void             e_ews_message_write_footer (SoupSoapMessage *msg);
-void		 e_ews_message_write_response (SoupSoapMessage *msg);
+void             e_ews_message_write_footer (ESoapMessage *msg);
+void		 e_ews_message_write_response (ESoapMessage *msg);
 
 G_END_DECLS
 
