@@ -16,8 +16,8 @@ noinst_PROGRAMS = $(TEST_PROGS)
 TESTS = testews
 check_PROGRAMS = testews
 testews_SOURCES = \
-		test_libews.c \
-		test_connection.c
+		test-libews.c \
+		test-connection.c
 #Fixme: Ugly. Kill me later
 testews_LDADD = -lglib-2.0 $(libeews)
 testews_CPPFLAGS = $(SERVERS_EWS_CPPFLAGS) -I$(top_srcdir)/src/server/
