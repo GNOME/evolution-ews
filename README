@@ -1,1 +1,136 @@
-http://www.go-evolution.org/
+========================
+
+1. BUILD
+
+   $ ./autogen.sh
+   $ make
+   $ make install
+
+========================
+
+2. Test Suite
+
+Pre-requisites to launch the test suite.
+Export the following environmental variables for your test suite to run.
+
+EWS_TEST_USERNAME
+EWS_TEST_PASSWORD
+EWS_TEST_EMAIL
+
+   $ make check
+
+=========================
+
+3. Autodiscover reference
+
+The Autodiscover service provides the configuration information necessary to 
+create a connection to an Exchange server. The Autodiscover service provides 
+a mechanism that allows you to use “plain old XML” (POX) messages — that is, 
+messages that consist solely of XML payloads without any enclosing SOAP 
+envelopes — to locate the settings that a client application must have in 
+order to connect to Exchange.
+
+Currently the test suite uses autodiscovery to fetch the url to connect to,
+using your username and email provided.
+
+Reference:
+http://msdn.microsoft.com/en-us/library/aa581522.aspx
+
+The ASUrl (POX) element contains the url. Use this for all subsequent requests
+to your Exchange server.
+
+A typical ASUrl looks like this,
+https://server_ip/EWS/Exchange.asmx
+
+==========================
+
+4. URLs
+
+  -> Development overview - http://msdn.microsoft.com/en-us/library/cc535017%28v=EXCHG.80%29.aspx
+
+  -> Autodiscover reference - http://msdn.microsoft.com/en-us/library/aa581522.aspx
+
+  -> EWS XML Elements - http://msdn.microsoft.com/en-us/library/aa580675%28v=EXCHG.80%29.aspx
+
+===========================
+
+5. Address book
+
+Fetching Global address list
+
+Use OAB (Offline Address Book) for caching the GAL locally into Evolution.
+
+While caching happens in the background, until the cache is setup, use 
+Resolve Names.
+
+Resolve names operation
+   http://msdn.microsoft.com/en-us/library/aa563518(v=EXCHG.80).aspx
+
+Unresolved Entry
+   http://msdn.microsoft.com/en-us/library/aa581054(v=EXCHG.80).aspx
+
+============================
+
+6. Fetching Public folders
+
+Needs an additional header not mentioned in the documentation
+Include the following header for Exchange 2007, 
+<soap:Header>
+  <t:RequestServerVersion Version="Exchange2007_SP1"/>
+</soap:Header>
+
+What's the equivalent for Exchange 2010? No server to test as yet.
+
+=============================
+ 
+7. Ideas yet to research on
+
+== Mailer ==
+
+Following the IMAPX backend, we could make EWS asynchronous in the same manner
+prioritizing the client requests.
+
+Separate out the prioritizing client requests and make it common to all 
+providers.
+
+Is pipe-ling requests possible?
+
+
+
+== Calendar ==
+
+Make the operations similar to mailer. Handle all the operations Offline and 
+later sync it with server.
+
+Handle all the offline operations in a single class, say CalBackendOffline.
+Cache needs to be extended to be able to give the list of un-syncronized 
+(local->server) items. We could handle the error messages for the 
+un-synchronized calendar items (eg: meeting created) by optionally displaying
+an error dialog and also providing a visual cue in the form of an icon.
+
+The error can also be logged per event. Eg: Opening the meeting can show the 
+actual error in the meeting editor in a non-intrusive manner. This very similar
+to how mailer handles the un-sent mails in OutBox showing the error messages.
+
+Improve FreeBusy performance by fetching free/busy information for all users at
+a single stretch if the server supports it. FreeBusy requests should be 
+cancellable. Provide EDS ECal apis for the same.
+
+
+== Address book ==
+
+Ensure the auto-completion performance doesn't fade while caching the contacts
+or fetching deltas.
+
+other improvement areas?
+
+
+== Single Connection (to be analyzed) ==
+
+Are multiple connections allowed on exchange servers or is there any limit ?
+Since address-book, calendar, mailer are run as separate processes we would 
+require three connections if connections are not shared.
+
+If we want to use a single connection, we might need to write ews connection 
+layer as a separate process and let mailer,e-address-book-factory, 
+e-calendar-factory send the requests to it.
