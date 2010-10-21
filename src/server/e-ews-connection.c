@@ -464,7 +464,7 @@ static void ews_connection_authenticate(SoupSession *sess, SoupMessage *msg,
 					SoupAuth *auth, gboolean retrying, 
 					gpointer data)
 {
-	EEwsConnection *cnc = *(EEwsConnection **)data;
+	EEwsConnection *cnc = data;
 	g_print("%s %s : \n\t username : %s\n\t pass : %s\n", G_STRLOC, G_STRFUNC,
 		cnc->priv->username, cnc->priv->password);
 	if (retrying) {
@@ -510,7 +510,7 @@ e_ews_connection_new_with_error_handler (const gchar *uri, const gchar *username
 	cnc->priv->password = g_strdup (password);
 
 	g_signal_connect (cnc->priv->soup_session, "authenticate",
-			  G_CALLBACK(ews_connection_authenticate), &cnc);
+			  G_CALLBACK(ews_connection_authenticate), cnc);
 
 	/*TODO :Issue a lightweight dummy call to check authentication - optional*/
 
@@ -562,7 +562,6 @@ e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const g
 	gchar *url;
 	gchar *domain;
 	gchar *asurl = NULL;
-	SoupSession *sess;
 	SoupMessage *msg;
 	xmlDoc *doc;
 	xmlNode *node, *child;
@@ -580,14 +579,10 @@ e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const g
 		return NULL;
 	domain++;
 
-	url = g_strdup_printf("https://autodiscover.%s/autodiscover/autodiscover.xml", domain);
+	url = g_strdup_printf("https://%s/autodiscover/autodiscover.xml", domain);
 
 	/*Fixme : We should be using CNC - Sleepy to fix this crash for now*/
 	cnc = e_ews_connection_new (url, username, password);
-
-	sess = soup_session_sync_new_with_options(SOUP_SESSION_USE_NTLM, TRUE, NULL);
-	g_signal_connect (sess, "authenticate",
-			  G_CALLBACK(ews_connection_authenticate), &cnc);
 
 	msg = soup_message_new("GET", url);
 	soup_message_headers_append (msg->request_headers,
@@ -613,7 +608,17 @@ e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const g
 				 (gchar *)buf->buffer->content,
 				 buf->buffer->use);
 				 
-	status = soup_session_send_message(sess, msg);
+	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) == 1)) {
+		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->request_body));
+		/* print request's body */
+		printf ("\n The request headers");
+		printf ("\n ===================");
+		fputc ('\n', stdout);
+		fputs (SOUP_MESSAGE (msg)->request_body->data, stdout);
+		fputc ('\n', stdout);
+	}
+
+	status = soup_session_send_message (cnc->priv->soup_session, msg);
 
 	xmlOutputBufferClose (buf);
 	xmlFreeDoc (doc);
@@ -621,6 +626,17 @@ e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const g
 	if (status != 200) {
 		fprintf(stderr, "Unexpected response from server: %d\n", status);
 		goto failed;
+	}
+
+
+	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) == 1)){
+		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->response_body));
+		/* print response body */
+		printf ("\n The response headers");
+		printf ("\n =====================");
+		fputc ('\n', stdout);
+		fputs (SOUP_MESSAGE (msg)->response_body->data, stdout);
+		fputc ('\n', stdout);
 	}
 	
 	doc = xmlReadMemory (msg->response_body->data, msg->response_body->length,

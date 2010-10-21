@@ -39,8 +39,10 @@ static void con_test_create_new_connection ()
 	g_assert_cmpstr (password, !=, NULL);
 	g_assert_cmpstr (uri, !=, NULL);
 	
-	cnc = e_ews_connection_new (uri, username, password);
+	cnc = e_ews_connection_new (uri, "wrongusername", password);
 	g_assert (cnc != NULL);
+
+
 }
 
 static void
@@ -51,8 +53,6 @@ con_test_autodiscover()
 	const gchar *uri;
 	const gchar *email;
 	EEwsConnection *cnc;
-
-	g_print ("Testing Autodiscovery... \n");
 
 	util_get_login_info_from_env (&username, &password, &uri);
 	g_assert_cmpstr (username, !=, NULL);
@@ -89,11 +89,12 @@ con_test_autodiscover()
 
 void connection_tests_run ()
 {
-	con_test_autodiscover();
-	/* con_test_create_new_connection (); */
+	g_printf ("Testing Connection");
+	con_test_create_new_connection ();
 }
 
 void autodiscovery_tests_run ()
 {
 	g_printf ("Testing Autodiscovery\n");
+	con_test_autodiscover();
 }
