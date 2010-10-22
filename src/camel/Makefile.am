@@ -18,7 +18,6 @@ libcamelews_la_CPPFLAGS = \
 
 libcamelews_la_SOURCES = 			\
 	camel-ews-folder.c                \
-	camel-ews-journal.c               \
 	camel-ews-store.c                 \
 	camel-ews-summary.c               \
 	camel-ews-provider.c		\
@@ -28,7 +27,6 @@ libcamelews_la_SOURCES = 			\
 
 noinst_HEADERS =         			\
 	camel-ews-folder.h		\
-	camel-ews-journal.h		\
 	camel-ews-private.h		\
 	camel-ews-store.h			\
 	camel-ews-summary.h		\
