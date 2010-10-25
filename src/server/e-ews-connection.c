@@ -65,6 +65,13 @@ struct _EEwsConnectionPrivate {
 	EProxy *proxy;
 };
 
+enum {
+	SHUTDOWN,
+	LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL];
+
 static void
 update_soup_session_proxy_settings (EProxy *proxy, SoupSession* session,
 				    const gchar * uri)
@@ -415,6 +422,20 @@ e_ews_connection_class_init (EEwsConnectionClass *klass)
 
 	object_class->dispose = e_ews_connection_dispose;
 	object_class->finalize = e_ews_connection_finalize;
+
+	klass->shutdown = NULL;
+
+	/**
+	 * EEwsConnection::shutdown
+	 **/
+	signals[SHUTDOWN] = g_signal_new (
+		"shutdown",
+		G_OBJECT_CLASS_TYPE (klass),
+		G_SIGNAL_RUN_FIRST,
+		G_STRUCT_OFFSET (EEwsConnectionClass, shutdown),
+		NULL, NULL,
+		g_cclosure_marshal_VOID__VOID,
+		G_TYPE_NONE, 0);
 }
 
 static void
@@ -460,7 +481,7 @@ e_ews_connection_init (EEwsConnection *cnc)
 	*/
 }
 
-static void ews_connection_authenticate(SoupSession *sess, SoupMessage *msg,
+static void ews_connection_authenticate (SoupSession *sess, SoupMessage *msg,
 					SoupAuth *auth, gboolean retrying, 
 					gpointer data)
 {
@@ -678,6 +699,40 @@ failed:
 	return asurl;
 }
 
+static void
+response_parse (SoupSession *session, SoupMessage *msg, EEwsConnection *cnc)
+{
+	ESoapResponse *response;
+
+	/* process response */
+	response = e_soap_message_parse_response (msg);
+
+	if (response && g_getenv ("EWS_DEBUG")) {
+
+		/* README: The stdout can be replaced with Evolution's
+		Logging framework also */
+
+		e_soap_response_dump_response (response, stdout);
+		g_print ("\n------\n");
+	}
+
+	g_signal_emit (cnc, signals[SHUTDOWN], 0);
+}
+
+void
+e_ews_connection_queue_message (EEwsConnection *cnc, ESoapMessage *msg, SoupSessionCallback callback,
+			   gpointer user_data)
+{
+	ESoapResponse *response;
+
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
+	g_return_val_if_fail (E_IS_SOAP_MESSAGE (msg), NULL);
+
+	g_mutex_lock (cnc->priv->msg_lock);
+	soup_session_queue_message (cnc->priv->soup_session, SOUP_MESSAGE (msg), response_parse, cnc);
+	g_mutex_unlock (cnc->priv->msg_lock);
+}
+
 ESoapResponse *
 e_ews_connection_send_message (EEwsConnection *cnc, ESoapMessage *msg)
 {
@@ -716,6 +771,88 @@ e_ews_connection_send_message (EEwsConnection *cnc, ESoapMessage *msg)
 	}
 
 	return response;
+}
+
+void
+e_ews_connection_create_folder (EEwsConnection *cnc)
+{
+	ESoapMessage *msg;
+	ESoapResponse *response;
+
+	char *url = NULL;
+
+	url = g_strdup ("https://164.99.116.11/EWS/Exchange.asmx");
+	g_print ("\n The Url is:%s", url);
+
+	msg = e_ews_message_new_with_header (url, "CreateFolder");
+
+	e_soap_message_start_element (msg, "ParentFolderId", NULL, NULL);
+	e_ews_message_write_string_parameter_with_attribute (msg, "DistinguishedFolderId", "types", NULL, "Id", "msgfolderroot");
+	e_soap_message_end_element (msg);
+
+	e_soap_message_start_element (msg, "Folders", NULL, NULL);
+	e_soap_message_start_element (msg, "Folder", "types", NULL);
+	e_ews_message_write_string_parameter (msg, "DisplayName", "types", "TestBharath");
+	e_soap_message_end_element (msg);
+	e_soap_message_end_element (msg);
+
+	e_ews_message_write_footer (msg);
+	e_ews_connection_queue_message (cnc, SOUP_MESSAGE (msg), response_parse, cnc);
+}
+
+EEwsConnectionStatus
+e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc, const gchar *sync_state, GList **folder_list)
+{
+	ESoapMessage *msg;
+	ESoapResponse *response;
+        EEwsConnectionStatus status;
+	ESoapParameter *param, *subparam;
+	gchar *url = g_getenv ("EWS_TEST_URI");
+
+	if (!cnc)
+		return E_EWS_CONNECTION_STATUS_UNKNOWN;
+
+	g_return_val_if_fail (folder_list != NULL, E_EWS_CONNECTION_STATUS_UNKNOWN);
+
+	g_print ("%s %s : Start syncing", G_STRLOC, G_STRFUNC);
+	msg = e_ews_message_new_with_header (url, "SyncFolderHierarchy");
+	e_soap_message_start_element (msg, "FolderShape", NULL, NULL);
+	e_ews_message_write_string_parameter (msg, "BaseShape", "types", "AllProperties");
+	e_soap_message_end_element (msg);
+
+	if (sync_state)
+		e_ews_message_write_string_parameter (msg, "SyncState", NULL, sync_state);
+	/* Complete the footer and print the request */
+	e_ews_message_write_footer (msg);
+
+	/* Send the request. Change this to queue later */
+	response = e_ews_connection_send_message (cnc, msg);
+
+	if (!response) {
+		g_object_unref (msg);
+		return E_EWS_CONNECTION_STATUS_NO_RESPONSE;
+	}
+
+	status = e_ews_connection_parse_response_status (response);
+
+	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
+	subparam = e_soap_parameter_get_first_child_by_name (param, "SyncFolderHierarchyResponseMessage");
+	subparam = e_soap_parameter_get_first_child_by_name (subparam, "ResponseCode");
+
+	/* Positive case */
+	if (!strcmp (e_soap_parameter_get_string_value(subparam), "NoError")) {
+		/* free memory */
+		g_object_unref (response);
+		g_object_unref (msg);
+
+		return E_EWS_CONNECTION_STATUS_OK;
+	}
+
+	/* free memory */
+	g_object_unref (response);
+	g_object_unref (msg);
+
+	return E_EWS_CONNECTION_STATUS_UNKNOWN;
 }
 
 gchar *

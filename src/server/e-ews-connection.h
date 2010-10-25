@@ -57,6 +57,8 @@ struct _EEwsConnection {
 
 struct _EEwsConnectionClass {
 	GObjectClass parent_class;
+
+	void	(*shutdown)	(EEwsConnection *cnc);
 };
 
 /* TODO:This has to go either in a generic file or specific to junk*/
@@ -71,7 +73,6 @@ typedef struct {
 
 GType          e_ews_connection_get_type (void);
 EEwsConnection *e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *password);
-
 EEwsConnection * e_ews_connection_new_with_error_handler (const gchar *uri, const gchar *username, const gchar *password, EEwsConnectionErrors *errors);
 
 gchar* e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const gchar *domain);
@@ -99,6 +100,8 @@ typedef enum {
 #define E_EWS_CURSOR_POSITION_END "end"
 
 ESoapResponse   *e_ews_connection_send_message (EEwsConnection *cnc, ESoapMessage *msg);
+void 		e_ews_connection_create_folder (EEwsConnection *cnc);
+EEwsConnectionStatus e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc, const gchar *sync_state, GList **folder_list);
 EEwsConnectionStatus e_ews_connection_parse_response_status (ESoapResponse *response);
 const gchar         *e_ews_connection_get_error_message (EEwsConnectionStatus status);
 
