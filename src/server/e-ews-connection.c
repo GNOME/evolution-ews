@@ -527,8 +527,10 @@ e_ews_connection_new_with_error_handler (const gchar *uri, const gchar *username
 	
 	g_free (cnc->priv->username);
 	g_free (cnc->priv->password);
+	g_free (cnc->priv->uri);
 	cnc->priv->username = g_strdup (username);
 	cnc->priv->password = g_strdup (password);
+	cnc->priv->uri = g_strdup (uri);
 
 	g_signal_connect (cnc->priv->soup_session, "authenticate",
 			  G_CALLBACK(ews_connection_authenticate), cnc);
@@ -779,10 +781,7 @@ e_ews_connection_create_folder (EEwsConnection *cnc)
 	ESoapMessage *msg;
 	ESoapResponse *response;
 
-	char *url = NULL;
-
-	url = g_strdup ("https://164.99.116.11/EWS/Exchange.asmx");
-	g_print ("\n The Url is:%s", url);
+	gchar *url = g_getenv ("EWS_TEST_URI");
 
 	msg = e_ews_message_new_with_header (url, "CreateFolder");
 
