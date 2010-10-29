@@ -40,10 +40,16 @@
 /* Soup session proxy-uri property */
 #define SOUP_SESSION_PROXY_URI "proxy-uri"
 
+#define QUEUE_LOCK(x) (g_static_rec_mutex_lock(&(x)->priv->queue_lock))
+#define QUEUE_UNLOCK(x) (g_static_rec_mutex_unlock(&(x)->priv->queue_lock))
+
 G_DEFINE_TYPE (EEwsConnection, e_ews_connection, G_TYPE_OBJECT)
 
 static GObjectClass *parent_class = NULL;
 static GHashTable *loaded_connections_permissions = NULL;
+
+/* Keep it ugly for now */
+static guint counter=0;
 
 struct _EEwsConnectionPrivate {
 	SoupSession *soup_session;
@@ -63,6 +69,9 @@ struct _EEwsConnectionPrivate {
 	GMutex *reauth_mutex;
 	GMutex *msg_lock;
 	EProxy *proxy;
+
+	GSList *jobs;
+	GStaticRecMutex queue_lock;
 };
 
 enum {
@@ -71,6 +80,23 @@ enum {
 };
 
 static guint signals[LAST_SIGNAL];
+
+typedef struct _EWSNode EWSNode;
+struct _EWSNode {
+	ESoapMessage *msg;
+
+	GCancellable *cancellable;
+	GError *error;
+
+	gint noreply:1;		/* dont wait for reply */
+	guint32 type;		/* operation type */
+	gint pri;		/* the command priority */
+	gshort commands;		/* counts how many commands are outstanding */
+
+	union {
+		const gchar *folder_name;
+	} u;
+};
 
 static void
 update_soup_session_proxy_settings (EProxy *proxy, SoupSession* session,
@@ -193,6 +219,20 @@ e_ews_connection_response_parse_status_and_description (ESoapResponse *response,
 	return TRUE;
 }
 #endif
+
+static EWSNode *
+ews_node_new ()
+{
+	EWSNode *node;
+
+//	if (cancellable != NULL)
+//		g_object_ref (cancellable);
+
+	node = g_malloc0 (sizeof (EWSNode));
+//	node->cancellable = cancellable;
+
+	return node;
+}
 
 EEwsConnectionStatus
 e_ews_connection_parse_response_status (ESoapResponse *response)
@@ -389,6 +429,12 @@ e_ews_connection_dispose (GObject *object)
 			g_object_unref (priv->proxy);
 			priv->proxy = NULL;
 		}
+
+		if (priv->jobs) {
+			g_slist_free (priv->jobs);
+			priv->jobs = NULL;
+
+		}
 	}
 
 	if (parent_class->dispose)
@@ -460,7 +506,7 @@ e_ews_connection_init (EEwsConnection *cnc)
         g_signal_connect (priv->proxy, "changed", G_CALLBACK (proxy_settings_changed), cnc);
 
 	/* create the SoupSession for this connection */
-	priv->soup_session = soup_session_sync_new_with_options (SOUP_SESSION_USE_NTLM, TRUE, NULL);
+	priv->soup_session = soup_session_async_new_with_options (SOUP_SESSION_USE_NTLM, TRUE, NULL);
 	priv->reauth_mutex = g_mutex_new ();
 	priv->msg_lock = g_mutex_new ();
 	priv->categories_by_id = NULL;
@@ -701,8 +747,8 @@ failed:
 	return asurl;
 }
 
-static void
-response_parse (SoupSession *session, SoupMessage *msg, EEwsConnection *cnc)
+static ESoapResponse *
+extract_response (SoupMessage *msg)
 {
 	ESoapResponse *response;
 
@@ -718,7 +764,50 @@ response_parse (SoupSession *session, SoupMessage *msg, EEwsConnection *cnc)
 		g_print ("\n------\n");
 	}
 
-	g_signal_emit (cnc, signals[SHUTDOWN], 0);
+	return response;
+}
+
+static void
+response_parse_sync_hierarchy (SoupSession *session, SoupMessage *msg, gpointer data)
+{
+	ESoapResponse *response = extract_response (msg);
+	ESoapParameter *param, *subparam, *node;
+	const gchar *new_sync_state = NULL;
+
+	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
+	subparam = e_soap_parameter_get_first_child_by_name (param, "SyncFolderHierarchyResponseMessage");
+	node = e_soap_parameter_get_first_child_by_name (subparam, "ResponseCode");
+
+	/* Negative cases */
+	if (strcmp (e_soap_parameter_get_string_value(node), "NoError") != E_EWS_CONNECTION_STATUS_OK) {
+
+		/* free memory */
+		g_object_unref (response);
+		g_object_unref (msg);
+
+		return E_EWS_CONNECTION_STATUS_UNKNOWN;
+
+	}
+
+	node = e_soap_parameter_get_first_child_by_name (subparam, "SyncState");
+	new_sync_state = e_soap_parameter_get_string_value(node);
+	g_print ("\n The sync state is... \n %s\n", new_sync_state);
+
+	/* free memory */
+	g_object_unref (response);
+	g_object_unref (msg);
+}
+
+static void
+response_parse_generic (SoupSession *session, SoupMessage *msg, gpointer data)
+{
+	ESoapResponse *response = extract_response (msg);
+	EEwsConnection *cnc = (EEwsConnection *) data;
+
+	/* This is just for tests. Need to handle it sanely. */
+	counter++;
+	if (counter == g_slist_length (cnc->priv->jobs))
+		g_signal_emit (cnc, signals[SHUTDOWN], 0);
 }
 
 void
@@ -730,9 +819,7 @@ e_ews_connection_queue_message (EEwsConnection *cnc, ESoapMessage *msg, SoupSess
 	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
 	g_return_val_if_fail (E_IS_SOAP_MESSAGE (msg), NULL);
 
-	g_mutex_lock (cnc->priv->msg_lock);
-	soup_session_queue_message (cnc->priv->soup_session, SOUP_MESSAGE (msg), response_parse, cnc);
-	g_mutex_unlock (cnc->priv->msg_lock);
+	soup_session_queue_message (cnc->priv->soup_session, SOUP_MESSAGE (msg), callback, user_data);
 }
 
 ESoapResponse *
@@ -775,13 +862,54 @@ e_ews_connection_send_message (EEwsConnection *cnc, ESoapMessage *msg)
 	return response;
 }
 
+static void
+schedule_all_jobs (EWSNode *node, gpointer data)
+{
+	EEwsConnection *cnc = (EEwsConnection *) data;
+
+	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) == 1)) {
+		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (node->msg)->request_body));
+		/* print request's body */
+		g_print ("\n The request headers");
+		g_print ("\n ==========================================");
+		fputc ('\n', stdout);
+		fputs (SOUP_MESSAGE (node->msg)->request_body->data, stdout);
+		fputc ('\n', stdout);
+	}
+
+	e_ews_connection_queue_message (cnc, SOUP_MESSAGE (node->msg), response_parse_generic, cnc);
+}
+
+gint
+comp_func (gconstpointer a, gconstpointer b)
+{
+	EWSNode *node1 = (EWSNode *) a;
+	EWSNode *node2 = (EWSNode *) b;
+
+	g_print ("\n In the comparison functions with node 1 pri=%d and node 2 pri=%d", node1->pri, node2->pri);
+	if (node1->pri > node2->pri) {
+		g_print ("\n Returning a +1");
+		return 1;
+	}
+	else
+		return -1;
+}
+
+void
+e_ews_connection_schedule_jobs (EEwsConnection *cnc)
+{
+	g_slist_foreach (cnc->priv->jobs, (GFunc) schedule_all_jobs, cnc);
+}
+
 void
 e_ews_connection_create_folder (EEwsConnection *cnc)
 {
 	ESoapMessage *msg;
 	ESoapResponse *response;
-
+	EWSNode *node1;
 	gchar *url = g_getenv ("EWS_TEST_URI");
+
+	node1 = ews_node_new ();
 
 	msg = e_ews_message_new_with_header (url, "CreateFolder");
 
@@ -796,24 +924,23 @@ e_ews_connection_create_folder (EEwsConnection *cnc)
 	e_soap_message_end_element (msg);
 
 	e_ews_message_write_footer (msg);
-	e_ews_connection_queue_message (cnc, SOUP_MESSAGE (msg), response_parse, cnc);
+
+	node1->msg = msg;
+	node1->pri = EWS_PRIORITY_CREATE_FOLDER;
+
+	QUEUE_LOCK (cnc);
+	cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, node1, (GCompareFunc *) comp_func);
+	QUEUE_UNLOCK (cnc);
 }
 
-EEwsConnectionStatus
+void
 e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc, const gchar *sync_state, GList **folder_list)
 {
 	ESoapMessage *msg;
-	ESoapResponse *response;
-        EEwsConnectionStatus status;
-	ESoapParameter *param, *subparam;
 	gchar *url = g_getenv ("EWS_TEST_URI");
+	EWSNode *node1;
+	node1 = ews_node_new ();
 
-	if (!cnc)
-		return E_EWS_CONNECTION_STATUS_UNKNOWN;
-
-	g_return_val_if_fail (folder_list != NULL, E_EWS_CONNECTION_STATUS_UNKNOWN);
-
-	g_print ("%s %s : Start syncing", G_STRLOC, G_STRFUNC);
 	msg = e_ews_message_new_with_header (url, "SyncFolderHierarchy");
 	e_soap_message_start_element (msg, "FolderShape", NULL, NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", "types", "AllProperties");
@@ -824,34 +951,12 @@ e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc, const gchar *sync_s
 	/* Complete the footer and print the request */
 	e_ews_message_write_footer (msg);
 
-	/* Send the request. Change this to queue later */
-	response = e_ews_connection_send_message (cnc, msg);
+	node1->msg = msg;
+	node1->pri = EWS_PRIORITY_SYNC_CHANGES;
 
-	if (!response) {
-		g_object_unref (msg);
-		return E_EWS_CONNECTION_STATUS_NO_RESPONSE;
-	}
-
-	status = e_ews_connection_parse_response_status (response);
-
-	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
-	subparam = e_soap_parameter_get_first_child_by_name (param, "SyncFolderHierarchyResponseMessage");
-	subparam = e_soap_parameter_get_first_child_by_name (subparam, "ResponseCode");
-
-	/* Positive case */
-	if (!strcmp (e_soap_parameter_get_string_value(subparam), "NoError")) {
-		/* free memory */
-		g_object_unref (response);
-		g_object_unref (msg);
-
-		return E_EWS_CONNECTION_STATUS_OK;
-	}
-
-	/* free memory */
-	g_object_unref (response);
-	g_object_unref (msg);
-
-	return E_EWS_CONNECTION_STATUS_UNKNOWN;
+	QUEUE_LOCK (cnc);
+	cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, node1, (GCompareFunc *) comp_func);
+	QUEUE_UNLOCK (cnc);
 }
 
 gchar *

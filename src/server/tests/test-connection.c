@@ -29,7 +29,8 @@ util_get_login_info_from_env (gchar **username, gchar **password, gchar **uri)
 
 /*Test cases*/
 
-static void con_test_create_new_connection ()
+static void
+con_test_create_new_connection ()
 {
 	const gchar *username;
 	const gchar *password;
@@ -43,7 +44,6 @@ static void con_test_create_new_connection ()
 	
 	cnc = e_ews_connection_new (uri, username, password);
 	g_assert (cnc != NULL);
-
 }
 
 static void
@@ -86,7 +86,8 @@ con_test_autodiscover()
 	g_assert_cmpstr (uri, ==, NULL);
 }
 
-static void op_test_sync_folder_hierarchy ()
+static void 
+op_test_sync_folder_hierarchy ()
 {
 	const gchar *username;
 	const gchar *password;
@@ -100,16 +101,13 @@ static void op_test_sync_folder_hierarchy ()
 	g_assert_cmpstr (username, !=, NULL);
 	g_assert_cmpstr (password, !=, NULL);
 	g_assert_cmpstr (uri, !=, NULL);
-	
+
 	cnc = e_ews_connection_new (uri, username, password);
 	g_assert (cnc != NULL);
 
-	status = e_ews_connection_sync_folder_hierarchy (cnc, NULL, &folder_list);
+	e_ews_connection_sync_folder_hierarchy (cnc, NULL, &folder_list);
 
-	if (status == E_EWS_CONNECTION_STATUS_OK)
-		g_print ("Folder hierarchy fetched... \n");
-	else
-		g_print ("The sync state data passed is invalid... \n");
+	e_ews_connection_schedule_jobs (cnc);
 }
 
 static void
@@ -119,35 +117,28 @@ ews_conn_shutdown (EEwsConnection *cnc)
 	g_main_loop_quit (main_loop);
 }
 
-static gboolean
-idle_cb (gpointer data)
+static void 
+op_test_create_folder ()
 {
 	const gchar *username;
 	const gchar *password;
 	const gchar *uri;
 	EEwsConnection *cnc;
-	ESoapMessage *msg;
-	guint status;
-	GList *folder_list = NULL;
 
 	util_get_login_info_from_env (&username, &password, &uri);
 	g_assert_cmpstr (username, !=, NULL);
 	g_assert_cmpstr (password, !=, NULL);
 	g_assert_cmpstr (uri, !=, NULL);
-	
+
 	cnc = e_ews_connection_new (uri, username, password);
 	g_assert (cnc != NULL);
 
-	g_print ("Testing create folder at the top level... \n");
-	e_ews_connection_create_folder (cnc);
-
 	g_signal_connect (cnc, "shutdown", G_CALLBACK (ews_conn_shutdown), NULL);
 
-	return FALSE;
+	e_ews_connection_create_folder (cnc);
 }
 
 /*Run tests*/
-
 void connection_tests_run ()
 {
 	g_printf ("Testing Connection..... \n");
@@ -160,13 +151,22 @@ void autodiscovery_tests_run ()
 	con_test_autodiscover();
 }
 
+static gboolean
+idle_cb (gpointer data)
+{
+	g_print ("Testing create folder at the top level... \n");
+	op_test_create_folder ();
+
+	g_print ("Testing the sync_hierarchy... \n");
+	op_test_sync_folder_hierarchy ();
+	
+	return FALSE;
+}
+
 
 void op_tests_run ()
 {
 	g_print ("Testing operations... \n");
-
-	g_print ("\n Testing the sync_hierarchy... \n");
-	op_test_sync_folder_hierarchy ();
 
 	g_type_init ();
 	g_thread_init (NULL);

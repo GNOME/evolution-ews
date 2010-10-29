@@ -61,6 +61,26 @@ struct _EEwsConnectionClass {
 	void	(*shutdown)	(EEwsConnection *cnc);
 };
 
+/* Operations on the store (folder_tree) will have highest priority as we know for sure they are sync
+   and user triggered. */
+enum {
+	EWS_PRIORITY_CREATE_FOLDER = 200,
+	EWS_PRIORITY_DELETE_FOLDER = 200,
+	EWS_PRIORITY_RENAME_FOLDER = 200,
+	EWS_PRIORITY_MANAGE_SUBSCRIPTION = 200,
+	EWS_PRIORITY_SYNC_CHANGES = 150,
+	EWS_PRIORITY_EXPUNGE = 150,
+	EWS_PRIORITY_GET_MESSAGE = 100,
+	EWS_PRIORITY_REFRESH_INFO = 0,
+	EWS_PRIORITY_NOOP = 0,
+	EWS_PRIORITY_NEW_MESSAGES = 0,
+	EWS_PRIORITY_APPEND_MESSAGE = -60,
+	EWS_PRIIORITY_COPY_MESSAGE = -60,
+	EWS_PRIORITY_LIST = -80,
+	EWS_PRIORITY_IDLE = -100,
+	EWS_PRIORITY_SYNC_MESSAGE = -120
+};
+
 /* TODO:This has to go either in a generic file or specific to junk*/
 typedef struct {
 	gchar *id;
@@ -74,6 +94,7 @@ typedef struct {
 GType          e_ews_connection_get_type (void);
 EEwsConnection *e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *password);
 EEwsConnection * e_ews_connection_new_with_error_handler (const gchar *uri, const gchar *username, const gchar *password, EEwsConnectionErrors *errors);
+void e_ews_connection_schedule_jobs (EEwsConnection *cnc);
 
 gchar* e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const gchar *domain);
 
@@ -101,7 +122,7 @@ typedef enum {
 
 ESoapResponse   *e_ews_connection_send_message (EEwsConnection *cnc, ESoapMessage *msg);
 void 		e_ews_connection_create_folder (EEwsConnection *cnc);
-EEwsConnectionStatus e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc, const gchar *sync_state, GList **folder_list);
+void		e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc, const gchar *sync_state, GList **folder_list);
 EEwsConnectionStatus e_ews_connection_parse_response_status (ESoapResponse *response);
 const gchar         *e_ews_connection_get_error_message (EEwsConnectionStatus status);
 

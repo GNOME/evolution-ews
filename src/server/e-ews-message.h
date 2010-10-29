@@ -44,7 +44,6 @@ void             e_ews_message_write_base64_parameter (ESoapMessage *msg,
 void e_ews_message_write_int_parameter (ESoapMessage *msg, const gchar *name, const gchar *prefix, glong value);
 
 void             e_ews_message_write_footer (ESoapMessage *msg);
-void		 e_ews_message_write_response (ESoapMessage *msg);
 
 G_END_DECLS
 
