@@ -27,6 +27,13 @@ util_get_login_info_from_env (gchar **username, gchar **password, gchar **uri)
 	*uri = g_getenv ("EWS_TEST_URI");
 }
 
+static void
+ews_conn_shutdown (EEwsConnection *cnc)
+{
+	g_print ("Terminating the connection. BYE... \n");
+	g_main_loop_quit (main_loop);
+}
+
 /*Test cases*/
 
 static void
@@ -44,6 +51,9 @@ con_test_create_new_connection ()
 	
 	cnc = e_ews_connection_new (uri, username, password);
 	g_assert (cnc != NULL);
+
+	/* Quit the test suite */
+	g_signal_connect (cnc, "shutdown", G_CALLBACK (ews_conn_shutdown), NULL);
 }
 
 static void
@@ -106,15 +116,7 @@ op_test_sync_folder_hierarchy ()
 	g_assert (cnc != NULL);
 
 	e_ews_connection_sync_folder_hierarchy (cnc, NULL, &folder_list);
-
-	e_ews_connection_schedule_jobs (cnc);
-}
-
-static void
-ews_conn_shutdown (EEwsConnection *cnc)
-{
-	g_print ("Terminating the connection. BYE... \n");
-	g_main_loop_quit (main_loop);
+	
 }
 
 static void 
@@ -132,8 +134,6 @@ op_test_create_folder ()
 
 	cnc = e_ews_connection_new (uri, username, password);
 	g_assert (cnc != NULL);
-
-	g_signal_connect (cnc, "shutdown", G_CALLBACK (ews_conn_shutdown), NULL);
 
 	e_ews_connection_create_folder (cnc);
 }
@@ -157,12 +157,17 @@ idle_cb (gpointer data)
 	g_print ("Testing create folder at the top level... \n");
 	op_test_create_folder ();
 
+	g_print ("Testing create folder at the top level again... \n");
+	op_test_create_folder ();
+
 	g_print ("Testing the sync_hierarchy... \n");
 	op_test_sync_folder_hierarchy ();
-	
+
+	g_print ("Testing create folder at the top level again third time... \n");
+	op_test_create_folder ();
+
 	return FALSE;
 }
-
 
 void op_tests_run ()
 {

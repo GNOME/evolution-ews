@@ -34,6 +34,11 @@
 #include "e-ews-message.h"
 /* #include "e-ews-filter.h" */
 
+#define d(x) x
+
+/* For the number of connections */
+#define EWS_CONNECTIONS_NUMBER 2
+
 /* For soup sync session timeout */
 #define EWS_SOUP_SESSION_TIMEOUT 30
 
@@ -71,6 +76,7 @@ struct _EEwsConnectionPrivate {
 	EProxy *proxy;
 
 	GSList *jobs;
+	GSList *active_jobs;
 	GStaticRecMutex queue_lock;
 };
 
@@ -435,6 +441,13 @@ e_ews_connection_dispose (GObject *object)
 			priv->jobs = NULL;
 
 		}
+
+		if (priv->active_jobs) {
+			g_slist_free (priv->active_jobs);
+			priv->active_jobs = NULL;
+
+		}
+
 	}
 
 	if (parent_class->dispose)
@@ -798,16 +811,21 @@ response_parse_sync_hierarchy (SoupSession *session, SoupMessage *msg, gpointer 
 	g_object_unref (msg);
 }
 
-static void
-response_parse_generic (SoupSession *session, SoupMessage *msg, gpointer data)
+gint
+comp_func (gconstpointer a, gconstpointer b)
 {
-	ESoapResponse *response = extract_response (msg);
-	EEwsConnection *cnc = (EEwsConnection *) data;
+	EWSNode *node1 = (EWSNode *) a;
+	EWSNode *node2 = (EWSNode *) b;
 
-	/* This is just for tests. Need to handle it sanely. */
-	counter++;
-	if (counter == g_slist_length (cnc->priv->jobs))
-		g_signal_emit (cnc, signals[SHUTDOWN], 0);
+	d(g_print ("\nIn the comparison functions\n ********With node 1 pri=%d and node 2 pri=%d********\n", node1->pri, node2->pri);)
+	if (node1->pri > node2->pri) {
+		d(g_print ("A higher priority job in here. Traverse further.....\n\n");)
+		return 1;
+	}
+	else {
+		d(g_print ("Perfect. This needs to be processed before other subsequent jobs in the queue\n\n");)
+		return -1;
+	}
 }
 
 void
@@ -815,11 +833,75 @@ e_ews_connection_queue_message (EEwsConnection *cnc, ESoapMessage *msg, SoupSess
 			   gpointer user_data)
 {
 	ESoapResponse *response;
+	EWSNode *node;
 
 	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
 	g_return_val_if_fail (E_IS_SOAP_MESSAGE (msg), NULL);
 
+	QUEUE_LOCK (cnc);
+
 	soup_session_queue_message (cnc->priv->soup_session, SOUP_MESSAGE (msg), callback, user_data);
+
+	QUEUE_UNLOCK (cnc);
+}
+
+static void
+response_parse_generic (SoupSession *session, SoupMessage *msg, gpointer data)
+{
+	ESoapResponse *response;
+	EEwsConnection *cnc = (EEwsConnection *) data;
+	EWSNode *node, *active_node;
+	guint num_jobs = 0;
+
+	GSList *l, *active_list;
+
+	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) == 1)) {
+		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->request_body));
+		/* print request's body */
+		g_print ("\n------\n");
+		fputs (SOUP_MESSAGE (msg)->request_body->data, stdout);
+		fputc ('\n', stdout);
+	}
+
+	response = extract_response (msg);
+
+	QUEUE_LOCK (cnc);
+
+	for (l = cnc->priv->jobs; l!= NULL ;l = g_slist_next (l)) {
+		node = (EWSNode *) l->data;
+		if (node->msg == msg) {
+			cnc->priv->jobs = g_slist_remove (cnc->priv->jobs, node);
+			cnc->priv->active_jobs = g_slist_remove (cnc->priv->active_jobs, node);
+			break;
+		}
+	}
+
+	for (l = cnc->priv->jobs; l!= NULL ;l = g_slist_next (l)) {
+		node = (EWSNode *) l->data;
+		active_list = g_slist_find (cnc->priv->active_jobs, node);
+		if (!active_list) {
+			cnc->priv->active_jobs = g_slist_append (cnc->priv->active_jobs, node);
+			if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) == 1)) {
+				soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (node->msg)->request_body));
+				/* print request's body */
+				printf ("\n The request headers");
+				printf ("\n ===================");
+				fputc ('\n', stdout);
+				fputs (SOUP_MESSAGE (node->msg)->request_body->data, stdout);
+				fputc ('\n', stdout);
+			}
+			e_ews_connection_queue_message (cnc, SOUP_MESSAGE (node->msg), response_parse_generic, cnc);
+			break;
+		}
+	}
+
+	num_jobs = g_slist_length (cnc->priv->jobs);
+	g_print ("\nThe number of jobs yet to be processed......%d\n", num_jobs);
+	/* This is to end the test programs */
+	if (num_jobs == 0)
+		g_signal_emit (cnc, signals[SHUTDOWN], 0);
+
+	QUEUE_UNLOCK (cnc);
 }
 
 ESoapResponse *
@@ -862,54 +944,13 @@ e_ews_connection_send_message (EEwsConnection *cnc, ESoapMessage *msg)
 	return response;
 }
 
-static void
-schedule_all_jobs (EWSNode *node, gpointer data)
-{
-	EEwsConnection *cnc = (EEwsConnection *) data;
-
-	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) == 1)) {
-		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (node->msg)->request_body));
-		/* print request's body */
-		g_print ("\n The request headers");
-		g_print ("\n ==========================================");
-		fputc ('\n', stdout);
-		fputs (SOUP_MESSAGE (node->msg)->request_body->data, stdout);
-		fputc ('\n', stdout);
-	}
-
-	e_ews_connection_queue_message (cnc, SOUP_MESSAGE (node->msg), response_parse_generic, cnc);
-}
-
-gint
-comp_func (gconstpointer a, gconstpointer b)
-{
-	EWSNode *node1 = (EWSNode *) a;
-	EWSNode *node2 = (EWSNode *) b;
-
-	g_print ("\n In the comparison functions with node 1 pri=%d and node 2 pri=%d", node1->pri, node2->pri);
-	if (node1->pri > node2->pri) {
-		g_print ("\n Returning a +1");
-		return 1;
-	}
-	else
-		return -1;
-}
-
-void
-e_ews_connection_schedule_jobs (EEwsConnection *cnc)
-{
-	g_slist_foreach (cnc->priv->jobs, (GFunc) schedule_all_jobs, cnc);
-}
-
 void
 e_ews_connection_create_folder (EEwsConnection *cnc)
 {
 	ESoapMessage *msg;
 	ESoapResponse *response;
-	EWSNode *node1;
+	EWSNode *node;
 	gchar *url = g_getenv ("EWS_TEST_URI");
-
-	node1 = ews_node_new ();
 
 	msg = e_ews_message_new_with_header (url, "CreateFolder");
 
@@ -925,11 +966,18 @@ e_ews_connection_create_folder (EEwsConnection *cnc)
 
 	e_ews_message_write_footer (msg);
 
-	node1->msg = msg;
-	node1->pri = EWS_PRIORITY_CREATE_FOLDER;
-
 	QUEUE_LOCK (cnc);
-	cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, node1, (GCompareFunc *) comp_func);
+
+	node = ews_node_new ();
+	node->msg = msg;
+	node->pri = EWS_PRIORITY_CREATE_FOLDER;
+	cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, node, (GCompareFunc *) comp_func);
+	
+	if (g_slist_length (cnc->priv->jobs) <= EWS_CONNECTIONS_NUMBER) {
+		cnc->priv->active_jobs = g_slist_append (cnc->priv->active_jobs, node);
+		e_ews_connection_queue_message (cnc, SOUP_MESSAGE (node->msg), response_parse_generic, cnc);
+	}
+
 	QUEUE_UNLOCK (cnc);
 }
 
@@ -938,8 +986,7 @@ e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc, const gchar *sync_s
 {
 	ESoapMessage *msg;
 	gchar *url = g_getenv ("EWS_TEST_URI");
-	EWSNode *node1;
-	node1 = ews_node_new ();
+	EWSNode *node;
 
 	msg = e_ews_message_new_with_header (url, "SyncFolderHierarchy");
 	e_soap_message_start_element (msg, "FolderShape", NULL, NULL);
@@ -951,11 +998,18 @@ e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc, const gchar *sync_s
 	/* Complete the footer and print the request */
 	e_ews_message_write_footer (msg);
 
-	node1->msg = msg;
-	node1->pri = EWS_PRIORITY_SYNC_CHANGES;
-
 	QUEUE_LOCK (cnc);
-	cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, node1, (GCompareFunc *) comp_func);
+
+	node = ews_node_new ();
+	node->msg = msg;
+	node->pri = EWS_PRIORITY_SYNC_CHANGES;
+	cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, node, (GCompareFunc *) comp_func);
+
+	if (g_slist_length (cnc->priv->jobs) <= EWS_CONNECTIONS_NUMBER) {
+		cnc->priv->active_jobs = g_slist_append (cnc->priv->active_jobs, node);
+		e_ews_connection_queue_message (cnc, SOUP_MESSAGE (node->msg), response_parse_generic, cnc);
+	}
+
 	QUEUE_UNLOCK (cnc);
 }
 
