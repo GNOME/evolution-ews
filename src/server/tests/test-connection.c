@@ -7,20 +7,22 @@
 void connection_util_get_login_info (gchar **username, gchar **password, gchar **uri);
 void test_create_new_connection ();
 static void con_test_create_new_connection ();
-static void util_get_login_info (gchar **username, gchar **password, gchar **uri);
+void connection_tests_run ();
+void autodiscovery_tests_run ();
+void op_tests_run ();
 
 static GMainLoop *main_loop;
 
 /*Utility functions */
 
 static void
-util_get_email_from_env (gchar **email)
+util_get_email_from_env (const gchar **email)
 {
 	*email = g_getenv ("EWS_TEST_EMAIL");
 }
 
 static void
-util_get_login_info_from_env (gchar **username, gchar **password, gchar **uri)
+util_get_login_info_from_env (const gchar **username, const gchar **password, const gchar **uri)
 {
 	*username = g_getenv ("EWS_TEST_USERNAME");
 	*password = g_getenv ("EWS_TEST_PASSWORD");
@@ -63,7 +65,6 @@ con_test_autodiscover()
 	const gchar *password;
 	const gchar *uri;
 	const gchar *email;
-	EEwsConnection *cnc;
 
 	util_get_login_info_from_env (&username, &password, &uri);
 	g_assert_cmpstr (username, !=, NULL);
@@ -103,8 +104,6 @@ op_test_sync_folder_hierarchy ()
 	const gchar *password;
 	const gchar *uri;
 	EEwsConnection *cnc;
-	ESoapMessage *msg;
-	guint status;
 	GList *folder_list = NULL;
 
 	util_get_login_info_from_env (&username, &password, &uri);
@@ -116,7 +115,6 @@ op_test_sync_folder_hierarchy ()
 	g_assert (cnc != NULL);
 
 	e_ews_connection_sync_folder_hierarchy (cnc, NULL, &folder_list);
-	
 }
 
 static void 
@@ -138,6 +136,25 @@ op_test_create_folder ()
 	e_ews_connection_create_folder (cnc);
 }
 
+static void 
+op_test_find_item ()
+{
+	const gchar *username;
+	const gchar *password;
+	const gchar *uri;
+	EEwsConnection *cnc;
+
+	util_get_login_info_from_env (&username, &password, &uri);
+	g_assert_cmpstr (username, !=, NULL);
+	g_assert_cmpstr (password, !=, NULL);
+	g_assert_cmpstr (uri, !=, NULL);
+
+	cnc = e_ews_connection_new (uri, username, password);
+	g_assert (cnc != NULL);
+
+	e_ews_connection_find_item (cnc, "contacts");
+}
+
 /*Run tests*/
 void connection_tests_run ()
 {
@@ -154,17 +171,20 @@ void autodiscovery_tests_run ()
 static gboolean
 idle_cb (gpointer data)
 {
-	g_print ("Testing create folder at the top level... \n");
+	g_print ("\nTesting create folder at the top level... \n");
 	op_test_create_folder ();
 
-	g_print ("Testing create folder at the top level again... \n");
+	g_print ("\nTesting create folder at the top level again... \n");
 	op_test_create_folder ();
 
-	g_print ("Testing the sync_hierarchy... \n");
+	g_print ("\nTesting the sync_hierarchy... \n");
 	op_test_sync_folder_hierarchy ();
 
-	g_print ("Testing create folder at the top level again third time... \n");
+	g_print ("\nTesting create folder at the top level again third time... \n");
 	op_test_create_folder ();
+
+	g_print ("\nTesting find item... \n");
+	op_test_find_item ();
 
 	return FALSE;
 }
