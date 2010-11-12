@@ -79,7 +79,7 @@ GType camel_ews_store_get_type (void);
 gchar * ews_get_name(CamelService *service, gboolean brief);
 
 /*IMplemented*/
-const gchar *camel_ews_store_folder_lookup (CamelEwsStore *ews_store, const gchar *container_id);
+/* const gchar *camel_ews_store_folder_lookup (CamelEwsStore *ews_store, const gchar *container_id); */
 EEwsConnection *cnc_lookup (CamelEwsStorePrivate *priv);
 gchar *storage_path_lookup (CamelEwsStorePrivate *priv);
 const gchar *ews_base_url_lookup (CamelEwsStorePrivate *priv);

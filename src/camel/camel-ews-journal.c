@@ -207,7 +207,7 @@ ews_entry_play_transfer (CamelOfflineJournal *journal, CamelEwsJournalEntry *ent
 	GPtrArray *xuids, *uids;
 	CamelFolder *src;
 	CamelStore *parent_store;
-	const gchar *name;
+	const gchar *name = NULL;
 
 	parent_store = camel_folder_get_parent_store (folder);
 
@@ -216,7 +216,7 @@ ews_entry_play_transfer (CamelOfflineJournal *journal, CamelEwsJournalEntry *ent
 		info = camel_message_info_new (NULL);
 	}
 
-	name = camel_ews_store_folder_lookup ((CamelEwsStore *) parent_store, entry->source_container);
+	/* name = camel_ews_store_folder_lookup ((CamelEwsStore *) parent_store, entry->source_container); */
 	if (name && (src = camel_store_get_folder_sync (parent_store, name, 0, cancellable, error))) {
 		uids = g_ptr_array_sized_new (1);
 		g_ptr_array_add (uids, entry->original_uid);
