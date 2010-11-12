@@ -24,6 +24,7 @@ libeews_1_2_la_CPPFLAGS = \
 libeews_1_2_la_SOURCES =		\
 	e-ews-connection.c		\
 	e-ews-connection.h		\
+	e-ews-folder.c			\
 	e-ews-message.c			
 
 libeews_1_2_la_LIBADD =						\
@@ -39,6 +40,7 @@ libeewsincludedir = $(privincludedir)/ews
 
 libeewsinclude_HEADERS =		\
         e-ews-connection.h		\
+	e-ews-folder.h			\
 	e-ews-message.h			
 
 %-$(API_VERSION).pc: %.pc

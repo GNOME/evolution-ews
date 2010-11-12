@@ -25,9 +25,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <glib/gi18n-lib.h>
-#include <libedataserver/e-soap-message.h>
 #include "e-ews-connection.h"
 #include "e-ews-message.h"
+#include "e-ews-folder.h"
 
 #define d(x) x
 
@@ -451,16 +451,59 @@ sync_hierarchy_response_cb (SoupSession *session, SoupMessage *msg, gpointer dat
 
 	/* Negative cases */
 	if (strcmp (e_soap_parameter_get_string_value(node), "NoError") != E_EWS_CONNECTION_STATUS_OK) {
-
 		/* free memory */
 		g_object_unref (response);
-//		g_object_unref (msg);
-
 	}
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "SyncState");
-	new_sync_state = e_soap_parameter_get_string_value(node);
+	new_sync_state = e_soap_parameter_get_string_value (node);
 	g_print ("\n The sync state is... \n %s\n", new_sync_state);
+
+	node = e_soap_parameter_get_first_child_by_name (subparam, "IncludesLastFolderInRange");
+	if (!strcmp (e_soap_parameter_get_string_value (node), "true")) {
+		/* This suggests we have received all the data and no need to make more sync
+		 * hierarchy requests.
+		 */
+	}
+
+	node = e_soap_parameter_get_first_child_by_name (subparam, "Changes");
+	
+	if (node) {
+		ESoapParameter *subparam1;
+		for (subparam1 = e_soap_parameter_get_first_child_by_name (node, "Create");
+		     subparam1 != NULL;
+		     subparam1 = e_soap_parameter_get_next_child_by_name (subparam1, "Create")) {
+			EEwsFolder *folder;
+
+			folder = e_ews_folder_new_from_soap_parameter (subparam1);
+			/* Add the folders in the "created" list of folders */
+		}
+
+		for (subparam1 = e_soap_parameter_get_first_child_by_name (node, "Update");
+		     subparam1 != NULL;
+		     subparam1 = e_soap_parameter_get_next_child_by_name (subparam1, "Update")) {
+			EEwsFolder *folder;
+
+			folder = e_ews_folder_new_from_soap_parameter (subparam1);
+			/* Add the folders in the "updated" list of folders */
+		}
+
+		for (subparam1 = e_soap_parameter_get_first_child_by_name (node, "Delete");
+		     subparam1 != NULL;
+		     subparam1 = e_soap_parameter_get_next_child_by_name (subparam1, "Delete")) {
+			ESoapParameter *folder_param;
+			gchar *value;
+
+			folder_param = e_soap_parameter_get_first_child_by_name (subparam1, "FolderId");
+			value = e_soap_parameter_get_property (folder_param, "Id");
+			g_print("\n The deleted folder id is... %s\n", value);
+			g_free (value);
+
+//			/* Should we construct a folder for the delete types? */
+//			folder = e_ews_folder_new_from_soap_parameter (subparam1);
+			/* Add the folders in the "deleted" list of folders */
+		}
+	}
 
 	QUEUE_LOCK (cnc);
 
@@ -469,14 +512,13 @@ sync_hierarchy_response_cb (SoupSession *session, SoupMessage *msg, gpointer dat
 
 	if (g_slist_length (cnc->priv->jobs))
 		g_signal_emit (cnc, signals[NEXT_REQUEST], 0);
-//	else
-//		g_signal_emit (cnc, signals[SHUTDOWN], 0);
+	else if (!cnc->priv->active_jobs)
+		g_signal_emit (cnc, signals[SHUTDOWN], 0);
 
 	QUEUE_UNLOCK (cnc);
 
 	/* free memory */
 	g_object_unref (response);
-//	g_object_unref (msg);
 }
 
 gint
@@ -542,6 +584,9 @@ response_parse_generic (SoupSession *session, SoupMessage *msg, gpointer data)
 		g_signal_emit (cnc, signals[SHUTDOWN], 0);
 
 	QUEUE_UNLOCK (cnc);
+
+	/* free memory */
+	g_object_unref (response);
 }
 
 void

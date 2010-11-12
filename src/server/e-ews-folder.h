@@ -1,0 +1,88 @@
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
+/*
+ * Authors :
+ *
+ * Copyright (C) 1999-2008 Novell, Inc. (www.novell.com)
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of version 2 of the GNU Lesser General Public
+ * License as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
+ * USA
+ */
+
+#ifndef E_EWS_FOLDER_H
+#define E_EWS_FOLDER_H
+
+#include <libedataserver/e-soap-message.h>
+
+G_BEGIN_DECLS
+
+#define E_TYPE_EWS_FOLDER            (e_ews_folder_get_type ())
+#define E_EWS_FOLDER(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), E_TYPE_EWS_FOLDER, EEwsFolder))
+#define E_EWS_FOLDER_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), E_TYPE_EWS_FOLDER, EEwsFolderClass))
+#define E_IS_EWS_FOLDER(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), E_TYPE_EWS_FOLDER))
+#define E_IS_EWS_FOLDER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), E_TYPE_EWS_FOLDER))
+
+typedef struct _EEwsFolder        EEwsFolder;
+typedef struct _EEwsFolderClass   EEwsFolderClass;
+typedef struct _EEwsFolderPrivate EEwsFolderPrivate;
+
+struct _EEwsFolder {
+	GObject parent;
+	EEwsFolderPrivate *priv;
+};
+
+struct _EEwsFolderClass {
+	GObjectClass parent_class;
+};
+
+typedef enum {
+	E_EWS_FOLDER_TYPE_ROOT,
+	E_EWS_FOLDER_TYPE_INBOX,
+	E_EWS_FOLDER_TYPE_SENT,
+	E_EWS_FOLDER_TYPE_CALENDAR,
+	E_EWS_FOLDER_TYPE_CONTACTS,
+	E_EWS_FOLDER_TYPE_DOCUMENTS,
+	E_EWS_FOLDER_TYPE_QUERY,
+	E_EWS_FOLDER_TYPE_CHECKLIST,
+	E_EWS_FOLDER_TYPE_DRAFT,
+	E_EWS_FOLDER_TYPE_CABINET,
+	E_EWS_FOLDER_TYPE_TRASH,
+	E_EWS_FOLDER_TYPE_JUNK,
+	E_EWS_FOLDER_TYPE_FOLDER
+} EEwsFolderType;
+
+GType         e_ews_folder_get_type (void);
+EEwsFolder *e_ews_folder_new_from_soap_parameter (ESoapParameter *param);
+gboolean      e_ews_folder_set_from_soap_parameter (EEwsFolder *folder,
+						      ESoapParameter *param);
+const gchar   *e_ews_folder_get_name (EEwsFolder *folder);
+void          e_ews_folder_set_name (EEwsFolder *folder, const gchar *new_name);
+const gchar   *e_ews_folder_get_folder_class (EEwsFolder *folder);
+void          e_ews_folder_set_folder_class (EEwsFolder *folder, const gchar *folder_class);
+const gchar   *e_ews_folder_get_id (EEwsFolder *folder);
+void          e_ews_folder_set_id (EEwsFolder *folder, const gchar *new_id);
+const gchar   *e_ews_folder_get_parent_id (EEwsFolder *folder);
+void	      e_ews_folder_set_parent_id (EEwsFolder *folder, const gchar *parent_id);
+guint32       e_ews_folder_get_total_count (EEwsFolder *folder);
+guint32       e_ews_folder_get_unread_count (EEwsFolder *folder);
+guint32       e_ews_folder_get_child_count (EEwsFolder *folder);
+gboolean      e_ews_folder_get_is_writable (EEwsFolder *folder);
+void          e_ews_folder_set_is_writable (EEwsFolder *folder, gboolean writable);
+gboolean    e_ews_folder_is_root (EEwsFolder *folder);
+EEwsFolderType e_ews_folder_get_folder_type (EEwsFolder *folder);
+gboolean e_ews_folder_get_is_system_folder (EEwsFolder *folder);
+void e_ews_folder_set_is_system_folder (EEwsFolder *folder, gboolean is_system_folder);
+
+G_END_DECLS
+
+#endif

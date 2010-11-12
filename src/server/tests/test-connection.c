@@ -103,6 +103,7 @@ op_test_sync_folder_hierarchy ()
 	const gchar *username;
 	const gchar *password;
 	const gchar *uri;
+	const gchar *sync_state = NULL;
 	EEwsConnection *cnc;
 	GList *folder_list = NULL;
 
@@ -114,7 +115,7 @@ op_test_sync_folder_hierarchy ()
 	cnc = e_ews_connection_new (uri, username, password);
 	g_assert (cnc != NULL);
 
-	e_ews_connection_sync_folder_hierarchy (cnc, NULL, &folder_list);
+	e_ews_connection_sync_folder_hierarchy (cnc, sync_state, &folder_list);
 }
 
 static void 
