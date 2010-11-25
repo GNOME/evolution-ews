@@ -47,7 +47,6 @@ which needs to be better organized via functions */
 #include <e-ews-connection.h>
 
 #include "camel-ews-folder.h"
-#include "camel-ews-journal.h"
 #include "camel-ews-private.h"
 #include "camel-ews-store.h"
 #include "camel-ews-summary.h"
@@ -176,7 +175,7 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 {
 	CamelFolder *folder;
 	CamelEwsFolder *ews_folder;
-	gchar *summary_file, *state_file, *journal_file;
+	gchar *summary_file, *state_file;
 	gchar *short_name;
 
 	short_name = strrchr (folder_name, '/');
@@ -215,13 +214,6 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 		return NULL;
 	}
 
-	journal_file = g_strdup_printf ("%s/journal",folder_dir);
-	ews_folder->journal = camel_ews_journal_new (ews_folder, journal_file);
-	g_free (journal_file);
-	if (!ews_folder->journal) {
-		g_object_unref (folder);
-		return NULL;
-	}
 
 	if (!strcmp (folder_name, "Mailbox")) {
 		if (camel_url_get_param (((CamelService *) store)->url, "filter"))
