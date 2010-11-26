@@ -466,15 +466,12 @@ e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *pass
 		}
 	}
 	
-	g_free (cnc->priv->username);
-	g_free (cnc->priv->password);
-	g_free (cnc->priv->uri);
+	/* not found, so create a new connection */
+	cnc = g_object_new (E_TYPE_EWS_CONNECTION, NULL);
+	
 	cnc->priv->username = g_strdup (username);
 	cnc->priv->password = g_strdup (password);
 	cnc->priv->uri = g_strdup (uri);
-	
-	/* not found, so create a new connection */
-	cnc = g_object_new (E_TYPE_EWS_CONNECTION, NULL);
 
 	g_signal_connect (cnc->priv->soup_session, "authenticate",
 			  G_CALLBACK(ews_connection_authenticate), cnc);
@@ -494,8 +491,6 @@ e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *pass
 	return cnc;
 
 }
-
-
 
 gchar*
 e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const gchar *email)
@@ -522,8 +517,6 @@ e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const g
 	domain++;
 
 	url = g_strdup_printf("https://%s/autodiscover/autodiscover.xml", domain);
-
-	/*Fixme : We should be using CNC - Sleepy to fix this crash for now*/
 	cnc = e_ews_connection_new (url, username, password, NULL);
 
 	msg = soup_message_new("GET", url);
