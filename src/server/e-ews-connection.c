@@ -74,7 +74,6 @@ struct _EWSNode {
 	ESoapMessage *msg;
 	GError *error;
 
-	guint32 type;		/* operation type */
 	gint pri;		/* the command priority */
 	response_cb cb;
 };
@@ -132,6 +131,19 @@ comp_func (gconstpointer a, gconstpointer b)
 		return -1;
 }
 
+static void
+e_ews_connection_queue_message (EEwsConnection *cnc, ESoapMessage *msg, SoupSessionCallback callback,
+			   gpointer user_data)
+{
+	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
+	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
+
+	QUEUE_LOCK (cnc);
+
+	soup_session_queue_message (cnc->priv->soup_session, SOUP_MESSAGE (msg), callback, user_data);
+
+	QUEUE_UNLOCK (cnc);
+}
 
 static void
 ews_next_request (EEwsConnection *cnc)
@@ -164,26 +176,49 @@ ews_next_request (EEwsConnection *cnc)
 	QUEUE_UNLOCK (cnc);
 }
 
+static void
+ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_cb cb, gint pri)
+{
+	EWSNode *node;
+
+	node = ews_node_new ();
+	node->msg = msg;
+	node->pri = pri;
+	node->cb = cb;
+
+	QUEUE_LOCK (cnc);
+	
+	if (cnc->priv->active_jobs < EWS_CONNECTIONS_NUMBER) {
+		/* FIXME put the node inside the active job list */
+		g_print ("\tRequest sent to the server. Response would be handled in a callback...\n");
+		cnc->priv->active_jobs++;
+		e_ews_connection_queue_message (cnc, msg, cb, cnc);
+	} else {
+		g_print ("\tQueueing request since we have %d active parallel requests...\n", EWS_CONNECTIONS_NUMBER);
+		cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, (gpointer *) node, (GCompareFunc) comp_func);
+	}
+	
+	QUEUE_UNLOCK (cnc);
+}
+
 /* Response callbacks */
 
+/* Just dump the response for debugging */
 static void
-response_parse_generic (SoupSession *session, SoupMessage *msg, gpointer data)
+dump_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 {
 	ESoapResponse *response;
 	EEwsConnection *cnc = (EEwsConnection *) data;
 
-	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) == 1)) {
-		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->request_body));
-		/* print request's body */
-		g_print ("\n------\n");
-		fputs (SOUP_MESSAGE (msg)->request_body->data, stdout);
-		fputc ('\n', stdout);
-	}
+	soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->request_body));
+	/* print request's body */
+	g_print ("\n------\n");
+	fputs (SOUP_MESSAGE (msg)->request_body->data, stdout);
+	fputc ('\n', stdout);
 
 	response = e_soap_message_parse_response ((ESoapMessage *) msg);
 
-	if (response && g_getenv ("EWS_DEBUG")) {
-
+	if (response) {
 		/* README: The stdout can be replaced with Evolution's
 		Logging framework also */
 
@@ -652,27 +687,11 @@ failed:
 }
 
 void
-e_ews_connection_queue_message (EEwsConnection *cnc, ESoapMessage *msg, SoupSessionCallback callback,
-			   gpointer user_data)
-{
-	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
-	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
-
-	QUEUE_LOCK (cnc);
-
-	soup_session_queue_message (cnc->priv->soup_session, SOUP_MESSAGE (msg), callback, user_data);
-
-	QUEUE_UNLOCK (cnc);
-}
-
-void
 e_ews_connection_find_item (EEwsConnection *cnc, const gchar *folder_name)
 {
 	ESoapMessage *msg;
-	const gchar *url = g_getenv ("EWS_TEST_URI");
-	EWSNode *node;
 
-	msg = e_ews_message_new_with_header (url, "FindItem");
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "FindItem");
 	e_soap_message_add_attribute (msg, "Traversal", "Shallow", NULL, NULL);
 	e_soap_message_start_element (msg, "ItemShape", NULL, NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", "types", "IdOnly");
@@ -684,32 +703,15 @@ e_ews_connection_find_item (EEwsConnection *cnc, const gchar *folder_name)
 
 	e_ews_message_write_footer (msg);
 
-	QUEUE_LOCK (cnc);
-
-	node = ews_node_new ();
-	node->msg = msg;
-	node->pri = EWS_PRIORITY_SYNC_CHANGES;
-	node->cb = response_parse_generic;
-
-	if (cnc->priv->active_jobs < EWS_CONNECTIONS_NUMBER) {
-		g_print ("\tRequest sent to the server. Response would be handled in a callback...\n");
-		cnc->priv->active_jobs++;
-		e_ews_connection_queue_message (cnc, msg, response_parse_generic, cnc);
-	} else {
-		g_print ("\tQueueing this FindItem request since we have %d active parallel requests...\n", EWS_CONNECTIONS_NUMBER);
-		cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, (gpointer *) node, (GCompareFunc) comp_func);
-	}
-	QUEUE_UNLOCK (cnc);
+	ews_connection_queue_request (cnc, msg, dump_response_cb, EWS_PRIORITY_SYNC_CHANGES);
 }
 
 void
 e_ews_connection_create_folder (EEwsConnection *cnc)
 {
 	ESoapMessage *msg;
-	EWSNode *node;
-	const gchar *url = g_getenv ("EWS_TEST_URI");
 
-	msg = e_ews_message_new_with_header (url, "CreateFolder");
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "CreateFolder");
 
 	e_soap_message_start_element (msg, "ParentFolderId", NULL, NULL);
 	e_ews_message_write_string_parameter_with_attribute (msg, "DistinguishedFolderId", "types", NULL, "Id", "msgfolderroot");
@@ -723,33 +725,15 @@ e_ews_connection_create_folder (EEwsConnection *cnc)
 
 	e_ews_message_write_footer (msg);
 
-	QUEUE_LOCK (cnc);
-
-	node = ews_node_new ();
-	node->msg = msg;
-	node->pri = EWS_PRIORITY_CREATE_FOLDER;
-	node->cb = response_parse_generic;
-
-	if (cnc->priv->active_jobs < EWS_CONNECTIONS_NUMBER) {
-		g_print ("\tRequest sent to the server. Response would be handled in a callback...\n");
-		cnc->priv->active_jobs++;
-		e_ews_connection_queue_message (cnc, msg, response_parse_generic, cnc);
-	} else {
-		g_print ("\tQueueing this CreateFolder request since we have %d active parallel requests...\n", EWS_CONNECTIONS_NUMBER);
-		cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, (gpointer *) node, (GCompareFunc) comp_func);
-	}
-
-	QUEUE_UNLOCK (cnc);
+	ews_connection_queue_request (cnc, msg, dump_response_cb, EWS_PRIORITY_CREATE_FOLDER);
 }
 
 void
 e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc, const gchar *sync_state, GList **folder_list)
 {
 	ESoapMessage *msg;
-	const gchar *url = g_getenv ("EWS_TEST_URI");
-	EWSNode *node;
 
-	msg = e_ews_message_new_with_header (url, "SyncFolderHierarchy");
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "SyncFolderHierarchy");
 	e_soap_message_start_element (msg, "FolderShape", NULL, NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", "types", "AllProperties");
 	e_soap_message_end_element (msg);
@@ -759,23 +743,5 @@ e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc, const gchar *sync_s
 	/* Complete the footer and print the request */
 	e_ews_message_write_footer (msg);
 
-	QUEUE_LOCK (cnc);
-
-	node = ews_node_new ();
-	node->msg = msg;
-	node->pri = EWS_PRIORITY_SYNC_CHANGES;
-	node->cb = sync_hierarchy_response_cb;
-
-	if (cnc->priv->active_jobs < EWS_CONNECTIONS_NUMBER) {
-		g_print ("\tRequest sent to the server. Response would be handled in a callback...\n");
-		cnc->priv->active_jobs++;
-		e_ews_connection_queue_message (cnc, msg, sync_hierarchy_response_cb, cnc);
-	} else {
-		g_print ("\tQueueing this SyncFolderHierarchy request since we have %d active parallel requests...\n", EWS_CONNECTIONS_NUMBER);
-		cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, (gpointer *) node, (GCompareFunc) comp_func);
-	}
-
-	QUEUE_UNLOCK (cnc);
+	ews_connection_queue_request (cnc, msg, sync_hierarchy_response_cb, EWS_PRIORITY_SYNC_CHANGES);
 }
-
-
