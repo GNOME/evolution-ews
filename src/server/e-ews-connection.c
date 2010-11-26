@@ -43,7 +43,11 @@ static GObjectClass *parent_class = NULL;
 static GHashTable *loaded_connections_permissions = NULL;
 static void ews_next_request (EEwsConnection *cnc);
 static gint comp_func (gconstpointer a, gconstpointer b);
+static GQuark ews_connection_error_quark (void);
 typedef void (*response_cb) (SoupSession *session, SoupMessage *msg, gpointer user_data);
+
+#define  EWS_CONNECTION_ERROR \
+         (ews_connection_error_quark ())
 
 struct _EEwsConnectionPrivate {
 	SoupSession *soup_session;
@@ -76,6 +80,20 @@ struct _EWSNode {
 };
 
 /* Static Functions */
+
+static GQuark
+ews_connection_error_quark (void)
+{
+	static GQuark quark = 0;
+
+	if (G_UNLIKELY (quark == 0)) {
+		const gchar *string = "ews-connection-error-quark";
+		quark = g_quark_from_static_string (string);
+	}
+
+	return quark;
+}
+
 static EWSNode *
 ews_node_new ()
 {
@@ -493,9 +511,8 @@ e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *pass
 }
 
 gchar*
-e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const gchar *email)
+e_ews_autodiscover_ws_url (const gchar *email, const gchar *password, GError **error)
 {
-	/*TODO : Add a GError*/
 	gchar *url;
 	gchar *domain;
 	gchar *asurl = NULL;
@@ -507,17 +524,22 @@ e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const g
 	xmlOutputBuffer *buf;
 	EEwsConnection *cnc;
 
-	g_return_val_if_fail (username != NULL, NULL);
 	g_return_val_if_fail (password != NULL, NULL);
 	g_return_val_if_fail (email != NULL, NULL);
 
 	domain = strchr(email, '@');
-	if (!(domain && *domain)) 
+	if (!(domain && *domain)) {
+		g_set_error (
+			error, EWS_CONNECTION_ERROR,
+			-1,
+			_("Wrong email id"));
+		
 		return NULL;
+	}
 	domain++;
 
 	url = g_strdup_printf("https://%s/autodiscover/autodiscover.xml", domain);
-	cnc = e_ews_connection_new (url, username, password, NULL);
+	cnc = e_ews_connection_new (url, email, password, NULL);
 
 	msg = soup_message_new("GET", url);
 	soup_message_headers_append (msg->request_headers,
@@ -559,10 +581,13 @@ e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const g
 	xmlFreeDoc (doc);
 
 	if (status != 200) {
-		fprintf(stderr, "Unexpected response from server: %d\n", status);
+		g_set_error (
+			error, EWS_CONNECTION_ERROR,
+			status,
+			_("Code: %d - Unexpected response from server"),
+			status);
 		goto failed;
 	}
-
 
 	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) == 1)){
 		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->response_body));
@@ -577,12 +602,18 @@ e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const g
 	doc = xmlReadMemory (msg->response_body->data, msg->response_body->length,
 			     "autodiscover.xml", NULL, 0);
 	if (!doc) {
-		fprintf(stderr, "Failed to parse autodiscover response XML\n");
+		g_set_error (
+			error, EWS_CONNECTION_ERROR,
+			-1,
+			_("Failed to parse autodiscover response XML"));
 		goto failed;
 	}
 	node = xmlDocGetRootElement(doc);
 	if (strcmp((char *)node->name, "Autodiscover")) {
-		fprintf(stderr, "Failed to find <Autodiscover> element\n");
+		g_set_error (
+			error, EWS_CONNECTION_ERROR,
+			-1,
+			_("Failed to find <Autodiscover> element\n"));
 		goto failed;
 	}
 	for (node = node->children; node; node = node->next) {
@@ -591,7 +622,10 @@ e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const g
 			break;
 	}
 	if (!node) {
-		fprintf(stderr, "Failed to find <Response> element\n");
+		g_set_error (
+			error, EWS_CONNECTION_ERROR,
+			-1,
+			_("Failed to find <Response> element\n"));
 		goto failed;
 	}
 	for (node = node->children; node; node = node->next) {
@@ -600,7 +634,10 @@ e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const g
 			break;
 	}
 	if (!node) {
-		fprintf(stderr, "Failed to find <Account> element\n");
+		g_set_error (
+			error, EWS_CONNECTION_ERROR,
+			-1,
+			_("Failed to find <Account> element\n"));
 		goto failed;
 	}
 	for (node = node->children; node; node = node->next) {
@@ -610,6 +647,7 @@ e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const g
 			break;
 	}
 failed:
+	g_object_unref (cnc);
 	return asurl;
 }
 

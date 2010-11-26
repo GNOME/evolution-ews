@@ -64,36 +64,49 @@ con_test_autodiscover()
 	const gchar *username;
 	const gchar *password;
 	const gchar *uri;
-	const gchar *email;
+	const gchar *email, *domain;
+	gchar *wrong_username;
+	GError *error = NULL;
 
+	/* FIXME username not needed here */
 	util_get_login_info_from_env (&username, &password, &uri);
 	g_assert_cmpstr (username, !=, NULL);
 	g_assert_cmpstr (password, !=, NULL);
 
 	util_get_email_from_env (&email);
 	g_assert_cmpstr (email, !=, NULL);
-	g_print("%s %s : username : %s \n", G_STRLOC, G_STRFUNC, username);
 	g_print("%s %s : password : %s \n", G_STRLOC, G_STRFUNC, password);
 	g_print("%s %s : email : %s \n", G_STRLOC, G_STRFUNC, email);
 
 	g_print ("Testing postive case... \n");
-	uri = e_ews_autodiscover_ws_url (username, password, email);
+	uri = e_ews_autodiscover_ws_url (email, password, &error);
 	g_assert_cmpstr (uri, !=, NULL);
 
 	g_print ("Testing wrong password... \n");
-	uri = e_ews_autodiscover_ws_url (username, "wrongpassword", email);
+	uri = e_ews_autodiscover_ws_url (email, "wrongpassword", &error);
+	g_print ("Error code:%d desc: %s \n", error->code, error->message);
+	g_clear_error (&error);
 	g_assert_cmpstr (uri, ==, NULL);
 
-	g_print ("Testing wrong username... \n");
-	uri = e_ews_autodiscover_ws_url ("wrongusername", password, email);
+	g_print ("Testing email without domain ... \n");
+	uri = e_ews_autodiscover_ws_url ("wronguseremail", password, &error);
+	g_print ("Error code:%d desc: %s \n", error->code, error->message);
+	g_clear_error (&error);
 	g_assert_cmpstr (uri, ==, NULL);
 
-	g_print ("Testing wrong username and password... \n");
-	uri = e_ews_autodiscover_ws_url ("wrongusername", "wrongpassword", email);
+	g_print ("Testing wrong email address and password... \n");
+	uri = e_ews_autodiscover_ws_url ("godknows@donknow.com", "wrongpassword", &error);
+	g_print ("Error code:%d desc: %s \n", error->code, error->message);
+	g_clear_error (&error);
 	g_assert_cmpstr (uri, ==, NULL);
 
-	g_print ("Testing malformed email address... \n");
-	uri = e_ews_autodiscover_ws_url (username, password, "emailnoatserver");
+	g_print ("Testing wrong user name ... \n");
+	domain = g_strstr_len (email, -1, "@");
+	wrong_username = g_strconcat ("godknows", domain, NULL);
+	uri = e_ews_autodiscover_ws_url (wrong_username, password, &error);
+	g_print ("Error code:%d desc: %s \n", error->code, error->message);
+	g_clear_error (&error);
+	g_free (wrong_username);
 	g_assert_cmpstr (uri, ==, NULL);
 }
 

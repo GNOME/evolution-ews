@@ -72,11 +72,6 @@ enum {
 	EWS_PRIORITY_SYNC_MESSAGE = -120
 };
 
-GType          e_ews_connection_get_type (void);
-EEwsConnection *e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *password, GError **error);
-
-gchar* e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const gchar *domain);
-
 typedef enum {
 	E_EWS_CONNECTION_STATUS_OK,
 	E_EWS_CONNECTION_STATUS_INVALID_CONNECTION,
@@ -94,6 +89,9 @@ typedef enum {
 	E_EWS_CONNECTION_STATUS_OVER_QUOTA = 58652
 } EEwsConnectionStatus;
 
+GType          e_ews_connection_get_type (void);
+EEwsConnection *e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *password, GError **error);
+gchar* e_ews_autodiscover_ws_url (const gchar *email, const gchar *password, GError **error);
 void e_ews_connection_queue_message (EEwsConnection *cnc, ESoapMessage *msg, SoupSessionCallback callback, gpointer user_data);
 void e_ews_connection_create_folder (EEwsConnection *cnc);
 void e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc, const gchar *sync_state, GList **folder_list);
