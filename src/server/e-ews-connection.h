@@ -40,11 +40,6 @@ typedef struct _EEwsConnection        EEwsConnection;
 typedef struct _EEwsConnectionClass   EEwsConnectionClass;
 typedef struct _EEwsConnectionPrivate EEwsConnectionPrivate;
 
-typedef struct {
-	gint status;
-	gchar *description;
-}EEwsConnectionErrors;
-
 struct _EEwsConnection {
 	GObject parent;
 	EEwsConnectionPrivate *priv;
@@ -78,8 +73,7 @@ enum {
 };
 
 GType          e_ews_connection_get_type (void);
-EEwsConnection *e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *password);
-EEwsConnection * e_ews_connection_new_with_error_handler (const gchar *uri, const gchar *username, const gchar *password, EEwsConnectionErrors *errors);
+EEwsConnection *e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *password, GError **error);
 
 gchar* e_ews_autodiscover_ws_url (const gchar *username, const gchar *password, const gchar *domain);
 

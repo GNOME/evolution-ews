@@ -51,7 +51,7 @@ con_test_create_new_connection ()
 	g_assert_cmpstr (password, !=, NULL);
 	g_assert_cmpstr (uri, !=, NULL);
 	
-	cnc = e_ews_connection_new (uri, username, password);
+	cnc = e_ews_connection_new (uri, username, password, NULL);
 	g_assert (cnc != NULL);
 
 	/* Quit the test suite */
@@ -112,7 +112,7 @@ op_test_sync_folder_hierarchy ()
 	g_assert_cmpstr (password, !=, NULL);
 	g_assert_cmpstr (uri, !=, NULL);
 
-	cnc = e_ews_connection_new (uri, username, password);
+	cnc = e_ews_connection_new (uri, username, password, NULL);
 	g_assert (cnc != NULL);
 
 	e_ews_connection_sync_folder_hierarchy (cnc, sync_state, &folder_list);
@@ -131,7 +131,7 @@ op_test_create_folder ()
 	g_assert_cmpstr (password, !=, NULL);
 	g_assert_cmpstr (uri, !=, NULL);
 
-	cnc = e_ews_connection_new (uri, username, password);
+	cnc = e_ews_connection_new (uri, username, password, NULL);
 	g_assert (cnc != NULL);
 
 	e_ews_connection_create_folder (cnc);
@@ -150,7 +150,7 @@ op_test_find_item ()
 	g_assert_cmpstr (password, !=, NULL);
 	g_assert_cmpstr (uri, !=, NULL);
 
-	cnc = e_ews_connection_new (uri, username, password);
+	cnc = e_ews_connection_new (uri, username, password, NULL);
 	g_assert (cnc != NULL);
 
 	e_ews_connection_find_item (cnc, "contacts");
