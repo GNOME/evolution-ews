@@ -110,6 +110,14 @@ con_test_autodiscover()
 	g_assert_cmpstr (uri, ==, NULL);
 }
 
+static gboolean
+cancel_sync_folder_hierarchy (gpointer data)
+{
+	GCancellable *cancellable = (GCancellable *) data;
+	g_print ("\nCanceling sync_folder_hierarchy...");
+	g_cancellable_cancel (cancellable);
+}
+
 static void 
 op_test_sync_folder_hierarchy ()
 {
@@ -119,6 +127,11 @@ op_test_sync_folder_hierarchy ()
 	const gchar *sync_state = NULL;
 	EEwsConnection *cnc;
 	GList *folder_list = NULL;
+	GThread *thread;
+	GError *error = NULL;
+	GCancellable *cancellable;
+
+	cancellable = g_cancellable_new ();
 
 	util_get_login_info_from_env (&username, &password, &uri);
 	g_assert_cmpstr (username, !=, NULL);
@@ -128,7 +141,13 @@ op_test_sync_folder_hierarchy ()
 	cnc = e_ews_connection_new (uri, username, password, NULL);
 	g_assert (cnc != NULL);
 
-	e_ews_connection_sync_folder_hierarchy (cnc, sync_state, &folder_list);
+	e_ews_connection_sync_folder_hierarchy (cnc, sync_state, cancellable, &folder_list);
+	
+	thread = g_thread_create ((GThreadFunc) cancel_sync_folder_hierarchy, cancellable, FALSE, &error);
+	if (error || !thread) {
+		g_warning ("%s: Creation of the thread failed with error: %s", G_STRFUNC, error->message);
+		g_error_free (error);
+	}
 }
 
 static void 
@@ -138,6 +157,9 @@ op_test_create_folder ()
 	const gchar *password;
 	const gchar *uri;
 	EEwsConnection *cnc;
+	GCancellable *cancellable;
+
+	cancellable = g_cancellable_new ();
 
 	util_get_login_info_from_env (&username, &password, &uri);
 	g_assert_cmpstr (username, !=, NULL);
@@ -147,7 +169,7 @@ op_test_create_folder ()
 	cnc = e_ews_connection_new (uri, username, password, NULL);
 	g_assert (cnc != NULL);
 
-	e_ews_connection_create_folder (cnc);
+	e_ews_connection_create_folder (cnc, cancellable);
 }
 
 static void 
@@ -157,6 +179,9 @@ op_test_find_item ()
 	const gchar *password;
 	const gchar *uri;
 	EEwsConnection *cnc;
+	GCancellable *cancellable;
+
+	cancellable = g_cancellable_new ();
 
 	util_get_login_info_from_env (&username, &password, &uri);
 	g_assert_cmpstr (username, !=, NULL);
@@ -166,7 +191,7 @@ op_test_find_item ()
 	cnc = e_ews_connection_new (uri, username, password, NULL);
 	g_assert (cnc != NULL);
 
-	e_ews_connection_find_item (cnc, "contacts");
+	e_ews_connection_find_item (cnc, "contacts", cancellable);
 }
 
 /*Run tests*/

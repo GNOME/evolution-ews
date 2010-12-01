@@ -92,9 +92,9 @@ typedef enum {
 GType          e_ews_connection_get_type (void);
 EEwsConnection *e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *password, GError **error);
 gchar* e_ews_autodiscover_ws_url (const gchar *email, const gchar *password, GError **error);
-void e_ews_connection_create_folder (EEwsConnection *cnc);
-void e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc, const gchar *sync_state, GList **folder_list);
-void e_ews_connection_find_item (EEwsConnection *cnc, const gchar *folder_name);
+void e_ews_connection_create_folder (EEwsConnection *cnc, GCancellable *cancellable);
+void e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc, const gchar *sync_state, GCancellable *cancellable, GList **folder_list);
+void e_ews_connection_find_item (EEwsConnection *cnc, const gchar *folder_name, GCancellable *cancellable);
 
 G_END_DECLS
 

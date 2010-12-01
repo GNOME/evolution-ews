@@ -57,7 +57,7 @@ struct _EEwsConnectionPrivate {
 	gchar *password;
 
 	GSList *jobs;
-	guint active_jobs;
+	GSList *active_job_queue;
 	GStaticRecMutex queue_lock;
 };
 
@@ -73,6 +73,7 @@ typedef struct _EWSNode EWSNode;
 struct _EWSNode {
 	ESoapMessage *msg;
 	GError *error;
+	EEwsConnection *cnc;
 
 	gint pri;		/* the command priority */
 	response_cb cb;
@@ -170,14 +171,89 @@ ews_next_request (EEwsConnection *cnc)
 	cnc->priv->jobs = g_slist_remove (cnc->priv->jobs, (gconstpointer *) node);
 
 	/* Add to active job queue */
-	cnc->priv->active_jobs++;
+	cnc->priv->active_job_queue = g_slist_append (cnc->priv->active_job_queue, node);
 	e_ews_connection_queue_message (cnc, node->msg, node->cb, cnc);
 
 	QUEUE_UNLOCK (cnc);
 }
 
+static gboolean
+ews_active_job_done (EEwsConnection *cnc, SoupMessage *msg)
+{
+	EWSNode *ews_node = NULL;
+	GSList *l = NULL;
+	gboolean found = FALSE;
+
+	QUEUE_LOCK (cnc);
+
+	for (l = cnc->priv->active_job_queue; l!= NULL ;l = g_slist_next (l)) {
+		ews_node = (EWSNode *) l->data;
+		if (SOUP_MESSAGE (ews_node->msg) == msg) {
+			found = TRUE;
+			/* One more job processed */
+			cnc->priv->active_job_queue = g_slist_remove (cnc->priv->active_job_queue, ews_node);
+
+			if (g_slist_length (cnc->priv->jobs))
+				g_signal_emit (cnc, signals[NEXT_REQUEST], 0);
+			else if (!g_slist_length (cnc->priv->active_job_queue))
+				g_signal_emit (cnc, signals[SHUTDOWN], 0);
+		
+			break;
+		}
+	}
+	
+	QUEUE_UNLOCK (cnc);
+
+	return found;
+}
+
+static void 
+ews_cancel_request (GCancellable *cancellable,
+		   gpointer user_data)
+{
+	EWSNode *node = user_data;
+	EEwsConnection *cnc = node->cnc;
+	gboolean found = FALSE;
+
+	g_print ("\nCanceled this request\n");
+
+	found = ews_active_job_done (cnc, SOUP_MESSAGE (node->msg));
+	if (found)
+		soup_session_cancel_message (cnc->priv->soup_session, SOUP_MESSAGE (node->msg), SOUP_STATUS_CANCELLED);
+	else {
+		QUEUE_LOCK (cnc);
+		cnc->priv->jobs = g_slist_remove (cnc->priv->jobs, (gconstpointer *) node);
+		QUEUE_UNLOCK (cnc);
+	}
+}
+
 static void
-ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_cb cb, gint pri)
+ews_add_node_to_active_queue (EEwsConnection *cnc, EWSNode *node, GCancellable *cancellable)
+{
+	gulong id = 0;
+
+	QUEUE_LOCK (cnc);
+
+	if (g_slist_length (cnc->priv->active_job_queue) < EWS_CONNECTIONS_NUMBER) {
+ 		/* FIXME put the node inside the active job list */
+ 		g_print ("\tRequest sent to the server. Response would be handled in a callback...\n");
+		cnc->priv->active_job_queue = g_slist_append (cnc->priv->active_job_queue, node);
+ 		e_ews_connection_queue_message (cnc, node->msg, node->cb, cnc);
+ 	} else {
+ 		g_print ("\tQueueing request since we have %d active parallel requests...\n", EWS_CONNECTIONS_NUMBER);
+ 		cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, (gpointer *) node, (GCompareFunc) comp_func);
+ 	}
+
+	if (cancellable)
+		id = g_cancellable_connect (cancellable,
+			      G_CALLBACK (ews_cancel_request),
+			      (gpointer *)node, NULL);
+
+ 	QUEUE_UNLOCK (cnc);
+}
+
+static void
+ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_cb cb, GCancellable *cancellable, gint pri)
 {
 	EWSNode *node;
 
@@ -185,20 +261,9 @@ ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_c
 	node->msg = msg;
 	node->pri = pri;
 	node->cb = cb;
+	node->cnc = cnc;
 
-	QUEUE_LOCK (cnc);
-	
-	if (cnc->priv->active_jobs < EWS_CONNECTIONS_NUMBER) {
-		/* FIXME put the node inside the active job list */
-		g_print ("\tRequest sent to the server. Response would be handled in a callback...\n");
-		cnc->priv->active_jobs++;
-		e_ews_connection_queue_message (cnc, msg, cb, cnc);
-	} else {
-		g_print ("\tQueueing request since we have %d active parallel requests...\n", EWS_CONNECTIONS_NUMBER);
-		cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, (gpointer *) node, (GCompareFunc) comp_func);
-	}
-	
-	QUEUE_UNLOCK (cnc);
+	ews_add_node_to_active_queue (cnc, node, cancellable);
 }
 
 /* Response callbacks */
@@ -209,6 +274,7 @@ dump_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 {
 	ESoapResponse *response;
 	EEwsConnection *cnc = (EEwsConnection *) data;
+	gboolean found = FALSE;
 
 	soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->request_body));
 	/* print request's body */
@@ -224,20 +290,10 @@ dump_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 
 		e_soap_response_dump_response (response, stdout);
 		g_print ("\n------\n");
-	}
+	} else
+		return;
 
-	QUEUE_LOCK (cnc);
-
-	/* One more job processed */
-	cnc->priv->active_jobs--;
-
-	if (g_slist_length (cnc->priv->jobs))
-		g_signal_emit (cnc, signals[NEXT_REQUEST], 0);
-	else if (!cnc->priv->active_jobs)
-		g_signal_emit (cnc, signals[SHUTDOWN], 0);
-
-	QUEUE_UNLOCK (cnc);
-
+	found = ews_active_job_done (cnc, msg);
 	/* free memory */
 	g_object_unref (response);
 }
@@ -245,10 +301,16 @@ dump_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 static void
 sync_hierarchy_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 {
-	ESoapResponse *response = e_soap_message_parse_response ((ESoapMessage *) msg);
+	ESoapResponse *response;
 	EEwsConnection *cnc = (EEwsConnection *) data;
 	ESoapParameter *param, *subparam, *node;
 	const gchar *new_sync_state = NULL;
+	gboolean found = FALSE;
+
+	response = e_soap_message_parse_response ((ESoapMessage *) msg);
+
+	if (!response)
+		return;
 
 	if (response && g_getenv ("EWS_DEBUG")) {
 		/* README: The stdout can be replaced with Evolution's
@@ -318,20 +380,10 @@ sync_hierarchy_response_cb (SoupSession *session, SoupMessage *msg, gpointer dat
 		}
 	}
 
-	QUEUE_LOCK (cnc);
-
-	/* One more job processed */
-	cnc->priv->active_jobs--;
-
-	if (g_slist_length (cnc->priv->jobs))
-		g_signal_emit (cnc, signals[NEXT_REQUEST], 0);
-	else if (!cnc->priv->active_jobs)
-		g_signal_emit (cnc, signals[SHUTDOWN], 0);
-
-	QUEUE_UNLOCK (cnc);
-
 	/* free memory */
 	g_object_unref (response);
+
+	found = ews_active_job_done (cnc, msg);
 }
 
 
@@ -385,6 +437,11 @@ e_ews_connection_dispose (GObject *object)
 		if (priv->jobs) {
 			g_slist_free (priv->jobs);
 			priv->jobs = NULL;
+		}
+
+		if (priv->active_job_queue) {
+			g_slist_free (priv->active_job_queue);
+			priv->active_job_queue = NULL;
 		}
 	}
 
@@ -687,7 +744,7 @@ failed:
 }
 
 void
-e_ews_connection_find_item (EEwsConnection *cnc, const gchar *folder_name)
+e_ews_connection_find_item (EEwsConnection *cnc, const gchar *folder_name, GCancellable *cancellable)
 {
 	ESoapMessage *msg;
 
@@ -703,11 +760,11 @@ e_ews_connection_find_item (EEwsConnection *cnc, const gchar *folder_name)
 
 	e_ews_message_write_footer (msg);
 
-	ews_connection_queue_request (cnc, msg, dump_response_cb, EWS_PRIORITY_SYNC_CHANGES);
+	ews_connection_queue_request (cnc, msg, dump_response_cb, cancellable, EWS_PRIORITY_SYNC_CHANGES);
 }
 
 void
-e_ews_connection_create_folder (EEwsConnection *cnc)
+e_ews_connection_create_folder (EEwsConnection *cnc, GCancellable *cancellable)
 {
 	ESoapMessage *msg;
 
@@ -725,11 +782,11 @@ e_ews_connection_create_folder (EEwsConnection *cnc)
 
 	e_ews_message_write_footer (msg);
 
-	ews_connection_queue_request (cnc, msg, dump_response_cb, EWS_PRIORITY_CREATE_FOLDER);
+	ews_connection_queue_request (cnc, msg, dump_response_cb, cancellable, EWS_PRIORITY_CREATE_FOLDER);
 }
 
 void
-e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc, const gchar *sync_state, GList **folder_list)
+e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc, const gchar *sync_state, GCancellable *cancellable, GList **folder_list)
 {
 	ESoapMessage *msg;
 
@@ -743,5 +800,5 @@ e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc, const gchar *sync_s
 	/* Complete the footer and print the request */
 	e_ews_message_write_footer (msg);
 
-	ews_connection_queue_request (cnc, msg, sync_hierarchy_response_cb, EWS_PRIORITY_SYNC_CHANGES);
+	ews_connection_queue_request (cnc, msg, sync_hierarchy_response_cb, cancellable, EWS_PRIORITY_SYNC_CHANGES);
 }
