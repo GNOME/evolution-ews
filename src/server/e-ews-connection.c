@@ -298,6 +298,87 @@ dump_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 	g_object_unref (response);
 }
 
+static guint
+get_response_status (ESoapParameter *param)
+{
+	ESoapParameter *subparam;
+	gchar *value;
+
+	value = e_soap_parameter_get_property (param, "ResponseClass");
+
+	if (!strcmp (value, "Error")) {
+		g_free (value);
+
+		g_print ("\nNegative case\n");
+
+		subparam = e_soap_parameter_get_first_child_by_name (param, "MessageText");
+		value = e_soap_parameter_get_string_value (subparam);
+		g_print ("\nThe message text:\n\t%s", value);
+		g_free (value);
+
+		subparam = e_soap_parameter_get_first_child_by_name (param, "ResponseCode");
+		value = e_soap_parameter_get_string_value (subparam);
+		g_print ("\nThe response code:\n\t%s", value);
+		g_free (value);
+		
+		return 0;
+	}
+
+	g_free (value);
+
+	return 1;
+}
+
+static void
+create_folder_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
+{
+	ESoapResponse *response;
+	EEwsConnection *cnc = (EEwsConnection *) data;
+	ESoapParameter *param, *subparam, *node;
+	gboolean test, found = FALSE;
+	gchar *value;
+
+	response = e_soap_message_parse_response ((ESoapMessage *) msg);
+	if (!response)
+		return;
+
+	if (response && g_getenv ("EWS_DEBUG")) {
+		/* README: The stdout can be replaced with Evolution's
+		Logging framework also */
+
+		e_soap_response_dump_response (response, stdout);
+		g_print ("\n------\n");
+	}
+
+	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
+	subparam = e_soap_parameter_get_first_child_by_name (param, "CreateFolderResponseMessage");
+	test = get_response_status (subparam);
+	if (!test)
+		goto error;
+
+	node = e_soap_parameter_get_first_child_by_name (subparam, "ResponseCode");
+
+	/* Negative cases */
+	if (strcmp (e_soap_parameter_get_string_value(node), "NoError") != E_EWS_CONNECTION_STATUS_OK) {
+		/* free memory */
+		g_object_unref (response);
+	}
+
+	node = e_soap_parameter_get_first_child_by_name (subparam, "Folders");
+	node = e_soap_parameter_get_first_child_by_name (node, "Folder");
+	subparam = e_soap_parameter_get_first_child_by_name (node, "FolderId");
+
+	value = e_soap_parameter_get_property (subparam, "Id");
+	g_print ("\nThe folder id is...%s\n", value);
+	g_free (value);
+	
+error:
+	/* free memory */
+	g_object_unref (response);
+
+	found = ews_active_job_done (cnc, msg);
+}
+
 static void
 sync_hierarchy_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 {
@@ -808,7 +889,7 @@ e_ews_connection_create_folder (EEwsConnection *cnc, GCancellable *cancellable)
 
 	e_ews_message_write_footer (msg);
 
-	ews_connection_queue_request (cnc, msg, dump_response_cb, cancellable, EWS_PRIORITY_CREATE_FOLDER);
+	ews_connection_queue_request (cnc, msg, create_folder_response_cb, cancellable, EWS_PRIORITY_CREATE_FOLDER);
 }
 
 void
