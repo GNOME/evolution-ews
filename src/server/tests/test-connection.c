@@ -110,7 +110,7 @@ con_test_autodiscover()
 	g_assert_cmpstr (uri, ==, NULL);
 }
 
-static gboolean
+static void
 cancel_sync_folder_hierarchy (gpointer data)
 {
 	GCancellable *cancellable = (GCancellable *) data;
@@ -194,6 +194,30 @@ op_test_find_item ()
 	e_ews_connection_find_item (cnc, "contacts", cancellable);
 }
 
+static void
+op_test_sync_folder_items ()
+{
+	const gchar *username;
+	const gchar *password;
+	const gchar *uri;
+	const gchar *sync_state = NULL;
+	EEwsConnection *cnc;
+	GCancellable *cancellable;
+
+	cancellable = g_cancellable_new ();
+
+	util_get_login_info_from_env (&username, &password, &uri);
+	g_assert_cmpstr (username, !=, NULL);
+	g_assert_cmpstr (password, !=, NULL);
+	g_assert_cmpstr (uri, !=, NULL);
+
+	cnc = e_ews_connection_new (uri, username, password, NULL);
+	g_assert (cnc != NULL);
+
+	/* Keep it to drafts folder for now */
+	e_ews_connection_sync_folder_items (cnc, sync_state, "drafts", cancellable);
+}
+
 /*Run tests*/
 void connection_tests_run ()
 {
@@ -224,6 +248,9 @@ idle_cb (gpointer data)
 
 	g_print ("\nTesting find item... \n");
 	op_test_find_item ();
+
+	g_print ("\n Testing sync folder items... \n");
+	op_test_sync_folder_items ();
 
 	return FALSE;
 }

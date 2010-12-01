@@ -744,6 +744,32 @@ failed:
 }
 
 void
+e_ews_connection_sync_folder_items (EEwsConnection *cnc, const gchar *sync_state, const gchar *folder_name, GCancellable *cancellable)
+{
+	ESoapMessage *msg;
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "SyncFolderItems");
+	e_soap_message_start_element (msg, "ItemShape", NULL, NULL);
+	e_ews_message_write_string_parameter (msg, "BaseShape", "types", "Default");
+	e_soap_message_end_element (msg);
+
+	e_soap_message_start_element (msg, "SyncFolderId", NULL, NULL);
+	e_ews_message_write_string_parameter_with_attribute (msg, "DistinguishedFolderId", "types", NULL, "Id", folder_name);
+	e_soap_message_end_element (msg);
+
+	if (sync_state)
+		e_ews_message_write_string_parameter (msg, "SyncState", NULL, sync_state);
+
+	/* Max changes requested */
+	e_ews_message_write_int_parameter (msg, "MaxChangesReturned", NULL, 100);
+
+	/* Complete the footer and print the request */
+	e_ews_message_write_footer (msg);
+
+	ews_connection_queue_request (cnc, msg, dump_response_cb, cancellable, EWS_PRIORITY_SYNC_CHANGES);
+}
+
+void
 e_ews_connection_find_item (EEwsConnection *cnc, const gchar *folder_name, GCancellable *cancellable)
 {
 	ESoapMessage *msg;
