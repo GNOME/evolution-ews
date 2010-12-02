@@ -618,18 +618,6 @@ e_ews_connection_class_init (EEwsConnectionClass *klass)
 		NULL, NULL,
 		g_cclosure_marshal_VOID__VOID,
 		G_TYPE_NONE, 0);
-
-	/**
-	 * EEwsConnection::shutdown
-	 **/
-	signals[SHUTDOWN] = g_signal_new (
-		"shutdown",
-		G_OBJECT_CLASS_TYPE (klass),
-		G_SIGNAL_RUN_FIRST,
-		G_STRUCT_OFFSET (EEwsConnectionClass, shutdown),
-		NULL, NULL,
-		g_cclosure_marshal_VOID__VOID,
-		G_TYPE_NONE, 0);
 }
 
 static void
