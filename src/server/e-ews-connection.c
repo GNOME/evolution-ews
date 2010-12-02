@@ -495,7 +495,7 @@ sync_hierarchy_response_cb (SoupSession *session, SoupMessage *msg, gpointer dat
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
 	async_data->folders = folders;
 	
-	g_simple_async_result_complete (enode->simple);
+	g_simple_async_result_complete_in_idle (enode->simple);
 	
 	found = ews_active_job_done (cnc, msg);
 }
@@ -934,7 +934,7 @@ e_ews_connection_sync_folder_hierarchy_start	(EEwsConnection *cnc,
                                       user_data,
                                       e_ews_connection_sync_folder_hierarchy_start);
 
-	async_data = g_new0 (EwsAsyncData, 0);
+	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
