@@ -39,6 +39,7 @@ libeews_1_2_la_LDFLAGS = $(NO_UNDEFINED)
 libeewsincludedir = $(privincludedir)/ews
 
 libeewsinclude_HEADERS =		\
+        ews-errors.h			\
         e-ews-connection.h		\
 	e-ews-folder.h			\
 	e-ews-message.h			
