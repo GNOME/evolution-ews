@@ -78,7 +78,10 @@ typedef struct _EWSNode EWSNode;
 typedef struct _EwsAsyncData EwsAsyncData;
 
 struct _EwsAsyncData {
-	GList *folders;	
+	GSList *folders_created;
+	GSList *folders_updated;	
+	GSList *folders_deleted;
+	gchar *sync_state;
 };
 
 struct _EWSNode {
@@ -410,42 +413,41 @@ sync_hierarchy_response_cb (SoupSession *session, SoupMessage *msg, gpointer dat
 	EEwsConnection *cnc = enode->cnc;
 	ESoapParameter *param, *subparam, *node;
 	EwsAsyncData *async_data;
-	const gchar *new_sync_state = NULL;
-	GList *folders = NULL;
+	gchar *new_sync_state = NULL;
+	GSList *folders_created = NULL, *folders_updated = NULL, *folders_deleted = NULL;
 
 	response = e_soap_message_parse_response ((ESoapMessage *) msg);
 
-	if (!response)
-		return;
-
-	if (response && g_getenv ("EWS_DEBUG")) {
-		/* README: The stdout can be replaced with Evolution's
-		Logging framework also */
-
-		e_soap_response_dump_response (response, stdout);
-		g_print ("\n------\n");
+	if (!response) {
+		g_simple_async_result_set_error	(enode->simple,
+						 EWS_CONNECTION_ERROR,
+						 EWS_CONNECTION_STATUS_NO_RESPONSE,
+						 _("No response"));
+		goto exit;	
 	}
+
+	if (response && g_getenv ("EWS_DEBUG"))
+		e_soap_response_dump_response (response, stdout);
 
 	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
 	subparam = e_soap_parameter_get_first_child_by_name (param, "SyncFolderHierarchyResponseMessage");
 	node = e_soap_parameter_get_first_child_by_name (subparam, "ResponseCode");
 
-	/* Negative cases */
-	if (strcmp (e_soap_parameter_get_string_value(node), "NoError") != EWS_CONNECTION_STATUS_OK) {
+	/* FIXME map and return proper error code */
+	if (strcmp (e_soap_parameter_get_string_value(node), "NoError") != 0) {
 		/* free memory */
 		g_object_unref (response);
+		goto exit;	
 	}
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "SyncState");
 	new_sync_state = e_soap_parameter_get_string_value (node);
-	g_print ("\n The sync state is... \n %s\n", new_sync_state);
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "IncludesLastFolderInRange");
-	if (!strcmp (e_soap_parameter_get_string_value (node), "true")) {
-		/* This suggests we have received all the data and no need to make more sync
-		 * hierarchy requests.
-		 */
-	}
+	
+	/* No change in data */
+	if (!strcmp (e_soap_parameter_get_string_value (node), "true"))
+		goto exit;
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "Changes");
 	
@@ -457,7 +459,7 @@ sync_hierarchy_response_cb (SoupSession *session, SoupMessage *msg, gpointer dat
 			EEwsFolder *folder;
 
 			folder = e_ews_folder_new_from_soap_parameter (subparam1);
-			/* Add the folders in the "created" list of folders */
+			folders_created = g_slist_append (folders_created, folder);
 		}
 
 		for (subparam1 = e_soap_parameter_get_first_child_by_name (node, "Update");
@@ -466,7 +468,7 @@ sync_hierarchy_response_cb (SoupSession *session, SoupMessage *msg, gpointer dat
 			EEwsFolder *folder;
 
 			folder = e_ews_folder_new_from_soap_parameter (subparam1);
-			/* Add the folders in the "updated" list of folders */
+			folders_updated = g_slist_append (folders_updated, folder);
 		}
 
 		for (subparam1 = e_soap_parameter_get_first_child_by_name (node, "Delete");
@@ -477,22 +479,20 @@ sync_hierarchy_response_cb (SoupSession *session, SoupMessage *msg, gpointer dat
 
 			folder_param = e_soap_parameter_get_first_child_by_name (subparam1, "FolderId");
 			value = e_soap_parameter_get_property (folder_param, "Id");
-			g_print("\n The deleted folder id is... %s\n", value);
-			g_free (value);
-
-//			/* Should we construct a folder for the delete types? */
-//			folder = e_ews_folder_new_from_soap_parameter (subparam1);
-			/* Add the folders in the "deleted" list of folders */
+			folders_deleted = g_slist_append (folders_deleted, value);
 		}
 	}
 
 	/* free memory */
 	g_object_unref (response);
 
-	/* FIXME propogate errors */
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
-	async_data->folders = folders;
-	
+	async_data->folders_created = folders_created;
+	async_data->folders_updated = folders_updated;
+	async_data->folders_deleted = folders_deleted;
+	async_data->sync_state = new_sync_state;
+
+exit:	
 	g_simple_async_result_complete_in_idle (enode->simple);
 	ews_active_job_done (cnc, msg);
 }
@@ -926,53 +926,69 @@ e_ews_connection_sync_folder_hierarchy_start	(EEwsConnection *cnc,
 }
 
 
-GList * 
+void
 e_ews_connection_sync_folder_hierarchy_finish	(EEwsConnection *cnc, 
-						 GAsyncResult *result, 
+						 GAsyncResult *result,
+					 	 gchar **sync_state, 
+						 GSList **folders_created,
+						 GSList **folders_updated,
+						 GSList **folders_deleted,
 						 GError **error)
 {
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
-	g_return_val_if_fail (
+	g_return_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_sync_folder_hierarchy_start), NULL);
+		result, G_OBJECT (cnc), e_ews_connection_sync_folder_hierarchy_start));
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
 	async_data = g_simple_async_result_get_op_res_gpointer (simple);
 
 	if (g_simple_async_result_propagate_error (simple, error))
-		return NULL;
+		return;
+	
+	*sync_state = async_data->sync_state;
+	*folders_created = async_data->folders_created;
+	*folders_updated = async_data->folders_updated;
+	*folders_deleted = async_data->folders_deleted;
 
-	return async_data->folders;
+	return;
 }
 
-GList *	
+void
 e_ews_connection_sync_folder_hierarchy	(EEwsConnection *cnc, 
 					 gint pri, 
-					 const gchar *sync_state, 
+					 gchar **sync_state, 
+					 GSList **folders_created,
+					 GSList **folders_updated,
+					 GSList **folders_deleted,
 					 GCancellable *cancellable, 
 					 GError **error)
 {
 	EwsSyncData *sync_data;
-	GList *folders;
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->context = g_main_context_new ();
 	sync_data->loop = g_main_loop_new (sync_data->context, FALSE);
 	
 	g_main_context_push_thread_default (sync_data->context);
-	e_ews_connection_sync_folder_hierarchy_start	(cnc, pri, sync_state, 
+	e_ews_connection_sync_folder_hierarchy_start	(cnc, pri, *sync_state, 
 							 ews_sync_reply_cb, cancellable, 
 							 (gpointer) sync_data);
 
 	g_main_loop_run (sync_data->loop);
-	folders = e_ews_connection_sync_folder_hierarchy_finish	(cnc, sync_data->res, error);
+	e_ews_connection_sync_folder_hierarchy_finish	(cnc, sync_data->res, 
+							 sync_state,
+							 folders_created,
+							 folders_updated,
+							 folders_deleted,
+							 error);
 
 	g_main_context_unref (sync_data->context);
 	g_main_loop_unref (sync_data->loop);
 	g_object_unref (sync_data->res);
 	g_free (sync_data);
 
-	return folders;  
+	return;
 }

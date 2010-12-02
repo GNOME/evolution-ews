@@ -96,10 +96,13 @@ void e_ews_connection_sync_folder_items
 						 GCancellable *cancellable);
 
 /* Get folder hierarchy */
-GList *	e_ews_connection_sync_folder_hierarchy 
+void	e_ews_connection_sync_folder_hierarchy 
 						(EEwsConnection *cnc, 
 						 gint pri, 
-						 const gchar *sync_state, 
+						 gchar **sync_state, 
+						 GSList **folders_created,
+						 GSList **folders_updated,
+						 GSList **folders_deleted,
 						 GCancellable *cancellable, 
 						 GError **error);
 void	e_ews_connection_sync_folder_hierarchy_start 
@@ -109,9 +112,13 @@ void	e_ews_connection_sync_folder_hierarchy_start
 						 GAsyncReadyCallback cb, 
 						 GCancellable *cancellable,
 						 gpointer user_data);
-GList *	e_ews_connection_sync_folder_hierarchy_finish 
+void	e_ews_connection_sync_folder_hierarchy_finish 
 						(EEwsConnection *cnc, 
 						 GAsyncResult *result, 
+						 gchar **sync_state, 
+						 GSList **folders_created,
+						 GSList **folders_updated,
+						 GSList **folders_deleted,
 						 GError **error);
 
 G_END_DECLS
