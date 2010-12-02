@@ -32,7 +32,7 @@
 #define d(x) x
 
 /* For the number of connections */
-#define EWS_CONNECTIONS_NUMBER 2
+#define EWS_CONNECTION_MAX_REQUESTS 2
 
 #define QUEUE_LOCK(x) (g_static_rec_mutex_lock(&(x)->priv->queue_lock))
 #define QUEUE_UNLOCK(x) (g_static_rec_mutex_unlock(&(x)->priv->queue_lock))
@@ -234,7 +234,7 @@ ews_next_request (EEwsConnection *cnc)
 	l = cnc->priv->jobs;
 	node = (EWSNode *) l->data;
 
-	if (g_slist_length (cnc->priv->active_job_queue) >= EWS_CONNECTIONS_NUMBER) {
+	if (g_slist_length (cnc->priv->active_job_queue) >= EWS_CONNECTION_MAX_REQUESTS) {
 		QUEUE_UNLOCK (cnc);
 		return;
 	}
