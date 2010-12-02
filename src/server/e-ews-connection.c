@@ -187,11 +187,15 @@ ews_next_request (EEwsConnection *cnc)
 	l = cnc->priv->jobs;
 	node = (EWSNode *) l->data;
 
+	if (g_slist_length (cnc->priv->active_job_queue) >= EWS_CONNECTIONS_NUMBER) {
+		QUEUE_UNLOCK (cnc);
+		return;
+	}
+
 	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) == 1)) {
 		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (node->msg)->request_body));
 		/* print request's body */
 		printf ("\n The request headers");
-		printf ("\n ===================");
 		fputc ('\n', stdout);
 		fputs (SOUP_MESSAGE (node->msg)->request_body->data, stdout);
 		fputc ('\n', stdout);
@@ -259,31 +263,6 @@ ews_cancel_request (GCancellable *cancellable,
 }
 
 static void
-ews_add_node_to_active_queue (EEwsConnection *cnc, EWSNode *node, GCancellable *cancellable)
-{
-	gulong id = 0;
-
-	QUEUE_LOCK (cnc);
-
-	if (g_slist_length (cnc->priv->active_job_queue) < EWS_CONNECTIONS_NUMBER) {
- 		/* FIXME put the node inside the active job list */
- 		g_print ("\tRequest sent to the server. Response would be handled in a callback...\n");
-		cnc->priv->active_job_queue = g_slist_append (cnc->priv->active_job_queue, node);
- 		e_ews_connection_queue_message (cnc, node->msg, node->cb, cnc);
- 	} else {
- 		g_print ("\tQueueing request since we have %d active parallel requests...\n", EWS_CONNECTIONS_NUMBER);
- 		cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, (gpointer *) node, (GCompareFunc) comp_func);
- 	}
-
-	if (cancellable)
-		id = g_cancellable_connect (cancellable,
-			      G_CALLBACK (ews_cancel_request),
-			      (gpointer *)node, NULL);
-
- 	QUEUE_UNLOCK (cnc);
-}
-
-static void
 ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_cb cb, gint pri, GCancellable *cancellable, GSimpleAsyncResult *simple)
 {
 	EWSNode *node;
@@ -295,7 +274,20 @@ ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_c
 	node->cnc = cnc;
 	node->simple = simple;
 
-	ews_add_node_to_active_queue (cnc, node, cancellable);
+	QUEUE_LOCK (cnc);
+
+	g_print ("\tQueueing request since we have %d active parallel requests...\n", EWS_CONNECTIONS_NUMBER);
+	cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, (gpointer *) node, (GCompareFunc) comp_func);
+
+ 	QUEUE_UNLOCK (cnc);
+
+	if (cancellable)
+		g_cancellable_connect (cancellable,
+					G_CALLBACK (ews_cancel_request),
+					(gpointer *)node, NULL);
+
+
+	g_signal_emit (cnc, signals[NEXT_REQUEST], 0);
 }
 
 /* Response callbacks */
