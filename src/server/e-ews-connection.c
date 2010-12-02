@@ -69,7 +69,6 @@ struct _EEwsConnectionPrivate {
 
 enum {
 	NEXT_REQUEST,
-	SHUTDOWN,
 	LAST_SIGNAL
 };
 
