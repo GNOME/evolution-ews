@@ -168,20 +168,6 @@ comp_func (gconstpointer a, gconstpointer b)
 }
 
 static void
-e_ews_connection_queue_message (EEwsConnection *cnc, ESoapMessage *msg, SoupSessionCallback callback,
-			   gpointer user_data)
-{
-	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
-	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
-
-	QUEUE_LOCK (cnc);
-
-	soup_session_queue_message (cnc->priv->soup_session, SOUP_MESSAGE (msg), callback, user_data);
-
-	QUEUE_UNLOCK (cnc);
-}
-
-static void
 ews_next_request (EEwsConnection *cnc)
 {
 	GSList *l;
@@ -211,7 +197,8 @@ ews_next_request (EEwsConnection *cnc)
 
 	/* Add to active job queue */
 	cnc->priv->active_job_queue = g_slist_append (cnc->priv->active_job_queue, node);
-	e_ews_connection_queue_message (cnc, node->msg, node->cb, node);
+	
+	soup_session_queue_message (cnc->priv->soup_session, SOUP_MESSAGE (node->msg), node->callback, node);
 
 	QUEUE_UNLOCK (cnc);
 }
@@ -424,7 +411,6 @@ sync_hierarchy_response_cb (SoupSession *session, SoupMessage *msg, gpointer dat
 	ESoapParameter *param, *subparam, *node;
 	EwsAsyncData *async_data;
 	const gchar *new_sync_state = NULL;
-	gboolean found = FALSE;
 	GList *folders = NULL;
 
 	response = e_soap_message_parse_response ((ESoapMessage *) msg);
@@ -508,8 +494,7 @@ sync_hierarchy_response_cb (SoupSession *session, SoupMessage *msg, gpointer dat
 	async_data->folders = folders;
 	
 	g_simple_async_result_complete_in_idle (enode->simple);
-	
-	found = ews_active_job_done (cnc, msg);
+	ews_active_job_done (cnc, msg);
 }
 
 
