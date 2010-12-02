@@ -45,6 +45,12 @@ static void ews_next_request (EEwsConnection *cnc);
 static gint comp_func (gconstpointer a, gconstpointer b);
 static GQuark ews_connection_error_quark (void);
 typedef void (*response_cb) (SoupSession *session, SoupMessage *msg, gpointer user_data);
+static void 
+ews_connection_authenticate	(SoupSession *sess, SoupMessage *msg,
+				 SoupAuth *auth, gboolean retrying, 
+				 gpointer data);
+
+/* Connection APIS */
 
 #define  EWS_CONNECTION_ERROR \
          (ews_connection_error_quark ())
@@ -211,6 +217,14 @@ ews_next_request (EEwsConnection *cnc)
 	QUEUE_UNLOCK (cnc);
 }
 
+/**
+ * ews_active_job_done 
+ * @cnc: 
+ * @msg: 
+ * Removes the node from active Queue and free's the node	 
+ * 
+ * Returns: 
+ **/
 static gboolean
 ews_active_job_done (EEwsConnection *cnc, SoupMessage *msg)
 {
@@ -220,25 +234,18 @@ ews_active_job_done (EEwsConnection *cnc, SoupMessage *msg)
 
 	QUEUE_LOCK (cnc);
 
-	/* FIXME Free the node */
 	for (l = cnc->priv->active_job_queue; l!= NULL ;l = g_slist_next (l)) {
 		ews_node = (EWSNode *) l->data;
 		if (SOUP_MESSAGE (ews_node->msg) == msg) {
 			found = TRUE;
-			/* One more job processed */
 			cnc->priv->active_job_queue = g_slist_remove (cnc->priv->active_job_queue, ews_node);
-
-			if (g_slist_length (cnc->priv->jobs))
-				g_signal_emit (cnc, signals[NEXT_REQUEST], 0);
-			else if (!g_slist_length (cnc->priv->active_job_queue))
-				g_signal_emit (cnc, signals[SHUTDOWN], 0);
-		
 			break;
 		}
 	}
 	
 	QUEUE_UNLOCK (cnc);
 
+	g_free (ews_node);
 	return found;
 }
 
@@ -248,18 +255,28 @@ ews_cancel_request (GCancellable *cancellable,
 {
 	EWSNode *node = user_data;
 	EEwsConnection *cnc = node->cnc;
+	GSimpleAsyncResult *simple = node->simple;
+	ESoapMessage *msg = node->msg;
 	gboolean found = FALSE;
 
 	g_print ("\nCanceled this request\n");
 
 	found = ews_active_job_done (cnc, SOUP_MESSAGE (node->msg));
 	if (found)
-		soup_session_cancel_message (cnc->priv->soup_session, SOUP_MESSAGE (node->msg), SOUP_STATUS_CANCELLED);
+		soup_session_cancel_message (cnc->priv->soup_session, SOUP_MESSAGE (msg), SOUP_STATUS_CANCELLED);
 	else {
 		QUEUE_LOCK (cnc);
-		cnc->priv->jobs = g_slist_remove (cnc->priv->jobs, (gconstpointer *) node);
+		cnc->priv->jobs = g_slist_remove (cnc->priv->jobs, (gconstpointer) node);
 		QUEUE_UNLOCK (cnc);
+
+		g_free (node);
 	}
+
+	g_simple_async_result_set_error	(simple,
+					 EWS_CONNECTION_ERROR,
+					 EWS_CONNECTION_STATUS_CANCELLED,
+					 _("Operation Cancelled"));
+	g_simple_async_result_complete_in_idle (simple);
 }
 
 static void
@@ -275,19 +292,15 @@ ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_c
 	node->simple = simple;
 
 	QUEUE_LOCK (cnc);
-
-	g_print ("\tQueueing request since we have %d active parallel requests...\n", EWS_CONNECTIONS_NUMBER);
 	cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, (gpointer *) node, (GCompareFunc) comp_func);
-
  	QUEUE_UNLOCK (cnc);
 
 	if (cancellable)
-		g_cancellable_connect (cancellable,
-					G_CALLBACK (ews_cancel_request),
-					(gpointer *)node, NULL);
+		g_cancellable_connect	(cancellable,
+					 G_CALLBACK (ews_cancel_request),
+					 (gpointer) node, NULL);
 
-
-	g_signal_emit (cnc, signals[NEXT_REQUEST], 0);
+	g_signal_emit	(cnc, signals[NEXT_REQUEST], 0);
 }
 
 /* Response callbacks */
@@ -383,7 +396,7 @@ create_folder_response_cb (SoupSession *session, SoupMessage *msg, gpointer data
 	node = e_soap_parameter_get_first_child_by_name (subparam, "ResponseCode");
 
 	/* Negative cases */
-	if (strcmp (e_soap_parameter_get_string_value(node), "NoError") != E_EWS_CONNECTION_STATUS_OK) {
+	if (strcmp (e_soap_parameter_get_string_value(node), "NoError") != EWS_CONNECTION_STATUS_OK) {
 		/* free memory */
 		g_object_unref (response);
 	}
@@ -433,7 +446,7 @@ sync_hierarchy_response_cb (SoupSession *session, SoupMessage *msg, gpointer dat
 	node = e_soap_parameter_get_first_child_by_name (subparam, "ResponseCode");
 
 	/* Negative cases */
-	if (strcmp (e_soap_parameter_get_string_value(node), "NoError") != E_EWS_CONNECTION_STATUS_OK) {
+	if (strcmp (e_soap_parameter_get_string_value(node), "NoError") != EWS_CONNECTION_STATUS_OK) {
 		/* free memory */
 		g_object_unref (response);
 	}
@@ -632,13 +645,14 @@ e_ews_connection_init (EEwsConnection *cnc)
 	priv->soup_session = soup_session_async_new_with_options (SOUP_SESSION_USE_NTLM, TRUE, NULL);
 
 	g_signal_connect (cnc, "next_request", G_CALLBACK (ews_next_request), NULL);
-
+	g_signal_connect (priv->soup_session, "authenticate", G_CALLBACK(ews_connection_authenticate), cnc);
+	g_signal_connect (priv->soup_session, "request-unqueued", G_CALLBACK (ews_next_request), cnc);
 }
 
 static void 
-ews_connection_authenticate (SoupSession *sess, SoupMessage *msg,
-					SoupAuth *auth, gboolean retrying, 
-					gpointer data)
+ews_connection_authenticate	(SoupSession *sess, SoupMessage *msg,
+				 SoupAuth *auth, gboolean retrying, 
+				 gpointer data)
 {
 	EEwsConnection *cnc = data;
 	
@@ -697,8 +711,6 @@ e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *pass
 	cnc->priv->password = g_strdup (password);
 	cnc->priv->uri = g_strdup (uri);
 
-	g_signal_connect (cnc->priv->soup_session, "authenticate",
-			  G_CALLBACK(ews_connection_authenticate), cnc);
 
 	/* add the connection to the loaded_connections_permissions hash table */
 	hash_key = g_strdup_printf ("%s:%s@%s",
