@@ -25,6 +25,7 @@
 #define E_EWS_CONNECTION_H
 
 #include <glib-object.h>
+#include <gio/gio.h>
 #include <libsoup/soup.h>
 #include <libedataserver/e-soap-message.h>
 
@@ -52,24 +53,10 @@ struct _EEwsConnectionClass {
 	void	(*shutdown)	(EEwsConnection *cnc);
 };
 
-/* Operations on the store (folder_tree) will have highest priority as we know for sure they are sync
-   and user triggered. */
 enum {
-	EWS_PRIORITY_CREATE_FOLDER = 200,
-	EWS_PRIORITY_DELETE_FOLDER = 200,
-	EWS_PRIORITY_RENAME_FOLDER = 200,
-	EWS_PRIORITY_MANAGE_SUBSCRIPTION = 200,
-	EWS_PRIORITY_SYNC_CHANGES = 150,
-	EWS_PRIORITY_EXPUNGE = 150,
-	EWS_PRIORITY_GET_MESSAGE = 100,
-	EWS_PRIORITY_REFRESH_INFO = 0,
-	EWS_PRIORITY_NOOP = 0,
-	EWS_PRIORITY_NEW_MESSAGES = 0,
-	EWS_PRIORITY_APPEND_MESSAGE = -60,
-	EWS_PRIIORITY_COPY_MESSAGE = -60,
-	EWS_PRIORITY_LIST = -80,
-	EWS_PRIORITY_IDLE = -100,
-	EWS_PRIORITY_SYNC_MESSAGE = -120
+	EWS_PRIORITY_LOW,
+	EWS_PRIORITY_MEDIUM,
+	EWS_PRIORITY_HIGH
 };
 
 typedef enum {
@@ -83,19 +70,49 @@ typedef enum {
 	E_EWS_CONNECTION_STATUS_BAD_PARAMETER,
 	E_EWS_CONNECTION_STATUS_ITEM_ALREADY_ACCEPTED,
 	E_EWS_CONNECTION_STATUS_REDIRECT,
+	E_EWS_CONNECTION_STATUS_CANCELLED,
 	E_EWS_CONNECTION_STATUS_OTHER,
 	E_EWS_CONNECTION_STATUS_UNKNOWN,
 	E_EWS_CONNECTION_STATUS_INVALID_PASSWORD = 53273,
 	E_EWS_CONNECTION_STATUS_OVER_QUOTA = 58652
 } EEwsConnectionStatus;
 
-GType          e_ews_connection_get_type (void);
-EEwsConnection *e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *password, GError **error);
-gchar* e_ews_autodiscover_ws_url (const gchar *email, const gchar *password, GError **error);
-void e_ews_connection_create_folder (EEwsConnection *cnc, GCancellable *cancellable);
-void e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc, const gchar *sync_state, GCancellable *cancellable, GList **folder_list);
-void e_ews_connection_find_item (EEwsConnection *cnc, const gchar *folder_name, GCancellable *cancellable);
-void e_ews_connection_sync_folder_items (EEwsConnection *cnc, const gchar *sync_state, const gchar *folder_name, GCancellable *cancellable);
+
+GType          e_ews_connection_get_type	(void);
+EEwsConnection *e_ews_connection_new		(const gchar *uri,
+						 const gchar *username, 
+						 const gchar *password, 
+						 GError **error);
+gchar* e_ews_autodiscover_ws_url		(const gchar *email,
+						 const gchar *password, 
+						 GError **error);
+
+void e_ews_connection_create_folder		(EEwsConnection *cnc, 
+						 GCancellable *cancellable);
+void e_ews_connection_sync_folder_items 
+						(EEwsConnection *cnc, 
+						 const gchar *sync_state, 
+						 const gchar *folder_name, 
+						 GCancellable *cancellable);
+
+/* Get folder hierarchy */
+GList *	e_ews_connection_sync_folder_hierarchy 
+						(EEwsConnection *cnc, 
+						 gint pri, 
+						 const gchar *sync_state, 
+						 GCancellable *cancellable, 
+						 GError **error);
+void	e_ews_connection_sync_folder_hierarchy_start 
+						(EEwsConnection *cnc, 
+						 gint pri, 
+						 const gchar *sync_state, 
+						 GAsyncReadyCallback cb, 
+						 GCancellable *cancellable,
+						 gpointer user_data);
+GList *	e_ews_connection_sync_folder_hierarchy_finish 
+						(EEwsConnection *cnc, 
+						 GAsyncResult *result, 
+						 GError **error);
 
 G_END_DECLS
 
