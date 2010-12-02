@@ -198,7 +198,7 @@ ews_next_request (EEwsConnection *cnc)
 	/* Add to active job queue */
 	cnc->priv->active_job_queue = g_slist_append (cnc->priv->active_job_queue, node);
 	
-	soup_session_queue_message (cnc->priv->soup_session, SOUP_MESSAGE (node->msg), node->callback, node);
+	soup_session_queue_message (cnc->priv->soup_session, SOUP_MESSAGE (node->msg), node->cb, node);
 
 	QUEUE_UNLOCK (cnc);
 }
