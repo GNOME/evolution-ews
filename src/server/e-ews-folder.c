@@ -109,7 +109,6 @@ e_ews_folder_init (EEwsFolder *folder)
 gboolean
 e_ews_folder_set_from_soap_parameter (EEwsFolder *folder, ESoapParameter *param)
 {
-	const gchar *folder_name;
 	gchar *value;
 	ESoapParameter *subparam, *node;
 

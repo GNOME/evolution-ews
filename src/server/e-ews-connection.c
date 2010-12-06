@@ -41,8 +41,6 @@ G_DEFINE_TYPE (EEwsConnection, e_ews_connection, G_TYPE_OBJECT)
 
 static GObjectClass *parent_class = NULL;
 static GHashTable *loaded_connections_permissions = NULL;
-static GHashTable *ews_error_hash = NULL;
-static GOnce setup_error_once = G_ONCE_INIT;
 static void ews_next_request (EEwsConnection *cnc);
 static gint comp_func (gconstpointer a, gconstpointer b);
 static GQuark ews_connection_error_quark (void);
@@ -116,18 +114,6 @@ ews_connection_error_quark (void)
 	return quark;
 }
 
-static gpointer
-setup_error_map (gpointer data)
-{
-	gint i;
-
-	ews_error_hash = g_hash_table_new	(g_str_hash, g_str_equal);
-	for (i = 0; i < G_N_ELEMENTS(ews_conn_errors); i++)
-		g_hash_table_insert	(ews_error_hash, (gpointer) ews_conn_errors[i].error_id, 
-					 GINT_TO_POINTER (ews_conn_errors[i].error_code));
-	return NULL;
-}
-
 static void
 async_data_free (EwsAsyncData *async_data)
 {
@@ -196,17 +182,14 @@ ews_get_response_status (ESoapParameter *param, GError **error)
 	if (!g_ascii_strcasecmp (value, "Error")) {
 		gchar *desc, *res;
 		gint error_code = ERROR_UNKNOWN;
-		gpointer data;
 
 		subparam = e_soap_parameter_get_first_child_by_name (param, "MessageText");
 		desc = e_soap_parameter_get_string_value (subparam);
 
 		subparam = e_soap_parameter_get_first_child_by_name (param, "ResponseCode");
 		res = e_soap_parameter_get_string_value (subparam);
-
-		data = g_hash_table_lookup (ews_error_hash, (gconstpointer) res);
-		if (data)
-			error_code = GPOINTER_TO_INT (data);
+		
+		error_code = ews_get_error_code ((const gchar *) res);
 
 		g_set_error	(error, 
 				 EWS_CONNECTION_ERROR,
@@ -647,8 +630,6 @@ e_ews_connection_init (EEwsConnection *cnc)
 	/* allocate internal structure */
 	priv = g_new0 (EEwsConnectionPrivate, 1);
 	cnc->priv = priv;
-
-	g_once (&setup_error_once, setup_error_map, NULL);
 
 	/* create the SoupSession for this connection */
 	priv->soup_session = soup_session_async_new_with_options (SOUP_SESSION_USE_NTLM, TRUE, NULL);

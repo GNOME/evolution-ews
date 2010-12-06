@@ -23,6 +23,7 @@ libeews_1_2_la_CPPFLAGS = \
 
 libeews_1_2_la_SOURCES =		\
         ews-errors.h			\
+        ews-errors.c			\
 	e-ews-connection.c		\
 	e-ews-connection.h		\
 	e-ews-folder.c			\
