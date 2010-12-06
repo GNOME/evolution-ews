@@ -303,7 +303,8 @@ struct EwsErrorMap {
 	gint error_code;
 };
 
-struct EwsErrorMap ews_conn_errors [] =
+struct EwsErrorMap 
+ews_conn_errors [] =
 {
 	{"ErrorAccessDenied",					ERROR_ACCESSDENIED},
 	{"ErrorAccountDisabled",				ERROR_ACCOUNTDISABLED},

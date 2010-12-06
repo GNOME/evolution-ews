@@ -223,6 +223,17 @@ ews_get_response_status (ESoapParameter *param, GError **error)
 	return TRUE;
 }
 
+
+static void
+soup_request_unqueued (SoupSession *session, SoupMessage *msg, gpointer user_data)
+{
+	EEwsConnection *cnc;
+
+	cnc = E_EWS_CONNECTION (user_data);
+
+	ews_next_request (cnc);
+}
+
 static void
 ews_next_request (EEwsConnection *cnc)
 {
@@ -232,12 +243,13 @@ ews_next_request (EEwsConnection *cnc)
 	QUEUE_LOCK (cnc);
 
 	l = cnc->priv->jobs;
-	node = (EWSNode *) l->data;
 
-	if (g_slist_length (cnc->priv->active_job_queue) >= EWS_CONNECTION_MAX_REQUESTS) {
+	if (!l || g_slist_length (cnc->priv->active_job_queue) >= EWS_CONNECTION_MAX_REQUESTS) {
 		QUEUE_UNLOCK (cnc);
 		return;
 	}
+	
+	node = (EWSNode *) l->data;
 
 	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) == 1)) {
 		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (node->msg)->request_body));
@@ -469,9 +481,9 @@ sync_hierarchy_response_cb (SoupSession *session, SoupMessage *msg, gpointer dat
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "IncludesLastFolderInRange");
 	
-	/* No change in data */
-	if (!strcmp (e_soap_parameter_get_string_value (node), "true"))
-		goto exit;
+	/* FIXME Understand and handle this better. No change in data */
+	if (!strcmp (e_soap_parameter_get_string_value (node), "true")) {
+	}
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "Changes");
 	
@@ -547,36 +559,37 @@ e_ews_connection_dispose (GObject *object)
 		g_free (hash_key);
 	}
 
-	if (priv) {
-		if (priv->soup_session) {
-			g_object_unref (priv->soup_session);
-			priv->soup_session = NULL;
-		}
+	g_signal_handlers_disconnect_by_func	(priv->soup_session, ews_connection_authenticate, cnc);
+	g_signal_handlers_disconnect_by_func 	(priv->soup_session, soup_request_unqueued, cnc);
 
-		if (priv->uri) {
-			g_free (priv->uri);
-			priv->uri = NULL;
-		}
+	if (priv->soup_session) {
+		g_object_unref (priv->soup_session);
+		priv->soup_session = NULL;
+	}
 
-		if (priv->username) {
-			g_free (priv->username);
-			priv->username = NULL;
-		}
+	if (priv->uri) {
+		g_free (priv->uri);
+		priv->uri = NULL;
+	}
 
-		if (priv->password) {
-			g_free (priv->password);
-			priv->password = NULL;
-		}
+	if (priv->username) {
+		g_free (priv->username);
+		priv->username = NULL;
+	}
 
-		if (priv->jobs) {
-			g_slist_free (priv->jobs);
-			priv->jobs = NULL;
-		}
+	if (priv->password) {
+		g_free (priv->password);
+		priv->password = NULL;
+	}
 
-		if (priv->active_job_queue) {
-			g_slist_free (priv->active_job_queue);
-			priv->active_job_queue = NULL;
-		}
+	if (priv->jobs) {
+		g_slist_free (priv->jobs);
+		priv->jobs = NULL;
+	}
+
+	if (priv->active_job_queue) {
+		g_slist_free (priv->active_job_queue);
+		priv->active_job_queue = NULL;
 	}
 
 	if (parent_class->dispose)
@@ -612,7 +625,6 @@ e_ews_connection_class_init (EEwsConnectionClass *klass)
 	object_class->finalize = e_ews_connection_finalize;
 
 	klass->next_request = NULL;
-	klass->shutdown = NULL;
 
 	/**
 	 * EEwsConnection::next_request
@@ -643,7 +655,7 @@ e_ews_connection_init (EEwsConnection *cnc)
 
 	g_signal_connect (cnc, "next_request", G_CALLBACK (ews_next_request), NULL);
 	g_signal_connect (priv->soup_session, "authenticate", G_CALLBACK(ews_connection_authenticate), cnc);
-	g_signal_connect (priv->soup_session, "request-unqueued", G_CALLBACK (ews_next_request), cnc);
+	g_signal_connect (priv->soup_session, "request-unqueued", G_CALLBACK (soup_request_unqueued), cnc);
 }
 
 static void 

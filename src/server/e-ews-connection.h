@@ -51,7 +51,6 @@ struct _EEwsConnectionClass {
 	GObjectClass parent_class;
 
 	void	(*next_request) (EEwsConnection *cnc);
-	void	(*shutdown)	(EEwsConnection *cnc);
 };
 
 enum {
