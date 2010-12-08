@@ -21,7 +21,6 @@ libcamelews_la_SOURCES = 			\
 	camel-ews-store.c                 \
 	camel-ews-summary.c               \
 	camel-ews-provider.c		\
-	camel-ews-store-summary.c         \
 	camel-ews-utils.c			\
 	camel-ews-transport.c     	       	
 
@@ -30,7 +29,6 @@ noinst_HEADERS =         			\
 	camel-ews-private.h		\
 	camel-ews-store.h			\
 	camel-ews-summary.h		\
-	camel-ews-store-summary.h		\
 	camel-ews-utils.h			\
 	camel-ews-transport.h		
 

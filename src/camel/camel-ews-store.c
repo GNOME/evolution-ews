@@ -38,7 +38,6 @@
 #include <glib/gstdio.h>
 
 #include "camel-ews-folder.h"
-#include "camel-ews-store-summary.h"
 #include "camel-ews-store.h"
 #include "camel-ews-summary.h"
 #include "camel-ews-utils.h"
@@ -308,7 +307,6 @@ camel_ews_store_init (CamelEwsStore *ews_store)
 	ews_store->priv =
 		CAMEL_EWS_STORE_GET_PRIVATE (ews_store);
 
-	d("in ews store init\n");
 	ews_store->priv->server_name = NULL;
 	ews_store->priv->port = NULL;
 	ews_store->priv->use_ssl = NULL;

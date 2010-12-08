@@ -26,8 +26,6 @@
 
 #include <camel/camel.h>
 
-#include "camel-ews-store-summary.h"
-
 #include <e-ews-connection.h>
 
 /* Standard GObject macros */
