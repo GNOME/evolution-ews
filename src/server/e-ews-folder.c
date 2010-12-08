@@ -30,8 +30,8 @@ G_DEFINE_TYPE (EEwsFolder, e_ews_folder, G_TYPE_OBJECT)
 
 struct _EEwsFolderPrivate {
 	gchar *name;
-	gchar *id;
-	gchar *parent;
+	EwsFolderId *fid;
+	EwsFolderId *parent_fid;
 	gchar *folder_class;
 	EwsFolderType folder_type;
 	guint32 unread;
@@ -61,25 +61,28 @@ e_ews_folder_finalize (GObject *object)
 	g_return_if_fail (E_IS_EWS_FOLDER (folder));
 
 	priv = folder->priv;
-	if (priv) {
-		if (priv->name) {
-			g_free (priv->name);
-			priv->name = NULL;
-		}
 
-		if (priv->id) {
-			g_free (priv->id);
-			priv->id = NULL;
-		}
-
-		if (priv->parent) {
-			g_free (priv->parent);
-			priv->parent = NULL;
-		}
-
-		g_free (priv);
-		folder->priv = NULL;
+	if (priv->name) {
+		g_free (priv->name);
+		priv->name = NULL;
 	}
+
+	if (priv->fid) {
+		g_free (priv->fid->id);
+		g_free (priv->fid->change_key);
+		g_free (priv->fid);
+		priv->fid = NULL;
+	}
+
+	if (priv->parent_fid) {
+		g_free (priv->parent_fid->id);
+		g_free (priv->parent_fid->change_key);
+		g_free (priv->parent_fid);
+		priv->parent_fid = NULL;
+	}
+
+	g_free (priv);
+	folder->priv = NULL;
 
 	if (parent_class->finalize)
 		(* parent_class->finalize) (object);
@@ -148,12 +151,18 @@ e_ews_folder_set_from_soap_parameter (EEwsFolder *folder, ESoapParameter *param)
 	}
 
 	subparam = e_soap_parameter_get_first_child_by_name (node, "FolderId");
-	if (subparam)
-		priv->id = e_soap_parameter_get_property (subparam, "Id");
+	if (subparam) {
+		priv->fid = g_new0 (EwsFolderId, 1);
+		priv->fid->id = e_soap_parameter_get_property (subparam, "Id");
+		priv->fid->change_key = e_soap_parameter_get_property (subparam, "ChangeKey");
+	}
 
 	subparam = e_soap_parameter_get_first_child_by_name (node, "ParentFolderId");
-	if (subparam)
-		priv->parent = e_soap_parameter_get_property (subparam, "Id");
+	if (subparam) {
+		priv->parent_fid = g_new0 (EwsFolderId, 1);
+		priv->parent_fid->id = e_soap_parameter_get_property (subparam, "Id");
+		priv->parent_fid->change_key = e_soap_parameter_get_property (subparam, "ChangeKey");
+	}
 
 	subparam = e_soap_parameter_get_first_child_by_name (node, "FolderClass");
 	if (subparam) {
@@ -221,36 +230,39 @@ e_ews_folder_set_name (EEwsFolder *folder, const gchar *new_name)
 }
 
 
-const gchar *
+const EwsFolderId *
 e_ews_folder_get_id (EEwsFolder *folder)
 {
 	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), NULL);
 
-	return (const gchar *) folder->priv->id;
+	return (const EwsFolderId *) folder->priv->fid;
 }
 
-const gchar *
+const EwsFolderId *
 e_ews_folder_get_parent_id (EEwsFolder *folder)
 {
 	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), NULL);
 
-	return (const gchar *) folder->priv->parent;
+	return (const EwsFolderId *) folder->priv->parent_fid;
 }
 
 void
-e_ews_folder_set_parent_id (EEwsFolder *folder, const gchar *parent_id)
+e_ews_folder_set_parent_id (EEwsFolder *folder, EwsFolderId *parent_fid)
 {
 	EEwsFolderPrivate *priv;
 
 	g_return_if_fail (E_IS_EWS_FOLDER (folder));
-	g_return_if_fail (parent_id != NULL);
+	g_return_if_fail (parent_fid != NULL);
 
 	priv = folder->priv;
 
-	if (priv->parent)
-		g_free (priv->parent);
+	if (priv->parent_fid) {
+		g_free (priv->parent_fid->id);
+		g_free (priv->parent_fid->change_key);
+		g_free (priv->parent_fid);
+	}
 
-	priv->parent = g_strdup (parent_id);
+	priv->parent_fid = parent_fid;
 }
 
 EwsFolderType

@@ -143,7 +143,9 @@ folder_hierarchy_ready_callback (GObject *object, GAsyncResult *res, gpointer us
 	g_print ("Folders created \n");
 	for (l = folders_created; l != NULL;l = g_slist_next (l)) {
 		EEwsFolder *folder = l->data;
-		g_print ("%s - %s \n", e_ews_folder_get_name (folder), e_ews_folder_get_id (folder));
+		EwsFolderId *fid = e_ews_folder_get_id (folder);
+
+		g_print ("Name: %s \n Id: %s  \n ChangeKey: %s \n\n", e_ews_folder_get_name (folder), fid->id, fid->change_key);
 		g_object_unref (folder);
 	}
 

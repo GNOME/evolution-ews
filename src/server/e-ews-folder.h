@@ -53,13 +53,20 @@ typedef enum {
 	EWS_FOLDER_TYPE_TASKS
 } EwsFolderType;
 
+typedef struct {
+	gchar *id;
+	gchar *change_key;
+} EwsFolderId;
+
 GType		e_ews_folder_get_type (void);
 EEwsFolder *	e_ews_folder_new_from_soap_parameter (ESoapParameter *param);
 const gchar *	e_ews_folder_get_name (EEwsFolder *folder);
 void		e_ews_folder_set_name (EEwsFolder *folder, const gchar *new_name);
-const gchar *	e_ews_folder_get_parent_id (EEwsFolder *folder);
-void		e_ews_folder_set_parent_id (EEwsFolder *folder, const gchar *parent_id);
-const gchar *	e_ews_folder_get_id (EEwsFolder *folder);
+void		e_ews_folder_set_parent_id (EEwsFolder *folder, EwsFolderId *fid);
+const EwsFolderId *
+		e_ews_folder_get_parent_id (EEwsFolder *folder);
+const EwsFolderId *	
+		e_ews_folder_get_id (EEwsFolder *folder);
 guint32		e_ews_folder_get_total_count (EEwsFolder *folder);
 guint32		e_ews_folder_get_unread_count (EEwsFolder *folder);
 guint32		e_ews_folder_get_child_count (EEwsFolder *folder);
