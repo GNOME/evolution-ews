@@ -46,42 +46,27 @@ struct _EEwsFolderClass {
 };
 
 typedef enum {
-	E_EWS_FOLDER_TYPE_ROOT,
-	E_EWS_FOLDER_TYPE_INBOX,
-	E_EWS_FOLDER_TYPE_SENT,
-	E_EWS_FOLDER_TYPE_CALENDAR,
-	E_EWS_FOLDER_TYPE_CONTACTS,
-	E_EWS_FOLDER_TYPE_DOCUMENTS,
-	E_EWS_FOLDER_TYPE_QUERY,
-	E_EWS_FOLDER_TYPE_CHECKLIST,
-	E_EWS_FOLDER_TYPE_DRAFT,
-	E_EWS_FOLDER_TYPE_CABINET,
-	E_EWS_FOLDER_TYPE_TRASH,
-	E_EWS_FOLDER_TYPE_JUNK,
-	E_EWS_FOLDER_TYPE_FOLDER
-} EEwsFolderType;
+	EWS_FOLDER_TYPE_MAILBOX,
+	EWS_FOLDER_TYPE_CALENDAR,
+	EWS_FOLDER_TYPE_CONTACTS,
+	EWS_FOLDER_TYPE_QUERY,
+	EWS_FOLDER_TYPE_TASKS
+} EwsFolderType;
 
-GType         e_ews_folder_get_type (void);
-EEwsFolder *e_ews_folder_new_from_soap_parameter (ESoapParameter *param);
-gboolean      e_ews_folder_set_from_soap_parameter (EEwsFolder *folder,
-						      ESoapParameter *param);
-const gchar   *e_ews_folder_get_name (EEwsFolder *folder);
-void          e_ews_folder_set_name (EEwsFolder *folder, const gchar *new_name);
-const gchar   *e_ews_folder_get_folder_class (EEwsFolder *folder);
-void          e_ews_folder_set_folder_class (EEwsFolder *folder, const gchar *folder_class);
-const gchar   *e_ews_folder_get_id (EEwsFolder *folder);
-void          e_ews_folder_set_id (EEwsFolder *folder, const gchar *new_id);
-const gchar   *e_ews_folder_get_parent_id (EEwsFolder *folder);
-void	      e_ews_folder_set_parent_id (EEwsFolder *folder, const gchar *parent_id);
-guint32       e_ews_folder_get_total_count (EEwsFolder *folder);
-guint32       e_ews_folder_get_unread_count (EEwsFolder *folder);
-guint32       e_ews_folder_get_child_count (EEwsFolder *folder);
-gboolean      e_ews_folder_get_is_writable (EEwsFolder *folder);
-void          e_ews_folder_set_is_writable (EEwsFolder *folder, gboolean writable);
-gboolean    e_ews_folder_is_root (EEwsFolder *folder);
-EEwsFolderType e_ews_folder_get_folder_type (EEwsFolder *folder);
-gboolean e_ews_folder_get_is_system_folder (EEwsFolder *folder);
-void e_ews_folder_set_is_system_folder (EEwsFolder *folder, gboolean is_system_folder);
+GType		e_ews_folder_get_type (void);
+EEwsFolder *	e_ews_folder_new_from_soap_parameter (ESoapParameter *param);
+const gchar *	e_ews_folder_get_name (EEwsFolder *folder);
+void		e_ews_folder_set_name (EEwsFolder *folder, const gchar *new_name);
+const gchar *	e_ews_folder_get_parent_id (EEwsFolder *folder);
+void		e_ews_folder_set_parent_id (EEwsFolder *folder, const gchar *parent_id);
+const gchar *	e_ews_folder_get_id (EEwsFolder *folder);
+guint32		e_ews_folder_get_total_count (EEwsFolder *folder);
+guint32		e_ews_folder_get_unread_count (EEwsFolder *folder);
+guint32		e_ews_folder_get_child_count (EEwsFolder *folder);
+gboolean	e_ews_folder_get_is_writable (EEwsFolder *folder);
+void		e_ews_folder_set_is_writable (EEwsFolder *folder, gboolean writable);
+EwsFolderType	e_ews_folder_get_folder_type (EEwsFolder *folder);
+void 		e_ews_folder_set_folder_type (EEwsFolder *folder, EwsFolderType folder_type);
 
 G_END_DECLS
 

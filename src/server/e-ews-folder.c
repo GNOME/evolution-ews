@@ -33,10 +33,10 @@ struct _EEwsFolderPrivate {
 	gchar *id;
 	gchar *parent;
 	gchar *folder_class;
+	EwsFolderType folder_type;
 	guint32 unread;
 	guint32 total;
 	guint32 child_count;
-	gboolean is_root;
 };
 
 static GObjectClass *parent_class = NULL;
@@ -104,91 +104,79 @@ e_ews_folder_init (EEwsFolder *folder)
 	/* allocate internal structure */
 	priv = g_new0 (EEwsFolderPrivate, 1);
 	folder->priv = priv;
+
+	priv->folder_type = EWS_FOLDER_TYPE_MAILBOX;
 }
 
-gboolean
+/* FIXME pick it from folder_type and make it set folder_type */
+static void
+e_ews_folder_set_folder_class (EEwsFolder *folder, const gchar *folder_class)
+{
+	EEwsFolderPrivate *priv;
+
+	g_return_if_fail (E_IS_EWS_FOLDER (folder));
+	g_return_if_fail (folder_class != NULL);
+
+	priv = folder->priv;
+
+	if (priv->folder_class)
+		g_free (priv->folder_class);
+	priv->folder_class = g_strdup (folder_class);
+}
+
+
+static gboolean
 e_ews_folder_set_from_soap_parameter (EEwsFolder *folder, ESoapParameter *param)
 {
+	EEwsFolderPrivate *priv = folder->priv;
 	gchar *value;
 	ESoapParameter *subparam, *node;
 
 	g_return_val_if_fail (param != NULL, FALSE);
 
-	node = e_soap_parameter_get_first_child_by_name (param, "Folder");
-
-	if (!node)
-		node = e_soap_parameter_get_first_child_by_name (param, "CalendarFolder");
-
-	if (!node)
-		node = e_soap_parameter_get_first_child_by_name (param, "ContactsFolder");
-
-	if (!node)
-		node = e_soap_parameter_get_first_child_by_name (param, "TasksFolder");
-
-	subparam = e_soap_parameter_get_first_child_by_name (param, "FolderId");
-	if (!subparam)
-		e_ews_folder_set_id (folder, "");
+	if ((node = e_soap_parameter_get_first_child_by_name (param, "Folder")))
+		priv->folder_type = EWS_FOLDER_TYPE_MAILBOX;
+	else if ((node = e_soap_parameter_get_first_child_by_name (param, "CalendarFolder")))
+		priv->folder_type = EWS_FOLDER_TYPE_CALENDAR;
+	else if ((node = e_soap_parameter_get_first_child_by_name (param, "ContactsFolder")))
+		priv->folder_type = EWS_FOLDER_TYPE_CONTACTS;
+	else if ((node = e_soap_parameter_get_first_child_by_name (param, "TasksFolder")))
+		priv->folder_type = EWS_FOLDER_TYPE_TASKS;
 	else {
-		value = e_soap_parameter_get_property (subparam, "Id");
-		e_ews_folder_set_id (folder, (const gchar *) value);
-		g_free (value);
+		g_warning ("Unable to find the Folder node \n");
+		return FALSE;
 	}
 
-	subparam = e_soap_parameter_get_first_child_by_name (param, "ParentFolderId");
-	if (!subparam) {
-		e_ews_folder_set_parent_id (folder, "");
-		folder->priv->is_root = TRUE;
-	} else {
-		value = e_soap_parameter_get_property (subparam, "Id");
-		e_ews_folder_set_parent_id (folder, (const gchar *) value);
-		g_free (value);
-	}
+	subparam = e_soap_parameter_get_first_child_by_name (node, "FolderId");
+	if (subparam)
+		priv->id = e_soap_parameter_get_property (subparam, "Id");
 
-	subparam = e_soap_parameter_get_first_child_by_name (node, "DisplayName");
-	if (!subparam)
-		e_ews_folder_set_name (folder, "");
-	else {
-		value = e_soap_parameter_get_string_value (subparam);
-		e_ews_folder_set_name (folder, (const gchar *) value);
-		g_free (value);
-	}
+	subparam = e_soap_parameter_get_first_child_by_name (node, "ParentFolderId");
+	if (subparam)
+		priv->parent = e_soap_parameter_get_property (subparam, "Id");
 
 	subparam = e_soap_parameter_get_first_child_by_name (node, "FolderClass");
-	if (!subparam)
-		e_ews_folder_set_folder_class (folder, "");
-	else {
+	if (subparam) {
 		value = e_soap_parameter_get_string_value (subparam);
 		e_ews_folder_set_folder_class (folder, (const gchar *) value);
 		g_free (value);
 	}
+	
+	subparam = e_soap_parameter_get_first_child_by_name (node, "DisplayName");
+	if (subparam)
+		priv->name = e_soap_parameter_get_string_value (subparam);
 
-	subparam = e_soap_parameter_get_first_child_by_name (param, "UnreadCount");
-	if (!subparam) {
-		folder->priv->unread = 0;
-	} else {
-		value = e_soap_parameter_get_string_value (subparam);
-		if (value)
-			folder->priv->unread = atoi (value);
-		else
-			folder->priv->unread = 0;
-		g_free (value);
-	}
+	subparam = e_soap_parameter_get_first_child_by_name (node, "UnreadCount");
+	if (subparam)
+		priv->unread = e_soap_parameter_get_int_value (subparam);
 
-	subparam = e_soap_parameter_get_first_child_by_name (param, "TotalCount");
-	if (subparam) {
-		value = e_soap_parameter_get_string_value (subparam);
-		if (value)
-			folder->priv->total = atoi (value);
-		g_free (value);
-	}
+	subparam = e_soap_parameter_get_first_child_by_name (node, "TotalCount");
+	if (subparam)
+		priv->total = e_soap_parameter_get_int_value (subparam);
 
-	subparam = e_soap_parameter_get_first_child_by_name (param, "ChildFolderCount");
-	if (subparam) {
-		value = e_soap_parameter_get_string_value (subparam);
-		if (value)
-			folder->priv->child_count = atoi (value);
-		g_free (value);
-	}
+	subparam = e_soap_parameter_get_first_child_by_name (node, "ChildFolderCount");
+	if (subparam)
+		priv->child_count = e_soap_parameter_get_int_value (subparam);
 
 	return TRUE;
 }
@@ -232,29 +220,6 @@ e_ews_folder_set_name (EEwsFolder *folder, const gchar *new_name)
 	priv->name = g_strdup (new_name);
 }
 
-const gchar *
-e_ews_folder_get_folder_class (EEwsFolder *folder)
-{
-	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), NULL);
-
-	return (const gchar *) folder->priv->folder_class;
-}
-
-void
-e_ews_folder_set_folder_class (EEwsFolder *folder, const gchar *folder_class)
-{
-	EEwsFolderPrivate *priv;
-
-	g_return_if_fail (E_IS_EWS_FOLDER (folder));
-	g_return_if_fail (folder_class != NULL);
-
-	priv = folder->priv;
-
-	if (priv->folder_class)
-		g_free (priv->folder_class);
-	priv->folder_class = g_strdup (folder_class);
-}
-
 
 const gchar *
 e_ews_folder_get_id (EEwsFolder *folder)
@@ -262,21 +227,6 @@ e_ews_folder_get_id (EEwsFolder *folder)
 	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), NULL);
 
 	return (const gchar *) folder->priv->id;
-}
-
-void
-e_ews_folder_set_id (EEwsFolder *folder, const gchar *new_id)
-{
-	EEwsFolderPrivate *priv;
-
-	g_return_if_fail (E_IS_EWS_FOLDER (folder));
-	g_return_if_fail (new_id != NULL);
-
-	priv = folder->priv;
-
-	if (priv->id)
-		g_free (priv->id);
-	priv->id = g_strdup (new_id);
 }
 
 const gchar *
@@ -303,6 +253,22 @@ e_ews_folder_set_parent_id (EEwsFolder *folder, const gchar *parent_id)
 	priv->parent = g_strdup (parent_id);
 }
 
+EwsFolderType
+e_ews_folder_get_folder_type (EEwsFolder *folder)
+{
+	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), -1);
+
+	return folder->priv->folder_type;
+}
+
+void
+e_ews_folder_set_folder_type (EEwsFolder *folder, EwsFolderType folder_type)
+{
+	g_return_if_fail (E_IS_EWS_FOLDER (folder));
+
+	folder->priv->folder_type = folder_type;
+}
+
 guint32
 e_ews_folder_get_total_count (EEwsFolder *folder)
 {
@@ -327,12 +293,4 @@ e_ews_folder_get_child_count (EEwsFolder *folder)
 
 	return folder->priv->child_count;
 
-}
-
-gboolean
-e_ews_folder_is_root (EEwsFolder *folder)
-{
-	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), FALSE);
-
-	return folder->priv->is_root;
 }
