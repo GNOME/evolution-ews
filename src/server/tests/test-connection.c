@@ -1,5 +1,7 @@
 /*Place holder for connection test cases*/
 #include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <e-ews-connection.h>
@@ -14,7 +16,7 @@ void op_tests_run ();
 
 static GMainLoop *main_loop;
 
-const gchar *inbox_folder_id = NULL;
+EwsFolderId *inbox_folder_id = NULL;
 
 /*Utility functions */
 
@@ -197,8 +199,11 @@ folder_hierarchy_ready_callback (GObject *object, GAsyncResult *res, gpointer us
 		EwsFolderId *fid = e_ews_folder_get_id (folder);
 
 		g_print ("Name: %s \n Id: %s  \n ChangeKey: %s \n\n", e_ews_folder_get_name (folder), fid->id, fid->change_key);
-		if (!g_ascii_strcasecmp (e_ews_folder_get_name (folder), "Inbox"))
-			inbox_folder_id = g_strdup (fid->id);
+		if (!strcmp (e_ews_folder_get_name (folder), "Inbox")) {
+			inbox_folder_id = g_new0 (EwsFolderId, 1);
+			inbox_folder_id->id = g_strdup (fid->id);
+			inbox_folder_id->change_key = g_strdup (fid->change_key);
+		}
 		g_object_unref (folder);
 	}
 

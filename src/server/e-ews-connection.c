@@ -27,7 +27,6 @@
 #include <glib/gi18n-lib.h>
 #include "e-ews-connection.h"
 #include "e-ews-message.h"
-#include "e-ews-folder.h"
 
 #define d(x) x
 
@@ -891,7 +890,7 @@ void
 e_ews_connection_sync_folder_items_start	(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *sync_state,
-						 const gchar *folder_id,
+						 EwsFolderId *fid,
 						 const gchar *default_props,
 						 const gchar *additional_props,
 						 guint max_entries,
@@ -925,7 +924,7 @@ e_ews_connection_sync_folder_items_start	(EEwsConnection *cnc,
 	e_soap_message_end_element (msg);
 
 	e_soap_message_start_element (msg, "SyncFolderId", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", "types", NULL, "Id", folder_id);
+	e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", "types", NULL, "Id", fid->id);
 	e_soap_message_end_element (msg);
 
 	if (sync_state)

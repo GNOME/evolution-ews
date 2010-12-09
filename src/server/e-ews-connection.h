@@ -29,6 +29,7 @@
 #include <libsoup/soup.h>
 #include <libedataserver/e-soap-message.h>
 #include "ews-errors.h"
+#include "e-ews-folder.h"
 
 G_BEGIN_DECLS
 
@@ -89,7 +90,7 @@ void	e_ews_connection_sync_folder_items_start
 						(EEwsConnection *cnc, 
 						 gint pri, 
 						 const gchar *sync_state, 
-						 const gchar *folder_id, 
+						 EwsFolderId *fid,
 						 const gchar *props, 
 						 const gchar *additional_props, 
 						 guint max_entries, 
