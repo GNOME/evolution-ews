@@ -61,18 +61,6 @@ static CamelProviderConfEntry ews_conf_entries[] = {
 	  N_("Automatically synchroni_ze account locally"), "0" },
 	{ CAMEL_PROVIDER_CONF_SECTION_END },
 
-	/* extra GroupWise  configuration settings */
-	{CAMEL_PROVIDER_CONF_SECTION_START, "soapport", NULL,
-	  N_("SOAP Settings") },
-
-	{ CAMEL_PROVIDER_CONF_ENTRY, "soap_port", NULL,
-	  N_("Post Office Agent SOAP _Port:"), "7191" },
-
-	{ CAMEL_PROVIDER_CONF_HIDDEN, "auth-domain", NULL,
-	  NULL, "Ews" },
-
-	{ CAMEL_PROVIDER_CONF_SECTION_END },
-
 	{ CAMEL_PROVIDER_CONF_END }
 };
 
@@ -80,12 +68,13 @@ static CamelProvider ews_provider = {
 	"ews",
 	N_("Exchange Web Services"),
 
-	N_("For accessing Exchange servers using EWS"),
+	N_("For accessing Exchange servers using Web Services"),
 
 	"mail",
 
-	CAMEL_PROVIDER_IS_REMOTE | CAMEL_PROVIDER_IS_SOURCE |
-	CAMEL_PROVIDER_IS_STORAGE | CAMEL_PROVIDER_SUPPORTS_SSL | CAMEL_PROVIDER_DISABLE_SENT_FOLDER,
+	CAMEL_PROVIDER_IS_REMOTE | CAMEL_PROVIDER_IS_SOURCE | 
+	CAMEL_PROVIDER_IS_STORAGE | CAMEL_PROVIDER_SUPPORTS_SSL | 
+	CAMEL_PROVIDER_DISABLE_SENT_FOLDER | CAMEL_PROVIDER_IS_EXTERNAL,
 
 	CAMEL_URL_NEED_USER | CAMEL_URL_NEED_HOST | CAMEL_URL_ALLOW_AUTH,
 
@@ -94,6 +83,7 @@ static CamelProvider ews_provider = {
 	/* ... */
 };
 
+/*TODO support more auth types */
 CamelServiceAuthType camel_ews_password_authtype = {
 	N_("Password"),
 
@@ -104,40 +94,25 @@ CamelServiceAuthType camel_ews_password_authtype = {
 	TRUE
 };
 
+/* TODO implement */
 static gint
 ews_auto_detect_cb (CamelURL *url, GHashTable **auto_detected,
 			 GError **error)
 {
-	*auto_detected = g_hash_table_new (g_str_hash, g_str_equal);
-
-	g_hash_table_insert (*auto_detected, g_strdup ("poa"),
-			     g_strdup (url->host));
-
 	return 0;
 }
 
 void
 camel_provider_module_init(void)
 {
-	CamelProvider *imap_provider = NULL;
-	gboolean use_imap = g_getenv ("USE_IMAP") != NULL;
-
-	if (use_imap)
-		imap_provider = camel_provider_get("imapx://", NULL);
-
-	g_print ("\n EWS camel provider init");
 	ews_provider.url_hash = ews_url_hash;
 	ews_provider.url_equal = ews_url_equal;
 	ews_provider.auto_detect = ews_auto_detect_cb;
 	ews_provider.authtypes = g_list_prepend (ews_provider.authtypes, &camel_ews_password_authtype);
 	ews_provider.translation_domain = GETTEXT_PACKAGE;
 
-	if (use_imap)
-		ews_provider.object_types[CAMEL_PROVIDER_STORE] = imap_provider->object_types [CAMEL_PROVIDER_STORE];
-	else	{
-		ews_provider.object_types[CAMEL_PROVIDER_STORE] =  camel_ews_store_get_type ();
-		ews_provider.object_types[CAMEL_PROVIDER_TRANSPORT] = camel_ews_transport_get_type ();
-	}
+	ews_provider.object_types[CAMEL_PROVIDER_STORE] =  camel_ews_store_get_type ();
+	ews_provider.object_types[CAMEL_PROVIDER_TRANSPORT] = camel_ews_transport_get_type ();
 
 	camel_provider_register (&ews_provider);
 }
