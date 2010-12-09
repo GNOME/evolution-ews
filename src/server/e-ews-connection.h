@@ -67,16 +67,49 @@ EEwsConnection *e_ews_connection_new		(const gchar *uri,
 gchar* e_ews_autodiscover_ws_url		(const gchar *email,
 						 const gchar *password, 
 						 GError **error);
-
+/* Create Folder */
 void e_ews_connection_create_folder		(EEwsConnection *cnc, 
 						 GCancellable *cancellable);
+
+void	e_ews_connection_create_folder_start
+						(EEwsConnection *cnc, 
+						 gint pri, 
+						 GAsyncReadyCallback cb, 
+						 GCancellable *cancellable,
+						 gpointer user_data);
+
+void	e_ews_connection_create_folder_finish 
+						(EEwsConnection *cnc, 
+						 GAsyncResult *result, 
+						 guint folder_id,
+						 GError **error);
+
+/* Sync folder items */
+void	e_ews_connection_sync_folder_items_start 
+						(EEwsConnection *cnc, 
+						 gint pri, 
+						 const gchar *sync_state, 
+						 const gchar *folder_id, 
+						 const gchar *props, 
+						 const gchar *additional_props, 
+						 guint max_entries, 
+						 GAsyncReadyCallback cb, 
+						 GCancellable *cancellable,
+						 gpointer user_data);
+
+void	e_ews_connection_sync_folder_items_finish 
+						(EEwsConnection *cnc, 
+						 GAsyncResult *result,
+					 	 gchar **sync_state, 
+						 GSList **item_ids,
+						 GError **error);
 void e_ews_connection_sync_folder_items 
 						(EEwsConnection *cnc, 
 						 const gchar *sync_state, 
 						 const gchar *folder_name, 
 						 GCancellable *cancellable);
 
-/* Get folder hierarchy */
+/* Sync folder hierarchy */
 void	e_ews_connection_sync_folder_hierarchy 
 						(EEwsConnection *cnc, 
 						 gint pri, 

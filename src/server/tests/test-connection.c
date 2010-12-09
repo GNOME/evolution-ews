@@ -14,6 +14,8 @@ void op_tests_run ();
 
 static GMainLoop *main_loop;
 
+const gchar *inbox_folder_id = NULL;
+
 /*Utility functions */
 
 static void
@@ -121,6 +123,55 @@ cancel_sync_folder_hierarchy (gpointer data)
 } */
 
 static void
+folder_items_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
+{
+	GSList *item_ids = NULL, *l;
+	EEwsConnection *cnc = E_EWS_CONNECTION (object);
+	gchar *sync_state = NULL;
+	GError *error = NULL;
+
+	e_ews_connection_sync_folder_items_finish	(cnc, res, &sync_state,
+							 &item_ids, &error);
+
+	if (error != NULL) {
+		g_print ("Unable to fetch the folder hierarchy: %s :%d \n", error->message, error->code);
+		return;
+	}
+
+	g_print ("Sync state for folder is\n  %s \n", sync_state);
+
+	g_free (sync_state);
+	g_slist_free (item_ids);
+}
+
+static void
+op_test_sync_folder_items ()
+{
+	const gchar *username;
+	const gchar *password;
+	const gchar *uri;
+	EEwsConnection *cnc;
+	GCancellable *cancellable;
+	/* const gchar *sync_state = NULL; */
+
+	cancellable = g_cancellable_new ();
+
+	util_get_login_info_from_env (&username, &password, &uri);
+	g_assert_cmpstr (username, !=, NULL);
+	g_assert_cmpstr (password, !=, NULL);
+	g_assert_cmpstr (uri, !=, NULL);
+
+	cnc = e_ews_connection_new (uri, username, password, NULL);
+	g_assert (cnc != NULL);
+
+	e_ews_connection_sync_folder_items_start	(cnc, EWS_PRIORITY_MEDIUM, 
+							 NULL, inbox_folder_id, 
+							 "IdOnly", "Subject DisplayTo", 
+							 100, folder_items_ready_callback, 
+							 cancellable, NULL);
+}
+
+static void
 folder_hierarchy_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
 {
 	GSList *folders_created = NULL, *folders_updated = NULL;
@@ -146,6 +197,8 @@ folder_hierarchy_ready_callback (GObject *object, GAsyncResult *res, gpointer us
 		EwsFolderId *fid = e_ews_folder_get_id (folder);
 
 		g_print ("Name: %s \n Id: %s  \n ChangeKey: %s \n\n", e_ews_folder_get_name (folder), fid->id, fid->change_key);
+		if (!g_ascii_strcasecmp (e_ews_folder_get_name (folder), "Inbox"))
+			inbox_folder_id = g_strdup (fid->id);
 		g_object_unref (folder);
 	}
 
@@ -153,6 +206,9 @@ folder_hierarchy_ready_callback (GObject *object, GAsyncResult *res, gpointer us
 	g_slist_free (folders_created);
 	g_slist_free (folders_updated);
 	g_slist_free (folders_deleted);
+
+	g_print ("\n Testing sync folder items... \n");
+	op_test_sync_folder_items ();
 }
 
 static void 
@@ -186,6 +242,21 @@ op_test_sync_folder_hierarchy ()
 	} */
 }
 
+static void
+create_folder_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
+{
+	EEwsConnection *cnc = E_EWS_CONNECTION (object);
+	guint folder_id;
+	GError *error = NULL;
+
+	e_ews_connection_create_folder_finish	(cnc, res, folder_id, &error);
+
+	if (error != NULL) {
+		g_print ("Unable to create folder: %s :%d \n", error->message, error->code);
+		return;
+	}
+}
+
 static void 
 op_test_create_folder ()
 {
@@ -204,6 +275,10 @@ op_test_create_folder ()
 
 	cnc = e_ews_connection_new (uri, username, password, NULL);
 	g_assert (cnc != NULL);
+
+	e_ews_connection_create_folder_start	(cnc, EWS_PRIORITY_LOW, 
+						 create_folder_ready_callback, 
+						 cancellable, NULL);
 
 	/* FIXME api fix
 	e_ews_connection_create_folder (cnc, cancellable); */
@@ -230,31 +305,6 @@ op_test_find_item ()
 
 	/* FIXME api fix
 	e_ews_connection_find_item (cnc, "contacts", cancellable); */
-}
-
-static void
-op_test_sync_folder_items ()
-{
-	const gchar *username;
-	const gchar *password;
-	const gchar *uri;
-	EEwsConnection *cnc;
-	GCancellable *cancellable;
-	/* const gchar *sync_state = NULL; */
-
-	cancellable = g_cancellable_new ();
-
-	util_get_login_info_from_env (&username, &password, &uri);
-	g_assert_cmpstr (username, !=, NULL);
-	g_assert_cmpstr (password, !=, NULL);
-	g_assert_cmpstr (uri, !=, NULL);
-
-	cnc = e_ews_connection_new (uri, username, password, NULL);
-	g_assert (cnc != NULL);
-
-	/* Keep it to drafts folder for now */
-	/* FIXME api fix
-	e_ews_connection_sync_folder_items (cnc, sync_state, "drafts", cancellable); */
 }
 
 /*Run tests*/
@@ -287,9 +337,6 @@ idle_cb (gpointer data)
 
 	g_print ("\nTesting find item... \n");
 	op_test_find_item ();
-
-	g_print ("\n Testing sync folder items... \n");
-	op_test_sync_folder_items ();
 
 	return FALSE;
 }
