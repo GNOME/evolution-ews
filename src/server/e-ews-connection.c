@@ -588,7 +588,7 @@ e_ews_connection_dispose (GObject *object)
 		g_slist_free (priv->active_job_queue);
 		priv->active_job_queue = NULL;
 	}
-
+	
 	if (parent_class->dispose)
 		(* parent_class->dispose) (object);
 }
@@ -602,8 +602,8 @@ e_ews_connection_finalize (GObject *object)
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
 	priv = cnc->priv;
-	printf ("ews connection finalize\n");
-	/* clean up */
+	g_static_rec_mutex_free (&priv->queue_lock);
+	
 	g_free (priv);
 	cnc->priv = NULL;
 
@@ -647,6 +647,7 @@ e_ews_connection_init (EEwsConnection *cnc)
 
 	/* create the SoupSession for this connection */
 	priv->soup_session = soup_session_async_new_with_options (SOUP_SESSION_USE_NTLM, TRUE, NULL);
+	g_static_rec_mutex_init (&priv->queue_lock);
 
 	g_signal_connect (cnc, "next_request", G_CALLBACK (ews_next_request), NULL);
 	g_signal_connect (priv->soup_session, "authenticate", G_CALLBACK(ews_connection_authenticate), cnc);
