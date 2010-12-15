@@ -127,23 +127,36 @@ cancel_sync_folder_hierarchy (gpointer data)
 static void
 folder_items_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
 {
-	GSList *item_ids = NULL, *l;
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
+	GSList *items_created = NULL, *items_updated = NULL;
+	GSList *items_deleted = NULL, *l;
 	gchar *sync_state = NULL;
 	GError *error = NULL;
 
 	e_ews_connection_sync_folder_items_finish	(cnc, res, &sync_state,
-							 &item_ids, &error);
+							 &items_created, &items_updated,
+							 &items_deleted, &error);
 
 	if (error != NULL) {
-		g_print ("Unable to fetch the folder hierarchy: %s :%d \n", error->message, error->code);
+		g_print ("Unable to sync the folder items: %s :%d \n", error->message, error->code);
 		return;
 	}
 
 	g_print ("Sync state for folder is\n  %s \n", sync_state);
 
+	g_print ("Items created \n");
+	for (l = items_created; l != NULL;l = g_slist_next (l)) {
+		EEwsItem *item = l->data;
+		EwsId *item_id = e_ews_item_get_id (item);
+
+		g_print ("Subject: %s \n Id: %s  \n ChangeKey: %s \n\n", e_ews_item_get_subject (item), item_id->id, item_id->change_key);
+		g_object_unref (item);
+	}
+
 	g_free (sync_state);
-	g_slist_free (item_ids);
+	g_slist_free (items_created);
+	g_slist_free (items_updated);
+	g_slist_free (items_deleted);
 }
 
 static void
@@ -248,6 +261,45 @@ op_test_sync_folder_hierarchy ()
 }
 
 static void
+get_item_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
+{
+	EEwsConnection *cnc = E_EWS_CONNECTION (object);
+	GError *error = NULL;
+
+	e_ews_connection_get_item_finish	(cnc, res, &error);
+
+	if (error != NULL) {
+		g_print ("Unable to get item: %s :%d \n", error->message, error->code);
+		return;
+	}
+}
+
+static void 
+op_test_get_item ()
+{
+	const gchar *username;
+	const gchar *password;
+	const gchar *uri;
+	EEwsConnection *cnc;
+	GCancellable *cancellable;
+
+	cancellable = g_cancellable_new ();
+
+	util_get_login_info_from_env (&username, &password, &uri);
+	g_assert_cmpstr (username, !=, NULL);
+	g_assert_cmpstr (password, !=, NULL);
+	g_assert_cmpstr (uri, !=, NULL);
+
+	cnc = e_ews_connection_new (uri, username, password, NULL);
+	g_assert (cnc != NULL);
+
+	e_ews_connection_get_item_start		(cnc, EWS_PRIORITY_MEDIUM, 
+						 NULL, "IdOnly", NULL, "true",
+						 get_item_ready_callback, 
+						 cancellable, NULL);
+}
+
+static void
 create_folder_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
@@ -342,6 +394,9 @@ idle_cb (gpointer data)
 
 	g_print ("\nTesting find item... \n");
 	op_test_find_item ();
+
+	g_print ("\nTesting get item... \n");
+	op_test_get_item ();
 
 	return FALSE;
 }

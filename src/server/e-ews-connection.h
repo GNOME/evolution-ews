@@ -30,6 +30,7 @@
 #include <libedataserver/e-soap-message.h>
 #include "ews-errors.h"
 #include "e-ews-folder.h"
+#include "e-ews-item.h"
 
 G_BEGIN_DECLS
 
@@ -102,13 +103,33 @@ void	e_ews_connection_sync_folder_items_finish
 						(EEwsConnection *cnc, 
 						 GAsyncResult *result,
 					 	 gchar **sync_state, 
-						 GSList **item_ids,
+						 GSList **items_created,
+						 GSList **items_updated,
+						 GSList **items_deleted,
 						 GError **error);
 void e_ews_connection_sync_folder_items 
 						(EEwsConnection *cnc, 
 						 const gchar *sync_state, 
 						 const gchar *folder_name, 
 						 GCancellable *cancellable);
+
+/* Get folder items */
+void	e_ews_connection_get_item_start 
+						(EEwsConnection *cnc,
+						 gint pri,
+						 EwsFolderId *fid,
+						 const gchar *default_props,
+						 const gchar *additional_props,
+						 const gchar *include_mime,
+						 GAsyncReadyCallback cb,
+						 GCancellable *cancellable,
+						 gpointer user_data);
+
+void	e_ews_connection_get_item_finish 
+						(EEwsConnection *cnc, 
+						 GAsyncResult *result,
+						 GError **error);
+
 
 /* Sync folder hierarchy */
 void	e_ews_connection_sync_folder_hierarchy 

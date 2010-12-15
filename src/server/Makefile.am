@@ -27,6 +27,7 @@ libeews_1_2_la_SOURCES =		\
 	e-ews-connection.c		\
 	e-ews-connection.h		\
 	e-ews-folder.c			\
+	e-ews-item.c			\
 	e-ews-message.c			
 
 libeews_1_2_la_LIBADD =						\
@@ -44,6 +45,7 @@ libeewsinclude_HEADERS =		\
         ews-errors.h			\
         e-ews-connection.h		\
 	e-ews-folder.h			\
+	e-ews-item.h			\
 	e-ews-message.h			
 
 %-$(API_VERSION).pc: %.pc
