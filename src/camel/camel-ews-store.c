@@ -55,17 +55,8 @@
 	((obj), CAMEL_TYPE_EWS_STORE, CamelEwsStorePrivate))
 
 struct _CamelEwsStorePrivate {
-	gchar *server_name;
-	gchar *port;
-	gchar *user;
-	gchar *use_ssl;
 
-	gchar *base_url;
 	gchar *storage_path;
-
-	GHashTable *id_hash; /*get names from ids*/
-	GHashTable *name_hash;/*get ids from names*/
-	GHashTable *parent_hash;
 	EEwsConnection *cnc;
 };
 
@@ -247,22 +238,7 @@ ews_store_finalize (GObject *object)
 
 	ews_store = CAMEL_EWS_STORE (object);
 
-	g_free (ews_store->priv->user);
-	g_free (ews_store->priv->server_name);
-	g_free (ews_store->priv->port);
-	g_free (ews_store->priv->use_ssl);
-	g_free (ews_store->priv->base_url);
 	g_free (ews_store->priv->storage_path);
-	g_free (ews_store->root_container);
-
-	if (ews_store->priv->id_hash != NULL)
-		g_hash_table_destroy (ews_store->priv->id_hash);
-
-	if (ews_store->priv->name_hash != NULL)
-		g_hash_table_destroy (ews_store->priv->name_hash);
-
-	if (ews_store->priv->parent_hash != NULL)
-		g_hash_table_destroy (ews_store->priv->parent_hash);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_ews_store_parent_class)->finalize (object);
@@ -307,10 +283,5 @@ camel_ews_store_init (CamelEwsStore *ews_store)
 	ews_store->priv =
 		CAMEL_EWS_STORE_GET_PRIVATE (ews_store);
 
-	ews_store->priv->server_name = NULL;
-	ews_store->priv->port = NULL;
-	ews_store->priv->use_ssl = NULL;
-	ews_store->priv->user = NULL;
 	ews_store->priv->cnc = NULL;
-	ews_store->current_folder = NULL;
 }

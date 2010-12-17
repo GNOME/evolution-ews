@@ -57,16 +57,9 @@ typedef struct _CamelEwsStorePrivate CamelEwsStorePrivate;
 
 struct _CamelEwsStore {
 	CamelOfflineStore parent;
-
-	struct _CamelEwsStoreSummary *summary;
-
-	gchar *root_container;
 	CamelEwsStorePrivate *priv;
-	CamelFolder *current_folder;
-
-	/* the parameters field is not to be included not. probably for 2.6*/
-	/*guint32 parameters;*/
-	time_t refresh_stamp;
+	
+	struct _CamelEwsStoreSummary *summary;
 };
 
 struct _CamelEwsStoreClass {
@@ -76,15 +69,12 @@ struct _CamelEwsStoreClass {
 GType camel_ews_store_get_type (void);
 gchar * ews_get_name(CamelService *service, gboolean brief);
 
-/*IMplemented*/
-/* const gchar *camel_ews_store_folder_lookup (CamelEwsStore *ews_store, const gchar *container_id); */
 EEwsConnection *cnc_lookup (CamelEwsStorePrivate *priv);
 gchar *storage_path_lookup (CamelEwsStorePrivate *priv);
 const gchar *ews_base_url_lookup (CamelEwsStorePrivate *priv);
 CamelFolderInfo * create_junk_folder (CamelStore *store);
 gboolean camel_ews_store_connected (CamelEwsStore *store, GCancellable *cancellable, GError **error);
 gboolean ews_store_reload_folder (CamelEwsStore *store, CamelFolder *folder, guint32 flags, GCancellable *cancellable, GError **error);
-void ews_store_set_current_folder (CamelEwsStore *ews_store, CamelFolder *folder);
 
 G_END_DECLS
 

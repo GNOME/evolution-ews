@@ -87,138 +87,20 @@ exchange_ews_accounts_peek_config_listener ()
 	return config_listener;
 }
 
-enum {
-  COL_EWS_FULL_NAME = 0,
-  COL_EWS_ACCOUNT,
-  COL_EWS_INDEX,
-  COLS_MAX
+struct _AutoDiscCallBackData {
+	EConfig *config;
+	GtkWidget *entry;
 };
-#if 0
-/* Callback for ProcessNetworkProfile. If we have more than one username,
- we need to let the user select. */
-static unsigned int
-create_profile_callback (struct SRowSet *rowset, gpointer data)
-{
-	struct SPropValue *lpProp_fullname, *lpProp_account;
-	gint response;
-	guint32	i, index = 0;
-	GtkTreeIter iter;
-	GtkListStore *store;
-	GtkCellRenderer *renderer;
-	GtkTreeSelection *selection;
-	GtkWidget *dialog, *view;
-	GtkVBox *vbox;
-	const gchar *username = (const gchar *)data;
-
-	/* If we can find the exact username, then find & return its index. */
-	for (i = 0; i < rowset->cRows; i++) {
-		lpProp_account = get_SPropValue_SRow(&(rowset->aRow[i]), PR_ACCOUNT_UNICODE);
-		if (!lpProp_account)
-			lpProp_account = get_SPropValue_SRow(&(rowset->aRow[i]), PR_ACCOUNT);
-
-		if (lpProp_account && lpProp_account->value.lpszA &&
-		    !g_strcmp0 (username, lpProp_account->value.lpszA))
-			return i;
-	}
-
-	/* NOTE: A good way would be display the list of username entries */
-	/* using GtkEntryCompletion in the username gtkentry. But plugins */
-	/* as of now does not have access to it */
-
-	/*TODO : Fix strings*/
-	dialog = gtk_dialog_new_with_buttons (_("Select username"),
-					      NULL, GTK_DIALOG_MODAL,
-					      GTK_STOCK_OK, GTK_RESPONSE_ACCEPT,
-					      GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT,
-					      NULL);
-
-	/*Tree View */
-	view = gtk_tree_view_new ();
-	renderer = gtk_cell_renderer_text_new ();
-	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
-						     -1, _("Full name"), renderer,
-						     "text", COL_EWS_FULL_NAME, NULL);
-
-	renderer = gtk_cell_renderer_text_new ();
-	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
-						     -1, _("Username"), renderer,
-						     "text", COL_EWS_ACCOUNT, NULL);
-
-	/* Model for TreeView */
-	store = gtk_list_store_new (3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
-	gtk_tree_view_set_model (GTK_TREE_VIEW (view), GTK_TREE_MODEL (store));
-
-	for (i = 0; i < rowset->cRows; i++) {
-		lpProp_fullname = get_SPropValue_SRow(&(rowset->aRow[i]), PR_DISPLAY_NAME_UNICODE);
-		if (!lpProp_fullname)
-			lpProp_fullname = get_SPropValue_SRow(&(rowset->aRow[i]), PR_DISPLAY_NAME);
-		lpProp_account = get_SPropValue_SRow(&(rowset->aRow[i]), PR_ACCOUNT_UNICODE);
-		if (!lpProp_account)
-			lpProp_account = get_SPropValue_SRow(&(rowset->aRow[i]), PR_ACCOUNT);
-
-		if (lpProp_fullname && lpProp_fullname->value.lpszA &&
-		    lpProp_account && lpProp_account->value.lpszA) {
-			gtk_list_store_append (store, &iter);
-			/* Preserve the index inside the store*/
-			gtk_list_store_set (store, &iter,
-					    COL_EWS_FULL_NAME, lpProp_fullname->value.lpszA,
-					    COL_EWS_ACCOUNT, lpProp_account->value.lpszA,
-					    COL_EWS_INDEX, i, -1);
-		}
-	}
-
-	/* Pack the TreeView into dialog's content area */
-	vbox = (GtkVBox *)gtk_dialog_get_content_area (GTK_DIALOG (dialog));
-	gtk_box_pack_start (GTK_BOX (vbox), view, TRUE, TRUE, 6);
-	gtk_widget_show_all (GTK_WIDGET (vbox));
-
-	response = gtk_dialog_run (GTK_DIALOG (dialog));
-	if (response == GTK_RESPONSE_ACCEPT) {
-	       /* Get the index from the selected value */
-		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (view));
-		gtk_tree_selection_get_selected (selection, NULL, &iter);
-		gtk_tree_model_get (GTK_TREE_MODEL (store), &iter, COL_EWS_INDEX,
-				    &index, -1);
-	} else /* If we return a value > available, we are canceling the login.*/
-	       index = rowset->cRows + 1;
-
-	gtk_widget_destroy (dialog);
-
-	return index;
-}
-#endif
 
 static void
-validate_credentials (GtkWidget *widget, EConfig *config)
+validate_credentials (GtkWidget *widget, struct _AutoDiscCallBackData *cbdata)
 {
-	g_print ("\n Validate_credentials not implemented yet");
-
-#if 0
+	EConfig *config = cbdata->config;
 	EMConfigTargetAccount *target_account = (EMConfigTargetAccount *)(config->target);
 	CamelURL *url = NULL;
-	gchar *key = NULL, *password = NULL;
-	const gchar *domain_name = NULL;
-	gboolean status = TRUE;
-
+	gchar *key, *password;
+	
 	url = camel_url_new (e_account_get_string (target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
-	domain_name = camel_url_get_param (url, "domain");
-
-	/* Silently remove domain part from a username when user enters it as such.
-	   This change will be visible in the UI on new edit open. */
-	if (url->user && strchr (url->user, '\\')) {
-		gchar *tmp, *at;
-
-		at = strrchr (url->user, '\\') + 1;
-		tmp = g_strdup (at);
-		camel_url_set_user (url, tmp);
-		g_free (tmp);
-	}
-
-	if (!url->user || !*url->user || !url->host || !*url->host || !domain_name || !*domain_name) {
-		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Server, username and domain name cannot be empty. Please fill them with correct values."));
-		camel_url_free (url);
-		return;
-	}
 
 	key = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
 	password = e_passwords_get_password (EXCHANGE_EWS_PASSWORD_COMPONENT, key);
@@ -227,7 +109,7 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 		gchar *title;
 
 		g_free (password);
-		title = g_strdup_printf (_("Enter Password for %s@%s"), url->user, url->host);
+		title = g_strdup_printf (_("Enter Password for %s"), target_account->account->id->address);
 		password = e_passwords_ask_password (title, EXCHANGE_EWS_PASSWORD_COMPONENT, key, title,
 						     E_PASSWORDS_REMEMBER_FOREVER|E_PASSWORDS_SECRET,
 						     &remember, NULL);
@@ -235,63 +117,32 @@ validate_credentials (GtkWidget *widget, EConfig *config)
 	}
 
 	/*Can there be a account without password ?*/
-	if (password && *password && domain_name && *domain_name && *url->user && *url->host) {
+	if (password && *password) {
 		GError *error = NULL;
-		EEwsConnection *conn;
-		gchar *profname;
+		gchar *auri = NULL;
 
-		status = FALSE;
-		profname = camel_ews_util_profile_name (url->user, domain_name, url->host, FALSE);
-
-		conn = e_ews_connection_new (profname, password, &error);
-		if (conn) {
-			status = e_ews_connection_connected (conn);
-			g_object_unref (conn);
+		auri = e_ews_autodiscover_ws_url (target_account->account->id->address, password, &error);
+		if (error) {
+			e_notice (NULL, GTK_MESSAGE_ERROR, "%s", error->message);
+			g_clear_error (&error);
+			goto exit;
 		}
 
-		g_free (profname);
-
-		if (status) {
-			/* Things are successful */
-			gchar *profname = NULL, *uri = NULL;
-
-			profname = camel_ews_util_profile_name (url->user, domain_name, url->host, FALSE);
-			camel_url_set_param (url, "profile", profname);
-			g_free (profname);
-
-			uri = camel_url_to_string(url, 0);
-			e_account_set_string (target_account->account, E_ACCOUNT_SOURCE_URL, uri);
-			e_account_set_string (target_account->account, E_ACCOUNT_TRANSPORT_URL, uri);
-			g_free (uri);
-
-			e_notice (NULL, GTK_MESSAGE_INFO, "%s", _("Authentication finished successfully."));
-		} else {
-			gchar *e;
-
-			e_passwords_forget_password (EXCHANGE_EWS_PASSWORD_COMPONENT, key);
-
-			e = g_strconcat (_("Authentication failed."), "\n", error ? error->message : NULL, NULL);
-
-			e_notice (NULL, GTK_MESSAGE_ERROR, "%s", e);
-
-			g_free (e);
-		}
-
-		if (error)
-			g_error_free (error);
+		gtk_entry_set_text ((GtkEntry *) cbdata->entry, auri);
+		g_free (auri);
 	} else {
 		e_passwords_forget_password (EXCHANGE_EWS_PASSWORD_COMPONENT, key);
 		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Authentication failed."));
 	}
 
+exit:	
 	g_free (password);
 	g_free (key);
 	camel_url_free (url);
-#endif
 }
 
 static void
-domain_entry_changed(GtkWidget *entry, EConfig *config)
+host_url_changed (GtkWidget *entry, EConfig *config)
 {
 	EMConfigTargetAccount *target = (EMConfigTargetAccount *)(config->target);
 	CamelURL *url = NULL;
@@ -302,28 +153,9 @@ domain_entry_changed(GtkWidget *entry, EConfig *config)
 	domain = gtk_entry_get_text (GTK_ENTRY(entry));
 
 	if (domain && domain[0])
-		camel_url_set_param (url, "domain", domain);
+		camel_url_set_param (url, "hosturl", domain);
 	else
-		camel_url_set_param (url, "domain", NULL);
-
-	url_string = camel_url_to_string (url, 0);
-	e_account_set_string (target->account, E_ACCOUNT_SOURCE_URL, url_string);
-	e_account_set_string (target->account, E_ACCOUNT_TRANSPORT_URL, url_string);
-	g_free (url_string);
-
-	camel_url_free (url);
-}
-
-static void
-secure_check_toggled (GtkWidget *check, EConfig *config)
-{
-	EMConfigTargetAccount *target = (EMConfigTargetAccount *)(config->target);
-	CamelURL *url = NULL;
-	gchar *url_string = NULL;
-
-	url = camel_url_new (e_account_get_string (target->account, E_ACCOUNT_SOURCE_URL), NULL);
-
-	camel_url_set_param (url, "ssl", gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (check)) ? "1" : NULL);
+		camel_url_set_param (url, "hosturl", NULL);
 
 	url_string = camel_url_to_string (url, 0);
 	e_account_set_string (target->account, E_ACCOUNT_SOURCE_URL, url_string);
@@ -344,47 +176,49 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 	target_account = (EMConfigTargetAccount *)data->config->target;
 	url = camel_url_new(e_account_get_string(target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
 
-	/* is NULL on New Account creation */
+	/* is NULL on new account creation */
 	if (url == NULL)
 		return NULL;
 
 	if (!g_ascii_strcasecmp (url->protocol, "ews")) {
 		GtkWidget *label;
-		GtkWidget *domain_name;
-		GtkWidget *auth_button;
-		GtkWidget *secure_conn;
-		const gchar *domain_value = camel_url_get_param (url, "domain");
-		const gchar *use_ssl = camel_url_get_param (url, "ssl");
+		GtkWidget *host_url;
+		GtkWidget *auto_discover;
+		const gchar *host_url_val = camel_url_get_param (url, "hosturl");
+		gchar *url_string;
+		struct _AutoDiscCallBackData *cbdata = g_new0 (struct _AutoDiscCallBackData, 1);
 
 		g_object_get (data->parent, "n-rows", &row, NULL);
+	
+		/* Set email_id */	
+		camel_url_set_param (url, "email", target_account->account->id->address);
+		url_string = camel_url_to_string (url, 0);
+		e_account_set_string (target_account->account, E_ACCOUNT_SOURCE_URL, url_string);
+		e_account_set_string (target_account->account, E_ACCOUNT_TRANSPORT_URL, url_string);
+		g_free (url_string);
 
-		/* Domain name & Authenticate Button */
+		/* Host url and Autodiscover button */
 		hbox = gtk_hbox_new (FALSE, 6);
-		label = gtk_label_new_with_mnemonic (_("_Domain name:"));
+		label = gtk_label_new_with_mnemonic (_("_Host Url:"));
 		gtk_widget_show (label);
 
-		domain_name = gtk_entry_new ();
-		gtk_label_set_mnemonic_widget (GTK_LABEL (label), domain_name);
-		if (domain_value && *domain_value)
-			gtk_entry_set_text (GTK_ENTRY (domain_name), domain_value);
-		gtk_box_pack_start (GTK_BOX (hbox), domain_name, FALSE, FALSE, 0);
-		g_signal_connect (domain_name, "changed", G_CALLBACK(domain_entry_changed), data->config);
+		host_url = gtk_entry_new ();
+		gtk_label_set_mnemonic_widget (GTK_LABEL (label), host_url);
+		if (host_url_val && *host_url_val)
+			gtk_entry_set_text (GTK_ENTRY (host_url), host_url_val);
+		gtk_box_pack_start (GTK_BOX (hbox), host_url, FALSE, FALSE, 0);
+		g_signal_connect (host_url, "changed", G_CALLBACK(host_url_changed), data->config);
 
-		auth_button = gtk_button_new_with_mnemonic (_("_Authenticate"));
-		gtk_box_pack_start (GTK_BOX (hbox), auth_button, FALSE, FALSE, 0);
-		g_signal_connect(GTK_OBJECT(auth_button), "clicked",  G_CALLBACK(validate_credentials), data->config);
+		cbdata->config = data->config;
+		cbdata->entry = host_url;
+		auto_discover = gtk_button_new_with_mnemonic (_("A_utoDiscover"));
+		gtk_box_pack_start (GTK_BOX (hbox), auto_discover, FALSE, FALSE, 0);
+		g_signal_connect (GTK_OBJECT(auto_discover), "clicked",  G_CALLBACK(validate_credentials), cbdata);
 
 		gtk_table_attach (GTK_TABLE (data->parent), label, 0, 1, row, row+1, 0, 0, 0, 0);
 		gtk_widget_show_all (GTK_WIDGET (hbox));
 		gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (hbox), 1, 2, row, row+1, GTK_FILL|GTK_EXPAND, GTK_FILL, 0, 0);
-
 		row++;
-
-		secure_conn = gtk_check_button_new_with_mnemonic (_("_Use secure connection"));
-		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (secure_conn), use_ssl && g_str_equal (use_ssl, "1"));
-		g_signal_connect (secure_conn, "toggled", G_CALLBACK (secure_check_toggled), data->config);
-		gtk_widget_show (secure_conn);
-		gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (secure_conn), 1, 2, row, row + 1, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
 	}
 
 	camel_url_free (url);

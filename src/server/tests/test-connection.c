@@ -85,6 +85,10 @@ con_test_autodiscover()
 
 	g_print ("Testing postive case... \n");
 	uri = e_ews_autodiscover_ws_url (email, password, &error);
+	if (error) {
+		g_print ("Error code:%d desc: %s \n", error->code, error->message);
+		g_clear_error (&error);
+	}
 	g_assert_cmpstr (uri, !=, NULL);
 
 	g_print ("Testing wrong password... \n");

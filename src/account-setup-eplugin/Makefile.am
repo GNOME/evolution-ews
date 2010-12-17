@@ -34,6 +34,7 @@ liborg_gnome_exchange_ews_la_SOURCES = 		\
 liborg_gnome_exchange_ews_la_LIBADD = 			\
 	$(EVOLUTION_PLUGIN_LIBS)			\
 	$(CAMEL_LIBS) 					\
+	$(top_builddir)/src/server/libeews-1.2.la	\
 	$(LIBECAL_LIBS)
 
 liborg_gnome_exchange_ews_la_LDFLAGS = -module -avoid-version $(NO_UNDEFINED)
