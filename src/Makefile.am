@@ -1,5 +1,5 @@
-SUBDIRS = account-setup-eplugin server server/tests camel
-DIST_SUBDIRS = account-setup-eplugin server camel
+SUBDIRS = server server/tests account-setup-eplugin camel
+DIST_SUBDIRS = server account-setup-eplugin camel
 
 changelogs =			\
 	ChangeLog

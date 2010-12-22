@@ -363,6 +363,46 @@ op_test_create_folder ()
 	e_ews_connection_create_folder (cnc, cancellable); */
 }
 
+static void
+resolve_names_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
+{
+	EEwsConnection *cnc = E_EWS_CONNECTION (object);
+	guint folder_id;
+	GError *error = NULL;
+
+	e_ews_connection_resolve_names_finish	(cnc, res, &error);
+
+	if (error != NULL) {
+		g_print ("Unable to create folder: %s :%d \n", error->message, error->code);
+		return;
+	}
+}
+
+static void 
+op_test_resolve_names ()
+{
+	const gchar *username;
+	const gchar *password;
+	const gchar *uri;
+	EEwsConnection *cnc;
+	GCancellable *cancellable;
+
+	cancellable = g_cancellable_new ();
+
+	util_get_login_info_from_env (&username, &password, &uri);
+	g_assert_cmpstr (username, !=, NULL);
+	g_assert_cmpstr (password, !=, NULL);
+	g_assert_cmpstr (uri, !=, NULL);
+
+	cnc = e_ews_connection_new (uri, username, password, NULL);
+	g_assert (cnc != NULL);
+
+	e_ews_connection_resolve_names_start	(cnc, EWS_PRIORITY_HIGH,
+						"bharath",
+						resolve_names_ready_callback,
+						cancellable, NULL);
+}
+
 static void 
 op_test_find_item ()
 {
@@ -396,7 +436,7 @@ void connection_tests_run ()
 void autodiscovery_tests_run ()
 {
 	g_printf ("Testing Autodiscovery.... \n");
-	con_test_autodiscover();
+//	con_test_autodiscover();
 }
 
 static gboolean
@@ -416,6 +456,9 @@ idle_cb (gpointer data)
 
 	g_print ("\nTesting find item... \n");
 	op_test_find_item ();
+
+	g_print ("\nTesting resolve names... \n");
+	op_test_resolve_names ();
 
 	return FALSE;
 }

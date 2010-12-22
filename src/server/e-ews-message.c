@@ -27,7 +27,10 @@
 #include "e-ews-message.h"
 
 ESoapMessage *
-e_ews_message_new_with_header (const gchar *uri, const gchar *method_name)
+e_ews_message_new_with_header (const gchar *uri,
+			      const gchar *method_name,
+			      const gchar *attribute_name,
+			      const gchar *attribute_value)
 {
 	ESoapMessage *msg;
 
@@ -50,6 +53,8 @@ e_ews_message_new_with_header (const gchar *uri, const gchar *method_name)
 	e_soap_message_start_element(msg, method_name, NULL, NULL);
 	e_soap_message_set_default_namespace(msg,
 						"http://schemas.microsoft.com/exchange/services/2006/messages");
+	if (attribute_name)
+		e_soap_message_add_attribute (msg, attribute_name, attribute_value, NULL, NULL);
 	return msg;
 }
 

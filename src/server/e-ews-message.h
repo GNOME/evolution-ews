@@ -28,14 +28,17 @@
 
 G_BEGIN_DECLS
 
-ESoapMessage *e_ews_message_new_with_header (const gchar *uri, const gchar *method_name);
+ESoapMessage *e_ews_message_new_with_header (const gchar *uri,
+					    const gchar *method_name,
+					    const gchar *attribute_name,
+					    const gchar *attribute_value);
 void             e_ews_message_write_string_parameter (ESoapMessage *msg, const gchar *name,
 						      const gchar *prefix, const gchar *value);
 void             e_ews_message_write_string_parameter_with_attribute (ESoapMessage *msg,
 								     const gchar *name,
 								     const gchar *prefix,
 								     const gchar *value,
-								     const gchar *attrubute_name,
+								     const gchar *attribute_name,
 								     const gchar *attribute_value);
 void             e_ews_message_write_base64_parameter (ESoapMessage *msg,
 						      const gchar *name,

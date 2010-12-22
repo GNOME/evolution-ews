@@ -157,6 +157,18 @@ void	e_ews_connection_sync_folder_hierarchy_finish
 						 GSList **folders_updated,
 						 GSList **folders_deleted,
 						 GError **error);
+void	e_ews_connection_resolve_names_start
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *resolve_name,
+						 GAsyncReadyCallback cb,
+						 GCancellable *cancellable,
+						 gpointer user_data);
+
+void	e_ews_connection_resolve_names_finish 
+						(EEwsConnection *cnc, 
+						 GAsyncResult *result, 
+						 GError **error);
 
 G_END_DECLS
 

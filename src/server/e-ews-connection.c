@@ -369,7 +369,7 @@ dump_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 						 EWS_CONNECTION_ERROR,
 						 ERROR_NORESPONSE,
 						 _("No response"));
-		goto exit;	
+		goto exit;
 	}
 		
 	/* README: The stdout can be replaced with Evolution's
@@ -404,7 +404,7 @@ create_folder_response_cb (SoupSession *session, SoupMessage *msg, gpointer data
 						 EWS_CONNECTION_ERROR,
 						 ERROR_NORESPONSE,
 						 _("No response"));
-		goto exit;	
+		goto exit;
 	}
 
 	if (response && g_getenv ("EWS_DEBUG")) {
@@ -646,7 +646,7 @@ get_item_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 						 EWS_CONNECTION_ERROR,
 						 ERROR_NORESPONSE,
 						 _("No response"));
-		goto exit;	
+		goto exit;
 	}
 
 	if (response && g_getenv ("EWS_DEBUG"))
@@ -1049,7 +1049,7 @@ e_ews_connection_sync_folder_items_start	(EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "SyncFolderItems");
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "SyncFolderItems", NULL, NULL);
 	e_soap_message_start_element (msg, "ItemShape", NULL, NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", "types", default_props);
 	
@@ -1096,9 +1096,9 @@ e_ews_connection_sync_folder_items_start	(EEwsConnection *cnc,
 }
 
 void
-e_ews_connection_sync_folder_items_finish	(EEwsConnection *cnc, 
+e_ews_connection_sync_folder_items_finish	(EEwsConnection *cnc,
 						 GAsyncResult *result,
-					 	 gchar **sync_state, 
+					 	 gchar **sync_state,
 						 GSList **items_created,
 						 GSList **items_updated,
 						 GSList **items_deleted,
@@ -1174,10 +1174,11 @@ e_ews_connection_create_folder (EEwsConnection *cnc, GCancellable *cancellable)
 	ews_connection_queue_request (cnc, msg, create_folder_response_cb, cancellable, EWS_PRIORITY_HIGH);
 } */
 
-void 
-e_ews_connection_create_folder_start	(EEwsConnection *cnc, 
-					 gint pri, 
-					 GAsyncReadyCallback cb, 
+void
+e_ews_connection_resolve_names_start 	(EEwsConnection *cnc,
+					 gint pri,
+					 const gchar *resolve_name,
+					 GAsyncReadyCallback cb,
 					 GCancellable *cancellable,
 					 gpointer user_data)
 {
@@ -1185,7 +1186,56 @@ e_ews_connection_create_folder_start	(EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "CreateFolder");
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "ResolveNames", "ReturnFullContactData", "true");
+	e_ews_message_write_string_parameter (msg, "UnresolvedEntry", NULL, resolve_name);
+
+	e_ews_message_write_footer (msg);
+
+	simple = g_simple_async_result_new (G_OBJECT (cnc),
+                                      cb,
+                                      user_data,
+                                      e_ews_connection_resolve_names_start);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	ews_connection_queue_request (cnc, msg, dump_response_cb, pri, cancellable, simple);
+}
+
+void
+e_ews_connection_resolve_names_finish	(EEwsConnection *cnc,
+					 GAsyncResult *result,
+					 GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_resolve_names_start));
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return;
+	
+	return;
+}
+
+void 
+e_ews_connection_create_folder_start	(EEwsConnection *cnc,
+					 gint pri,
+					 GAsyncReadyCallback cb,
+					 GCancellable *cancellable,
+					 gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "CreateFolder", NULL, NULL);
 
 	e_soap_message_start_element (msg, "ParentFolderId", NULL, NULL);
 	e_ews_message_write_string_parameter_with_attribute (msg, "DistinguishedFolderId", "types", NULL, "Id", "msgfolderroot");
@@ -1213,7 +1263,7 @@ e_ews_connection_create_folder_start	(EEwsConnection *cnc,
 
 
 void
-e_ews_connection_create_folder_finish	(EEwsConnection *cnc, 
+e_ews_connection_create_folder_finish	(EEwsConnection *cnc,
 					 GAsyncResult *result,
 					 guint folder_id,
 					 GError **error)
@@ -1235,10 +1285,10 @@ e_ews_connection_create_folder_finish	(EEwsConnection *cnc,
 }
 
 void 
-e_ews_connection_sync_folder_hierarchy_start	(EEwsConnection *cnc, 
-						 gint pri, 
-						 const gchar *sync_state, 
-						 GAsyncReadyCallback cb, 
+e_ews_connection_sync_folder_hierarchy_start	(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *sync_state,
+						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
 						 gpointer user_data)
 {
@@ -1246,7 +1296,7 @@ e_ews_connection_sync_folder_hierarchy_start	(EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "SyncFolderHierarchy");
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "SyncFolderHierarchy", NULL, NULL);
 	e_soap_message_start_element (msg, "FolderShape", NULL, NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", "types", "AllProperties");
 	e_soap_message_end_element (msg);
@@ -1270,9 +1320,9 @@ e_ews_connection_sync_folder_hierarchy_start	(EEwsConnection *cnc,
 
 
 void
-e_ews_connection_sync_folder_hierarchy_finish	(EEwsConnection *cnc, 
+e_ews_connection_sync_folder_hierarchy_finish	(EEwsConnection *cnc,
 						 GAsyncResult *result,
-					 	 gchar **sync_state, 
+					 	 gchar **sync_state,
 						 GSList **folders_created,
 						 GSList **folders_updated,
 						 GSList **folders_deleted,
@@ -1300,13 +1350,13 @@ e_ews_connection_sync_folder_hierarchy_finish	(EEwsConnection *cnc,
 }
 
 void
-e_ews_connection_sync_folder_hierarchy	(EEwsConnection *cnc, 
-					 gint pri, 
-					 gchar **sync_state, 
+e_ews_connection_sync_folder_hierarchy	(EEwsConnection *cnc,
+					 gint pri,
+					 gchar **sync_state,
 					 GSList **folders_created,
 					 GSList **folders_updated,
 					 GSList **folders_deleted,
-					 GCancellable *cancellable, 
+					 GCancellable *cancellable,
 					 GError **error)
 {
 	EwsSyncData *sync_data;
@@ -1316,12 +1366,12 @@ e_ews_connection_sync_folder_hierarchy	(EEwsConnection *cnc,
 	sync_data->loop = g_main_loop_new (sync_data->context, FALSE);
 	
 	g_main_context_push_thread_default (sync_data->context);
-	e_ews_connection_sync_folder_hierarchy_start	(cnc, pri, *sync_state, 
-							 ews_sync_reply_cb, cancellable, 
+	e_ews_connection_sync_folder_hierarchy_start	(cnc, pri, *sync_state,
+							 ews_sync_reply_cb, cancellable,
 							 (gpointer) sync_data);
 
 	g_main_loop_run (sync_data->loop);
-	e_ews_connection_sync_folder_hierarchy_finish	(cnc, sync_data->res, 
+	e_ews_connection_sync_folder_hierarchy_finish	(cnc, sync_data->res,
 							 sync_state,
 							 folders_created,
 							 folders_updated,
@@ -1351,7 +1401,7 @@ e_ews_connection_get_item_start		(EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetItem");
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetItem", NULL, NULL);
 
 	e_soap_message_start_element (msg, "ItemShape", NULL, NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", "types", default_props);
@@ -1377,7 +1427,7 @@ e_ews_connection_get_item_start		(EEwsConnection *cnc,
 }
 
 void
-e_ews_connection_get_item_finish	(EEwsConnection *cnc, 
+e_ews_connection_get_item_finish	(EEwsConnection *cnc,
 					 GAsyncResult *result,
 					 EEwsItem **item,
 					 GError **error)
