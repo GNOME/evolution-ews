@@ -37,6 +37,7 @@ struct _EEwsItemPrivate {
 	/* properties */
 	EwsId *item_id;
 	gchar *subject;
+	gchar *mime_content;
 };
 
 static GObjectClass *parent_class = NULL;
@@ -156,6 +157,23 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 		g_free (value);
 	}
 
+	subparam = e_soap_parameter_get_first_child_by_name (node, "MimeContent");
+	if (subparam) {
+		guchar *data;
+		gsize data_len = 0;
+
+		value = e_soap_parameter_get_string_value (subparam);
+		data = g_base64_decode (value, &data_len);
+		if (!data || !data_len) {
+			g_free (value);
+			g_free (data);
+			return NULL;
+		}
+		e_ews_item_set_mime_content (item, (const gchar *) data);
+
+		g_free (value);
+	}
+
 	return TRUE;
 }
 
@@ -208,6 +226,24 @@ e_ews_item_set_subject (EEwsItem *item, const gchar *new_subject)
 	if (item->priv->subject)
 		g_free (item->priv->subject);
 	item->priv->subject = g_strdup (new_subject);
+}
+
+const gchar *
+e_ews_item_get_mime_content (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	return (const gchar *) item->priv->mime_content;
+}
+
+void
+e_ews_item_set_mime_content (EEwsItem *item, const gchar *new_mime_content)
+{
+	g_return_if_fail (E_IS_EWS_ITEM (item));
+
+	if (item->priv->mime_content)
+		g_free (item->priv->mime_content);
+	item->priv->mime_content = g_strdup (new_mime_content);
 }
 
 const EwsId *

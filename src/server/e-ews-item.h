@@ -72,6 +72,8 @@ EEwsItemType e_ews_item_get_item_type (EEwsItem *item);
 void        e_ews_item_set_item_type (EEwsItem *item, EEwsItemType new_type);
 const gchar *e_ews_item_get_subject (EEwsItem *item);
 void        e_ews_item_set_subject (EEwsItem *item, const gchar *new_subject);
+const gchar *e_ews_item_get_mime_content (EEwsItem *item);
+void        e_ews_item_set_mime_content (EEwsItem *item, const gchar *new_mime_content);
 const EwsId *e_ews_item_get_id (EEwsItem *item);
 
 G_END_DECLS

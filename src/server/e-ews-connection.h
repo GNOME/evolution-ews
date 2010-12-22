@@ -117,7 +117,7 @@ void e_ews_connection_sync_folder_items
 void	e_ews_connection_get_item_start 
 						(EEwsConnection *cnc,
 						 gint pri,
-						 EwsFolderId *fid,
+						 EwsId *fid,
 						 const gchar *default_props,
 						 const gchar *additional_props,
 						 const gchar *include_mime,
@@ -128,6 +128,7 @@ void	e_ews_connection_get_item_start
 void	e_ews_connection_get_item_finish 
 						(EEwsConnection *cnc, 
 						 GAsyncResult *result,
+						 EEwsItem **item,
 						 GError **error);
 
 

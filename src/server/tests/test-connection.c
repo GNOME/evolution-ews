@@ -6,6 +6,7 @@
 #include <glib/gprintf.h>
 #include <e-ews-connection.h>
 #include <e-ews-folder.h>
+#include <e-ews-item.h>
 
 void connection_util_get_login_info (gchar **username, gchar **password, gchar **uri);
 void test_create_new_connection ();
@@ -13,10 +14,12 @@ static void con_test_create_new_connection ();
 void connection_tests_run ();
 void autodiscovery_tests_run ();
 void op_tests_run ();
+static void op_test_get_item ();
 
 static GMainLoop *main_loop;
 
 EwsFolderId *inbox_folder_id = NULL;
+EwsId *first_item_id = NULL;
 
 /*Utility functions */
 
@@ -136,6 +139,8 @@ folder_items_ready_callback (GObject *object, GAsyncResult *res, gpointer user_d
 	GSList *items_deleted = NULL, *l;
 	gchar *sync_state = NULL;
 	GError *error = NULL;
+	/* Only for test program */
+	EwsId *i_id;
 
 	e_ews_connection_sync_folder_items_finish	(cnc, res, &sync_state,
 							 &items_created, &items_updated,
@@ -147,6 +152,12 @@ folder_items_ready_callback (GObject *object, GAsyncResult *res, gpointer user_d
 	}
 
 	g_print ("Sync state for folder is\n  %s \n", sync_state);
+
+	/* Only for testing the get item API later */
+	i_id = e_ews_item_get_id ((EEwsItem *) items_created->data);
+	first_item_id = g_new0 (EwsId, 1);
+	first_item_id->id = g_strdup (i_id->id);
+	first_item_id->change_key = g_strdup (i_id->change_key);
 
 	g_print ("Items created \n");
 	for (l = items_created; l != NULL;l = g_slist_next (l)) {
@@ -161,6 +172,9 @@ folder_items_ready_callback (GObject *object, GAsyncResult *res, gpointer user_d
 	g_slist_free (items_created);
 	g_slist_free (items_updated);
 	g_slist_free (items_deleted);
+
+	g_print ("\nTesting get item... \n");
+	op_test_get_item ();
 }
 
 static void
@@ -269,13 +283,17 @@ get_item_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	GError *error = NULL;
+	EEwsItem *item;
 
-	e_ews_connection_get_item_finish	(cnc, res, &error);
+	e_ews_connection_get_item_finish	(cnc, res, &item, &error);
 
 	if (error != NULL) {
 		g_print ("Unable to get item: %s :%d \n", error->message, error->code);
 		return;
 	}
+
+	g_print ("\nMime content is:\n%s\n", e_ews_item_get_mime_content (item));
+
 }
 
 static void 
@@ -298,7 +316,7 @@ op_test_get_item ()
 	g_assert (cnc != NULL);
 
 	e_ews_connection_get_item_start		(cnc, EWS_PRIORITY_MEDIUM, 
-						 NULL, "IdOnly", NULL, "true",
+						 first_item_id, "IdOnly", NULL, "true",
 						 get_item_ready_callback, 
 						 cancellable, NULL);
 }
@@ -398,9 +416,6 @@ idle_cb (gpointer data)
 
 	g_print ("\nTesting find item... \n");
 	op_test_find_item ();
-
-	g_print ("\nTesting get item... \n");
-	op_test_get_item ();
 
 	return FALSE;
 }
