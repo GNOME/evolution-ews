@@ -231,6 +231,20 @@ camel_ews_store_summary_set_folder_total	(CamelEwsStoreSummary *ews_summary,
 	S_UNLOCK(ews_summary);
 }
 
+void
+camel_ews_store_summary_store_string_val	(CamelEwsStoreSummary *ews_summary,
+						 const gchar *key, 
+						 const gchar *value)
+{
+	S_LOCK(ews_summary);
+
+	g_key_file_set_string	(ews_summary->priv->key_file, STORE_GROUP_NAME,
+				 key, value);
+	ews_summary->priv->dirty = TRUE;
+		
+	S_UNLOCK(ews_summary);
+}
+
 const gchar *	
 camel_ews_store_summary_get_folder_name	(CamelEwsStoreSummary *ews_summary,
 					 const gchar *folder_full_name,
@@ -354,6 +368,22 @@ camel_ews_store_summary_get_folder_total	(CamelEwsStoreSummary *ews_summary,
 	return ret;
 }
 
+const gchar *	
+camel_ews_store_summary_get_string_val	(CamelEwsStoreSummary *ews_summary,
+					 const gchar *key,
+					 GError **error)
+{
+	gchar *ret;
+
+	S_LOCK(ews_summary);
+
+	ret = g_key_file_get_string	(ews_summary->priv->key_file, STORE_GROUP_NAME,
+					 key, error);
+	
+	S_UNLOCK(ews_summary);
+
+	return ret;
+}
 
 gboolean	
 camel_ews_store_summary_remove_folder	(CamelEwsStoreSummary *ews_summary,
