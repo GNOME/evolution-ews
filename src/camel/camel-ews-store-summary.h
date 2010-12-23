@@ -24,8 +24,6 @@
 
 G_BEGIN_DECLS
 
-#define STORE_GROUP_NAME "##storepriv"
-
 typedef struct _CamelEwsStoreSummary CamelEwsStoreSummary;
 typedef struct _CamelEwsStoreSummaryClass CamelEwsStoreSummaryClass;
 typedef struct _CamelEwsStoreSummaryPrivate CamelEwsStoreSummaryPrivate;
@@ -106,6 +104,9 @@ guint64		camel_ews_store_summary_get_folder_total
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_full_name,
 						 GError **error);
+GSList *	camel_ews_store_summary_get_folders	
+						(CamelEwsStoreSummary *ews_summary);
+
 
 void		camel_ews_store_summary_store_string_val
 						(CamelEwsStoreSummary *ews_summary,

@@ -7,6 +7,8 @@
 #define S_LOCK(x) (g_static_rec_mutex_lock(&(x)->priv->s_lock))
 #define S_UNLOCK(x) (g_static_rec_mutex_unlock(&(x)->priv->s_lock))
 
+#define STORE_GROUP_NAME "##storepriv"
+
 struct _CamelEwsStoreSummaryPrivate {
 	GKeyFile *key_file;
 	gboolean dirty;
@@ -383,6 +385,25 @@ camel_ews_store_summary_get_string_val	(CamelEwsStoreSummary *ews_summary,
 	S_UNLOCK(ews_summary);
 
 	return ret;
+}
+
+GSList *	
+camel_ews_store_summary_get_folders	(CamelEwsStoreSummary *ews_summary)
+{
+	GSList *folders = NULL;
+	gchar **groups = NULL;
+	gsize length;
+	gint i;
+
+	groups = g_key_file_get_groups (ews_summary->priv->key_file, &length);
+	for (i = 0; i < length; i++) {
+		if (!g_ascii_strcasecmp (groups [i], STORE_GROUP_NAME))
+			continue;
+		folders = g_slist_append (folders, g_strdup (groups [i]));
+	}
+	
+	g_strfreev (groups);
+	return folders;
 }
 
 gboolean	
