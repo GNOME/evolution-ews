@@ -436,7 +436,7 @@ void connection_tests_run ()
 void autodiscovery_tests_run ()
 {
 	g_printf ("Testing Autodiscovery.... \n");
-//	con_test_autodiscover();
+	con_test_autodiscover();
 }
 
 static gboolean

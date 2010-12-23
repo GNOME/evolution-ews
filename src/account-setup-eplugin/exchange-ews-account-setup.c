@@ -90,6 +90,7 @@ exchange_ews_accounts_peek_config_listener ()
 struct _AutoDiscCallBackData {
 	EConfig *config;
 	GtkWidget *entry;
+	GtkWidget *vbox;
 };
 
 static void
@@ -122,9 +123,12 @@ validate_credentials (GtkWidget *widget, struct _AutoDiscCallBackData *cbdata)
 		gchar *auri = NULL;
 
 		auri = e_ews_autodiscover_ws_url (target_account->account->id->address, password, &error);
+		gtk_widget_show_all (cbdata->vbox);
 		if (error) {
-			e_notice (NULL, GTK_MESSAGE_ERROR, "%s", error->message);
+			e_notice (NULL, GTK_MESSAGE_ERROR, "%s. Enter the Host URL manually", error->message);
 			g_clear_error (&error);
+			gtk_widget_set_sensitive (cbdata->entry, TRUE);
+			gtk_entry_set_text ((GtkEntry *) cbdata->entry, "https://server_ip/EWS/Exchange.asmx");
 			goto exit;
 		}
 
@@ -170,7 +174,7 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 {
 	EMConfigTargetAccount *target_account;
 	CamelURL *url;
-	GtkWidget *hbox = NULL;
+	GtkWidget *vbox = NULL, *hbox = NULL;
 	gint row;
 
 	target_account = (EMConfigTargetAccount *)data->config->target;
@@ -198,31 +202,35 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		g_free (url_string);
 
 		/* Host url and Autodiscover button */
+		vbox = gtk_vbox_new (FALSE, 6);
 		hbox = gtk_hbox_new (FALSE, 6);
 		label = gtk_label_new_with_mnemonic (_("_Host Url:"));
-		gtk_widget_show (label);
+		gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
 
 		host_url = gtk_entry_new ();
 		gtk_label_set_mnemonic_widget (GTK_LABEL (label), host_url);
 		if (host_url_val && *host_url_val)
 			gtk_entry_set_text (GTK_ENTRY (host_url), host_url_val);
-		gtk_box_pack_start (GTK_BOX (hbox), host_url, FALSE, FALSE, 0);
+		gtk_widget_set_sensitive (host_url, FALSE);
 		g_signal_connect (host_url, "changed", G_CALLBACK(host_url_changed), data->config);
+		gtk_box_pack_start (GTK_BOX (hbox), host_url, TRUE, TRUE, 0);
 
 		cbdata->config = data->config;
 		cbdata->entry = host_url;
+		cbdata->vbox = vbox;
 		auto_discover = gtk_button_new_with_mnemonic (_("A_utoDiscover"));
-		gtk_box_pack_start (GTK_BOX (hbox), auto_discover, FALSE, FALSE, 0);
+		gtk_widget_show (GTK_WIDGET (auto_discover));
+		gtk_box_pack_start (GTK_BOX (vbox), auto_discover, FALSE, FALSE, 0);
+		gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 		g_signal_connect (GTK_OBJECT(auto_discover), "clicked",  G_CALLBACK(validate_credentials), cbdata);
 
-		gtk_table_attach (GTK_TABLE (data->parent), label, 0, 1, row, row+1, 0, 0, 0, 0);
-		gtk_widget_show_all (GTK_WIDGET (hbox));
-		gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (hbox), 1, 2, row, row+1, GTK_FILL|GTK_EXPAND, GTK_FILL, 0, 0);
+		gtk_widget_show (GTK_WIDGET (vbox));
+		gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (vbox), 0, 1, row, row+1, GTK_FILL|GTK_EXPAND, GTK_FILL, 0, 0);
 		row++;
 	}
 
 	camel_url_free (url);
-	return hbox;
+	return vbox;
 }
 
 gboolean
