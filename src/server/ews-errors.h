@@ -3,6 +3,10 @@
 
 #include <glib.h>
 
+#ifdef ERROR_CANCELLED
+#undef ERROR_CANCELLED
+#endif
+
 G_BEGIN_DECLS
 
 enum {
