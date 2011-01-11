@@ -13,6 +13,7 @@ struct _CamelEwsStoreSummaryPrivate {
 	GKeyFile *key_file;
 	gboolean dirty;
 	gchar *path;
+	GHashTable *id_fname_hash;
 	GStaticRecMutex s_lock;
 };
 
@@ -26,6 +27,7 @@ ews_store_summary_finalize (GObject *object)
 
 	g_key_file_free (priv->key_file);
 	g_free (priv->path);
+	g_hash_table_destroy (priv->id_fname_hash);
 	g_static_rec_mutex_free (&priv->s_lock);
 
 	g_free (priv);
@@ -53,7 +55,28 @@ camel_ews_store_summary_init (CamelEwsStoreSummary *ews_summary)
 
 	priv->key_file = g_key_file_new ();
 	priv->dirty = FALSE;
+	priv->id_fname_hash = g_hash_table_new_full (g_str_hash, g_str_equal, (GDestroyNotify) g_free, (GDestroyNotify) g_free);
 	g_static_rec_mutex_lock (&priv->s_lock);
+}
+
+static void
+load_id_fname_hash (CamelEwsStoreSummary *ews_summary)
+{
+	GSList *folders, *l;
+
+	folders = camel_ews_store_summary_get_folders (ews_summary);
+
+	for (l = folders; l != NULL; l = g_slist_next (l)) {
+		gchar *fname = l->data;
+		gchar *id;
+
+		id = g_strdup (camel_ews_store_summary_get_folder_id	
+						(ews_summary, fname, NULL));
+
+		g_hash_table_insert (ews_summary->priv->id_fname_hash, id, fname);
+	}
+
+	g_slist_free (folders);
 }
 
 CamelEwsStoreSummary *
@@ -80,7 +103,8 @@ camel_ews_store_summary_load	(CamelEwsStoreSummary *ews_summary,
 	ret = g_key_file_load_from_file	(priv->key_file,
 					 priv->path,
 					 0, error);
-	
+
+	load_id_fname_hash (ews_summary);	
 	S_UNLOCK(ews_summary);
 
 	return ret;
@@ -412,8 +436,13 @@ camel_ews_store_summary_remove_folder	(CamelEwsStoreSummary *ews_summary,
 					 GError **error)
 {
 	gboolean ret;
+	const gchar *id;
 
 	S_LOCK(ews_summary);
+
+	id = camel_ews_store_summary_get_folder_id	(ews_summary, folder_full_name,
+							 NULL);
+	g_hash_table_remove (ews_summary->priv->id_fname_hash, id);
 
 	ret = g_key_file_remove_group (ews_summary->priv->key_file, folder_full_name,
 					error);
@@ -422,4 +451,19 @@ camel_ews_store_summary_remove_folder	(CamelEwsStoreSummary *ews_summary,
 	S_UNLOCK(ews_summary);
 
 	return ret;	
+}
+
+const gchar *
+camel_ews_store_summary_get_folder_name_from_id	(CamelEwsStoreSummary *ews_summary,
+						 const gchar *folder_id)
+{
+	const gchar *folder_name;
+	
+	S_LOCK(ews_summary);
+	
+	folder_name = g_hash_table_lookup (ews_summary->priv->id_fname_hash, folder_id);
+
+	S_UNLOCK(ews_summary);
+
+	return folder_name;
 }
