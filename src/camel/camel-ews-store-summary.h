@@ -123,6 +123,10 @@ gboolean	camel_ews_store_summary_remove_folder
 						 const gchar *folder_full_name,
 						 GError **error);
 
+const gchar *	camel_ews_store_summary_get_folder_name_from_id	
+						(CamelEwsStoreSummary *ews_summary,
+						 const gchar *folder_id);
+
 G_END_DECLS
 
 #endif /* CAMEL_EWS_STORE_SUMMARY_H */
