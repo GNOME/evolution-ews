@@ -65,9 +65,9 @@ extern CamelServiceAuthType camel_ews_password_authtype; /*for the query_auth_ty
 G_DEFINE_TYPE (CamelEwsStore, camel_ews_store, CAMEL_TYPE_OFFLINE_STORE)
 
 static gboolean
-ews_store_construct (CamelService *service, CamelSession *session,
-			   CamelProvider *provider, CamelURL *url,
-			   GCancellable *cancellable, GError **error)
+ews_store_construct	(CamelService *service, CamelSession *session,
+			 CamelProvider *provider, CamelURL *url,
+			 GError **error)
 {
 	d(printf ("\nin ews store constrcut\n"));
 
@@ -127,9 +127,77 @@ ews_store_reload_folder (CamelEwsStore *ews_store, CamelFolder *folder, guint32 
 }
 
 static CamelFolderInfo *
+folder_info_from_store_summary (CamelEwsStore *store, const gchar *top, guint32 flags, GError **error)
+{
+	CamelEwsStoreSummary *ews_summary;
+	GSList *folders, *l;
+	GPtrArray *folder_infos;
+	CamelFolderInfo *root_fi = NULL;
+	gchar *url;
+	
+	ews_summary = store->summary;
+	folders = camel_ews_store_summary_get_folders (ews_summary);
+
+	if (!folders)
+		return NULL;
+
+	folder_infos = g_ptr_array_new ();
+
+	url = camel_url_to_string (CAMEL_SERVICE (store)->url,
+				   (CAMEL_URL_HIDE_PASSWORD|
+				    CAMEL_URL_HIDE_PARAMS|
+				    CAMEL_URL_HIDE_AUTH) );
+
+	if ( url[strlen (url) - 1] != '/') {
+		gchar *temp_url;
+
+		temp_url = g_strconcat (url, "/", NULL);
+		g_free ((gchar *)url);
+		url = temp_url;
+	}
+
+	for (l = folders; l != NULL; l = g_slist_next (l)) {
+		CamelFolderInfo *fi;
+	
+		fi = camel_folder_info_new ();
+		fi->full_name = g_strdup (l->data);
+		fi->name = g_strdup (camel_ews_store_summary_get_folder_name	(ews_summary,
+	 								 fi->full_name,
+									 NULL));
+		fi->uri = g_strconcat (url, fi->full_name, NULL);
+		fi->flags = camel_ews_store_summary_get_folder_flags	(ews_summary,
+									 fi->full_name,
+									 NULL);
+		fi->unread = camel_ews_store_summary_get_folder_unread	(ews_summary,
+									 fi->full_name,
+									 NULL);
+		fi->total = camel_ews_store_summary_get_folder_total	(ews_summary,
+									 fi->full_name,
+									 NULL);
+		g_ptr_array_add	(folder_infos, fi);
+	}
+	
+	root_fi = camel_folder_info_build (folder_infos, top, '/', TRUE);
+	
+	g_ptr_array_free (folder_infos, TRUE);
+	g_slist_foreach (folders, (GFunc) g_free, NULL);
+	g_slist_free (folders);
+	g_free (url);
+
+	return root_fi;
+}
+
+static CamelFolderInfo *
 ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, GCancellable *cancellable, GError **error)
 {
-	return NULL;
+	CamelFolderInfo *fi = NULL;
+
+	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store)))
+		goto offline;
+
+offline:
+	fi = folder_info_from_store_summary ( (CamelEwsStore *) store, top, flags, error);
+	return fi;
 }
 
 
@@ -193,7 +261,7 @@ ews_get_trash_folder_sync (CamelStore *store, GCancellable *cancellable, GError 
 }
 
 static gboolean
-ews_can_refresh_folder (CamelStore *store, CamelFolderInfo *info, GCancellable *cancellable, GError **error)
+ews_can_refresh_folder (CamelStore *store, CamelFolderInfo *info, GError **error)
 {
 	return TRUE;
 }

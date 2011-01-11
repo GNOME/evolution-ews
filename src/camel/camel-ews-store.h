@@ -27,6 +27,7 @@
 #include <camel/camel.h>
 
 #include <e-ews-connection.h>
+#include "camel-ews-store-summary.h"
 
 /* Standard GObject macros */
 #define CAMEL_TYPE_EWS_STORE \
@@ -59,7 +60,7 @@ struct _CamelEwsStore {
 	CamelOfflineStore parent;
 	CamelEwsStorePrivate *priv;
 	
-	struct _CamelEwsStoreSummary *summary;
+	CamelEwsStoreSummary *summary;
 };
 
 struct _CamelEwsStoreClass {
