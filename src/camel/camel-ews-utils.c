@@ -283,3 +283,149 @@ strip_lt_gt (gchar **string, gint s_offset, gint e_offset)
 	*string = memcpy(*string, temp+s_offset, len-e_offset);
 	g_free (temp);
 }
+
+CamelFolderInfo *
+camel_ews_utils_build_folder_info (CamelEwsStore *store, const gchar *fname)
+{
+	CamelEwsStoreSummary *ews_summary = store->summary;
+	CamelFolderInfo *fi;
+	gchar *url;
+
+	url = camel_url_to_string (CAMEL_SERVICE (store)->url,
+			(CAMEL_URL_HIDE_PASSWORD|
+			 CAMEL_URL_HIDE_PARAMS|
+			 CAMEL_URL_HIDE_AUTH) );
+
+	if ( url[strlen (url) - 1] != '/') {
+		gchar *temp_url;
+
+		temp_url = g_strconcat (url, "/", NULL);
+		g_free ((gchar *)url);
+		url = temp_url;
+	}
+
+	fi = camel_folder_info_new ();
+	fi->full_name = g_strdup (fname);
+	fi->name = g_strdup (camel_ews_store_summary_get_folder_name	(ews_summary,
+				fi->full_name,
+				NULL));
+	fi->uri = g_strconcat (url, fi->full_name, NULL);
+	fi->flags = camel_ews_store_summary_get_folder_flags	(ews_summary,
+			fi->full_name,
+			NULL);
+	fi->unread = camel_ews_store_summary_get_folder_unread	(ews_summary,
+			fi->full_name,
+			NULL);
+	fi->total = camel_ews_store_summary_get_folder_total	(ews_summary,
+			fi->full_name,
+			NULL);
+
+	g_free (url);
+
+	return fi;
+}
+	
+static void
+sync_deleted_folders (CamelEwsStore *store, GSList *deleted_folders)
+{
+	CamelEwsStoreSummary *ews_summary = store->summary;
+	GSList *l;
+
+	for (l = deleted_folders; l != NULL; l = g_slist_next (l)) {
+		EEwsFolder *ews_folder = (EEwsFolder *)	l->data;
+		GError *error = NULL;
+		const gchar *folder_name;
+		const EwsFolderId *fid;
+		CamelFolderInfo *fi;
+
+		fid = e_ews_folder_get_id (ews_folder);
+		folder_name = camel_ews_store_summary_get_folder_name_from_id (ews_summary, fid->id);
+		fi = camel_ews_utils_build_folder_info (store, folder_name);
+
+		camel_ews_store_summary_remove_folder (ews_summary, folder_name, &error);
+		camel_store_folder_deleted ((CamelStore *) store, fi);
+
+		g_clear_error (&error);
+	}
+}
+
+static void
+sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
+{
+	CamelEwsStoreSummary *ews_summary = store->summary;
+	GSList *l;
+	
+	for (l = updated_folders; l != NULL; l = g_slist_next (l)) {
+		EEwsFolder *ews_folder = (EEwsFolder *)	l->data;
+		const gchar *folder_name, *display_name;
+		const EwsFolderId *fid, *pfid;
+
+		fid = e_ews_folder_get_id (ews_folder);
+		folder_name = camel_ews_store_summary_get_folder_name_from_id (ews_summary, fid->id);
+
+		pfid = e_ews_folder_get_parent_id (ews_folder);
+		display_name = e_ews_folder_get_name (ews_folder);
+
+		if (pfid || display_name) {
+			gchar *new_fname = NULL;
+			const gchar *pfname;
+			guint64 flags;
+			CamelFolderInfo *fi;
+			GError *error = NULL;
+
+			if (pfid)
+				pfname = camel_ews_store_summary_get_folder_name_from_id (ews_summary, pfid->id);
+			if (!display_name)
+				display_name = camel_ews_store_summary_get_folder_name (ews_summary, folder_name, &error);
+
+			if (pfname) {
+				new_fname = g_strconcat (pfname, "/", display_name, NULL);
+				camel_ews_store_summary_set_parent_folder_id (ews_summary, new_fname, pfid->id);
+			} else {
+				const gchar *last_slash, *o_pfid;
+				gchar *tmp;
+
+				last_slash = g_strrstr (folder_name, "/");
+				tmp = g_strndup (folder_name, (last_slash - folder_name));
+				new_fname = g_strconcat (tmp, "/", display_name, NULL);
+
+				o_pfid = camel_ews_store_summary_get_parent_folder_id (ews_summary, folder_name, NULL);
+				camel_ews_store_summary_set_parent_folder_id (ews_summary, new_fname, o_pfid);
+
+				g_free (tmp);
+			}
+			
+			camel_ews_store_summary_set_folder_id (ews_summary, new_fname, fid->id);
+			camel_ews_store_summary_set_change_key (ews_summary, new_fname, fid->change_key);
+			camel_ews_store_summary_set_folder_name (ews_summary, new_fname, fid->id);
+
+			flags = camel_ews_store_summary_get_folder_flags (ews_summary, folder_name, NULL);
+			camel_ews_store_summary_set_folder_flags (ews_summary, new_fname, flags);
+		
+			fi = camel_ews_utils_build_folder_info (store, new_fname);
+			camel_store_folder_renamed ((CamelStore *) store, folder_name, fi);
+
+			/* TODO set total and unread count. Check if server returns all properties on update */
+
+			camel_ews_store_summary_remove_folder (ews_summary, folder_name, &error);
+
+			g_free (new_fname);
+			g_clear_error (&error);
+		}
+	}
+}
+
+static void
+sync_created_folders (CamelEwsStore *store, GSList *created_folders)
+{
+	CamelEwsStoreSummary *ews_summary = store->summary;
+	
+}
+
+void
+ews_utils_sync_folders (CamelEwsStore *ews_store, GSList *created_folders, GSList *deleted_folders, GSList *updated_folders)
+{
+	sync_deleted_folders (ews_store, deleted_folders);
+	sync_updated_folders (ews_store, updated_folders);
+	sync_created_folders (ews_store, created_folders);
+}
