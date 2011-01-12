@@ -415,11 +415,89 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 	}
 }
 
+
+static void
+add_folder_to_summary (CamelEwsStore *store, const gchar *fname, EEwsFolder *folder)
+{
+	CamelEwsStoreSummary *ews_summary = store->summary;
+	const EwsFolderId *pfid, *fid;
+	const gchar *dname;
+	gint64 flags = 0, unread, total;
+
+	fid = e_ews_folder_get_id (folder);
+	pfid = e_ews_folder_get_parent_id (folder);
+	dname = e_ews_folder_get_name (folder);
+	total = e_ews_folder_get_total_count (folder);
+	unread = e_ews_folder_get_unread_count (folder);
+
+	camel_ews_store_summary_set_folder_id (ews_summary, fname, fid->id);
+	camel_ews_store_summary_set_change_key (ews_summary, fname, fid->change_key);
+	camel_ews_store_summary_set_parent_folder_id (ews_summary, fname, pfid->id);
+	camel_ews_store_summary_set_folder_name (ews_summary, fname, dname);
+	camel_ews_store_summary_set_folder_total (ews_summary, fname, total);
+	camel_ews_store_summary_set_folder_unread (ews_summary, fname, unread);
+	
+	if (!g_ascii_strcasecmp (fname, "Inbox")) {
+		flags |= CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_INBOX; 
+	} else if (!g_ascii_strcasecmp (fname, "Drafts")) {
+		flags |= CAMEL_FOLDER_SYSTEM; 
+	} else if (!g_ascii_strcasecmp (fname, "Deleted items")) {
+		flags |= CAMEL_FOLDER_SYSTEM; 
+	} else if (!g_ascii_strcasecmp (fname, "Outbox")) {
+		flags |= CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_OUTBOX; 
+	}
+	
+	camel_ews_store_summary_set_folder_flags (ews_summary, fname, unread);
+}
+
 static void
 sync_created_folders (CamelEwsStore *store, GSList *created_folders)
 {
 	CamelEwsStoreSummary *ews_summary = store->summary;
+	GSList *l;
+	GHashTable *c_folders_hash;
+
+	c_folders_hash = g_hash_table_new (g_str_hash, g_str_equal);
+
+	for (l = created_folders; l != NULL; l = g_slist_next (l)) {
+		EEwsFolder *folder = (EEwsFolder *) l->data;
+		const EwsFolderId *fid;
+		const gchar *display_name;
+
+		fid = e_ews_folder_get_id (folder);
+		display_name = e_ews_folder_get_name (folder);
+		g_hash_table_insert (c_folders_hash, fid->id, (gpointer) display_name);
+	}
 	
+	for (l = created_folders; l != NULL; l = g_slist_next (l)) {
+		EEwsFolder *folder = (EEwsFolder *) l->data;
+		const EwsFolderId *fid, *pfid;
+		const gchar *display_name, *pfname;
+		gchar *fname = NULL;
+		
+		fid = e_ews_folder_get_id (folder);
+		pfid = e_ews_folder_get_parent_id (folder);
+		display_name = e_ews_folder_get_name (folder);
+		pfname = camel_ews_store_summary_get_folder_name_from_id (ews_summary, pfid->id);
+
+		if (pfname)
+			fname = g_strconcat (pfname, "/", display_name, NULL);
+		else {
+			GString *full_name;
+			const gchar *p_dname;
+
+			full_name = g_string_new (display_name);
+			while ((p_dname = g_hash_table_lookup (c_folders_hash, pfid->id)))
+				g_string_append_printf (full_name, "%s/", p_dname);
+
+			fname = full_name->str;
+			g_string_free (full_name, FALSE);
+		}
+
+		add_folder_to_summary (store, fname, folder);
+	}
+
+	g_hash_table_destroy (c_folders_hash);
 }
 
 void
