@@ -2,7 +2,7 @@
 /* camel-ews-store.h : class for an groupwise store */
 
 /*
- * Authors: Sivaiah Nallagatla <snallagatla@novell.com>
+ * Authors: Chenthill Palanisamy <pchenthill@novell.com>
  *
  * Copyright (C) 1999-2008 Novell, Inc. (www.novell.com)
  *

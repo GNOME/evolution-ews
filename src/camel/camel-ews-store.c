@@ -3,8 +3,7 @@
 
 /*
  *  Authors:
- *  Sivaiah Nallagatla <snallagatla@novell.com>
- *  parthasarathi susarla <sparthasarathi@novell.com>
+ *  Chenthill Palanisamy <pchenthill@novell.com>
  *
  *  Copyright (C) 1999-2008 Novell, Inc. (www.novell.com)
  *
@@ -57,6 +56,8 @@
 struct _CamelEwsStorePrivate {
 
 	gchar *host_url;
+	gchar *user;
+	gchar *host;
 	EEwsConnection *cnc;
 };
 
@@ -72,7 +73,8 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 	CamelServiceClass *service_class;
 	CamelEwsStore *ews_store;
 	CamelEwsStorePrivate *priv;
-	gchar *summary_file;
+	const gchar *email_id, *temp;
+	gchar *summary_file, *session_storage_path;
 
 	ews_store = (CamelEwsStore *) service;
 	priv = ews_store->priv;
@@ -83,9 +85,16 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 		return FALSE;
 
 	/*storage path*/
-	ews_store->storage_path = camel_session_get_storage_path (session, service, error);
-	if (!ews_store->storage_path)
+	session_storage_path = camel_session_get_storage_path (session, service, error);
+	if (!session_storage_path)
 		return FALSE;
+	email_id = camel_url_get_param (url, "email");
+	ews_store->storage_path = g_strconcat (session_storage_path, email_id, NULL);
+	g_free (session_storage_path);
+
+	temp = g_strstr_len (email_id, -1, "@");
+	priv->user = g_strndup (email_id, (temp - email_id));
+	priv->host = g_strdup (temp + 1);
 
 	priv->host_url = g_strdup (camel_url_get_param (url, "hosturl"));
 	if (!priv->host_url)
@@ -114,15 +123,113 @@ ews_compare_folder_name (gconstpointer a, gconstpointer b)
 }
 
 static gboolean
+ews_store_authenticate	(CamelService *service,
+			 GCancellable *cancellable,
+			 GError **error)
+{
+	CamelSession *session;
+	CamelStore *store;
+	CamelEwsStore *ews_store;
+	CamelEwsStorePrivate *priv;
+	gboolean authenticated = FALSE;
+	guint32 prompt_flags = CAMEL_SESSION_PASSWORD_SECRET;
+
+	session = camel_service_get_session (service);
+	store = CAMEL_STORE (service);
+	ews_store = (CamelEwsStore *) service;
+	priv = ews_store->priv;
+	service->url->passwd = NULL;
+
+	while (!authenticated) {
+
+		if (!service->url->passwd) {
+			gchar *prompt;
+
+			prompt = camel_session_build_password_prompt (
+				"Exchange Web Services", priv->user, priv->host);
+			service->url->passwd =
+				camel_session_get_password (session, service, "Exchange Web Services",
+							    prompt, "password", prompt_flags, error);
+			g_free (prompt);
+
+			if (!service->url->passwd) {
+				g_set_error (
+					error, G_IO_ERROR,
+					G_IO_ERROR_CANCELLED,
+					_("You did not enter a password."));
+				return FALSE;
+			}
+		}
+
+		priv->cnc = e_ews_connection_new (priv->host_url, priv->user, service->url->passwd, error);
+		if (*error) {
+			/*FIXME check for the right code */
+			if ((*error)->code == ERROR_PASSWORDEXPIRED) {
+				/* We need to un-cache the password before prompting again */
+				prompt_flags |= CAMEL_SESSION_PASSWORD_REPROMPT;
+				g_free (service->url->passwd);
+				service->url->passwd = NULL;
+			} else
+				return FALSE;
+		} else
+			authenticated = TRUE;
+
+	}
+
+	return TRUE;
+}
+
+static gboolean
 ews_connect_sync (CamelService *service, GCancellable *cancellable, GError **error)
 {
+	CamelEwsStore *ews_store;
+	CamelEwsStorePrivate *priv;
+
+	ews_store = (CamelEwsStore *) service;
+	priv = ews_store->priv;
+	
+	if (service->status == CAMEL_SERVICE_DISCONNECTED)
+		return FALSE;
+	
+	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
+	
+	if (priv->cnc) {
+		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
+		return TRUE;
+	}
+
+	if (!ews_store_authenticate (service, cancellable, error)) {
+		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
+		camel_service_disconnect_sync (service, TRUE, NULL);
+		return FALSE;
+	}
+	
+	service->status = CAMEL_SERVICE_CONNECTED;
+	camel_offline_store_set_online_sync (
+		CAMEL_OFFLINE_STORE (ews_store), TRUE, cancellable, NULL);
+
+	camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
+
 	return TRUE;
 }
 
 static gboolean
 ews_disconnect_sync (CamelService *service, gboolean clean, GCancellable *cancellable, GError **error)
 {
-	d(printf("in ews store disconnect\n"));
+	CamelEwsStore *ews_store = (CamelEwsStore *) service;
+	CamelServiceClass *service_class;
+
+	service_class = CAMEL_SERVICE_CLASS (camel_ews_store_parent_class);
+	if (!service_class->disconnect_sync (service, clean, cancellable, error))
+		return FALSE;
+
+	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
+
+	/* TODO cancel all operations in the connection */	
+	g_object_unref (ews_store->priv->cnc);
+	ews_store->priv->cnc = NULL;
+	
+	camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	return TRUE;
 }
@@ -186,7 +293,8 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, GC
 {
 	CamelFolderInfo *fi = NULL;
 
-	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store)))
+	if (!(camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))
+	    && camel_service_connect_sync ((CamelService *)store, error)))
 		goto offline;
 
 offline:
@@ -229,11 +337,14 @@ ews_rename_folder_sync	(CamelStore *store,
 gchar *
 ews_get_name (CamelService *service, gboolean brief)
 {
+	CamelEwsStore *ews_store = (CamelEwsStore *) service;
+	CamelEwsStorePrivate *priv = ews_store->priv;
+
 	if (brief)
-		return g_strdup_printf(_("Exchange server %s"), service->url->host);
+		return g_strdup_printf(_("Exchange server %s"), priv->host);
 	else
 		return g_strdup_printf(_("Exchange service for %s on %s"),
-				       service->url->user, service->url->host);
+				       priv->user, priv->host);
 }
 
 EEwsConnection *
@@ -295,6 +406,8 @@ ews_store_finalize (GObject *object)
 
 	g_free (ews_store->storage_path);
 	g_free (ews_store->priv->host_url);
+	g_free (ews_store->priv->user);
+	g_free (ews_store->priv->host);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_ews_store_parent_class)->finalize (object);
