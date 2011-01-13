@@ -93,7 +93,7 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 	if (!session_storage_path)
 		return FALSE;
 	email_id = camel_url_get_param (url, "email");
-	ews_store->storage_path = g_strconcat (session_storage_path, email_id, NULL);
+	ews_store->storage_path = g_build_filename (session_storage_path, email_id, NULL);
 	g_free (session_storage_path);
 
 	temp = g_strstr_len (email_id, -1, "@");
@@ -104,8 +104,9 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 	if (!priv->host_url)
 		return FALSE;
 
+	g_mkdir_with_parents (ews_store->storage_path, 0700);
 	summary_file = g_build_filename (ews_store->storage_path, "folder-tree", NULL);
-	ews_store->summary = camel_ews_store_summary_new (ews_store->storage_path);
+	ews_store->summary = camel_ews_store_summary_new (summary_file);
 	camel_ews_store_summary_load (ews_store->summary, NULL);
 
 	g_free (summary_file);
@@ -137,7 +138,7 @@ ews_store_authenticate	(CamelService *service,
 	CamelEwsStorePrivate *priv;
 	gboolean authenticated = FALSE;
 	guint32 prompt_flags = CAMEL_SESSION_PASSWORD_SECRET;
-
+	
 	session = camel_service_get_session (service);
 	store = CAMEL_STORE (service);
 	ews_store = (CamelEwsStore *) service;
@@ -165,8 +166,6 @@ ews_store_authenticate	(CamelService *service,
 			}
 		}
 
-		priv->host_url = e_ews_autodiscover_ws_url	(camel_url_get_param (service->url, "email"),
-								 service->url->passwd, error);
 		priv->cnc = e_ews_connection_new (priv->host_url, priv->user, service->url->passwd, error);
 		if (*error) {
 			/*FIXME check for the right code */

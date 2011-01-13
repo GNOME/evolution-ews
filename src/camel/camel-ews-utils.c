@@ -395,7 +395,7 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 				g_free (tmp);
 			}
 			
-			camel_ews_store_summary_set_folder_id (ews_summary, new_fname, fid->id);
+			camel_ews_store_summary_new_folder (ews_summary, new_fname, fid->id);
 			camel_ews_store_summary_set_change_key (ews_summary, new_fname, fid->change_key);
 			camel_ews_store_summary_set_folder_name (ews_summary, new_fname, fid->id);
 
@@ -430,7 +430,7 @@ add_folder_to_summary (CamelEwsStore *store, const gchar *fname, EEwsFolder *fol
 	total = e_ews_folder_get_total_count (folder);
 	unread = e_ews_folder_get_unread_count (folder);
 
-	camel_ews_store_summary_set_folder_id (ews_summary, fname, fid->id);
+	camel_ews_store_summary_new_folder (ews_summary, fname, fid->id);
 	camel_ews_store_summary_set_change_key (ews_summary, fname, fid->change_key);
 	camel_ews_store_summary_set_parent_folder_id (ews_summary, fname, pfid->id);
 	camel_ews_store_summary_set_folder_name (ews_summary, fname, dname);
@@ -447,7 +447,7 @@ add_folder_to_summary (CamelEwsStore *store, const gchar *fname, EEwsFolder *fol
 		flags |= CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_OUTBOX; 
 	}
 	
-	camel_ews_store_summary_set_folder_flags (ews_summary, fname, unread);
+	camel_ews_store_summary_set_folder_flags (ews_summary, fname, flags);
 }
 
 static void
@@ -471,6 +471,7 @@ sync_created_folders (CamelEwsStore *store, GSList *created_folders)
 	
 	for (l = created_folders; l != NULL; l = g_slist_next (l)) {
 		EEwsFolder *folder = (EEwsFolder *) l->data;
+		CamelFolderInfo *fi;
 		const EwsFolderId *fid, *pfid;
 		const gchar *display_name, *pfname;
 		gchar *fname = NULL;
@@ -495,6 +496,9 @@ sync_created_folders (CamelEwsStore *store, GSList *created_folders)
 		}
 
 		add_folder_to_summary (store, fname, folder);
+		fi = camel_ews_utils_build_folder_info (store, fname);
+		camel_store_folder_created ((CamelStore *) store, fi);
+
 		g_free (fname);
 	}
 
@@ -504,7 +508,16 @@ sync_created_folders (CamelEwsStore *store, GSList *created_folders)
 void
 ews_utils_sync_folders (CamelEwsStore *ews_store, GSList *created_folders, GSList *deleted_folders, GSList *updated_folders)
 {
+	GError *error = NULL;
+
 	sync_deleted_folders (ews_store, deleted_folders);
 	sync_updated_folders (ews_store, updated_folders);
 	sync_created_folders (ews_store, created_folders);
+	
+	camel_ews_store_summary_save (ews_store->summary, &error);
+	if (error != NULL) {
+		g_print ("Error while saving store summary %s \n", error->message);
+		g_clear_error (&error);
+	}
+	return;
 }

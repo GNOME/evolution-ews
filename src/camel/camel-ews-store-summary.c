@@ -79,24 +79,6 @@ load_id_fname_hash (CamelEwsStoreSummary *ews_summary)
 	g_slist_free (folders);
 }
 
-/* This should be called in all the functions that set the key as they create the group */
-static void
-ensure_folder_in_fname_hash (CamelEwsStoreSummary *ews_summary, const gchar *fname)
-{
-	S_LOCK(ews_summary);
-
-	if (!g_key_file_has_group (ews_summary->priv->key_file, fname)) {
-		gchar *id;
-
-		id = g_strdup (camel_ews_store_summary_get_folder_id	
-						(ews_summary, fname, NULL));
-
-		g_hash_table_insert (ews_summary->priv->id_fname_hash, id, g_strdup (fname));
-	}
-
-	S_UNLOCK(ews_summary);
-}
-
 CamelEwsStoreSummary *
 camel_ews_store_summary_new (const gchar *path)
 {
@@ -180,7 +162,6 @@ camel_ews_store_summary_set_folder_name	(CamelEwsStoreSummary *ews_summary,
 	
 	S_LOCK(ews_summary);
 
-	ensure_folder_in_fname_hash (ews_summary, folder_full_name);
 	g_key_file_set_string	(ews_summary->priv->key_file, folder_full_name,
 				 "DisplayName", display_name);
 	ews_summary->priv->dirty = TRUE;
@@ -190,15 +171,16 @@ camel_ews_store_summary_set_folder_name	(CamelEwsStoreSummary *ews_summary,
 
 
 void		
-camel_ews_store_summary_set_folder_id	(CamelEwsStoreSummary *ews_summary,
+camel_ews_store_summary_new_folder	(CamelEwsStoreSummary *ews_summary,
 					 const gchar *folder_full_name, 
 					 const gchar *folder_id)
 {
 	S_LOCK(ews_summary);
 
-	ensure_folder_in_fname_hash (ews_summary, folder_full_name);
 	g_key_file_set_string	(ews_summary->priv->key_file, folder_full_name,
 				 "FolderId", folder_id);
+	g_hash_table_insert	(ews_summary->priv->id_fname_hash, g_strdup (folder_id), 
+				 g_strdup (folder_full_name));
 	ews_summary->priv->dirty = TRUE;
 		
 	S_UNLOCK(ews_summary);
@@ -212,7 +194,6 @@ camel_ews_store_summary_set_parent_folder_id	(CamelEwsStoreSummary *ews_summary,
 {
 	S_LOCK(ews_summary);
 
-	ensure_folder_in_fname_hash (ews_summary, folder_full_name);
 	g_key_file_set_string	(ews_summary->priv->key_file, folder_full_name,
 				 "ParentFolderId", parent_fid);
 	ews_summary->priv->dirty = TRUE;
@@ -228,7 +209,6 @@ camel_ews_store_summary_set_change_key	(CamelEwsStoreSummary *ews_summary,
 {
 	S_LOCK(ews_summary);
 
-	ensure_folder_in_fname_hash (ews_summary, folder_full_name);
 	g_key_file_set_string	(ews_summary->priv->key_file, folder_full_name,
 				 "ChangeKey", change_key);
 	ews_summary->priv->dirty = TRUE;
@@ -244,7 +224,6 @@ camel_ews_store_summary_set_folder_flags	(CamelEwsStoreSummary *ews_summary,
 {
 	S_LOCK(ews_summary);
 
-	ensure_folder_in_fname_hash (ews_summary, folder_full_name);
 	g_key_file_set_uint64	(ews_summary->priv->key_file, folder_full_name,
 				 "Flags", flags);
 	ews_summary->priv->dirty = TRUE;
@@ -259,7 +238,6 @@ camel_ews_store_summary_set_folder_unread	(CamelEwsStoreSummary *ews_summary,
 {
 	S_LOCK(ews_summary);
 
-	ensure_folder_in_fname_hash (ews_summary, folder_full_name);
 	g_key_file_set_uint64	(ews_summary->priv->key_file, folder_full_name,
 				 "UnRead", unread);
 	ews_summary->priv->dirty = TRUE;
@@ -274,7 +252,6 @@ camel_ews_store_summary_set_folder_total	(CamelEwsStoreSummary *ews_summary,
 {
 	S_LOCK(ews_summary);
 
-	ensure_folder_in_fname_hash (ews_summary, folder_full_name);
 	g_key_file_set_uint64	(ews_summary->priv->key_file, folder_full_name,
 				 "Total", total);
 	ews_summary->priv->dirty = TRUE;

@@ -51,10 +51,6 @@ void		camel_ews_store_summary_set_folder_name
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_full_name, 
 						 const gchar *display_name);
-void		camel_ews_store_summary_set_folder_id	
-						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name, 
-						 const gchar *folder_id);
 void		camel_ews_store_summary_set_parent_folder_id	
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_full_name, 
@@ -122,6 +118,11 @@ gboolean	camel_ews_store_summary_remove_folder
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_full_name,
 						 GError **error);
+
+void		camel_ews_store_summary_new_folder
+						(CamelEwsStoreSummary *ews_summary,
+						 const gchar *folder_full_name, 
+						 const gchar *folder_id);
 
 const gchar *	camel_ews_store_summary_get_folder_name_from_id	
 						(CamelEwsStoreSummary *ews_summary,
