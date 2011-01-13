@@ -94,20 +94,11 @@ CamelServiceAuthType camel_ews_password_authtype = {
 	TRUE
 };
 
-/* TODO implement */
-static gint
-ews_auto_detect_cb (CamelURL *url, GHashTable **auto_detected,
-			 GError **error)
-{
-	return 0;
-}
-
 void
 camel_provider_module_init(void)
 {
 	ews_provider.url_hash = ews_url_hash;
 	ews_provider.url_equal = ews_url_equal;
-	ews_provider.auto_detect = ews_auto_detect_cb;
 	ews_provider.authtypes = g_list_prepend (ews_provider.authtypes, &camel_ews_password_authtype);
 	ews_provider.translation_domain = GETTEXT_PACKAGE;
 

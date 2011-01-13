@@ -56,7 +56,7 @@
 
 struct _CamelEwsStorePrivate {
 
-	gchar *storage_path;
+	gchar *host_url;
 	EEwsConnection *cnc;
 };
 
@@ -69,8 +69,33 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 			 CamelProvider *provider, CamelURL *url,
 			 GError **error)
 {
-	d(printf ("\nin ews store constrcut\n"));
+	CamelServiceClass *service_class;
+	CamelEwsStore *ews_store;
+	CamelEwsStorePrivate *priv;
+	gchar *summary_file;
 
+	ews_store = (CamelEwsStore *) service;
+	priv = ews_store->priv;
+	
+	/* Chain up to parent's construct() method. */
+	service_class = CAMEL_SERVICE_CLASS (camel_ews_store_parent_class);
+	if (!service_class->construct (service, session, provider, url, error))
+		return FALSE;
+
+	/*storage path*/
+	ews_store->storage_path = camel_session_get_storage_path (session, service, error);
+	if (!ews_store->storage_path)
+		return FALSE;
+
+	priv->host_url = g_strdup (camel_url_get_param (url, "hosturl"));
+	if (!priv->host_url)
+		return FALSE;
+
+	summary_file = g_build_filename (ews_store->storage_path, "folder-tree", NULL);
+	ews_store->summary = camel_ews_store_summary_new (ews_store->storage_path);
+	camel_ews_store_summary_load (ews_store->summary, NULL);
+
+	g_free (summary_file);
 	return TRUE;
 }
 
@@ -91,8 +116,6 @@ ews_compare_folder_name (gconstpointer a, gconstpointer b)
 static gboolean
 ews_connect_sync (CamelService *service, GCancellable *cancellable, GError **error)
 {
-	d(printf("in ews store connect\n"));
-
 	return TRUE;
 }
 
@@ -219,12 +242,6 @@ cnc_lookup (CamelEwsStorePrivate *priv)
 	return priv->cnc;
 }
 
-gchar *
-storage_path_lookup (CamelEwsStorePrivate *priv)
-{
-	return priv->storage_path;
-}
-
 static CamelFolder *
 ews_get_trash_folder_sync (CamelStore *store, GCancellable *cancellable, GError **error)
 {
@@ -255,8 +272,7 @@ ews_store_dispose (GObject *object)
 	ews_store = CAMEL_EWS_STORE (object);
 
 	if (ews_store->summary != NULL) {
-		camel_store_summary_save (
-			CAMEL_STORE_SUMMARY (ews_store->summary));
+		camel_ews_store_summary_save (ews_store->summary, NULL);
 		g_object_unref (ews_store->summary);
 		ews_store->summary = NULL;
 	}
@@ -277,7 +293,8 @@ ews_store_finalize (GObject *object)
 
 	ews_store = CAMEL_EWS_STORE (object);
 
-	g_free (ews_store->priv->storage_path);
+	g_free (ews_store->storage_path);
+	g_free (ews_store->priv->host_url);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_ews_store_parent_class)->finalize (object);

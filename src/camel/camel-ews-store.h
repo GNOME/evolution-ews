@@ -61,6 +61,7 @@ struct _CamelEwsStore {
 	CamelEwsStorePrivate *priv;
 	
 	CamelEwsStoreSummary *summary;
+	gchar *storage_path;
 };
 
 struct _CamelEwsStoreClass {
@@ -71,7 +72,6 @@ GType camel_ews_store_get_type (void);
 gchar * ews_get_name(CamelService *service, gboolean brief);
 
 EEwsConnection *cnc_lookup (CamelEwsStorePrivate *priv);
-gchar *storage_path_lookup (CamelEwsStorePrivate *priv);
 const gchar *ews_base_url_lookup (CamelEwsStorePrivate *priv);
 CamelFolderInfo * create_junk_folder (CamelStore *store);
 gboolean camel_ews_store_connected (CamelEwsStore *store, GCancellable *cancellable, GError **error);

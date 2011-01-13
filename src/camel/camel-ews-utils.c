@@ -495,6 +495,7 @@ sync_created_folders (CamelEwsStore *store, GSList *created_folders)
 		}
 
 		add_folder_to_summary (store, fname, folder);
+		g_free (fname);
 	}
 
 	g_hash_table_destroy (c_folders_hash);
