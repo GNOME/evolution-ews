@@ -56,7 +56,7 @@ camel_ews_store_summary_init (CamelEwsStoreSummary *ews_summary)
 	priv->key_file = g_key_file_new ();
 	priv->dirty = FALSE;
 	priv->id_fname_hash = g_hash_table_new_full (g_str_hash, g_str_equal, (GDestroyNotify) g_free, (GDestroyNotify) g_free);
-	g_static_rec_mutex_lock (&priv->s_lock);
+	g_static_rec_mutex_init (&priv->s_lock);
 }
 
 static void
@@ -444,7 +444,12 @@ camel_ews_store_summary_get_folders	(CamelEwsStoreSummary *ews_summary)
 	gsize length;
 	gint i;
 
+	S_LOCK(ews_summary);
+	
 	groups = g_key_file_get_groups (ews_summary->priv->key_file, &length);
+	
+	S_UNLOCK(ews_summary);
+	
 	for (i = 0; i < length; i++) {
 		if (!g_ascii_strcasecmp (groups [i], STORE_GROUP_NAME))
 			continue;

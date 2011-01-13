@@ -53,11 +53,15 @@
 	(G_TYPE_INSTANCE_GET_PRIVATE \
 	((obj), CAMEL_TYPE_EWS_STORE, CamelEwsStorePrivate))
 
+#define FINFO_REFRESH_INTERVAL 60
+
 struct _CamelEwsStorePrivate {
 
 	gchar *host_url;
 	gchar *user;
 	gchar *host;
+	time_t last_refresh_time;
+	GMutex *get_finfo_lock;
 	EEwsConnection *cnc;
 };
 
@@ -161,6 +165,8 @@ ews_store_authenticate	(CamelService *service,
 			}
 		}
 
+		priv->host_url = e_ews_autodiscover_ws_url	(camel_url_get_param (service->url, "email"),
+								 service->url->passwd, error);
 		priv->cnc = e_ews_connection_new (priv->host_url, priv->user, service->url->passwd, error);
 		if (*error) {
 			/*FIXME check for the right code */
@@ -288,17 +294,126 @@ folder_info_from_store_summary (CamelEwsStore *store, const gchar *top, guint32 
 	return root_fi;
 }
 
+static void
+ews_folder_hierarchy_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
+{
+	GSList *folders_created = NULL, *folders_updated = NULL;
+	GSList *folders_deleted = NULL;
+	CamelEwsStore *ews_store = (CamelEwsStore *) user_data;
+	EEwsConnection *cnc = (EEwsConnection *) obj;
+	gchar *sync_state = NULL;
+	GError *error = NULL;
+
+	e_ews_connection_sync_folder_hierarchy_finish	(cnc, res, &sync_state, 
+							 &folders_created, &folders_updated,
+							 &folders_deleted, &error);
+
+	if (error != NULL) {
+		g_warning ("Unable to fetch the folder hierarchy: %s :%d \n", error->message, error->code);
+		return;	
+	}
+
+	ews_utils_sync_folders (ews_store, folders_created, folders_deleted, folders_updated);
+	camel_ews_store_summary_store_string_val (ews_store->summary, "sync_state", sync_state);
+	ews_store->priv->last_refresh_time = time (NULL);
+
+	g_slist_foreach (folders_created, (GFunc) g_object_unref, NULL);
+	g_slist_foreach (folders_deleted, (GFunc) g_object_unref, NULL);
+	g_slist_foreach (folders_updated, (GFunc) g_object_unref, NULL);
+	g_slist_free (folders_created);
+	g_slist_free (folders_deleted);
+	g_slist_free (folders_updated);
+	g_free (sync_state);
+}
+
+struct _ews_refresh_msg {
+	CamelSessionThreadMsg msg;
+	CamelStore *store;
+};
+
+static void
+ews_refresh_finfo (CamelSession *session, CamelSessionThreadMsg *msg)
+{
+	struct _ews_refresh_msg *m = (struct _ews_refresh_msg *)msg;
+	CamelEwsStore *ews_store = (CamelEwsStore *) m->store;
+	const gchar *sync_state;
+
+	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (ews_store)))
+		return;
+
+	if (!camel_service_connect_sync ((CamelService *) ews_store, &msg->error))
+		return;
+	
+	sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
+	e_ews_connection_sync_folder_hierarchy_start	(ews_store->priv->cnc, EWS_PRIORITY_MEDIUM, 
+							 sync_state, ews_folder_hierarchy_ready_cb, 
+							 NULL, ews_store);
+}
+
+static void
+ews_refresh_free (CamelSession *session, CamelSessionThreadMsg *msg)
+{
+	struct _ews_refresh_msg *m = (struct _ews_refresh_msg *)msg;
+
+	g_object_unref (m->store);
+}
+
+
+static CamelSessionThreadOps ews_refresh_ops = {
+	ews_refresh_finfo,
+	ews_refresh_free,
+};
+
 static CamelFolderInfo *
 ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, GCancellable *cancellable, GError **error)
 {
+	CamelEwsStore *ews_store;
+	CamelEwsStorePrivate *priv;
 	CamelFolderInfo *fi = NULL;
+	const gchar *sync_state;
+	GSList *folders = NULL;
+	gboolean initial_setup;
+
+	ews_store = (CamelEwsStore *) store;
+	priv = ews_store->priv;
+
 
 	if (!(camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))
 	    && camel_service_connect_sync ((CamelService *)store, error)))
 		goto offline;
+	
+	g_mutex_lock (priv->get_finfo_lock);
+
+	folders = camel_ews_store_summary_get_folders (ews_store->summary);
+	if (!folders)
+		initial_setup = TRUE;
+
+	if (!initial_setup && flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIBED) {
+		time_t now = time (NULL);
+
+		if (now - priv->last_refresh_time > FINFO_REFRESH_INTERVAL) {
+			struct _ews_refresh_msg *m;
+
+			m = camel_session_thread_msg_new (((CamelService *)store)->session, &ews_refresh_ops, sizeof (*m));
+			m->store = g_object_ref (store);
+			camel_session_thread_queue (((CamelService *)store)->session, &m->msg, 0);
+		}
+		g_mutex_unlock (priv->get_finfo_lock);
+		goto offline;
+	}
+
+	g_slist_foreach (folders, (GFunc)g_free, NULL);
+	g_slist_free (folders);
+	
+	sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
+	e_ews_connection_sync_folder_hierarchy_start	(priv->cnc, EWS_PRIORITY_MEDIUM, 
+							 sync_state, ews_folder_hierarchy_ready_cb, 
+							 cancellable, ews_store);
+	g_mutex_unlock (priv->get_finfo_lock);
 
 offline:
 	fi = folder_info_from_store_summary ( (CamelEwsStore *) store, top, flags, error);
+
 	return fi;
 }
 
@@ -408,6 +523,7 @@ ews_store_finalize (GObject *object)
 	g_free (ews_store->priv->host_url);
 	g_free (ews_store->priv->user);
 	g_free (ews_store->priv->host);
+	g_mutex_free (ews_store->priv->get_finfo_lock);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_ews_store_parent_class)->finalize (object);
@@ -453,4 +569,6 @@ camel_ews_store_init (CamelEwsStore *ews_store)
 		CAMEL_EWS_STORE_GET_PRIVATE (ews_store);
 
 	ews_store->priv->cnc = NULL;
+	ews_store->priv->last_refresh_time = time (NULL) - (FINFO_REFRESH_INTERVAL + 10);
+	ews_store->priv->get_finfo_lock = g_mutex_new ();
 }

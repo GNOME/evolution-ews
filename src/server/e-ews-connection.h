@@ -61,33 +61,34 @@ enum {
 	EWS_PRIORITY_HIGH
 };
 
-GType          e_ews_connection_get_type	(void);
-EEwsConnection *e_ews_connection_new		(const gchar *uri,
+GType		e_ews_connection_get_type	(void);
+EEwsConnection *
+		e_ews_connection_new		(const gchar *uri,
 						 const gchar *username, 
 						 const gchar *password, 
 						 GError **error);
-gchar* e_ews_autodiscover_ws_url		(const gchar *email,
+gchar *		e_ews_autodiscover_ws_url	(const gchar *email,
 						 const gchar *password, 
 						 GError **error);
 /* Create Folder */
-void e_ews_connection_create_folder		(EEwsConnection *cnc, 
+void		e_ews_connection_create_folder	(EEwsConnection *cnc, 
 						 GCancellable *cancellable);
 
-void	e_ews_connection_create_folder_start
+void		e_ews_connection_create_folder_start
 						(EEwsConnection *cnc, 
 						 gint pri, 
 						 GAsyncReadyCallback cb, 
 						 GCancellable *cancellable,
 						 gpointer user_data);
 
-void	e_ews_connection_create_folder_finish 
+void		e_ews_connection_create_folder_finish 
 						(EEwsConnection *cnc, 
 						 GAsyncResult *result, 
 						 guint folder_id,
 						 GError **error);
 
 /* Sync folder items */
-void	e_ews_connection_sync_folder_items_start 
+void		e_ews_connection_sync_folder_items_start 
 						(EEwsConnection *cnc, 
 						 gint pri, 
 						 const gchar *sync_state, 
@@ -99,7 +100,7 @@ void	e_ews_connection_sync_folder_items_start
 						 GCancellable *cancellable,
 						 gpointer user_data);
 
-void	e_ews_connection_sync_folder_items_finish 
+void		e_ews_connection_sync_folder_items_finish 
 						(EEwsConnection *cnc, 
 						 GAsyncResult *result,
 					 	 gchar **sync_state, 
@@ -107,14 +108,14 @@ void	e_ews_connection_sync_folder_items_finish
 						 GSList **items_updated,
 						 GSList **items_deleted,
 						 GError **error);
-void e_ews_connection_sync_folder_items 
+void		e_ews_connection_sync_folder_items 
 						(EEwsConnection *cnc, 
 						 const gchar *sync_state, 
 						 const gchar *folder_name, 
 						 GCancellable *cancellable);
 
 /* Get folder items */
-void	e_ews_connection_get_item_start 
+void		e_ews_connection_get_item_start 
 						(EEwsConnection *cnc,
 						 gint pri,
 						 EwsId *fid,
@@ -125,7 +126,7 @@ void	e_ews_connection_get_item_start
 						 GCancellable *cancellable,
 						 gpointer user_data);
 
-void	e_ews_connection_get_item_finish 
+void		e_ews_connection_get_item_finish 
 						(EEwsConnection *cnc, 
 						 GAsyncResult *result,
 						 EEwsItem **item,
@@ -133,7 +134,7 @@ void	e_ews_connection_get_item_finish
 
 
 /* Sync folder hierarchy */
-void	e_ews_connection_sync_folder_hierarchy 
+void		e_ews_connection_sync_folder_hierarchy 
 						(EEwsConnection *cnc, 
 						 gint pri, 
 						 gchar **sync_state, 
@@ -142,14 +143,14 @@ void	e_ews_connection_sync_folder_hierarchy
 						 GSList **folders_deleted,
 						 GCancellable *cancellable, 
 						 GError **error);
-void	e_ews_connection_sync_folder_hierarchy_start 
+void		e_ews_connection_sync_folder_hierarchy_start 
 						(EEwsConnection *cnc, 
 						 gint pri, 
 						 const gchar *sync_state, 
 						 GAsyncReadyCallback cb, 
 						 GCancellable *cancellable,
 						 gpointer user_data);
-void	e_ews_connection_sync_folder_hierarchy_finish 
+void		e_ews_connection_sync_folder_hierarchy_finish 
 						(EEwsConnection *cnc, 
 						 GAsyncResult *result, 
 						 gchar **sync_state, 
@@ -157,7 +158,7 @@ void	e_ews_connection_sync_folder_hierarchy_finish
 						 GSList **folders_updated,
 						 GSList **folders_deleted,
 						 GError **error);
-void	e_ews_connection_resolve_names_start
+void		e_ews_connection_resolve_names_start
 						(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *resolve_name,
@@ -165,7 +166,7 @@ void	e_ews_connection_resolve_names_start
 						 GCancellable *cancellable,
 						 gpointer user_data);
 
-void	e_ews_connection_resolve_names_finish 
+void		e_ews_connection_resolve_names_finish 
 						(EEwsConnection *cnc, 
 						 GAsyncResult *result, 
 						 GError **error);
