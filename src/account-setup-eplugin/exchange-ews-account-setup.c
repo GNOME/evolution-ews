@@ -236,14 +236,17 @@ org_gnome_exchange_ews_check_options(EPlugin *epl, EConfigHookPageCheckData *dat
 								    E_ACCOUNT_SOURCE_URL), NULL);
 
 		if (url && url->protocol && g_ascii_strcasecmp (url->protocol, "ews") == 0) {
-			const gchar *prof = NULL;
+			const gchar *url_str = NULL;
+			CamelURL *hurl;
 
-			/* We assume that if the profile is set, then the setting is valid. */
-			prof = camel_url_get_param (url, "profile");
+			url_str = camel_url_get_param (url, "hosturl");
+			hurl = camel_url_new (url_str, NULL);
 
-			/*Profile not set. Do not proceed with account creation.*/
-			if (!(prof && *prof))
+			/*Host url not set. Do not proceed with account creation.*/
+			if (!hurl)
 				status = FALSE;
+			else
+				camel_url_free (hurl);
 		}
 
 		if (url)
