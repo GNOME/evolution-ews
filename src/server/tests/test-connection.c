@@ -193,7 +193,7 @@ op_test_sync_folder_items ()
 	g_assert (cnc != NULL);
 
 	e_ews_connection_sync_folder_items_start	(cnc, EWS_PRIORITY_MEDIUM, 
-							 NULL, inbox_folder_id, 
+							 NULL, inbox_folder_id->id, 
 							 "IdOnly", "item:Subject item:DisplayTo", 
 							 500, folder_items_ready_callback, 
 							 cancellable, NULL);

@@ -1043,7 +1043,7 @@ void
 e_ews_connection_sync_folder_items_start	(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *sync_state,
-						 EwsFolderId *fid,
+						 const gchar *fid,
 						 const gchar *default_props,
 						 const gchar *additional_props,
 						 guint max_entries,
@@ -1075,7 +1075,7 @@ e_ews_connection_sync_folder_items_start	(EEwsConnection *cnc,
 	e_soap_message_end_element (msg);
 
 	e_soap_message_start_element (msg, "SyncFolderId", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", "types", NULL, "Id", fid->id);
+	e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", "types", NULL, "Id", fid);
 	e_soap_message_end_element (msg);
 
 	if (sync_state)

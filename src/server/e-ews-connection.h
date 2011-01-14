@@ -92,7 +92,7 @@ void		e_ews_connection_sync_folder_items_start
 						(EEwsConnection *cnc, 
 						 gint pri, 
 						 const gchar *sync_state, 
-						 EwsFolderId *fid,
+						 const gchar *fid,
 						 const gchar *props, 
 						 const gchar *additional_props, 
 						 guint max_entries, 
