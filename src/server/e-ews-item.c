@@ -167,7 +167,7 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 		if (!data || !data_len) {
 			g_free (value);
 			g_free (data);
-			return NULL;
+			return FALSE;
 		}
 		e_ews_item_set_mime_content (item, (const gchar *) data);
 
@@ -181,7 +181,6 @@ EEwsItem *
 e_ews_item_new_from_soap_parameter (ESoapParameter *param)
 {
 	EEwsItem *item;
-	gchar *item_type;
 
 	g_return_val_if_fail (param != NULL, NULL);
 

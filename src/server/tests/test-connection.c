@@ -19,7 +19,7 @@ static void op_test_get_item ();
 static GMainLoop *main_loop;
 
 EwsFolderId *inbox_folder_id = NULL;
-EwsId *first_item_id = NULL;
+GSList *ids = NULL;
 
 /*Utility functions */
 
@@ -153,25 +153,20 @@ folder_items_ready_callback (GObject *object, GAsyncResult *res, gpointer user_d
 
 	g_print ("Sync state for folder is\n  %s \n", sync_state);
 
-	/* Only for testing the get item API later */
-	i_id = e_ews_item_get_id ((EEwsItem *) items_created->data);
-	first_item_id = g_new0 (EwsId, 1);
-	first_item_id->id = g_strdup (i_id->id);
-	first_item_id->change_key = g_strdup (i_id->change_key);
-
 	g_print ("Items created \n");
 	for (l = items_created; l != NULL;l = g_slist_next (l)) {
 		EEwsItem *item = l->data;
 		EwsId *item_id = e_ews_item_get_id (item);
 
 		g_print ("Subject: %s \n Id: %s  \n ChangeKey: %s \n\n", e_ews_item_get_subject (item), item_id->id, item_id->change_key);
+		ids = g_slist_append (ids, g_strdup (item_id->id));
 		g_object_unref (item);
 	}
 
-	g_free (sync_state);
 	g_slist_free (items_created);
 	g_slist_free (items_updated);
 	g_slist_free (items_deleted);
+	g_free (sync_state);
 
 	g_print ("\nTesting get item... \n");
 	op_test_get_item ();
@@ -199,7 +194,7 @@ op_test_sync_folder_items ()
 
 	e_ews_connection_sync_folder_items_start	(cnc, EWS_PRIORITY_MEDIUM, 
 							 NULL, inbox_folder_id, 
-							 "IdOnly", "Subject DisplayTo", 
+							 "IdOnly", "item:Subject item:DisplayTo message:References", 
 							 100, folder_items_ready_callback, 
 							 cancellable, NULL);
 }
@@ -283,17 +278,26 @@ get_item_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	GError *error = NULL;
+	GSList *items = NULL, *l;
 	EEwsItem *item;
 
-	e_ews_connection_get_item_finish	(cnc, res, &item, &error);
+	e_ews_connection_get_item_finish	(cnc, res, &items, &error);
 
 	if (error != NULL) {
 		g_print ("Unable to get item: %s :%d \n", error->message, error->code);
 		return;
 	}
 
-	g_print ("\nMime content is:\n%s\n", e_ews_item_get_mime_content (item));
+	g_print ("\nMime content of first item is:\n%s\n", e_ews_item_get_mime_content (items->data));
 
+	for (l = items; l != NULL; l = g_slist_next (l)) {
+		EEwsItem *item = l->data;
+
+		g_print ("GetItem: Subject is %s \n", e_ews_item_get_subject (item));
+	}
+
+	g_slist_foreach (items, (GFunc) g_object_unref, NULL);
+	g_slist_free (items);
 }
 
 static void 
@@ -316,9 +320,12 @@ op_test_get_item ()
 	g_assert (cnc != NULL);
 
 	e_ews_connection_get_item_start		(cnc, EWS_PRIORITY_MEDIUM, 
-						 first_item_id, "IdOnly", NULL, "true",
+						 ids, "IdOnly", "message:ToRecipients message:From item:Subject", "false",
 						 get_item_ready_callback, 
 						 cancellable, NULL);
+
+	g_slist_foreach (ids, (GFunc) g_free, NULL);
+	g_slist_free (ids);
 }
 
 static void
