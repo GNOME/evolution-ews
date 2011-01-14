@@ -194,8 +194,8 @@ op_test_sync_folder_items ()
 
 	e_ews_connection_sync_folder_items_start	(cnc, EWS_PRIORITY_MEDIUM, 
 							 NULL, inbox_folder_id, 
-							 "IdOnly", "item:Subject item:DisplayTo message:References", 
-							 100, folder_items_ready_callback, 
+							 "IdOnly", "item:Subject item:DisplayTo", 
+							 500, folder_items_ready_callback, 
 							 cancellable, NULL);
 }
 
@@ -319,8 +319,9 @@ op_test_get_item ()
 	cnc = e_ews_connection_new (uri, username, password, NULL);
 	g_assert (cnc != NULL);
 
+	ids = g_slist_reverse (ids);
 	e_ews_connection_get_item_start		(cnc, EWS_PRIORITY_MEDIUM, 
-						 ids, "IdOnly", "message:ToRecipients message:From item:Subject", "false",
+						 g_slist_last (ids), "IdOnly", "item:Subject item:DateTimeReceived item:DateTimeSent item:DateTimeCreated item:Size item:HasAttachments message:InternetMessageId message:From message:Sender message:ToRecipients message:CcRecipients message:BccRecipients message:IsRead item:MimeContent", "false",
 						 get_item_ready_callback, 
 						 cancellable, NULL);
 

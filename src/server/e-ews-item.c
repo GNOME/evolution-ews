@@ -38,9 +38,26 @@ struct _EEwsItemPrivate {
 	EwsId *item_id;
 	gchar *subject;
 	gchar *mime_content;
+
+	time_t date_received;
+	time_t date_sent;
+	time_t date_created;
+
+	gsize size;
+	gchar *msg_id;
+	gboolean has_attachments;
+	gboolean is_read;
+
+	GSList *to_recipients;
+	GSList *cc_recipients;
+	GSList *bcc_recipients;
+
+	EwsMailbox *from;
+	EwsMailbox *sender;
 };
 
 static GObjectClass *parent_class = NULL;
+static void	ews_item_free_mailbox (EwsMailbox *mb);
 
 static void
 e_ews_item_dispose (GObject *object)
@@ -51,18 +68,42 @@ e_ews_item_dispose (GObject *object)
 	g_return_if_fail (E_IS_EWS_ITEM (item));
 
 	priv = item->priv;
-	if (priv) {
-		if (priv->item_id) {
-			g_free (priv->item_id);
-			priv->item_id = NULL;
-		}
 
-		if (priv->subject) {
-			g_free (priv->subject);
-			priv->subject = NULL;
-		}
-
+	if (priv->item_id) {
+		g_free (priv->item_id);
+		priv->item_id = NULL;
 	}
+
+	if (priv->subject) {
+		g_free (priv->subject);
+		priv->subject = NULL;
+	}
+
+	if (priv->msg_id) {
+		g_free (priv->msg_id);
+		priv->subject = NULL;
+	}
+	
+	if (priv->to_recipients) {
+		g_slist_foreach (priv->to_recipients, (GFunc) ews_item_free_mailbox, NULL);
+		g_slist_free (priv->to_recipients);
+		priv->to_recipients = NULL;
+	}
+
+	if (priv->cc_recipients) {
+		g_slist_foreach (priv->cc_recipients, (GFunc) ews_item_free_mailbox, NULL);
+		g_slist_free (priv->cc_recipients);
+		priv->cc_recipients = NULL;
+	}
+
+	if (priv->bcc_recipients) {
+		g_slist_foreach (priv->bcc_recipients, (GFunc) ews_item_free_mailbox, NULL);
+		g_slist_free (priv->bcc_recipients);
+		priv->bcc_recipients = NULL;
+	}
+
+	ews_item_free_mailbox (priv->sender);
+	ews_item_free_mailbox (priv->from);
 
 	if (parent_class->dispose)
 		(* parent_class->dispose) (object);
@@ -109,11 +150,78 @@ e_ews_item_init (EEwsItem *item)
 	priv->item_type = E_EWS_ITEM_TYPE_UNKNOWN;
 }
 
+static void
+ews_item_free_mailbox (EwsMailbox *mb)
+{
+	if (mb) {
+		g_free (mb->name);
+		g_free (mb->email);
+		g_free (mb);
+	}
+}
+
+
+static time_t
+ews_item_parse_date (const gchar *dtstring)
+{
+	time_t t = 0;
+	GTimeVal t_val;
+
+	g_return_val_if_fail (dtstring != NULL, 0);
+
+	if (g_time_val_from_iso8601 (dtstring, &t_val)) {
+		t = (time_t) t_val.tv_sec;
+	} else if (strlen (dtstring) == 8) {
+		/* It might be a date value */
+		GDate date;
+		struct tm tt;
+		guint16 year;
+		guint month;
+		guint8 day;
+
+		g_date_clear (&date, 1);
+#define digit_at(x,y) (x[y] - '0')
+		year = digit_at (dtstring, 0) * 1000
+			+ digit_at (dtstring, 1) * 100
+			+ digit_at (dtstring, 2) * 10
+			+ digit_at (dtstring, 3);
+		month = digit_at (dtstring, 4) * 10 + digit_at (dtstring, 5);
+		day = digit_at (dtstring, 6) * 10 + digit_at (dtstring, 7);
+
+		g_date_set_year (&date, year);
+		g_date_set_month (&date, month);
+		g_date_set_day (&date, day);
+
+		g_date_to_struct_tm (&date, &tt);
+		t = mktime (&tt);
+
+	} else
+		g_warning ("Could not parse the string \n");
+
+	return t;
+}
+
+static EwsMailbox *
+ews_mailbox_from_soap_param (ESoapParameter *param)
+{
+	EwsMailbox *mb;
+	ESoapParameter *subparam;
+
+	mb = g_new0 (EwsMailbox, 1);
+	
+	subparam = e_soap_parameter_get_first_child_by_name (param, "Name");
+	mb->name = e_soap_parameter_get_string_value (subparam);
+	
+	subparam = e_soap_parameter_get_first_child_by_name (param, "EmailAddress");
+	mb->email = e_soap_parameter_get_string_value (subparam);
+
+	return mb;
+}
+
 static gboolean
 e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 {
 	EEwsItemPrivate *priv = item->priv;
-	gchar *value;
 	ESoapParameter *subparam, *node;
 
 	g_return_val_if_fail (param != NULL, FALSE);
@@ -142,36 +250,95 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 		g_warning ("Unable to find the Item type \n");
 		return FALSE;
 	}
+	
+	for (subparam = e_soap_parameter_get_first_child (node);
+			subparam != NULL;
+			subparam = e_soap_parameter_get_next_child (subparam)) {
+		ESoapParameter *subparam1;
+		const gchar *name;
+		gchar *value = NULL;
 
-	subparam = e_soap_parameter_get_first_child_by_name (node, "ItemId");
-	if (subparam) {
-		priv->item_id = g_new0 (EwsId, 1);
-		priv->item_id->id = e_soap_parameter_get_property (subparam, "Id");
-		priv->item_id->change_key = e_soap_parameter_get_property (subparam, "ChangeKey");
-	}
+		name = e_soap_parameter_get_name (subparam);
 
-	subparam = e_soap_parameter_get_first_child_by_name (node, "Subject");
-	if (subparam) {
-		value = e_soap_parameter_get_string_value (subparam);
-		e_ews_item_set_subject (item, (const gchar *) value);
-		g_free (value);
-	}
+		/* The order is maintained according the order in soap response */
+		if (!g_ascii_strcasecmp (name, "MimeContent")) {
+			guchar *data;
+			gsize data_len = 0;
 
-	subparam = e_soap_parameter_get_first_child_by_name (node, "MimeContent");
-	if (subparam) {
-		guchar *data;
-		gsize data_len = 0;
+			value = e_soap_parameter_get_string_value (subparam);
+			data = g_base64_decode (value, &data_len);
+			if (!data || !data_len) {
+				g_free (value);
+				g_free (data);
+				return FALSE;
+			}
+			priv->mime_content = (gchar *) data;
 
-		value = e_soap_parameter_get_string_value (subparam);
-		data = g_base64_decode (value, &data_len);
-		if (!data || !data_len) {
 			g_free (value);
-			g_free (data);
-			return FALSE;
+		} else if (!g_ascii_strcasecmp (name, "ItemId")) {
+			priv->item_id = g_new0 (EwsId, 1);
+			priv->item_id->id = e_soap_parameter_get_property (subparam, "Id");
+			priv->item_id->change_key = e_soap_parameter_get_property (subparam, "ChangeKey");
+		} else if (!g_ascii_strcasecmp (name, "Subject")) {
+			priv->subject = e_soap_parameter_get_string_value (subparam);
+		} else if (!g_ascii_strcasecmp (name, "DateTimeReceived")) {
+			value = e_soap_parameter_get_string_value (subparam);
+			priv->date_received = ews_item_parse_date (value);
+			g_free (value);
+		} else if (!g_ascii_strcasecmp (name, "Size")) {
+			priv->size = e_soap_parameter_get_int_value (subparam);
+		} else if (!g_ascii_strcasecmp (name, "DateTimeSent")) {
+			value = e_soap_parameter_get_string_value (subparam);
+			priv->date_sent = ews_item_parse_date (value);
+			g_free (value);
+		} else if (!g_ascii_strcasecmp (name, "DateTimeCreated")) {
+			value = e_soap_parameter_get_string_value (subparam);
+			priv->date_created = ews_item_parse_date (value);
+			g_free (value);
+		} else if (!g_ascii_strcasecmp (name, "HasAttachments")) {
+			value = e_soap_parameter_get_string_value (subparam);
+			priv->has_attachments = (!g_ascii_strcasecmp (value, "true"));
+			g_free (value);
+		} else if (!g_ascii_strcasecmp (name, "Sender")) {
+			subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Mailbox");
+			priv->sender = ews_mailbox_from_soap_param (subparam1);
+		} else if (!g_ascii_strcasecmp (name, "ToRecipients")) {
+			GSList *list = NULL;
+			for (subparam1 = e_soap_parameter_get_first_child (subparam);
+				subparam1 != NULL;
+				subparam1 = e_soap_parameter_get_next_child (subparam1)) {
+				EwsMailbox *mb = ews_mailbox_from_soap_param (subparam1);
+				list = g_slist_append (list, mb);
+			}
+			priv->to_recipients = list;
+		} else if (!g_ascii_strcasecmp (name, "CcRecipients")) {
+			GSList *list = NULL;
+			for (subparam1 = e_soap_parameter_get_first_child (subparam);
+				subparam1 != NULL;
+				subparam1 = e_soap_parameter_get_next_child (subparam1)) {
+				EwsMailbox *mb = ews_mailbox_from_soap_param (subparam1);
+				list = g_slist_append (list, mb);
+			}
+			priv->cc_recipients = list;
+		} else if (!g_ascii_strcasecmp (name, "BccRecipients")) {
+			GSList *list = NULL;
+			for (subparam1 = e_soap_parameter_get_first_child (subparam);
+				subparam1 != NULL;
+				subparam1 = e_soap_parameter_get_next_child (subparam1)) {
+				EwsMailbox *mb = ews_mailbox_from_soap_param (subparam1);
+				list = g_slist_append (list, mb);
+			}
+			priv->bcc_recipients = list;
+		} else if (!g_ascii_strcasecmp (name, "From")) {
+			subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Mailbox");
+			priv->from = ews_mailbox_from_soap_param (subparam1);
+		} else if (!g_ascii_strcasecmp (name, "InternetMessageId")) {
+			priv->msg_id = e_soap_parameter_get_string_value (subparam);
+		} else if (!g_ascii_strcasecmp (name, "IsRead")) {
+			value = e_soap_parameter_get_string_value (subparam);
+			priv->has_attachments = (!g_ascii_strcasecmp (value, "true"));
+			g_free (value);
 		}
-		e_ews_item_set_mime_content (item, (const gchar *) data);
-
-		g_free (value);
 	}
 
 	return TRUE;
@@ -246,9 +413,109 @@ e_ews_item_set_mime_content (EEwsItem *item, const gchar *new_mime_content)
 }
 
 const EwsId *
-e_ews_item_get_id (EEwsItem *item)
+e_ews_item_get_id	(EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
 	return (const EwsId *) item->priv->item_id;
+}
+
+gsize
+e_ews_item_get_size	(EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
+
+	return item->priv->size;	
+}
+
+const gchar *
+e_ews_item_get_msg_id	(EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	return (const gchar *) item->priv->msg_id;
+}
+
+time_t
+e_ews_item_get_date_received	(EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
+
+	return item->priv->date_received;	
+}
+
+time_t
+e_ews_item_get_date_sent	(EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
+
+	return item->priv->date_sent;
+}
+
+time_t
+e_ews_item_get_date_created	(EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
+
+	return item->priv->date_created;
+}
+
+gboolean
+e_ews_item_has_attachments	(EEwsItem *item, gboolean *has_attachments)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), FALSE);
+
+	*has_attachments = item->priv->has_attachments;
+
+	return TRUE;
+}
+
+gboolean
+e_ews_item_is_read		(EEwsItem *item, gboolean *read)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), FALSE);
+
+	*read = item->priv->is_read;
+
+	return TRUE;
+}
+
+const GSList *	
+e_ews_item_get_to_recipients	(EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	return (const GSList *)	item->priv->to_recipients;
+}
+
+const GSList *	
+e_ews_item_get_cc_recipients	(EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	return (const GSList *)	item->priv->cc_recipients;
+}
+
+const GSList *	
+e_ews_item_get_bcc_recipients	(EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	return (const GSList *)	item->priv->bcc_recipients;
+}
+
+const EwsMailbox *
+e_ews_item_get_sender		(EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	return (const EwsMailbox *) item->priv->sender;
+}
+
+const EwsMailbox *
+e_ews_item_get_from		(EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	return (const EwsMailbox *) item->priv->from;
 }

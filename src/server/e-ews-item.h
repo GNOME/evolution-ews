@@ -65,16 +65,41 @@ typedef struct {
 	gchar *change_key;
 } EwsId;
 
-GType       e_ews_item_get_type (void);
-EEwsItem    *e_ews_item_new_from_soap_parameter (ESoapParameter *param);
+typedef struct {
+	gchar *name;
+	gchar *email;
+} EwsMailbox;
 
-EEwsItemType e_ews_item_get_item_type (EEwsItem *item);
-void        e_ews_item_set_item_type (EEwsItem *item, EEwsItemType new_type);
-const gchar *e_ews_item_get_subject (EEwsItem *item);
-void        e_ews_item_set_subject (EEwsItem *item, const gchar *new_subject);
-const gchar *e_ews_item_get_mime_content (EEwsItem *item);
-void        e_ews_item_set_mime_content (EEwsItem *item, const gchar *new_mime_content);
-const EwsId *e_ews_item_get_id (EEwsItem *item);
+GType       	e_ews_item_get_type (void);
+EEwsItem *	e_ews_item_new_from_soap_parameter	
+						(ESoapParameter *param);
+
+EEwsItemType 	e_ews_item_get_item_type	(EEwsItem *item);
+void		e_ews_item_set_item_type	(EEwsItem *item, 
+						 EEwsItemType new_type);
+const gchar *	e_ews_item_get_subject		(EEwsItem *item);
+void		e_ews_item_set_subject		(EEwsItem *item, 
+						 const gchar *new_subject);
+const gchar *	e_ews_item_get_mime_content	(EEwsItem *item);
+void		e_ews_item_set_mime_content	(EEwsItem *item, 
+						 const gchar *new_mime_content);
+const EwsId *	e_ews_item_get_id		(EEwsItem *item);
+gsize		e_ews_item_get_size		(EEwsItem *item);
+const gchar *	e_ews_item_get_msg_id		(EEwsItem *item);
+time_t		e_ews_item_get_date_received	(EEwsItem *item);
+time_t		e_ews_item_get_date_sent	(EEwsItem *item);
+time_t		e_ews_item_get_date_created	(EEwsItem *item);
+gboolean	e_ews_item_has_attachments	(EEwsItem *item, 
+						 gboolean *has_attachments);
+gboolean	e_ews_item_is_read		(EEwsItem *item, 
+						 gboolean *is_read);
+const GSList *	e_ews_item_get_to_recipients	(EEwsItem *item);
+const GSList *	e_ews_item_get_cc_recipients	(EEwsItem *item);
+const GSList *	e_ews_item_get_bcc_recipients	(EEwsItem *item);
+const EwsMailbox *	
+		e_ews_item_get_sender		(EEwsItem *item);
+const EwsMailbox *	
+		e_ews_item_get_from		(EEwsItem *item);
 
 G_END_DECLS
 
