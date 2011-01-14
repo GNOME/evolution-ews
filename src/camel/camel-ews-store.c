@@ -252,7 +252,30 @@ ews_store_query_auth_types_sync (CamelService *service, GCancellable *cancellabl
 static CamelFolder *
 ews_get_folder_sync (CamelStore *store, const gchar *folder_name, guint32 flags, GCancellable *cancellable, GError **error)
 {
-	return NULL;
+	CamelEwsStore *ews_store;
+	CamelFolder *folder = NULL;
+
+
+	ews_store = (CamelEwsStore *) store;
+
+	if (camel_ews_store_summary_has_folder (ews_store->summary, folder_name)) {
+		gchar *folder_dir;
+
+		folder_dir = g_build_filename (ews_store->storage_path, "folders", folder_name, NULL);
+		folder = camel_ews_folder_new (store, folder_name, folder_dir, cancellable, error);
+
+		g_free (folder_dir);
+	}
+	
+	if (folder == NULL) {
+		g_set_error (
+			error, CAMEL_STORE_ERROR,
+			CAMEL_STORE_ERROR_NO_FOLDER,
+			_("No such folder: %s"), folder_name);
+		return NULL;
+	}
+
+	return folder;
 }
 
 gboolean
@@ -369,20 +392,21 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, GC
 	CamelEwsStore *ews_store;
 	CamelEwsStorePrivate *priv;
 	CamelFolderInfo *fi = NULL;
-	const gchar *sync_state;
+	gchar *sync_state;
 	GSList *folders = NULL;
-	gboolean initial_setup;
+	GSList *folders_created = NULL, *folders_updated = NULL;
+	GSList *folders_deleted = NULL;
+	gboolean initial_setup = FALSE;
 
 	ews_store = (CamelEwsStore *) store;
 	priv = ews_store->priv;
 
+	g_mutex_lock (priv->get_finfo_lock);
 
 	if (!(camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))
 	    && camel_service_connect_sync ((CamelService *)store, error)))
 		goto offline;
 	
-	g_mutex_lock (priv->get_finfo_lock);
-
 	folders = camel_ews_store_summary_get_folders (ews_store->summary);
 	if (!folders)
 		initial_setup = TRUE;
@@ -404,10 +428,28 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, GC
 	g_slist_foreach (folders, (GFunc)g_free, NULL);
 	g_slist_free (folders);
 	
-	sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
-	e_ews_connection_sync_folder_hierarchy_start	(priv->cnc, EWS_PRIORITY_MEDIUM, 
-							 sync_state, ews_folder_hierarchy_ready_cb, 
-							 cancellable, ews_store);
+	sync_state = (gchar *) camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
+	e_ews_connection_sync_folder_hierarchy	(ews_store->priv->cnc, EWS_PRIORITY_MEDIUM, &sync_state,
+						 &folders_created, &folders_updated, &folders_deleted,
+						 cancellable, error);
+	if (*error != NULL) {
+		g_warning ("Unable to fetch the folder hierarchy: %s :%d \n", (*error)->message, (*error)->code);
+		return NULL;	
+	}
+
+	ews_utils_sync_folders (ews_store, folders_created, folders_deleted, folders_updated);
+	camel_ews_store_summary_store_string_val (ews_store->summary, "sync_state", sync_state);
+	ews_store->priv->last_refresh_time = time (NULL);
+
+	g_slist_foreach (folders_created, (GFunc) g_object_unref, NULL);
+	g_slist_foreach (folders_deleted, (GFunc) g_object_unref, NULL);
+	g_slist_foreach (folders_updated, (GFunc) g_object_unref, NULL);
+	g_slist_free (folders_created);
+	g_slist_free (folders_deleted);
+	g_slist_free (folders_updated);
+	g_free (sync_state);
+
+	
 	g_mutex_unlock (priv->get_finfo_lock);
 
 offline:
@@ -415,7 +457,6 @@ offline:
 
 	return fi;
 }
-
 
 static CamelFolderInfo*
 ews_create_folder_sync (CamelStore *store,

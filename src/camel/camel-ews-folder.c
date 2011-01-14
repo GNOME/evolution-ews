@@ -174,15 +174,14 @@ CamelFolder *
 camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *folder_dir, GCancellable *cancellable, GError **error)
 {
 	CamelFolder *folder;
+	CamelEwsStore *ews_store;
 	CamelEwsFolder *ews_folder;
 	gchar *summary_file, *state_file;
-	gchar *short_name;
+	const gchar *short_name;
 
-	short_name = strrchr (folder_name, '/');
-	if (short_name)
-		short_name++;
-	else
-		short_name = (gchar *) folder_name;
+	ews_store = (CamelEwsStore *) store;
+
+	short_name = camel_ews_store_summary_get_folder_name (ews_store->summary, folder_name, NULL);
 
 	folder = g_object_new (
 		CAMEL_TYPE_EWS_FOLDER,
@@ -191,9 +190,10 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 
 	ews_folder = CAMEL_EWS_FOLDER(folder);
 
-	summary_file = g_strdup_printf ("%s/summary",folder_dir);
+	summary_file = g_build_filename (folder_dir, "summary", NULL);
 	folder->summary = camel_ews_summary_new(folder, summary_file);
 	g_free(summary_file);
+
 	if (!folder->summary) {
 		g_object_unref (CAMEL_OBJECT (folder));
 		g_set_error (
@@ -203,10 +203,10 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 	}
 
 	/* set/load persistent state */
-	state_file = g_strdup_printf ("%s/cmeta", folder_dir);
+	state_file = g_build_filename (folder_dir, "cmeta", NULL);
 	camel_object_set_state_filename (CAMEL_OBJECT (folder), state_file);
-	g_free(state_file);
 	camel_object_state_read (CAMEL_OBJECT (folder));
+	g_free(state_file);
 
 	ews_folder->cache = camel_data_cache_new (folder_dir, error);
 	if (!ews_folder->cache) {
@@ -215,7 +215,7 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 	}
 
 
-	if (!strcmp (folder_name, "Mailbox")) {
+	if (!g_ascii_strcasecmp (folder_name, "Inbox")) {
 		if (camel_url_get_param (((CamelService *) store)->url, "filter"))
 			folder->folder_flags |= CAMEL_FOLDER_FILTER_RECENT;
 	}

@@ -474,3 +474,17 @@ camel_ews_store_summary_get_folder_name_from_id	(CamelEwsStoreSummary *ews_summa
 
 	return folder_name;
 }
+
+gboolean
+camel_ews_store_summary_has_folder (CamelEwsStoreSummary *ews_summary, const gchar *full_name)
+{
+	gboolean ret;
+	
+	S_LOCK(ews_summary);
+	
+	ret = g_key_file_has_group (ews_summary->priv->key_file, full_name);
+	
+	S_UNLOCK(ews_summary);
+
+	return ret;
+}
