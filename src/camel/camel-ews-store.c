@@ -58,8 +58,6 @@
 struct _CamelEwsStorePrivate {
 
 	gchar *host_url;
-	gchar *user;
-	gchar *host;
 	time_t last_refresh_time;
 	GMutex *get_finfo_lock;
 	EEwsConnection *cnc;
@@ -77,7 +75,7 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 	CamelServiceClass *service_class;
 	CamelEwsStore *ews_store;
 	CamelEwsStorePrivate *priv;
-	const gchar *email_id, *temp;
+	const gchar *email_id;
 	gchar *summary_file, *session_storage_path;
 
 	ews_store = (CamelEwsStore *) service;
@@ -95,10 +93,6 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 	email_id = camel_url_get_param (url, "email");
 	ews_store->storage_path = g_build_filename (session_storage_path, email_id, NULL);
 	g_free (session_storage_path);
-
-	temp = g_strstr_len (email_id, -1, "@");
-	priv->user = g_strndup (email_id, (temp - email_id));
-	priv->host = g_strdup (temp + 1);
 
 	priv->host_url = g_strdup (camel_url_get_param (url, "hosturl"));
 	if (!priv->host_url)
@@ -151,7 +145,7 @@ ews_store_authenticate	(CamelService *service,
 			gchar *prompt;
 
 			prompt = camel_session_build_password_prompt (
-				"Exchange Web Services", priv->user, priv->host);
+				"Exchange Web Services", service->url->user, service->url->host);
 			service->url->passwd =
 				camel_session_get_password (session, service, "Exchange Web Services",
 							    prompt, "password", prompt_flags, error);
@@ -166,7 +160,7 @@ ews_store_authenticate	(CamelService *service,
 			}
 		}
 
-		priv->cnc = e_ews_connection_new (priv->host_url, priv->user, service->url->passwd, error);
+		priv->cnc = e_ews_connection_new (priv->host_url, service->url->user, service->url->passwd, error);
 		if (*error) {
 			/*FIXME check for the right code */
 			if ((*error)->code == ERROR_PASSWORDEXPIRED) {
@@ -492,14 +486,11 @@ ews_rename_folder_sync	(CamelStore *store,
 gchar *
 ews_get_name (CamelService *service, gboolean brief)
 {
-	CamelEwsStore *ews_store = (CamelEwsStore *) service;
-	CamelEwsStorePrivate *priv = ews_store->priv;
-
 	if (brief)
-		return g_strdup_printf(_("Exchange server %s"), priv->host);
+		return g_strdup_printf(_("Exchange server %s"), service->url->host);
 	else
 		return g_strdup_printf(_("Exchange service for %s on %s"),
-				       priv->user, priv->host);
+				       service->url->user, service->url->host);
 }
 
 EEwsConnection *
@@ -561,8 +552,6 @@ ews_store_finalize (GObject *object)
 
 	g_free (ews_store->storage_path);
 	g_free (ews_store->priv->host_url);
-	g_free (ews_store->priv->user);
-	g_free (ews_store->priv->host);
 	g_mutex_free (ews_store->priv->get_finfo_lock);
 
 	/* Chain up to parent's finalize() method. */

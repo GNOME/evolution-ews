@@ -185,13 +185,19 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		GtkWidget *host_url;
 		GtkWidget *auto_discover;
 		const gchar *host_url_val = camel_url_get_param (url, "hosturl");
+		const gchar *temp, *email_id;
 		gchar *url_string;
 		struct _AutoDiscCallBackData *cbdata = g_new0 (struct _AutoDiscCallBackData, 1);
 
 		g_object_get (data->parent, "n-rows", &row, NULL);
 	
-		/* Set email_id */	
-		camel_url_set_param (url, "email", target_account->account->id->address);
+		/* Set email_id */
+		email_id = target_account->account->id->address;
+		camel_url_set_param (url, "email", email_id);
+		temp = g_strstr_len (email_id, -1, "@");
+		url->user = g_strndup (email_id, (temp - email_id));
+		url->host = g_strdup (temp + 1);
+		
 		url_string = camel_url_to_string (url, 0);
 		e_account_set_string (target_account->account, E_ACCOUNT_SOURCE_URL, url_string);
 		e_account_set_string (target_account->account, E_ACCOUNT_TRANSPORT_URL, url_string);

@@ -61,14 +61,7 @@ struct _CamelEwsFolder {
 	CamelEwsFolderPrivate *priv;
 
 	CamelFolderSearch *search;
-
-	CamelOfflineJournal *journal;
 	CamelDataCache *cache;
-
-	guint need_rescan:1;
-	guint need_refresh:1;
-	guint read_only:1;
-
 };
 
 struct _CamelEwsFolderClass {
