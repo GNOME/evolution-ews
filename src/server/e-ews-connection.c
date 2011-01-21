@@ -1059,7 +1059,7 @@ e_ews_connection_sync_folder_items_start	(EEwsConnection *cnc,
 	e_soap_message_start_element (msg, "ItemShape", NULL, NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", "types", default_props);
 	
-	if (additional_props) {
+	if (additional_props && *additional_props) {
 		gchar **prop = g_strsplit (additional_props, " ", 0);
 		gint i = 0;
 
@@ -1416,7 +1416,7 @@ e_ews_connection_get_items_start	(EEwsConnection *cnc,
 	else
 		e_ews_message_write_string_parameter (msg, "IncludeMimeContent", "types", "false");
 	
-	if (additional_props) {
+	if (additional_props && *additional_props) {
 		gchar **prop = g_strsplit (additional_props, " ", 0);
 		gint i = 0;
 
