@@ -216,6 +216,19 @@ camel_ews_store_summary_set_change_key	(CamelEwsStoreSummary *ews_summary,
 	S_UNLOCK(ews_summary);
 }
 
+void		
+camel_ews_store_summary_set_sync_state	(CamelEwsStoreSummary *ews_summary,
+					 const gchar *folder_full_name, 
+					 const gchar *sync_state)
+{
+	S_LOCK(ews_summary);
+
+	g_key_file_set_string	(ews_summary->priv->key_file, folder_full_name,
+				 "SyncState", sync_state);
+	ews_summary->priv->dirty = TRUE;
+		
+	S_UNLOCK(ews_summary);
+}
 
 void		
 camel_ews_store_summary_set_folder_flags	(CamelEwsStoreSummary *ews_summary,
@@ -343,6 +356,22 @@ camel_ews_store_summary_get_change_key	(CamelEwsStoreSummary *ews_summary,
 	return ret;
 }
 
+const gchar *	
+camel_ews_store_summary_get_sync_state	(CamelEwsStoreSummary *ews_summary,
+					 const gchar *folder_full_name,
+					 GError **error)
+{
+	gchar *ret;
+
+	S_LOCK(ews_summary);
+
+	ret = g_key_file_get_string	(ews_summary->priv->key_file, folder_full_name,
+					 "SyncState", error);
+	
+	S_UNLOCK(ews_summary);
+
+	return ret;
+}
 
 guint64		
 camel_ews_store_summary_get_folder_flags	(CamelEwsStoreSummary *ews_summary,

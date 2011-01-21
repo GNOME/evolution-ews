@@ -23,6 +23,7 @@
 #include <camel/camel.h>
 #include <e-ews-connection.h>
 #include "camel-ews-store.h"
+#include "camel-ews-folder.h"
 
 /*Headers for send options*/
 #define X_SEND_OPTIONS        "X-ews-send-options"
@@ -81,6 +82,11 @@ void	ews_utils_sync_folders	(CamelEwsStore *ews_store,
 CamelFolderInfo *
 	camel_ews_utils_build_folder_info	(CamelEwsStore *store, 
 						 const gchar *fname);
+void	camel_ews_utils_sync_folder_items	(CamelEwsFolder *ews_folder, 
+						 GSList *items_created, 
+						 GSList *items_updated, 
+						 GSList *items_deleted, 
+						 GError **error);
 G_END_DECLS
 
 #endif

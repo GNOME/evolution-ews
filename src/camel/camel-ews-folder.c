@@ -52,12 +52,11 @@ which needs to be better organized via functions */
 #include "camel-ews-summary.h"
 #include "camel-ews-utils.h"
 
-#define ADD_JUNK_ENTRY 1
-#define REMOVE_JUNK_ENTRY -1
 #define JUNK_FOLDER "Junk Mail"
-#define READ_CURSOR_MAX_IDS 50
+#define EWS_MAX_FETCH_COUNT 100
 #define MAX_ATTACHMENT_SIZE 1*1024*1024   /*In bytes*/
-#define GROUPWISE_BULK_DELETE_LIMIT 100
+#define SUMMARY_DEFAULT_PROPS	"IdOnly"
+#define SUMMARY_ADD_PROPS	"item:Subject item:DateTimeReceived item:DateTimeSent item:DateTimeCreated item:Size item:HasAttachments message:InternetMessageId message:From message:Sender message:ToRecipients message:CcRecipient message:BccRecipients message:IsRead item:MimeContent"
 
 #define CAMEL_EWS_FOLDER_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE \
@@ -66,6 +65,10 @@ which needs to be better organized via functions */
 struct _CamelEwsFolderPrivate {
 	GMutex *search_lock;	/* for locking the search object */
 	GStaticRecMutex cache_lock;	/* for locking the cache object */
+
+	/* For syncronizing refresh_info/sync_changes */
+	gboolean refreshing;
+	GMutex *refresh_lock;
 };
 
 extern gint camel_application_is_exiting;
@@ -182,7 +185,7 @@ ews_folder_search_free (CamelFolder *folder, GPtrArray *uids)
 	return;
 }
 
-/********************* back to folder functions*************************/
+/********************* folder functions*************************/
 
 static gboolean
 ews_synchronize_sync (CamelFolder *folder, gboolean expunge, GCancellable *cancellable, GError **error)
@@ -250,28 +253,79 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 	return folder;
 }
 
-struct _folder_update_msg {
-	CamelSessionThreadMsg msg;
-
+static void
+ews_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
+{
 	EEwsConnection *cnc;
-	CamelFolder *folder;
-	gchar *container_id;
-	gchar *t_str;
-	GSList *slist;
-};
+	CamelEwsFolder *ews_folder;
+	CamelEwsFolderPrivate *priv;
+	CamelEwsStore *ews_store;
+	GSList *items_created = NULL, *items_updated = NULL;
+	GSList *items_deleted = NULL;
+	gchar *sync_state = NULL;
+	GError *error = NULL;
+
+	cnc = (EEwsConnection *) obj;
+	ews_folder = (CamelEwsFolder *) user_data;
+	priv = ews_folder->priv;
+	ews_store = (CamelEwsStore *) camel_folder_get_parent_store ((CamelFolder *) ews_folder);
+
+	e_ews_connection_sync_folder_items_finish	(cnc, res, &sync_state,
+							 &items_created, &items_updated,
+							 &items_deleted, &error);
+
+	g_slist_foreach (items_created, (GFunc) g_object_unref, NULL);
+	g_slist_foreach (items_deleted, (GFunc) g_object_unref, NULL);
+	g_slist_foreach (items_updated, (GFunc) g_object_unref, NULL);
+	g_slist_free (items_created);
+	g_slist_free (items_deleted);
+	g_slist_free (items_updated);
+	g_free (sync_state);
+	g_object_unref (cnc);
+}
 
 static gboolean
 ews_refresh_info_sync (CamelFolder *folder, GCancellable *cancellable, GError **error)
 {
+	CamelEwsFolder *ews_folder;
+	CamelEwsFolderPrivate *priv;
+	EEwsConnection *cnc;
 	CamelEwsStore *ews_store;
-	CamelStore *parent_store;
-	const gchar *full_name;
+	const gchar *full_name, *sync_state, *id;
 
 	full_name = camel_folder_get_full_name (folder);
-	parent_store = camel_folder_get_parent_store (folder);
+	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
 
-	ews_store = CAMEL_EWS_STORE (parent_store);
+	ews_folder = (CamelEwsFolder *) folder;
+	priv = ews_folder->priv;
 
+	if (!camel_ews_store_connected (ews_store, error))
+		return FALSE;
+
+	g_mutex_lock (priv->refresh_lock);
+
+	if (priv->refreshing)
+		goto exit;
+
+	priv->refreshing = TRUE;
+	
+	cnc = camel_ews_store_get_connection (ews_store);
+	sync_state = camel_ews_store_summary_get_sync_state	
+						(ews_store->summary,
+						 full_name, NULL);
+	id = camel_ews_store_summary_get_folder_id
+						(ews_store->summary,
+						 full_name, NULL);
+	e_ews_connection_sync_folder_items_start	
+						(cnc, EWS_PRIORITY_MEDIUM,
+						 sync_state, id, 
+						 SUMMARY_DEFAULT_PROPS, SUMMARY_ADD_PROPS,
+						 EWS_MAX_FETCH_COUNT, 
+						 ews_items_ready_cb,
+						 cancellable, error);
+
+exit:
+	g_mutex_unlock (priv->refresh_lock);
 	return TRUE;
 }
 
@@ -400,7 +454,10 @@ camel_ews_folder_init (CamelEwsFolder *ews_folder)
 	folder->folder_flags = CAMEL_FOLDER_HAS_SUMMARY_CAPABILITY | CAMEL_FOLDER_HAS_SEARCH_CAPABILITY;
 
 	ews_folder->priv->search_lock = g_mutex_new ();
+	ews_folder->priv->refresh_lock = g_mutex_new ();
 	g_static_rec_mutex_init(&ews_folder->priv->cache_lock);
+	
+	ews_folder->priv->refreshing = FALSE;
 	
 	camel_folder_set_lock_async (folder, TRUE);
 }

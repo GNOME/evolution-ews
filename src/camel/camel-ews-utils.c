@@ -521,3 +521,55 @@ ews_utils_sync_folders (CamelEwsStore *ews_store, GSList *created_folders, GSLis
 	}
 	return;
 }
+
+static void
+sync_deleted_items (CamelEwsFolder *ews_folder, CamelEwsStore *ews_store, GSList *items_deleted, CamelFolderChangeInfo *ci)
+{
+	CamelFolder *folder;
+	CamelStore *store;
+	const gchar *full_name;
+	GSList *l;
+
+	folder = (CamelFolder *) ews_folder;
+	store = camel_folder_get_parent_store (folder);
+	full_name = camel_folder_get_full_name (folder);
+
+	for (l = items_deleted; l != NULL; l = g_slist_next (l)) {
+		const gchar *id = (const gchar *) l->data;
+
+		camel_ews_summary_delete_id (folder->summary, id);
+		camel_folder_change_info_remove_uid (ci, id);
+	}
+	camel_db_delete_uids (store->cdb_w, full_name, items_deleted, NULL);
+}
+
+static void
+sync_created_items (CamelEwsFolder *ews_folder, CamelEwsStore *ews_store, GSList *items_created, CamelFolderChangeInfo *ci)
+{
+	CamelFolder *folder;
+	CamelStore *store;
+	GSList *l;
+
+	folder = (CamelFolder *) ews_folder;
+	store = camel_folder_get_parent_store (folder);
+
+	for (l = items_created; l != NULL; l = g_slist_next (l)) {
+		EEwsItem *item = (EEwsItem *) l->data;
+	}
+}
+
+void
+camel_ews_utils_sync_folder_items (CamelEwsFolder *ews_folder, GSList *items_created, GSList *items_updated, GSList *items_deleted, GError **error)
+{
+	CamelEwsStore *ews_store;
+	CamelFolderChangeInfo *ci;
+
+	ews_store = (CamelEwsStore *) camel_folder_get_parent_store ((CamelFolder *) ews_folder);
+
+	ci = camel_folder_change_info_new ();
+	sync_deleted_items (ews_folder, ews_store, items_deleted, ci);
+	sync_created_items (ews_folder, ews_store, items_created, ci);
+	
+	camel_folder_changed ((CamelFolder *) ews_folder, ci);
+	camel_folder_change_info_free (ci);
+}

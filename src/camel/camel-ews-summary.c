@@ -357,12 +357,17 @@ ews_info_set_flags (CamelMessageInfo *info, guint32 flags, guint32 set)
 }
 
 void
-camel_ews_summary_add_offline (CamelFolderSummary *summary, const gchar *uid, CamelMimeMessage *message, const CamelMessageInfo *info)
+camel_ews_summary_add_message	(CamelFolderSummary *summary, 
+				 const gchar *uid, 
+				 CamelMimeMessage *message)
 {
 	CamelEwsMessageInfo *mi;
+	CamelMessageInfo *info;
 	const CamelFlag *flag;
 	const CamelTag *tag;
 
+	info = camel_folder_summary_uid (summary, uid);
+	
 	/* Create summary entry */
 	mi = (CamelEwsMessageInfo *)camel_folder_summary_info_new_from_message (summary, message, NULL);
 
@@ -384,21 +389,107 @@ camel_ews_summary_add_offline (CamelFolderSummary *summary, const gchar *uid, Ca
 	mi->info.uid = camel_pstring_strdup (uid);
 
 	camel_folder_summary_add (summary, (CamelMessageInfo *)mi);
-
+	camel_message_info_free (info);
 }
 
 void
-camel_ews_summary_add_offline_uncached (CamelFolderSummary *summary, const gchar *uid, const CamelMessageInfo *info)
+camel_ews_summary_add_message_info	(CamelFolderSummary *summary, 
+					 const gchar *uid,
+					 guint32 server_flags,
+					 const CamelMessageInfo *info)
 {
-	CamelEwsMessageInfo *mi;
+	CamelEwsMessageInfo *mi = camel_message_info_clone (info);
+	CamelMessageInfoBase *binfo = (CamelMessageInfoBase *) mi;
+	CamelEwsMessageInfo *einfo = (CamelEwsMessageInfo *) mi;
+	gint unread=0, deleted=0, junk=0;
+	guint32 flags;
 
-	mi = camel_message_info_clone(info);
 	mi->info.uid = camel_pstring_strdup(uid);
+	binfo->flags |= server_flags;
+	einfo->server_flags = server_flags;
+
+	/* TODO update user flags */
+
+	/* update the summary count */
+	flags = binfo->flags;
+
+	if (!(flags & CAMEL_MESSAGE_SEEN))
+		unread = 1;
+
+	if (flags & CAMEL_MESSAGE_DELETED)
+		deleted = 1;
+
+	if (flags & CAMEL_MESSAGE_JUNK)
+		junk = 1;
+
+	if (summary) {
+		if (unread)
+			summary->unread_count += unread;
+		if (deleted)
+			summary->deleted_count += deleted;
+		if (junk)
+			summary->junk_count += junk;
+		if (junk && !deleted)
+			summary->junk_not_deleted_count += junk;
+		summary->visible_count++;
+		if (junk ||  deleted)
+			summary->visible_count -= junk ? junk : deleted;
+
+		summary->saved_count++;
+		camel_folder_summary_touch (summary);
+	}
+
+	binfo->flags &= ~CAMEL_MESSAGE_FOLDER_FLAGGED;
 	camel_folder_summary_add (summary, (CamelMessageInfo *)mi);
 }
 
+/* Caller should use camel_db_delete_uids to permanently delete the mi
+   from summary */
 void
-ews_summary_clear (CamelFolderSummary *summary, gboolean uncache)
+camel_ews_summary_delete_id	(CamelFolderSummary *summary,
+				 const gchar *uid)
+{
+	CamelMessageInfo *mi;
+
+	mi = camel_folder_summary_uid (summary, uid);
+	if (mi) {
+		CamelMessageInfoBase *dinfo = (CamelMessageInfoBase *) mi;
+		gint unread=0, deleted=0, junk=0;
+		guint32 flags;
+
+		flags = dinfo->flags;
+		if (!(flags & CAMEL_MESSAGE_SEEN))
+			unread = 1;
+
+		if (flags & CAMEL_MESSAGE_DELETED)
+			deleted = 1;
+
+		if (flags & CAMEL_MESSAGE_JUNK)
+			junk = 1;
+
+		if (unread) 
+			summary->unread_count--;
+
+		if (deleted)
+			summary->deleted_count--;
+		if (junk)
+			summary->junk_count--;
+
+		if (junk && !deleted)
+			summary->junk_not_deleted_count--;
+
+		if (!junk &&  !deleted)
+			summary->visible_count--;
+
+		summary->saved_count--;
+		camel_message_info_free (mi);
+	}
+	camel_folder_summary_remove_uid_fast (summary, uid);
+}
+
+void
+ews_summary_clear	(CamelFolderSummary *summary, 
+			 gboolean uncache)
 {
 	CamelFolderChangeInfo *changes;
 	CamelMessageInfo *info;

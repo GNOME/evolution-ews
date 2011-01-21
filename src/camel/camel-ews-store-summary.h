@@ -59,6 +59,10 @@ void		camel_ews_store_summary_set_change_key
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_full_name, 
 						 const gchar *change_key);
+void		camel_ews_store_summary_set_sync_state
+						(CamelEwsStoreSummary *ews_summary,
+						 const gchar *folder_full_name, 
+						 const gchar *sync_state);
 void		camel_ews_store_summary_set_folder_flags
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_full_name, 
@@ -85,6 +89,10 @@ const gchar *	camel_ews_store_summary_get_parent_folder_id
 						 const gchar *folder_full_name,
 						 GError **error);
 const gchar *	camel_ews_store_summary_get_change_key
+						(CamelEwsStoreSummary *ews_summary,
+						 const gchar *folder_full_name,
+						 GError **error);
+const gchar *	camel_ews_store_summary_get_sync_state
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_full_name,
 						 GError **error);

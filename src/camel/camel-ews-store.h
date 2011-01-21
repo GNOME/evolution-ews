@@ -69,13 +69,12 @@ struct _CamelEwsStoreClass {
 };
 
 GType camel_ews_store_get_type (void);
-gchar * ews_get_name(CamelService *service, gboolean brief);
+gchar *		ews_get_name	(CamelService *service, gboolean brief);
+EEwsConnection *	
+		camel_ews_store_get_connection	(CamelEwsStore *ews_store);
 
-EEwsConnection *cnc_lookup (CamelEwsStorePrivate *priv);
-const gchar *ews_base_url_lookup (CamelEwsStorePrivate *priv);
-CamelFolderInfo * create_junk_folder (CamelStore *store);
-gboolean camel_ews_store_connected (CamelEwsStore *store, GCancellable *cancellable, GError **error);
-gboolean ews_store_reload_folder (CamelEwsStore *store, CamelFolder *folder, guint32 flags, GCancellable *cancellable, GError **error);
+gboolean	camel_ews_store_connected	(CamelEwsStore *store, 
+						 GError **error);
 
 G_END_DECLS
 

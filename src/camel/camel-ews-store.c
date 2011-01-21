@@ -272,12 +272,6 @@ ews_get_folder_sync (CamelStore *store, const gchar *folder_name, guint32 flags,
 	return folder;
 }
 
-gboolean
-ews_store_reload_folder (CamelEwsStore *ews_store, CamelFolder *folder, guint32 flags, GCancellable *cancellable, GError **error)
-{
-	return TRUE;
-}
-
 static CamelFolderInfo *
 folder_info_from_store_summary (CamelEwsStore *store, const gchar *top, guint32 flags, GError **error)
 {
@@ -494,9 +488,9 @@ ews_get_name (CamelService *service, gboolean brief)
 }
 
 EEwsConnection *
-cnc_lookup (CamelEwsStorePrivate *priv)
+camel_ews_store_get_connection (CamelEwsStore *ews_store)
 {
-	return priv->cnc;
+	return g_object_ref (ews_store->priv->cnc);
 }
 
 static CamelFolder *
@@ -511,13 +505,21 @@ ews_can_refresh_folder (CamelStore *store, CamelFolderInfo *info, GError **error
 	return TRUE;
 }
 
-/*
- * Function to check if we are both connected and are _actually_
- * online. Based on an equivalient function in IMAP
- */
 gboolean
-camel_ews_store_connected (CamelEwsStore *store, GCancellable *cancellable, GError **error)
+camel_ews_store_connected (CamelEwsStore *ews_store, GError **error)
 {
+	
+	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (ews_store))) {
+		g_set_error (
+			error, CAMEL_SERVICE_ERROR,
+			CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("You must be working online to complete this operation"));
+		return FALSE;
+	}
+
+	if (!camel_service_connect_sync ((CamelService *) ews_store, error))
+		return FALSE;
+
 	return TRUE;
 }
 

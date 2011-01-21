@@ -606,7 +606,7 @@ sync_folder_items_response_cb (SoupSession *session, SoupMessage *msg, gpointer 
 		     subparam1 = e_soap_parameter_get_next_child_by_name (subparam1, "Delete")) {
 			ESoapParameter *item_param;
 
-			item_param = e_soap_parameter_get_first_child_by_name (subparam1, "FolderId");
+			item_param = e_soap_parameter_get_first_child_by_name (subparam1, "ItemId");
 			value = e_soap_parameter_get_property (item_param, "Id");
 			items_deleted = g_slist_append (items_deleted, value);
 		}
