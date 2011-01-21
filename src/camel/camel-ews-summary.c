@@ -401,7 +401,7 @@ camel_ews_summary_add_message_info	(CamelFolderSummary *summary,
 	CamelEwsMessageInfo *mi = camel_message_info_clone (info);
 	CamelMessageInfoBase *binfo = (CamelMessageInfoBase *) mi;
 	CamelEwsMessageInfo *einfo = (CamelEwsMessageInfo *) mi;
-	gint unread=0, deleted=0, junk=0;
+	gint unread=0, junk=0;
 	guint32 flags;
 
 	mi->info.uid = camel_pstring_strdup(uid);
@@ -416,24 +416,17 @@ camel_ews_summary_add_message_info	(CamelFolderSummary *summary,
 	if (!(flags & CAMEL_MESSAGE_SEEN))
 		unread = 1;
 
-	if (flags & CAMEL_MESSAGE_DELETED)
-		deleted = 1;
-
 	if (flags & CAMEL_MESSAGE_JUNK)
 		junk = 1;
 
 	if (summary) {
 		if (unread)
 			summary->unread_count += unread;
-		if (deleted)
-			summary->deleted_count += deleted;
 		if (junk)
 			summary->junk_count += junk;
-		if (junk && !deleted)
-			summary->junk_not_deleted_count += junk;
 		summary->visible_count++;
-		if (junk ||  deleted)
-			summary->visible_count -= junk ? junk : deleted;
+		if (junk)
+			summary->visible_count -= junk;
 
 		summary->saved_count++;
 		camel_folder_summary_touch (summary);

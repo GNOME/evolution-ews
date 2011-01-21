@@ -325,6 +325,7 @@ ews_folder_hierarchy_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_da
 
 	ews_utils_sync_folders (ews_store, folders_created, folders_deleted, folders_updated);
 	camel_ews_store_summary_store_string_val (ews_store->summary, "sync_state", sync_state);
+	camel_ews_store_summary_save (ews_store->summary, NULL);
 	ews_store->priv->last_refresh_time = time (NULL);
 
 	g_slist_foreach (folders_created, (GFunc) g_object_unref, NULL);
@@ -427,6 +428,7 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, GC
 
 	ews_utils_sync_folders (ews_store, folders_created, folders_deleted, folders_updated);
 	camel_ews_store_summary_store_string_val (ews_store->summary, "sync_state", sync_state);
+	camel_ews_store_summary_save (ews_store->summary, NULL);
 	ews_store->priv->last_refresh_time = time (NULL);
 
 	g_slist_foreach (folders_created, (GFunc) g_object_unref, NULL);

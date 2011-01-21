@@ -530,6 +530,9 @@ sync_deleted_items (CamelEwsFolder *ews_folder, CamelEwsStore *ews_store, GSList
 	const gchar *full_name;
 	GSList *l;
 
+	if (!items_deleted)
+		return;
+
 	folder = (CamelFolder *) ews_folder;
 	store = camel_folder_get_parent_store (folder);
 	full_name = camel_folder_get_full_name (folder);
@@ -543,6 +546,82 @@ sync_deleted_items (CamelEwsFolder *ews_folder, CamelEwsStore *ews_store, GSList
 	camel_db_delete_uids (store->cdb_w, full_name, items_deleted, NULL);
 }
 
+/* Use it for updating props common for created/updated items */
+static void
+ews_utils_update_changes (EEwsItem *item, CamelEwsMessageInfo *mi)
+{
+	gboolean read;
+	EwsImportance importance;
+
+	e_ews_item_is_read (item, &read);
+	if (read)	
+		mi->info.flags |= CAMEL_MESSAGE_SEEN;
+	else
+		mi->info.flags &= ~CAMEL_MESSAGE_SEEN;
+
+	importance = e_ews_item_get_importance (item);
+	if (importance == EWS_ITEM_HIGH)
+		mi->info.flags |= CAMEL_MESSAGE_FLAGGED;
+
+	/* TODO Update replied flags */
+}
+
+static const gchar *
+form_email_string_from_mb (const EwsMailbox *mb)
+{
+	const gchar *ret = NULL;
+
+	if (mb) {
+		GString *str;
+
+		str = g_string_new ("");
+		if (mb->name && mb->name[0]) {
+			str = g_string_append (str, mb->name);
+			str = g_string_append (str, " ");
+		} else {
+			str = g_string_append (str, mb->email);
+			str = g_string_append (str, " ");
+		}
+
+		g_string_append (str, "<");
+		str = g_string_append (str, mb->email);
+		g_string_append (str, ">");
+		
+		ret = camel_pstring_strdup (str->str);
+		g_string_free (str, TRUE);
+
+		return ret;
+	} else
+	       return camel_pstring_strdup ("");
+}
+
+static const gchar *
+form_recipient_list (const GSList *recipients)
+{
+	const GSList *l;
+	GString *str;
+	const gchar *ret;
+
+	if (!recipients)
+		return NULL;
+
+	str = g_string_new ("");
+
+	for (l = recipients; l != NULL; l = g_slist_next (l)) {
+		EwsMailbox *mb = (EwsMailbox *) l->data;
+		const gchar *mb_str = form_email_string_from_mb (mb);
+
+		str = g_string_append (str, mb_str);
+		str = g_string_append (str, ", ");
+	}
+
+	g_string_truncate (str, 0);
+	ret = camel_pstring_strdup (str->str);
+	g_string_free (str, TRUE);
+
+	return ret;
+}
+
 static void
 sync_created_items (CamelEwsFolder *ews_folder, CamelEwsStore *ews_store, GSList *items_created, CamelFolderChangeInfo *ci)
 {
@@ -552,14 +631,71 @@ sync_created_items (CamelEwsFolder *ews_folder, CamelEwsStore *ews_store, GSList
 
 	folder = (CamelFolder *) ews_folder;
 	store = camel_folder_get_parent_store (folder);
+	
+	if (!items_created)
+		return;
 
 	for (l = items_created; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;
+		CamelEwsMessageInfo *mi;
+		const EwsId *id;
+		const EwsMailbox *from;
+		EEwsItemType item_type;
+		const GSList *to, *cc;
+		gboolean has_attachments;
+		guint32 server_flags;
+
+		mi = (CamelEwsMessageInfo *)camel_message_info_new (folder->summary);
+		
+		if (mi->info.content == NULL) {
+			mi->info.content = camel_folder_summary_content_info_new (folder->summary);
+			mi->info.content->type = camel_content_type_new ("multipart", "mixed");
+		}
+		
+		item_type = e_ews_item_get_item_type (item);
+		if	(item_type == E_EWS_ITEM_TYPE_CALENDAR_ITEM || 
+			 item_type == E_EWS_ITEM_TYPE_MEETING_MESSAGE ||
+			 item_type == E_EWS_ITEM_TYPE_MEETING_REQUEST ||
+			 item_type == E_EWS_ITEM_TYPE_MEETING_RESPONSE ||
+			 item_type == E_EWS_ITEM_TYPE_MEETING_RESPONSE)
+			camel_message_info_set_user_flag ((CamelMessageInfo*)mi, "$has_cal", TRUE);
+		
+		id = e_ews_item_get_id (item);
+		mi->info.uid = camel_pstring_strdup (id->id);
+		mi->info.size = e_ews_item_get_size (item);
+		mi->info.subject = camel_pstring_strdup (e_ews_item_get_subject (item));
+		
+		mi->info.date_sent = e_ews_item_get_date_sent (item);
+		mi->info.date_received = e_ews_item_get_date_received (item);
+
+		from = e_ews_item_get_from (item);
+		mi->info.from = form_email_string_from_mb (from);
+
+		to = e_ews_item_get_to_recipients (item);
+		mi->info.to = form_recipient_list (to);
+
+		cc = e_ews_item_get_cc_recipients (item);
+		mi->info.cc = form_recipient_list (cc);
+
+		e_ews_item_has_attachments (item, &has_attachments);
+		if (has_attachments)
+			mi->info.flags |= CAMEL_MESSAGE_ATTACHMENTS;
+		
+		ews_utils_update_changes (item, mi);
+		server_flags = mi->info.flags;
+		camel_ews_summary_add_message_info (folder->summary, id->id, server_flags, (CamelMessageInfo *) mi);
+
+		camel_folder_change_info_add_uid (ci, mi->info.uid);
+		camel_folder_change_info_recent_uid (ci, mi->info.uid);
 	}
 }
 
 void
-camel_ews_utils_sync_folder_items (CamelEwsFolder *ews_folder, GSList *items_created, GSList *items_updated, GSList *items_deleted, GError **error)
+camel_ews_utils_sync_folder_items	(CamelEwsFolder *ews_folder, 
+					 GSList *items_created, 
+					 GSList *items_updated, 
+					 GSList *items_deleted, 
+					 GError **error)
 {
 	CamelEwsStore *ews_store;
 	CamelFolderChangeInfo *ci;

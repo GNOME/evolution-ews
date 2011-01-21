@@ -55,8 +55,12 @@ which needs to be better organized via functions */
 #define JUNK_FOLDER "Junk Mail"
 #define EWS_MAX_FETCH_COUNT 100
 #define MAX_ATTACHMENT_SIZE 1*1024*1024   /*In bytes*/
+
+#define FLAG_PROPS		"message:IsRead item:Importance"
+
 #define SUMMARY_DEFAULT_PROPS	"IdOnly"
-#define SUMMARY_ADD_PROPS	"item:Subject item:DateTimeReceived item:DateTimeSent item:DateTimeCreated item:Size item:HasAttachments message:InternetMessageId message:From message:Sender message:ToRecipients message:CcRecipient message:BccRecipients message:IsRead item:MimeContent"
+#define SUMMARY_ADD_PROPS	"item:Subject item:DateTimeReceived item:DateTimeSent item:DateTimeCreated item:Size item:HasAttachments message:From message:Sender message:ToRecipients message:CcRecipients message:BccRecipients message:IsRead item:Importance"
+
 
 #define CAMEL_EWS_FOLDER_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE \
@@ -68,10 +72,12 @@ struct _CamelEwsFolderPrivate {
 
 	/* For syncronizing refresh_info/sync_changes */
 	gboolean refreshing;
+	gboolean fetch_pending;
 	GMutex *refresh_lock;
 };
 
 extern gint camel_application_is_exiting;
+static void ews_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data);
 
 #define d(x)
 
@@ -253,17 +259,93 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 	return folder;
 }
 
+struct _ews_sync_data {
+	gchar *sync_state;
+	CamelEwsFolder *ews_folder;
+	GSList *items_updated;
+};
+
 static void
-ews_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
+ews_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
+{
+	EEwsConnection *cnc;
+	CamelEwsFolder *ews_folder;
+	CamelEwsFolderPrivate *priv;
+	CamelEwsStore *ews_store;
+	GSList *items_created = NULL;
+	gchar *sync_state = NULL;
+	const gchar *full_name;
+	GError *error = NULL;
+	struct _ews_sync_data *sync_data;
+
+	cnc = (EEwsConnection *) obj;
+	sync_data = (struct _ews_sync_data *) user_data;
+	ews_folder = sync_data->ews_folder;
+	sync_state = sync_data->sync_state;
+	priv = ews_folder->priv;
+	ews_store = (CamelEwsStore *) camel_folder_get_parent_store ((CamelFolder *) ews_folder);
+	full_name = camel_folder_get_full_name ((CamelFolder *) ews_folder);
+
+	e_ews_connection_get_items_finish	(cnc, res, &items_created, &error);
+	if (error != NULL) {
+		g_warning ("Unable to get summary items %s \n", error->message);
+		
+		g_mutex_lock (priv->refresh_lock);
+		priv->refreshing = FALSE;
+		g_mutex_unlock (priv->refresh_lock);
+
+		g_clear_error (&error);
+		return;
+	}
+
+	camel_ews_utils_sync_folder_items	(ews_folder, 
+						 items_created, 
+						 sync_data->items_updated, 
+						 NULL, 
+						 &error);
+	camel_ews_store_summary_set_sync_state	(ews_store->summary, 
+						 full_name, 
+						 sync_state);
+	camel_ews_store_summary_save (ews_store->summary, NULL);
+
+	g_mutex_lock (priv->refresh_lock);
+	if (!priv->fetch_pending)
+		priv->refreshing = FALSE;
+	g_mutex_unlock (priv->refresh_lock);
+
+	if (priv->fetch_pending) {
+		const gchar *id;
+
+		id = camel_ews_store_summary_get_folder_id (ews_store->summary, full_name, NULL);
+		e_ews_connection_sync_folder_items_start	
+						(cnc, EWS_PRIORITY_MEDIUM,
+						 sync_state, id, 
+						 "Default", NULL,
+						 EWS_MAX_FETCH_COUNT, 
+						 ews_sync_items_ready_cb,
+						 NULL, ews_folder);
+	}
+
+	g_slist_foreach (items_created, (GFunc) g_object_unref, NULL);
+	g_slist_foreach (sync_data->items_updated, (GFunc) g_object_unref, NULL);
+	g_slist_free (items_created);
+	g_slist_free (sync_data->items_updated);
+	g_free (sync_state);
+	g_free (sync_data);
+}
+
+static void
+ews_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 {
 	EEwsConnection *cnc;
 	CamelEwsFolder *ews_folder;
 	CamelEwsFolderPrivate *priv;
 	CamelEwsStore *ews_store;
 	GSList *items_created = NULL, *items_updated = NULL;
-	GSList *items_deleted = NULL;
+	GSList *items_deleted = NULL, *l, *created_ids = NULL;
 	gchar *sync_state = NULL;
 	GError *error = NULL;
+	struct _ews_sync_data *sync_data;
 
 	cnc = (EEwsConnection *) obj;
 	ews_folder = (CamelEwsFolder *) user_data;
@@ -274,13 +356,53 @@ ews_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 							 &items_created, &items_updated,
 							 &items_deleted, &error);
 
+
+	if (error != NULL) {
+		g_warning ("Unable to sync folder %s \n", error->message);
+
+		g_mutex_lock (priv->refresh_lock);
+		priv->refreshing = FALSE;
+		g_mutex_unlock (priv->refresh_lock);
+
+		g_clear_error (&error);
+		return;
+	}
+
+	for (l = items_created; l != NULL; l = g_slist_next (l)) {
+		EEwsItem *item = (EEwsItem *) l->data;
+		const EwsId *id = e_ews_item_get_id (item);
+		
+	       	created_ids = g_slist_append (created_ids, g_strdup (id->id));
+	}
+
+	if	((g_slist_length (items_created) + 
+	 	  g_slist_length (items_updated) + 
+		  g_slist_length (items_deleted)) == EWS_MAX_FETCH_COUNT)
+		priv->fetch_pending = TRUE;
+	else
+		priv->fetch_pending = FALSE;
+
+	camel_ews_utils_sync_folder_items (ews_folder, NULL, NULL, items_deleted, &error);
+
+	sync_data = g_new0 (struct _ews_sync_data, 1);
+	sync_data->sync_state = sync_state;
+	sync_data->ews_folder = ews_folder;
+	sync_data->items_updated = items_updated;
+
+	/* Fetch new items using get_items as recipient email ids is not returned in sync_items */
+	e_ews_connection_get_items_start	(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
+						 created_ids,
+//						 SUMMARY_DEFAULT_PROPS, SUMMARY_ADD_PROPS,
+						 "Default", NULL,
+						 FALSE, ews_get_items_ready_cb, NULL, 
+						 (gpointer) sync_data);
+
 	g_slist_foreach (items_created, (GFunc) g_object_unref, NULL);
-	g_slist_foreach (items_deleted, (GFunc) g_object_unref, NULL);
-	g_slist_foreach (items_updated, (GFunc) g_object_unref, NULL);
+	g_slist_foreach (items_deleted, (GFunc) g_free, NULL);
+	g_slist_foreach (created_ids, (GFunc) g_free, NULL);
 	g_slist_free (items_created);
 	g_slist_free (items_deleted);
-	g_slist_free (items_updated);
-	g_free (sync_state);
+	g_slist_free (created_ids);
 	g_object_unref (cnc);
 }
 
@@ -319,10 +441,10 @@ ews_refresh_info_sync (CamelFolder *folder, GCancellable *cancellable, GError **
 	e_ews_connection_sync_folder_items_start	
 						(cnc, EWS_PRIORITY_MEDIUM,
 						 sync_state, id, 
-						 SUMMARY_DEFAULT_PROPS, SUMMARY_ADD_PROPS,
+						 "Default", "",
 						 EWS_MAX_FETCH_COUNT, 
-						 ews_items_ready_cb,
-						 cancellable, error);
+						 ews_sync_items_ready_cb,
+						 cancellable, ews_folder);
 
 exit:
 	g_mutex_unlock (priv->refresh_lock);
