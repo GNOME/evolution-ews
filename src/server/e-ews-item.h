@@ -51,6 +51,12 @@ typedef enum {
 	E_EWS_ITEM_TYPE_UNKNOWN
 } EEwsItemType;
 
+typedef enum {
+	EWS_ITEM_LOW,
+	EWS_ITEM_NORMAL,
+	EWS_ITEM_HIGH
+} EwsImportance;
+
 struct _EEwsItem {
 	GObject parent;
 	EEwsItemPrivate *priv;
@@ -100,6 +106,8 @@ const EwsMailbox *
 		e_ews_item_get_sender		(EEwsItem *item);
 const EwsMailbox *	
 		e_ews_item_get_from		(EEwsItem *item);
+EwsImportance
+		e_ews_item_get_importance	(EEwsItem *item);
 
 G_END_DECLS
 

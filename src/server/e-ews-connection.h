@@ -115,23 +115,32 @@ void		e_ews_connection_sync_folder_items
 						 GCancellable *cancellable);
 
 /* Get folder items */
-void		e_ews_connection_get_item_start 
+void		e_ews_connection_get_items_start 
 						(EEwsConnection *cnc,
 						 gint pri,
 						 GSList *ids,
 						 const gchar *default_props,
 						 const gchar *additional_props,
-						 const gchar *include_mime,
+						 gboolean include_mime,
 						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
 						 gpointer user_data);
 
-void		e_ews_connection_get_item_finish 
+void		e_ews_connection_get_items_finish 
 						(EEwsConnection *cnc, 
 						 GAsyncResult *result,
 						 GSList **items,
 						 GError **error);
 
+void		e_ews_connection_get_items	(EEwsConnection *cnc,
+						 gint pri, 
+						 GSList *ids,
+						 const gchar *default_props,
+						 const gchar *additional_props,
+						 gboolean include_mime,
+						 GSList **items,
+						 GCancellable *cancellable,
+						 GError **error);
 
 /* Sync folder hierarchy */
 void		e_ews_connection_sync_folder_hierarchy 

@@ -281,7 +281,7 @@ get_item_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
 	GSList *items = NULL, *l;
 	EEwsItem *item;
 
-	e_ews_connection_get_item_finish	(cnc, res, &items, &error);
+	e_ews_connection_get_items_finish	(cnc, res, &items, &error);
 
 	if (error != NULL) {
 		g_print ("Unable to get item: %s :%d \n", error->message, error->code);
@@ -320,8 +320,8 @@ op_test_get_item ()
 	g_assert (cnc != NULL);
 
 	ids = g_slist_reverse (ids);
-	e_ews_connection_get_item_start		(cnc, EWS_PRIORITY_MEDIUM, 
-						 g_slist_last (ids), "IdOnly", "item:Subject item:DateTimeReceived item:DateTimeSent item:DateTimeCreated item:Size item:HasAttachments message:InternetMessageId message:From message:Sender message:ToRecipients message:CcRecipients message:BccRecipients message:IsRead item:MimeContent", "false",
+	e_ews_connection_get_items_start		(cnc, EWS_PRIORITY_MEDIUM, 
+						 g_slist_last (ids), "IdOnly", "item:Subject item:DateTimeReceived item:DateTimeSent item:DateTimeCreated item:Size item:HasAttachments message:InternetMessageId message:From message:Sender message:ToRecipients message:CcRecipients message:BccRecipients message:IsRead item:MimeContent item:Importance", FALSE,
 						 get_item_ready_callback, 
 						 cancellable, NULL);
 

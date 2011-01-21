@@ -47,6 +47,7 @@ struct _EEwsItemPrivate {
 	gchar *msg_id;
 	gboolean has_attachments;
 	gboolean is_read;
+	EwsImportance importance;
 
 	GSList *to_recipients;
 	GSList *cc_recipients;
@@ -218,6 +219,22 @@ ews_mailbox_from_soap_param (ESoapParameter *param)
 	return mb;
 }
 
+static EwsImportance 
+parse_importance (ESoapParameter *param)
+{
+	gchar *value;
+	EwsImportance importance = EWS_ITEM_LOW;
+
+	value = e_soap_parameter_get_string_value (param);
+	
+	if (!g_ascii_strcasecmp (value, "Normal"))
+		importance = EWS_ITEM_NORMAL;
+	else if (!g_ascii_strcasecmp (value, "High") )
+		importance = EWS_ITEM_HIGH;
+
+	return importance;
+}
+
 static gboolean
 e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 {
@@ -287,6 +304,8 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 			g_free (value);
 		} else if (!g_ascii_strcasecmp (name, "Size")) {
 			priv->size = e_soap_parameter_get_int_value (subparam);
+		} else if (!g_ascii_strcasecmp (name, "Importance")) {
+			priv->importance = parse_importance (subparam);
 		} else if (!g_ascii_strcasecmp (name, "DateTimeSent")) {
 			value = e_soap_parameter_get_string_value (subparam);
 			priv->date_sent = ews_item_parse_date (value);
@@ -518,4 +537,12 @@ e_ews_item_get_from		(EEwsItem *item)
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
 	return (const EwsMailbox *) item->priv->from;
+}
+	
+EwsImportance
+e_ews_item_get_importance	(EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), EWS_ITEM_LOW);
+
+	return item->priv->importance;
 }
