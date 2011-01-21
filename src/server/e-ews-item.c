@@ -355,7 +355,7 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 			priv->msg_id = e_soap_parameter_get_string_value (subparam);
 		} else if (!g_ascii_strcasecmp (name, "IsRead")) {
 			value = e_soap_parameter_get_string_value (subparam);
-			priv->has_attachments = (!g_ascii_strcasecmp (value, "true"));
+			priv->is_read = (!g_ascii_strcasecmp (value, "true"));
 			g_free (value);
 		}
 	}

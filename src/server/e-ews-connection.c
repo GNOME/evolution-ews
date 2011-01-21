@@ -473,7 +473,7 @@ sync_hierarchy_response_cb (SoupSession *session, SoupMessage *msg, gpointer dat
 
 	success = ews_get_response_status (subparam, &error);
 	if (!success) {
-		g_simple_async_result_propagate_error (enode->simple, &error);
+		g_simple_async_result_set_from_error (enode->simple, error);
 		g_object_unref (response);
 		goto exit;	
 	}
@@ -566,7 +566,7 @@ sync_folder_items_response_cb (SoupSession *session, SoupMessage *msg, gpointer 
 
 	success = ews_get_response_status (subparam, &error);
 	if (!success) {
-		g_simple_async_result_propagate_error (enode->simple, &error);
+		g_simple_async_result_set_from_error (enode->simple, error);
 		g_object_unref (response);
 		goto exit;	
 	}
@@ -662,7 +662,7 @@ get_item_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 
 		success = ews_get_response_status (subparam, &error);
 		if (!success) {
-			g_simple_async_result_propagate_error (enode->simple, &error);
+			g_simple_async_result_set_from_error (enode->simple, error);
 			g_object_unref (response);
 			continue;
 		}
@@ -1391,7 +1391,7 @@ e_ews_connection_sync_folder_hierarchy	(EEwsConnection *cnc,
 }
 
 void
-e_ews_connection_get_items_start		(EEwsConnection *cnc,
+e_ews_connection_get_items_start	(EEwsConnection *cnc,
 					 gint pri,
 					 GSList *ids,
 					 const gchar *default_props,
