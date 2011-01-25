@@ -645,6 +645,13 @@ sync_created_items (CamelEwsFolder *ews_folder, CamelEwsStore *ews_store, GSList
 		gboolean has_attachments;
 		guint32 server_flags;
 
+		id = e_ews_item_get_id (item);
+		mi = (CamelEwsMessageInfo *) camel_folder_summary_uid (folder->summary, id->id);
+		if (mi) {
+			camel_message_info_free (mi);
+			continue;
+		}
+
 		mi = (CamelEwsMessageInfo *)camel_message_info_new (folder->summary);
 		
 		if (mi->info.content == NULL) {
@@ -660,7 +667,6 @@ sync_created_items (CamelEwsFolder *ews_folder, CamelEwsStore *ews_store, GSList
 			 item_type == E_EWS_ITEM_TYPE_MEETING_RESPONSE)
 			camel_message_info_set_user_flag ((CamelMessageInfo*)mi, "$has_cal", TRUE);
 		
-		id = e_ews_item_get_id (item);
 		mi->info.uid = camel_pstring_strdup (id->id);
 		mi->info.size = e_ews_item_get_size (item);
 		mi->info.subject = camel_pstring_strdup (e_ews_item_get_subject (item));

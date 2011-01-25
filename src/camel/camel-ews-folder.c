@@ -263,6 +263,7 @@ struct _ews_sync_data {
 	gchar *sync_state;
 	CamelEwsFolder *ews_folder;
 	GSList *items_updated;
+	GSList *created_item_ids;
 };
 
 static void
@@ -295,14 +296,34 @@ ews_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 		g_mutex_unlock (priv->refresh_lock);
 
 		g_clear_error (&error);
+		g_object_unref (cnc);
 		return;
 	}
 
 	camel_ews_utils_sync_folder_items	(ews_folder, 
 						 items_created, 
-						 sync_data->items_updated, 
+						 sync_data->created_item_ids ? NULL: sync_data->items_updated, 
 						 NULL, 
 						 &error);
+	
+	g_slist_foreach (items_created, (GFunc) g_object_unref, NULL);
+	g_slist_free (items_created);
+
+	if (sync_data->created_item_ids) {
+		g_print ("Pointer created item ids %p %s \n", sync_data->created_item_ids, sync_state);
+		g_print ("Number of ids %d \n", g_slist_length (sync_data->created_item_ids));
+		e_ews_connection_get_items_start	(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
+							 sync_data->created_item_ids,
+							 "AllProperties", NULL,
+							 FALSE, ews_get_items_ready_cb, NULL, 
+							 (gpointer) sync_data);
+		g_slist_foreach (sync_data->created_item_ids, (GFunc) g_free, NULL);
+		g_slist_free (sync_data->created_item_ids);
+		sync_data->created_item_ids = NULL;
+		g_object_unref (cnc);
+		return;
+	}
+	
 	camel_ews_store_summary_set_sync_state	(ews_store->summary, 
 						 full_name, 
 						 sync_state);
@@ -326,12 +347,11 @@ ews_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 						 NULL, ews_folder);
 	}
 
-	g_slist_foreach (items_created, (GFunc) g_object_unref, NULL);
 	g_slist_foreach (sync_data->items_updated, (GFunc) g_object_unref, NULL);
-	g_slist_free (items_created);
 	g_slist_free (sync_data->items_updated);
 	g_free (sync_state);
 	g_free (sync_data);
+	g_object_unref (cnc);
 }
 
 static void
@@ -342,10 +362,13 @@ ews_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 	CamelEwsFolderPrivate *priv;
 	CamelEwsStore *ews_store;
 	GSList *items_created = NULL, *items_updated = NULL;
-	GSList *items_deleted = NULL, *l, *created_ids = NULL;
+	GSList *items_deleted = NULL, *l, *created_msg_ids = NULL;
+	GSList *created_item_ids = NULL;
 	gchar *sync_state = NULL;
 	GError *error = NULL;
 	struct _ews_sync_data *sync_data;
+	gint total = 0;
+	gboolean fetch_items = FALSE;
 
 	cnc = (EEwsConnection *) obj;
 	ews_folder = (CamelEwsFolder *) user_data;
@@ -365,19 +388,44 @@ ews_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 		g_mutex_unlock (priv->refresh_lock);
 
 		g_clear_error (&error);
+		g_object_unref (cnc);
 		return;
 	}
 
 	for (l = items_created; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;
 		const EwsId *id = e_ews_item_get_id (item);
+		EEwsItemType item_type = e_ews_item_get_item_type (item);
 		
-	       	created_ids = g_slist_append (created_ids, g_strdup (id->id));
+		/* created_msg_ids are items other than generic item. We fetch them
+		 separately since the property sets vary */
+		if (item_type == E_EWS_ITEM_TYPE_GENERIC_ITEM)
+		       	created_item_ids = g_slist_append (created_item_ids, g_strdup (id->id));
+		else
+			created_msg_ids = g_slist_append (created_msg_ids, g_strdup (id->id));
+
+		fetch_items = TRUE;
+	}
+	
+	total =	g_slist_length (items_created) + 
+	 	g_slist_length (items_updated) + 
+		g_slist_length (items_deleted);
+
+	/* There are no created items to fetch */
+	if (total && !fetch_items)
+		camel_ews_utils_sync_folder_items (ews_folder, NULL, items_updated, items_deleted, &error);
+
+	if (!total || !fetch_items) {
+		const gchar *full_name = camel_folder_get_full_name ((CamelFolder *) ews_folder);
+		camel_ews_store_summary_set_sync_state	(ews_store->summary, 
+							 full_name, 
+							 sync_state);
+		camel_ews_store_summary_save (ews_store->summary, NULL);
+		
+		goto exit;	
 	}
 
-	if	((g_slist_length (items_created) + 
-	 	  g_slist_length (items_updated) + 
-		  g_slist_length (items_deleted)) == EWS_MAX_FETCH_COUNT)
+	if (total == EWS_MAX_FETCH_COUNT)
 		priv->fetch_pending = TRUE;
 	else
 		priv->fetch_pending = FALSE;
@@ -385,24 +433,41 @@ ews_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 	camel_ews_utils_sync_folder_items (ews_folder, NULL, NULL, items_deleted, &error);
 
 	sync_data = g_new0 (struct _ews_sync_data, 1);
-	sync_data->sync_state = sync_state;
+	sync_data->sync_state = g_strdup (sync_state);
 	sync_data->ews_folder = ews_folder;
 	sync_data->items_updated = items_updated;
+	sync_data->created_item_ids = created_item_ids;
+	
+	g_print ("Generic items count: %d, Other items count: %d  - %p \n %s \n", g_slist_length (sync_data->created_item_ids),
+								g_slist_length (created_msg_ids), 
+								sync_data->created_item_ids, sync_state);
 
-	/* Fetch new items using get_items as recipient email ids is not returned in sync_items */
+	/* Fetch new items using get_items as recipient email ids is not returned in sync_items.
+	   We first fetch the message/meeting response items and then generic items */
 	e_ews_connection_get_items_start	(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
-						 created_ids,
-//						 SUMMARY_DEFAULT_PROPS, SUMMARY_ADD_PROPS,
-						 "Default", NULL,
+						 created_msg_ids,
+						 SUMMARY_DEFAULT_PROPS, SUMMARY_ADD_PROPS,
 						 FALSE, ews_get_items_ready_cb, NULL, 
 						 (gpointer) sync_data);
 
-	g_slist_foreach (items_created, (GFunc) g_object_unref, NULL);
-	g_slist_foreach (items_deleted, (GFunc) g_free, NULL);
-	g_slist_foreach (created_ids, (GFunc) g_free, NULL);
-	g_slist_free (items_created);
-	g_slist_free (items_deleted);
-	g_slist_free (created_ids);
+
+exit:	
+	if (items_created) {
+		g_slist_foreach (items_created, (GFunc) g_object_unref, NULL);
+		g_slist_free (items_created);
+	}
+	
+	if (items_deleted) {
+		g_slist_foreach (items_deleted, (GFunc) g_free, NULL);
+		g_slist_free (items_deleted);
+	}
+	
+	if (created_msg_ids) {
+		g_slist_foreach (created_msg_ids, (GFunc) g_free, NULL);
+		g_slist_free (created_msg_ids);
+	}
+
+	g_free (sync_state);
 	g_object_unref (cnc);
 }
 
