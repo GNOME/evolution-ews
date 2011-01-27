@@ -96,6 +96,9 @@ struct _EWSNode {
 
 	gint pri;		/* the command priority */
 	response_cb cb;
+	
+	GCancellable *cancellable;
+	gulong cancel_handler_id;
 };
 
 typedef struct {
@@ -142,7 +145,7 @@ ews_node_new ()
 {
 	EWSNode *node;
 
-	node = g_malloc0 (sizeof (EWSNode));
+	node = g_new0 (EWSNode, 1);
 	return node;
 }
 
@@ -168,7 +171,6 @@ comp_func (gconstpointer a, gconstpointer b)
 	EWSNode *node1 = (EWSNode *) a;
 	EWSNode *node2 = (EWSNode *) b;
 
-	g_print ("\tSorting based on priority...\n");
 	if (node1->pri > node2->pri)
 		return 1;
 	else
@@ -281,6 +283,8 @@ ews_active_job_done (EEwsConnection *cnc, SoupMessage *msg)
 		if (SOUP_MESSAGE (ews_node->msg) == msg) {
 			found = TRUE;
 			cnc->priv->active_job_queue = g_slist_remove (cnc->priv->active_job_queue, ews_node);
+			if (ews_node->cancellable)
+				g_cancellable_disconnect (ews_node->cancellable, ews_node->cancel_handler_id);
 			break;
 		}
 	}
@@ -337,10 +341,12 @@ ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_c
 	cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, (gpointer *) node, (GCompareFunc) comp_func);
  	QUEUE_UNLOCK (cnc);
 
-	if (cancellable)
-		g_cancellable_connect	(cancellable,
-					 G_CALLBACK (ews_cancel_request),
-					 (gpointer) node, NULL);
+	if (cancellable) {
+		node->cancellable = cancellable;	
+		node->cancel_handler_id = g_cancellable_connect	(cancellable,
+								 G_CALLBACK (ews_cancel_request),
+								 (gpointer) node, NULL);
+	}
 
 	g_signal_emit	(cnc, signals[NEXT_REQUEST], 0);
 }
@@ -1375,6 +1381,8 @@ e_ews_connection_sync_folder_hierarchy	(EEwsConnection *cnc,
 							 (gpointer) sync_data);
 
 	g_main_loop_run (sync_data->loop);
+	g_main_context_pop_thread_default (sync_data->context);
+
 	e_ews_connection_sync_folder_hierarchy_finish	(cnc, sync_data->res,
 							 sync_state,
 							 folders_created,
@@ -1500,6 +1508,7 @@ e_ews_connection_get_items	(EEwsConnection *cnc,
 		       				 	
 
 	g_main_loop_run (sync_data->loop);
+	g_main_context_pop_thread_default (sync_data->context);
 	
 	e_ews_connection_get_items_finish	(cnc, 
 						 sync_data->res, 
