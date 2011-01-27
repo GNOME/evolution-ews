@@ -43,7 +43,8 @@ which needs to be better organized via functions */
 #include <sys/types.h>
 
 #include <glib/gi18n-lib.h>
-
+#include <glib/gstdio.h>
+#include <libedataserver/e-flag.h>
 #include <e-ews-connection.h>
 
 #include "camel-ews-folder.h"
@@ -73,7 +74,8 @@ struct _CamelEwsFolderPrivate {
 	/* For syncronizing refresh_info/sync_changes */
 	gboolean refreshing;
 	gboolean fetch_pending;
-	GMutex *refresh_lock;
+	GMutex *state_lock;
+	GHashTable *uid_eflags;
 };
 
 extern gint camel_application_is_exiting;
@@ -91,13 +93,192 @@ ews_get_filename (CamelFolder *folder, const gchar *uid, GError **error)
 	return camel_data_cache_get_filename (ews_folder->cache, "cache", uid, error);
 }
 
-/* Get a message from cache if available otherwise get it from server */
+
 static CamelMimeMessage *
-ews_folder_get_message_sync ( CamelFolder *folder, const gchar *uid, GCancellable *cancellable, GError **error )
+camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder, const gchar *uid, GCancellable *cancellable, GError **error)
 {
-	g_print ("\n Get message not implemented");
+	CamelStream *stream;
+	CamelMimeMessage *msg;
+	CamelEwsFolderPrivate *priv;
+
+	priv = ews_folder->priv;
 	
-	return NULL;
+	g_static_rec_mutex_lock (&priv->cache_lock);
+	stream = camel_data_cache_get (ews_folder->cache, "cur", uid, NULL);
+	if (!stream) {
+			g_static_rec_mutex_unlock (&priv->cache_lock);
+		return NULL;
+	}
+	
+	msg = camel_mime_message_new ();
+
+	if (!camel_data_wrapper_construct_from_stream_sync (
+				(CamelDataWrapper *)msg, stream, cancellable, error)) {
+		g_object_unref (msg);
+		msg = NULL;
+	}
+	
+	g_static_rec_mutex_unlock (&priv->cache_lock);
+	g_object_unref (stream);
+
+	return msg;
+}
+
+/*
+static void
+ews_get_message_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
+{	
+	EEwsConnection *cnc;
+	CamelEwsFolder *ews_folder;
+	CamelEwsFolderPrivate *priv;
+	CamelEwsStore *ews_store;
+	CamelStream *stream = NULL, *tmp_stream;
+	EEwsItem *item;
+	GSList *items = NULL;
+	const gchar *full_name, *mime_content;
+	GError *error = NULL;
+
+	cnc = (EEwsConnection *) obj;
+	ews_folder = (EEwsFolder *) user_data;
+	priv = ews_folder->priv;
+	ews_store = (CamelEwsStore *) camel_folder_get_parent_store ((CamelFolder *) ews_folder);
+	full_name = camel_folder_get_full_name ((CamelFolder *) ews_folder);
+
+	e_ews_connection_get_items_finish	(cnc, res, &items, &error);
+	if (error != NULL) {
+		g_warning ("Unable to retrieve message %s \n", error->message);
+		
+		g_mutex_lock (priv->state_lock);
+		g_mutex_unlock (priv->state_lock);
+
+		g_clear_error (&error);
+		g_object_unref (cnc);
+		return;
+	}
+	
+	item = (EEwsItem *) items->data;
+	mime_content = e_ews_item_get_mime_content (item);
+
+	tmp_stream = camel_data_cache_add (ifolder->cache, "tmp", uid, NULL);
+
+	g_object_unref (items->data);
+	g_slist_free (items);
+	g_object_unref (cnc);
+} */
+
+static CamelMimeMessage *
+camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, GCancellable *cancellable, GError **error)
+{
+	CamelEwsFolder *ews_folder;
+	CamelEwsFolderPrivate *priv;
+	EEwsConnection *cnc;
+	CamelEwsStore *ews_store;
+	const gchar *full_name, *mime_content;
+	CamelMimeMessage *message = NULL;
+	CamelStream *tmp_stream = NULL;
+	GSList *ids = NULL, *items = NULL;
+	EFlag *flag = NULL;
+
+	full_name = camel_folder_get_full_name (folder);
+	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
+	ews_folder = (CamelEwsFolder *) folder;
+	priv = ews_folder->priv;
+
+	if (!camel_ews_store_connected (ews_store, error)) {
+		g_set_error (
+			error, CAMEL_SERVICE_ERROR,
+			CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("This message is not available in offline mode."));
+		return NULL;
+	}
+
+	g_mutex_lock (priv->state_lock);
+
+	if ((flag = g_hash_table_lookup (priv->uid_eflags, uid))) {
+		g_mutex_unlock (priv->state_lock);
+		e_flag_wait (flag);
+		
+		message = camel_ews_folder_get_message_from_cache (ews_folder, uid, cancellable, error);
+		return message;
+	}
+	
+	flag = e_flag_new ();
+	g_hash_table_insert (priv->uid_eflags, g_strdup (uid), flag);
+	
+	g_mutex_unlock (priv->state_lock);
+
+	cnc = camel_ews_store_get_connection (ews_store);
+	ids = g_slist_append (ids, (gchar *) uid);
+	e_ews_connection_get_items	(cnc, pri, ids, "IdOnly", "item:MimeContent", TRUE,
+					 &items, cancellable, error);
+
+	if (error && *error)
+		goto exit;	
+
+	mime_content = e_ews_item_get_mime_content (items->data);
+	tmp_stream = camel_data_cache_add (ews_folder->cache, "tmp", uid, NULL);
+	camel_stream_write_string (tmp_stream, mime_content, cancellable, error);
+	if (error && *error)
+		goto exit;
+
+	if (camel_stream_flush (tmp_stream, cancellable, error) == 0 && camel_stream_close (tmp_stream, cancellable, error) == 0) {
+		gchar *tmp, *cache_file, *dir;
+		const gchar *temp;
+		
+		tmp = camel_data_cache_get_filename (ews_folder->cache, "tmp", uid, NULL);
+		cache_file = camel_data_cache_get_filename  (ews_folder->cache, "cur", uid, NULL);
+		temp = g_strrstr (cache_file, "/");
+		dir = g_strndup (cache_file, temp - cache_file);
+
+		g_mkdir_with_parents (dir, 0700);
+		g_free (dir);
+		
+		if (g_rename (tmp, cache_file) != 0)
+			g_set_error (
+				error, CAMEL_ERROR, 1,
+				"failed to copy the tmp file");
+		g_free (cache_file);
+		g_free (tmp);
+	}
+
+	message = camel_ews_folder_get_message_from_cache (ews_folder, uid, cancellable, error);
+	e_flag_set (flag);
+	
+	/* HACK FIXME just sleep for sometime so that the other waiting locks gets released by that time. Think of a
+	 better way..*/
+	g_usleep (1000);
+	g_mutex_lock (priv->state_lock);
+	g_hash_table_remove (priv->uid_eflags, uid);
+	g_mutex_unlock (priv->state_lock);
+
+	if (!message && !error)
+		g_set_error (
+			error, CAMEL_ERROR, 1,
+			"Could not retrieve the message");
+exit:
+	g_slist_free (ids);
+	if (items) {
+		g_object_unref (items->data);
+		g_slist_free (items);
+	}
+
+	if (tmp_stream)
+		g_object_unref (tmp_stream);
+
+	return message;
+}
+
+/* Get the message from cache if available otherwise get it from server */
+static CamelMimeMessage *
+ews_folder_get_message_sync (CamelFolder *folder, const gchar *uid, GCancellable *cancellable, GError **error )
+{
+	CamelMimeMessage *message;
+
+	message = camel_ews_folder_get_message_from_cache ((CamelEwsFolder *)folder, uid, cancellable, error);
+	if (!message)
+		message = camel_ews_folder_get_message (folder, uid, EWS_ITEM_HIGH, cancellable, error);
+
+	return message;
 }
 
 /* code to rename a folder. all the "meta nonsense" code should simply go away */
@@ -291,9 +472,9 @@ ews_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 	if (error != NULL) {
 		g_warning ("Unable to get summary items %s \n", error->message);
 		
-		g_mutex_lock (priv->refresh_lock);
+		g_mutex_lock (priv->state_lock);
 		priv->refreshing = FALSE;
-		g_mutex_unlock (priv->refresh_lock);
+		g_mutex_unlock (priv->state_lock);
 
 		g_clear_error (&error);
 		g_object_unref (cnc);
@@ -329,10 +510,10 @@ ews_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 						 sync_state);
 	camel_ews_store_summary_save (ews_store->summary, NULL);
 
-	g_mutex_lock (priv->refresh_lock);
+	g_mutex_lock (priv->state_lock);
 	if (!priv->fetch_pending)
 		priv->refreshing = FALSE;
-	g_mutex_unlock (priv->refresh_lock);
+	g_mutex_unlock (priv->state_lock);
 
 	if (priv->fetch_pending) {
 		const gchar *id;
@@ -383,9 +564,9 @@ ews_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 	if (error != NULL) {
 		g_warning ("Unable to sync folder %s \n", error->message);
 
-		g_mutex_lock (priv->refresh_lock);
+		g_mutex_lock (priv->state_lock);
 		priv->refreshing = FALSE;
-		g_mutex_unlock (priv->refresh_lock);
+		g_mutex_unlock (priv->state_lock);
 
 		g_clear_error (&error);
 		g_object_unref (cnc);
@@ -489,7 +670,7 @@ ews_refresh_info_sync (CamelFolder *folder, GCancellable *cancellable, GError **
 	if (!camel_ews_store_connected (ews_store, error))
 		return FALSE;
 
-	g_mutex_lock (priv->refresh_lock);
+	g_mutex_lock (priv->state_lock);
 
 	if (priv->refreshing)
 		goto exit;
@@ -509,10 +690,10 @@ ews_refresh_info_sync (CamelFolder *folder, GCancellable *cancellable, GError **
 						 "Default", "",
 						 EWS_MAX_FETCH_COUNT, 
 						 ews_sync_items_ready_cb,
-						 cancellable, ews_folder);
+						 NULL, ews_folder);
 
 exit:
-	g_mutex_unlock (priv->refresh_lock);
+	g_mutex_unlock (priv->state_lock);
 	return TRUE;
 }
 
@@ -575,6 +756,7 @@ ews_folder_dispose (GObject *object)
 	}
 
 	g_mutex_free (ews_folder->priv->search_lock);
+	g_hash_table_destroy (ews_folder->priv->uid_eflags);
 
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (camel_ews_folder_parent_class)->dispose (object);
@@ -641,11 +823,14 @@ camel_ews_folder_init (CamelEwsFolder *ews_folder)
 	folder->folder_flags = CAMEL_FOLDER_HAS_SUMMARY_CAPABILITY | CAMEL_FOLDER_HAS_SEARCH_CAPABILITY;
 
 	ews_folder->priv->search_lock = g_mutex_new ();
-	ews_folder->priv->refresh_lock = g_mutex_new ();
+	ews_folder->priv->state_lock = g_mutex_new ();
 	g_static_rec_mutex_init(&ews_folder->priv->cache_lock);
 	
 	ews_folder->priv->refreshing = FALSE;
 	
+	ews_folder->priv->uid_eflags = g_hash_table_new_full	(g_str_hash, g_str_equal, 
+								 (GDestroyNotify)g_free, 
+								 (GDestroyNotify) e_flag_free);
 	camel_folder_set_lock_async (folder, TRUE);
 }
 
