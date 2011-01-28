@@ -891,6 +891,28 @@ e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *pass
 
 }
 
+static xmlDoc *
+e_ews_autodiscover_ws_xml(const gchar *email)
+{
+	xmlDoc *doc;
+	xmlNode *node, *child;
+	xmlNs *ns;
+
+	doc = xmlNewDoc((xmlChar *) "1.0");
+	node = xmlNewDocNode(doc, NULL, (xmlChar *)"Autodiscover", NULL);
+	xmlDocSetRootElement(doc, node);
+	ns = xmlNewNs (node,
+		       (xmlChar *)"http://schemas.microsoft.com/exchange/autodiscover/outlook/requestschema/2006", NULL);
+
+	node = xmlNewChild(node, ns, (xmlChar *)"Request", NULL);
+	child = xmlNewChild(node, ns, (xmlChar *)"EMailAddress",
+			    (xmlChar *)email);
+	child = xmlNewChild(node, ns, (xmlChar *)"AcceptableResponseSchema", 
+			    (xmlChar *)"http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a");
+	
+	return doc;
+}
+
 gchar*
 e_ews_autodiscover_ws_url (const gchar *email, const gchar *password, GError **error)
 {
@@ -899,8 +921,7 @@ e_ews_autodiscover_ws_url (const gchar *email, const gchar *password, GError **e
 	gchar *asurl = NULL;
 	SoupMessage *msg;
 	xmlDoc *doc;
-	xmlNode *node, *child;
-	xmlNs *ns;
+	xmlNode *node;
 	guint status;
 	xmlOutputBuffer *buf;
 	EEwsConnection *cnc;
@@ -926,18 +947,7 @@ e_ews_autodiscover_ws_url (const gchar *email, const gchar *password, GError **e
 	soup_message_headers_append (msg->request_headers,
 				     "User-Agent", "libews/0.1");
 
-	doc = xmlNewDoc((xmlChar *) "1.0");
-	node = xmlNewDocNode(doc, NULL, (xmlChar *)"Autodiscover", NULL);
-	xmlDocSetRootElement(doc, node);
-	ns = xmlNewNs (node,
-		       (xmlChar *)"http://schemas.microsoft.com/exchange/autodiscover/outlook/requestschema/2006", NULL);
-
-	node = xmlNewChild(node, ns, (xmlChar *)"Request", NULL);
-	child = xmlNewChild(node, ns, (xmlChar *)"EMailAddress",
-			    (xmlChar *)email);
-	child = xmlNewChild(node, ns, (xmlChar *)"AcceptableResponseSchema", 
-			    (xmlChar *)"http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a");
-	
+	doc = e_ews_autodiscover_ws_xml(email);
 	buf = xmlAllocOutputBuffer(NULL);
 	xmlNodeDumpOutput(buf, doc, xmlDocGetRootElement(doc), 0, 1, NULL);
 	xmlOutputBufferFlush(buf);
