@@ -913,37 +913,19 @@ e_ews_autodiscover_ws_xml(const gchar *email)
 	return doc;
 }
 
-gchar*
-e_ews_autodiscover_ws_url (const gchar *email, const gchar *password, GError **error)
+static guint
+e_ews_autodiscover_ws_send(gchar *url, const gchar *email,
+			   const gchar *password, SoupMessage **msg_parm,
+			   EEwsConnection **cnc_parm, xmlDoc *doc)
 {
-	gchar *url;
-	gchar *domain;
-	gchar *asurl = NULL;
 	SoupMessage *msg;
-	xmlDoc *doc;
-	xmlNode *node;
-	guint status;
-	xmlOutputBuffer *buf;
 	EEwsConnection *cnc;
+	xmlOutputBuffer *buf;
+	guint status;
+       
+	*cnc_parm = cnc = e_ews_connection_new (url, email, password, NULL);
 
-	g_return_val_if_fail (password != NULL, NULL);
-	g_return_val_if_fail (email != NULL, NULL);
-
-	domain = strchr(email, '@');
-	if (!(domain && *domain)) {
-		g_set_error (
-			error, EWS_CONNECTION_ERROR,
-			-1,
-			_("Wrong email id"));
-		
-		return NULL;
-	}
-	domain++;
-
-	url = g_strdup_printf("https://%s/autodiscover/autodiscover.xml", domain);
-	cnc = e_ews_connection_new (url, email, password, NULL);
-
-	msg = soup_message_new("GET", url);
+	*msg_parm = msg = soup_message_new("GET", url);
 	soup_message_headers_append (msg->request_headers,
 				     "User-Agent", "libews/0.1");
 
@@ -969,6 +951,42 @@ e_ews_autodiscover_ws_url (const gchar *email, const gchar *password, GError **e
 	status = soup_session_send_message (cnc->priv->soup_session, msg);
 
 	xmlOutputBufferClose (buf);
+
+	return status;
+}
+
+gchar*
+e_ews_autodiscover_ws_url (const gchar *email, const gchar *password, GError **error)
+{
+	gchar *url;
+	gchar *domain;
+	gchar *asurl = NULL;
+	SoupMessage *msg;
+	xmlDoc *doc;
+	xmlNode *node;
+	guint status;
+	EEwsConnection *cnc;
+
+	g_return_val_if_fail (password != NULL, NULL);
+	g_return_val_if_fail (email != NULL, NULL);
+
+	domain = strchr(email, '@');
+	if (!(domain && *domain)) {
+		g_set_error (
+			error, EWS_CONNECTION_ERROR,
+			-1,
+			_("Wrong email id"));
+		
+		return NULL;
+	}
+	domain++;
+
+	url = g_strdup_printf("https://%s/autodiscover/autodiscover.xml", domain);
+	doc = e_ews_autodiscover_ws_xml(email);
+
+	status = e_ews_autodiscover_ws_send(url, email, password, &msg, &cnc,
+					    doc);
+
 	xmlFreeDoc (doc);
 
 	if (status != 200) {
