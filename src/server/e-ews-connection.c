@@ -986,6 +986,18 @@ e_ews_autodiscover_ws_url (const gchar *email, const gchar *password, GError **e
 
 	status = e_ews_autodiscover_ws_send(url, email, password, &msg, &cnc,
 					    doc);
+	/*
+	 * According to MS documentation (http://msdn.microsoft.com/en-us/library/ee332364.aspx)
+	 * there are a couple of autodiscover URLs to try in the following preferred order
+	 */
+
+	url = g_strdup_printf("https://%s/autodiscover/autodiscover.xml", domain);
+	status = e_ews_autodiscover_ws_send(url, email, password, &msg, &cnc, doc);
+
+	if (status != 200) {
+		url = g_strdup_printf("https://autodiscover.%s/autodiscover/autodiscover.xml", domain);
+		status = e_ews_autodiscover_ws_send(url, email, password, &msg, &cnc, doc);
+	}
 
 	xmlFreeDoc (doc);
 
