@@ -343,6 +343,24 @@ e_cal_backend_ews_open (ECalBackendSync *backend, EDataCal *cal, gboolean only_i
 }
 
 static void
+e_cal_backend_ews_remove (ECalBackendSync *backend, EDataCal *cal, GError **perror)
+{
+	ECalBackendEws *cbews;
+	ECalBackendEwsPrivate *priv;
+
+	cbews = E_CAL_BACKEND_EWS (backend);
+	priv = cbews->priv;
+
+	PRIV_LOCK (priv);
+
+	/* remove the cache */
+	if (priv->store)
+		e_cal_backend_store_remove (priv->store);
+
+	PRIV_UNLOCK (priv);
+}
+
+static void
 e_cal_backend_ews_get_object (ECalBackendSync *backend, EDataCal *cal, const gchar *uid, const gchar *rid, gchar **object, GError **error)
 {
 	ECalComponent *comp;
@@ -578,6 +596,7 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->get_mode = e_cal_backend_ews_get_mode;
 	backend_class->set_mode = e_cal_backend_ews_set_mode;
 
+	/* Many of these can be moved to Base class */
 	sync_class->add_timezone_sync = e_cal_backend_ews_add_timezone;
 	sync_class->get_default_object_sync = e_cal_backend_ews_get_default_object;
 	
@@ -586,10 +605,11 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	sync_class->open_sync = e_cal_backend_ews_open;
 	sync_class->get_object_sync = e_cal_backend_ews_get_object;
 	sync_class->get_object_list_sync = e_cal_backend_ews_get_object_list;
+	sync_class->remove_sync = e_cal_backend_ews_remove;
+	
 	backend_class->start_query = e_cal_backend_ews_start_query;
 
-/*	sync_class->remove_sync = e_cal_backend_ews_remove;
-	sync_class->create_object_sync = e_cal_backend_ews_create_object;
+/*	sync_class->create_object_sync = e_cal_backend_ews_create_object;
 	sync_class->modify_object_sync = e_cal_backend_ews_modify_object;
 	sync_class->remove_object_sync = e_cal_backend_ews_remove_object;
 	sync_class->receive_objects_sync = e_cal_backend_ews_receive_objects;
