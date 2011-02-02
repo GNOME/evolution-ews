@@ -146,7 +146,7 @@ PKG_CHECK_MODULES(CAMEL, camel-provider-$EDS_PACKAGE >= eds_minimum_version)
 dnl ****************************
 dnl Check for evolution plugins 
 dnl ****************************
-PKG_CHECK_MODULES(EVOLUTION_PLUGIN, evolution-plugin >= evo_minimum_version)
+PKG_CHECK_MODULES(EVOLUTION_PLUGIN, evolution-plugin-3.0 >= evo_minimum_version)
 
 dnl ****************************
 dnl Expose version information

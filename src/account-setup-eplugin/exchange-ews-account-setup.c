@@ -219,7 +219,7 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		cbdata->entry = host_url;
 		auto_discover = gtk_button_new_with_mnemonic (_("_Fetch Url"));
 		gtk_box_pack_start (GTK_BOX (hbox), auto_discover, FALSE, FALSE, 0);
-		g_signal_connect (GTK_OBJECT(auto_discover), "clicked",  G_CALLBACK(validate_credentials), cbdata);
+		g_signal_connect (G_OBJECT(auto_discover), "clicked",  G_CALLBACK(validate_credentials), cbdata);
 
 		gtk_table_attach (GTK_TABLE (data->parent), label, 0, 1, row, row+1, 0, 0, 0, 0);
 		gtk_widget_show_all (GTK_WIDGET (hbox));
