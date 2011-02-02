@@ -48,21 +48,7 @@ struct _ECalBackendEwsClass {
 	ECalBackendSyncClass parent_class;
 };
 
-typedef struct {
-	ECalBackendEws *cbews;
-	EEwsSendOptions *opts;
-} EwsSettings;
-
 GType   e_cal_backend_ews_get_type (void);
-EEwsConnection* e_cal_backend_ews_get_connection (ECalBackendEws *cbews);
-GHashTable* e_cal_backend_ews_get_categories_by_id (ECalBackendEws *cbews);
-GHashTable* e_cal_backend_ews_get_categories_by_name (ECalBackendEws *cbews);
-icaltimezone* e_cal_backend_ews_get_default_zone (ECalBackendEws *cbews);
-void    e_cal_backend_ews_notify_error_code (ECalBackendEws *cbews, EEwsConnectionStatus status);
-const gchar *e_cal_backend_ews_get_container_id (ECalBackendEws *cbews);
-const gchar * e_cal_backend_ews_get_local_attachments_store (ECalBackendEws *cbews);
-void e_cal_backend_ews_priv_lock (ECalBackendEws *cbews);
-void e_cal_backend_ews_priv_unlock (ECalBackendEws *cbews);
 
 G_END_DECLS
 

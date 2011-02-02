@@ -53,36 +53,21 @@
 #define gmtime_r(tp,tmp) (gmtime(tp)?(*(tmp)=*gmtime(tp),(tmp)):0)
 #endif
 
-#define SERVER_UTC_TIME "server_utc_time"
-#define CACHE_MARKER "populated"
-
 G_DEFINE_TYPE (ECalBackendEws, e_cal_backend_ews, E_TYPE_CAL_BACKEND_SYNC)
-
-typedef struct {
-	GCond *cond;
-	GMutex *mutex;
-	gboolean exit;
-} SyncDelta;
 
 /* Private part of the CalBackendEws structure */
 struct _ECalBackendEwsPrivate {
+	/* Fields required for online server requests */
 	EEwsConnection *cnc;
-	ECalBackendStore *store;
-	gboolean read_only;
-	gchar *uri;
+	gchar *host_url;
 	gchar *username;
 	gchar *password;
-	gchar *container_id;
+	gchar *folder_id;
+	
 	CalMode mode;
 	gboolean mode_changed;
-	GHashTable *categories_by_id;
-	GHashTable *categories_by_name;
-
-	/* number of calendar items in the folder */
-	guint32 total_count;
-
-	/* timeout handler for syncing sendoptions */
-	guint sendoptions_sync_timeout;
+	ECalBackendStore *store;
+	gboolean read_only;
 
 	/* fields for storing info while offline */
 	gchar *user_email;
@@ -92,38 +77,121 @@ struct _ECalBackendEwsPrivate {
 	GStaticRecMutex rec_mutex;
 	icaltimezone *default_zone;
 	guint timeout_id;
-	GThread *dthread;
-	SyncDelta *dlock;
 };
 
 #define PRIV_LOCK(p)   (g_static_rec_mutex_lock (&(p)->rec_mutex))
 #define PRIV_UNLOCK(p) (g_static_rec_mutex_unlock (&(p)->rec_mutex))
 
+#define PARENT_TYPE E_TYPE_CAL_BACKEND_SYNC
+static ECalBackendClass *parent_class = NULL;
 
+static void
+e_cal_backend_ews_open (ECalBackendSync *backend, EDataCal *cal, gboolean only_if_exists,
+			      const gchar *username, const gchar *password, GError **perror)
+{
+	ECalBackendEws *cbews;
+	ECalBackendEwsPrivate *priv;
+	const gchar *cache_dir;
+	
+	cbews = (ECalBackendEws *) backend;
+	priv = cbews->priv;
 
+	cache_dir = e_cal_backend_get_cache_dir (E_CAL_BACKEND (backend));
+	
+	e_cal_backend_store_load (priv->store);
+}
 
+/* Dispose handler for the file backend */
+static void
+e_cal_backend_ews_dispose (GObject *object)
+{
+	ECalBackendEws *cbews;
+	ECalBackendEwsPrivate *priv;
 
+	cbews = E_CAL_BACKEND_EWS (object);
+	priv = cbews->priv;
 
+	if (G_OBJECT_CLASS (parent_class)->dispose)
+		(* G_OBJECT_CLASS (parent_class)->dispose) (object);
+}
 
+/* Finalize handler for the file backend */
+static void
+e_cal_backend_ews_finalize (GObject *object)
+{
+	ECalBackendEws *cbews;
+	ECalBackendEwsPrivate *priv;
 
+	g_return_if_fail (object != NULL);
+	g_return_if_fail (E_IS_CAL_BACKEND_EWS (object));
+
+	cbews = E_CAL_BACKEND_EWS (object);
+	priv = cbews->priv;
+
+	/* Clean up */
+	g_static_rec_mutex_free (&priv->rec_mutex);
+
+	/* TODO Cancel all the server requests */
+	if (priv->cnc) {
+		g_object_unref (priv->cnc);
+		priv->cnc = NULL;
+	}
+
+	if (priv->store) {
+		g_object_unref (priv->store);
+		priv->store = NULL;
+	}
+
+	if (priv->host_url) {
+		g_free (priv->host_url);
+		priv->host_url = NULL;
+	}
+	
+	if (priv->username) {
+		g_free (priv->username);
+		priv->username = NULL;
+	}
+
+	if (priv->password) {
+		g_free (priv->password);
+		priv->password = NULL;
+	}
+
+	if (priv->folder_id) {
+		g_free (priv->folder_id);
+		priv->folder_id = NULL;
+	}
+
+	if (priv->user_email) {
+		g_free (priv->user_email);
+		priv->user_email = NULL;
+	}
+
+	if (priv->default_zone) {
+		icaltimezone_free (priv->default_zone, 1);
+		priv->default_zone = NULL;
+	}
+
+	g_free (priv);
+	cbews->priv = NULL;
+
+	if (G_OBJECT_CLASS (parent_class)->finalize)
+		(* G_OBJECT_CLASS (parent_class)->finalize) (object);
+}
 
 /* Object initialization function for the file backend */
 static void
-e_cal_backend_ews_init (ECalBackendEws *cbgw)
+e_cal_backend_ews_init (ECalBackendEws *cbews)
 {
 	ECalBackendEwsPrivate *priv;
 
 	priv = g_new0 (ECalBackendEwsPrivate, 1);
 
-	priv->cnc = NULL;
-	priv->sendoptions_sync_timeout = 0;
-
 	/* create the mutex for thread safety */
 	g_static_rec_mutex_init (&priv->rec_mutex);
+	cbews->priv = priv;
 
-	cbgw->priv = priv;
-
-	e_cal_backend_sync_set_lock (E_CAL_BACKEND_SYNC (cbgw), TRUE);
+	e_cal_backend_sync_set_lock (E_CAL_BACKEND_SYNC (cbews), TRUE);
 }
 
 /* Class initialization function for the gw backend */
@@ -138,17 +206,17 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class = (ECalBackendClass *) class;
 	sync_class = (ECalBackendSyncClass *) class;
 
-/*	parent_class = g_type_class_peek_parent (class);
+	parent_class = g_type_class_peek_parent (class);
 
 	object_class->dispose = e_cal_backend_ews_dispose;
 	object_class->finalize = e_cal_backend_ews_finalize;
 
-	sync_class->is_read_only_sync = e_cal_backend_ews_is_read_only;
+	sync_class->open_sync = e_cal_backend_ews_open;
+/*	sync_class->is_read_only_sync = e_cal_backend_ews_is_read_only;
 	sync_class->get_cal_address_sync = e_cal_backend_ews_get_cal_address;
 	sync_class->get_alarm_email_address_sync = e_cal_backend_ews_get_alarm_email_address;
 	sync_class->get_ldap_attribute_sync = e_cal_backend_ews_get_ldap_attribute;
 	sync_class->get_static_capabilities_sync = e_cal_backend_ews_get_static_capabilities;
-	sync_class->open_sync = e_cal_backend_ews_open;
 	sync_class->remove_sync = e_cal_backend_ews_remove;
 	sync_class->create_object_sync = e_cal_backend_ews_create_object;
 	sync_class->modify_object_sync = e_cal_backend_ews_modify_object;
@@ -172,23 +240,4 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->internal_get_default_timezone = e_cal_backend_ews_internal_get_default_timezone;
 	backend_class->internal_get_timezone = e_cal_backend_ews_internal_get_timezone;
 */
-}
-
-void
-e_cal_backend_ews_notify_error_code (ECalBackendEws *cbgw, EEwsConnectionStatus status)
-{
-	const gchar *msg;
-
-	g_return_if_fail (E_IS_CAL_BACKEND_EWS (cbgw));
-
-	msg = e_ews_connection_get_error_message (status);
-	if (msg)
-		e_cal_backend_notify_error (E_CAL_BACKEND (cbgw), msg);
-}
-
-const gchar *
-e_cal_backend_ews_get_local_attachments_store (ECalBackendEws *cbgw)
-{
-	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (cbgw), NULL);
-	return cbgw->priv->local_attachments_store;
 }

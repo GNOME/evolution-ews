@@ -172,8 +172,11 @@ dnl *******************
 plugindir=`$PKG_CONFIG --variable=plugindir evolution-plugin-3.0`
 AC_SUBST(plugindir)
 
-extensiondir=`$PKG_CONFIG --variable=extensiondir evolution-data-server-$EDS_PACKAGE`
-AC_SUBST(extensiondir)
+ecal_backenddir=`$PKG_CONFIG --variable=backenddir libedata-cal-$EDS_PACKAGE`
+AC_SUBST(ecal_backenddir)
+
+ebook_backenddir=`$PKG_CONFIG --variable=backenddir libedata-book-$EDS_PACKAGE`
+AC_SUBST(ebook_backenddir)
 
 camel_providerdir=`$PKG_CONFIG --variable=camel_providerdir camel-provider-$EDS_PACKAGE`
 AC_SUBST(camel_providerdir) 
