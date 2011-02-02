@@ -342,7 +342,122 @@ e_cal_backend_ews_open (ECalBackendSync *backend, EDataCal *cal, gboolean only_i
 	e_cal_backend_store_load (priv->store);
 }
 
-/* Dispose handler for the file backend */
+static void
+e_cal_backend_ews_get_object (ECalBackendSync *backend, EDataCal *cal, const gchar *uid, const gchar *rid, gchar **object, GError **error)
+{
+	ECalComponent *comp;
+	ECalBackendEwsPrivate *priv;
+	ECalBackendEws *cbews = (ECalBackendEws *) backend;
+
+	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
+
+	priv = cbews->priv;
+
+	PRIV_LOCK (priv);
+
+	/* search the object in the cache */
+	comp = e_cal_backend_store_get_component (priv->store, uid, rid);
+	if (comp) {
+		PRIV_UNLOCK (priv);
+		if (e_cal_backend_get_kind (E_CAL_BACKEND (backend)) ==
+		    icalcomponent_isa (e_cal_component_get_icalcomponent (comp)))
+			*object = e_cal_component_get_as_string (comp);
+		else
+			*object = NULL;
+
+		g_object_unref (comp);
+
+		if (!*object)
+			g_propagate_error (error, EDC_ERROR (ObjectNotFound));
+		return;
+	}
+
+	PRIV_UNLOCK (priv);
+
+	/* callers will never have a uuid that is in server but not in cache */
+	g_propagate_error (error, EDC_ERROR (ObjectNotFound));
+}
+
+static void
+e_cal_backend_ews_get_object_list (ECalBackendSync *backend, EDataCal *cal, const gchar *sexp, GList **objects, GError **perror)
+{
+	ECalBackendEws *cbews;
+	ECalBackendEwsPrivate *priv;
+	GSList *components, *l;
+	ECalBackendSExp *cbsexp;
+	gboolean search_needed = TRUE;
+	time_t occur_start = -1, occur_end = -1;
+	gboolean prunning_by_time;
+
+	cbews = E_CAL_BACKEND_EWS (backend);
+	priv = cbews->priv;
+
+	if (!strcmp (sexp, "#t"))
+		search_needed = FALSE;
+
+	cbsexp = e_cal_backend_sexp_new (sexp);
+	if (!cbsexp) {
+		g_propagate_error (perror, EDC_ERROR (InvalidQuery));
+		return;
+	}
+
+	*objects = NULL;
+
+	prunning_by_time = e_cal_backend_sexp_evaluate_occur_times (cbsexp,
+									    &occur_start,
+									    &occur_end);
+	components = prunning_by_time ?
+		e_cal_backend_store_get_components_occuring_in_range (priv->store, occur_start, occur_end)
+		: e_cal_backend_store_get_components (priv->store);
+
+	for (l = components; l != NULL; l = l->next) {
+		ECalComponent *comp = E_CAL_COMPONENT (l->data);
+
+		if (e_cal_backend_get_kind (E_CAL_BACKEND (backend)) ==
+		    icalcomponent_isa (e_cal_component_get_icalcomponent (comp))) {
+			if ((!search_needed) ||
+			    (e_cal_backend_sexp_match_comp (cbsexp, comp, E_CAL_BACKEND (backend)))) {
+				*objects = g_list_append (*objects, e_cal_component_get_as_string (comp));
+			}
+		}
+	}
+
+	g_object_unref (cbsexp);
+	g_slist_foreach (components, (GFunc) g_object_unref, NULL);
+	g_slist_free (components);
+}
+
+static void
+e_cal_backend_ews_start_query (ECalBackend *backend, EDataCalView *query)
+{
+	ECalBackendEws *cbews;
+	ECalBackendEwsPrivate *priv;
+	GList *objects = NULL;
+	GError *err = NULL;
+
+	cbews = E_CAL_BACKEND_EWS (backend);
+	priv = cbews->priv;
+
+	e_cal_backend_ews_get_object_list (E_CAL_BACKEND_SYNC (backend), NULL,
+					   e_data_cal_view_get_text (query), &objects, &err);
+	if (err) {
+		e_data_cal_view_notify_done (query, err);
+		g_error_free (err);
+		return;
+	}
+
+	/* notify listeners of all objects */
+	if (objects) {
+		e_data_cal_view_notify_objects_added (query, (const GList *) objects);
+
+		/* free memory */
+		g_list_foreach (objects, (GFunc) g_free, NULL);
+		g_list_free (objects);
+	}
+
+	e_data_cal_view_notify_done (query, NULL);
+}
+
 static void
 e_cal_backend_ews_dispose (GObject *object)
 {
@@ -469,6 +584,9 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->internal_get_timezone = e_cal_backend_ews_internal_get_timezone;
 	
 	sync_class->open_sync = e_cal_backend_ews_open;
+	sync_class->get_object_sync = e_cal_backend_ews_get_object;
+	sync_class->get_object_list_sync = e_cal_backend_ews_get_object_list;
+	backend_class->start_query = e_cal_backend_ews_start_query;
 
 /*	sync_class->remove_sync = e_cal_backend_ews_remove;
 	sync_class->create_object_sync = e_cal_backend_ews_create_object;
@@ -476,11 +594,8 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	sync_class->remove_object_sync = e_cal_backend_ews_remove_object;
 	sync_class->receive_objects_sync = e_cal_backend_ews_receive_objects;
 	sync_class->send_objects_sync = e_cal_backend_ews_send_objects;
-	sync_class->get_object_sync = e_cal_backend_ews_get_object;
-	sync_class->get_object_list_sync = e_cal_backend_ews_get_object_list;
 	sync_class->get_attachment_list_sync = e_cal_backend_ews_get_attachment_list;
 	sync_class->get_freebusy_sync = e_cal_backend_ews_get_free_busy;
 	sync_class->get_changes_sync = e_cal_backend_ews_get_changes;
-	backend_class->start_query = e_cal_backend_ews_start_query;
 */
 }
