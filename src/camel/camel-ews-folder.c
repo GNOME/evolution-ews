@@ -124,48 +124,6 @@ camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder, const gchar
 	return msg;
 }
 
-/*
-static void
-ews_get_message_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
-{	
-	EEwsConnection *cnc;
-	CamelEwsFolder *ews_folder;
-	CamelEwsFolderPrivate *priv;
-	CamelEwsStore *ews_store;
-	CamelStream *stream = NULL, *tmp_stream;
-	EEwsItem *item;
-	GSList *items = NULL;
-	const gchar *full_name, *mime_content;
-	GError *error = NULL;
-
-	cnc = (EEwsConnection *) obj;
-	ews_folder = (EEwsFolder *) user_data;
-	priv = ews_folder->priv;
-	ews_store = (CamelEwsStore *) camel_folder_get_parent_store ((CamelFolder *) ews_folder);
-	full_name = camel_folder_get_full_name ((CamelFolder *) ews_folder);
-
-	e_ews_connection_get_items_finish	(cnc, res, &items, &error);
-	if (error != NULL) {
-		g_warning ("Unable to retrieve message %s \n", error->message);
-		
-		g_mutex_lock (priv->state_lock);
-		g_mutex_unlock (priv->state_lock);
-
-		g_clear_error (&error);
-		g_object_unref (cnc);
-		return;
-	}
-	
-	item = (EEwsItem *) items->data;
-	mime_content = e_ews_item_get_mime_content (item);
-
-	tmp_stream = camel_data_cache_add (ifolder->cache, "tmp", uid, NULL);
-
-	g_object_unref (items->data);
-	g_slist_free (items);
-	g_object_unref (cnc);
-} */
-
 static CamelMimeMessage *
 camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, GCancellable *cancellable, GError **error)
 {
@@ -477,8 +435,7 @@ ews_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 		g_mutex_unlock (priv->state_lock);
 
 		g_clear_error (&error);
-		g_object_unref (cnc);
-		return;
+		goto exit;
 	}
 
 	camel_ews_utils_sync_folder_items	(ews_folder, 
@@ -491,8 +448,6 @@ ews_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 	g_slist_free (items_created);
 
 	if (sync_data->created_item_ids) {
-		g_print ("Pointer created item ids %p %s \n", sync_data->created_item_ids, sync_state);
-		g_print ("Number of ids %d \n", g_slist_length (sync_data->created_item_ids));
 		e_ews_connection_get_items_start	(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
 							 sync_data->created_item_ids,
 							 "AllProperties", NULL,
@@ -528,8 +483,17 @@ ews_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 						 NULL, ews_folder);
 	}
 
-	g_slist_foreach (sync_data->items_updated, (GFunc) g_object_unref, NULL);
-	g_slist_free (sync_data->items_updated);
+exit:
+	if (sync_data->items_updated) {
+		g_slist_foreach (sync_data->items_updated, (GFunc) g_object_unref, NULL);
+		g_slist_free (sync_data->items_updated);
+	}
+	
+	if (sync_data->created_item_ids) {
+		g_slist_foreach (sync_data->created_item_ids, (GFunc) g_free, NULL);
+		g_slist_free (sync_data->created_item_ids);
+	}
+	
 	g_free (sync_state);
 	g_free (sync_data);
 	g_object_unref (cnc);
