@@ -23,3 +23,5 @@ testews_LDADD = -lglib-2.0 $(libeews)
 testews_CPPFLAGS = $(SERVERS_EWS_CPPFLAGS) -I$(top_srcdir)/src/server/
 
 DISTCLEANFILES = $(TEST_PROGS)
+
+-include $(top_srcdir)/git.mk
