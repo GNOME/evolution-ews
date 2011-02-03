@@ -82,7 +82,7 @@ struct _ECalBackendEwsPrivate {
 
 #define SYNC_KEY "sync-state"
 #define EWS_MAX_FETCH_COUNT 100
-#define REFRESH_INTERVAL 600000
+#define REFRESH_INTERVAL 600
 
 #define PARENT_TYPE E_TYPE_CAL_BACKEND_SYNC
 static ECalBackendClass *parent_class = NULL;
@@ -729,7 +729,7 @@ ews_cal_start_refreshing (ECalBackendEws *cbews)
 	if	(!priv->refresh_timeout && 
  		 priv->mode == CAL_MODE_REMOTE &&
 		 priv->cnc)
-			priv->refresh_timeout = g_timeout_add	
+			priv->refresh_timeout = g_timeout_add_seconds
 							(REFRESH_INTERVAL,
 							 (GSourceFunc) ews_start_sync,
 							  cbews);
