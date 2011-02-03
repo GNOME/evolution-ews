@@ -1,4 +1,8 @@
+if ENABLE_GTK3
 ecal_backend_LTLIBRARIES = libecalbackendews.la
+else
+extension_LTLIBRARIES = libecalbackendews.la
+endif
 
 libecalbackendews_la_CPPFLAGS = \
 	$(AM_CPPFLAGS)					\

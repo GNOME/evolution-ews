@@ -27,7 +27,7 @@ m4_define([eds_minimum_version], [2.31.1])
 m4_define([evo_minimum_version], [2.31.1])
 m4_define([glib_minimum_version], [2.16.1])
 m4_define([gconf_minimum_version], [2.0.0])
-m4_define([gtk_minimum_version], [2.90.4])
+
 
 dnl ***********************************
 dnl Automake 1.11 - Silent Build Rules
@@ -123,12 +123,46 @@ AC_PROG_LIBTOOL
 
 PKG_PROG_PKG_CONFIG
 
+dnl **********************************
+dnl Gtk-3 compatibility
+dnl Use the API version 3.0 while compiling with gtk+-3
+dnl **********************************
+AC_ARG_ENABLE([gtk3],
+	AS_HELP_STRING([--enable-gtk3],
+	[Attempt to use gtk+-3]),
+	[enable_gtk3=$enableval],[enable_gtk3=no])
+
+if test "x${enable_gtk3}" = "xyes"; then
+	GTK_PACKAGE="gtk+-3.0"
+	EVO_PLUGIN_PACKAGE="evolution-plugin-3.0"
+	gtk_minimum_version="2.90.4"
+
+dnl	extensiondir has been replaced with below evolution-3.0 onwards, so use same
+dnl	gtk3 check for this too
+	ecal_backenddir=`$PKG_CONFIG --variable=backenddir libedata-cal-$EDS_PACKAGE`
+	AC_SUBST(ecal_backenddir)
+
+	ebook_backenddir=`$PKG_CONFIG --variable=backenddir libedata-book-$EDS_PACKAGE`
+	AC_SUBST(ebook_backenddir)
+else	
+	GTK_PACKAGE="gtk+-2.0"
+	EVO_PLUGIN_PACKAGE="evolution-plugin"
+	gtk_minimum_version="2.20.0"
+
+	extensiondir=`$PKG_CONFIG --variable=extensiondir evolution-data-server-$EDS_PACKAGE`
+	AC_SUBST(extensiondir)
+fi
+
+AM_CONDITIONAL([ENABLE_GTK3], [test "$enable_gtk3" = yes])
+GTK_MODULE="$GTK_PACKAGE >= $gtk_minimum_version"
+AC_SUBST(GTK_MODULE)
+
 dnl *****************************
 dnl Check for GNOME Platform
 dnl *****************************
 PKG_CHECK_MODULES(GNOME_PLATFORM,
 	[glib-2.0 >= glib_minimum_version
-	gtk+-3.0 >= gtk_minimum_version
+	$GTK_MODULE
 	gconf-2.0 >= gconf_minimum_version])
 
 dnl ********************************
@@ -146,7 +180,7 @@ PKG_CHECK_MODULES(CAMEL, camel-provider-$EDS_PACKAGE >= eds_minimum_version)
 dnl ****************************
 dnl Check for evolution plugins 
 dnl ****************************
-PKG_CHECK_MODULES(EVOLUTION_PLUGIN, evolution-plugin-3.0 >= evo_minimum_version)
+PKG_CHECK_MODULES(EVOLUTION_PLUGIN, $EVO_PLUGIN_PACKAGE >= evo_minimum_version)
 
 dnl ****************************
 dnl Expose version information
@@ -169,14 +203,8 @@ AC_SUBST_FILE(EVO_PLUGIN_RULE)
 dnl *******************
 dnl Special directories
 dnl *******************
-plugindir=`$PKG_CONFIG --variable=plugindir evolution-plugin-3.0`
+plugindir=`$PKG_CONFIG --variable=plugindir $EVO_PLUGIN_PACKAGE`
 AC_SUBST(plugindir)
-
-ecal_backenddir=`$PKG_CONFIG --variable=backenddir libedata-cal-$EDS_PACKAGE`
-AC_SUBST(ecal_backenddir)
-
-ebook_backenddir=`$PKG_CONFIG --variable=backenddir libedata-book-$EDS_PACKAGE`
-AC_SUBST(ebook_backenddir)
 
 camel_providerdir=`$PKG_CONFIG --variable=camel_providerdir camel-provider-$EDS_PACKAGE`
 AC_SUBST(camel_providerdir) 

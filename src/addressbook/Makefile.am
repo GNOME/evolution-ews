@@ -1,4 +1,8 @@
+if ENABLE_GTK3
 ebook_backend_LTLIBRARIES = libebookbackendews.la
+else
+extension_LTLIBRARIES = libebookbackendews.la
+endif
 
 libebookbackendews_la_CPPFLAGS = \
 	$(AM_CPPFLAGS)					\
