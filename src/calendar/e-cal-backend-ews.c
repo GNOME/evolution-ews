@@ -86,6 +86,7 @@ struct _ECalBackendEwsPrivate {
 
 #define PARENT_TYPE E_TYPE_CAL_BACKEND_SYNC
 static ECalBackendClass *parent_class = NULL;
+static void ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data);
 
 static void
 switch_offline (ECalBackendEws *cbews)
@@ -339,7 +340,7 @@ ews_cal_component_get_item_id (ECalComponent *comp)
 
 		x_name = icalproperty_get_x_name (prop);
 		x_val = icalproperty_get_x (prop);
-		if (!strcmp (x_name, "X-GWRECORDID")) {
+		if (!strcmp (x_name, "X-EVOLUTION-ITEMID")) {
 			return g_strdup (x_val);
 		}
 
@@ -517,7 +518,7 @@ e_cal_backend_ews_get_object_list (ECalBackendSync *backend, EDataCal *cal, cons
 }
 
 static void
-add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gboolean modified)
+add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item)
 {
 	ECalBackendEwsPrivate *priv;
 	icalcomponent_kind kind;
@@ -547,6 +548,7 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gboolean modified)
 		ECalComponent *comp, *cache_comp = NULL;
 		icalproperty *icalprop;
 		const EwsId *item_id;
+		ECalComponentId *id;
 		gchar *comp_str;
 
 		item_id = e_ews_item_get_id (item);
@@ -557,17 +559,10 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gboolean modified)
 		comp = e_cal_component_new ();
 		e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (icalcomp));
 
-		if (modified) {
-			const gchar *uid;
-			gchar *rid;
-			
-			e_cal_component_get_uid (comp, &uid);
-			rid = e_cal_component_get_recurid_as_string (comp);
-			cache_comp = e_cal_backend_store_get_component (priv->store, uid, rid);
+		id = e_cal_component_get_id (comp);
+		cache_comp = e_cal_backend_store_get_component (priv->store, id->uid, id->rid);
+		e_cal_component_free_id (id);
 
-			g_free (rid);
-		}
-		
 		comp_str = e_cal_component_get_as_string (comp);
 		e_cal_backend_store_put_component (priv->store, comp);
 	
@@ -581,21 +576,85 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gboolean modified)
 
 			g_free (cache_str);
 		}
+		
+		PRIV_LOCK (priv);
+		g_hash_table_insert (priv->item_id_hash, g_strdup (item_id->id), g_object_ref (comp));
+		PRIV_UNLOCK (priv);
 
 		g_object_unref (comp);
 	}
 }
 
+struct _ews_sync_data {
+	ECalBackendEws *cbews;
+	gchar *sync_state;
+	gboolean sync_pending;
+};
+
 static void
-ews_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
+ews_cal_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
+{
+	EEwsConnection *cnc;
+	ECalBackendEws *cbews;
+	ECalBackendEwsPrivate *priv;
+	GSList *items = NULL, *l;
+	struct _ews_sync_data *sync_data;
+	GError *error = NULL;
+	
+	sync_data = (struct _ews_sync_data *) user_data;
+	cbews = sync_data->cbews;
+	priv = cbews->priv;
+	cnc = (EEwsConnection *) obj;
+	
+	e_ews_connection_get_items_finish	(cnc, res, &items, &error);
+	if (error != NULL) {
+		g_warning ("Unable to get items %s \n", error->message);
+	
+		PRIV_LOCK (priv);
+		priv->refreshing = FALSE;
+		PRIV_UNLOCK (priv);
+
+		g_clear_error (&error);
+		goto exit;
+	}
+
+	e_cal_backend_store_freeze_changes (priv->store);
+	for (l = items; l != NULL; l = g_slist_next (l)) {
+		EEwsItem *item = (EEwsItem *) l->data;
+
+		add_item_to_cache (cbews, item)	;
+		g_object_unref (item);
+	}
+	e_cal_backend_store_thaw_changes (priv->store);
+	/* TODO fetch attachments */	
+
+	e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, sync_data->sync_state);
+	if (sync_data->sync_pending)
+		e_ews_connection_sync_folder_items_start
+						(g_object_ref (priv->cnc), EWS_PRIORITY_MEDIUM,
+						 sync_data->sync_state, priv->folder_id, 
+						 "IdOnly", NULL,
+						 EWS_MAX_FETCH_COUNT, 
+						 ews_cal_sync_items_ready_cb,
+						 NULL, cbews);
+
+exit:
+	g_free (sync_data->sync_state);
+	g_free (sync_data);
+	g_object_unref (cnc);
+}
+
+static void
+ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 {
 	EEwsConnection *cnc;
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
 	GSList *items_created = NULL, *items_updated = NULL;
-	GSList *items_deleted = NULL, *l;
+	GSList *items_deleted = NULL, *l, *cal_item_ids = NULL;
 	gchar *sync_state = NULL;
 	GError *error = NULL;
+	struct _ews_sync_data *sync_data;
 	gint total;
 	
 	cnc = (EEwsConnection *) obj;
@@ -620,10 +679,11 @@ ews_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 	for (l = items_created; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;
 		EEwsItemType type = e_ews_item_get_item_type (item);
+		const EwsId *id;
 
-		/* TODO fetch attachments */
+		id = e_ews_item_get_id (item);
 		if (type == E_EWS_ITEM_TYPE_CALENDAR_ITEM)
-			add_item_to_cache (cbews, item, FALSE);
+			cal_item_ids = g_slist_append (cal_item_ids, g_strdup (id->id));
 
 		g_object_unref (item);
 	}
@@ -631,14 +691,14 @@ ews_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 	for (l = items_updated; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;
 		EEwsItemType type = e_ews_item_get_item_type (item);
+		const EwsId *id;
 
-		/* TODO fetch attachments */
+		id = e_ews_item_get_id (item);
 		if (type == E_EWS_ITEM_TYPE_CALENDAR_ITEM)
-			add_item_to_cache (cbews, item, TRUE);
+			cal_item_ids = g_slist_append (cal_item_ids, g_strdup (id->id));
 
 		g_object_unref (item);
 	}
-
 
 	for (l = items_deleted; l != NULL; l = g_slist_next (l)) {
 		gchar *item_id = (gchar *) l->data;
@@ -659,6 +719,10 @@ ews_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 			comp_str = e_cal_component_get_as_string (comp);
 			e_cal_backend_notify_object_removed (E_CAL_BACKEND (cbews), id, comp_str, NULL);
 
+			PRIV_LOCK (priv);
+			g_hash_table_remove (priv->item_id_hash, item_id);
+			PRIV_UNLOCK (priv);
+
 			e_cal_component_free_id (id);
 			g_free (comp_str);
 		}
@@ -666,30 +730,52 @@ ews_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 		g_free (l->data);
 	}
 
-	e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, sync_state);
-
 	total = g_slist_length (items_created) +
 		g_slist_length (items_updated) +
 		g_slist_length (items_deleted);
-	if (total != EWS_MAX_FETCH_COUNT)
+
+	if (!cal_item_ids && g_slist_length (items_deleted) == EWS_MAX_FETCH_COUNT) {
+		e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, sync_state);
 		e_ews_connection_sync_folder_items_start
 						(g_object_ref (priv->cnc), EWS_PRIORITY_MEDIUM,
 						 sync_state, priv->folder_id, 
-						 "IdOnly", "item:attachments item:MimeContent",
+						 "IdOnly", NULL,
 						 EWS_MAX_FETCH_COUNT, 
-						 ews_sync_items_ready_cb,
+						 ews_cal_sync_items_ready_cb,
 						 NULL, cbews);
-	else {
-		PRIV_LOCK (priv);
-		priv->refreshing = FALSE;
-		PRIV_UNLOCK (priv);
+		g_free (sync_state);
+		goto exit;
 	}
 
+	if (!cal_item_ids)
+		goto exit;
+
+	sync_data = g_new0 (struct _ews_sync_data, 1);
+	sync_data->cbews = cbews;
+	sync_data->sync_state = sync_state;
+	sync_data->sync_pending = (total == EWS_MAX_FETCH_COUNT);
+	
+	e_ews_connection_get_items_start	(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
+						 cal_item_ids,
+						 "IdOnly", "item:Attachments item:HasAttachments item:MimeContent",
+						 FALSE, ews_cal_get_items_ready_cb, NULL, 
+						 (gpointer) sync_data);
+
+	if (total == EWS_MAX_FETCH_COUNT)
+
+exit:
 	g_object_unref (cnc);
-	g_slist_free (items_created);
-	g_slist_free (items_updated);
-	g_slist_free (items_deleted);
-	g_free (sync_state);
+	if (cal_item_ids) {
+		g_slist_foreach (cal_item_ids, (GFunc) g_free, NULL);
+		g_slist_free (cal_item_ids);
+	}
+	
+	if (items_created)
+		g_slist_free (items_created);
+	if (items_updated)
+		g_slist_free (items_updated);
+	if (items_deleted)
+		g_slist_free (items_deleted);
 }
 
 static gboolean
@@ -710,9 +796,9 @@ ews_start_sync	(gpointer data)
 	e_ews_connection_sync_folder_items_start
 						(g_object_ref (priv->cnc), EWS_PRIORITY_MEDIUM,
 						 sync_state, priv->folder_id, 
-						 "IdOnly", "item:attachments item:MimeContent",
+						 "IdOnly", NULL,
 						 EWS_MAX_FETCH_COUNT, 
-						 ews_sync_items_ready_cb,
+						 ews_cal_sync_items_ready_cb,
 						 NULL, cbews);
 	return TRUE;
 }
@@ -728,11 +814,13 @@ ews_cal_start_refreshing (ECalBackendEws *cbews)
 		
 	if	(!priv->refresh_timeout && 
  		 priv->mode == CAL_MODE_REMOTE &&
-		 priv->cnc)
+		 priv->cnc) {
+			ews_start_sync (cbews);
 			priv->refresh_timeout = g_timeout_add_seconds
 							(REFRESH_INTERVAL,
 							 (GSourceFunc) ews_start_sync,
 							  cbews);
+	}
 
 	PRIV_UNLOCK (priv);
 }
