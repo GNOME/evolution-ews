@@ -94,6 +94,18 @@ ews_get_filename (CamelFolder *folder, const gchar *uid, GError **error)
 	return camel_data_cache_get_filename (ews_folder->cache, "cache", uid, error);
 }
 
+#if ! EDS_CHECK_VERSION(2,33,0)
+static gboolean camel_data_wrapper_construct_from_stream_sync(CamelDataWrapper *data_wrapper,
+							     CamelStream *stream,
+							     GCancellable *cancellable,
+							     GError **error)
+{
+	/* In 2.32 this returns an int, which is zero for success */
+	return !camel_data_wrapper_construct_from_stream(data_wrapper, stream, error);
+}
+
+#endif
+
 
 static CamelMimeMessage *
 camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder, const gchar *uid, GCancellable *cancellable, GError **error)
@@ -113,8 +125,8 @@ camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder, const gchar
 	
 	msg = camel_mime_message_new ();
 
-	if (!EVO3_sync(camel_data_wrapper_construct_from_stream) (
-				(CamelDataWrapper *)msg, stream, EVO3(cancellable,) error)) {
+	if (!camel_data_wrapper_construct_from_stream_sync (
+				(CamelDataWrapper *)msg, stream, cancellable, error)) {
 		g_object_unref (msg);
 		msg = NULL;
 	}
