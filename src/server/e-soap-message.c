@@ -3,6 +3,9 @@
  * Copyright (C) 1999-2008 Novell, Inc. (www.novell.com)
  */
 
+#include <libedataserver/eds-version.h>
+#if ! EDS_CHECK_VERSION(2,33,0)
+
 #include <string.h>
 #include <libsoup/soup.h>
 #include "e-soap-message.h"
@@ -880,3 +883,5 @@ e_soap_message_parse_response (ESoapMessage *msg)
 
 	return e_soap_response_new_from_string (SOUP_MESSAGE (msg)->response_body->data);
 }
+
+#endif

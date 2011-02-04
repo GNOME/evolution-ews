@@ -30,6 +30,8 @@
 
 #include <glib/gi18n-lib.h>
 
+#include <e-ews-compat.h>
+
 #include "camel-ews-store.h"
 #include "camel-ews-transport.h"
 #include "camel-ews-utils.h"
@@ -40,7 +42,7 @@ G_DEFINE_TYPE (CamelEwsTransport, camel_ews_transport, CAMEL_TYPE_TRANSPORT)
 
 static gboolean
 ews_transport_connect_sync (CamelService *service,
-                            /*GCancellable *cancellable,*/ 
+                            EVO3(GCancellable *cancellable,)
 			    GError **error)
 {
 	return TRUE;
@@ -78,11 +80,11 @@ camel_ews_transport_class_init (CamelEwsTransportClass *class)
 	CamelTransportClass *transport_class;
 
 	service_class = CAMEL_SERVICE_CLASS (class);
-	service_class->connect/*_sync*/ = ews_transport_connect_sync;
+	service_class->EVO3_sync(connect) = ews_transport_connect_sync;
 	service_class->get_name = ews_transport_get_name;
 
 	transport_class = CAMEL_TRANSPORT_CLASS (class);
-	transport_class->send_to/*_sync*/ = ews_send_to_sync;
+	transport_class->EVO3_sync(send_to) = ews_send_to_sync;
 }
 
 static void

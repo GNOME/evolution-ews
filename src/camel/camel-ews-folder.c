@@ -46,6 +46,7 @@ which needs to be better organized via functions */
 #include <glib/gstdio.h>
 #include <libedataserver/e-flag.h>
 #include <e-ews-connection.h>
+#include <e-ews-compat.h>
 
 #include "camel-ews-folder.h"
 #include "camel-ews-private.h"
@@ -112,8 +113,8 @@ camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder, const gchar
 	
 	msg = camel_mime_message_new ();
 
-	if (!camel_data_wrapper_construct_from_stream/*_sync*/ (
-				(CamelDataWrapper *)msg, stream, /*cancellable,*/ error)) {
+	if (!EVO3_sync(camel_data_wrapper_construct_from_stream) (
+				(CamelDataWrapper *)msg, stream, EVO3(cancellable,) error)) {
 		g_object_unref (msg);
 		msg = NULL;
 	}
@@ -175,11 +176,11 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 
 	mime_content = e_ews_item_get_mime_content (items->data);
 	tmp_stream = camel_data_cache_add (ews_folder->cache, "tmp", uid, NULL);
-	camel_stream_write_string (tmp_stream, mime_content, /*cancellable,*/ error);
+	camel_stream_write_string (tmp_stream, mime_content, EVO3(cancellable,) error);
 	if (error && *error)
 		goto exit;
 
-	if (camel_stream_flush (tmp_stream, /*cancellable,*/ error) == 0 && camel_stream_close (tmp_stream, /*cancellable,*/ error) == 0) {
+	if (camel_stream_flush (tmp_stream, EVO3(cancellable,) error) == 0 && camel_stream_close (tmp_stream, EVO3(cancellable,) error) == 0) {
 		gchar *tmp, *cache_file, *dir;
 		const gchar *temp;
 		
@@ -228,10 +229,10 @@ exit:
 
 /* Get the message from cache if available otherwise get it from server */
 static CamelMimeMessage *
-ews_folder_get_message_sync (CamelFolder *folder, const gchar *uid, /*GCancellable *cancellable,*/ GError **error )
+ews_folder_get_message_sync (CamelFolder *folder, const gchar *uid, EVO3(GCancellable *cancellable,) GError **error )
 {
 	CamelMimeMessage *message;
-	GCancellable *cancellable = NULL;
+	EVO2(GCancellable *cancellable = NULL);
 
 	message = camel_ews_folder_get_message_from_cache ((CamelEwsFolder *)folder, uid, cancellable, error);
 	if (!message)
@@ -334,7 +335,7 @@ ews_folder_search_free (CamelFolder *folder, GPtrArray *uids)
 /********************* folder functions*************************/
 
 static gboolean
-ews_synchronize_sync (CamelFolder *folder, gboolean expunge, /*GCancellable *cancellable,*/ GError **error)
+ews_synchronize_sync (CamelFolder *folder, gboolean expunge, EVO3(GCancellable *cancellable,) GError **error)
 {
 	g_print ("\n You better write a good sync for EWS :)");
 	
@@ -618,7 +619,7 @@ exit:
 }
 
 static gboolean
-ews_refresh_info_sync (CamelFolder *folder, /*GCancellable *cancellable,*/ GError **error)
+ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GError **error)
 {
 	CamelEwsFolder *ews_folder;
 	CamelEwsFolderPrivate *priv;
@@ -665,7 +666,7 @@ exit:
 static gboolean
 ews_append_message_sync (CamelFolder *folder, CamelMimeMessage *message,
 		const CamelMessageInfo *info, gchar **appended_uid,
-		/*GCancellable *cancellable,*/ GError **error)
+		EVO3(GCancellable *cancellable,) GError **error)
 {
 	g_print ("\n append_message not implemented");
 
@@ -679,7 +680,7 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 				 CamelFolder *destination, 
 				 GPtrArray **transferred_uids,
 				 gboolean delete_originals, 
-				 /*GCancellable *cancellable,*/ 
+				 EVO3(GCancellable *cancellable,) 
 				 GError **error)
 {
 
@@ -689,7 +690,7 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 }
 
 static gboolean
-ews_expunge_sync (CamelFolder *folder, /*GCancellable *cancellable,*/ GError **error)
+ews_expunge_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GError **error)
 {
 	g_print ("\n expunge not implemented");
 
@@ -760,18 +761,19 @@ camel_ews_folder_class_init (CamelEwsFolderClass *class)
 	object_class->constructed = ews_folder_constructed;
 
 	folder_class = CAMEL_FOLDER_CLASS (class);
-	folder_class->get_message/*_sync*/ = ews_folder_get_message_sync;
+	folder_class->EVO3_sync(get_message) = ews_folder_get_message_sync;
 	folder_class->rename = ews_folder_rename;
 	folder_class->search_by_expression = ews_folder_search_by_expression;
 	folder_class->count_by_expression = ews_folder_count_by_expression;
 	folder_class->cmp_uids = ews_cmp_uids;
 	folder_class->search_by_uids = ews_folder_search_by_uids;
 	folder_class->search_free = ews_folder_search_free;
-	folder_class->append_message/*_sync*/ = ews_append_message_sync;
-	folder_class->refresh_info/*_sync*/ = ews_refresh_info_sync;
-	folder_class->sync/*hronize_sync*/ = ews_synchronize_sync;
-	folder_class->expunge/*_sync*/ = ews_expunge_sync;
-	folder_class->transfer_messages_to/*_sync*/ = ews_transfer_messages_to_sync;
+	folder_class->EVO3_sync(append_message) = ews_append_message_sync;
+	folder_class->EVO3_sync(refresh_info) = ews_refresh_info_sync;
+	EVO3(folder_class->synchronize_sync = ews_synchronize_sync);
+	EVO2(folder_class->sync = ews_synchronize_sync);
+	folder_class->EVO3_sync(expunge) = ews_expunge_sync;
+	folder_class->EVO3_sync(transfer_messages_to) = ews_transfer_messages_to_sync;
 	folder_class->get_filename = ews_get_filename;
 }
 

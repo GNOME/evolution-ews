@@ -3,8 +3,13 @@
  * Copyright (C) 1999-2008 Novell, Inc. (www.novell.com)
  */
 
-#ifndef E_SOAP_RESPONSE_H
-#define E_SOAP_RESPONSE_H
+#ifndef EWS_SOAP_RESPONSE_H
+#define EWS_SOAP_RESPONSE_H
+
+#include <libedataserver/eds-version.h>
+#if EDS_CHECK_VERSION(2,33,0)
+#include <libedataserver/e-soap-response.h>
+#else
 
 #include <glib-object.h>
 #include <libxml/tree.h>
@@ -65,4 +70,5 @@ gint e_soap_response_dump_response (ESoapResponse *response, FILE *buffer);
 
 G_END_DECLS
 
+#endif
 #endif

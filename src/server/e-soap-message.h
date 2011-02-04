@@ -3,8 +3,13 @@
  * Copyright (C) 1999-2008 Novell, Inc. (www.novell.com)
  */
 
-#ifndef E_SOAP_MESSAGE_H
-#define E_SOAP_MESSAGE_H 1
+#ifndef EWS_SOAP_MESSAGE_H
+#define EWS_SOAP_MESSAGE_H 1
+
+#include <libedataserver/eds-version.h>
+#if EDS_CHECK_VERSION(2,33,0)
+#include <libedataserver/e-soap-message.h>
+#else
 
 #include <time.h>
 #include <libxml/tree.h>
@@ -93,4 +98,5 @@ ESoapResponse *e_soap_message_parse_response (ESoapMessage *msg);
 
 G_END_DECLS
 
+#endif
 #endif
