@@ -16,6 +16,7 @@ Export the following environmental variables for your test suite to run.
 EWS_TEST_USERNAME
 EWS_TEST_PASSWORD
 EWS_TEST_EMAIL
+EWS_TEST_URI
 
    $ make check
 

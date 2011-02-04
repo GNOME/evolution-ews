@@ -139,9 +139,8 @@ folder_items_ready_callback (GObject *object, GAsyncResult *res, gpointer user_d
 	GSList *items_deleted = NULL, *l;
 	gchar *sync_state = NULL;
 	GError *error = NULL;
-	/* Only for test program */
-	EwsId *i_id;
 
+	/* Only for test program */
 	e_ews_connection_sync_folder_items_finish	(cnc, res, &sync_state,
 							 &items_created, &items_updated,
 							 &items_deleted, &error);
@@ -156,7 +155,7 @@ folder_items_ready_callback (GObject *object, GAsyncResult *res, gpointer user_d
 	g_print ("Items created \n");
 	for (l = items_created; l != NULL;l = g_slist_next (l)) {
 		EEwsItem *item = l->data;
-		EwsId *item_id = e_ews_item_get_id (item);
+		const EwsId *item_id = e_ews_item_get_id (item);
 
 		g_print ("Subject: %s \n Id: %s  \n ChangeKey: %s \n\n", e_ews_item_get_subject (item), item_id->id, item_id->change_key);
 		ids = g_slist_append (ids, g_strdup (item_id->id));
@@ -222,7 +221,7 @@ folder_hierarchy_ready_callback (GObject *object, GAsyncResult *res, gpointer us
 	g_print ("Folders created \n");
 	for (l = folders_created; l != NULL;l = g_slist_next (l)) {
 		EEwsFolder *folder = l->data;
-		EwsFolderId *fid = e_ews_folder_get_id (folder);
+		const EwsFolderId *fid = e_ews_folder_get_id (folder);
 
 		g_print ("Name: %s \n Id: %s  \n ChangeKey: %s \n\n", e_ews_folder_get_name (folder), fid->id, fid->change_key);
 		if (!strcmp (e_ews_folder_get_name (folder), "Inbox")) {
@@ -279,7 +278,6 @@ get_item_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	GError *error = NULL;
 	GSList *items = NULL, *l;
-	EEwsItem *item;
 
 	e_ews_connection_get_items_finish	(cnc, res, &items, &error);
 
@@ -333,10 +331,9 @@ static void
 create_folder_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
-	guint folder_id;
 	GError *error = NULL;
 
-	e_ews_connection_create_folder_finish	(cnc, res, folder_id, &error);
+	e_ews_connection_create_folder_finish	(cnc, res, 0, &error);
 
 	if (error != NULL) {
 		g_print ("Unable to create folder: %s :%d \n", error->message, error->code);
@@ -375,7 +372,6 @@ static void
 resolve_names_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
-	guint folder_id;
 	GError *error = NULL;
 
 	e_ews_connection_resolve_names_finish	(cnc, res, &error);
