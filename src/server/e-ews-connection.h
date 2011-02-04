@@ -27,7 +27,7 @@
 #include <glib-object.h>
 #include <gio/gio.h>
 #include <libsoup/soup.h>
-#include <libedataserver/e-soap-message.h>
+#include "e-soap-message.h"
 #include "ews-errors.h"
 #include "e-ews-folder.h"
 #include "e-ews-item.h"

@@ -22,8 +22,8 @@
 #ifndef E_EWS_ITEM_H
 #define E_EWS_ITEM_H
 
-#include <libedataserver/e-soap-message.h>
-#include <libedataserver/e-soap-response.h>
+#include "e-soap-message.h"
+#include "e-soap-response.h"
 
 G_BEGIN_DECLS
 

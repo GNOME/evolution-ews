@@ -22,7 +22,7 @@
 #ifndef E_EWS_FOLDER_H
 #define E_EWS_FOLDER_H
 
-#include <libedataserver/e-soap-message.h>
+#include "e-soap-message.h"
 
 G_BEGIN_DECLS
 
