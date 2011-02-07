@@ -432,6 +432,7 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, EV
 			m->store = g_object_ref (store);
 			camel_session_thread_queue (((CamelService *)store)->session, &m->msg, 0);
 		}
+		ews_store->priv->last_refresh_time = time (NULL);
 		g_mutex_unlock (priv->get_finfo_lock);
 		goto offline;
 	}
@@ -461,7 +462,6 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, EV
 	g_slist_free (folders_updated);
 	g_free (sync_state);
 
-	
 	g_mutex_unlock (priv->get_finfo_lock);
 
 offline:
