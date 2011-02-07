@@ -338,27 +338,24 @@ sync_deleted_folders (CamelEwsStore *store, GSList *deleted_folders)
 	GSList *l;
 
 	for (l = deleted_folders; l != NULL; l = g_slist_next (l)) {
-		EEwsFolder *ews_folder = (EEwsFolder *)	l->data;
-		EwsFolderType ftype;
+		const gchar *fid = l->data;
 		const gchar *folder_name;
-		const EwsFolderId *fid;
 		CamelFolderInfo *fi;
 		GError *error = NULL;
 
-		ftype = e_ews_folder_get_folder_type (ews_folder);
-		if (ftype == EWS_FOLDER_TYPE_CALENDAR) {
-			/* TODO remove esource */
-			continue;
+		folder_name = camel_ews_store_summary_get_folder_name_from_id (ews_summary, fid);
+		if (folder_name) {
+			fi = camel_ews_utils_build_folder_info (store, folder_name);
+
+			camel_ews_store_summary_remove_folder (ews_summary, folder_name, &error);
+			camel_store_folder_deleted ((CamelStore *) store, fi);
+			
+			g_clear_error (&error);
+		} else {
+			/* FIXME: Try to delete esources for calendar, addressbook, tasks in that 
+			 * order. We do not get the folder type from the server for deleted folders
+			*/
 		}
-
-		fid = e_ews_folder_get_id (ews_folder);
-		folder_name = camel_ews_store_summary_get_folder_name_from_id (ews_summary, fid->id);
-		fi = camel_ews_utils_build_folder_info (store, folder_name);
-
-		camel_ews_store_summary_remove_folder (ews_summary, folder_name, &error);
-		camel_store_folder_deleted ((CamelStore *) store, fi);
-
-		g_clear_error (&error);
 	}
 }
 

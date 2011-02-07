@@ -352,7 +352,6 @@ ews_folder_hierarchy_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_da
 	ews_store->priv->last_refresh_time = time (NULL);
 
 	g_slist_foreach (folders_created, (GFunc) g_object_unref, NULL);
-	g_slist_foreach (folders_deleted, (GFunc) g_object_unref, NULL);
 	g_slist_foreach (folders_updated, (GFunc) g_object_unref, NULL);
 	g_slist_free (folders_created);
 	g_slist_free (folders_deleted);
