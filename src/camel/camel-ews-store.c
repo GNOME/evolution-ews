@@ -333,6 +333,7 @@ ews_folder_hierarchy_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_da
 	GSList *folders_created = NULL, *folders_updated = NULL;
 	GSList *folders_deleted = NULL;
 	CamelEwsStore *ews_store = (CamelEwsStore *) user_data;
+	CamelEwsStorePrivate *priv = ews_store->priv;
 	EEwsConnection *cnc = (EEwsConnection *) obj;
 	gchar *sync_state = NULL;
 	GError *error = NULL;
@@ -343,13 +344,20 @@ ews_folder_hierarchy_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_da
 
 	if (error != NULL) {
 		g_warning ("Unable to fetch the folder hierarchy: %s :%d \n", error->message, error->code);
+		
+		g_mutex_lock (priv->get_finfo_lock);
+		ews_store->priv->last_refresh_time -= FINFO_REFRESH_INTERVAL;
+		g_mutex_unlock (priv->get_finfo_lock);
 		return;	
 	}
 
 	ews_utils_sync_folders (ews_store, folders_created, folders_deleted, folders_updated);
 	camel_ews_store_summary_store_string_val (ews_store->summary, "sync_state", sync_state);
 	camel_ews_store_summary_save (ews_store->summary, NULL);
+	
+	g_mutex_lock (priv->get_finfo_lock);
 	ews_store->priv->last_refresh_time = time (NULL);
+	g_mutex_unlock (priv->get_finfo_lock);
 
 	g_slist_foreach (folders_created, (GFunc) g_object_unref, NULL);
 	g_slist_foreach (folders_updated, (GFunc) g_object_unref, NULL);
@@ -432,6 +440,7 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, EV
 			m->store = g_object_ref (store);
 			camel_session_thread_queue (((CamelService *)store)->session, &m->msg, 0);
 		}
+		
 		ews_store->priv->last_refresh_time = time (NULL);
 		g_mutex_unlock (priv->get_finfo_lock);
 		goto offline;
