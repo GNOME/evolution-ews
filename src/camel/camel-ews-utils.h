@@ -82,11 +82,12 @@ void	ews_utils_sync_folders	(CamelEwsStore *ews_store,
 CamelFolderInfo *
 	camel_ews_utils_build_folder_info	(CamelEwsStore *store, 
 						 const gchar *fname);
-void	camel_ews_utils_sync_folder_items	(CamelEwsFolder *ews_folder, 
-						 GSList *items_created, 
-						 GSList *items_updated, 
-						 GSList *items_deleted, 
-						 GError **error);
+
+void	camel_ews_utils_sync_deleted_items	(CamelEwsFolder *ews_folder, 
+						 GSList *items_deleted);
+void	camel_ews_utils_sync_items		(CamelEwsFolder *ews_folder, 
+						 GSList *items_created);
+
 G_END_DECLS
 
 #endif
