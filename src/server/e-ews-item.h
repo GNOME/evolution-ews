@@ -92,6 +92,8 @@ void		e_ews_item_set_mime_content	(EEwsItem *item,
 const EwsId *	e_ews_item_get_id		(EEwsItem *item);
 gsize		e_ews_item_get_size		(EEwsItem *item);
 const gchar *	e_ews_item_get_msg_id		(EEwsItem *item);
+const gchar *	e_ews_item_get_in_replyto	(EEwsItem *item);
+const gchar *	e_ews_item_get_references	(EEwsItem *item);
 time_t		e_ews_item_get_date_received	(EEwsItem *item);
 time_t		e_ews_item_get_date_sent	(EEwsItem *item);
 time_t		e_ews_item_get_date_created	(EEwsItem *item);

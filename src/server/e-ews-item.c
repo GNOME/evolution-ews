@@ -45,6 +45,8 @@ struct _EEwsItemPrivate {
 
 	gsize size;
 	gchar *msg_id;
+	gchar *in_replyto;
+	gchar *references;
 	gboolean has_attachments;
 	gboolean is_read;
 	EwsImportance importance;
@@ -75,15 +77,17 @@ e_ews_item_dispose (GObject *object)
 		priv->item_id = NULL;
 	}
 
-	if (priv->subject) {
-		g_free (priv->subject);
-		priv->subject = NULL;
-	}
+	g_free (priv->subject);
+	priv->subject = NULL;
 
-	if (priv->msg_id) {
-		g_free (priv->msg_id);
-		priv->subject = NULL;
-	}
+	g_free (priv->msg_id);
+	priv->msg_id = NULL;
+
+	g_free (priv->in_replyto);
+	priv->in_replyto = NULL;
+
+	g_free (priv->references);
+	priv->references = NULL;
 	
 	if (priv->to_recipients) {
 		g_slist_foreach (priv->to_recipients, (GFunc) ews_item_free_mailbox, NULL);
@@ -306,6 +310,8 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 			priv->size = e_soap_parameter_get_int_value (subparam);
 		} else if (!g_ascii_strcasecmp (name, "Importance")) {
 			priv->importance = parse_importance (subparam);
+		} else if (!g_ascii_strcasecmp (name, "InReplyTo")) {
+			priv->in_replyto = e_soap_parameter_get_string_value (subparam);
 		} else if (!g_ascii_strcasecmp (name, "DateTimeSent")) {
 			value = e_soap_parameter_get_string_value (subparam);
 			priv->date_sent = ews_item_parse_date (value);
@@ -357,6 +363,8 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 			value = e_soap_parameter_get_string_value (subparam);
 			priv->is_read = (!g_ascii_strcasecmp (value, "true"));
 			g_free (value);
+		} else if (!g_ascii_strcasecmp (name, "References")) {
+			priv->references = e_soap_parameter_get_string_value (subparam);
 		}
 	}
 
@@ -453,6 +461,21 @@ e_ews_item_get_msg_id	(EEwsItem *item)
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
 	return (const gchar *) item->priv->msg_id;
+}
+
+const gchar *
+e_ews_item_get_in_replyto (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	return (const gchar *) item->priv->in_replyto;
+}
+const gchar *
+e_ews_item_get_references (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	return (const gchar *) item->priv->references;
 }
 
 time_t
