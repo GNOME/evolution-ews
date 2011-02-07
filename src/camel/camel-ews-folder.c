@@ -117,7 +117,7 @@ camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder, const gchar
 	priv = ews_folder->priv;
 	
 	g_static_rec_mutex_lock (&priv->cache_lock);
-	stream = camel_data_cache_get (ews_folder->cache, "cur", uid, NULL);
+	stream = camel_data_cache_get (ews_folder->cache, "cur", uid, error);
 	if (!stream) {
 			g_static_rec_mutex_unlock (&priv->cache_lock);
 		return NULL;
@@ -187,7 +187,10 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 		goto exit;	
 
 	mime_content = e_ews_item_get_mime_content (items->data);
-	tmp_stream = camel_data_cache_add (ews_folder->cache, "tmp", uid, NULL);
+	tmp_stream = camel_data_cache_add (ews_folder->cache, "tmp", uid, error);
+	if (error && *error)
+		goto exit;
+
 	camel_stream_write_string (tmp_stream, mime_content, EVO3(cancellable,) error);
 	if (error && *error)
 		goto exit;
@@ -196,8 +199,8 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 		gchar *tmp, *cache_file, *dir;
 		const gchar *temp;
 		
-		tmp = camel_data_cache_get_filename (ews_folder->cache, "tmp", uid, NULL);
-		cache_file = camel_data_cache_get_filename  (ews_folder->cache, "cur", uid, NULL);
+		tmp = camel_data_cache_get_filename (ews_folder->cache, "tmp", uid, error);
+		cache_file = camel_data_cache_get_filename  (ews_folder->cache, "cur", uid, error);
 		temp = g_strrstr (cache_file, "/");
 		dir = g_strndup (cache_file, temp - cache_file);
 
