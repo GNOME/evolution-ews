@@ -53,7 +53,7 @@
 #define gmtime_r(tp,tmp) (gmtime(tp)?(*(tmp)=*gmtime(tp),(tmp)):0)
 #endif
 
-G_DEFINE_TYPE (ECalBackendEws, e_cal_backend_ews, E_TYPE_CAL_BACKEND_SYNC)
+G_DEFINE_TYPE (ECalBackendEws, e_cal_backend_ews, E_TYPE_CAL_BACKEND)
 
 /* Private part of the CalBackendEws structure */
 struct _ECalBackendEwsPrivate {
@@ -84,7 +84,22 @@ struct _ECalBackendEwsPrivate {
 #define EWS_MAX_FETCH_COUNT 100
 #define REFRESH_INTERVAL 600
 
-#define PARENT_TYPE E_TYPE_CAL_BACKEND_SYNC
+#define e_data_cal_error_if_fail(expr, _code)					\
+	G_STMT_START {								\
+		if (G_LIKELY (expr)) {						\
+		} else {							\
+			g_log (G_LOG_DOMAIN,					\
+				G_LOG_LEVEL_CRITICAL,				\
+				"file %s: line %d (%s): assertion `%s' failed",	\
+				__FILE__, __LINE__, G_STRFUNC, #expr);		\
+			g_set_error (&error, E_DATA_CAL_ERROR, (_code),		\
+				"file %s: line %d (%s): assertion `%s' failed",	\
+				__FILE__, __LINE__, G_STRFUNC, #expr);		\
+			goto exit;						\
+		}								\
+	} G_STMT_END
+
+#define PARENT_TYPE E_TYPE_CAL_BACKEND
 static ECalBackendClass *parent_class = NULL;
 static void ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data);
 
@@ -109,16 +124,17 @@ switch_offline (ECalBackendEws *cbews)
 
 /* Property Accessors */
 static void
-e_cal_backend_ews_is_read_only (ECalBackendSync *backend, EDataCal *cal, gboolean *read_only, GError **perror)
+e_cal_backend_ews_is_read_only (ECalBackend *backend, EDataCal *cal)
 {
 	ECalBackendEws *cbews;
 
 	cbews = E_CAL_BACKEND_EWS (backend);
-	*read_only = cbews->priv->read_only;
+	
+	e_data_cal_notify_read_only (cal, NULL, cbews->priv->read_only);
 }
 
 static void
-e_cal_backend_ews_get_cal_address (ECalBackendSync *backend, EDataCal *cal, gchar **address, GError **perror)
+e_cal_backend_ews_get_cal_address (ECalBackend *backend, EDataCal *cal, EServerMethodContext context)
 {
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
@@ -126,20 +142,24 @@ e_cal_backend_ews_get_cal_address (ECalBackendSync *backend, EDataCal *cal, gcha
 	cbews = E_CAL_BACKEND_EWS (backend);
 	priv = cbews->priv;
 
-	*address = g_strdup (priv->user_email);
+	e_data_cal_notify_cal_address (cal, context, NULL, priv->user_email);
 }
 
 static void
-e_cal_backend_ews_get_static_capabilities (ECalBackendSync *backend, EDataCal *cal, gchar **capabilities, GError **perror)
+e_cal_backend_ews_get_static_capabilities (ECalBackend *backend, EDataCal *cal, EServerMethodContext context)
 {
-	*capabilities = g_strdup (CAL_STATIC_CAPABILITY_NO_EMAIL_ALARMS ","
-				  CAL_STATIC_CAPABILITY_ONE_ALARM_ONLY ","
-				  CAL_STATIC_CAPABILITY_REMOVE_ALARMS ","
-				  CAL_STATIC_CAPABILITY_NO_THISANDPRIOR ","
-				  CAL_STATIC_CAPABILITY_NO_THISANDFUTURE ","
-				  CAL_STATIC_CAPABILITY_NO_CONV_TO_ASSIGN_TASK ","
-				  CAL_STATIC_CAPABILITY_NO_CONV_TO_RECUR ","
-				  CAL_STATIC_CAPABILITY_SAVE_SCHEDULES);
+	const gchar *capabilities;
+
+	capabilities =	(CAL_STATIC_CAPABILITY_NO_EMAIL_ALARMS ","
+			 CAL_STATIC_CAPABILITY_ONE_ALARM_ONLY ","
+			 CAL_STATIC_CAPABILITY_REMOVE_ALARMS ","
+			 CAL_STATIC_CAPABILITY_NO_THISANDPRIOR ","
+			 CAL_STATIC_CAPABILITY_NO_THISANDFUTURE ","
+			 CAL_STATIC_CAPABILITY_NO_CONV_TO_ASSIGN_TASK ","
+			 CAL_STATIC_CAPABILITY_NO_CONV_TO_RECUR ","
+			 CAL_STATIC_CAPABILITY_SAVE_SCHEDULES);
+	
+	e_data_cal_notify_static_capabilities (cal, context, NULL, capabilities);
 }
 
 static gboolean
@@ -216,24 +236,25 @@ e_cal_backend_ews_set_mode (ECalBackend *backend, CalMode mode)
 }
 
 static void
-e_cal_backend_ews_set_default_zone (ECalBackendSync *backend, EDataCal *cal, const gchar *tzobj, GError **error)
+e_cal_backend_ews_set_default_zone (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *tzobj)
 {
 	icalcomponent *tz_comp;
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
 	icaltimezone *zone;
+	GError *error = NULL;
 
 	cbews = (ECalBackendEws *) backend;
 
-	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
-	e_return_data_cal_error_if_fail (tzobj != NULL, InvalidArg);
+	e_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
+	e_data_cal_error_if_fail (tzobj != NULL, InvalidArg);
 
 	priv = cbews->priv;
 
 	tz_comp = icalparser_parse_string (tzobj);
 	if (!tz_comp) {
-		g_propagate_error (error, EDC_ERROR (InvalidObject));
-		return;
+		g_propagate_error (&error, EDC_ERROR (InvalidObject));
+		goto exit;
 	}
 
 	zone = icaltimezone_new ();
@@ -246,8 +267,12 @@ e_cal_backend_ews_set_default_zone (ECalBackendSync *backend, EDataCal *cal, con
 
 	/* Set the default timezone to it. */
 	priv->default_zone = zone;
+	e_cal_backend_store_set_default_timezone (priv->store, zone);
 
 	PRIV_UNLOCK (priv);
+
+exit:
+	e_data_cal_notify_default_timezone_set (cal, context, error);
 }
 
 static icaltimezone *
@@ -270,23 +295,24 @@ e_cal_backend_ews_internal_get_timezone (ECalBackend *backend, const gchar *tzid
 }
 
 static void
-e_cal_backend_ews_add_timezone (ECalBackendSync *backend, EDataCal *cal, const gchar *tzobj, GError **error)
+e_cal_backend_ews_add_timezone (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *tzobj)
 {
 	icalcomponent *tz_comp;
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
+	GError *error = NULL;
 
 	cbews = (ECalBackendEws *) backend;
 
-	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
-	e_return_data_cal_error_if_fail (tzobj != NULL, InvalidArg);
+	e_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
+	e_data_cal_error_if_fail (tzobj != NULL, InvalidArg);
 
 	priv = cbews->priv;
 
 	tz_comp = icalparser_parse_string (tzobj);
 	if (!tz_comp) {
-		g_propagate_error (error, EDC_ERROR (InvalidObject));
-		return;
+		g_propagate_error (&error, EDC_ERROR (InvalidObject));
+		goto exit;
 	}
 
 	if (icalcomponent_isa (tz_comp) == ICAL_VTIMEZONE_COMPONENT) {
@@ -296,22 +322,27 @@ e_cal_backend_ews_add_timezone (ECalBackendSync *backend, EDataCal *cal, const g
 		icaltimezone_set_component (zone, tz_comp);
 		if (e_cal_backend_store_put_timezone (priv->store, zone) == FALSE) {
 			icaltimezone_free (zone, 1);
-			g_propagate_error (error, EDC_ERROR_EX (OtherError, "Put timezone failed"));
-			return;
+			g_propagate_error (&error, EDC_ERROR_EX (OtherError, "Put timezone failed"));
+			goto exit;
 		}
 		icaltimezone_free (zone, 1);
 	}
+
+exit:	
+	e_data_cal_notify_timezone_added (cal, context, error, tzobj);
 }
 
 static void
-e_cal_backend_ews_get_default_object (ECalBackendSync *backend, EDataCal *cal, gchar **object, GError **perror)
+e_cal_backend_ews_get_default_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context)
 {
 
 	ECalComponent *comp;
+	GError *error = NULL;
+	gchar *object = NULL;
 
 	comp = e_cal_component_new ();
 
-	switch (e_cal_backend_get_kind (E_CAL_BACKEND (backend))) {
+	switch (e_cal_backend_get_kind (backend)) {
 	case ICAL_VEVENT_COMPONENT:
 		e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_EVENT);
 		break;
@@ -320,12 +351,16 @@ e_cal_backend_ews_get_default_object (ECalBackendSync *backend, EDataCal *cal, g
 		break;
 	default:
 		g_object_unref (comp);
-		g_propagate_error (perror, EDC_ERROR (ObjectNotFound));
-		return;
+		g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
+		goto exit;
 	}
 
-	*object = e_cal_component_get_as_string (comp);
+	object = e_cal_component_get_as_string (comp);
 	g_object_unref (comp);
+
+exit:	
+	e_data_cal_notify_default_object (cal, context, error, object);
+	g_free (object);
 }
 
 static gchar *
@@ -374,17 +409,18 @@ add_comps_to_item_id_hash (ECalBackendEws *cbews)
 	g_slist_free (comps);
 }
 static void
-e_cal_backend_ews_open (ECalBackendSync *backend, EDataCal *cal, gboolean only_if_exists,
-			      const gchar *username, const gchar *password, GError **perror)
+e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, 
+			gboolean only_if_exists, const gchar *username, const gchar *password)
 {
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
 	const gchar *cache_dir;
+	GError *error = NULL;
 	
 	cbews = (ECalBackendEws *) backend;
 	priv = cbews->priv;
 
-	cache_dir = e_cal_backend_get_cache_dir (E_CAL_BACKEND (backend));
+	cache_dir = e_cal_backend_get_cache_dir (backend);
 
 	PRIV_LOCK (priv);
 	if (!priv->store) {
@@ -395,7 +431,7 @@ e_cal_backend_ews_open (ECalBackendSync *backend, EDataCal *cal, gboolean only_i
 
 	if (priv->mode == CAL_MODE_LOCAL) {
 		PRIV_UNLOCK (priv);
-		return;
+		goto exit;
 	}
 	
 	if (!priv->cnc) {
@@ -408,14 +444,17 @@ e_cal_backend_ews_open (ECalBackendSync *backend, EDataCal *cal, gboolean only_i
 		priv->user_email = e_source_get_duped_property (esource, "email");
 		
 		host_url = e_source_get_property (esource, "hosturl");
-		priv->cnc = e_ews_connection_new (host_url, username, password, perror);
+		priv->cnc = e_ews_connection_new (host_url, username, password, &error);
 	}
 	
 	PRIV_UNLOCK (priv);
+
+exit:	
+	e_data_cal_notify_open (cal, context, error);
 }
 
 static void
-e_cal_backend_ews_remove (ECalBackendSync *backend, EDataCal *cal, GError **perror)
+e_cal_backend_ews_remove (ECalBackend *backend, EDataCal *cal, EServerMethodContext context)
 {
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
@@ -430,16 +469,21 @@ e_cal_backend_ews_remove (ECalBackendSync *backend, EDataCal *cal, GError **perr
 		e_cal_backend_store_remove (priv->store);
 
 	PRIV_UNLOCK (priv);
+	
+	e_data_cal_notify_remove (cal, context, NULL);
 }
 
 static void
-e_cal_backend_ews_get_object (ECalBackendSync *backend, EDataCal *cal, const gchar *uid, const gchar *rid, gchar **object, GError **error)
+e_cal_backend_ews_get_object	(ECalBackend *backend, EDataCal *cal, EServerMethodContext context, 
+	 			 const gchar *uid, const gchar *rid)
 {
 	ECalComponent *comp;
 	ECalBackendEwsPrivate *priv;
 	ECalBackendEws *cbews = (ECalBackendEws *) backend;
+	gchar *object = NULL;
+	GError *error = NULL;
 
-	e_return_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
+	e_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
 
 	priv = cbews->priv;
 
@@ -449,27 +493,31 @@ e_cal_backend_ews_get_object (ECalBackendSync *backend, EDataCal *cal, const gch
 	comp = e_cal_backend_store_get_component (priv->store, uid, rid);
 	if (comp) {
 		PRIV_UNLOCK (priv);
-		if (e_cal_backend_get_kind (E_CAL_BACKEND (backend)) ==
+		if (e_cal_backend_get_kind (backend) ==
 		    icalcomponent_isa (e_cal_component_get_icalcomponent (comp)))
-			*object = e_cal_component_get_as_string (comp);
+			object = e_cal_component_get_as_string (comp);
 		else
-			*object = NULL;
+			object = NULL;
 
 		g_object_unref (comp);
 
-		if (!*object)
-			g_propagate_error (error, EDC_ERROR (ObjectNotFound));
-		return;
+		if (!object)
+			g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
+		goto exit;
 	}
 
 	PRIV_UNLOCK (priv);
 
 	/* callers will never have a uuid that is in server but not in cache */
-	g_propagate_error (error, EDC_ERROR (ObjectNotFound));
+	g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
+
+exit:	
+	e_data_cal_notify_object (cal, context, error, object);
+	g_free (object);
 }
 
 static void
-e_cal_backend_ews_get_object_list (ECalBackendSync *backend, EDataCal *cal, const gchar *sexp, GList **objects, GError **perror)
+cal_backend_ews_get_object_list (ECalBackend *backend, const gchar *sexp, GList **objects, GError **error)
 {
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
@@ -487,7 +535,7 @@ e_cal_backend_ews_get_object_list (ECalBackendSync *backend, EDataCal *cal, cons
 
 	cbsexp = e_cal_backend_sexp_new (sexp);
 	if (!cbsexp) {
-		g_propagate_error (perror, EDC_ERROR (InvalidQuery));
+		g_propagate_error (error, EDC_ERROR (InvalidQuery));
 		return;
 	}
 
@@ -503,10 +551,10 @@ e_cal_backend_ews_get_object_list (ECalBackendSync *backend, EDataCal *cal, cons
 	for (l = components; l != NULL; l = l->next) {
 		ECalComponent *comp = E_CAL_COMPONENT (l->data);
 
-		if (e_cal_backend_get_kind (E_CAL_BACKEND (backend)) ==
+		if (e_cal_backend_get_kind (backend) ==
 		    icalcomponent_isa (e_cal_component_get_icalcomponent (comp))) {
 			if ((!search_needed) ||
-			    (e_cal_backend_sexp_match_comp (cbsexp, comp, E_CAL_BACKEND (backend)))) {
+			    (e_cal_backend_sexp_match_comp (cbsexp, comp, backend))) {
 				*objects = g_list_append (*objects, e_cal_component_get_as_string (comp));
 			}
 		}
@@ -515,6 +563,22 @@ e_cal_backend_ews_get_object_list (ECalBackendSync *backend, EDataCal *cal, cons
 	g_object_unref (cbsexp);
 	g_slist_foreach (components, (GFunc) g_object_unref, NULL);
 	g_slist_free (components);
+}
+
+static void
+e_cal_backend_ews_get_object_list (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *sexp)
+{
+	GList *objects = NULL, *l;
+	GError *error = NULL;
+	
+	cal_backend_ews_get_object_list (backend, sexp, &objects, &error);
+	
+	e_data_cal_notify_object_list (cal, context, error, objects);
+	if (objects) {
+		for (l = objects; l != NULL; l = l->next)
+			g_free (l->data);
+		g_list_free (objects);
+	}
 }
 
 static void
@@ -830,8 +894,8 @@ e_cal_backend_ews_start_query (ECalBackend *backend, EDataCalView *query)
 	priv = cbews->priv;
 
 	ews_cal_start_refreshing (cbews);
-	e_cal_backend_ews_get_object_list (E_CAL_BACKEND_SYNC (backend), NULL,
-					   e_data_cal_view_get_text (query), &objects, &err);
+	cal_backend_ews_get_object_list (backend, e_data_cal_view_get_text (query), 
+					 &objects, &err);
 	if (err) {
 		e_data_cal_view_notify_done (query, err);
 		g_error_free (err);
@@ -935,8 +999,6 @@ e_cal_backend_ews_init (ECalBackendEws *cbews)
 						 (GDestroyNotify) g_object_unref);
 
 	cbews->priv = priv;
-
-	e_cal_backend_sync_set_lock (E_CAL_BACKEND_SYNC (cbews), TRUE);
 }
 
 /* Class initialization function for the gw backend */
@@ -945,11 +1007,9 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 {
 	GObjectClass *object_class;
 	ECalBackendClass *backend_class;
-	ECalBackendSyncClass *sync_class;
 
 	object_class = (GObjectClass *) class;
 	backend_class = (ECalBackendClass *) class;
-	sync_class = (ECalBackendSyncClass *) class;
 
 	parent_class = g_type_class_peek_parent (class);
 
@@ -957,36 +1017,35 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	object_class->finalize = e_cal_backend_ews_finalize;
 
 	/* Property accessors */
-	sync_class->is_read_only_sync = e_cal_backend_ews_is_read_only;
-	sync_class->get_cal_address_sync = e_cal_backend_ews_get_cal_address;
-	sync_class->get_static_capabilities_sync = e_cal_backend_ews_get_static_capabilities;
-	sync_class->set_default_zone_sync = e_cal_backend_ews_set_default_zone;
-
+	backend_class->is_read_only = e_cal_backend_ews_is_read_only;
+	backend_class->get_cal_address = e_cal_backend_ews_get_cal_address;
+	backend_class->get_static_capabilities = e_cal_backend_ews_get_static_capabilities;
+	backend_class->set_default_zone = e_cal_backend_ews_set_default_zone;
 	backend_class->is_loaded = e_cal_backend_ews_is_loaded;
 	backend_class->internal_get_default_timezone = e_cal_backend_ews_internal_get_default_timezone;
 	backend_class->get_mode = e_cal_backend_ews_get_mode;
 	backend_class->set_mode = e_cal_backend_ews_set_mode;
 
 	/* Many of these can be moved to Base class */
-	sync_class->add_timezone_sync = e_cal_backend_ews_add_timezone;
-	sync_class->get_default_object_sync = e_cal_backend_ews_get_default_object;
+	backend_class->add_timezone = e_cal_backend_ews_add_timezone;
+	backend_class->get_default_object = e_cal_backend_ews_get_default_object;
 	
 	backend_class->internal_get_timezone = e_cal_backend_ews_internal_get_timezone;
 	
-	sync_class->open_sync = e_cal_backend_ews_open;
-	sync_class->get_object_sync = e_cal_backend_ews_get_object;
-	sync_class->get_object_list_sync = e_cal_backend_ews_get_object_list;
-	sync_class->remove_sync = e_cal_backend_ews_remove;
+	backend_class->open = e_cal_backend_ews_open;
+	backend_class->get_object = e_cal_backend_ews_get_object;
+	backend_class->get_object_list = e_cal_backend_ews_get_object_list;
+	backend_class->remove = e_cal_backend_ews_remove;
 	
 	backend_class->start_query = e_cal_backend_ews_start_query;
 
-/*	sync_class->create_object_sync = e_cal_backend_ews_create_object;
-	sync_class->modify_object_sync = e_cal_backend_ews_modify_object;
-	sync_class->remove_object_sync = e_cal_backend_ews_remove_object;
-	sync_class->receive_objects_sync = e_cal_backend_ews_receive_objects;
-	sync_class->send_objects_sync = e_cal_backend_ews_send_objects;
-	sync_class->get_attachment_list_sync = e_cal_backend_ews_get_attachment_list;
-	sync_class->get_freebusy_sync = e_cal_backend_ews_get_free_busy;
-	sync_class->get_changes_sync = e_cal_backend_ews_get_changes;
+/*	backend_class->create_object = e_cal_backend_ews_create_object;
+	backend_class->modify_object = e_cal_backend_ews_modify_object;
+	backend_class->remove_object = e_cal_backend_ews_remove_object;
+	backend_class->receive_objects = e_cal_backend_ews_receive_objects;
+	backend_class->send_objects = e_cal_backend_ews_send_objects;
+	backend_class->get_attachment_list = e_cal_backend_ews_get_attachment_list;
+	backend_class->get_freebusy = e_cal_backend_ews_get_free_busy;
+	backend_class->get_changes = e_cal_backend_ews_get_changes;
 */
 }

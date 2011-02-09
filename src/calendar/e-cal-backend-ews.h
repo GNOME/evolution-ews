@@ -38,14 +38,14 @@ typedef struct _ECalBackendEwsClass   ECalBackendEwsClass;
 typedef struct _ECalBackendEwsPrivate ECalBackendEwsPrivate;
 
 struct _ECalBackendEws {
-	ECalBackendSync backend;
+	ECalBackend backend;
 
 	/* Private data */
 	ECalBackendEwsPrivate *priv;
 };
 
 struct _ECalBackendEwsClass {
-	ECalBackendSyncClass parent_class;
+	ECalBackendClass parent_class;
 };
 
 GType   e_cal_backend_ews_get_type (void);
