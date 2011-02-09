@@ -252,7 +252,7 @@ ews_folder_get_message_sync (CamelFolder *folder, const gchar *uid, EVO3(GCancel
 	CamelMimeMessage *message;
 	EVO2(GCancellable *cancellable = NULL);
 
-	message = camel_ews_folder_get_message_from_cache ((CamelEwsFolder *)folder, uid, cancellable, error);
+	message = camel_ews_folder_get_message_from_cache ((CamelEwsFolder *)folder, uid, cancellable, NULL);
 	if (!message)
 		message = camel_ews_folder_get_message (folder, uid, EWS_ITEM_HIGH, cancellable, error);
 
