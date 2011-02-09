@@ -195,8 +195,7 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		email_id = target_account->account->id->address;
 		camel_url_set_param (url, "email", email_id);
 		temp = g_strstr_len (email_id, -1, "@");
-		url->user = g_strndup (email_id, (temp - email_id));
-		url->host = g_strdup (temp + 1);
+		camel_url_set_host (url, g_strdup (temp + 1));
 		camel_url_set_param (url, "account-name", target_account->account->name);
 		
 		url_string = camel_url_to_string (url, 0);

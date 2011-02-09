@@ -379,7 +379,7 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 	ews_folder = CAMEL_EWS_FOLDER(folder);
 
 	summary_file = g_build_filename (folder_dir, "summary", NULL);
-	folder->summary = camel_ews_summary_new(folder, summary_file);
+	folder->summary = camel_ews_summary_new (folder, summary_file);
 	g_free(summary_file);
 
 	if (!folder->summary) {

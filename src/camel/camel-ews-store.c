@@ -96,7 +96,6 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 	CamelServiceClass *service_class;
 	CamelEwsStore *ews_store;
 	CamelEwsStorePrivate *priv;
-	const gchar *email_id;
 	gchar *summary_file, *session_storage_path;
 
 	ews_store = (CamelEwsStore *) service;
@@ -111,9 +110,7 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 	session_storage_path = camel_session_get_storage_path (session, service, error);
 	if (!session_storage_path)
 		return FALSE;
-	email_id = camel_url_get_param (url, "email");
-	ews_store->storage_path = g_build_filename (session_storage_path, email_id, NULL);
-	g_free (session_storage_path);
+	ews_store->storage_path = session_storage_path;
 
 	priv->host_url = g_strdup (camel_url_get_param (url, "hosturl"));
 	if (!priv->host_url)
