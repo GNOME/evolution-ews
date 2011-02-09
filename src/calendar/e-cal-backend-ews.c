@@ -651,11 +651,11 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
 	GSList *items_created = NULL, *items_updated = NULL;
-	GSList *items_deleted = NULL, *l, *cal_item_ids = NULL;
+	GSList *items_deleted = NULL, *l[2], *m, *cal_item_ids = NULL;
 	gchar *sync_state = NULL;
 	GError *error = NULL;
 	struct _ews_sync_data *sync_data;
-	gint total;
+	gint total, i;
 	
 	cnc = (EEwsConnection *) obj;
 	cbews = (ECalBackendEws *) user_data;
@@ -675,33 +675,27 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 		g_object_unref (cnc);
 		return;
 	}
+
+	l[0] = items_created;
+	l[1] = items_updated;
 	
-	for (l = items_created; l != NULL; l = g_slist_next (l)) {
-		EEwsItem *item = (EEwsItem *) l->data;
-		EEwsItemType type = e_ews_item_get_item_type (item);
-		const EwsId *id;
+	for (i = 0; i < 2; i++)	{
+		for (;l[i] != NULL; l[i] = g_slist_next (l[i])) {
+			EEwsItem *item = (EEwsItem *) l[i]->data;
+			EEwsItemType type = e_ews_item_get_item_type (item);
+			const EwsId *id;
 
-		id = e_ews_item_get_id (item);
-		if (type == E_EWS_ITEM_TYPE_CALENDAR_ITEM)
-			cal_item_ids = g_slist_append (cal_item_ids, g_strdup (id->id));
+			id = e_ews_item_get_id (item);
+			if (type == E_EWS_ITEM_TYPE_CALENDAR_ITEM)
+				cal_item_ids = g_slist_append (cal_item_ids, g_strdup (id->id));
 
-		g_object_unref (item);
+			g_object_unref (item);
+		}
 	}
 	
-	for (l = items_updated; l != NULL; l = g_slist_next (l)) {
-		EEwsItem *item = (EEwsItem *) l->data;
-		EEwsItemType type = e_ews_item_get_item_type (item);
-		const EwsId *id;
-
-		id = e_ews_item_get_id (item);
-		if (type == E_EWS_ITEM_TYPE_CALENDAR_ITEM)
-			cal_item_ids = g_slist_append (cal_item_ids, g_strdup (id->id));
-
-		g_object_unref (item);
-	}
-
-	for (l = items_deleted; l != NULL; l = g_slist_next (l)) {
-		gchar *item_id = (gchar *) l->data;
+	e_cal_backend_store_freeze_changes (priv->store);
+	for (m = items_deleted; m != NULL; m = g_slist_next (m)) {
+		gchar *item_id = (gchar *) m->data;
 		ECalComponent *comp;
 
 		PRIV_LOCK (priv);
@@ -727,8 +721,9 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 			g_free (comp_str);
 		}
 
-		g_free (l->data);
+		g_free (m->data);
 	}
+	e_cal_backend_store_thaw_changes (priv->store);
 
 	total = g_slist_length (items_created) +
 		g_slist_length (items_updated) +
@@ -760,8 +755,6 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 						 "IdOnly", "item:Attachments item:HasAttachments item:MimeContent",
 						 FALSE, ews_cal_get_items_ready_cb, NULL, 
 						 (gpointer) sync_data);
-
-	if (total == EWS_MAX_FETCH_COUNT)
 
 exit:
 	g_object_unref (cnc);
