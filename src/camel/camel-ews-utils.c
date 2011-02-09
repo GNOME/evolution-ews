@@ -643,24 +643,26 @@ camel_ews_utils_sync_deleted_items (CamelEwsFolder *ews_folder, GSList *items_de
 	camel_folder_change_info_free (ci);
 }
 
-/* Use it for updating props common for created/updated items */
-static void
-ews_utils_update_changes (EEwsItem *item, CamelEwsMessageInfo *mi)
+static gint
+ews_utils_get_server_flags (EEwsItem *item)
 {
 	gboolean read;
 	EwsImportance importance;
+	gint server_flags = 0;
 
 	e_ews_item_is_read (item, &read);
 	if (read)	
-		mi->info.flags |= CAMEL_MESSAGE_SEEN;
+		server_flags |= CAMEL_MESSAGE_SEEN;
 	else
-		mi->info.flags &= ~CAMEL_MESSAGE_SEEN;
+		server_flags &= ~CAMEL_MESSAGE_SEEN;
 
 	importance = e_ews_item_get_importance (item);
 	if (importance == EWS_ITEM_HIGH)
-		mi->info.flags |= CAMEL_MESSAGE_FLAGGED;
+		server_flags |= CAMEL_MESSAGE_FLAGGED;
 
 	/* TODO Update replied flags */
+
+	return server_flags;
 }
 
 static const gchar *
@@ -809,8 +811,11 @@ camel_ews_utils_sync_items (CamelEwsFolder *ews_folder, GSList *items_created)
 		id = e_ews_item_get_id (item);
 		mi = (CamelEwsMessageInfo *) camel_folder_summary_uid (folder->summary, id->id);
 		if (mi) {
-			ews_utils_update_changes (item, mi);
-			camel_folder_change_info_change_uid (ci, mi->info.uid);
+			server_flags = ews_utils_get_server_flags (item);
+
+			if (camel_ews_update_message_info_flags (folder->summary, (CamelMessageInfo *)mi, 
+								 server_flags, NULL))
+				camel_folder_change_info_change_uid (ci, mi->info.uid);
 			
 			camel_message_info_free (mi);
 			g_object_unref (item);
@@ -832,6 +837,7 @@ camel_ews_utils_sync_items (CamelEwsFolder *ews_folder, GSList *items_created)
 			 item_type == E_EWS_ITEM_TYPE_MEETING_RESPONSE)
 			camel_message_info_set_user_flag ((CamelMessageInfo*)mi, "$has_cal", TRUE);
 		
+		mi->item_type = item_type;
 		mi->info.uid = camel_pstring_strdup (id->id);
 		mi->info.size = e_ews_item_get_size (item);
 		mi->info.subject = camel_pstring_strdup (e_ews_item_get_subject (item));
@@ -852,9 +858,8 @@ camel_ews_utils_sync_items (CamelEwsFolder *ews_folder, GSList *items_created)
 		if (has_attachments)
 			mi->info.flags |= CAMEL_MESSAGE_ATTACHMENTS;
 		
-		ews_utils_update_changes (item, mi);
-		server_flags = mi->info.flags;
 		ews_set_threading_data (mi, item);
+		server_flags = ews_utils_get_server_flags (item);
 		
 		camel_ews_summary_add_message_info (folder->summary, id->id, server_flags, (CamelMessageInfo *) mi);
 		camel_folder_change_info_add_uid (ci, mi->info.uid);

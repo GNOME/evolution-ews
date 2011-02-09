@@ -213,7 +213,11 @@ message_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
 	if (info) {
 		gchar *part = mir->bdata;
 		iinfo = (CamelEwsMessageInfo *)info;
-		EXTRACT_FIRST_DIGIT (iinfo->server_flags)
+	
+		if (part)
+			EXTRACT_FIRST_DIGIT (iinfo->server_flags)
+		if (part)
+			EXTRACT_DIGIT (iinfo->item_type)
 	}
 
 	return info;}
@@ -245,7 +249,7 @@ message_info_to_db (CamelFolderSummary *s, CamelMessageInfo *info)
 
 	mir = CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->message_info_to_db (s, info);
 	if (mir)
-		mir->bdata = g_strdup_printf ("%u", iinfo->server_flags);
+		mir->bdata = g_strdup_printf ("%u %d", iinfo->server_flags, iinfo->item_type);
 
 	return mir;
 }
@@ -478,6 +482,84 @@ camel_ews_summary_delete_id	(CamelFolderSummary *summary,
 		camel_message_info_free (mi);
 	}
 	camel_folder_summary_remove_uid_fast (summary, uid);
+}
+
+static gboolean
+ews_update_user_flags (CamelMessageInfo *info, CamelFlag *server_user_flags)
+{
+	gboolean changed = FALSE;
+	CamelMessageInfoBase *binfo = (CamelMessageInfoBase *) info;
+	gboolean set_cal = FALSE;
+
+	if (camel_flag_get (&binfo->user_flags, "$has_cal"))
+		set_cal = TRUE;
+
+	changed = camel_flag_list_copy (&binfo->user_flags, &server_user_flags);
+
+	/* reset the calendar flag if it was set in messageinfo before */
+	if (set_cal)
+		camel_flag_set (&binfo->user_flags, "$has_cal", TRUE);
+
+	return changed;
+}
+
+gboolean
+camel_ews_update_message_info_flags	(CamelFolderSummary *summary,
+					 CamelMessageInfo *info, 
+					 guint32 server_flags, 
+					 CamelFlag *server_user_flags)
+{
+	CamelEwsMessageInfo *einfo = (CamelEwsMessageInfo *) info;
+	gboolean changed = FALSE;
+
+	if (server_flags != einfo->server_flags)
+	{
+		guint32 server_set, server_cleared;
+		gint read=0, deleted=0, junk=0;
+
+		server_set = server_flags & ~einfo->server_flags;
+		server_cleared = einfo->server_flags & ~server_flags;
+
+		if (server_set & CAMEL_MESSAGE_SEEN)
+			read = 1;
+		else if (server_cleared & CAMEL_MESSAGE_SEEN)
+			read = -1;
+
+		if (server_set & CAMEL_MESSAGE_DELETED)
+			deleted = 1;
+		else if (server_cleared & CAMEL_MESSAGE_DELETED)
+			deleted = -1;
+
+		if (server_set & CAMEL_MESSAGE_JUNK)
+			junk = 1;
+		else if (server_cleared & CAMEL_MESSAGE_JUNK)
+			junk = -1;
+
+		if (read) {
+			summary->unread_count -= read;
+		}
+		if (deleted)
+			summary->deleted_count += deleted;
+		if (junk)
+			summary->junk_count += junk;
+		if (junk && !deleted)
+			summary->junk_not_deleted_count += junk;
+		if (junk ||  deleted)
+			summary->visible_count -= junk ? junk : deleted;
+
+		einfo->info.flags = (einfo->info.flags | server_set) & ~server_cleared;
+		einfo->server_flags = server_flags;
+		einfo->info.dirty = TRUE;
+		if (info->summary)
+			camel_folder_summary_touch (info->summary);
+		changed = TRUE;
+	}
+
+	/* TODO test user_flags after enabling it */
+	if (server_user_flags && ews_update_user_flags (info, server_user_flags))
+		changed = TRUE;
+
+	return changed;
 }
 
 void

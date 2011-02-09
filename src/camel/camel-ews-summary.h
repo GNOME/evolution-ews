@@ -60,6 +60,7 @@ struct _CamelEwsMessageInfo {
 	CamelMessageInfoBase info;
 
 	guint32 server_flags;
+	gint32 item_type;
 } ;
 
 struct _CamelEwsMessageContentInfo {
@@ -83,6 +84,12 @@ GType camel_ews_summary_get_type (void);
 CamelFolderSummary *
 	camel_ews_summary_new		(struct _CamelFolder *folder, 
 					 const gchar *filename);
+gboolean
+	camel_ews_update_message_info_flags	
+					(CamelFolderSummary *summary,
+					 CamelMessageInfo *info, 
+					 guint32 server_flags, 
+					 CamelFlag *server_user_flags);
 void	camel_ews_summary_add_message	(CamelFolderSummary *summary, 
 					 const gchar *uid, 
 					 CamelMimeMessage *message);
