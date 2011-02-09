@@ -217,6 +217,8 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	}
 
 	message = camel_ews_folder_get_message_from_cache (ews_folder, uid, cancellable, error);
+
+exit:
 	e_flag_set (flag);
 	
 	/* HACK FIXME just sleep for sometime so that the other waiting locks gets released by that time. Think of a
@@ -230,8 +232,8 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 		g_set_error (
 			error, CAMEL_ERROR, 1,
 			"Could not retrieve the message");
-exit:
-	g_slist_free (ids);
+	if (ids)
+		g_slist_free (ids);
 	if (items) {
 		g_object_unref (items->data);
 		g_slist_free (items);

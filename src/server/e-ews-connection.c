@@ -269,30 +269,19 @@ ews_next_request (EEwsConnection *cnc)
  * 
  * Returns: 
  **/
-static gboolean
-ews_active_job_done (EEwsConnection *cnc, SoupMessage *msg)
+static void
+ews_active_job_done (EEwsConnection *cnc, EWSNode *ews_node)
 {
-	EWSNode *ews_node = NULL;
-	GSList *l = NULL;
-	gboolean found = FALSE;
-
 	QUEUE_LOCK (cnc);
 
-	for (l = cnc->priv->active_job_queue; l!= NULL ;l = g_slist_next (l)) {
-		ews_node = (EWSNode *) l->data;
-		if (SOUP_MESSAGE (ews_node->msg) == msg) {
-			found = TRUE;
-			cnc->priv->active_job_queue = g_slist_remove (cnc->priv->active_job_queue, ews_node);
-			if (ews_node->cancellable)
-				g_cancellable_disconnect (ews_node->cancellable, ews_node->cancel_handler_id);
-			break;
-		}
-	}
+	cnc->priv->active_job_queue = g_slist_remove (cnc->priv->active_job_queue, ews_node);
+	if (ews_node->cancellable)
+		g_signal_handler_disconnect (ews_node->cancellable, ews_node->cancel_handler_id);
 	
 	QUEUE_UNLOCK (cnc);
 
 	g_free (ews_node);
-	return found;
+	return;
 }
 
 static void 
@@ -303,19 +292,20 @@ ews_cancel_request (GCancellable *cancellable,
 	EEwsConnection *cnc = node->cnc;
 	GSimpleAsyncResult *simple = node->simple;
 	ESoapMessage *msg = node->msg;
-	gboolean found = FALSE;
+	GSList *found;
 
 	g_print ("\nCanceled this request\n");
 
-	found = ews_active_job_done (cnc, SOUP_MESSAGE (node->msg));
+	QUEUE_LOCK (cnc);
+	found = g_slist_find (cnc->priv->active_job_queue, node);
+	QUEUE_UNLOCK (cnc);
+
 	if (found)
 		soup_session_cancel_message (cnc->priv->soup_session, SOUP_MESSAGE (msg), SOUP_STATUS_CANCELLED);
 	else {
 		QUEUE_LOCK (cnc);
 		cnc->priv->jobs = g_slist_remove (cnc->priv->jobs, (gconstpointer) node);
 		QUEUE_UNLOCK (cnc);
-
-		g_free (node);
 	}
 
 	g_simple_async_result_set_error	(simple,
@@ -390,7 +380,7 @@ dump_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
 exit:	
 	g_simple_async_result_complete_in_idle (enode->simple);
-	ews_active_job_done (cnc, msg);
+	ews_active_job_done (cnc, enode);
 }
 
 static void
@@ -444,7 +434,7 @@ error:
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
 exit:	
 	g_simple_async_result_complete_in_idle (enode->simple);
-	ews_active_job_done (cnc, msg);
+	ews_active_job_done (cnc, enode);
 }
 
 static void
@@ -537,7 +527,7 @@ sync_hierarchy_response_cb (SoupSession *session, SoupMessage *msg, gpointer dat
 
 exit:	
 	g_simple_async_result_complete_in_idle (enode->simple);
-	ews_active_job_done (cnc, msg);
+	ews_active_job_done (cnc, enode);
 }
 
 static void
@@ -629,7 +619,7 @@ sync_folder_items_response_cb (SoupSession *session, SoupMessage *msg, gpointer 
 
 exit:	
 	g_simple_async_result_complete_in_idle (enode->simple);
-	ews_active_job_done (cnc, msg);
+	ews_active_job_done (cnc, enode);
 }
 
 static void
@@ -685,7 +675,7 @@ get_item_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 
 exit:
 	g_simple_async_result_complete_in_idle (enode->simple);
-	ews_active_job_done (cnc, msg);
+	ews_active_job_done (cnc, enode);
 }
 
 static void
