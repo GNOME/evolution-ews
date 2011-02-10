@@ -61,6 +61,7 @@ struct _CamelEwsMessageInfo {
 
 	guint32 server_flags;
 	gint32 item_type;
+	gchar *change_key;
 } ;
 
 struct _CamelEwsMessageContentInfo {

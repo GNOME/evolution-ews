@@ -38,6 +38,7 @@ typedef struct _EEwsItemClass   EEwsItemClass;
 typedef struct _EEwsItemPrivate EEwsItemPrivate;
 
 typedef enum {
+	E_EWS_ITEM_TYPE_UNKNOWN,
 	E_EWS_ITEM_TYPE_MESSAGE,
 	E_EWS_ITEM_TYPE_CALENDAR_ITEM,
 	E_EWS_ITEM_TYPE_CONTACT,
@@ -47,8 +48,7 @@ typedef enum {
 	E_EWS_ITEM_TYPE_MEETING_RESPONSE,
 	E_EWS_ITEM_TYPE_MEETING_CANCELLATION,
 	E_EWS_ITEM_TYPE_TASK,
-	E_EWS_ITEM_TYPE_GENERIC_ITEM,
-	E_EWS_ITEM_TYPE_UNKNOWN
+	E_EWS_ITEM_TYPE_GENERIC_ITEM
 } EEwsItemType;
 
 typedef enum {

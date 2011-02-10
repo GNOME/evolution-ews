@@ -71,6 +71,8 @@ ews_message_info_clone(CamelFolderSummary *s, const CamelMessageInfo *mi)
 
 	to = (CamelEwsMessageInfo *)CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->message_info_clone(s, mi);
 	to->server_flags = from->server_flags;
+	to->item_type = from->item_type;
+	to->change_key = g_strdup (from->change_key);
 
 	/* FIXME: parent clone should do this */
 	to->info.content = camel_folder_summary_content_info_new(s);
@@ -212,15 +214,20 @@ message_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
 	info = CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->message_info_from_db (s, mir);
 	if (info) {
 		gchar *part = mir->bdata;
+		gchar **values;
+		
 		iinfo = (CamelEwsMessageInfo *)info;
-	
-		if (part)
-			EXTRACT_FIRST_DIGIT (iinfo->server_flags)
-		if (part)
-			EXTRACT_DIGIT (iinfo->item_type)
+		values = g_strsplit (part, " ", -1);
+
+		iinfo->server_flags = g_ascii_strtoll (values [0], NULL, 10);
+		iinfo->item_type = g_ascii_strtoll (values [1], NULL, 10);
+		iinfo->change_key = g_strdup (values [2]);
+
+		g_strfreev (values);
 	}
 
-	return info;}
+	return info;
+}
 
 static CamelMessageInfo *
 ews_message_info_migrate (CamelFolderSummary *s, FILE *in)
@@ -249,7 +256,7 @@ message_info_to_db (CamelFolderSummary *s, CamelMessageInfo *info)
 
 	mir = CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->message_info_to_db (s, info);
 	if (mir)
-		mir->bdata = g_strdup_printf ("%u %d", iinfo->server_flags, iinfo->item_type);
+		mir->bdata = g_strdup_printf ("%u %d %s", iinfo->server_flags, iinfo->item_type, iinfo->change_key);
 
 	return mir;
 }

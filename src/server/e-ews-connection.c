@@ -1156,54 +1156,51 @@ e_ews_connection_sync_folder_items_finish	(EEwsConnection *cnc,
 	return;
 }
 
-/* FIXME implement this as async apis
 void
-e_ews_connection_sync_folder_items (EEwsConnection *cnc, const gchar *sync_state, const gchar *folder_name, GCancellable *cancellable)
+e_ews_connection_sync_folder_items	(EEwsConnection *cnc,
+					 gint pri,
+					 gchar **sync_state,
+					 const gchar *fid,
+					 const gchar *default_props,
+					 const gchar *additional_props,
+					 guint max_entries,
+					 GSList **items_created,
+					 GSList **items_updated,
+					 GSList **items_deleted,
+					 GCancellable *cancellable,
+					 GError **error)
 {
-	ESoapMessage *msg;
+	EwsSyncData *sync_data;
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "SyncFolderItems");
-	e_soap_message_start_element (msg, "ItemShape", NULL, NULL);
-	e_ews_message_write_string_parameter (msg, "BaseShape", "types", "Default");
-	e_soap_message_end_element (msg);
+	sync_data = g_new0 (EwsSyncData, 1);
+	sync_data->context = g_main_context_new ();
+	sync_data->loop = g_main_loop_new (sync_data->context, FALSE);
+	
+	g_main_context_push_thread_default (sync_data->context);
+	e_ews_connection_sync_folder_items_start	(cnc, pri, *sync_state, fid,
+							 default_props, additional_props, 
+							 max_entries,
+							 ews_sync_reply_cb, cancellable,
+							 (gpointer) sync_data);
 
-	e_soap_message_start_element (msg, "SyncFolderId", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (msg, "DistinguishedFolderId", "types", NULL, "Id", folder_name);
-	e_soap_message_end_element (msg);
+	g_main_loop_run (sync_data->loop);
+	g_main_context_pop_thread_default (sync_data->context);
 
-	if (sync_state)
-		e_ews_message_write_string_parameter (msg, "SyncState", NULL, sync_state);
+	e_ews_connection_sync_folder_items_finish	(cnc, sync_data->res,
+							 sync_state,
+							 items_created,
+							 items_updated,
+							 items_deleted,
+							 error);
 
-	 Max changes requested 
-	e_ews_message_write_int_parameter (msg, "MaxChangesReturned", NULL, 100);
+	g_main_context_unref (sync_data->context);
+	g_main_loop_unref (sync_data->loop);
+	g_object_unref (sync_data->res);
+	g_free (sync_data);
 
-	 Complete the footer and print the request 
-	e_ews_message_write_footer (msg);
-
-	ews_connection_queue_request (cnc, msg, dump_response_cb, cancellable, EWS_PRIORITY_MEDIUM);
+	return;
 }
 
-void
-e_ews_connection_create_folder (EEwsConnection *cnc, GCancellable *cancellable)
-{
-	ESoapMessage *msg;
-
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "CreateFolder");
-
-	e_soap_message_start_element (msg, "ParentFolderId", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (msg, "DistinguishedFolderId", "types", NULL, "Id", "msgfolderroot");
-	e_soap_message_end_element (msg);
-
-	e_soap_message_start_element (msg, "Folders", NULL, NULL);
-	e_soap_message_start_element (msg, "Folder", "types", NULL);
-	e_ews_message_write_string_parameter (msg, "DisplayName", "types", "TestBharath");
-	e_soap_message_end_element (msg);
-	e_soap_message_end_element (msg);
-
-	e_ews_message_write_footer (msg);
-
-	ews_connection_queue_request (cnc, msg, create_folder_response_cb, cancellable, EWS_PRIORITY_HIGH);
-} */
 
 void
 e_ews_connection_resolve_names_start 	(EEwsConnection *cnc,

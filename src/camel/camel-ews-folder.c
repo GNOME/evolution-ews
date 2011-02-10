@@ -3,9 +3,6 @@
 
 /*
  * Authors:
- *  Sivaiah Nallagatla <snallagatla@novell.com>
- *  parthasarathi susarla <sparthasarathi@novell.com>
- *  Sankar P <psankar@novell.com>
  *
  *
  * Copyright (C) 1999-2008 Novell, Inc. (www.novell.com)
@@ -58,11 +55,14 @@ which needs to be better organized via functions */
 #define EWS_MAX_FETCH_COUNT 100
 #define MAX_ATTACHMENT_SIZE 1*1024*1024   /*In bytes*/
 
+#define SUMMARY_ITEM_FLAGS "item:ResponseObjects"
 #define SUMMARY_ITEM_PROPS "item:Subject item:DateTimeReceived item:DateTimeSent item:DateTimeCreated item:Size " \
-			   "item:HasAttachments item:Attachments item:Importance item:InReplyTo"
+		   "item:HasAttachments item:Importance item:InReplyTo"
 
+#define SUMMARY_MESSAGE_FLAGS SUMMARY_ITEM_FLAGS " message:IsRead"
 #define SUMMARY_MESSAGE_PROPS SUMMARY_ITEM_PROPS " message:From message:Sender message:ToRecipients message:CcRecipients " \
-			      "message:BccRecipients message:IsRead message:References message:InternetMessageId"
+		   "message:BccRecipients message:IsRead message:References message:InternetMessageId " \
+		   SUMMARY_MESSAGE_FLAGS
 
 
 #define CAMEL_EWS_FOLDER_GET_PRIVATE(obj) \
@@ -81,7 +81,6 @@ struct _CamelEwsFolderPrivate {
 };
 
 extern gint camel_application_is_exiting;
-static void ews_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data);
 
 #define d(x)
 
@@ -418,233 +417,124 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 	return folder;
 }
 
-struct _ews_sync_data {
-	gchar *sync_state;
-	CamelEwsFolder *ews_folder;
-	GSList *generic_item_ids;
-};
-
 static void
-ews_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
+sync_updated_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *updated_items, GError **error)
 {
-	EEwsConnection *cnc;
-	CamelEwsFolder *ews_folder;
-	CamelEwsFolderPrivate *priv;
-	CamelEwsStore *ews_store;
-	GSList *items_created = NULL;
-	gchar *sync_state = NULL;
-	const gchar *full_name;
-	GError *error = NULL;
-	struct _ews_sync_data *sync_data;
+	CamelFolder *folder = (CamelFolder *) ews_folder;
+	GSList *items = NULL, *l;
+	GSList *generic_item_ids = NULL, *msg_ids = NULL;
 
-	cnc = (EEwsConnection *) obj;
-	sync_data = (struct _ews_sync_data *) user_data;
-	ews_folder = sync_data->ews_folder;
-	sync_state = sync_data->sync_state;
-	priv = ews_folder->priv;
-	ews_store = (CamelEwsStore *) camel_folder_get_parent_store ((CamelFolder *) ews_folder);
-	full_name = camel_folder_get_full_name ((CamelFolder *) ews_folder);
+	
+	for (l = updated_items; l != NULL; l = g_slist_next (l)) {
+		EEwsItem *item = (EEwsItem *) l->data;
+		const EwsId *id = e_ews_item_get_id (item);
+		CamelMessageInfo *mi;
 
-	e_ews_connection_get_items_finish	(cnc, res, &items_created, &error);
-	if (error != NULL) {
-		g_warning ("Unable to get summary items %s \n", error->message);
-		
-		g_mutex_lock (priv->state_lock);
-		priv->refreshing = FALSE;
-		g_mutex_unlock (priv->state_lock);
+		/* Compare the item_type from summary as the updated items seems to 
+		   arrive as generic types while its not the case */
+		mi = camel_folder_summary_uid (folder->summary, id->id);
+		if (!mi) {
+			g_object_unref (item);
+			continue;
+		}
 
-		g_clear_error (&error);
+		/* Check if the item has really changed */
+		if (!strcmp (((CamelEwsMessageInfo *)mi)->change_key, id->change_key)) {
+			g_object_unref (item);
+			continue;
+		}
+
+		if (((CamelEwsMessageInfo *)mi)->item_type == E_EWS_ITEM_TYPE_GENERIC_ITEM)
+			generic_item_ids = g_slist_append (generic_item_ids, g_strdup (id->id));
+		else
+			msg_ids = g_slist_append (msg_ids, g_strdup (id->id));
+
+		g_object_unref (item);
+	}
+	g_slist_free (updated_items);
+
+	if (msg_ids)
+		e_ews_connection_get_items
+			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
+			 msg_ids, "IdOnly", SUMMARY_MESSAGE_FLAGS,
+			 FALSE, &items, NULL, error);
+
+	camel_ews_utils_sync_updated_items (ews_folder, items);
+	items = NULL;
+	if (*error)
 		goto exit;
+
+	if (generic_item_ids)
+		e_ews_connection_get_items
+			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
+			 generic_item_ids, "IdOnly", SUMMARY_ITEM_FLAGS,
+			 FALSE, &items, NULL, error);
+	camel_ews_utils_sync_updated_items (ews_folder, items);
+
+exit:	
+	if (msg_ids) {
+		g_slist_foreach (msg_ids, (GFunc) g_free, NULL);
+		g_slist_free (msg_ids);
 	}
 
-	camel_ews_utils_sync_items (ews_folder, items_created);
-	g_slist_free (items_created);
-
-	if (sync_data->generic_item_ids) {
-		e_ews_connection_get_items_start	(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
-							 sync_data->generic_item_ids,
-							 "IdOnly", SUMMARY_ITEM_PROPS,
-							 FALSE, ews_get_items_ready_cb, NULL, 
-							 (gpointer) sync_data);
-		g_slist_foreach (sync_data->generic_item_ids, (GFunc) g_free, NULL);
-		g_slist_free (sync_data->generic_item_ids);
-		sync_data->generic_item_ids = NULL;
-		g_object_unref (cnc);
-		return;
-	}
-	
-	camel_ews_store_summary_set_sync_state	(ews_store->summary, 
-						 full_name, 
-						 sync_state);
-	camel_ews_store_summary_save (ews_store->summary, NULL);
-
-	g_mutex_lock (priv->state_lock);
-	if (!priv->fetch_pending)
-		priv->refreshing = FALSE;
-	g_mutex_unlock (priv->state_lock);
-
-	if (priv->fetch_pending) {
-		const gchar *id;
-
-		id = camel_ews_store_summary_get_folder_id (ews_store->summary, full_name, NULL);
-		e_ews_connection_sync_folder_items_start	
-						(cnc, EWS_PRIORITY_MEDIUM,
-						 sync_state, id, 
-						 "IdOnly", NULL,
-						 EWS_MAX_FETCH_COUNT, 
-						 ews_sync_items_ready_cb,
-						 NULL, ews_folder);
-	}
-
-exit:
-	if (sync_data->generic_item_ids) {
-		g_slist_foreach (sync_data->generic_item_ids, (GFunc) g_free, NULL);
-		g_slist_free (sync_data->generic_item_ids);
-	}
-	
-	g_free (sync_state);
-	g_free (sync_data);
-	g_object_unref (cnc);
-}
-
-static void
-ews_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
-{
-	EEwsConnection *cnc;
-	CamelEwsFolder *ews_folder;
-	CamelEwsFolderPrivate *priv;
-	CamelEwsStore *ews_store;
-	GSList *items_created = NULL, *items_updated = NULL;
-	GSList *items_deleted = NULL, *l [2], *created_msg_ids = NULL;
-	GSList *generic_item_ids = NULL;
-	gchar *sync_state = NULL;
-	GError *error = NULL;
-	struct _ews_sync_data *sync_data;
-	gint total = 0, i;
-	gboolean fetch_items = FALSE;
-
-	cnc = (EEwsConnection *) obj;
-	ews_folder = (CamelEwsFolder *) user_data;
-	priv = ews_folder->priv;
-	ews_store = (CamelEwsStore *) camel_folder_get_parent_store ((CamelFolder *) ews_folder);
-
-	e_ews_connection_sync_folder_items_finish	(cnc, res, &sync_state,
-							 &items_created, &items_updated,
-							 &items_deleted, &error);
-
-
-	if (error != NULL) {
-		g_warning ("Unable to sync folder %s \n", error->message);
-
-		g_mutex_lock (priv->state_lock);
-		priv->refreshing = FALSE;
-		g_mutex_unlock (priv->state_lock);
-
-		g_clear_error (&error);
-		g_object_unref (cnc);
-		return;
-	}
-	
-	/* Sync deleted items */
-	camel_ews_utils_sync_deleted_items (ews_folder, items_deleted);
-
-	l[0] = items_created;
-	l[1] = items_updated;
-
-	for (i = 0; i < 2; i++) {
-		for (; l[i] != NULL; l[i] = g_slist_next (l[i])) {
-			EEwsItem *item = (EEwsItem *) l[i]->data;
-			const EwsId *id = e_ews_item_get_id (item);
-			EEwsItemType item_type = e_ews_item_get_item_type (item);
-
-			/* created_msg_ids are items other than generic item. We fetch them
-			   separately since the property sets vary */
-			if (item_type == E_EWS_ITEM_TYPE_GENERIC_ITEM)
-				generic_item_ids = g_slist_append (generic_item_ids, g_strdup (id->id));
-			else
-				created_msg_ids = g_slist_append (created_msg_ids, g_strdup (id->id));
-
-			fetch_items = TRUE;
-		}
-	}
-	
-	total =	g_slist_length (items_created) + 
-	 	g_slist_length (items_updated) + 
-		g_slist_length (items_deleted);
-
-
-	if (!total || !fetch_items) {
-		const gchar *full_name = camel_folder_get_full_name ((CamelFolder *) ews_folder);
-		camel_ews_store_summary_set_sync_state	(ews_store->summary, 
-							 full_name, 
-							 sync_state);
-		camel_ews_store_summary_save (ews_store->summary, NULL);
-
-		/* If all the items were deleted items, fetch for more updates */
-		if (total == EWS_MAX_FETCH_COUNT) {
-			const gchar *id;
-
-			id = camel_ews_store_summary_get_folder_id (ews_store->summary, full_name, NULL);
-			e_ews_connection_sync_folder_items_start	
-						(cnc, EWS_PRIORITY_MEDIUM,
-						 sync_state, id, 
-						 "IdOnly", NULL,
-						 EWS_MAX_FETCH_COUNT, 
-						 ews_sync_items_ready_cb,
-						 NULL, ews_folder);
-		}
-
-		goto exit;	
-	}
-
-	if (total == EWS_MAX_FETCH_COUNT)
-		priv->fetch_pending = TRUE;
-	else
-		priv->fetch_pending = FALSE;
-
-	sync_data = g_new0 (struct _ews_sync_data, 1);
-	sync_data->sync_state = g_strdup (sync_state);
-	sync_data->ews_folder = ews_folder;
-	
-	/* We first fetch the message/meeting related items and then generic items */
-	if (created_msg_ids) {
-		e_ews_connection_get_items_start	
-						(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
-						 created_msg_ids,
-						 "IdOnly", SUMMARY_MESSAGE_PROPS,
-						 FALSE, ews_get_items_ready_cb, NULL, 
-						 (gpointer) sync_data);
-
-		sync_data->generic_item_ids = generic_item_ids;
-	} else {
-		e_ews_connection_get_items_start	
-						(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
-						 generic_item_ids,
-						 "IdOnly", SUMMARY_ITEM_PROPS,
-						 FALSE, ews_get_items_ready_cb, NULL, 
-						 (gpointer) sync_data);
-	
+	if (generic_item_ids) {
 		g_slist_foreach (generic_item_ids, (GFunc) g_free, NULL);
 		g_slist_free (generic_item_ids);
 	}
+}
 
-exit:	
-	if (items_created)
-		g_slist_free (items_created);
+static void
+sync_created_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *created_items, GError **error)
+{
+	GSList *items = NULL, *l;
+	GSList *generic_item_ids = NULL, *msg_ids = NULL;
 	
-	if (items_updated)
-		g_slist_free (items_updated);
+	for (l = created_items; l != NULL; l = g_slist_next (l)) {
+		EEwsItem *item = (EEwsItem *) l->data;
+		const EwsId *id = e_ews_item_get_id (item);
+		EEwsItemType item_type = e_ews_item_get_item_type (item);
 
-	if (items_deleted)
-		g_slist_free (items_deleted);
+		/* created_msg_ids are items other than generic item. We fetch them
+		   separately since the property sets vary */
+		if (item_type == E_EWS_ITEM_TYPE_GENERIC_ITEM)
+			generic_item_ids = g_slist_append (generic_item_ids, g_strdup (id->id));
+		else
+			msg_ids = g_slist_append (msg_ids, g_strdup (id->id));
+
+		g_object_unref (item);
+	}
+	g_slist_free (created_items);
 	
-	if (created_msg_ids) {
-		g_slist_foreach (created_msg_ids, (GFunc) g_free, NULL);
-		g_slist_free (created_msg_ids);
+	if (msg_ids)
+		e_ews_connection_get_items
+			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
+			 msg_ids, "IdOnly", SUMMARY_MESSAGE_PROPS,
+			 FALSE, &items, NULL, error);
+
+	if (*error)
+		goto exit;
+	
+	camel_ews_utils_sync_created_items (ews_folder, items);
+	items = NULL;
+
+	if (generic_item_ids)
+		e_ews_connection_get_items
+			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
+			 generic_item_ids, "IdOnly", SUMMARY_ITEM_PROPS,
+			 FALSE, &items, NULL, error);
+	
+	camel_ews_utils_sync_created_items (ews_folder, items);
+
+exit:
+	if (msg_ids) {
+		g_slist_foreach (msg_ids, (GFunc) g_free, NULL);
+		g_slist_free (msg_ids);
 	}
 
-	g_free (sync_state);
-	g_object_unref (cnc);
+	if (generic_item_ids) {
+		g_slist_foreach (generic_item_ids, (GFunc) g_free, NULL);
+		g_slist_free (generic_item_ids);
+	}
 }
 
 static gboolean
@@ -654,7 +544,10 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 	CamelEwsFolderPrivate *priv;
 	EEwsConnection *cnc;
 	CamelEwsStore *ews_store;
-	const gchar *full_name, *sync_state, *id;
+	const gchar *full_name, *id;
+	gchar *sync_state;
+	gint total = 0;
+	GError *rerror = NULL;
 
 	full_name = camel_folder_get_full_name (folder);
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
@@ -667,34 +560,88 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 
 	g_mutex_lock (priv->state_lock);
 
-	if (priv->refreshing)
-		goto exit;
+	if (priv->refreshing) {
+		g_mutex_unlock (priv->state_lock);
+		return TRUE;	
+	}
 
 	priv->refreshing = TRUE;
+	g_mutex_unlock (priv->state_lock);
 	
 	cnc = camel_ews_store_get_connection (ews_store);
-	sync_state = camel_ews_store_summary_get_sync_state	
-						(ews_store->summary,
-						 full_name, NULL);
 	id = camel_ews_store_summary_get_folder_id
 						(ews_store->summary,
 						 full_name, NULL);
+
 	/* Sync folder items does not return the fileds ToRecipients, 
 	   CCRecipients. With the item_type unknown, its not possible
 	   to fetch the right properties which are valid for an item type.
 	   Due to these reasons we just get the item ids and its type in
 	   SyncFolderItem request and fetch the item using the 
 	   GetItem request. */
-	e_ews_connection_sync_folder_items_start	
-						(cnc, EWS_PRIORITY_MEDIUM,
-						 sync_state, id, 
-						 "IdOnly", NULL,
-						 EWS_MAX_FETCH_COUNT, 
-						 ews_sync_items_ready_cb,
-						 NULL, ews_folder);
+	do
+	{
+		GSList *items_created = NULL, *items_updated = NULL;
+		GSList *items_deleted = NULL;
 
-exit:
+		sync_state = (gchar *) camel_ews_store_summary_get_sync_state	
+							(ews_store->summary,
+							 full_name, NULL);
+		e_ews_connection_sync_folder_items	
+							(cnc, EWS_PRIORITY_MEDIUM,
+							 &sync_state, id, 
+							 "IdOnly", NULL,
+							 EWS_MAX_FETCH_COUNT, &items_created,
+							 &items_updated, &items_deleted, 
+							 cancellable, &rerror);
+
+		if (rerror)
+			break;
+
+		total = g_slist_length (items_created) +
+			g_slist_length (items_updated) +
+			g_slist_length (items_deleted);
+
+		if (items_deleted)
+			camel_ews_utils_sync_deleted_items (ews_folder, items_deleted);
+
+		if (items_created)
+			sync_created_items (ews_folder, cnc, items_created, &rerror);
+	
+		if (rerror) {
+			if (items_updated) {
+				g_slist_foreach (items_updated, (GFunc) g_object_unref, NULL);
+				g_slist_free (items_updated);
+			}
+
+			break;
+		}
+
+		if (items_updated)
+			sync_updated_items (ews_folder, cnc, items_updated, &rerror);
+	
+		if (rerror)
+			break;
+
+		camel_ews_store_summary_set_sync_state	(ews_store->summary, 
+							 full_name, 
+							 sync_state);
+		camel_ews_store_summary_save (ews_store->summary, NULL);
+
+		g_free (sync_state);
+		sync_state = NULL;
+	} while (!rerror && total == EWS_MAX_FETCH_COUNT);
+	
+	if (rerror)
+		g_propagate_error (error, rerror);
+
+	g_mutex_lock (priv->state_lock);
+	priv->refreshing = FALSE;
 	g_mutex_unlock (priv->state_lock);
+
+	g_free (sync_state);
+	g_object_unref (cnc);
+
 	return TRUE;
 }
 

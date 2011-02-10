@@ -108,11 +108,19 @@ void		e_ews_connection_sync_folder_items_finish
 						 GSList **items_updated,
 						 GSList **items_deleted,
 						 GError **error);
-void		e_ews_connection_sync_folder_items 
-						(EEwsConnection *cnc, 
-						 const gchar *sync_state, 
-						 const gchar *folder_name, 
-						 GCancellable *cancellable);
+void		e_ews_connection_sync_folder_items	
+						(EEwsConnection *cnc,
+						 gint pri,
+						 gchar **sync_state,
+						 const gchar *fid,
+						 const gchar *default_props,
+						 const gchar *additional_props,
+						 guint max_entries,
+						 GSList **items_created,
+						 GSList **items_updated,
+						 GSList **items_deleted,
+						 GCancellable *cancellable,
+						 GError **error);
 
 /* Get folder items */
 void		e_ews_connection_get_items_start 
