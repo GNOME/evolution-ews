@@ -134,13 +134,13 @@ void		e_ews_connection_get_items_start
 						 GCancellable *cancellable,
 						 gpointer user_data);
 
-void		e_ews_connection_get_items_finish 
+gboolean	e_ews_connection_get_items_finish 
 						(EEwsConnection *cnc, 
 						 GAsyncResult *result,
 						 GSList **items,
 						 GError **error);
 
-void		e_ews_connection_get_items	(EEwsConnection *cnc,
+gboolean	e_ews_connection_get_items	(EEwsConnection *cnc,
 						 gint pri, 
 						 GSList *ids,
 						 const gchar *default_props,

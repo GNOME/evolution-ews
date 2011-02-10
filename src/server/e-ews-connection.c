@@ -1477,7 +1477,7 @@ e_ews_connection_get_items_start	(EEwsConnection *cnc,
 	ews_connection_queue_request (cnc, msg, get_item_response_cb, pri, cancellable, simple);
 }
 
-void
+gboolean
 e_ews_connection_get_items_finish	(EEwsConnection *cnc,
 					 GAsyncResult *result,
 					 GSList **items,
@@ -1486,22 +1486,23 @@ e_ews_connection_get_items_finish	(EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
-	g_return_if_fail (
+	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_get_items_start));
+		result, G_OBJECT (cnc), e_ews_connection_get_items_start),
+		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
 	async_data = g_simple_async_result_get_op_res_gpointer (simple);
 
 	if (g_simple_async_result_propagate_error (simple, error))
-		return;
+		return FALSE;
 
 	*items = async_data->items;
 	
-	return;
+	return TRUE;
 }
 
-void		
+gboolean		
 e_ews_connection_get_items	(EEwsConnection *cnc,
 				 gint pri, 
 				 GSList *ids,
@@ -1513,6 +1514,7 @@ e_ews_connection_get_items	(EEwsConnection *cnc,
 				 GError **error)
 {
 	EwsSyncData *sync_data;
+	gboolean result;
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->context = g_main_context_new ();
@@ -1528,13 +1530,15 @@ e_ews_connection_get_items	(EEwsConnection *cnc,
 	g_main_loop_run (sync_data->loop);
 	g_main_context_pop_thread_default (sync_data->context);
 	
-	e_ews_connection_get_items_finish	(cnc, 
-						 sync_data->res, 
-						 items, 
-						 error);
+	result = e_ews_connection_get_items_finish (cnc, 
+						    sync_data->res, 
+						    items, 
+						    error);
 	
 	g_main_context_unref (sync_data->context);
 	g_main_loop_unref (sync_data->loop);
 	g_object_unref (sync_data->res);
 	g_free (sync_data);
+
+	return result;
 }

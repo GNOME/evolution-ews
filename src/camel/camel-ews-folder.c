@@ -188,11 +188,11 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 
 	mime_content = e_ews_item_get_mime_content (items->data);
 	tmp_stream = camel_data_cache_add (ews_folder->cache, "tmp", uid, error);
-	if (error && *error)
+	if (!tmp_stream)
 		goto exit;
 
-	camel_stream_write_string (tmp_stream, mime_content, EVO3(cancellable,) error);
-	if (error && *error)
+	if (camel_stream_write_string (tmp_stream, mime_content,
+				       EVO3(cancellable,) error) < 0)
 		goto exit;
 
 	if (camel_stream_flush (tmp_stream, EVO3(cancellable,) error) == 0 && camel_stream_close (tmp_stream, EVO3(cancellable,) error) == 0) {
