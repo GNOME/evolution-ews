@@ -648,7 +648,8 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 
 static gboolean
 ews_append_message_sync (CamelFolder *folder, CamelMimeMessage *message,
-	 		 CamelMessageInfo *info, gchar **appended_uid,
+	 		 EVO2(const) CamelMessageInfo *info,
+			 gchar **appended_uid,
 	 		 EVO3(GCancellable *cancellable,) GError **error)
 {
 	g_print ("\n append_message not implemented");
@@ -661,8 +662,9 @@ static gboolean
 ews_transfer_messages_to_sync	(CamelFolder *source, 
 				 GPtrArray *uids,
 				 CamelFolder *destination, 
+				 EVO2(GPtrArray **transferred_uids,)
 				 gboolean delete_originals, 
-				 GPtrArray **transferred_uids,
+				 EVO3(GPtrArray **transferred_uids,)
 				 EVO3(GCancellable *cancellable,) 
 				 GError **error)
 {
