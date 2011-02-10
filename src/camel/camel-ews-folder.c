@@ -418,7 +418,7 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 }
 
 static void
-sync_updated_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *updated_items, GError **error)
+sync_updated_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *updated_items, GCancellable *cancellable, GError **error)
 {
 	CamelFolder *folder = (CamelFolder *) ews_folder;
 	GSList *items = NULL, *l;
@@ -457,7 +457,7 @@ sync_updated_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *upd
 		e_ews_connection_get_items
 			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
 			 msg_ids, "IdOnly", SUMMARY_MESSAGE_FLAGS,
-			 FALSE, &items, NULL, error);
+			 FALSE, &items, cancellable, error);
 
 	camel_ews_utils_sync_updated_items (ews_folder, items);
 	items = NULL;
@@ -468,7 +468,7 @@ sync_updated_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *upd
 		e_ews_connection_get_items
 			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
 			 generic_item_ids, "IdOnly", SUMMARY_ITEM_FLAGS,
-			 FALSE, &items, NULL, error);
+			 FALSE, &items, cancellable, error);
 	camel_ews_utils_sync_updated_items (ews_folder, items);
 
 exit:	
@@ -484,7 +484,7 @@ exit:
 }
 
 static void
-sync_created_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *created_items, GError **error)
+sync_created_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *created_items, GCancellable *cancellable, GError **error)
 {
 	GSList *items = NULL, *l;
 	GSList *generic_item_ids = NULL, *msg_ids = NULL;
@@ -509,7 +509,7 @@ sync_created_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *cre
 		e_ews_connection_get_items
 			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
 			 msg_ids, "IdOnly", SUMMARY_MESSAGE_PROPS,
-			 FALSE, &items, NULL, error);
+			 FALSE, &items, cancellable, error);
 
 	if (*error)
 		goto exit;
@@ -521,7 +521,7 @@ sync_created_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *cre
 		e_ews_connection_get_items
 			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
 			 generic_item_ids, "IdOnly", SUMMARY_ITEM_PROPS,
-			 FALSE, &items, NULL, error);
+			 FALSE, &items, cancellable, error);
 	
 	camel_ews_utils_sync_created_items (ews_folder, items);
 
@@ -548,6 +548,7 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 	gchar *sync_state;
 	gint total = 0;
 	GError *rerror = NULL;
+	EVO2(GCancellable *cancellable = NULL);
 
 	full_name = camel_folder_get_full_name (folder);
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
@@ -606,7 +607,7 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 			camel_ews_utils_sync_deleted_items (ews_folder, items_deleted);
 
 		if (items_created)
-			sync_created_items (ews_folder, cnc, items_created, &rerror);
+			sync_created_items (ews_folder, cnc, items_created, cancellable, &rerror);
 	
 		if (rerror) {
 			if (items_updated) {
@@ -618,7 +619,7 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 		}
 
 		if (items_updated)
-			sync_updated_items (ews_folder, cnc, items_updated, &rerror);
+			sync_updated_items (ews_folder, cnc, items_updated, cancellable, &rerror);
 	
 		if (rerror)
 			break;
@@ -647,8 +648,8 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 
 static gboolean
 ews_append_message_sync (CamelFolder *folder, CamelMimeMessage *message,
-		const CamelMessageInfo *info, gchar **appended_uid,
-		EVO3(GCancellable *cancellable,) GError **error)
+	 		 CamelMessageInfo *info, gchar **appended_uid,
+	 		 EVO3(GCancellable *cancellable,) GError **error)
 {
 	g_print ("\n append_message not implemented");
 
@@ -660,8 +661,8 @@ static gboolean
 ews_transfer_messages_to_sync	(CamelFolder *source, 
 				 GPtrArray *uids,
 				 CamelFolder *destination, 
-				 GPtrArray **transferred_uids,
 				 gboolean delete_originals, 
+				 GPtrArray **transferred_uids,
 				 EVO3(GCancellable *cancellable,) 
 				 GError **error)
 {
