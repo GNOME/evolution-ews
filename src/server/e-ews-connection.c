@@ -173,8 +173,10 @@ comp_func (gconstpointer a, gconstpointer b)
 
 	if (node1->pri > node2->pri)
 		return 1;
-	else
+	else if (node1->pri < node2->pri)
 		return -1;
+	else
+		return 0;
 }
 
 static gboolean
@@ -211,17 +213,6 @@ ews_get_response_status (ESoapParameter *param, GError **error)
 	g_free (value);
 
 	return ret;
-}
-
-
-static void
-soup_request_unqueued (SoupSession *session, SoupMessage *msg, gpointer user_data)
-{
-	EEwsConnection *cnc;
-
-	cnc = E_EWS_CONNECTION (user_data);
-
-	ews_next_request (cnc);
 }
 
 static void
@@ -281,6 +272,8 @@ ews_active_job_done (EEwsConnection *cnc, EWSNode *ews_node)
 	QUEUE_UNLOCK (cnc);
 
 	g_free (ews_node);
+	
+	g_signal_emit	(cnc, signals[NEXT_REQUEST], 0);
 	return;
 }
 
@@ -705,7 +698,6 @@ e_ews_connection_dispose (GObject *object)
 	}
 
 	g_signal_handlers_disconnect_by_func	(priv->soup_session, ews_connection_authenticate, cnc);
-	g_signal_handlers_disconnect_by_func 	(priv->soup_session, soup_request_unqueued, cnc);
 
 	if (priv->soup_session) {
 		g_object_unref (priv->soup_session);
@@ -799,7 +791,6 @@ e_ews_connection_init (EEwsConnection *cnc)
 
 	g_signal_connect (cnc, "next_request", G_CALLBACK (ews_next_request), NULL);
 	g_signal_connect (priv->soup_session, "authenticate", G_CALLBACK(ews_connection_authenticate), cnc);
-	g_signal_connect (priv->soup_session, "request-unqueued", G_CALLBACK (soup_request_unqueued), cnc);
 }
 
 static void 

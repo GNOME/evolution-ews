@@ -319,12 +319,6 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store, const gchar *fname)
 	fi->flags = camel_ews_store_summary_get_folder_flags	(ews_summary,
 			fi->full_name,
 			NULL);
-	fi->unread = camel_ews_store_summary_get_folder_unread	(ews_summary,
-			fi->full_name,
-			NULL);
-	fi->total = camel_ews_store_summary_get_folder_total	(ews_summary,
-			fi->full_name,
-			NULL);
 
 	g_free (url);
 
