@@ -71,7 +71,7 @@ gchar *		e_ews_autodiscover_ws_url	(const gchar *email,
 						 const gchar *password, 
 						 GError **error);
 /* Create Folder */
-void		e_ews_connection_create_folder	(EEwsConnection *cnc, 
+gboolean	e_ews_connection_create_folder	(EEwsConnection *cnc, 
 						 GCancellable *cancellable);
 
 void		e_ews_connection_create_folder_start
@@ -81,7 +81,7 @@ void		e_ews_connection_create_folder_start
 						 GCancellable *cancellable,
 						 gpointer user_data);
 
-void		e_ews_connection_create_folder_finish 
+gboolean	e_ews_connection_create_folder_finish 
 						(EEwsConnection *cnc, 
 						 GAsyncResult *result, 
 						 guint folder_id,
@@ -100,7 +100,7 @@ void		e_ews_connection_sync_folder_items_start
 						 GCancellable *cancellable,
 						 gpointer user_data);
 
-void		e_ews_connection_sync_folder_items_finish 
+gboolean	e_ews_connection_sync_folder_items_finish 
 						(EEwsConnection *cnc, 
 						 GAsyncResult *result,
 					 	 gchar **sync_state, 
@@ -108,7 +108,7 @@ void		e_ews_connection_sync_folder_items_finish
 						 GSList **items_updated,
 						 GSList **items_deleted,
 						 GError **error);
-void		e_ews_connection_sync_folder_items	
+gboolean	e_ews_connection_sync_folder_items	
 						(EEwsConnection *cnc,
 						 gint pri,
 						 gchar **sync_state,
@@ -151,7 +151,7 @@ gboolean	e_ews_connection_get_items	(EEwsConnection *cnc,
 						 GError **error);
 
 /* Sync folder hierarchy */
-void		e_ews_connection_sync_folder_hierarchy 
+gboolean	e_ews_connection_sync_folder_hierarchy 
 						(EEwsConnection *cnc, 
 						 gint pri, 
 						 gchar **sync_state, 
@@ -167,7 +167,7 @@ void		e_ews_connection_sync_folder_hierarchy_start
 						 GAsyncReadyCallback cb, 
 						 GCancellable *cancellable,
 						 gpointer user_data);
-void		e_ews_connection_sync_folder_hierarchy_finish 
+gboolean	e_ews_connection_sync_folder_hierarchy_finish 
 						(EEwsConnection *cnc, 
 						 GAsyncResult *result, 
 						 gchar **sync_state, 
@@ -183,7 +183,7 @@ void		e_ews_connection_resolve_names_start
 						 GCancellable *cancellable,
 						 gpointer user_data);
 
-void		e_ews_connection_resolve_names_finish 
+gboolean	e_ews_connection_resolve_names_finish 
 						(EEwsConnection *cnc, 
 						 GAsyncResult *result, 
 						 GError **error);

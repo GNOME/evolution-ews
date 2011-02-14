@@ -1126,7 +1126,7 @@ e_ews_connection_sync_folder_items_start	(EEwsConnection *cnc,
 	ews_connection_queue_request (cnc, msg, sync_folder_items_response_cb, pri, cancellable, simple);
 }
 
-void
+gboolean
 e_ews_connection_sync_folder_items_finish	(EEwsConnection *cnc,
 						 GAsyncResult *result,
 					 	 gchar **sync_state,
@@ -1138,25 +1138,26 @@ e_ews_connection_sync_folder_items_finish	(EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
-	g_return_if_fail (
+	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_sync_folder_items_start));
+		result, G_OBJECT (cnc), e_ews_connection_sync_folder_items_start),
+		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
 	async_data = g_simple_async_result_get_op_res_gpointer (simple);
 
 	if (g_simple_async_result_propagate_error (simple, error))
-		return;
+		return FALSE;
 	
 	*sync_state = async_data->sync_state;
 	*items_created = async_data->items_created;
 	*items_updated = async_data->items_updated;
 	*items_deleted = async_data->items_deleted;
 
-	return;
+	return TRUE;
 }
 
-void
+gboolean
 e_ews_connection_sync_folder_items	(EEwsConnection *cnc,
 					 gint pri,
 					 gchar **sync_state,
@@ -1171,6 +1172,7 @@ e_ews_connection_sync_folder_items	(EEwsConnection *cnc,
 					 GError **error)
 {
 	EwsSyncData *sync_data;
+	gboolean result;
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->context = g_main_context_new ();
@@ -1186,19 +1188,19 @@ e_ews_connection_sync_folder_items	(EEwsConnection *cnc,
 	g_main_loop_run (sync_data->loop);
 	g_main_context_pop_thread_default (sync_data->context);
 
-	e_ews_connection_sync_folder_items_finish	(cnc, sync_data->res,
-							 sync_state,
-							 items_created,
-							 items_updated,
-							 items_deleted,
-							 error);
+	result = e_ews_connection_sync_folder_items_finish (cnc, sync_data->res,
+							    sync_state,
+							    items_created,
+							    items_updated,
+							    items_deleted,
+							    error);
 
 	g_main_context_unref (sync_data->context);
 	g_main_loop_unref (sync_data->loop);
 	g_object_unref (sync_data->res);
 	g_free (sync_data);
 
-	return;
+	return result;
 }
 
 
@@ -1231,7 +1233,7 @@ e_ews_connection_resolve_names_start 	(EEwsConnection *cnc,
 	ews_connection_queue_request (cnc, msg, dump_response_cb, pri, cancellable, simple);
 }
 
-void
+gboolean
 e_ews_connection_resolve_names_finish	(EEwsConnection *cnc,
 					 GAsyncResult *result,
 					 GError **error)
@@ -1239,17 +1241,18 @@ e_ews_connection_resolve_names_finish	(EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
-	g_return_if_fail (
+	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_resolve_names_start));
+		result, G_OBJECT (cnc), e_ews_connection_resolve_names_start),
+		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
 	async_data = g_simple_async_result_get_op_res_gpointer (simple);
 
 	if (g_simple_async_result_propagate_error (simple, error))
-		return;
+		return FALSE;
 	
-	return;
+	return TRUE;
 }
 
 void 
@@ -1290,7 +1293,7 @@ e_ews_connection_create_folder_start	(EEwsConnection *cnc,
 }
 
 
-void
+gboolean
 e_ews_connection_create_folder_finish	(EEwsConnection *cnc,
 					 GAsyncResult *result,
 					 guint folder_id,
@@ -1299,17 +1302,18 @@ e_ews_connection_create_folder_finish	(EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
-	g_return_if_fail (
+	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_create_folder_start));
+		result, G_OBJECT (cnc), e_ews_connection_create_folder_start),
+		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
 	async_data = g_simple_async_result_get_op_res_gpointer (simple);
 
 	if (g_simple_async_result_propagate_error (simple, error))
-		return;
+		return FALSE;
 	
-	return;
+	return TRUE;
 }
 
 void 
@@ -1347,7 +1351,7 @@ e_ews_connection_sync_folder_hierarchy_start	(EEwsConnection *cnc,
 }
 
 
-void
+gboolean
 e_ews_connection_sync_folder_hierarchy_finish	(EEwsConnection *cnc,
 						 GAsyncResult *result,
 					 	 gchar **sync_state,
@@ -1359,25 +1363,26 @@ e_ews_connection_sync_folder_hierarchy_finish	(EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
-	g_return_if_fail (
+	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_sync_folder_hierarchy_start));
+		result, G_OBJECT (cnc), e_ews_connection_sync_folder_hierarchy_start),
+		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
 	async_data = g_simple_async_result_get_op_res_gpointer (simple);
 
 	if (g_simple_async_result_propagate_error (simple, error))
-		return;
+		return FALSE;
 	
 	*sync_state = async_data->sync_state;
 	*folders_created = async_data->folders_created;
 	*folders_updated = async_data->folders_updated;
 	*folders_deleted = async_data->folders_deleted;
 
-	return;
+	return TRUE;
 }
 
-void
+gboolean
 e_ews_connection_sync_folder_hierarchy	(EEwsConnection *cnc,
 					 gint pri,
 					 gchar **sync_state,
@@ -1388,6 +1393,7 @@ e_ews_connection_sync_folder_hierarchy	(EEwsConnection *cnc,
 					 GError **error)
 {
 	EwsSyncData *sync_data;
+	gboolean result;
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->context = g_main_context_new ();
@@ -1401,19 +1407,19 @@ e_ews_connection_sync_folder_hierarchy	(EEwsConnection *cnc,
 	g_main_loop_run (sync_data->loop);
 	g_main_context_pop_thread_default (sync_data->context);
 
-	e_ews_connection_sync_folder_hierarchy_finish	(cnc, sync_data->res,
-							 sync_state,
-							 folders_created,
-							 folders_updated,
-							 folders_deleted,
-							 error);
+	result = e_ews_connection_sync_folder_hierarchy_finish (cnc, sync_data->res,
+								sync_state,
+								folders_created,
+								folders_updated,
+								folders_deleted,
+								error);
 
 	g_main_context_unref (sync_data->context);
 	g_main_loop_unref (sync_data->loop);
 	g_object_unref (sync_data->res);
 	g_free (sync_data);
 
-	return;
+	return result;
 }
 
 void
