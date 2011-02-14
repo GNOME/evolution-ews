@@ -232,7 +232,7 @@ ews_next_request (EEwsConnection *cnc)
 	
 	node = (EWSNode *) l->data;
 
-	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) == 1)) {
+	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1)) {
 		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (node->msg)->request_body));
 		/* print request's body */
 		printf ("\n The request headers");
@@ -396,7 +396,7 @@ create_folder_response_cb (SoupSession *session, SoupMessage *msg, gpointer data
 		goto exit;
 	}
 
-	if (response && g_getenv ("EWS_DEBUG")) {
+	if (response && g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1)) {
 		/* README: The stdout can be replaced with Evolution's
 		Logging framework also */
 
@@ -453,7 +453,7 @@ sync_hierarchy_response_cb (SoupSession *session, SoupMessage *msg, gpointer dat
 		goto exit;	
 	}
 
-	if (response && g_getenv ("EWS_DEBUG"))
+	if (response && g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1))
 		e_soap_response_dump_response (response, stdout);
 
 	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
@@ -546,7 +546,7 @@ sync_folder_items_response_cb (SoupSession *session, SoupMessage *msg, gpointer 
 		goto exit;	
 	}
 
-	if (response && g_getenv ("EWS_DEBUG"))
+	if (response && g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1))
 		e_soap_response_dump_response (response, stdout);
 
 	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
@@ -638,7 +638,7 @@ get_item_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 		goto exit;
 	}
 
-	if (response && g_getenv ("EWS_DEBUG"))
+	if (response && g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1))
 		e_soap_response_dump_response (response, stdout);
 
 	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
@@ -787,6 +787,14 @@ e_ews_connection_init (EEwsConnection *cnc)
 
 	/* create the SoupSession for this connection */
 	priv->soup_session = soup_session_async_new_with_options (SOUP_SESSION_USE_NTLM, TRUE, NULL);
+
+        if (getenv("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 2)) {
+                SoupLogger *logger;
+                logger = soup_logger_new(SOUP_LOGGER_LOG_BODY, -1);
+                soup_session_add_feature(priv->soup_session, SOUP_SESSION_FEATURE(logger));
+        }
+
+
 	g_static_rec_mutex_init (&priv->queue_lock);
 
 	g_signal_connect (cnc, "next_request", G_CALLBACK (ews_next_request), NULL);
@@ -919,7 +927,7 @@ e_ews_autodiscover_ws_send(gchar *url, const gchar *email,
 				 (gchar *)buf->buffer->content,
 				 buf->buffer->use);
 				 
-	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) == 1)) {
+	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1)) {
 		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->request_body));
 		/* print request's body */
 		printf ("\n The request headers");
@@ -991,7 +999,7 @@ e_ews_autodiscover_ws_url (const gchar *email, const gchar *password, GError **e
 		goto failed;
 	}
 
-	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) == 1)){
+	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1)) {
 		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->response_body));
 		/* print response body */
 		printf ("\n The response headers");
