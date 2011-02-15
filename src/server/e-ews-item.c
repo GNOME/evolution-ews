@@ -281,7 +281,7 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 
 		name = e_soap_parameter_get_name (subparam);
 
-		/* The order is maintained according the order in soap response */
+		/* The order is maintained according to the order in soap response */
 		if (!g_ascii_strcasecmp (name, "MimeContent")) {
 			guchar *data;
 			gsize data_len = 0;

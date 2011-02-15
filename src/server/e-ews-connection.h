@@ -70,23 +70,6 @@ EEwsConnection *
 gchar *		e_ews_autodiscover_ws_url	(const gchar *email,
 						 const gchar *password, 
 						 GError **error);
-/* Create Folder */
-gboolean	e_ews_connection_create_folder	(EEwsConnection *cnc, 
-						 GCancellable *cancellable);
-
-void		e_ews_connection_create_folder_start
-						(EEwsConnection *cnc, 
-						 gint pri, 
-						 GAsyncReadyCallback cb, 
-						 GCancellable *cancellable,
-						 gpointer user_data);
-
-gboolean	e_ews_connection_create_folder_finish 
-						(EEwsConnection *cnc, 
-						 GAsyncResult *result, 
-						 guint folder_id,
-						 GError **error);
-
 /* Sync folder items */
 void		e_ews_connection_sync_folder_items_start 
 						(EEwsConnection *cnc, 
@@ -174,18 +157,6 @@ gboolean	e_ews_connection_sync_folder_hierarchy_finish
 						 GSList **folders_created,
 						 GSList **folders_updated,
 						 GSList **folders_deleted,
-						 GError **error);
-void		e_ews_connection_resolve_names_start
-						(EEwsConnection *cnc,
-						 gint pri,
-						 const gchar *resolve_name,
-						 GAsyncReadyCallback cb,
-						 GCancellable *cancellable,
-						 gpointer user_data);
-
-gboolean	e_ews_connection_resolve_names_finish 
-						(EEwsConnection *cnc, 
-						 GAsyncResult *result, 
 						 GError **error);
 
 G_END_DECLS

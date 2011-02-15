@@ -43,7 +43,8 @@ static GHashTable *loaded_connections_permissions = NULL;
 static void ews_next_request (EEwsConnection *cnc);
 static gint comp_func (gconstpointer a, gconstpointer b);
 static GQuark ews_connection_error_quark (void);
-typedef void (*response_cb) (SoupSession *session, SoupMessage *msg, gpointer user_data);
+typedef void (*response_cb) (ESoapResponse *response, gpointer data);
+static void ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data);
 static void 
 ews_connection_authenticate	(SoupSession *sess, SoupMessage *msg,
 				 SoupAuth *auth, gboolean retrying, 
@@ -73,7 +74,7 @@ enum {
 
 static guint signals[LAST_SIGNAL];
 
-typedef struct _EWSNode EWSNode;
+typedef struct _EwsNode EwsNode;
 typedef struct _EwsAsyncData EwsAsyncData;
 
 struct _EwsAsyncData {
@@ -89,7 +90,7 @@ struct _EwsAsyncData {
 	gchar *sync_state;
 };
 
-struct _EWSNode {
+struct _EwsNode {
 	ESoapMessage *msg;
 	EEwsConnection *cnc;
 	GSimpleAsyncResult *simple;
@@ -140,12 +141,12 @@ ews_sync_reply_cb	(GObject *object,
   g_main_loop_quit (sync_data->loop);
 }
 
-static EWSNode *
+static EwsNode *
 ews_node_new ()
 {
-	EWSNode *node;
+	EwsNode *node;
 
-	node = g_new0 (EWSNode, 1);
+	node = g_new0 (EwsNode, 1);
 	return node;
 }
 
@@ -168,8 +169,8 @@ autodiscover_parse_protocol(xmlNode *node)
 static gint
 comp_func (gconstpointer a, gconstpointer b)
 {
-	EWSNode *node1 = (EWSNode *) a;
-	EWSNode *node2 = (EWSNode *) b;
+	EwsNode *node1 = (EwsNode *) a;
+	EwsNode *node2 = (EwsNode *) b;
 
 	if (node1->pri > node2->pri)
 		return 1;
@@ -219,7 +220,7 @@ static void
 ews_next_request (EEwsConnection *cnc)
 {
 	GSList *l;
-	EWSNode *node;
+	EwsNode *node;
 
 	QUEUE_LOCK (cnc);
 
@@ -230,7 +231,7 @@ ews_next_request (EEwsConnection *cnc)
 		return;
 	}
 	
-	node = (EWSNode *) l->data;
+	node = (EwsNode *) l->data;
 
 	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1)) {
 		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (node->msg)->request_body));
@@ -247,7 +248,7 @@ ews_next_request (EEwsConnection *cnc)
 	/* Add to active job queue */
 	cnc->priv->active_job_queue = g_slist_append (cnc->priv->active_job_queue, node);
 	
-	soup_session_queue_message (cnc->priv->soup_session, SOUP_MESSAGE (node->msg), node->cb, node);
+	soup_session_queue_message (cnc->priv->soup_session, SOUP_MESSAGE (node->msg), ews_response_cb, node);
 
 	QUEUE_UNLOCK (cnc);
 }
@@ -261,7 +262,7 @@ ews_next_request (EEwsConnection *cnc)
  * Returns: 
  **/
 static void
-ews_active_job_done (EEwsConnection *cnc, EWSNode *ews_node)
+ews_active_job_done (EEwsConnection *cnc, EwsNode *ews_node)
 {
 	QUEUE_LOCK (cnc);
 
@@ -272,46 +273,42 @@ ews_active_job_done (EEwsConnection *cnc, EWSNode *ews_node)
 	QUEUE_UNLOCK (cnc);
 
 	g_free (ews_node);
-	
 	g_signal_emit	(cnc, signals[NEXT_REQUEST], 0);
-	return;
 }
 
 static void 
 ews_cancel_request (GCancellable *cancellable,
 		   gpointer user_data)
 {
-	EWSNode *node = user_data;
+	EwsNode *node = user_data;
 	EEwsConnection *cnc = node->cnc;
 	GSimpleAsyncResult *simple = node->simple;
 	ESoapMessage *msg = node->msg;
 	GSList *found;
 
-	g_print ("\nCanceled this request\n");
-
 	QUEUE_LOCK (cnc);
 	found = g_slist_find (cnc->priv->active_job_queue, node);
 	QUEUE_UNLOCK (cnc);
 
+	g_simple_async_result_set_error	(simple,
+			EWS_CONNECTION_ERROR,
+			ERROR_CANCELLED,
+			_("Operation Cancelled"));
 	if (found)
 		soup_session_cancel_message (cnc->priv->soup_session, SOUP_MESSAGE (msg), SOUP_STATUS_CANCELLED);
 	else {
 		QUEUE_LOCK (cnc);
 		cnc->priv->jobs = g_slist_remove (cnc->priv->jobs, (gconstpointer) node);
 		QUEUE_UNLOCK (cnc);
-	}
 
-	g_simple_async_result_set_error	(simple,
-					 EWS_CONNECTION_ERROR,
-					 ERROR_CANCELLED,
-					 _("Operation Cancelled"));
-	g_simple_async_result_complete_in_idle (simple);
+		ews_response_cb (cnc->priv->soup_session, SOUP_MESSAGE (msg), node);
+	}
 }
 
 static void
 ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_cb cb, gint pri, GCancellable *cancellable, GSimpleAsyncResult *simple)
 {
-	EWSNode *node;
+	EwsNode *node;
 
 	node = ews_node_new ();
 	node->msg = msg;
@@ -336,125 +333,46 @@ ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_c
 
 /* Response callbacks */
 
-/* Just dump the response for debugging */
 static void
-dump_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
+ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 {
+	EwsNode *enode = (EwsNode *) data;
 	ESoapResponse *response;
-	EWSNode *enode = (EWSNode *) data;
-	EEwsConnection *cnc = enode->cnc;
-	EwsAsyncData *async_data;
-
-	soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->request_body));
-	/* print request's body */
-	g_print ("\n------\n");
-	fputs (SOUP_MESSAGE (msg)->request_body->data, stdout);
-	fputc ('\n', stdout);
-
-	response = e_soap_message_parse_response ((ESoapMessage *) msg);
-
-	if (!response) {
-		g_simple_async_result_set_error	(enode->simple,
-						 EWS_CONNECTION_ERROR,
-						 ERROR_NORESPONSE,
-						 _("No response"));
-		goto exit;
-	}
-		
-	/* README: The stdout can be replaced with Evolution's
-	Logging framework also */
-
-	e_soap_response_dump_response (response, stdout);
-	g_print ("\n------\n");
-
-	/* free memory */
-	g_object_unref (response);
-
-	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
-exit:	
-	g_simple_async_result_complete_in_idle (enode->simple);
-	ews_active_job_done (cnc, enode);
-}
-
-static void
-create_folder_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
-{
-	ESoapResponse *response;
-	EWSNode *enode = (EWSNode *) data;
-	EEwsConnection *cnc = enode->cnc;
-	EwsAsyncData *async_data;
-	ESoapParameter *param, *subparam, *node;
-	gboolean test;
-	gchar *value;
-
-	response = e_soap_message_parse_response ((ESoapMessage *) msg);
-	if (!response) {
-		g_simple_async_result_set_error	(enode->simple,
-						 EWS_CONNECTION_ERROR,
-						 ERROR_NORESPONSE,
-						 _("No response"));
-		goto exit;
-	}
-
-	if (response && g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1)) {
-		/* README: The stdout can be replaced with Evolution's
-		Logging framework also */
-
-		e_soap_response_dump_response (response, stdout);
-		g_print ("\n------\n");
-	}
-
-	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
-	subparam = e_soap_parameter_get_first_child_by_name (param, "CreateFolderResponseMessage");
-	test = ews_get_response_status (subparam, NULL);
-	if (!test)
-		goto error;
-
-	node = e_soap_parameter_get_first_child_by_name (subparam, "ResponseCode");
-
-	node = e_soap_parameter_get_first_child_by_name (subparam, "Folders");
-	node = e_soap_parameter_get_first_child_by_name (node, "Folder");
-	subparam = e_soap_parameter_get_first_child_by_name (node, "FolderId");
-
-	value = e_soap_parameter_get_property (subparam, "Id");
-	g_print ("\nThe folder id is...%s\n", value);
-	g_free (value);
 	
-error:
-	/* free memory */
-	g_object_unref (response);
+	if (enode->cancellable && g_cancellable_is_cancelled (enode->cancellable))
+		goto exit;
 
-	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
-exit:	
+	response = e_soap_message_parse_response ((ESoapMessage *) msg);
+	if (!response) {
+		g_simple_async_result_set_error	(enode->simple,
+						 EWS_CONNECTION_ERROR,
+						 ERROR_NORESPONSE,
+						 _("No response"));
+	} else {
+		/* TODO: The stdout can be replaced with Evolution's
+		   Logging framework also */
+		if (response && g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1))
+			e_soap_response_dump_response (response, stdout);
+
+		enode->cb (response, enode);
+		g_object_unref (response);
+	}
+
+exit:
 	g_simple_async_result_complete_in_idle (enode->simple);
-	ews_active_job_done (cnc, enode);
+	ews_active_job_done (enode->cnc, enode);
 }
 
 static void
-sync_hierarchy_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
+sync_hierarchy_response_cb (ESoapResponse *response, gpointer data)
 {
-	ESoapResponse *response;
-	EWSNode *enode = (EWSNode *) data;	
-	EEwsConnection *cnc = enode->cnc;
+	EwsNode *enode = (EwsNode *) data;
 	ESoapParameter *param, *subparam, *node;
 	EwsAsyncData *async_data;
 	gchar *new_sync_state = NULL, *value;
 	GSList *folders_created = NULL, *folders_updated = NULL, *folders_deleted = NULL;
 	gboolean success = TRUE;
 	GError *error = NULL;
-
-	response = e_soap_message_parse_response ((ESoapMessage *) msg);
-
-	if (!response) {
-		g_simple_async_result_set_error	(enode->simple,
-						 EWS_CONNECTION_ERROR,
-						 ERROR_NORESPONSE,
-						 _("No response"));
-		goto exit;	
-	}
-
-	if (response && g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1))
-		e_soap_response_dump_response (response, stdout);
 
 	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
 	subparam = e_soap_parameter_get_first_child_by_name (param, "SyncFolderHierarchyResponseMessage");
@@ -463,8 +381,7 @@ sync_hierarchy_response_cb (SoupSession *session, SoupMessage *msg, gpointer dat
 	success = ews_get_response_status (subparam, &error);
 	if (!success) {
 		g_simple_async_result_set_from_error (enode->simple, error);
-		g_object_unref (response);
-		goto exit;	
+		return;
 	}
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "SyncState");
@@ -509,45 +426,23 @@ sync_hierarchy_response_cb (SoupSession *session, SoupMessage *msg, gpointer dat
 		}
 	}
 
-	/* free memory */
-	g_object_unref (response);
-
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
 	async_data->folders_created = folders_created;
 	async_data->folders_updated = folders_updated;
 	async_data->folders_deleted = folders_deleted;
 	async_data->sync_state = new_sync_state;
-
-exit:	
-	g_simple_async_result_complete_in_idle (enode->simple);
-	ews_active_job_done (cnc, enode);
 }
 
 static void
-sync_folder_items_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
+sync_folder_items_response_cb (ESoapResponse *response, gpointer data)
 {
-	ESoapResponse *response;
-	EWSNode *enode = (EWSNode *) data;	
-	EEwsConnection *cnc = enode->cnc;
+	EwsNode *enode = (EwsNode *) data;
 	ESoapParameter *param, *subparam, *node;
 	EwsAsyncData *async_data;
 	gchar *new_sync_state = NULL, *value;
 	GSList *items_created = NULL, *items_updated = NULL, *items_deleted = NULL;
 	gboolean success = TRUE;
 	GError *error = NULL;
-
-	response = e_soap_message_parse_response ((ESoapMessage *) msg);
-
-	if (!response) {
-		g_simple_async_result_set_error	(enode->simple,
-						 EWS_CONNECTION_ERROR,
-						 ERROR_NORESPONSE,
-						 _("No response"));
-		goto exit;	
-	}
-
-	if (response && g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1))
-		e_soap_response_dump_response (response, stdout);
 
 	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
 	subparam = e_soap_parameter_get_first_child_by_name (param, "SyncFolderItemsResponseMessage");
@@ -556,8 +451,7 @@ sync_folder_items_response_cb (SoupSession *session, SoupMessage *msg, gpointer 
 	success = ews_get_response_status (subparam, &error);
 	if (!success) {
 		g_simple_async_result_set_from_error (enode->simple, error);
-		g_object_unref (response);
-		goto exit;	
+		return;
 	}
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "SyncState");
@@ -601,45 +495,23 @@ sync_folder_items_response_cb (SoupSession *session, SoupMessage *msg, gpointer 
 		}
 	}
 
-	/* free memory */
-	g_object_unref (response);
-
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
 	async_data->items_created = items_created;
 	async_data->items_updated = items_updated;
 	async_data->items_deleted = items_deleted;
 	async_data->sync_state = new_sync_state;
-
-exit:	
-	g_simple_async_result_complete_in_idle (enode->simple);
-	ews_active_job_done (cnc, enode);
 }
 
 static void
-get_item_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
+get_items_response_cb (ESoapResponse *response, gpointer data)
 {
-	ESoapResponse *response;
-	EWSNode *enode = (EWSNode *) data;	
-	EEwsConnection *cnc = enode->cnc;
+	EwsNode *enode = (EwsNode *) data;
 	ESoapParameter *param, *subparam, *node;
 	EwsAsyncData *async_data;
 	GSList *items = NULL;
 	EEwsItem *item;
 	gboolean success = TRUE;
 	GError *error = NULL;
-
-	response = e_soap_message_parse_response ((ESoapMessage *) msg);
-
-	if (!response) {
-		g_simple_async_result_set_error	(enode->simple,
-						 EWS_CONNECTION_ERROR,
-						 ERROR_NORESPONSE,
-						 _("No response"));
-		goto exit;
-	}
-
-	if (response && g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1))
-		e_soap_response_dump_response (response, stdout);
 
 	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
 	
@@ -652,8 +524,7 @@ get_item_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 		success = ews_get_response_status (subparam, &error);
 		if (!success) {
 			g_simple_async_result_set_from_error (enode->simple, error);
-			g_object_unref (response);
-			continue;
+			return;
 		}
 
 		node = e_soap_parameter_get_first_child_by_name (subparam, "Items");
@@ -665,10 +536,6 @@ get_item_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
 	async_data->items = items;
-
-exit:
-	g_simple_async_result_complete_in_idle (enode->simple);
-	ews_active_job_done (cnc, enode);
 }
 
 static void
@@ -681,9 +548,8 @@ e_ews_connection_dispose (GObject *object)
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
 	priv = cnc->priv;
-	printf ("ews connection dispose \n");
 
-	/* removed the connection from the hash table */
+	/* remove the connection from the hash table */
 	if (loaded_connections_permissions != NULL) {
 		hash_key = g_strdup_printf ("%s:%s@%s",
 					    priv->username ? priv->username : "",
@@ -1211,119 +1077,6 @@ e_ews_connection_sync_folder_items	(EEwsConnection *cnc,
 	return result;
 }
 
-
-void
-e_ews_connection_resolve_names_start 	(EEwsConnection *cnc,
-					 gint pri,
-					 const gchar *resolve_name,
-					 GAsyncReadyCallback cb,
-					 GCancellable *cancellable,
-					 gpointer user_data)
-{
-	ESoapMessage *msg;
-	GSimpleAsyncResult *simple;
-	EwsAsyncData *async_data;
-
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "ResolveNames", "ReturnFullContactData", "true");
-	e_ews_message_write_string_parameter (msg, "UnresolvedEntry", NULL, resolve_name);
-
-	e_ews_message_write_footer (msg);
-
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-                                      cb,
-                                      user_data,
-                                      e_ews_connection_resolve_names_start);
-
-	async_data = g_new0 (EwsAsyncData, 1);
-	g_simple_async_result_set_op_res_gpointer (
-		simple, async_data, (GDestroyNotify) async_data_free);
-
-	ews_connection_queue_request (cnc, msg, dump_response_cb, pri, cancellable, simple);
-}
-
-gboolean
-e_ews_connection_resolve_names_finish	(EEwsConnection *cnc,
-					 GAsyncResult *result,
-					 GError **error)
-{
-	GSimpleAsyncResult *simple;
-	EwsAsyncData *async_data;
-
-	g_return_val_if_fail (
-		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_resolve_names_start),
-		FALSE);
-
-	simple = G_SIMPLE_ASYNC_RESULT (result);
-	async_data = g_simple_async_result_get_op_res_gpointer (simple);
-
-	if (g_simple_async_result_propagate_error (simple, error))
-		return FALSE;
-	
-	return TRUE;
-}
-
-void 
-e_ews_connection_create_folder_start	(EEwsConnection *cnc,
-					 gint pri,
-					 GAsyncReadyCallback cb,
-					 GCancellable *cancellable,
-					 gpointer user_data)
-{
-	ESoapMessage *msg;
-	GSimpleAsyncResult *simple;
-	EwsAsyncData *async_data;
-
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "CreateFolder", NULL, NULL);
-
-	e_soap_message_start_element (msg, "ParentFolderId", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (msg, "DistinguishedFolderId", "types", NULL, "Id", "msgfolderroot");
-	e_soap_message_end_element (msg);
-
-	e_soap_message_start_element (msg, "Folders", NULL, NULL);
-	e_soap_message_start_element (msg, "Folder", "types", NULL);
-	e_ews_message_write_string_parameter (msg, "DisplayName", "types", "TestBharath");
-	e_soap_message_end_element (msg);
-	e_soap_message_end_element (msg);
-
-	e_ews_message_write_footer (msg);
-
-      	simple = g_simple_async_result_new (G_OBJECT (cnc),
-                                      cb,
-                                      user_data,
-                                      e_ews_connection_create_folder_start);
-
-	async_data = g_new0 (EwsAsyncData, 1);
-	g_simple_async_result_set_op_res_gpointer (
-		simple, async_data, (GDestroyNotify) async_data_free);
-
-	ews_connection_queue_request (cnc, msg, create_folder_response_cb, pri, cancellable, simple);
-}
-
-
-gboolean
-e_ews_connection_create_folder_finish	(EEwsConnection *cnc,
-					 GAsyncResult *result,
-					 guint folder_id,
-					 GError **error)
-{
-	GSimpleAsyncResult *simple;
-	EwsAsyncData *async_data;
-
-	g_return_val_if_fail (
-		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_create_folder_start),
-		FALSE);
-
-	simple = G_SIMPLE_ASYNC_RESULT (result);
-	async_data = g_simple_async_result_get_op_res_gpointer (simple);
-
-	if (g_simple_async_result_propagate_error (simple, error))
-		return FALSE;
-	
-	return TRUE;
-}
-
 void 
 e_ews_connection_sync_folder_hierarchy_start	(EEwsConnection *cnc,
 						 gint pri,
@@ -1488,7 +1241,7 @@ e_ews_connection_get_items_start	(EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (cnc, msg, get_item_response_cb, pri, cancellable, simple);
+	ews_connection_queue_request (cnc, msg, get_items_response_cb, pri, cancellable, simple);
 }
 
 gboolean

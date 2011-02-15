@@ -37,13 +37,6 @@ util_get_login_info_from_env (const gchar **username, const gchar **password, co
 	*uri = g_getenv ("EWS_TEST_URI");
 }
 
-static void
-ews_conn_shutdown (EEwsConnection *cnc)
-{
-	g_print ("Terminating the connection. BYE... \n");
-	g_main_loop_quit (main_loop);
-}
-
 /*Test cases*/
 
 static void
@@ -327,86 +320,6 @@ op_test_get_item ()
 	g_slist_free (ids);
 }
 
-static void
-create_folder_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
-{
-	EEwsConnection *cnc = E_EWS_CONNECTION (object);
-	GError *error = NULL;
-
-	e_ews_connection_create_folder_finish	(cnc, res, 0, &error);
-
-	if (error != NULL) {
-		g_print ("Unable to create folder: %s :%d \n", error->message, error->code);
-		return;
-	}
-}
-
-static void 
-op_test_create_folder ()
-{
-	const gchar *username;
-	const gchar *password;
-	const gchar *uri;
-	EEwsConnection *cnc;
-	GCancellable *cancellable;
-
-	cancellable = g_cancellable_new ();
-
-	util_get_login_info_from_env (&username, &password, &uri);
-	g_assert_cmpstr (username, !=, NULL);
-	g_assert_cmpstr (password, !=, NULL);
-	g_assert_cmpstr (uri, !=, NULL);
-
-	cnc = e_ews_connection_new (uri, username, password, NULL);
-	g_assert (cnc != NULL);
-
-	e_ews_connection_create_folder_start	(cnc, EWS_PRIORITY_LOW, 
-						 create_folder_ready_callback, 
-						 cancellable, NULL);
-
-	/* FIXME api fix
-	e_ews_connection_create_folder (cnc, cancellable); */
-}
-
-static void
-resolve_names_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
-{
-	EEwsConnection *cnc = E_EWS_CONNECTION (object);
-	GError *error = NULL;
-
-	e_ews_connection_resolve_names_finish	(cnc, res, &error);
-
-	if (error != NULL) {
-		g_print ("Unable to create folder: %s :%d \n", error->message, error->code);
-		return;
-	}
-}
-
-static void 
-op_test_resolve_names ()
-{
-	const gchar *username;
-	const gchar *password;
-	const gchar *uri;
-	EEwsConnection *cnc;
-	GCancellable *cancellable;
-
-	cancellable = g_cancellable_new ();
-
-	util_get_login_info_from_env (&username, &password, &uri);
-	g_assert_cmpstr (username, !=, NULL);
-	g_assert_cmpstr (password, !=, NULL);
-	g_assert_cmpstr (uri, !=, NULL);
-
-	cnc = e_ews_connection_new (uri, username, password, NULL);
-	g_assert (cnc != NULL);
-
-	e_ews_connection_resolve_names_start	(cnc, EWS_PRIORITY_HIGH,
-						"bharath",
-						resolve_names_ready_callback,
-						cancellable, NULL);
-}
-
 static void 
 op_test_find_item ()
 {
@@ -446,23 +359,12 @@ void autodiscovery_tests_run ()
 static gboolean
 idle_cb (gpointer data)
 {
-	g_print ("\nTesting create folder at the top level... \n");
-	op_test_create_folder ();
-
-	g_print ("\nTesting create folder at the top level again... \n");
-	op_test_create_folder ();
 
 	g_print ("\nTesting the sync_hierarchy... \n");
 	op_test_sync_folder_hierarchy ();
 
-	g_print ("\nTesting create folder at the top level again third time... \n");
-	op_test_create_folder ();
-
 	g_print ("\nTesting find item... \n");
 	op_test_find_item ();
-
-	g_print ("\nTesting resolve names... \n");
-	op_test_resolve_names ();
 
 	return FALSE;
 }
