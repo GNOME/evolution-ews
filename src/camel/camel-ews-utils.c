@@ -625,13 +625,13 @@ camel_ews_utils_sync_deleted_items (CamelEwsFolder *ews_folder, GSList *items_de
 
 		camel_ews_summary_delete_id (folder->summary, id);
 		camel_folder_change_info_remove_uid (ci, id);
-
-		g_free (id);
 	}
 	camel_db_delete_uids (((CamelStore *)ews_store)->cdb_w, full_name, items_deleted, NULL);
 	
 	camel_folder_changed ((CamelFolder *) ews_folder, ci);
 	camel_folder_change_info_free (ci);
+
+	g_slist_foreach (items_deleted, (GFunc) g_free, NULL);
 	g_slist_free (items_deleted);
 }
 

@@ -55,12 +55,13 @@ which needs to be better organized via functions */
 #define EWS_MAX_FETCH_COUNT 100
 #define MAX_ATTACHMENT_SIZE 1*1024*1024   /*In bytes*/
 
-#define SUMMARY_ITEM_FLAGS "item:ResponseObjects"
-#define SUMMARY_ITEM_PROPS "item:Subject item:DateTimeReceived item:DateTimeSent item:DateTimeCreated item:Size " \
-		   "item:HasAttachments item:Importance item:InReplyTo"
+#define SUMMARY_ITEM_FLAGS "item:ResponseObjects item:Sensitivity item:Importance"
+#define ITEM_PROPS "item:Subject item:DateTimeReceived item:DateTimeSent item:DateTimeCreated item:Size " \
+		   "item:HasAttachments item:InReplyTo"
+#define SUMMARY_ITEM_PROPS ITEM_PROPS " " SUMMARY_ITEM_FLAGS 
 
 #define SUMMARY_MESSAGE_FLAGS SUMMARY_ITEM_FLAGS " message:IsRead"
-#define SUMMARY_MESSAGE_PROPS SUMMARY_ITEM_PROPS " message:From message:Sender message:ToRecipients message:CcRecipients " \
+#define SUMMARY_MESSAGE_PROPS ITEM_PROPS " message:From message:Sender message:ToRecipients message:CcRecipients " \
 		   "message:BccRecipients message:IsRead message:References message:InternetMessageId " \
 		   SUMMARY_MESSAGE_FLAGS
 
