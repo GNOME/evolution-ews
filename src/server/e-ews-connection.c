@@ -31,7 +31,7 @@
 #define d(x) x
 
 /* For the number of connections */
-#define EWS_CONNECTION_MAX_REQUESTS 2
+#define EWS_CONNECTION_MAX_REQUESTS 1
 
 #define QUEUE_LOCK(x) (g_static_rec_mutex_lock(&(x)->priv->queue_lock))
 #define QUEUE_UNLOCK(x) (g_static_rec_mutex_unlock(&(x)->priv->queue_lock))
