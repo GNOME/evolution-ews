@@ -36,6 +36,7 @@
 #include <libedata-cal/e-cal-backend-util.h>
 #include <libecal/e-cal-component.h>
 #include <libecal/e-cal-time-util.h>
+#include <libical/icaltz-util.h>
 #include "e-cal-backend-ews.h"
 #include "e-cal-backend-ews-utils.h"
 #include "e-ews-connection.h"
@@ -267,7 +268,6 @@ e_cal_backend_ews_set_default_zone (ECalBackend *backend, EDataCal *cal, EServer
 
 	/* Set the default timezone to it. */
 	priv->default_zone = zone;
-	e_cal_backend_store_set_default_timezone (priv->store, zone);
 
 	PRIV_UNLOCK (priv);
 
@@ -331,6 +331,69 @@ e_cal_backend_ews_add_timezone (ECalBackend *backend, EDataCal *cal, EServerMeth
 exit:	
 	e_data_cal_notify_timezone_added (cal, context, error, tzobj);
 }
+
+static void
+e_cal_backend_ews_get_timezone (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *tzid)
+{
+	icalcomponent *icalcomp;
+	icaltimezone *zone;
+	gchar *object = NULL;
+	GError *error = NULL;
+
+	zone = e_cal_backend_ews_internal_get_timezone (backend, tzid);
+	if (zone) {
+		icalcomp = icaltimezone_get_component (zone);
+
+		if (!icalcomp)
+			g_propagate_error (&error, e_data_cal_create_error (InvalidObject, NULL));
+		else 
+			object = icalcomponent_as_ical_string_r (icalcomp);
+	} else {
+		/* TODO Implement in ECalBackend base class */
+		/* fallback if tzid contains only the location of timezone */
+		gint i, slashes = 0;
+
+		for (i = 0; tzid[i]; i++) {
+			if (tzid[i] == '/')
+				slashes++;
+		}
+
+		if (slashes == 1) {
+			icalcomponent *icalcomp = NULL, *free_comp = NULL;
+
+			icaltimezone *zone = icaltimezone_get_builtin_timezone (tzid);
+			if (!zone) {
+				icalcomp = free_comp = icaltzutil_fetch_timezone (tzid);
+			}
+
+			if (zone)
+				icalcomp = icaltimezone_get_component (zone);
+
+			if (icalcomp) {
+				icalcomponent *clone = icalcomponent_new_clone (icalcomp);
+				icalproperty *prop;
+
+				prop = icalcomponent_get_first_property (clone, ICAL_TZID_PROPERTY);
+				if (prop) {
+					/* change tzid to our, because the component has the buildin tzid */
+					icalproperty_set_tzid (prop, tzid);
+
+					object = icalcomponent_as_ical_string_r (clone);
+					g_clear_error (&error);
+				}
+				icalcomponent_free (clone);
+			}
+
+			if (free_comp)
+				icalcomponent_free (free_comp);
+		}
+	}
+	
+	e_data_cal_notify_timezone_requested (cal, context, error, object);
+	g_free (object);
+
+}
+
 
 static void
 e_cal_backend_ews_get_default_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context)
@@ -427,6 +490,7 @@ e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal, EServerMethodContex
 		priv->store = e_cal_backend_file_store_new (cache_dir);
 		e_cal_backend_store_load (priv->store);
 		add_comps_to_item_id_hash (cbews);
+		e_cal_backend_store_set_default_timezone (priv->store, priv->default_zone);
 	}
 
 	if (priv->mode == CAL_MODE_LOCAL) {
@@ -581,6 +645,38 @@ e_cal_backend_ews_get_object_list (ECalBackend *backend, EDataCal *cal, EServerM
 	}
 }
 
+/* TODO Do not replicate this in every backend */
+static icaltimezone *
+resolve_tzid (const gchar *tzid, gpointer user_data)
+{
+	icaltimezone *zone;
+
+	zone = (!strcmp (tzid, "UTC"))
+		? icaltimezone_get_utc_timezone ()
+		: icaltimezone_get_builtin_timezone_from_tzid (tzid);
+
+	if (!zone)
+		zone = e_cal_backend_internal_get_timezone (E_CAL_BACKEND (user_data), tzid);
+
+	return zone;
+}
+
+static void
+put_component_to_store (ECalBackendEws *cbews,
+			ECalComponent *comp)
+{
+	time_t time_start, time_end;
+	ECalBackendEwsPrivate *priv;
+
+	priv = cbews->priv;
+
+	e_cal_util_get_component_occur_times (comp, &time_start, &time_end,
+				   resolve_tzid, cbews, priv->default_zone,
+				   e_cal_backend_get_kind (E_CAL_BACKEND (cbews)));
+
+	e_cal_backend_store_put_component_with_time_range (priv->store, comp, time_start, time_end);
+}
+
 static void
 add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item)
 {
@@ -628,8 +724,8 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item)
 		e_cal_component_free_id (id);
 
 		comp_str = e_cal_component_get_as_string (comp);
-		e_cal_backend_store_put_component (priv->store, comp);
-	
+		put_component_to_store (cbews, comp);
+
 		if (!cache_comp) {
 			e_cal_backend_notify_object_created (E_CAL_BACKEND (cbews), comp_str);
 		} else {
@@ -1029,7 +1125,8 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	/* Many of these can be moved to Base class */
 	backend_class->add_timezone = e_cal_backend_ews_add_timezone;
 	backend_class->get_default_object = e_cal_backend_ews_get_default_object;
-	
+	backend_class->get_timezone = e_cal_backend_ews_get_timezone;
+
 	backend_class->internal_get_timezone = e_cal_backend_ews_internal_get_timezone;
 	
 	backend_class->open = e_cal_backend_ews_open;
