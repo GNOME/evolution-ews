@@ -173,9 +173,9 @@ comp_func (gconstpointer a, gconstpointer b)
 	EwsNode *node2 = (EwsNode *) b;
 
 	if (node1->pri > node2->pri)
-		return 1;
-	else if (node1->pri < node2->pri)
 		return -1;
+	else if (node1->pri < node2->pri)
+		return 1;
 	else
 		return 0;
 }
