@@ -319,6 +319,14 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store, const gchar *fname)
 	fi->flags = camel_ews_store_summary_get_folder_flags	(ews_summary,
 			fi->full_name,
 			NULL);
+	
+	fi->unread = camel_ews_store_summary_get_folder_unread	(ews_summary,
+			fi->full_name,
+			NULL);
+	fi->total = camel_ews_store_summary_get_folder_total	(ews_summary,
+			fi->full_name,
+			NULL);
+
 
 	g_free (url);
 
@@ -445,8 +453,6 @@ add_folder_to_summary (CamelEwsStore *store, const gchar *fname, EEwsFolder *fol
 	camel_ews_store_summary_set_change_key (ews_summary, fname, fid->change_key);
 	camel_ews_store_summary_set_parent_folder_id (ews_summary, fname, pfid->id);
 	camel_ews_store_summary_set_folder_name (ews_summary, fname, dname);
-	camel_ews_store_summary_set_folder_total (ews_summary, fname, total);
-	camel_ews_store_summary_set_folder_unread (ews_summary, fname, unread);
 	
 	if (!g_ascii_strcasecmp (fname, "Inbox")) {
 		flags |= CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_INBOX; 
