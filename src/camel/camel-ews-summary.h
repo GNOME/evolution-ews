@@ -71,9 +71,8 @@ struct _CamelEwsMessageContentInfo {
 struct _CamelEwsSummary {
 	CamelFolderSummary parent;
 
-	gchar *time_string;
+	gchar *sync_state;
 	gint32 version;
-	gint32 validity;
 } ;
 
 struct _CamelEwsSummaryClass {

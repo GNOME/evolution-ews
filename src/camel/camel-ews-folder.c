@@ -51,8 +51,8 @@ which needs to be better organized via functions */
 #include "camel-ews-summary.h"
 #include "camel-ews-utils.h"
 
-#define JUNK_FOLDER "Junk Mail"
 #define EWS_MAX_FETCH_COUNT 100
+
 #define MAX_ATTACHMENT_SIZE 1*1024*1024   /*In bytes*/
 
 #define SUMMARY_ITEM_FLAGS "item:ResponseObjects item:Sensitivity item:Importance"
@@ -585,10 +585,13 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 	{
 		GSList *items_created = NULL, *items_updated = NULL;
 		GSList *items_deleted = NULL;
+		guint32 total, unread;
 
 		sync_state = (gchar *) camel_ews_store_summary_get_sync_state	
 							(ews_store->summary,
 							 full_name, NULL);
+
+		sync_state = ((CamelEwsSummary *) folder->summary)->sync_state;
 		e_ews_connection_sync_folder_items	
 							(cnc, EWS_PRIORITY_MEDIUM,
 							 &sync_state, id, 
@@ -624,11 +627,17 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 	
 		if (rerror)
 			break;
+		
+		total = camel_folder_summary_count (folder->summary);
+		unread = folder->summary->unread_count;
 
-		camel_ews_store_summary_set_sync_state	(ews_store->summary, 
-							 full_name, 
-							 sync_state);
+		camel_ews_store_summary_set_folder_total (ews_store->summary, full_name, total);
+		camel_ews_store_summary_set_folder_unread (ews_store->summary, full_name, unread);
 		camel_ews_store_summary_save (ews_store->summary, NULL);
+
+		g_free (((CamelEwsSummary *) folder->summary)->sync_state);
+		((CamelEwsSummary *) folder->summary)->sync_state = g_strdup (sync_state);
+		camel_folder_summary_save_to_db (folder->summary, NULL);
 
 		g_free (sync_state);
 		sync_state = NULL;

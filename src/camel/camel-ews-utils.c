@@ -496,7 +496,9 @@ camel_ews_add_esource (EEwsFolder *folder, CamelURL *url, gboolean can_create)
 
 	client = gconf_client_get_default ();
 	source_list = e_source_list_new_for_gconf (client, conf_key);
-	name = camel_url_get_param (url, "account-name");
+
+	/* TODO fix it to use Account name for the group name */	
+	name = camel_url_get_param (url, "email");
 	group = e_source_list_ensure_group (source_list, name, EWS_URI_PREFIX, TRUE);
 
 	/* At the moment do not allow users to create new calendars under this group */

@@ -36,7 +36,7 @@
 #include "camel-ews-folder.h"
 #include "camel-ews-summary.h"
 
-#define CAMEL_GW_SUMMARY_VERSION (1)
+#define CAMEL_EWS_SUMMARY_VERSION (1)
 
 #define EXTRACT_FIRST_DIGIT(val) part ? val=strtoul (part, &part, 10) : 0;
 #define EXTRACT_DIGIT(val) part++; part ? val=strtoul (part, &part, 10) : 0;
@@ -149,11 +149,8 @@ summary_header_from_db (CamelFolderSummary *s, CamelFIRecord *mir)
 	if (part)
 		EXTRACT_FIRST_DIGIT(gms->version);
 
-	if (part)
-		EXTRACT_DIGIT (gms->validity);
-
 	if (part && part++) {
-		gms->time_string = g_strdup (part);
+		gms->sync_state = g_strdup (part);
 	}
 
 	return 0;
@@ -167,11 +164,10 @@ ews_summary_header_load (CamelFolderSummary *s, FILE *in)
 	if (CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_load (s, in) == -1)
 		return -1;
 
-	if (camel_file_util_decode_fixed_int32(in, &gms->version) == -1
-			|| camel_file_util_decode_fixed_int32(in, &gms->validity) == -1)
+	if (camel_file_util_decode_fixed_int32(in, &gms->version) == -1)
 		return -1;
 
-	if (camel_file_util_decode_string (in, &gms->time_string) == -1)
+	if (camel_file_util_decode_string (in, &gms->sync_state) == -1)
 		return -1;
 	return 0;
 }
@@ -186,7 +182,7 @@ summary_header_to_db (CamelFolderSummary *s, GError **error)
 	if (!fir)
 		return NULL;
 
-	fir->bdata = g_strdup_printf ("%d %d %s", CAMEL_GW_SUMMARY_VERSION, ims->validity, ims->time_string);
+	fir->bdata = g_strdup_printf ("%d %s", CAMEL_EWS_SUMMARY_VERSION, ims->sync_state);
 
 	return fir;
 
@@ -200,9 +196,8 @@ ews_summary_header_save (CamelFolderSummary *s, FILE *out)
 	if (CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_save (s, out) == -1)
 		return -1;
 
-	camel_file_util_encode_fixed_int32(out, CAMEL_GW_SUMMARY_VERSION);
-	camel_file_util_encode_fixed_int32(out, gms->validity);
-	return camel_file_util_encode_string (out, gms->time_string);
+	camel_file_util_encode_fixed_int32(out, CAMEL_EWS_SUMMARY_VERSION);
+	return camel_file_util_encode_string (out, gms->sync_state);
 }
 
 static CamelMessageInfo *
