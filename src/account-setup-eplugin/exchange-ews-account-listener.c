@@ -21,10 +21,16 @@
 #include <config.h>
 #endif
 
+#include "e-ews-compat.h"
+
 #include <string.h>
 #include <glib/gi18n-lib.h>
 #include <shell/e-shell.h>
+#if EDS_CHECK_VERSION(2,33,0)
 #include <mail/e-mail-session.h>
+#else
+#include <mail/mail-session.h>
+#endif
 #include <mail/e-mail-backend.h>
 
 #include <camel/camel.h>
@@ -111,7 +117,7 @@ ews_account_removed (EAccountList *account_listener, EAccount *account)
 {
 	EShell *shell;
 	EShellBackend *shell_backend;
-	EMailSession *session;
+	EVO3(EMailSession *session;)
 	EwsAccountInfo *info = NULL;
 	CamelStore *store;
 
@@ -127,7 +133,7 @@ ews_account_removed (EAccountList *account_listener, EAccount *account)
 
 	shell = e_shell_get_default ();
 	shell_backend = e_shell_get_backend_by_name (shell, "mail");
-	session = e_mail_backend_get_session (E_MAIL_BACKEND (shell_backend));
+	EVO3(session = e_mail_backend_get_session (E_MAIL_BACKEND (shell_backend)));
 	store = (CamelStore *) camel_session_get_service (CAMEL_SESSION (session), 
 						account->source->url, CAMEL_PROVIDER_STORE, NULL);
 
