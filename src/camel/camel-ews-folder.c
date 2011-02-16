@@ -547,7 +547,7 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 	CamelEwsStore *ews_store;
 	const gchar *full_name, *id;
 	gchar *sync_state;
-	gint total = 0;
+	gboolean includes_last_item = FALSE;
 	GError *rerror = NULL;
 	EVO2(GCancellable *cancellable = NULL);
 
@@ -594,18 +594,14 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 		sync_state = ((CamelEwsSummary *) folder->summary)->sync_state;
 		e_ews_connection_sync_folder_items	
 							(cnc, EWS_PRIORITY_MEDIUM,
-							 &sync_state, id, 
+							 &sync_state, id,
 							 "IdOnly", NULL,
-							 EWS_MAX_FETCH_COUNT, &items_created,
-							 &items_updated, &items_deleted, 
-							 cancellable, &rerror);
+							 EWS_MAX_FETCH_COUNT, &includes_last_item,
+							 &items_created, &items_updated, 
+							 &items_deleted, cancellable, &rerror);
 
 		if (rerror)
 			break;
-
-		total = g_slist_length (items_created) +
-			g_slist_length (items_updated) +
-			g_slist_length (items_deleted);
 
 		if (items_deleted)
 			camel_ews_utils_sync_deleted_items (ews_folder, items_deleted);
@@ -641,7 +637,7 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 
 		g_free (sync_state);
 		sync_state = NULL;
-	} while (!rerror && total == EWS_MAX_FETCH_COUNT);
+	} while (!rerror && !includes_last_item);
 	
 	if (rerror)
 		g_propagate_error (error, rerror);

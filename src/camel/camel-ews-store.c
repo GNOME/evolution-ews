@@ -333,9 +333,10 @@ ews_folder_hierarchy_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_da
 	CamelEwsStorePrivate *priv = ews_store->priv;
 	EEwsConnection *cnc = (EEwsConnection *) obj;
 	gchar *sync_state = NULL;
+	gboolean includes_last_folder;
 	GError *error = NULL;
 
-	e_ews_connection_sync_folder_hierarchy_finish	(cnc, res, &sync_state, 
+	e_ews_connection_sync_folder_hierarchy_finish	(cnc, res, &sync_state, &includes_last_folder, 
 							 &folders_created, &folders_updated,
 							 &folders_deleted, &error);
 
@@ -410,6 +411,7 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, EV
 	CamelEwsStorePrivate *priv;
 	CamelFolderInfo *fi = NULL;
 	gchar *sync_state;
+	gboolean includes_last_folder;
 	GSList *folders = NULL;
 	GSList *folders_created = NULL, *folders_updated = NULL;
 	GSList *folders_deleted = NULL;
@@ -447,7 +449,7 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, EV
 	g_slist_free (folders);
 	
 	sync_state = (gchar *) camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
-	e_ews_connection_sync_folder_hierarchy	(ews_store->priv->cnc, EWS_PRIORITY_MEDIUM, &sync_state,
+	e_ews_connection_sync_folder_hierarchy	(ews_store->priv->cnc, EWS_PRIORITY_MEDIUM, &sync_state, &includes_last_folder,
 						 &folders_created, &folders_updated, &folders_deleted,
 						 cancellable, error);
 	if (*error != NULL) {

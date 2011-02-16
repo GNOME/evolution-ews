@@ -89,6 +89,7 @@ struct _EwsAsyncData {
 	
 	GSList *items;
 	gchar *sync_state;
+	gboolean includes_last_item;
 };
 
 struct _EwsNode {
@@ -371,7 +372,7 @@ sync_hierarchy_response_cb (ESoapResponse *response, gpointer data)
 	EwsAsyncData *async_data;
 	gchar *new_sync_state = NULL, *value;
 	GSList *folders_created = NULL, *folders_updated = NULL, *folders_deleted = NULL;
-	gboolean success = TRUE;
+	gboolean success = TRUE, includes_last_item = FALSE;
 	GError *error = NULL;
 
 	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
@@ -389,9 +390,8 @@ sync_hierarchy_response_cb (ESoapResponse *response, gpointer data)
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "IncludesLastFolderInRange");
 	
-	/* FIXME Understand and handle this better. No change in data */
-	if (!strcmp (e_soap_parameter_get_string_value (node), "true")) {
-	}
+	if (!strcmp (e_soap_parameter_get_string_value (node), "true"))
+		includes_last_item = TRUE;
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "Changes");
 	
@@ -431,6 +431,7 @@ sync_hierarchy_response_cb (ESoapResponse *response, gpointer data)
 	async_data->folders_updated = folders_updated;
 	async_data->folders_deleted = folders_deleted;
 	async_data->sync_state = new_sync_state;
+	async_data->includes_last_item = includes_last_item;
 }
 
 static void
@@ -441,7 +442,7 @@ sync_folder_items_response_cb (ESoapResponse *response, gpointer data)
 	EwsAsyncData *async_data;
 	gchar *new_sync_state = NULL, *value;
 	GSList *items_created = NULL, *items_updated = NULL, *items_deleted = NULL;
-	gboolean success = TRUE;
+	gboolean success = TRUE, includes_last_item = FALSE;
 	GError *error = NULL;
 
 	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
@@ -458,9 +459,8 @@ sync_folder_items_response_cb (ESoapResponse *response, gpointer data)
 	new_sync_state = e_soap_parameter_get_string_value (node);
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "IncludesLastItemInRange");
-	/* FIXME Understand and handle this better. No change in data */
-	if (!strcmp (e_soap_parameter_get_string_value (node), "true")) {
-	}
+	if (!strcmp (e_soap_parameter_get_string_value (node), "true"))
+		includes_last_item = TRUE;
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "Changes");
 	
@@ -500,6 +500,7 @@ sync_folder_items_response_cb (ESoapResponse *response, gpointer data)
 	async_data->items_updated = items_updated;
 	async_data->items_deleted = items_deleted;
 	async_data->sync_state = new_sync_state;
+	async_data->includes_last_item = includes_last_item;
 }
 
 static void
@@ -1004,6 +1005,7 @@ gboolean
 e_ews_connection_sync_folder_items_finish	(EEwsConnection *cnc,
 						 GAsyncResult *result,
 					 	 gchar **sync_state,
+						 gboolean *includes_last_item,
 						 GSList **items_created,
 						 GSList **items_updated,
 						 GSList **items_deleted,
@@ -1024,6 +1026,7 @@ e_ews_connection_sync_folder_items_finish	(EEwsConnection *cnc,
 		return FALSE;
 	
 	*sync_state = async_data->sync_state;
+	*includes_last_item = async_data->includes_last_item;
 	*items_created = async_data->items_created;
 	*items_updated = async_data->items_updated;
 	*items_deleted = async_data->items_deleted;
@@ -1039,6 +1042,7 @@ e_ews_connection_sync_folder_items	(EEwsConnection *cnc,
 					 const gchar *default_props,
 					 const gchar *additional_props,
 					 guint max_entries,
+					 gboolean *includes_last_item,
 					 GSList **items_created,
 					 GSList **items_updated,
 					 GSList **items_deleted,
@@ -1061,6 +1065,7 @@ e_ews_connection_sync_folder_items	(EEwsConnection *cnc,
 
 	result = e_ews_connection_sync_folder_items_finish (cnc, sync_data->res,
 							    sync_state,
+							    includes_last_item,
 							    items_created,
 							    items_updated,
 							    items_deleted,
@@ -1112,6 +1117,7 @@ gboolean
 e_ews_connection_sync_folder_hierarchy_finish	(EEwsConnection *cnc,
 						 GAsyncResult *result,
 					 	 gchar **sync_state,
+						 gboolean *includes_last_folder,
 						 GSList **folders_created,
 						 GSList **folders_updated,
 						 GSList **folders_deleted,
@@ -1132,6 +1138,7 @@ e_ews_connection_sync_folder_hierarchy_finish	(EEwsConnection *cnc,
 		return FALSE;
 	
 	*sync_state = async_data->sync_state;
+	*includes_last_folder = async_data->includes_last_item;
 	*folders_created = async_data->folders_created;
 	*folders_updated = async_data->folders_updated;
 	*folders_deleted = async_data->folders_deleted;
@@ -1143,6 +1150,7 @@ gboolean
 e_ews_connection_sync_folder_hierarchy	(EEwsConnection *cnc,
 					 gint pri,
 					 gchar **sync_state,
+					 gboolean *includes_last_folder,
 					 GSList **folders_created,
 					 GSList **folders_updated,
 					 GSList **folders_deleted,
@@ -1163,6 +1171,7 @@ e_ews_connection_sync_folder_hierarchy	(EEwsConnection *cnc,
 
 	result = e_ews_connection_sync_folder_hierarchy_finish (cnc, sync_data->res,
 								sync_state,
+								includes_last_folder,
 								folders_created,
 								folders_updated,
 								folders_deleted,

@@ -813,15 +813,16 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 	GSList *items_created = NULL, *items_updated = NULL;
 	GSList *items_deleted = NULL, *l[2], *m, *cal_item_ids = NULL;
 	gchar *sync_state = NULL;
+	gboolean includes_last_item;
 	GError *error = NULL;
 	struct _ews_sync_data *sync_data;
-	gint total, i;
+	gint i;
 	
 	cnc = (EEwsConnection *) obj;
 	cbews = (ECalBackendEws *) user_data;
 	priv = cbews->priv;
 
-	e_ews_connection_sync_folder_items_finish	(cnc, res, &sync_state,
+	e_ews_connection_sync_folder_items_finish	(cnc, res, &sync_state, &includes_last_item,
 							 &items_created, &items_updated,
 							 &items_deleted, &error);
 	if (error != NULL) {
@@ -885,11 +886,7 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 	}
 	e_cal_backend_store_thaw_changes (priv->store);
 
-	total = g_slist_length (items_created) +
-		g_slist_length (items_updated) +
-		g_slist_length (items_deleted);
-
-	if (!cal_item_ids && g_slist_length (items_deleted) == EWS_MAX_FETCH_COUNT) {
+	if (!cal_item_ids && !includes_last_item) {
 		e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, sync_state);
 		e_ews_connection_sync_folder_items_start
 						(g_object_ref (priv->cnc), EWS_PRIORITY_MEDIUM,
@@ -908,7 +905,7 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 	sync_data = g_new0 (struct _ews_sync_data, 1);
 	sync_data->cbews = cbews;
 	sync_data->sync_state = sync_state;
-	sync_data->sync_pending = (total == EWS_MAX_FETCH_COUNT);
+	sync_data->sync_pending = !includes_last_item;
 	
 	e_ews_connection_get_items_start	(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
 						 cal_item_ids,
