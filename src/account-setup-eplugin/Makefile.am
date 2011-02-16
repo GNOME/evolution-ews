@@ -35,6 +35,7 @@ liborg_gnome_exchange_ews_la_LIBADD = 			\
 	$(EVOLUTION_PLUGIN_LIBS)			\
 	$(CAMEL_LIBS) 					\
 	$(top_builddir)/src/server/libeews-1.2.la	\
+	$(top_builddir)/src/server/libewsutils.la 	\
 	$(LIBECAL_LIBS)
 
 liborg_gnome_exchange_ews_la_LDFLAGS = -module -avoid-version $(NO_UNDEFINED)
@@ -44,8 +45,9 @@ liborg_gnome_exchange_ews_la_CFLAGS = \
 	-I$(top_builddir)				\
 	-I$(top_srcdir)/src/camel			\
 	-I$(top_builddir)/src/camel			\
-	-I$(top_srcdir)/src/server		\
-	-I$(top_builddir)/src/server		\
+	-I$(top_srcdir)/src/server			\
+	-I$(top_builddir)/src/server			\
+	-I$(top_srcdir)/src/utils	        	\
 	$(LIBEWS_CFLAGS)
 
 EXTRA_DIST = 						\

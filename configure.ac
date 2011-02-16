@@ -238,13 +238,14 @@ dnl **************************
 AC_CONFIG_FILES([
 Makefile 
 src/Makefile
+src/server/Makefile
+src/server/tests/Makefile
+src/server/libeews.pc
+src/utils/Makefile
 src/account-setup-eplugin/Makefile
 src/addressbook/Makefile
 src/calendar/Makefile
 src/camel/Makefile
-src/server/Makefile
-src/server/tests/Makefile
-src/server/libeews.pc
 po/Makefile.in
 ])
 AC_OUTPUT
