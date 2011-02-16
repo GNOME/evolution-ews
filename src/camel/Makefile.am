@@ -39,7 +39,7 @@ libcamelews_la_LDFLAGS = -avoid-version -module $(NO_UNDEFINED)
 
 libcamelews_la_LIBADD =					\
 	$(top_builddir)/src/server/libeews-1.2.la 	\
-	$(top_builddir)/src/server/libewsutils.la 	\
+	$(top_builddir)/src/utils/libewsutils.la 	\
 	$(CAMEL_LIBS)                                   \
 	$(EVOLUTION_PLUGIN_LIBS)			\
 	$(LIBEDATASERVER_LIBS)				\
