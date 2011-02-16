@@ -26,6 +26,7 @@
 #include <ctype.h>
 #include <glib/gi18n-lib.h>
 #include "e-ews-connection.h"
+#include <libedataserver/e-flag.h>
 #include "e-ews-message.h"
 
 #define d(x) x
@@ -104,8 +105,7 @@ struct _EwsNode {
 
 typedef struct {
   GAsyncResult *res;
-  GMainContext *context;
-  GMainLoop *loop;
+  EFlag *eflag;
 } EwsSyncData;
 
 /* Static Functions */
@@ -138,7 +138,7 @@ ews_sync_reply_cb	(GObject *object,
   EwsSyncData *sync_data = user_data;
 
   sync_data->res = g_object_ref (res);
-  g_main_loop_quit (sync_data->loop);
+  e_flag_set (sync_data->eflag);
 }
 
 static EwsNode *
@@ -1049,18 +1049,15 @@ e_ews_connection_sync_folder_items	(EEwsConnection *cnc,
 	gboolean result;
 
 	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->context = g_main_context_new ();
-	sync_data->loop = g_main_loop_new (sync_data->context, FALSE);
+	sync_data->eflag = e_flag_new ();
 	
-	g_main_context_push_thread_default (sync_data->context);
 	e_ews_connection_sync_folder_items_start	(cnc, pri, *sync_state, fid,
 							 default_props, additional_props, 
 							 max_entries,
 							 ews_sync_reply_cb, cancellable,
 							 (gpointer) sync_data);
 
-	g_main_loop_run (sync_data->loop);
-	g_main_context_pop_thread_default (sync_data->context);
+	e_flag_wait (sync_data->eflag);
 
 	result = e_ews_connection_sync_folder_items_finish (cnc, sync_data->res,
 							    sync_state,
@@ -1069,8 +1066,7 @@ e_ews_connection_sync_folder_items	(EEwsConnection *cnc,
 							    items_deleted,
 							    error);
 
-	g_main_context_unref (sync_data->context);
-	g_main_loop_unref (sync_data->loop);
+	e_flag_free (sync_data->eflag);
 	g_object_unref (sync_data->res);
 	g_free (sync_data);
 
@@ -1157,16 +1153,13 @@ e_ews_connection_sync_folder_hierarchy	(EEwsConnection *cnc,
 	gboolean result;
 
 	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->context = g_main_context_new ();
-	sync_data->loop = g_main_loop_new (sync_data->context, FALSE);
+	sync_data->eflag = e_flag_new ();
 	
-	g_main_context_push_thread_default (sync_data->context);
 	e_ews_connection_sync_folder_hierarchy_start	(cnc, pri, *sync_state,
 							 ews_sync_reply_cb, cancellable,
 							 (gpointer) sync_data);
 
-	g_main_loop_run (sync_data->loop);
-	g_main_context_pop_thread_default (sync_data->context);
+	e_flag_wait (sync_data->eflag);
 
 	result = e_ews_connection_sync_folder_hierarchy_finish (cnc, sync_data->res,
 								sync_state,
@@ -1175,8 +1168,7 @@ e_ews_connection_sync_folder_hierarchy	(EEwsConnection *cnc,
 								folders_deleted,
 								error);
 
-	g_main_context_unref (sync_data->context);
-	g_main_loop_unref (sync_data->loop);
+	e_flag_free (sync_data->eflag);
 	g_object_unref (sync_data->res);
 	g_free (sync_data);
 
@@ -1284,26 +1276,21 @@ e_ews_connection_get_items	(EEwsConnection *cnc,
 	gboolean result;
 
 	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->context = g_main_context_new ();
-	sync_data->loop = g_main_loop_new (sync_data->context, FALSE);
+	sync_data->eflag = e_flag_new ();
 	
-	g_main_context_push_thread_default (sync_data->context);
 	e_ews_connection_get_items_start	(cnc, pri,ids, default_props,
 						 additional_props, include_mime,
 						 ews_sync_reply_cb, cancellable,
 						 (gpointer) sync_data); 
 		       				 	
-
-	g_main_loop_run (sync_data->loop);
-	g_main_context_pop_thread_default (sync_data->context);
+	e_flag_wait (sync_data->eflag);
 	
 	result = e_ews_connection_get_items_finish (cnc, 
 						    sync_data->res, 
 						    items, 
 						    error);
 	
-	g_main_context_unref (sync_data->context);
-	g_main_loop_unref (sync_data->loop);
+	e_flag_free (sync_data->eflag);
 	g_object_unref (sync_data->res);
 	g_free (sync_data);
 
