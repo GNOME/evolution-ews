@@ -154,6 +154,23 @@ camel_ews_store_summary_clear	(CamelEwsStoreSummary *ews_summary)
 	return TRUE;
 }
 
+gboolean	
+camel_ews_store_summary_remove	(CamelEwsStoreSummary *ews_summary)
+{
+	gint ret;
+	
+	S_LOCK(ews_summary);
+	
+	if (ews_summary->priv->key_file)
+		camel_ews_store_summary_clear (ews_summary);
+
+	ret = g_unlink (ews_summary->priv->path);
+
+	S_UNLOCK(ews_summary);
+
+	return (ret == 0);
+}
+
 void		
 camel_ews_store_summary_set_folder_name	(CamelEwsStoreSummary *ews_summary,
 					 const gchar *folder_full_name, 
@@ -267,6 +284,20 @@ camel_ews_store_summary_set_folder_total	(CamelEwsStoreSummary *ews_summary,
 
 	g_key_file_set_uint64	(ews_summary->priv->key_file, folder_full_name,
 				 "Total", total);
+	ews_summary->priv->dirty = TRUE;
+		
+	S_UNLOCK(ews_summary);
+}
+
+void		
+camel_ews_store_summary_set_folder_type		(CamelEwsStoreSummary *ews_summary,
+						 const gchar *folder_full_name, 
+						 guint64 ews_folder_type)
+{
+	S_LOCK(ews_summary);
+
+	g_key_file_set_uint64	(ews_summary->priv->key_file, folder_full_name,
+				 "FolderType", ews_folder_type);
 	ews_summary->priv->dirty = TRUE;
 		
 	S_UNLOCK(ews_summary);
@@ -419,6 +450,23 @@ camel_ews_store_summary_get_folder_total	(CamelEwsStoreSummary *ews_summary,
 
 	ret = g_key_file_get_uint64	(ews_summary->priv->key_file, folder_full_name,
 					 "Total", error);
+	
+	S_UNLOCK(ews_summary);
+
+	return ret;
+}
+
+guint64		
+camel_ews_store_summary_get_folder_type		(CamelEwsStoreSummary *ews_summary,
+						 const gchar *folder_full_name,
+						 GError **error)
+{
+	guint64 ret;
+
+	S_LOCK(ews_summary);
+
+	ret = g_key_file_get_uint64	(ews_summary->priv->key_file, folder_full_name,
+					 "FolderType", error);
 	
 	S_UNLOCK(ews_summary);
 

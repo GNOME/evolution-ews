@@ -46,6 +46,7 @@ gboolean	camel_ews_store_summary_load	(CamelEwsStoreSummary *ews_summary,
 gboolean	camel_ews_store_summary_save	(CamelEwsStoreSummary *ews_summary,
 						 GError **error);
 gboolean	camel_ews_store_summary_clear	(CamelEwsStoreSummary *ews_summary);
+gboolean	camel_ews_store_summary_remove	(CamelEwsStoreSummary *ews_summary);
 
 void		camel_ews_store_summary_set_folder_name
 						(CamelEwsStoreSummary *ews_summary,
@@ -75,6 +76,10 @@ void		camel_ews_store_summary_set_folder_total
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_full_name, 
 						 guint64 total);
+void		camel_ews_store_summary_set_folder_type
+						(CamelEwsStoreSummary *ews_summary,
+						 const gchar *folder_full_name, 
+						 guint64 ews_foldeews_folder_type);
 
 const gchar *	camel_ews_store_summary_get_folder_name
 						(CamelEwsStoreSummary *ews_summary,
@@ -108,6 +113,11 @@ guint64		camel_ews_store_summary_get_folder_total
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_full_name,
 						 GError **error);
+guint64		camel_ews_store_summary_get_folder_type
+						(CamelEwsStoreSummary *ews_summary,
+						 const gchar *folder_full_name,
+						 GError **error);
+
 GSList *	camel_ews_store_summary_get_folders	
 						(CamelEwsStoreSummary *ews_summary);
 

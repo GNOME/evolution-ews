@@ -152,8 +152,6 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 	e_source_set_color_spec (source, "#EEBC60");
 
 	e_source_group_add_source (group, source, -1);
-	g_object_unref (source);
-	
 	e_source_list_sync (source_list, NULL);
 
 	if (selection_key) {
@@ -166,6 +164,7 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 		g_slist_foreach (ids, (GFunc) g_free, NULL);
 		g_slist_free (ids);
 	}
+	g_object_unref (source);
 
 exit:
 	g_object_unref (group);
@@ -178,7 +177,6 @@ exit:
 gboolean
 ews_esource_utils_remove_esource	(const gchar *fid, 
 					 const gchar *account_name, 
-					 const gchar *folder_id,
 					 EwsFolderType ftype)
 {
 	ESourceList *source_list;

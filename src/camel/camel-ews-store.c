@@ -310,6 +310,11 @@ folder_info_from_store_summary (CamelEwsStore *store, const gchar *top, guint32 
 
 	for (l = folders; l != NULL; l = g_slist_next (l)) {
 		CamelFolderInfo *fi;
+		gint64 ftype;
+		
+		ftype = camel_ews_store_summary_get_folder_type (ews_summary, l->data, NULL);
+		if (ftype != EWS_FOLDER_TYPE_MAILBOX)
+			continue;
 
 		fi = camel_ews_utils_build_folder_info (store, l->data);
 		g_ptr_array_add	(folder_infos, fi);

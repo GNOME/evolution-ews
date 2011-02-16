@@ -27,7 +27,7 @@
 #define EXCHANGE_EWS_PASSWORD_COMPONENT "ExchangeEWS"
 
 #define EWS_URI_PREFIX   "ews://" 
-#define EWS_PREFIX_LENGTH 7
+#define EWS_PREFIX_LENGTH 6
 
 ExchangeEWSAccountListener *
 exchange_ews_accounts_peek_config_listener (void);

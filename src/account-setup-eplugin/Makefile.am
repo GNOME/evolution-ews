@@ -36,6 +36,7 @@ liborg_gnome_exchange_ews_la_LIBADD = 			\
 	$(CAMEL_LIBS) 					\
 	$(top_builddir)/src/server/libeews-1.2.la	\
 	$(top_builddir)/src/utils/libewsutils.la 	\
+	$(top_builddir)/src/camel/libcamelews.la 	\
 	$(LIBECAL_LIBS)
 
 liborg_gnome_exchange_ews_la_LDFLAGS = -module -avoid-version $(NO_UNDEFINED)

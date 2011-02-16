@@ -1,12 +1,3 @@
-SERVERS_EWS_CPPFLAGS= \
-	-DG_LOG_DOMAIN=\"libeews\"		\
-	-I$(top_srcdir)					\
-	-I$(top_builddir)				\
-	$(SOUP_CFLAGS)					\
-	$(EVOLUTION_DATA_SERVER_CFLAGS)					\
-	$(LIBEDATASERVER_CFLAGS)			\
-	$(E_DATA_SERVER_CFLAGS)
-
 lib_LTLIBRARIES = libeews-1.2.la
 
 libeews_1_2_la_CPPFLAGS = \

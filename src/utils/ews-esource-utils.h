@@ -17,8 +17,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CAMEL_EWS_UTILS_H
-#define CAMEL_EWS_UTILS_H
+#ifndef EWS_ESOURCE_UTILS_H
+#define EWS_ESOURCE_UTILS_H
 
 #include <e-ews-folder.h>
 
@@ -35,7 +35,6 @@ gboolean
 ews_esource_utils_remove_esource	
 				(const gchar *fid, 
 				 const gchar *account_name, 
-				 const gchar *folder_id,
 				 EwsFolderType ftype);
 
 gboolean
