@@ -32,7 +32,7 @@
 #define d(x) x
 
 /* For the number of connections */
-#define EWS_CONNECTION_MAX_REQUESTS 1
+#define EWS_CONNECTION_MAX_REQUESTS 10
 
 #define QUEUE_LOCK(x) (g_static_rec_mutex_lock(&(x)->priv->queue_lock))
 #define QUEUE_UNLOCK(x) (g_static_rec_mutex_unlock(&(x)->priv->queue_lock))
@@ -41,7 +41,7 @@ G_DEFINE_TYPE (EEwsConnection, e_ews_connection, G_TYPE_OBJECT)
 
 static GObjectClass *parent_class = NULL;
 static GHashTable *loaded_connections_permissions = NULL;
-static void ews_next_request (EEwsConnection *cnc);
+static gboolean ews_next_request (gpointer _cnc);
 static gint comp_func (gconstpointer a, gconstpointer b);
 static GQuark ews_connection_error_quark (void);
 typedef void (*response_cb) (ESoapResponse *response, gpointer data);
@@ -67,13 +67,6 @@ struct _EEwsConnectionPrivate {
 	GSList *active_job_queue;
 	GStaticRecMutex queue_lock;
 };
-
-enum {
-	NEXT_REQUEST,
-	LAST_SIGNAL
-};
-
-static guint signals[LAST_SIGNAL];
 
 typedef struct _EwsNode EwsNode;
 typedef struct _EwsAsyncData EwsAsyncData;
@@ -217,9 +210,10 @@ ews_get_response_status (ESoapParameter *param, GError **error)
 	return ret;
 }
 
-static void
-ews_next_request (EEwsConnection *cnc)
+static gboolean
+ews_next_request (gpointer _cnc)
 {
+	EEwsConnection *cnc = _cnc;
 	GSList *l;
 	EwsNode *node;
 
@@ -229,7 +223,7 @@ ews_next_request (EEwsConnection *cnc)
 
 	if (!l || g_slist_length (cnc->priv->active_job_queue) >= EWS_CONNECTION_MAX_REQUESTS) {
 		QUEUE_UNLOCK (cnc);
-		return;
+		return FALSE;
 	}
 	
 	node = (EwsNode *) l->data;
@@ -252,6 +246,7 @@ ews_next_request (EEwsConnection *cnc)
 	soup_session_queue_message (cnc->priv->soup_session, SOUP_MESSAGE (node->msg), ews_response_cb, node);
 
 	QUEUE_UNLOCK (cnc);
+	return FALSE;
 }
 
 /**
@@ -274,7 +269,7 @@ ews_active_job_done (EEwsConnection *cnc, EwsNode *ews_node)
 	QUEUE_UNLOCK (cnc);
 
 	g_free (ews_node);
-	g_signal_emit	(cnc, signals[NEXT_REQUEST], 0);
+	g_idle_add_full(G_PRIORITY_DEFAULT, ews_next_request, cnc, NULL);
 }
 
 static void 
@@ -329,7 +324,7 @@ ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_c
 								 (gpointer) node, NULL);
 	}
 
-	g_signal_emit	(cnc, signals[NEXT_REQUEST], 0);
+	g_idle_add_full(G_PRIORITY_DEFAULT, ews_next_request, cnc, NULL);
 }
 
 /* Response callbacks */
@@ -627,20 +622,6 @@ e_ews_connection_class_init (EEwsConnectionClass *klass)
 
 	object_class->dispose = e_ews_connection_dispose;
 	object_class->finalize = e_ews_connection_finalize;
-
-	klass->next_request = NULL;
-
-	/**
-	 * EEwsConnection::next_request
-	 **/
-	signals[NEXT_REQUEST] = g_signal_new (
-		"next_request",
-		G_OBJECT_CLASS_TYPE (klass),
-		G_SIGNAL_RUN_FIRST,
-		G_STRUCT_OFFSET (EEwsConnectionClass, next_request),
-		NULL, NULL,
-		g_cclosure_marshal_VOID__VOID,
-		G_TYPE_NONE, 0);
 }
 
 static void
@@ -664,7 +645,6 @@ e_ews_connection_init (EEwsConnection *cnc)
 
 	g_static_rec_mutex_init (&priv->queue_lock);
 
-	g_signal_connect (cnc, "next_request", G_CALLBACK (ews_next_request), NULL);
 	g_signal_connect (priv->soup_session, "authenticate", G_CALLBACK(ews_connection_authenticate), cnc);
 }
 
