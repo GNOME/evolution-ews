@@ -333,6 +333,15 @@ exit:
 }
 
 static void
+e_cal_backend_ews_discard_alarm (ECalBackend *backend, EDataCal *cal, const gchar *uid, const gchar *auid, GError **perror)
+{
+        /* None of the other backends seem to do anything here. Should we be
+	   clearing the <ReminderIsSet> property so that other clients also
+	   clear the alarm, so that cancelling it on *one* of your computers
+	   will stop it from annoying you on *all* of them? */
+}
+
+static void
 e_cal_backend_ews_get_timezone (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *tzid)
 {
 	icalcomponent *icalcomp;
@@ -1132,6 +1141,8 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->remove = e_cal_backend_ews_remove;
 	
 	backend_class->start_query = e_cal_backend_ews_start_query;
+
+	backend_class->discard_alarm = e_cal_backend_ews_discard_alarm;
 
 /*	backend_class->create_object = e_cal_backend_ews_create_object;
 	backend_class->modify_object = e_cal_backend_ews_modify_object;
