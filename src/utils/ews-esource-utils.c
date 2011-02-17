@@ -114,6 +114,7 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 	GConfClient* client;
 	const gchar *conf_key, *selection_key = NULL;
 	const gchar *source_name;
+	gchar *source_uri;
 	GSList *sources;
 	gboolean ret = TRUE;
 
@@ -141,7 +142,8 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 		goto exit;
 	}
 
-	source = e_source_new (source_name, email_id);
+	source_uri = g_strdup_printf("%s/%s", email_id, fid->id);
+	source = e_source_new (source_name, source_uri);
 	e_source_set_property (source, "auth", "1");
 	e_source_set_property (source, "username", username);
 	e_source_set_property (source, "auth-domain", "Ews");
@@ -165,6 +167,7 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 		g_slist_free (ids);
 	}
 	g_object_unref (source);
+	g_free(source_uri);
 
 exit:
 	g_object_unref (group);
