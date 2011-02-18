@@ -16,7 +16,6 @@ int main (int argc, char *argv[])
 	/*Register tests*/
 	g_test_add_func ("/libews/connections", connection_tests_run);
 	g_test_add_func ("/libews/autodiscovery", autodiscovery_tests_run);
-	g_test_add_func ("/libews/operations", op_tests_run);
 
 	return g_test_run ();
 }
