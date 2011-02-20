@@ -333,7 +333,7 @@ exit:
 }
 
 static void
-e_cal_backend_ews_discard_alarm (ECalBackend *backend, EDataCal *cal, const gchar *uid, const gchar *auid, GError **perror)
+e_cal_backend_ews_discard_alarm (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *uid, const gchar *auid)
 {
         /* None of the other backends seem to do anything here. Should we be
 	   clearing the <ReminderIsSet> property so that other clients also
