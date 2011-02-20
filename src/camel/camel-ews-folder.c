@@ -644,7 +644,7 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 		g_free(sync_state);
 	g_object_unref (cnc);
 
-	return TRUE;
+	return !rerror;
 }
 
 static gboolean
