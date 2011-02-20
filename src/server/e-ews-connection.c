@@ -174,6 +174,23 @@ comp_func (gconstpointer a, gconstpointer b)
 		return 0;
 }
 
+static void
+ews_parse_soap_fault (ESoapResponse *response, GError **error)
+{
+	ESoapParameter *param;
+	gchar *faultstring = NULL;
+
+	param = e_soap_response_get_first_parameter_by_name(response, "faultstring");
+	if (param)
+		faultstring = e_soap_parameter_get_string_value(param);
+
+
+	g_set_error (error, EWS_CONNECTION_ERROR, ERROR_UNKNOWN,
+		     "%s", faultstring?:"No <ResponseMessages> or SOAP <faultstring> in response");
+
+	g_free(faultstring);
+}
+
 static gboolean
 ews_get_response_status (ESoapParameter *param, GError **error)
 {
@@ -371,6 +388,12 @@ sync_hierarchy_response_cb (ESoapResponse *response, gpointer data)
 	GError *error = NULL;
 
 	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
+	if (!param) {
+		ews_parse_soap_fault(response, &error);
+		g_simple_async_result_set_from_error (enode->simple, error);
+		return;
+	}
+
 	subparam = e_soap_parameter_get_first_child_by_name (param, "SyncFolderHierarchyResponseMessage");
 	node = e_soap_parameter_get_first_child_by_name (subparam, "ResponseCode");
 
@@ -441,6 +464,12 @@ sync_folder_items_response_cb (ESoapResponse *response, gpointer data)
 	GError *error = NULL;
 
 	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
+	if (!param) {
+		ews_parse_soap_fault(response, &error);
+		g_simple_async_result_set_from_error (enode->simple, error);
+		return;
+	}
+		
 	subparam = e_soap_parameter_get_first_child_by_name (param, "SyncFolderItemsResponseMessage");
 	node = e_soap_parameter_get_first_child_by_name (subparam, "ResponseCode");
 
@@ -510,6 +539,11 @@ get_items_response_cb (ESoapResponse *response, gpointer data)
 	GError *error = NULL;
 
 	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
+	if (!param) {
+		ews_parse_soap_fault(response, &error);
+		g_simple_async_result_set_from_error (enode->simple, error);
+		return;
+	}
 	
 	for (subparam = e_soap_parameter_get_first_child_by_name (param, "GetItemResponseMessage");
 		subparam != NULL;
