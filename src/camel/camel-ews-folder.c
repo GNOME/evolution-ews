@@ -581,17 +581,13 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 	   Due to these reasons we just get the item ids and its type in
 	   SyncFolderItem request and fetch the item using the 
 	   GetItem request. */
+	sync_state = ((CamelEwsSummary *) folder->summary)->sync_state;
 	do
 	{
 		GSList *items_created = NULL, *items_updated = NULL;
 		GSList *items_deleted = NULL;
 		guint32 total, unread;
 
-		sync_state = (gchar *) camel_ews_store_summary_get_sync_state	
-							(ews_store->summary,
-							 full_name, NULL);
-
-		sync_state = ((CamelEwsSummary *) folder->summary)->sync_state;
 		e_ews_connection_sync_folder_items	
 							(cnc, EWS_PRIORITY_MEDIUM,
 							 &sync_state, id,
@@ -632,11 +628,10 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 		camel_ews_store_summary_save (ews_store->summary, NULL);
 
 		g_free (((CamelEwsSummary *) folder->summary)->sync_state);
-		((CamelEwsSummary *) folder->summary)->sync_state = g_strdup (sync_state);
+		((CamelEwsSummary *) folder->summary)->sync_state = sync_state;
+
 		camel_folder_summary_save_to_db (folder->summary, NULL);
 
-		g_free (sync_state);
-		sync_state = NULL;
 	} while (!rerror && !includes_last_item);
 	
 	if (rerror)
@@ -645,8 +640,8 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 	g_mutex_lock (priv->state_lock);
 	priv->refreshing = FALSE;
 	g_mutex_unlock (priv->state_lock);
-
-	g_free (sync_state);
+	if (sync_state != ((CamelEwsSummary *) folder->summary)->sync_state)
+		g_free(sync_state);
 	g_object_unref (cnc);
 
 	return TRUE;
