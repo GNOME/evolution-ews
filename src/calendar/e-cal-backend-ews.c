@@ -37,6 +37,8 @@
 #include <libecal/e-cal-component.h>
 #include <libecal/e-cal-time-util.h>
 #include <libical/icaltz-util.h>
+#include <libical/icalcomponent.h>
+#include <libical/icalproperty.h>
 #include "e-cal-backend-ews.h"
 #include "e-cal-backend-ews-utils.h"
 #include "e-ews-connection.h"
@@ -676,6 +678,118 @@ ews_cal_delete_comp (ECalBackendEws *cbews, ECalComponent *comp, const gchar *it
 	g_free (comp_str);
 }
 
+typedef struct {
+	ECalBackendEws *cbews;
+	EDataCal *cal;
+	ECalComponent *comp;
+	EServerMethodContext context;
+	GSList *ids;
+} EwsRemoveData;
+
+static void
+ews_cal_remove_object_cb (GObject *object, GAsyncResult *res, gpointer user_data)
+{
+	EwsRemoveData *remove_data = user_data;
+	GSimpleAsyncResult *simple;
+	GError *error = NULL;
+
+	simple = G_SIMPLE_ASYNC_RESULT (res);
+
+	if (!g_simple_async_result_propagate_error(simple, &error)) {
+		/* FIXME: This is horrid. Will bite us when we start to delete
+		   more than one item at a time... */
+		ews_cal_delete_comp (remove_data->cbews, remove_data->comp,
+				     g_slist_nth_data(remove_data->ids, 0));
+	} else {
+		/* The calendar UI doesn't *display* errors unless they have
+		   the OtherError code */
+		error->code = OtherError;
+	}
+
+	e_data_cal_notify_remove (remove_data->cal, remove_data->context, error);
+
+	g_slist_foreach (remove_data->ids, (GFunc) g_free, NULL);
+	g_slist_free (remove_data->ids);
+	g_object_unref(remove_data->cbews);
+	g_object_unref(remove_data->comp);
+	g_object_unref(remove_data->cal);
+	g_free(remove_data);
+}
+
+static void
+e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context,
+				 const gchar *uid, const gchar *rid, CalObjModType mod)
+{
+	EwsRemoveData *remove_data;
+	ECalBackendEws *cbews = (ECalBackendEws *) backend;
+	ECalBackendEwsPrivate *priv;
+	ECalComponent *comp;
+	icalcomponent *icomp;
+	icalproperty *prop;
+	GError *error = NULL;
+	const gchar *itemid = NULL;
+
+	e_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
+
+	priv = cbews->priv;
+
+	/* We don't handle recurring appointments yet */
+	if (rid) {
+		g_propagate_error(&error, EDC_ERROR_EX(OtherError,
+		    "Removal of individual recurrences not yet supported"));
+		goto exit;
+	}
+
+	PRIV_LOCK (priv);
+
+	comp = e_cal_backend_store_get_component (priv->store, uid, rid);
+	if (!comp) {
+		g_propagate_error (&error, EDC_ERROR(ObjectNotFound));
+		goto exit;
+	}
+
+	PRIV_UNLOCK (priv);
+
+	icomp = e_cal_component_get_icalcomponent (comp);
+	prop = icalcomponent_get_first_property (icomp, ICAL_X_PROPERTY);
+	while (prop) {
+		const gchar *name = icalproperty_get_x_name (prop);
+		const gchar *id;
+
+		if (name && !g_ascii_strcasecmp(name, "X-EVOLUTION-ITEMID")) {
+			id = icalproperty_get_x (prop);
+			if (id) {
+				itemid = strdup(id);
+				break;
+			}
+		}
+		prop = icalcomponent_get_next_property (icomp, ICAL_X_PROPERTY);
+	}
+	
+	if (!itemid) {
+		g_propagate_error(&error, EDC_ERROR_EX(OtherError,
+					       "Cannot determine EWS ItemId"));
+		g_object_unref (comp);
+		goto exit;
+	}
+
+	remove_data = g_new0 (EwsRemoveData, 1);
+	remove_data->cbews = g_object_ref(cbews);
+	remove_data->comp = comp;
+	remove_data->cal = g_object_ref(cal);
+	remove_data->context = context;
+	remove_data->ids = g_slist_append (NULL, (gpointer)itemid);
+
+	e_ews_connection_delete_items_start (priv->cnc, EWS_PRIORITY_MEDIUM, remove_data->ids,
+					     "HardDelete", "SendToNone", NULL,
+					     ews_cal_remove_object_cb, NULL,
+					     remove_data);
+	return;
+
+exit:
+	e_data_cal_notify_remove (cal, context, error);
+}
+
 /* TODO Do not replicate this in every backend */
 static icaltimezone *
 resolve_tzid (const gchar *tzid, gpointer user_data)
@@ -1152,7 +1266,9 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 
 /*	backend_class->create_object = e_cal_backend_ews_create_object;
 	backend_class->modify_object = e_cal_backend_ews_modify_object;
+ */
 	backend_class->remove_object = e_cal_backend_ews_remove_object;
+/*
 	backend_class->receive_objects = e_cal_backend_ews_receive_objects;
 	backend_class->send_objects = e_cal_backend_ews_send_objects;
 	backend_class->get_attachment_list = e_cal_backend_ews_get_attachment_list;
