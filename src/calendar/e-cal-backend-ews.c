@@ -654,6 +654,28 @@ e_cal_backend_ews_get_object_list (ECalBackend *backend, EDataCal *cal, EServerM
 	}
 }
 
+static void
+ews_cal_delete_comp (ECalBackendEws *cbews, ECalComponent *comp, const gchar *item_id)
+{
+	ECalBackendEwsPrivate *priv = cbews->priv;
+	gchar *comp_str;
+	ECalComponentId *id;
+
+	id = e_cal_component_get_id (comp);
+	e_cal_backend_store_remove_component (priv->store, id->uid, id->rid);
+
+	/* TODO test with recurrence handling */
+	comp_str = e_cal_component_get_as_string (comp);
+	e_cal_backend_notify_object_removed (E_CAL_BACKEND (cbews), id, comp_str, NULL);
+
+	PRIV_LOCK (priv);
+	g_hash_table_remove (priv->item_id_hash, item_id);
+	PRIV_UNLOCK (priv);
+
+	e_cal_component_free_id (id);
+	g_free (comp_str);
+}
+
 /* TODO Do not replicate this in every backend */
 static icaltimezone *
 resolve_tzid (const gchar *tzid, gpointer user_data)
@@ -872,24 +894,8 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 		comp = g_hash_table_lookup (priv->item_id_hash, item_id);
 		PRIV_UNLOCK (priv);
 
-		if (comp) {
-			gchar *comp_str;
-			ECalComponentId *id;
-
-			id = e_cal_component_get_id (comp);
-			e_cal_backend_store_remove_component (priv->store, id->uid, id->rid);
-
-			/* TODO test with recurrence handling */
-			comp_str = e_cal_component_get_as_string (comp);
-			e_cal_backend_notify_object_removed (E_CAL_BACKEND (cbews), id, comp_str, NULL);
-
-			PRIV_LOCK (priv);
-			g_hash_table_remove (priv->item_id_hash, item_id);
-			PRIV_UNLOCK (priv);
-
-			e_cal_component_free_id (id);
-			g_free (comp_str);
-		}
+		if (comp)
+			ews_cal_delete_comp(cbews, comp, item_id);
 
 		g_free (m->data);
 	}
