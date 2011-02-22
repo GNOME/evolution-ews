@@ -1354,6 +1354,8 @@ e_ews_connection_delete_items_start	(EEwsConnection *cnc,
 					 gint pri,
 					 GSList *ids,
 					 const gchar *delete_type,
+					 const gchar *send_cancels,
+					 const gchar *affected_tasks,
 					 GAsyncReadyCallback cb,
 					 GCancellable *cancellable,
 					 gpointer user_data)
@@ -1365,6 +1367,13 @@ e_ews_connection_delete_items_start	(EEwsConnection *cnc,
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "DeleteItem",
 					     "DeleteType", delete_type);
+
+	if (send_cancels)
+		e_soap_message_add_attribute (msg, "SendMeetingCancellations",
+					      send_cancels, NULL, NULL);
+	if (affected_tasks)
+		e_soap_message_add_attribute (msg, "AffectedTaskOccurrences",
+					      affected_tasks, NULL, NULL);
 
 	e_soap_message_start_element (msg, "ItemIds", NULL, NULL);
 	
@@ -1414,6 +1423,8 @@ e_ews_connection_delete_items	(EEwsConnection *cnc,
 				 gint pri,
 				 GSList *ids,
 				 const gchar *delete_type,
+				 const gchar *send_cancels,
+				 const gchar *affected_tasks,
 				 GCancellable *cancellable,
 				 GError **error)
 {
@@ -1424,6 +1435,7 @@ e_ews_connection_delete_items	(EEwsConnection *cnc,
 	sync_data->eflag = e_flag_new ();
 	
 	e_ews_connection_delete_items_start (cnc, pri, ids, delete_type,
+					     send_cancels, affected_tasks,
 					     ews_sync_reply_cb, cancellable,
 					     (gpointer) sync_data); 
 		       				 	

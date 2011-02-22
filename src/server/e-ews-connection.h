@@ -139,6 +139,8 @@ void		e_ews_connection_delete_items_start
 						 gint pri,
 						 GSList *ids,
 						 const gchar *delete_type,
+						 const gchar *send_cancels,
+						 const gchar *affected_tasks,
 						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
 						 gpointer user_data);
@@ -152,6 +154,8 @@ gboolean	e_ews_connection_delete_items	(EEwsConnection *cnc,
 						 gint pri, 
 						 GSList *ids,
 						 const gchar *delete_type,
+						 const gchar *send_cancels,
+						 const gchar *affected_tasks,
 						 GCancellable *cancellable,
 						 GError **error);
 
