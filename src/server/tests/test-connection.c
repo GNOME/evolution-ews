@@ -131,10 +131,11 @@ folder_items_ready_callback (GObject *object, GAsyncResult *res, gpointer user_d
 	GSList *items_created = NULL, *items_updated = NULL;
 	GSList *items_deleted = NULL, *l;
 	gchar *sync_state = NULL;
+	gboolean last_folder_item;
 	GError *error = NULL;
 
 	/* Only for test program */
-	e_ews_connection_sync_folder_items_finish	(cnc, res, &sync_state,
+	e_ews_connection_sync_folder_items_finish	(cnc, res, &sync_state, &last_folder_item,
 							 &items_created, &items_updated,
 							 &items_deleted, &error);
 
@@ -198,9 +199,10 @@ folder_hierarchy_ready_callback (GObject *object, GAsyncResult *res, gpointer us
 	GSList *folders_deleted = NULL, *l;
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	gchar *sync_state = NULL;
+	gboolean last_folder;
 	GError *error = NULL;
 
-	e_ews_connection_sync_folder_hierarchy_finish	(cnc, res, &sync_state,
+	e_ews_connection_sync_folder_hierarchy_finish	(cnc, res, &sync_state, &last_folder,
 							 &folders_created, &folders_updated,
 							 &folders_deleted, &error);
 
