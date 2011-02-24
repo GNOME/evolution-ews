@@ -159,6 +159,34 @@ gboolean	e_ews_connection_delete_items	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 
+/* Update folder items */
+void		e_ews_connection_update_items_start 
+						(EEwsConnection *cnc,
+						 gint pri, 
+						 const gchar *conflict_res,
+						 const gchar *msg_disposition,
+						 const gchar *send_invites,
+						 const gchar *folder_id,
+						 GSList *changes,
+						 GAsyncReadyCallback cb,
+						 GCancellable *cancellable,
+						 gpointer user_data);
+
+gboolean	e_ews_connection_update_items_finish 
+						(EEwsConnection *cnc, 
+						 GAsyncResult *result,
+						 GError **error);
+
+gboolean	e_ews_connection_update_items	(EEwsConnection *cnc,
+						 gint pri, 
+						 const gchar *conflict_res,
+						 const gchar *msg_disposition,
+						 const gchar *send_invites,
+						 const gchar *folder_id,
+						 GSList *changes,
+						 GCancellable *cancellable,
+						 GError **error);
+
 /* Sync folder hierarchy */
 gboolean	e_ews_connection_sync_folder_hierarchy 
 						(EEwsConnection *cnc, 

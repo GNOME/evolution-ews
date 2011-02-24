@@ -28,6 +28,7 @@
 #include "e-ews-connection.h"
 #include <libedataserver/e-flag.h>
 #include "e-ews-message.h"
+#include "e-ews-item-change.h"
 
 #define d(x) x
 
@@ -586,6 +587,35 @@ delete_items_response_cb (ESoapResponse *response, gpointer data)
 	for (subparam = e_soap_parameter_get_first_child_by_name (param, "DeleteItemResponseMessage");
 		subparam != NULL;
 		subparam = e_soap_parameter_get_next_child_by_name (subparam, "DeleteItemResponseMessage")) {
+
+		node = e_soap_parameter_get_first_child_by_name (subparam, "ResponseCode");
+
+		success = ews_get_response_status (subparam, &error);
+		if (!success) {
+			g_simple_async_result_set_from_error (enode->simple, error);
+			return;
+		}
+	}
+}
+
+static void
+update_items_response_cb (ESoapResponse *response, gpointer data)
+{
+	EwsNode *enode = (EwsNode *) data;
+	ESoapParameter *param, *subparam, *node;
+	gboolean success = TRUE;
+	GError *error = NULL;
+
+	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
+	if (!param) {
+		ews_parse_soap_fault(response, &error);
+		g_simple_async_result_set_from_error (enode->simple, error);
+		return;
+	}
+	
+	for (subparam = e_soap_parameter_get_first_child_by_name (param, "UpdateItemResponseMessage");
+		subparam != NULL;
+		subparam = e_soap_parameter_get_next_child_by_name (subparam, "UpdateItemResponseMessage")) {
 
 		node = e_soap_parameter_get_first_child_by_name (subparam, "ResponseCode");
 
@@ -1442,6 +1472,175 @@ e_ews_connection_delete_items	(EEwsConnection *cnc,
 	e_flag_wait (sync_data->eflag);
 	
 	result = e_ews_connection_delete_items_finish (cnc, sync_data->res,
+						       error);
+	
+	e_flag_free (sync_data->eflag);
+	g_object_unref (sync_data->res);
+	g_free (sync_data);
+
+	return result;
+}
+
+static void ews_message_add_update (ESoapMessage *msg, EEwsUpdate *update)
+{
+	/* FIXME: How to represent individual updates? Transpose XmlNodes into
+	   the ESoapMessage directly? */
+}
+
+static void ews_message_add_itemchange (ESoapMessage *msg, EEwsItemChange *change)
+{
+	gchar *instance;
+	GSList *l;
+
+	e_soap_message_start_element (msg, "ItemChange", "types", NULL);
+
+	switch (change->type) {
+	case E_EWS_ITEMCHANGE_TYPE_ITEM:
+		e_soap_message_start_element (msg, "ItemId",
+					      "types", NULL);
+		e_soap_message_add_attribute (msg, "Id",
+					      change->itemid, NULL, NULL);
+		break;
+
+	case E_EWS_ITEMCHANGE_TYPE_OCCURRENCEITEM:
+		e_soap_message_start_element (msg, "OccurrenceItemId",
+					      "types", NULL);
+		e_soap_message_add_attribute (msg, "RecurringMasterId",
+					      change->itemid, NULL, NULL);
+		instance = g_strdup_printf("%d", change->instanceidx);
+		e_soap_message_add_attribute (msg, "InstanceIndex", instance,
+					      NULL, NULL);
+		g_free(instance);
+		break;
+
+	case E_EWS_ITEMCHANGE_TYPE_RECURRINGMASTER:
+		e_soap_message_start_element (msg, "RecurringMasterItemId",
+					      "types", NULL);
+		e_soap_message_add_attribute (msg, "OccurrenceId",
+					      change->itemid, NULL, NULL);
+		break;
+	}
+	e_soap_message_add_attribute (msg, "ChangeKey",
+				      change->changekey, NULL, NULL);
+	e_soap_message_end_element (msg);
+
+	e_soap_message_start_element (msg, "Updates", "types", NULL);
+
+	for (l = change->updates; l != NULL; l = g_slist_next (l))
+		ews_message_add_update(msg, l->data);
+
+	e_soap_message_end_element (msg); /* Updates */
+	e_soap_message_end_element (msg); /* ItemChange */
+}
+
+void
+e_ews_connection_update_items_start	(EEwsConnection *cnc,
+					 gint pri,
+					 const gchar *conflict_res,
+					 const gchar *msg_disposition,
+					 const gchar *send_invites,
+					 const gchar *folder_id,
+					 GSList *changes,
+					 GAsyncReadyCallback cb,
+					 GCancellable *cancellable,
+					 gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+	GSList *l;
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "UpdateItem",
+					     NULL, NULL);
+
+	if (conflict_res)
+		e_soap_message_add_attribute (msg, "ConflictResolution",
+					      conflict_res, NULL, NULL);
+	if (msg_disposition)
+		e_soap_message_add_attribute (msg, "MessageDisposition",
+					      msg_disposition, NULL, NULL);
+	if (send_invites)
+		e_soap_message_add_attribute (msg, "SendMeetingInvitationsOrCancellations",
+					      send_invites, NULL, NULL);
+
+	if (folder_id) {
+		e_soap_message_start_element (msg, "SavedItemFolderId", NULL, NULL);
+		e_ews_message_write_string_parameter_with_attribute (msg, "FolderId",
+						     "types", NULL, "Id", folder_id);
+		e_soap_message_end_element (msg);
+	}
+
+	e_soap_message_start_element (msg, "ItemChanges", NULL, NULL);
+	
+	for (l = changes; l != NULL; l = g_slist_next (l))
+		ews_message_add_itemchange(msg, l->data);
+	
+	e_soap_message_end_element (msg); /* ItemChanges */
+
+	e_soap_message_end_element (msg); /* UpdateItem */
+	
+	e_ews_message_write_footer (msg);
+
+	simple = g_simple_async_result_new (G_OBJECT (cnc),
+                                      cb,
+                                      user_data,
+                                      e_ews_connection_update_items_start);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	ews_connection_queue_request (cnc, msg, update_items_response_cb, pri, cancellable, simple);
+}
+
+gboolean
+e_ews_connection_update_items_finish	(EEwsConnection *cnc,
+					 GAsyncResult *result,
+					 GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_update_items_start),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	return TRUE;
+}
+
+gboolean		
+e_ews_connection_update_items	(EEwsConnection *cnc,
+				 gint pri,
+				 const gchar *conflict_res,
+				 const gchar *msg_disposition,
+				 const gchar *send_invites,
+				 const gchar *folder_id,
+				 GSList *changes,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	EwsSyncData *sync_data;
+	gboolean result;
+
+	sync_data = g_new0 (EwsSyncData, 1);
+	sync_data->eflag = e_flag_new ();
+	
+	e_ews_connection_update_items_start (cnc, pri, conflict_res,
+					     msg_disposition, send_invites,
+					     folder_id, changes,
+					     ews_sync_reply_cb, cancellable,
+					     (gpointer) sync_data); 
+		       				 	
+	e_flag_wait (sync_data->eflag);
+	
+	result = e_ews_connection_update_items_finish (cnc, sync_data->res,
 						       error);
 	
 	e_flag_free (sync_data->eflag);

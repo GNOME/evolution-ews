@@ -42,6 +42,7 @@ libeewsinclude_HEADERS =		\
         e-ews-connection.h		\
 	e-ews-folder.h			\
 	e-ews-item.h			\
+	e-ews-item-change.h		\
 	e-ews-message.h			
 
 %-$(API_VERSION).pc: %.pc
