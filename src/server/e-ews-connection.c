@@ -1483,8 +1483,20 @@ e_ews_connection_delete_items	(EEwsConnection *cnc,
 
 static void ews_message_add_update (ESoapMessage *msg, EEwsUpdate *update)
 {
-	/* FIXME: How to represent individual updates? Transpose XmlNodes into
-	   the ESoapMessage directly? */
+	switch (update->type) {
+	case E_EWS_UPDATE_TYPE_APPEND:
+		e_soap_message_start_element (msg, "AppendToItemField", "types", NULL);
+		break;
+	case E_EWS_UPDATE_TYPE_SET:
+		e_soap_message_start_element (msg, "SetItemField", "types", NULL);
+		break;
+	case E_EWS_UPDATE_TYPE_DELETE:
+		e_soap_message_start_element (msg, "DeleteItemField", "types", NULL);
+		break;
+	}
+	update->callback(msg, update->cb_data);
+
+	e_soap_message_end_element (msg);
 }
 
 static void ews_message_add_itemchange (ESoapMessage *msg, EEwsItemChange *change)

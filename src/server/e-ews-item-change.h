@@ -49,7 +49,8 @@ typedef enum {
 
 typedef struct {
 	EEwsUpdateType		type;
-//	XmlNode *		node;
+	void			(*callback)(ESoapMessage *message, gpointer user_data);
+	gpointer		cb_data;
 } EEwsUpdate;
 
 G_END_DECLS
