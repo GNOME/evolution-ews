@@ -558,11 +558,11 @@ get_items_response_cb (ESoapResponse *response, gpointer data)
 			return;
 		}
 
-		node = e_soap_parameter_get_first_child_by_name (subparam, "Items");
-
-		if (node)
+		for (node = e_soap_parameter_get_first_child_by_name (subparam, "Items");
+		     node; node = e_soap_parameter_get_next_child_by_name (subparam, "Items")) {
 			item = e_ews_item_new_from_soap_parameter (node);
-		items = g_slist_append (items, item);
+			items = g_slist_append (items, item);
+		}
 	}
 
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
