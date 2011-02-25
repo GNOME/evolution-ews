@@ -1501,48 +1501,15 @@ static void ews_message_add_update (ESoapMessage *msg, EEwsUpdate *update)
 
 static void ews_message_add_itemchange (ESoapMessage *msg, EEwsItemChange *change)
 {
-	gchar *instance;
 	GSList *l;
 
-	e_soap_message_start_element (msg, "ItemChange", "types", NULL);
-
-	switch (change->type) {
-	case E_EWS_ITEMCHANGE_TYPE_ITEM:
-		e_soap_message_start_element (msg, "ItemId",
-					      "types", NULL);
-		e_soap_message_add_attribute (msg, "Id",
-					      change->itemid, NULL, NULL);
-		break;
-
-	case E_EWS_ITEMCHANGE_TYPE_OCCURRENCEITEM:
-		e_soap_message_start_element (msg, "OccurrenceItemId",
-					      "types", NULL);
-		e_soap_message_add_attribute (msg, "RecurringMasterId",
-					      change->itemid, NULL, NULL);
-		instance = g_strdup_printf("%d", change->instanceidx);
-		e_soap_message_add_attribute (msg, "InstanceIndex", instance,
-					      NULL, NULL);
-		g_free(instance);
-		break;
-
-	case E_EWS_ITEMCHANGE_TYPE_RECURRINGMASTER:
-		e_soap_message_start_element (msg, "RecurringMasterItemId",
-					      "types", NULL);
-		e_soap_message_add_attribute (msg, "OccurrenceId",
-					      change->itemid, NULL, NULL);
-		break;
-	}
-	e_soap_message_add_attribute (msg, "ChangeKey",
-				      change->changekey, NULL, NULL);
-	e_soap_message_end_element (msg);
-
-	e_soap_message_start_element (msg, "Updates", "types", NULL);
+	e_ews_message_start_item_change(msg, change->type, change->itemid,
+					change->changekey, change->instanceidx);
 
 	for (l = change->updates; l != NULL; l = g_slist_next (l))
 		ews_message_add_update(msg, l->data);
 
-	e_soap_message_end_element (msg); /* Updates */
-	e_soap_message_end_element (msg); /* ItemChange */
+	e_ews_message_end_item_change(msg);
 }
 
 void

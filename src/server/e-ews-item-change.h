@@ -53,6 +53,11 @@ typedef struct {
 	gpointer		cb_data;
 } EEwsUpdate;
 
+void e_ews_message_start_item_change(ESoapMessage *msg, EEwsItemChangeType type,
+				     const gchar *itemid, const gchar *changekey,
+				     gint instance_index);
+void e_ews_message_end_item_change (ESoapMessage *msg);
+
 G_END_DECLS
 
 #endif
