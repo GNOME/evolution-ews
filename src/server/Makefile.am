@@ -19,6 +19,7 @@ libeews_1_2_la_SOURCES =		\
 	e-ews-connection.h		\
 	e-ews-folder.c			\
 	e-ews-item.c			\
+	e-ews-item-change.c		\
 	e-ews-message.c			\
 	e-soap-message.c		\
 	e-soap-message.h		\
