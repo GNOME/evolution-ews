@@ -1481,37 +1481,6 @@ e_ews_connection_delete_items	(EEwsConnection *cnc,
 	return result;
 }
 
-static void ews_message_add_update (ESoapMessage *msg, EEwsUpdate *update)
-{
-	switch (update->type) {
-	case E_EWS_UPDATE_TYPE_APPEND:
-		e_soap_message_start_element (msg, "AppendToItemField", "types", NULL);
-		break;
-	case E_EWS_UPDATE_TYPE_SET:
-		e_soap_message_start_element (msg, "SetItemField", "types", NULL);
-		break;
-	case E_EWS_UPDATE_TYPE_DELETE:
-		e_soap_message_start_element (msg, "DeleteItemField", "types", NULL);
-		break;
-	}
-	update->callback(msg, update->cb_data);
-
-	e_soap_message_end_element (msg);
-}
-
-static void ews_message_add_itemchange (ESoapMessage *msg, EEwsItemChange *change)
-{
-	GSList *l;
-
-	e_ews_message_start_item_change(msg, change->type, change->itemid,
-					change->changekey, change->instanceidx);
-
-	for (l = change->updates; l != NULL; l = g_slist_next (l))
-		ews_message_add_update(msg, l->data);
-
-	e_ews_message_end_item_change(msg);
-}
-
 void
 e_ews_connection_update_items_start	(EEwsConnection *cnc,
 					 gint pri,
@@ -1519,7 +1488,8 @@ e_ews_connection_update_items_start	(EEwsConnection *cnc,
 					 const gchar *msg_disposition,
 					 const gchar *send_invites,
 					 const gchar *folder_id,
-					 GSList *changes,
+					 EEwsRequestCreationCallback create_cb,
+					 gpointer create_user_data,
 					 GAsyncReadyCallback cb,
 					 GCancellable *cancellable,
 					 gpointer user_data)
@@ -1527,7 +1497,6 @@ e_ews_connection_update_items_start	(EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
-	GSList *l;
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "UpdateItem",
 					     NULL, NULL);
@@ -1551,9 +1520,8 @@ e_ews_connection_update_items_start	(EEwsConnection *cnc,
 
 	e_soap_message_start_element (msg, "ItemChanges", NULL, NULL);
 	
-	for (l = changes; l != NULL; l = g_slist_next (l))
-		ews_message_add_itemchange(msg, l->data);
-	
+	create_cb (msg, create_user_data);
+
 	e_soap_message_end_element (msg); /* ItemChanges */
 
 	e_soap_message_end_element (msg); /* UpdateItem */
@@ -1601,7 +1569,8 @@ e_ews_connection_update_items	(EEwsConnection *cnc,
 				 const gchar *msg_disposition,
 				 const gchar *send_invites,
 				 const gchar *folder_id,
-				 GSList *changes,
+				 EEwsRequestCreationCallback create_cb,
+				 gpointer create_user_data,
 				 GCancellable *cancellable,
 				 GError **error)
 {
@@ -1613,7 +1582,8 @@ e_ews_connection_update_items	(EEwsConnection *cnc,
 	
 	e_ews_connection_update_items_start (cnc, pri, conflict_res,
 					     msg_disposition, send_invites,
-					     folder_id, changes,
+					     folder_id,
+					     create_cb, create_user_data,
 					     ews_sync_reply_cb, cancellable,
 					     (gpointer) sync_data); 
 		       				 	

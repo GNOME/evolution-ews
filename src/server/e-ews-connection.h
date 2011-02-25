@@ -60,6 +60,9 @@ enum {
 	EWS_PRIORITY_HIGH
 };
 
+typedef void (*EEwsRequestCreationCallback) (ESoapMessage *msg,
+					     gpointer user_data);
+
 GType		e_ews_connection_get_type	(void);
 EEwsConnection *
 		e_ews_connection_new		(const gchar *uri,
@@ -167,7 +170,8 @@ void		e_ews_connection_update_items_start
 						 const gchar *msg_disposition,
 						 const gchar *send_invites,
 						 const gchar *folder_id,
-						 GSList *changes,
+						 EEwsRequestCreationCallback create_cb,
+						 gpointer create_user_data,
 						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
 						 gpointer user_data);
@@ -183,7 +187,8 @@ gboolean	e_ews_connection_update_items	(EEwsConnection *cnc,
 						 const gchar *msg_disposition,
 						 const gchar *send_invites,
 						 const gchar *folder_id,
-						 GSList *changes,
+						 EEwsRequestCreationCallback create_cb,
+						 gpointer create_user_data,
 						 GCancellable *cancellable,
 						 GError **error);
 
