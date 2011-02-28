@@ -207,6 +207,7 @@ void		e_ews_connection_create_items_start
 gboolean	e_ews_connection_create_items_finish 
 						(EEwsConnection *cnc, 
 						 GAsyncResult *result,
+						 GSList **ids,
 						 GError **error);
 
 gboolean	e_ews_connection_create_items	(EEwsConnection *cnc,
@@ -216,6 +217,7 @@ gboolean	e_ews_connection_create_items	(EEwsConnection *cnc,
 						 const gchar *folder_id,
 						 EEwsRequestCreationCallback create_cb,
 						 gpointer create_user_data,
+						 GSList **ids,
 						 GCancellable *cancellable,
 						 GError **error);
 

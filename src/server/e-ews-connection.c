@@ -632,6 +632,9 @@ create_items_response_cb (ESoapResponse *response, gpointer data)
 {
 	EwsNode *enode = (EwsNode *) data;
 	ESoapParameter *param, *subparam, *node;
+	EwsAsyncData *async_data;
+	GSList *ids = NULL;
+	EEwsItem *item;
 	gboolean success = TRUE;
 	GError *error = NULL;
 
@@ -653,7 +656,17 @@ create_items_response_cb (ESoapResponse *response, gpointer data)
 			g_simple_async_result_set_from_error (enode->simple, error);
 			return;
 		}
+
+		for (node = e_soap_parameter_get_first_child_by_name (subparam, "Items");
+		     node != NULL;
+		     node = e_soap_parameter_get_next_child_by_name (node, "Items")) {
+
+			item = e_ews_item_new_from_soap_parameter (node);
+			ids = g_slist_append (ids, (gpointer)item);
+		}
 	}
+	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
+	async_data->items = ids;
 }
 
 static void
@@ -1689,6 +1702,7 @@ e_ews_connection_create_items_start	(EEwsConnection *cnc,
 gboolean
 e_ews_connection_create_items_finish	(EEwsConnection *cnc,
 					 GAsyncResult *result,
+					 GSList **ids,
 					 GError **error)
 {
 	GSimpleAsyncResult *simple;
@@ -1705,6 +1719,8 @@ e_ews_connection_create_items_finish	(EEwsConnection *cnc,
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
 
+	*ids = async_data->items;
+
 	return TRUE;
 }
 
@@ -1716,6 +1732,7 @@ e_ews_connection_create_items	(EEwsConnection *cnc,
 				 const gchar *folder_id,
 				 EEwsRequestCreationCallback create_cb,
 				 gpointer create_user_data,
+				 GSList **ids,
 				 GCancellable *cancellable,
 				 GError **error)
 {
@@ -1734,7 +1751,7 @@ e_ews_connection_create_items	(EEwsConnection *cnc,
 	e_flag_wait (sync_data->eflag);
 	
 	result = e_ews_connection_create_items_finish (cnc, sync_data->res,
-						       error);
+						       ids, error);
 	
 	e_flag_free (sync_data->eflag);
 	g_object_unref (sync_data->res);
