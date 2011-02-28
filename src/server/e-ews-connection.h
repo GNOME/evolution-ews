@@ -191,6 +191,33 @@ gboolean	e_ews_connection_update_items	(EEwsConnection *cnc,
 						 gpointer create_user_data,
 						 GCancellable *cancellable,
 						 GError **error);
+/* Create folder items */
+void		e_ews_connection_create_items_start 
+						(EEwsConnection *cnc,
+						 gint pri, 
+						 const gchar *msg_disposition,
+						 const gchar *send_invites,
+						 const gchar *folder_id,
+						 EEwsRequestCreationCallback create_cb,
+						 gpointer create_user_data,
+						 GAsyncReadyCallback cb,
+						 GCancellable *cancellable,
+						 gpointer user_data);
+
+gboolean	e_ews_connection_create_items_finish 
+						(EEwsConnection *cnc, 
+						 GAsyncResult *result,
+						 GError **error);
+
+gboolean	e_ews_connection_create_items	(EEwsConnection *cnc,
+						 gint pri, 
+						 const gchar *msg_disposition,
+						 const gchar *send_invites,
+						 const gchar *folder_id,
+						 EEwsRequestCreationCallback create_cb,
+						 gpointer create_user_data,
+						 GCancellable *cancellable,
+						 GError **error);
 
 /* Sync folder hierarchy */
 gboolean	e_ews_connection_sync_folder_hierarchy 
