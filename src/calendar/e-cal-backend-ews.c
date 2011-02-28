@@ -348,7 +348,7 @@ static void clear_reminder_is_set (ESoapMessage *msg, gpointer user_data)
 {
 	EwsDiscardAlarmData *edad = user_data;
 
-	e_ews_message_start_item_change (msg, E_EWS_UPDATE_TYPE_SET, 
+	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
 					 edad->itemid, NULL, 0);
 
 	/* FIXME: Provide higher-level helper functions to add this kind
