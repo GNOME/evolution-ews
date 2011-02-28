@@ -33,26 +33,6 @@ typedef enum {
 	E_EWS_ITEMCHANGE_TYPE_RECURRINGMASTER,
 } EEwsItemChangeType;
 
-typedef struct {
-	EEwsItemChangeType	type;
-	const gchar *		itemid;
-	const gchar *		changekey;
-	gint			instanceidx;
-	GSList *		updates;
-} EEwsItemChange;
-
-typedef enum {
-	E_EWS_UPDATE_TYPE_APPEND,
-	E_EWS_UPDATE_TYPE_SET,
-	E_EWS_UPDATE_TYPE_DELETE,
-} EEwsUpdateType;
-
-typedef struct {
-	EEwsUpdateType		type;
-	void			(*callback)(ESoapMessage *message, gpointer user_data);
-	gpointer		cb_data;
-} EEwsUpdate;
-
 void e_ews_message_start_item_change(ESoapMessage *msg, EEwsItemChangeType type,
 				     const gchar *itemid, const gchar *changekey,
 				     gint instance_index);
