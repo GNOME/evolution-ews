@@ -42,6 +42,8 @@
 #include "e-cal-backend-ews.h"
 #include "e-cal-backend-ews-utils.h"
 #include "e-ews-connection.h"
+#include "e-ews-message.h"
+#include "e-ews-item-change.h"
 
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -105,6 +107,7 @@ struct _ECalBackendEwsPrivate {
 #define PARENT_TYPE E_TYPE_CAL_BACKEND
 static ECalBackendClass *parent_class = NULL;
 static void ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data);
+static gchar *ews_cal_component_get_item_id (ECalComponent *comp);
 
 static void
 switch_offline (ECalBackendEws *cbews)
@@ -334,13 +337,93 @@ exit:
 	e_data_cal_notify_timezone_added (cal, context, error, tzobj);
 }
 
+typedef struct {
+	ECalBackendEws *cbews;
+	EDataCal *cal;
+	EServerMethodContext *context;
+	gchar *itemid;
+} EwsDiscardAlarmData;
+
+static void clear_reminder_is_set (ESoapMessage *msg, gpointer user_data)
+{
+	EwsDiscardAlarmData *edad = user_data;
+
+	e_ews_message_start_item_change (msg, E_EWS_UPDATE_TYPE_SET, 
+					 edad->itemid, NULL, 0);
+
+	/* FIXME: Provide higher-level helper functions to add this kind
+	   of thing */
+	e_soap_message_start_element (msg, "SetItemField", "types", NULL);
+
+	e_soap_message_start_element (msg, "FieldURI", "types", NULL);
+	e_soap_message_add_attribute (msg, "FieldURI", "item:ReminderIsSet", NULL, NULL);
+	e_soap_message_end_element (msg);
+
+	e_soap_message_start_element (msg, "Item", "types", NULL);
+	e_ews_message_write_string_parameter (msg, "ReminderIsSet", "types", "false");
+	e_soap_message_end_element (msg); /* Item */
+
+	e_soap_message_end_element (msg); /* SetItemField */
+
+	e_ews_message_end_item_change (msg);
+}
+
+
+static void
+ews_cal_discard_alarm_cb (GObject *object, GAsyncResult *res, gpointer user_data)
+{
+	EEwsConnection *cnc = E_EWS_CONNECTION (object);
+	EwsDiscardAlarmData *edad = user_data;
+	GError *error = NULL;
+
+	if (!e_ews_connection_update_items_finish (cnc, res, &error)) {
+		/* The calendar UI doesn't *display* errors unless they have
+		   the OtherError code */
+		error->code = OtherError;
+	}
+
+	e_data_cal_notify_alarm_discarded (edad->cal, edad->context, error);
+
+	g_free(edad->itemid);
+	g_object_unref(edad->cbews);
+	g_object_unref(edad->cal);
+	g_free(edad);
+}
+	
 static void
 e_cal_backend_ews_discard_alarm (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *uid, const gchar *auid)
 {
-        /* None of the other backends seem to do anything here. Should we be
-	   clearing the <ReminderIsSet> property so that other clients also
-	   clear the alarm, so that cancelling it on *one* of your computers
-	   will stop it from annoying you on *all* of them? */
+	ECalBackendEws *cbews = (ECalBackendEws *) backend;
+	ECalBackendEwsPrivate *priv;
+	EwsDiscardAlarmData *edad;
+	ECalComponent *comp;
+
+	priv = cbews->priv;
+
+	PRIV_LOCK (priv);
+
+	comp = e_cal_backend_store_get_component (priv->store, uid, NULL);
+	if (!comp) {
+		e_data_cal_notify_alarm_discarded (cal, context,
+						   EDC_ERROR(ObjectNotFound));
+		return;
+	}
+
+	PRIV_UNLOCK (priv);
+
+	/* FIXME: Can't there be multiple alarms for each event? Or does
+	   Exchange not support that? */
+	edad = g_new0 (EwsDiscardAlarmData, 1);
+	edad->cbews = g_object_ref (cbews);
+	edad->cal = g_object_ref (cal);
+	edad->context = context;
+	edad->itemid = ews_cal_component_get_item_id (comp);
+
+	e_ews_connection_update_items_start (priv->cnc, EWS_PRIORITY_MEDIUM,
+					     NULL, NULL, NULL, NULL,
+					     clear_reminder_is_set, edad,
+					     ews_cal_discard_alarm_cb, NULL,
+					     edad);
 }
 
 static void
