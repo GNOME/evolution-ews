@@ -1562,15 +1562,10 @@ e_ews_connection_update_items_start	(EEwsConnection *cnc,
 
 	e_soap_message_start_element (msg, "ItemChanges", NULL, NULL);
 	
-	e_soap_message_start_element (msg, "ItemChange", "types", NULL);
-
 	create_cb (msg, create_user_data);
 
-	e_soap_message_end_element (msg); /* ItemChange */
 	e_soap_message_end_element (msg); /* ItemChanges */
 
-	e_soap_message_end_element (msg); /* UpdateItem */
-	
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
