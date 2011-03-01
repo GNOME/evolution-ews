@@ -56,6 +56,7 @@ typedef enum {
 typedef struct {
 	gchar *id;
 	gchar *change_key;
+	gboolean is_distinguished_id;
 } EwsFolderId;
 
 GType		e_ews_folder_get_type (void);
@@ -74,6 +75,8 @@ gboolean	e_ews_folder_get_is_writable (EEwsFolder *folder);
 void		e_ews_folder_set_is_writable (EEwsFolder *folder, gboolean writable);
 EwsFolderType	e_ews_folder_get_folder_type (EEwsFolder *folder);
 void 		e_ews_folder_set_folder_type (EEwsFolder *folder, EwsFolderType folder_type);
+
+void		e_ews_folder_free_fid (EwsFolderId *fid);
 
 G_END_DECLS
 

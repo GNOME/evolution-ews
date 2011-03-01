@@ -62,6 +62,13 @@ enum {
 
 typedef void (*EEwsRequestCreationCallback) (ESoapMessage *msg,
 					     gpointer user_data);
+typedef enum {
+	EWS_SEARCH_AD,
+	EWS_SEARCH_AD_CONTACTS,
+	EWS_SEARCH_CONTACTS,
+	EWS_SEARCH_CONTACTS_AD
+	
+} EwsContactsSearchScope;
 
 GType		e_ews_connection_get_type	(void);
 EEwsConnection *
@@ -72,6 +79,8 @@ EEwsConnection *
 gchar *		e_ews_autodiscover_ws_url	(const gchar *email,
 						 const gchar *password, 
 						 GError **error);
+void		e_ews_connection_set_mailbox	(EEwsConnection *cnc,
+						 const gchar *email);
 /* Sync folder items */
 void		e_ews_connection_sync_folder_items_start 
 						(EEwsConnection *cnc, 
@@ -247,6 +256,24 @@ gboolean	e_ews_connection_sync_folder_hierarchy_finish
 						 GSList **folders_created,
 						 GSList **folders_updated,
 						 GSList **folders_deleted,
+						 GError **error);
+/* Resolve names */
+void		e_ews_connection_resolve_names_start 	
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *resolve_name,
+						 EwsContactsSearchScope scope,
+						 GSList *parent_folder_ids,
+						 gboolean fetch_contact_data,
+						 GAsyncReadyCallback cb,
+						 GCancellable *cancellable,
+						 gpointer user_data);
+gboolean	e_ews_connection_resolve_names_finish	
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GSList **mailboxes,
+						 GSList **contact_items,
+						 gboolean *includes_last_item,
 						 GError **error);
 
 G_END_DECLS
