@@ -1766,7 +1766,7 @@ e_ews_connection_create_items_start	(EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (cnc, msg, resolve_names_response_cb, pri, cancellable, simple);
+	ews_connection_queue_request (cnc, msg, create_items_response_cb, pri, cancellable, simple);
 }
 
 static const gchar *
@@ -1909,7 +1909,7 @@ e_ews_connection_resolve_names_start 	(EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (cnc, msg, create_items_response_cb, pri, cancellable, simple);
+	ews_connection_queue_request (cnc, msg, resolve_names_response_cb, pri, cancellable, simple);
 }
 
 gboolean	
