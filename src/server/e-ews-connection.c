@@ -1747,10 +1747,8 @@ e_ews_connection_create_items_start	(EEwsConnection *cnc,
 	create_cb (msg, create_user_data);
 
 	e_soap_message_end_element (msg); /* Items */
-
-	e_soap_message_end_element (msg); /* CreateItem */
 	
-	e_ews_message_write_footer (msg);
+	e_ews_message_write_footer (msg); /* CreateItem */
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
                                       cb,
