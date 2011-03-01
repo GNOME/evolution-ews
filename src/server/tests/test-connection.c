@@ -26,8 +26,9 @@
 #include <ctype.h>
 #include <glib.h>
 #include <glib/gprintf.h>
-#include <e-ews-connection.h>
 #include "utils.h"
+#include <e-ews-connection.h>
+
 
 static void con_test_create_new_connection ();
 void connection_tests_run ();
@@ -36,19 +37,6 @@ void autodiscovery_tests_run ();
 EwsFolderId *inbox_folder_id = NULL;
 GSList *ids = NULL;
 
-static void
-util_get_email_from_env (const gchar **email)
-{
-	*email = g_getenv ("EWS_TEST_EMAIL");
-}
-
-static void
-util_get_login_info_from_env (const gchar **username, const gchar **password, const gchar **uri)
-{
-	*username = g_getenv ("EWS_TEST_USERNAME");
-	*password = g_getenv ("EWS_TEST_PASSWORD");
-	*uri = g_getenv ("EWS_TEST_URI");
-}
 
 /*Test cases*/
 
