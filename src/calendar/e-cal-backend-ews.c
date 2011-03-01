@@ -420,7 +420,8 @@ e_cal_backend_ews_discard_alarm (ECalBackend *backend, EDataCal *cal, EServerMet
 	edad->itemid = ews_cal_component_get_item_id (comp);
 
 	e_ews_connection_update_items_start (priv->cnc, EWS_PRIORITY_MEDIUM,
-					     NULL, NULL, NULL, NULL,
+					     "AlwaysOverwrite", NULL,
+					     "SendToNone", NULL,
 					     clear_reminder_is_set, edad,
 					     ews_cal_discard_alarm_cb, NULL,
 					     edad);
