@@ -32,11 +32,12 @@ liborg_gnome_exchange_ews_la_SOURCES = 		\
 	exchange-ews-account-listener.h
 
 liborg_gnome_exchange_ews_la_LIBADD = 			\
-	$(EVOLUTION_PLUGIN_LIBS)			\
-	$(CAMEL_LIBS) 					\
 	$(top_builddir)/src/server/libeews-1.2.la	\
 	$(top_builddir)/src/utils/libewsutils.la 	\
 	$(top_builddir)/src/camel/libcamelews.la 	\
+	$(EVOLUTION_PLUGIN_LIBS)			\
+	$(EVOLUTION_SHELL_LIBS) \
+	$(CAMEL_LIBS) 					\
 	$(LIBECAL_LIBS)
 
 liborg_gnome_exchange_ews_la_LDFLAGS = -module -avoid-version $(NO_UNDEFINED)

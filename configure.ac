@@ -135,6 +135,7 @@ AC_ARG_ENABLE([gtk3],
 if test "x${enable_gtk3}" = "xyes"; then
 	GTK_PACKAGE="gtk+-3.0"
 	EVO_PLUGIN_PACKAGE="evolution-plugin-3.0"
+	EVO_SHELL_PACKAGE="evolution-shell-3.0"
 	gtk_minimum_version="2.90.4"
 
 dnl	extensiondir has been replaced with below evolution-3.0 onwards, so use same
@@ -147,6 +148,7 @@ dnl	gtk3 check for this too
 else	
 	GTK_PACKAGE="gtk+-2.0"
 	EVO_PLUGIN_PACKAGE="evolution-plugin"
+	EVO_SHELL_PACKAGE="evolution-shell"
 	gtk_minimum_version="2.20.0"
 
 	extensiondir=`$PKG_CONFIG --variable=extensiondir evolution-data-server-$EDS_PACKAGE`
@@ -170,6 +172,7 @@ dnl Check for evolution-data-server
 dnl ********************************
 PKG_CHECK_MODULES(EVOLUTION_DATA_SERVER, evolution-data-server-$EDS_PACKAGE >= eds_minimum_version)
 PKG_CHECK_MODULES(LIBEDATASERVER, libedataserver-$EDS_PACKAGE >= eds_minimum_version)
+PKG_CHECK_MODULES(LIBEDATASERVERUI, libedataserverui-$EDS_PACKAGE >= eds_minimum_version)
 PKG_CHECK_MODULES(LIBEBACKEND, libebackend-$EDS_PACKAGE >= eds_minimum_version)
 PKG_CHECK_MODULES(LIBECAL, libecal-$EDS_PACKAGE >= eds_minimum_version)
 PKG_CHECK_MODULES(LIBEDATACAL, libedata-cal-$EDS_PACKAGE >= eds_minimum_version)
@@ -181,6 +184,11 @@ dnl ****************************
 dnl Check for evolution plugins 
 dnl ****************************
 PKG_CHECK_MODULES(EVOLUTION_PLUGIN, $EVO_PLUGIN_PACKAGE >= evo_minimum_version)
+
+dnl ****************************
+dnl Check for evolution shell 
+dnl ****************************
+PKG_CHECK_MODULES(EVOLUTION_SHELL, $EVO_SHELL_PACKAGE >= evo_minimum_version)
 
 dnl ****************************
 dnl Expose version information
