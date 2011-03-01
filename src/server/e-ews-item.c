@@ -206,23 +206,6 @@ ews_item_parse_date (const gchar *dtstring)
 	return t;
 }
 
-static EwsMailbox *
-ews_mailbox_from_soap_param (ESoapParameter *param)
-{
-	EwsMailbox *mb;
-	ESoapParameter *subparam;
-
-	mb = g_new0 (EwsMailbox, 1);
-	
-	subparam = e_soap_parameter_get_first_child_by_name (param, "Name");
-	mb->name = e_soap_parameter_get_string_value (subparam);
-	
-	subparam = e_soap_parameter_get_first_child_by_name (param, "EmailAddress");
-	mb->email = e_soap_parameter_get_string_value (subparam);
-
-	return mb;
-}
-
 static EwsImportance 
 parse_importance (ESoapParameter *param)
 {
@@ -326,13 +309,13 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 			g_free (value);
 		} else if (!g_ascii_strcasecmp (name, "Sender")) {
 			subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Mailbox");
-			priv->sender = ews_mailbox_from_soap_param (subparam1);
+			priv->sender = e_ews_item_mailbox_from_soap_param (subparam1);
 		} else if (!g_ascii_strcasecmp (name, "ToRecipients")) {
 			GSList *list = NULL;
 			for (subparam1 = e_soap_parameter_get_first_child (subparam);
 				subparam1 != NULL;
 				subparam1 = e_soap_parameter_get_next_child (subparam1)) {
-				EwsMailbox *mb = ews_mailbox_from_soap_param (subparam1);
+				EwsMailbox *mb = e_ews_item_mailbox_from_soap_param (subparam1);
 				list = g_slist_append (list, mb);
 			}
 			priv->to_recipients = list;
@@ -341,7 +324,7 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 			for (subparam1 = e_soap_parameter_get_first_child (subparam);
 				subparam1 != NULL;
 				subparam1 = e_soap_parameter_get_next_child (subparam1)) {
-				EwsMailbox *mb = ews_mailbox_from_soap_param (subparam1);
+				EwsMailbox *mb = e_ews_item_mailbox_from_soap_param (subparam1);
 				list = g_slist_append (list, mb);
 			}
 			priv->cc_recipients = list;
@@ -350,13 +333,13 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 			for (subparam1 = e_soap_parameter_get_first_child (subparam);
 				subparam1 != NULL;
 				subparam1 = e_soap_parameter_get_next_child (subparam1)) {
-				EwsMailbox *mb = ews_mailbox_from_soap_param (subparam1);
+				EwsMailbox *mb = e_ews_item_mailbox_from_soap_param (subparam1);
 				list = g_slist_append (list, mb);
 			}
 			priv->bcc_recipients = list;
 		} else if (!g_ascii_strcasecmp (name, "From")) {
 			subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Mailbox");
-			priv->from = ews_mailbox_from_soap_param (subparam1);
+			priv->from = e_ews_item_mailbox_from_soap_param (subparam1);
 		} else if (!g_ascii_strcasecmp (name, "InternetMessageId")) {
 			priv->msg_id = e_soap_parameter_get_string_value (subparam);
 		} else if (!g_ascii_strcasecmp (name, "IsRead")) {
@@ -568,4 +551,21 @@ e_ews_item_get_importance	(EEwsItem *item)
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), EWS_ITEM_LOW);
 
 	return item->priv->importance;
+}
+	
+EwsMailbox *
+e_ews_item_mailbox_from_soap_param (ESoapParameter *param)
+{
+	EwsMailbox *mb;
+	ESoapParameter *subparam;
+
+	mb = g_new0 (EwsMailbox, 1);
+	
+	subparam = e_soap_parameter_get_first_child_by_name (param, "Name");
+	mb->name = e_soap_parameter_get_string_value (subparam);
+	
+	subparam = e_soap_parameter_get_first_child_by_name (param, "EmailAddress");
+	mb->email = e_soap_parameter_get_string_value (subparam);
+
+	return mb;
 }

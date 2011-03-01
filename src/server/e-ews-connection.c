@@ -63,6 +63,7 @@ struct _EEwsConnectionPrivate {
 	gchar *uri;
 	gchar *username;
 	gchar *password;
+	gchar *email;
 
 	GSList *jobs;
 	GSList *active_job_queue;
@@ -670,6 +671,59 @@ create_items_response_cb (ESoapResponse *response, gpointer data)
 }
 
 static void
+resolve_names_response_cb (ESoapResponse *response, gpointer data)
+{
+	EwsNode *enode = (EwsNode *) data;
+	ESoapParameter *param, *subparam, *node;
+	gboolean includes_last_item;
+	gboolean success = TRUE;
+	GSList *mailboxes = NULL, *contact_items = NULL;
+	EwsAsyncData *async_data;
+	GError *error = NULL;
+
+	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
+	if (!param) {
+		ews_parse_soap_fault(response, &error);
+		g_simple_async_result_set_from_error (enode->simple, error);
+		return;
+	}
+
+	subparam = e_soap_parameter_get_first_child_by_name (param, "ResolveNamesResponseMessage");
+	node = e_soap_parameter_get_first_child_by_name (subparam, "ResponseCode");
+
+	success = ews_get_response_status (subparam, &error);
+	if (!success) {
+		g_simple_async_result_set_from_error (enode->simple, error);
+		return;
+	}
+
+	subparam = e_soap_parameter_get_first_child_by_name (param, "ResolutionSet");
+	node = e_soap_parameter_get_first_child_by_name (subparam, "IncludesLastItemInRange");
+	
+	if (!strcmp (e_soap_parameter_get_string_value (node), "true"))
+		includes_last_item = TRUE;
+
+	for (subparam = e_soap_parameter_get_first_child_by_name (subparam, "Resolution");
+		subparam != NULL;
+		subparam = e_soap_parameter_get_next_child_by_name (subparam, "Resolution")) {
+		EwsMailbox *mb;
+
+		node = e_soap_parameter_get_first_child_by_name (subparam, "Mailbox");
+		mb = e_ews_item_mailbox_from_soap_param (node);
+		mailboxes = g_slist_append (mailboxes, mb);
+
+		/* TODO parse contacts */
+	}
+	
+	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
+	
+	/* Reuse existing variables */
+	async_data->items = mailboxes;
+	async_data->includes_last_item = includes_last_item;
+	async_data->items_created = contact_items;
+}
+
+static void
 e_ews_connection_dispose (GObject *object)
 {
 	EEwsConnection *cnc = (EEwsConnection *) object;
@@ -714,6 +768,11 @@ e_ews_connection_dispose (GObject *object)
 	if (priv->password) {
 		g_free (priv->password);
 		priv->password = NULL;
+	}
+
+	if (priv->email) {
+		g_free (priv->email);
+		priv->email = NULL;
 	}
 
 	if (priv->jobs) {
@@ -1041,6 +1100,17 @@ e_ews_autodiscover_ws_url (const gchar *email, const gchar *password, GError **e
 failed:
 	g_object_unref (cnc);
 	return asurl;
+}
+
+void
+e_ews_connection_set_mailbox	(EEwsConnection *cnc, 
+				 const gchar *email)
+{
+	
+	g_return_if_fail (email != NULL);
+
+	g_free (cnc->priv->email);
+	cnc->priv->email = g_strdup (email);
 }
 
 /**
@@ -1659,7 +1729,7 @@ e_ews_connection_create_items_start	(EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
-
+	
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "CreateItem",
 					     NULL, NULL);
 
@@ -1696,7 +1766,26 @@ e_ews_connection_create_items_start	(EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (cnc, msg, create_items_response_cb, pri, cancellable, simple);
+	ews_connection_queue_request (cnc, msg, resolve_names_response_cb, pri, cancellable, simple);
+}
+
+static const gchar *
+get_search_scope_str (EwsContactsSearchScope scope)
+{
+	switch (scope) {
+		case EWS_SEARCH_AD:
+			return "ActiveDirectory";
+		case EWS_SEARCH_AD_CONTACTS:
+			return "ActiveDirectoryContacts";
+		case EWS_SEARCH_CONTACTS:
+			return "Contacts";
+		case EWS_SEARCH_CONTACTS_AD:
+			return "ContactsActiveDirectory";
+		default:
+			g_assert_not_reached ();
+			return NULL;
+
+	}
 }
 
 gboolean
@@ -1718,7 +1807,6 @@ e_ews_connection_create_items_finish	(EEwsConnection *cnc,
 
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
-
 	*ids = async_data->items;
 
 	return TRUE;
@@ -1758,4 +1846,97 @@ e_ews_connection_create_items	(EEwsConnection *cnc,
 	g_free (sync_data);
 
 	return result;
+}
+
+void
+e_ews_connection_resolve_names_start 	(EEwsConnection *cnc,
+					 gint pri,
+					 const gchar *resolve_name,
+					 EwsContactsSearchScope scope,
+					 GSList *parent_folder_ids,
+					 gboolean fetch_contact_data,
+					 GAsyncReadyCallback cb,
+					 GCancellable *cancellable,
+					 gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+	GSList *l;
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "ResolveNames", NULL, NULL);
+
+	if (fetch_contact_data)
+		e_soap_message_add_attribute (msg, "ReturnFullContactData", "true", NULL, NULL);
+	else
+		e_soap_message_add_attribute (msg, "ReturnFullContactData", "false", NULL, NULL);
+
+	e_soap_message_add_attribute (msg, "SearchScope", get_search_scope_str (scope), NULL, NULL);
+
+	if (parent_folder_ids) {
+		e_soap_message_start_element (msg, "ParentFolderIds", NULL, NULL);
+
+		for (l = parent_folder_ids; l != NULL; l = g_slist_next (l)) {
+			EwsFolderId *fid = (EwsFolderId *) l->data;
+			
+			if (fid->is_distinguished_id)
+				e_soap_message_start_element (msg, "DistinguishedFolderId", NULL, NULL);
+			else
+				e_soap_message_start_element (msg, "FolderId", NULL, NULL);
+		
+			e_soap_message_add_attribute (msg, "Id", fid->id, NULL, NULL);
+			e_soap_message_add_attribute (msg, "ChangeKey", fid->change_key, NULL, NULL);
+
+			if (fid->is_distinguished_id)
+				e_ews_message_write_string_parameter (msg, "Mailbox", NULL, cnc->priv->email);
+
+			e_soap_message_end_element (msg);
+		}
+
+		e_soap_message_end_element (msg);
+	}
+
+	e_ews_message_write_string_parameter (msg, "UnresolvedEntry", NULL, resolve_name);
+
+	e_ews_message_write_footer (msg);
+
+	simple = g_simple_async_result_new (G_OBJECT (cnc),
+                                      cb,
+                                      user_data,
+                                      e_ews_connection_resolve_names_start);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	ews_connection_queue_request (cnc, msg, create_items_response_cb, pri, cancellable, simple);
+}
+
+gboolean	
+e_ews_connection_resolve_names_finish	(EEwsConnection *cnc,
+					 GAsyncResult *result,
+					 GSList **mailboxes,
+					 GSList **contact_items,
+					 gboolean *includes_last_item,
+					 GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_resolve_names_start),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+	
+	*includes_last_item = async_data->includes_last_item;
+	*contact_items = async_data->items_created;
+	*mailboxes = async_data->items;
+	
+	return TRUE;	
 }

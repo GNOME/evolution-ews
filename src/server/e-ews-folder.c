@@ -206,6 +206,16 @@ e_ews_folder_new_from_soap_parameter (ESoapParameter *param)
 	return folder;
 }
 
+void		
+e_ews_folder_free_fid (EwsFolderId *fid)
+{
+	if (fid) {
+		g_free (fid->id);
+		g_free (fid->change_key);
+		g_free (fid);
+	}
+}
+
 const gchar *
 e_ews_folder_get_name (EEwsFolder *folder)
 {
@@ -306,3 +316,4 @@ e_ews_folder_get_child_count (EEwsFolder *folder)
 	return folder->priv->child_count;
 
 }
+
