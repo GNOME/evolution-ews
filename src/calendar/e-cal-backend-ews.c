@@ -107,7 +107,7 @@ struct _ECalBackendEwsPrivate {
 #define PARENT_TYPE E_TYPE_CAL_BACKEND
 static ECalBackendClass *parent_class = NULL;
 static void ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data);
-static gchar *ews_cal_component_get_item_id (ECalComponent *comp);
+static void ews_cal_component_get_item_id (ECalComponent *comp, gchar **itemid, gchar **changekey);
 
 static void
 switch_offline (ECalBackendEws *cbews)
@@ -417,7 +417,7 @@ e_cal_backend_ews_discard_alarm (ECalBackend *backend, EDataCal *cal, EServerMet
 	edad->cbews = g_object_ref (cbews);
 	edad->cal = g_object_ref (cal);
 	edad->context = context;
-	edad->itemid = ews_cal_component_get_item_id (comp);
+	ews_cal_component_get_item_id (comp, &edad->itemid, NULL);
 
 	e_ews_connection_update_items_start (priv->cnc, EWS_PRIORITY_MEDIUM,
 					     "AlwaysOverwrite", NULL,
@@ -521,26 +521,32 @@ exit:
 	g_free (object);
 }
 
-static gchar *
-ews_cal_component_get_item_id (ECalComponent *comp)
+/* changekey can be NULL if you don't want it. itemid cannot. */
+static void
+ews_cal_component_get_item_id (ECalComponent *comp, gchar **itemid, gchar **changekey)
 {
 	icalproperty *prop;
+	gchar *id = NULL, *ck = NULL;
 
 	prop = icalcomponent_get_first_property (e_cal_component_get_icalcomponent (comp),
 						 ICAL_X_PROPERTY);
-	while (prop) {
+	while (prop && (!id || (changekey && !ck))) {
 		const gchar *x_name, *x_val;
 
 		x_name = icalproperty_get_x_name (prop);
 		x_val = icalproperty_get_x (prop);
-		if (!strcmp (x_name, "X-EVOLUTION-ITEMID")) {
-			return g_strdup (x_val);
-		}
+		if (!id && !g_ascii_strcasecmp (x_name, "X-EVOLUTION-ITEMID"))
+		 	id = g_strdup (x_val);
+		else if (changekey && !ck &&
+			   !g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY"))
+			ck = g_strdup (x_val);
 
 		prop = icalcomponent_get_next_property (e_cal_component_get_icalcomponent (comp),
 							ICAL_X_PROPERTY);
 	}
-	return NULL;
+	*itemid = id;
+	if (changekey)
+		*changekey = ck;
 }
 
 
@@ -557,7 +563,9 @@ add_comps_to_item_id_hash (ECalBackendEws *cbews)
 	comps = e_cal_backend_store_get_components (priv->store);
 	for (l = comps; l != NULL; l = g_slist_next (l)) {
 		ECalComponent *comp = (ECalComponent *)	l->data;
-		gchar *item_id = ews_cal_component_get_item_id (comp);
+		gchar *item_id;
+
+		ews_cal_component_get_item_id (comp, &item_id, NULL);
 
 		g_hash_table_insert (priv->item_id_hash, item_id, comp);
 	}
