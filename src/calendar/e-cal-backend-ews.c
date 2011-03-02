@@ -342,6 +342,7 @@ typedef struct {
 	EDataCal *cal;
 	EServerMethodContext *context;
 	gchar *itemid;
+	gchar *changekey;
 } EwsDiscardAlarmData;
 
 static void clear_reminder_is_set (ESoapMessage *msg, gpointer user_data)
@@ -349,7 +350,7 @@ static void clear_reminder_is_set (ESoapMessage *msg, gpointer user_data)
 	EwsDiscardAlarmData *edad = user_data;
 
 	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
-					 edad->itemid, NULL, 0);
+					 edad->itemid, edad->changekey, 0);
 
 	/* FIXME: Provide higher-level helper functions to add this kind
 	   of thing */
@@ -385,6 +386,7 @@ ews_cal_discard_alarm_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	e_data_cal_notify_alarm_discarded (edad->cal, edad->context, error);
 
 	g_free(edad->itemid);
+	g_free(edad->changekey);
 	g_object_unref(edad->cbews);
 	g_object_unref(edad->cal);
 	g_free(edad);
@@ -417,7 +419,7 @@ e_cal_backend_ews_discard_alarm (ECalBackend *backend, EDataCal *cal, EServerMet
 	edad->cbews = g_object_ref (cbews);
 	edad->cal = g_object_ref (cal);
 	edad->context = context;
-	ews_cal_component_get_item_id (comp, &edad->itemid, NULL);
+	ews_cal_component_get_item_id (comp, &edad->itemid, &edad->changekey);
 
 	e_ews_connection_update_items_start (priv->cnc, EWS_PRIORITY_MEDIUM,
 					     "AlwaysOverwrite", NULL,
