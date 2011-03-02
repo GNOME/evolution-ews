@@ -816,10 +816,8 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	ECalBackendEws *cbews = (ECalBackendEws *) backend;
 	ECalBackendEwsPrivate *priv;
 	ECalComponent *comp;
-	icalcomponent *icomp;
-	icalproperty *prop;
 	GError *error = NULL;
-	const gchar *itemid = NULL;
+	gchar *itemid = NULL;
 
 	e_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
 
@@ -842,22 +840,7 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 
 	PRIV_UNLOCK (priv);
 
-	icomp = e_cal_component_get_icalcomponent (comp);
-	prop = icalcomponent_get_first_property (icomp, ICAL_X_PROPERTY);
-	while (prop) {
-		const gchar *name = icalproperty_get_x_name (prop);
-		const gchar *id;
-
-		if (name && !g_ascii_strcasecmp(name, "X-EVOLUTION-ITEMID")) {
-			id = icalproperty_get_x (prop);
-			if (id) {
-				itemid = strdup(id);
-				break;
-			}
-		}
-		prop = icalcomponent_get_next_property (icomp, ICAL_X_PROPERTY);
-	}
-	
+	ews_cal_component_get_item_id (comp, &itemid, NULL);
 	if (!itemid) {
 		g_propagate_error(&error, EDC_ERROR_EX(OtherError,
 					       "Cannot determine EWS ItemId"));
