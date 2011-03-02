@@ -944,7 +944,10 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item)
 		icalprop = icalproperty_new_x (item_id->id);
 		icalproperty_set_x_name (icalprop, "X-EVOLUTION-ITEMID");
 		icalcomponent_add_property (icalcomp, icalprop);
-		
+		icalprop = icalproperty_new_x (item_id->change_key);
+		icalproperty_set_x_name (icalprop, "X-EVOLUTION-CHANGEKEY");
+		icalcomponent_add_property (icalcomp, icalprop);
+
 		comp = e_cal_component_new ();
 		e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (icalcomp));
 
