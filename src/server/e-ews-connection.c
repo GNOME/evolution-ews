@@ -653,7 +653,7 @@ resolve_names_response_cb (ESoapParameter *param, EwsNode *enode)
 		return;
 	}
 
-	subparam = e_soap_parameter_get_first_child_by_name (param, "ResolutionSet");
+	subparam = e_soap_parameter_get_first_child_by_name (subparam, "ResolutionSet");
 	node = e_soap_parameter_get_first_child_by_name (subparam, "IncludesLastItemInRange");
 	
 	if (!strcmp (e_soap_parameter_get_string_value (node), "true"))
