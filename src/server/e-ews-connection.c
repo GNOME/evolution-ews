@@ -390,8 +390,8 @@ ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 					g_simple_async_result_set_from_error (enode->simple, error);
 					break;
 				}
-
-				enode->cb (subparam, enode);
+				if (enode->cb)
+					enode->cb (subparam, enode);
 			}
 		} else
 			ews_parse_soap_fault (response, &error);
@@ -536,16 +536,6 @@ get_items_response_cb (ESoapParameter *subparam, EwsNode *enode)
 		item = e_ews_item_new_from_soap_parameter (node);
 		async_data->items = g_slist_append (async_data->items, item);
 	}
-}
-
-static void
-delete_items_response_cb (ESoapParameter *subparam, EwsNode *enode)
-{
-}
-
-static void
-update_items_response_cb (ESoapParameter *subparam, EwsNode *enode)
-{
 }
 
 static void
@@ -1412,7 +1402,7 @@ e_ews_connection_delete_items_start	(EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (cnc, msg, delete_items_response_cb, pri, cancellable, simple);
+	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple);
 }
 
 gboolean
@@ -1524,7 +1514,7 @@ e_ews_connection_update_items_start	(EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (cnc, msg, update_items_response_cb, pri, cancellable, simple);
+	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple);
 }
 
 gboolean
