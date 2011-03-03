@@ -18,6 +18,7 @@ check_PROGRAMS = testews
 testews_SOURCES = \
 		utils.c \
 		test-connection.c \
+		test-cuditem.c \
 		test-libews.c \
 		utils.h
 
