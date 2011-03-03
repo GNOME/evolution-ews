@@ -40,12 +40,13 @@
 
 G_DEFINE_TYPE (EEwsConnection, e_ews_connection, G_TYPE_OBJECT)
 
+struct _EwsNode;
 static GObjectClass *parent_class = NULL;
 static GHashTable *loaded_connections_permissions = NULL;
 static gboolean ews_next_request (gpointer _cnc);
 static gint comp_func (gconstpointer a, gconstpointer b);
 static GQuark ews_connection_error_quark (void);
-typedef void (*response_cb) (ESoapResponse *response, gpointer data);
+typedef void (*response_cb) (ESoapParameter *param, struct _EwsNode *enode);
 static void ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data);
 static void 
 ews_connection_authenticate	(SoupSession *sess, SoupMessage *msg,
@@ -364,12 +365,23 @@ ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 						 ERROR_NORESPONSE,
 						 _("No response"));
 	} else {
+		ESoapParameter *param;
+		GError *error = NULL;
+
 		/* TODO: The stdout can be replaced with Evolution's
 		   Logging framework also */
 		if (response && g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1))
 			e_soap_response_dump_response (response, stdout);
 
-		enode->cb (response, enode);
+		param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
+		if (param)
+			enode->cb (param, enode);
+		else
+			ews_parse_soap_fault (response, &error);
+
+		if (error)
+			g_simple_async_result_set_from_error (enode->simple, error);
+
 		g_object_unref (response);
 	}
 
@@ -379,22 +391,14 @@ exit:
 }
 
 static void
-sync_hierarchy_response_cb (ESoapResponse *response, gpointer data)
+sync_hierarchy_response_cb (ESoapParameter *param, EwsNode *enode)
 {
-	EwsNode *enode = (EwsNode *) data;
-	ESoapParameter *param, *subparam, *node;
+	ESoapParameter *subparam, *node;
 	EwsAsyncData *async_data;
 	gchar *new_sync_state = NULL, *value;
 	GSList *folders_created = NULL, *folders_updated = NULL, *folders_deleted = NULL;
 	gboolean success = TRUE, includes_last_item = FALSE;
 	GError *error = NULL;
-
-	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
-	if (!param) {
-		ews_parse_soap_fault(response, &error);
-		g_simple_async_result_set_from_error (enode->simple, error);
-		return;
-	}
 
 	subparam = e_soap_parameter_get_first_child_by_name (param, "SyncFolderHierarchyResponseMessage");
 	node = e_soap_parameter_get_first_child_by_name (subparam, "ResponseCode");
@@ -455,23 +459,15 @@ sync_hierarchy_response_cb (ESoapResponse *response, gpointer data)
 }
 
 static void
-sync_folder_items_response_cb (ESoapResponse *response, gpointer data)
+sync_folder_items_response_cb (ESoapParameter *param, EwsNode *enode)
 {
-	EwsNode *enode = (EwsNode *) data;
-	ESoapParameter *param, *subparam, *node;
+	ESoapParameter *subparam, *node;
 	EwsAsyncData *async_data;
 	gchar *new_sync_state = NULL, *value;
 	GSList *items_created = NULL, *items_updated = NULL, *items_deleted = NULL;
 	gboolean success = TRUE, includes_last_item = FALSE;
 	GError *error = NULL;
 
-	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
-	if (!param) {
-		ews_parse_soap_fault(response, &error);
-		g_simple_async_result_set_from_error (enode->simple, error);
-		return;
-	}
-		
 	subparam = e_soap_parameter_get_first_child_by_name (param, "SyncFolderItemsResponseMessage");
 	node = e_soap_parameter_get_first_child_by_name (subparam, "ResponseCode");
 
@@ -530,23 +526,15 @@ sync_folder_items_response_cb (ESoapResponse *response, gpointer data)
 }
 
 static void
-get_items_response_cb (ESoapResponse *response, gpointer data)
+get_items_response_cb (ESoapParameter *param, EwsNode *enode)
 {
-	EwsNode *enode = (EwsNode *) data;
-	ESoapParameter *param, *subparam, *node;
+	ESoapParameter *subparam, *node;
 	EwsAsyncData *async_data;
 	GSList *items = NULL;
 	EEwsItem *item;
 	gboolean success = TRUE;
 	GError *error = NULL;
 
-	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
-	if (!param) {
-		ews_parse_soap_fault(response, &error);
-		g_simple_async_result_set_from_error (enode->simple, error);
-		return;
-	}
-	
 	for (subparam = e_soap_parameter_get_first_child_by_name (param, "GetItemResponseMessage");
 		subparam != NULL;
 		subparam = e_soap_parameter_get_next_child_by_name (subparam, "GetItemResponseMessage")) {
@@ -571,20 +559,12 @@ get_items_response_cb (ESoapResponse *response, gpointer data)
 }
 
 static void
-delete_items_response_cb (ESoapResponse *response, gpointer data)
+delete_items_response_cb (ESoapParameter *param, EwsNode *enode)
 {
-	EwsNode *enode = (EwsNode *) data;
-	ESoapParameter *param, *subparam, *node;
+	ESoapParameter *subparam, *node;
 	gboolean success = TRUE;
 	GError *error = NULL;
 
-	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
-	if (!param) {
-		ews_parse_soap_fault(response, &error);
-		g_simple_async_result_set_from_error (enode->simple, error);
-		return;
-	}
-	
 	for (subparam = e_soap_parameter_get_first_child_by_name (param, "DeleteItemResponseMessage");
 		subparam != NULL;
 		subparam = e_soap_parameter_get_next_child_by_name (subparam, "DeleteItemResponseMessage")) {
@@ -600,20 +580,12 @@ delete_items_response_cb (ESoapResponse *response, gpointer data)
 }
 
 static void
-update_items_response_cb (ESoapResponse *response, gpointer data)
+update_items_response_cb (ESoapParameter *param, EwsNode *enode)
 {
-	EwsNode *enode = (EwsNode *) data;
-	ESoapParameter *param, *subparam, *node;
+	ESoapParameter *subparam, *node;
 	gboolean success = TRUE;
 	GError *error = NULL;
 
-	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
-	if (!param) {
-		ews_parse_soap_fault(response, &error);
-		g_simple_async_result_set_from_error (enode->simple, error);
-		return;
-	}
-	
 	for (subparam = e_soap_parameter_get_first_child_by_name (param, "UpdateItemResponseMessage");
 		subparam != NULL;
 		subparam = e_soap_parameter_get_next_child_by_name (subparam, "UpdateItemResponseMessage")) {
@@ -629,23 +601,15 @@ update_items_response_cb (ESoapResponse *response, gpointer data)
 }
 
 static void
-create_items_response_cb (ESoapResponse *response, gpointer data)
+create_items_response_cb (ESoapParameter *param, EwsNode *enode)
 {
-	EwsNode *enode = (EwsNode *) data;
-	ESoapParameter *param, *subparam, *node;
+	ESoapParameter *subparam, *node;
 	EwsAsyncData *async_data;
 	GSList *ids = NULL;
 	EEwsItem *item;
 	gboolean success = TRUE;
 	GError *error = NULL;
 
-	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
-	if (!param) {
-		ews_parse_soap_fault(response, &error);
-		g_simple_async_result_set_from_error (enode->simple, error);
-		return;
-	}
-	
 	for (subparam = e_soap_parameter_get_first_child_by_name (param, "CreateItemResponseMessage");
 		subparam != NULL;
 		subparam = e_soap_parameter_get_next_child_by_name (subparam, "CreateItemResponseMessage")) {
@@ -671,22 +635,14 @@ create_items_response_cb (ESoapResponse *response, gpointer data)
 }
 
 static void
-resolve_names_response_cb (ESoapResponse *response, gpointer data)
+resolve_names_response_cb (ESoapParameter *param, EwsNode *enode)
 {
-	EwsNode *enode = (EwsNode *) data;
-	ESoapParameter *param, *subparam, *node;
+	ESoapParameter *subparam, *node;
 	gboolean includes_last_item;
 	gboolean success = TRUE;
 	GSList *mailboxes = NULL, *contact_items = NULL;
 	EwsAsyncData *async_data;
 	GError *error = NULL;
-
-	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
-	if (!param) {
-		ews_parse_soap_fault(response, &error);
-		g_simple_async_result_set_from_error (enode->simple, error);
-		return;
-	}
 
 	subparam = e_soap_parameter_get_first_child_by_name (param, "ResolveNamesResponseMessage");
 	node = e_soap_parameter_get_first_child_by_name (subparam, "ResponseCode");
