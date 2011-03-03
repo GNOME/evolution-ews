@@ -42,6 +42,7 @@
 #include "e-cal-backend-ews.h"
 #include "e-cal-backend-ews-utils.h"
 #include "e-ews-connection.h"
+#include "e-soap-response.h"
 #include "e-ews-message.h"
 #include "e-ews-item-change.h"
 
@@ -867,6 +868,215 @@ exit:
 	e_data_cal_notify_remove (cal, context, error);
 }
 
+static icaltimezone * resolve_tzid (const gchar *tzid, gpointer user_data);
+static void put_component_to_store (ECalBackendEws *cbews,ECalComponent *comp);
+
+typedef struct {
+	ECalBackendEws *cbews;
+	EDataCal *cal;
+	ECalComponent *comp;
+	EServerMethodContext context;
+} EwsCreateData;
+
+static void
+convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
+{
+	icalcomponent *inner, *icalcomp = (icalcomponent*)user_data;
+	time_t t;
+	struct tm * timeinfo;
+	char buff[30];
+	icalproperty *prop;
+
+	// FORMAT OF A SAMPLE SOAP MESSAGE:
+	// http://msdn.microsoft.com/en-us/library/aa564690.aspx
+
+	/* Prepare CalendarItem node in the SOAP message */
+	e_soap_message_start_element(msg, "CalendarItem", "types", NULL);
+	e_soap_message_add_attribute(msg, "xmlns", "http://schemas.microsoft.com/exchange/services/2006/types", NULL, NULL);
+
+	// subject
+	e_ews_message_write_string_parameter(msg, "Subject", NULL,  icalcomponent_get_summary(icalcomp));
+
+	// description
+	e_ews_message_write_string_parameter_with_attribute(msg, "Body", NULL, icalcomponent_get_description(icalcomp), "BodyType", "Text");
+
+	// start time
+	t = icaltime_as_timet(icalcomponent_get_dtstart(icalcomp));
+	timeinfo = localtime(&t);
+	strftime(buff, 30, "%Y-%m-%dT%H:%M:%S", timeinfo);
+	e_ews_message_write_string_parameter(msg, "Start", NULL, buff);
+
+	// end time
+	t = icaltime_as_timet(icalcomponent_get_dtend(icalcomp));
+	timeinfo = localtime(&t);
+	strftime(buff, 30, "%Y-%m-%dT%H:%M:%S", timeinfo);
+	e_ews_message_write_string_parameter(msg, "End", NULL, buff);
+
+	// location
+	e_ews_message_write_string_parameter(msg, "Location", NULL, icalcomponent_get_location(icalcomp));
+
+	/* attendees */
+	e_soap_message_start_element(msg, "RequiredAttendees", NULL, NULL);
+	inner = icalcomponent_get_inner(icalcomp); // look at the internal VEVENT component
+	// iterate over every attendee property
+	for (prop = icalcomponent_get_first_property(inner, ICAL_ATTENDEE_PROPERTY);
+	     prop != NULL;
+	     prop = icalcomponent_get_next_property(inner, ICAL_ATTENDEE_PROPERTY)) {
+
+		// inner soap elements
+		e_soap_message_start_element(msg, "Attendee", NULL, NULL);
+		e_soap_message_start_element(msg, "Mailbox", NULL, NULL);
+
+		e_ews_message_write_string_parameter(msg,
+						     "EmailAddress",
+						     NULL,
+						     icalproperty_get_attendee(prop));
+
+		e_soap_message_end_element(msg); // "Mailbox"
+		e_soap_message_end_element(msg); // "Attendee"
+	}
+
+	e_soap_message_end_element(msg); // "RequiredAttendees"
+	/* end of attendees */
+
+	/* TODO:attachments */
+	// it's not clear (supported at all ?) how to add attachments to the soap request
+
+	// end of "CalendarItem"
+	e_soap_message_end_element(msg);
+}
+
+static void
+ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
+{
+	EEwsConnection *cnc = E_EWS_CONNECTION (object);
+	EwsCreateData *create_data = user_data;
+	ECalBackendEws *cbews = create_data->cbews;
+	ECalBackendEwsPrivate *priv = cbews->priv;
+	GError *error = NULL;
+	GSList *ids = NULL;
+	const gchar *comp_uid;
+	const EwsId *item_id;
+	icalproperty *icalprop;
+	icalcomponent *icalcomp;
+
+	// get a list of ids from server (single item)
+	e_ews_connection_create_items_finish(cnc, res, &ids, &error);
+
+	// make sure there was no error
+	if (error != NULL) {
+		g_print("Unable to get item: %s :%d \n", error->message, error->code);
+		return;
+	}
+
+	// get exclusive access to the store
+	e_cal_backend_store_freeze_changes(priv->store);
+
+	// set item id
+	item_id = e_ews_item_get_id((EEwsItem *)ids->data);
+	e_cal_component_set_uid(create_data->comp, item_id->id);
+
+	// set a new ical property containing the id we got from the exchange server for future use
+	icalprop = icalproperty_new_x(item_id->id);
+	icalproperty_set_x_name (icalprop, "X-EVOLUTION-ITEMID");
+	icalcomp = e_cal_component_get_icalcomponent(create_data->comp);
+	icalcomponent_add_property(icalcomp, icalprop);
+
+	// update component internal data
+	e_cal_component_commit_sequence(create_data->comp);
+	put_component_to_store (create_data->cbews, create_data->comp);
+
+	// notify the backend and the application that a new object was created
+	e_cal_backend_notify_object_created (E_CAL_BACKEND(create_data->cbews), create_data->context);
+	e_cal_component_get_uid(create_data->comp, &comp_uid);
+	e_data_cal_notify_object_created (create_data->cal, create_data->context, error, comp_uid, e_cal_component_get_as_string(create_data->comp));
+
+	// place new component in our cache
+	PRIV_LOCK (priv);
+	g_hash_table_insert (priv->item_id_hash, g_strdup(item_id->id), g_object_ref (create_data->comp));
+	PRIV_UNLOCK (priv);
+
+	// update changes and release access to the store
+	e_cal_backend_store_thaw_changes (priv->store);
+
+	// no need to keep reference to the object
+	g_object_unref(create_data->comp);
+
+	// free memory allocated for create_data & unref contained objects
+	g_object_unref(create_data->cbews);
+	g_object_unref(create_data->cal);
+	g_free(create_data);
+}
+
+static void
+e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *calobj)
+{
+	EwsCreateData *create_data;
+	ECalBackendEws *cbews;
+	ECalBackendEwsPrivate *priv;
+	icalcomponent_kind kind;
+	icalcomponent *icalcomp;
+	ECalComponent *comp;
+	struct icaltimetype current;
+	GError **error = NULL;
+	GCancellable *cancellable = NULL;
+
+	// sanity check
+	e_return_data_cal_error_if_fail(E_IS_CAL_BACKEND_EWS(backend), InvalidArg);
+	e_return_data_cal_error_if_fail(calobj != NULL && *calobj != '\0', InvalidArg);
+
+	cbews = E_CAL_BACKEND_EWS(backend);
+	priv = cbews->priv;
+
+	kind = e_cal_backend_get_kind(E_CAL_BACKEND(backend));
+
+	// make sure we're not offline
+	if (priv->mode == CAL_MODE_LOCAL) {
+		g_propagate_error(error, EDC_ERROR(RepositoryOffline));
+		return;
+	}
+	// parse ical data
+	icalcomp = icalparser_parse_string(calobj);
+
+	// make sure data was parsed properly
+	if (!icalcomp) {
+		g_propagate_error(error, EDC_ERROR(InvalidObject));
+		return;
+	}
+
+	// make sure ical data we parse is actually an ical component
+	if (kind != icalcomponent_isa(icalcomp)) {
+		icalcomponent_free(icalcomp);
+		g_propagate_error(error, EDC_ERROR(InvalidObject));
+		return;
+	}
+
+	// prepare new calender component
+	comp = e_cal_component_new();
+	e_cal_component_set_icalcomponent(comp, icalcomp);
+
+	current = icaltime_current_time_with_zone(icaltimezone_get_utc_timezone());
+	e_cal_component_set_created(comp, &current);
+	e_cal_component_set_last_modified(comp, &current);
+
+	create_data = g_new0(EwsCreateData, 1);
+	create_data->cbews = g_object_ref(cbews);
+	create_data->comp = comp;
+	create_data->cal = g_object_ref(cal);
+	create_data->context = context;
+
+	// pass new calendar component data to the exchange server and expect response in the callback
+	e_ews_connection_create_items_start(priv->cnc,
+					     EWS_PRIORITY_MEDIUM,NULL,
+					     "SendToAllAndSaveCopy",
+					     priv->folder_id,
+					     convert_calcomp_to_xml,
+					     icalcomp,
+					     ews_create_object_cb,
+					     cancellable,
+					     create_data);
+}
+
 /* TODO Do not replicate this in every backend */
 static icaltimezone *
 resolve_tzid (const gchar *tzid, gpointer user_data)
@@ -1344,8 +1554,8 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 
 	backend_class->discard_alarm = e_cal_backend_ews_discard_alarm;
 
-/*	backend_class->create_object = e_cal_backend_ews_create_object;
-	backend_class->modify_object = e_cal_backend_ews_modify_object;
+	backend_class->create_object = e_cal_backend_ews_create_object;
+/*	backend_class->modify_object = e_cal_backend_ews_modify_object;
  */
 	backend_class->remove_object = e_cal_backend_ews_remove_object;
 /*
