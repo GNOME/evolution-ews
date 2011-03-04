@@ -75,10 +75,6 @@ typedef struct _EwsNode EwsNode;
 typedef struct _EwsAsyncData EwsAsyncData;
 
 struct _EwsAsyncData {
-	GSList *folders_created;
-	GSList *folders_updated;	
-	GSList *folders_deleted;
-	
 	GSList *items_created;
 	GSList *items_updated;
 	GSList *items_deleted;
@@ -413,7 +409,7 @@ sync_hierarchy_response_cb (ESoapParameter *subparam, EwsNode *enode)
 	ESoapParameter *node;
 	EwsAsyncData *async_data;
 	gchar *new_sync_state = NULL, *value;
-	GSList *folders_created = NULL, *folders_updated = NULL, *folders_deleted = NULL;
+	GSList *items_created = NULL, *items_updated = NULL, *items_deleted = NULL;
 	gboolean includes_last_item = FALSE;
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "SyncState");
@@ -434,7 +430,7 @@ sync_hierarchy_response_cb (ESoapParameter *subparam, EwsNode *enode)
 			EEwsFolder *folder;
 
 			folder = e_ews_folder_new_from_soap_parameter (subparam1);
-			folders_created = g_slist_append (folders_created, folder);
+			items_created = g_slist_append (items_created, folder);
 		}
 
 		for (subparam1 = e_soap_parameter_get_first_child_by_name (node, "Update");
@@ -443,7 +439,7 @@ sync_hierarchy_response_cb (ESoapParameter *subparam, EwsNode *enode)
 			EEwsFolder *folder;
 
 			folder = e_ews_folder_new_from_soap_parameter (subparam1);
-			folders_updated = g_slist_append (folders_updated, folder);
+			items_updated = g_slist_append (items_updated, folder);
 		}
 
 		for (subparam1 = e_soap_parameter_get_first_child_by_name (node, "Delete");
@@ -453,14 +449,14 @@ sync_hierarchy_response_cb (ESoapParameter *subparam, EwsNode *enode)
 
 			folder_param = e_soap_parameter_get_first_child_by_name (subparam1, "FolderId");
 			value = e_soap_parameter_get_property (folder_param, "Id");
-			folders_deleted = g_slist_append (folders_deleted, value);
+			items_deleted = g_slist_append (items_deleted, value);
 		}
 	}
 
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
-	async_data->folders_created = folders_created;
-	async_data->folders_updated = folders_updated;
-	async_data->folders_deleted = folders_deleted;
+	async_data->items_created = items_created;
+	async_data->items_updated = items_updated;
+	async_data->items_deleted = items_deleted;
 	async_data->sync_state = new_sync_state;
 	async_data->includes_last_item = includes_last_item;
 }
@@ -1174,9 +1170,9 @@ e_ews_connection_sync_folder_hierarchy_finish	(EEwsConnection *cnc,
 	
 	*sync_state = async_data->sync_state;
 	*includes_last_folder = async_data->includes_last_item;
-	*folders_created = async_data->folders_created;
-	*folders_updated = async_data->folders_updated;
-	*folders_deleted = async_data->folders_deleted;
+	*folders_created = async_data->items_created;
+	*folders_updated = async_data->items_updated;
+	*folders_deleted = async_data->items_deleted;
 
 	return TRUE;
 }
