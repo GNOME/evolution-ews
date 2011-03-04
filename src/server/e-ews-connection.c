@@ -522,6 +522,7 @@ sync_folder_items_response_cb (ESoapParameter *subparam, EwsNode *enode)
 	async_data->includes_last_item = includes_last_item;
 }
 
+/* Used for CreateItems and GetItems */
 static void
 get_items_response_cb (ESoapParameter *subparam, EwsNode *enode)
 {
@@ -535,24 +536,6 @@ get_items_response_cb (ESoapParameter *subparam, EwsNode *enode)
 	     node; node = e_soap_parameter_get_next_child_by_name (subparam, "Items")) {
 		item = e_ews_item_new_from_soap_parameter (node);
 		async_data->items = g_slist_append (async_data->items, item);
-	}
-}
-
-static void
-create_items_response_cb (ESoapParameter *subparam, EwsNode *enode)
-{
-	ESoapParameter *node;
-	EwsAsyncData *async_data;
-	EEwsItem *item;
-
-	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
-
-	for (node = e_soap_parameter_get_first_child_by_name (subparam, "Items");
-	     node != NULL;
-	     node = e_soap_parameter_get_next_child_by_name (node, "Items")) {
-
-		item = e_ews_item_new_from_soap_parameter (node);
-		async_data->items = g_slist_append (async_data->items, (gpointer)item);
 	}
 }
 
@@ -1626,7 +1609,7 @@ e_ews_connection_create_items_start	(EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (cnc, msg, create_items_response_cb, pri, cancellable, simple);
+	ews_connection_queue_request (cnc, msg, get_items_response_cb, pri, cancellable, simple);
 }
 
 static const gchar *
