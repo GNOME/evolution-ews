@@ -43,6 +43,8 @@ which needs to be better organized via functions */
 #include <glib/gstdio.h>
 #include <libedataserver/e-flag.h>
 #include <e-ews-connection.h>
+#include <e-ews-item-change.h>
+#include <e-ews-message.h>
 #include <e-ews-compat.h>
 
 #include "camel-ews-folder.h"
@@ -352,11 +354,95 @@ ews_folder_search_free (CamelFolder *folder, GPtrArray *uids)
 
 /********************* folder functions*************************/
 
+
+static void
+msg_update_flags (ESoapMessage *msg, gpointer user_data)
+{
+	GSList *mi_list = user_data;
+	CamelEwsMessageInfo *mi;
+
+	while ((mi = g_slist_nth_data (mi_list, 0))) {
+		mi_list = g_slist_remove (mi_list, mi);
+
+		e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
+						 mi->info.uid, mi->change_key, 0);
+		e_soap_message_start_element (msg, "SetItemField", "types", NULL);
+
+		e_soap_message_start_element (msg, "FieldURI", "types", NULL);
+		e_soap_message_add_attribute (msg, "FieldURI", "message:IsRead", NULL, NULL);
+		e_soap_message_end_element (msg);
+		
+		e_soap_message_start_element (msg, "Message", "types", NULL);
+		e_ews_message_write_string_parameter (msg, "IsRead", "types", 
+			      (mi->info.flags & CAMEL_MESSAGE_SEEN)?"true":"false");
+		e_soap_message_end_element (msg); /* Item */
+
+		e_soap_message_end_element (msg); /* SetItemField */
+
+		e_ews_message_end_item_change (msg);
+
+		camel_message_info_free (mi);
+	}
+	/* Don't think we need to free the list; we already freed every element */
+}
+
+static gboolean
+ews_sync_mi_flags (CamelFolder *folder, GSList *mi_list, GCancellable *cancellable, GError **error)
+{
+	CamelEwsStore *ews_store;
+	EEwsConnection *cnc;
+
+	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
+	cnc = camel_ews_store_get_connection (ews_store);
+
+	return e_ews_connection_update_items (cnc, EWS_PRIORITY_LOW,
+					      "AlwaysOverwrite", "SaveOnly",
+					      NULL, NULL,
+					      msg_update_flags, mi_list,
+					      cancellable, error);
+}
 static gboolean
 ews_synchronize_sync (CamelFolder *folder, gboolean expunge, EVO3(GCancellable *cancellable,) GError **error)
 {
-	g_print ("\n You better write a good sync for EWS :)");
+	GPtrArray *uids;
+	GSList *mi_list = NULL;
+	int mi_list_len = 0;
+	gboolean success = TRUE;
+	int i;
+	EVO2(GCancellable *cancellable = NULL);
+
+	uids = camel_folder_summary_get_changed (folder->summary);
+	if (!uids->len) {
+		camel_folder_free_uids (folder, uids);
+		return TRUE;
+	}
+
+	for (i = 0; success && i < uids->len; i++) {
+		guint32 flags_changed;
+		CamelEwsMessageInfo *mi = (void *)camel_folder_summary_uid (folder->summary, uids->pdata[i]);
+		if (!mi)
+			continue;
+
+		flags_changed = mi->server_flags ^ mi->info.flags;
+
+		/* Exchange doesn't seem to have a sane representation
+		   for most flags — not even replied/forwarded. */
+		if ((flags_changed & CAMEL_MESSAGE_SEEN)) {
+			mi_list = g_slist_append (mi_list, mi);
+			mi_list_len++;
+		} else {
+			camel_message_info_free (mi);
+		}
+		if (mi_list_len == EWS_MAX_FETCH_COUNT) {
+			success = ews_sync_mi_flags (folder, mi_list, cancellable, error);
+			mi_list = NULL;
+			mi_list_len = 0;
+		}
+	}
+	if (mi_list_len)
+		success = ews_sync_mi_flags (folder, mi_list, cancellable, error);
 	
+	camel_folder_free_uids (folder, uids);
 	return TRUE;
 }
 
