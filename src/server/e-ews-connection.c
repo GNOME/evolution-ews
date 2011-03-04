@@ -403,8 +403,11 @@ exit:
 	ews_active_job_done (enode->cnc, enode);
 }
 
+typedef gpointer (*ItemParser) (ESoapParameter *param);
+
 static void
-sync_hierarchy_response_cb (ESoapParameter *subparam, EwsNode *enode)
+sync_xxx_response_cb (ESoapParameter *subparam, EwsNode *enode, ItemParser parser,
+		      const gchar *last_tag, const gchar *delete_id_tag)
 {
 	ESoapParameter *node;
 	EwsAsyncData *async_data;
@@ -415,8 +418,7 @@ sync_hierarchy_response_cb (ESoapParameter *subparam, EwsNode *enode)
 	node = e_soap_parameter_get_first_child_by_name (subparam, "SyncState");
 	new_sync_state = e_soap_parameter_get_string_value (node);
 
-	node = e_soap_parameter_get_first_child_by_name (subparam, "IncludesLastFolderInRange");
-	
+	node = e_soap_parameter_get_first_child_by_name (subparam, last_tag);
 	if (!strcmp (e_soap_parameter_get_string_value (node), "true"))
 		includes_last_item = TRUE;
 
@@ -429,7 +431,7 @@ sync_hierarchy_response_cb (ESoapParameter *subparam, EwsNode *enode)
 		     subparam1 = e_soap_parameter_get_next_child_by_name (subparam1, "Create")) {
 			EEwsFolder *folder;
 
-			folder = e_ews_folder_new_from_soap_parameter (subparam1);
+			folder = parser (subparam1);
 			items_created = g_slist_append (items_created, folder);
 		}
 
@@ -438,7 +440,7 @@ sync_hierarchy_response_cb (ESoapParameter *subparam, EwsNode *enode)
 		     subparam1 = e_soap_parameter_get_next_child_by_name (subparam1, "Update")) {
 			EEwsFolder *folder;
 
-			folder = e_ews_folder_new_from_soap_parameter (subparam1);
+			folder = parser (subparam1);
 			items_updated = g_slist_append (items_updated, folder);
 		}
 
@@ -447,7 +449,7 @@ sync_hierarchy_response_cb (ESoapParameter *subparam, EwsNode *enode)
 		     subparam1 = e_soap_parameter_get_next_child_by_name (subparam1, "Delete")) {
 			ESoapParameter *folder_param;
 
-			folder_param = e_soap_parameter_get_first_child_by_name (subparam1, "FolderId");
+			folder_param = e_soap_parameter_get_first_child_by_name (subparam1, delete_id_tag);
 			value = e_soap_parameter_get_property (folder_param, "Id");
 			items_deleted = g_slist_append (items_deleted, value);
 		}
@@ -462,60 +464,17 @@ sync_hierarchy_response_cb (ESoapParameter *subparam, EwsNode *enode)
 }
 
 static void
+sync_hierarchy_response_cb (ESoapParameter *subparam, EwsNode *enode)
+{
+	sync_xxx_response_cb (subparam, enode, (ItemParser)e_ews_folder_new_from_soap_parameter,
+			      "IncludesLastFolderInRange", "FolderId");
+}
+
+static void
 sync_folder_items_response_cb (ESoapParameter *subparam, EwsNode *enode)
 {
-	ESoapParameter *node;
-	EwsAsyncData *async_data;
-	gchar *new_sync_state = NULL, *value;
-	GSList *items_created = NULL, *items_updated = NULL, *items_deleted = NULL;
-	gboolean includes_last_item = FALSE;
-
-	node = e_soap_parameter_get_first_child_by_name (subparam, "SyncState");
-	new_sync_state = e_soap_parameter_get_string_value (node);
-
-	node = e_soap_parameter_get_first_child_by_name (subparam, "IncludesLastItemInRange");
-	if (!strcmp (e_soap_parameter_get_string_value (node), "true"))
-		includes_last_item = TRUE;
-
-	node = e_soap_parameter_get_first_child_by_name (subparam, "Changes");
-	
-	if (node) {
-		ESoapParameter *subparam1;
-		for (subparam1 = e_soap_parameter_get_first_child_by_name (node, "Create");
-		     subparam1 != NULL;
-		     subparam1 = e_soap_parameter_get_next_child_by_name (subparam1, "Create")) {
-			EEwsItem *item;
-
-			item = e_ews_item_new_from_soap_parameter (subparam1);
-			items_created = g_slist_append (items_created, item);
-		}
-
-		for (subparam1 = e_soap_parameter_get_first_child_by_name (node, "Update");
-		     subparam1 != NULL;
-		     subparam1 = e_soap_parameter_get_next_child_by_name (subparam1, "Update")) {
-			EEwsItem *item;
-
-			item = e_ews_item_new_from_soap_parameter (subparam1);
-			items_updated = g_slist_append (items_updated, item);
-		}
-
-		for (subparam1 = e_soap_parameter_get_first_child_by_name (node, "Delete");
-		     subparam1 != NULL;
-		     subparam1 = e_soap_parameter_get_next_child_by_name (subparam1, "Delete")) {
-			ESoapParameter *item_param;
-
-			item_param = e_soap_parameter_get_first_child_by_name (subparam1, "ItemId");
-			value = e_soap_parameter_get_property (item_param, "Id");
-			items_deleted = g_slist_append (items_deleted, value);
-		}
-	}
-
-	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
-	async_data->items_created = items_created;
-	async_data->items_updated = items_updated;
-	async_data->items_deleted = items_deleted;
-	async_data->sync_state = new_sync_state;
-	async_data->includes_last_item = includes_last_item;
+	sync_xxx_response_cb (subparam, enode, (ItemParser) e_ews_item_new_from_soap_parameter,
+			      "IncludesLastItemInRange", "ItemId");
 }
 
 /* Used for CreateItems and GetItems */
