@@ -34,6 +34,19 @@ G_DEFINE_TYPE (EEwsItem, e_ews_item, G_TYPE_OBJECT)
 struct _EEwsItemPrivate {
 	EEwsItemType item_type;
 
+	/* MAPI properties */
+	/* The Exchange server is so fundamentally misdesigned that it doesn't expose
+	   certain information in a coherent way; the \Answered, and \Deleted message
+	   flags don't even seem to work properly. It looks like the only way to work
+	   it out is from the PidTagIconIndex field. Quite what the hell an *icon*
+	   selector is doing in the database, I have absolutely no fucking idea; a
+	   database is supposed to represent the *data*, not do bizarre things that
+	   live in the client. But that's typical Exchange brain damage for you... */
+	guint32 mapi_icon_index;		/* http://msdn.microsoft.com/en-us/library/cc815472.aspx */
+	guint32 mapi_last_verb_executed;	/* http://msdn.microsoft.com/en-us/library/cc841968.aspx */
+	guint32 mapi_message_status;		/* http://msdn.microsoft.com/en-us/library/cc839915.aspx */
+	guint32 mapi_message_flags;		/* http://msdn.microsoft.com/en-us/library/cc839733.aspx */
+
 	/* properties */
 	EwsId *item_id;
 	gchar *subject;
@@ -206,6 +219,68 @@ ews_item_parse_date (const gchar *dtstring)
 	return t;
 }
 
+static void parse_extended_property (EEwsItemPrivate *priv, ESoapParameter *param)
+{
+	ESoapParameter *subparam;
+	gchar *str;
+	guint32 tag, value;
+
+	subparam = e_soap_parameter_get_first_child_by_name (param, "ExtendedFieldURI");
+	if (!subparam)
+		return;
+
+	str = e_soap_parameter_get_property (subparam, "PropertyType");
+	if (!str)
+		return;
+
+	/* We only handle integer MAPI properties for now... */
+	if (g_ascii_strcasecmp (str, "Integer")) {
+		g_free (str);
+		return;
+	}
+	g_free (str);
+
+	str = e_soap_parameter_get_property (subparam, "PropertyTag");
+	if (!str)
+		return;
+
+	tag = strtol (str, NULL, 0);
+	g_free (str);
+
+	subparam = e_soap_parameter_get_first_child_by_name (param, "Value");
+	if (!subparam)
+		return;
+
+	str = e_soap_parameter_get_string_value (subparam);
+	if (!str)
+		return;
+
+	value = strtol (str, NULL, 0);
+	g_free (str);
+
+	switch (tag) {
+	case 0x01080: /* PidTagIconIndex */
+		priv->mapi_icon_index = value;
+		break;
+
+	case 0x1081:
+		priv->mapi_last_verb_executed = value;
+		break;
+
+	case 0xe07:
+		priv->mapi_message_flags = value;
+		break;
+
+	case 0xe17:
+		priv->mapi_message_status = value;
+		break;
+
+	default:
+		g_print ("Fetched unrecognised MAPI property 0x%x, value %d\n",
+			 tag, value);
+	}
+}
+
 static EwsImportance 
 parse_importance (ESoapParameter *param)
 {
@@ -348,6 +423,8 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 			g_free (value);
 		} else if (!g_ascii_strcasecmp (name, "References")) {
 			priv->references = e_soap_parameter_get_string_value (subparam);
+		} else if (!g_ascii_strcasecmp (name, "ExtendedProperty")) {
+			parse_extended_property (priv, subparam);
 		}
 	}
 
@@ -504,6 +581,27 @@ e_ews_item_is_read		(EEwsItem *item, gboolean *read)
 
 	return TRUE;
 }
+
+gboolean
+e_ews_item_is_forwarded		(EEwsItem *item, gboolean *forwarded)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), FALSE);
+
+	*forwarded = (item->priv->mapi_icon_index == 0x106);
+
+	return TRUE;
+}
+
+gboolean
+e_ews_item_is_answered		(EEwsItem *item, gboolean *answered)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), FALSE);
+
+	*answered = (item->priv->mapi_icon_index == 0x105);
+
+	return TRUE;
+}
+
 
 const GSList *	
 e_ews_item_get_to_recipients	(EEwsItem *item)

@@ -101,6 +101,10 @@ gboolean	e_ews_item_has_attachments	(EEwsItem *item,
 						 gboolean *has_attachments);
 gboolean	e_ews_item_is_read		(EEwsItem *item, 
 						 gboolean *is_read);
+gboolean	e_ews_item_is_forwarded		(EEwsItem *item, 
+						 gboolean *is_forwarded);
+gboolean	e_ews_item_is_answered		(EEwsItem *item, 
+						 gboolean *is_answered);
 const GSList *	e_ews_item_get_to_recipients	(EEwsItem *item);
 const GSList *	e_ews_item_get_cc_recipients	(EEwsItem *item);
 const GSList *	e_ews_item_get_bcc_recipients	(EEwsItem *item);
