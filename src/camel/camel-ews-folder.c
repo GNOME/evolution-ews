@@ -62,7 +62,7 @@ which needs to be better organized via functions */
 		   "item:HasAttachments item:InReplyTo"
 #define SUMMARY_ITEM_PROPS ITEM_PROPS " " SUMMARY_ITEM_FLAGS 
 
-#define SUMMARY_MESSAGE_FLAGS SUMMARY_ITEM_FLAGS " message:IsRead"
+#define SUMMARY_MESSAGE_FLAGS SUMMARY_ITEM_FLAGS " message:IsRead mapi:int:0x0e07 mapi:int:0x0e17 mapi:int:0x1080 mapi:int:0x1081"
 #define SUMMARY_MESSAGE_PROPS ITEM_PROPS " message:From message:Sender message:ToRecipients message:CcRecipients " \
 		   "message:BccRecipients message:IsRead message:References message:InternetMessageId " \
 		   SUMMARY_MESSAGE_FLAGS
@@ -857,7 +857,8 @@ camel_ews_folder_init (CamelEwsFolder *ews_folder)
 	ews_folder->priv = CAMEL_EWS_FOLDER_GET_PRIVATE (ews_folder);
 
 	folder->permanent_flags = CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_DELETED |
-		CAMEL_MESSAGE_DRAFT | CAMEL_MESSAGE_FLAGGED | CAMEL_MESSAGE_SEEN;
+		CAMEL_MESSAGE_DRAFT | CAMEL_MESSAGE_FLAGGED | CAMEL_MESSAGE_SEEN |
+		CAMEL_MESSAGE_FORWARDED;
 
 	folder->folder_flags = CAMEL_FOLDER_HAS_SUMMARY_CAPABILITY | CAMEL_FOLDER_HAS_SEARCH_CAPABILITY;
 

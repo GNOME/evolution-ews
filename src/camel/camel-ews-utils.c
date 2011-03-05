@@ -597,15 +597,27 @@ camel_ews_utils_sync_deleted_items (CamelEwsFolder *ews_folder, GSList *items_de
 static gint
 ews_utils_get_server_flags (EEwsItem *item)
 {
-	gboolean read;
+	gboolean flag;
 	EwsImportance importance;
 	gint server_flags = 0;
 
-	e_ews_item_is_read (item, &read);
-	if (read)	
+	e_ews_item_is_read (item, &flag);
+	if (flag)	
 		server_flags |= CAMEL_MESSAGE_SEEN;
 	else
 		server_flags &= ~CAMEL_MESSAGE_SEEN;
+
+	e_ews_item_is_forwarded (item, &flag);
+	if (flag)
+		server_flags |= CAMEL_MESSAGE_FORWARDED;
+	else
+		server_flags &= ~CAMEL_MESSAGE_FORWARDED;
+
+	e_ews_item_is_answered (item, &flag);
+	if (flag)
+		server_flags |= CAMEL_MESSAGE_ANSWERED;
+	else
+		server_flags &= ~CAMEL_MESSAGE_ANSWERED;
 
 	importance = e_ews_item_get_importance (item);
 	if (importance == EWS_ITEM_HIGH)
