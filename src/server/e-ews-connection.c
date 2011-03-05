@@ -1206,7 +1206,15 @@ e_ews_connection_get_items_start	(EEwsConnection *cnc,
 
 		e_soap_message_start_element (msg, "AdditionalProperties", "types", NULL);
 		while (prop[i]) {
-			e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", "types", NULL, "FieldURI", prop [i]);
+			/* XX FIXME: Come up with a better way of doing this */
+			if (!g_ascii_strncasecmp (prop[i], "mapi:int:0x", 11)) {
+				e_soap_message_start_element (msg, "ExtendedFieldURI", "types", NULL);
+				e_soap_message_add_attribute (msg, "PropertyTag", prop[i] + 9, NULL, NULL);
+				e_soap_message_add_attribute (msg, "PropertyType", "Integer", NULL, NULL);
+				e_soap_message_end_element (msg);
+			} else {
+				e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", "types", NULL, "FieldURI", prop [i]);
+			}
 			i++;
 		}
 		g_strfreev (prop);
