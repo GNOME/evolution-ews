@@ -902,13 +902,13 @@ convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 
 	// start time
 	t = icaltime_as_timet(icalcomponent_get_dtstart(icalcomp));
-	timeinfo = localtime(&t);
+	timeinfo = gmtime(&t);
 	strftime(buff, 30, "%Y-%m-%dT%H:%M:%S", timeinfo);
 	e_ews_message_write_string_parameter(msg, "Start", NULL, buff);
 
 	// end time
 	t = icaltime_as_timet(icalcomponent_get_dtend(icalcomp));
-	timeinfo = localtime(&t);
+	timeinfo = gmtime(&t);
 	strftime(buff, 30, "%Y-%m-%dT%H:%M:%S", timeinfo);
 	e_ews_message_write_string_parameter(msg, "End", NULL, buff);
 
