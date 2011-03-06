@@ -362,23 +362,61 @@ msg_update_flags (ESoapMessage *msg, gpointer user_data)
 	CamelEwsMessageInfo *mi;
 
 	while ((mi = g_slist_nth_data (mi_list, 0))) {
+		guint32 flags_changed;
+
 		mi_list = g_slist_remove (mi_list, mi);
+
+		flags_changed = mi->server_flags ^ mi->info.flags;
 
 		e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
 						 mi->info.uid, mi->change_key, 0);
-		e_soap_message_start_element (msg, "SetItemField", "types", NULL);
 
-		e_soap_message_start_element (msg, "FieldURI", "types", NULL);
-		e_soap_message_add_attribute (msg, "FieldURI", "message:IsRead", NULL, NULL);
-		e_soap_message_end_element (msg);
+		if (flags_changed & CAMEL_MESSAGE_SEEN) {
+			e_soap_message_start_element (msg, "SetItemField", "types", NULL);
+
+			e_soap_message_start_element (msg, "FieldURI", "types", NULL);
+			e_soap_message_add_attribute (msg, "FieldURI", "message:IsRead", NULL, NULL);
+			e_soap_message_end_element (msg);
 		
-		e_soap_message_start_element (msg, "Message", "types", NULL);
-		e_ews_message_write_string_parameter (msg, "IsRead", "types", 
-			      (mi->info.flags & CAMEL_MESSAGE_SEEN)?"true":"false");
-		e_soap_message_end_element (msg); /* Item */
+			e_soap_message_start_element (msg, "Message", "types", NULL);
+			e_ews_message_write_string_parameter (msg, "IsRead", "types", 
+					      (mi->info.flags & CAMEL_MESSAGE_SEEN)?"true":"false");
 
-		e_soap_message_end_element (msg); /* SetItemField */
+			e_soap_message_end_element (msg); /* Message */
+			e_soap_message_end_element (msg); /* SetItemField */
+		}
+		/* Ick Ick Ick. Why in hell is there a field in the database for the Icon
+		   *anyway*? Why isn't there a better place for forwarded/answered status? */
+		if (flags_changed & (CAMEL_MESSAGE_FORWARDED|CAMEL_MESSAGE_ANSWERED)) {
+			gint icon = (mi->info.flags & CAMEL_MESSAGE_SEEN) ? 0x100 : 0x101;
+			
+			if (mi->info.flags & CAMEL_MESSAGE_ANSWERED)
+				icon = 0x105;
+			if (mi->info.flags & CAMEL_MESSAGE_FORWARDED)
+				icon = 0x106;
 
+			e_soap_message_start_element (msg, "SetItemField", "types", NULL);
+
+			e_soap_message_start_element (msg, "ExtendedFieldURI", "types", NULL);
+			e_soap_message_add_attribute (msg, "PropertyTag", "0x1080", NULL, NULL);
+			e_soap_message_add_attribute (msg, "PropertyType", "Integer", NULL, NULL);
+			e_soap_message_end_element (msg);
+		
+			e_soap_message_start_element (msg, "Message", "types", NULL);
+			e_soap_message_start_element (msg, "ExtendedProperty", "types", NULL);
+
+			/* And now we have to specify the field *again*. Yay for XML crap */
+			e_soap_message_start_element (msg, "ExtendedFieldURI", "types", NULL);
+			e_soap_message_add_attribute (msg, "PropertyTag", "0x1080", NULL, NULL);
+			e_soap_message_add_attribute (msg, "PropertyType", "Integer", NULL, NULL);
+			e_soap_message_end_element (msg);
+
+			e_ews_message_write_int_parameter (msg, "Value", "types", icon);
+			
+			e_soap_message_end_element (msg); /* ExtendedProperty */
+			e_soap_message_end_element (msg); /* Message */
+			e_soap_message_end_element (msg); /* SetItemField */
+		}
 		e_ews_message_end_item_change (msg);
 
 		camel_message_info_free (mi);
@@ -427,7 +465,7 @@ ews_synchronize_sync (CamelFolder *folder, gboolean expunge, EVO3(GCancellable *
 
 		/* Exchange doesn't seem to have a sane representation
 		   for most flags — not even replied/forwarded. */
-		if ((flags_changed & CAMEL_MESSAGE_SEEN)) {
+		if (flags_changed & (CAMEL_MESSAGE_SEEN|CAMEL_MESSAGE_ANSWERED|CAMEL_MESSAGE_FORWARDED)) {
 			mi_list = g_slist_append (mi_list, mi);
 			mi_list_len++;
 		} else {
