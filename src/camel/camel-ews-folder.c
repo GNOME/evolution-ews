@@ -481,7 +481,7 @@ ews_synchronize_sync (CamelFolder *folder, gboolean expunge, EVO3(GCancellable *
 		success = ews_sync_mi_flags (folder, mi_list, cancellable, error);
 	
 	camel_folder_free_uids (folder, uids);
-	return TRUE;
+	return success;
 }
 
 CamelFolder *
