@@ -28,25 +28,38 @@
 
 G_BEGIN_DECLS
 
-ESoapMessage *e_ews_message_new_with_header (const gchar *uri,
-					    const gchar *method_name,
-					    const gchar *attribute_name,
-					    const gchar *attribute_value);
-void             e_ews_message_write_string_parameter (ESoapMessage *msg, const gchar *name,
-						      const gchar *prefix, const gchar *value);
-void             e_ews_message_write_string_parameter_with_attribute (ESoapMessage *msg,
-								     const gchar *name,
-								     const gchar *prefix,
-								     const gchar *value,
-								     const gchar *attribute_name,
-								     const gchar *attribute_value);
-void             e_ews_message_write_base64_parameter (ESoapMessage *msg,
-						      const gchar *name,
-						      const gchar *prefix,
-						      const gchar *value);
-void e_ews_message_write_int_parameter (ESoapMessage *msg, const gchar *name, const gchar *prefix, glong value);
+typedef enum {
+	EWS_EXCHANGE_2007,
+	EWS_EXCHANGE_2007_SP1
+} EwsServerVersion;
 
-void             e_ews_message_write_footer (ESoapMessage *msg);
+ESoapMessage *	e_ews_message_new_with_header	(const gchar *uri,
+						 const gchar *method_name,
+						 const gchar *attribute_name,
+						 const gchar *attribute_value,
+						 EwsServerVersion version);
+void		e_ews_message_write_string_parameter 
+						(ESoapMessage *msg, const gchar *name,
+						 const gchar *prefix, const gchar *value);
+void		e_ews_message_write_string_parameter_with_attribute 
+						(ESoapMessage *msg,
+						 const gchar *name,
+						 const gchar *prefix,
+						 const gchar *value,
+						 const gchar *attribute_name,
+						 const gchar *attribute_value);
+void		e_ews_message_write_base64_parameter 
+						(ESoapMessage *msg,
+						 const gchar *name,
+						 const gchar *prefix,
+						 const gchar *value);
+void 		e_ews_message_write_int_parameter 
+						(ESoapMessage *msg, 
+						 const gchar *name, 
+						 const gchar *prefix, 
+						 glong value);
+
+void		e_ews_message_write_footer	(ESoapMessage *msg);
 
 G_END_DECLS
 
