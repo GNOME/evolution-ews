@@ -878,25 +878,43 @@ typedef struct {
 	EServerMethodContext context;
 } EwsCreateData;
 
+static void add_attendees_list_to_message(ESoapMessage *msg, const gchar *listname, GSList *list) {
+	GSList *item;
+
+	e_soap_message_start_element(msg, listname, NULL, NULL);
+
+	for (item = list ; item != NULL; item = item->next) {
+		e_soap_message_start_element(msg, "Attendee", NULL, NULL);
+		e_soap_message_start_element(msg, "Mailbox", NULL, NULL);
+
+		e_ews_message_write_string_parameter(msg, "EmailAddress", NULL, item->data);
+
+		e_soap_message_end_element(msg); /* "Mailbox" */
+		e_soap_message_end_element(msg); /* "Attendee" */
+	}
+
+	e_soap_message_end_element(msg);
+}
+
 static void
 convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 {
-	icalcomponent *inner, *icalcomp = (icalcomponent*)user_data;
+	icalcomponent *icalcomp = (icalcomponent*)user_data;
 	time_t t;
 	struct tm * timeinfo;
 	char buff[30];
-	icalproperty *prop;
+	GSList *required = NULL, *optional = NULL, *resource = NULL;
 
 	/* FORMAT OF A SAMPLE SOAP MESSAGE: http://msdn.microsoft.com/en-us/library/aa564690.aspx */
 
 	/* Prepare CalendarItem node in the SOAP message */
 	e_soap_message_start_element(msg, "CalendarItem", "types", NULL);
-	e_soap_message_add_attribute(msg, "xmlns", "http://schemas.microsoft.com/exchange/services/2006/types", NULL, NULL);
+	e_soap_message_add_attribute (msg, "xmlns", "http://schemas.microsoft.com/exchange/services/2006/types", NULL, NULL);
 
 	/* subject */
 	e_ews_message_write_string_parameter(msg, "Subject", NULL,  icalcomponent_get_summary(icalcomp));
 
-	// description
+	/* description */
 	e_ews_message_write_string_parameter_with_attribute(msg, "Body", NULL, icalcomponent_get_description(icalcomp), "BodyType", "Text");
 
 	/* start time */
@@ -914,32 +932,24 @@ convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 	/* location */
 	e_ews_message_write_string_parameter(msg, "Location", NULL, icalcomponent_get_location(icalcomp));
 
-	/* attendees */
-	e_soap_message_start_element(msg, "RequiredAttendees", NULL, NULL);
-	inner = icalcomponent_get_inner(icalcomp); /* look at the internal VEVENT component */
-	/* iterate over every attendee property */
-	for (prop = icalcomponent_get_first_property(inner, ICAL_ATTENDEE_PROPERTY);
-	     prop != NULL;
-	     prop = icalcomponent_get_next_property(inner, ICAL_ATTENDEE_PROPERTY)) {
+	/* collect attendees */
+	e_ews_collect_attendees(icalcomp, &required, &optional, &resource);
 
-		/* inner soap elements */
-		e_soap_message_start_element(msg, "Attendee", NULL, NULL);
-		e_soap_message_start_element(msg, "Mailbox", NULL, NULL);
-
-		e_ews_message_write_string_parameter(msg,
-						     "EmailAddress",
-						     NULL,
-						     icalproperty_get_attendee(prop));
-
-		e_soap_message_end_element(msg); /* "Mailbox" */
-		e_soap_message_end_element(msg); /* "Attendee" */
+	if (required != NULL) {
+		add_attendees_list_to_message(msg, "RequiredAttendees", required);
+		g_slist_free(required);
 	}
-
-	e_soap_message_end_element(msg); /* "RequiredAttendees" */
+	if (optional != NULL) {
+		add_attendees_list_to_message(msg, "OptionalAttendees", optional);
+		g_slist_free(optional);
+	}
+	if (resource != NULL) {
+		add_attendees_list_to_message(msg, "Resources", resource);
+		g_slist_free(resource);
+	}
 	/* end of attendees */
 
 	/* TODO:attachments */
-
 
 	// end of "CalendarItem"
 	e_soap_message_end_element(msg);

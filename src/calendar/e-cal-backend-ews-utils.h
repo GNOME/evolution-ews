@@ -27,6 +27,8 @@
 
 G_BEGIN_DECLS
 
+void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **optional, GSList **resource);
+
 G_END_DECLS
 
 #endif

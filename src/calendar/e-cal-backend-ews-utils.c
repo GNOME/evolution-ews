@@ -40,5 +40,50 @@
 #include "e-cal-backend-ews-utils.h"
 #include "libedataserver/e-source-list.h"
 
+/*
+ * Iterate over the icalcomponent properties and collect attendees
+ */
+void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **optional, GSList **resource) {
+	icalcomponent *inner;
+	icalproperty *prop, *org_prop = NULL;
+	icalparameter *param;
+	const gchar *org = NULL, *str = NULL;
 
+	/* we need to know who the orgenizer is so we wont duplicate him/her */
+	org_prop = icalcomponent_get_first_property (comp, ICAL_ORGANIZER_PROPERTY);
+	org = icalproperty_get_organizer(org_prop);
+	if (!org) org = "";
+
+	/* Look at the internal VEVENT component */
+	inner = icalcomponent_get_inner(comp);
+
+	/* iterate over every attendee property */
+	for (prop = icalcomponent_get_first_property(comp, ICAL_ATTENDEE_PROPERTY);
+		prop != NULL;
+		prop = icalcomponent_get_next_property(comp, ICAL_ATTENDEE_PROPERTY)) {
+
+		str = icalproperty_get_attendee(prop);
+
+		/* if this attenddee is the orgenizer - dont add him/her */
+		if (g_ascii_strcasecmp(org, str) == 0) continue;
+
+		/* figure the email address of the attendee, discard "mailto:" if it's there */
+		if (!g_ascii_strncasecmp (str, "mailto:", 7)) str = (str) + 7;
+
+		/* figure type of attendee, add to relevant list */
+		param = icalproperty_get_first_parameter(prop, ICAL_ROLE_PARAMETER);
+		switch (icalparameter_get_role(param)) {
+			case ICAL_ROLE_OPTPARTICIPANT:
+				*optional = g_slist_append(*optional, (gpointer)str);
+				break;
+			case ICAL_ROLE_CHAIR:
+			case ICAL_ROLE_REQPARTICIPANT:
+				*required = g_slist_append(*required, (gpointer)str);
+				break;
+			case ICAL_ROLE_NONPARTICIPANT:
+				*resource = g_slist_append(*resource, (gpointer)str);
+				break;
+		}
+	}
+}
 
