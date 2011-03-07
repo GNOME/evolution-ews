@@ -534,25 +534,29 @@ static void
 ews_cal_component_get_item_id (ECalComponent *comp, gchar **itemid, gchar **changekey)
 {
 	icalproperty *prop;
-	gchar *id = NULL, *ck = NULL;
+	gchar *ck = NULL;
+	const gchar *id = NULL;
 
-	prop = icalcomponent_get_first_property (e_cal_component_get_icalcomponent (comp),
+	if (changekey) {
+		prop = icalcomponent_get_first_property (e_cal_component_get_icalcomponent (comp),
 						 ICAL_X_PROPERTY);
-	while (prop && (!id || (changekey && !ck))) {
-		const gchar *x_name, *x_val;
+		while (prop) {
+			const gchar *x_name, *x_val;
 
-		x_name = icalproperty_get_x_name (prop);
-		x_val = icalproperty_get_x (prop);
-		if (!id && !g_ascii_strcasecmp (x_name, "X-EVOLUTION-ITEMID"))
-		 	id = g_strdup (x_val);
-		else if (changekey && !ck &&
-			   !g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY"))
-			ck = g_strdup (x_val);
+			x_name = icalproperty_get_x_name (prop);
+			x_val = icalproperty_get_x (prop);
+			if (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY")) {
+				ck = g_strdup (x_val);
+				break;
+			}
 
-		prop = icalcomponent_get_next_property (e_cal_component_get_icalcomponent (comp),
+			prop = icalcomponent_get_next_property (e_cal_component_get_icalcomponent (comp),
 							ICAL_X_PROPERTY);
+		}
 	}
-	*itemid = id;
+
+	e_cal_component_get_uid(comp, &id);
+	*itemid = g_strdup (id);
 	if (changekey)
 		*changekey = ck;
 }
@@ -990,11 +994,11 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	item_id = e_ews_item_get_id((EEwsItem *)ids->data);
 	e_cal_component_set_uid(create_data->comp, item_id->id);
 
-	/* set a new ical property containing the id we got from the exchange server for future use */
-	icalprop = icalproperty_new_x(item_id->id);
-	icalproperty_set_x_name (icalprop, "X-EVOLUTION-ITEMID");
+	/* set a new ical property containing the change key we got from the exchange server for future use */
+	icalprop = icalproperty_new_x (item_id->change_key);
+	icalproperty_set_x_name (icalprop, "X-EVOLUTION-CHANGEKEY");
 	icalcomp = e_cal_component_get_icalcomponent(create_data->comp);
-	icalcomponent_add_property(icalcomp, icalprop);
+	icalcomponent_add_property (icalcomp, icalprop);
 
 	/* update component internal data */
 	e_cal_component_commit_sequence(create_data->comp);
@@ -1375,9 +1379,11 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item)
 		gchar *comp_str;
 
 		item_id = e_ews_item_get_id (item);
-		icalprop = icalproperty_new_x (item_id->id);
-		icalproperty_set_x_name (icalprop, "X-EVOLUTION-ITEMID");
-		icalcomponent_add_property (icalcomp, icalprop);
+
+		/* The server sets a UID here, but it bears no relation to the ItemID.
+		   Override it to the ItemId instead. */
+		icalcomponent_set_uid (icalcomp, item_id->id);
+
 		icalprop = icalproperty_new_x (item_id->change_key);
 		icalproperty_set_x_name (icalprop, "X-EVOLUTION-CHANGEKEY");
 		icalcomponent_add_property (icalcomp, icalprop);
