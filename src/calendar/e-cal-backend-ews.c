@@ -1091,6 +1091,223 @@ e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMeth
 					     create_data);
 }
 
+typedef struct {
+	ECalBackendEws *cbews;
+	EDataCal *cal;
+	ECalComponent *comp;
+	ECalComponent *oldcomp;
+	EServerMethodContext context;
+	gchar *itemid;
+	gchar *changekey;
+} EwsModifyData;
+
+static void
+ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data)
+{
+	EEwsConnection *cnc = E_EWS_CONNECTION (object);
+	EwsModifyData *modify_data = user_data;
+	ECalBackendEws *cbews = modify_data->cbews;
+	ECalBackendEwsPrivate *priv = cbews->priv;
+	GError *error = NULL;
+
+
+	if (!e_ews_connection_update_items_finish (cnc, res, &error)) {
+		/* The calendar UI doesn't *display* errors unless they have
+		   the OtherError code */
+		error->code = OtherError;
+		return;
+	}
+
+	e_cal_backend_store_freeze_changes(priv->store);
+
+	e_cal_component_commit_sequence (modify_data->comp);
+	e_cal_component_commit_sequence (modify_data->oldcomp);
+	put_component_to_store (modify_data->cbews, modify_data->comp);
+
+	e_data_cal_notify_object_modified (modify_data->cal, modify_data->context, error,
+					   e_cal_component_get_as_string (modify_data->oldcomp),
+					   e_cal_component_get_as_string (modify_data->comp));
+
+	PRIV_LOCK (priv);
+	g_hash_table_replace (priv->item_id_hash, g_strdup(modify_data->itemid), g_object_ref (modify_data->comp));
+	PRIV_UNLOCK (priv);
+
+	e_cal_backend_store_thaw_changes (priv->store);
+
+	g_free(modify_data->itemid);
+	g_free(modify_data->changekey);
+	g_object_unref(modify_data->oldcomp);
+	g_object_unref(modify_data->comp);
+	g_object_unref(modify_data->cbews);
+	g_object_unref(modify_data->cal);
+	g_free(modify_data);
+}
+
+static void
+convert_property_to_updatexml (ESoapMessage *msg, const gchar *name, const gchar *value, const gchar * prefix, const gchar *attr_name, const gchar *attr_value)
+{
+	gchar * fielduri = NULL;
+	fielduri = g_strconcat (prefix, name, NULL);
+
+	e_soap_message_start_element (msg, "SetItemField", "types", NULL);
+
+	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", "types", NULL, "FieldURI", fielduri);
+
+	e_soap_message_start_element (msg, "CalendarItem", "types", NULL);
+	e_ews_message_write_string_parameter_with_attribute (msg, name, "types", value, attr_name, attr_value);
+	e_soap_message_end_element (msg); /* CalendarItem */
+
+	e_soap_message_end_element (msg); /* SetItemField */
+
+	g_free (fielduri);
+}
+
+static void
+convert_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
+{
+	EwsModifyData *modify_data = user_data;
+	icalcomponent *inner, *icalcomp = e_cal_component_get_icalcomponent (modify_data->comp);
+	icalproperty *prop;
+	time_t t;
+	struct tm *timeinfo;
+	char buff[30];
+
+	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
+					 modify_data->itemid, modify_data->changekey, 0);
+
+	convert_property_to_updatexml  (msg, "Subject", icalcomponent_get_summary(icalcomp), "item:", NULL, NULL);
+
+	convert_property_to_updatexml  (msg, "Body", icalcomponent_get_description(icalcomp), "item:", "BodyType", "Text");
+
+	t = icaltime_as_timet_with_zone(icalcomponent_get_dtstart(icalcomp), icaltimezone_get_utc_timezone ());
+	timeinfo = gmtime(&t);
+	strftime(buff, 30, "%Y-%m-%dT%H:%M:%SZ", timeinfo);
+	convert_property_to_updatexml  (msg, "Start", buff, "calendar:", NULL, NULL);
+
+	t = icaltime_as_timet_with_zone(icalcomponent_get_dtend(icalcomp), icaltimezone_get_utc_timezone ());
+	timeinfo = gmtime(&t);
+	strftime(buff, 30, "%Y-%m-%dT%H:%M:%SZ", timeinfo);
+	convert_property_to_updatexml  (msg, "End", buff, "calendar:", NULL, NULL);
+
+	convert_property_to_updatexml  (msg, "Location", icalcomponent_get_location(icalcomp), "calendar:", NULL, NULL);
+
+	inner = icalcomponent_get_inner(icalcomp);
+	prop = icalcomponent_get_first_property(inner, ICAL_ATTENDEE_PROPERTY);
+	if (prop != NULL) {
+		e_soap_message_start_element (msg, "SetItemField", "types", NULL);
+
+		e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", "types", NULL, "FieldURI", "calendar:RequiredAttendees");
+
+		e_soap_message_start_element (msg, "CalendarItem", "types", NULL);
+
+		e_soap_message_start_element(msg, "RequiredAttendees", "types", NULL);
+
+		for (prop = icalcomponent_get_first_property(inner, ICAL_ATTENDEE_PROPERTY);
+		     prop != NULL;
+		     prop = icalcomponent_get_next_property(inner, ICAL_ATTENDEE_PROPERTY)) {
+
+			e_soap_message_start_element(msg, "Attendee", NULL, NULL);
+			e_soap_message_start_element(msg, "Mailbox", NULL, NULL);
+
+			e_ews_message_write_string_parameter(msg,
+							     "EmailAddress",
+							     NULL,
+							     icalproperty_get_attendee(prop));
+
+			e_soap_message_end_element(msg);
+			e_soap_message_end_element(msg);
+		}
+
+		e_soap_message_end_element(msg); /* RequiredAttendees */
+
+		e_soap_message_end_element (msg); /* CalendarItem */
+
+		e_soap_message_end_element (msg); /* SetItemField */
+	}
+
+	e_ews_message_end_item_change (msg);
+}
+
+static void
+e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context,
+				 const gchar *calobj, CalObjModType mod)
+{
+	EwsModifyData *modify_data;
+	ECalBackendEws *cbews;
+	ECalBackendEwsPrivate *priv;
+	icalcomponent_kind kind;
+	ECalComponent *comp, *oldcomp;
+	icalcomponent *icalcomp;
+	gchar *itemid = NULL, *changekey = NULL;
+	struct icaltimetype current;
+	GError *error = NULL;
+	GCancellable *cancellable = NULL;
+
+	e_data_cal_error_if_fail(E_IS_CAL_BACKEND_EWS(backend), InvalidArg);
+	e_data_cal_error_if_fail(calobj != NULL && *calobj != '\0', InvalidArg);
+
+	cbews = E_CAL_BACKEND_EWS(backend);
+	priv = cbews->priv;
+	kind = e_cal_backend_get_kind(E_CAL_BACKEND(backend));
+
+	if (priv->mode == CAL_MODE_LOCAL) {
+		g_propagate_error(&error, EDC_ERROR(RepositoryOffline));
+		return;
+	}
+
+	icalcomp = icalparser_parse_string(calobj);
+	if (!icalcomp) {
+		g_propagate_error(&error, EDC_ERROR(InvalidObject));
+		return;
+	}
+	if (kind != icalcomponent_isa(icalcomp)) {
+		icalcomponent_free(icalcomp);
+		g_propagate_error(&error, EDC_ERROR(InvalidObject));
+		return;
+	}
+
+	comp = e_cal_component_new ();
+	e_cal_component_set_icalcomponent (comp, icalcomp);
+	current = icaltime_current_time_with_zone (icaltimezone_get_utc_timezone ());
+	e_cal_component_set_last_modified (comp, &current);
+
+	ews_cal_component_get_item_id (comp, &itemid, &changekey);
+	if (!itemid) {
+		g_propagate_error(&error, EDC_ERROR_EX(OtherError,
+					       "Cannot determine EWS ItemId"));
+		g_object_unref (comp);
+		goto exit;
+	}
+
+	PRIV_LOCK (priv);
+	oldcomp = g_hash_table_lookup (priv->item_id_hash, itemid);
+	if (!oldcomp) {
+		g_propagate_error (&error, EDC_ERROR(ObjectNotFound));
+		goto exit;
+	}
+	PRIV_UNLOCK (priv);
+
+	modify_data = g_new0 (EwsModifyData, 1);
+	modify_data->cbews = g_object_ref(cbews);
+	modify_data->comp = comp;
+	modify_data->oldcomp = oldcomp;
+	modify_data->cal = g_object_ref(cal);
+	modify_data->context = context;
+	modify_data->itemid = itemid;
+	modify_data->changekey = changekey;
+
+	e_ews_connection_update_items_start (priv->cnc, EWS_PRIORITY_MEDIUM,
+					     "AlwaysOverwrite", "SendAndSaveCopy",
+					     "SendToAllAndSaveCopy", priv->folder_id,
+					     convert_component_to_updatexml, modify_data,
+					     ews_cal_modify_object_cb, cancellable,
+					     modify_data);
+	return;
+
+exit:
+	e_data_cal_notify_object_modified (cal, context, error, e_cal_component_get_as_string (oldcomp), e_cal_component_get_as_string (comp));
+}
+
 /* TODO Do not replicate this in every backend */
 static icaltimezone *
 resolve_tzid (const gchar *tzid, gpointer user_data)
@@ -1570,8 +1787,8 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->discard_alarm = e_cal_backend_ews_discard_alarm;
 
 	backend_class->create_object = e_cal_backend_ews_create_object;
-/*	backend_class->modify_object = e_cal_backend_ews_modify_object;
- */
+	backend_class->modify_object = e_cal_backend_ews_modify_object;
+
 	backend_class->remove_object = e_cal_backend_ews_remove_object;
 /*
 	backend_class->receive_objects = e_cal_backend_ews_receive_objects;
