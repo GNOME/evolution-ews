@@ -275,6 +275,17 @@ gboolean	e_ews_connection_resolve_names_finish
 						 GSList **contact_items,
 						 gboolean *includes_last_item,
 						 GError **error);
+gboolean	e_ews_connection_resolve_names	(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *resolve_name,
+						 EwsContactsSearchScope scope,
+						 GSList *parent_folder_ids,
+						 gboolean fetch_contact_data,
+						 GSList **mailboxes,
+						 GSList **contact_items,
+						 gboolean *includes_last_item,
+						 GCancellable *cancellable,
+						 GError **error);
 
 G_END_DECLS
 

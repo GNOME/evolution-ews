@@ -501,12 +501,14 @@ resolve_names_response_cb (ESoapParameter *subparam, EwsNode *enode)
 	gboolean includes_last_item;
 	GSList *mailboxes = NULL, *contact_items = NULL;
 	EwsAsyncData *async_data;
+	gchar *prop;
 
 	subparam = e_soap_parameter_get_first_child_by_name (subparam, "ResolutionSet");
-	node = e_soap_parameter_get_first_child_by_name (subparam, "IncludesLastItemInRange");
+	prop = e_soap_parameter_get_property (subparam, "IncludesLastItemInRange");
 	
-	if (!strcmp (e_soap_parameter_get_string_value (node), "true"))
+	if (prop && !strcmp (prop, "true"))
 		includes_last_item = TRUE;
+	g_free (prop);
 
 	for (subparam = e_soap_parameter_get_first_child_by_name (subparam, "Resolution");
 		subparam != NULL;
@@ -947,7 +949,7 @@ e_ews_connection_sync_folder_items_start	(EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "SyncFolderItems", NULL, NULL);
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "SyncFolderItems", NULL, NULL, EWS_EXCHANGE_2007);
 	e_soap_message_start_element (msg, "ItemShape", NULL, NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", "types", default_props);
 	
@@ -1080,7 +1082,7 @@ e_ews_connection_sync_folder_hierarchy_start	(EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "SyncFolderHierarchy", NULL, NULL);
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "SyncFolderHierarchy", NULL, NULL, EWS_EXCHANGE_2007);
 	e_soap_message_start_element (msg, "FolderShape", NULL, NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", "types", "AllProperties");
 	e_soap_message_end_element (msg);
@@ -1190,7 +1192,7 @@ e_ews_connection_get_items_start	(EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 	GSList *l;
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetItem", NULL, NULL);
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetItem", NULL, NULL, EWS_EXCHANGE_2007);
 
 	e_soap_message_start_element (msg, "ItemShape", NULL, NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", "types", default_props);
@@ -1321,7 +1323,7 @@ e_ews_connection_delete_items_start	(EEwsConnection *cnc,
 	GSList *l;
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "DeleteItem",
-					     "DeleteType", delete_type);
+					     "DeleteType", delete_type, EWS_EXCHANGE_2007);
 
 	if (send_cancels)
 		e_soap_message_add_attribute (msg, "SendMeetingCancellations",
@@ -1424,7 +1426,7 @@ e_ews_connection_update_items_start	(EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "UpdateItem",
-					     NULL, NULL);
+					     NULL, NULL, EWS_EXCHANGE_2007);
 
 	if (conflict_res)
 		e_soap_message_add_attribute (msg, "ConflictResolution",
@@ -1539,7 +1541,7 @@ e_ews_connection_create_items_start	(EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 	
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "CreateItem",
-					     NULL, NULL);
+					     NULL, NULL, EWS_EXCHANGE_2007);
 
 	if (msg_disposition)
 		e_soap_message_add_attribute (msg, "MessageDisposition",
@@ -1573,25 +1575,6 @@ e_ews_connection_create_items_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, get_items_response_cb, pri, cancellable, simple);
-}
-
-static const gchar *
-get_search_scope_str (EwsContactsSearchScope scope)
-{
-	switch (scope) {
-		case EWS_SEARCH_AD:
-			return "ActiveDirectory";
-		case EWS_SEARCH_AD_CONTACTS:
-			return "ActiveDirectoryContacts";
-		case EWS_SEARCH_CONTACTS:
-			return "Contacts";
-		case EWS_SEARCH_CONTACTS_AD:
-			return "ContactsActiveDirectory";
-		default:
-			g_assert_not_reached ();
-			return NULL;
-
-	}
 }
 
 gboolean
@@ -1654,6 +1637,25 @@ e_ews_connection_create_items	(EEwsConnection *cnc,
 	return result;
 }
 
+static const gchar *
+get_search_scope_str (EwsContactsSearchScope scope)
+{
+	switch (scope) {
+		case EWS_SEARCH_AD:
+			return "ActiveDirectory";
+		case EWS_SEARCH_AD_CONTACTS:
+			return "ActiveDirectoryContacts";
+		case EWS_SEARCH_CONTACTS:
+			return "Contacts";
+		case EWS_SEARCH_CONTACTS_AD:
+			return "ContactsActiveDirectory";
+		default:
+			g_assert_not_reached ();
+			return NULL;
+
+	}
+}
+
 void
 e_ews_connection_resolve_names_start 	(EEwsConnection *cnc,
 					 gint pri,
@@ -1670,14 +1672,14 @@ e_ews_connection_resolve_names_start 	(EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 	GSList *l;
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "ResolveNames", NULL, NULL);
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "ResolveNames", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
+	e_soap_message_add_attribute (msg, "SearchScope", get_search_scope_str (scope), NULL, NULL);
+	
 	if (fetch_contact_data)
 		e_soap_message_add_attribute (msg, "ReturnFullContactData", "true", NULL, NULL);
 	else
 		e_soap_message_add_attribute (msg, "ReturnFullContactData", "false", NULL, NULL);
-
-	e_soap_message_add_attribute (msg, "SearchScope", get_search_scope_str (scope), NULL, NULL);
 
 	if (parent_folder_ids) {
 		e_soap_message_start_element (msg, "ParentFolderIds", NULL, NULL);
@@ -1745,4 +1747,42 @@ e_ews_connection_resolve_names_finish	(EEwsConnection *cnc,
 	*mailboxes = async_data->items;
 	
 	return TRUE;	
+}
+
+gboolean
+e_ews_connection_resolve_names	(EEwsConnection *cnc,
+				 gint pri,
+				 const gchar *resolve_name,
+				 EwsContactsSearchScope scope,
+				 GSList *parent_folder_ids,
+				 gboolean fetch_contact_data,
+				 GSList **mailboxes,
+				 GSList **contact_items,
+				 gboolean *includes_last_item,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	EwsSyncData *sync_data;
+	gboolean result;
+
+	sync_data = g_new0 (EwsSyncData, 1);
+	sync_data->eflag = e_flag_new ();
+	
+	e_ews_connection_resolve_names_start (cnc, pri, resolve_name,
+					     scope, parent_folder_ids,
+					     fetch_contact_data,
+					     ews_sync_reply_cb, cancellable,
+					     (gpointer) sync_data); 
+		       				 	
+	e_flag_wait (sync_data->eflag);
+	
+	result = e_ews_connection_resolve_names_finish (cnc, sync_data->res,
+						       mailboxes, contact_items,
+						       includes_last_item, error);
+	
+	e_flag_free (sync_data->eflag);
+	g_object_unref (sync_data->res);
+	g_free (sync_data);
+
+	return result;
 }
