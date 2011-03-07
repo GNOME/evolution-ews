@@ -48,7 +48,7 @@ create_item_ready_callback (GObject *object, GAsyncResult *res, gpointer user_da
 
 	if (error != NULL) {
 		g_print ("Unable to get item: %s :%d \n", error->message, error->code);
-		return;
+		goto quit;
 	}
 
 	for (l = ids; l != NULL; l = g_slist_next (l)) {
@@ -58,6 +58,7 @@ create_item_ready_callback (GObject *object, GAsyncResult *res, gpointer user_da
 		break;
 	}
 
+quit:
 	g_main_loop_quit(main_loop);
 }
 
