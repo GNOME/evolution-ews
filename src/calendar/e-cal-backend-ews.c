@@ -338,6 +338,11 @@ exit:
 	e_data_cal_notify_timezone_added (cal, context, error, tzobj);
 }
 
+static void e_cal_backend_ews_get_ldap_attribute (ECalBackend *backend, EDataCal *cal, EServerMethodContext context)
+{
+	e_data_cal_notify_ldap_attribute (cal, context, NULL, NULL);
+}
+
 typedef struct {
 	ECalBackendEws *cbews;
 	EDataCal *cal;
@@ -1546,6 +1551,7 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->internal_get_default_timezone = e_cal_backend_ews_internal_get_default_timezone;
 	backend_class->get_mode = e_cal_backend_ews_get_mode;
 	backend_class->set_mode = e_cal_backend_ews_set_mode;
+	backend_class->get_ldap_attribute = e_cal_backend_ews_get_ldap_attribute;
 
 	/* Many of these can be moved to Base class */
 	backend_class->add_timezone = e_cal_backend_ews_add_timezone;
