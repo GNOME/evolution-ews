@@ -18,21 +18,20 @@
  * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  *
- * Authors: Sivaiah Nallagatla <snallagatla@novell.com>
  */
 
-#ifndef __E_BOOK_BACKEND_GROUPWISE_H__
-#define __E_BOOK_BACKEND_GROUPWISE_H__
+#ifndef __E_BOOK_BACKEND_EWS_H__
+#define __E_BOOK_BACKEND_EWS_H__
 
 #include <libedata-book/e-book-backend-sync.h>
 #include "db.h"
 
-#define E_TYPE_BOOK_BACKEND_GROUPWISE        (e_book_backend_ews_get_type ())
-#define E_BOOK_BACKEND_GROUPWISE(o)          (G_TYPE_CHECK_INSTANCE_CAST ((o), E_TYPE_BOOK_BACKEND_GROUPWISE, EBookBackendEws))
-#define E_BOOK_BACKEND_GROUPWISE_CLASS(k)    (G_TYPE_CHECK_CLASS_CAST((k), E_TYPE_BOOK_BACKEND_GROUPWISE, EBookBackendEwsClass))
-#define E_IS_BOOK_BACKEND_GROUPWISE(o)       (G_TYPE_CHECK_INSTANCE_TYPE ((o), E_TYPE_BOOK_BACKEND_GROUPWISE))
-#define E_IS_BOOK_BACKEND_GROUPWISE_CLASS(k) (G_TYPE_CHECK_CLASS_TYPE ((k), E_TYPE_BOOK_BACKEND_GROUPWISE))
-#define E_BOOK_BACKEND_GROUPWISE_GET_CLASS(k) (G_TYPE_INSTANCE_GET_CLASS ((obj), E_TYPE_BOOK_BACKEND_GROUPWISE, EBookBackenEwsClass))
+#define E_TYPE_BOOK_BACKEND_EWS        (e_book_backend_ews_get_type ())
+#define E_BOOK_BACKEND_EWS(o)          (G_TYPE_CHECK_INSTANCE_CAST ((o), E_TYPE_BOOK_BACKEND_EWS, EBookBackendEws))
+#define E_BOOK_BACKEND_EWS_CLASS(k)    (G_TYPE_CHECK_CLASS_CAST((k), E_TYPE_BOOK_BACKEND_EWS, EBookBackendEwsClass))
+#define E_IS_BOOK_BACKEND_EWS(o)       (G_TYPE_CHECK_INSTANCE_TYPE ((o), E_TYPE_BOOK_BACKEND_EWS))
+#define E_IS_BOOK_BACKEND_EWS_CLASS(k) (G_TYPE_CHECK_CLASS_TYPE ((k), E_TYPE_BOOK_BACKEND_EWS))
+#define E_BOOK_BACKEND_EWS_GET_CLASS(k) (G_TYPE_INSTANCE_GET_CLASS ((obj), E_TYPE_BOOK_BACKEND_EWS, EBookBackenEwsClass))
 typedef struct _EBookBackendEwsPrivate EBookBackendEwsPrivate;
 
 typedef struct {
@@ -47,5 +46,5 @@ typedef struct {
 EBookBackend *e_book_backend_ews_new      (void);
 GType       e_book_backend_ews_get_type (void);
 
-#endif /* __E_BOOK_BACKEND_GROUPWISE_H__ */
+#endif /* __E_BOOK_BACKEND_EWS_H__ */
 
