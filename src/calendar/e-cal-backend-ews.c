@@ -1113,7 +1113,7 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	ECalBackendEws *cbews = modify_data->cbews;
 	ECalBackendEwsPrivate *priv = cbews->priv;
 	GError *error = NULL;
-
+	gchar *comp_str, *comp_str_old;
 
 	if (!e_ews_connection_update_items_finish (cnc, res, &error)) {
 		/* The calendar UI doesn't *display* errors unless they have
@@ -1126,11 +1126,13 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 
 	e_cal_component_commit_sequence (modify_data->comp);
 	e_cal_component_commit_sequence (modify_data->oldcomp);
-	put_component_to_store (modify_data->cbews, modify_data->comp);
+	put_component_to_store (cbews, modify_data->comp);
 
-	e_data_cal_notify_object_modified (modify_data->cal, modify_data->context, error,
-					   e_cal_component_get_as_string (modify_data->oldcomp),
-					   e_cal_component_get_as_string (modify_data->comp));
+	comp_str = e_cal_component_get_as_string (modify_data->comp);
+	comp_str_old = e_cal_component_get_as_string (modify_data->oldcomp);
+
+	e_cal_backend_notify_object_modified (E_CAL_BACKEND (cbews), comp_str_old, comp_str);
+	e_data_cal_notify_object_modified (modify_data->cal, modify_data->context, error, comp_str_old, comp_str);
 
 	PRIV_LOCK (priv);
 	g_hash_table_replace (priv->item_id_hash, g_strdup(modify_data->itemid), g_object_ref (modify_data->comp));
@@ -1138,6 +1140,8 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 
 	e_cal_backend_store_thaw_changes (priv->store);
 
+	g_free(comp_str);
+	g_free(comp_str_old);
 	g_free(modify_data->itemid);
 	g_free(modify_data->changekey);
 	g_object_unref(modify_data->oldcomp);
@@ -1150,83 +1154,64 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 static void
 convert_property_to_updatexml (ESoapMessage *msg, const gchar *name, const gchar *value, const gchar * prefix, const gchar *attr_name, const gchar *attr_value)
 {
-	gchar * fielduri = NULL;
-	fielduri = g_strconcat (prefix, name, NULL);
-
-	e_soap_message_start_element (msg, "SetItemField", "types", NULL);
-
-	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", "types", NULL, "FieldURI", fielduri);
-
-	e_soap_message_start_element (msg, "CalendarItem", "types", NULL);
+	e_ews_message_start_set_item_field (msg, name, prefix);
 	e_ews_message_write_string_parameter_with_attribute (msg, name, "types", value, attr_name, attr_value);
-	e_soap_message_end_element (msg); /* CalendarItem */
-
-	e_soap_message_end_element (msg); /* SetItemField */
-
-	g_free (fielduri);
+	e_ews_message_end_set_item_field (msg);
 }
 
 static void
 convert_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 {
 	EwsModifyData *modify_data = user_data;
-	icalcomponent *inner, *icalcomp = e_cal_component_get_icalcomponent (modify_data->comp);
-	icalproperty *prop;
+	icalcomponent *icalcomp = e_cal_component_get_icalcomponent (modify_data->comp);
 	time_t t;
 	struct tm *timeinfo;
 	char buff[30];
+	GSList *required = NULL, *optional = NULL, *resource = NULL;
 
 	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
 					 modify_data->itemid, modify_data->changekey, 0);
 
-	convert_property_to_updatexml  (msg, "Subject", icalcomponent_get_summary(icalcomp), "item:", NULL, NULL);
+	convert_property_to_updatexml  (msg, "Subject", icalcomponent_get_summary(icalcomp), "item", NULL, NULL);
 
-	convert_property_to_updatexml  (msg, "Body", icalcomponent_get_description(icalcomp), "item:", "BodyType", "Text");
+	convert_property_to_updatexml  (msg, "Body", icalcomponent_get_description(icalcomp), "item", "BodyType", "Text");
 
-	t = icaltime_as_timet_with_zone(icalcomponent_get_dtstart(icalcomp), icaltimezone_get_utc_timezone ());
+	t = icaltime_as_timet_with_zone (icalcomponent_get_dtstart(icalcomp), icaltimezone_get_utc_timezone ());
 	timeinfo = gmtime(&t);
 	strftime(buff, 30, "%Y-%m-%dT%H:%M:%SZ", timeinfo);
-	convert_property_to_updatexml  (msg, "Start", buff, "calendar:", NULL, NULL);
+	convert_property_to_updatexml  (msg, "Start", buff, "calendar", NULL, NULL);
 
 	t = icaltime_as_timet_with_zone(icalcomponent_get_dtend(icalcomp), icaltimezone_get_utc_timezone ());
 	timeinfo = gmtime(&t);
 	strftime(buff, 30, "%Y-%m-%dT%H:%M:%SZ", timeinfo);
-	convert_property_to_updatexml  (msg, "End", buff, "calendar:", NULL, NULL);
+	convert_property_to_updatexml  (msg, "End", buff, "calendar", NULL, NULL);
 
-	convert_property_to_updatexml  (msg, "Location", icalcomponent_get_location(icalcomp), "calendar:", NULL, NULL);
+	convert_property_to_updatexml  (msg, "Location", icalcomponent_get_location(icalcomp), "calendar", NULL, NULL);
 
-	inner = icalcomponent_get_inner(icalcomp);
-	prop = icalcomponent_get_first_property(inner, ICAL_ATTENDEE_PROPERTY);
-	if (prop != NULL) {
-		e_soap_message_start_element (msg, "SetItemField", "types", NULL);
+	e_ews_collect_attendees(icalcomp, &required, &optional, &resource);
+	if (required != NULL) {
+		e_ews_message_start_set_item_field (msg, "RequiredAttendees", "calendar");
 
-		e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", "types", NULL, "FieldURI", "calendar:RequiredAttendees");
+		add_attendees_list_to_message (msg, "RequiredAttendees", required);
+		g_slist_free(required);
 
-		e_soap_message_start_element (msg, "CalendarItem", "types", NULL);
+		e_ews_message_end_set_item_field (msg);
+	}
+	if (optional != NULL) {
+		e_ews_message_start_set_item_field (msg, "OptionalAttendees", "calendar");
 
-		e_soap_message_start_element(msg, "RequiredAttendees", "types", NULL);
+		add_attendees_list_to_message (msg, "OptionalAttendees", optional);
+		g_slist_free(optional);
 
-		for (prop = icalcomponent_get_first_property(inner, ICAL_ATTENDEE_PROPERTY);
-		     prop != NULL;
-		     prop = icalcomponent_get_next_property(inner, ICAL_ATTENDEE_PROPERTY)) {
+		e_ews_message_end_set_item_field (msg);
+	}
+	if (resource != NULL) {
+		e_ews_message_start_set_item_field (msg, "Resources", "calendar");
 
-			e_soap_message_start_element(msg, "Attendee", NULL, NULL);
-			e_soap_message_start_element(msg, "Mailbox", NULL, NULL);
+		add_attendees_list_to_message (msg, "Resources", resource);
+		g_slist_free(resource);
 
-			e_ews_message_write_string_parameter(msg,
-							     "EmailAddress",
-							     NULL,
-							     icalproperty_get_attendee(prop));
-
-			e_soap_message_end_element(msg);
-			e_soap_message_end_element(msg);
-		}
-
-		e_soap_message_end_element(msg); /* RequiredAttendees */
-
-		e_soap_message_end_element (msg); /* CalendarItem */
-
-		e_soap_message_end_element (msg); /* SetItemField */
+		e_ews_message_end_set_item_field (msg);
 	}
 
 	e_ews_message_end_item_change (msg);
@@ -1256,18 +1241,18 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 
 	if (priv->mode == CAL_MODE_LOCAL) {
 		g_propagate_error(&error, EDC_ERROR(RepositoryOffline));
-		return;
+		goto exit;
 	}
 
 	icalcomp = icalparser_parse_string(calobj);
 	if (!icalcomp) {
 		g_propagate_error(&error, EDC_ERROR(InvalidObject));
-		return;
+		goto exit;
 	}
 	if (kind != icalcomponent_isa(icalcomp)) {
 		icalcomponent_free(icalcomp);
 		g_propagate_error(&error, EDC_ERROR(InvalidObject));
-		return;
+		goto exit;
 	}
 
 	comp = e_cal_component_new ();
@@ -1287,6 +1272,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	oldcomp = g_hash_table_lookup (priv->item_id_hash, itemid);
 	if (!oldcomp) {
 		g_propagate_error (&error, EDC_ERROR(ObjectNotFound));
+		g_object_unref (comp);
 		goto exit;
 	}
 	PRIV_UNLOCK (priv);
@@ -1309,7 +1295,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	return;
 
 exit:
-	e_data_cal_notify_object_modified (cal, context, error, e_cal_component_get_as_string (oldcomp), e_cal_component_get_as_string (comp));
+	e_data_cal_notify_object_modified (cal, context, error, NULL, NULL);
 }
 
 /* TODO Do not replicate this in every backend */

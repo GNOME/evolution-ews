@@ -21,6 +21,7 @@
 
 #include "e-soap-message.h"
 #include "e-soap-response.h"
+#include "e-ews-message.h"
 #include "e-ews-item-change.h"
 
 void
@@ -71,4 +72,24 @@ e_ews_message_end_item_change (ESoapMessage *msg)
 {
 	e_soap_message_end_element (msg); /* Updates */
 	e_soap_message_end_element (msg); /* ItemChange */
+}
+
+void
+e_ews_message_start_set_item_field (ESoapMessage *msg, const gchar *name, const gchar * fielduri_prefix)
+{
+	gchar * fielduri = NULL;
+	fielduri = g_strconcat (fielduri_prefix, ":", name, NULL);
+
+	e_soap_message_start_element (msg, "SetItemField", "types", NULL);
+	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", "types", NULL, "FieldURI", fielduri);
+	e_soap_message_start_element (msg, "CalendarItem", "types", NULL);
+
+	g_free (fielduri);
+}
+
+void
+e_ews_message_end_set_item_field (ESoapMessage *msg)
+{
+	e_soap_message_end_element (msg); /* CalendarItem */
+	e_soap_message_end_element (msg); /* SetItemField */
 }

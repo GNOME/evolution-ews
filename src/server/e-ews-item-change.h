@@ -38,6 +38,10 @@ void e_ews_message_start_item_change(ESoapMessage *msg, EEwsItemChangeType type,
 				     gint instance_index);
 void e_ews_message_end_item_change (ESoapMessage *msg);
 
+void e_ews_message_start_set_item_field (ESoapMessage *msg, const gchar *name, const gchar * fielduri_prefix);
+
+void e_ews_message_end_set_item_field (ESoapMessage *msg);
+
 G_END_DECLS
 
 #endif
