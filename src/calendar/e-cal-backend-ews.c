@@ -983,7 +983,7 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 
 	/* make sure there was no error */
 	if (error != NULL) {
-		g_print("Unable to get item: %s :%d \n", error->message, error->code);
+		e_data_cal_notify_object_created(create_data->cal, create_data->context, error, NULL, NULL);
 		return;
 	}
 
@@ -1036,12 +1036,12 @@ e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMeth
 	icalcomponent *icalcomp;
 	ECalComponent *comp;
 	struct icaltimetype current;
-	GError **error = NULL;
+	GError *error = NULL;
 	GCancellable *cancellable = NULL;
 
 	/* sanity check */
-	e_return_data_cal_error_if_fail(E_IS_CAL_BACKEND_EWS(backend), InvalidArg);
-	e_return_data_cal_error_if_fail(calobj != NULL && *calobj != '\0', InvalidArg);
+	e_data_cal_error_if_fail(E_IS_CAL_BACKEND_EWS(backend), InvalidArg);
+	e_data_cal_error_if_fail(calobj != NULL && *calobj != '\0', InvalidArg);
 
 	cbews = E_CAL_BACKEND_EWS(backend);
 	priv = cbews->priv;
@@ -1050,23 +1050,23 @@ e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMeth
 
 	/* make sure we're not offline */
 	if (priv->mode == CAL_MODE_LOCAL) {
-		g_propagate_error(error, EDC_ERROR(RepositoryOffline));
-		return;
+		g_propagate_error(&error, EDC_ERROR(RepositoryOffline));
+		goto exit;
 	}
 	/* parse ical data */
 	icalcomp = icalparser_parse_string(calobj);
 
 	/* make sure data was parsed properly */
 	if (!icalcomp) {
-		g_propagate_error(error, EDC_ERROR(InvalidObject));
-		return;
+		g_propagate_error(&error, EDC_ERROR(InvalidObject));
+		goto exit;
 	}
 
 	/* make sure ical data we parse is actually an ical component */
 	if (kind != icalcomponent_isa(icalcomp)) {
 		icalcomponent_free(icalcomp);
-		g_propagate_error(error, EDC_ERROR(InvalidObject));
-		return;
+		g_propagate_error(&error, EDC_ERROR(InvalidObject));
+		goto exit;
 	}
 
 	/* prepare new calender component */
@@ -1093,6 +1093,10 @@ e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMeth
 					     ews_create_object_cb,
 					     cancellable,
 					     create_data);
+	return;
+
+exit:
+	e_data_cal_notify_object_created(cal, context, error, NULL, NULL);
 }
 
 typedef struct {
