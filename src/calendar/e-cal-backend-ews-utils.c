@@ -87,3 +87,26 @@ void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **op
 	}
 }
 
+void e_ews_set_start_time_as_utc(ESoapMessage *msg, icalcomponent *icalcomp) {
+	time_t t = icaltime_as_timet_with_zone(icalcomponent_get_dtstart(icalcomp), icaltimezone_get_utc_timezone());
+	struct tm * timeinfo;
+	char buff[30];
+
+	timeinfo = gmtime(&t);
+	strftime(buff, 30, "%Y-%m-%dT%H:%M:%SZ", timeinfo);
+
+	/* The start time soap element */
+	e_ews_message_write_string_parameter(msg, "Start", NULL, buff);
+}
+
+void e_ews_set_end_time_as_utc(ESoapMessage *msg, icalcomponent *icalcomp) {
+	time_t t = icaltime_as_timet_with_zone(icalcomponent_get_dtend(icalcomp), icaltimezone_get_utc_timezone());
+	struct tm * timeinfo;
+	char buff[30];
+
+	timeinfo = gmtime(&t);
+	strftime(buff, 30, "%Y-%m-%dT%H:%M:%SZ", timeinfo);
+
+	/* The start time soap element */
+	e_ews_message_write_string_parameter(msg, "Start", NULL, buff);
+}

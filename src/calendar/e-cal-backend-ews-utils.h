@@ -29,6 +29,9 @@ G_BEGIN_DECLS
 
 void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **optional, GSList **resource);
 
+void e_ews_set_start_time_as_utc(ESoapMessage *msg, icalcomponent *icalcomp);
+void e_ews_set_end_time_as_utc(ESoapMessage *msg, icalcomponent *icalcomp);
+
 G_END_DECLS
 
 #endif

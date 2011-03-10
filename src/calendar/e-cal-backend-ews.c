@@ -909,9 +909,6 @@ static void
 convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 {
 	icalcomponent *icalcomp = (icalcomponent*)user_data;
-	time_t t;
-	struct tm * timeinfo;
-	char buff[30];
 	GSList *required = NULL, *optional = NULL, *resource = NULL;
 
 	/* FORMAT OF A SAMPLE SOAP MESSAGE: http://msdn.microsoft.com/en-us/library/aa564690.aspx */
@@ -927,16 +924,13 @@ convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 	e_ews_message_write_string_parameter_with_attribute(msg, "Body", NULL, icalcomponent_get_description(icalcomp), "BodyType", "Text");
 
 	/* start time */
-	t = icaltime_as_timet(icalcomponent_get_dtstart(icalcomp));
-	timeinfo = gmtime(&t);
-	strftime(buff, 30, "%Y-%m-%dT%H:%M:%S", timeinfo);
-	e_ews_message_write_string_parameter(msg, "Start", NULL, buff);
+	e_ews_set_start_time_as_utc(msg, icalcomp);
 
 	/* end time */
-	t = icaltime_as_timet(icalcomponent_get_dtend(icalcomp));
-	timeinfo = gmtime(&t);
-	strftime(buff, 30, "%Y-%m-%dT%H:%M:%S", timeinfo);
-	e_ews_message_write_string_parameter(msg, "End", NULL, buff);
+	e_ews_set_end_time_as_utc(msg, icalcomp);
+
+	/* time zone - always UTC */
+	e_ews_message_write_string_parameter(msg, "TimeZone", NULL, "UTC");
 
 	/* location */
 	e_ews_message_write_string_parameter(msg, "Location", NULL, icalcomponent_get_location(icalcomp));
