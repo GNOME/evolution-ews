@@ -920,9 +920,6 @@ convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 	/* end time */
 	e_ews_set_end_time_as_utc(msg, icalcomp);
 
-	/* time zone - always UTC */
-	e_ews_message_write_string_parameter(msg, "TimeZone", NULL, "UTC");
-
 	/* location */
 	e_ews_message_write_string_parameter(msg, "Location", NULL, icalcomponent_get_location(icalcomp));
 
