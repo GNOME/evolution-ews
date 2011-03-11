@@ -108,5 +108,5 @@ void e_ews_set_end_time_as_utc(ESoapMessage *msg, icalcomponent *icalcomp) {
 	strftime(buff, 30, "%Y-%m-%dT%H:%M:%SZ", timeinfo);
 
 	/* The start time soap element */
-	e_ews_message_write_string_parameter(msg, "Start", NULL, buff);
+	e_ews_message_write_string_parameter(msg, "End", NULL, buff);
 }
