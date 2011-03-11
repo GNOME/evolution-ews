@@ -372,14 +372,14 @@ msg_update_flags (ESoapMessage *msg, gpointer user_data)
 						 mi->info.uid, mi->change_key, 0);
 
 		if (flags_changed & CAMEL_MESSAGE_SEEN) {
-			e_soap_message_start_element (msg, "SetItemField", "types", NULL);
+			e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
 
-			e_soap_message_start_element (msg, "FieldURI", "types", NULL);
+			e_soap_message_start_element (msg, "FieldURI", NULL, NULL);
 			e_soap_message_add_attribute (msg, "FieldURI", "message:IsRead", NULL, NULL);
 			e_soap_message_end_element (msg);
 		
-			e_soap_message_start_element (msg, "Message", "types", NULL);
-			e_ews_message_write_string_parameter (msg, "IsRead", "types", 
+			e_soap_message_start_element (msg, "Message", NULL, NULL);
+			e_ews_message_write_string_parameter (msg, "IsRead", NULL,
 					      (mi->info.flags & CAMEL_MESSAGE_SEEN)?"true":"false");
 
 			e_soap_message_end_element (msg); /* Message */
@@ -395,23 +395,23 @@ msg_update_flags (ESoapMessage *msg, gpointer user_data)
 			if (mi->info.flags & CAMEL_MESSAGE_FORWARDED)
 				icon = 0x106;
 
-			e_soap_message_start_element (msg, "SetItemField", "types", NULL);
+			e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
 
-			e_soap_message_start_element (msg, "ExtendedFieldURI", "types", NULL);
+			e_soap_message_start_element (msg, "ExtendedFieldURI", NULL, NULL);
 			e_soap_message_add_attribute (msg, "PropertyTag", "0x1080", NULL, NULL);
 			e_soap_message_add_attribute (msg, "PropertyType", "Integer", NULL, NULL);
 			e_soap_message_end_element (msg);
 		
-			e_soap_message_start_element (msg, "Message", "types", NULL);
-			e_soap_message_start_element (msg, "ExtendedProperty", "types", NULL);
+			e_soap_message_start_element (msg, "Message", NULL, NULL);
+			e_soap_message_start_element (msg, "ExtendedProperty", NULL, NULL);
 
 			/* And now we have to specify the field *again*. Yay for XML crap */
-			e_soap_message_start_element (msg, "ExtendedFieldURI", "types", NULL);
+			e_soap_message_start_element (msg, "ExtendedFieldURI", NULL, NULL);
 			e_soap_message_add_attribute (msg, "PropertyTag", "0x1080", NULL, NULL);
 			e_soap_message_add_attribute (msg, "PropertyType", "Integer", NULL, NULL);
 			e_soap_message_end_element (msg);
 
-			e_ews_message_write_int_parameter (msg, "Value", "types", icon);
+			e_ews_message_write_int_parameter (msg, "Value", NULL, icon);
 			
 			e_soap_message_end_element (msg); /* ExtendedProperty */
 			e_soap_message_end_element (msg); /* Message */
