@@ -31,19 +31,19 @@ e_ews_message_start_item_change(ESoapMessage *msg, EEwsItemChangeType type,
 {
 	gchar *instance;
 
-	e_soap_message_start_element (msg, "ItemChange", "types", NULL);
+	e_soap_message_start_element (msg, "ItemChange", NULL, NULL);
 
 	switch (type) {
 	case E_EWS_ITEMCHANGE_TYPE_ITEM:
 		e_soap_message_start_element (msg, "ItemId",
-					      "types", NULL);
+					      NULL, NULL);
 		e_soap_message_add_attribute (msg, "Id",
 					      itemid, NULL, NULL);
 		break;
 
 	case E_EWS_ITEMCHANGE_TYPE_OCCURRENCEITEM:
 		e_soap_message_start_element (msg, "OccurrenceItemId",
-					      "types", NULL);
+					      NULL, NULL);
 		e_soap_message_add_attribute (msg, "RecurringMasterId",
 					      itemid, NULL, NULL);
 		instance = g_strdup_printf("%d", instance_index);
@@ -54,7 +54,7 @@ e_ews_message_start_item_change(ESoapMessage *msg, EEwsItemChangeType type,
 
 	case E_EWS_ITEMCHANGE_TYPE_RECURRINGMASTER:
 		e_soap_message_start_element (msg, "RecurringMasterItemId",
-					      "types", NULL);
+					      NULL, NULL);
 		e_soap_message_add_attribute (msg, "OccurrenceId",
 					      itemid, NULL, NULL);
 		break;
@@ -64,7 +64,7 @@ e_ews_message_start_item_change(ESoapMessage *msg, EEwsItemChangeType type,
 					      changekey, NULL, NULL);
 	e_soap_message_end_element (msg);
 
-	e_soap_message_start_element (msg, "Updates", "types", NULL);
+	e_soap_message_start_element (msg, "Updates", NULL, NULL);
 }
 
 void
@@ -80,9 +80,9 @@ e_ews_message_start_set_item_field (ESoapMessage *msg, const gchar *name, const 
 	gchar * fielduri = NULL;
 	fielduri = g_strconcat (fielduri_prefix, ":", name, NULL);
 
-	e_soap_message_start_element (msg, "SetItemField", "types", NULL);
-	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", "types", NULL, "FieldURI", fielduri);
-	e_soap_message_start_element (msg, "CalendarItem", "types", NULL);
+	e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
+	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", fielduri);
+	e_soap_message_start_element (msg, "CalendarItem", NULL, NULL);
 
 	g_free (fielduri);
 }

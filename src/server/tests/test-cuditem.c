@@ -70,8 +70,7 @@ op_test_create_item_get_soap_msg(ESoapMessage *msg, gpointer user_data)
 	int size;
 
 	//creating XML node for create item
-	e_soap_message_start_element (msg, "CalendarItem", "types", NULL);
-	e_soap_message_add_attribute (msg, "xmlns", "http://schemas.microsoft.com/exchange/services/2006/types", NULL, NULL);
+	e_soap_message_start_element (msg, "CalendarItem", NULL, NULL);
 
 	e_ews_message_write_string_parameter (msg, "Subject", NULL,  "Test Summary");
 	e_ews_message_write_string_parameter_with_attribute (msg, "Body", NULL, "Test Body", "BodyType", "Text");

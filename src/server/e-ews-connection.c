@@ -950,16 +950,16 @@ e_ews_connection_sync_folder_items_start	(EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "SyncFolderItems", NULL, NULL, EWS_EXCHANGE_2007);
-	e_soap_message_start_element (msg, "ItemShape", NULL, NULL);
-	e_ews_message_write_string_parameter (msg, "BaseShape", "types", default_props);
+	e_soap_message_start_element (msg, "ItemShape", "messages", NULL);
+	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, default_props);
 	
 	if (additional_props && *additional_props) {
 		gchar **prop = g_strsplit (additional_props, " ", 0);
 		gint i = 0;
 
-		e_soap_message_start_element (msg, "AdditionalProperties", "types", NULL);
+		e_soap_message_start_element (msg, "AdditionalProperties", NULL, NULL);
 		while (prop[i]) {
-			e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", "types", NULL, "FieldURI", prop [i]);
+			e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", prop [i]);
 			i++;
 		}
 		g_strfreev (prop);
@@ -968,15 +968,15 @@ e_ews_connection_sync_folder_items_start	(EEwsConnection *cnc,
 
 	e_soap_message_end_element (msg);
 
-	e_soap_message_start_element (msg, "SyncFolderId", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", "types", NULL, "Id", fid);
+	e_soap_message_start_element (msg, "SyncFolderId", "messages", NULL);
+	e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", NULL, NULL, "Id", fid);
 	e_soap_message_end_element (msg);
 
 	if (sync_state)
-		e_ews_message_write_string_parameter (msg, "SyncState", NULL, sync_state);
+		e_ews_message_write_string_parameter (msg, "SyncState", "messages", sync_state);
 
 	/* Max changes requested */
-	e_ews_message_write_int_parameter (msg, "MaxChangesReturned", NULL, max_entries);
+	e_ews_message_write_int_parameter (msg, "MaxChangesReturned", "messages", max_entries);
 
 	/* Complete the footer and print the request */
 	e_ews_message_write_footer (msg);
@@ -1083,12 +1083,12 @@ e_ews_connection_sync_folder_hierarchy_start	(EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "SyncFolderHierarchy", NULL, NULL, EWS_EXCHANGE_2007);
-	e_soap_message_start_element (msg, "FolderShape", NULL, NULL);
-	e_ews_message_write_string_parameter (msg, "BaseShape", "types", "AllProperties");
+	e_soap_message_start_element (msg, "FolderShape", "messages", NULL);
+	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, "AllProperties");
 	e_soap_message_end_element (msg);
 
 	if (sync_state)
-		e_ews_message_write_string_parameter (msg, "SyncState", NULL, sync_state);
+		e_ews_message_write_string_parameter (msg, "SyncState", "messages", sync_state);
 
 	e_ews_message_write_footer (msg);
 
@@ -1194,28 +1194,28 @@ e_ews_connection_get_items_start	(EEwsConnection *cnc,
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetItem", NULL, NULL, EWS_EXCHANGE_2007);
 
-	e_soap_message_start_element (msg, "ItemShape", NULL, NULL);
-	e_ews_message_write_string_parameter (msg, "BaseShape", "types", default_props);
+	e_soap_message_start_element (msg, "ItemShape", "messages", NULL);
+	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, default_props);
 	
 	if (include_mime)
-		e_ews_message_write_string_parameter (msg, "IncludeMimeContent", "types", "true");
+		e_ews_message_write_string_parameter (msg, "IncludeMimeContent", NULL, "true");
 	else
-		e_ews_message_write_string_parameter (msg, "IncludeMimeContent", "types", "false");
+		e_ews_message_write_string_parameter (msg, "IncludeMimeContent", NULL, "false");
 	
 	if (additional_props && *additional_props) {
 		gchar **prop = g_strsplit (additional_props, " ", 0);
 		gint i = 0;
 
-		e_soap_message_start_element (msg, "AdditionalProperties", "types", NULL);
+		e_soap_message_start_element (msg, "AdditionalProperties", NULL, NULL);
 		while (prop[i]) {
 			/* XX FIXME: Come up with a better way of doing this */
 			if (!g_ascii_strncasecmp (prop[i], "mapi:int:0x", 11)) {
-				e_soap_message_start_element (msg, "ExtendedFieldURI", "types", NULL);
+				e_soap_message_start_element (msg, "ExtendedFieldURI", NULL, NULL);
 				e_soap_message_add_attribute (msg, "PropertyTag", prop[i] + 9, NULL, NULL);
 				e_soap_message_add_attribute (msg, "PropertyType", "Integer", NULL, NULL);
 				e_soap_message_end_element (msg);
 			} else {
-				e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", "types", NULL, "FieldURI", prop [i]);
+				e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", prop [i]);
 			}
 			i++;
 		}
@@ -1224,10 +1224,10 @@ e_ews_connection_get_items_start	(EEwsConnection *cnc,
 	}
 	e_soap_message_end_element (msg);
 
-	e_soap_message_start_element (msg, "ItemIds", NULL, NULL);
+	e_soap_message_start_element (msg, "ItemIds", "messages", NULL);
 	
 	for (l = ids; l != NULL; l = g_slist_next (l))
-		e_ews_message_write_string_parameter_with_attribute (msg, "ItemId", "types", NULL, "Id", l->data);
+		e_ews_message_write_string_parameter_with_attribute (msg, "ItemId", NULL, NULL, "Id", l->data);
 	
 	e_soap_message_end_element (msg);
 	
@@ -1332,10 +1332,10 @@ e_ews_connection_delete_items_start	(EEwsConnection *cnc,
 		e_soap_message_add_attribute (msg, "AffectedTaskOccurrences",
 					      affected_tasks, NULL, NULL);
 
-	e_soap_message_start_element (msg, "ItemIds", NULL, NULL);
+	e_soap_message_start_element (msg, "ItemIds", "messages", NULL);
 	
 	for (l = ids; l != NULL; l = g_slist_next (l))
-		e_ews_message_write_string_parameter_with_attribute (msg, "ItemId", "types", NULL, "Id", l->data);
+		e_ews_message_write_string_parameter_with_attribute (msg, "ItemId", NULL, NULL, "Id", l->data);
 	
 	e_soap_message_end_element (msg);
 	
@@ -1439,13 +1439,13 @@ e_ews_connection_update_items_start	(EEwsConnection *cnc,
 					      send_invites, NULL, NULL);
 
 	if (folder_id) {
-		e_soap_message_start_element (msg, "SavedItemFolderId", NULL, NULL);
+		e_soap_message_start_element (msg, "SavedItemFolderId", "messages", NULL);
 		e_ews_message_write_string_parameter_with_attribute (msg, "FolderId",
-						     "types", NULL, "Id", folder_id);
+						     NULL, NULL, "Id", folder_id);
 		e_soap_message_end_element (msg);
 	}
 
-	e_soap_message_start_element (msg, "ItemChanges", NULL, NULL);
+	e_soap_message_start_element (msg, "ItemChanges", "messages", NULL);
 	
 	create_cb (msg, create_user_data);
 
@@ -1551,13 +1551,13 @@ e_ews_connection_create_items_start	(EEwsConnection *cnc,
 					      send_invites, NULL, NULL);
 
 	if (folder_id) {
-		e_soap_message_start_element (msg, "SavedItemFolderId", NULL, NULL);
+		e_soap_message_start_element (msg, "SavedItemFolderId", "messages", NULL);
 		e_ews_message_write_string_parameter_with_attribute (msg, "FolderId",
-						     "types", NULL, "Id", folder_id);
+						     NULL, NULL, "Id", folder_id);
 		e_soap_message_end_element (msg);
 	}
 
-	e_soap_message_start_element (msg, "Items", NULL, NULL);
+	e_soap_message_start_element (msg, "Items", "messages", NULL);
 	
 	create_cb (msg, create_user_data);
 
@@ -1682,21 +1682,21 @@ e_ews_connection_resolve_names_start 	(EEwsConnection *cnc,
 		e_soap_message_add_attribute (msg, "ReturnFullContactData", "false", NULL, NULL);
 
 	if (parent_folder_ids) {
-		e_soap_message_start_element (msg, "ParentFolderIds", NULL, NULL);
+		e_soap_message_start_element (msg, "ParentFolderIds", "messages", NULL);
 
 		for (l = parent_folder_ids; l != NULL; l = g_slist_next (l)) {
 			EwsFolderId *fid = (EwsFolderId *) l->data;
 			
 			if (fid->is_distinguished_id)
-				e_soap_message_start_element (msg, "DistinguishedFolderId", NULL, NULL);
+				e_soap_message_start_element (msg, "DistinguishedFolderId", "messages", NULL);
 			else
-				e_soap_message_start_element (msg, "FolderId", NULL, NULL);
+				e_soap_message_start_element (msg, "FolderId", "messages", NULL);
 		
 			e_soap_message_add_attribute (msg, "Id", fid->id, NULL, NULL);
 			e_soap_message_add_attribute (msg, "ChangeKey", fid->change_key, NULL, NULL);
 
 			if (fid->is_distinguished_id)
-				e_ews_message_write_string_parameter (msg, "Mailbox", NULL, cnc->priv->email);
+				e_ews_message_write_string_parameter (msg, "Mailbox", "messages", cnc->priv->email);
 
 			e_soap_message_end_element (msg);
 		}
@@ -1704,7 +1704,7 @@ e_ews_connection_resolve_names_start 	(EEwsConnection *cnc,
 		e_soap_message_end_element (msg);
 	}
 
-	e_ews_message_write_string_parameter (msg, "UnresolvedEntry", NULL, resolve_name);
+	e_ews_message_write_string_parameter (msg, "UnresolvedEntry", "messages", resolve_name);
 
 	e_ews_message_write_footer (msg);
 

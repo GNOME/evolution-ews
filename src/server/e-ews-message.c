@@ -65,11 +65,11 @@ e_ews_message_new_with_header (const gchar *uri,
 	e_soap_message_end_header (msg);
 	
 	e_soap_message_start_body(msg);
-	e_soap_message_add_namespace(msg, "types", 
-				       "http://schemas.microsoft.com/exchange/services/2006/types");
-	e_soap_message_start_element(msg, method_name, NULL, NULL);
+	e_soap_message_add_namespace(msg, "messages",
+				       "http://schemas.microsoft.com/exchange/services/2006/messages");
+	e_soap_message_start_element(msg, method_name, "messages", NULL);
 	e_soap_message_set_default_namespace(msg,
-						"http://schemas.microsoft.com/exchange/services/2006/messages");
+						"http://schemas.microsoft.com/exchange/services/2006/types");
 	if (attribute_name)
 		e_soap_message_add_attribute (msg, attribute_name, attribute_value, NULL, NULL);
 	return msg;

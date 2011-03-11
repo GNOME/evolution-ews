@@ -358,19 +358,11 @@ static void clear_reminder_is_set (ESoapMessage *msg, gpointer user_data)
 	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
 					 edad->itemid, edad->changekey, 0);
 
-	/* FIXME: Provide higher-level helper functions to add this kind
-	   of thing */
-	e_soap_message_start_element (msg, "SetItemField", "types", NULL);
+	e_ews_message_start_set_item_field (msg, "ReminderIsSet","item");
 
-	e_soap_message_start_element (msg, "FieldURI", "types", NULL);
-	e_soap_message_add_attribute (msg, "FieldURI", "item:ReminderIsSet", NULL, NULL);
-	e_soap_message_end_element (msg);
+	e_ews_message_write_string_parameter (msg, "ReminderIsSet", NULL, "false");
 
-	e_soap_message_start_element (msg, "Item", "types", NULL);
-	e_ews_message_write_string_parameter (msg, "ReminderIsSet", "types", "false");
-	e_soap_message_end_element (msg); /* Item */
-
-	e_soap_message_end_element (msg); /* SetItemField */
+	e_ews_message_end_set_item_field (msg);
 
 	e_ews_message_end_item_change (msg);
 }
@@ -914,8 +906,7 @@ convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 	/* FORMAT OF A SAMPLE SOAP MESSAGE: http://msdn.microsoft.com/en-us/library/aa564690.aspx */
 
 	/* Prepare CalendarItem node in the SOAP message */
-	e_soap_message_start_element(msg, "CalendarItem", "types", NULL);
-	e_soap_message_add_attribute (msg, "xmlns", "http://schemas.microsoft.com/exchange/services/2006/types", NULL, NULL);
+	e_soap_message_start_element(msg, "CalendarItem", NULL, NULL);
 
 	/* subject */
 	e_ews_message_write_string_parameter(msg, "Subject", NULL,  icalcomponent_get_summary(icalcomp));
@@ -1153,7 +1144,7 @@ static void
 convert_property_to_updatexml (ESoapMessage *msg, const gchar *name, const gchar *value, const gchar * prefix, const gchar *attr_name, const gchar *attr_value)
 {
 	e_ews_message_start_set_item_field (msg, name, prefix);
-	e_ews_message_write_string_parameter_with_attribute (msg, name, "types", value, attr_name, attr_value);
+	e_ews_message_write_string_parameter_with_attribute (msg, name, NULL, value, attr_name, attr_value);
 	e_ews_message_end_set_item_field (msg);
 }
 
