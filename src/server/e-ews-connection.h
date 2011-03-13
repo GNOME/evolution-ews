@@ -287,6 +287,29 @@ gboolean	e_ews_connection_resolve_names	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 
+/* Update (e.g. rename) folder */
+void		e_ews_connection_update_folder_start 
+						(EEwsConnection *cnc,
+						 gint pri, 
+						 EEwsRequestCreationCallback create_cb,
+						 gpointer create_user_data,
+						 GAsyncReadyCallback cb,
+						 GCancellable *cancellable,
+						 gpointer user_data);
+
+gboolean	e_ews_connection_update_folder_finish 
+						(EEwsConnection *cnc, 
+						 GAsyncResult *result,
+						 GError **error);
+
+gboolean	e_ews_connection_update_folder	(EEwsConnection *cnc,
+						 gint pri, 
+						 EEwsRequestCreationCallback create_cb,
+						 gpointer create_user_data,
+						 GCancellable *cancellable,
+						 GError **error);
+
+
 G_END_DECLS
 
 #endif
