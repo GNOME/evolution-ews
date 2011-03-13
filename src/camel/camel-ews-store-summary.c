@@ -521,12 +521,21 @@ camel_ews_store_summary_remove_folder	(CamelEwsStoreSummary *ews_summary,
 {
 	gboolean ret;
 	const gchar *id;
+	const gchar *old_fname;
 
 	S_LOCK(ews_summary);
 
 	id = camel_ews_store_summary_get_folder_id	(ews_summary, folder_full_name,
 							 NULL);
-	g_hash_table_remove (ews_summary->priv->id_fname_hash, id);
+
+	/* Don't remove the folder name from the hash unless it's actually
+	   *this* folder's name that's in the hash. Otherwise, a folder
+	   rename would insert the new folder name into the hash replacing
+	   the old one, and then when this function is called to remove the
+	   old folder, we'd remove the *new* name leaving nothing. */
+	old_fname = g_hash_table_lookup (ews_summary->priv->id_fname_hash, id);
+	if (old_fname && !strcmp (old_fname, folder_full_name))
+		g_hash_table_remove (ews_summary->priv->id_fname_hash, id);
 
 	ret = g_key_file_remove_group (ews_summary->priv->key_file, folder_full_name,
 					error);
