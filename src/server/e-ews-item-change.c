@@ -31,10 +31,17 @@ e_ews_message_start_item_change(ESoapMessage *msg, EEwsItemChangeType type,
 {
 	gchar *instance;
 
-	e_soap_message_start_element (msg, "ItemChange", NULL, NULL);
-
 	switch (type) {
+	case E_EWS_ITEMCHANGE_TYPE_FOLDER:
+		e_soap_message_start_element (msg, "FolderChange", NULL, NULL);
+		e_soap_message_start_element (msg, "FolderId",
+					      NULL, NULL);
+		e_soap_message_add_attribute (msg, "Id",
+					      itemid, NULL, NULL);
+		break;
+
 	case E_EWS_ITEMCHANGE_TYPE_ITEM:
+		e_soap_message_start_element (msg, "ItemChange", NULL, NULL);
 		e_soap_message_start_element (msg, "ItemId",
 					      NULL, NULL);
 		e_soap_message_add_attribute (msg, "Id",
@@ -42,6 +49,7 @@ e_ews_message_start_item_change(ESoapMessage *msg, EEwsItemChangeType type,
 		break;
 
 	case E_EWS_ITEMCHANGE_TYPE_OCCURRENCEITEM:
+		e_soap_message_start_element (msg, "ItemChange", NULL, NULL);
 		e_soap_message_start_element (msg, "OccurrenceItemId",
 					      NULL, NULL);
 		e_soap_message_add_attribute (msg, "RecurringMasterId",
@@ -53,6 +61,7 @@ e_ews_message_start_item_change(ESoapMessage *msg, EEwsItemChangeType type,
 		break;
 
 	case E_EWS_ITEMCHANGE_TYPE_RECURRINGMASTER:
+		e_soap_message_start_element (msg, "ItemChange", NULL, NULL);
 		e_soap_message_start_element (msg, "RecurringMasterItemId",
 					      NULL, NULL);
 		e_soap_message_add_attribute (msg, "OccurrenceId",
