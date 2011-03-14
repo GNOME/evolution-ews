@@ -60,6 +60,9 @@ ews_connection_authenticate	(SoupSession *sess, SoupMessage *msg,
 
 struct _EEwsConnectionPrivate {
 	SoupSession *soup_session;
+	GThread *soup_thread;
+	GMainLoop *soup_loop;
+	GMainContext *soup_context;
 
 	gchar *uri;
 	gchar *username;
@@ -265,6 +268,16 @@ ews_next_request (gpointer _cnc)
 	return FALSE;
 }
 
+static void ews_trigger_next_request(EEwsConnection *cnc)
+{
+	GSource *source;
+
+	source = g_idle_source_new ();
+	g_source_set_priority (source, G_PRIORITY_DEFAULT);
+	g_source_set_callback (source, ews_next_request, cnc, NULL);
+	g_source_attach (source, cnc->priv->soup_context);
+}
+
 /**
  * ews_active_job_done 
  * @cnc: 
@@ -285,7 +298,7 @@ ews_active_job_done (EEwsConnection *cnc, EwsNode *ews_node)
 	QUEUE_UNLOCK (cnc);
 
 	g_free (ews_node);
-	g_idle_add_full(G_PRIORITY_DEFAULT, ews_next_request, cnc, NULL);
+	ews_trigger_next_request(cnc);
 }
 
 static void 
@@ -340,7 +353,7 @@ ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_c
 								 (gpointer) node, NULL);
 	}
 
-	g_idle_add_full(G_PRIORITY_DEFAULT, ews_next_request, cnc, NULL);
+	ews_trigger_next_request(cnc);
 }
 
 /* Response callbacks */
@@ -560,6 +573,15 @@ e_ews_connection_dispose (GObject *object)
 	if (priv->soup_session) {
 		g_object_unref (priv->soup_session);
 		priv->soup_session = NULL;
+
+		g_main_loop_quit(priv->soup_loop);
+		g_thread_join(priv->soup_thread);
+		priv->soup_thread = NULL;
+
+		g_main_loop_unref(priv->soup_loop);
+		priv->soup_loop = NULL;
+		g_main_context_unref(priv->soup_context);
+		priv->soup_context = NULL;
 	}
 
 	if (priv->uri) {
@@ -625,6 +647,17 @@ e_ews_connection_class_init (EEwsConnectionClass *klass)
 	object_class->finalize = e_ews_connection_finalize;
 }
 
+
+static gpointer e_ews_soup_thread (gpointer user_data)
+{
+	EEwsConnectionPrivate *priv = user_data;
+
+	g_main_context_push_thread_default (priv->soup_context);
+	g_main_loop_run (priv->soup_loop);
+	g_main_context_pop_thread_default (priv->soup_context);
+	return NULL;
+}
+
 static void
 e_ews_connection_init (EEwsConnection *cnc)
 {
@@ -634,8 +667,14 @@ e_ews_connection_init (EEwsConnection *cnc)
 	priv = g_new0 (EEwsConnectionPrivate, 1);
 	cnc->priv = priv;
 
+	priv->soup_context = g_main_context_new ();
+	priv->soup_loop = g_main_loop_new (priv->soup_context, FALSE);
+
+	priv->soup_thread = g_thread_create(e_ews_soup_thread, priv, TRUE, NULL);
+	
 	/* create the SoupSession for this connection */
-	priv->soup_session = soup_session_async_new_with_options (SOUP_SESSION_USE_NTLM, TRUE, NULL);
+	priv->soup_session = soup_session_async_new_with_options (SOUP_SESSION_USE_NTLM, TRUE, 
+								  SOUP_SESSION_ASYNC_CONTEXT, priv->soup_context, NULL);
 
         if (getenv("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 2)) {
                 SoupLogger *logger;
