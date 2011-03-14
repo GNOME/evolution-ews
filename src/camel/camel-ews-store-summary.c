@@ -64,7 +64,7 @@ load_id_fname_hash (CamelEwsStoreSummary *ews_summary)
 {
 	GSList *folders, *l;
 
-	folders = camel_ews_store_summary_get_folders (ews_summary);
+	folders = camel_ews_store_summary_get_folders (ews_summary, NULL);
 
 	for (l = folders; l != NULL; l = g_slist_next (l)) {
 		gchar *fname = l->data;
@@ -491,12 +491,17 @@ camel_ews_store_summary_get_string_val	(CamelEwsStoreSummary *ews_summary,
 }
 
 GSList *	
-camel_ews_store_summary_get_folders	(CamelEwsStoreSummary *ews_summary)
+camel_ews_store_summary_get_folders	(CamelEwsStoreSummary *ews_summary,
+					 const gchar *prefix)
 {
 	GSList *folders = NULL;
 	gchar **groups = NULL;
 	gsize length;
+	int prefixlen = 0;
 	gint i;
+
+	if (prefix)
+		prefixlen = strlen(prefix);
 
 	S_LOCK(ews_summary);
 	
@@ -507,6 +512,10 @@ camel_ews_store_summary_get_folders	(CamelEwsStoreSummary *ews_summary)
 	for (i = 0; i < length; i++) {
 		if (!g_ascii_strcasecmp (groups [i], STORE_GROUP_NAME))
 			continue;
+		if (prefix && (strncmp(groups[i], prefix, strlen(prefix)) ||
+			       (groups[i][prefixlen] && groups[i][prefixlen] != '/'))) {
+			continue;
+		}
 		folders = g_slist_append (folders, g_strdup (groups [i]));
 	}
 	

@@ -119,7 +119,8 @@ guint64		camel_ews_store_summary_get_folder_type
 						 GError **error);
 
 GSList *	camel_ews_store_summary_get_folders	
-						(CamelEwsStoreSummary *ews_summary);
+						(CamelEwsStoreSummary *ews_summary,
+						 const gchar *prefix);
 
 
 void		camel_ews_store_summary_store_string_val

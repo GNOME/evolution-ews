@@ -302,7 +302,7 @@ folder_info_from_store_summary (CamelEwsStore *store, const gchar *top, guint32 
 	CamelFolderInfo *root_fi = NULL;
 	
 	ews_summary = store->summary;
-	folders = camel_ews_store_summary_get_folders (ews_summary);
+	folders = camel_ews_store_summary_get_folders (ews_summary, top);
 
 	if (!folders)
 		return NULL;
@@ -470,7 +470,7 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, EV
 		goto offline;
 	}
 
-	folders = camel_ews_store_summary_get_folders (ews_store->summary);
+	folders = camel_ews_store_summary_get_folders (ews_store->summary, NULL);
 	if (!folders)
 		initial_setup = TRUE;
 
