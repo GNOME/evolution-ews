@@ -453,10 +453,12 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, EV
 	CamelEwsStore *ews_store;
 	CamelEwsStorePrivate *priv;
 	CamelFolderInfo *fi = NULL;
-	const gchar *sync_state;
+	gchar *sync_state;
 	GSList *folders = NULL;
 	gboolean initial_setup = FALSE;
-	struct _store_sync_data *sync_data;
+	GSList *folders_created = NULL, *folders_updated = NULL;
+	GSList *folders_deleted = NULL;
+	gboolean includes_last_folder;
 
 	ews_store = (CamelEwsStore *) store;
 	priv = ews_store->priv;
@@ -494,27 +496,22 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, EV
 	sync_state = (gchar *) camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
 
 
-	 /* Since one cannot access gconf from a thread, create calendar folders using mainl thread only.
-	    */
-	sync_data = g_new0 (struct _store_sync_data, 1);
-	sync_data->ews_store = ews_store;
-	sync_data->sync = e_flag_new ();
-	sync_data->error = error;
+	if (!e_ews_connection_sync_folder_hierarchy (ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
+						    &sync_state, &includes_last_folder,
+						    &folders_created, &folders_updated,
+						    &folders_deleted, cancellable, error)) {
+		if (error)
+			g_warning ("Unable to fetch the folder hierarchy: %s :%d \n",
+				   (*error)->message, (*error)->code);
+		else
+			g_warning ("Unable to fetch the folder hierarchy.\n");
 
-	e_ews_connection_sync_folder_hierarchy_start	(ews_store->priv->cnc, EWS_PRIORITY_MEDIUM, 
-							 sync_state, ews_folder_hierarchy_ready_cb, 
-							 cancellable, sync_data);
-	
-	e_flag_wait (sync_data->sync);
-	g_mutex_unlock (priv->get_finfo_lock);
-	
-	e_flag_free (sync_data->sync);
-	g_free (sync_data);
-
-	if (*error != NULL) {
-		g_warning ("Unable to fetch the folder hierarchy: %s :%d \n", (*error)->message, (*error)->code);
+		g_mutex_unlock (priv->get_finfo_lock);
 		return NULL;	
 	}
+	ews_update_folder_hierarchy (ews_store, sync_state, includes_last_folder,
+				     folders_created, folders_deleted, folders_updated);
+	g_mutex_unlock (priv->get_finfo_lock);
 
 offline:
 	fi = folder_info_from_store_summary ( (CamelEwsStore *) store, top, flags, error);
