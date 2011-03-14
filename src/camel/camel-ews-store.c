@@ -340,6 +340,23 @@ struct _store_sync_data
 };
 
 static void
+ews_update_folder_hierarchy (CamelEwsStore *ews_store, gchar *sync_state,
+			     gboolean includes_last_folder, GSList *folders_created,
+			     GSList *folders_deleted, GSList *folders_updated)
+{
+	ews_utils_sync_folders (ews_store, folders_created, folders_deleted, folders_updated);
+	camel_ews_store_summary_store_string_val (ews_store->summary, "sync_state", sync_state);
+	camel_ews_store_summary_save (ews_store->summary, NULL);
+	
+	g_slist_foreach (folders_created, (GFunc) g_object_unref, NULL);
+	g_slist_foreach (folders_updated, (GFunc) g_object_unref, NULL);
+	g_slist_free (folders_created);
+	g_slist_free (folders_deleted);
+	g_slist_free (folders_updated);
+	g_free (sync_state);
+}
+
+static void
 ews_folder_hierarchy_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 {
 	GSList *folders_created = NULL, *folders_updated = NULL;
@@ -366,23 +383,14 @@ ews_folder_hierarchy_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_da
 		}
 		goto exit;
 	}
+	ews_update_folder_hierarchy (ews_store, sync_state, includes_last_folder,
+				     folders_created, folders_deleted, folders_updated);
 
-	ews_utils_sync_folders (ews_store, folders_created, folders_deleted, folders_updated);
-	camel_ews_store_summary_store_string_val (ews_store->summary, "sync_state", sync_state);
-	camel_ews_store_summary_save (ews_store->summary, NULL);
-	
 	if (!sync_data->sync) {
 		g_mutex_lock (priv->get_finfo_lock);
 		ews_store->priv->last_refresh_time = time (NULL);
 		g_mutex_unlock (priv->get_finfo_lock);
 	}
-
-	g_slist_foreach (folders_created, (GFunc) g_object_unref, NULL);
-	g_slist_foreach (folders_updated, (GFunc) g_object_unref, NULL);
-	g_slist_free (folders_created);
-	g_slist_free (folders_deleted);
-	g_slist_free (folders_updated);
-	g_free (sync_state);
 
 exit:
 	if (sync_data->sync) {
