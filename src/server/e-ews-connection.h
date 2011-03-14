@@ -309,6 +309,28 @@ gboolean	e_ews_connection_update_folder	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 
+/* Move folder (to new parent; for rename we need update_folder) */
+void		e_ews_connection_move_folder_start 
+						(EEwsConnection *cnc,
+						 gint pri, 
+						 const gchar *to_folder,
+						 const gchar *folder,
+						 GAsyncReadyCallback cb,
+						 GCancellable *cancellable,
+						 gpointer user_data);
+
+gboolean	e_ews_connection_move_folder_finish 
+						(EEwsConnection *cnc, 
+						 GAsyncResult *result,
+						 GError **error);
+
+gboolean	e_ews_connection_move_folder	(EEwsConnection *cnc,
+						 gint pri, 
+						 const gchar *to_folder,
+						 const gchar *folder,
+						 GCancellable *cancellable,
+						 GError **error);
+
 
 G_END_DECLS
 
