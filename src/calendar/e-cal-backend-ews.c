@@ -921,9 +921,14 @@ convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 
 	ewscal_set_time (msg, "Start", &dtstart);
 	ewscal_set_time (msg, "End", &dtend);
-
-	icaltimezone *tz = icalcomponent_extract_timezone(icalcomp);
-	e_ews_set_meeting_timezone(msg, tz);
+	if (0 /* Exchange 2010 detected */ && dtstart.zone != dtend.zone) {
+		/* We have to cast these because libical puts a const pointer into the
+		   icaltimetype, but its basic read-only icaltimezone_foo() functions
+		   take a non-const pointer! */
+		ewscal_set_timezone (msg, "StartTimeZone", (icaltimezone *)dtstart.zone);
+		ewscal_set_timezone (msg, "EndTimeZone", (icaltimezone *)dtstart.zone);
+	} else 
+		ewscal_set_timezone (msg, "MeetingTimeZone", (icaltimezone *)dtstart.zone);
 
 	/* location */
 	e_ews_message_write_string_parameter(msg, "Location", NULL, icalcomponent_get_location(icalcomp));

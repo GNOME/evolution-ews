@@ -139,26 +139,8 @@ static const char *weekindex_to_ical(int index) {
 	return 0;
 }
 
-struct extract_timezone_cb_data_ {
-	icalcomponent *comp;
-	icaltimezone *icaltz;
-};
-
-static void extract_timezone_cb(icalparameter *param, void *data) {
-	struct extract_timezone_cb_data_ *cb_data = data;
-	cb_data->icaltz = icalcomponent_get_timezone(cb_data->comp, icalparameter_get_xvalue(param));
-}
-
-icaltimezone *icalcomponent_extract_timezone(icalcomponent *comp) {
-	struct extract_timezone_cb_data_ cb_data;
-	cb_data.comp = comp;
-
-	icalcomponent_foreach_tzid(comp, extract_timezone_cb, &cb_data);
-
-	return cb_data.icaltz;
-}
-
-void e_ews_set_meeting_timezone(ESoapMessage *msg, icaltimezone *icaltz) {
+void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *icaltz)
+{
 	icalcomponent *comp;
 	icalproperty *prop;
 	struct icalrecurrencetype xstd_recur, daylight_recur;
@@ -170,7 +152,7 @@ void e_ews_set_meeting_timezone(ESoapMessage *msg, icaltimezone *icaltz) {
 	xstd = icalcomponent_get_first_component(comp, ICAL_XSTANDARD_COMPONENT);
 	xdaylight = icalcomponent_get_first_component(comp, ICAL_XDAYLIGHT_COMPONENT);
 
-	e_soap_message_start_element(msg, "MeetingTimeZone", NULL, NULL);
+	e_soap_message_start_element(msg, name, NULL, NULL);
 	e_soap_message_add_attribute(msg, "TimeZoneName", icaltimezone_get_tznames(icaltz), NULL, NULL);
 	e_ews_message_write_string_parameter(msg, "BaseOffset", NULL, "PT0S");
 
