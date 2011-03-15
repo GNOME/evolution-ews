@@ -261,14 +261,6 @@ ews_folder_get_message_sync (CamelFolder *folder, const gchar *uid, EVO3(GCancel
 	return message;
 }
 
-/* code to rename a folder. all the "meta nonsense" code should simply go away */
-static void
-ews_folder_rename (CamelFolder *folder, const gchar *new)
-{
-	g_print ("\n Folder Rename not implemented");
-	
-}
-
 static GPtrArray *
 ews_folder_search_by_expression (CamelFolder *folder, const gchar *expression, GError **error)
 {
@@ -872,7 +864,6 @@ camel_ews_folder_class_init (CamelEwsFolderClass *class)
 
 	folder_class = CAMEL_FOLDER_CLASS (class);
 	folder_class->EVO3_sync(get_message) = ews_folder_get_message_sync;
-	folder_class->rename = ews_folder_rename;
 	folder_class->search_by_expression = ews_folder_search_by_expression;
 	folder_class->count_by_expression = ews_folder_count_by_expression;
 	folder_class->cmp_uids = ews_cmp_uids;
