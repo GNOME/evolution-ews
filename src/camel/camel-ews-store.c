@@ -544,9 +544,83 @@ ews_rename_folder_sync	(CamelStore *store,
 			EVO3(GCancellable *cancellable,)
 			GError **error)
 {
-	g_print ("Rename not implemented yet");
-	return TRUE;
+	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
+	CamelEwsStoreSummary *ews_summary = ews_store->summary;
+	const gchar *old_slash, *new_slash;
+	EVO2(GCancellable *cancellable = NULL;)
 
+	old_slash = g_strrstr (old_name, "/");
+	new_slash = g_strrstr (new_name, "/");
+	
+	if (old_slash)
+		old_slash++;
+	else
+		old_slash = old_name;
+
+	if (new_slash)
+		new_slash++;
+	else
+		new_slash = new_name;
+
+	if (strcmp (old_slash, new_slash)) {
+		int parent_len = old_slash - old_name;
+
+		/* Folder basename changed (i.e. UpdateFolder needed).
+		   Therefore, we can only do it if the folder hasn't also
+		   been moved from one parent folder to another.
+
+		   Strictly speaking, we could probably handle this, even
+		   if there are name collisions. We could UpdateFolder to
+		   a new temporary name that doesn't exist in either the
+		   old or new parent folders, then MoveFolder, then issue
+		   another UpdateFolder to the name we actually wanted.
+		   But since the Evolution UI doesn't seem to let us
+		   make both changes at the same time anyway, we'll just
+		   bail out for now; we can deal with it later if we need
+		   to.
+		*/
+		if (new_slash - new_name != parent_len ||
+		    strncmp (old_name, new_name, parent_len)) {
+			g_set_error (error, CAMEL_STORE_ERROR,
+				     CAMEL_STORE_ERROR_INVALID,
+				     _("Cannot both rename and move a folder at the same time"));
+			return FALSE;
+		}
+		
+		g_set_error (error, CAMEL_STORE_ERROR,
+			     CAMEL_STORE_ERROR_INVALID,
+			     _("Rename %s to %s not implemented"),
+			     old_name, new_name);
+		return FALSE;
+	} else {
+		const gchar *fid, *changekey, *pfid = NULL;
+		gchar *parent_name;
+
+		fid = camel_ews_store_summary_get_folder_id (ews_summary, old_name, error);
+		if (!fid)
+			return FALSE;
+
+		changekey = camel_ews_store_summary_get_change_key (ews_summary, old_name, error);
+		if (!changekey)
+			return FALSE;
+
+		/* If we are not moving to the root folder, work out the ItemId of
+		   the new parent folder */
+		if (new_slash != new_name) {
+			parent_name = g_strndup (new_name, new_slash - new_name - 1);
+			pfid = camel_ews_store_summary_get_folder_id (ews_summary, parent_name, error);
+			g_free (parent_name);
+			if (!pfid)
+				return FALSE;
+		}
+		if (!e_ews_connection_move_folder (ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
+						   pfid, fid, cancellable, error))
+			return FALSE;
+
+		ews_utils_rename_folder (CAMEL_EWS_STORE (store), EWS_FOLDER_TYPE_MAILBOX,
+					 fid, changekey, new_name, old_name, new_slash, NULL);
+	}
+	return TRUE;
 }
 
 gchar *
