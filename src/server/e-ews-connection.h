@@ -286,6 +286,31 @@ gboolean	e_ews_connection_resolve_names	(EEwsConnection *cnc,
 						 gboolean *includes_last_item,
 						 GCancellable *cancellable,
 						 GError **error);
+/*Create Folder*/
+
+void		e_ews_connection_create_folder_start	
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *parent_folder_id,
+						 gboolean is_distinguished_id,
+						 const gchar *folder_name,
+						 GAsyncReadyCallback cb,
+						 GCancellable *cancellable,
+						 gpointer user_data);
+gboolean	e_ews_connection_create_folder_finish	
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 EwsFolderId **folder_id,
+				 		 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_ews_connection_create_folder	(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *parent_folder_id,
+						 gboolean is_distinguished_id,
+						 const gchar *folder_name,
+						 EwsFolderId **folder_id,
+						 GCancellable *cancellable,
+						 GError **error);
 
 /* Update (e.g. rename) folder */
 void		e_ews_connection_update_folder_start 

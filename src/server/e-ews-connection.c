@@ -557,6 +557,28 @@ resolve_names_response_cb (ESoapParameter *subparam, EwsNode *enode)
 	async_data->items_created = contact_items;
 }
 
+/* TODO scan all folders if we support creating multiple folders in the request */
+static void
+ews_create_folder_cb (ESoapParameter *soapparam, EwsNode *enode)
+{
+	ESoapParameter *param, *node;
+	EwsAsyncData *async_data;
+	EwsFolderId *fid = NULL;
+	GSList *fids = NULL;
+
+	node = e_soap_parameter_get_first_child_by_name (soapparam, "Folders");
+	node = e_soap_parameter_get_first_child_by_name (node, "Folder");
+	param = e_soap_parameter_get_first_child_by_name (node, "FolderId");
+
+	fid = g_new0 (EwsFolderId, 1);
+	fid->id = e_soap_parameter_get_property (param, "Id");
+	fid->change_key = e_soap_parameter_get_property (param, "ChangeKey");
+	fids = g_slist_append (fids, fid);
+
+	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
+	async_data->items_created = fids;
+}
+
 static void
 e_ews_connection_dispose (GObject *object)
 {
@@ -1747,15 +1769,15 @@ e_ews_connection_resolve_names_start 	(EEwsConnection *cnc,
 			EwsFolderId *fid = (EwsFolderId *) l->data;
 			
 			if (fid->is_distinguished_id)
-				e_soap_message_start_element (msg, "DistinguishedFolderId", "messages", NULL);
+				e_soap_message_start_element (msg, "DistinguishedFolderId", NULL, NULL);
 			else
-				e_soap_message_start_element (msg, "FolderId", "messages", NULL);
+				e_soap_message_start_element (msg, "FolderId", NULL, NULL);
 		
 			e_soap_message_add_attribute (msg, "Id", fid->id, NULL, NULL);
 			e_soap_message_add_attribute (msg, "ChangeKey", fid->change_key, NULL, NULL);
 
-			if (fid->is_distinguished_id)
-				e_ews_message_write_string_parameter (msg, "Mailbox", "messages", cnc->priv->email);
+			if (fid->is_distinguished_id && cnc->priv->email)
+				e_ews_message_write_string_parameter (msg, "Mailbox", NULL, cnc->priv->email);
 
 			e_soap_message_end_element (msg);
 		}
@@ -2033,4 +2055,119 @@ e_ews_connection_move_folder	(EEwsConnection *cnc,
 	g_free (sync_data);
 
 	return result;
+}
+
+void
+e_ews_connection_create_folder_start	(EEwsConnection *cnc,
+					 gint pri,
+					 const gchar *parent_folder_id,
+					 gboolean is_distinguished_id,
+					 const gchar *folder_name,
+					 GAsyncReadyCallback cb,
+					 GCancellable *cancellable,
+					 gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "CreateFolder", NULL, NULL, EWS_EXCHANGE_2007);
+
+	e_soap_message_start_element (msg, "ParentFolderId", "messages", NULL);
+	
+	if (is_distinguished_id)
+		e_ews_message_write_string_parameter_with_attribute (msg, "DistinguishedFolderId", NULL, NULL, "Id", parent_folder_id);
+	else
+		e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", NULL, NULL, "Id", parent_folder_id);
+		
+	if (is_distinguished_id && cnc->priv->email)
+		e_ews_message_write_string_parameter (msg, "Mailbox", NULL, cnc->priv->email);
+
+	e_soap_message_end_element (msg);
+
+	e_soap_message_start_element (msg, "Folders", "messages", NULL);
+	e_soap_message_start_element(msg, "Folder", NULL, NULL);
+	e_ews_message_write_string_parameter (msg, "DisplayName", NULL, folder_name);
+
+	e_soap_message_end_element (msg);
+	e_soap_message_end_element (msg);
+
+	e_ews_message_write_footer (msg);
+
+      	simple = g_simple_async_result_new (G_OBJECT (cnc),
+                                      cb,
+				      user_data,
+                                      e_ews_connection_create_folder_start);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	ews_connection_queue_request (cnc, msg, ews_create_folder_cb, pri, cancellable, simple, cb == ews_sync_reply_cb);
+}
+
+gboolean
+e_ews_connection_create_folder_finish	(EEwsConnection *cnc,
+					 GAsyncResult *result,
+					 EwsFolderId **fid,
+			 		 GCancellable *cancellable,
+					 GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_create_folder_start),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	*fid = (EwsFolderId *) async_data->items_created->data;
+	g_slist_free (async_data->items_created);
+
+	return TRUE;
+}
+
+
+gboolean		
+e_ews_connection_create_folder	(EEwsConnection *cnc,
+				 gint pri,
+				 const gchar *parent_folder_id,
+				 gboolean is_distinguished_id,
+				 const gchar *folder_name,
+				 EwsFolderId **folder_id,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	EwsSyncData *sync_data;
+	gboolean result;
+
+	sync_data = g_new0 (EwsSyncData, 1);
+	sync_data->eflag = e_flag_new ();
+	
+	e_ews_connection_create_folder_start	(cnc, pri, parent_folder_id, 
+						 is_distinguished_id,
+						 folder_name,
+						 ews_sync_reply_cb, 
+						 cancellable,
+						 (gpointer) sync_data);
+
+	e_flag_wait (sync_data->eflag);
+
+	result = e_ews_connection_create_folder_finish (cnc, sync_data->res,
+							folder_id,
+							cancellable,
+							error);
+
+	e_flag_free (sync_data->eflag);
+	g_object_unref (sync_data->res);
+	g_free (sync_data);
+
+	return result;
+
 }
