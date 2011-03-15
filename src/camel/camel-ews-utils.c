@@ -390,8 +390,8 @@ sync_deleted_folders (CamelEwsStore *store, GSList *deleted_folders)
 }
 
 gboolean ews_utils_rename_folder (CamelEwsStore *store, EwsFolderType ftype,
-				  const EwsFolderId *fid, const EwsFolderId *pfid,
-				  const gchar *folder_name, gchar *display_name,
+				  const gchar *fid, const gchar *changekey, const gchar *pfid,
+				  const gchar *folder_name, const gchar *display_name,
 				  GError **error)
 {
 	CamelEwsStoreSummary *ews_summary = store->summary;
@@ -406,14 +406,16 @@ gboolean ews_utils_rename_folder (CamelEwsStore *store, EwsFolderType ftype,
 		if (!display_name)
 			display_name = camel_ews_store_summary_get_folder_name (ews_summary,
 										folder_name, error);
+		if (!display_name)
+			return FALSE;
 
-		pfname = camel_ews_store_summary_get_folder_name_from_id (ews_summary, pfid->id);
+		pfname = camel_ews_store_summary_get_folder_name_from_id (ews_summary, pfid);
 		if (pfname)
 			new_fname = g_strconcat (pfname, "/", display_name, NULL);
 		else /* root folder, hopefully never else */
 			new_fname = g_strdup (display_name);
 
-		camel_ews_store_summary_set_parent_folder_id (ews_summary, new_fname, pfid->id);
+		camel_ews_store_summary_set_parent_folder_id (ews_summary, new_fname, pfid);
 	} else {
 		/* Parent folder not changed; just basename */
 		const gchar *last_slash, *o_pfid;
@@ -430,8 +432,8 @@ gboolean ews_utils_rename_folder (CamelEwsStore *store, EwsFolderType ftype,
 		camel_ews_store_summary_set_parent_folder_id (ews_summary, new_fname, o_pfid);
 	}
 
-	camel_ews_store_summary_new_folder (ews_summary, new_fname, fid->id);
-	camel_ews_store_summary_set_change_key (ews_summary, new_fname, fid->change_key);
+	camel_ews_store_summary_new_folder (ews_summary, new_fname, fid);
+	camel_ews_store_summary_set_change_key (ews_summary, new_fname, changekey);
 	camel_ews_store_summary_set_folder_name (ews_summary, new_fname, display_name);
 
 	flags = camel_ews_store_summary_get_folder_flags (ews_summary, folder_name, NULL);
@@ -443,7 +445,9 @@ gboolean ews_utils_rename_folder (CamelEwsStore *store, EwsFolderType ftype,
 	}
 
 	/* TODO set total and unread count. Check if server returns all properties on update */
-	camel_ews_store_summary_remove_folder (ews_summary, folder_name, error);
+
+	/* Discard error if removal fails; it's not the end of the world */
+	camel_ews_store_summary_remove_folder (ews_summary, folder_name, NULL);
 
 	g_free (new_fname);
 	return TRUE;
@@ -481,8 +485,8 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 		   or parent folder will change. Handle both... */
 		if (pfid || display_name) {
 			GError *error = NULL;
-			ews_utils_rename_folder (store, ftype, fid, pfid,
-						 folder_name, display_name, &error);
+			ews_utils_rename_folder (store, ftype, fid->id, fid->change_key,
+						 pfid?pfid->id:NULL, folder_name, display_name, &error);
 			g_clear_error (&error);
 		}
 

@@ -91,8 +91,8 @@ void	camel_ews_utils_sync_updated_items	(CamelEwsFolder *ews_folder,
 						 GSList *items_updated);
 
 gboolean ews_utils_rename_folder (CamelEwsStore *store, EwsFolderType ftype,
-				  const EwsFolderId *fid, const EwsFolderId *pfid,
-				  const gchar *folder_name, gchar *display_name,
+				  const gchar *fid, const gchar *changekey, const gchar *pfid,
+				  const gchar *folder_name, const gchar *display_name,
 				  GError **error);
 
 G_END_DECLS
