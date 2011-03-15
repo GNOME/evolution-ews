@@ -195,7 +195,7 @@ void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *ic
 	dtstart = icalproperty_get_dtstart(prop);
 	prop = icalcomponent_get_first_property(xdaylight, ICAL_TZOFFSETTO_PROPERTY);
 	offset = icaldurationtype_as_ical_string_r(icaldurationtype_from_int(icalproperty_get_tzoffsetto(prop)));
-	e_soap_message_add_attribute(msg, "Offset", offset, NULL, NULL);
+	e_ews_message_write_string_parameter(msg, "Offset", NULL, offset);
 	free(offset);
 
 	e_soap_message_start_element(msg, "RelativeYearlyRecurrence", NULL, NULL);
