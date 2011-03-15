@@ -38,6 +38,8 @@
 
 #include <libedataserver/e-flag.h>
 #include <e-ews-compat.h>
+#include <e-ews-item-change.h>
+#include <e-ews-message.h>
 
 #include "camel-ews-folder.h"
 #include "camel-ews-store.h"
@@ -537,6 +539,31 @@ ews_delete_folder_sync	(CamelStore *store,
 	return TRUE;
 }
 
+struct _rename_cb_data {
+	const gchar *display_name;
+	const gchar *change_key;
+	const gchar *folder_id;
+};
+
+static void rename_folder_cb (ESoapMessage *msg, gpointer user_data)
+{
+	struct _rename_cb_data *rename_data = user_data;
+
+	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_FOLDER,
+					 rename_data->folder_id, rename_data->change_key, 0);
+	e_soap_message_start_element (msg, "SetFolderField", NULL, NULL);
+	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL,
+							      "FieldURI", "folder:DisplayName");
+	
+	e_soap_message_start_element (msg, "Folder", NULL, NULL);
+	e_ews_message_write_string_parameter (msg, "DisplayName", NULL, rename_data->display_name);
+	e_soap_message_end_element (msg); /* Folder */
+
+	e_soap_message_end_element (msg); /* SetFolderField */
+
+	e_ews_message_end_item_change (msg);
+}
+
 static gboolean
 ews_rename_folder_sync	(CamelStore *store,
 			const gchar *old_name,
@@ -548,6 +575,18 @@ ews_rename_folder_sync	(CamelStore *store,
 	CamelEwsStoreSummary *ews_summary = ews_store->summary;
 	const gchar *old_slash, *new_slash;
 	EVO2(GCancellable *cancellable = NULL;)
+	const gchar *fid, *changekey;
+
+	fid = camel_ews_store_summary_get_folder_id (ews_summary, old_name, error);
+	if (!fid)
+		return FALSE;
+
+	changekey = camel_ews_store_summary_get_change_key (ews_summary, old_name, error);
+	if (!changekey)
+		return FALSE;
+
+	if (!strcmp (old_name, new_name))
+		return TRUE;
 
 	old_slash = g_strrstr (old_name, "/");
 	new_slash = g_strrstr (new_name, "/");
@@ -564,6 +603,7 @@ ews_rename_folder_sync	(CamelStore *store,
 
 	if (strcmp (old_slash, new_slash)) {
 		int parent_len = old_slash - old_name;
+		struct _rename_cb_data *rename_data;
 
 		/* Folder basename changed (i.e. UpdateFolder needed).
 		   Therefore, we can only do it if the folder hasn't also
@@ -586,23 +626,21 @@ ews_rename_folder_sync	(CamelStore *store,
 				     _("Cannot both rename and move a folder at the same time"));
 			return FALSE;
 		}
+
+		rename_data = g_new0 (struct _rename_cb_data, 1);
+		rename_data->display_name = new_slash;
+		rename_data->folder_id = fid;
+		rename_data->change_key = changekey;
 		
-		g_set_error (error, CAMEL_STORE_ERROR,
-			     CAMEL_STORE_ERROR_INVALID,
-			     _("Rename %s to %s not implemented"),
-			     old_name, new_name);
-		return FALSE;
+		if (!e_ews_connection_update_folder (ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
+						     rename_folder_cb, rename_data, cancellable, error)) {
+			g_free (rename_data);
+			return FALSE;
+		}
+		g_free (rename_data);
 	} else {
-		const gchar *fid, *changekey, *pfid = NULL;
+		const gchar *pfid = NULL;
 		gchar *parent_name;
-
-		fid = camel_ews_store_summary_get_folder_id (ews_summary, old_name, error);
-		if (!fid)
-			return FALSE;
-
-		changekey = camel_ews_store_summary_get_change_key (ews_summary, old_name, error);
-		if (!changekey)
-			return FALSE;
 
 		/* If we are not moving to the root folder, work out the ItemId of
 		   the new parent folder */
@@ -616,10 +654,10 @@ ews_rename_folder_sync	(CamelStore *store,
 		if (!e_ews_connection_move_folder (ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
 						   pfid, fid, cancellable, error))
 			return FALSE;
-
-		ews_utils_rename_folder (CAMEL_EWS_STORE (store), EWS_FOLDER_TYPE_MAILBOX,
-					 fid, changekey, new_name, old_name, new_slash, NULL);
 	}
+
+	ews_utils_rename_folder (CAMEL_EWS_STORE (store), EWS_FOLDER_TYPE_MAILBOX,
+				 fid, changekey, new_name, old_name, new_slash, NULL);
 	return TRUE;
 }
 
