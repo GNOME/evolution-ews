@@ -148,6 +148,9 @@ void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *ic
 	char buffer[16], *offset;
 	icalcomponent *xstd, *xdaylight;
 
+	if (!icaltz)
+		return;
+
 	comp = icaltimezone_get_component(icaltz);
 	xstd = icalcomponent_get_first_component(comp, ICAL_XSTANDARD_COMPONENT);
 	xdaylight = icalcomponent_get_first_component(comp, ICAL_XDAYLIGHT_COMPONENT);
