@@ -356,7 +356,33 @@ gboolean	e_ews_connection_move_folder	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 
+/* Copy and Move item */
+void		e_ews_connection_move_items_start
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *folder_id,
+						 gboolean docopy,
+						 EEwsRequestCreationCallback create_cb,
+						 gpointer create_user_data,
+						 GAsyncReadyCallback cb,
+						 GCancellable *cancellable,
+						 gpointer user_data);
 
+gboolean	e_ews_connection_move_items_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GSList **items,
+						 GError **error);
+
+gboolean	e_ews_connection_move_items	(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *folder_id,
+						 gboolean docopy,
+						 EEwsRequestCreationCallback create_cb,
+						 gpointer create_user_data,
+						 GSList **items,
+						 GCancellable *cancellable,
+						 GError **error);
 G_END_DECLS
 
 #endif
