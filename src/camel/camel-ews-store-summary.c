@@ -205,21 +205,6 @@ camel_ews_store_summary_new_folder	(CamelEwsStoreSummary *ews_summary,
 
 
 void		
-camel_ews_store_summary_set_parent_folder_id	(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name, 
-						 const gchar *parent_fid)
-{
-	S_LOCK(ews_summary);
-
-	g_key_file_set_string	(ews_summary->priv->key_file, folder_full_name,
-				 "ParentFolderId", parent_fid);
-	ews_summary->priv->dirty = TRUE;
-		
-	S_UNLOCK(ews_summary);
-}
-
-
-void		
 camel_ews_store_summary_set_change_key	(CamelEwsStoreSummary *ews_summary,
 					 const gchar *folder_full_name, 
 					 const gchar *change_key)
@@ -350,25 +335,6 @@ camel_ews_store_summary_get_folder_id	(CamelEwsStoreSummary *ews_summary,
 
 	return ret;
 }
-
-
-const gchar *	
-camel_ews_store_summary_get_parent_folder_id	(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name,
-						 GError **error)
-{
-	gchar *ret;
-
-	S_LOCK(ews_summary);
-
-	ret = g_key_file_get_string	(ews_summary->priv->key_file, folder_full_name,
-					 "ParentFolderId", error);
-	
-	S_UNLOCK(ews_summary);
-
-	return ret;
-}
-
 
 const gchar *	
 camel_ews_store_summary_get_change_key	(CamelEwsStoreSummary *ews_summary,

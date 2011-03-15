@@ -414,11 +414,9 @@ gboolean ews_utils_rename_folder (CamelEwsStore *store, EwsFolderType ftype,
 			new_fname = g_strconcat (pfname, "/", display_name, NULL);
 		else /* root folder, hopefully never else */
 			new_fname = g_strdup (display_name);
-
-		camel_ews_store_summary_set_parent_folder_id (ews_summary, new_fname, pfid);
 	} else {
 		/* Parent folder not changed; just basename */
-		const gchar *last_slash, *o_pfid;
+		const gchar *last_slash;
 
 		/* Append new display_name to old parent directory name... */
 		last_slash = g_strrstr (folder_name, "/");
@@ -427,9 +425,6 @@ gboolean ews_utils_rename_folder (CamelEwsStore *store, EwsFolderType ftype,
 						     folder_name, display_name);
 		else /* ...unless it was a child of the root folder */
 			new_fname = g_strdup (display_name);
-
-		o_pfid = camel_ews_store_summary_get_parent_folder_id (ews_summary, folder_name, NULL);
-		camel_ews_store_summary_set_parent_folder_id (ews_summary, new_fname, o_pfid);
 	}
 
 	camel_ews_store_summary_new_folder (ews_summary, new_fname, fid);
@@ -512,7 +507,6 @@ add_folder_to_summary (CamelEwsStore *store, const gchar *fname, EEwsFolder *fol
 
 	camel_ews_store_summary_new_folder (ews_summary, fname, fid->id);
 	camel_ews_store_summary_set_change_key (ews_summary, fname, fid->change_key);
-	camel_ews_store_summary_set_parent_folder_id (ews_summary, fname, pfid->id);
 	camel_ews_store_summary_set_folder_name (ews_summary, fname, dname);
 	camel_ews_store_summary_set_folder_type (ews_summary, fname, (gint64) ftype);
 	
