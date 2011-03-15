@@ -20,6 +20,7 @@ testews_SOURCES = 				\
 		test-connection.c 		\
 		test-cuditem.c 			\
 		test-autocompletion.c		\
+		test-createfolder.c		\
 		test-libews.c 			\
 		utils.h
 

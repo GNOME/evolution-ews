@@ -8,6 +8,7 @@ void autodiscovery_tests_run ();
 void op_tests_run ();
 void cuditem_tests_run ();
 void autocompletion_tests_run ();
+void createfolder_tests_run ();
 
 int main (int argc, char *argv[])
 {
@@ -19,6 +20,7 @@ int main (int argc, char *argv[])
 	g_test_add_func ("/libews/connections", connection_tests_run);
 	g_test_add_func ("/libews/autodiscovery", autodiscovery_tests_run);
 	g_test_add_func ("/libews/autocompletion", autocompletion_tests_run);
+	g_test_add_func ("/libews/createfolder", createfolder_tests_run);
 	g_test_add_func ("/libews/cuditem", cuditem_tests_run);
 
 	return g_test_run ();
