@@ -87,28 +87,16 @@ void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **op
 	}
 }
 
-void e_ews_set_start_time(ESoapMessage *msg, icalcomponent *icalcomp, icaltimezone *tz) {
-	time_t t = icaltime_as_timet_with_zone(icalcomponent_get_dtstart(icalcomp), tz);
-	struct tm * timeinfo;
-	char buff[30];
+void ewscal_set_time (ESoapMessage *msg, const gchar *name, icaltimetype *t)
+{
+	char *str;
 
-	timeinfo = gmtime(&t);
-	strftime(buff, 30, "%Y-%m-%dT%H:%M:%S", timeinfo);
+	str = g_strdup_printf("%04d-%02d-%02dT%02d:%02d:%02d",
+			      t->year, t->month, t->day,
+			      t->hour, t->minute, t->second);
 
-	/* The start time soap element */
-	e_ews_message_write_string_parameter(msg, "Start", NULL, buff);
-}
-
-void e_ews_set_end_time(ESoapMessage *msg, icalcomponent *icalcomp, icaltimezone *tz) {
-	time_t t = icaltime_as_timet_with_zone(icalcomponent_get_dtend(icalcomp), tz);
-	struct tm * timeinfo;
-	char buff[30];
-
-	timeinfo = gmtime(&t);
-	strftime(buff, 30, "%Y-%m-%dT%H:%M:%S", timeinfo);
-
-	/* The start time soap element */
-	e_ews_message_write_string_parameter(msg, "End", NULL, buff);
+	e_ews_message_write_string_parameter(msg, name, NULL, str);
+	g_free (str);
 }
 
 static const char *number_to_month(int num) {

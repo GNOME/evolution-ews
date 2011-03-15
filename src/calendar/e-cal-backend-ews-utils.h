@@ -24,6 +24,8 @@
 #include <e-ews-connection.h>
 #include <libecal/e-cal-component.h>
 #include <e-cal-backend-ews.h>
+#include <libical/icaltime.h>
+#include <libical/icaltimezone.h>
 
 G_BEGIN_DECLS
 
@@ -31,8 +33,7 @@ void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **op
 
 icaltimezone *icalcomponent_extract_timezone(icalcomponent *comp);
 
-void e_ews_set_start_time(ESoapMessage *msg, icalcomponent *icalcomp, icaltimezone *tz);
-void e_ews_set_end_time(ESoapMessage *msg, icalcomponent *icalcomp, icaltimezone *tz);
+void ewscal_set_time (ESoapMessage *msg, const gchar *name, icaltimetype *t);
 
 void e_ews_set_meeting_timezone(ESoapMessage *msg, icaltimezone *icaltz);
 

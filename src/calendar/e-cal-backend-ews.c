@@ -902,6 +902,7 @@ convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 {
 	icalcomponent *icalcomp = (icalcomponent*)user_data;
 	GSList *required = NULL, *optional = NULL, *resource = NULL;
+	icaltimetype dtstart, dtend;
 
 	/* FORMAT OF A SAMPLE SOAP MESSAGE: http://msdn.microsoft.com/en-us/library/aa564690.aspx */
 
@@ -915,9 +916,13 @@ convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 	e_ews_message_write_string_parameter_with_attribute(msg, "Body", NULL, icalcomponent_get_description(icalcomp), "BodyType", "Text");
 
 	/* start time, end time and meeting time zone */
+	dtstart = icalcomponent_get_dtstart (icalcomp);
+	dtend = icalcomponent_get_dtend (icalcomp);
+
+	ewscal_set_time (msg, "Start", &dtstart);
+	ewscal_set_time (msg, "End", &dtend);
+
 	icaltimezone *tz = icalcomponent_extract_timezone(icalcomp);
-	e_ews_set_start_time(msg, icalcomp, tz);
-	e_ews_set_end_time(msg, icalcomp, tz);
 	e_ews_set_meeting_timezone(msg, tz);
 
 	/* location */
