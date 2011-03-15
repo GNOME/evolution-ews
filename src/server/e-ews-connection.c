@@ -1954,8 +1954,13 @@ e_ews_connection_move_folder_start	(EEwsConnection *cnc,
 					     NULL, NULL, EWS_EXCHANGE_2007);
 
 	e_soap_message_start_element (msg, "ToFolderId", "messages", NULL);
-	e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", NULL,
-							     NULL, "Id", to_folder);
+	if (to_folder)
+		e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", NULL,
+								     NULL, "Id", to_folder);
+	else
+		e_ews_message_write_string_parameter_with_attribute (msg, "DistinguishedFolderId", NULL,
+								     NULL, "Id", "root");
+
 	e_soap_message_end_element (msg);
 
 	e_soap_message_start_element (msg, "FolderIds", "messages", NULL);
