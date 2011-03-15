@@ -390,17 +390,17 @@ sync_deleted_folders (CamelEwsStore *store, GSList *deleted_folders)
 }
 
 gboolean ews_utils_rename_folder (CamelEwsStore *store, EwsFolderType ftype,
-				  const gchar *fid, const gchar *changekey, const gchar *pfid,
+				  const gchar *fid, const gchar *changekey,
+				  const gchar *new_parent_name,
 				  const gchar *folder_name, const gchar *display_name,
 				  GError **error)
 {
 	CamelEwsStoreSummary *ews_summary = store->summary;
 	gchar *new_fname = NULL;
-	const gchar *pfname;
 	guint64 flags;
 	CamelFolderInfo *fi;
 
-	if (pfid) {
+	if (new_parent_name) {
 		/* If the display name wasn't changed, its basename is still
 		   the same as it was before... */
 		if (!display_name)
@@ -409,9 +409,8 @@ gboolean ews_utils_rename_folder (CamelEwsStore *store, EwsFolderType ftype,
 		if (!display_name)
 			return FALSE;
 
-		pfname = camel_ews_store_summary_get_folder_name_from_id (ews_summary, pfid);
-		if (pfname)
-			new_fname = g_strconcat (pfname, "/", display_name, NULL);
+		if (new_parent_name[0])
+			new_fname = g_strconcat (new_parent_name, "/", display_name, NULL);
 		else /* root folder, hopefully never else */
 			new_fname = g_strdup (display_name);
 	} else {
@@ -480,8 +479,18 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 		   or parent folder will change. Handle both... */
 		if (pfid || display_name) {
 			GError *error = NULL;
+			const gchar *pfname = NULL;
+
+			if (pfid) {
+				pfname = camel_ews_store_summary_get_folder_name_from_id (ews_summary, pfid->id);
+				/* If this lookup fails, it'll be because the folder is now
+				   the message folder root. */
+				if (!pfname)
+					pfname = "";
+			}
+
 			ews_utils_rename_folder (store, ftype, fid->id, fid->change_key,
-						 pfid?pfid->id:NULL, folder_name, display_name, &error);
+						 pfname, folder_name, display_name, &error);
 			g_clear_error (&error);
 		}
 
