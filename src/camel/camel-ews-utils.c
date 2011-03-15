@@ -485,8 +485,9 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 					new_fname = g_strdup (display_name);
 			}
 
-			ews_utils_rename_folder (store, ftype, fid->id, fid->change_key,
-						 new_fname, folder_name, display_name, &error);
+			if (strcmp(new_fname, folder_name))
+				ews_utils_rename_folder (store, ftype, fid->id, fid->change_key,
+							 new_fname, folder_name, display_name, &error);
 			g_free (new_fname);
 			g_clear_error (&error);
 		}
