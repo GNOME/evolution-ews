@@ -1959,7 +1959,7 @@ e_ews_connection_move_folder_start	(EEwsConnection *cnc,
 								     NULL, "Id", to_folder);
 	else
 		e_ews_message_write_string_parameter_with_attribute (msg, "DistinguishedFolderId", NULL,
-								     NULL, "Id", "root");
+								     NULL, "Id", "msgfolderroot");
 
 	e_soap_message_end_element (msg);
 
