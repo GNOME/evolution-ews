@@ -87,26 +87,156 @@ void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **op
 	}
 }
 
-void e_ews_set_start_time_as_utc(ESoapMessage *msg, icalcomponent *icalcomp) {
-	time_t t = icaltime_as_timet_with_zone(icalcomponent_get_dtstart(icalcomp), icaltimezone_get_utc_timezone());
+void e_ews_set_start_time(ESoapMessage *msg, icalcomponent *icalcomp, icaltimezone *tz) {
+	time_t t = icaltime_as_timet_with_zone(icalcomponent_get_dtstart(icalcomp), tz);
 	struct tm * timeinfo;
 	char buff[30];
 
 	timeinfo = gmtime(&t);
-	strftime(buff, 30, "%Y-%m-%dT%H:%M:%SZ", timeinfo);
+	strftime(buff, 30, "%Y-%m-%dT%H:%M:%S", timeinfo);
 
 	/* The start time soap element */
 	e_ews_message_write_string_parameter(msg, "Start", NULL, buff);
 }
 
-void e_ews_set_end_time_as_utc(ESoapMessage *msg, icalcomponent *icalcomp) {
-	time_t t = icaltime_as_timet_with_zone(icalcomponent_get_dtend(icalcomp), icaltimezone_get_utc_timezone());
+void e_ews_set_end_time(ESoapMessage *msg, icalcomponent *icalcomp, icaltimezone *tz) {
+	time_t t = icaltime_as_timet_with_zone(icalcomponent_get_dtend(icalcomp), tz);
 	struct tm * timeinfo;
 	char buff[30];
 
 	timeinfo = gmtime(&t);
-	strftime(buff, 30, "%Y-%m-%dT%H:%M:%SZ", timeinfo);
+	strftime(buff, 30, "%Y-%m-%dT%H:%M:%S", timeinfo);
 
 	/* The start time soap element */
 	e_ews_message_write_string_parameter(msg, "End", NULL, buff);
+}
+
+static const char *number_to_month(int num) {
+	static const char *months[] = {
+		"January", "February", "March", "April", "May", "June", "July",
+		"August", "September", "October", "November", "December"
+	};
+
+	return months[num-1];
+}
+
+static const char *number_to_weekday(int num) {
+	static const char *days[] = {
+		"Sunday", "Monday", "Tuesday", "Wednesday",
+		"Thursday", "Friday", "Saturday",
+		"Day", "Weekday", "WeekendDay"
+	};
+
+	return days[num+1];
+}
+
+static const char *weekindex_to_ical(int index) {
+	static struct {
+		const char *exch;
+		int index;
+	} table[] = {
+		{ "First", 1 },
+		{ "Second", 2 },
+		{ "Third", 3 },
+		{ "Fourth", 4 },
+		{ "Last", -1 }
+	};
+	int i;
+
+	for (i = 0; i < 5; i++) {
+		if (index == table[i].index)
+				return table[i].exch;
+	}
+
+	return 0;
+}
+
+struct extract_timezone_cb_data_ {
+	icalcomponent *comp;
+	icaltimezone *icaltz;
+};
+
+static void extract_timezone_cb(icalparameter *param, void *data) {
+	struct extract_timezone_cb_data_ *cb_data = data;
+	cb_data->icaltz = icalcomponent_get_timezone(cb_data->comp, icalparameter_get_xvalue(param));
+}
+
+icaltimezone *icalcomponent_extract_timezone(icalcomponent *comp) {
+	struct extract_timezone_cb_data_ cb_data;
+	cb_data.comp = comp;
+
+	icalcomponent_foreach_tzid(comp, extract_timezone_cb, &cb_data);
+
+	return cb_data.icaltz;
+}
+
+void e_ews_set_meeting_timezone(ESoapMessage *msg, icaltimezone *icaltz) {
+	icalcomponent *comp;
+	icalproperty *prop;
+	struct icalrecurrencetype xstd_recur, daylight_recur;
+	struct icaltimetype dtstart;
+	char buffer[16], *offset;
+	icalcomponent *xstd, *xdaylight;
+
+	comp = icaltimezone_get_component(icaltz);
+	xstd = icalcomponent_get_first_component(comp, ICAL_XSTANDARD_COMPONENT);
+	xdaylight = icalcomponent_get_first_component(comp, ICAL_XDAYLIGHT_COMPONENT);
+
+	e_soap_message_start_element(msg, "MeetingTimeZone", NULL, NULL);
+	e_soap_message_add_attribute(msg, "TimeZoneName", icaltimezone_get_tznames(icaltz), NULL, NULL);
+	e_ews_message_write_string_parameter(msg, "BaseOffset", NULL, "PT0S");
+
+	/* Standard */
+	e_soap_message_start_element(msg, "Standard", NULL, NULL);
+	e_soap_message_add_attribute(msg, "TimeZoneName", icaltimezone_get_tznames(icaltz), NULL, NULL);
+
+	prop = icalcomponent_get_first_property(xstd, ICAL_RRULE_PROPERTY);
+	xstd_recur = icalproperty_get_rrule(prop);
+	prop = icalcomponent_get_first_property(xstd, ICAL_DTSTART_PROPERTY);
+	dtstart = icalproperty_get_dtstart(prop);
+	prop = icalcomponent_get_first_property(xstd, ICAL_TZOFFSETTO_PROPERTY);
+	offset = icaldurationtype_as_ical_string_r(icaldurationtype_from_int(icalproperty_get_tzoffsetto(prop)));
+	e_ews_message_write_string_parameter(msg, "Offset", NULL, offset);
+	free(offset);
+
+	e_soap_message_start_element(msg, "RelativeYearlyRecurrence", NULL, NULL);
+
+	e_ews_message_write_string_parameter(msg, "DaysOfWeek", NULL, number_to_weekday(icalrecurrencetype_day_day_of_week(xstd_recur.by_day[0]) - xstd_recur.week_start));
+	e_ews_message_write_string_parameter(msg, "DayOfWeekIndex", NULL, weekindex_to_ical(icalrecurrencetype_day_position(xstd_recur.by_day[0])));
+	e_ews_message_write_string_parameter(msg, "Month", NULL, number_to_month(xstd_recur.by_month[0]));
+
+	e_soap_message_end_element(msg); /* "RelativeYearlyRecurrence" */
+
+	snprintf(buffer, 16, "%02d:%02d:%02d", dtstart.hour, dtstart.minute, dtstart.second);
+	e_ews_message_write_string_parameter(msg, "Time", NULL, buffer);
+
+	e_soap_message_end_element(msg); /* "Standard" */
+
+	/* DayLight */
+	e_soap_message_start_element(msg, "Daylight", NULL, NULL);
+	e_soap_message_add_attribute(msg, "TimeZoneName", icaltimezone_get_tznames(icaltz), NULL, NULL);
+
+	prop = icalcomponent_get_first_property(xdaylight, ICAL_RRULE_PROPERTY);
+	daylight_recur = icalproperty_get_rrule(prop);
+	prop = icalcomponent_get_first_property(xdaylight, ICAL_DTSTART_PROPERTY);
+	dtstart = icalproperty_get_dtstart(prop);
+	prop = icalcomponent_get_first_property(xdaylight, ICAL_TZOFFSETTO_PROPERTY);
+	offset = icaldurationtype_as_ical_string_r(icaldurationtype_from_int(icalproperty_get_tzoffsetto(prop)));
+	e_soap_message_add_attribute(msg, "Offset", offset, NULL, NULL);
+	free(offset);
+
+	e_soap_message_start_element(msg, "RelativeYearlyRecurrence", NULL, NULL);
+
+	e_ews_message_write_string_parameter(msg, "DaysOfWeek", NULL, number_to_weekday(icalrecurrencetype_day_day_of_week(daylight_recur.by_day[0]) - xstd_recur.week_start));
+	e_ews_message_write_string_parameter(msg, "DayOfWeekIndex", NULL, weekindex_to_ical(icalrecurrencetype_day_position(daylight_recur.by_day[0])));
+	e_ews_message_write_string_parameter(msg, "Month", NULL, number_to_month(daylight_recur.by_month[0]));
+
+	e_soap_message_end_element(msg); /* "RelativeYearlyRecurrence" */
+
+	snprintf(buffer, 16, "%02d:%02d:%02d", dtstart.hour, dtstart.minute, dtstart.second);
+	e_ews_message_write_string_parameter(msg, "Time", NULL, buffer);
+
+	e_soap_message_end_element(msg); /* "Daylight" */
+
+	e_soap_message_end_element(msg); /* "MeetingTimeZone" */
 }

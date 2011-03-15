@@ -29,8 +29,12 @@ G_BEGIN_DECLS
 
 void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **optional, GSList **resource);
 
-void e_ews_set_start_time_as_utc(ESoapMessage *msg, icalcomponent *icalcomp);
-void e_ews_set_end_time_as_utc(ESoapMessage *msg, icalcomponent *icalcomp);
+icaltimezone *icalcomponent_extract_timezone(icalcomponent *comp);
+
+void e_ews_set_start_time(ESoapMessage *msg, icalcomponent *icalcomp, icaltimezone *tz);
+void e_ews_set_end_time(ESoapMessage *msg, icalcomponent *icalcomp, icaltimezone *tz);
+
+void e_ews_set_meeting_timezone(ESoapMessage *msg, icaltimezone *icaltz);
 
 G_END_DECLS
 

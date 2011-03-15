@@ -914,11 +914,11 @@ convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 	/* description */
 	e_ews_message_write_string_parameter_with_attribute(msg, "Body", NULL, icalcomponent_get_description(icalcomp), "BodyType", "Text");
 
-	/* start time */
-	e_ews_set_start_time_as_utc(msg, icalcomp);
-
-	/* end time */
-	e_ews_set_end_time_as_utc(msg, icalcomp);
+	/* start time, end time and meeting time zone */
+	icaltimezone *tz = icalcomponent_extract_timezone(icalcomp);
+	e_ews_set_start_time(msg, icalcomp, tz);
+	e_ews_set_end_time(msg, icalcomp, tz);
+	e_ews_set_meeting_timezone(msg, tz);
 
 	/* location */
 	e_ews_message_write_string_parameter(msg, "Location", NULL, icalcomponent_get_location(icalcomp));
