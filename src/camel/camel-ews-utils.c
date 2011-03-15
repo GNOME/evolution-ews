@@ -389,6 +389,66 @@ sync_deleted_folders (CamelEwsStore *store, GSList *deleted_folders)
 	}
 }
 
+gboolean ews_utils_rename_folder (CamelEwsStore *store, EwsFolderType ftype,
+				  const EwsFolderId *fid, const EwsFolderId *pfid,
+				  const gchar *folder_name, gchar *display_name,
+				  GError **error)
+{
+	CamelEwsStoreSummary *ews_summary = store->summary;
+	gchar *new_fname = NULL;
+	const gchar *pfname;
+	guint64 flags;
+	CamelFolderInfo *fi;
+
+	if (pfid) {
+		/* If the display name wasn't changed, its basename is still
+		   the same as it was before... */
+		if (!display_name)
+			display_name = camel_ews_store_summary_get_folder_name (ews_summary,
+										folder_name, error);
+
+		pfname = camel_ews_store_summary_get_folder_name_from_id (ews_summary, pfid->id);
+		if (pfname)
+			new_fname = g_strconcat (pfname, "/", display_name, NULL);
+		else /* root folder, hopefully never else */
+			new_fname = g_strdup (display_name);
+
+		camel_ews_store_summary_set_parent_folder_id (ews_summary, new_fname, pfid->id);
+	} else {
+		/* Parent folder not changed; just basename */
+		const gchar *last_slash, *o_pfid;
+
+		/* Append new display_name to old parent directory name... */
+		last_slash = g_strrstr (folder_name, "/");
+		if (last_slash)
+			new_fname = g_strdup_printf ("%.*s/%s", (int)(last_slash - folder_name),
+						     folder_name, display_name);
+		else /* ...unless it was a child of the root folder */
+			new_fname = g_strdup (display_name);
+
+		o_pfid = camel_ews_store_summary_get_parent_folder_id (ews_summary, folder_name, NULL);
+		camel_ews_store_summary_set_parent_folder_id (ews_summary, new_fname, o_pfid);
+	}
+
+	camel_ews_store_summary_new_folder (ews_summary, new_fname, fid->id);
+	camel_ews_store_summary_set_change_key (ews_summary, new_fname, fid->change_key);
+	camel_ews_store_summary_set_folder_name (ews_summary, new_fname, display_name);
+
+	flags = camel_ews_store_summary_get_folder_flags (ews_summary, folder_name, NULL);
+	camel_ews_store_summary_set_folder_flags (ews_summary, new_fname, flags);
+		
+	if (ftype == EWS_FOLDER_TYPE_MAILBOX) {
+		fi = camel_ews_utils_build_folder_info (store, new_fname);
+		camel_store_folder_renamed ((CamelStore *) store, folder_name, fi);
+	}
+
+	/* TODO set total and unread count. Check if server returns all properties on update */
+	camel_ews_store_summary_remove_folder (ews_summary, folder_name, error);
+
+	g_free (new_fname);
+	return TRUE;
+}
+
 static void
 sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 {
@@ -420,59 +480,10 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 		   operations in Exchange, unfortunately, then the name
 		   or parent folder will change. Handle both... */
 		if (pfid || display_name) {
-			gchar *new_fname = NULL;
-			const gchar *pfname;
-			guint64 flags;
-			CamelFolderInfo *fi;
 			GError *error = NULL;
-
-			if (pfid) {
-				/* If the display name wasn't changed, its basename is still
-				   the same as it was before... */
-				if (!display_name)
-					display_name = camel_ews_store_summary_get_folder_name (ews_summary,
-											folder_name, &error);
-
-				pfname = camel_ews_store_summary_get_folder_name_from_id (ews_summary, pfid->id);
-				if (pfname)
-					new_fname = g_strconcat (pfname, "/", display_name, NULL);
-				else /* root folder, hopefully never else */
-					new_fname = g_strdup (display_name);
-
-				camel_ews_store_summary_set_parent_folder_id (ews_summary, new_fname, pfid->id);
-			} else {
-				/* Parent folder not changed; just basename */
-				const gchar *last_slash, *o_pfid;
-
-				/* Append new display_name to old parent directory name... */
-				last_slash = g_strrstr (folder_name, "/");
-				if (last_slash)
-					new_fname = g_strdup_printf ("%.*s/%s", (int)(last_slash - folder_name),
-								     folder_name, display_name);
-				else /* ...unless it was a child of the root folder */
-					new_fname = g_strdup (display_name);
-
-				o_pfid = camel_ews_store_summary_get_parent_folder_id (ews_summary, folder_name, NULL);
-				camel_ews_store_summary_set_parent_folder_id (ews_summary, new_fname, o_pfid);
-			}
-			
-			camel_ews_store_summary_new_folder (ews_summary, new_fname, fid->id);
-			camel_ews_store_summary_set_change_key (ews_summary, new_fname, fid->change_key);
-			camel_ews_store_summary_set_folder_name (ews_summary, new_fname, display_name);
-
-			flags = camel_ews_store_summary_get_folder_flags (ews_summary, folder_name, NULL);
-			camel_ews_store_summary_set_folder_flags (ews_summary, new_fname, flags);
-		
-			if (ftype == EWS_FOLDER_TYPE_MAILBOX) {
-				fi = camel_ews_utils_build_folder_info (store, new_fname);
-				camel_store_folder_renamed ((CamelStore *) store, folder_name, fi);
-			}
-
-			/* TODO set total and unread count. Check if server returns all properties on update */
-			camel_ews_store_summary_remove_folder (ews_summary, folder_name, &error);
-
+			ews_utils_rename_folder (store, ftype, fid, pfid,
+						 folder_name, display_name, &error);
 			g_free (folder_name);
-			g_free (new_fname);
 			g_clear_error (&error);
 		}
 	}
