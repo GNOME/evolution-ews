@@ -483,9 +483,10 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 			GError *error = NULL;
 			ews_utils_rename_folder (store, ftype, fid, pfid,
 						 folder_name, display_name, &error);
-			g_free (folder_name);
 			g_clear_error (&error);
 		}
+
+		g_free (folder_name);
 	}
 }
 
