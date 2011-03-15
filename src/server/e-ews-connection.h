@@ -362,8 +362,7 @@ void		e_ews_connection_move_items_start
 						 gint pri,
 						 const gchar *folder_id,
 						 gboolean docopy,
-						 EEwsRequestCreationCallback create_cb,
-						 gpointer create_user_data,
+						 GSList *ids,
 						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
 						 gpointer user_data);
@@ -378,9 +377,8 @@ gboolean	e_ews_connection_move_items	(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *folder_id,
 						 gboolean docopy,
-						 EEwsRequestCreationCallback create_cb,
-						 gpointer create_user_data,
-						 GSList **items,
+						 GSList *ids,
+						 GSList **items_ret,
 						 GCancellable *cancellable,
 						 GError **error);
 G_END_DECLS

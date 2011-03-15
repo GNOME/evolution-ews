@@ -2177,8 +2177,7 @@ e_ews_connection_move_items_start	(EEwsConnection *cnc,
 					 gint pri,
 					 const gchar *folder_id,
 					 gboolean docopy,
-					 EEwsRequestCreationCallback create_cb,
-					 gpointer create_user_data,
+					 GSList *ids,
 					 GAsyncReadyCallback cb,
 					 GCancellable *cancellable,
 					 gpointer user_data)
@@ -2186,6 +2185,7 @@ e_ews_connection_move_items_start	(EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
+	GSList *l;
 
 	if (docopy)
 		msg = e_ews_message_new_with_header (cnc->priv->uri, "CopyItem",
@@ -2195,16 +2195,15 @@ e_ews_connection_move_items_start	(EEwsConnection *cnc,
 					     NULL, NULL, EWS_EXCHANGE_2007);
 
 	e_soap_message_start_element (msg, "ToFolderId", "messages", NULL);
-
 	e_soap_message_start_element (msg, "FolderId", NULL, NULL);
-
 	e_soap_message_add_attribute (msg, "Id", folder_id, NULL, NULL);
-
 	e_soap_message_end_element (msg); /* FolderId */
-
 	e_soap_message_end_element (msg); /* ToFolderId */
 
-	create_cb (msg, create_user_data);
+	e_soap_message_start_element (msg, "ItemIds", "messages", NULL);
+	for (l = ids; l != NULL; l = g_slist_next (l))
+		e_ews_message_write_string_parameter_with_attribute (msg, "ItemId", NULL, NULL, "Id", l->data);
+	e_soap_message_end_element (msg); /* ItemIds */
 
 	e_ews_message_write_footer (msg);
 
@@ -2251,8 +2250,7 @@ e_ews_connection_move_items	(EEwsConnection *cnc,
 				 gint pri,
 				 const gchar *folder_id,
 				 gboolean docopy,
-				 EEwsRequestCreationCallback create_cb,
-				 gpointer create_user_data,
+				 GSList *ids,
 				 GSList **items,
 				 GCancellable *cancellable,
 				 GError **error)
@@ -2263,8 +2261,7 @@ e_ews_connection_move_items	(EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_move_items_start (cnc, pri, folder_id, docopy,
-					   create_cb, create_user_data,
+	e_ews_connection_move_items_start (cnc, pri, folder_id, docopy, ids,
 					   ews_sync_reply_cb, cancellable,
 					   (gpointer) sync_data);
 
