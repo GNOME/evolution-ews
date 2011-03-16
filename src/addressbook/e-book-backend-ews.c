@@ -30,7 +30,6 @@
 #include <time.h>
 #include <unistd.h>
 #include <errno.h>
-#include "db.h"
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -45,8 +44,6 @@
 #include "libedata-book/e-book-backend-sexp.h"
 #include "libedata-book/e-data-book.h"
 #include "libedata-book/e-data-book-view.h"
-#include "libedata-book/e-book-backend-db-cache.h"
-#include "libedata-book/e-book-backend-summary.h"
 #include "e-book-backend-ews.h"
 
 #include "e-ews-connection.h"
@@ -61,15 +58,11 @@ G_DEFINE_TYPE (EBookBackendEws, e_book_backend_ews, E_TYPE_BOOK_BACKEND)
 struct _EBookBackendEwsPrivate {
 	EEwsConnection *cnc;
 	gchar *folder_id;
-	gchar *summary_file_name;
 	gboolean only_if_exists;
 	gboolean is_writable;
-	gboolean is_cache_ready;
-	gboolean is_summary_ready;
 	gint mode;
-	EBookBackendSummary *summary;
 	
-	guint cache_timeout;
+	GHashTable *ops;
 };
 
 #define CACHE_REFRESH_INTERVAL 600000
@@ -244,16 +237,298 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 	}
 }
 
+typedef struct {
+	/* For future use */
+	gpointer restriction;
+
+	gboolean is_query_handled;
+	gboolean is_autocompletion;
+	gchar *auto_comp_str;
+} EBookBackendEwsSExpData;
+
+static ESExpResult *
+func_not (ESExp *f, gint argc, ESExpResult **argv, gpointer data)
+{
+	ESExpResult *r;
+
+	if (argc != 1 || argv[0]->type != ESEXP_RES_UNDEFINED) {
+		e_sexp_fatal_error (f, "parse error");
+		return NULL;
+	}
+	
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = FALSE;
+
+	return r;
+}
+
+static ESExpResult *
+func_and_or (ESExp *f, gint argc, ESExpResult **argv, gpointer and)
+{
+	ESExpResult *r;
+
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = FALSE;
+	
+	return r;
+}
+
+/* TODO implement */
+static ESExpResult *
+func_is (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer data)
+{
+	ESExpResult *r;
+	EBookBackendEwsSExpData *sdata = data;
+
+	if (argc != 2
+	    && argv[0]->type != ESEXP_RES_STRING
+	    && argv[1]->type != ESEXP_RES_STRING) {
+		e_sexp_fatal_error (f, "parse error");
+		return NULL;
+	}
+
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = FALSE;
+
+	sdata->is_query_handled = FALSE;
+	return r;
+}
+
+/* TODO implement */
+static ESExpResult *
+func_endswith (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer data)
+{
+	ESExpResult *r;
+	EBookBackendEwsSExpData *sdata = data;
+
+	if (argc != 2
+	    && argv[0]->type != ESEXP_RES_STRING
+	    && argv[1]->type != ESEXP_RES_STRING) {
+		e_sexp_fatal_error (f, "parse error");
+		return NULL;
+	}
+
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = FALSE;
+
+	sdata->is_query_handled = FALSE;
+	return r;
+
+}
+
+/* TODO implement */
+static ESExpResult *
+func_contains (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer data)
+{
+	ESExpResult *r;
+	EBookBackendEwsSExpData *sdata = data;
+
+	if (argc != 2
+	    && argv[0]->type != ESEXP_RES_STRING
+	    && argv[1]->type != ESEXP_RES_STRING) {
+		e_sexp_fatal_error (f, "parse error");
+		return NULL;
+	}
+
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = FALSE;
+
+	sdata->is_query_handled = FALSE;
+	return r;
+
+}
+
+/* We are just handling for autocompletion now. We need to support other fields after implementing 
+   Restrictions and find_items request */
+static ESExpResult *
+func_beginswith (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer data)
+{
+	ESExpResult *r;
+	gchar *propname, *str;
+	EBookBackendEwsSExpData *sdata = data;
+
+	if (argc != 2 ||
+	    argv[0]->type != ESEXP_RES_STRING ||
+	    argv[1]->type != ESEXP_RES_STRING) {
+		e_sexp_fatal_error (f, "parse error");
+		return NULL;
+	}
+
+	propname = argv[0]->value.string;
+	str = argv[1]->value.string;
+
+	if (!strcmp (propname, "full_name") || !strcmp (propname, "email")) {
+		if (!sdata->auto_comp_str) {
+			sdata->auto_comp_str = g_strdup (str);
+			sdata->is_autocompletion = TRUE;
+		}
+	}
+	
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = FALSE;
+	return r;
+}
+
+static struct {
+	const gchar *name;
+	ESExpFunc *func;
+	guint flags;
+} symbols[] = {
+	{ "and", func_and_or, 0 },
+	{ "or", func_and_or, 0},
+	{ "not", func_not, 0 },
+	{ "contains", func_contains, 0},
+	{ "is", func_is, 0},
+	{ "beginswith", func_beginswith, 0},
+	{ "endswith", func_endswith, 0},
+};
+
+static gpointer 
+e_book_backend_ews_build_restriction (const gchar *query, gboolean *autocompletion, gchar **auto_comp_str)
+{
+	ESExpResult *r;
+	ESExp *sexp;
+	EBookBackendEwsSExpData *sdata;
+	gint i;
+
+	sexp = e_sexp_new ();
+	sdata = g_new0 (EBookBackendEwsSExpData, 1);
+
+	sdata->is_query_handled = TRUE;
+
+	for (i = 0; i < G_N_ELEMENTS (symbols); i++) {
+		e_sexp_add_function (sexp, 0, (gchar *) symbols[i].name,
+				     symbols[i].func,
+				     sdata);
+	}
+
+	e_sexp_input_text (sexp, query, strlen (query));
+	e_sexp_parse (sexp);
+
+	r = e_sexp_eval (sexp);
+	if (r) {
+		*autocompletion = sdata->is_autocompletion;
+		*auto_comp_str = sdata->auto_comp_str;
+	}
+
+	e_sexp_result_free (sexp, r);
+	e_sexp_unref (sexp);
+
+	return NULL;
+}
+
 static void
 e_book_backend_ews_start_book_view (EBookBackend  *backend,
 				     EDataBookView *book_view)
 {
+	EBookBackendEws *bews;
+	EBookBackendEwsPrivate *priv;
+	const gchar *query;
+	gboolean is_autocompletion;
+	gchar *auto_comp_str = NULL;
+	GCancellable *cancellable;
+	GSList *ids = NULL, *mailboxes = NULL, *l;
+	EwsFolderId *fid;
+	GError *error = NULL;
+	gboolean includes_last_item;
+	ESource *source;
+
+	bews = E_BOOK_BACKEND_EWS (backend);
+	priv = bews->priv;
+	query = e_data_book_view_get_card_query (book_view);
+
+	e_data_book_view_ref (book_view);
+	e_data_book_view_notify_status_message (book_view, _("Searching..."));
+
+	switch (priv->mode) {
+	case E_DATA_BOOK_MODE_LOCAL:
+		error = EDB_ERROR (OFFLINE_UNAVAILABLE);
+		e_data_book_view_notify_complete (book_view, error);
+		g_error_free (error);
+		return;
+	case E_DATA_BOOK_MODE_REMOTE:
+		if (!priv->cnc) {
+			error = EDB_ERROR (AUTHENTICATION_REQUIRED);
+			e_book_backend_notify_auth_required (backend);
+			e_data_book_view_notify_complete (book_view, error);
+			e_data_book_view_unref (book_view);
+			g_error_free (error);
+			return;
+		}
+		
+		e_book_backend_ews_build_restriction (query, &is_autocompletion, &auto_comp_str);
+		if (!is_autocompletion || !auto_comp_str) {
+			e_data_book_view_notify_complete (book_view, error);
+			e_data_book_view_unref (book_view);
+			return;
+		}
+		
+		source = e_book_backend_get_source (backend);
+		cancellable = g_cancellable_new ();
+		
+		/* FIXME Need to convert the Ids from EwsLegacyId format to EwsId format using 
+		   convert_id operation before using it as the schema has changed between Exchange
+		   2007 and 2007_SP1 */
+		fid = g_new0 (EwsFolderId, 1);
+		fid->id = g_strdup (priv->folder_id);
+		fid->change_key = e_source_get_duped_property (source, "change-key");
+		ids = g_slist_append (ids, fid);
+
+		/* We do not scan until we reach the last_item as it might be good enough to show first 100 
+		   items during auto-completion. Change it if needed */
+		g_hash_table_insert (priv->ops, book_view, cancellable);
+		e_ews_connection_resolve_names	(priv->cnc, EWS_PRIORITY_MEDIUM, auto_comp_str, 
+						 EWS_SEARCH_AD, NULL, FALSE, &mailboxes, NULL,
+						 &includes_last_item, cancellable, &error);
+		
+		g_hash_table_remove (priv->ops, book_view);
+		e_ews_folder_free_fid (fid);
+		if (error != NULL) {
+			e_data_book_view_notify_complete (book_view, error);
+			e_data_book_view_unref (book_view);
+			g_clear_error (&error);
+			return;
+		}
+
+		for (l = mailboxes; l != NULL; l = g_slist_next (l)) {
+			EwsMailbox *mb = l->data;
+			EContact *contact;
+
+			contact = e_contact_new ();
+			
+			/* We do not get an id from the server, so just using email_id as uid for now */
+			e_contact_set (contact, E_CONTACT_UID, mb->email);
+			e_contact_set (contact, E_CONTACT_FULL_NAME, mb->name);
+			e_contact_set (contact, E_CONTACT_EMAIL_1, mb->email);
+			
+			e_data_book_view_notify_update (book_view, contact);
+
+			g_free (mb->email);
+			g_free (mb->name);
+			g_free (mb);
+		}
+
+		g_slist_free (mailboxes);
+		e_data_book_view_notify_complete (book_view, error);
+		e_data_book_view_unref (book_view);
+	default:
+		break;
+	}
 }
 
 static void
 e_book_backend_ews_stop_book_view (EBookBackend  *backend,
 					 EDataBookView *book_view)
 {
+	EBookBackendEws *bews = E_BOOK_BACKEND_EWS (backend);
+	EBookBackendEwsPrivate *priv = bews->priv;
+	GCancellable *cancellable;
+
+	cancellable = g_hash_table_lookup (priv->ops, book_view);
+	if (cancellable) {
+		g_cancellable_cancel (cancellable);
+		g_hash_table_remove (priv->ops, book_view);
+	}
 }
 
 static void
@@ -274,30 +549,30 @@ e_book_backend_ews_authenticate_user (EBookBackend *backend,
 {
 	EBookBackendEws *ebgw;
 	EBookBackendEwsPrivate *priv;
+	ESource *esource;
+	GError *error = NULL;
+	const gchar *host_url;
 
 	ebgw = E_BOOK_BACKEND_EWS (backend);
 	priv = ebgw->priv;
 
 	switch (ebgw->priv->mode) {
 	case E_DATA_BOOK_MODE_LOCAL:
-		/* load summary file for offline use */
-		g_mkdir_with_parents (g_path_get_dirname (priv->summary_file_name), 0700);
-		priv->summary = e_book_backend_summary_new (priv->summary_file_name,
-						    SUMMARY_FLUSH_TIMEOUT);
-		e_book_backend_summary_load (priv->summary);
-
-		e_book_backend_notify_writable (backend, FALSE);
-		e_book_backend_notify_connection_status (backend, FALSE);
 		e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (SUCCESS));
 		return;
 
 	case E_DATA_BOOK_MODE_REMOTE:
-		if (priv->cnc) { /*we have already authenticated to server */
-			printf("already authenticated\n");
+		if (priv->cnc) {
 			e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (SUCCESS));
 			return;
 		}
 
+		esource = e_book_backend_get_source (backend);
+		priv->folder_id = e_source_get_duped_property (esource, "folder-id");
+		host_url = e_source_get_property (esource, "hosturl");
+
+		priv->cnc = e_ews_connection_new (host_url, user, passwd, &error);
+		e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (SUCCESS));
 		return;
 	default :
 		break;
@@ -344,6 +619,7 @@ e_book_backend_ews_get_supported_fields (EBookBackend *backend,
 static void
 e_book_backend_ews_cancel_operation (EBookBackend *backend, EDataBook *book, GError **perror)
 {
+
 }
 
 static void
@@ -352,6 +628,7 @@ e_book_backend_ews_load_source (EBookBackend           *backend,
 				      gboolean                only_if_exists,
 				      GError                **perror)
 {
+	
 }
 
 static void
@@ -359,6 +636,7 @@ e_book_backend_ews_remove (EBookBackend *backend,
 				 EDataBook        *book,
 				 guint32           opid)
 {
+	e_data_book_respond_remove (book,  opid, EDB_ERROR (SUCCESS));
 }
 
 static gchar *
@@ -441,6 +719,19 @@ e_book_backend_ews_dispose (GObject *object)
 	bgw = E_BOOK_BACKEND_EWS (object);
         priv = bgw->priv;
 
+	if (priv->cnc) {
+		g_object_unref (priv->cnc);
+		priv->cnc = NULL;
+	}
+
+	if (priv->folder_id) {
+		g_free (priv->folder_id);
+		priv->folder_id = NULL;
+	}
+
+	g_free (priv);
+	priv = NULL;
+
 	G_OBJECT_CLASS (e_book_backend_ews_parent_class)->dispose (object);
 }
 
@@ -456,29 +747,40 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 	/* Set the virtual methods. */
 	parent_class->load_source             = e_book_backend_ews_load_source;
 	parent_class->get_static_capabilities = e_book_backend_ews_get_static_capabilities;
+	parent_class->remove                  = e_book_backend_ews_remove;
+	
+	parent_class->set_mode                = e_book_backend_ews_set_mode;
+	parent_class->get_required_fields     = e_book_backend_ews_get_required_fields;
+	parent_class->get_supported_fields    = e_book_backend_ews_get_supported_fields;
+	parent_class->get_supported_auth_methods = e_book_backend_ews_get_supported_auth_methods;
+
+	parent_class->authenticate_user       = e_book_backend_ews_authenticate_user;
+	
+	parent_class->start_book_view         = e_book_backend_ews_start_book_view;
+	parent_class->stop_book_view          = e_book_backend_ews_stop_book_view;
+	parent_class->cancel_operation        = e_book_backend_ews_cancel_operation;
 
 	parent_class->create_contact          = e_book_backend_ews_create_contact;
 	parent_class->remove_contacts         = e_book_backend_ews_remove_contacts;
 	parent_class->modify_contact          = e_book_backend_ews_modify_contact;
 	parent_class->get_contact             = e_book_backend_ews_get_contact;
 	parent_class->get_contact_list        = e_book_backend_ews_get_contact_list;
-	parent_class->start_book_view         = e_book_backend_ews_start_book_view;
-	parent_class->stop_book_view          = e_book_backend_ews_stop_book_view;
+	
 	parent_class->get_changes             = e_book_backend_ews_get_changes;
-	parent_class->authenticate_user       = e_book_backend_ews_authenticate_user;
-	parent_class->get_required_fields     = e_book_backend_ews_get_required_fields;
-	parent_class->get_supported_fields    = e_book_backend_ews_get_supported_fields;
-	parent_class->get_supported_auth_methods = e_book_backend_ews_get_supported_auth_methods;
-	parent_class->cancel_operation        = e_book_backend_ews_cancel_operation;
-	parent_class->remove                  = e_book_backend_ews_remove;
-	parent_class->set_mode                = e_book_backend_ews_set_mode;
+	
 	object_class->dispose                 = e_book_backend_ews_dispose;
 }
 
 static void
 e_book_backend_ews_init (EBookBackendEws *backend)
 {
+	EBookBackendEws *bews;
 	EBookBackendEwsPrivate *priv;
 
-	priv= g_new0 (EBookBackendEwsPrivate, 1);
+	bews = E_BOOK_BACKEND_EWS (backend);
+
+	priv = g_new0 (EBookBackendEwsPrivate, 1);
+	priv->ops = g_hash_table_new (NULL, NULL);
+
+	bews->priv = priv;
 }
