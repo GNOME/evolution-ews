@@ -785,10 +785,58 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 				 EVO3(GCancellable *cancellable,) 
 				 GError **error)
 {
+	CamelEwsFolder *dst_ews_folder;
+	CamelEwsFolderPrivate *priv;
+	EEwsConnection *cnc;
+	CamelEwsStore *dst_ews_store;
+	CamelFolderChangeInfo *changes = NULL;
+	const gchar *dst_full_name, *dst_id;
+	GError *rerror = NULL;
+	GSList *ids = NULL, *ret_items = NULL;
+	gint i = 0;
+	EVO2(GCancellable *cancellable = NULL);
 
-	g_print ("\n transfer_messages_to not implemented");
+	dst_full_name = camel_folder_get_full_name (destination);
+	dst_ews_store = (CamelEwsStore *) camel_folder_get_parent_store (destination);
 
-	return TRUE;
+	dst_ews_folder = (CamelEwsFolder *) destination;
+	priv = dst_ews_folder->priv;
+
+	if (!camel_ews_store_connected (dst_ews_store, error))
+		return FALSE;
+
+	cnc = camel_ews_store_get_connection (dst_ews_store);
+	dst_id = camel_ews_store_summary_get_folder_id
+						(dst_ews_store->summary,
+						 dst_full_name, NULL);
+
+	for (i = 0; i < uids->len; i++) {
+		ids = g_slist_append(ids, (gchar *)uids->pdata[i]);
+	}
+
+	if (e_ews_connection_move_items	(cnc, EWS_PRIORITY_MEDIUM,
+					 dst_id, !delete_originals,
+					 ids, &ret_items,
+					 cancellable, &rerror)) {
+		if (delete_originals) {
+			changes = camel_folder_change_info_new ();
+			for (i=0; i < uids->len; i++) {
+				camel_folder_summary_remove_uid (source->summary, uids->pdata[i]);
+				camel_folder_change_info_remove_uid (changes, uids->pdata[i]);
+			}
+			camel_folder_changed (source, changes);
+			camel_folder_change_info_free (changes);
+		}
+	}
+
+	if (rerror)
+		g_propagate_error (error, rerror);
+
+	g_object_unref (cnc);
+	g_slist_free (ids);
+	g_slist_free (ret_items);
+
+	return !rerror;
 }
 
 static gboolean
