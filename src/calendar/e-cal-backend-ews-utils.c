@@ -139,16 +139,52 @@ static const char *weekindex_to_ical(int index) {
 	return 0;
 }
 
+static void ewscal_add_timechange (ESoapMessage *msg, icalcomponent *comp, int baseoffs)
+{
+	char buffer[16], *offset;
+	const gchar *tzname;
+	icalproperty *prop;
+	struct icalrecurrencetype recur;
+	struct icaltimetype dtstart;
+	int utcoffs;
+
+	prop = icalcomponent_get_first_property(comp, ICAL_TZNAME_PROPERTY);
+	tzname = icalproperty_get_tzname (prop);
+	e_soap_message_add_attribute(msg, "TimeZoneName", tzname, NULL, NULL);
+
+	prop = icalcomponent_get_first_property(comp, ICAL_RRULE_PROPERTY);
+	recur = icalproperty_get_rrule(prop);
+	prop = icalcomponent_get_first_property(comp, ICAL_DTSTART_PROPERTY);
+	dtstart = icalproperty_get_dtstart(prop);
+
+	/* Calculate zone Offset from BaseOffset */
+	prop = icalcomponent_get_first_property(comp, ICAL_TZOFFSETTO_PROPERTY);
+	utcoffs = -icalproperty_get_tzoffsetto(prop);
+	utcoffs -= baseoffs;
+	offset = icaldurationtype_as_ical_string_r(icaldurationtype_from_int(utcoffs));
+	e_ews_message_write_string_parameter(msg, "Offset", NULL, offset);
+	free(offset);
+
+	e_soap_message_start_element(msg, "RelativeYearlyRecurrence", NULL, NULL);
+
+	e_ews_message_write_string_parameter(msg, "DaysOfWeek", NULL, number_to_weekday(icalrecurrencetype_day_day_of_week(recur.by_day[0]) - recur.week_start));
+	e_ews_message_write_string_parameter(msg, "DayOfWeekIndex", NULL, weekindex_to_ical(icalrecurrencetype_day_position(recur.by_day[0])));
+	e_ews_message_write_string_parameter(msg, "Month", NULL, number_to_month(recur.by_month[0]));
+
+	e_soap_message_end_element(msg); /* "RelativeYearlyRecurrence" */
+
+	snprintf(buffer, 16, "%02d:%02d:%02d", dtstart.hour, dtstart.minute, dtstart.second);
+	e_ews_message_write_string_parameter(msg, "Time", NULL, buffer);
+}
+
 void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *icaltz)
 {
 	icalcomponent *comp;
 	icalproperty *prop;
-	struct icalrecurrencetype xstd_recur, daylight_recur;
-	struct icaltimetype dtstart;
-	char buffer[16], *offset;
-	const gchar *location, *tzname;
+	const gchar *location;
 	icalcomponent *xstd, *xdaylight;
-	int std_utcoffs, day_utcoffs;
+	int std_utcoffs;
+	gchar *offset;
 
 	if (!icaltz)
 		return;
@@ -207,60 +243,12 @@ void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *ic
 	if (xdaylight) {
 		/* Standard */
 		e_soap_message_start_element(msg, "Standard", NULL, NULL);
-		prop = icalcomponent_get_first_property(xstd, ICAL_TZNAME_PROPERTY);
-		tzname = icalproperty_get_tzname (prop);
-		e_soap_message_add_attribute(msg, "TimeZoneName", tzname, NULL, NULL);
-
-		prop = icalcomponent_get_first_property(xstd, ICAL_RRULE_PROPERTY);
-		xstd_recur = icalproperty_get_rrule(prop);
-		prop = icalcomponent_get_first_property(xstd, ICAL_DTSTART_PROPERTY);
-		dtstart = icalproperty_get_dtstart(prop);
-		e_ews_message_write_string_parameter(msg, "Offset", NULL, "PT0M");
-
-		e_soap_message_start_element(msg, "RelativeYearlyRecurrence", NULL, NULL);
-
-		e_ews_message_write_string_parameter(msg, "DaysOfWeek", NULL, number_to_weekday(icalrecurrencetype_day_day_of_week(xstd_recur.by_day[0]) - xstd_recur.week_start));
-		e_ews_message_write_string_parameter(msg, "DayOfWeekIndex", NULL, weekindex_to_ical(icalrecurrencetype_day_position(xstd_recur.by_day[0])));
-		e_ews_message_write_string_parameter(msg, "Month", NULL, number_to_month(xstd_recur.by_month[0]));
-
-		e_soap_message_end_element(msg); /* "RelativeYearlyRecurrence" */
-
-		snprintf(buffer, 16, "%02d:%02d:%02d", dtstart.hour, dtstart.minute, dtstart.second);
-		e_ews_message_write_string_parameter(msg, "Time", NULL, buffer);
-
+		ewscal_add_timechange (msg, xstd, std_utcoffs);
 		e_soap_message_end_element(msg); /* "Standard" */
 
 		/* DayLight */
 		e_soap_message_start_element(msg, "Daylight", NULL, NULL);
-		prop = icalcomponent_get_first_property(xdaylight, ICAL_TZNAME_PROPERTY);
-		tzname = icalproperty_get_tzname (prop);
-		e_soap_message_add_attribute(msg, "TimeZoneName", tzname, NULL, NULL);
-
-		prop = icalcomponent_get_first_property(xdaylight, ICAL_RRULE_PROPERTY);
-		daylight_recur = icalproperty_get_rrule(prop);
-		prop = icalcomponent_get_first_property(xdaylight, ICAL_DTSTART_PROPERTY);
-		dtstart = icalproperty_get_dtstart(prop);
-
-		/* Calculate Daylight zone offset from Standard zone (which is
-		   what we set the BaseOffset to) */
-		prop = icalcomponent_get_first_property(xdaylight, ICAL_TZOFFSETTO_PROPERTY);
-		day_utcoffs = -icalproperty_get_tzoffsetto(prop);
-		day_utcoffs -= std_utcoffs;
-		offset = icaldurationtype_as_ical_string_r(icaldurationtype_from_int(day_utcoffs));
-		e_ews_message_write_string_parameter(msg, "Offset", NULL, offset);
-		free(offset);
-
-		e_soap_message_start_element(msg, "RelativeYearlyRecurrence", NULL, NULL);
-
-		e_ews_message_write_string_parameter(msg, "DaysOfWeek", NULL, number_to_weekday(icalrecurrencetype_day_day_of_week(daylight_recur.by_day[0]) - xstd_recur.week_start));
-		e_ews_message_write_string_parameter(msg, "DayOfWeekIndex", NULL, weekindex_to_ical(icalrecurrencetype_day_position(daylight_recur.by_day[0])));
-		e_ews_message_write_string_parameter(msg, "Month", NULL, number_to_month(daylight_recur.by_month[0]));
-
-		e_soap_message_end_element(msg); /* "RelativeYearlyRecurrence" */
-
-		snprintf(buffer, 16, "%02d:%02d:%02d", dtstart.hour, dtstart.minute, dtstart.second);
-		e_ews_message_write_string_parameter(msg, "Time", NULL, buffer);
-
+		ewscal_add_timechange (msg, xdaylight, std_utcoffs);
 		e_soap_message_end_element(msg); /* "Daylight" */
 	}
 	e_soap_message_end_element(msg); /* "MeetingTimeZone" */
