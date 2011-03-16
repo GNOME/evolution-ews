@@ -146,7 +146,7 @@ void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *ic
 	struct icalrecurrencetype xstd_recur, daylight_recur;
 	struct icaltimetype dtstart;
 	char buffer[16], *offset;
-	const gchar *location;
+	const gchar *location, *tzname;
 	icalcomponent *xstd, *xdaylight;
 
 	if (!icaltz)
@@ -168,7 +168,9 @@ void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *ic
 
 	/* Standard */
 	e_soap_message_start_element(msg, "Standard", NULL, NULL);
-	e_soap_message_add_attribute(msg, "TimeZoneName", icaltimezone_get_tznames(icaltz), NULL, NULL);
+	prop = icalcomponent_get_first_property(xstd, ICAL_TZNAME_PROPERTY);
+	tzname = icalproperty_get_tzname (prop);
+	e_soap_message_add_attribute(msg, "TimeZoneName", tzname, NULL, NULL);
 
 	prop = icalcomponent_get_first_property(xstd, ICAL_RRULE_PROPERTY);
 	xstd_recur = icalproperty_get_rrule(prop);
@@ -194,7 +196,9 @@ void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *ic
 
 	/* DayLight */
 	e_soap_message_start_element(msg, "Daylight", NULL, NULL);
-	e_soap_message_add_attribute(msg, "TimeZoneName", icaltimezone_get_tznames(icaltz), NULL, NULL);
+	prop = icalcomponent_get_first_property(xdaylight, ICAL_TZNAME_PROPERTY);
+	tzname = icalproperty_get_tzname (prop);
+	e_soap_message_add_attribute(msg, "TimeZoneName", tzname, NULL, NULL);
 
 	prop = icalcomponent_get_first_property(xdaylight, ICAL_RRULE_PROPERTY);
 	daylight_recur = icalproperty_get_rrule(prop);
