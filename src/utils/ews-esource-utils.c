@@ -144,14 +144,21 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 
 	source_uri = g_strdup_printf("%s/%s", email_id, fid->id);
 	source = e_source_new (source_name, source_uri);
-	e_source_set_property (source, "auth", "1");
 	e_source_set_property (source, "username", username);
 	e_source_set_property (source, "auth-domain", "Ews");
 	e_source_set_property (source, "folder-id", fid->id);
+	e_source_set_property (source, "change-key", fid->change_key);
 	e_source_set_property (source, "email", email_id);
 	e_source_set_property (source, "hosturl", hosturl);
 	e_source_set_property (source, "delete", "no");
 	e_source_set_color_spec (source, "#EEBC60");
+
+	/* set props required for contacts */
+	if (ftype == EWS_FOLDER_TYPE_CONTACTS) {
+		e_source_set_property (source, "auth", "plain/password");
+		e_source_set_property (source, "completion", "true");
+	} else 
+		e_source_set_property (source, "auth", "1");
 
 	e_source_group_add_source (group, source, -1);
 	e_source_list_sync (source_list, NULL);
