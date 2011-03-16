@@ -1826,7 +1826,9 @@ e_ews_connection_resolve_names_finish	(EEwsConnection *cnc,
 		return FALSE;
 	
 	*includes_last_item = async_data->includes_last_item;
-	*contact_items = async_data->items_created;
+	
+	if (contact_items)
+		*contact_items = async_data->items_created;
 	*mailboxes = async_data->items;
 	
 	return TRUE;	
