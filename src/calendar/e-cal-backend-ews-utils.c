@@ -139,12 +139,24 @@ static const char *weekindex_to_ical(int index) {
 	return 0;
 }
 
+static void ewscal_add_rrule (ESoapMessage *msg, icalproperty *prop)
+{
+	struct icalrecurrencetype recur = icalproperty_get_rrule(prop);
+
+	e_soap_message_start_element(msg, "RelativeYearlyRecurrence", NULL, NULL);
+
+	e_ews_message_write_string_parameter(msg, "DaysOfWeek", NULL, number_to_weekday(icalrecurrencetype_day_day_of_week(recur.by_day[0]) - recur.week_start));
+	e_ews_message_write_string_parameter(msg, "DayOfWeekIndex", NULL, weekindex_to_ical(icalrecurrencetype_day_position(recur.by_day[0])));
+	e_ews_message_write_string_parameter(msg, "Month", NULL, number_to_month(recur.by_month[0]));
+
+	e_soap_message_end_element(msg); /* "RelativeYearlyRecurrence" */
+}
+
 static void ewscal_add_timechange (ESoapMessage *msg, icalcomponent *comp, int baseoffs)
 {
 	char buffer[16], *offset;
 	const gchar *tzname;
 	icalproperty *prop;
-	struct icalrecurrencetype recur;
 	struct icaltimetype dtstart;
 	int utcoffs;
 
@@ -165,17 +177,8 @@ static void ewscal_add_timechange (ESoapMessage *msg, icalcomponent *comp, int b
 	}
 
 	prop = icalcomponent_get_first_property(comp, ICAL_RRULE_PROPERTY);
-	if (prop) {
-		recur = icalproperty_get_rrule(prop);
-
-		e_soap_message_start_element(msg, "RelativeYearlyRecurrence", NULL, NULL);
-
-		e_ews_message_write_string_parameter(msg, "DaysOfWeek", NULL, number_to_weekday(icalrecurrencetype_day_day_of_week(recur.by_day[0]) - recur.week_start));
-		e_ews_message_write_string_parameter(msg, "DayOfWeekIndex", NULL, weekindex_to_ical(icalrecurrencetype_day_position(recur.by_day[0])));
-		e_ews_message_write_string_parameter(msg, "Month", NULL, number_to_month(recur.by_month[0]));
-
-		e_soap_message_end_element(msg); /* "RelativeYearlyRecurrence" */
-	}
+	if (prop)
+		ewscal_add_rrule (msg, prop);
 
 	prop = icalcomponent_get_first_property(comp, ICAL_DTSTART_PROPERTY);
 	if (prop) {
