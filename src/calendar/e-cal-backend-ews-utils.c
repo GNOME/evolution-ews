@@ -148,6 +148,7 @@ void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *ic
 	char buffer[16], *offset;
 	const gchar *location, *tzname;
 	icalcomponent *xstd, *xdaylight;
+	int std_utcoffs, day_utcoffs;
 
 	if (!icaltz)
 		return;
@@ -164,7 +165,22 @@ void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *ic
 
 	e_soap_message_start_element(msg, name, NULL, NULL);
 	e_soap_message_add_attribute(msg, "TimeZoneName", location, NULL, NULL);
-	e_ews_message_write_string_parameter(msg, "BaseOffset", NULL, "PT0S");
+
+	/* Fetch the timezone offsets for standard and daylight zones.
+	   Negate them, because Exchange does it backwards */
+	prop = icalcomponent_get_first_property(xstd, ICAL_TZOFFSETTO_PROPERTY);
+	std_utcoffs = -icalproperty_get_tzoffsetto(prop);
+	prop = icalcomponent_get_first_property(xdaylight, ICAL_TZOFFSETTO_PROPERTY);
+	day_utcoffs = -icalproperty_get_tzoffsetto(prop);
+
+	/* This is the overall BaseOffset tag, which the Standard and Daylight
+	   zones are offset from. It's redundant, but Exchange always sets it
+	   to the offset of the Standard zone, and the Offset in the Standard
+	   zone to zero. So try to avoid problems by doing the same. */
+	offset = icaldurationtype_as_ical_string_r(icaldurationtype_from_int(std_utcoffs));
+	e_ews_message_write_string_parameter(msg, "BaseOffset", NULL, offset);
+	free (offset);
+	day_utcoffs -= std_utcoffs;
 
 	/* Standard */
 	e_soap_message_start_element(msg, "Standard", NULL, NULL);
@@ -177,9 +193,7 @@ void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *ic
 	prop = icalcomponent_get_first_property(xstd, ICAL_DTSTART_PROPERTY);
 	dtstart = icalproperty_get_dtstart(prop);
 	prop = icalcomponent_get_first_property(xstd, ICAL_TZOFFSETTO_PROPERTY);
-	offset = icaldurationtype_as_ical_string_r(icaldurationtype_from_int(icalproperty_get_tzoffsetto(prop)));
-	e_ews_message_write_string_parameter(msg, "Offset", NULL, offset);
-	free(offset);
+	e_ews_message_write_string_parameter(msg, "Offset", NULL, "PT0M");
 
 	e_soap_message_start_element(msg, "RelativeYearlyRecurrence", NULL, NULL);
 
@@ -204,8 +218,7 @@ void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *ic
 	daylight_recur = icalproperty_get_rrule(prop);
 	prop = icalcomponent_get_first_property(xdaylight, ICAL_DTSTART_PROPERTY);
 	dtstart = icalproperty_get_dtstart(prop);
-	prop = icalcomponent_get_first_property(xdaylight, ICAL_TZOFFSETTO_PROPERTY);
-	offset = icaldurationtype_as_ical_string_r(icaldurationtype_from_int(icalproperty_get_tzoffsetto(prop)));
+	offset = icaldurationtype_as_ical_string_r(icaldurationtype_from_int(day_utcoffs));
 	e_ews_message_write_string_parameter(msg, "Offset", NULL, offset);
 	free(offset);
 
