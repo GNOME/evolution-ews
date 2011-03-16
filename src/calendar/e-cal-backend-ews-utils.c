@@ -146,6 +146,7 @@ void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *ic
 	struct icalrecurrencetype xstd_recur, daylight_recur;
 	struct icaltimetype dtstart;
 	char buffer[16], *offset;
+	const gchar *location;
 	icalcomponent *xstd, *xdaylight;
 
 	if (!icaltz)
@@ -155,8 +156,14 @@ void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *ic
 	xstd = icalcomponent_get_first_component(comp, ICAL_XSTANDARD_COMPONENT);
 	xdaylight = icalcomponent_get_first_component(comp, ICAL_XDAYLIGHT_COMPONENT);
 
+	location = icaltimezone_get_location (icaltz);
+	if (!location)
+		location = icaltimezone_get_tzid (icaltz);
+	if (!location)
+		location = icaltimezone_get_tznames (icaltz);
+
 	e_soap_message_start_element(msg, name, NULL, NULL);
-	e_soap_message_add_attribute(msg, "TimeZoneName", icaltimezone_get_tznames(icaltz), NULL, NULL);
+	e_soap_message_add_attribute(msg, "TimeZoneName", location, NULL, NULL);
 	e_ews_message_write_string_parameter(msg, "BaseOffset", NULL, "PT0S");
 
 	/* Standard */
