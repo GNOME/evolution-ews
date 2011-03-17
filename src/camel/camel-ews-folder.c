@@ -158,13 +158,8 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	ews_folder = (CamelEwsFolder *) folder;
 	priv = ews_folder->priv;
 
-	if (!camel_ews_store_connected (ews_store, error)) {
-		g_set_error (
-			error, CAMEL_SERVICE_ERROR,
-			CAMEL_SERVICE_ERROR_UNAVAILABLE,
-			_("This message is not available in offline mode."));
+	if (!camel_ews_store_connected (ews_store, error))
 		return NULL;
-	}
 
 	g_mutex_lock (priv->state_lock);
 
