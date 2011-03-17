@@ -1774,7 +1774,8 @@ e_ews_connection_resolve_names_start 	(EEwsConnection *cnc,
 				e_soap_message_start_element (msg, "FolderId", NULL, NULL);
 		
 			e_soap_message_add_attribute (msg, "Id", fid->id, NULL, NULL);
-			e_soap_message_add_attribute (msg, "ChangeKey", fid->change_key, NULL, NULL);
+			if (fid->change_key)
+				e_soap_message_add_attribute (msg, "ChangeKey", fid->change_key, NULL, NULL);
 
 			if (fid->is_distinguished_id && cnc->priv->email)
 				e_ews_message_write_string_parameter (msg, "Mailbox", NULL, cnc->priv->email);
@@ -1825,7 +1826,9 @@ e_ews_connection_resolve_names_finish	(EEwsConnection *cnc,
 		return FALSE;
 	
 	*includes_last_item = async_data->includes_last_item;
-	*contact_items = async_data->items_created;
+	
+	if (contact_items)
+		*contact_items = async_data->items_created;
 	*mailboxes = async_data->items;
 	
 	return TRUE;	

@@ -967,3 +967,13 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder, GSList *items_cr
 	camel_folder_change_info_free (ci);
 	g_slist_free (items_created);
 }
+
+gboolean
+camel_ews_utils_create_mime_message (EEwsConnection *cnc, CamelMimeMessage *message,
+				     gint32 message_camel_flags, CamelAddress *from,
+				     GCancellable *cancellable, GError **error)
+{
+	g_set_error(error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+		    "Message creation not yet implemented");
+	return FALSE;
+}
