@@ -429,12 +429,18 @@ ews_sync_mi_flags (CamelFolder *folder, GSList *mi_list, GCancellable *cancellab
 static gboolean
 ews_synchronize_sync (CamelFolder *folder, gboolean expunge, EVO3(GCancellable *cancellable,) GError **error)
 {
+	CamelEwsStore *ews_store;
 	GPtrArray *uids;
 	GSList *mi_list = NULL;
 	int mi_list_len = 0;
 	gboolean success = TRUE;
 	int i;
 	EVO2(GCancellable *cancellable = NULL);
+
+	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
+
+	if (!camel_ews_store_connected (ews_store, error))
+		return FALSE;
 
 	uids = camel_folder_summary_get_changed (folder->summary);
 	if (!uids->len) {
