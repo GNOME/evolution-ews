@@ -92,6 +92,20 @@ struct _AutoDiscCallBackData {
 	GtkWidget *entry;
 };
 
+static void autodiscover_callback (char *url, gpointer user_data, GError *error)
+{
+	if (error) {
+		g_warning ("Autodiscover failed: %s", error->message);
+		g_clear_error (&error);
+	}
+	if (url) {
+		g_message("Got ASURL %s", url);
+		gtk_entry_set_text (GTK_ENTRY (user_data), url);
+		g_free (url);
+	}
+}
+ 
+
 static void
 validate_credentials (GtkWidget *widget, struct _AutoDiscCallBackData *cbdata)
 {
@@ -118,25 +132,15 @@ validate_credentials (GtkWidget *widget, struct _AutoDiscCallBackData *cbdata)
 
 	/*Can there be a account without password ?*/
 	if (password && *password) {
-		GError *error = NULL;
-		gchar *auri = NULL;
-
-		auri = e_ews_autodiscover_ws_url (target_account->account->id->address, password, &error);
-		if (error) {
-			e_notice (NULL, GTK_MESSAGE_ERROR, "%s", error->message);
-			g_clear_error (&error);
-			goto exit;
-		}
-
-		gtk_entry_set_text ((GtkEntry *) cbdata->entry, auri);
-		g_free (auri);
+		e_ews_autodiscover_ws_url (autodiscover_callback, cbdata->entry,
+					   g_strdup(target_account->account->id->address),
+					   password);
 	} else {
 		e_passwords_forget_password (EXCHANGE_EWS_PASSWORD_COMPONENT, key);
 		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Authentication failed."));
+		g_free (password);
 	}
 
-exit:	
-	g_free (password);
 	g_free (key);
 	camel_url_free (url);
 }

@@ -154,10 +154,8 @@ autodiscover_parse_protocol(xmlNode *node)
 		if (node->type == XML_ELEMENT_NODE &&
 		    !strcmp((char *)node->name, "ASUrl")) {
 			char *asurl = (char *)xmlNodeGetContent(node);
-			if (asurl) {
-				printf("Got ASUrl %s\n", asurl);
+			if (asurl)
 				return asurl;
-			}
 		}
 	}
 	return NULL;
@@ -825,97 +823,63 @@ e_ews_autodiscover_ws_xml(const gchar *email)
 	return doc;
 }
 
-static guint
-e_ews_autodiscover_ws_send(gchar *url, const gchar *email,
-			   const gchar *password, SoupMessage **msg_parm,
-			   EEwsConnection **cnc_parm, xmlDoc *doc)
-{
-	SoupMessage *msg;
+struct _autodiscover_data {
 	EEwsConnection *cnc;
-	xmlOutputBuffer *buf;
-	guint status;
-       
-	*cnc_parm = cnc = e_ews_connection_new (url, email, password, NULL);
+	GSimpleAsyncResult *simple;
+	SoupMessage *msgs[2];
+	EEwsAutoDiscoverCallback cb;
+	gpointer cbdata;
+};
 
-	*msg_parm = msg = soup_message_new("GET", url);
-	soup_message_headers_append (msg->request_headers,
-				     "User-Agent", "libews/0.1");
 
-	doc = e_ews_autodiscover_ws_xml(email);
-	buf = xmlAllocOutputBuffer(NULL);
-	xmlNodeDumpOutput(buf, doc, xmlDocGetRootElement(doc), 0, 1, NULL);
-	xmlOutputBufferFlush(buf);
+/* Called in the context e_ews_autodiscover_ws_url() was called from,
+   with the final result. */
+static void autodiscover_done_cb (GObject *cnc, GAsyncResult *res,
+				  gpointer user_data)
+{
+	struct _autodiscover_data *ad = user_data;
+	GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (res);
+	GError *error = NULL;
+	gchar *url = NULL;
 
-	soup_message_set_request(msg, "application/xml", SOUP_MEMORY_COPY,
-				 (gchar *)buf->buffer->content,
-				 buf->buffer->use);
-				 
-	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1)) {
-		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->request_body));
-		/* print request's body */
-		printf ("\n The request headers");
-		printf ("\n ===================");
-		fputc ('\n', stdout);
-		fputs (SOUP_MESSAGE (msg)->request_body->data, stdout);
-		fputc ('\n', stdout);
-	}
+	if (!g_simple_async_result_propagate_error (simple, &error))
+		url = g_simple_async_result_get_op_res_gpointer (simple);
 
-	status = soup_session_send_message (cnc->priv->soup_session, msg);
-
-	xmlOutputBufferClose (buf);
-
-	return status;
+	ad->cb (url, ad->cbdata, error);
+	g_object_unref (G_OBJECT (ad->cnc));
+	g_free (ad);
 }
 
-gchar*
-e_ews_autodiscover_ws_url (const gchar *email, const gchar *password, GError **error)
+/* Called when each soup message completes */
+static void
+autodiscover_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
+
 {
-	gchar *url;
-	gchar *domain;
-	gchar *asurl = NULL;
-	SoupMessage *msg;
+	GError *error = NULL;
+	struct _autodiscover_data *ad = data;
+	guint status = msg->status_code;
 	xmlDoc *doc;
 	xmlNode *node;
-	guint status;
-	EEwsConnection *cnc;
+	char *asurl;
+	int idx;
 
-	g_return_val_if_fail (password != NULL, NULL);
-	g_return_val_if_fail (email != NULL, NULL);
-
-	domain = strchr(email, '@');
-	if (!(domain && *domain)) {
-		g_set_error (
-			error, EWS_CONNECTION_ERROR,
-			-1,
-			_("Wrong email id"));
-		
-		return NULL;
+	for (idx = 0; idx < 2; idx++) {
+		if (ad->msgs[idx] == msg)
+			break;
 	}
-	domain++;
-
-	doc = e_ews_autodiscover_ws_xml(email);
-
-	/*
-	 * According to MS documentation (http://msdn.microsoft.com/en-us/library/ee332364.aspx)
-	 * there are a couple of autodiscover URLs to try in the following preferred order
-	 */
-
-	url = g_strdup_printf("https://%s/autodiscover/autodiscover.xml", domain);
-	status = e_ews_autodiscover_ws_send(url, email, password, &msg, &cnc, doc);
-
-	if (status != 200) {
-		url = g_strdup_printf("https://autodiscover.%s/autodiscover/autodiscover.xml", domain);
-		status = e_ews_autodiscover_ws_send(url, email, password, &msg, &cnc, doc);
+	if (idx == 2) {
+		/* We already got removed (cancelled). Do nothing */
+		return;
 	}
 
-	xmlFreeDoc (doc);
+	ad->msgs[idx] = NULL;
 
 	if (status != 200) {
 		g_set_error (
-			error, EWS_CONNECTION_ERROR,
-			status,
-			_("Code: %d - Unexpected response from server"),
-			status);
+			     &error, EWS_CONNECTION_ERROR,
+			     status,
+			     _("Code: %d - Unexpected response from server"),
+			     status);
 		goto failed;
 	}
 
@@ -933,17 +897,17 @@ e_ews_autodiscover_ws_url (const gchar *email, const gchar *password, GError **e
 			     "autodiscover.xml", NULL, 0);
 	if (!doc) {
 		g_set_error (
-			error, EWS_CONNECTION_ERROR,
-			-1,
-			_("Failed to parse autodiscover response XML"));
+			     &error, EWS_CONNECTION_ERROR,
+			     -1,
+			     _("Failed to parse autodiscover response XML"));
 		goto failed;
 	}
 	node = xmlDocGetRootElement(doc);
 	if (strcmp((char *)node->name, "Autodiscover")) {
 		g_set_error (
-			error, EWS_CONNECTION_ERROR,
-			-1,
-			_("Failed to find <Autodiscover> element\n"));
+			     &error, EWS_CONNECTION_ERROR,
+			     -1,
+			     _("Failed to find <Autodiscover> element\n"));
 		goto failed;
 	}
 	for (node = node->children; node; node = node->next) {
@@ -953,9 +917,9 @@ e_ews_autodiscover_ws_url (const gchar *email, const gchar *password, GError **e
 	}
 	if (!node) {
 		g_set_error (
-			error, EWS_CONNECTION_ERROR,
-			-1,
-			_("Failed to find <Response> element\n"));
+			     &error, EWS_CONNECTION_ERROR,
+			     -1,
+			     _("Failed to find <Response> element\n"));
 		goto failed;
 	}
 	for (node = node->children; node; node = node->next) {
@@ -965,9 +929,9 @@ e_ews_autodiscover_ws_url (const gchar *email, const gchar *password, GError **e
 	}
 	if (!node) {
 		g_set_error (
-			error, EWS_CONNECTION_ERROR,
-			-1,
-			_("Failed to find <Account> element\n"));
+			     &error, EWS_CONNECTION_ERROR,
+			     -1,
+			     _("Failed to find <Account> element\n"));
 		goto failed;
 	}
 	for (node = node->children; node; node = node->next) {
@@ -976,9 +940,144 @@ e_ews_autodiscover_ws_url (const gchar *email, const gchar *password, GError **e
 		    (asurl = autodiscover_parse_protocol(node)))
 			break;
 	}
+
+	/* We have a good response; cancel all the others */
+	for (idx = 0; idx < 2; idx++) {
+		if (ad->msgs[idx]) {
+			SoupMessage *m = ad->msgs[idx];
+			ad->msgs[idx] = NULL;
+			soup_session_cancel_message (ad->cnc->priv->soup_session,
+						     m, SOUP_STATUS_CANCELLED);
+		}
+	}
+	g_simple_async_result_set_op_res_gpointer (ad->simple, asurl, NULL);
+	g_simple_async_result_complete_in_idle (ad->simple);
+	return;
+
 failed:
-	g_object_unref (cnc);
-	return asurl;
+	for (idx = 0; idx < 2; idx++) {
+		if (ad->msgs[idx]) {
+			/* There's another request outstanding.
+			   Hope that it has better luck. */
+			g_clear_error (&error);
+			return;
+		}
+	}
+
+	/* FIXME: We're actually returning the *last* error here,
+	   and in some cases (stupid firewalls causing timeouts)
+	   that's going to be the least interesting one. We probably
+	   want the *first* error */
+	g_simple_async_result_set_from_error (ad->simple, error);
+	g_simple_async_result_complete_in_idle (ad->simple);
+}
+
+static SoupMessage *
+e_ews_autodiscover_ws_msg(EEwsConnection *cnc, gchar *url,
+			  xmlOutputBuffer *buf, struct _autodiscover_data *ad)
+{
+	SoupMessage *msg;
+       
+	msg = soup_message_new("GET", url);
+	soup_message_headers_append (msg->request_headers,
+				     "User-Agent", "libews/0.1");
+
+
+	soup_message_set_request(msg, "application/xml", SOUP_MEMORY_COPY,
+				 (gchar *)buf->buffer->content,
+				 buf->buffer->use);
+				 
+	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1)) {
+		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->request_body));
+		/* print request's body */
+		printf ("\n The request headers");
+		printf ("\n ===================");
+		fputc ('\n', stdout);
+		fputs (SOUP_MESSAGE (msg)->request_body->data, stdout);
+		fputc ('\n', stdout);
+	}
+
+	return msg;
+}
+
+void
+e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb, gpointer cbdata,
+			   gchar *email, gchar *password)
+{
+	struct _autodiscover_data *ad;
+	xmlOutputBuffer *buf;
+	GError *error = NULL;
+	gchar *url;
+	gchar *domain;
+	xmlDoc *doc;
+	EEwsConnection *cnc;
+
+	if (!password || !email) {
+		g_set_error (&error, EWS_CONNECTION_ERROR,
+			     -1, _("Both email and password must be provided"));
+		goto err;
+	}
+
+	domain = strchr(email, '@');
+	if (!(domain && *domain)) {
+		g_set_error (&error, EWS_CONNECTION_ERROR,
+			     -1, _("Wrong email id"));
+		goto err;
+	}
+	domain++;
+
+	doc = e_ews_autodiscover_ws_xml(email);
+	buf = xmlAllocOutputBuffer(NULL);
+	xmlNodeDumpOutput(buf, doc, xmlDocGetRootElement(doc), 0, 1, NULL);
+	xmlOutputBufferFlush(buf);
+
+	url = g_strdup_printf("https://%s/autodiscover/autodiscover.xml", domain);
+
+	/* FIXME: Get username from config; don't assume same as email */
+	cnc = e_ews_connection_new (url, email, password, &error);
+	if (!cnc) {
+	err:
+		g_free (email);
+		g_free (password);
+		cb (NULL, cbdata, error);
+		return;
+	}
+
+	/*
+	 * http://msdn.microsoft.com/en-us/library/ee332364.aspx says we are
+	 * supposed to try $domain and then autodiscover.$domain. But some
+	 * people have broken firewalls on the former which drop packets
+	 * instead of rejecting connections, and make the request take ages
+	 * to time out. So run both queries in parallel and let the fastest
+	 * (successful) one win.
+	 */
+	ad = g_new0 (struct _autodiscover_data, 1);
+	ad->cb = cb;
+	ad->cbdata = cbdata;
+	ad->cnc = cnc;
+	ad->simple = g_simple_async_result_new (G_OBJECT (cnc), autodiscover_done_cb,
+					    ad, e_ews_autodiscover_ws_url);
+	ad->msgs[0] = e_ews_autodiscover_ws_msg(cnc, url, buf, ad);
+	g_free (url);
+
+	url = g_strdup_printf("https://autodiscover.%s/autodiscover/autodiscover.xml", domain);
+	ad->msgs[1] = e_ews_autodiscover_ws_msg(cnc, url, buf, ad);
+	g_free (url);
+
+	/* These have to be submitted only after they're both set in ad->msgs[]
+	   or there will be races with fast completion */
+	soup_session_queue_message (cnc->priv->soup_session, ad->msgs[0],
+				    autodiscover_response_cb, ad);
+	soup_session_queue_message (cnc->priv->soup_session, ad->msgs[1],
+				    autodiscover_response_cb, ad);
+
+	g_object_unref (cnc); /* the GSimpleAsyncResult holds it now */
+
+	g_free (email);
+	g_free (password);
+
+	xmlOutputBufferClose (buf);
+	xmlFreeDoc (doc);
 }
 
 void
