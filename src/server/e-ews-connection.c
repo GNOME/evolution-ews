@@ -2279,6 +2279,17 @@ e_ews_connection_move_items	(EEwsConnection *cnc,
 }
 
 void
+/**
+ * e_ews_connection_delete_folder_start 
+ * @cnc: 
+ * @pri: 
+ * @folder_id: folder to be deleted 
+ * @is_distinguished_id: 
+ * @delete_type: "HardDelete", "SoftDelete", "MoveToDeletedItems"
+ * @cb: 
+ * @cancellable: 
+ * @user_data: 
+ **/
 e_ews_connection_delete_folder_start	(EEwsConnection *cnc,
 					 gint pri,
 					 const gchar *folder_id,
@@ -2345,6 +2356,16 @@ e_ews_connection_delete_folder_finish	(EEwsConnection *cnc,
 }
 
 gboolean		
+/**
+ * e_ews_connection_delete_folder 
+ * @cnc: 
+ * @pri: 
+ * @folder_id: folder to be deleted 
+ * @is_distinguished_id: 
+ * @delete_type: "HardDelete", "SoftDelete", "MoveToDeletedItems"
+ * @cancellable: 
+ * @error: 
+ **/
 e_ews_connection_delete_folder	(EEwsConnection *cnc,
 				 gint pri,
 				 const gchar *folder_id,
@@ -2359,7 +2380,7 @@ e_ews_connection_delete_folder	(EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 	
-	e_ews_connection_create_folder_start	(cnc, pri, folder_id, 
+	e_ews_connection_delete_folder_start	(cnc, pri, folder_id, 
 						 is_distinguished_id,
 						 delete_type,
 						 ews_sync_reply_cb, 
