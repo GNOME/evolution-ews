@@ -40,10 +40,9 @@ delete_folder_cb (GObject *object, GAsyncResult *res, gpointer data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	GError *error = NULL;
-	GCancellable *cancellable;
 
 	e_ews_connection_delete_folder_finish	(cnc, res, 
-						 cancellable, &error);
+						 &error);
 	if (error != NULL) {
 		g_warning ("Unable to create: %s \n", error->message);
 		g_clear_error (&error);

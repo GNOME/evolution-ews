@@ -2113,7 +2113,6 @@ gboolean
 e_ews_connection_create_folder_finish	(EEwsConnection *cnc,
 					 GAsyncResult *result,
 					 EwsFolderId **fid,
-			 		 GCancellable *cancellable,
 					 GError **error)
 {
 	GSimpleAsyncResult *simple;
@@ -2164,7 +2163,6 @@ e_ews_connection_create_folder	(EEwsConnection *cnc,
 
 	result = e_ews_connection_create_folder_finish (cnc, sync_data->res,
 							folder_id,
-							cancellable,
 							error);
 
 	e_flag_free (sync_data->eflag);
@@ -2327,7 +2325,6 @@ e_ews_connection_delete_folder_start	(EEwsConnection *cnc,
 gboolean
 e_ews_connection_delete_folder_finish	(EEwsConnection *cnc,
 					 GAsyncResult *result,
-			 		 GCancellable *cancellable,
 					 GError **error)
 {
 	GSimpleAsyncResult *simple;
@@ -2372,7 +2369,6 @@ e_ews_connection_delete_folder	(EEwsConnection *cnc,
 	e_flag_wait (sync_data->eflag);
 
 	result = e_ews_connection_delete_folder_finish (cnc, sync_data->res,
-							cancellable,
 							error);
 
 	e_flag_free (sync_data->eflag);

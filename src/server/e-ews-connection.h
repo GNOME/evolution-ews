@@ -301,7 +301,6 @@ gboolean	e_ews_connection_create_folder_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 EwsFolderId **folder_id,
-				 		 GCancellable *cancellable,
 						 GError **error);
 gboolean	e_ews_connection_create_folder	(EEwsConnection *cnc,
 						 gint pri,
@@ -327,7 +326,6 @@ void		e_ews_connection_delete_folder_start
 gboolean	e_ews_connection_delete_folder_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
-				 		 GCancellable *cancellable,
 						 GError **error);
 
 gboolean	e_ews_connection_delete_folder	(EEwsConnection *cnc,
