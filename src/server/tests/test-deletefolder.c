@@ -19,7 +19,7 @@
  * USA
  */
 
-/* API : e_ews_connection_create_folders */
+/* API : e_ews_connection_delete_folders */
 
 #include <stdio.h>
 #include <string.h>
@@ -31,20 +31,17 @@
 #include <e-ews-folder.h>
 #include <e-ews-message.h>
 
-void createfolder_tests_run ();
-
 static GMainLoop *main_loop;
 
-EwsFolderId *folder_id;
+void deletefolder_tests_run (gconstpointer data);
 
 static void
-create_folder_cb (GObject *object, GAsyncResult *res, gpointer data)
+delete_folder_cb (GObject *object, GAsyncResult *res, gpointer data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	GError *error = NULL;
-	EwsFolderId *fid = NULL;
 
-	e_ews_connection_create_folder_finish	(cnc, res, &fid,
+	e_ews_connection_delete_folder_finish	(cnc, res, 
 						 &error);
 	if (error != NULL) {
 		g_warning ("Unable to create: %s \n", error->message);
@@ -52,27 +49,21 @@ create_folder_cb (GObject *object, GAsyncResult *res, gpointer data)
 		goto quit;
 	}
 
-	g_print ("Folder is successfully created. The Folder Id is %s \n", fid->id);
-
-	/*Assigning the folder_id which would be used for testing delete folder */
-	folder_id = g_new0 (EwsFolderId, 1);
-	folder_id->id = g_strdup (fid->id);
-	folder_id->change_key = g_strdup (fid->change_key);
-
-	e_ews_folder_free_fid (fid);
+	g_print ("Folder is successfully Deleted. \n");
 
 quit:	
 	g_main_loop_quit(main_loop);
 }
 
 static void
-op_test_create_folder ()
+op_test_delete_folder (gpointer data)
 {
 	const gchar *username;
 	const gchar *password;
 	const gchar *uri;
 	EEwsConnection *cnc;
 	GCancellable *cancellable;
+	EwsFolderId **fid = (EwsFolderId **) data;
 
 	cancellable = g_cancellable_new ();
 
@@ -83,9 +74,9 @@ op_test_create_folder ()
 
 	cnc = e_ews_connection_new (uri, username, password, NULL);
 	g_assert (cnc != NULL);
-	e_ews_connection_create_folder_start	(cnc, EWS_PRIORITY_MEDIUM, "inbox", 
-						 TRUE ,"test", 
-						 create_folder_cb,
+	e_ews_connection_delete_folder_start	(cnc, EWS_PRIORITY_MEDIUM, (*fid)->id, 
+						 FALSE ,"HardDelete", 
+						 delete_folder_cb,
 						 cancellable, NULL);
 
 }
@@ -93,18 +84,22 @@ op_test_create_folder ()
 static gboolean
 idle_cb (gpointer data)
 {
-	op_test_create_folder ();
+	op_test_delete_folder (data);
 	return FALSE;
 }
 
 void 
-createfolder_tests_run ()
+deletefolder_tests_run (gconstpointer data)
 {
+	EwsFolderId **fid = (EwsFolderId **) data;
+	
+	g_return_if_fail (*fid != NULL);
+	
 	g_type_init ();
 	g_thread_init (NULL);
 
 	main_loop = g_main_loop_new (NULL, TRUE);
-	g_idle_add ((GSourceFunc) idle_cb, NULL);
+	g_idle_add ((GSourceFunc) idle_cb, fid);
 	g_main_loop_run (main_loop);
 
 	/* terminate */

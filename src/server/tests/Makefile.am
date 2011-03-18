@@ -21,6 +21,7 @@ testews_SOURCES = 				\
 		test-cuditem.c 			\
 		test-autocompletion.c		\
 		test-createfolder.c		\
+		test-deletefolder.c		\
 		test-libews.c 			\
 		utils.h
 
