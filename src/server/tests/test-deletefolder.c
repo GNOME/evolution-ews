@@ -19,7 +19,7 @@
  * USA
  */
 
-/* API : e_ews_connection_create_folders */
+/* API : e_ews_connection_delete_folders */
 
 #include <stdio.h>
 #include <string.h>
@@ -35,18 +35,16 @@ void createfolder_tests_run ();
 
 static GMainLoop *main_loop;
 
-EwsFolderId *folder_id;
+extern EwsFolderId *folder_id;
 
 static void
-create_folder_cb (GObject *object, GAsyncResult *res, gpointer data)
+delete_folder_cb (GObject *object, GAsyncResult *res, gpointer data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
-	GSList *contact_items = NULL, *l;
 	GError *error = NULL;
 	GCancellable *cancellable;
-	EwsFolderId *fid = NULL;
 
-	e_ews_connection_create_folder_finish	(cnc, res, &fid,
+	e_ews_connection_delete_folder_finish	(cnc, res, 
 						 cancellable, &error);
 	if (error != NULL) {
 		g_warning ("Unable to create: %s \n", error->message);
@@ -54,21 +52,14 @@ create_folder_cb (GObject *object, GAsyncResult *res, gpointer data)
 		goto quit;
 	}
 
-	g_print ("Folder is successfully created. The Folder Id is %s", fid->id);
-
-	/*Assigning the folder_id to inbox_folder_id for testing delete folder call*/
-	folder_id = g_new0 (EwsFolderId, 1);
-	folder_id->id = g_strdup (fid->id);
-	folder_id->change_key = g_strdup (fid->change_key);
-
-	e_ews_folder_free_fid (fid);
+	g_print ("Folder is successfully Deleted.");
 
 quit:	
 	g_main_loop_quit(main_loop);
 }
 
 static void
-op_test_create_folder ()
+op_test_delete_folder ()
 {
 	const gchar *username;
 	const gchar *password;
@@ -85,9 +76,9 @@ op_test_create_folder ()
 
 	cnc = e_ews_connection_new (uri, username, password, NULL);
 	g_assert (cnc != NULL);
-	e_ews_connection_create_folder_start	(cnc, EWS_PRIORITY_MEDIUM, "inbox", 
-						 TRUE ,"test", 
-						 create_folder_cb,
+	e_ews_connection_delete_folder_start	(cnc, EWS_PRIORITY_MEDIUM, folder_id->id, 
+						 FALSE ,"HardDelete", 
+						 delete_folder_cb,
 						 cancellable, NULL);
 
 }
@@ -95,12 +86,12 @@ op_test_create_folder ()
 static gboolean
 idle_cb (gpointer data)
 {
-	op_test_create_folder ();
+	op_test_delete_folder ();
 	return FALSE;
 }
 
 void 
-createfolder_tests_run ()
+deletefolder_tests_run ()
 {
 	g_type_init ();
 	g_thread_init (NULL);

@@ -2279,3 +2279,106 @@ e_ews_connection_move_items	(EEwsConnection *cnc,
 
 	return result;
 }
+
+void
+e_ews_connection_delete_folder_start	(EEwsConnection *cnc,
+					 gint pri,
+					 const gchar *folder_id,
+					 gboolean is_distinguished_id,
+					 const gchar *delete_type,
+					 GAsyncReadyCallback cb,
+					 GCancellable *cancellable,
+					 gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "DeleteFolder", "DeleteType", delete_type, EWS_EXCHANGE_2007);
+
+	e_soap_message_start_element (msg, "FolderIds", "messages", NULL);
+	
+	if (is_distinguished_id)
+		e_ews_message_write_string_parameter_with_attribute (msg, "DistinguishedFolderId", NULL, NULL, "Id", folder_id);
+	else
+		e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", NULL, NULL, "Id", folder_id);
+	
+	/*This element is required for delegate access*/	
+	if (is_distinguished_id && cnc->priv->email)
+		e_ews_message_write_string_parameter (msg, "Mailbox", NULL, cnc->priv->email);
+
+	e_soap_message_end_element (msg);
+
+	e_ews_message_write_footer (msg);
+
+      	simple = g_simple_async_result_new (G_OBJECT (cnc),
+                                      cb,
+				      user_data,
+                                      e_ews_connection_delete_folder_start);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple, cb == ews_sync_reply_cb);
+}
+
+
+gboolean
+e_ews_connection_delete_folder_finish	(EEwsConnection *cnc,
+					 GAsyncResult *result,
+			 		 GCancellable *cancellable,
+					 GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_delete_folder_start),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	return TRUE;
+}
+
+gboolean		
+e_ews_connection_delete_folder	(EEwsConnection *cnc,
+				 gint pri,
+				 const gchar *folder_id,
+				 gboolean is_distinguished_id,
+				 const gchar *delete_type,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	EwsSyncData *sync_data;
+	gboolean result;
+
+	sync_data = g_new0 (EwsSyncData, 1);
+	sync_data->eflag = e_flag_new ();
+	
+	e_ews_connection_create_folder_start	(cnc, pri, folder_id, 
+						 is_distinguished_id,
+						 delete_type,
+						 ews_sync_reply_cb, 
+						 cancellable,
+						 (gpointer) sync_data);
+
+	e_flag_wait (sync_data->eflag);
+
+	result = e_ews_connection_delete_folder_finish (cnc, sync_data->res,
+							cancellable,
+							error);
+
+	e_flag_free (sync_data->eflag);
+	g_object_unref (sync_data->res);
+	g_free (sync_data);
+
+	return result;
+
+}

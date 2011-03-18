@@ -312,6 +312,32 @@ gboolean	e_ews_connection_create_folder	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 
+/*Delete Folder*/
+
+void		e_ews_connection_delete_folder_start
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *folder_id,
+						 gboolean is_distinguished_id,
+						 const gchar *delete_type,
+						 GAsyncReadyCallback cb,
+						 GCancellable *cancellable,
+						 gpointer user_data);
+
+gboolean	e_ews_connection_delete_folder_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+				 		 GCancellable *cancellable,
+						 GError **error);
+
+gboolean	e_ews_connection_delete_folder	(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *folder_id,
+						 gboolean is_distinguished_id,
+						 const gchar *delete_type,
+						 GCancellable *cancellable,
+						 GError **error);
+
 /* Update (e.g. rename) folder */
 void		e_ews_connection_update_folder_start 
 						(EEwsConnection *cnc,
