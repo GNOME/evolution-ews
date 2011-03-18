@@ -843,9 +843,77 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 static gboolean
 ews_expunge_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GError **error)
 {
-	g_print ("\n expunge not implemented");
+	CamelEwsStore *ews_store;
+	CamelEwsFolder *ews_folder;
+	CamelEwsMessageInfo *ews_info;
+	CamelMessageInfo *info;
+	CamelFolderChangeInfo *changes;
+	CamelStore *parent_store;
+	EEwsConnection *cnc;
+	EVO2(GCancellable *cancellable = NULL);
+	gint i, count;
+	gboolean status = TRUE;
+	const gchar *folder_id;
+	const gchar *full_name;
+	GSList *deleted_items = NULL, *deleted_head = NULL;
 
-	return TRUE;
+	full_name = camel_folder_get_full_name (folder);
+	parent_store = camel_folder_get_parent_store (folder);
+	ews_folder = CAMEL_EWS_FOLDER (folder);
+	ews_store = CAMEL_EWS_STORE (parent_store);
+
+	if (!camel_ews_store_connected (ews_store, error))
+		return FALSE;
+
+	cnc = camel_ews_store_get_connection (ews_store);
+	folder_id =  camel_ews_store_summary_get_folder_id (ews_store->summary, full_name, NULL);
+
+	changes = camel_folder_change_info_new ();
+
+	/*Collect UIDs of deleted messages.*/
+	count = camel_folder_summary_count (folder->summary);
+	for (i = 0; i < count; i++) {
+		info = camel_folder_summary_index (folder->summary, i);
+		ews_info = (CamelEwsMessageInfo *) info;
+		if (ews_info && (ews_info->info.flags & CAMEL_MESSAGE_DELETED)) {
+			const gchar *uid = camel_message_info_uid (info);
+			deleted_items = g_slist_prepend (deleted_items, (gpointer) uid);
+		}
+		camel_message_info_free (info);
+	}
+	deleted_head = deleted_items;
+
+	if (deleted_items) {
+		GError *rerror = NULL;
+
+		camel_service_lock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+		status = e_ews_connection_delete_items (cnc, EWS_PRIORITY_MEDIUM, deleted_items, "HardDelete",
+							NULL, NULL, cancellable, &rerror);
+		camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+
+		if (status) {
+			while (deleted_items) {
+				const gchar *uid = (gchar *)deleted_items->data;
+				camel_folder_summary_lock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+				camel_folder_change_info_remove_uid (changes, uid);
+				camel_folder_summary_remove_uid (folder->summary, uid);
+				camel_data_cache_remove(ews_folder->cache, "cache", uid, NULL);
+				camel_folder_summary_unlock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+				deleted_items = g_slist_next (deleted_items);
+			}
+		}
+
+		if (rerror)
+			g_propagate_error (error, rerror);
+
+		camel_folder_changed (folder, changes);
+
+		g_slist_free (deleted_head);
+	}
+
+	camel_folder_change_info_free (changes);
+
+	return status;
 }
 
 static gint
