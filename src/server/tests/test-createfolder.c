@@ -41,7 +41,6 @@ static void
 create_folder_cb (GObject *object, GAsyncResult *res, gpointer data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
-	GSList *contact_items = NULL, *l;
 	GError *error = NULL;
 	GCancellable *cancellable;
 	EwsFolderId *fid = NULL;
@@ -54,9 +53,9 @@ create_folder_cb (GObject *object, GAsyncResult *res, gpointer data)
 		goto quit;
 	}
 
-	g_print ("Folder is successfully created. The Folder Id is %s", fid->id);
+	g_print ("Folder is successfully created. The Folder Id is %s \n", fid->id);
 
-	/*Assigning the folder_id to inbox_folder_id for testing delete folder call*/
+	/*Assigning the folder_id which would be used for testing delete folder */
 	folder_id = g_new0 (EwsFolderId, 1);
 	folder_id->id = g_strdup (fid->id);
 	folder_id->change_key = g_strdup (fid->change_key);

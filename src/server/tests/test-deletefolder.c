@@ -31,11 +31,9 @@
 #include <e-ews-folder.h>
 #include <e-ews-message.h>
 
-void createfolder_tests_run ();
-
 static GMainLoop *main_loop;
 
-extern EwsFolderId *folder_id;
+void deletefolder_tests_run (gconstpointer data);
 
 static void
 delete_folder_cb (GObject *object, GAsyncResult *res, gpointer data)
@@ -52,20 +50,21 @@ delete_folder_cb (GObject *object, GAsyncResult *res, gpointer data)
 		goto quit;
 	}
 
-	g_print ("Folder is successfully Deleted.");
+	g_print ("Folder is successfully Deleted. \n");
 
 quit:	
 	g_main_loop_quit(main_loop);
 }
 
 static void
-op_test_delete_folder ()
+op_test_delete_folder (gpointer data)
 {
 	const gchar *username;
 	const gchar *password;
 	const gchar *uri;
 	EEwsConnection *cnc;
 	GCancellable *cancellable;
+	EwsFolderId **fid = (EwsFolderId **) data;
 
 	cancellable = g_cancellable_new ();
 
@@ -76,7 +75,7 @@ op_test_delete_folder ()
 
 	cnc = e_ews_connection_new (uri, username, password, NULL);
 	g_assert (cnc != NULL);
-	e_ews_connection_delete_folder_start	(cnc, EWS_PRIORITY_MEDIUM, folder_id->id, 
+	e_ews_connection_delete_folder_start	(cnc, EWS_PRIORITY_MEDIUM, (*fid)->id, 
 						 FALSE ,"HardDelete", 
 						 delete_folder_cb,
 						 cancellable, NULL);
@@ -86,18 +85,22 @@ op_test_delete_folder ()
 static gboolean
 idle_cb (gpointer data)
 {
-	op_test_delete_folder ();
+	op_test_delete_folder (data);
 	return FALSE;
 }
 
 void 
-deletefolder_tests_run ()
+deletefolder_tests_run (gconstpointer data)
 {
+	EwsFolderId **fid = (EwsFolderId **) data;
+	
+	g_return_if_fail (*fid != NULL);
+	
 	g_type_init ();
 	g_thread_init (NULL);
 
 	main_loop = g_main_loop_new (NULL, TRUE);
-	g_idle_add ((GSourceFunc) idle_cb, NULL);
+	g_idle_add ((GSourceFunc) idle_cb, fid);
 	g_main_loop_run (main_loop);
 
 	/* terminate */
