@@ -978,7 +978,8 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder, GSList *items_cr
 }
 
 gboolean
-camel_ews_utils_create_mime_message (EEwsConnection *cnc, CamelMimeMessage *message,
+camel_ews_utils_create_mime_message (EEwsConnection *cnc, const gchar *disposition,
+				     const gchar *save_folder, CamelMimeMessage *message,
 				     gint32 message_camel_flags, CamelAddress *from,
 				     GCancellable *cancellable, GError **error)
 {

@@ -96,7 +96,8 @@ gboolean ews_utils_rename_folder (CamelEwsStore *store, EwsFolderType ftype,
 				  const gchar *folder_name, const gchar *display_name,
 				  GError **error);
 gboolean
-camel_ews_utils_create_mime_message (EEwsConnection *cnc, CamelMimeMessage *message,
+camel_ews_utils_create_mime_message (EEwsConnection *cnc, const gchar *disposition,
+				     const gchar *save_folder, CamelMimeMessage *message,
 				     gint32 message_camel_flags, CamelAddress *from,
 				     GCancellable *cancellable, GError **error);
 
