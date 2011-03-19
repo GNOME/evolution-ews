@@ -42,6 +42,7 @@ G_DEFINE_TYPE (EEwsConnection, e_ews_connection, G_TYPE_OBJECT)
 
 struct _EwsNode;
 static GObjectClass *parent_class = NULL;
+static GStaticMutex connecting = G_STATIC_MUTEX_INIT;
 static GHashTable *loaded_connections_permissions = NULL;
 static gboolean ews_next_request (gpointer _cnc);
 static gint comp_func (gconstpointer a, gconstpointer b);
@@ -739,6 +740,43 @@ ews_connection_authenticate	(SoupSession *sess, SoupMessage *msg,
 /* Connection APIS */
 
 /**
+ * e_ews_connection_find
+ * @uri: Exchange server uri
+ * @username: 
+ * 
+ * Find an existing connection for this user/uri, if it exists.
+ * 
+ * Returns: EEwsConnection
+ **/
+EEwsConnection *
+e_ews_connection_find (const gchar *uri, const gchar *username)
+{
+	EEwsConnection *cnc;
+	gchar *hash_key;
+
+	g_static_mutex_lock (&connecting);
+
+	/* search the connection in our hash table */
+	if (loaded_connections_permissions) {
+		hash_key = g_strdup_printf ("%s@%s",
+				username ? username : "",
+				uri);
+		cnc = g_hash_table_lookup (loaded_connections_permissions, hash_key);
+		g_free (hash_key);
+
+		if (E_IS_EWS_CONNECTION (cnc)) {
+			g_object_ref (cnc);
+			g_static_mutex_unlock (&connecting);
+			return cnc;
+		}
+	}
+		     
+	g_static_mutex_unlock (&connecting);
+
+	return NULL;
+}
+
+/**
  * e_ews_connection_new 
  * @uri: Exchange server uri
  * @username: 
@@ -755,8 +793,6 @@ e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *pass
 {
 	EEwsConnection *cnc;
 	gchar *hash_key;
-
-	static GStaticMutex connecting = G_STATIC_MUTEX_INIT;
 
 	g_static_mutex_lock (&connecting);
 

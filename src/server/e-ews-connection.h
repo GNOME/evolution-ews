@@ -71,11 +71,13 @@ typedef enum {
 } EwsContactsSearchScope;
 
 GType		e_ews_connection_get_type	(void);
-EEwsConnection *
-		e_ews_connection_new		(const gchar *uri,
+EEwsConnection *e_ews_connection_new		(const gchar *uri,
 						 const gchar *username, 
 						 const gchar *password, 
 						 GError **error);
+EEwsConnection *e_ews_connection_find		(const gchar *uri,
+						 const gchar *username);
+
 typedef void (*EEwsAutoDiscoverCallback) (char *url, gpointer user_data, GError *error);
 void		e_ews_autodiscover_ws_url	(EEwsAutoDiscoverCallback cb,
 						 gpointer cbdata,
