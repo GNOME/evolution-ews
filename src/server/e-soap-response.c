@@ -106,6 +106,34 @@ e_soap_response_new_from_string (const gchar *xmlstr)
 	return response;
 }
 
+/**
+ * e_soap_response_new_from_xmldoc:
+ * @xmldoc: the XML document to parse.
+ *
+ * Create a new #ESoapResponse object from the XML document contained
+ * in @xmldoc.
+ *
+ * Returns: the new #ESoapResponse (or %NULL if there was an
+ * error).
+ *
+ * Since: xxx
+ */
+ESoapResponse *
+e_soap_response_new_from_xmldoc (xmlDoc *xmldoc)
+{
+	ESoapResponse *response;
+
+	g_return_val_if_fail (xmldoc != NULL, NULL);
+
+	response = g_object_new (E_TYPE_SOAP_RESPONSE, NULL);
+	if (!e_soap_response_from_xmldoc (response, xmldoc)) {
+		g_object_unref (response);
+		return NULL;
+	}
+
+	return response;
+}
+
 static void
 parse_parameters (ESoapResponsePrivate *priv, xmlNodePtr xml_method)
 {
