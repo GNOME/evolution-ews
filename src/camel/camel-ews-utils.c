@@ -981,6 +981,7 @@ gboolean
 camel_ews_utils_create_mime_message (EEwsConnection *cnc, const gchar *disposition,
 				     const gchar *save_folder, CamelMimeMessage *message,
 				     gint32 message_camel_flags, CamelAddress *from,
+				     gchar **itemid, gchar **changekey,
 				     GCancellable *cancellable, GError **error)
 {
 	g_set_error(error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,

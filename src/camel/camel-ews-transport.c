@@ -89,6 +89,7 @@ ews_send_to_sync (CamelTransport *transport,
 
 	res = camel_ews_utils_create_mime_message (cnc, "SendOnly", NULL,
 						   message, 0, from,
+						   NULL, NULL,
 						   cancellable, error);
 	g_object_unref (cnc);
 	return res;
