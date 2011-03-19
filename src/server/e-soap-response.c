@@ -141,7 +141,6 @@ e_soap_response_from_string (ESoapResponse *response, const gchar *xmlstr)
 {
 	ESoapResponsePrivate *priv;
 	xmlDocPtr xmldoc;
-	xmlNodePtr xml_root, xml_body, xml_method = NULL;
 
 	g_return_val_if_fail (E_IS_SOAP_RESPONSE (response), FALSE);
 	priv = E_SOAP_RESPONSE_GET_PRIVATE (response);
@@ -151,6 +150,30 @@ e_soap_response_from_string (ESoapResponse *response, const gchar *xmlstr)
 	xmldoc = xmlParseMemory (xmlstr, strlen (xmlstr));
 	if (!xmldoc)
 		return FALSE;
+
+	return e_soap_response_from_xmldoc (response, xmldoc);
+}
+
+
+/**
+ * e_soap_response_from_xmldoc:
+ * @response: the #ESoapResponse object.
+ * @xmldoc: XML document.
+ *
+ * Sets all properties from the @xmldoc in the @response object.
+ *
+ * Returns: %TRUE if successful, %FALSE otherwise.
+ *
+ * Since: xxx
+ */
+gboolean e_soap_response_from_xmldoc (ESoapResponse *response, xmlDoc *xmldoc)
+{
+	ESoapResponsePrivate *priv;
+	xmlNodePtr xml_root, xml_body, xml_method = NULL;
+
+	g_return_val_if_fail (E_IS_SOAP_RESPONSE (response), FALSE);
+	priv = E_SOAP_RESPONSE_GET_PRIVATE (response);
+	g_return_val_if_fail (xmldoc != NULL, FALSE);
 
 	xml_root = xmlDocGetRootElement (xmldoc);
 	if (!xml_root) {

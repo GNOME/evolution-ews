@@ -38,6 +38,7 @@ ESoapResponse *e_soap_response_new (void);
 ESoapResponse *e_soap_response_new_from_string (const gchar *xmlstr);
 
 gboolean          e_soap_response_from_string (ESoapResponse *response, const gchar *xmlstr);
+gboolean          e_soap_response_from_xmldoc (ESoapResponse *response, xmlDoc *xmldoc);
 
 const gchar       *e_soap_response_get_method_name (ESoapResponse *response);
 void              e_soap_response_set_method_name (ESoapResponse *response,
