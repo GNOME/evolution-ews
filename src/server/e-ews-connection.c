@@ -590,9 +590,8 @@ e_ews_connection_dispose (GObject *object)
 
 	/* remove the connection from the hash table */
 	if (loaded_connections_permissions != NULL) {
-		hash_key = g_strdup_printf ("%s:%s@%s",
+		hash_key = g_strdup_printf ("%s@%s",
 					    priv->username ? priv->username : "",
-					    priv->password ? priv->password : "",
 					    priv->uri ? priv->uri : "");
 		g_hash_table_remove (loaded_connections_permissions, hash_key);
 		if (g_hash_table_size (loaded_connections_permissions) == 0) {
@@ -763,9 +762,8 @@ e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *pass
 
 	/* search the connection in our hash table */
 	if (loaded_connections_permissions != NULL) {
-		hash_key = g_strdup_printf ("%s:%s@%s",
+		hash_key = g_strdup_printf ("%s@%s",
 				username ? username : "",
-				password ? password : "",
 				uri);
 		cnc = g_hash_table_lookup (loaded_connections_permissions, hash_key);
 		g_free (hash_key);
@@ -786,9 +784,8 @@ e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *pass
 
 
 	/* add the connection to the loaded_connections_permissions hash table */
-	hash_key = g_strdup_printf ("%s:%s@%s",
+	hash_key = g_strdup_printf ("%s@%s",
 			cnc->priv->username ? cnc->priv->username : "",
-			cnc->priv->password ? cnc->priv->password : "",
 			cnc->priv->uri);
 	if (loaded_connections_permissions == NULL)
 		loaded_connections_permissions = g_hash_table_new_full (g_str_hash, g_str_equal,
