@@ -140,34 +140,26 @@ gboolean
 e_soap_response_from_string (ESoapResponse *response, const gchar *xmlstr)
 {
 	ESoapResponsePrivate *priv;
-	xmlDocPtr old_doc = NULL;
+	xmlDocPtr xmldoc;
 	xmlNodePtr xml_root, xml_body, xml_method = NULL;
 
 	g_return_val_if_fail (E_IS_SOAP_RESPONSE (response), FALSE);
 	priv = E_SOAP_RESPONSE_GET_PRIVATE (response);
 	g_return_val_if_fail (xmlstr != NULL, FALSE);
 
-	/* clear the previous contents */
-	if (priv->xmldoc)
-		old_doc = priv->xmldoc;
-
 	/* parse the string */
-	priv->xmldoc = xmlParseMemory (xmlstr, strlen (xmlstr));
-	if (!priv->xmldoc) {
-		priv->xmldoc = old_doc;
+	xmldoc = xmlParseMemory (xmlstr, strlen (xmlstr));
+	if (!xmldoc)
 		return FALSE;
-	}
 
-	xml_root = xmlDocGetRootElement (priv->xmldoc);
+	xml_root = xmlDocGetRootElement (xmldoc);
 	if (!xml_root) {
-		xmlFreeDoc (priv->xmldoc);
-		priv->xmldoc = old_doc;
+		xmlFreeDoc (xmldoc);
 		return FALSE;
 	}
 
 	if (strcmp ((const gchar *)xml_root->name, "Envelope") != 0) {
-		xmlFreeDoc (priv->xmldoc);
-		priv->xmldoc = old_doc;
+		xmlFreeDoc (xmldoc);
 		return FALSE;
 	}
 
@@ -176,8 +168,7 @@ e_soap_response_from_string (ESoapResponse *response, const gchar *xmlstr)
 		if (strcmp ((const gchar *)xml_body->name, "Header") == 0)
 			xml_body = soup_xml_real_node (xml_body->next);
 		if (strcmp ((const gchar *)xml_body->name, "Body") != 0) {
-			xmlFreeDoc (priv->xmldoc);
-			priv->xmldoc = old_doc;
+			xmlFreeDoc (xmldoc);
 			return FALSE;
 		}
 
@@ -188,7 +179,8 @@ e_soap_response_from_string (ESoapResponse *response, const gchar *xmlstr)
 			parse_parameters (priv, xml_method);
 	}
 
-	xmlFreeDoc (old_doc);
+	xmlFreeDoc (priv->xmldoc);
+	priv->xmldoc = xmldoc;
 
 	priv->xml_root = xml_root;
 	priv->xml_body = xml_body;
