@@ -14,6 +14,7 @@ G_DEFINE_TYPE (ESoapMessage, e_soap_message, SOUP_TYPE_MESSAGE)
 
 typedef struct {
 	/* Serialization fields */
+	xmlParserCtxtPtr ctxt;
 	xmlDocPtr doc;
 	xmlNodePtr last_node;
 	xmlNsPtr soap_ns;
@@ -30,6 +31,11 @@ finalize (GObject *object)
 {
 	ESoapMessagePrivate *priv = E_SOAP_MESSAGE_GET_PRIVATE (object);
 
+	if (priv->ctxt) {
+		if (priv->ctxt->myDoc)
+			xmlFreeDoc (priv->ctxt->myDoc);
+		xmlFreeParserCtxt (priv->ctxt);
+	}
 	if (priv->doc)
 		xmlFreeDoc (priv->doc);
 	if (priv->action)
@@ -80,6 +86,33 @@ fetch_ns (ESoapMessage *msg, const gchar *prefix, const gchar *ns_uri)
         return ns;
 }
 
+static void soap_restarted (SoupMessage *msg, gpointer data)
+{
+	ESoapMessagePrivate *priv = E_SOAP_MESSAGE_GET_PRIVATE (msg);
+
+	/* Discard the existing context, if there is one, and start again */
+	if (priv->ctxt) {
+		if (priv->ctxt->myDoc)
+			xmlFreeDoc (priv->ctxt->myDoc);
+		xmlFreeParserCtxt (priv->ctxt);
+		priv->ctxt = NULL;
+	}
+}
+
+static void soap_got_chunk (SoupMessage *msg, SoupBuffer *chunk, gpointer data)
+{
+	ESoapMessagePrivate *priv = E_SOAP_MESSAGE_GET_PRIVATE (msg);
+
+	if (msg->status_code != 200)
+		return;
+
+	if (!priv->ctxt)
+		priv->ctxt = xmlCreatePushParserCtxt (NULL, msg, chunk->data,
+						      chunk->length, NULL);
+	else
+		xmlParseChunk (priv->ctxt, chunk->data, chunk->length, 0);
+}
+
 /**
  * e_soap_message_new:
  * @method: the HTTP method for the created request.
@@ -109,9 +142,16 @@ e_soap_message_new (const gchar *method, const gchar *uri_string,
 		return NULL;
 
 	msg = e_soap_message_new_from_uri (method, uri, standalone,
-					      xml_encoding, env_prefix, env_uri);
+					   xml_encoding, env_prefix, env_uri);
 
 	soup_uri_free (uri);
+
+	/* Don't accumulate body data into a huge buffer.
+	   Instead, parse it as it arrives. */
+	soup_message_body_set_accumulate (SOUP_MESSAGE (msg)->response_body,
+					  FALSE);
+	g_signal_connect (msg, "got-chunk", G_CALLBACK (soap_got_chunk), NULL);
+	g_signal_connect (msg, "restarted", G_CALLBACK (soap_restarted), NULL);
 
 	return msg;
 }
@@ -879,9 +919,27 @@ e_soap_message_get_xml_doc (ESoapMessage *msg)
 ESoapResponse *
 e_soap_message_parse_response (ESoapMessage *msg)
 {
+	ESoapMessagePrivate *priv;
+	xmlDocPtr xmldoc;
+
 	g_return_val_if_fail (E_IS_SOAP_MESSAGE (msg), NULL);
 
-	return e_soap_response_new_from_string (SOUP_MESSAGE (msg)->response_body->data);
+	priv = E_SOAP_MESSAGE_GET_PRIVATE (msg);
+
+	if (!priv->ctxt)
+		return NULL;
+
+	xmlParseChunk (priv->ctxt, 0, 0, 1);
+
+	xmldoc = priv->ctxt->myDoc;
+
+	xmlFreeParserCtxt (priv->ctxt);
+	priv->ctxt = NULL;
+
+	if (!xmldoc)
+		return NULL;
+
+	return e_soap_response_new_from_xmldoc (xmldoc);
 }
 
 #endif
