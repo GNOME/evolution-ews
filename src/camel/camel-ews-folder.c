@@ -770,7 +770,40 @@ ews_append_message_sync (CamelFolder *folder, CamelMimeMessage *message,
 			 gchar **appended_uid,
 	 		 EVO3(GCancellable *cancellable,) GError **error)
 {
-	g_print ("\n append_message not implemented");
+	EVO2(GCancellable *cancellable = NULL;)
+	gchar *itemid, *changekey;
+	const gchar *folder_name;
+	const gchar *folder_id;
+	CamelAddress *from;
+	CamelEwsStore *ews_store;
+	EEwsConnection *cnc;
+
+	ews_store = (CamelEwsStore *)camel_folder_get_parent_store(folder);
+
+	folder_name = camel_folder_get_full_name (folder);
+	folder_id = camel_ews_store_summary_get_folder_id (ews_store->summary,
+							   folder_name, error);
+	if (!folder_id)
+		return FALSE;
+
+	from = CAMEL_ADDRESS (camel_mime_message_get_from (message));
+
+	cnc = camel_ews_store_get_connection(ews_store);
+
+	if (!camel_ews_utils_create_mime_message (cnc, "SaveOnly", folder_id,
+						  message,
+						  camel_message_info_flags (info),
+						  from, &itemid, &changekey,
+						  cancellable, error)) {
+		g_object_unref (cnc);
+		return FALSE;
+	}
+	/* FIXME: Do we have to add it to the summary info ourselves?
+	   Hopefully, since we need to store the changekey with it... */
+	g_free (changekey);
+	*appended_uid = itemid;
+
+	g_object_unref (cnc);
 
 	return TRUE;
 }
