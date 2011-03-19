@@ -798,10 +798,10 @@ get_md5_digest (const guchar *str)
 static void
 ews_set_threading_data (CamelEwsMessageInfo *mi, EEwsItem *item)
 {
-	const gchar *references;
+	const gchar *references, *inreplyto;
 	gint count = 0;
 	const gchar *message_id;
-	struct _camel_header_references *refs, *scan;
+	struct _camel_header_references *refs, *irt, *scan;
 	guint8 *digest;
 	gchar *msgid;
 
@@ -816,11 +816,20 @@ ews_set_threading_data (CamelEwsMessageInfo *mi, EEwsItem *item)
 	g_free (digest);
 	g_free (msgid);
 
+	/* Process References: header */
 	references = e_ews_item_get_references (item);
-	if (!references)
+	refs = camel_header_references_decode (references);
+
+	/* Prepend In-Reply-To: contents to References: for summary info */
+	inreplyto = e_ews_item_get_in_replyto (item);
+	irt = camel_header_references_inreplyto_decode (inreplyto);
+	if (irt) {
+		irt->next = refs;
+		refs = irt;
+	}
+	if (!refs)
 		return;
 
-	refs = camel_header_references_decode (references);
 	count = camel_header_references_list_size (&refs);
 	mi->info.references = g_malloc (sizeof (*mi->info.references) + ((count-1) * sizeof (mi->info.references->references[0])));
 	scan = refs;
