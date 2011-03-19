@@ -805,16 +805,15 @@ ews_set_threading_data (CamelEwsMessageInfo *mi, EEwsItem *item)
 	guint8 *digest;
 	gchar *msgid;
 
-	message_id = e_ews_item_get_msg_id (item);
-	if (!message_id)
-		return;
-	
 	/* set message id */
+	message_id = e_ews_item_get_msg_id (item);
 	msgid = camel_header_msgid_decode (message_id);
-	digest = get_md5_digest ((const guchar *)msgid);
-	memcpy (mi->info.message_id.id.hash, digest, sizeof (mi->info.message_id.id.hash));
-	g_free (digest);
-	g_free (msgid);
+	if (msgid) {
+		digest = get_md5_digest ((const guchar *)msgid);
+		memcpy (mi->info.message_id.id.hash, digest, sizeof (mi->info.message_id.id.hash));
+		g_free (digest);
+		g_free (msgid);
+	}
 
 	/* Process References: header */
 	references = e_ews_item_get_references (item);
