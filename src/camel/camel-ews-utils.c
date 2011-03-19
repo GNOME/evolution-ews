@@ -753,23 +753,24 @@ static const gchar *
 form_recipient_list (const GSList *recipients)
 {
 	const GSList *l;
-	GString *str;
+	GString *str = NULL;
 	const gchar *ret;
 
 	if (!recipients)
 		return NULL;
 
-	str = g_string_new ("");
-
 	for (l = recipients; l != NULL; l = g_slist_next (l)) {
 		EwsMailbox *mb = (EwsMailbox *) l->data;
 		const gchar *mb_str = form_email_string_from_mb (mb);
 
+		if (!str)
+			str = g_string_new ("");
+		else
+			str = g_string_append (str, ", ");
+
 		str = g_string_append (str, mb_str);
-		str = g_string_append (str, ", ");
 	}
 
-	g_string_truncate (str, 0);
 	ret = camel_pstring_strdup (str->str);
 	g_string_free (str, TRUE);
 
