@@ -741,8 +741,8 @@ form_email_string_from_mb (const EwsMailbox *mb)
 		str = g_string_append (str, mb->email);
 		g_string_append (str, ">");
 		
-		ret = camel_pstring_strdup (str->str);
-		g_string_free (str, TRUE);
+		ret = camel_pstring_add (str->str, TRUE);
+		g_string_free (str, FALSE);
 
 		return ret;
 	} else
@@ -771,8 +771,8 @@ form_recipient_list (const GSList *recipients)
 		str = g_string_append (str, mb_str);
 	}
 
-	ret = camel_pstring_strdup (str->str);
-	g_string_free (str, TRUE);
+	ret = camel_pstring_add (str->str, TRUE);
+	g_string_free (str, FALSE);
 
 	return ret;
 }
