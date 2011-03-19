@@ -64,13 +64,34 @@ ews_transport_get_name (CamelService *service,
 
 static gboolean
 ews_send_to_sync (CamelTransport *transport,
-                   CamelMimeMessage *message,
-                   CamelAddress *from,
-                   CamelAddress *recipients,
-                   /*GCancellable *cancellable,*/
-		   GError **error)
+		  CamelMimeMessage *message,
+		  CamelAddress *from,
+		  CamelAddress *recipients,
+		  EVO3(GCancellable *cancellable,)
+		  GError **error)
 {
-	return TRUE;
+	EVO2(GCancellable *cancellable = NULL;)
+	CamelService *service;
+	EEwsConnection *cnc;
+	const gchar *host_url;
+	gboolean res;
+
+	service = CAMEL_SERVICE (transport);
+	host_url = camel_url_get_param (service->url, "hosturl");
+
+	cnc = e_ews_connection_find (host_url, service->url->user);
+	if (!cnc) {
+		g_set_error (error, CAMEL_SERVICE_ERROR,
+			     CAMEL_SERVICE_ERROR_NOT_CONNECTED,
+			     _("Service not connected"));
+		return FALSE;
+	}
+
+	res = camel_ews_utils_create_mime_message (cnc, "SendOnly", NULL,
+						   message, 0, from,
+						   cancellable, error);
+	g_object_unref (cnc);
+	return res;
 }
 
 static void
