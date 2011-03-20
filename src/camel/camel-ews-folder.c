@@ -800,8 +800,11 @@ ews_append_message_sync (CamelFolder *folder, CamelMimeMessage *message,
 	}
 	/* FIXME: Do we have to add it to the summary info ourselves?
 	   Hopefully, since we need to store the changekey with it... */
+	if (appended_uid)
+		*appended_uid = itemid;
+	else
+		g_free (itemid);
 	g_free (changekey);
-	*appended_uid = itemid;
 
 	g_object_unref (cnc);
 
