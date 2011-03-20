@@ -27,6 +27,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 
 #include "camel-ews-utils.h"
@@ -977,6 +978,52 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder, GSList *items_cr
 	g_slist_free (items_created);
 }
 
+struct _create_mime_msg_data {
+	CamelMimeMessage *message;
+	gint32 message_camel_flags;
+	CamelAddress *from;
+};
+
+static void
+create_mime_message_cb (ESoapMessage *msg, gpointer user_data)
+{
+	struct _create_mime_msg_data *create_data = user_data;
+	CamelStream *mem;
+	GByteArray *bytes;
+	gchar *base64;
+
+	e_soap_message_start_element (msg, "Message", NULL, NULL);
+	e_soap_message_start_element (msg, "MimeContent", NULL, NULL);
+	
+	/* This is horrid. We really need to extend ESoapMessage to allow us
+	   to stream this directly rather than storing it in RAM. Which right
+	   now we are doing about four times: the GByteArray in the mem stream,
+	   then the base64 version, then the xmlDoc, then the soup request. */
+	camel_mime_message_set_best_encoding (create_data->message,
+					      CAMEL_BESTENC_GET_ENCODING,
+					      CAMEL_BESTENC_8BIT);
+
+	mem = camel_stream_mem_new();
+	camel_data_wrapper_write_to_stream (CAMEL_DATA_WRAPPER (create_data->message),
+					    mem, NULL);
+
+	bytes = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (mem));
+	
+	base64 = g_base64_encode (bytes->data, bytes->len);
+	g_object_unref (mem);
+
+	e_soap_message_write_string (msg, base64);
+	g_free (base64);
+
+	e_soap_message_end_element (msg); /* MimeContent */
+
+	/* FIXME: Handle From address and message_camel_flags */
+
+	e_soap_message_end_element (msg); /* Message */
+	
+	g_free (create_data);
+}
+
 gboolean
 camel_ews_utils_create_mime_message (EEwsConnection *cnc, const gchar *disposition,
 				     const gchar *save_folder, CamelMimeMessage *message,
@@ -984,7 +1031,38 @@ camel_ews_utils_create_mime_message (EEwsConnection *cnc, const gchar *dispositi
 				     gchar **itemid, gchar **changekey,
 				     GCancellable *cancellable, GError **error)
 {
-	g_set_error(error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-		    "Message creation not yet implemented");
-	return FALSE;
+	struct _create_mime_msg_data *create_data;
+	GSList *ids;
+	EEwsItem *item;
+	const EwsId *ewsid;
+	gboolean res;
+
+	create_data = g_new0 (struct _create_mime_msg_data, 1);
+
+	create_data->message = message;
+	create_data->message_camel_flags = message_camel_flags;
+	create_data->from = from;
+
+	res = e_ews_connection_create_items (cnc, EWS_PRIORITY_MEDIUM,
+					     disposition, NULL, save_folder,
+					     create_mime_message_cb, create_data,
+					     &ids, cancellable, error);
+	if (!res || (!itemid && !changekey))
+		return res;
+
+	item = (EEwsItem *)ids->data;
+	if (!item || !(ewsid = e_ews_item_get_id (item))) {
+		g_set_error(error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			    _("CreateItem call failed to return ID for new message"));
+		return FALSE;
+	}
+
+	if (itemid)
+		*itemid = ewsid->id;
+	if (changekey)
+		*changekey = ewsid->change_key;
+
+	g_object_unref (item);
+	g_slist_free (ids);
+	return TRUE;
 }
