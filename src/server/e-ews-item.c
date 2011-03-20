@@ -660,10 +660,12 @@ e_ews_item_mailbox_from_soap_param (ESoapParameter *param)
 	mb = g_new0 (EwsMailbox, 1);
 	
 	subparam = e_soap_parameter_get_first_child_by_name (param, "Name");
-	mb->name = e_soap_parameter_get_string_value (subparam);
+	if (subparam)
+		mb->name = e_soap_parameter_get_string_value (subparam);
 	
 	subparam = e_soap_parameter_get_first_child_by_name (param, "EmailAddress");
-	mb->email = e_soap_parameter_get_string_value (subparam);
+	if (subparam)
+		mb->email = e_soap_parameter_get_string_value (subparam);
 
 	return mb;
 }
