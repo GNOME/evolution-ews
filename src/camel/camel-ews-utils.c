@@ -988,7 +988,8 @@ static void
 create_mime_message_cb (ESoapMessage *msg, gpointer user_data)
 {
 	struct _create_mime_msg_data *create_data = user_data;
-	CamelStream *mem;
+	CamelStream *mem, *filtered;
+	CamelMimeFilter *filter;
 	GByteArray *bytes;
 	gchar *base64;
 
@@ -1004,13 +1005,22 @@ create_mime_message_cb (ESoapMessage *msg, gpointer user_data)
 					      CAMEL_BESTENC_8BIT);
 
 	mem = camel_stream_mem_new();
-	camel_data_wrapper_write_to_stream (CAMEL_DATA_WRAPPER (create_data->message),
-					    mem, NULL);
+	filtered = camel_stream_filter_new (mem);
 
+	filter = camel_mime_filter_crlf_new (CAMEL_MIME_FILTER_CRLF_ENCODE,
+				     CAMEL_MIME_FILTER_CRLF_MODE_CRLF_ONLY);
+	camel_stream_filter_add (CAMEL_STREAM_FILTER (filtered), filter);
+	g_object_unref (filter);
+
+	camel_data_wrapper_write_to_stream (CAMEL_DATA_WRAPPER (create_data->message),
+					    filtered, NULL);
+	camel_stream_flush (filtered, NULL);
+	camel_stream_flush (mem, NULL);
 	bytes = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (mem));
 	
 	base64 = g_base64_encode (bytes->data, bytes->len);
 	g_object_unref (mem);
+	g_object_unref (filtered);
 
 	e_soap_message_write_string (msg, base64);
 	g_free (base64);
