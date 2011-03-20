@@ -32,6 +32,7 @@
 
 #include "camel-ews-utils.h"
 #include "ews-esource-utils.h"
+#include "e-ews-compat.h"
 
 #define SUBFOLDER_DIR_NAME     "subfolders"
 #define SUBFOLDER_DIR_NAME_LEN 10
@@ -1012,10 +1013,11 @@ create_mime_message_cb (ESoapMessage *msg, gpointer user_data)
 	camel_stream_filter_add (CAMEL_STREAM_FILTER (filtered), filter);
 	g_object_unref (filter);
 
-	camel_data_wrapper_write_to_stream (CAMEL_DATA_WRAPPER (create_data->message),
-					    filtered, NULL);
-	camel_stream_flush (filtered, NULL);
-	camel_stream_flush (mem, NULL);
+	EVO3_sync(camel_data_wrapper_write_to_stream)
+				(CAMEL_DATA_WRAPPER (create_data->message),
+				 filtered, EVO3(NULL,) NULL);
+	camel_stream_flush (filtered, EVO3(NULL,) NULL);
+	camel_stream_flush (mem, EVO3(NULL,) NULL);
 	bytes = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (mem));
 	
 	base64 = g_base64_encode (bytes->data, bytes->len);
