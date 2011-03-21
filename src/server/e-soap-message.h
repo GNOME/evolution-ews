@@ -93,6 +93,12 @@ xmlDocPtr         e_soap_message_get_xml_doc (ESoapMessage *msg);
 
 ESoapResponse *e_soap_message_parse_response (ESoapMessage *msg);
 
+/* By an amazing coincidence, this looks a lot like camel_progress() */
+typedef void (*ESoapProgressFn) (gpointer object, gint percent);
+
+void		  e_soap_message_set_progress_fn (ESoapMessage *msg,
+						  ESoapProgressFn fn,
+						  gpointer object);
 G_END_DECLS
 
 #endif

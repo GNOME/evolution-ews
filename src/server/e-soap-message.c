@@ -22,6 +22,13 @@ typedef struct {
 	xmlChar *env_uri;
 	gboolean body_started;
 	gchar *action;
+
+	/* Progress callbacks */
+	gsize response_size;
+	gsize response_received;
+	ESoapProgressFn progress_fn;
+	gpointer progress_data;
+
 } ESoapMessagePrivate;
 #define E_SOAP_MESSAGE_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), E_TYPE_SOAP_MESSAGE, ESoapMessagePrivate))
 
@@ -85,9 +92,24 @@ fetch_ns (ESoapMessage *msg, const gchar *prefix, const gchar *ns_uri)
         return ns;
 }
 
+static void soap_got_headers (SoupMessage *msg, gpointer data)
+{
+	ESoapMessagePrivate *priv = E_SOAP_MESSAGE_GET_PRIVATE (msg);
+	const char *size;
+
+	size = soup_message_headers_get_one (msg->response_headers,
+					     "Content-Length");
+
+	if (size)
+		priv->response_size = strtol(size, NULL, 10);
+}
+
 static void soap_restarted (SoupMessage *msg, gpointer data)
 {
 	ESoapMessagePrivate *priv = E_SOAP_MESSAGE_GET_PRIVATE (msg);
+
+	priv->response_size = 0;
+	priv->response_received = 0;
 
 	/* Discard the existing context, if there is one, and start again */
 	if (priv->ctxt) {
@@ -104,6 +126,13 @@ static void soap_got_chunk (SoupMessage *msg, SoupBuffer *chunk, gpointer data)
 
 	if (msg->status_code != 200)
 		return;
+
+	priv->response_received += chunk->length;
+
+	if (priv->response_size && priv->progress_fn) {
+		int pc = priv->response_received * 100 / priv->response_size;
+		priv->progress_fn (priv->progress_data, pc);
+	}
 
 	if (!priv->ctxt)
 		priv->ctxt = xmlCreatePushParserCtxt (NULL, msg, chunk->data,
@@ -149,6 +178,7 @@ e_soap_message_new (const gchar *method, const gchar *uri_string,
 	   Instead, parse it as it arrives. */
 	soup_message_body_set_accumulate (SOUP_MESSAGE (msg)->response_body,
 					  FALSE);
+	g_signal_connect (msg, "got-headers", G_CALLBACK (soap_got_headers), NULL);
 	g_signal_connect (msg, "got-chunk", G_CALLBACK (soap_got_chunk), NULL);
 	g_signal_connect (msg, "restarted", G_CALLBACK (soap_restarted), NULL);
 
@@ -198,6 +228,30 @@ e_soap_message_new_from_uri (const gchar *method, SoupURI *uri,
 		priv->env_uri = xmlCharStrdup (env_uri);
 
 	return msg;
+}
+
+
+/**
+ * e_soap_message_set_progress_fn:
+ * @msg: the %ESoapMessage.
+ * @fn: callback function to be given progress updates
+ * @object: first argument to callback function
+ *
+ * Starts the top level SOAP Envelope element.
+ *
+ * Since: xxx
+ */
+void		  e_soap_message_set_progress_fn (ESoapMessage *msg,
+						  ESoapProgressFn fn,
+						  gpointer object)
+{
+	ESoapMessagePrivate *priv;
+
+	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
+	priv = E_SOAP_MESSAGE_GET_PRIVATE (msg);
+
+	priv->progress_fn = fn;
+	priv->progress_data = object;
 }
 
 /**
