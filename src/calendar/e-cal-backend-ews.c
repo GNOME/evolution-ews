@@ -1648,6 +1648,22 @@ e_cal_backend_ews_start_query (ECalBackend *backend, EDataCalView *query)
 }
 
 static void
+e_cal_backend_ews_refresh(ECalBackend *backend, EDataCal *cal, EServerMethodContext context) {
+	ECalBackendEws *cbews;
+	ECalBackendEwsPrivate *priv;
+	GError *error = NULL;
+
+	cbews = E_CAL_BACKEND_EWS (backend);
+	priv = cbews->priv;
+
+	PRIV_LOCK(priv);
+	ews_start_sync(cbews);
+	PRIV_UNLOCK(priv);
+
+	e_data_cal_notify_refresh(cal, context, error);
+}
+
+static void
 e_cal_backend_ews_dispose (GObject *object)
 {
 	ECalBackendEws *cbews;
@@ -1768,6 +1784,7 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->internal_get_timezone = e_cal_backend_ews_internal_get_timezone;
 	
 	backend_class->open = e_cal_backend_ews_open;
+	backend_class->refresh = e_cal_backend_ews_refresh;
 	backend_class->get_object = e_cal_backend_ews_get_object;
 	backend_class->get_object_list = e_cal_backend_ews_get_object_list;
 	backend_class->remove = e_cal_backend_ews_remove;
