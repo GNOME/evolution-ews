@@ -4,7 +4,6 @@
  */
 
 #include <libedataserver/eds-version.h>
-#if ! EDS_CHECK_VERSION(2,33,0)
 
 #include <stdlib.h>
 #include <string.h>
@@ -663,4 +662,3 @@ e_soap_response_dump_response (ESoapResponse *response, FILE *buffer)
 
 	return ret;
 }
-#endif

@@ -4,7 +4,6 @@
  */
 
 #include <libedataserver/eds-version.h>
-#if ! EDS_CHECK_VERSION(2,33,0)
 
 #include <string.h>
 #include <libsoup/soup.h>
@@ -942,4 +941,3 @@ e_soap_message_parse_response (ESoapMessage *msg)
 	return e_soap_response_new_from_xmldoc (xmldoc);
 }
 
-#endif
