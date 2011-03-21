@@ -131,6 +131,8 @@ void		e_ews_connection_get_items_start
 						 const gchar *additional_props,
 						 gboolean include_mime,
 						 GAsyncReadyCallback cb,
+						 ESoapProgressFn progress_fn,
+						 gpointer progress_data,
 						 GCancellable *cancellable,
 						 gpointer user_data);
 
@@ -147,6 +149,8 @@ gboolean	e_ews_connection_get_items	(EEwsConnection *cnc,
 						 const gchar *additional_props,
 						 gboolean include_mime,
 						 GSList **items,
+						 ESoapProgressFn progress_fn,
+						 gpointer progress_data,
 						 GCancellable *cancellable,
 						 GError **error);
 /* Delete folder items */

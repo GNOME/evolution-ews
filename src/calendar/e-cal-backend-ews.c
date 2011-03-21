@@ -1550,7 +1550,7 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 	e_ews_connection_get_items_start	(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
 						 cal_item_ids,
 						 "IdOnly", "item:Attachments item:HasAttachments item:MimeContent",
-						 FALSE, ews_cal_get_items_ready_cb, NULL, 
+						 FALSE, ews_cal_get_items_ready_cb, NULL, NULL, NULL,
 						 (gpointer) sync_data);
 
 exit:

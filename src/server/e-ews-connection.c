@@ -1390,6 +1390,8 @@ e_ews_connection_get_items_start	(EEwsConnection *cnc,
 					 const gchar *additional_props,
 					 gboolean include_mime,
 					 GAsyncReadyCallback cb,
+					 ESoapProgressFn progress_fn,
+					 gpointer progress_data,
 					 GCancellable *cancellable,
 					 gpointer user_data)
 {
@@ -1399,6 +1401,9 @@ e_ews_connection_get_items_start	(EEwsConnection *cnc,
 	GSList *l;
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetItem", NULL, NULL, EWS_EXCHANGE_2007);
+
+	if (progress_fn && progress_data)
+		e_soap_message_set_progress_fn (msg, progress_fn, progress_data);
 
 	e_soap_message_start_element (msg, "ItemShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, default_props);
@@ -1485,6 +1490,8 @@ e_ews_connection_get_items	(EEwsConnection *cnc,
 				 const gchar *additional_props,
 				 gboolean include_mime,
 				 GSList **items, 
+				 ESoapProgressFn progress_fn,
+				 gpointer progress_data,
 				 GCancellable *cancellable,
 				 GError **error)
 {
@@ -1496,7 +1503,9 @@ e_ews_connection_get_items	(EEwsConnection *cnc,
 	
 	e_ews_connection_get_items_start	(cnc, pri,ids, default_props,
 						 additional_props, include_mime,
-						 ews_sync_reply_cb, cancellable,
+						 ews_sync_reply_cb, 
+						 progress_fn, progress_data,
+						 cancellable,
 						 (gpointer) sync_data); 
 		       				 	
 	e_flag_wait (sync_data->eflag);
