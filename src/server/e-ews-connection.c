@@ -29,6 +29,7 @@
 #include <libedataserver/e-flag.h>
 #include "e-ews-message.h"
 #include "e-ews-item-change.h"
+#include "ews-marshal.h"
 
 #define d(x) x
 
@@ -74,6 +75,13 @@ struct _EEwsConnectionPrivate {
 	GSList *active_job_queue;
 	GStaticRecMutex queue_lock;
 };
+
+enum {
+	AUTHENTICATE,
+	LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL];
 
 typedef struct _EwsNode EwsNode;
 typedef struct _EwsAsyncData EwsAsyncData;
@@ -679,6 +687,21 @@ e_ews_connection_class_init (EEwsConnectionClass *klass)
 
 	object_class->dispose = e_ews_connection_dispose;
 	object_class->finalize = e_ews_connection_finalize;
+
+	klass->authenticate = NULL;
+
+       /**
+        * EEwsConnection::authenticate
+        **/
+	signals[AUTHENTICATE] = g_signal_new (
+	      "authenticate",
+	      G_OBJECT_CLASS_TYPE (klass),
+	      G_SIGNAL_RUN_FIRST,
+	      G_STRUCT_OFFSET (EEwsConnectionClass, authenticate),
+	      NULL, NULL,
+	      ews_marshal_VOID__OBJECT_OBJECT_BOOLEAN,
+	      G_TYPE_NONE, 3,
+	      SOUP_TYPE_MESSAGE, SOUP_TYPE_AUTH, G_TYPE_BOOLEAN);
 }
 
 
@@ -729,14 +752,36 @@ ews_connection_authenticate	(SoupSession *sess, SoupMessage *msg,
 {
 	EEwsConnection *cnc = data;
 	
+	printf("%s\n", __func__);
 	if (retrying) {
-		g_print ("Authentication failed.");
+		g_free (cnc->priv->password);
+		cnc->priv->password = NULL;
+	}
+
+	if (cnc->priv->password) {
+		soup_auth_authenticate (auth, cnc->priv->username,
+					cnc->priv->password);
 		return;
 	}
-	soup_auth_authenticate (auth, cnc->priv->username, cnc->priv->password);
+
+	g_signal_emit (cnc, signals[AUTHENTICATE], 0, msg, auth, retrying);
 }
 
+void
+e_ews_connection_authenticate (EEwsConnection *cnc,
+			       SoupAuth *auth, const gchar *user,
+			       const gchar *passwd, GError *error)
+{
+	if (error) {
+		g_warning ("Auth error: %s", error->message);
+		g_clear_error (&error);
+		return;
+	}
 
+	g_free (cnc->priv->password);
+	cnc->priv->password = g_strdup(passwd);
+	soup_auth_authenticate (auth, user, passwd);
+}
 /* Connection APIS */
 
 /**

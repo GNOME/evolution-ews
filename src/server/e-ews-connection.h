@@ -52,6 +52,7 @@ struct _EEwsConnection {
 struct _EEwsConnectionClass {
 	GObjectClass parent_class;
 
+	void (*authenticate) (EEwsConnection *cnc);
 };
 
 enum {
@@ -77,6 +78,11 @@ EEwsConnection *e_ews_connection_new		(const gchar *uri,
 						 GError **error);
 EEwsConnection *e_ews_connection_find		(const gchar *uri,
 						 const gchar *username);
+void		e_ews_connection_authenticate	(EEwsConnection *cnc,
+						 SoupAuth *auth,
+						 const gchar *user,
+						 const gchar *passwd,
+						 GError *error);
 
 typedef void (*EEwsAutoDiscoverCallback) (char *url, gpointer user_data, GError *error);
 void		e_ews_autodiscover_ws_url	(EEwsAutoDiscoverCallback cb,
