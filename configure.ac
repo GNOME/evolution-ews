@@ -107,6 +107,7 @@ dnl i18n stuff
 dnl ************
 IT_PROG_INTLTOOL([0.35.5])
 AM_GLIB_GNU_GETTEXT
+AM_PATH_GLIB_2_0(2.26.0,,,gobject gthread)
 
 GETTEXT_PACKAGE=evolution-ews
 AC_SUBST(GETTEXT_PACKAGE)

@@ -1,5 +1,18 @@
 lib_LTLIBRARIES = libeews-1.2.la
 
+MARSHAL_GENERATED = ews-marshal.c ews-marshal.h
+
+ews-marshal.h: ews-marshal.list
+	$(AM_V_GEN) ( $(GLIB_GENMARSHAL) --prefix=ews_marshal $(srcdir)/ews-marshal.list --header > ews-marshal.tmp \
+	&& mv ews-marshal.tmp ews-marshal.h ) \
+	|| ( rm -f ews-marshal.tmp && exit 1 )
+
+ews-marshal.c: ews-marshal.h
+	$(AM_V_GEN) ( (echo '#include "ews-marshal.h"'; $(GLIB_GENMARSHAL) --prefix=ews_marshal $(srcdir)/ews-marshal.list --body) > ews-marshal.tmp \
+	&& mv ews-marshal.tmp ews-marshal.c ) \
+	|| ( rm -f ews-marshal.tmp && exit 1 )
+
+
 libeews_1_2_la_CPPFLAGS = \
 	$(AM_CPPFLAGS)					\
 	-DG_LOG_DOMAIN=\"libeews\"		\
@@ -25,6 +38,8 @@ libeews_1_2_la_SOURCES =		\
 	e-soap-message.h		\
 	e-soap-response.c		\
 	e-soap-response.h		\
+	ews-marshal.h			\
+	ews-marshal.c			\
 	e-ews-compat.h
 
 libeews_1_2_la_LIBADD =						\
@@ -55,6 +70,6 @@ pkgconfig_DATA = libeews-$(API_VERSION).pc
 EXTRA_DIST = $(pkgconfig_DATA:-$(API_VERSION).pc=.pc.in)
 
 DISTCLEANFILES = $(pkgconfig_DATA)
-
+CLEANFILES = $(MARSHAL_GENERATED)
 
 -include $(top_srcdir)/git.mk
