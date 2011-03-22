@@ -142,61 +142,34 @@ ews_compare_folder_name (gconstpointer a, gconstpointer b)
 	return g_str_equal (aname, bname);
 }
 
-static gboolean
-ews_store_authenticate	(CamelService *service,
-			 GCancellable *cancellable,
-			 GError **error)
+static void 
+ews_store_authenticate	(EEwsConnection *cnc,
+			 SoupMessage *msg, SoupAuth *auth,
+			 gboolean retrying, gpointer data)
 {
-	CamelSession *session;
-	CamelStore *store;
-	CamelEwsStore *ews_store;
-	CamelEwsStorePrivate *priv;
-	gboolean authenticated = FALSE;
-	guint32 prompt_flags = CAMEL_SESSION_PASSWORD_SECRET;
-	
-	session = camel_service_get_session (service);
-	store = CAMEL_STORE (service);
-	ews_store = (CamelEwsStore *) service;
-	priv = ews_store->priv;
-	service->url->passwd = NULL;
+	CamelService *service = data;
+	CamelSession *session = camel_service_get_session (service);
+	GError *error = NULL;
 
-	while (!authenticated) {
+	printf("%s\n", __func__);
+	if (retrying)
+		service->url->passwd = NULL;
 
-		if (!service->url->passwd) {
-			gchar *prompt;
+	if (!service->url->passwd) {
+		gchar *prompt;
 
-			prompt = camel_session_build_password_prompt (
-				"Exchange Web Services", service->url->user, service->url->host);
-			service->url->passwd =
-				camel_session_get_password (session, service, "Exchange Web Services",
-							    prompt, "password", prompt_flags, error);
-			g_free (prompt);
-
-			if (!service->url->passwd) {
-				g_set_error (
-					error, G_IO_ERROR,
-					G_IO_ERROR_CANCELLED,
-					_("You did not enter a password."));
-				return FALSE;
-			}
-		}
-
-		priv->cnc = e_ews_connection_new (priv->host_url, service->url->user, service->url->passwd, error);
-		if (*error) {
-			/*FIXME check for the right code */
-			if ((*error)->code == ERROR_PASSWORDEXPIRED) {
-				/* We need to un-cache the password before prompting again */
-				prompt_flags |= CAMEL_SESSION_PASSWORD_REPROMPT;
-				g_free (service->url->passwd);
-				service->url->passwd = NULL;
-			} else
-				return FALSE;
-		} else
-			authenticated = TRUE;
-
+		prompt = camel_session_build_password_prompt ("Exchange Web Services",
+				      service->url->user, service->url->host);
+		service->url->passwd =
+		camel_session_get_password (session, service, "Exchange Web Services",
+					    prompt, "password",
+					    CAMEL_SESSION_PASSWORD_SECRET,
+					    &error);
+		g_free (prompt);
 	}
 
-	return TRUE;
+	e_ews_connection_authenticate (cnc, auth, service->url->user,
+				       service->url->passwd, error);
 }
 
 static gboolean
@@ -219,11 +192,16 @@ ews_connect_sync (CamelService *service, EVO3(GCancellable *cancellable,) GError
 		return TRUE;
 	}
 
-	if (!ews_store_authenticate (service, cancellable, error)) {
+	priv->cnc = e_ews_connection_new (priv->host_url, service->url->user,
+					  NULL, error);
+
+	if (!priv->cnc) {
 		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 		EVO3_sync(camel_service_disconnect) (service, TRUE, NULL);
 		return FALSE;
 	}
+
+	g_signal_connect (priv->cnc, "authenticate", G_CALLBACK (ews_store_authenticate), service);
 	
 	service->status = CAMEL_SERVICE_CONNECTED;
 	camel_offline_store_set_online_sync (
