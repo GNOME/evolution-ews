@@ -1163,10 +1163,8 @@ convert_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 {
 	EwsModifyData *modify_data = user_data;
 	icalcomponent *icalcomp = e_cal_component_get_icalcomponent (modify_data->comp);
-	time_t t;
-	struct tm *timeinfo;
-	char buff[30];
 	GSList *required = NULL, *optional = NULL, *resource = NULL;
+	icaltimetype dtstart, dtend;
 
 	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
 					 modify_data->itemid, modify_data->changekey, 0);
@@ -1175,15 +1173,16 @@ convert_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 
 	convert_property_to_updatexml  (msg, "Body", icalcomponent_get_description(icalcomp), "item", "BodyType", "Text");
 
-	t = icaltime_as_timet_with_zone (icalcomponent_get_dtstart(icalcomp), icaltimezone_get_utc_timezone ());
-	timeinfo = gmtime(&t);
-	strftime(buff, 30, "%Y-%m-%dT%H:%M:%SZ", timeinfo);
-	convert_property_to_updatexml  (msg, "Start", buff, "calendar", NULL, NULL);
+	dtstart = icalcomponent_get_dtstart (icalcomp);
+	dtend = icalcomponent_get_dtend (icalcomp);
 
-	t = icaltime_as_timet_with_zone(icalcomponent_get_dtend(icalcomp), icaltimezone_get_utc_timezone ());
-	timeinfo = gmtime(&t);
-	strftime(buff, 30, "%Y-%m-%dT%H:%M:%SZ", timeinfo);
-	convert_property_to_updatexml  (msg, "End", buff, "calendar", NULL, NULL);
+	e_ews_message_start_set_item_field (msg, "Start", "calendar");
+	ewscal_set_time (msg, "Start", &dtstart);
+	e_ews_message_end_set_item_field (msg);
+
+	e_ews_message_start_set_item_field (msg, "End", "calendar");
+	ewscal_set_time (msg, "End", &dtend);
+	e_ews_message_end_set_item_field (msg);
 
 	convert_property_to_updatexml  (msg, "Location", icalcomponent_get_location(icalcomp), "calendar", NULL, NULL);
 
@@ -1211,6 +1210,25 @@ convert_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 		g_slist_free(resource);
 
 		e_ews_message_end_set_item_field (msg);
+	}
+
+	if (0 /* Exchange 2010 detected */ && dtstart.zone != dtend.zone) {
+		if (dtstart.zone) {
+			e_ews_message_start_set_item_field (msg, "StartTimeZone", "calendar");
+			ewscal_set_timezone (msg, "StartTimeZone", (icaltimezone *)dtstart.zone);
+			e_ews_message_end_set_item_field (msg);
+		}
+		if (dtend.zone) {
+			e_ews_message_start_set_item_field (msg, "EndTimeZone", "calendar");
+			ewscal_set_timezone (msg, "EndTimeZone", (icaltimezone *)dtend.zone);
+			e_ews_message_end_set_item_field (msg);
+		}
+	} else {
+		if (dtstart.zone) {
+			e_ews_message_start_set_item_field (msg, "MeetingTimeZone", "calendar");
+			ewscal_set_timezone (msg, "MeetingTimeZone", (icaltimezone *)dtstart.zone);
+			e_ews_message_end_set_item_field (msg);
+		}
 	}
 
 	e_ews_message_end_item_change (msg);
