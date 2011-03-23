@@ -12,6 +12,7 @@ ews-marshal.c: ews-marshal.h
 	&& mv ews-marshal.tmp ews-marshal.c ) \
 	|| ( rm -f ews-marshal.tmp && exit 1 )
 
+e-ews-connection.c: $(MARSHAL_GENERATED)
 
 libeews_1_2_la_CPPFLAGS = \
 	$(AM_CPPFLAGS)					\
