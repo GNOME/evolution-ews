@@ -376,7 +376,7 @@ ews_cal_discard_alarm_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	EwsDiscardAlarmData *edad = user_data;
 	GError *error = NULL;
 
-	if (!e_ews_connection_update_items_finish (cnc, res, &error)) {
+	if (!e_ews_connection_update_items_finish (cnc, res, NULL, &error)) {
 		/* The calendar UI doesn't *display* errors unless they have
 		   the OtherError code */
 		error->code = OtherError;
@@ -1113,8 +1113,13 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	ECalBackendEwsPrivate *priv = cbews->priv;
 	GError *error = NULL;
 	gchar *comp_str, *comp_str_old;
+	GSList *ids = NULL;
+	const EwsId *item_id;
+	icalproperty *icalprop;
+	icalcomponent *icalcomp;
+	ECalComponentId *id;
 
-	if (!e_ews_connection_update_items_finish (cnc, res, &error)) {
+	if (!e_ews_connection_update_items_finish (cnc, res, &ids, &error)) {
 		/* The calendar UI doesn't *display* errors unless they have
 		   the OtherError code */
 		error->code = OtherError;
@@ -1123,8 +1128,24 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 
 	e_cal_backend_store_freeze_changes(priv->store);
 
+	item_id = e_ews_item_get_id((EEwsItem *)ids->data);
+
+	/* Update change key. id remains the same, but change key changed.*/
+	icalcomp = e_cal_component_get_icalcomponent (modify_data->comp);
+	icalprop = icalcomponent_get_first_property (icalcomp, ICAL_X_PROPERTY);
+	while (icalprop) {
+		const gchar *x_name;
+		x_name = icalproperty_get_x_name (icalprop);
+		if (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY")) {
+			icalproperty_set_value_from_string (icalprop, item_id->change_key, "NO");
+			break;
+		}
+		icalprop = icalcomponent_get_next_property (icalcomp, ICAL_X_PROPERTY);
+	}
+
 	e_cal_component_commit_sequence (modify_data->comp);
-	e_cal_component_commit_sequence (modify_data->oldcomp);
+	id = e_cal_component_get_id (modify_data->oldcomp);
+	e_cal_backend_store_remove_component (cbews->priv->store, id->uid, id->rid);
 	put_component_to_store (cbews, modify_data->comp);
 
 	comp_str = e_cal_component_get_as_string (modify_data->comp);
@@ -1139,6 +1160,8 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 
 	e_cal_backend_store_thaw_changes (priv->store);
 
+	icalproperty_free (icalprop);
+	e_cal_component_free_id (id);
 	g_free(comp_str);
 	g_free(comp_str_old);
 	g_free(modify_data->itemid);

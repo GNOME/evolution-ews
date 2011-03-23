@@ -426,7 +426,7 @@ ews_sync_mi_flags (CamelFolder *folder, GSList *mi_list, GCancellable *cancellab
 	return e_ews_connection_update_items (cnc, EWS_PRIORITY_LOW,
 					      "AlwaysOverwrite", "SaveOnly",
 					      NULL, NULL,
-					      msg_update_flags, mi_list,
+					      msg_update_flags, mi_list, NULL,
 					      cancellable, error);
 }
 static gboolean

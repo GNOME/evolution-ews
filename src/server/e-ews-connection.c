@@ -1724,13 +1724,14 @@ e_ews_connection_update_items_start	(EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple,
+	ews_connection_queue_request (cnc, msg, get_items_response_cb, pri, cancellable, simple,
 				      cb == ews_sync_reply_cb);
 }
 
 gboolean
 e_ews_connection_update_items_finish	(EEwsConnection *cnc,
 					 GAsyncResult *result,
+					 GSList **ids,
 					 GError **error)
 {
 	GSimpleAsyncResult *simple;
@@ -1746,6 +1747,8 @@ e_ews_connection_update_items_finish	(EEwsConnection *cnc,
 
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
+	if (ids)
+		*ids = async_data->items;
 
 	return TRUE;
 }
@@ -1759,6 +1762,7 @@ e_ews_connection_update_items	(EEwsConnection *cnc,
 				 const gchar *folder_id,
 				 EEwsRequestCreationCallback create_cb,
 				 gpointer create_user_data,
+				 GSList **ids,
 				 GCancellable *cancellable,
 				 GError **error)
 {
@@ -1778,7 +1782,7 @@ e_ews_connection_update_items	(EEwsConnection *cnc,
 	e_flag_wait (sync_data->eflag);
 	
 	result = e_ews_connection_update_items_finish (cnc, sync_data->res,
-						       error);
+						       ids, error);
 	
 	e_flag_free (sync_data->eflag);
 	g_object_unref (sync_data->res);
