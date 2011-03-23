@@ -28,6 +28,8 @@ libeews_1_2_la_CPPFLAGS = \
 libeews_1_2_la_SOURCES =		\
         ews-errors.h			\
         ews-errors.c			\
+	ews-marshal.h			\
+	ews-marshal.c			\
 	e-ews-connection.c		\
 	e-ews-connection.h		\
 	e-ews-folder.c			\
@@ -38,8 +40,6 @@ libeews_1_2_la_SOURCES =		\
 	e-soap-message.h		\
 	e-soap-response.c		\
 	e-soap-response.h		\
-	ews-marshal.h			\
-	ews-marshal.c			\
 	e-ews-compat.h
 
 libeews_1_2_la_LIBADD =						\
