@@ -152,6 +152,7 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	CamelStream *tmp_stream = NULL;
 	GSList *ids = NULL, *items = NULL;
 	EFlag *flag = NULL;
+	gpointer progress_data;
 
 	full_name = camel_folder_get_full_name (folder);
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
@@ -178,10 +179,13 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 
 	cnc = camel_ews_store_get_connection (ews_store);
 	ids = g_slist_append (ids, (gchar *) uid);
+	EVO3(progress_data = cancellable);
+	EVO2(progress_data = camel_operation_registered ());
+
 	e_ews_connection_get_items	(cnc, pri, ids, "IdOnly", "item:MimeContent", TRUE,
 					 &items, 
 					 (ESoapProgressFn)camel_operation_progress,
-					 camel_operation_registered(),
+					 progress_data,
 					 cancellable, error);
 
 	if (error && *error)
