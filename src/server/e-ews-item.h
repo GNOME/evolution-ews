@@ -126,6 +126,10 @@ EwsMailbox *
 
 const GSList *	e_ews_item_get_modified_occurrences
 						(EEwsItem *item);
+const GSList *
+		e_ews_item_get_attachments_ids
+						(EEwsItem *item);
+
 
 G_END_DECLS
 

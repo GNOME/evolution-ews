@@ -727,3 +727,11 @@ e_ews_item_get_modified_occurrences(EEwsItem *item)
 
 	return item->priv->modified_occurrences;
 }
+
+const GSList *
+e_ews_item_get_attachments_ids(EEwsItem *item)
+{
+	g_return_val_if_fail(E_IS_EWS_ITEM(item), NULL);
+
+	return (const GSList *) item->priv->attachments_list;
+}
