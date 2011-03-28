@@ -72,6 +72,7 @@ struct _EEwsItemPrivate {
 	EwsMailbox *sender;
 
 	GSList *modified_occurrences;
+	GSList *attachments_list;
 };
 
 static GObjectClass *parent_class = NULL;
@@ -319,6 +320,29 @@ static void process_modified_occurrences(EEwsItemPrivate *priv, ESoapParameter *
 	return;
 }
 
+static void process_attachments_list(EEwsItemPrivate *priv, ESoapParameter *param) {
+
+	ESoapParameter *subparam, *subparam1;
+	CalendarAttachmentId *calendar_attachment_id;
+	GSList *list = NULL;
+
+	for (subparam = e_soap_parameter_get_first_child (param); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
+
+		calendar_attachment_id = g_new0 (CalendarAttachmentId, 1);
+
+		calendar_attachment_id->type = e_soap_parameter_get_name(subparam);
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "AttachmentId");
+
+		calendar_attachment_id->id = e_soap_parameter_get_property (subparam1, "Id");
+
+		list = g_slist_append (list, calendar_attachment_id);
+	}
+
+	priv->attachments_list = list;
+	return;
+}
+
 static gboolean
 e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 {
@@ -404,6 +428,8 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 			value = e_soap_parameter_get_string_value (subparam);
 			priv->has_attachments = (!g_ascii_strcasecmp (value, "true"));
 			g_free (value);
+		} else if (!g_ascii_strcasecmp (name, "Attachments")) {
+			process_attachments_list(priv, subparam);
 		} else if (!g_ascii_strcasecmp (name, "Sender")) {
 			subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Mailbox");
 			priv->sender = e_ews_item_mailbox_from_soap_param (subparam1);
