@@ -36,7 +36,7 @@ G_BEGIN_DECLS
 typedef struct _EEwsItem        EEwsItem;
 typedef struct _EEwsItemClass   EEwsItemClass;
 typedef struct _EEwsItemPrivate EEwsItemPrivate;
-typedef struct _CalendarAttachmentId CalendarAttachmentId;
+typedef struct _CalendarAttachment CalendarAttachment;
 
 typedef enum {
 	E_EWS_ITEM_TYPE_UNKNOWN,
@@ -77,9 +77,10 @@ typedef struct {
 	gchar *email;
 } EwsMailbox;
 
-struct _CalendarAttachmentId {
+struct _CalendarAttachment {
 	const gchar *type;
 	gchar *id;
+	GObject *data;
 };
 
 GType       	e_ews_item_get_type (void);
@@ -129,6 +130,8 @@ const GSList *	e_ews_item_get_modified_occurrences
 const GSList *
 		e_ews_item_get_attachments_ids
 						(EEwsItem *item);
+GObject *
+e_ews_item_new_file_attachment_from_soap_parameter (ESoapParameter *param);
 
 
 G_END_DECLS

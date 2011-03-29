@@ -323,20 +323,20 @@ static void process_modified_occurrences(EEwsItemPrivate *priv, ESoapParameter *
 static void process_attachments_list(EEwsItemPrivate *priv, ESoapParameter *param) {
 
 	ESoapParameter *subparam, *subparam1;
-	CalendarAttachmentId *calendar_attachment_id;
+	CalendarAttachment *calendar_attachment;
 	GSList *list = NULL;
 
 	for (subparam = e_soap_parameter_get_first_child (param); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
 
-		calendar_attachment_id = g_new0 (CalendarAttachmentId, 1);
+		calendar_attachment = g_new0 (CalendarAttachment, 1);
 
-		calendar_attachment_id->type = e_soap_parameter_get_name(subparam);
+		calendar_attachment->type = e_soap_parameter_get_name(subparam);
 
 		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "AttachmentId");
 
-		calendar_attachment_id->id = e_soap_parameter_get_property (subparam1, "Id");
+		calendar_attachment->id = e_soap_parameter_get_property (subparam1, "Id");
 
-		list = g_slist_append (list, calendar_attachment_id);
+		list = g_slist_append (list, calendar_attachment);
 	}
 
 	priv->attachments_list = list;
@@ -734,4 +734,11 @@ e_ews_item_get_attachments_ids(EEwsItem *item)
 	g_return_val_if_fail(E_IS_EWS_ITEM(item), NULL);
 
 	return (const GSList *) item->priv->attachments_list;
+}
+
+GObject *
+e_ews_item_new_file_attachment_from_soap_parameter (ESoapParameter *param)
+{
+	g_return_val_if_fail (param != NULL, NULL);
+	return NULL;
 }
