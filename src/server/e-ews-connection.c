@@ -30,7 +30,6 @@
 #include "e-ews-message.h"
 #include "e-ews-item-change.h"
 #include "ews-marshal.h"
-#include <libedataserver/e-xml-utils.h>
 
 #define d(x) x
 
@@ -2627,19 +2626,6 @@ e_ews_connection_get_attachments_start	(EEwsConnection *cnc,
 	e_soap_message_end_element (msg);
 
 	e_ews_message_write_footer (msg);
-
-	/* save msg xml file */
-
-	xmlDocPtr doc = e_soap_message_get_xml_doc(msg);
-	xmlChar *xmlbuff;
-	int size;
-	xmlDocDumpFormatMemory(doc, &xmlbuff,&size,1);
-	e_xml_save_file("/home/pavel/getattachments.xml",doc);
-	g_print((gchar *)xmlbuff); g_print("\n");
-	xmlFree(xmlbuff);
-
-	/* end save file*/
-
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
 				      cb,
