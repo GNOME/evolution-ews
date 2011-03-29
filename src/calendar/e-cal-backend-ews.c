@@ -1735,6 +1735,15 @@ e_cal_backend_ews_refresh(ECalBackend *backend, EDataCal *cal, EServerMethodCont
 }
 
 static void
+e_cal_backend_ews_get_free_busy (ECalBackend *backend, EDataCal *cal,
+				 EServerMethodContext context, GList *users,
+				 time_t start, time_t end)
+{
+	/* Implement me */
+	e_data_cal_notify_free_busy (cal, context, NULL, NULL);
+}
+
+static void
 e_cal_backend_ews_dispose (GObject *object)
 {
 	ECalBackendEws *cbews;
@@ -1868,11 +1877,10 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->modify_object = e_cal_backend_ews_modify_object;
 
 	backend_class->remove_object = e_cal_backend_ews_remove_object;
-/*
-	backend_class->receive_objects = e_cal_backend_ews_receive_objects;
-	backend_class->send_objects = e_cal_backend_ews_send_objects;
-	backend_class->get_attachment_list = e_cal_backend_ews_get_attachment_list;
-	backend_class->get_freebusy = e_cal_backend_ews_get_free_busy;
-	backend_class->get_changes = e_cal_backend_ews_get_changes;
-*/
+
+//	backend_class->receive_objects = e_cal_backend_ews_receive_objects;
+//	backend_class->send_objects = e_cal_backend_ews_send_objects;
+//	backend_class->get_attachment_list = e_cal_backend_ews_get_attachment_list;
+	backend_class->get_free_busy = e_cal_backend_ews_get_free_busy;
+//	backend_class->get_changes = e_cal_backend_ews_get_changes;
 }
