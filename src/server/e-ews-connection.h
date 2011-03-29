@@ -132,7 +132,7 @@ gboolean	e_ews_connection_sync_folder_items
 void		e_ews_connection_get_items_start 
 						(EEwsConnection *cnc,
 						 gint pri,
-						 GSList *ids,
+						 const GSList *ids,
 						 const gchar *default_props,
 						 const gchar *additional_props,
 						 gboolean include_mime,
@@ -150,7 +150,7 @@ gboolean	e_ews_connection_get_items_finish
 
 gboolean	e_ews_connection_get_items	(EEwsConnection *cnc,
 						 gint pri, 
-						 GSList *ids,
+						 const GSList *ids,
 						 const gchar *default_props,
 						 const gchar *additional_props,
 						 gboolean include_mime,
