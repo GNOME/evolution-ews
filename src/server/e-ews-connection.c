@@ -1433,7 +1433,7 @@ e_ews_connection_sync_folder_hierarchy	(EEwsConnection *cnc,
 void
 e_ews_connection_get_items_start	(EEwsConnection *cnc,
 					 gint pri,
-					 GSList *ids,
+					 const GSList *ids,
 					 const gchar *default_props,
 					 const gchar *additional_props,
 					 gboolean include_mime,
@@ -1446,7 +1446,7 @@ e_ews_connection_get_items_start	(EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
-	GSList *l;
+	const GSList *l;
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetItem", NULL, NULL, EWS_EXCHANGE_2007);
 
@@ -1533,7 +1533,7 @@ e_ews_connection_get_items_finish	(EEwsConnection *cnc,
 gboolean		
 e_ews_connection_get_items	(EEwsConnection *cnc,
 				 gint pri, 
-				 GSList *ids,
+				 const GSList *ids,
 				 const gchar *default_props,
 				 const gchar *additional_props,
 				 gboolean include_mime,
