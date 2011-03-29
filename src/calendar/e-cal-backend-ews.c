@@ -1371,7 +1371,7 @@ put_component_to_store (ECalBackendEws *cbews,
 }
 
 static void
-add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item)
+add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 {
 	ECalBackendEwsPrivate *priv;
 	icalcomponent_kind kind;
@@ -1406,9 +1406,15 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item)
 
 		item_id = e_ews_item_get_id (item);
 
+		if (uid) {
+			/* Exchange sets RRULE even on the children, which is broken */
+			icalprop = icalcomponent_get_first_property (icalcomp, ICAL_RRULE_PROPERTY);
+			if (icalprop)
+				icalcomponent_remove_property (icalcomp, icalprop);
+		}
 		/* The server sets a UID here, but it bears no relation to the ItemID.
 		   Override it to the ItemId instead. */
-		icalcomponent_set_uid (icalcomp, item_id->id);
+		icalcomponent_set_uid (icalcomp, uid?:item_id->id);
 
 		icalprop = icalproperty_new_x (item_id->change_key);
 		icalproperty_set_x_name (icalprop, "X-EVOLUTION-CHANGEKEY");
@@ -1447,6 +1453,7 @@ struct _ews_sync_data {
 	ECalBackendEws *cbews;
 	gchar *sync_state;
 	gboolean sync_pending;
+	gchar *master_uid;
 };
 
 static void
@@ -1456,7 +1463,7 @@ ews_cal_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
 	GSList *items = NULL, *l;
-	struct _ews_sync_data *sync_data;
+	struct _ews_sync_data *sync_data, *sub_sync_data;
 	GError *error = NULL;
 	
 	sync_data = (struct _ews_sync_data *) user_data;
@@ -1475,18 +1482,39 @@ ews_cal_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 		g_clear_error (&error);
 		goto exit;
 	}
+	
+	/* fetch modified occurrences */
+	for (l = items; l != NULL; l = g_slist_next(l)) {
+		const GSList *modified_occurrences = e_ews_item_get_modified_occurrences (l->data);
+		
+		if (modified_occurrences) {
+			const EwsId *item_id = e_ews_item_get_id (l->data);
+
+			sub_sync_data = g_new0 (struct _ews_sync_data, 1);
+			sub_sync_data->cbews = sync_data->cbews;
+			sub_sync_data->master_uid = g_strdup (item_id->id);
+
+			e_ews_connection_get_items_start(g_object_ref(cnc), EWS_PRIORITY_MEDIUM,
+					modified_occurrences,
+					"IdOnly", "item:Attachments item:HasAttachments item:MimeContent calendar:ModifiedOccurrences",
+					FALSE, ews_cal_get_items_ready_cb, NULL, NULL, NULL,
+					(gpointer) sub_sync_data);
+
+			g_object_unref(cnc);
+		}
+	}
 
 	e_cal_backend_store_freeze_changes (priv->store);
 	for (l = items; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;
 
-		add_item_to_cache (cbews, item)	;
+		add_item_to_cache (cbews, item, sync_data->master_uid);
 		g_object_unref (item);
 	}
 	e_cal_backend_store_thaw_changes (priv->store);
 	/* TODO fetch attachments */	
-
-	e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, sync_data->sync_state);
+	if (sync_data->sync_state)
+		e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, sync_data->sync_state);
 	if (sync_data->sync_pending)
 		e_ews_connection_sync_folder_items_start
 						(g_object_ref (priv->cnc), EWS_PRIORITY_MEDIUM,
@@ -1497,6 +1525,7 @@ ews_cal_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 						 NULL, cbews);
 
 exit:
+	g_free (sync_data->master_uid);
 	g_free (sync_data->sync_state);
 	g_free (sync_data);
 	g_object_unref (cnc);
@@ -1591,7 +1620,7 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 	
 	e_ews_connection_get_items_start	(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
 						 cal_item_ids,
-						 "IdOnly", "item:Attachments item:HasAttachments item:MimeContent",
+						 "IdOnly", "item:Attachments item:HasAttachments item:MimeContent calendar:ModifiedOccurrences",
 						 FALSE, ews_cal_get_items_ready_cb, NULL, NULL, NULL,
 						 (gpointer) sync_data);
 
