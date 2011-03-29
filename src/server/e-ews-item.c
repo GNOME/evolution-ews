@@ -70,6 +70,8 @@ struct _EEwsItemPrivate {
 
 	EwsMailbox *from;
 	EwsMailbox *sender;
+
+	GSList *modified_occurrences;
 };
 
 static GObjectClass *parent_class = NULL;
@@ -118,6 +120,12 @@ e_ews_item_dispose (GObject *object)
 		g_slist_foreach (priv->bcc_recipients, (GFunc) ews_item_free_mailbox, NULL);
 		g_slist_free (priv->bcc_recipients);
 		priv->bcc_recipients = NULL;
+	}
+
+	if (priv->modified_occurrences) {
+		g_slist_foreach (priv->modified_occurrences, (GFunc) g_free, NULL);
+		g_slist_free (priv->modified_occurrences);
+		priv->modified_occurrences = NULL;
 	}
 
 	ews_item_free_mailbox (priv->sender);
@@ -297,6 +305,20 @@ parse_importance (ESoapParameter *param)
 	return importance;
 }
 
+static void process_modified_occurrences(EEwsItemPrivate *priv, ESoapParameter *param) {
+	ESoapParameter *subparam, *subparam1;
+	gchar *modified_occurrence_id;
+
+	for (subparam = e_soap_parameter_get_first_child(param); subparam != NULL; subparam = e_soap_parameter_get_next_child(subparam)) {
+
+		subparam1 = e_soap_parameter_get_first_child_by_name(subparam, "ItemId");
+		modified_occurrence_id = e_soap_parameter_get_property(subparam1, "Id");
+		priv->modified_occurrences = g_slist_append(priv->modified_occurrences, modified_occurrence_id);
+	}
+
+	return;
+}
+
 static gboolean
 e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 {
@@ -425,6 +447,8 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 			priv->references = e_soap_parameter_get_string_value (subparam);
 		} else if (!g_ascii_strcasecmp (name, "ExtendedProperty")) {
 			parse_extended_property (priv, subparam);
+		} else if (!g_ascii_strcasecmp (name, "ModifiedOccurrences")) {
+			process_modified_occurrences(priv, subparam);
 		}
 	}
 
@@ -668,4 +692,12 @@ e_ews_item_mailbox_from_soap_param (ESoapParameter *param)
 		mb->email = e_soap_parameter_get_string_value (subparam);
 
 	return mb;
+}
+
+const GSList *
+e_ews_item_get_modified_occurrences(EEwsItem *item)
+{
+	g_return_val_if_fail(E_IS_EWS_ITEM(item), NULL);
+
+	return item->priv->modified_occurrences;
 }

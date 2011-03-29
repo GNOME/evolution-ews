@@ -118,6 +118,9 @@ EwsMailbox *
 		e_ews_item_mailbox_from_soap_param	
 						(ESoapParameter *param);
 
+const GSList *	e_ews_item_get_modified_occurrences
+						(EEwsItem *item);
+
 G_END_DECLS
 
 #endif
