@@ -421,6 +421,35 @@ gboolean	e_ews_connection_move_items	(EEwsConnection *cnc,
 						 GSList **items_ret,
 						 GCancellable *cancellable,
 						 GError **error);
+/* Get attachments items */
+void		e_ews_connection_get_attachments_start
+						(EEwsConnection *cnc,
+						 gint pri,
+						 GSList *ids,
+						 gboolean include_mime,
+						 GAsyncReadyCallback cb,
+						 ESoapProgressFn progress_fn,
+						 gpointer progress_data,
+						 GCancellable *cancellable,
+						 gpointer user_data);
+
+gboolean	e_ews_connection_get_attachments_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GSList **items,
+						 GError **error);
+
+gboolean	e_ews_connection_get_attachments
+						(EEwsConnection *cnc,
+						 gint pri,
+						 GSList *ids,
+						 gboolean include_mime,
+						 GSList **items,
+						 ESoapProgressFn progress_fn,
+						 gpointer progress_data,
+						 GCancellable *cancellable,
+						 GError **error);
+
 G_END_DECLS
 
 #endif

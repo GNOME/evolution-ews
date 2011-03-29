@@ -30,6 +30,7 @@
 #include "e-ews-message.h"
 #include "e-ews-item-change.h"
 #include "ews-marshal.h"
+#include <libedataserver/e-xml-utils.h>
 
 #define d(x) x
 
@@ -48,8 +49,10 @@ static GHashTable *loaded_connections_permissions = NULL;
 static gboolean ews_next_request (gpointer _cnc);
 static gint comp_func (gconstpointer a, gconstpointer b);
 static GQuark ews_connection_error_quark (void);
+
 typedef void (*response_cb) (ESoapParameter *param, struct _EwsNode *enode);
 static void ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data);
+
 static void 
 ews_connection_authenticate	(SoupSession *sess, SoupMessage *msg,
 				 SoupAuth *auth, gboolean retrying, 
@@ -2584,5 +2587,166 @@ e_ews_connection_delete_folder	(EEwsConnection *cnc,
 	g_free (sync_data);
 
 	return result;
+
+}
+
+static void get_attachments_response_cb (ESoapParameter *subparam, EwsNode *enode);
+
+void
+e_ews_connection_get_attachments_start	(EEwsConnection *cnc,
+					 gint pri,
+					 GSList *ids,
+					 gboolean include_mime,
+					 GAsyncReadyCallback cb,
+					 ESoapProgressFn progress_fn,
+					 gpointer progress_data,
+					 GCancellable *cancellable,
+					 gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+	GSList *l;
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetAttachment", NULL, NULL, EWS_EXCHANGE_2007);
+
+	/* not sure why I need it, need to check */
+	if (progress_fn && progress_data)
+		e_soap_message_set_progress_fn (msg, progress_fn, progress_data);
+
+	/* wrtie empty attachments shape, need to discover maybe usefull in some cases*/
+	e_soap_message_start_element (msg, "AttachmentShape", NULL, NULL);
+	e_soap_message_end_element(msg);
+
+	/* start interation over all items to get the attachemnts */
+	e_soap_message_start_element (msg, "AttachmentIds", NULL, NULL);
+
+	for (l = ids; l != NULL; l = g_slist_next (l))
+		e_ews_message_write_string_parameter_with_attribute (msg, "ItemId", NULL, NULL, "Id", l->data);
+
+	e_soap_message_end_element (msg);
+
+	e_ews_message_write_footer (msg);
+
+	/* save msg xml file */
+
+	xmlDocPtr doc = e_soap_message_get_xml_doc(msg);
+	xmlChar *xmlbuff;
+	int size;
+	xmlDocDumpFormatMemory(doc, &xmlbuff,&size,1);
+	e_xml_save_file("/home/pavel/getattachments.xml",doc);
+	g_print((gchar *)xmlbuff); g_print("\n");
+	xmlFree(xmlbuff);
+
+	/* end save file*/
+
+
+	simple = g_simple_async_result_new (G_OBJECT (cnc),
+				      cb,
+				      user_data,
+				      e_ews_connection_get_attachments_start);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	ews_connection_queue_request (cnc, msg, get_attachments_response_cb, pri,
+				      cancellable, simple, cb == ews_sync_reply_cb);
+}
+
+gboolean
+e_ews_connection_get_attachments_finish	(EEwsConnection *cnc,
+					 GAsyncResult *result,
+					 GSList **items,
+					 GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_get_attachments_start),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	*items = async_data->items;
+
+	return TRUE;
+}
+
+gboolean
+e_ews_connection_get_attachments(EEwsConnection *cnc,
+				 gint pri,
+				 GSList *ids,
+				 gboolean include_mime,
+				 GSList **items,
+				 ESoapProgressFn progress_fn,
+				 gpointer progress_data,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	EwsSyncData *sync_data;
+	gboolean result;
+
+	sync_data = g_new0 (EwsSyncData, 1);
+	sync_data->eflag = e_flag_new ();
+
+	e_ews_connection_get_attachments_start	(cnc, pri,ids, include_mime,
+						 ews_sync_reply_cb,
+						 progress_fn, progress_data,
+						 cancellable,
+						 (gpointer) sync_data);
+
+	e_flag_wait (sync_data->eflag);
+
+	result = e_ews_connection_get_attachments_finish(cnc,
+						    sync_data->res,
+						    items,
+						    error);
+
+	e_flag_free (sync_data->eflag);
+	g_object_unref (sync_data->res);
+	g_free (sync_data);
+
+	return result;
+}
+
+static void
+get_attachments_response_cb (ESoapParameter *param, EwsNode *enode)
+{
+	ESoapParameter *subparam,*subparam1;
+	EwsAsyncData *async_data;
+	CalendarAttachment *calendar_attachment;
+
+	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
+
+	for (subparam = e_soap_parameter_get_first_child (param); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
+
+		calendar_attachment = g_new0 (CalendarAttachment, 1);
+
+		calendar_attachment->type = e_soap_parameter_get_name(subparam);
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "AttachmentId");
+
+		calendar_attachment->id = e_soap_parameter_get_property (subparam1, "Id");
+
+		if (!g_ascii_strcasecmp (calendar_attachment->type, "ItemAttachment")){
+			for (subparam1 = e_soap_parameter_get_first_child (subparam); subparam1 != NULL; subparam1 = e_soap_parameter_get_next_child (subparam1)) {
+				if ((g_ascii_strcasecmp (calendar_attachment->type, "AttachmentId")|| (g_ascii_strcasecmp (calendar_attachment->type, "Name")))){
+					calendar_attachment->data = e_ews_item_new_from_soap_parameter (e_soap_parameter_get_next_child(subparam1));
+					break;
+				}
+			}
+		}
+		else if (!g_ascii_strcasecmp (calendar_attachment->type, "FileAttachment")){
+			calendar_attachment->data = e_ews_item_new_file_attachment_from_soap_parameter(e_soap_parameter_get_next_child(subparam1));
+		}
+		async_data->items = g_slist_append (async_data->items, calendar_attachment);
+	}
 
 }
