@@ -19,6 +19,7 @@ testews_SOURCES = 				\
 		utils.c 			\
 		test-connection.c 		\
 		test-cuditem.c 			\
+		test-getattachment.c 		\
 		test-autocompletion.c		\
 		test-createfolder.c		\
 		test-deletefolder.c		\
