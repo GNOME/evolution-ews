@@ -9,6 +9,9 @@
 
 G_BEGIN_DECLS
 
+GQuark ews_connection_error_quark (void);
+#define EWS_CONNECTION_ERROR (ews_connection_error_quark ())
+
 enum {
 	ERROR_NONE,
 	ERROR_ACCESSDENIED,

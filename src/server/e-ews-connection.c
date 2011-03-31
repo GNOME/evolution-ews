@@ -47,7 +47,6 @@ static GStaticMutex connecting = G_STATIC_MUTEX_INIT;
 static GHashTable *loaded_connections_permissions = NULL;
 static gboolean ews_next_request (gpointer _cnc);
 static gint comp_func (gconstpointer a, gconstpointer b);
-static GQuark ews_connection_error_quark (void);
 
 typedef void (*response_cb) (ESoapParameter *param, struct _EwsNode *enode);
 static void ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data);
@@ -58,9 +57,6 @@ ews_connection_authenticate	(SoupSession *sess, SoupMessage *msg,
 				 gpointer data);
 
 /* Connection APIS */
-
-#define  EWS_CONNECTION_ERROR \
-         (ews_connection_error_quark ())
 
 struct _EEwsConnectionPrivate {
 	SoupSession *soup_session;
@@ -118,7 +114,7 @@ typedef struct {
 
 /* Static Functions */
 
-static GQuark
+GQuark
 ews_connection_error_quark (void)
 {
 	static GQuark quark = 0;
