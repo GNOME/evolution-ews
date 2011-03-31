@@ -67,7 +67,10 @@ struct _ECalBackendEwsPrivate {
 	EEwsConnection *cnc;
 	gchar *folder_id;
 	gchar *user_email;
-	
+
+	EDataCal *opening_cal;
+	EServerMethodContext opening_ctx;
+
 	CalMode mode;
 	ECalBackendStore *store;
 	gboolean read_only;
@@ -109,6 +112,7 @@ struct _ECalBackendEwsPrivate {
 static ECalBackendClass *parent_class = NULL;
 static void ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data);
 static void ews_cal_component_get_item_id (ECalComponent *comp, gchar **itemid, gchar **changekey);
+static gboolean ews_start_sync	(gpointer data);
 
 static void
 switch_offline (ECalBackendEws *cbews)
@@ -601,14 +605,13 @@ e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal, EServerMethodContex
 		e_cal_backend_store_set_default_timezone (priv->store, priv->default_zone);
 	}
 
-	if (priv->mode == CAL_MODE_LOCAL) {
-		PRIV_UNLOCK (priv);
-		goto exit;
-	}
-	
-	if (!priv->cnc) {
+	if (priv->mode != CAL_MODE_LOCAL && !priv->cnc) {
 		ESource *esource;
 		const gchar *host_url;
+
+		/* If we can be called a second time while the first is still
+		   "outstanding", we need a bit of a rethink... */
+		g_assert (!priv->opening_ctx && !priv->opening_cal);
 
 		esource = e_cal_backend_get_source (E_CAL_BACKEND (cbews));
 		
@@ -616,13 +619,22 @@ e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal, EServerMethodContex
 		priv->user_email = e_source_get_duped_property (esource, "email");
 		
 		host_url = e_source_get_property (esource, "hosturl");
+
+		priv->opening_cal = cal;
+		priv->opening_ctx = context;
+
 		priv->cnc = e_ews_connection_new (host_url, username, password,
 						  NULL, NULL, &error);
-	}
-	
-	PRIV_UNLOCK (priv);
+		if (priv->cnc) {
+			/* Trigger an update request, which will test our authentication */
+			ews_start_sync (cbews);
 
-exit:	
+			PRIV_UNLOCK (priv);
+			return;
+		}
+	}
+
+	PRIV_UNLOCK (priv);
 	e_data_cal_notify_open (cal, context, error);
 }
 
@@ -1553,6 +1565,31 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 	e_ews_connection_sync_folder_items_finish	(cnc, res, &sync_state, &includes_last_item,
 							 &items_created, &items_updated,
 							 &items_deleted, &error);
+
+	PRIV_LOCK (priv);
+
+	if (priv->opening_ctx) {
+		/* Report success/failure for calendar open if pending,
+		   translating an authentication failure into something that
+		   will be recognised and handled appropriately */
+		if (error && error->domain == EWS_CONNECTION_ERROR &&
+		    error->code == EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED) {
+			e_data_cal_notify_open(priv->opening_cal, priv->opening_ctx,
+					       EDC_ERROR(AuthenticationFailed));
+		} else {
+			e_data_cal_notify_open(priv->opening_cal, priv->opening_ctx,
+					       error);
+		}
+		priv->opening_ctx = NULL;
+		priv->opening_cal = NULL;
+		if (error) {
+			priv->cnc = NULL;
+			g_object_unref (cnc);
+		}
+
+	}
+	PRIV_UNLOCK (priv);
+
 	if (error != NULL) {
 		g_warning ("Unable to Sync changes %s \n", error->message);
 
