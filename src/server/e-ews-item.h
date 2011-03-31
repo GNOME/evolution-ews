@@ -130,7 +130,7 @@ const GSList *	e_ews_item_get_modified_occurrences
 const GSList *
 		e_ews_item_get_attachments_ids
 						(EEwsItem *item);
-GObject *
+gchar *
 e_ews_item_new_file_attachment_from_soap_parameter (ESoapParameter *param);
 
 

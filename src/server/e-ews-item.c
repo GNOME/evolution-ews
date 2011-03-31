@@ -736,9 +736,47 @@ e_ews_item_get_attachments_ids(EEwsItem *item)
 	return (const GSList *) item->priv->attachments_list;
 }
 
-GObject *
+gchar *
 e_ews_item_new_file_attachment_from_soap_parameter (ESoapParameter *param)
 {
+	ESoapParameter *subparam;
+	const gchar *param_name;
+	gchar *name = NULL, *value, *content = NULL, *filename[256];
+	gsize data_len = 0;
+	int fd;
+
 	g_return_val_if_fail (param != NULL, NULL);
-	return NULL;
+
+	/* Parse element, look for filename and content */
+	for (subparam = e_soap_parameter_get_first_child(param); subparam != NULL; subparam = e_soap_parameter_get_next_child(param)) {
+		param_name = e_soap_parameter_get_name(subparam);
+
+		if (g_ascii_strcasecmp(param_name, "Name") == 0)
+			name = e_soap_parameter_get_string_value(subparam);
+
+		else if (g_ascii_strcasecmp(param_name, "Content") == 0) {
+			value = e_soap_parameter_get_string_value (subparam);
+			content = g_base64_decode (value, &data_len);
+			g_free (value);
+		}
+	}
+
+	/* Make sure we have needed data */
+	if (!content || !name) {
+		g_free(name);
+		g_free(content);
+		return NULL;
+	}
+	
+	/* Save to a file in a temporary directory */
+	snprintf(filename, 256, "/tmp/XXXXXX/%s", name);
+	fd = g_mkstemp(filename);
+	write(fd, content, data_len);
+
+	g_free(name);
+	g_free(content);
+	close(fd);
+
+	/* Return URI to saved file */
+	return g_filename_to_uri(filename, NULL, NULL);
 }
