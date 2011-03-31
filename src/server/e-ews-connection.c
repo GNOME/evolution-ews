@@ -374,6 +374,13 @@ ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 	if (enode->cancellable && g_cancellable_is_cancelled (enode->cancellable))
 		goto exit;
 
+	if (msg->status_code == SOUP_STATUS_UNAUTHORIZED) {
+		g_simple_async_result_set_error (enode->simple,
+						 EWS_CONNECTION_ERROR,
+						 EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED,
+						 _("Authentication failed"));
+		goto exit;
+	}
 	response = e_soap_message_parse_response ((ESoapMessage *) msg);
 	if (!response) {
 		g_simple_async_result_set_error	(enode->simple,
