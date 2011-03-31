@@ -754,7 +754,6 @@ ews_connection_authenticate	(SoupSession *sess, SoupMessage *msg,
 {
 	EEwsConnection *cnc = data;
 	
-	printf("%s\n", __func__);
 	if (retrying) {
 		g_free (cnc->priv->password);
 		cnc->priv->password = NULL;
