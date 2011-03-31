@@ -193,7 +193,7 @@ ews_parse_soap_fault (ESoapResponse *response, GError **error)
 		faultstring = e_soap_parameter_get_string_value(param);
 
 
-	g_set_error (error, EWS_CONNECTION_ERROR, ERROR_UNKNOWN,
+	g_set_error (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_UNKNOWN,
 		     "%s", faultstring?:"No <ResponseMessages> or SOAP <faultstring> in response");
 
 	g_free(faultstring);
@@ -210,7 +210,7 @@ ews_get_response_status (ESoapParameter *param, GError **error)
 
 	if (!g_ascii_strcasecmp (value, "Error")) {
 		gchar *desc, *res;
-		gint error_code = ERROR_UNKNOWN;
+		gint error_code = EWS_CONNECTION_ERROR_UNKNOWN;
 
 		subparam = e_soap_parameter_get_first_child_by_name (param, "MessageText");
 		desc = e_soap_parameter_get_string_value (subparam);
@@ -323,7 +323,7 @@ ews_cancel_request (GCancellable *cancellable,
 
 	g_simple_async_result_set_error	(simple,
 			EWS_CONNECTION_ERROR,
-			ERROR_CANCELLED,
+			EWS_CONNECTION_ERROR_CANCELLED,
 			_("Operation Cancelled"));
 	if (found)
 		soup_session_cancel_message (cnc->priv->soup_session, SOUP_MESSAGE (msg), SOUP_STATUS_CANCELLED);
@@ -378,7 +378,7 @@ ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 	if (!response) {
 		g_simple_async_result_set_error	(enode->simple,
 						 EWS_CONNECTION_ERROR,
-						 ERROR_NORESPONSE,
+						 EWS_CONNECTION_ERROR_NORESPONSE,
 						 _("No response"));
 	} else {
 		ESoapParameter *param, *subparam;
