@@ -779,9 +779,16 @@ e_ews_connection_authenticate (EEwsConnection *cnc,
 		return;
 	}
 
+	if (user) {
+		g_free (cnc->priv->username);
+		cnc->priv->username = g_strdup (user);
+	}
+
 	g_free (cnc->priv->password);
 	cnc->priv->password = g_strdup(passwd);
-	soup_auth_authenticate (auth, user, passwd);
+
+	soup_auth_authenticate (auth, cnc->priv->username,
+				cnc->priv->password);
 }
 /* Connection APIS */
 
