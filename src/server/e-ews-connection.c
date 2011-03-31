@@ -836,7 +836,9 @@ e_ews_connection_find (const gchar *uri, const gchar *username)
  * Returns: EEwsConnection
  **/
 EEwsConnection *
-e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *password, GError **error)
+e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *password, 
+		      GCallback authenticate_cb, gpointer authenticate_ctx,
+		      GError **error)
 {
 	EEwsConnection *cnc;
 	gchar *hash_key;
@@ -865,6 +867,10 @@ e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *pass
 	cnc->priv->password = g_strdup (password);
 	cnc->priv->uri = g_strdup (uri);
 
+	/* register a handler to the authenticate signal */
+	if (authenticate_cb)
+		g_signal_connect (cnc, "authenticate",
+				  authenticate_cb, authenticate_ctx);
 
 	/* add the connection to the loaded_connections_permissions hash table */
 	hash_key = g_strdup_printf ("%s@%s",
@@ -1114,7 +1120,7 @@ e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb, gpointer cbdata,
 	url = g_strdup_printf("https://%s/autodiscover/autodiscover.xml", domain);
 
 	/* FIXME: Get username from config; don't assume same as email */
-	cnc = e_ews_connection_new (url, email, password, &error);
+	cnc = e_ews_connection_new (url, email, password, NULL, NULL, &error);
 	if (!cnc) {
 	err:
 		g_free (email);

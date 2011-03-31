@@ -571,7 +571,8 @@ e_book_backend_ews_authenticate_user (EBookBackend *backend,
 		priv->folder_id = e_source_get_duped_property (esource, "folder-id");
 		host_url = e_source_get_property (esource, "hosturl");
 
-		priv->cnc = e_ews_connection_new (host_url, user, passwd, &error);
+		priv->cnc = e_ews_connection_new (host_url, user, passwd, 
+						  NULL, NULL, &error);
 		e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (SUCCESS));
 		return;
 	default :

@@ -192,8 +192,9 @@ ews_connect_sync (CamelService *service, EVO3(GCancellable *cancellable,) GError
 		return TRUE;
 	}
 
-	priv->cnc = e_ews_connection_new (priv->host_url, service->url->user,
-					  NULL, error);
+	priv->cnc = e_ews_connection_new (priv->host_url, service->url->user, NULL,
+					  G_CALLBACK (ews_store_authenticate), service,
+					  error);
 
 	if (!priv->cnc) {
 		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
@@ -201,8 +202,6 @@ ews_connect_sync (CamelService *service, EVO3(GCancellable *cancellable,) GError
 		return FALSE;
 	}
 
-	g_signal_connect (priv->cnc, "authenticate", G_CALLBACK (ews_store_authenticate), service);
-	
 	service->status = CAMEL_SERVICE_CONNECTED;
 	camel_offline_store_set_online_sync (
 		CAMEL_OFFLINE_STORE (ews_store), TRUE, cancellable, NULL);

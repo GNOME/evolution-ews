@@ -75,6 +75,8 @@ GType		e_ews_connection_get_type	(void);
 EEwsConnection *e_ews_connection_new		(const gchar *uri,
 						 const gchar *username, 
 						 const gchar *password, 
+						 GCallback authenticate_cb,
+						 gpointer authenticate_ctx,
 						 GError **error);
 EEwsConnection *e_ews_connection_find		(const gchar *uri,
 						 const gchar *username);

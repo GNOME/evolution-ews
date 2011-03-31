@@ -616,7 +616,8 @@ e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal, EServerMethodContex
 		priv->user_email = e_source_get_duped_property (esource, "email");
 		
 		host_url = e_source_get_property (esource, "hosturl");
-		priv->cnc = e_ews_connection_new (host_url, username, password, &error);
+		priv->cnc = e_ews_connection_new (host_url, username, password,
+						  NULL, NULL, &error);
 	}
 	
 	PRIV_UNLOCK (priv);
