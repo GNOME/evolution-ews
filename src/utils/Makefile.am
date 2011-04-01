@@ -11,7 +11,9 @@ libewsutils_la_CPPFLAGS = \
 
 libewsutils_la_SOURCES =				\
         ews-esource-utils.h				\
-        ews-esource-utils.c		
+        ews-esource-utils.c				\
+	e-sqlite3-vfs.c					\
+	e-sqlite3-vfs.h
 
 libewsutils_la_LIBADD =					\
 	$(top_builddir)/src/server/libeews-1.2.la 	\
