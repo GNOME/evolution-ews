@@ -1383,6 +1383,90 @@ put_component_to_store (ECalBackendEws *cbews,
 	e_cal_backend_store_put_component_with_time_range (priv->store, comp, time_start, time_end);
 }
 
+typedef struct {
+	ECalComponent *comp;
+	ECalBackendEws *cbews;
+	gchar* itemid;
+} EwsAttachmentData;
+
+static void
+ews_get_attachments_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
+{
+	EEwsConnection *cnc = E_EWS_CONNECTION (object);
+	EwsAttachmentData *att_data = user_data;
+	GError *error = NULL;
+	GSList *uris = NULL;
+	ECalComponentId *id;
+	ECalBackendEws *cbews;
+	gchar *comp_str, *itemid;
+	ECalComponent *comp_att, *cache_comp = NULL;
+
+	e_ews_connection_get_attachments_finish	(cnc, res, &uris, &error);
+
+	if (error != NULL) {
+		error->code = OtherError;
+		return;
+	}
+
+	comp_att = att_data->comp;
+	cbews = att_data->cbews;
+	itemid = att_data->itemid;
+
+	e_cal_component_set_attachment_list (comp_att, uris);
+
+	id = e_cal_component_get_id (comp_att);
+	cache_comp = e_cal_backend_store_get_component (cbews->priv->store, id->uid, id->rid);
+	e_cal_component_free_id (id);
+
+	comp_str = e_cal_component_get_as_string (comp_att);
+	put_component_to_store (cbews, comp_att);
+
+	if (cache_comp) {
+		gchar *cache_str;
+
+		cache_str = e_cal_component_get_as_string (cache_comp);
+		e_cal_backend_notify_object_modified (E_CAL_BACKEND (cbews), cache_str, comp_str);
+
+		g_free (cache_str);
+
+		PRIV_LOCK (cbews->priv);
+		g_hash_table_insert (cbews->priv->item_id_hash, g_strdup (itemid), g_object_ref (comp_att));
+		PRIV_UNLOCK (cbews->priv);
+	}
+
+	g_free(comp_str);
+	g_free(itemid);
+	g_object_unref(att_data->comp);
+	g_free(att_data);
+}
+
+static void
+ews_get_attachments (ECalBackendEws *cbews, EEwsItem *item)
+{
+	gboolean has_attachment = FALSE;
+
+	e_ews_item_has_attachments (item, & has_attachment);
+	if (has_attachment) {
+		const GSList *attachment_ids;
+		const EwsId *item_id;
+		EwsAttachmentData *att_data;
+
+		attachment_ids = e_ews_item_get_attachments_ids (item);
+		item_id = e_ews_item_get_id (item);
+		att_data = g_new0 (EwsAttachmentData, 1);
+		att_data->comp = g_hash_table_lookup (cbews->priv->item_id_hash, item_id->id);
+		att_data->cbews = cbews;
+		att_data->itemid = item_id->id;
+
+		e_ews_connection_get_attachments_start (cbews->priv->cnc, EWS_PRIORITY_MEDIUM,
+							attachment_ids, TRUE,
+							ews_get_attachments_ready_callback,
+							NULL, NULL,
+							NULL, att_data);
+	}
+
+}
+
 static void
 add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 {
@@ -1522,10 +1606,16 @@ ews_cal_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 		EEwsItem *item = (EEwsItem *) l->data;
 
 		add_item_to_cache (cbews, item, sync_data->master_uid);
-		g_object_unref (item);
 	}
 	e_cal_backend_store_thaw_changes (priv->store);
-	/* TODO fetch attachments */	
+
+	for (l = items; l != NULL; l = g_slist_next (l)) {
+		EEwsItem *item = (EEwsItem *) l->data;
+
+		ews_get_attachments (cbews, item);
+		g_object_unref (item);
+	}
+
 	if (sync_data->sync_state)
 		e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, sync_data->sync_state);
 	if (sync_data->sync_pending)
