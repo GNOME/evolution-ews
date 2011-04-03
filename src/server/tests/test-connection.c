@@ -53,7 +53,7 @@ con_test_create_new_connection ()
 	g_assert_cmpstr (password, !=, NULL);
 	g_assert_cmpstr (uri, !=, NULL);
 	
-	cnc = e_ews_connection_new (uri, username, password, NULL);
+	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
 
 	/* Quit the test suite */

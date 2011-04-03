@@ -52,19 +52,7 @@ get_attachments_ready_callback (GObject *object, GAsyncResult *res, gpointer use
 	}
 
 	for (l = ids; l != NULL; l = g_slist_next (l)) {
-		CalendarAttachment *att = (CalendarAttachment *)l->data;
-		g_print ("Got Attachment: \nType is %s \n", att->type);
-		if (!g_ascii_strcasecmp (att->type, "ItemAttachment")) {
-			EEwsItem *item = (EEwsItem *) att->data;
-			if (item) {
-				g_print ("Subject %s\n", e_ews_item_get_subject(item));
-				g_print ("MimeContent %s\n", e_ews_item_get_mime_content(item));
-			}
-		}
-		else if (att->type == "FileAttachment") {
-
-		}
-		break;
+		g_print ("Attachment uri is: %s\n", (gchar *) l->data);
 	}
 
 quit:
@@ -89,11 +77,10 @@ op_test_get_attachments()
 	g_assert_cmpstr (password, !=, NULL);
 	g_assert_cmpstr (uri, !=, NULL);
 
-	cnc = e_ews_connection_new (uri, username, password, NULL);
+	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
 
-	//attachmentid = "AAASAG1hbmR5Lnd1QGludGVsLmNvbQBGAAAAAACdSXexmsgJTpd3WpdX6ulXBwAm9E+BClHfQqEnvCoGvhheAAAAjpb6AADy6etzSLgmT4a2q4FRzi15ABEAn2nlAAABEgAQANZ8v7RLDR9Pnd9QRxPK0c0=";
-	attachmentid = "AAASAG1hbmR5Lnd1QGludGVsLmNvbQBGAAAAAACdSXexmsgJTpd3WpdX6ulXBwAm9E+BClHfQqEnvCoGvhheAAAAjpb6AACIeDU1D80fTrC3245yXdhOADUAPRACAAABEgAQAPyRSkVm3h1Dt6ZAKCTrk1s=";
+	attachmentid = "AAASAG1hbmR5Lnd1QGludGVsLmNvbQBGAAAAAACdSXexmsgJTpd3WpdX6ulXBwAm9E+BClHfQqEnvCoGvhheAAAAjpb6AACIeDU1D80fTrC3245yXdhOADUAPRB8AAABEgAQAHRSNFL/du5AgGUcZnaMNMk=";
 	ids = g_slist_append (ids, (gpointer *)attachmentid);
 
 	e_ews_connection_get_attachments_start	(cnc, EWS_PRIORITY_MEDIUM,
