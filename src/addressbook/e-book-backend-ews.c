@@ -424,7 +424,7 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 	EBookBackendEws *bews;
 	EBookBackendEwsPrivate *priv;
 	const gchar *query;
-	gboolean is_autocompletion;
+	gboolean is_autocompletion = FALSE;
 	gchar *auto_comp_str = NULL;
 	GCancellable *cancellable;
 	GSList *ids = NULL, *mailboxes = NULL, *l;
