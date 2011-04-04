@@ -534,6 +534,7 @@ add_folder_to_summary (CamelEwsStore *store, const gchar *fname, EEwsFolder *fol
 
 struct add_esrc_data {
 	EEwsFolder *folder;
+	gchar *account_uri;
 	gchar *account_name;
 	gchar *username;
 	gchar *email_id;
@@ -546,11 +547,13 @@ static gboolean ews_do_add_esource (gpointer user_data)
 	struct add_esrc_data *add_data = user_data;
 
 
-	ews_esource_utils_add_esource (add_data->folder, add_data->account_name,
+	ews_esource_utils_add_esource (add_data->folder, add_data->account_uri,
+				       add_data->account_name,
 				       add_data->username, add_data->email_id,
 				       add_data->hosturl, add_data->refresh_timeout);
 
 	g_object_unref (add_data->folder);
+	g_free (add_data->account_uri);
 	g_free (add_data->account_name);
 	g_free (add_data->username);
 	g_free (add_data->email_id);
@@ -596,6 +599,7 @@ sync_created_folders (CamelEwsStore *ews_store, GSList *created_folders)
 			CamelURL *url = CAMEL_SERVICE (ews_store)->url;
 
 			add_data->folder = g_object_ref (folder);
+			add_data->account_uri = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
 			add_data->account_name = g_strdup (camel_url_get_param (url, "email"));
 			add_data->username = g_strdup (url->user);
 			/* Duplicate... for now */

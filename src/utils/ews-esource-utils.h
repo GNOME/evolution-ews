@@ -26,6 +26,7 @@ G_BEGIN_DECLS
 
 gboolean
 ews_esource_utils_add_esource	(EEwsFolder *folder, 
+				 const gchar *account_uri,
 				 const gchar *account_name, 
 				 const gchar *username, 
 				 const gchar *email_id,

@@ -100,6 +100,7 @@ ews_ensure_group (ESourceList *source_list, const gchar *account_name)
 
 gboolean
 ews_esource_utils_add_esource	(EEwsFolder *folder, 
+				 const gchar *account_uri,
 				 const gchar *account_name, 
 				 const gchar *username, 
 				 const gchar *email_id,
@@ -114,7 +115,6 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 	GConfClient* client;
 	const gchar *conf_key, *selection_key = NULL;
 	const gchar *source_name;
-	gchar *source_uri;
 	GSList *sources;
 	gboolean ret = TRUE;
 
@@ -142,8 +142,12 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 		goto exit;
 	}
 
-	source_uri = g_strdup_printf("%s/%s", email_id, fid->id);
-	source = e_source_new (source_name, source_uri);
+	/* We use the same URI for all calendars as for the mail, since
+	   there's no other way to set the key used for password storage
+	   in *either* calendar or mail code. Note the tricks we have to
+	   play in the calendar back end to make the cache directory
+	   unique again. */
+	source = e_source_new_with_absolute_uri (source_name, account_uri);
 	e_source_set_property (source, "username", username);
 	e_source_set_property (source, "auth-domain", "Ews");
 	e_source_set_property (source, "folder-id", fid->id);
@@ -174,7 +178,6 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 		g_slist_free (ids);
 	}
 	g_object_unref (source);
-	g_free(source_uri);
 
 exit:
 	g_object_unref (group);
