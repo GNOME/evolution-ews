@@ -654,11 +654,13 @@ camel_ews_store_get_connection (CamelEwsStore *ews_store)
 	return g_object_ref (ews_store->priv->cnc);
 }
 
+#if EDS_CHECK_VERSION (2,33,0)
 static CamelFolder *
 ews_get_trash_folder_sync (CamelStore *store, EVO3(GCancellable *cancellable,) GError **error)
 {
 	return NULL;
 }
+#endif
 
 static gboolean
 ews_can_refresh_folder (CamelStore *store, CamelFolderInfo *info, GError **error)
