@@ -1850,6 +1850,32 @@ e_cal_backend_ews_finalize (GObject *object)
 		(* G_OBJECT_CLASS (parent_class)->finalize) (object);
 }
 
+static void
+e_cal_backend_ews_constructed (GObject *object)
+{
+	ESource *source;
+	const gchar *old_cache_dir;
+	gchar *folder_id, *new_cache_dir;
+
+	source = e_cal_backend_get_source (E_CAL_BACKEND (object));
+
+	if (G_OBJECT_CLASS (parent_class)->constructed)
+		(* G_OBJECT_CLASS (parent_class)->constructed) (object);
+
+	old_cache_dir = e_cal_backend_get_cache_dir (E_CAL_BACKEND (object));
+
+	folder_id = e_source_get_duped_property (source, "folder-id");
+	g_strdelimit (folder_id, "/", '\\');
+
+	new_cache_dir = g_strdup_printf ("%s_%s", old_cache_dir, folder_id);
+
+	e_cal_backend_set_cache_dir (E_CAL_BACKEND (object), new_cache_dir);
+
+	g_free (folder_id);
+	g_free (new_cache_dir);
+}
+
+
 /* Object initialization function for the file backend */
 static void
 e_cal_backend_ews_init (ECalBackendEws *cbews)
@@ -1882,6 +1908,7 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 
 	object_class->dispose = e_cal_backend_ews_dispose;
 	object_class->finalize = e_cal_backend_ews_finalize;
+	object_class->constructed = e_cal_backend_ews_constructed;
 
 	/* Property accessors */
 	backend_class->is_read_only = e_cal_backend_ews_is_read_only;
