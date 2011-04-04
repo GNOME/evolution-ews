@@ -156,9 +156,15 @@ host_url_changed (GtkWidget *entry, EConfig *config)
 	url = camel_url_new (e_account_get_string(target->account, E_ACCOUNT_SOURCE_URL), NULL);
 	domain = gtk_entry_get_text (GTK_ENTRY(entry));
 
-	if (domain && domain[0])
+	if (domain && domain[0]) {
+		CamelURL *hosturl;
 		camel_url_set_param (url, "hosturl", domain);
-	else
+		hosturl = camel_url_new (domain, NULL);
+		if (hosturl) {
+			camel_url_set_host (url, hosturl->host);
+			camel_url_free (hosturl);
+		}
+	} else
 		camel_url_set_param (url, "hosturl", NULL);
 
 	url_string = camel_url_to_string (url, 0);
