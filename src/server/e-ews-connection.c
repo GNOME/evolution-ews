@@ -955,7 +955,7 @@ autodiscover_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 	guint status = msg->status_code;
 	xmlDoc *doc;
 	xmlNode *node;
-	char *asurl;
+	char *asurl = NULL;
 	int idx;
 
 	for (idx = 0; idx < 2; idx++) {
@@ -1036,6 +1036,13 @@ autodiscover_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 			break;
 	}
 
+	if (!asurl) {
+		g_set_error (
+			     &error, EWS_CONNECTION_ERROR,
+			     -1,
+			     _("Failed to find <ASUrl> in autodiscover response"));
+		goto failed;
+	}
 	/* We have a good response; cancel all the others */
 	for (idx = 0; idx < 2; idx++) {
 		if (ad->msgs[idx]) {
