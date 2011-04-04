@@ -2746,7 +2746,7 @@ get_attachments_response_cb (ESoapParameter *param, EwsNode *enode)
 		calendar_attachment->id = e_soap_parameter_get_property (subparam1, "Id");
 
 		if (!g_ascii_strcasecmp (calendar_attachment->type, "ItemAttachment")) {
-			calendar_attachment->data = e_ews_item_new_from_soap_parameter (subparam);
+			calendar_attachment->data = G_OBJECT (e_ews_item_new_from_soap_parameter (subparam));
 		}
 		else if (!g_ascii_strcasecmp (calendar_attachment->type, "FileAttachment")) {
 			calendar_attachment->data = e_ews_item_new_file_attachment_from_soap_parameter(e_soap_parameter_get_next_child(subparam1));
