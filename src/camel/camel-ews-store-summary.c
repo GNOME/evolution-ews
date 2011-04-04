@@ -115,7 +115,7 @@ camel_ews_store_summary_save	(CamelEwsStoreSummary *ews_summary,
 				 GError **error)
 {
 	CamelEwsStoreSummaryPrivate *priv = ews_summary->priv;
-	gboolean ret;
+	gboolean ret = TRUE;
 	GFile *file;
 	gchar *contents = NULL;
 	
