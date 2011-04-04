@@ -73,16 +73,20 @@ void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **op
 		/* figure type of attendee, add to relevant list */
 		param = icalproperty_get_first_parameter(prop, ICAL_ROLE_PARAMETER);
 		switch (icalparameter_get_role(param)) {
-			case ICAL_ROLE_OPTPARTICIPANT:
-				*optional = g_slist_append(*optional, (gpointer)str);
-				break;
-			case ICAL_ROLE_CHAIR:
-			case ICAL_ROLE_REQPARTICIPANT:
-				*required = g_slist_append(*required, (gpointer)str);
-				break;
-			case ICAL_ROLE_NONPARTICIPANT:
-				*resource = g_slist_append(*resource, (gpointer)str);
-				break;
+		case ICAL_ROLE_OPTPARTICIPANT:
+			*optional = g_slist_append(*optional, (gpointer)str);
+			break;
+		case ICAL_ROLE_CHAIR:
+		case ICAL_ROLE_REQPARTICIPANT:
+			*required = g_slist_append(*required, (gpointer)str);
+			break;
+		case ICAL_ROLE_NONPARTICIPANT:
+			*resource = g_slist_append(*resource, (gpointer)str);
+			break;
+		case ICAL_ROLE_X:
+		case ICAL_ROLE_NONE:
+			/* Ignore these for now */
+			break;
 		}
 	}
 }
