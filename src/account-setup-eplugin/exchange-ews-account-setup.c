@@ -240,7 +240,8 @@ org_gnome_exchange_ews_check_options(EPlugin *epl, EConfigHookPageCheckData *dat
 	EMConfigTargetAccount *target = (EMConfigTargetAccount *)(data->config->target);
 	gboolean status = TRUE;
 
-	if (data->pageid != NULL && g_ascii_strcasecmp (data->pageid, "10.receive") == 0) {
+	if (data->pageid == NULL || data->pageid[0] == 0 ||
+	    g_ascii_strcasecmp (data->pageid, "10.receive") == 0) {
 		CamelURL *url = camel_url_new (e_account_get_string(target->account,
 								    E_ACCOUNT_SOURCE_URL), NULL);
 
