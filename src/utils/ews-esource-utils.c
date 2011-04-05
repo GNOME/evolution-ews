@@ -130,7 +130,8 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 		selection_key = SELECTED_TASKS;
 	} else if (ftype == EWS_FOLDER_TYPE_CONTACTS) {
 		conf_key = CONTACT_SOURCES;
-	}
+	} else
+		return FALSE;
 
 	client = gconf_client_get_default ();
 	source_list = e_source_list_new_for_gconf (client, conf_key);
@@ -206,7 +207,8 @@ ews_esource_utils_remove_esource	(const gchar *fid,
 		conf_key = TASKS_SOURCES;
 	} else if (ftype == EWS_FOLDER_TYPE_CONTACTS) {
 		conf_key = CONTACT_SOURCES;
-	}
+	} else
+		return FALSE;
 
 	client = gconf_client_get_default ();
 	source_list = e_source_list_new_for_gconf (client, conf_key);
@@ -245,7 +247,8 @@ ews_source_utils_remove_group (const gchar *account_name, EwsFolderType ftype)
 		conf_key = TASKS_SOURCES;
 	} else if (ftype == EWS_FOLDER_TYPE_CONTACTS) {
 		conf_key = CONTACT_SOURCES;
-	}
+	} else
+		return FALSE;
 
 	client = gconf_client_get_default ();
 	source_list = e_source_list_new_for_gconf (client, conf_key);
