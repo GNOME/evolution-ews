@@ -1521,8 +1521,10 @@ ews_cal_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 	for (l = items; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;
 
-		add_item_to_cache (cbews, item, sync_data->master_uid);
-		g_object_unref (item);
+		if (item) {
+			add_item_to_cache (cbews, item, sync_data->master_uid);
+			g_object_unref (item);
+		}
 	}
 	e_cal_backend_store_thaw_changes (priv->store);
 	/* TODO fetch attachments */	
