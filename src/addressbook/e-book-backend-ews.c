@@ -573,6 +573,8 @@ e_book_backend_ews_authenticate_user (EBookBackend *backend,
 
 		priv->cnc = e_ews_connection_new (host_url, user, passwd, 
 						  NULL, NULL, &error);
+		/* FIXME: Do some dummy request to ensure that the password is actually
+		   correct; don't just blindly return success */
 		e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (SUCCESS));
 		return;
 	default :
