@@ -22,6 +22,10 @@
 #include <config.h>
 #endif
 #include <string.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <libsoup/soup-misc.h>
@@ -104,7 +108,7 @@ e_ews_item_dispose (GObject *object)
 
 	g_free (priv->references);
 	priv->references = NULL;
-	
+
 	if (priv->to_recipients) {
 		g_slist_foreach (priv->to_recipients, (GFunc) ews_item_free_mailbox, NULL);
 		g_slist_free (priv->to_recipients);
@@ -127,6 +131,12 @@ e_ews_item_dispose (GObject *object)
 		g_slist_foreach (priv->modified_occurrences, (GFunc) g_free, NULL);
 		g_slist_free (priv->modified_occurrences);
 		priv->modified_occurrences = NULL;
+	}
+
+	if (priv->attachments_list) {
+		g_slist_foreach (priv->attachments_list, (GFunc) g_free, NULL);
+		g_slist_free (priv->attachments_list);
+		priv->attachments_list = NULL;
 	}
 
 	ews_item_free_mailbox (priv->sender);
@@ -290,14 +300,14 @@ static void parse_extended_property (EEwsItemPrivate *priv, ESoapParameter *para
 	}
 }
 
-static EwsImportance 
+static EwsImportance
 parse_importance (ESoapParameter *param)
 {
 	gchar *value;
 	EwsImportance importance = EWS_ITEM_LOW;
 
 	value = e_soap_parameter_get_string_value (param);
-	
+
 	if (!g_ascii_strcasecmp (value, "Normal"))
 		importance = EWS_ITEM_NORMAL;
 	else if (!g_ascii_strcasecmp (value, "High") )
@@ -323,20 +333,14 @@ static void process_modified_occurrences(EEwsItemPrivate *priv, ESoapParameter *
 static void process_attachments_list(EEwsItemPrivate *priv, ESoapParameter *param) {
 
 	ESoapParameter *subparam, *subparam1;
-	CalendarAttachment *calendar_attachment;
+
 	GSList *list = NULL;
 
 	for (subparam = e_soap_parameter_get_first_child (param); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
 
-		calendar_attachment = g_new0 (CalendarAttachment, 1);
-
-		calendar_attachment->type = e_soap_parameter_get_name(subparam);
-
 		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "AttachmentId");
 
-		calendar_attachment->id = e_soap_parameter_get_property (subparam1, "Id");
-
-		list = g_slist_append (list, calendar_attachment);
+		list = g_slist_append (list, e_soap_parameter_get_property (subparam1, "Id"));
 	}
 
 	priv->attachments_list = list;
@@ -375,7 +379,7 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 		g_warning ("Unable to find the Item type \n");
 		return FALSE;
 	}
-	
+
 	for (subparam = e_soap_parameter_get_first_child (node);
 			subparam != NULL;
 			subparam = e_soap_parameter_get_next_child (subparam)) {
@@ -562,7 +566,7 @@ e_ews_item_get_size	(EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
 
-	return item->priv->size;	
+	return item->priv->size;
 }
 
 const gchar *
@@ -593,7 +597,7 @@ e_ews_item_get_date_received	(EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
 
-	return item->priv->date_received;	
+	return item->priv->date_received;
 }
 
 time_t
@@ -653,7 +657,7 @@ e_ews_item_is_answered		(EEwsItem *item, gboolean *answered)
 }
 
 
-const GSList *	
+const GSList *
 e_ews_item_get_to_recipients	(EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
@@ -661,7 +665,7 @@ e_ews_item_get_to_recipients	(EEwsItem *item)
 	return (const GSList *)	item->priv->to_recipients;
 }
 
-const GSList *	
+const GSList *
 e_ews_item_get_cc_recipients	(EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
@@ -669,7 +673,7 @@ e_ews_item_get_cc_recipients	(EEwsItem *item)
 	return (const GSList *)	item->priv->cc_recipients;
 }
 
-const GSList *	
+const GSList *
 e_ews_item_get_bcc_recipients	(EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
@@ -692,7 +696,7 @@ e_ews_item_get_from		(EEwsItem *item)
 
 	return (const EwsMailbox *) item->priv->from;
 }
-	
+
 EwsImportance
 e_ews_item_get_importance	(EEwsItem *item)
 {
@@ -700,7 +704,7 @@ e_ews_item_get_importance	(EEwsItem *item)
 
 	return item->priv->importance;
 }
-	
+
 EwsMailbox *
 e_ews_item_mailbox_from_soap_param (ESoapParameter *param)
 {
@@ -708,11 +712,11 @@ e_ews_item_mailbox_from_soap_param (ESoapParameter *param)
 	ESoapParameter *subparam;
 
 	mb = g_new0 (EwsMailbox, 1);
-	
+
 	subparam = e_soap_parameter_get_first_child_by_name (param, "Name");
 	if (subparam)
 		mb->name = e_soap_parameter_get_string_value (subparam);
-	
+
 	subparam = e_soap_parameter_get_first_child_by_name (param, "EmailAddress");
 	if (subparam)
 		mb->email = e_soap_parameter_get_string_value (subparam);
@@ -728,32 +732,32 @@ e_ews_item_get_modified_occurrences(EEwsItem *item)
 	return item->priv->modified_occurrences;
 }
 
-const GSList *
+GSList *
 e_ews_item_get_attachments_ids(EEwsItem *item)
 {
 	g_return_val_if_fail(E_IS_EWS_ITEM(item), NULL);
 
-	return (const GSList *) item->priv->attachments_list;
+	return item->priv->attachments_list;
 }
 
 gchar *
-e_ews_item_new_file_attachment_from_soap_parameter (ESoapParameter *param)
+e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gchar *cache)
 {
 	ESoapParameter *subparam;
 	const gchar *param_name;
-	gchar *name = NULL, *value, *content = NULL, *filename[256];
+	gchar *name = NULL, *value, filename[350], *surename, dirname[350];
+	guchar *content = NULL;
 	gsize data_len = 0;
 	int fd;
 
 	g_return_val_if_fail (param != NULL, NULL);
 
 	/* Parse element, look for filename and content */
-	for (subparam = e_soap_parameter_get_first_child(param); subparam != NULL; subparam = e_soap_parameter_get_next_child(param)) {
+	for (subparam = e_soap_parameter_get_first_child(param); subparam != NULL; subparam = e_soap_parameter_get_next_child(subparam)) {
 		param_name = e_soap_parameter_get_name(subparam);
 
 		if (g_ascii_strcasecmp(param_name, "Name") == 0)
 			name = e_soap_parameter_get_string_value(subparam);
-
 		else if (g_ascii_strcasecmp(param_name, "Content") == 0) {
 			value = e_soap_parameter_get_string_value (subparam);
 			content = g_base64_decode (value, &data_len);
@@ -767,12 +771,21 @@ e_ews_item_new_file_attachment_from_soap_parameter (ESoapParameter *param)
 		g_free(content);
 		return NULL;
 	}
-	
-	/* Save to a file in a temporary directory */
-	snprintf(filename, 256, "/tmp/XXXXXX/%s", name);
-	fd = g_mkstemp(filename);
-	write(fd, content, data_len);
 
+	/* Save to a file in a temporary directory */
+	snprintf(dirname, 350, "%s/XXXXXX", cache);
+	mkdtemp(dirname);
+	surename = g_uri_escape_string(name, "", TRUE);
+	snprintf(filename, 350, "%s/%s", dirname, surename);
+	fd = creat(filename, 0600);
+	if (fd == -1) {
+		g_warning("*** Cant Dump File: %s ***\n", strerror(errno));
+	}
+	else {
+		write(fd, content, data_len);
+	}
+
+	g_free(surename);
 	g_free(name);
 	g_free(content);
 	close(fd);
@@ -780,3 +793,33 @@ e_ews_item_new_file_attachment_from_soap_parameter (ESoapParameter *param)
 	/* Return URI to saved file */
 	return g_filename_to_uri(filename, NULL, NULL);
 }
+
+gchar *
+e_ews_item_dump_mime_content(EEwsItem *item, const gchar *cache) {
+	gchar filename[512], *surename, dirname[350];
+	int fd;
+	gsize data_len = 0;
+
+	g_return_val_if_fail (item->priv->mime_content != NULL, NULL);
+
+	/* Save to a file in a temporary directory */
+	data_len = strlen(item->priv->mime_content);
+	snprintf(dirname, 350, "%s/XXXXXX", cache);
+	mkdtemp(dirname);
+	surename = g_uri_escape_string(item->priv->subject, "", TRUE);
+	snprintf(filename, 350, "%s/%s", dirname, surename);
+	fd = creat(filename, 0600);
+	if (fd == -1) {
+		g_warning("*** Cant Dump File: %s ***\n", strerror(errno));
+	}
+	else {
+		write(fd, item->priv->mime_content, data_len);
+	}
+
+	g_free(surename);
+	close(fd);
+
+	/* Return URI to saved file */
+	return g_filename_to_uri(filename, NULL, NULL);
+}
+
