@@ -221,14 +221,21 @@ ews_get_response_status (ESoapParameter *param, GError **error)
 		
 		error_code = ews_get_error_code ((const gchar *) res);
 
-		g_set_error	(error, 
-				 EWS_CONNECTION_ERROR,
-				 error_code,
-				 "%s", desc);
+		/* FIXME: This happens because of a bug in the Exchange server,
+		   which doesn't like returning <Recurrence> for any appointment
+		   without a timezone, even if it's an all day event like a
+		   birthday. We need to handle the error and correctly report it
+		   to the user, but for now we'll just ignore it... */
+		if (error_code != EWS_CONNECTION_ERROR_CORRUPTDATA) {
+			g_set_error	(error, 
+					 EWS_CONNECTION_ERROR,
+					 error_code,
+					 "%s", desc);
+			ret = FALSE;
+		}
 
 		g_free (desc);
 		g_free (res);
-		ret = FALSE;
 	}
 
 	g_free (value);
