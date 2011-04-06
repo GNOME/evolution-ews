@@ -1458,8 +1458,11 @@ ews_get_attachments (ECalBackendEws *cbews, EEwsItem *item)
 		att_data->cbews = cbews;
 		att_data->itemid = item_id->id;
 
-		e_ews_connection_get_attachments_start (cbews->priv->cnc, EWS_PRIORITY_MEDIUM,
-							attachment_ids, TRUE,
+		e_ews_connection_get_attachments_start (cbews->priv->cnc,
+							EWS_PRIORITY_MEDIUM,
+							attachment_ids,
+							e_cal_backend_get_cache_dir(E_CAL_BACKEND(cbews)),
+							TRUE,
 							ews_get_attachments_ready_callback,
 							NULL, NULL,
 							NULL, att_data);
@@ -1606,15 +1609,13 @@ ews_cal_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 		EEwsItem *item = (EEwsItem *) l->data;
 
 		add_item_to_cache (cbews, item, sync_data->master_uid);
+
+		ews_get_attachments (cbews, item);
+
+		g_object_unref (item);
 	}
 	e_cal_backend_store_thaw_changes (priv->store);
 
-	for (l = items; l != NULL; l = g_slist_next (l)) {
-		EEwsItem *item = (EEwsItem *) l->data;
-
-		ews_get_attachments (cbews, item);
-		g_object_unref (item);
-	}
 
 	if (sync_data->sync_state)
 		e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, sync_data->sync_state);
