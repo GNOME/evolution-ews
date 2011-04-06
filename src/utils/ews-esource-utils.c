@@ -115,6 +115,7 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 	GConfClient* client;
 	const gchar *conf_key, *selection_key = NULL;
 	const gchar *source_name;
+	gchar *source_uri;
 	GSList *sources;
 	gboolean ret = TRUE;
 
@@ -148,7 +149,9 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 	   in *either* calendar or mail code. Note the tricks we have to
 	   play in the calendar back end to make the cache directory
 	   unique again. */
-	source = e_source_new_with_absolute_uri (source_name, account_uri);
+	source_uri = g_strdup_printf("%s?folderid=%s", account_uri, fid->id);
+	source = e_source_new_with_absolute_uri (source_name, source_uri);
+	g_free (source_uri);
 	e_source_set_property (source, "username", username);
 	e_source_set_property (source, "auth-domain", "Ews");
 	e_source_set_property (source, "folder-id", fid->id);
