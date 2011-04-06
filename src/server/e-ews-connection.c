@@ -89,6 +89,7 @@ struct _EwsAsyncData {
 	GSList *items_updated;
 	GSList *items_deleted;
 	
+	const gchar *directory;
 	GSList *items;
 	gchar *sync_state;
 	gboolean includes_last_item;
@@ -2616,7 +2617,8 @@ static void get_attachments_response_cb (ESoapParameter *subparam, EwsNode *enod
 void
 e_ews_connection_get_attachments_start	(EEwsConnection *cnc,
 					 gint pri,
-					 GSList *ids,
+					 const GSList *ids,
+					 const gchar *cache,
 					 gboolean include_mime,
 					 GAsyncReadyCallback cb,
 					 ESoapProgressFn progress_fn,
@@ -2627,7 +2629,7 @@ e_ews_connection_get_attachments_start	(EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
-	GSList *l;
+	const GSList *l;
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetAttachment", NULL, NULL, EWS_EXCHANGE_2007);
 
@@ -2637,6 +2639,7 @@ e_ews_connection_get_attachments_start	(EEwsConnection *cnc,
 
 	/* wrtie empty attachments shape, need to discover maybe usefull in some cases*/
 	e_soap_message_start_element (msg, "AttachmentShape", "messages", NULL);
+	e_ews_message_write_string_parameter (msg, "IncludeMimeContent", NULL, "true");
 	e_soap_message_end_element(msg);
 
 	/* start interation over all items to get the attachemnts */
@@ -2655,6 +2658,7 @@ e_ews_connection_get_attachments_start	(EEwsConnection *cnc,
 				      e_ews_connection_get_attachments_start);
 
 	async_data = g_new0 (EwsAsyncData, 1);
+	async_data->directory = cache;
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -2663,7 +2667,7 @@ e_ews_connection_get_attachments_start	(EEwsConnection *cnc,
 }
 
 gboolean
-e_ews_connection_get_attachments_finish	(EEwsConnection *cnc,
+e_ews_connection_get_attachments_finish(EEwsConnection *cnc,
 					 GAsyncResult *result,
 					 GSList **items,
 					 GError **error)
@@ -2672,9 +2676,9 @@ e_ews_connection_get_attachments_finish	(EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 
 	g_return_val_if_fail (
-		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_get_attachments_start),
-		FALSE);
+			g_simple_async_result_is_valid (
+					result, G_OBJECT (cnc), e_ews_connection_get_attachments_start),
+			FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
 	async_data = g_simple_async_result_get_op_res_gpointer (simple);
@@ -2691,6 +2695,7 @@ gboolean
 e_ews_connection_get_attachments(EEwsConnection *cnc,
 				 gint pri,
 				 GSList *ids,
+				 const gchar *cache,
 				 gboolean include_mime,
 				 GSList **items,
 				 ESoapProgressFn progress_fn,
@@ -2704,7 +2709,7 @@ e_ews_connection_get_attachments(EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_get_attachments_start	(cnc, pri,ids, include_mime,
+	e_ews_connection_get_attachments_start	(cnc,pri,ids,cache,include_mime,
 						 ews_sync_reply_cb,
 						 progress_fn, progress_data,
 						 cancellable,
@@ -2729,29 +2734,29 @@ get_attachments_response_cb (ESoapParameter *param, EwsNode *enode)
 {
 	ESoapParameter *subparam,*subparam1, *attspara;
 	EwsAsyncData *async_data;
-	CalendarAttachment *calendar_attachment;
+	gchar *uri = NULL;
+	EEwsItem *item;
+	const gchar *name;
 
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
 
 	attspara = e_soap_parameter_get_first_child_by_name (param, "Attachments");
 
 	for (subparam = e_soap_parameter_get_first_child (attspara); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
-
-		calendar_attachment = g_new0 (CalendarAttachment, 1);
-
-		calendar_attachment->type = e_soap_parameter_get_name(subparam);
-
+		name = e_soap_parameter_get_name(subparam);
 		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "AttachmentId");
 
-		calendar_attachment->id = e_soap_parameter_get_property (subparam1, "Id");
+		if (!g_ascii_strcasecmp (name, "ItemAttachment")) {
+			item = e_ews_item_new_from_soap_parameter(subparam);
+			uri = e_ews_item_dump_mime_content(item, async_data->directory);
 
-		if (!g_ascii_strcasecmp (calendar_attachment->type, "ItemAttachment")) {
-			calendar_attachment->data = G_OBJECT (e_ews_item_new_from_soap_parameter (subparam));
 		}
-		else if (!g_ascii_strcasecmp (calendar_attachment->type, "FileAttachment")) {
-			calendar_attachment->data = e_ews_item_new_file_attachment_from_soap_parameter(e_soap_parameter_get_next_child(subparam1));
+		else if (!g_ascii_strcasecmp (name, "FileAttachment")) {
+			uri = e_ews_dump_file_attachment_from_soap_parameter(subparam, async_data->directory);
 		}
-		async_data->items = g_slist_append (async_data->items, calendar_attachment);
+		if (uri) {
+			async_data->items = g_slist_append (async_data->items, uri);
+			uri = NULL;
+		}
 	}
-
 }
