@@ -152,7 +152,12 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	CamelStream *tmp_stream = NULL;
 	GSList *ids = NULL, *items = NULL;
 	EFlag *flag = NULL;
+	gchar *mime_dir;
+	gchar *cache_file;
+	gchar *dir;
+	const gchar *temp;
 	gpointer progress_data;
+	gboolean res;
 
 	full_name = camel_folder_get_full_name (folder);
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
@@ -182,44 +187,52 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	EVO3(progress_data = cancellable);
 	EVO2(progress_data = camel_operation_registered ());
 
-	e_ews_connection_get_items	(cnc, pri, ids, "IdOnly", "item:MimeContent",
-					 TRUE, NULL,
-					 &items, 
-					 (ESoapProgressFn)camel_operation_progress,
-					 progress_data,
-					 cancellable, error);
+	mime_dir = g_build_filename (camel_data_cache_get_path (ews_folder->cache),
+				     "mimecontent", NULL);
 
-	if (error && *error)
-		goto exit;	
-
-	mime_content = e_ews_item_get_mime_content (items->data);
-	tmp_stream = camel_data_cache_add (ews_folder->cache, "tmp", uid, error);
-	if (!tmp_stream)
+	if (g_access (mime_dir, F_OK) == -1 &&
+	    g_mkdir_with_parents (mime_dir, 0700) == -1) {
+		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			     _("Unable to create cache path"));
+		g_free (mime_dir);
 		goto exit;
-
-	if (camel_stream_write_string (tmp_stream, mime_content,
-				       EVO3(cancellable,) error) < 0)
-		goto exit;
-
-	if (camel_stream_flush (tmp_stream, EVO3(cancellable,) error) == 0 && camel_stream_close (tmp_stream, EVO3(cancellable,) error) == 0) {
-		gchar *tmp, *cache_file, *dir;
-		const gchar *temp;
-		
-		tmp = camel_data_cache_get_filename (ews_folder->cache, "tmp", uid, error);
-		cache_file = camel_data_cache_get_filename  (ews_folder->cache, "cur", uid, error);
-		temp = g_strrstr (cache_file, "/");
-		dir = g_strndup (cache_file, temp - cache_file);
-
-		g_mkdir_with_parents (dir, 0700);
-		g_free (dir);
-		
-		if (g_rename (tmp, cache_file) != 0)
-			g_set_error (
-				error, CAMEL_ERROR, 1,
-				"failed to copy the tmp file");
-		g_free (cache_file);
-		g_free (tmp);
 	}
+
+	res = e_ews_connection_get_items (cnc, pri, ids, "IdOnly", "item:MimeContent",
+					  TRUE, mime_dir,
+					  &items, 
+					  (ESoapProgressFn)camel_operation_progress,
+					  progress_data,
+					  cancellable, error);
+	g_free (mime_dir);
+
+	if (!res)
+		goto exit;
+
+	/* The mime_content actually contains the *filename*, due to the
+	   streaming hack in ESoapMessage */
+	mime_content = e_ews_item_get_mime_content (items->data);
+	cache_file = camel_data_cache_get_filename  (ews_folder->cache, "cur",
+						     uid, error);
+	temp = g_strrstr (cache_file, "/");
+	dir = g_strndup (cache_file, temp - cache_file);
+
+	if (g_mkdir_with_parents (dir, 0700) == -1) {
+		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			     _("Unable to create cache path"));
+		g_free (dir);
+		g_free (cache_file);
+		goto exit;
+	}
+	g_free (dir);
+
+	if (g_rename (mime_content, cache_file) != 0) {
+		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			     _("Failed to move message cache file"));
+		g_free (cache_file);
+		goto exit;
+	}
+	g_free (cache_file);
 
 	message = camel_ews_folder_get_message_from_cache (ews_folder, uid, cancellable, error);
 
