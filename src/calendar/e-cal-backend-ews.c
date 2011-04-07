@@ -1499,12 +1499,34 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 	icalcomp = icalcomponent_get_first_component (vcomp, kind);
 	if (icalcomp) {
 		ECalComponent *comp, *cache_comp = NULL;
-		icalproperty *icalprop;
+		icalproperty *icalprop, *freebusy;
 		const EwsId *item_id;
 		ECalComponentId *id;
 		gchar *comp_str;
 
 		item_id = e_ews_item_get_id (item);
+
+		/* Free/Busy */
+		freebusy = icalcomponent_get_first_property (icalcomp, ICAL_TRANSP_PROPERTY);
+		if (!freebusy) {
+			/* Busy by default */
+			freebusy = icalproperty_new_transp(ICAL_TRANSP_OPAQUE);
+			icalcomponent_add_property (icalcomp, freebusy);
+		}
+		for (icalprop = icalcomponent_get_first_property (icalcomp, ICAL_X_PROPERTY);
+				icalprop != NULL;
+				icalprop = icalcomponent_get_next_property (icalcomp, ICAL_X_PROPERTY)) {
+
+			if (g_strcmp0(icalproperty_get_x_name(icalprop), "X-MICROSOFT-CDO-BUSYSTATUS") == 0) {
+				if (g_strcmp0(icalproperty_get_value_as_string(icalprop), "FREE") == 0) {
+					icalproperty_set_transp(freebusy, ICAL_TRANSP_TRANSPARENT);
+				} else {
+					icalproperty_set_transp(freebusy, ICAL_TRANSP_OPAQUE);
+				}
+
+				break;
+			}
+		}
 
 		if (uid) {
 			/* Exchange sets RRULE even on the children, which is broken */
