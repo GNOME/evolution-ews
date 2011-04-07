@@ -23,6 +23,15 @@ typedef struct {
 	gboolean body_started;
 	gchar *action;
 
+	/* Content stealing */
+	gchar *steal_node;
+	gchar *steal_dir;
+	gboolean steal_base64;
+
+	gint steal_b64_state;
+	guint steal_b64_save;
+	int steal_fd;
+
 	/* Progress callbacks */
 	gsize response_size;
 	gsize response_received;
@@ -51,6 +60,10 @@ finalize (GObject *object)
 	if (priv->env_prefix)
                 xmlFree (priv->env_prefix);
 
+	g_free (priv->steal_node);
+	g_free (priv->steal_dir);
+	if (priv->steal_fd != -1)
+		close (priv->steal_fd);
 	G_OBJECT_CLASS (e_soap_message_parent_class)->finalize (object);
 }
 
@@ -73,6 +86,7 @@ e_soap_message_init (ESoapMessage *msg)
 	priv->doc = xmlNewDoc ((const xmlChar *)"1.0");
 	priv->doc->standalone = FALSE;
 	priv->doc->encoding = xmlCharStrdup ("UTF-8");
+	priv->steal_fd = -1;
 }
 
 static xmlNsPtr
@@ -120,6 +134,75 @@ static void soap_restarted (SoupMessage *msg, gpointer data)
 	}
 }
 
+static void soap_sax_startElementNs (void * _ctxt, 
+				     const xmlChar *localname, 
+				     const xmlChar *prefix, 
+				     const xmlChar *uri, 
+				     int nb_namespaces, 
+				     const xmlChar **namespaces, 
+				     int nb_attributes, 
+				     int nb_defaulted, 
+				     const xmlChar **attributes)
+{
+	xmlParserCtxt *ctxt = _ctxt; 
+	ESoapMessagePrivate *priv = ctxt->_private;
+	gchar *fname;
+
+	xmlSAX2StartElementNs (ctxt, localname, prefix, uri, nb_namespaces,
+			       namespaces, nb_attributes, nb_defaulted,
+			       attributes);
+
+	if (!priv->steal_node || strcmp ((const char *)localname, priv->steal_node))
+		return;
+
+	fname = g_build_filename (priv->steal_dir, "XXXXXX", NULL);
+	priv->steal_fd = g_mkstemp (fname);
+	if (priv->steal_fd != -1) {
+		if (priv->steal_base64) {
+			gchar *enc = g_base64_encode ((guchar *)fname, strlen(fname));
+			xmlSAX2Characters (ctxt, (xmlChar *)enc, strlen (enc));
+			g_free (enc);
+		} else
+			xmlSAX2Characters (ctxt, (xmlChar *)fname, strlen (fname));
+	}
+	g_free (fname);
+}
+
+static void soap_sax_endElementNs (void *_ctxt,
+				   const xmlChar *localname, 
+				   const xmlChar *prefix, 
+				   const xmlChar *uri)
+{
+	xmlParserCtxt *ctxt = _ctxt; 
+	ESoapMessagePrivate *priv = ctxt->_private;
+
+	if (priv->steal_fd != -1) {
+		close (priv->steal_fd);
+		priv->steal_fd = -1;
+	}
+	xmlSAX2EndElementNs (ctxt, localname, prefix, uri);
+}
+
+static void soap_sax_characters (void *_ctxt, const xmlChar *ch, int len)
+{
+	xmlParserCtxt *ctxt = _ctxt; 
+	ESoapMessagePrivate *priv = ctxt->_private;
+
+	if (priv->steal_fd == -1)
+		xmlSAX2Characters (ctxt, ch, len);
+	else if (!priv->steal_base64)
+		write (priv->steal_fd, ch, len);
+	else {
+		guchar *bdata = g_malloc (len);
+		gsize blen;
+
+		blen = g_base64_decode_step ((const gchar *)ch, len,
+					     bdata, &priv->steal_b64_state,
+					     &priv->steal_b64_save);
+		write (priv->steal_fd, bdata, blen);
+		g_free (bdata);
+	}
+}
 static void soap_got_chunk (SoupMessage *msg, SoupBuffer *chunk, gpointer data)
 {
 	ESoapMessagePrivate *priv = E_SOAP_MESSAGE_GET_PRIVATE (msg);
@@ -134,9 +217,14 @@ static void soap_got_chunk (SoupMessage *msg, SoupBuffer *chunk, gpointer data)
 		priv->progress_fn (priv->progress_data, pc);
 	}
 
-	if (!priv->ctxt)
+	if (!priv->ctxt) {
 		priv->ctxt = xmlCreatePushParserCtxt (NULL, msg, chunk->data,
 						      chunk->length, NULL);
+		priv->ctxt->_private = priv;
+		priv->ctxt->sax->startElementNs = soap_sax_startElementNs;
+		priv->ctxt->sax->endElementNs = soap_sax_endElementNs;
+		priv->ctxt->sax->characters = soap_sax_characters;
+	}
 	else
 		xmlParseChunk (priv->ctxt, chunk->data, chunk->length, 0);
 }
@@ -230,6 +318,35 @@ e_soap_message_new_from_uri (const gchar *method, SoupURI *uri,
 	return msg;
 }
 
+/**
+ * e_soap_message_store_node_data:
+ * @msg: the %ESoapMessage.
+ * @nodename: the name of the XML node from which to store data
+ * @directory: cache directory in which to create data files
+ * @base64: flag to request base64 decoding of node content
+ *
+ * This requests that character data for certain XML nodes should
+ * be streamed directly to a disk file as it arrives, rather than
+ * being stored in memory in the soup response buffer.
+ *
+ * Since: xxx
+ */
+
+void
+e_soap_message_store_node_data (ESoapMessage *msg,
+				const gchar *nodename,
+				const gchar *directory,
+				gboolean base64)
+{
+	ESoapMessagePrivate *priv;
+
+	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
+	priv = E_SOAP_MESSAGE_GET_PRIVATE (msg);
+
+	priv->steal_node = g_strdup (nodename);
+	priv->steal_dir = g_strdup (directory);
+	priv->steal_base64 = base64;	       
+}
 
 /**
  * e_soap_message_set_progress_fn:
