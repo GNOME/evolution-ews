@@ -182,7 +182,8 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	EVO3(progress_data = cancellable);
 	EVO2(progress_data = camel_operation_registered ());
 
-	e_ews_connection_get_items	(cnc, pri, ids, "IdOnly", "item:MimeContent", TRUE,
+	e_ews_connection_get_items	(cnc, pri, ids, "IdOnly", "item:MimeContent",
+					 TRUE, NULL,
 					 &items, 
 					 (ESoapProgressFn)camel_operation_progress,
 					 progress_data,
@@ -582,7 +583,7 @@ sync_updated_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *upd
 		e_ews_connection_get_items
 			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
 			 msg_ids, "IdOnly", SUMMARY_MESSAGE_FLAGS,
-			 FALSE, &items, NULL, NULL,
+			 FALSE, NULL, &items, NULL, NULL,
 			 cancellable, error);
 
 	camel_ews_utils_sync_updated_items (ews_folder, items);
@@ -594,7 +595,7 @@ sync_updated_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *upd
 		e_ews_connection_get_items
 			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
 			 generic_item_ids, "IdOnly", SUMMARY_ITEM_FLAGS,
-			 FALSE, &items, NULL, NULL,
+			 FALSE, NULL, &items, NULL, NULL,
 			 cancellable, error);
 	camel_ews_utils_sync_updated_items (ews_folder, items);
 
@@ -636,7 +637,7 @@ sync_created_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *cre
 		e_ews_connection_get_items
 			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
 			 msg_ids, "IdOnly", SUMMARY_MESSAGE_PROPS,
-			 FALSE, &items, NULL, NULL,
+			 FALSE, NULL, &items, NULL, NULL,
 			 cancellable, error);
 
 	if (*error)
@@ -649,7 +650,7 @@ sync_created_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *cre
 		e_ews_connection_get_items
 			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
 			 generic_item_ids, "IdOnly", SUMMARY_ITEM_PROPS,
-			 FALSE, &items, NULL, NULL,
+			 FALSE, NULL, &items, NULL, NULL,
 			 cancellable, error);
 	
 	camel_ews_utils_sync_created_items (ews_folder, items);

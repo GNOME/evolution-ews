@@ -1619,7 +1619,7 @@ ews_cal_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 			e_ews_connection_get_items_start(g_object_ref(cnc), EWS_PRIORITY_MEDIUM,
 					modified_occurrences,
 					"IdOnly", "item:Attachments item:HasAttachments item:MimeContent calendar:ModifiedOccurrences",
-					FALSE, ews_cal_get_items_ready_cb, NULL, NULL, NULL,
+					FALSE, NULL, ews_cal_get_items_ready_cb, NULL, NULL, NULL,
 					(gpointer) sub_sync_data);
 
 			g_object_unref(cnc);
@@ -1772,7 +1772,7 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 	e_ews_connection_get_items_start	(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
 						 cal_item_ids,
 						 "IdOnly", "item:Attachments item:HasAttachments item:MimeContent calendar:ModifiedOccurrences",
-						 FALSE, ews_cal_get_items_ready_cb, NULL, NULL, NULL,
+						 FALSE, NULL, ews_cal_get_items_ready_cb, NULL, NULL, NULL,
 						 (gpointer) sync_data);
 
 exit:
