@@ -458,7 +458,7 @@ sync_xxx_response_cb (ESoapParameter *subparam, EwsNode *enode, ItemParser parse
 {
 	ESoapParameter *node;
 	EwsAsyncData *async_data;
-	gchar *new_sync_state = NULL, *value;
+	gchar *new_sync_state = NULL, *value, *last;
 	GSList *items_created = NULL, *items_updated = NULL, *items_deleted = NULL;
 	gboolean includes_last_item = FALSE;
 
@@ -466,8 +466,10 @@ sync_xxx_response_cb (ESoapParameter *subparam, EwsNode *enode, ItemParser parse
 	new_sync_state = e_soap_parameter_get_string_value (node);
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, last_tag);
-	if (!strcmp (e_soap_parameter_get_string_value (node), "true"))
+	last = e_soap_parameter_get_string_value (node);
+	if (!strcmp (last, "true"))
 		includes_last_item = TRUE;
+	g_free (last);
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "Changes");
 	
