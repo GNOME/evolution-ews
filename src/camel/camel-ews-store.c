@@ -111,13 +111,23 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 
 	/*storage path*/
 	session_storage_path = camel_session_get_storage_path (session, service, error);
-	if (!session_storage_path)
+	if (!session_storage_path) {
+		g_set_error (
+			error, CAMEL_STORE_ERROR,
+			CAMEL_STORE_ERROR_INVALID,
+			_("Session has no storage path"));
 		return FALSE;
+	}
 	ews_store->storage_path = session_storage_path;
 
 	priv->host_url = g_strdup (camel_url_get_param (url, "hosturl"));
-	if (!priv->host_url)
+	if (!priv->host_url) {
+		g_set_error (
+			error, CAMEL_STORE_ERROR,
+			CAMEL_STORE_ERROR_INVALID,
+			_("EWS service has no host URL"));
 		return FALSE;
+	}
 
 	g_mkdir_with_parents (ews_store->storage_path, 0700);
 	summary_file = g_build_filename (ews_store->storage_path, "folder-tree", NULL);
