@@ -413,6 +413,7 @@ e_book_backend_ews_build_restriction (const gchar *query, gboolean *autocompleti
 
 	e_sexp_result_free (sexp, r);
 	e_sexp_unref (sexp);
+	g_free (sdata);
 
 	return NULL;
 }
