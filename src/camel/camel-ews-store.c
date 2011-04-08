@@ -514,6 +514,8 @@ ews_create_folder_sync (CamelStore *store,
 		EVO3(GCancellable *cancellable,)
 		GError **error)
 {
+	g_set_error(error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+		    _("Folder creation not yet implemented"));
 	return NULL;
 }
 
@@ -523,7 +525,9 @@ ews_delete_folder_sync	(CamelStore *store,
 			 EVO3(GCancellable *cancellable,)
 			 GError **error)
 {
-	return TRUE;
+	g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+		     _("Folder deletion not yet implemented"));
+	return FALSE;
 }
 
 struct _rename_cb_data {
