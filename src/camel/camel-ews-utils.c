@@ -1074,9 +1074,9 @@ camel_ews_utils_create_mime_message (EEwsConnection *cnc, const gchar *dispositi
 	}
 
 	if (itemid)
-		*itemid = ewsid->id;
+		*itemid = g_strdup (ewsid->id);
 	if (changekey)
-		*changekey = ewsid->change_key;
+		*changekey = g_strdup (ewsid->change_key);
 
 	g_object_unref (item);
 	g_slist_free (ids);
