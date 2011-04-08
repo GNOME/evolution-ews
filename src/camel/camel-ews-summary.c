@@ -81,6 +81,15 @@ ews_message_info_clone(CamelFolderSummary *s, const CamelMessageInfo *mi)
 }
 
 static void
+ews_message_info_free (CamelFolderSummary *s, CamelMessageInfo *mi)
+{
+	CamelEwsMessageInfo *emi = (void *)mi;
+
+	g_free (emi->change_key);
+	CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->message_info_free (s, mi);
+}
+
+static void
 camel_ews_summary_class_init (CamelEwsSummaryClass *class)
 {
 	CamelFolderSummaryClass *folder_summary_class;
@@ -89,6 +98,7 @@ camel_ews_summary_class_init (CamelEwsSummaryClass *class)
 	folder_summary_class->message_info_size = sizeof (CamelEwsMessageInfo);
 	folder_summary_class->content_info_size = sizeof (CamelEwsMessageContentInfo);
 	folder_summary_class->message_info_clone = ews_message_info_clone;
+	folder_summary_class->message_info_free = ews_message_info_free;
 	folder_summary_class->summary_header_load = ews_summary_header_load;
 	folder_summary_class->summary_header_save = ews_summary_header_save;
 	folder_summary_class->message_info_migrate = ews_message_info_migrate;
