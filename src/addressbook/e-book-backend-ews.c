@@ -459,6 +459,7 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 		
 		e_book_backend_ews_build_restriction (query, &is_autocompletion, &auto_comp_str);
 		if (!is_autocompletion || !auto_comp_str) {
+			g_free (auto_comp_str);
 			e_data_book_view_notify_complete (book_view, error);
 			e_data_book_view_unref (book_view);
 			return;
@@ -481,7 +482,7 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 		e_ews_connection_resolve_names	(priv->cnc, EWS_PRIORITY_MEDIUM, auto_comp_str, 
 						 EWS_SEARCH_AD, NULL, FALSE, &mailboxes, NULL,
 						 &includes_last_item, cancellable, &error);
-		
+		g_free (auto_comp_str);
 		g_hash_table_remove (priv->ops, book_view);
 		e_ews_folder_free_fid (fid);
 		if (error != NULL) {
