@@ -93,6 +93,8 @@ e_ews_item_dispose (GObject *object)
 	priv = item->priv;
 
 	if (priv->item_id) {
+		g_free (priv->item_id->id);
+		g_free (priv->item_id->change_key);
 		g_free (priv->item_id);
 		priv->item_id = NULL;
 	}
