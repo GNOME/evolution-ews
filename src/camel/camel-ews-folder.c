@@ -505,7 +505,7 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 	CamelEwsStore *ews_store;
 	CamelEwsFolder *ews_folder;
 	gchar *summary_file, *state_file;
-	const gchar *short_name;
+	gchar *short_name;
 
 	ews_store = (CamelEwsStore *) store;
 
@@ -516,6 +516,7 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 		"name", short_name, "full-name", folder_name,
 		"parent_store", store, NULL);
 
+	g_free (short_name);
 	ews_folder = CAMEL_EWS_FOLDER(folder);
 
 	summary_file = g_build_filename (folder_dir, "summary", NULL);
@@ -687,7 +688,8 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 	CamelEwsFolderPrivate *priv;
 	EEwsConnection *cnc;
 	CamelEwsStore *ews_store;
-	const gchar *full_name, *id;
+	const gchar *full_name;
+	gchar *id;
 	gchar *sync_state;
 	gboolean includes_last_item = FALSE;
 	GError *rerror = NULL;
@@ -785,6 +787,7 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 	if (sync_state != ((CamelEwsSummary *) folder->summary)->sync_state)
 		g_free(sync_state);
 	g_object_unref (cnc);
+	g_free (id);
 
 	return !rerror;
 }
@@ -798,7 +801,7 @@ ews_append_message_sync (CamelFolder *folder, CamelMimeMessage *message,
 	EVO2(GCancellable *cancellable = NULL;)
 	gchar *itemid, *changekey;
 	const gchar *folder_name;
-	const gchar *folder_id;
+	gchar *folder_id;
 	CamelAddress *from;
 	CamelEwsStore *ews_store;
 	EEwsConnection *cnc;
@@ -820,9 +823,12 @@ ews_append_message_sync (CamelFolder *folder, CamelMimeMessage *message,
 						  camel_message_info_flags (info),
 						  from, &itemid, &changekey,
 						  cancellable, error)) {
+		g_free (folder_id);
 		g_object_unref (cnc);
 		return FALSE;
 	}
+	g_free (folder_id);
+
 	/* FIXME: Do we have to add it to the summary info ourselves?
 	   Hopefully, since we need to store the changekey with it... */
 	if (appended_uid)
@@ -852,7 +858,8 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 	EEwsConnection *cnc;
 	CamelEwsStore *dst_ews_store;
 	CamelFolderChangeInfo *changes = NULL;
-	const gchar *dst_full_name, *dst_id;
+	const gchar *dst_full_name;
+	gchar *dst_id;
 	GError *rerror = NULL;
 	GSList *ids = NULL, *ret_items = NULL;
 	gint i = 0;
@@ -890,6 +897,7 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 			camel_folder_change_info_free (changes);
 		}
 	}
+	g_free (dst_id);
 
 	if (rerror)
 		g_propagate_error (error, rerror);
@@ -914,7 +922,6 @@ ews_expunge_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GError *
 	EVO2(GCancellable *cancellable = NULL);
 	gint i, count;
 	gboolean status = TRUE;
-	const gchar *folder_id;
 	const gchar *full_name;
 	GSList *deleted_items = NULL, *deleted_head = NULL;
 
@@ -927,7 +934,6 @@ ews_expunge_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GError *
 		return FALSE;
 
 	cnc = camel_ews_store_get_connection (ews_store);
-	folder_id =  camel_ews_store_summary_get_folder_id (ews_store->summary, full_name, NULL);
 
 	changes = camel_folder_change_info_new ();
 

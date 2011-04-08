@@ -70,8 +70,8 @@ load_id_fname_hash (CamelEwsStoreSummary *ews_summary)
 		gchar *fname = l->data;
 		gchar *id;
 
-		id = g_strdup (camel_ews_store_summary_get_folder_id	
-						(ews_summary, fname, NULL));
+		id = camel_ews_store_summary_get_folder_id (ews_summary, fname,
+							    NULL);
 
 		g_hash_table_insert (ews_summary->priv->id_fname_hash, id, fname);
 	}
@@ -302,7 +302,7 @@ camel_ews_store_summary_store_string_val	(CamelEwsStoreSummary *ews_summary,
 	S_UNLOCK(ews_summary);
 }
 
-const gchar *	
+gchar *	
 camel_ews_store_summary_get_folder_name	(CamelEwsStoreSummary *ews_summary,
 					 const gchar *folder_full_name,
 					 GError **error)
@@ -319,7 +319,7 @@ camel_ews_store_summary_get_folder_name	(CamelEwsStoreSummary *ews_summary,
 	return ret;
 }
 
-const gchar *	
+gchar *	
 camel_ews_store_summary_get_folder_id	(CamelEwsStoreSummary *ews_summary,
 					 const gchar *folder_full_name,
 					 GError **error)
@@ -336,7 +336,7 @@ camel_ews_store_summary_get_folder_id	(CamelEwsStoreSummary *ews_summary,
 	return ret;
 }
 
-const gchar *	
+gchar *	
 camel_ews_store_summary_get_change_key	(CamelEwsStoreSummary *ews_summary,
 					 const gchar *folder_full_name,
 					 GError **error)
@@ -353,7 +353,7 @@ camel_ews_store_summary_get_change_key	(CamelEwsStoreSummary *ews_summary,
 	return ret;
 }
 
-const gchar *	
+gchar *	
 camel_ews_store_summary_get_sync_state	(CamelEwsStoreSummary *ews_summary,
 					 const gchar *folder_full_name,
 					 GError **error)
@@ -439,7 +439,7 @@ camel_ews_store_summary_get_folder_type		(CamelEwsStoreSummary *ews_summary,
 	return ret;
 }
 
-const gchar *	
+gchar *	
 camel_ews_store_summary_get_string_val	(CamelEwsStoreSummary *ews_summary,
 					 const gchar *key,
 					 GError **error)
@@ -495,13 +495,13 @@ camel_ews_store_summary_remove_folder	(CamelEwsStoreSummary *ews_summary,
 					 GError **error)
 {
 	gboolean ret;
-	const gchar *id;
+	gchar *id;
 	const gchar *old_fname;
 
 	S_LOCK(ews_summary);
 
-	id = camel_ews_store_summary_get_folder_id	(ews_summary, folder_full_name,
-							 NULL);
+	id = camel_ews_store_summary_get_folder_id (ews_summary,
+						    folder_full_name, NULL);
 
 	/* Don't remove the folder name from the hash unless it's actually
 	   *this* folder's name that's in the hash. Otherwise, a folder
@@ -517,6 +517,7 @@ camel_ews_store_summary_remove_folder	(CamelEwsStoreSummary *ews_summary,
 	ews_summary->priv->dirty = TRUE;
 
 	S_UNLOCK(ews_summary);
+	g_free (id);
 
 	return ret;	
 }

@@ -403,7 +403,7 @@ ews_refresh_finfo (CamelSession *session, CamelSessionThreadMsg *msg)
 {
 	struct _ews_refresh_msg *m = (struct _ews_refresh_msg *)msg;
 	CamelEwsStore *ews_store = (CamelEwsStore *) m->store;
-	const gchar *sync_state;
+	gchar *sync_state;
 	struct _store_sync_data *sync_data;
 
 	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (ews_store)))
@@ -419,6 +419,7 @@ ews_refresh_finfo (CamelSession *session, CamelSessionThreadMsg *msg)
 	e_ews_connection_sync_folder_hierarchy_start	(ews_store->priv->cnc, EWS_PRIORITY_MEDIUM, 
 							 sync_state, ews_folder_hierarchy_ready_cb, 
 							 NULL, sync_data);
+	g_free (sync_state);
 }
 
 static void
@@ -482,7 +483,7 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, EV
 	g_slist_foreach (folders, (GFunc)g_free, NULL);
 	g_slist_free (folders);
 	
-	sync_state = (gchar *) camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
+	sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
 
 
 	if (!e_ews_connection_sync_folder_hierarchy (ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
@@ -566,18 +567,21 @@ ews_rename_folder_sync	(CamelStore *store,
 	CamelEwsStoreSummary *ews_summary = ews_store->summary;
 	const gchar *old_slash, *new_slash;
 	EVO2(GCancellable *cancellable = NULL;)
-	const gchar *fid, *changekey;
+	gchar *fid, *changekey;
+	gboolean res = FALSE;
+
+	if (!strcmp (old_name, new_name))
+		return TRUE;
 
 	fid = camel_ews_store_summary_get_folder_id (ews_summary, old_name, error);
 	if (!fid)
 		return FALSE;
 
 	changekey = camel_ews_store_summary_get_change_key (ews_summary, old_name, error);
-	if (!changekey)
+	if (!changekey) {
+		g_free (fid);
 		return FALSE;
-
-	if (!strcmp (old_name, new_name))
-		return TRUE;
+	}
 
 	old_slash = g_strrstr (old_name, "/");
 	new_slash = g_strrstr (new_name, "/");
@@ -615,7 +619,9 @@ ews_rename_folder_sync	(CamelStore *store,
 			g_set_error (error, CAMEL_STORE_ERROR,
 				     CAMEL_STORE_ERROR_INVALID,
 				     _("Cannot both rename and move a folder at the same time"));
-			return FALSE;
+			g_free (fid);
+			g_free (changekey);
+			goto out;
 		}
 
 		rename_data = g_new0 (struct _rename_cb_data, 1);
@@ -626,7 +632,7 @@ ews_rename_folder_sync	(CamelStore *store,
 		if (!e_ews_connection_update_folder (ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
 						     rename_folder_cb, rename_data, cancellable, error)) {
 			g_free (rename_data);
-			return FALSE;
+			goto out;
 		}
 		g_free (rename_data);
 	} else {
@@ -640,16 +646,20 @@ ews_rename_folder_sync	(CamelStore *store,
 			pfid = camel_ews_store_summary_get_folder_id (ews_summary, parent_name, error);
 			g_free (parent_name);
 			if (!pfid)
-				return FALSE;
+				goto out;
 		}
 		if (!e_ews_connection_move_folder (ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
 						   pfid, fid, cancellable, error))
-			return FALSE;
+			goto out;
 	}
 
 	ews_utils_rename_folder (CAMEL_EWS_STORE (store), EWS_FOLDER_TYPE_MAILBOX,
 				 fid, changekey, new_name, old_name, new_slash, NULL);
-	return TRUE;
+	res = TRUE;
+ out:
+	g_free (fid);
+	g_free (changekey);
+	return res;
 }
 
 gchar *
