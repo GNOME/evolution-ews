@@ -2302,9 +2302,11 @@ e_ews_connection_create_folder_start	(EEwsConnection *cnc,
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "CreateFolder", NULL, NULL, EWS_EXCHANGE_2007);
 
 	e_soap_message_start_element (msg, "ParentFolderId", "messages", NULL);
-	
-	if (is_distinguished_id)
-		e_ews_message_write_string_parameter_with_attribute (msg, "DistinguishedFolderId", NULL, NULL, "Id", parent_folder_id);
+
+	/* If NULL passed for parent_folder_id, use "msgfolderroot" */
+	if (is_distinguished_id || !parent_folder_id)
+		e_ews_message_write_string_parameter_with_attribute (msg, "DistinguishedFolderId", NULL, NULL, "Id",
+								     parent_folder_id?:"msgfolderroot");
 	else
 		e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", NULL, NULL, "Id", parent_folder_id);
 		
