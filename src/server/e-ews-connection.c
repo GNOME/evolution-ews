@@ -2650,6 +2650,9 @@ e_ews_connection_get_attachments_start	(EEwsConnection *cnc,
 	if (progress_fn && progress_data)
 		e_soap_message_set_progress_fn (msg, progress_fn, progress_data);
 
+	if (cache)
+		e_soap_message_store_node_data (msg, "MimeContent Content", cache, TRUE);
+
 	/* wrtie empty attachments shape, need to discover maybe usefull in some cases*/
 	e_soap_message_start_element (msg, "AttachmentShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "IncludeMimeContent", NULL, "true");
