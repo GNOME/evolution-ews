@@ -93,9 +93,13 @@ e_ews_item_dispose (GObject *object)
 	priv = item->priv;
 
 	if (priv->item_id) {
+		g_free (priv->item_id->id);
+		g_free (priv->item_id->change_key);
 		g_free (priv->item_id);
 		priv->item_id = NULL;
 	}
+
+	g_free (priv->mime_content);
 
 	g_free (priv->subject);
 	priv->subject = NULL;
@@ -313,6 +317,7 @@ parse_importance (ESoapParameter *param)
 	else if (!g_ascii_strcasecmp (value, "High") )
 		importance = EWS_ITEM_HIGH;
 
+	g_free (value);
 	return importance;
 }
 

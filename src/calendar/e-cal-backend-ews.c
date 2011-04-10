@@ -1456,7 +1456,7 @@ ews_get_attachments (ECalBackendEws *cbews, EEwsItem *item)
 		att_data = g_new0 (EwsAttachmentData, 1);
 		att_data->comp = g_hash_table_lookup (cbews->priv->item_id_hash, item_id->id);
 		att_data->cbews = cbews;
-		att_data->itemid = item_id->id;
+		att_data->itemid = g_strdup (item_id->id);
 
 		e_ews_connection_get_attachments_start (cbews->priv->cnc,
 							EWS_PRIORITY_MEDIUM,
@@ -1563,12 +1563,15 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 			g_free (cache_str);
 		}
 		
+		g_free (comp_str);
+
 		PRIV_LOCK (priv);
 		g_hash_table_insert (priv->item_id_hash, g_strdup (item_id->id), g_object_ref (comp));
 		PRIV_UNLOCK (priv);
 
 		g_object_unref (comp);
 	}
+	icalcomponent_free (vcomp);
 }
 
 struct _ews_sync_data {
@@ -1619,7 +1622,7 @@ ews_cal_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 			e_ews_connection_get_items_start(g_object_ref(cnc), EWS_PRIORITY_MEDIUM,
 					modified_occurrences,
 					"IdOnly", "item:Attachments item:HasAttachments item:MimeContent calendar:ModifiedOccurrences",
-					FALSE, ews_cal_get_items_ready_cb, NULL, NULL, NULL,
+					FALSE, NULL, ews_cal_get_items_ready_cb, NULL, NULL, NULL,
 					(gpointer) sub_sync_data);
 
 			g_object_unref(cnc);
@@ -1772,7 +1775,7 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 	e_ews_connection_get_items_start	(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
 						 cal_item_ids,
 						 "IdOnly", "item:Attachments item:HasAttachments item:MimeContent calendar:ModifiedOccurrences",
-						 FALSE, ews_cal_get_items_ready_cb, NULL, NULL, NULL,
+						 FALSE, NULL, ews_cal_get_items_ready_cb, NULL, NULL, NULL,
 						 (gpointer) sync_data);
 
 exit:

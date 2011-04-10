@@ -308,9 +308,9 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store, const gchar *fname)
 
 	fi = camel_folder_info_new ();
 	fi->full_name = g_strdup (fname);
-	fi->name = g_strdup (camel_ews_store_summary_get_folder_name	(ews_summary,
+	fi->name = camel_ews_store_summary_get_folder_name	(ews_summary,
 				fi->full_name,
-				NULL));
+				NULL);
 	fi->uri = g_strconcat (url, fi->full_name, NULL);
 	fi->flags = camel_ews_store_summary_get_folder_flags	(ews_summary,
 			fi->full_name,
@@ -430,8 +430,8 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 	for (l = updated_folders; l != NULL; l = g_slist_next (l)) {
 		EEwsFolder *ews_folder = (EEwsFolder *)	l->data;
 		EwsFolderType ftype;
-		gchar *folder_name;
-		const gchar *display_name;
+		const gchar *folder_name;
+		gchar *display_name;
 		const EwsFolderId *fid, *pfid;
 
 		ftype = e_ews_folder_get_folder_type (ews_folder);
@@ -443,10 +443,10 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 			continue;
 
 		fid = e_ews_folder_get_id (ews_folder);
-		folder_name = g_strdup(camel_ews_store_summary_get_folder_name_from_id (ews_summary, fid->id));
+		folder_name = camel_ews_store_summary_get_folder_name_from_id (ews_summary, fid->id);
 
 		pfid = e_ews_folder_get_parent_id (ews_folder);
-		display_name = e_ews_folder_get_name (ews_folder);
+		display_name = g_strdup (e_ews_folder_get_name (ews_folder));
 
 		/* If the folder is moved or renamed (which are separate
 		   operations in Exchange, unfortunately, then the name
@@ -494,7 +494,7 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 			g_clear_error (&error);
 		}
  done:
-		g_free (folder_name);
+		g_free (display_name);
 	}
 }
 
@@ -1074,9 +1074,9 @@ camel_ews_utils_create_mime_message (EEwsConnection *cnc, const gchar *dispositi
 	}
 
 	if (itemid)
-		*itemid = ewsid->id;
+		*itemid = g_strdup (ewsid->id);
 	if (changekey)
-		*changekey = ewsid->change_key;
+		*changekey = g_strdup (ewsid->change_key);
 
 	g_object_unref (item);
 	g_slist_free (ids);

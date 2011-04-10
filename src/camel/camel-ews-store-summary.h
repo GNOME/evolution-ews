@@ -77,19 +77,19 @@ void		camel_ews_store_summary_set_folder_type
 						 const gchar *folder_full_name, 
 						 guint64 ews_foldeews_folder_type);
 
-const gchar *	camel_ews_store_summary_get_folder_name
+gchar *	camel_ews_store_summary_get_folder_name
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_full_name,
 						 GError **error);
-const gchar *	camel_ews_store_summary_get_folder_id
+gchar *	camel_ews_store_summary_get_folder_id
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_full_name,
 						 GError **error);
-const gchar *	camel_ews_store_summary_get_change_key
+gchar *	camel_ews_store_summary_get_change_key
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_full_name,
 						 GError **error);
-const gchar *	camel_ews_store_summary_get_sync_state
+gchar *	camel_ews_store_summary_get_sync_state
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_full_name,
 						 GError **error);
@@ -120,7 +120,7 @@ void		camel_ews_store_summary_store_string_val
 						 const gchar *key, 
 						 const gchar *value);
 
-const gchar *	camel_ews_store_summary_get_string_val
+gchar *	camel_ews_store_summary_get_string_val
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *key,
 						 GError **error);

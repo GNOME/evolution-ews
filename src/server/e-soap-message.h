@@ -91,6 +91,11 @@ const gchar       *e_soap_message_get_namespace_prefix (ESoapMessage *msg, const
 
 xmlDocPtr         e_soap_message_get_xml_doc (ESoapMessage *msg);
 
+void		  e_soap_message_store_node_data (ESoapMessage *msg,
+						  const gchar *nodename,
+						  const gchar *directory,
+						  gboolean base64);
+
 ESoapResponse *e_soap_message_parse_response (ESoapMessage *msg);
 
 /* By an amazing coincidence, this looks a lot like camel_progress() */

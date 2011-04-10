@@ -458,7 +458,7 @@ sync_xxx_response_cb (ESoapParameter *subparam, EwsNode *enode, ItemParser parse
 {
 	ESoapParameter *node;
 	EwsAsyncData *async_data;
-	gchar *new_sync_state = NULL, *value;
+	gchar *new_sync_state = NULL, *value, *last;
 	GSList *items_created = NULL, *items_updated = NULL, *items_deleted = NULL;
 	gboolean includes_last_item = FALSE;
 
@@ -466,8 +466,10 @@ sync_xxx_response_cb (ESoapParameter *subparam, EwsNode *enode, ItemParser parse
 	new_sync_state = e_soap_parameter_get_string_value (node);
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, last_tag);
-	if (!strcmp (e_soap_parameter_get_string_value (node), "true"))
+	last = e_soap_parameter_get_string_value (node);
+	if (!strcmp (last, "true"))
 		includes_last_item = TRUE;
+	g_free (last);
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "Changes");
 	
@@ -1466,6 +1468,7 @@ e_ews_connection_get_items_start	(EEwsConnection *cnc,
 					 const gchar *default_props,
 					 const gchar *additional_props,
 					 gboolean include_mime,
+					 const gchar *mime_directory,
 					 GAsyncReadyCallback cb,
 					 ESoapProgressFn progress_fn,
 					 gpointer progress_data,
@@ -1489,7 +1492,9 @@ e_ews_connection_get_items_start	(EEwsConnection *cnc,
 		e_ews_message_write_string_parameter (msg, "IncludeMimeContent", NULL, "true");
 	else
 		e_ews_message_write_string_parameter (msg, "IncludeMimeContent", NULL, "false");
-	
+	if (mime_directory)
+		e_soap_message_store_node_data (msg, "MimeContent", mime_directory, TRUE);
+
 	if (additional_props && *additional_props) {
 		gchar **prop = g_strsplit (additional_props, " ", 0);
 		gint i = 0;
@@ -1566,6 +1571,7 @@ e_ews_connection_get_items	(EEwsConnection *cnc,
 				 const gchar *default_props,
 				 const gchar *additional_props,
 				 gboolean include_mime,
+				 const gchar *mime_directory,
 				 GSList **items, 
 				 ESoapProgressFn progress_fn,
 				 gpointer progress_data,
@@ -1580,7 +1586,7 @@ e_ews_connection_get_items	(EEwsConnection *cnc,
 	
 	e_ews_connection_get_items_start	(cnc, pri,ids, default_props,
 						 additional_props, include_mime,
-						 ews_sync_reply_cb, 
+						 mime_directory, ews_sync_reply_cb, 
 						 progress_fn, progress_data,
 						 cancellable,
 						 (gpointer) sync_data); 

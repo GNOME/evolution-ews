@@ -152,7 +152,12 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	CamelStream *tmp_stream = NULL;
 	GSList *ids = NULL, *items = NULL;
 	EFlag *flag = NULL;
+	gchar *mime_dir;
+	gchar *cache_file;
+	gchar *dir;
+	const gchar *temp;
 	gpointer progress_data;
+	gboolean res;
 
 	full_name = camel_folder_get_full_name (folder);
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
@@ -182,43 +187,52 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	EVO3(progress_data = cancellable);
 	EVO2(progress_data = camel_operation_registered ());
 
-	e_ews_connection_get_items	(cnc, pri, ids, "IdOnly", "item:MimeContent", TRUE,
-					 &items, 
-					 (ESoapProgressFn)camel_operation_progress,
-					 progress_data,
-					 cancellable, error);
+	mime_dir = g_build_filename (camel_data_cache_get_path (ews_folder->cache),
+				     "mimecontent", NULL);
 
-	if (error && *error)
-		goto exit;	
-
-	mime_content = e_ews_item_get_mime_content (items->data);
-	tmp_stream = camel_data_cache_add (ews_folder->cache, "tmp", uid, error);
-	if (!tmp_stream)
+	if (g_access (mime_dir, F_OK) == -1 &&
+	    g_mkdir_with_parents (mime_dir, 0700) == -1) {
+		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			     _("Unable to create cache path"));
+		g_free (mime_dir);
 		goto exit;
-
-	if (camel_stream_write_string (tmp_stream, mime_content,
-				       EVO3(cancellable,) error) < 0)
-		goto exit;
-
-	if (camel_stream_flush (tmp_stream, EVO3(cancellable,) error) == 0 && camel_stream_close (tmp_stream, EVO3(cancellable,) error) == 0) {
-		gchar *tmp, *cache_file, *dir;
-		const gchar *temp;
-		
-		tmp = camel_data_cache_get_filename (ews_folder->cache, "tmp", uid, error);
-		cache_file = camel_data_cache_get_filename  (ews_folder->cache, "cur", uid, error);
-		temp = g_strrstr (cache_file, "/");
-		dir = g_strndup (cache_file, temp - cache_file);
-
-		g_mkdir_with_parents (dir, 0700);
-		g_free (dir);
-		
-		if (g_rename (tmp, cache_file) != 0)
-			g_set_error (
-				error, CAMEL_ERROR, 1,
-				"failed to copy the tmp file");
-		g_free (cache_file);
-		g_free (tmp);
 	}
+
+	res = e_ews_connection_get_items (cnc, pri, ids, "IdOnly", "item:MimeContent",
+					  TRUE, mime_dir,
+					  &items, 
+					  (ESoapProgressFn)camel_operation_progress,
+					  progress_data,
+					  cancellable, error);
+	g_free (mime_dir);
+
+	if (!res)
+		goto exit;
+
+	/* The mime_content actually contains the *filename*, due to the
+	   streaming hack in ESoapMessage */
+	mime_content = e_ews_item_get_mime_content (items->data);
+	cache_file = camel_data_cache_get_filename  (ews_folder->cache, "cur",
+						     uid, error);
+	temp = g_strrstr (cache_file, "/");
+	dir = g_strndup (cache_file, temp - cache_file);
+
+	if (g_mkdir_with_parents (dir, 0700) == -1) {
+		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			     _("Unable to create cache path"));
+		g_free (dir);
+		g_free (cache_file);
+		goto exit;
+	}
+	g_free (dir);
+
+	if (g_rename (mime_content, cache_file) != 0) {
+		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			     _("Failed to move message cache file"));
+		g_free (cache_file);
+		goto exit;
+	}
+	g_free (cache_file);
 
 	message = camel_ews_folder_get_message_from_cache (ews_folder, uid, cancellable, error);
 
@@ -491,7 +505,7 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 	CamelEwsStore *ews_store;
 	CamelEwsFolder *ews_folder;
 	gchar *summary_file, *state_file;
-	const gchar *short_name;
+	gchar *short_name;
 
 	ews_store = (CamelEwsStore *) store;
 
@@ -502,6 +516,7 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 		"name", short_name, "full-name", folder_name,
 		"parent_store", store, NULL);
 
+	g_free (short_name);
 	ews_folder = CAMEL_EWS_FOLDER(folder);
 
 	summary_file = g_build_filename (folder_dir, "summary", NULL);
@@ -582,7 +597,7 @@ sync_updated_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *upd
 		e_ews_connection_get_items
 			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
 			 msg_ids, "IdOnly", SUMMARY_MESSAGE_FLAGS,
-			 FALSE, &items, NULL, NULL,
+			 FALSE, NULL, &items, NULL, NULL,
 			 cancellable, error);
 
 	camel_ews_utils_sync_updated_items (ews_folder, items);
@@ -594,7 +609,7 @@ sync_updated_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *upd
 		e_ews_connection_get_items
 			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
 			 generic_item_ids, "IdOnly", SUMMARY_ITEM_FLAGS,
-			 FALSE, &items, NULL, NULL,
+			 FALSE, NULL, &items, NULL, NULL,
 			 cancellable, error);
 	camel_ews_utils_sync_updated_items (ews_folder, items);
 
@@ -636,7 +651,7 @@ sync_created_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *cre
 		e_ews_connection_get_items
 			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
 			 msg_ids, "IdOnly", SUMMARY_MESSAGE_PROPS,
-			 FALSE, &items, NULL, NULL,
+			 FALSE, NULL, &items, NULL, NULL,
 			 cancellable, error);
 
 	if (*error)
@@ -649,7 +664,7 @@ sync_created_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *cre
 		e_ews_connection_get_items
 			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
 			 generic_item_ids, "IdOnly", SUMMARY_ITEM_PROPS,
-			 FALSE, &items, NULL, NULL,
+			 FALSE, NULL, &items, NULL, NULL,
 			 cancellable, error);
 	
 	camel_ews_utils_sync_created_items (ews_folder, items);
@@ -673,7 +688,8 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 	CamelEwsFolderPrivate *priv;
 	EEwsConnection *cnc;
 	CamelEwsStore *ews_store;
-	const gchar *full_name, *id;
+	const gchar *full_name;
+	gchar *id;
 	gchar *sync_state;
 	gboolean includes_last_item = FALSE;
 	GError *rerror = NULL;
@@ -771,6 +787,7 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 	if (sync_state != ((CamelEwsSummary *) folder->summary)->sync_state)
 		g_free(sync_state);
 	g_object_unref (cnc);
+	g_free (id);
 
 	return !rerror;
 }
@@ -784,7 +801,7 @@ ews_append_message_sync (CamelFolder *folder, CamelMimeMessage *message,
 	EVO2(GCancellable *cancellable = NULL;)
 	gchar *itemid, *changekey;
 	const gchar *folder_name;
-	const gchar *folder_id;
+	gchar *folder_id;
 	CamelAddress *from;
 	CamelEwsStore *ews_store;
 	EEwsConnection *cnc;
@@ -806,9 +823,12 @@ ews_append_message_sync (CamelFolder *folder, CamelMimeMessage *message,
 						  camel_message_info_flags (info),
 						  from, &itemid, &changekey,
 						  cancellable, error)) {
+		g_free (folder_id);
 		g_object_unref (cnc);
 		return FALSE;
 	}
+	g_free (folder_id);
+
 	/* FIXME: Do we have to add it to the summary info ourselves?
 	   Hopefully, since we need to store the changekey with it... */
 	if (appended_uid)
@@ -838,7 +858,8 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 	EEwsConnection *cnc;
 	CamelEwsStore *dst_ews_store;
 	CamelFolderChangeInfo *changes = NULL;
-	const gchar *dst_full_name, *dst_id;
+	const gchar *dst_full_name;
+	gchar *dst_id;
 	GError *rerror = NULL;
 	GSList *ids = NULL, *ret_items = NULL;
 	gint i = 0;
@@ -876,6 +897,7 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 			camel_folder_change_info_free (changes);
 		}
 	}
+	g_free (dst_id);
 
 	if (rerror)
 		g_propagate_error (error, rerror);
@@ -900,7 +922,6 @@ ews_expunge_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GError *
 	EVO2(GCancellable *cancellable = NULL);
 	gint i, count;
 	gboolean status = TRUE;
-	const gchar *folder_id;
 	const gchar *full_name;
 	GSList *deleted_items = NULL, *deleted_head = NULL;
 
@@ -913,7 +934,6 @@ ews_expunge_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GError *
 		return FALSE;
 
 	cnc = camel_ews_store_get_connection (ews_store);
-	folder_id =  camel_ews_store_summary_get_folder_id (ews_store->summary, full_name, NULL);
 
 	changes = camel_folder_change_info_new ();
 
