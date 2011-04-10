@@ -283,6 +283,42 @@ ews_get_folder_sync (CamelStore *store, const gchar *folder_name, guint32 flags,
 }
 
 static CamelFolderInfo *
+folder_info_build(CamelEwsStore *store, const gchar *parent_name, const gchar *folder_name)
+{
+	CamelURL *url;
+	const gchar *name;
+	CamelFolderInfo *fi;
+	CamelEwsStorePrivate *priv = store->priv;
+
+	fi = camel_folder_info_new ();
+
+	fi->unread = -1;
+	fi->total = -1;
+
+	if (parent_name && *parent_name)
+		fi->full_name = g_strconcat (parent_name, "/", folder_name, NULL);
+	else
+		fi->full_name = g_strdup (folder_name);
+
+	url = camel_url_new (priv->host_url, NULL);
+	g_free(url->path);
+
+	url->path = g_strdup_printf("/%s", fi->full_name);
+	fi->uri = camel_url_to_string(url,CAMEL_URL_HIDE_ALL);
+	camel_url_free(url);
+
+	name = strrchr(fi->full_name,'/');
+	if (name == NULL)
+		name = fi->full_name;
+	else
+		name++;
+
+	fi->name = g_strdup (name);
+
+	return fi;
+}
+
+static CamelFolderInfo *
 folder_info_from_store_summary (CamelEwsStore *store, const gchar *top, guint32 flags, GError **error)
 {
 	CamelEwsStoreSummary *ews_summary;
@@ -515,9 +551,34 @@ ews_create_folder_sync (CamelStore *store,
 		EVO3(GCancellable *cancellable,)
 		GError **error)
 {
-	g_set_error(error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-		    _("Folder creation not yet implemented"));
-	return NULL;
+	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
+	CamelEwsStoreSummary *ews_summary = ews_store->summary;
+	gchar *fid;
+	EwsFolderId *folder_id;
+	GCancellable *c = NULL;
+	CamelFolderInfo *root = NULL;
+
+	/* Get Parent folder ID */
+	fid = camel_ews_store_summary_get_folder_id(ews_summary, parent_name, error);
+	if (!fid) return NULL;
+
+	/* Make the call */
+	e_ews_connection_create_folder(ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
+									fid, FALSE, folder_name,
+									&folder_id,
+									c,
+									error);
+	g_free(fid);
+
+	if (error) return NULL;
+
+	/* Translate & store returned folder id */
+	camel_ews_store_summary_new_folder(ews_summary, folder_name, folder_id->id);
+
+	root = folder_info_build(ews_store, parent_name, folder_name);
+
+	camel_store_folder_created (store, root);
+	return root;
 }
 
 static gboolean
