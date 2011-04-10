@@ -587,9 +587,26 @@ ews_delete_folder_sync	(CamelStore *store,
 			 EVO3(GCancellable *cancellable,)
 			 GError **error)
 {
-	g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-		     _("Folder deletion not yet implemented"));
-	return FALSE;
+	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
+	CamelEwsStoreSummary *ews_summary = ews_store->summary;
+	gchar *fid;
+	EwsFolderId *folder_id;
+	GCancellable *c = NULL;
+	CamelFolderInfo *root = NULL;
+	gboolean result;
+
+
+	result = e_ews_connection_delete_folder(ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
+									folder_id->id, FALSE,
+									"HardDelete",
+									c, error);
+
+	if (error) return FALSE;
+
+	camel_ews_store_summary_remove_folder(ews_summary, folder_name, error);
+
+	camel_store_folder_deleted(store, root);
+	return TRUE;
 }
 
 struct _rename_cb_data {
