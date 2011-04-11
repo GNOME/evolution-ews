@@ -553,7 +553,7 @@ ews_create_folder_sync (CamelStore *store,
 {
 	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
 	CamelEwsStoreSummary *ews_summary = ews_store->summary;
-	gchar *fid;
+	gchar *fid, *full_name;
 	EwsFolderId *folder_id;
 	EVO2(GCancellable *cancellable = NULL;)
 	CamelFolderInfo *root = NULL;
@@ -575,16 +575,22 @@ ews_create_folder_sync (CamelStore *store,
 		return NULL;
 
 	/* Translate & store returned folder id */
-	camel_ews_store_summary_new_folder (ews_summary, folder_name,
+	if (parent_name && parent_name[0])
+		full_name = g_strdup_printf ("%s/%s", parent_name, folder_name);
+	else
+		full_name = g_strdup (folder_name);
+
+	camel_ews_store_summary_new_folder (ews_summary, full_name,
 					    folder_id->id);
-	camel_ews_store_summary_set_change_key (ews_summary, folder_name,
-					       folder_id->change_key);
+	camel_ews_store_summary_set_change_key (ews_summary, full_name,
+						folder_id->change_key);
 	e_ews_folder_free_fid (folder_id);
 
 	root = folder_info_build (ews_store, parent_name, folder_name);
 
 	camel_store_folder_created (store, root);
 
+	g_free (full_name);
 	return root;
 }
 
