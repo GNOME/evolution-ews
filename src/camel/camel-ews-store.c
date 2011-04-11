@@ -520,7 +520,7 @@ ews_create_folder_sync (CamelStore *store,
 	gchar *fid, *full_name;
 	EwsFolderId *folder_id;
 	EVO2(GCancellable *cancellable = NULL;)
-	CamelFolderInfo *root = NULL;
+	CamelFolderInfo *fi = NULL;
 	gboolean result;
 
 	/* Get Parent folder ID */
@@ -551,12 +551,12 @@ ews_create_folder_sync (CamelStore *store,
 						folder_id->change_key);
 	e_ews_folder_free_fid (folder_id);
 
-	root = camel_ews_utils_build_folder_info (ews_store, full_name);
+	fi = camel_ews_utils_build_folder_info (ews_store, full_name);
 
-	camel_store_folder_created (store, root);
+	camel_store_folder_created (store, fi);
 
 	g_free (full_name);
-	return root;
+	return fi;
 }
 
 static gboolean
