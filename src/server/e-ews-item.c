@@ -78,6 +78,7 @@ struct _EEwsItemPrivate {
 
 	GSList *modified_occurrences;
 	GSList *attachments_list;
+	GSList *attendees;
 };
 
 static GObjectClass *parent_class = NULL;
@@ -353,6 +354,35 @@ static void process_attachments_list(EEwsItemPrivate *priv, ESoapParameter *para
 	return;
 }
 
+static void process_attendees(EEwsItemPrivate *priv, ESoapParameter *param, const gchar *type) {
+	ESoapParameter *subparam, *subparam1;
+	EwsAttendee *attendee;
+
+	for (subparam = e_soap_parameter_get_first_child(param); subparam != NULL; subparam = e_soap_parameter_get_next_child(subparam)) {
+		EwsMailbox *mailbox = NULL;
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Mailbox");
+		mailbox = e_ews_item_mailbox_from_soap_param (subparam1);
+		/* Ignore attendee if mailbox is not valid,
+		   for instance, ppl that does not exists any more */
+		if (!mailbox)
+			continue;
+
+		attendee = g_new0 (EwsAttendee, 1);
+
+		attendee->mailbox = mailbox;
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "ResponseType");
+		attendee->responsetype = e_soap_parameter_get_string_value (subparam1);
+
+		attendee->attendeetype = (gchar *)type;
+
+		priv->attendees = g_slist_append (priv->attendees, attendee);
+	}
+
+	return;
+}
+
 static gboolean
 e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 {
@@ -485,6 +515,10 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 			parse_extended_property (priv, subparam);
 		} else if (!g_ascii_strcasecmp (name, "ModifiedOccurrences")) {
 			process_modified_occurrences(priv, subparam);
+		} else if (!g_ascii_strcasecmp (name, "RequiredAttendees")) {
+			process_attendees (priv, subparam, "Required");
+		} else if (!g_ascii_strcasecmp (name, "OptionalAttendees")) {
+			process_attendees (priv, subparam, "Optional");
 		}
 	}
 
@@ -717,6 +751,12 @@ e_ews_item_mailbox_from_soap_param (ESoapParameter *param)
 	EwsMailbox *mb;
 	ESoapParameter *subparam;
 
+	/* Return NULL if RoutingType of Mailbox is not SMTP
+		   For instance, people who don't exist any more	*/
+	subparam = e_soap_parameter_get_first_child_by_name (param, "RoutingType");
+	if (g_ascii_strcasecmp (e_soap_parameter_get_string_value (subparam), "SMTP"))
+		return NULL;
+
 	mb = g_new0 (EwsMailbox, 1);
 
 	subparam = e_soap_parameter_get_first_child_by_name (param, "Name");
@@ -826,3 +866,10 @@ e_ews_item_dump_mime_content(EEwsItem *item, const gchar *cache) {
 	return g_filename_to_uri(filename, NULL, NULL);
 }
 
+const GSList *
+e_ews_item_get_attendees (EEwsItem *item)
+{
+	g_return_val_if_fail(E_IS_EWS_ITEM(item), NULL);
+
+	return item->priv->attendees;
+}

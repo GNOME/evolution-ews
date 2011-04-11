@@ -1505,8 +1505,45 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 		const EwsId *item_id;
 		ECalComponentId *id;
 		gchar *comp_str;
+		const GSList *l = NULL;
 
 		item_id = e_ews_item_get_id (item);
+
+		/* Attendees */
+		for (l = e_ews_item_get_attendees (item); l != NULL; l = g_slist_next (l)) {
+			icalparameter *param;
+			char *mailtoname;
+			EwsAttendee *attendee = (EwsAttendee *)l->data;
+
+			mailtoname = g_strdup_printf("mailto:%s", attendee->mailbox->email);
+			icalprop = icalproperty_new_attendee(mailtoname);
+			g_free(mailtoname);
+
+			param = icalparameter_new_cn(attendee->mailbox->name);
+			icalproperty_add_parameter(icalprop, param);
+
+			if (g_ascii_strcasecmp(attendee->attendeetype, "Required") == 0)
+				param = icalparameter_new_role(ICAL_ROLE_REQPARTICIPANT);
+			else
+				param = icalparameter_new_role(ICAL_ROLE_OPTPARTICIPANT);
+			icalproperty_add_parameter(icalprop, param);
+
+			if (g_ascii_strcasecmp (attendee->responsetype, "Organizer") == 0)
+				param = icalparameter_new_partstat (ICAL_PARTSTAT_ACCEPTED);
+			else if (g_ascii_strcasecmp (attendee->responsetype, "Tentative") == 0)
+				param = icalparameter_new_partstat (ICAL_PARTSTAT_TENTATIVE);
+			else if (g_ascii_strcasecmp (attendee->responsetype, "Accept") == 0)
+				param = icalparameter_new_partstat (ICAL_PARTSTAT_ACCEPTED);
+			else if (g_ascii_strcasecmp (attendee->responsetype, "Decline") == 0)
+				param = icalparameter_new_partstat (ICAL_PARTSTAT_DECLINED);
+			else if (g_ascii_strcasecmp (attendee->responsetype, "NoResponseReceived") == 0)
+				param = icalparameter_new_partstat (ICAL_PARTSTAT_NEEDSACTION);
+			else if (g_ascii_strcasecmp (attendee->responsetype, "Unknown") == 0)
+				param = icalparameter_new_partstat (ICAL_PARTSTAT_NONE);
+			icalproperty_add_parameter(icalprop, param);
+
+			icalcomponent_add_property(icalcomp, icalprop);
+		}
 
 		/* Free/Busy */
 		freebusy = icalcomponent_get_first_property (icalcomp, ICAL_TRANSP_PROPERTY);
@@ -1623,7 +1660,7 @@ ews_cal_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 
 			e_ews_connection_get_items_start(g_object_ref(cnc), EWS_PRIORITY_MEDIUM,
 					modified_occurrences,
-					"IdOnly", "item:Attachments item:HasAttachments item:MimeContent calendar:ModifiedOccurrences",
+					"IdOnly", "item:Attachments item:HasAttachments item:MimeContent calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
 					FALSE, NULL, ews_cal_get_items_ready_cb, NULL, NULL, NULL,
 					(gpointer) sub_sync_data);
 
@@ -1776,7 +1813,7 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 	
 	e_ews_connection_get_items_start	(g_object_ref (cnc), EWS_PRIORITY_MEDIUM, 
 						 cal_item_ids,
-						 "IdOnly", "item:Attachments item:HasAttachments item:MimeContent calendar:ModifiedOccurrences",
+						 "IdOnly", "item:Attachments item:HasAttachments item:MimeContent calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
 						 FALSE, NULL, ews_cal_get_items_ready_cb, NULL, NULL, NULL,
 						 (gpointer) sync_data);
 
