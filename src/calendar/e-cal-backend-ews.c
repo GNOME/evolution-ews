@@ -1434,6 +1434,8 @@ ews_get_attachments_ready_callback (GObject *object, GAsyncResult *res, gpointer
 		PRIV_UNLOCK (cbews->priv);
 	}
 
+	g_slist_foreach (uris, (GFunc) g_free, NULL);
+	g_slist_free (uris);
 	g_free(comp_str);
 	g_free(itemid);
 	g_object_unref(att_data->comp);

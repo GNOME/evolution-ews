@@ -53,6 +53,7 @@ get_attachments_ready_callback (GObject *object, GAsyncResult *res, gpointer use
 
 	for (l = ids; l != NULL; l = g_slist_next (l)) {
 		g_print ("Attachment uri is: %s\n", (gchar *) l->data);
+		g_free (l->data);
 	}
 
 quit:
@@ -69,7 +70,7 @@ op_test_get_attachments()
 	EEwsConnection *cnc;
 	GCancellable *cancellable;
 	GSList *ids = NULL;
-
+	gchar *tmpdir;
 	cancellable = g_cancellable_new ();
 
 	util_get_login_info_from_env (&username, &password, &uri);
@@ -80,14 +81,19 @@ op_test_get_attachments()
 	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
 
-	attachmentid = "AAASAG1hbmR5Lnd1QGludGVsLmNvbQBGAAAAAACdSXexmsgJTpd3WpdX6ulXBwAm9E+BClHfQqEnvCoGvhheAAAAjpb6AACIeDU1D80fTrC3245yXdhOADUAPRB8AAABEgAQAHRSNFL/du5AgGUcZnaMNMk=";
+	attachmentid = "AAASAG1hbmR5Lnd1QGludGVsLmNvbQBGAAAAAACdSXexmsgJTpd3WpdX6ulXBwAm9E+BClHfQqEnvCoGvhheAAAAjpb6AACIeDU1D80fTrC3245yXdhOADUAPRB8AAABEgAQAIlh9YZzdzdMtvWW9ZI7+vM=";
+	ids = g_slist_append (ids, (gpointer *)attachmentid);
+	attachmentid = "AAASAG1hbmR5Lnd1QGludGVsLmNvbQBGAAAAAACdSXexmsgJTpd3WpdX6ulXBwAm9E+BClHfQqEnvCoGvhheAAAAjpb6AACIeDU1D80fTrC3245yXdhOADUAPRB8AAABEgAQADgh/XHkRSZEoCsn9BHi5Fc=";
 	ids = g_slist_append (ids, (gpointer *)attachmentid);
 
+	tmpdir = g_build_filename ("/home/xwu1/evo-cache", NULL); //a test directory that exists already
+
 	e_ews_connection_get_attachments_start	(cnc, EWS_PRIORITY_MEDIUM,
-						 ids, TRUE,
+						 ids, tmpdir, TRUE,
 						 get_attachments_ready_callback,
 						 NULL, NULL,
 						 cancellable, NULL);
+	g_free(tmpdir);
 }
 
 static gboolean

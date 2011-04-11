@@ -152,7 +152,23 @@ static void soap_sax_startElementNs (void * _ctxt,
 			       namespaces, nb_attributes, nb_defaulted,
 			       attributes);
 
-	if (!priv->steal_node || strcmp ((const char *)localname, priv->steal_node))
+	/* steal_node can contain multiple node name separated by " " */
+	if (priv->steal_node && *priv->steal_node) {
+		gchar **prop = g_strsplit (priv->steal_node, " ", 0);
+		gint i = 0;
+		gboolean isnode = FALSE;
+
+		while (prop[i]) {
+			if (strcmp ((const char *)localname, prop [i]) == 0) {
+				isnode = TRUE;
+				break;
+			}
+			i++;
+		}
+		g_strfreev (prop);
+
+		if (!isnode) return;
+	} else
 		return;
 
 	fname = g_build_filename (priv->steal_dir, "XXXXXX", NULL);

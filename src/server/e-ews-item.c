@@ -27,6 +27,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <glib/gprintf.h>
 #include <libsoup/soup-misc.h>
 #include "e-ews-item.h"
@@ -753,7 +754,7 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 	gchar *name = NULL, *value, filename[350], *surename, dirname[350];
 	guchar *content = NULL;
 	gsize data_len = 0;
-	int fd;
+	gchar *tmpdir, *tmpfilename;
 
 	g_return_val_if_fail (param != NULL, NULL);
 
@@ -777,23 +778,22 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 		return NULL;
 	}
 
-	/* Save to a file in a temporary directory */
-	snprintf(dirname, 350, "%s/XXXXXX", cache);
+	tmpfilename = (gchar *) content;
+	tmpdir = g_strndup(tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
+
+	snprintf(dirname, 350, "%s/XXXXXX", tmpdir);
 	mkdtemp(dirname);
 	surename = g_uri_escape_string(name, "", TRUE);
 	snprintf(filename, 350, "%s/%s", dirname, surename);
-	fd = creat(filename, 0600);
-	if (fd == -1) {
-		g_warning("*** Cant Dump File: %s ***\n", strerror(errno));
-	}
-	else {
-		write(fd, content, data_len);
+
+	if (g_rename (tmpfilename, filename) != 0) {
+		g_warning("Failed to move attachment cache file");
 	}
 
+	g_free(tmpdir);
 	g_free(surename);
 	g_free(name);
 	g_free(content);
-	close(fd);
 
 	/* Return URI to saved file */
 	return g_filename_to_uri(filename, NULL, NULL);
@@ -802,27 +802,25 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 gchar *
 e_ews_item_dump_mime_content(EEwsItem *item, const gchar *cache) {
 	gchar filename[512], *surename, dirname[350];
-	int fd;
-	gsize data_len = 0;
+	gchar *tmpdir, *tmpfilename;
 
 	g_return_val_if_fail (item->priv->mime_content != NULL, NULL);
 
-	/* Save to a file in a temporary directory */
-	data_len = strlen(item->priv->mime_content);
-	snprintf(dirname, 350, "%s/XXXXXX", cache);
+	tmpfilename = (gchar *) item->priv->mime_content;
+	tmpdir = g_strndup(tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
+
+	snprintf(dirname, 350, "%s/XXXXXX", tmpdir);
 	mkdtemp(dirname);
 	surename = g_uri_escape_string(item->priv->subject, "", TRUE);
 	snprintf(filename, 350, "%s/%s", dirname, surename);
-	fd = creat(filename, 0600);
-	if (fd == -1) {
-		g_warning("*** Cant Dump File: %s ***\n", strerror(errno));
-	}
-	else {
-		write(fd, item->priv->mime_content, data_len);
+
+	if (g_rename ((const gchar *)item->priv->mime_content, filename) != 0) {
+		g_warning("Failed to move attachment cache file");
 	}
 
+	g_free(tmpdir);
+	g_free(tmpfilename);
 	g_free(surename);
-	close(fd);
 
 	/* Return URI to saved file */
 	return g_filename_to_uri(filename, NULL, NULL);
