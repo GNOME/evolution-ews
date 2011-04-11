@@ -283,42 +283,6 @@ ews_get_folder_sync (CamelStore *store, const gchar *folder_name, guint32 flags,
 }
 
 static CamelFolderInfo *
-folder_info_build(CamelEwsStore *store, const gchar *parent_name, const gchar *folder_name)
-{
-	CamelURL *url;
-	const gchar *name;
-	CamelFolderInfo *fi;
-	CamelEwsStorePrivate *priv = store->priv;
-
-	fi = camel_folder_info_new ();
-
-	fi->unread = -1;
-	fi->total = -1;
-
-	if (parent_name && *parent_name)
-		fi->full_name = g_strconcat (parent_name, "/", folder_name, NULL);
-	else
-		fi->full_name = g_strdup (folder_name);
-
-	url = camel_url_new (priv->host_url, NULL);
-	g_free(url->path);
-
-	url->path = g_strdup_printf("/%s", fi->full_name);
-	fi->uri = camel_url_to_string(url,CAMEL_URL_HIDE_ALL);
-	camel_url_free(url);
-
-	name = strrchr(fi->full_name,'/');
-	if (name == NULL)
-		name = fi->full_name;
-	else
-		name++;
-
-	fi->name = g_strdup (name);
-
-	return fi;
-}
-
-static CamelFolderInfo *
 folder_info_from_store_summary (CamelEwsStore *store, const gchar *top, guint32 flags, GError **error)
 {
 	CamelEwsStoreSummary *ews_summary;
@@ -586,7 +550,7 @@ ews_create_folder_sync (CamelStore *store,
 						folder_id->change_key);
 	e_ews_folder_free_fid (folder_id);
 
-	root = folder_info_build (ews_store, parent_name, folder_name);
+	root = camel_ews_utils_build_folder_info (ews_store, full_name);
 
 	camel_store_folder_created (store, root);
 
