@@ -569,7 +569,7 @@ ews_delete_folder_sync	(CamelStore *store,
 	CamelEwsStoreSummary *ews_summary = ews_store->summary;
 	gchar *fid;
 	EVO2(GCancellable *cancellable = NULL;)
-	//CamelFolderInfo *root = NULL;
+	CamelFolderInfo *fi = NULL;
 	gboolean result;
 
 	fid = camel_ews_store_summary_get_folder_id (ews_summary, folder_name,
@@ -585,9 +585,12 @@ ews_delete_folder_sync	(CamelStore *store,
 	if (!result)
 		return FALSE;
 
+	fi = camel_ews_utils_build_folder_info (ews_store, folder_name);
 	camel_ews_store_summary_remove_folder (ews_summary, folder_name, error);
 
-	//camel_store_folder_deleted(store, root);
+	camel_store_folder_deleted (store, fi);
+	camel_folder_info_free (fi);
+
 	return TRUE;
 }
 
