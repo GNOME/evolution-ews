@@ -76,6 +76,12 @@ typedef struct {
 	gchar *email;
 } EwsMailbox;
 
+typedef struct {
+	EwsMailbox *mailbox;
+	gchar *attendeetype;
+	gchar *responsetype;
+} EwsAttendee;
+
 GType       	e_ews_item_get_type (void);
 EEwsItem *	e_ews_item_new_from_soap_parameter	
 						(ESoapParameter *param);
@@ -130,6 +136,8 @@ e_ews_item_ical_dump(EEwsItem *item);
 
 gchar *
 e_ews_item_dump_mime_content(EEwsItem *item, const gchar *cache);
+
+const GSList *	e_ews_item_get_attendees	(EEwsItem *item);
 
 G_END_DECLS
 
