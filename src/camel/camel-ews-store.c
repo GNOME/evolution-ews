@@ -551,6 +551,8 @@ ews_create_folder_sync (CamelStore *store,
 						 folder_name);
 	camel_ews_store_summary_set_change_key (ews_summary, full_name,
 						folder_id->change_key);
+	camel_ews_store_summary_set_folder_type (ews_summary, full_name,
+						 EWS_FOLDER_TYPE_MAILBOX);
 	e_ews_folder_free_fid (folder_id);
 
 	fi = camel_ews_utils_build_folder_info (ews_store, full_name);
