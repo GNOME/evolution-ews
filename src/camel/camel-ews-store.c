@@ -770,7 +770,12 @@ ews_get_trash_folder_sync (CamelStore *store, EVO3(GCancellable *cancellable,) G
 static gboolean
 ews_can_refresh_folder (CamelStore *store, CamelFolderInfo *info, GError **error)
 {
-	return TRUE;
+	/* Skip unselectable folders from automatic refresh */
+	if (info && (info->flags & CAMEL_FOLDER_NOSELECT) != 0) return FALSE;
+
+	/* Delegate decision to parent class */
+	return CAMEL_STORE_CLASS(camel_ews_store_parent_class)->can_refresh_folder (store, info, error) ||
+			(camel_url_get_param (((CamelService *)store)->url, "check_all") != NULL);
 }
 
 gboolean
