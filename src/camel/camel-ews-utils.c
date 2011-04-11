@@ -287,7 +287,7 @@ strip_lt_gt (gchar **string, gint s_offset, gint e_offset)
 }
 
 CamelFolderInfo *
-camel_ews_utils_build_folder_info (CamelEwsStore *store, const gchar *fname)
+camel_ews_utils_build_folder_info (CamelEwsStore *store, const gchar *fid)
 {
 	CamelEwsStoreSummary *ews_summary = store->summary;
 	CamelFolderInfo *fi;
@@ -307,22 +307,17 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store, const gchar *fname)
 	}
 
 	fi = camel_folder_info_new ();
-	fi->full_name = g_strdup (fname);
-	fi->name = camel_ews_store_summary_get_folder_name	(ews_summary,
-				fi->full_name,
-				NULL);
+	fi->full_name = camel_ews_store_summary_get_folder_full_name (ews_summary,
+								      fid, NULL);
+	fi->name = camel_ews_store_summary_get_folder_name (ews_summary,
+							    fid, NULL);
 	fi->uri = g_strconcat (url, fi->full_name, NULL);
-	fi->flags = camel_ews_store_summary_get_folder_flags	(ews_summary,
-			fi->full_name,
-			NULL);
-	
-	fi->unread = camel_ews_store_summary_get_folder_unread	(ews_summary,
-			fi->full_name,
-			NULL);
-	fi->total = camel_ews_store_summary_get_folder_total	(ews_summary,
-			fi->full_name,
-			NULL);
-
+	fi->flags = camel_ews_store_summary_get_folder_flags (ews_summary,
+							      fid, NULL);
+	fi->unread = camel_ews_store_summary_get_folder_unread (ews_summary,
+								fid, NULL);
+	fi->total = camel_ews_store_summary_get_folder_total (ews_summary,
+							      fid, NULL);
 
 	g_free (url);
 
@@ -358,24 +353,20 @@ sync_deleted_folders (CamelEwsStore *store, GSList *deleted_folders)
 
 	for (l = deleted_folders; l != NULL; l = g_slist_next (l)) {
 		const gchar *fid = l->data;
-		const gchar *folder_name;
 		EwsFolderType ftype;
 		CamelFolderInfo *fi;
 		GError *error = NULL;
 
-		folder_name = camel_ews_store_summary_get_folder_name_from_id (ews_summary, fid);
-		if (!folder_name) {
-			g_warning ("Folder unavailable for deletion");
+		if (!camel_ews_store_summary_has_folder (ews_summary, fid))
 			continue;
-		}
-		
-		ftype = camel_ews_store_summary_get_folder_type (ews_summary, folder_name, NULL);
-		if (ftype == EWS_FOLDER_TYPE_MAILBOX) {
-			fi = camel_ews_utils_build_folder_info (store, folder_name);
 
-			camel_ews_store_summary_remove_folder (ews_summary, folder_name, &error);
+		ftype = camel_ews_store_summary_get_folder_type (ews_summary, fid, NULL);
+		if (ftype == EWS_FOLDER_TYPE_MAILBOX) {
+			fi = camel_ews_utils_build_folder_info (store, fid);
+
+			camel_ews_store_summary_remove_folder (ews_summary, fid, &error);
 			camel_store_folder_deleted ((CamelStore *) store, fi);
-			
+
 			g_clear_error (&error);
 		} else {
 			struct remove_esrc_data *remove_data = g_new0(struct remove_esrc_data, 1);
@@ -391,32 +382,24 @@ sync_deleted_folders (CamelEwsStore *store, GSList *deleted_folders)
 	}
 }
 
-gboolean ews_utils_rename_folder (CamelEwsStore *store, EwsFolderType ftype,
-				  const gchar *fid, const gchar *changekey,
-				  const gchar *new_fname,
-				  const gchar *folder_name, const gchar *display_name,
-				  GError **error)
+static gboolean ews_utils_rename_folder (CamelEwsStore *store, EwsFolderType ftype,
+					 const gchar *fid, const gchar *changekey,
+					 const gchar *pfid, const gchar *display_name,
+					 const gchar *old_fname, GError **error)
 {
 	CamelEwsStoreSummary *ews_summary = store->summary;
-	guint64 flags;
 	CamelFolderInfo *fi;
 
-	camel_ews_store_summary_new_folder (ews_summary, new_fname, fid);
-	camel_ews_store_summary_set_change_key (ews_summary, new_fname, changekey);
-	camel_ews_store_summary_set_folder_name (ews_summary, new_fname, display_name);
+	camel_ews_store_summary_set_change_key (ews_summary, fid, changekey);
+	if (display_name)
+		camel_ews_store_summary_set_folder_name (ews_summary, fid, display_name);
+	if (pfid)
+		camel_ews_store_summary_set_parent_folder_id (ews_summary, fid, pfid);
 
-	flags = camel_ews_store_summary_get_folder_flags (ews_summary, folder_name, NULL);
-	camel_ews_store_summary_set_folder_flags (ews_summary, new_fname, flags);
-		
 	if (ftype == EWS_FOLDER_TYPE_MAILBOX) {
-		fi = camel_ews_utils_build_folder_info (store, new_fname);
-		camel_store_folder_renamed ((CamelStore *) store, folder_name, fi);
+		fi = camel_ews_utils_build_folder_info (store, fid);
+		camel_store_folder_renamed ((CamelStore *) store, old_fname, fi);
 	}
-
-	/* TODO set total and unread count. Check if server returns all properties on update */
-
-	/* Discard error if removal fails; it's not the end of the world */
-	camel_ews_store_summary_remove_folder (ews_summary, folder_name, NULL);
 
 	return TRUE;
 }
@@ -426,11 +409,11 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 {
 	CamelEwsStoreSummary *ews_summary = store->summary;
 	GSList *l;
-	
+
 	for (l = updated_folders; l != NULL; l = g_slist_next (l)) {
 		EEwsFolder *ews_folder = (EEwsFolder *)	l->data;
 		EwsFolderType ftype;
-		const gchar *folder_name;
+		gchar *folder_name;
 		gchar *display_name;
 		const EwsFolderId *fid, *pfid;
 
@@ -443,7 +426,7 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 			continue;
 
 		fid = e_ews_folder_get_id (ews_folder);
-		folder_name = camel_ews_store_summary_get_folder_name_from_id (ews_summary, fid->id);
+		folder_name = camel_ews_store_summary_get_folder_full_name (ews_summary, fid->id, NULL);
 
 		pfid = e_ews_folder_get_parent_id (ews_folder);
 		display_name = g_strdup (e_ews_folder_get_name (ews_folder));
@@ -456,23 +439,24 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 			gchar *new_fname = NULL;
 
 			if (pfid) {
-				const gchar *pfname;
+				gchar *pfname;
 
 				/* If the display name wasn't changed, its basename is still
 				   the same as it was before... */
 				if (!display_name)
 					display_name = camel_ews_store_summary_get_folder_name (ews_summary,
-										folder_name, NULL);
+										fid->id, NULL);
 				if (!display_name)
 					goto done;
 
-				pfname = camel_ews_store_summary_get_folder_name_from_id (ews_summary, pfid->id);
+				pfname = camel_ews_store_summary_get_folder_full_name (ews_summary, pfid->id, NULL);
 
 				/* If the lookup failed, it'll be because the new parent folder
 				   is the message folder root. */
-				if (pfname)
+				if (pfname) {
 					new_fname = g_strconcat (pfname, "/", display_name, NULL);
-				else
+					g_free (pfname);
+				} else
 					new_fname = g_strdup (display_name);
 			} else {
 				/* Parent folder not changed; just basename */
@@ -488,23 +472,27 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 			}
 
 			if (strcmp(new_fname, folder_name))
-				ews_utils_rename_folder (store, ftype, fid->id, fid->change_key,
-							 new_fname, folder_name, display_name, &error);
+				ews_utils_rename_folder (store, ftype,
+							 fid->id, fid->change_key,
+							 pfid?pfid->id:NULL,
+							 display_name, folder_name, &error);
 			g_free (new_fname);
 			g_clear_error (&error);
 		}
  done:
+		g_free (folder_name);
 		g_free (display_name);
 	}
 }
 
 
 static void
-add_folder_to_summary (CamelEwsStore *store, const gchar *fname, EEwsFolder *folder)
+add_folder_to_summary (CamelEwsStore *store, EEwsFolder *folder)
 {
 	CamelEwsStoreSummary *ews_summary = store->summary;
 	const EwsFolderId *pfid, *fid;
 	const gchar *dname;
+	gchar *fname;
 	gint64 flags = 0, unread, total, ftype;
 
 	fid = e_ews_folder_get_id (folder);
@@ -514,22 +502,23 @@ add_folder_to_summary (CamelEwsStore *store, const gchar *fname, EEwsFolder *fol
 	unread = e_ews_folder_get_unread_count (folder);
 	ftype = e_ews_folder_get_folder_type (folder);
 
-	camel_ews_store_summary_new_folder (ews_summary, fname, fid->id);
-	camel_ews_store_summary_set_change_key (ews_summary, fname, fid->change_key);
-	camel_ews_store_summary_set_folder_name (ews_summary, fname, dname);
-	camel_ews_store_summary_set_folder_type (ews_summary, fname, (gint64) ftype);
-	
+	camel_ews_store_summary_new_folder (ews_summary, fid->id,
+					    pfid->id, fid->change_key,
+					    dname, ftype, 0, total);
+
+	fname = camel_ews_store_summary_get_folder_full_name (ews_summary, fid->id, NULL);
 	if (!g_ascii_strcasecmp (fname, "Inbox")) {
-		flags |= CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_INBOX; 
+		flags |= CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_INBOX;
 	} else if (!g_ascii_strcasecmp (fname, "Drafts")) {
-		flags |= CAMEL_FOLDER_SYSTEM; 
+		flags |= CAMEL_FOLDER_SYSTEM;
 	} else if (!g_ascii_strcasecmp (fname, "Deleted items")) {
-		flags |= CAMEL_FOLDER_SYSTEM; 
+		flags |= CAMEL_FOLDER_SYSTEM;
 	} else if (!g_ascii_strcasecmp (fname, "Outbox")) {
-		flags |= CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_OUTBOX; 
+		flags |= CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_OUTBOX;
 	}
-	
-	camel_ews_store_summary_set_folder_flags (ews_summary, fname, flags);
+	g_free (fname);
+
+	camel_ews_store_summary_set_folder_flags (ews_summary, fid->id, flags);
 }
 
 struct add_esrc_data {
@@ -567,30 +556,15 @@ static gboolean ews_do_add_esource (gpointer user_data)
 static void
 sync_created_folders (CamelEwsStore *ews_store, GSList *created_folders)
 {
-	CamelEwsStoreSummary *ews_summary = ews_store->summary;
 	GSList *l;
-	GHashTable *c_folders_hash;
 
-	c_folders_hash = g_hash_table_new (g_str_hash, g_str_equal);
-
-	for (l = created_folders; l != NULL; l = g_slist_next (l)) {
-		EEwsFolder *folder = (EEwsFolder *) l->data;
-		const EwsFolderId *fid;
-		const gchar *display_name;
-
-		fid = e_ews_folder_get_id (folder);
-		display_name = e_ews_folder_get_name (folder);
-		g_hash_table_insert (c_folders_hash, fid->id, (gpointer) display_name);
-	}
-	
 	for (l = created_folders; l != NULL; l = g_slist_next (l)) {
 		EEwsFolder *folder = (EEwsFolder *) l->data;
 		EwsFolderType ftype;
 		CamelFolderInfo *fi;
 		const EwsFolderId *fid, *pfid;
-		const gchar *display_name, *pfname;
-		gchar *fname = NULL;
-		
+		const gchar *display_name;
+
 		ftype = e_ews_folder_get_folder_type (folder);
 		if (ftype == EWS_FOLDER_TYPE_CALENDAR ||
 		    ftype == EWS_FOLDER_TYPE_TASKS ||
@@ -609,40 +583,26 @@ sync_created_folders (CamelEwsStore *ews_store, GSList *created_folders)
 
 			/* This uses GConf so has to be done in the main thread */
 			g_idle_add_full (G_PRIORITY_DEFAULT, ews_do_add_esource, add_data, NULL);
-	
+
 		} else 	if (ftype != EWS_FOLDER_TYPE_MAILBOX)
 			continue;
 
 		fid = e_ews_folder_get_id (folder);
 		pfid = e_ews_folder_get_parent_id (folder);
 		display_name = e_ews_folder_get_name (folder);
-		pfname = camel_ews_store_summary_get_folder_name_from_id (ews_summary, pfid->id);
 
-		if (pfname)
-			fname = g_strconcat (pfname, "/", display_name, NULL);
-		else {
-			GString *full_name;
-			const gchar *p_dname;
+		/* FIXME: Sort folders so that a child is always added *after*
+		   its parent. But since the old code was already completely
+		   broken and would just go into an endless loop if the server
+		   didn't return the folders in the 'right' order for that,
+		   let's worry about that in a later commit. */
+		add_folder_to_summary (ews_store, folder);
 
-			full_name = g_string_new (display_name);
-			while ((p_dname = g_hash_table_lookup (c_folders_hash, pfid->id)))
-				g_string_append_printf (full_name, "%s/", p_dname);
-
-			fname = full_name->str;
-			g_string_free (full_name, FALSE);
-		}
-
-		add_folder_to_summary (ews_store, fname, folder);
-		
 		if (ftype == EWS_FOLDER_TYPE_MAILBOX) {
-			fi = camel_ews_utils_build_folder_info (ews_store, fname);
+			fi = camel_ews_utils_build_folder_info (ews_store, fid->id);
 			camel_store_folder_created ((CamelStore *) ews_store, fi);
 		}
-
-		g_free (fname);
 	}
-
-	g_hash_table_destroy (c_folders_hash);
 }
 
 void
@@ -653,7 +613,7 @@ ews_utils_sync_folders (CamelEwsStore *ews_store, GSList *created_folders, GSLis
 	sync_deleted_folders (ews_store, deleted_folders);
 	sync_updated_folders (ews_store, updated_folders);
 	sync_created_folders (ews_store, created_folders);
-	
+
 	camel_ews_store_summary_save (ews_store->summary, &error);
 	if (error != NULL) {
 		g_print ("Error while saving store summary %s \n", error->message);

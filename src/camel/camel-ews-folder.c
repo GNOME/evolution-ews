@@ -505,18 +505,19 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 	CamelEwsStore *ews_store;
 	CamelEwsFolder *ews_folder;
 	gchar *summary_file, *state_file;
-	gchar *short_name;
+	const gchar *short_name;
 
 	ews_store = (CamelEwsStore *) store;
 
-	short_name = camel_ews_store_summary_get_folder_name (ews_store->summary, folder_name, NULL);
+	short_name = strrchr (folder_name, '/');
+	if (!short_name)
+		short_name = folder_name;
 
 	folder = g_object_new (
 		CAMEL_TYPE_EWS_FOLDER,
 		"name", short_name, "full-name", folder_name,
 		"parent_store", store, NULL);
 
-	g_free (short_name);
 	ews_folder = CAMEL_EWS_FOLDER(folder);
 
 	summary_file = g_build_filename (folder_dir, "summary", NULL);
@@ -708,22 +709,22 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 
 	if (priv->refreshing) {
 		g_mutex_unlock (priv->state_lock);
-		return TRUE;	
+		return TRUE;
 	}
 
 	priv->refreshing = TRUE;
 	g_mutex_unlock (priv->state_lock);
-	
-	cnc = camel_ews_store_get_connection (ews_store);
-	id = camel_ews_store_summary_get_folder_id
-						(ews_store->summary,
-						 full_name, NULL);
 
-	/* Sync folder items does not return the fileds ToRecipients, 
+	cnc = camel_ews_store_get_connection (ews_store);
+	id = camel_ews_store_summary_get_folder_id_from_name
+						(ews_store->summary,
+						 full_name);
+
+	/* Sync folder items does not return the fields ToRecipients,
 	   CCRecipients. With the item_type unknown, its not possible
 	   to fetch the right properties which are valid for an item type.
 	   Due to these reasons we just get the item ids and its type in
-	   SyncFolderItem request and fetch the item using the 
+	   SyncFolderItem request and fetch the item using the
 	   GetItem request. */
 	sync_state = ((CamelEwsSummary *) folder->summary)->sync_state;
 	do
@@ -732,12 +733,12 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 		GSList *items_deleted = NULL;
 		guint32 total, unread;
 
-		e_ews_connection_sync_folder_items	
+		e_ews_connection_sync_folder_items
 							(cnc, EWS_PRIORITY_MEDIUM,
 							 &sync_state, id,
 							 "IdOnly", NULL,
 							 EWS_MAX_FETCH_COUNT, &includes_last_item,
-							 &items_created, &items_updated, 
+							 &items_created, &items_updated,
 							 &items_deleted, cancellable, &rerror);
 
 		if (rerror)
@@ -748,7 +749,7 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 
 		if (items_created)
 			sync_created_items (ews_folder, cnc, items_created, cancellable, &rerror);
-	
+
 		if (rerror) {
 			if (items_updated) {
 				g_slist_foreach (items_updated, (GFunc) g_object_unref, NULL);
@@ -760,15 +761,15 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 
 		if (items_updated)
 			sync_updated_items (ews_folder, cnc, items_updated, cancellable, &rerror);
-	
+
 		if (rerror)
 			break;
-		
+
 		total = camel_folder_summary_count (folder->summary);
 		unread = folder->summary->unread_count;
 
-		camel_ews_store_summary_set_folder_total (ews_store->summary, full_name, total);
-		camel_ews_store_summary_set_folder_unread (ews_store->summary, full_name, unread);
+		camel_ews_store_summary_set_folder_total (ews_store->summary, id, total);
+		camel_ews_store_summary_set_folder_unread (ews_store->summary, id, unread);
 		camel_ews_store_summary_save (ews_store->summary, NULL);
 
 		g_free (((CamelEwsSummary *) folder->summary)->sync_state);
@@ -777,7 +778,7 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 		camel_folder_summary_save_to_db (folder->summary, NULL);
 
 	} while (!rerror && !includes_last_item);
-	
+
 	if (rerror)
 		g_propagate_error (error, rerror);
 
@@ -809,8 +810,8 @@ ews_append_message_sync (CamelFolder *folder, CamelMimeMessage *message,
 	ews_store = (CamelEwsStore *)camel_folder_get_parent_store(folder);
 
 	folder_name = camel_folder_get_full_name (folder);
-	folder_id = camel_ews_store_summary_get_folder_id (ews_store->summary,
-							   folder_name, error);
+	folder_id = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary,
+								     folder_name);
 	if (!folder_id)
 		return FALSE;
 
@@ -875,9 +876,9 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 		return FALSE;
 
 	cnc = camel_ews_store_get_connection (dst_ews_store);
-	dst_id = camel_ews_store_summary_get_folder_id
+	dst_id = camel_ews_store_summary_get_folder_id_from_name
 						(dst_ews_store->summary,
-						 dst_full_name, NULL);
+						 dst_full_name);
 
 	for (i = 0; i < uids->len; i++) {
 		ids = g_slist_append(ids, (gchar *)uids->pdata[i]);

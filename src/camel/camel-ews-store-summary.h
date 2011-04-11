@@ -50,67 +50,75 @@ gboolean	camel_ews_store_summary_remove	(CamelEwsStoreSummary *ews_summary);
 
 void		camel_ews_store_summary_set_folder_name
 						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name, 
+						 const gchar *folder_id,
 						 const gchar *display_name);
-void		camel_ews_store_summary_set_change_key	
+void		camel_ews_store_summary_set_parent_folder_id
 						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name, 
+						 const gchar *folder_id,
+						 const gchar *parent_id);
+void		camel_ews_store_summary_set_change_key
+						(CamelEwsStoreSummary *ews_summary,
+						 const gchar *folder_id,
 						 const gchar *change_key);
 void		camel_ews_store_summary_set_sync_state
 						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name, 
+						 const gchar *folder_id,
 						 const gchar *sync_state);
 void		camel_ews_store_summary_set_folder_flags
 						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name, 
+						 const gchar *folder_id,
 						 guint64 flags);
 void		camel_ews_store_summary_set_folder_unread
 						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name, 
+						 const gchar *folder_id,
 						 guint64 unread);
 void		camel_ews_store_summary_set_folder_total
 						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name, 
+						 const gchar *folder_id,
 						 guint64 total);
 void		camel_ews_store_summary_set_folder_type
 						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name, 
-						 guint64 ews_foldeews_folder_type);
+						 const gchar *folder_id,
+						 guint64 folder_type);
 
 gchar *	camel_ews_store_summary_get_folder_name
 						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name,
+						 const gchar *folder_id,
 						 GError **error);
-gchar *	camel_ews_store_summary_get_folder_id
+gchar *camel_ews_store_summary_get_folder_full_name
 						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name,
+						 const gchar *folder_id,
+						 GError **error);
+gchar *	camel_ews_store_summary_get_parent_folder_id
+						(CamelEwsStoreSummary *ews_summary,
+						 const gchar *folder_id,
 						 GError **error);
 gchar *	camel_ews_store_summary_get_change_key
 						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name,
+						 const gchar *folder_id,
 						 GError **error);
 gchar *	camel_ews_store_summary_get_sync_state
 						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name,
+						 const gchar *folder_id,
 						 GError **error);
 guint64		camel_ews_store_summary_get_folder_flags
 						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name,
+						 const gchar *folder_id,
 						 GError **error);
 guint64		camel_ews_store_summary_get_folder_unread
 						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name,
+						 const gchar *folder_id,
 						 GError **error);
 guint64		camel_ews_store_summary_get_folder_total
 						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name,
+						 const gchar *folder_id,
 						 GError **error);
 guint64		camel_ews_store_summary_get_folder_type
 						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name,
+						 const gchar *folder_id,
 						 GError **error);
 
-GSList *	camel_ews_store_summary_get_folders	
+GSList *	camel_ews_store_summary_get_folders
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *prefix);
 
@@ -127,21 +135,26 @@ gchar *	camel_ews_store_summary_get_string_val
 
 gboolean	camel_ews_store_summary_remove_folder
 						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name,
+						 const gchar *folder_id,
 						 GError **error);
 
 void		camel_ews_store_summary_new_folder
 						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name, 
-						 const gchar *folder_id);
+						 const gchar *folder_id,
+						 const gchar *parent_fid,
+						 const gchar *change_key,
+						 const gchar *display_name,
+						 guint64 folder_type,
+						 guint64 folder_flags,
+						 guint64 total);
 
-const gchar *	camel_ews_store_summary_get_folder_name_from_id	
+gchar *		camel_ews_store_summary_get_folder_id_from_name
 						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_id);
+						 const gchar *folder_name);
 
-gboolean	camel_ews_store_summary_has_folder	
+gboolean	camel_ews_store_summary_has_folder
 						(CamelEwsStoreSummary *ews_summary, 
-						 const gchar *full_name);
+						 const gchar *id);
 
 G_END_DECLS
 

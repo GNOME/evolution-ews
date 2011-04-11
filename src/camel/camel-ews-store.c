@@ -130,7 +130,7 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 	}
 
 	g_mkdir_with_parents (ews_store->storage_path, 0700);
-	summary_file = g_build_filename (ews_store->storage_path, "folder-tree", NULL);
+	summary_file = g_build_filename (ews_store->storage_path, "folder-tree-v2", NULL);
 	ews_store->summary = camel_ews_store_summary_new (summary_file);
 	camel_ews_store_summary_load (ews_store->summary, NULL);
 
@@ -258,19 +258,21 @@ ews_get_folder_sync (CamelStore *store, const gchar *folder_name, guint32 flags,
 	EVO2(GCancellable *cancellable = NULL;)
 	CamelEwsStore *ews_store;
 	CamelFolder *folder = NULL;
-
+	gchar *fid;
 
 	ews_store = (CamelEwsStore *) store;
 
-	if (camel_ews_store_summary_has_folder (ews_store->summary, folder_name)) {
+	fid = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, folder_name);
+	if (fid) {
 		gchar *folder_dir;
 
 		folder_dir = g_build_filename (ews_store->storage_path, "folders", folder_name, NULL);
 		folder = camel_ews_folder_new (store, folder_name, folder_dir, cancellable, error);
 
 		g_free (folder_dir);
+		g_free (fid);
 	}
-	
+
 	if (folder == NULL) {
 		g_set_error (
 			error, CAMEL_STORE_ERROR,
@@ -517,27 +519,29 @@ ews_create_folder_sync (CamelStore *store,
 {
 	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
 	CamelEwsStoreSummary *ews_summary = ews_store->summary;
-	gchar *fid, *full_name;
+	gchar *fid;
+	gchar *full_name;
 	EwsFolderId *folder_id;
 	EVO2(GCancellable *cancellable = NULL;)
 	CamelFolderInfo *fi = NULL;
-	gboolean result;
 
 	/* Get Parent folder ID */
-	fid = camel_ews_store_summary_get_folder_id (ews_summary, parent_name,
-						     error);
-	if (!fid)
+	fid = camel_ews_store_summary_get_folder_id_from_name (ews_summary,
+							       parent_name);
+	if (!fid) {
+		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			     _("Parent folder %s does not exist"), parent_name);
 		return NULL;
+	}
 
 	/* Make the call */
-	result = e_ews_connection_create_folder (ews_store->priv->cnc,
-						 EWS_PRIORITY_MEDIUM, fid,
-						 FALSE, folder_name, &folder_id,
-						 cancellable, error);
-	g_free(fid);
-
-	if (!result)
+	if (!e_ews_connection_create_folder (ews_store->priv->cnc,
+					     EWS_PRIORITY_MEDIUM, fid,
+					     FALSE, folder_name, &folder_id,
+					     cancellable, error)) {
+		g_free (fid);
 		return NULL;
+	}
 
 	/* Translate & store returned folder id */
 	if (parent_name && parent_name[0])
@@ -545,21 +549,18 @@ ews_create_folder_sync (CamelStore *store,
 	else
 		full_name = g_strdup (folder_name);
 
-	camel_ews_store_summary_new_folder (ews_summary, full_name,
-					    folder_id->id);
-	camel_ews_store_summary_set_folder_name (ews_summary, full_name,
-						 folder_name);
-	camel_ews_store_summary_set_change_key (ews_summary, full_name,
-						folder_id->change_key);
-	camel_ews_store_summary_set_folder_type (ews_summary, full_name,
-						 EWS_FOLDER_TYPE_MAILBOX);
+	camel_ews_store_summary_new_folder (ews_summary, folder_id->id,
+					    fid, folder_id->change_key,
+					    folder_name,
+					    EWS_FOLDER_TYPE_MAILBOX,
+					    0, 0);
+	fi = camel_ews_utils_build_folder_info (ews_store, folder_id->id);
 	e_ews_folder_free_fid (folder_id);
-
-	fi = camel_ews_utils_build_folder_info (ews_store, full_name);
 
 	camel_store_folder_created (store, fi);
 
 	g_free (full_name);
+	g_free (fid);
 	return fi;
 }
 
@@ -574,26 +575,30 @@ ews_delete_folder_sync	(CamelStore *store,
 	gchar *fid;
 	EVO2(GCancellable *cancellable = NULL;)
 	CamelFolderInfo *fi = NULL;
-	gboolean result;
 
-	fid = camel_ews_store_summary_get_folder_id (ews_summary, folder_name,
-						     error);
-	if (!fid)
+	fid = camel_ews_store_summary_get_folder_id_from_name (ews_summary,
+							       folder_name);
+	if (!fid) {
+		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			     _("Folder does not exist"));
 		return FALSE;
+	}
 
-	result = e_ews_connection_delete_folder (ews_store->priv->cnc,
-						 EWS_PRIORITY_MEDIUM,
-						 fid, FALSE, "HardDelete",
-						 cancellable, error);
-	g_free(fid);
-	if (!result)
+	if (!e_ews_connection_delete_folder (ews_store->priv->cnc,
+					     EWS_PRIORITY_MEDIUM,
+					     fid, FALSE, "HardDelete",
+					     cancellable, error)) {
+		g_free (fid);
 		return FALSE;
+	}
 
-	fi = camel_ews_utils_build_folder_info (ews_store, folder_name);
-	camel_ews_store_summary_remove_folder (ews_summary, folder_name, error);
+	fi = camel_ews_utils_build_folder_info (ews_store, fid);
+	camel_ews_store_summary_remove_folder (ews_summary, fid, error);
 
 	camel_store_folder_deleted (store, fi);
 	camel_folder_info_free (fi);
+
+	g_free (fid);
 
 	return TRUE;
 }
@@ -632,19 +637,21 @@ ews_rename_folder_sync	(CamelStore *store,
 {
 	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
 	CamelEwsStoreSummary *ews_summary = ews_store->summary;
+	CamelFolderInfo *fi;
 	const gchar *old_slash, *new_slash;
 	EVO2(GCancellable *cancellable = NULL;)
-	gchar *fid, *changekey;
+	gchar *fid;
+	gchar *changekey;
 	gboolean res = FALSE;
 
 	if (!strcmp (old_name, new_name))
 		return TRUE;
 
-	fid = camel_ews_store_summary_get_folder_id (ews_summary, old_name, error);
+	fid = camel_ews_store_summary_get_folder_id_from_name (ews_summary, old_name);
 	if (!fid)
 		return FALSE;
 
-	changekey = camel_ews_store_summary_get_change_key (ews_summary, old_name, error);
+	changekey = camel_ews_store_summary_get_change_key (ews_summary, fid, error);
 	if (!changekey) {
 		g_free (fid);
 		return FALSE;
@@ -652,7 +659,7 @@ ews_rename_folder_sync	(CamelStore *store,
 
 	old_slash = g_strrstr (old_name, "/");
 	new_slash = g_strrstr (new_name, "/");
-	
+
 	if (old_slash)
 		old_slash++;
 	else
@@ -686,7 +693,6 @@ ews_rename_folder_sync	(CamelStore *store,
 			g_set_error (error, CAMEL_STORE_ERROR,
 				     CAMEL_STORE_ERROR_INVALID,
 				     _("Cannot both rename and move a folder at the same time"));
-			g_free (fid);
 			g_free (changekey);
 			goto out;
 		}
@@ -695,37 +701,43 @@ ews_rename_folder_sync	(CamelStore *store,
 		rename_data->display_name = new_slash;
 		rename_data->folder_id = fid;
 		rename_data->change_key = changekey;
-		
+
 		if (!e_ews_connection_update_folder (ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
 						     rename_folder_cb, rename_data, cancellable, error)) {
 			g_free (rename_data);
 			goto out;
 		}
 		g_free (rename_data);
+		camel_ews_store_summary_set_folder_name (ews_summary, fid, new_slash);
 	} else {
-		const gchar *pfid = NULL;
+		gchar *pfid = NULL;
 		gchar *parent_name;
 
 		/* If we are not moving to the root folder, work out the ItemId of
 		   the new parent folder */
 		if (new_slash != new_name) {
 			parent_name = g_strndup (new_name, new_slash - new_name - 1);
-			pfid = camel_ews_store_summary_get_folder_id (ews_summary, parent_name, error);
+			pfid = camel_ews_store_summary_get_folder_id_from_name (ews_summary,
+										parent_name);
 			g_free (parent_name);
 			if (!pfid)
 				goto out;
 		}
 		if (!e_ews_connection_move_folder (ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
-						   pfid, fid, cancellable, error))
+						   pfid, fid, cancellable, error)) {
+			g_free (pfid);
 			goto out;
+		}
+		camel_ews_store_summary_set_parent_folder_id (ews_summary, fid, pfid);
+		g_free (pfid);
 	}
 
-	ews_utils_rename_folder (CAMEL_EWS_STORE (store), EWS_FOLDER_TYPE_MAILBOX,
-				 fid, changekey, new_name, old_name, new_slash, NULL);
+	fi = camel_ews_utils_build_folder_info (ews_store, fid);
+	camel_store_folder_renamed (store, old_name, fi);
 	res = TRUE;
  out:
-	g_free (fid);
 	g_free (changekey);
+	g_free (fid);
 	return res;
 }
 

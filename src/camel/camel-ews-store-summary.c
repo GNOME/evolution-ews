@@ -13,7 +13,11 @@ struct _CamelEwsStoreSummaryPrivate {
 	GKeyFile *key_file;
 	gboolean dirty;
 	gchar *path;
+	/* Note: We use the *same* strings in both of these hash tables, and
+	   only id_fname_hash has g_free() hooked up as the destructor func.
+	   So entries must always be removed from fname_id_hash *first*. */
 	GHashTable *id_fname_hash;
+	GHashTable *fname_id_hash;
 	GStaticRecMutex s_lock;
 };
 
@@ -27,6 +31,7 @@ ews_store_summary_finalize (GObject *object)
 
 	g_key_file_free (priv->key_file);
 	g_free (priv->path);
+	g_hash_table_destroy (priv->fname_id_hash);
 	g_hash_table_destroy (priv->id_fname_hash);
 	g_static_rec_mutex_free (&priv->s_lock);
 
@@ -55,8 +60,35 @@ camel_ews_store_summary_init (CamelEwsStoreSummary *ews_summary)
 
 	priv->key_file = g_key_file_new ();
 	priv->dirty = FALSE;
-	priv->id_fname_hash = g_hash_table_new_full (g_str_hash, g_str_equal, (GDestroyNotify) g_free, (GDestroyNotify) g_free);
+	priv->fname_id_hash = g_hash_table_new (g_str_hash, g_str_equal);
+	priv->id_fname_hash = g_hash_table_new_full (g_str_hash, g_str_equal,
+						     (GDestroyNotify) g_free,
+						     (GDestroyNotify) g_free);
 	g_static_rec_mutex_init (&priv->s_lock);
+}
+
+static gchar *build_full_name (CamelEwsStoreSummary *ews_summary, const gchar *fid)
+{
+	gchar *pfid, *pname, *dname, *ret;
+
+	dname = camel_ews_store_summary_get_folder_name (ews_summary, fid, NULL);
+	if (!dname)
+		return NULL;
+
+	pfid = camel_ews_store_summary_get_parent_folder_id (ews_summary, fid, NULL);
+	if (pfid) {
+		pname = build_full_name (ews_summary, pfid);
+		g_free (pfid);
+	}
+
+	if (pname) {
+		ret = g_strdup_printf ("%s/%s", pname, dname);
+		g_free (pname);
+		g_free (dname);
+	} else
+		ret = dname;
+
+	return ret;
 }
 
 static void
@@ -67,12 +99,12 @@ load_id_fname_hash (CamelEwsStoreSummary *ews_summary)
 	folders = camel_ews_store_summary_get_folders (ews_summary, NULL);
 
 	for (l = folders; l != NULL; l = g_slist_next (l)) {
-		gchar *fname = l->data;
-		gchar *id;
+		gchar *id = l->data;
+		gchar *fname;
 
-		id = camel_ews_store_summary_get_folder_id (ews_summary, fname,
-							    NULL);
+		fname = build_full_name (ews_summary, id);
 
+		g_hash_table_insert (ews_summary->priv->fname_id_hash, fname, id);
 		g_hash_table_insert (ews_summary->priv->id_fname_hash, id, fname);
 	}
 
@@ -92,33 +124,33 @@ camel_ews_store_summary_new (const gchar *path)
 }
 
 gboolean
-camel_ews_store_summary_load	(CamelEwsStoreSummary *ews_summary,
-				 GError **error)
+camel_ews_store_summary_load (CamelEwsStoreSummary *ews_summary,
+			      GError **error)
 {
 	CamelEwsStoreSummaryPrivate *priv = ews_summary->priv;
 	gboolean ret;
 
 	S_LOCK(ews_summary);
-	
+
 	ret = g_key_file_load_from_file	(priv->key_file,
 					 priv->path,
 					 0, error);
 
-	load_id_fname_hash (ews_summary);	
+	load_id_fname_hash (ews_summary);
 	S_UNLOCK(ews_summary);
 
 	return ret;
 }
 
-gboolean	
-camel_ews_store_summary_save	(CamelEwsStoreSummary *ews_summary,
-				 GError **error)
+gboolean
+camel_ews_store_summary_save (CamelEwsStoreSummary *ews_summary,
+			      GError **error)
 {
 	CamelEwsStoreSummaryPrivate *priv = ews_summary->priv;
 	gboolean ret = TRUE;
 	GFile *file;
 	gchar *contents = NULL;
-	
+
 	S_LOCK(ews_summary);
 
 	if (!priv->dirty)
@@ -134,13 +166,13 @@ camel_ews_store_summary_save	(CamelEwsStoreSummary *ews_summary,
 
 exit:
 	S_UNLOCK(ews_summary);
-	
+
 	g_free (contents);
 	return ret;
 }
 
-gboolean	
-camel_ews_store_summary_clear	(CamelEwsStoreSummary *ews_summary)
+gboolean
+camel_ews_store_summary_clear (CamelEwsStoreSummary *ews_summary)
 {
 
 	S_LOCK(ews_summary);
@@ -154,13 +186,13 @@ camel_ews_store_summary_clear	(CamelEwsStoreSummary *ews_summary)
 	return TRUE;
 }
 
-gboolean	
-camel_ews_store_summary_remove	(CamelEwsStoreSummary *ews_summary)
+gboolean
+camel_ews_store_summary_remove (CamelEwsStoreSummary *ews_summary)
 {
 	gint ret;
-	
+
 	S_LOCK(ews_summary);
-	
+
 	if (ews_summary->priv->key_file)
 		camel_ews_store_summary_clear (ews_summary);
 
@@ -170,276 +202,356 @@ camel_ews_store_summary_remove	(CamelEwsStoreSummary *ews_summary)
 
 	return (ret == 0);
 }
+/* Must be called with the summary lock held, and gets to keep
+   both its string arguments */
+static void ews_ss_hash_replace (CamelEwsStoreSummary *ews_summary,
+				 gchar *folder_id,
+				 gchar *full_name)
+{
+	const gchar *ofname;
 
-void		
-camel_ews_store_summary_set_folder_name	(CamelEwsStoreSummary *ews_summary,
-					 const gchar *folder_full_name, 
+	if (!full_name)
+		full_name = build_full_name (ews_summary, folder_id);
+
+	ofname = g_hash_table_lookup (ews_summary->priv->id_fname_hash,
+				      folder_id);
+	/* Remove the old fullname->id hash entry *iff* it's pointing
+	   to this folder id. */
+	if (ofname) {
+		char *ofid = g_hash_table_lookup (ews_summary->priv->fname_id_hash,
+						  ofname);
+		if (!strcmp (folder_id, ofid))
+			g_hash_table_remove (ews_summary->priv->fname_id_hash,
+					     ofname);
+	}
+	g_hash_table_insert (ews_summary->priv->fname_id_hash, full_name, folder_id);
+
+	/* Replace, not insert. The difference is that it frees the *old* folder_id
+	   key, not the new one which we just inserted into fname_id_hash too. */
+	g_hash_table_replace (ews_summary->priv->id_fname_hash, folder_id, full_name);
+}
+
+void
+camel_ews_store_summary_set_folder_name (CamelEwsStoreSummary *ews_summary,
+					 const gchar *folder_id,
 					 const gchar *display_name)
 {
-	
 	S_LOCK(ews_summary);
 
-	g_key_file_set_string	(ews_summary->priv->key_file, folder_full_name,
+	g_key_file_set_string	(ews_summary->priv->key_file, folder_id,
 				 "DisplayName", display_name);
+
+	ews_ss_hash_replace (ews_summary, g_strdup (folder_id), NULL);
 	ews_summary->priv->dirty = TRUE;
-		
+
 	S_UNLOCK(ews_summary);
 }
 
 
-void		
-camel_ews_store_summary_new_folder	(CamelEwsStoreSummary *ews_summary,
-					 const gchar *folder_full_name, 
-					 const gchar *folder_id)
+void
+camel_ews_store_summary_new_folder (CamelEwsStoreSummary *ews_summary,
+				    const gchar *folder_id,
+				    const gchar *parent_fid,
+				    const gchar *change_key,
+				    const gchar *display_name,
+				    guint64 folder_type,
+				    guint64 folder_flags,
+				    guint64 total)
 {
 	S_LOCK(ews_summary);
 
-	g_key_file_set_string	(ews_summary->priv->key_file, folder_full_name,
-				 "FolderId", folder_id);
-	g_hash_table_insert	(ews_summary->priv->id_fname_hash, g_strdup (folder_id), 
-				 g_strdup (folder_full_name));
+	g_key_file_set_string (ews_summary->priv->key_file, folder_id,
+			       "ParentFolderId", parent_fid);
+	g_key_file_set_string (ews_summary->priv->key_file, folder_id,
+			       "ChangeKey", change_key);
+	g_key_file_set_string (ews_summary->priv->key_file, folder_id,
+			       "DisplayName", display_name);
+	g_key_file_set_uint64 (ews_summary->priv->key_file, folder_id,
+			       "FolderType", folder_type);
+	g_key_file_set_uint64 (ews_summary->priv->key_file, folder_id,
+			       "Flags", folder_flags);
+	g_key_file_set_uint64 (ews_summary->priv->key_file, folder_id,
+			       "Total", total);
+
+	ews_ss_hash_replace (ews_summary, g_strdup (folder_id), NULL);
+
 	ews_summary->priv->dirty = TRUE;
-		
+
 	S_UNLOCK(ews_summary);
 }
 
 
-void		
-camel_ews_store_summary_set_change_key	(CamelEwsStoreSummary *ews_summary,
-					 const gchar *folder_full_name, 
-					 const gchar *change_key)
+void
+camel_ews_store_summary_set_parent_folder_id (CamelEwsStoreSummary *ews_summary,
+					      const gchar *folder_id,
+					      const gchar *parent_id)
 {
 	S_LOCK(ews_summary);
 
-	g_key_file_set_string	(ews_summary->priv->key_file, folder_full_name,
-				 "ChangeKey", change_key);
+	g_key_file_set_string	(ews_summary->priv->key_file, folder_id,
+				 "ParentFolderId", parent_id);
+	ews_ss_hash_replace (ews_summary, g_strdup (folder_id), NULL);
+
 	ews_summary->priv->dirty = TRUE;
-		
-	S_UNLOCK(ews_summary);
-}
 
-void		
-camel_ews_store_summary_set_sync_state	(CamelEwsStoreSummary *ews_summary,
-					 const gchar *folder_full_name, 
-					 const gchar *sync_state)
-{
-	S_LOCK(ews_summary);
-
-	g_key_file_set_string	(ews_summary->priv->key_file, folder_full_name,
-				 "SyncState", sync_state);
-	ews_summary->priv->dirty = TRUE;
-		
-	S_UNLOCK(ews_summary);
-}
-
-void		
-camel_ews_store_summary_set_folder_flags	(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name, 
-						 guint64 flags)
-{
-	S_LOCK(ews_summary);
-
-	g_key_file_set_uint64	(ews_summary->priv->key_file, folder_full_name,
-				 "Flags", flags);
-	ews_summary->priv->dirty = TRUE;
-		
-	S_UNLOCK(ews_summary);
-}
-
-void		
-camel_ews_store_summary_set_folder_unread	(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name, 
-						 guint64 unread)
-{
-	S_LOCK(ews_summary);
-
-	g_key_file_set_uint64	(ews_summary->priv->key_file, folder_full_name,
-				 "UnRead", unread);
-	ews_summary->priv->dirty = TRUE;
-		
-	S_UNLOCK(ews_summary);
-}
-
-void		
-camel_ews_store_summary_set_folder_total	(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name, 
-						 guint64 total)
-{
-	S_LOCK(ews_summary);
-
-	g_key_file_set_uint64	(ews_summary->priv->key_file, folder_full_name,
-				 "Total", total);
-	ews_summary->priv->dirty = TRUE;
-		
-	S_UNLOCK(ews_summary);
-}
-
-void		
-camel_ews_store_summary_set_folder_type		(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name, 
-						 guint64 ews_folder_type)
-{
-	S_LOCK(ews_summary);
-
-	g_key_file_set_uint64	(ews_summary->priv->key_file, folder_full_name,
-				 "FolderType", ews_folder_type);
-	ews_summary->priv->dirty = TRUE;
-		
 	S_UNLOCK(ews_summary);
 }
 
 void
-camel_ews_store_summary_store_string_val	(CamelEwsStoreSummary *ews_summary,
-						 const gchar *key, 
-						 const gchar *value)
+camel_ews_store_summary_set_change_key	(CamelEwsStoreSummary *ews_summary,
+					 const gchar *folder_id,
+					 const gchar *change_key)
+{
+	S_LOCK(ews_summary);
+
+	g_key_file_set_string	(ews_summary->priv->key_file, folder_id,
+				 "ChangeKey", change_key);
+	ews_summary->priv->dirty = TRUE;
+
+	S_UNLOCK(ews_summary);
+}
+
+void
+camel_ews_store_summary_set_sync_state (CamelEwsStoreSummary *ews_summary,
+					const gchar *folder_id,
+					const gchar *sync_state)
+{
+	S_LOCK(ews_summary);
+
+	g_key_file_set_string	(ews_summary->priv->key_file, folder_id,
+				 "SyncState", sync_state);
+	ews_summary->priv->dirty = TRUE;
+
+	S_UNLOCK(ews_summary);
+}
+
+void
+camel_ews_store_summary_set_folder_flags (CamelEwsStoreSummary *ews_summary,
+					  const gchar *folder_id,
+					  guint64 flags)
+{
+	S_LOCK(ews_summary);
+
+	g_key_file_set_uint64	(ews_summary->priv->key_file, folder_id,
+				 "Flags", flags);
+	ews_summary->priv->dirty = TRUE;
+
+	S_UNLOCK(ews_summary);
+}
+
+void
+camel_ews_store_summary_set_folder_unread (CamelEwsStoreSummary *ews_summary,
+					   const gchar *folder_id,
+					   guint64 unread)
+{
+	S_LOCK(ews_summary);
+
+	g_key_file_set_uint64	(ews_summary->priv->key_file, folder_id,
+				 "UnRead", unread);
+	ews_summary->priv->dirty = TRUE;
+
+	S_UNLOCK(ews_summary);
+}
+
+void
+camel_ews_store_summary_set_folder_total (CamelEwsStoreSummary *ews_summary,
+					  const gchar *folder_id,
+					  guint64 total)
+{
+	S_LOCK(ews_summary);
+
+	g_key_file_set_uint64	(ews_summary->priv->key_file, folder_id,
+				 "Total", total);
+	ews_summary->priv->dirty = TRUE;
+
+	S_UNLOCK(ews_summary);
+}
+
+void
+camel_ews_store_summary_set_folder_type (CamelEwsStoreSummary *ews_summary,
+					 const gchar *folder_id,
+					 guint64 ews_folder_type)
+{
+	S_LOCK(ews_summary);
+
+	g_key_file_set_uint64	(ews_summary->priv->key_file, folder_id,
+				 "FolderType", ews_folder_type);
+	ews_summary->priv->dirty = TRUE;
+
+	S_UNLOCK(ews_summary);
+}
+
+void
+camel_ews_store_summary_store_string_val (CamelEwsStoreSummary *ews_summary,
+					  const gchar *key,
+					  const gchar *value)
 {
 	S_LOCK(ews_summary);
 
 	g_key_file_set_string	(ews_summary->priv->key_file, STORE_GROUP_NAME,
 				 key, value);
 	ews_summary->priv->dirty = TRUE;
-		
+
 	S_UNLOCK(ews_summary);
 }
 
-gchar *	
-camel_ews_store_summary_get_folder_name	(CamelEwsStoreSummary *ews_summary,
-					 const gchar *folder_full_name,
+gchar *
+camel_ews_store_summary_get_folder_name (CamelEwsStoreSummary *ews_summary,
+					 const gchar *folder_id,
 					 GError **error)
 {
 	gchar *ret;
 
 	S_LOCK(ews_summary);
 
-	ret = g_key_file_get_string	(ews_summary->priv->key_file, folder_full_name,
+	ret = g_key_file_get_string	(ews_summary->priv->key_file, folder_id,
 					 "DisplayName", error);
-	
+
 	S_UNLOCK(ews_summary);
 
 	return ret;
 }
 
-gchar *	
-camel_ews_store_summary_get_folder_id	(CamelEwsStoreSummary *ews_summary,
-					 const gchar *folder_full_name,
-					 GError **error)
+gchar *
+camel_ews_store_summary_get_folder_full_name (CamelEwsStoreSummary *ews_summary,
+					      const gchar *folder_id,
+					      GError **error)
 {
 	gchar *ret;
 
 	S_LOCK(ews_summary);
 
-	ret = g_key_file_get_string	(ews_summary->priv->key_file, folder_full_name,
-					 "FolderId", error);
-	
+	ret = g_hash_table_lookup (ews_summary->priv->id_fname_hash, folder_id);
+
+	if (ret)
+		ret = g_strdup (ret);
+
 	S_UNLOCK(ews_summary);
 
 	return ret;
 }
 
-gchar *	
-camel_ews_store_summary_get_change_key	(CamelEwsStoreSummary *ews_summary,
-					 const gchar *folder_full_name,
-					 GError **error)
+gchar *
+camel_ews_store_summary_get_parent_folder_id (CamelEwsStoreSummary *ews_summary,
+					      const gchar *folder_id,
+					      GError **error)
 {
 	gchar *ret;
 
 	S_LOCK(ews_summary);
 
-	ret = g_key_file_get_string	(ews_summary->priv->key_file, folder_full_name,
+	ret = g_key_file_get_string	(ews_summary->priv->key_file, folder_id,
+					 "ParentFolderId", error);
+
+	S_UNLOCK(ews_summary);
+
+	return ret;
+}
+
+gchar *
+camel_ews_store_summary_get_change_key (CamelEwsStoreSummary *ews_summary,
+					const gchar *folder_id,
+					GError **error)
+{
+	gchar *ret;
+
+	S_LOCK(ews_summary);
+
+	ret = g_key_file_get_string	(ews_summary->priv->key_file, folder_id,
 					 "ChangeKey", error);
-	
+
 	S_UNLOCK(ews_summary);
 
 	return ret;
 }
 
-gchar *	
-camel_ews_store_summary_get_sync_state	(CamelEwsStoreSummary *ews_summary,
-					 const gchar *folder_full_name,
-					 GError **error)
+gchar *
+camel_ews_store_summary_get_sync_state (CamelEwsStoreSummary *ews_summary,
+					const gchar *folder_id,
+					GError **error)
 {
 	gchar *ret;
 
 	S_LOCK(ews_summary);
 
-	ret = g_key_file_get_string	(ews_summary->priv->key_file, folder_full_name,
+	ret = g_key_file_get_string	(ews_summary->priv->key_file, folder_id,
 					 "SyncState", error);
-	
+
 	S_UNLOCK(ews_summary);
 
 	return ret;
 }
 
-guint64		
-camel_ews_store_summary_get_folder_flags	(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name,
-						 GError **error)
+guint64
+camel_ews_store_summary_get_folder_flags (CamelEwsStoreSummary *ews_summary,
+					  const gchar *folder_id,
+					  GError **error)
 {
 	guint64 ret;
 
 	S_LOCK(ews_summary);
 
-	ret = g_key_file_get_uint64	(ews_summary->priv->key_file, folder_full_name,
+	ret = g_key_file_get_uint64	(ews_summary->priv->key_file, folder_id,
 					 "Flags", error);
-	
+
 	S_UNLOCK(ews_summary);
 
 	return ret;
 }
 
 
-guint64		
-camel_ews_store_summary_get_folder_unread	(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name,
-						 GError **error)
+guint64
+camel_ews_store_summary_get_folder_unread (CamelEwsStoreSummary *ews_summary,
+					   const gchar *folder_id,
+					   GError **error)
 {
 	guint64 ret;
 
 	S_LOCK(ews_summary);
 
-	ret = g_key_file_get_uint64	(ews_summary->priv->key_file, folder_full_name,
+	ret = g_key_file_get_uint64	(ews_summary->priv->key_file, folder_id,
 					 "UnRead", error);
-	
+
 	S_UNLOCK(ews_summary);
 
 	return ret;
 }
 
-guint64		
-camel_ews_store_summary_get_folder_total	(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name,
-						 GError **error)
+guint64
+camel_ews_store_summary_get_folder_total (CamelEwsStoreSummary *ews_summary,
+					  const gchar *folder_id,
+					  GError **error)
 {
 	guint64 ret;
 
 	S_LOCK(ews_summary);
 
-	ret = g_key_file_get_uint64	(ews_summary->priv->key_file, folder_full_name,
+	ret = g_key_file_get_uint64	(ews_summary->priv->key_file, folder_id,
 					 "Total", error);
-	
+
 	S_UNLOCK(ews_summary);
 
 	return ret;
 }
 
-guint64		
-camel_ews_store_summary_get_folder_type		(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_full_name,
-						 GError **error)
+guint64
+camel_ews_store_summary_get_folder_type (CamelEwsStoreSummary *ews_summary,
+					 const gchar *folder_id,
+					 GError **error)
 {
 	guint64 ret;
 
 	S_LOCK(ews_summary);
 
-	ret = g_key_file_get_uint64	(ews_summary->priv->key_file, folder_full_name,
+	ret = g_key_file_get_uint64	(ews_summary->priv->key_file, folder_id,
 					 "FolderType", error);
-	
+
 	S_UNLOCK(ews_summary);
 
 	return ret;
 }
 
-gchar *	
+gchar *
 camel_ews_store_summary_get_string_val	(CamelEwsStoreSummary *ews_summary,
 					 const gchar *key,
 					 GError **error)
@@ -450,15 +562,15 @@ camel_ews_store_summary_get_string_val	(CamelEwsStoreSummary *ews_summary,
 
 	ret = g_key_file_get_string	(ews_summary->priv->key_file, STORE_GROUP_NAME,
 					 key, error);
-	
+
 	S_UNLOCK(ews_summary);
 
 	return ret;
 }
 
-GSList *	
-camel_ews_store_summary_get_folders	(CamelEwsStoreSummary *ews_summary,
-					 const gchar *prefix)
+GSList *
+camel_ews_store_summary_get_folders (CamelEwsStoreSummary *ews_summary,
+				     const gchar *prefix)
 {
 	GSList *folders = NULL;
 	gchar **groups = NULL;
@@ -470,82 +582,82 @@ camel_ews_store_summary_get_folders	(CamelEwsStoreSummary *ews_summary,
 		prefixlen = strlen(prefix);
 
 	S_LOCK(ews_summary);
-	
+
 	groups = g_key_file_get_groups (ews_summary->priv->key_file, &length);
-	
+
 	S_UNLOCK(ews_summary);
-	
+
 	for (i = 0; i < length; i++) {
 		if (!g_ascii_strcasecmp (groups [i], STORE_GROUP_NAME))
 			continue;
-		if (prefix && (strncmp(groups[i], prefix, strlen(prefix)) ||
-			       (groups[i][prefixlen] && groups[i][prefixlen] != '/'))) {
-			continue;
+		if (prefix) {
+			const gchar *fname = g_hash_table_lookup (ews_summary->priv->id_fname_hash, groups[i]);
+
+			if (!fname || strncmp(fname, prefix, prefixlen) ||
+			    (fname[prefixlen] && fname[prefixlen] != '/'))
+				continue;
 		}
 		folders = g_slist_append (folders, g_strdup (groups [i]));
 	}
-	
+
 	g_strfreev (groups);
 	return folders;
 }
 
-gboolean	
-camel_ews_store_summary_remove_folder	(CamelEwsStoreSummary *ews_summary,
-					 const gchar *folder_full_name,
-					 GError **error)
+gboolean
+camel_ews_store_summary_remove_folder (CamelEwsStoreSummary *ews_summary,
+				       const gchar *folder_id,
+				       GError **error)
 {
 	gboolean ret;
-	gchar *id;
-	const gchar *old_fname;
+	gchar *full_name;
 
 	S_LOCK(ews_summary);
 
-	id = camel_ews_store_summary_get_folder_id (ews_summary,
-						    folder_full_name, NULL);
+	full_name = g_hash_table_lookup (ews_summary->priv->id_fname_hash, folder_id);
+	if (!full_name)
+		goto unlock;
 
-	/* Don't remove the folder name from the hash unless it's actually
-	   *this* folder's name that's in the hash. Otherwise, a folder
-	   rename would insert the new folder name into the hash replacing
-	   the old one, and then when this function is called to remove the
-	   old folder, we'd remove the *new* name leaving nothing. */
-	old_fname = g_hash_table_lookup (ews_summary->priv->id_fname_hash, id);
-	if (old_fname && !strcmp (old_fname, folder_full_name))
-		g_hash_table_remove (ews_summary->priv->id_fname_hash, id);
+	ret = g_key_file_remove_group (ews_summary->priv->key_file, folder_id,
+				       error);
 
-	ret = g_key_file_remove_group (ews_summary->priv->key_file, folder_full_name,
-					error);
+	g_hash_table_remove (ews_summary->priv->fname_id_hash, full_name);
+	g_hash_table_remove (ews_summary->priv->id_fname_hash, folder_id);
+
 	ews_summary->priv->dirty = TRUE;
 
+ unlock:
 	S_UNLOCK(ews_summary);
-	g_free (id);
 
-	return ret;	
+	return ret;
 }
 
-const gchar *
-camel_ews_store_summary_get_folder_name_from_id	(CamelEwsStoreSummary *ews_summary,
-						 const gchar *folder_id)
+gchar *
+camel_ews_store_summary_get_folder_id_from_name (CamelEwsStoreSummary *ews_summary,
+						 const gchar *folder_name)
 {
-	const gchar *folder_name;
-	
+	gchar *folder_id;
+
 	S_LOCK(ews_summary);
-	
-	folder_name = g_hash_table_lookup (ews_summary->priv->id_fname_hash, folder_id);
+
+	folder_id = g_hash_table_lookup (ews_summary->priv->fname_id_hash, folder_name);
+	if (folder_id)
+		folder_id = g_strdup (folder_id);
 
 	S_UNLOCK(ews_summary);
 
-	return folder_name;
+	return folder_id;
 }
 
 gboolean
-camel_ews_store_summary_has_folder (CamelEwsStoreSummary *ews_summary, const gchar *full_name)
+camel_ews_store_summary_has_folder (CamelEwsStoreSummary *ews_summary, const gchar *folder_id)
 {
 	gboolean ret;
-	
+
 	S_LOCK(ews_summary);
-	
-	ret = g_key_file_has_group (ews_summary->priv->key_file, full_name);
-	
+
+	ret = g_key_file_has_group (ews_summary->priv->key_file, folder_id);
+
 	S_UNLOCK(ews_summary);
 
 	return ret;
