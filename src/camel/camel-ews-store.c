@@ -559,27 +559,32 @@ ews_create_folder_sync (CamelStore *store,
 	CamelFolderInfo *root = NULL;
 
 	/* Get Parent folder ID */
-	fid = camel_ews_store_summary_get_folder_id(ews_summary, parent_name, error);
-	if (!fid) return NULL;
+	fid = camel_ews_store_summary_get_folder_id (ews_summary, parent_name,
+						     error);
+	if (!fid)
+		return NULL;
 
 	/* Make the call */
-	e_ews_connection_create_folder(ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
-									fid, FALSE, folder_name,
-									&folder_id,
-									cancellable,
-									error);
+	e_ews_connection_create_folder (ews_store->priv->cnc,
+					EWS_PRIORITY_MEDIUM, fid, FALSE,
+					folder_name, &folder_id,
+					cancellable, error);
 	g_free(fid);
 
-	if (error) return NULL;
+	if (error)
+		return NULL;
 
 	/* Translate & store returned folder id */
-	camel_ews_store_summary_new_folder(ews_summary, folder_name, folder_id->id);
-	camel_ews_store_summary_set_change_key(ews_summary, folder_name, folder_id->change_key);
-	e_ews_folder_free_fid(folder_id);
+	camel_ews_store_summary_new_folder (ews_summary, folder_name,
+					    folder_id->id);
+	camel_ews_store_summary_set_change_key (ews_summary, folder_name,
+					       folder_id->change_key);
+	e_ews_folder_free_fid (folder_id);
 
-	root = folder_info_build(ews_store, parent_name, folder_name);
+	root = folder_info_build (ews_store, parent_name, folder_name);
 
 	camel_store_folder_created (store, root);
+
 	return root;
 }
 
@@ -596,17 +601,20 @@ ews_delete_folder_sync	(CamelStore *store,
 	//CamelFolderInfo *root = NULL;
 	gboolean result;
 
-	fid = camel_ews_store_summary_get_folder_id(ews_summary, folder_name, error);
-	if (!fid) return FALSE;
+	fid = camel_ews_store_summary_get_folder_id (ews_summary, folder_name,
+						     error);
+	if (!fid)
+		return FALSE;
 
-	result = e_ews_connection_delete_folder(ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
-									fid, FALSE,
-									"HardDelete",
-									cancellable, error);
+	result = e_ews_connection_delete_folder (ews_store->priv->cnc,
+						 EWS_PRIORITY_MEDIUM,
+						 fid, FALSE, "HardDelete",
+						 cancellable, error);
 	g_free(fid);
-	if (error) return FALSE;
+	if (error)
+		return FALSE;
 
-	camel_ews_store_summary_remove_folder(ews_summary, folder_name, error);
+	camel_ews_store_summary_remove_folder (ews_summary, folder_name, error);
 
 	//camel_store_folder_deleted(store, root);
 	return TRUE;
