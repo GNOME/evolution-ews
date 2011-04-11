@@ -592,22 +592,23 @@ ews_delete_folder_sync	(CamelStore *store,
 	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
 	CamelEwsStoreSummary *ews_summary = ews_store->summary;
 	gchar *fid;
-	EwsFolderId *folder_id;
 	GCancellable *c = NULL;
-	CamelFolderInfo *root = NULL;
+	//CamelFolderInfo *root = NULL;
 	gboolean result;
 
+	fid = camel_ews_store_summary_get_folder_id(ews_summary, folder_name, error);
+	if (!fid) return FALSE;
 
 	result = e_ews_connection_delete_folder(ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
-									folder_id->id, FALSE,
+									fid, FALSE,
 									"HardDelete",
 									c, error);
-
+	g_free(fid);
 	if (error) return FALSE;
 
 	camel_ews_store_summary_remove_folder(ews_summary, folder_name, error);
 
-	camel_store_folder_deleted(store, root);
+	//camel_store_folder_deleted(store, root);
 	return TRUE;
 }
 
