@@ -547,6 +547,8 @@ ews_create_folder_sync (CamelStore *store,
 
 	camel_ews_store_summary_new_folder (ews_summary, full_name,
 					    folder_id->id);
+	camel_ews_store_summary_set_folder_name (ews_summary, full_name,
+						 folder_name);
 	camel_ews_store_summary_set_change_key (ews_summary, full_name,
 						folder_id->change_key);
 	e_ews_folder_free_fid (folder_id);
