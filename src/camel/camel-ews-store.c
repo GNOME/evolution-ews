@@ -521,6 +521,7 @@ ews_create_folder_sync (CamelStore *store,
 	EwsFolderId *folder_id;
 	EVO2(GCancellable *cancellable = NULL;)
 	CamelFolderInfo *root = NULL;
+	gboolean result;
 
 	/* Get Parent folder ID */
 	fid = camel_ews_store_summary_get_folder_id (ews_summary, parent_name,
@@ -529,13 +530,13 @@ ews_create_folder_sync (CamelStore *store,
 		return NULL;
 
 	/* Make the call */
-	e_ews_connection_create_folder (ews_store->priv->cnc,
-					EWS_PRIORITY_MEDIUM, fid, FALSE,
-					folder_name, &folder_id,
-					cancellable, error);
+	result = e_ews_connection_create_folder (ews_store->priv->cnc,
+						 EWS_PRIORITY_MEDIUM, fid,
+						 FALSE, folder_name, &folder_id,
+						 cancellable, error);
 	g_free(fid);
 
-	if (error)
+	if (!result)
 		return NULL;
 
 	/* Translate & store returned folder id */
@@ -581,7 +582,7 @@ ews_delete_folder_sync	(CamelStore *store,
 						 fid, FALSE, "HardDelete",
 						 cancellable, error);
 	g_free(fid);
-	if (error)
+	if (!result)
 		return FALSE;
 
 	camel_ews_store_summary_remove_folder (ews_summary, folder_name, error);
