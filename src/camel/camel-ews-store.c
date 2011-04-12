@@ -338,9 +338,10 @@ ews_update_folder_hierarchy (CamelEwsStore *ews_store, gchar *sync_state,
 	ews_utils_sync_folders (ews_store, folders_created, folders_deleted, folders_updated);
 	camel_ews_store_summary_store_string_val (ews_store->summary, "sync_state", sync_state);
 	camel_ews_store_summary_save (ews_store->summary, NULL);
-	
+
 	g_slist_foreach (folders_created, (GFunc) g_object_unref, NULL);
 	g_slist_foreach (folders_updated, (GFunc) g_object_unref, NULL);
+	g_slist_foreach (folders_deleted, (GFunc) g_free, NULL);
 	g_slist_free (folders_created);
 	g_slist_free (folders_deleted);
 	g_slist_free (folders_updated);
