@@ -519,19 +519,21 @@ ews_create_folder_sync (CamelStore *store,
 {
 	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
 	CamelEwsStoreSummary *ews_summary = ews_store->summary;
-	gchar *fid;
+	gchar *fid = NULL;
 	gchar *full_name;
 	EwsFolderId *folder_id;
 	EVO2(GCancellable *cancellable = NULL;)
 	CamelFolderInfo *fi = NULL;
 
 	/* Get Parent folder ID */
-	fid = camel_ews_store_summary_get_folder_id_from_name (ews_summary,
-							       parent_name);
-	if (!fid) {
-		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			     _("Parent folder %s does not exist"), parent_name);
-		return NULL;
+	if (parent_name && parent_name[0]) {
+		fid = camel_ews_store_summary_get_folder_id_from_name (ews_summary,
+								       parent_name);
+		if (!fid) {
+			g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+				     _("Parent folder %s does not exist"), parent_name);
+			return NULL;
+		}
 	}
 
 	/* Make the call */
@@ -544,7 +546,7 @@ ews_create_folder_sync (CamelStore *store,
 	}
 
 	/* Translate & store returned folder id */
-	if (parent_name && parent_name[0])
+	if (fid)
 		full_name = g_strdup_printf ("%s/%s", parent_name, folder_name);
 	else
 		full_name = g_strdup (folder_name);
