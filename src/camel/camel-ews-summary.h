@@ -82,16 +82,16 @@ struct _CamelEwsSummaryClass {
 GType camel_ews_summary_get_type (void);
 
 CamelFolderSummary *
-	camel_ews_summary_new		(struct _CamelFolder *folder, 
+	camel_ews_summary_new		(struct _CamelFolder *folder,
 					 const gchar *filename);
 gboolean
-	camel_ews_update_message_info_flags	
+	camel_ews_update_message_info_flags
 					(CamelFolderSummary *summary,
-					 CamelMessageInfo *info, 
-					 guint32 server_flags, 
+					 CamelMessageInfo *info,
+					 guint32 server_flags,
 					 CamelFlag *server_user_flags);
-void	camel_ews_summary_add_message	(CamelFolderSummary *summary, 
-					 const gchar *uid, 
+void	camel_ews_summary_add_message	(CamelFolderSummary *summary,
+					 const gchar *uid,
 					 CamelMimeMessage *message);
 void	camel_ews_summary_add_message_info
 					(CamelFolderSummary *summary,
@@ -100,7 +100,7 @@ void	camel_ews_summary_add_message_info
 void
 camel_ews_summary_delete_id		(CamelFolderSummary *summary,
 					 const gchar *id);
-void	ews_summary_clear		(CamelFolderSummary *summary, 
+void	ews_summary_clear		(CamelFolderSummary *summary,
 					 gboolean uncache);
 
 G_END_DECLS

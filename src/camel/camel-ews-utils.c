@@ -644,7 +644,7 @@ camel_ews_utils_sync_deleted_items (CamelEwsFolder *ews_folder, GSList *items_de
 		camel_folder_change_info_remove_uid (ci, id);
 	}
 	camel_db_delete_uids (((CamelStore *)ews_store)->cdb_w, full_name, items_deleted, NULL);
-	
+
 	camel_folder_changed ((CamelFolder *) ews_folder, ci);
 	camel_folder_change_info_free (ci);
 
@@ -660,7 +660,7 @@ ews_utils_get_server_flags (EEwsItem *item)
 	gint server_flags = 0;
 
 	e_ews_item_is_read (item, &flag);
-	if (flag)	
+	if (flag)
 		server_flags |= CAMEL_MESSAGE_SEEN;
 	else
 		server_flags &= ~CAMEL_MESSAGE_SEEN;
@@ -706,7 +706,7 @@ form_email_string_from_mb (const EwsMailbox *mb)
 		g_string_append (str, "<");
 		str = g_string_append (str, mb->email);
 		g_string_append (str, ">");
-		
+
 		ret = camel_pstring_add (str->str, TRUE);
 		g_string_free (str, FALSE);
 
@@ -829,7 +829,7 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder, GSList *items_up
 		EEwsItem *item = (EEwsItem *) l->data;
 		const EwsId *id;
 		CamelEwsMessageInfo *mi;
-	
+
 		id = e_ews_item_get_id (item);
 		mi = (CamelEwsMessageInfo *) camel_folder_summary_uid (folder->summary, id->id);
 		if (mi) {
@@ -839,7 +839,7 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder, GSList *items_up
 			if (camel_ews_update_message_info_flags (folder->summary, (CamelMessageInfo *)mi,
 						server_flags, NULL))
 				camel_folder_change_info_change_uid (ci, mi->info.uid);
-			
+
 			mi->change_key = g_strdup (id->change_key);
 			mi->info.dirty = TRUE;
 
@@ -847,10 +847,10 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder, GSList *items_up
 			g_object_unref (item);
 			continue;
 		}
-	
+
 		g_object_unref (item);
 	}
-	
+
 	camel_folder_summary_save_to_db (folder->summary, NULL);
 	camel_folder_changed ((CamelFolder *) ews_folder, ci);
 	camel_folder_change_info_free (ci);
@@ -867,7 +867,7 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder, GSList *items_cr
 
 	if (!items_created)
 		return;
-	
+
 	ci = camel_folder_change_info_new ();
 	folder = (CamelFolder *) ews_folder;
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store ((CamelFolder *) ews_folder);
@@ -891,26 +891,26 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder, GSList *items_cr
 		}
 
 		mi = (CamelEwsMessageInfo *)camel_message_info_new (folder->summary);
-		
+
 		if (mi->info.content == NULL) {
 			mi->info.content = camel_folder_summary_content_info_new (folder->summary);
 			mi->info.content->type = camel_content_type_new ("multipart", "mixed");
 		}
-		
+
 		item_type = e_ews_item_get_item_type (item);
-		if	(item_type == E_EWS_ITEM_TYPE_CALENDAR_ITEM || 
+		if	(item_type == E_EWS_ITEM_TYPE_CALENDAR_ITEM ||
 			 item_type == E_EWS_ITEM_TYPE_MEETING_MESSAGE ||
 			 item_type == E_EWS_ITEM_TYPE_MEETING_REQUEST ||
 			 item_type == E_EWS_ITEM_TYPE_MEETING_RESPONSE ||
 			 item_type == E_EWS_ITEM_TYPE_MEETING_RESPONSE)
 			camel_message_info_set_user_flag ((CamelMessageInfo*)mi, "$has_cal", TRUE);
-		
+
 		mi->info.uid = camel_pstring_strdup (id->id);
 		mi->info.size = e_ews_item_get_size (item);
 		mi->info.subject = camel_pstring_strdup (e_ews_item_get_subject (item));
 		mi->item_type = item_type;
 		mi->change_key = g_strdup (id->change_key);
-		
+
 		mi->info.date_sent = e_ews_item_get_date_sent (item);
 		mi->info.date_received = e_ews_item_get_date_received (item);
 
@@ -926,18 +926,18 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder, GSList *items_cr
 		e_ews_item_has_attachments (item, &has_attachments);
 		if (has_attachments)
 			mi->info.flags |= CAMEL_MESSAGE_ATTACHMENTS;
-		
+
 		ews_set_threading_data (mi, item);
 		server_flags = ews_utils_get_server_flags (item);
-		
+
 		camel_ews_summary_add_message_info (folder->summary, server_flags,
 						    (CamelMessageInfo *) mi);
 		camel_folder_change_info_add_uid (ci, id->id);
 		camel_folder_change_info_recent_uid (ci, id->id);
-		
+
 		g_object_unref (item);
 	}
-	
+
 	camel_folder_summary_save_to_db (folder->summary, NULL);
 	camel_folder_changed ((CamelFolder *) ews_folder, ci);
 	camel_folder_change_info_free (ci);
@@ -961,7 +961,7 @@ create_mime_message_cb (ESoapMessage *msg, gpointer user_data)
 
 	e_soap_message_start_element (msg, "Message", NULL, NULL);
 	e_soap_message_start_element (msg, "MimeContent", NULL, NULL);
-	
+
 	/* This is horrid. We really need to extend ESoapMessage to allow us
 	   to stream this directly rather than storing it in RAM. Which right
 	   now we are doing about four times: the GByteArray in the mem stream,
@@ -984,7 +984,7 @@ create_mime_message_cb (ESoapMessage *msg, gpointer user_data)
 	camel_stream_flush (filtered, EVO3(NULL,) NULL);
 	camel_stream_flush (mem, EVO3(NULL,) NULL);
 	bytes = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (mem));
-	
+
 	base64 = g_base64_encode (bytes->data, bytes->len);
 	g_object_unref (mem);
 	g_object_unref (filtered);
@@ -997,7 +997,7 @@ create_mime_message_cb (ESoapMessage *msg, gpointer user_data)
 	/* FIXME: Handle From address and message_camel_flags */
 
 	e_soap_message_end_element (msg); /* Message */
-	
+
 	g_free (create_data);
 }
 

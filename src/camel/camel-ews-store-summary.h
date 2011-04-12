@@ -39,7 +39,7 @@ struct _CamelEwsStoreSummaryClass {
 
 GType		camel_ews_store_summary_get_type	(void);
 
-CamelEwsStoreSummary *	
+CamelEwsStoreSummary *
 		camel_ews_store_summary_new	(const gchar *path);
 gboolean	camel_ews_store_summary_load	(CamelEwsStoreSummary *ews_summary,
 						 GError **error);
@@ -125,7 +125,7 @@ GSList *	camel_ews_store_summary_get_folders
 
 void		camel_ews_store_summary_store_string_val
 						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *key, 
+						 const gchar *key,
 						 const gchar *value);
 
 gchar *	camel_ews_store_summary_get_string_val
@@ -153,7 +153,7 @@ gchar *		camel_ews_store_summary_get_folder_id_from_name
 						 const gchar *folder_name);
 
 gboolean	camel_ews_store_summary_has_folder
-						(CamelEwsStoreSummary *ews_summary, 
+						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *id);
 
 G_END_DECLS

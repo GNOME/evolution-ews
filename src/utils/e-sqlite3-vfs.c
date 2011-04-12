@@ -331,7 +331,7 @@ void
 e_sqlite3_vfs_init (void)
 {
 	static GOnce vfs_once = G_ONCE_INIT;
-	
+
 	g_once (&vfs_once, (GThreadFunc) init_sqlite_vfs, NULL);
 
 	return;

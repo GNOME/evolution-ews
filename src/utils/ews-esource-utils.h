@@ -25,17 +25,17 @@
 G_BEGIN_DECLS
 
 gboolean
-ews_esource_utils_add_esource	(EEwsFolder *folder, 
+ews_esource_utils_add_esource	(EEwsFolder *folder,
 				 const gchar *account_uri,
-				 const gchar *account_name, 
-				 const gchar *username, 
+				 const gchar *account_name,
+				 const gchar *username,
 				 const gchar *email_id,
 				 const gchar *hosturl,
 				 gint refresh_timeout);
 gboolean
-ews_esource_utils_remove_esource	
-				(const gchar *fid, 
-				 const gchar *account_name, 
+ews_esource_utils_remove_esource
+				(const gchar *fid,
+				 const gchar *account_name,
 				 EwsFolderType ftype);
 
 gboolean

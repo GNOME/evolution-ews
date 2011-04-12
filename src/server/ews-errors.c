@@ -3,7 +3,7 @@
 static GHashTable *ews_error_hash = NULL;
 static GOnce setup_error_once = G_ONCE_INIT;
 
-static struct EwsErrorMap 
+static struct EwsErrorMap
 ews_conn_errors [] =
 {
 	{"ErrorAccessDenied",					EWS_CONNECTION_ERROR_ACCESSDENIED},
@@ -301,7 +301,7 @@ setup_error_map (gpointer data)
 
 	ews_error_hash = g_hash_table_new	(g_str_hash, g_str_equal);
 	for (i = 0; i < G_N_ELEMENTS(ews_conn_errors); i++)
-		g_hash_table_insert	(ews_error_hash, (gpointer) ews_conn_errors[i].error_id, 
+		g_hash_table_insert	(ews_error_hash, (gpointer) ews_conn_errors[i].error_id,
 					 GINT_TO_POINTER (ews_conn_errors[i].error_code));
 	return NULL;
 }

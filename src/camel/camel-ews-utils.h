@@ -74,20 +74,20 @@ void do_flags_diff (flags_diff_t *diff, guint32 old, guint32 _new);
 gchar *ews_concat ( const gchar *prefix, const gchar *suffix);
 void strip_lt_gt (gchar **string, gint s_offset, gint e_offset);
 
-void	ews_utils_sync_folders	(CamelEwsStore *ews_store, 
-				 GSList *created_folders, 
-				 GSList *deleted_folders, 
+void	ews_utils_sync_folders	(CamelEwsStore *ews_store,
+				 GSList *created_folders,
+				 GSList *deleted_folders,
 				 GSList *updated_folders);
 
 CamelFolderInfo *
-	camel_ews_utils_build_folder_info	(CamelEwsStore *store, 
+	camel_ews_utils_build_folder_info	(CamelEwsStore *store,
 						 const gchar *fname);
 
-void	camel_ews_utils_sync_deleted_items	(CamelEwsFolder *ews_folder, 
+void	camel_ews_utils_sync_deleted_items	(CamelEwsFolder *ews_folder,
 						 GSList *items_deleted);
-void	camel_ews_utils_sync_created_items	(CamelEwsFolder *ews_folder, 
+void	camel_ews_utils_sync_created_items	(CamelEwsFolder *ews_folder,
 						 GSList *items_created);
-void	camel_ews_utils_sync_updated_items	(CamelEwsFolder *ews_folder, 
+void	camel_ews_utils_sync_updated_items	(CamelEwsFolder *ews_folder,
 						 GSList *items_updated);
 
 gboolean

@@ -51,9 +51,9 @@ static gint comp_func (gconstpointer a, gconstpointer b);
 typedef void (*response_cb) (ESoapParameter *param, struct _EwsNode *enode);
 static void ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data);
 
-static void 
+static void
 ews_connection_authenticate	(SoupSession *sess, SoupMessage *msg,
-				 SoupAuth *auth, gboolean retrying, 
+				 SoupAuth *auth, gboolean retrying,
 				 gpointer data);
 
 /* Connection APIS */
@@ -88,7 +88,7 @@ struct _EwsAsyncData {
 	GSList *items_created;
 	GSList *items_updated;
 	GSList *items_deleted;
-	
+
 	const gchar *directory;
 	GSList *items;
 	gchar *sync_state;
@@ -103,7 +103,7 @@ struct _EwsNode {
 
 	gint pri;		/* the command priority */
 	response_cb cb;
-	
+
 	GCancellable *cancellable;
 	gulong cancel_handler_id;
 };
@@ -218,7 +218,7 @@ ews_get_response_status (ESoapParameter *param, GError **error)
 
 		subparam = e_soap_parameter_get_first_child_by_name (param, "ResponseCode");
 		res = e_soap_parameter_get_string_value (subparam);
-		
+
 		error_code = ews_get_error_code ((const gchar *) res);
 
 		/* FIXME: This happens because of a bug in the Exchange server,
@@ -227,7 +227,7 @@ ews_get_response_status (ESoapParameter *param, GError **error)
 		   birthday. We need to handle the error and correctly report it
 		   to the user, but for now we'll just ignore it... */
 		if (error_code != EWS_CONNECTION_ERROR_CORRUPTDATA) {
-			g_set_error	(error, 
+			g_set_error	(error,
 					 EWS_CONNECTION_ERROR,
 					 error_code,
 					 "%s", desc);
@@ -258,7 +258,7 @@ ews_next_request (gpointer _cnc)
 		QUEUE_UNLOCK (cnc);
 		return FALSE;
 	}
-	
+
 	node = (EwsNode *) l->data;
 
 	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1)) {
@@ -275,7 +275,7 @@ ews_next_request (gpointer _cnc)
 
 	/* Add to active job queue */
 	cnc->priv->active_job_queue = g_slist_append (cnc->priv->active_job_queue, node);
-	
+
 	soup_session_queue_message (cnc->priv->soup_session, SOUP_MESSAGE (node->msg), ews_response_cb, node);
 
 	QUEUE_UNLOCK (cnc);
@@ -293,12 +293,12 @@ static void ews_trigger_next_request(EEwsConnection *cnc)
 }
 
 /**
- * ews_active_job_done 
- * @cnc: 
- * @msg: 
- * Removes the node from active Queue and free's the node	 
- * 
- * Returns: 
+ * ews_active_job_done
+ * @cnc:
+ * @msg:
+ * Removes the node from active Queue and free's the node
+ *
+ * Returns:
  **/
 static void
 ews_active_job_done (EEwsConnection *cnc, EwsNode *ews_node)
@@ -308,14 +308,14 @@ ews_active_job_done (EEwsConnection *cnc, EwsNode *ews_node)
 	cnc->priv->active_job_queue = g_slist_remove (cnc->priv->active_job_queue, ews_node);
 	if (ews_node->cancellable)
 		g_signal_handler_disconnect (ews_node->cancellable, ews_node->cancel_handler_id);
-	
+
 	QUEUE_UNLOCK (cnc);
 
 	g_free (ews_node);
 	ews_trigger_next_request(cnc);
 }
 
-static void 
+static void
 ews_cancel_request (GCancellable *cancellable,
 		   gpointer user_data)
 {
@@ -362,7 +362,7 @@ ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_c
  	QUEUE_UNLOCK (cnc);
 
 	if (cancellable) {
-		node->cancellable = cancellable;	
+		node->cancellable = cancellable;
 		node->cancel_handler_id = g_cancellable_connect	(cancellable,
 								 G_CALLBACK (ews_cancel_request),
 								 (gpointer) node, NULL);
@@ -378,7 +378,7 @@ ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 {
 	EwsNode *enode = (EwsNode *) data;
 	ESoapResponse *response;
-	
+
 	if (enode->cancellable && g_cancellable_is_cancelled (enode->cancellable))
 		goto exit;
 
@@ -472,7 +472,7 @@ sync_xxx_response_cb (ESoapParameter *subparam, EwsNode *enode, ItemParser parse
 	g_free (last);
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "Changes");
-	
+
 	if (node) {
 		ESoapParameter *subparam1;
 		for (subparam1 = e_soap_parameter_get_first_child_by_name (node, "Create");
@@ -554,7 +554,7 @@ resolve_names_response_cb (ESoapParameter *subparam, EwsNode *enode)
 
 	subparam = e_soap_parameter_get_first_child_by_name (subparam, "ResolutionSet");
 	prop = e_soap_parameter_get_property (subparam, "IncludesLastItemInRange");
-	
+
 	if (prop && !strcmp (prop, "true"))
 		includes_last_item = TRUE;
 	g_free (prop);
@@ -570,9 +570,9 @@ resolve_names_response_cb (ESoapParameter *subparam, EwsNode *enode)
 
 		/* TODO parse contacts */
 	}
-	
+
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
-	
+
 	/* Reuse existing variables */
 	async_data->items = mailboxes;
 	async_data->includes_last_item = includes_last_item;
@@ -670,7 +670,7 @@ e_ews_connection_dispose (GObject *object)
 		g_slist_free (priv->active_job_queue);
 		priv->active_job_queue = NULL;
 	}
-	
+
 	if (parent_class->dispose)
 		(* parent_class->dispose) (object);
 }
@@ -685,7 +685,7 @@ e_ews_connection_finalize (GObject *object)
 
 	priv = cnc->priv;
 	g_static_rec_mutex_free (&priv->queue_lock);
-	
+
 	g_free (priv);
 	cnc->priv = NULL;
 
@@ -743,9 +743,9 @@ e_ews_connection_init (EEwsConnection *cnc)
 	priv->soup_loop = g_main_loop_new (priv->soup_context, FALSE);
 
 	priv->soup_thread = g_thread_create(e_ews_soup_thread, priv, TRUE, NULL);
-	
+
 	/* create the SoupSession for this connection */
-	priv->soup_session = soup_session_async_new_with_options (SOUP_SESSION_USE_NTLM, TRUE, 
+	priv->soup_session = soup_session_async_new_with_options (SOUP_SESSION_USE_NTLM, TRUE,
 								  SOUP_SESSION_ASYNC_CONTEXT, priv->soup_context, NULL);
 
         if (getenv("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 2)) {
@@ -760,13 +760,13 @@ e_ews_connection_init (EEwsConnection *cnc)
 	g_signal_connect (priv->soup_session, "authenticate", G_CALLBACK(ews_connection_authenticate), cnc);
 }
 
-static void 
+static void
 ews_connection_authenticate	(SoupSession *sess, SoupMessage *msg,
-				 SoupAuth *auth, gboolean retrying, 
+				 SoupAuth *auth, gboolean retrying,
 				 gpointer data)
 {
 	EEwsConnection *cnc = data;
-	
+
 	if (retrying) {
 		g_free (cnc->priv->password);
 		cnc->priv->password = NULL;
@@ -808,10 +808,10 @@ e_ews_connection_authenticate (EEwsConnection *cnc,
 /**
  * e_ews_connection_find
  * @uri: Exchange server uri
- * @username: 
- * 
+ * @username:
+ *
  * Find an existing connection for this user/uri, if it exists.
- * 
+ *
  * Returns: EEwsConnection
  **/
 EEwsConnection *
@@ -836,26 +836,26 @@ e_ews_connection_find (const gchar *uri, const gchar *username)
 			return cnc;
 		}
 	}
-		     
+
 	g_static_mutex_unlock (&connecting);
 
 	return NULL;
 }
 
 /**
- * e_ews_connection_new 
+ * e_ews_connection_new
  * @uri: Exchange server uri
- * @username: 
- * @password: 
+ * @username:
+ * @password:
  * @error: Currently unused, but may require in future. Can take NULL value.
- * 
+ *
  * This does not authenticate to the server. It merely stores the username and password.
  * Authentication happens when a request is made to the server.
- * 
+ *
  * Returns: EEwsConnection
  **/
 EEwsConnection *
-e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *password, 
+e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *password,
 		      GCallback authenticate_cb, gpointer authenticate_ctx,
 		      GError **error)
 {
@@ -878,10 +878,10 @@ e_ews_connection_new (const gchar *uri, const gchar *username, const gchar *pass
 			return cnc;
 		}
 	}
-	
+
 	/* not found, so create a new connection */
 	cnc = g_object_new (E_TYPE_EWS_CONNECTION, NULL);
-	
+
 	cnc->priv->username = g_strdup (username);
 	cnc->priv->password = g_strdup (password);
 	cnc->priv->uri = g_strdup (uri);
@@ -922,9 +922,9 @@ e_ews_autodiscover_ws_xml(const gchar *email)
 	node = xmlNewChild(node, ns, (xmlChar *)"Request", NULL);
 	child = xmlNewChild(node, ns, (xmlChar *)"EMailAddress",
 			    (xmlChar *)email);
-	child = xmlNewChild(node, ns, (xmlChar *)"AcceptableResponseSchema", 
+	child = xmlNewChild(node, ns, (xmlChar *)"AcceptableResponseSchema",
 			    (xmlChar *)"http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a");
-	
+
 	return doc;
 }
 
@@ -997,7 +997,7 @@ autodiscover_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 		fputs (SOUP_MESSAGE (msg)->response_body->data, stdout);
 		fputc ('\n', stdout);
 	}
-	
+
 	doc = xmlReadMemory (msg->response_body->data, msg->response_body->length,
 			     "autodiscover.xml", NULL, 0);
 	if (!doc) {
@@ -1089,7 +1089,7 @@ e_ews_autodiscover_ws_msg(EEwsConnection *cnc, gchar *url,
 			  xmlOutputBuffer *buf, struct _autodiscover_data *ad)
 {
 	SoupMessage *msg;
-       
+
 	msg = soup_message_new("GET", url);
 	soup_message_headers_append (msg->request_headers,
 				     "User-Agent", "libews/0.1");
@@ -1098,7 +1098,7 @@ e_ews_autodiscover_ws_msg(EEwsConnection *cnc, gchar *url,
 	soup_message_set_request(msg, "application/xml", SOUP_MEMORY_COPY,
 				 (gchar *)buf->buffer->content,
 				 buf->buffer->use);
-				 
+
 	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1)) {
 		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->request_body));
 		/* print request's body */
@@ -1193,10 +1193,10 @@ e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb, gpointer cbdata,
 }
 
 void
-e_ews_connection_set_mailbox	(EEwsConnection *cnc, 
+e_ews_connection_set_mailbox	(EEwsConnection *cnc,
 				 const gchar *email)
 {
-	
+
 	g_return_if_fail (email != NULL);
 
 	g_free (cnc->priv->email);
@@ -1235,7 +1235,7 @@ e_ews_connection_sync_folder_items_start	(EEwsConnection *cnc,
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "SyncFolderItems", NULL, NULL, EWS_EXCHANGE_2007);
 	e_soap_message_start_element (msg, "ItemShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, default_props);
-	
+
 	if (additional_props && *additional_props) {
 		gchar **prop = g_strsplit (additional_props, " ", 0);
 		gint i = 0;
@@ -1300,7 +1300,7 @@ e_ews_connection_sync_folder_items_finish	(EEwsConnection *cnc,
 
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
-	
+
 	*sync_state = async_data->sync_state;
 	*includes_last_item = async_data->includes_last_item;
 	*items_created = async_data->items_created;
@@ -1330,9 +1330,9 @@ e_ews_connection_sync_folder_items	(EEwsConnection *cnc,
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
-	
+
 	e_ews_connection_sync_folder_items_start	(cnc, pri, *sync_state, fid,
-							 default_props, additional_props, 
+							 default_props, additional_props,
 							 max_entries,
 							 ews_sync_reply_cb, cancellable,
 							 (gpointer) sync_data);
@@ -1354,7 +1354,7 @@ e_ews_connection_sync_folder_items	(EEwsConnection *cnc,
 	return result;
 }
 
-void 
+void
 e_ews_connection_sync_folder_hierarchy_start	(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *sync_state,
@@ -1413,7 +1413,7 @@ e_ews_connection_sync_folder_hierarchy_finish	(EEwsConnection *cnc,
 
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
-	
+
 	*sync_state = async_data->sync_state;
 	*includes_last_folder = async_data->includes_last_item;
 	*folders_created = async_data->items_created;
@@ -1439,7 +1439,7 @@ e_ews_connection_sync_folder_hierarchy	(EEwsConnection *cnc,
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
-	
+
 	e_ews_connection_sync_folder_hierarchy_start	(cnc, pri, *sync_state,
 							 ews_sync_reply_cb, cancellable,
 							 (gpointer) sync_data);
@@ -1487,7 +1487,7 @@ e_ews_connection_get_items_start	(EEwsConnection *cnc,
 
 	e_soap_message_start_element (msg, "ItemShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, default_props);
-	
+
 	if (include_mime)
 		e_ews_message_write_string_parameter (msg, "IncludeMimeContent", NULL, "true");
 	else
@@ -1518,12 +1518,12 @@ e_ews_connection_get_items_start	(EEwsConnection *cnc,
 	e_soap_message_end_element (msg);
 
 	e_soap_message_start_element (msg, "ItemIds", "messages", NULL);
-	
+
 	for (l = ids; l != NULL; l = g_slist_next (l))
 		e_ews_message_write_string_parameter_with_attribute (msg, "ItemId", NULL, NULL, "Id", l->data);
-	
+
 	e_soap_message_end_element (msg);
-	
+
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
@@ -1560,19 +1560,19 @@ e_ews_connection_get_items_finish	(EEwsConnection *cnc,
 		return FALSE;
 
 	*items = async_data->items;
-	
+
 	return TRUE;
 }
 
-gboolean		
+gboolean
 e_ews_connection_get_items	(EEwsConnection *cnc,
-				 gint pri, 
+				 gint pri,
 				 const GSList *ids,
 				 const gchar *default_props,
 				 const gchar *additional_props,
 				 gboolean include_mime,
 				 const gchar *mime_directory,
-				 GSList **items, 
+				 GSList **items,
 				 ESoapProgressFn progress_fn,
 				 gpointer progress_data,
 				 GCancellable *cancellable,
@@ -1583,21 +1583,21 @@ e_ews_connection_get_items	(EEwsConnection *cnc,
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
-	
+
 	e_ews_connection_get_items_start	(cnc, pri,ids, default_props,
 						 additional_props, include_mime,
-						 mime_directory, ews_sync_reply_cb, 
+						 mime_directory, ews_sync_reply_cb,
 						 progress_fn, progress_data,
 						 cancellable,
-						 (gpointer) sync_data); 
-		       				 	
+						 (gpointer) sync_data);
+
 	e_flag_wait (sync_data->eflag);
-	
-	result = e_ews_connection_get_items_finish (cnc, 
-						    sync_data->res, 
-						    items, 
+
+	result = e_ews_connection_get_items_finish (cnc,
+						    sync_data->res,
+						    items,
 						    error);
-	
+
 	e_flag_free (sync_data->eflag);
 	g_object_unref (sync_data->res);
 	g_free (sync_data);
@@ -1632,12 +1632,12 @@ e_ews_connection_delete_items_start	(EEwsConnection *cnc,
 					      affected_tasks, NULL, NULL);
 
 	e_soap_message_start_element (msg, "ItemIds", "messages", NULL);
-	
+
 	for (l = ids; l != NULL; l = g_slist_next (l))
 		e_ews_message_write_string_parameter_with_attribute (msg, "ItemId", NULL, NULL, "Id", l->data);
-	
+
 	e_soap_message_end_element (msg);
-	
+
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
@@ -1675,7 +1675,7 @@ e_ews_connection_delete_items_finish	(EEwsConnection *cnc,
 	return TRUE;
 }
 
-gboolean		
+gboolean
 e_ews_connection_delete_items	(EEwsConnection *cnc,
 				 gint pri,
 				 GSList *ids,
@@ -1690,17 +1690,17 @@ e_ews_connection_delete_items	(EEwsConnection *cnc,
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
-	
+
 	e_ews_connection_delete_items_start (cnc, pri, ids, delete_type,
 					     send_cancels, affected_tasks,
 					     ews_sync_reply_cb, cancellable,
-					     (gpointer) sync_data); 
-		       				 	
+					     (gpointer) sync_data);
+
 	e_flag_wait (sync_data->eflag);
-	
+
 	result = e_ews_connection_delete_items_finish (cnc, sync_data->res,
 						       error);
-	
+
 	e_flag_free (sync_data->eflag);
 	g_object_unref (sync_data->res);
 	g_free (sync_data);
@@ -1746,7 +1746,7 @@ e_ews_connection_update_items_start	(EEwsConnection *cnc,
 	}
 
 	e_soap_message_start_element (msg, "ItemChanges", "messages", NULL);
-	
+
 	create_cb (msg, create_user_data);
 
 	e_soap_message_end_element (msg); /* ItemChanges */
@@ -1791,7 +1791,7 @@ e_ews_connection_update_items_finish	(EEwsConnection *cnc,
 	return TRUE;
 }
 
-gboolean		
+gboolean
 e_ews_connection_update_items	(EEwsConnection *cnc,
 				 gint pri,
 				 const gchar *conflict_res,
@@ -1809,19 +1809,19 @@ e_ews_connection_update_items	(EEwsConnection *cnc,
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
-	
+
 	e_ews_connection_update_items_start (cnc, pri, conflict_res,
 					     msg_disposition, send_invites,
 					     folder_id,
 					     create_cb, create_user_data,
 					     ews_sync_reply_cb, cancellable,
-					     (gpointer) sync_data); 
-		       				 	
+					     (gpointer) sync_data);
+
 	e_flag_wait (sync_data->eflag);
-	
+
 	result = e_ews_connection_update_items_finish (cnc, sync_data->res,
 						       ids, error);
-	
+
 	e_flag_free (sync_data->eflag);
 	g_object_unref (sync_data->res);
 	g_free (sync_data);
@@ -1844,7 +1844,7 @@ e_ews_connection_create_items_start	(EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
-	
+
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "CreateItem",
 					     NULL, NULL, EWS_EXCHANGE_2007);
 
@@ -1863,11 +1863,11 @@ e_ews_connection_create_items_start	(EEwsConnection *cnc,
 	}
 
 	e_soap_message_start_element (msg, "Items", "messages", NULL);
-	
+
 	create_cb (msg, create_user_data);
 
 	e_soap_message_end_element (msg); /* Items */
-	
+
 	e_ews_message_write_footer (msg); /* CreateItem */
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
@@ -1907,7 +1907,7 @@ e_ews_connection_create_items_finish	(EEwsConnection *cnc,
 	return TRUE;
 }
 
-gboolean		
+gboolean
 e_ews_connection_create_items	(EEwsConnection *cnc,
 				 gint pri,
 				 const gchar *msg_disposition,
@@ -1924,18 +1924,18 @@ e_ews_connection_create_items	(EEwsConnection *cnc,
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
-	
+
 	e_ews_connection_create_items_start (cnc, pri, msg_disposition,
 					     send_invites, folder_id,
 					     create_cb, create_user_data,
 					     ews_sync_reply_cb, cancellable,
-					     (gpointer) sync_data); 
-		       				 	
+					     (gpointer) sync_data);
+
 	e_flag_wait (sync_data->eflag);
-	
+
 	result = e_ews_connection_create_items_finish (cnc, sync_data->res,
 						       ids, error);
-	
+
 	e_flag_free (sync_data->eflag);
 	g_object_unref (sync_data->res);
 	g_free (sync_data);
@@ -1981,7 +1981,7 @@ e_ews_connection_resolve_names_start 	(EEwsConnection *cnc,
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "ResolveNames", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_add_attribute (msg, "SearchScope", get_search_scope_str (scope), NULL, NULL);
-	
+
 	if (fetch_contact_data)
 		e_soap_message_add_attribute (msg, "ReturnFullContactData", "true", NULL, NULL);
 	else
@@ -1992,12 +1992,12 @@ e_ews_connection_resolve_names_start 	(EEwsConnection *cnc,
 
 		for (l = parent_folder_ids; l != NULL; l = g_slist_next (l)) {
 			EwsFolderId *fid = (EwsFolderId *) l->data;
-			
+
 			if (fid->is_distinguished_id)
 				e_soap_message_start_element (msg, "DistinguishedFolderId", NULL, NULL);
 			else
 				e_soap_message_start_element (msg, "FolderId", NULL, NULL);
-		
+
 			e_soap_message_add_attribute (msg, "Id", fid->id, NULL, NULL);
 			if (fid->change_key)
 				e_soap_message_add_attribute (msg, "ChangeKey", fid->change_key, NULL, NULL);
@@ -2028,7 +2028,7 @@ e_ews_connection_resolve_names_start 	(EEwsConnection *cnc,
 				      cancellable, simple, cb == ews_sync_reply_cb);
 }
 
-gboolean	
+gboolean
 e_ews_connection_resolve_names_finish	(EEwsConnection *cnc,
 					 GAsyncResult *result,
 					 GSList **mailboxes,
@@ -2049,14 +2049,14 @@ e_ews_connection_resolve_names_finish	(EEwsConnection *cnc,
 
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
-	
+
 	*includes_last_item = async_data->includes_last_item;
-	
+
 	if (contact_items)
 		*contact_items = async_data->items_created;
 	*mailboxes = async_data->items;
-	
-	return TRUE;	
+
+	return TRUE;
 }
 
 gboolean
@@ -2077,19 +2077,19 @@ e_ews_connection_resolve_names	(EEwsConnection *cnc,
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
-	
+
 	e_ews_connection_resolve_names_start (cnc, pri, resolve_name,
 					     scope, parent_folder_ids,
 					     fetch_contact_data,
 					     ews_sync_reply_cb, cancellable,
-					     (gpointer) sync_data); 
-		       				 	
+					     (gpointer) sync_data);
+
 	e_flag_wait (sync_data->eflag);
-	
+
 	result = e_ews_connection_resolve_names_finish (cnc, sync_data->res,
 						       mailboxes, contact_items,
 						       includes_last_item, error);
-	
+
 	e_flag_free (sync_data->eflag);
 	g_object_unref (sync_data->res);
 	g_free (sync_data);
@@ -2114,7 +2114,7 @@ e_ews_connection_update_folder_start	(EEwsConnection *cnc,
 					     NULL, NULL, EWS_EXCHANGE_2007);
 
 	e_soap_message_start_element (msg, "FolderChanges", "messages", NULL);
-	
+
 	create_cb (msg, create_user_data);
 
 	e_soap_message_end_element (msg); /* FolderChanges */
@@ -2156,7 +2156,7 @@ e_ews_connection_update_folder_finish	(EEwsConnection *cnc,
 	return TRUE;
 }
 
-gboolean		
+gboolean
 e_ews_connection_update_folder	(EEwsConnection *cnc,
 				 gint pri,
 				 EEwsRequestCreationCallback create_cb,
@@ -2169,17 +2169,17 @@ e_ews_connection_update_folder	(EEwsConnection *cnc,
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
-	
+
 	e_ews_connection_update_folder_start (cnc, pri,
 					      create_cb, create_user_data,
 					      ews_sync_reply_cb, cancellable,
-					      (gpointer) sync_data); 
-		       				 	
+					      (gpointer) sync_data);
+
 	e_flag_wait (sync_data->eflag);
-	
+
 	result = e_ews_connection_update_folder_finish (cnc, sync_data->res,
 							error);
-	
+
 	e_flag_free (sync_data->eflag);
 	g_object_unref (sync_data->res);
 	g_free (sync_data);
@@ -2255,7 +2255,7 @@ e_ews_connection_move_folder_finish	(EEwsConnection *cnc,
 	return TRUE;
 }
 
-gboolean		
+gboolean
 e_ews_connection_move_folder	(EEwsConnection *cnc,
 				 gint pri,
 				 const gchar *to_folder,
@@ -2268,16 +2268,16 @@ e_ews_connection_move_folder	(EEwsConnection *cnc,
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
-	
+
 	e_ews_connection_move_folder_start (cnc, pri, to_folder, folder,
 					    ews_sync_reply_cb, cancellable,
-					    (gpointer) sync_data); 
-		       				 	
+					    (gpointer) sync_data);
+
 	e_flag_wait (sync_data->eflag);
-	
+
 	result = e_ews_connection_move_folder_finish (cnc, sync_data->res,
 						      error);
-	
+
 	e_flag_free (sync_data->eflag);
 	g_object_unref (sync_data->res);
 	g_free (sync_data);
@@ -2309,7 +2309,7 @@ e_ews_connection_create_folder_start	(EEwsConnection *cnc,
 								     parent_folder_id?:"msgfolderroot");
 	else
 		e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", NULL, NULL, "Id", parent_folder_id);
-		
+
 	if (is_distinguished_id && cnc->priv->email)
 		e_ews_message_write_string_parameter (msg, "Mailbox", NULL, cnc->priv->email);
 
@@ -2363,7 +2363,7 @@ e_ews_connection_create_folder_finish	(EEwsConnection *cnc,
 }
 
 
-gboolean		
+gboolean
 e_ews_connection_create_folder	(EEwsConnection *cnc,
 				 gint pri,
 				 const gchar *parent_folder_id,
@@ -2378,11 +2378,11 @@ e_ews_connection_create_folder	(EEwsConnection *cnc,
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
-	
-	e_ews_connection_create_folder_start	(cnc, pri, parent_folder_id, 
+
+	e_ews_connection_create_folder_start	(cnc, pri, parent_folder_id,
 						 is_distinguished_id,
 						 folder_name,
-						 ews_sync_reply_cb, 
+						 ews_sync_reply_cb,
 						 cancellable,
 						 (gpointer) sync_data);
 
@@ -2507,15 +2507,15 @@ e_ews_connection_move_items	(EEwsConnection *cnc,
 
 void
 /**
- * e_ews_connection_delete_folder_start 
- * @cnc: 
- * @pri: 
- * @folder_id: folder to be deleted 
- * @is_distinguished_id: 
+ * e_ews_connection_delete_folder_start
+ * @cnc:
+ * @pri:
+ * @folder_id: folder to be deleted
+ * @is_distinguished_id:
  * @delete_type: "HardDelete", "SoftDelete", "MoveToDeletedItems"
- * @cb: 
- * @cancellable: 
- * @user_data: 
+ * @cb:
+ * @cancellable:
+ * @user_data:
  **/
 e_ews_connection_delete_folder_start	(EEwsConnection *cnc,
 					 gint pri,
@@ -2533,13 +2533,13 @@ e_ews_connection_delete_folder_start	(EEwsConnection *cnc,
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "DeleteFolder", "DeleteType", delete_type, EWS_EXCHANGE_2007);
 
 	e_soap_message_start_element (msg, "FolderIds", "messages", NULL);
-	
+
 	if (is_distinguished_id)
 		e_ews_message_write_string_parameter_with_attribute (msg, "DistinguishedFolderId", NULL, NULL, "Id", folder_id);
 	else
 		e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", NULL, NULL, "Id", folder_id);
-	
-	/*This element is required for delegate access*/	
+
+	/*This element is required for delegate access*/
 	if (is_distinguished_id && cnc->priv->email)
 		e_ews_message_write_string_parameter (msg, "Mailbox", NULL, cnc->priv->email);
 
@@ -2582,16 +2582,16 @@ e_ews_connection_delete_folder_finish	(EEwsConnection *cnc,
 	return TRUE;
 }
 
-gboolean		
+gboolean
 /**
- * e_ews_connection_delete_folder 
- * @cnc: 
- * @pri: 
- * @folder_id: folder to be deleted 
- * @is_distinguished_id: 
+ * e_ews_connection_delete_folder
+ * @cnc:
+ * @pri:
+ * @folder_id: folder to be deleted
+ * @is_distinguished_id:
  * @delete_type: "HardDelete", "SoftDelete", "MoveToDeletedItems"
- * @cancellable: 
- * @error: 
+ * @cancellable:
+ * @error:
  **/
 e_ews_connection_delete_folder	(EEwsConnection *cnc,
 				 gint pri,
@@ -2606,11 +2606,11 @@ e_ews_connection_delete_folder	(EEwsConnection *cnc,
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
-	
-	e_ews_connection_delete_folder_start	(cnc, pri, folder_id, 
+
+	e_ews_connection_delete_folder_start	(cnc, pri, folder_id,
 						 is_distinguished_id,
 						 delete_type,
-						 ews_sync_reply_cb, 
+						 ews_sync_reply_cb,
 						 cancellable,
 						 (gpointer) sync_data);
 

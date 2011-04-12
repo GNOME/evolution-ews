@@ -59,7 +59,7 @@ typedef struct _CamelEwsStorePrivate CamelEwsStorePrivate;
 struct _CamelEwsStore {
 	CamelOfflineStore parent;
 	CamelEwsStorePrivate *priv;
-	
+
 	CamelEwsStoreSummary *summary;
 	gchar *storage_path;
 };
@@ -70,10 +70,10 @@ struct _CamelEwsStoreClass {
 
 GType camel_ews_store_get_type (void);
 gchar *		ews_get_name	(CamelService *service, gboolean brief);
-EEwsConnection *	
+EEwsConnection *
 		camel_ews_store_get_connection	(CamelEwsStore *ews_store);
 
-gboolean	camel_ews_store_connected	(CamelEwsStore *store, 
+gboolean	camel_ews_store_connected	(CamelEwsStore *store,
 						 GError **error);
 
 G_END_DECLS

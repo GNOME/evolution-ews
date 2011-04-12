@@ -38,25 +38,25 @@ ESoapMessage *	e_ews_message_new_with_header	(const gchar *uri,
 						 const gchar *attribute_name,
 						 const gchar *attribute_value,
 						 EwsServerVersion version);
-void		e_ews_message_write_string_parameter 
+void		e_ews_message_write_string_parameter
 						(ESoapMessage *msg, const gchar *name,
 						 const gchar *prefix, const gchar *value);
-void		e_ews_message_write_string_parameter_with_attribute 
+void		e_ews_message_write_string_parameter_with_attribute
 						(ESoapMessage *msg,
 						 const gchar *name,
 						 const gchar *prefix,
 						 const gchar *value,
 						 const gchar *attribute_name,
 						 const gchar *attribute_value);
-void		e_ews_message_write_base64_parameter 
+void		e_ews_message_write_base64_parameter
 						(ESoapMessage *msg,
 						 const gchar *name,
 						 const gchar *prefix,
 						 const gchar *value);
-void 		e_ews_message_write_int_parameter 
-						(ESoapMessage *msg, 
-						 const gchar *name, 
-						 const gchar *prefix, 
+void 		e_ews_message_write_int_parameter
+						(ESoapMessage *msg,
+						 const gchar *name,
+						 const gchar *prefix,
 						 glong value);
 
 void		e_ews_message_write_footer	(ESoapMessage *msg);

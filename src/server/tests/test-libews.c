@@ -41,7 +41,7 @@ int main (int argc, char *argv[])
 	/* delete folder uses the data from create_folder test. */
 	g_test_add_func ("/libews/createfolder", createfolder_tests_run);
 	g_test_add_data_func ("/libews/deletefolder", &folder_id, deletefolder_tests_run);
-	
+
 	g_test_add_func ("/libews/cuditem", cuditem_tests_run);
 
 	g_test_add_func ("/libews/getattachment", get_attachments_tests_run);
@@ -49,5 +49,5 @@ int main (int argc, char *argv[])
 	ret = g_test_run ();
 	finalize_test_data ();
 
-	return ret; 
+	return ret;
 }

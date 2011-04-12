@@ -58,9 +58,9 @@ ews_find_group (GSList *groups, const gchar *account_name)
 {
 	GSList *p;
 	gint len;
-	
+
 	len = strlen (EWS_BASE_URI);
-	
+
 	for (p = groups; p != NULL; p = g_slist_next (p)) {
 		ESourceGroup *group = E_SOURCE_GROUP (p->data);
 		const gchar *buri = e_source_group_peek_base_uri (group);
@@ -70,7 +70,7 @@ ews_find_group (GSList *groups, const gchar *account_name)
 		    !g_ascii_strcasecmp (name, account_name))
 			return group;
 	}
-	
+
 	return NULL;
 }
 
@@ -84,7 +84,7 @@ ews_ensure_group (ESourceList *source_list, const gchar *account_name)
 	group = ews_find_group (groups, account_name);
 	if (group)
 		return g_object_ref (group);
-	
+
 	group = e_source_group_new (account_name, EWS_BASE_URI);
 	e_source_group_set_property (group, "create_source", "no");
 
@@ -93,16 +93,16 @@ ews_ensure_group (ESourceList *source_list, const gchar *account_name)
 		g_object_unref (group);
 		return NULL;
 	}
-	
+
 	e_source_list_sync (source_list, NULL);
 	return group;
 }
 
 gboolean
-ews_esource_utils_add_esource	(EEwsFolder *folder, 
+ews_esource_utils_add_esource	(EEwsFolder *folder,
 				 const gchar *account_uri,
-				 const gchar *account_name, 
-				 const gchar *username, 
+				 const gchar *account_name,
+				 const gchar *username,
 				 const gchar *email_id,
 				 const gchar *hosturl,
 				 gint refresh_timeout)
@@ -140,7 +140,7 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 
 	sources = e_source_group_peek_sources (group);
 	if (ews_find_source_by_fid (sources, fid->id)) {
-		ret = FALSE;	
+		ret = FALSE;
 		goto exit;
 	}
 
@@ -165,7 +165,7 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 	if (ftype == EWS_FOLDER_TYPE_CONTACTS) {
 		e_source_set_property (source, "auth", "plain/password");
 		e_source_set_property (source, "completion", "true");
-	} else 
+	} else
 		e_source_set_property (source, "auth", "1");
 
 	e_source_group_add_source (group, source, -1);
@@ -173,11 +173,11 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 
 	if (selection_key) {
 		GSList *ids;
-		
+
 		ids = gconf_client_get_list (client, selection_key , GCONF_VALUE_STRING, NULL);
 		ids = g_slist_append (ids, g_strdup (e_source_peek_uid (source)));
 		gconf_client_set_list (client,  selection_key, GCONF_VALUE_STRING, ids, NULL);
-	
+
 		g_slist_foreach (ids, (GFunc) g_free, NULL);
 		g_slist_free (ids);
 	}
@@ -192,8 +192,8 @@ exit:
 }
 
 gboolean
-ews_esource_utils_remove_esource	(const gchar *fid, 
-					 const gchar *account_name, 
+ews_esource_utils_remove_esource	(const gchar *fid,
+					 const gchar *account_name,
 					 EwsFolderType ftype)
 {
 	ESourceList *source_list;
@@ -219,7 +219,7 @@ ews_esource_utils_remove_esource	(const gchar *fid,
 
 	sources = e_source_group_peek_sources (group);
 	if (!(source = ews_find_source_by_fid (sources, fid))) {
-		ret = FALSE;	
+		ret = FALSE;
 		goto exit;
 	}
 

@@ -134,17 +134,17 @@ static void soap_restarted (SoupMessage *msg, gpointer data)
 	}
 }
 
-static void soap_sax_startElementNs (void * _ctxt, 
-				     const xmlChar *localname, 
-				     const xmlChar *prefix, 
-				     const xmlChar *uri, 
-				     int nb_namespaces, 
-				     const xmlChar **namespaces, 
-				     int nb_attributes, 
-				     int nb_defaulted, 
+static void soap_sax_startElementNs (void * _ctxt,
+				     const xmlChar *localname,
+				     const xmlChar *prefix,
+				     const xmlChar *uri,
+				     int nb_namespaces,
+				     const xmlChar **namespaces,
+				     int nb_attributes,
+				     int nb_defaulted,
 				     const xmlChar **attributes)
 {
-	xmlParserCtxt *ctxt = _ctxt; 
+	xmlParserCtxt *ctxt = _ctxt;
 	ESoapMessagePrivate *priv = ctxt->_private;
 	gchar *fname;
 
@@ -185,11 +185,11 @@ static void soap_sax_startElementNs (void * _ctxt,
 }
 
 static void soap_sax_endElementNs (void *_ctxt,
-				   const xmlChar *localname, 
-				   const xmlChar *prefix, 
+				   const xmlChar *localname,
+				   const xmlChar *prefix,
 				   const xmlChar *uri)
 {
-	xmlParserCtxt *ctxt = _ctxt; 
+	xmlParserCtxt *ctxt = _ctxt;
 	ESoapMessagePrivate *priv = ctxt->_private;
 
 	if (priv->steal_fd != -1) {
@@ -201,7 +201,7 @@ static void soap_sax_endElementNs (void *_ctxt,
 
 static void soap_sax_characters (void *_ctxt, const xmlChar *ch, int len)
 {
-	xmlParserCtxt *ctxt = _ctxt; 
+	xmlParserCtxt *ctxt = _ctxt;
 	ESoapMessagePrivate *priv = ctxt->_private;
 
 	if (priv->steal_fd == -1)
@@ -361,7 +361,7 @@ e_soap_message_store_node_data (ESoapMessage *msg,
 
 	priv->steal_node = g_strdup (nodename);
 	priv->steal_dir = g_strdup (directory);
-	priv->steal_base64 = base64;	       
+	priv->steal_base64 = base64;
 }
 
 /**

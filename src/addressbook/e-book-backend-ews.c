@@ -61,7 +61,7 @@ struct _EBookBackendEwsPrivate {
 	gboolean only_if_exists;
 	gboolean is_writable;
 	gint mode;
-	
+
 	GHashTable *ops;
 };
 
@@ -90,12 +90,12 @@ e_book_backend_ews_create_contact (EBookBackend *backend,
 			e_data_book_respond_create (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
 			return;
 		}
-		
+
 		if (!ebews->priv->is_writable) {
 			e_data_book_respond_create (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
 			return;
 		}
-		
+
 		e_data_book_respond_create (book, opid, EDB_ERROR (SUCCESS), contact);
 
 		return;
@@ -165,7 +165,7 @@ e_book_backend_ews_modify_contact (EBookBackend *backend,
 			e_data_book_respond_modify (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
 			return;
 		}
-	
+
 		e_data_book_respond_modify (book, opid, EDB_ERROR (SUCCESS), contact);
 		return;
 	default :
@@ -255,7 +255,7 @@ func_not (ESExp *f, gint argc, ESExpResult **argv, gpointer data)
 		e_sexp_fatal_error (f, "parse error");
 		return NULL;
 	}
-	
+
 	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
 	r->value.boolean = FALSE;
 
@@ -269,7 +269,7 @@ func_and_or (ESExp *f, gint argc, ESExpResult **argv, gpointer and)
 
 	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
 	r->value.boolean = FALSE;
-	
+
 	return r;
 }
 
@@ -338,7 +338,7 @@ func_contains (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer
 
 }
 
-/* We are just handling for autocompletion now. We need to support other fields after implementing 
+/* We are just handling for autocompletion now. We need to support other fields after implementing
    Restrictions and find_items request */
 static ESExpResult *
 func_beginswith (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer data)
@@ -363,7 +363,7 @@ func_beginswith (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpoint
 			sdata->is_autocompletion = TRUE;
 		}
 	}
-	
+
 	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
 	r->value.boolean = FALSE;
 	return r;
@@ -383,7 +383,7 @@ static struct {
 	{ "endswith", func_endswith, 0},
 };
 
-static gpointer 
+static gpointer
 e_book_backend_ews_build_restriction (const gchar *query, gboolean *autocompletion, gchar **auto_comp_str)
 {
 	ESExpResult *r;
@@ -456,7 +456,7 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 			g_error_free (error);
 			return;
 		}
-		
+
 		e_book_backend_ews_build_restriction (query, &is_autocompletion, &auto_comp_str);
 		if (!is_autocompletion || !auto_comp_str) {
 			g_free (auto_comp_str);
@@ -464,11 +464,11 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 			e_data_book_view_unref (book_view);
 			return;
 		}
-		
+
 		source = e_book_backend_get_source (backend);
 		cancellable = g_cancellable_new ();
-		
-		/* FIXME Need to convert the Ids from EwsLegacyId format to EwsId format using 
+
+		/* FIXME Need to convert the Ids from EwsLegacyId format to EwsId format using
 		   convert_id operation before using it as the schema has changed between Exchange
 		   2007 and 2007_SP1 */
 		fid = g_new0 (EwsFolderId, 1);
@@ -476,10 +476,10 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 		fid->change_key = e_source_get_duped_property (source, "change-key");
 		ids = g_slist_append (ids, fid);
 
-		/* We do not scan until we reach the last_item as it might be good enough to show first 100 
+		/* We do not scan until we reach the last_item as it might be good enough to show first 100
 		   items during auto-completion. Change it if needed */
 		g_hash_table_insert (priv->ops, book_view, cancellable);
-		e_ews_connection_resolve_names	(priv->cnc, EWS_PRIORITY_MEDIUM, auto_comp_str, 
+		e_ews_connection_resolve_names	(priv->cnc, EWS_PRIORITY_MEDIUM, auto_comp_str,
 						 EWS_SEARCH_AD, NULL, FALSE, &mailboxes, NULL,
 						 &includes_last_item, cancellable, &error);
 		g_free (auto_comp_str);
@@ -497,12 +497,12 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 			EContact *contact;
 
 			contact = e_contact_new ();
-			
+
 			/* We do not get an id from the server, so just using email_id as uid for now */
 			e_contact_set (contact, E_CONTACT_UID, mb->email);
 			e_contact_set (contact, E_CONTACT_FULL_NAME, mb->name);
 			e_contact_set (contact, E_CONTACT_EMAIL_1, mb->email);
-			
+
 			e_data_book_view_notify_update (book_view, contact);
 
 			g_free (mb->email);
@@ -573,7 +573,7 @@ e_book_backend_ews_authenticate_user (EBookBackend *backend,
 		priv->folder_id = e_source_get_duped_property (esource, "folder-id");
 		host_url = e_source_get_property (esource, "hosturl");
 
-		priv->cnc = e_ews_connection_new (host_url, user, passwd, 
+		priv->cnc = e_ews_connection_new (host_url, user, passwd,
 						  NULL, NULL, &error);
 		/* FIXME: Do some dummy request to ensure that the password is actually
 		   correct; don't just blindly return success */
@@ -633,7 +633,7 @@ e_book_backend_ews_load_source (EBookBackend           *backend,
 				      gboolean                only_if_exists,
 				      GError                **perror)
 {
-	
+
 }
 
 static void
@@ -753,14 +753,14 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 	parent_class->load_source             = e_book_backend_ews_load_source;
 	parent_class->get_static_capabilities = e_book_backend_ews_get_static_capabilities;
 	parent_class->remove                  = e_book_backend_ews_remove;
-	
+
 	parent_class->set_mode                = e_book_backend_ews_set_mode;
 	parent_class->get_required_fields     = e_book_backend_ews_get_required_fields;
 	parent_class->get_supported_fields    = e_book_backend_ews_get_supported_fields;
 	parent_class->get_supported_auth_methods = e_book_backend_ews_get_supported_auth_methods;
 
 	parent_class->authenticate_user       = e_book_backend_ews_authenticate_user;
-	
+
 	parent_class->start_book_view         = e_book_backend_ews_start_book_view;
 	parent_class->stop_book_view          = e_book_backend_ews_stop_book_view;
 	parent_class->cancel_operation        = e_book_backend_ews_cancel_operation;
@@ -770,9 +770,9 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 	parent_class->modify_contact          = e_book_backend_ews_modify_contact;
 	parent_class->get_contact             = e_book_backend_ews_get_contact;
 	parent_class->get_contact_list        = e_book_backend_ews_get_contact_list;
-	
+
 	parent_class->get_changes             = e_book_backend_ews_get_changes;
-	
+
 	object_class->dispose                 = e_book_backend_ews_dispose;
 }
 

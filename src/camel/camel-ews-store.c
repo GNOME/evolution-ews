@@ -103,7 +103,7 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 
 	ews_store = (CamelEwsStore *) service;
 	priv = ews_store->priv;
-	
+
 	/* Chain up to parent's construct() method. */
 	service_class = CAMEL_SERVICE_CLASS (camel_ews_store_parent_class);
 	if (!service_class->construct (service, session, provider, url, error))
@@ -152,7 +152,7 @@ ews_compare_folder_name (gconstpointer a, gconstpointer b)
 	return g_str_equal (aname, bname);
 }
 
-static void 
+static void
 ews_store_authenticate	(EEwsConnection *cnc,
 			 SoupMessage *msg, SoupAuth *auth,
 			 gboolean retrying, gpointer data)
@@ -191,12 +191,12 @@ ews_connect_sync (CamelService *service, EVO3(GCancellable *cancellable,) GError
 
 	ews_store = (CamelEwsStore *) service;
 	priv = ews_store->priv;
-	
+
 	if (service->status == CAMEL_SERVICE_DISCONNECTED)
 		return FALSE;
-	
+
 	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-	
+
 	if (priv->cnc) {
 		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 		return TRUE;
@@ -233,10 +233,10 @@ ews_disconnect_sync (CamelService *service, gboolean clean, EVO3(GCancellable *c
 
 	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
-	/* TODO cancel all operations in the connection */	
+	/* TODO cancel all operations in the connection */
 	g_object_unref (ews_store->priv->cnc);
 	ews_store->priv->cnc = NULL;
-	
+
 	camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	return TRUE;
@@ -291,7 +291,7 @@ folder_info_from_store_summary (CamelEwsStore *store, const gchar *top, guint32 
 	GSList *folders, *l;
 	GPtrArray *folder_infos;
 	CamelFolderInfo *root_fi = NULL;
-	
+
 	ews_summary = store->summary;
 	folders = camel_ews_store_summary_get_folders (ews_summary, top);
 
@@ -303,7 +303,7 @@ folder_info_from_store_summary (CamelEwsStore *store, const gchar *top, guint32 
 	for (l = folders; l != NULL; l = g_slist_next (l)) {
 		CamelFolderInfo *fi;
 		gint64 ftype;
-		
+
 		ftype = camel_ews_store_summary_get_folder_type (ews_summary, l->data, NULL);
 		if (ftype != EWS_FOLDER_TYPE_MAILBOX)
 			continue;
@@ -311,9 +311,9 @@ folder_info_from_store_summary (CamelEwsStore *store, const gchar *top, guint32 
 		fi = camel_ews_utils_build_folder_info (store, l->data);
 		g_ptr_array_add	(folder_infos, fi);
 	}
-	
+
 	root_fi = camel_folder_info_build (folder_infos, top, '/', TRUE);
-	
+
 	g_ptr_array_free (folder_infos, TRUE);
 	g_slist_foreach (folders, (GFunc) g_free, NULL);
 	g_slist_free (folders);
@@ -361,13 +361,13 @@ ews_folder_hierarchy_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_da
 	gboolean includes_last_folder;
 	GError *error = NULL;
 
-	e_ews_connection_sync_folder_hierarchy_finish	(cnc, res, &sync_state, &includes_last_folder, 
+	e_ews_connection_sync_folder_hierarchy_finish	(cnc, res, &sync_state, &includes_last_folder,
 							 &folders_created, &folders_updated,
 							 &folders_deleted, &error);
 
 	if (error != NULL) {
 		g_warning ("Unable to fetch the folder hierarchy: %s :%d \n", error->message, error->code);
-		
+
 		if (!sync_data->sync) {
 			g_mutex_lock (priv->get_finfo_lock);
 			ews_store->priv->last_refresh_time -= FINFO_REFRESH_INTERVAL;
@@ -389,7 +389,7 @@ exit:
 		e_flag_set (sync_data->sync);
 		if (error)
 			g_propagate_error (sync_data->error, error);
-		
+
 	} else {
 		g_free (sync_data);
 		g_clear_error (&error);
@@ -414,13 +414,13 @@ ews_refresh_finfo (CamelSession *session, CamelSessionThreadMsg *msg)
 
 	if (!EVO3_sync(camel_service_connect) ((CamelService *) ews_store, &msg->error))
 		return;
-	
+
 	sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
 
 	sync_data = g_new0 (struct _store_sync_data, 1);
 	sync_data->ews_store = ews_store;
-	e_ews_connection_sync_folder_hierarchy_start	(ews_store->priv->cnc, EWS_PRIORITY_MEDIUM, 
-							 sync_state, ews_folder_hierarchy_ready_cb, 
+	e_ews_connection_sync_folder_hierarchy_start	(ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
+							 sync_state, ews_folder_hierarchy_ready_cb,
 							 NULL, sync_data);
 	g_free (sync_state);
 }
@@ -477,7 +477,7 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, EV
 			m->store = g_object_ref (store);
 			camel_session_thread_queue (((CamelService *)store)->session, &m->msg, 0);
 		}
-		
+
 		ews_store->priv->last_refresh_time = time (NULL);
 		g_mutex_unlock (priv->get_finfo_lock);
 		goto offline;
@@ -485,7 +485,7 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, EV
 
 	g_slist_foreach (folders, (GFunc)g_free, NULL);
 	g_slist_free (folders);
-	
+
 	sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
 
 
@@ -500,7 +500,7 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, EV
 			g_warning ("Unable to fetch the folder hierarchy.\n");
 
 		g_mutex_unlock (priv->get_finfo_lock);
-		return NULL;	
+		return NULL;
 	}
 	ews_update_folder_hierarchy (ews_store, sync_state, includes_last_folder,
 				     folders_created, folders_deleted, folders_updated);
@@ -621,7 +621,7 @@ static void rename_folder_cb (ESoapMessage *msg, gpointer user_data)
 	e_soap_message_start_element (msg, "SetFolderField", NULL, NULL);
 	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL,
 							      "FieldURI", "folder:DisplayName");
-	
+
 	e_soap_message_start_element (msg, "Folder", NULL, NULL);
 	e_ews_message_write_string_parameter (msg, "DisplayName", NULL, rename_data->display_name);
 	e_soap_message_end_element (msg); /* Folder */

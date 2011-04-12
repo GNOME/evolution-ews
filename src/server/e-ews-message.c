@@ -50,20 +50,20 @@ e_ews_message_new_with_header (const gchar *uri,
 	e_soap_message_start_envelope (msg);
 
 	/* server info */
-	if (server_info == EWS_EXCHANGE_2007_SP1)	
+	if (server_info == EWS_EXCHANGE_2007_SP1)
 		server_ver = "Exchange2007_SP1";
 	else
 		server_ver = "Exchange2007";
 
 	e_soap_message_start_header (msg);
-	
-	e_soap_message_start_element (msg, "RequestServerVersion", "types", 
+
+	e_soap_message_start_element (msg, "RequestServerVersion", "types",
 					"http://schemas.microsoft.com/exchange/services/2006/types");
 	e_soap_message_add_attribute (msg, "Version", server_ver, NULL, NULL);
 	e_soap_message_end_element (msg);
 
 	e_soap_message_end_header (msg);
-	
+
 	e_soap_message_start_body(msg);
 	e_soap_message_add_namespace(msg, "messages",
 				       "http://schemas.microsoft.com/exchange/services/2006/messages");
