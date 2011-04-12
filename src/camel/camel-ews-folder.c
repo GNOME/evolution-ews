@@ -80,6 +80,7 @@ struct _CamelEwsFolderPrivate {
 	gboolean refreshing;
 	gboolean fetch_pending;
 	GMutex *state_lock;
+	GCond *fetch_cond;
 	GHashTable *uid_eflags;
 };
 
@@ -151,7 +152,6 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	CamelMimeMessage *message = NULL;
 	CamelStream *tmp_stream = NULL;
 	GSList *ids = NULL, *items = NULL;
-	EFlag *flag = NULL;
 	gchar *mime_dir;
 	gchar *cache_file;
 	gchar *dir;
@@ -169,17 +169,29 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 
 	g_mutex_lock (priv->state_lock);
 
-	if ((flag = g_hash_table_lookup (priv->uid_eflags, uid))) {
+	/* If another thread is already fetching this message, wait for it */
+
+	/* FIXME: We might end up refetching a message anyway, if another
+	   thread has already finished fetching it by the time we get to
+	   this point in the code — ews_folder_get_message_sync() doesn't
+	   hold any locks when it calls get_message_from_cache() and then
+	   falls back to this function. */
+	if (g_hash_table_lookup (priv->uid_eflags, uid)) {
+		do {
+			g_cond_wait (priv->fetch_cond, priv->state_lock);
+			g_mutex_lock (priv->state_lock);
+		} while (g_hash_table_lookup (priv->uid_eflags, uid));
+
 		g_mutex_unlock (priv->state_lock);
-		e_flag_wait (flag);
-		
+
 		message = camel_ews_folder_get_message_from_cache (ews_folder, uid, cancellable, error);
 		return message;
 	}
-	
-	flag = e_flag_new ();
-	g_hash_table_insert (priv->uid_eflags, g_strdup (uid), flag);
-	
+
+	/* Because we're using this as a form of mutex, we *know* that
+	   we won't be inserting where an entry already exists. So it's
+	   OK to insert uid itself, not g_strdup (uid) */
+	g_hash_table_insert (priv->uid_eflags, (gchar *)uid, (gchar *)uid);
 	g_mutex_unlock (priv->state_lock);
 
 	cnc = camel_ews_store_get_connection (ews_store);
@@ -237,14 +249,10 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	message = camel_ews_folder_get_message_from_cache (ews_folder, uid, cancellable, error);
 
 exit:
-	e_flag_set (flag);
-	
-	/* HACK FIXME just sleep for sometime so that the other waiting locks gets released by that time. Think of a
-	 better way..*/
-	g_usleep (1000);
 	g_mutex_lock (priv->state_lock);
 	g_hash_table_remove (priv->uid_eflags, uid);
 	g_mutex_unlock (priv->state_lock);
+	g_cond_broadcast (priv->fetch_cond);
 
 	if (!message && !error)
 		g_set_error (
@@ -1012,6 +1020,7 @@ ews_folder_dispose (GObject *object)
 
 	g_mutex_free (ews_folder->priv->search_lock);
 	g_hash_table_destroy (ews_folder->priv->uid_eflags);
+	g_cond_free (ews_folder->priv->fetch_cond);
 
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (camel_ews_folder_parent_class)->dispose (object);
@@ -1081,12 +1090,11 @@ camel_ews_folder_init (CamelEwsFolder *ews_folder)
 	ews_folder->priv->search_lock = g_mutex_new ();
 	ews_folder->priv->state_lock = g_mutex_new ();
 	g_static_rec_mutex_init(&ews_folder->priv->cache_lock);
-	
+
 	ews_folder->priv->refreshing = FALSE;
-	
-	ews_folder->priv->uid_eflags = g_hash_table_new_full	(g_str_hash, g_str_equal, 
-								 (GDestroyNotify)g_free, 
-								 (GDestroyNotify) e_flag_free);
+
+	ews_folder->priv->fetch_cond = g_cond_new ();
+	ews_folder->priv->uid_eflags = g_hash_table_new (g_str_hash, g_str_equal);
 	camel_folder_set_lock_async (folder, TRUE);
 }
 
