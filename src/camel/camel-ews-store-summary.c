@@ -69,7 +69,8 @@ camel_ews_store_summary_init (CamelEwsStoreSummary *ews_summary)
 
 static gchar *build_full_name (CamelEwsStoreSummary *ews_summary, const gchar *fid)
 {
-	gchar *pfid, *pname, *dname, *ret;
+	gchar *pfid, *dname, *ret;
+	gchar *pname = NULL;
 
 	dname = camel_ews_store_summary_get_folder_name (ews_summary, fid, NULL);
 	if (!dname)
@@ -609,7 +610,7 @@ camel_ews_store_summary_remove_folder (CamelEwsStoreSummary *ews_summary,
 				       const gchar *folder_id,
 				       GError **error)
 {
-	gboolean ret;
+	gboolean ret = FALSE;
 	gchar *full_name;
 
 	S_LOCK(ews_summary);
