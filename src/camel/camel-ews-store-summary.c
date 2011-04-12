@@ -203,13 +203,30 @@ camel_ews_store_summary_remove (CamelEwsStoreSummary *ews_summary)
 
 	return (ret == 0);
 }
+
+struct subfolder_match {
+	GSList *ids;
+	gchar *match;
+	gsize matchlen;
+};
+
+static void
+match_subfolder (gpointer key, gpointer value, gpointer user_data)
+{
+	struct subfolder_match *sm = user_data;
+
+	if (!strncmp (key, sm->match, sm->matchlen))
+		sm->ids = g_slist_prepend (sm->ids, g_strdup (value));
+}
+
 /* Must be called with the summary lock held, and gets to keep
    both its string arguments */
 static void ews_ss_hash_replace (CamelEwsStoreSummary *ews_summary,
-				 gchar *folder_id,
-				 gchar *full_name)
+				 gchar *folder_id, gchar *full_name,
+				 gboolean recurse)
 {
 	const gchar *ofname;
+	struct subfolder_match sm = { NULL, NULL };
 
 	if (!full_name)
 		full_name = build_full_name (ews_summary, folder_id);
@@ -221,15 +238,34 @@ static void ews_ss_hash_replace (CamelEwsStoreSummary *ews_summary,
 	if (ofname) {
 		char *ofid = g_hash_table_lookup (ews_summary->priv->fname_id_hash,
 						  ofname);
-		if (!strcmp (folder_id, ofid))
+		if (!strcmp (folder_id, ofid)) {
 			g_hash_table_remove (ews_summary->priv->fname_id_hash,
 					     ofname);
+			if (recurse)
+				sm.match = g_strdup_printf ("%s/", ofname);
+		}
 	}
+
 	g_hash_table_insert (ews_summary->priv->fname_id_hash, full_name, folder_id);
 
 	/* Replace, not insert. The difference is that it frees the *old* folder_id
 	   key, not the new one which we just inserted into fname_id_hash too. */
 	g_hash_table_replace (ews_summary->priv->id_fname_hash, folder_id, full_name);
+
+	if (sm.match) {
+		GSList *l;
+
+		sm.matchlen = strlen (sm.match);
+
+		g_hash_table_foreach (ews_summary->priv->fname_id_hash,
+				      match_subfolder, &sm);
+
+		for (l = sm.ids; l; l = g_slist_next (l))
+			ews_ss_hash_replace (ews_summary, l->data, NULL, FALSE);
+
+		g_slist_free (sm.ids);
+		g_free (sm.match);
+	}
 }
 
 void
@@ -242,7 +278,7 @@ camel_ews_store_summary_set_folder_name (CamelEwsStoreSummary *ews_summary,
 	g_key_file_set_string	(ews_summary->priv->key_file, folder_id,
 				 "DisplayName", display_name);
 
-	ews_ss_hash_replace (ews_summary, g_strdup (folder_id), NULL);
+	ews_ss_hash_replace (ews_summary, g_strdup (folder_id), NULL, TRUE);
 	ews_summary->priv->dirty = TRUE;
 
 	S_UNLOCK(ews_summary);
@@ -274,7 +310,7 @@ camel_ews_store_summary_new_folder (CamelEwsStoreSummary *ews_summary,
 	g_key_file_set_uint64 (ews_summary->priv->key_file, folder_id,
 			       "Total", total);
 
-	ews_ss_hash_replace (ews_summary, g_strdup (folder_id), NULL);
+	ews_ss_hash_replace (ews_summary, g_strdup (folder_id), NULL, FALSE);
 
 	ews_summary->priv->dirty = TRUE;
 
@@ -291,7 +327,7 @@ camel_ews_store_summary_set_parent_folder_id (CamelEwsStoreSummary *ews_summary,
 
 	g_key_file_set_string	(ews_summary->priv->key_file, folder_id,
 				 "ParentFolderId", parent_id);
-	ews_ss_hash_replace (ews_summary, g_strdup (folder_id), NULL);
+	ews_ss_hash_replace (ews_summary, g_strdup (folder_id), NULL, TRUE);
 
 	ews_summary->priv->dirty = TRUE;
 
