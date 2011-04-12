@@ -581,6 +581,7 @@ sync_updated_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *upd
 
 		/* Check if the item has really changed */
 		if (!strcmp (((CamelEwsMessageInfo *)mi)->change_key, id->change_key)) {
+			camel_message_info_free (mi);
 			g_object_unref (item);
 			continue;
 		}
@@ -590,6 +591,7 @@ sync_updated_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *upd
 		else
 			msg_ids = g_slist_append (msg_ids, g_strdup (id->id));
 
+		camel_message_info_free (mi);
 		g_object_unref (item);
 	}
 	g_slist_free (updated_items);
