@@ -179,7 +179,6 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	if (g_hash_table_lookup (priv->uid_eflags, uid)) {
 		do {
 			g_cond_wait (priv->fetch_cond, priv->state_lock);
-			g_mutex_lock (priv->state_lock);
 		} while (g_hash_table_lookup (priv->uid_eflags, uid));
 
 		g_mutex_unlock (priv->state_lock);
