@@ -930,9 +930,10 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder, GSList *items_cr
 		ews_set_threading_data (mi, item);
 		server_flags = ews_utils_get_server_flags (item);
 		
-		camel_ews_summary_add_message_info (folder->summary, id->id, server_flags, (CamelMessageInfo *) mi);
-		camel_folder_change_info_add_uid (ci, mi->info.uid);
-		camel_folder_change_info_recent_uid (ci, mi->info.uid);
+		camel_ews_summary_add_message_info (folder->summary, server_flags,
+						    (CamelMessageInfo *) mi);
+		camel_folder_change_info_add_uid (ci, id->id);
+		camel_folder_change_info_recent_uid (ci, id->id);
 		
 		g_object_unref (item);
 	}

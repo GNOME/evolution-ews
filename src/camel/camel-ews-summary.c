@@ -410,17 +410,14 @@ camel_ews_summary_add_message	(CamelFolderSummary *summary,
 
 void
 camel_ews_summary_add_message_info	(CamelFolderSummary *summary, 
-					 const gchar *uid,
 					 guint32 server_flags,
-					 const CamelMessageInfo *info)
+					 CamelMessageInfo *mi)
 {
-	CamelEwsMessageInfo *mi = camel_message_info_clone (info);
 	CamelMessageInfoBase *binfo = (CamelMessageInfoBase *) mi;
 	CamelEwsMessageInfo *einfo = (CamelEwsMessageInfo *) mi;
 	gint unread=0, junk=0;
 	guint32 flags;
 
-	mi->info.uid = camel_pstring_strdup(uid);
 	binfo->flags |= server_flags;
 	einfo->server_flags = server_flags;
 

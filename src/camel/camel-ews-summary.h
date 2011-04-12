@@ -93,11 +93,10 @@ gboolean
 void	camel_ews_summary_add_message	(CamelFolderSummary *summary, 
 					 const gchar *uid, 
 					 CamelMimeMessage *message);
-void	camel_ews_summary_add_message_info	
-					(CamelFolderSummary *summary, 
-					 const gchar *uid,
-					 guint32 server_flags, 
-					 const CamelMessageInfo *info);
+void	camel_ews_summary_add_message_info
+					(CamelFolderSummary *summary,
+					 guint32 server_flags,
+					 CamelMessageInfo *info);
 void
 camel_ews_summary_delete_id		(CamelFolderSummary *summary,
 					 const gchar *id);
