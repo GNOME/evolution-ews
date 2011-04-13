@@ -267,27 +267,31 @@ ews_get_folder_sync (CamelStore *store, const gchar *folder_name, guint32 flags,
 
 	/*check is this is a request for copy folder*/
 	if (flags == CAMEL_STORE_FOLDER_CREATE){
-		gchar *parent, *folder;
-		parent = strdup(folder_name);
-		folder = strrchr(parent, '/');
-		if (folder != NULL) {
-			/*clean slash form parent folder*/
-			folder[0] = 0;
-			/*move one to get the folder name property*/
-			folder++;
+		gchar *copy, *parent, *slash;
+		const gchar *top;
 
-			fi = ews_create_folder_sync (store, parent, folder, error);
-			free(parent);
-			if (!fi) {
-				g_set_error(
-					error, CAMEL_STORE_ERROR,
-					CAMEL_ERROR_GENERIC,
-					_("Cannot create folder: %s"), folder_name);
+		copy = strdup(folder_name);
 
-				return NULL;
-			}
-		} else
-			free(parent);
+		if ((slash = strrchr (copy, '/')) != NULL) {
+			parent = copy;
+			slash[0] = 0;
+			top = slash + 1;
+		} else {
+			free(copy);
+			parent = strdup("");
+			top = folder_name;
+		}
+
+		fi = ews_create_folder_sync (store, parent, top, error);
+		free(parent);
+
+		if (!fi) {
+			g_set_error(
+				error, CAMEL_STORE_ERROR,
+				CAMEL_ERROR_GENERIC,
+				_("Cannot create folder: %s"), folder_name);
+			return NULL;
+		}
 	}
 
 	fid = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, folder_name);
