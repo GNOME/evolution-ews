@@ -252,17 +252,46 @@ ews_store_query_auth_types_sync (CamelService *service, EVO3(GCancellable *cance
 	return auth_types;
 }
 
+static CamelFolderInfo* ews_create_folder_sync (CamelStore *store, const gchar *parent_name,const gchar *folder_name,EVO3(GCancellable *cancellable,)GError **error);
+
 static CamelFolder *
 ews_get_folder_sync (CamelStore *store, const gchar *folder_name, guint32 flags, EVO3(GCancellable *cancellable,) GError **error)
 {
 	EVO2(GCancellable *cancellable = NULL;)
 	CamelEwsStore *ews_store;
 	CamelFolder *folder = NULL;
+	CamelFolderInfo* fi;
 	gchar *fid;
 
 	ews_store = (CamelEwsStore *) store;
 
+	/*check is this is a request for copy folder*/
+	if (flags == CAMEL_STORE_FOLDER_CREATE){
+		gchar *parent, *folder;
+		parent = strdup(folder_name);
+		folder = strrchr(parent, '/');
+		if (folder != NULL) {
+			/*clean slash form parent folder*/
+			folder[0] = 0;
+			/*move one to get the folder name property*/
+			folder++;
+
+			fi = ews_create_folder_sync (store, parent, folder, error);
+			free(parent);
+			if (!fi) {
+				g_set_error(
+					error, CAMEL_STORE_ERROR,
+					CAMEL_ERROR_GENERIC,
+					_("Cannot create folder: %s"), folder_name);
+
+				return NULL;
+			}
+		} else
+			free(parent);
+	}
+
 	fid = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, folder_name);
+
 	if (fid) {
 		gchar *folder_dir;
 
