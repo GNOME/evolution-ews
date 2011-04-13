@@ -220,7 +220,7 @@ message_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
 	if (info) {
 		gchar *part = mir->bdata;
 		gchar **values;
-		
+
 		iinfo = (CamelEwsMessageInfo *)info;
 		values = g_strsplit (part, " ", -1);
 
@@ -373,8 +373,8 @@ ews_info_set_flags (CamelMessageInfo *info, guint32 flags, guint32 set)
 }
 
 void
-camel_ews_summary_add_message	(CamelFolderSummary *summary, 
-				 const gchar *uid, 
+camel_ews_summary_add_message	(CamelFolderSummary *summary,
+				 const gchar *uid,
 				 CamelMimeMessage *message)
 {
 	CamelEwsMessageInfo *mi;
@@ -383,7 +383,7 @@ camel_ews_summary_add_message	(CamelFolderSummary *summary,
 	const CamelTag *tag;
 
 	info = camel_folder_summary_uid (summary, uid);
-	
+
 	/* Create summary entry */
 	mi = (CamelEwsMessageInfo *)camel_folder_summary_info_new_from_message (summary, message, NULL);
 
@@ -409,18 +409,15 @@ camel_ews_summary_add_message	(CamelFolderSummary *summary,
 }
 
 void
-camel_ews_summary_add_message_info	(CamelFolderSummary *summary, 
-					 const gchar *uid,
+camel_ews_summary_add_message_info	(CamelFolderSummary *summary,
 					 guint32 server_flags,
-					 const CamelMessageInfo *info)
+					 CamelMessageInfo *mi)
 {
-	CamelEwsMessageInfo *mi = camel_message_info_clone (info);
 	CamelMessageInfoBase *binfo = (CamelMessageInfoBase *) mi;
 	CamelEwsMessageInfo *einfo = (CamelEwsMessageInfo *) mi;
 	gint unread=0, junk=0;
 	guint32 flags;
 
-	mi->info.uid = camel_pstring_strdup(uid);
 	binfo->flags |= server_flags;
 	einfo->server_flags = server_flags;
 
@@ -476,7 +473,7 @@ camel_ews_summary_delete_id	(CamelFolderSummary *summary,
 		if (flags & CAMEL_MESSAGE_JUNK)
 			junk = 1;
 
-		if (unread) 
+		if (unread)
 			summary->unread_count--;
 
 		if (deleted)
@@ -517,8 +514,8 @@ ews_update_user_flags (CamelMessageInfo *info, CamelFlag *server_user_flags)
 
 gboolean
 camel_ews_update_message_info_flags	(CamelFolderSummary *summary,
-					 CamelMessageInfo *info, 
-					 guint32 server_flags, 
+					 CamelMessageInfo *info,
+					 guint32 server_flags,
 					 CamelFlag *server_user_flags)
 {
 	CamelEwsMessageInfo *einfo = (CamelEwsMessageInfo *) info;
@@ -575,7 +572,7 @@ camel_ews_update_message_info_flags	(CamelFolderSummary *summary,
 }
 
 void
-ews_summary_clear	(CamelFolderSummary *summary, 
+ews_summary_clear	(CamelFolderSummary *summary,
 			 gboolean uncache)
 {
 	CamelFolderChangeInfo *changes;

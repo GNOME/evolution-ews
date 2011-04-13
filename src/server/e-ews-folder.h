@@ -66,7 +66,7 @@ void		e_ews_folder_set_name (EEwsFolder *folder, const gchar *new_name);
 void		e_ews_folder_set_parent_id (EEwsFolder *folder, EwsFolderId *fid);
 const EwsFolderId *
 		e_ews_folder_get_parent_id (EEwsFolder *folder);
-const EwsFolderId *	
+const EwsFolderId *
 		e_ews_folder_get_id (EEwsFolder *folder);
 guint32		e_ews_folder_get_total_count (EEwsFolder *folder);
 guint32		e_ews_folder_get_unread_count (EEwsFolder *folder);

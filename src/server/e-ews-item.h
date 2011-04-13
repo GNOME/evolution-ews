@@ -83,17 +83,17 @@ typedef struct {
 } EwsAttendee;
 
 GType       	e_ews_item_get_type (void);
-EEwsItem *	e_ews_item_new_from_soap_parameter	
+EEwsItem *	e_ews_item_new_from_soap_parameter
 						(ESoapParameter *param);
 
 EEwsItemType 	e_ews_item_get_item_type	(EEwsItem *item);
-void		e_ews_item_set_item_type	(EEwsItem *item, 
+void		e_ews_item_set_item_type	(EEwsItem *item,
 						 EEwsItemType new_type);
 const gchar *	e_ews_item_get_subject		(EEwsItem *item);
-void		e_ews_item_set_subject		(EEwsItem *item, 
+void		e_ews_item_set_subject		(EEwsItem *item,
 						 const gchar *new_subject);
 const gchar *	e_ews_item_get_mime_content	(EEwsItem *item);
-void		e_ews_item_set_mime_content	(EEwsItem *item, 
+void		e_ews_item_set_mime_content	(EEwsItem *item,
 						 const gchar *new_mime_content);
 const EwsId *	e_ews_item_get_id		(EEwsItem *item);
 gsize		e_ews_item_get_size		(EEwsItem *item);
@@ -103,25 +103,25 @@ const gchar *	e_ews_item_get_references	(EEwsItem *item);
 time_t		e_ews_item_get_date_received	(EEwsItem *item);
 time_t		e_ews_item_get_date_sent	(EEwsItem *item);
 time_t		e_ews_item_get_date_created	(EEwsItem *item);
-gboolean	e_ews_item_has_attachments	(EEwsItem *item, 
+gboolean	e_ews_item_has_attachments	(EEwsItem *item,
 						 gboolean *has_attachments);
-gboolean	e_ews_item_is_read		(EEwsItem *item, 
+gboolean	e_ews_item_is_read		(EEwsItem *item,
 						 gboolean *is_read);
-gboolean	e_ews_item_is_forwarded		(EEwsItem *item, 
+gboolean	e_ews_item_is_forwarded		(EEwsItem *item,
 						 gboolean *is_forwarded);
-gboolean	e_ews_item_is_answered		(EEwsItem *item, 
+gboolean	e_ews_item_is_answered		(EEwsItem *item,
 						 gboolean *is_answered);
 const GSList *	e_ews_item_get_to_recipients	(EEwsItem *item);
 const GSList *	e_ews_item_get_cc_recipients	(EEwsItem *item);
 const GSList *	e_ews_item_get_bcc_recipients	(EEwsItem *item);
-const EwsMailbox *	
+const EwsMailbox *
 		e_ews_item_get_sender		(EEwsItem *item);
-const EwsMailbox *	
+const EwsMailbox *
 		e_ews_item_get_from		(EEwsItem *item);
 EwsImportance
 		e_ews_item_get_importance	(EEwsItem *item);
 EwsMailbox *
-		e_ews_item_mailbox_from_soap_param	
+		e_ews_item_mailbox_from_soap_param
 						(ESoapParameter *param);
 
 const GSList *	e_ews_item_get_modified_occurrences

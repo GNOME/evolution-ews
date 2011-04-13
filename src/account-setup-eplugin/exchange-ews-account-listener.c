@@ -91,7 +91,7 @@ static EwsAccountInfo *
 ews_account_info_from_eaccount (EAccount *account)
 {
 	EwsAccountInfo *info;
-	
+
 	info = g_new0 (EwsAccountInfo, 1);
 	info->uid = g_strdup (account->uid);
 	info->name = g_strdup (account->name);
@@ -134,7 +134,7 @@ ews_account_removed (EAccountList *account_listener, EAccount *account)
 	shell = e_shell_get_default ();
 	shell_backend = e_shell_get_backend_by_name (shell, "mail");
 	EVO3(session = e_mail_backend_get_session (E_MAIL_BACKEND (shell_backend)));
-	store = (CamelStore *) camel_session_get_service (CAMEL_SESSION (session), 
+	store = (CamelStore *) camel_session_get_service (CAMEL_SESSION (session),
 				  account->source->url, CAMEL_PROVIDER_STORE, NULL);
 
 	/* FIXME This has to go through the CamelStore instead of accessing through derived class.
@@ -174,7 +174,7 @@ static void
 ews_account_added (EAccountList *account_listener, EAccount *account)
 {
 	gboolean ews_account = FALSE;
-	
+
 	ews_account = is_ews_account (account);
 
 	if (ews_account) {
@@ -189,7 +189,7 @@ exchange_ews_account_listener_construct (ExchangeEWSAccountListener *config_list
 	EIterator *iter;
 
 	d(g_print ("\n Construct the listener"));
-	
+
 	config_listener->priv->account_list = e_account_list_new (config_listener->priv->gconf_client);
 
 	for (iter = e_list_get_iterator (E_LIST(config_listener->priv->account_list)); e_iterator_is_valid (iter); e_iterator_next (iter)) {
@@ -201,7 +201,7 @@ exchange_ews_account_listener_construct (ExchangeEWSAccountListener *config_list
 			ews_accounts = g_list_append (ews_accounts, info);
 		}
 	}
-	
+
 	g_signal_connect (config_listener->priv->account_list, "account_added", G_CALLBACK (ews_account_added), NULL);
 	g_signal_connect (config_listener->priv->account_list, "account_changed", G_CALLBACK (ews_account_changed), NULL);
 	g_signal_connect (config_listener->priv->account_list, "account_removed", G_CALLBACK (ews_account_removed), NULL);

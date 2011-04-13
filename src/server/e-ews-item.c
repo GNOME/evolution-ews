@@ -83,6 +83,7 @@ struct _EEwsItemPrivate {
 
 static GObjectClass *parent_class = NULL;
 static void	ews_item_free_mailbox (EwsMailbox *mb);
+static void	ews_item_free_attendee (EwsAttendee *attendee);
 
 static void
 e_ews_item_dispose (GObject *object)
@@ -145,6 +146,13 @@ e_ews_item_dispose (GObject *object)
 		priv->attachments_list = NULL;
 	}
 
+	if (priv->attendees) {
+		g_slist_foreach (priv->attendees, (GFunc) ews_item_free_attendee, NULL);
+		g_slist_free (priv->attendees);
+		priv->attendees = NULL;
+
+	}
+
 	ews_item_free_mailbox (priv->sender);
 	ews_item_free_mailbox (priv->from);
 
@@ -203,6 +211,15 @@ ews_item_free_mailbox (EwsMailbox *mb)
 	}
 }
 
+static void
+ews_item_free_attendee (EwsAttendee *attendee)
+{
+	if (attendee) {
+		ews_item_free_mailbox (attendee->mailbox);
+		g_free (attendee->responsetype);
+		g_free (attendee);
+	}
+}
 
 static time_t
 ews_item_parse_date (const gchar *dtstring)
@@ -754,8 +771,15 @@ e_ews_item_mailbox_from_soap_param (ESoapParameter *param)
 	/* Return NULL if RoutingType of Mailbox is not SMTP
 		   For instance, people who don't exist any more	*/
 	subparam = e_soap_parameter_get_first_child_by_name (param, "RoutingType");
-	if (g_ascii_strcasecmp (e_soap_parameter_get_string_value (subparam), "SMTP"))
-		return NULL;
+	if (subparam) {
+		gchar *routingtype;
+		routingtype = e_soap_parameter_get_string_value (subparam);
+		if (g_ascii_strcasecmp (routingtype, "SMTP")) {
+			g_free (routingtype);
+			return NULL;
+		}
+		g_free (routingtype);
+	}
 
 	mb = g_new0 (EwsMailbox, 1);
 

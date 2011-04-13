@@ -104,7 +104,7 @@ static void autodiscover_callback (char *url, gpointer user_data, GError *error)
 		g_free (url);
 	}
 }
- 
+
 
 static void
 validate_credentials (GtkWidget *widget, struct _AutoDiscCallBackData *cbdata)
@@ -113,7 +113,7 @@ validate_credentials (GtkWidget *widget, struct _AutoDiscCallBackData *cbdata)
 	EMConfigTargetAccount *target_account = (EMConfigTargetAccount *)(config->target);
 	CamelURL *url = NULL;
 	gchar *key, *password;
-	
+
 	url = camel_url_new (e_account_get_string (target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
 
 	key = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
@@ -200,7 +200,7 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		struct _AutoDiscCallBackData *cbdata = g_new0 (struct _AutoDiscCallBackData, 1);
 
 		g_object_get (data->parent, "n-rows", &row, NULL);
-	
+
 		/* Set email_id */
 		email_id = target_account->account->id->address;
 		camel_url_set_param (url, "email", email_id);
@@ -208,7 +208,7 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		/* Don't overwrite the URL if it's already been set */
 		if (!url->host || !url->host[0])
 			camel_url_set_host (url, g_strdup (temp + 1));
-		
+
 		url_string = camel_url_to_string (url, 0);
 		e_account_set_string (target_account->account, E_ACCOUNT_SOURCE_URL, url_string);
 		e_account_set_string (target_account->account, E_ACCOUNT_TRANSPORT_URL, url_string);
@@ -272,6 +272,6 @@ org_gnome_exchange_ews_check_options(EPlugin *epl, EConfigHookPageCheckData *dat
 		if (url)
 			camel_url_free(url);
 	}
-	
+
 	return status;
 }

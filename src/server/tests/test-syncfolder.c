@@ -92,10 +92,10 @@ op_test_sync_folder_items ()
 	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
 
-	e_ews_connection_sync_folder_items_start	(cnc, EWS_PRIORITY_MEDIUM, 
-							 NULL, inbox_folder_id->id, 
-							 "Default", NULL, 
-							 500, folder_items_ready_callback, 
+	e_ews_connection_sync_folder_items_start	(cnc, EWS_PRIORITY_MEDIUM,
+							 NULL, inbox_folder_id->id,
+							 "Default", NULL,
+							 500, folder_items_ready_callback,
 							 cancellable, NULL);
 }
 
@@ -142,7 +142,7 @@ folder_hierarchy_ready_callback (GObject *object, GAsyncResult *res, gpointer us
 	op_test_sync_folder_items ();
 }
 
-static void 
+static void
 op_test_sync_folder_hierarchy ()
 {
 	const gchar *username;
@@ -161,11 +161,11 @@ op_test_sync_folder_hierarchy ()
 	cnc = e_ews_connection_new (uri, username, password, NULL);
 	g_assert (cnc != NULL);
 
-	e_ews_connection_sync_folder_hierarchy_start	(cnc, EWS_PRIORITY_MEDIUM, 
-							 NULL, folder_hierarchy_ready_callback, 
+	e_ews_connection_sync_folder_hierarchy_start	(cnc, EWS_PRIORITY_MEDIUM,
+							 NULL, folder_hierarchy_ready_callback,
 							 cancellable, NULL);
 
-	/* FIXME Have a separate test for cancel without disrupting sync_hierarchy test 	
+	/* FIXME Have a separate test for cancel without disrupting sync_hierarchy test
 	thread = g_thread_create ((GThreadFunc) cancel_sync_folder_hierarchy, cancellable, FALSE, &error);
 	if (error || !thread) {
 		g_warning ("%s: Creation of the thread failed with error: %s", G_STRFUNC, error->message);
@@ -199,7 +199,7 @@ get_item_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
 	g_slist_free (items);
 }
 
-static void 
+static void
 op_test_get_item ()
 {
 	const gchar *username;
@@ -219,16 +219,16 @@ op_test_get_item ()
 	g_assert (cnc != NULL);
 
 	ids = g_slist_reverse (ids);
-	e_ews_connection_get_items_start		(cnc, EWS_PRIORITY_MEDIUM, 
+	e_ews_connection_get_items_start		(cnc, EWS_PRIORITY_MEDIUM,
 						 g_slist_last (ids), "IdOnly", "item:Subject item:DateTimeReceived item:DateTimeSent item:DateTimeCreated item:Size item:HasAttachments message:InternetMessageId message:From message:Sender message:ToRecipients message:CcRecipients message:BccRecipients message:IsRead item:MimeContent item:Importance", FALSE,
-						 get_item_ready_callback, 
+						 get_item_ready_callback,
 						 cancellable, NULL);
 
 	g_slist_foreach (ids, (GFunc) g_free, NULL);
 	g_slist_free (ids);
 }
 
-static void 
+static void
 op_test_find_item ()
 {
 	const gchar *username;

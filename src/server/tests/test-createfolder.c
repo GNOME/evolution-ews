@@ -61,7 +61,7 @@ create_folder_cb (GObject *object, GAsyncResult *res, gpointer data)
 
 	e_ews_folder_free_fid (fid);
 
-quit:	
+quit:
 	g_main_loop_quit(main_loop);
 }
 
@@ -83,8 +83,8 @@ op_test_create_folder ()
 
 	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
-	e_ews_connection_create_folder_start	(cnc, EWS_PRIORITY_MEDIUM, "inbox", 
-						 TRUE ,"test", 
+	e_ews_connection_create_folder_start	(cnc, EWS_PRIORITY_MEDIUM, "inbox",
+						 TRUE ,"test",
 						 create_folder_cb,
 						 cancellable, NULL);
 
@@ -97,7 +97,7 @@ idle_cb (gpointer data)
 	return FALSE;
 }
 
-void 
+void
 createfolder_tests_run ()
 {
 	g_type_init ();

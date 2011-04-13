@@ -41,7 +41,7 @@ resolve_names_cb (GObject *object, GAsyncResult *res, gpointer data)
 	gboolean has_last_item = FALSE;
 	GError *error = NULL;
 
-	e_ews_connection_resolve_names_finish	(cnc, res, &mailboxes, &contact_items, 
+	e_ews_connection_resolve_names_finish	(cnc, res, &mailboxes, &contact_items,
 						 &has_last_item, &error);
 	if (error != NULL) {
 		g_warning ("Unable to autocomplete: %s \n", error->message);
@@ -66,7 +66,7 @@ resolve_names_cb (GObject *object, GAsyncResult *res, gpointer data)
 
 	/* FIXME once we fetch contact items free them as well */
 
-quit:	
+quit:
 	g_main_loop_quit(main_loop);
 }
 
@@ -88,7 +88,7 @@ op_test_resolve_names ()
 
 	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
-	e_ews_connection_resolve_names_start	(cnc, EWS_PRIORITY_MEDIUM, username, 
+	e_ews_connection_resolve_names_start	(cnc, EWS_PRIORITY_MEDIUM, username,
 						 EWS_SEARCH_AD, NULL, FALSE, resolve_names_cb,
 						 cancellable, NULL);
 
@@ -102,7 +102,7 @@ idle_cb (gpointer data)
 	return FALSE;
 }
 
-void 
+void
 autocompletion_tests_run ()
 {
 	g_print ("Testing autocompletion... \n");

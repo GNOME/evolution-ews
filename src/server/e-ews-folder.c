@@ -170,7 +170,7 @@ e_ews_folder_set_from_soap_parameter (EEwsFolder *folder, ESoapParameter *param)
 		e_ews_folder_set_folder_class (folder, (const gchar *) value);
 		g_free (value);
 	}
-	
+
 	subparam = e_soap_parameter_get_first_child_by_name (node, "DisplayName");
 	if (subparam)
 		priv->name = e_soap_parameter_get_string_value (subparam);
@@ -206,7 +206,7 @@ e_ews_folder_new_from_soap_parameter (ESoapParameter *param)
 	return folder;
 }
 
-void		
+void
 e_ews_folder_free_fid (EwsFolderId *fid)
 {
 	if (fid) {

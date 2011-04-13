@@ -41,7 +41,7 @@ delete_folder_cb (GObject *object, GAsyncResult *res, gpointer data)
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	GError *error = NULL;
 
-	e_ews_connection_delete_folder_finish	(cnc, res, 
+	e_ews_connection_delete_folder_finish	(cnc, res,
 						 &error);
 	if (error != NULL) {
 		g_warning ("Unable to create: %s \n", error->message);
@@ -51,7 +51,7 @@ delete_folder_cb (GObject *object, GAsyncResult *res, gpointer data)
 
 	g_print ("Folder is successfully Deleted. \n");
 
-quit:	
+quit:
 	g_main_loop_quit(main_loop);
 }
 
@@ -74,8 +74,8 @@ op_test_delete_folder (gpointer data)
 
 	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
-	e_ews_connection_delete_folder_start	(cnc, EWS_PRIORITY_MEDIUM, (*fid)->id, 
-						 FALSE ,"HardDelete", 
+	e_ews_connection_delete_folder_start	(cnc, EWS_PRIORITY_MEDIUM, (*fid)->id,
+						 FALSE ,"HardDelete",
 						 delete_folder_cb,
 						 cancellable, NULL);
 
@@ -88,13 +88,13 @@ idle_cb (gpointer data)
 	return FALSE;
 }
 
-void 
+void
 deletefolder_tests_run (gconstpointer data)
 {
 	EwsFolderId **fid = (EwsFolderId **) data;
-	
+
 	g_return_if_fail (*fid != NULL);
-	
+
 	g_type_init ();
 	g_thread_init (NULL);
 
