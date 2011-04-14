@@ -906,6 +906,10 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 			camel_folder_changed (source, changes);
 			camel_folder_change_info_free (changes);
 		}
+
+		/*update the store about the content of the source and destination folders*/
+		ews_refresh_info_sync(source,EVO3(NULL,)NULL);
+		ews_refresh_info_sync(destination,EVO3(NULL,)NULL);
 	}
 	g_free (dst_id);
 
