@@ -109,6 +109,10 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 	if (!service_class->construct (service, session, provider, url, error))
 		return FALSE;
 
+	/* Disable virtual trash and junk folders. Exchange has real
+	   folders for that */
+	((CamelStore *)ews_store)->flags &= ~(CAMEL_STORE_VTRASH|CAMEL_STORE_VJUNK);
+
 	/*storage path*/
 	session_storage_path = camel_session_get_storage_path (session, service, error);
 	if (!session_storage_path) {
