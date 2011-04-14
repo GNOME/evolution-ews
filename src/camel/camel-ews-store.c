@@ -671,7 +671,6 @@ ews_rename_folder_sync	(CamelStore *store,
 {
 	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
 	CamelEwsStoreSummary *ews_summary = ews_store->summary;
-	CamelFolderInfo *fi;
 	const gchar *old_slash, *new_slash;
 	EVO2(GCancellable *cancellable = NULL;)
 	gchar *fid;
@@ -778,8 +777,6 @@ ews_rename_folder_sync	(CamelStore *store,
 		g_free (pfid);
 	}
 
-	fi = camel_ews_utils_build_folder_info (ews_store, fid);
-	camel_store_folder_renamed (store, old_name, fi);
 	res = TRUE;
  out:
 	g_free (changekey);
