@@ -289,7 +289,7 @@ ews_get_folder_sync (CamelStore *store, const gchar *folder_name, guint32 flags,
 			top = folder_name;
 		}
 
-		fi = ews_create_folder_sync (store, parent, top, error);
+		fi = ews_create_folder_sync (store, parent, top, EVO3(cancellable,) error);
 		g_free (copy);
 
 		if (!fi)
