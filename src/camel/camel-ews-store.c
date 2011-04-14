@@ -281,16 +281,17 @@ ews_get_folder_sync (CamelStore *store, const gchar *folder_name, guint32 flags,
 			parent = strdup("");
 			top = folder_name;
 		}
+		if (camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, folder_name) == NULL) {
+			fi = ews_create_folder_sync (store, parent, top, error);
+			free(parent);
 
-		fi = ews_create_folder_sync (store, parent, top, error);
-		free(parent);
-
-		if (!fi) {
-			g_set_error(
-				error, CAMEL_STORE_ERROR,
-				CAMEL_ERROR_GENERIC,
-				_("Cannot create folder: %s"), folder_name);
-			return NULL;
+			if (!fi) {
+				g_set_error(
+					error, CAMEL_STORE_ERROR,
+					CAMEL_ERROR_GENERIC,
+					_("Cannot create folder: %s"), folder_name);
+				return NULL;
+			}
 		}
 	}
 
@@ -559,6 +560,7 @@ ews_create_folder_sync (CamelStore *store,
 	EVO2(GCancellable *cancellable = NULL;)
 	CamelFolderInfo *fi = NULL;
 
+	
 	/* Get Parent folder ID */
 	if (parent_name && parent_name[0]) {
 		fid = camel_ews_store_summary_get_folder_id_from_name (ews_summary,
