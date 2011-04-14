@@ -44,7 +44,6 @@
  * Iterate over the icalcomponent properties and collect attendees
  */
 void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **optional, GSList **resource) {
-	icalcomponent *inner;
 	icalproperty *prop, *org_prop = NULL;
 	icalparameter *param;
 	const gchar *org = NULL, *str = NULL;
@@ -53,9 +52,6 @@ void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **op
 	org_prop = icalcomponent_get_first_property (comp, ICAL_ORGANIZER_PROPERTY);
 	org = icalproperty_get_organizer(org_prop);
 	if (!org) org = "";
-
-	/* Look at the internal VEVENT component */
-	inner = icalcomponent_get_inner(comp);
 
 	/* iterate over every attendee property */
 	for (prop = icalcomponent_get_first_property(comp, ICAL_ATTENDEE_PROPERTY);

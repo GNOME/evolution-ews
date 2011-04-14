@@ -209,7 +209,6 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 {
 	GList *vcard_list;
 	EBookBackendEws *egwb;
-	gboolean match_needed;
 
 	egwb = E_BOOK_BACKEND_EWS (backend);
 	vcard_list = NULL;
@@ -228,7 +227,6 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 			return;
 		}
 
-		match_needed = TRUE;
 		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (SUCCESS), vcard_list);
 		return;
 	default :
@@ -647,11 +645,7 @@ e_book_backend_ews_remove (EBookBackend *backend,
 static gchar *
 e_book_backend_ews_get_static_capabilities (EBookBackend *backend)
 {
-	EBookBackendEws *ebgw;
-
-	ebgw = E_BOOK_BACKEND_EWS (backend);
-
-	/* do-initialy-query is enabled for system address book also, so that we get the
+	/* do-initial-query is enabled for system address book also, so that we get the
 	 * book_view, which is needed for displaying cache update progress.
 	 * and null query is handled for system address book.
 	 */

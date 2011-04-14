@@ -563,8 +563,7 @@ sync_created_folders (CamelEwsStore *ews_store, GSList *created_folders)
 		EEwsFolder *folder = (EEwsFolder *) l->data;
 		EwsFolderType ftype;
 		CamelFolderInfo *fi;
-		const EwsFolderId *fid, *pfid;
-		const gchar *display_name;
+		const EwsFolderId *fid;
 
 		ftype = e_ews_folder_get_folder_type (folder);
 		if (ftype == EWS_FOLDER_TYPE_CALENDAR ||
@@ -589,8 +588,6 @@ sync_created_folders (CamelEwsStore *ews_store, GSList *created_folders)
 			continue;
 
 		fid = e_ews_folder_get_id (folder);
-		pfid = e_ews_folder_get_parent_id (folder);
-		display_name = e_ews_folder_get_name (folder);
 
 		/* FIXME: Sort folders so that a child is always added *after*
 		   its parent. But since the old code was already completely
@@ -819,12 +816,10 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder, GSList *items_up
 {
 	CamelFolder *folder;
 	CamelFolderChangeInfo *ci;
-	CamelEwsStore *ews_store;
 	GSList *l;
 
 	ci = camel_folder_change_info_new ();
 	folder = (CamelFolder *) ews_folder;
-	ews_store = (CamelEwsStore *) camel_folder_get_parent_store ((CamelFolder *) ews_folder);
 
 	for (l = items_updated; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;
@@ -863,7 +858,6 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder, GSList *items_cr
 {
 	CamelFolder *folder;
 	CamelFolderChangeInfo *ci;
-	CamelEwsStore *ews_store;
 	GSList *l;
 
 	if (!items_created)
@@ -871,7 +865,6 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder, GSList *items_cr
 
 	ci = camel_folder_change_info_new ();
 	folder = (CamelFolder *) ews_folder;
-	ews_store = (CamelEwsStore *) camel_folder_get_parent_store ((CamelFolder *) ews_folder);
 
 	for (l = items_created; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;

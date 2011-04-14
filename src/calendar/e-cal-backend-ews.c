@@ -1883,12 +1883,10 @@ static void
 e_cal_backend_ews_start_query (ECalBackend *backend, EDataCalView *query)
 {
 	ECalBackendEws *cbews;
-	ECalBackendEwsPrivate *priv;
 	GList *objects = NULL;
 	GError *err = NULL;
 
 	cbews = E_CAL_BACKEND_EWS (backend);
-	priv = cbews->priv;
 
 	ews_cal_start_refreshing (cbews);
 	cal_backend_ews_get_object_list (backend, e_data_cal_view_get_text (query),
@@ -1939,12 +1937,6 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend, EDataCal *cal,
 static void
 e_cal_backend_ews_dispose (GObject *object)
 {
-	ECalBackendEws *cbews;
-	ECalBackendEwsPrivate *priv;
-
-	cbews = E_CAL_BACKEND_EWS (object);
-	priv = cbews->priv;
-
 	if (G_OBJECT_CLASS (parent_class)->dispose)
 		(* G_OBJECT_CLASS (parent_class)->dispose) (object);
 }

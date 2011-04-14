@@ -148,7 +148,7 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	CamelEwsFolderPrivate *priv;
 	EEwsConnection *cnc;
 	CamelEwsStore *ews_store;
-	const gchar *full_name, *mime_content;
+	const gchar *mime_content;
 	CamelMimeMessage *message = NULL;
 	CamelStream *tmp_stream = NULL;
 	GSList *ids = NULL, *items = NULL;
@@ -159,7 +159,6 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	gpointer progress_data;
 	gboolean res;
 
-	full_name = camel_folder_get_full_name (folder);
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
 	ews_folder = (CamelEwsFolder *) folder;
 	priv = ews_folder->priv;
@@ -509,12 +508,9 @@ CamelFolder *
 camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *folder_dir, GCancellable *cancellable, GError **error)
 {
 	CamelFolder *folder;
-	CamelEwsStore *ews_store;
 	CamelEwsFolder *ews_folder;
 	gchar *summary_file, *state_file;
 	const gchar *short_name;
-
-	ews_store = (CamelEwsStore *) store;
 
 	short_name = strrchr (folder_name, '/');
 	if (!short_name)
@@ -863,8 +859,6 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 				 EVO3(GCancellable *cancellable,)
 				 GError **error)
 {
-	CamelEwsFolder *dst_ews_folder;
-	CamelEwsFolderPrivate *priv;
 	EEwsConnection *cnc;
 	CamelEwsStore *dst_ews_store;
 	CamelFolderChangeInfo *changes = NULL;
@@ -877,9 +871,6 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 
 	dst_full_name = camel_folder_get_full_name (destination);
 	dst_ews_store = (CamelEwsStore *) camel_folder_get_parent_store (destination);
-
-	dst_ews_folder = (CamelEwsFolder *) destination;
-	priv = dst_ews_folder->priv;
 
 	if (!camel_ews_store_connected (dst_ews_store, error))
 		return FALSE;
@@ -933,13 +924,11 @@ ews_expunge_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GError *
 	CamelFolderChangeInfo *changes;
 	CamelStore *parent_store;
 	EEwsConnection *cnc;
-	EVO2(GCancellable *cancellable = NULL);
+	EVO2(GCancellable *cancellable = NULL;)
 	gint i, count;
 	gboolean status = TRUE;
-	const gchar *full_name;
 	GSList *deleted_items = NULL, *deleted_head = NULL;
 
-	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
 	ews_folder = CAMEL_EWS_FOLDER (folder);
 	ews_store = CAMEL_EWS_STORE (parent_store);

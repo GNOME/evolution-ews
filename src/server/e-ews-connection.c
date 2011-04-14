@@ -910,7 +910,7 @@ static xmlDoc *
 e_ews_autodiscover_ws_xml(const gchar *email)
 {
 	xmlDoc *doc;
-	xmlNode *node, *child;
+	xmlNode *node;
 	xmlNs *ns;
 
 	doc = xmlNewDoc((xmlChar *) "1.0");
@@ -920,9 +920,9 @@ e_ews_autodiscover_ws_xml(const gchar *email)
 		       (xmlChar *)"http://schemas.microsoft.com/exchange/autodiscover/outlook/requestschema/2006", NULL);
 
 	node = xmlNewChild(node, ns, (xmlChar *)"Request", NULL);
-	child = xmlNewChild(node, ns, (xmlChar *)"EMailAddress",
+	xmlNewChild(node, ns, (xmlChar *)"EMailAddress",
 			    (xmlChar *)email);
-	child = xmlNewChild(node, ns, (xmlChar *)"AcceptableResponseSchema",
+	xmlNewChild(node, ns, (xmlChar *)"AcceptableResponseSchema",
 			    (xmlChar *)"http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a");
 
 	return doc;
@@ -1659,7 +1659,6 @@ e_ews_connection_delete_items_finish	(EEwsConnection *cnc,
 					 GError **error)
 {
 	GSimpleAsyncResult *simple;
-	EwsAsyncData *async_data;
 
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
@@ -1667,7 +1666,6 @@ e_ews_connection_delete_items_finish	(EEwsConnection *cnc,
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
-	async_data = g_simple_async_result_get_op_res_gpointer (simple);
 
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
@@ -2140,7 +2138,6 @@ e_ews_connection_update_folder_finish	(EEwsConnection *cnc,
 					 GError **error)
 {
 	GSimpleAsyncResult *simple;
-	EwsAsyncData *async_data;
 
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
@@ -2148,7 +2145,6 @@ e_ews_connection_update_folder_finish	(EEwsConnection *cnc,
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
-	async_data = g_simple_async_result_get_op_res_gpointer (simple);
 
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
@@ -2239,7 +2235,6 @@ e_ews_connection_move_folder_finish	(EEwsConnection *cnc,
 					 GError **error)
 {
 	GSimpleAsyncResult *simple;
-	EwsAsyncData *async_data;
 
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
@@ -2247,7 +2242,6 @@ e_ews_connection_move_folder_finish	(EEwsConnection *cnc,
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
-	async_data = g_simple_async_result_get_op_res_gpointer (simple);
 
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
@@ -2566,7 +2560,6 @@ e_ews_connection_delete_folder_finish	(EEwsConnection *cnc,
 					 GError **error)
 {
 	GSimpleAsyncResult *simple;
-	EwsAsyncData *async_data;
 
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
@@ -2574,7 +2567,6 @@ e_ews_connection_delete_folder_finish	(EEwsConnection *cnc,
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
-	async_data = g_simple_async_result_get_op_res_gpointer (simple);
 
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
@@ -2750,7 +2742,7 @@ e_ews_connection_get_attachments(EEwsConnection *cnc,
 static void
 get_attachments_response_cb (ESoapParameter *param, EwsNode *enode)
 {
-	ESoapParameter *subparam,*subparam1, *attspara;
+	ESoapParameter *subparam, *attspara;
 	EwsAsyncData *async_data;
 	gchar *uri = NULL;
 	EEwsItem *item;
@@ -2762,7 +2754,6 @@ get_attachments_response_cb (ESoapParameter *param, EwsNode *enode)
 
 	for (subparam = e_soap_parameter_get_first_child (attspara); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
 		name = e_soap_parameter_get_name(subparam);
-		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "AttachmentId");
 
 		if (!g_ascii_strcasecmp (name, "ItemAttachment")) {
 			item = e_ews_item_new_from_soap_parameter(subparam);
