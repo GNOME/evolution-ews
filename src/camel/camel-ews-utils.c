@@ -505,6 +505,7 @@ add_folder_to_summary (CamelEwsStore *store, EEwsFolder *folder)
 	camel_ews_store_summary_new_folder (ews_summary, fid->id,
 					    pfid->id, fid->change_key,
 					    dname, ftype, 0, total);
+	camel_ews_store_summary_set_folder_unread (ews_summary, fid->id, unread);
 
 	fname = camel_ews_store_summary_get_folder_full_name (ews_summary, fid->id, NULL);
 	if (!g_ascii_strcasecmp (fname, "Inbox")) {
