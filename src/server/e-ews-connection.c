@@ -226,7 +226,14 @@ ews_get_response_status (ESoapParameter *param, GError **error)
 		   without a timezone, even if it's an all day event like a
 		   birthday. We need to handle the error and correctly report it
 		   to the user, but for now we'll just ignore it... */
-		if (error_code != EWS_CONNECTION_ERROR_CORRUPTDATA) {
+		if (error_code != EWS_CONNECTION_ERROR_CORRUPTDATA &&
+		/* Ick, another one. If we try to set the IsRead flag on certain
+		   types of item (task requests, those stupid 'recall' requests),
+		   it complains. We really need to find a better way to return
+		   individual errors for each response to a multiple request; it
+		   isn't necessarily the case that a single error should be reported
+		   as an error for the whole transaction */
+		    error_code != EWS_CONNECTION_ERROR_INVALIDPROPERTYREQUEST) {
 			g_set_error	(error,
 					 EWS_CONNECTION_ERROR,
 					 error_code,
