@@ -682,12 +682,19 @@ ews_rename_folder_sync	(CamelStore *store,
 		return TRUE;
 
 	fid = camel_ews_store_summary_get_folder_id_from_name (ews_summary, old_name);
-	if (!fid)
+	if (!fid) {
+		g_set_error (error, CAMEL_STORE_ERROR,
+			     CAMEL_STORE_ERROR_NO_FOLDER,
+			     _("Folder %s does not exist"), old_name);
 		return FALSE;
+	}
 
 	changekey = camel_ews_store_summary_get_change_key (ews_summary, fid, error);
 	if (!changekey) {
 		g_free (fid);
+		g_set_error (error, CAMEL_STORE_ERROR,
+			     CAMEL_STORE_ERROR_NO_FOLDER,
+			     _("No change key record for folder %s"), fid);
 		return FALSE;
 	}
 
@@ -754,8 +761,13 @@ ews_rename_folder_sync	(CamelStore *store,
 			pfid = camel_ews_store_summary_get_folder_id_from_name (ews_summary,
 										parent_name);
 			g_free (parent_name);
-			if (!pfid)
+			if (!pfid) {
+				g_set_error (error, CAMEL_STORE_ERROR,
+					     CAMEL_STORE_ERROR_NO_FOLDER,
+					     _("Cannot find folder ID for parent folder %s"),
+					     parent_name);
 				goto out;
+			}
 		}
 		if (!e_ews_connection_move_folder (ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
 						   pfid, fid, cancellable, error)) {
