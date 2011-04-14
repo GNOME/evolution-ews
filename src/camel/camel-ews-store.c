@@ -264,60 +264,52 @@ ews_get_folder_sync (CamelStore *store, const gchar *folder_name, guint32 flags,
 	EVO2(GCancellable *cancellable = NULL;)
 	CamelEwsStore *ews_store;
 	CamelFolder *folder = NULL;
-	CamelFolderInfo* fi;
-	gchar *fid;
+	gchar *fid, *folder_dir;
 
 	ews_store = (CamelEwsStore *) store;
 
-	/*check is this is a request for copy folder*/
-	if (flags == CAMEL_STORE_FOLDER_CREATE){
-		gchar *copy, *parent, *slash;
-		const gchar *top;
-
-		copy = strdup(folder_name);
-
-		if ((slash = strrchr (copy, '/')) != NULL) {
-			parent = copy;
-			slash[0] = 0;
-			top = slash + 1;
-		} else {
-			free(copy);
-			parent = strdup("");
-			top = folder_name;
-		}
-		if (camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, folder_name) == NULL) {
-			fi = ews_create_folder_sync (store, parent, top, error);
-			free(parent);
-
-			if (!fi) {
-				g_set_error(
-					error, CAMEL_STORE_ERROR,
-					CAMEL_ERROR_GENERIC,
-					_("Cannot create folder: %s"), folder_name);
-				return NULL;
-			}
-		}
-	}
-
 	fid = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, folder_name);
 
-	if (fid) {
-		gchar *folder_dir;
+	/* We don't support CAMEL_STORE_FOLDER_EXCL. Nobody ever uses it */
+	if (!fid && (flags & CAMEL_STORE_FOLDER_CREATE)) {
+		CamelFolderInfo *fi;
+		const gchar *parent, *top, *slash;
+		gchar *copy = NULL;
 
-		folder_dir = g_build_filename (ews_store->storage_path, "folders", folder_name, NULL);
-		folder = camel_ews_folder_new (store, folder_name, folder_dir, cancellable, error);
+		slash = strrchr (folder_name, '/');
+		if (slash) {
+			copy = g_strdup (folder_name);
 
-		g_free (folder_dir);
+			/* Split into parent path, and new name */
+			copy[slash - folder_name] = 0;
+			parent = copy;
+			top = copy + (slash - folder_name) + 1;
+		} else {
+			parent = "";
+			top = folder_name;
+		}
+
+		fi = ews_create_folder_sync (store, parent, top, error);
+		g_free (copy);
+
+		if (!fi)
+			return NULL;
+
+		camel_folder_info_free (fi);
+	} else if (!fid) {
+		g_set_error (error, CAMEL_STORE_ERROR,
+			     CAMEL_ERROR_GENERIC,
+			     _("No such folder: %s"), folder_name);
+		return NULL;
+	} else {
+		/* We don't actually care what it is; only that it exists */
 		g_free (fid);
 	}
 
-	if (folder == NULL) {
-		g_set_error (
-			error, CAMEL_STORE_ERROR,
-			CAMEL_STORE_ERROR_NO_FOLDER,
-			_("No such folder: %s"), folder_name);
-		return NULL;
-	}
+	folder_dir = g_build_filename (ews_store->storage_path, "folders", folder_name, NULL);
+	folder = camel_ews_folder_new (store, folder_name, folder_dir, cancellable, error);
+
+	g_free (folder_dir);
 
 	return folder;
 }
