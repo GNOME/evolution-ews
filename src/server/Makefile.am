@@ -70,7 +70,7 @@ libeewsinclude_HEADERS =		\
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libeews-$(API_VERSION).pc
 
-EXTRA_DIST = $(pkgconfig_DATA:-$(API_VERSION).pc=.pc.in)
+EXTRA_DIST = $(pkgconfig_DATA:-$(API_VERSION).pc=.pc.in) ews-marshal.list
 
 DISTCLEANFILES = $(pkgconfig_DATA)
 CLEANFILES = $(MARSHAL_GENERATED)
