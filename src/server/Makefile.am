@@ -1,3 +1,5 @@
+DIST_SUBDIRS = tests
+
 lib_LTLIBRARIES = libeews-1.2.la
 
 MARSHAL_GENERATED = ews-marshal.c ews-marshal.h
