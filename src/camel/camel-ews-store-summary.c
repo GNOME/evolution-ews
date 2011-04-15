@@ -325,8 +325,13 @@ camel_ews_store_summary_set_parent_folder_id (CamelEwsStoreSummary *ews_summary,
 {
 	S_LOCK(ews_summary);
 
-	g_key_file_set_string	(ews_summary->priv->key_file, folder_id,
-				 "ParentFolderId", parent_id);
+	if (parent_id)
+		g_key_file_set_string (ews_summary->priv->key_file, folder_id,
+				       "ParentFolderId", parent_id);
+	else
+		g_key_file_remove_key (ews_summary->priv->key_file, folder_id,
+				       "ParentFolderId", NULL);
+
 	ews_ss_hash_replace (ews_summary, g_strdup (folder_id), NULL, TRUE);
 
 	ews_summary->priv->dirty = TRUE;
