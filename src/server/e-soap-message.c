@@ -948,10 +948,7 @@ e_soap_message_add_namespace (ESoapMessage *msg, const gchar *prefix, const gcha
 void
 e_soap_message_set_default_namespace (ESoapMessage *msg, const gchar *ns_uri)
 {
-	ESoapMessagePrivate *priv;
-
 	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
-	priv = E_SOAP_MESSAGE_GET_PRIVATE (msg);
 
 	e_soap_message_add_namespace (msg, NULL, ns_uri);
 }

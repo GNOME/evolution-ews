@@ -166,11 +166,9 @@ parse_parameters (ESoapResponsePrivate *priv, xmlNodePtr xml_method)
 gboolean
 e_soap_response_from_string (ESoapResponse *response, const gchar *xmlstr)
 {
-	ESoapResponsePrivate *priv;
 	xmlDocPtr xmldoc;
 
 	g_return_val_if_fail (E_IS_SOAP_RESPONSE (response), FALSE);
-	priv = E_SOAP_RESPONSE_GET_PRIVATE (response);
 	g_return_val_if_fail (xmlstr != NULL, FALSE);
 
 	/* parse the string */
