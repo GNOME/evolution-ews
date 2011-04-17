@@ -644,10 +644,12 @@ sync_created_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *cre
 
 		/* created_msg_ids are items other than generic item. We fetch them
 		   separately since the property sets vary */
-		if (item_type == E_EWS_ITEM_TYPE_GENERIC_ITEM)
-			generic_item_ids = g_slist_append (generic_item_ids, g_strdup (id->id));
-		else
+		/* FIXME: Do we need to handle any other item types
+		   "specially"? */
+		if (item_type == E_EWS_ITEM_TYPE_MESSAGE)
 			msg_ids = g_slist_append (msg_ids, g_strdup (id->id));
+		else
+			generic_item_ids = g_slist_append (generic_item_ids, g_strdup (id->id));
 
 		g_object_unref (item);
 	}
