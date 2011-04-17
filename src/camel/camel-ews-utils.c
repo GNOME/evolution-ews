@@ -876,6 +876,9 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder, GSList *items_cr
 		gboolean has_attachments;
 		guint32 server_flags;
 
+		if (!item)
+			continue;
+
 		id = e_ews_item_get_id (item);
 		mi = (CamelEwsMessageInfo *) camel_folder_summary_uid (folder->summary, id->id);
 		if (mi) {
