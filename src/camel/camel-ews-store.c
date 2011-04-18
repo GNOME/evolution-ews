@@ -165,7 +165,6 @@ ews_store_authenticate	(EEwsConnection *cnc,
 	CamelSession *session = camel_service_get_session (service);
 	GError *error = NULL;
 
-	printf("%s\n", __func__);
 	if (retrying)
 		service->url->passwd = NULL;
 
