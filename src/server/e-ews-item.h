@@ -139,6 +139,9 @@ e_ews_item_dump_mime_content(EEwsItem *item, const gchar *cache);
 
 const GSList *	e_ews_item_get_attendees	(EEwsItem *item);
 
+const gchar *	e_ews_item_get_associatedcalendarid
+						(EEwsItem *item);
+
 G_END_DECLS
 
 #endif
