@@ -42,6 +42,8 @@ which needs to be better organized via functions */
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 #include <libedataserver/e-flag.h>
+#include <libical/icalcomponent.h>
+#include <libical/icalparser.h>
 #include <e-ews-connection.h>
 #include <e-ews-item-change.h>
 #include <e-ews-message.h>
@@ -141,6 +143,139 @@ camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder, const gchar
 	return msg;
 }
 
+static gchar *
+ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar* id, GError **error)
+{
+	CamelMimeParser *mimeparser;
+	CamelDataWrapper *dw;
+	CamelMimeMessage *msg;
+	guint partnumber, i;
+	int fd_old;
+	gchar *mime_fname_new = NULL;
+
+	// original mime file
+	fd_old = open (mime_fname, O_RDONLY);
+	if (fd_old == -1) {
+		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			     _("Unable to open mimecontent temparory file!"));
+		return NULL;
+	}
+
+	mimeparser = camel_mime_parser_new();
+	if(camel_mime_parser_init_with_fd (mimeparser, fd_old) == -1) {
+		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			     _("Unable to generate parser from mimecontent!"));
+		goto exit;
+	}
+
+	msg = camel_mime_message_new();
+	if (camel_mime_part_construct_from_parser(CAMEL_MIME_PART(msg), mimeparser, error) == -1) {
+		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			     _("Unable to parse meeting request mimecontent!"));
+		g_object_unref(msg);
+		goto exit;
+	}
+
+	dw = camel_medium_get_content(CAMEL_MEDIUM (msg));
+	partnumber = camel_multipart_get_number (CAMEL_MULTIPART(dw));
+	for (i=0; i< partnumber; i++) {
+		gchar *type;
+		CamelMimePart *mimepart = NULL;
+		CamelDataWrapper *datawrapper;
+
+		mimepart = camel_multipart_get_part (CAMEL_MULTIPART(dw), i);
+
+		if (!mimepart) {
+			g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+				     _("Unable to get mimepart!"));
+			g_object_unref (msg);
+			goto exit;
+		}
+
+		datawrapper = camel_medium_get_content (CAMEL_MEDIUM (mimepart));
+		type = camel_data_wrapper_get_mime_type (datawrapper);
+		if (!g_ascii_strcasecmp(type, "text/calendar")) {
+			gsize decode_size, size1;
+			CamelStream *tmpstream = NULL;
+
+			decode_size = camel_mime_part_get_content_size (mimepart);
+			tmpstream = camel_stream_mem_new ();
+			size1 = camel_data_wrapper_decode_to_stream (datawrapper, tmpstream, error);
+			if(size1 != -1) {
+				gchar *calstring;
+				gsize size_read;
+
+				calstring = g_malloc (decode_size);
+				camel_stream_reset (tmpstream, error);
+				size_read = camel_stream_read (tmpstream, calstring, decode_size, error);
+
+				//Replace original ramdom UID with AssociatedCalendarItemId (ItemId)
+				if (size_read != -1) {
+					icalcomponent *icalcomp;
+					gchar *calstring_new;
+
+					icalcomp = icalparser_parse_string((const gchar*)calstring);
+					icalcomponent_set_uid (icalcomp, (gchar *) id);
+					calstring_new = icalcomponent_as_ical_string_r (icalcomp);
+
+					camel_mime_part_set_content (mimepart,
+								     (const gchar*)calstring_new, strlen(calstring_new),
+								     (const gchar*)type);
+
+					g_free (calstring_new);
+					icalcomponent_free (icalcomp);
+				}
+				g_free(calstring);
+			}
+			camel_stream_close (tmpstream, error);
+			g_free (type);
+			break;
+		}
+	}
+
+	if (!(*error)) {
+		CamelStream  *newstream = NULL;
+		gchar *dir;
+		const gchar *temp;
+		int fd;
+
+		// Create a new file to store updated mimecontent
+		temp = g_strrstr (mime_fname, "/");
+		dir = g_strndup (mime_fname, temp - mime_fname);
+		mime_fname_new = g_build_filename ((const gchar*) dir, "XXXXXX", NULL);
+		fd = g_mkstemp (mime_fname_new);
+		if (fd == -1) {
+			g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+				     _("Unable to create cache file"));
+			g_free (dir);
+			g_free (mime_fname_new);
+			mime_fname_new = NULL;
+			g_object_unref (msg);
+			goto exit;
+		}
+		newstream = camel_stream_fs_new_with_fd (fd);
+		// Dump updated message data to the stream
+		camel_data_wrapper_write_to_stream (CAMEL_DATA_WRAPPER (msg), newstream, error);
+		// Flush stream to its backend store
+		camel_stream_flush (newstream, error);
+		camel_stream_close (newstream, error);
+		g_object_unref(msg);
+		g_free (dir);
+		close (fd);
+		fd = -1;
+		// remove original file
+		g_remove (mime_fname);
+	}
+
+exit:
+	g_object_unref(mimeparser);
+	close (fd_old);
+	fd_old = -1;
+
+	// must be freed in the caller
+	return mime_fname_new;
+}
+
 static CamelMimeMessage *
 camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, GCancellable *cancellable, GError **error)
 {
@@ -158,6 +293,7 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	const gchar *temp;
 	gpointer progress_data;
 	gboolean res;
+	gchar *mime_fname_new = NULL;
 
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
 	ews_folder = (CamelEwsFolder *) folder;
@@ -222,6 +358,44 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	/* The mime_content actually contains the *filename*, due to the
 	   streaming hack in ESoapMessage */
 	mime_content = e_ews_item_get_mime_content (items->data);
+
+	/* Exchange returns random UID for associated calendar item, which has no way
+	   to match with calendar components saved in calendar cache. So manually get
+	   AssociatedCalendarItemId, replace the random UID with this ItemId,
+	   And save updated message data to a new temp file */
+	if (e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_MEETING_REQUEST) {
+		GSList *items_req = NULL;
+		const gchar *associatedcalendarid;
+
+		// Get AssociatedCalendarItemId with second get_items call
+		res = e_ews_connection_get_items (cnc, pri, ids, "IdOnly", "meeting:AssociatedCalendarItemId",
+						  FALSE, NULL,
+						  &items_req,
+						  (ESoapProgressFn)camel_operation_progress,
+						  progress_data,
+						  cancellable, error);
+		if (!res) {
+			if (items_req) {
+				g_object_unref (items_req->data);
+				g_slist_free (items_req);
+			}
+			goto exit;
+		}
+		associatedcalendarid = e_ews_item_get_associatedcalendarid (items_req->data);
+
+		mime_fname_new = ews_update_mgtrequest_mime_calendar_itemid (mime_content,
+									     associatedcalendarid,
+									     error);
+
+		if (mime_fname_new)
+			mime_content = (const gchar *) mime_fname_new;
+
+		if (items_req) {
+			g_object_unref (items_req->data);
+			g_slist_free (items_req);
+		}
+	}
+
 	cache_file = camel_data_cache_get_filename  (ews_folder->cache, "cur",
 						     uid, error);
 	temp = g_strrstr (cache_file, "/");
@@ -265,6 +439,9 @@ exit:
 
 	if (tmp_stream)
 		g_object_unref (tmp_stream);
+
+	if (mime_fname_new)
+		g_free (mime_fname_new);
 
 	return message;
 }
