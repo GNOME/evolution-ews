@@ -1137,7 +1137,7 @@ ews_expunge_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GError *
 
 		camel_service_lock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		status = e_ews_connection_delete_items (cnc, EWS_PRIORITY_MEDIUM, deleted_items, "HardDelete",
-							NULL, NULL, cancellable, &rerror);
+							"SendToNone", NULL, cancellable, &rerror);
 		camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 		if (status) {
