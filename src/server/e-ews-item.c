@@ -79,6 +79,8 @@ struct _EEwsItemPrivate {
 	GSList *modified_occurrences;
 	GSList *attachments_list;
 	GSList *attendees;
+
+	gchar *associatedcalendaritemid;
 };
 
 static GObjectClass *parent_class = NULL;
@@ -152,6 +154,9 @@ e_ews_item_dispose (GObject *object)
 		priv->attendees = NULL;
 
 	}
+
+	g_free (priv->associatedcalendaritemid);
+	priv->associatedcalendaritemid = NULL;
 
 	ews_item_free_mailbox (priv->sender);
 	ews_item_free_mailbox (priv->from);
@@ -536,6 +541,8 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 			process_attendees (priv, subparam, "Required");
 		} else if (!g_ascii_strcasecmp (name, "OptionalAttendees")) {
 			process_attendees (priv, subparam, "Optional");
+		} else if (!g_ascii_strcasecmp (name, "AssociatedCalendarItemId")) {
+			priv->associatedcalendaritemid = e_soap_parameter_get_property (subparam, "Id");
 		}
 	}
 
@@ -846,7 +853,8 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 	tmpdir = g_strndup(tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
 
 	snprintf(dirname, 350, "%s/XXXXXX", tmpdir);
-	mkdtemp(dirname);
+	if (!mkdtemp(dirname))
+		g_warning ("Failed to create directory for attachment cache");
 	surename = g_uri_escape_string(name, "", TRUE);
 	snprintf(filename, 350, "%s/%s", dirname, surename);
 
@@ -874,7 +882,9 @@ e_ews_item_dump_mime_content(EEwsItem *item, const gchar *cache) {
 	tmpdir = g_strndup(tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
 
 	snprintf(dirname, 350, "%s/XXXXXX", tmpdir);
-	mkdtemp(dirname);
+	if (!mkdtemp(dirname))
+		g_warning ("Failed to create directory for attachment cache");
+
 	surename = g_uri_escape_string(item->priv->subject, "", TRUE);
 	snprintf(filename, 350, "%s/%s", dirname, surename);
 
@@ -896,4 +906,12 @@ e_ews_item_get_attendees (EEwsItem *item)
 	g_return_val_if_fail(E_IS_EWS_ITEM(item), NULL);
 
 	return item->priv->attendees;
+}
+
+const gchar *
+e_ews_item_get_associatedcalendarid (EEwsItem *item)
+{
+	g_return_val_if_fail(E_IS_EWS_ITEM(item), NULL);
+
+	return (const gchar*) item->priv->associatedcalendaritemid;
 }

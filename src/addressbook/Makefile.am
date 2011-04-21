@@ -9,6 +9,7 @@ libebookbackendews_la_CPPFLAGS = \
 	-DG_LOG_DOMAIN=\"libebookbackend\"		\
 	-I$(top_srcdir)/src/addressbook			\
 	-I$(top_srcdir)/src/server	                \
+	-I$(top_srcdir)/src/utils	                \
 	$(LIBEBACKEND_CFLAGS)				\
 	$(LIBEDATASERVER_CFLAGS)			\
 	$(LIBEBOOK_CFLAGS)				\
@@ -16,7 +17,9 @@ libebookbackendews_la_CPPFLAGS = \
 	$(EVOLUTION_ADDRESSBOOK_CFLAGS)                 \
 	$(SOUP_CFLAGS)	
 
-libebookbackendews_la_SOURCES =		\
+libebookbackendews_la_SOURCES =			\
+	e-book-backend-sqlitedb.c		\
+	e-book-backend-sqlitedb.h		\
 	e-book-backend-ews.c			\
 	e-book-backend-ews.h			\
 	e-book-backend-ews-factory.c
