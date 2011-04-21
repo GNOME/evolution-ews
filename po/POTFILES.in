@@ -1,3 +1,12 @@
 # List of source files containing translatable strings.
 # Please keep this list in alphabetic order.
 [encoding: UTF-8]
+src/account-setup-eplugin/exchange-ews-account-setup.c
+src/addressbook/e-book-backend-ews.c
+src/addressbook/e-book-backend-sqlitedb.c
+src/camel/camel-ews-folder.c
+src/camel/camel-ews-provider.c
+src/camel/camel-ews-store.c
+src/camel/camel-ews-transport.c
+src/camel/camel-ews-utils.c
+src/server/e-ews-connection.c
