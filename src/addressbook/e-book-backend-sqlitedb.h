@@ -86,6 +86,10 @@ const gchar *	e_book_backend_sqlitedb_get_vcard_string
 							 const gchar *folderid,
 							 const gchar *uid,
 							 GError **error);
+GList *		e_book_backend_sqlitedb_search		(EBookBackendSqliteDB *ebsdb,
+							 const gchar *folderid,
+							 const gchar *sexp,
+							 GError **error);
 
 G_END_DECLS
 

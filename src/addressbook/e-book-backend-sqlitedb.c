@@ -24,6 +24,8 @@
 
 #include <glib/gi18n.h>
 #include <libebook/e-contact.h>
+#include <libedataserver/e-sexp.h>
+#include <libedata-book/e-book-backend-sexp.h>
 
 #include "e-sqlite3-vfs.h"
 #include "e-book-backend-sqlitedb.h"
@@ -215,6 +217,7 @@ create_folders_table	(EBookBackendSqliteDB *ebsdb,
 	gint ret;
 	const gchar *stmt = "CREATE TABLE IF NOT EXISTS folders		\
 			     ( folder_id  TEXT PRIMARY KEY,		\
+			       folder_name TEXT,			\
 			       sync_data TEXT,		 		\
 			       bdata1 TEXT, bdata2 TEXT,		\
 			       bdata3 TEXT)";
@@ -226,6 +229,7 @@ create_folders_table	(EBookBackendSqliteDB *ebsdb,
 	return ret;
 }
 
+/* The column names match the fields used in book-backend-sexp */
 static gint
 create_contacts_table	(EBookBackendSqliteDB *ebsdb,
 			 const gchar *folderid,
@@ -236,8 +240,8 @@ create_contacts_table	(EBookBackendSqliteDB *ebsdb,
 		
 	stmt = sqlite3_mprintf ("CREATE TABLE IF NOT EXISTS %Q	 		\
 			     ( uid  TEXT PRIMARY KEY,				\
-			       nickname TEXT, fullname TEXT,			\
-			       given_name TEXT, surname TEXT,			\
+			       nickname TEXT, full_name TEXT,			\
+			       given_name TEXT, family_name TEXT,		\
 			       email_1 TEXT, email_2 TEXT,			\
 			       email_3 TEXT, email_4 TEXT,			\
 			       vcard TEXT)", folderid);
@@ -537,4 +541,332 @@ e_book_backend_sqlitedb_get_vcard_string	(EBookBackendSqliteDB *ebsdb,
 	READER_UNLOCK (ebsdb);
 	
 	return vcard_str;	
+}
+
+static ESExpResult *
+func_check (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer data)
+{
+	ESExpResult *r;
+	gint truth = FALSE;
+
+	if (argc == 2
+	    && argv[0]->type == ESEXP_RES_STRING
+	    && argv[1]->type == ESEXP_RES_STRING) {
+		gchar *query_name = argv[0]->value.string;
+
+		if (!strcmp (query_name, "nickname") ||
+		    !strcmp (query_name, "full_name") ||
+		    !strcmp (query_name, "file_as") ||
+		    !strcmp (query_name, "email")) {
+			truth = TRUE;
+		}
+	}
+
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = truth;
+
+	return r;
+}
+
+/* 'builtin' functions */
+static const struct {
+	const gchar *name;
+	ESExpFunc *func;
+	gint type;		/* set to 1 if a function can perform shortcut evaluation, or
+				   doesn't execute everything, 0 otherwise */
+} check_symbols[] = {
+	{ "contains", func_check, 0 },
+	{ "is", func_check, 0 },
+	{ "beginswith", func_check, 0 },
+	{ "endswith", func_check, 0 },
+	{ "exists", func_check, 0 }
+};
+
+static gboolean
+book_backend_sqlitedb_is_summary_query (const gchar *query)
+{
+	ESExp *sexp;
+	ESExpResult *r;
+	gboolean retval;
+	gint i;
+	gint esexp_error;
+
+	sexp = e_sexp_new ();
+
+	for (i = 0; i < G_N_ELEMENTS (check_symbols); i++) {
+		if (check_symbols[i].type == 1) {
+			e_sexp_add_ifunction (sexp, 0, check_symbols[i].name,
+					     (ESExpIFunc *)check_symbols[i].func, NULL);
+		} else {
+			e_sexp_add_function (sexp, 0, check_symbols[i].name,
+					    check_symbols[i].func, NULL);
+		}
+	}
+
+	e_sexp_input_text (sexp, query, strlen (query));
+	esexp_error = e_sexp_parse (sexp);
+
+	if (esexp_error == -1) {
+		return FALSE;
+	}
+
+	r = e_sexp_eval (sexp);
+
+	retval = (r && r->type == ESEXP_RES_BOOL && r->value.boolean);
+
+	e_sexp_result_free (sexp, r);
+
+	e_sexp_unref (sexp);
+
+	return retval;
+}
+
+static ESExpResult *
+func_or (ESExp *f, gint argc, struct _ESExpTerm **argv, gpointer data)
+{
+	ESExpResult *r, *r1;
+	GString *string;
+	gint i;
+
+	string = g_string_new("( ");
+	for (i = 0; i < argc; i++) {
+		r1 = e_sexp_term_eval (f, argv[i]);
+
+		if (r1->type != ESEXP_RES_STRING) {
+			e_sexp_result_free (f, r1);
+			continue;
+		}
+		g_string_append_printf(string, "%s%s", r1->value.string, ((argc>1) && (i != argc-1)) ?  " OR ":"");
+		e_sexp_result_free (f, r1);
+	}
+	g_string_append(string, " )");
+
+	r = e_sexp_result_new (f, ESEXP_RES_STRING);
+	r->value.string = string->str;
+	g_string_free (string, FALSE);
+	return r;
+}
+
+
+typedef enum {
+	MATCH_CONTAINS,
+	MATCH_IS,
+	MATCH_BEGINS_WITH,
+	MATCH_ENDS_WITH
+} match_type;
+
+static ESExpResult *
+convert_match_exp (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer data, match_type match)
+{
+	ESExpResult *r;
+	gchar *str=NULL;
+
+	/* are we inside a match-all? */
+	if (argc>1 && argv[0]->type == ESEXP_RES_STRING) {
+		const gchar *field;
+
+		/* only a subset of headers are supported .. */
+		field = argv[0]->value.string;
+
+		if (argv[1]->type == ESEXP_RES_STRING && argv[1]->value.string [0] != 0) {
+			gchar *value=NULL;
+			
+			if (match == MATCH_CONTAINS) {
+				value = g_strdup_printf ("%%%s%%", argv[1]->value.string);
+			} else if (match == MATCH_ENDS_WITH) {
+				value = g_strdup_printf ("%%%s", argv[1]->value.string);
+			} else if (match == MATCH_BEGINS_WITH) {
+				value = g_strdup_printf ("%s%%", argv[1]->value.string);
+			} else if (match == MATCH_IS) {
+				value = g_strdup_printf ("%%%s%%", argv[1]->value.string);
+			}
+			
+			if (!strcmp (value, "full_name")) {
+				gchar *full, *sur, *given, *nick;
+
+				full = g_strdup_printf("(full_name IS NOT NULL AND full_name LIKE %s)",value);
+				sur = g_strdup_printf("(family_name IS NOT NULL AND family_name LIKE %s)",value);
+				given = g_strdup_printf("(given_name IS NOT NULL AND given_name LIKE %s)",value);
+				nick = g_strdup_printf("(nick_name IS NOT NULL AND nick_name LIKE %s)",value);
+			
+				str = g_strdup_printf (" %s OR %s OR %s OR %s ", full, sur, given, nick);
+
+				g_free (full);
+				g_free (sur);
+				g_free (given);
+				g_free (nick);
+			} else if (!strcmp (value, "email")) {
+				gint i;	
+				GString *emails = g_string_new (NULL);
+				
+				for (i = 1; i < 4; i++) {
+					g_string_append_printf (emails, "(email_%d IS NOT NULL AND email_%d LIKE %s)", i, i, value);
+					g_string_append (emails, " OR ");
+				}
+				g_string_append_printf (emails, "(email_4 IS NOT NULL AND email_4 LIKE %s)", value);
+
+				str = emails->str;
+				g_string_free (emails, FALSE);
+			} else
+				str = g_strdup_printf("(%s IS NOT NULL AND %s LIKE %s)", field, field, value);
+			g_free (value);
+		}
+	}
+
+	r = e_sexp_result_new (f, ESEXP_RES_STRING);
+	r->value.string = str;
+
+	return r;
+}
+
+static ESExpResult *
+func_contains (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer data)
+{
+	return convert_match_exp (f, argc, argv, data, MATCH_CONTAINS);
+}
+
+static ESExpResult *
+func_is (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer data)
+{
+	return convert_match_exp (f, argc, argv, data, MATCH_IS);
+}
+
+static ESExpResult *
+func_beginswith (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer data)
+{
+	return convert_match_exp (f, argc, argv, data, MATCH_BEGINS_WITH);
+}
+
+static ESExpResult *
+func_endswith (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer data)
+{
+	return convert_match_exp (f, argc, argv, data, MATCH_ENDS_WITH);
+}
+
+/* 'builtin' functions */
+static struct {
+	const gchar *name;
+	ESExpFunc *func;
+	guint immediate :1;
+} symbols[] = {
+	{ "or", (ESExpFunc *) func_or, 1},
+
+	{ "contains", func_contains, 0 },
+	{ "is", func_is, 0 },
+	{ "beginswith", func_beginswith, 0 },
+	{ "endswith", func_endswith, 0 },
+};
+
+static char *
+sexp_to_sql_query (const gchar *query)
+{
+	ESExp *sexp;
+	ESExpResult *r;
+	gint i;
+	gchar *res;
+
+	sexp = e_sexp_new ();
+
+	for (i = 0; i < G_N_ELEMENTS (symbols); i++) {
+		if (symbols[i].immediate)
+			e_sexp_add_ifunction (sexp, 0, symbols[i].name,
+					     (ESExpIFunc *) symbols[i].func, NULL);
+		else
+			e_sexp_add_function (sexp, 0, symbols[i].name,
+					    symbols[i].func, NULL);
+	}
+
+	e_sexp_input_text (sexp, query, strlen (query));
+	e_sexp_parse (sexp);
+
+	r = e_sexp_eval (sexp);
+	if (!r)
+		return NULL;
+	if (r->type == ESEXP_RES_STRING) {
+		res = g_strdup (r->value.string);
+	} else
+		g_assert (0);
+
+	e_sexp_result_free (sexp, r);
+	e_sexp_unref (sexp);
+	return res;
+}
+
+static gint
+addto_vcard_list_cb (gpointer ref, gint col, gchar **cols, gchar **name)
+{
+	GList **vcards = ref;
+
+	if (cols [0])
+		*vcards = g_list_prepend (*vcards, cols [0]);
+
+	return 0;
+}
+
+static GList *
+book_backend_sqlitedb_search_query (EBookBackendSqliteDB *ebsdb, const gchar *sql, const gchar *folderid, GError **error)
+{
+	GList *vcards = NULL;
+	gchar *stmt;
+	
+	READER_LOCK (ebsdb);
+
+	stmt = sqlite3_mprintf ("SELECT vcard FROM %Q WHERE %s", folderid, sql);
+	book_backend_sql_exec (ebsdb->priv->db, stmt, addto_vcard_list_cb , &vcards, error);
+	sqlite3_free (stmt);
+
+	READER_UNLOCK (ebsdb);
+
+	vcards = g_list_reverse (vcards);
+	
+	return vcards;
+}
+
+static GList *
+book_backend_sqlitedb_search_full (EBookBackendSqliteDB *ebsdb, const gchar *sexp, const gchar *folderid, GError **error)
+{
+	GList *vcards = NULL, *all = NULL, *l;
+	EBookBackendSExp *bsexp = NULL;
+	gchar *stmt;
+	
+	READER_LOCK (ebsdb);
+
+	stmt = sqlite3_mprintf ("SELECT vcard FROM %Q", folderid);
+	book_backend_sql_exec (ebsdb->priv->db, stmt, addto_vcard_list_cb , &all, error);
+	sqlite3_free (stmt);
+
+	READER_UNLOCK (ebsdb);
+
+	bsexp = e_book_backend_sexp_new (sexp);
+	
+	for (l = all; l != NULL; l = g_list_next (l)) {
+		if (e_book_backend_sexp_match_vcard (bsexp, l->data))
+			vcards = g_list_prepend (vcards, g_strdup (l->data));
+	}
+
+	g_object_unref (bsexp);
+	g_list_foreach (all, (GFunc) g_free, NULL);
+	g_list_free (all);
+
+	return vcards;
+
+}
+
+GList *
+e_book_backend_sqlitedb_search	(EBookBackendSqliteDB *ebsdb,
+				 const gchar *folderid,
+				 const gchar *sexp,
+				 GError **error)
+{
+	GList *vcards = NULL;
+
+	if (book_backend_sqlitedb_is_summary_query (sexp)) {
+		char *sql_query;
+
+		sql_query = sexp_to_sql_query (sexp);
+		vcards = book_backend_sqlitedb_search_query (ebsdb, sql_query, folderid, error);
+	} else
+		vcards = book_backend_sqlitedb_search_full (ebsdb, sexp, folderid, error);
+
+	return vcards;
 }
