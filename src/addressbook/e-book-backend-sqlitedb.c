@@ -236,7 +236,7 @@ create_contacts_table	(EBookBackendSqliteDB *ebsdb,
 			 GError **error)
 {
 	gint ret;
-	gchar *stmt;
+	gchar *stmt, *tmp;
 		
 	stmt = sqlite3_mprintf ("CREATE TABLE IF NOT EXISTS %Q	 		\
 			     ( uid  TEXT PRIMARY KEY,				\
@@ -247,13 +247,27 @@ create_contacts_table	(EBookBackendSqliteDB *ebsdb,
 			       vcard TEXT)", folderid);
 
 	WRITER_LOCK (ebsdb);
-	ret = book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL , NULL);
-	WRITER_UNLOCK (ebsdb);
-
+	ret = book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL , error);
 	sqlite3_free (stmt);
 
-	/* TODO create indexes */
 	
+	/* Create indexes on full_name and email_1 as autocompletion queries would mainly
+	   rely on this. Assuming that the frequency of matching on these would be higher than
+	   on the other fields like email_2, surname etc. email_1 should be the primary email */
+	tmp = g_strdup_printf("FNINDEX-%s", folderid);
+	stmt = sqlite3_mprintf ("CREATE INDEX IF NOT EXISTS %Q ON %Q (full_name)", tmp, folderid);
+	ret = book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, error);
+	g_free (tmp);
+	sqlite3_free (stmt);
+
+	tmp = g_strdup_printf("EMINDEX-%s", folderid);
+	stmt = sqlite3_mprintf ("CREATE INDEX IF NOT EXISTS %Q ON %Q (email_1)", tmp, folderid);
+	ret = book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, error);
+	g_free (tmp);
+	sqlite3_free (stmt);
+
+	WRITER_UNLOCK (ebsdb);
+
 	return ret;
 }
 
