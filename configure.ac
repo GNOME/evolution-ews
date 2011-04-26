@@ -124,16 +124,17 @@ AC_PROG_LIBTOOL
 
 PKG_PROG_PKG_CONFIG
 
+dnl ********************************
+dnl Check for evolution-data-server
+dnl ********************************
+PKG_CHECK_MODULES(EVOLUTION_DATA_SERVER, evolution-data-server-$EDS_PACKAGE >= eds_minimum_version)
+
 dnl **********************************
 dnl Gtk-3 compatibility
 dnl Use the API version 3.0 while compiling with gtk+-3
 dnl **********************************
-AC_ARG_ENABLE([gtk3],
-	AS_HELP_STRING([--enable-gtk3],
-	[Attempt to use gtk+-3]),
-	[enable_gtk3=$enableval],[enable_gtk3=no])
-
-if test "x${enable_gtk3}" = "xyes"; then
+if $PKG_CONFIG --atleast-version=3.0 evolution-data-server-$EDS_PACKAGE; then
+	enable_gtk3=yes
 	GTK_PACKAGE="gtk+-3.0"
 	EVO_PLUGIN_PACKAGE="evolution-plugin-3.0"
 	EVO_SHELL_PACKAGE="evolution-shell-3.0"
@@ -147,7 +148,8 @@ dnl	gtk3 check for this too
 
 	ebook_backenddir=`$PKG_CONFIG --variable=backenddir libedata-book-$EDS_PACKAGE`
 	AC_SUBST(ebook_backenddir)
-else	
+else
+	enable_gtk3=no
 	GTK_PACKAGE="gtk+-2.0"
 	EVO_PLUGIN_PACKAGE="evolution-plugin"
 	EVO_SHELL_PACKAGE="evolution-shell"
@@ -171,9 +173,8 @@ PKG_CHECK_MODULES(GNOME_PLATFORM,
 	gconf-2.0 >= gconf_minimum_version])
 
 dnl ********************************
-dnl Check for evolution-data-server 
+dnl Check for remaining evolution-data-server modules
 dnl ********************************
-PKG_CHECK_MODULES(EVOLUTION_DATA_SERVER, evolution-data-server-$EDS_PACKAGE >= eds_minimum_version)
 PKG_CHECK_MODULES(LIBEDATASERVER, libedataserver-$EDS_PACKAGE >= eds_minimum_version)
 PKG_CHECK_MODULES(LIBEDATASERVERUI, $EDS_UI_PACKAGE >= eds_minimum_version)
 PKG_CHECK_MODULES(LIBEBACKEND, libebackend-$EDS_PACKAGE >= eds_minimum_version)
