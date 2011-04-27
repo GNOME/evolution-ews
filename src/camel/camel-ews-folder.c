@@ -823,7 +823,11 @@ sync_created_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *cre
 		   separately since the property sets vary */
 		/* FIXME: Do we need to handle any other item types
 		   "specially"? */
-		if (item_type == E_EWS_ITEM_TYPE_MESSAGE)
+		if (item_type == E_EWS_ITEM_TYPE_MESSAGE ||
+			item_type == E_EWS_ITEM_TYPE_MEETING_REQUEST ||
+			item_type == E_EWS_ITEM_TYPE_MEETING_MESSAGE ||
+			item_type == E_EWS_ITEM_TYPE_MEETING_RESPONSE ||
+			item_type == E_EWS_ITEM_TYPE_MEETING_CANCELLATION)
 			msg_ids = g_slist_append (msg_ids, g_strdup (id->id));
 		else
 			generic_item_ids = g_slist_append (generic_item_ids, g_strdup (id->id));
