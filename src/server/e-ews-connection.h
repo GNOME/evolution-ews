@@ -93,6 +93,12 @@ void		e_ews_autodiscover_ws_url	(EEwsAutoDiscoverCallback cb,
 						 gchar *password);
 void		e_ews_connection_set_mailbox	(EEwsConnection *cnc,
 						 const gchar *email);
+
+/* Expose uri and mail for a new API */
+const gchar * e_ews_connection_get_uri (EEwsConnection *cnc);
+
+const gchar * e_ews_connection_get_email (EEwsConnection *cnc);
+
 /* Sync folder items */
 void		e_ews_connection_sync_folder_items_start
 						(EEwsConnection *cnc,

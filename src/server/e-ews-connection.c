@@ -788,6 +788,22 @@ ews_connection_authenticate	(SoupSession *sess, SoupMessage *msg,
 	g_signal_emit (cnc, signals[AUTHENTICATE], 0, msg, auth, retrying);
 }
 
+const gchar *
+e_ews_connection_get_uri (EEwsConnection *cnc)
+{
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
+
+	return cnc->priv->uri;
+}
+
+const gchar *
+e_ews_connection_get_email (EEwsConnection *cnc)
+{
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
+
+	return cnc->priv->email;
+}
+
 void
 e_ews_connection_authenticate (EEwsConnection *cnc,
 			       SoupAuth *auth, const gchar *user,
