@@ -55,11 +55,11 @@ struct _EEwsConnectionClass {
 	void (*authenticate) (EEwsConnection *cnc);
 };
 
-enum {
+typedef enum {
 	EWS_PRIORITY_LOW,
 	EWS_PRIORITY_MEDIUM,
 	EWS_PRIORITY_HIGH
-};
+} EwsOperationPriority;;
 
 typedef void (*EEwsRequestCreationCallback) (ESoapMessage *msg,
 					     gpointer user_data);
