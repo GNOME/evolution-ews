@@ -50,6 +50,7 @@ static gint comp_func (gconstpointer a, gconstpointer b);
 
 typedef void (*response_cb) (ESoapParameter *param, struct _EwsNode *enode);
 static void ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data);
+static void ews_operation_response_cb (SoupSession *session, SoupMessage *msg, gpointer data);
 
 static void
 ews_connection_authenticate	(SoupSession *sess, SoupMessage *msg,
@@ -106,6 +107,8 @@ struct _EwsNode {
 
 	GCancellable *cancellable;
 	gulong cancel_handler_id;
+
+	SoupSessionCallback callback;
 };
 
 typedef struct {
@@ -378,7 +381,90 @@ ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_c
 	ews_trigger_next_request(cnc);
 }
 
+static void
+ews_connection_queue_operation_request (EEwsConnection *cnc, ESoapMessage *msg, EwsOperationPriority priority, GCancellable *cancellable, GSimpleAsyncResult *simple)
+{
+	EwsNode *node;
+
+	node = ews_node_new ();
+	node->msg = msg;
+	node->pri = priority;
+	node->cnc = cnc;
+	node->simple = simple;
+	node->callback = ews_operation_response_cb;
+
+	QUEUE_LOCK (cnc);
+	cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, (gpointer *) node, (GCompareFunc) comp_func);
+	QUEUE_UNLOCK (cnc);
+
+	if (cancellable) {
+		node->cancellable = cancellable;
+		node->cancel_handler_id = g_cancellable_connect	(cancellable,
+								 G_CALLBACK (ews_cancel_request),
+								 (gpointer) node, NULL);
+	}
+
+	ews_trigger_next_request(cnc);
+}
+
 /* Response callbacks */
+static void
+ews_operation_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
+{
+	EwsNode *enode = (EwsNode *) data;
+	ESoapResponse *response;
+	ESoapParameter *param;
+	GError *error = NULL;
+
+	// check for cancelled state
+	if (enode->cancellable && g_cancellable_is_cancelled (enode->cancellable))
+		goto exit;
+
+	// no "401 Unauthorized"
+	if (msg->status_code == SOUP_STATUS_UNAUTHORIZED) {
+		g_simple_async_result_set_error (enode->simple,
+						 EWS_CONNECTION_ERROR,
+						 EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED,
+						 _("Authentication failed"));
+		goto exit;
+	}
+
+	// got a response
+	response = e_soap_message_parse_response ((ESoapMessage *) msg);
+	if (!response) {
+		g_simple_async_result_set_error	(enode->simple,
+						 EWS_CONNECTION_ERROR,
+						 EWS_CONNECTION_ERROR_NORESPONSE,
+						 _("No response"));
+
+		goto exit;
+	}
+
+	// dump response if expected to
+	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1))
+		e_soap_response_dump_response (response, stdout);
+
+	// TODO: validate response using xml schema
+
+	// prepare value returned to callback
+	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
+	if (param)
+		g_simple_async_result_set_op_res_gpointer (enode->simple, g_object_ref (response), g_object_unref);
+	else
+		ews_parse_soap_fault (response, &error);
+
+	if (error) {
+		g_simple_async_result_set_from_error (enode->simple, error);
+		g_clear_error (&error);
+	}
+
+exit:
+	g_simple_async_result_complete_in_idle (enode->simple);
+
+	ews_active_job_done (enode->cnc, enode);
+
+	g_object_unref (response);
+}
 
 static void
 ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
@@ -606,6 +692,25 @@ ews_create_folder_cb (ESoapParameter *soapparam, EwsNode *enode)
 
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
 	async_data->items_created = fids;
+}
+
+void
+e_ews_connection_queue_operation (EEwsConnection *cnc,
+						ESoapMessage *msg,
+						GCancellable *cancellable,
+						EwsOperationPriority priority,
+						GAsyncReadyCallback cb,
+						GObject *source,
+						gpointer user_data)
+{
+	GSimpleAsyncResult *simple;
+
+	simple = g_simple_async_result_new (source,
+					    cb,
+					    user_data,
+					    e_ews_connection_queue_operation);
+
+	ews_connection_queue_operation_request (cnc, msg, priority, cancellable, simple);
 }
 
 static void

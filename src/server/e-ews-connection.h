@@ -94,6 +94,15 @@ void		e_ews_autodiscover_ws_url	(EEwsAutoDiscoverCallback cb,
 void		e_ews_connection_set_mailbox	(EEwsConnection *cnc,
 						 const gchar *email);
 
+/* API for queuing messages */
+void		e_ews_connection_queue_operation (EEwsConnection *cnc,
+						ESoapMessage *msg,
+						GCancellable *cancellable,
+						EwsOperationPriority priority,
+						GAsyncReadyCallback cb,
+						GObject *source,
+						gpointer user_data);
+
 /* Expose uri and mail for a new API */
 const gchar * e_ews_connection_get_uri (EEwsConnection *cnc);
 
