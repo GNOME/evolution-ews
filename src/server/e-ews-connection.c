@@ -101,6 +101,8 @@ struct _EwsNode {
 	EEwsConnection *cnc;
 	GSimpleAsyncResult *simple;
 	gboolean complete_sync;
+	gboolean multi_value_response;
+
 
 	gint pri;		/* the command priority */
 	response_cb cb;
@@ -286,7 +288,7 @@ ews_next_request (gpointer _cnc)
 	/* Add to active job queue */
 	cnc->priv->active_job_queue = g_slist_append (cnc->priv->active_job_queue, node);
 
-	soup_session_queue_message (cnc->priv->soup_session, SOUP_MESSAGE (node->msg), ews_response_cb, node);
+	soup_session_queue_message (cnc->priv->soup_session, SOUP_MESSAGE (node->msg), node->callback, node);
 
 	QUEUE_UNLOCK (cnc);
 	return FALSE;
@@ -355,7 +357,7 @@ ews_cancel_request (GCancellable *cancellable,
 }
 
 static void
-ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_cb cb, gint pri, GCancellable *cancellable, GSimpleAsyncResult *simple, gboolean complete_sync)
+ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_cb cb, gint pri, GCancellable *cancellable, GSimpleAsyncResult *simple, gboolean complete_sync,gboolean multi_value_response)
 {
 	EwsNode *node;
 
@@ -366,6 +368,8 @@ ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_c
 	node->cnc = cnc;
 	node->complete_sync = complete_sync;
 	node->simple = simple;
+	node->multi_value_response = multi_value_response;
+	node->callback = ews_response_cb;
 
 	QUEUE_LOCK (cnc);
 	cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, (gpointer *) node, (GCompareFunc) comp_func);
@@ -431,6 +435,7 @@ ews_operation_response_cb (SoupSession *session, SoupMessage *msg, gpointer data
 
 	// got a response
 	response = e_soap_message_parse_response ((ESoapMessage *) msg);
+
 	if (!response) {
 		g_simple_async_result_set_error	(enode->simple,
 						 EWS_CONNECTION_ERROR,
@@ -1402,7 +1407,7 @@ e_ews_connection_sync_folder_items_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, sync_folder_items_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb);
+				      cancellable, simple, cb == ews_sync_reply_cb,FALSE);
 }
 
 gboolean
@@ -1514,7 +1519,7 @@ e_ews_connection_sync_folder_hierarchy_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, sync_hierarchy_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb);
+				      cancellable, simple, cb == ews_sync_reply_cb,FALSE);
 }
 
 
@@ -1664,7 +1669,7 @@ e_ews_connection_get_items_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, get_items_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb);
+				      cancellable, simple, cb == ews_sync_reply_cb,TRUE);
 }
 
 gboolean
@@ -1778,7 +1783,7 @@ e_ews_connection_delete_items_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple,
-				      cb == ews_sync_reply_cb);
+				      cb == ews_sync_reply_cb,TRUE);
 }
 
 gboolean
@@ -1889,7 +1894,7 @@ e_ews_connection_update_items_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, get_items_response_cb, pri, cancellable, simple,
-				      cb == ews_sync_reply_cb);
+				      cb == ews_sync_reply_cb,TRUE);
 }
 
 gboolean
@@ -2006,7 +2011,7 @@ e_ews_connection_create_items_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, get_items_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb);
+				      cancellable, simple, cb == ews_sync_reply_cb,TRUE);
 }
 
 gboolean
@@ -2151,7 +2156,7 @@ e_ews_connection_resolve_names_start 	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, resolve_names_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb);
+				      cancellable, simple, cb == ews_sync_reply_cb,FALSE);
 }
 
 gboolean
@@ -2257,7 +2262,7 @@ e_ews_connection_update_folder_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple,
-				      cb == ews_sync_reply_cb);
+				      cb == ews_sync_reply_cb,FALSE);
 }
 
 gboolean
@@ -2354,7 +2359,7 @@ e_ews_connection_move_folder_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple,
-				      cb == ews_sync_reply_cb);
+				      cb == ews_sync_reply_cb,FALSE);
 }
 
 gboolean
@@ -2455,7 +2460,7 @@ e_ews_connection_create_folder_start	(EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (cnc, msg, ews_create_folder_cb, pri, cancellable, simple, cb == ews_sync_reply_cb);
+	ews_connection_queue_request (cnc, msg, ews_create_folder_cb, pri, cancellable, simple, cb == ews_sync_reply_cb,FALSE);
 }
 
 gboolean
@@ -2567,7 +2572,7 @@ e_ews_connection_move_items_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, get_items_response_cb, pri, cancellable, simple,
-				      cb == ews_sync_reply_cb);
+				      cb == ews_sync_reply_cb,TRUE);
 }
 
 gboolean
@@ -2678,7 +2683,7 @@ e_ews_connection_delete_folder_start	(EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple, cb == ews_sync_reply_cb);
+	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple, cb == ews_sync_reply_cb,FALSE);
 }
 
 
@@ -2801,7 +2806,7 @@ e_ews_connection_get_attachments_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, get_attachments_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb);
+				      cancellable, simple, cb == ews_sync_reply_cb,TRUE);
 }
 
 gboolean
