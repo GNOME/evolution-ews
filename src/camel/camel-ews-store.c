@@ -552,7 +552,6 @@ ews_create_folder_sync (CamelStore *store,
 	gchar *fid = NULL;
 	gchar *full_name;
 	EwsFolderId *folder_id;
-	EVO2(GCancellable *cancellable = NULL;)
 	CamelFolderInfo *fi = NULL;
 
 	
@@ -567,11 +566,10 @@ ews_create_folder_sync (CamelStore *store,
 		}
 	}
 
-	/* Make the call */
-	if (!e_ews_connection_create_folder (ews_store->priv->cnc,
-					     EWS_PRIORITY_MEDIUM, fid,
-					     FALSE, folder_name, &folder_id,
-					     cancellable, error)) {
+	/* Make the call with new API*/
+	if (!e_ews_create_folder_operation_sync (ews_store->priv->cnc,
+						 fid, FALSE, folder_name, &folder_id,
+						 error)) {
 		g_free (fid);
 		return NULL;
 	}
