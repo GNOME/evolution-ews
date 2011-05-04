@@ -28,6 +28,8 @@
 
 #include <e-ews-connection.h>
 #include <e-ews-create-folder-operation.h>
+#include <e-ews-delete-folder-operation.h>
+#include <e-ews-move-folder-operation.h>
 #include "camel-ews-store-summary.h"
 
 /* Standard GObject macros */
