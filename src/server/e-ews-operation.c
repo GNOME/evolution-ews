@@ -21,6 +21,7 @@
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
+#include <libxml2/libxml/tree.h>
 #endif
 #include "e-ews-operation.h"
 
@@ -30,6 +31,8 @@ struct _EEwsOperationPrivate {
 	EEwsConnection *cnc;
 	
 	ESoapMessage *msg;
+
+	gchar *name;
 };
 
 #define E_EWS_OPERATION_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), E_TYPE_EWS_OPERATION, EEwsOperationPrivate))
@@ -44,6 +47,7 @@ e_ews_operation_callback (GObject *source, GAsyncResult *res, gpointer user_data
 	EEwsOperation *operation = E_EWS_OPERATION (source);
 	EEwsOperationClass *class = E_EWS_OPERATION_GET_CLASS (source);
 	ESoapResponse *response = NULL;
+	ESoapParameter *param, *subparam;
 	EFlag *eflag = (EFlag *)user_data;
 
 	if (!g_simple_async_result_propagate_error ((GSimpleAsyncResult *) res, &error))
@@ -53,9 +57,13 @@ e_ews_operation_callback (GObject *source, GAsyncResult *res, gpointer user_data
 
 	if (!error)
 	{
-		class->parse (operation,
-			e_soap_response_get_first_parameter_by_name (response, "ResponseMessages"), error);
+		param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
+		subparam = e_soap_parameter_get_first_child (param);
 
+		if (g_getenv ("EWS_DEBUG_OPERATION") && (g_strrstr((const gchar *) subparam->name, g_getenv ("EWS_DEBUG_OPERATION")) != NULL))
+			e_soap_response_dump_response (response, stdout);
+
+		class->parse (operation, param, error);
 		g_object_unref (response);
 
 	} else
@@ -106,6 +114,8 @@ e_ews_operation_finalize (GObject *self)
 
 	priv = operation->priv;
 
+	g_free (priv->name);
+
 	/* Chain up to the parent class */
 	G_OBJECT_CLASS (e_ews_operation_parent_class)->finalize (self);
 }
@@ -138,6 +148,16 @@ void e_ews_operation_submit (EEwsOperation *self, GCancellable *cancellable, Ews
 	g_return_if_fail (E_IS_EWS_OPERATION (self));
 	g_return_if_fail (self->priv->msg != NULL);
 
+	if (self->priv->name && g_getenv ("EWS_DEBUG_OPERATION") && (g_strcmp0(self->priv->name, g_getenv ("EWS_DEBUG_OPERATION")) == 0))
+	{
+		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (self->priv->msg)->request_body));
+		/* print request's body */
+		printf ("\n The request headers");
+		fputc ('\n', stdout);
+		fputs (SOUP_MESSAGE (self->priv->msg)->request_body->data, stdout);
+		fputc ('\n', stdout);
+	}
+
 	e_ews_connection_queue_operation (self->priv->cnc, self->priv->msg, cancellable, priority, e_ews_operation_callback, (GObject *)(self), eflag);
 
 	if (eflag != NULL)
@@ -166,4 +186,36 @@ EEwsConnection *e_ews_operation_get_connection(EEwsOperation *op)
 	g_return_val_if_fail (E_IS_EWS_OPERATION (op), NULL);
 	
 	return op->priv->cnc;
+}
+
+gboolean
+e_ews_operation_is_response_error (ESoapParameter *param, GError **error)
+{
+	ESoapParameter *subparam;
+	gchar *value, *desc, *res;
+
+	value = e_soap_parameter_get_property (param, "ResponseClass");
+	 
+	if (!g_ascii_strcasecmp (value, "Error")) {
+		subparam = e_soap_parameter_get_first_child_by_name (param, "MessageText");
+		desc = e_soap_parameter_get_string_value (subparam);
+		subparam = e_soap_parameter_get_first_child_by_name (param, "ResponseCode");
+		res = e_soap_parameter_get_string_value (subparam);
+
+		g_set_error (error, EWS_CONNECTION_ERROR, ews_get_error_code ((const gchar *) res), "%s", desc);
+		g_free (desc);
+		g_free (res);
+	}
+
+	g_free (value);
+
+	return (*error != NULL);
+}
+
+void
+e_ews_operation_set_name (EEwsOperation *op, const gchar *name)
+{
+	g_return_if_fail (E_IS_EWS_OPERATION (op));
+
+	op->priv->name = g_strdup (name);
 }

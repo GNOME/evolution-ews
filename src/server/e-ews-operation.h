@@ -54,12 +54,17 @@ struct _EEwsOperationClass {
 
 GType e_ews_operation_get_type (void);
 
+void e_ews_operation_set_name (EEwsOperation *op, const gchar *name);
+
 void e_ews_operation_submit (EEwsOperation *op, GCancellable *cancellable, EwsOperationPriority priority, EFlag *eflag);
 
 void e_ews_operation_set_message(EEwsOperation *op, ESoapMessage *msg);
 
 void e_ews_operation_set_connection(EEwsOperation *op, EEwsConnection *cnc);
+
 EEwsConnection *e_ews_operation_get_connection(EEwsOperation *op);
+
+gboolean e_ews_operation_is_response_error (ESoapParameter *param, GError **error);
 
 G_END_DECLS
 
