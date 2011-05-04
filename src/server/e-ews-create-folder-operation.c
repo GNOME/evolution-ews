@@ -77,7 +77,6 @@ create_folder_operation_parse (EEwsOperation *op, ESoapParameter *response, GErr
 
 		goto finish;
 	}
-
 	// make sure we got a "CreateFolderResponseMessage"
 	if (g_strcmp0((const char *)subparam->name, "CreateFolderResponseMessage") != 0)
 	{
@@ -88,7 +87,11 @@ create_folder_operation_parse (EEwsOperation *op, ESoapParameter *response, GErr
 
 		goto finish;
 	}
-	
+
+	// make sure the exchange didnt return an error
+	if (e_ews_operation_is_response_error (subparam, &error))
+		goto finish;
+
 	node = e_soap_parameter_get_first_child_by_name (subparam, "Folders");
 	node = e_soap_parameter_get_first_child_by_name (node, "Folder");
 	param = e_soap_parameter_get_first_child_by_name (node, "FolderId");
@@ -167,6 +170,7 @@ e_ews_create_folder_operation_new(EEwsConnection *cnc)
 {
 	EEwsCreateFolderOperation *op = g_object_new (E_TYPE_EWS_CREATE_FOLDER_OPERATION, NULL);
 	e_ews_operation_set_connection (E_EWS_OPERATION (op), cnc);
+	e_ews_operation_set_name (E_EWS_OPERATION (op), "CreateFolder");
 
 	return op;
 }
@@ -268,7 +272,10 @@ e_ews_create_folder_operation_sync (EEwsConnection *cnc,
 		g_propagate_error (error, data.error);
 		g_clear_error (&data.error);
 	}
-
+	
 	*folder_id = data.folder_id;
+
+	g_object_unref (op);
+
 	return (*error == NULL);
 }
