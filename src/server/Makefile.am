@@ -36,9 +36,11 @@ libeews_1_2_la_SOURCES =		\
 	e-ews-connection.c		\
 	e-ews-connection.h		\
 	e-ews-operation.c		\
-	e-ews-opration.h		\
+	e-ews-utils.c			\
 	e-ews-create-folder-operation.c	\
-	e-ews-create-folder-operation.h	\
+	e-ews-delete-folder-operation.c	\
+	e-ews-move-folder-operation.c	\
+	e-ews-move-items-operation.c	\
 	e-ews-folder.c			\
 	e-ews-item.c			\
 	e-ews-item-change.c		\

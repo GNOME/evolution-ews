@@ -24,6 +24,7 @@
 
 #include "e-soap-message.h"
 #include "e-soap-response.h"
+#include <e-ews-utils.h>
 
 G_BEGIN_DECLS
 
@@ -65,11 +66,6 @@ struct _EEwsItem {
 struct _EEwsItemClass {
 	GObjectClass parent_class;
 };
-
-typedef struct {
-	gchar *id;
-	gchar *change_key;
-} EwsId;
 
 typedef struct {
 	gchar *name;
