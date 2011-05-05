@@ -27,6 +27,7 @@ m4_define([eds_minimum_version], [2.31.1])
 m4_define([evo_minimum_version], [2.31.1])
 m4_define([glib_minimum_version], [2.16.1])
 m4_define([gconf_minimum_version], [2.0.0])
+m4_define([libsoup_minimum_version], [2.32])
 
 
 dnl ***********************************
@@ -171,6 +172,12 @@ PKG_CHECK_MODULES(GNOME_PLATFORM,
 	[glib-2.0 >= glib_minimum_version
 	$GTK_MODULE
 	gconf-2.0 >= gconf_minimum_version])
+
+PKG_CHECK_MODULES(SOUP, libsoup-2.4 >= libsoup_minimum_version)
+AC_SUBST(SOUP_CFLAGS)
+AC_SUBST(SOUP_LIBS)
+LIBSOUP_REQUIRED=libsoup_minimum_version
+AC_SUBST(LIBSOUP_REQUIRED)
 
 dnl ********************************
 dnl Check for remaining evolution-data-server modules
