@@ -670,6 +670,7 @@ ews_rename_folder_sync	(CamelStore *store,
 	gchar *fid;
 	gchar *changekey;
 	gboolean res = FALSE;
+	EVO2(GCancellable *cancellable = NULL;)
 
 	if (!strcmp (old_name, new_name))
 		return TRUE;
