@@ -34,7 +34,6 @@ liborg_gnome_exchange_ews_la_SOURCES = 		\
 liborg_gnome_exchange_ews_la_LIBADD = 			\
 	$(top_builddir)/src/server/libeews-1.2.la	\
 	$(top_builddir)/src/utils/libewsutils.la 	\
-	$(top_builddir)/src/camel/libcamelews.la 	\
 	$(EVOLUTION_PLUGIN_LIBS)			\
 	$(EVOLUTION_SHELL_LIBS) \
 	$(CAMEL_LIBS) 					\
