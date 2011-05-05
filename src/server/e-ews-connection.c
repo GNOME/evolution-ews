@@ -416,7 +416,7 @@ static void
 ews_operation_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 {
 	EwsNode *enode = (EwsNode *) data;
-	ESoapResponse *response;
+	ESoapResponse *response = NULL;
 	ESoapParameter *param;
 	GError *error = NULL;
 
