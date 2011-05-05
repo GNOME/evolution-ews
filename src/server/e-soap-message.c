@@ -63,7 +63,11 @@ finalize (GObject *object)
 	g_free (priv->steal_node);
 	g_free (priv->steal_dir);
 	if (priv->steal_fd != -1)
+#ifdef G_OS_WIN32
+		closesocket (priv->steal_fd);
+#else
 		close (priv->steal_fd);
+#endif
 	G_OBJECT_CLASS (e_soap_message_parent_class)->finalize (object);
 }
 
@@ -193,7 +197,11 @@ static void soap_sax_endElementNs (void *_ctxt,
 	ESoapMessagePrivate *priv = ctxt->_private;
 
 	if (priv->steal_fd != -1) {
+#ifdef G_OS_WIN32
+		closesocket (priv->steal_fd);
+#else
 		close (priv->steal_fd);
+#endif
 		priv->steal_fd = -1;
 	}
 	xmlSAX2EndElementNs (ctxt, localname, prefix, uri);
@@ -207,7 +215,7 @@ static void soap_sax_characters (void *_ctxt, const xmlChar *ch, int len)
 	if (priv->steal_fd == -1)
 		xmlSAX2Characters (ctxt, ch, len);
 	else if (!priv->steal_base64) {
-		if (write (priv->steal_fd, ch, len) != len) {
+		if (send (priv->steal_fd, (const gchar*)ch, len, 0) != len) {
 		write_err:
 			/* Handle error better */
 			g_warning ("Failed to write streaming data to file");
@@ -219,7 +227,7 @@ static void soap_sax_characters (void *_ctxt, const xmlChar *ch, int len)
 		blen = g_base64_decode_step ((const gchar *)ch, len,
 					     bdata, &priv->steal_b64_state,
 					     &priv->steal_b64_save);
-		if (write (priv->steal_fd, bdata, blen) != blen) {
+		if (send (priv->steal_fd, (const gchar*)bdata, blen, 0) != blen) {
 			g_free (bdata);
 			goto write_err;
 		}

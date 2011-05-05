@@ -30,6 +30,7 @@
 #include <glib/gstdio.h>
 #include <glib/gprintf.h>
 #include <libsoup/soup-misc.h>
+#include <e-util/e-mktemp.h>
 #include "e-ews-item.h"
 #include "e-ews-connection.h"
 #include "e-ews-message.h"
@@ -853,7 +854,7 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 	tmpdir = g_strndup(tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
 
 	snprintf(dirname, 350, "%s/XXXXXX", tmpdir);
-	if (!mkdtemp(dirname))
+	if (!e_mkdtemp(dirname))
 		g_warning ("Failed to create directory for attachment cache");
 	surename = g_uri_escape_string(name, "", TRUE);
 	snprintf(filename, 350, "%s/%s", dirname, surename);
@@ -882,7 +883,7 @@ e_ews_item_dump_mime_content(EEwsItem *item, const gchar *cache) {
 	tmpdir = g_strndup(tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
 
 	snprintf(dirname, 350, "%s/XXXXXX", tmpdir);
-	if (!mkdtemp(dirname))
+	if (!e_mkdtemp(dirname))
 		g_warning ("Failed to create directory for attachment cache");
 
 	surename = g_uri_escape_string(item->priv->subject, "", TRUE);

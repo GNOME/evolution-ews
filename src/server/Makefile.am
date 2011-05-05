@@ -26,6 +26,7 @@ libeews_1_2_la_CPPFLAGS = \
 	$(LIBEBACKEND_CFLAGS)				\
 	$(LIBEDATASERVER_CFLAGS)			\
 	$(E_DATA_SERVER_CFLAGS)				\
+	$(EVOLUTION_PLUGIN_CFLAGS)				\
 	$(DEBUG_CFLAGS)
 
 libeews_1_2_la_SOURCES =		\
@@ -49,6 +50,7 @@ libeews_1_2_la_LIBADD =						\
 	$(LIBEBACKEND_LIBS)						\
 	$(LIBEDATASERVER_LIBS)						\
 	$(E_DATA_SERVER_LIBS)						\
+	$(EVOLUTION_PLUGIN_LIBS)				\
 	$(SOUP_LIBS)						\
 	$(SOCKET_LIBS)
 

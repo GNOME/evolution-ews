@@ -26,6 +26,7 @@ libebookbackendews_la_SOURCES =			\
 
 libebookbackendews_la_LIBADD =				\
 	$(top_builddir)/src/server/libeews-1.2.la		\
+	$(top_builddir)/src/utils/libewsutils.la		\
 	$(LIBEBACKEND_LIBS)					\
 	$(LIBEDATASERVER_LIBS)					\
 	$(LIBEDATABOOK_LIBS) \
