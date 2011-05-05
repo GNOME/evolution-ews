@@ -115,11 +115,11 @@ ews_account_info_free (EwsAccountInfo *info)
 static void
 ews_account_removed (EAccountList *account_listener, EAccount *account)
 {
-	EShell *shell;
-	EShellBackend *shell_backend;
+	EVO3(EShell *shell;)
+	EVO3(EShellBackend *shell_backend;)
 	EVO3(EMailSession *session;)
 	EwsAccountInfo *info = NULL;
-	CamelStore *store;
+	EVO3(CamelStore *store;)
 
 	if (!is_ews_account (account))
 		return;
@@ -131,18 +131,18 @@ ews_account_removed (EAccountList *account_listener, EAccount *account)
 	ews_esource_utils_remove_groups (account->id->address);
 	ews_accounts = g_list_remove (ews_accounts, info);
 
-	shell = e_shell_get_default ();
-	shell_backend = e_shell_get_backend_by_name (shell, "mail");
-	EVO3(session = e_mail_backend_get_session (E_MAIL_BACKEND (shell_backend)));
-	store = (CamelStore *) camel_session_get_service (CAMEL_SESSION (session),
-				  account->source->url, CAMEL_PROVIDER_STORE, NULL);
+	EVO3(shell = e_shell_get_default ();)
+	EVO3(shell_backend = e_shell_get_backend_by_name (shell, "mail");)
+	EVO3(session = e_mail_backend_get_session (E_MAIL_BACKEND (shell_backend));)
+	EVO3(store = (CamelStore *) camel_session_get_service (CAMEL_SESSION (session),
+				  account->source->url, CAMEL_PROVIDER_STORE, NULL);)
 
 	/* FIXME This has to go through the CamelStore instead of accessing through derived class.
 	    Ideally Evo should delete the cache when the email account is removed */
-	camel_ews_store_summary_remove (((CamelEwsStore *)store)->summary);
+	EVO3(camel_ews_store_summary_remove (((CamelEwsStore *)store)->summary);)
 
 	ews_account_info_free (info);
-	g_object_unref (store);
+	EVO3(g_object_unref (store);)
 }
 
 static void
