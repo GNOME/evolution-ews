@@ -169,7 +169,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 	}
 
 	msg = camel_mime_message_new();
-	if (camel_mime_part_construct_from_parser(CAMEL_MIME_PART(msg), mimeparser, error) == -1) {
+	if (EVO3_sync(camel_mime_part_construct_from_parser)(CAMEL_MIME_PART(msg), mimeparser, EVO3(NULL,) error) == -1) {
 		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 			     _("Unable to parse meeting request mimecontent!"));
 		g_object_unref(msg);
@@ -195,19 +195,18 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 		datawrapper = camel_medium_get_content (CAMEL_MEDIUM (mimepart));
 		type = camel_data_wrapper_get_mime_type (datawrapper);
 		if (!g_ascii_strcasecmp(type, "text/calendar")) {
-			gsize decode_size, size1;
+			gsize decode_size;
 			CamelStream *tmpstream = NULL;
 
-			decode_size = camel_mime_part_get_content_size (mimepart);
 			tmpstream = camel_stream_mem_new ();
-			size1 = camel_data_wrapper_decode_to_stream (datawrapper, tmpstream, error);
-			if(size1 != -1) {
+			decode_size = EVO3_sync(camel_data_wrapper_decode_to_stream) (datawrapper, tmpstream, EVO3(NULL,) error);
+			if (decode_size != -1) {
 				gchar *calstring;
 				gsize size_read;
 
 				calstring = g_malloc (decode_size);
 				camel_stream_reset (tmpstream, error);
-				size_read = camel_stream_read (tmpstream, calstring, decode_size, error);
+				size_read = camel_stream_read (tmpstream, calstring, decode_size, EVO3(NULL,) error);
 
 				//Replace original ramdom UID with AssociatedCalendarItemId (ItemId)
 				if (size_read != -1) {
@@ -227,7 +226,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 				}
 				g_free(calstring);
 			}
-			camel_stream_close (tmpstream, error);
+			camel_stream_close (tmpstream, EVO3(NULL,) error);
 			g_free (type);
 			break;
 		}
@@ -255,10 +254,10 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 		}
 		newstream = camel_stream_fs_new_with_fd (fd);
 		// Dump updated message data to the stream
-		camel_data_wrapper_write_to_stream (CAMEL_DATA_WRAPPER (msg), newstream, error);
+		EVO3_sync(camel_data_wrapper_write_to_stream) (CAMEL_DATA_WRAPPER (msg), newstream, EVO3(NULL,) error);
 		// Flush stream to its backend store
-		camel_stream_flush (newstream, error);
-		camel_stream_close (newstream, error);
+		camel_stream_flush (newstream, EVO3(NULL,) error);
+		camel_stream_close (newstream, EVO3(NULL,) error);
 		g_object_unref(msg);
 		g_free (dir);
 		close (fd);
