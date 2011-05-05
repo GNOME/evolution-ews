@@ -50,7 +50,6 @@ static gint comp_func (gconstpointer a, gconstpointer b);
 
 typedef void (*response_cb) (ESoapParameter *param, struct _EwsNode *enode);
 static void ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data);
-static void ews_operation_response_cb (SoupSession *session, SoupMessage *msg, gpointer data);
 
 static void
 ews_connection_authenticate	(SoupSession *sess, SoupMessage *msg,
@@ -101,16 +100,12 @@ struct _EwsNode {
 	EEwsConnection *cnc;
 	GSimpleAsyncResult *simple;
 	gboolean complete_sync;
-	gboolean multi_value_response;
-
 
 	gint pri;		/* the command priority */
 	response_cb cb;
 
 	GCancellable *cancellable;
 	gulong cancel_handler_id;
-
-	SoupSessionCallback callback;
 };
 
 typedef struct {
@@ -288,7 +283,7 @@ ews_next_request (gpointer _cnc)
 	/* Add to active job queue */
 	cnc->priv->active_job_queue = g_slist_append (cnc->priv->active_job_queue, node);
 
-	soup_session_queue_message (cnc->priv->soup_session, SOUP_MESSAGE (node->msg), node->callback, node);
+	soup_session_queue_message (cnc->priv->soup_session, SOUP_MESSAGE (node->msg), ews_response_cb, node);
 
 	QUEUE_UNLOCK (cnc);
 	return FALSE;
@@ -357,7 +352,7 @@ ews_cancel_request (GCancellable *cancellable,
 }
 
 static void
-ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_cb cb, gint pri, GCancellable *cancellable, GSimpleAsyncResult *simple, gboolean complete_sync,gboolean multi_value_response)
+ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_cb cb, gint pri, GCancellable *cancellable, GSimpleAsyncResult *simple, gboolean complete_sync)
 {
 	EwsNode *node;
 
@@ -368,8 +363,6 @@ ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_c
 	node->cnc = cnc;
 	node->complete_sync = complete_sync;
 	node->simple = simple;
-	node->multi_value_response = multi_value_response;
-	node->callback = ews_response_cb;
 
 	QUEUE_LOCK (cnc);
 	cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, (gpointer *) node, (GCompareFunc) comp_func);
@@ -385,91 +378,7 @@ ews_connection_queue_request (EEwsConnection *cnc, ESoapMessage *msg, response_c
 	ews_trigger_next_request(cnc);
 }
 
-static void
-ews_connection_queue_operation_request (EEwsConnection *cnc, ESoapMessage *msg, EwsOperationPriority priority, GCancellable *cancellable, GSimpleAsyncResult *simple)
-{
-	EwsNode *node;
-
-	node = ews_node_new ();
-	node->msg = msg;
-	node->pri = priority;
-	node->cnc = cnc;
-	node->simple = simple;
-	node->callback = ews_operation_response_cb;
-
-	QUEUE_LOCK (cnc);
-	cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, (gpointer *) node, (GCompareFunc) comp_func);
-	QUEUE_UNLOCK (cnc);
-
-	if (cancellable) {
-		node->cancellable = cancellable;
-		node->cancel_handler_id = g_cancellable_connect	(cancellable,
-								 G_CALLBACK (ews_cancel_request),
-								 (gpointer) node, NULL);
-	}
-
-	ews_trigger_next_request(cnc);
-}
-
 /* Response callbacks */
-static void
-ews_operation_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
-{
-	EwsNode *enode = (EwsNode *) data;
-	ESoapResponse *response = NULL;
-	ESoapParameter *param;
-	GError *error = NULL;
-
-	// check for cancelled state
-	if (enode->cancellable && g_cancellable_is_cancelled (enode->cancellable))
-		goto exit;
-
-	// no "401 Unauthorized"
-	if (msg->status_code == SOUP_STATUS_UNAUTHORIZED) {
-		g_simple_async_result_set_error (enode->simple,
-						 EWS_CONNECTION_ERROR,
-						 EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED,
-						 _("Authentication failed"));
-		goto exit;
-	}
-
-	// got a response
-	response = e_soap_message_parse_response ((ESoapMessage *) msg);
-
-	if (!response) {
-		g_simple_async_result_set_error	(enode->simple,
-						 EWS_CONNECTION_ERROR,
-						 EWS_CONNECTION_ERROR_NORESPONSE,
-						 _("No response"));
-
-		goto exit;
-	}
-
-	// dump response if expected to
-	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1))
-		e_soap_response_dump_response (response, stdout);
-
-	// TODO: validate response using xml schema
-
-	// prepare value returned to callback
-	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
-	if (param)
-		g_simple_async_result_set_op_res_gpointer (enode->simple, g_object_ref (response), g_object_unref);
-	else
-		ews_parse_soap_fault (response, &error);
-
-	if (error) {
-		g_simple_async_result_set_from_error (enode->simple, error);
-		g_clear_error (&error);
-	}
-
-exit:
-	g_simple_async_result_complete_in_idle (enode->simple);
-
-	ews_active_job_done (enode->cnc, enode);
-
-	g_object_unref (response);
-}
 
 static void
 ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
@@ -699,25 +608,6 @@ ews_create_folder_cb (ESoapParameter *soapparam, EwsNode *enode)
 	async_data->items_created = fids;
 }
 
-void
-e_ews_connection_queue_operation (EEwsConnection *cnc,
-						ESoapMessage *msg,
-						GCancellable *cancellable,
-						EwsOperationPriority priority,
-						GAsyncReadyCallback cb,
-						GObject *source,
-						gpointer user_data)
-{
-	GSimpleAsyncResult *simple;
-
-	simple = g_simple_async_result_new (source,
-					    cb,
-					    user_data,
-					    e_ews_connection_queue_operation);
-
-	ews_connection_queue_operation_request (cnc, msg, priority, cancellable, simple);
-}
-
 static void
 e_ews_connection_dispose (GObject *object)
 {
@@ -896,22 +786,6 @@ ews_connection_authenticate	(SoupSession *sess, SoupMessage *msg,
 	}
 
 	g_signal_emit (cnc, signals[AUTHENTICATE], 0, msg, auth, retrying);
-}
-
-const gchar *
-e_ews_connection_get_uri (EEwsConnection *cnc)
-{
-	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
-
-	return cnc->priv->uri;
-}
-
-const gchar *
-e_ews_connection_get_email (EEwsConnection *cnc)
-{
-	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
-
-	return cnc->priv->email;
 }
 
 void
@@ -1407,7 +1281,7 @@ e_ews_connection_sync_folder_items_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, sync_folder_items_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb,FALSE);
+				      cancellable, simple, cb == ews_sync_reply_cb);
 }
 
 gboolean
@@ -1519,7 +1393,7 @@ e_ews_connection_sync_folder_hierarchy_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, sync_hierarchy_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb,FALSE);
+				      cancellable, simple, cb == ews_sync_reply_cb);
 }
 
 
@@ -1669,7 +1543,7 @@ e_ews_connection_get_items_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, get_items_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb,TRUE);
+				      cancellable, simple, cb == ews_sync_reply_cb);
 }
 
 gboolean
@@ -1783,7 +1657,7 @@ e_ews_connection_delete_items_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple,
-				      cb == ews_sync_reply_cb,TRUE);
+				      cb == ews_sync_reply_cb);
 }
 
 gboolean
@@ -1894,7 +1768,7 @@ e_ews_connection_update_items_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, get_items_response_cb, pri, cancellable, simple,
-				      cb == ews_sync_reply_cb,TRUE);
+				      cb == ews_sync_reply_cb);
 }
 
 gboolean
@@ -2011,7 +1885,7 @@ e_ews_connection_create_items_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, get_items_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb,TRUE);
+				      cancellable, simple, cb == ews_sync_reply_cb);
 }
 
 gboolean
@@ -2156,7 +2030,7 @@ e_ews_connection_resolve_names_start 	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, resolve_names_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb,FALSE);
+				      cancellable, simple, cb == ews_sync_reply_cb);
 }
 
 gboolean
@@ -2262,7 +2136,7 @@ e_ews_connection_update_folder_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple,
-				      cb == ews_sync_reply_cb,FALSE);
+				      cb == ews_sync_reply_cb);
 }
 
 gboolean
@@ -2359,7 +2233,7 @@ e_ews_connection_move_folder_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple,
-				      cb == ews_sync_reply_cb,FALSE);
+				      cb == ews_sync_reply_cb);
 }
 
 gboolean
@@ -2460,7 +2334,7 @@ e_ews_connection_create_folder_start	(EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (cnc, msg, ews_create_folder_cb, pri, cancellable, simple, cb == ews_sync_reply_cb,FALSE);
+	ews_connection_queue_request (cnc, msg, ews_create_folder_cb, pri, cancellable, simple, cb == ews_sync_reply_cb);
 }
 
 gboolean
@@ -2572,7 +2446,7 @@ e_ews_connection_move_items_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, get_items_response_cb, pri, cancellable, simple,
-				      cb == ews_sync_reply_cb,TRUE);
+				      cb == ews_sync_reply_cb);
 }
 
 gboolean
@@ -2683,7 +2557,7 @@ e_ews_connection_delete_folder_start	(EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple, cb == ews_sync_reply_cb,FALSE);
+	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple, cb == ews_sync_reply_cb);
 }
 
 
@@ -2806,7 +2680,7 @@ e_ews_connection_get_attachments_start	(EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, get_attachments_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb,TRUE);
+				      cancellable, simple, cb == ews_sync_reply_cb);
 }
 
 gboolean

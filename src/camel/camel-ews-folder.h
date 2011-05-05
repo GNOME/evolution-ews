@@ -30,7 +30,6 @@
 #include <camel/camel.h>
 
 #include "camel-ews-summary.h"
-#include <e-ews-move-items-operation.h>
 
 /* Standard GObject macros */
 #define CAMEL_TYPE_EWS_FOLDER \

@@ -55,11 +55,11 @@ struct _EEwsConnectionClass {
 	void (*authenticate) (EEwsConnection *cnc);
 };
 
-typedef enum {
+enum {
 	EWS_PRIORITY_LOW,
 	EWS_PRIORITY_MEDIUM,
 	EWS_PRIORITY_HIGH
-} EwsOperationPriority;;
+};
 
 typedef void (*EEwsRequestCreationCallback) (ESoapMessage *msg,
 					     gpointer user_data);
@@ -93,21 +93,6 @@ void		e_ews_autodiscover_ws_url	(EEwsAutoDiscoverCallback cb,
 						 gchar *password);
 void		e_ews_connection_set_mailbox	(EEwsConnection *cnc,
 						 const gchar *email);
-
-/* API for queuing messages */
-void		e_ews_connection_queue_operation (EEwsConnection *cnc,
-						ESoapMessage *msg,
-						GCancellable *cancellable,
-						EwsOperationPriority priority,
-						GAsyncReadyCallback cb,
-						GObject *source,
-						gpointer user_data);
-
-/* Expose uri and mail for a new API */
-const gchar * e_ews_connection_get_uri (EEwsConnection *cnc);
-
-const gchar * e_ews_connection_get_email (EEwsConnection *cnc);
-
 /* Sync folder items */
 void		e_ews_connection_sync_folder_items_start
 						(EEwsConnection *cnc,

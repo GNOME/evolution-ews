@@ -1050,6 +1050,7 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 	GError *rerror = NULL;
 	GSList *ids = NULL, *ret_items = NULL;
 	gint i = 0;
+	EVO2(GCancellable *cancellable = NULL);
 
 	dst_full_name = camel_folder_get_full_name (destination);
 	dst_ews_store = (CamelEwsStore *) camel_folder_get_parent_store (destination);
@@ -1066,9 +1067,10 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 		ids = g_slist_append(ids, (gchar *)uids->pdata[i]);
 	}
 
-	ret_items = e_ews_move_items_operation_sync (cnc, dst_id, !delete_originals,ids, &rerror);
-	
-	if (ret_items) {
+	if (e_ews_connection_move_items	(cnc, EWS_PRIORITY_MEDIUM,
+					 dst_id, !delete_originals,
+					 ids, &ret_items,
+					 cancellable, &rerror)) {
 		if (delete_originals) {
 			changes = camel_folder_change_info_new ();
 			for (i=0; i < uids->len; i++) {
@@ -1083,15 +1085,13 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 		ews_refresh_info_sync (source, EVO3(cancellable,) NULL);
 		ews_refresh_info_sync (destination, EVO3(cancellable,) NULL);
 	}
-	else {
-		if (rerror)
-			g_propagate_error (error, rerror);
-	}
-	
 	g_free (dst_id);
+
+	if (rerror)
+		g_propagate_error (error, rerror);
+
 	g_object_unref (cnc);
 	g_slist_free (ids);
-	g_slist_foreach (ret_items, (GFunc) e_ews_free_id, NULL);
 	g_slist_free (ret_items);
 
 	return !rerror;

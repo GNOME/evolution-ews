@@ -551,7 +551,8 @@ ews_create_folder_sync (CamelStore *store,
 	CamelEwsStoreSummary *ews_summary = ews_store->summary;
 	gchar *fid = NULL;
 	gchar *full_name;
-	EwsFolderId *folder_id = NULL;
+	EwsFolderId *folder_id;
+	EVO2(GCancellable *cancellable = NULL;)
 	CamelFolderInfo *fi = NULL;
 
 	
@@ -566,10 +567,11 @@ ews_create_folder_sync (CamelStore *store,
 		}
 	}
 
-	/* Make the call with new API*/
-	if (!e_ews_create_folder_operation_sync (ews_store->priv->cnc,
-						 fid, FALSE, folder_name, &folder_id,
-						 error)) {
+	/* Make the call */
+	if (!e_ews_connection_create_folder (ews_store->priv->cnc,
+					     EWS_PRIORITY_MEDIUM, fid,
+					     FALSE, folder_name, &folder_id,
+					     cancellable, error)) {
 		g_free (fid);
 		return NULL;
 	}
@@ -604,6 +606,7 @@ ews_delete_folder_sync	(CamelStore *store,
 	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
 	CamelEwsStoreSummary *ews_summary = ews_store->summary;
 	gchar *fid;
+	EVO2(GCancellable *cancellable = NULL;)
 	CamelFolderInfo *fi = NULL;
 
 	fid = camel_ews_store_summary_get_folder_id_from_name (ews_summary,
@@ -614,9 +617,10 @@ ews_delete_folder_sync	(CamelStore *store,
 		return FALSE;
 	}
 
-	if (!e_ews_delete_folder_operation_sync (ews_store->priv->cnc,
+	if (!e_ews_connection_delete_folder (ews_store->priv->cnc,
+					     EWS_PRIORITY_MEDIUM,
 					     fid, FALSE, "HardDelete",
-					     error)) {
+					     cancellable, error)) {
 		g_free (fid);
 		return FALSE;
 	}
@@ -667,10 +671,10 @@ ews_rename_folder_sync	(CamelStore *store,
 	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
 	CamelEwsStoreSummary *ews_summary = ews_store->summary;
 	const gchar *old_slash, *new_slash;
+	EVO2(GCancellable *cancellable = NULL;)
 	gchar *fid;
 	gchar *changekey;
 	gboolean res = FALSE;
-	EVO2(GCancellable *cancellable = NULL;)
 
 	if (!strcmp (old_name, new_name))
 		return TRUE;
@@ -763,7 +767,8 @@ ews_rename_folder_sync	(CamelStore *store,
 				goto out;
 			}
 		}
-		if (!e_ews_move_folder_operation_sync (ews_store->priv->cnc, pfid, fid, error)) {
+		if (!e_ews_connection_move_folder (ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
+						   pfid, fid, cancellable, error)) {
 			g_free (pfid);
 			goto out;
 		}

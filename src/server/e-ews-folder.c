@@ -206,20 +206,6 @@ e_ews_folder_new_from_soap_parameter (ESoapParameter *param)
 	return folder;
 }
 
-EwsFolderId *
-e_ews_folder_fid_copy (const EwsFolderId *fid)
-{
-	EwsFolderId *fid_copy;
-
-	if (!fid) return NULL;
-
-	fid_copy = g_new0 (EwsFolderId, 1);
-	fid_copy->id = g_strdup(fid->id);
-	fid_copy->change_key = g_strdup(fid->change_key);
-	fid_copy->is_distinguished_id = fid->is_distinguished_id;
-
-	return fid_copy;
-}
 void
 e_ews_folder_free_fid (EwsFolderId *fid)
 {

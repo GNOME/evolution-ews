@@ -76,7 +76,6 @@ void		e_ews_folder_set_is_writable (EEwsFolder *folder, gboolean writable);
 EwsFolderType	e_ews_folder_get_folder_type (EEwsFolder *folder);
 void 		e_ews_folder_set_folder_type (EEwsFolder *folder, EwsFolderType folder_type);
 
-EwsFolderId *	e_ews_folder_fid_copy (const EwsFolderId *fid);
 void		e_ews_folder_free_fid (EwsFolderId *fid);
 
 G_END_DECLS
