@@ -215,7 +215,7 @@ static void soap_sax_characters (void *_ctxt, const xmlChar *ch, int len)
 	if (priv->steal_fd == -1)
 		xmlSAX2Characters (ctxt, ch, len);
 	else if (!priv->steal_base64) {
-		if (send (priv->steal_fd, (const gchar*)ch, len, 0) != len) {
+		if (write (priv->steal_fd, (const gchar*)ch, len, 0) != len) {
 		write_err:
 			/* Handle error better */
 			g_warning ("Failed to write streaming data to file");
@@ -227,7 +227,7 @@ static void soap_sax_characters (void *_ctxt, const xmlChar *ch, int len)
 		blen = g_base64_decode_step ((const gchar *)ch, len,
 					     bdata, &priv->steal_b64_state,
 					     &priv->steal_b64_save);
-		if (send (priv->steal_fd, (const gchar*)bdata, blen, 0) != blen) {
+		if (write (priv->steal_fd, (const gchar*)bdata, blen, 0) != blen) {
 			g_free (bdata);
 			goto write_err;
 		}
