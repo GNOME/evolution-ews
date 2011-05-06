@@ -27,7 +27,7 @@ m4_define([eds_minimum_version], [2.31.1])
 m4_define([evo_minimum_version], [2.31.1])
 m4_define([glib_minimum_version], [2.16.1])
 m4_define([gconf_minimum_version], [2.0.0])
-m4_define([libsoup_minimum_version], [2.32])
+m4_define([libsoup_minimum_version], [2.30])
 
 
 dnl ***********************************
