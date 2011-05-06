@@ -1733,7 +1733,7 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 					       EDC_ERROR(AuthenticationFailed));
 		} else {
 			e_data_cal_notify_open(priv->opening_cal, priv->opening_ctx,
-					       error);
+					       g_error_copy (error));
 		}
 		priv->opening_ctx = NULL;
 		priv->opening_cal = NULL;
