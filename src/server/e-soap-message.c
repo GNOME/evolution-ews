@@ -6,6 +6,7 @@
 #include <libedataserver/eds-version.h>
 
 #include <string.h>
+#include <stdio.h>
 #include <libsoup/soup.h>
 #include "e-soap-message.h"
 
@@ -63,11 +64,7 @@ finalize (GObject *object)
 	g_free (priv->steal_node);
 	g_free (priv->steal_dir);
 	if (priv->steal_fd != -1)
-#ifdef G_OS_WIN32
-		closesocket (priv->steal_fd);
-#else
 		close (priv->steal_fd);
-#endif
 	G_OBJECT_CLASS (e_soap_message_parent_class)->finalize (object);
 }
 
