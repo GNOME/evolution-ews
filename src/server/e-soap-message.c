@@ -8,6 +8,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <libsoup/soup.h>
+#ifdef G_OS_WIN32
+#include <io.h>
+#endif
 #include "e-soap-message.h"
 
 G_DEFINE_TYPE (ESoapMessage, e_soap_message, SOUP_TYPE_MESSAGE)
