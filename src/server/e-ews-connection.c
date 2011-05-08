@@ -546,6 +546,7 @@ get_items_response_cb (ESoapParameter *subparam, EwsNode *enode)
 	for (node = e_soap_parameter_get_first_child_by_name (subparam, "Items");
 	     node; node = e_soap_parameter_get_next_child_by_name (subparam, "Items")) {
 		item = e_ews_item_new_from_soap_parameter (node);
+		if (!item) continue;
 		async_data->items = g_slist_append (async_data->items, item);
 	}
 }
