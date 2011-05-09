@@ -34,6 +34,67 @@
 #include "e-ews-connection.h"
 #include "e-ews-message.h"
 
+#ifdef G_OS_WIN32
+
+static gchar *
+g_mkdtemp (gchar *tmpl, int mode)
+{
+	static const char letters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	static const int NLETTERS = sizeof (letters) - 1;
+	static int counter = 0;
+	char *XXXXXX;
+	GTimeVal tv;
+	glong value;
+	int count;
+
+	/* find the last occurrence of "XXXXXX" */
+	XXXXXX = g_strrstr (tmpl, "XXXXXX");
+
+	if (!XXXXXX || strncmp (XXXXXX, "XXXXXX", 6)) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	/* Get some more or less random data.  */
+	g_get_current_time (&tv);
+	value = (tv.tv_usec ^ tv.tv_sec) + counter++;
+
+	for (count = 0; count < 100; value += 7777, ++count) {
+		glong v = value;
+
+		/* Fill in the random bits.  */
+		XXXXXX[0] = letters[v % NLETTERS];
+		v /= NLETTERS;
+		XXXXXX[1] = letters[v % NLETTERS];
+		v /= NLETTERS;
+		XXXXXX[2] = letters[v % NLETTERS];
+		v /= NLETTERS;
+		XXXXXX[3] = letters[v % NLETTERS];
+		v /= NLETTERS;
+		XXXXXX[4] = letters[v % NLETTERS];
+		v /= NLETTERS;
+		XXXXXX[5] = letters[v % NLETTERS];
+
+		/* tmpl is in UTF-8 on Windows, thus use g_mkdir() */
+		if (g_mkdir (tmpl, mode) == 0)
+			return tmpl;
+
+		if (errno != EEXIST)
+			/* Any other error will apply also to other names we might
+			 *  try, and there are 2^32 or so of them, so give up now.
+			 */
+			return NULL;
+	}
+
+	/* We got out of the loop because we ran out of combinations to try.  */
+	errno = EEXIST;
+	return NULL;
+}
+
+#define mkdtemp(t) g_mkdtemp(t, 0700)
+
+#endif
+
 G_DEFINE_TYPE (EEwsItem, e_ews_item, G_TYPE_OBJECT)
 
 struct _EEwsItemPrivate {
