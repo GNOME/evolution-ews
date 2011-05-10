@@ -218,14 +218,19 @@ create_folders_table	(EBookBackendSqliteDB *ebsdb,
 	gint ret;
 	/* sync_data points to syncronization data, it could be last_modified time
 	   or a sequence number or some text depending on the backend. 
+	   
 	   parial_content says whether the contents are partially downloaded for
-	   auto-completion or if it has the complete content */
+	   auto-completion or if it has the complete content.
+	   
+	   Have not included a bdata here since the keys table should suffice any
+	   additional need that arises.
+	 */
 	const gchar *stmt = "CREATE TABLE IF NOT EXISTS folders		\
 			     ( folder_id  TEXT PRIMARY KEY,		\
 			       folder_name TEXT,			\
 			       sync_data TEXT,		 		\
 			       populated INTEGER			\
-			       partial_content INTEGER)";
+			       partial_content INTEGER)";	
 	
 	WRITER_LOCK (ebsdb);
 	ret = book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL , NULL);
@@ -253,7 +258,8 @@ create_contacts_table	(EBookBackendSqliteDB *ebsdb,
 {
 	gint ret;
 	gchar *stmt, *tmp;
-		
+	
+	/* bdata is a place holder if any future need arises */	
 	stmt = sqlite3_mprintf ("CREATE TABLE IF NOT EXISTS %Q	 		\
 			     ( uid  TEXT PRIMARY KEY,				\
 			       nickname TEXT, full_name TEXT,			\
@@ -261,7 +267,7 @@ create_contacts_table	(EBookBackendSqliteDB *ebsdb,
 			       email_1 TEXT, email_2 TEXT,			\
 			       email_3 TEXT, email_4 TEXT,			\
 			       partial_content INTEGER,				\
-			       vcard TEXT)", folderid);
+			       vcard TEXT, bdata TEXT)", folderid);
 
 	WRITER_LOCK (ebsdb);
 	ret = book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL , error);
