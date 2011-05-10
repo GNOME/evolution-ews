@@ -68,13 +68,14 @@ EBookBackendSqliteDB *
 		e_book_backend_sqlitedb_new		(const gchar *path,
 							 const gchar *email_id,
 							 const gchar *folderid,
+							 const gchar *folder_name,
 							 GError **error);
-gboolean	e_book_backend_sqlitedb_add_contact	(EBookBackendSqliteDB *ebsdb,
+gboolean	e_book_backend_sqlitedb_add_contacts	(EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,
 							 GSList *contacts,
 							 gboolean partial_content,
 							 GError **error);
-gboolean	e_book_backend_sqlitedb_remove_contact	(EBookBackendSqliteDB *ebsdb,
+gboolean	e_book_backend_sqlitedb_remove_contacts	(EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,
 							 GSList *uids,
 							 GError **error);
@@ -83,7 +84,7 @@ gboolean	e_book_backend_sqlitedb_has_contact	(EBookBackendSqliteDB *ebsdb,
 					 		 const gchar *uid,
 							 gboolean *partial_content,
 							 GError **error);
-const gchar *	e_book_backend_sqlitedb_get_vcard_string
+gchar *		e_book_backend_sqlitedb_get_vcard_string
 							(EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,
 							 const gchar *uid,
@@ -91,6 +92,50 @@ const gchar *	e_book_backend_sqlitedb_get_vcard_string
 GList *		e_book_backend_sqlitedb_search		(EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,
 							 const gchar *sexp,
+							 GError **error);
+gboolean	e_book_backend_sqlitedb_get_is_populated	
+							(EBookBackendSqliteDB *ebsdb,
+							 const gchar *folderid,
+							 GError **error);
+
+gboolean	e_book_backend_sqlitedb_set_is_populated	
+							(EBookBackendSqliteDB *ebsdb,
+							 const gchar *folderid,
+							 gboolean populated,
+							 GError **error);
+gchar *		e_book_backend_sqlitedb_get_sync_data	
+							(EBookBackendSqliteDB *ebsdb,
+							 const gchar *folderid,
+							 GError **error);
+gboolean	e_book_backend_sqlitedb_set_sync_data	
+							(EBookBackendSqliteDB *ebsdb,
+							 const gchar *folderid,
+							 const gchar *sync_data,
+							 GError **error);
+gchar *		e_book_backend_sqlitedb_get_key_value	
+							(EBookBackendSqliteDB *ebsdb,
+							 const gchar *folderid,
+							 const gchar *key,
+							 GError **error);
+gboolean	e_book_backend_sqlitedb_set_key_value	
+							(EBookBackendSqliteDB *ebsdb,
+							 const gchar *folderid,
+							 const gchar *key,
+							 const gchar *value,
+							 GError **error);
+
+gboolean	e_book_backend_sqlitedb_get_has_partial_content	
+							(EBookBackendSqliteDB *ebsdb,
+							 const gchar *folderid,
+							 GError **error);
+gboolean	e_book_backend_sqlitedb_set_has_partial_content	
+							(EBookBackendSqliteDB *ebsdb,
+							 const gchar *folderid,
+							 gboolean partial_content,
+							 GError **error);
+GSList *	e_book_backend_sqlitedb_get_partially_cached_ids
+							(EBookBackendSqliteDB *ebsdb,
+							 const gchar *folderid,
 							 GError **error);
 
 G_END_DECLS
