@@ -21,6 +21,7 @@
 
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
 
 #include <glib/gi18n.h>
 #include <libebook/e-contact.h>
@@ -215,15 +216,30 @@ create_folders_table	(EBookBackendSqliteDB *ebsdb,
 			 GError **error)
 {
 	gint ret;
+	/* sync_data points to syncronization data, it could be last_modified time
+	   or a sequence number or some text depending on the backend. 
+	   parial_content says whether the contents are partially downloaded for
+	   auto-completion or if it has the complete content */
 	const gchar *stmt = "CREATE TABLE IF NOT EXISTS folders		\
 			     ( folder_id  TEXT PRIMARY KEY,		\
 			       folder_name TEXT,			\
 			       sync_data TEXT,		 		\
-			       bdata1 TEXT, bdata2 TEXT,		\
-			       bdata3 TEXT)";
+			       populated INTEGER			\
+			       partial_content INTEGER)";
 	
 	WRITER_LOCK (ebsdb);
 	ret = book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL , NULL);
+	
+	
+	/* Create a child table to store key/value pairs for a folder */
+	stmt = "CREATE TABLE IF NOT EXISTS keys	\
+		( key TEXT, value TEXT,\
+		  folder_id TEXT REFERENCES folders)";
+	ret = book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, NULL);
+
+	stmt = "CREATE INDEX keysindex ON keys(folder_id)";
+	ret = book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, NULL);
+	
 	WRITER_UNLOCK (ebsdb);
 	
 	return ret;
@@ -244,6 +260,7 @@ create_contacts_table	(EBookBackendSqliteDB *ebsdb,
 			       given_name TEXT, family_name TEXT,		\
 			       email_1 TEXT, email_2 TEXT,			\
 			       email_3 TEXT, email_4 TEXT,			\
+			       partial_content INTEGER,				\
 			       vcard TEXT)", folderid);
 
 	WRITER_LOCK (ebsdb);
@@ -354,7 +371,7 @@ exit:
 
 /* Add Contact */
 static gchar *
-insert_stmt_from_contact	(EContact *contact, const gchar *folderid)
+insert_stmt_from_contact	(EContact *contact, gboolean partial_content, const gchar *folderid)
 {
 	gchar *stmt = NULL;
 	gchar *id, *nickname, *full_name;
@@ -376,9 +393,9 @@ insert_stmt_from_contact	(EContact *contact, const gchar *folderid)
 
 
 	stmt = sqlite3_mprintf ("INSERT or REPLACE INTO %Q VALUES (%Q, %s, %s, \
-	       				%s, %s, %s, %s, %s, %s, %s, %s))", folderid, id, nickname,
+	       				%s, %s, %s, %s, %s, %s, %s, %d %s))", folderid, id, nickname,
 					full_name, given_name, surname, file_as, email_1,
-					email_2, email_3, email_4, vcard_str
+					email_2, email_3, email_4, partial_content, vcard_str
 					);
 
 	g_free (id);
@@ -399,6 +416,7 @@ gboolean
 e_book_backend_sqlitedb_add_contact	(EBookBackendSqliteDB *ebsdb,
 					 const gchar *folderid,
 					 GSList *contacts,
+					 gboolean partial_content,
 					 GError **error)
 {
 	GSList *l;
@@ -415,7 +433,7 @@ e_book_backend_sqlitedb_add_contact	(EBookBackendSqliteDB *ebsdb,
 		gchar *stmt;
 		EContact *contact = (EContact *) l->data;
 		
-		stmt = insert_stmt_from_contact (contact, folderid);
+		stmt = insert_stmt_from_contact (contact, partial_content, folderid);
 		book_backend_sql_exec (priv->db, stmt, NULL, NULL, &err);
 		
 		sqlite3_free (stmt);
@@ -496,12 +514,18 @@ e_book_backend_sqlitedb_remove_contact	(EBookBackendSqliteDB *ebsdb,
 	return ret;
 }
 
+struct _contact_info {
+	gboolean exists;
+	gboolean partial_content;
+};
+
 static gint
 contact_found_cb (gpointer ref, gint col, gchar **cols, gchar **name)
 {
-	gboolean *ret = ref;
+	struct _contact_info *cinfo = ref;
 
-	*ret = TRUE;
+	cinfo->exists = TRUE;
+	cinfo->partial_content = cols [0] ? strtoul (cols [0], NULL, 10) : 0;
 
 	return 0;
 }
@@ -510,20 +534,27 @@ gboolean
 e_book_backend_sqlitedb_has_contact	(EBookBackendSqliteDB *ebsdb,
 					 const gchar *folderid,
 					 const gchar *uid,
+					 gboolean *partial_content,
 					 GError **error)
 {
 	gchar *stmt;
-	gboolean ret = FALSE;
+	struct _contact_info cinfo;
+	
+	cinfo.exists = FALSE;
+	cinfo.partial_content = FALSE;
 	
 	READER_LOCK (ebsdb);
 
-	stmt = sqlite3_mprintf ("SELECT uid FROM %Q WHERE uid = %Q", folderid, uid);
-	book_backend_sql_exec (ebsdb->priv->db, stmt, contact_found_cb , &ret, error);
+	stmt = sqlite3_mprintf ("SELECT partial_content FROM %Q WHERE uid = %Q", folderid, uid);
+	book_backend_sql_exec (ebsdb->priv->db, stmt, contact_found_cb , &cinfo, error);
 	sqlite3_free (stmt);
 	
+	if (!error || !*error)
+		*partial_content = cinfo.partial_content;
+
 	READER_UNLOCK (ebsdb);
 
-	return ret;
+	return cinfo.exists;
 }
 
 static gint

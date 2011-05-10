@@ -72,6 +72,7 @@ EBookBackendSqliteDB *
 gboolean	e_book_backend_sqlitedb_add_contact	(EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,
 							 GSList *contacts,
+							 gboolean partial_content,
 							 GError **error);
 gboolean	e_book_backend_sqlitedb_remove_contact	(EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,
@@ -80,6 +81,7 @@ gboolean	e_book_backend_sqlitedb_remove_contact	(EBookBackendSqliteDB *ebsdb,
 gboolean	e_book_backend_sqlitedb_has_contact	(EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,
 					 		 const gchar *uid,
+							 gboolean *partial_content,
 							 GError **error);
 const gchar *	e_book_backend_sqlitedb_get_vcard_string
 							(EBookBackendSqliteDB *ebsdb,
