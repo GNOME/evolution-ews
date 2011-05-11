@@ -69,6 +69,7 @@ EBookBackendSqliteDB *
 							 const gchar *email_id,
 							 const gchar *folderid,
 							 const gchar *folder_name,
+							 gboolean vcard_as_files,
 							 GError **error);
 gboolean	e_book_backend_sqlitedb_add_contacts	(EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,
@@ -134,6 +135,10 @@ gboolean	e_book_backend_sqlitedb_set_has_partial_content
 							 gboolean partial_content,
 							 GError **error);
 GSList *	e_book_backend_sqlitedb_get_partially_cached_ids
+							(EBookBackendSqliteDB *ebsdb,
+							 const gchar *folderid,
+							 GError **error);
+gboolean	e_book_backend_sqlitedb_delete_addressbook	
 							(EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,
 							 GError **error);
