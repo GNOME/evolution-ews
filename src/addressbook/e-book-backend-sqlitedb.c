@@ -1140,6 +1140,7 @@ e_book_backend_sqlitedb_set_is_populated	(EBookBackendSqliteDB *ebsdb,
 	if (err)
 		ret = FALSE;
 
+	g_propagate_error (error, err);
 	return ret;
 }
 
@@ -1187,6 +1188,7 @@ e_book_backend_sqlitedb_set_has_partial_content	(EBookBackendSqliteDB *ebsdb,
 	if (err)
 		ret = FALSE;
 
+	g_propagate_error (error, err);
 	return ret;
 }
 
@@ -1243,6 +1245,7 @@ e_book_backend_sqlitedb_set_sync_data	(EBookBackendSqliteDB *ebsdb,
 	if (err)
 		ret = FALSE;
 
+	g_propagate_error (error, err);
 	return ret;
 }
 
@@ -1283,12 +1286,14 @@ e_book_backend_sqlitedb_set_key_value	(EBookBackendSqliteDB *ebsdb,
 	stmt = sqlite3_mprintf ("INSERT or REPLACE INTO keys (key, value, folder_id)	\
 	     			values (%Q %Q %Q)", key, value, folderid);
 	book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
+	sqlite3_free (stmt);
 
 	book_backend_sqlitedb_end_transaction (ebsdb, &err);
 	WRITER_UNLOCK (ebsdb);
 	if (err)
 		ret = FALSE;
-
+	
+	g_propagate_error (error, err);
 	return ret;
 }
 
@@ -1310,4 +1315,45 @@ e_book_backend_sqlitedb_get_partially_cached_ids	(EBookBackendSqliteDB *ebsdb,
 	READER_UNLOCK (ebsdb);
 
 	return uids;
+}
+
+gboolean	
+e_book_backend_sqlitedb_delete_addressbook	(EBookBackendSqliteDB *ebsdb,
+						 const gchar *folderid,
+						 GError **error)
+{
+	gchar *stmt;
+	GError *err = NULL;
+	gboolean ret = TRUE;
+	
+	WRITER_LOCK (ebsdb);
+	book_backend_sqlitedb_start_transaction (ebsdb, &err);
+	
+	/* delete the contacts table */
+	stmt = sqlite3_mprintf ("DROP TABLE %Q ", folderid);
+	book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
+	sqlite3_free (stmt);
+
+	/* delete the key/value pairs corresponding to this table */	
+	if (!err) {
+		stmt = sqlite3_mprintf ("DELETE FROM keys WHERE folder_id = %Q", folderid);
+		book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
+		sqlite3_free (stmt);
+	}
+
+	/* delete the folder from the folders table */	
+	if (!err) {
+		stmt = sqlite3_mprintf ("DELETE FROM folders WHERE folder_id = %Q", folderid);
+		book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
+		sqlite3_free (stmt);
+	}
+
+	book_backend_sqlitedb_end_transaction (ebsdb, &err);
+	WRITER_UNLOCK (ebsdb);
+	
+	if (err)
+		ret = FALSE;
+
+	g_propagate_error (error, err);
+	return ret;
 }
