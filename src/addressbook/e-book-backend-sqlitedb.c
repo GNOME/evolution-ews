@@ -1320,6 +1320,36 @@ e_book_backend_sqlitedb_get_partially_cached_ids	(EBookBackendSqliteDB *ebsdb,
 	return uids;
 }
 
+
+/**
+ * delete_vcard_files 
+ * @ebsdb: 
+ * @folderid: 
+ *
+ * Caller holds the writer lock.
+ **/
+static void
+delete_vcard_files (EBookBackendSqliteDB *ebsdb, const gchar *folderid, GError **error)
+{
+	gchar *stmt;
+	GSList *uids = NULL, *l;
+	
+	stmt = sqlite3_mprintf ("SELECT uid FROM %Q", folderid);
+	book_backend_sql_exec (ebsdb->priv->db, stmt, addto_slist_cb, &uids, error);
+	sqlite3_free (stmt);
+
+	for (l = uids; l != NULL; l = g_slist_next (l)) {
+		gchar *vcard_file = get_vcard_storage_path (ebsdb, l->data);
+
+		g_unlink (vcard_file);
+
+		g_free (vcard_file);
+		g_free (l->data);
+	}
+	
+	g_slist_free (uids);
+}
+
 gboolean	
 e_book_backend_sqlitedb_delete_addressbook	(EBookBackendSqliteDB *ebsdb,
 						 const gchar *folderid,
@@ -1332,6 +1362,10 @@ e_book_backend_sqlitedb_delete_addressbook	(EBookBackendSqliteDB *ebsdb,
 	WRITER_LOCK (ebsdb);
 	book_backend_sqlitedb_start_transaction (ebsdb, &err);
 	
+	/* delete the vcard files if they were stored as files	*/
+	if (ebsdb->priv->vcard_as_files)
+		delete_vcard_files (ebsdb, folderid, &err);
+
 	/* delete the contacts table */
 	stmt = sqlite3_mprintf ("DROP TABLE %Q ", folderid);
 	book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
