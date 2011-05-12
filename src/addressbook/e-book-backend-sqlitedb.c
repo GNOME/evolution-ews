@@ -377,7 +377,10 @@ book_backend_sqlitedb_load	(EBookBackendSqliteDB *ebsdb,
 	sqlite3_create_function (priv->db, "MATCH", 2, SQLITE_UTF8, NULL, e_book_sqlitedb_match_func, NULL, NULL);
 	
 	WRITER_LOCK (ebsdb);
+
 	book_backend_sql_exec (priv->db, "ATTACH DATABASE ':memory:' AS mem", NULL, NULL, NULL);
+	book_backend_sql_exec (priv->db, "PRAGMA foreign_keys = ON", NULL, NULL, NULL);
+
 	WRITER_UNLOCK (ebsdb);
 
 	create_folders_table (ebsdb, error);
