@@ -354,14 +354,22 @@ typedef struct {
 	EServerMethodContext *context;
 	gchar *itemid;
 	gchar *changekey;
+	gboolean is_occurrence;
+	gint instance_index;
 } EwsDiscardAlarmData;
 
 static void clear_reminder_is_set (ESoapMessage *msg, gpointer user_data)
 {
 	EwsDiscardAlarmData *edad = user_data;
+	EEwsItemChangeType change_type;
 
-	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
-					 edad->itemid, edad->changekey, 0);
+	if (edad->is_occurrence)
+		change_type = E_EWS_ITEMCHANGE_TYPE_OCCURRENCEITEM;
+	else
+		change_type = E_EWS_ITEMCHANGE_TYPE_ITEM;
+
+	e_ews_message_start_item_change (msg, change_type,
+					 edad->itemid, edad->changekey, edad->instance_index);
 
 	e_ews_message_start_set_item_field (msg, "ReminderIsSet","item");
 
@@ -422,6 +430,28 @@ e_cal_backend_ews_discard_alarm (ECalBackend *backend, EDataCal *cal, EServerMet
 	edad->cbews = g_object_ref (cbews);
 	edad->cal = g_object_ref (cal);
 	edad->context = context;
+
+	if (e_cal_component_has_recurrences (comp)) {
+		gint *index;
+
+		edad->is_occurrence = TRUE;
+		e_cal_component_get_sequence (comp, &index);
+
+		if (index != NULL) {
+			/*Microsoft is counting the occurrences starting from 1
+			 where EcalComponent is starting from zerro*/
+			edad->instance_index = *index + 1;
+			e_cal_component_free_sequence (index);
+		} else {
+			edad->is_occurrence = FALSE;
+			edad->instance_index = -1;
+		}
+	}
+	else {
+		edad->is_occurrence = FALSE;
+		edad->instance_index = -1;
+	}
+	
 	ews_cal_component_get_item_id (comp, &edad->itemid, &edad->changekey);
 
 	e_ews_connection_update_items_start (priv->cnc, EWS_PRIORITY_MEDIUM,
