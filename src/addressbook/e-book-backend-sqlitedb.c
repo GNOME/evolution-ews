@@ -25,7 +25,6 @@
 
 #include <glib/gi18n.h>
 #include <glib/gstdio.h>
-#include <libebook/e-contact.h>
 #include <libedataserver/e-sexp.h>
 #include <libedata-book/e-book-backend-sexp.h>
 
@@ -242,12 +241,12 @@ create_folders_table	(EBookBackendSqliteDB *ebsdb,
 	   Have not included a bdata here since the keys table should suffice any
 	   additional need that arises.
 	 */
-	const gchar *stmt = "CREATE TABLE IF NOT EXISTS folders		\
-			     ( folder_id  TEXT PRIMARY KEY,		\
-			       folder_name TEXT,			\
-			       sync_data TEXT,		 		\
-			       is_populated INTEGER			\
-			       partial_content INTEGER)";	
+	const gchar *stmt = "CREATE TABLE IF NOT EXISTS folders"
+			     "( folder_id  TEXT PRIMARY KEY,"
+			     " folder_name TEXT,"
+			     "  sync_data TEXT,"
+			     " is_populated INTEGER,"
+			     "  partial_content INTEGER)";	
 	
 	WRITER_LOCK (ebsdb);
 	book_backend_sqlitedb_start_transaction (ebsdb, &err);
@@ -256,18 +255,19 @@ create_folders_table	(EBookBackendSqliteDB *ebsdb,
 	
 	
 	/* Create a child table to store key/value pairs for a folder */
-	stmt = "CREATE TABLE IF NOT EXISTS keys				\
-		( key TEXT PRIMARY KEY, value TEXT,			\
-		  folder_id TEXT REFERENCES folders)";
+	stmt =	"CREATE TABLE IF NOT EXISTS keys"
+		"( key TEXT PRIMARY KEY, value TEXT,"
+		" folder_id TEXT REFERENCES folders)";
 	book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
 
-	stmt = "CREATE INDEX keysindex ON keys(folder_id)";
+	stmt = "CREATE INDEX IF NOT EXISTS keysindex ON keys(folder_id)";
 	book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
 	
 	book_backend_sqlitedb_end_transaction (ebsdb, &err);
 	WRITER_UNLOCK (ebsdb);
 	
-	g_propagate_error (error, err);
+	if (err)
+		g_propagate_error (error, err);
 	
 	return;
 }
@@ -294,7 +294,9 @@ add_folder_into_db	(EBookBackendSqliteDB *ebsdb,
 	book_backend_sqlitedb_end_transaction (ebsdb, &err);
 	WRITER_UNLOCK (ebsdb);
 
-	g_propagate_error (error, err);
+	if (err)
+		g_propagate_error (error, err);
+
 	return;	
 }
 
@@ -309,14 +311,15 @@ create_contacts_table	(EBookBackendSqliteDB *ebsdb,
 	gchar *stmt, *tmp;
 	
 	/* bdata is a place holder if any future need arises */	
-	stmt = sqlite3_mprintf ("CREATE TABLE IF NOT EXISTS %Q	 		\
-			     ( uid  TEXT PRIMARY KEY,				\
-			       nickname TEXT, full_name TEXT,			\
-			       given_name TEXT, family_name TEXT,		\
-			       email_1 TEXT, email_2 TEXT,			\
-			       email_3 TEXT, email_4 TEXT,			\
-			       partial_content INTEGER,				\
-			       vcard TEXT, bdata TEXT)", folderid);
+	stmt = sqlite3_mprintf ("CREATE TABLE IF NOT EXISTS %Q"
+			     	"( uid  TEXT PRIMARY KEY,"
+			       	" nickname TEXT, full_name TEXT,"
+			       	" given_name TEXT, family_name TEXT,"
+			       	" file_as TEXT,"
+			       	" email_1 TEXT, email_2 TEXT,"
+			       	" email_3 TEXT, email_4 TEXT,"
+			       	" partial_content INTEGER,"
+			       	" vcard TEXT, bdata TEXT)", folderid);
 
 	WRITER_LOCK (ebsdb);
 	ret = book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL , error);
@@ -485,11 +488,11 @@ insert_stmt_from_contact	(EContact *contact,
 	if (store_vcard)
 		vcard_str = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
 
-	stmt = sqlite3_mprintf ("INSERT or REPLACE INTO %Q VALUES (%Q, %s, %s, \
-	       				%s, %s, %s, %s, %s, %s, %s, %d %s))", folderid, id, nickname,
-					full_name, given_name, surname, file_as, email_1,
-					email_2, email_3, email_4, partial_content, vcard_str
-					);
+	stmt = sqlite3_mprintf ("INSERT or REPLACE INTO %Q VALUES (%Q, %Q, %Q, "
+	       			"%Q, %Q, %Q, %Q, %Q, %Q, %Q, %d, %Q, %Q)", folderid, id, nickname,
+				full_name, given_name, surname, file_as, email_1,
+				email_2, email_3, email_4, partial_content, vcard_str, NULL);
+	g_print ("%s \n", stmt);
 
 	g_free (id);
 	g_free (nickname);
@@ -505,6 +508,18 @@ insert_stmt_from_contact	(EContact *contact,
 	return stmt;
 }
 
+/**
+ * e_book_backend_sqlitedb_add_contacts 
+ * @ebsdb: 
+ * @folderid: folder id
+ * @contacts: list of EContacts
+ * @partial_content: contact does not contain full information. Used when
+ * the backend cache's partial information for auto-completion.
+ * @error: 
+ * 
+ * 
+ * Returns: TRUE on success.
+ **/
 gboolean
 e_book_backend_sqlitedb_add_contacts	(EBookBackendSqliteDB *ebsdb,
 					 const gchar *folderid,
@@ -561,7 +576,8 @@ e_book_backend_sqlitedb_add_contacts	(EBookBackendSqliteDB *ebsdb,
 	if (err)
 		ret = FALSE;
 
-	g_propagate_error (error, err);
+	if (err)
+		g_propagate_error (error, err);
 
 	return ret;
 }
@@ -630,7 +646,8 @@ e_book_backend_sqlitedb_remove_contacts	(EBookBackendSqliteDB *ebsdb,
 	if (err)
 		ret = FALSE;
 
-	g_propagate_error (error, err);
+	if (err)
+		g_propagate_error (error, err);
 
 	return ret;
 }
@@ -1131,9 +1148,9 @@ e_book_backend_sqlitedb_set_is_populated	(EBookBackendSqliteDB *ebsdb,
 	WRITER_LOCK (ebsdb);
 	book_backend_sqlitedb_start_transaction (ebsdb, &err);
 	
-	stmt = sqlite3_mprintf ("INSERT or REPLACE INTO folders (folder_id, 		\
-				folder_name, sync_data, is_populated,			\
-				partial_content) SELECT %Q, folder_name, sync_data,	\
+	stmt = sqlite3_mprintf ("INSERT or REPLACE INTO folders (folder_id,\
+				folder_name, sync_data, is_populated,\
+				partial_content) SELECT %Q, folder_name, sync_data,\
 	     			%d, partial_content) WHERE folder_id = %Q)", folderid,
 				populated, folderid);
 	book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
@@ -1143,7 +1160,9 @@ e_book_backend_sqlitedb_set_is_populated	(EBookBackendSqliteDB *ebsdb,
 	if (err)
 		ret = FALSE;
 
-	g_propagate_error (error, err);
+	if (err)
+		g_propagate_error (error, err);
+
 	return ret;
 }
 
@@ -1179,9 +1198,9 @@ e_book_backend_sqlitedb_set_has_partial_content	(EBookBackendSqliteDB *ebsdb,
 	WRITER_LOCK (ebsdb);
 	book_backend_sqlitedb_start_transaction (ebsdb, &err);
 	
-	stmt = sqlite3_mprintf ("INSERT or REPLACE INTO folders (folder_id, 		\
-				folder_name, sync_data, is_populated,			\
-				partial_content) SELECT %Q, folder_name, sync_data,	\
+	stmt = sqlite3_mprintf ("INSERT or REPLACE INTO folders (folder_id,\
+				folder_name, sync_data, is_populated,\
+				partial_content) SELECT %Q, folder_name, sync_data,\
 	     			is_populated, %d) WHERE folder_id = %Q)", folderid,
 				partial_content, folderid);
 	book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
@@ -1191,7 +1210,9 @@ e_book_backend_sqlitedb_set_has_partial_content	(EBookBackendSqliteDB *ebsdb,
 	if (err)
 		ret = FALSE;
 
-	g_propagate_error (error, err);
+	if (err)
+		g_propagate_error (error, err);
+
 	return ret;
 }
 
@@ -1236,9 +1257,9 @@ e_book_backend_sqlitedb_set_sync_data	(EBookBackendSqliteDB *ebsdb,
 	WRITER_LOCK (ebsdb);
 	book_backend_sqlitedb_start_transaction (ebsdb, &err);
 	
-	stmt = sqlite3_mprintf ("INSERT or REPLACE INTO folders (folder_id, 		\
-				folder_name, sync_data, is_populated,			\
-				partial_content) SELECT %Q, folder_name, %Q,		\
+	stmt = sqlite3_mprintf ("INSERT or REPLACE INTO folders (folder_id,\
+				folder_name, sync_data, is_populated,\
+				partial_content) SELECT %Q, folder_name, %Q,\
 	     			is_populated, partial_content) WHERE folder_id = %Q)", folderid,
 				sync_data, folderid);
 	book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
@@ -1248,7 +1269,9 @@ e_book_backend_sqlitedb_set_sync_data	(EBookBackendSqliteDB *ebsdb,
 	if (err)
 		ret = FALSE;
 
-	g_propagate_error (error, err);
+	if (err)
+		g_propagate_error (error, err);
+
 	return ret;
 }
 
@@ -1296,7 +1319,9 @@ e_book_backend_sqlitedb_set_key_value	(EBookBackendSqliteDB *ebsdb,
 	if (err)
 		ret = FALSE;
 	
-	g_propagate_error (error, err);
+	if (err)
+		g_propagate_error (error, err);
+
 	return ret;
 }
 
@@ -1391,6 +1416,8 @@ e_book_backend_sqlitedb_delete_addressbook	(EBookBackendSqliteDB *ebsdb,
 	if (err)
 		ret = FALSE;
 
-	g_propagate_error (error, err);
+	if (err)
+		g_propagate_error (error, err);
+
 	return ret;
 }

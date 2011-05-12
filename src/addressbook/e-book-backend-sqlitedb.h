@@ -25,6 +25,7 @@
 #include <glib.h>
 #include <glib-object.h>
 #include <sqlite3.h>
+#include <libebook/e-contact.h>
 
 /* Standard GObject macros */
 #define E_TYPE_BOOK_BACKEND_SQLITEDB \
