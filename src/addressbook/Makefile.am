@@ -38,4 +38,14 @@ libebookbackendews_la_LIBADD =				\
 libebookbackendews_la_LDFLAGS =		\
 	-module -avoid-version $(NO_UNDEFINED)
 
+noinst_PROGRAMS = e-book-backend-sqlitedb-test
+
+e_book_backend_sqlitedb_test_CPPFLAGS =					\
+	$(libebookbackendews_la_CPPFLAGS)
+e_book_backend_sqlitedb_test_SOURCES = e-book-backend-sqlitedb-test.c	\
+			       e-book-backend-sqlitedb.c		\
+			       e-book-backend-sqlitedb.h
+e_book_backend_sqlitedb_test_LDADD = 					\
+	$(libebookbackendews_la_LIBADD)
+
 -include $(top_srcdir)/git.mk
