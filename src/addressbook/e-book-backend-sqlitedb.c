@@ -394,9 +394,11 @@ book_backend_sqlitedb_load	(EBookBackendSqliteDB *ebsdb,
 static gchar *
 get_vcard_storage_path (EBookBackendSqliteDB *ebsdb, const gchar *uid)
 {
-	gchar *vcard_path;
+	gchar *vcard_path, *filename;
 
-	vcard_path = g_build_filename (ebsdb->priv->path, uid, ".vcf", NULL);
+	filename = g_strconcat (uid, ".vcf", NULL);
+	vcard_path = g_build_filename (ebsdb->priv->path, filename, NULL);
+	g_free (filename);
 
 	return vcard_path;
 }
@@ -443,6 +445,7 @@ e_book_backend_sqlitedb_new	(const gchar *path,
 
 	ebsdb = g_object_new	(E_TYPE_BOOK_BACKEND_SQLITEDB, NULL);
 	ebsdb->priv->path = g_strdup (path);
+	ebsdb->priv->vcard_as_files = vcard_as_files;
 	filename = g_build_filename (path, DB_FILENAME, NULL);
 
 	book_backend_sqlitedb_load (ebsdb, filename, error);
