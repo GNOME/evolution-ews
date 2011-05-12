@@ -495,7 +495,6 @@ insert_stmt_from_contact	(EContact *contact,
 	       			"%Q, %Q, %Q, %Q, %Q, %Q, %Q, %d, %Q, %Q)", folderid, id, nickname,
 				full_name, given_name, surname, file_as, email_1,
 				email_2, email_3, email_4, partial_content, vcard_str, NULL);
-	g_print ("%s \n", stmt);
 
 	g_free (id);
 	g_free (nickname);
@@ -606,9 +605,6 @@ e_book_backend_sqlitedb_remove_contacts	(EBookBackendSqliteDB *ebsdb,
 	g_string_append (str, tmp);
 	sqlite3_free (tmp);
 
-	WRITER_LOCK (ebsdb);
-	book_backend_sqlitedb_start_transaction (ebsdb, &err);
-
 	for (l = uids; l != NULL; l = g_slist_next (l)) {
 		gchar *uid = (gchar *) uids->data;
 		
@@ -623,9 +619,11 @@ e_book_backend_sqlitedb_remove_contacts	(EBookBackendSqliteDB *ebsdb,
 	}
 
 	/* remove the last comma */
-	g_string_truncate (str, 1);
-
+	g_string_truncate (str, str->len - 1);
 	g_string_append (str, ")");
+
+	WRITER_LOCK (ebsdb);
+	book_backend_sqlitedb_start_transaction (ebsdb, &err);
 
 	book_backend_sql_exec (priv->db, str->str, NULL, NULL, &err);
 
@@ -867,22 +865,22 @@ convert_match_exp (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpoi
 			gchar *value=NULL;
 			
 			if (match == MATCH_CONTAINS) {
-				value = g_strdup_printf ("%%%s%%", argv[1]->value.string);
+				value = g_strdup_printf ("'%%%s%%'", argv[1]->value.string);
 			} else if (match == MATCH_ENDS_WITH) {
-				value = g_strdup_printf ("%%%s", argv[1]->value.string);
+				value = g_strdup_printf ("'%%%s'", argv[1]->value.string);
 			} else if (match == MATCH_BEGINS_WITH) {
-				value = g_strdup_printf ("%s%%", argv[1]->value.string);
+				value = g_strdup_printf ("'%s%%'", argv[1]->value.string);
 			} else if (match == MATCH_IS) {
-				value = g_strdup_printf ("%%%s%%", argv[1]->value.string);
+				value = g_strdup_printf ("'%%%s%%'", argv[1]->value.string);
 			}
 			
-			if (!strcmp (value, "full_name")) {
+			if (!strcmp (field, "full_name")) {
 				gchar *full, *sur, *given, *nick;
 
 				full = g_strdup_printf("(full_name IS NOT NULL AND full_name LIKE %s)",value);
 				sur = g_strdup_printf("(family_name IS NOT NULL AND family_name LIKE %s)",value);
 				given = g_strdup_printf("(given_name IS NOT NULL AND given_name LIKE %s)",value);
-				nick = g_strdup_printf("(nick_name IS NOT NULL AND nick_name LIKE %s)",value);
+				nick = g_strdup_printf("(nickname IS NOT NULL AND nickname LIKE %s)",value);
 			
 				str = g_strdup_printf (" %s OR %s OR %s OR %s ", full, sur, given, nick);
 
@@ -890,7 +888,7 @@ convert_match_exp (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpoi
 				g_free (sur);
 				g_free (given);
 				g_free (nick);
-			} else if (!strcmp (value, "email")) {
+			} else if (!strcmp (field, "email")) {
 				gint i;	
 				GString *emails = g_string_new (NULL);
 				
@@ -993,7 +991,7 @@ addto_vcard_list_cb (gpointer ref, gint col, gchar **cols, gchar **name)
 	GList **vcards = ref;
 
 	if (cols [0])
-		*vcards = g_list_prepend (*vcards, cols [0]);
+		*vcards = g_list_prepend (*vcards, g_strdup (cols [0]));
 
 	return 0;
 }
@@ -1004,7 +1002,7 @@ addto_slist_cb (gpointer ref, gint col, gchar **cols, gchar **name)
 	GSList **uids = ref;
 
 	if (cols [0])
-		*uids = g_slist_prepend (*uids, cols [0]);
+		*uids = g_slist_prepend (*uids, g_strdup (cols [0]));
 
 	return 0;
 }
@@ -1138,6 +1136,7 @@ e_book_backend_sqlitedb_get_is_populated	(EBookBackendSqliteDB *ebsdb,
 
 }
 
+
 gboolean	
 e_book_backend_sqlitedb_set_is_populated	(EBookBackendSqliteDB *ebsdb,
 						 const gchar *folderid,
@@ -1151,12 +1150,10 @@ e_book_backend_sqlitedb_set_is_populated	(EBookBackendSqliteDB *ebsdb,
 	WRITER_LOCK (ebsdb);
 	book_backend_sqlitedb_start_transaction (ebsdb, &err);
 	
-	stmt = sqlite3_mprintf ("INSERT or REPLACE INTO folders (folder_id,\
-				folder_name, sync_data, is_populated,\
-				partial_content) SELECT %Q, folder_name, sync_data,\
-	     			%d, partial_content) WHERE folder_id = %Q)", folderid,
+	stmt = sqlite3_mprintf ("UPDATE folders SET is_populated = %d WHERE folder_id = %Q",
 				populated, folderid);
 	book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
+	sqlite3_free (stmt);
 
 	book_backend_sqlitedb_end_transaction (ebsdb, &err);
 	WRITER_UNLOCK (ebsdb);
@@ -1201,12 +1198,10 @@ e_book_backend_sqlitedb_set_has_partial_content	(EBookBackendSqliteDB *ebsdb,
 	WRITER_LOCK (ebsdb);
 	book_backend_sqlitedb_start_transaction (ebsdb, &err);
 	
-	stmt = sqlite3_mprintf ("INSERT or REPLACE INTO folders (folder_id,\
-				folder_name, sync_data, is_populated,\
-				partial_content) SELECT %Q, folder_name, sync_data,\
-	     			is_populated, %d) WHERE folder_id = %Q)", folderid,
+	stmt = sqlite3_mprintf ("UPDATE folders SET partial_content = %d WHERE folder_id = %Q",
 				partial_content, folderid);
 	book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
+	sqlite3_free (stmt);
 
 	book_backend_sqlitedb_end_transaction (ebsdb, &err);
 	WRITER_UNLOCK (ebsdb);
@@ -1260,12 +1255,10 @@ e_book_backend_sqlitedb_set_sync_data	(EBookBackendSqliteDB *ebsdb,
 	WRITER_LOCK (ebsdb);
 	book_backend_sqlitedb_start_transaction (ebsdb, &err);
 	
-	stmt = sqlite3_mprintf ("INSERT or REPLACE INTO folders (folder_id,\
-				folder_name, sync_data, is_populated,\
-				partial_content) SELECT %Q, folder_name, %Q,\
-	     			is_populated, partial_content) WHERE folder_id = %Q)", folderid,
+	stmt = sqlite3_mprintf ("UPDATE folders SET sync_data = %Q WHERE folder_id = %Q",
 				sync_data, folderid);
 	book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
+	sqlite3_free (stmt);
 
 	book_backend_sqlitedb_end_transaction (ebsdb, &err);
 	WRITER_UNLOCK (ebsdb);
@@ -1313,7 +1306,7 @@ e_book_backend_sqlitedb_set_key_value	(EBookBackendSqliteDB *ebsdb,
 	book_backend_sqlitedb_start_transaction (ebsdb, &err);
 	
 	stmt = sqlite3_mprintf ("INSERT or REPLACE INTO keys (key, value, folder_id)	\
-	     			values (%Q %Q %Q)", key, value, folderid);
+	     			values (%Q, %Q, %Q)", key, value, folderid);
 	book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
 	sqlite3_free (stmt);
 

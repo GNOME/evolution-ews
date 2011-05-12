@@ -22,6 +22,7 @@
 #include <config.h>
 #include <glib.h>
 #include <glib-object.h>
+#include <libebook/e-book-query.h>
 #include "e-book-backend-sqlitedb.h"
 
 static GMainLoop *main_loop;
@@ -87,10 +88,27 @@ add_contacts (EBookBackendSqliteDB *ebsdb)
 	g_object_unref (con);
 }
 
+static void
+search_db (EBookBackendSqliteDB *ebsdb, const gchar *type, const gchar *sexp)
+{
+	GList *vcards;
+	
+	g_print ("%s - query: %s \n", type, sexp);
+	op = type;
+	vcards = e_book_backend_sqlitedb_search (ebsdb, folderid, sexp, &error);
+	if (error)
+		return;
+	g_print ("Result: %s \n", (gchar *) vcards->data);
+}
+
 static gboolean
 start_tests (gpointer data)
 {
 	EBookBackendSqliteDB *ebsdb;
+	gboolean populated = FALSE;
+	gchar *vcard_str = NULL, *sexp;
+	EBookQuery *q;
+	GSList *uids = NULL;
 
 	g_print ("Creating the sqlitedb \n");
 	op = "create sqlitedb";
@@ -101,6 +119,63 @@ start_tests (gpointer data)
 		goto exit;
 
 	add_contacts (ebsdb);
+	if (error)
+		goto exit;
+
+	g_print ("Getting is_populated \n");
+	op = "set is_populated";
+	e_book_backend_sqlitedb_set_is_populated (ebsdb, folderid, TRUE, &error);
+	if (error)
+		goto exit;
+	
+	g_print ("Setting is_populated \n");
+	op = "set is_populated";
+	populated = e_book_backend_sqlitedb_get_is_populated (ebsdb, folderid, &error);
+	if (error)
+		goto exit;
+	g_print ("Populated: %d \n", populated);
+	
+	g_print ("Setting key value \n");
+	op = "set key/value";
+	e_book_backend_sqlitedb_set_key_value (ebsdb, folderid, "customkey", "stored", &error);
+	if (error)
+		goto exit;
+	
+	g_print ("Get Vcard string \n");
+	op = "get vcard string";
+	vcard_str = e_book_backend_sqlitedb_get_vcard_string (ebsdb, folderid, uid, &error);
+	if (error)
+		goto exit;
+	g_print ("VCard: %s \n", vcard_str);
+	g_free (vcard_str);
+
+	q = e_book_query_field_test (E_CONTACT_FULL_NAME, E_BOOK_QUERY_CONTAINS, "test");
+	sexp = e_book_query_to_string (q);
+	search_db (ebsdb, "summary query", sexp);
+	e_book_query_unref (q);
+	g_free (sexp);
+	if (error)
+		goto exit;
+	
+	q = e_book_query_any_field_contains ("word");
+	sexp = e_book_query_to_string (q);
+	search_db (ebsdb, "full_search query", sexp);
+	e_book_query_unref (q);
+	g_free (sexp);
+	if (error)
+		goto exit;
+	
+	g_print ("Delete contact \n");
+	op = "delete contact";
+	uids = g_slist_append (uids, (gchar *) uid);
+	e_book_backend_sqlitedb_remove_contacts (ebsdb, folderid, uids, &error);
+	g_slist_free (uids);
+	if (error)
+		goto exit;
+
+	g_print ("Delete addressbook \n");
+	op = "delete addressbook";
+	e_book_backend_sqlitedb_delete_addressbook (ebsdb, folderid, &error);
 	
 exit:
 	g_object_unref (ebsdb);
