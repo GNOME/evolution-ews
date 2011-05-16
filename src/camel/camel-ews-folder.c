@@ -200,7 +200,11 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 			tmpstream = camel_stream_mem_new ();
 			decode_size = EVO3_sync (camel_data_wrapper_decode_to_stream) (datawrapper,
 								tmpstream, EVO3(NULL,) error);
-			if (decode_size != -1) {
+			if (decode_size == -1) {
+				g_object_unref (tmpstream);
+				g_free (type);
+				goto exit_msg;
+			} else {
 				gchar *calstring;
 				gsize size_read;
 
@@ -208,9 +212,13 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 				camel_stream_reset (tmpstream, error);
 				size_read = camel_stream_read (tmpstream, calstring,
 						decode_size, EVO3(NULL,) error);
-
-				//Replace original ramdom UID with AssociatedCalendarItemId (ItemId)
-				if (size_read != -1) {
+				if (size_read == -1) {
+					g_free (calstring);
+					g_free (type);
+					g_object_unref (tmpstream);
+					goto exit_msg;
+				} else {
+					/* Replace original random UID with AssociatedCalendarItemId (ItemId) */
 					icalcomponent *icalcomp;
 					gchar *calstring_new;
 
@@ -222,18 +230,23 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 								     (const gchar*)calstring_new, strlen(calstring_new),
 								     (const gchar*)type);
 
+					g_free (type);
 					g_free (calstring_new);
 					icalcomponent_free (icalcomp);
 				}
 				g_free (calstring);
 			}
-			camel_stream_close (tmpstream, EVO3(NULL,) error);
-			g_free (type);
+			if (camel_stream_close (tmpstream, EVO3(NULL,) error) == -1) {
+				g_object_unref (tmpstream);
+				goto exit_msg;
+			}
+			g_object_unref (tmpstream);
 			break;
 		}
+		g_free (type);
 	}
 
-	if (!(*error)) {
+	if (1) {
 		CamelStream  *newstream = NULL;
 		gchar *dir;
 		const gchar *temp;
