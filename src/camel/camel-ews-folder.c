@@ -157,26 +157,27 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 	fd_old = open (mime_fname, O_RDONLY);
 	if (fd_old == -1) {
 		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			     _("Unable to open mimecontent temparory file!"));
+			     _("Unable to open mimecontent temporary file!"));
 		return NULL;
 	}
 
-	mimeparser = camel_mime_parser_new();
-	if(camel_mime_parser_init_with_fd (mimeparser, fd_old) == -1) {
+	mimeparser = camel_mime_parser_new ();
+	if (camel_mime_parser_init_with_fd (mimeparser, fd_old) == -1) {
 		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 			     _("Unable to generate parser from mimecontent!"));
 		goto exit;
 	}
 
-	msg = camel_mime_message_new();
-	if (EVO3_sync(camel_mime_part_construct_from_parser)(CAMEL_MIME_PART(msg), mimeparser, EVO3(NULL,) error) == -1) {
+	msg = camel_mime_message_new ();
+	if (EVO3_sync(camel_mime_part_construct_from_parser) (CAMEL_MIME_PART(msg),
+						mimeparser, EVO3(NULL,) error) == -1) {
 		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 			     _("Unable to parse meeting request mimecontent!"));
 		g_object_unref(msg);
 		goto exit;
 	}
 
-	dw = camel_medium_get_content(CAMEL_MEDIUM (msg));
+	dw = camel_medium_get_content (CAMEL_MEDIUM (msg));
 	partnumber = camel_multipart_get_number (CAMEL_MULTIPART(dw));
 	for (i=0; i< partnumber; i++) {
 		gchar *type;
@@ -199,21 +200,23 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 			CamelStream *tmpstream = NULL;
 
 			tmpstream = camel_stream_mem_new ();
-			decode_size = EVO3_sync(camel_data_wrapper_decode_to_stream) (datawrapper, tmpstream, EVO3(NULL,) error);
+			decode_size = EVO3_sync (camel_data_wrapper_decode_to_stream) (datawrapper,
+								tmpstream, EVO3(NULL,) error);
 			if (decode_size != -1) {
 				gchar *calstring;
 				gsize size_read;
 
 				calstring = g_malloc (decode_size);
 				camel_stream_reset (tmpstream, error);
-				size_read = camel_stream_read (tmpstream, calstring, decode_size, EVO3(NULL,) error);
+				size_read = camel_stream_read (tmpstream, calstring,
+						decode_size, EVO3(NULL,) error);
 
 				//Replace original ramdom UID with AssociatedCalendarItemId (ItemId)
 				if (size_read != -1) {
 					icalcomponent *icalcomp;
 					gchar *calstring_new;
 
-					icalcomp = icalparser_parse_string((const gchar*)calstring);
+					icalcomp = icalparser_parse_string ((const gchar*)calstring);
 					icalcomponent_set_uid (icalcomp, (gchar *) id);
 					calstring_new = icalcomponent_as_ical_string_r (icalcomp);
 
@@ -224,7 +227,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 					g_free (calstring_new);
 					icalcomponent_free (icalcomp);
 				}
-				g_free(calstring);
+				g_free (calstring);
 			}
 			camel_stream_close (tmpstream, EVO3(NULL,) error);
 			g_free (type);
@@ -258,7 +261,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 		// Flush stream to its backend store
 		camel_stream_flush (newstream, EVO3(NULL,) error);
 		camel_stream_close (newstream, EVO3(NULL,) error);
-		g_object_unref(msg);
+		g_object_unref (msg);
 		g_free (dir);
 		close (fd);
 		fd = -1;
@@ -267,7 +270,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 	}
 
 exit:
-	g_object_unref(mimeparser);
+	g_object_unref (mimeparser);
 	close (fd_old);
 	fd_old = -1;
 
