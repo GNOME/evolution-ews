@@ -165,7 +165,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 	if (camel_mime_parser_init_with_fd (mimeparser, fd_old) == -1) {
 		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 			     _("Unable to generate parser from mimecontent!"));
-		goto exit;
+		goto exit_parser;
 	}
 
 	msg = camel_mime_message_new ();
@@ -173,8 +173,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 						mimeparser, EVO3(NULL,) error) == -1) {
 		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 			     _("Unable to parse meeting request mimecontent!"));
-		g_object_unref(msg);
-		goto exit;
+		goto exit_msg;
 	}
 
 	dw = camel_medium_get_content (CAMEL_MEDIUM (msg));
@@ -189,8 +188,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 		if (!mimepart) {
 			g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 				     _("Unable to get mimepart!"));
-			g_object_unref (msg);
-			goto exit;
+			goto exit_msg;
 		}
 
 		datawrapper = camel_medium_get_content (CAMEL_MEDIUM (mimepart));
@@ -252,8 +250,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 			g_free (dir);
 			g_free (mime_fname_new);
 			mime_fname_new = NULL;
-			g_object_unref (msg);
-			goto exit;
+			goto exit_msg;
 		}
 		newstream = camel_stream_fs_new_with_fd (fd);
 		// Dump updated message data to the stream
@@ -261,15 +258,15 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 		// Flush stream to its backend store
 		camel_stream_flush (newstream, EVO3(NULL,) error);
 		camel_stream_close (newstream, EVO3(NULL,) error);
-		g_object_unref (msg);
 		g_free (dir);
 		close (fd);
 		fd = -1;
 		// remove original file
 		g_remove (mime_fname);
 	}
-
-exit:
+ exit_msg:
+	g_object_unref (msg);
+ exit_parser:
 	g_object_unref (mimeparser);
 	close (fd_old);
 	fd_old = -1;
