@@ -22,6 +22,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include <glib/gi18n.h>
 #include <glib/gstdio.h>
@@ -462,6 +463,11 @@ e_book_backend_sqlitedb_new	(const gchar *path,
 	ebsdb = g_object_new	(E_TYPE_BOOK_BACKEND_SQLITEDB, NULL);
 	ebsdb->priv->path = g_strdup (path);
 	ebsdb->priv->vcard_as_files = vcard_as_files;
+	if (g_mkdir_with_parents (path, 0777) < 0) {
+		g_set_error (error, E_BOOK_SDB_ERROR,
+				0, "Can not make parent directory: errno %d", errno);
+		return NULL;
+	}
 	filename = g_build_filename (path, DB_FILENAME, NULL);
 
 	book_backend_sqlitedb_load (ebsdb, filename, &err);
