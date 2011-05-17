@@ -26,11 +26,17 @@
 #include <ctype.h>
 #include <glib.h>
 #include <glib/gprintf.h>
+#include "utils.h"
+#include <e-ews-connection.h>
 #include <e-ews-folder.h>
 #include <e-ews-item.h>
 
 static void op_test_get_item ();
 void op_tests_run ();
+
+GSList *ids;
+EwsFolderId *folder_id;
+GMainLoop *main_loop;
 
 static void
 folder_items_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
@@ -39,10 +45,11 @@ folder_items_ready_callback (GObject *object, GAsyncResult *res, gpointer user_d
 	GSList *items_created = NULL, *items_updated = NULL;
 	GSList *items_deleted = NULL, *l;
 	gchar *sync_state = NULL;
+	gboolean last_in_range = FALSE;
 	GError *error = NULL;
 
 	/* Only for test program */
-	e_ews_connection_sync_folder_items_finish	(cnc, res, &sync_state,
+	e_ews_connection_sync_folder_items_finish	(cnc, res, &sync_state, &last_in_range,
 							 &items_created, &items_updated,
 							 &items_deleted, &error);
 
@@ -93,8 +100,8 @@ op_test_sync_folder_items ()
 	g_assert (cnc != NULL);
 
 	e_ews_connection_sync_folder_items_start	(cnc, EWS_PRIORITY_MEDIUM,
-							 NULL, inbox_folder_id->id,
-							 "Default", NULL,
+							 NULL, folder_id->id,
+							 "Default", "",
 							 500, folder_items_ready_callback,
 							 cancellable, NULL);
 }
@@ -105,10 +112,11 @@ folder_hierarchy_ready_callback (GObject *object, GAsyncResult *res, gpointer us
 	GSList *folders_created = NULL, *folders_updated = NULL;
 	GSList *folders_deleted = NULL, *l;
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
+	gboolean last_in_range = FALSE;
 	gchar *sync_state = NULL;
 	GError *error = NULL;
 
-	e_ews_connection_sync_folder_hierarchy_finish	(cnc, res, &sync_state,
+	e_ews_connection_sync_folder_hierarchy_finish	(cnc, res, &sync_state, &last_in_range,
 							 &folders_created, &folders_updated,
 							 &folders_deleted, &error);
 
@@ -125,10 +133,10 @@ folder_hierarchy_ready_callback (GObject *object, GAsyncResult *res, gpointer us
 		const EwsFolderId *fid = e_ews_folder_get_id (folder);
 
 		g_print ("Name: %s \n Id: %s  \n ChangeKey: %s \n\n", e_ews_folder_get_name (folder), fid->id, fid->change_key);
-		if (!strcmp (e_ews_folder_get_name (folder), "Inbox")) {
-			inbox_folder_id = g_new0 (EwsFolderId, 1);
-			inbox_folder_id->id = g_strdup (fid->id);
-			inbox_folder_id->change_key = g_strdup (fid->change_key);
+		if (!strcmp (e_ews_folder_get_name (folder), "Contacts")) {
+			folder_id = g_new0 (EwsFolderId, 1);
+			folder_id->id = g_strdup (fid->id);
+			folder_id->change_key = g_strdup (fid->change_key);
 		}
 		g_object_unref (folder);
 	}
@@ -158,19 +166,13 @@ op_test_sync_folder_hierarchy ()
 	g_assert_cmpstr (password, !=, NULL);
 	g_assert_cmpstr (uri, !=, NULL);
 
-	cnc = e_ews_connection_new (uri, username, password, NULL);
+	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
 
 	e_ews_connection_sync_folder_hierarchy_start	(cnc, EWS_PRIORITY_MEDIUM,
 							 NULL, folder_hierarchy_ready_callback,
 							 cancellable, NULL);
 
-	/* FIXME Have a separate test for cancel without disrupting sync_hierarchy test
-	thread = g_thread_create ((GThreadFunc) cancel_sync_folder_hierarchy, cancellable, FALSE, &error);
-	if (error || !thread) {
-		g_warning ("%s: Creation of the thread failed with error: %s", G_STRFUNC, error->message);
-		g_error_free (error);
-	} */
 }
 
 static void
@@ -187,16 +189,16 @@ get_item_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
 		return;
 	}
 
-	g_print ("\nMime content of first item is:\n%s\n", e_ews_item_get_mime_content (items->data));
-
 	for (l = items; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = l->data;
+		const EwsId *id = e_ews_item_get_id (item);
 
-		g_print ("GetItem: Subject is %s \n", e_ews_item_get_subject (item));
+		g_print ("GetItem: Id is %s \n", id->id);
 	}
 
 	g_slist_foreach (items, (GFunc) g_object_unref, NULL);
 	g_slist_free (items);
+	g_main_loop_quit (main_loop);
 }
 
 static void
@@ -215,40 +217,27 @@ op_test_get_item ()
 	g_assert_cmpstr (password, !=, NULL);
 	g_assert_cmpstr (uri, !=, NULL);
 
-	cnc = e_ews_connection_new (uri, username, password, NULL);
+	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
 
 	ids = g_slist_reverse (ids);
 	e_ews_connection_get_items_start		(cnc, EWS_PRIORITY_MEDIUM,
-						 g_slist_last (ids), "IdOnly", "item:Subject item:DateTimeReceived item:DateTimeSent item:DateTimeCreated item:Size item:HasAttachments message:InternetMessageId message:From message:Sender message:ToRecipients message:CcRecipients message:BccRecipients message:IsRead item:MimeContent item:Importance", FALSE,
-						 get_item_ready_callback,
+						 g_slist_last (ids), "IdOnly", NULL, FALSE, NULL,
+						 get_item_ready_callback, NULL, NULL,
 						 cancellable, NULL);
 
 	g_slist_foreach (ids, (GFunc) g_free, NULL);
 	g_slist_free (ids);
 }
 
-static void
-op_test_find_item ()
+static gboolean
+idle_cb (gpointer data)
 {
-	const gchar *username;
-	const gchar *password;
-	const gchar *uri;
-	EEwsConnection *cnc;
-	GCancellable *cancellable;
 
-	cancellable = g_cancellable_new ();
+	g_print ("\nTesting the sync_hierarchy... \n");
+	op_test_sync_folder_hierarchy ();
 
-	util_get_login_info_from_env (&username, &password, &uri);
-	g_assert_cmpstr (username, !=, NULL);
-	g_assert_cmpstr (password, !=, NULL);
-	g_assert_cmpstr (uri, !=, NULL);
-
-	cnc = e_ews_connection_new (uri, username, password, NULL);
-	g_assert (cnc != NULL);
-
-	/* FIXME api fix
-	e_ews_connection_find_item (cnc, "contacts", cancellable); */
+	return FALSE;
 }
 
 void op_tests_run ()
@@ -265,17 +254,3 @@ void op_tests_run ()
 	/* terminate */
 	g_main_loop_unref (main_loop);
 }
-
-static gboolean
-idle_cb (gpointer data)
-{
-
-	g_print ("\nTesting the sync_hierarchy... \n");
-	op_test_sync_folder_hierarchy ();
-
-	g_print ("\nTesting find item... \n");
-	op_test_find_item ();
-
-	return FALSE;
-}
-

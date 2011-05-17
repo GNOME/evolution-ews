@@ -36,7 +36,7 @@ void autodiscovery_tests_run ();
 
 EwsFolderId *inbox_folder_id = NULL;
 GSList *ids = NULL;
-
+GMainLoop *main_loop;
 
 /*Test cases*/
 
@@ -60,15 +60,41 @@ con_test_create_new_connection ()
 	//g_signal_connect (cnc, "shutdown", G_CALLBACK (ews_conn_shutdown), NULL);
 }
 
+struct _cb_data {
+	gboolean positive_case;
+	gboolean quit;
+};
+
+static void
+autodiscover_cb (gchar *uri, gpointer user_data, GError *error)
+{
+	struct _cb_data *data = (struct _cb_data *) user_data;
+	gboolean quit = data->quit;
+
+	if (data->positive_case) {
+		g_assert_cmpstr (uri, !=, NULL);
+	} else
+		g_assert_cmpstr (uri, ==, NULL);
+	
+	if (error)
+		g_print ("Error code:%d desc: %s \n", error->code, error->message);
+	
+	g_clear_error (&error);
+	g_free (data);
+	
+	if (quit)
+		g_main_loop_quit (main_loop);
+}
+
 static void
 con_test_autodiscover()
 {
 	const gchar *username;
 	const gchar *password;
+	const gchar *email;
+//	gchar *wrong_username, *domain;
 	const gchar *uri;
-	const gchar *email, *domain;
-	gchar *wrong_username;
-	GError *error = NULL;
+	struct _cb_data *user_data;
 
 	/* FIXME username not needed here */
 	util_get_login_info_from_env (&username, &password, &uri);
@@ -81,50 +107,54 @@ con_test_autodiscover()
 	g_print("%s %s : email : %s \n", G_STRLOC, G_STRFUNC, email);
 
 	g_print ("Testing postive case... \n");
-	uri = e_ews_autodiscover_ws_url (email, password, &error);
-	if (error) {
-		g_print ("Error code:%d desc: %s \n", error->code, error->message);
-		g_clear_error (&error);
-	}
-	g_assert_cmpstr (uri, !=, NULL);
+	user_data = g_new0 (struct _cb_data, 1);
+	user_data->positive_case = TRUE;
+	user_data->quit = TRUE;
+	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, email, password);
 
 	g_print ("Testing wrong password... \n");
-	uri = e_ews_autodiscover_ws_url (email, "wrongpassword", &error);
-	g_print ("Error code:%d desc: %s \n", error->code, error->message);
-	g_clear_error (&error);
-	g_assert_cmpstr (uri, ==, NULL);
+	user_data = g_new0 (struct _cb_data, 1);
+	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, email, "wrongpassword");
 
 	g_print ("Testing email without domain ... \n");
-	uri = e_ews_autodiscover_ws_url ("wronguseremail", password, &error);
-	g_print ("Error code:%d desc: %s \n", error->code, error->message);
-	g_clear_error (&error);
-	g_assert_cmpstr (uri, ==, NULL);
+	user_data = g_new0 (struct _cb_data, 1);
+	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, "wronguseremail", password);
 
 	g_print ("Testing wrong email address and password... \n");
-	uri = e_ews_autodiscover_ws_url ("godknows@donknow.com", "wrongpassword", &error);
-	g_print ("Error code:%d desc: %s \n", error->code, error->message);
-	g_clear_error (&error);
-	g_assert_cmpstr (uri, ==, NULL);
+	user_data = g_new0 (struct _cb_data, 1);
+	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, "godknows@donknow.com", "wrongpassword");
 
 	g_print ("Testing wrong user name ... \n");
 	domain = g_strstr_len (email, -1, "@");
 	wrong_username = g_strconcat ("godknows", domain, NULL);
-	uri = e_ews_autodiscover_ws_url (wrong_username, password, &error);
-	g_print ("Error code:%d desc: %s \n", error->code, error->message);
-	g_clear_error (&error);
+	user_data = g_new0 (struct _cb_data, 1);
+	user_data->quit = TRUE;
+	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, wrong_username, password);
 	g_free (wrong_username);
-	g_assert_cmpstr (uri, ==, NULL);
+}
+
+static gboolean
+idle_cb (gpointer data)
+{
+	g_printf ("Test Connections");
+	con_test_create_new_connection ();
+
+	g_printf ("Testing Autodiscovery.... \n");
+	con_test_autodiscover();
+	
+	return FALSE;
 }
 
 /*Run tests*/
 void connection_tests_run ()
 {
-	g_printf ("Testing Connection..... \n");
-	con_test_create_new_connection ();
-}
+	g_type_init ();
+	g_thread_init (NULL);
 
-void autodiscovery_tests_run ()
-{
-	g_printf ("Testing Autodiscovery.... \n");
-	con_test_autodiscover();
+	main_loop = g_main_loop_new (NULL, TRUE);
+	g_idle_add ((GSourceFunc) idle_cb, NULL);
+	g_main_loop_run (main_loop);
+
+	/* terminate */
+	g_main_loop_unref (main_loop);
 }

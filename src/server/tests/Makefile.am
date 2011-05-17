@@ -17,7 +17,8 @@ TESTS = testews
 check_PROGRAMS = testews
 testews_SOURCES = 				\
 		utils.c 			\
-		test-connection.c 		\
+		test-connection.c		\
+		test-syncfolder.c		\
 		test-cuditem.c 			\
 		test-getattachment.c 		\
 		test-autocompletion.c		\

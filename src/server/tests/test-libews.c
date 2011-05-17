@@ -8,7 +8,6 @@
 extern EwsFolderId *folder_id;
 
 void connection_tests_run ();
-void autodiscovery_tests_run ();
 void op_tests_run ();
 void cuditem_tests_run ();
 void autocompletion_tests_run ();
@@ -35,8 +34,9 @@ int main (int argc, char *argv[])
 
 	/*Register tests*/
 	g_test_add_func ("/libews/connections", connection_tests_run);
-	g_test_add_func ("/libews/autodiscovery", autodiscovery_tests_run);
 	g_test_add_func ("/libews/autocompletion", autocompletion_tests_run);
+
+	g_test_add_func ("/libews/syncfolder", op_tests_run);
 
 	/* delete folder uses the data from create_folder test. */
 	g_test_add_func ("/libews/createfolder", createfolder_tests_run);
