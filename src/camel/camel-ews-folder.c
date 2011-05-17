@@ -194,52 +194,34 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 		datawrapper = camel_medium_get_content (CAMEL_MEDIUM (mimepart));
 		type = camel_data_wrapper_get_mime_type (datawrapper);
 		if (!g_ascii_strcasecmp(type, "text/calendar")) {
-			gsize decode_size;
 			CamelStream *tmpstream = NULL;
+			GByteArray *ba;
+			icalcomponent *icalcomp;
+			gchar *calstring_new;
 
 			tmpstream = camel_stream_mem_new ();
-			decode_size = EVO3_sync (camel_data_wrapper_decode_to_stream) (datawrapper,
-								tmpstream, EVO3(NULL,) error);
-			if (decode_size == -1) {
+			if (EVO3_sync (camel_data_wrapper_decode_to_stream) (datawrapper,
+					     tmpstream, EVO3(NULL,) error) == -1) {
 				g_object_unref (tmpstream);
 				g_free (type);
 				goto exit_msg;
-			} else {
-				gchar *calstring;
-				gsize size_read;
-
-				calstring = g_malloc (decode_size);
-				camel_stream_reset (tmpstream, error);
-				size_read = camel_stream_read (tmpstream, calstring,
-						decode_size, EVO3(NULL,) error);
-				if (size_read == -1) {
-					g_free (calstring);
-					g_free (type);
-					g_object_unref (tmpstream);
-					goto exit_msg;
-				} else {
-					/* Replace original random UID with AssociatedCalendarItemId (ItemId) */
-					icalcomponent *icalcomp;
-					gchar *calstring_new;
-
-					icalcomp = icalparser_parse_string ((const gchar*)calstring);
-					icalcomponent_set_uid (icalcomp, (gchar *) id);
-					calstring_new = icalcomponent_as_ical_string_r (icalcomp);
-
-					camel_mime_part_set_content (mimepart,
-								     (const gchar*)calstring_new, strlen(calstring_new),
-								     (const gchar*)type);
-
-					g_free (type);
-					g_free (calstring_new);
-					icalcomponent_free (icalcomp);
-				}
-				g_free (calstring);
 			}
-			if (camel_stream_close (tmpstream, EVO3(NULL,) error) == -1) {
-				g_object_unref (tmpstream);
-				goto exit_msg;
-			}
+
+			/* Replace original random UID with AssociatedCalendarItemId (ItemId) */
+			ba = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (tmpstream));
+			g_byte_array_append (ba, (guint8 *) "\0", 1);
+
+			icalcomp = icalparser_parse_string ((gchar *) ba->data);
+			icalcomponent_set_uid (icalcomp, (gchar *) id);
+			calstring_new = icalcomponent_as_ical_string_r (icalcomp);
+
+			camel_mime_part_set_content (mimepart,
+						     (const gchar*)calstring_new, strlen(calstring_new),
+						     (const gchar*)type);
+
+			g_free (type);
+			g_free (calstring_new);
+			icalcomponent_free (icalcomp);
 			g_object_unref (tmpstream);
 			break;
 		}
