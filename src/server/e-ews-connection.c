@@ -1122,7 +1122,7 @@ e_ews_autodiscover_ws_msg(EEwsConnection *cnc, gchar *url,
 
 void
 e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb, gpointer cbdata,
-			   gchar *email, gchar *password)
+			   const gchar *email, const gchar *password)
 {
 	struct _autodiscover_data *ad;
 	xmlOutputBuffer *buf;
@@ -1157,8 +1157,6 @@ e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb, gpointer cbdata,
 	cnc = e_ews_connection_new (url, email, password, NULL, NULL, &error);
 	if (!cnc) {
 	err:
-		g_free (email);
-		g_free (password);
 		cb (NULL, cbdata, error);
 		return;
 	}
@@ -1192,9 +1190,6 @@ e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb, gpointer cbdata,
 				    autodiscover_response_cb, ad);
 
 	g_object_unref (cnc); /* the GSimpleAsyncResult holds it now */
-
-	g_free (email);
-	g_free (password);
 
 	xmlOutputBufferClose (buf);
 	xmlFreeDoc (doc);

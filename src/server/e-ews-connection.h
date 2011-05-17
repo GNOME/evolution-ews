@@ -89,8 +89,8 @@ void		e_ews_connection_authenticate	(EEwsConnection *cnc,
 typedef void (*EEwsAutoDiscoverCallback) (char *url, gpointer user_data, GError *error);
 void		e_ews_autodiscover_ws_url	(EEwsAutoDiscoverCallback cb,
 						 gpointer cbdata,
-						 gchar *email,
-						 gchar *password);
+						 const gchar *email,
+						 const gchar *password);
 void		e_ews_connection_set_mailbox	(EEwsConnection *cnc,
 						 const gchar *email);
 /* Sync folder items */

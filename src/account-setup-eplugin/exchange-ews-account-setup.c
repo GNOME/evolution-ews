@@ -112,7 +112,7 @@ validate_credentials (GtkWidget *widget, struct _AutoDiscCallBackData *cbdata)
 	EConfig *config = cbdata->config;
 	EMConfigTargetAccount *target_account = (EMConfigTargetAccount *)(config->target);
 	CamelURL *url = NULL;
-	gchar *key, *password;
+	gchar *key, *password = NULL;
 
 	url = camel_url_new (e_account_get_string (target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
 
@@ -133,14 +133,14 @@ validate_credentials (GtkWidget *widget, struct _AutoDiscCallBackData *cbdata)
 	/*Can there be a account without password ?*/
 	if (password && *password) {
 		e_ews_autodiscover_ws_url (autodiscover_callback, cbdata->entry,
-					   g_strdup(target_account->account->id->address),
+					   target_account->account->id->address,
 					   password);
 	} else {
 		e_passwords_forget_password (EXCHANGE_EWS_PASSWORD_COMPONENT, key);
 		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Authentication failed."));
-		g_free (password);
 	}
 
+	g_free (password);
 	g_free (key);
 	camel_url_free (url);
 }
