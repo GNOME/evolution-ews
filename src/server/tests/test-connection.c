@@ -92,7 +92,7 @@ con_test_autodiscover()
 	const gchar *username;
 	const gchar *password;
 	const gchar *email;
-//	gchar *wrong_username, *domain;
+	gchar *wrong_username, *domain;
 	const gchar *uri;
 	struct _cb_data *user_data;
 
