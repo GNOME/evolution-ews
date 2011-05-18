@@ -18,15 +18,12 @@ e-ews-connection.c: $(MARSHAL_GENERATED)
 
 libeews_1_2_la_CPPFLAGS = \
 	$(AM_CPPFLAGS)					\
-	-DG_LOG_DOMAIN=\"libeews\"		\
+	-DG_LOG_DOMAIN=\"libeews\"			\
 	-I$(top_srcdir)					\
 	-I$(top_builddir)				\
-	-I$(top_builddir)/src/server				\
+	-I$(top_builddir)/src/server			\
 	$(SOUP_CFLAGS)					\
-	$(LIBEBACKEND_CFLAGS)				\
 	$(LIBEDATASERVER_CFLAGS)			\
-	$(E_DATA_SERVER_CFLAGS)				\
-	$(EVOLUTION_PLUGIN_CFLAGS)				\
 	$(DEBUG_CFLAGS)
 
 libeews_1_2_la_SOURCES =		\
@@ -47,11 +44,8 @@ libeews_1_2_la_SOURCES =		\
 	e-ews-compat.h
 
 libeews_1_2_la_LIBADD =						\
-	$(LIBEBACKEND_LIBS)						\
-	$(LIBEDATASERVER_LIBS)						\
-	$(E_DATA_SERVER_LIBS)						\
-	$(EVOLUTION_PLUGIN_LIBS)				\
 	$(SOUP_LIBS)						\
+	$(LIBEDATASERVER_LIBS)					\
 	$(SOCKET_LIBS)
 
 libeews_1_2_la_LDFLAGS = $(NO_UNDEFINED)
