@@ -6,8 +6,6 @@
 #ifndef EWS_SOAP_RESPONSE_H
 #define EWS_SOAP_RESPONSE_H
 
-#include <libedataserver/eds-version.h>
-
 #include <glib-object.h>
 #include <libxml/tree.h>
 

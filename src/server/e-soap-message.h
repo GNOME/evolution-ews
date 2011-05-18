@@ -6,8 +6,6 @@
 #ifndef EWS_SOAP_MESSAGE_H
 #define EWS_SOAP_MESSAGE_H 1
 
-#include <libedataserver/eds-version.h>
-
 #include <time.h>
 #include <libxml/tree.h>
 #include <libsoup/soup-message.h>
