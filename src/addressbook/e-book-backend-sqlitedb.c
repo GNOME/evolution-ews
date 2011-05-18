@@ -1371,7 +1371,7 @@ e_book_backend_sqlitedb_get_key_value	(EBookBackendSqliteDB *ebsdb,
 
 	READER_LOCK (ebsdb);
 
-	stmt = sqlite3_mprintf ("SELECT value FROM folders WHERE folder_id = %Q AND key = %Q",
+	stmt = sqlite3_mprintf ("SELECT value FROM keys WHERE folder_id = %Q AND key = %Q",
 							folderid, key);
 	book_backend_sql_exec (ebsdb->priv->db, stmt, get_string_cb , &ret, error);
 	sqlite3_free (stmt);
