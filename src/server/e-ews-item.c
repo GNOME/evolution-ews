@@ -606,12 +606,10 @@ parse_entries (GHashTable *hash_table, ESoapParameter *param)
 }
 
 static void
-process_contact_field (EEwsItem *item, const gchar *name, ESoapParameter *subparam)
+parse_contact_field (EEwsItem *item, const gchar *name, ESoapParameter *subparam)
 {
 	EEwsItemPrivate *priv = item->priv;
 	gchar *value = NULL;
-
-	priv->contact_fields = g_new0 (struct _EEwsContactFields, 1);
 	
 	if (!g_ascii_strcasecmp (name, "Culture")) {
 		priv->contact_fields->culture = e_soap_parameter_get_string_value (subparam);
@@ -676,6 +674,7 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 	else if ((node = e_soap_parameter_get_first_child_by_name (param, "Contact"))) {
 		contact = TRUE;	
 		priv->item_type = E_EWS_ITEM_TYPE_CONTACT;
+		priv->contact_fields = g_new0 (struct _EEwsContactFields, 1);
 	} else if ((node = e_soap_parameter_get_first_child_by_name (param, "DistributionList")))
 		priv->item_type = E_EWS_ITEM_TYPE_GROUP;
 	else if ((node = e_soap_parameter_get_first_child_by_name (param, "MeetingMessage")))
@@ -750,7 +749,7 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 		} else if (!g_ascii_strcasecmp (name, "Attachments")) {
 			process_attachments_list(priv, subparam);
 		} else if (contact)
-			process_contact_field (item, name, subparam);
+			parse_contact_field (item, name, subparam);
 			/* fields below are not relevant for contacts, so skip them */	
 		else if (!g_ascii_strcasecmp (name, "Sender")) {
 			subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Mailbox");
@@ -1194,6 +1193,14 @@ e_ews_item_get_complete_name (EEwsItem *item)
 	return (const EwsCompleteName *) item->priv->contact_fields->complete_name;
 }
 
+/**
+ * e_ews_item_get_email_address 
+ * @item: 
+ * @field: "EmailAddress1", "EmailAddress2", "EmailAddress3"
+ * 
+ * 
+ * Returns: 
+ **/
 const gchar *
 e_ews_item_get_email_address (EEwsItem *item, const gchar *field)
 {
@@ -1206,6 +1213,14 @@ e_ews_item_get_email_address (EEwsItem *item, const gchar *field)
 	return NULL;
 }
 
+/**
+ * e_ews_item_get_physical_address 
+ * @item: 
+ * @field: "Business", "Home", "Other"
+ * 
+ * 
+ * Returns: 
+ **/
 const gchar *
 e_ews_item_get_physical_address (EEwsItem *item, const gchar *field)
 {
@@ -1218,6 +1233,16 @@ e_ews_item_get_physical_address (EEwsItem *item, const gchar *field)
 	return NULL;
 }
 
+/**
+ * e_ews_item_get_phone_number 
+ * @item: 
+ * @field: "AssistantPhone", "BusinessFax", "BusinessPhone", "BusinessPhone2", "Callback"
+ * "CarPhone", "CompanyMainPhone", "HomeFax", "HomePhone", "HomePhone2", "Isdn", "MobilePhone"
+ * "OtherFax", "OtherTelephone", "Pager", "PrimaryPhone", "RadioPhone", "Telex", "TtyTddPhone"
+ * 
+ * 
+ * Returns: 
+ **/
 const gchar *
 e_ews_item_get_phone_number (EEwsItem *item, const gchar *field)
 {
@@ -1229,6 +1254,15 @@ e_ews_item_get_phone_number (EEwsItem *item, const gchar *field)
 
 	return NULL;
 }
+
+/**
+ * e_ews_item_get_im_address 
+ * @item: 
+ * @field: "ImAddress1", "ImAddress2", "ImAddress3"
+ * 
+ * 
+ * Returns: 
+ **/
 const gchar *
 e_ews_item_get_im_address (EEwsItem *item, const gchar *field)
 {
