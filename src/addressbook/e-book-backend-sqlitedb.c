@@ -1154,6 +1154,7 @@ book_backend_sqlitedb_search_full (EBookBackendSqliteDB *ebsdb, const gchar *sex
 				all = g_list_prepend (all, vcard);
 		}
 
+		g_slist_foreach (uids, (GFunc) g_free, NULL);
 		g_slist_free (uids);
 	} else {
 		stmt = sqlite3_mprintf ("SELECT vcard FROM %Q", folderid);
