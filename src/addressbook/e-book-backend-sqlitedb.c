@@ -697,7 +697,6 @@ e_book_backend_sqlitedb_remove_contacts	(EBookBackendSqliteDB *ebsdb,
 				g_unlink (l->data);
 				g_free (l->data);
 			}
-			g_slist_free (vcard_files);
 		} else
 			g_slist_foreach (vcard_files, (GFunc) g_free, NULL);
 
