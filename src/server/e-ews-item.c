@@ -98,7 +98,7 @@ g_mkdtemp (gchar *tmpl, int mode)
 G_DEFINE_TYPE (EEwsItem, e_ews_item, G_TYPE_OBJECT)
 
 struct _EEwsContactFields {
-	gchar *file_as;
+	gchar *fileas;
 	EwsCompleteName *complete_name;
 	
 	GHashTable *email_addresses;
@@ -330,7 +330,7 @@ ews_free_contact_fields (struct _EEwsContactFields *con_fields)
 		if (con_fields->im_addresses)
 			g_hash_table_destroy (con_fields->im_addresses);
 		
-		g_free (con_fields->file_as);
+		g_free (con_fields->fileas);
 		g_free (con_fields->company_name);
 		g_free (con_fields->department);
 		g_free (con_fields->job_title);
@@ -616,7 +616,7 @@ process_contact_field (EEwsItem *item, const gchar *name, ESoapParameter *subpar
 	if (!g_ascii_strcasecmp (name, "Culture")) {
 		priv->contact_fields->culture = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "FileAs")) {
-		priv->contact_fields->file_as = e_soap_parameter_get_string_value (subparam);
+		priv->contact_fields->fileas = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "CompleteName")) {
 		parse_complete_name (priv->contact_fields, subparam);
 	} else if (!g_ascii_strcasecmp (name, "CompanyName")) {
@@ -1174,4 +1174,168 @@ e_ews_item_get_associatedcalendarid (EEwsItem *item)
 	g_return_val_if_fail(E_IS_EWS_ITEM(item), NULL);
 
 	return (const gchar*) item->priv->associatedcalendaritemid;
+}
+
+const gchar *
+e_ews_item_get_fileas (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+
+	return (const gchar*) item->priv->contact_fields->fileas;
+}
+
+const EwsCompleteName *
+e_ews_item_get_complete_name (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+
+	return (const EwsCompleteName *) item->priv->contact_fields->complete_name;
+}
+
+const gchar *
+e_ews_item_get_email_address (EEwsItem *item, const gchar *field)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+	
+	if (item->priv->contact_fields->email_addresses)
+		return g_hash_table_lookup (item->priv->contact_fields->email_addresses, field);
+
+	return NULL;
+}
+
+const gchar *
+e_ews_item_get_physical_address (EEwsItem *item, const gchar *field)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+	
+	if (item->priv->contact_fields->physical_addresses)
+		return g_hash_table_lookup (item->priv->contact_fields->physical_addresses, field);
+
+	return NULL;
+}
+
+const gchar *
+e_ews_item_get_phone_number (EEwsItem *item, const gchar *field)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+	
+	if (item->priv->contact_fields->phone_numbers)
+		return g_hash_table_lookup (item->priv->contact_fields->phone_numbers, field);
+
+	return NULL;
+}
+const gchar *
+e_ews_item_get_im_address (EEwsItem *item, const gchar *field)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+	
+	if (item->priv->contact_fields->im_addresses)
+		return g_hash_table_lookup (item->priv->contact_fields->im_addresses, field);
+
+	return NULL;
+}
+
+const gchar *
+e_ews_item_get_company_name (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+
+	return (const gchar*) item->priv->contact_fields->company_name;
+}
+
+const gchar *
+e_ews_item_get_department (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+
+	return (const gchar*) item->priv->contact_fields->department;
+}
+
+const gchar *
+e_ews_item_get_job_title (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+
+	return (const gchar*) item->priv->contact_fields->job_title;
+}
+
+const gchar *
+e_ews_item_get_assistant_name (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+
+	return (const gchar*) item->priv->contact_fields->assistant_name;
+}
+
+const gchar *
+e_ews_item_get_manager (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+
+	return (const gchar*) item->priv->contact_fields->manager;
+}
+
+const gchar *
+e_ews_item_get_office_location (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+
+	return (const gchar*) item->priv->contact_fields->office_location;
+}
+
+const gchar *
+e_ews_item_get_business_homepage (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+
+	return (const gchar*) item->priv->contact_fields->business_homepage;
+}
+
+const gchar *
+e_ews_item_get_spouse_name (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+
+	return (const gchar*) item->priv->contact_fields->spouse_name;
+}
+
+const gchar *
+e_ews_item_get_surname (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+
+	return (const gchar*) item->priv->contact_fields->surname;
+}
+	
+time_t
+e_ews_item_get_birthday (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), -1);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, -1);
+
+	return item->priv->contact_fields->birthday;
+}
+
+time_t
+e_ews_item_get_wedding_anniversary (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), -1);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, -1);
+
+	return item->priv->contact_fields->wedding_anniversary;
 }

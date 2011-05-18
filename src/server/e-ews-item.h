@@ -162,6 +162,29 @@ const GSList *	e_ews_item_get_attendees	(EEwsItem *item);
 
 const gchar *	e_ews_item_get_associatedcalendarid
 						(EEwsItem *item);
+/* Contact fields */
+const gchar *	e_ews_item_get_fileas		(EEwsItem *item);
+const EwsCompleteName *	
+		e_ews_item_get_complete_name	(EEwsItem *item);
+const gchar *	e_ews_item_get_email_address	(EEwsItem *item, const gchar *type);
+const gchar *	e_ews_item_get_physical_address	(EEwsItem *item, const gchar *type);
+const gchar *	e_ews_item_get_phone_number	(EEwsItem *item, const gchar *type);
+const gchar *	e_ews_item_get_im_address	(EEwsItem *item, const gchar *type);
+
+const gchar *	e_ews_item_get_company_name	(EEwsItem *item);
+const gchar *	e_ews_item_get_department	(EEwsItem *item);
+const gchar *	e_ews_item_get_job_title	(EEwsItem *item);
+const gchar *	e_ews_item_get_assistant_name	(EEwsItem *item);
+const gchar *	e_ews_item_get_manager		(EEwsItem *item);
+const gchar *	e_ews_item_get_office_location	(EEwsItem *item);
+const gchar *	e_ews_item_get_business_homepage
+						(EEwsItem *item);
+time_t		e_ews_item_get_birthday		(EEwsItem *item);
+time_t		e_ews_item_get_wedding_anniversary
+						(EEwsItem *item);
+const gchar *	e_ews_item_get_spouse_name	(EEwsItem *item);
+const gchar *	e_ews_item_get_culture		(EEwsItem *item);
+const gchar *	e_ews_item_get_surname		(EEwsItem *item);
 
 G_END_DECLS
 
