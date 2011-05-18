@@ -82,6 +82,27 @@ typedef struct {
 	gchar *responsetype;
 } EwsAttendee;
 
+typedef struct {
+	gchar *title;
+	gchar *first_name;
+	gchar *middle_name;
+	gchar *last_name;
+	gchar *suffix;
+	gchar *initials;
+	gchar *full_name;
+	gchar *nick_name;
+	gchar *yomi_first_name;
+	gchar *yomi_last_name;
+} EwsCompleteName;
+
+typedef struct {
+	gchar *street;
+	gchar *city;
+	gchar *state;
+	gchar *country;
+	gchar *postal_code;
+} EwsAddress;
+
 GType       	e_ews_item_get_type (void);
 EEwsItem *	e_ews_item_new_from_soap_parameter
 						(ESoapParameter *param);

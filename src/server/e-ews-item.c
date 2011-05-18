@@ -97,6 +97,32 @@ g_mkdtemp (gchar *tmpl, int mode)
 
 G_DEFINE_TYPE (EEwsItem, e_ews_item, G_TYPE_OBJECT)
 
+struct _EEwsContactFields {
+	gchar *file_as;
+	EwsCompleteName *complete_name;
+	
+	GHashTable *email_addresses;
+	GHashTable *physical_addresses;
+	GHashTable *phone_numbers;
+	GHashTable *im_addresses;
+
+	gchar *company_name;
+	gchar *department;
+	gchar *job_title;
+	gchar *assistant_name;
+	gchar *manager;
+	gchar *office_location;
+	
+	gchar *business_homepage;
+	
+	time_t birthday;
+	time_t wedding_anniversary;
+	
+	gchar *spouse_name;
+	gchar *culture;
+	gchar *surname;
+};
+
 struct _EEwsItemPrivate {
 	EEwsItemType item_type;
 
@@ -142,11 +168,14 @@ struct _EEwsItemPrivate {
 	GSList *attendees;
 
 	gchar *associatedcalendaritemid;
+
+	struct _EEwsContactFields *contact_fields;
 };
 
 static GObjectClass *parent_class = NULL;
 static void	ews_item_free_mailbox (EwsMailbox *mb);
 static void	ews_item_free_attendee (EwsAttendee *attendee);
+static void	ews_free_contact_fields (struct _EEwsContactFields *con_fields);
 
 static void
 e_ews_item_dispose (GObject *object)
@@ -222,6 +251,9 @@ e_ews_item_dispose (GObject *object)
 	ews_item_free_mailbox (priv->sender);
 	ews_item_free_mailbox (priv->from);
 
+	if (priv->item_type == E_EWS_ITEM_TYPE_CONTACT)
+		ews_free_contact_fields (priv->contact_fields);
+
 	if (parent_class->dispose)
 		(* parent_class->dispose) (object);
 }
@@ -265,6 +297,51 @@ e_ews_item_init (EEwsItem *item)
 	item->priv = priv;
 
 	priv->item_type = E_EWS_ITEM_TYPE_UNKNOWN;
+}
+
+static void
+ews_free_contact_fields (struct _EEwsContactFields *con_fields)
+{
+	if (con_fields) {
+		if (con_fields->complete_name) {
+			EwsCompleteName *cn = con_fields->complete_name;
+			
+			g_free (cn->title);
+			g_free (cn->first_name);
+			g_free (cn->middle_name);
+			g_free (cn->last_name);
+			g_free (cn->suffix);
+			g_free (cn->initials);
+			g_free (cn->full_name);
+			g_free (cn->nick_name);
+			g_free (cn->yomi_first_name);
+			g_free (cn->yomi_last_name);
+		}
+
+		if (con_fields->email_addresses)
+			g_hash_table_destroy (con_fields->email_addresses);
+		
+		if (con_fields->physical_addresses)
+			g_hash_table_destroy (con_fields->physical_addresses);
+		
+		if (con_fields->phone_numbers)
+			g_hash_table_destroy (con_fields->phone_numbers);
+		
+		if (con_fields->im_addresses)
+			g_hash_table_destroy (con_fields->im_addresses);
+		
+		g_free (con_fields->file_as);
+		g_free (con_fields->company_name);
+		g_free (con_fields->department);
+		g_free (con_fields->job_title);
+		g_free (con_fields->assistant_name);
+		g_free (con_fields->manager);
+		g_free (con_fields->office_location);
+		g_free (con_fields->business_homepage);
+		g_free (con_fields->spouse_name);
+		g_free (con_fields->culture);
+		g_free (con_fields->surname);
+	}	
 }
 
 static void
@@ -466,11 +543,129 @@ static void process_attendees(EEwsItemPrivate *priv, ESoapParameter *param, cons
 	return;
 }
 
+static void
+parse_complete_name (struct _EEwsContactFields *con_fields, ESoapParameter *param)
+{
+	ESoapParameter *subparam;
+	EwsCompleteName *cn;
+
+	cn = g_new0 (EwsCompleteName, 1);
+
+	subparam = e_soap_parameter_get_first_child_by_name (param, "Title");
+	if (subparam)	
+		cn->title = e_soap_parameter_get_string_value (subparam);
+	subparam = e_soap_parameter_get_first_child_by_name (param, "FirstName");
+	if (subparam)	
+		cn->first_name = e_soap_parameter_get_string_value (subparam);
+	subparam = e_soap_parameter_get_first_child_by_name (param, "MiddleName");
+	if (subparam)	
+		cn->middle_name = e_soap_parameter_get_string_value (subparam);
+	subparam = e_soap_parameter_get_first_child_by_name (param, "LastName");
+	if (subparam)	
+		cn->last_name = e_soap_parameter_get_string_value (subparam);
+	subparam = e_soap_parameter_get_first_child_by_name (param, "Suffix");
+	if (subparam)	
+		cn->suffix = e_soap_parameter_get_string_value (subparam);
+	subparam = e_soap_parameter_get_first_child_by_name (param, "Initials");
+	if (subparam)	
+		cn->initials = e_soap_parameter_get_string_value (subparam);
+	subparam = e_soap_parameter_get_first_child_by_name (param, "FullName");
+	if (subparam)	
+		cn->full_name = e_soap_parameter_get_string_value (subparam);
+	subparam = e_soap_parameter_get_first_child_by_name (param, "Nickname");
+	if (subparam)	
+		cn->nick_name = e_soap_parameter_get_string_value (subparam);
+	subparam = e_soap_parameter_get_first_child_by_name (param, "YomiFirstName");
+	if (subparam)	
+		cn->yomi_first_name = e_soap_parameter_get_string_value (subparam);
+	subparam = e_soap_parameter_get_first_child_by_name (param, "YomiLastName");
+	if (subparam)	
+		cn->yomi_last_name = e_soap_parameter_get_string_value (subparam);
+
+	con_fields->complete_name = cn;
+}
+
+static void
+parse_entries (GHashTable *hash_table, ESoapParameter *param)
+{
+	ESoapParameter *subparam;
+
+	for (subparam = e_soap_parameter_get_first_child_by_name (param, "Entry");
+			subparam != NULL;
+			subparam = e_soap_parameter_get_next_child_by_name (subparam, "Entry")) {
+		gchar *key, *value;
+			
+		key = e_soap_parameter_get_property (subparam, "Key");
+		value = e_soap_parameter_get_string_value (subparam);
+	
+		if (value)
+			g_hash_table_insert (hash_table, key, value);
+		else
+			g_free (key);
+	}
+}
+
+static void
+process_contact_field (EEwsItem *item, const gchar *name, ESoapParameter *subparam)
+{
+	EEwsItemPrivate *priv = item->priv;
+	gchar *value = NULL;
+
+	priv->contact_fields = g_new0 (struct _EEwsContactFields, 1);
+	
+	if (!g_ascii_strcasecmp (name, "Culture")) {
+		priv->contact_fields->culture = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "FileAs")) {
+		priv->contact_fields->file_as = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "CompleteName")) {
+		parse_complete_name (priv->contact_fields, subparam);
+	} else if (!g_ascii_strcasecmp (name, "CompanyName")) {
+		priv->contact_fields->company_name = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "EmailAddresses")) {
+		priv->contact_fields->email_addresses = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+		parse_entries (priv->contact_fields->email_addresses, subparam);
+	} else if (!g_ascii_strcasecmp (name, "PhysicalAddresses")) {
+		priv->contact_fields->physical_addresses = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+		parse_entries (priv->contact_fields->physical_addresses, subparam);
+	} else if (!g_ascii_strcasecmp (name, "PhoneNumbers")) {
+		priv->contact_fields->phone_numbers = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+		parse_entries (priv->contact_fields->phone_numbers, subparam);
+	} else if (!g_ascii_strcasecmp (name, "AssistantName")) {
+		priv->contact_fields->assistant_name = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "Birthday")) {
+			value = e_soap_parameter_get_string_value (subparam);
+			priv->contact_fields->birthday = ews_item_parse_date (value);
+			g_free (value);
+	} else if (!g_ascii_strcasecmp (name, "BusinessHomePage")) {
+		priv->contact_fields->business_homepage = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "Department")) {
+		priv->contact_fields->department = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "ImAddresses")) {
+		priv->contact_fields->im_addresses = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+		parse_entries (priv->contact_fields->im_addresses, subparam);
+	} else if (!g_ascii_strcasecmp (name, "JobTitle")) {
+		priv->contact_fields->job_title = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "Manager")) {
+		priv->contact_fields->manager = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "OfficeLocation")) {
+		priv->contact_fields->office_location = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "SpouseName")) {
+		priv->contact_fields->spouse_name = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "Surname")) {
+		priv->contact_fields->surname = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "WeddingAnniversary")) {
+			value = e_soap_parameter_get_string_value (subparam);
+			priv->contact_fields->wedding_anniversary = ews_item_parse_date (value);
+			g_free (value);
+	}
+}
+
 static gboolean
 e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 {
 	EEwsItemPrivate *priv = item->priv;
 	ESoapParameter *subparam, *node;
+	gboolean contact = FALSE;
 
 	g_return_val_if_fail (param != NULL, FALSE);
 
@@ -478,9 +673,10 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 		priv->item_type = E_EWS_ITEM_TYPE_MESSAGE;
 	else if ((node = e_soap_parameter_get_first_child_by_name (param, "CalendarItem")))
 		priv->item_type = E_EWS_ITEM_TYPE_CALENDAR_ITEM;
-	else if ((node = e_soap_parameter_get_first_child_by_name (param, "Contact")))
+	else if ((node = e_soap_parameter_get_first_child_by_name (param, "Contact"))) {
+		contact = TRUE;	
 		priv->item_type = E_EWS_ITEM_TYPE_CONTACT;
-	else if ((node = e_soap_parameter_get_first_child_by_name (param, "DistributionList")))
+	} else if ((node = e_soap_parameter_get_first_child_by_name (param, "DistributionList")))
 		priv->item_type = E_EWS_ITEM_TYPE_GROUP;
 	else if ((node = e_soap_parameter_get_first_child_by_name (param, "MeetingMessage")))
 		priv->item_type = E_EWS_ITEM_TYPE_MEETING_MESSAGE;
@@ -553,7 +749,10 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 			g_free (value);
 		} else if (!g_ascii_strcasecmp (name, "Attachments")) {
 			process_attachments_list(priv, subparam);
-		} else if (!g_ascii_strcasecmp (name, "Sender")) {
+		} else if (contact)
+			process_contact_field (item, name, subparam);
+			/* fields below are not relevant for contacts, so skip them */	
+		else if (!g_ascii_strcasecmp (name, "Sender")) {
 			subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Mailbox");
 			priv->sender = e_ews_item_mailbox_from_soap_param (subparam1);
 		} else if (!g_ascii_strcasecmp (name, "ToRecipients")) {
