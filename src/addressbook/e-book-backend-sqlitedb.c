@@ -613,6 +613,19 @@ e_book_backend_sqlitedb_add_contacts	(EBookBackendSqliteDB *ebsdb,
 }
 
 gboolean
+e_book_backend_sqlitedb_remove_contact	(EBookBackendSqliteDB *ebsdb,
+					 const gchar *folderid,
+					 const gchar *uid,
+					 GError **error)
+{
+	GSList l;
+	l.data = (char*)uid; /* Won't modify it, I promise :) */
+	l.next = NULL;
+	return e_book_backend_sqlitedb_remove_contacts (ebsdb, folderid, &l,
+							error);
+}
+
+gboolean
 e_book_backend_sqlitedb_remove_contacts	(EBookBackendSqliteDB *ebsdb,
 					 const gchar *folderid,
 					 GSList *uids,
