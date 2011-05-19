@@ -72,6 +72,11 @@ EBookBackendSqliteDB *
 							 const gchar *folder_name,
 							 gboolean vcard_as_files,
 							 GError **error);
+gboolean	e_book_backend_sqlitedb_add_contact	(EBookBackendSqliteDB *ebsdb,
+							 const gchar *folderid,
+							 EContact *contact,
+							 gboolean partial_content,
+							 GError **error);
 gboolean	e_book_backend_sqlitedb_add_contacts	(EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,
 							 GSList *contacts,

@@ -511,6 +511,34 @@ insert_stmt_from_contact	(EContact *contact,
 }
 
 /**
+ * e_book_backend_sqlitedb_add_contact
+ * @ebsdb:
+ * @folderid: folder id
+ * @contact: EContact to be added
+ * @partial_content: contact does not contain full information. Used when
+ * the backend cache's partial information for auto-completion.
+ * @error:
+ *
+ * This is a convenience wrapper for e_book_backend_sqlitedb_add_contacts,
+ * which is the preferred means to add multiple contacts when possible.
+ *
+ * Returns: TRUE on success.
+ **/
+gboolean
+e_book_backend_sqlitedb_add_contact	(EBookBackendSqliteDB *ebsdb,
+					 const gchar *folderid,
+					 EContact *contact,
+					 gboolean partial_content,
+					 GError **error)
+{
+	GSList l;
+	l.data = contact;
+	l.next = NULL;
+	return e_book_backend_sqlitedb_add_contacts (ebsdb, folderid, &l,
+						     partial_content, error);
+}
+
+/**
  * e_book_backend_sqlitedb_add_contacts
  * @ebsdb:
  * @folderid: folder id
