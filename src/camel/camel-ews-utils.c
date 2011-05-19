@@ -513,7 +513,7 @@ add_folder_to_summary (CamelEwsStore *store, EEwsFolder *folder)
 	} else if (!g_ascii_strcasecmp (fname, "Drafts")) {
 		flags |= CAMEL_FOLDER_SYSTEM;
 	} else if (!g_ascii_strcasecmp (fname, "Deleted items")) {
-		flags |= CAMEL_FOLDER_SYSTEM;
+		flags |= CAMEL_FOLDER_SYSTEM |CAMEL_FOLDER_TYPE_TRASH;
 	} else if (!g_ascii_strcasecmp (fname, "Outbox")) {
 		flags |= CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_OUTBOX;
 	}

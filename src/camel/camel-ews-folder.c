@@ -88,6 +88,9 @@ struct _CamelEwsFolderPrivate {
 
 extern gint camel_application_is_exiting;
 
+static gboolean
+ews_delete_messages (CamelFolder *folder, GSList *deleted_items, gboolean expunge, GCancellable *cancellable, GError **error);
+
 #define d(x)
 
 G_DEFINE_TYPE (CamelEwsFolder, camel_ews_folder, CAMEL_TYPE_OFFLINE_FOLDER)
@@ -629,7 +632,7 @@ ews_synchronize_sync (CamelFolder *folder, gboolean expunge, EVO3(GCancellable *
 {
 	CamelEwsStore *ews_store;
 	GPtrArray *uids;
-	GSList *mi_list = NULL;
+	GSList *mi_list = NULL, *deleted_uids = NULL;
 	int mi_list_len = 0;
 	gboolean success = TRUE;
 	int i;
@@ -660,16 +663,22 @@ ews_synchronize_sync (CamelFolder *folder, gboolean expunge, EVO3(GCancellable *
 			mi_list = g_slist_append (mi_list, mi);
 			mi_list_len++;
 		} else {
+			deleted_uids = g_slist_prepend (deleted_uids, (gpointer) camel_pstring_strdup (uids->pdata [i]));
 			camel_message_info_free (mi);
 		}
+
 		if (mi_list_len == EWS_MAX_FETCH_COUNT) {
 			success = ews_sync_mi_flags (folder, mi_list, cancellable, error);
 			mi_list = NULL;
 			mi_list_len = 0;
 		}
 	}
+	
 	if (mi_list_len)
 		success = ews_sync_mi_flags (folder, mi_list, cancellable, error);
+
+	if (deleted_uids)
+		success = ews_delete_messages (folder, deleted_uids, FALSE, cancellable, error);
 
 	camel_folder_free_uids (folder, uids);
 	return success;
@@ -1092,49 +1101,32 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 }
 
 static gboolean
-ews_expunge_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GError **error)
+ews_delete_messages (CamelFolder *folder, GSList *deleted_items, gboolean expunge, GCancellable *cancellable, GError **error)
 {
-	CamelEwsStore *ews_store;
 	CamelEwsFolder *ews_folder;
-	CamelEwsMessageInfo *ews_info;
-	CamelMessageInfo *info;
-	CamelFolderChangeInfo *changes;
 	CamelStore *parent_store;
+	CamelEwsStore *ews_store;
+	CamelFolderChangeInfo *changes;
 	EEwsConnection *cnc;
-	EVO2(GCancellable *cancellable = NULL;)
-	gint i, count;
 	gboolean status = TRUE;
-	GSList *deleted_items = NULL, *deleted_head = NULL;
-
+	GSList *deleted_head = NULL;
+	
 	parent_store = camel_folder_get_parent_store (folder);
 	ews_folder = CAMEL_EWS_FOLDER (folder);
 	ews_store = CAMEL_EWS_STORE (parent_store);
-
-	if (!camel_ews_store_connected (ews_store, error))
-		return FALSE;
+	deleted_head = deleted_items;
 
 	cnc = camel_ews_store_get_connection (ews_store);
-
 	changes = camel_folder_change_info_new ();
-
-	/*Collect UIDs of deleted messages.*/
-	count = camel_folder_summary_count (folder->summary);
-	for (i = 0; i < count; i++) {
-		info = camel_folder_summary_index (folder->summary, i);
-		ews_info = (CamelEwsMessageInfo *) info;
-		if (ews_info && (ews_info->info.flags & CAMEL_MESSAGE_DELETED)) {
-			const gchar *uid = camel_message_info_uid (info);
-			deleted_items = g_slist_prepend (deleted_items, (gpointer) uid);
-		}
-		camel_message_info_free (info);
-	}
-	deleted_head = deleted_items;
 
 	if (deleted_items) {
 		GError *rerror = NULL;
+		const gchar *delete_type;
+
+		delete_type = expunge ? "HardDelete" : "MoveToDeletedItems";
 
 		camel_service_lock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-		status = e_ews_connection_delete_items (cnc, EWS_PRIORITY_MEDIUM, deleted_items, "HardDelete",
+		status = e_ews_connection_delete_items (cnc, EWS_PRIORITY_MEDIUM, deleted_items, delete_type,
 							"SendToNone", NULL, cancellable, &rerror);
 		camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
@@ -1155,12 +1147,47 @@ ews_expunge_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GError *
 
 		camel_folder_changed (folder, changes);
 
+		g_slist_foreach (deleted_head, (GFunc) camel_pstring_free, NULL);
 		g_slist_free (deleted_head);
 	}
 
 	camel_folder_change_info_free (changes);
-
+	
 	return status;
+}
+
+static gboolean
+ews_expunge_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GError **error)
+{
+	CamelEwsStore *ews_store;
+	CamelEwsFolder *ews_folder;
+	CamelEwsMessageInfo *ews_info;
+	CamelMessageInfo *info;
+	CamelStore *parent_store;
+	GSList *deleted_items = NULL;
+	EVO2(GCancellable *cancellable = NULL;)
+	gint i, count;
+
+	parent_store = camel_folder_get_parent_store (folder);
+	ews_folder = CAMEL_EWS_FOLDER (folder);
+	ews_store = CAMEL_EWS_STORE (parent_store);
+
+	if (!camel_ews_store_connected (ews_store, error))
+		return FALSE;
+
+	/*Collect UIDs of deleted messages.*/
+	count = camel_folder_summary_count (folder->summary);
+	for (i = 0; i < count; i++) {
+		info = camel_folder_summary_index (folder->summary, i);
+		ews_info = (CamelEwsMessageInfo *) info;
+		if (ews_info && (ews_info->info.flags & CAMEL_MESSAGE_DELETED)) {
+			const gchar *uid = camel_message_info_uid (info);
+			deleted_items = g_slist_prepend (deleted_items, (gpointer) camel_pstring_strdup (uid));
+		}
+		camel_message_info_free (info);
+	}
+
+	return ews_delete_messages (folder, deleted_items, TRUE, cancellable, error);
 }
 
 static gint
