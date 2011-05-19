@@ -43,7 +43,7 @@ struct _EBookBackendSqliteDBPrivate {
 	sqlite3 *db;
 	gchar *path;
 	gchar *hash_key;
-	
+
 	gboolean vcard_as_files;
 	GStaticRWLock rwlock;
 };
@@ -75,7 +75,7 @@ e_book_backend_sqlitedb_finalize (GObject *object)
 	EBookBackendSqliteDBPrivate *priv;
 
 	priv = E_BOOK_BACKEND_SQLITEDB (object)->priv;
-	
+
 	g_static_rw_lock_free (&priv->rwlock);
 
 	sqlite3_close (priv->db);
@@ -92,7 +92,7 @@ e_book_backend_sqlitedb_finalize (GObject *object)
 			g_hash_table_destroy (db_connections);
 			db_connections = NULL;
 		}
-		
+
 		g_free (priv->hash_key);
 		priv->hash_key = NULL;
 	}
@@ -165,19 +165,19 @@ e_book_sqlitedb_match_func (sqlite3_context *ctx, gint nArgs, sqlite3_value **va
 }
 
 /**
- * e_book_sql_exec 
- * @db: 
- * @stmt: 
- * @callback: 
- * @data: 
- * @error: 
- * 
+ * e_book_sql_exec
+ * @db:
+ * @stmt:
+ * @callback:
+ * @data:
+ * @error:
+ *
  *  Callers should hold the rw lock depending on read or write operation
- * Returns: 
+ * Returns:
  **/
 static gint
 book_backend_sql_exec	(sqlite3 *db,
-	              	 const gchar *stmt,
+			 const gchar *stmt,
 			 gint (*callback)(void*,gint,gchar**,gchar**),
 			 gpointer data,
 			 GError **error)
@@ -233,11 +233,11 @@ create_folders_table	(EBookBackendSqliteDB *ebsdb,
 {
 	GError *err = NULL;
 	/* sync_data points to syncronization data, it could be last_modified time
-	   or a sequence number or some text depending on the backend. 
-	   
+	   or a sequence number or some text depending on the backend.
+
 	   parial_content says whether the contents are partially downloaded for
 	   auto-completion or if it has the complete content.
-	   
+
 	   Have not included a bdata here since the keys table should suffice any
 	   additional need that arises.
 	 */
@@ -246,14 +246,14 @@ create_folders_table	(EBookBackendSqliteDB *ebsdb,
 			     " folder_name TEXT,"
 			     "  sync_data TEXT,"
 			     " is_populated INTEGER,"
-			     "  partial_content INTEGER)";	
-	
+			     "  partial_content INTEGER)";
+
 	WRITER_LOCK (ebsdb);
 	book_backend_sqlitedb_start_transaction (ebsdb, &err);
 
 	book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL , &err);
-	
-	
+
+
 	/* Create a child table to store key/value pairs for a folder */
 	stmt =	"CREATE TABLE IF NOT EXISTS keys"
 		"( key TEXT PRIMARY KEY, value TEXT,"
@@ -262,13 +262,13 @@ create_folders_table	(EBookBackendSqliteDB *ebsdb,
 
 	stmt = "CREATE INDEX IF NOT EXISTS keysindex ON keys(folder_id)";
 	book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
-	
+
 	book_backend_sqlitedb_end_transaction (ebsdb, &err);
 	WRITER_UNLOCK (ebsdb);
-	
+
 	if (err)
 		g_propagate_error (error, err);
-	
+
 	return;
 }
 
@@ -285,19 +285,19 @@ add_folder_into_db	(EBookBackendSqliteDB *ebsdb,
 	book_backend_sqlitedb_start_transaction (ebsdb, &err);
 
 	stmt = sqlite3_mprintf ("INSERT OR REPLACE INTO folders VALUES ( %Q, %Q, %Q, %d, %d ) ",
-	     	folderid, folder_name, NULL, 0, 0);
-	
+		folderid, folder_name, NULL, 0, 0);
+
 	book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
-	
+
 	sqlite3_free (stmt);
-	
+
 	book_backend_sqlitedb_end_transaction (ebsdb, &err);
 	WRITER_UNLOCK (ebsdb);
 
 	if (err)
 		g_propagate_error (error, err);
 
-	return;	
+	return;
 }
 
 
@@ -309,23 +309,23 @@ create_contacts_table	(EBookBackendSqliteDB *ebsdb,
 {
 	gint ret;
 	gchar *stmt, *tmp;
-	
-	/* bdata is a place holder if any future need arises */	
+
+	/* bdata is a place holder if any future need arises */
 	stmt = sqlite3_mprintf ("CREATE TABLE IF NOT EXISTS %Q"
-			     	"( uid  TEXT PRIMARY KEY,"
-			       	" nickname TEXT, full_name TEXT,"
-			       	" given_name TEXT, family_name TEXT,"
-			       	" file_as TEXT,"
-			       	" email_1 TEXT, email_2 TEXT,"
-			       	" email_3 TEXT, email_4 TEXT,"
-			       	" partial_content INTEGER,"
-			       	" vcard TEXT, bdata TEXT)", folderid);
+				"( uid  TEXT PRIMARY KEY,"
+				" nickname TEXT, full_name TEXT,"
+				" given_name TEXT, family_name TEXT,"
+				" file_as TEXT,"
+				" email_1 TEXT, email_2 TEXT,"
+				" email_3 TEXT, email_4 TEXT,"
+				" partial_content INTEGER,"
+				" vcard TEXT, bdata TEXT)", folderid);
 
 	WRITER_LOCK (ebsdb);
 	ret = book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL , error);
 	sqlite3_free (stmt);
 
-	
+
 	/* Create indexes on full_name and email_1 as autocompletion queries would mainly
 	   rely on this. Assuming that the frequency of matching on these would be higher than
 	   on the other fields like email_2, surname etc. email_1 should be the primary email */
@@ -353,7 +353,7 @@ book_backend_sqlitedb_load	(EBookBackendSqliteDB *ebsdb,
 {
 	EBookBackendSqliteDBPrivate *priv;
 	gint ret;
-	
+
 	priv = ebsdb->priv;
 
 	e_sqlite3_vfs_init ();
@@ -378,7 +378,7 @@ book_backend_sqlitedb_load	(EBookBackendSqliteDB *ebsdb,
 	}
 
 	sqlite3_create_function (priv->db, "MATCH", 2, SQLITE_UTF8, NULL, e_book_sqlitedb_match_func, NULL, NULL);
-	
+
 	WRITER_LOCK (ebsdb);
 
 	book_backend_sql_exec (priv->db, "ATTACH DATABASE ':memory:' AS mem", NULL, NULL, NULL);
@@ -404,19 +404,19 @@ get_vcard_storage_path (EBookBackendSqliteDB *ebsdb, const gchar *uid)
 }
 
 /**
- * e_book_backend_sqlitedb_new 
+ * e_book_backend_sqlitedb_new
  * @path: location where the db would be created
  * @emailid: email id of the user
  * @folderid: folder id of the address-book
  * @folder_name: name of the address-book
  * @vcard_as_files: True if the vcards should be stored in separate files rather than in db. If
  *  this option is selected, choose different path's for storing the addressbooks.
- * @error: 
- * 
+ * @error:
+ *
  * If the path for multiple addressbooks are same, the contacts from all addressbooks
  * would be stored in same db in different tables.
- * 
- * Returns:  
+ *
+ * Returns:
  **/
 EBookBackendSqliteDB *
 e_book_backend_sqlitedb_new	(const gchar *path,
@@ -450,12 +450,12 @@ e_book_backend_sqlitedb_new	(const gchar *path,
 
 	book_backend_sqlitedb_load (ebsdb, filename, error);
 	g_free (filename);
-	
+
 	if (db_connections == NULL)
 		db_connections = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 	g_hash_table_insert (db_connections, hash_key, ebsdb);
 	ebsdb->priv->hash_key = g_strdup (hash_key);
-	
+
 	g_static_mutex_unlock (&dbcon_lock);
 
 exit:
@@ -466,8 +466,8 @@ exit:
 
 /* Add Contact */
 static gchar *
-insert_stmt_from_contact	(EContact *contact, 
-				 gboolean partial_content, 
+insert_stmt_from_contact	(EContact *contact,
+				 gboolean partial_content,
 				 const gchar *folderid,
 				 gboolean store_vcard)
 {
@@ -477,22 +477,22 @@ insert_stmt_from_contact	(EContact *contact,
 	gchar *email_1, *email_2, *email_3, *email_4;
 	gchar *vcard_str = NULL;
 
-	id		= e_contact_get (contact, E_CONTACT_UID);
-	nickname   	= e_contact_get (contact, E_CONTACT_NICKNAME);
-	full_name  	= e_contact_get (contact, E_CONTACT_FULL_NAME);
-	given_name 	= e_contact_get (contact, E_CONTACT_GIVEN_NAME);
-	surname    	= e_contact_get (contact, E_CONTACT_FAMILY_NAME);
-	file_as    	= e_contact_get (contact, E_CONTACT_FILE_AS);
-	email_1    	= e_contact_get (contact, E_CONTACT_EMAIL_1);
-	email_2    	= e_contact_get (contact, E_CONTACT_EMAIL_2);
-	email_3    	= e_contact_get (contact, E_CONTACT_EMAIL_3);
-	email_4    	= e_contact_get (contact, E_CONTACT_EMAIL_4);
-	
+	id          = e_contact_get (contact, E_CONTACT_UID);
+	nickname    = e_contact_get (contact, E_CONTACT_NICKNAME);
+	full_name   = e_contact_get (contact, E_CONTACT_FULL_NAME);
+	given_name  = e_contact_get (contact, E_CONTACT_GIVEN_NAME);
+	surname     = e_contact_get (contact, E_CONTACT_FAMILY_NAME);
+	file_as     = e_contact_get (contact, E_CONTACT_FILE_AS);
+	email_1     = e_contact_get (contact, E_CONTACT_EMAIL_1);
+	email_2     = e_contact_get (contact, E_CONTACT_EMAIL_2);
+	email_3     = e_contact_get (contact, E_CONTACT_EMAIL_3);
+	email_4     = e_contact_get (contact, E_CONTACT_EMAIL_4);
+
 	if (store_vcard)
 		vcard_str = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
 
 	stmt = sqlite3_mprintf ("INSERT or REPLACE INTO %Q VALUES (%Q, %Q, %Q, "
-	       			"%Q, %Q, %Q, %Q, %Q, %Q, %Q, %d, %Q, %Q)", folderid, id, nickname,
+		"%Q, %Q, %Q, %Q, %Q, %Q, %Q, %d, %Q, %Q)", folderid, id, nickname,
 				full_name, given_name, surname, file_as, email_1,
 				email_2, email_3, email_4, partial_content, vcard_str, NULL);
 
@@ -511,15 +511,15 @@ insert_stmt_from_contact	(EContact *contact,
 }
 
 /**
- * e_book_backend_sqlitedb_add_contacts 
- * @ebsdb: 
+ * e_book_backend_sqlitedb_add_contacts
+ * @ebsdb:
  * @folderid: folder id
  * @contacts: list of EContacts
  * @partial_content: contact does not contain full information. Used when
  * the backend cache's partial information for auto-completion.
- * @error: 
- * 
- * 
+ * @error:
+ *
+ *
  * Returns: TRUE on success.
  **/
 gboolean
@@ -533,7 +533,7 @@ e_book_backend_sqlitedb_add_contacts	(EBookBackendSqliteDB *ebsdb,
 	GError *err = NULL;
 	gboolean ret = TRUE;
 	EBookBackendSqliteDBPrivate *priv;
-	
+
 	priv = ebsdb->priv;
 
 	WRITER_LOCK (ebsdb);
@@ -542,9 +542,9 @@ e_book_backend_sqlitedb_add_contacts	(EBookBackendSqliteDB *ebsdb,
 	for (l = contacts; l != NULL; l = g_slist_next (l)) {
 		gchar *stmt;
 		EContact *contact = (EContact *) l->data;
-	
+
 		if (priv->vcard_as_files) {
-			gchar *path, *uid; 
+			gchar *path, *uid;
 			gchar *vcard_str;
 
 			uid = e_contact_get (contact, E_CONTACT_UID);
@@ -557,20 +557,20 @@ e_book_backend_sqlitedb_add_contacts	(EBookBackendSqliteDB *ebsdb,
 			g_free (uid);
 			g_free (vcard_str);
 		}
-		
+
 		if (err)
 			break;
 
-		stmt = insert_stmt_from_contact (contact, partial_content, folderid, 
+		stmt = insert_stmt_from_contact (contact, partial_content, folderid,
 						 !priv->vcard_as_files);
 		book_backend_sql_exec (priv->db, stmt, NULL, NULL, &err);
-		
+
 		sqlite3_free (stmt);
 
 		if (err)
 			break;
 	}
-	
+
 	book_backend_sqlitedb_end_transaction (ebsdb, &err);
 
 	WRITER_UNLOCK (ebsdb);
@@ -589,7 +589,7 @@ e_book_backend_sqlitedb_remove_contacts	(EBookBackendSqliteDB *ebsdb,
 					 const gchar *folderid,
 					 GSList *uids,
 					 GError **error)
-{	
+{
 	GSList *l;
 	GError *err = NULL;
 	gboolean ret = TRUE;
@@ -600,14 +600,14 @@ e_book_backend_sqlitedb_remove_contacts	(EBookBackendSqliteDB *ebsdb,
 
 	priv = ebsdb->priv;
 	str = g_string_new ("DELETE FROM ");
-       
+
 	tmp = sqlite3_mprintf ("%Q WHERE uid IN (", folderid);
 	g_string_append (str, tmp);
 	sqlite3_free (tmp);
 
 	for (l = uids; l != NULL; l = g_slist_next (l)) {
 		gchar *uid = (gchar *) uids->data;
-		
+
 		tmp = sqlite3_mprintf ("%Q", uid);
 		g_string_append_printf (str, " %s ,", tmp);
 		sqlite3_free (tmp);
@@ -678,16 +678,16 @@ e_book_backend_sqlitedb_has_contact	(EBookBackendSqliteDB *ebsdb,
 {
 	gchar *stmt;
 	struct _contact_info cinfo;
-	
+
 	cinfo.exists = FALSE;
 	cinfo.partial_content = FALSE;
-	
+
 	READER_LOCK (ebsdb);
 
 	stmt = sqlite3_mprintf ("SELECT partial_content FROM %Q WHERE uid = %Q", folderid, uid);
 	book_backend_sql_exec (ebsdb->priv->db, stmt, contact_found_cb , &cinfo, error);
 	sqlite3_free (stmt);
-	
+
 	if (!error || !*error)
 		*partial_content = cinfo.partial_content;
 
@@ -715,13 +715,13 @@ e_book_backend_sqlitedb_get_vcard_string	(EBookBackendSqliteDB *ebsdb,
 {
 	gchar *stmt;
 	gchar *vcard_str = NULL;
-	
+
 	READER_LOCK (ebsdb);
 
 	if (ebsdb->priv->vcard_as_files) {
 		gchar *path = get_vcard_storage_path (ebsdb, uid);
 		gsize len = -1;
-		
+
 		g_file_get_contents (path, &vcard_str, &len, error);
 
 		g_free (path);
@@ -732,8 +732,8 @@ e_book_backend_sqlitedb_get_vcard_string	(EBookBackendSqliteDB *ebsdb,
 	}
 
 	READER_UNLOCK (ebsdb);
-	
-	return vcard_str;	
+
+	return vcard_str;
 }
 
 static ESExpResult *
@@ -863,7 +863,7 @@ convert_match_exp (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpoi
 
 		if (argv[1]->type == ESEXP_RES_STRING && argv[1]->value.string [0] != 0) {
 			gchar *value=NULL;
-			
+
 			if (match == MATCH_CONTAINS) {
 				value = g_strdup_printf ("'%%%s%%'", argv[1]->value.string);
 			} else if (match == MATCH_ENDS_WITH) {
@@ -873,7 +873,7 @@ convert_match_exp (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpoi
 			} else if (match == MATCH_IS) {
 				value = g_strdup_printf ("'%%%s%%'", argv[1]->value.string);
 			}
-			
+
 			if (!strcmp (field, "full_name")) {
 				gchar *full, *sur, *given, *nick;
 
@@ -881,7 +881,7 @@ convert_match_exp (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpoi
 				sur = g_strdup_printf("(family_name IS NOT NULL AND family_name LIKE %s)",value);
 				given = g_strdup_printf("(given_name IS NOT NULL AND given_name LIKE %s)",value);
 				nick = g_strdup_printf("(nickname IS NOT NULL AND nickname LIKE %s)",value);
-			
+
 				str = g_strdup_printf (" %s OR %s OR %s OR %s ", full, sur, given, nick);
 
 				g_free (full);
@@ -889,9 +889,9 @@ convert_match_exp (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpoi
 				g_free (given);
 				g_free (nick);
 			} else if (!strcmp (field, "email")) {
-				gint i;	
+				gint i;
 				GString *emails = g_string_new (NULL);
-				
+
 				for (i = 1; i < 4; i++) {
 					g_string_append_printf (emails, "(email_%d IS NOT NULL AND email_%d LIKE %s)", i, i, value);
 					g_string_append (emails, " OR ");
@@ -1013,7 +1013,7 @@ book_backend_sqlitedb_search_query (EBookBackendSqliteDB *ebsdb, const gchar *sq
 {
 	GList *vcards = NULL;
 	gchar *stmt;
-	
+
 	READER_LOCK (ebsdb);
 
 	if (ebsdb->priv->vcard_as_files) {
@@ -1039,7 +1039,7 @@ book_backend_sqlitedb_search_query (EBookBackendSqliteDB *ebsdb, const gchar *sq
 	READER_UNLOCK (ebsdb);
 
 	vcards = g_list_reverse (vcards);
-	
+
 	return vcards;
 }
 
@@ -1049,7 +1049,7 @@ book_backend_sqlitedb_search_full (EBookBackendSqliteDB *ebsdb, const gchar *sex
 	GList *vcards = NULL, *all = NULL, *l;
 	EBookBackendSExp *bsexp = NULL;
 	gchar *stmt;
-	
+
 	READER_LOCK (ebsdb);
 
 	if (ebsdb->priv->vcard_as_files) {
@@ -1070,11 +1070,11 @@ book_backend_sqlitedb_search_full (EBookBackendSqliteDB *ebsdb, const gchar *sex
 		book_backend_sql_exec (ebsdb->priv->db, stmt, addto_vcard_list_cb , &all, error);
 		sqlite3_free (stmt);
 	}
-	
+
 	READER_UNLOCK (ebsdb);
 
 	bsexp = e_book_backend_sexp_new (sexp);
-	
+
 	for (l = all; l != NULL; l = g_list_next (l)) {
 		if (e_book_backend_sexp_match_vcard (bsexp, l->data))
 			vcards = g_list_prepend (vcards, g_strdup (l->data));
@@ -1116,14 +1116,14 @@ get_bool_cb (gpointer ref, gint col, gchar **cols, gchar **name)
 	return 0;
 }
 
-gboolean	
+gboolean
 e_book_backend_sqlitedb_get_is_populated	(EBookBackendSqliteDB *ebsdb,
 						 const gchar *folderid,
 						 GError **error)
 {
 	gchar *stmt;
 	gboolean ret = FALSE;
-	
+
 	READER_LOCK (ebsdb);
 
 	stmt = sqlite3_mprintf ("SELECT is_populated FROM folders WHERE folder_id = %Q", folderid);
@@ -1137,7 +1137,7 @@ e_book_backend_sqlitedb_get_is_populated	(EBookBackendSqliteDB *ebsdb,
 }
 
 
-gboolean	
+gboolean
 e_book_backend_sqlitedb_set_is_populated	(EBookBackendSqliteDB *ebsdb,
 						 const gchar *folderid,
 						 gboolean populated,
@@ -1146,10 +1146,10 @@ e_book_backend_sqlitedb_set_is_populated	(EBookBackendSqliteDB *ebsdb,
 	gchar *stmt = NULL;
 	GError *err = NULL;
 	gboolean ret = TRUE;
-	
+
 	WRITER_LOCK (ebsdb);
 	book_backend_sqlitedb_start_transaction (ebsdb, &err);
-	
+
 	stmt = sqlite3_mprintf ("UPDATE folders SET is_populated = %d WHERE folder_id = %Q",
 				populated, folderid);
 	book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
@@ -1166,14 +1166,14 @@ e_book_backend_sqlitedb_set_is_populated	(EBookBackendSqliteDB *ebsdb,
 	return ret;
 }
 
-gboolean	
+gboolean
 e_book_backend_sqlitedb_get_has_partial_content	(EBookBackendSqliteDB *ebsdb,
 						 const gchar *folderid,
 						 GError **error)
 {
 	gchar *stmt;
 	gboolean ret = FALSE;
-	
+
 	READER_LOCK (ebsdb);
 
 	stmt = sqlite3_mprintf ("SELECT partial_content FROM folders WHERE folder_id = %Q", folderid);
@@ -1185,7 +1185,7 @@ e_book_backend_sqlitedb_get_has_partial_content	(EBookBackendSqliteDB *ebsdb,
 	return ret;
 }
 
-gboolean	
+gboolean
 e_book_backend_sqlitedb_set_has_partial_content	(EBookBackendSqliteDB *ebsdb,
 						 const gchar *folderid,
 						 gboolean partial_content,
@@ -1194,10 +1194,10 @@ e_book_backend_sqlitedb_set_has_partial_content	(EBookBackendSqliteDB *ebsdb,
 	gchar *stmt = NULL;
 	GError *err = NULL;
 	gboolean ret = TRUE;
-	
+
 	WRITER_LOCK (ebsdb);
 	book_backend_sqlitedb_start_transaction (ebsdb, &err);
-	
+
 	stmt = sqlite3_mprintf ("UPDATE folders SET partial_content = %d WHERE folder_id = %Q",
 				partial_content, folderid);
 	book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
@@ -1224,13 +1224,13 @@ get_string_cb (gpointer ref, gint col, gchar **cols, gchar **name)
 	return 0;
 }
 
-gchar *		
+gchar *
 e_book_backend_sqlitedb_get_sync_data	(EBookBackendSqliteDB *ebsdb,
 					 const gchar *folderid,
 					 GError **error)
 {
 	gchar *stmt, *ret = NULL;
-	
+
 	READER_LOCK (ebsdb);
 
 	stmt = sqlite3_mprintf ("SELECT sync_data FROM folders WHERE folder_id = %Q", folderid);
@@ -1242,7 +1242,7 @@ e_book_backend_sqlitedb_get_sync_data	(EBookBackendSqliteDB *ebsdb,
 	return ret;
 }
 
-gboolean	
+gboolean
 e_book_backend_sqlitedb_set_sync_data	(EBookBackendSqliteDB *ebsdb,
 					 const gchar *folderid,
 					 const gchar *sync_data,
@@ -1251,10 +1251,10 @@ e_book_backend_sqlitedb_set_sync_data	(EBookBackendSqliteDB *ebsdb,
 	gchar *stmt = NULL;
 	GError *err = NULL;
 	gboolean ret = TRUE;
-	
+
 	WRITER_LOCK (ebsdb);
 	book_backend_sqlitedb_start_transaction (ebsdb, &err);
-	
+
 	stmt = sqlite3_mprintf ("UPDATE folders SET sync_data = %Q WHERE folder_id = %Q",
 				sync_data, folderid);
 	book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
@@ -1271,17 +1271,17 @@ e_book_backend_sqlitedb_set_sync_data	(EBookBackendSqliteDB *ebsdb,
 	return ret;
 }
 
-gchar *		
+gchar *
 e_book_backend_sqlitedb_get_key_value	(EBookBackendSqliteDB *ebsdb,
 					 const gchar *folderid,
 					 const gchar *key,
 					 GError **error)
 {
 	gchar *stmt, *ret = NULL;
-	
+
 	READER_LOCK (ebsdb);
 
-	stmt = sqlite3_mprintf ("SELECT value FROM folders WHERE folder_id = %Q AND key = %Q", 
+	stmt = sqlite3_mprintf ("SELECT value FROM folders WHERE folder_id = %Q AND key = %Q",
 							folderid, key);
 	book_backend_sql_exec (ebsdb->priv->db, stmt, get_string_cb , &ret, error);
 	sqlite3_free (stmt);
@@ -1291,7 +1291,7 @@ e_book_backend_sqlitedb_get_key_value	(EBookBackendSqliteDB *ebsdb,
 	return ret;
 }
 
-gboolean	
+gboolean
 e_book_backend_sqlitedb_set_key_value	(EBookBackendSqliteDB *ebsdb,
 					 const gchar *folderid,
 					 const gchar *key,
@@ -1301,10 +1301,10 @@ e_book_backend_sqlitedb_set_key_value	(EBookBackendSqliteDB *ebsdb,
 	gchar *stmt = NULL;
 	GError *err = NULL;
 	gboolean ret = TRUE;
-	
+
 	WRITER_LOCK (ebsdb);
 	book_backend_sqlitedb_start_transaction (ebsdb, &err);
-	
+
 	stmt = sqlite3_mprintf ("INSERT or REPLACE INTO keys (key, value, folder_id)	\
 	     			values (%Q, %Q, %Q)", key, value, folderid);
 	book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
@@ -1314,24 +1314,24 @@ e_book_backend_sqlitedb_set_key_value	(EBookBackendSqliteDB *ebsdb,
 	WRITER_UNLOCK (ebsdb);
 	if (err)
 		ret = FALSE;
-	
+
 	if (err)
 		g_propagate_error (error, err);
 
 	return ret;
 }
 
-GSList *	
+GSList *
 e_book_backend_sqlitedb_get_partially_cached_ids	(EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,
 							 GError **error)
 {
 	gchar *stmt;
 	GSList *uids = NULL;
-	
+
 	READER_LOCK (ebsdb);
 
-	stmt = sqlite3_mprintf ("SELECT uid FROM %Q WHERE partial_content = 1", 
+	stmt = sqlite3_mprintf ("SELECT uid FROM %Q WHERE partial_content = 1",
 							folderid);
 	book_backend_sql_exec (ebsdb->priv->db, stmt, addto_slist_cb, &uids, error);
 	sqlite3_free (stmt);
@@ -1343,9 +1343,9 @@ e_book_backend_sqlitedb_get_partially_cached_ids	(EBookBackendSqliteDB *ebsdb,
 
 
 /**
- * delete_vcard_files 
- * @ebsdb: 
- * @folderid: 
+ * delete_vcard_files
+ * @ebsdb:
+ * @folderid:
  *
  * Caller holds the writer lock.
  **/
@@ -1354,7 +1354,7 @@ delete_vcard_files (EBookBackendSqliteDB *ebsdb, const gchar *folderid, GError *
 {
 	gchar *stmt;
 	GSList *uids = NULL, *l;
-	
+
 	stmt = sqlite3_mprintf ("SELECT uid FROM %Q", folderid);
 	book_backend_sql_exec (ebsdb->priv->db, stmt, addto_slist_cb, &uids, error);
 	sqlite3_free (stmt);
@@ -1367,11 +1367,11 @@ delete_vcard_files (EBookBackendSqliteDB *ebsdb, const gchar *folderid, GError *
 		g_free (vcard_file);
 		g_free (l->data);
 	}
-	
+
 	g_slist_free (uids);
 }
 
-gboolean	
+gboolean
 e_book_backend_sqlitedb_delete_addressbook	(EBookBackendSqliteDB *ebsdb,
 						 const gchar *folderid,
 						 GError **error)
@@ -1379,10 +1379,10 @@ e_book_backend_sqlitedb_delete_addressbook	(EBookBackendSqliteDB *ebsdb,
 	gchar *stmt;
 	GError *err = NULL;
 	gboolean ret = TRUE;
-	
+
 	WRITER_LOCK (ebsdb);
 	book_backend_sqlitedb_start_transaction (ebsdb, &err);
-	
+
 	/* delete the vcard files if they were stored as files	*/
 	if (ebsdb->priv->vcard_as_files)
 		delete_vcard_files (ebsdb, folderid, &err);
@@ -1392,14 +1392,14 @@ e_book_backend_sqlitedb_delete_addressbook	(EBookBackendSqliteDB *ebsdb,
 	book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
 	sqlite3_free (stmt);
 
-	/* delete the key/value pairs corresponding to this table */	
+	/* delete the key/value pairs corresponding to this table */
 	if (!err) {
 		stmt = sqlite3_mprintf ("DELETE FROM keys WHERE folder_id = %Q", folderid);
 		book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
 		sqlite3_free (stmt);
 	}
 
-	/* delete the folder from the folders table */	
+	/* delete the folder from the folders table */
 	if (!err) {
 		stmt = sqlite3_mprintf ("DELETE FROM folders WHERE folder_id = %Q", folderid);
 		book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
@@ -1408,7 +1408,7 @@ e_book_backend_sqlitedb_delete_addressbook	(EBookBackendSqliteDB *ebsdb,
 
 	book_backend_sqlitedb_end_transaction (ebsdb, &err);
 	WRITER_UNLOCK (ebsdb);
-	
+
 	if (err)
 		ret = FALSE;
 
