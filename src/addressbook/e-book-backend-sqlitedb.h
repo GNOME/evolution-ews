@@ -95,6 +95,11 @@ gboolean	e_book_backend_sqlitedb_has_contact	(EBookBackendSqliteDB *ebsdb,
 							 const gchar *uid,
 							 gboolean *partial_content,
 							 GError **error);
+EContact *	e_book_backend_sqlitedb_get_contact
+							(EBookBackendSqliteDB *ebsdb,
+							 const gchar *folderid,
+							 const gchar *uid,
+							 GError **error);
 gchar *		e_book_backend_sqlitedb_get_vcard_string
 							(EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,

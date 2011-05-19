@@ -748,6 +748,23 @@ get_vcard_cb (gpointer ref, gint col, gchar **cols, gchar **name)
 	return 0;
 }
 
+EContact *
+e_book_backend_sqlitedb_get_contact	(EBookBackendSqliteDB *ebsdb,
+						 const gchar *folderid,
+						 const gchar *uid,
+						 GError **error) {
+	GError *err = NULL;
+	EContact *contact = NULL;
+	gchar *vcard = e_book_backend_sqlitedb_get_vcard_string (ebsdb, folderid, uid, &err);
+	if (!err) {
+		contact = e_contact_new_from_vcard(vcard);
+		g_free (vcard);
+	} else
+		g_propagate_error (error, err);
+
+	return contact;
+}
+
 gchar *
 e_book_backend_sqlitedb_get_vcard_string	(EBookBackendSqliteDB *ebsdb,
 						 const gchar *folderid,
