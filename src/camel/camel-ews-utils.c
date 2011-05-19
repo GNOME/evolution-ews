@@ -485,7 +485,8 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 	}
 }
 
-
+/* FIXME get the real folder ids of the system folders using
+   by fetching them using distinguished folder ids once */
 static void
 add_folder_to_summary (CamelEwsStore *store, EEwsFolder *folder)
 {

@@ -1174,6 +1174,8 @@ ews_expunge_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GError *
 
 	if (!camel_ews_store_connected (ews_store, error))
 		return FALSE;
+	
+	/* FIXME Run expunge on just trash folder once we are able to identify the exact trash */
 
 	/*Collect UIDs of deleted messages.*/
 	count = camel_folder_summary_count (folder->summary);
