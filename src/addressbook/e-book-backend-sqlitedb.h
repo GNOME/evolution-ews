@@ -24,7 +24,6 @@
 
 #include <glib.h>
 #include <glib-object.h>
-#include <sqlite3.h>
 #include <libebook/e-contact.h>
 
 /* Standard GObject macros */
