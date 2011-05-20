@@ -45,6 +45,7 @@
 #include "libedata-book/e-data-book.h"
 #include "libedata-book/e-data-book-view.h"
 #include "e-book-backend-ews.h"
+#include "e-book-backend-sqlitedb.h"
 
 #include "e-ews-connection.h"
 #include "e-ews-item.h"
@@ -58,8 +59,12 @@ G_DEFINE_TYPE (EBookBackendEws, e_book_backend_ews, E_TYPE_BOOK_BACKEND)
 struct _EBookBackendEwsPrivate {
 	EEwsConnection *cnc;
 	gchar *folder_id;
+
+	EBookBackendSqliteDB *ebsdb;
+
 	gboolean only_if_exists;
 	gboolean is_writable;
+	gboolean marked_for_offline;
 	gint mode;
 
 	GHashTable *ops;
@@ -626,16 +631,41 @@ e_book_backend_ews_cancel_operation (EBookBackend *backend, EDataBook *book, GEr
 }
 
 static void
-e_book_backend_ews_load_source (EBookBackend           *backend,
-				      ESource                *source,
-				      gboolean                only_if_exists,
-				      GError                **perror)
+e_book_backend_ews_load_source 	(EBookBackend           *backend,
+				 ESource                *source,
+				 gboolean                only_if_exists,
+				 GError                **perror)
 {
+	EBookBackendEws *cbews;
+	EBookBackendEwsPrivate *priv;
+	const gchar *cache_dir, *email;
+	const gchar *folder_id, *folder_name;
+	const gchar *offline;
+	GError *err = NULL;
 
+	cbews = E_BOOK_BACKEND_EWS (backend);
+	priv = cbews->priv;
+
+	cache_dir = e_book_backend_get_cache_dir (backend);
+	email = e_source_get_property (source, "email");
+	folder_id = e_source_get_property (source, "folder-id");
+	folder_name = e_source_peek_name (source);
+
+	priv->ebsdb = e_book_backend_sqlitedb_new (cache_dir, email, folder_id, folder_name, FALSE, &err);
+	if (err) {
+		g_propagate_error (perror, err);
+		return;
+	}
+
+	offline = e_source_get_property (source, "offline_sync");
+	if (offline  && g_str_equal (offline, "1"))
+		priv->marked_for_offline = TRUE;
+	
+	e_book_backend_set_is_loaded (backend, TRUE);
 }
 
 static void
-e_book_backend_ews_remove (EBookBackend *backend,
+e_book_backend_ews_remove	(EBookBackend *backend,
 				 EDataBook        *book,
 				 guint32           opid)
 {
