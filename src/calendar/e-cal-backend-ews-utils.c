@@ -407,3 +407,55 @@ void ewscal_set_reccurence (ESoapMessage *msg, icalproperty *rrule, icaltimetype
 exit:
 	e_soap_message_end_element (msg); /* "Recurrence" */
 }
+
+static struct icaltimetype
+icalcomponent_get_datetime(icalcomponent *comp, icalproperty *prop)
+{
+	/* Extract datetime with proper timezone */
+	icalcomponent *c;
+	icalparameter *param;
+	struct icaltimetype ret;
+
+	ret = icalvalue_get_datetime (icalproperty_get_value(prop));
+
+	if ((param = icalproperty_get_first_parameter (prop, ICAL_TZID_PARAMETER)) != NULL) {
+		const char *tzid = icalparameter_get_tzid (param);
+		icaltimezone *tz = NULL;
+
+		for (c = comp; c != NULL; c = icalcomponent_get_parent (c)) {
+			tz = icalcomponent_get_timezone (c, tzid);
+			if (tz != NULL)	break;
+		}
+
+		if (tz == NULL)
+			tz = icaltimezone_get_builtin_timezone_from_tzid(tzid);
+
+		if (tz != NULL)
+			ret = icaltime_set_timezone(&ret, tz);
+	}
+
+	return ret;
+}
+
+void ewscal_set_reccurence_exceptions (ESoapMessage *msg, icalcomponent *comp)
+{
+	icalproperty *exdate;
+
+	/* Make sure we have at least 1 excluded occurrence */
+	exdate = icalcomponent_get_first_property (comp,ICAL_EXDATE_PROPERTY);
+	if (!exdate) return;
+
+	e_soap_message_start_element (msg, "DeletedOccurrences", NULL, NULL);
+
+	for (; exdate; exdate = icalcomponent_get_next_property (comp, ICAL_EXDATE_PROPERTY)) {
+		struct icaltimetype exdatetime = icalcomponent_get_datetime(comp, exdate);
+
+		e_soap_message_start_element (msg, "DeletedOccurrence", NULL, NULL);
+
+		ewscal_set_date (msg, "Start", &exdatetime);
+
+		e_soap_message_end_element (msg); /* "DeletedOccurrence" */
+	}
+
+	e_soap_message_end_element (msg); /* "DeletedOccurrences" */
+}
