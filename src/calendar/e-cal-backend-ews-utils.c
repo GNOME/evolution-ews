@@ -99,6 +99,17 @@ void ewscal_set_time (ESoapMessage *msg, const gchar *name, icaltimetype *t)
 	g_free (str);
 }
 
+static void ewscal_set_date (ESoapMessage *msg, const gchar *name, icaltimetype *t)
+{
+	char *str;
+
+	str = g_strdup_printf("%04d-%02d-%02d",
+			      t->year, t->month, t->day);
+
+	e_ews_message_write_string_parameter(msg, name, NULL, str);
+	g_free (str);
+}
+
 static const char *number_to_month(int num) {
 	static const char *months[] = {
 		"January", "February", "March", "April", "May", "June", "July",
@@ -127,6 +138,7 @@ static const char *weekindex_to_ical(int index) {
 		{ "Second", 2 },
 		{ "Third", 3 },
 		{ "Fourth", 4 },
+		{ "Fifth", 5 },
 		{ "Last", -1 }
 	};
 	int i;
@@ -263,4 +275,135 @@ void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *ic
 		e_soap_message_end_element(msg); /* "Daylight" */
 	}
 	e_soap_message_end_element(msg); /* "MeetingTimeZone" */
+}
+
+void ewscal_set_reccurence (ESoapMessage *msg, icalproperty *rrule, icaltimetype *dtstart)
+{
+	char buffer[256];
+	int i, len;
+	gboolean is_relative = FALSE;
+
+	/* MSDN reference: http://msdn.microsoft.com/en-us/library/aa580471%28v=EXCHG.80%29.aspx
+	 */
+	struct icalrecurrencetype recur = icalproperty_get_rrule (rrule);
+
+	e_soap_message_start_element (msg, "Recurrence", NULL, NULL);
+
+	switch (recur.freq) {
+		case ICAL_DAILY_RECURRENCE:
+			e_soap_message_start_element (msg, "DailyRecurrence", NULL, NULL);
+			snprintf (buffer, 32, "%d", recur.interval);
+			e_ews_message_write_string_parameter (msg, "Interval", NULL, buffer);
+			e_soap_message_end_element (msg); /* "DailyRecurrence" */
+			break;
+
+		case ICAL_WEEKLY_RECURRENCE:
+			e_soap_message_start_element (msg, "WeeklyRecurrence", NULL, NULL);
+
+			snprintf (buffer, 32, "%d", recur.interval);
+			e_ews_message_write_string_parameter (msg, "Interval", NULL, buffer);
+
+			len = snprintf (buffer, 256, "%s",
+				number_to_weekday(icalrecurrencetype_day_day_of_week(recur.by_day[0]) - recur.week_start));
+			for (i = 1; recur.by_day[i] != ICAL_RECURRENCE_ARRAY_MAX; i++) {
+				len += snprintf (buffer+len, 256-len, " %s",
+					number_to_weekday(icalrecurrencetype_day_day_of_week(recur.by_day[i]) - recur.week_start));
+			}
+			e_ews_message_write_string_parameter(msg, "DaysOfWeek", NULL, buffer);
+
+			e_soap_message_end_element (msg); /* "WeeklyRecurrence" */
+			break;
+
+		case ICAL_MONTHLY_RECURRENCE:
+			if (recur.by_month_day[0] == ICAL_RECURRENCE_ARRAY_MAX) {
+				e_soap_message_start_element (msg, "RelativeMonthlyRecurrence", NULL, NULL);
+
+				/* For now this is what got implemented since this is the only
+				 relative monthly recurrence evolution can set.
+				 TODO: extend the code with all possible monthly recurrence settings */
+				snprintf (buffer, 32, "%d", recur.interval);
+				e_ews_message_write_string_parameter(msg, "Interval", NULL, buffer);
+				
+				e_ews_message_write_string_parameter(msg, "DaysOfWeek", NULL,
+					number_to_weekday (icalrecurrencetype_day_day_of_week(recur.by_day[0]) - recur.week_start));
+				
+				e_ews_message_write_string_parameter(msg, "DayOfWeekIndex", NULL, weekindex_to_ical (recur.by_set_pos[0]));
+
+				e_soap_message_end_element (msg); /* "RelativeMonthlyRecurrence" */
+
+			} else {
+				e_soap_message_start_element (msg, "AbsoluteMonthlyRecurrence", NULL, NULL);
+
+				snprintf (buffer, 256, "%d", recur.by_month_day[0]);
+				e_ews_message_write_string_parameter(msg, "DayOfMonth", NULL, buffer);
+
+				snprintf (buffer, 256, "%d", recur.interval);
+				e_ews_message_write_string_parameter (msg, "Interval", NULL, buffer);
+
+				e_soap_message_end_element (msg); /* "AbsoluteMonthlyRecurrence" */
+
+			}
+			break;
+
+		case ICAL_YEARLY_RECURRENCE:
+			if (is_relative) {
+				ewscal_add_rrule (msg, rrule);
+
+			} else {
+				e_soap_message_start_element (msg, "AbsoluteYearlyRecurrence", NULL, NULL);
+
+				/* work according to RFC5545 §3.3.10
+				 * dtstart is the default, give preference to by_month & by_month_day if they are set
+				 */
+				if (recur.by_month_day[0] != ICAL_RECURRENCE_ARRAY_MAX) {
+					snprintf (buffer, 256, "%d", recur.by_month_day[0]);
+				} else {
+					snprintf (buffer, 256, "%d", dtstart->day);
+				}
+				e_ews_message_write_string_parameter(msg, "DayOfMonth", NULL, buffer);
+
+				if (recur.by_month[0] != ICAL_RECURRENCE_ARRAY_MAX) {
+					snprintf (buffer, 256, "%d", recur.by_month_day[0]);
+					e_ews_message_write_string_parameter(msg, "Month", NULL,
+						number_to_month (recur.by_month[0]));
+				} else {
+					e_ews_message_write_string_parameter(msg, "Month", NULL,
+						number_to_month (dtstart->month));
+				}
+
+				e_soap_message_end_element (msg); /* "AbsoluteYearlyRecurrence" */
+
+			}
+			break;
+
+		case ICAL_SECONDLY_RECURRENCE:
+		case ICAL_MINUTELY_RECURRENCE:
+		case ICAL_HOURLY_RECURRENCE:
+		default:
+			/* TODO: remove the "Recurrence" element somehow */
+			g_warning ("EWS cant handle recurrence with frequency higher than DAILY\n");
+			goto exit;
+	}
+
+	if (recur.count > 0) {
+		e_soap_message_start_element (msg, "NumberedRecurrence", NULL, NULL);
+		ewscal_set_date (msg, "StartDate", dtstart);
+		snprintf (buffer, 32, "%d", recur.count);
+		e_ews_message_write_string_parameter (msg, "NumberOfOccurrences", NULL, buffer);
+		e_soap_message_end_element (msg); /* "NumberedRecurrence" */
+
+	} else if (!icaltime_is_null_time (recur.until)) {
+		e_soap_message_start_element (msg, "EndDateRecurrence", NULL, NULL);
+		ewscal_set_date (msg, "StartDate", dtstart);
+		ewscal_set_date (msg, "EndDate", &recur.until);
+		e_soap_message_end_element (msg); /* "EndDateRecurrence" */
+
+	} else {
+		e_soap_message_start_element (msg, "NoEndRecurrence", NULL, NULL);
+		ewscal_set_date (msg, "StartDate", dtstart);
+		e_soap_message_end_element (msg); /* "NoEndRecurrence" */
+	}
+
+exit:
+	e_soap_message_end_element (msg); /* "Recurrence" */
 }
