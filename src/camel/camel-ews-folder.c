@@ -378,7 +378,7 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 			}
 			goto exit;
 		}
-		associatedcalendarid = e_ews_item_get_associatedcalendarid (items_req->data);
+		associatedcalendarid = (e_ews_item_get_associated_calendar_item_id (items_req->data))->id;
 
 		mime_fname_new = ews_update_mgtrequest_mime_calendar_itemid (mime_content,
 									     associatedcalendarid,

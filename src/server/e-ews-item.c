@@ -167,7 +167,7 @@ struct _EEwsItemPrivate {
 	GSList *attachments_list;
 	GSList *attendees;
 
-	gchar *associatedcalendaritemid;
+	EwsId *associated_calendar_item_id;
 
 	struct _EEwsContactFields *contact_fields;
 };
@@ -245,8 +245,12 @@ e_ews_item_dispose (GObject *object)
 
 	}
 
-	g_free (priv->associatedcalendaritemid);
-	priv->associatedcalendaritemid = NULL;
+	if (priv->associated_calendar_item_id) {
+		g_free (priv->associated_calendar_item_id->id);
+		g_free (priv->associated_calendar_item_id->change_key);
+		g_free (priv->associated_calendar_item_id);
+		priv->associated_calendar_item_id = NULL;
+	}
 
 	ews_item_free_mailbox (priv->sender);
 	ews_item_free_mailbox (priv->from);
@@ -801,7 +805,9 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 		} else if (!g_ascii_strcasecmp (name, "OptionalAttendees")) {
 			process_attendees (priv, subparam, "Optional");
 		} else if (!g_ascii_strcasecmp (name, "AssociatedCalendarItemId")) {
-			priv->associatedcalendaritemid = e_soap_parameter_get_property (subparam, "Id");
+			priv->associated_calendar_item_id = g_new0 (EwsId, 1);
+			priv->associated_calendar_item_id->id = e_soap_parameter_get_property (subparam, "Id");
+			priv->associated_calendar_item_id->change_key = e_soap_parameter_get_property (subparam, "ChangeKey");
 		}
 	}
 
@@ -1167,12 +1173,12 @@ e_ews_item_get_attendees (EEwsItem *item)
 	return item->priv->attendees;
 }
 
-const gchar *
-e_ews_item_get_associatedcalendarid (EEwsItem *item)
+const EwsId *
+e_ews_item_get_associated_calendar_item_id (EEwsItem *item)
 {
 	g_return_val_if_fail(E_IS_EWS_ITEM(item), NULL);
 
-	return (const gchar*) item->priv->associatedcalendaritemid;
+	return (const EwsId*) item->priv->associated_calendar_item_id;
 }
 
 const gchar *

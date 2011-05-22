@@ -162,6 +162,9 @@ const GSList *	e_ews_item_get_attendees	(EEwsItem *item);
 
 const gchar *	e_ews_item_get_associatedcalendarid
 						(EEwsItem *item);
+const EwsId *	e_ews_item_get_associated_calendar_item_id
+						(EEwsItem *item);
+
 /* Contact fields */
 const gchar *	e_ews_item_get_fileas		(EEwsItem *item);
 const EwsCompleteName *	
