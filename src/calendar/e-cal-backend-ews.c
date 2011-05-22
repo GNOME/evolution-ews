@@ -1238,6 +1238,7 @@ convert_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 	icalcomponent *icalcomp = e_cal_component_get_icalcomponent (modify_data->comp);
 	GSList *required = NULL, *optional = NULL, *resource = NULL;
 	icaltimetype dtstart, dtend;
+	icalproperty *prop;
 
 	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
 					 modify_data->itemid, modify_data->changekey, 0);
@@ -1258,6 +1259,12 @@ convert_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 	e_ews_message_end_set_item_field (msg);
 
 	convert_property_to_updatexml  (msg, "Location", icalcomponent_get_location(icalcomp), "calendar", NULL, NULL);
+
+	/* Recurrence */
+	prop = icalcomponent_get_first_property(icalcomp, ICAL_RRULE_PROPERTY);
+	if (prop != NULL) {
+		ewscal_set_reccurence(msg, prop, &dtstart);
+	}
 
 	e_ews_collect_attendees(icalcomp, &required, &optional, &resource);
 	if (required != NULL) {
