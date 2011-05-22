@@ -146,13 +146,47 @@ camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder, const gchar
 	return msg;
 }
 
+static CamelMimePart *
+ews_get_calendar_mime_part (CamelMimePart* mimepart)
+{
+	guint partnumber, i;
+	CamelDataWrapper *datawrapper;
+	datawrapper = camel_medium_get_content (CAMEL_MEDIUM (mimepart));
+
+	if (CAMEL_IS_MULTIPART (datawrapper)) {
+		partnumber = camel_multipart_get_number (CAMEL_MULTIPART (datawrapper));
+		for (i = 0; i < partnumber; i++) {
+			CamelMimePart *child_mimepart = NULL;
+			CamelMimePart *ret_mimepart = NULL;
+			child_mimepart = camel_multipart_get_part (CAMEL_MULTIPART (datawrapper), i);
+
+			if (!child_mimepart)
+				goto exit;
+
+			ret_mimepart = ews_get_calendar_mime_part (child_mimepart) ;
+			if (ret_mimepart)
+				return ret_mimepart;
+		}
+	}
+	else {
+		gchar *type;
+		type = camel_data_wrapper_get_mime_type (datawrapper);
+		if (!g_ascii_strcasecmp (type, "text/calendar")) {
+			g_free (type);
+			return mimepart;
+		}
+		g_free (type);
+	}
+	exit:
+	return NULL;
+}
+
 static gchar *
 ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar* id, GError **error)
 {
 	CamelMimeParser *mimeparser;
-	CamelDataWrapper *dw;
 	CamelMimeMessage *msg;
-	guint partnumber, i;
+	CamelMimePart *mimepart = NULL;
 	int fd_old;
 	gchar *mime_fname_new = NULL;
 
@@ -173,69 +207,42 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 
 	msg = camel_mime_message_new ();
 	if (EVO3_sync(camel_mime_part_construct_from_parser) (CAMEL_MIME_PART(msg),
-						mimeparser, EVO3(NULL,) error) == -1) {
+							      mimeparser, EVO3(NULL,) error) == -1) {
 		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 			     _("Unable to parse meeting request mimecontent!"));
 		goto exit_msg;
 	}
 
-	dw = camel_medium_get_content (CAMEL_MEDIUM (msg));
-	partnumber = camel_multipart_get_number (CAMEL_MULTIPART(dw));
-	for (i=0; i< partnumber; i++) {
-		gchar *type;
-		CamelMimePart *mimepart = NULL;
-		CamelDataWrapper *datawrapper;
-
-		mimepart = camel_multipart_get_part (CAMEL_MULTIPART(dw), i);
-
-		if (!mimepart) {
-			g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-				     _("Unable to get mimepart!"));
-			goto exit_msg;
-		}
-
-		datawrapper = camel_medium_get_content (CAMEL_MEDIUM (mimepart));
-		type = camel_data_wrapper_get_mime_type (datawrapper);
-		if (!g_ascii_strcasecmp(type, "text/calendar")) {
-			CamelStream *tmpstream = NULL;
-			GByteArray *ba;
-			icalcomponent *icalcomp;
-			gchar *calstring_new;
-
-			tmpstream = camel_stream_mem_new ();
-			if (EVO3_sync (camel_data_wrapper_decode_to_stream) (datawrapper,
-					     tmpstream, EVO3(NULL,) error) == -1) {
-				g_object_unref (tmpstream);
-				g_free (type);
-				goto exit_msg;
-			}
-
-			/* Replace original random UID with AssociatedCalendarItemId (ItemId) */
-			ba = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (tmpstream));
-			g_byte_array_append (ba, (guint8 *) "\0", 1);
-
-			icalcomp = icalparser_parse_string ((gchar *) ba->data);
-			icalcomponent_set_uid (icalcomp, (gchar *) id);
-			calstring_new = icalcomponent_as_ical_string_r (icalcomp);
-
-			camel_mime_part_set_content (mimepart,
-						     (const gchar*)calstring_new, strlen(calstring_new),
-						     (const gchar*)type);
-
-			g_free (type);
-			g_free (calstring_new);
-			icalcomponent_free (icalcomp);
-			g_object_unref (tmpstream);
-			break;
-		}
-		g_free (type);
-	}
-
-	if (1) {
-		CamelStream  *newstream = NULL;
-		gchar *dir;
+	mimepart = ews_get_calendar_mime_part (CAMEL_MIME_PART (msg));
+	if (mimepart) {
+		CamelDataWrapper *dw;
+		CamelStream *tmpstream = NULL, *newstream = NULL;
+		GByteArray *ba;
+		icalcomponent *icalcomp;
+		gchar *calstring_new, *dir;
 		const gchar *temp;
 		int fd;
+		gboolean success = FALSE;
+
+		dw = camel_medium_get_content (CAMEL_MEDIUM (mimepart));
+		tmpstream = camel_stream_mem_new ();
+		if (EVO3_sync(camel_data_wrapper_decode_to_stream) (dw,
+								    tmpstream, EVO3(NULL,) error) == -1) {
+			g_object_unref (tmpstream);
+			goto exit_msg;
+		}
+		/* Replace original random UID with AssociatedCalendarItemId (ItemId) */
+		ba = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (tmpstream));
+		g_byte_array_append (ba, (guint8 *) "\0", 1);
+		icalcomp = icalparser_parse_string ((gchar *) ba->data);
+		icalcomponent_set_uid (icalcomp, (gchar *) id);
+		calstring_new = icalcomponent_as_ical_string_r (icalcomp);
+		camel_mime_part_set_content (mimepart,
+					     (const gchar*) calstring_new, strlen (calstring_new),
+					     "text/calendar");
+		g_free (calstring_new);
+		icalcomponent_free (icalcomp);
+		g_object_unref (tmpstream);
 
 		// Create a new file to store updated mimecontent
 		temp = g_strrstr (mime_fname, "/");
@@ -245,22 +252,30 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 		if (fd == -1) {
 			g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 				     _("Unable to create cache file"));
-			g_free (dir);
-			g_free (mime_fname_new);
-			mime_fname_new = NULL;
-			goto exit_msg;
+			goto exit_save;
 		}
 		newstream = camel_stream_fs_new_with_fd (fd);
-		// Dump updated message data to the stream
-		EVO3_sync(camel_data_wrapper_write_to_stream) (CAMEL_DATA_WRAPPER (msg), newstream, EVO3(NULL,) error);
-		// Flush stream to its backend store
-		camel_stream_flush (newstream, EVO3(NULL,) error);
-		camel_stream_close (newstream, EVO3(NULL,) error);
-		g_free (dir);
-		close (fd);
-		fd = -1;
-		// remove original file
+		if (EVO3_sync(camel_data_wrapper_write_to_stream) (CAMEL_DATA_WRAPPER (msg),
+								   newstream, EVO3(NULL,) error) == -1)
+			goto exit_save;
+		if (camel_stream_flush (newstream, EVO3(NULL,) error) == -1)
+			goto exit_save;
+		if (camel_stream_close (newstream, EVO3(NULL,) error) == -1)
+			goto exit_save;
 		g_remove (mime_fname);
+		success = TRUE;
+ exit_save:
+		if (fd != -1) {
+			close (fd);
+			fd = -1;
+		}
+		g_free (dir);
+		if (newstream)
+			g_object_unref (newstream);
+		if (!success) {
+			g_free (mime_fname_new);
+			mime_fname_new = NULL;
+		}
 	}
  exit_msg:
 	g_object_unref (msg);
