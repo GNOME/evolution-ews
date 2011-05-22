@@ -947,6 +947,7 @@ convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 	icalcomponent *icalcomp = (icalcomponent*)user_data;
 	GSList *required = NULL, *optional = NULL, *resource = NULL;
 	icaltimetype dtstart, dtend;
+	icalproperty *prop;
 
 	/* FORMAT OF A SAMPLE SOAP MESSAGE: http://msdn.microsoft.com/en-us/library/aa564690.aspx */
 
@@ -970,6 +971,12 @@ convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 	/* location */
 	e_ews_message_write_string_parameter(msg, "Location", NULL, icalcomponent_get_location(icalcomp));
 
+	/* Recurrence */
+	prop = icalcomponent_get_first_property(icalcomp, ICAL_RRULE_PROPERTY);
+	if (prop != NULL) {
+		ewscal_set_reccurence(msg, prop, &dtstart);
+	}
+	
 	/* collect attendees */
 	e_ews_collect_attendees(icalcomp, &required, &optional, &resource);
 
