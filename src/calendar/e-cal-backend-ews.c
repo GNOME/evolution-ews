@@ -1395,6 +1395,141 @@ exit:
 	e_data_cal_notify_object_modified (cal, context, error, NULL, NULL);
 }
 
+static void
+prepare_accept_item_request(ESoapMessage *msg, gpointer user_data)
+{
+	ECalComponent *comp = user_data;
+	gchar *uid = NULL, *change_key = NULL;
+
+	g_warning("Preparing msg for accept item\n");
+
+	/* gather needed data from icalcomponent */
+	ews_cal_component_get_item_id (comp, &uid, &change_key);
+
+	g_warning("Preparing msg for accept item - uid:%s change_key:%s\n", uid, change_key);
+
+	/* FORMAT OF A SAMPLE SOAP MESSAGE: http://msdn.microsoft.com/en-us/library/aa566464%28v=exchg.140%29.aspx */
+
+	/* Prepare AcceptItem node in the SOAP message */
+	e_soap_message_start_element (msg, "AcceptItem", NULL, NULL);
+
+	e_soap_message_start_element (msg, "ReferenceItemId", NULL, NULL);
+	e_soap_message_add_attribute (msg, "Id", uid, NULL, NULL);
+	e_soap_message_add_attribute (msg, "ChangeKey", change_key, NULL, NULL);
+	e_soap_message_end_element (msg); // "ReferenceItemId"
+
+	// end of "AcceptItem"
+	e_soap_message_end_element (msg);
+
+	g_free (uid);
+	g_free (change_key);
+}
+
+static gboolean
+e_cal_backend_send_accept_item(ECalBackend *backend, icalcomponent *icalcomp) {
+	ECalBackendEwsPrivate *priv = E_CAL_BACKEND_EWS(backend)->priv;
+	GCancellable *cancellable = NULL;
+	const gchar *uid = NULL;
+	GSList *ids = NULL;
+	ECalComponent *comp;
+
+	uid = icalcomponent_get_uid(icalcomp);
+
+	g_warning ("UID of item is %s\n",uid);
+
+	g_warning ("ICal component%s\n", icalcomponent_as_ical_string(icalcomp));
+
+	comp = e_cal_component_new ();
+	e_cal_component_set_icalcomponent (comp, icalcomp);
+
+	if (!comp)
+		return FALSE;
+
+	g_warning("Accepting item '%s'\n", icalcomponent_as_ical_string (icalcomp));
+
+	return e_ews_connection_create_items (priv->cnc,
+					      EWS_PRIORITY_MEDIUM,
+					      "SendAndSaveCopy",NULL,NULL,
+					      prepare_accept_item_request,
+					      comp,
+					      &ids,
+					      cancellable,
+					      NULL);
+}
+
+static void
+e_cal_backend_ews_receive_objects(ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *calobj) {
+	ECalBackendEws *cbews;
+	ECalBackendEwsPrivate *priv;
+	icalcomponent_kind kind;
+	icalcomponent *icalcomp, *subcomp;
+	GError *error = NULL;
+	gboolean stop = FALSE;
+	icalproperty_method method;
+
+	cbews = E_CAL_BACKEND_EWS(backend);
+	priv = cbews->priv;
+
+	/* make sure we're not offline */
+	if (priv->mode == CAL_MODE_LOCAL) {
+		g_propagate_error(&error, EDC_ERROR(RepositoryOffline));
+		goto exit;
+	}
+
+	g_warning ("Printing original calobj form e_cal_backend_ews_receive_objects\n %s\n",calobj);
+
+	/* parse ical data */
+	icalcomp = icalparser_parse_string (calobj);
+
+	/* make sure data was parsed properly */
+	if (!icalcomp) {
+		g_propagate_error (&error, EDC_ERROR(InvalidObject));
+		goto exit;
+	}
+
+	/* make sure ical data we parse is actually an vcal component */
+	if (icalcomponent_isa(icalcomp) != ICAL_VCALENDAR_COMPONENT) {
+		icalcomponent_free (icalcomp);
+		g_propagate_error(&error, EDC_ERROR(InvalidObject));
+		goto exit;
+	}
+
+	kind = e_cal_backend_get_kind (E_CAL_BACKEND(backend));
+
+	method = icalcomponent_get_method (icalcomp);
+	subcomp = icalcomponent_get_first_component (icalcomp, kind);
+
+	while (subcomp && !stop) {
+		ECalComponent *comp = e_cal_component_new();
+		gboolean result;
+
+		/* duplicate the ical component */
+		e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone(subcomp));
+
+		switch (method) {
+			case ICAL_METHOD_REQUEST:
+				result = e_cal_backend_send_accept_item(backend, subcomp);
+				e_data_cal_notify_objects_received (cal,context,error);
+				break;
+			case ICAL_METHOD_CANCEL:
+			case ICAL_METHOD_REPLY:
+			default:
+				break;
+		}
+		g_object_unref (comp);
+		subcomp = icalcomponent_get_next_component (icalcomp,
+					e_cal_backend_get_kind (E_CAL_BACKEND (backend)));
+	}
+
+	icalcomponent_free (icalcomp);
+
+exit:
+	if (error) {
+		g_warning("Got an error: %s\n", error->message);
+		g_clear_error(&error);
+	}
+}
+
 /* TODO Do not replicate this in every backend */
 static icaltimezone *
 resolve_tzid (const gchar *tzid, gpointer user_data)
@@ -2107,7 +2242,7 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 
 	backend_class->remove_object = e_cal_backend_ews_remove_object;
 
-//	backend_class->receive_objects = e_cal_backend_ews_receive_objects;
+	backend_class->receive_objects = e_cal_backend_ews_receive_objects;
 //	backend_class->send_objects = e_cal_backend_ews_send_objects;
 //	backend_class->get_attachment_list = e_cal_backend_ews_get_attachment_list;
 	backend_class->get_free_busy = e_cal_backend_ews_get_free_busy;
