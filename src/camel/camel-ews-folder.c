@@ -182,7 +182,7 @@ ews_get_calendar_mime_part (CamelMimePart* mimepart)
 }
 
 static gchar *
-ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar* id, GError **error)
+ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId* item_id, GError **error)
 {
 	CamelMimeParser *mimeparser;
 	CamelMimeMessage *msg;
@@ -218,7 +218,8 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 		CamelDataWrapper *dw;
 		CamelStream *tmpstream = NULL, *newstream = NULL;
 		GByteArray *ba;
-		icalcomponent *icalcomp;
+		icalcomponent *icalcomp, *subcomp;
+		icalproperty *icalprop;
 		gchar *calstring_new, *dir;
 		const gchar *temp;
 		int fd;
@@ -235,7 +236,11 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const gchar
 		ba = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (tmpstream));
 		g_byte_array_append (ba, (guint8 *) "\0", 1);
 		icalcomp = icalparser_parse_string ((gchar *) ba->data);
-		icalcomponent_set_uid (icalcomp, (gchar *) id);
+		icalcomponent_set_uid (icalcomp, (gchar *) item_id->id);
+		subcomp = icalcomponent_get_first_component (icalcomp, ICAL_VEVENT_COMPONENT);
+		icalprop = icalproperty_new_x (item_id->change_key);
+		icalproperty_set_x_name (icalprop, "X-EVOLUTION-CHANGEKEY");
+		icalcomponent_add_property (subcomp, icalprop);
 		calstring_new = icalcomponent_as_ical_string_r (icalcomp);
 		camel_mime_part_set_content (mimepart,
 					     (const gchar*) calstring_new, strlen (calstring_new),
@@ -377,7 +382,7 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	   And save updated message data to a new temp file */
 	if (e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_MEETING_REQUEST) {
 		GSList *items_req = NULL;
-		const gchar *associatedcalendarid;
+		const EwsId *associated_calendar_id;
 
 		// Get AssociatedCalendarItemId with second get_items call
 		res = e_ews_connection_get_items (cnc, pri, ids, "IdOnly", "meeting:AssociatedCalendarItemId",
@@ -393,10 +398,10 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 			}
 			goto exit;
 		}
-		associatedcalendarid = (e_ews_item_get_associated_calendar_item_id (items_req->data))->id;
+		associated_calendar_id = e_ews_item_get_associated_calendar_item_id (items_req->data);
 
 		mime_fname_new = ews_update_mgtrequest_mime_calendar_itemid (mime_content,
-									     associatedcalendarid,
+									     associated_calendar_id,
 									     error);
 
 		if (mime_fname_new)
