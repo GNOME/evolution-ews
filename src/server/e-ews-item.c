@@ -184,6 +184,12 @@ struct _EEwsItemPrivate {
 
 	EwsId *calendar_item_accept_id;
 
+	/* the evolution labels are implemented as exchange
+	 * Categories.  These appear in the message headers as
+	 * Keywords: and are set and extracted from the EWS server as
+	 * <Categories> which is a string array valued XML element */
+	GSList *categories;
+
 	struct _EEwsContactFields *contact_fields;
 	struct _EEwsTaskFields *task_fields;
 };
@@ -501,6 +507,29 @@ static void parse_extended_property (EEwsItemPrivate *priv, ESoapParameter *para
 		g_print ("Fetched unrecognised MAPI property 0x%x, value %d\n",
 			 tag, value);
 	}
+}
+
+static void parse_categories (EEwsItemPrivate *priv, ESoapParameter *param)
+{
+	gchar *value;
+	ESoapParameter *subparam;
+
+	/* release all the old data (if any) */
+	if (priv->categories) {
+		g_slist_foreach (priv->categories, (GFunc) g_free, NULL);
+		g_slist_free (priv->categories);
+		priv->categories = NULL;
+	}
+
+	/* categories are an array of <string> */
+	for (subparam = e_soap_parameter_get_first_child(param);
+	     subparam != NULL;
+	     subparam = e_soap_parameter_get_next_child(subparam)) {
+		value = e_soap_parameter_get_string_value (subparam);
+
+		priv->categories = g_slist_append(priv->categories, value);
+	}
+
 }
 
 static EwsImportance
@@ -882,6 +911,8 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 			g_free (value);
 		} else if (!g_ascii_strcasecmp (name, "Size")) {
 			priv->size = e_soap_parameter_get_int_value (subparam);
+		} else if (!g_ascii_strcasecmp (name, "Categories")) {
+			parse_categories (priv, subparam);
 		} else if (!g_ascii_strcasecmp (name, "Importance")) {
 			priv->importance = parse_importance (subparam);
 		} else if (!g_ascii_strcasecmp (name, "InReplyTo")) {
@@ -1175,6 +1206,14 @@ e_ews_item_get_from		(EEwsItem *item)
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
 	return (const EwsMailbox *) item->priv->from;
+}
+
+const GSList *
+e_ews_item_get_categories	(EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	return item->priv->categories;
 }
 
 EwsImportance

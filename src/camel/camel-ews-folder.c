@@ -60,7 +60,7 @@ which needs to be better organized via functions */
 
 #define MAX_ATTACHMENT_SIZE 1*1024*1024   /*In bytes*/
 
-#define SUMMARY_ITEM_FLAGS "item:ResponseObjects item:Sensitivity item:Importance"
+#define SUMMARY_ITEM_FLAGS "item:ResponseObjects item:Sensitivity item:Importance item:Categories"
 #define ITEM_PROPS "item:Subject item:DateTimeReceived item:DateTimeSent item:DateTimeCreated item:Size " \
 		   "item:HasAttachments item:InReplyTo"
 #define SUMMARY_ITEM_PROPS ITEM_PROPS " " SUMMARY_ITEM_FLAGS
@@ -638,6 +638,22 @@ msg_update_flags (ESoapMessage *msg, gpointer user_data)
 			e_soap_message_end_element (msg); /* Message */
 			e_soap_message_end_element (msg); /* SetItemField */
 		}
+		/* now update the Categories */
+		e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
+
+		e_soap_message_start_element (msg, "FieldURI", NULL, NULL);
+		e_soap_message_add_attribute (msg, "FieldURI", "item:Categories", NULL, NULL);
+		e_soap_message_end_element (msg);
+
+		e_soap_message_start_element (msg, "Message", NULL, NULL);
+		e_soap_message_start_element (msg, "Categories", NULL, NULL);
+
+		ews_utils_replace_server_user_flags(msg, mi);
+
+		e_soap_message_end_element (msg); /* Categories */
+		e_soap_message_end_element (msg); /* Message */
+		e_soap_message_end_element (msg); /* SetItemField */
+
 		e_ews_message_end_item_change (msg);
 
 		camel_message_info_free (mi);
@@ -698,7 +714,11 @@ ews_synchronize_sync (CamelFolder *folder, gboolean expunge, EVO3(GCancellable *
 		} else if (flags_changed & CAMEL_MESSAGE_DELETED) {
 			deleted_uids = g_slist_prepend (deleted_uids, (gpointer) camel_pstring_strdup (uids->pdata [i]));
 			camel_message_info_free (mi);
-		}
+		} else {
+			/* OK, the change must have been the labels */
+			mi_list = g_slist_append (mi_list, mi);
+			mi_list_len++;
+		}			
 
 		if (mi_list_len == EWS_MAX_FETCH_COUNT) {
 			success = ews_sync_mi_flags (folder, mi_list, cancellable, error);
@@ -1328,7 +1348,7 @@ camel_ews_folder_init (CamelEwsFolder *ews_folder)
 
 	folder->permanent_flags = CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_DELETED |
 		CAMEL_MESSAGE_DRAFT | CAMEL_MESSAGE_FLAGGED | CAMEL_MESSAGE_SEEN |
-		CAMEL_MESSAGE_FORWARDED;
+		CAMEL_MESSAGE_FORWARDED | CAMEL_MESSAGE_USER;
 
 	folder->folder_flags = CAMEL_FOLDER_HAS_SUMMARY_CAPABILITY | CAMEL_FOLDER_HAS_SEARCH_CAPABILITY;
 

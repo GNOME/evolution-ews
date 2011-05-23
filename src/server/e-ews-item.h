@@ -141,6 +141,8 @@ const EwsMailbox *
 		e_ews_item_get_from		(EEwsItem *item);
 EwsImportance
 		e_ews_item_get_importance	(EEwsItem *item);
+const GSList *
+		e_ews_item_get_categories	(EEwsItem *item);
 EwsMailbox *
 		e_ews_item_mailbox_from_soap_param
 						(ESoapParameter *param);

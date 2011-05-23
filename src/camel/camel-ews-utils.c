@@ -33,6 +33,7 @@
 #include "camel-ews-utils.h"
 #include "ews-esource-utils.h"
 #include "e-ews-compat.h"
+#include "e-ews-message.h"
 
 #define SUBFOLDER_DIR_NAME     "subfolders"
 #define SUBFOLDER_DIR_NAME_LEN 10
@@ -651,6 +652,86 @@ camel_ews_utils_sync_deleted_items (CamelEwsFolder *ews_folder, GSList *items_de
 	g_slist_free (items_deleted);
 }
 
+static const gchar*
+ews_utils_rename_label (const gchar *cat, int from_cat)
+{
+	gint i;
+
+	/* this is a mapping from Exchange/Outlook categories to
+	 * evolution labels based on the standard colours */
+	const gchar *labels[] = {
+		"Red Category", "$Labelimportant",
+		"Orange Category", "$Labelwork",
+		"Green Category", "$Labelpersonal",
+		"Blue Category", "$Labeltodo",
+		"Purple Category", "$Labellater",
+		NULL, NULL
+	};
+
+	if (!cat || !*cat)
+		return "";
+
+	for (i = 0; labels[i]; i += 2) {
+		if (from_cat) {
+			if (!g_ascii_strcasecmp (cat, labels[i]))
+				return labels[i + 1];
+		} else {
+			if (!g_ascii_strcasecmp (cat, labels[i + 1]))
+				return labels[i];
+		}
+	}
+	return cat;
+}
+
+void
+ews_utils_replace_server_user_flags (ESoapMessage *msg, CamelEwsMessageInfo *mi)
+{
+	const CamelFlag *flag;
+
+	/* transfer camel flags to become the categories as an XML
+	 * array of strings */
+	for (flag = camel_message_info_user_flags (&mi->info); flag;
+	     flag = flag->next) {
+		const gchar *n = ews_utils_rename_label (flag->name, 0);
+		if (*n == '\0')
+			continue;
+		/* This is a mismatch between evolution flags and
+		 * exchange categories.  Evolution uses a
+		 * receipt-handled flag for message receipts, which we
+		 * don't want showing up in the categories, so
+		 * silently drop it here */
+		if (strcmp (n, "receipt-handled") == 0)
+			continue;
+		e_ews_message_write_string_parameter (msg, "String", NULL, n);
+	}
+}
+
+static void
+ews_utils_merge_server_user_flags (EEwsItem *item, CamelEwsMessageInfo *mi)
+{
+	GSList *list = NULL;
+	const GSList *p;
+	const CamelFlag *flag;
+
+	/* transfer camel flags to a list */
+	for (flag = camel_message_info_user_flags (&mi->info); flag;
+	     flag = flag->next)
+		list = g_slist_append (list, (gchar *)flag->name);
+
+	/* we're transferring from server only, so just dump them */
+	for (p = list; p; p = p->next) {
+		camel_flag_set (&mi->info.user_flags, p->data, 0);
+	}
+	//g_slist_foreach(list, (GFunc)g_free, NULL);
+	g_slist_free(list);
+
+	/* now transfer over all the categories */
+	for (p = e_ews_item_get_categories (item); p; p = p->next) {
+		camel_flag_set (&mi->info.user_flags,
+				ews_utils_rename_label(p->data, 1), 1);
+	}
+}
+
 static gint
 ews_utils_get_server_flags (EEwsItem *item)
 {
@@ -833,8 +914,9 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder, GSList *items_up
 			gint server_flags;
 
 			server_flags = ews_utils_get_server_flags (item);
+			ews_utils_merge_server_user_flags (item, mi);
 			if (camel_ews_update_message_info_flags (folder->summary, (CamelMessageInfo *)mi,
-						server_flags, NULL))
+								 server_flags, NULL))
 				camel_folder_change_info_change_uid (ci, mi->info.uid);
 
 			mi->change_key = g_strdup (id->change_key);

@@ -89,6 +89,9 @@ void	camel_ews_utils_sync_created_items	(CamelEwsFolder *ews_folder,
 						 GSList *items_created);
 void	camel_ews_utils_sync_updated_items	(CamelEwsFolder *ews_folder,
 						 GSList *items_updated);
+void	ews_utils_replace_server_user_flags	(ESoapMessage *msg,
+						 CamelEwsMessageInfo *mi);
+
 
 G_END_DECLS
 
