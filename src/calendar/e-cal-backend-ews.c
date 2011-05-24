@@ -1396,17 +1396,13 @@ exit:
 }
 
 static void
-prepare_accept_item_request(ESoapMessage *msg, gpointer user_data)
+prepare_accept_item_request (ESoapMessage *msg, gpointer user_data)
 {
 	ECalComponent *comp = user_data;
 	gchar *uid = NULL, *change_key = NULL;
 
-	g_warning("Preparing msg for accept item\n");
-
 	/* gather needed data from icalcomponent */
 	ews_cal_component_get_item_id (comp, &uid, &change_key);
-
-	g_warning("Preparing msg for accept item - uid:%s change_key:%s\n", uid, change_key);
 
 	/* FORMAT OF A SAMPLE SOAP MESSAGE: http://msdn.microsoft.com/en-us/library/aa566464%28v=exchg.140%29.aspx */
 
@@ -1418,7 +1414,7 @@ prepare_accept_item_request(ESoapMessage *msg, gpointer user_data)
 	e_soap_message_add_attribute (msg, "ChangeKey", change_key, NULL, NULL);
 	e_soap_message_end_element (msg); // "ReferenceItemId"
 
-	// end of "AcceptItem"
+	/* end of "AcceptItem" */
 	e_soap_message_end_element (msg);
 
 	g_free (uid);
@@ -1426,7 +1422,8 @@ prepare_accept_item_request(ESoapMessage *msg, gpointer user_data)
 }
 
 static gboolean
-e_cal_backend_send_accept_item(ECalBackend *backend, icalcomponent *icalcomp) {
+e_cal_backend_send_accept_item (ECalBackend *backend, icalcomponent *icalcomp, GError **error)
+{
 	ECalBackendEwsPrivate *priv = E_CAL_BACKEND_EWS(backend)->priv;
 	GCancellable *cancellable = NULL;
 	const gchar *uid = NULL;
@@ -1435,18 +1432,14 @@ e_cal_backend_send_accept_item(ECalBackend *backend, icalcomponent *icalcomp) {
 
 	uid = icalcomponent_get_uid(icalcomp);
 
-	g_warning ("UID of item is %s\n",uid);
-
-	g_warning ("ICal component%s\n", icalcomponent_as_ical_string(icalcomp));
-
 	comp = e_cal_component_new ();
 	e_cal_component_set_icalcomponent (comp, icalcomp);
 
-	if (!comp)
+	if (!comp) {
+		g_propagate_error (error, EDC_ERROR(InvalidObject));
 		return FALSE;
-
-	g_warning("Accepting item '%s'\n", icalcomponent_as_ical_string (icalcomp));
-
+	}
+	
 	return e_ews_connection_create_items (priv->cnc,
 					      EWS_PRIORITY_MEDIUM,
 					      "SendAndSaveCopy",NULL,NULL,
@@ -1454,11 +1447,12 @@ e_cal_backend_send_accept_item(ECalBackend *backend, icalcomponent *icalcomp) {
 					      comp,
 					      &ids,
 					      cancellable,
-					      NULL);
+					      error);
 }
 
 static void
-e_cal_backend_ews_receive_objects(ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *calobj) {
+e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *calobj)
+{
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
 	icalcomponent_kind kind;
@@ -1476,9 +1470,6 @@ e_cal_backend_ews_receive_objects(ECalBackend *backend, EDataCal *cal, EServerMe
 		goto exit;
 	}
 
-	g_warning ("Printing original calobj form e_cal_backend_ews_receive_objects\n %s\n",calobj);
-
-	/* parse ical data */
 	icalcomp = icalparser_parse_string (calobj);
 
 	/* make sure data was parsed properly */
@@ -1508,11 +1499,12 @@ e_cal_backend_ews_receive_objects(ECalBackend *backend, EDataCal *cal, EServerMe
 
 		switch (method) {
 			case ICAL_METHOD_REQUEST:
-				result = e_cal_backend_send_accept_item(backend, subcomp);
-				e_data_cal_notify_objects_received (cal,context,error);
+				result = e_cal_backend_send_accept_item (backend, subcomp, &error);
+				if (!result && error) {
+					error->code = OtherError;
+				}
 				break;
 			case ICAL_METHOD_CANCEL:
-			case ICAL_METHOD_REPLY:
 			default:
 				break;
 		}
@@ -1524,10 +1516,7 @@ e_cal_backend_ews_receive_objects(ECalBackend *backend, EDataCal *cal, EServerMe
 	icalcomponent_free (icalcomp);
 
 exit:
-	if (error) {
-		g_warning("Got an error: %s\n", error->message);
-		g_clear_error(&error);
-	}
+	e_data_cal_notify_objects_received (cal, context, error);
 }
 
 /* TODO Do not replicate this in every backend */
