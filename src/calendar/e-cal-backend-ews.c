@@ -1510,6 +1510,8 @@ e_cal_backend_ews_receive_objects(ECalBackend *backend, EDataCal *cal, EServerMe
 			case ICAL_METHOD_REQUEST:
 				result = e_cal_backend_send_accept_item(backend, subcomp);
 				e_data_cal_notify_objects_received (cal,context,error);
+				/* Temporary compile fix until error handling here gets cleaned up... */
+				(void) result;
 				break;
 			case ICAL_METHOD_CANCEL:
 			case ICAL_METHOD_REPLY:
