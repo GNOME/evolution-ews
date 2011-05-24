@@ -1180,7 +1180,6 @@ static gboolean
 ews_expunge_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GError **error)
 {
 	CamelEwsStore *ews_store;
-	CamelEwsFolder *ews_folder;
 	CamelEwsMessageInfo *ews_info;
 	CamelMessageInfo *info;
 	CamelStore *parent_store;
@@ -1189,7 +1188,6 @@ ews_expunge_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GError *
 	gint i, count;
 
 	parent_store = camel_folder_get_parent_store (folder);
-	ews_folder = CAMEL_EWS_FOLDER (folder);
 	ews_store = CAMEL_EWS_STORE (parent_store);
 
 	if (!camel_ews_store_connected (ews_store, error))
