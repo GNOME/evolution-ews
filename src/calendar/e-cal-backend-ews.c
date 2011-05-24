@@ -1503,6 +1503,7 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 				if (!result && error) {
 					error->code = OtherError;
 				}
+
 				break;
 			case ICAL_METHOD_CANCEL:
 			default:
