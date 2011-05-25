@@ -1757,10 +1757,10 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 				icalprop = icalcomponent_get_next_property (icalcomp, ICAL_X_PROPERTY)) {
 
 			if (g_strcmp0(icalproperty_get_x_name(icalprop), "X-MICROSOFT-CDO-BUSYSTATUS") == 0) {
-				if (g_strcmp0(icalproperty_get_value_as_string(icalprop), "FREE") == 0) {
-					icalproperty_set_transp(freebusy, ICAL_TRANSP_TRANSPARENT);
-				} else {
+				if (g_strcmp0(icalproperty_get_value_as_string(icalprop), "BUSY") == 0) {
 					icalproperty_set_transp(freebusy, ICAL_TRANSP_OPAQUE);
+				} else {
+					icalproperty_set_transp(freebusy, ICAL_TRANSP_TRANSPARENT);
 				}
 
 				break;
