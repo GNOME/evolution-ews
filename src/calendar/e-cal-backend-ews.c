@@ -39,6 +39,7 @@
 #include <libical/icaltz-util.h>
 #include <libical/icalcomponent.h>
 #include <libical/icalproperty.h>
+#include <glib-2.0/glib/gerror.h>
 #include "e-cal-backend-ews.h"
 #include "e-cal-backend-ews-utils.h"
 #include "e-ews-connection.h"
@@ -1395,20 +1396,51 @@ exit:
 	e_data_cal_notify_object_modified (cal, context, error, NULL, NULL);
 }
 
+typedef struct {
+	ECalBackendEws *cbews;
+	ECalComponent *comp;
+} EwsAcceptData;
+
 static void
 prepare_accept_item_request (ESoapMessage *msg, gpointer user_data)
 {
-	ECalComponent *comp = user_data;
+	EwsAcceptData *data = user_data;
+	ECalComponent *comp = data->comp;
+	ECalBackendEwsPrivate *priv = E_CAL_BACKEND_EWS(data->cbews)->priv;
+	icalcomponent *icalcomp;
+	icalproperty *attendee;
 	gchar *uid = NULL, *change_key = NULL;
+	const char *attendee_str = NULL, *response_type = NULL;
 
 	/* gather needed data from icalcomponent */
 	ews_cal_component_get_item_id (comp, &uid, &change_key);
+	
+	icalcomp = e_cal_component_get_icalcomponent (comp);
 
-	/* FORMAT OF A SAMPLE SOAP MESSAGE: http://msdn.microsoft.com/en-us/library/aa566464%28v=exchg.140%29.aspx */
+	for (attendee = icalcomponent_get_first_property (icalcomp, ICAL_ATTENDEE_PROPERTY);
+		attendee != NULL;
+		attendee = icalcomponent_get_next_property (icalcomp, ICAL_ATTENDEE_PROPERTY)) {
+		attendee_str = icalproperty_get_attendee (attendee);
+		if ((attendee_str != NULL) && !strncasecmp(attendee_str, "MAILTO:", 7))
+			if (g_strcmp0(attendee_str + 7 , priv->user_email) == 0) {
+				response_type = icalproperty_get_parameter_as_string (attendee, "PARTSTAT");
+				break;
+			}
+	}
 
-	/* Prepare AcceptItem node in the SOAP message */
-	e_soap_message_start_element (msg, "AcceptItem", NULL, NULL);
+	/* FORMAT OF A SAMPLE SOAP MESSAGE: http://msdn.microsoft.com/en-us/library/aa566464%28v=exchg.140%29.aspx
+	 * Accept and Decline meeting have same method code (10032)
+	 * The real status is reflected at Attendee property PARTSTAT
+	 * need to find current user as attendee and make a desision what to do.
+	 * Prepare AcceptItem node in the SOAP message */
 
+	if (!g_ascii_strcasecmp (response_type, "ACCEPTED"))
+		e_soap_message_start_element (msg, "AcceptItem", NULL, NULL);
+	else if (!g_ascii_strcasecmp (response_type, "DECLINED"))
+		e_soap_message_start_element (msg, "DeclineItem", NULL, NULL);
+	else
+		e_soap_message_start_element (msg, "TentativelyAcceptItem", NULL, NULL);
+	
 	e_soap_message_start_element (msg, "ReferenceItemId", NULL, NULL);
 	e_soap_message_add_attribute (msg, "Id", uid, NULL, NULL);
 	e_soap_message_add_attribute (msg, "ChangeKey", change_key, NULL, NULL);
@@ -1424,6 +1456,7 @@ prepare_accept_item_request (ESoapMessage *msg, gpointer user_data)
 static gboolean
 e_cal_backend_send_accept_item (ECalBackend *backend, icalcomponent *icalcomp, GError **error)
 {
+	EwsAcceptData *accept_data;
 	ECalBackendEwsPrivate *priv = E_CAL_BACKEND_EWS(backend)->priv;
 	GCancellable *cancellable = NULL;
 	const gchar *uid = NULL;
@@ -1439,12 +1472,15 @@ e_cal_backend_send_accept_item (ECalBackend *backend, icalcomponent *icalcomp, G
 		g_propagate_error (error, EDC_ERROR(InvalidObject));
 		return FALSE;
 	}
-	
+	accept_data = g_new0 (EwsAcceptData, 1);
+	accept_data->cbews = g_object_ref(backend);
+	accept_data->comp = comp;
+
 	return e_ews_connection_create_items (priv->cnc,
 					      EWS_PRIORITY_MEDIUM,
 					      "SendAndSaveCopy",NULL,NULL,
 					      prepare_accept_item_request,
-					      comp,
+					      accept_data,
 					      &ids,
 					      cancellable,
 					      error);
@@ -1458,7 +1494,6 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 	icalcomponent_kind kind;
 	icalcomponent *icalcomp, *subcomp;
 	GError *error = NULL;
-	gboolean stop = FALSE;
 	icalproperty_method method;
 
 	cbews = E_CAL_BACKEND_EWS(backend);
@@ -1486,11 +1521,10 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 	}
 
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND(backend));
-
 	method = icalcomponent_get_method (icalcomp);
 	subcomp = icalcomponent_get_first_component (icalcomp, kind);
 
-	while (subcomp && !stop) {
+	while (subcomp) {
 		ECalComponent *comp = e_cal_component_new();
 		gboolean result;
 
@@ -1500,18 +1534,15 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 		switch (method) {
 			case ICAL_METHOD_REQUEST:
 				result = e_cal_backend_send_accept_item (backend, subcomp, &error);
-				if (!result && error) {
+				if (!result && error)
 					error->code = OtherError;
-				}
-
 				break;
 			case ICAL_METHOD_CANCEL:
 			default:
 				break;
 		}
 		g_object_unref (comp);
-		subcomp = icalcomponent_get_next_component (icalcomp,
-					e_cal_backend_get_kind (E_CAL_BACKEND (backend)));
+		subcomp = icalcomponent_get_next_component (icalcomp, kind);
 	}
 
 	icalcomponent_free (icalcomp);
