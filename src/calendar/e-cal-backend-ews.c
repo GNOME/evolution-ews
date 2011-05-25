@@ -1459,11 +1459,8 @@ e_cal_backend_send_accept_item (ECalBackend *backend, icalcomponent *icalcomp, G
 	EwsAcceptData *accept_data;
 	ECalBackendEwsPrivate *priv = E_CAL_BACKEND_EWS(backend)->priv;
 	GCancellable *cancellable = NULL;
-	const gchar *uid = NULL;
 	GSList *ids = NULL;
 	ECalComponent *comp;
-
-	uid = icalcomponent_get_uid(icalcomp);
 
 	comp = e_cal_component_new ();
 	e_cal_component_set_icalcomponent (comp, icalcomp);
