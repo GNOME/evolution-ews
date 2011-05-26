@@ -202,6 +202,11 @@ dnl ****************************
 PKG_CHECK_MODULES(EVOLUTION_SHELL, $EVO_SHELL_PACKAGE >= evo_minimum_version)
 
 dnl ****************************
+dnl Check for sqlite3 
+dnl ****************************
+PKG_CHECK_MODULES(SQLITE3, sqlite3)
+
+dnl ****************************
 dnl Expose version information
 dnl ****************************
 API_VERSION=$EDS_PACKAGE

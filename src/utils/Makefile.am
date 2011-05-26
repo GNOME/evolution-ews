@@ -7,17 +7,19 @@ libewsutils_la_CPPFLAGS = \
 	-I$(top_builddir)				\
 	-I$(top_builddir)/src/server			\
 	$(LIBEDATASERVER_CFLAGS)			\
+	$(SQLITE3_CFLAGS)			\
 	$(DEBUG_CFLAGS)
 
 libewsutils_la_SOURCES =				\
-        ews-esource-utils.h				\
-        ews-esource-utils.c				\
+	ews-esource-utils.h				\
+	ews-esource-utils.c				\
 	e-sqlite3-vfs.c					\
 	e-sqlite3-vfs.h
 
 libewsutils_la_LIBADD =					\
 	$(top_builddir)/src/server/libeews-1.2.la 	\
-	$(LIBEDATASERVER_LIBS)				
+	$(SQLITE3_LIBS)	\
+	$(LIBEDATASERVER_LIBS)
 
 libewsutils_la_LDFLAGS = $(NO_UNDEFINED)
 
