@@ -15,6 +15,7 @@ libebookbackendews_la_CPPFLAGS = \
 	$(LIBEBOOK_CFLAGS)				\
 	$(DB_CFLAGS)					\
 	$(EVOLUTION_ADDRESSBOOK_CFLAGS)                 \
+	$(SQLITE3_CFLAGS)			\
 	$(SOUP_CFLAGS)	
 
 libebookbackendews_la_SOURCES =			\
@@ -33,6 +34,7 @@ libebookbackendews_la_LIBADD =				\
 	$(LIBEBOOK_LIBS)					\
 	$(DB_LIBS)						\
 	$(EVOLUTION_ADDRESSBOOK_LIBS)				\
+	$(SQLITE3_LIBS)	\
 	$(SOUP_LIBS)
 
 libebookbackendews_la_LDFLAGS =		\
