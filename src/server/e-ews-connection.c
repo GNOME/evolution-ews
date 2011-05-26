@@ -1608,13 +1608,53 @@ e_ews_connection_get_items	(EEwsConnection *cnc,
 	return result;
 }
 
+static const char *
+ews_delete_type_to_str (EwsDeleteType delete_type)
+{
+	switch (delete_type) {
+		case EWS_HARD_DELETE:
+			return "HardDelete";
+		case EWS_SOFT_DELETE:
+			return "SoftDelete";
+		case EWS_MOVE_TO_DELETED_ITEMS:
+			return "MoveToDeletedItems";
+	}
+	return NULL;
+}
+
+static const char *
+ews_send_cancels_to_str (EwsSendMeetingCancellationsType send_cancels)
+{
+	switch (send_cancels) {
+		case EWS_SEND_TO_NONE:
+			return "SendToNone";
+		case EWS_SEND_ONLY_TO_ALL:
+			return "SendOnlyToAll";
+		case EWS_SEND_TO_ALL_AND_SAVE_COPY:
+			return "SendToAllAndSaveCopy";
+	}
+	return NULL;
+}
+
+static const char *
+ews_affected_tasks_to_str (EwsAffectedTaskOccurrencesType affected_tasks)
+{
+	switch (affected_tasks) {
+		case EWS_ALL_OCCURRENCES:
+			return "AllOccurrences";
+		case EWS_SPECIFIED_OCCURRENCE_ONLY:
+			return "SpecifiedOccurrenceOnly";
+	}
+	return NULL;
+}
+
 void
 e_ews_connection_delete_items_start	(EEwsConnection *cnc,
 					 gint pri,
 					 GSList *ids,
-					 const gchar *delete_type,
-					 const gchar *send_cancels,
-					 const gchar *affected_tasks,
+					 EwsDeleteType delete_type,
+					 EwsSendMeetingCancellationsType send_cancels,
+					 EwsAffectedTaskOccurrencesType affected_tasks,
 					 GAsyncReadyCallback cb,
 					 GCancellable *cancellable,
 					 gpointer user_data)
@@ -1625,14 +1665,15 @@ e_ews_connection_delete_items_start	(EEwsConnection *cnc,
 	GSList *l;
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "DeleteItem",
-					     "DeleteType", delete_type, EWS_EXCHANGE_2007);
+					     "DeleteType", ews_delete_type_to_str (delete_type), EWS_EXCHANGE_2007);
 
 	if (send_cancels)
 		e_soap_message_add_attribute (msg, "SendMeetingCancellations",
-					      send_cancels, NULL, NULL);
+					      ews_send_cancels_to_str (send_cancels), NULL, NULL);
+
 	if (affected_tasks)
 		e_soap_message_add_attribute (msg, "AffectedTaskOccurrences",
-					      affected_tasks, NULL, NULL);
+					      ews_affected_tasks_to_str (affected_tasks), NULL, NULL);
 
 	e_soap_message_start_element (msg, "ItemIds", "messages", NULL);
 
@@ -1680,9 +1721,9 @@ gboolean
 e_ews_connection_delete_items	(EEwsConnection *cnc,
 				 gint pri,
 				 GSList *ids,
-				 const gchar *delete_type,
-				 const gchar *send_cancels,
-				 const gchar *affected_tasks,
+				 EwsDeleteType delete_type,
+				 EwsSendMeetingCancellationsType send_cancels,
+				 EwsAffectedTaskOccurrencesType affected_tasks,
 				 GCancellable *cancellable,
 				 GError **error)
 {

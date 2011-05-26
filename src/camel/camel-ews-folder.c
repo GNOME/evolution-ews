@@ -1141,13 +1141,13 @@ ews_delete_messages (CamelFolder *folder, GSList *deleted_items, gboolean expung
 
 	if (deleted_items) {
 		GError *rerror = NULL;
-		const gchar *delete_type;
+		EwsDeleteType delete_type;
 
-		delete_type = expunge ? "HardDelete" : "MoveToDeletedItems";
+		delete_type = expunge ? EWS_HARD_DELETE : EWS_MOVE_TO_DELETED_ITEMS;
 
 		camel_service_lock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		status = e_ews_connection_delete_items (cnc, EWS_PRIORITY_MEDIUM, deleted_items, delete_type,
-							"SendToNone", NULL, cancellable, &rerror);
+							EWS_SEND_TO_NONE, FALSE, cancellable, &rerror);
 		camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 		if (status) {

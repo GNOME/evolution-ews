@@ -71,6 +71,23 @@ typedef enum {
 
 } EwsContactsSearchScope;
 
+typedef enum {
+	EWS_HARD_DELETE = 1,
+	EWS_SOFT_DELETE,
+	EWS_MOVE_TO_DELETED_ITEMS
+} EwsDeleteType;
+
+typedef enum {
+	EWS_SEND_TO_NONE = 1,
+	EWS_SEND_ONLY_TO_ALL,
+	EWS_SEND_TO_ALL_AND_SAVE_COPY
+} EwsSendMeetingCancellationsType;
+
+typedef enum {
+	EWS_ALL_OCCURRENCES = 1,
+	EWS_SPECIFIED_OCCURRENCE_ONLY
+} EwsAffectedTaskOccurrencesType;
+
 GType		e_ews_connection_get_type	(void);
 EEwsConnection *e_ews_connection_new		(const gchar *uri,
 						 const gchar *username,
@@ -164,16 +181,15 @@ gboolean	e_ews_connection_get_items	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 /* Delete folder items */
-void		e_ews_connection_delete_items_start
-						(EEwsConnection *cnc,
-						 gint pri,
-						 GSList *ids,
-						 const gchar *delete_type,
-						 const gchar *send_cancels,
-						 const gchar *affected_tasks,
-						 GAsyncReadyCallback cb,
-						 GCancellable *cancellable,
-						 gpointer user_data);
+void		e_ews_connection_delete_items_start	(EEwsConnection *cnc,
+					 gint pri,
+					 GSList *ids,
+					 EwsDeleteType delete_type,
+					 EwsSendMeetingCancellationsType send_cancels,
+					 EwsAffectedTaskOccurrencesType affected_tasks,
+					 GAsyncReadyCallback cb,
+					 GCancellable *cancellable,
+					 gpointer user_data);
 
 gboolean	e_ews_connection_delete_items_finish
 						(EEwsConnection *cnc,
@@ -183,9 +199,9 @@ gboolean	e_ews_connection_delete_items_finish
 gboolean	e_ews_connection_delete_items	(EEwsConnection *cnc,
 						 gint pri,
 						 GSList *ids,
-						 const gchar *delete_type,
-						 const gchar *send_cancels,
-						 const gchar *affected_tasks,
+						 EwsDeleteType delete_type,
+						 EwsSendMeetingCancellationsType send_cancels,
+						 EwsAffectedTaskOccurrencesType affected_tasks,
 						 GCancellable *cancellable,
 						 GError **error);
 

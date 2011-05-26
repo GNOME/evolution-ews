@@ -905,7 +905,7 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	remove_data->ids = g_slist_append (NULL, (gpointer)itemid);
 
 	e_ews_connection_delete_items_start (priv->cnc, EWS_PRIORITY_MEDIUM, remove_data->ids,
-					     "HardDelete", "SendToNone", NULL,
+					     EWS_HARD_DELETE, EWS_SEND_TO_NONE, FALSE,
 					     ews_cal_remove_object_cb, NULL,
 					     remove_data);
 	return;
