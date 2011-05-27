@@ -65,6 +65,7 @@ struct _EBookBackendEwsPrivate {
 	gboolean only_if_exists;
 	gboolean is_writable;
 	gboolean marked_for_offline;
+	gboolean cache_ready;
 	gint mode;
 
 	GHashTable *ops;
@@ -73,8 +74,167 @@ struct _EBookBackendEwsPrivate {
 #define CACHE_REFRESH_INTERVAL 600000
 #define SUMMARY_FLUSH_TIMEOUT 5000
 
+#define ELEMENT_TYPE_SIMPLE 0x01 /* simple string fields */
+#define ELEMENT_TYPE_COMPLEX 0x02 /* complex fields while require different get/set functions */
+
 static void
-e_book_backend_ews_create_contact (EBookBackend *backend,
+ebews_populate_uid	(EContact *contact, EEwsItem *item)
+{
+	
+}
+
+static void
+ebews_populate_full_name	(EContact *contact, EEwsItem *item)
+{
+	
+}
+
+static void
+ebews_populate_birth_date	(EContact *contact, EEwsItem *item)
+{
+	
+}
+
+static void
+ebews_populate_phone_numbers	(EContact *contact, EEwsItem *item)
+{
+	
+}
+
+static void
+ebews_populate_address		(EContact *contact, EEwsItem *item)
+{
+	
+}
+
+static void
+ebews_populate_ims		(EContact *contact, EEwsItem *item)
+{
+	
+}
+
+static void
+ebews_populate_emails		(EContact *contact, EEwsItem *item)
+{
+	
+}
+
+
+static void
+ebews_set_item_id		(ESoapMessage *message, EContact *contact)
+{
+	
+}
+
+static void
+ebews_set_full_name		(ESoapMessage *message, EContact *contact)
+{
+	
+}
+
+static void
+ebews_set_birth_date		(ESoapMessage *message, EContact *contact)
+{
+	
+}
+
+static void
+ebews_set_phone_numbers		(ESoapMessage *message, EContact *contact)
+{
+	
+}
+
+static void
+ebews_set_address		(ESoapMessage *message, EContact *contact)
+{
+	
+}
+
+static void
+ebews_set_ims			(ESoapMessage *message, EContact *contact)
+{
+	
+}
+
+static void
+ebews_set_emails		(ESoapMessage *message, EContact *contact)
+{
+	
+}
+
+static void
+ebews_set_full_name_changes	(ESoapMessage *message, EContact *new, EContact *old)
+{
+	
+}
+
+static void
+ebews_set_birth_date_changes	(ESoapMessage *message, EContact *new, EContact *old)
+{
+	
+}
+
+static void
+ebews_set_phone_number_changes	(ESoapMessage *message, EContact *new, EContact *old)
+{
+	
+}
+
+static void
+ebews_set_address_changes	(ESoapMessage *message, EContact *new, EContact *old)
+{
+	
+}
+
+static void
+ebews_set_im_changes		(ESoapMessage *message, EContact *new, EContact *old)
+{
+	
+}
+
+static void
+ebews_set_email_changes		(ESoapMessage *message, EContact *new, EContact *old)
+{
+	
+}
+
+static const struct field_element_mapping {
+	EContactField field_id;
+	gint element_type;
+	const gchar *element_name;
+	/* set function for simple string type values */
+	const gchar * (*get_simple_prop_func) (EEwsItem *item);
+	void (*populate_contact_func)(EContact *contact, EEwsItem *item);
+	void (*set_value_in_soap_message) (ESoapMessage *message, EContact *contact);
+	void (*set_changes) (ESoapMessage *message, EContact *new, EContact *old);
+
+} mappings[] = {
+	{ E_CONTACT_FILE_AS, ELEMENT_TYPE_SIMPLE, "FileAs", e_ews_item_get_fileas},
+	{ E_CONTACT_HOMEPAGE_URL, ELEMENT_TYPE_SIMPLE, "BusinessHomePage", e_ews_item_get_business_homepage},
+	{ E_CONTACT_ORG, ELEMENT_TYPE_SIMPLE, "CompanyName", e_ews_item_get_company_name},
+	{ E_CONTACT_ORG_UNIT, ELEMENT_TYPE_SIMPLE, "Department", e_ews_item_get_department},
+	{ E_CONTACT_TITLE, ELEMENT_TYPE_SIMPLE, "JobTitle", e_ews_item_get_job_title},
+	{ E_CONTACT_ASSISTANT, ELEMENT_TYPE_SIMPLE, "AssistantName", e_ews_item_get_assistant_name},
+	{ E_CONTACT_MANAGER, ELEMENT_TYPE_SIMPLE, "Manager", e_ews_item_get_manager},
+	{ E_CONTACT_SPOUSE, ELEMENT_TYPE_SIMPLE, "SpouseName", e_ews_item_get_spouse_name},
+
+	/* Should take of uid and changekey (REV) */
+	{ E_CONTACT_UID, ELEMENT_TYPE_COMPLEX, "ItemId", NULL,  ebews_populate_uid, ebews_set_item_id},
+	{ E_CONTACT_FULL_NAME, ELEMENT_TYPE_COMPLEX, "CompleteName", NULL, ebews_populate_full_name, ebews_set_full_name, ebews_set_full_name_changes},
+	{ E_CONTACT_BIRTH_DATE, ELEMENT_TYPE_COMPLEX, "Birthday", NULL,  ebews_populate_birth_date, ebews_set_birth_date, ebews_set_birth_date_changes },
+	/* should take care of all phone number fields */
+	{ E_CONTACT_PHONE_PRIMARY, ELEMENT_TYPE_COMPLEX , "PhoneNumbers", NULL, ebews_populate_phone_numbers, ebews_set_phone_numbers, ebews_set_phone_number_changes},
+	/* should take care of home, work and other adresss fields */
+	{ E_CONTACT_ADDRESS_HOME, ELEMENT_TYPE_COMPLEX, "PhysicalAddresses", NULL, ebews_populate_address, ebews_set_address, ebews_set_address_changes },
+	/* should take care of all im fields */
+	{ E_CONTACT_IM_AIM, ELEMENT_TYPE_COMPLEX, "ImAddresses", NULL, ebews_populate_ims, ebews_set_ims, ebews_set_im_changes },
+	/* should take care of all email adresss fields */
+	{ E_CONTACT_EMAIL_1, ELEMENT_TYPE_COMPLEX, "EmailAddresses", NULL, ebews_populate_emails, ebews_set_emails, ebews_set_email_changes }
+};
+
+
+static void
+e_book_backend_ews_create_contact	(EBookBackend *backend,
 					 EDataBook *book,
 					 guint32 opid,
 					 const gchar *vcard )
@@ -110,10 +270,10 @@ e_book_backend_ews_create_contact (EBookBackend *backend,
 }
 
 static void
-e_book_backend_ews_remove_contacts (EBookBackend *backend,
-					  EDataBook    *book,
-					  guint32 opid,
-					  GList *id_list)
+e_book_backend_ews_remove_contacts	(EBookBackend *backend,
+					 EDataBook    *book,
+					 guint32 opid,
+					 GList *id_list)
 {
 	EBookBackendEws *ebgw;
 	GList *deleted_ids = NULL;
@@ -145,7 +305,7 @@ e_book_backend_ews_remove_contacts (EBookBackend *backend,
 
 
 static void
-e_book_backend_ews_modify_contact (EBookBackend *backend,
+e_book_backend_ews_modify_contact	(EBookBackend *backend,
 					 EDataBook    *book,
 					 guint32       opid,
 					 const gchar   *vcard)
@@ -179,10 +339,10 @@ e_book_backend_ews_modify_contact (EBookBackend *backend,
 }
 
 static void
-e_book_backend_ews_get_contact (EBookBackend *backend,
-				      EDataBook    *book,
-				      guint32       opid,
-				      const gchar   *id)
+e_book_backend_ews_get_contact	(EBookBackend *backend,
+				 EDataBook    *book,
+				 guint32       opid,
+				 const gchar   *id)
 {
 	EBookBackendEws *gwb;
 
@@ -207,10 +367,10 @@ e_book_backend_ews_get_contact (EBookBackend *backend,
 }
 
 static void
-e_book_backend_ews_get_contact_list (EBookBackend *backend,
-					   EDataBook    *book,
-					   guint32       opid,
-					   const gchar   *query )
+e_book_backend_ews_get_contact_list	(EBookBackend *backend,
+					 EDataBook    *book,
+					 guint32       opid,
+					 const gchar   *query )
 {
 	GList *vcard_list;
 	EBookBackendEws *egwb;
