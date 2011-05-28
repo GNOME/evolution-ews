@@ -857,6 +857,29 @@ ews_cal_remove_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	g_free(remove_data);
 }
 
+static unsigned int
+e_cal_rid_to_index (const char *rid, icalcomponent *comp, GError **error)
+{
+	unsigned int index = 1;
+	icalproperty *prop = icalcomponent_get_first_property(comp, ICAL_RRULE_PROPERTY);
+	struct icalrecurrencetype rule = icalproperty_get_rrule (prop);
+	struct icaltimetype dtstart = icalcomponent_get_dtstart (comp);
+	icalrecur_iterator* ritr = icalrecur_iterator_new (rule, dtstart);
+	icaltimetype next = icalrecur_iterator_next (ritr),
+		o_time = icaltime_from_string_with_zone (rid, dtstart.zone);
+	
+	for (; !icaltime_is_null_time (next); next = icalrecur_iterator_next (ritr), index++) {
+		if (icaltime_compare (o_time, next) == 0) break;
+	}
+	
+	if (icaltime_is_null_time (next)) {
+		g_propagate_error (error, EDC_ERROR_EX(OtherError,
+		    "Invalid occurrence ID"));
+	}
+	
+	return index;
+}
+
 static void
 e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context,
 				 const gchar *uid, const gchar *rid, CalObjModType mod)
@@ -867,17 +890,11 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	ECalComponent *comp;
 	GError *error = NULL;
 	gchar *itemid = NULL;
+	unsigned int index;
 
 	e_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
 
 	priv = cbews->priv;
-
-	/* We don't handle recurring appointments yet */
-	if (rid) {
-		g_propagate_error(&error, EDC_ERROR_EX(OtherError,
-		    "Removal of individual recurrences not yet supported"));
-		goto exit;
-	}
 
 	PRIV_LOCK (priv);
 
@@ -888,6 +905,14 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	}
 
 	PRIV_UNLOCK (priv);
+
+	/* We don't handle recurring appointments yet */
+	if (rid) {
+		index = e_cal_rid_to_index (rid, e_cal_component_get_icalcomponent (comp), &error);
+		g_propagate_error(&error, EDC_ERROR_EX(OtherError,
+		    "Removal of individual recurrences not yet supported"));
+		goto exit;
+	}
 
 	ews_cal_component_get_item_id (comp, &itemid, NULL);
 	if (!itemid) {
