@@ -1431,7 +1431,7 @@ exit:
 }
 
 typedef struct {
-	const char *current_user_mail;
+	const char *response_type;
 	ECalComponent *comp;
 } EwsAcceptData;
 
@@ -1457,12 +1457,10 @@ prepare_accept_item_request (ESoapMessage *msg, gpointer user_data)
 	EwsAcceptData *data = user_data;
 	ECalComponent *comp = data->comp;
 	gchar *uid = NULL, *change_key = NULL;
-	const char *response_type = NULL;
+	const char *response_type = data->response_type;
 
 	/* gather needed data from icalcomponent */
 	ews_cal_component_get_item_id (comp, &uid, &change_key);
-
-	response_type = e_ews_get_current_user_meeting_reponse (e_cal_component_get_icalcomponent (comp),data->current_user_mail);
 
 	/* FORMAT OF A SAMPLE SOAP MESSAGE: http://msdn.microsoft.com/en-us/library/aa566464%28v=exchg.140%29.aspx
 	 * Accept and Decline meeting have same method code (10032)
@@ -1532,14 +1530,16 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 
 	while (subcomp) {
 		ECalComponent *comp = e_cal_component_new ();
-
+		const char *response_type;
 		/* duplicate the ical component */
 		e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone(subcomp));
+
+		response_type = e_ews_get_current_user_meeting_reponse (e_cal_component_get_icalcomponent (comp),priv->user_email);
 
 		switch (method) {
 			case ICAL_METHOD_REQUEST:	
 				accept_data = g_new0 (EwsAcceptData, 1);
-				accept_data->current_user_mail = priv->user_email;
+				accept_data->response_type = response_type;
 				accept_data->comp = comp;
 				e_ews_connection_create_items (priv->cnc, EWS_PRIORITY_MEDIUM,
 							       "SendAndSaveCopy", NULL, NULL,
