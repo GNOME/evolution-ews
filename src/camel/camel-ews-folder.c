@@ -381,7 +381,9 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	   AssociatedCalendarItemId, replace the random UID with this ItemId,
 	   And save updated message data to a new temp file */
 	if (e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_MEETING_REQUEST ||
-		e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_MEETING_CANCELLATION) {
+		e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_MEETING_CANCELLATION ||
+		e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_MEETING_MESSAGE ||
+		e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_MEETING_RESPONSE) {
 		GSList *items_req = NULL;
 		const EwsId *associated_calendar_id;
 
