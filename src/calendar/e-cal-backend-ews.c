@@ -1435,31 +1435,34 @@ typedef struct {
 	ECalComponent *comp;
 } EwsAcceptData;
 
-static void
-prepare_accept_item_request (ESoapMessage *msg, gpointer user_data)
+static const char*
+e_ews_get_current_user_meeting_reponse (icalcomponent *icalcomp, const char *current_user_mail)
 {
-	EwsAcceptData *data = user_data;
-	ECalComponent *comp = data->comp;
-	icalcomponent *icalcomp;
 	icalproperty *attendee;
-	gchar *uid = NULL, *change_key = NULL;
-	const char *attendee_str = NULL, *response_type = NULL;
-
-	/* gather needed data from icalcomponent */
-	ews_cal_component_get_item_id (comp, &uid, &change_key);
-	
-	icalcomp = e_cal_component_get_icalcomponent (comp);
-
+	const char *attendee_str = NULL;
 	for (attendee = icalcomponent_get_first_property (icalcomp, ICAL_ATTENDEE_PROPERTY);
 		attendee != NULL;
 		attendee = icalcomponent_get_next_property (icalcomp, ICAL_ATTENDEE_PROPERTY)) {
 		attendee_str = icalproperty_get_attendee (attendee);
 		if ((attendee_str != NULL) && !strncasecmp (attendee_str, "MAILTO:", 7))
-			if (g_strcmp0 (attendee_str + 7 , data->current_user_mail) == 0) {
-				response_type = icalproperty_get_parameter_as_string (attendee, "PARTSTAT");
-				break;
+			if (g_strcmp0 (attendee_str + 7 , current_user_mail) == 0) {
+				return icalproperty_get_parameter_as_string (attendee, "PARTSTAT");
 			}
 	}
+	return NULL;
+}
+static void
+prepare_accept_item_request (ESoapMessage *msg, gpointer user_data)
+{
+	EwsAcceptData *data = user_data;
+	ECalComponent *comp = data->comp;
+	gchar *uid = NULL, *change_key = NULL;
+	const char *response_type = NULL;
+
+	/* gather needed data from icalcomponent */
+	ews_cal_component_get_item_id (comp, &uid, &change_key);
+
+	response_type = e_ews_get_current_user_meeting_reponse (e_cal_component_get_icalcomponent (comp),data->current_user_mail);
 
 	/* FORMAT OF A SAMPLE SOAP MESSAGE: http://msdn.microsoft.com/en-us/library/aa566464%28v=exchg.140%29.aspx
 	 * Accept and Decline meeting have same method code (10032)
