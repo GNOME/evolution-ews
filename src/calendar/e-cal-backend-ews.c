@@ -1422,7 +1422,7 @@ exit:
 }
 
 typedef struct {
-	ECalBackendEws *cbews;
+	const char *current_user_mail;
 	ECalComponent *comp;
 } EwsAcceptData;
 
@@ -1431,7 +1431,6 @@ prepare_accept_item_request (ESoapMessage *msg, gpointer user_data)
 {
 	EwsAcceptData *data = user_data;
 	ECalComponent *comp = data->comp;
-	ECalBackendEwsPrivate *priv = E_CAL_BACKEND_EWS(data->cbews)->priv;
 	icalcomponent *icalcomp;
 	icalproperty *attendee;
 	gchar *uid = NULL, *change_key = NULL;
@@ -1447,7 +1446,7 @@ prepare_accept_item_request (ESoapMessage *msg, gpointer user_data)
 		attendee = icalcomponent_get_next_property (icalcomp, ICAL_ATTENDEE_PROPERTY)) {
 		attendee_str = icalproperty_get_attendee (attendee);
 		if ((attendee_str != NULL) && !strncasecmp(attendee_str, "MAILTO:", 7))
-			if (g_strcmp0(attendee_str + 7 , priv->user_email) == 0) {
+			if (g_strcmp0(attendee_str + 7 , data->current_user_mail) == 0) {
 				response_type = icalproperty_get_parameter_as_string (attendee, "PARTSTAT");
 				break;
 			}
@@ -1495,7 +1494,7 @@ e_cal_backend_send_accept_item (ECalBackend *backend, icalcomponent *icalcomp, G
 		return FALSE;
 	}
 	accept_data = g_new0 (EwsAcceptData, 1);
-	accept_data->cbews = g_object_ref(backend);
+	accept_data->current_user_mail = priv->user_email;
 	accept_data->comp = comp;
 
 	return e_ews_connection_create_items (priv->cnc,
