@@ -1445,8 +1445,8 @@ prepare_accept_item_request (ESoapMessage *msg, gpointer user_data)
 		attendee != NULL;
 		attendee = icalcomponent_get_next_property (icalcomp, ICAL_ATTENDEE_PROPERTY)) {
 		attendee_str = icalproperty_get_attendee (attendee);
-		if ((attendee_str != NULL) && !strncasecmp(attendee_str, "MAILTO:", 7))
-			if (g_strcmp0(attendee_str + 7 , data->current_user_mail) == 0) {
+		if ((attendee_str != NULL) && !strncasecmp (attendee_str, "MAILTO:", 7))
+			if (g_strcmp0 (attendee_str + 7 , data->current_user_mail) == 0) {
 				response_type = icalproperty_get_parameter_as_string (attendee, "PARTSTAT");
 				break;
 			}
@@ -1477,36 +1477,6 @@ prepare_accept_item_request (ESoapMessage *msg, gpointer user_data)
 	g_free (change_key);
 }
 
-static gboolean
-e_cal_backend_send_accept_item (ECalBackend *backend, icalcomponent *icalcomp, GError **error)
-{
-	EwsAcceptData *accept_data;
-	ECalBackendEwsPrivate *priv = E_CAL_BACKEND_EWS(backend)->priv;
-	GCancellable *cancellable = NULL;
-	GSList *ids = NULL;
-	ECalComponent *comp;
-
-	comp = e_cal_component_new ();
-	e_cal_component_set_icalcomponent (comp, icalcomp);
-
-	if (!comp) {
-		g_propagate_error (error, EDC_ERROR(InvalidObject));
-		return FALSE;
-	}
-	accept_data = g_new0 (EwsAcceptData, 1);
-	accept_data->current_user_mail = priv->user_email;
-	accept_data->comp = comp;
-
-	return e_ews_connection_create_items (priv->cnc,
-					      EWS_PRIORITY_MEDIUM,
-					      "SendAndSaveCopy",NULL,NULL,
-					      prepare_accept_item_request,
-					      accept_data,
-					      &ids,
-					      cancellable,
-					      error);
-}
-
 static void
 e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *calobj)
 {
@@ -1516,13 +1486,16 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 	icalcomponent *icalcomp, *subcomp;
 	GError *error = NULL;
 	icalproperty_method method;
+	EwsAcceptData *accept_data;
+	GCancellable *cancellable = NULL;
+	GSList *ids = NULL;
 
 	cbews = E_CAL_BACKEND_EWS(backend);
 	priv = cbews->priv;
 
 	/* make sure we're not offline */
 	if (priv->mode == CAL_MODE_LOCAL) {
-		g_propagate_error(&error, EDC_ERROR(RepositoryOffline));
+		g_propagate_error (&error, EDC_ERROR(RepositoryOffline));
 		goto exit;
 	}
 
@@ -1537,7 +1510,7 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 	/* make sure ical data we parse is actually an vcal component */
 	if (icalcomponent_isa(icalcomp) != ICAL_VCALENDAR_COMPONENT) {
 		icalcomponent_free (icalcomp);
-		g_propagate_error(&error, EDC_ERROR(InvalidObject));
+		g_propagate_error (&error, EDC_ERROR(InvalidObject));
 		goto exit;
 	}
 
@@ -1546,16 +1519,27 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 	subcomp = icalcomponent_get_first_component (icalcomp, kind);
 
 	while (subcomp) {
-		ECalComponent *comp = e_cal_component_new();
-		gboolean result;
+		ECalComponent *comp = e_cal_component_new ();
 
 		/* duplicate the ical component */
 		e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone(subcomp));
 
 		switch (method) {
-			case ICAL_METHOD_REQUEST:
-				result = e_cal_backend_send_accept_item (backend, subcomp, &error);
-				if (!result && error)
+			case ICAL_METHOD_REQUEST:	
+				accept_data = g_new0 (EwsAcceptData, 1);
+				accept_data->current_user_mail = priv->user_email;
+				accept_data->comp = comp;
+				e_ews_connection_create_items (priv->cnc, EWS_PRIORITY_MEDIUM,
+							       "SendAndSaveCopy", NULL, NULL,
+							       prepare_accept_item_request,
+							       accept_data,
+							       &ids,
+							       cancellable,
+							       &error);
+
+				if (error)
+					/* The calendar UI doesn't *display* errors unless they have
+					 * the OtherError code */
 					error->code = OtherError;
 				break;
 			case ICAL_METHOD_CANCEL:
