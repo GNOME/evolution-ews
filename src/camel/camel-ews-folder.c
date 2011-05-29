@@ -380,7 +380,8 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	   to match with calendar components saved in calendar cache. So manually get
 	   AssociatedCalendarItemId, replace the random UID with this ItemId,
 	   And save updated message data to a new temp file */
-	if (e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_MEETING_REQUEST) {
+	if (e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_MEETING_REQUEST ||
+		e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_MEETING_CANCELLATION) {
 		GSList *items_req = NULL;
 		const EwsId *associated_calendar_id;
 
