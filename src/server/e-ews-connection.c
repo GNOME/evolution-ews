@@ -1697,6 +1697,69 @@ e_ews_connection_delete_items_start	(EEwsConnection *cnc,
 				      cb == ews_sync_reply_cb);
 }
 
+void
+e_ews_connection_delete_item_start	(EEwsConnection *cnc,
+					 gint pri,
+					 EwsId *item_id,
+					 guint index,
+					 EwsDeleteType delete_type,
+					 EwsSendMeetingCancellationsType send_cancels,
+					 EwsAffectedTaskOccurrencesType affected_tasks,
+					 GAsyncReadyCallback cb,
+					 GCancellable *cancellable,
+					 gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+	gchar buffer[32];
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "DeleteItem",
+					     "DeleteType", ews_delete_type_to_str (delete_type), EWS_EXCHANGE_2007);
+
+	if (send_cancels)
+		e_soap_message_add_attribute (msg, "SendMeetingCancellations",
+					      ews_send_cancels_to_str (send_cancels), NULL, NULL);
+
+	if (affected_tasks)
+		e_soap_message_add_attribute (msg, "AffectedTaskOccurrences",
+					      ews_affected_tasks_to_str (affected_tasks), NULL, NULL);
+
+	e_soap_message_start_element (msg, "ItemIds", "messages", NULL);
+
+	if (index) {
+		e_soap_message_start_element (msg, "OccurrenceItemId", NULL, NULL);
+		e_soap_message_add_attribute (msg, "RecurringMasterId", item_id->id, NULL, NULL);
+		if (item_id->change_key)
+			e_soap_message_add_attribute (msg, "ChangeKey", item_id->change_key, NULL, NULL);
+		snprintf (buffer, 32, "%u", index);
+		e_soap_message_add_attribute (msg, "InstanceIndex", buffer, NULL, NULL);
+		e_soap_message_end_element (msg);
+	} else {
+		e_soap_message_start_element (msg, "ItemId", NULL, NULL);
+		e_soap_message_add_attribute (msg, "Id", item_id->id, NULL, NULL);
+		if (item_id->change_key)
+			e_soap_message_add_attribute (msg, "ChangeKey", item_id->change_key, NULL, NULL);
+		e_soap_message_end_element (msg);
+	}
+
+	e_soap_message_end_element (msg);
+
+	e_ews_message_write_footer (msg);
+
+	simple = g_simple_async_result_new (G_OBJECT (cnc),
+                                      cb,
+                                      user_data,
+                                      e_ews_connection_delete_items_start);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple,
+				      cb == ews_sync_reply_cb);
+}
+
 gboolean
 e_ews_connection_delete_items_finish	(EEwsConnection *cnc,
 					 GAsyncResult *result,

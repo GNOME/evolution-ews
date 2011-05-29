@@ -191,6 +191,17 @@ void		e_ews_connection_delete_items_start	(EEwsConnection *cnc,
 					 GCancellable *cancellable,
 					 gpointer user_data);
 
+void		e_ews_connection_delete_item_start	(EEwsConnection *cnc,
+					 gint pri,
+					 EwsId *id,
+					 guint index,
+					 EwsDeleteType delete_type,
+					 EwsSendMeetingCancellationsType send_cancels,
+					 EwsAffectedTaskOccurrencesType affected_tasks,
+					 GAsyncReadyCallback cb,
+					 GCancellable *cancellable,
+					 gpointer user_data);
+
 gboolean	e_ews_connection_delete_items_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
