@@ -824,7 +824,8 @@ typedef struct {
 	EDataCal *cal;
 	ECalComponent *comp;
 	EServerMethodContext context;
-	GSList *ids;
+	EwsId item_id;
+	guint index;
 } EwsRemoveData;
 
 static void
@@ -839,8 +840,8 @@ ews_cal_remove_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	if (!g_simple_async_result_propagate_error(simple, &error)) {
 		/* FIXME: This is horrid. Will bite us when we start to delete
 		   more than one item at a time... */
-		ews_cal_delete_comp (remove_data->cbews, remove_data->comp,
-				     g_slist_nth_data(remove_data->ids, 0));
+		if (remove_data->comp)
+			ews_cal_delete_comp (remove_data->cbews, remove_data->comp, remove_data->item_id.id);
 	} else {
 		/* The calendar UI doesn't *display* errors unless they have
 		   the OtherError code */
@@ -849,24 +850,25 @@ ews_cal_remove_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 
 	e_data_cal_notify_remove (remove_data->cal, remove_data->context, error);
 
-	g_slist_foreach (remove_data->ids, (GFunc) g_free, NULL);
-	g_slist_free (remove_data->ids);
+	g_free (remove_data->item_id.id);
+	g_free (remove_data->item_id.change_key);
 	g_object_unref(remove_data->cbews);
 	g_object_unref(remove_data->comp);
 	g_object_unref(remove_data->cal);
 	g_free(remove_data);
 }
 
-static unsigned int
+static guint
 e_cal_rid_to_index (const char *rid, icalcomponent *comp, GError **error)
 {
-	unsigned int index = 1;
+	guint index = 1;
 	icalproperty *prop = icalcomponent_get_first_property(comp, ICAL_RRULE_PROPERTY);
 	struct icalrecurrencetype rule = icalproperty_get_rrule (prop);
 	struct icaltimetype dtstart = icalcomponent_get_dtstart (comp);
 	icalrecur_iterator* ritr = icalrecur_iterator_new (rule, dtstart);
 	icaltimetype next = icalrecur_iterator_next (ritr),
-		o_time = icaltime_from_string_with_zone (rid, dtstart.zone);
+		/*o_time = icaltime_from_string_with_zone (rid, dtstart.zone);*/
+		o_time = icaltime_from_string (rid);
 	
 	for (; !icaltime_is_null_time (next); next = icalrecur_iterator_next (ritr), index++) {
 		if (icaltime_compare (o_time, next) == 0) break;
@@ -889,8 +891,8 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	ECalBackendEwsPrivate *priv;
 	ECalComponent *comp;
 	GError *error = NULL;
-	gchar *itemid = NULL;
-	unsigned int index;
+	EwsId item_id;
+	guint index = 0;
 
 	e_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
 
@@ -900,25 +902,30 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 
 	comp = e_cal_backend_store_get_component (priv->store, uid, rid);
 	if (!comp) {
-		g_propagate_error (&error, EDC_ERROR(ObjectNotFound));
-		goto exit;
+		comp = e_cal_backend_store_get_component (priv->store, uid, NULL);
+		if (!comp) {
+			g_warning ("EEE Cant find component with uid:%s & rid:%s\n", uid, rid);
+			g_propagate_error (&error, EDC_ERROR(ObjectNotFound));
+			goto exit;
+		}
+
+		index = e_cal_rid_to_index (rid, e_cal_component_get_icalcomponent (comp), &error);
+		if (error) goto exit;
+
+		ews_cal_component_get_item_id (comp, &item_id.id, &item_id.change_key);
+
+		g_object_unref (comp);
+		comp = NULL;
+	} else {
+		ews_cal_component_get_item_id (comp, &item_id.id, &item_id.change_key);
 	}
 
 	PRIV_UNLOCK (priv);
 
-	/* We don't handle recurring appointments yet */
-	if (rid) {
-		index = e_cal_rid_to_index (rid, e_cal_component_get_icalcomponent (comp), &error);
-		g_propagate_error(&error, EDC_ERROR_EX(OtherError,
-		    "Removal of individual recurrences not yet supported"));
-		goto exit;
-	}
-
-	ews_cal_component_get_item_id (comp, &itemid, NULL);
-	if (!itemid) {
+	if (!item_id.id) {
 		g_propagate_error(&error, EDC_ERROR_EX(OtherError,
 					       "Cannot determine EWS ItemId"));
-		g_object_unref (comp);
+		if (comp) g_object_unref (comp);
 		goto exit;
 	}
 
@@ -927,9 +934,11 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	remove_data->comp = comp;
 	remove_data->cal = g_object_ref(cal);
 	remove_data->context = context;
-	remove_data->ids = g_slist_append (NULL, (gpointer)itemid);
+	remove_data->index = index;
+	remove_data->item_id.id = item_id.id;
+	remove_data->item_id.change_key = item_id.change_key;
 
-	e_ews_connection_delete_items_start (priv->cnc, EWS_PRIORITY_MEDIUM, remove_data->ids,
+	e_ews_connection_delete_item_start (priv->cnc, EWS_PRIORITY_MEDIUM, &remove_data->item_id, index,
 					     EWS_HARD_DELETE, EWS_SEND_TO_NONE, FALSE,
 					     ews_cal_remove_object_cb, NULL,
 					     remove_data);
