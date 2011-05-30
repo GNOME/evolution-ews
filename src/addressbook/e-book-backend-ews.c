@@ -80,45 +80,123 @@ struct _EBookBackendEwsPrivate {
 static void
 ebews_populate_uid	(EContact *contact, EEwsItem *item)
 {
-	
+	const EwsId *id;
+
+	id = e_ews_item_get_id (item);
+	e_contact_set (contact, E_CONTACT_UID, id->id);
+	e_contact_set (contact, E_CONTACT_REV, id->change_key);
 }
 
 static void
 ebews_populate_full_name	(EContact *contact, EEwsItem *item)
 {
-	
+	const EwsCompleteName *cn;
+	const gchar *sur_name;
+
+	cn = e_ews_item_get_complete_name (item);
+	sur_name = e_ews_item_get_surname (item);
+
+	e_contact_set (contact, E_CONTACT_FULL_NAME, cn->full_name);
+	e_contact_set (contact, E_CONTACT_NICKNAME, cn->nick_name);
+	e_contact_set (contact, E_CONTACT_FAMILY_NAME, sur_name);
 }
 
 static void
 ebews_populate_birth_date	(EContact *contact, EEwsItem *item)
 {
+	time_t bdate;
+	GDate date;
+	EContactDate edate;
+
+	bdate = e_ews_item_get_birthday (item);
+	g_date_clear (&date, 1);
+	g_date_set_time_t (&date, bdate);
 	
+	edate.year = date.year;
+	edate.month = date.month;
+	edate.day = date.day;
+
+	if (g_date_valid (&date))
+		e_contact_set (contact, E_CONTACT_BIRTH_DATE, &edate);
+}
+
+
+static void
+set_phone_number (EContact *contact, EContactField field, EEwsItem *item, const gchar *item_field)
+{
+	const gchar *pn;
+	
+	pn = e_ews_item_get_phone_number (item, item_field);
+	if (pn)
+		e_contact_set (contact, field, pn);
 }
 
 static void
 ebews_populate_phone_numbers	(EContact *contact, EEwsItem *item)
 {
+	set_phone_number (contact, E_CONTACT_PHONE_ASSISTANT, item, "AssistantPhone");
+	set_phone_number (contact, E_CONTACT_PHONE_BUSINESS_FAX, item, "BusinessFax");
+	set_phone_number (contact, E_CONTACT_PHONE_BUSINESS, item, "BusinessPhone");
+	set_phone_number (contact, E_CONTACT_PHONE_BUSINESS_2, item, "BusinessPhone2");
+	set_phone_number (contact, E_CONTACT_PHONE_CAR, item, "CarPhone");
+	set_phone_number (contact, E_CONTACT_PHONE_COMPANY, item, "CompanyMainPhone");
+	set_phone_number (contact, E_CONTACT_PHONE_HOME_FAX, item, "HomeFax");
+	set_phone_number (contact, E_CONTACT_PHONE_HOME, item, "HomePhone");
+	set_phone_number (contact, E_CONTACT_PHONE_HOME_2, item, "HomePhone2");
+	set_phone_number (contact, E_CONTACT_PHONE_ISDN, item, "Isdn");
+	set_phone_number (contact, E_CONTACT_PHONE_MOBILE, item, "MobilePhone");
+	set_phone_number (contact, E_CONTACT_PHONE_OTHER_FAX, item, "OtherFax");
+	set_phone_number (contact, E_CONTACT_PHONE_OTHER, item, "OtherTelephone");
+	set_phone_number (contact, E_CONTACT_PHONE_PAGER, item, "Pager");
+	set_phone_number (contact, E_CONTACT_PHONE_PRIMARY, item, "PrimaryPhone");
+	set_phone_number (contact, E_CONTACT_PHONE_RADIO, item, "RadioPhone");
+	set_phone_number (contact, E_CONTACT_PHONE_TELEX, item, "Telex");
+	set_phone_number (contact, E_CONTACT_PHONE_TTYTDD, item, "TtyTddPhone");
+}
+
+static void
+set_address (EContact *contact, EContactField field, EEwsItem *item, const gchar *item_field)
+{
+	const gchar *add;
 	
+	add = e_ews_item_get_physical_address (item, item_field);
+	if (add)
+		e_contact_set (contact, field, add);
 }
 
 static void
 ebews_populate_address		(EContact *contact, EEwsItem *item)
 {
 	
+	set_address (contact, E_CONTACT_ADDRESS_WORK, item, "Business");
+	set_address (contact, E_CONTACT_ADDRESS_HOME, item, "Home");
+	set_address (contact, E_CONTACT_ADDRESS_OTHER, item, "Other");
 }
 
 static void
 ebews_populate_ims		(EContact *contact, EEwsItem *item)
 {
+	/* TODO : The fields returned by server does not match with the EContact fields
+	   for the IMS, handle it later */
+}
+
+static void
+set_email_address (EContact *contact, EContactField field, EEwsItem *item, const gchar *item_field)
+{
+	const gchar *ea;
 	
+	ea = e_ews_item_get_email_address (item, item_field);
+	if (ea)
+		e_contact_set (contact, field, ea);
 }
 
 static void
 ebews_populate_emails		(EContact *contact, EEwsItem *item)
 {
-	
+	set_email_address (contact, E_CONTACT_EMAIL_1, item, "EmailAddress1");
+	set_email_address (contact, E_CONTACT_EMAIL_2, item, "EmailAddress2");
+	set_email_address (contact, E_CONTACT_EMAIL_3, item, "EmailAddress3");
 }
-
 
 static void
 ebews_set_item_id		(ESoapMessage *message, EContact *contact)
@@ -220,6 +298,7 @@ static const struct field_element_mapping {
 
 	/* Should take of uid and changekey (REV) */
 	{ E_CONTACT_UID, ELEMENT_TYPE_COMPLEX, "ItemId", NULL,  ebews_populate_uid, ebews_set_item_id},
+	/* Should handle all name parts */
 	{ E_CONTACT_FULL_NAME, ELEMENT_TYPE_COMPLEX, "CompleteName", NULL, ebews_populate_full_name, ebews_set_full_name, ebews_set_full_name_changes},
 	{ E_CONTACT_BIRTH_DATE, ELEMENT_TYPE_COMPLEX, "Birthday", NULL,  ebews_populate_birth_date, ebews_set_birth_date, ebews_set_birth_date_changes },
 	/* should take care of all phone number fields */
