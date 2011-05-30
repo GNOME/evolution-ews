@@ -1482,6 +1482,22 @@ prepare_accept_item_request (ESoapMessage *msg, gpointer user_data)
 }
 
 static void
+prepare_set_free_busy_status (ESoapMessage *msg, gpointer user_data)
+{
+	EwsAcceptData *data = user_data;
+
+	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM, data->item_id, data->change_key, 0);
+
+	e_ews_message_start_set_item_field (msg,"LegacyFreeBusyStatus","calendar");
+
+	e_ews_message_write_string_parameter (msg, "LegacyFreeBusyStatus", NULL, "Free");
+
+	e_ews_message_end_set_item_field (msg);
+
+	e_ews_message_end_item_change (msg);
+}
+
+static void
 e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *calobj)
 {
 	ECalBackendEws *cbews;
@@ -1492,7 +1508,6 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 	icalproperty_method method;
 	EwsAcceptData *accept_data;
 	GCancellable *cancellable = NULL;
-	GSList *ids = NULL;
 
 	cbews = E_CAL_BACKEND_EWS(backend);
 	priv = cbews->priv;
@@ -1526,6 +1541,9 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 		ECalComponent *comp = e_cal_component_new ();
 		const char *response_type;
 		gchar *item_id = NULL, *change_key = NULL;
+		GSList *ids = NULL, *l;
+		icalproperty *transp = icalcomponent_get_first_property (subcomp, ICAL_TRANSP_PROPERTY);
+
 		/* duplicate the ical component */
 		e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (subcomp));
 
@@ -1553,6 +1571,31 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 					/* The calendar UI doesn't *display* errors unless they have
 					 * the OtherError code */
 					error->code = OtherError;
+				else if (!g_strcmp0 (icalproperty_get_value_as_string (transp), "TRANSPARENT") &&
+					 !g_strcmp0 (response_type, "ACCEPTED")) {
+					/*user can accpet meeting but mark it as free in it's calendar
+					 the folowing code is updating the exchange meeting status to free */
+					for (l = ids; l != NULL; l = g_slist_next (l)) {
+						EEwsItem *item = (EEwsItem *) l->data;
+						if (item) {
+							accept_data->item_id = e_ews_item_get_id (item)->id;
+							accept_data->change_key = e_ews_item_get_id (item)->change_key;
+							break;
+						}
+					}
+					e_ews_connection_update_items (priv->cnc, 
+								       EWS_PRIORITY_MEDIUM,
+								       "AlwaysOverwrite",
+								       NULL, "SendToNone",
+								       NULL,
+								       prepare_set_free_busy_status,
+								       accept_data,
+								       &ids,
+								       cancellable,
+								       &error);
+					if (error)
+						error->code = OtherError;
+				}
 				break;
 			case ICAL_METHOD_CANCEL:
 			default:
