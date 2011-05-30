@@ -1432,7 +1432,8 @@ exit:
 
 typedef struct {
 	const char *response_type;
-	ECalComponent *comp;
+	const char *item_id;
+	const char *change_key;
 } EwsAcceptData;
 
 static const char*
@@ -1451,16 +1452,12 @@ e_ews_get_current_user_meeting_reponse (icalcomponent *icalcomp, const char *cur
 	}
 	return NULL;
 }
+
 static void
 prepare_accept_item_request (ESoapMessage *msg, gpointer user_data)
 {
 	EwsAcceptData *data = user_data;
-	ECalComponent *comp = data->comp;
-	gchar *uid = NULL, *change_key = NULL;
 	const char *response_type = data->response_type;
-
-	/* gather needed data from icalcomponent */
-	ews_cal_component_get_item_id (comp, &uid, &change_key);
 
 	/* FORMAT OF A SAMPLE SOAP MESSAGE: http://msdn.microsoft.com/en-us/library/aa566464%28v=exchg.140%29.aspx
 	 * Accept and Decline meeting have same method code (10032)
@@ -1476,15 +1473,12 @@ prepare_accept_item_request (ESoapMessage *msg, gpointer user_data)
 		e_soap_message_start_element (msg, "TentativelyAcceptItem", NULL, NULL);
 	
 	e_soap_message_start_element (msg, "ReferenceItemId", NULL, NULL);
-	e_soap_message_add_attribute (msg, "Id", uid, NULL, NULL);
-	e_soap_message_add_attribute (msg, "ChangeKey", change_key, NULL, NULL);
+	e_soap_message_add_attribute (msg, "Id", data->item_id, NULL, NULL);
+	e_soap_message_add_attribute (msg, "ChangeKey", data->change_key, NULL, NULL);
 	e_soap_message_end_element (msg); // "ReferenceItemId"
 
 	/* end of "AcceptItem" */
 	e_soap_message_end_element (msg);
-
-	g_free (uid);
-	g_free (change_key);
 }
 
 static void
@@ -1531,16 +1525,22 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 	while (subcomp) {
 		ECalComponent *comp = e_cal_component_new ();
 		const char *response_type;
+		gchar *item_id = NULL, *change_key = NULL;
 		/* duplicate the ical component */
 		e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (subcomp));
 
+		/*getting a data for meeting request response*/
 		response_type = e_ews_get_current_user_meeting_reponse (e_cal_component_get_icalcomponent (comp), priv->user_email);
+		ews_cal_component_get_item_id (comp, &item_id, &change_key);
 
 		switch (method) {
-			case ICAL_METHOD_REQUEST:	
+			case ICAL_METHOD_REQUEST:
+			case ICAL_METHOD_PUBLISH:
+			case ICAL_METHOD_REPLY:
 				accept_data = g_new0 (EwsAcceptData, 1);
 				accept_data->response_type = response_type;
-				accept_data->comp = comp;
+				accept_data->item_id = item_id;
+				accept_data->change_key = change_key;
 				e_ews_connection_create_items (priv->cnc, EWS_PRIORITY_MEDIUM,
 							       "SendAndSaveCopy", NULL, NULL,
 							       prepare_accept_item_request,
@@ -1566,6 +1566,8 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 
 exit:
 	e_data_cal_notify_objects_received (cal, context, error);
+
+	g_free(accept_data);
 }
 
 /* TODO Do not replicate this in every backend */
