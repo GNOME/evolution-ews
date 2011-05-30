@@ -1505,7 +1505,7 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 
 	/* make sure we're not offline */
 	if (priv->mode == CAL_MODE_LOCAL) {
-		g_propagate_error (&error, EDC_ERROR(RepositoryOffline));
+		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
 		goto exit;
 	}
 
@@ -1513,18 +1513,18 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 
 	/* make sure data was parsed properly */
 	if (!icalcomp) {
-		g_propagate_error (&error, EDC_ERROR(InvalidObject));
+		g_propagate_error (&error, EDC_ERROR (InvalidObject));
 		goto exit;
 	}
 
 	/* make sure ical data we parse is actually an vcal component */
-	if (icalcomponent_isa(icalcomp) != ICAL_VCALENDAR_COMPONENT) {
+	if (icalcomponent_isa (icalcomp) != ICAL_VCALENDAR_COMPONENT) {
 		icalcomponent_free (icalcomp);
-		g_propagate_error (&error, EDC_ERROR(InvalidObject));
+		g_propagate_error (&error, EDC_ERROR (InvalidObject));
 		goto exit;
 	}
 
-	kind = e_cal_backend_get_kind (E_CAL_BACKEND(backend));
+	kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
 	method = icalcomponent_get_method (icalcomp);
 	subcomp = icalcomponent_get_first_component (icalcomp, kind);
 
@@ -1532,9 +1532,9 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 		ECalComponent *comp = e_cal_component_new ();
 		const char *response_type;
 		/* duplicate the ical component */
-		e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone(subcomp));
+		e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (subcomp));
 
-		response_type = e_ews_get_current_user_meeting_reponse (e_cal_component_get_icalcomponent (comp),priv->user_email);
+		response_type = e_ews_get_current_user_meeting_reponse (e_cal_component_get_icalcomponent (comp), priv->user_email);
 
 		switch (method) {
 			case ICAL_METHOD_REQUEST:	
