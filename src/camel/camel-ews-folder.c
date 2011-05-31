@@ -402,11 +402,12 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 			goto exit;
 		}
 		associated_calendar_id = e_ews_item_get_associated_calendar_item_id (items_req->data);
-
-		mime_fname_new = ews_update_mgtrequest_mime_calendar_itemid (mime_content,
-									     associated_calendar_id,
-									     error);
-
+		/*In case of non-exchange based meetings invites the calendar backend have to create the meeting*/
+		if (associated_calendar_id) {
+			mime_fname_new = ews_update_mgtrequest_mime_calendar_itemid (mime_content,
+										     associated_calendar_id,
+										     error);
+		}
 		if (mime_fname_new)
 			mime_content = (const gchar *) mime_fname_new;
 
