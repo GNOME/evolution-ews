@@ -1596,6 +1596,9 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 					if (error)
 						error->code = OtherError;
 				}
+				g_free (item_id);
+				g_free (change_key);
+				g_free (accept_data);
 				break;
 			case ICAL_METHOD_CANCEL:
 			default:
@@ -1609,8 +1612,6 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 
 exit:
 	e_data_cal_notify_objects_received (cal, context, error);
-
-	g_free(accept_data);
 }
 
 /* TODO Do not replicate this in every backend */
