@@ -2727,6 +2727,36 @@ e_ews_connection_delete_folder	(EEwsConnection *cnc,
 
 }
 
+void
+e_ews_connection_create_attachments_start (EEwsConnection *cnc,
+                                         gint pri,
+                                         const EwsId *parent,
+                                         const GSList *files,
+                                         GCancellable *cancellable,
+                                         gpointer user_data)
+{
+
+}
+
+GSList *
+e_ews_connection_create_attachments_finish (EEwsConnection *cnc,
+                                         GAsyncResult *result,
+                                         GError **error)
+{
+	return NULL;
+}
+
+GSList *
+e_ews_connection_create_attachments (EEwsConnection *cnc,
+                                     gint pri,
+                                     const EwsId *parent,
+                                     const GSList *files,
+                                     GCancellable *cancellable,
+                                     GError **error)
+{
+	return NULL;
+}
+
 static void get_attachments_response_cb (ESoapParameter *subparam, EwsNode *enode);
 
 void

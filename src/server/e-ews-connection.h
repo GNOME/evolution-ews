@@ -452,6 +452,29 @@ gboolean	e_ews_connection_move_items	(EEwsConnection *cnc,
 						 GSList **items_ret,
 						 GCancellable *cancellable,
 						 GError **error);
+
+/* Create attachemnts and associate them with an item */
+void		e_ews_connection_create_attachments_start
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const EwsId *parent,
+						 const GSList *files,
+						 GCancellable *cancellable,
+						 gpointer user_data);
+
+GSList *	e_ews_connection_create_attachments_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GError **error);
+
+GSList *	e_ews_connection_create_attachments
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const EwsId *parent,
+						 const GSList *files,
+						 GCancellable *cancellable,
+						 GError **error);
+
 /* Get attachments items */
 void		e_ews_connection_get_attachments_start
 						(EEwsConnection *cnc,
