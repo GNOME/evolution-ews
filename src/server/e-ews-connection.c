@@ -574,7 +574,8 @@ resolve_names_response_cb (ESoapParameter *subparam, EwsNode *enode)
 
 		node = e_soap_parameter_get_first_child_by_name (subparam, "Mailbox");
 		mb = e_ews_item_mailbox_from_soap_param (node);
-		mailboxes = g_slist_append (mailboxes, mb);
+		if (mb)
+			mailboxes = g_slist_append (mailboxes, mb);
 
 		/* TODO parse contacts */
 	}
