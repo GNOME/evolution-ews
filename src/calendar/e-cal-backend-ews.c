@@ -1544,7 +1544,8 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 		const char *response_type;
 		gchar *item_id = NULL, *change_key = NULL;
 		GSList *ids = NULL, *l;
-		icalproperty *transp = icalcomponent_get_first_property (subcomp, ICAL_TRANSP_PROPERTY);
+		icalproperty *transp;
+
 
 		/* duplicate the ical component */
 		e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (subcomp));
@@ -1571,10 +1572,12 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 
 				if (error)
 					/* The calendar UI doesn't *display* errors unless they have
-					 * the OtherError code */
-					error->code = OtherError;
-				else if (!g_strcmp0 (icalproperty_get_value_as_string (transp), "TRANSPARENT") &&
-					 !g_strcmp0 (response_type, "ACCEPTED")) {
+				 * the OtherError code */
+				error->code = OtherError;
+			else {
+				transp = icalcomponent_get_first_property (subcomp, ICAL_TRANSP_PROPERTY);
+				if (!g_strcmp0 (icalproperty_get_value_as_string (transp), "TRANSPARENT") &&
+				    !g_strcmp0 (response_type, "ACCEPTED")) {
 					/*user can accpet meeting but mark it as free in it's calendar
 					 the folowing code is updating the exchange meeting status to free */
 					for (l = ids; l != NULL; l = g_slist_next (l)) {
@@ -1598,6 +1601,7 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 					if (error)
 						error->code = OtherError;
 				}
+			}
 				g_free (item_id);
 				g_free (change_key);
 				g_free (accept_data);
