@@ -1544,7 +1544,7 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 		const char *response_type;
 		gchar *item_id = NULL, *change_key = NULL;
 		GSList *ids = NULL, *l;
-		icalproperty *transp;
+		icalproperty *recurrence_id, *transp;
 
 
 		/* duplicate the ical component */
@@ -1607,6 +1607,9 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 				g_free (accept_data);
 				break;
 			case ICAL_METHOD_CANCEL:
+				recurrence_id = icalcomponent_get_first_property (subcomp, ICAL_RECURRENCEID_PROPERTY);
+				e_cal_backend_ews_remove_object (backend, cal, NULL, item_id, icalproperty_get_value_as_string (recurrence_id), CALOBJ_MOD_ALL);
+				break;
 			default:
 				break;
 		}
