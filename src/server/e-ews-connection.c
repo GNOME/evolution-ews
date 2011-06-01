@@ -2754,7 +2754,28 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
                                      GCancellable *cancellable,
                                      GError **error)
 {
-	return NULL;
+	EwsSyncData *sync_data;
+	GSList *ids;
+
+	sync_data = g_new0 (EwsSyncData, 1);
+	sync_data->eflag = e_flag_new ();
+
+	e_ews_connection_create_attachments_start (cnc, pri,
+						 parent,
+						 files,
+						 cancellable,
+						 (gpointer) sync_data);
+
+	e_flag_wait (sync_data->eflag);
+
+	ids = e_ews_connection_delete_folder_finish (cnc, sync_data->res,
+							error);
+
+	e_flag_free (sync_data->eflag);
+	g_object_unref (sync_data->res);
+	g_free (sync_data);
+
+	return ids;
 }
 
 static void get_attachments_response_cb (ESoapParameter *subparam, EwsNode *enode);
