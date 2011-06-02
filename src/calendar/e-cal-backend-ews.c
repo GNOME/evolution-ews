@@ -40,6 +40,7 @@
 #include <libical/icalcomponent.h>
 #include <libical/icalproperty.h>
 #include <glib-2.0/glib/gerror.h>
+#include <glib-2.0/glib/glist.h>
 #include "e-cal-backend-ews.h"
 #include "e-cal-backend-ews-utils.h"
 #include "e-ews-connection.h"
@@ -1627,6 +1628,156 @@ exit:
 	e_data_cal_notify_objects_received (cal, context, error);
 }
 
+typedef struct {
+	const char *new_body_content;
+	const char *item_id;
+	const char *change_key;
+} EwsCancellationData;
+
+static void
+prepare_cancellation_meeting_request (ESoapMessage *msg, gpointer user_data)
+{
+	EwsCancellationData *data = user_data;
+
+	e_soap_message_start_element (msg, "CancelCalendarItem", NULL, NULL);
+	e_soap_message_start_element (msg, "ReferenceItemId", NULL, NULL);
+	e_soap_message_add_attribute (msg, "Id", data->item_id, NULL, NULL);
+	e_soap_message_add_attribute (msg, "ChangeKey", data->change_key, NULL, NULL);
+	e_soap_message_end_element (msg); // "ReferenceItemId"
+
+	if (data->new_body_content) {
+		e_soap_message_start_element (msg, "NewBodyContent", NULL, NULL);
+		e_soap_message_add_attribute (msg, "BodyType", "Text", NULL, NULL);
+		e_soap_message_write_string (msg, data->new_body_content);
+		e_soap_message_end_element (msg);
+	}
+	/* end of "CancelCalendarItem" */
+	e_soap_message_end_element (msg);
+}
+
+static const char *
+e_cal_get_meeting_cancellation_comment (ECalComponent *comp)
+{
+	icalproperty *prop;
+	prop = icalcomponent_get_first_property (e_cal_component_get_icalcomponent (comp),
+		ICAL_X_PROPERTY);
+	while (prop) {
+		const gchar *x_name, *x_val;
+		x_name = icalproperty_get_x_name (prop);
+		x_val = icalproperty_get_x (prop);
+		if (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-RETRACT-COMMENT")) {
+			return g_strdup (x_val);
+			break;
+		}
+
+		prop = icalcomponent_get_next_property (e_cal_component_get_icalcomponent (comp),
+			ICAL_X_PROPERTY);
+	}
+	return NULL;
+
+}
+
+static void
+e_cal_backend_ews_send_objects (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *calobj)
+{
+	ECalBackendEws *cbews;
+	ECalBackendEwsPrivate *priv;
+	icalcomponent_kind kind;
+	icalcomponent *icalcomp, *subcomp;
+	GError *error = NULL;
+	icalproperty_method method;
+	//EwsAcceptData *accept_data;
+	GCancellable *cancellable = NULL;
+
+	cbews = E_CAL_BACKEND_EWS(backend);
+	priv = cbews->priv;
+
+	/* make sure we're not offline */
+	if (priv->mode == CAL_MODE_LOCAL) {
+		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
+		goto exit;
+	}
+
+	icalcomp = icalparser_parse_string (calobj);
+
+	/* make sure data was parsed properly */
+	if (!icalcomp) {
+		g_propagate_error (&error, EDC_ERROR (InvalidObject));
+		goto exit;
+	}
+	/* make sure ical data we parse is actually an vcal component */
+	if ((icalcomponent_isa (icalcomp) != ICAL_VCALENDAR_COMPONENT) && (icalcomponent_isa (icalcomp) != ICAL_VEVENT_COMPONENT)) {
+		icalcomponent_free (icalcomp);
+		g_propagate_error (&error, EDC_ERROR (InvalidObject));
+		goto exit;
+	}
+
+	if (icalcomponent_isa (icalcomp) == ICAL_VCALENDAR_COMPONENT) {
+		kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
+		method = icalcomponent_get_method (icalcomp);
+		subcomp = icalcomponent_get_first_component (icalcomp, kind);
+	}
+	if (icalcomponent_isa (icalcomp) == ICAL_VEVENT_COMPONENT)
+		subcomp = icalcomp;
+	while (subcomp) {
+		ECalComponent *comp = e_cal_component_new ();
+		const char *new_body_content = NULL;
+		gchar *item_id = NULL, *change_key = NULL;
+		GSList *ids = NULL, *items = NULL, *l;
+		EwsCancellationData *cancellation_data;
+		e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (subcomp));
+
+		new_body_content = e_cal_get_meeting_cancellation_comment(comp);
+
+		ews_cal_component_get_item_id (comp, &item_id, &change_key);
+
+		ids = g_slist_append (ids,item_id);
+		e_ews_connection_get_items (priv->cnc, EWS_PRIORITY_MEDIUM, ids, "IdOnly", NULL, FALSE, NULL, &items, NULL, NULL, cancellable, &error);
+
+		if (error){
+			error->code = OtherError;
+			break;
+		}
+		else {
+			for (l = items; l != NULL; l = g_slist_next (l)) {
+				EEwsItem *item = (EEwsItem *) l->data;
+				if (item) {
+					item_id = e_ews_item_get_id (item)->id;
+					change_key = e_ews_item_get_id (item)->change_key;
+					break;
+				}
+			}
+
+			cancellation_data = g_new0 (EwsCancellationData, 1);
+			cancellation_data->new_body_content = new_body_content;
+			cancellation_data->item_id = item_id;
+			cancellation_data->change_key = change_key;
+			e_ews_connection_create_items (priv->cnc, EWS_PRIORITY_MEDIUM,
+				"SendAndSaveCopy", NULL, NULL,
+				prepare_cancellation_meeting_request,
+				cancellation_data,
+				&ids,
+				cancellable,
+				&error);
+
+			if (error){
+				error->code = OtherError;
+				break;
+			}
+		}
+		g_free (item_id);
+		g_free (change_key);
+		g_free (cancellation_data);
+		g_object_unref (comp);
+		subcomp = icalcomponent_get_next_component (icalcomp, kind);
+	}
+
+	icalcomponent_free (icalcomp);
+
+exit:
+	e_data_cal_notify_objects_sent (cal,context,error,NULL,calobj);
+}
+
 /* TODO Do not replicate this in every backend */
 static icaltimezone *
 resolve_tzid (const gchar *tzid, gpointer user_data)
@@ -2340,7 +2491,7 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->remove_object = e_cal_backend_ews_remove_object;
 
 	backend_class->receive_objects = e_cal_backend_ews_receive_objects;
-//	backend_class->send_objects = e_cal_backend_ews_send_objects;
+	backend_class->send_objects = e_cal_backend_ews_send_objects;
 //	backend_class->get_attachment_list = e_cal_backend_ews_get_attachment_list;
 	backend_class->get_free_busy = e_cal_backend_ews_get_free_busy;
 //	backend_class->get_changes = e_cal_backend_ews_get_changes;
