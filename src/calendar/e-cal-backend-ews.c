@@ -837,15 +837,19 @@ ews_cal_remove_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 
 	simple = G_SIMPLE_ASYNC_RESULT (res);
 
-	if (!g_simple_async_result_propagate_error(simple, &error)) {
+	if (!g_simple_async_result_propagate_error (simple, &error)) {
 		/* FIXME: This is horrid. Will bite us when we start to delete
 		   more than one item at a time... */
 		if (remove_data->comp)
 			ews_cal_delete_comp (remove_data->cbews, remove_data->comp, remove_data->item_id.id);
 	} else {
-		/* The calendar UI doesn't *display* errors unless they have
-		   the OtherError code */
-		error->code = OtherError;
+		/*In case where item already removed, we do not want to fail*/
+		if (error->code == EWS_CONNECTION_ERROR_ITEMNOTFOUND) {
+			g_clear_error (&error);
+			/*probably we are not in sync, let's sync with server*/
+			ews_start_sync (remove_data->cbews);
+		} else
+			error->code = OtherError;
 	}
 
 	if (remove_data->context)
