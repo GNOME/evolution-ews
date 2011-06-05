@@ -1720,8 +1720,6 @@ e_cal_backend_ews_send_objects (ECalBackend *backend, EDataCal *cal, EServerMeth
 	icalcomponent_kind kind;
 	icalcomponent *icalcomp, *subcomp = NULL;
 	GError *error = NULL;
-	icalproperty_method method;
-	//EwsAcceptData *accept_data;
 	GCancellable *cancellable = NULL;
 
 	cbews = E_CAL_BACKEND_EWS(backend);
@@ -1751,7 +1749,6 @@ e_cal_backend_ews_send_objects (ECalBackend *backend, EDataCal *cal, EServerMeth
 
 	if (icalcomponent_isa (icalcomp) == ICAL_VCALENDAR_COMPONENT) {
 		kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
-		method = icalcomponent_get_method (icalcomp);
 		subcomp = icalcomponent_get_first_component (icalcomp, kind);
 	}
 	if (icalcomponent_isa (icalcomp) == ICAL_VEVENT_COMPONENT)
