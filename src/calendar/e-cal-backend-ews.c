@@ -1683,7 +1683,7 @@ e_cal_backend_ews_send_objects (ECalBackend *backend, EDataCal *cal, EServerMeth
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
 	icalcomponent_kind kind;
-	icalcomponent *icalcomp, *subcomp;
+	icalcomponent *icalcomp, *subcomp = NULL;
 	GError *error = NULL;
 	icalproperty_method method;
 	//EwsAcceptData *accept_data;
@@ -1711,6 +1711,8 @@ e_cal_backend_ews_send_objects (ECalBackend *backend, EDataCal *cal, EServerMeth
 		g_propagate_error (&error, EDC_ERROR (InvalidObject));
 		goto exit;
 	}
+
+	kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
 
 	if (icalcomponent_isa (icalcomp) == ICAL_VCALENDAR_COMPONENT) {
 		kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
