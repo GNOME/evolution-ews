@@ -2778,11 +2778,12 @@ e_ews_connection_attach_file (ESoapMessage *msg,
 	}
 
 	buffer = malloc (st.st_size);
-	close (fd);
 	if (read (fd, buffer, st.st_size) != st.st_size) {
 		g_warning ("Error reading %u bytes from %s\n", (unsigned int)st.st_size, filepath);
+		close (fd);
 		return;
 	}
+	close (fd);
 
 	filename = strrchr (filepath, '/');
 	if (filename) filename++;
