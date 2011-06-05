@@ -901,6 +901,8 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	guint index = 0;
 
 	e_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
+	/*We have to run synce before rihth operations, in some cases change key may change */
+	ews_start_sync (cbews);
 
 	priv = cbews->priv;
 
