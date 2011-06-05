@@ -1052,6 +1052,31 @@ convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 }
 
 static void
+ews_create_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data)
+{
+	EEwsConnection *cnc = E_EWS_CONNECTION (object);
+	/*ECalComponent *comp = user_data;*/
+	GSList *ids = NULL, *next;
+	EwsAttachmentId *attach_id;
+	GError *error = NULL;
+
+	/* TODO - am I suppose to do anything with the ids I get back ? */
+	/* right now just free them */
+	ids = e_ews_connection_create_attachments_finish (cnc, res, &error);
+	for (next = ids; next; next = next->next) {
+		attach_id = next->data;
+
+		g_free (attach_id->id);
+		g_free (attach_id->rootItemId);
+		g_free (attach_id->rootItemChangeKey);
+
+		g_free (attach_id);
+	}
+
+	g_slist_free (ids);
+}
+
+static void
 ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
@@ -1059,7 +1084,7 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	ECalBackendEws *cbews = create_data->cbews;
 	ECalBackendEwsPrivate *priv = cbews->priv;
 	GError *error = NULL;
-	GSList *ids = NULL;
+	GSList *ids = NULL, *attachments = NULL;
 	const gchar *comp_uid;
 	const EwsId *item_id;
 	icalproperty *icalprop;
@@ -1086,6 +1111,14 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	icalproperty_set_x_name (icalprop, "X-EVOLUTION-CHANGEKEY");
 	icalcomp = e_cal_component_get_icalcomponent(create_data->comp);
 	icalcomponent_add_property (icalcomp, icalprop);
+
+	/* attachments */
+	if (e_cal_component_get_num_attachments (create_data->comp) > 0) {
+		e_cal_component_get_attachment_list (create_data->comp, &attachments);
+		e_ews_connection_create_attachments_start (cnc, EWS_PRIORITY_MEDIUM,
+							   item_id, attachments,
+							   ews_create_attachments_cb, NULL, create_data->comp);
+	}
 
 	/* update component internal data */
 	e_cal_component_commit_sequence(create_data->comp);
