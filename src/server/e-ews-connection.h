@@ -459,6 +459,7 @@ void		e_ews_connection_create_attachments_start
 						 gint pri,
 						 const EwsId *parent,
 						 const GSList *files,
+						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
 						 gpointer user_data);
 

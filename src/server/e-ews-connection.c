@@ -23,10 +23,14 @@
 #include <config.h>
 #endif
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <ctype.h>
 #include <glib/gi18n-lib.h>
 #include "e-ews-connection.h"
 #include <libedataserver/e-flag.h>
+#include <bits/stat.h>
 #include "e-ews-message.h"
 #include "e-ews-item-change.h"
 #include "ews-marshal.h"
@@ -2727,32 +2731,155 @@ e_ews_connection_delete_folder	(EEwsConnection *cnc,
 
 }
 
+static void
+create_attachments_response_cb (ESoapParameter *param,
+				EwsNode *enode)
+{
+	ESoapParameter *subparam, *attspara;
+	EwsAsyncData *async_data;
+	EwsAttachmentId *attach_id;
+
+	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
+
+	attspara = e_soap_parameter_get_first_child_by_name (param, "Attachments");
+
+	for (subparam = e_soap_parameter_get_first_child (attspara); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
+		if (!g_ascii_strcasecmp (e_soap_parameter_get_name(subparam), "FileAttachment")) {
+			attach_id = g_new0 (EwsAttachmentId, 1);
+			attach_id->id = e_soap_parameter_get_property (subparam, "Id");
+			attach_id->rootItemId = e_soap_parameter_get_property (subparam, "RootItemId");
+			attach_id->rootItemChangeKey = e_soap_parameter_get_property (subparam, "RootItemChangeKey");
+
+			async_data->items = g_slist_append (async_data->items, attach_id);
+		}
+	}
+}
+
+static void
+e_ews_connection_attach_file (ESoapMessage *msg,
+				const char *filepath)
+{
+	/* TODO - handle a situation where the file isnt accessible/other problem with it */
+	/* TODO - This is a naive implementation that just uploads the whole content into memory, ie very inefficient */
+	struct stat st;
+	char *buffer;
+	const char *filename;
+	int fd;
+
+	if (stat (filepath, &st) == -1) {
+		g_warning ("Error while calling stat() on %s\n", filepath);
+		return;
+	}
+
+	fd = open (filepath, O_RDONLY);
+	if (fd == -1) {
+		g_warning ("Error opening %s for reading\n", filepath);
+		return;
+	}
+
+	buffer = malloc (st.st_size);
+	close (fd);
+	if (read (fd, buffer, st.st_size) != st.st_size) {
+		g_warning ("Error reading %u bytes from %s\n", (unsigned int)st.st_size, filepath);
+		return;
+	}
+
+	filename = strrchr (filepath, '/');
+	if (filename) filename++;
+	else filename = filepath;
+
+	e_soap_message_start_element (msg, "FileAttachment", "messages", NULL);
+
+	e_ews_message_write_string_parameter (msg, "Name", NULL, filename);
+
+	e_soap_message_start_element (msg, "Content", NULL, NULL);
+	e_soap_message_write_base64 (msg, buffer, st.st_size);
+	e_soap_message_end_element(msg); /* "Content" */
+
+	e_soap_message_end_element(msg); /* "FileAttachment" */
+
+	free (buffer);
+}
+
 void
 e_ews_connection_create_attachments_start (EEwsConnection *cnc,
-                                         gint pri,
-                                         const EwsId *parent,
-                                         const GSList *files,
-                                         GCancellable *cancellable,
-                                         gpointer user_data)
+					   gint pri,
+					   const EwsId *parent,
+					   const GSList *files,
+					   GAsyncReadyCallback cb,
+					   GCancellable *cancellable,
+					   gpointer user_data)
 {
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+	const GSList *l;
 
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "CreateAttachment", NULL, NULL, EWS_EXCHANGE_2007);
+
+	e_soap_message_start_element (msg, "ParentItemId", "messages", NULL);
+	e_soap_message_add_attribute (msg, "Id", parent->id, NULL, NULL);
+	if (parent->change_key)
+		e_soap_message_add_attribute (msg, "ChangeKey", parent->change_key, NULL, NULL);
+	e_soap_message_end_element(msg);
+
+	/* start interation over all items to get the attachemnts */
+	e_soap_message_start_element (msg, "Attachments", "messages", NULL);
+
+	for (l = files; l != NULL; l = g_slist_next (l))
+		e_ews_connection_attach_file (msg, l->data);
+
+	e_soap_message_end_element (msg); /* "Attachments" */
+
+	e_ews_message_write_footer (msg);
+
+	simple = g_simple_async_result_new (G_OBJECT (cnc),
+				      cb,
+				      user_data,
+				      e_ews_connection_get_attachments_start);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	ews_connection_queue_request (cnc, msg, create_attachments_response_cb, pri,
+				      cancellable, simple, cb == ews_sync_reply_cb);
 }
 
 GSList *
 e_ews_connection_create_attachments_finish (EEwsConnection *cnc,
-                                         GAsyncResult *result,
-                                         GError **error)
+					    GAsyncResult *result,
+					    GError **error)
 {
-	return NULL;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+	GSList *ids = NULL;
+
+	g_return_val_if_fail (
+			g_simple_async_result_is_valid (
+					result, G_OBJECT (cnc), e_ews_connection_create_attachments_start),
+			NULL);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return NULL;
+
+	ids = async_data->items;
+
+	g_free (async_data);
+
+	return ids;
 }
 
 GSList *
 e_ews_connection_create_attachments (EEwsConnection *cnc,
-                                     gint pri,
-                                     const EwsId *parent,
-                                     const GSList *files,
-                                     GCancellable *cancellable,
-                                     GError **error)
+				     gint pri,
+				     const EwsId *parent,
+				     const GSList *files,
+				     GCancellable *cancellable,
+				     GError **error)
 {
 	EwsSyncData *sync_data;
 	GSList *ids;
@@ -2763,12 +2890,13 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
 	e_ews_connection_create_attachments_start (cnc, pri,
 						 parent,
 						 files,
+						 ews_sync_reply_cb,
 						 cancellable,
 						 (gpointer) sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
-	ids = e_ews_connection_delete_folder_finish (cnc, sync_data->res,
+	ids = e_ews_connection_create_attachments_finish (cnc, sync_data->res,
 							error);
 
 	e_flag_free (sync_data->eflag);
