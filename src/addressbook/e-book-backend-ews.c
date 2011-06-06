@@ -56,6 +56,12 @@
 
 G_DEFINE_TYPE (EBookBackendEws, e_book_backend_ews, E_TYPE_BOOK_BACKEND)
 
+typedef struct {
+	GCond *cond;
+	GMutex *mutex;
+	gboolean exit;
+} SyncDelta;
+
 struct _EBookBackendEwsPrivate {
 	EEwsConnection *cnc;
 	gchar *folder_id;
@@ -69,13 +75,24 @@ struct _EBookBackendEwsPrivate {
 	gint mode;
 
 	GHashTable *ops;
+
+	GStaticRecMutex rec_mutex;
+	GThread *dthread;
+	SyncDelta *dlock;
 };
 
-#define CACHE_REFRESH_INTERVAL 600000
-#define SUMMARY_FLUSH_TIMEOUT 5000
+#define EWS_MAX_FETCH_COUNT 500
+#define REFRESH_INTERVAL 600000
 
 #define ELEMENT_TYPE_SIMPLE 0x01 /* simple string fields */
 #define ELEMENT_TYPE_COMPLEX 0x02 /* complex fields while require different get/set functions */
+
+/* passing field uris for PhysicalAddress, PhoneNumbers causes error, so we use Default view to fetch them. Thus the summary props just have attachments */
+#define CONTACT_ITEM_PROPS "item:Attachments item:HasAttachments"
+#define DISTRIBUTION_ITEM_PROPS "item:ItemId contacts:FileAs contacts:DisplayName"
+
+#define PRIV_LOCK(p)   (g_static_rec_mutex_lock (&(p)->rec_mutex))
+#define PRIV_UNLOCK(p) (g_static_rec_mutex_unlock (&(p)->rec_mutex))
 
 static void
 ebews_populate_uid	(EContact *contact, EEwsItem *item)
@@ -127,7 +144,7 @@ set_phone_number (EContact *contact, EContactField field, EEwsItem *item, const 
 	const gchar *pn;
 	
 	pn = e_ews_item_get_phone_number (item, item_field);
-	if (pn)
+	if (pn && *pn)
 		e_contact_set (contact, field, pn);
 }
 
@@ -160,7 +177,7 @@ set_address (EContact *contact, EContactField field, EEwsItem *item, const gchar
 	const gchar *add;
 	
 	add = e_ews_item_get_physical_address (item, item_field);
-	if (add)
+	if (add && *add)
 		e_contact_set (contact, field, add);
 }
 
@@ -186,7 +203,7 @@ set_email_address (EContact *contact, EContactField field, EEwsItem *item, const
 	const gchar *ea;
 	
 	ea = e_ews_item_get_email_address (item, item_field);
-	if (ea)
+	if (ea && *ea)
 		e_contact_set (contact, field, ea);
 }
 
@@ -660,11 +677,284 @@ e_book_backend_ews_build_restriction (const gchar *query, gboolean *autocompleti
 	return NULL;
 }
 
+
+/**
+ * ebews_sync_deleted_items 
+ * @ebews: 
+ * @deleted_items: 
+ * @error: cannot be NULL 
+ **/
+static void
+ebews_sync_deleted_items (EBookBackendEws *ebews, GSList *deleted_ids, GError **error)
+{
+	GSList *l;
+	EBookBackendEwsPrivate *priv;
+
+	priv = ebews->priv;
+
+	for (l = deleted_ids; l != NULL && *error != NULL; l = g_slist_next (l)) {
+		gchar *id = (gchar *) l->data;
+		
+		e_book_backend_sqlitedb_remove_contact (priv->ebsdb, priv->folder_id, id, error);
+	}
+
+	g_slist_foreach (deleted_ids, (GFunc) g_free, NULL);
+	g_slist_free (deleted_ids);
+}
+
+
+static void
+ebews_store_contact_items (EBookBackendEws *ebews, GSList *new_items, gboolean distribution_list, GError **error)
+{
+	EBookBackendEwsPrivate *priv;
+	GSList *l;
+	GSList *contacts = NULL;
+	
+	priv = ebews->priv;
+
+	for (l = new_items; l != NULL; l = g_slist_next (l)) {
+		EContact *contact;
+		gint i, element_type;
+		EEwsItem *item;
+	
+		item = (EEwsItem *) l->data;
+		contact = e_contact_new ();
+
+		if (!distribution_list) {
+			for (i = 0; i < G_N_ELEMENTS (mappings); i++) {
+				element_type = mappings[i].element_type;
+
+				if (element_type == ELEMENT_TYPE_SIMPLE) {
+					const char *val = mappings [i].get_simple_prop_func (item);
+
+					if (val != NULL)
+						e_contact_set (contact, mappings [i].field_id, val);
+				} else
+					mappings[i].populate_contact_func (contact, item);
+			}
+		} else {
+			/* store display_name, fileas, item id */	
+		}
+
+		contacts = g_slist_prepend (contacts, contact);
+		g_object_unref (item);
+	}
+
+	e_book_backend_sqlitedb_add_contacts (priv->ebsdb, priv->folder_id, contacts, FALSE, error);
+
+	g_slist_foreach (contacts, (GFunc) g_object_unref, NULL);
+	g_slist_free (contacts);
+	g_slist_free (new_items);
+}
+
+static void
+ebews_sync_items (EBookBackendEws *ebews, GSList *items, GError **error)
+{
+	EBookBackendEwsPrivate *priv;
+	EEwsConnection *cnc;
+	GSList *l;
+	GSList *contact_item_ids = NULL, *dis_list_ids = NULL;
+	GSList *new_items = NULL;
+
+	priv = ebews->priv;
+	cnc = priv->cnc;
+
+	for (l = items; l != NULL; l = g_slist_next (l)) {
+		EEwsItem *item = (EEwsItem *) l->data;
+		const EwsId *id = e_ews_item_get_id (item);
+		EEwsItemType type = e_ews_item_get_item_type (item);
+
+		if (type == E_EWS_ITEM_TYPE_CONTACT)
+			contact_item_ids = g_slist_prepend (contact_item_ids, g_strdup (id->id));
+		else if (type == E_EWS_ITEM_TYPE_GROUP)
+			dis_list_ids = g_slist_prepend (dis_list_ids, g_strdup (id->id));
+
+		g_object_unref (item);
+	}
+	g_slist_free (items);
+
+	/* TODO fetch attachments */
+	if (contact_item_ids)
+		e_ews_connection_get_items
+			(cnc, EWS_PRIORITY_MEDIUM,
+			 contact_item_ids, "Default", CONTACT_ITEM_PROPS,
+			 FALSE, NULL, &new_items, NULL, NULL,
+			 NULL, error);
+	if (*error) {
+		if (dis_list_ids) {
+			g_slist_foreach (dis_list_ids, (GFunc) g_free, NULL);
+			g_slist_free (dis_list_ids);
+		}
+
+		return;
+	}
+
+	if (new_items)
+		ebews_store_contact_items (ebews, new_items, FALSE, error);
+
+	if (dis_list_ids) {
+		new_items = NULL;
+
+		e_ews_connection_get_items
+			(cnc, EWS_PRIORITY_MEDIUM,
+			 dis_list_ids, "Default", DISTRIBUTION_ITEM_PROPS,
+			 FALSE, NULL, &new_items, NULL, NULL,
+			 NULL, error);
+	}
+
+	/* TODO store distribution list, we might also need to expand the members
+	if (new_items)
+		ebews_store_distribution_list_items (ebews, new_items, error); */
+}
+
+static gboolean
+ebews_start_sync	(gpointer data)
+{
+	EBookBackendEws *ebews;
+	EBookBackendEwsPrivate *priv;
+	EEwsConnection *cnc;
+	gchar *sync_state;
+	gboolean includes_last_item;
+	GError *error = NULL;
+
+	ebews = (EBookBackendEws *) data;
+	priv = ebews->priv;
+	cnc = priv->cnc;
+
+	sync_state = e_book_backend_sqlitedb_get_sync_data (priv->ebsdb, priv->folder_id, NULL);
+	do
+	{
+		GSList *items_created = NULL, *items_updated = NULL;
+		GSList *items_deleted = NULL;
+
+		e_ews_connection_sync_folder_items	(priv->cnc, EWS_PRIORITY_MEDIUM,
+							 &sync_state, priv->folder_id,
+							 "IdOnly", NULL,
+							 EWS_MAX_FETCH_COUNT, &includes_last_item,
+							 &items_created, &items_updated,
+							 &items_deleted, NULL, &error);
+
+		if (error)
+			break;
+
+		if (items_deleted)
+			ebews_sync_deleted_items (ebews, items_deleted, &error);
+
+		if (items_created)
+			ebews_sync_items (ebews, items_created, &error);
+
+		if (error) {
+			if (items_updated) {
+				g_slist_foreach (items_updated, (GFunc) g_object_unref, NULL);
+				g_slist_free (items_updated);
+			}
+
+			break;
+		}
+
+		if (items_updated)
+			ebews_sync_items (ebews, items_updated, &error);
+
+		if (error)
+			break;
+
+		e_book_backend_sqlitedb_set_sync_data (priv->ebsdb, priv->folder_id, sync_state, &error);
+	} while (!error && !includes_last_item);
+
+	if (!error)
+		e_book_backend_sqlitedb_set_is_populated (priv->ebsdb, priv->folder_id, TRUE, &error);
+
+	g_free (sync_state);
+
+	if (error) {
+		g_warning ("Error Syncing Contacts: Folder %s Error: %s", priv->folder_id, error->message);
+		g_clear_error (&error);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+static gpointer
+delta_thread (gpointer data)
+{
+	EBookBackendEws *ebews = data;
+	EBookBackendEwsPrivate *priv = ebews->priv;
+	GTimeVal timeout;
+
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 0;
+
+	while (TRUE)	{
+		gboolean succeeded = ebews_start_sync (ebews);
+
+		g_mutex_lock (priv->dlock->mutex);
+
+		if (!succeeded || priv->dlock->exit)
+			break;
+
+		g_get_current_time (&timeout);
+		g_time_val_add (&timeout, REFRESH_INTERVAL * 1000);
+		g_cond_timed_wait (priv->dlock->cond, priv->dlock->mutex, &timeout);
+
+		if (priv->dlock->exit)
+			break;
+
+		g_mutex_unlock (priv->dlock->mutex);
+	}
+
+	g_mutex_unlock (priv->dlock->mutex);
+	priv->dthread = NULL;
+	return NULL;
+}
+
+static gboolean
+fetch_deltas (EBookBackendEws *ebews)
+{
+	EBookBackendEwsPrivate *priv = ebews->priv;
+	GError *error = NULL;
+
+	/* If the thread is already running just return back */
+	if (priv->dthread)
+		return FALSE;
+
+	if (!priv->dlock) {
+		priv->dlock = g_new0 (SyncDelta, 1);
+		priv->dlock->mutex = g_mutex_new ();
+		priv->dlock->cond = g_cond_new ();
+	}
+
+	priv->dlock->exit = FALSE;
+	priv->dthread = g_thread_create ((GThreadFunc) delta_thread, ebews, TRUE, &error);
+	if (!priv->dthread) {
+		g_warning (G_STRLOC ": %s", error->message);
+		g_error_free (error);
+	}
+
+	return TRUE;
+}
+
+static void
+ebews_start_refreshing (EBookBackendEws *ebews)
+{
+	EBookBackendEwsPrivate *priv;
+
+	priv = ebews->priv;
+
+	PRIV_LOCK (priv);
+
+	if	(priv->mode == E_DATA_BOOK_MODE_REMOTE &&
+		 priv->cnc && priv->marked_for_offline)
+				fetch_deltas (ebews);
+
+	PRIV_UNLOCK (priv);
+}
+
 static void
 e_book_backend_ews_start_book_view (EBookBackend  *backend,
 				     EDataBookView *book_view)
 {
-	EBookBackendEws *bews;
+	EBookBackendEws *ebews;
 	EBookBackendEwsPrivate *priv;
 	const gchar *query;
 	gboolean is_autocompletion = FALSE;
@@ -676,8 +966,8 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 	gboolean includes_last_item;
 	ESource *source;
 
-	bews = E_BOOK_BACKEND_EWS (backend);
-	priv = bews->priv;
+	ebews = E_BOOK_BACKEND_EWS (backend);
+	priv = ebews->priv;
 	query = e_data_book_view_get_card_query (book_view);
 
 	e_data_book_view_ref (book_view);
@@ -696,6 +986,28 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 			e_data_book_view_notify_complete (book_view, error);
 			e_data_book_view_unref (book_view);
 			g_error_free (error);
+			return;
+		}
+
+		ebews_start_refreshing (ebews);
+
+		if (e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
+			GList *contacts, *k;
+			
+			contacts = e_book_backend_sqlitedb_search (priv->ebsdb, priv->folder_id, query, &error);
+			for (k = contacts; k != NULL; k = g_list_next (k)) {
+				gchar *vcard = (gchar *) k->data;
+				EContact *contact = e_contact_new_from_vcard (vcard);
+				const gchar *id = e_contact_get_const (contact, E_CONTACT_UID);
+			
+				e_data_book_view_notify_update_prefiltered_vcard (book_view, id, vcard);
+
+				g_object_unref (contact);
+			}
+
+			g_list_free (contacts);
+			e_data_book_view_notify_complete (book_view, error);
+			e_data_book_view_unref (book_view);
 			return;
 		}
 
@@ -750,6 +1062,7 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 			g_free (mb->email);
 			g_free (mb->name);
 			g_free (mb);
+			g_object_unref (contact);
 		}
 
 		g_slist_free (mailboxes);
@@ -941,21 +1254,33 @@ static void
 e_book_backend_ews_set_mode (EBookBackend *backend,
                                    EDataBookMode mode)
 {
-	EBookBackendEws *bg;
+	EBookBackendEws *ebews;
+	EBookBackendEwsPrivate *priv;
 
-	bg = E_BOOK_BACKEND_EWS (backend);
-	bg->priv->mode = mode;
+	ebews = E_BOOK_BACKEND_EWS (backend);
+	priv = ebews->priv;
+	priv->mode = mode;
+
 	if (e_book_backend_is_loaded (backend)) {
 		if (mode == E_DATA_BOOK_MODE_LOCAL) {
 			e_book_backend_notify_writable (backend, FALSE);
 			e_book_backend_notify_connection_status (backend, FALSE);
-			if (bg->priv->cnc) {
-				g_object_unref (bg->priv->cnc);
-				bg->priv->cnc=NULL;
+			
+			if (priv->dlock) {
+				g_mutex_lock (priv->dlock->mutex);
+				priv->dlock->exit = TRUE;
+				g_mutex_unlock (priv->dlock->mutex);
+
+				g_cond_signal (priv->dlock->cond);
+			}
+					
+			if (priv->cnc) {
+				g_object_unref (priv->cnc);
+				priv->cnc=NULL;
 			}
 		}
 		else if (mode == E_DATA_BOOK_MODE_REMOTE) {
-			if (bg->priv->is_writable)
+			if (ebews->priv->is_writable)
 				e_book_backend_notify_writable (backend, TRUE);
 			else
 				e_book_backend_notify_writable (backend, FALSE);
@@ -996,6 +1321,24 @@ e_book_backend_ews_dispose (GObject *object)
 		g_free (priv->folder_id);
 		priv->folder_id = NULL;
 	}
+	
+	if (priv->dlock) {
+		g_mutex_lock (priv->dlock->mutex);
+		priv->dlock->exit = TRUE;
+		g_mutex_unlock (priv->dlock->mutex);
+
+		g_cond_signal (priv->dlock->cond);
+
+		if (priv->dthread)
+			g_thread_join (priv->dthread);
+
+		g_mutex_free (priv->dlock->mutex);
+		g_cond_free (priv->dlock->cond);
+		g_free (priv->dlock);
+		priv->dthread = NULL;
+	}
+
+	g_static_rec_mutex_free (&priv->rec_mutex);
 
 	g_free (priv);
 	priv = NULL;
@@ -1051,4 +1394,5 @@ e_book_backend_ews_init (EBookBackendEws *backend)
 	priv->ops = g_hash_table_new (NULL, NULL);
 
 	bews->priv = priv;
+	g_static_rec_mutex_init (&priv->rec_mutex);
 }
