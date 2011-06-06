@@ -280,6 +280,36 @@ create_folders_table	(EBookBackendSqliteDB *ebsdb,
 	return;
 }
 
+
+static gint
+folder_found_cb (gpointer ref, gint col, gchar **cols, gchar **name)
+{
+	gboolean *found = ref;
+
+	*found = TRUE;
+
+	return 0;
+}
+
+static gboolean
+folder_exists	(EBookBackendSqliteDB *ebsdb,
+		 const gchar *folderid,
+		 GError **error)
+{
+	gchar *stmt;
+	gboolean found = FALSE;
+
+	READER_LOCK (ebsdb);
+
+	stmt = sqlite3_mprintf ("SELECT folder_id FROM folders WHERE folder_id = %Q", folderid);
+	book_backend_sql_exec (ebsdb->priv->db, stmt, folder_found_cb , &found, error);
+	sqlite3_free (stmt);
+
+	READER_UNLOCK (ebsdb);
+
+	return found;
+}
+
 static void
 add_folder_into_db	(EBookBackendSqliteDB *ebsdb,
 			 const gchar *folderid,
@@ -288,6 +318,9 @@ add_folder_into_db	(EBookBackendSqliteDB *ebsdb,
 {
 	gchar *stmt;
 	GError *err = NULL;
+
+	if (folder_exists (ebsdb, folderid, error))
+		return;
 
 	WRITER_LOCK (ebsdb);
 	book_backend_sqlitedb_start_transaction (ebsdb, &err);
