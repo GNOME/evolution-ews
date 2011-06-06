@@ -1803,7 +1803,7 @@ e_cal_backend_ews_send_objects (ECalBackend *backend, EDataCal *cal, EServerMeth
 		g_free (change_key);
 		g_free (cancellation_data);
 		g_object_unref (comp);
-		g_slist_free (ids)
+		g_slist_free (ids);
 		subcomp = icalcomponent_get_next_component (icalcomp, kind);
 	}
 
