@@ -109,12 +109,13 @@ start_tests (gpointer data)
 	gchar *vcard_str = NULL, *sexp;
 	EBookQuery *q;
 	GSList *uids = NULL;
+	gboolean store_vcard = FALSE;
 
 	g_print ("Creating the sqlitedb \n");
 	op = "create sqlitedb";
 	ebsdb = e_book_backend_sqlitedb_new 
 					(cache_path, email, folderid, folder_name,
-					 FALSE, &error);
+					 store_vcard, &error);
 	if (error)
 		goto exit;
 
@@ -156,14 +157,16 @@ start_tests (gpointer data)
 	g_free (sexp);
 	if (error)
 		goto exit;
-	
-	q = e_book_query_any_field_contains ("word");
-	sexp = e_book_query_to_string (q);
-	search_db (ebsdb, "full_search query", sexp);
-	e_book_query_unref (q);
-	g_free (sexp);
-	if (error)
-		goto exit;
+
+	if (store_vcard) {
+		q = e_book_query_any_field_contains ("word");
+		sexp = e_book_query_to_string (q);
+		search_db (ebsdb, "full_search query", sexp);
+		e_book_query_unref (q);
+		g_free (sexp);
+		if (error)
+			goto exit;
+	}
 	
 	g_print ("Delete contact \n");
 	op = "delete contact";
