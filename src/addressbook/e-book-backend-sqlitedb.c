@@ -804,7 +804,13 @@ e_book_backend_sqlitedb_get_vcard_string	(EBookBackendSqliteDB *ebsdb,
 		sqlite3_free (stmt);
 
 		if (vcards) {
-			vcard_str = vcards->data;
+			EbSdbSearchData *s_data = (EbSdbSearchData *) vcards->data;
+
+			vcard_str = s_data->vcard;
+			
+			g_free (s_data->uid);
+			g_free (s_data->bdata);
+			g_free (s_data);
 			g_slist_free (vcards);
 			vcards = NULL;
 		}
@@ -1072,9 +1078,18 @@ static gint
 addto_vcard_list_cb (gpointer ref, gint col, gchar **cols, gchar **name)
 {
 	GList **vcards = ref;
+	EbSdbSearchData *s_data = g_new0 (EbSdbSearchData, 1);
 
 	if (cols [0])
-		*vcards = g_list_prepend (*vcards, g_strdup (cols [0]));
+		s_data->uid = g_strdup (cols [0]);
+
+	if (cols [1])
+		s_data->vcard = g_strdup (cols [1]);
+	
+	if (cols [2])
+		s_data->bdata = g_strdup (cols [1]);
+
+	*vcards = g_list_prepend (*vcards, s_data);
 
 	return 0;
 }
@@ -1094,6 +1109,7 @@ static int
 store_data_to_vcard (gpointer ref, gint ncol, gchar **cols, gchar **name)
 {
 	GSList **vcards = ref;
+	EbSdbSearchData *search_data = g_new0 (EbSdbSearchData, 1);
 	EContact *contact = e_contact_new ();
 	gchar *vcard;
 	gint i;
@@ -1104,9 +1120,11 @@ store_data_to_vcard (gpointer ref, gint ncol, gchar **cols, gchar **name)
 		if (!name[i] || !cols[i])
 			continue;
 
-		if (!strcmp (name [i], "uid"))
+		if (!strcmp (name [i], "uid")) {
 			e_contact_set (contact, E_CONTACT_UID, cols [i]);
-		else if (!strcmp (name [i], "nickname"))
+			
+			search_data->uid = g_strdup (cols [i]);
+		} else if (!strcmp (name [i], "nickname"))
 			e_contact_set (contact, E_CONTACT_NICKNAME, cols [i]);
 		else if (!strcmp (name [i], "full_name"))
 			e_contact_set (contact, E_CONTACT_FULL_NAME, cols [i]);
@@ -1131,12 +1149,17 @@ store_data_to_vcard (gpointer ref, gint ncol, gchar **cols, gchar **name)
 		} else if (!strcmp (name [i], "wants_html")) {
 			gint val = cols[i] ? strtoul (cols[i], NULL, 10) : 0;
 			e_contact_set (contact, E_CONTACT_WANTS_HTML, GINT_TO_POINTER (val));
+		} else if (!strcmp (name [i], "bdata")) {
+			search_data->bdata = g_strdup (cols [i]);
 		}
+		
 	}
 
 	vcard = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
-	*vcards = g_slist_prepend (*vcards, vcard);
+	search_data->vcard = vcard;
+	*vcards = g_slist_prepend (*vcards, search_data);
 
+	g_object_unref (contact);
 	return 0;
 }
 
@@ -1155,7 +1178,7 @@ book_backend_sqlitedb_search_query (EBookBackendSqliteDB *ebsdb, const gchar *sq
 		book_backend_sql_exec (ebsdb->priv->db, stmt, store_data_to_vcard, &vcards, &err);
 		sqlite3_free (stmt);
 	} else {
-		stmt = sqlite3_mprintf ("SELECT vcard FROM %Q WHERE %s", folderid, sql);
+		stmt = sqlite3_mprintf ("SELECT uid vcard bdata FROM %Q WHERE %s", folderid, sql);
 		book_backend_sql_exec (ebsdb->priv->db, stmt, addto_vcard_list_cb , &vcards, &err);
 		sqlite3_free (stmt);
 	}
@@ -1181,7 +1204,7 @@ book_backend_sqlitedb_search_full (EBookBackendSqliteDB *ebsdb, const gchar *sex
 
 	READER_LOCK (ebsdb);
 
-	stmt = sqlite3_mprintf ("SELECT vcard FROM %Q", folderid);
+	stmt = sqlite3_mprintf ("SELECT uid vcard bdata FROM %Q", folderid);
 	book_backend_sql_exec (ebsdb->priv->db, stmt, addto_vcard_list_cb , &all, &err);
 	sqlite3_free (stmt);
 
@@ -1193,12 +1216,19 @@ book_backend_sqlitedb_search_full (EBookBackendSqliteDB *ebsdb, const gchar *sex
 		for (l = all; l != NULL; l = g_list_next (l)) {
 			if (e_book_backend_sexp_match_vcard (bsexp, l->data))
 				vcards = g_list_prepend (vcards, g_strdup (l->data));
+			else {
+				EbSdbSearchData *s_data = (EbSdbSearchData *) l->data;
+		
+				g_free (s_data->uid);
+				g_free (s_data->bdata);
+				g_free (s_data->vcard);
+				g_free (s_data);
+			}
 		}
 
 		g_object_unref (bsexp);
 	}
 
-	g_list_foreach (all, (GFunc) g_free, NULL);
 	g_list_free (all);
 
 	return vcards;
@@ -1213,7 +1243,7 @@ book_backend_sqlitedb_search_full (EBookBackendSqliteDB *ebsdb, const gchar *sex
  *  Search on summary fields is only supported. Search expression containing
  *  any other field is supported only if backend chooses to store the vcard inside the db.
  * 
- * Returns: 
+ * Returns: List of EbSdbSearchData.
  **/
 GList *
 e_book_backend_sqlitedb_search	(EBookBackendSqliteDB *ebsdb,
@@ -1518,4 +1548,15 @@ e_book_backend_sqlitedb_delete_addressbook	(EBookBackendSqliteDB *ebsdb,
 		g_propagate_error (error, err);
 
 	return !err;
+}
+
+void	
+e_book_backend_sqlitedb_search_data_free	(EbSdbSearchData *s_data)
+{
+	if (s_data) {
+		g_free (s_data->uid);
+		g_free (s_data->vcard);
+		g_free (s_data->bdata);
+		g_free (s_data);
+	}
 }

@@ -62,6 +62,12 @@ struct _EBookBackendSqliteDBClass {
 	/* virtual methods */
 };
 
+typedef struct {
+	gchar *vcard;
+	gchar *uid;
+	gchar *bdata;
+} EbSdbSearchData;
+
 GType		e_book_backend_sqlitedb_get_type	(void);
 
 EBookBackendSqliteDB *
@@ -156,6 +162,8 @@ gboolean	e_book_backend_sqlitedb_delete_addressbook
 							(EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,
 							 GError **error);
+void		e_book_backend_sqlitedb_search_data_free	
+							(EbSdbSearchData *s_data);
 
 G_END_DECLS
 

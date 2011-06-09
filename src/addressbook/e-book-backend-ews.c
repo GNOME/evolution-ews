@@ -996,13 +996,10 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 			
 			contacts = e_book_backend_sqlitedb_search (priv->ebsdb, priv->folder_id, query, &error);
 			for (k = contacts; k != NULL; k = g_list_next (k)) {
-				gchar *vcard = (gchar *) k->data;
-				EContact *contact = e_contact_new_from_vcard (vcard);
-				const gchar *id = e_contact_get_const (contact, E_CONTACT_UID);
+				EbSdbSearchData *s_data = (EbSdbSearchData *) k->data;
 			
-				e_data_book_view_notify_update_prefiltered_vcard (book_view, id, vcard);
-
-				g_object_unref (contact);
+				e_data_book_view_notify_update_prefiltered_vcard (book_view, s_data->uid, s_data->vcard);
+				e_book_backend_sqlitedb_search_data_free (s_data);
 			}
 
 			g_list_free (contacts);

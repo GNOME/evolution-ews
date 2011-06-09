@@ -92,13 +92,17 @@ static void
 search_db (EBookBackendSqliteDB *ebsdb, const gchar *type, const gchar *sexp)
 {
 	GList *vcards;
+	EbSdbSearchData *s_data;
 	
 	g_print ("%s - query: %s \n", type, sexp);
 	op = type;
 	vcards = e_book_backend_sqlitedb_search (ebsdb, folderid, sexp, &error);
 	if (error)
 		return;
-	g_print ("Result: %s \n", (gchar *) vcards->data);
+
+	s_data = vcards->data;
+	g_print ("Result: %s \n", s_data->vcard);
+	e_book_backend_sqlitedb_search_data_free (s_data);
 }
 
 static gboolean
