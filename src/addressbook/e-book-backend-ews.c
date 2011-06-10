@@ -994,7 +994,7 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 		if (e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
 			GList *contacts, *k;
 			
-			contacts = e_book_backend_sqlitedb_search (priv->ebsdb, priv->folder_id, query, &error);
+			contacts = e_book_backend_sqlitedb_search (priv->ebsdb, priv->folder_id, query, NULL, &error);
 			for (k = contacts; k != NULL; k = g_list_next (k)) {
 				EbSdbSearchData *s_data = (EbSdbSearchData *) k->data;
 			

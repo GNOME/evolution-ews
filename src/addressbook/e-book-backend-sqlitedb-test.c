@@ -96,7 +96,7 @@ search_db (EBookBackendSqliteDB *ebsdb, const gchar *type, const gchar *sexp)
 	
 	g_print ("%s - query: %s \n", type, sexp);
 	op = type;
-	vcards = e_book_backend_sqlitedb_search (ebsdb, folderid, sexp, &error);
+	vcards = e_book_backend_sqlitedb_search (ebsdb, folderid, sexp, NULL, &error);
 	if (error)
 		return;
 

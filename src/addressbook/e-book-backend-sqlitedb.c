@@ -798,7 +798,7 @@ e_book_backend_sqlitedb_get_vcard_string	(EBookBackendSqliteDB *ebsdb,
 	if (!ebsdb->priv->store_vcard) {
 		GSList *vcards = NULL;
 		
-		stmt = sqlite3_mprintf ("SELECT uid, nickname, full_name, given_name, family_name, file_As, email_1, email_2, " 
+		stmt = sqlite3_mprintf ("SELECT uid, nickname, full_name, given_name, family_name, file_as, email_1, email_2, " 
 					"email_3, is_list, list_show_addresses, wants_html FROM %Q WHERE uid = %Q", folderid, uid);
 		book_backend_sql_exec (ebsdb->priv->db, stmt, store_data_to_vcard, &vcards, error);
 		sqlite3_free (stmt);
@@ -1132,7 +1132,7 @@ store_data_to_vcard (gpointer ref, gint ncol, gchar **cols, gchar **name)
 			e_contact_set (contact, E_CONTACT_GIVEN_NAME, cols [i]);
 		else if (!strcmp (name [i], "family_name"))
 			e_contact_set (contact, E_CONTACT_FAMILY_NAME, cols [i]);
-		else if (!strcmp (name [i], "file_As"))
+		else if (!strcmp (name [i], "file_as"))
 			e_contact_set (contact, E_CONTACT_FILE_AS, cols [i]);
 		else if (!strcmp (name [i], "email_1"))
 			e_contact_set (contact, E_CONTACT_EMAIL_1, cols [i]);
@@ -1164,7 +1164,11 @@ store_data_to_vcard (gpointer ref, gint ncol, gchar **cols, gchar **name)
 }
 
 static GList *
-book_backend_sqlitedb_search_query (EBookBackendSqliteDB *ebsdb, const gchar *sql, const gchar *folderid, GError **error)
+book_backend_sqlitedb_search_query	(EBookBackendSqliteDB *ebsdb, 
+			 		 const gchar *sql, 
+					 const gchar *folderid, 
+					 GSList *requested_fields, 
+					 GError **error)
 {
 	GError *err = NULL;
 	GList *vcards = NULL;
@@ -1172,8 +1176,9 @@ book_backend_sqlitedb_search_query (EBookBackendSqliteDB *ebsdb, const gchar *sq
 
 	READER_LOCK (ebsdb);
 
-	if (!ebsdb->priv->store_vcard) {
-		stmt = sqlite3_mprintf ("SELECT uid, nickname, full_name, given_name, family_name, file_As, email_1, email_2, " 
+	/* TODO enable return just the requested fields. */
+	if (!ebsdb->priv->store_vcard || requested_fields) {
+		stmt = sqlite3_mprintf ("SELECT uid, nickname, full_name, given_name, family_name, file_as, email_1, email_2, " 
 					"email_3, is_list, list_show_addresses, wants_html FROM %Q WHERE %s", folderid, sql);
 		book_backend_sql_exec (ebsdb->priv->db, stmt, store_data_to_vcard, &vcards, &err);
 		sqlite3_free (stmt);
@@ -1240,16 +1245,23 @@ book_backend_sqlitedb_search_full (EBookBackendSqliteDB *ebsdb, const gchar *sex
  * @ebsdb: 
  * @folderid: 
  * @sexp: search expression.
+ * &requested_fields: a #GList containing the names of fields to return, or NULL for all. 
+ *  At the moment if this is non-null, the vcard will be populated with summary fields, else it would return the 
+ *  whole vcard if its stored in the db. [not implemented fully]
  * @error: 
- *  Search on summary fields is only supported. Search expression containing
+ *  Search on summary fields is always supported. Search expression containing
  *  any other field is supported only if backend chooses to store the vcard inside the db.
- * 
+ *
+ * Summary fields - uid, nickname, given_name, family_name, file_as email_1, email_2, email_3, email_4, is_list, 
+ * list_show_addresses, wants_html
+ *
  * Returns: List of EbSdbSearchData.
  **/
 GList *
 e_book_backend_sqlitedb_search	(EBookBackendSqliteDB *ebsdb,
 				 const gchar *folderid,
 				 const gchar *sexp,
+				 GSList *requested_fields,
 				 GError **error)
 {
 	GList *search_contacts = NULL;
@@ -1258,7 +1270,7 @@ e_book_backend_sqlitedb_search	(EBookBackendSqliteDB *ebsdb,
 		gchar *sql_query;
 
 		sql_query = sexp_to_sql_query (sexp);
-		search_contacts = book_backend_sqlitedb_search_query (ebsdb, sql_query, folderid, error);
+		search_contacts = book_backend_sqlitedb_search_query (ebsdb, sql_query, folderid, requested_fields, error);
 		g_free (sql_query);
 	} else if (ebsdb->priv->store_vcard)
 		search_contacts = book_backend_sqlitedb_search_full (ebsdb, sexp, folderid, FALSE, error);
