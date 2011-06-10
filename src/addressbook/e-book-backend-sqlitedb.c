@@ -1195,10 +1195,10 @@ book_backend_sqlitedb_search_query (EBookBackendSqliteDB *ebsdb, const gchar *sq
 }
 
 static GList *
-book_backend_sqlitedb_search_full (EBookBackendSqliteDB *ebsdb, const gchar *sexp, const gchar *folderid, GError **error)
+book_backend_sqlitedb_search_full (EBookBackendSqliteDB *ebsdb, const gchar *sexp, const gchar *folderid, gboolean return_uids, GError **error)
 {
 	GError *err = NULL;
-	GList *vcards = NULL, *all = NULL, *l;
+	GList *r_list = NULL, *all = NULL, *l;
 	EBookBackendSExp *bsexp = NULL;
 	gchar *stmt;
 
@@ -1214,16 +1214,17 @@ book_backend_sqlitedb_search_full (EBookBackendSqliteDB *ebsdb, const gchar *sex
 		bsexp = e_book_backend_sexp_new (sexp);
 
 		for (l = all; l != NULL; l = g_list_next (l)) {
-			if (e_book_backend_sexp_match_vcard (bsexp, l->data))
-				vcards = g_list_prepend (vcards, g_strdup (l->data));
-			else {
-				EbSdbSearchData *s_data = (EbSdbSearchData *) l->data;
-		
-				g_free (s_data->uid);
-				g_free (s_data->bdata);
-				g_free (s_data->vcard);
-				g_free (s_data);
-			}
+			EbSdbSearchData *s_data = (EbSdbSearchData *) l->data;
+			
+			if (e_book_backend_sexp_match_vcard (bsexp, s_data->vcard)) {
+				if (!return_uids)
+					r_list = g_list_prepend (r_list, s_data);
+				else {
+					r_list = g_list_prepend (r_list, g_strdup (s_data->uid));
+					e_book_backend_sqlitedb_search_data_free (s_data);
+				}
+			} else
+				e_book_backend_sqlitedb_search_data_free (s_data);
 		}
 
 		g_object_unref (bsexp);
@@ -1231,7 +1232,7 @@ book_backend_sqlitedb_search_full (EBookBackendSqliteDB *ebsdb, const gchar *sex
 
 	g_list_free (all);
 
-	return vcards;
+	return r_list;
 }
 
 /**
@@ -1251,21 +1252,53 @@ e_book_backend_sqlitedb_search	(EBookBackendSqliteDB *ebsdb,
 				 const gchar *sexp,
 				 GError **error)
 {
-	GList *vcards = NULL;
+	GList *search_contacts = NULL;
 
 	if (book_backend_sqlitedb_is_summary_query (sexp)) {
-		char *sql_query;
+		gchar *sql_query;
 
 		sql_query = sexp_to_sql_query (sexp);
-		vcards = book_backend_sqlitedb_search_query (ebsdb, sql_query, folderid, error);
+		search_contacts = book_backend_sqlitedb_search_query (ebsdb, sql_query, folderid, error);
+		g_free (sql_query);
 	} else if (ebsdb->priv->store_vcard)
-		vcards = book_backend_sqlitedb_search_full (ebsdb, sexp, folderid, error);
+		search_contacts = book_backend_sqlitedb_search_full (ebsdb, sexp, folderid, FALSE, error);
+	else {
+		g_set_error (error, E_BOOK_SDB_ERROR,
+				0, "Full search_contacts are not stored in cache. Hence only summary query is supported.");
+	}
+
+	return search_contacts;
+}
+
+GList *		
+e_book_backend_sqlitedb_search_uids	(EBookBackendSqliteDB *ebsdb,
+					 const gchar *folderid,
+					 const gchar *sexp,
+					 GError **error)
+{
+	GList *uids = NULL;
+	
+	if (book_backend_sqlitedb_is_summary_query (sexp)) {
+		gchar *stmt;
+		gchar *sql_query = sexp_to_sql_query (sexp);
+
+		READER_LOCK (ebsdb);
+		
+		stmt = sqlite3_mprintf ("SELECT uid FROM %Q WHERE %s", folderid, sql_query);
+		book_backend_sql_exec (ebsdb->priv->db, stmt, addto_slist_cb, &uids, error);
+		sqlite3_free (stmt);
+
+		READER_UNLOCK (ebsdb);
+
+		g_free (sql_query);
+	} else if (ebsdb->priv->store_vcard)
+		uids = book_backend_sqlitedb_search_full (ebsdb, sexp, folderid, TRUE, error);
 	else {
 		g_set_error (error, E_BOOK_SDB_ERROR,
 				0, "Full vcards are not stored in cache. Hence only summary query is supported.");
 	}
 
-	return vcards;
+	return uids;
 }
 
 static gint
@@ -1392,6 +1425,55 @@ get_string_cb (gpointer ref, gint col, gchar **cols, gchar **name)
 	*ret = g_strdup (cols [0]);
 
 	return 0;
+}
+
+
+gchar *                
+e_book_backend_sqlitedb_get_contact_bdata	(EBookBackendSqliteDB *ebsdb,
+						 const gchar *folderid,
+						 const gchar *uid,
+						 GError **error)
+{
+	gchar *stmt, *ret = NULL;
+
+	READER_LOCK (ebsdb);
+
+	stmt = sqlite3_mprintf ("SELECT bdata FROM %Q WHERE uid = %Q", folderid, uid);
+	book_backend_sql_exec (ebsdb->priv->db, stmt, get_string_cb , &ret, error);
+	sqlite3_free (stmt);
+
+	READER_UNLOCK (ebsdb);
+
+	return ret;
+}
+
+gboolean	
+e_book_backend_sqlitedb_set_contact_bdata	(EBookBackendSqliteDB *ebsdb,
+						 const gchar *folderid,
+						 const gchar *uid,
+						 const gchar *value,
+						 GError **error)
+{
+	gchar *stmt = NULL;
+	GError *err = NULL;
+
+	WRITER_LOCK (ebsdb);
+	book_backend_sqlitedb_start_transaction (ebsdb, &err);
+
+	if (!err) {
+		stmt = sqlite3_mprintf ("UPDATE %Q SET bdata = %Q WHERE uid = %Q", folderid,
+					value, uid);
+		book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
+		sqlite3_free (stmt);
+	}
+
+	book_backend_sqlitedb_end_transaction (ebsdb, &err);
+	WRITER_UNLOCK (ebsdb);
+
+	if (err)
+		g_propagate_error (error, err);
+
+	return !err;
 }
 
 gchar *
@@ -1559,4 +1641,32 @@ e_book_backend_sqlitedb_search_data_free	(EbSdbSearchData *s_data)
 		g_free (s_data->bdata);
 		g_free (s_data);
 	}
+}
+
+gboolean       
+e_book_backend_sqlitedb_remove          (EBookBackendSqliteDB *ebsdb,
+                                         GError **error)
+{
+	EBookBackendSqliteDBPrivate *priv;
+	gchar *filename;
+	gint ret;
+
+	priv = ebsdb->priv;
+
+	WRITER_LOCK (ebsdb);
+	
+	sqlite3_close (priv->db);
+	filename = g_build_filename (priv->path, DB_FILENAME, NULL);
+	ret = g_unlink (filename);
+
+	WRITER_UNLOCK (ebsdb);
+
+	g_free (filename);
+	if (ret == -1) {
+		g_set_error (error, E_BOOK_SDB_ERROR,
+				0, "Unable to remove the db file: errno %d", errno);
+		return FALSE;
+	}
+
+	return TRUE;
 }

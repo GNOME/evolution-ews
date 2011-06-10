@@ -114,6 +114,10 @@ GList *		e_book_backend_sqlitedb_search		(EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,
 							 const gchar *sexp,
 							 GError **error);
+GList *		e_book_backend_sqlitedb_search_uids	(EBookBackendSqliteDB *ebsdb,
+							 const gchar *folderid,
+							 const gchar *sexp,
+							 GError **error);
 gboolean	e_book_backend_sqlitedb_get_is_populated
 							(EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,
@@ -145,6 +149,18 @@ gboolean	e_book_backend_sqlitedb_set_key_value
 							 const gchar *value,
 							 GError **error);
 
+gchar *		e_book_backend_sqlitedb_get_contact_bdata
+							(EBookBackendSqliteDB *ebsdb,
+							 const gchar *folderid,
+							 const gchar *uid,
+							 GError **error);
+gboolean	e_book_backend_sqlitedb_set_contact_bdata
+							(EBookBackendSqliteDB *ebsdb,
+							 const gchar *folderid,
+							 const gchar *uid,
+							 const gchar *value,
+							 GError **error);
+
 gboolean	e_book_backend_sqlitedb_get_has_partial_content
 							(EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,
@@ -161,6 +177,8 @@ GSList *	e_book_backend_sqlitedb_get_partially_cached_ids
 gboolean	e_book_backend_sqlitedb_delete_addressbook
 							(EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,
+							 GError **error);
+gboolean	e_book_backend_sqlitedb_remove		(EBookBackendSqliteDB *ebsdb,
 							 GError **error);
 void		e_book_backend_sqlitedb_search_data_free	
 							(EbSdbSearchData *s_data);
