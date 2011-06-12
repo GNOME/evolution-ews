@@ -37,6 +37,8 @@
 #define d(x)
 
 #define DB_FILENAME "contacts.db"
+#define FOLDER_VERSION 1
+
 #define READER_LOCK(ebsdb) g_static_rw_lock_reader_lock (&ebsdb->priv->rwlock)
 #define READER_UNLOCK(ebsdb) g_static_rw_lock_reader_unlock (&ebsdb->priv->rwlock)
 #define WRITER_LOCK(ebssdb) g_static_rw_lock_writer_lock (&ebsdb->priv->rwlock)
@@ -252,7 +254,8 @@ create_folders_table	(EBookBackendSqliteDB *ebsdb,
 			     " folder_name TEXT,"
 			     "  sync_data TEXT,"
 			     " is_populated INTEGER,"
-			     "  partial_content INTEGER)";
+			     "  partial_content INTEGER,"
+			     " version INTEGER)";
 
 	WRITER_LOCK (ebsdb);
 	book_backend_sqlitedb_start_transaction (ebsdb, &err);
@@ -329,8 +332,8 @@ add_folder_into_db	(EBookBackendSqliteDB *ebsdb,
 	book_backend_sqlitedb_start_transaction (ebsdb, &err);
 
 	if (!err) {
-		stmt = sqlite3_mprintf ("INSERT OR REPLACE INTO folders VALUES ( %Q, %Q, %Q, %d, %d ) ",
-		                        folderid, folder_name, NULL, 0, 0);
+		stmt = sqlite3_mprintf ("INSERT OR REPLACE INTO folders VALUES ( %Q, %Q, %Q, %d, %d, %d ) ",
+		                        folderid, folder_name, NULL, 0, 0, FOLDER_VERSION);
 
 		book_backend_sql_exec (ebsdb->priv->db, stmt, NULL, NULL, &err);
 
