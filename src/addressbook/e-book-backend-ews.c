@@ -992,17 +992,17 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 		ebews_start_refreshing (ebews);
 
 		if (e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
-			GList *contacts, *k;
+			GSList *contacts;
 			
 			contacts = e_book_backend_sqlitedb_search (priv->ebsdb, priv->folder_id, query, NULL, &error);
-			for (k = contacts; k != NULL; k = g_list_next (k)) {
-				EbSdbSearchData *s_data = (EbSdbSearchData *) k->data;
+			for (l = contacts; l != NULL; l = g_slist_next (l)) {
+				EbSdbSearchData *s_data = (EbSdbSearchData *) l->data;
 			
 				e_data_book_view_notify_update_prefiltered_vcard (book_view, s_data->uid, s_data->vcard);
 				e_book_backend_sqlitedb_search_data_free (s_data);
 			}
 
-			g_list_free (contacts);
+			g_slist_free (contacts);
 			e_data_book_view_notify_complete (book_view, error);
 			e_data_book_view_unref (book_view);
 			return;

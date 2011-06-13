@@ -91,7 +91,7 @@ add_contacts (EBookBackendSqliteDB *ebsdb)
 static void
 search_db (EBookBackendSqliteDB *ebsdb, const gchar *type, const gchar *sexp)
 {
-	GList *vcards;
+	GSList *vcards;
 	EbSdbSearchData *s_data;
 	
 	g_print ("%s - query: %s \n", type, sexp);
