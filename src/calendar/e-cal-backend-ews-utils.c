@@ -47,11 +47,18 @@ void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **op
 	icalproperty *prop, *org_prop = NULL;
 	icalparameter *param;
 	const gchar *org = NULL, *str = NULL;
+	const char *org_email_address = NULL;
 
 	/* we need to know who the orgenizer is so we wont duplicate him/her */
 	org_prop = icalcomponent_get_first_property (comp, ICAL_ORGANIZER_PROPERTY);
 	org = icalproperty_get_organizer(org_prop);
-	if (!org) org = "";
+	if (!org)
+		org = "";
+	else
+		if (g_ascii_strncasecmp (org, "MAILTO:", 7))
+				org_email_address = (org) + 7;
+			else
+				org_email_address = org;
 
 	/* iterate over every attendee property */
 	for (prop = icalcomponent_get_first_property(comp, ICAL_ATTENDEE_PROPERTY);
@@ -60,8 +67,9 @@ void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **op
 
 		str = icalproperty_get_attendee(prop);
 
-		/* if this attenddee is the orgenizer - dont add him/her */
-		if (g_ascii_strcasecmp(org, str) == 0) continue;
+		/* if this attenddee is the orgenizer - dont add him/her
+		 in some cases there is no maito for email if meeting orginazer*/
+		if (g_ascii_strcasecmp(org_email_address, str) == 0) continue;
 
 		/* figure the email address of the attendee, discard "mailto:" if it's there */
 		if (!g_ascii_strncasecmp (str, "mailto:", 7)) str = (str) + 7;
