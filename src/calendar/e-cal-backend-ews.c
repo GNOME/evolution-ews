@@ -855,6 +855,10 @@ ews_cal_remove_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 
 	if (remove_data->context)
 		e_data_cal_notify_remove (remove_data->cal, remove_data->context, error);
+	else if (error) {
+		g_warning ("Remove object error :  %s\n", error->message);
+		g_clear_error (&error);
+	}
 
 	g_free (remove_data->item_id.id);
 	g_free (remove_data->item_id.change_key);
@@ -955,6 +959,10 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 exit:
 	if (context)
 		e_data_cal_notify_remove (cal, context, error);
+	else if (error) {
+		g_warning ("Remove object error :  %s\n", error->message);
+		g_clear_error (&error);
+	}
 }
 
 static icaltimezone * resolve_tzid (const gchar *tzid, gpointer user_data);
