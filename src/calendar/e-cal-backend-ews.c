@@ -1321,7 +1321,6 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	g_free(comp_str_old);
 	g_free(modify_data->itemid);
 	g_free(modify_data->changekey);
-	g_object_unref(modify_data->oldcomp);
 	g_object_unref(modify_data->comp);
 	g_object_unref(modify_data->cbews);
 	g_object_unref(modify_data->cal);
