@@ -47,6 +47,7 @@
 #include "e-book-backend-ews.h"
 #include "e-book-backend-sqlitedb.h"
 
+#include "e-ews-message.h"
 #include "e-ews-connection.h"
 #include "e-ews-item.h"
 
@@ -93,6 +94,31 @@ struct _EBookBackendEwsPrivate {
 
 #define PRIV_LOCK(p)   (g_static_rec_mutex_lock (&(p)->rec_mutex))
 #define PRIV_UNLOCK(p) (g_static_rec_mutex_unlock (&(p)->rec_mutex))
+
+
+static const struct phone_field_mapping {
+	EContactField field;
+	const gchar *element;
+} phone_field_map [] = {
+	{E_CONTACT_PHONE_ASSISTANT, "AssistantPhone"},
+	{E_CONTACT_PHONE_BUSINESS_FAX, "BusinessFax"},
+	{E_CONTACT_PHONE_BUSINESS, "BusinessPhone"},
+	{E_CONTACT_PHONE_BUSINESS_2, "BusinessPhone2"},
+	{E_CONTACT_PHONE_CAR, "CarPhone"},
+	{E_CONTACT_PHONE_COMPANY, "CompanyMainPhone"},
+	{E_CONTACT_PHONE_HOME_FAX, "HomeFax"},
+	{E_CONTACT_PHONE_HOME, "HomePhone"},
+	{E_CONTACT_PHONE_HOME_2, "HomePhone2"},
+	{E_CONTACT_PHONE_ISDN, "Isdn"},
+	{E_CONTACT_PHONE_MOBILE, "MobilePhone"},
+	{E_CONTACT_PHONE_OTHER_FAX, "OtherFax"},
+	{E_CONTACT_PHONE_OTHER, "OtherTelephone"},
+	{E_CONTACT_PHONE_PAGER, "Pager"},
+	{E_CONTACT_PHONE_PRIMARY, "PrimaryPhone"},
+	{E_CONTACT_PHONE_RADIO, "RadioPhone"},
+	{E_CONTACT_PHONE_TELEX, "Telex"},
+	{E_CONTACT_PHONE_TTYTDD, "TtyTddPhone"}
+};
 
 static void
 ebews_populate_uid	(EContact *contact, EEwsItem *item)
@@ -151,24 +177,10 @@ set_phone_number (EContact *contact, EContactField field, EEwsItem *item, const 
 static void
 ebews_populate_phone_numbers	(EContact *contact, EEwsItem *item)
 {
-	set_phone_number (contact, E_CONTACT_PHONE_ASSISTANT, item, "AssistantPhone");
-	set_phone_number (contact, E_CONTACT_PHONE_BUSINESS_FAX, item, "BusinessFax");
-	set_phone_number (contact, E_CONTACT_PHONE_BUSINESS, item, "BusinessPhone");
-	set_phone_number (contact, E_CONTACT_PHONE_BUSINESS_2, item, "BusinessPhone2");
-	set_phone_number (contact, E_CONTACT_PHONE_CAR, item, "CarPhone");
-	set_phone_number (contact, E_CONTACT_PHONE_COMPANY, item, "CompanyMainPhone");
-	set_phone_number (contact, E_CONTACT_PHONE_HOME_FAX, item, "HomeFax");
-	set_phone_number (contact, E_CONTACT_PHONE_HOME, item, "HomePhone");
-	set_phone_number (contact, E_CONTACT_PHONE_HOME_2, item, "HomePhone2");
-	set_phone_number (contact, E_CONTACT_PHONE_ISDN, item, "Isdn");
-	set_phone_number (contact, E_CONTACT_PHONE_MOBILE, item, "MobilePhone");
-	set_phone_number (contact, E_CONTACT_PHONE_OTHER_FAX, item, "OtherFax");
-	set_phone_number (contact, E_CONTACT_PHONE_OTHER, item, "OtherTelephone");
-	set_phone_number (contact, E_CONTACT_PHONE_PAGER, item, "Pager");
-	set_phone_number (contact, E_CONTACT_PHONE_PRIMARY, item, "PrimaryPhone");
-	set_phone_number (contact, E_CONTACT_PHONE_RADIO, item, "RadioPhone");
-	set_phone_number (contact, E_CONTACT_PHONE_TELEX, item, "Telex");
-	set_phone_number (contact, E_CONTACT_PHONE_TTYTDD, item, "TtyTddPhone");
+	gint i;
+	
+	for (i = 0; i < G_N_ELEMENTS (phone_field_map); i++)
+		set_phone_number (contact, phone_field_map[i].field, item, phone_field_map[i].element);
 }
 
 static void
@@ -222,9 +234,25 @@ ebews_set_item_id		(ESoapMessage *message, EContact *contact)
 }
 
 static void
-ebews_set_full_name		(ESoapMessage *message, EContact *contact)
+ebews_set_full_name		(ESoapMessage *msg, EContact *contact)
 {
+	gchar *val;
 	
+//	if ((val = e_contact_get (contact, E_CONTACT_FULL_NAME)))
+//		e_ews_message_write_string_parameter(msg, "FullName", NULL, val);
+//	g_free (val);
+	
+	if ((val = e_contact_get (contact, E_CONTACT_GIVEN_NAME)))
+		e_ews_message_write_string_parameter(msg, "GivenName", NULL, val);
+	g_free (val);
+
+	if ((val = e_contact_get (contact, E_CONTACT_NICKNAME)) && *val)
+		e_ews_message_write_string_parameter(msg, "Nickname", NULL, val);
+	g_free (val);
+	
+	if ((val = e_contact_get (contact, E_CONTACT_FAMILY_NAME)) && *val)
+		e_ews_message_write_string_parameter(msg, "Surname", NULL, val);
+	g_free (val);
 }
 
 static void
@@ -234,15 +262,62 @@ ebews_set_birth_date		(ESoapMessage *message, EContact *contact)
 }
 
 static void
-ebews_set_phone_numbers		(ESoapMessage *message, EContact *contact)
+add_entry (ESoapMessage *msg, EContact *contact, EContactField field, const gchar *entry_name)
 {
+	gchar *entry_val;
+
+	entry_val = e_contact_get (contact, field);
 	
+	if (entry_val && *entry_val)
+		e_ews_message_write_string_parameter_with_attribute(msg, "Entry", NULL, entry_val, "Key", entry_name);
+
+	g_free (entry_val);
 }
 
 static void
-ebews_set_address		(ESoapMessage *message, EContact *contact)
+ebews_set_phone_numbers		(ESoapMessage *msg, EContact *contact)
 {
+	gint i;
 	
+	e_soap_message_start_element(msg, "PhoneNumbers", NULL, NULL);
+	
+	for (i = 0; i < G_N_ELEMENTS (phone_field_map); i++)
+		add_entry (msg, contact, phone_field_map[i].field, phone_field_map[i].element);
+
+	e_soap_message_end_element(msg);
+}
+
+static void
+add_physical_address (ESoapMessage *msg, EContact *contact, EContactField field, const gchar *entry_name)
+{
+	EContactAddress *contact_addr;
+
+	contact_addr = e_contact_get (contact, field);
+	if (!contact_addr)
+		return;
+
+	e_soap_message_start_element (msg, "Entry", NULL, NULL);
+	
+	e_soap_message_add_attribute (msg, "Key", entry_name, NULL, NULL);
+	e_ews_message_write_string_parameter (msg, "Street", NULL, contact_addr->street);
+	e_ews_message_write_string_parameter (msg, "City", NULL, contact_addr->locality);
+	e_ews_message_write_string_parameter (msg, "State", NULL, contact_addr->region);
+	e_ews_message_write_string_parameter (msg, "PostalCode", NULL, contact_addr->code);
+
+	e_soap_message_end_element (msg);
+	e_contact_address_free (contact_addr);
+}
+
+static void
+ebews_set_address	(ESoapMessage *msg, EContact *contact)
+{
+	e_soap_message_start_element (msg, "PhysicalAddresses", NULL, NULL);
+
+	add_physical_address (msg, contact, E_CONTACT_ADDRESS_WORK, "Business");
+	add_physical_address (msg, contact, E_CONTACT_ADDRESS_HOME, "Home");
+	add_physical_address (msg, contact, E_CONTACT_ADDRESS_OTHER, "Other");
+
+	e_soap_message_end_element(msg);
 }
 
 static void
@@ -252,9 +327,15 @@ ebews_set_ims			(ESoapMessage *message, EContact *contact)
 }
 
 static void
-ebews_set_emails		(ESoapMessage *message, EContact *contact)
+ebews_set_emails		(ESoapMessage *msg, EContact *contact)
 {
-	
+	e_soap_message_start_element(msg, "EmailAddresses", NULL, NULL);
+
+	add_entry (msg, contact, E_CONTACT_EMAIL_1, "EMailAddress1");
+	add_entry (msg, contact, E_CONTACT_EMAIL_2, "EMailAddress2");
+	add_entry (msg, contact, E_CONTACT_EMAIL_3, "EMailAddress3");
+
+	e_soap_message_end_element(msg);
 }
 
 static void
@@ -329,6 +410,84 @@ static const struct field_element_mapping {
 };
 
 
+typedef struct {
+	EBookBackendEws *ebews;
+	EDataBook *book;
+	EContact *contact;
+	guint32 opid;
+} EwsCreateContact;
+
+static void
+convert_contact_to_xml (ESoapMessage *msg, gpointer user_data)
+{
+	EContact *contact = (EContact*)user_data;
+	gint i, element_type;
+
+	/* Prepare Contact node in the SOAP message */
+	e_soap_message_start_element(msg, "Contact", NULL, NULL);
+
+	for (i = 0; i < G_N_ELEMENTS (mappings); i++) {
+		element_type = mappings[i].element_type;
+
+		if (element_type == ELEMENT_TYPE_SIMPLE) {
+			char *val = e_contact_get (contact, mappings [i].field_id);
+
+			/* skip uid while creating contacts */
+			if (mappings [i].field_id == E_CONTACT_UID)
+				continue;
+
+			if (val && *val)
+				e_ews_message_write_string_parameter(msg, mappings[i].element_name, NULL, val);
+			g_free (val);
+		} else
+			mappings[i].set_value_in_soap_message (msg, contact);
+	}
+
+	// end of "Contact"
+	e_soap_message_end_element(msg);
+}
+
+static void
+ews_create_contact_cb(GObject *object, GAsyncResult *res, gpointer user_data)
+{
+	EEwsConnection *cnc = E_EWS_CONNECTION (object);
+	EwsCreateContact *create_contact = user_data;
+	EBookBackendEws *ebews = create_contact->ebews;
+	GError *error = NULL;
+	GSList *items = NULL;
+	const EwsId *item_id;
+
+	/* get a list of ids from server (single item) */
+	e_ews_connection_create_items_finish(cnc, res, &items, &error);
+
+	if (error == NULL) {
+		EEwsItem *item = (EEwsItem *) items->data;
+
+		/* set item id */
+		item_id = e_ews_item_get_id((EEwsItem *)items->data);
+
+		e_contact_set (create_contact->contact, E_CONTACT_UID, item_id);
+		e_book_backend_sqlitedb_add_contact (ebews->priv->ebsdb, ebews->priv->folder_id, create_contact->contact, FALSE, &error);
+
+		if (error == NULL)
+			e_data_book_respond_create (create_contact->book, create_contact->opid, EDB_ERROR (SUCCESS), create_contact->contact);
+
+		g_object_unref (item);
+		g_slist_free (items);
+	}
+	
+	if (error) {
+		g_warning("Error while Creating contact: %s", error->message);
+		e_data_book_respond_create (create_contact->book, create_contact->opid, EDB_ERROR_EX (OTHER_ERROR, error->message), create_contact->contact);
+	}
+
+	/* free memory allocated for create_contact & unref contained objects */
+	g_object_unref(create_contact->ebews);
+	g_object_unref(create_contact->contact);
+	g_free(create_contact);
+	g_clear_error (&error);
+}
+
 static void
 e_book_backend_ews_create_contact	(EBookBackend *backend,
 					 EDataBook *book,
@@ -337,8 +496,12 @@ e_book_backend_ews_create_contact	(EBookBackend *backend,
 {
 	EContact *contact = NULL;
 	EBookBackendEws *ebews;
-
+	EwsCreateContact *create_contact;
+	EBookBackendEwsPrivate *priv;
+	GCancellable *cancellable = NULL;
+ 
 	ebews = E_BOOK_BACKEND_EWS (backend);
+	priv = ebews->priv;
 
 	switch (ebews->priv->mode) {
 	case E_DATA_BOOK_MODE_LOCAL :
@@ -357,8 +520,24 @@ e_book_backend_ews_create_contact	(EBookBackend *backend,
 			return;
 		}
 
-		e_data_book_respond_create (book, opid, EDB_ERROR (SUCCESS), contact);
+		contact = e_contact_new_from_vcard (vcard);
 
+		create_contact = g_new0(EwsCreateContact, 1);
+		create_contact->ebews = g_object_ref(ebews);
+		create_contact->book = g_object_ref(book);
+		create_contact->opid = opid;
+		create_contact->contact = g_object_ref(contact);
+
+		/* pass new contact component data to the exchange server and expect response in the callback */
+		e_ews_connection_create_items_start (priv->cnc,
+						     EWS_PRIORITY_MEDIUM, NULL,
+						     NULL,
+						     priv->folder_id,
+						     convert_contact_to_xml,
+						     contact,
+						     ews_create_contact_cb,
+						     cancellable,
+						     create_contact);
 		return;
 	default:
 		break;
@@ -370,7 +549,6 @@ typedef struct {
 	EDataBook *book;
 	guint32 opid;
 	GSList *sl_ids;
-	GList *dl_ids;
 } EwsRemoveContact;
 
 static void
@@ -388,9 +566,17 @@ ews_book_remove_contact_cb (GObject *object, GAsyncResult *res, gpointer user_da
 	if (!g_simple_async_result_propagate_error(simple, &error))
 		deleted = e_book_backend_sqlitedb_remove_contacts (priv->ebsdb, priv->folder_id, remove_contact->sl_ids, &error);
 
-	if (deleted)
-		e_data_book_respond_remove_contacts (remove_contact->book, remove_contact->opid, EDB_ERROR (SUCCESS),  remove_contact->dl_ids);
-	else {
+	if (deleted) {
+		GList *dl_ids = NULL;
+		GSList *l;
+
+		/* This is pretty ugly, but cant help */
+		for (l = remove_contact->sl_ids; l != NULL; l = g_slist_next (l))
+			dl_ids = g_list_prepend (dl_ids, l->data);
+
+		e_data_book_respond_remove_contacts (remove_contact->book, remove_contact->opid, EDB_ERROR (SUCCESS),  dl_ids);
+		g_list_free (dl_ids);
+	} else {
 		e_data_book_respond_remove_contacts (remove_contact->book, remove_contact->opid, EDB_ERROR_EX (OTHER_ERROR, error->message), NULL);
 		
 		g_warning ("\nError removing contact %s \n", error->message);
@@ -398,8 +584,7 @@ ews_book_remove_contact_cb (GObject *object, GAsyncResult *res, gpointer user_da
 
 	g_slist_foreach (remove_contact->sl_ids, (GFunc) g_free, NULL);
 	g_slist_free (remove_contact->sl_ids);
-	g_list_free (remove_contact->dl_ids);
-
+	
 	g_object_unref (remove_contact->ebews);
 	g_object_unref (remove_contact->book);
 	g_free (remove_contact);
@@ -439,15 +624,13 @@ e_book_backend_ews_remove_contacts	(EBookBackend *backend,
 		}
 
 		for (dl = id_list; dl != NULL; dl = g_list_next (dl))
-			deleted_ids = g_slist_prepend (NULL, (gpointer) dl->data);
+			deleted_ids = g_slist_prepend (NULL, g_strdup (dl->data));
 
 		remove_contact = g_new0(EwsRemoveContact, 1);
 		remove_contact->ebews = g_object_ref(ebews);
 		remove_contact->book = g_object_ref(book);
 		remove_contact->opid = opid;
 		remove_contact->sl_ids = deleted_ids;
-		/* Remove the dl_ids as GList would be replaced with GSList with eds 3.2 */
-		remove_contact->dl_ids = id_list;
 
 		e_ews_connection_delete_items_start (priv->cnc, EWS_PRIORITY_MEDIUM, deleted_ids,
 						     EWS_HARD_DELETE, 0 , FALSE,
@@ -755,7 +938,8 @@ ebews_sync_deleted_items (EBookBackendEws *ebews, GSList *deleted_ids, GError **
 	for (l = deleted_ids; l != NULL && *error != NULL; l = g_slist_next (l)) {
 		gchar *id = (gchar *) l->data;
 		
-		e_book_backend_sqlitedb_remove_contact (priv->ebsdb, priv->folder_id, id, error);
+		e_book_backend_sqlitedb_remove_contact (priv->ebsdb, priv->folder_id, id, NULL);
+		e_book_backend_notify_remove (E_BOOK_BACKEND (ebews), id);
 	}
 
 	g_slist_foreach (deleted_ids, (GFunc) g_free, NULL);
@@ -768,7 +952,6 @@ ebews_store_contact_items (EBookBackendEws *ebews, GSList *new_items, gboolean d
 {
 	EBookBackendEwsPrivate *priv;
 	GSList *l;
-	GSList *contacts = NULL;
 	
 	priv = ebews->priv;
 
@@ -796,14 +979,14 @@ ebews_store_contact_items (EBookBackendEws *ebews, GSList *new_items, gboolean d
 			/* store display_name, fileas, item id */	
 		}
 
-		contacts = g_slist_prepend (contacts, contact);
+		e_book_backend_sqlitedb_add_contact (priv->ebsdb, priv->folder_id, contact, FALSE, error);
+		e_book_backend_notify_update (E_BOOK_BACKEND (ebews), contact);
+		
 		g_object_unref (item);
+		g_object_unref (contact);
 	}
 
-	e_book_backend_sqlitedb_add_contacts (priv->ebsdb, priv->folder_id, contacts, FALSE, error);
 
-	g_slist_foreach (contacts, (GFunc) g_object_unref, NULL);
-	g_slist_free (contacts);
 	g_slist_free (new_items);
 }
 
@@ -1058,7 +1241,10 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 			for (l = contacts; l != NULL; l = g_slist_next (l)) {
 				EbSdbSearchData *s_data = (EbSdbSearchData *) l->data;
 			
+				/* reset vcard to NULL as it would be free'ed in prefiltered_vcard function */
 				e_data_book_view_notify_update_prefiltered_vcard (book_view, s_data->uid, s_data->vcard);
+				s_data->vcard = NULL;
+
 				e_book_backend_sqlitedb_search_data_free (s_data);
 			}
 
@@ -1166,6 +1352,7 @@ e_book_backend_ews_authenticate_user (EBookBackend *backend,
 	ESource *esource;
 	GError *error = NULL;
 	const gchar *host_url;
+	const gchar *read_only;
 
 	ebgw = E_BOOK_BACKEND_EWS (backend);
 	priv = ebgw->priv;
@@ -1184,12 +1371,20 @@ e_book_backend_ews_authenticate_user (EBookBackend *backend,
 		esource = e_book_backend_get_source (backend);
 		priv->folder_id = e_source_get_duped_property (esource, "folder-id");
 		host_url = e_source_get_property (esource, "hosturl");
+		read_only = e_source_get_property (esource, "read_only");
 
 		priv->cnc = e_ews_connection_new (host_url, user, passwd,
 						  NULL, NULL, &error);
+
+		if (read_only && !strcmp (read_only, "true")) {
+			priv->is_writable = FALSE;
+		} else 
+			priv->is_writable = TRUE;
+
 		/* FIXME: Do some dummy request to ensure that the password is actually
 		   correct; don't just blindly return success */
 		e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (SUCCESS));
+		e_book_backend_notify_writable (backend, priv->is_writable);
 		return;
 	default :
 		break;
@@ -1217,16 +1412,24 @@ e_book_backend_ews_get_supported_fields (EBookBackend *backend,
 					       guint32       opid)
 {
 	GList *fields = NULL;
-
+	gint i;
+	
+	for (i = 0; i < G_N_ELEMENTS (mappings) && mappings [i].element_type == ELEMENT_TYPE_SIMPLE; i++)
+		fields = g_list_append (fields, g_strdup (e_contact_field_name (mappings[i].field_id)));
+	
+	for (i = 0; i < G_N_ELEMENTS (phone_field_map); i++)
+		fields = g_list_append (fields, g_strdup (e_contact_field_name (phone_field_map[i].field)));
+	
+	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_FULL_NAME)));
+	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_NICKNAME)));
+	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_FAMILY_NAME)));
+	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_EMAIL_1)));
 	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_EMAIL_2)));
 	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_EMAIL_3)));
-	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_IM_ICQ)));
-	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_IM_YAHOO)));
-	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_IM_GADUGADU)));
-	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_IM_MSN)));
-	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_IM_SKYPE)));
-	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_IM_JABBER)));
 	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_ADDRESS_WORK)));
+	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_ADDRESS_HOME)));
+	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_ADDRESS_OTHER)));
+	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_BIRTH_DATE)));
 	e_data_book_respond_get_supported_fields (book, opid,
 						  EDB_ERROR (SUCCESS),
 						  fields);
@@ -1260,7 +1463,7 @@ e_book_backend_ews_load_source 	(EBookBackend           *backend,
 	folder_id = e_source_get_property (source, "folder-id");
 	folder_name = e_source_peek_name (source);
 
-	priv->ebsdb = e_book_backend_sqlitedb_new (cache_dir, email, folder_id, folder_name, FALSE, &err);
+	priv->ebsdb = e_book_backend_sqlitedb_new (cache_dir, email, folder_id, folder_name, TRUE, &err);
 	if (err) {
 		g_propagate_error (perror, err);
 		return;
