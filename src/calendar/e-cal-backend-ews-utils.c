@@ -76,6 +76,10 @@ void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **op
 
 		/* figure type of attendee, add to relevant list */
 		param = icalproperty_get_first_parameter(prop, ICAL_ROLE_PARAMETER);
+
+		/*in case of new time proposal the role parameter is not a part of ical*/
+		if (!param) continue;
+
 		switch (icalparameter_get_role(param)) {
 		case ICAL_ROLE_OPTPARTICIPANT:
 			*optional = g_slist_append(*optional, (gpointer)str);
