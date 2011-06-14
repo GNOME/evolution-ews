@@ -1186,7 +1186,7 @@ book_backend_sqlitedb_search_query	(EBookBackendSqliteDB *ebsdb,
 		book_backend_sql_exec (ebsdb->priv->db, stmt, store_data_to_vcard, &vcard_data, &err);
 		sqlite3_free (stmt);
 	} else {
-		stmt = sqlite3_mprintf ("SELECT uid vcard bdata FROM %Q WHERE %s", folderid, sql);
+		stmt = sqlite3_mprintf ("SELECT uid, vcard, bdata FROM %Q WHERE %s", folderid, sql);
 		book_backend_sql_exec (ebsdb->priv->db, stmt, addto_vcard_list_cb , &vcard_data, &err);
 		sqlite3_free (stmt);
 	}
@@ -1212,7 +1212,7 @@ book_backend_sqlitedb_search_full (EBookBackendSqliteDB *ebsdb, const gchar *sex
 
 	READER_LOCK (ebsdb);
 
-	stmt = sqlite3_mprintf ("SELECT uid vcard bdata FROM %Q", folderid);
+	stmt = sqlite3_mprintf ("SELECT uid, vcard, bdata FROM %Q", folderid);
 	book_backend_sql_exec (ebsdb->priv->db, stmt, addto_vcard_list_cb , &all, &err);
 	sqlite3_free (stmt);
 
