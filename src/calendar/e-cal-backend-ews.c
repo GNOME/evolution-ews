@@ -1514,15 +1514,20 @@ static const char*
 e_ews_get_current_user_meeting_reponse (icalcomponent *icalcomp, const char *current_user_mail)
 {
 	icalproperty *attendee;
-	const char *attendee_str = NULL;
+	const char *attendee_str = NULL, *attendee_mail = NULL;
 	for (attendee = icalcomponent_get_first_property (icalcomp, ICAL_ATTENDEE_PROPERTY);
 		attendee != NULL;
 		attendee = icalcomponent_get_next_property (icalcomp, ICAL_ATTENDEE_PROPERTY)) {
 		attendee_str = icalproperty_get_attendee (attendee);
-		if ((attendee_str != NULL) && !strncasecmp (attendee_str, "MAILTO:", 7))
-			if (g_strcmp0 (attendee_str + 7 , current_user_mail) == 0) {
+
+		if (attendee_str != NULL){
+			if (!strncasecmp (attendee_str, "MAILTO:", 7))
+				attendee_mail = attendee_str + 7;
+			else
+				attendee_mail = attendee_str;
+			if (g_strcmp0 (attendee_mail, current_user_mail) == 0)
 				return icalproperty_get_parameter_as_string (attendee, "PARTSTAT");
-			}
+		}
 	}
 	return NULL;
 }
