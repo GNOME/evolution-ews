@@ -1621,7 +1621,8 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 		const char *response_type;
 		gchar *item_id = NULL, *change_key = NULL;
 		GSList *ids = NULL, *l;
-		icalproperty *recurrence_id, *transp;
+		icalproperty *recurrence_id, *transp, *summary;
+		char **split_subject;
 
 
 		/* duplicate the ical component */
@@ -1686,6 +1687,20 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 			case ICAL_METHOD_CANCEL:
 				recurrence_id = icalcomponent_get_first_property (subcomp, ICAL_RECURRENCEID_PROPERTY);
 				e_cal_backend_ews_remove_object (backend, cal, NULL, item_id, icalproperty_get_value_as_string (recurrence_id), CALOBJ_MOD_ALL);
+				break;
+			case ICAL_METHOD_COUNTER:
+				/*this is a new time proposal mail from one of the attendees
+				 * if we decline the proposal, nothing have to be done
+				 * if we accept it we will call to modify_object */
+				if (!g_strcmp0 (response_type, "ACCEPTED")) {
+					/*we have to edit the meeting subject to remove exchange header*/
+					summary = icalcomponent_get_first_property (subcomp, ICAL_SUMMARY_PROPERTY);
+					split_subject  = g_strsplit (icalproperty_get_value_as_string(summary), ":", -1);
+					icalproperty_set_value_from_string (summary, split_subject[1] , "NO");
+					g_strfreev (split_subject);
+
+					e_cal_backend_ews_modify_object (backend, cal, NULL, icalcomponent_as_ical_string(subcomp), CALOBJ_MOD_ALL);
+				}
 				break;
 			default:
 				break;
