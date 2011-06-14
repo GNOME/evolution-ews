@@ -365,34 +365,94 @@ e_book_backend_ews_create_contact	(EBookBackend *backend,
 	}
 }
 
+typedef struct {
+	EBookBackendEws *ebews;
+	EDataBook *book;
+	guint32 opid;
+	GSList *sl_ids;
+	GList *dl_ids;
+} EwsRemoveContact;
+
+static void
+ews_book_remove_contact_cb (GObject *object, GAsyncResult *res, gpointer user_data)
+{
+	EwsRemoveContact *remove_contact = user_data;
+	EBookBackendEws *ebews = remove_contact->ebews;
+	EBookBackendEwsPrivate *priv = ebews->priv;
+	GSimpleAsyncResult *simple;
+	GError *error = NULL;
+	gboolean deleted = FALSE;
+
+	simple = G_SIMPLE_ASYNC_RESULT (res);
+
+	if (!g_simple_async_result_propagate_error(simple, &error))
+		deleted = e_book_backend_sqlitedb_remove_contacts (priv->ebsdb, priv->folder_id, remove_contact->sl_ids, &error);
+
+	if (deleted)
+		e_data_book_respond_remove_contacts (remove_contact->book, remove_contact->opid, EDB_ERROR (SUCCESS),  remove_contact->dl_ids);
+	else {
+		e_data_book_respond_remove_contacts (remove_contact->book, remove_contact->opid, EDB_ERROR_EX (OTHER_ERROR, error->message), NULL);
+		
+		g_warning ("\nError removing contact %s \n", error->message);
+	}
+
+	g_slist_foreach (remove_contact->sl_ids, (GFunc) g_free, NULL);
+	g_slist_free (remove_contact->sl_ids);
+	g_list_free (remove_contact->dl_ids);
+
+	g_object_unref (remove_contact->ebews);
+	g_object_unref (remove_contact->book);
+	g_free (remove_contact);
+	g_clear_error (&error);
+}
+
 static void
 e_book_backend_ews_remove_contacts	(EBookBackend *backend,
 					 EDataBook    *book,
 					 guint32 opid,
 					 GList *id_list)
 {
-	EBookBackendEws *ebgw;
-	GList *deleted_ids = NULL;
+	EBookBackendEws *ebews;
+	EwsRemoveContact *remove_contact;
+	EBookBackendEwsPrivate *priv;
+	GSList *deleted_ids = NULL;
+	GList *dl;
+ 
+	ebews = E_BOOK_BACKEND_EWS (backend);
+ 
+	priv = ebews->priv;
 
-	ebgw = E_BOOK_BACKEND_EWS (backend);
-
-	switch (ebgw->priv->mode) {
+	switch (ebews->priv->mode) {
 	case E_DATA_BOOK_MODE_LOCAL :
 		e_data_book_respond_remove_contacts (book, opid, EDB_ERROR (REPOSITORY_OFFLINE), NULL);
 		return;
 
 	case E_DATA_BOOK_MODE_REMOTE :
-		if (ebgw->priv->cnc == NULL) {
+		if (ebews->priv->cnc == NULL) {
 			e_data_book_respond_remove_contacts (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
 			return;
 		}
 
-		if (!ebgw->priv->is_writable) {
+		if (!ebews->priv->is_writable) {
 			e_data_book_respond_remove_contacts (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
 			return;
 		}
 
-		e_data_book_respond_remove_contacts (book, opid, EDB_ERROR (SUCCESS),  deleted_ids);
+		for (dl = id_list; dl != NULL; dl = g_list_next (dl))
+			deleted_ids = g_slist_prepend (NULL, (gpointer) dl->data);
+
+		remove_contact = g_new0(EwsRemoveContact, 1);
+		remove_contact->ebews = g_object_ref(ebews);
+		remove_contact->book = g_object_ref(book);
+		remove_contact->opid = opid;
+		remove_contact->sl_ids = deleted_ids;
+		/* Remove the dl_ids as GList would be replaced with GSList with eds 3.2 */
+		remove_contact->dl_ids = id_list;
+
+		e_ews_connection_delete_items_start (priv->cnc, EWS_PRIORITY_MEDIUM, deleted_ids,
+						     EWS_HARD_DELETE, 0 , FALSE,
+						     ews_book_remove_contact_cb, NULL,
+						     remove_contact);
 		return;
 	default :
 		break;
