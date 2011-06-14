@@ -1079,6 +1079,10 @@ ews_create_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data
 }
 
 static void
+e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context,
+				 const gchar *uid, const gchar *rid, CalObjModType mod);
+
+static void
 ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
@@ -1138,6 +1142,16 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 
 	/* update changes and release access to the store */
 	e_cal_backend_store_thaw_changes (priv->store);
+
+	/* Excluded occurrences */
+	icalprop = icalcomponent_get_first_property(icalcomp, ICAL_RRULE_PROPERTY);
+	if (icalprop != NULL) {
+		icalprop = icalcomponent_get_first_property(icalcomp, ICAL_EXDATE_PROPERTY);
+		for (; icalprop; icalprop = icalcomponent_get_next_property(icalcomp, ICAL_RRULE_PROPERTY)) {
+			e_cal_backend_ews_remove_object (E_CAL_BACKEND (create_data->cbews), create_data->cal, NULL,
+							 item_id->id, icalproperty_get_value_as_string (icalprop), CALOBJ_MOD_THIS);
+		}
+	}
 
 	/* no need to keep reference to the object */
 	g_object_unref(create_data->comp);
