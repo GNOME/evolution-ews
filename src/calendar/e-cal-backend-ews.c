@@ -1300,8 +1300,14 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	comp_str = e_cal_component_get_as_string (modify_data->comp);
 	comp_str_old = e_cal_component_get_as_string (modify_data->oldcomp);
 
-	e_cal_backend_notify_object_modified (E_CAL_BACKEND (cbews), comp_str_old, comp_str);
-	e_data_cal_notify_object_modified (modify_data->cal, modify_data->context, error, comp_str_old, comp_str);
+	if (modify_data->context) {
+		e_cal_backend_notify_object_modified (E_CAL_BACKEND (cbews), comp_str_old, comp_str);
+		e_data_cal_notify_object_modified (modify_data->cal, modify_data->context, error, comp_str_old, comp_str);
+	}
+	else if (error) {
+		g_warning ("Modify object error :  %s\n", error->message);
+		g_clear_error (&error);
+	}
 
 	PRIV_LOCK (priv);
 	g_hash_table_replace (priv->item_id_hash, g_strdup(modify_data->itemid), g_object_ref (modify_data->comp));
@@ -1491,7 +1497,12 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	return;
 
 exit:
-	e_data_cal_notify_object_modified (cal, context, error, NULL, NULL);
+	if (context)
+		e_data_cal_notify_object_modified (cal, context, error, NULL, NULL);
+	else if (error) {
+		g_warning ("Modify object error :  %s\n", error->message);
+		g_clear_error (&error);
+	}
 }
 
 typedef struct {
