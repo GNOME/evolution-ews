@@ -2907,6 +2907,123 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
 	return ids;
 }
 
+/* Delete attachemnts */
+static void
+delete_attachments_response_cb (ESoapParameter *subparam, EwsNode *enode)
+{
+	/* http://msdn.microsoft.com/en-us/library/aa580782%28v=EXCHG.80%29.aspx */
+	ESoapParameter *attspara;
+	EwsAsyncData *async_data;
+	EwsId *item_id;
+
+	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
+
+	attspara = e_soap_parameter_get_first_child_by_name (subparam, "RootItemId");
+
+	if (!attspara) return;
+
+	item_id = g_new0 (EwsId, 1);
+	item_id->id = e_soap_parameter_get_property (attspara, "RootItemId");
+	item_id->change_key = e_soap_parameter_get_property (attspara, "RootItemChangeKey");
+
+	async_data->items = g_slist_append (async_data->items, item_id);
+}
+
+void
+e_ews_connection_delete_attachments_start (EEwsConnection *cnc,
+					 gint pri,
+					 const GSList *ids,
+					 GAsyncReadyCallback cb,
+					 GCancellable *cancellable,
+					 gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+	const GSList *l;
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "DeleteAttachment", NULL, NULL, EWS_EXCHANGE_2007);
+
+	/* start interation over all items to get the attachemnts */
+	e_soap_message_start_element (msg, "AttachmentIds", "messages", NULL);
+
+	for (l = ids; l != NULL; l = g_slist_next (l)) {
+		e_ews_message_write_string_parameter_with_attribute (msg, "AttachmentId", NULL, NULL, "Id", l->data);
+	}
+
+	e_soap_message_end_element (msg); /* "AttachmentIds" */
+
+	e_ews_message_write_footer (msg);
+
+	simple = g_simple_async_result_new (G_OBJECT (cnc),
+				      cb,
+				      user_data,
+				      e_ews_connection_delete_attachments_start);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	ews_connection_queue_request (cnc, msg, delete_attachments_response_cb, pri,
+				      cancellable, simple, cb == ews_sync_reply_cb);
+}
+
+GSList *
+e_ews_connection_delete_attachments_finish (EEwsConnection *cnc,
+					 GAsyncResult *result,
+					 GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+	GSList *ids = NULL;
+
+	g_return_val_if_fail (
+			g_simple_async_result_is_valid (
+					result, G_OBJECT (cnc), e_ews_connection_delete_attachments_start),
+			NULL);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return NULL;
+
+	ids = async_data->items;
+
+	return ids;
+}
+
+GSList *
+e_ews_connection_delete_attachments (EEwsConnection *cnc,
+				 gint pri,
+				 const GSList *ids,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	EwsSyncData *sync_data;
+	GSList *parents;
+
+	sync_data = g_new0 (EwsSyncData, 1);
+	sync_data->eflag = e_flag_new ();
+
+	e_ews_connection_delete_attachments_start (cnc, pri,
+						 ids,
+						 ews_sync_reply_cb,
+						 cancellable,
+						 (gpointer) sync_data);
+
+	e_flag_wait (sync_data->eflag);
+
+	parents = e_ews_connection_delete_attachments_finish (cnc, sync_data->res,
+							error);
+
+	e_flag_free (sync_data->eflag);
+	g_object_unref (sync_data->res);
+	g_free (sync_data);
+
+	return parents;
+}
+
 static void get_attachments_response_cb (ESoapParameter *subparam, EwsNode *enode);
 
 void
