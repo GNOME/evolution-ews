@@ -61,35 +61,35 @@ void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **op
 				org_email_address = org;
 
 	/* iterate over every attendee property */
-	for (prop = icalcomponent_get_first_property(comp, ICAL_ATTENDEE_PROPERTY);
+	for (prop = icalcomponent_get_first_property (comp, ICAL_ATTENDEE_PROPERTY);
 		prop != NULL;
-		prop = icalcomponent_get_next_property(comp, ICAL_ATTENDEE_PROPERTY)) {
+		prop = icalcomponent_get_next_property (comp, ICAL_ATTENDEE_PROPERTY)) {
 
-		str = icalproperty_get_attendee(prop);
+		str = icalproperty_get_attendee (prop);
 
 		/* if this attenddee is the orgenizer - dont add him/her
 		 in some cases there is no maito for email if meeting orginazer*/
-		if (g_ascii_strcasecmp(org_email_address, str) == 0) continue;
+		if (g_ascii_strcasecmp (org_email_address, str) == 0) continue;
 
 		/* figure the email address of the attendee, discard "mailto:" if it's there */
 		if (!g_ascii_strncasecmp (str, "mailto:", 7)) str = (str) + 7;
 
 		/* figure type of attendee, add to relevant list */
-		param = icalproperty_get_first_parameter(prop, ICAL_ROLE_PARAMETER);
+		param = icalproperty_get_first_parameter (prop, ICAL_ROLE_PARAMETER);
 
 		/*in case of new time proposal the role parameter is not a part of ical*/
 		if (!param) continue;
 
 		switch (icalparameter_get_role(param)) {
 		case ICAL_ROLE_OPTPARTICIPANT:
-			*optional = g_slist_append(*optional, (gpointer)str);
+			*optional = g_slist_append (*optional, (gpointer)str);
 			break;
 		case ICAL_ROLE_CHAIR:
 		case ICAL_ROLE_REQPARTICIPANT:
-			*required = g_slist_append(*required, (gpointer)str);
+			*required = g_slist_append (*required, (gpointer)str);
 			break;
 		case ICAL_ROLE_NONPARTICIPANT:
-			*resource = g_slist_append(*resource, (gpointer)str);
+			*resource = g_slist_append (*resource, (gpointer)str);
 			break;
 		case ICAL_ROLE_X:
 		case ICAL_ROLE_NONE:
