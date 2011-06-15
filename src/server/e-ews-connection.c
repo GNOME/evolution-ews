@@ -2837,7 +2837,7 @@ e_ews_connection_create_attachments_start (EEwsConnection *cnc,
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
 				      cb,
 				      user_data,
-				      e_ews_connection_get_attachments_start);
+				      e_ews_connection_create_attachments_start);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -2868,8 +2868,6 @@ e_ews_connection_create_attachments_finish (EEwsConnection *cnc,
 		return NULL;
 
 	ids = async_data->items;
-
-	g_free (async_data);
 
 	return ids;
 }
