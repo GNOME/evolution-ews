@@ -1055,14 +1055,12 @@ ebews_start_sync	(gpointer data)
 {
 	EBookBackendEws *ebews;
 	EBookBackendEwsPrivate *priv;
-	EEwsConnection *cnc;
 	gchar *sync_state;
 	gboolean includes_last_item;
 	GError *error = NULL;
 
 	ebews = (EBookBackendEws *) data;
 	priv = ebews->priv;
-	cnc = priv->cnc;
 
 	sync_state = e_book_backend_sqlitedb_get_sync_data (priv->ebsdb, priv->folder_id, NULL);
 	do
