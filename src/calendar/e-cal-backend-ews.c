@@ -41,6 +41,8 @@
 #include <libical/icalproperty.h>
 #include <glib-2.0/glib/gerror.h>
 #include <glib-2.0/glib/glist.h>
+#include <camel/camel.h>
+#include <ews-camel-common.h>
 #include "e-cal-backend-ews.h"
 #include "e-cal-backend-ews-utils.h"
 #include "e-ews-connection.h"
@@ -1715,33 +1717,6 @@ exit:
 	e_data_cal_notify_objects_received (cal, context, error);
 }
 
-typedef struct {
-	const char *new_body_content;
-	const char *item_id;
-	const char *change_key;
-} EwsCancellationData;
-
-static void
-prepare_cancellation_meeting_request (ESoapMessage *msg, gpointer user_data)
-{
-	EwsCancellationData *data = user_data;
-
-	e_soap_message_start_element (msg, "CancelCalendarItem", NULL, NULL);
-	e_soap_message_start_element (msg, "ReferenceItemId", NULL, NULL);
-	e_soap_message_add_attribute (msg, "Id", data->item_id, NULL, NULL);
-	e_soap_message_add_attribute (msg, "ChangeKey", data->change_key, NULL, NULL);
-	e_soap_message_end_element (msg); // "ReferenceItemId"
-
-	if (data->new_body_content) {
-		e_soap_message_start_element (msg, "NewBodyContent", NULL, NULL);
-		e_soap_message_add_attribute (msg, "BodyType", "Text", NULL, NULL);
-		e_soap_message_write_string (msg, data->new_body_content);
-		e_soap_message_end_element (msg);
-	}
-	/* end of "CancelCalendarItem" */
-	e_soap_message_end_element (msg);
-}
-
 static const char *
 e_cal_get_meeting_cancellation_comment (ECalComponent *comp)
 {
@@ -1765,6 +1740,26 @@ e_cal_get_meeting_cancellation_comment (ECalComponent *comp)
 }
 
 static void
+ewscal_send_cancellation_email (EEwsConnection *cnc, CamelAddress *from, CamelInternetAddress *recipient, const gchar *subject, const gchar *body)
+{
+	CamelMimeMessage *message;
+	GError *error = NULL;
+
+	message = camel_mime_message_new ();
+	camel_mime_message_set_subject (message, subject);
+	camel_mime_message_set_from (message, CAMEL_INTERNET_ADDRESS (from));
+	camel_mime_message_set_recipients (message, CAMEL_RECIPIENT_TYPE_TO, recipient);
+	camel_mime_part_set_content (CAMEL_MIME_PART (message), body, strlen (body), "text/plain");
+
+	camel_ews_utils_create_mime_message (cnc, "SendOnly", NULL, message, 0, from, NULL, NULL, NULL, &error);
+
+	if (error) {
+		g_warning ("Failed to send cancellation email\n");
+		g_clear_error (&error);
+	}
+}
+
+static void
 e_cal_backend_ews_send_objects (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *calobj)
 {
 	ECalBackendEws *cbews;
@@ -1772,7 +1767,6 @@ e_cal_backend_ews_send_objects (ECalBackend *backend, EDataCal *cal, EServerMeth
 	icalcomponent_kind kind;
 	icalcomponent *icalcomp, *subcomp = NULL;
 	GError *error = NULL;
-	GCancellable *cancellable = NULL;
 
 	cbews = E_CAL_BACKEND_EWS(backend);
 	priv = cbews->priv;
@@ -1807,55 +1801,42 @@ e_cal_backend_ews_send_objects (ECalBackend *backend, EDataCal *cal, EServerMeth
 		subcomp = icalcomp;
 	while (subcomp) {
 		ECalComponent *comp = e_cal_component_new ();
-		const char *new_body_content = NULL;
-		gchar *item_id = NULL, *change_key = NULL;
-		GSList *ids = NULL, *items = NULL, *l;
-		EwsCancellationData *cancellation_data;
+		const char *new_body_content = NULL, *subject = NULL, *org_email = NULL;
+		const gchar *org = NULL, *attendee = NULL;
+		icalproperty *prop, *org_prop = NULL;
+		CamelInternetAddress *org_addr = camel_internet_address_new ();
+
 		e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (subcomp));
 
 		new_body_content = e_cal_get_meeting_cancellation_comment(comp);
+		subject = icalproperty_get_value_as_string (icalcomponent_get_first_property (subcomp, ICAL_SUMMARY_PROPERTY));
 
-		ews_cal_component_get_item_id (comp, &item_id, &change_key);
+		org_prop = icalcomponent_get_first_property (subcomp, ICAL_ORGANIZER_PROPERTY);
+		org = icalproperty_get_organizer(org_prop);
+		if (!g_ascii_strncasecmp (org, "MAILTO:", 7))
+				org_email = (org) + 7;
+			else
+				org_email = org;
 
-		ids = g_slist_append (ids,item_id);
-		e_ews_connection_get_items (priv->cnc, EWS_PRIORITY_MEDIUM, ids, "IdOnly", NULL, FALSE, NULL, &items, NULL, NULL, cancellable, &error);
+		camel_internet_address_add (org_addr, icalproperty_get_parameter_as_string (org_prop, "CN"), org_email);
 
-		if (error){
-			error->code = OtherError;
-			break;
+		/* iterate over every attendee property */
+		for (prop = icalcomponent_get_first_property (subcomp, ICAL_ATTENDEE_PROPERTY);
+			prop != NULL;
+			prop = icalcomponent_get_next_property (subcomp, ICAL_ATTENDEE_PROPERTY)) {
+
+			CamelInternetAddress *attendee_addr = camel_internet_address_new ();
+			attendee = icalproperty_get_attendee (prop);
+			if (g_ascii_strcasecmp (org_email, attendee) == 0) continue;
+			if (!g_ascii_strncasecmp (attendee, "mailto:", 7)) attendee = (attendee) + 7;
+
+			camel_internet_address_add (attendee_addr, icalproperty_get_parameter_as_string (prop, "CN"), attendee);
+			ewscal_send_cancellation_email (priv->cnc, CAMEL_ADDRESS(org_addr), attendee_addr, subject, new_body_content);
+			g_object_unref (attendee_addr);
 		}
-		else {
-			for (l = items; l != NULL; l = g_slist_next (l)) {
-				EEwsItem *item = (EEwsItem *) l->data;
-				if (item) {
-					item_id = e_ews_item_get_id (item)->id;
-					change_key = e_ews_item_get_id (item)->change_key;
-					break;
-				}
-			}
 
-			cancellation_data = g_new0 (EwsCancellationData, 1);
-			cancellation_data->new_body_content = new_body_content;
-			cancellation_data->item_id = item_id;
-			cancellation_data->change_key = change_key;
-			e_ews_connection_create_items (priv->cnc, EWS_PRIORITY_MEDIUM,
-				"SendAndSaveCopy", NULL, NULL,
-				prepare_cancellation_meeting_request,
-				cancellation_data,
-				&ids,
-				cancellable,
-				&error);
-
-			if (error){
-				error->code = OtherError;
-				break;
-			}
-		}
-		g_free (item_id);
-		g_free (change_key);
-		g_free (cancellation_data);
+		g_object_unref (org_addr);
 		g_object_unref (comp);
-		g_slist_free (ids);
 		subcomp = icalcomponent_get_next_component (icalcomp, kind);
 	}
 

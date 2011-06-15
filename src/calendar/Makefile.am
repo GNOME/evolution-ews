@@ -12,11 +12,13 @@ libecalbackendews_la_CPPFLAGS = \
 	-I$(top_builddir)/src/calendar			\
 	-I$(top_srcdir)/src/server			\
 	-I$(top_builddir)/src/server			\
+	-I$(top_srcdir)/src/utils			\
 	$(EVOLUTION_CALENDAR_CFLAGS)			\
 	$(LIBEBACKEND_CFLAGS)    	                \
 	$(LIBECAL_CFLAGS)               	        \
 	$(LIBEDATACAL_CFLAGS)                   	\
 	$(SOUP_CFLAGS)					\
+	$(CAMEL_CFLAGS)					\
 	$(DEBUG_CFLAGS)
 
 libecalbackendews_la_SOURCES =				\
@@ -29,11 +31,13 @@ libecalbackendews_la_SOURCES =				\
 
 libecalbackendews_la_LIBADD =				\
 	$(top_builddir)/src/server/libeews-1.2.la	\
+	$(top_builddir)/src/utils/libewsutils.la	\
 	$(EVOLUTION_CALENDAR_LIBS)			\
 	$(LIBEBACKEND_LIBS)    	  		        \
 	$(LIBECAL_LIBS)               	        	\
 	$(LIBEDATACAL_LIBS) 		                \
-	$(SOUP_LIBS)
+	$(SOUP_LIBS)					\
+	$(CAMEL_LIBS)
 
 libecalbackendews_la_LDFLAGS =				\
 	-module -avoid-version $(NO_UNDEFINED)
