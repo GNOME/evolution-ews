@@ -55,7 +55,7 @@ void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **op
 	if (!org)
 		org = "";
 	else
-		if (g_ascii_strncasecmp (org, "MAILTO:", 7))
+		if (!g_ascii_strncasecmp (org, "MAILTO:", 7))
 				org_email_address = (org) + 7;
 			else
 				org_email_address = org;
