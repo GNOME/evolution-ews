@@ -1155,6 +1155,14 @@ ews_delete_messages (CamelFolder *folder, GSList *deleted_items, gboolean expung
 							EWS_SEND_TO_NONE, FALSE, cancellable, &rerror);
 		camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
+		if (!status && rerror->code == EWS_CONNECTION_ERROR_ITEMNOTFOUND) {
+			/* If delete failed due to the item not found, ignore the error,
+			   trigger folder info refresh and then go on to clear the
+			   cache of the deleted items anyway. */
+			g_clear_error(&rerror);
+			status = ews_refresh_info_sync (folder, EVO3(cancellable,) &rerror);
+		}
+
 		if (status) {
 			while (deleted_items) {
 				const gchar *uid = (gchar *)deleted_items->data;
