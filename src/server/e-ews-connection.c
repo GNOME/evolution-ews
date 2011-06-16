@@ -2757,17 +2757,17 @@ create_attachments_response_cb (ESoapParameter *param,
 
 static void
 e_ews_connection_attach_file (ESoapMessage *msg,
-				const char *filepath)
+				const char *uri)
 {
 	/* TODO - handle a situation where the file isnt accessible/other problem with it */
 	/* TODO - This is a naive implementation that just uploads the whole content into memory, ie very inefficient */
 	struct stat st;
-	char *buffer;
+	char *buffer, *filepath;
 	const char *filename;
 	int fd;
 
-	/* get over the "protocol" 'file://' */
-	filepath += 7;
+	/* convert uri to actual file path */
+	filepath = g_filename_from_uri (uri, NULL, NULL);
 
 	if (stat (filepath, &st) == -1) {
 		g_warning ("Error while calling stat() on %s\n", filepath);
@@ -2775,6 +2775,7 @@ e_ews_connection_attach_file (ESoapMessage *msg,
 	}
 
 	fd = open (filepath, O_RDONLY);
+	free (filepath);
 	if (fd == -1) {
 		g_warning ("Error opening %s for reading\n", filepath);
 		return;
