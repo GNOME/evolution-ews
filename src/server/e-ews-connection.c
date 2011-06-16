@@ -2766,6 +2766,9 @@ e_ews_connection_attach_file (ESoapMessage *msg,
 	const char *filename;
 	int fd;
 
+	/* get over the "protocol" 'file://' */
+	filepath += 7;
+
 	if (stat (filepath, &st) == -1) {
 		g_warning ("Error while calling stat() on %s\n", filepath);
 		return;
@@ -2789,7 +2792,7 @@ e_ews_connection_attach_file (ESoapMessage *msg,
 	if (filename) filename++;
 	else filename = filepath;
 
-	e_soap_message_start_element (msg, "FileAttachment", "messages", NULL);
+	e_soap_message_start_element (msg, "FileAttachment", NULL, NULL);
 
 	e_ews_message_write_string_parameter (msg, "Name", NULL, filename);
 
