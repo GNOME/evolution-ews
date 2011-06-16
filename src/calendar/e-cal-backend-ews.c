@@ -1740,16 +1740,35 @@ e_cal_get_meeting_cancellation_comment (ECalComponent *comp)
 }
 
 static void
-ewscal_send_cancellation_email (EEwsConnection *cnc, CamelAddress *from, CamelInternetAddress *recipient, const gchar *subject, const gchar *body)
+ewscal_send_cancellation_email (EEwsConnection *cnc, CamelAddress *from, CamelInternetAddress *recipient, const gchar *subject, const gchar *body, const icalcomponent *vevent)
 {
 	CamelMimeMessage *message;
 	GError *error = NULL;
+	CamelMultipart *multi;
+	CamelMimePart *text_part, *vevent_part;
+	char *ical_str;
+
+	text_part = camel_mime_part_new ();
+	camel_mime_part_set_content (text_part, body, strlen (body), "text/plain");
+
+	vevent_part = camel_mime_part_new ();
+	ical_str = icalcomponent_as_ical_string_r ((icalcomponent *)vevent);
+	camel_mime_part_set_content (vevent_part, ical_str, strlen (ical_str), "text/calendar");
+	free (ical_str);
+
+	multi = camel_multipart_new ();
+	camel_multipart_add_part (multi, text_part);
+	camel_multipart_add_part (multi, vevent_part);
+	g_object_unref (text_part);
+	g_object_unref (vevent_part);
 
 	message = camel_mime_message_new ();
 	camel_mime_message_set_subject (message, subject);
 	camel_mime_message_set_from (message, CAMEL_INTERNET_ADDRESS (from));
 	camel_mime_message_set_recipients (message, CAMEL_RECIPIENT_TYPE_TO, recipient);
-	camel_mime_part_set_content (CAMEL_MIME_PART (message), body, strlen (body), "text/plain");
+
+	camel_medium_set_content ((CamelMedium *)message, (CamelDataWrapper *)multi);
+	g_object_unref (multi);
 
 	camel_ews_utils_create_mime_message (cnc, "SendOnly", NULL, message, 0, from, NULL, NULL, NULL, &error);
 
@@ -1757,6 +1776,8 @@ ewscal_send_cancellation_email (EEwsConnection *cnc, CamelAddress *from, CamelIn
 		g_warning ("Failed to send cancellation email\n");
 		g_clear_error (&error);
 	}
+
+	g_object_unref (message);
 }
 
 static void
@@ -1831,7 +1852,7 @@ e_cal_backend_ews_send_objects (ECalBackend *backend, EDataCal *cal, EServerMeth
 			if (!g_ascii_strncasecmp (attendee, "mailto:", 7)) attendee = (attendee) + 7;
 
 			camel_internet_address_add (attendee_addr, icalproperty_get_parameter_as_string (prop, "CN"), attendee);
-			ewscal_send_cancellation_email (priv->cnc, CAMEL_ADDRESS(org_addr), attendee_addr, subject, new_body_content);
+			ewscal_send_cancellation_email (priv->cnc, CAMEL_ADDRESS(org_addr), attendee_addr, subject, new_body_content, subcomp);
 			g_object_unref (attendee_addr);
 		}
 
