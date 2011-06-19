@@ -2775,7 +2775,6 @@ e_ews_connection_attach_file (ESoapMessage *msg,
 	}
 
 	fd = open (filepath, O_RDONLY);
-	free (filepath);
 	if (fd == -1) {
 		g_warning ("Error opening %s for reading\n", filepath);
 		return;
@@ -2803,6 +2802,7 @@ e_ews_connection_attach_file (ESoapMessage *msg,
 
 	e_soap_message_end_element(msg); /* "FileAttachment" */
 
+	free (filepath);
 	free (buffer);
 }
 
