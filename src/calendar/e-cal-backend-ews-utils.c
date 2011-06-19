@@ -471,3 +471,29 @@ void ewscal_set_reccurence_exceptions (ESoapMessage *msg, icalcomponent *comp)
 
 	e_soap_message_end_element (msg); /* "DeletedOccurrences" */
 }
+
+void ewscal_get_attach_differences (const GSList *original, const GSList *modified, GSList **removed, GSList **added)
+{
+	gboolean flag;
+	GSList *i, *i_next, *j, *j_next, *original_copy, *modified_copy;
+	original_copy = g_slist_copy ((GSList *)original);
+	modified_copy = g_slist_copy ((GSList *)modified);
+
+	for (j = modified_copy; j; j = j_next) {
+		j_next = j->next;
+
+		for (i = original_copy, flag = FALSE; !flag && i; i = i_next) {
+			i_next = i->next;
+
+			if (g_strcmp0 (j->data, i->data) == 0) {
+				/* Remove from the lists attachments that are on both */
+				original_copy = g_slist_delete_link (original_copy, i);
+				modified_copy = g_slist_delete_link (modified_copy, j);
+				flag = TRUE;
+			}
+		}
+	}
+
+	*removed = original_copy;
+	*added = modified_copy;
+}
