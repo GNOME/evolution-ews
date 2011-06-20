@@ -88,6 +88,16 @@ typedef enum {
 	EWS_SPECIFIED_OCCURRENCE_ONLY
 } EwsAffectedTaskOccurrencesType;
 
+typedef struct {
+	gchar *as_url;
+	gchar *oab_url;
+
+	/* all the below variables are for future use */
+	gchar *oof_url;
+	gpointer future1;
+	gpointer future2;
+} EwsUrls;
+
 GType		e_ews_connection_get_type	(void);
 EEwsConnection *e_ews_connection_new		(const gchar *uri,
 						 const gchar *username,
@@ -103,7 +113,7 @@ void		e_ews_connection_authenticate	(EEwsConnection *cnc,
 						 const gchar *passwd,
 						 GError *error);
 
-typedef void (*EEwsAutoDiscoverCallback) (char *url, gpointer user_data, GError *error);
+typedef void (*EEwsAutoDiscoverCallback) (EwsUrls *urls, gpointer user_data, GError *error);
 void		e_ews_autodiscover_ws_url	(EEwsAutoDiscoverCallback cb,
 						 gpointer cbdata,
 						 const gchar *email,

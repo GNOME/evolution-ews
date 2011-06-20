@@ -92,16 +92,22 @@ struct _AutoDiscCallBackData {
 	GtkWidget *entry;
 };
 
-static void autodiscover_callback (char *url, gpointer user_data, GError *error)
+static void autodiscover_callback (EwsUrls *urls, gpointer user_data, GError *error)
 {
+	struct _AutoDiscCallBackData *cbdata = (struct _AutoDiscCallBackData *) user_data;
+	
 	if (error) {
 		g_warning ("Autodiscover failed: %s", error->message);
 		g_clear_error (&error);
 	}
-	if (url) {
-		g_message("Got ASURL %s", url);
-		gtk_entry_set_text (GTK_ENTRY (user_data), url);
-		g_free (url);
+	if (urls) {
+		g_message("Got ASURL %s", urls->as_url);
+
+		gtk_entry_set_text (GTK_ENTRY (cbdata->entry), urls->as_url);
+		
+		g_free (urls->as_url);
+		g_free (urls->oab_url);
+		g_free (urls);
 	}
 }
 
@@ -125,14 +131,14 @@ validate_credentials (GtkWidget *widget, struct _AutoDiscCallBackData *cbdata)
 		g_free (password);
 		title = g_strdup_printf (_("Enter Password for %s"), target_account->account->id->address);
 		password = e_passwords_ask_password (title, EXCHANGE_EWS_PASSWORD_COMPONENT, key, title,
-						     E_PASSWORDS_REMEMBER_FOREVER|E_PASSWORDS_SECRET,
+                                                    E_PASSWORDS_REMEMBER_FOREVER|E_PASSWORDS_SECRET,
 						     &remember, NULL);
 		g_free (title);
 	}
 
 	/*Can there be a account without password ?*/
 	if (password && *password) {
-		e_ews_autodiscover_ws_url (autodiscover_callback, cbdata->entry,
+		e_ews_autodiscover_ws_url (autodiscover_callback, cbdata,
 					   target_account->account->id->address,
 					   password);
 	} else {
@@ -198,6 +204,7 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		const gchar *temp, *email_id;
 		gchar *url_string;
 		struct _AutoDiscCallBackData *cbdata = g_new0 (struct _AutoDiscCallBackData, 1);
+		/* FIXME free cbdata */
 
 		g_object_get (data->parent, "n-rows", &row, NULL);
 
@@ -266,8 +273,6 @@ org_gnome_exchange_ews_check_options(EPlugin *epl, EConfigHookPageCheckData *dat
 			else
 				camel_url_free (hurl);
 		}
-
-
 
 		if (url)
 			camel_url_free(url);

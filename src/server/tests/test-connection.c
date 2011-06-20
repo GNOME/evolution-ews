@@ -62,26 +62,36 @@ con_test_create_new_connection ()
 
 struct _cb_data {
 	gboolean positive_case;
+	gchar *test_case;
 	gboolean quit;
 };
 
 static void
-autodiscover_cb (gchar *uri, gpointer user_data, GError *error)
+autodiscover_cb (EwsUrls *urls, gpointer user_data, GError *error)
 {
 	struct _cb_data *data = (struct _cb_data *) user_data;
 	gboolean quit = data->quit;
 
+	g_print ("Response for test case : %s \n", data->test_case);
+
 	if (data->positive_case) {
-		g_assert_cmpstr (uri, !=, NULL);
+		g_assert (urls != NULL);
 	} else
-		g_assert_cmpstr (uri, ==, NULL);
+		g_assert (urls == NULL);
 	
 	if (error)
 		g_print ("Error code:%d desc: %s \n", error->code, error->message);
 	
 	g_clear_error (&error);
+	g_free (data->test_case);
 	g_free (data);
-	
+
+	if (urls) {
+		g_print ("ASUrl - %s \nOABUrl - %s \n", urls->as_url, urls->oab_url);
+		g_free (urls->as_url);
+		g_free (urls->oab_url);
+	}
+
 	if (quit)
 		g_main_loop_quit (main_loop);
 }
@@ -106,28 +116,36 @@ con_test_autodiscover()
 	g_print("%s %s : password : %s \n", G_STRLOC, G_STRFUNC, password);
 	g_print("%s %s : email : %s \n", G_STRLOC, G_STRFUNC, email);
 
-	g_print ("Testing postive case... \n");
 	user_data = g_new0 (struct _cb_data, 1);
+	user_data->test_case = g_strdup ("postive case... \n");
+	g_print ("Testing %s \n", user_data->test_case);
 	user_data->positive_case = TRUE;
-	user_data->quit = TRUE;
 	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, email, password);
 
-	g_print ("Testing wrong password... \n");
 	user_data = g_new0 (struct _cb_data, 1);
+	user_data->test_case =	g_strdup ("wrong password... \n");
+	/* It does respond properly with the url, Check it out */
+	user_data->positive_case = TRUE;
+	g_print ("Testing %s \n", user_data->test_case);
 	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, email, "wrongpassword");
 
-	g_print ("Testing email without domain ... \n");
 	user_data = g_new0 (struct _cb_data, 1);
+	user_data->test_case = g_strdup ("email without domain ... \n");
+	g_print ("Testing %s \n", user_data->test_case);
 	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, "wronguseremail", password);
 
-	g_print ("Testing wrong email address and password... \n");
 	user_data = g_new0 (struct _cb_data, 1);
+	user_data->test_case = g_strdup ("wrong email address and password... \n");
+	g_print ("Testing %s \n", user_data->test_case);
 	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, "godknows@donknow.com", "wrongpassword");
 
-	g_print ("Testing wrong user name ... \n");
+	user_data->test_case = g_strdup ("wrong user name ... \n");
+	g_print ("Testing %s \n", user_data->test_case);
 	domain = g_strstr_len (email, -1, "@");
 	wrong_username = g_strconcat ("godknows", domain, NULL);
 	user_data = g_new0 (struct _cb_data, 1);
+	user_data->test_case = g_strdup ("wrong user name ... \n");
+	g_print ("Testing %s \n", user_data->test_case);
 	user_data->quit = TRUE;
 	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, wrong_username, password);
 	g_free (wrong_username);

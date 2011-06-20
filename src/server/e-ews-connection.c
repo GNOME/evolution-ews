@@ -158,18 +158,22 @@ ews_node_new ()
 	return node;
 }
 
-static gchar*
-autodiscover_parse_protocol(xmlNode *node)
+static gboolean
+autodiscover_parse_protocol (xmlNode *node, EwsUrls *urls)
 {
 	for (node = node->children; node; node = node->next) {
 		if (node->type == XML_ELEMENT_NODE &&
 		    !strcmp((char *)node->name, "ASUrl")) {
-			char *asurl = (char *)xmlNodeGetContent(node);
-			if (asurl)
-				return asurl;
-		}
+			urls->as_url = (gchar *) xmlNodeGetContent(node);
+		} else if (node->type == XML_ELEMENT_NODE &&
+		    !strcmp((char *)node->name, "OABUrl"))
+			urls->oab_url = (gchar *) xmlNodeGetContent(node);
+			
+		if (urls->as_url && urls->oab_url)
+			return TRUE;
 	}
-	return NULL;
+
+	return FALSE;
 }
 
 static gint
@@ -948,21 +952,20 @@ struct _autodiscover_data {
 	gpointer cbdata;
 };
 
-
 /* Called in the context e_ews_autodiscover_ws_url() was called from,
    with the final result. */
 static void autodiscover_done_cb (GObject *cnc, GAsyncResult *res,
 				  gpointer user_data)
 {
 	struct _autodiscover_data *ad = user_data;
+	EwsUrls *urls = NULL;
 	GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (res);
 	GError *error = NULL;
-	gchar *url = NULL;
 
 	if (!g_simple_async_result_propagate_error (simple, &error))
-		url = g_simple_async_result_get_op_res_gpointer (simple);
+		urls = g_simple_async_result_get_op_res_gpointer (simple);
 
-	ad->cb (url, ad->cbdata, error);
+	ad->cb (urls, ad->cbdata, error);
 	g_object_unref (G_OBJECT (ad->cnc));
 	g_free (ad);
 }
@@ -974,10 +977,10 @@ autodiscover_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 {
 	GError *error = NULL;
 	struct _autodiscover_data *ad = data;
+	EwsUrls *urls = NULL;
 	guint status = msg->status_code;
 	xmlDoc *doc;
 	xmlNode *node;
-	char *asurl = NULL;
 	int idx;
 
 	for (idx = 0; idx < 2; idx++) {
@@ -1051,20 +1054,25 @@ autodiscover_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 			     _("Failed to find <Account> element\n"));
 		goto failed;
 	}
+
+	urls = g_new0 (EwsUrls, 1);
 	for (node = node->children; node; node = node->next) {
 		if (node->type == XML_ELEMENT_NODE &&
-		    !strcmp((char *)node->name, "Protocol") &&
-		    (asurl = autodiscover_parse_protocol(node)))
-			break;
+		    !strcmp((char *)node->name, "Protocol")) {
+		    	if (autodiscover_parse_protocol(node, urls))
+				break;
+			else {
+				g_free (urls->as_url);
+				g_free (urls->oab_url);
+				g_free (urls);
+				g_set_error	(&error, EWS_CONNECTION_ERROR,
+						 -1,
+						 _("Failed to find <ASUrl> and <OABUrl> in autodiscover response"));
+				goto failed;
+			}
+		}
 	}
 
-	if (!asurl) {
-		g_set_error (
-			     &error, EWS_CONNECTION_ERROR,
-			     -1,
-			     _("Failed to find <ASUrl> in autodiscover response"));
-		goto failed;
-	}
 	/* We have a good response; cancel all the others */
 	for (idx = 0; idx < 2; idx++) {
 		if (ad->msgs[idx]) {
@@ -1074,7 +1082,9 @@ autodiscover_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 						     m, SOUP_STATUS_CANCELLED);
 		}
 	}
-	g_simple_async_result_set_op_res_gpointer (ad->simple, asurl, NULL);
+	
+	
+	g_simple_async_result_set_op_res_gpointer (ad->simple, urls, NULL);
 	g_simple_async_result_complete_in_idle (ad->simple);
 	return;
 
