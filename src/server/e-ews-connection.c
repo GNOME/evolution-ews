@@ -2743,9 +2743,9 @@ static void
 create_attachments_response_cb (ESoapParameter *param,
 				EwsNode *enode)
 {
-	ESoapParameter *subparam, *attspara;
+	/* http://msdn.microsoft.com/en-us/library/aa565877%28v=EXCHG.80%29.aspx */
+	ESoapParameter *subparam, *attspara, *last_relevant = NULL;
 	EwsAsyncData *async_data;
-	EwsAttachmentId *attach_id;
 
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
 
@@ -2753,13 +2753,14 @@ create_attachments_response_cb (ESoapParameter *param,
 
 	for (subparam = e_soap_parameter_get_first_child (attspara); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
 		if (!g_ascii_strcasecmp (e_soap_parameter_get_name(subparam), "FileAttachment")) {
-			attach_id = g_new0 (EwsAttachmentId, 1);
-			attach_id->id = e_soap_parameter_get_property (subparam, "Id");
-			attach_id->rootItemId = e_soap_parameter_get_property (subparam, "RootItemId");
-			attach_id->rootItemChangeKey = e_soap_parameter_get_property (subparam, "RootItemChangeKey");
+			last_relevant = subparam;
 
-			async_data->items = g_slist_append (async_data->items, attach_id);
+			async_data->items = g_slist_append (async_data->items, e_soap_parameter_get_property (subparam, "Id"));
 		}
+	}
+
+	if (last_relevant != NULL) {
+		async_data->sync_state = e_soap_parameter_get_property (last_relevant, "RootItemChangeKey");
 	}
 }
 
@@ -2861,6 +2862,7 @@ e_ews_connection_create_attachments_start (EEwsConnection *cnc,
 
 GSList *
 e_ews_connection_create_attachments_finish (EEwsConnection *cnc,
+					    gchar **change_key,
 					    GAsyncResult *result,
 					    GError **error)
 {
@@ -2880,6 +2882,7 @@ e_ews_connection_create_attachments_finish (EEwsConnection *cnc,
 		return NULL;
 
 	ids = async_data->items;
+	*change_key = async_data->sync_state;
 
 	return ids;
 }
@@ -2889,6 +2892,7 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
 				     gint pri,
 				     const EwsId *parent,
 				     const GSList *files,
+				     gchar **change_key,
 				     GCancellable *cancellable,
 				     GError **error)
 {
@@ -2907,7 +2911,7 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
 
 	e_flag_wait (sync_data->eflag);
 
-	ids = e_ews_connection_create_attachments_finish (cnc, sync_data->res,
+	ids = e_ews_connection_create_attachments_finish (cnc, change_key, sync_data->res,
 							error);
 
 	e_flag_free (sync_data->eflag);

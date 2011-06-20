@@ -475,6 +475,7 @@ void		e_ews_connection_create_attachments_start
 
 GSList *	e_ews_connection_create_attachments_finish
 						(EEwsConnection *cnc,
+						 gchar **change_key,
 						 GAsyncResult *result,
 						 GError **error);
 
@@ -483,6 +484,7 @@ GSList *	e_ews_connection_create_attachments
 						 gint pri,
 						 const EwsId *parent,
 						 const GSList *files,
+						 gchar **change_key,
 						 GCancellable *cancellable,
 						 GError **error);
 

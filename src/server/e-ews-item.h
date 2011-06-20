@@ -72,12 +72,6 @@ typedef struct {
 } EwsId;
 
 typedef struct {
-	gchar *id;
-	gchar *rootItemId;
-	gchar *rootItemChangeKey;
-} EwsAttachmentId;
-
-typedef struct {
 	gchar *name;
 	gchar *email;
 } EwsMailbox;

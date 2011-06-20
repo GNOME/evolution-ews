@@ -1064,33 +1064,74 @@ convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 }
 
 static void
+e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context,
+				 const gchar *uid, const gchar *rid, CalObjModType mod);
+
+typedef struct {
+	ECalBackendEws *cbews;
+	ECalComponent *comp;
+} EwsCreateAttachmentsData;
+
+static void
 ews_create_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
-	/*ECalComponent *comp = user_data;*/
-	GSList *ids = NULL, *next;
-	EwsAttachmentId *attach_id;
+	EwsCreateAttachmentsData *create_data = user_data;
+	ECalBackendEwsPrivate *priv = create_data->cbews->priv;
+	gchar *change_key;
+	GSList *ids, *i;
 	GError *error = NULL;
+	icalproperty *icalprop;
+	icalcomponent *icalcomp;
+	icalparameter *icalparam;
 
-	/* TODO - am I suppose to do anything with the ids I get back ? */
-	/* right now just free them */
-	ids = e_ews_connection_create_attachments_finish (cnc, res, &error);
-	for (next = ids; next; next = next->next) {
-		attach_id = next->data;
+	ids = e_ews_connection_create_attachments_finish (cnc, &change_key, res, &error);
 
-		g_free (attach_id->id);
-		g_free (attach_id->rootItemId);
-		g_free (attach_id->rootItemChangeKey);
-
-		g_free (attach_id);
+	/* make sure there was no error */
+	if (error != NULL) {
+		g_warning ("Error while creating attachments: %s\n", error->message);
+		g_clear_error (&error);
+		return;
 	}
 
-	g_slist_free (ids);
-}
+	/* get exclusive access to the store */
+	e_cal_backend_store_freeze_changes(priv->store);
 
-static void
-e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context,
-				 const gchar *uid, const gchar *rid, CalObjModType mod);
+	/* Update change key. id remains the same, but change key changed.*/
+	icalcomp = e_cal_component_get_icalcomponent (create_data->comp);
+	icalprop = icalcomponent_get_first_property (icalcomp, ICAL_X_PROPERTY);
+	while (icalprop) {
+		const gchar *x_name;
+		x_name = icalproperty_get_x_name (icalprop);
+		if (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY")) {
+			icalproperty_set_value_from_string (icalprop, change_key, "NO");
+			break;
+		}
+		icalprop = icalcomponent_get_next_property (icalcomp, ICAL_X_PROPERTY);
+	}
+
+	/* TODO: are we setting the correct attachment ids ? */
+	icalprop = icalcomponent_get_first_property (icalcomp, ICAL_ATTACH_PROPERTY);
+	i = ids;
+	for (; i && icalprop; i = i->next, icalprop = icalcomponent_get_next_property (icalcomp, ICAL_ATTACH_PROPERTY)) {
+		icalparam = icalparameter_new_x (i->data);
+		icalparameter_set_xname (icalparam, "X-EWS-ATTACHMENTID");
+		icalproperty_add_parameter (icalprop, icalparam);
+
+		g_free (i->data);
+	}
+
+	e_cal_component_commit_sequence (create_data->comp);
+
+	/* update changes and release access to the store */
+	e_cal_backend_store_thaw_changes (priv->store);
+
+	g_slist_free (ids);
+
+	g_object_unref (create_data->cbews);
+	g_object_unref (create_data->comp);
+	g_free (create_data);
+}
 
 static void
 ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
@@ -1100,7 +1141,7 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	ECalBackendEws *cbews = create_data->cbews;
 	ECalBackendEwsPrivate *priv = cbews->priv;
 	GError *error = NULL;
-	GSList *ids = NULL, *attachments = NULL;
+	GSList *ids = NULL, *attachments = NULL, *i;
 	const gchar *comp_uid;
 	const EwsId *item_id;
 	icalproperty *icalprop;
@@ -1115,11 +1156,29 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 		return;
 	}
 
+	item_id = e_ews_item_get_id((EEwsItem *)ids->data);
+	g_slist_free (ids);
+
+	/* attachments */
+	if (e_cal_component_get_num_attachments (create_data->comp) > 0) {
+		EwsCreateAttachmentsData *attach_data = g_new0(EwsCreateAttachmentsData, 1);
+
+		attach_data->cbews = g_object_ref (create_data->cbews);
+		attach_data->comp = g_object_ref (create_data->comp);
+
+		e_cal_component_get_attachment_list (create_data->comp, &attachments);
+		e_ews_connection_create_attachments_start (cnc, EWS_PRIORITY_MEDIUM,
+							   item_id, attachments,
+							   ews_create_attachments_cb, NULL, attach_data);
+
+		for (i = attachments; i ; i = i->next) g_free (i->data);
+		g_slist_free (attachments);
+	}
+
 	/* get exclusive access to the store */
 	e_cal_backend_store_freeze_changes(priv->store);
 
 	/* set item id */
-	item_id = e_ews_item_get_id((EEwsItem *)ids->data);
 	e_cal_component_set_uid(create_data->comp, item_id->id);
 
 	/* set a new ical property containing the change key we got from the exchange server for future use */
@@ -1127,14 +1186,6 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	icalproperty_set_x_name (icalprop, "X-EVOLUTION-CHANGEKEY");
 	icalcomp = e_cal_component_get_icalcomponent(create_data->comp);
 	icalcomponent_add_property (icalcomp, icalprop);
-
-	/* attachments */
-	if (e_cal_component_get_num_attachments (create_data->comp) > 0) {
-		e_cal_component_get_attachment_list (create_data->comp, &attachments);
-		e_ews_connection_create_attachments_start (cnc, EWS_PRIORITY_MEDIUM,
-							   item_id, attachments,
-							   ews_create_attachments_cb, NULL, create_data->comp);
-	}
 
 	/* update component internal data */
 	e_cal_component_commit_sequence(create_data->comp);
