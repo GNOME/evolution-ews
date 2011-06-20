@@ -30,7 +30,6 @@
 #include <glib/gi18n-lib.h>
 #include "e-ews-connection.h"
 #include <libedataserver/e-flag.h>
-#include <bits/stat.h>
 #include "e-ews-message.h"
 #include "e-ews-item-change.h"
 #include "ews-marshal.h"
@@ -1098,8 +1097,7 @@ failed:
 }
 
 static SoupMessage *
-e_ews_autodiscover_ws_msg(EEwsConnection *cnc, gchar *url,
-			  xmlOutputBuffer *buf, struct _autodiscover_data *ad)
+e_ews_get_msg_for_url (gchar *url, xmlOutputBuffer *buf)
 {
 	SoupMessage *msg;
 
@@ -1180,11 +1178,11 @@ e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb, gpointer cbdata,
 	ad->cnc = cnc;
 	ad->simple = g_simple_async_result_new (G_OBJECT (cnc), autodiscover_done_cb,
 					    ad, e_ews_autodiscover_ws_url);
-	ad->msgs[0] = e_ews_autodiscover_ws_msg(cnc, url, buf, ad);
+	ad->msgs[0] = e_ews_get_msg_for_url (url, buf);
 	g_free (url);
 
 	url = g_strdup_printf("https://autodiscover.%s/autodiscover/autodiscover.xml", domain);
-	ad->msgs[1] = e_ews_autodiscover_ws_msg(cnc, url, buf, ad);
+	ad->msgs[1] = e_ews_get_msg_for_url (url, buf);
 	g_free (url);
 
 	/* These have to be submitted only after they're both set in ad->msgs[]
