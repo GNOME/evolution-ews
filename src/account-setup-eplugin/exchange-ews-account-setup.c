@@ -89,7 +89,8 @@ exchange_ews_accounts_peek_config_listener ()
 
 struct _AutoDiscCallBackData {
 	EConfig *config;
-	GtkWidget *entry;
+	GtkWidget *host_entry;
+	GtkWidget *oab_entry;
 };
 
 static void autodiscover_callback (EwsUrls *urls, gpointer user_data, GError *error)
@@ -103,7 +104,8 @@ static void autodiscover_callback (EwsUrls *urls, gpointer user_data, GError *er
 	if (urls) {
 		g_message("Got ASURL %s", urls->as_url);
 
-		gtk_entry_set_text (GTK_ENTRY (cbdata->entry), urls->as_url);
+		gtk_entry_set_text (GTK_ENTRY (cbdata->host_entry), urls->as_url);
+		gtk_entry_set_text (GTK_ENTRY (cbdata->oab_entry), urls->oab_url);
 		
 		g_free (urls->as_url);
 		g_free (urls->oab_url);
@@ -152,7 +154,7 @@ validate_credentials (GtkWidget *widget, struct _AutoDiscCallBackData *cbdata)
 }
 
 static void
-host_url_changed (GtkWidget *entry, EConfig *config)
+url_changed (GtkWidget *entry, EConfig *config, const gchar *param)
 {
 	EMConfigTargetAccount *target = (EMConfigTargetAccount *)(config->target);
 	CamelURL *url = NULL;
@@ -181,6 +183,18 @@ host_url_changed (GtkWidget *entry, EConfig *config)
 	camel_url_free (url);
 }
 
+static void
+host_url_changed (GtkWidget *entry, EConfig *config)
+{
+	url_changed (entry, config, "hosturl");
+}
+
+static void
+oab_url_changed (GtkWidget *entry, EConfig *config)
+{
+	url_changed (entry, config, "oaburl");
+}
+
 GtkWidget *
 org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *data)
 {
@@ -197,10 +211,11 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		return NULL;
 
 	if (!g_ascii_strcasecmp (url->protocol, "ews")) {
-		GtkWidget *label;
-		GtkWidget *host_url;
+		GtkWidget *label, *oab_label;
+		GtkWidget *host_url, *oab_url;
 		GtkWidget *auto_discover;
 		const gchar *host_url_val = camel_url_get_param (url, "hosturl");
+		const gchar *oab_url_val = camel_url_get_param (url, "oaburl");
 		const gchar *temp, *email_id;
 		gchar *url_string;
 		struct _AutoDiscCallBackData *cbdata = g_new0 (struct _AutoDiscCallBackData, 1);
@@ -220,6 +235,17 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		e_account_set_string (target_account->account, E_ACCOUNT_SOURCE_URL, url_string);
 		e_account_set_string (target_account->account, E_ACCOUNT_TRANSPORT_URL, url_string);
 		g_free (url_string);
+		
+		/* OAB url entry */
+		oab_label = gtk_label_new_with_mnemonic (_("OA_B Url:"));
+		gtk_widget_show (oab_label);
+
+		oab_url = gtk_entry_new ();
+		gtk_label_set_mnemonic_widget (GTK_LABEL (oab_label), oab_url);
+		if (oab_url_val && *oab_url_val)
+			gtk_entry_set_text (GTK_ENTRY (oab_url), oab_url_val);
+		g_signal_connect (oab_url, "changed", G_CALLBACK (oab_url_changed), data->config);
+		gtk_widget_show (oab_url);
 
 		/* Host url and Autodiscover button */
 		hbox = gtk_hbox_new (FALSE, 6);
@@ -230,18 +256,25 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		gtk_label_set_mnemonic_widget (GTK_LABEL (label), host_url);
 		if (host_url_val && *host_url_val)
 			gtk_entry_set_text (GTK_ENTRY (host_url), host_url_val);
-		gtk_box_pack_start (GTK_BOX (hbox), host_url, FALSE, FALSE, 0);
+		gtk_box_pack_start (GTK_BOX (hbox), host_url, TRUE, TRUE, 0);
 		g_signal_connect (host_url, "changed", G_CALLBACK(host_url_changed), data->config);
 
 		cbdata->config = data->config;
-		cbdata->entry = host_url;
+		cbdata->host_entry = host_url;
+		cbdata->oab_entry = oab_url;
 		auto_discover = gtk_button_new_with_mnemonic (_("_Fetch Url"));
 		gtk_box_pack_start (GTK_BOX (hbox), auto_discover, FALSE, FALSE, 0);
 		g_signal_connect (G_OBJECT(auto_discover), "clicked",  G_CALLBACK(validate_credentials), cbdata);
 
+		/* Add Host entry */
 		gtk_table_attach (GTK_TABLE (data->parent), label, 0, 1, row, row+1, 0, 0, 0, 0);
 		gtk_widget_show_all (GTK_WIDGET (hbox));
 		gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (hbox), 1, 2, row, row+1, GTK_FILL|GTK_EXPAND, GTK_FILL, 0, 0);
+		row++;
+
+		/* Add OAB entry */
+		gtk_table_attach (GTK_TABLE (data->parent), oab_label, 0, 1, row, row+1, 0, 0, 0, 0);
+		gtk_table_attach (GTK_TABLE (data->parent), oab_url, 1, 2, row, row+1, GTK_FILL|GTK_EXPAND, GTK_FILL, 0, 0);
 		row++;
 	}
 
