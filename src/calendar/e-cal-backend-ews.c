@@ -1320,6 +1320,7 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	icalproperty *icalprop;
 	icalcomponent *icalcomp;
 	ECalComponentId *id;
+	GSList *original_attachments = NULL, *modified_attachments = NULL, *added_attachments, *removed_attachments;
 
 	if (!e_ews_connection_update_items_finish (cnc, res, &ids, &error)) {
 		/* The calendar UI doesn't *display* errors unless they have
@@ -1327,6 +1328,9 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 		error->code = OtherError;
 		return;
 	}
+
+	g_object_ref (modify_data->comp);
+	g_object_ref (modify_data->oldcomp);
 
 	e_cal_backend_store_freeze_changes(priv->store);
 
@@ -1367,6 +1371,34 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	PRIV_UNLOCK (priv);
 
 	e_cal_backend_store_thaw_changes (priv->store);
+
+	/* Attachments */
+	e_cal_component_get_attachment_list (modify_data->oldcomp, &original_attachments);
+	e_cal_component_get_attachment_list (modify_data->comp, &modified_attachments);
+
+	ewscal_get_attach_differences (original_attachments, modified_attachments, &removed_attachments, &added_attachments);
+	g_slist_free (original_attachments);
+	g_slist_free (modified_attachments);
+
+	if (added_attachments) {
+		EwsCreateAttachmentsData *attach_data = g_new0(EwsCreateAttachmentsData, 1);
+
+		attach_data->cbews = g_object_ref (modify_data->cbews);
+		attach_data->comp = g_object_ref (modify_data->comp);
+
+		e_ews_connection_create_attachments_start (cnc, EWS_PRIORITY_MEDIUM,
+							   item_id, added_attachments,
+							   ews_create_attachments_cb, NULL, attach_data);
+
+		g_slist_free (added_attachments);
+	}
+	if (removed_attachments) {
+		/* TODO: Implement removing attachments */
+		g_slist_free (removed_attachments);
+	}
+
+	g_object_unref (modify_data->comp);
+	g_object_unref (modify_data->oldcomp);
 
 	icalproperty_free (icalprop);
 	e_cal_component_free_id (id);
