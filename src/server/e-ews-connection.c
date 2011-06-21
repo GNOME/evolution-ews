@@ -982,6 +982,7 @@ autodiscover_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 	xmlDoc *doc;
 	xmlNode *node;
 	int idx;
+	gboolean success = FALSE;
 
 	for (idx = 0; idx < 2; idx++) {
 		if (ad->msgs[idx] == msg)
@@ -1059,18 +1060,19 @@ autodiscover_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 	for (node = node->children; node; node = node->next) {
 		if (node->type == XML_ELEMENT_NODE &&
 		    !strcmp((char *)node->name, "Protocol")) {
-		    	if (autodiscover_parse_protocol(node, urls))
-				break;
-			else {
-				g_free (urls->as_url);
-				g_free (urls->oab_url);
-				g_free (urls);
-				g_set_error	(&error, EWS_CONNECTION_ERROR,
-						 -1,
-						 _("Failed to find <ASUrl> and <OABUrl> in autodiscover response"));
-				goto failed;
-			}
+		    	success = autodiscover_parse_protocol(node, urls);
+			break;
 		}
+	}
+
+	if (!success) {
+		g_free (urls->as_url);
+		g_free (urls->oab_url);
+		g_free (urls);
+		g_set_error	(&error, EWS_CONNECTION_ERROR,
+				-1,
+				_("Failed to find <ASUrl> and <OABUrl> in autodiscover response"));
+		goto failed;
 	}
 
 	/* We have a good response; cancel all the others */
