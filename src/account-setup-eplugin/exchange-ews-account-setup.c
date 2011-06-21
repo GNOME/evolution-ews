@@ -39,6 +39,7 @@
 #include <camel-ews-folder.h>
 #include <e-ews-connection.h>
 #include <camel-ews-utils.h>
+#include <shell/e-shell.h>
 
 #define d(x) x
 
@@ -48,17 +49,8 @@ gint e_plugin_lib_enable (EPlugin *ep, gint enable);
 GtkWidget *org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *data);
 gboolean org_gnome_exchange_ews_check_options(EPlugin *epl, EConfigHookPageCheckData *data);
 
-/* New Addressbook/CAL */
-GtkWidget *exchange_ews_create_addressbook (EPlugin *epl, EConfigHookItemFactoryData *data);
-GtkWidget *exchange_ews_create_calendar (EPlugin *epl, EConfigHookItemFactoryData *data);
-
-/* New Addressbook */
-gboolean exchange_ews_book_check (EPlugin *epl, EConfigHookPageCheckData *data);
-void exchange_ews_book_commit (EPlugin *epl, EConfigTarget *target);
-
-/* New calendar/task list/memo list */
-gboolean exchange_ews_cal_check (EPlugin *epl, EConfigHookPageCheckData *data);
-void exchange_ews_cal_commit (EPlugin *epl, EConfigTarget *target);
+/* OAB receiving options */
+GtkWidget * org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data);
 
 static ExchangeEWSAccountListener *config_listener = NULL;
 
@@ -113,15 +105,12 @@ static void autodiscover_callback (EwsUrls *urls, gpointer user_data, GError *er
 	}
 }
 
-
-static void
-validate_credentials (GtkWidget *widget, struct _AutoDiscCallBackData *cbdata)
+static char *
+get_password (EMConfigTargetAccount *target_account)
 {
-	EConfig *config = cbdata->config;
-	EMConfigTargetAccount *target_account = (EMConfigTargetAccount *)(config->target);
-	CamelURL *url = NULL;
 	gchar *key, *password = NULL;
-
+	CamelURL *url;
+	
 	url = camel_url_new (e_account_get_string (target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
 
 	key = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
@@ -138,19 +127,32 @@ validate_credentials (GtkWidget *widget, struct _AutoDiscCallBackData *cbdata)
 		g_free (title);
 	}
 
+	if (!password || !*password) {
+		e_passwords_forget_password (EXCHANGE_EWS_PASSWORD_COMPONENT, key);
+		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Authentication failed."));
+	}
+
+	g_free (key);
+	camel_url_free (url);
+	
+	return password;
+}
+
+static void
+validate_credentials (GtkWidget *widget, struct _AutoDiscCallBackData *cbdata)
+{
+	EConfig *config = cbdata->config;
+	EMConfigTargetAccount *target_account = (EMConfigTargetAccount *)(config->target);
+	gchar *password = NULL;
+
+	password = get_password (target_account);
 	/*Can there be a account without password ?*/
 	if (password && *password) {
 		e_ews_autodiscover_ws_url (autodiscover_callback, cbdata,
 					   target_account->account->id->address,
 					   password);
-	} else {
-		e_passwords_forget_password (EXCHANGE_EWS_PASSWORD_COMPONENT, key);
-		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Authentication failed."));
 	}
-
 	g_free (password);
-	g_free (key);
-	camel_url_free (url);
 }
 
 static void
@@ -166,14 +168,14 @@ url_changed (GtkWidget *entry, EConfig *config, const gchar *param)
 
 	if (domain && domain[0]) {
 		CamelURL *hosturl;
-		camel_url_set_param (url, "hosturl", domain);
+		camel_url_set_param (url, param, domain);
 		hosturl = camel_url_new (domain, NULL);
 		if (hosturl) {
 			camel_url_set_host (url, hosturl->host);
 			camel_url_free (hosturl);
 		}
 	} else
-		camel_url_set_param (url, "hosturl", NULL);
+		camel_url_set_param (url, param, NULL);
 
 	url_string = camel_url_to_string (url, 0);
 	e_account_set_string (target->account, E_ACCOUNT_SOURCE_URL, url_string);
@@ -287,29 +289,265 @@ org_gnome_exchange_ews_check_options(EPlugin *epl, EConfigHookPageCheckData *dat
 {
 	EMConfigTargetAccount *target = (EMConfigTargetAccount *)(data->config->target);
 	gboolean status = TRUE;
+	CamelURL *url;
 
-	if (data->pageid == NULL || data->pageid[0] == 0 ||
-	    g_ascii_strcasecmp (data->pageid, "10.receive") == 0) {
-		CamelURL *url = camel_url_new (e_account_get_string(target->account,
-								    E_ACCOUNT_SOURCE_URL), NULL);
+	url = camel_url_new (e_account_get_string(target->account, E_ACCOUNT_SOURCE_URL), NULL);
 
-		if (url && url->protocol && g_ascii_strcasecmp (url->protocol, "ews") == 0) {
-			const gchar *url_str = NULL;
-			CamelURL *hurl;
+	if (url && url->protocol && g_ascii_strcasecmp (url->protocol, "ews") != 0)
+		goto exit;
 
-			url_str = camel_url_get_param (url, "hosturl");
-			hurl = camel_url_new (url_str, NULL);
+	if (!data->pageid || !*data->pageid)
+		goto exit;
 
-			/*Host url not set. Do not proceed with account creation.*/
-			if (!hurl)
+	if (!g_ascii_strcasecmp (data->pageid, "10.receive")) {
+		const gchar *url_str = NULL;
+		CamelURL *hurl;
+
+		url_str = camel_url_get_param (url, "hosturl");
+		hurl = camel_url_new (url_str, NULL);
+
+		/*Host url not set. Do not proceed with account creation.*/
+		if (!hurl)
+			status = FALSE;
+		else
+			camel_url_free (hurl);
+
+	} else if (!g_ascii_strcasecmp (data->pageid, "20.receive_options")) {
+		const gchar *marked_for_offline, *oab_selected;	
+
+		/* If GAL is marked for caching, an OAL (offline address list) should be selected */
+		marked_for_offline = camel_url_get_param (url, "oab_offline");
+		if (marked_for_offline && !strcmp (marked_for_offline, "1")) {
+			oab_selected = camel_url_get_param (url, "oab_selected");
+			if (!oab_selected || !*oab_selected)
 				status = FALSE;
-			else
-				camel_url_free (hurl);
 		}
-
-		if (url)
-			camel_url_free(url);
 	}
 
+exit:	
+	if (url)
+		camel_url_free(url);
+
 	return status;
+}
+
+struct _oab_setting_data {
+	EConfig *config;
+	GtkWidget *combo_text;
+	GtkWidget *hbox;
+	GtkWidget *check;
+	GCancellable *cancellable;
+	gboolean cancel;
+	GSList *oals;
+};
+
+static void
+update_camel_url (struct _oab_setting_data *cbdata)
+{
+	EMConfigTargetAccount *target = (EMConfigTargetAccount *) cbdata->config->target;
+	CamelURL *url;
+	gchar *url_string;
+	
+	url = camel_url_new (e_account_get_string(target->account, E_ACCOUNT_SOURCE_URL), NULL);
+	
+	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (cbdata->check))) {
+		gtk_widget_set_sensitive (cbdata->hbox, TRUE);
+		camel_url_set_param (url, "oab_offline", "1");
+		/* Set the active oal */
+	} else {
+		gtk_widget_set_sensitive (cbdata->hbox, FALSE);
+		camel_url_set_param (url, "oab_offline", NULL);
+		camel_url_set_param (url, "oal_selected", NULL);
+	}
+
+	url_string = camel_url_to_string (url, 0);
+	e_account_set_string (target->account, E_ACCOUNT_SOURCE_URL, url_string);
+	g_free (url_string);
+	camel_url_free (url);
+}
+
+static void
+cache_setting_toggled (GtkToggleButton *check, gpointer user_data)
+{
+	struct _oab_setting_data *cbdata = (struct _oab_setting_data *) user_data;
+
+	update_camel_url (cbdata);
+}
+
+static void
+combo_selection_changed (GtkComboBox *combo, gpointer user_data)
+{
+	struct _oab_setting_data *cbdata = (struct _oab_setting_data *) user_data;
+
+	update_camel_url (cbdata);
+}
+
+static void
+fetch_button_clicked_cb (GtkButton *button, gpointer user_data)
+{
+	struct _oab_setting_data *cbdata = (struct _oab_setting_data *) user_data;
+
+	/* De-sensitize fetch_button and get the list from the server */
+	g_signal_handlers_block_by_func (cbdata->combo_text, combo_selection_changed, cbdata);
+	
+	gtk_combo_box_text_remove (GTK_COMBO_BOX_TEXT (cbdata->combo_text), 0);
+	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (cbdata->combo_text), _("Fetching..."));
+	gtk_widget_set_sensitive (GTK_WIDGET (button), FALSE);
+
+	g_signal_handlers_unblock_by_func (cbdata->combo_text, combo_selection_changed, cbdata);
+
+	/* Fetch the oab lists from server */
+
+}
+
+static gboolean
+table_deleted_cb (GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+	struct _oab_setting_data *cbdata = (struct _oab_setting_data *) user_data;
+	
+	if (cbdata->cancel) {
+		g_cancellable_cancel (cbdata->cancellable);
+		g_object_unref (cbdata->cancellable);
+	}
+	g_free (cbdata);
+	return FALSE;
+}
+
+static void
+init_widgets (struct _oab_setting_data *cbdata)
+{
+	const gchar *oab_url, *marked_for_offline;
+	EMConfigTargetAccount *target_account;
+	CamelURL *url;
+	
+	target_account = (EMConfigTargetAccount *) cbdata->config->target;
+	url = camel_url_new(e_account_get_string(target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
+
+	marked_for_offline = camel_url_get_param (url, "oab_offline");
+	if (marked_for_offline && !strcmp (marked_for_offline, "1")) {
+		const gchar *selected_list, *tmp;
+
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cbdata->check), TRUE);
+
+		/* selected list will be of form "id:name" */
+		selected_list = camel_url_get_param (url, "oal_selected");
+		tmp = strrchr (selected_list, ':');
+		gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (cbdata->combo_text), tmp+1);
+	} else
+		gtk_widget_set_sensitive (cbdata->hbox, FALSE);
+
+	/* If oab url is not set, dsensitize*/
+	oab_url = camel_url_get_param (url, "oaburl");
+	if (!oab_url) {
+		gtk_widget_set_sensitive (cbdata->check, FALSE);
+		gtk_widget_set_sensitive (cbdata->hbox, FALSE);
+	} else
+		gtk_widget_set_sensitive (cbdata->check, TRUE);
+
+	camel_url_free (url);
+}
+
+static void
+ews_prepare_receive_options_page (GtkWidget *page, gpointer user_data)
+{
+	struct _oab_setting_data *cbdata = (struct _oab_setting_data *) user_data;
+	GtkWidget *receive_options;
+
+	receive_options = e_config_page_get (cbdata->config, "20.receive_options");
+	if (receive_options == page)
+		init_widgets (cbdata);
+}
+
+static void
+ews_assistant_page_changed_cb (GtkAssistant *assistant, GtkWidget *page, gpointer user_data)
+{
+	ews_prepare_receive_options_page (page, user_data);
+}
+
+static void
+ews_page_switched_cb (GtkNotebook *notebook, GtkWidget *page, guint page_num, gpointer user_data)
+{
+	ews_prepare_receive_options_page (page, user_data);
+}
+
+GtkWidget *
+org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
+{	
+	EMConfigTargetAccount *target_account;
+	CamelURL *url;
+	
+	target_account = (EMConfigTargetAccount *)data->config->target;
+	url = camel_url_new(e_account_get_string(target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
+
+	/* is NULL on new account creation */
+	if (url == NULL)
+		return NULL;
+
+	if (!g_ascii_strcasecmp (url->protocol, "ews")) {
+		GtkWidget *check = NULL;
+		GtkWidget *label;
+		GtkWidget *hbox, *oal_combo, *fetch_button;
+		gint row = 0;
+		EShell *shell;
+		struct _oab_setting_data *cbdata;
+
+		/* Add cache check box */
+		check = gtk_check_button_new_with_mnemonic (_("Cache o_ffline address book"));
+		gtk_widget_show (check);
+		gtk_table_attach (GTK_TABLE (data->parent), check, 0, 1, row, row+1, 0, 0, 0, 0);
+		row++;
+	
+		/* Add label */	
+		label = gtk_label_new_with_mnemonic (_("Select Ad_dress list: "));
+		gtk_widget_show (label);
+		gtk_table_attach (GTK_TABLE (data->parent), label, 0, 1, row, row+1, 0, 0, 0, 0);
+		
+		/* OAL combo and fetch OAL button */	
+		hbox = gtk_hbox_new (FALSE, 6);
+		oal_combo = gtk_combo_box_text_new ();
+		gtk_box_pack_start (GTK_BOX (hbox), oal_combo, TRUE, TRUE, 0);
+
+		fetch_button = gtk_button_new_with_mnemonic (_("Fetch list"));
+		gtk_box_pack_start (GTK_BOX (hbox), fetch_button, FALSE, FALSE, 0);
+
+		/* Add hbox to table */
+		gtk_table_attach (GTK_TABLE (data->parent), hbox, 1, 2, row, row+1, GTK_FILL|GTK_EXPAND, GTK_FILL, 0, 0);
+		gtk_widget_show_all (hbox);
+		row++;
+
+		/* If evolution is offline, dsensitize and return */
+		shell = e_shell_get_default ();
+		if (!e_shell_get_online (shell)) {
+			gtk_widget_set_sensitive (check, FALSE);
+			gtk_widget_set_sensitive (hbox, FALSE);
+			camel_url_free (url);
+			return check;
+		}
+		
+		cbdata = g_new0 (struct _oab_setting_data, 1);
+		cbdata->check = check;
+		cbdata->combo_text = oal_combo;
+		cbdata->hbox = hbox;
+		cbdata->config = data->config; 
+
+		/* Connect the signals */
+		g_signal_connect (check, "toggled", G_CALLBACK (cache_setting_toggled), cbdata);
+		g_signal_connect (G_OBJECT (fetch_button), "clicked",  G_CALLBACK (fetch_button_clicked_cb), cbdata);
+		g_signal_connect (GTK_COMBO_BOX (oal_combo), "changed", G_CALLBACK (combo_selection_changed), cbdata);
+
+		/* Init widgets when the page is changed to receiving options page */
+		if (GTK_IS_ASSISTANT (data->config->widget))
+			g_signal_connect (GTK_ASSISTANT (data->config->widget), "prepare", G_CALLBACK (ews_assistant_page_changed_cb), cbdata);
+		if (GTK_IS_NOTEBOOK (data->config->widget))
+			g_signal_connect (GTK_NOTEBOOK (data->config->widget), "switch-page", G_CALLBACK (ews_page_switched_cb), cbdata);
+
+		/* Free the call back data here */
+		g_signal_connect (GTK_WIDGET (data->parent), "delete-event", G_CALLBACK (table_deleted_cb), cbdata);
+
+		camel_url_free (url);
+		return check;
+	}
+
+	camel_url_free (url);
+	return NULL;
 }
