@@ -970,6 +970,21 @@ static void autodiscover_done_cb (GObject *cnc, GAsyncResult *res,
 	g_free (ad);
 }
 
+static void
+ews_dump_raw_soup_response (SoupMessage *msg)
+{
+	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1)) {
+		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->response_body));
+		/* print response body */
+		printf ("\n The response headers");
+		printf ("\n =====================");
+		fputc ('\n', stdout);
+		fputs (SOUP_MESSAGE (msg)->response_body->data, stdout);
+		fputc ('\n', stdout);
+	}
+
+}
+
 /* Called when each soup message completes */
 static void
 autodiscover_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
@@ -1004,16 +1019,7 @@ autodiscover_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 		goto failed;
 	}
 
-	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1)) {
-		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->response_body));
-		/* print response body */
-		printf ("\n The response headers");
-		printf ("\n =====================");
-		fputc ('\n', stdout);
-		fputs (SOUP_MESSAGE (msg)->response_body->data, stdout);
-		fputc ('\n', stdout);
-	}
-
+	ews_dump_raw_soup_response (msg);
 	doc = xmlReadMemory (msg->response_body->data, msg->response_body->length,
 			     "autodiscover.xml", NULL, 0);
 	if (!doc) {
@@ -1109,7 +1115,7 @@ failed:
 }
 
 static SoupMessage *
-e_ews_get_msg_for_url (gchar *url, xmlOutputBuffer *buf)
+e_ews_get_msg_for_url (const gchar *url, xmlOutputBuffer *buf)
 {
 	SoupMessage *msg;
 
@@ -1118,9 +1124,10 @@ e_ews_get_msg_for_url (gchar *url, xmlOutputBuffer *buf)
 				     "User-Agent", "libews/0.1");
 
 
-	soup_message_set_request(msg, "application/xml", SOUP_MEMORY_COPY,
-				 (gchar *)buf->buffer->content,
-				 buf->buffer->use);
+	if (buf)
+		soup_message_set_request (msg, "application/xml", SOUP_MEMORY_COPY,
+					  (gchar *)buf->buffer->content,
+					  buf->buffer->use);
 
 	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1)) {
 		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->request_body));
@@ -1208,6 +1215,127 @@ e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb, gpointer cbdata,
 
 	xmlOutputBufferClose (buf);
 	xmlFreeDoc (doc);
+}
+
+
+struct _oal_req_data {
+	EEwsConnection *cnc;
+	GSimpleAsyncResult *simple;
+};
+
+static gchar *
+get_property (xmlNodePtr node_ptr, const gchar *name)
+{
+	xmlChar *xml_s;
+	gchar *s;
+	
+	xml_s = xmlGetProp (node_ptr, (const xmlChar *) name);
+	s = g_strdup ((gchar *)xml_s);
+	xmlFree (xml_s);
+
+	return s;
+}
+
+static void
+oal_response_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
+{
+	GError *error = NULL;
+	guint status = msg->status_code;
+	xmlDoc *doc;
+	xmlNode *node;
+	struct _oal_req_data *data = (struct _oal_req_data *) user_data;
+	GSList *oals = NULL;
+
+	if (status != 200) {
+		g_set_error (&error, EWS_CONNECTION_ERROR, status,
+			     _("Code: %d - Unexpected response from server"),
+			     status);
+		goto exit;
+	}
+	ews_dump_raw_soup_response (msg);
+	
+	doc = xmlReadMemory (msg->response_body->data, msg->response_body->length,
+			     "oab.xml", NULL, 0);
+	if (!doc) {
+		g_set_error (&error, EWS_CONNECTION_ERROR,
+			     -1, _("Failed to parse oab XML"));
+		goto exit;
+	}
+
+	node = xmlDocGetRootElement(doc);
+	if (strcmp((char *)node->name, "OAB")) {
+		g_set_error (&error, EWS_CONNECTION_ERROR, -1,
+			     _("Failed to find <OAB> element\n"));
+		goto exit;
+	}
+
+	for (node = node->children; node; node = node->next) {
+		if (node->type == XML_ELEMENT_NODE &&
+		    !strcmp((char *)node->name, "OAL")) {
+			EwsOAL *oal = g_new0 (EwsOAL, 1);
+			
+			oal->id = get_property (node, "id");
+			oal->dn = get_property (node, "dn");
+			oal->name = get_property (node, "name");
+
+			oals = g_slist_prepend (oals, oal);
+		}
+	}
+
+	oals = g_slist_reverse (oals);
+	g_simple_async_result_set_op_res_gpointer (data->simple, oals, NULL);
+
+exit:	
+	if (error)
+		g_simple_async_result_take_error (data->simple, error);
+	g_simple_async_result_complete_in_idle (data->simple);
+}
+
+void		
+e_ews_connection_get_oal_list_start	(EEwsConnection *cnc,
+					 const gchar *oab_url,
+					 GAsyncReadyCallback cb,
+					 GCancellable *cancellable,
+					 gpointer user_data)
+{
+	GSimpleAsyncResult *simple;
+	SoupMessage *msg;
+	struct _oal_req_data *data;
+
+	msg = e_ews_get_msg_for_url (oab_url, NULL);
+ 	
+	simple = g_simple_async_result_new (G_OBJECT (cnc),
+                                      cb,
+                                      user_data,
+                                      e_ews_connection_get_oal_list_start);
+	data = g_new0 (struct _oal_req_data, 1);
+	data->cnc = cnc;
+	data->simple = simple;
+	soup_session_queue_message (cnc->priv->soup_session, msg,
+				    oal_response_cb, data);
+}
+
+gboolean	
+e_ews_connection_get_oal_list_finish	(EEwsConnection *cnc,
+					 GAsyncResult *result,
+					 GSList **oals,
+					 GError **error)
+{
+	GSimpleAsyncResult *simple;
+
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_get_oal_list_start),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+	
+	*oals= g_simple_async_result_get_op_res_gpointer (simple);
+
+	return TRUE;
 }
 
 void

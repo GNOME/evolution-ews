@@ -98,6 +98,21 @@ typedef struct {
 	gpointer future2;
 } EwsUrls;
 
+typedef struct {
+	gchar *id;
+	gchar *dn;
+	gchar *name;
+} EwsOAL;
+
+typedef struct {
+	gint seq;
+	gint ver;
+	gint size;
+	gint uncompressed_size;
+	gchar *sha;
+	gchar *name;
+} EwsOALDetails;
+
 GType		e_ews_connection_get_type	(void);
 EEwsConnection *e_ews_connection_new		(const gchar *uri,
 						 const gchar *username,
@@ -538,6 +553,18 @@ gboolean	e_ews_connection_get_attachments
 						 ESoapProgressFn progress_fn,
 						 gpointer progress_data,
 						 GCancellable *cancellable,
+						 GError **error);
+
+void		e_ews_connection_get_oal_list_start
+						(EEwsConnection *cnc,
+						 const gchar *oab_url,
+						 GAsyncReadyCallback cb,
+						 GCancellable *cancellable,
+						 gpointer user_data);
+gboolean	e_ews_connection_get_oal_list_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GSList **oals,
 						 GError **error);
 
 G_END_DECLS
