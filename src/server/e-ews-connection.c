@@ -3061,7 +3061,6 @@ delete_attachments_response_cb (ESoapParameter *subparam, EwsNode *enode)
 	/* http://msdn.microsoft.com/en-us/library/aa580782%28v=EXCHG.80%29.aspx */
 	ESoapParameter *attspara;
 	EwsAsyncData *async_data;
-	EwsId *item_id;
 
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
 
@@ -3069,11 +3068,7 @@ delete_attachments_response_cb (ESoapParameter *subparam, EwsNode *enode)
 
 	if (!attspara) return;
 
-	item_id = g_new0 (EwsId, 1);
-	item_id->id = e_soap_parameter_get_property (attspara, "RootItemId");
-	item_id->change_key = e_soap_parameter_get_property (attspara, "RootItemChangeKey");
-
-	async_data->items = g_slist_append (async_data->items, item_id);
+	async_data->items = g_slist_append (async_data->items, e_soap_parameter_get_property (attspara, "RootItemChangeKey"));
 }
 
 void
