@@ -390,8 +390,8 @@ fetch_button_clicked_cb (GtkButton *button, gpointer user_data)
 	/* De-sensitize fetch_button and get the list from the server */
 	g_signal_handlers_block_by_func (cbdata->combo_text, combo_selection_changed, cbdata);
 	
-	gtk_combo_box_text_remove (GTK_COMBO_BOX_TEXT (cbdata->combo_text), 0);
-	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (cbdata->combo_text), _("Fetching..."));
+	gtk_combo_box_remove_text (GTK_COMBO_BOX (cbdata->combo_text), 0);
+	gtk_combo_box_append_text (GTK_COMBO_BOX (cbdata->combo_text), _("Fetching..."));
 	gtk_widget_set_sensitive (GTK_WIDGET (button), FALSE);
 
 	g_signal_handlers_unblock_by_func (cbdata->combo_text, combo_selection_changed, cbdata);
@@ -432,7 +432,7 @@ init_widgets (struct _oab_setting_data *cbdata)
 		/* selected list will be of form "id:name" */
 		selected_list = camel_url_get_param (url, "oal_selected");
 		tmp = strrchr (selected_list, ':');
-		gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (cbdata->combo_text), tmp+1);
+		gtk_combo_box_append_text (GTK_COMBO_BOX (cbdata->combo_text), tmp+1);
 	} else
 		gtk_widget_set_sensitive (cbdata->hbox, FALSE);
 
@@ -504,7 +504,7 @@ org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 		
 		/* OAL combo and fetch OAL button */	
 		hbox = gtk_hbox_new (FALSE, 6);
-		oal_combo = gtk_combo_box_text_new ();
+		oal_combo = gtk_combo_box_new ();
 		gtk_box_pack_start (GTK_BOX (hbox), oal_combo, TRUE, TRUE, 0);
 
 		fetch_button = gtk_button_new_with_mnemonic (_("Fetch list"));
