@@ -1286,8 +1286,11 @@ oal_response_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
 	g_simple_async_result_set_op_res_gpointer (data->simple, oals, NULL);
 
 exit:	
-	if (error)
-		g_simple_async_result_take_error (data->simple, error);
+	if (error) {
+		g_simple_async_result_set_from_error (data->simple, error);
+		g_clear_error (&error);
+	}
+
 	g_simple_async_result_complete_in_idle (data->simple);
 }
 
