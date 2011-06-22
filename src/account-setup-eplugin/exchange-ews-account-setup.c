@@ -43,6 +43,13 @@
 
 #define d(x) x
 
+#if GTK_CHECK_VERSION(3,0,0)
+#else
+#define GTK_COMBO_BOX_TEXT GTK_COMBO_BOX
+#define gtk_combo_box_text_append_text gtk_combo_box_append_text
+#define gtk_combo_box_text_new gtk_combo_box_new
+#endif
+
 gint e_plugin_lib_enable (EPlugin *ep, gint enable);
 
 /* Account Setup */
@@ -611,7 +618,7 @@ org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 		
 		/* OAL combo and fetch OAL button */	
 		hbox = gtk_hbox_new (FALSE, 6);
-		oal_combo = gtk_combo_box_new ();
+		oal_combo = gtk_combo_box_text_new ();
 		gtk_box_pack_start (GTK_BOX (hbox), oal_combo, TRUE, TRUE, 0);
 
 		fetch_button = gtk_button_new_with_mnemonic (_("Fetch list"));
