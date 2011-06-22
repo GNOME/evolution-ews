@@ -43,12 +43,13 @@
 
 #define d(x) x
 
-#if GTK_CHECK_VERSION(3,0,0)
+#if GTK_CHECK_VERSION(2,24,0)
 #else
 #define GTK_COMBO_BOX_TEXT GTK_COMBO_BOX
 #define GTK_IS_COMBO_BOX_TEXT GTK_IS_COMBO_BOX
 #define gtk_combo_box_text_append_text gtk_combo_box_append_text
 #define gtk_combo_box_text_new gtk_combo_box_new
+#define GtkComboBoxText GtkComboBox
 #endif
 
 gint e_plugin_lib_enable (EPlugin *ep, gint enable);
