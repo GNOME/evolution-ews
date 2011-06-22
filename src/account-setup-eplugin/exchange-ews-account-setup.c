@@ -94,10 +94,13 @@ static void autodiscover_callback (EwsUrls *urls, gpointer user_data, GError *er
 		g_clear_error (&error);
 	}
 	if (urls) {
-		g_message("Got ASURL %s", urls->as_url);
-
+		char *oab_url;
+		
 		gtk_entry_set_text (GTK_ENTRY (cbdata->host_entry), urls->as_url);
-		gtk_entry_set_text (GTK_ENTRY (cbdata->oab_entry), urls->oab_url);
+
+		oab_url = g_strconcat (urls->oab_url, "oab.xml", NULL);
+		gtk_entry_set_text (GTK_ENTRY (cbdata->oab_entry), oab_url);
+		g_free (oab_url);
 		
 		g_free (urls->as_url);
 		g_free (urls->oab_url);
@@ -129,7 +132,7 @@ get_password (EMConfigTargetAccount *target_account)
 
 	if (!password || !*password) {
 		e_passwords_forget_password (EXCHANGE_EWS_PASSWORD_COMPONENT, key);
-		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Authentication failed."));
+		e_notice (NULL, GTK_MESSAGE_ERROR, "%s", _("Could not get password."));
 	}
 
 	g_free (key);
@@ -336,10 +339,21 @@ struct _oab_setting_data {
 	GtkWidget *combo_text;
 	GtkWidget *hbox;
 	GtkWidget *check;
+	GtkWidget *fetch_button;
 	GCancellable *cancellable;
-	gboolean cancel;
 	GSList *oals;
 };
+
+static void
+clear_combo (GtkComboBoxText *combo_box)
+{
+	GtkListStore *store;
+
+	g_return_if_fail (GTK_IS_COMBO_BOX_TEXT (combo_box));
+
+	store = GTK_LIST_STORE (gtk_combo_box_get_model (GTK_COMBO_BOX (combo_box)));
+	gtk_list_store_clear (store);
+}
 
 static void
 update_camel_url (struct _oab_setting_data *cbdata)
@@ -351,13 +365,28 @@ update_camel_url (struct _oab_setting_data *cbdata)
 	url = camel_url_new (e_account_get_string(target->account, E_ACCOUNT_SOURCE_URL), NULL);
 	
 	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (cbdata->check))) {
+		gint num;
+		
 		gtk_widget_set_sensitive (cbdata->hbox, TRUE);
 		camel_url_set_param (url, "oab_offline", "1");
+		num = gtk_combo_box_get_active (GTK_COMBO_BOX (cbdata->combo_text));
+		
 		/* Set the active oal */
+		if (cbdata->oals && num != -1) {
+			gchar *mangled_oal;
+			EwsOAL *oal = g_slist_nth_data (cbdata->oals, num);
+
+			mangled_oal = g_strconcat (oal->id, ":", oal->name, NULL);
+			camel_url_set_param (url, "oal_selected", mangled_oal);
+			g_free (mangled_oal);
+		}
 	} else {
 		gtk_widget_set_sensitive (cbdata->hbox, FALSE);
 		camel_url_set_param (url, "oab_offline", NULL);
 		camel_url_set_param (url, "oal_selected", NULL);
+
+		if (cbdata->oals == NULL)
+			clear_combo (GTK_COMBO_BOX_TEXT (cbdata->combo_text));
 	}
 
 	url_string = camel_url_to_string (url, 0);
@@ -383,21 +412,85 @@ combo_selection_changed (GtkComboBox *combo, gpointer user_data)
 }
 
 static void
+ews_oal_list_ready (GObject *obj, GAsyncResult *res, gpointer user_data)
+{
+	struct _oab_setting_data *cbdata = (struct _oab_setting_data *) user_data;
+	EEwsConnection *cnc = E_EWS_CONNECTION (obj);
+	GError *error = NULL;
+	GSList *oals = NULL, *l;
+
+	cbdata->cancellable = NULL;
+	if (!e_ews_connection_get_oal_list_finish (E_EWS_CONNECTION (cnc), res, &oals, &error)) {
+		e_notice (NULL, GTK_MESSAGE_ERROR, "%s%s", _("Could not fetch oal list: "), error->message);
+		g_clear_error (&error);
+
+		/* Re-activate fetch button since we were not able to fetch the list */
+		gtk_widget_set_sensitive (GTK_WIDGET (cbdata->fetch_button), TRUE);
+		g_object_unref (cnc);
+	}
+	g_signal_handlers_block_by_func (cbdata->combo_text, combo_selection_changed, cbdata);
+	clear_combo (GTK_COMBO_BOX_TEXT (cbdata->combo_text));
+	g_signal_handlers_unblock_by_func (cbdata->combo_text, combo_selection_changed, cbdata);
+
+	for (l = oals; l != NULL; l = g_slist_next (l)) {
+		EwsOAL *oal = l->data;
+		
+		gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (cbdata->combo_text), oal->name);
+	}
+
+	gtk_combo_box_set_active (GTK_COMBO_BOX (cbdata->combo_text), 0);
+
+	cbdata->oals = oals;
+	g_object_unref (cnc);
+}
+
+static void
 fetch_button_clicked_cb (GtkButton *button, gpointer user_data)
 {
 	struct _oab_setting_data *cbdata = (struct _oab_setting_data *) user_data;
+	EMConfigTargetAccount *target = (EMConfigTargetAccount *) cbdata->config->target;
+	GCancellable *cancellable;
+	EEwsConnection *cnc;
+	CamelURL *url;
+	const gchar *oab_url;
+	gchar *password;
+	
+	url = camel_url_new (e_account_get_string(target->account, E_ACCOUNT_SOURCE_URL), NULL);
+
+	cancellable = g_cancellable_new ();
 
 	/* De-sensitize fetch_button and get the list from the server */
 	g_signal_handlers_block_by_func (cbdata->combo_text, combo_selection_changed, cbdata);
 	
-	gtk_combo_box_remove_text (GTK_COMBO_BOX (cbdata->combo_text), 0);
-	gtk_combo_box_append_text (GTK_COMBO_BOX (cbdata->combo_text), _("Fetching..."));
+	clear_combo (GTK_COMBO_BOX_TEXT (cbdata->combo_text));
+	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (cbdata->combo_text), _("Fetching..."));
+	gtk_combo_box_set_active (GTK_COMBO_BOX (cbdata->combo_text), 0);
 	gtk_widget_set_sensitive (GTK_WIDGET (button), FALSE);
 
 	g_signal_handlers_unblock_by_func (cbdata->combo_text, combo_selection_changed, cbdata);
+	
 
 	/* Fetch the oab lists from server */
+	oab_url = camel_url_get_param (url, "oaburl");
+	password = get_password (target);
 
+	/* pass user name while creating connection  to fetch oals */
+	cnc = e_ews_connection_new (oab_url, url->user, password, NULL, NULL, NULL);
+	e_ews_connection_get_oal_list_start (cnc, oab_url, ews_oal_list_ready, cancellable, cbdata);
+
+	camel_url_free (url);
+	g_free (password);
+}
+
+static void
+ews_oal_free (gpointer data, gpointer user_data)
+{
+	EwsOAL *oal = (EwsOAL *) data;
+
+	g_free (oal->id);
+	g_free (oal->dn);
+	g_free (oal->name);
+	g_free (oal);
 }
 
 static gboolean
@@ -405,10 +498,16 @@ table_deleted_cb (GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
 	struct _oab_setting_data *cbdata = (struct _oab_setting_data *) user_data;
 	
-	if (cbdata->cancel) {
+	if (cbdata->cancellable) {
 		g_cancellable_cancel (cbdata->cancellable);
 		g_object_unref (cbdata->cancellable);
 	}
+	
+	if (cbdata->oals) {
+		g_slist_foreach (cbdata->oals, (GFunc) ews_oal_free, NULL);
+		g_slist_free (cbdata->oals);
+	}
+	
 	g_free (cbdata);
 	return FALSE;
 }
@@ -425,14 +524,22 @@ init_widgets (struct _oab_setting_data *cbdata)
 
 	marked_for_offline = camel_url_get_param (url, "oab_offline");
 	if (marked_for_offline && !strcmp (marked_for_offline, "1")) {
-		const gchar *selected_list, *tmp;
+		const gchar *selected_list;
 
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cbdata->check), TRUE);
 
 		/* selected list will be of form "id:name" */
 		selected_list = camel_url_get_param (url, "oal_selected");
-		tmp = strrchr (selected_list, ':');
-		gtk_combo_box_append_text (GTK_COMBO_BOX (cbdata->combo_text), tmp+1);
+		if (selected_list) {
+			const gchar *tmp;
+			
+			tmp = strrchr (selected_list, ':');
+			gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (cbdata->combo_text), tmp+1);
+			
+			g_signal_handlers_block_by_func (cbdata->combo_text, combo_selection_changed, cbdata);
+			gtk_combo_box_set_active (GTK_COMBO_BOX (cbdata->combo_text), 0);
+			g_signal_handlers_unblock_by_func (cbdata->combo_text, combo_selection_changed, cbdata);
+		}
 	} else
 		gtk_widget_set_sensitive (cbdata->hbox, FALSE);
 
@@ -528,6 +635,7 @@ org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 		cbdata->check = check;
 		cbdata->combo_text = oal_combo;
 		cbdata->hbox = hbox;
+		cbdata->fetch_button = fetch_button;
 		cbdata->config = data->config; 
 
 		/* Connect the signals */
