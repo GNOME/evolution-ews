@@ -170,7 +170,8 @@ const gchar *	e_ews_item_get_fileas		(EEwsItem *item);
 const EwsCompleteName *	
 		e_ews_item_get_complete_name	(EEwsItem *item);
 const gchar *	e_ews_item_get_email_address	(EEwsItem *item, const gchar *type);
-const gchar *	e_ews_item_get_physical_address	(EEwsItem *item, const gchar *type);
+const EwsAddress *	
+		e_ews_item_get_physical_address	(EEwsItem *item, const gchar *type);
 const gchar *	e_ews_item_get_phone_number	(EEwsItem *item, const gchar *type);
 const gchar *	e_ews_item_get_im_address	(EEwsItem *item, const gchar *type);
 

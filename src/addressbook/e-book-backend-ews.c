@@ -184,13 +184,31 @@ ebews_populate_phone_numbers	(EContact *contact, EEwsItem *item)
 }
 
 static void
+copy_ews_address_to_contact_address ( EContactAddress *contact_addr, const EwsAddress *address)
+{
+	contact_addr->address_format = NULL;
+	contact_addr->po = NULL;
+	contact_addr->street = g_strdup (address->street);
+	contact_addr->ext = NULL;
+	contact_addr->locality = g_strdup (address->city);
+	contact_addr->region = g_strdup (address->state);
+	contact_addr->code = g_strdup (address->postal_code);
+	contact_addr->country = g_strdup (address->country);
+}
+static void
 set_address (EContact *contact, EContactField field, EEwsItem *item, const gchar *item_field)
 {
-	const gchar *add;
+	const EwsAddress *address;
 	
-	add = e_ews_item_get_physical_address (item, item_field);
-	if (add && *add)
-		e_contact_set (contact, field, add);
+	address = e_ews_item_get_physical_address (item, item_field);
+	if (address) {
+		EContactAddress *addr;
+	
+		addr = g_new0 (EContactAddress, 1);
+		copy_ews_address_to_contact_address (addr, address);
+		e_contact_set (contact, field, addr);
+		e_contact_address_free (addr);
+	}
 }
 
 static void

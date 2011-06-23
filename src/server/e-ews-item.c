@@ -177,6 +177,8 @@ static void	ews_item_free_mailbox (EwsMailbox *mb);
 static void	ews_item_free_attendee (EwsAttendee *attendee);
 static void	ews_free_contact_fields (struct _EEwsContactFields *con_fields);
 
+typedef gpointer (* EwsGetValFunc) (ESoapParameter *param);
+
 static void
 e_ews_item_dispose (GObject *object)
 {
@@ -589,23 +591,70 @@ parse_complete_name (struct _EEwsContactFields *con_fields, ESoapParameter *para
 	con_fields->complete_name = cn;
 }
 
+static gpointer
+ews_get_physical_address (ESoapParameter *param)
+{
+	ESoapParameter *subparam;
+	EwsAddress *address;
+
+	address = g_new0 (EwsAddress, 1);
+
+	subparam = e_soap_parameter_get_first_child_by_name (param, "Street");
+	if (subparam)	
+		address->street = e_soap_parameter_get_string_value (subparam);
+
+	subparam = e_soap_parameter_get_first_child_by_name (param, "City");
+	if (subparam)	
+		address->city = e_soap_parameter_get_string_value (subparam);
+
+	subparam = e_soap_parameter_get_first_child_by_name (param, "State");
+	if (subparam)	
+		address->state = e_soap_parameter_get_string_value (subparam);
+
+	subparam = e_soap_parameter_get_first_child_by_name (param, "Country");
+	if (subparam)	
+		address->country = e_soap_parameter_get_string_value (subparam);
+
+	subparam = e_soap_parameter_get_first_child_by_name (param, "PostalCode");
+	if (subparam)	
+		address->postal_code = e_soap_parameter_get_string_value (subparam);
+
+	return address;
+}
+
 static void
-parse_entries (GHashTable *hash_table, ESoapParameter *param)
+parse_entries (GHashTable *hash_table, ESoapParameter *param, EwsGetValFunc get_val_func)
 {
 	ESoapParameter *subparam;
 
 	for (subparam = e_soap_parameter_get_first_child_by_name (param, "Entry");
 			subparam != NULL;
 			subparam = e_soap_parameter_get_next_child_by_name (subparam, "Entry")) {
-		gchar *key, *value;
+		gchar *key;
+		gpointer value;
 			
 		key = e_soap_parameter_get_property (subparam, "Key");
-		value = e_soap_parameter_get_string_value (subparam);
+		value = get_val_func (subparam);
 	
 		if (value)
 			g_hash_table_insert (hash_table, key, value);
 		else
 			g_free (key);
+	}
+}
+
+static void
+ews_free_physical_address (gpointer value)
+{
+	EwsAddress *address = (EwsAddress *) value;
+
+	if (address) {
+		g_free (address->street);
+		g_free (address->city);
+		g_free (address->state);
+		g_free (address->country);
+		g_free (address->postal_code);
+		g_free (address);
 	}
 }
 
@@ -625,13 +674,13 @@ parse_contact_field (EEwsItem *item, const gchar *name, ESoapParameter *subparam
 		priv->contact_fields->company_name = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "EmailAddresses")) {
 		priv->contact_fields->email_addresses = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
-		parse_entries (priv->contact_fields->email_addresses, subparam);
+		parse_entries (priv->contact_fields->email_addresses, subparam, (EwsGetValFunc) e_soap_parameter_get_string_value);
 	} else if (!g_ascii_strcasecmp (name, "PhysicalAddresses")) {
-		priv->contact_fields->physical_addresses = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
-		parse_entries (priv->contact_fields->physical_addresses, subparam);
+		priv->contact_fields->physical_addresses = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, ews_free_physical_address);
+		parse_entries (priv->contact_fields->physical_addresses, subparam, ews_get_physical_address);
 	} else if (!g_ascii_strcasecmp (name, "PhoneNumbers")) {
 		priv->contact_fields->phone_numbers = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
-		parse_entries (priv->contact_fields->phone_numbers, subparam);
+		parse_entries (priv->contact_fields->phone_numbers, subparam, (EwsGetValFunc) e_soap_parameter_get_string_value);
 	} else if (!g_ascii_strcasecmp (name, "AssistantName")) {
 		priv->contact_fields->assistant_name = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "Birthday")) {
@@ -644,7 +693,7 @@ parse_contact_field (EEwsItem *item, const gchar *name, ESoapParameter *subparam
 		priv->contact_fields->department = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "ImAddresses")) {
 		priv->contact_fields->im_addresses = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
-		parse_entries (priv->contact_fields->im_addresses, subparam);
+		parse_entries (priv->contact_fields->im_addresses, subparam, (EwsGetValFunc) e_soap_parameter_get_string_value);
 	} else if (!g_ascii_strcasecmp (name, "JobTitle")) {
 		priv->contact_fields->job_title = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "Manager")) {
@@ -1227,7 +1276,7 @@ e_ews_item_get_email_address (EEwsItem *item, const gchar *field)
  * 
  * Returns: 
  **/
-const gchar *
+const EwsAddress *
 e_ews_item_get_physical_address (EEwsItem *item, const gchar *field)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
