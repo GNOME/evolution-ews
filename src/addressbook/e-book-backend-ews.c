@@ -1213,6 +1213,30 @@ ebews_start_refreshing (EBookBackendEws *ebews)
 }
 
 static void
+fetch_from_offline (EBookBackendEws *ews, EDataBookView *book_view, const gchar *query, GError *error)
+{
+	GSList *contacts, *l;
+	EBookBackendEwsPrivate *priv;
+
+	priv = ews->priv;
+
+	contacts = e_book_backend_sqlitedb_search (priv->ebsdb, priv->folder_id, query, NULL, &error);
+	for (l = contacts; l != NULL; l = g_slist_next (l)) {
+		EbSdbSearchData *s_data = (EbSdbSearchData *) l->data;
+
+		/* reset vcard to NULL as it would be free'ed in prefiltered_vcard function */
+		e_data_book_view_notify_update_prefiltered_vcard (book_view, s_data->uid, s_data->vcard);
+		s_data->vcard = NULL;
+
+		e_book_backend_sqlitedb_search_data_free (s_data);
+	}
+
+	g_slist_free (contacts);
+	e_data_book_view_notify_complete (book_view, error);
+	e_data_book_view_unref (book_view);
+}
+
+static void
 e_book_backend_ews_start_book_view (EBookBackend  *backend,
 				     EDataBookView *book_view)
 {
@@ -1237,6 +1261,11 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 
 	switch (priv->mode) {
 	case E_DATA_BOOK_MODE_LOCAL:
+		if (e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
+			fetch_from_offline (ebews, book_view, query, error);
+			return;
+		}
+
 		error = EDB_ERROR (OFFLINE_UNAVAILABLE);
 		e_data_book_view_notify_complete (book_view, error);
 		g_error_free (error);
@@ -1254,22 +1283,7 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 		ebews_start_refreshing (ebews);
 
 		if (e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
-			GSList *contacts;
-			
-			contacts = e_book_backend_sqlitedb_search (priv->ebsdb, priv->folder_id, query, NULL, &error);
-			for (l = contacts; l != NULL; l = g_slist_next (l)) {
-				EbSdbSearchData *s_data = (EbSdbSearchData *) l->data;
-			
-				/* reset vcard to NULL as it would be free'ed in prefiltered_vcard function */
-				e_data_book_view_notify_update_prefiltered_vcard (book_view, s_data->uid, s_data->vcard);
-				s_data->vcard = NULL;
-
-				e_book_backend_sqlitedb_search_data_free (s_data);
-			}
-
-			g_slist_free (contacts);
-			e_data_book_view_notify_complete (book_view, error);
-			e_data_book_view_unref (book_view);
+			fetch_from_offline (ebews, book_view, query, error);
 			return;
 		}
 
@@ -1388,7 +1402,6 @@ e_book_backend_ews_authenticate_user (EBookBackend *backend,
 		}
 
 		esource = e_book_backend_get_source (backend);
-		priv->folder_id = e_source_get_duped_property (esource, "folder-id");
 		host_url = e_source_get_property (esource, "hosturl");
 		read_only = e_source_get_property (esource, "read_only");
 
@@ -1470,7 +1483,7 @@ e_book_backend_ews_load_source 	(EBookBackend           *backend,
 	EBookBackendEws *cbews;
 	EBookBackendEwsPrivate *priv;
 	const gchar *cache_dir, *email;
-	const gchar *folder_id, *folder_name;
+	const gchar *folder_name;
 	const gchar *offline;
 	GError *err = NULL;
 
@@ -1479,10 +1492,10 @@ e_book_backend_ews_load_source 	(EBookBackend           *backend,
 
 	cache_dir = e_book_backend_get_cache_dir (backend);
 	email = e_source_get_property (source, "email");
-	folder_id = e_source_get_property (source, "folder-id");
+	priv->folder_id = e_source_get_duped_property (source, "folder-id");
 	folder_name = e_source_peek_name (source);
 
-	priv->ebsdb = e_book_backend_sqlitedb_new (cache_dir, email, folder_id, folder_name, TRUE, &err);
+	priv->ebsdb = e_book_backend_sqlitedb_new (cache_dir, email, priv->folder_id, folder_name, TRUE, &err);
 	if (err) {
 		g_propagate_error (perror, err);
 		return;
