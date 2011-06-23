@@ -256,9 +256,9 @@ ebews_set_full_name		(ESoapMessage *msg, EContact *contact)
 {
 	gchar *val;
 	
-//	if ((val = e_contact_get (contact, E_CONTACT_FULL_NAME)))
-//		e_ews_message_write_string_parameter(msg, "FullName", NULL, val);
-//	g_free (val);
+	if ((val = e_contact_get (contact, E_CONTACT_FULL_NAME)))
+		e_ews_message_write_string_parameter(msg, "FullName", NULL, val);
+	g_free (val);
 	
 	if ((val = e_contact_get (contact, E_CONTACT_GIVEN_NAME)))
 		e_ews_message_write_string_parameter(msg, "GivenName", NULL, val);
@@ -953,10 +953,12 @@ ebews_sync_deleted_items (EBookBackendEws *ebews, GSList *deleted_ids, GError **
 
 	priv = ebews->priv;
 
-	for (l = deleted_ids; l != NULL && *error != NULL; l = g_slist_next (l)) {
+	for (l = deleted_ids; l != NULL; l = g_slist_next (l)) {
 		gchar *id = (gchar *) l->data;
+		gboolean partial_content;
 		
-		e_book_backend_sqlitedb_remove_contact (priv->ebsdb, priv->folder_id, id, NULL);
+		if (e_book_backend_sqlitedb_has_contact (priv->ebsdb, priv->folder_id, id, &partial_content, NULL))
+			e_book_backend_sqlitedb_remove_contact (priv->ebsdb, priv->folder_id, id, error);
 		e_book_backend_notify_remove (E_BOOK_BACKEND (ebews), id);
 	}
 
