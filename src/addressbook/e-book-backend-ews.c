@@ -88,8 +88,9 @@ struct _EBookBackendEwsPrivate {
 #define ELEMENT_TYPE_SIMPLE 0x01 /* simple string fields */
 #define ELEMENT_TYPE_COMPLEX 0x02 /* complex fields while require different get/set functions */
 
-/* passing field uris for PhysicalAddress, PhoneNumbers causes error, so we use Default view to fetch them. Thus the summary props just have attachments */
-#define CONTACT_ITEM_PROPS "item:Attachments item:HasAttachments"
+/* passing field uris for PhysicalAddress, PhoneNumbers causes error, so we use Default view to fetch them. Thus the summary props just have attachments  and 
+   some additional properties that are not return with Default view */
+#define CONTACT_ITEM_PROPS "item:Attachments item:HasAttachments contacts:Manager contacts:Department contacts:SpouseName contacts:AssistantName contacts:BusinessHomePage contacts:Birthday"
 #define DISTRIBUTION_ITEM_PROPS "item:ItemId contacts:FileAs contacts:DisplayName"
 
 #define PRIV_LOCK(p)   (g_static_rec_mutex_lock (&(p)->rec_mutex))
