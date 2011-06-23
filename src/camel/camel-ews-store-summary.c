@@ -105,6 +105,12 @@ load_id_fname_hash (CamelEwsStoreSummary *ews_summary)
 
 		fname = build_full_name (ews_summary, id);
 
+		if (!fname) {
+			/* eep */
+			g_warning ("Cannot build full name for folder %s", id);
+			g_free (id);
+			continue;
+		}
 		g_hash_table_insert (ews_summary->priv->fname_id_hash, fname, id);
 		g_hash_table_insert (ews_summary->priv->id_fname_hash, id, fname);
 	}
