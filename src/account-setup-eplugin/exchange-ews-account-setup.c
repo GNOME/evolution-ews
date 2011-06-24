@@ -428,15 +428,24 @@ ews_oal_list_ready (GObject *obj, GAsyncResult *res, gpointer user_data)
 	EEwsConnection *cnc = E_EWS_CONNECTION (obj);
 	GError *error = NULL;
 	GSList *oals = NULL, *l;
+	gboolean cancelled;
 
+	cancelled = g_cancellable_is_cancelled (cbdata->cancellable);
+	g_object_unref (cbdata->cancellable);
 	cbdata->cancellable = NULL;
+
 	if (!e_ews_connection_get_oal_list_finish (E_EWS_CONNECTION (cnc), res, &oals, &error)) {
+		g_object_unref (cnc);
+
+		if (cancelled) {
+			g_clear_error (&error);
+			return;	
+		}
+
 		e_notice (NULL, GTK_MESSAGE_ERROR, "%s%s", _("Could not fetch oal list: "), error->message);
 		g_clear_error (&error);
-
 		/* Re-activate fetch button since we were not able to fetch the list */
 		gtk_widget_set_sensitive (GTK_WIDGET (cbdata->fetch_button), TRUE);
-		g_object_unref (cnc);
 		return;
 	}
 	cbdata->oals = oals;
@@ -488,6 +497,7 @@ fetch_button_clicked_cb (GtkButton *button, gpointer user_data)
 
 	/* pass user name while creating connection  to fetch oals */
 	cnc = e_ews_connection_new (oab_url, url->user, password, NULL, NULL, NULL);
+	cbdata->cancellable = cancellable;
 	e_ews_connection_get_oal_list_start (cnc, oab_url, ews_oal_list_ready, cancellable, cbdata);
 
 	camel_url_free (url);
@@ -506,14 +516,12 @@ ews_oal_free (gpointer data, gpointer user_data)
 }
 
 static gboolean
-table_deleted_cb (GtkWidget *widget, GdkEvent *event, gpointer user_data)
+table_deleted_cb (GtkWidget *widget, gpointer user_data)
 {
 	struct _oab_setting_data *cbdata = (struct _oab_setting_data *) user_data;
 	
-	if (cbdata->cancellable) {
+	if (cbdata->cancellable)
 		g_cancellable_cancel (cbdata->cancellable);
-		g_object_unref (cbdata->cancellable);
-	}
 	
 	if (cbdata->oals) {
 		g_slist_foreach (cbdata->oals, (GFunc) ews_oal_free, NULL);
@@ -664,7 +672,7 @@ org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 			g_signal_connect (GTK_NOTEBOOK (data->config->widget), "switch-page", G_CALLBACK (ews_page_switched_cb), cbdata);
 
 		/* Free the call back data here */
-		g_signal_connect (GTK_WIDGET (data->parent), "delete-event", G_CALLBACK (table_deleted_cb), cbdata);
+		g_signal_connect (GTK_WIDGET (data->config->widget), "destroy", G_CALLBACK (table_deleted_cb), cbdata);
 
 		camel_url_free (url);
 		return check;
