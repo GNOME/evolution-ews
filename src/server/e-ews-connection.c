@@ -1221,6 +1221,9 @@ e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb, gpointer cbdata,
 struct _oal_req_data {
 	EEwsConnection *cnc;
 	GSimpleAsyncResult *simple;
+	SoupMessage *msg;
+	GCancellable *cancellable;
+	gulong cancel_handler_id;
 };
 
 static gchar *
@@ -1285,13 +1288,26 @@ oal_response_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
 	oals = g_slist_reverse (oals);
 	g_simple_async_result_set_op_res_gpointer (data->simple, oals, NULL);
 
-exit:	
+exit:
+	if (data->cancellable)
+		g_signal_handler_disconnect (data->cancellable, data->cancel_handler_id);
+
 	if (error) {
 		g_simple_async_result_set_from_error (data->simple, error);
 		g_clear_error (&error);
 	}
 
 	g_simple_async_result_complete_in_idle (data->simple);
+	g_free (data);
+}
+
+static void
+ews_cancel_msg (GCancellable *cancellable,
+		gpointer user_data)
+{
+	struct _oal_req_data *data = (struct _oal_req_data *) user_data;
+
+	soup_session_cancel_message (data->cnc->priv->soup_session, SOUP_MESSAGE (data->msg), SOUP_STATUS_CANCELLED);
 }
 
 void		
@@ -1314,6 +1330,12 @@ e_ews_connection_get_oal_list_start	(EEwsConnection *cnc,
 	data = g_new0 (struct _oal_req_data, 1);
 	data->cnc = cnc;
 	data->simple = simple;
+	data->cancellable = cancellable;
+	data->msg = msg;
+	
+	if (cancellable)
+		data->cancel_handler_id = g_cancellable_connect	(cancellable,
+							 	 G_CALLBACK (ews_cancel_msg), (gpointer) data, NULL);
 	soup_session_queue_message (cnc->priv->soup_session, msg,
 				    oal_response_cb, data);
 }
