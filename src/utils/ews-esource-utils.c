@@ -19,19 +19,10 @@
 
 #include <string.h>
 
-#include <libedataserver/e-source-list.h>
-
 #include "ews-esource-utils.h"
 
-#define EWS_BASE_URI   "ews://"
-#define CALENDAR_SOURCES "/apps/evolution/calendar/sources"
-#define TASKS_SOURCES "/apps/evolution/tasks/sources"
-#define SELECTED_CALENDARS "/apps/evolution/calendar/display/selected_calendars"
-#define SELECTED_TASKS   "/apps/evolution/calendar/tasks/selected_tasks"
-#define CONTACT_SOURCES     "/apps/evolution/addressbook/sources"
-
-static ESource *
-ews_find_source_by_fid (GSList *sources, const gchar *fid)
+ESource *
+ews_find_source_by_matched_prop (GSList *sources, const gchar *prop, const gchar *value)
 {
 	GSList *s;
 
@@ -42,16 +33,15 @@ ews_find_source_by_fid (GSList *sources, const gchar *fid)
 		ESource *source = s->data;
 
 		if (source && E_IS_SOURCE (source)) {
-			const gchar *has_fid = e_source_get_property (source, "folder-id");
+			const gchar *has_fid = e_source_get_property (source, prop);
 
-			if (has_fid && g_str_equal (fid, has_fid))
+			if (has_fid && g_str_equal (value, has_fid))
 				return source;
 		}
 	}
 
 	return NULL;
 }
-
 
 static ESourceGroup *
 ews_find_group (GSList *groups, const gchar *account_name)
@@ -74,8 +64,8 @@ ews_find_group (GSList *groups, const gchar *account_name)
 	return NULL;
 }
 
-static ESourceGroup *
-ews_ensure_group (ESourceList *source_list, const gchar *account_name)
+ESourceGroup *
+ews_esource_utils_ensure_group (ESourceList *source_list, const gchar *account_name)
 {
 	ESourceGroup *group = NULL;
 	GSList *groups;
@@ -136,10 +126,10 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 
 	client = gconf_client_get_default ();
 	source_list = e_source_list_new_for_gconf (client, conf_key);
-	group = ews_ensure_group (source_list, account_name);
+	group = ews_esource_utils_ensure_group (source_list, account_name);
 
 	sources = e_source_group_peek_sources (group);
-	if (ews_find_source_by_fid (sources, fid->id)) {
+	if (ews_find_source_by_matched_prop (sources, "folder-id", fid->id)) {
 		ret = FALSE;
 		goto exit;
 	}
@@ -191,6 +181,7 @@ exit:
 	return ret;
 }
 
+/* FIXME remove cache */
 gboolean
 ews_esource_utils_remove_esource	(const gchar *fid,
 					 const gchar *account_name,
@@ -215,10 +206,10 @@ ews_esource_utils_remove_esource	(const gchar *fid,
 
 	client = gconf_client_get_default ();
 	source_list = e_source_list_new_for_gconf (client, conf_key);
-	group = ews_ensure_group (source_list, account_name);
+	group = ews_esource_utils_ensure_group (source_list, account_name);
 
 	sources = e_source_group_peek_sources (group);
-	if (!(source = ews_find_source_by_fid (sources, fid))) {
+	if (!(source = ews_find_source_by_matched_prop (sources, "folder-id", fid))) {
 		ret = FALSE;
 		goto exit;
 	}
@@ -272,10 +263,10 @@ ews_source_utils_remove_group (const gchar *account_name, EwsFolderType ftype)
 
 }
 
-gboolean
+void
 ews_esource_utils_remove_groups	(const gchar *account_name)
 {
-	return	ews_source_utils_remove_group (account_name, EWS_FOLDER_TYPE_CALENDAR) &&
-		ews_source_utils_remove_group (account_name, EWS_FOLDER_TYPE_CONTACTS) &&
-		ews_source_utils_remove_group (account_name, EWS_FOLDER_TYPE_TASKS);
+	ews_source_utils_remove_group (account_name, EWS_FOLDER_TYPE_CALENDAR);
+	ews_source_utils_remove_group (account_name, EWS_FOLDER_TYPE_CONTACTS);
+	ews_source_utils_remove_group (account_name, EWS_FOLDER_TYPE_TASKS);
 }

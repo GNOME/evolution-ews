@@ -308,6 +308,7 @@ org_gnome_exchange_ews_check_options(EPlugin *epl, EConfigHookPageCheckData *dat
 	if (url && url->protocol && g_ascii_strcasecmp (url->protocol, "ews") != 0)
 		goto exit;
 
+	/* FIXME pageid is not set while editing an account */
 	if (!data->pageid || !*data->pageid)
 		goto exit;
 
@@ -325,13 +326,13 @@ org_gnome_exchange_ews_check_options(EPlugin *epl, EConfigHookPageCheckData *dat
 			camel_url_free (hurl);
 
 	} else if (!g_ascii_strcasecmp (data->pageid, "20.receive_options")) {
-		const gchar *marked_for_offline, *oab_selected;	
+		const gchar *marked_for_offline, *oal_selected;	
 
 		/* If GAL is marked for caching, an OAL (offline address list) should be selected */
 		marked_for_offline = camel_url_get_param (url, "oab_offline");
 		if (marked_for_offline && !strcmp (marked_for_offline, "1")) {
-			oab_selected = camel_url_get_param (url, "oab_selected");
-			if (!oab_selected || !*oab_selected)
+			oal_selected = camel_url_get_param (url, "oal_selected");
+			if (!oal_selected || !*oal_selected)
 				status = FALSE;
 		}
 	}
@@ -436,7 +437,10 @@ ews_oal_list_ready (GObject *obj, GAsyncResult *res, gpointer user_data)
 		/* Re-activate fetch button since we were not able to fetch the list */
 		gtk_widget_set_sensitive (GTK_WIDGET (cbdata->fetch_button), TRUE);
 		g_object_unref (cnc);
+		return;
 	}
+	cbdata->oals = oals;
+
 	g_signal_handlers_block_by_func (cbdata->combo_text, combo_selection_changed, cbdata);
 	clear_combo (GTK_COMBO_BOX_TEXT (cbdata->combo_text));
 	g_signal_handlers_unblock_by_func (cbdata->combo_text, combo_selection_changed, cbdata);
@@ -449,7 +453,6 @@ ews_oal_list_ready (GObject *obj, GAsyncResult *res, gpointer user_data)
 
 	gtk_combo_box_set_active (GTK_COMBO_BOX (cbdata->combo_text), 0);
 
-	cbdata->oals = oals;
 	g_object_unref (cnc);
 }
 
@@ -535,7 +538,9 @@ init_widgets (struct _oab_setting_data *cbdata)
 	if (marked_for_offline && !strcmp (marked_for_offline, "1")) {
 		const gchar *selected_list;
 
+		g_signal_handlers_block_by_func (cbdata->check, cache_setting_toggled, cbdata);
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cbdata->check), TRUE);
+		g_signal_handlers_unblock_by_func (cbdata->check, cache_setting_toggled, cbdata);
 
 		/* selected list will be of form "id:name" */
 		selected_list = camel_url_get_param (url, "oal_selected");

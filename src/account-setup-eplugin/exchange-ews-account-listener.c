@@ -36,6 +36,7 @@
 #include <camel/camel.h>
 #include <libedataserver/e-account.h>
 #include <libedataserver/e-account-list.h>
+#include <libebook/e-book.h>
 #include <camel-ews-utils.h>
 
 #include "exchange-ews-account-listener.h"
@@ -55,6 +56,9 @@ struct _ExchangeEWSAccountListenerPrivate {
 };
 
 typedef struct _EwsAccountInfo EwsAccountInfo;
+
+static void
+ews_account_added (EAccountList *account_listener, EAccount *account);
 
 struct _EwsAccountInfo {
 	gchar *uid;
@@ -145,6 +149,122 @@ ews_account_removed (EAccountList *account_listener, EAccount *account)
 	EVO3(g_object_unref (store);)
 }
 
+static gboolean
+ews_is_str_equal (const gchar *str1, const gchar *str2)
+{
+	if (str1 && str2 && !strcmp (str1, str2))
+		return TRUE;
+	else if (!str1 && !str2)
+		return TRUE;
+	else
+		return FALSE;
+}
+
+static gboolean
+remove_gal_esource (const gchar *account_name)
+{
+	ESourceList *source_list;
+	ESourceGroup *group;
+	ESource *source;
+	GConfClient* client;
+	const gchar *conf_key;
+	GSList *sources;
+	gboolean ret = TRUE;
+	EBook *book;
+	GError *error = NULL;
+
+	conf_key = CONTACT_SOURCES;
+	client = gconf_client_get_default ();
+	source_list = e_source_list_new_for_gconf (client, conf_key);
+	group = ews_esource_utils_ensure_group (source_list, account_name);
+
+	sources = e_source_group_peek_sources (group);
+	if (!(source = ews_find_source_by_matched_prop (sources, "gal", "1"))) {
+		ret = FALSE;
+		goto exit;
+	}
+
+	book = e_book_new (source, &error);
+	if (book) {
+		e_book_remove (book, &error);
+		g_object_unref (book);
+	}
+
+	e_source_group_remove_source (group, source);
+	e_source_list_sync (source_list, NULL);
+
+exit:
+	g_object_unref (group);
+	g_object_unref (source_list);
+	g_object_unref (client);
+
+	if (error) {
+		g_warning ("Unable to remove GAL cache : %s \n", error->message);
+		g_clear_error (&error);
+	}
+
+	return ret;
+}
+
+/* add gal esource. If oal is not selected, gal will be just used for auto-completion */
+static void
+add_gal_esource (CamelURL *url)
+{
+	ESourceList *source_list;
+	ESourceGroup *group;
+	ESource *source;
+	GConfClient* client;
+	const gchar *conf_key, *email_id;
+	const gchar *oal_sel, *tmp, *oal_name;
+	gchar *source_uri, *oal_id = NULL;
+
+	conf_key = CONTACT_SOURCES;
+	client = gconf_client_get_default ();
+	source_list = e_source_list_new_for_gconf (client, conf_key);
+	email_id = camel_url_get_param (url, "email");
+	oal_sel = camel_url_get_param (url, "oal_selected");
+
+	/* if oal is not selected, gal just performs auto-completion and does not cache GAL */	
+	if (oal_sel) {
+		tmp = strrchr (oal_sel, ':');
+		oal_name = tmp + 1;
+		oal_id = g_strndup (oal_sel, (tmp - oal_sel));
+	} else
+		oal_name = _("Global Address list");
+
+	/* hmm is it the right way to do ? */
+	source_uri = g_strdup_printf("ewsgal://%s/gal", oal_id ? oal_id : "nodownload");
+	source = e_source_new_with_absolute_uri (oal_name, source_uri);
+	
+	/* set properties */
+	e_source_set_property (source, "username", url->user);
+	e_source_set_property (source, "auth-domain", "Ews");
+	e_source_set_property (source, "email", email_id);
+	e_source_set_property (source, "gal", "1");
+	e_source_set_property (source, "delete", "no");
+	e_source_set_color_spec (source, "#EEBC60");
+
+	if (oal_sel)
+		e_source_set_property (source, "oal_id", oal_id);
+
+	e_source_set_property (source, "auth", "plain/password");
+	e_source_set_property (source, "completion", "true");
+
+	/* add the source to group and sync */
+	group = ews_esource_utils_ensure_group (source_list, email_id);
+	e_source_group_add_source (group, source, -1);
+	e_source_list_sync (source_list, NULL);
+
+	g_object_unref (source);
+	g_object_unref (group);
+	g_object_unref (source_list);
+	g_object_unref (client);
+	g_free (oal_id);
+	g_free (source_uri);
+
+	return;
+}
+
 static void
 ews_account_changed (EAccountList *account_listener, EAccount *account)
 {
@@ -157,15 +277,40 @@ ews_account_changed (EAccountList *account_listener, EAccount *account)
 		existing_account_info = lookup_account_info (account->uid);
 
 	if (existing_account_info == NULL && ews_account && account->enabled) {
-		EwsAccountInfo *info = ews_account_info_from_eaccount (account);
-		ews_accounts = g_list_append (ews_accounts, info);
+		ews_account_added (account_listener, account);
 	} else if (existing_account_info != NULL && !ews_account)
 		ews_account_removed (account_listener, account);
 	else if (existing_account_info != NULL && ews_account) {
 		if (!account->enabled)
 			ews_account_removed (account_listener, account);
 		else {
+			CamelURL *old_url, *new_url;
+			const gchar *o_oal_sel, *n_oal_sel;
+			
 			/* TODO update props like refresh timeout */
+			old_url = camel_url_new (existing_account_info->source_url, NULL);
+			new_url = camel_url_new (account->source->url, NULL);
+
+			o_oal_sel = camel_url_get_param (old_url, "oal_selected");
+			n_oal_sel = camel_url_get_param (new_url, "oal_selected");
+
+			if (!ews_is_str_equal (o_oal_sel, n_oal_sel)) {
+				const gchar *account_name = camel_url_get_param (new_url, "email");
+				
+				/* remove gal esource and cache associated with it */
+				remove_gal_esource (account_name);
+			
+				/* add gal esource */
+				add_gal_esource (new_url);
+			}
+			
+			g_free (existing_account_info->name);
+			g_free (existing_account_info->source_url);
+			existing_account_info->name = g_strdup (account->name);
+			existing_account_info->source_url = g_strdup (account->source->url);
+
+			camel_url_free (old_url);
+			camel_url_free (new_url);
 		}
 	}
 }
@@ -178,8 +323,16 @@ ews_account_added (EAccountList *account_listener, EAccount *account)
 	ews_account = is_ews_account (account);
 
 	if (ews_account) {
+		CamelURL *url;
+
 		EwsAccountInfo *info = ews_account_info_from_eaccount (account);
 		ews_accounts = g_list_append (ews_accounts, info);
+		url = camel_url_new (account->source->url, NULL);
+		
+		/* add gal esource */
+		add_gal_esource (url);
+
+		camel_url_free (url);
 	}
 }
 

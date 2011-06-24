@@ -20,9 +20,17 @@
 #ifndef EWS_ESOURCE_UTILS_H
 #define EWS_ESOURCE_UTILS_H
 
+#include <libedataserver/e-source-list.h>
 #include <e-ews-folder.h>
 
 G_BEGIN_DECLS
+
+#define EWS_BASE_URI   "ews://"
+#define CALENDAR_SOURCES "/apps/evolution/calendar/sources"
+#define TASKS_SOURCES "/apps/evolution/tasks/sources"
+#define SELECTED_CALENDARS "/apps/evolution/calendar/display/selected_calendars"
+#define SELECTED_TASKS   "/apps/evolution/calendar/tasks/selected_tasks"
+#define CONTACT_SOURCES     "/apps/evolution/addressbook/sources"
 
 gboolean
 ews_esource_utils_add_esource	(EEwsFolder *folder,
@@ -38,11 +46,17 @@ ews_esource_utils_remove_esource
 				 const gchar *account_name,
 				 EwsFolderType ftype);
 
-gboolean
+void
 ews_esource_utils_remove_groups	(const gchar *account_name);
 
 gboolean
 ews_source_utils_remove_group (const gchar *account_name, EwsFolderType ftype);
+
+ESource *
+ews_find_source_by_matched_prop (GSList *sources, const gchar *prop, const gchar *val);
+
+ESourceGroup *
+ews_esource_utils_ensure_group (ESourceList *source_list, const gchar *account_name);
 
 G_END_DECLS
 
