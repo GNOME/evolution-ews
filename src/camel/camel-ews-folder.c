@@ -183,7 +183,7 @@ ews_get_calendar_mime_part (CamelMimePart* mimepart)
 }
 
 static gchar *
-ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId* item_id, GError **error)
+ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId* item_id, gboolean is_calendar_UID, GError **error)
 {
 	CamelMimeParser *mimeparser;
 	CamelMimeMessage *msg;
@@ -237,11 +237,18 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId
 		ba = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (tmpstream));
 		g_byte_array_append (ba, (guint8 *) "\0", 1);
 		icalcomp = icalparser_parse_string ((gchar *) ba->data);
-		icalcomponent_set_uid (icalcomp, (gchar *) item_id->id);
 		subcomp = icalcomponent_get_first_component (icalcomp, ICAL_VEVENT_COMPONENT);
 		icalprop = icalproperty_new_x (item_id->change_key);
 		icalproperty_set_x_name (icalprop, "X-EVOLUTION-CHANGEKEY");
 		icalcomponent_add_property (subcomp, icalprop);
+		if (is_calendar_UID){
+			icalcomponent_set_uid (icalcomp, (gchar *) item_id->id);
+		}
+		else {
+			icalprop = icalproperty_new_x (item_id->id);
+			icalproperty_set_x_name (icalprop, "X-EVOLUTION-ACCEPT-ID");
+			icalcomponent_add_property (subcomp, icalprop);
+		}
 		calstring_new = icalcomponent_as_ical_string_r (icalcomp);
 		camel_mime_part_set_content (mimepart,
 					     (const gchar*) calstring_new, strlen (calstring_new),
@@ -387,6 +394,7 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 		e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_MEETING_RESPONSE) {
 		GSList *items_req = NULL;
 		const EwsId *calendar_item_accept_id;
+		gboolean is_calendar_UID = TRUE;
 
 		// Get AssociatedCalendarItemId with second get_items call
 		res = e_ews_connection_get_items (cnc, pri, ids, "IdOnly", "meeting:AssociatedCalendarItemId",
@@ -406,8 +414,9 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 		/*In case of non-exchange based meetings invites the calendar backend have to create the meeting*/
 		if (!calendar_item_accept_id) {
 			calendar_item_accept_id = e_ews_item_get_id (items->data);
+			is_calendar_UID = FALSE;
 		}
-		mime_fname_new = ews_update_mgtrequest_mime_calendar_itemid (mime_content, calendar_item_accept_id, error);
+		mime_fname_new = ews_update_mgtrequest_mime_calendar_itemid (mime_content, calendar_item_accept_id, is_calendar_UID, error);
 		if (mime_fname_new)
 			mime_content = (const gchar *) mime_fname_new;
 
