@@ -1876,6 +1876,8 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 				g_free (item_id);
 				g_free (change_key);
 				g_free (accept_data);
+				/*We have to run sync before any other operations */
+				ews_start_sync (cbews);
 				break;
 			case ICAL_METHOD_CANCEL:
 				recurrence_id = icalcomponent_get_first_property (subcomp, ICAL_RECURRENCEID_PROPERTY);
