@@ -241,9 +241,11 @@ add_gal_esource (CamelURL *url)
 	e_source_set_property (source, "auth-domain", "Ews");
 	e_source_set_property (source, "email", email_id);
 	e_source_set_property (source, "gal", "1");
+	e_source_set_property (source, "hosturl", camel_url_get_param (url, "hosturl"));
 	e_source_set_property (source, "delete", "no");
 	e_source_set_color_spec (source, "#EEBC60");
 
+	/* If oal_id is present it means the GAL is marked for offline usage, we do not check for offline_sync property */
 	if (oal_sel)
 		e_source_set_property (source, "oal_id", oal_id);
 

@@ -1,0 +1,900 @@
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
+
+/* e-book-backend-ews-gal.c - EwsGal contact backend.
+ *
+ * Copyright (C) 1999-2008 Novell, Inc. (www.novell.com)
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of version 2 of the GNU Lesser General Public
+ * License as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program; if not, write to the
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ *
+ */
+
+#include <config.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <time.h>
+#include <unistd.h>
+#include <errno.h>
+
+#include <glib.h>
+#include <glib/gstdio.h>
+#include <glib/gi18n-lib.h>
+
+#include "libedataserver/e-sexp.h"
+#include "libedataserver/e-data-server-util.h"
+#include "libedataserver/e-flag.h"
+#include "libedataserver/e-url.h"
+#include "libebook/e-contact.h"
+#include "libebook/e-destination.h"
+#include "libedata-book/e-book-backend-sexp.h"
+#include "libedata-book/e-data-book.h"
+#include "libedata-book/e-data-book-view.h"
+#include "e-book-backend-ews-gal.h"
+#include "e-book-backend-sqlitedb.h"
+
+#include "e-ews-message.h"
+#include "e-ews-connection.h"
+#include "e-ews-item.h"
+
+#define EDB_ERROR(_code) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, NULL)
+#define EDB_ERROR_EX(_code,_msg) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, _msg)
+#define EDB_ERROR_FAILED_STATUS(_code, _status) e_data_book_create_error_fmt (E_DATA_BOOK_STATUS_ ## _code, "Failed with status 0x%x", _status)
+
+G_DEFINE_TYPE (EBookBackendEwsGal, e_book_backend_ews_gal, E_TYPE_BOOK_BACKEND)
+
+GList *supported_fields = NULL;
+
+typedef struct {
+	GCond *cond;
+	GMutex *mutex;
+	gboolean exit;
+} SyncDelta;
+
+struct _EBookBackendEwsGalPrivate {
+	EEwsConnection *cnc;
+	gchar *oal_id;
+
+	EBookBackendSqliteDB *ebsdb;
+
+	gboolean only_if_exists;
+	gboolean marked_for_offline;
+	gboolean cache_ready;
+	gint mode;
+
+	GHashTable *ops;
+
+	GStaticRecMutex rec_mutex;
+	GThread *dthread;
+	SyncDelta *dlock;
+};
+
+#define EWS_GAL_MAX_FETCH_COUNT 500
+#define REFRESH_INTERVAL 600000
+
+#define PRIV_LOCK(p)   (g_static_rec_mutex_lock (&(p)->rec_mutex))
+#define PRIV_UNLOCK(p) (g_static_rec_mutex_unlock (&(p)->rec_mutex))
+
+static void
+e_book_backend_ews_gal_create_contact	(EBookBackend *backend,
+					 EDataBook *book,
+					 guint32 opid,
+					 const gchar *vcard )
+{
+	e_data_book_respond_create (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
+}
+
+static void
+e_book_backend_ews_gal_remove_contacts	(EBookBackend *backend,
+					 EDataBook    *book,
+					 guint32 opid,
+					 GList *id_list)
+{
+	e_data_book_respond_remove_contacts (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
+}
+
+
+static void
+e_book_backend_ews_gal_modify_contact	(EBookBackend *backend,
+					 EDataBook    *book,
+					 guint32       opid,
+					 const gchar   *vcard)
+{
+	e_data_book_respond_modify (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
+}
+
+static void
+e_book_backend_ews_gal_get_contact	(EBookBackend *backend,
+				 EDataBook    *book,
+				 guint32       opid,
+				 const gchar   *id)
+{
+	EBookBackendEwsGal *gwb;
+
+	gwb =  E_BOOK_BACKEND_EWS_GAL (backend);
+
+	switch (gwb->priv->mode) {
+
+	case E_DATA_BOOK_MODE_LOCAL :
+		e_data_book_respond_get_contact (book, opid, EDB_ERROR (CONTACT_NOT_FOUND), "");
+		return;
+
+	case E_DATA_BOOK_MODE_REMOTE :
+		if (gwb->priv->cnc == NULL) {
+			e_data_book_respond_get_contact (book, opid, e_data_book_create_error_fmt (E_DATA_BOOK_STATUS_OTHER_ERROR, "Not connected"), NULL);
+			return;
+		}
+		e_data_book_respond_get_contact (book, opid, EDB_ERROR (CONTACT_NOT_FOUND), "");
+		return;
+	default :
+		break;
+	}
+}
+
+static void
+e_book_backend_ews_gal_get_contact_list	(EBookBackend *backend,
+					 EDataBook    *book,
+					 guint32       opid,
+					 const gchar   *query )
+{
+	GList *vcard_list;
+	EBookBackendEwsGal *egwb;
+
+	egwb = E_BOOK_BACKEND_EWS_GAL (backend);
+	vcard_list = NULL;
+
+	switch (egwb->priv->mode) {
+
+	case E_DATA_BOOK_MODE_LOCAL :
+
+		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (SUCCESS), vcard_list);
+		return;
+
+	case E_DATA_BOOK_MODE_REMOTE:
+
+		if (egwb->priv->cnc == NULL) {
+			e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
+			return;
+		}
+
+		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (SUCCESS), vcard_list);
+		return;
+	default :
+		break;
+
+	}
+}
+
+static gboolean
+ebews_start_sync	(gpointer data)
+{
+	/* TODO cache the gal contents */
+	
+	return TRUE;
+}
+
+static gpointer
+delta_thread (gpointer data)
+{
+	EBookBackendEwsGal *ebews = data;
+	EBookBackendEwsGalPrivate *priv = ebews->priv;
+	GTimeVal timeout;
+
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 0;
+
+	while (TRUE)	{
+		gboolean succeeded = ebews_start_sync (ebews);
+
+		g_mutex_lock (priv->dlock->mutex);
+
+		if (!succeeded || priv->dlock->exit)
+			break;
+
+		g_get_current_time (&timeout);
+		g_time_val_add (&timeout, REFRESH_INTERVAL * 1000);
+		g_cond_timed_wait (priv->dlock->cond, priv->dlock->mutex, &timeout);
+
+		if (priv->dlock->exit)
+			break;
+
+		g_mutex_unlock (priv->dlock->mutex);
+	}
+
+	g_mutex_unlock (priv->dlock->mutex);
+	priv->dthread = NULL;
+	return NULL;
+}
+
+static gboolean
+fetch_deltas (EBookBackendEwsGal *ebews)
+{
+	EBookBackendEwsGalPrivate *priv = ebews->priv;
+	GError *error = NULL;
+
+	/* If the thread is already running just return back */
+	if (priv->dthread)
+		return FALSE;
+
+	if (!priv->dlock) {
+		priv->dlock = g_new0 (SyncDelta, 1);
+		priv->dlock->mutex = g_mutex_new ();
+		priv->dlock->cond = g_cond_new ();
+	}
+
+	priv->dlock->exit = FALSE;
+	priv->dthread = g_thread_create ((GThreadFunc) delta_thread, ebews, TRUE, &error);
+	if (!priv->dthread) {
+		g_warning (G_STRLOC ": %s", error->message);
+		g_error_free (error);
+	}
+
+	return TRUE;
+}
+
+static void
+ebews_start_refreshing (EBookBackendEwsGal *ebews)
+{
+	EBookBackendEwsGalPrivate *priv;
+
+	priv = ebews->priv;
+
+	PRIV_LOCK (priv);
+
+	if	(priv->mode == E_DATA_BOOK_MODE_REMOTE &&
+		 priv->cnc && priv->marked_for_offline)
+				fetch_deltas (ebews);
+
+	PRIV_UNLOCK (priv);
+}
+
+static void
+fetch_from_offline (EBookBackendEwsGal *ews, EDataBookView *book_view, const gchar *query, GError *error)
+{
+	GSList *contacts, *l;
+	EBookBackendEwsGalPrivate *priv;
+
+	priv = ews->priv;
+
+	contacts = e_book_backend_sqlitedb_search (priv->ebsdb, priv->oal_id, query, NULL, &error);
+	for (l = contacts; l != NULL; l = g_slist_next (l)) {
+		EbSdbSearchData *s_data = (EbSdbSearchData *) l->data;
+
+		/* reset vcard to NULL as it would be free'ed in prefiltered_vcard function */
+		e_data_book_view_notify_update_prefiltered_vcard (book_view, s_data->uid, s_data->vcard);
+		s_data->vcard = NULL;
+
+		e_book_backend_sqlitedb_search_data_free (s_data);
+	}
+
+	g_slist_free (contacts);
+	e_data_book_view_notify_complete (book_view, error);
+	e_data_book_view_unref (book_view);
+}
+
+typedef struct {
+	/* For future use */
+	gpointer restriction;
+
+	gboolean is_query_handled;
+	gboolean is_autocompletion;
+	gchar *auto_comp_str;
+} EBookBackendEwsSExpData;
+
+static ESExpResult *
+func_not (ESExp *f, gint argc, ESExpResult **argv, gpointer data)
+{
+	ESExpResult *r;
+
+	if (argc != 1 || argv[0]->type != ESEXP_RES_UNDEFINED) {
+		e_sexp_fatal_error (f, "parse error");
+		return NULL;
+	}
+
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = FALSE;
+
+	return r;
+}
+
+static ESExpResult *
+func_and_or (ESExp *f, gint argc, ESExpResult **argv, gpointer and)
+{
+	ESExpResult *r;
+
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = FALSE;
+
+	return r;
+}
+
+/* TODO implement */
+static ESExpResult *
+func_is (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer data)
+{
+	ESExpResult *r;
+	EBookBackendEwsSExpData *sdata = data;
+
+	if (argc != 2
+	    && argv[0]->type != ESEXP_RES_STRING
+	    && argv[1]->type != ESEXP_RES_STRING) {
+		e_sexp_fatal_error (f, "parse error");
+		return NULL;
+	}
+
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = FALSE;
+
+	sdata->is_query_handled = FALSE;
+	return r;
+}
+
+/* TODO implement */
+static ESExpResult *
+func_endswith (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer data)
+{
+	ESExpResult *r;
+	EBookBackendEwsSExpData *sdata = data;
+
+	if (argc != 2
+	    && argv[0]->type != ESEXP_RES_STRING
+	    && argv[1]->type != ESEXP_RES_STRING) {
+		e_sexp_fatal_error (f, "parse error");
+		return NULL;
+	}
+
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = FALSE;
+
+	sdata->is_query_handled = FALSE;
+	return r;
+
+}
+
+/* TODO implement */
+static ESExpResult *
+func_contains (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer data)
+{
+	ESExpResult *r;
+	EBookBackendEwsSExpData *sdata = data;
+
+	if (argc != 2
+	    && argv[0]->type != ESEXP_RES_STRING
+	    && argv[1]->type != ESEXP_RES_STRING) {
+		e_sexp_fatal_error (f, "parse error");
+		return NULL;
+	}
+
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = FALSE;
+
+	sdata->is_query_handled = FALSE;
+	return r;
+
+}
+
+/* We are just handling for autocompletion now. We need to support other fields after implementing
+   Restrictions and find_items request */
+static ESExpResult *
+func_beginswith (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer data)
+{
+	ESExpResult *r;
+	gchar *propname, *str;
+	EBookBackendEwsSExpData *sdata = data;
+
+	if (argc != 2 ||
+	    argv[0]->type != ESEXP_RES_STRING ||
+	    argv[1]->type != ESEXP_RES_STRING) {
+		e_sexp_fatal_error (f, "parse error");
+		return NULL;
+	}
+
+	propname = argv[0]->value.string;
+	str = argv[1]->value.string;
+
+	if (!strcmp (propname, "full_name") || !strcmp (propname, "email")) {
+		if (!sdata->auto_comp_str) {
+			sdata->auto_comp_str = g_strdup (str);
+			sdata->is_autocompletion = TRUE;
+		}
+	}
+
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = FALSE;
+	return r;
+}
+
+static struct {
+	const gchar *name;
+	ESExpFunc *func;
+	guint flags;
+} symbols[] = {
+	{ "and", func_and_or, 0 },
+	{ "or", func_and_or, 0},
+	{ "not", func_not, 0 },
+	{ "contains", func_contains, 0},
+	{ "is", func_is, 0},
+	{ "beginswith", func_beginswith, 0},
+	{ "endswith", func_endswith, 0},
+};
+
+static gpointer
+ews_gal_get_autocompletion_str_from_query (const gchar *query, gboolean *autocompletion, gchar **auto_comp_str)
+{
+	ESExpResult *r;
+	ESExp *sexp;
+	EBookBackendEwsSExpData *sdata;
+	gint i;
+
+	sexp = e_sexp_new ();
+	sdata = g_new0 (EBookBackendEwsSExpData, 1);
+
+	sdata->is_query_handled = TRUE;
+
+	for (i = 0; i < G_N_ELEMENTS (symbols); i++) {
+		e_sexp_add_function (sexp, 0, (gchar *) symbols[i].name,
+				     symbols[i].func,
+				     sdata);
+	}
+
+	e_sexp_input_text (sexp, query, strlen (query));
+	e_sexp_parse (sexp);
+
+	r = e_sexp_eval (sexp);
+	if (r) {
+		*autocompletion = sdata->is_autocompletion;
+		*auto_comp_str = sdata->auto_comp_str;
+	}
+
+	e_sexp_result_free (sexp, r);
+	e_sexp_unref (sexp);
+	g_free (sdata);
+
+	return NULL;
+}
+
+
+static void
+e_book_backend_ews_gal_start_book_view (EBookBackend  *backend,
+				     EDataBookView *book_view)
+{
+	EBookBackendEwsGal *ebews;
+	EBookBackendEwsGalPrivate *priv;
+	const gchar *query;
+	gboolean is_autocompletion = FALSE;
+	gchar *auto_comp_str = NULL;
+	GCancellable *cancellable;
+	GSList *mailboxes = NULL, *l;
+	GError *error = NULL;
+	gboolean includes_last_item;
+	ESource *source;
+
+	ebews = E_BOOK_BACKEND_EWS_GAL (backend);
+	priv = ebews->priv;
+	query = e_data_book_view_get_card_query (book_view);
+
+	e_data_book_view_ref (book_view);
+	e_data_book_view_notify_status_message (book_view, _("Searching..."));
+
+	switch (priv->mode) {
+	case E_DATA_BOOK_MODE_LOCAL:
+		if (priv->marked_for_offline && e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->oal_id, NULL)) {
+			fetch_from_offline (ebews, book_view, query, error);
+			return;
+		}
+
+		error = EDB_ERROR (OFFLINE_UNAVAILABLE);
+		e_data_book_view_notify_complete (book_view, error);
+		g_error_free (error);
+		return;
+	case E_DATA_BOOK_MODE_REMOTE:
+		if (!priv->cnc) {
+			error = EDB_ERROR (AUTHENTICATION_REQUIRED);
+			e_book_backend_notify_auth_required (backend);
+			e_data_book_view_notify_complete (book_view, error);
+			e_data_book_view_unref (book_view);
+			g_error_free (error);
+			return;
+		}
+
+		ebews_start_refreshing (ebews);
+
+		if (priv->marked_for_offline && e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->oal_id, NULL)) {
+			fetch_from_offline (ebews, book_view, query, error);
+			return;
+		}
+		
+		/* Only autocompletion query is supported in online query. */
+		ews_gal_get_autocompletion_str_from_query (query, &is_autocompletion, &auto_comp_str);
+		if (!is_autocompletion || !auto_comp_str) {
+			error = g_error_new 	(E_DATA_BOOK_ERROR, E_DATA_BOOK_STATUS_OTHER_ERROR, 
+						 _("Only auto-completion is supported for online query. Other queries are supported after gal is cached"));
+			g_free (auto_comp_str);
+			e_data_book_view_notify_complete (book_view, error);
+			e_data_book_view_unref (book_view);
+			return;
+		}
+
+		source = e_book_backend_get_source (backend);
+		cancellable = g_cancellable_new ();
+
+		/* We do not scan until we reach the last_item as it might be good enough to show first 100
+		   items during auto-completion. Change it if needed */
+		g_hash_table_insert (priv->ops, book_view, cancellable);
+		e_ews_connection_resolve_names	(priv->cnc, EWS_PRIORITY_MEDIUM, auto_comp_str,
+						 EWS_SEARCH_AD, NULL, FALSE, &mailboxes, NULL,
+						 &includes_last_item, cancellable, &error);
+		g_free (auto_comp_str);
+		g_hash_table_remove (priv->ops, book_view);
+		if (error != NULL) {
+			e_data_book_view_notify_complete (book_view, error);
+			e_data_book_view_unref (book_view);
+			g_clear_error (&error);
+			return;
+		}
+
+		for (l = mailboxes; l != NULL; l = g_slist_next (l)) {
+			EwsMailbox *mb = l->data;
+			EContact *contact;
+
+			contact = e_contact_new ();
+
+			/* We do not get an id from the server, so just using email_id as uid for now */
+			e_contact_set (contact, E_CONTACT_UID, mb->email);
+			e_contact_set (contact, E_CONTACT_FULL_NAME, mb->name);
+			e_contact_set (contact, E_CONTACT_EMAIL_1, mb->email);
+
+			e_data_book_view_notify_update (book_view, contact);
+
+			g_free (mb->email);
+			g_free (mb->name);
+			g_free (mb);
+			g_object_unref (contact);
+		}
+
+		g_slist_free (mailboxes);
+		e_data_book_view_notify_complete (book_view, error);
+		e_data_book_view_unref (book_view);
+	default:
+		break;
+	}
+}
+
+static void
+e_book_backend_ews_gal_stop_book_view (EBookBackend  *backend,
+					 EDataBookView *book_view)
+{
+	EBookBackendEwsGal *bews = E_BOOK_BACKEND_EWS_GAL (backend);
+	EBookBackendEwsGalPrivate *priv = bews->priv;
+	GCancellable *cancellable;
+
+	cancellable = g_hash_table_lookup (priv->ops, book_view);
+	if (cancellable) {
+		g_cancellable_cancel (cancellable);
+		g_hash_table_remove (priv->ops, book_view);
+	}
+}
+
+static void
+e_book_backend_ews_gal_get_changes (EBookBackend *backend,
+				      EDataBook    *book,
+				      guint32       opid,
+				      const gchar *change_id)
+{
+}
+
+static void
+e_book_backend_ews_gal_authenticate_user (EBookBackend *backend,
+					    EDataBook    *book,
+					    guint32       opid,
+					    const gchar *user,
+					    const gchar *passwd,
+					    const gchar *auth_method)
+{
+	EBookBackendEwsGal *ebgw;
+	EBookBackendEwsGalPrivate *priv;
+	ESource *esource;
+	GError *error = NULL;
+	const gchar *host_url;
+
+	ebgw = E_BOOK_BACKEND_EWS_GAL (backend);
+	priv = ebgw->priv;
+
+	switch (ebgw->priv->mode) {
+	case E_DATA_BOOK_MODE_LOCAL:
+		e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (SUCCESS));
+		return;
+
+	case E_DATA_BOOK_MODE_REMOTE:
+		if (priv->cnc) {
+			e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (SUCCESS));
+			return;
+		}
+
+		esource = e_book_backend_get_source (backend);
+		host_url = e_source_get_property (esource, "hosturl");
+
+		priv->cnc = e_ews_connection_new (host_url, user, passwd,
+						  NULL, NULL, &error);
+
+		/* FIXME: Do some dummy request to ensure that the password is actually
+		   correct; don't just blindly return success */
+		e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (SUCCESS));
+		e_book_backend_notify_writable (backend, FALSE);
+		return;
+	default :
+		break;
+	}
+}
+
+static void
+e_book_backend_ews_gal_get_required_fields (EBookBackend *backend,
+					       EDataBook    *book,
+					       guint32       opid)
+{
+	GList *fields = NULL;
+
+	fields = g_list_append (fields, (gchar *)e_contact_field_name (E_CONTACT_FILE_AS));
+	e_data_book_respond_get_supported_fields (book, opid,
+						  EDB_ERROR (SUCCESS),
+						  fields);
+	g_list_free (fields);
+
+}
+
+static void
+e_book_backend_ews_gal_get_supported_fields (EBookBackend *backend,
+					       EDataBook    *book,
+					       guint32       opid)
+{
+	e_data_book_respond_get_supported_fields (book,
+						  opid,
+						  NULL,
+						  supported_fields);
+}
+
+static void
+e_book_backend_ews_gal_cancel_operation (EBookBackend *backend, EDataBook *book, GError **perror)
+{
+
+}
+
+static void
+e_book_backend_ews_gal_load_source 	(EBookBackend *backend,
+				 	 ESource *source,
+					 gboolean only_if_exists,
+					 GError **perror)
+{
+	EBookBackendEwsGal *cbews;
+	EBookBackendEwsGalPrivate *priv;
+	GError *err = NULL;
+
+	cbews = E_BOOK_BACKEND_EWS_GAL (backend);
+	priv = cbews->priv;
+
+	priv->oal_id = e_source_get_duped_property (source, "oal_id");
+
+	/* If oal_id is present it means the GAL is marked for offline usage, we do not check for offline_sync property */
+	if (priv->oal_id) {
+		const gchar *folder_name;
+		const gchar *cache_dir, *email;
+		
+		cache_dir = e_book_backend_get_cache_dir (backend);
+		email = e_source_get_property (source, "email");
+		folder_name = e_source_peek_name (source);
+
+		priv->ebsdb = e_book_backend_sqlitedb_new (cache_dir, email, priv->oal_id, folder_name, FALSE, &err);
+		if (err) {
+			g_propagate_error (perror, err);
+			return;
+		}
+		priv->marked_for_offline = TRUE;
+	}
+
+	e_book_backend_set_is_loaded (backend, TRUE);
+}
+
+static void
+e_book_backend_ews_gal_remove	(EBookBackend *backend,
+				 EDataBook        *book,
+				 guint32           opid)
+{
+	e_data_book_respond_remove (book,  opid, EDB_ERROR (SUCCESS));
+}
+
+static gchar *
+e_book_backend_ews_gal_get_static_capabilities (EBookBackend *backend)
+{
+	/* do-initial-query is enabled for system address book also, so that we get the
+	 * book_view, which is needed for displaying cache update progress.
+	 * and null query is handled for system address book.
+	 */
+	return g_strdup ("net,bulk-removes,do-initial-query,contact-lists");
+}
+
+static void
+e_book_backend_ews_gal_get_supported_auth_methods (EBookBackend *backend, EDataBook *book, guint32 opid)
+{
+	GList *auth_methods = NULL;
+	gchar *auth_method;
+
+	auth_method =  g_strdup_printf ("plain/password");
+	auth_methods = g_list_append (auth_methods, auth_method);
+	e_data_book_respond_get_supported_auth_methods (book,
+							opid,
+							EDB_ERROR (SUCCESS),
+							auth_methods);
+	g_free (auth_method);
+	g_list_free (auth_methods);
+}
+
+static void
+e_book_backend_ews_gal_set_mode (EBookBackend *backend,
+                                   EDataBookMode mode)
+{
+	EBookBackendEwsGal *ebews;
+	EBookBackendEwsGalPrivate *priv;
+
+	ebews = E_BOOK_BACKEND_EWS_GAL (backend);
+	priv = ebews->priv;
+	priv->mode = mode;
+
+	if (e_book_backend_is_loaded (backend)) {
+		if (mode == E_DATA_BOOK_MODE_LOCAL) {
+			e_book_backend_notify_writable (backend, FALSE);
+			e_book_backend_notify_connection_status (backend, FALSE);
+			
+			if (priv->dlock) {
+				g_mutex_lock (priv->dlock->mutex);
+				priv->dlock->exit = TRUE;
+				g_mutex_unlock (priv->dlock->mutex);
+
+				g_cond_signal (priv->dlock->cond);
+			}
+					
+			if (priv->cnc) {
+				g_object_unref (priv->cnc);
+				priv->cnc=NULL;
+			}
+		}
+		else if (mode == E_DATA_BOOK_MODE_REMOTE) {
+			e_book_backend_notify_writable (backend, FALSE);
+			e_book_backend_notify_connection_status (backend, TRUE);
+			e_book_backend_notify_auth_required (backend);
+		}
+	}
+}
+
+/**
+ * e_book_backend_ews_new:
+ */
+EBookBackend *
+e_book_backend_ews_gal_new (void)
+{
+	EBookBackendEwsGal *backend;
+
+	backend = g_object_new (E_TYPE_BOOK_BACKEND_EWS_GAL, NULL);
+
+	return E_BOOK_BACKEND (backend);
+}
+
+static void
+e_book_backend_ews_gal_dispose (GObject *object)
+{
+	EBookBackendEwsGal *bgw;
+        EBookBackendEwsGalPrivate *priv;
+
+	bgw = E_BOOK_BACKEND_EWS_GAL (object);
+        priv = bgw->priv;
+
+	if (priv->cnc) {
+		g_object_unref (priv->cnc);
+		priv->cnc = NULL;
+	}
+
+	if (priv->oal_id) {
+		g_free (priv->oal_id);
+		priv->oal_id = NULL;
+	}
+	
+	if (priv->dlock) {
+		g_mutex_lock (priv->dlock->mutex);
+		priv->dlock->exit = TRUE;
+		g_mutex_unlock (priv->dlock->mutex);
+
+		g_cond_signal (priv->dlock->cond);
+
+		if (priv->dthread)
+			g_thread_join (priv->dthread);
+
+		g_mutex_free (priv->dlock->mutex);
+		g_cond_free (priv->dlock->cond);
+		g_free (priv->dlock);
+		priv->dthread = NULL;
+	}
+
+	if (priv->ebsdb) {
+		g_object_unref (priv->ebsdb);
+		priv->ebsdb = NULL;
+	}
+
+	g_static_rec_mutex_free (&priv->rec_mutex);
+
+	g_free (priv);
+	priv = NULL;
+
+	G_OBJECT_CLASS (e_book_backend_ews_gal_parent_class)->dispose (object);
+}
+
+static void
+e_book_backend_ews_gal_class_init (EBookBackendEwsGalClass *klass)
+{
+
+	GObjectClass  *object_class = G_OBJECT_CLASS (klass);
+	EBookBackendClass *parent_class;
+	gint i;
+
+	parent_class = E_BOOK_BACKEND_CLASS (klass);
+
+	/* Set the virtual methods. */
+	parent_class->load_source             = e_book_backend_ews_gal_load_source;
+	parent_class->get_static_capabilities = e_book_backend_ews_gal_get_static_capabilities;
+	parent_class->remove                  = e_book_backend_ews_gal_remove;
+
+	parent_class->set_mode                = e_book_backend_ews_gal_set_mode;
+	parent_class->get_required_fields     = e_book_backend_ews_gal_get_required_fields;
+	parent_class->get_supported_fields    = e_book_backend_ews_gal_get_supported_fields;
+	parent_class->get_supported_auth_methods = e_book_backend_ews_gal_get_supported_auth_methods;
+
+	parent_class->authenticate_user       = e_book_backend_ews_gal_authenticate_user;
+
+	parent_class->start_book_view         = e_book_backend_ews_gal_start_book_view;
+	parent_class->stop_book_view          = e_book_backend_ews_gal_stop_book_view;
+	parent_class->cancel_operation        = e_book_backend_ews_gal_cancel_operation;
+
+	parent_class->create_contact          = e_book_backend_ews_gal_create_contact;
+	parent_class->remove_contacts         = e_book_backend_ews_gal_remove_contacts;
+	parent_class->modify_contact          = e_book_backend_ews_gal_modify_contact;
+	parent_class->get_contact             = e_book_backend_ews_gal_get_contact;
+	parent_class->get_contact_list        = e_book_backend_ews_gal_get_contact_list;
+
+	parent_class->get_changes             = e_book_backend_ews_gal_get_changes;
+
+	object_class->dispose                 = e_book_backend_ews_gal_dispose;
+
+	/* TODO add only supported fields. For now, we add all the fields */
+	supported_fields = NULL;
+	for (i = 1; i < E_CONTACT_FIELD_LAST; i++) {
+		supported_fields = g_list_append (supported_fields,
+				(gchar *)e_contact_field_name (i));
+	}
+}
+
+static void
+e_book_backend_ews_gal_init (EBookBackendEwsGal *backend)
+{
+	EBookBackendEwsGal *bewsgal;
+	EBookBackendEwsGalPrivate *priv;
+
+	bewsgal = E_BOOK_BACKEND_EWS_GAL (backend);
+
+	priv = g_new0 (EBookBackendEwsGalPrivate, 1);
+	priv->ops = g_hash_table_new (NULL, NULL);
+
+	bewsgal->priv = priv;
+	g_static_rec_mutex_init (&priv->rec_mutex);
+}

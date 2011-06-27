@@ -23,6 +23,8 @@ libebookbackendews_la_SOURCES =			\
 	e-book-backend-sqlitedb.h		\
 	e-book-backend-ews.c			\
 	e-book-backend-ews.h			\
+	e-book-backend-ews-gal.c		\
+	e-book-backend-ews-gal.h		\
 	e-book-backend-ews-factory.c
 
 libebookbackendews_la_LIBADD =				\

@@ -904,6 +904,7 @@ static struct {
 	{ "endswith", func_endswith, 0},
 };
 
+/* FIXME  build a complete filter from the query that can be used by find_items */
 static gpointer
 e_book_backend_ews_build_restriction (const gchar *query, gboolean *autocompletion, gchar **auto_comp_str)
 {
@@ -1307,7 +1308,8 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 		ids = g_slist_append (ids, fid);
 
 		/* We do not scan until we reach the last_item as it might be good enough to show first 100
-		   items during auto-completion. Change it if needed */
+		   items during auto-completion. Change it if needed. TODO, Personal Address-book should start using
+		   find_items rather than resolve_names to support all queries */
 		g_hash_table_insert (priv->ops, book_view, cancellable);
 		e_ews_connection_resolve_names	(priv->cnc, EWS_PRIORITY_MEDIUM, auto_comp_str,
 						 EWS_SEARCH_AD, NULL, FALSE, &mailboxes, NULL,
@@ -1628,6 +1630,11 @@ e_book_backend_ews_dispose (GObject *object)
 		g_cond_free (priv->dlock->cond);
 		g_free (priv->dlock);
 		priv->dthread = NULL;
+	}
+
+	if (priv->ebsdb) {
+		g_object_unref (priv->ebsdb);
+		priv->ebsdb = NULL;
 	}
 
 	g_static_rec_mutex_free (&priv->rec_mutex);
