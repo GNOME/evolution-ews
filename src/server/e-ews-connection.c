@@ -1501,6 +1501,39 @@ e_ews_connection_get_oal_full_detail_finish	(EEwsConnection *cnc,
 
 }
 
+gboolean	
+e_ews_connection_get_oal_full_detail	(EEwsConnection *cnc,
+					 const gchar *oab_url,
+					 const gchar *oal_id,
+					 EwsOALDetails **oal_det,
+					 GCancellable *cancellable,
+					 GError **error)
+{
+	EwsSyncData *sync_data;
+	gboolean result;
+
+	sync_data = g_new0 (EwsSyncData, 1);
+	sync_data->eflag = e_flag_new ();
+
+	e_ews_connection_get_oal_full_detail_start	
+						(cnc, oab_url, oal_id, 
+						 ews_sync_reply_cb,
+						 cancellable,
+						 (gpointer) sync_data);
+
+	e_flag_wait (sync_data->eflag);
+
+	result = e_ews_connection_get_oal_full_detail_finish 
+						(cnc, sync_data->res,
+						 oal_det, error);
+
+	e_flag_free (sync_data->eflag);
+	g_object_unref (sync_data->res);
+	g_free (sync_data);
+
+	return result;
+}
+
 static void
 oal_download_response_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
 {
@@ -1649,6 +1682,40 @@ e_ews_connection_download_oal_file_finish	(EEwsConnection *cnc,
 		return FALSE;
 
 	return TRUE;
+}
+
+gboolean	
+e_ews_connection_download_oal_file	(EEwsConnection *cnc,
+					 const gchar *url,
+					 const gchar *cache_filename,
+					 EwsProgressFn progress_fn,
+					 gpointer progress_data,
+					 GCancellable *cancellable,
+					 GError **error)
+{
+	EwsSyncData *sync_data;
+	gboolean result;
+
+	sync_data = g_new0 (EwsSyncData, 1);
+	sync_data->eflag = e_flag_new ();
+
+	e_ews_connection_download_oal_file_start
+						(cnc, url, cache_filename, 
+						 ews_sync_reply_cb,
+						 progress_fn, progress_data,
+						 cancellable, sync_data);
+
+	e_flag_wait (sync_data->eflag);
+
+	result = e_ews_connection_download_oal_file_finish
+						(cnc, sync_data->res,
+						 error);
+
+	e_flag_free (sync_data->eflag);
+	g_object_unref (sync_data->res);
+	g_free (sync_data);
+
+	return result;
 }
 
 void

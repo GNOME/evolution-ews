@@ -580,6 +580,13 @@ gboolean	e_ews_connection_get_oal_full_detail_finish
 						 GAsyncResult *result,
 						 EwsOALDetails **oal_det,
 						 GError **error);
+gboolean	e_ews_connection_get_oal_full_detail 
+						(EEwsConnection *cnc,
+						 const gchar *oab_url,
+						 const gchar *oal_id,
+						 EwsOALDetails **oal_det,
+						 GCancellable *cancellable,
+						 GError **error);
 
 /* Get free-busy status */
 void		e_ews_connection_get_free_busy_start
@@ -615,6 +622,14 @@ void		e_ews_connection_download_oal_file_start
 gboolean	e_ews_connection_download_oal_file_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
+						 GError **error);
+gboolean	e_ews_connection_download_oal_file	
+						(EEwsConnection *cnc,
+						 const gchar *url,
+						 const gchar *cache_filename,
+						 EwsProgressFn progress_fn,
+						 gpointer progress_data,
+						 GCancellable *cancellable,
 						 GError **error);
 
 G_END_DECLS
