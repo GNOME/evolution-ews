@@ -1244,7 +1244,7 @@ static gint
 get_property_as_int (xmlNodePtr node_ptr, const gchar *name)
 {
 	gchar *s;
-	gint val;
+	gint val = -1;
 	
 	s = get_property (node_ptr, name);
 	if (s)
