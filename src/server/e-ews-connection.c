@@ -1391,7 +1391,6 @@ ews_cancel_msg (GCancellable *cancellable,
 
 void		
 e_ews_connection_get_oal_list_start	(EEwsConnection *cnc,
-					 const gchar *oab_url,
 					 GAsyncReadyCallback cb,
 					 GCancellable *cancellable,
 					 gpointer user_data)
@@ -1400,7 +1399,7 @@ e_ews_connection_get_oal_list_start	(EEwsConnection *cnc,
 	SoupMessage *msg;
 	struct _oal_req_data *data;
 
-	msg = e_ews_get_msg_for_url (oab_url, NULL);
+	msg = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
  	
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
                                       cb,
@@ -1444,7 +1443,6 @@ e_ews_connection_get_oal_list_finish	(EEwsConnection *cnc,
 
 void		
 e_ews_connection_get_oal_detail_start	(EEwsConnection *cnc,
-					 const gchar *oab_url,
 					 const gchar *oal_id,
 					 const gchar *oal_element,
 					 GAsyncReadyCallback cb,
@@ -1455,7 +1453,7 @@ e_ews_connection_get_oal_detail_start	(EEwsConnection *cnc,
 	SoupMessage *msg;
 	struct _oal_req_data *data;
 
-	msg = e_ews_get_msg_for_url (oab_url, NULL);
+	msg = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
  	
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
                                       cb,
@@ -1503,7 +1501,6 @@ e_ews_connection_get_oal_detail_finish	(EEwsConnection *cnc,
 
 gboolean	
 e_ews_connection_get_oal_detail	(EEwsConnection *cnc,
-				 const gchar *oab_url,
 				 const gchar *oal_id,
 				 const gchar *oal_element,
 				 GSList **elements,
@@ -1516,7 +1513,7 @@ e_ews_connection_get_oal_detail	(EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_get_oal_detail_start	(cnc, oab_url, oal_id, oal_element,
+	e_ews_connection_get_oal_detail_start	(cnc, oal_id, oal_element,
 						 ews_sync_reply_cb,
 						 cancellable,
 						 (gpointer) sync_data);
@@ -1623,7 +1620,6 @@ ews_soup_got_chunk (SoupMessage *msg, SoupBuffer *chunk, gpointer user_data)
 
 void		
 e_ews_connection_download_oal_file_start	(EEwsConnection *cnc,
-						 const gchar *url,
 						 const gchar *cache_filename,
 						 GAsyncReadyCallback cb,
 						 EwsProgressFn progress_fn,
@@ -1635,7 +1631,7 @@ e_ews_connection_download_oal_file_start	(EEwsConnection *cnc,
 	SoupMessage *msg;
 	struct _oal_req_data *data;
 
-	msg = e_ews_get_msg_for_url (url, NULL);
+	msg = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
 			cb,
@@ -1686,7 +1682,6 @@ e_ews_connection_download_oal_file_finish	(EEwsConnection *cnc,
 
 gboolean	
 e_ews_connection_download_oal_file	(EEwsConnection *cnc,
-					 const gchar *url,
 					 const gchar *cache_filename,
 					 EwsProgressFn progress_fn,
 					 gpointer progress_data,
@@ -1700,7 +1695,7 @@ e_ews_connection_download_oal_file	(EEwsConnection *cnc,
 	sync_data->eflag = e_flag_new ();
 
 	e_ews_connection_download_oal_file_start
-						(cnc, url, cache_filename, 
+						(cnc, cache_filename, 
 						 ews_sync_reply_cb,
 						 progress_fn, progress_data,
 						 cancellable, sync_data);

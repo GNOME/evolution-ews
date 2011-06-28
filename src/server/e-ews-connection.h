@@ -559,7 +559,6 @@ gboolean	e_ews_connection_get_attachments
 
 void		e_ews_connection_get_oal_list_start
 						(EEwsConnection *cnc,
-						 const gchar *oab_url,
 						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
 						 gpointer user_data);
@@ -570,7 +569,6 @@ gboolean	e_ews_connection_get_oal_list_finish
 						 GError **error);
 void		e_ews_connection_get_oal_detail_start
 						(EEwsConnection *cnc,
-						 const gchar *oab_url,
 						 const gchar *oal_id,
 						 const gchar *oal_element,
 						 GAsyncReadyCallback cb,
@@ -583,7 +581,6 @@ gboolean	e_ews_connection_get_oal_detail_finish
 						 GError **error);
 gboolean	e_ews_connection_get_oal_detail 
 						(EEwsConnection *cnc,
-						 const gchar *oab_url,
 						 const gchar *oal_id,
 						 const gchar *oal_element,
 						 GSList **elements,
@@ -613,7 +610,6 @@ gboolean	e_ews_connection_get_free_busy
 						 GCancellable *cancellable,
 void		e_ews_connection_download_oal_file_start
 						(EEwsConnection *cnc,
-						 const gchar *url,
 						 const gchar *cache_filename,
 						 GAsyncReadyCallback cb,
 						 EwsProgressFn progress_fn,
@@ -627,7 +623,6 @@ gboolean	e_ews_connection_download_oal_file_finish
 						 GError **error);
 gboolean	e_ews_connection_download_oal_file	
 						(EEwsConnection *cnc,
-						 const gchar *url,
 						 const gchar *cache_filename,
 						 EwsProgressFn progress_fn,
 						 gpointer progress_data,
