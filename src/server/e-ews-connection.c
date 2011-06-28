@@ -3466,3 +3466,99 @@ get_attachments_response_cb (ESoapParameter *param, EwsNode *enode)
 		}
 	}
 }
+
+static void
+get_free_busy_response_cb (ESoapParameter *param, EwsNode *enode)
+{
+       /*parse the response to create a free_busy data
+        http://msdn.microsoft.com/en-us/library/aa564001%28v=EXCHG.140%29.aspx*/
+}
+
+void
+e_ews_connection_get_free_busy_start (EEwsConnection *cnc,
+				      gint pri,
+				      EEwsRequestCreationCallback free_busy_cb,
+				      gpointer free_busy_user_data,
+				      GAsyncReadyCallback cb,
+				      GCancellable *cancellable,
+				      gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetUserAvailabilityRequest",
+					     NULL, NULL, EWS_EXCHANGE_2007);
+
+	free_busy_cb (msg, free_busy_user_data);
+
+	e_ews_message_write_footer (msg); /*GetUserAvailabilityRequest  */
+
+	simple = g_simple_async_result_new (G_OBJECT (cnc),
+					    cb,
+					    user_data,
+					    e_ews_connection_get_free_busy_start);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+						   simple, async_data, (GDestroyNotify) async_data_free);
+
+	ews_connection_queue_request (cnc, msg, get_free_busy_response_cb, pri,
+				      cancellable, simple, cb == ews_sync_reply_cb);
+}
+
+gboolean
+e_ews_connection_get_free_busy_finish (EEwsConnection *cnc,
+				       GAsyncResult *result,
+				       GSList **free_busy,
+				       GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (
+			      g_simple_async_result_is_valid (
+							      result, G_OBJECT (cnc), e_ews_connection_get_free_busy_start),
+			      FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+	*free_busy = async_data->items;
+
+	return TRUE;
+}
+
+gboolean
+e_ews_connection_get_free_busy (EEwsConnection *cnc,
+				gint pri,
+				EEwsRequestCreationCallback free_busy_cb,
+				gpointer free_busy_user_data,
+				GSList **free_busy,
+				GCancellable *cancellable,
+				GError **error)
+{
+	EwsSyncData *sync_data;
+	gboolean result;
+
+	sync_data = g_new0 (EwsSyncData, 1);
+	sync_data->eflag = e_flag_new ();
+
+	e_ews_connection_get_free_busy_start (cnc, pri,
+					      free_busy_cb, free_busy_user_data,
+					      ews_sync_reply_cb, cancellable,
+					      (gpointer) sync_data);
+
+	e_flag_wait (sync_data->eflag);
+
+	result = e_ews_connection_get_free_busy_finish (cnc, sync_data->res,
+							free_busy, error);
+
+	e_flag_free (sync_data->eflag);
+	g_object_unref (sync_data->res);
+	g_free (sync_data);
+
+	return result;
+}

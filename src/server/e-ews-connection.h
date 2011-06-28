@@ -579,6 +579,28 @@ gboolean	e_ews_connection_get_oal_full_detail_finish
 						 EwsOALDetails **oal_det,
 						 GError **error);
 
+/* Get free-busy status */
+void		e_ews_connection_get_free_busy_start
+						(EEwsConnection *cnc,
+						 gint pri,
+						 EEwsRequestCreationCallback free_busy_cb,
+						 gpointer free_busy_user_data,
+						 GAsyncReadyCallback cb,
+						 GCancellable *cancellable,
+						 gpointer user_data);
+gboolean	e_ews_connection_get_free_busy_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GSList **free_busy,
+						 GError **error);
+gboolean	e_ews_connection_get_free_busy
+						(EEwsConnection *cnc,
+						 gint pri,
+						 EEwsRequestCreationCallback free_busy_cb,
+						 gpointer create_user_data,
+						 GSList **free_busy,
+						 GCancellable *cancellable,
+						 GError **error);
 
 G_END_DECLS
 
