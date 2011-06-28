@@ -110,7 +110,7 @@ typedef struct {
 	gint size;
 	gint uncompressed_size;
 	gchar *sha;
-	gchar *name;
+	gchar *filename;
 } EwsOALDetails;
 
 GType		e_ews_connection_get_type	(void);
@@ -566,6 +566,19 @@ gboolean	e_ews_connection_get_oal_list_finish
 						 GAsyncResult *result,
 						 GSList **oals,
 						 GError **error);
+void		e_ews_connection_get_oal_full_detail_start
+						(EEwsConnection *cnc,
+						 const gchar *oab_url,
+						 const gchar *oal_id,
+						 GAsyncReadyCallback cb,
+						 GCancellable *cancellable,
+						 gpointer user_data);
+gboolean	e_ews_connection_get_oal_full_detail_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 EwsOALDetails **oal_det,
+						 GError **error);
+
 
 G_END_DECLS
 

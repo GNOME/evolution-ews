@@ -1224,6 +1224,7 @@ struct _oal_req_data {
 	SoupMessage *msg;
 	GCancellable *cancellable;
 	gulong cancel_handler_id;
+	gchar *oal_id;
 };
 
 static gchar *
@@ -1239,6 +1240,56 @@ get_property (xmlNodePtr node_ptr, const gchar *name)
 	return s;
 }
 
+static gint
+get_property_as_int (xmlNodePtr node_ptr, const gchar *name)
+{
+	gchar *s;
+	gint val;
+	
+	s = get_property (node_ptr, name);
+	if (s)
+		val = atoi (s);
+	g_free (s);
+
+	return val;
+}
+
+static gchar *
+get_content (xmlNodePtr node_ptr)
+{
+	xmlChar *xml_s;
+	gchar *s;
+
+	xml_s = xmlNodeGetContent (node_ptr);
+	s = g_strdup ((gchar *)xml_s);
+	xmlFree (xml_s);
+
+	return s;
+}
+
+static EwsOALDetails *
+parse_oal_full_details (xmlNode *node)
+{
+	EwsOALDetails *det = NULL;
+	
+	for (node = node->children; node; node = node->next) {
+		if (node->type == XML_ELEMENT_NODE && !strcmp((char *)node->name, "Full")) {
+			det = g_new0 (EwsOALDetails, 1);
+
+			det->seq = get_property_as_int (node, "seq");
+			det->ver = get_property_as_int (node, "ver");
+			det->size = get_property_as_int (node, "size");
+			det->uncompressed_size = get_property_as_int (node, "uncompressedsize");
+			det->sha = get_property (node, "uncompressedsize");
+			det->filename = g_strstrip (get_content (node));
+
+			break; 
+		}
+	}
+
+	return det;
+}
+
 static void
 oal_response_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
 {
@@ -1247,6 +1298,7 @@ oal_response_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
 	xmlDoc *doc;
 	xmlNode *node;
 	struct _oal_req_data *data = (struct _oal_req_data *) user_data;
+	EwsOALDetails *oal_det = NULL;
 	GSList *oals = NULL;
 
 	if (status != 200) {
@@ -1273,20 +1325,36 @@ oal_response_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
 	}
 
 	for (node = node->children; node; node = node->next) {
-		if (node->type == XML_ELEMENT_NODE &&
-		    !strcmp((char *)node->name, "OAL")) {
-			EwsOAL *oal = g_new0 (EwsOAL, 1);
-			
-			oal->id = get_property (node, "id");
-			oal->dn = get_property (node, "dn");
-			oal->name = get_property (node, "name");
+		if (node->type == XML_ELEMENT_NODE && !strcmp((char *)node->name, "OAL")) {
+			if (!data->oal_id) {
+				EwsOAL *oal = g_new0 (EwsOAL, 1);
 
-			oals = g_slist_prepend (oals, oal);
+				oal->id = get_property (node, "id");
+				oal->dn = get_property (node, "dn");
+				oal->name = get_property (node, "name");
+
+				oals = g_slist_prepend (oals, oal);
+			} else {
+				gchar *id = get_property (node, "id");
+				
+				if (!strcmp (id, data->oal_id)) {
+					/* parse details of full_details file */
+					oal_det = parse_oal_full_details (node);
+
+					g_free (id);
+					break;
+				}
+
+				g_free (id);
+			}
 		}
 	}
 
-	oals = g_slist_reverse (oals);
-	g_simple_async_result_set_op_res_gpointer (data->simple, oals, NULL);
+	if (!data->oal_id) {
+		oals = g_slist_reverse (oals);
+		g_simple_async_result_set_op_res_gpointer (data->simple, oals, NULL);
+	} else
+		g_simple_async_result_set_op_res_gpointer (data->simple, oal_det, NULL);
 
 exit:
 	if (data->cancellable)
@@ -1298,6 +1366,7 @@ exit:
 	}
 
 	g_simple_async_result_complete_in_idle (data->simple);
+	g_free (data->oal_id);
 	g_free (data);
 }
 
@@ -1361,6 +1430,65 @@ e_ews_connection_get_oal_list_finish	(EEwsConnection *cnc,
 	*oals= g_simple_async_result_get_op_res_gpointer (simple);
 
 	return TRUE;
+}
+
+void		
+e_ews_connection_get_oal_full_detail_start	(EEwsConnection *cnc,
+						 const gchar *oab_url,
+						 const gchar *oal_id,
+						 GAsyncReadyCallback cb,
+						 GCancellable *cancellable,
+						 gpointer user_data)
+{
+	GSimpleAsyncResult *simple;
+	SoupMessage *msg;
+	struct _oal_req_data *data;
+
+	msg = e_ews_get_msg_for_url (oab_url, NULL);
+ 	
+	simple = g_simple_async_result_new (G_OBJECT (cnc),
+                                      cb,
+                                      user_data,
+                                      e_ews_connection_get_oal_list_start);
+	data = g_new0 (struct _oal_req_data, 1);
+	data->cnc = cnc;
+	data->simple = simple;
+	data->cancellable = cancellable;
+	data->msg = msg;
+	
+	if (oal_id)
+		data->oal_id = g_strdup (oal_id);
+	
+	if (cancellable)
+		data->cancel_handler_id = g_cancellable_connect	(cancellable,
+							 	 G_CALLBACK (ews_cancel_msg), (gpointer) data, NULL);
+	soup_session_queue_message (cnc->priv->soup_session, msg,
+				    oal_response_cb, data);
+
+}
+
+gboolean	
+e_ews_connection_get_oal_full_detail_finish	(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 EwsOALDetails **oal_det,
+						 GError **error)
+{
+	GSimpleAsyncResult *simple;
+
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_get_oal_list_start),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+	
+	*oal_det= g_simple_async_result_get_op_res_gpointer (simple);
+
+	return TRUE;
+
 }
 
 void
