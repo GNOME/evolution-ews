@@ -608,6 +608,7 @@ gboolean	e_ews_connection_get_free_busy
 						 gpointer create_user_data,
 						 GSList **free_busy,
 						 GCancellable *cancellable,
+						 GError **error);
 void		e_ews_connection_download_oal_file_start
 						(EEwsConnection *cnc,
 						 const gchar *cache_filename,
