@@ -1933,27 +1933,37 @@ e_cal_get_meeting_cancellation_comment (ECalComponent *comp)
 }
 
 static void
-ewscal_send_cancellation_email (EEwsConnection *cnc, CamelAddress *from, CamelInternetAddress *recipient, const gchar *subject, const gchar *body, const icalcomponent *vevent)
+ewscal_send_cancellation_email (EEwsConnection *cnc, CamelAddress *from, CamelInternetAddress *recipient, const gchar *subject, const gchar *body, const gchar *calobj)
 {
 	CamelMimeMessage *message;
 	GError *error = NULL;
 	CamelMultipart *multi;
-	CamelMimePart *text_part, *vevent_part;
+	CamelMimePart *text_part, *vcal_part;
 	char *ical_str;
+	icalcomponent *vcal;
+
+	vcal = icalcomponent_new (ICAL_VCALENDAR_COMPONENT);
+	icalcomponent_add_property (vcal, icalproperty_new_version("2.0"));
+	icalcomponent_add_property (vcal, icalproperty_new_method(ICAL_METHOD_CANCEL));
+	icalcomponent_add_component (vcal, icalcomponent_new_from_string (calobj));
 
 	text_part = camel_mime_part_new ();
 	camel_mime_part_set_content (text_part, body, strlen (body), "text/plain");
 
-	vevent_part = camel_mime_part_new ();
-	ical_str = icalcomponent_as_ical_string_r ((icalcomponent *)vevent);
-	camel_mime_part_set_content (vevent_part, ical_str, strlen (ical_str), "text/calendar");
+	vcal_part = camel_mime_part_new ();
+	camel_content_type_set_param(CAMEL_DATA_WRAPPER (vcal_part)->mime_type, "charset", "utf-8");
+	camel_content_type_set_param(CAMEL_DATA_WRAPPER (vcal_part)->mime_type, "method", "CANCEL");
+	ical_str = icalcomponent_as_ical_string_r ((icalcomponent *)vcal);
+	camel_mime_part_set_content (vcal_part, ical_str, strlen (ical_str), "text/calendar; method=CANCEL");
 	free (ical_str);
 
 	multi = camel_multipart_new ();
+	camel_content_type_set_param(CAMEL_DATA_WRAPPER (multi)->mime_type, "type", "multipart/alternative");
 	camel_multipart_add_part (multi, text_part);
-	camel_multipart_add_part (multi, vevent_part);
+	camel_multipart_set_boundary (multi, NULL);
+	camel_multipart_add_part (multi, vcal_part);
 	g_object_unref (text_part);
-	g_object_unref (vevent_part);
+	g_object_unref (vcal_part);
 
 	message = camel_mime_message_new ();
 	camel_mime_message_set_subject (message, subject);
@@ -1971,6 +1981,7 @@ ewscal_send_cancellation_email (EEwsConnection *cnc, CamelAddress *from, CamelIn
 	}
 
 	g_object_unref (message);
+	icalcomponent_free (vcal);
 }
 
 static void
@@ -1981,6 +1992,7 @@ e_cal_backend_ews_send_objects (ECalBackend *backend, EDataCal *cal, EServerMeth
 	icalcomponent_kind kind;
 	icalcomponent *icalcomp, *subcomp = NULL;
 	GError *error = NULL;
+	gchar *subcalobj;
 
 	cbews = E_CAL_BACKEND_EWS(backend);
 	priv = cbews->priv;
@@ -2044,9 +2056,11 @@ e_cal_backend_ews_send_objects (ECalBackend *backend, EDataCal *cal, EServerMeth
 			if (g_ascii_strcasecmp (org_email, attendee) == 0) continue;
 			if (!g_ascii_strncasecmp (attendee, "mailto:", 7)) attendee = (attendee) + 7;
 
+			subcalobj = icalcomponent_as_ical_string_r (subcomp);
 			camel_internet_address_add (attendee_addr, icalproperty_get_parameter_as_string (prop, "CN"), attendee);
-			ewscal_send_cancellation_email (priv->cnc, CAMEL_ADDRESS(org_addr), attendee_addr, subject, new_body_content, subcomp);
+			ewscal_send_cancellation_email (priv->cnc, CAMEL_ADDRESS(org_addr), attendee_addr, subject, new_body_content, subcalobj);
 			g_object_unref (attendee_addr);
+			free (subcalobj);
 		}
 
 		g_object_unref (org_addr);
