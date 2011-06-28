@@ -568,23 +568,25 @@ gboolean	e_ews_connection_get_oal_list_finish
 						 GAsyncResult *result,
 						 GSList **oals,
 						 GError **error);
-void		e_ews_connection_get_oal_full_detail_start
+void		e_ews_connection_get_oal_detail_start
 						(EEwsConnection *cnc,
 						 const gchar *oab_url,
 						 const gchar *oal_id,
+						 const gchar *oal_element,
 						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
 						 gpointer user_data);
-gboolean	e_ews_connection_get_oal_full_detail_finish
+gboolean	e_ews_connection_get_oal_detail_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
-						 EwsOALDetails **oal_det,
+						 GSList **elements,
 						 GError **error);
-gboolean	e_ews_connection_get_oal_full_detail 
+gboolean	e_ews_connection_get_oal_detail 
 						(EEwsConnection *cnc,
 						 const gchar *oab_url,
 						 const gchar *oal_id,
-						 EwsOALDetails **oal_det,
+						 const gchar *oal_element,
+						 GSList **elements,
 						 GCancellable *cancellable,
 						 GError **error);
 
