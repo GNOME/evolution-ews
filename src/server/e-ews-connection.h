@@ -63,6 +63,8 @@ enum {
 
 typedef void (*EEwsRequestCreationCallback) (ESoapMessage *msg,
 					     gpointer user_data);
+typedef void (*EwsProgressFn) (gpointer object, gint percent);
+
 typedef enum {
 	EWS_SEARCH_AD,
 	EWS_SEARCH_AD_CONTACTS,
@@ -600,6 +602,19 @@ gboolean	e_ews_connection_get_free_busy
 						 gpointer create_user_data,
 						 GSList **free_busy,
 						 GCancellable *cancellable,
+void		e_ews_connection_download_oal_file_start
+						(EEwsConnection *cnc,
+						 const gchar *url,
+						 const gchar *cache_filename,
+						 GAsyncReadyCallback cb,
+						 EwsProgressFn progress_fn,
+						 gpointer progress_data,
+						 GCancellable *cancellable,
+						 gpointer user_data);
+
+gboolean	e_ews_connection_download_oal_file_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
 						 GError **error);
 
 G_END_DECLS

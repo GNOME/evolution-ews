@@ -27,7 +27,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <ctype.h>
+#include <errno.h>
 #include <glib/gi18n-lib.h>
+#include <glib/gstdio.h>
 #include "e-ews-connection.h"
 #include <libedataserver/e-flag.h>
 #include "e-ews-message.h"
@@ -1225,6 +1227,14 @@ struct _oal_req_data {
 	GCancellable *cancellable;
 	gulong cancel_handler_id;
 	gchar *oal_id;
+	
+	/* for dowloading oal file */
+	gchar *cache_filename;
+	GError *error;
+	EwsProgressFn progress_fn;
+	gpointer progress_data;
+	gsize response_size;
+	gsize received_size;
 };
 
 static gchar *
@@ -1449,7 +1459,7 @@ e_ews_connection_get_oal_full_detail_start	(EEwsConnection *cnc,
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
                                       cb,
                                       user_data,
-                                      e_ews_connection_get_oal_list_start);
+                                      e_ews_connection_get_oal_full_detail_start);
 	data = g_new0 (struct _oal_req_data, 1);
 	data->cnc = cnc;
 	data->simple = simple;
@@ -1477,7 +1487,7 @@ e_ews_connection_get_oal_full_detail_finish	(EEwsConnection *cnc,
 
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_get_oal_list_start),
+		result, G_OBJECT (cnc), e_ews_connection_get_oal_full_detail_start),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -1489,6 +1499,156 @@ e_ews_connection_get_oal_full_detail_finish	(EEwsConnection *cnc,
 
 	return TRUE;
 
+}
+
+static void
+oal_download_response_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
+{
+	GError *error = NULL;
+	guint status = msg->status_code;
+	struct _oal_req_data *data = (struct _oal_req_data *) user_data;
+
+	if (status != 200) {
+		g_set_error (&error, EWS_CONNECTION_ERROR, status,
+			     _("Code: %d - Unexpected response from server"),
+			     status);
+		g_unlink (data->cache_filename);
+		goto exit;
+	} else if (data->error != NULL) {
+		g_propagate_error (&error, data->error);
+		g_unlink (data->cache_filename);
+		goto exit;
+	}
+
+	g_simple_async_result_set_op_res_gpointer (data->simple, NULL, NULL);
+
+exit:
+	if (error) {
+		g_simple_async_result_set_from_error (data->simple, error);
+		g_clear_error (&error);
+	}
+
+	g_simple_async_result_complete_in_idle (data->simple);
+	g_free (data->cache_filename);
+	g_free (data);
+}
+
+static void 
+ews_soup_got_headers (SoupMessage *msg, gpointer user_data)
+{
+	struct _oal_req_data *data = (struct _oal_req_data *) user_data;
+	const char *size;
+
+	size = soup_message_headers_get_one (msg->response_headers,
+					     "Content-Length");
+
+	if (size)
+		data->response_size = strtol(size, NULL, 10);
+}
+
+static void 
+ews_soup_restarted (SoupMessage *msg, gpointer user_data)
+{
+	struct _oal_req_data *data = (struct _oal_req_data *) user_data;
+
+	data->response_size = 0;
+	data->received_size = 0;
+}
+
+static void 
+ews_soup_got_chunk (SoupMessage *msg, SoupBuffer *chunk, gpointer user_data)
+{
+	struct _oal_req_data *data = (struct _oal_req_data *) user_data;
+	gint fd;
+
+	if (msg->status_code != 200)
+		return;
+
+	data->received_size += chunk->length;
+
+	if (data->response_size && data->progress_fn) {
+		int pc = data->received_size * 100 / data->response_size;
+		data->progress_fn (data->progress_data, pc);
+	}
+
+	fd = g_open (data->cache_filename, O_WRONLY | O_CREAT);
+	if (fd != -1) {
+		if (write (fd, (const gchar*)chunk->data, chunk->length) != chunk->length) {
+			g_set_error (&data->error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_UNKNOWN,
+					"Failed to write streaming data to file : %d ", errno);
+		}
+#ifdef G_OS_WIN32
+		closesocket (fd);
+#else
+		close (fd);
+#endif
+	} else {
+		g_set_error (&data->error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_UNKNOWN,
+			"Failed to open the cache file : %d ", errno);
+	}
+}
+
+void		
+e_ews_connection_download_oal_file_start	(EEwsConnection *cnc,
+						 const gchar *url,
+						 const gchar *cache_filename,
+						 GAsyncReadyCallback cb,
+						 EwsProgressFn progress_fn,
+						 gpointer progress_data,
+						 GCancellable *cancellable,
+						 gpointer user_data)
+{
+	GSimpleAsyncResult *simple;
+	SoupMessage *msg;
+	struct _oal_req_data *data;
+
+	msg = e_ews_get_msg_for_url (url, NULL);
+
+	simple = g_simple_async_result_new (G_OBJECT (cnc),
+			cb,
+			user_data,
+			e_ews_connection_download_oal_file_start);
+	data = g_new0 (struct _oal_req_data, 1);
+	data->cnc = cnc;
+	data->simple = simple;
+	data->cancellable = cancellable;
+	data->msg = SOUP_MESSAGE (msg);
+	data->cache_filename = g_strdup (cache_filename);
+	data->progress_fn = progress_fn;
+	data->progress_data = progress_data;
+
+	if (cancellable)
+		data->cancel_handler_id = g_cancellable_connect	(cancellable,
+						G_CALLBACK (ews_cancel_msg), (gpointer) data, NULL);
+	
+	soup_message_body_set_accumulate (SOUP_MESSAGE (msg)->response_body,
+					  FALSE);
+	g_signal_connect (msg, "got-headers", G_CALLBACK (ews_soup_got_headers), data);
+	g_signal_connect (msg, "got-chunk", G_CALLBACK (ews_soup_got_chunk), data);
+	g_signal_connect (msg, "restarted", G_CALLBACK (ews_soup_restarted), data);
+
+	soup_session_queue_message	(cnc->priv->soup_session, SOUP_MESSAGE (msg),
+					 oal_download_response_cb, data);
+}
+
+gboolean	
+e_ews_connection_download_oal_file_finish	(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GError **error)
+{
+	GSimpleAsyncResult *simple;
+
+	g_return_val_if_fail (
+			g_simple_async_result_is_valid (
+				result, G_OBJECT (cnc), e_ews_connection_download_oal_file_start),
+			FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	return TRUE;
 }
 
 void
