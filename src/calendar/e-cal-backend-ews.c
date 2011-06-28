@@ -2648,13 +2648,112 @@ e_cal_backend_ews_refresh(ECalBackend *backend, EDataCal *cal, EServerMethodCont
 	e_data_cal_notify_refresh(cal, context, error);
 }
 
+typedef struct {
+	GList *users;
+	time_t start;
+	time_t end;
+	icaltimezone *timezone;
+} EwsFreeBusyData;
+
+static void
+prepear_free_busy_request (ESoapMessage *msg, gpointer user_data)
+{
+	EwsFreeBusyData *free_busy_data = user_data;
+	GList *addr;
+	icaltimetype t_start, t_end;
+
+	e_soap_message_start_element(msg, "MailboxDataArray", NULL, NULL);
+
+	for (addr = free_busy_data->users; addr; addr = addr->next) {
+		e_soap_message_start_element(msg, "MailboxData", NULL, NULL);
+
+		e_soap_message_start_element(msg, "Email", NULL, NULL);
+		e_ews_message_write_string_parameter (msg, "Address", NULL, addr->data);
+		e_soap_message_end_element(msg); /* "Email" */
+
+		e_ews_message_write_string_parameter (msg, "AttendeeType", NULL, "Required");
+		e_ews_message_write_string_parameter (msg, "ExcludeConflicts", NULL, "false");
+
+		e_soap_message_end_element(msg); /* "MailboxData" */
+	}
+
+	e_soap_message_end_element(msg); /* "MailboxDataArray" */
+
+	e_soap_message_start_element(msg, "FreeBusyViewOptions", NULL, NULL);
+
+	e_soap_message_start_element(msg, "TimeWindow", NULL, NULL);
+	t_start = icaltime_from_timet_with_zone (free_busy_data->start, 0, free_busy_data->timezone);
+	t_end = icaltime_from_timet_with_zone (free_busy_data->end, 0, free_busy_data->timezone);
+	ewscal_set_time (msg, "StartTime", &t_start);
+	ewscal_set_time (msg, "EndTime", &t_end);
+	e_soap_message_end_element(msg); /* "TimeWindow" */
+
+	e_ews_message_write_string_parameter (msg, "MergedFreeBusyIntervalInMinutes", NULL, "60");
+	e_ews_message_write_string_parameter (msg, "RequestedView", NULL, "DetailedMerged");
+
+	e_soap_message_end_element(msg); /* "FreeBusyViewOptions" */
+}
+
+static void
+ews_cal_get_free_busy_cb (GObject *obj, GAsyncResult *res, gpointer user_data) {
+	/*EEwsConnection *cnc;
+	ECalBackendEws *cbews;
+	ECalBackendEwsPrivate *priv;
+
+	e_ews_connection_get_items_finish       (cnc, res, &items, &error);
+
+ exit:
+	g_free (sync_data->master_uid);
+	g_free (sync_data->sync_state);
+	g_free (sync_data);
+	g_object_unref (cnc);*/
+}
+
 static void
 e_cal_backend_ews_get_free_busy (ECalBackend *backend, EDataCal *cal,
 				 EServerMethodContext context, GList *users,
 				 time_t start, time_t end)
 {
-	/* Implement me */
-	e_data_cal_notify_free_busy (cal, context, NULL, NULL);
+	ECalBackendEws *cbews = E_CAL_BACKEND_EWS (backend);
+	ECalBackendEwsPrivate *priv = cbews->priv;
+	GError *error = NULL;
+	GList *free_busy = NULL;
+	EwsFreeBusyData *free_busy_data;
+	GCancellable *cancellable = NULL;
+
+	/* make sure we're not offline */
+	if (priv->mode == CAL_MODE_LOCAL)
+	{
+		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
+		goto exit;
+	}
+
+	/* EWS can support only 100 identities, which is the maximum number of identities that the Web service method can request
+	 see http://msdn.microsoft.com/en-us/library/aa564001%28v=EXCHG.140%29.aspx*/
+	if (g_list_length (users) > 100)
+	{
+		g_propagate_error (&error, EDC_ERROR (SearchSizeLimitExceeded));
+		goto exit;
+	}
+
+	free_busy_data = g_new0 (EwsFreeBusyData, 1);
+	free_busy_data->users = users;
+	free_busy_data->start = start;
+	free_busy_data->end = end;
+	free_busy_data->timezone = priv->default_zone;
+
+	e_ews_connection_get_free_busy_start (priv->cnc,
+					      EWS_PRIORITY_MEDIUM,
+					      prepear_free_busy_request,
+					      free_busy_data,
+					      ews_cal_get_free_busy_cb,
+					      cancellable,
+					      free_busy_data);
+
+	return;
+
+exit:
+	e_data_cal_notify_free_busy (cal, context, error, free_busy);
 }
 
 static void
