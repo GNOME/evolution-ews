@@ -68,6 +68,11 @@ typedef struct {
 struct _EBookBackendEwsGalPrivate {
 	EEwsConnection *cnc;
 	gchar *oal_id;
+	gchar *oab_url;
+	gchar *folder_name;
+	
+	gchar *username;
+	gchar *password;
 
 	EBookBackendSqliteDB *ebsdb;
 
@@ -83,8 +88,8 @@ struct _EBookBackendEwsGalPrivate {
 	SyncDelta *dlock;
 };
 
-#define EWS_GAL_MAX_FETCH_COUNT 500
-#define REFRESH_INTERVAL 600000
+/* refresh once per day */
+#define REFRESH_INTERVAL (24 * 60 * 60)
 
 #define PRIV_LOCK(p)   (g_static_rec_mutex_lock (&(p)->rec_mutex))
 #define PRIV_UNLOCK(p) (g_static_rec_mutex_unlock (&(p)->rec_mutex))
@@ -180,10 +185,102 @@ e_book_backend_ews_gal_get_contact_list	(EBookBackend *backend,
 }
 
 static gboolean
+ews_needs_update (EBookBackendEwsGal *cbews, EwsOALDetails *full, GError **error)
+{
+	EBookBackendEwsGalPrivate *priv = cbews->priv;
+	gint seq;
+	gboolean ret = FALSE;
+	gchar *tmp;
+
+	tmp = e_book_backend_sqlitedb_get_key_value (priv->ebsdb, priv->oal_id, "seq", error);
+	if (error)
+		goto exit;
+
+	seq = atoi (tmp);
+	if (seq < full->seq)
+		ret = TRUE;
+	
+exit:
+	g_free (tmp);
+	return ret;	
+}
+
+static void
+ews_download_full_gal (EBookBackendEwsGal *cbews, EwsOALDetails *full, GCancellable *cancellable, GError **error)
+{
+	EBookBackendEwsGalPrivate *priv = cbews->priv;
+	EEwsConnection *oab_cnc;
+	gchar *full_url, *oab_url, *cache_file = NULL;
+	const gchar *cache_dir;
+	gchar *comp_cache_file = NULL, *uncompress_file = NULL;
+
+	/* oab url with oab.xml removed from the suffix */
+	oab_url = g_strndup (priv->oab_url, strlen (priv->oab_url) - 7);
+	full_url = g_strconcat (oab_url, full->filename, NULL);
+	cache_dir = e_book_backend_get_cache_dir (E_BOOK_BACKEND (cbews));
+	comp_cache_file = g_build_filename (cache_dir, full->filename, NULL);
+
+	oab_cnc = e_ews_connection_new (full_url, priv->username, priv->password, NULL, NULL, NULL);
+	if (!e_ews_connection_download_oal_file (oab_cnc, comp_cache_file, NULL, NULL, cancellable, error))
+		goto exit;
+
+	cache_file = g_strdup_printf ("%s-%d", priv->folder_name, full->ver);
+	uncompress_file = g_build_filename (cache_dir, cache_file, NULL);
+//	if (!ews_decompress_gal (comp_cache_file, uncompress_file, error))
+//		goto exit;
+		
+
+exit:	
+	if (comp_cache_file)
+		g_unlink (comp_cache_file);
+	g_object_unref (oab_cnc);
+	g_free (oab_url);
+	g_free (full_url);
+	g_free (comp_cache_file);
+	g_free (cache_file);
+	g_free (uncompress_file);
+}
+
+static gboolean
 ebews_start_sync	(gpointer data)
 {
-	/* TODO cache the gal contents */
+	EBookBackendEwsGal *cbews;
+	EBookBackendEwsGalPrivate *priv;
+	EwsOALDetails *full;
+	GError *error = NULL;
+	EEwsConnection *oab_cnc;
+	GSList *full_l = NULL;
+	GCancellable *cancellable;
+
+	cbews = (EBookBackendEwsGal *) data;
+	priv = cbews->priv;
+
+	cancellable = g_cancellable_new ();
+	oab_cnc = e_ews_connection_new (priv->oab_url, priv->username, priv->password, NULL, NULL, NULL);
+
+	if (!e_ews_connection_get_oal_detail (oab_cnc, priv->oal_id, "Full", &full_l, cancellable, &error)) 
+		goto exit;
+
+	full = (EwsOALDetails *) full_l->data; 
+	/* TODO fetch differential updates if available instead of downloading the whole GAL */
+	if (!e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->oal_id, NULL) || ews_needs_update (cbews, full, &error)) {
+		ews_download_full_gal (cbews, full, cancellable, &error);
+	}
 	
+exit:
+	if (error) {
+		g_warning ("Unable to update gal : %s \n", error->message);
+		g_clear_error (&error);
+	}
+
+	if (full_l) {
+		g_free (full->sha);
+		g_free (full->filename);
+		g_free (full);
+		g_slist_free (full_l);
+	}
+
+	g_object_unref (oab_cnc);
 	return TRUE;
 }
 
@@ -206,7 +303,7 @@ delta_thread (gpointer data)
 			break;
 
 		g_get_current_time (&timeout);
-		g_time_val_add (&timeout, REFRESH_INTERVAL * 1000);
+		timeout.tv_sec += REFRESH_INTERVAL;
 		g_cond_timed_wait (priv->dlock->cond, priv->dlock->mutex, &timeout);
 
 		if (priv->dlock->exit)
@@ -630,6 +727,8 @@ e_book_backend_ews_gal_authenticate_user (EBookBackend *backend,
 
 		priv->cnc = e_ews_connection_new (host_url, user, passwd,
 						  NULL, NULL, &error);
+		priv->username = e_source_get_duped_property (esource, "username");
+		priv->password = g_strdup (passwd);
 
 		/* FIXME: Do some dummy request to ensure that the password is actually
 		   correct; don't just blindly return success */
@@ -690,14 +789,14 @@ e_book_backend_ews_gal_load_source 	(EBookBackend *backend,
 
 	/* If oal_id is present it means the GAL is marked for offline usage, we do not check for offline_sync property */
 	if (priv->oal_id) {
-		const gchar *folder_name;
 		const gchar *cache_dir, *email;
 		
 		cache_dir = e_book_backend_get_cache_dir (backend);
 		email = e_source_get_property (source, "email");
-		folder_name = e_source_peek_name (source);
+		priv->folder_name = g_strdup (e_source_peek_name (source));
+		priv->oab_url = e_source_get_duped_property (source, "oab_url");
 
-		priv->ebsdb = e_book_backend_sqlitedb_new (cache_dir, email, priv->oal_id, folder_name, FALSE, &err);
+		priv->ebsdb = e_book_backend_sqlitedb_new (cache_dir, email, priv->oal_id, priv->folder_name, FALSE, &err);
 		if (err) {
 			g_propagate_error (perror, err);
 			return;
@@ -811,6 +910,16 @@ e_book_backend_ews_gal_dispose (GObject *object)
 		priv->oal_id = NULL;
 	}
 	
+	if (priv->oab_url) {
+		g_free (priv->oab_url);
+		priv->oab_url = NULL;
+	}
+	
+	if (priv->folder_name) {
+		g_free (priv->folder_name);
+		priv->folder_name = NULL;
+	}
+
 	if (priv->dlock) {
 		g_mutex_lock (priv->dlock->mutex);
 		priv->dlock->exit = TRUE;
