@@ -123,6 +123,13 @@ struct _EEwsContactFields {
 	gchar *surname;
 };
 
+struct _EEwsTaskFields {
+	gchar *percent_complete;
+	gchar *status;
+	time_t due_date;
+	time_t start_date;
+};
+
 struct _EEwsItemPrivate {
 	EEwsItemType item_type;
 
@@ -170,6 +177,7 @@ struct _EEwsItemPrivate {
 	EwsId *calendar_item_accept_id;
 
 	struct _EEwsContactFields *contact_fields;
+	struct _EEwsTaskFields *task_fields;
 };
 
 static GObjectClass *parent_class = NULL;
@@ -260,6 +268,15 @@ e_ews_item_dispose (GObject *object)
 	if (priv->item_type == E_EWS_ITEM_TYPE_CONTACT)
 		ews_free_contact_fields (priv->contact_fields);
 
+	if (priv->task_fields) {
+		g_free (priv->task_fields->percent_complete);
+		priv->task_fields->percent_complete = NULL;
+		g_free (priv->task_fields->status);
+		priv->task_fields->status = NULL;
+		g_free (priv->task_fields->status);
+		g_free (priv->task_fields);
+	}
+
 	if (parent_class->dispose)
 		(* parent_class->dispose) (object);
 }
@@ -347,6 +364,7 @@ ews_free_contact_fields (struct _EEwsContactFields *con_fields)
 		g_free (con_fields->spouse_name);
 		g_free (con_fields->culture);
 		g_free (con_fields->surname);
+		g_free (con_fields);
 	}	
 }
 
@@ -711,12 +729,33 @@ parse_contact_field (EEwsItem *item, const gchar *name, ESoapParameter *subparam
 	}
 }
 
+static void
+parse_task_field (EEwsItem *item, const gchar *name, ESoapParameter *subparam)
+{
+	EEwsItemPrivate *priv = item->priv;
+	gchar *value = NULL;
+
+	if (!g_ascii_strcasecmp (name, "Status")) {
+		priv->task_fields->status = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "PercentComplete")) {
+		priv->task_fields->percent_complete = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "DueDate")) {
+			value = e_soap_parameter_get_string_value (subparam);
+			priv->task_fields->due_date = ews_item_parse_date (value);
+			g_free (value);
+	} else if (!g_ascii_strcasecmp (name, "StartDate")) {
+			value = e_soap_parameter_get_string_value (subparam);
+			priv->task_fields->start_date = ews_item_parse_date (value);
+			g_free (value);
+	}
+}
+
 static gboolean
 e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 {
 	EEwsItemPrivate *priv = item->priv;
 	ESoapParameter *subparam, *node;
-	gboolean contact = FALSE;
+	gboolean contact = FALSE, task = FALSE;
 
 	g_return_val_if_fail (param != NULL, FALSE);
 
@@ -738,8 +777,11 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 		priv->item_type = E_EWS_ITEM_TYPE_MEETING_RESPONSE;
 	else if ((node = e_soap_parameter_get_first_child_by_name (param, "MeetingCancellation")))
 		priv->item_type = E_EWS_ITEM_TYPE_MEETING_CANCELLATION;
-	else if ((node = e_soap_parameter_get_first_child_by_name (param, "Task")))
+	else if ((node = e_soap_parameter_get_first_child_by_name (param, "Task"))) {
+		task = TRUE;
 		priv->item_type = E_EWS_ITEM_TYPE_TASK;
+		priv->task_fields = g_new0 (struct _EEwsTaskFields, 1);
+	}
 	else if ((node = e_soap_parameter_get_first_child_by_name (param, "Item")))
 		priv->item_type = E_EWS_ITEM_TYPE_GENERIC_ITEM;
 	else {
@@ -843,6 +885,9 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 			value = e_soap_parameter_get_string_value (subparam);
 			priv->is_read = (!g_ascii_strcasecmp (value, "true"));
 			g_free (value);
+		} else if (task) {
+			parse_task_field (item, name, subparam);
+			/* fields below are not relevant for task, so skip them */
 		} else if (!g_ascii_strcasecmp (name, "References")) {
 			priv->references = e_soap_parameter_get_string_value (subparam);
 		} else if (!g_ascii_strcasecmp (name, "ExtendedProperty")) {
@@ -1427,4 +1472,38 @@ e_ews_item_get_wedding_anniversary (EEwsItem *item)
 	g_return_val_if_fail (item->priv->contact_fields != NULL, -1);
 
 	return item->priv->contact_fields->wedding_anniversary;
+}
+
+const gchar *
+e_ews_item_get_status (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->task_fields != NULL, NULL);
+
+	return item->priv->task_fields->status;
+}
+
+const gchar *	e_ews_item_get_percent_complete (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->task_fields != NULL, NULL);
+
+	return item->priv->task_fields->percent_complete;
+}
+
+time_t
+e_ews_item_get_due_date (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), -1);
+	g_return_val_if_fail (item->priv->task_fields != NULL, -1);
+
+	return item->priv->task_fields->due_date;
+}
+time_t
+e_ews_item_get_start_date (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), -1);
+	g_return_val_if_fail (item->priv->task_fields != NULL, -1);
+
+	return item->priv->task_fields->start_date;
 }

@@ -188,6 +188,12 @@ const gchar *	e_ews_item_get_spouse_name	(EEwsItem *item);
 const gchar *	e_ews_item_get_culture		(EEwsItem *item);
 const gchar *	e_ews_item_get_surname		(EEwsItem *item);
 
+/*Task fields*/
+const gchar *	e_ews_item_get_status		(EEwsItem *item);
+const gchar *	e_ews_item_get_percent_complete (EEwsItem *item);
+time_t		e_ews_item_get_due_date		(EEwsItem *item);
+time_t		e_ews_item_get_start_date	(EEwsItem *item);
+
 G_END_DECLS
 
 #endif
