@@ -268,6 +268,7 @@ src/server/libeews.pc
 src/utils/Makefile
 src/account-setup-eplugin/Makefile
 src/addressbook/Makefile
+src/addressbook/lzx/Makefile
 src/calendar/Makefile
 src/camel/Makefile
 po/Makefile.in

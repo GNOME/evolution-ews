@@ -1,3 +1,5 @@
+SUBDIRS = lzx .
+
 if ENABLE_GTK3
 ebook_backend_LTLIBRARIES = libebookbackendews.la
 else
@@ -27,9 +29,10 @@ libebookbackendews_la_SOURCES =			\
 	e-book-backend-ews-gal.h		\
 	e-book-backend-ews-factory.c
 
-libebookbackendews_la_LIBADD =				\
+libebookbackendews_la_LIBADD =					\
 	$(top_builddir)/src/server/libeews-1.2.la		\
 	$(top_builddir)/src/utils/libewsutils.la		\
+	$(top_builddir)/src/addressbook/lzx/liblzx.la		\
 	$(LIBEBACKEND_LIBS)					\
 	$(LIBEDATASERVER_LIBS)					\
 	$(LIBEDATABOOK_LIBS) \

@@ -46,6 +46,7 @@
 #include "libedata-book/e-data-book-view.h"
 #include "e-book-backend-ews-gal.h"
 #include "e-book-backend-sqlitedb.h"
+#include "lzx/ews-oal-decompress.h"
 
 #include "e-ews-message.h"
 #include "e-ews-connection.h"
@@ -226,9 +227,10 @@ ews_download_full_gal (EBookBackendEwsGal *cbews, EwsOALDetails *full, GCancella
 
 	cache_file = g_strdup_printf ("%s-%d", priv->folder_name, full->ver);
 	uncompress_file = g_build_filename (cache_dir, cache_file, NULL);
-//	if (!ews_decompress_gal (comp_cache_file, uncompress_file, error))
-//		goto exit;
-		
+	if (!oal_decompress_v4_full_detail_file (comp_cache_file, uncompress_file, error))
+		goto exit;
+
+	g_print ("OAL file decompressed %s \n", uncompress_file);
 
 exit:	
 	if (comp_cache_file)
