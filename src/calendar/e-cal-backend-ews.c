@@ -2205,21 +2205,30 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 
 	kind = e_cal_backend_get_kind ((ECalBackend *) cbews);
 	priv = cbews->priv;
-	mime_content = e_ews_item_get_mime_content (item);
-	vcomp = icalparser_parse_string (mime_content);
 
-	/* Add the timezone */
-	vtimezone = icalcomponent_get_first_component (vcomp, ICAL_VTIMEZONE_COMPONENT);
-	if (vtimezone) {
-		icaltimezone *zone;
+	if (e_ews_item_get_item_type(item)==E_EWS_ITEM_TYPE_TASK){
+		icalproperty *icalprop;
+		vcomp = icalcomponent_new(ICAL_VCALENDAR_COMPONENT);
+		icalcomp = icalcomponent_new(ICAL_VTODO_COMPONENT);
+		icalprop = icalproperty_new_summary(e_ews_item_get_subject(item));
+		icalcomponent_add_property(icalcomp, icalprop);
+		icalcomponent_add_component(vcomp,icalcomp);
+	} else {
+		mime_content = e_ews_item_get_mime_content (item);
+		vcomp = icalparser_parse_string (mime_content);
 
-		zone = icaltimezone_new ();
-		icaltimezone_set_component (zone, icalcomponent_new_clone (vtimezone));
-		e_cal_backend_store_put_timezone (priv->store, zone);
+		/* Add the timezone */
+		vtimezone = icalcomponent_get_first_component (vcomp, ICAL_VTIMEZONE_COMPONENT);
+		if (vtimezone) {
+			icaltimezone *zone;
 
-		icaltimezone_free (zone, TRUE);
+			zone = icaltimezone_new ();
+			icaltimezone_set_component (zone, icalcomponent_new_clone (vtimezone));
+			e_cal_backend_store_put_timezone (priv->store, zone);
+
+			icaltimezone_free (zone, TRUE);
+		}
 	}
-
 	/* Vevent or Vtodo */
 	icalcomp = icalcomponent_get_first_component (vcomp, kind);
 	if (icalcomp) {
@@ -2270,7 +2279,7 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 
 		/* Free/Busy */
 		freebusy = icalcomponent_get_first_property (icalcomp, ICAL_TRANSP_PROPERTY);
-		if (!freebusy) {
+		if (!freebusy && (e_ews_item_get_item_type(item)!=E_EWS_ITEM_TYPE_TASK)) {
 			/* Busy by default */
 			freebusy = icalproperty_new_transp(ICAL_TRANSP_OPAQUE);
 			icalcomponent_add_property (icalcomp, freebusy);
@@ -2429,11 +2438,11 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
 	GSList *items_created = NULL, *items_updated = NULL;
-	GSList *items_deleted = NULL, *l[2], *m, *cal_item_ids = NULL;
+	GSList *items_deleted = NULL, *l[2], *m, *cal_item_ids = NULL, *task_item_ids = NULL;
 	gchar *sync_state = NULL;
 	gboolean includes_last_item;
 	GError *error = NULL;
-	struct _ews_sync_data *sync_data;
+	struct _ews_sync_data *sync_data = NULL;
 	gint i;
 
 	cnc = (EEwsConnection *) obj;
@@ -2492,7 +2501,8 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 			id = e_ews_item_get_id (item);
 			if (type == E_EWS_ITEM_TYPE_CALENDAR_ITEM)
 				cal_item_ids = g_slist_append (cal_item_ids, g_strdup (id->id));
-
+			else if (type == E_EWS_ITEM_TYPE_TASK)
+				task_item_ids = g_slist_append (task_item_ids, g_strdup (id->id));
 			g_object_unref (item);
 		}
 	}
@@ -2513,7 +2523,7 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 	}
 	e_cal_backend_store_thaw_changes (priv->store);
 
-	if (!cal_item_ids && !includes_last_item) {
+	if (!cal_item_ids && !task_item_ids && !includes_last_item) {
 		e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, sync_state);
 		e_ews_connection_sync_folder_items_start
 						(g_object_ref (priv->cnc), EWS_PRIORITY_MEDIUM,
@@ -2526,25 +2536,45 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 		goto exit;
 	}
 
-	if (!cal_item_ids)
-		goto exit;
+	if (cal_item_ids || task_item_ids) {
+		sync_data = g_new0 (struct _ews_sync_data, 1);
+		sync_data->cbews = cbews;
+		sync_data->sync_state = sync_state;
+		sync_data->sync_pending = !includes_last_item;
+	}
 
-	sync_data = g_new0 (struct _ews_sync_data, 1);
-	sync_data->cbews = cbews;
-	sync_data->sync_state = sync_state;
-	sync_data->sync_pending = !includes_last_item;
+	if (cal_item_ids)
+		e_ews_connection_get_items_start (g_object_ref (cnc),
+						  EWS_PRIORITY_MEDIUM,
+						  cal_item_ids,
+						  "IdOnly",
+						  "item:Attachments item:HasAttachments item:MimeContent calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
+						  FALSE, NULL,
+						  ews_cal_get_items_ready_cb,
+						  NULL, NULL, NULL,
+						  (gpointer) sync_data);
 
-	e_ews_connection_get_items_start	(g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
-						 cal_item_ids,
-						 "IdOnly", "item:Attachments item:HasAttachments item:MimeContent calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
-						 FALSE, NULL, ews_cal_get_items_ready_cb, NULL, NULL, NULL,
-						 (gpointer) sync_data);
+	if (task_item_ids)
+		e_ews_connection_get_items_start (g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
+						  task_item_ids,
+						  "Default",
+						  NULL,
+						  FALSE,
+						  NULL,
+						  ews_cal_get_items_ready_cb,
+						  NULL, NULL, NULL,
+						  (gpointer) sync_data);
+
 
 exit:
 	g_object_unref (cnc);
 	if (cal_item_ids) {
 		g_slist_foreach (cal_item_ids, (GFunc) g_free, NULL);
 		g_slist_free (cal_item_ids);
+	}
+	if (task_item_ids) {
+		g_slist_foreach (task_item_ids, (GFunc) g_free, NULL);
+		g_slist_free (task_item_ids);
 	}
 
 	if (items_created)
