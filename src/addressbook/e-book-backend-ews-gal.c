@@ -248,7 +248,7 @@ ebews_start_sync	(gpointer data)
 {
 	EBookBackendEwsGal *cbews;
 	EBookBackendEwsGalPrivate *priv;
-	EwsOALDetails *full;
+	EwsOALDetails *full = NULL;
 	GError *error = NULL;
 	EEwsConnection *oab_cnc;
 	GSList *full_l = NULL;
@@ -580,7 +580,6 @@ e_book_backend_ews_gal_start_book_view (EBookBackend  *backend,
 	GSList *mailboxes = NULL, *l;
 	GError *error = NULL;
 	gboolean includes_last_item;
-	ESource *source;
 
 	ebews = E_BOOK_BACKEND_EWS_GAL (backend);
 	priv = ebews->priv;
@@ -628,7 +627,6 @@ e_book_backend_ews_gal_start_book_view (EBookBackend  *backend,
 			return;
 		}
 
-		source = e_book_backend_get_source (backend);
 		cancellable = g_cancellable_new ();
 
 		/* We do not scan until we reach the last_item as it might be good enough to show first 100

@@ -2209,7 +2209,7 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 	if (e_ews_item_get_item_type(item)==E_EWS_ITEM_TYPE_TASK){
 		icalproperty *icalprop;
 		icaltimetype due_date, start_date;
-		icalproperty_status status;
+		icalproperty_status status  = ICAL_STATUS_NONE;
 		const char *ews_task_status;
 		vcomp = icalcomponent_new(ICAL_VCALENDAR_COMPONENT);
 		/*subject*/
