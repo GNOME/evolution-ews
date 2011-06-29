@@ -2649,6 +2649,9 @@ e_cal_backend_ews_refresh(ECalBackend *backend, EDataCal *cal, EServerMethodCont
 }
 
 typedef struct {
+	ECalBackendEws *cbews;
+	EDataCal *cal;
+	EServerMethodContext context;
 	GList *users;
 	time_t start;
 	time_t end;
@@ -2695,18 +2698,29 @@ prepear_free_busy_request (ESoapMessage *msg, gpointer user_data)
 }
 
 static void
-ews_cal_get_free_busy_cb (GObject *obj, GAsyncResult *res, gpointer user_data) {
-	/*EEwsConnection *cnc;
-	ECalBackendEws *cbews;
-	ECalBackendEwsPrivate *priv;
+ews_cal_get_free_busy_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
+{
+	EEwsConnection *cnc = (EEwsConnection *)obj;
+	EwsFreeBusyData *free_busy_data = user_data;
+	GSList *free_busy_sl = NULL, *i;
+	GList *free_busy = NULL;
+	GError *error = NULL;
 
-	e_ews_connection_get_items_finish       (cnc, res, &items, &error);
+	if (!e_ews_connection_get_free_busy_finish (cnc, res, &free_busy_sl, &error)) {
+		error->code = OtherError;
+		goto done;
+	}
+	
+	for (i = free_busy_sl; i; i = i->next)
+		free_busy = g_list_append (free_busy, i->data);
+	g_slist_free (free_busy_sl);
 
- exit:
-	g_free (sync_data->master_uid);
-	g_free (sync_data->sync_state);
-	g_free (sync_data);
-	g_object_unref (cnc);*/
+done:
+	e_data_cal_notify_free_busy (free_busy_data->cal, free_busy_data->context, error, free_busy);
+
+	g_object_unref (free_busy_data->cal);
+	g_object_unref (free_busy_data->cbews);
+	g_free (free_busy_data);
 }
 
 static void
@@ -2717,7 +2731,6 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend, EDataCal *cal,
 	ECalBackendEws *cbews = E_CAL_BACKEND_EWS (backend);
 	ECalBackendEwsPrivate *priv = cbews->priv;
 	GError *error = NULL;
-	GList *free_busy = NULL;
 	EwsFreeBusyData *free_busy_data;
 	GCancellable *cancellable = NULL;
 
@@ -2737,6 +2750,9 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend, EDataCal *cal,
 	}
 
 	free_busy_data = g_new0 (EwsFreeBusyData, 1);
+	free_busy_data->cbews = g_object_ref (cbews);
+	free_busy_data->cal = g_object_ref (cal);
+	free_busy_data->context = context;
 	free_busy_data->users = users;
 	free_busy_data->start = start;
 	free_busy_data->end = end;
@@ -2753,7 +2769,7 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend, EDataCal *cal,
 	return;
 
 exit:
-	e_data_cal_notify_free_busy (cal, context, error, free_busy);
+	e_data_cal_notify_free_busy (cal, context, error, NULL);
 }
 
 static void
