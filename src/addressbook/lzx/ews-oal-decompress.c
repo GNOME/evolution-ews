@@ -139,9 +139,9 @@ exit:
 gboolean
 oal_decompress_v4_full_detail_file (const gchar *filename, const gchar *output_filename, GError **error)
 {
-	LzxHeader *lzx_h;
+	LzxHeader *lzx_h = NULL;
 	guint total_decomp_size = 0;
-	FILE *input, *output;
+	FILE *input, *output = NULL;
 	gboolean ret = TRUE;
 	GError *err = NULL;
 
