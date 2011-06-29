@@ -2208,10 +2208,42 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 
 	if (e_ews_item_get_item_type(item)==E_EWS_ITEM_TYPE_TASK){
 		icalproperty *icalprop;
+		icaltimetype due_date, start_date;
+		icalproperty_status status;
+		const char *ews_task_status;
 		vcomp = icalcomponent_new(ICAL_VCALENDAR_COMPONENT);
+		/*subject*/
 		icalcomp = icalcomponent_new(ICAL_VTODO_COMPONENT);
 		icalprop = icalproperty_new_summary(e_ews_item_get_subject(item));
 		icalcomponent_add_property(icalcomp, icalprop);
+		/*status*/
+		ews_task_status = e_ews_item_get_status (item);
+		if (!g_strcmp0(ews_task_status, "NotStarted") == 0) {
+			if (g_strcmp0 (ews_task_status, "Completed") == 0)
+				status = ICAL_STATUS_COMPLETED;
+			else if (g_strcmp0(ews_task_status, "InProgress") == 0)
+				status = ICAL_STATUS_INPROCESS;
+			else if (g_strcmp0(ews_task_status, "WaitingOnOthers") == 0)
+				status = ICAL_STATUS_NEEDSACTION;
+			else if (g_strcmp0(ews_task_status, "Deferred") == 0)
+				status = ICAL_STATUS_CANCELLED;
+			icalprop = icalproperty_new_status(status);
+			icalcomponent_add_property(icalcomp, icalprop);
+			}
+		/*precent complete*/
+		icalprop  = icalproperty_new_percentcomplete (atoi(e_ews_item_get_percent_complete(item)));
+		icalcomponent_add_property(icalcomp, icalprop);
+
+		/*due date*/
+		due_date = icaltime_from_timet_with_zone (e_ews_item_get_due_date(item), 0, priv->default_zone);
+		icalprop = icalproperty_new_due (due_date);
+		icalcomponent_add_property(icalcomp, icalprop);
+
+		/*start date*/
+		start_date = icaltime_from_timet_with_zone (e_ews_item_get_start_date(item), 0, priv->default_zone);
+		icalprop = icalproperty_new_dtstart (start_date);
+		icalcomponent_add_property(icalcomp, icalprop);
+
 		icalcomponent_add_component(vcomp,icalcomp);
 	} else {
 		mime_content = e_ews_item_get_mime_content (item);
