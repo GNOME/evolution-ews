@@ -30,6 +30,8 @@
 #include <errno.h>
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
+#include <libical/icalcomponent.h>
+#include <libical/icalproperty.h>
 #include "e-ews-connection.h"
 #include <libedataserver/e-flag.h>
 #include "e-ews-message.h"
@@ -3694,12 +3696,12 @@ get_free_busy_response_cb (ESoapParameter *param, EwsNode *enode)
 {
        /*parse the response to create a free_busy data
         http://msdn.microsoft.com/en-us/library/aa564001%28v=EXCHG.140%29.aspx*/
-	/*icalcomponent *vfb;
+	icalcomponent *vfb;
 	EwsAsyncData *async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
 
 	vfb = icalcomponent_new_vfreebusy ();
 
-	async_data->items = g_slist_append (async_data->items, vfb);*/
+	async_data->items = g_slist_append (async_data->items, vfb);
 }
 
 void
