@@ -2794,7 +2794,7 @@ ews_cal_get_free_busy_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 	EEwsConnection *cnc = (EEwsConnection *)obj;
 	EwsFreeBusyData *free_busy_data = user_data;
 	GSList *free_busy_sl = NULL, *i;
-	GList *free_busy = NULL;
+	GList *free_busy = NULL, *j;
 	GError *error = NULL;
 
 	if (!e_ews_connection_get_free_busy_finish (cnc, res, &free_busy_sl, &error)) {
@@ -2802,8 +2802,12 @@ ews_cal_get_free_busy_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 		goto done;
 	}
 	
-	for (i = free_busy_sl; i; i = i->next)
-		free_busy = g_list_append (free_busy, i->data);
+	for (i = free_busy_sl, j = free_busy_data->users; i && j; i = i->next, j = j->next) {
+		/* add attendee property */
+		icalcomponent_add_property((icalcomponent *)i->data, icalproperty_new_attendee (j->data));
+
+		free_busy = g_list_append (free_busy, icalcomponent_as_ical_string_r (i->data));
+	}
 	g_slist_free (free_busy_sl);
 
 done:
