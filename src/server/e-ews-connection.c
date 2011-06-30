@@ -3697,9 +3697,52 @@ get_free_busy_response_cb (ESoapParameter *param, EwsNode *enode)
        /*parse the response to create a free_busy data
         http://msdn.microsoft.com/en-us/library/aa564001%28v=EXCHG.140%29.aspx*/
 	icalcomponent *vfb;
+	icalproperty *icalprop = NULL;
+	struct icalperiodtype ipt;
+	ESoapParameter *viewparam, *eventarray, *event_param, *subparam;
+	GTimeVal t_val;
+	const gchar *name;
+	gchar *value;
 	EwsAsyncData *async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
 
 	vfb = icalcomponent_new_vfreebusy ();
+
+	viewparam = e_soap_parameter_get_first_child_by_name (param, "FreeBusyView");
+	eventarray = e_soap_parameter_get_first_child_by_name (viewparam, "CalendarEventArray");
+	for (event_param = e_soap_parameter_get_first_child (eventarray); event_param != NULL; event_param = e_soap_parameter_get_next_child (eventarray), icalprop = NULL) {
+		for (subparam = e_soap_parameter_get_first_child (event_param); subparam != NULL; subparam = e_soap_parameter_get_next_child (event_param)) {
+			name = e_soap_parameter_get_name (subparam);
+
+			if (!g_ascii_strcasecmp (name, "StartTime")) {
+				value = e_soap_parameter_get_string_value (subparam);
+				g_time_val_from_iso8601 (value, &t_val);
+				g_free (value);
+
+				ipt.start = icaltime_from_timet (t_val.tv_sec, 0);
+
+			} else if (!g_ascii_strcasecmp (name, "EndTime")) {
+				value = e_soap_parameter_get_string_value (subparam);
+				g_time_val_from_iso8601 (value, &t_val);
+				g_free (value);
+
+				ipt.end = icaltime_from_timet (t_val.tv_sec, 0);
+
+				icalprop = icalproperty_new_freebusy (ipt);
+			} else if (!g_ascii_strcasecmp (name, "BusyType")) {
+				value = e_soap_parameter_get_string_value (subparam);
+				if (!strcmp (value, "Busy"))
+					icalproperty_set_parameter_from_string (icalprop, "FBTYPE", "BUSY");
+				else if (!strcmp (value, "Tentative"))
+					icalproperty_set_parameter_from_string (icalprop, "FBTYPE", "BUSY-TENTATIVE");
+				else if (!strcmp (value, "OOF"))
+					icalproperty_set_parameter_from_string (icalprop, "FBTYPE", "BUSY-UNAVAILABLE");
+				else if (!strcmp (value, "Free"))
+					icalproperty_set_parameter_from_string (icalprop, "FBTYPE", "FREE");
+				g_free (value);
+			}
+		}
+		if (icalprop != NULL) icalcomponent_add_property(vfb, icalprop);
+	}
 
 	async_data->items = g_slist_append (async_data->items, vfb);
 }
