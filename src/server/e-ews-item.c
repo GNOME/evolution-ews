@@ -126,6 +126,9 @@ struct _EEwsContactFields {
 struct _EEwsTaskFields {
 	gchar *percent_complete;
 	gchar *status;
+	gchar *body;
+	gchar *sensitivity;
+	gchar *owner;
 	time_t due_date;
 	time_t start_date;
 };
@@ -273,7 +276,12 @@ e_ews_item_dispose (GObject *object)
 		priv->task_fields->percent_complete = NULL;
 		g_free (priv->task_fields->status);
 		priv->task_fields->status = NULL;
-		g_free (priv->task_fields->status);
+		g_free (priv->task_fields->body);
+		priv->task_fields->body = NULL;
+		g_free (priv->task_fields->sensitivity);
+		priv->task_fields->sensitivity = NULL;
+		g_free (priv->task_fields->owner);
+		priv->task_fields->owner = NULL;
 		g_free (priv->task_fields);
 	}
 
@@ -747,6 +755,12 @@ parse_task_field (EEwsItem *item, const gchar *name, ESoapParameter *subparam)
 			value = e_soap_parameter_get_string_value (subparam);
 			priv->task_fields->start_date = ews_item_parse_date (value);
 			g_free (value);
+	} else if (!g_ascii_strcasecmp (name, "Sensitivity")) {
+		priv->task_fields->sensitivity = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "Body")) {
+		priv->task_fields->body = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "Owner")) {
+		priv->task_fields->owner = e_soap_parameter_get_string_value (subparam);
 	}
 }
 
@@ -1506,4 +1520,31 @@ e_ews_item_get_start_date (EEwsItem *item)
 	g_return_val_if_fail (item->priv->task_fields != NULL, -1);
 
 	return item->priv->task_fields->start_date;
+}
+
+const gchar *
+e_ews_item_get_sensitivity (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->task_fields != NULL, NULL);
+
+	return item->priv->task_fields->sensitivity;
+}
+
+const gchar *
+e_ews_item_get_body (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->task_fields != NULL, NULL);
+
+	return item->priv->task_fields->body;
+}
+
+const gchar *
+e_ews_item_get_owner (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->task_fields != NULL, NULL);
+
+	return item->priv->task_fields->owner;
 }
