@@ -638,7 +638,7 @@ camel_ews_store_summary_get_folders (CamelEwsStoreSummary *ews_summary,
 	for (i = 0; i < length; i++) {
 		if (!g_ascii_strcasecmp (groups [i], STORE_GROUP_NAME))
 			continue;
-		if (prefix) {
+		if (prefixlen) {
 			const gchar *fname = g_hash_table_lookup (ews_summary->priv->id_fname_hash, groups[i]);
 
 			if (!fname || strncmp(fname, prefix, prefixlen) ||
