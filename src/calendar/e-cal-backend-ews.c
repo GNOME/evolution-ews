@@ -2213,7 +2213,7 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 		icalproperty_class class = ICAL_CLASS_NONE;
 		const char *ews_task_status, *sensitivity;
 		EwsImportance item_importance;
-		int priority = 2;
+		int priority = 5;
 
 		vcomp = icalcomponent_new (ICAL_VCALENDAR_COMPONENT);
 		/*subject*/
@@ -2253,7 +2253,7 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 		if (item_importance == EWS_ITEM_HIGH)
 			priority = 3;
 		else if (item_importance == EWS_ITEM_LOW)
-			priority = 1;
+			priority = 7;
 		icalprop = icalproperty_new_priority (priority);
 		icalcomponent_add_property (icalcomp, icalprop);
 
