@@ -1558,7 +1558,7 @@ convert_property_to_updatexml (ESoapMessage *msg, const gchar *name, const gchar
 }
 
 static void
-convert_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
+convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 {
 	EwsModifyData *modify_data = user_data;
 	icalcomponent *icalcomp = e_cal_component_get_icalcomponent (modify_data->comp);
@@ -1638,6 +1638,38 @@ convert_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 	}
 
 	e_ews_message_end_item_change (msg);
+}
+
+static void
+convert_vtodo_component_to_updatexml (ESoapMessage *msg, gpointer user_data)
+{
+	EwsModifyData *modify_data = user_data;
+	icalcomponent *icalcomp = e_cal_component_get_icalcomponent (modify_data->comp);
+
+	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
+					 modify_data->itemid, modify_data->changekey, 0);
+
+	convert_property_to_updatexml  (msg, "Subject", icalcomponent_get_summary(icalcomp), "item", NULL, NULL);
+
+	e_ews_message_end_item_change (msg);
+}
+
+static void
+convert_component_to_updatexml (ESoapMessage *msg, gpointer user_data)
+{
+	EwsModifyData *modify_data = user_data;
+	icalcomponent *icalcomp = e_cal_component_get_icalcomponent (modify_data->comp);
+
+	switch (icalcomponent_isa (icalcomp)) {
+	case ICAL_VEVENT_COMPONENT:
+		convert_vevent_component_to_updatexml (msg, user_data);
+		break;
+	case ICAL_VTODO_COMPONENT:
+		convert_vtodo_component_to_updatexml (msg, user_data);
+		break;
+	default:
+		break;
+	}
 }
 
 static void
