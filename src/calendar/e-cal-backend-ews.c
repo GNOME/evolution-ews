@@ -1026,7 +1026,7 @@ static void add_attendees_list_to_message(ESoapMessage *msg, const gchar *listna
 }
 
 static void
-convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
+convert_vevent_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 {
 	icalcomponent *icalcomp = (icalcomponent*)user_data;
 	GSList *required = NULL, *optional = NULL, *resource = NULL;
@@ -1091,6 +1091,35 @@ convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 
 	// end of "CalendarItem"
 	e_soap_message_end_element(msg);
+}
+
+static void
+convert_vtodo_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
+{
+	icalcomponent *icalcomp = (icalcomponent*)user_data;
+
+	e_soap_message_start_element(msg, "Task", NULL, NULL);
+
+	e_ews_message_write_string_parameter(msg, "Subject", NULL,  icalcomponent_get_summary(icalcomp));
+
+	e_soap_message_end_element(msg); // "Task"
+}
+
+static void
+convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
+{
+	icalcomponent *icalcomp = (icalcomponent*)user_data;
+
+	switch (icalcomponent_isa (icalcomp)) {
+	case ICAL_VEVENT_COMPONENT:
+		convert_vevent_calcomp_to_xml (msg, user_data);
+		break;
+	case ICAL_VTODO_COMPONENT:
+		convert_vtodo_calcomp_to_xml (msg, user_data);
+		break;
+	default:
+		break;
+	}
 }
 
 static void
