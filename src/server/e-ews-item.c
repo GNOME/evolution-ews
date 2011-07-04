@@ -737,6 +737,12 @@ parse_contact_field (EEwsItem *item, const gchar *name, ESoapParameter *subparam
 	}
 }
 
+static gchar *
+strip_html_tags (const gchar *html_text)
+{
+	return g_strdup (html_text);
+}
+
 static void
 parse_task_field (EEwsItem *item, const gchar *name, ESoapParameter *subparam)
 {
@@ -758,7 +764,9 @@ parse_task_field (EEwsItem *item, const gchar *name, ESoapParameter *subparam)
 	} else if (!g_ascii_strcasecmp (name, "Sensitivity")) {
 		priv->task_fields->sensitivity = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "Body")) {
-		priv->task_fields->body = e_soap_parameter_get_string_value (subparam);
+		value = e_soap_parameter_get_string_value (subparam);
+		priv->task_fields->body = strip_html_tags (value);
+		g_free (value);
 	} else if (!g_ascii_strcasecmp (name, "Owner")) {
 		priv->task_fields->owner = e_soap_parameter_get_string_value (subparam);
 	}
