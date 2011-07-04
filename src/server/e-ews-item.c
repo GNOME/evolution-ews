@@ -740,7 +740,20 @@ parse_contact_field (EEwsItem *item, const gchar *name, ESoapParameter *subparam
 static gchar *
 strip_html_tags (const gchar *html_text)
 {
-	return g_strdup (html_text);
+	gssize haystack_len = strlen (html_text);
+	gchar *plain_text = g_malloc (haystack_len);
+	gchar *start = g_strstr_len (html_text, haystack_len, "<body>"),
+		*end = g_strstr_len (html_text, haystack_len, "</body>"),
+		*i, *j;
+
+	for (j = plain_text, i = start + 6; i < end; i++) {
+		if (*i == '<') { while (*i != '>') i++; }
+		else { *j = *i; j++; }
+	}
+
+	*j = '\0';
+
+	return plain_text;
 }
 
 static void
