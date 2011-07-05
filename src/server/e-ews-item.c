@@ -131,8 +131,10 @@ struct _EEwsTaskFields {
 	gchar *owner;
 	time_t due_date;
 	time_t start_date;
+	time_t complete_date;
 	gboolean has_due_date;
 	gboolean has_start_date;
+	gboolean has_complete_date;
 };
 
 struct _EEwsItemPrivate {
@@ -778,6 +780,12 @@ parse_task_field (EEwsItem *item, const gchar *name, ESoapParameter *subparam)
 		priv->task_fields->start_date = ews_item_parse_date (value);
 		g_free (value);
 		priv->task_fields->has_start_date = TRUE;
+	}
+	else if (!g_ascii_strcasecmp (name, "CompleteDate")) {
+		value = e_soap_parameter_get_string_value (subparam);
+		priv->task_fields->complete_date = ews_item_parse_date (value);
+		g_free (value);
+		priv->task_fields->has_complete_date = TRUE;
 	} else if (!g_ascii_strcasecmp (name, "Sensitivity")) {
 		priv->task_fields->sensitivity = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "Body")) {
@@ -825,6 +833,7 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 		priv->task_fields = g_new0 (struct _EEwsTaskFields, 1);
 		priv->task_fields->has_due_date = FALSE;
 		priv->task_fields->has_start_date = FALSE;
+		priv->task_fields->has_complete_date = FALSE;
 	}
 	else if ((node = e_soap_parameter_get_first_child_by_name (param, "Item")))
 		priv->item_type = E_EWS_ITEM_TYPE_GENERIC_ITEM;
@@ -1543,6 +1552,7 @@ e_ews_item_get_due_date (EEwsItem *item)
 
 	return item->priv->task_fields->due_date;
 }
+
 time_t
 e_ews_item_get_start_date (EEwsItem *item)
 {
@@ -1550,6 +1560,15 @@ e_ews_item_get_start_date (EEwsItem *item)
 	g_return_val_if_fail (item->priv->task_fields != NULL, -1);
 
 	return item->priv->task_fields->start_date;
+}
+
+time_t
+e_ews_item_get_complete_date (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), -1);
+	g_return_val_if_fail (item->priv->task_fields != NULL, -1);
+
+	return item->priv->task_fields->complete_date;
 }
 
 const gchar *
@@ -1597,6 +1616,17 @@ e_ews_item_task_has_due_date (EEwsItem *item,  gboolean *has_date)
 	g_return_val_if_fail (item->priv->task_fields != NULL, FALSE);
 
 	*has_date =  item->priv->task_fields->has_due_date;
+
+	return TRUE;
+}
+
+gboolean
+e_ews_item_task_has_complete_date (EEwsItem *item,  gboolean *has_date)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), FALSE);
+	g_return_val_if_fail (item->priv->task_fields != NULL, FALSE);
+
+	*has_date =  item->priv->task_fields->has_complete_date;
 
 	return TRUE;
 }

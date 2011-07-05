@@ -2269,7 +2269,7 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 
 	if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_TASK){
 		icalproperty *icalprop;
-		icaltimetype due_date, start_date;
+		icaltimetype due_date, start_date, complete_date;
 		icalproperty_status status  = ICAL_STATUS_NONE;
 		icalproperty_class class = ICAL_CLASS_NONE;
 		const char *ews_task_status, *sensitivity;
@@ -2317,6 +2317,15 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 			icalcomponent_add_property (icalcomp, icalprop);
 		}
 
+		/*complete date*/
+		has_this_date = FALSE;
+		e_ews_item_task_has_complete_date (item, &has_this_date);
+		if (has_this_date) {
+			g_warning ("Task with compleete date");
+			complete_date = icaltime_from_timet_with_zone (e_ews_item_get_complete_date (item), 0, priv->default_zone);
+			icalprop = icalproperty_new_completed (complete_date);
+			icalcomponent_add_property (icalcomp, icalprop);
+		}
 		/*priority*/
 		item_importance = e_ews_item_get_importance (item);
 		if (item_importance == EWS_ITEM_HIGH)
