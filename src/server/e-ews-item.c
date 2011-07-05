@@ -781,9 +781,12 @@ parse_task_field (EEwsItem *item, const gchar *name, ESoapParameter *subparam)
 	} else if (!g_ascii_strcasecmp (name, "Sensitivity")) {
 		priv->task_fields->sensitivity = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "Body")) {
-		value = e_soap_parameter_get_string_value (subparam);
-		priv->task_fields->body = strip_html_tags (value);
-		g_free (value);
+		if (!g_ascii_strcasecmp (e_soap_parameter_get_property (subparam, "BodyType"),"HTML")) {
+			value = e_soap_parameter_get_string_value (subparam);
+			priv->task_fields->body = strip_html_tags (value);
+			g_free (value);
+		} else
+			priv->task_fields->body = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "Owner")) {
 		priv->task_fields->owner = e_soap_parameter_get_string_value (subparam);
 	}
