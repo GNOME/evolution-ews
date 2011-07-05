@@ -196,6 +196,10 @@ const gchar *	e_ews_item_get_body		(EEwsItem *item);
 const gchar *	e_ews_item_get_owner		(EEwsItem *item);
 time_t		e_ews_item_get_due_date		(EEwsItem *item);
 time_t		e_ews_item_get_start_date	(EEwsItem *item);
+gboolean	e_ews_item_task_has_start_date	(EEwsItem *item,
+						 gboolean *has_date);
+gboolean	e_ews_item_task_has_due_date	(EEwsItem *item,
+						 gboolean *has_date);
 
 G_END_DECLS
 

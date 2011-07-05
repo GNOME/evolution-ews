@@ -2275,6 +2275,7 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 		const char *ews_task_status, *sensitivity;
 		EwsImportance item_importance;
 		int priority = 5;
+		gboolean has_this_date = FALSE;
 
 		vcomp = icalcomponent_new (ICAL_VCALENDAR_COMPONENT);
 		/*subject*/
@@ -2300,14 +2301,21 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 		icalcomponent_add_property (icalcomp, icalprop);
 
 		/*due date*/
-		due_date = icaltime_from_timet_with_zone (e_ews_item_get_due_date (item), 0, priv->default_zone);
-		icalprop = icalproperty_new_due (due_date);
-		icalcomponent_add_property (icalcomp, icalprop);
+		e_ews_item_task_has_due_date (item, &has_this_date);
+		if (has_this_date) {
+			due_date = icaltime_from_timet_with_zone (e_ews_item_get_due_date (item), 0, priv->default_zone);
+			icalprop = icalproperty_new_due (due_date);
+			icalcomponent_add_property (icalcomp, icalprop);
+		}
 
 		/*start date*/
-		start_date = icaltime_from_timet_with_zone (e_ews_item_get_start_date (item), 0, priv->default_zone);
-		icalprop = icalproperty_new_dtstart (start_date);
-		icalcomponent_add_property (icalcomp, icalprop);
+		has_this_date = FALSE;
+		e_ews_item_task_has_start_date (item, &has_this_date);
+		if (has_this_date) {
+			start_date = icaltime_from_timet_with_zone (e_ews_item_get_start_date (item), 0, priv->default_zone);
+			icalprop = icalproperty_new_dtstart (start_date);
+			icalcomponent_add_property (icalcomp, icalprop);
+		}
 
 		/*priority*/
 		item_importance = e_ews_item_get_importance (item);
