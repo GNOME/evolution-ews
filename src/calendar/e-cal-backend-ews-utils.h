@@ -33,6 +33,7 @@ void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **op
 
 void ewscal_set_time (ESoapMessage *msg, const gchar *name, icaltimetype *t);
 void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *icaltz);
+void ewscal_set_availability_timezone (ESoapMessage *msg, icaltimezone *icaltz);
 void ewscal_set_reccurence (ESoapMessage *msg, icalproperty *rrule, icaltimetype *dtstart);
 void ewscal_set_reccurence_exceptions (ESoapMessage *msg, icalcomponent *comp);
 void ewscal_get_attach_differences (const GSList *original, const GSList *modified, GSList **removed, GSList **added);

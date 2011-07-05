@@ -289,6 +289,97 @@ void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *ic
 	e_soap_message_end_element(msg); /* "MeetingTimeZone" */
 }
 
+static void ewscal_add_availability_rrule (ESoapMessage *msg, icalproperty *prop)
+{
+	struct icalrecurrencetype recur = icalproperty_get_rrule(prop);
+	char buffer[16];
+
+	snprintf (buffer, 16, "%d", icalrecurrencetype_day_position(recur.by_day[0]));
+	e_ews_message_write_string_parameter(msg, "DayOrder", NULL, buffer);
+
+	snprintf (buffer, 16, "%d", recur.by_month[0]);
+	e_ews_message_write_string_parameter(msg, "Month", NULL, buffer);
+
+	e_ews_message_write_string_parameter(msg, "DayOfWeek", NULL, number_to_weekday(icalrecurrencetype_day_day_of_week(recur.by_day[0]) - recur.week_start));
+}
+
+static void ewscal_add_availability_timechange (ESoapMessage *msg, icalcomponent *comp, int baseoffs)
+{
+	char buffer[16];
+	icalproperty *prop;
+	struct icaltimetype dtstart;
+	int utcoffs;
+
+	/* Calculate zone Offset from BaseOffset */
+	prop = icalcomponent_get_first_property(comp, ICAL_TZOFFSETTO_PROPERTY);
+	if (prop) {
+		utcoffs = -icalproperty_get_tzoffsetto(prop)/60;
+		utcoffs -= baseoffs;
+		snprintf (buffer, 16, "%d", utcoffs);
+		e_ews_message_write_string_parameter(msg, "Bias", NULL, buffer);
+	}
+
+	prop = icalcomponent_get_first_property(comp, ICAL_DTSTART_PROPERTY);
+	if (prop) {
+		dtstart = icalproperty_get_dtstart(prop);
+		snprintf(buffer, 16, "%02d:%02d:%02d", dtstart.hour, dtstart.minute, dtstart.second);
+		e_ews_message_write_string_parameter(msg, "Time", NULL, buffer);
+	}
+
+	prop = icalcomponent_get_first_property(comp, ICAL_RRULE_PROPERTY);
+	if (prop)
+		ewscal_add_availability_rrule (msg, prop);
+}
+
+void ewscal_set_availability_timezone (ESoapMessage *msg, icaltimezone *icaltz)
+{
+	icalcomponent *comp;
+	icalproperty *prop;
+	icalcomponent *xstd, *xdaylight;
+	int std_utcoffs;
+	gchar *offset;
+
+	if (!icaltz)
+		return;
+
+	comp = icaltimezone_get_component(icaltz);
+
+	xstd = icalcomponent_get_first_component(comp, ICAL_XSTANDARD_COMPONENT);
+	xdaylight = icalcomponent_get_first_component(comp, ICAL_XDAYLIGHT_COMPONENT);
+
+	/* Should never happen. Exchange will bail out */
+	if (!xstd || !xdaylight)
+		return;
+
+	e_soap_message_start_element(msg, "TimeZone", NULL, NULL);
+
+	/* Fetch the timezone offsets for the standard (or only) zone.
+	   Negate it, because Exchange does it backwards */
+	prop = icalcomponent_get_first_property(xstd, ICAL_TZOFFSETTO_PROPERTY);
+	std_utcoffs = -icalproperty_get_tzoffsetto(prop)/60;
+
+	/* This is the overall BaseOffset tag, which the Standard and Daylight
+	   zones are offset from. It's redundant, but Exchange always sets it
+	   to the offset of the Standard zone, and the Offset in the Standard
+	   zone to zero. So try to avoid problems by doing the same. */
+	offset = g_strdup_printf ("%d", std_utcoffs);
+	e_ews_message_write_string_parameter(msg, "Bias", NULL, offset);
+	g_free (offset);
+
+	if (xdaylight) {
+		/* Standard */
+		e_soap_message_start_element(msg, "StandardTime", NULL, NULL);
+		ewscal_add_availability_timechange (msg, xstd, std_utcoffs);
+		e_soap_message_end_element(msg); /* "StandardTime" */
+
+		/* DayLight */
+		e_soap_message_start_element(msg, "DaylightTime", NULL, NULL);
+		ewscal_add_availability_timechange (msg, xdaylight, std_utcoffs);
+		e_soap_message_end_element(msg); /* "DaylightTime" */
+	}
+	e_soap_message_end_element(msg); /* "TimeZone" */
+}
+
 void ewscal_set_reccurence (ESoapMessage *msg, icalproperty *rrule, icaltimetype *dtstart)
 {
 	char buffer[256];

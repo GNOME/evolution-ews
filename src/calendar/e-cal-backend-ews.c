@@ -2828,13 +2828,15 @@ typedef struct {
 } EwsFreeBusyData;
 
 static void
-prepear_free_busy_request (ESoapMessage *msg, gpointer user_data)
+prepare_free_busy_request (ESoapMessage *msg, gpointer user_data)
 {
 	EwsFreeBusyData *free_busy_data = user_data;
 	GList *addr;
 	icaltimetype t_start, t_end;
 
-	e_soap_message_start_element(msg, "MailboxDataArray", NULL, NULL);
+	ewscal_set_availability_timezone (msg, free_busy_data->timezone);
+
+	e_soap_message_start_element(msg, "MailboxDataArray", "messages", NULL);
 
 	for (addr = free_busy_data->users; addr; addr = addr->next) {
 		e_soap_message_start_element(msg, "MailboxData", NULL, NULL);
@@ -2933,7 +2935,7 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend, EDataCal *cal,
 
 	e_ews_connection_get_free_busy_start (priv->cnc,
 					      EWS_PRIORITY_MEDIUM,
-					      prepear_free_busy_request,
+					      prepare_free_busy_request,
 					      free_busy_data,
 					      ews_cal_get_free_busy_cb,
 					      cancellable,
