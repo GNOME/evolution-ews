@@ -194,6 +194,7 @@ const gchar *	e_ews_item_get_percent_complete (EEwsItem *item);
 const gchar *	e_ews_item_get_sensitivity	(EEwsItem *item);
 const gchar *	e_ews_item_get_body		(EEwsItem *item);
 const gchar *	e_ews_item_get_owner		(EEwsItem *item);
+const gchar *	e_ews_item_get_delegator	(EEwsItem *item);
 time_t		e_ews_item_get_due_date		(EEwsItem *item);
 time_t		e_ews_item_get_start_date	(EEwsItem *item);
 time_t		e_ews_item_get_complete_date	(EEwsItem *item);

@@ -129,6 +129,7 @@ struct _EEwsTaskFields {
 	gchar *body;
 	gchar *sensitivity;
 	gchar *owner;
+	gchar *delegator;
 	time_t due_date;
 	time_t start_date;
 	time_t complete_date;
@@ -797,7 +798,10 @@ parse_task_field (EEwsItem *item, const gchar *name, ESoapParameter *subparam)
 			priv->task_fields->body = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "Owner")) {
 		priv->task_fields->owner = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "Delegator")) {
+		priv->task_fields->delegator = e_soap_parameter_get_string_value (subparam);
 	}
+
 }
 
 static gboolean
@@ -1596,6 +1600,15 @@ e_ews_item_get_owner (EEwsItem *item)
 	g_return_val_if_fail (item->priv->task_fields != NULL, NULL);
 
 	return item->priv->task_fields->owner;
+}
+
+const gchar *
+e_ews_item_get_delegator (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->task_fields != NULL, NULL);
+
+	return item->priv->task_fields->delegator;
 }
 
 gboolean

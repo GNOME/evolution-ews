@@ -2321,7 +2321,6 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 		has_this_date = FALSE;
 		e_ews_item_task_has_complete_date (item, &has_this_date);
 		if (has_this_date) {
-			g_warning ("Task with compleete date");
 			complete_date = icaltime_from_timet_with_zone (e_ews_item_get_complete_date (item), 0, priv->default_zone);
 			icalprop = icalproperty_new_completed (complete_date);
 			icalcomponent_add_property (icalcomp, icalprop);
@@ -2350,6 +2349,49 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 		/*description*/
 		icalprop = icalproperty_new_description (e_ews_item_get_body (item));
 		icalcomponent_add_property (icalcomp, icalprop);
+
+		/*task assaingments*/
+		if (!(e_ews_item_get_delegator (item)== NULL)) {
+			const char *task_owner = e_ews_item_get_delegator (item);
+			GSList *mailboxes = NULL, *l;
+			GError *error = NULL;
+			gboolean includes_last_item;
+			char *mailtoname;
+			icalparameter *param;
+
+			/*The task owner according to Exchange is current user, even that the task was assigned by
+			 *someone else. I'm making the current user attendee and task delegator will be a task organizer */
+
+			mailtoname = g_strdup_printf ("mailto:%s", priv->user_email);
+			icalprop = icalproperty_new_attendee (mailtoname);
+			g_free(mailtoname);
+
+			param = icalparameter_new_cn (e_ews_item_get_owner (item));
+			icalproperty_add_parameter (icalprop, param);
+			icalcomponent_add_property (icalcomp, icalprop);
+
+			/* get delegator mail box*/
+			e_ews_connection_resolve_names	(priv->cnc, EWS_PRIORITY_MEDIUM, task_owner,
+						 EWS_SEARCH_AD, NULL, FALSE, &mailboxes, NULL,
+						 &includes_last_item, NULL, &error);
+
+			for (l = mailboxes; l != NULL; l = g_slist_next (l)) {
+				EwsMailbox *mb = l->data;
+
+				mailtoname = g_strdup_printf ("mailto:%s", mb->email);
+				icalprop = icalproperty_new_organizer (mailtoname);
+				param = icalparameter_new_cn (mb->name);
+				icalproperty_add_parameter (icalprop, param);
+				icalcomponent_add_property (icalcomp, icalprop);
+
+				g_free (mailtoname);
+				g_free (mb->email);
+				g_free (mb->name);
+				g_free (mb);
+			}
+			g_slist_free (mailboxes);
+		}
+
 
 		icalcomponent_add_component (vcomp,icalcomp);
 	} else {
