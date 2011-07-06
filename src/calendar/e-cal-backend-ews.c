@@ -1097,10 +1097,56 @@ static void
 convert_vtodo_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 {
 	icalcomponent *icalcomp = (icalcomponent*)user_data;
+	icalproperty *prop;
+	icaltimetype dt;
+	int value;
+	char buffer[16];
 
 	e_soap_message_start_element(msg, "Task", NULL, NULL);
 
-	e_ews_message_write_string_parameter(msg, "Subject", NULL,  icalcomponent_get_summary(icalcomp));
+	e_ews_message_write_string_parameter(msg, "Subject", NULL, icalcomponent_get_summary(icalcomp));
+
+	e_ews_message_write_string_parameter_with_attribute (msg, "Body", NULL, icalcomponent_get_description (icalcomp), "BodyType", "Text");
+
+	prop = icalcomponent_get_first_property (icalcomp, ICAL_CREATED_PROPERTY);
+	if (prop) {
+		dt = icalproperty_get_created (prop);
+		ewscal_set_time (msg, "DateTimeCreated", &dt);
+	}
+
+	prop = icalcomponent_get_first_property (icalcomp, ICAL_DUE_PROPERTY);
+	if (prop) {
+		dt = icalproperty_get_due (prop);
+		ewscal_set_time (msg, "DueDate", &dt);
+	}
+
+	prop = icalcomponent_get_first_property (icalcomp, ICAL_PERCENTCOMPLETE_PROPERTY);
+	if (prop) {
+		value = icalproperty_get_percentcomplete (prop);
+		snprintf (buffer, 16, "%d", value);
+		e_ews_message_write_string_parameter(msg, "PercentComplete", NULL, buffer);
+	}
+
+	prop = icalcomponent_get_first_property (icalcomp, ICAL_DTSTART_PROPERTY);
+	if (prop) {
+		dt = icalproperty_get_dtstart (prop);
+		ewscal_set_time (msg, "StartDate", &dt);
+	}
+
+	prop = icalcomponent_get_first_property (icalcomp, ICAL_STATUS_PROPERTY);
+	if (prop) {
+		switch (icalproperty_get_status (prop)) {
+		case ICAL_STATUS_INPROCESS:
+			e_ews_message_write_string_parameter(msg, "Status", NULL, "InProgress");
+			break;
+		case ICAL_STATUS_COMPLETED:
+			e_ews_message_write_string_parameter(msg, "Status", NULL, "Completed");
+			break;
+		default:
+			break;
+		}
+		ewscal_set_time (msg, "StartDate", &dt);
+	}
 
 	e_soap_message_end_element(msg); // "Task"
 }
