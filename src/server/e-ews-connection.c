@@ -206,7 +206,7 @@ ews_parse_soap_fault (ESoapResponse *response, GError **error)
 
 
 	g_set_error (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_UNKNOWN,
-		     "%s", faultstring?:"No <ResponseMessages> or SOAP <faultstring> in response");
+		     "%s", faultstring?:"No <ResponseMessages> or <FreeBusyResponseArray> or SOAP <faultstring> in response");
 
 	g_free(faultstring);
 }
@@ -423,19 +423,21 @@ ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 			e_soap_response_dump_response (response, stdout);
 
 		param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
+		if (!param) param = e_soap_response_get_first_parameter_by_name (response, "FreeBusyResponseArray");
 		if (param) {
 			/* Iterate over all "*ResponseMessage" elements. */
 			for (subparam = e_soap_parameter_get_first_child (param);
 			     subparam;
 			     subparam = e_soap_parameter_get_next_child (subparam)) {
 				int l = strlen ((char *)subparam->name);
-				if (l < 15 || strcmp((char *)subparam->name + l - 15, "ResponseMessage")) {
-					g_warning ("Unexpected element '%s' in place of ResponseMessage",
+				if (l < 15 || (strcmp((char *)subparam->name + l - 15, "ResponseMessage") &&
+				    strcmp((char *)subparam->name, "FreeBusyResponse"))) {
+					g_warning ("Unexpected element '%s' in place of ResponseMessage or FreeBusyResponse",
 						   subparam->name);
 					continue;
 				}
 
-				if (!ews_get_response_status (subparam, &error)) {
+				if (strcmp((char *)subparam->name, "FreeBusyResponse") && !ews_get_response_status (subparam, &error)) {
 					g_simple_async_result_set_from_error (enode->simple, error);
 					break;
 				}
@@ -3705,12 +3707,12 @@ get_free_busy_response_cb (ESoapParameter *param, EwsNode *enode)
 	gchar *value;
 	EwsAsyncData *async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
 
-	vfb = icalcomponent_new_vfreebusy ();
-
 	viewparam = e_soap_parameter_get_first_child_by_name (param, "FreeBusyView");
+	if (!viewparam) return;
+	vfb = icalcomponent_new_vfreebusy ();
 	eventarray = e_soap_parameter_get_first_child_by_name (viewparam, "CalendarEventArray");
-	for (event_param = e_soap_parameter_get_first_child (eventarray); event_param != NULL; event_param = e_soap_parameter_get_next_child (eventarray), icalprop = NULL) {
-		for (subparam = e_soap_parameter_get_first_child (event_param); subparam != NULL; subparam = e_soap_parameter_get_next_child (event_param)) {
+	for (event_param = e_soap_parameter_get_first_child (eventarray); event_param != NULL; event_param = e_soap_parameter_get_next_child (event_param), icalprop = NULL) {
+		for (subparam = e_soap_parameter_get_first_child (event_param); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
 			name = e_soap_parameter_get_name (subparam);
 
 			if (!g_ascii_strcasecmp (name, "StartTime")) {
