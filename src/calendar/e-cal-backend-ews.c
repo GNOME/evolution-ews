@@ -1691,11 +1691,57 @@ convert_vtodo_component_to_updatexml (ESoapMessage *msg, gpointer user_data)
 {
 	EwsModifyData *modify_data = user_data;
 	icalcomponent *icalcomp = e_cal_component_get_icalcomponent (modify_data->comp);
+	icalproperty *prop;
+	icaltimetype dt;
+	int value;
+	char buffer[16];
 
 	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
 					 modify_data->itemid, modify_data->changekey, 0);
 
-	convert_property_to_updatexml  (msg, "Subject", icalcomponent_get_summary(icalcomp), "item", NULL, NULL);
+	e_ews_message_write_string_parameter(msg, "Subject", NULL, icalcomponent_get_summary(icalcomp));
+
+	e_ews_message_write_string_parameter_with_attribute (msg, "Body", NULL, icalcomponent_get_description (icalcomp), "BodyType", "Text");
+
+	prop = icalcomponent_get_first_property (icalcomp, ICAL_CREATED_PROPERTY);
+	if (prop) {
+		dt = icalproperty_get_created (prop);
+		ewscal_set_time (msg, "DateTimeCreated", &dt);
+	}
+
+	prop = icalcomponent_get_first_property (icalcomp, ICAL_DUE_PROPERTY);
+	if (prop) {
+		dt = icalproperty_get_due (prop);
+		ewscal_set_time (msg, "DueDate", &dt);
+	}
+
+	prop = icalcomponent_get_first_property (icalcomp, ICAL_PERCENTCOMPLETE_PROPERTY);
+	if (prop) {
+		value = icalproperty_get_percentcomplete (prop);
+		snprintf (buffer, 16, "%d", value);
+		e_ews_message_write_string_parameter(msg, "PercentComplete", NULL, buffer);
+	}
+
+	prop = icalcomponent_get_first_property (icalcomp, ICAL_DTSTART_PROPERTY);
+	if (prop) {
+		dt = icalproperty_get_dtstart (prop);
+		ewscal_set_time (msg, "StartDate", &dt);
+	}
+
+	prop = icalcomponent_get_first_property (icalcomp, ICAL_STATUS_PROPERTY);
+	if (prop) {
+		switch (icalproperty_get_status (prop)) {
+		case ICAL_STATUS_INPROCESS:
+			e_ews_message_write_string_parameter(msg, "Status", NULL, "InProgress");
+			break;
+		case ICAL_STATUS_COMPLETED:
+			e_ews_message_write_string_parameter(msg, "Status", NULL, "Completed");
+			break;
+		default:
+			break;
+		}
+		ewscal_set_time (msg, "StartDate", &dt);
+	}
 
 	e_ews_message_end_item_change (msg);
 }
