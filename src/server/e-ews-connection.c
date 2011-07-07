@@ -1503,6 +1503,18 @@ e_ews_connection_get_oal_detail_finish	(EEwsConnection *cnc,
 
 }
 
+/**
+ * e_ews_connection_get_oal_detail 
+ * @cnc: 
+ * @oal_id: 
+ * @oal_element: 
+ * @elements: "Full" "Diff" "Template" are the possible values.
+ * @cancellable: 
+ * @error: 
+ * 
+ * 
+ * Returns: 
+ **/
 gboolean	
 e_ews_connection_get_oal_detail	(EEwsConnection *cnc,
 				 const gchar *oal_id,
