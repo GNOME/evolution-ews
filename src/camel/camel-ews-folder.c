@@ -728,6 +728,8 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 	short_name = strrchr (folder_name, '/');
 	if (!short_name)
 		short_name = folder_name;
+	else
+		short_name++;
 
 	folder = g_object_new (
 		CAMEL_TYPE_EWS_FOLDER,
