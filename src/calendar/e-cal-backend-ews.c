@@ -1054,12 +1054,6 @@ convert_vevent_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 
 	/* location */
 	e_ews_message_write_string_parameter(msg, "Location", NULL, icalcomponent_get_location(icalcomp));
-
-	/* Recurrence */
-	prop = icalcomponent_get_first_property(icalcomp, ICAL_RRULE_PROPERTY);
-	if (prop != NULL) {
-		ewscal_set_reccurence(msg, prop, &dtstart);
-	}
 	
 	/* collect attendees */
 	e_ews_collect_attendees(icalcomp, &required, &optional, &resource);
@@ -1078,6 +1072,12 @@ convert_vevent_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 	}
 	/* end of attendees */
 
+	/* Recurrence */
+	prop = icalcomponent_get_first_property(icalcomp, ICAL_RRULE_PROPERTY);
+	if (prop != NULL) {
+		ewscal_set_reccurence(msg, prop, &dtstart);
+	}
+	
 	/* TODO:attachments */
 
 	if (0 /* Exchange 2010 detected */ && dtstart.zone != dtend.zone) {
@@ -1632,12 +1632,6 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 
 	convert_property_to_updatexml  (msg, "Location", icalcomponent_get_location(icalcomp), "calendar", NULL, NULL);
 
-	/* Recurrence */
-	prop = icalcomponent_get_first_property(icalcomp, ICAL_RRULE_PROPERTY);
-	if (prop != NULL) {
-		ewscal_set_reccurence(msg, prop, &dtstart);
-	}
-
 	e_ews_collect_attendees(icalcomp, &required, &optional, &resource);
 	if (required != NULL) {
 		e_ews_message_start_set_item_field (msg, "RequiredAttendees", "calendar");
@@ -1662,6 +1656,12 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 		g_slist_free(resource);
 
 		e_ews_message_end_set_item_field (msg);
+	}
+
+	/* Recurrence */
+	prop = icalcomponent_get_first_property(icalcomp, ICAL_RRULE_PROPERTY);
+	if (prop != NULL) {
+		ewscal_set_reccurence(msg, prop, &dtstart);
 	}
 
 	if (0 /* Exchange 2010 detected */ && dtstart.zone != dtend.zone) {
