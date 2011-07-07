@@ -155,7 +155,7 @@ static const char *weekindex_to_ical(int index) {
 	};
 	int i;
 
-	for (i = 0; i < 5; i++) {
+	for (i = 0; i < 6; i++) {
 		if (index == table[i].index)
 				return table[i].exch;
 	}
