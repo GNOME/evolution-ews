@@ -19,6 +19,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#ifndef _EWS_OAB_PROPS
+#define _EWS_OAB_PROPS
+
 /* Ews oab data types */
 #define EWS_PTYP_INTEGER32		0x0003
 #define EWS_PTYP_BOOLEAN		0x000B
@@ -73,3 +76,5 @@
 #define EWS_PT_MEMBER_OF_DLS		0x8008101E
 #define EWS_PT_TRUNCATED_PROPS		0x68051003
 #define EWS_PT_THUMBNAIL_PHOTO		0x8C9E0102
+
+#endif /* _EWS_OAB_PROPS */

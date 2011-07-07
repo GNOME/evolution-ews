@@ -25,6 +25,9 @@
 
 #include <glib.h>
 #include <glib-object.h>
+#include <gio/gio.h>
+
+#include "e-book-backend-sqlitedb.h"
 
 G_BEGIN_DECLS
 
@@ -55,7 +58,18 @@ typedef struct {
 
 GType ews_oab_decoder_get_type (void);
 
-EwsOabDecoder* ews_oab_decoder_new (const gchar *oab_filename);
+EwsOabDecoder*	ews_oab_decoder_new	(const gchar *oab_filename,
+					 const gchar *cache_dir,
+					 EBookBackendSqliteDB *ebsdb,
+					 GError **error);
+gboolean	ews_oab_decoder_decode	(EwsOabDecoder *eod,
+					 GCancellable *cancellable,
+					 GError **error);
+EContact *	ews_oab_decoder_get_contact_from_offset
+					(EwsOabDecoder *eod,
+					 goffset offset,
+					 GCancellable *cancellable,
+					 GError **error);
 
 G_END_DECLS
 
