@@ -60,6 +60,7 @@ GType ews_oab_decoder_get_type (void);
 
 EwsOabDecoder*	ews_oab_decoder_new	(const gchar *oab_filename,
 					 const gchar *cache_dir,
+					 const gchar *folder_id,
 					 EBookBackendSqliteDB *ebsdb,
 					 GError **error);
 gboolean	ews_oab_decoder_decode	(EwsOabDecoder *eod,
