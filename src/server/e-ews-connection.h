@@ -107,10 +107,10 @@ typedef struct {
 } EwsOAL;
 
 typedef struct {
-	gint seq;
-	gint ver;
-	gint size;
-	gint uncompressed_size;
+	guint32 seq;
+	guint32 ver;
+	guint32 size;
+	guint32 uncompressed_size;
 	gchar *sha;
 	gchar *filename;
 } EwsOALDetails;

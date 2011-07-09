@@ -52,6 +52,8 @@
 #include "e-ews-connection.h"
 #include "e-ews-item.h"
 
+#define d(x) x
+
 #define EDB_ERROR(_code) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, NULL)
 #define EDB_ERROR_EX(_code,_msg) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, _msg)
 #define EDB_ERROR_FAILED_STATUS(_code, _status) e_data_book_create_error_fmt (E_DATA_BOOK_STATUS_ ## _code, "Failed with status 0x%x", _status)
@@ -189,7 +191,7 @@ static gboolean
 ews_needs_update (EBookBackendEwsGal *cbews, EwsOALDetails *full, GError **error)
 {
 	EBookBackendEwsGalPrivate *priv = cbews->priv;
-	gint seq;
+	guint32 seq;
 	gboolean ret = FALSE;
 	gchar *tmp;
 
@@ -197,7 +199,7 @@ ews_needs_update (EBookBackendEwsGal *cbews, EwsOALDetails *full, GError **error
 	if (error)
 		goto exit;
 
-	seq = atoi (tmp);
+	sscanf (tmp, "%"G_GUINT32_FORMAT, &seq);
 	if (seq < full->seq)
 		ret = TRUE;
 	
@@ -211,6 +213,7 @@ ews_download_full_gal (EBookBackendEwsGal *cbews, EwsOALDetails *full, GCancella
 {
 	EBookBackendEwsGalPrivate *priv = cbews->priv;
 	EEwsConnection *oab_cnc;
+	EwsOabDecoder *eod;
 	gchar *full_url, *oab_url, *cache_file = NULL;
 	const gchar *cache_dir;
 	gchar *comp_cache_file = NULL, *uncompress_file = NULL;
@@ -230,7 +233,8 @@ ews_download_full_gal (EBookBackendEwsGal *cbews, EwsOALDetails *full, GCancella
 	if (!oal_decompress_v4_full_detail_file (comp_cache_file, uncompress_file, error))
 		goto exit;
 
-	g_print ("OAL file decompressed %s \n", uncompress_file);
+	d(g_print ("OAL file decompressed %s \n", uncompress_file);)
+	
 
 exit:	
 	if (comp_cache_file)

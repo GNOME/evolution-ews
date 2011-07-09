@@ -1255,15 +1255,15 @@ get_property (xmlNodePtr node_ptr, const gchar *name)
 	return s;
 }
 
-static gint
-get_property_as_int (xmlNodePtr node_ptr, const gchar *name)
+static guint32
+get_property_as_uint32 (xmlNodePtr node_ptr, const gchar *name)
 {
 	gchar *s;
-	gint val = -1;
+	guint32 val = -1;
 	
 	s = get_property (node_ptr, name);
 	if (s)
-		val = atoi (s);
+		sscanf (s,"%"G_GUINT32_FORMAT, &val);
 	g_free (s);
 
 	return val;
@@ -1291,10 +1291,10 @@ parse_oal_full_details (xmlNode *node, const gchar *element)
 		if (node->type == XML_ELEMENT_NODE && !strcmp((char *)node->name, element)) {
 			EwsOALDetails *det = g_new0 (EwsOALDetails, 1);
 
-			det->seq = get_property_as_int (node, "seq");
-			det->ver = get_property_as_int (node, "ver");
-			det->size = get_property_as_int (node, "size");
-			det->uncompressed_size = get_property_as_int (node, "uncompressedsize");
+			det->seq = get_property_as_uint32 (node, "seq");
+			det->ver = get_property_as_uint32 (node, "ver");
+			det->size = get_property_as_uint32 (node, "size");
+			det->uncompressed_size = get_property_as_uint32 (node, "uncompressedsize");
 			det->sha = get_property (node, "uncompressedsize");
 			det->filename = g_strstrip (get_content (node));
 			
