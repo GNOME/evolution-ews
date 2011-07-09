@@ -297,12 +297,12 @@ ews_oab_decoder_error_quark (void)
 }
 
 /* endian-neutral reading of little-endian data */
-#define __egi32(a,n) ( ((((unsigned char *) a)[n+3]) << 24) | \
-		       ((((unsigned char *) a)[n+2]) << 16) | \
-		       ((((unsigned char *) a)[n+1]) <<  8) | \
-		       ((((unsigned char *) a)[n+0])))
-#define EndGetI64(a) ((((unsigned long long int) __egi32(a,4)) << 32) | \
-		      ((unsigned int) __egi32(a,0)))
+#define __egi32(a,n) ( ((((guchar *) a)[n+3]) << 24) | \
+		       ((((guchar *) a)[n+2]) << 16) | \
+		       ((((guchar *) a)[n+1]) <<  8) | \
+		       ((((guchar *) a)[n+0])))
+#define EndGetI64(a) ((((guint64) __egi32(a,4)) << 32) | \
+		      ((guint) __egi32(a,0)))
 #define EndGetI32(a) __egi32(a,0)
 #define EndGetI16(a) ((((a)[1])<<8)|((a)[0]))
 
@@ -494,7 +494,7 @@ ews_decode_uint32 (EwsOabDecoder *eod, GCancellable *cancellable, GError **error
 		/* not sure if its the right way to do, test it */
 		tmp = g_strconcat ("0", str, NULL);
 
-		ret = atoi (tmp);
+		sscanf (tmp, "%"G_GUINT32_FORMAT, &ret);
 		ret = GUINT32_SWAP_LE_BE (ret);
 		
 		g_free (str);
@@ -811,10 +811,54 @@ exit:
 static gboolean
 ews_store_oab_props (EwsOabDecoder *eod, GError **error)
 {
+	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	gboolean ret = TRUE;
-	/* TODO Implement */
+	GString *str = g_string_new (NULL);
+	GSList *l;
+
+	for (l = priv->oab_props; l != NULL; l = g_slist_next (l)) {
+		guint32 prop_id = GPOINTER_TO_UINT (l->data);
+		g_string_append_printf (str, "%"G_GUINT32_FORMAT, prop_id);
+		g_string_append_c (str, ';');
+	}
+	g_string_erase (str, str->len - 1, 1);
+
+	d(g_print ("Oab prop string: %s \n", str->str);)
+	e_book_backend_sqlitedb_set_key_value (priv->ebsdb, priv->folder_id, "oab-props", str->str, error);
+	if (*error)
+		ret = TRUE;
 
 	return ret;
+}
+
+static GSList *
+ews_get_oab_props (EwsOabDecoder *eod, GError **error)
+{
+	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
+	gchar *prop_str, **vals;
+	guint32 len, i;
+	GSList *props = NULL;
+
+	prop_str = e_book_backend_sqlitedb_get_key_value (priv->ebsdb, priv->folder_id, "oab-props", error);
+	if (*error)
+		return NULL;
+
+	vals = g_strsplit (prop_str, ";", -1);
+	len = g_strv_length (vals);
+	for (i = 0; i < len; i++) {
+		guint32 prop_id;
+
+		sscanf (vals[i],"%"G_GUINT32_FORMAT,&prop_id);
+		props = g_slist_prepend (props, GUINT_TO_POINTER (prop_id));
+		d(printf ("%X\n", prop_id);)
+	}
+
+	props = g_slist_reverse (props);
+
+	g_strfreev (vals);
+	g_free (prop_str);
+
+	return props;
 }
 
 /**
@@ -855,7 +899,6 @@ ews_oab_decoder_decode	(EwsOabDecoder *eod,
 		goto exit;
 
 	ret = ews_store_oab_props (eod, &err);
-
 exit:
 	if (o_hdr)
 		g_free (o_hdr);
@@ -885,15 +928,16 @@ ews_oab_decoder_get_contact_from_offset	(EwsOabDecoder *eod,
 	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	EwsDeferredSet *dset;
 	EContact *contact = NULL;
+	GSList *oab_props;
 
-	if (!g_seekable_seek ((GSeekable *) priv->fis, offset, G_SEEK_CUR, cancellable, error))
+	if (!g_seekable_seek ((GSeekable *) priv->fis, offset, G_SEEK_SET, cancellable, error))
 		return NULL;
 
-	/* priv->oab_props = fetch from sqlite db */ 
+	oab_props = ews_get_oab_props (eod, error);
 
 	contact = e_contact_new ();
 	dset = g_new0 (EwsDeferredSet, 1);
-	ews_decode_addressbook_record (eod, contact, dset, priv->oab_props, cancellable, error);
+	ews_decode_addressbook_record (eod, contact, dset, oab_props, cancellable, error);
 	if (*error) {
 		g_object_unref (contact);
 		contact = NULL;
@@ -902,9 +946,9 @@ ews_oab_decoder_get_contact_from_offset	(EwsOabDecoder *eod,
 	e_contact_address_free (dset->addr);
 	g_free (dset);
 	
-	if (priv->oab_props) {
-		g_slist_free (priv->oab_props);
-		priv->oab_props = NULL;
+	if (oab_props) {
+		g_slist_free (oab_props);
+		oab_props = NULL;
 	}
 
 	return contact;
@@ -917,6 +961,9 @@ main (gint argc, gchar *argv [])
 	EBookBackendSqliteDB *ebsdb;
 	EwsOabDecoder *eod;
 	GError *err = NULL;
+	EContact *contact;
+	gchar *val;
+	goffset offset;
 
 	g_type_init ();
 	g_thread_init (NULL);
@@ -932,7 +979,19 @@ main (gint argc, gchar *argv [])
 		g_print ("Unable to decode %s \n", err->message);
 	}
 
+	val = e_book_backend_sqlitedb_get_contact_bdata (ebsdb, "de", "chen@g3.com", NULL);
+	sscanf (val,"%"G_GOFFSET_FORMAT,&offset);
+	contact = ews_oab_decoder_get_contact_from_offset (eod, offset, NULL, &err);
+	if (!err)
+		g_print ("%s \n", e_vcard_to_string ((EVCard *) contact, EVC_FORMAT_VCARD_30));
 
 	if (err)
 		g_clear_error (&err);
+
+	g_free (val);
+	g_object_unref (contact);
+	g_object_unref (eod);
+	g_object_unref (ebsdb);
+
+	return 0;
 } */
