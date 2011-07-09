@@ -816,6 +816,8 @@ ews_store_oab_props (EwsOabDecoder *eod, GError **error)
 	GString *str = g_string_new (NULL);
 	GSList *l;
 
+	/* Ideally i would liked to store int as int instead of converting to string,
+	   but ebsdb doesn't yet support storing keys as blob */
 	for (l = priv->oab_props; l != NULL; l = g_slist_next (l)) {
 		guint32 prop_id = GPOINTER_TO_UINT (l->data);
 		g_string_append_printf (str, "%"G_GUINT32_FORMAT, prop_id);
