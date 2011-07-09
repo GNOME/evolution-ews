@@ -180,6 +180,12 @@ gboolean	e_book_backend_sqlitedb_delete_addressbook
 							(EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,
 							 GError **error);
+gboolean	e_book_backend_sqlitedb_create_addressbook
+							(EBookBackendSqliteDB *ebsdb,
+							 const gchar *folder_id,
+							 const gchar *folder_name,
+							 gboolean store_vcard,
+							 GError **error);
 gboolean	e_book_backend_sqlitedb_remove		(EBookBackendSqliteDB *ebsdb,
 							 GError **error);
 void		e_book_backend_sqlitedb_search_data_free	

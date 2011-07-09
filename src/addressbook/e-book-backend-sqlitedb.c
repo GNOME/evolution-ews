@@ -453,13 +453,13 @@ book_backend_sqlitedb_load	(EBookBackendSqliteDB *ebsdb,
  * e_book_backend_sqlitedb_new
  * @path: location where the db would be created
  * @emailid: email id of the user
- * @folderid: folder id of the address-book
+ * @folderid: folder id of the address-book. This is used as primary_key for the folder.
  * @folder_name: name of the address-book
  * @store_vcard: True if the vcard should be stored inside db, if FALSE only the summary fields would be stored inside db.
  * @error:
  *
  * If the path for multiple addressbooks are same, the contacts from all addressbooks
- * would be stored in same db in different tables.
+ * would be stored in same db in different tables. It would also create a new address-book table with folder_id as its name.
  *
  * Returns:
  **/
@@ -1645,6 +1645,39 @@ e_book_backend_sqlitedb_delete_addressbook	(EBookBackendSqliteDB *ebsdb,
 		g_propagate_error (error, err);
 
 	return !err;
+}
+
+/**
+ * e_book_backend_sqlitedb_create_addressbook 
+ * @ebsdb: 
+ * @folder_id: Used as a primary key.
+ * @folder_name: Set the folder name prop.
+ * @store_vcard: 
+ * @error: 
+ * 
+ * Creates an address-book table with folder_id as its name.
+ * Returns: 
+ **/
+gboolean
+e_book_backend_sqlitedb_create_addressbook	(EBookBackendSqliteDB *ebsdb,
+						 const gchar *folderid,
+						 const gchar *folder_name,
+						 gboolean store_vcard,
+						 GError **error)
+{
+	GError *err = NULL;
+	gboolean ret = TRUE;
+
+	add_folder_into_db (ebsdb, folderid, folder_name, &err);
+	if (!err)
+		create_contacts_table (ebsdb, folderid, &err);
+
+	if (err) {
+		g_propagate_error (error, err);
+		ret = FALSE;
+	}
+
+	return ret;
 }
 
 void	
