@@ -885,9 +885,10 @@ ews_cal_remove_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 			error->code = OtherError;
 	}
 
-	if (remove_data->context)
+	if (remove_data->context) {
+		if (!error && remove_data->index != 0) ews_start_sync (remove_data->cbews);
 		e_data_cal_notify_remove (remove_data->cal, remove_data->context, error);
-	else if (error) {
+	} else if (error) {
 		g_warning ("Remove object error :  %s\n", error->message);
 		g_clear_error (&error);
 	}
