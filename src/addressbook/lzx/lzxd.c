@@ -334,7 +334,6 @@ int lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes) {
 
     /* LZXD format has the chunk_size. not present in lzx format */
     READ_BITS (chunk_size, 16);
-    D(("chunk size is %d \n", chunk_size))
 
     /* read header if necessary */
     if (!lzx->header_read) {
