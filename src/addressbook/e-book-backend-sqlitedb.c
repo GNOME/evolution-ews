@@ -1718,3 +1718,9 @@ e_book_backend_sqlitedb_remove          (EBookBackendSqliteDB *ebsdb,
 
 	return TRUE;
 }
+
+gboolean
+e_book_backend_sqlitedb_is_summary_query	(const gchar *query)
+{
+	return book_backend_sqlitedb_is_summary_query (query);
+}

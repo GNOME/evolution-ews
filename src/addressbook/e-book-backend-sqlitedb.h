@@ -190,7 +190,8 @@ gboolean	e_book_backend_sqlitedb_remove		(EBookBackendSqliteDB *ebsdb,
 							 GError **error);
 void		e_book_backend_sqlitedb_search_data_free	
 							(EbSdbSearchData *s_data);
-
+gboolean	e_book_backend_sqlitedb_is_summary_query
+							(const gchar *query);
 G_END_DECLS
 
 #endif /* E_BOOK_BACKEND_SQLITEDB_H */
