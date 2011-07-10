@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <glib.h>
+#include <glib/gstdio.h>
 #include "lzx.h"
 #include "ews-oal-decompress.h"
 
@@ -49,6 +50,7 @@ typedef struct {
 	guint32 flags;
 	guint32 comp_size;
 	guint32 ucomp_size;
+	guint32 crc;
 } LzxBlockHeader;
 
 static gboolean
@@ -123,6 +125,8 @@ read_block_header (FILE *input, GError **error)
 	success = read_uint32 (input, &lzx_b->ucomp_size);
 	if (!success)
 		goto exit;
+	
+	success = read_uint32 (input, &lzx_b->crc);
 
 exit:
 	if (!success) {
@@ -148,27 +152,37 @@ oal_decompress_v4_full_detail_file (const gchar *filename, const gchar *output_f
 	input = fopen (filename, "rb");
 	if (!input) {
 		g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "unable to open the input file");
+		ret = FALSE;
 		goto exit;	
 	}
 	
 	output = fopen (output_filename, "wb");
 	if (!input) {
 		g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "unable to open the output file");
+		ret = FALSE;
 		goto exit;	
 	}
 
 	lzx_h = read_headers (input, &err);
-	if (!lzx_h)
+	if (!lzx_h) {
+		ret = FALSE;
 		goto exit;
+	}
 	
 	/* TODO decompressing multiple lzx_blocks has not been tested yet. Will need to get a setup and test it. */
 	do {
 		LzxBlockHeader *lzx_b;
         	struct lzxd_stream *lzs;
+		goffset offset;
 
 		lzx_b = read_block_header (input, &err);
-		if (err)
+		if (err) {
+			ret = FALSE;
 			goto exit;
+		}
+
+		/* note the file offset */
+		offset = ftell (input);
 
 		/* lzx_b points to 1, write it directly to file */
 		if (lzx_b->flags == 0) {
@@ -178,31 +192,58 @@ oal_decompress_v4_full_detail_file (const gchar *filename, const gchar *output_f
 				fwrite (buffer, 1, lzx_b->ucomp_size, output) == lzx_b->ucomp_size)) {
 				g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "failed to write data in output file");
 				g_free (buffer);
+				ret = FALSE;
 				goto exit;
 			}
 			g_free (buffer);
 		} else {
+			/* round to multiples of 32768 */
+			guint round = (lzx_b->ucomp_size % 32768) + lzx_b->ucomp_size;
+			gint set = g_bit_nth_lsf ((round >> 17), -1);
+			guint window_bits = set + 17;
+	
+			if (set > 8)
+				window_bits = 25;
+			else if (set == -1)
+				window_bits = 17;
+			else
+				window_bits = set + 17;
 
-			lzs = lzxd_init (input, output, 17, 0, 16, lzx_b->ucomp_size);
+			if (window_bits > 25)
+				window_bits = 25;
+				
+			lzs = lzxd_init (input, output, window_bits, 0, 16, lzx_b->ucomp_size);
+
 			if (lzxd_decompress (lzs, lzs->length) != LZX_ERR_OK) {
 				g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed");
-				/* set err */
+				ret = FALSE;
 				goto exit;
 			}
 		}
+
+
+		/* Set the fp to beggining of next block. This is a HACK, looks like decompress reads beyond the block.
+		   Since we can identify the next block start from block header, we just reset the offset */
+		offset += lzx_b->comp_size;
+		fseek (input, offset, SEEK_SET);
 
 		total_decomp_size += lzx_b->ucomp_size;
 		g_free (lzx_b);
 	} while (total_decomp_size < lzx_h->target_size);
 
 exit:
+	if (input)
+		fclose (input);
+	
+	if (output)
+		fclose (output);
+
 	if (err) {
 		ret = FALSE;
 		g_propagate_error (error, err);
+		g_unlink (output_filename);
 	}
 
-	fclose (input);
-	fclose (output);
 	g_free (lzx_h);
 
 	return ret;
@@ -216,6 +257,7 @@ main (int argc, char *argv [])
 		g_print ("Pass an lzx file and an output filename as argument \n");
 		return;
 	}
+
 	g_type_init ();
 	g_thread_init (NULL);
 
@@ -225,4 +267,4 @@ main (int argc, char *argv [])
 		g_print ("decompression failed \n");
 
 	return 0;
-} */ 
+} */

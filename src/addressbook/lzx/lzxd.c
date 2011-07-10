@@ -211,6 +211,7 @@ static void lzxd_reset_state(struct lzxd_stream *lzx) {
 }
 
 /*-------- main LZX code --------*/
+static int pos_slots[9] = {34, 36, 38, 42, 50, 66, 98, 162, 290};
 
 struct lzxd_stream *lzxd_init(FILE *input,
 			      FILE *output,
@@ -222,8 +223,8 @@ struct lzxd_stream *lzxd_init(FILE *input,
   unsigned int window_size = 1 << window_bits;
   struct lzxd_stream *lzx;
 
-  /* LZX supports window sizes of 2^15 (32Kb) through 2^21 (2Mb) */
-  if (window_bits < 15 || window_bits > 21) return NULL;
+  /* LZX supports window sizes of 2^17 (128Kb) through 2^25 (32Mb) */
+  if (window_bits < 17 || window_bits > 26) return NULL;
 
   input_buffer_size = (input_buffer_size + 1) & -2;
   if (!input_buffer_size) return NULL;
@@ -260,10 +261,9 @@ struct lzxd_stream *lzxd_init(FILE *input,
   lzx->intel_started   = 0;
   lzx->error           = LZX_ERR_OK;
 
-  /* window bits:    15  16  17  18  19  20  21
-   * position slots: 30  32  34  36  38  42  50  */
-  lzx->posn_slots      = ((window_bits == 21) ? 50 :
-			  ((window_bits == 20) ? 42 : (window_bits << 1)));
+  /* window bits:    17  18  19  20  21 22 23 24  25
+   * position slots: 34  36  38  42  50 66 98 162 290 */
+  lzx->posn_slots      = pos_slots[window_bits-17];
 
   lzx->o_ptr = lzx->o_end = &lzx->e8_buf[0];
   lzxd_reset_state(lzx);
@@ -316,6 +316,8 @@ int lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes) {
   end_frame = (unsigned int)((lzx->offset + out_bytes) / LZX_FRAME_SIZE) + 1;
 
   while (lzx->frame < end_frame) {
+    int chunk_size;
+
     /* have we reached the reset interval? (if there is one?) */
     if (lzx->reset_interval && ((lzx->frame % lzx->reset_interval) == 0)) {
       if (lzx->block_remaining) {
@@ -331,8 +333,8 @@ int lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes) {
     }
 
     /* LZXD format has the chunk_size. not present in lzx format */
-    READ_BITS (i, 16);
-    D(("chunk size is %d \n", i))
+    READ_BITS (chunk_size, 16);
+    D(("chunk size is %d \n", chunk_size))
 
     /* read header if necessary */
     if (!lzx->header_read) {
@@ -368,7 +370,7 @@ int lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes) {
 	READ_BITS(lzx->block_type, 3);
 	READ_BITS(i, 16); READ_BITS(j, 8);
 	lzx->block_remaining = lzx->block_length = (i << 8) | j;
-	/*D(("new block t%d len %u", lzx->block_type, lzx->block_length))*/
+	D(("new block type %d len %u", lzx->block_type, lzx->block_length))
 
 	/* read individual block headers */
 	switch (lzx->block_type) {
@@ -434,6 +436,8 @@ int lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes) {
 	    this_run--;
 	  }
 	  else {
+ 	    int bit = 0, extra_len = 0;
+
 	    /* match: LZX_NUM_CHARS + ((slot<<3) | length_header (3 bits)) */
 	    main_element -= LZX_NUM_CHARS;
 
@@ -459,10 +463,41 @@ int lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes) {
 	    }
 
 	    if ((window_posn + match_length) > lzx->window_size) {
-	      D(("match ran over window wrap"))
+	      D(("match ran over window wrap %lu %d ", ftell (lzx->input), match_length))
+      	      lzx->o_ptr = &lzx->window[lzx->frame_posn];
 	      return lzx->error = LZX_ERR_DECRUNCH;
 	    }
-	    
+	   
+	    /* check for extra len */
+	    if (match_length == 257) {
+		READ_BITS (bit, 1);
+		if (bit) {
+			bit = 0;
+			READ_BITS (bit, 1);
+			if (bit) {
+				bit = 0;
+				READ_BITS (bit, 1);
+				if (bit) {
+					/* 111 */
+					READ_BITS (extra_len, 15);
+				} else {
+					/* 110 */	
+					READ_BITS (extra_len, 12);
+					extra_len += 256 + 1024;
+				}
+			} else {
+				/* 10 */
+				READ_BITS (extra_len, 10);
+				extra_len += 256;
+			}
+		} else {
+			/* 0 */
+			READ_BITS (extra_len, 8);
+		}
+	    }
+
+	    match_length += extra_len;
+
 	    /* copy match */
 	    rundest = &window[window_posn];
 	    i = match_length;
@@ -486,10 +521,10 @@ int lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes) {
 	      runsrc = rundest - match_offset;
 	      while (i-- > 0) *rundest++ = *runsrc++;
 	    }
-
 	    this_run    -= match_length;
 	    window_posn += match_length;
 	  }
+
 	} /* while (this_run > 0) */
 	break;
 
@@ -502,6 +537,8 @@ int lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes) {
 	    this_run--;
 	  }
 	  else {
+ 	    int bit = 0, extra_len = 0;
+	    
 	    /* match: LZX_NUM_CHARS + ((slot<<3) | length_header (3 bits)) */
 	    main_element -= LZX_NUM_CHARS;
 
@@ -550,6 +587,34 @@ int lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes) {
 	    if ((window_posn + match_length) > lzx->window_size) {
 	      D(("match ran over window wrap"))
 	      return lzx->error = LZX_ERR_DECRUNCH;
+	    }
+	    
+	    /* check for extra len */
+	    if (match_length == 257) {
+		READ_BITS (bit, 1);
+		if (bit) {
+			bit = 0;
+			READ_BITS (bit, 1);
+			if (bit) {
+				bit = 0;
+				READ_BITS (bit, 1);
+				if (bit) {
+					/* 111 */
+					READ_BITS (extra_len, 15);
+				} else {
+					/* 110 */	
+					READ_BITS (extra_len, 12);
+					extra_len += 256 + 1024;
+				}
+			} else {
+				/* 10 */
+				READ_BITS (extra_len, 10);
+				extra_len += 256;
+			}
+		} else {
+			/* 0 */
+			READ_BITS (extra_len, 8);
+		}
 	    }
 
 	    /* copy match */
@@ -629,7 +694,7 @@ int lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes) {
 
     /* check that we've used all of the previous frame first */
     if (lzx->o_ptr != lzx->o_end) {
-      D(("%ld avail bytes, new %d frame", (long int)(lzx->o_end-lzx->o_ptr), frame_size))
+      D(("%d avail bytes, new %d frame", lzx->o_end-lzx->o_ptr, frame_size))
       return lzx->error = LZX_ERR_DECRUNCH;
     }
 
