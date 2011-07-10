@@ -29,6 +29,7 @@
 
 G_BEGIN_DECLS
 
+const char *e_ews_collect_orginizer(icalcomponent *comp);
 void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **optional, GSList **resource);
 
 void ewscal_set_time (ESoapMessage *msg, const gchar *name, icaltimetype *t);

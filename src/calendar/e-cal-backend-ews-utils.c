@@ -44,21 +44,13 @@
  * Iterate over the icalcomponent properties and collect attendees
  */
 void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **optional, GSList **resource) {
-	icalproperty *prop, *org_prop = NULL;
+	icalproperty *prop;
 	icalparameter *param;
-	const gchar *org = NULL, *str = NULL;
+	const gchar *str = NULL;
 	const char *org_email_address = NULL;
 
 	/* we need to know who the orgenizer is so we wont duplicate him/her */
-	org_prop = icalcomponent_get_first_property (comp, ICAL_ORGANIZER_PROPERTY);
-	org = icalproperty_get_organizer(org_prop);
-	if (!org)
-		org = "";
-	else
-		if (!g_ascii_strncasecmp (org, "MAILTO:", 7))
-				org_email_address = (org) + 7;
-			else
-				org_email_address = org;
+	org_email_address = e_ews_collect_orginizer (comp);
 
 	/* iterate over every attendee property */
 	for (prop = icalcomponent_get_first_property (comp, ICAL_ATTENDEE_PROPERTY);
@@ -587,4 +579,25 @@ void ewscal_get_attach_differences (const GSList *original, const GSList *modifi
 
 	*removed = original_copy;
 	*added = modified_copy;
+}
+
+/*
+ * get meeting orginizer e-mail address
+ */
+const char *e_ews_collect_orginizer(icalcomponent *comp)
+{
+	icalproperty *org_prop = NULL;
+	const gchar *org = NULL;
+	const char *org_email_address = NULL;
+
+	org_prop = icalcomponent_get_first_property (comp, ICAL_ORGANIZER_PROPERTY);
+	org = icalproperty_get_organizer(org_prop);
+	if (!org)
+		org = "";
+	else
+		if (!g_ascii_strncasecmp (org, "MAILTO:", 7))
+				org_email_address = (org) + 7;
+			else
+				org_email_address = org;
+	return org_email_address;
 }

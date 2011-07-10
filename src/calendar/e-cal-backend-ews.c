@@ -1611,7 +1611,8 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 	icalcomponent *icalcomp = e_cal_component_get_icalcomponent (modify_data->comp);
 	GSList *required = NULL, *optional = NULL, *resource = NULL;
 	icaltimetype dtstart, dtend;
-	icalproperty *prop;
+	icalproperty *prop, *transp;
+	const char *org_email_address = NULL;
 
 	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
 					 modify_data->itemid, modify_data->changekey, 0);
@@ -1620,6 +1621,20 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 
 	convert_property_to_updatexml  (msg, "Body", icalcomponent_get_description(icalcomp), "item", "BodyType", "Text");
 
+	convert_property_to_updatexml  (msg, "Location", icalcomponent_get_location(icalcomp), "calendar", NULL, NULL);
+
+	transp = icalcomponent_get_first_property (icalcomp, ICAL_TRANSP_PROPERTY);
+	if (!g_strcmp0 (icalproperty_get_value_as_string (transp), "TRANSPARENT"))
+		convert_property_to_updatexml  (msg, "LegacyFreeBusyStatus","Free" , "calendar", NULL, NULL);
+	else
+		convert_property_to_updatexml  (msg, "LegacyFreeBusyStatus","Busy" , "calendar", NULL, NULL);
+
+	org_email_address = e_ews_collect_orginizer (icalcomp);
+	if (g_ascii_strcasecmp (org_email_address, modify_data->cbews->priv->user_email)) {
+		e_ews_message_end_item_change (msg);
+		return;
+	}
+	/* Update other properties allowed only for meeting organizers*/
 	dtstart = icalcomponent_get_dtstart (icalcomp);
 	dtend = icalcomponent_get_dtend (icalcomp);
 
@@ -1630,8 +1645,6 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 	e_ews_message_start_set_item_field (msg, "End", "calendar");
 	ewscal_set_time (msg, "End", &dtend);
 	e_ews_message_end_set_item_field (msg);
-
-	convert_property_to_updatexml  (msg, "Location", icalcomponent_get_location(icalcomp), "calendar", NULL, NULL);
 
 	e_ews_collect_attendees(icalcomp, &required, &optional, &resource);
 	if (required != NULL) {
