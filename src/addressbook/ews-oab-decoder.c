@@ -21,6 +21,7 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
 #include <glib/gstdio.h>
 
 #include <libebook/e-vcard.h>
@@ -134,30 +135,41 @@ ews_populate_photo (EContact *contact, EContactField field, gpointer value, gpoi
 {
 	EwsOabDecoder *eod = EWS_OAB_DECODER (user_data);
 	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
-	const gchar *val = (gchar *) value;
+	const gchar *val = (gchar *) value, *at;
 	EContactPhoto *photo = g_new0 (EContactPhoto, 1);
-	gchar *fullname = e_contact_get (contact, E_CONTACT_FULL_NAME);
-	gchar *filename = NULL, *pic_name = NULL;
+	gchar *email = e_contact_get (contact, E_CONTACT_EMAIL_1);
+	gchar *filename = NULL, *pic_name = NULL, *name;
+	gboolean success = TRUE;
 
-	/* Rename the binary file to fullname.png */
-	if (fullname) {
-		pic_name = g_strconcat (fullname, ".png", NULL);
-		filename = g_build_filename (priv->cache_dir, pic_name, NULL);
-		g_rename (val, filename);
-	} else
-		filename = g_strdup (val);
+	/* Rename the binary file to name.jpg */
+	at = strchr(email, '@');
+	name = g_strndup (email, at - email);
 
-	photo->type = E_CONTACT_PHOTO_TYPE_URI;
-	photo->data.uri = filename;
-
-	e_contact_set (contact, field, (gpointer) photo);
+	pic_name = g_strconcat (name, ".jpg", NULL);
+	filename = g_build_filename (priv->cache_dir, pic_name, NULL);
 	
+	if (g_file_test (filename, G_FILE_TEST_EXISTS))
+		g_unlink (val);
+	else {
+		if (g_rename (val, filename))
+			success = FALSE;	
+	}
+
+	if (success) {
+		photo->type = E_CONTACT_PHOTO_TYPE_URI;
+		photo->data.uri = filename;
+
+		e_contact_set (contact, field, (gpointer) photo);
+	}
+
 	g_free (photo);
-	g_free (fullname);
+	g_free (email);
+	g_free (name);
 	g_free (pic_name);
 	g_free (filename);
 }
 
+/* Make sure that all the temp files are renamed while the fields are getting set in EContact */
 static const struct prop_field_mapping {
 	guint32 prop_id;
 	EContactField field;
