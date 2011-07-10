@@ -44,9 +44,11 @@
 #include "libedata-book/e-book-backend-sexp.h"
 #include "libedata-book/e-data-book.h"
 #include "libedata-book/e-data-book-view.h"
+
 #include "e-book-backend-ews-gal.h"
 #include "e-book-backend-sqlitedb.h"
 #include "lzx/ews-oal-decompress.h"
+#include "ews-oab-decoder.h"
 
 #include "e-ews-message.h"
 #include "e-ews-connection.h"
@@ -86,6 +88,9 @@ struct _EBookBackendEwsGalPrivate {
 
 	GHashTable *ops;
 
+	/* used for storing attachments */
+	gchar *attachment_dir;
+
 	GStaticRecMutex rec_mutex;
 	GThread *dthread;
 	SyncDelta *dlock;
@@ -96,6 +101,9 @@ struct _EBookBackendEwsGalPrivate {
 
 #define PRIV_LOCK(p)   (g_static_rec_mutex_lock (&(p)->rec_mutex))
 #define PRIV_UNLOCK(p) (g_static_rec_mutex_unlock (&(p)->rec_mutex))
+
+static gboolean
+ews_remove_attachments (const gchar *attachment_dir);
 
 static void
 e_book_backend_ews_gal_create_contact	(EBookBackend *backend,
@@ -188,7 +196,7 @@ e_book_backend_ews_gal_get_contact_list	(EBookBackend *backend,
 }
 
 static gboolean
-ews_needs_update (EBookBackendEwsGal *cbews, EwsOALDetails *full, GError **error)
+ews_gal_needs_update (EBookBackendEwsGal *cbews, EwsOALDetails *full, GError **error)
 {
 	EBookBackendEwsGalPrivate *priv = cbews->priv;
 	guint32 seq;
@@ -203,17 +211,17 @@ ews_needs_update (EBookBackendEwsGal *cbews, EwsOALDetails *full, GError **error
 	if (seq < full->seq)
 		ret = TRUE;
 	
+	d(printf ("Gal needs update: %d \n", ret);)
 exit:
 	g_free (tmp);
 	return ret;	
 }
 
-static void
+static gchar *
 ews_download_full_gal (EBookBackendEwsGal *cbews, EwsOALDetails *full, GCancellable *cancellable, GError **error)
 {
 	EBookBackendEwsGalPrivate *priv = cbews->priv;
 	EEwsConnection *oab_cnc;
-	EwsOabDecoder *eod;
 	gchar *full_url, *oab_url, *cache_file = NULL;
 	const gchar *cache_dir;
 	gchar *comp_cache_file = NULL, *uncompress_file = NULL;
@@ -228,13 +236,15 @@ ews_download_full_gal (EBookBackendEwsGal *cbews, EwsOALDetails *full, GCancella
 	if (!e_ews_connection_download_oal_file (oab_cnc, comp_cache_file, NULL, NULL, cancellable, error))
 		goto exit;
 
-	cache_file = g_strdup_printf ("%s-%d", priv->folder_name, full->ver);
+	cache_file = g_strdup_printf ("%s-%d.oab", priv->folder_name, full->seq);
 	uncompress_file = g_build_filename (cache_dir, cache_file, NULL);
-	if (!oal_decompress_v4_full_detail_file (comp_cache_file, uncompress_file, error))
+	if (!oal_decompress_v4_full_detail_file (comp_cache_file, uncompress_file, error)) {
+		g_free (uncompress_file);
+		uncompress_file = NULL;
 		goto exit;
+	}
 
 	d(g_print ("OAL file decompressed %s \n", uncompress_file);)
-	
 
 exit:	
 	if (comp_cache_file)
@@ -244,7 +254,97 @@ exit:
 	g_free (full_url);
 	g_free (comp_cache_file);
 	g_free (cache_file);
-	g_free (uncompress_file);
+
+	return uncompress_file;
+}
+
+static gboolean
+ews_remove_old_gal_file (EBookBackendEwsGal *cbews, GError **error)
+{
+	EBookBackendEwsGalPrivate *priv = cbews->priv;
+	gchar *filename;
+
+	filename = e_book_backend_sqlitedb_get_key_value (priv->ebsdb, priv->oal_id, "oab-filename", error);
+	if (*error)
+		return FALSE;
+
+	g_unlink (filename);
+	
+	return TRUE;
+}
+
+struct _db_data {
+	GSList *contact_collector;
+	guint collected_length;
+	EBookBackendEwsGal *cbews;
+};
+
+static void
+ews_gal_store_contact (EContact *contact, goffset offset, guint percent, gpointer user_data, GError **error)
+{
+	struct _db_data *data = (struct _db_data *) user_data;
+	EBookBackendEwsGalPrivate *priv = data->cbews->priv;
+	
+	data->contact_collector = g_slist_prepend (data->contact_collector, g_object_ref (contact));
+	data->collected_length += 1;
+
+	if (data->collected_length == 1000 || percent >= 100) {
+		GSList *l;
+
+		d(g_print ("GAL adding contacts, percent complete : %d \n", percent);)
+
+		data->contact_collector = g_slist_reverse (data->contact_collector);
+		e_book_backend_sqlitedb_add_contacts (priv->ebsdb, priv->oal_id, data->contact_collector, FALSE, error);
+
+		for (l = data->contact_collector; l != NULL; l = g_slist_next (l))
+			e_book_backend_notify_update (E_BOOK_BACKEND (data->cbews), E_CONTACT (l->data));
+
+		/* reset data */
+		g_slist_foreach (data->contact_collector, (GFunc) g_object_unref, NULL);
+		g_slist_free (data->contact_collector);
+		data->contact_collector = NULL;
+		data->collected_length = 0;
+	}
+
+	if (percent == 100)
+		e_book_backend_notify_complete (E_BOOK_BACKEND (data->cbews));
+}
+
+static gboolean
+ews_replace_gal_in_db (EBookBackendEwsGal *cbews, const gchar *filename, GCancellable *cancellable, GError **error)
+{
+	EBookBackendEwsGalPrivate *priv = cbews->priv;
+	EwsOabDecoder *eod;
+	gboolean ret;
+	struct _db_data data;
+
+	/* remove the old address-book and create a new one in db */
+	if (e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->oal_id, NULL)) {
+		ret = e_book_backend_sqlitedb_delete_addressbook (priv->ebsdb, priv->oal_id, error);
+		ews_remove_attachments (priv->attachment_dir);
+		if (ret)
+			ret = e_book_backend_sqlitedb_create_addressbook (priv->ebsdb, priv->oal_id, priv->folder_name, FALSE, error);
+	}
+
+	if (!ret)
+		return FALSE;
+
+	eod = ews_oab_decoder_new (filename, priv->attachment_dir, error);
+	if (*error)
+		return FALSE;
+
+	data.contact_collector = NULL;
+	data.collected_length = 0;
+	data.cbews = cbews;
+
+	ret = ews_oab_decoder_decode (eod, ews_gal_store_contact, &data, cancellable, error);
+	if (!ret)
+	       return ret;
+
+	/* mark the db as populated */
+	ret = e_book_backend_sqlitedb_set_is_populated (priv->ebsdb, priv->oal_id, TRUE, error);
+
+	return ret;
 }
 
 static gboolean
@@ -256,6 +356,8 @@ ebews_start_sync	(gpointer data)
 	GError *error = NULL;
 	EEwsConnection *oab_cnc;
 	GSList *full_l = NULL;
+	gboolean ret = TRUE;
+	gchar *uncompressed_filename = NULL;
 	GCancellable *cancellable;
 
 	cbews = (EBookBackendEwsGal *) data;
@@ -264,19 +366,59 @@ ebews_start_sync	(gpointer data)
 	cancellable = g_cancellable_new ();
 	oab_cnc = e_ews_connection_new (priv->oab_url, priv->username, priv->password, NULL, NULL, NULL);
 
-	if (!e_ews_connection_get_oal_detail (oab_cnc, priv->oal_id, "Full", &full_l, cancellable, &error)) 
+	d(printf ("Ewsgal: Fetching oal full details file \n");)
+
+	if (!e_ews_connection_get_oal_detail (oab_cnc, priv->oal_id, "Full", &full_l, cancellable, &error)) {
+		ret = FALSE;
 		goto exit;
+	}
 
 	full = (EwsOALDetails *) full_l->data; 
 	/* TODO fetch differential updates if available instead of downloading the whole GAL */
-	if (!e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->oal_id, NULL) || ews_needs_update (cbews, full, &error)) {
-		ews_download_full_gal (cbews, full, cancellable, &error);
+	if (!e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->oal_id, NULL) || ews_gal_needs_update (cbews, full, &error)) {
+		gchar *seq;
+		
+		d(printf ("Ewsgal: Downloading full gal \n");)
+		uncompressed_filename = ews_download_full_gal (cbews, full, cancellable, &error);
+		if (error) {
+			ret = FALSE;
+			goto exit;
+		}
+
+		d(printf ("Ewsgal: Removing old gal \n");)
+		/* remove old_gal_file */
+		ret = ews_remove_old_gal_file (cbews, &error);
+		if (!ret) {
+			goto exit;
+		}
+
+		d(printf ("Ewsgal: Replacing old gal with new gal contents in db \n");)
+		ret = ews_replace_gal_in_db (cbews, uncompressed_filename, cancellable, &error);
+		if (!ret)
+			goto exit;
+	
+		seq = g_strdup_printf ("%"G_GUINT32_FORMAT, full->seq);
+		ret = e_book_backend_sqlitedb_set_key_value (priv->ebsdb, priv->oal_id, "seq", seq, &error);
+		g_free (seq);
+		
+		if (!ret) {
+			e_book_backend_sqlitedb_delete_addressbook (priv->ebsdb, priv->oal_id, &error);
+			goto exit;
+		}
 	}
+	
+	d(printf ("Ews gal: sync successfull complete \n");)
 	
 exit:
 	if (error) {
 		g_warning ("Unable to update gal : %s \n", error->message);
 		g_clear_error (&error);
+	}
+
+	/* preserve  the oab file once we are able to decode the differential updates */
+	if (uncompressed_filename) {
+		g_unlink (uncompressed_filename);
+		g_free (uncompressed_filename);
 	}
 
 	if (full_l) {
@@ -287,7 +429,7 @@ exit:
 	}
 
 	g_object_unref (oab_cnc);
-	return TRUE;
+	return ret;
 }
 
 static gpointer
@@ -384,7 +526,8 @@ fetch_from_offline (EBookBackendEwsGal *ews, EDataBookView *book_view, const gch
 		e_book_backend_sqlitedb_search_data_free (s_data);
 	}
 
-	g_slist_free (contacts);
+	if (contacts)
+		g_slist_free (contacts);
 	e_data_book_view_notify_complete (book_view, error);
 	e_data_book_view_unref (book_view);
 }
@@ -613,6 +756,7 @@ e_book_backend_ews_gal_start_book_view (EBookBackend  *backend,
 			return;
 		}
 
+		/* TODO update the progress messages */
 		ebews_start_refreshing (ebews);
 
 		if (priv->marked_for_offline && e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->oal_id, NULL)) {
@@ -623,8 +767,9 @@ e_book_backend_ews_gal_start_book_view (EBookBackend  *backend,
 		/* Only autocompletion query is supported in online query. */
 		ews_gal_get_autocompletion_str_from_query (query, &is_autocompletion, &auto_comp_str);
 		if (!is_autocompletion || !auto_comp_str) {
-			error = g_error_new 	(E_DATA_BOOK_ERROR, E_DATA_BOOK_STATUS_OTHER_ERROR, 
-						 _("Only auto-completion is supported for online query. Other queries are supported after gal is cached"));
+			/* TODO Indicate that the contacts will be available in BookView only after they are cached.
+			   Until then only auto-completion works */
+
 			g_free (auto_comp_str);
 			e_data_book_view_notify_complete (book_view, error);
 			e_data_book_view_unref (book_view);
@@ -776,6 +921,34 @@ e_book_backend_ews_gal_cancel_operation (EBookBackend *backend, EDataBook *book,
 
 }
 
+static gboolean
+ews_remove_attachments (const gchar *attachment_dir)
+{
+	GDir *dir;
+	
+	dir = g_dir_open (attachment_dir, 0, NULL);
+	if (dir) {
+		const gchar *fname;
+		gchar *full_path;
+
+		while ((fname = g_dir_read_name (dir))) {
+			full_path = g_build_filename (attachment_dir, fname, NULL);
+			if (g_unlink (full_path) != 0) {
+				g_free (full_path);
+				g_dir_close (dir);
+
+				return FALSE;
+			}
+
+			g_free (full_path);
+		}
+
+		g_dir_close (dir);
+	}
+
+	return TRUE;
+}
+
 static void
 e_book_backend_ews_gal_load_source 	(EBookBackend *backend,
 				 	 ESource *source,
@@ -797,8 +970,13 @@ e_book_backend_ews_gal_load_source 	(EBookBackend *backend,
 		
 		cache_dir = e_book_backend_get_cache_dir (backend);
 		email = e_source_get_property (source, "email");
+
 		priv->folder_name = g_strdup (e_source_peek_name (source));
 		priv->oab_url = e_source_get_duped_property (source, "oab_url");
+		
+		/* setup stagging dir, remove any old files from there */
+		priv->attachment_dir = g_build_filename (cache_dir, "attachments", NULL);
+		g_mkdir_with_parents (priv->attachment_dir, 0777);
 
 		priv->ebsdb = e_book_backend_sqlitedb_new (cache_dir, email, priv->oal_id, priv->folder_name, FALSE, &err);
 		if (err) {
@@ -922,6 +1100,11 @@ e_book_backend_ews_gal_dispose (GObject *object)
 	if (priv->folder_name) {
 		g_free (priv->folder_name);
 		priv->folder_name = NULL;
+	}
+
+	if (priv->attachment_dir) {
+		g_free (priv->attachment_dir);
+		priv->attachment_dir = NULL;
 	}
 
 	if (priv->dlock) {
