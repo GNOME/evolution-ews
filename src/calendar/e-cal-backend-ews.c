@@ -1873,7 +1873,19 @@ typedef struct {
 static gchar *
 e_ews_get_icalcomponent_as_mime_content (icalcomponent *vevent)
 {
-	return NULL;
+	icalcomponent *vcal;
+	char *vcal_str;
+
+	vcal = icalcomponent_new (ICAL_VCALENDAR_COMPONENT);
+	icalcomponent_add_property (vcal, icalproperty_new_version("2.0"));
+	icalcomponent_add_property (vcal, icalproperty_new_method(ICAL_METHOD_REQUEST));
+	icalcomponent_add_component (vcal, icalcomponent_new_clone (vevent));
+
+	vcal_str = icalcomponent_as_ical_string_r ((icalcomponent *)vcal);
+
+	icalcomponent_free (vcal);
+
+	return vcal_str;
 }
 
 static const char*
