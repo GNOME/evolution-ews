@@ -521,7 +521,7 @@ ews_decode_binary (EwsOabDecoder *eod, GCancellable *cancellable, GError **error
 	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	guint32 len;
 	gchar *binary, *filename = NULL;
-	gint fd;
+	gint fd = 0;
 
 	len = ews_decode_uint32 (eod, cancellable, error);
 	if (*error)
