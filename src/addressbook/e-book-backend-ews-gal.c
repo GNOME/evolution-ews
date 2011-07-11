@@ -315,7 +315,7 @@ ews_replace_gal_in_db (EBookBackendEwsGal *cbews, const gchar *filename, GCancel
 {
 	EBookBackendEwsGalPrivate *priv = cbews->priv;
 	EwsOabDecoder *eod;
-	gboolean ret;
+	gboolean ret = TRUE;
 	struct _db_data data;
 
 	/* remove the old address-book and create a new one in db */
