@@ -339,19 +339,50 @@ ews_oab_read_uint16 (GInputStream *is, GCancellable *cancellable, GError **error
 	return ret;
 }
 
+static gint
+get_pos (const gchar *str, gint len, gchar stop)
+{
+	gint i = 0;
+
+	while (str [i] != stop && i < len)
+		i++;
+	return i;
+}
+
 /* Read upto the stop char include the same */
 static gchar *
 ews_oab_read_upto (GInputStream *is, gchar stop, GCancellable *cancellable, GError **error)
 {
-	gchar c = -1;
+	gsize size = 50;
 	GString *str;
 
-	str = g_string_new (NULL);
+	str = g_string_sized_new (size);
 	do {
-		g_input_stream_read (is, &c, 1, cancellable, error);
-		if (c == stop)
+		gint len;
+		gsize bytes_read;
+		gchar *c = g_malloc0 (size);
+
+		g_input_stream_read_all (is, c, size, &bytes_read, cancellable, error);
+		if (*error)
 			break;
-		str = g_string_append_c (str, c);
+
+		if (bytes_read != size)
+			size = bytes_read;
+
+		len = get_pos (c, size, stop);
+		if (len)
+			str = g_string_append_len (str, c, len);
+		
+		if (len == 0 || len < size) {
+			goffset seek = len + 1 - (gint) size;
+			
+			/* seek back */
+			g_seekable_seek ((GSeekable *) is, seek, G_SEEK_CUR, cancellable, error);
+			break;
+		}
+	 
+	        size *= 2;	
+		g_free (c);
 	} while (!*error);
 
 	return g_string_free (str, FALSE);
