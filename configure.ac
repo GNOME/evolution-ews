@@ -87,6 +87,7 @@ AS_COMPILER_FLAGS(WARNING_FLAGS,
 	-Wno-sign-compare
 	-Wno-unused-parameter
 	-Wdeclaration-after-statement
+	-Wno-unused-but-set-variable
 	-Werror-implicit-function-declaration
 	-Wformat-nonliteral -Wformat-security -Winit-self
 	-Wmissing-declarations -Wmissing-include-dirs
