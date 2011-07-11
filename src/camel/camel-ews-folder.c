@@ -1045,6 +1045,12 @@ ews_append_message_sync (CamelFolder *folder, CamelMimeMessage *message,
 
 	cnc = camel_ews_store_get_connection(ews_store);
 
+	if (!cnc) {
+		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			     _("Cant perform actions on the folder while in offline mode"));
+		return FALSE;
+	}
+
 	if (!camel_ews_utils_create_mime_message (cnc, "SaveOnly", folder_id,
 						  message,
 						  camel_message_info_flags (info),
