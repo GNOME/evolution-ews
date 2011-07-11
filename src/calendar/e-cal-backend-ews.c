@@ -1870,6 +1870,12 @@ typedef struct {
 	const char *change_key;
 } EwsAcceptData;
 
+static gchar *
+e_ews_get_icalcomponent_as_mime_content (icalcomponent *vevent)
+{
+	return NULL;
+}
+
 static const char*
 e_ews_get_current_user_meeting_reponse (icalcomponent *icalcomp, const char *current_user_mail)
 {
@@ -1904,6 +1910,8 @@ prepare_accept_item_request (ESoapMessage *msg, gpointer user_data)
 	 * need to find current user as attendee and make a desision what to do.
 	 * Prepare AcceptItem node in the SOAP message */
 
+	e_ews_get_icalcomponent_as_mime_content (NULL);
+	
 	if (!g_ascii_strcasecmp (response_type, "ACCEPTED"))
 		e_soap_message_start_element (msg, "AcceptItem", NULL, NULL);
 	else if (!g_ascii_strcasecmp (response_type, "DECLINED"))
