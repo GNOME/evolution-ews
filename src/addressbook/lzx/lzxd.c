@@ -693,7 +693,7 @@ int lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes) {
 
     /* check that we've used all of the previous frame first */
     if (lzx->o_ptr != lzx->o_end) {
-      D(("%d avail bytes, new %d frame", lzx->o_end-lzx->o_ptr, frame_size))
+      D(("%d avail bytes, new %d frame", (int)(lzx->o_end-lzx->o_ptr), frame_size))
       return lzx->error = LZX_ERR_DECRUNCH;
     }
 
