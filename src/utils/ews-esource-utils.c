@@ -149,6 +149,7 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 	e_source_set_property (source, "email", email_id);
 	e_source_set_property (source, "hosturl", hosturl);
 	e_source_set_property (source, "delete", "no");
+	e_source_set_property (source, "offline_sync", "1");
 	e_source_set_color_spec (source, "#EEBC60");
 
 	/* set props required for contacts */
