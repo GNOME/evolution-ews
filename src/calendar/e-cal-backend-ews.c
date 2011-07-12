@@ -1888,6 +1888,34 @@ e_ews_get_icalcomponent_as_mime_content (icalcomponent *vevent)
 	return vcal_str;
 }
 
+static void
+prepare_create_item_with_mime_content_request(ESoapMessage *msg, gpointer user_data)
+{
+	gchar *mime_content = (gchar*) user_data;
+
+	/* Prepare CalendarItem node in the SOAP message */
+	e_soap_message_start_element(msg, "CalendarItem", NULL, NULL);
+
+	e_ews_message_write_base64_parameter (msg,"MimeContent",NULL,mime_content);
+	// end of "CalendarItem"
+	e_soap_message_end_element(msg);
+}
+
+static void
+e_ews_receive_objects_no_exchange_mail (ECalBackendEwsPrivate *priv, icalcomponent *subcomp, GSList *ids, GCancellable *cancellable, GError *error)
+{
+	gchar *mime_content = e_ews_get_icalcomponent_as_mime_content (subcomp);
+	e_ews_connection_create_items (priv->cnc, EWS_PRIORITY_MEDIUM,
+							       "SendAndSaveCopy", "SendToNone", NULL,
+							       prepare_create_item_with_mime_content_request,
+							       mime_content,
+							       &ids,
+							       cancellable,
+							       &error);
+	g_free (mime_content);
+	/*we still have to send a mail with accept to meeting orginizaer*/
+}
+
 static const char*
 e_ews_get_current_user_meeting_reponse (icalcomponent *icalcomp, const char *current_user_mail)
 {
@@ -2028,10 +2056,14 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 							       cancellable,
 							       &error);
 
+				if (error && error->code == EWS_CONNECTION_ERROR_INVALIDIDMALFORMED) {
+					g_clear_error (&error);
+					e_ews_receive_objects_no_exchange_mail (priv, subcomp, ids, cancellable, error);
+				}
 				if (error)
 					/* The calendar UI doesn't *display* errors unless they have
-				 * the OtherError code */
-				error->code = OtherError;
+					 * the OtherError code */
+					error->code = OtherError;
 			else {
 				transp = icalcomponent_get_first_property (subcomp, ICAL_TRANSP_PROPERTY);
 				if (!g_strcmp0 (icalproperty_get_value_as_string (transp), "TRANSPARENT") &&
