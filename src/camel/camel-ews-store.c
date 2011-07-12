@@ -567,6 +567,13 @@ ews_create_folder_sync (CamelStore *store,
 		}
 	}
 
+	if (!ews_store->priv->cnc) {
+		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			     _("Cant perform actions on the folder while in offline mode"));
+		if (fid) g_free (fid);
+		return NULL;
+	}
+
 	/* Make the call */
 	if (!e_ews_connection_create_folder (ews_store->priv->cnc,
 					     EWS_PRIORITY_MEDIUM, fid,
@@ -614,6 +621,13 @@ ews_delete_folder_sync	(CamelStore *store,
 	if (!fid) {
 		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 			     _("Folder does not exist"));
+		return FALSE;
+	}
+
+	if (!ews_store->priv->cnc) {
+		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			     _("Cant perform actions on the folder while in offline mode"));
+		g_free (fid);
 		return FALSE;
 	}
 
@@ -678,6 +692,12 @@ ews_rename_folder_sync	(CamelStore *store,
 
 	if (!strcmp (old_name, new_name))
 		return TRUE;
+
+	if (!ews_store->priv->cnc) {
+		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			     _("Cant perform actions on the folder while in offline mode"));
+		return FALSE;
+	}
 
 	fid = camel_ews_store_summary_get_folder_id_from_name (ews_summary, old_name);
 	if (!fid) {
