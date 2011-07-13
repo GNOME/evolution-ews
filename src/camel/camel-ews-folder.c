@@ -591,6 +591,27 @@ msg_update_flags (ESoapMessage *msg, gpointer user_data)
 
 		e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
 						 mi->info.uid, mi->change_key, 0);
+		if (flags_changed & CAMEL_MESSAGE_FLAGGED) {
+			const char *flag;
+
+			if (mi->info.flags & CAMEL_MESSAGE_FLAGGED)
+				flag = "High";
+			else
+				flag = "Normal";
+
+			e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
+
+			e_soap_message_start_element (msg, "FieldURI", NULL, NULL);
+			e_soap_message_add_attribute (msg, "FieldURI", "item:Importance", NULL, NULL);
+			e_soap_message_end_element (msg);
+
+			e_soap_message_start_element (msg, "Message", NULL, NULL);
+
+			e_ews_message_write_string_parameter (msg, "Importance", NULL, flag);
+
+			e_soap_message_end_element (msg); /* Message */
+			e_soap_message_end_element (msg); /* SetItemField */
+		}
 
 		if (flags_changed & CAMEL_MESSAGE_SEEN) {
 			e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
@@ -708,7 +729,7 @@ ews_synchronize_sync (CamelFolder *folder, gboolean expunge, EVO3(GCancellable *
 
 		/* Exchange doesn't seem to have a sane representation
 		   for most flags — not even replied/forwarded. */
-		if (flags_changed & (CAMEL_MESSAGE_SEEN|CAMEL_MESSAGE_ANSWERED|CAMEL_MESSAGE_FORWARDED)) {
+		if (flags_changed & (CAMEL_MESSAGE_SEEN|CAMEL_MESSAGE_ANSWERED|CAMEL_MESSAGE_FORWARDED|CAMEL_MESSAGE_FLAGGED)) {
 			mi_list = g_slist_append (mi_list, mi);
 			mi_list_len++;
 		} else if (flags_changed & CAMEL_MESSAGE_DELETED) {
