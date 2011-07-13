@@ -27,12 +27,17 @@
 
 #include "ews-camel-common.h"
 #include "e-ews-compat.h"
+#include "e-ews-message.h"
 
 struct _create_mime_msg_data {
 	CamelMimeMessage *message;
 	gint32 message_camel_flags;
 	CamelAddress *from;
 };
+
+/* MAPI flags gleaned from windows header files */
+#define MAPI_MSGFLAG_READ	0x01
+#define MAPI_MSGFLAG_UNSENT	0x08
 
 static void
 create_mime_message_cb (ESoapMessage *msg, gpointer user_data)
@@ -42,6 +47,7 @@ create_mime_message_cb (ESoapMessage *msg, gpointer user_data)
 	CamelMimeFilter *filter;
 	GByteArray *bytes;
 	gchar *base64;
+	int msgflag;
 
 	e_soap_message_start_element (msg, "Message", NULL, NULL);
 	e_soap_message_start_element (msg, "MimeContent", NULL, NULL);
@@ -78,8 +84,24 @@ create_mime_message_cb (ESoapMessage *msg, gpointer user_data)
 
 	e_soap_message_end_element (msg); /* MimeContent */
 
-	/* FIXME: Handle From address and message_camel_flags */
+	/* more MAPI crap.  You can't just set the IsDraft property
+	 * here you have to use the MAPI MSGFLAG_UNSENT extended
+	 * property Further crap is that Exchange 2007 assumes when it
+	 * sees this property that you're setting the value to 0
+	 * ... it never checks */
+	msgflag  = MAPI_MSGFLAG_READ; /* draft or sent is always read */
+	if (create_data->message_camel_flags & CAMEL_MESSAGE_DRAFT)
+		msgflag |= MAPI_MSGFLAG_UNSENT;
 
+	e_soap_message_start_element (msg, "ExtendedProperty", NULL, NULL);
+	e_soap_message_start_element (msg, "ExtendedFieldURI", NULL, NULL);
+	e_soap_message_add_attribute (msg, "PropertyTag", "0x0E07", NULL, NULL);
+	e_soap_message_add_attribute (msg, "PropertyType", "Integer", NULL, NULL);
+	e_soap_message_end_element (msg); /* ExtendedFieldURI */
+
+	e_ews_message_write_int_parameter (msg, "Value", NULL, msgflag);
+
+	e_soap_message_end_element (msg); /* ExtendedProperty */
 	e_soap_message_end_element (msg); /* Message */
 
 	g_free (create_data);
