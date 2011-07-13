@@ -84,14 +84,14 @@ e_ews_message_end_item_change (ESoapMessage *msg)
 }
 
 void
-e_ews_message_start_set_item_field (ESoapMessage *msg, const gchar *name, const gchar * fielduri_prefix)
+e_ews_message_start_set_item_field (ESoapMessage *msg, const gchar *name, const gchar * fielduri_prefix, const char *field_kind)
 {
 	gchar * fielduri = NULL;
 	fielduri = g_strconcat (fielduri_prefix, ":", name, NULL);
 
 	e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
 	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", fielduri);
-	e_soap_message_start_element (msg, "CalendarItem", NULL, NULL);
+	e_soap_message_start_element (msg, field_kind, NULL, NULL);
 
 	g_free (fielduri);
 }

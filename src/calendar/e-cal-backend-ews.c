@@ -375,7 +375,7 @@ static void clear_reminder_is_set (ESoapMessage *msg, gpointer user_data)
 	e_ews_message_start_item_change (msg, change_type,
 					 edad->itemid, edad->changekey, edad->instance_index);
 
-	e_ews_message_start_set_item_field (msg, "ReminderIsSet","item");
+	e_ews_message_start_set_item_field (msg, "ReminderIsSet","item", "CalendarItem");
 
 	e_ews_message_write_string_parameter (msg, "ReminderIsSet", NULL, "false");
 
@@ -1111,12 +1111,6 @@ convert_vtodo_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 
 	e_ews_message_write_string_parameter_with_attribute (msg, "Body", NULL, icalcomponent_get_description (icalcomp), "BodyType", "Text");
 
-	prop = icalcomponent_get_first_property (icalcomp, ICAL_CREATED_PROPERTY);
-	if (prop) {
-		dt = icalproperty_get_created (prop);
-		ewscal_set_time (msg, "DateTimeCreated", &dt);
-	}
-
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_DUE_PROPERTY);
 	if (prop) {
 		dt = icalproperty_get_due (prop);
@@ -1599,9 +1593,9 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 }
 
 static void
-convert_property_to_updatexml (ESoapMessage *msg, const gchar *name, const gchar *value, const gchar * prefix, const gchar *attr_name, const gchar *attr_value)
+convert_vevent_property_to_updatexml (ESoapMessage *msg, const gchar *name, const gchar *value, const gchar * prefix, const gchar *attr_name, const gchar *attr_value)
 {
-	e_ews_message_start_set_item_field (msg, name, prefix);
+	e_ews_message_start_set_item_field (msg, name, prefix, "CalendarItem");
 	e_ews_message_write_string_parameter_with_attribute (msg, name, NULL, value, attr_name, attr_value);
 	e_ews_message_end_set_item_field (msg);
 }
@@ -1619,17 +1613,17 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
 					 modify_data->itemid, modify_data->changekey, 0);
 
-	convert_property_to_updatexml  (msg, "Subject", icalcomponent_get_summary(icalcomp), "item", NULL, NULL);
+	convert_vevent_property_to_updatexml  (msg, "Subject", icalcomponent_get_summary(icalcomp), "item", NULL, NULL);
 
-	convert_property_to_updatexml  (msg, "Body", icalcomponent_get_description(icalcomp), "item", "BodyType", "Text");
+	convert_vevent_property_to_updatexml  (msg, "Body", icalcomponent_get_description(icalcomp), "item", "BodyType", "Text");
 
-	convert_property_to_updatexml  (msg, "Location", icalcomponent_get_location(icalcomp), "calendar", NULL, NULL);
+	convert_vevent_property_to_updatexml  (msg, "Location", icalcomponent_get_location(icalcomp), "calendar", NULL, NULL);
 
 	transp = icalcomponent_get_first_property (icalcomp, ICAL_TRANSP_PROPERTY);
 	if (!g_strcmp0 (icalproperty_get_value_as_string (transp), "TRANSPARENT"))
-		convert_property_to_updatexml  (msg, "LegacyFreeBusyStatus","Free" , "calendar", NULL, NULL);
+		convert_vevent_property_to_updatexml (msg, "LegacyFreeBusyStatus", "Free" , "calendar", NULL, NULL);
 	else
-		convert_property_to_updatexml  (msg, "LegacyFreeBusyStatus","Busy" , "calendar", NULL, NULL);
+		convert_vevent_property_to_updatexml (msg, "LegacyFreeBusyStatus", "Busy" , "calendar", NULL, NULL);
 
 	org_email_address = e_ews_collect_orginizer (icalcomp);
 	if (g_ascii_strcasecmp (org_email_address, modify_data->cbews->priv->user_email)) {
@@ -1640,17 +1634,17 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 	dtstart = icalcomponent_get_dtstart (icalcomp);
 	dtend = icalcomponent_get_dtend (icalcomp);
 
-	e_ews_message_start_set_item_field (msg, "Start", "calendar");
+	e_ews_message_start_set_item_field (msg, "Start", "calendar", "CalendarItem");
 	ewscal_set_time (msg, "Start", &dtstart);
 	e_ews_message_end_set_item_field (msg);
 
-	e_ews_message_start_set_item_field (msg, "End", "calendar");
+	e_ews_message_start_set_item_field (msg, "End", "calendar", "CalendarItem");
 	ewscal_set_time (msg, "End", &dtend);
 	e_ews_message_end_set_item_field (msg);
 
 	e_ews_collect_attendees(icalcomp, &required, &optional, &resource);
 	if (required != NULL) {
-		e_ews_message_start_set_item_field (msg, "RequiredAttendees", "calendar");
+		e_ews_message_start_set_item_field (msg, "RequiredAttendees", "calendar", "CalendarItem");
 
 		add_attendees_list_to_message (msg, "RequiredAttendees", required);
 		g_slist_free(required);
@@ -1658,7 +1652,7 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 		e_ews_message_end_set_item_field (msg);
 	}
 	if (optional != NULL) {
-		e_ews_message_start_set_item_field (msg, "OptionalAttendees", "calendar");
+		e_ews_message_start_set_item_field (msg, "OptionalAttendees", "calendar", "CalendarItem");
 
 		add_attendees_list_to_message (msg, "OptionalAttendees", optional);
 		g_slist_free(optional);
@@ -1666,7 +1660,7 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 		e_ews_message_end_set_item_field (msg);
 	}
 	if (resource != NULL) {
-		e_ews_message_start_set_item_field (msg, "Resources", "calendar");
+		e_ews_message_start_set_item_field (msg, "Resources", "calendar", "CalendarItem");
 
 		add_attendees_list_to_message (msg, "Resources", resource);
 		g_slist_free(resource);
@@ -1682,24 +1676,32 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 
 	if (0 /* Exchange 2010 detected */ && dtstart.zone != dtend.zone) {
 		if (dtstart.zone) {
-			e_ews_message_start_set_item_field (msg, "StartTimeZone", "calendar");
+			e_ews_message_start_set_item_field (msg, "StartTimeZone", "calendar", "CalendarItem");
 			ewscal_set_timezone (msg, "StartTimeZone", (icaltimezone *)dtstart.zone);
 			e_ews_message_end_set_item_field (msg);
 		}
 		if (dtend.zone) {
-			e_ews_message_start_set_item_field (msg, "EndTimeZone", "calendar");
+			e_ews_message_start_set_item_field (msg, "EndTimeZone", "calendar", "CalendarItem");
 			ewscal_set_timezone (msg, "EndTimeZone", (icaltimezone *)dtend.zone);
 			e_ews_message_end_set_item_field (msg);
 		}
 	} else {
 		if (dtstart.zone) {
-			e_ews_message_start_set_item_field (msg, "MeetingTimeZone", "calendar");
+			e_ews_message_start_set_item_field (msg, "MeetingTimeZone", "calendar", "CalendarItem");
 			ewscal_set_timezone (msg, "MeetingTimeZone", (icaltimezone *)dtstart.zone);
 			e_ews_message_end_set_item_field (msg);
 		}
 	}
 
 	e_ews_message_end_item_change (msg);
+}
+
+static void
+convert_vtodo_property_to_updatexml (ESoapMessage *msg, const gchar *name, const gchar *value, const gchar * prefix, const gchar *attr_name, const gchar *attr_value)
+{
+	e_ews_message_start_set_item_field (msg, name, prefix, "Task");
+	e_ews_message_write_string_parameter_with_attribute (msg, name, NULL, value, attr_name, attr_value);
+	e_ews_message_end_set_item_field (msg);
 }
 
 static void
@@ -1715,48 +1717,47 @@ convert_vtodo_component_to_updatexml (ESoapMessage *msg, gpointer user_data)
 	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
 					 modify_data->itemid, modify_data->changekey, 0);
 
-	e_ews_message_write_string_parameter(msg, "Subject", NULL, icalcomponent_get_summary(icalcomp));
+	convert_vtodo_property_to_updatexml (msg, "Subject", icalcomponent_get_summary(icalcomp), "item", NULL, NULL);
 
-	e_ews_message_write_string_parameter_with_attribute (msg, "Body", NULL, icalcomponent_get_description (icalcomp), "BodyType", "Text");
-
-	prop = icalcomponent_get_first_property (icalcomp, ICAL_CREATED_PROPERTY);
-	if (prop) {
-		dt = icalproperty_get_created (prop);
-		ewscal_set_time (msg, "DateTimeCreated", &dt);
-	}
+	convert_vtodo_property_to_updatexml (msg, "Body", icalcomponent_get_description (icalcomp), "item", "BodyType", "Text");
 
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_DUE_PROPERTY);
 	if (prop) {
 		dt = icalproperty_get_due (prop);
+		e_ews_message_start_set_item_field (msg, "DueDate", "task", "Task");
 		ewscal_set_time (msg, "DueDate", &dt);
+		e_ews_message_end_set_item_field (msg);
 	}
 
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_PERCENTCOMPLETE_PROPERTY);
 	if (prop) {
 		value = icalproperty_get_percentcomplete (prop);
 		snprintf (buffer, 16, "%d", value);
+		e_ews_message_start_set_item_field (msg, "PercentComplete", "task", "Task");
 		e_ews_message_write_string_parameter(msg, "PercentComplete", NULL, buffer);
+		e_ews_message_end_set_item_field (msg);
 	}
 
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_DTSTART_PROPERTY);
 	if (prop) {
 		dt = icalproperty_get_dtstart (prop);
+		e_ews_message_start_set_item_field (msg, "StartDate", "task", "Task");
 		ewscal_set_time (msg, "StartDate", &dt);
+		e_ews_message_end_set_item_field (msg);
 	}
 
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_STATUS_PROPERTY);
 	if (prop) {
 		switch (icalproperty_get_status (prop)) {
 		case ICAL_STATUS_INPROCESS:
-			e_ews_message_write_string_parameter(msg, "Status", NULL, "InProgress");
+			convert_vtodo_property_to_updatexml (msg, "Status", "InProgress", "task", NULL, NULL);
 			break;
 		case ICAL_STATUS_COMPLETED:
-			e_ews_message_write_string_parameter(msg, "Status", NULL, "Completed");
+			convert_vtodo_property_to_updatexml (msg, "Status", "Completed", "task", NULL, NULL);
 			break;
 		default:
 			break;
 		}
-		ewscal_set_time (msg, "StartDate", &dt);
 	}
 
 	e_ews_message_end_item_change (msg);
@@ -1977,7 +1978,7 @@ prepare_set_free_busy_status (ESoapMessage *msg, gpointer user_data)
 
 	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM, data->item_id, data->change_key, 0);
 
-	e_ews_message_start_set_item_field (msg,"LegacyFreeBusyStatus","calendar");
+	e_ews_message_start_set_item_field (msg, "LegacyFreeBusyStatus", "calendar", "CalendarItem");
 
 	e_ews_message_write_string_parameter (msg, "LegacyFreeBusyStatus", NULL, "Free");
 
