@@ -1852,7 +1852,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 
 	e_ews_connection_update_items_start (priv->cnc, EWS_PRIORITY_MEDIUM,
 					     "AlwaysOverwrite", "SendAndSaveCopy",
-					     "SendToAllAndSaveCopy", priv->folder_id,
+					     "SendToChangedAndSaveCopy", priv->folder_id,
 					     convert_component_to_updatexml, modify_data,
 					     ews_cal_modify_object_cb, cancellable,
 					     modify_data);
