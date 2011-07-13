@@ -912,7 +912,9 @@ e_cal_rid_to_index (const char *rid, icalcomponent *comp, GError **error)
 	icaltimetype next = icalrecur_iterator_next (ritr),
 		/*o_time = icaltime_from_string_with_zone (rid, dtstart.zone);*/
 		o_time = icaltime_from_string (rid);
-	
+
+	o_time.zone = dtstart.zone;
+
 	for (; !icaltime_is_null_time (next); next = icalrecur_iterator_next (ritr), index++) {
 		if (icaltime_compare (o_time, next) == 0) break;
 	}
