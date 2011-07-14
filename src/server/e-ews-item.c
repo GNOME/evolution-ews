@@ -1238,7 +1238,7 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 {
 	ESoapParameter *subparam;
 	const gchar *param_name;
-	gchar *name = NULL, *value, filename[350], *surename, dirname[350];
+	gchar *name = NULL, *value, filename[350], *surename, dirname[350], *attach_id = NULL;
 	guchar *content = NULL;
 	gsize data_len = 0;
 	gchar *tmpdir, *tmpfilename;
@@ -1255,24 +1255,24 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 			value = e_soap_parameter_get_string_value (subparam);
 			content = g_base64_decode (value, &data_len);
 			g_free (value);
+		} else if (g_ascii_strcasecmp(param_name, "AttachmentId") == 0) {
+			attach_id = e_soap_parameter_get_string_value(subparam);
 		}
 	}
 
 	/* Make sure we have needed data */
-	if (!content || !name) {
+	if (!content || !name || !attach_id) {
 		g_free(name);
 		g_free(content);
+		g_free(attach_id);
 		return NULL;
 	}
 
 	tmpfilename = (gchar *) content;
 	tmpdir = g_strndup(tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
 
-	snprintf(dirname, 350, "%s/XXXXXX", tmpdir);
-	if (!mkdtemp(dirname))
-		g_warning ("Failed to create directory for attachment cache");
 	surename = g_uri_escape_string(name, "", TRUE);
-	snprintf(filename, 350, "%s/%s", dirname, surename);
+	snprintf(filename, 350, "%s/%s/%s", dirname, attach_id, surename);
 
 	if (g_rename (tmpfilename, filename) != 0) {
 		g_warning("Failed to move attachment cache file");
@@ -1282,6 +1282,7 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 	g_free(surename);
 	g_free(name);
 	g_free(content);
+	g_free(attach_id);
 
 	/* Return URI to saved file */
 	return g_filename_to_uri(filename, NULL, NULL);
