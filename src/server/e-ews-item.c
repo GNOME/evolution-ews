@@ -1238,7 +1238,7 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 {
 	ESoapParameter *subparam;
 	const gchar *param_name;
-	gchar *name = NULL, *value, filename[350], *surename, dirname[350], *attach_id = NULL;
+	gchar *name = NULL, *value, filename[350], dirname[350], *attach_id = NULL;
 	guchar *content = NULL;
 	gsize data_len = 0;
 	gchar *tmpdir, *tmpfilename;
@@ -1249,14 +1249,18 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 	for (subparam = e_soap_parameter_get_first_child(param); subparam != NULL; subparam = e_soap_parameter_get_next_child(subparam)) {
 		param_name = e_soap_parameter_get_name(subparam);
 
-		if (g_ascii_strcasecmp(param_name, "Name") == 0)
-			name = e_soap_parameter_get_string_value(subparam);
-		else if (g_ascii_strcasecmp(param_name, "Content") == 0) {
+		if (g_ascii_strcasecmp(param_name, "Name") == 0) {
+			value = e_soap_parameter_get_string_value(subparam);
+			name = g_uri_escape_string(value, "", TRUE);
+			g_free (value);
+		} else if (g_ascii_strcasecmp(param_name, "Content") == 0) {
 			value = e_soap_parameter_get_string_value (subparam);
 			content = g_base64_decode (value, &data_len);
 			g_free (value);
 		} else if (g_ascii_strcasecmp(param_name, "AttachmentId") == 0) {
-			attach_id = e_soap_parameter_get_string_value(subparam);
+			value = e_soap_parameter_get_property (subparam, "Id");
+			attach_id = g_uri_escape_string(value, "", TRUE);
+			g_free (value);
 		}
 	}
 
@@ -1271,15 +1275,17 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 	tmpfilename = (gchar *) content;
 	tmpdir = g_strndup(tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
 
-	surename = g_uri_escape_string(name, "", TRUE);
-	snprintf(filename, 350, "%s/%s/%s", dirname, attach_id, surename);
+	snprintf (dirname, 350, "%s/%s", tmpdir, attach_id);
+	if (g_mkdir (dirname, 0775) == -1) {
+		g_warning("Failed create directory to place file in [%s]: %s\n", dirname, strerror (errno));
+	}
 
+	snprintf(filename, 350, "%s/%s", dirname, name);
 	if (g_rename (tmpfilename, filename) != 0) {
-		g_warning("Failed to move attachment cache file");
+		g_warning("Failed to move attachment cache file [%s -> %s]: %s\n", tmpfilename, filename, strerror (errno));
 	}
 
 	g_free(tmpdir);
-	g_free(surename);
 	g_free(name);
 	g_free(content);
 	g_free(attach_id);
