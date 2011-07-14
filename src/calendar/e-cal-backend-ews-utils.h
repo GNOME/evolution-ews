@@ -38,6 +38,7 @@ void ewscal_set_availability_timezone (ESoapMessage *msg, icaltimezone *icaltz);
 void ewscal_set_reccurence (ESoapMessage *msg, icalproperty *rrule, icaltimetype *dtstart);
 void ewscal_set_reccurence_exceptions (ESoapMessage *msg, icalcomponent *comp);
 void ewscal_get_attach_differences (const GSList *original, const GSList *modified, GSList **removed, GSList **added);
+gchar *e_ews_extract_attachment_id_from_uri (const gchar *uri);
 
 G_END_DECLS
 

@@ -600,3 +600,18 @@ const char *e_ews_collect_orginizer(icalcomponent *comp)
 				org_email_address = org;
 	return org_email_address;
 }
+
+gchar *e_ews_extract_attachment_id_from_uri (const gchar *uri)
+{
+	gchar *attachment_id, *filepath = g_filename_from_uri (uri, NULL, NULL);
+	gchar **dirs = g_strsplit (filepath, "/", 0);
+	int n = 0;
+
+	while (dirs[n]) n++;
+
+	attachment_id = g_strdup (dirs[n-1]);
+
+	g_strfreev (dirs);
+
+	return attachment_id;
+}
