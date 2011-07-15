@@ -133,6 +133,8 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 		return FALSE;
 	}
 
+	/* Note. update account-listener plugin if filename is changed here, as it would remove the summary
+	   by forming the path itself */
 	g_mkdir_with_parents (ews_store->storage_path, 0700);
 	summary_file = g_build_filename (ews_store->storage_path, "folder-tree-v2", NULL);
 	ews_store->summary = camel_ews_store_summary_new (summary_file);

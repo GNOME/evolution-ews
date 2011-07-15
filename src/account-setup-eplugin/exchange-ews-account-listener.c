@@ -25,6 +25,7 @@
 
 #include <string.h>
 #include <glib/gi18n-lib.h>
+#include <glib/gstdio.h>
 #include <shell/e-shell.h>
 #if EDS_CHECK_VERSION(2,33,0)
 #include <mail/e-mail-session.h>
@@ -116,14 +117,18 @@ ews_account_info_free (EwsAccountInfo *info)
 	}
 }
 
+EVO2 (CamelSession *session;)
+
 static void
 ews_account_removed (EAccountList *account_listener, EAccount *account)
 {
 	EVO3(EShell *shell;)
 	EVO3(EShellBackend *shell_backend;)
-	EVO3(EMailSession *session;)
+	EVO3(CamelSession *session;)
 	EwsAccountInfo *info = NULL;
-	EVO3(CamelStore *store;)
+	CamelService *service;
+	gchar *summary_file, *storage_path;
+	
 
 	if (!is_ews_account (account))
 		return;
@@ -137,16 +142,20 @@ ews_account_removed (EAccountList *account_listener, EAccount *account)
 
 	EVO3(shell = e_shell_get_default ();)
 	EVO3(shell_backend = e_shell_get_backend_by_name (shell, "mail");)
-	EVO3(session = e_mail_backend_get_session (E_MAIL_BACKEND (shell_backend));)
-	EVO3(store = (CamelStore *) camel_session_get_service (CAMEL_SESSION (session),
-				  account->source->url, CAMEL_PROVIDER_STORE, NULL);)
+	EVO3 (session = (CamelSession *) e_mail_backend_get_session (E_MAIL_BACKEND (shell_backend));)
+	service = camel_session_get_service (session, account->source->url, CAMEL_PROVIDER_STORE, NULL);
 
-	/* FIXME This has to go through the CamelStore instead of accessing through derived class.
-	    Ideally Evo should delete the cache when the email account is removed */
-	EVO3(camel_ews_store_summary_remove (((CamelEwsStore *)store)->summary);)
-
+	/* FIXME  Use this until CamelStore gets camel_store_remove_storage API which would be available eds 3.2 onwards */
+	storage_path = camel_session_get_storage_path (session, service, NULL);
+	summary_file = g_build_filename (storage_path, "folder-tree-v2", NULL);
+	g_unlink (summary_file);
+	
+	d(g_print ("Removed ews store summary: %s \n", summary_file);)
+	
+	g_free (storage_path);
+	g_free (summary_file);
 	ews_account_info_free (info);
-	EVO3(g_object_unref (store);)
+	g_object_unref (service);
 }
 
 static gboolean

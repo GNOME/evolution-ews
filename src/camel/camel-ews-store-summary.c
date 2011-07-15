@@ -19,6 +19,8 @@ struct _CamelEwsStoreSummaryPrivate {
 	GHashTable *id_fname_hash;
 	GHashTable *fname_id_hash;
 	GStaticRecMutex s_lock;
+	
+	GFileMonitor *monitor_delete;
 };
 
 G_DEFINE_TYPE (CamelEwsStoreSummary, camel_ews_store_summary, CAMEL_TYPE_OBJECT)
@@ -34,6 +36,8 @@ ews_store_summary_finalize (GObject *object)
 	g_hash_table_destroy (priv->fname_id_hash);
 	g_hash_table_destroy (priv->id_fname_hash);
 	g_static_rec_mutex_free (&priv->s_lock);
+	if (priv->monitor_delete)
+		g_object_unref (priv->monitor_delete);
 
 	g_free (priv);
 
@@ -118,14 +122,44 @@ load_id_fname_hash (CamelEwsStoreSummary *ews_summary)
 	g_slist_free (folders);
 }
 
+/* we only care about delete and ignore create */
+static void
+monitor_delete_cb (GFileMonitor *monitor, GFile *file, GFile *other_file, GFileMonitorEvent event, gpointer user_data)
+{
+	CamelEwsStoreSummary *ews_summary = (CamelEwsStoreSummary *) user_data;
+
+	if (event == G_FILE_MONITOR_EVENT_DELETED) {
+		S_LOCK(ews_summary);
+
+		if (ews_summary->priv->key_file)
+			camel_ews_store_summary_clear (ews_summary);
+
+		S_UNLOCK(ews_summary);
+	}
+}
+
 CamelEwsStoreSummary *
 camel_ews_store_summary_new (const gchar *path)
 {
 	CamelEwsStoreSummary *ews_summary;
+	GError *error = NULL;
+	GFile *file;
 
 	ews_summary = g_object_new (CAMEL_TYPE_EWS_STORE_SUMMARY, NULL);
 
 	ews_summary->priv->path = g_strdup (path);
+	file = g_file_new_for_path (path);
+	ews_summary->priv->monitor_delete = g_file_monitor_file (file, G_FILE_MONITOR_SEND_MOVED, NULL, &error);
+
+	/* Remove this once we have camel_store_remove_storage api, which should be available from 3.2 */
+	if (!error)
+		g_signal_connect (ews_summary->priv->monitor_delete, "changed", G_CALLBACK (monitor_delete_cb), ews_summary);
+	else {
+		g_warning ("CamelEwsStoreSummary: Error create monitor_delete: %s \n", error->message);
+		g_clear_error (&error);
+	}
+
+	g_object_unref (file);
 
 	return ews_summary;
 }
