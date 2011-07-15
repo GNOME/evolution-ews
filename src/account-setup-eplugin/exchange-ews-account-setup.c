@@ -552,7 +552,7 @@ init_widgets (struct _oab_setting_data *cbdata)
 
 		/* selected list will be of form "id:name" */
 		selected_list = camel_url_get_param (url, "oal_selected");
-		if (selected_list) {
+		if (selected_list && gtk_combo_box_get_active (GTK_COMBO_BOX (cbdata->combo_text)) == -1) {
 			const gchar *tmp;
 			
 			tmp = strrchr (selected_list, ':');
