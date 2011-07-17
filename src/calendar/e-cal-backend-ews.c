@@ -2610,6 +2610,7 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 		ECalComponentId *id;
 		gchar *comp_str;
 		const GSList *l = NULL;
+		const char *org_email_address = e_ews_collect_orginizer(icalcomp);
 
 		item_id = e_ews_item_get_id (item);
 
@@ -2618,6 +2619,9 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 			icalparameter *param;
 			char *mailtoname;
 			EwsAttendee *attendee = (EwsAttendee *)l->data;
+			/*remove orginizer for attendeees list*/
+			if (g_ascii_strcasecmp (org_email_address, attendee->mailbox->email)== 0)
+				continue;
 
 			mailtoname = g_strdup_printf("mailto:%s", attendee->mailbox->email);
 			icalprop = icalproperty_new_attendee(mailtoname);
