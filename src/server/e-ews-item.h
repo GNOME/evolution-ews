@@ -149,6 +149,7 @@ EwsMailbox *
 
 const GSList *	e_ews_item_get_modified_occurrences
 						(EEwsItem *item);
+gchar *		e_ews_embed_attachment_id_in_uri (const gchar *olduri, const char *attach_id);
 GSList *	e_ews_item_get_attachments_ids
 						(EEwsItem *item);
 gchar *

@@ -1273,6 +1273,31 @@ e_ews_item_get_attachments_ids(EEwsItem *item)
 }
 
 gchar *
+e_ews_embed_attachment_id_in_uri (const gchar *olduri, const char *attach_id)
+{
+	gchar *tmpdir, *tmpfilename, filename[350], dirname[350], *name;
+
+	tmpfilename = g_filename_from_uri (olduri, NULL, NULL);
+
+	name = g_strrstr (tmpfilename, "/")+1;
+	tmpdir = g_strndup(tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
+
+	snprintf (dirname, 350, "%s/%s", tmpdir, attach_id);
+	if (g_mkdir (dirname, 0775) == -1) {
+		g_warning("Failed create directory to place file in [%s]: %s\n", dirname, strerror (errno));
+	}
+
+	snprintf(filename, 350, "%s/%s", dirname, name);
+	if (g_rename (tmpfilename, filename) != 0) {
+		g_warning("Failed to move attachment cache file [%s -> %s]: %s\n", tmpfilename, filename, strerror (errno));
+	}
+
+	g_free(tmpdir);
+
+	return g_filename_to_uri(filename, NULL, NULL);
+}
+
+gchar *
 e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gchar *cache)
 {
 	ESoapParameter *subparam;
