@@ -1785,6 +1785,10 @@ convert_vtodo_component_to_updatexml (ESoapMessage *msg, gpointer user_data)
 		case ICAL_STATUS_COMPLETED:
 			convert_vtodo_property_to_updatexml (msg, "Status", "Completed", "task", NULL, NULL);
 			break;
+		case ICAL_STATUS_NONE:
+		case ICAL_STATUS_NEEDSACTION:
+			convert_vtodo_property_to_updatexml (msg, "Status", "NotStarted", "task", NULL, NULL);
+			break;
 		default:
 			break;
 		}
