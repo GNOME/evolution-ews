@@ -281,10 +281,6 @@ void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *ic
 	xstd = icalcomponent_get_first_component(comp, ICAL_XSTANDARD_COMPONENT);
 	xdaylight = icalcomponent_get_first_component(comp, ICAL_XDAYLIGHT_COMPONENT);
 
-	/* Should never happen. RFC5545 requires at least one */
-	if (!xstd && !xdaylight)
-		return;
-
 	/* If there was only a DAYLIGHT component, swap them over and pretend
 	   it was the STANDARD component. We're only going to give the server
 	   the BaseOffset anyway. */
@@ -305,8 +301,13 @@ void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *ic
 
 	/* Fetch the timezone offsets for the standard (or only) zone.
 	   Negate it, because Exchange does it backwards */
-	prop = icalcomponent_get_first_property(xstd, ICAL_TZOFFSETTO_PROPERTY);
-	std_utcoffs = -icalproperty_get_tzoffsetto(prop);
+	if (xstd) {
+		prop = icalcomponent_get_first_property(xstd, ICAL_TZOFFSETTO_PROPERTY);
+		std_utcoffs = -icalproperty_get_tzoffsetto(prop);
+	} else {
+		/* UTC has no properties at all, so just set manually */
+		std_utcoffs = 0;
+	}
 
 	/* This is the overall BaseOffset tag, which the Standard and Daylight
 	   zones are offset from. It's redundant, but Exchange always sets it
