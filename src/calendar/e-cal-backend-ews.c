@@ -986,7 +986,7 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	remove_data->item_id.change_key = item_id.change_key;
 
 	e_ews_connection_delete_item_start (priv->cnc, EWS_PRIORITY_MEDIUM, &remove_data->item_id, index,
-					     EWS_HARD_DELETE, EWS_SEND_TO_NONE, FALSE,
+					     EWS_HARD_DELETE, EWS_SEND_TO_NONE, EWS_ALL_OCCURRENCES,
 					     ews_cal_remove_object_cb, NULL,
 					     remove_data);
 	return;
