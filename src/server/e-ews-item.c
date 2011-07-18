@@ -171,6 +171,8 @@ struct _EEwsItemPrivate {
 	gboolean is_read;
 	EwsImportance importance;
 
+	gchar *timezone;
+
 	GSList *to_recipients;
 	GSList *cc_recipients;
 	GSList *bcc_recipients;
@@ -231,6 +233,9 @@ e_ews_item_dispose (GObject *object)
 
 	g_free (priv->references);
 	priv->references = NULL;
+
+	g_free (priv->timezone);
+	priv->timezone = NULL;
 
 	if (priv->to_recipients) {
 		g_slist_foreach (priv->to_recipients, (GFunc) ews_item_free_mailbox, NULL);
@@ -973,6 +978,8 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 			value = e_soap_parameter_get_string_value (subparam);
 			priv->is_read = (!g_ascii_strcasecmp (value, "true"));
 			g_free (value);
+		} else if (!g_ascii_strcasecmp (name, "TimeZone")) {
+			priv->timezone = e_soap_parameter_get_string_value (subparam);
 		} else if (task) {
 			parse_task_field (item, name, subparam);
 			/* fields below are not relevant for task, so skip them */
@@ -1713,4 +1720,13 @@ e_ews_item_task_has_complete_date (EEwsItem *item,  gboolean *has_date)
 	*has_date =  item->priv->task_fields->has_complete_date;
 
 	return TRUE;
+}
+
+const gchar *
+e_ews_item_get_tzid (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->timezone != NULL, NULL);
+
+	return item->priv->timezone;
 }

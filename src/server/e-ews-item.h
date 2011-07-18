@@ -208,6 +208,7 @@ gboolean	e_ews_item_task_has_due_date	(EEwsItem *item,
 gboolean	e_ews_item_task_has_complete_date
 						(EEwsItem* item,
 						 gboolean* has_date);
+const gchar *	e_ews_item_get_tzid		(EEwsItem *item);
 
 G_END_DECLS
 

@@ -2596,19 +2596,36 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 
 		icalcomponent_add_component (vcomp,icalcomp);
 	} else {
+		struct icaltimetype dt;
+		icaltimezone *zone;
 		mime_content = e_ews_item_get_mime_content (item);
 		vcomp = icalparser_parse_string (mime_content);
 
 		/* Add the timezone */
 		vtimezone = icalcomponent_get_first_component (vcomp, ICAL_VTIMEZONE_COMPONENT);
 		if (vtimezone) {
-			icaltimezone *zone;
-
 			zone = icaltimezone_new ();
 			icaltimezone_set_component (zone, icalcomponent_new_clone (vtimezone));
 			e_cal_backend_store_put_timezone (priv->store, zone);
 
 			icaltimezone_free (zone, TRUE);
+		}
+
+		if ((zone = (icaltimezone *)e_cal_backend_store_get_timezone(priv->store, e_ews_item_get_tzid (item))) == NULL)
+			zone = (icaltimezone *)icaltimezone_get_builtin_timezone(e_ews_item_get_tzid (item));
+
+		if (zone) {
+			icalcomp = icalcomponent_get_first_component (vcomp, kind);
+
+			icalcomponent_add_component (vcomp, icalcomponent_new_clone (icaltimezone_get_component (zone)));
+
+			dt = icalcomponent_get_dtstart (icalcomp);
+			dt = icaltime_set_timezone (&dt, zone);
+			icalcomponent_set_dtstart (icalcomp, dt);
+
+			dt = icalcomponent_get_dtend (icalcomp);
+			dt = icaltime_set_timezone (&dt, zone);
+			icalcomponent_set_dtend (icalcomp, dt);
 		}
 	}
 	/* Vevent or Vtodo */
@@ -2934,7 +2951,7 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 						  EWS_PRIORITY_MEDIUM,
 						  cal_item_ids,
 						  "IdOnly",
-						  "item:Attachments item:HasAttachments item:MimeContent calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
+						  "item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
 						  FALSE, NULL,
 						  ews_cal_get_items_ready_cb,
 						  NULL, NULL, NULL,
