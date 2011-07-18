@@ -2627,11 +2627,11 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 			icalcomponent_add_component (vcomp, icalcomponent_new_clone (icaltimezone_get_component (zone)));
 
 			dt = icalcomponent_get_dtstart (icalcomp);
-			dt = icaltime_set_timezone (&dt, zone);
+			dt = icaltime_convert_to_zone (dt, zone);
 			icalcomponent_set_dtstart (icalcomp, dt);
 
 			dt = icalcomponent_get_dtend (icalcomp);
-			dt = icaltime_set_timezone (&dt, zone);
+			dt = icaltime_convert_to_zone (dt, zone);
 			icalcomponent_set_dtend (icalcomp, dt);
 		}
 	}
