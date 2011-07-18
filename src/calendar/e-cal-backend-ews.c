@@ -1062,8 +1062,6 @@ convert_vevent_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 		ECalComponentAlarm *alarm = e_cal_component_get_alarm (comp, (const gchar *)(alarm_uids->data));
 		ECalComponentAlarmAction action;
 
-		g_warning ("Starting with alarm print all");
-
 		e_ews_message_write_string_parameter(msg, "ReminderIsSet", NULL, "true");
 		e_cal_component_alarm_get_action (alarm, &action);
 		if (action == E_CAL_COMPONENT_ALARM_DISPLAY) {
