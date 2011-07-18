@@ -1010,9 +1010,6 @@ typedef struct {
 	EServerMethodContext context;
 } EwsCreateData;
 
-#define MINUTES_IN_HOUR 60
-#define SECS_IN_MINUTE 60
-
 static void add_attendees_list_to_message(ESoapMessage *msg, const gchar *listname, GSList *list) {
 	GSList *item;
 
