@@ -41,6 +41,8 @@ void ewscal_set_reccurence (ESoapMessage *msg, icalproperty *rrule, icaltimetype
 void ewscal_set_reccurence_exceptions (ESoapMessage *msg, icalcomponent *comp);
 void ewscal_get_attach_differences (const GSList *original, const GSList *modified, GSList **removed, GSList **added);
 gchar *e_ews_extract_attachment_id_from_uri (const gchar *uri);
+void ews_set_alarm (ESoapMessage *msg, ECalComponent *comp);
+gint ews_get_alarm (ECalComponent *comp);
 
 G_END_DECLS
 
