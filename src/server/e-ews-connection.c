@@ -601,6 +601,38 @@ resolve_names_response_cb (ESoapParameter *subparam, EwsNode *enode)
 	async_data->items_created = contact_items;
 }
 
+static void
+expand_dl_response_cb (ESoapParameter *subparam, EwsNode *enode)
+{
+	gboolean includes_last_item;
+	GSList *mailboxes = NULL;
+	EwsAsyncData *async_data;
+	gchar *prop;
+
+	subparam = e_soap_parameter_get_first_child_by_name (subparam, "DLExpansion");
+	prop = e_soap_parameter_get_property (subparam, "IncludesLastItemInRange");
+
+	if (prop && !strcmp (prop, "true"))
+		includes_last_item = TRUE;
+	g_free (prop);
+
+	for (subparam = e_soap_parameter_get_first_child_by_name (subparam, "Mailbox");
+		subparam != NULL;
+		subparam = e_soap_parameter_get_next_child_by_name (subparam, "Mailbox")) {
+		EwsMailbox *mb;
+
+		mb = e_ews_item_mailbox_from_soap_param (subparam);
+		if (mb)
+			mailboxes = g_slist_append (mailboxes, mb);
+	}
+
+	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
+
+	/* Reuse existing variables */
+	async_data->items = mailboxes;
+	async_data->includes_last_item = includes_last_item;
+}
+
 /* TODO scan all folders if we support creating multiple folders in the request */
 static void
 ews_create_folder_cb (ESoapParameter *soapparam, EwsNode *enode)
@@ -2728,6 +2760,111 @@ e_ews_connection_resolve_names	(EEwsConnection *cnc,
 	result = e_ews_connection_resolve_names_finish (cnc, sync_data->res,
 						       mailboxes, contact_items,
 						       includes_last_item, error);
+
+	e_flag_free (sync_data->eflag);
+	g_object_unref (sync_data->res);
+	g_free (sync_data);
+
+	return result;
+}
+
+void		
+e_ews_connection_expand_dl_start	(EEwsConnection *cnc,
+					 gint pri,
+					 const EwsMailbox *mb,
+					 GAsyncReadyCallback cb,
+					 GCancellable *cancellable,
+					 gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "ExpandDL", NULL, NULL, EWS_EXCHANGE_2007);
+
+	e_soap_message_start_element (msg, "Mailbox", "messages", NULL);
+
+	if (mb->item_id) {
+		e_soap_message_start_element (msg, "ItemId", NULL, NULL);
+		
+		e_soap_message_add_attribute (msg, "Id", mb->item_id->id, NULL, NULL);
+		e_soap_message_add_attribute (msg, "ChangeKey", mb->item_id->change_key, NULL, NULL);
+		
+		e_soap_message_end_element (msg); /* Mailbox */
+		
+	} else if (mb->email)
+		e_ews_message_write_string_parameter (msg, "EmailAddress", NULL, mb->email);
+	
+	e_soap_message_end_element (msg); /* Mailbox */
+
+	e_ews_message_write_footer (msg);
+
+	simple = g_simple_async_result_new (G_OBJECT (cnc),
+                                      cb,
+                                      user_data,
+                                      e_ews_connection_expand_dl_start);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	ews_connection_queue_request (cnc, msg, expand_dl_response_cb, pri,
+				      cancellable, simple, cb == ews_sync_reply_cb);
+}
+
+/* includes_last_item does not make sense as expand_dl does not support recursive 
+   fetch, wierd */
+gboolean	
+e_ews_connection_expand_dl_finish	(EEwsConnection *cnc,
+					 GAsyncResult *result,
+					 GSList **mailboxes,
+					 gboolean *includes_last_item,
+					 GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_expand_dl_start),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	*includes_last_item = async_data->includes_last_item;
+	*mailboxes = async_data->items;
+
+	return TRUE;
+
+}
+
+gboolean	
+e_ews_connection_expand_dl	(EEwsConnection *cnc,
+				 gint pri,
+				 const EwsMailbox *mb,
+				 GSList **mailboxes,
+				 gboolean *includes_last_item,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	EwsSyncData *sync_data;
+	gboolean result;
+
+	sync_data = g_new0 (EwsSyncData, 1);
+	sync_data->eflag = e_flag_new ();
+
+	e_ews_connection_expand_dl_start (cnc, pri, mb,
+					  ews_sync_reply_cb, cancellable,
+					  (gpointer) sync_data);
+
+	e_flag_wait (sync_data->eflag);
+
+	result = e_ews_connection_expand_dl_finish (cnc, sync_data->res,
+						       mailboxes, includes_last_item, error);
 
 	e_flag_free (sync_data->eflag);
 	g_object_unref (sync_data->res);

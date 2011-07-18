@@ -360,6 +360,28 @@ gboolean	e_ews_connection_resolve_names	(EEwsConnection *cnc,
 						 gboolean *includes_last_item,
 						 GCancellable *cancellable,
 						 GError **error);
+/* Expand distribution lists */
+void		e_ews_connection_expand_dl_start
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const EwsMailbox *mb,
+						 GAsyncReadyCallback cb,
+						 GCancellable *cancellable,
+						 gpointer user_data);
+gboolean	e_ews_connection_expand_dl_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GSList **mailboxes,
+						 gboolean *includes_last_item,
+						 GError **error);
+gboolean	e_ews_connection_expand_dl	(EEwsConnection *cnc,
+						 gint pri,
+						 const EwsMailbox *mb,
+						 GSList **mailboxes,
+						 gboolean *includes_last_item,
+						 GCancellable *cancellable,
+						 GError **error);
+
 /*Create Folder*/
 
 void		e_ews_connection_create_folder_start
