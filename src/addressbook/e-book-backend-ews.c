@@ -539,6 +539,12 @@ e_book_backend_ews_create_contact	(EBookBackend *backend,
 		}
 
 		contact = e_contact_new_from_vcard (vcard);
+		
+		if (e_contact_get (contact, E_CONTACT_IS_LIST)) {
+			g_object_unref (contact);
+			e_data_book_respond_create (book, opid, EDB_ERROR (NOT_SUPPORTED), NULL);
+			return;
+		}
 
 		create_contact = g_new0(EwsCreateContact, 1);
 		create_contact->ebews = g_object_ref(ebews);
@@ -683,12 +689,23 @@ e_book_backend_ews_modify_contact	(EBookBackend *backend,
 			e_data_book_respond_modify (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
 			return;
 		}
+		
 		if (!egwb->priv->is_writable) {
 			e_data_book_respond_modify (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
 			return;
 		}
+		
+		contact = e_contact_new_from_vcard (vcard);
 
-		e_data_book_respond_modify (book, opid, EDB_ERROR (SUCCESS), contact);
+		if (e_contact_get (contact, E_CONTACT_IS_LIST)) {
+			g_object_unref (contact);
+			e_data_book_respond_create (book, opid, EDB_ERROR (NOT_SUPPORTED), NULL);
+			return;
+		}
+
+		/* TODO implement */
+		g_object_unref (contact);
+		e_data_book_respond_create (book, opid, EDB_ERROR (NOT_SUPPORTED), NULL);
 		return;
 	default :
 		break;
