@@ -1010,6 +1010,9 @@ typedef struct {
 	EServerMethodContext context;
 } EwsCreateData;
 
+#define MINUTES_IN_HOUR 60
+#define SECS_IN_MINUTE 60
+
 static void add_attendees_list_to_message(ESoapMessage *msg, const gchar *listname, GSList *list) {
 	GSList *item;
 
@@ -1032,9 +1035,13 @@ static void
 convert_vevent_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 {
 	icalcomponent *icalcomp = (icalcomponent*)user_data;
+	ECalComponent *comp = e_cal_component_new();
 	GSList *required = NULL, *optional = NULL, *resource = NULL;
 	icaltimetype dtstart, dtend;
 	icalproperty *prop;
+	gboolean has_alarms;
+
+	e_cal_component_set_icalcomponent(comp, icalcomp);
 
 	/* FORMAT OF A SAMPLE SOAP MESSAGE: http://msdn.microsoft.com/en-us/library/aa564690.aspx */
 
@@ -1046,6 +1053,37 @@ convert_vevent_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 
 	/* description */
 	e_ews_message_write_string_parameter_with_attribute(msg, "Body", NULL, icalcomponent_get_description(icalcomp), "BodyType", "Text");
+
+	/* set alarms */
+	has_alarms = e_cal_component_has_alarms (comp);
+	if (has_alarms) {
+		/* We know there would be only a single alarm in EWS calendar item */
+		GList *alarm_uids = e_cal_component_get_alarm_uids (comp);
+		ECalComponentAlarm *alarm = e_cal_component_get_alarm (comp, (const gchar *)(alarm_uids->data));
+		ECalComponentAlarmAction action;
+
+		g_warning ("Starting with alarm print all");
+
+		e_ews_message_write_string_parameter(msg, "ReminderIsSet", NULL, "true");
+		e_cal_component_alarm_get_action (alarm, &action);
+		if (action == E_CAL_COMPONENT_ALARM_DISPLAY) {
+			ECalComponentAlarmTrigger trigger;
+			char buf[20];
+			gint dur_int = 0;
+			e_cal_component_alarm_get_trigger (alarm, &trigger);
+			switch (trigger.type) {
+			case E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_START :
+				dur_int = ((icaldurationtype_as_int (trigger.u.rel_duration)) / SECS_IN_MINUTE) * -1;
+				snprintf (buf, 20, "%d",dur_int);
+				e_ews_message_write_string_parameter(msg, "ReminderMinutesBeforeStart", NULL, buf);
+				break;
+			default :
+				break;
+			}
+		}
+		e_cal_component_alarm_free (alarm);
+		cal_obj_uid_list_free (alarm_uids);
+	}
 
 	/* start time, end time and meeting time zone */
 	dtstart = icalcomponent_get_dtstart (icalcomp);
@@ -1080,8 +1118,6 @@ convert_vevent_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 	if (prop != NULL) {
 		ewscal_set_reccurence(msg, prop, &dtstart);
 	}
-	
-	/* TODO:attachments */
 
 	if (0 /* Exchange 2010 detected */ && dtstart.zone != dtend.zone) {
 		/* We have to cast these because libical puts a const pointer into the
