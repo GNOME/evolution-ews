@@ -91,7 +91,6 @@ struct _EBookBackendEwsPrivate {
 /* passing field uris for PhysicalAddress, PhoneNumbers causes error, so we use Default view to fetch them. Thus the summary props just have attachments  and 
    some additional properties that are not return with Default view */
 #define CONTACT_ITEM_PROPS "item:Attachments item:HasAttachments contacts:Manager contacts:Department contacts:SpouseName contacts:AssistantName contacts:BusinessHomePage contacts:Birthday"
-#define DISTRIBUTION_ITEM_PROPS "item:ItemId contacts:FileAs contacts:DisplayName"
 
 #define PRIV_LOCK(p)   (g_static_rec_mutex_lock (&(p)->rec_mutex))
 #define PRIV_UNLOCK(p) (g_static_rec_mutex_unlock (&(p)->rec_mutex))
@@ -1013,12 +1012,73 @@ ebews_store_contact_items (EBookBackendEws *ebews, GSList *new_items, gboolean d
 }
 
 static void
+ews_mb_free (EwsMailbox *mb)
+{
+	if (mb) {
+		g_free (mb->name);
+		g_free (mb->email);
+	
+		if (mb->item_id) {
+			g_free (mb->item_id->id);
+			g_free (mb->item_id->change_key);
+			g_free (mb->item_id);
+		}
+
+		g_free (mb);
+	}
+}
+
+static void
+ebews_store_distribution_list_items (EBookBackendEws *ebews, const EwsId *id, const gchar *d_name, GSList *members, GError **error)
+{
+	GSList *l;
+	EContact *contact;
+
+	contact = e_contact_new ();
+	e_contact_set (contact, E_CONTACT_UID, id->id);
+	e_contact_set (contact, E_CONTACT_REV, id->change_key);
+	
+	e_contact_set (contact, E_CONTACT_IS_LIST, GINT_TO_POINTER (TRUE));
+	e_contact_set (contact, E_CONTACT_LIST_SHOW_ADDRESSES, GINT_TO_POINTER (TRUE));
+	e_contact_set (contact, E_CONTACT_FULL_NAME, d_name);
+
+	for (l = members; l != NULL; l = g_slist_next (l)) {
+		EwsMailbox *mb = (EwsMailbox *)	l->data;
+		EVCardAttribute *attr;
+
+		attr = e_vcard_attribute_new (NULL, EVC_EMAIL);
+		if (mb->name) {
+			gint len = strlen (mb->name);
+			gchar *value;
+
+			if (mb->name [0] == '\"' && mb->name [len - 1] == '\"')
+				value = g_strdup_printf ("%s <%s>", mb->name, mb->email);
+			else
+				value = g_strdup_printf ("\"%s\" <%s>", mb->name, mb->email);
+
+			e_vcard_attribute_add_value (attr, value);
+			g_free (value);
+		} else
+			e_vcard_attribute_add_value (attr, mb->email);
+
+		e_vcard_add_attribute (E_VCARD (contact), attr);
+		ews_mb_free (mb);
+	}
+	
+	g_slist_free (members);
+	e_book_backend_sqlitedb_add_contact (ebews->priv->ebsdb, ebews->priv->folder_id, contact, FALSE, error);
+	e_book_backend_notify_update (E_BOOK_BACKEND (ebews), contact);
+
+	g_object_unref (contact);
+}
+
+static void
 ebews_sync_items (EBookBackendEws *ebews, GSList *items, GError **error)
 {
 	EBookBackendEwsPrivate *priv;
 	EEwsConnection *cnc;
 	GSList *l;
-	GSList *contact_item_ids = NULL, *dis_list_ids = NULL;
+	GSList *contact_item_ids = NULL, *dl_ids = NULL;
 	GSList *new_items = NULL;
 
 	priv = ebews->priv;
@@ -1031,8 +1091,10 @@ ebews_sync_items (EBookBackendEws *ebews, GSList *items, GError **error)
 
 		if (type == E_EWS_ITEM_TYPE_CONTACT)
 			contact_item_ids = g_slist_prepend (contact_item_ids, g_strdup (id->id));
-		else if (type == E_EWS_ITEM_TYPE_GROUP)
-			dis_list_ids = g_slist_prepend (dis_list_ids, g_strdup (id->id));
+		else if (type == E_EWS_ITEM_TYPE_GROUP) {
+			/* store a list of EwsMailBox's in case of distribution lists */
+			dl_ids = g_slist_prepend (dl_ids, g_strdup (id->id));
+		}
 
 		g_object_unref (item);
 	}
@@ -1045,31 +1107,66 @@ ebews_sync_items (EBookBackendEws *ebews, GSList *items, GError **error)
 			 contact_item_ids, "Default", CONTACT_ITEM_PROPS,
 			 FALSE, NULL, &new_items, NULL, NULL,
 			 NULL, error);
-	if (*error) {
-		if (dis_list_ids) {
-			g_slist_foreach (dis_list_ids, (GFunc) g_free, NULL);
-			g_slist_free (dis_list_ids);
-		}
-
-		return;
-	}
+	if (*error)
+		goto cleanup;
 
 	if (new_items)
 		ebews_store_contact_items (ebews, new_items, FALSE, error);
+	new_items = NULL;
 
-	if (dis_list_ids) {
-		new_items = NULL;
-
+	/* Get the display names of the distribution lists */
+	if (dl_ids)
 		e_ews_connection_get_items
 			(cnc, EWS_PRIORITY_MEDIUM,
-			 dis_list_ids, "Default", DISTRIBUTION_ITEM_PROPS,
+			 dl_ids, "Default", NULL,
 			 FALSE, NULL, &new_items, NULL, NULL,
 			 NULL, error);
+	if (*error)
+		goto cleanup;
+
+	for (l = new_items; l != NULL; l = g_slist_next (l)) {
+		EEwsItem *item = (EEwsItem *) l->data;
+		const gchar *d_name;
+		const EwsId *id;
+		EwsMailbox *mb = g_new0 (EwsMailbox, 1);
+		GSList *members = NULL;
+		gboolean includes_last;
+
+		id = e_ews_item_get_id (item);
+		mb = g_new0 (EwsMailbox, 1);
+		mb->item_id = (EwsId *) id;
+
+		/* expand dl */
+		if (*error)
+			goto cleanup;
+		
+		d_name = e_ews_item_get_subject (item);
+		e_ews_connection_expand_dl (cnc, EWS_PRIORITY_MEDIUM, mb, &members, &includes_last, NULL, error);
+		if (*error)
+			goto cleanup;
+		
+		ebews_store_distribution_list_items (ebews, id, d_name, members, error);
+		g_free (mb);
+
+		if (*error)
+			goto cleanup;
 	}
 
-	/* TODO store distribution list, we might also need to expand the members
-	if (new_items)
-		ebews_store_distribution_list_items (ebews, new_items, error); */
+cleanup:
+	if (new_items) {
+		g_slist_foreach (new_items, (GFunc) g_object_unref, NULL);
+		g_slist_free (new_items);
+	}
+
+	if (dl_ids) {
+		g_slist_foreach (dl_ids, (GFunc) g_free, NULL);
+		g_slist_free (dl_ids);
+	}
+	
+	if (contact_item_ids) {
+		g_slist_foreach (contact_item_ids, (GFunc) g_free, NULL);
+		g_slist_free (contact_item_ids);
+	}
 }
 
 static gboolean
