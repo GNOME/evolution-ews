@@ -3749,7 +3749,7 @@ e_ews_connection_get_attachments_start	(EEwsConnection *cnc,
 				      cancellable, simple, cb == ews_sync_reply_cb);
 }
 
-gboolean
+GSList *
 e_ews_connection_get_attachments_finish(EEwsConnection *cnc,
 					 GAsyncResult *result,
 					 GSList **items,
@@ -3761,20 +3761,20 @@ e_ews_connection_get_attachments_finish(EEwsConnection *cnc,
 	g_return_val_if_fail (
 			g_simple_async_result_is_valid (
 					result, G_OBJECT (cnc), e_ews_connection_get_attachments_start),
-			FALSE);
+			NULL);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
 	async_data = g_simple_async_result_get_op_res_gpointer (simple);
 
 	if (g_simple_async_result_propagate_error (simple, error))
-		return FALSE;
+		return NULL;
 
 	*items = async_data->items;
 
-	return TRUE;
+	return async_data->items_created;
 }
 
-gboolean
+GSList *
 e_ews_connection_get_attachments(EEwsConnection *cnc,
 				 gint pri,
 				 GSList *ids,
@@ -3787,7 +3787,7 @@ e_ews_connection_get_attachments(EEwsConnection *cnc,
 				 GError **error)
 {
 	EwsSyncData *sync_data;
-	gboolean result;
+	GSList *attachments_ids;
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -3800,7 +3800,7 @@ e_ews_connection_get_attachments(EEwsConnection *cnc,
 
 	e_flag_wait (sync_data->eflag);
 
-	result = e_ews_connection_get_attachments_finish(cnc,
+	attachments_ids = e_ews_connection_get_attachments_finish(cnc,
 						    sync_data->res,
 						    items,
 						    error);
@@ -3809,7 +3809,7 @@ e_ews_connection_get_attachments(EEwsConnection *cnc,
 	g_object_unref (sync_data->res);
 	g_free (sync_data);
 
-	return result;
+	return attachments_ids;
 }
 
 static void
@@ -3817,7 +3817,7 @@ get_attachments_response_cb (ESoapParameter *param, EwsNode *enode)
 {
 	ESoapParameter *subparam, *attspara;
 	EwsAsyncData *async_data;
-	gchar *uri = NULL;
+	gchar *uri = NULL, *attach_id = NULL;
 	EEwsItem *item;
 	const gchar *name;
 
@@ -3830,15 +3830,18 @@ get_attachments_response_cb (ESoapParameter *param, EwsNode *enode)
 
 		if (!g_ascii_strcasecmp (name, "ItemAttachment")) {
 			item = e_ews_item_new_from_soap_parameter(subparam);
+			attach_id = g_strdup (e_ews_item_get_attachment_id (item)->id);
 			uri = e_ews_item_dump_mime_content(item, async_data->directory);
 
 		}
 		else if (!g_ascii_strcasecmp (name, "FileAttachment")) {
-			uri = e_ews_dump_file_attachment_from_soap_parameter(subparam, async_data->directory);
+			uri = e_ews_dump_file_attachment_from_soap_parameter(subparam, async_data->directory, &attach_id);
 		}
-		if (uri) {
+		if (uri && attach_id) {
 			async_data->items = g_slist_append (async_data->items, uri);
+			async_data->items_created = g_slist_append (async_data->items_created, attach_id);
 			uri = NULL;
+			attach_id = NULL;
 		}
 	}
 }

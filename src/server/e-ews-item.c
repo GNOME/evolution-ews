@@ -139,6 +139,7 @@ struct _EEwsTaskFields {
 };
 
 struct _EEwsItemPrivate {
+	EwsId *attachment_id;
 	EEwsItemType item_type;
 
 	/* MAPI properties */
@@ -218,6 +219,13 @@ e_ews_item_dispose (GObject *object)
 		g_free (priv->item_id->change_key);
 		g_free (priv->item_id);
 		priv->item_id = NULL;
+	}
+
+	if (priv->attachment_id) {
+		g_free (priv->attachment_id->id);
+		g_free (priv->attachment_id->change_key);
+		g_free (priv->attachment_id);
+		priv->attachment_id = NULL;
 	}
 
 	g_free (priv->mime_content);
@@ -847,7 +855,11 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 
 	g_return_val_if_fail (param != NULL, FALSE);
 
-	if ((node = e_soap_parameter_get_first_child_by_name (param, "Message")))
+	if ((node = e_soap_parameter_get_first_child_by_name (param, "AttachmentId"))) {
+		priv->attachment_id = g_new0 (EwsId, 1);
+		priv->attachment_id->id = e_soap_parameter_get_property (node, "Id");
+		priv->attachment_id->change_key = e_soap_parameter_get_property (node, "ChangeKey");
+	} else if ((node = e_soap_parameter_get_first_child_by_name (param, "Message")))
 		priv->item_type = E_EWS_ITEM_TYPE_MESSAGE;
 	else if ((node = e_soap_parameter_get_first_child_by_name (param, "CalendarItem")))
 		priv->item_type = E_EWS_ITEM_TYPE_CALENDAR_ITEM;
@@ -1079,6 +1091,14 @@ e_ews_item_get_id	(EEwsItem *item)
 	return (const EwsId *) item->priv->item_id;
 }
 
+const EwsId *
+e_ews_item_get_attachment_id	(EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	return (const EwsId *) item->priv->attachment_id;
+}
+
 gsize
 e_ews_item_get_size	(EEwsItem *item)
 {
@@ -1305,11 +1325,11 @@ e_ews_embed_attachment_id_in_uri (const gchar *olduri, const char *attach_id)
 }
 
 gchar *
-e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gchar *cache)
+e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gchar *cache, gchar **attach_id)
 {
 	ESoapParameter *subparam;
 	const gchar *param_name;
-	gchar *name = NULL, *value, filename[350], dirname[350], *attach_id = NULL;
+	gchar *name = NULL, *value, filename[350], dirname[350];
 	guchar *content = NULL;
 	gsize data_len = 0;
 	gchar *tmpdir, *tmpfilename;
@@ -1317,6 +1337,7 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 	g_return_val_if_fail (param != NULL, NULL);
 
 	/* Parse element, look for filename and content */
+	*attach_id = NULL;
 	for (subparam = e_soap_parameter_get_first_child(param); subparam != NULL; subparam = e_soap_parameter_get_next_child(subparam)) {
 		param_name = e_soap_parameter_get_name(subparam);
 
@@ -1330,23 +1351,23 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 			g_free (value);
 		} else if (g_ascii_strcasecmp(param_name, "AttachmentId") == 0) {
 			value = e_soap_parameter_get_property (subparam, "Id");
-			attach_id = g_uri_escape_string(value, "", TRUE);
+			*attach_id = g_uri_escape_string(value, "", TRUE);
 			g_free (value);
 		}
 	}
 
 	/* Make sure we have needed data */
-	if (!content || !name || !attach_id) {
+	if (!content || !name || !*attach_id) {
 		g_free(name);
 		g_free(content);
-		g_free(attach_id);
+		g_free(*attach_id);
 		return NULL;
 	}
 
 	tmpfilename = (gchar *) content;
 	tmpdir = g_strndup(tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
 
-	snprintf (dirname, 350, "%s/%s", tmpdir, attach_id);
+	snprintf (dirname, 350, "%s/%s", tmpdir, *attach_id);
 	if (g_mkdir (dirname, 0775) == -1) {
 		g_warning("Failed create directory to place file in [%s]: %s\n", dirname, strerror (errno));
 	}
@@ -1359,7 +1380,6 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 	g_free(tmpdir);
 	g_free(name);
 	g_free(content);
-	g_free(attach_id);
 
 	/* Return URI to saved file */
 	return g_filename_to_uri(filename, NULL, NULL);
@@ -1730,3 +1750,5 @@ e_ews_item_get_tzid (EEwsItem *item)
 
 	return item->priv->timezone;
 }
+
+

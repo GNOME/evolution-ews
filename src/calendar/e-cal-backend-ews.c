@@ -1179,6 +1179,12 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 typedef struct {
 	ECalBackendEws *cbews;
 	ECalComponent *comp;
+
+	int cb_type; /* 0 - nothing, 1 - create, 2 - update */
+
+	EDataCal *cal;
+	EServerMethodContext context;
+
 } EwsAttachmentsData;
 
 static void
@@ -1193,6 +1199,7 @@ ews_create_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data
 	icalproperty *icalprop;
 	icalcomponent *icalcomp;
 	icalparameter *icalparam;
+	const gchar *comp_uid;
 
 	ids = e_ews_connection_create_attachments_finish (cnc, &change_key, res, &error);
 
@@ -1226,14 +1233,19 @@ ews_create_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data
 		icalparam = icalparameter_new_x (i->data);
 		icalparameter_set_xname (icalparam, "X-EWS-ATTACHMENTID");
 		icalproperty_add_parameter (icalprop, icalparam);
-
 		g_free (i->data);
 	}
 
 	e_cal_component_commit_sequence (create_data->comp);
-
 	/* update changes and release access to the store */
 	e_cal_backend_store_thaw_changes (priv->store);
+
+	e_cal_component_get_uid(create_data->comp, &comp_uid);
+	if (create_data->cb_type == 1) {
+		e_data_cal_notify_object_created (create_data->cal, create_data->context, error, comp_uid, e_cal_component_get_as_string(create_data->comp));
+	} else if (create_data->cb_type == 2) {
+
+	}
 
 	g_slist_free (ids);
 
@@ -1308,6 +1320,7 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	const EwsId *item_id;
 	icalproperty *icalprop;
 	icalcomponent *icalcomp;
+	guint n_attach;
 
 	/* get a list of ids from server (single item) */
 	e_ews_connection_create_items_finish(cnc, res, &ids, &error);
@@ -1321,12 +1334,19 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	item_id = e_ews_item_get_id((EEwsItem *)ids->data);
 	g_slist_free (ids);
 
+	/* set item id */
+	e_cal_component_set_uid(create_data->comp, item_id->id);
+
 	/* attachments */
-	if (e_cal_component_get_num_attachments (create_data->comp) > 0) {
+	n_attach = e_cal_component_get_num_attachments (create_data->comp);
+	if (n_attach > 0) {
 		EwsAttachmentsData *attach_data = g_new0(EwsAttachmentsData, 1);
 
 		attach_data->cbews = g_object_ref (create_data->cbews);
 		attach_data->comp = g_object_ref (create_data->comp);
+		attach_data->cal = create_data->cal;
+		attach_data->context = create_data->context;
+		attach_data->cb_type = 1;
 
 		e_cal_component_get_attachment_list (create_data->comp, &attachments);
 		e_ews_connection_create_attachments_start (cnc, EWS_PRIORITY_MEDIUM,
@@ -1339,9 +1359,6 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 
 	/* get exclusive access to the store */
 	e_cal_backend_store_freeze_changes(priv->store);
-
-	/* set item id */
-	e_cal_component_set_uid(create_data->comp, item_id->id);
 
 	/* set a new ical property containing the change key we got from the exchange server for future use */
 	icalprop = icalproperty_new_x (item_id->change_key);
@@ -1356,7 +1373,9 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	/* notify the backend and the application that a new object was created */
 	e_cal_backend_notify_object_created (E_CAL_BACKEND(create_data->cbews), create_data->context);
 	e_cal_component_get_uid(create_data->comp, &comp_uid);
-	e_data_cal_notify_object_created (create_data->cal, create_data->context, error, comp_uid, e_cal_component_get_as_string(create_data->comp));
+	
+	if (n_attach == 0)
+		e_data_cal_notify_object_created (create_data->cal, create_data->context, error, comp_uid, e_cal_component_get_as_string(create_data->comp));
 
 	/* place new component in our cache */
 	PRIV_LOCK (priv);
@@ -2381,13 +2400,16 @@ ews_get_attachments_ready_callback (GObject *object, GAsyncResult *res, gpointer
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	EwsAttachmentData *att_data = user_data;
 	GError *error = NULL;
-	GSList *uris = NULL;
+	GSList *uris = NULL, *ids, *i;
 	ECalComponentId *id;
 	ECalBackendEws *cbews;
 	gchar *comp_str, *itemid;
 	ECalComponent *comp_att, *cache_comp = NULL;
+	icalcomponent *icalcomp;
+	icalproperty *icalprop;
+	icalparameter *icalparam;
 
-	e_ews_connection_get_attachments_finish	(cnc, res, &uris, &error);
+	ids = e_ews_connection_get_attachments_finish	(cnc, res, &uris, &error);
 
 	if (error != NULL) {
 		error->code = OtherError;
@@ -2399,6 +2421,16 @@ ews_get_attachments_ready_callback (GObject *object, GAsyncResult *res, gpointer
 	itemid = att_data->itemid;
 
 	e_cal_component_set_attachment_list (comp_att, uris);
+
+	icalcomp = e_cal_component_get_icalcomponent (comp_att);
+	icalprop = icalcomponent_get_first_property (icalcomp, ICAL_ATTACH_PROPERTY);
+	i = ids;
+	for (; i && icalprop; i = i->next, icalprop = icalcomponent_get_next_property (icalcomp, ICAL_ATTACH_PROPERTY)) {
+		icalparam = icalparameter_new_x (i->data);
+		icalparameter_set_xname (icalparam, "X-EWS-ATTACHMENTID");
+		icalproperty_add_parameter (icalprop, icalparam);
+		g_free (i->data);
+	}
 
 	id = e_cal_component_get_id (comp_att);
 	cache_comp = e_cal_backend_store_get_component (cbews->priv->store, id->uid, id->rid);

@@ -561,13 +561,13 @@ void		e_ews_connection_get_attachments_start
 						 GCancellable *cancellable,
 						 gpointer user_data);
 
-gboolean	e_ews_connection_get_attachments_finish
+GSList *	e_ews_connection_get_attachments_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 GSList **items,
 						 GError **error);
 
-gboolean	e_ews_connection_get_attachments
+GSList *	e_ews_connection_get_attachments
 						(EEwsConnection *cnc,
 						 gint pri,
 						 GSList *ids,

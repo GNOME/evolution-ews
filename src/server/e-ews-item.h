@@ -119,6 +119,7 @@ const gchar *	e_ews_item_get_mime_content	(EEwsItem *item);
 void		e_ews_item_set_mime_content	(EEwsItem *item,
 						 const gchar *new_mime_content);
 const EwsId *	e_ews_item_get_id		(EEwsItem *item);
+const EwsId *	e_ews_item_get_attachment_id		(EEwsItem *item);
 gsize		e_ews_item_get_size		(EEwsItem *item);
 const gchar *	e_ews_item_get_msg_id		(EEwsItem *item);
 const gchar *	e_ews_item_get_in_replyto	(EEwsItem *item);
@@ -155,7 +156,7 @@ gchar *		e_ews_embed_attachment_id_in_uri (const gchar *olduri, const char *atta
 GSList *	e_ews_item_get_attachments_ids
 						(EEwsItem *item);
 gchar *
-e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gchar *cache);
+e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gchar *cache, gchar **attach_id);
 
 gchar *
 e_ews_item_ical_dump(EEwsItem *item);
