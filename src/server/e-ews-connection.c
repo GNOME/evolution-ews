@@ -3402,7 +3402,7 @@ create_attachments_response_cb (ESoapParameter *param,
 				EwsNode *enode)
 {
 	/* http://msdn.microsoft.com/en-us/library/aa565877%28v=EXCHG.80%29.aspx */
-	ESoapParameter *subparam, *attspara, *last_relevant = NULL;
+	ESoapParameter *subparam, *attspara, *last_relevant = NULL, *attparam;
 	EwsAsyncData *async_data;
 
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
@@ -3411,9 +3411,10 @@ create_attachments_response_cb (ESoapParameter *param,
 
 	for (subparam = e_soap_parameter_get_first_child (attspara); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
 		if (!g_ascii_strcasecmp (e_soap_parameter_get_name(subparam), "FileAttachment")) {
-			last_relevant = subparam;
+			attparam = e_soap_parameter_get_first_child (subparam);
+			last_relevant = attparam;
 
-			async_data->items = g_slist_append (async_data->items, e_soap_parameter_get_property (subparam, "Id"));
+			async_data->items = g_slist_append (async_data->items, e_soap_parameter_get_property (attparam, "Id"));
 		}
 	}
 
