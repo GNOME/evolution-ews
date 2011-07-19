@@ -1055,6 +1055,8 @@ convert_vevent_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 	has_alarms = e_cal_component_has_alarms (comp);
 	if (has_alarms)
 		ews_set_alarm (msg, comp);
+	else
+		e_ews_message_write_string_parameter (msg, "ReminderIsSet", NULL, "false");
 
 	/* start time, end time and meeting time zone */
 	dtstart = icalcomponent_get_dtstart (icalcomp);
