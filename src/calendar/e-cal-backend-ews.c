@@ -1636,6 +1636,8 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 	icaltimetype dtstart, dtend, dtstart_old, dtend_old;
 	icalproperty *prop, *transp;
 	const char *org_email_address = NULL, *value = NULL, *old_value = NULL;
+	gboolean has_alarms, has_alarms_old;
+	gint alarm = 0, alarm_old = 0;
 
 	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
 					 modify_data->itemid, modify_data->changekey, 0);
@@ -1650,6 +1652,21 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 	old_value = icalcomponent_get_description (icalcomp_old);
 	if (g_ascii_strcasecmp (value, old_value))
 		convert_vevent_property_to_updatexml (msg, "Body", value, "item", "BodyType", "Text");
+
+	/*update alarm items*/
+	has_alarms = e_cal_component_has_alarms (modify_data->comp);
+	if (has_alarms) {
+		alarm = ews_get_alarm (modify_data->comp);
+		has_alarms_old = e_cal_component_has_alarms (modify_data->oldcomp);
+		if (has_alarms_old)
+			alarm_old = ews_get_alarm (modify_data->oldcomp);
+		if (!(alarm == alarm_old)) {
+			char buf[20];
+			snprintf (buf, 20, "%d", alarm);
+			convert_vevent_property_to_updatexml (msg, "ReminderIsSet", "true", "item", NULL, NULL);
+			convert_vevent_property_to_updatexml (msg, "ReminderMinutesBeforeStart", buf, "item", NULL, NULL);
+		}
+	}
 
 	/*location*/
 	value = icalcomponent_get_location (icalcomp);
