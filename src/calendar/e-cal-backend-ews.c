@@ -1433,6 +1433,8 @@ e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMeth
 		g_propagate_error(&error, EDC_ERROR(RepositoryOffline));
 		goto exit;
 	}
+
+	g_warning ("start create a movible instance\n%s\n",calobj);
 	/* parse ical data */
 	icalcomp = icalparser_parse_string(calobj);
 
@@ -1463,8 +1465,20 @@ e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMeth
 	create_data->cal = g_object_ref(cal);
 	create_data->context = context;
 
-	/* pass new calendar component data to the exchange server and expect response in the callback */
-	e_ews_connection_create_items_start(priv->cnc,
+	if (e_cal_component_has_attachments (comp))
+		e_ews_connection_create_items_start(priv->cnc,
+					     EWS_PRIORITY_MEDIUM,
+					     "SaveOnly",
+					     "SendToNone",
+					     priv->folder_id,
+					     convert_calcomp_to_xml,
+					     icalcomp,
+					     ews_create_object_cb,
+					     cancellable,
+					     create_data);
+	else
+		/* pass new calendar component data to the exchange server and expect response in the callback */
+		e_ews_connection_create_items_start(priv->cnc,
 					     EWS_PRIORITY_MEDIUM,NULL,
 					     "SendToAllAndSaveCopy",
 					     priv->folder_id,
