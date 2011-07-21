@@ -2664,7 +2664,8 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 		if (vtimezone) {
 			zone = icaltimezone_new ();
 			icaltimezone_set_component (zone, icalcomponent_new_clone (vtimezone));
-			e_cal_backend_store_put_timezone (priv->store, zone);
+			if (icaltimezone_get_tzid(zone))
+				e_cal_backend_store_put_timezone (priv->store, zone);
 
 			icaltimezone_free (zone, TRUE);
 		}
