@@ -8,7 +8,9 @@ liblzx_la_SOURCES =				\
 	lzx.h					\
 	ews-oal-decompress.h			\
 	lzxd.c					\
-	ews-oal-decompress.c
+	ews-oal-decompress.c			\
+	readbits.h				\
+	readhuff.h
 
 liblzx_la_LDFLAGS = $(NO_UNDEFINED)
 
