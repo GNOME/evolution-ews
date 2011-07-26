@@ -916,7 +916,7 @@ e_cal_rid_to_index (const char *rid, icalcomponent *comp, GError **error)
 	o_time.zone = dtstart.zone;
 
 	for (; !icaltime_is_null_time (next); next = icalrecur_iterator_next (ritr), index++) {
-		if (icaltime_compare (o_time, next) == 0) break;
+		if (icaltime_compare_date_only (o_time, next) == 0) break;
 	}
 	
 	if (icaltime_is_null_time (next)) {
@@ -1324,7 +1324,7 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	ECalBackendEws *cbews = create_data->cbews;
 	ECalBackendEwsPrivate *priv = cbews->priv;
 	GError *error = NULL;
-	GSList *ids = NULL, *attachments = NULL, *i;
+	GSList *ids = NULL, *attachments = NULL, *i, *exceptions = NULL;
 	const gchar *comp_uid;
 	const EwsId *item_id;
 	icalproperty *icalprop;
@@ -1398,10 +1398,17 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	icalprop = icalcomponent_get_first_property(icalcomp, ICAL_RRULE_PROPERTY);
 	if (icalprop != NULL) {
 		icalprop = icalcomponent_get_first_property(icalcomp, ICAL_EXDATE_PROPERTY);
-		for (; icalprop; icalprop = icalcomponent_get_next_property(icalcomp, ICAL_RRULE_PROPERTY)) {
-			e_cal_backend_ews_remove_object (E_CAL_BACKEND (create_data->cbews), create_data->cal, NULL,
-							 item_id->id, icalproperty_get_value_as_string (icalprop), CALOBJ_MOD_THIS);
+		for (; icalprop; icalprop = icalcomponent_get_next_property(icalcomp, ICAL_EXDATE_PROPERTY)) {
+			exceptions = g_slist_append (exceptions, g_strdup (icalproperty_get_value_as_string (icalprop)));
 		}
+
+		for (i = exceptions; i; i = i->next) {
+			e_cal_backend_ews_remove_object (E_CAL_BACKEND (create_data->cbews), create_data->cal, NULL,
+							 item_id->id, i->data, CALOBJ_MOD_THIS);
+		}
+
+		g_slist_foreach (exceptions, (GFunc)g_free, NULL);
+		g_slist_free (exceptions);
 	}
 
 	/* no need to keep reference to the object */
