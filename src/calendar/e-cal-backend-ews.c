@@ -1066,6 +1066,13 @@ convert_vevent_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 	ewscal_set_time (msg, "End", &dtend);
 	/* We have to do the time zone(s) later, or the server rejects the request */
 
+	/*freebusy*/
+	prop = icalcomponent_get_first_property (icalcomp, ICAL_TRANSP_PROPERTY);
+	if (!g_strcmp0 (icalproperty_get_value_as_string (prop), "TRANSPARENT"))
+		e_ews_message_write_string_parameter (msg, "LegacyFreeBusyStatus",NULL,"Free");
+	else
+		e_ews_message_write_string_parameter (msg, "LegacyFreeBusyStatus",NULL,"Busy");
+
 	/* location */
 	e_ews_message_write_string_parameter(msg, "Location", NULL, icalcomponent_get_location(icalcomp));
 	
