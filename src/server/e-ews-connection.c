@@ -1801,7 +1801,7 @@ e_ews_connection_sync_folder_items_start	(EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "SyncFolderItems", NULL, NULL, EWS_EXCHANGE_2007);
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "SyncFolderItems", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 	e_soap_message_start_element (msg, "ItemShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, default_props);
 
@@ -1935,7 +1935,7 @@ e_ews_connection_sync_folder_hierarchy_start	(EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "SyncFolderHierarchy", NULL, NULL, EWS_EXCHANGE_2007);
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "SyncFolderHierarchy", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 	e_soap_message_start_element (msg, "FolderShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, "AllProperties");
 	e_soap_message_end_element (msg);
@@ -2049,7 +2049,7 @@ e_ews_connection_get_items_start	(EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 	const GSList *l;
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetItem", NULL, NULL, EWS_EXCHANGE_2007);
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetItem", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	if (progress_fn && progress_data)
 		e_soap_message_set_progress_fn (msg, progress_fn, progress_data);
@@ -2231,7 +2231,7 @@ e_ews_connection_delete_items_start	(EEwsConnection *cnc,
 	GSList *l;
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "DeleteItem",
-					     "DeleteType", ews_delete_type_to_str (delete_type), EWS_EXCHANGE_2007);
+					     "DeleteType", ews_delete_type_to_str (delete_type), EWS_EXCHANGE_2007_SP1);
 
 	if (send_cancels)
 		e_soap_message_add_attribute (msg, "SendMeetingCancellations",
@@ -2281,7 +2281,7 @@ e_ews_connection_delete_item_start	(EEwsConnection *cnc,
 	gchar buffer[32];
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "DeleteItem",
-					     "DeleteType", ews_delete_type_to_str (delete_type), EWS_EXCHANGE_2007);
+					     "DeleteType", ews_delete_type_to_str (delete_type), EWS_EXCHANGE_2007_SP1);
 
 	if (send_cancels)
 		e_soap_message_add_attribute (msg, "SendMeetingCancellations",
@@ -2397,7 +2397,7 @@ e_ews_connection_update_items_start	(EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "UpdateItem",
-					     NULL, NULL, EWS_EXCHANGE_2007);
+					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	if (conflict_res)
 		e_soap_message_add_attribute (msg, "ConflictResolution",
@@ -2517,7 +2517,7 @@ e_ews_connection_create_items_start	(EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "CreateItem",
-					     NULL, NULL, EWS_EXCHANGE_2007);
+					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	if (msg_disposition)
 		e_soap_message_add_attribute (msg, "MessageDisposition",
@@ -2780,7 +2780,7 @@ e_ews_connection_expand_dl_start	(EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "ExpandDL", NULL, NULL, EWS_EXCHANGE_2007);
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "ExpandDL", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_start_element (msg, "Mailbox", "messages", NULL);
 
@@ -2887,7 +2887,7 @@ e_ews_connection_update_folder_start	(EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "UpdateFolder",
-					     NULL, NULL, EWS_EXCHANGE_2007);
+					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_start_element (msg, "FolderChanges", "messages", NULL);
 
@@ -2975,7 +2975,7 @@ e_ews_connection_move_folder_start	(EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "MoveFolder",
-					     NULL, NULL, EWS_EXCHANGE_2007);
+					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_start_element (msg, "ToFolderId", "messages", NULL);
 	if (to_folder)
@@ -3071,7 +3071,7 @@ e_ews_connection_create_folder_start	(EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "CreateFolder", NULL, NULL, EWS_EXCHANGE_2007);
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "CreateFolder", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_start_element (msg, "ParentFolderId", "messages", NULL);
 
@@ -3189,10 +3189,10 @@ e_ews_connection_move_items_start	(EEwsConnection *cnc,
 
 	if (docopy)
 		msg = e_ews_message_new_with_header (cnc->priv->uri, "CopyItem",
-					     NULL, NULL, EWS_EXCHANGE_2007);
+					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
 	else
 		msg = e_ews_message_new_with_header (cnc->priv->uri, "MoveItem",
-					     NULL, NULL, EWS_EXCHANGE_2007);
+					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_start_element (msg, "ToFolderId", "messages", NULL);
 	e_soap_message_start_element (msg, "FolderId", NULL, NULL);
@@ -3302,7 +3302,7 @@ e_ews_connection_delete_folder_start	(EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "DeleteFolder", "DeleteType", delete_type, EWS_EXCHANGE_2007);
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "DeleteFolder", "DeleteType", delete_type, EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_start_element (msg, "FolderIds", "messages", NULL);
 
@@ -3488,7 +3488,7 @@ e_ews_connection_create_attachments_start (EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 	const GSList *l;
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "CreateAttachment", NULL, NULL, EWS_EXCHANGE_2007);
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "CreateAttachment", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_start_element (msg, "ParentItemId", "messages", NULL);
 	e_soap_message_add_attribute (msg, "Id", parent->id, NULL, NULL);
@@ -3610,7 +3610,7 @@ e_ews_connection_delete_attachments_start (EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 	const GSList *l;
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "DeleteAttachment", NULL, NULL, EWS_EXCHANGE_2007);
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "DeleteAttachment", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	/* start interation over all items to get the attachemnts */
 	e_soap_message_start_element (msg, "AttachmentIds", "messages", NULL);
@@ -3711,7 +3711,7 @@ e_ews_connection_get_attachments_start	(EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 	const GSList *l;
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetAttachment", NULL, NULL, EWS_EXCHANGE_2007);
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetAttachment", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	/* not sure why I need it, need to check */
 	if (progress_fn && progress_data)
@@ -3916,7 +3916,7 @@ e_ews_connection_get_free_busy_start (EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetUserAvailabilityRequest",
-					     NULL, NULL, EWS_EXCHANGE_2007);
+					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	free_busy_cb (msg, free_busy_user_data);
 
