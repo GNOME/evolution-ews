@@ -940,7 +940,7 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	guint index = 0;
 
 	e_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
-	/*We have to run synce before rihth operations, in some cases change key may change */
+	/*We have to run sync before some write operations, in some cases we may need a new change key for our items */
 	ews_start_sync (cbews);
 
 	priv = cbews->priv;
@@ -2059,8 +2059,6 @@ prepare_accept_item_request (ESoapMessage *msg, gpointer user_data)
 	 * The real status is reflected at Attendee property PARTSTAT
 	 * need to find current user as attendee and make a desision what to do.
 	 * Prepare AcceptItem node in the SOAP message */
-
-	e_ews_get_icalcomponent_as_mime_content (NULL);
 	
 	if (!g_ascii_strcasecmp (response_type, "ACCEPTED"))
 		e_soap_message_start_element (msg, "AcceptItem", NULL, NULL);
