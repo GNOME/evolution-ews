@@ -45,6 +45,7 @@
 #include "camel-ews-store.h"
 #include "camel-ews-summary.h"
 #include "camel-ews-utils.h"
+#include "ews-esource-utils.h"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>
@@ -448,6 +449,11 @@ ews_refresh_finfo (CamelSession *session, CamelSessionThreadMsg *msg)
 
 	sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
 
+	if (!sync_state) {
+		CamelURL *url = CAMEL_SERVICE (m->store)->url;
+		ews_esource_utils_remove_groups (camel_url_get_param (url, "email"));
+	}
+
 	sync_data = g_new0 (struct _store_sync_data, 1);
 	sync_data->ews_store = ews_store;
 	e_ews_connection_sync_folder_hierarchy_start	(ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
@@ -494,6 +500,13 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, EV
 		goto offline;
 	}
 
+	sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
+	if (!sync_state) {
+		CamelURL *url = CAMEL_SERVICE (store)->url;
+		ews_esource_utils_remove_groups (camel_url_get_param (url, "email"));
+		initial_setup = TRUE;
+	}
+
 	folders = camel_ews_store_summary_get_folders (ews_store->summary, NULL);
 	if (!folders)
 		initial_setup = TRUE;
@@ -516,9 +529,6 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, EV
 
 	g_slist_foreach (folders, (GFunc)g_free, NULL);
 	g_slist_free (folders);
-
-	sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
-
 
 	if (!e_ews_connection_sync_folder_hierarchy (ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
 						    &sync_state, &includes_last_folder,
