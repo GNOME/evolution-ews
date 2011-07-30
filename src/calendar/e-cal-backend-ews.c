@@ -595,36 +595,6 @@ ews_cal_component_get_item_id (ECalComponent *comp, gchar **itemid, gchar **chan
 		*changekey = ck;
 }
 
-/* changekey can be NULL if you don't want it. itemid cannot. */
-static void
-ews_cal_component_get_calendar_item_accept_id (ECalComponent *comp, gchar **itemid, gchar **changekey)
-{
-	icalproperty *prop;
-	const gchar *id = NULL;
-	*itemid = NULL;
-
-	prop = icalcomponent_get_first_property (e_cal_component_get_icalcomponent (comp),
-		ICAL_X_PROPERTY);
-	while (prop) {
-		const gchar *x_name, *x_val;
-
-		x_name = icalproperty_get_x_name (prop);
-		x_val = icalproperty_get_x (prop);
-		if (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY")) {
-			*changekey = g_strdup (x_val);
-		} else if (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-ACCEPT-ID")) {
-			*itemid = g_strdup (x_val);
-		}
-
-		prop = icalcomponent_get_next_property (e_cal_component_get_icalcomponent (comp),
-			ICAL_X_PROPERTY);
-	}
-	if (!*itemid){
-		e_cal_component_get_uid(comp, &id);
-		*itemid = g_strdup (id);
-	}
-}
-
 
 static void
 add_comps_to_item_id_hash (ECalBackendEws *cbews)
@@ -2152,7 +2122,16 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 
 		/*getting a data for meeting request response*/
 		response_type = e_ews_get_current_user_meeting_reponse (e_cal_component_get_icalcomponent (comp), priv->user_email);
-		ews_cal_component_get_calendar_item_accept_id (comp, &item_id, &change_key);
+		ews_cal_component_get_item_id (comp, &item_id, &change_key);
+		if (!item_id) {
+			/* FIXME: How does Exchange even cope with this case? Don't we have to
+			   do something completely different if there's no AssociatedCalendarItemId
+			   in the email we received? Or if we received the email through a route
+			   other than an Exchange mailbox? */
+			const gchar *id;
+			e_cal_component_get_uid (comp, &id);
+			item_id = g_strdup (id);
+		}
 
 		switch (method) {
 			case ICAL_METHOD_REQUEST:

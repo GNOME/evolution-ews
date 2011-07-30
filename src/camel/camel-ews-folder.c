@@ -233,7 +233,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId
 			g_object_unref (tmpstream);
 			goto exit_msg;
 		}
-		/* Replace original random UID with AssociatedCalendarItemId (ItemId) */
+		/* Add details of AssociatedCalendarItemId */
 		ba = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (tmpstream));
 		g_byte_array_append (ba, (guint8 *) "\0", 1);
 		icalcomp = icalparser_parse_string ((gchar *) ba->data);
@@ -241,14 +241,10 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId
 		icalprop = icalproperty_new_x (item_id->change_key);
 		icalproperty_set_x_name (icalprop, "X-EVOLUTION-CHANGEKEY");
 		icalcomponent_add_property (subcomp, icalprop);
-		if (is_calendar_UID){
-			icalcomponent_set_uid (icalcomp, (gchar *) item_id->id);
-		}
-		else {
-			icalprop = icalproperty_new_x (item_id->id);
-			icalproperty_set_x_name (icalprop, "X-EVOLUTION-ACCEPT-ID");
-			icalcomponent_add_property (subcomp, icalprop);
-		}
+		icalprop = icalproperty_new_x (item_id->id);
+		icalproperty_set_x_name (icalprop, "X-EVOLUTION-ITEMID");
+		icalcomponent_add_property (subcomp, icalprop);
+
 		calstring_new = icalcomponent_as_ical_string_r (icalcomp);
 		camel_mime_part_set_content (mimepart,
 					     (const gchar*) calstring_new, strlen (calstring_new),
