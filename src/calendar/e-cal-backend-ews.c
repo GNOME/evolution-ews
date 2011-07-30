@@ -566,27 +566,30 @@ ews_cal_component_get_item_id (ECalComponent *comp, gchar **itemid, gchar **chan
 {
 	icalproperty *prop;
 	gchar *ck = NULL;
-	const gchar *id = NULL;
+	gchar *id = NULL;
 
-	if (changekey) {
-		prop = icalcomponent_get_first_property (e_cal_component_get_icalcomponent (comp),
+
+	prop = icalcomponent_get_first_property (e_cal_component_get_icalcomponent (comp),
 						 ICAL_X_PROPERTY);
-		while (prop) {
-			const gchar *x_name, *x_val;
+	while (prop) {
+		const gchar *x_name, *x_val;
 
-			x_name = icalproperty_get_x_name (prop);
-			x_val = icalproperty_get_x (prop);
-			if (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY")) {
-				ck = g_strdup (x_val);
-				break;
-			}
-
-			prop = icalcomponent_get_next_property (e_cal_component_get_icalcomponent (comp),
-							ICAL_X_PROPERTY);
+		x_name = icalproperty_get_x_name (prop);
+		x_val = icalproperty_get_x (prop);
+		if (!id && !g_ascii_strcasecmp (x_name, "X-EVOLUTION-ITEMID")) {
+			id = g_strdup (x_val);
+			break;
+		} else if (changekey && !ck && !g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY")) {
+			ck = g_strdup (x_val);
+			break;
 		}
+		if (id && (ck || !changekey))
+			break;
+
+		prop = icalcomponent_get_next_property (e_cal_component_get_icalcomponent (comp),
+							ICAL_X_PROPERTY);
 	}
 
-	e_cal_component_get_uid(comp, &id);
 	*itemid = g_strdup (id);
 	if (changekey)
 		*changekey = ck;
@@ -1343,9 +1346,6 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	item_id = e_ews_item_get_id((EEwsItem *)ids->data);
 	g_slist_free (ids);
 
-	/* set item id */
-	e_cal_component_set_uid(create_data->comp, item_id->id);
-
 	/* attachments */
 	n_attach = e_cal_component_get_num_attachments (create_data->comp);
 	if (n_attach > 0) {
@@ -1370,6 +1370,12 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	e_cal_backend_store_freeze_changes(priv->store);
 
 	/* set a new ical property containing the change key we got from the exchange server for future use */
+
+	icalprop = icalproperty_new_x (item_id->id);
+	icalproperty_set_x_name (icalprop, "X-EVOLUTION-ITEMID");
+	icalcomp = e_cal_component_get_icalcomponent(create_data->comp);
+	icalcomponent_add_property (icalcomp, icalprop);
+
 	icalprop = icalproperty_new_x (item_id->change_key);
 	icalproperty_set_x_name (icalprop, "X-EVOLUTION-CHANGEKEY");
 	icalcomp = e_cal_component_get_icalcomponent(create_data->comp);
@@ -1381,8 +1387,8 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 
 	/* notify the backend and the application that a new object was created */
 	e_cal_backend_notify_object_created (E_CAL_BACKEND(create_data->cbews), create_data->context);
-	e_cal_component_get_uid(create_data->comp, &comp_uid);
 	
+	e_cal_component_get_uid(create_data->comp, &comp_uid);
 	if (n_attach == 0)
 		e_data_cal_notify_object_created (create_data->cal, create_data->context, error, comp_uid, e_cal_component_get_as_string(create_data->comp));
 
@@ -2726,6 +2732,7 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 		gchar *comp_str;
 		const GSList *l = NULL;
 		const char *org_email_address = e_ews_collect_orginizer(icalcomp);
+		const char *uid = e_ews_item_get_uid (item);
 
 		item_id = e_ews_item_get_id (item);
 
@@ -2796,9 +2803,16 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 			if (icalprop)
 				icalcomponent_remove_property (icalcomp, icalprop);
 		}
-		/* The server sets a UID here, but it bears no relation to the ItemID.
-		   Override it to the ItemId instead. */
+
+		/* The server sets a random UID here, but at least 2007SP1 will tell
+		   us the real UID. Override it to be sane. Or fall back to the ItemId */
+		if (!uid)
+			g_warning ("item %s has no UID; using itemid instead", item_id->id);
 		icalcomponent_set_uid (icalcomp, uid?:item_id->id);
+
+		icalprop = icalproperty_new_x (item_id->id);
+		icalproperty_set_x_name (icalprop, "X-EVOLUTION-ITEMID");
+		icalcomponent_add_property (icalcomp, icalprop);
 
 		icalprop = icalproperty_new_x (item_id->change_key);
 		icalproperty_set_x_name (icalprop, "X-EVOLUTION-CHANGEKEY");
@@ -2883,7 +2897,7 @@ ews_cal_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 
 			e_ews_connection_get_items_start(g_object_ref(cnc), EWS_PRIORITY_MEDIUM,
 					modified_occurrences,
-					"IdOnly", "item:Attachments item:HasAttachments item:MimeContent calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
+					"IdOnly", "item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:UID calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
 					FALSE, NULL, ews_cal_get_items_ready_cb, NULL, NULL, NULL,
 					(gpointer) sub_sync_data);
 
@@ -3039,7 +3053,7 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 						  EWS_PRIORITY_MEDIUM,
 						  cal_item_ids,
 						  "IdOnly",
-						  "item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
+						  "item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:UID calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
 						  FALSE, NULL,
 						  ews_cal_get_items_ready_cb,
 						  NULL, NULL, NULL,
