@@ -172,6 +172,7 @@ struct _EEwsItemPrivate {
 	gboolean is_read;
 	EwsImportance importance;
 
+	gchar *uid;
 	gchar *timezone;
 
 	GSList *to_recipients;
@@ -235,6 +236,9 @@ e_ews_item_dispose (GObject *object)
 
 	g_free (priv->msg_id);
 	priv->msg_id = NULL;
+
+	g_free (priv->uid);
+	priv->uid = NULL;
 
 	g_free (priv->in_replyto);
 	priv->in_replyto = NULL;
@@ -986,6 +990,8 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 			priv->from = e_ews_item_mailbox_from_soap_param (subparam1);
 		} else if (!g_ascii_strcasecmp (name, "InternetMessageId")) {
 			priv->msg_id = e_soap_parameter_get_string_value (subparam);
+		} else if (!g_ascii_strcasecmp (name, "UID")) {
+			priv->uid = e_soap_parameter_get_string_value (subparam);
 		} else if (!g_ascii_strcasecmp (name, "IsRead")) {
 			value = e_soap_parameter_get_string_value (subparam);
 			priv->is_read = (!g_ascii_strcasecmp (value, "true"));
@@ -1113,6 +1119,14 @@ e_ews_item_get_msg_id	(EEwsItem *item)
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
 	return (const gchar *) item->priv->msg_id;
+}
+
+const gchar *
+e_ews_item_get_uid	(EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	return (const gchar *) item->priv->uid;
 }
 
 const gchar *
