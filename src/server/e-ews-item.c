@@ -1343,7 +1343,7 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 {
 	ESoapParameter *subparam;
 	const gchar *param_name;
-	gchar *name = NULL, *value, filename[350], dirname[350];
+	gchar *name = NULL, *value, *filename, *dirname;
 	guchar *content = NULL;
 	gsize data_len = 0;
 	gchar *tmpdir, *tmpfilename;
@@ -1381,16 +1381,18 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 	tmpfilename = (gchar *) content;
 	tmpdir = g_strndup(tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
 
-	snprintf (dirname, 350, "%s/%s", tmpdir, *attach_id);
-	if (g_mkdir (dirname, 0775) == -1) {
+	dirname = g_build_filename (tmpdir, *attach_id, NULL);
+	if (g_mkdir_with_parents (dirname, 0775) == -1) {
 		g_warning("Failed create directory to place file in [%s]: %s\n", dirname, strerror (errno));
 	}
 
-	snprintf(filename, 350, "%s/%s", dirname, name);
+	filename = g_build_filename (dirname, name, NULL);
 	if (g_rename (tmpfilename, filename) != 0) {
 		g_warning("Failed to move attachment cache file [%s -> %s]: %s\n", tmpfilename, filename, strerror (errno));
 	}
 
+	g_free (dirname);
+	g_free (filename);
 	g_free(tmpdir);
 	g_free(name);
 	g_free(content);
@@ -1401,7 +1403,7 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 
 gchar *
 e_ews_item_dump_mime_content(EEwsItem *item, const gchar *cache) {
-	gchar filename[512], *surename, dirname[350];
+	gchar *filename, *surename, *dirname;
 	gchar *tmpdir, *tmpfilename;
 
 	g_return_val_if_fail (item->priv->mime_content != NULL, NULL);
@@ -1409,17 +1411,19 @@ e_ews_item_dump_mime_content(EEwsItem *item, const gchar *cache) {
 	tmpfilename = (gchar *) item->priv->mime_content;
 	tmpdir = g_strndup(tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
 
-	snprintf(dirname, 350, "%s/XXXXXX", tmpdir);
+	dirname = g_build_filename (tmpdir, "XXXXXX", NULL);
 	if (!mkdtemp(dirname))
 		g_warning ("Failed to create directory for attachment cache");
 
 	surename = g_uri_escape_string(item->priv->subject, "", TRUE);
-	snprintf(filename, 350, "%s/%s", dirname, surename);
+	filename = g_build_filename (dirname, surename, NULL);
 
 	if (g_rename ((const gchar *)item->priv->mime_content, filename) != 0) {
 		g_warning("Failed to move attachment cache file");
 	}
 
+	g_free (filename);
+	g_free (dirname);
 	g_free(tmpdir);
 	g_free(tmpfilename);
 	g_free(surename);
