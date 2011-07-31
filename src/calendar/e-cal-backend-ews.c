@@ -576,15 +576,10 @@ ews_cal_component_get_item_id (ECalComponent *comp, gchar **itemid, gchar **chan
 
 		x_name = icalproperty_get_x_name (prop);
 		x_val = icalproperty_get_x (prop);
-		if (!id && !g_ascii_strcasecmp (x_name, "X-EVOLUTION-ITEMID")) {
+		if (!id && !g_ascii_strcasecmp (x_name, "X-EVOLUTION-ITEMID"))
 			id = g_strdup (x_val);
-			break;
-		} else if (changekey && !ck && !g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY")) {
+		 else if (changekey && !ck && !g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY"))
 			ck = g_strdup (x_val);
-			break;
-		}
-		if (id && (ck || !changekey))
-			break;
 
 		prop = icalcomponent_get_next_property (e_cal_component_get_icalcomponent (comp),
 							ICAL_X_PROPERTY);
