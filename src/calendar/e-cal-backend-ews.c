@@ -595,29 +595,28 @@ static void
 ews_cal_component_get_calendar_item_accept_id (ECalComponent *comp, gchar **itemid, gchar **changekey)
 {
 	icalproperty *prop;
-	const gchar *id = NULL;
-	*itemid = NULL;
+	gchar *id = NULL;
+	gchar *ck = NULL;
 
 	prop = icalcomponent_get_first_property (e_cal_component_get_icalcomponent (comp),
-		ICAL_X_PROPERTY);
+						 ICAL_X_PROPERTY);
 	while (prop) {
 		const gchar *x_name, *x_val;
 
 		x_name = icalproperty_get_x_name (prop);
 		x_val = icalproperty_get_x (prop);
-		if (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY")) {
-			*changekey = g_strdup (x_val);
-		} else if (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-ACCEPT-ID")) {
-			*itemid = g_strdup (x_val);
-		}
+		if (!id && (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-ITEMID") || !g_ascii_strcasecmp (x_name, "X-EVOLUTION-ACCEPT-ID")))
+			id = g_strdup (x_val);
+		else if (changekey && !ck && !g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY"))
+			ck = g_strdup (x_val);
 
 		prop = icalcomponent_get_next_property (e_cal_component_get_icalcomponent (comp),
 			ICAL_X_PROPERTY);
 	}
-	if (!*itemid){
-		e_cal_component_get_uid(comp, &id);
-		*itemid = g_strdup (id);
-	}
+
+	*itemid = g_strdup (id);
+	if (changekey)
+		*changekey = ck;
 }
 
 
