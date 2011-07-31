@@ -2732,7 +2732,7 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item)
 		gchar *comp_str;
 		const GSList *l = NULL;
 		const char *org_email_address = e_ews_collect_orginizer(icalcomp);
-		//const char *uid = e_ews_item_get_uid (item);
+		const char *uid = e_ews_item_get_uid (item);
 
 		item_id = e_ews_item_get_id (item);
 
@@ -2804,10 +2804,7 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item)
 				icalcomponent_remove_property (icalcomp, icalprop);
 		}
 
-		if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_TASK)
-			icalcomponent_set_uid (icalcomp, item_id->id);
-		else
-			icalcomponent_set_uid (icalcomp, e_ews_item_get_uid (item));
+		icalcomponent_set_uid (icalcomp,uid?uid:item_id->id);
 
 		icalprop = icalproperty_new_x (item_id->id);
 		icalproperty_set_x_name (icalprop, "X-EVOLUTION-ITEMID");
