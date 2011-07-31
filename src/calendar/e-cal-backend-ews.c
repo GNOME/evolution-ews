@@ -2524,7 +2524,7 @@ ews_get_attachments (ECalBackendEws *cbews, EEwsItem *item)
 }
 
 static void
-add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
+add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item)
 {
 	ECalBackendEwsPrivate *priv;
 	icalcomponent_kind kind;
@@ -2711,7 +2711,7 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 		gchar *comp_str;
 		const GSList *l = NULL;
 		const char *org_email_address = e_ews_collect_orginizer(icalcomp);
-		const char *uid = e_ews_item_get_uid (item);
+		//const char *uid = e_ews_item_get_uid (item);
 
 		item_id = e_ews_item_get_id (item);
 
@@ -2776,18 +2776,17 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item, gchar *uid)
 			}
 		}
 
-		if (uid) {
+		if (icalcomponent_get_first_property (icalcomp, ICAL_RECURRENCEID_PROPERTY)) {
 			/* Exchange sets RRULE even on the children, which is broken */
 			icalprop = icalcomponent_get_first_property (icalcomp, ICAL_RRULE_PROPERTY);
 			if (icalprop)
 				icalcomponent_remove_property (icalcomp, icalprop);
 		}
 
-		/* The server sets a random UID here, but at least 2007SP1 will tell
-		   us the real UID. Override it to be sane. Or fall back to the ItemId */
-		if (!uid)
-			g_warning ("item %s has no UID; using itemid instead", item_id->id);
-		icalcomponent_set_uid (icalcomp, uid?:item_id->id);
+		if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_TASK)
+			icalcomponent_set_uid (icalcomp, item_id->id);
+		else
+			icalcomponent_set_uid (icalcomp, e_ews_item_get_uid (item));
 
 		icalprop = icalproperty_new_x (item_id->id);
 		icalproperty_set_x_name (icalprop, "X-EVOLUTION-ITEMID");
@@ -2889,7 +2888,7 @@ ews_cal_get_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 		EEwsItem *item = (EEwsItem *) l->data;
 
 		if (item) {
-			add_item_to_cache (cbews, item, sync_data->master_uid);
+			add_item_to_cache (cbews, item);
 			ews_get_attachments (cbews, item);
 			g_object_unref (item);
 		}
