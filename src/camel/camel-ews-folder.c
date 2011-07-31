@@ -233,18 +233,21 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId
 			g_object_unref (tmpstream);
 			goto exit_msg;
 		}
-		/* Replace original random UID with AssociatedCalendarItemId (ItemId) */
 		ba = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (tmpstream));
 		g_byte_array_append (ba, (guint8 *) "\0", 1);
 		icalcomp = icalparser_parse_string ((gchar *) ba->data);
 		subcomp = icalcomponent_get_first_component (icalcomp, ICAL_VEVENT_COMPONENT);
 		icalprop = icalproperty_new_x (item_id->change_key);
 		icalproperty_set_x_name (icalprop, "X-EVOLUTION-CHANGEKEY");
+
+		/* In order to accept items we have to store AssociatedCalendarItemId (X-EVOLUTION-ITEMID)
+		 * or mail id (X-EVOLUTION-ACCEPT-ID ) when we do not have AssociatedCalendarItemId */
 		icalcomponent_add_property (subcomp, icalprop);
 		if (is_calendar_UID){
-			icalcomponent_set_uid (icalcomp, (gchar *) item_id->id);
-		}
-		else {
+			icalprop = icalproperty_new_x (item_id->id);
+			icalproperty_set_x_name (icalprop, "X-EVOLUTION-ITEMID");
+			icalcomponent_add_property (subcomp, icalprop);
+		} else {
 			icalprop = icalproperty_new_x (item_id->id);
 			icalproperty_set_x_name (icalprop, "X-EVOLUTION-ACCEPT-ID");
 			icalcomponent_add_property (subcomp, icalprop);
