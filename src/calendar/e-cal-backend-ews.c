@@ -983,7 +983,7 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	remove_data->item_id.change_key = item_id.change_key;
 
 	e_ews_connection_delete_item_start (priv->cnc, EWS_PRIORITY_MEDIUM, &remove_data->item_id, index,
-					     EWS_HARD_DELETE, EWS_SEND_TO_ALL_AND_SAVE_COPY, EWS_ALL_OCCURRENCES,
+					     EWS_HARD_DELETE, EWS_SEND_TO_NONE, EWS_ALL_OCCURRENCES,
 					     ews_cal_remove_object_cb, NULL,
 					     remove_data);
 	return;
@@ -2320,8 +2320,6 @@ e_cal_backend_ews_send_objects (ECalBackend *backend, EDataCal *cal, EServerMeth
 	GError *error = NULL;
 	gchar *subcalobj;
 
-	/*we cannot support the send meeting cancleation until we will find solution for calendar:UID*/
-	goto exit;
 
 	cbews = E_CAL_BACKEND_EWS(backend);
 	priv = cbews->priv;
