@@ -2156,18 +2156,17 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 				accept_data->response_type = response_type;
 				accept_data->item_id = item_id;
 				accept_data->change_key = change_key;
-				e_ews_connection_create_items (priv->cnc, EWS_PRIORITY_MEDIUM,
-							       "SendAndSaveCopy", NULL, NULL,
-							       prepare_accept_item_request,
-							       accept_data,
-							       &ids,
-							       cancellable,
-							       &error);
 
-				if (error && error->code == EWS_CONNECTION_ERROR_INVALIDIDMALFORMED) {
-					g_clear_error (&error);
+				/*in case we do not have item id we will create item with mime content only*/
+				if (item_id == NULL)
 					e_ews_receive_objects_no_exchange_mail (priv, subcomp, ids, cancellable, error);
-				}
+				else
+					e_ews_connection_create_items (priv->cnc, EWS_PRIORITY_MEDIUM,
+								       "SendAndSaveCopy",
+								       NULL, NULL,
+								       prepare_accept_item_request,
+								       accept_data,
+								       &ids, cancellable, &error);
 				if (error)
 					/* The calendar UI doesn't *display* errors unless they have
 					 * the OtherError code */
