@@ -1448,7 +1448,6 @@ e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMeth
 		goto exit;
 	}
 
-	g_warning ("start create a movible instance\n%s\n",calobj);
 	/* parse ical data */
 	icalcomp = icalparser_parse_string(calobj);
 
