@@ -633,10 +633,20 @@ add_comps_to_item_id_hash (ECalBackendEws *cbews)
 	comps = e_cal_backend_store_get_components (priv->store);
 	for (l = comps; l != NULL; l = g_slist_next (l)) {
 		ECalComponent *comp = (ECalComponent *)	l->data;
-		gchar *item_id;
+		gchar *item_id = NULL;
 
 		ews_cal_component_get_item_id (comp, &item_id, NULL);
+		if (!item_id) {
+			const gchar *uid;
 
+			/* This should never happen, but sometimes when our
+			   use of X- fields has changed it has triggered. Make
+			   it cope, and not crash */
+			e_cal_component_get_uid(comp, &uid);
+			g_warning ("EWS calendar item %s had no EWS ItemID!",
+				   uid);
+			continue;
+		}
 		g_hash_table_insert (priv->item_id_hash, item_id, comp);
 	}
 
