@@ -1339,7 +1339,7 @@ e_ews_embed_attachment_id_in_uri (const gchar *olduri, const char *attach_id)
 }
 
 gchar *
-e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gchar *cache, gchar **attach_id)
+e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gchar *cache, const gchar *comp_uid, gchar **attach_id)
 {
 	ESoapParameter *subparam;
 	const gchar *param_name;
@@ -1364,9 +1364,7 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 			content = g_base64_decode (value, &data_len);
 			g_free (value);
 		} else if (g_ascii_strcasecmp(param_name, "AttachmentId") == 0) {
-			value = e_soap_parameter_get_property (subparam, "Id");
-			*attach_id = g_uri_escape_string(value, "", TRUE);
-			g_free (value);
+			*attach_id = e_soap_parameter_get_property (subparam, "Id");
 		}
 	}
 
@@ -1381,7 +1379,7 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 	tmpfilename = (gchar *) content;
 	tmpdir = g_strndup(tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
 
-	dirname = g_build_filename (tmpdir, *attach_id, NULL);
+	dirname = g_build_filename (tmpdir, comp_uid, NULL);
 	if (g_mkdir_with_parents (dirname, 0775) == -1) {
 		g_warning("Failed create directory to place file in [%s]: %s\n", dirname, strerror (errno));
 	}
@@ -1392,13 +1390,14 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 	}
 
 	g_free (dirname);
-	g_free (filename);
 	g_free(tmpdir);
 	g_free(name);
 	g_free(content);
 
 	/* Return URI to saved file */
-	return g_filename_to_uri(filename, NULL, NULL);
+	name = g_filename_to_uri(filename, NULL, NULL);
+	g_free (filename);
+	return name;
 }
 
 gchar *

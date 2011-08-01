@@ -1530,7 +1530,7 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	icalproperty *icalprop;
 	icalcomponent *icalcomp;
 	ECalComponentId *id;
-	GSList *original_attachments = NULL, *modified_attachments = NULL, *added_attachments, *removed_attachments, *removed_attachments_ids = NULL, *i;
+	GSList *original_attachments = NULL, *modified_attachments = NULL, *added_attachments = NULL, *removed_attachments = NULL, *removed_attachments_ids = NULL, *i;
 	const gchar *x_name;
 	EwsAttachmentsData *attach_data;
 
@@ -1587,9 +1587,11 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	e_cal_component_get_attachment_list (modify_data->oldcomp, &original_attachments);
 	e_cal_component_get_attachment_list (modify_data->comp, &modified_attachments);
 
-	ewscal_get_attach_differences (original_attachments, modified_attachments, &removed_attachments, &added_attachments);
+	/*ewscal_get_attach_differences (original_attachments, modified_attachments, &removed_attachments, &added_attachments);
 	g_slist_free (original_attachments);
-	g_slist_free (modified_attachments);
+	g_slist_free (modified_attachments);*/
+	removed_attachments = original_attachments;
+	added_attachments = modified_attachments;
 
 	if (added_attachments) {
 		attach_data = g_new0(EwsAttachmentsData, 1);
@@ -1607,14 +1609,7 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 		/* convert attachment uri to attachment id, should have used a hash table somehow */
 		icalprop = icalcomponent_get_first_property (icalcomp, ICAL_ATTACH_PROPERTY);
 		while (icalprop) {
-			x_name = icalproperty_get_value_as_string (icalprop);
-
-			for (i = removed_attachments; i; i = i->next)
-				if (g_strcmp0 (i->data, x_name)) {
-					removed_attachments_ids = g_slist_append (removed_attachments_ids, icalproperty_get_parameter_as_string_r (icalprop, "X-EWS-ATTACHMENTID"));
-					break;
-				}
-
+			removed_attachments_ids = g_slist_append (removed_attachments_ids, icalproperty_get_parameter_as_string_r (icalprop, "X-EWS-ATTACHMENTID"));
 			icalprop = icalcomponent_get_next_property (icalcomp, ICAL_ATTACH_PROPERTY);
 		}
 
@@ -2514,6 +2509,7 @@ ews_get_attachments (ECalBackendEws *cbews, EEwsItem *item)
 		const GSList *attachment_ids;
 		const EwsId *item_id;
 		EwsAttachmentData *att_data;
+		const gchar *uid;
 
 		attachment_ids = e_ews_item_get_attachments_ids (item);
 		item_id = e_ews_item_get_id (item);
@@ -2521,9 +2517,11 @@ ews_get_attachments (ECalBackendEws *cbews, EEwsItem *item)
 		att_data->comp = g_hash_table_lookup (cbews->priv->item_id_hash, item_id->id);
 		att_data->cbews = cbews;
 		att_data->itemid = g_strdup (item_id->id);
+		e_cal_component_get_uid (att_data->comp, &uid);
 
 		e_ews_connection_get_attachments_start (cbews->priv->cnc,
 							EWS_PRIORITY_MEDIUM,
+							uid,
 							attachment_ids,
 							e_cal_backend_get_cache_dir(E_CAL_BACKEND(cbews)),
 							TRUE,

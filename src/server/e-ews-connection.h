@@ -552,6 +552,7 @@ GSList *	e_ews_connection_delete_attachments
 void		e_ews_connection_get_attachments_start
 						(EEwsConnection *cnc,
 						 gint pri,
+						 const gchar *comp_uid,
 						 const GSList *ids,
 						 const gchar *cache,
 						 gboolean include_mime,
@@ -570,6 +571,7 @@ GSList *	e_ews_connection_get_attachments_finish
 GSList *	e_ews_connection_get_attachments
 						(EEwsConnection *cnc,
 						 gint pri,
+						 const gchar *comp_uid,
 						 GSList *ids,
 						 const gchar *cache,
 						 gboolean include_mime,

@@ -3697,6 +3697,7 @@ static void get_attachments_response_cb (ESoapParameter *subparam, EwsNode *enod
 void
 e_ews_connection_get_attachments_start	(EEwsConnection *cnc,
 					 gint pri,
+					 const gchar *uid,
 					 const GSList *ids,
 					 const gchar *cache,
 					 gboolean include_mime,
@@ -3742,6 +3743,7 @@ e_ews_connection_get_attachments_start	(EEwsConnection *cnc,
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	async_data->directory = cache;
+	async_data->sync_state = (gchar *)uid;
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -3777,6 +3779,7 @@ e_ews_connection_get_attachments_finish(EEwsConnection *cnc,
 GSList *
 e_ews_connection_get_attachments(EEwsConnection *cnc,
 				 gint pri,
+				 const gchar *uid,
 				 GSList *ids,
 				 const gchar *cache,
 				 gboolean include_mime,
@@ -3792,7 +3795,7 @@ e_ews_connection_get_attachments(EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_get_attachments_start	(cnc,pri,ids,cache,include_mime,
+	e_ews_connection_get_attachments_start	(cnc,pri,uid,ids,cache,include_mime,
 						 ews_sync_reply_cb,
 						 progress_fn, progress_data,
 						 cancellable,
@@ -3835,7 +3838,8 @@ get_attachments_response_cb (ESoapParameter *param, EwsNode *enode)
 
 		}
 		else if (!g_ascii_strcasecmp (name, "FileAttachment")) {
-			uri = e_ews_dump_file_attachment_from_soap_parameter(subparam, async_data->directory, &attach_id);
+			uri = e_ews_dump_file_attachment_from_soap_parameter(subparam, async_data->directory, async_data->sync_state, &attach_id);
+			g_warning ("DDD uid:%s -> attach_id:%s + uri:%s\n", async_data->sync_state, attach_id, uri);
 		}
 		if (uri && attach_id) {
 			async_data->items = g_slist_append (async_data->items, uri);

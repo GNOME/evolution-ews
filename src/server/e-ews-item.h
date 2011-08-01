@@ -157,7 +157,7 @@ gchar *		e_ews_embed_attachment_id_in_uri (const gchar *olduri, const char *atta
 GSList *	e_ews_item_get_attachments_ids
 						(EEwsItem *item);
 gchar *
-e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gchar *cache, gchar **attach_id);
+e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gchar *cache, const gchar *comp_uid, gchar **attach_id);
 
 gchar *
 e_ews_item_ical_dump(EEwsItem *item);
