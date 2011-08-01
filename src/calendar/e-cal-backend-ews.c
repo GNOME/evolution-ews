@@ -1305,8 +1305,6 @@ ews_delete_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data
 	e_cal_backend_store_thaw_changes (priv->store);
 
 	g_slist_free (ids);
-
-	g_slist_free (ids);
 	g_free (change_key);
 	g_object_unref (delete_data->cbews);
 	g_object_unref (delete_data->comp);
@@ -1607,6 +1605,7 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	}
 	if (removed_attachments) {
 		/* convert attachment uri to attachment id, should have used a hash table somehow */
+		icalcomp = e_cal_component_get_icalcomponent (modify_data->oldcomp);
 		icalprop = icalcomponent_get_first_property (icalcomp, ICAL_ATTACH_PROPERTY);
 		while (icalprop) {
 			removed_attachments_ids = g_slist_append (removed_attachments_ids, icalproperty_get_parameter_as_string_r (icalprop, "X-EWS-ATTACHMENTID"));
