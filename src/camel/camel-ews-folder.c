@@ -898,9 +898,14 @@ sync_created_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *cre
 
 	for (l = created_items; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;
-		const EwsId *id = e_ews_item_get_id (item);
-		EEwsItemType item_type = e_ews_item_get_item_type (item);
+		const EwsId *id;
+		EEwsItemType item_type;
 
+		if (!item)
+			continue;
+
+		id = e_ews_item_get_id (item);
+		item_type = e_ews_item_get_item_type (item);
 		/* created_msg_ids are items other than generic item. We fetch them
 		   separately since the property sets vary */
 		/* FIXME: Do we need to handle any other item types
