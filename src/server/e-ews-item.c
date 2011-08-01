@@ -865,6 +865,8 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 		priv->attachment_id->change_key = e_soap_parameter_get_property (node, "ChangeKey");
 	} else if ((node = e_soap_parameter_get_first_child_by_name (param, "Message")))
 		priv->item_type = E_EWS_ITEM_TYPE_MESSAGE;
+	else if ((node = e_soap_parameter_get_first_child_by_name (param, "PostItem")))
+		priv->item_type = E_EWS_ITEM_TYPE_POST_ITEM;
 	else if ((node = e_soap_parameter_get_first_child_by_name (param, "CalendarItem")))
 		priv->item_type = E_EWS_ITEM_TYPE_CALENDAR_ITEM;
 	else if ((node = e_soap_parameter_get_first_child_by_name (param, "Contact"))) {
