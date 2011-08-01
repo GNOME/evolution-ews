@@ -1339,29 +1339,33 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 
 	item = (EEwsItem *)ids->data;
 	item_id = e_ews_item_get_id (item);
-
-	items = g_slist_append (items, item_id->id);
 	g_slist_free (ids);
-	/* get calender uid from server*/
-	result = e_ews_connection_get_items (cnc, EWS_PRIORITY_MEDIUM,
-					  items,
-					  "IdOnly",
-					  "calendar:UID",
-					  FALSE, NULL,
-					  &items_req,
-					  NULL, NULL, NULL, &error);
+
+	if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_CALENDAR_ITEM) {
+
+		items = g_slist_append (items, item_id->id);
+
+		/* get calender uid from server*/
+		result = e_ews_connection_get_items (cnc, EWS_PRIORITY_MEDIUM,
+			items,
+			"IdOnly",
+			"calendar:UID",
+			FALSE, NULL,
+			&items_req,
+			NULL, NULL, NULL, &error);
 		if (!res && error != NULL) {
 			if (items_req)
 				g_slist_free (items_req);
-			e_data_cal_notify_object_created(create_data->cal, create_data->context, error, NULL, NULL);
+			e_data_cal_notify_object_created (create_data->cal, create_data->context, error, NULL, NULL);
 			return;
 		}
 
-	item = (EEwsItem *)items_req->data;
-	item_id = e_ews_item_get_id (item);
+		item = (EEwsItem *) items_req->data;
+		item_id = e_ews_item_get_id (item);
 
-	g_slist_free (items);
-	g_slist_free (items_req);
+		g_slist_free (items);
+		g_slist_free (items_req);
+	}
 
 	/* attachments */
 	n_attach = e_cal_component_get_num_attachments (create_data->comp);
@@ -1387,8 +1391,10 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	e_cal_backend_store_freeze_changes(priv->store);
 
 	/* set a new ical property containing the change key we got from the exchange server for future use */
-
-	e_cal_component_set_uid (create_data->comp, e_ews_item_get_uid (item));
+	if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_CALENDAR_ITEM)
+		e_cal_component_set_uid (create_data->comp, e_ews_item_get_uid (item));
+	else
+		e_cal_component_set_uid (create_data->comp, item_id->id);
 
 	icalprop = icalproperty_new_x (item_id->id);
 	icalproperty_set_x_name (icalprop, "X-EVOLUTION-ITEMID");
