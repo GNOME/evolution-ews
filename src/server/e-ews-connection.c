@@ -437,7 +437,8 @@ ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 					continue;
 				}
 
-				if (strcmp((char *)subparam->name, "FreeBusyResponse") && !ews_get_response_status (subparam, &error)) {
+				if ((strcmp((char *)subparam->name, "FreeBusyResponse") == 0 && !ews_get_response_status (e_soap_parameter_get_first_child (subparam), &error)) ||
+				 !ews_get_response_status (subparam, &error)) {
 					g_simple_async_result_set_from_error (enode->simple, error);
 					break;
 				}
