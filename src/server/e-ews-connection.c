@@ -3840,7 +3840,6 @@ get_attachments_response_cb (ESoapParameter *param, EwsNode *enode)
 		}
 		else if (!g_ascii_strcasecmp (name, "FileAttachment")) {
 			uri = e_ews_dump_file_attachment_from_soap_parameter(subparam, async_data->directory, async_data->sync_state, &attach_id);
-			g_warning ("DDD uid:%s -> attach_id:%s + uri:%s\n", async_data->sync_state, attach_id, uri);
 		}
 		if (uri && attach_id) {
 			async_data->items = g_slist_append (async_data->items, uri);
