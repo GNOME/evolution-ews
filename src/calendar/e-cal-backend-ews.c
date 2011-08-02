@@ -1165,7 +1165,6 @@ convert_vtodo_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 		default:
 			break;
 		}
-		ewscal_set_time (msg, "StartDate", &dt);
 	}
 
 	e_soap_message_end_element(msg); // "Task"
