@@ -1241,7 +1241,6 @@ ews_create_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data
 		icalprop = icalcomponent_get_next_property (icalcomp, ICAL_X_PROPERTY);
 	}
 
-	/* TODO: are we setting the correct attachment ids ? */
 	icalprop = icalcomponent_get_first_property (icalcomp, ICAL_ATTACH_PROPERTY);
 	i = ids;
 	for (; i && icalprop; i = i->next, icalprop = icalcomponent_get_next_property (icalcomp, ICAL_ATTACH_PROPERTY)) {
