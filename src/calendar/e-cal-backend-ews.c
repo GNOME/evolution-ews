@@ -1285,7 +1285,7 @@ ews_delete_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data
 
 	/* make sure there was no error */
 	if (error != NULL) {
-		g_warning ("Error while creating attachments: %s\n", error->message);
+		g_warning ("Error while delete attachments: %s\n", error->message);
 		g_clear_error (&error);
 		return;
 	}
