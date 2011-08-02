@@ -1203,6 +1203,10 @@ typedef struct {
 } EwsAttachmentsData;
 
 static void
+e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context,
+				 const gchar *calobj, CalObjModType mod);
+
+static void
 ews_create_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
@@ -1256,6 +1260,18 @@ ews_create_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data
 
 	e_cal_component_get_uid(create_data->comp, &comp_uid);
 	if (create_data->cb_type == 1) {
+		/*In case we have attendees we have to fake update items,
+		* this is the only way to pass attachments in meeting invite mail*/
+		if (e_cal_component_has_attendees (create_data->comp)) {
+			icalcomponent *icalcomp = e_cal_component_get_icalcomponent (create_data->comp);
+			/*fake summary update*/
+			const char* summary = icalcomponent_get_summary (icalcomp);
+			char buffer[256];
+			snprintf (buffer, 16, "%s ", summary);
+			icalcomponent_set_summary (icalcomp, buffer);
+
+			e_cal_backend_ews_modify_object ((ECalBackend *) create_data->cbews, create_data->cal, NULL, icalcomponent_as_ical_string (icalcomp), CALOBJ_MOD_ALL);
+		}
 		e_data_cal_notify_object_created (create_data->cal, create_data->context, error, comp_uid, e_cal_component_get_as_string(create_data->comp));
 	} else if (create_data->cb_type == 2) {
 
@@ -1517,7 +1533,13 @@ e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMeth
 	create_data->cal = g_object_ref(cal);
 	create_data->context = context;
 
-	if (e_cal_component_has_attachments (comp))
+	/*In case we are creating a meeting with attendees and attachments. 
+	 * We have to preform 3 steps in order to allow attendees to receive attachments in their invite mails.
+	 * 1. create meeting and do not send invites
+	 * 2. create attachments
+	 * 3. dummy update meeting and send invites to all*/
+
+	if (e_cal_component_has_attachments (comp) && e_cal_component_has_attendees (comp))
 		e_ews_connection_create_items_start(priv->cnc,
 					     EWS_PRIORITY_MEDIUM,
 					     "SaveOnly",
@@ -1626,17 +1648,18 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	e_cal_component_get_attachment_list (modify_data->oldcomp, &original_attachments);
 	e_cal_component_get_attachment_list (modify_data->comp, &modified_attachments);
 
-	/*ewscal_get_attach_differences (original_attachments, modified_attachments, &removed_attachments, &added_attachments);
+	ewscal_get_attach_differences (original_attachments, modified_attachments, &removed_attachments, &added_attachments);
 	g_slist_free (original_attachments);
-	g_slist_free (modified_attachments);*/
-	removed_attachments = original_attachments;
-	added_attachments = modified_attachments;
+	g_slist_free (modified_attachments);
+	//removed_attachments = original_attachments;
+	//added_attachments = modified_attachments;
 
 	if (added_attachments) {
 		attach_data = g_new0(EwsAttachmentsData, 1);
 
 		attach_data->cbews = g_object_ref (modify_data->cbews);
 		attach_data->comp = g_object_ref (modify_data->comp);
+		attach_data->cb_type = 2;
 
 		e_ews_connection_create_attachments_start (cnc, EWS_PRIORITY_MEDIUM,
 							   item_id, added_attachments,
@@ -1657,6 +1680,7 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 
 		attach_data->cbews = g_object_ref (modify_data->cbews);
 		attach_data->comp = g_object_ref (modify_data->comp);
+		attach_data->cb_type = 2;
 
 		e_ews_connection_delete_attachments_start (cnc, EWS_PRIORITY_MEDIUM,
 							   removed_attachments_ids,
