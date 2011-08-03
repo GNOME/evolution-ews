@@ -1190,21 +1190,35 @@ convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 static void
 e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context,
 				 const gchar *uid, const gchar *rid, CalObjModType mod);
-
+/*I will unate both type, they are same now*/
 typedef struct {
 	ECalBackendEws *cbews;
 	ECalComponent *comp;
-
 	int cb_type; /* 0 - nothing, 1 - create, 2 - update */
-
 	EDataCal *cal;
 	EServerMethodContext context;
+	ECalComponent *oldcomp;
+	gchar *itemid;
+	gchar *changekey;
 
 } EwsAttachmentsData;
+
+typedef struct {
+	ECalBackendEws *cbews;
+	EDataCal *cal;
+	ECalComponent *comp;
+	ECalComponent *oldcomp;
+	EServerMethodContext context;
+	gchar *itemid;
+	gchar *changekey;
+} EwsModifyData;
 
 static void
 e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context,
 				 const gchar *calobj, CalObjModType mod);
+
+static void convert_component_to_updatexml (ESoapMessage *msg, gpointer user_data);
+static void ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data);
 
 static void
 ews_create_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data)
@@ -1274,7 +1288,25 @@ ews_create_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data
 		}
 		e_data_cal_notify_object_created (create_data->cal, create_data->context, error, comp_uid, e_cal_component_get_as_string(create_data->comp));
 	} else if (create_data->cb_type == 2) {
-
+		EwsModifyData* modify_data;
+		modify_data = g_new0 (EwsModifyData, 1);
+		modify_data->cbews = g_object_ref (create_data->cbews);
+		modify_data->comp = create_data->comp;
+		modify_data->oldcomp = create_data->oldcomp;
+		modify_data->cal = g_object_ref (create_data->cal);
+		modify_data->context = create_data->context;
+		modify_data->itemid = create_data->itemid;
+		modify_data->changekey = create_data->changekey;
+		e_ews_connection_update_items_start (priv->cnc, EWS_PRIORITY_MEDIUM,
+						     "AlwaysOverwrite",
+						     "SendAndSaveCopy",
+						     "SendToAllAndSaveCopy",
+						     priv->folder_id,
+						     convert_component_to_updatexml,
+						     modify_data,
+						     ews_cal_modify_object_cb,
+						     NULL,
+						     modify_data);
 	}
 
 	g_slist_free (ids);
@@ -1282,57 +1314,6 @@ ews_create_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data
 	g_object_unref (create_data->cbews);
 	g_object_unref (create_data->comp);
 	g_free (create_data);
-}
-
-static void
-ews_delete_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data)
-{
-	EEwsConnection *cnc = E_EWS_CONNECTION (object);
-	EwsAttachmentsData *delete_data = user_data;
-	ECalBackendEwsPrivate *priv = delete_data->cbews->priv;
-	gchar *change_key;
-	GSList *ids;
-	GError *error = NULL;
-	icalproperty *icalprop;
-	icalcomponent *icalcomp;
-
-	ids = e_ews_connection_delete_attachments_finish (cnc, res, &error);
-
-	/* make sure there was no error */
-	if (error != NULL) {
-		g_warning ("Error while delete attachments: %s\n", error->message);
-		g_clear_error (&error);
-		return;
-	}
-
-	change_key = ids->data;
-
-	/* get exclusive access to the store */
-	e_cal_backend_store_freeze_changes(priv->store);
-
-	/* Update change key. id remains the same, but change key changed.*/
-	icalcomp = e_cal_component_get_icalcomponent (delete_data->comp);
-	icalprop = icalcomponent_get_first_property (icalcomp, ICAL_X_PROPERTY);
-	while (icalprop) {
-		const gchar *x_name;
-		x_name = icalproperty_get_x_name (icalprop);
-		if (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY")) {
-			icalproperty_set_value_from_string (icalprop, change_key, "NO");
-			break;
-		}
-		icalprop = icalcomponent_get_next_property (icalcomp, ICAL_X_PROPERTY);
-	}
-
-	e_cal_component_commit_sequence (delete_data->comp);
-
-	/* update changes and release access to the store */
-	e_cal_backend_store_thaw_changes (priv->store);
-
-	g_slist_free (ids);
-	g_free (change_key);
-	g_object_unref (delete_data->cbews);
-	g_object_unref (delete_data->comp);
-	g_free (delete_data);
 }
 
 static void
@@ -1567,16 +1548,6 @@ exit:
 	e_data_cal_notify_object_created(cal, context, error, NULL, NULL);
 }
 
-typedef struct {
-	ECalBackendEws *cbews;
-	EDataCal *cal;
-	ECalComponent *comp;
-	ECalComponent *oldcomp;
-	EServerMethodContext context;
-	gchar *itemid;
-	gchar *changekey;
-} EwsModifyData;
-
 static void
 ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data)
 {
@@ -1591,9 +1562,7 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	icalproperty *icalprop;
 	icalcomponent *icalcomp;
 	ECalComponentId *id;
-	GSList *original_attachments = NULL, *modified_attachments = NULL, *added_attachments = NULL, *removed_attachments = NULL, *removed_attachments_ids = NULL, *i;
 	const gchar *x_name;
-	EwsAttachmentsData *attach_data;
 
 	if (!e_ews_connection_update_items_finish (cnc, res, &ids, &error)) {
 		/* The calendar UI doesn't *display* errors unless they have
@@ -1643,53 +1612,6 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	PRIV_UNLOCK (priv);
 
 	e_cal_backend_store_thaw_changes (priv->store);
-
-	/* Attachments */
-	e_cal_component_get_attachment_list (modify_data->oldcomp, &original_attachments);
-	e_cal_component_get_attachment_list (modify_data->comp, &modified_attachments);
-
-	ewscal_get_attach_differences (original_attachments, modified_attachments, &removed_attachments, &added_attachments);
-	g_slist_free (original_attachments);
-	g_slist_free (modified_attachments);
-	//removed_attachments = original_attachments;
-	//added_attachments = modified_attachments;
-
-	if (added_attachments) {
-		attach_data = g_new0(EwsAttachmentsData, 1);
-
-		attach_data->cbews = g_object_ref (modify_data->cbews);
-		attach_data->comp = g_object_ref (modify_data->comp);
-		attach_data->cb_type = 2;
-
-		e_ews_connection_create_attachments_start (cnc, EWS_PRIORITY_MEDIUM,
-							   item_id, added_attachments,
-							   ews_create_attachments_cb, NULL, attach_data);
-
-		g_slist_free (added_attachments);
-	}
-	if (removed_attachments) {
-		/* convert attachment uri to attachment id, should have used a hash table somehow */
-		icalcomp = e_cal_component_get_icalcomponent (modify_data->oldcomp);
-		icalprop = icalcomponent_get_first_property (icalcomp, ICAL_ATTACH_PROPERTY);
-		while (icalprop) {
-			removed_attachments_ids = g_slist_append (removed_attachments_ids, icalproperty_get_parameter_as_string_r (icalprop, "X-EWS-ATTACHMENTID"));
-			icalprop = icalcomponent_get_next_property (icalcomp, ICAL_ATTACH_PROPERTY);
-		}
-
-		attach_data = g_new0(EwsAttachmentsData, 1);
-
-		attach_data->cbews = g_object_ref (modify_data->cbews);
-		attach_data->comp = g_object_ref (modify_data->comp);
-		attach_data->cb_type = 2;
-
-		e_ews_connection_delete_attachments_start (cnc, EWS_PRIORITY_MEDIUM,
-							   removed_attachments_ids,
-							   ews_delete_attachments_cb, NULL, attach_data);
-
-		for (i = removed_attachments_ids; i; i = i->next) free (i->data);
-		g_slist_free (removed_attachments_ids);
-		g_slist_free (removed_attachments);
-	}
 
 	g_object_unref (modify_data->comp);
 	g_object_unref (modify_data->oldcomp);
@@ -1960,6 +1882,8 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	struct icaltimetype current;
 	GError *error = NULL;
 	GCancellable *cancellable = NULL;
+	GSList *original_attachments = NULL, *modified_attachments = NULL, *added_attachments = NULL, *removed_attachments = NULL, *removed_attachments_ids = NULL, *i;
+	EwsAttachmentsData *attach_data;
 
 	e_data_cal_error_if_fail(E_IS_CAL_BACKEND_EWS(backend), InvalidArg);
 	e_data_cal_error_if_fail(calobj != NULL && *calobj != '\0', InvalidArg);
@@ -2006,21 +1930,82 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	}
 	PRIV_UNLOCK (priv);
 
-	modify_data = g_new0 (EwsModifyData, 1);
-	modify_data->cbews = g_object_ref(cbews);
-	modify_data->comp = comp;
-	modify_data->oldcomp = oldcomp;
-	modify_data->cal = g_object_ref(cal);
-	modify_data->context = context;
-	modify_data->itemid = itemid;
-	modify_data->changekey = changekey;
+	/*In case we have updated attachments we have to run update attachments
+	 before update items so attendess we recieve and mail with already updated attachemtns*/
 
-	e_ews_connection_update_items_start (priv->cnc, EWS_PRIORITY_MEDIUM,
-					     "AlwaysOverwrite", "SendAndSaveCopy",
-					     "SendToAllAndSaveCopy", priv->folder_id,
-					     convert_component_to_updatexml, modify_data,
-					     ews_cal_modify_object_cb, cancellable,
-					     modify_data);
+	e_cal_component_get_attachment_list (oldcomp, &original_attachments);
+	e_cal_component_get_attachment_list (comp, &modified_attachments);
+
+	ewscal_get_attach_differences (original_attachments, modified_attachments, &removed_attachments, &added_attachments);
+	g_slist_free (original_attachments);
+	g_slist_free (modified_attachments);
+
+	/* preform sync delete attachemnt operation*/
+	if (removed_attachments) {
+		icalproperty *icalprop;
+		GSList *items;
+
+		/* convert attachment uri to attachment id, should have used a hash table somehow */
+		icalcomp = e_cal_component_get_icalcomponent (oldcomp);
+		icalprop = icalcomponent_get_first_property (icalcomp, ICAL_ATTACH_PROPERTY);
+		while (icalprop) {
+			removed_attachments_ids = g_slist_append (removed_attachments_ids, icalproperty_get_parameter_as_string_r (icalprop, "X-EWS-ATTACHMENTID"));
+			icalprop = icalcomponent_get_next_property (icalcomp, ICAL_ATTACH_PROPERTY);
+		}
+
+		items = e_ews_connection_delete_attachments (priv->cnc, EWS_PRIORITY_MEDIUM, removed_attachments_ids, cancellable, &error);
+
+		changekey = items->data;
+
+		for (i = removed_attachments_ids; i; i = i->next) free (i->data);
+		g_slist_free (removed_attachments_ids);
+		g_slist_free (removed_attachments);
+	}
+
+	/*in case we have a new attachmetns the update item will be preformed in ews_create_attachments_cb*/
+	if (added_attachments) {
+		EwsId *item_id = g_new0(EwsId, 1);
+		item_id->id = itemid;
+		item_id->change_key = changekey;
+		attach_data = g_new0(EwsAttachmentsData, 1);
+
+		attach_data->cbews = g_object_ref (cbews);
+		attach_data->comp = g_object_ref (comp);
+		attach_data->cb_type = 2;
+		attach_data->oldcomp = oldcomp;
+		attach_data->cal = g_object_ref (cal);
+		attach_data->context = context;
+		attach_data->itemid = itemid;
+		attach_data->changekey = changekey;
+
+
+		e_ews_connection_create_attachments_start (priv->cnc, EWS_PRIORITY_MEDIUM,
+							   item_id, added_attachments,
+							   ews_create_attachments_cb, NULL, attach_data);
+
+		g_slist_free (added_attachments);
+
+	} else {
+		modify_data = g_new0 (EwsModifyData, 1);
+		modify_data->cbews = g_object_ref (cbews);
+		modify_data->comp = comp;
+		modify_data->oldcomp = oldcomp;
+		modify_data->cal = g_object_ref (cal);
+		modify_data->context = context;
+		modify_data->itemid = itemid;
+		modify_data->changekey = changekey;
+
+		e_ews_connection_update_items_start (priv->cnc, EWS_PRIORITY_MEDIUM,
+						     "AlwaysOverwrite",
+						     "SendAndSaveCopy",
+						     "SendToAllAndSaveCopy",
+						     priv->folder_id,
+						     convert_component_to_updatexml,
+						     modify_data,
+						     ews_cal_modify_object_cb,
+						     cancellable,
+						     modify_data);
+	}
 	return;
 
 exit:
