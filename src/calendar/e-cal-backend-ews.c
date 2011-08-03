@@ -1931,7 +1931,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	PRIV_UNLOCK (priv);
 
 	/*In case we have updated attachments we have to run update attachments
-	 before update items so attendess we recieve and mail with already updated attachemtns*/
+	 *before update items so attendees will receive mails with already updated attachments */
 
 	e_cal_component_get_attachment_list (oldcomp, &original_attachments);
 	e_cal_component_get_attachment_list (comp, &modified_attachments);
