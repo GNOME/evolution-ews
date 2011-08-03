@@ -46,6 +46,7 @@
 #include "libedata-book/e-data-book-view.h"
 #include "e-book-backend-ews.h"
 #include "e-book-backend-sqlitedb.h"
+#include "e-book-backend-ews-utils.h"
 
 #include "e-ews-message.h"
 #include "e-ews-connection.h"
@@ -1191,13 +1192,18 @@ ebews_start_sync	(gpointer data)
 {
 	EBookBackendEws *ebews;
 	EBookBackendEwsPrivate *priv;
-	gchar *sync_state;
+	gchar *sync_state, *status_message = NULL;
 	gboolean includes_last_item;
 	GError *error = NULL;
+	EDataBookView *book_view;
 
 	ebews = (EBookBackendEws *) data;
 	priv = ebews->priv;
 
+	status_message = g_strdup (_("Syncing contacts..."));
+	book_view = e_book_backend_ews_utils_get_book_view (E_BOOK_BACKEND (ebews));
+
+	e_data_book_view_notify_status_message (book_view, status_message);
 	sync_state = e_book_backend_sqlitedb_get_sync_data (priv->ebsdb, priv->folder_id, NULL);
 	do
 	{
@@ -1238,10 +1244,13 @@ ebews_start_sync	(gpointer data)
 		e_book_backend_sqlitedb_set_sync_data (priv->ebsdb, priv->folder_id, sync_state, &error);
 	} while (!error && !includes_last_item);
 
+	e_data_book_view_notify_complete (book_view, error);
+
 	if (!error)
 		e_book_backend_sqlitedb_set_is_populated (priv->ebsdb, priv->folder_id, TRUE, &error);
 
 	g_free (sync_state);
+	g_free (status_message);
 
 	if (error) {
 		g_warning ("Error Syncing Contacts: Folder %s Error: %s", priv->folder_id, error->message);

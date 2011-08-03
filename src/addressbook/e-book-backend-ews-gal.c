@@ -47,6 +47,7 @@
 
 #include "e-book-backend-ews-gal.h"
 #include "e-book-backend-sqlitedb.h"
+#include "e-book-backend-ews-utils.h"
 #include "lzx/ews-oal-decompress.h"
 #include "ews-oab-decoder.h"
 
@@ -284,14 +285,19 @@ ews_gal_store_contact (EContact *contact, goffset offset, guint percent, gpointe
 {
 	struct _db_data *data = (struct _db_data *) user_data;
 	EBookBackendEwsGalPrivate *priv = data->cbews->priv;
-	
+
 	data->contact_collector = g_slist_prepend (data->contact_collector, g_object_ref (contact));
 	data->collected_length += 1;
 
 	if (data->collected_length == 1000 || percent >= 100) {
 		GSList *l;
+		gchar *status_message=NULL;
+		EDataBookView *book_view = e_book_backend_ews_utils_get_book_view (E_BOOK_BACKEND (data->cbews));
 
 		d(g_print ("GAL adding contacts, percent complete : %d \n", percent);)
+
+		status_message = g_strdup_printf (_("Downloading contacts in %s %d%% completed... "), priv->folder_name, percent);
+		e_data_book_view_notify_status_message (book_view, status_message);
 
 		data->contact_collector = g_slist_reverse (data->contact_collector);
 		e_book_backend_sqlitedb_add_contacts (priv->ebsdb, priv->oal_id, data->contact_collector, FALSE, error);
@@ -300,6 +306,7 @@ ews_gal_store_contact (EContact *contact, goffset offset, guint percent, gpointe
 			e_book_backend_notify_update (E_BOOK_BACKEND (data->cbews), E_CONTACT (l->data));
 
 		/* reset data */
+		g_free (status_message);
 		g_slist_foreach (data->contact_collector, (GFunc) g_object_unref, NULL);
 		g_slist_free (data->contact_collector);
 		data->contact_collector = NULL;
