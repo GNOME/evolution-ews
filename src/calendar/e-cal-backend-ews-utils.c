@@ -482,11 +482,11 @@ void ewscal_set_reccurence (ESoapMessage *msg, icalproperty *rrule, icaltimetype
 			} else {
 				e_soap_message_start_element (msg, "AbsoluteMonthlyRecurrence", NULL, NULL);
 
+                                snprintf (buffer, 256, "%d", recur.interval);
+				e_ews_message_write_string_parameter (msg, "Interval", NULL, buffer);
+
 				snprintf (buffer, 256, "%d", recur.by_month_day[0]);
 				e_ews_message_write_string_parameter(msg, "DayOfMonth", NULL, buffer);
-
-				snprintf (buffer, 256, "%d", recur.interval);
-				e_ews_message_write_string_parameter (msg, "Interval", NULL, buffer);
 
 				e_soap_message_end_element (msg); /* "AbsoluteMonthlyRecurrence" */
 
