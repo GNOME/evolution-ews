@@ -1278,12 +1278,6 @@ ews_create_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data
 		* this is the only way to pass attachments in meeting invite mail*/
 		if (e_cal_component_has_attendees (create_data->comp)) {
 			icalcomponent *icalcomp = e_cal_component_get_icalcomponent (create_data->comp);
-			/*fake summary update*/
-			const char* summary = icalcomponent_get_summary (icalcomp);
-			char buffer[256];
-			snprintf (buffer, 16, "%s ", summary);
-			icalcomponent_set_summary (icalcomp, buffer);
-
 			e_cal_backend_ews_modify_object ((ECalBackend *) create_data->cbews, create_data->cal, NULL, icalcomponent_as_ical_string (icalcomp), CALOBJ_MOD_ALL);
 		}
 		e_data_cal_notify_object_created (create_data->cal, create_data->context, error, comp_uid, e_cal_component_get_as_string(create_data->comp));
