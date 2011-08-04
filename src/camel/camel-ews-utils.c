@@ -1009,6 +1009,7 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder, GSList *items_cr
 
 		ews_set_threading_data (mi, item);
 		server_flags = ews_utils_get_server_flags (item);
+		ews_utils_merge_server_user_flags (item, mi);
 
 		camel_ews_summary_add_message_info (folder->summary, server_flags,
 						    (CamelMessageInfo *) mi);
