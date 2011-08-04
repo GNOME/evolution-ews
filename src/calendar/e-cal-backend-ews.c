@@ -2303,12 +2303,18 @@ ewscal_send_cancellation_email (EEwsConnection *cnc, CamelAddress *from, CamelIn
 	CamelMultipart *multi;
 	CamelMimePart *text_part, *vcal_part;
 	char *ical_str;
-	icalcomponent *vcal;
+	icalcomponent *vcal, *vevent;
+	icalproperty *prop;
 
 	vcal = icalcomponent_new (ICAL_VCALENDAR_COMPONENT);
 	icalcomponent_add_property (vcal, icalproperty_new_version("2.0"));
+        icalcomponent_add_property (vcal, icalproperty_new_prodid("-//Evolution EWS backend//EN"));
 	icalcomponent_add_property (vcal, icalproperty_new_method(ICAL_METHOD_CANCEL));
-	icalcomponent_add_component (vcal, icalcomponent_new_from_string (calobj));
+	vevent = icalcomponent_new_from_string (calobj);
+	icalcomponent_add_property (vevent, icalproperty_new_status(ICAL_STATUS_CANCELLED));
+	prop = icalcomponent_get_first_property (vevent, ICAL_METHOD_PROPERTY);
+	if (prop != NULL) icalcomponent_remove_property (vevent, prop);
+	icalcomponent_add_component (vcal, vevent);
 
 	text_part = camel_mime_part_new ();
 	camel_mime_part_set_content (text_part, body, strlen (body), "text/plain");
