@@ -182,7 +182,7 @@ static const char *number_to_weekday(int num) {
 		"Day", "Weekday", "WeekendDay"
 	};
 
-	return days[num+1];
+	return days[num-1];
 }
 
 static const char *weekindex_to_ical(int index) {
@@ -213,7 +213,7 @@ static void ewscal_add_rrule (ESoapMessage *msg, icalproperty *prop)
 
 	e_soap_message_start_element(msg, "RelativeYearlyRecurrence", NULL, NULL);
 
-	e_ews_message_write_string_parameter(msg, "DaysOfWeek", NULL, number_to_weekday(icalrecurrencetype_day_day_of_week(recur.by_day[0]) - recur.week_start));
+	e_ews_message_write_string_parameter(msg, "DaysOfWeek", NULL, number_to_weekday(icalrecurrencetype_day_day_of_week(recur.by_day[0])));
 	e_ews_message_write_string_parameter(msg, "DayOfWeekIndex", NULL, weekindex_to_ical(icalrecurrencetype_day_position(recur.by_day[0])));
 	e_ews_message_write_string_parameter(msg, "Month", NULL, number_to_month(recur.by_month[0]));
 
@@ -345,7 +345,7 @@ static void ewscal_add_availability_rrule (ESoapMessage *msg, icalproperty *prop
 	snprintf (buffer, 16, "%d", recur.by_month[0]);
 	e_ews_message_write_string_parameter(msg, "Month", NULL, buffer);
 
-	e_ews_message_write_string_parameter(msg, "DayOfWeek", NULL, number_to_weekday(icalrecurrencetype_day_day_of_week(recur.by_day[0]) - recur.week_start));
+	e_ews_message_write_string_parameter(msg, "DayOfWeek", NULL, number_to_weekday(icalrecurrencetype_day_day_of_week(recur.by_day[0])));
 }
 
 static void ewscal_add_availability_timechange (ESoapMessage *msg, icalcomponent *comp, int baseoffs)
@@ -452,10 +452,10 @@ void ewscal_set_reccurence (ESoapMessage *msg, icalproperty *rrule, icaltimetype
 			e_ews_message_write_string_parameter (msg, "Interval", NULL, buffer);
 
 			len = snprintf (buffer, 256, "%s",
-				number_to_weekday(icalrecurrencetype_day_day_of_week(recur.by_day[0]) - recur.week_start));
+				number_to_weekday(icalrecurrencetype_day_day_of_week(recur.by_day[0])));
 			for (i = 1; recur.by_day[i] != ICAL_RECURRENCE_ARRAY_MAX; i++) {
 				len += snprintf (buffer+len, 256-len, " %s",
-					number_to_weekday(icalrecurrencetype_day_day_of_week(recur.by_day[i]) - recur.week_start));
+					number_to_weekday(icalrecurrencetype_day_day_of_week(recur.by_day[i])));
 			}
 			e_ews_message_write_string_parameter(msg, "DaysOfWeek", NULL, buffer);
 
@@ -473,7 +473,7 @@ void ewscal_set_reccurence (ESoapMessage *msg, icalproperty *rrule, icaltimetype
 				e_ews_message_write_string_parameter(msg, "Interval", NULL, buffer);
 				
 				e_ews_message_write_string_parameter(msg, "DaysOfWeek", NULL,
-					number_to_weekday (icalrecurrencetype_day_day_of_week(recur.by_day[0]) - recur.week_start));
+					number_to_weekday (icalrecurrencetype_day_day_of_week(recur.by_day[0])));
 				
 				e_ews_message_write_string_parameter(msg, "DayOfWeekIndex", NULL, weekindex_to_ical (recur.by_set_pos[0]));
 
