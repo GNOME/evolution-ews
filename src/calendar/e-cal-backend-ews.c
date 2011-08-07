@@ -3302,6 +3302,8 @@ ews_cal_get_free_busy_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 done:
 	e_data_cal_notify_free_busy (free_busy_data->cal, free_busy_data->context, error, free_busy);
 
+	g_list_foreach (free_busy_data->users, (GFunc)free, NULL);
+	g_list_free (free_busy_data->users);
 	g_object_unref (free_busy_data->cal);
 	g_object_unref (free_busy_data->cbews);
 	g_free (free_busy_data);
@@ -3317,6 +3319,7 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend, EDataCal *cal,
 	GError *error = NULL;
 	EwsFreeBusyData *free_busy_data;
 	GCancellable *cancellable = NULL;
+	GList *users_copy = NULL;
 
 	/* make sure we're not offline */
 	if (priv->mode == CAL_MODE_LOCAL)
@@ -3333,11 +3336,14 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend, EDataCal *cal,
 		goto exit;
 	}
 
+	for (;users; users = users->next)
+	    users_copy = g_list_append (users_copy, g_strdup (users->data));
+
 	free_busy_data = g_new0 (EwsFreeBusyData, 1);
 	free_busy_data->cbews = g_object_ref (cbews);
 	free_busy_data->cal = g_object_ref (cal);
 	free_busy_data->context = context;
-	free_busy_data->users = users;
+	free_busy_data->users = users_copy;
 	free_busy_data->start = start;
 	free_busy_data->end = end;
 	free_busy_data->timezone = priv->default_zone;
