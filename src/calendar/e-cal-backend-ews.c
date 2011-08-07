@@ -2775,7 +2775,7 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item)
 
 		/* Attendees */
 		for (l = e_ews_item_get_attendees (item); l != NULL; l = g_slist_next (l)) {
-			icalparameter *param;
+			icalparameter *param, *cu_type;
 			char *mailtoname;
 			EwsAttendee *attendee = (EwsAttendee *)l->data;
 			/*remove orginizer for attendeees list*/
@@ -2789,11 +2789,20 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item)
 			param = icalparameter_new_cn(attendee->mailbox->name);
 			icalproperty_add_parameter(icalprop, param);
 
-			if (g_ascii_strcasecmp(attendee->attendeetype, "Required") == 0)
-				param = icalparameter_new_role(ICAL_ROLE_REQPARTICIPANT);
-			else
-				param = icalparameter_new_role(ICAL_ROLE_OPTPARTICIPANT);
-			icalproperty_add_parameter(icalprop, param);
+			if (g_ascii_strcasecmp(attendee->attendeetype, "Required") == 0) {
+				param = icalparameter_new_role (ICAL_ROLE_REQPARTICIPANT);
+				cu_type = icalparameter_new_cutype (ICAL_CUTYPE_INDIVIDUAL);
+			}
+			else if (g_ascii_strcasecmp(attendee->attendeetype, "Resource") == 0) {
+				param = icalparameter_new_role (ICAL_ROLE_NONPARTICIPANT);
+				cu_type = icalparameter_new_cutype (ICAL_CUTYPE_RESOURCE);
+			}
+			else {
+				param = icalparameter_new_role ( ICAL_ROLE_OPTPARTICIPANT);
+				cu_type = icalparameter_new_cutype (ICAL_CUTYPE_INDIVIDUAL);
+			}
+			icalproperty_add_parameter (icalprop, cu_type);
+			icalproperty_add_parameter (icalprop, param);
 
 			if (g_ascii_strcasecmp (attendee->responsetype, "Organizer") == 0)
 				param = icalparameter_new_partstat (ICAL_PARTSTAT_ACCEPTED);
