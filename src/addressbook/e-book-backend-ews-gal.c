@@ -297,7 +297,8 @@ ews_gal_store_contact (EContact *contact, goffset offset, guint percent, gpointe
 		d(g_print ("GAL adding contacts, percent complete : %d \n", percent);)
 
 		status_message = g_strdup_printf (_("Downloading contacts in %s %d%% completed... "), priv->folder_name, percent);
-		e_data_book_view_notify_status_message (book_view, status_message);
+		if (book_view)
+			e_data_book_view_notify_status_message (book_view, status_message);
 
 		data->contact_collector = g_slist_reverse (data->contact_collector);
 		e_book_backend_sqlitedb_add_contacts (priv->ebsdb, priv->oal_id, data->contact_collector, FALSE, error);
@@ -306,6 +307,8 @@ ews_gal_store_contact (EContact *contact, goffset offset, guint percent, gpointe
 			e_book_backend_notify_update (E_BOOK_BACKEND (data->cbews), E_CONTACT (l->data));
 
 		/* reset data */
+		if (book_view)
+			e_data_book_view_unref (book_view);
 		g_free (status_message);
 		g_slist_foreach (data->contact_collector, (GFunc) g_object_unref, NULL);
 		g_slist_free (data->contact_collector);

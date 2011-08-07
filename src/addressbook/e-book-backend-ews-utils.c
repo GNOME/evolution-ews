@@ -69,8 +69,10 @@ e_book_backend_ews_utils_get_book_view (EBookBackend *backend)
 	if (e_iterator_is_valid (iter)) {
 		/* just always use the first book view */
 		EDataBookView *v = (EDataBookView*)e_iterator_get (iter);
-		if (v)
+		if (v) {
 			rv = v;
+			e_data_book_view_ref (rv);
+		}
 	}
 
 	g_object_unref (iter);

@@ -1202,8 +1202,9 @@ ebews_start_sync	(gpointer data)
 
 	status_message = g_strdup (_("Syncing contacts..."));
 	book_view = e_book_backend_ews_utils_get_book_view (E_BOOK_BACKEND (ebews));
+	if (book_view)
+		e_data_book_view_notify_status_message (book_view, status_message);
 
-	e_data_book_view_notify_status_message (book_view, status_message);
 	sync_state = e_book_backend_sqlitedb_get_sync_data (priv->ebsdb, priv->folder_id, NULL);
 	do
 	{
@@ -1244,7 +1245,10 @@ ebews_start_sync	(gpointer data)
 		e_book_backend_sqlitedb_set_sync_data (priv->ebsdb, priv->folder_id, sync_state, &error);
 	} while (!error && !includes_last_item);
 
-	e_data_book_view_notify_complete (book_view, error);
+	if (book_view) {
+		e_data_book_view_notify_complete (book_view, error);
+		e_data_book_view_unref (book_view);
+	}
 
 	if (!error)
 		e_book_backend_sqlitedb_set_is_populated (priv->ebsdb, priv->folder_id, TRUE, &error);
