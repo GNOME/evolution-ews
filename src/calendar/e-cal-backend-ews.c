@@ -1434,7 +1434,7 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 
 		for (i = exceptions; i; i = i->next) {
 			e_cal_backend_ews_remove_object (E_CAL_BACKEND (create_data->cbews), create_data->cal, NULL,
-							 item_id->id, i->data, CALOBJ_MOD_THIS);
+							 comp_uid, i->data, CALOBJ_MOD_THIS);
 		}
 
 		g_slist_foreach (exceptions, (GFunc)g_free, NULL);
