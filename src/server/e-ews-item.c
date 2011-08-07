@@ -1013,6 +1013,8 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 			process_attendees (priv, subparam, "Required");
 		} else if (!g_ascii_strcasecmp (name, "OptionalAttendees")) {
 			process_attendees (priv, subparam, "Optional");
+		} else if (!g_ascii_strcasecmp (name, "Resources")) {
+			process_attendees (priv, subparam, "Resource");
 		} else if (!g_ascii_strcasecmp (name, "AssociatedCalendarItemId")) {
 			priv->calendar_item_accept_id = g_new0 (EwsId, 1);
 			priv->calendar_item_accept_id->id = e_soap_parameter_get_property (subparam, "Id");
