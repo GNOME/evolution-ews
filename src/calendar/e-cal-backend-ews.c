@@ -1450,6 +1450,33 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	g_free(create_data);
 }
 
+struct TzidCbData {
+	icalcomponent *comp;
+	ECalBackendEws *cbews;
+};
+
+static void tzid_cb(icalparameter *param, void *data)
+{
+	struct TzidCbData *cbd = data;
+	const gchar *tzid;
+	icaltimezone *zone;
+	icalcomponent *new_comp;
+
+	tzid = icalparameter_get_tzid (param);
+	if (!tzid)
+		return;
+
+	zone = resolve_tzid(tzid, cbd->cbews);
+	if (!zone)
+		return;
+
+	new_comp = icaltimezone_get_component(zone);
+	if (!new_comp)
+		return;
+
+	icalcomponent_add_component(cbd->comp, new_comp);
+}
+
 static void
 e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *calobj)
 {
@@ -1463,6 +1490,7 @@ e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMeth
 	GError *error = NULL;
 	GCancellable *cancellable = NULL;
 	const char *send_meeting_invitations;
+	struct TzidCbData cbd;
 
 	/* sanity check */
 	e_data_cal_error_if_fail(E_IS_CAL_BACKEND_EWS(backend), InvalidArg);
@@ -1480,7 +1508,12 @@ e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMeth
 	}
 
 	/* parse ical data */
-	icalcomp = icalparser_parse_string(calobj);
+	comp =  e_cal_component_new_from_string (calobj);
+	if (comp == NULL) {
+		g_propagate_error (&error, EDC_ERROR (InvalidObject));
+		return;
+	}
+	icalcomp = e_cal_component_get_icalcomponent(comp);
 
 	/* make sure data was parsed properly */
 	if (!icalcomp) {
@@ -1495,10 +1528,13 @@ e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMeth
 		goto exit;
 	}
 
-	/* prepare new calender component */
-	comp = e_cal_component_new();
-	e_cal_component_set_icalcomponent(comp, icalcomp);
+	/* pick all the tzids out of the component and resolve
+	 * them using the vtimezones in the current calendar */
+	cbd.cbews = cbews;
+	cbd.comp = icalcomp;
+	icalcomponent_foreach_tzid(icalcomp, tzid_cb, &cbd);
 
+	/* prepare new calender component */
 	current = icaltime_current_time_with_zone(icaltimezone_get_utc_timezone());
 	e_cal_component_set_created(comp, &current);
 	e_cal_component_set_last_modified(comp, &current);
