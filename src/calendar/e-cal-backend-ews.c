@@ -2718,7 +2718,7 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item)
 		icalcomponent_add_property (icalcomp, icalprop);
 
 		/*task assaingments*/
-		if (!(e_ews_item_get_delegator (item)== NULL)) {
+		if (e_ews_item_get_delegator (item)!= NULL) {
 			const char *task_owner = e_ews_item_get_delegator (item);
 			GSList *mailboxes = NULL, *l;
 			GError *error = NULL;

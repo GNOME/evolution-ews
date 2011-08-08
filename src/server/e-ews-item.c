@@ -845,9 +845,11 @@ parse_task_field (EEwsItem *item, const gchar *name, ESoapParameter *subparam)
 	} else if (!g_ascii_strcasecmp (name, "Owner")) {
 		priv->task_fields->owner = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "Delegator")) {
+		priv->task_fields->delegator = NULL;
 		priv->task_fields->delegator = e_soap_parameter_get_string_value (subparam);
+		if (!g_ascii_strcasecmp (priv->task_fields->delegator,""))
+			priv->task_fields->delegator = NULL;
 	}
-
 }
 
 static gboolean
