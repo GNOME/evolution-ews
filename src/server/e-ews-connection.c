@@ -513,6 +513,16 @@ sync_xxx_response_cb (ESoapParameter *subparam, EwsNode *enode, ItemParser parse
 			folder = parser (subparam1);
 			items_updated = g_slist_append (items_updated, folder);
 		}
+		  /* Exchange 2007SP1 introduced <ReadFlagChange> which is basically identical
+		   * to <Update>; no idea why they thought it was a good idea. */
+		for (subparam1 = e_soap_parameter_get_first_child_by_name (node, "ReadFlagChange");
+		     subparam1 != NULL;
+		     subparam1 = e_soap_parameter_get_next_child_by_name (subparam1, "ReadFlagChange")) {
+			EEwsFolder *folder;
+
+			folder = parser (subparam1);
+			items_updated = g_slist_append (items_updated, folder);
+		}
 
 		for (subparam1 = e_soap_parameter_get_first_child_by_name (node, "Delete");
 		     subparam1 != NULL;

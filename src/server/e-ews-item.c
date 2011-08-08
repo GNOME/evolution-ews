@@ -863,6 +863,12 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 		priv->attachment_id = g_new0 (EwsId, 1);
 		priv->attachment_id->id = e_soap_parameter_get_property (node, "Id");
 		priv->attachment_id->change_key = e_soap_parameter_get_property (node, "ChangeKey");
+	} else if ((node = e_soap_parameter_get_first_child_by_name (param, "ItemId"))) {
+		/*Spesial case when we are facing  <ReadFlagChange> during sync folders*/
+		priv->item_id = g_new0 (EwsId, 1);
+		priv->item_id->id = e_soap_parameter_get_property (node, "Id");
+		priv->item_id->change_key = e_soap_parameter_get_property (node, "ChangeKey");
+		return TRUE;
 	} else if ((node = e_soap_parameter_get_first_child_by_name (param, "Message")))
 		priv->item_type = E_EWS_ITEM_TYPE_MESSAGE;
 	else if ((node = e_soap_parameter_get_first_child_by_name (param, "PostItem")))
