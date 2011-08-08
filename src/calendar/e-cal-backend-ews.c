@@ -1462,6 +1462,7 @@ e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMeth
 	struct icaltimetype current;
 	GError *error = NULL;
 	GCancellable *cancellable = NULL;
+	const char *send_meeting_invitations;
 
 	/* sanity check */
 	e_data_cal_error_if_fail(E_IS_CAL_BACKEND_EWS(backend), InvalidArg);
@@ -1508,28 +1509,26 @@ e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMeth
 	create_data->cal = g_object_ref(cal);
 	create_data->context = context;
 
+
+
 	/*In case we are creating a meeting with attendees and attachments. 
 	 * We have to preform 3 steps in order to allow attendees to receive attachments in their invite mails.
 	 * 1. create meeting and do not send invites
 	 * 2. create attachments
 	 * 3. dummy update meeting and send invites to all*/
+	if (e_cal_component_has_attendees (comp)) {
+		if (e_cal_component_has_attachments (comp))
+			send_meeting_invitations = "SendToNone";
+		else
+			send_meeting_invitations = "SendToAllAndSaveCopy";
+	} else
+		/*In case of appointment we have to set SendMeetingInvites to SendToNone */
+		send_meeting_invitations = "SendToNone";
 
-	if (e_cal_component_has_attachments (comp) && e_cal_component_has_attendees (comp))
-		e_ews_connection_create_items_start(priv->cnc,
+	e_ews_connection_create_items_start (priv->cnc,
 					     EWS_PRIORITY_MEDIUM,
 					     "SaveOnly",
-					     "SendToNone",
-					     priv->folder_id,
-					     convert_calcomp_to_xml,
-					     icalcomp,
-					     ews_create_object_cb,
-					     cancellable,
-					     create_data);
-	else
-		/* pass new calendar component data to the exchange server and expect response in the callback */
-		e_ews_connection_create_items_start(priv->cnc,
-					     EWS_PRIORITY_MEDIUM,NULL,
-					     "SendToAllAndSaveCopy",
+					     send_meeting_invitations,
 					     priv->folder_id,
 					     convert_calcomp_to_xml,
 					     icalcomp,
