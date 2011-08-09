@@ -1683,13 +1683,17 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 	/* subject */
 	value = icalcomponent_get_summary (icalcomp);
 	old_value = icalcomponent_get_summary (icalcomp_old);
-	if (g_ascii_strcasecmp (value, old_value))
+	if (value == NULL)
+		convert_vevent_property_to_updatexml (msg, "Subject", "", "item", NULL, NULL);
+	else if ((old_value ==  NULL) || g_ascii_strcasecmp (value, old_value))
 		convert_vevent_property_to_updatexml (msg, "Subject", value, "item", NULL, NULL);
 
 	/*description*/
 	value = icalcomponent_get_description (icalcomp);
 	old_value = icalcomponent_get_description (icalcomp_old);
-	if (g_ascii_strcasecmp (value, old_value))
+	if (value == NULL)
+		convert_vevent_property_to_updatexml (msg, "Body", "", "item", "BodyType", "Text");
+	else if ((old_value == NULL) || g_ascii_strcasecmp (value, old_value))
 		convert_vevent_property_to_updatexml (msg, "Body", value, "item", "BodyType", "Text");
 
 	/*update alarm items*/
@@ -1710,7 +1714,9 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 	/*location*/
 	value = icalcomponent_get_location (icalcomp);
 	old_value = icalcomponent_get_location (icalcomp_old);
-	if (g_ascii_strcasecmp (value, old_value))
+	if (value == NULL)
+		convert_vevent_property_to_updatexml (msg, "Location", "", "calendar", NULL, NULL);
+	else if ((old_value == NULL) || g_ascii_strcasecmp (value, old_value))
 		convert_vevent_property_to_updatexml (msg, "Location", value, "calendar", NULL, NULL);
 
 	/*freebusy*/
