@@ -1306,7 +1306,9 @@ ews_create_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data
 	g_slist_free (ids);
 
 	g_object_unref (create_data->cbews);
+	g_object_unref (create_data->cal);
 	g_object_unref (create_data->comp);
+	if (create_data->oldcomp) g_object_unref (create_data->oldcomp);
 	g_free (create_data);
 }
 
@@ -1642,9 +1644,6 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 
 	e_cal_backend_store_thaw_changes (priv->store);
 
-	g_object_unref (modify_data->comp);
-	g_object_unref (modify_data->oldcomp);
-
 	icalproperty_free (icalprop);
 	e_cal_component_free_id (id);
 	g_free(comp_str);
@@ -1652,6 +1651,7 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	g_free(modify_data->itemid);
 	g_free(modify_data->changekey);
 	g_object_unref(modify_data->comp);
+	g_object_unref(modify_data->oldcomp);
 	g_object_unref(modify_data->cbews);
 	g_object_unref(modify_data->cal);
 	g_free(modify_data);
@@ -2001,7 +2001,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 		attach_data->cbews = g_object_ref (cbews);
 		attach_data->comp = g_object_ref (comp);
 		attach_data->cb_type = 2;
-		attach_data->oldcomp = oldcomp;
+		attach_data->oldcomp = g_object_ref (oldcomp);
 		attach_data->cal = g_object_ref (cal);
 		attach_data->context = context;
 		attach_data->itemid = itemid;
@@ -2013,12 +2013,13 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 							   ews_create_attachments_cb, NULL, attach_data);
 
 		g_slist_free (added_attachments);
+		g_free (item_id);
 
 	} else {
 		modify_data = g_new0 (EwsModifyData, 1);
 		modify_data->cbews = g_object_ref (cbews);
-		modify_data->comp = comp;
-		modify_data->oldcomp = oldcomp;
+		modify_data->comp = g_object_ref (comp);
+		modify_data->oldcomp = g_object_ref (oldcomp);
 		modify_data->cal = g_object_ref (cal);
 		modify_data->context = context;
 		modify_data->itemid = itemid;
