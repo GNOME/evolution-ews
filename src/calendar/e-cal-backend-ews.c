@@ -1989,6 +1989,9 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	}
 	PRIV_UNLOCK (priv);
 
+	cbd.comp = e_cal_component_get_icalcomponent (oldcomp);
+	icalcomponent_foreach_tzid(cbd.comp, tzid_cb, &cbd);
+	
 	/*In case we have updated attachments we have to run update attachments
 	 *before update items so attendees will receive mails with already updated attachments */
 
