@@ -1677,9 +1677,25 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 	const char *org_email_address = NULL, *value = NULL, *old_value = NULL;
 	gboolean has_alarms, has_alarms_old;
 	gint alarm = 0, alarm_old = 0;
+	gchar *recid;
+	GError *error = NULL;
 
-	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
+	/* Modifying a recurring meeting ? */
+	if (icalcomponent_get_first_property(icalcomp_old, ICAL_RRULE_PROPERTY) != NULL) {
+		/* A single occurrence ? */
+		prop = icalcomponent_get_first_property(icalcomp, ICAL_RECURRENCEID_PROPERTY);
+		if (prop != NULL) {
+			recid = icalproperty_get_value_as_string_r (prop);
+			e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_OCCURRENCEITEM,
+					 modify_data->itemid, modify_data->changekey, e_cal_rid_to_index (recid, icalcomp_old, &error));
+			free (recid);
+		} else {
+			e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_RECURRINGMASTER,
 					 modify_data->itemid, modify_data->changekey, 0);
+		}
+	} else e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
+					 modify_data->itemid, modify_data->changekey, 0);
+
 	/* subject */
 	value = icalcomponent_get_summary (icalcomp);
 	old_value = icalcomponent_get_summary (icalcomp_old);
