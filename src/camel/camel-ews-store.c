@@ -478,7 +478,7 @@ ews_refresh_free (CamelSession *session, CamelSessionThreadMsg *msg)
 {
 	struct _ews_refresh_msg *m = (struct _ews_refresh_msg *)msg;
 
-	g_object_unref (m->store);
+	camel_object_unref (m->store);
 }
 
 
@@ -524,7 +524,8 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, EV
 			struct _ews_refresh_msg *m;
 
 			m = camel_session_thread_msg_new (((CamelService *)store)->session, &ews_refresh_ops, sizeof (*m));
-			m->store = g_object_ref (store);
+			camel_object_ref (store);
+			m->store = store; 
 			camel_session_thread_queue (((CamelService *)store)->session, &m->msg, 0);
 		}
 

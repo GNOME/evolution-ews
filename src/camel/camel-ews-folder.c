@@ -124,12 +124,12 @@ camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder, const gchar
 
 	if (!camel_data_wrapper_construct_from_stream_sync (
 				(CamelDataWrapper *)msg, stream, cancellable, error)) {
-		g_object_unref (msg);
+		camel_object_unref (msg);
 		msg = NULL;
 	}
 
 	g_static_rec_mutex_unlock (&priv->cache_lock);
-	g_object_unref (stream);
+	camel_object_unref (stream);
 
 	return msg;
 }
@@ -216,7 +216,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId
 		dw = camel_medium_get_content (CAMEL_MEDIUM (mimepart));
 		tmpstream = camel_stream_mem_new ();
 		if (camel_data_wrapper_decode_to_stream_sync (dw, tmpstream, NULL, error) == -1) {
-			g_object_unref (tmpstream);
+			camel_object_unref (tmpstream);
 			goto exit_msg;
 		}
 		ba = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (tmpstream));
@@ -244,7 +244,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId
 					     "text/calendar");
 		g_free (calstring_new);
 		icalcomponent_free (icalcomp);
-		g_object_unref (tmpstream);
+		camel_object_unref (tmpstream);
 
 		// Create a new file to store updated mimecontent
 		temp = g_strrstr (mime_fname, "/");
@@ -272,16 +272,16 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId
 		}
 		g_free (dir);
 		if (newstream)
-			g_object_unref (newstream);
+			camel_object_unref (newstream);
 		if (!success) {
 			g_free (mime_fname_new);
 			mime_fname_new = NULL;
 		}
 	}
  exit_msg:
-	g_object_unref (msg);
+	camel_object_unref (msg);
  exit_parser:
-	g_object_unref (mimeparser);
+	camel_object_unref (mimeparser);
 	close (fd_old);
 	fd_old = -1;
 
@@ -456,7 +456,7 @@ exit:
 	}
 
 	if (tmp_stream)
-		g_object_unref (tmp_stream);
+		camel_object_unref (tmp_stream);
 
 	if (mime_fname_new)
 		g_free (mime_fname_new);
@@ -770,7 +770,7 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 	g_free(summary_file);
 
 	if (!folder->summary) {
-		g_object_unref (CAMEL_OBJECT (folder));
+		camel_object_unref (CAMEL_OBJECT (folder));
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 			_("Could not load summary for %s"), folder_name);
@@ -785,7 +785,7 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 
 	ews_folder->cache = camel_data_cache_new_compat (folder_dir, error);
 	if (!ews_folder->cache) {
-		g_object_unref (folder);
+		camel_object_unref (folder);
 		return NULL;
 	}
 
@@ -796,7 +796,7 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 
 	ews_folder->search = camel_folder_search_new ();
 	if (!ews_folder->search) {
-		g_object_unref (folder);
+		camel_object_unref (folder);
 		return NULL;
 	}
 
@@ -1281,12 +1281,12 @@ ews_folder_dispose (CamelObject *object)
 	CamelEwsFolder *ews_folder = CAMEL_EWS_FOLDER (object);
 
 	if (ews_folder->cache != NULL) {
-		g_object_unref (ews_folder->cache);
+		camel_object_unref (ews_folder->cache);
 		ews_folder->cache = NULL;
 	}
 
 	if (ews_folder->search != NULL) {
-		g_object_unref (ews_folder->search);
+		camel_object_unref (ews_folder->search);
 		ews_folder->search = NULL;
 	}
 
