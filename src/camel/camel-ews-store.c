@@ -113,6 +113,7 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 
 	/* Chain up to parent's construct() method. */
 	service_class = CAMEL_SERVICE_CLASS (parent_class);
+	camel_exception_init (&ex);
 	service_class->construct (service, session, provider, url, &ex);
 
 	if (camel_exception_is_set (&ex)) {
@@ -245,6 +246,7 @@ ews_disconnect_sync (CamelService *service, gboolean clean, EVO3(GCancellable *c
 	CamelException ex;
 
 	service_class = CAMEL_SERVICE_CLASS (parent_class);
+	camel_exception_init (&ex);
 	if (!service_class->EVO3_sync(disconnect) (service, clean, EVO3(cancellable,) &ex)) {
 		ews_compat_propagate_exception_to_gerror (&ex, error);
 		return FALSE;

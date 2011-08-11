@@ -56,7 +56,8 @@ camel_data_cache_get_filename_compat	(CamelDataCache *cdc,
 #else
 	CamelException ex;
 	gchar *ret;
-
+	
+	camel_exception_init (&ex);
 	ret = camel_data_cache_get_filename (cdc, path, key, &ex);
 	ews_compat_propagate_exception_to_gerror (&ex, error);
 	
@@ -74,6 +75,7 @@ camel_data_cache_new_compat	(const gchar *path,
 	CamelException ex;
 	CamelDataCache *ret;
 
+	camel_exception_init (&ex);
 	ret = camel_data_cache_new (path, 0, &ex);
 	ews_compat_propagate_exception_to_gerror (&ex, error);
 	
@@ -93,6 +95,7 @@ camel_data_cache_get_compat	(CamelDataCache *cdc,
 	CamelException ex;
 	CamelStream *ret;
 
+	camel_exception_init (&ex);
 	ret = camel_data_cache_get (cdc, path, key, &ex);
 	ews_compat_propagate_exception_to_gerror (&ex, error);
 	
@@ -112,6 +115,7 @@ camel_folder_search_search_compat	(CamelFolderSearch *search,
 	CamelException ex;
 	GPtrArray *ret;
 
+	camel_exception_init (&ex);
 	ret = camel_folder_search_search (search, expr, uids, &ex);
 	ews_compat_propagate_exception_to_gerror (&ex, error);
 	
@@ -130,6 +134,7 @@ camel_folder_search_count_compat	(CamelFolderSearch *search,
 	CamelException ex;
 	guint32 ret;
 
+	camel_exception_init (&ex);
 	ret = camel_folder_search_count (search, expr, &ex);
 	ews_compat_propagate_exception_to_gerror (&ex, error);
 	
@@ -149,6 +154,7 @@ camel_session_get_storage_path_compat	(CamelSession *session,
 	CamelException ex;
 	gchar *ret;
 
+	camel_exception_init (&ex);
 	ret = camel_session_get_storage_path (session, service, &ex);
 	ews_compat_propagate_exception_to_gerror (&ex, error);
 	return ret;
@@ -170,6 +176,7 @@ camel_session_get_password_compat	(CamelSession *session,
 	CamelException ex;
 	gchar *ret;
 
+	camel_exception_init (&ex);
 	ret = camel_session_get_password (session, service, domain, prompt, item, flags, &ex);
 	ews_compat_propagate_exception_to_gerror (&ex, error);
 	return ret;
@@ -188,6 +195,7 @@ camel_service_connect_compat	(CamelService *service,
 	CamelException ex;
 	gboolean ret;
 	
+	camel_exception_init (&ex);
 	ret = camel_service_connect (service, &ex);
 	ews_compat_propagate_exception_to_gerror (&ex, error);
 	return ret;
