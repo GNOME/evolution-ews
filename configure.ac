@@ -4,8 +4,8 @@ AM_INIT_AUTOMAKE([gnu 1.9])
 AC_CONFIG_SRCDIR(README)
 AC_CONFIG_HEADERS(config.h)
 
-BASE_VERSION=3.0
-m4_define([base_version], [3.0])
+BASE_VERSION=2.28
+m4_define([base_version], [2.28])
 AC_SUBST(BASE_VERSION)
 
 dnl ****************************
