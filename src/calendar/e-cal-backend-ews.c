@@ -158,7 +158,7 @@ static ECalBackendClass *parent_class = NULL;
 static void ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data);
 static void ews_cal_component_get_item_id (ECalComponent *comp, gchar **itemid, gchar **changekey);
 static gboolean ews_start_sync	(gpointer data);
-
+static icaltimezone * resolve_tzid (const gchar *tzid, gpointer user_data);
 static void
 switch_offline (ECalBackendEws *cbews)
 {
@@ -2567,6 +2567,22 @@ e_cal_backend_ews_send_objects (ECalBackend *backend, EDataCal *cal, const gchar
 exit:
 	e_data_cal_notify_objects_sent (cal, EDC_ER_CODE(error), NULL, calobj);
 }
+
+/* TODO Do not replicate this in every backend */
+static icaltimezone *
+resolve_tzid (const gchar *tzid, gpointer user_data)
+{
+	icaltimezone *zone;
+
+	zone = (!strcmp (tzid, "UTC"))
+		? icaltimezone_get_utc_timezone ()
+		: icaltimezone_get_builtin_timezone_from_tzid (tzid);
+
+	if (!zone)
+		zone = e_cal_backend_internal_get_timezone (E_CAL_BACKEND (user_data), tzid);
+
+	return zone;
+ }
 
 static void
 put_component_to_store (ECalBackendEws *cbews,
