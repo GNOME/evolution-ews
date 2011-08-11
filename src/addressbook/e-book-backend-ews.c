@@ -1610,7 +1610,7 @@ ews_get_cache_dir (EBookBackend *backend, ESource *source)
 	mangled_uri = g_strdelimit (e_source_get_uri (source), ":/", '_');
 
 	filename = g_build_filename (
-		g_get_home_dir (), ".evolution", "addressbook", "cache", mangled_uri, NULL);
+		g_get_home_dir (), ".evolution", "cache", "addressbook", mangled_uri, NULL);
 
 	g_free (mangled_uri);
 
