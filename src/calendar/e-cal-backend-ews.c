@@ -1758,12 +1758,13 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 	dtend = icalcomponent_get_dtend (icalcomp);
 	dtstart_old = icalcomponent_get_dtstart (icalcomp_old);
 	dtend_old = icalcomponent_get_dtend (icalcomp_old);
-	if (g_strcmp0 (icaltime_as_ical_string (dtstart), icaltime_as_ical_string (dtstart_old)) ||
-	    g_strcmp0 (icaltime_as_ical_string (dtend), icaltime_as_ical_string (dtend_old))) {
+	if (icaltime_compare (dtstart, dtstart_old) != 0) {
 		e_ews_message_start_set_item_field (msg, "Start", "calendar","CalendarItem");
 		ewscal_set_time (msg, "Start", &dtstart);
 		e_ews_message_end_set_item_field (msg);
+	}
 
+	if (icaltime_compare (dtend, dtend_old) != 0) {
 		e_ews_message_start_set_item_field (msg, "End", "calendar", "CalendarItem");
 		ewscal_set_time (msg, "End", &dtend);
 		e_ews_message_end_set_item_field (msg);
@@ -1935,6 +1936,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	GCancellable *cancellable = NULL;
 	GSList *original_attachments = NULL, *modified_attachments = NULL, *added_attachments = NULL, *removed_attachments = NULL, *removed_attachments_ids = NULL, *i;
 	EwsAttachmentsData *attach_data;
+	struct TzidCbData cbd;
 
 	e_data_cal_error_if_fail(E_IS_CAL_BACKEND_EWS(backend), InvalidArg);
 	e_data_cal_error_if_fail(calobj != NULL && *calobj != '\0', InvalidArg);
@@ -1958,6 +1960,12 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 		g_propagate_error(&error, EDC_ERROR(InvalidObject));
 		goto exit;
 	}
+	
+	/* pick all the tzids out of the component and resolve
+	 * them using the vtimezones in the current calendar */
+	cbd.cbews = cbews;
+	cbd.comp = icalcomp;
+	icalcomponent_foreach_tzid(icalcomp, tzid_cb, &cbd);
 
 	comp = e_cal_component_new ();
 	e_cal_component_set_icalcomponent (comp, icalcomp);
