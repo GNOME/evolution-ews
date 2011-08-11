@@ -16,7 +16,7 @@
 		<group 	target="account"
 			id="org.gnome.evolution.mail.config.accountWizard" 
 			check="org_gnome_exchange_ews_check_options">
-			<item type="item_table" path="10.receive/15.config/30.ews" factory="org_gnome_exchange_ews_account_setup"/>
+			<item type="item_table" path="10.receive/10.config/30.ews" factory="org_gnome_exchange_ews_account_setup"/>
 			<item type="section_table" path="20.receive_options/20.gal" _label="GAL settings"/>
 			<item type="item_table" path="20.receive_options/20.gal/10.oab" factory="org_gnome_ews_oab_settings"/>
 		</group>
@@ -24,9 +24,9 @@
 	
 	<hook class="org.gnome.evolution.mail.config:1.0">
 		<group 	target="account"
-			id="org.gnome.evolution.mail.config.accountAssistant"
+			id="org.gnome.evolution.mail.config.accountDruid"
 			check="org_gnome_exchange_ews_check_options">
-			<item type="item_table" path="10.receive/15.config/30.ews" factory="org_gnome_exchange_ews_account_setup"/>
+			<item type="item_table" path="10.receive/10.config/30.ews" factory="org_gnome_exchange_ews_account_setup"/>
 			<item type="section_table" path="20.receive_options/20.gal" _label="GAL settings"/>
 			<item type="item_table" path="20.receive_options/20.gal/10.oab" factory="org_gnome_ews_oab_settings"/>
 		</group>
@@ -36,7 +36,7 @@
 		<group 	target="account" 
 			id="org.gnome.evolution.mail.config.accountEditor" 
 			check="org_gnome_exchange_ews_check_options">
-			<item type="item_table" path="10.receive/15.config/30.ews" factory="org_gnome_exchange_ews_account_setup"/>
+			<item type="item_table" path="10.receive/10.config/30.ews" factory="org_gnome_exchange_ews_account_setup"/>
 			<item type="section_table" path="20.receive_options/20.gal" _label="GAL settings"/>
 			<item type="item_table" path="20.receive_options/20.gal/10.oab" factory="org_gnome_ews_oab_settings"/>
 		</group>

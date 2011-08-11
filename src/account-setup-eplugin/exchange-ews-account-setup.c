@@ -72,7 +72,7 @@ free_ews_listener ( void )
 gint
 e_plugin_lib_enable (EPlugin *ep, gint enable)
 {
-	g_debug ("Loading Exchange EWS Plugin \n");
+	g_message ("Loading Exchange EWS Plugin \n");
 
 	if (!config_listener) {
 		config_listener = exchange_ews_account_listener_new ();
