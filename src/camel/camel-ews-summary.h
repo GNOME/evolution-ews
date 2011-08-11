@@ -23,25 +23,16 @@
 #define CAMEL_GW_SUMMARY_H
 
 #include <camel/camel.h>
+#include <camel/camel-folder-summary.h>
+#include <camel/camel-db.h>
+#include <camel/camel-exception.h>
+#include <camel/camel-store.h>
 
 /* Standard GObject macros */
-#define CAMEL_TYPE_EWS_SUMMARY \
-	(camel_ews_summary_get_type ())
-#define CAMEL_EWS_SUMMARY(obj) \
-	(G_TYPE_CHECK_INSTANCE_CAST \
-	((obj), CAMEL_TYPE_EWS_SUMMARY, CamelEwsSummary))
-#define CAMEL_EWS_SUMMARY_CLASS(cls) \
-	(G_TYPE_CHECK_CLASS_CAST \
-	((cls), CAMEL_TYPE_EWS_SUMMARY, CamelEwsSummaryClass))
-#define CAMEL_IS_EWS_SUMMARY(obj) \
-	(G_TYPE_CHECK_INSTANCE_TYPE \
-	((obj), CAMEL_TYPE_EWS_SUMMARY))
-#define CAMEL_IS_EWS_SUMMARY_CLASS(cls) \
-	(G_TYPE_CHECK_CLASS_TYPE \
-	((cls), CAMEL_TYPE_EWS_SUMMARY))
-#define CAMEL_EWS_SUMMARY_GET_CLASS(obj) \
-	(G_TYPE_INSTANCE_GET_CLASS \
-	((obj), CAMEL_TYPE_EWS_SUMMARY, CamelEwsSummaryClass))
+#define CAMEL_EWS_SUMMARY(obj)         CAMEL_CHECK_CAST (obj, camel_ews_summary_get_type (), CamelEwsSummary)
+#define CAMEL_EWS_SUMMARY_CLASS(klass) CAMEL_CHECK_CLASS_CAST (klass, camel_ews_summary_get_type (), CamelEwsSummaryClass)
+#define CAMEL_IS_EWS_SUMMARY(obj)      CAMEL_CHECK_TYPE (obj, camel_ews_summary_get_type ())
+
 
 G_BEGIN_DECLS
 
@@ -79,7 +70,7 @@ struct _CamelEwsSummaryClass {
 	CamelFolderSummaryClass parent_class;
 } ;
 
-GType camel_ews_summary_get_type (void);
+CamelType camel_ews_summary_get_type (void);
 
 CamelFolderSummary *
 	camel_ews_summary_new		(struct _CamelFolder *folder,

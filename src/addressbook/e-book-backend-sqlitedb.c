@@ -848,7 +848,7 @@ func_check (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer da
 	}
 
 	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
-	r->value.boolean = truth;
+	r->value.bool = truth;
 
 	return r;
 }
@@ -897,7 +897,7 @@ book_backend_sqlitedb_is_summary_query (const gchar *query)
 
 	r = e_sexp_eval (sexp);
 
-	retval = (r && r->type == ESEXP_RES_BOOL && r->value.boolean);
+	retval = (r && r->type == ESEXP_RES_BOOL && r->value.bool);
 
 	e_sexp_result_free (sexp, r);
 

@@ -30,10 +30,12 @@ int main (int argc, char *argv[])
 
 	g_type_init ();
 	g_test_init (&argc, &argv, NULL);
+	g_thread_init (NULL);
+
 	/*Create test suites and use more features of g_test */
 
 	/*Register tests*/
-	g_test_add_func ("/libews/connections", connection_tests_run);
+//	g_test_add_func ("/libews/connections", connection_tests_run);
 	g_test_add_func ("/libews/autocompletion", autocompletion_tests_run);
 
 	g_test_add_func ("/libews/syncfolder", op_tests_run);
@@ -44,7 +46,6 @@ int main (int argc, char *argv[])
 
 	g_test_add_func ("/libews/cuditem", cuditem_tests_run);
 
-	g_test_add_func ("/libews/getattachment", get_attachments_tests_run);
 
 	ret = g_test_run ();
 	finalize_test_data ();

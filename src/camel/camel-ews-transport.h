@@ -26,24 +26,11 @@
 
 #include <camel/camel.h>
 
-/* Standard GObject macros */
-#define CAMEL_TYPE_EWS_TRANSPORT \
-	(camel_ews_transport_get_type ())
-#define CAMEL_EWS_TRANSPORT(obj) \
-	(G_TYPE_CHECK_INSTANCE_CAST \
-	((obj), CAMEL_TYPE_EWS_TRANSPORT, CamelEwsTransport))
-#define CAMEL_EWS_TRANSPORT_CLASS(cls) \
-	(G_TYPE_CHECK_CLASS_CAST \
-	((cls), CAMEL_TYPE_EWS_TRANSPORT, CamelEwsTransportClass))
-#define CAMEL_IS_EWS_TRANSPORT(obj) \
-	(G_TYPE_CHECK_INSTANCE_TYPE \
-	((obj), CAMEL_TYPE_EWS_TRANSPORT))
-#define CAMEL_IS_EWS_TRANSPORT_CLASS(cls) \
-	(G_TYPE_CHECK_CLASS_TYPE \
-	((cls), CAMEL_TYPE_EWS_TRANSPORT))
-#define CAMEL_EWS_TRANSPORT_GET_CLASS(obj) \
-	(G_TYPE_INSTANCE_GET_CLASS \
-	((obj), CAMEL_TYPE_EWS_TRANSPORT, CamelEwsTransportClass))
+/* Standard CamelObject macros - added for 2.28 compatibility */
+#define CAMEL_EWS_TRANSPORT_TYPE     (camel_ews_transport_get_type ())
+#define CAMEL_EWS_TRANSPORT(obj)     (CAMEL_CHECK_CAST((obj), CAMEL_EWS_TRANSPORT_TYPE, CamelEwsTransport))
+#define CAMEL_EWS_TRANSPORT_CLASS(k) (CAMEL_CHECK_CLASS_CAST ((k), CAMEL_EWS_TRANSPORT_TYPE, CamelEwsTransportClass))
+#define CAMEL_IS_EWS_TRANSPORT(o)    (CAMEL_CHECK_TYPE((o), CAMEL_EWS_TRANSPORT_TYPE))
 
 G_BEGIN_DECLS
 
@@ -59,7 +46,7 @@ struct _CamelEwsTransportClass {
 	CamelTransportClass parent_class;
 };
 
-GType camel_ews_transport_get_type (void);
+CamelType camel_ews_transport_get_type (void);
 
 G_END_DECLS
 

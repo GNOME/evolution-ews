@@ -34,6 +34,7 @@
 #include "ews-esource-utils.h"
 #include "e-ews-compat.h"
 #include "e-ews-message.h"
+#include "ews-camel-compat.h"
 
 #define SUBFOLDER_DIR_NAME     "subfolders"
 #define SUBFOLDER_DIR_NAME_LEN 10
@@ -366,7 +367,7 @@ sync_deleted_folders (CamelEwsStore *store, GSList *deleted_folders)
 			fi = camel_ews_utils_build_folder_info (store, fid);
 
 			camel_ews_store_summary_remove_folder (ews_summary, fid, &error);
-			camel_store_folder_deleted ((CamelStore *) store, fi);
+			camel_object_trigger_event (CAMEL_OBJECT (store), "folder_deleted", fi);
 
 			g_clear_error (&error);
 		} else {
@@ -399,7 +400,8 @@ static gboolean ews_utils_rename_folder (CamelEwsStore *store, EwsFolderType fty
 
 	if (ftype == EWS_FOLDER_TYPE_MAILBOX) {
 		fi = camel_ews_utils_build_folder_info (store, fid);
-		camel_store_folder_renamed ((CamelStore *) store, old_fname, fi);
+		/* FIXME for 2.28 */
+		//camel_store_folder_renamed ((CamelStore *) store, old_fname, fi);
 	}
 
 	return TRUE;
@@ -600,7 +602,7 @@ sync_created_folders (CamelEwsStore *ews_store, GSList *created_folders)
 
 		if (ftype == EWS_FOLDER_TYPE_MAILBOX) {
 			fi = camel_ews_utils_build_folder_info (ews_store, fid->id);
-			camel_store_folder_created ((CamelStore *) ews_store, fi);
+			camel_object_trigger_event (CAMEL_OBJECT (ews_store), "folder_created", fi);
 		}
 	}
 }

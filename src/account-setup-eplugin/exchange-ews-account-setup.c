@@ -33,13 +33,13 @@
 #include <e-util/e-dialog-utils.h>
 #include "mail/em-config.h"
 #include "exchange-ews-account-setup.h"
+#include "ews-plugin-compat.h"
 #include <addressbook/gui/widgets/eab-config.h>
 #include <calendar/gui/e-cal-config.h>
 
 #include <camel-ews-folder.h>
 #include <e-ews-connection.h>
 #include <camel-ews-utils.h>
-#include <shell/e-shell.h>
 
 #define d(x) x
 
@@ -617,7 +617,6 @@ org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 		GtkWidget *label;
 		GtkWidget *hbox, *oal_combo, *fetch_button;
 		gint row = 0;
-		EShell *shell;
 		struct _oab_setting_data *cbdata;
 
 		/* Add cache check box */
@@ -645,8 +644,7 @@ org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 		row++;
 
 		/* If evolution is offline, dsensitize and return */
-		shell = e_shell_get_default ();
-		if (!e_shell_get_online (shell)) {
+		if (!ews_plugin_get_online_status ()) {
 			gtk_widget_set_sensitive (check, FALSE);
 			gtk_widget_set_sensitive (hbox, FALSE);
 			camel_url_free (url);

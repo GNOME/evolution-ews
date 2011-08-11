@@ -28,6 +28,7 @@
 #include <fcntl.h>
 #include <ctype.h>
 #include <errno.h>
+#include <unistd.h>
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 #include <libical/icalcomponent.h>

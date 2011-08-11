@@ -54,6 +54,7 @@ which needs to be better organized via functions */
 #include "camel-ews-store.h"
 #include "camel-ews-summary.h"
 #include "camel-ews-utils.h"
+#include "ews-camel-compat.h"
 #include <ews-camel-common.h>
 
 #define EWS_MAX_FETCH_COUNT 100
@@ -71,9 +72,8 @@ which needs to be better organized via functions */
 		   SUMMARY_MESSAGE_FLAGS
 
 
-#define CAMEL_EWS_FOLDER_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE \
-	((obj), CAMEL_TYPE_EWS_FOLDER, CamelEwsFolderPrivate))
+#define CAMEL_EWS_FOLDER_GET_PRIVATE(obj) obj->priv 
+static CamelOfflineFolderClass *parent_class = NULL;
 
 struct _CamelEwsFolderPrivate {
 	GMutex *search_lock;	/* for locking the search object */
@@ -89,33 +89,20 @@ struct _CamelEwsFolderPrivate {
 
 extern gint camel_application_is_exiting;
 
+static void
+ews_folder_constructed (CamelEwsFolder *object);
 static gboolean
 ews_delete_messages (CamelFolder *folder, GSList *deleted_items, gboolean expunge, GCancellable *cancellable, GError **error);
 
 #define d(x)
-
-G_DEFINE_TYPE (CamelEwsFolder, camel_ews_folder, CAMEL_TYPE_OFFLINE_FOLDER)
 
 static gchar *
 ews_get_filename (CamelFolder *folder, const gchar *uid, GError **error)
 {
 	CamelEwsFolder *ews_folder = CAMEL_EWS_FOLDER(folder);
 
-	return camel_data_cache_get_filename (ews_folder->cache, "cache", uid, error);
+	return camel_data_cache_get_filename_compat (ews_folder->cache, "cache", uid, error);
 }
-
-#if ! EDS_CHECK_VERSION(2,33,0)
-static gboolean camel_data_wrapper_construct_from_stream_sync(CamelDataWrapper *data_wrapper,
-							     CamelStream *stream,
-							     GCancellable *cancellable,
-							     GError **error)
-{
-	/* In 2.32 this returns an int, which is zero for success */
-	return !camel_data_wrapper_construct_from_stream(data_wrapper, stream, error);
-}
-
-#endif
-
 
 static CamelMimeMessage *
 camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder, const gchar *uid, GCancellable *cancellable, GError **error)
@@ -127,7 +114,7 @@ camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder, const gchar
 	priv = ews_folder->priv;
 
 	g_static_rec_mutex_lock (&priv->cache_lock);
-	stream = camel_data_cache_get (ews_folder->cache, "cur", uid, error);
+	stream = camel_data_cache_get_compat (ews_folder->cache, "cur", uid, error);
 	if (!stream) {
 			g_static_rec_mutex_unlock (&priv->cache_lock);
 		return NULL;
@@ -207,8 +194,8 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId
 	}
 
 	msg = camel_mime_message_new ();
-	if (EVO3_sync(camel_mime_part_construct_from_parser) (CAMEL_MIME_PART(msg),
-							      mimeparser, EVO3(NULL,) error) == -1) {
+	if (camel_mime_part_construct_from_parser_sync (CAMEL_MIME_PART(msg),
+							mimeparser, NULL, error) == -1) {
 		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 			     _("Unable to parse meeting request mimecontent!"));
 		goto exit_msg;
@@ -228,8 +215,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId
 
 		dw = camel_medium_get_content (CAMEL_MEDIUM (mimepart));
 		tmpstream = camel_stream_mem_new ();
-		if (EVO3_sync(camel_data_wrapper_decode_to_stream) (dw,
-								    tmpstream, EVO3(NULL,) error) == -1) {
+		if (camel_data_wrapper_decode_to_stream_sync (dw, tmpstream, NULL, error) == -1) {
 			g_object_unref (tmpstream);
 			goto exit_msg;
 		}
@@ -271,12 +257,11 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId
 			goto exit_save;
 		}
 		newstream = camel_stream_fs_new_with_fd (fd);
-		if (EVO3_sync(camel_data_wrapper_write_to_stream) (CAMEL_DATA_WRAPPER (msg),
-								   newstream, EVO3(NULL,) error) == -1)
+		if (camel_data_wrapper_write_to_stream_sync (CAMEL_DATA_WRAPPER (msg), newstream, NULL, error) == -1)
 			goto exit_save;
-		if (camel_stream_flush (newstream, EVO3(NULL,) error) == -1)
+		if (camel_stream_flush_compat (newstream, NULL, error) == -1)
 			goto exit_save;
-		if (camel_stream_close (newstream, EVO3(NULL,) error) == -1)
+		if (camel_stream_close_compat (newstream, NULL, error) == -1)
 			goto exit_save;
 		g_remove (mime_fname);
 		success = TRUE;
@@ -429,8 +414,8 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 		}
 	}
 
-	cache_file = camel_data_cache_get_filename  (ews_folder->cache, "cur",
-						     uid, error);
+	cache_file = camel_data_cache_get_filename_compat  (ews_folder->cache, "cur",
+						    	    uid, error);
 	temp = g_strrstr (cache_file, "/");
 	dir = g_strndup (cache_file, temp - cache_file);
 
@@ -481,10 +466,9 @@ exit:
 
 /* Get the message from cache if available otherwise get it from server */
 static CamelMimeMessage *
-ews_folder_get_message_sync (CamelFolder *folder, const gchar *uid, EVO3(GCancellable *cancellable,) GError **error )
+ews_folder_get_message_sync (CamelFolder *folder, const gchar *uid, GCancellable *cancellable, GError **error )
 {
 	CamelMimeMessage *message;
-	EVO2(GCancellable *cancellable = NULL);
 
 	message = camel_ews_folder_get_message_from_cache ((CamelEwsFolder *)folder, uid, cancellable, NULL);
 	if (!message)
@@ -506,7 +490,7 @@ ews_folder_search_by_expression (CamelFolder *folder, const gchar *expression, G
 	g_mutex_lock (priv->search_lock);
 
 	camel_folder_search_set_folder (ews_folder->search, folder);
-	matches = camel_folder_search_search (ews_folder->search, expression, NULL, error);
+	matches = camel_folder_search_search_compat (ews_folder->search, expression, NULL, error);
 
 	g_mutex_unlock (priv->search_lock);
 
@@ -526,7 +510,7 @@ ews_folder_count_by_expression (CamelFolder *folder, const gchar *expression, GE
 	g_mutex_lock (priv->search_lock);
 
 	camel_folder_search_set_folder (ews_folder->search, folder);
-	matches = camel_folder_search_count (ews_folder->search, expression, error);
+	matches = camel_folder_search_count_compat (ews_folder->search, expression, error);
 
 	g_mutex_unlock (priv->search_lock);
 
@@ -549,7 +533,7 @@ ews_folder_search_by_uids(CamelFolder *folder, const gchar *expression, GPtrArra
 	g_mutex_lock (priv->search_lock);
 
 	camel_folder_search_set_folder (ews_folder->search, folder);
-	matches = camel_folder_search_search (ews_folder->search, expression, uids, error);
+	matches = camel_folder_search_search_compat (ews_folder->search, expression, uids, error);
 
 	g_mutex_unlock (priv->search_lock);
 
@@ -700,8 +684,9 @@ ews_sync_mi_flags (CamelFolder *folder, GSList *mi_list, GCancellable *cancellab
 					      msg_update_flags, mi_list, NULL,
 					      cancellable, error);
 }
+
 static gboolean
-ews_synchronize_sync (CamelFolder *folder, gboolean expunge, EVO3(GCancellable *cancellable,) GError **error)
+ews_synchronize_sync (CamelFolder *folder, gboolean expunge, GCancellable *cancellable, GError **error)
 {
 	CamelEwsStore *ews_store;
 	GPtrArray *uids;
@@ -709,7 +694,6 @@ ews_synchronize_sync (CamelFolder *folder, gboolean expunge, EVO3(GCancellable *
 	int mi_list_len = 0;
 	gboolean success = TRUE;
 	int i;
-	EVO2(GCancellable *cancellable = NULL);
 
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
 
@@ -775,12 +759,11 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 	else
 		short_name++;
 
-	folder = g_object_new (
-		CAMEL_TYPE_EWS_FOLDER,
-		"name", short_name, "full-name", folder_name,
-		"parent_store", store, NULL);
-
+	folder = CAMEL_FOLDER (camel_object_new(camel_ews_folder_get_type ()) );
+	
 	ews_folder = CAMEL_EWS_FOLDER(folder);
+	camel_folder_construct (folder, store, folder_name, short_name);
+	ews_folder_constructed (ews_folder);
 
 	summary_file = g_build_filename (folder_dir, "summary", NULL);
 	folder->summary = camel_ews_summary_new (folder, summary_file);
@@ -800,7 +783,7 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 	camel_object_state_read (CAMEL_OBJECT (folder));
 	g_free(state_file);
 
-	ews_folder->cache = camel_data_cache_new (folder_dir, error);
+	ews_folder->cache = camel_data_cache_new_compat (folder_dir, error);
 	if (!ews_folder->cache) {
 		g_object_unref (folder);
 		return NULL;
@@ -958,7 +941,7 @@ exit:
 }
 
 static gboolean
-ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GError **error)
+ews_refresh_info_sync (CamelFolder *folder, GCancellable *cancellable, GError **error)
 {
 	CamelEwsFolder *ews_folder;
 	CamelEwsFolderPrivate *priv;
@@ -969,7 +952,6 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 	gchar *sync_state;
 	gboolean includes_last_item = FALSE;
 	GError *rerror = NULL;
-	EVO2(GCancellable *cancellable = NULL);
 
 	full_name = camel_folder_get_full_name (folder);
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
@@ -1070,11 +1052,10 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 
 static gboolean
 ews_append_message_sync (CamelFolder *folder, CamelMimeMessage *message,
-	 		 EVO2(const) CamelMessageInfo *info,
+	 		 CamelMessageInfo *info,
 			 gchar **appended_uid,
-	 		 EVO3(GCancellable *cancellable,) GError **error)
+	 		 GCancellable *cancellable, GError **error)
 {
-	EVO2(GCancellable *cancellable = NULL;)
 	gchar *itemid, *changekey;
 	const gchar *folder_name;
 	gchar *folder_id;
@@ -1129,10 +1110,9 @@ static gboolean
 ews_transfer_messages_to_sync	(CamelFolder *source,
 				 GPtrArray *uids,
 				 CamelFolder *destination,
-				 EVO2(GPtrArray **transferred_uids,)
 				 gboolean delete_originals,
-				 EVO3(GPtrArray **transferred_uids,)
-				 EVO3(GCancellable *cancellable,)
+				 GPtrArray **transferred_uids,
+				 GCancellable *cancellable,
 				 GError **error)
 {
 	EEwsConnection *cnc;
@@ -1143,7 +1123,6 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 	GError *rerror = NULL;
 	GSList *ids = NULL, *ret_items = NULL;
 	gint i = 0;
-	EVO2(GCancellable *cancellable = NULL);
 
 	dst_full_name = camel_folder_get_full_name (destination);
 	dst_ews_store = (CamelEwsStore *) camel_folder_get_parent_store (destination);
@@ -1175,8 +1154,8 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 		}
 
 		/*update the store about the content of the source and destination folders*/
-		ews_refresh_info_sync (source, EVO3(cancellable,) NULL);
-		ews_refresh_info_sync (destination, EVO3(cancellable,) NULL);
+		ews_refresh_info_sync (source, cancellable, NULL);
+		ews_refresh_info_sync (destination, cancellable, NULL);
 	}
 	g_free (dst_id);
 
@@ -1225,7 +1204,7 @@ ews_delete_messages (CamelFolder *folder, GSList *deleted_items, gboolean expung
 			   trigger folder info refresh and then go on to clear the
 			   cache of the deleted items anyway. */
 			g_clear_error(&rerror);
-			status = ews_refresh_info_sync (folder, EVO3(cancellable,) &rerror);
+			status = ews_refresh_info_sync (folder, cancellable, &rerror);
 		}
 
 		if (status) {
@@ -1255,14 +1234,13 @@ ews_delete_messages (CamelFolder *folder, GSList *deleted_items, gboolean expung
 }
 
 static gboolean
-ews_expunge_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GError **error)
+ews_expunge_sync (CamelFolder *folder, GCancellable *cancellable, GError **error)
 {
 	CamelEwsStore *ews_store;
 	CamelEwsMessageInfo *ews_info;
 	CamelMessageInfo *info;
 	CamelStore *parent_store;
 	GSList *deleted_items = NULL;
-	EVO2(GCancellable *cancellable = NULL;)
 	gint i, count;
 
 	parent_store = camel_folder_get_parent_store (folder);
@@ -1298,7 +1276,7 @@ ews_cmp_uids (CamelFolder *folder, const gchar *uid1, const gchar *uid2)
 }
 
 static void
-ews_folder_dispose (GObject *object)
+ews_folder_dispose (CamelObject *object)
 {
 	CamelEwsFolder *ews_folder = CAMEL_EWS_FOLDER (object);
 
@@ -1316,12 +1294,11 @@ ews_folder_dispose (GObject *object)
 	g_hash_table_destroy (ews_folder->priv->uid_eflags);
 	g_cond_free (ews_folder->priv->fetch_cond);
 
-	/* Chain up to parent's dispose() method. */
-	G_OBJECT_CLASS (camel_ews_folder_parent_class)->dispose (object);
+	g_free (ews_folder->priv);
 }
 
 static void
-ews_folder_constructed (GObject *object)
+ews_folder_constructed (CamelEwsFolder *object)
 {
 	CamelFolder *folder;
 	CamelStore *parent_store;
@@ -1340,32 +1317,137 @@ ews_folder_constructed (GObject *object)
 	g_free (description);
 }
 
+#if ! EDS_CHECK_VERSION (2,29,0)
+/* Compatibility with 2.28 */
+
+static GPtrArray *
+ews_folder_search_by_expression_compat (CamelFolder *folder, const gchar *expression, CamelException *ex)
+{
+	GError *error = NULL;
+	GPtrArray *ret;
+
+	ret = ews_folder_search_by_expression (folder, expression, &error);
+
+	ews_compat_propagate_gerror_to_exception (error, ex);
+	return ret;
+}
+
+static guint32
+ews_folder_count_by_expression_compat (CamelFolder *folder, const gchar *expression, CamelException *ex)
+{
+	GError *error = NULL;
+	guint32 ret;
+
+	ret = ews_folder_count_by_expression (folder, expression, &error);
+	ews_compat_propagate_gerror_to_exception (error, ex);
+	return ret;
+}
+
+static GPtrArray *
+ews_folder_search_by_uids_compat (CamelFolder *folder, const gchar *expression, GPtrArray *uids, CamelException *ex)
+{
+	GError *error = NULL;
+	GPtrArray *ret;
+
+	ret = ews_folder_search_by_uids (folder, expression, uids, &error);
+	ews_compat_propagate_gerror_to_exception (error, ex);
+	return ret;
+}
+
+static gchar *
+ews_get_filename_compat (CamelFolder *folder, const gchar *uid, CamelException *ex)
+{
+	GError *error = NULL;
+	gchar *ret;
+
+	ret = ews_get_filename (folder, uid, &error);
+	ews_compat_propagate_gerror_to_exception (error, ex);
+	return ret;
+}
+
+static CamelMimeMessage *
+ews_folder_get_message_compat (CamelFolder *folder, const gchar *uid, CamelException *ex)
+{
+	GError *error = NULL;
+	CamelMimeMessage *ret;
+
+	ret = ews_folder_get_message_sync (folder, uid, NULL, &error);
+	ews_compat_propagate_gerror_to_exception (error, ex);
+	return ret;
+}
+
+static void
+ews_append_message_compat (CamelFolder *folder, CamelMimeMessage *message,
+	 		   const CamelMessageInfo *info,
+			   gchar **appended_uid,
+	 		   CamelException *ex)
+{
+	GError *error = NULL;
+	ews_append_message_sync (folder, message, (CamelMessageInfo *) info, appended_uid, NULL, &error);	
+	ews_compat_propagate_gerror_to_exception (error, ex);
+}
+
+static void
+ews_refresh_info_compat (CamelFolder *folder, CamelException *ex)
+{
+	GError *error = NULL;
+	ews_refresh_info_sync (folder, NULL, &error);
+	ews_compat_propagate_gerror_to_exception (error, ex);
+}
+
+static void
+ews_synchronize_compat (CamelFolder *folder, gboolean expunge, CamelException *ex)
+{
+	GError *error = NULL;
+	ews_synchronize_sync (folder, expunge, NULL, &error);
+	ews_compat_propagate_gerror_to_exception (error, ex);
+}
+
+static void 
+ews_expunge_compat (CamelFolder *folder, CamelException *ex)
+{
+	GError *error = NULL;
+	ews_expunge_sync (folder, NULL, &error);
+	ews_compat_propagate_gerror_to_exception (error, ex);
+}
+
+static void 
+ews_transfer_messages_to_compat	(CamelFolder *source,
+				 GPtrArray *uids,
+				 CamelFolder *destination,
+				 GPtrArray **transferred_uids,
+				 gboolean delete_originals,
+				 CamelException *ex)
+{
+	GError *error = NULL;
+	ews_transfer_messages_to_sync	(source, uids, destination, delete_originals, 
+					 transferred_uids, NULL, &error);
+	ews_compat_propagate_gerror_to_exception (error, ex);
+}
+
+#endif /* compat */
+
 static void
 camel_ews_folder_class_init (CamelEwsFolderClass *class)
 {
-	GObjectClass *object_class;
 	CamelFolderClass *folder_class;
 
-	g_type_class_add_private (class, sizeof (CamelEwsFolderPrivate));
-
-	object_class = G_OBJECT_CLASS (class);
-	object_class->dispose = ews_folder_dispose;
-	object_class->constructed = ews_folder_constructed;
+	parent_class = CAMEL_OFFLINE_FOLDER_CLASS (camel_type_get_global_classfuncs (camel_offline_folder_get_type ()));
 
 	folder_class = CAMEL_FOLDER_CLASS (class);
-	folder_class->EVO3_sync(get_message) = ews_folder_get_message_sync;
-	folder_class->search_by_expression = ews_folder_search_by_expression;
-	folder_class->count_by_expression = ews_folder_count_by_expression;
+	folder_class->EVO3_sync(get_message) = ews_folder_get_message_compat;
+	folder_class->search_by_expression = ews_folder_search_by_expression_compat;
+	folder_class->count_by_expression = ews_folder_count_by_expression_compat;
 	folder_class->cmp_uids = ews_cmp_uids;
-	folder_class->search_by_uids = ews_folder_search_by_uids;
+	folder_class->search_by_uids = ews_folder_search_by_uids_compat;
 	folder_class->search_free = ews_folder_search_free;
-	folder_class->EVO3_sync(append_message) = ews_append_message_sync;
-	folder_class->EVO3_sync(refresh_info) = ews_refresh_info_sync;
-	EVO3(folder_class->synchronize_sync = ews_synchronize_sync);
-	EVO2(folder_class->sync = ews_synchronize_sync);
-	folder_class->EVO3_sync(expunge) = ews_expunge_sync;
-	folder_class->EVO3_sync(transfer_messages_to) = ews_transfer_messages_to_sync;
-	folder_class->get_filename = ews_get_filename;
+	folder_class->EVO3_sync(append_message) = ews_append_message_compat;
+	folder_class->EVO3_sync(refresh_info) = ews_refresh_info_compat;
+	EVO3(folder_class->synchronize_sync = ews_synchronize_compat);
+	EVO2(folder_class->sync = ews_synchronize_compat);
+	folder_class->EVO3_sync(expunge) = ews_expunge_compat;
+	folder_class->EVO3_sync(transfer_messages_to) = ews_transfer_messages_to_compat;
+	folder_class->get_filename = ews_get_filename_compat;
 }
 
 static void
@@ -1373,7 +1455,7 @@ camel_ews_folder_init (CamelEwsFolder *ews_folder)
 {
 	CamelFolder *folder = CAMEL_FOLDER (ews_folder);
 
-	ews_folder->priv = CAMEL_EWS_FOLDER_GET_PRIVATE (ews_folder);
+	ews_folder->priv = g_new0 (CamelEwsFolderPrivate, 1);
 
 	folder->permanent_flags = CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_DELETED |
 		CAMEL_MESSAGE_DRAFT | CAMEL_MESSAGE_FLAGGED | CAMEL_MESSAGE_SEEN |
@@ -1391,5 +1473,27 @@ camel_ews_folder_init (CamelEwsFolder *ews_folder)
 	ews_folder->priv->uid_eflags = g_hash_table_new (g_str_hash, g_str_equal);
 	camel_folder_set_lock_async (folder, TRUE);
 }
+
+/* CamelObject 2.28 */
+CamelType
+camel_ews_folder_get_type (void)
+{
+	static CamelType camel_ews_folder_type = CAMEL_INVALID_TYPE;
+
+	if (camel_ews_folder_type == CAMEL_INVALID_TYPE) {
+		camel_ews_folder_type =
+			camel_type_register (camel_offline_folder_get_type (),
+					"CamelEwsFolder",
+					sizeof (CamelEwsFolder),
+					sizeof (CamelEwsFolderClass),
+					(CamelObjectClassInitFunc) camel_ews_folder_class_init,
+					NULL,
+					(CamelObjectInitFunc) camel_ews_folder_init,
+					(CamelObjectFinalizeFunc) ews_folder_dispose);
+	}
+
+	return camel_ews_folder_type;
+}
+
 
 /** End **/

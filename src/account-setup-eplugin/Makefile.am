@@ -26,8 +26,10 @@ plugin_DATA = org-gnome-exchange-ews.eplug
 plugin_LTLIBRARIES = liborg-gnome-exchange-ews.la
 
 liborg_gnome_exchange_ews_la_SOURCES = 		\
-	exchange-ews-account-setup.c			\
-	exchange-ews-account-setup.h			\
+	ews-plugin-compat.c			\
+	ews-plugin-compat.h			\
+	exchange-ews-account-setup.c		\
+	exchange-ews-account-setup.h		\
 	exchange-ews-account-listener.c		\
 	exchange-ews-account-listener.h
 

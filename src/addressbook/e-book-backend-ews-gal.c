@@ -57,9 +57,7 @@
 
 #define d(x) x
 
-#define EDB_ERROR(_code) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, NULL)
-#define EDB_ERROR_EX(_code,_msg) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, _msg)
-#define EDB_ERROR_FAILED_STATUS(_code, _status) e_data_book_create_error_fmt (E_DATA_BOOK_STATUS_ ## _code, "Failed with status 0x%x", _status)
+#define EDB_ERROR(_code) GNOME_Evolution_Addressbook_##_code
 
 G_DEFINE_TYPE (EBookBackendEwsGal, e_book_backend_ews_gal, E_TYPE_BOOK_BACKEND)
 
@@ -112,7 +110,7 @@ e_book_backend_ews_gal_create_contact	(EBookBackend *backend,
 					 guint32 opid,
 					 const gchar *vcard )
 {
-	e_data_book_respond_create (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
+	e_data_book_respond_create (book, opid, EDB_ERROR (PermissionDenied), NULL);
 }
 
 static void
@@ -121,7 +119,7 @@ e_book_backend_ews_gal_remove_contacts	(EBookBackend *backend,
 					 guint32 opid,
 					 GList *id_list)
 {
-	e_data_book_respond_remove_contacts (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
+	e_data_book_respond_remove_contacts (book, opid, EDB_ERROR (PermissionDenied), NULL);
 }
 
 
@@ -131,7 +129,7 @@ e_book_backend_ews_gal_modify_contact	(EBookBackend *backend,
 					 guint32       opid,
 					 const gchar   *vcard)
 {
-	e_data_book_respond_modify (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
+	e_data_book_respond_modify (book, opid, EDB_ERROR (PermissionDenied), NULL);
 }
 
 static void
@@ -146,16 +144,16 @@ e_book_backend_ews_gal_get_contact	(EBookBackend *backend,
 
 	switch (gwb->priv->mode) {
 
-	case E_DATA_BOOK_MODE_LOCAL :
-		e_data_book_respond_get_contact (book, opid, EDB_ERROR (CONTACT_NOT_FOUND), "");
+	case GNOME_Evolution_Addressbook_MODE_LOCAL :
+		e_data_book_respond_get_contact (book, opid, EDB_ERROR (ContactNotFound), "");
 		return;
 
-	case E_DATA_BOOK_MODE_REMOTE :
+	case GNOME_Evolution_Addressbook_MODE_REMOTE :
 		if (gwb->priv->cnc == NULL) {
-			e_data_book_respond_get_contact (book, opid, e_data_book_create_error_fmt (E_DATA_BOOK_STATUS_OTHER_ERROR, "Not connected"), NULL);
+			e_data_book_respond_get_contact (book, opid, EDB_ERROR(OtherError), NULL);
 			return;
 		}
-		e_data_book_respond_get_contact (book, opid, EDB_ERROR (CONTACT_NOT_FOUND), "");
+		e_data_book_respond_get_contact (book, opid, EDB_ERROR (ContactNotFound), "");
 		return;
 	default :
 		break;
@@ -176,19 +174,19 @@ e_book_backend_ews_gal_get_contact_list	(EBookBackend *backend,
 
 	switch (egwb->priv->mode) {
 
-	case E_DATA_BOOK_MODE_LOCAL :
+	case GNOME_Evolution_Addressbook_MODE_LOCAL :
 
-		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (SUCCESS), vcard_list);
+		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (Success), vcard_list);
 		return;
 
-	case E_DATA_BOOK_MODE_REMOTE:
+	case GNOME_Evolution_Addressbook_MODE_REMOTE:
 
 		if (egwb->priv->cnc == NULL) {
-			e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
+			e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (AuthenticationRequired), NULL);
 			return;
 		}
 
-		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (SUCCESS), vcard_list);
+		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (Success), vcard_list);
 		return;
 	default :
 		break;
@@ -219,19 +217,38 @@ exit:
 }
 
 static gchar *
+ews_get_cache_dir (EBookBackend *backend, ESource *source)
+{
+        gchar *filename, *mangled_uri;
+
+        mangled_uri = g_strdelimit (e_source_get_uri (source), ":/", '_');
+
+        filename = g_build_filename (
+                g_get_home_dir (), ".evolution", "addressbook", "cache", mangled_uri, NULL);
+
+        g_free (mangled_uri);
+
+        return filename;
+}
+
+static gchar *
 ews_download_full_gal (EBookBackendEwsGal *cbews, EwsOALDetails *full, GCancellable *cancellable, GError **error)
 {
 	EBookBackendEwsGalPrivate *priv = cbews->priv;
 	EEwsConnection *oab_cnc;
 	gchar *full_url, *oab_url, *cache_file = NULL;
-	const gchar *cache_dir;
+	gchar *cache_dir;
 	gchar *comp_cache_file = NULL, *uncompress_file = NULL;
+	ESource *source;
 
 	/* oab url with oab.xml removed from the suffix */
 	oab_url = g_strndup (priv->oab_url, strlen (priv->oab_url) - 7);
 	full_url = g_strconcat (oab_url, full->filename, NULL);
-	cache_dir = e_book_backend_get_cache_dir (E_BOOK_BACKEND (cbews));
+	
+	source = e_book_backend_get_source (E_BOOK_BACKEND (cbews));
+	cache_dir = ews_get_cache_dir (E_BOOK_BACKEND (cbews), source);
 	comp_cache_file = g_build_filename (cache_dir, full->filename, NULL);
+	g_free (cache_dir);
 
 	oab_cnc = e_ews_connection_new (full_url, priv->username, priv->password, NULL, NULL, NULL);
 	if (!e_ews_connection_download_oal_file (oab_cnc, comp_cache_file, NULL, NULL, cancellable, error))
@@ -510,7 +527,7 @@ ebews_start_refreshing (EBookBackendEwsGal *ebews)
 
 	PRIV_LOCK (priv);
 
-	if	(priv->mode == E_DATA_BOOK_MODE_REMOTE &&
+	if	(priv->mode == GNOME_Evolution_Addressbook_MODE_REMOTE &&
 		 priv->cnc && priv->marked_for_offline)
 				fetch_deltas (ebews);
 
@@ -538,7 +555,7 @@ fetch_from_offline (EBookBackendEwsGal *ews, EDataBookView *book_view, const gch
 
 	if (contacts)
 		g_slist_free (contacts);
-	e_data_book_view_notify_complete (book_view, error);
+	e_data_book_view_notify_complete (book_view, error ? EDB_ERROR (OtherError) : 0);
 	e_data_book_view_unref (book_view);
 }
 
@@ -562,7 +579,7 @@ func_not (ESExp *f, gint argc, ESExpResult **argv, gpointer data)
 	}
 
 	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
-	r->value.boolean = FALSE;
+	r->value.bool = FALSE;
 
 	return r;
 }
@@ -573,7 +590,7 @@ func_and_or (ESExp *f, gint argc, ESExpResult **argv, gpointer and)
 	ESExpResult *r;
 
 	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
-	r->value.boolean = FALSE;
+	r->value.bool = FALSE;
 
 	return r;
 }
@@ -593,7 +610,7 @@ func_is (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer data)
 	}
 
 	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
-	r->value.boolean = FALSE;
+	r->value.bool = FALSE;
 
 	sdata->is_query_handled = FALSE;
 	return r;
@@ -614,7 +631,7 @@ func_endswith (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer
 	}
 
 	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
-	r->value.boolean = FALSE;
+	r->value.bool = FALSE;
 
 	sdata->is_query_handled = FALSE;
 	return r;
@@ -636,7 +653,7 @@ func_contains (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpointer
 	}
 
 	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
-	r->value.boolean = FALSE;
+	r->value.bool = FALSE;
 
 	sdata->is_query_handled = FALSE;
 	return r;
@@ -670,7 +687,7 @@ func_beginswith (struct _ESExp *f, gint argc, struct _ESExpResult **argv, gpoint
 	}
 
 	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
-	r->value.boolean = FALSE;
+	r->value.bool = FALSE;
 	return r;
 }
 
@@ -746,23 +763,19 @@ e_book_backend_ews_gal_start_book_view (EBookBackend  *backend,
 	e_data_book_view_notify_status_message (book_view, _("Searching..."));
 
 	switch (priv->mode) {
-	case E_DATA_BOOK_MODE_LOCAL:
+	case GNOME_Evolution_Addressbook_MODE_LOCAL:
 		if (priv->marked_for_offline && e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->oal_id, NULL)) {
 			fetch_from_offline (ebews, book_view, query, error);
 			return;
 		}
 
-		error = EDB_ERROR (OFFLINE_UNAVAILABLE);
-		e_data_book_view_notify_complete (book_view, error);
-		g_error_free (error);
+		e_data_book_view_notify_complete (book_view, EDB_ERROR (OfflineUnavailable));
 		return;
-	case E_DATA_BOOK_MODE_REMOTE:
+	case GNOME_Evolution_Addressbook_MODE_REMOTE:
 		if (!priv->cnc) {
-			error = EDB_ERROR (AUTHENTICATION_REQUIRED);
 			e_book_backend_notify_auth_required (backend);
-			e_data_book_view_notify_complete (book_view, error);
+			e_data_book_view_notify_complete (book_view, EDB_ERROR (AuthenticationRequired));
 			e_data_book_view_unref (book_view);
-			g_error_free (error);
 			return;
 		}
 
@@ -781,7 +794,7 @@ e_book_backend_ews_gal_start_book_view (EBookBackend  *backend,
 			   Until then only auto-completion works */
 
 			g_free (auto_comp_str);
-			e_data_book_view_notify_complete (book_view, error);
+			e_data_book_view_notify_complete (book_view, error ? EDB_ERROR (OtherError) : 0);
 			e_data_book_view_unref (book_view);
 			return;
 		}
@@ -797,7 +810,7 @@ e_book_backend_ews_gal_start_book_view (EBookBackend  *backend,
 		g_free (auto_comp_str);
 		g_hash_table_remove (priv->ops, book_view);
 		if (error != NULL) {
-			e_data_book_view_notify_complete (book_view, error);
+			e_data_book_view_notify_complete (book_view, error ? EDB_ERROR (OtherError) : 0);
 			e_data_book_view_unref (book_view);
 			g_clear_error (&error);
 			return;
@@ -823,7 +836,7 @@ e_book_backend_ews_gal_start_book_view (EBookBackend  *backend,
 		}
 
 		g_slist_free (mailboxes);
-		e_data_book_view_notify_complete (book_view, error);
+		e_data_book_view_notify_complete (book_view, error ? EDB_ERROR (OtherError) : 0);
 		e_data_book_view_unref (book_view);
 	default:
 		break;
@@ -871,13 +884,13 @@ e_book_backend_ews_gal_authenticate_user (EBookBackend *backend,
 	priv = ebgw->priv;
 
 	switch (ebgw->priv->mode) {
-	case E_DATA_BOOK_MODE_LOCAL:
-		e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (SUCCESS));
+	case GNOME_Evolution_Addressbook_MODE_LOCAL:
+		e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (Success));
 		return;
 
-	case E_DATA_BOOK_MODE_REMOTE:
+	case GNOME_Evolution_Addressbook_MODE_REMOTE:
 		if (priv->cnc) {
-			e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (SUCCESS));
+			e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (Success));
 			return;
 		}
 
@@ -891,7 +904,7 @@ e_book_backend_ews_gal_authenticate_user (EBookBackend *backend,
 
 		/* FIXME: Do some dummy request to ensure that the password is actually
 		   correct; don't just blindly return success */
-		e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (SUCCESS));
+		e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (Success));
 		e_book_backend_notify_writable (backend, FALSE);
 		return;
 	default :
@@ -907,8 +920,8 @@ e_book_backend_ews_gal_get_required_fields (EBookBackend *backend,
 	GList *fields = NULL;
 
 	fields = g_list_append (fields, (gchar *)e_contact_field_name (E_CONTACT_FILE_AS));
-	e_data_book_respond_get_supported_fields (book, opid,
-						  EDB_ERROR (SUCCESS),
+	e_data_book_respond_get_required_fields (book, opid,
+						  EDB_ERROR (Success),
 						  fields);
 	g_list_free (fields);
 
@@ -921,14 +934,14 @@ e_book_backend_ews_gal_get_supported_fields (EBookBackend *backend,
 {
 	e_data_book_respond_get_supported_fields (book,
 						  opid,
-						  NULL,
+						  0,
 						  supported_fields);
 }
 
-static void
-e_book_backend_ews_gal_cancel_operation (EBookBackend *backend, EDataBook *book, GError **perror)
+static GNOME_Evolution_Addressbook_CallStatus
+e_book_backend_ews_gal_cancel_operation (EBookBackend *backend, EDataBook *book)
 {
-
+	return EDB_ERROR (CouldNotCancel);
 }
 
 static gboolean
@@ -959,11 +972,10 @@ ews_remove_attachments (const gchar *attachment_dir)
 	return TRUE;
 }
 
-static void
+static GNOME_Evolution_Addressbook_CallStatus 
 e_book_backend_ews_gal_load_source 	(EBookBackend *backend,
 				 	 ESource *source,
-					 gboolean only_if_exists,
-					 GError **perror)
+					 gboolean only_if_exists)
 {
 	EBookBackendEwsGal *cbews;
 	EBookBackendEwsGalPrivate *priv;
@@ -976,9 +988,10 @@ e_book_backend_ews_gal_load_source 	(EBookBackend *backend,
 
 	/* If oal_id is present it means the GAL is marked for offline usage, we do not check for offline_sync property */
 	if (priv->oal_id) {
-		const gchar *cache_dir, *email;
+		const gchar *email;
+		gchar *cache_dir;
 		
-		cache_dir = e_book_backend_get_cache_dir (backend);
+		cache_dir = ews_get_cache_dir (backend, source);
 		email = e_source_get_property (source, "email");
 
 		priv->folder_name = g_strdup (e_source_peek_name (source));
@@ -989,14 +1002,16 @@ e_book_backend_ews_gal_load_source 	(EBookBackend *backend,
 		g_mkdir_with_parents (priv->attachment_dir, 0777);
 
 		priv->ebsdb = e_book_backend_sqlitedb_new (cache_dir, email, priv->oal_id, priv->folder_name, FALSE, &err);
+		g_free (cache_dir);
 		if (err) {
-			g_propagate_error (perror, err);
-			return;
+			g_clear_error (&err);
+			return EDB_ERROR (OtherError);
 		}
 		priv->marked_for_offline = TRUE;
 	}
 
 	e_book_backend_set_is_loaded (backend, TRUE);
+	return EDB_ERROR (Success);
 }
 
 static void
@@ -1004,7 +1019,7 @@ e_book_backend_ews_gal_remove	(EBookBackend *backend,
 				 EDataBook        *book,
 				 guint32           opid)
 {
-	e_data_book_respond_remove (book,  opid, EDB_ERROR (SUCCESS));
+	e_data_book_respond_remove (book,  opid, EDB_ERROR (Success));
 }
 
 static gchar *
@@ -1027,7 +1042,7 @@ e_book_backend_ews_gal_get_supported_auth_methods (EBookBackend *backend, EDataB
 	auth_methods = g_list_append (auth_methods, auth_method);
 	e_data_book_respond_get_supported_auth_methods (book,
 							opid,
-							EDB_ERROR (SUCCESS),
+							EDB_ERROR (Success),
 							auth_methods);
 	g_free (auth_method);
 	g_list_free (auth_methods);
@@ -1035,7 +1050,7 @@ e_book_backend_ews_gal_get_supported_auth_methods (EBookBackend *backend, EDataB
 
 static void
 e_book_backend_ews_gal_set_mode (EBookBackend *backend,
-                                   EDataBookMode mode)
+                                   gint mode)
 {
 	EBookBackendEwsGal *ebews;
 	EBookBackendEwsGalPrivate *priv;
@@ -1045,7 +1060,7 @@ e_book_backend_ews_gal_set_mode (EBookBackend *backend,
 	priv->mode = mode;
 
 	if (e_book_backend_is_loaded (backend)) {
-		if (mode == E_DATA_BOOK_MODE_LOCAL) {
+		if (mode == GNOME_Evolution_Addressbook_MODE_LOCAL) {
 			e_book_backend_notify_writable (backend, FALSE);
 			e_book_backend_notify_connection_status (backend, FALSE);
 			
@@ -1062,7 +1077,7 @@ e_book_backend_ews_gal_set_mode (EBookBackend *backend,
 				priv->cnc=NULL;
 			}
 		}
-		else if (mode == E_DATA_BOOK_MODE_REMOTE) {
+		else if (mode == GNOME_Evolution_Addressbook_MODE_REMOTE) {
 			e_book_backend_notify_writable (backend, FALSE);
 			e_book_backend_notify_connection_status (backend, TRUE);
 			e_book_backend_notify_auth_required (backend);

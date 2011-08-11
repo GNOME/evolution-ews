@@ -35,6 +35,7 @@
 
 #include "camel-ews-folder.h"
 #include "camel-ews-summary.h"
+#include "ews-camel-compat.h"
 
 #define CAMEL_EWS_SUMMARY_VERSION (1)
 
@@ -47,13 +48,10 @@
 static gint ews_summary_header_load (CamelFolderSummary *, FILE *);
 static gint ews_summary_header_save (CamelFolderSummary *, FILE *);
 
-static CamelMessageInfo *ews_message_info_migrate (CamelFolderSummary *s, FILE *in);
-
-static CamelMessageContentInfo * ews_content_info_migrate (CamelFolderSummary *s, FILE *in);
 static gboolean ews_info_set_flags(CamelMessageInfo *info, guint32 flags, guint32 set);
 
 static gint summary_header_from_db (CamelFolderSummary *s, CamelFIRecord *mir);
-static CamelFIRecord * summary_header_to_db (CamelFolderSummary *s, GError **error);
+static CamelFIRecord * summary_header_to_db (CamelFolderSummary *s, CamelException *ex);
 static CamelMIRecord * message_info_to_db (CamelFolderSummary *s, CamelMessageInfo *info);
 static CamelMessageInfo * message_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir);
 static gint content_info_to_db (CamelFolderSummary *s, CamelMessageContentInfo *info, CamelMIRecord *mir);
@@ -61,7 +59,7 @@ static CamelMessageContentInfo * content_info_from_db (CamelFolderSummary *s, Ca
 
 /*End of Prototypes*/
 
-G_DEFINE_TYPE (CamelEwsSummary, camel_ews_summary, CAMEL_TYPE_FOLDER_SUMMARY)
+static CamelFolderSummaryClass *camel_ews_summary_parent_class;
 
 static CamelMessageInfo *
 ews_message_info_clone(CamelFolderSummary *s, const CamelMessageInfo *mi)
@@ -94,15 +92,13 @@ camel_ews_summary_class_init (CamelEwsSummaryClass *class)
 {
 	CamelFolderSummaryClass *folder_summary_class;
 
+	camel_ews_summary_parent_class = CAMEL_FOLDER_SUMMARY_CLASS (camel_type_get_global_classfuncs (camel_folder_summary_get_type()));
+	
 	folder_summary_class = CAMEL_FOLDER_SUMMARY_CLASS (class);
-	folder_summary_class->message_info_size = sizeof (CamelEwsMessageInfo);
-	folder_summary_class->content_info_size = sizeof (CamelEwsMessageContentInfo);
 	folder_summary_class->message_info_clone = ews_message_info_clone;
 	folder_summary_class->message_info_free = ews_message_info_free;
 	folder_summary_class->summary_header_load = ews_summary_header_load;
 	folder_summary_class->summary_header_save = ews_summary_header_save;
-	folder_summary_class->message_info_migrate = ews_message_info_migrate;
-	folder_summary_class->content_info_migrate = ews_content_info_migrate;
 	folder_summary_class->info_set_flags = ews_info_set_flags;
 	folder_summary_class->summary_header_to_db = summary_header_to_db;
 	folder_summary_class->summary_header_from_db = summary_header_from_db;
@@ -116,6 +112,9 @@ static void
 camel_ews_summary_init (CamelEwsSummary *ews_summary)
 {
 	CamelFolderSummary *summary = CAMEL_FOLDER_SUMMARY (ews_summary);
+	
+	summary->message_info_size = sizeof(CamelEwsMessageInfo);
+	summary->content_info_size = sizeof(CamelEwsMessageContentInfo);
 
 	/* Meta-summary - Overriding UID len */
 	summary->meta_summary->uid_len = 2048;
@@ -134,8 +133,9 @@ CamelFolderSummary *
 camel_ews_summary_new (struct _CamelFolder *folder, const gchar *filename)
 {
 	CamelFolderSummary *summary;
+	
+	summary = CAMEL_FOLDER_SUMMARY (camel_object_new (camel_ews_summary_get_type ()));
 
-	summary = g_object_new (CAMEL_TYPE_EWS_SUMMARY, NULL);
 	summary->folder = folder;
 	camel_folder_summary_set_build_content (summary, TRUE);
 	camel_folder_summary_set_filename (summary, filename);
@@ -143,6 +143,25 @@ camel_ews_summary_new (struct _CamelFolder *folder, const gchar *filename)
 	camel_folder_summary_load_from_db (summary, NULL);
 
 	return summary;
+}
+
+CamelType
+camel_ews_summary_get_type (void)
+{
+	static CamelType type = CAMEL_INVALID_TYPE;
+
+	if (type == CAMEL_INVALID_TYPE) {
+		type = camel_type_register(
+				camel_folder_summary_get_type(), "CamelEwsSummary",
+				sizeof (CamelEwsSummary),
+				sizeof (CamelEwsSummaryClass),
+				(CamelObjectClassInitFunc) camel_ews_summary_class_init,
+				NULL,
+				(CamelObjectInitFunc) camel_ews_summary_init,
+				NULL);
+	}
+
+	return type;
 }
 
 static gint
@@ -183,12 +202,12 @@ ews_summary_header_load (CamelFolderSummary *s, FILE *in)
 }
 
 static CamelFIRecord *
-summary_header_to_db (CamelFolderSummary *s, GError **error)
+summary_header_to_db (CamelFolderSummary *s, CamelException *ex)
 {
 	CamelEwsSummary *ims = CAMEL_EWS_SUMMARY(s);
 	struct _CamelFIRecord *fir;
 
-	fir = CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_to_db (s, error);
+	fir = CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_to_db (s, ex);
 	if (!fir)
 		return NULL;
 
@@ -234,25 +253,6 @@ message_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
 	return info;
 }
 
-static CamelMessageInfo *
-ews_message_info_migrate (CamelFolderSummary *s, FILE *in)
-{
-	CamelMessageInfo *info;
-	CamelEwsMessageInfo *ews_info;
-
-	info = CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->message_info_migrate (s,in);
-	if (info) {
-		ews_info = (CamelEwsMessageInfo*) info;
-		if (camel_file_util_decode_uint32 (in, &ews_info->server_flags) == -1)
-			goto error;
-	}
-
-	return info;
-error:
-	camel_message_info_free (info);
-	return NULL;
-}
-
 static CamelMIRecord *
 message_info_to_db (CamelFolderSummary *s, CamelMessageInfo *info)
 {
@@ -282,15 +282,6 @@ content_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
 	mir->cinfo = part;
 	if (type)
 		return CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->content_info_from_db (s, mir);
-	else
-		return camel_folder_summary_content_info_new (s);
-}
-
-static CamelMessageContentInfo *
-ews_content_info_migrate (CamelFolderSummary *s, FILE *in)
-{
-	if (fgetc (in))
-		return CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->content_info_migrate (s, in);
 	else
 		return camel_folder_summary_content_info_new (s);
 }
@@ -385,7 +376,7 @@ camel_ews_summary_add_message	(CamelFolderSummary *summary,
 	info = camel_folder_summary_uid (summary, uid);
 
 	/* Create summary entry */
-	mi = (CamelEwsMessageInfo *)camel_folder_summary_info_new_from_message (summary, message, NULL);
+	mi = (CamelEwsMessageInfo *)camel_folder_summary_info_new_from_message (summary, message);
 
 	/* Copy flags 'n' tags */
 	mi->info.flags = camel_message_info_flags(info);

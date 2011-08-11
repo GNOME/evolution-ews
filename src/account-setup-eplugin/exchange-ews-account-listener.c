@@ -22,18 +22,11 @@
 #endif
 
 #include "e-ews-compat.h"
+#include "ews-plugin-compat.h"
 
 #include <string.h>
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
-#include <shell/e-shell.h>
-#if EDS_CHECK_VERSION(2,33,0)
-#include <mail/e-mail-session.h>
-#else
-#include <mail/mail-session.h>
-#endif
-#include <mail/e-mail-backend.h>
-
 #include <camel/camel.h>
 #include <libedataserver/e-account.h>
 #include <libedataserver/e-account-list.h>
@@ -122,13 +115,10 @@ EVO2 (CamelSession *session;)
 static void
 ews_account_removed (EAccountList *account_listener, EAccount *account)
 {
-	EVO3(EShell *shell;)
-	EVO3(EShellBackend *shell_backend;)
-	EVO3(CamelSession *session;)
 	EwsAccountInfo *info = NULL;
 	CamelService *service;
 	gchar *summary_file, *storage_path;
-	
+	CamelSession *l_session;
 
 	if (!is_ews_account (account))
 		return;
@@ -140,13 +130,11 @@ ews_account_removed (EAccountList *account_listener, EAccount *account)
 	ews_esource_utils_remove_groups (account->id->address);
 	ews_accounts = g_list_remove (ews_accounts, info);
 
-	EVO3(shell = e_shell_get_default ();)
-	EVO3(shell_backend = e_shell_get_backend_by_name (shell, "mail");)
-	EVO3 (session = (CamelSession *) e_mail_backend_get_session (E_MAIL_BACKEND (shell_backend));)
-	service = camel_session_get_service (session, account->source->url, CAMEL_PROVIDER_STORE, NULL);
+	l_session = ews_plugin_get_default_camel_session ();
+	service = camel_session_get_service (l_session, account->source->url, CAMEL_PROVIDER_STORE, NULL);
 
 	/* FIXME  Use this until CamelStore gets camel_store_remove_storage API which would be available eds 3.2 onwards */
-	storage_path = camel_session_get_storage_path (session, service, NULL);
+	storage_path = camel_session_get_storage_path (l_session, service, NULL);
 	summary_file = g_build_filename (storage_path, "folder-tree-v2", NULL);
 	g_unlink (summary_file);
 	

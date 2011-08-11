@@ -23,11 +23,11 @@ EDS_PACKAGE=1.2
 dnl *******************
 dnl Required Packages
 dnl *******************
-m4_define([eds_minimum_version], [2.31.1])
-m4_define([evo_minimum_version], [2.31.1])
+m4_define([eds_minimum_version], [2.28.2])
+m4_define([evo_minimum_version], [2.28.2])
 m4_define([glib_minimum_version], [2.16.1])
 m4_define([gconf_minimum_version], [2.0.0])
-m4_define([libsoup_minimum_version], [2.30])
+m4_define([libsoup_minimum_version], [2.28])
 
 
 dnl ***********************************
@@ -93,6 +93,7 @@ AS_COMPILER_FLAGS(WARNING_FLAGS,
 	-Wmissing-declarations -Wmissing-include-dirs
 	-Wmissing-noreturn -Wnested-externs -Wpointer-arith
 	-Wundef -Wwrite-strings -Werror")
+
 AC_SUBST(WARNING_FLAGS)
 
 dnl Other useful compiler warnings for test builds only.
@@ -156,7 +157,7 @@ else
 	EVO_PLUGIN_PACKAGE="evolution-plugin"
 	EVO_SHELL_PACKAGE="evolution-shell"
 	EDS_UI_PACKAGE="libedataserverui-$EDS_PACKAGE"
-	gtk_minimum_version="2.20.0"
+	gtk_minimum_version="2.18.0"
 
 	extensiondir=`$PKG_CONFIG --variable=extensiondir evolution-data-server-$EDS_PACKAGE`
 	AC_SUBST(extensiondir)

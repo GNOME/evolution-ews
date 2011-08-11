@@ -3,6 +3,7 @@
 #include <gio/gio.h>
 #include <string.h>
 #include "camel-ews-store-summary.h"
+#include "ews-camel-compat.h"
 
 #define S_LOCK(x) (g_static_rec_mutex_lock(&(x)->priv->s_lock))
 #define S_UNLOCK(x) (g_static_rec_mutex_unlock(&(x)->priv->s_lock))
@@ -23,7 +24,7 @@ struct _CamelEwsStoreSummaryPrivate {
 	GFileMonitor *monitor_delete;
 };
 
-G_DEFINE_TYPE (CamelEwsStoreSummary, camel_ews_store_summary, CAMEL_TYPE_OBJECT)
+G_DEFINE_TYPE (CamelEwsStoreSummary, camel_ews_store_summary, G_TYPE_OBJECT)
 
 static void
 ews_store_summary_finalize (GObject *object)
@@ -149,7 +150,7 @@ camel_ews_store_summary_new (const gchar *path)
 
 	ews_summary->priv->path = g_strdup (path);
 	file = g_file_new_for_path (path);
-	ews_summary->priv->monitor_delete = g_file_monitor_file (file, G_FILE_MONITOR_SEND_MOVED, NULL, &error);
+	ews_summary->priv->monitor_delete = g_file_monitor_file (file, G_FILE_MONITOR_NONE, NULL, &error);
 
 	/* Remove this once we have camel_store_remove_storage api, which should be available from 3.2 */
 	if (!error)
@@ -343,11 +344,11 @@ camel_ews_store_summary_new_folder (CamelEwsStoreSummary *ews_summary,
 			       "ChangeKey", change_key);
 	g_key_file_set_string (ews_summary->priv->key_file, folder_id,
 			       "DisplayName", display_name);
-	g_key_file_set_uint64 (ews_summary->priv->key_file, folder_id,
+	g_key_file_set_integer (ews_summary->priv->key_file, folder_id,
 			       "FolderType", folder_type);
-	g_key_file_set_uint64 (ews_summary->priv->key_file, folder_id,
+	g_key_file_set_integer (ews_summary->priv->key_file, folder_id,
 			       "Flags", folder_flags);
-	g_key_file_set_uint64 (ews_summary->priv->key_file, folder_id,
+	g_key_file_set_integer (ews_summary->priv->key_file, folder_id,
 			       "Total", total);
 
 	ews_ss_hash_replace (ews_summary, g_strdup (folder_id), NULL, FALSE);
@@ -414,7 +415,7 @@ camel_ews_store_summary_set_folder_flags (CamelEwsStoreSummary *ews_summary,
 {
 	S_LOCK(ews_summary);
 
-	g_key_file_set_uint64	(ews_summary->priv->key_file, folder_id,
+	g_key_file_set_integer	(ews_summary->priv->key_file, folder_id,
 				 "Flags", flags);
 	ews_summary->priv->dirty = TRUE;
 
@@ -428,7 +429,7 @@ camel_ews_store_summary_set_folder_unread (CamelEwsStoreSummary *ews_summary,
 {
 	S_LOCK(ews_summary);
 
-	g_key_file_set_uint64	(ews_summary->priv->key_file, folder_id,
+	g_key_file_set_integer	(ews_summary->priv->key_file, folder_id,
 				 "UnRead", unread);
 	ews_summary->priv->dirty = TRUE;
 
@@ -442,7 +443,7 @@ camel_ews_store_summary_set_folder_total (CamelEwsStoreSummary *ews_summary,
 {
 	S_LOCK(ews_summary);
 
-	g_key_file_set_uint64	(ews_summary->priv->key_file, folder_id,
+	g_key_file_set_integer	(ews_summary->priv->key_file, folder_id,
 				 "Total", total);
 	ews_summary->priv->dirty = TRUE;
 
@@ -456,7 +457,7 @@ camel_ews_store_summary_set_folder_type (CamelEwsStoreSummary *ews_summary,
 {
 	S_LOCK(ews_summary);
 
-	g_key_file_set_uint64	(ews_summary->priv->key_file, folder_id,
+	g_key_file_set_integer	(ews_summary->priv->key_file, folder_id,
 				 "FolderType", ews_folder_type);
 	ews_summary->priv->dirty = TRUE;
 
@@ -573,7 +574,7 @@ camel_ews_store_summary_get_folder_flags (CamelEwsStoreSummary *ews_summary,
 
 	S_LOCK(ews_summary);
 
-	ret = g_key_file_get_uint64	(ews_summary->priv->key_file, folder_id,
+	ret = g_key_file_get_integer	(ews_summary->priv->key_file, folder_id,
 					 "Flags", error);
 
 	S_UNLOCK(ews_summary);
@@ -591,7 +592,7 @@ camel_ews_store_summary_get_folder_unread (CamelEwsStoreSummary *ews_summary,
 
 	S_LOCK(ews_summary);
 
-	ret = g_key_file_get_uint64	(ews_summary->priv->key_file, folder_id,
+	ret = g_key_file_get_integer	(ews_summary->priv->key_file, folder_id,
 					 "UnRead", error);
 
 	S_UNLOCK(ews_summary);
@@ -608,7 +609,7 @@ camel_ews_store_summary_get_folder_total (CamelEwsStoreSummary *ews_summary,
 
 	S_LOCK(ews_summary);
 
-	ret = g_key_file_get_uint64	(ews_summary->priv->key_file, folder_id,
+	ret = g_key_file_get_integer	(ews_summary->priv->key_file, folder_id,
 					 "Total", error);
 
 	S_UNLOCK(ews_summary);
@@ -625,7 +626,7 @@ camel_ews_store_summary_get_folder_type (CamelEwsStoreSummary *ews_summary,
 
 	S_LOCK(ews_summary);
 
-	ret = g_key_file_get_uint64	(ews_summary->priv->key_file, folder_id,
+	ret = g_key_file_get_integer	(ews_summary->priv->key_file, folder_id,
 					 "FolderType", error);
 
 	S_UNLOCK(ews_summary);

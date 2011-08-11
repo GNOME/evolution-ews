@@ -5,12 +5,12 @@ lib_LTLIBRARIES = libeews-1.2.la
 MARSHAL_GENERATED = ews-marshal.c ews-marshal.h
 
 ews-marshal.h: ews-marshal.list
-	$(AM_V_GEN) ( $(GLIB_GENMARSHAL) --prefix=ews_marshal $(srcdir)/ews-marshal.list --header > ews-marshal.tmp \
+	$(AM_V_GEN) ( glib-genmarshal --prefix=ews_marshal $(srcdir)/ews-marshal.list --header > ews-marshal.tmp \
 	&& mv ews-marshal.tmp ews-marshal.h ) \
 	|| ( rm -f ews-marshal.tmp && exit 1 )
 
 ews-marshal.c: ews-marshal.h
-	$(AM_V_GEN) ( (echo '#include "ews-marshal.h"'; $(GLIB_GENMARSHAL) --prefix=ews_marshal $(srcdir)/ews-marshal.list --body) > ews-marshal.tmp \
+	$(AM_V_GEN) ( (echo '#include "ews-marshal.h"'; glib-genmarshal --prefix=ews_marshal $(srcdir)/ews-marshal.list --body) > ews-marshal.tmp \
 	&& mv ews-marshal.tmp ews-marshal.c ) \
 	|| ( rm -f ews-marshal.tmp && exit 1 )
 

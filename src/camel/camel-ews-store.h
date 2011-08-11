@@ -29,26 +29,11 @@
 #include <e-ews-connection.h>
 #include "camel-ews-store-summary.h"
 
-/* Standard GObject macros */
-#define CAMEL_TYPE_EWS_STORE \
-	(camel_ews_store_get_type ())
-#define CAMEL_EWS_STORE(obj) \
-	(G_TYPE_CHECK_INSTANCE_CAST \
-	((obj), CAMEL_TYPE_EWS_STORE, CamelEwsStore))
-#define CAMEL_EWS_STORE_CLASS(cls) \
-	(G_TYPE_CHECK_CLASS_CAST \
-	((cls), CAMEL_TYPE_EWS_STORE, CamelEwsStoreClass))
-#define CAMEL_IS_EWS_STORE(obj) \
-	(G_TYPE_CHECK_INSTANCE_TYPE \
-	((obj), CAMEL_TYPE_EWS_STORE))
-#define CAMEL_IS_EWS_STORE_CLASS(cls) \
-	(G_TYPE_CHECK_CLASS_TYPE \
-	((cls), CAMEL_TYPE_EWS_STORE))
-#define CAMEL_EWS_STORE_GET_CLASS(obj) \
-	(G_TYPE_INSTANCE_GET_CLASS \
-	((obj), CAMEL_TYPE_EWS_STORE, CamelEwsStoreClass))
-
-#define GW_PARAM_FILTER_INBOX		(1 << 0)
+/* Standard Camel Object macros - added for 2.28 compatibility */
+#define CAMEL_EWS_STORE_TYPE     (camel_ews_store_get_type ())
+#define CAMEL_EWS_STORE(obj)     (CAMEL_CHECK_CAST((obj), CAMEL_EWS_STORE_TYPE, CamelEwsStore))
+#define CAMEL_EWS_STORE_CLASS(k) (CAMEL_CHECK_CLASS_CAST ((k), CAMEL_EWS_STORE_TYPE, CamelEwsStoreClass))
+#define CAMEL_IS_EWS_STORE(o)    (CAMEL_CHECK_TYPE((o), CAMEL_EWS_STORE_TYPE))
 
 G_BEGIN_DECLS
 
@@ -68,7 +53,7 @@ struct _CamelEwsStoreClass {
 	CamelOfflineStoreClass parent_class;
 };
 
-GType camel_ews_store_get_type (void);
+CamelType camel_ews_store_get_type (void);
 gchar *		ews_get_name	(CamelService *service, gboolean brief);
 EEwsConnection *
 		camel_ews_store_get_connection	(CamelEwsStore *ews_store);

@@ -28,27 +28,14 @@
 #define CAMEL_EWS_FOLDER_H
 
 #include <camel/camel.h>
-
+#include <gio/gio.h>
 #include "camel-ews-summary.h"
 
-/* Standard GObject macros */
-#define CAMEL_TYPE_EWS_FOLDER \
-	(camel_ews_folder_get_type ())
-#define CAMEL_EWS_FOLDER(obj) \
-	(G_TYPE_CHECK_INSTANCE_CAST \
-	((obj), CAMEL_TYPE_EWS_FOLDER, CamelEwsFolder))
-#define CAMEL_EWS_FOLDER_CLASS(cls) \
-	(G_TYPE_CHECK_CLASS_CAST \
-	((cls), CAMEL_TYPE_EWS_FOLDER, CamelEwsFolderClass))
-#define CAMEL_IS_EWS_FOLDER(obj) \
-	(G_TYPE_CHECK_INSTANCE_TYPE \
-	((obj), CAMEL_TYPE_EWS_FOLDER))
-#define CAMEL_IS_EWS_FOLDER_CLASS(cls) \
-	(G_TYPE_CHECK_CLASS_TYPE \
-	((cls), CAMEL_TYPE_EWS_FOLDER))
-#define CAMEL_EWS_FOLDER_GET_CLASS(obj) \
-	(G_TYPE_INSTANCE_GET_CLASS \
-	((obj), CAMEL_TYPE_EWS_FOLDER, CamelEwsFolderClass))
+/* Camel macros - gobject stuff replaced */
+#define CAMEL_EWS_FOLDER_TYPE     (camel_ews_folder_get_type ())
+#define CAMEL_EWS_FOLDER(obj)     (CAMEL_CHECK_CAST((obj), CAMEL_EWS_FOLDER_TYPE, CamelEwsFolder))
+#define CAMEL_EWS_FOLDER_CLASS(k) (CAMEL_CHECK_CLASS_CAST ((k), CAMEL_EWS_FOLDER_TYPE, CamelEwsFolderClass))
+#define CAMEL_IS_EWS_FOLDER(o)    (CAMEL_CHECK_TYPE((o), CAMEL_EWS_FOLDER_TYPE))
 
 G_BEGIN_DECLS
 
@@ -68,7 +55,7 @@ struct _CamelEwsFolderClass {
 	CamelOfflineFolderClass parent_class;
 };
 
-GType camel_ews_folder_get_type (void);
+CamelType camel_ews_folder_get_type (void);
 
 /* implemented */
 CamelFolder * camel_ews_folder_new(CamelStore *store, const gchar *folder_dir, const gchar *folder_name, GCancellable *cancellable, GError **error);

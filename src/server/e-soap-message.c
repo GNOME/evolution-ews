@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <libsoup/soup.h>
+#include <unistd.h>
 #ifdef G_OS_WIN32
 #include <io.h>
 #endif

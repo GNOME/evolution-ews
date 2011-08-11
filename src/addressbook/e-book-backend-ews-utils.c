@@ -35,10 +35,11 @@
 #include <glib/gstdio.h>
 #include <glib/gi18n-lib.h>
 
+#include <libedata-book/e-book-backend-sexp.h>
+#include <libedata-book/e-book-backend.h>
+#include <libedata-book/e-data-book.h>
+#include <libedata-book/e-data-book-view.h>
 #include "e-book-backend-ews-utils.h"
-#include "libedata-book/e-book-backend-sexp.h"
-#include "libedata-book/e-data-book.h"
-#include "libedata-book/e-data-book-view.h"
 
 
 /**
