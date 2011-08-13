@@ -448,8 +448,10 @@ ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 		} else
 			ews_parse_soap_fault (response, &error);
 
-		if (error)
+		if (error) {
 			g_simple_async_result_set_from_error (enode->simple, error);
+			g_clear_error (&error);
+		}
 
 		g_object_unref (response);
 	}
