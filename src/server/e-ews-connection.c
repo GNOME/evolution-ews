@@ -468,6 +468,7 @@ exit:
 	} else {
 		g_simple_async_result_complete_in_idle (enode->simple);
 	}
+	g_object_unref (enode->simple);
 	ews_active_job_done (enode->cnc, enode);
 }
 
