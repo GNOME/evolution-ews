@@ -1044,6 +1044,7 @@ convert_vevent_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 	icaltimetype dtstart, dtend;
 	icalproperty *prop;
 	gboolean has_alarms;
+	const char *value;
 
 	e_cal_component_set_icalcomponent(comp, icalcomp);
 
@@ -1053,10 +1054,14 @@ convert_vevent_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 	e_soap_message_start_element(msg, "CalendarItem", NULL, NULL);
 
 	/* subject */
-	e_ews_message_write_string_parameter(msg, "Subject", NULL,  icalcomponent_get_summary(icalcomp));
+	value = icalcomponent_get_summary(icalcomp);
+	if (value)
+		e_ews_message_write_string_parameter(msg, "Subject", NULL, value);
 
 	/* description */
-	e_ews_message_write_string_parameter_with_attribute(msg, "Body", NULL, icalcomponent_get_description(icalcomp), "BodyType", "Text");
+	value = icalcomponent_get_description(icalcomp);
+	if (value)
+		e_ews_message_write_string_parameter_with_attribute(msg, "Body", NULL, value, "BodyType", "Text");
 
 	/* set alarms */
 	has_alarms = e_cal_component_has_alarms (comp);
@@ -1081,7 +1086,9 @@ convert_vevent_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 		e_ews_message_write_string_parameter (msg, "LegacyFreeBusyStatus",NULL,"Busy");
 
 	/* location */
-	e_ews_message_write_string_parameter(msg, "Location", NULL, icalcomponent_get_location(icalcomp));
+	value = icalcomponent_get_location(icalcomp);
+	if (value)
+		e_ews_message_write_string_parameter(msg, "Location", NULL, value);
 	
 	/* collect attendees */
 	e_ews_collect_attendees(icalcomp, &required, &optional, &resource);
