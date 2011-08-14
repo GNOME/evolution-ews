@@ -1735,6 +1735,7 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 			convert_vevent_property_to_updatexml (msg, "ReminderMinutesBeforeStart", buf, "item", NULL, NULL);
 		}
 	}
+	else convert_vevent_property_to_updatexml (msg, "ReminderIsSet", "false", "item", NULL, NULL);
 
 	/*location*/
 	value = icalcomponent_get_location (icalcomp);
