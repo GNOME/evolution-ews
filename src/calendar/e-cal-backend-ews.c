@@ -1017,6 +1017,11 @@ typedef struct {
 	EServerMethodContext context;
 } EwsCreateData;
 
+typedef struct {
+	ECalBackendEws *cbews;
+	icalcomponent *icalcomp;
+} EwsConvertData;
+
 static void add_attendees_list_to_message(ESoapMessage *msg, const gchar *listname, GSList *list) {
 	GSList *item;
 
@@ -1038,7 +1043,8 @@ static void add_attendees_list_to_message(ESoapMessage *msg, const gchar *listna
 static void
 convert_vevent_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 {
-	icalcomponent *icalcomp = (icalcomponent*)user_data;
+	EwsConvertData *convert_data = user_data;
+	icalcomponent *icalcomp = convert_data->icalcomp;
 	ECalComponent *comp = e_cal_component_new();
 	GSList *required = NULL, *optional = NULL, *resource = NULL;
 	icaltimetype dtstart, dtend;
@@ -1077,6 +1083,10 @@ convert_vevent_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 	ewscal_set_time (msg, "Start", &dtstart);
 	ewscal_set_time (msg, "End", &dtend);
 	/* We have to do the time zone(s) later, or the server rejects the request */
+
+	/* All day event ? */
+	if (icaltime_is_date (dtstart))
+		e_ews_message_write_string_parameter(msg, "IsAllDayEvent", NULL, "true");
 
 	/*freebusy*/
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_TRANSP_PROPERTY);
@@ -1120,7 +1130,7 @@ convert_vevent_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 		ewscal_set_timezone (msg, "StartTimeZone", (icaltimezone *)dtstart.zone);
 		ewscal_set_timezone (msg, "EndTimeZone", (icaltimezone *)dtstart.zone);
 	} else
-		ewscal_set_timezone (msg, "MeetingTimeZone", (icaltimezone *)dtstart.zone);
+		ewscal_set_timezone (msg, "MeetingTimeZone", (icaltimezone *)(dtstart.zone?dtstart.zone:convert_data->cbews->priv->default_zone));
 
 	// end of "CalendarItem"
 	e_soap_message_end_element(msg);
@@ -1129,7 +1139,8 @@ convert_vevent_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 static void
 convert_vtodo_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 {
-	icalcomponent *icalcomp = (icalcomponent*)user_data;
+	EwsConvertData *convert_data = user_data;
+	icalcomponent *icalcomp = convert_data->icalcomp;
 	icalproperty *prop;
 	icaltimetype dt;
 	int value;
@@ -1180,9 +1191,9 @@ convert_vtodo_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 static void
 convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 {
-	icalcomponent *icalcomp = (icalcomponent*)user_data;
+	EwsConvertData *convert_data = user_data;
 
-	switch (icalcomponent_isa (icalcomp)) {
+	switch (icalcomponent_isa (convert_data->icalcomp)) {
 	case ICAL_VEVENT_COMPONENT:
 		convert_vevent_calcomp_to_xml (msg, user_data);
 		break;
@@ -1192,6 +1203,9 @@ convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 	default:
 		break;
 	}
+	
+	g_object_unref (convert_data->cbews);
+	g_free (convert_data);
 }
 
 static void
@@ -1490,6 +1504,7 @@ static void
 e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *calobj)
 {
 	EwsCreateData *create_data;
+	EwsConvertData *convert_data;
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
 	icalcomponent_kind kind;
@@ -1554,7 +1569,9 @@ e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMeth
 	create_data->cal = g_object_ref(cal);
 	create_data->context = context;
 
-
+	convert_data = g_new0 (EwsConvertData, 1);
+	convert_data->cbews = g_object_ref (cbews);
+	convert_data->icalcomp = icalcomp;
 
 	/*In case we are creating a meeting with attendees and attachments. 
 	 * We have to preform 3 steps in order to allow attendees to receive attachments in their invite mails.
@@ -1576,7 +1593,7 @@ e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMeth
 					     send_meeting_invitations,
 					     priv->folder_id,
 					     convert_calcomp_to_xml,
-					     icalcomp,
+					     convert_data,
 					     ews_create_object_cb,
 					     cancellable,
 					     create_data);
