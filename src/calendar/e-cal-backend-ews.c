@@ -1734,9 +1734,9 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 	old_value = icalcomponent_get_description (icalcomp_old);
 	if ((value && old_value && g_ascii_strcasecmp (value, old_value)) || 
 	 (value && old_value == NULL)) {
-			convert_vevent_property_to_updatexml (msg, "Body", "", "item", "BodyType", "Text");
-	} else if (!value && old_value)
 			convert_vevent_property_to_updatexml (msg, "Body", value, "item", "BodyType", "Text");
+	} else if (!value && old_value)
+			convert_vevent_property_to_updatexml (msg, "Body", "", "item", "BodyType", "Text");
 
 	/*update alarm items*/
 	has_alarms = e_cal_component_has_alarms (modify_data->comp);
@@ -1759,9 +1759,9 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 	old_value = icalcomponent_get_location (icalcomp_old);
 	if ((value && old_value && g_ascii_strcasecmp (value, old_value)) || 
 	 (value && old_value == NULL)) {
-			convert_vevent_property_to_updatexml (msg, "Location", "", "calendar", NULL, NULL);
-	} else if (!value && old_value)
 			convert_vevent_property_to_updatexml (msg, "Location", value, "calendar", NULL, NULL);
+	} else if (!value && old_value)
+			convert_vevent_property_to_updatexml (msg, "Location", "", "calendar", NULL, NULL);
 
 	/*freebusy*/
 	transp = icalcomponent_get_first_property (icalcomp, ICAL_TRANSP_PROPERTY);
