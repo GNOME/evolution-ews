@@ -1497,7 +1497,7 @@ static void tzid_cb(icalparameter *param, void *data)
 	if (!new_comp)
 		return;
 
-	icalcomponent_add_component(cbd->comp, new_comp);
+	icalcomponent_add_component(cbd->comp, icalcomponent_new_clone (new_comp));
 }
 
 static void
