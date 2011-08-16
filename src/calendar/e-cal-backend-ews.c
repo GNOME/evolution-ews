@@ -3073,7 +3073,6 @@ exit:
 	g_free (sync_data->master_uid);
 	g_free (sync_data->sync_state);
 	g_free (sync_data);
-	g_object_unref (cnc);
 }
 
 static void
@@ -3130,7 +3129,6 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 		PRIV_UNLOCK (priv);
 
 		g_clear_error (&error);
-		g_object_unref (cnc);
 		return;
 	}
 
@@ -3189,7 +3187,7 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 	}
 
 	if (cal_item_ids)
-		e_ews_connection_get_items_start (g_object_ref (cnc),
+		e_ews_connection_get_items_start (cnc,
 						  EWS_PRIORITY_MEDIUM,
 						  cal_item_ids,
 						  "IdOnly",
@@ -3200,7 +3198,7 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 						  (gpointer) sync_data);
 
 	if (task_item_ids)
-		e_ews_connection_get_items_start (g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
+		e_ews_connection_get_items_start (cnc, EWS_PRIORITY_MEDIUM,
 						  task_item_ids,
 						  "AllProperties",
 						  NULL,
@@ -3212,7 +3210,6 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 
 
 exit:
-	g_object_unref (cnc);
 	if (cal_item_ids) {
 		g_slist_foreach (cal_item_ids, (GFunc) g_free, NULL);
 		g_slist_free (cal_item_ids);
@@ -3246,7 +3243,7 @@ ews_start_sync	(gpointer data)
 
 	sync_state = e_cal_backend_store_get_key_value (priv->store, SYNC_KEY);
 	e_ews_connection_sync_folder_items_start
-						(g_object_ref (priv->cnc), EWS_PRIORITY_MEDIUM,
+						(priv->cnc, EWS_PRIORITY_MEDIUM,
 						 sync_state, priv->folder_id,
 						 "IdOnly", NULL,
 						 EWS_MAX_FETCH_COUNT,
