@@ -329,8 +329,9 @@ ews_active_job_done (EEwsConnection *cnc, EwsNode *ews_node)
 
 	QUEUE_UNLOCK (cnc);
 
-	g_free (ews_node);
 	ews_trigger_next_request(cnc);
+	g_object_unref (ews_node->simple);
+	g_free (ews_node);
 }
 
 static void
