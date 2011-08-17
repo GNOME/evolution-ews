@@ -1714,7 +1714,7 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 					 modify_data->itemid, modify_data->changekey, e_cal_rid_to_index (recid, icalcomp_old, &error));
 			free (recid);
 		} else {
-			e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_RECURRINGMASTER,
+			e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
 					 modify_data->itemid, modify_data->changekey, 0);
 		}
 	} else e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
@@ -1834,8 +1834,11 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 	if (prop != NULL)
 		value = icalproperty_get_value_as_string (prop);
 
-	if (g_strcmp0 (value, old_value) && prop != NULL)
+	if (prop != NULL && g_strcmp0 (value, old_value)) {
+		e_ews_message_start_set_item_field (msg, "Recurrence", "calendar", "CalendarItem");
 		ewscal_set_reccurence(msg, prop, &dtstart);
+		e_ews_message_end_set_item_field (msg);
+	}
 
 	if (0 /* Exchange 2010 detected */ && dtstart.zone != dtend.zone) {
 		if (dtstart.zone) {
