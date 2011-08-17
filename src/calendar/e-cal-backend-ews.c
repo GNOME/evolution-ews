@@ -1396,7 +1396,7 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 
 		attach_data->cbews = g_object_ref (create_data->cbews);
 		attach_data->comp = g_object_ref (create_data->comp);
-		attach_data->cal = create_data->cal;
+		attach_data->cal = g_object_ref (create_data->cal);
 		attach_data->context = create_data->context;
 		attach_data->cb_type = 1;
 
