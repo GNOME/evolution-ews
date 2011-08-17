@@ -919,6 +919,7 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder, GSList *items_up
 								 server_flags, NULL))
 				camel_folder_change_info_change_uid (ci, mi->info.uid);
 
+			g_free (mi->change_key);
 			mi->change_key = g_strdup (id->change_key);
 			mi->info.dirty = TRUE;
 
