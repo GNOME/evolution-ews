@@ -2411,12 +2411,13 @@ ewscal_send_cancellation_email (EEwsConnection *cnc, CamelAddress *from, CamelIn
         icalcomponent_add_property (vcal, icalproperty_new_prodid("-//Evolution EWS backend//EN"));
 	icalcomponent_add_property (vcal, icalproperty_new_method(ICAL_METHOD_CANCEL));
 	vevent = icalcomponent_new_from_string (calobj);
+	prop = icalcomponent_get_first_property (vevent, ICAL_STATUS_PROPERTY);
+	if (prop != NULL) icalcomponent_remove_property (vevent, prop);
 	icalcomponent_add_property (vevent, icalproperty_new_status(ICAL_STATUS_CANCELLED));
 	prop = icalcomponent_get_first_property (vevent, ICAL_METHOD_PROPERTY);
 	if (prop != NULL) icalcomponent_remove_property (vevent, prop);
 	icalcomponent_add_component (vcal, icalcomponent_new_clone (icaltimezone_get_component ((icaltimezone *)icalcomponent_get_dtstart (vevent).zone)));
 	icalcomponent_add_component (vcal, vevent);
-
 	text_part = camel_mime_part_new ();
 	camel_mime_part_set_content (text_part, body, strlen (body), "text/plain");
 
