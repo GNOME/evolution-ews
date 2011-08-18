@@ -1303,6 +1303,7 @@ ews_create_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data
 		}
 		e_data_cal_notify_object_created (create_data->cal, create_data->context, error, comp_uid, e_cal_component_get_as_string(create_data->comp));
 	} else if (create_data->cb_type == 2) {
+		const char *send_meeting_invitations;
 		EwsModifyData* modify_data;
 		modify_data = g_new0 (EwsModifyData, 1);
 		modify_data->cbews = g_object_ref (create_data->cbews);
@@ -1312,10 +1313,17 @@ ews_create_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data
 		modify_data->context = create_data->context;
 		modify_data->itemid = create_data->itemid;
 		modify_data->changekey = create_data->changekey;
+		
+		if (e_cal_component_has_attendees (create_data->comp))
+			send_meeting_invitations = "SendToAllAndSaveCopy";
+		else
+			/*In case of appointment we have to set SendMeetingInvites to SendToNone */
+			send_meeting_invitations = "SendToNone";
+		
 		e_ews_connection_update_items_start (priv->cnc, EWS_PRIORITY_MEDIUM,
 						     "AlwaysOverwrite",
 						     "SendAndSaveCopy",
-						     "SendToAllAndSaveCopy",
+						     send_meeting_invitations,
 						     priv->folder_id,
 						     convert_component_to_updatexml,
 						     modify_data,
@@ -2080,6 +2088,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 		g_free (item_id);
 
 	} else {
+		const char *send_meeting_invitations;
 		modify_data = g_new0 (EwsModifyData, 1);
 		modify_data->cbews = g_object_ref (cbews);
 		modify_data->comp = g_object_ref (comp);
@@ -2088,11 +2097,17 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 		modify_data->context = context;
 		modify_data->itemid = itemid;
 		modify_data->changekey = changekey;
+		
+		if (e_cal_component_has_attendees (comp))
+			send_meeting_invitations = "SendToAllAndSaveCopy";
+		else
+			/*In case of appointment we have to set SendMeetingInvites to SendToNone */
+			send_meeting_invitations = "SendToNone";
 
 		e_ews_connection_update_items_start (priv->cnc, EWS_PRIORITY_MEDIUM,
 						     "AlwaysOverwrite",
 						     "SendAndSaveCopy",
-						     "SendToAllAndSaveCopy",
+						     send_meeting_invitations,
 						     priv->folder_id,
 						     convert_component_to_updatexml,
 						     modify_data,
