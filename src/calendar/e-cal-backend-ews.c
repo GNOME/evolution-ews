@@ -1301,7 +1301,6 @@ ews_create_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data
 			icalcomponent *icalcomp = e_cal_component_get_icalcomponent (create_data->comp);
 			e_cal_backend_ews_modify_object ((ECalBackend *) create_data->cbews, create_data->cal, NULL, icalcomponent_as_ical_string (icalcomp), CALOBJ_MOD_ALL);
 		}
-		e_data_cal_notify_object_created (create_data->cal, create_data->context, error, comp_uid, e_cal_component_get_as_string(create_data->comp));
 	} else if (create_data->cb_type == 2) {
 		const char *send_meeting_invitations;
 		EwsModifyData* modify_data;
@@ -1444,8 +1443,8 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	e_cal_backend_notify_object_created (E_CAL_BACKEND(create_data->cbews), create_data->context);
 	
 	e_cal_component_get_uid(create_data->comp, &comp_uid);
-	if (n_attach == 0)
-		e_data_cal_notify_object_created (create_data->cal, create_data->context, error, comp_uid, e_cal_component_get_as_string(create_data->comp));
+
+	e_data_cal_notify_object_created (create_data->cal, create_data->context, error, comp_uid, e_cal_component_get_as_string(create_data->comp));
 
 	/* place new component in our cache */
 	PRIV_LOCK (priv);
