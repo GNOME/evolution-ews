@@ -2960,6 +2960,26 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item)
 			}
 		}
 
+		/*AllDayEvent*/
+		for (icalprop = icalcomponent_get_first_property (icalcomp, ICAL_X_PROPERTY);
+				icalprop != NULL;
+				icalprop = icalcomponent_get_next_property (icalcomp, ICAL_X_PROPERTY)) {
+
+			if (g_strcmp0(icalproperty_get_x_name(icalprop), "X-MICROSOFT-CDO-ALLDAYEVENT") == 0) {
+				if (g_strcmp0(icalproperty_get_value_as_string(icalprop), "TRUE") == 0) {
+					struct icaltimetype dtend, dtstart;
+					dtstart = icalcomponent_get_dtstart (icalcomp);
+					dtstart.is_date = 1;
+					icalcomponent_set_dtstart (icalcomp, dtstart);
+
+					dtend = icalcomponent_get_dtend (icalcomp);
+					dtend.is_date = 1;
+					icalcomponent_set_dtend (icalcomp, dtend);
+				}
+				break;
+			}
+		}
+
 		if (icalcomponent_get_first_property (icalcomp, ICAL_RECURRENCEID_PROPERTY)) {
 			/* Exchange sets RRULE even on the children, which is broken */
 			icalprop = icalcomponent_get_first_property (icalcomp, ICAL_RRULE_PROPERTY);
