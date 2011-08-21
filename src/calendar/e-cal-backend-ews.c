@@ -1707,7 +1707,7 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 	icaltimetype dtstart, dtend, dtstart_old, dtend_old;
 	icalproperty *prop, *transp;
 	const char *org_email_address = NULL, *value = NULL, *old_value = NULL;
-	gboolean has_alarms, has_alarms_old;
+	gboolean has_alarms, has_alarms_old, dt_changed = FALSE;
 	gint alarm = 0, alarm_old = 0;
 	gchar *recid;
 	GError *error = NULL;
@@ -1798,12 +1798,22 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 		e_ews_message_start_set_item_field (msg, "Start", "calendar","CalendarItem");
 		ewscal_set_time (msg, "Start", &dtstart);
 		e_ews_message_end_set_item_field (msg);
+		dt_changed = TRUE;
 	}
 
 	if (icaltime_compare (dtend, dtend_old) != 0) {
 		e_ews_message_start_set_item_field (msg, "End", "calendar", "CalendarItem");
 		ewscal_set_time (msg, "End", &dtend);
 		e_ews_message_end_set_item_field (msg);
+		dt_changed = TRUE;
+	}
+
+	/*Check for All Day Event*/
+	if (dt_changed) {
+		if (icaltime_is_date (dtstart))
+			convert_vevent_property_to_updatexml (msg, "IsAllDayEvent", "true", "calendar", NULL, NULL);
+		else
+			convert_vevent_property_to_updatexml (msg, "IsAllDayEvent", "false", "calendar", NULL, NULL);
 	}
 
 	/*need to test it*/
