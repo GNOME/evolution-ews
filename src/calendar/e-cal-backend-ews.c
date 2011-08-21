@@ -3332,10 +3332,17 @@ e_cal_backend_ews_refresh(ECalBackend *backend, EDataCal *cal, EServerMethodCont
 	cbews = E_CAL_BACKEND_EWS (backend);
 	priv = cbews->priv;
 
+	/* make sure we're not offline */
+	if (priv->mode == CAL_MODE_LOCAL) {
+		g_propagate_error(&error, EDC_ERROR(RepositoryOffline));
+		goto exit;
+	}
+
 	PRIV_LOCK(priv);
 	ews_start_sync(cbews);
 	PRIV_UNLOCK(priv);
 
+exit:
 	e_data_cal_notify_refresh(cal, context, error);
 }
 
