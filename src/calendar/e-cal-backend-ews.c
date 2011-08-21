@@ -2444,7 +2444,7 @@ ewscal_send_cancellation_email (EEwsConnection *cnc, CamelAddress *from, CamelIn
 	free (ical_str);
 
 	multi = camel_multipart_new ();
-	camel_content_type_set_param(CAMEL_DATA_WRAPPER (multi)->mime_type, "type", "multipart/alternative");
+	camel_data_wrapper_set_mime_type(CAMEL_DATA_WRAPPER (multi), "multipart/alternative");
 	camel_multipart_add_part (multi, text_part);
 	camel_multipart_set_boundary (multi, NULL);
 	camel_multipart_add_part (multi, vcal_part);
