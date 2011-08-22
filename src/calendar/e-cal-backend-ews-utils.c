@@ -475,7 +475,7 @@ void ewscal_set_reccurence (ESoapMessage *msg, icalproperty *rrule, icaltimetype
 				e_ews_message_write_string_parameter(msg, "DaysOfWeek", NULL,
 					number_to_weekday (icalrecurrencetype_day_day_of_week(recur.by_day[0])));
 				
-				e_ews_message_write_string_parameter(msg, "DayOfWeekIndex", NULL, weekindex_to_ical (recur.by_set_pos[0]));
+				e_ews_message_write_string_parameter(msg, "DayOfWeekIndex", NULL, weekindex_to_ical ((recur.by_set_pos[0] == 5 ? -1 : recur.by_set_pos[0])));
 
 				e_soap_message_end_element (msg); /* "RelativeMonthlyRecurrence" */
 
