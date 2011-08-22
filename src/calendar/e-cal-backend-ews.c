@@ -1311,7 +1311,7 @@ ews_create_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data
 		modify_data->cal = g_object_ref (create_data->cal);
 		modify_data->context = create_data->context;
 		modify_data->itemid = create_data->itemid;
-		modify_data->changekey = create_data->changekey;
+		modify_data->changekey = change_key;
 		
 		if (e_cal_component_has_attendees (create_data->comp))
 			send_meeting_invitations = "SendToAllAndSaveCopy";
