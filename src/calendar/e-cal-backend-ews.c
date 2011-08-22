@@ -2407,10 +2407,8 @@ e_cal_get_meeting_cancellation_comment (ECalComponent *comp)
 		const gchar *x_name, *x_val;
 		x_name = icalproperty_get_x_name (prop);
 		x_val = icalproperty_get_x (prop);
-		if (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-RETRACT-COMMENT")) {
-			return g_strdup (x_val);
-			break;
-		}
+		if (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-RETRACT-COMMENT"))
+			return x_val;
 
 		prop = icalcomponent_get_next_property (e_cal_component_get_icalcomponent (comp),
 			ICAL_X_PROPERTY);
