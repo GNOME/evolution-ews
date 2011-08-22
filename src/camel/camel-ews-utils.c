@@ -783,9 +783,11 @@ form_email_string_from_mb (const EwsMailbox *mb)
 			str = g_string_append (str, " ");
 		}
 
-		g_string_append (str, "<");
-		str = g_string_append (str, mb->email);
-		g_string_append (str, ">");
+		if (mb->email) {
+			g_string_append (str, "<");
+			str = g_string_append (str, mb->email);
+			g_string_append (str, ">");
+		}
 
 		ret = camel_pstring_add (str->str, TRUE);
 		g_string_free (str, FALSE);
