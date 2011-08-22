@@ -2427,8 +2427,10 @@ ewscal_send_cancellation_email (EEwsConnection *cnc, CamelAddress *from, CamelIn
 	CamelMultipart *multi;
 	CamelMimePart *text_part, *vcal_part;
 	char *ical_str;
-	icalcomponent *vcal, *vevent;
+	icalcomponent *vcal, *vevent, *vtz;
 	icalproperty *prop;
+	icaltimezone *icaltz;
+	struct icaltimetype dt;
 
 	vcal = icalcomponent_new (ICAL_VCALENDAR_COMPONENT);
 	icalcomponent_add_property (vcal, icalproperty_new_version("2.0"));
@@ -2440,7 +2442,10 @@ ewscal_send_cancellation_email (EEwsConnection *cnc, CamelAddress *from, CamelIn
 	icalcomponent_add_property (vevent, icalproperty_new_status(ICAL_STATUS_CANCELLED));
 	prop = icalcomponent_get_first_property (vevent, ICAL_METHOD_PROPERTY);
 	if (prop != NULL) icalcomponent_remove_property (vevent, prop);
-	icalcomponent_add_component (vcal, icalcomponent_new_clone (icaltimezone_get_component ((icaltimezone *)icalcomponent_get_dtstart (vevent).zone)));
+	dt = icalcomponent_get_dtstart (vevent);
+	icaltz = (icaltimezone *)dt.zone;
+	vtz = icaltimezone_get_component (icaltz);
+	icalcomponent_add_component (vcal, icalcomponent_new_clone (vtz));
 	icalcomponent_add_component (vcal, vevent);
 	text_part = camel_mime_part_new ();
 	camel_mime_part_set_content (text_part, body, strlen (body), "text/plain");
