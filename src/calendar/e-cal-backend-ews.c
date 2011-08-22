@@ -2088,6 +2088,8 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 		attach_data->itemid = itemid;
 		attach_data->changekey = changekey;
 
+		if (context)
+			e_data_cal_notify_object_modified (cal, context, error, NULL, NULL);
 
 		e_ews_connection_create_attachments_start (priv->cnc, EWS_PRIORITY_MEDIUM,
 							   item_id, added_attachments,
