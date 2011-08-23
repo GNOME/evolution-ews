@@ -369,11 +369,11 @@ ebews_set_emails		(ESoapMessage *msg, EContact *contact)
 {
 	const gchar *include_hdr = "EmailAddresses";
 	
-	if (add_entry (msg, contact, E_CONTACT_EMAIL_1, "EMailAddress1", include_hdr))
+	if (add_entry (msg, contact, E_CONTACT_EMAIL_1, "EmailAddress1", include_hdr))
 		include_hdr = NULL;
-	if (add_entry (msg, contact, E_CONTACT_EMAIL_2, "EMailAddress2", include_hdr))
+	if (add_entry (msg, contact, E_CONTACT_EMAIL_2, "EmailAddress2", include_hdr))
 		include_hdr = NULL;
-	if (add_entry (msg, contact, E_CONTACT_EMAIL_3, "EMailAddress3", include_hdr))
+	if (add_entry (msg, contact, E_CONTACT_EMAIL_3, "EmailAddress3", include_hdr))
 		include_hdr = NULL;
 
 	if (!include_hdr)
