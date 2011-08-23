@@ -1869,11 +1869,9 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 			e_ews_message_end_set_item_field (msg);
 		}
 	} else {
-		if (dtstart.zone) {
-			e_ews_message_start_set_item_field (msg, "MeetingTimeZone", "calendar", "CalendarItem");
-			ewscal_set_timezone (msg, "MeetingTimeZone", (icaltimezone *)dtstart.zone);
-			e_ews_message_end_set_item_field (msg);
-		}
+		e_ews_message_start_set_item_field (msg, "MeetingTimeZone", "calendar", "CalendarItem");
+		ewscal_set_timezone (msg, "MeetingTimeZone", (icaltimezone *)(dtstart.zone?dtstart.zone:modify_data->cbews->priv->default_zone));
+		e_ews_message_end_set_item_field (msg);
 	}
 
 	e_ews_message_end_item_change (msg);
