@@ -135,14 +135,18 @@ static void
 ebews_populate_full_name	(EContact *contact, EEwsItem *item)
 {
 	const EwsCompleteName *cn;
-	const gchar *sur_name;
 
 	cn = e_ews_item_get_complete_name (item);
-	sur_name = e_ews_item_get_surname (item);
-
 	e_contact_set (contact, E_CONTACT_FULL_NAME, cn->full_name);
+}
+
+static void
+ebews_populate_nick_name	(EContact *contact, EEwsItem *item)
+{
+	const EwsCompleteName *cn;
+
+	cn = e_ews_item_get_complete_name (item);
 	e_contact_set (contact, E_CONTACT_NICKNAME, cn->nick_name);
-	e_contact_set (contact, E_CONTACT_FAMILY_NAME, sur_name);
 }
 
 static void
@@ -255,23 +259,19 @@ ebews_set_item_id		(ESoapMessage *message, EContact *contact)
 static void
 ebews_set_full_name		(ESoapMessage *msg, EContact *contact)
 {
-	gchar *val;
-	
-	if ((val = e_contact_get (contact, E_CONTACT_FULL_NAME)))
-		e_ews_message_write_string_parameter(msg, "FullName", NULL, val);
-	g_free (val);
-	
-	if ((val = e_contact_get (contact, E_CONTACT_GIVEN_NAME)))
-		e_ews_message_write_string_parameter(msg, "GivenName", NULL, val);
-	g_free (val);
+	EContactName *name;
 
-	if ((val = e_contact_get (contact, E_CONTACT_NICKNAME)) && *val)
-		e_ews_message_write_string_parameter(msg, "Nickname", NULL, val);
-	g_free (val);
+	name = e_contact_get (contact, E_CONTACT_NAME);
+	if (!name)
+		return;
 	
-	if ((val = e_contact_get (contact, E_CONTACT_FAMILY_NAME)) && *val)
-		e_ews_message_write_string_parameter(msg, "Surname", NULL, val);
-	g_free (val);
+	if (name->given)
+		e_ews_message_write_string_parameter(msg, "GivenName", NULL, name->given);
+	
+	if (name->additional && *name->additional)
+		e_ews_message_write_string_parameter(msg, "MiddleName", NULL, name->additional);
+
+	e_contact_name_free (name);
 }
 
 static void
@@ -280,40 +280,53 @@ ebews_set_birth_date		(ESoapMessage *message, EContact *contact)
 	
 }
 
-static void
-add_entry (ESoapMessage *msg, EContact *contact, EContactField field, const gchar *entry_name)
+static gboolean
+add_entry (ESoapMessage *msg, EContact *contact, EContactField field, const gchar *entry_name, const gchar *include_hdr)
 {
 	gchar *entry_val;
 
 	entry_val = e_contact_get (contact, field);
 	
-	if (entry_val && *entry_val)
+	if (entry_val && *entry_val){
+		if (include_hdr)
+			e_soap_message_start_element(msg, include_hdr, NULL, NULL);
+
 		e_ews_message_write_string_parameter_with_attribute(msg, "Entry", NULL, entry_val, "Key", entry_name);
+		
+		g_free (entry_val);
+		return TRUE;
+	}
 
 	g_free (entry_val);
+	return FALSE;
 }
 
 static void
 ebews_set_phone_numbers		(ESoapMessage *msg, EContact *contact)
 {
 	gint i;
+	const gchar *include_hdr = "PhoneNumbers";
 	
-	e_soap_message_start_element(msg, "PhoneNumbers", NULL, NULL);
-	
-	for (i = 0; i < G_N_ELEMENTS (phone_field_map); i++)
-		add_entry (msg, contact, phone_field_map[i].field, phone_field_map[i].element);
+	for (i = 0; i < G_N_ELEMENTS (phone_field_map); i++) {
+		if (add_entry (msg, contact, phone_field_map[i].field, phone_field_map[i].element, include_hdr))
+			include_hdr = NULL;
+	}
 
-	e_soap_message_end_element(msg);
+	if (!include_hdr)
+		e_soap_message_end_element(msg);
 }
 
-static void
-add_physical_address (ESoapMessage *msg, EContact *contact, EContactField field, const gchar *entry_name)
+static gboolean
+add_physical_address (ESoapMessage *msg, EContact *contact, EContactField field, const gchar *entry_name, gboolean include_start_hdr)
 {
 	EContactAddress *contact_addr;
 
 	contact_addr = e_contact_get (contact, field);
 	if (!contact_addr)
-		return;
+		return FALSE;
+
+	if (include_start_hdr)
+		e_soap_message_start_element (msg, "PhysicalAddresses", NULL, NULL);
 
 	e_soap_message_start_element (msg, "Entry", NULL, NULL);
 	
@@ -325,18 +338,24 @@ add_physical_address (ESoapMessage *msg, EContact *contact, EContactField field,
 
 	e_soap_message_end_element (msg);
 	e_contact_address_free (contact_addr);
+
+	return TRUE;
 }
 
 static void
 ebews_set_address	(ESoapMessage *msg, EContact *contact)
 {
-	e_soap_message_start_element (msg, "PhysicalAddresses", NULL, NULL);
+	gboolean include_hdr = TRUE;
 
-	add_physical_address (msg, contact, E_CONTACT_ADDRESS_WORK, "Business");
-	add_physical_address (msg, contact, E_CONTACT_ADDRESS_HOME, "Home");
-	add_physical_address (msg, contact, E_CONTACT_ADDRESS_OTHER, "Other");
+	if (add_physical_address (msg, contact, E_CONTACT_ADDRESS_WORK, "Business", include_hdr))
+		include_hdr = FALSE;
+	if (add_physical_address (msg, contact, E_CONTACT_ADDRESS_HOME, "Home", include_hdr))
+		include_hdr = FALSE;
+	if (add_physical_address (msg, contact, E_CONTACT_ADDRESS_OTHER, "Other", include_hdr))
+		include_hdr = FALSE;
 
-	e_soap_message_end_element(msg);
+	if (!include_hdr)
+		e_soap_message_end_element(msg);
 }
 
 static void
@@ -348,13 +367,17 @@ ebews_set_ims			(ESoapMessage *message, EContact *contact)
 static void
 ebews_set_emails		(ESoapMessage *msg, EContact *contact)
 {
-	e_soap_message_start_element(msg, "EmailAddresses", NULL, NULL);
+	const gchar *include_hdr = "EmailAddresses";
+	
+	if (add_entry (msg, contact, E_CONTACT_EMAIL_1, "EMailAddress1", include_hdr))
+		include_hdr = NULL;
+	if (add_entry (msg, contact, E_CONTACT_EMAIL_2, "EMailAddress2", include_hdr))
+		include_hdr = NULL;
+	if (add_entry (msg, contact, E_CONTACT_EMAIL_3, "EMailAddress3", include_hdr))
+		include_hdr = NULL;
 
-	add_entry (msg, contact, E_CONTACT_EMAIL_1, "EMailAddress1");
-	add_entry (msg, contact, E_CONTACT_EMAIL_2, "EMailAddress2");
-	add_entry (msg, contact, E_CONTACT_EMAIL_3, "EMailAddress3");
-
-	e_soap_message_end_element(msg);
+	if (!include_hdr)
+		e_soap_message_end_element(msg);
 }
 
 static void
@@ -404,28 +427,30 @@ static const struct field_element_mapping {
 	void (*set_changes) (ESoapMessage *message, EContact *new, EContact *old);
 
 } mappings[] = {
+	/* The order should be maintained for create contacts to work */
 	{ E_CONTACT_FILE_AS, ELEMENT_TYPE_SIMPLE, "FileAs", e_ews_item_get_fileas},
-	{ E_CONTACT_HOMEPAGE_URL, ELEMENT_TYPE_SIMPLE, "BusinessHomePage", e_ews_item_get_business_homepage},
+	{ E_CONTACT_FULL_NAME, ELEMENT_TYPE_COMPLEX, "CompleteName", NULL, ebews_populate_full_name, ebews_set_full_name, ebews_set_full_name_changes},
+	{ E_CONTACT_NICKNAME, ELEMENT_TYPE_SIMPLE, "Nickname", NULL, ebews_populate_nick_name},
 	{ E_CONTACT_ORG, ELEMENT_TYPE_SIMPLE, "CompanyName", e_ews_item_get_company_name},
-	{ E_CONTACT_ORG_UNIT, ELEMENT_TYPE_SIMPLE, "Department", e_ews_item_get_department},
-	{ E_CONTACT_TITLE, ELEMENT_TYPE_SIMPLE, "JobTitle", e_ews_item_get_job_title},
+	/* should take care of all email adresss fields */
+	{ E_CONTACT_EMAIL_1, ELEMENT_TYPE_COMPLEX, "EmailAddresses", NULL, ebews_populate_emails, ebews_set_emails, ebews_set_email_changes },
+	/* should take care of home, work and other adresss fields */
+	{ E_CONTACT_ADDRESS_HOME, ELEMENT_TYPE_COMPLEX, "PhysicalAddresses", NULL, ebews_populate_address, ebews_set_address, ebews_set_address_changes },
+	/* should take care of all phone number fields */
+	{ E_CONTACT_PHONE_PRIMARY, ELEMENT_TYPE_COMPLEX , "PhoneNumbers", NULL, ebews_populate_phone_numbers, ebews_set_phone_numbers, ebews_set_phone_number_changes},
 	{ E_CONTACT_ASSISTANT, ELEMENT_TYPE_SIMPLE, "AssistantName", e_ews_item_get_assistant_name},
+	{ E_CONTACT_BIRTH_DATE, ELEMENT_TYPE_COMPLEX, "Birthday", NULL,  ebews_populate_birth_date, ebews_set_birth_date, ebews_set_birth_date_changes },
+	{ E_CONTACT_HOMEPAGE_URL, ELEMENT_TYPE_SIMPLE, "BusinessHomePage", e_ews_item_get_business_homepage},
+	{ E_CONTACT_ORG_UNIT, ELEMENT_TYPE_SIMPLE, "Department", e_ews_item_get_department},
+	/* should take care of all im fields */
+	{ E_CONTACT_IM_AIM, ELEMENT_TYPE_COMPLEX, "ImAddresses", NULL, ebews_populate_ims, ebews_set_ims, ebews_set_im_changes },
+	{ E_CONTACT_TITLE, ELEMENT_TYPE_SIMPLE, "JobTitle", e_ews_item_get_job_title},
 	{ E_CONTACT_MANAGER, ELEMENT_TYPE_SIMPLE, "Manager", e_ews_item_get_manager},
 	{ E_CONTACT_SPOUSE, ELEMENT_TYPE_SIMPLE, "SpouseName", e_ews_item_get_spouse_name},
+	{ E_CONTACT_FAMILY_NAME, ELEMENT_TYPE_SIMPLE, "Surname", e_ews_item_get_surname},
 
 	/* Should take of uid and changekey (REV) */
 	{ E_CONTACT_UID, ELEMENT_TYPE_COMPLEX, "ItemId", NULL,  ebews_populate_uid, ebews_set_item_id},
-	/* Should handle all name parts */
-	{ E_CONTACT_FULL_NAME, ELEMENT_TYPE_COMPLEX, "CompleteName", NULL, ebews_populate_full_name, ebews_set_full_name, ebews_set_full_name_changes},
-	{ E_CONTACT_BIRTH_DATE, ELEMENT_TYPE_COMPLEX, "Birthday", NULL,  ebews_populate_birth_date, ebews_set_birth_date, ebews_set_birth_date_changes },
-	/* should take care of all phone number fields */
-	{ E_CONTACT_PHONE_PRIMARY, ELEMENT_TYPE_COMPLEX , "PhoneNumbers", NULL, ebews_populate_phone_numbers, ebews_set_phone_numbers, ebews_set_phone_number_changes},
-	/* should take care of home, work and other adresss fields */
-	{ E_CONTACT_ADDRESS_HOME, ELEMENT_TYPE_COMPLEX, "PhysicalAddresses", NULL, ebews_populate_address, ebews_set_address, ebews_set_address_changes },
-	/* should take care of all im fields */
-	{ E_CONTACT_IM_AIM, ELEMENT_TYPE_COMPLEX, "ImAddresses", NULL, ebews_populate_ims, ebews_set_ims, ebews_set_im_changes },
-	/* should take care of all email adresss fields */
-	{ E_CONTACT_EMAIL_1, ELEMENT_TYPE_COMPLEX, "EmailAddresses", NULL, ebews_populate_emails, ebews_set_emails, ebews_set_email_changes }
 };
 
 
@@ -485,7 +510,7 @@ ews_create_contact_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 		/* set item id */
 		item_id = e_ews_item_get_id((EEwsItem *)items->data);
 
-		e_contact_set (create_contact->contact, E_CONTACT_UID, item_id);
+		e_contact_set (create_contact->contact, E_CONTACT_UID, item_id->id);
 		e_book_backend_sqlitedb_add_contact (ebews->priv->ebsdb, ebews->priv->folder_id, create_contact->contact, FALSE, &error);
 
 		if (error == NULL)
@@ -1006,7 +1031,7 @@ ebews_store_contact_items (EBookBackendEws *ebews, GSList *new_items, gboolean d
 			for (i = 0; i < G_N_ELEMENTS (mappings); i++) {
 				element_type = mappings[i].element_type;
 
-				if (element_type == ELEMENT_TYPE_SIMPLE) {
+				if (element_type == ELEMENT_TYPE_SIMPLE && !mappings [i].populate_contact_func) {
 					const char *val = mappings [i].get_simple_prop_func (item);
 
 					if (val != NULL)
@@ -1575,8 +1600,9 @@ e_book_backend_ews_get_supported_fields (EBookBackend *backend,
 	GList *fields = NULL;
 	gint i;
 	
-	for (i = 0; i < G_N_ELEMENTS (mappings) && mappings [i].element_type == ELEMENT_TYPE_SIMPLE; i++)
-		fields = g_list_append (fields, g_strdup (e_contact_field_name (mappings[i].field_id)));
+	for (i = 0; i < G_N_ELEMENTS (mappings); i++)
+		if (mappings [i].element_type == ELEMENT_TYPE_SIMPLE)
+			fields = g_list_append (fields, g_strdup (e_contact_field_name (mappings[i].field_id)));
 	
 	for (i = 0; i < G_N_ELEMENTS (phone_field_map); i++)
 		fields = g_list_append (fields, g_strdup (e_contact_field_name (phone_field_map[i].field)));
