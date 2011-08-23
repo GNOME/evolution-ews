@@ -173,6 +173,7 @@ e_cal_backend_ews_get_static_capabilities (ECalBackend *backend, EDataCal *cal, 
 			 CAL_STATIC_CAPABILITY_NO_THISANDFUTURE ","
 			 CAL_STATIC_CAPABILITY_NO_CONV_TO_ASSIGN_TASK ","
 			 CAL_STATIC_CAPABILITY_NO_CONV_TO_RECUR ","
+			 CAL_STATIC_CAPABILITY_NO_TASK_ASSIGNMENT ","
 			 CAL_STATIC_CAPABILITY_SAVE_SCHEDULES);
 
 	e_data_cal_notify_static_capabilities (cal, context, NULL, capabilities);
