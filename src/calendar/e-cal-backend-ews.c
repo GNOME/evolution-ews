@@ -2222,9 +2222,9 @@ prepare_accept_item_request (ESoapMessage *msg, gpointer user_data)
 	 * need to find current user as attendee and make a desision what to do.
 	 * Prepare AcceptItem node in the SOAP message */
 	
-	if (!g_ascii_strcasecmp (response_type, "ACCEPTED"))
+	if (response_type && !g_ascii_strcasecmp (response_type, "ACCEPTED"))
 		e_soap_message_start_element (msg, "AcceptItem", NULL, NULL);
-	else if (!g_ascii_strcasecmp (response_type, "DECLINED"))
+	else if (response_type && !g_ascii_strcasecmp (response_type, "DECLINED"))
 		e_soap_message_start_element (msg, "DeclineItem", NULL, NULL);
 	else
 		e_soap_message_start_element (msg, "TentativelyAcceptItem", NULL, NULL);
