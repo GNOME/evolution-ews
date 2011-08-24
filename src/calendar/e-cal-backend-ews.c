@@ -39,6 +39,7 @@
 #include <libical/icaltz-util.h>
 #include <libical/icalcomponent.h>
 #include <libical/icalproperty.h>
+#include <libical/icalparameter.h>
 #include <glib-2.0/glib/gerror.h>
 #include <glib-2.0/glib/glist.h>
 #include <camel/camel.h>
@@ -2418,8 +2419,24 @@ e_cal_get_meeting_cancellation_comment (ECalComponent *comp)
 
 }
 
+static icaltimezone*
+e_cal_get_timezone_from_ical_component (ECalBackend *backend, icalcomponent *comp) {
+	icalproperty *prop;
+	icalparameter *param;
+	
+	prop = icalcomponent_get_first_property(comp, ICAL_DTSTART_PROPERTY);
+	if ((param = icalproperty_get_first_parameter(prop, ICAL_TZID_PARAMETER))) {
+		const char *tzid = icalparameter_get_tzid (param);
+		
+		return e_cal_backend_ews_internal_get_timezone (E_CAL_BACKEND (backend), tzid);
+	}
+	
+	g_warning ("EEE Cant figure the relevant timezone of the component\n");
+	return NULL;
+}
+
 static void
-ewscal_send_cancellation_email (EEwsConnection *cnc, CamelAddress *from, CamelInternetAddress *recipient, const gchar *subject, const gchar *body, const gchar *calobj)
+ewscal_send_cancellation_email (ECalBackend *backend, EEwsConnection *cnc, CamelAddress *from, CamelInternetAddress *recipient, const gchar *subject, const gchar *body, const gchar *calobj)
 {
 	CamelMimeMessage *message;
 	GError *error = NULL;
@@ -2442,7 +2459,7 @@ ewscal_send_cancellation_email (EEwsConnection *cnc, CamelAddress *from, CamelIn
 	prop = icalcomponent_get_first_property (vevent, ICAL_METHOD_PROPERTY);
 	if (prop != NULL) icalcomponent_remove_property (vevent, prop);
 	dt = icalcomponent_get_dtstart (vevent);
-	icaltz = (icaltimezone *)dt.zone;
+	icaltz = (icaltimezone *)(dt.zone ? dt.zone : e_cal_get_timezone_from_ical_component (backend, vevent));
 	vtz = icaltimezone_get_component (icaltz);
 	icalcomponent_add_component (vcal, icalcomponent_new_clone (vtz));
 	icalcomponent_add_component (vcal, vevent);
@@ -2558,7 +2575,7 @@ e_cal_backend_ews_send_objects (ECalBackend *backend, EDataCal *cal, EServerMeth
 
 			subcalobj = icalcomponent_as_ical_string_r (subcomp);
 			camel_internet_address_add (attendee_addr, icalproperty_get_parameter_as_string (prop, "CN"), attendee);
-			ewscal_send_cancellation_email (priv->cnc, CAMEL_ADDRESS(org_addr), attendee_addr, subject, new_body_content, subcalobj);
+			ewscal_send_cancellation_email (backend, priv->cnc, CAMEL_ADDRESS(org_addr), attendee_addr, subject, new_body_content, subcalobj);
 			g_object_unref (attendee_addr);
 			free (subcalobj);
 		}
