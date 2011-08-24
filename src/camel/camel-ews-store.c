@@ -495,7 +495,6 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, EV
 	CamelEwsStorePrivate *priv;
 	CamelFolderInfo *fi = NULL;
 	gchar *sync_state;
-	GSList *folders = NULL;
 	gboolean initial_setup = FALSE;
 	GSList *folders_created = NULL, *folders_updated = NULL;
 	GSList *folders_deleted = NULL;
@@ -512,13 +511,13 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, EV
 	}
 
 	sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
-
-	folders = camel_ews_store_summary_get_folders (ews_store->summary, NULL);
-	if (!folders)
+	if (!sync_state)
 		initial_setup = TRUE;
 
 	if (!initial_setup && flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIBED) {
 		time_t now = time (NULL);
+
+		g_free (sync_state);
 
 		if (now - priv->last_refresh_time > FINFO_REFRESH_INTERVAL) {
 			struct _ews_refresh_msg *m;
@@ -533,9 +532,6 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, EV
 		g_mutex_unlock (priv->get_finfo_lock);
 		goto offline;
 	}
-
-	g_slist_foreach (folders, (GFunc)g_free, NULL);
-	g_slist_free (folders);
 
 	if (!e_ews_connection_sync_folder_hierarchy (ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
 						    &sync_state, &includes_last_folder,

@@ -71,6 +71,7 @@ which needs to be better organized via functions */
 		   "message:BccRecipients message:IsRead message:References message:InternetMessageId " \
 		   SUMMARY_MESSAGE_FLAGS
 
+#define SUMMARY_POSTITEM_PROPS ITEM_PROPS " " SUMMARY_ITEM_FLAGS " message:From message:Sender"
 
 #define CAMEL_EWS_FOLDER_GET_PRIVATE(obj) obj->priv 
 static CamelOfflineFolderClass *parent_class = NULL;
@@ -877,7 +878,7 @@ static void
 sync_created_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *created_items, GCancellable *cancellable, GError **error)
 {
 	GSList *items = NULL, *l;
-	GSList *generic_item_ids = NULL, *msg_ids = NULL;
+	GSList *generic_item_ids = NULL, *msg_ids = NULL, *post_item_ids = NULL;
 
 	for (l = created_items; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;
@@ -899,6 +900,8 @@ sync_created_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *cre
 			item_type == E_EWS_ITEM_TYPE_MEETING_RESPONSE ||
 			item_type == E_EWS_ITEM_TYPE_MEETING_CANCELLATION)
 			msg_ids = g_slist_append (msg_ids, g_strdup (id->id));
+		else if (item_type == E_EWS_ITEM_TYPE_POST_ITEM)
+			post_item_ids = g_slist_append (post_item_ids, g_strdup (id->id));
 		else
 			generic_item_ids = g_slist_append (generic_item_ids, g_strdup (id->id));
 
@@ -910,6 +913,19 @@ sync_created_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *cre
 		e_ews_connection_get_items
 			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
 			 msg_ids, "IdOnly", SUMMARY_MESSAGE_PROPS,
+			 FALSE, NULL, &items, NULL, NULL,
+			 cancellable, error);
+
+	if (*error)
+		goto exit;
+
+	camel_ews_utils_sync_created_items (ews_folder, items);
+	items = NULL;
+
+	if (post_item_ids)
+		e_ews_connection_get_items
+			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
+			 post_item_ids, "IdOnly", SUMMARY_POSTITEM_PROPS,
 			 FALSE, NULL, &items, NULL, NULL,
 			 cancellable, error);
 
@@ -932,6 +948,11 @@ exit:
 	if (msg_ids) {
 		g_slist_foreach (msg_ids, (GFunc) g_free, NULL);
 		g_slist_free (msg_ids);
+	}
+
+	if (post_item_ids) {
+		g_slist_foreach (post_item_ids, (GFunc) g_free, NULL);
+		g_slist_free (post_item_ids);
 	}
 
 	if (generic_item_ids) {

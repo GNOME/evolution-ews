@@ -330,8 +330,9 @@ ews_active_job_done (EEwsConnection *cnc, EwsNode *ews_node)
 
 	QUEUE_UNLOCK (cnc);
 
-	g_free (ews_node);
 	ews_trigger_next_request(cnc);
+	g_object_unref (ews_node->simple);
+	g_free (ews_node);
 }
 
 static void
@@ -449,8 +450,10 @@ ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 		} else
 			ews_parse_soap_fault (response, &error);
 
-		if (error)
+		if (error) {
 			g_simple_async_result_set_from_error (enode->simple, error);
+			g_clear_error (&error);
+		}
 
 		g_object_unref (response);
 	}
@@ -996,6 +999,7 @@ e_ews_autodiscover_ws_xml(const gchar *email)
 
 struct _autodiscover_data {
 	EEwsConnection *cnc;
+	xmlOutputBuffer *buf;
 	GSimpleAsyncResult *simple;
 	SoupMessage *msgs[2];
 	EEwsAutoDiscoverCallback cb;
@@ -1014,6 +1018,8 @@ static void autodiscover_done_cb (GObject *cnc, GAsyncResult *res,
 
 	if (!g_simple_async_result_propagate_error (simple, &error))
 		urls = g_simple_async_result_get_op_res_gpointer (simple);
+
+	xmlOutputBufferClose (ad->buf);
 
 	ad->cb (urls, ad->cbdata, error);
 	g_object_unref (G_OBJECT (ad->cnc));
@@ -1164,20 +1170,37 @@ failed:
 	g_simple_async_result_complete_in_idle (ad->simple);
 }
 
+static void post_restarted (SoupMessage *msg, gpointer data)
+{
+	xmlOutputBuffer *buf = data;
+
+	/* In violation of RFC2616, libsoup will change a POST request to
+	   a GET on receiving a 302 redirect. */
+	printf("Working around libsoup bug with redirect\n");
+	g_object_set (msg, SOUP_MESSAGE_METHOD, "POST", NULL);
+
+	soup_message_set_request(msg, "text/xml", SOUP_MEMORY_COPY,
+				 (gchar *)buf->buffer->content,
+				 buf->buffer->use);
+}
+
 static SoupMessage *
 e_ews_get_msg_for_url (const gchar *url, xmlOutputBuffer *buf)
 {
 	SoupMessage *msg;
 
-	msg = soup_message_new("GET", url);
+	msg = soup_message_new(buf?"POST":"GET", url);
 	soup_message_headers_append (msg->request_headers,
 				     "User-Agent", "libews/0.1");
 
 
-	if (buf)
+	if (buf) {
 		soup_message_set_request (msg, "application/xml", SOUP_MEMORY_COPY,
 					  (gchar *)buf->buffer->content,
 					  buf->buffer->use);
+		g_signal_connect (msg, "restarted",
+				  G_CALLBACK (post_restarted), buf);
+	}
 
 	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1)) {
 		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->request_body));
@@ -1245,6 +1268,7 @@ e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb, gpointer cbdata,
 	ad->cb = cb;
 	ad->cbdata = cbdata;
 	ad->cnc = cnc;
+	ad->buf = buf;
 	ad->simple = g_simple_async_result_new (G_OBJECT (cnc), autodiscover_done_cb,
 					    ad, e_ews_autodiscover_ws_url);
 	ad->msgs[0] = e_ews_get_msg_for_url (url, buf);
@@ -1263,7 +1287,6 @@ e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb, gpointer cbdata,
 
 	g_object_unref (cnc); /* the GSimpleAsyncResult holds it now */
 
-	xmlOutputBufferClose (buf);
 	xmlFreeDoc (doc);
 }
 
@@ -2470,7 +2493,13 @@ e_ews_connection_update_items_finish	(EEwsConnection *cnc,
 		return FALSE;
 	if (ids)
 		*ids = async_data->items;
-
+	else {
+		while (async_data->items) {
+			g_object_unref (async_data->items->data);
+			async_data->items = g_slist_remove (async_data->items,
+							    async_data->items->data);
+		}
+	}
 	return TRUE;
 }
 
