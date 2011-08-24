@@ -2872,7 +2872,8 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item)
 			icaltimezone_free (zone, TRUE);
 		}
 
-		if ((zone = (icaltimezone *)e_cal_backend_store_get_timezone(priv->store, e_ews_item_get_tzid (item))) == NULL)
+		zone = NULL;
+		if (e_ews_item_get_tzid (item) && (zone = (icaltimezone *)e_cal_backend_store_get_timezone(priv->store, e_ews_item_get_tzid (item))) == NULL)
 			zone = (icaltimezone *)icaltimezone_get_builtin_timezone(e_ews_item_get_tzid (item));
 
 		if (zone) {
