@@ -1632,7 +1632,9 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 		/* The calendar UI doesn't *display* errors unless they have
 		   the OtherError code */
 		error->code = OtherError;
-		return;
+		if (modify_data->context)
+			e_data_cal_notify_object_modified (modify_data->cal, modify_data->context, error, NULL, NULL);
+		goto exit;
 	}
 
 	g_object_ref (modify_data->comp);
@@ -1677,6 +1679,7 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 
 	e_cal_backend_store_thaw_changes (priv->store);
 
+exit:
 	icalproperty_free (icalprop);
 	e_cal_component_free_id (id);
 	g_free(comp_str);
