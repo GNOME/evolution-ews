@@ -1671,7 +1671,7 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	else if (error) {
 		g_warning ("Modify object error :  %s\n", error->message);
 		g_clear_error (&error);
-	}
+	} else ews_start_sync (modify_data->cbews);
 
 	PRIV_LOCK (priv);
 	g_hash_table_replace (priv->item_id_hash, g_strdup(modify_data->itemid), g_object_ref (modify_data->comp));
@@ -2087,7 +2087,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 		attach_data->cb_type = 2;
 		attach_data->oldcomp = g_object_ref (oldcomp);
 		attach_data->cal = g_object_ref (cal);
-		attach_data->context = context;
+		attach_data->context = NULL;
 		attach_data->itemid = itemid;
 		attach_data->changekey = changekey;
 
