@@ -1620,12 +1620,12 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	ECalBackendEws *cbews = modify_data->cbews;
 	ECalBackendEwsPrivate *priv = cbews->priv;
 	GError *error = NULL;
-	gchar *comp_str, *comp_str_old;
+	gchar *comp_str = NULL, *comp_str_old = NULL;
 	GSList *ids = NULL;
 	const EwsId *item_id;
-	icalproperty *icalprop;
+	icalproperty *icalprop = NULL;
 	icalcomponent *icalcomp;
-	ECalComponentId *id;
+	ECalComponentId *id = NULL;
 	const gchar *x_name;
 
 	if (!e_ews_connection_update_items_finish (cnc, res, &ids, &error)) {
