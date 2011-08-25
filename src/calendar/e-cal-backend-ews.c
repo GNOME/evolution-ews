@@ -587,7 +587,7 @@ ews_cal_component_get_item_id (ECalComponent *comp, gchar **itemid, gchar **chan
 							ICAL_X_PROPERTY);
 	}
 
-	*itemid = g_strdup (id);
+	*itemid = id;
 	if (changekey)
 		*changekey = ck;
 }
