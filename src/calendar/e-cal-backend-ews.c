@@ -1358,6 +1358,7 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	guint n_attach;
 	gboolean result;
 	EEwsItem *item;
+	gchar *comp_str;
 
 	/* get a list of ids from server (single item) */
 	e_ews_connection_create_items_finish(cnc, res, &ids, &error);
@@ -1446,7 +1447,9 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	
 	e_cal_component_get_uid(create_data->comp, &comp_uid);
 
-	e_data_cal_notify_object_created (create_data->cal, create_data->context, error, comp_uid, e_cal_component_get_as_string(create_data->comp));
+	comp_str = e_cal_component_get_as_string(create_data->comp);
+	e_data_cal_notify_object_created (create_data->cal, create_data->context, error, comp_uid, comp_str);
+	g_free (comp_str);
 
 	/* place new component in our cache */
 	PRIV_LOCK (priv);
