@@ -927,6 +927,8 @@ e_cal_rid_to_index (const char *rid, icalcomponent *comp, GError **error)
 	for (; !icaltime_is_null_time (next); next = icalrecur_iterator_next (ritr), index++) {
 		if (icaltime_compare_date_only (o_time, next) == 0) break;
 	}
+
+	icalrecur_iterator_free (ritr);
 	
 	if (icaltime_is_null_time (next)) {
 		g_propagate_error (error, EDC_ERROR_EX(OtherError,
