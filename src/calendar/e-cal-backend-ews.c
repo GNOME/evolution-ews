@@ -2194,7 +2194,7 @@ e_ews_receive_objects_no_exchange_mail (ECalBackendEwsPrivate *priv, icalcompone
 							       cancellable,
 							       &error);
 	g_free (mime_content);
-	/*we still have to send a mail with accept to meeting orginizaer*/
+	/*we still have to send a mail with accept to meeting organizer*/
 }
 
 static const char*
@@ -2228,7 +2228,7 @@ prepare_accept_item_request (ESoapMessage *msg, gpointer user_data)
 	/* FORMAT OF A SAMPLE SOAP MESSAGE: http://msdn.microsoft.com/en-us/library/aa566464%28v=exchg.140%29.aspx
 	 * Accept and Decline meeting have same method code (10032)
 	 * The real status is reflected at Attendee property PARTSTAT
-	 * need to find current user as attendee and make a desision what to do.
+	 * need to find current user as attendee and make a decision what to do.
 	 * Prepare AcceptItem node in the SOAP message */
 	
 	if (response_type && !g_ascii_strcasecmp (response_type, "ACCEPTED"))
@@ -2346,8 +2346,8 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 				transp = icalcomponent_get_first_property (subcomp, ICAL_TRANSP_PROPERTY);
 				if (!g_strcmp0 (icalproperty_get_value_as_string (transp), "TRANSPARENT") &&
 				    !g_strcmp0 (response_type, "ACCEPTED")) {
-					/*user can accpet meeting but mark it as free in it's calendar
-					 the folowing code is updating the exchange meeting status to free */
+					/*user can accept meeting but mark it as free in it's calendar
+					 the following code is updating the exchange meeting status to free */
 					for (l = ids; l != NULL; l = g_slist_next (l)) {
 						EEwsItem *item = (EEwsItem *) l->data;
 						if (item) {
