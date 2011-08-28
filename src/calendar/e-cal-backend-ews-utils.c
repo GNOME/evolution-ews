@@ -50,7 +50,7 @@ void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **op
 	const char *org_email_address = NULL;
 
 	/* we need to know who the orgenizer is so we wont duplicate him/her */
-	org_email_address = e_ews_collect_orginizer (comp);
+	org_email_address = e_ews_collect_organizer (comp);
 
 	/* iterate over every attendee property */
 	for (prop = icalcomponent_get_first_property (comp, ICAL_ATTENDEE_PROPERTY);
@@ -635,9 +635,9 @@ void ewscal_get_attach_differences (const GSList *original, const GSList *modifi
 }
 
 /*
- * get meeting orginizer e-mail address
+ * get meeting organizer e-mail address
  */
-const char *e_ews_collect_orginizer(icalcomponent *comp)
+const char *e_ews_collect_organizer(icalcomponent *comp)
 {
 	icalproperty *org_prop = NULL;
 	const gchar *org = NULL;

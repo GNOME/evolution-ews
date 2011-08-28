@@ -1792,7 +1792,7 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 			convert_vevent_property_to_updatexml (msg, "LegacyFreeBusyStatus","Busy" , "calendar", NULL, NULL);
 	}
 
-	org_email_address = e_ews_collect_orginizer (icalcomp);
+	org_email_address = e_ews_collect_organizer (icalcomp);
 	if (g_ascii_strcasecmp (org_email_address, modify_data->cbews->priv->user_email)) {
 		e_ews_message_end_item_change (msg);
 		return;
@@ -2924,7 +2924,7 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item)
 		ECalComponentId *id;
 		gchar *comp_str;
 		const GSList *l = NULL;
-		const char *org_email_address = e_ews_collect_orginizer(icalcomp);
+		const char *org_email_address = e_ews_collect_organizer(icalcomp);
 		const char *uid = e_ews_item_get_uid (item);
 
 		item_id = e_ews_item_get_id (item);
