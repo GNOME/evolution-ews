@@ -919,7 +919,6 @@ e_cal_rid_to_index (const char *rid, icalcomponent *comp, GError **error)
 	struct icaltimetype dtstart = icalcomponent_get_dtstart (comp);
 	icalrecur_iterator* ritr = icalrecur_iterator_new (rule, dtstart);
 	icaltimetype next = icalrecur_iterator_next (ritr),
-		/*o_time = icaltime_from_string_with_zone (rid, dtstart.zone);*/
 		o_time = icaltime_from_string (rid);
 
 	o_time.zone = dtstart.zone;
@@ -2935,7 +2934,7 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item)
 			icalparameter *param, *cu_type;
 			char *mailtoname;
 			EwsAttendee *attendee = (EwsAttendee *)l->data;
-			/*remove orginizer for attendeees list*/
+			/*remove organizer for attendees list*/
 			if (g_ascii_strcasecmp (org_email_address, attendee->mailbox->email)== 0)
 				continue;
 
@@ -3181,7 +3180,7 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 	if (priv->opening_ctx) {
 		/* Report success/failure for calendar open if pending,
 		   translating an authentication failure into something that
-		   will be recognised and handled appropriately */
+		   will be recognized and handled appropriately */
 		if (error && error->domain == EWS_CONNECTION_ERROR &&
 		    error->code == EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED) {
 			e_data_cal_notify_open(priv->opening_cal, priv->opening_ctx,
