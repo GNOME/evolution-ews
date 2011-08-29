@@ -888,16 +888,15 @@ ews_cal_remove_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 		/*In case where item already removed, we do not want to fail*/
 		if (error->code == EWS_CONNECTION_ERROR_ITEMNOTFOUND) {
 			g_clear_error (&error);
-			/*probably we are not in sync, let's sync with server*/
-			ews_start_sync (remove_data->cbews);
+			if (remove_data->comp)
+				ews_cal_delete_comp (remove_data->cbews, remove_data->comp, remove_data->item_id.id);
 		} else
 			error->code = OtherError;
 	}
 
-	if (remove_data->context) {
-		if (!error && remove_data->index != 0) ews_start_sync (remove_data->cbews);
+	if (remove_data->context)
 		e_data_cal_notify_remove (remove_data->cal, remove_data->context, error);
-	} else if (error) {
+	else if (error) {
 		g_warning ("Remove object error :  %s\n", error->message);
 		g_clear_error (&error);
 	}
@@ -950,8 +949,6 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	guint index = 0;
 
 	e_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
-	/*We have to run sync before some write operations, in some cases we may need a new change key for our items */
-	ews_start_sync (cbews);
 
 	priv = cbews->priv;
 
