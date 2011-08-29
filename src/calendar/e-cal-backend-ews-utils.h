@@ -43,6 +43,7 @@ void ewscal_get_attach_differences (const GSList *original, const GSList *modifi
 gchar *e_ews_extract_attachment_id_from_uri (const gchar *uri);
 void ews_set_alarm (ESoapMessage *msg, ECalComponent *comp);
 gint ews_get_alarm (ECalComponent *comp);
+void e_ews_clean_icalcomponent (icalcomponent *icalcomp);
 
 G_END_DECLS
 

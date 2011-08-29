@@ -669,3 +669,25 @@ gchar *e_ews_extract_attachment_id_from_uri (const gchar *uri)
 
 	return attachment_id;
 }
+
+void e_ews_clean_icalcomponent (icalcomponent *icalcomp)
+{
+	icalproperty *prop, *item_id_prop = NULL, *changekey_prop = NULL;
+
+	prop = icalcomponent_get_first_property (icalcomp, ICAL_X_PROPERTY);
+	while (prop) {
+		const gchar *x_name = icalproperty_get_x_name (prop);
+		if (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-ITEMID"))
+			item_id_prop = prop;
+		 else if (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY"))
+			changekey_prop = prop;
+
+		prop = icalcomponent_get_next_property (icalcomp, ICAL_X_PROPERTY);
+	}
+
+	if (item_id_prop != NULL)
+		icalcomponent_remove_property (icalcomp, item_id_prop);
+
+	if (changekey_prop != NULL)
+		icalcomponent_remove_property (icalcomp, changekey_prop);
+}
