@@ -1566,6 +1566,7 @@ e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMeth
 		goto exit;
 	}
 
+	e_ews_clean_icalcomponent (icalcomp);
 	/* pick all the tzids out of the component and resolve
 	 * them using the vtimezones in the current calendar */
 	cbd.cbews = cbews;
