@@ -917,7 +917,7 @@ ews_cal_remove_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 		   more than one item at a time... */
 		if (remove_data->comp) {
 			if (remove_data->rid && !remove_data->modified) ews_cal_append_exdate (remove_data->cbews, remove_data->comp, remove_data->rid);
-			else ews_cal_delete_comp (remove_data->cbews, remove_data->comp, remove_data->item_id.id, remove_data->modified);
+			if (!remove_data->rid || remove_data->modified) ews_cal_delete_comp (remove_data->cbews, remove_data->comp, remove_data->item_id.id, remove_data->modified);
 		}
 	} else {
 		/*In case where item already removed, we do not want to fail*/
@@ -925,7 +925,7 @@ ews_cal_remove_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 			g_clear_error (&error);
 			if (remove_data->comp) {
 				if (remove_data->rid && !remove_data->modified) ews_cal_append_exdate (remove_data->cbews, remove_data->comp, remove_data->rid);
-				else ews_cal_delete_comp (remove_data->cbews, remove_data->comp, remove_data->item_id.id, remove_data->modified);
+				if (!remove_data->rid || remove_data->modified) ews_cal_delete_comp (remove_data->cbews, remove_data->comp, remove_data->item_id.id, remove_data->modified);
 			}
 		} else
 			error->code = OtherError;
@@ -1013,7 +1013,11 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 
 		ews_cal_component_get_item_id (comp, &item_id.id, &item_id.change_key);
 	} else {
-		if (rid) modified = TRUE;
+		if (rid) {
+			modified = TRUE;
+			index = e_cal_rid_to_index (rid, e_cal_component_get_icalcomponent (comp), &error);
+			if (error) goto exit;
+		}
 		ews_cal_component_get_item_id (comp, &item_id.id, &item_id.change_key);
 	}
 
