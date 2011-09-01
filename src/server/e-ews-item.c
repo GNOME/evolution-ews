@@ -798,7 +798,8 @@ strip_html_tags (const gchar *html_text)
 		*i, *j;
 
 	for (j = plain_text, i = start + 6; i < end; i++) {
-		if (*i == '<') { while (*i != '>') i++; }
+		if (*i == '&') i = i + 6;
+		if (*i == '<') while (*i != '>') i++;
 		else { *j = *i; j++; }
 	}
 
