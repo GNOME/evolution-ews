@@ -243,6 +243,17 @@ gboolean	e_ews_connection_delete_items	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 
+gboolean
+e_ews_connection_delete_item	(EEwsConnection *cnc,
+				 gint pri,
+				 EwsId *id,
+				 guint index,
+				 EwsDeleteType delete_type,
+				 EwsSendMeetingCancellationsType send_cancels,
+				 EwsAffectedTaskOccurrencesType affected_tasks,
+				 GCancellable *cancellable,
+				 GError **error);
+
 /* Update folder items */
 void		e_ews_connection_update_items_start
 						(EEwsConnection *cnc,

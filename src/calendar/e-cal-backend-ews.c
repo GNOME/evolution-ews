@@ -1489,11 +1489,12 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	e_cal_backend_store_thaw_changes (priv->store);
 
 	/* Excluded occurrences */
+	g_clear_error (&error);
 	icalprop = icalcomponent_get_first_property(icalcomp, ICAL_RRULE_PROPERTY);
 	if (icalprop != NULL) {
 		icalprop = icalcomponent_get_first_property(icalcomp, ICAL_EXDATE_PROPERTY);
 		for (; icalprop; icalprop = icalcomponent_get_next_property(icalcomp, ICAL_EXDATE_PROPERTY)) {
-			exceptions = g_slist_append (exceptions, g_strdup (icalproperty_get_value_as_string (icalprop)));
+			exceptions = g_slist_prepend (exceptions, g_strdup (icalproperty_get_value_as_string (icalprop)));
 		}
 
 		for (i = exceptions; i; i = i->next) {
