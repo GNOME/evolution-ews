@@ -840,7 +840,7 @@ e_cal_backend_ews_get_object_list (ECalBackend *backend, EDataCal *cal, EServerM
 }
 
 static void
-ews_cal_delete_comp (ECalBackendEws *cbews, ECalComponent *comp, const gchar *item_id, gboolean modified)
+ews_cal_delete_comp (ECalBackendEws *cbews, ECalComponent *comp, const gchar *item_id)
 {
 	ECalBackendEwsPrivate *priv = cbews->priv;
 	gchar *comp_str;
@@ -851,7 +851,7 @@ ews_cal_delete_comp (ECalBackendEws *cbews, ECalComponent *comp, const gchar *it
 
 	/* TODO test with recurrence handling */
 	comp_str = e_cal_component_get_as_string (comp);
-	if (!modified) e_cal_backend_notify_object_removed (E_CAL_BACKEND (cbews), id, comp_str, NULL);
+	e_cal_backend_notify_object_removed (E_CAL_BACKEND (cbews), id, comp_str, NULL);
 
 	PRIV_LOCK (priv);
 	g_hash_table_remove (priv->item_id_hash, item_id);
@@ -895,7 +895,7 @@ ews_cal_append_exdate (ECalBackendEws *cbews, ECalComponent *comp, const gchar *
 typedef struct {
 	ECalBackendEws *cbews;
 	EDataCal *cal;
-	ECalComponent *comp;
+	ECalComponent *comp, *parent;
 	EServerMethodContext context;
 	EwsId item_id;
 	guint index;
@@ -912,24 +912,13 @@ ews_cal_remove_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 
 	simple = G_SIMPLE_ASYNC_RESULT (res);
 
-	if (!g_simple_async_result_propagate_error (simple, &error)) {
+	if (!g_simple_async_result_propagate_error (simple, &error) || error->code == EWS_CONNECTION_ERROR_ITEMNOTFOUND) {
 		/* FIXME: This is horrid. Will bite us when we start to delete
 		   more than one item at a time... */
-		if (remove_data->comp) {
-			if (remove_data->rid && !remove_data->modified) ews_cal_append_exdate (remove_data->cbews, remove_data->comp, remove_data->rid);
-			if (!remove_data->rid || remove_data->modified) ews_cal_delete_comp (remove_data->cbews, remove_data->comp, remove_data->item_id.id, remove_data->modified);
-		}
-	} else {
-		/*In case where item already removed, we do not want to fail*/
-		if (error->code == EWS_CONNECTION_ERROR_ITEMNOTFOUND) {
-			g_clear_error (&error);
-			if (remove_data->comp) {
-				if (remove_data->rid && !remove_data->modified) ews_cal_append_exdate (remove_data->cbews, remove_data->comp, remove_data->rid);
-				if (!remove_data->rid || remove_data->modified) ews_cal_delete_comp (remove_data->cbews, remove_data->comp, remove_data->item_id.id, remove_data->modified);
-			}
-		} else
-			error->code = OtherError;
-	}
+		if (remove_data->comp) ews_cal_delete_comp (remove_data->cbews, remove_data->comp, remove_data->item_id.id);
+		if (remove_data->parent) ews_cal_append_exdate (remove_data->cbews, remove_data->parent, remove_data->rid);
+
+	} else error->code = OtherError;
 
 	if (remove_data->context)
 		e_data_cal_notify_remove (remove_data->cal, remove_data->context, error);
@@ -942,9 +931,10 @@ ews_cal_remove_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	g_free (remove_data->item_id.change_key);
 	g_object_unref(remove_data->cbews);
 	if (remove_data->comp) g_object_unref(remove_data->comp);
+	if (remove_data->parent) g_object_unref(remove_data->parent);
 	g_object_unref(remove_data->cal);
-	g_free(remove_data);
 	if (remove_data->rid) g_free (remove_data->rid);
+	g_free(remove_data);
 }
 
 static guint
@@ -981,11 +971,10 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	EwsRemoveData *remove_data;
 	ECalBackendEws *cbews = (ECalBackendEws *) backend;
 	ECalBackendEwsPrivate *priv;
-	ECalComponent *comp;
+	ECalComponent *comp, *parent = NULL;
 	GError *error = NULL;
 	EwsId item_id;
 	guint index = 0;
-	gboolean modified = FALSE;
 
 	/* There are 3 situations that require a call to this function:
 	 * 1. An item with no recurrence - rid is NULL. Nothing special here.
@@ -999,53 +988,60 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 
 	PRIV_LOCK (priv);
 
-	comp = e_cal_backend_store_get_component (priv->store, uid, rid);
-	if (!comp) {
-		comp = e_cal_backend_store_get_component (priv->store, uid, NULL);
-		if (!comp) {
-			g_warning ("EEE Cant find component with uid:%s & rid:%s\n", uid, rid);
+	if (rid) {
+		parent = e_cal_backend_store_get_component (priv->store, uid, NULL);
+		if (!parent) {
+			g_warning ("EEE Cant find master component with uid:%s\n", uid);
 			g_propagate_error (&error, EDC_ERROR(ObjectNotFound));
 			goto exit;
 		}
-
-		index = e_cal_rid_to_index (rid, e_cal_component_get_icalcomponent (comp), &error);
-		if (error) goto exit;
-
-		ews_cal_component_get_item_id (comp, &item_id.id, &item_id.change_key);
-	} else {
-		if (rid) {
-			modified = TRUE;
-			index = e_cal_rid_to_index (rid, e_cal_component_get_icalcomponent (comp), &error);
-			if (error) goto exit;
-		}
-		ews_cal_component_get_item_id (comp, &item_id.id, &item_id.change_key);
 	}
+
+	comp = e_cal_backend_store_get_component (priv->store, uid, rid);
+	
+	if (!comp && !parent) {
+		g_warning ("EEE Cant find component with uid:%s & rid:%s\n", uid, rid);
+		g_propagate_error (&error, EDC_ERROR(ObjectNotFound));
+		goto errorlvl1;
+	}
+	
+	ews_cal_component_get_item_id ((comp ? comp : parent), &item_id.id, &item_id.change_key);
 
 	PRIV_UNLOCK (priv);
 
 	if (!item_id.id) {
 		g_propagate_error(&error, EDC_ERROR_EX(OtherError,
 					       "Cannot determine EWS ItemId"));
-		if (comp) g_object_unref (comp);
-		goto exit;
+		goto errorlvl2;
+	}
+	
+	if (parent && !comp) {
+		index = e_cal_rid_to_index (rid, e_cal_component_get_icalcomponent (parent), &error);
+		if (error) goto errorlvl2;
 	}
 
 	remove_data = g_new0 (EwsRemoveData, 1);
 	remove_data->cbews = g_object_ref(cbews);
 	remove_data->comp = comp;
+	remove_data->parent = parent;
 	remove_data->cal = g_object_ref(cal);
 	remove_data->context = context;
 	remove_data->index = index;
 	remove_data->item_id.id = item_id.id;
 	remove_data->item_id.change_key = item_id.change_key;
 	remove_data->rid = (rid ? g_strdup (rid) : NULL);
-	remove_data->modified = modified;
 
 	e_ews_connection_delete_item_start (priv->cnc, EWS_PRIORITY_MEDIUM, &remove_data->item_id, index,
 					     EWS_HARD_DELETE, EWS_SEND_TO_NONE, EWS_ALL_OCCURRENCES,
 					     ews_cal_remove_object_cb, NULL,
 					     remove_data);
 	return;
+
+errorlvl2:
+	if (comp) g_object_unref (comp);
+
+errorlvl1:
+	if (parent) g_object_unref (parent);
 
 exit:
 	if (context)
@@ -3284,7 +3280,7 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 		PRIV_UNLOCK (priv);
 
 		if (comp)
-			ews_cal_delete_comp(cbews, comp, item_id, FALSE);
+			ews_cal_delete_comp(cbews, comp, item_id);
 
 		g_free (m->data);
 	}
