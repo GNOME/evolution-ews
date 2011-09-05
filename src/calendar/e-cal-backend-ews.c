@@ -844,46 +844,30 @@ ews_cal_delete_comp (ECalBackendEws *cbews, ECalComponent *comp, const gchar *it
 {
 	ECalBackendEwsPrivate *priv = cbews->priv;
 	gchar *comp_str;
-	ECalComponentId *id;
+	ECalComponentId *uid;
 
-	id = e_cal_component_get_id (comp);
-	e_cal_backend_store_remove_component (priv->store, id->uid, id->rid);
+	uid = e_cal_component_get_id (comp);
+	e_cal_backend_store_remove_component (priv->store, uid->uid, uid->rid);
 
 	/* TODO test with recurrence handling */
 	comp_str = e_cal_component_get_as_string (comp);
-	e_cal_backend_notify_object_removed (E_CAL_BACKEND (cbews), id, comp_str, NULL);
+	e_cal_backend_notify_object_removed (E_CAL_BACKEND (cbews), uid, comp_str, NULL);
 
 	PRIV_LOCK (priv);
 	g_hash_table_remove (priv->item_id_hash, item_id);
 	PRIV_UNLOCK (priv);
 
-	e_cal_component_free_id (id);
+	e_cal_component_free_id (uid);
 	g_free (comp_str);
 }
 
 static void
-ews_cal_append_exdate (ECalBackendEws *cbews, ECalComponent *comp, const gchar *rid)
+ews_cal_append_exdate (ECalBackendEws *cbews, ECalComponent *comp, const gchar *rid, CalObjModType mod)
 {
 	gchar *old_comp_str, *comp_str;
-	struct icaltimetype dtstart = icalcomponent_get_dtstart (e_cal_component_get_icalcomponent (comp));
-	GSList *list;
-	ECalComponentDateTime *cdt;
 
 	old_comp_str = e_cal_component_get_as_string (comp);
-
-	e_cal_component_get_exdate_list (comp, &list);
-
-	cdt = g_new (ECalComponentDateTime, 1);
-	cdt->value = g_new (struct icaltimetype, 1);
-	*cdt->value = icaltime_from_string (rid);
-	cdt->value->zone = dtstart.zone;
-	cdt->tzid = g_strdup (icaltimezone_get_tzid ((icaltimezone *)dtstart.zone));
-
-	list = g_slist_append (list, cdt);
-	e_cal_component_set_exdate_list (comp, list);
-	e_cal_component_free_exdate_list (list);
-	
-	e_cal_component_commit_sequence (comp);
+	e_cal_util_remove_instances (e_cal_component_get_icalcomponent (comp), icaltime_from_string (rid), mod);
 	comp_str = e_cal_component_get_as_string (comp);
 	
 	e_cal_backend_notify_object_modified (E_CAL_BACKEND (cbews), old_comp_str, comp_str);
@@ -901,6 +885,7 @@ typedef struct {
 	guint index;
 	gchar *rid;
 	gboolean modified;
+	CalObjModType mod;
 } EwsRemoveData;
 
 static void
@@ -916,7 +901,7 @@ ews_cal_remove_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 		/* FIXME: This is horrid. Will bite us when we start to delete
 		   more than one item at a time... */
 		if (remove_data->comp) ews_cal_delete_comp (remove_data->cbews, remove_data->comp, remove_data->item_id.id);
-		if (remove_data->parent) ews_cal_append_exdate (remove_data->cbews, remove_data->parent, remove_data->rid);
+		if (remove_data->parent) ews_cal_append_exdate (remove_data->cbews, remove_data->parent, remove_data->rid, remove_data->mod);
 
 	} else error->code = OtherError;
 
@@ -976,7 +961,7 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	EwsId item_id;
 	guint index = 0;
 
-	/* There are 3 situations that require a call to this function:
+	/* There are 3 scenarios where this function is called:
 	 * 1. An item with no recurrence - rid is NULL. Nothing special here.
 	 * 2. A modified occurrence of a recurring event - rid isnt NULL. The store will contain the object which will have to be removed from it.
 	 * 3. A non modified occurrence of a recurring event - rid isnt NULL. The store will only have a reference to the master event.
@@ -988,6 +973,8 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 
 	PRIV_LOCK (priv);
 
+	comp = e_cal_backend_store_get_component (priv->store, uid, rid);
+
 	if (rid) {
 		parent = e_cal_backend_store_get_component (priv->store, uid, NULL);
 		if (!parent) {
@@ -996,8 +983,6 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 			goto exit;
 		}
 	}
-
-	comp = e_cal_backend_store_get_component (priv->store, uid, rid);
 	
 	if (!comp && !parent) {
 		g_warning ("EEE Cant find component with uid:%s & rid:%s\n", uid, rid);
@@ -1030,6 +1015,7 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	remove_data->item_id.id = item_id.id;
 	remove_data->item_id.change_key = item_id.change_key;
 	remove_data->rid = (rid ? g_strdup (rid) : NULL);
+	remove_data->mod = mod;
 
 	e_ews_connection_delete_item_start (priv->cnc, EWS_PRIORITY_MEDIUM, &remove_data->item_id, index,
 					     EWS_HARD_DELETE, EWS_SEND_TO_NONE, EWS_ALL_OCCURRENCES,
