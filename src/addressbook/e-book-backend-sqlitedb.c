@@ -907,37 +907,6 @@ book_backend_sqlitedb_is_summary_query (const gchar *query)
 }
 
 static ESExpResult *
-func_and (ESExp *f, gint argc, struct _ESExpTerm **argv, gpointer data)
-{
-	ESExpResult *r, *r1;
-	GString *string;
-	gint i;
-
-	string = g_string_new("( ");
-	for (i = 0; i < argc; i++) {
-		r1 = e_sexp_term_eval (f, argv[i]);
-
-		if (r1->type != ESEXP_RES_STRING) {
-			e_sexp_result_free (f, r1);
-			continue;
-		}
-		if (r1->value.string && *r1->value.string)
-			g_string_append_printf(string, "%s%s", r1->value.string, ((argc>1) && (i != argc-1)) ?  " AND ":"");
-		e_sexp_result_free (f, r1);
-	}
-	g_string_append(string, " )");
-	r = e_sexp_result_new (f, ESEXP_RES_STRING);
-
-	if (strlen (string->str) == 4)
-		r->value.string = g_strdup("");
-	else
-		r->value.string = string->str;
-	g_string_free (string, FALSE);
-
-	return r;
-}
-
-static ESExpResult *
 func_or (ESExp *f, gint argc, struct _ESExpTerm **argv, gpointer data)
 {
 	ESExpResult *r, *r1;
@@ -962,6 +931,7 @@ func_or (ESExp *f, gint argc, struct _ESExpTerm **argv, gpointer data)
 	g_string_free (string, FALSE);
 	return r;
 }
+
 
 typedef enum {
 	MATCH_CONTAINS,
@@ -1064,7 +1034,6 @@ static struct {
 	ESExpFunc *func;
 	guint immediate :1;
 } symbols[] = {
-	{ "and", (ESExpFunc *) func_and, 1},
 	{ "or", (ESExpFunc *) func_or, 1},
 
 	{ "contains", func_contains, 0 },
