@@ -251,7 +251,7 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		g_free (url_string);
 		
 		/* OAB url entry */
-		oab_label = gtk_label_new_with_mnemonic (_("OA_B Url:"));
+		oab_label = gtk_label_new_with_mnemonic (_("OA_B URL:"));
 		gtk_widget_show (oab_label);
 
 		oab_url = gtk_entry_new ();
@@ -263,7 +263,7 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 
 		/* Host url and Autodiscover button */
 		hbox = gtk_hbox_new (FALSE, 6);
-		label = gtk_label_new_with_mnemonic (_("_Host Url:"));
+		label = gtk_label_new_with_mnemonic (_("_Host URL:"));
 		gtk_widget_show (label);
 
 		host_url = gtk_entry_new ();
@@ -276,7 +276,7 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		cbdata->config = data->config;
 		cbdata->host_entry = host_url;
 		cbdata->oab_entry = oab_url;
-		auto_discover = gtk_button_new_with_mnemonic (_("_Fetch Url"));
+		auto_discover = gtk_button_new_with_mnemonic (_("_Fetch URL"));
 		gtk_box_pack_start (GTK_BOX (hbox), auto_discover, FALSE, FALSE, 0);
 		g_signal_connect (G_OBJECT(auto_discover), "clicked",  G_CALLBACK(validate_credentials), cbdata);
 
