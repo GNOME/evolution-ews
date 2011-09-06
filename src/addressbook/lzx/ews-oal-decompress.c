@@ -23,6 +23,7 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include <unistd.h>
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -198,20 +199,25 @@ oal_decompress_v4_full_detail_file (const gchar *filename, const gchar *output_f
 			g_free (buffer);
 		} else {
 			/* round to multiples of 32768 */
-			guint round = (lzx_b->ucomp_size % 32768) + lzx_b->ucomp_size;
-			gint set = g_bit_nth_lsf ((round >> 17), -1);
-			guint window_bits = set + 17;
+			guint mul, round, set, window_bits;
 	
+			mul = ceil (lzx_b->ucomp_size / 32768.0);
+			round = mul * 32768;
+			set = g_bit_nth_lsf ((round >> 17), -1);
+			
 			if (set > 8)
 				window_bits = 25;
-			else if (set == -1)
+			else if (set == 0 && !(round >> 17))
 				window_bits = 17;
-			else
+			else {
 				window_bits = set + 17;
+				if (round % (2^window_bits))
+					window_bits++;
+			}
 
 			if (window_bits > 25)
 				window_bits = 25;
-				
+
 			lzs = lzxd_init (input, output, window_bits, 0, 16, lzx_b->ucomp_size);
 
 			if (lzxd_decompress (lzs, lzs->length) != LZX_ERR_OK) {
