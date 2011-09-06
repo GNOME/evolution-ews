@@ -41,6 +41,10 @@ void e_ews_message_end_item_change (ESoapMessage *msg);
 
 void e_ews_message_start_set_item_field (ESoapMessage *msg, const gchar *name, const gchar * fielduri_prefix, const char *field_kind);
 
+void e_ews_message_start_set_indexed_item_field (ESoapMessage *msg, const gchar *name, const gchar * fielduri_prefix, const char *field_kind, const char *field_index, gboolean delete_field);
+
+void e_ews_message_end_set_indexed_item_field (ESoapMessage *msg, gboolean delete_field);
+
 void e_ews_message_end_set_item_field (ESoapMessage *msg);
 
 G_END_DECLS

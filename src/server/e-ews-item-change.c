@@ -97,6 +97,36 @@ e_ews_message_start_set_item_field (ESoapMessage *msg, const gchar *name, const 
 }
 
 void
+e_ews_message_start_set_indexed_item_field (ESoapMessage *msg, const gchar *name, const gchar * fielduri_prefix, const char *field_kind, const char *field_index, gboolean delete_field)
+{
+	gchar * fielduri = NULL;
+	fielduri = g_strconcat (fielduri_prefix, ":", name, NULL);
+
+	if(delete_field)
+		e_soap_message_start_element (msg, "DeleteItemField", NULL, NULL);
+	else
+		e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
+
+	e_soap_message_start_element (msg, "IndexedFieldURI", NULL, NULL);
+	e_soap_message_add_attribute (msg, "FieldURI", fielduri, NULL, NULL);
+	e_soap_message_add_attribute (msg, "FieldIndex", field_index, NULL, NULL);
+	e_soap_message_end_element (msg);
+
+	if(!delete_field)
+		e_soap_message_start_element (msg, field_kind, NULL, NULL);
+
+	g_free (fielduri);
+}
+
+void
+e_ews_message_end_set_indexed_item_field (ESoapMessage *msg, gboolean delete_field)
+{
+	if(!delete_field)
+		e_soap_message_end_element (msg); /* CalendarItem */
+	e_soap_message_end_element (msg); /* SetItemField */
+}
+
+void
 e_ews_message_end_set_item_field (ESoapMessage *msg)
 {
 	e_soap_message_end_element (msg); /* CalendarItem */
