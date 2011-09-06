@@ -173,7 +173,7 @@ e_cal_backend_ews_get_static_capabilities (ECalBackend *backend, EDataCal *cal, 
 			 CAL_STATIC_CAPABILITY_NO_THISANDPRIOR ","
 			 CAL_STATIC_CAPABILITY_NO_THISANDFUTURE ","
 			 CAL_STATIC_CAPABILITY_NO_CONV_TO_ASSIGN_TASK ","
-			 CAL_STATIC_CAPABILITY_NO_CONV_TO_RECUR ","
+		//	 CAL_STATIC_CAPABILITY_NO_CONV_TO_RECUR ","
 			 CAL_STATIC_CAPABILITY_NO_TASK_ASSIGNMENT ","
 			 CAL_STATIC_CAPABILITY_SAVE_SCHEDULES);
 
@@ -3051,8 +3051,25 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item)
 		if (icalcomponent_get_first_property (icalcomp, ICAL_RECURRENCEID_PROPERTY)) {
 			/* Exchange sets RRULE even on the children, which is broken */
 			icalprop = icalcomponent_get_first_property (icalcomp, ICAL_RRULE_PROPERTY);
-			if (icalprop)
+			if (icalprop) {
 				icalcomponent_remove_property (icalcomp, icalprop);
+				icalproperty_free (icalprop);
+			}
+		}
+
+		/* Exchange sets an ORGANIZER on all events. RFC2445 says:
+		 *
+		 *   This property MUST NOT be specified in an iCalendar
+		 *   object that specifies only a time zone definition or
+		 *   that defines calendar entities that are not group
+		 *   scheduled entities, but are entities only on a single
+		 *   user's calendar.
+		 */
+		if (!icalcomponent_get_first_property (icalcomp, ICAL_ATTENDEE_PROPERTY)) {
+			if ((icalprop = icalcomponent_get_first_property (icalcomp, ICAL_ORGANIZER_PROPERTY))) {
+				icalcomponent_remove_property (icalcomp, icalprop);
+				icalproperty_free (icalprop);
+			}
 		}
 
 		icalcomponent_set_uid (icalcomp,uid?uid:item_id->id);
