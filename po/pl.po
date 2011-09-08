@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-08-11 18:18+0200\n"
-"PO-Revision-Date: 2010-09-17 09:56+0200\n"
+"POT-Creation-Date: 2011-09-08 22:22+0200\n"
+"PO-Revision-Date: 2011-09-08 22:23+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -21,112 +21,108 @@ msgstr ""
 "X-Poedit-Language: Polish\n"
 "X-Poedit-Country: Poland\n"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:135
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:148
 #, c-format
 msgid "Enter Password for %s"
 msgstr "Proszę wprowadzić hasło dla %s"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:144
-#, fuzzy
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:157
 msgid "Could not get password."
-msgstr "Nie można zmienić hasła."
+msgstr "Nie można uzyskać hasła."
 
 #. OAB url entry
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:254
-msgid "OA_B Url:"
-msgstr ""
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:271
+msgid "OA_B URL:"
+msgstr "Adres URL OA_B:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:266
-msgid "_Host Url:"
-msgstr ""
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:283
+msgid "_Host URL:"
+msgstr "Adres URL _komputera:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:279
-msgid "_Fetch Url"
-msgstr ""
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:296
+msgid "_Fetch URL"
+msgstr "_Pobierz adres URL"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:445
-#, fuzzy
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:462
 msgid "Could not fetch oal list: "
-msgstr "Nie można utworzyć buforu dla %s: "
+msgstr "Nie można pobrać listy oal: "
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:487
-#, fuzzy
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:504
 msgid "Fetching..."
-msgstr "Wyszukiwanie..."
+msgstr "Pobieranie..."
 
 #. Add cache check box
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:624
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:641
 msgid "Cache o_ffline address book"
 msgstr ""
+"_Przechowywanie książki adresowej w buforze podczas pracy w trybie offline"
 
 #. Add label
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:630
-#, fuzzy
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:647
 msgid "Select Ad_dress list: "
-msgstr "Globalna lista adresowa"
+msgstr "Wybór listy a_dresów: "
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:639
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:656
 msgid "Fetch list"
-msgstr ""
+msgstr "Pobierz listę"
 
-#: ../src/addressbook/e-book-backend-ews.c:1203
+#: ../src/addressbook/e-book-backend-ews.c:1443
 msgid "Syncing contacts..."
-msgstr ""
+msgstr "Synchronizowanie kontaktów..."
 
-#: ../src/addressbook/e-book-backend-ews.c:1388
+#: ../src/addressbook/e-book-backend-ews.c:1628
 msgid "Searching..."
 msgstr "Wyszukiwanie..."
 
 #: ../src/addressbook/e-book-backend-sqlitedb.c:425
 #, c-format
 msgid "Insufficient memory"
-msgstr ""
+msgstr "Brak pamięci"
 
-#: ../src/camel/camel-ews-folder.c:198
+#: ../src/camel/camel-ews-folder.c:200
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
-msgstr ""
+msgstr "Nie można otworzyć tymczasowego pliku treści MIME."
 
-#: ../src/camel/camel-ews-folder.c:205
+#: ../src/camel/camel-ews-folder.c:207
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
-msgstr ""
+msgstr "Nie można utworzyć parsera z treści MIME."
 
-#: ../src/camel/camel-ews-folder.c:213
+#: ../src/camel/camel-ews-folder.c:215
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
-msgstr ""
+msgstr "Nie można przetworzyć treści MIME żądania spotkania."
 
-#: ../src/camel/camel-ews-folder.c:270
-#, fuzzy, c-format
+#: ../src/camel/camel-ews-folder.c:272
+#, c-format
 msgid "Unable to create cache file"
-msgstr "Brak miejsca do utworzenia katalogu"
+msgstr "Nie można utworzyć pliku bufora"
 
-#: ../src/camel/camel-ews-folder.c:370 ../src/camel/camel-ews-folder.c:439
-#, fuzzy, c-format
+#: ../src/camel/camel-ews-folder.c:372 ../src/camel/camel-ews-folder.c:441
+#, c-format
 msgid "Unable to create cache path"
-msgstr "Nie można modyfikować delegatów."
+msgstr "Nie można utworzyć ścieżki bufora"
 
-#: ../src/camel/camel-ews-folder.c:448
-#, fuzzy, c-format
+#: ../src/camel/camel-ews-folder.c:450
+#, c-format
 msgid "Failed to move message cache file"
-msgstr "Nie można przenieść/skopiować wiadomości"
+msgstr "Przeniesienie pliku bufora wiadomości się nie powiodło"
 
-#: ../src/camel/camel-ews-folder.c:793
+#: ../src/camel/camel-ews-folder.c:795
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nie można wczytać zestawienia dla %s"
 
-#: ../src/camel/camel-ews-folder.c:1099 ../src/camel/camel-ews-store.c:575
+#: ../src/camel/camel-ews-folder.c:1121 ../src/camel/camel-ews-store.c:575
 #: ../src/camel/camel-ews-store.c:632 ../src/camel/camel-ews-store.c:701
-#, fuzzy, c-format
+#, c-format
 msgid "Cant perform actions on the folder while in offline mode"
-msgstr "Nie można utworzyć katalogu w trybie offline."
+msgstr "Nie można wykonać działań na katalogu w trybie offline"
 
 #: ../src/camel/camel-ews-provider.c:48
-#, fuzzy
 msgid "Checking for new mail"
-msgstr "Sprawdzanie poczty"
+msgstr "Sprawdzanie nowej poczty"
 
 #: ../src/camel/camel-ews-provider.c:50
 msgid "C_heck for new messages in all folders"
@@ -142,60 +138,54 @@ msgstr ""
 "_Zastosowanie filtrów na nowych wiadomościach w Nadchodzących na tym serwerze"
 
 #: ../src/camel/camel-ews-provider.c:57
-#, fuzzy
-msgid "Check new messages for J_unk contents"
-msgstr "Sp_rawdzanie nowych wiadomości pod kątem spamu"
+msgid "Check new messages for Jun_k contents"
+msgstr "Sp_rawdzanie nowych wiadomości pod kątem niechcianych wiadomości"
 
 #: ../src/camel/camel-ews-provider.c:59
-#, fuzzy
 msgid "Only check for Junk messages in the IN_BOX folder"
-msgstr "Sprawdzanie spamu tylko w katalogu _Odebrane"
+msgstr "Sprawdzanie niechcianych wiadomości tylko w katalogu _Odebrane"
 
 #: ../src/camel/camel-ews-provider.c:61
-msgid "Automatically synchroni_ze account locally"
+msgid "Automatically synchroni_ze remote mail locally"
 msgstr "Automatyczna _synchronizacja kont lokalnie"
 
 #: ../src/camel/camel-ews-provider.c:69
-#, fuzzy
 msgid "Exchange Web Services"
-msgstr "Serwer Exchange %s"
+msgstr "Exchange Web Services"
 
 #: ../src/camel/camel-ews-provider.c:71
 msgid "For accessing Exchange servers using Web Services"
-msgstr ""
+msgstr "Dostęp do serwerów Exchange używając Web Services"
 
 #: ../src/camel/camel-ews-provider.c:87
-#, fuzzy
 msgid "Password"
-msgstr "_Hasło:"
+msgstr "Hasło"
 
 #: ../src/camel/camel-ews-provider.c:89
-#, fuzzy
 msgid ""
 "This option will connect to the Exchange server using a plaintext password."
 msgstr ""
-"Opcja ta spowoduje połączenie z serwerem Exchange przy użyciu standardowego "
-"uwierzytelniania hasła tekstowego."
+"Ta opcja spowoduje połączenie z serwerem Exchange używając hasła tekstowego."
 
-#: ../src/camel/camel-ews-store.c:123
+#: ../src/camel/camel-ews-store.c:174
 #, c-format
 msgid "Session has no storage path"
-msgstr ""
+msgstr "Sesja nie powiada ścieżki do pamięci masowej"
 
-#: ../src/camel/camel-ews-store.c:133
+#: ../src/camel/camel-ews-store.c:184
 #, c-format
 msgid "EWS service has no host URL"
-msgstr ""
+msgstr "Usługa EWS nie posiada adresu URL komputera"
 
-#: ../src/camel/camel-ews-store.c:304
-#, fuzzy, c-format
+#: ../src/camel/camel-ews-store.c:359
+#, c-format
 msgid "No such folder: %s"
-msgstr "Nie ma takiego katalogu %s"
+msgstr "Nie ma takiego katalogu: %s"
 
 #: ../src/camel/camel-ews-store.c:568
-#, fuzzy, c-format
+#, c-format
 msgid "Parent folder %s does not exist"
-msgstr "Katalog nie istnieje"
+msgstr "Katalog nadrzędny %s nie istnieje"
 
 #: ../src/camel/camel-ews-store.c:626
 #, c-format
@@ -203,111 +193,112 @@ msgid "Folder does not exist"
 msgstr "Katalog nie istnieje"
 
 #: ../src/camel/camel-ews-store.c:709
-#, fuzzy, c-format
+#, c-format
 msgid "Folder %s does not exist"
-msgstr "Katalog nie istnieje"
+msgstr "Katalog %s nie istnieje"
 
 #: ../src/camel/camel-ews-store.c:718
 #, c-format
 msgid "No change key record for folder %s"
-msgstr ""
+msgstr "Brak wpisu klucza zmiany dla katalogu %s"
 
 #: ../src/camel/camel-ews-store.c:757
-#, fuzzy, c-format
+#, c-format
 msgid "Cannot both rename and move a folder at the same time"
-msgstr "Nie można utworzyć katalogu o takiej nazwie"
+msgstr "Nie można zmienić nazwy i przenieść katalogu w tym samym czasie"
 
 #: ../src/camel/camel-ews-store.c:788
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
-msgstr ""
+msgstr "Nie można odnaleźć identyfikatora katalogu dla katalogu nadrzędnego %s"
 
-#: ../src/camel/camel-ews-store.c:813 ../src/camel/camel-ews-transport.c:58
+#: ../src/camel/camel-ews-store.c:817 ../src/camel/camel-ews-transport.c:61
 #, c-format
 msgid "Exchange server %s"
 msgstr "Serwer Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:815
-#, fuzzy, c-format
+#: ../src/camel/camel-ews-store.c:819
+#, c-format
 msgid "Exchange service for %s on %s"
-msgstr "Konto Exchange dla %s na %s"
+msgstr "Usługa Exchange dla %s na %s"
 
-#: ../src/camel/camel-ews-store.c:852
+#: ../src/camel/camel-ews-store.c:856
 #, c-format
 msgid "You must be working online to complete this operation"
-msgstr ""
+msgstr "Należy pracować w trybie online, aby ukończyć to działanie"
 
-#: ../src/camel/camel-ews-transport.c:62
-#, fuzzy, c-format
+#: ../src/camel/camel-ews-transport.c:65
+#, c-format
 msgid "Exchange mail delivery via %s"
-msgstr "Serwer Exchange %s"
+msgstr "Dostarczanie poczty Exchange przez %s"
 
-#: ../src/camel/camel-ews-transport.c:87
+#: ../src/camel/camel-ews-transport.c:92
 #, c-format
 msgid "Service not connected"
-msgstr ""
+msgstr "Usługa nie jest połączona"
 
-#: ../src/server/e-ews-connection.c:353
-#, fuzzy
+#: ../src/server/e-ews-connection.c:354
 msgid "Operation Cancelled"
-msgstr "Anulowano"
+msgstr "Anulowano działanie"
 
-#: ../src/server/e-ews-connection.c:407
-#, fuzzy
+#: ../src/server/e-ews-connection.c:408
 msgid "Authentication failed"
-msgstr "_Typ uwierzytelniania:"
+msgstr "Uwierzytelnienie się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:415
+#: ../src/server/e-ews-connection.c:416
 msgid "No response"
-msgstr ""
+msgstr "Brak odpowiedzi"
 
-#: ../src/server/e-ews-connection.c:1066 ../src/server/e-ews-connection.c:1365
-#: ../src/server/e-ews-connection.c:1602
+#: ../src/server/e-ews-connection.c:1072 ../src/server/e-ews-connection.c:1388
+#: ../src/server/e-ews-connection.c:1625
 #, c-format
 msgid "Code: %d - Unexpected response from server"
-msgstr ""
+msgstr "Kod: %d - nieoczekiwana odpowiedź od serwera"
 
-#: ../src/server/e-ews-connection.c:1078
+#: ../src/server/e-ews-connection.c:1084
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr ""
+"Przetworzenie XML odpowiedzi automatycznego wykrywania się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:1086
+#: ../src/server/e-ews-connection.c:1092
 #, c-format
 msgid "Failed to find <Autodiscover> element\n"
-msgstr ""
+msgstr "Odnalezienie elementu <Autodiscover> się nie powiodło\n"
 
-#: ../src/server/e-ews-connection.c:1098
+#: ../src/server/e-ews-connection.c:1104
 #, c-format
 msgid "Failed to find <Response> element\n"
-msgstr ""
+msgstr "Odnalezienie elementu <Response> się nie powiodło\n"
 
-#: ../src/server/e-ews-connection.c:1110
+#: ../src/server/e-ews-connection.c:1116
 #, c-format
 msgid "Failed to find <Account> element\n"
-msgstr ""
+msgstr "Odnalezienie elementu <Account> się nie powiodło\n"
 
-#: ../src/server/e-ews-connection.c:1129
+#: ../src/server/e-ews-connection.c:1135
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
+"Odnalezienie elementów <ASUrl> i <OABUrl> w odpowiedzi automatycznego "
+"wykrywania się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:1208
+#: ../src/server/e-ews-connection.c:1231
 #, c-format
 msgid "Both email and password must be provided"
-msgstr ""
+msgstr "Należy podać adres e-mail i hasło"
 
-#: ../src/server/e-ews-connection.c:1215
+#: ../src/server/e-ews-connection.c:1238
 #, c-format
 msgid "Wrong email id"
-msgstr ""
+msgstr "Błędny identyfikator adresu e-mail"
 
-#: ../src/server/e-ews-connection.c:1375
-#, fuzzy, c-format
+#: ../src/server/e-ews-connection.c:1398
+#, c-format
 msgid "Failed to parse oab XML"
-msgstr "Nie powiodła się aktualizacja delegatów:"
+msgstr "Przetworzenie XML oab się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:1382
+#: ../src/server/e-ews-connection.c:1405
 #, c-format
 msgid "Failed to find <OAB> element\n"
-msgstr ""
+msgstr "Odnalezienie elementu <OAB> się nie powiodło\n"
