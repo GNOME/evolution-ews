@@ -135,12 +135,6 @@ camel_ews_store_initable_init (GInitableIface *interface)
 	interface->init = ews_store_initable_init;
 }
 
-static gchar *
-camel_session_get_storage_path (CamelSession *session, CamelService *service, GError **error)
-{
-	return g_strdup (camel_service_get_user_data_dir (service));
-}
-
 #else
 G_DEFINE_TYPE (CamelEwsStore, camel_ews_store, CAMEL_TYPE_OFFLINE_STORE)
 

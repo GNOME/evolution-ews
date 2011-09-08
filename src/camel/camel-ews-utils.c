@@ -33,6 +33,7 @@
 #include "camel-ews-utils.h"
 #include "ews-esource-utils.h"
 #include "e-ews-compat.h"
+#include "ews-camel-compat.h"
 #include "e-ews-message.h"
 
 #define SUBFOLDER_DIR_NAME     "subfolders"
