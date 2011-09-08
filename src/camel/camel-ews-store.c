@@ -45,6 +45,7 @@
 #include "camel-ews-store.h"
 #include "camel-ews-summary.h"
 #include "camel-ews-utils.h"
+#include "ews-camel-compat.h"
 #include "ews-esource-utils.h"
 
 #ifdef G_OS_WIN32
@@ -89,26 +90,82 @@ static inline gboolean camel_offline_store_get_online(CamelOfflineStore *store)
 #endif
 
 extern CamelServiceAuthType camel_ews_password_authtype; /*for the query_auth_types function*/
+static gboolean	ews_store_construct	(CamelService *service, CamelSession *session,
+			 		 CamelProvider *provider, CamelURL *url,
+		 			 GError **error);
+#if EDS_CHECK_VERSION(3,1,0)
+static void camel_ews_store_initable_init (GInitableIface *interface);
+static GInitableIface *parent_initable_interface;
 
+G_DEFINE_TYPE_WITH_CODE (
+	CamelEwsStore, camel_ews_store, CAMEL_TYPE_OFFLINE_STORE,
+	G_IMPLEMENT_INTERFACE (
+		G_TYPE_INITABLE, camel_ews_store_initable_init))
+
+static gboolean
+ews_store_initable_init		(GInitable *initable,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	CamelService *service;
+	CamelSession *session;
+	CamelURL *url;
+	gboolean ret;
+	
+	service = CAMEL_SERVICE (initable);
+	url = camel_service_get_camel_url (service);
+	session = camel_service_get_session (service);
+
+	/* Chain up to parent interface's init() method. */
+	if (!parent_initable_interface->init (initable, cancellable, error))
+		return FALSE;
+
+	ret = ews_store_construct (service, session, NULL, url, error);
+
+	/* Add transport here ? */
+
+	return ret;
+}
+
+static void
+camel_ews_store_initable_init (GInitableIface *interface)
+{
+	parent_initable_interface = g_type_interface_peek_parent (interface);
+
+	interface->init = ews_store_initable_init;
+}
+
+static gchar *
+camel_session_get_storage_path (CamelSession *session, CamelService *service, GError **error)
+{
+	return g_strdup (camel_service_get_user_data_dir (service));
+}
+
+#else
 G_DEFINE_TYPE (CamelEwsStore, camel_ews_store, CAMEL_TYPE_OFFLINE_STORE)
+
+#endif
 
 static gboolean
 ews_store_construct	(CamelService *service, CamelSession *session,
 			 CamelProvider *provider, CamelURL *url,
 			 GError **error)
 {
-	CamelServiceClass *service_class;
 	CamelEwsStore *ews_store;
 	CamelEwsStorePrivate *priv;
 	gchar *summary_file, *session_storage_path;
 
-	ews_store = (CamelEwsStore *) service;
-	priv = ews_store->priv;
+#if ! EDS_CHECK_VERSION(3,1,0)
+	CamelServiceClass *service_class;
 
 	/* Chain up to parent's construct() method. */
 	service_class = CAMEL_SERVICE_CLASS (camel_ews_store_parent_class);
 	if (!service_class->construct (service, session, provider, url, error))
 		return FALSE;
+#endif	
+	
+	ews_store = (CamelEwsStore *) service;
+	priv = ews_store->priv;
 
 	/* Disable virtual trash and junk folders. Exchange has real
 	   folders for that */
@@ -167,25 +224,28 @@ ews_store_authenticate	(EEwsConnection *cnc,
 	CamelService *service = data;
 	CamelSession *session = camel_service_get_session (service);
 	GError *error = NULL;
+	CamelURL *url;
+
+	url = camel_service_get_camel_url (service);
 
 	if (retrying)
-		service->url->passwd = NULL;
+		url->passwd = NULL;
 
-	if (!service->url->passwd) {
+	if (!url->passwd) {
 		gchar *prompt;
 
 		prompt = camel_session_build_password_prompt ("Exchange Web Services",
-				      service->url->user, service->url->host);
-		service->url->passwd =
-		camel_session_get_password (session, service, "Exchange Web Services",
-					    prompt, "password",
-					    CAMEL_SESSION_PASSWORD_SECRET,
-					    &error);
+				      url->user, url->host);
+		url->passwd =
+		camel_session_get_password_compat (session, service, "Exchange Web Services",
+						    prompt, "password",
+						    CAMEL_SESSION_PASSWORD_SECRET,
+						    &error);
 		g_free (prompt);
 	}
 
-	e_ews_connection_authenticate (cnc, auth, service->url->user,
-				       service->url->passwd, error);
+	e_ews_connection_authenticate (cnc, auth, url->user,
+				       url->passwd, error);
 }
 
 static gboolean
@@ -194,11 +254,13 @@ ews_connect_sync (CamelService *service, EVO3(GCancellable *cancellable,) GError
 	EVO2(GCancellable *cancellable = NULL;)
 	CamelEwsStore *ews_store;
 	CamelEwsStorePrivate *priv;
+	CamelURL *url;
 
 	ews_store = (CamelEwsStore *) service;
 	priv = ews_store->priv;
+	url = camel_service_get_camel_url (service);
 
-	if (service->status == CAMEL_SERVICE_DISCONNECTED)
+	if (camel_service_get_connection_status (service) == CAMEL_SERVICE_DISCONNECTED)
 		return FALSE;
 
 	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
@@ -208,7 +270,7 @@ ews_connect_sync (CamelService *service, EVO3(GCancellable *cancellable,) GError
 		return TRUE;
 	}
 
-	priv->cnc = e_ews_connection_new (priv->host_url, service->url->user, NULL,
+	priv->cnc = e_ews_connection_new (priv->host_url, url->user, NULL,
 					  G_CALLBACK (ews_store_authenticate), service,
 					  error);
 
@@ -218,7 +280,6 @@ ews_connect_sync (CamelService *service, EVO3(GCancellable *cancellable,) GError
 		return FALSE;
 	}
 
-	service->status = CAMEL_SERVICE_CONNECTED;
 	camel_offline_store_set_online_sync (
 		CAMEL_OFFLINE_STORE (ews_store), TRUE, cancellable, NULL);
 
@@ -805,11 +866,15 @@ ews_rename_folder_sync	(CamelStore *store,
 gchar *
 ews_get_name (CamelService *service, gboolean brief)
 {
+	CamelURL *url;
+
+	url = camel_service_get_camel_url (service);
+
 	if (brief)
-		return g_strdup_printf(_("Exchange server %s"), service->url->host);
+		return g_strdup_printf(_("Exchange server %s"), url->host);
 	else
 		return g_strdup_printf(_("Exchange service for %s on %s"),
-				       service->url->user, service->url->host);
+				       url->user, url->host);
 }
 
 EEwsConnection *
@@ -834,7 +899,7 @@ ews_can_refresh_folder (CamelStore *store, CamelFolderInfo *info, GError **error
 
 	/* Delegate decision to parent class */
 	return CAMEL_STORE_CLASS(camel_ews_store_parent_class)->can_refresh_folder (store, info, error) ||
-			(camel_url_get_param (((CamelService *)store)->url, "check_all") != NULL);
+			(camel_url_get_param (camel_service_get_camel_url ((CamelService *)store), "check_all") != NULL);
 }
 
 gboolean
@@ -906,7 +971,10 @@ camel_ews_store_class_init (CamelEwsStoreClass *class)
 	object_class->finalize = ews_store_finalize;
 
 	service_class = CAMEL_SERVICE_CLASS (class);
+
+#if ! EDS_CHECK_VERSION(3,1,0)
 	service_class->construct = ews_store_construct;
+#endif	
 	service_class->EVO3_sync(query_auth_types) = ews_store_query_auth_types_sync;
 	service_class->get_name = ews_get_name;
 	service_class->EVO3_sync(connect) = ews_connect_sync;
