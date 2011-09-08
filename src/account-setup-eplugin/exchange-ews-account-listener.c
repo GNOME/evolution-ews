@@ -44,6 +44,7 @@
 #include "exchange-ews-account-setup.h"
 #include "camel-ews-store-summary.h"
 #include "ews-esource-utils.h"
+#include "ews-camel-compat.h"
 
 #define d(x) x
 
@@ -143,7 +144,7 @@ ews_account_removed (EAccountList *account_listener, EAccount *account)
 	EVO3(shell = e_shell_get_default ();)
 	EVO3(shell_backend = e_shell_get_backend_by_name (shell, "mail");)
 	EVO3 (session = (CamelSession *) e_mail_backend_get_session (E_MAIL_BACKEND (shell_backend));)
-	service = camel_session_get_service (session, account->source->url, CAMEL_PROVIDER_STORE, NULL);
+	service = camel_session_get_service_compat (session, account->source->url, CAMEL_PROVIDER_STORE);
 
 	/* FIXME  Use this until CamelStore gets camel_store_remove_storage API which would be available eds 3.2 onwards */
 	storage_path = camel_session_get_storage_path (session, service, NULL);
