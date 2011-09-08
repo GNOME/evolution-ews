@@ -38,6 +38,21 @@ camel_session_get_password_compat (CamelSession *session,
 }
 
 
+CamelService *
+camel_session_get_service_compat (CamelSession *session, const gchar *url, CamelProviderType type)
+{
+#if ! EDS_CHECK_VERSION(3,1,0)
+	return camel_session_get_service (session, url, type, NULL);
+#else
+	CamelURL *curl = camel_url_new (url, NULL);
+	CamelService *service;
+
+	service = camel_session_get_service_by_url (session, curl, type);
+	camel_url_free (curl);
+	return service;
+#endif	
+}
+
 #if ! EDS_CHECK_VERSION(3,1,0)
 
 CamelURL *
@@ -52,6 +67,14 @@ CamelServiceConnectionStatus
 camel_service_get_connection_status (CamelService *service)
 {
 	return service->status;
+}
+
+#else
+
+gchar *
+camel_session_get_storage_path (CamelSession *session, CamelService *service, GError **error)
+{
+	return g_strdup (camel_service_get_user_data_dir (service));
 }
 
 #endif
