@@ -594,6 +594,7 @@ ews_create_contact_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 		item_id = e_ews_item_get_id((EEwsItem *)items->data);
 
 		e_contact_set (create_contact->contact, E_CONTACT_UID, item_id->id);
+		e_contact_set (create_contact->contact, E_CONTACT_REV, item_id->change_key);
 		e_book_backend_sqlitedb_add_contact (ebews->priv->ebsdb, ebews->priv->folder_id, create_contact->contact, FALSE, &error);
 
 		if (error == NULL)
