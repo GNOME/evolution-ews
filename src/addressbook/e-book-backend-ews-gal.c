@@ -988,7 +988,7 @@ e_book_backend_ews_gal_load_source 	(EBookBackend *backend,
 		priv->attachment_dir = g_build_filename (cache_dir, "attachments", NULL);
 		g_mkdir_with_parents (priv->attachment_dir, 0777);
 
-		priv->ebsdb = e_book_backend_sqlitedb_new (cache_dir, email, priv->oal_id, priv->folder_name, FALSE, &err);
+		priv->ebsdb = e_book_backend_sqlitedb_new (cache_dir, email, priv->oal_id, priv->folder_name, TRUE, &err);
 		if (err) {
 			g_propagate_error (perror, err);
 			return;
