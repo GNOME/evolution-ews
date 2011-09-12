@@ -791,7 +791,7 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 	}
 
 	if (!g_ascii_strcasecmp (folder_name, "Inbox")) {
-		if (camel_url_get_param (((CamelService *) store)->url, "filter"))
+		if (camel_url_get_param (camel_service_get_camel_url ((CamelService *) store), "filter"))
 			folder->folder_flags |= CAMEL_FOLDER_FILTER_RECENT;
 	}
 
@@ -1330,7 +1330,7 @@ ews_folder_constructed (CamelEwsFolder *object)
 	folder = CAMEL_FOLDER (object);
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
-	url = CAMEL_SERVICE (parent_store)->url;
+	url = camel_service_get_camel_url (CAMEL_SERVICE (parent_store));
 
 	description = g_strdup_printf (
 		"%s@%s:%s", url->user, url->host, full_name);

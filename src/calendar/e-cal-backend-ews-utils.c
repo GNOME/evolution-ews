@@ -50,7 +50,7 @@ void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **op
 	const char *org_email_address = NULL;
 
 	/* we need to know who the orgenizer is so we wont duplicate him/her */
-	org_email_address = e_ews_collect_orginizer (comp);
+	org_email_address = e_ews_collect_organizer (comp);
 
 	/* iterate over every attendee property */
 	for (prop = icalcomponent_get_first_property (comp, ICAL_ATTENDEE_PROPERTY);
@@ -635,9 +635,9 @@ void ewscal_get_attach_differences (const GSList *original, const GSList *modifi
 }
 
 /*
- * get meeting orginizer e-mail address
+ * get meeting organizer e-mail address
  */
-const char *e_ews_collect_orginizer(icalcomponent *comp)
+const char *e_ews_collect_organizer(icalcomponent *comp)
 {
 	icalproperty *org_prop = NULL;
 	const gchar *org = NULL;
@@ -668,4 +668,26 @@ gchar *e_ews_extract_attachment_id_from_uri (const gchar *uri)
 	g_strfreev (dirs);
 
 	return attachment_id;
+}
+
+void e_ews_clean_icalcomponent (icalcomponent *icalcomp)
+{
+	icalproperty *prop, *item_id_prop = NULL, *changekey_prop = NULL;
+
+	prop = icalcomponent_get_first_property (icalcomp, ICAL_X_PROPERTY);
+	while (prop) {
+		const gchar *x_name = icalproperty_get_x_name (prop);
+		if (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-ITEMID"))
+			item_id_prop = prop;
+		 else if (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY"))
+			changekey_prop = prop;
+
+		prop = icalcomponent_get_next_property (icalcomp, ICAL_X_PROPERTY);
+	}
+
+	if (item_id_prop != NULL)
+		icalcomponent_remove_property (icalcomp, item_id_prop);
+
+	if (changekey_prop != NULL)
+		icalcomponent_remove_property (icalcomp, changekey_prop);
 }

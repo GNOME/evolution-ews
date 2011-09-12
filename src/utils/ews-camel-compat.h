@@ -164,5 +164,13 @@ void			ews_compat_propagate_gerror_to_exception
 
 #endif /* 2.28 api adds */
 
+CamelService * camel_session_get_service_compat (CamelSession *session, const gchar *url, CamelProviderType type);
+#if ! EDS_CHECK_VERSION(3,1,0)
+CamelURL * camel_service_get_camel_url (CamelService *service);
+CamelServiceConnectionStatus camel_service_get_connection_status (CamelService *service);
+
+#else
+gchar * camel_session_get_storage_path (CamelSession *session, CamelService *service, GError **error);
+#endif
 
 #endif /* EWS_CAMEL_COMPAT_H */

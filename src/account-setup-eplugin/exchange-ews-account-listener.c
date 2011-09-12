@@ -37,6 +37,7 @@
 #include "exchange-ews-account-setup.h"
 #include "camel-ews-store-summary.h"
 #include "ews-esource-utils.h"
+#include "ews-camel-compat.h"
 
 #define d(x) x
 

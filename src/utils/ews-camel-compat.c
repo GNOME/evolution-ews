@@ -170,7 +170,10 @@ camel_session_get_password_compat	(CamelSession *session,
 					 guint32 flags,
 					 GError **error)
 {
-#if EDS_CHECK_VERSION(2,29,0)
+
+#if EDS_CHECK_VERSION(3,1,0)
+	return camel_session_get_password (session, service, prompt, item, flags, error);
+#elif EDS_CHECK_VERSION(2,29,0)
 	return camel_session_get_password (session, service, domain, prompt, item, flags, error);
 #else	
 	CamelException ex;
@@ -376,6 +379,46 @@ ews_compat_propagate_gerror_to_exception (GError *error, CamelException *ex)
 		camel_exception_set (ex, error->code, error->message);
 	}
 	g_clear_error (&error);
+}
+#endif /* 2.28 */
+
+CamelService *
+camel_session_get_service_compat (CamelSession *session, const gchar *url, CamelProviderType type)
+{
+#if ! EDS_CHECK_VERSION(3,1,0)
+	return camel_session_get_service (session, url, type, NULL);
+#else
+	CamelURL *curl = camel_url_new (url, NULL);
+	CamelService *service;
+
+	service = camel_session_get_service_by_url (session, curl, type);
+	camel_url_free (curl);
+	return service;
+#endif	
+}
+
+#if ! EDS_CHECK_VERSION(3,1,0)
+
+CamelURL *
+camel_service_get_camel_url (CamelService *service)
+{
+	g_return_val_if_fail (CAMEL_IS_SERVICE (service), NULL);
+
+	return service->url;
+}
+
+CamelServiceConnectionStatus
+camel_service_get_connection_status (CamelService *service)
+{
+	return service->status;
+}
+
+#else
+
+gchar *
+camel_session_get_storage_path (CamelSession *session, CamelService *service, GError **error)
+{
+	return g_strdup (camel_service_get_user_data_dir (service));
 }
 
 #endif

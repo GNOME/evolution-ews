@@ -13,8 +13,8 @@ libewsutils_la_CPPFLAGS = \
 	$(CAMEL_CFLAGS)
 
 libewsutils_la_SOURCES =				\
-	ews-camel-compat.c				\
 	ews-camel-compat.h				\
+	ews-camel-compat.c				\
 	ews-esource-utils.h				\
 	ews-esource-utils.c				\
 	e-sqlite3-vfs.c					\

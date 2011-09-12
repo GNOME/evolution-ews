@@ -31,7 +31,7 @@ G_BEGIN_DECLS
 #define MINUTES_IN_HOUR 60
 #define SECS_IN_MINUTE 60
 
-const char *e_ews_collect_orginizer(icalcomponent *comp);
+const char *e_ews_collect_organizer(icalcomponent *comp);
 void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **optional, GSList **resource);
 
 void ewscal_set_time (ESoapMessage *msg, const gchar *name, icaltimetype *t);
@@ -43,6 +43,7 @@ void ewscal_get_attach_differences (const GSList *original, const GSList *modifi
 gchar *e_ews_extract_attachment_id_from_uri (const gchar *uri);
 void ews_set_alarm (ESoapMessage *msg, ECalComponent *comp);
 gint ews_get_alarm (ECalComponent *comp);
+void e_ews_clean_icalcomponent (icalcomponent *icalcomp);
 
 G_END_DECLS
 

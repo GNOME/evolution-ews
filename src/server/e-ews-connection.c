@@ -2414,6 +2414,40 @@ e_ews_connection_delete_items	(EEwsConnection *cnc,
 	return result;
 }
 
+gboolean
+e_ews_connection_delete_item	(EEwsConnection *cnc,
+				 gint pri,
+				 EwsId *id,
+				 guint index,
+				 EwsDeleteType delete_type,
+				 EwsSendMeetingCancellationsType send_cancels,
+				 EwsAffectedTaskOccurrencesType affected_tasks,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	EwsSyncData *sync_data;
+	gboolean result;
+
+	sync_data = g_new0 (EwsSyncData, 1);
+	sync_data->eflag = e_flag_new ();
+
+	e_ews_connection_delete_item_start (cnc, pri, id, index, delete_type,
+					     send_cancels, affected_tasks,
+					     ews_sync_reply_cb, cancellable,
+					     (gpointer) sync_data);
+
+	e_flag_wait (sync_data->eflag);
+
+	result = e_ews_connection_delete_items_finish (cnc, sync_data->res,
+						       error);
+
+	e_flag_free (sync_data->eflag);
+	g_object_unref (sync_data->res);
+	g_free (sync_data);
+
+	return result;
+}
+
 void
 e_ews_connection_update_items_start	(EEwsConnection *cnc,
 					 gint pri,

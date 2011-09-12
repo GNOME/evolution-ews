@@ -33,6 +33,7 @@
 #include "camel-ews-utils.h"
 #include "ews-esource-utils.h"
 #include "e-ews-compat.h"
+#include "ews-camel-compat.h"
 #include "e-ews-message.h"
 #include "ews-camel-compat.h"
 
@@ -294,8 +295,10 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store, const gchar *fid)
 	CamelEwsStoreSummary *ews_summary = store->summary;
 	CamelFolderInfo *fi;
 	gchar *url;
+	CamelURL *curl;
 
-	url = camel_url_to_string (CAMEL_SERVICE (store)->url,
+	curl = camel_service_get_camel_url (CAMEL_SERVICE (store));
+	url = camel_url_to_string (curl,
 			(CAMEL_URL_HIDE_PASSWORD|
 			 CAMEL_URL_HIDE_PARAMS|
 			 CAMEL_URL_HIDE_AUTH) );
@@ -311,9 +314,14 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store, const gchar *fid)
 	fi = camel_folder_info_new ();
 	fi->full_name = camel_ews_store_summary_get_folder_full_name (ews_summary,
 								      fid, NULL);
+#if ! EDS_CHECK_VERSION(3,1,0)	
 	fi->name = camel_ews_store_summary_get_folder_name (ews_summary,
 							    fid, NULL);
 	fi->uri = g_strconcat (url, fi->full_name, NULL);
+#else
+	fi->display_name = camel_ews_store_summary_get_folder_name (ews_summary, fid, NULL);
+#endif
+
 	fi->flags = camel_ews_store_summary_get_folder_flags (ews_summary,
 							      fid, NULL);
 	fi->unread = camel_ews_store_summary_get_folder_unread (ews_summary,
@@ -372,7 +380,7 @@ sync_deleted_folders (CamelEwsStore *store, GSList *deleted_folders)
 			g_clear_error (&error);
 		} else {
 			struct remove_esrc_data *remove_data = g_new0(struct remove_esrc_data, 1);
-			CamelURL *url = CAMEL_SERVICE (store)->url;
+			CamelURL *url = camel_service_get_camel_url (CAMEL_SERVICE (store));
 
 			remove_data->fid = g_strdup (fid);
 			remove_data->account_name = g_strdup (camel_url_get_param (url, "email"));
@@ -574,7 +582,7 @@ sync_created_folders (CamelEwsStore *ews_store, GSList *created_folders)
 		    ftype == EWS_FOLDER_TYPE_TASKS ||
 		    ftype == EWS_FOLDER_TYPE_CONTACTS) {
 			struct add_esrc_data *add_data = g_new0 (struct add_esrc_data, 1);
-			CamelURL *url = CAMEL_SERVICE (ews_store)->url;
+			CamelURL *url = camel_service_get_camel_url (CAMEL_SERVICE (ews_store));
 
 			add_data->folder = g_object_ref (folder);
 			add_data->account_uri = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);

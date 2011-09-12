@@ -50,14 +50,16 @@ static gchar *
 ews_transport_get_name (CamelService *service,
                               gboolean brief)
 {
+	CamelURL *url = camel_service_get_camel_url (service);
+
 	if (brief)
 		return g_strdup_printf (
 			_("Exchange server %s"),
-			service->url->host);
+			url->host);
 	else
 		return g_strdup_printf (
 			_("Exchange mail delivery via %s"),
-			service->url->host);
+			url->host);
 }
 
 static gboolean
@@ -72,13 +74,15 @@ ews_send_to_sync (CamelTransport *transport,
 	CamelService *service;
 	EEwsConnection *cnc;
 	const gchar *host_url;
+	CamelURL *url;
 	gboolean res;
 	GError *error = NULL;
 
 	service = CAMEL_SERVICE (transport);
-	host_url = camel_url_get_param (service->url, "hosturl");
+	url = camel_service_get_camel_url (service);
+	host_url = camel_url_get_param (url, "hosturl");
 
-	cnc = e_ews_connection_find (host_url, service->url->user);
+	cnc = e_ews_connection_find (host_url, url->user);
 	if (!cnc) {
 		g_set_error (&error, CAMEL_SERVICE_ERROR,
 			     CAMEL_SERVICE_ERROR_NOT_CONNECTED,

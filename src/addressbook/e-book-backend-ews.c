@@ -47,6 +47,7 @@
 #include "e-book-backend-ews.h"
 #include "e-book-backend-sqlitedb.h"
 #include "e-book-backend-ews-utils.h"
+#include "e-ews-item-change.h"
 
 #include "e-ews-message.h"
 #include "e-ews-connection.h"
@@ -379,8 +380,50 @@ ebews_set_emails		(ESoapMessage *msg, EContact *contact)
 }
 
 static void
+convert_contact_property_to_updatexml (ESoapMessage *msg, const gchar *name, const gchar *value, const gchar * prefix, const gchar *attr_name, const gchar *attr_value)
+{
+	e_ews_message_start_set_item_field (msg, name, prefix, "Contact");
+	e_ews_message_write_string_parameter_with_attribute (msg, name, NULL, value, attr_name, attr_value);
+	e_ews_message_end_set_item_field (msg);
+}
+
+static void
+convert_indexed_contact_property_to_updatexml (ESoapMessage *message, const gchar *name, const gchar *value, const gchar * prefix, const gchar *element_name, const gchar *key)
+{
+	gboolean delete_field = FALSE;
+
+	if(!value)
+		delete_field = TRUE;
+	e_ews_message_start_set_indexed_item_field (message, name , prefix, "Contact", key, delete_field);
+	
+	if(!delete_field)
+	{
+		e_soap_message_start_element(message, element_name, NULL, NULL);
+		e_ews_message_write_string_parameter_with_attribute(message, "Entry", NULL, value, "Key", key);
+		e_soap_message_end_element(message);
+	}
+	e_ews_message_end_set_indexed_item_field (message, delete_field);
+}
+
+
+static void
 ebews_set_full_name_changes	(ESoapMessage *message, EContact *new, EContact *old)
 {
+	EContactName *name, *old_name;
+
+	name = e_contact_get (new, E_CONTACT_NAME);
+	old_name = e_contact_get (old, E_CONTACT_NAME);
+	if (!name && !old_name)
+		return;
+	
+	if (g_ascii_strcasecmp(name->given, old_name->given))
+		convert_contact_property_to_updatexml(message, "GivenName", name->given, "contacts", NULL, NULL);
+	
+	if (g_ascii_strcasecmp(name->additional, old_name->additional))
+		convert_contact_property_to_updatexml(message, "MiddleName", name->additional, "contacts", NULL, NULL);
+
+	e_contact_name_free (name);
+	e_contact_name_free (old_name);
 	
 }
 
@@ -393,7 +436,20 @@ ebews_set_birth_date_changes	(ESoapMessage *message, EContact *new, EContact *ol
 static void
 ebews_set_phone_number_changes	(ESoapMessage *message, EContact *new, EContact *old)
 {
-	
+	gint i;
+	gchar *new_value, *old_value;
+		
+	for (i = 0; i < G_N_ELEMENTS (phone_field_map); i++) {
+		new_value = e_contact_get (new, phone_field_map[i].field);
+		old_value = e_contact_get (old, phone_field_map[i].field);
+		if((new_value && !old_value) || (!new_value && old_value) ||(new_value && old_value && g_ascii_strcasecmp(new_value, old_value)))
+			convert_indexed_contact_property_to_updatexml (message, "PhoneNumber", new_value, "contacts", "PhoneNumbers", phone_field_map[i].element);
+		if(new_value)
+			g_free(new_value);
+		
+		if(old_value)
+			g_free(old_value);
+	}
 }
 
 static void
@@ -411,7 +467,34 @@ ebews_set_im_changes		(ESoapMessage *message, EContact *new, EContact *old)
 static void
 ebews_set_email_changes		(ESoapMessage *message, EContact *new, EContact *old)
 {
-	
+	gchar *new_value, *old_value;
+		
+	new_value = e_contact_get (new, E_CONTACT_EMAIL_1);
+	old_value = e_contact_get (old, E_CONTACT_EMAIL_1);
+	if((new_value && !old_value) || (!new_value && old_value) ||(new_value && old_value && g_ascii_strcasecmp(new_value, old_value)))
+		convert_indexed_contact_property_to_updatexml (message, "EmailAddress", new_value, "contacts", "EmailAddresses", "EmailAddress1");
+	if(new_value)
+		g_free(new_value);
+	if (old_value)
+		g_free(old_value);
+
+	new_value = e_contact_get (new, E_CONTACT_EMAIL_2);
+	old_value = e_contact_get (old, E_CONTACT_EMAIL_2);
+	if((new_value && !old_value) || (!new_value && old_value) ||(new_value && old_value && g_ascii_strcasecmp(new_value, old_value)))
+		convert_indexed_contact_property_to_updatexml (message, "EmailAddress", new_value, "contacts", "EmailAddresses", "EmailAddress2");
+	if(new_value)
+		g_free(new_value);
+	if (old_value)
+		g_free(old_value);
+
+	new_value = e_contact_get (new, E_CONTACT_EMAIL_3);
+	old_value = e_contact_get (old, E_CONTACT_EMAIL_3);
+	if((new_value && !old_value) || (!new_value && old_value) ||(new_value && old_value && g_ascii_strcasecmp(new_value, old_value)))
+		convert_indexed_contact_property_to_updatexml (message, "EmailAddress", new_value, "contacts", "EmailAddresses", "EmailAddress3");
+	if(new_value)
+		g_free(new_value);
+	if (old_value)
+		g_free(old_value);
 }
 
 static const struct field_element_mapping {
@@ -509,6 +592,7 @@ ews_create_contact_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 		item_id = e_ews_item_get_id((EEwsItem *)items->data);
 
 		e_contact_set (create_contact->contact, E_CONTACT_UID, item_id->id);
+		e_contact_set (create_contact->contact, E_CONTACT_REV, item_id->change_key);
 		e_book_backend_sqlitedb_add_contact (ebews->priv->ebsdb, ebews->priv->folder_id, create_contact->contact, FALSE, &error);
 
 		if (error == NULL)
@@ -690,6 +774,107 @@ e_book_backend_ews_remove_contacts	(EBookBackend *backend,
 	}
 }
 
+typedef struct {
+	EBookBackendEws *ebews;
+	EDataBook *book;
+	EContact *new_contact;
+	EContact *old_contact;
+	guint32 opid;
+} EwsModifyContact;
+
+static void
+ews_modify_contact_cb (GObject *object, GAsyncResult *res, gpointer user_data)
+{
+	EEwsConnection *cnc = E_EWS_CONNECTION (object);
+	EwsModifyContact *modify_contact = user_data;
+	EBookBackendEws *ebews = modify_contact->ebews;
+	EBookBackendEwsPrivate *priv = ebews->priv;
+	GError *error = NULL;
+	GSList *items = NULL;
+	gchar *id;
+	const EwsId *item_id;
+
+	g_object_ref (modify_contact->new_contact);
+	g_object_ref (modify_contact->old_contact);
+
+
+	e_ews_connection_update_items_finish(cnc, res, &items, &error);
+
+	if (error == NULL) {
+		EEwsItem *item = (EEwsItem *) items->data;
+
+		/* set item id */
+		item_id = e_ews_item_get_id((EEwsItem *)items->data);
+
+		e_contact_set (modify_contact->new_contact, E_CONTACT_UID, item_id->id);
+		e_contact_set (modify_contact->new_contact, E_CONTACT_REV, item_id->change_key);
+
+		id = e_contact_get (modify_contact->old_contact, E_CONTACT_UID);
+
+		e_book_backend_sqlitedb_remove_contact (priv->ebsdb, priv->folder_id, id, &error);
+		e_book_backend_sqlitedb_add_contact (ebews->priv->ebsdb, ebews->priv->folder_id, modify_contact->new_contact, FALSE, &error);
+
+		if (error == NULL)
+			e_data_book_respond_modify (modify_contact->book, modify_contact->opid, EDB_ERROR (Success), modify_contact->new_contact);
+
+		g_object_unref (item);
+		g_slist_free (items);
+	}
+	
+	if (error) {
+		g_warning("Error while Creating contact: %s", error->message);
+		e_data_book_respond_modify (modify_contact->book, modify_contact->opid, EDB_ERROR (OtherError), modify_contact->new_contact);
+	}
+
+	/* free memory allocated for create_contact & unref contained objects */
+	g_object_unref(modify_contact->ebews);
+	g_object_unref(modify_contact->new_contact);
+	g_object_unref(modify_contact->old_contact);
+	g_free(modify_contact);
+	g_clear_error (&error);
+}
+
+static void
+convert_contact_to_updatexml (ESoapMessage *msg, gpointer user_data)
+{
+	EwsModifyContact *modify_contact = user_data;
+	EwsId *id;
+	EContact *old_contact = modify_contact->old_contact;
+	EContact *new_contact = modify_contact->new_contact;
+	gchar *value = NULL, *old_value = NULL ;
+	gint i, element_type;
+
+	id = g_new0 (EwsId, 1);
+	id->id = e_contact_get (old_contact, E_CONTACT_UID);
+	id->change_key = e_contact_get (old_contact, E_CONTACT_REV);
+
+	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
+                                         id->id, id->change_key, 0);
+
+	/*Iterate for each field in contact*/
+
+	for (i = 0; i < G_N_ELEMENTS (mappings); i++) {
+		element_type = mappings[i].element_type;
+		if (element_type == ELEMENT_TYPE_SIMPLE)  {
+			value =  e_contact_get (new_contact, mappings[i].field_id);
+			old_value =  e_contact_get (old_contact, mappings[i].field_id);
+			if (value)
+			{
+				if(( *value && !old_value) || g_ascii_strcasecmp (value, old_value))
+					convert_contact_property_to_updatexml(msg, mappings[i].element_name, value, "contacts", NULL, NULL);
+				g_free(value);
+			}
+			if(old_value)
+				g_free(old_value);
+		} else if (element_type == ELEMENT_TYPE_COMPLEX) {
+			if(mappings [i].field_id == E_CONTACT_UID)
+				continue;
+			mappings[i].set_changes (msg, new_contact, old_contact);
+		}
+	}
+	
+	e_ews_message_end_item_change (msg);
+}
 
 static void
 e_book_backend_ews_modify_contact	(EBookBackend *backend,
@@ -697,39 +882,70 @@ e_book_backend_ews_modify_contact	(EBookBackend *backend,
 					 guint32       opid,
 					 const gchar   *vcard)
 {
-	EContact *contact = NULL;
-	EBookBackendEws *egwb;
+	EContact *contact = NULL, *old_contact;
+	EwsModifyContact *modify_contact;
+	EBookBackendEws *ebews;
+	EwsId *id;
+	EBookBackendEwsPrivate *priv;
+	GCancellable *cancellable = NULL;
+	GError *error;
 
-	egwb = E_BOOK_BACKEND_EWS (backend);
 
-	switch (egwb->priv->mode) {
+	ebews = E_BOOK_BACKEND_EWS (backend);
+	priv = ebews->priv;
+
+	switch (priv->mode) {
 
 	case GNOME_Evolution_Addressbook_MODE_LOCAL :
 		e_data_book_respond_modify (book, opid, EDB_ERROR (RepositoryOffline), NULL);
 		return;
 	case GNOME_Evolution_Addressbook_MODE_REMOTE :
 
-		if (egwb->priv->cnc == NULL) {
+		if (ebews->priv->cnc == NULL) {
 			e_data_book_respond_modify (book, opid, EDB_ERROR (AuthenticationRequired), NULL);
 			return;
 		}
 		
-		if (!egwb->priv->is_writable) {
+		if (!ebews->priv->is_writable) {
 			e_data_book_respond_modify (book, opid, EDB_ERROR (PermissionDenied), NULL);
 			return;
 		}
 		
 		contact = e_contact_new_from_vcard (vcard);
 
+		id = g_new0 (EwsId, 1);
+		id->id = e_contact_get (contact, E_CONTACT_UID);
+		id->change_key = e_contact_get (contact, E_CONTACT_REV);
+
+		/*get item id and change key from contact and fetch old contact and assign.*/
+
 		if (e_contact_get (contact, E_CONTACT_IS_LIST)) {
 			g_object_unref (contact);
-			e_data_book_respond_create (book, opid, EDB_ERROR (OtherError), NULL);
+			e_data_book_respond_modify (book, opid, EDB_ERROR (OtherError), NULL);
+			return;
+		}
+
+		old_contact = e_book_backend_sqlitedb_get_contact ( priv->ebsdb, priv->folder_id,
+					 id->id, &error); 
+		if (!old_contact) {
+			g_object_unref (contact);
+			e_data_book_respond_modify (book, opid, EDB_ERROR (OtherError), NULL);
 			return;
 		}
 
 		/* TODO implement */
-		g_object_unref (contact);
-		e_data_book_respond_create (book, opid, EDB_ERROR (OtherError), NULL);
+		modify_contact = g_new0 (EwsModifyContact, 1);
+		modify_contact->ebews = g_object_ref(ebews);
+		modify_contact->book = g_object_ref(book);
+		modify_contact->opid = opid;
+		modify_contact->old_contact = g_object_ref(old_contact);
+		modify_contact->new_contact = g_object_ref(contact);
+		e_ews_connection_update_items_start (priv->cnc, EWS_PRIORITY_MEDIUM,
+							"AlwaysOverwrite", "SendAndSaveCopy",
+							"SendToAllAndSaveCopy", priv->folder_id,
+							convert_contact_to_updatexml, modify_contact,
+							ews_modify_contact_cb, cancellable,
+							modify_contact);
 		return;
 	default :
 		break;

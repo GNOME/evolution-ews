@@ -30,6 +30,7 @@
 #include <libedataserver/e-xml-hash-utils.h>
 #include <libedataserverui/e-passwords.h>
 #include <libedataserver/e-account.h>
+#include <libedataserver/eds-version.h>
 #include <e-util/e-dialog-utils.h>
 #include "mail/em-config.h"
 #include "exchange-ews-account-setup.h"
@@ -82,6 +83,16 @@ e_plugin_lib_enable (EPlugin *ep, gint enable)
 	return 0;
 }
 
+static EAccount *
+get_modified_account (EMConfigTargetAccount *target)
+{
+#if EDS_CHECK_VERSION(3,1,0)	
+	return target->modified_account;
+#else
+	return target->account;
+#endif	
+}
+
 ExchangeEWSAccountListener *
 exchange_ews_accounts_peek_config_listener ()
 {
@@ -122,17 +133,19 @@ get_password (EMConfigTargetAccount *target_account)
 {
 	gchar *key, *password = NULL;
 	CamelURL *url;
-	
-	url = camel_url_new (e_account_get_string (target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
+	EAccount *account;
+
+	account = get_modified_account (target_account);
+	url = camel_url_new (e_account_get_string (account, E_ACCOUNT_SOURCE_URL), NULL);
 
 	key = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
 	password = e_passwords_get_password (EXCHANGE_EWS_PASSWORD_COMPONENT, key);
 	if (!password || !*password) {
-		gboolean remember = e_account_get_bool (target_account->account, E_ACCOUNT_SOURCE_SAVE_PASSWD);
+		gboolean remember = e_account_get_bool (account, E_ACCOUNT_SOURCE_SAVE_PASSWD);
 		gchar *title;
 
 		g_free (password);
-		title = g_strdup_printf (_("Enter Password for %s"), target_account->account->id->address);
+		title = g_strdup_printf (_("Enter Password for %s"), account->id->address);
 		password = e_passwords_ask_password (title, EXCHANGE_EWS_PASSWORD_COMPONENT, key, title,
                                                     E_PASSWORDS_REMEMBER_FOREVER|E_PASSWORDS_SECRET,
 						     &remember, NULL);
@@ -161,7 +174,7 @@ validate_credentials (GtkWidget *widget, struct _AutoDiscCallBackData *cbdata)
 	/*Can there be a account without password ?*/
 	if (password && *password) {
 		e_ews_autodiscover_ws_url (autodiscover_callback, cbdata,
-					   target_account->account->id->address,
+					   (get_modified_account (target_account))->id->address,
 					   password);
 	}
 	g_free (password);
@@ -174,8 +187,10 @@ url_changed (GtkWidget *entry, EConfig *config, const gchar *param)
 	CamelURL *url = NULL;
 	const gchar *domain = NULL;
 	gchar *url_string = NULL;
+	EAccount *account;
 
-	url = camel_url_new (e_account_get_string(target->account, E_ACCOUNT_SOURCE_URL), NULL);
+	account = get_modified_account (target);
+	url = camel_url_new (e_account_get_string(account, E_ACCOUNT_SOURCE_URL), NULL);
 	domain = gtk_entry_get_text (GTK_ENTRY(entry));
 
 	if (domain && domain[0]) {
@@ -190,8 +205,8 @@ url_changed (GtkWidget *entry, EConfig *config, const gchar *param)
 		camel_url_set_param (url, param, NULL);
 
 	url_string = camel_url_to_string (url, 0);
-	e_account_set_string (target->account, E_ACCOUNT_SOURCE_URL, url_string);
-	e_account_set_string (target->account, E_ACCOUNT_TRANSPORT_URL, url_string);
+	e_account_set_string (account, E_ACCOUNT_SOURCE_URL, url_string);
+	e_account_set_string (account, E_ACCOUNT_TRANSPORT_URL, url_string);
 	g_free (url_string);
 
 	camel_url_free (url);
@@ -218,7 +233,7 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 	gint row;
 
 	target_account = (EMConfigTargetAccount *)data->config->target;
-	url = camel_url_new(e_account_get_string(target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
+	url = camel_url_new(e_account_get_string(get_modified_account (target_account), E_ACCOUNT_SOURCE_URL), NULL);
 
 	/* is NULL on new account creation */
 	if (url == NULL)
@@ -233,12 +248,14 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		const gchar *temp, *email_id;
 		gchar *url_string;
 		struct _AutoDiscCallBackData *cbdata = g_new0 (struct _AutoDiscCallBackData, 1);
+		EAccount *account;
 		/* FIXME free cbdata */
 
 		g_object_get (data->parent, "n-rows", &row, NULL);
+		account = get_modified_account (target_account);
 
 		/* Set email_id */
-		email_id = target_account->account->id->address;
+		email_id = account->id->address;
 		camel_url_set_param (url, "email", email_id);
 		temp = g_strstr_len (email_id, -1, "@");
 		/* Don't overwrite the URL if it's already been set */
@@ -246,12 +263,12 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 			camel_url_set_host (url, g_strdup (temp + 1));
 
 		url_string = camel_url_to_string (url, 0);
-		e_account_set_string (target_account->account, E_ACCOUNT_SOURCE_URL, url_string);
-		e_account_set_string (target_account->account, E_ACCOUNT_TRANSPORT_URL, url_string);
+		e_account_set_string (account, E_ACCOUNT_SOURCE_URL, url_string);
+		e_account_set_string (account, E_ACCOUNT_TRANSPORT_URL, url_string);
 		g_free (url_string);
 		
 		/* OAB url entry */
-		oab_label = gtk_label_new_with_mnemonic (_("OA_B Url:"));
+		oab_label = gtk_label_new_with_mnemonic (_("OA_B URL:"));
 		gtk_widget_show (oab_label);
 
 		oab_url = gtk_entry_new ();
@@ -263,7 +280,7 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 
 		/* Host url and Autodiscover button */
 		hbox = gtk_hbox_new (FALSE, 6);
-		label = gtk_label_new_with_mnemonic (_("_Host Url:"));
+		label = gtk_label_new_with_mnemonic (_("_Host URL:"));
 		gtk_widget_show (label);
 
 		host_url = gtk_entry_new ();
@@ -276,7 +293,7 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		cbdata->config = data->config;
 		cbdata->host_entry = host_url;
 		cbdata->oab_entry = oab_url;
-		auto_discover = gtk_button_new_with_mnemonic (_("_Fetch Url"));
+		auto_discover = gtk_button_new_with_mnemonic (_("_Fetch URL"));
 		gtk_box_pack_start (GTK_BOX (hbox), auto_discover, FALSE, FALSE, 0);
 		g_signal_connect (G_OBJECT(auto_discover), "clicked",  G_CALLBACK(validate_credentials), cbdata);
 
@@ -303,7 +320,7 @@ org_gnome_exchange_ews_check_options(EPlugin *epl, EConfigHookPageCheckData *dat
 	gboolean status = TRUE;
 	CamelURL *url;
 
-	url = camel_url_new (e_account_get_string(target->account, E_ACCOUNT_SOURCE_URL), NULL);
+	url = camel_url_new (e_account_get_string(get_modified_account (target), E_ACCOUNT_SOURCE_URL), NULL);
 
 	if (url && url->protocol && g_ascii_strcasecmp (url->protocol, "ews") != 0)
 		goto exit;
@@ -372,7 +389,7 @@ update_camel_url (struct _oab_setting_data *cbdata)
 	CamelURL *url;
 	gchar *url_string;
 	
-	url = camel_url_new (e_account_get_string(target->account, E_ACCOUNT_SOURCE_URL), NULL);
+	url = camel_url_new (e_account_get_string(get_modified_account (target), E_ACCOUNT_SOURCE_URL), NULL);
 	
 	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (cbdata->check))) {
 		gint num;
@@ -400,7 +417,7 @@ update_camel_url (struct _oab_setting_data *cbdata)
 	}
 
 	url_string = camel_url_to_string (url, 0);
-	e_account_set_string (target->account, E_ACCOUNT_SOURCE_URL, url_string);
+	e_account_set_string (get_modified_account (target), E_ACCOUNT_SOURCE_URL, url_string);
 	g_free (url_string);
 	camel_url_free (url);
 }
@@ -476,7 +493,7 @@ fetch_button_clicked_cb (GtkButton *button, gpointer user_data)
 	const gchar *oab_url;
 	gchar *password;
 	
-	url = camel_url_new (e_account_get_string(target->account, E_ACCOUNT_SOURCE_URL), NULL);
+	url = camel_url_new (e_account_get_string(get_modified_account (target), E_ACCOUNT_SOURCE_URL), NULL);
 
 	cancellable = g_cancellable_new ();
 
@@ -540,7 +557,7 @@ init_widgets (struct _oab_setting_data *cbdata)
 	CamelURL *url;
 	
 	target_account = (EMConfigTargetAccount *) cbdata->config->target;
-	url = camel_url_new(e_account_get_string(target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
+	url = camel_url_new(e_account_get_string(get_modified_account (target_account), E_ACCOUNT_SOURCE_URL), NULL);
 
 	marked_for_offline = camel_url_get_param (url, "oab_offline");
 	if (marked_for_offline && !strcmp (marked_for_offline, "1")) {
@@ -607,7 +624,7 @@ org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 	CamelURL *url;
 	
 	target_account = (EMConfigTargetAccount *)data->config->target;
-	url = camel_url_new(e_account_get_string(target_account->account, E_ACCOUNT_SOURCE_URL), NULL);
+	url = camel_url_new(e_account_get_string(get_modified_account (target_account), E_ACCOUNT_SOURCE_URL), NULL);
 
 	/* is NULL on new account creation */
 	if (url == NULL)
