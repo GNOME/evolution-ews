@@ -224,7 +224,7 @@ ews_get_cache_dir (EBookBackend *backend, ESource *source)
         mangled_uri = g_strdelimit (e_source_get_uri (source), ":/", '_');
 
         filename = g_build_filename (
-                g_get_home_dir (), ".evolution", "addressbook", "cache", mangled_uri, NULL);
+                g_get_home_dir (), ".evolution", "cache", "addressbook", mangled_uri, NULL);
 
         g_free (mangled_uri);
 
@@ -1011,6 +1011,9 @@ e_book_backend_ews_gal_load_source 	(EBookBackend *backend,
 	}
 
 	e_book_backend_set_is_loaded (backend, TRUE);
+	if (priv->mode == GNOME_Evolution_Addressbook_MODE_REMOTE)
+		e_book_backend_notify_connection_status (backend, TRUE);
+
 	return EDB_ERROR (Success);
 }
 
