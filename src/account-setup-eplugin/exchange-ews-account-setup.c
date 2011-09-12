@@ -596,6 +596,7 @@ ews_assistant_page_changed_cb (GtkAssistant *assistant, GtkWidget *page, gpointe
 static void
 ews_page_switched_cb (GtkNotebook *notebook, GtkWidget *page, guint page_num, gpointer user_data)
 {
+	page = gtk_notebook_get_nth_page (notebook, page_num);
 	ews_prepare_receive_options_page (page, user_data);
 }
 
