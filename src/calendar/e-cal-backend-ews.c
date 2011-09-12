@@ -597,7 +597,6 @@ e_cal_backend_ews_get_default_object (ECalBackend *backend, EDataCal *cal)
 
 exit:
 	e_data_cal_notify_default_object (cal, EDC_ER_CODE(error), object);
-	g_clear_error (&error);
 	g_free (object);
 }
 
@@ -2143,8 +2142,12 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal,
 		attach_data->itemid = itemid;
 		attach_data->changekey = changekey;
 
-		if (cal)
+		if (cal) {
+			if (error)
+				g_warning ("Modify object error :  %s\n", error->message);
 			e_data_cal_notify_object_modified (cal, EDC_ER_CODE (error), NULL, NULL);
+			error = NULL;
+		}
 
 		e_ews_connection_create_attachments_start (priv->cnc, EWS_PRIORITY_MEDIUM,
 							   item_id, added_attachments,
@@ -2183,12 +2186,13 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal,
 	return;
 
 exit:
+	if (error)
+		g_warning ("Modify object error :  %s\n", error->message);
+
 	if (cal)
 		e_data_cal_notify_object_modified (cal, EDC_ER_CODE(error), NULL, NULL);
-	if (error) {
-		g_warning ("Modify object error :  %s\n", error->message);
+	else
 		g_clear_error (&error);
-	}
 }
 
 typedef struct {
@@ -3220,13 +3224,11 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 	PRIV_UNLOCK (priv);
 
 	if (error != NULL) {
-		g_warning ("Unable to Sync changes %s \n", error->message);
+		g_warning ("Unable to Sync changes \n");
 
 		PRIV_LOCK (priv);
 		priv->refreshing = FALSE;
 		PRIV_UNLOCK (priv);
-
-		g_clear_error (&error);
 		return;
 	}
 
