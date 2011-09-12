@@ -1674,19 +1674,21 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	ECalBackendEws *cbews = modify_data->cbews;
 	ECalBackendEwsPrivate *priv = cbews->priv;
 	GError *error = NULL;
-	gchar *comp_str, *comp_str_old;
+	gchar *comp_str = NULL, *comp_str_old = NULL;
 	GSList *ids = NULL;
 	const EwsId *item_id;
-	icalproperty *icalprop;
+	icalproperty *icalprop = NULL;
 	icalcomponent *icalcomp;
-	ECalComponentId *id;
+	ECalComponentId *id = NULL;
 	const gchar *x_name;
 
 	if (!e_ews_connection_update_items_finish (cnc, res, &ids, &error)) {
 		/* The calendar UI doesn't *display* errors unless they have
 		   the OtherError code */
 		error->code = EDC_CODE (OtherError);
-		return;
+		if (modify_data->cal)
+			e_data_cal_notify_object_modified (modify_data->cal, EDC_ER_CODE(error), NULL, NULL);
+		goto exit;
 	}
 
 	g_object_ref (modify_data->comp);
@@ -1736,6 +1738,8 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	e_cal_component_free_id (id);
 	g_free(comp_str);
 	g_free(comp_str_old);
+
+exit:
 	g_free(modify_data->itemid);
 	g_free(modify_data->changekey);
 	g_object_unref(modify_data->comp);
