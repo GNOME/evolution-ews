@@ -473,7 +473,7 @@ ews_folder_hierarchy_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_da
 	g_mutex_unlock (priv->get_finfo_lock);
 
 exit:
-	g_object_unref (ews_store);
+	camel_object_unref (ews_store);
 	g_clear_error (&error);
 }
 
@@ -490,10 +490,10 @@ ews_refresh_finfo (CamelEwsStore *ews_store)
 
 	sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
 
-
+	camel_object_ref (ews_store);
 	e_ews_connection_sync_folder_hierarchy_start	(ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
 							 sync_state, ews_folder_hierarchy_ready_cb,
-							 NULL, g_object_ref (ews_store));
+							 NULL, ews_store);
 	g_free (sync_state);
 	return TRUE;
 }
