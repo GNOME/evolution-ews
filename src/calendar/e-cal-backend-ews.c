@@ -1713,11 +1713,12 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 
 	e_cal_backend_store_thaw_changes (priv->store);
 
-exit:
 	icalproperty_free (icalprop);
 	e_cal_component_free_id (id);
 	g_free(comp_str);
 	g_free(comp_str_old);
+
+exit:
 	g_free(modify_data->itemid);
 	g_free(modify_data->changekey);
 	g_object_unref(modify_data->comp);
