@@ -997,6 +997,8 @@ e_book_backend_ews_gal_load_source 	(EBookBackend *backend,
 	}
 
 	e_book_backend_set_is_loaded (backend, TRUE);
+	if (priv->mode == E_DATA_BOOK_MODE_REMOTE)
+		e_book_backend_notify_connection_status (backend, TRUE);
 }
 
 static void
