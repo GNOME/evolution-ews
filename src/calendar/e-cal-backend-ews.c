@@ -118,6 +118,7 @@ static ECalBackendClass *parent_class = NULL;
 static void ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data);
 static void ews_cal_component_get_item_id (ECalComponent *comp, gchar **itemid, gchar **changekey);
 static gboolean ews_start_sync	(gpointer data);
+static icaltimezone* e_cal_get_timezone_from_ical_component (ECalBackend *backend, icalcomponent *comp);
 
 static void
 switch_offline (ECalBackendEws *cbews)
@@ -923,16 +924,22 @@ ews_cal_remove_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 }
 
 static guint
-e_cal_rid_to_index (const char *rid, icalcomponent *comp, GError **error)
+e_cal_rid_to_index (ECalBackend *backend, const char *rid, icalcomponent *comp, GError **error)
 {
 	guint index = 1;
 	icalproperty *prop = icalcomponent_get_first_property(comp, ICAL_RRULE_PROPERTY);
 	struct icalrecurrencetype rule = icalproperty_get_rrule (prop);
 	struct icaltimetype dtstart = icalcomponent_get_dtstart (comp);
-	icalrecur_iterator* ritr = icalrecur_iterator_new (rule, dtstart);
-	icaltimetype next = icalrecur_iterator_next (ritr),
-		o_time = icaltime_from_string (rid);
+	icalrecur_iterator* ritr;
+	icaltimetype next, o_time;
 
+	/* icalcomponent_get_datetime needs a fix to initialize ret.zone to NULL. If a timezone is not
+	   found in libical, it remains uninitialized in that function causing invalid read or crash. so
+	   we set the timezone as we cannot identify if it has a valid timezone or not */
+	dtstart.zone = e_cal_get_timezone_from_ical_component (backend, comp);
+	ritr = icalrecur_iterator_new (rule, dtstart);
+	next = icalrecur_iterator_next (ritr);
+	o_time = icaltime_from_string (rid);
 	o_time.zone = dtstart.zone;
 
 	for (; !icaltime_is_null_time (next); next = icalrecur_iterator_next (ritr), index++) {
@@ -1001,7 +1008,7 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	}
 	
 	if (parent && !comp) {
-		index = e_cal_rid_to_index (rid, e_cal_component_get_icalcomponent (parent), &error);
+		index = e_cal_rid_to_index (backend, rid, e_cal_component_get_icalcomponent (parent), &error);
 		if (error) goto errorlvl2;
 	}
 
@@ -1758,7 +1765,7 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 		if (prop != NULL) {
 			recid = icalproperty_get_value_as_string_r (prop);
 			e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_OCCURRENCEITEM,
-					 modify_data->itemid, modify_data->changekey, e_cal_rid_to_index (recid, icalcomp_old, &error));
+					 modify_data->itemid, modify_data->changekey, e_cal_rid_to_index (E_CAL_BACKEND (modify_data->cbews), recid, icalcomp_old, &error));
 			free (recid);
 		} else {
 			e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
@@ -2465,6 +2472,11 @@ e_cal_get_timezone_from_ical_component (ECalBackend *backend, icalcomponent *com
 	prop = icalcomponent_get_first_property(comp, ICAL_DTSTART_PROPERTY);
 	if ((param = icalproperty_get_first_parameter(prop, ICAL_TZID_PARAMETER))) {
 		const char *tzid = icalparameter_get_tzid (param);
+		icaltimezone *zone;
+
+		zone = icaltimezone_get_builtin_timezone_from_tzid (tzid);
+		if (zone)
+			return zone;
 		
 		return e_cal_backend_ews_internal_get_timezone (E_CAL_BACKEND (backend), tzid);
 	}
