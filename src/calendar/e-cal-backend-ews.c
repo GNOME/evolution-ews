@@ -2574,8 +2574,8 @@ ewscal_send_cancellation_email (ECalBackend *backend, EEwsConnection *cnc, Camel
 	camel_multipart_add_part (multi, text_part);
 	camel_multipart_set_boundary (multi, NULL);
 	camel_multipart_add_part (multi, vcal_part);
-	g_object_unref (text_part);
-	g_object_unref (vcal_part);
+	camel_object_unref (text_part);
+	camel_object_unref (vcal_part);
 
 	message = camel_mime_message_new ();
 	camel_mime_message_set_subject (message, subject);
@@ -2591,7 +2591,7 @@ ewscal_send_cancellation_email (ECalBackend *backend, EEwsConnection *cnc, Camel
 		g_clear_error (&error);
 	}
 
-	g_object_unref (message);
+	camel_object_unref (message);
 	icalcomponent_free (vcal);
 }
 
