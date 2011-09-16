@@ -72,6 +72,7 @@ struct _ECalBackendEwsPrivate {
 	EEwsConnection *cnc;
 	gchar *folder_id;
 	gchar *user_email;
+	gchar *storage_path;
 
 	EDataCal *opening_cal;
 	EServerMethodContext opening_ctx;
@@ -663,6 +664,7 @@ e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal, EServerMethodContex
 {
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
+	ESource *esource;
 	const gchar *cache_dir;
 	GError *error = NULL;
 
@@ -670,26 +672,26 @@ e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal, EServerMethodContex
 	priv = cbews->priv;
 
 	cache_dir = e_cal_backend_get_cache_dir (backend);
+	esource = e_cal_backend_get_source (E_CAL_BACKEND (cbews));
 
 	PRIV_LOCK (priv);
 	if (!priv->store) {
-		priv->store = e_cal_backend_file_store_new (cache_dir);
+		priv->folder_id = e_source_get_duped_property (esource, "folder-id");
+		priv->storage_path = g_build_filename (cache_dir, priv->folder_id, NULL);
+		
+		priv->store = e_cal_backend_file_store_new (priv->storage_path);
 		e_cal_backend_store_load (priv->store);
 		add_comps_to_item_id_hash (cbews);
 		e_cal_backend_store_set_default_timezone (priv->store, priv->default_zone);
 	}
 
 	if (priv->mode != CAL_MODE_LOCAL && !priv->cnc) {
-		ESource *esource;
 		const gchar *host_url;
 
 		/* If we can be called a second time while the first is still
 		   "outstanding", we need a bit of a rethink... */
 		g_assert (!priv->opening_ctx && !priv->opening_cal);
 
-		esource = e_cal_backend_get_source (E_CAL_BACKEND (cbews));
-
-		priv->folder_id = e_source_get_duped_property (esource, "folder-id");
 		priv->user_email = e_source_get_duped_property (esource, "email");
 
 		host_url = e_source_get_property (esource, "hosturl");
@@ -2769,7 +2771,7 @@ ews_get_attachments (ECalBackendEws *cbews, EEwsItem *item)
 							EWS_PRIORITY_MEDIUM,
 							uid,
 							attachment_ids,
-							e_cal_backend_get_cache_dir(E_CAL_BACKEND(cbews)),
+							cbews->priv->storage_path,
 							TRUE,
 							ews_get_attachments_ready_callback,
 							NULL, NULL,
@@ -3642,6 +3644,11 @@ e_cal_backend_ews_finalize (GObject *object)
 	if (priv->user_email) {
 		g_free (priv->user_email);
 		priv->user_email = NULL;
+	}
+
+	if (priv->storage_path) {
+		g_free (priv->storage_path);
+		priv->storage_path = NULL;
 	}
 
 	if (priv->default_zone) {

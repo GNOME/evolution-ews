@@ -139,9 +139,12 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 	   in *either* calendar or mail code. Note the tricks we have to
 	   play in the calendar back end to make the cache directory
 	   unique again. */
-	source_uri = g_strdup_printf("%s?folderid=%s", account_uri, fid->id);
-	source = e_source_new_with_absolute_uri (source_name, source_uri);
-	g_free (source_uri);
+	if (ftype == EWS_FOLDER_TYPE_CONTACTS)
+		source_uri = g_strdup_printf ("%s?folderid=%s", account_uri + strlen (EWS_BASE_URI), fid->id);
+	else
+		source_uri = g_strdup (account_uri + strlen (EWS_BASE_URI));
+
+	source = e_source_new (source_name, source_uri);
 	e_source_set_property (source, "username", username);
 	e_source_set_property (source, "auth-domain", "Ews");
 	e_source_set_property (source, "folder-id", fid->id);
@@ -152,6 +155,7 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 	e_source_set_property (source, "offline_sync", "1");
 	e_source_set_color_spec (source, "#EEBC60");
 
+	g_free (source_uri);
 	/* set props required for contacts */
 	if (ftype == EWS_FOLDER_TYPE_CONTACTS) {
 		e_source_set_property (source, "auth", "plain/password");
