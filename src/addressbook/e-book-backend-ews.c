@@ -436,7 +436,7 @@ convert_indexed_contact_property_to_updatexml (ESoapMessage *message, const gcha
 {
 	gboolean delete_field = FALSE;
 
-	if(!value)
+	if(!value || !g_strcmp0(value, ""))
 		delete_field = TRUE;
 	e_ews_message_start_set_indexed_item_field (message, name , prefix, "Contact", key, delete_field);
 	
@@ -474,7 +474,7 @@ ebews_set_full_name_changes	(ESoapMessage *message, EContact *new, EContact *old
 static void
 ebews_set_birth_date_changes	(ESoapMessage *message, EContact *new, EContact *old)
 {
-	
+
 }
 
 static void
@@ -482,7 +482,7 @@ ebews_set_phone_number_changes	(ESoapMessage *message, EContact *new, EContact *
 {
 	gint i;
 	gchar *new_value, *old_value;
-		
+	
 	for (i = 0; i < G_N_ELEMENTS (phone_field_map); i++) {
 		new_value = e_contact_get (new, phone_field_map[i].field);
 		old_value = e_contact_get (old, phone_field_map[i].field);
@@ -497,9 +497,71 @@ ebews_set_phone_number_changes	(ESoapMessage *message, EContact *new, EContact *
 }
 
 static void
+convert_indexed_contact_property_to_updatexml_physical_address (ESoapMessage *message, const gchar *name, const gchar *uri_element, const gchar *value, const gchar * prefix, const gchar *element_name, const gchar *key)
+{
+	gchar * fielduri = NULL;
+	gboolean delete_field = FALSE;
+
+	if(!value || !g_strcmp0(value, ""))
+		delete_field = TRUE;
+
+	fielduri = g_strconcat (name, ":", uri_element, NULL);
+
+	e_ews_message_start_set_indexed_item_field (message, fielduri , prefix, "Contact", key, delete_field);
+	
+	if(!delete_field)
+	{
+		e_soap_message_start_element(message, element_name, NULL, NULL);
+
+		e_soap_message_start_element (message, "Entry", NULL, NULL);
+		e_soap_message_add_attribute (message, "Key", key, NULL, NULL);
+		e_ews_message_write_string_parameter (message, uri_element, NULL, value);
+		e_soap_message_end_element(message);
+
+		e_soap_message_end_element(message);
+	}
+	e_ews_message_end_set_indexed_item_field (message, delete_field);
+}
+
+static void compare_address(ESoapMessage *message, EContact *new, EContact *old, EContactField field, const char *key)
+{
+	EContactAddress *new_address, *old_address;
+	gboolean set = FALSE;
+
+	new_address = e_contact_get(new, field);
+	old_address = e_contact_get(old, field);
+
+	if(!new_address && !old_address)
+		return;
+
+	if(!old_address && new_address)
+		set = TRUE;
+
+	if(!new_address && old_address)
+	{
+		set = TRUE;
+		new_address = g_new0(EContactAddress, 1);
+	}
+
+	if (set || g_ascii_strcasecmp(new_address->street, old_address->street))
+		convert_indexed_contact_property_to_updatexml_physical_address (message, "PhysicalAddress", "Street", new_address->street, "contacts", "PhysicalAddresses", key);
+	if (set || g_ascii_strcasecmp(new_address->locality, old_address->locality))
+		convert_indexed_contact_property_to_updatexml_physical_address (message, "PhysicalAddress", "City", new_address->locality, "contacts", "PhysicalAddresses", key);
+	if (set || g_ascii_strcasecmp(new_address->region, old_address->region))
+		convert_indexed_contact_property_to_updatexml_physical_address (message, "PhysicalAddress", "State", new_address->region, "contacts", "PhysicalAddresses", key);
+	if (set || g_ascii_strcasecmp(new_address->code, old_address->code))
+		convert_indexed_contact_property_to_updatexml_physical_address (message, "PhysicalAddress", "PostalCode", new_address->code, "contacts", "PhysicalAddresses", key);
+
+	e_contact_address_free(old_address);
+	e_contact_address_free(new_address);
+}
+
+static void
 ebews_set_address_changes	(ESoapMessage *message, EContact *new, EContact *old)
 {
-	
+	compare_address(message, new, old, E_CONTACT_ADDRESS_WORK, "Business");
+	compare_address(message, new, old, E_CONTACT_ADDRESS_HOME, "Home");
+	compare_address(message, new, old, E_CONTACT_ADDRESS_OTHER, "Other");
 }
 
 static void
