@@ -259,7 +259,7 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		g_free (url_string);
 		
 		/* OAB url entry */
-		oab_label = gtk_label_new_with_mnemonic (_("OA_B URL:"));
+		oab_label = gtk_label_new_with_mnemonic (_("OAB U_RL:"));
 		gtk_widget_show (oab_label);
 
 		oab_url = gtk_entry_new ();
