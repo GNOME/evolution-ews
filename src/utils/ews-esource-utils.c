@@ -140,7 +140,7 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 	   play in the calendar back end to make the cache directory
 	   unique again. */
 	if (ftype == EWS_FOLDER_TYPE_CONTACTS)
-		source_uri = g_strdup_printf ("%s?folderid=%s", account_uri + strlen (EWS_BASE_URI), fid->id);
+		source_uri = g_strdup_printf ("%s;folderid=%s", account_uri + strlen (EWS_BASE_URI), fid->id);
 	else
 		source_uri = g_strdup (account_uri + strlen (EWS_BASE_URI));
 
