@@ -642,6 +642,7 @@ org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 		/* OAL combo and fetch OAL button */	
 		hbox = gtk_hbox_new (FALSE, 6);
 		oal_combo = gtk_combo_box_text_new ();
+		gtk_label_set_mnemonic_widget (GTK_LABEL(label), oal_combo);
 		gtk_box_pack_start (GTK_BOX (hbox), oal_combo, TRUE, TRUE, 0);
 
 		fetch_button = gtk_button_new_with_mnemonic (_("Fetch _list"));
