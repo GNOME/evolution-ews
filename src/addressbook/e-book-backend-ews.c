@@ -1459,7 +1459,7 @@ ews_replace_gal_in_db (EBookBackendEws *cbews, const gchar *filename, GCancellab
 		ret = e_book_backend_sqlitedb_delete_addressbook (priv->ebsdb, priv->folder_id, error);
 		ews_remove_attachments (priv->attachment_dir);
 		if (ret)
-			ret = e_book_backend_sqlitedb_create_addressbook (priv->ebsdb, priv->folder_id, priv->folder_name, FALSE, error);
+			ret = e_book_backend_sqlitedb_create_addressbook (priv->ebsdb, priv->folder_id, priv->folder_name, TRUE, error);
 	}
 
 	if (!ret)
