@@ -111,6 +111,7 @@ static void autodiscover_callback (EwsUrls *urls, gpointer user_data, GError *er
 	
 	if (error) {
 		g_warning ("Autodiscover failed: %s", error->message);
+		e_notice (NULL, GTK_MESSAGE_ERROR, _("Autodiscover failed: %s"), error->message);
 		g_clear_error (&error);
 	}
 	if (urls) {
