@@ -185,25 +185,15 @@ url_changed (GtkWidget *entry, EConfig *config, const gchar *param)
 {
 	EMConfigTargetAccount *target = (EMConfigTargetAccount *)(config->target);
 	CamelURL *url = NULL;
-	const gchar *domain = NULL;
+	const gchar *uri_str = NULL;
 	gchar *url_string = NULL;
 	EAccount *account;
 
 	account = get_modified_account (target);
 	url = camel_url_new (e_account_get_string(account, E_ACCOUNT_SOURCE_URL), NULL);
-	domain = gtk_entry_get_text (GTK_ENTRY(entry));
+	uri_str = gtk_entry_get_text (GTK_ENTRY(entry));
 
-	if (domain && domain[0]) {
-		CamelURL *hosturl;
-		camel_url_set_param (url, param, domain);
-		hosturl = camel_url_new (domain, NULL);
-		if (hosturl) {
-			camel_url_set_host (url, hosturl->host);
-			camel_url_free (hosturl);
-		}
-	} else
-		camel_url_set_param (url, param, NULL);
-
+	camel_url_set_param (url, param, uri_str);
 	url_string = camel_url_to_string (url, 0);
 	e_account_set_string (account, E_ACCOUNT_SOURCE_URL, url_string);
 	e_account_set_string (account, E_ACCOUNT_TRANSPORT_URL, url_string);
