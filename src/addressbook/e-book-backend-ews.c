@@ -72,7 +72,6 @@ typedef struct {
 struct _EBookBackendEwsPrivate {
 	EEwsConnection *cnc;
 	gchar *folder_id;
-	gchar *oal_id;
 	gchar *oab_url;
 	gchar *folder_name;
 
@@ -1328,7 +1327,7 @@ ews_gal_needs_update (EBookBackendEws *cbews, EwsOALDetails *full, GError **erro
 	gboolean ret = FALSE;
 	gchar *tmp;
 
-	tmp = e_book_backend_sqlitedb_get_key_value (priv->ebsdb, priv->oal_id, "seq", error);
+	tmp = e_book_backend_sqlitedb_get_key_value (priv->ebsdb, priv->folder_id, "seq", error);
 	if (error)
 		goto exit;
 
@@ -1389,7 +1388,7 @@ ews_remove_old_gal_file (EBookBackendEws *cbews, GError **error)
 	EBookBackendEwsPrivate *priv = cbews->priv;
 	gchar *filename;
 
-	filename = e_book_backend_sqlitedb_get_key_value (priv->ebsdb, priv->oal_id, "oab-filename", error);
+	filename = e_book_backend_sqlitedb_get_key_value (priv->ebsdb, priv->folder_id, "oab-filename", error);
 	if (*error)
 		return FALSE;
 
@@ -1425,7 +1424,7 @@ ews_gal_store_contact (EContact *contact, goffset offset, guint percent, gpointe
 			e_data_book_view_notify_status_message (book_view, status_message);
 
 		data->contact_collector = g_slist_reverse (data->contact_collector);
-		e_book_backend_sqlitedb_add_contacts (priv->ebsdb, priv->oal_id, data->contact_collector, FALSE, error);
+		e_book_backend_sqlitedb_add_contacts (priv->ebsdb, priv->folder_id, data->contact_collector, FALSE, error);
 
 		for (l = data->contact_collector; l != NULL; l = g_slist_next (l))
 			e_book_backend_notify_update (E_BOOK_BACKEND (data->cbews), E_CONTACT (l->data));
@@ -1453,11 +1452,11 @@ ews_replace_gal_in_db (EBookBackendEws *cbews, const gchar *filename, GCancellab
 	struct _db_data data;
 
 	/* remove the old address-book and create a new one in db */
-	if (e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->oal_id, NULL)) {
-		ret = e_book_backend_sqlitedb_delete_addressbook (priv->ebsdb, priv->oal_id, error);
+	if (e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
+		ret = e_book_backend_sqlitedb_delete_addressbook (priv->ebsdb, priv->folder_id, error);
 		ews_remove_attachments (priv->attachment_dir);
 		if (ret)
-			ret = e_book_backend_sqlitedb_create_addressbook (priv->ebsdb, priv->oal_id, priv->folder_name, FALSE, error);
+			ret = e_book_backend_sqlitedb_create_addressbook (priv->ebsdb, priv->folder_id, priv->folder_name, FALSE, error);
 	}
 
 	if (!ret)
@@ -1476,7 +1475,7 @@ ews_replace_gal_in_db (EBookBackendEws *cbews, const gchar *filename, GCancellab
 	       return ret;
 
 	/* mark the db as populated */
-	ret = e_book_backend_sqlitedb_set_is_populated (priv->ebsdb, priv->oal_id, TRUE, error);
+	ret = e_book_backend_sqlitedb_set_is_populated (priv->ebsdb, priv->folder_id, TRUE, error);
 
 	return ret;
 }
@@ -1502,14 +1501,14 @@ ebews_start_gal_sync	(gpointer data)
 
 	d(printf ("Ewsgal: Fetching oal full details file \n");)
 
-	if (!e_ews_connection_get_oal_detail (oab_cnc, priv->oal_id, "Full", &full_l, cancellable, &error)) {
+	if (!e_ews_connection_get_oal_detail (oab_cnc, priv->folder_id, "Full", &full_l, cancellable, &error)) {
 		ret = FALSE;
 		goto exit;
 	}
 
 	full = (EwsOALDetails *) full_l->data; 
 	/* TODO fetch differential updates if available instead of downloading the whole GAL */
-	if (!e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->oal_id, NULL) || ews_gal_needs_update (cbews, full, &error)) {
+	if (!e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL) || ews_gal_needs_update (cbews, full, &error)) {
 		gchar *seq;
 		
 		d(printf ("Ewsgal: Downloading full gal \n");)
@@ -1532,11 +1531,11 @@ ebews_start_gal_sync	(gpointer data)
 			goto exit;
 	
 		seq = g_strdup_printf ("%"G_GUINT32_FORMAT, full->seq);
-		ret = e_book_backend_sqlitedb_set_key_value (priv->ebsdb, priv->oal_id, "seq", seq, &error);
+		ret = e_book_backend_sqlitedb_set_key_value (priv->ebsdb, priv->folder_id, "seq", seq, &error);
 		g_free (seq);
 		
 		if (!ret) {
-			e_book_backend_sqlitedb_delete_addressbook (priv->ebsdb, priv->oal_id, &error);
+			e_book_backend_sqlitedb_delete_addressbook (priv->ebsdb, priv->folder_id, &error);
 			goto exit;
 		}
 	}
@@ -2266,10 +2265,10 @@ e_book_backend_ews_load_source 	(EBookBackend           *backend,
 		if (offline  && g_str_equal (offline, "1"))
 			priv->marked_for_offline = TRUE;
 	} else {
-		priv->oal_id = e_source_get_duped_property (source, "oal_id");
+		priv->folder_id = e_source_get_duped_property (source, "oal_id");
 	
-		/* If oal_id is present it means the GAL is marked for offline usage, we do not check for offline_sync property */
-		if (priv->oal_id) {
+		/* If folder_id is present it means the GAL is marked for offline usage, we do not check for offline_sync property */
+		if (priv->folder_id) {
 			priv->folder_name = g_strdup (e_source_peek_name (source));
 			priv->oab_url = e_source_get_duped_property (source, "oab_url");
 
@@ -2277,7 +2276,7 @@ e_book_backend_ews_load_source 	(EBookBackend           *backend,
 			priv->attachment_dir = g_build_filename (cache_dir, "attachments", NULL);
 			g_mkdir_with_parents (priv->attachment_dir, 0777);
 
-			priv->ebsdb = e_book_backend_sqlitedb_new (cache_dir, email, priv->oal_id, priv->folder_name, TRUE, &err);
+			priv->ebsdb = e_book_backend_sqlitedb_new (cache_dir, email, priv->folder_id, priv->folder_name, TRUE, &err);
 			if (err) {
 				g_propagate_error (perror, err);
 				return;
@@ -2395,11 +2394,6 @@ e_book_backend_ews_dispose (GObject *object)
 		priv->folder_id = NULL;
 	}
 
-		if (priv->oal_id) {
-		g_free (priv->oal_id);
-		priv->oal_id = NULL;
-	}
-	
 	if (priv->oab_url) {
 		g_free (priv->oab_url);
 		priv->oab_url = NULL;
