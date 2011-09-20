@@ -284,7 +284,7 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		cbdata->config = data->config;
 		cbdata->host_entry = host_url;
 		cbdata->oab_entry = oab_url;
-		auto_discover = gtk_button_new_with_mnemonic (_("_Fetch URL"));
+		auto_discover = gtk_button_new_with_mnemonic (_("Fetch _URL"));
 		gtk_box_pack_start (GTK_BOX (hbox), auto_discover, FALSE, FALSE, 0);
 		g_signal_connect (G_OBJECT(auto_discover), "clicked",  G_CALLBACK(validate_credentials), cbdata);
 
@@ -644,7 +644,7 @@ org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 		oal_combo = gtk_combo_box_text_new ();
 		gtk_box_pack_start (GTK_BOX (hbox), oal_combo, TRUE, TRUE, 0);
 
-		fetch_button = gtk_button_new_with_mnemonic (_("Fetch list"));
+		fetch_button = gtk_button_new_with_mnemonic (_("Fetch _list"));
 		gtk_box_pack_start (GTK_BOX (hbox), fetch_button, FALSE, FALSE, 0);
 
 		/* Add hbox to table */
