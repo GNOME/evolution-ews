@@ -28,7 +28,6 @@
 #include "libebackend/e-data-server-module.h"
 #include "libedata-book/e-book-backend-factory.h"
 #include "e-book-backend-ews.h"
-#include "e-book-backend-ews-gal.h"
 
 E_BOOK_BACKEND_FACTORY_SIMPLE (ews, Ews, e_book_backend_ews_new)
 
