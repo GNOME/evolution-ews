@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-09-08 22:22+0200\n"
-"PO-Revision-Date: 2011-09-08 22:23+0200\n"
+"POT-Creation-Date: 2011-09-20 16:24+0200\n"
+"PO-Revision-Date: 2011-09-20 16:20+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -21,56 +21,83 @@ msgstr ""
 "X-Poedit-Language: Polish\n"
 "X-Poedit-Country: Poland\n"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:148
+#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:244
+msgid "Global Address list"
+msgstr "Ogólna lista adresowa"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:114
+#, c-format
+msgid "Autodiscover failed: %s"
+msgstr "Wykrywanie automatyczne się nie powiodło: %s"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:149
 #, c-format
 msgid "Enter Password for %s"
 msgstr "Proszę wprowadzić hasło dla %s"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:157
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:158
 msgid "Could not get password."
 msgstr "Nie można uzyskać hasła."
 
 #. OAB url entry
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:271
-msgid "OA_B URL:"
-msgstr "Adres URL OA_B:"
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:262
+msgid "OAB U_RL:"
+msgstr "Adres U_RL OAB:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:283
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:274
 msgid "_Host URL:"
 msgstr "Adres URL _komputera:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:296
-msgid "_Fetch URL"
-msgstr "_Pobierz adres URL"
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:287
+msgid "Fetch _URL"
+msgstr "Pobierz adres _URL"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:462
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:453
 msgid "Could not fetch oal list: "
 msgstr "Nie można pobrać listy oal: "
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:504
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:495
 msgid "Fetching..."
 msgstr "Pobieranie..."
 
 #. Add cache check box
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:641
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:632
 msgid "Cache o_ffline address book"
 msgstr ""
 "_Przechowywanie książki adresowej w buforze podczas pracy w trybie offline"
 
 #. Add label
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:647
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:638
 msgid "Select Ad_dress list: "
 msgstr "Wybór listy a_dresów: "
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:656
-msgid "Fetch list"
-msgstr "Pobierz listę"
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:648
+msgid "Fetch _list"
+msgstr "_Pobierz listę"
 
-#: ../src/addressbook/e-book-backend-ews.c:1443
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:1
+#: ../src/camel/camel-ews-provider.c:69
+msgid "Exchange Web Services"
+msgstr "Exchange Web Services"
+
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:2
+msgid "Exchange Web Services Plugin"
+msgstr "Wtyczka usługi Exchange Web Services"
+
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:3
+msgid "GAL settings"
+msgstr "Ustawienia GAL"
+
+#: ../src/addressbook/e-book-backend-ews.c:1425
+#, c-format
+msgid "Downloading contacts in %s %d%% completed... "
+msgstr "Pobieranie kontaktów w %s %d%% ukończono... "
+
+#: ../src/addressbook/e-book-backend-ews.c:1815
 msgid "Syncing contacts..."
 msgstr "Synchronizowanie kontaktów..."
 
-#: ../src/addressbook/e-book-backend-ews.c:1628
+#: ../src/addressbook/e-book-backend-ews.c:2012
 msgid "Searching..."
 msgstr "Wyszukiwanie..."
 
@@ -148,10 +175,6 @@ msgstr "Sprawdzanie niechcianych wiadomości tylko w katalogu _Odebrane"
 #: ../src/camel/camel-ews-provider.c:61
 msgid "Automatically synchroni_ze remote mail locally"
 msgstr "Automatyczna _synchronizacja kont lokalnie"
-
-#: ../src/camel/camel-ews-provider.c:69
-msgid "Exchange Web Services"
-msgstr "Exchange Web Services"
 
 #: ../src/camel/camel-ews-provider.c:71
 msgid "For accessing Exchange servers using Web Services"
@@ -302,3 +325,10 @@ msgstr "Przetworzenie XML oab się nie powiodło"
 #, c-format
 msgid "Failed to find <OAB> element\n"
 msgstr "Odnalezienie elementu <OAB> się nie powiodło\n"
+
+#: ../src/utils/ews-camel-common.c:139
+#, c-format
+msgid "CreateItem call failed to return ID for new message"
+msgstr ""
+"Zwrócenie identyfikatora dla nowej wiadomości przez wywołanie CreateItem się "
+"nie powiodło"
