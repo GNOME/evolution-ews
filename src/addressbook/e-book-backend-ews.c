@@ -199,15 +199,18 @@ ebews_populate_birth_date	(EContact *contact, EEwsItem *item)
 	EContactDate edate;
 
 	bdate = e_ews_item_get_birthday (item);
-	g_date_clear (&date, 1);
-	g_date_set_time_t (&date, bdate);
-	
-	edate.year = date.year;
-	edate.month = date.month;
-	edate.day = date.day;
 
-	if (g_date_valid (&date))
-		e_contact_set (contact, E_CONTACT_BIRTH_DATE, &edate);
+	if (bdate) {
+		g_date_clear (&date, 1);
+		g_date_set_time_t (&date, bdate);
+	
+		edate.year = date.year;
+		edate.month = date.month;
+		edate.day = date.day;
+
+		if (g_date_valid (&date))
+			e_contact_set (contact, E_CONTACT_BIRTH_DATE, &edate);
+	}
 }
 
 
