@@ -1963,6 +1963,12 @@ fetch_from_offline (EBookBackendEws *ews, EDataBookView *book_view, const gchar 
 
 	priv = ews->priv;
 
+	if (priv->is_gal && !g_strcmp0 (query, "(contains \"x-evolution-any-field\" \"\")")) {
+		e_data_book_view_notify_complete (book_view, error);
+		e_data_book_view_unref (book_view);
+		return;
+	}
+
 	contacts = e_book_backend_sqlitedb_search (priv->ebsdb, priv->folder_id, query, NULL, &error);
 	for (l = contacts; l != NULL; l = g_slist_next (l)) {
 		EbSdbSearchData *s_data = (EbSdbSearchData *) l->data;
