@@ -1395,7 +1395,8 @@ ews_remove_old_gal_file (EBookBackendEws *cbews, GError **error)
 	if (*error)
 		return FALSE;
 
-	g_unlink (filename);
+	if (filename)
+		g_unlink (filename);
 	
 	return TRUE;
 }
