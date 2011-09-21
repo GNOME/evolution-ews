@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-09-20 16:24+0200\n"
-"PO-Revision-Date: 2011-09-20 16:20+0200\n"
+"POT-Creation-Date: 2011-09-21 22:47+0200\n"
+"PO-Revision-Date: 2011-09-21 22:48+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -88,16 +88,16 @@ msgstr "Wtyczka usługi Exchange Web Services"
 msgid "GAL settings"
 msgstr "Ustawienia GAL"
 
-#: ../src/addressbook/e-book-backend-ews.c:1425
+#: ../src/addressbook/e-book-backend-ews.c:1426
 #, c-format
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr "Pobieranie kontaktów w %s %d%% ukończono... "
 
-#: ../src/addressbook/e-book-backend-ews.c:1815
+#: ../src/addressbook/e-book-backend-ews.c:1816
 msgid "Syncing contacts..."
 msgstr "Synchronizowanie kontaktów..."
 
-#: ../src/addressbook/e-book-backend-ews.c:2012
+#: ../src/addressbook/e-book-backend-ews.c:2013
 msgid "Searching..."
 msgstr "Wyszukiwanie..."
 
@@ -136,12 +136,12 @@ msgstr "Nie można utworzyć ścieżki bufora"
 msgid "Failed to move message cache file"
 msgstr "Przeniesienie pliku bufora wiadomości się nie powiodło"
 
-#: ../src/camel/camel-ews-folder.c:795
+#: ../src/camel/camel-ews-folder.c:798
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nie można wczytać zestawienia dla %s"
 
-#: ../src/camel/camel-ews-folder.c:1121 ../src/camel/camel-ews-store.c:575
+#: ../src/camel/camel-ews-folder.c:1124 ../src/camel/camel-ews-store.c:575
 #: ../src/camel/camel-ews-store.c:632 ../src/camel/camel-ews-store.c:701
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
@@ -269,8 +269,9 @@ msgid "Authentication failed"
 msgstr "Uwierzytelnienie się nie powiodło"
 
 #: ../src/server/e-ews-connection.c:416
-msgid "No response"
-msgstr "Brak odpowiedzi"
+#, c-format
+msgid "No response: %s"
+msgstr "Brak odpowiedzi: %s"
 
 #: ../src/server/e-ews-connection.c:1072 ../src/server/e-ews-connection.c:1388
 #: ../src/server/e-ews-connection.c:1625
