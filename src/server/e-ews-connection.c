@@ -413,7 +413,7 @@ ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 		g_simple_async_result_set_error	(enode->simple,
 						 EWS_CONNECTION_ERROR,
 						 EWS_CONNECTION_ERROR_NORESPONSE,
-						 _("No response"));
+						 _("No response: %s"), msg->reason_phrase);
 	} else {
 		ESoapParameter *param, *subparam;
 		GError *error = NULL;
