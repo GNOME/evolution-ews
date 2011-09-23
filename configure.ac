@@ -208,6 +208,11 @@ dnl ****************************
 PKG_CHECK_MODULES(SQLITE3, sqlite3)
 
 dnl ****************************
+dnl Check for libical
+dnl ****************************
+PKG_CHECK_MODULES(LIBICAL, libical)
+
+dnl ****************************
 dnl Expose version information
 dnl ****************************
 API_VERSION=$EDS_PACKAGE
