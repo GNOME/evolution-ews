@@ -723,8 +723,9 @@ e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal, EServerMethodContex
 			return;
 		}
 	}
-
+	
 	PRIV_UNLOCK (priv);
+	e_data_cal_respond_open (cal, context, *error);
 }
 
 #if ! EDS_CHECK_VERSION (3,1,0)
@@ -735,7 +736,6 @@ e_cal_backend_ews_open_compat	(ECalBackend *backend, EDataCal *cal, EServerMetho
 	GError *error = NULL;
 	
 	e_cal_backend_ews_open (backend, cal, context, NULL, only_if_exists, username, password, &error);
-	e_data_cal_respond_open (cal, context, error);
 }
 #else
 
@@ -748,7 +748,6 @@ e_cal_backend_ews_open_compat (ECalBackend *backend, EDataCal *cal, guint32 opid
 
 	e_cal_backend_ews_open (backend, cal, opid, cancellable, only_if_exists, e_credentials_peek (priv->credentials, E_CREDENTIALS_KEY_USERNAME), 
 				e_credentials_peek (priv->credentials, E_CREDENTIALS_KEY_PASSWORD), &error);
-	e_data_cal_respond_open (cal, opid, error);
 }
 
 static void
@@ -3614,7 +3613,7 @@ ews_cal_get_free_busy_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 done:
 #if ! EDS_CHECK_VERSION (3,1,0)	
 	for (j = free_busy; j != NULL; j = g_slist_next (j))
-		fb = g_slist_prepend (fb, j->data);
+		fb = g_list_prepend (fb, j->data);
 	fb = g_list_reverse (fb);
 	e_data_cal_notify_free_busy (free_busy_data->cal, free_busy_data->context, error, fb);
 	g_list_free (fb);
@@ -3937,7 +3936,7 @@ e_cal_backend_ews_remove_compat (ECalBackend *backend, EDataCal *cal, EServerMet
 }
 
 static void
-e_cal_backend_ews_discard_alarm_compat (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *uid, const gchar *rid, const gchar *auid)
+e_cal_backend_ews_discard_alarm_compat (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *uid, const gchar *auid)
 {
 	e_cal_backend_ews_discard_alarm (backend, cal, context, NULL, uid, NULL, auid);
 }
@@ -3951,7 +3950,7 @@ e_cal_backend_ews_create_object_compat (ECalBackend *backend, EDataCal *cal, ESe
 static void
 e_cal_backend_ews_modify_object_compat (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *calobj, CalObjModType mod)
 {
-	e_cal_backend_ews_modify_object (backend, cal, context, NULL calobj, mod);
+	e_cal_backend_ews_modify_object (backend, cal, context, NULL, calobj, mod);
 }
 
 static void
@@ -3970,7 +3969,7 @@ e_cal_backend_ews_receive_objects_compat (ECalBackend *backend, EDataCal *cal, E
 static void
 e_cal_backend_ews_send_objects_compat (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *calobj)
 {
-	e_cal_backend_ews_send_objects_compat (backend, cal, context, NULL, calobj);
+	e_cal_backend_ews_send_objects (backend, cal, context, NULL, calobj);
 }
 
 static void
@@ -3981,11 +3980,11 @@ e_cal_backend_ews_get_free_busy_compat (ECalBackend *backend, EDataCal *cal,
 	GSList *s_users = NULL;
 	GList *l = NULL;
 
-	for (l = users, l != NULL; l = g_list_next (users))
+	for (l = users; l != NULL; l = g_list_next (users))
 		s_users = g_slist_prepend (s_users, l->data);
-	g_slist_reverse (s_users);
+	s_users = g_slist_reverse (s_users);
 
-	e_cal_backend_ews_get_free_busy (backend, cal, context, NULL, s_users);
+	e_cal_backend_ews_get_free_busy (backend, cal, context, NULL, s_users, start, end);
 	g_slist_free (s_users);
 }
 
