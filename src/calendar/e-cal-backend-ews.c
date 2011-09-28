@@ -3594,7 +3594,7 @@ ews_cal_get_free_busy_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 	GSList *free_busy = NULL, *j;
 	GError *error = NULL;
 #if ! EDS_CHECK_VERSION (3,1,0)	
-	GList *fb;
+	GList *fb = NULL;
 #endif	
 
 	if (!e_ews_connection_get_free_busy_finish (cnc, res, &free_busy_sl, &error)) {
@@ -3614,7 +3614,8 @@ done:
 #if ! EDS_CHECK_VERSION (3,1,0)	
 	for (j = free_busy; j != NULL; j = g_slist_next (j))
 		fb = g_list_prepend (fb, j->data);
-	fb = g_list_reverse (fb);
+	if (fb)
+		fb = g_list_reverse (fb);
 	e_data_cal_notify_free_busy (free_busy_data->cal, free_busy_data->context, error, fb);
 	g_list_free (fb);
 #else
