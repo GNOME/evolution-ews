@@ -68,10 +68,6 @@
 
 G_DEFINE_TYPE (ECalBackendEws, e_cal_backend_ews, E_TYPE_CAL_BACKEND)
 
-#if EDS_CHECK_VERSION (3,1,0)
-#define EServerMethodContext guint32
-#endif
-
 /* Private part of the CalBackendEws structure */
 struct _ECalBackendEwsPrivate {
 	/* Fields required for online server requests */
