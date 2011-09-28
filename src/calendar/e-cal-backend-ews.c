@@ -404,7 +404,7 @@ exit:
 typedef struct {
 	ECalBackendEws *cbews;
 	EDataCal *cal;
-	EServerMethodContext *context;
+	EServerMethodContext context;
 	gchar *itemid;
 	gchar *changekey;
 	gboolean is_occurrence;
@@ -672,15 +672,15 @@ add_comps_to_item_id_hash (ECalBackendEws *cbews)
 	g_slist_free (comps);
 }
 
+
 static void
-e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal, EServerMethodContext context,
-			gboolean only_if_exists, const gchar *username, const gchar *password)
+e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable,
+			gboolean only_if_exists, const gchar *username, const gchar *password, GError **error)
 {
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
 	ESource *esource;
 	const gchar *cache_dir;
-	GError *error = NULL;
 
 	cbews = (ECalBackendEws *) backend;
 	priv = cbews->priv;
@@ -714,7 +714,7 @@ e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal, EServerMethodContex
 		priv->opening_ctx = context;
 
 		priv->cnc = e_ews_connection_new (host_url, username, password,
-						  NULL, NULL, &error);
+						  NULL, NULL, error);
 		if (priv->cnc) {
 			/* Trigger an update request, which will test our authentication */
 			ews_start_sync (cbews);
@@ -725,8 +725,63 @@ e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal, EServerMethodContex
 	}
 
 	PRIV_UNLOCK (priv);
+}
+
+#if ! EDS_CHECK_VERSION (3,1,0)
+static void	
+e_cal_backend_ews_open_compat	(ECalBackend *backend, EDataCal *cal, EServerMethodContext context, gboolean only_if_exists, const gchar *username,
+				 const gchar *password)
+{
+	GError *error = NULL;
+	
+	e_cal_backend_ews_open (backend, cal, context, NULL, only_if_exists, username, password, &error);
 	e_data_cal_notify_open (cal, context, error);
 }
+#else
+
+static void	
+e_cal_backend_ews_open_compat (ECalBackend *backend, EDataCal *cal, guint32 opid, GCancellable *cancellable, gboolean only_if_exists)
+{
+	GError *error = NULL;
+	ECalBackendEws *cbews = E_CAL_BACKEND_EWS (backend);
+	ECalBackendEwsPrivate *priv = cbews->priv;
+
+	e_cal_backend_ews_open (backend, cal, opid, cancellable, only_if_exists, e_credentials_peek (priv->credentials, E_CREDENTIALS_KEY_USERNAME), 
+				e_credentials_peek (priv->credentials, E_CREDENTIALS_KEY_PASSWORD), &error);
+	e_data_cal_respond_open (cal, opid, error);
+}
+
+static void
+e_cal_backend_ews_authenticate_user (ECalBackend *backend,
+                                     GCancellable *cancellable,
+                                     ECredentials *credentials)
+{
+	ECalBackendEws        *cbews;
+	ECalBackendEwsPrivate *priv;
+	GError *error = NULL;
+
+	cbews = E_CAL_BACKEND_EWS (backend);
+	priv  = cbews->priv;
+
+	PRIV_LOCK (priv);
+
+	e_credentials_free (priv->credentials);
+	priv->credentials = NULL;
+
+	if (!credentials || !e_credentials_has_key (credentials, E_CREDENTIALS_KEY_USERNAME)) {
+		PRIV_UNLOCK (priv);
+		g_propagate_error (&error, EDC_ERROR (AuthenticationFailed));
+		return;
+	}
+
+	priv->credentials = e_credentials_new_clone (credentials);
+
+	PRIV_UNLOCK (priv);
+
+	e_cal_backend_notify_opened (backend, error);
+}
+
+#endif
 
 static void
 e_cal_backend_ews_remove (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable)
@@ -3947,7 +4002,7 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->add_timezone = e_cal_backend_ews_add_timezone_compat;
 	backend_class->get_timezone = e_cal_backend_ews_get_timezone_compat;
 
-	backend_class->open = e_cal_backend_ews_open;
+	backend_class->open = e_cal_backend_ews_open_compat;
 	backend_class->refresh = e_cal_backend_ews_refresh_compat;
 	backend_class->get_object = e_cal_backend_ews_get_object_compat;
 	backend_class->get_object_list = e_cal_backend_ews_get_object_list_compat;
@@ -3976,7 +4031,7 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->add_timezone = e_cal_backend_ews_add_timezone;
 	backend_class->get_timezone = e_cal_backend_ews_get_timezone;
 
-	backend_class->open = e_cal_backend_ews_open;
+	backend_class->open = e_cal_backend_ews_open_compat;
 	backend_class->refresh = e_cal_backend_ews_refresh;
 	backend_class->get_object = e_cal_backend_ews_get_object;
 	backend_class->get_object_list = e_cal_backend_ews_get_object_list;
