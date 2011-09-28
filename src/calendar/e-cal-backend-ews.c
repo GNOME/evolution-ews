@@ -44,6 +44,7 @@
 #include <glib-2.0/glib/glist.h>
 #include <camel/camel.h>
 #include <ews-camel-common.h>
+#include <libedataserver/eds-version.h>
 #include "e-cal-backend-ews.h"
 #include "e-cal-backend-ews-utils.h"
 #include "e-ews-connection.h"
@@ -66,6 +67,8 @@
 
 G_DEFINE_TYPE (ECalBackendEws, e_cal_backend_ews, E_TYPE_CAL_BACKEND)
 
+#define EServerMethodContext guint32
+
 /* Private part of the CalBackendEws structure */
 struct _ECalBackendEwsPrivate {
 	/* Fields required for online server requests */
@@ -87,6 +90,10 @@ struct _ECalBackendEwsPrivate {
 	guint refresh_timeout;
 	gboolean refreshing;
 	GHashTable *item_id_hash;
+
+#if EDS_CHECK_VERSION (3,1,0)
+	ECredentials *credentials;
+#endif
 };
 
 #define PRIV_LOCK(p)   (g_static_rec_mutex_lock (&(p)->rec_mutex))
@@ -141,6 +148,8 @@ switch_offline (ECalBackendEws *cbews)
 }
 
 /* Property Accessors */
+
+#if ! EDS_CHECK_VERSION (3, 1, 0)	
 static void
 e_cal_backend_ews_is_read_only (ECalBackend *backend, EDataCal *cal)
 {
@@ -294,6 +303,47 @@ exit:
 	e_data_cal_notify_default_timezone_set (cal, context, error);
 }
 
+static void 
+e_cal_backend_ews_get_ldap_attribute (ECalBackend *backend, EDataCal *cal, EServerMethodContext context)
+{
+	e_data_cal_notify_ldap_attribute (cal, context, NULL, NULL);
+}
+
+static void
+e_cal_backend_ews_get_default_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context)
+{
+
+	ECalComponent *comp;
+	GError *error = NULL;
+	gchar *object = NULL;
+
+	comp = e_cal_component_new ();
+
+	switch (e_cal_backend_get_kind (backend)) {
+	case ICAL_VEVENT_COMPONENT:
+		e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_EVENT);
+		break;
+	case ICAL_VTODO_COMPONENT:
+		e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_TODO);
+		break;
+	default:
+		g_object_unref (comp);
+		g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
+		goto exit;
+	}
+
+	object = e_cal_component_get_as_string (comp);
+	g_object_unref (comp);
+
+exit:
+	e_data_cal_notify_default_object (cal, context, error, object);
+	g_free (object);
+}
+
+
+
+#endif
+
 static icaltimezone *
 e_cal_backend_ews_internal_get_timezone (ECalBackend *backend, const gchar *tzid)
 {
@@ -349,11 +399,6 @@ e_cal_backend_ews_add_timezone (ECalBackend *backend, EDataCal *cal, EServerMeth
 
 exit:
 	e_data_cal_notify_timezone_added (cal, context, error, tzobj);
-}
-
-static void e_cal_backend_ews_get_ldap_attribute (ECalBackend *backend, EDataCal *cal, EServerMethodContext context)
-{
-	e_data_cal_notify_ldap_attribute (cal, context, NULL, NULL);
 }
 
 typedef struct {
@@ -530,38 +575,6 @@ e_cal_backend_ews_get_timezone (ECalBackend *backend, EDataCal *cal, EServerMeth
 	e_data_cal_notify_timezone_requested (cal, context, error, object);
 	g_free (object);
 
-}
-
-
-static void
-e_cal_backend_ews_get_default_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context)
-{
-
-	ECalComponent *comp;
-	GError *error = NULL;
-	gchar *object = NULL;
-
-	comp = e_cal_component_new ();
-
-	switch (e_cal_backend_get_kind (backend)) {
-	case ICAL_VEVENT_COMPONENT:
-		e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_EVENT);
-		break;
-	case ICAL_VTODO_COMPONENT:
-		e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_TODO);
-		break;
-	default:
-		g_object_unref (comp);
-		g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
-		goto exit;
-	}
-
-	object = e_cal_component_get_as_string (comp);
-	g_object_unref (comp);
-
-exit:
-	e_data_cal_notify_default_object (cal, context, error, object);
-	g_free (object);
 }
 
 /* changekey can be NULL if you don't want it. itemid cannot. */
@@ -3444,7 +3457,7 @@ e_cal_backend_ews_start_query (ECalBackend *backend, EDataCalView *query)
 }
 
 static void
-e_cal_backend_ews_refresh(ECalBackend *backend, EDataCal *cal, EServerMethodContext context) {
+e_cal_backend_ews_refresh (ECalBackend *backend, EDataCal *cal, EServerMethodContext context) {
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
 	GError *error = NULL;
@@ -3602,6 +3615,122 @@ exit:
 	e_data_cal_notify_free_busy (cal, context, error, NULL);
 }
 
+/* new virtual functions from 3.2 onwards */
+#if EDS_CHECK_VERSION (3,1,0)
+
+static void
+e_cal_backend_ews_get_backend_property	(ECalBackend *backend,
+                                         EDataCal *cal,
+					 guint32 opid,
+                                         GCancellable *cancellable,
+                                         const gchar *prop_name)
+{
+        gchar *prop_value = NULL;
+	GError *error = NULL;
+
+	g_return_if_fail (prop_name != NULL);
+
+	if (g_str_equal (prop_name, CLIENT_BACKEND_PROPERTY_CAPABILITIES)) {
+		prop_value = g_strdup	(CAL_STATIC_CAPABILITY_NO_EMAIL_ALARMS ","
+					 CAL_STATIC_CAPABILITY_ONE_ALARM_ONLY ","
+					 CAL_STATIC_CAPABILITY_REMOVE_ALARMS ","
+					 CAL_STATIC_CAPABILITY_REFRESH_SUPPORTED ","
+					 CAL_STATIC_CAPABILITY_NO_THISANDPRIOR ","
+					 CAL_STATIC_CAPABILITY_NO_THISANDFUTURE ","
+					 CAL_STATIC_CAPABILITY_NO_CONV_TO_ASSIGN_TASK ","
+				//	 CAL_STATIC_CAPABILITY_NO_CONV_TO_RECUR ","
+					 CAL_STATIC_CAPABILITY_NO_TASK_ASSIGNMENT ","
+					 CAL_STATIC_CAPABILITY_SAVE_SCHEDULES);
+	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_CAL_EMAIL_ADDRESS)) {
+		/* return email address of the person who opened the calendar */
+		ECalBackendEws *cbews;
+		ECalBackendEwsPrivate *priv;
+
+		cbews = E_CAL_BACKEND_EWS (backend);
+		priv = cbews->priv;
+
+		prop_value = g_strdup (priv->user_email);
+	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_ALARM_EMAIL_ADDRESS)) {
+		/* group wise does not support email based alarms */
+		prop_value = NULL;
+	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_DEFAULT_OBJECT)) {
+		ECalComponent *comp;
+
+		comp = e_cal_component_new ();
+
+		switch (e_cal_backend_get_kind (E_CAL_BACKEND (backend))) {
+		case ICAL_VEVENT_COMPONENT:
+			e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_EVENT);
+			break;
+		case ICAL_VTODO_COMPONENT:
+			e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_TODO);
+			break;
+		default:
+			g_object_unref (comp);
+			e_data_cal_respond_get_backend_property (cal, opid, EDC_ERROR (ObjectNotFound), NULL);
+			return;
+		}
+
+		prop_value = e_cal_component_get_as_string (comp);
+		g_object_unref (comp);
+	} else {
+		e_data_cal_respond_get_backend_property (cal, opid, e_data_cal_create_error_fmt (NotSupported, _("Unknown calendar property '%s'"), prop_name), NULL);
+		return;
+	}
+
+	e_data_cal_respond_get_backend_property (cal, opid, error, prop_value);
+	g_free (prop_value);
+}
+
+static void
+e_cal_backend_ews_set_online (ECalBackend *backend,
+                              gboolean is_online)
+{
+	ECalBackendEws *cbgw;
+	ECalBackendEwsPrivate *priv;
+	CalMode mode;
+
+	cbgw = E_CAL_BACKEND_EWS (backend);
+	priv = cbgw->priv;
+
+	if (is_online)
+		mode = CAL_MODE_REMOTE;
+	else
+		mode = CAL_MODE_LOCAL;
+
+	if (priv->mode == mode) {
+		e_cal_backend_notify_online (backend, (mode == CAL_MODE_REMOTE) ? TRUE : FALSE);
+		return;
+	}
+
+	PRIV_LOCK (priv);
+
+	switch (mode) {
+	case CAL_MODE_REMOTE :/* go online */
+		priv->mode = CAL_MODE_REMOTE;
+		priv->read_only = FALSE;
+		e_cal_backend_notify_online (backend, TRUE);
+		e_cal_backend_notify_readonly (backend, priv->read_only);
+		if (e_cal_backend_is_opened (backend))
+			      e_cal_backend_notify_auth_required (backend, TRUE, priv->credentials);
+		break;
+
+	case CAL_MODE_LOCAL : /* go offline */
+		priv->mode = CAL_MODE_LOCAL;
+		switch_offline (E_CAL_BACKEND_EWS (backend));
+		e_cal_backend_notify_readonly (backend, priv->read_only);
+		e_cal_backend_notify_online (backend, FALSE);
+
+		break;
+	default :
+		e_cal_backend_notify_online (backend, FALSE);
+	}
+
+	PRIV_UNLOCK (priv);
+}
+
+#endif
+
 static void
 e_cal_backend_ews_dispose (GObject *object)
 {
@@ -3663,6 +3792,11 @@ e_cal_backend_ews_finalize (GObject *object)
 
 	g_hash_table_destroy (priv->item_id_hash);
 
+#if EDS_CHECK_VERSION (3,1,0)
+	e_credentials_free (priv->credentials);
+	priv->credentials = NULL;
+#endif	
+	
 	g_free (priv);
 	cbews->priv = NULL;
 
@@ -3704,6 +3838,7 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	object_class->finalize = e_cal_backend_ews_finalize;
 
 	/* Property accessors */
+#if ! EDS_CHECK_VERSION (3,1,0)	
 	backend_class->is_read_only = e_cal_backend_ews_is_read_only;
 	backend_class->get_cal_address = e_cal_backend_ews_get_cal_address;
 	backend_class->get_static_capabilities = e_cal_backend_ews_get_static_capabilities;
@@ -3713,13 +3848,16 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->get_mode = e_cal_backend_ews_get_mode;
 	backend_class->set_mode = e_cal_backend_ews_set_mode;
 	backend_class->get_ldap_attribute = e_cal_backend_ews_get_ldap_attribute;
-
+	backend_class->get_default_object = e_cal_backend_ews_get_default_object;
+	backend_class->internal_get_timezone = e_cal_backend_ews_internal_get_timezone;
+#else
+	backend_class->get_backend_property = e_cal_backend_ews_get_backend_property;
+	backend_class->set_online = e_cal_backend_ews_set_online;
+#endif
+	
 	/* Many of these can be moved to Base class */
 	backend_class->add_timezone = e_cal_backend_ews_add_timezone;
-	backend_class->get_default_object = e_cal_backend_ews_get_default_object;
 	backend_class->get_timezone = e_cal_backend_ews_get_timezone;
-
-	backend_class->internal_get_timezone = e_cal_backend_ews_internal_get_timezone;
 
 	backend_class->open = e_cal_backend_ews_open;
 	backend_class->refresh = e_cal_backend_ews_refresh;
