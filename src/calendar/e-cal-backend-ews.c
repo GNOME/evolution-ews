@@ -51,6 +51,7 @@
 #include "e-soap-response.h"
 #include "e-ews-message.h"
 #include "e-ews-item-change.h"
+#include "libedata-cal-compat.h"
 
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -67,7 +68,9 @@
 
 G_DEFINE_TYPE (ECalBackendEws, e_cal_backend_ews, E_TYPE_CAL_BACKEND)
 
+#if EDS_CHECK_VERSION (3,1,0)
 #define EServerMethodContext guint32
+#endif
 
 /* Private part of the CalBackendEws structure */
 struct _ECalBackendEwsPrivate {
@@ -398,7 +401,8 @@ e_cal_backend_ews_add_timezone (ECalBackend *backend, EDataCal *cal, EServerMeth
 	}
 
 exit:
-	e_data_cal_notify_timezone_added (cal, context, error, tzobj);
+	/*FIXME pass tzid here */
+	e_data_cal_respond_add_timezone_compat (cal, context, tzobj, error);
 }
 
 typedef struct {
@@ -447,7 +451,7 @@ ews_cal_discard_alarm_cb (GObject *object, GAsyncResult *res, gpointer user_data
 		error->code = OtherError;
 	}
 
-	e_data_cal_notify_alarm_discarded (edad->cal, edad->context, error);
+	e_data_cal_respond_discard_alarm (edad->cal, edad->context, error);
 
 	g_free(edad->itemid);
 	g_free(edad->changekey);
@@ -470,7 +474,7 @@ e_cal_backend_ews_discard_alarm (ECalBackend *backend, EDataCal *cal, EServerMet
 
 	comp = e_cal_backend_store_get_component (priv->store, uid, NULL);
 	if (!comp) {
-		e_data_cal_notify_alarm_discarded (cal, context,
+		e_data_cal_respond_discard_alarm (cal, context,
 						   EDC_ERROR(ObjectNotFound));
 		return;
 	}
@@ -572,7 +576,7 @@ e_cal_backend_ews_get_timezone (ECalBackend *backend, EDataCal *cal, EServerMeth
 		}
 	}
 
-	e_data_cal_notify_timezone_requested (cal, context, error, object);
+	e_data_cal_respond_get_timezone (cal, context, error, object);
 	g_free (object);
 
 }
@@ -735,7 +739,7 @@ e_cal_backend_ews_open_compat	(ECalBackend *backend, EDataCal *cal, EServerMetho
 	GError *error = NULL;
 	
 	e_cal_backend_ews_open (backend, cal, context, NULL, only_if_exists, username, password, &error);
-	e_data_cal_notify_open (cal, context, error);
+	e_data_cal_respond_open (cal, context, error);
 }
 #else
 
@@ -800,7 +804,7 @@ e_cal_backend_ews_remove (ECalBackend *backend, EDataCal *cal, EServerMethodCont
 
 	PRIV_UNLOCK (priv);
 
-	e_data_cal_notify_remove (cal, context, NULL);
+	e_data_cal_respond_remove (cal, context, NULL);
 }
 
 static void
@@ -842,12 +846,12 @@ e_cal_backend_ews_get_object	(ECalBackend *backend, EDataCal *cal, EServerMethod
 	g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
 
 exit:
-	e_data_cal_notify_object (cal, context, error, object);
+	e_data_cal_respond_get_object (cal, context, error, object);
 	g_free (object);
 }
 
 static void
-cal_backend_ews_get_object_list (ECalBackend *backend, const gchar *sexp, GList **objects, GError **error)
+cal_backend_ews_get_object_list (ECalBackend *backend, const gchar *sexp, GSList **objects, GError **error)
 {
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
@@ -885,7 +889,7 @@ cal_backend_ews_get_object_list (ECalBackend *backend, const gchar *sexp, GList 
 		    icalcomponent_isa (e_cal_component_get_icalcomponent (comp))) {
 			if ((!search_needed) ||
 			    (e_cal_backend_sexp_match_comp (cbsexp, comp, backend))) {
-				*objects = g_list_append (*objects, e_cal_component_get_as_string (comp));
+				*objects = g_slist_append (*objects, e_cal_component_get_as_string (comp));
 			}
 		}
 	}
@@ -898,16 +902,16 @@ cal_backend_ews_get_object_list (ECalBackend *backend, const gchar *sexp, GList 
 static void
 e_cal_backend_ews_get_object_list (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable, const gchar *sexp)
 {
-	GList *objects = NULL, *l;
+	GSList *objects = NULL, *l;
 	GError *error = NULL;
 
 	cal_backend_ews_get_object_list (backend, sexp, &objects, &error);
 
-	e_data_cal_notify_object_list (cal, context, error, objects);
+	e_data_cal_respond_get_object_list (cal, context, error, objects);
 	if (objects) {
-		for (l = objects; l != NULL; l = l->next)
+		for (l = objects; l != NULL; l = g_slist_next (l))
 			g_free (l->data);
-		g_list_free (objects);
+		g_slist_free (objects);
 	}
 }
 
@@ -978,7 +982,7 @@ ews_cal_remove_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	} else error->code = OtherError;
 
 	if (remove_data->context)
-		e_data_cal_notify_remove (remove_data->cal, remove_data->context, error);
+		e_data_cal_respond_remove (remove_data->cal, remove_data->context, error);
 	else if (error) {
 		g_warning ("Remove object error :  %s\n", error->message);
 		g_clear_error (&error);
@@ -1109,7 +1113,7 @@ errorlvl1:
 
 exit:
 	if (context)
-		e_data_cal_notify_remove (cal, context, error);
+		e_data_cal_respond_remove (cal, context, error);
 	else if (error) {
 		g_warning ("Remove object error :  %s\n", error->message);
 		g_clear_error (&error);
@@ -1472,7 +1476,7 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 
 	/* make sure there was no error */
 	if (error != NULL) {
-		e_data_cal_notify_object_created(create_data->cal, create_data->context, error, NULL, NULL);
+		e_data_cal_respond_create_object(create_data->cal, create_data->context, error, NULL, NULL);
 		return;
 	}
 
@@ -1495,7 +1499,7 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 		if (!res && error != NULL) {
 			if (items_req)
 				g_slist_free (items_req);
-			e_data_cal_notify_object_created (create_data->cal, create_data->context, error, NULL, NULL);
+			e_data_cal_respond_create_object (create_data->cal, create_data->context, error, NULL, NULL);
 			return;
 		}
 
@@ -1549,13 +1553,15 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	e_cal_component_commit_sequence(create_data->comp);
 	put_component_to_store (create_data->cbews, create_data->comp);
 
-	/* notify the backend and the application that a new object was created */
-	e_cal_backend_notify_object_created (E_CAL_BACKEND(create_data->cbews), create_data->context);
 	
 	e_cal_component_get_uid(create_data->comp, &comp_uid);
 
 	comp_str = e_cal_component_get_as_string(create_data->comp);
-	e_data_cal_notify_object_created (create_data->cal, create_data->context, error, comp_uid, comp_str);
+	e_data_cal_respond_create_object (create_data->cal, create_data->context, error, comp_uid, comp_str);
+	
+	/* notify the backend and the application that a new object was created */
+	e_cal_backend_notify_object_created (E_CAL_BACKEND(create_data->cbews), comp_str);
+
 	g_free (comp_str);
 
 	/* place new component in our cache */
@@ -1720,7 +1726,7 @@ e_cal_backend_ews_create_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	return;
 
 exit:
-	e_data_cal_notify_object_created(cal, context, error, NULL, NULL);
+	e_data_cal_respond_create_object(cal, context, error, NULL, NULL);
 }
 
 static void
@@ -1744,7 +1750,7 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 		   the OtherError code */
 		error->code = OtherError;
 		if (modify_data->context)
-			e_data_cal_notify_object_modified (modify_data->cal, modify_data->context, error, NULL, NULL);
+			e_data_cal_respond_modify_object (modify_data->cal, modify_data->context, error, NULL, NULL);
 		goto exit;
 	}
 
@@ -1777,7 +1783,7 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 
 	if (modify_data->context) {
 		e_cal_backend_notify_object_modified (E_CAL_BACKEND (cbews), comp_str_old, comp_str);
-		e_data_cal_notify_object_modified (modify_data->cal, modify_data->context, error, comp_str_old, comp_str);
+		e_data_cal_respond_modify_object (modify_data->cal, modify_data->context, error, comp_str_old, comp_str);
 	}
 	else if (error) {
 		g_warning ("Modify object error :  %s\n", error->message);
@@ -2203,7 +2209,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 		attach_data->changekey = changekey;
 
 		if (context)
-			e_data_cal_notify_object_modified (cal, context, error, NULL, NULL);
+			e_data_cal_respond_modify_object (cal, context, error, NULL, NULL);
 
 		e_ews_connection_create_attachments_start (priv->cnc, EWS_PRIORITY_MEDIUM,
 							   item_id, added_attachments,
@@ -2244,7 +2250,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 
 exit:
 	if (context)
-		e_data_cal_notify_object_modified (cal, context, error, NULL, NULL);
+		e_data_cal_respond_modify_object (cal, context, error, NULL, NULL);
 	else if (error) {
 		g_warning ("Modify object error :  %s\n", error->message);
 		g_clear_error (&error);
@@ -2509,7 +2515,7 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 	icalcomponent_free (icalcomp);
 
 exit:
-	e_data_cal_notify_objects_received (cal, context, error);
+	e_data_cal_respond_receive_objects (cal, context, error);
 }
 
 static const char *
@@ -2706,7 +2712,7 @@ e_cal_backend_ews_send_objects (ECalBackend *backend, EDataCal *cal, EServerMeth
 	icalcomponent_free (icalcomp);
 
 exit:
-	e_data_cal_notify_objects_sent (cal,context,error,NULL,calobj);
+	e_data_cal_respond_send_objects (cal, context, error,  NULL, calobj);
 }
 
 /* TODO Do not replicate this in every backend */
@@ -3310,10 +3316,10 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 		   will be recognized and handled appropriately */
 		if (error && error->domain == EWS_CONNECTION_ERROR &&
 		    error->code == EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED) {
-			e_data_cal_notify_open(priv->opening_cal, priv->opening_ctx,
+			e_data_cal_respond_open(priv->opening_cal, priv->opening_ctx,
 					       EDC_ERROR(AuthenticationFailed));
 		} else {
-			e_data_cal_notify_open(priv->opening_cal, priv->opening_ctx,
+			e_data_cal_respond_open(priv->opening_cal, priv->opening_ctx,
 					       error?g_error_copy (error):NULL);
 		}
 		priv->opening_ctx = 0;
@@ -3483,7 +3489,7 @@ static void
 e_cal_backend_ews_start_query (ECalBackend *backend, EDataCalView *query)
 {
 	ECalBackendEws *cbews;
-	GList *objects = NULL;
+	GSList *objects = NULL;
 	GError *err = NULL;
 
 	cbews = E_CAL_BACKEND_EWS (backend);
@@ -3492,21 +3498,21 @@ e_cal_backend_ews_start_query (ECalBackend *backend, EDataCalView *query)
 	cal_backend_ews_get_object_list (backend, e_data_cal_view_get_text (query),
 					 &objects, &err);
 	if (err) {
-		e_data_cal_view_notify_done (query, err);
+		e_data_cal_view_notify_complete (query, err);
 		g_error_free (err);
 		return;
 	}
 
 	/* notify listeners of all objects */
 	if (objects) {
-		e_data_cal_view_notify_objects_added (query, (const GList *) objects);
+		e_data_cal_view_notify_objects_added_compat (query, objects);
 
 		/* free memory */
-		g_list_foreach (objects, (GFunc) g_free, NULL);
-		g_list_free (objects);
+		g_slist_foreach (objects, (GFunc) g_free, NULL);
+		g_slist_free (objects);
 	}
 
-	e_data_cal_view_notify_done (query, NULL);
+	e_data_cal_view_notify_complete (query, NULL);
 }
 
 static void
@@ -3530,7 +3536,7 @@ e_cal_backend_ews_refresh (ECalBackend *backend, EDataCal *cal, EServerMethodCon
 	PRIV_UNLOCK(priv);
 
 exit:
-	e_data_cal_notify_refresh(cal, context, error);
+	e_data_cal_respond_refresh (cal, context, error);
 }
 
 typedef struct {
@@ -3592,6 +3598,9 @@ ews_cal_get_free_busy_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 	GSList *free_busy_sl = NULL, *i;
 	GSList *free_busy = NULL, *j;
 	GError *error = NULL;
+#if ! EDS_CHECK_VERSION (3,1,0)	
+	GList *fb;
+#endif	
 
 	if (!e_ews_connection_get_free_busy_finish (cnc, res, &free_busy_sl, &error)) {
 		error->code = OtherError;
@@ -3607,8 +3616,21 @@ ews_cal_get_free_busy_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 	g_slist_free (free_busy_sl);
 
 done:
-	e_data_cal_notify_free_busy (free_busy_data->cal, free_busy_data->context, error, free_busy);
+#if ! EDS_CHECK_VERSION (3,1,0)	
+	for (j = free_busy; j != NULL; j = g_slist_next (j))
+		fb = g_slist_prepend (fb, j->data);
+	fb = g_list_reverse (fb);
+	e_data_cal_notify_free_busy (free_busy_data->cal, free_busy_data->context, error, fb);
+	g_list_free (fb);
+#else
+	if (free_busy)
+		e_data_cal_report_free_busy_data (free_busy_data->cal, free_busy);
+	e_data_cal_respond_get_free_busy (free_busy_data->cal, free_busy_data->context, error);
+#endif
 
+	/* FIXME free free_busy_sl ? */
+	g_slist_foreach (free_busy, (GFunc) g_free, NULL);
+	g_slist_free (free_busy);
 	g_slist_foreach (free_busy_data->users, (GFunc)free, NULL);
 	g_slist_free (free_busy_data->users);
 	g_object_unref (free_busy_data->cal);
@@ -3665,7 +3687,12 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend, EDataCal *cal,
 	return;
 
 exit:
+#if ! EDS_CHECK_VERSION (3,1,0)	
 	e_data_cal_notify_free_busy (cal, context, error, NULL);
+#else
+	e_data_cal_respond_get_free_busy (cal, context, error);
+#endif	
+
 }
 
 /* new virtual functions from 3.2 onwards */
@@ -4032,6 +4059,7 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->get_timezone = e_cal_backend_ews_get_timezone;
 
 	backend_class->open = e_cal_backend_ews_open_compat;
+	backend_class->authenticate_user = e_cal_backend_ews_authenticate_user;
 	backend_class->refresh = e_cal_backend_ews_refresh;
 	backend_class->get_object = e_cal_backend_ews_get_object;
 	backend_class->get_object_list = e_cal_backend_ews_get_object_list;
