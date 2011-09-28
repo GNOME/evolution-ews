@@ -21,7 +21,7 @@
 #include "libedata-cal-compat.h"
 
 void
-e_data_cal_respond_add_timezone_compat	(EDataCal *cal, guint32 opid, const gchar *tzid, GError *error)
+e_data_cal_respond_add_timezone_compat	(EDataCal *cal, EServerMethodContext opid, const gchar *tzid, GError *error)
 {
 #if ! EDS_CHECK_VERSION (3,1,0)
 	e_data_cal_notify_timezone_added (cal, opid, error, tzid);
@@ -53,32 +53,32 @@ e_data_cal_view_notify_objects_added_compat	(EDataCalView *view, const GSList *o
 
 
 void		
-e_data_cal_respond_get_timezone			(EDataCal *cal, guint32 opid, GError *error, const gchar *tzobject)
+e_data_cal_respond_get_timezone			(EDataCal *cal, EServerMethodContext opid, GError *error, const gchar *tzobject)
 {
 	e_data_cal_notify_timezone_requested (cal, opid, error, tzobject);
 }
 
 void		
-e_data_cal_respond_discard_alarm	(EDataCal *cal, guint32 opid, GError *error)
+e_data_cal_respond_discard_alarm	(EDataCal *cal, EServerMethodContext opid, GError *error)
 {
 	e_data_cal_notify_alarm_discarded (cal, opid, error);
 }
 
 void		
-e_data_cal_respond_remove	(EDataCal *cal, guint32 opid, GError *error)
+e_data_cal_respond_remove	(EDataCal *cal, EServerMethodContext opid, GError *error)
 {
 	e_data_cal_notify_remove (cal, opid, error);
 }
 
 void		
-e_data_cal_respond_get_object	(EDataCal *cal, guint32 opid, GError *error, const gchar *object)
+e_data_cal_respond_get_object	(EDataCal *cal, EServerMethodContext opid, GError *error, const gchar *object)
 {
 	e_data_cal_notify_object (cal, opid, error, object);
 }
 
 
 void		
-e_data_cal_respond_get_object_list	(EDataCal *cal, guint32 opid, GError *error, const GSList *objects)
+e_data_cal_respond_get_object_list	(EDataCal *cal, EServerMethodContext opid, GError *error, const GSList *objects)
 {
 	GList *l = NULL;
 	GSList *sl = NULL;
@@ -92,32 +92,32 @@ e_data_cal_respond_get_object_list	(EDataCal *cal, guint32 opid, GError *error, 
 }
 
 void		
-e_data_cal_respond_create_object	(EDataCal *cal, guint32 opid, GError *error, const gchar *uid, const gchar *object)
+e_data_cal_respond_create_object	(EDataCal *cal, EServerMethodContext opid, GError *error, const gchar *uid, const gchar *object)
 {
 	e_cal_backend_notify_object_created (cal, opid, error, uid, object);
 }
 
 void		
-e_data_cal_respond_modify_object	(EDataCal *cal, guint32 opid, GError *error, const gchar *old_object, const gchar *object)
+e_data_cal_respond_modify_object	(EDataCal *cal, EServerMethodContext opid, GError *error, const gchar *old_object, const gchar *object)
 {
 	e_data_cal_notify_object_modified (cal, opid, error, old_object, object);
 }
 
 
 void		
-e_data_cal_respond_remove_object	(EDataCal *cal, guint32 opid, GError *error, const ECalComponentId *id, const gchar *old_object, const gchar *object);
+e_data_cal_respond_remove_object	(EDataCal *cal, EServerMethodContext opid, GError *error, const ECalComponentId *id, const gchar *old_object, const gchar *object);
 {
 	e_data_cal_notify_object_removed (cal, opid, error, id, old_object, object);
 }
 
 void		
-e_data_cal_respond_receive_objects	(EDataCal *cal, guint32 opid, GError *error)
+e_data_cal_respond_receive_objects	(EDataCal *cal, EServerMethodContext opid, GError *error)
 {
 	e_data_cal_notify_objects_received (cal, opid, error);
 }
 
 void
-e_data_cal_respond_send_objects		(EDataCal *cal, guint32 opid, GError *error, const GSList *users, const gchar *calobj)
+e_data_cal_respond_send_objects		(EDataCal *cal, EServerMethodContext opid, GError *error, const GSList *users, const gchar *calobj)
 {
 	GList *l;
 	GSList *sl;
@@ -132,13 +132,13 @@ e_data_cal_respond_send_objects		(EDataCal *cal, guint32 opid, GError *error, co
 }
 
 void		
-e_data_cal_respond_open	(EDataCal *cal, guint32 opid, GError *error)
+e_data_cal_respond_open	(EDataCal *cal, EServerMethodContext opid, GError *error)
 {
 	e_data_cal_notify_open (cal, opid, error);
 }
 
 void		
-e_data_cal_respond_refresh	(EDataCal *cal, guint32 opid, GError *error)
+e_data_cal_respond_refresh	(EDataCal *cal, EServerMethodContext opid, GError *error)
 {
 	e_data_cal_notify_refresh (cal, opid, error);
 }
