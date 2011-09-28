@@ -364,7 +364,7 @@ e_cal_backend_ews_internal_get_timezone (ECalBackend *backend, const gchar *tzid
 }
 
 static void
-e_cal_backend_ews_add_timezone (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *tzobj)
+e_cal_backend_ews_add_timezone (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable, const gchar *tzobj)
 {
 	icalcomponent *tz_comp;
 	ECalBackendEws *cbews;
@@ -457,7 +457,7 @@ ews_cal_discard_alarm_cb (GObject *object, GAsyncResult *res, gpointer user_data
 }
 
 static void
-e_cal_backend_ews_discard_alarm (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *uid, const gchar *auid)
+e_cal_backend_ews_discard_alarm (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable, const gchar *uid, const gchar *rid, const gchar *auid)
 {
 	ECalBackendEws *cbews = (ECalBackendEws *) backend;
 	ECalBackendEwsPrivate *priv;
@@ -516,7 +516,7 @@ e_cal_backend_ews_discard_alarm (ECalBackend *backend, EDataCal *cal, EServerMet
 }
 
 static void
-e_cal_backend_ews_get_timezone (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *tzid)
+e_cal_backend_ews_get_timezone (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable, const gchar *tzid)
 {
 	icalcomponent *icalcomp;
 	icaltimezone *zone;
@@ -671,6 +671,7 @@ add_comps_to_item_id_hash (ECalBackendEws *cbews)
 
 	g_slist_free (comps);
 }
+
 static void
 e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal, EServerMethodContext context,
 			gboolean only_if_exists, const gchar *username, const gchar *password)
@@ -728,7 +729,7 @@ e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal, EServerMethodContex
 }
 
 static void
-e_cal_backend_ews_remove (ECalBackend *backend, EDataCal *cal, EServerMethodContext context)
+e_cal_backend_ews_remove (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable)
 {
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
@@ -748,7 +749,7 @@ e_cal_backend_ews_remove (ECalBackend *backend, EDataCal *cal, EServerMethodCont
 }
 
 static void
-e_cal_backend_ews_get_object	(ECalBackend *backend, EDataCal *cal, EServerMethodContext context,
+e_cal_backend_ews_get_object	(ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable,
 	 			 const gchar *uid, const gchar *rid)
 {
 	ECalComponent *comp;
@@ -840,7 +841,7 @@ cal_backend_ews_get_object_list (ECalBackend *backend, const gchar *sexp, GList 
 }
 
 static void
-e_cal_backend_ews_get_object_list (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *sexp)
+e_cal_backend_ews_get_object_list (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable, const gchar *sexp)
 {
 	GList *objects = NULL, *l;
 	GError *error = NULL;
@@ -972,7 +973,7 @@ e_cal_rid_to_index (ECalBackend *backend, const char *rid, icalcomponent *comp, 
 }
 
 static void
-e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context,
+e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable,
 				 const gchar *uid, const gchar *rid, CalObjModType mod)
 {
 	EwsRemoveData *remove_data;
@@ -1262,7 +1263,7 @@ convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 }
 
 static void
-e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context,
+e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable,
 				 const gchar *uid, const gchar *rid, CalObjModType mod);
 /*I will unate both type, they are same now*/
 typedef struct {
@@ -1288,7 +1289,7 @@ typedef struct {
 } EwsModifyData;
 
 static void
-e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context,
+e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable,
 				 const gchar *calobj, CalObjModType mod);
 
 static void convert_component_to_updatexml (ESoapMessage *msg, gpointer user_data);
@@ -1352,7 +1353,7 @@ ews_create_attachments_cb(GObject *object, GAsyncResult *res, gpointer user_data
 		* this is the only way to pass attachments in meeting invite mail*/
 		if (e_cal_component_has_attendees (create_data->comp)) {
 			icalcomponent *icalcomp = e_cal_component_get_icalcomponent (create_data->comp);
-			e_cal_backend_ews_modify_object ((ECalBackend *) create_data->cbews, create_data->cal, NULL, icalcomponent_as_ical_string (icalcomp), CALOBJ_MOD_ALL);
+			e_cal_backend_ews_modify_object ((ECalBackend *) create_data->cbews, create_data->cal, 0, NULL, icalcomponent_as_ical_string (icalcomp), CALOBJ_MOD_ALL);
 		}
 	} else if (create_data->cb_type == 2) {
 		const char *send_meeting_invitations;
@@ -1520,7 +1521,7 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 		}
 
 		for (i = exceptions; i; i = i->next) {
-			e_cal_backend_ews_remove_object (E_CAL_BACKEND (create_data->cbews), create_data->cal, NULL,
+			e_cal_backend_ews_remove_object (E_CAL_BACKEND (create_data->cbews), create_data->cal, 0, NULL,
 							 comp_uid, i->data, CALOBJ_MOD_THIS);
 		}
 
@@ -1565,7 +1566,7 @@ static void tzid_cb(icalparameter *param, void *data)
 }
 
 static void
-e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *calobj)
+e_cal_backend_ews_create_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable, const gchar *calobj)
 {
 	EwsCreateData *create_data;
 	EwsConvertData *convert_data;
@@ -1576,7 +1577,6 @@ e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, EServerMeth
 	ECalComponent *comp;
 	struct icaltimetype current;
 	GError *error = NULL;
-	GCancellable *cancellable = NULL;
 	const char *send_meeting_invitations;
 	struct TzidCbData cbd;
 
@@ -2029,7 +2029,7 @@ convert_component_to_updatexml (ESoapMessage *msg, gpointer user_data)
 }
 
 static void
-e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context,
+e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable,
 				 const gchar *calobj, CalObjModType mod)
 {
 	EwsModifyData *modify_data;
@@ -2041,7 +2041,6 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 	gchar *itemid = NULL, *changekey = NULL;
 	struct icaltimetype current;
 	GError *error = NULL;
-	GCancellable *cancellable = NULL;
 	GSList *original_attachments = NULL, *modified_attachments = NULL, *added_attachments = NULL, *removed_attachments = NULL, *removed_attachments_ids = NULL, *i;
 	EwsAttachmentsData *attach_data;
 	struct TzidCbData cbd;
@@ -2144,7 +2143,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMet
 		attach_data->cb_type = 2;
 		attach_data->oldcomp = g_object_ref (oldcomp);
 		attach_data->cal = g_object_ref (cal);
-		attach_data->context = NULL;
+		attach_data->context = 0;
 		attach_data->itemid = itemid;
 		attach_data->changekey = changekey;
 
@@ -2316,7 +2315,7 @@ prepare_set_free_busy_status (ESoapMessage *msg, gpointer user_data)
 }
 
 static void
-e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *calobj)
+e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable, const gchar *calobj)
 {
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
@@ -2325,7 +2324,6 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 	GError *error = NULL;
 	icalproperty_method method;
 	EwsAcceptData *accept_data;
-	GCancellable *cancellable = NULL;
 
 	cbews = E_CAL_BACKEND_EWS(backend);
 	priv = cbews->priv;
@@ -2430,7 +2428,7 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 				break;
 			case ICAL_METHOD_CANCEL:
 				recurrence_id = icalcomponent_get_first_property (subcomp, ICAL_RECURRENCEID_PROPERTY);
-				e_cal_backend_ews_remove_object (backend, cal, NULL, item_id, icalproperty_get_value_as_string (recurrence_id), CALOBJ_MOD_ALL);
+				e_cal_backend_ews_remove_object (backend, cal, 0, cancellable, item_id, icalproperty_get_value_as_string (recurrence_id), CALOBJ_MOD_ALL);
 				break;
 			case ICAL_METHOD_COUNTER:
 				/*this is a new time proposal mail from one of the attendees
@@ -2443,7 +2441,7 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerM
 					icalproperty_set_value_from_string (summary, split_subject[1] , "NO");
 					g_strfreev (split_subject);
 
-					e_cal_backend_ews_modify_object (backend, cal, NULL, icalcomponent_as_ical_string(subcomp), CALOBJ_MOD_ALL);
+					e_cal_backend_ews_modify_object (backend, cal, 0, cancellable, icalcomponent_as_ical_string(subcomp), CALOBJ_MOD_ALL);
 				}
 				break;
 			default:
@@ -2566,7 +2564,7 @@ ewscal_send_cancellation_email (ECalBackend *backend, EEwsConnection *cnc, Camel
 }
 
 static void
-e_cal_backend_ews_send_objects (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *calobj)
+e_cal_backend_ews_send_objects (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable, const gchar *calobj)
 {
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
@@ -3263,7 +3261,7 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 			e_data_cal_notify_open(priv->opening_cal, priv->opening_ctx,
 					       error?g_error_copy (error):NULL);
 		}
-		priv->opening_ctx = NULL;
+		priv->opening_ctx = 0;
 		priv->opening_cal = NULL;
 		if (error) {
 			priv->cnc = NULL;
@@ -3457,7 +3455,8 @@ e_cal_backend_ews_start_query (ECalBackend *backend, EDataCalView *query)
 }
 
 static void
-e_cal_backend_ews_refresh (ECalBackend *backend, EDataCal *cal, EServerMethodContext context) {
+e_cal_backend_ews_refresh (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable) 
+{
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
 	GError *error = NULL;
@@ -3483,7 +3482,7 @@ typedef struct {
 	ECalBackendEws *cbews;
 	EDataCal *cal;
 	EServerMethodContext context;
-	GList *users;
+	GSList *users;
 	time_t start;
 	time_t end;
 	icaltimezone *timezone;
@@ -3493,7 +3492,7 @@ static void
 prepare_free_busy_request (ESoapMessage *msg, gpointer user_data)
 {
 	EwsFreeBusyData *free_busy_data = user_data;
-	GList *addr;
+	GSList *addr;
 	icaltimetype t_start, t_end;
 
 	ewscal_set_availability_timezone (msg, free_busy_data->timezone);
@@ -3536,7 +3535,7 @@ ews_cal_get_free_busy_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 	EEwsConnection *cnc = (EEwsConnection *)obj;
 	EwsFreeBusyData *free_busy_data = user_data;
 	GSList *free_busy_sl = NULL, *i;
-	GList *free_busy = NULL, *j;
+	GSList *free_busy = NULL, *j;
 	GError *error = NULL;
 
 	if (!e_ews_connection_get_free_busy_finish (cnc, res, &free_busy_sl, &error)) {
@@ -3548,15 +3547,15 @@ ews_cal_get_free_busy_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 		/* add attendee property */
 		icalcomponent_add_property((icalcomponent *)i->data, icalproperty_new_attendee (j->data));
 
-		free_busy = g_list_append (free_busy, icalcomponent_as_ical_string_r (i->data));
+		free_busy = g_slist_append (free_busy, icalcomponent_as_ical_string_r (i->data));
 	}
 	g_slist_free (free_busy_sl);
 
 done:
 	e_data_cal_notify_free_busy (free_busy_data->cal, free_busy_data->context, error, free_busy);
 
-	g_list_foreach (free_busy_data->users, (GFunc)free, NULL);
-	g_list_free (free_busy_data->users);
+	g_slist_foreach (free_busy_data->users, (GFunc)free, NULL);
+	g_slist_free (free_busy_data->users);
 	g_object_unref (free_busy_data->cal);
 	g_object_unref (free_busy_data->cbews);
 	g_free (free_busy_data);
@@ -3564,15 +3563,14 @@ done:
 
 static void
 e_cal_backend_ews_get_free_busy (ECalBackend *backend, EDataCal *cal,
-				 EServerMethodContext context, GList *users,
+				 EServerMethodContext context, GCancellable *cancellable, const GSList *users,
 				 time_t start, time_t end)
 {
 	ECalBackendEws *cbews = E_CAL_BACKEND_EWS (backend);
 	ECalBackendEwsPrivate *priv = cbews->priv;
 	GError *error = NULL;
 	EwsFreeBusyData *free_busy_data;
-	GCancellable *cancellable = NULL;
-	GList *users_copy = NULL;
+	GSList *users_copy = NULL;
 
 	/* make sure we're not offline */
 	if (priv->mode == CAL_MODE_LOCAL)
@@ -3583,14 +3581,14 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend, EDataCal *cal,
 
 	/* EWS can support only 100 identities, which is the maximum number of identities that the Web service method can request
 	 see http://msdn.microsoft.com/en-us/library/aa564001%28v=EXCHG.140%29.aspx*/
-	if (g_list_length (users) > 100)
+	if (g_slist_length ((GSList *) users) > 100)
 	{
 		g_propagate_error (&error, EDC_ERROR (SearchSizeLimitExceeded));
 		goto exit;
 	}
 
 	for (;users; users = users->next)
-	    users_copy = g_list_append (users_copy, g_strdup (users->data));
+	    users_copy = g_slist_append (users_copy, g_strdup (users->data));
 
 	free_busy_data = g_new0 (EwsFreeBusyData, 1);
 	free_busy_data->cbews = g_object_ref (cbews);
@@ -3822,6 +3820,99 @@ e_cal_backend_ews_init (ECalBackendEws *cbews)
 	cbews->priv = priv;
 }
 
+#if ! EDS_CHECK_VERSION (3,1,0)
+static void
+e_cal_backend_ews_add_timezone_compat (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *tzobj)
+{
+	e_cal_backend_ews_add_timezone (backend, cal, context, NULL, tzobj);
+}
+
+static void
+e_cal_backend_ews_get_timezone_compat (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *tzid)
+{
+	e_cal_backend_ews_get_timezone (backend, cal, context, NULL, tzid);
+}
+
+static void
+e_cal_backend_ews_refresh_compat (ECalBackend *backend, EDataCal *cal, EServerMethodContext context)
+{
+	e_cal_backend_ews_refresh (backend, cal, context, NULL);
+}
+
+static void
+e_cal_backend_ews_get_object_compat	(ECalBackend *backend, EDataCal *cal, EServerMethodContext context,
+	 			 	 const gchar *uid, const gchar *rid)
+{
+	e_cal_backend_ews_get_object (backend, cal, context, NULL, uid, rid);
+}
+
+static void
+e_cal_backend_ews_get_object_list_compat (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *sexp)
+{
+	e_cal_backend_ews_get_object_list (backend, cal, context, NULL, sexp);
+}
+
+static void
+e_cal_backend_ews_remove_compat (ECalBackend *backend, EDataCal *cal, EServerMethodContext context)
+{
+	e_cal_backend_ews_remove (backend, cal, context, NULL);
+}
+
+static void
+e_cal_backend_ews_discard_alarm_compat (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *uid, const gchar *rid, const gchar *auid)
+{
+	e_cal_backend_ews_discard_alarm (backend, cal, context, NULL, uid, NULL, auid);
+}
+
+static void
+e_cal_backend_ews_create_object_compat (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *calobj)
+{
+	e_cal_backend_ews_create_object (backend, cal, context, NULL, calobj);
+}
+
+static void
+e_cal_backend_ews_modify_object_compat (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *calobj, CalObjModType mod)
+{
+	e_cal_backend_ews_modify_object (backend, cal, context, NULL calobj, mod);
+}
+
+static void
+e_cal_backend_ews_remove_object_compat	(ECalBackend *backend, EDataCal *cal, EServerMethodContext context,
+					 const gchar *uid, const gchar *rid, CalObjModType mod)
+{
+	e_cal_backend_ews_remove_object (backend, cal, context, NULL, uid, rid, mod);
+}
+
+static void
+e_cal_backend_ews_receive_objects_compat (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *calobj)
+{
+	e_cal_backend_ews_receive_objects (backend, cal, context, NULL, calobj);
+}
+
+static void
+e_cal_backend_ews_send_objects_compat (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, const gchar *calobj)
+{
+	e_cal_backend_ews_send_objects_compat (backend, cal, context, NULL, calobj);
+}
+
+static void
+e_cal_backend_ews_get_free_busy_compat (ECalBackend *backend, EDataCal *cal,
+				 EServerMethodContext context, GList *users,
+				 time_t start, time_t end)
+{
+	GSList *s_users = NULL;
+	GList *l = NULL;
+
+	for (l = users, l != NULL; l = g_list_next (users))
+		s_users = g_slist_prepend (s_users, l->data);
+	g_slist_reverse (s_users);
+
+	e_cal_backend_ews_get_free_busy (backend, cal, context, NULL, s_users);
+	g_slist_free (s_users);
+}
+
+#endif
+
 /* Class initialization function for the gw backend */
 static void
 e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
@@ -3850,10 +3941,36 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->get_ldap_attribute = e_cal_backend_ews_get_ldap_attribute;
 	backend_class->get_default_object = e_cal_backend_ews_get_default_object;
 	backend_class->internal_get_timezone = e_cal_backend_ews_internal_get_timezone;
+	
+	backend_class->start_query = e_cal_backend_ews_start_query;
+
+	backend_class->add_timezone = e_cal_backend_ews_add_timezone_compat;
+	backend_class->get_timezone = e_cal_backend_ews_get_timezone_compat;
+
+	backend_class->open = e_cal_backend_ews_open;
+	backend_class->refresh = e_cal_backend_ews_refresh_compat;
+	backend_class->get_object = e_cal_backend_ews_get_object_compat;
+	backend_class->get_object_list = e_cal_backend_ews_get_object_list_compat;
+	backend_class->remove = e_cal_backend_ews_remove_compat;
+
+	backend_class->discard_alarm = e_cal_backend_ews_discard_alarm_compat;
+
+	backend_class->create_object = e_cal_backend_ews_create_object_compat;
+	backend_class->modify_object = e_cal_backend_ews_modify_object_compat;
+
+	backend_class->remove_object = e_cal_backend_ews_remove_object_compat;
+
+	backend_class->receive_objects = e_cal_backend_ews_receive_objects_compat;
+	backend_class->send_objects = e_cal_backend_ews_send_objects_compat;
+//	backend_class->get_attachment_list = e_cal_backend_ews_get_attachment_list;
+	backend_class->get_free_busy = e_cal_backend_ews_get_free_busy_compat;
+//	backend_class->get_changes = e_cal_backend_ews_get_changes;
+
 #else
 	backend_class->get_backend_property = e_cal_backend_ews_get_backend_property;
 	backend_class->set_online = e_cal_backend_ews_set_online;
-#endif
+
+	backend_class->start_view = e_cal_backend_ews_start_query;
 	
 	/* Many of these can be moved to Base class */
 	backend_class->add_timezone = e_cal_backend_ews_add_timezone;
@@ -3865,7 +3982,6 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->get_object_list = e_cal_backend_ews_get_object_list;
 	backend_class->remove = e_cal_backend_ews_remove;
 
-	backend_class->start_query = e_cal_backend_ews_start_query;
 
 	backend_class->discard_alarm = e_cal_backend_ews_discard_alarm;
 
@@ -3879,4 +3995,5 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 //	backend_class->get_attachment_list = e_cal_backend_ews_get_attachment_list;
 	backend_class->get_free_busy = e_cal_backend_ews_get_free_busy;
 //	backend_class->get_changes = e_cal_backend_ews_get_changes;
+#endif
 }
