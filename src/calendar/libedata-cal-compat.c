@@ -38,7 +38,7 @@ e_data_cal_view_notify_objects_added_compat	(EDataCalView *view, const GSList *o
 	GList *l = NULL;
 	GSList *sl;
 
-	for (sl = objects; sl != NULL; sl = g_slist_next (sl))
+	for (sl = (GSList *) objects; sl != NULL; sl = g_slist_next (sl))
 		l = g_list_prepend (l, sl->data);
 	l = g_list_reverse (l);
 
@@ -83,7 +83,7 @@ e_data_cal_respond_get_object_list	(EDataCal *cal, EServerMethodContext opid, GE
 	GList *l = NULL;
 	GSList *sl = NULL;
 
-	for (sl = objects; sl != NULL; sl = g_slist_next (sl))
+	for (sl = (GSList *) objects; sl != NULL; sl = g_slist_next (sl))
 		l = g_list_prepend (l, sl->data);
 	l = g_list_reverse (l);
 
@@ -94,7 +94,7 @@ e_data_cal_respond_get_object_list	(EDataCal *cal, EServerMethodContext opid, GE
 void		
 e_data_cal_respond_create_object	(EDataCal *cal, EServerMethodContext opid, GError *error, const gchar *uid, const gchar *object)
 {
-	e_cal_backend_notify_object_created (cal, opid, error, uid, object);
+	e_data_cal_notify_object_created (cal, opid, error, uid, object);
 }
 
 void		
@@ -105,7 +105,7 @@ e_data_cal_respond_modify_object	(EDataCal *cal, EServerMethodContext opid, GErr
 
 
 void		
-e_data_cal_respond_remove_object	(EDataCal *cal, EServerMethodContext opid, GError *error, const ECalComponentId *id, const gchar *old_object, const gchar *object);
+e_data_cal_respond_remove_object	(EDataCal *cal, EServerMethodContext opid, GError *error, const ECalComponentId *id, const gchar *old_object, const gchar *object)
 {
 	e_data_cal_notify_object_removed (cal, opid, error, id, old_object, object);
 }
@@ -122,7 +122,7 @@ e_data_cal_respond_send_objects		(EDataCal *cal, EServerMethodContext opid, GErr
 	GList *l;
 	GSList *sl;
 	
-	for (sl = users; sl != NULL; sl = g_slist_next (sl))
+	for (sl = (GSList *) users; sl != NULL; sl = g_slist_next (sl))
 		l = g_list_prepend (l, sl->data);
 	l = g_list_reverse (l);
 
@@ -144,7 +144,7 @@ e_data_cal_respond_refresh	(EDataCal *cal, EServerMethodContext opid, GError *er
 }
 
 void            
-e_data_cal_view_notify_complete                 (EDataCalView *view, const GError *error);
+e_data_cal_view_notify_complete                 (EDataCalView *view, const GError *error)
 {
 	e_data_cal_view_notify_done (view, error);
 }
