@@ -51,6 +51,7 @@
 #include "lzx/ews-oal-decompress.h"
 #include "ews-oab-decoder.h"
 #include "e-ews-item-change.h"
+#include "libedata-book-compat.h"
 
 #include "e-ews-message.h"
 #include "e-ews-connection.h"
@@ -122,6 +123,16 @@ enum {
 #define PRIV_LOCK(p)   (g_static_rec_mutex_lock (&(p)->rec_mutex))
 #define PRIV_UNLOCK(p) (g_static_rec_mutex_unlock (&(p)->rec_mutex))
 
+static void
+ews_auth_required (EBookBackend *backend)
+{
+#if EDS_CHECK_VERSION (3,1,0)
+	e_book_backend_notify_auth_required (backend, TRUE, NULL);
+
+#else
+	e_book_backend_notify_auth_required (backend);
+#endif	
+}
 
 static gboolean
 ews_remove_attachments (const gchar *attachment_dir)
@@ -823,18 +834,10 @@ ews_book_remove_contact_cb (GObject *object, GAsyncResult *res, gpointer user_da
 	if (!g_simple_async_result_propagate_error(simple, &error))
 		deleted = e_book_backend_sqlitedb_remove_contacts (priv->ebsdb, priv->folder_id, remove_contact->sl_ids, &error);
 
-	if (deleted) {
-		GList *dl_ids = NULL;
-		GSList *l;
-
-		/* This is pretty ugly, but cant help */
-		for (l = remove_contact->sl_ids; l != NULL; l = g_slist_next (l))
-			dl_ids = g_list_prepend (dl_ids, l->data);
-
-		e_data_book_respond_remove_contacts (remove_contact->book, remove_contact->opid, EDB_ERROR (SUCCESS),  dl_ids);
-		g_list_free (dl_ids);
-	} else {
-		e_data_book_respond_remove_contacts (remove_contact->book, remove_contact->opid, EDB_ERROR_EX (OTHER_ERROR, error->message), NULL);
+	if (deleted)
+		e_data_book_respond_remove_contacts_compat (remove_contact->book, remove_contact->opid, EDB_ERROR (SUCCESS),  remove_contact->sl_ids);
+	else {
+		e_data_book_respond_remove_contacts_compat (remove_contact->book, remove_contact->opid, EDB_ERROR_EX (OTHER_ERROR, error->message), NULL);
 		
 		g_warning ("\nError removing contact %s \n", error->message);
 	}
@@ -1121,7 +1124,7 @@ e_book_backend_ews_get_contact_list	(EBookBackend *backend,
 					 guint32       opid,
 					 const gchar   *query )
 {
-	GList *vcard_list;
+	GSList *vcard_list;
 	EBookBackendEws *egwb;
 
 	egwb = E_BOOK_BACKEND_EWS (backend);
@@ -1437,7 +1440,7 @@ ews_gal_store_contact (EContact *contact, goffset offset, guint percent, gpointe
 
 		status_message = g_strdup_printf (_("Downloading contacts in %s %d%% completed... "), priv->folder_name, percent);
 		if (book_view)
-			e_data_book_view_notify_status_message (book_view, status_message);
+			e_data_book_view_notify_progress (book_view, -1, status_message);
 
 		data->contact_collector = g_slist_reverse (data->contact_collector);
 		e_book_backend_sqlitedb_add_contacts (priv->ebsdb, priv->folder_id, data->contact_collector, FALSE, error);
@@ -1828,7 +1831,7 @@ ebews_start_sync	(gpointer data)
 	status_message = g_strdup (_("Syncing contacts..."));
 	book_view = e_book_backend_ews_utils_get_book_view (E_BOOK_BACKEND (ebews));
 	if (book_view)
-		e_data_book_view_notify_status_message (book_view, status_message);
+		e_data_book_view_notify_progress (book_view, -1, status_message);
 
 	sync_state = e_book_backend_sqlitedb_get_sync_data (priv->ebsdb, priv->folder_id, NULL);
 	do
@@ -2022,7 +2025,7 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 	query = e_data_book_view_get_card_query (book_view);
 
 	e_data_book_view_ref (book_view);
-	e_data_book_view_notify_status_message (book_view, _("Searching..."));
+	e_data_book_view_notify_progress (book_view, -1, _("Searching..."));
 
 	switch (priv->mode) {
 	case MODE_LOCAL:
@@ -2038,7 +2041,7 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 	case MODE_REMOTE:
 		if (!priv->cnc) {
 			error = EDB_ERROR (AUTHENTICATION_REQUIRED);
-			e_book_backend_notify_auth_required (backend);
+			ews_auth_required (backend);
 			e_data_book_view_notify_complete (book_view, error);
 			e_data_book_view_unref (book_view);
 			g_error_free (error);
@@ -2188,9 +2191,9 @@ e_book_backend_ews_load_source 	(EBookBackend           *backend,
 		}
 	}
 	
-	e_book_backend_set_is_loaded (backend, TRUE);
+	e_book_backend_notify_opened (backend, NULL);
 	if (priv->mode == MODE_REMOTE)
-		e_book_backend_notify_connection_status (backend, TRUE);
+		e_book_backend_set_online (backend, TRUE);
 }
 
 static void
