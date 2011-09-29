@@ -40,7 +40,8 @@ e_data_cal_view_notify_objects_added_compat	(EDataCalView *view, const GSList *o
 
 	for (sl = (GSList *) objects; sl != NULL; sl = g_slist_next (sl))
 		l = g_list_prepend (l, sl->data);
-	l = g_list_reverse (l);
+	if (l)
+		l = g_list_reverse (l);
 
 	e_data_cal_view_notify_objects_added (view, (const GList *) l);
 	g_list_free (l);
@@ -85,7 +86,8 @@ e_data_cal_respond_get_object_list	(EDataCal *cal, EServerMethodContext opid, GE
 
 	for (sl = (GSList *) objects; sl != NULL; sl = g_slist_next (sl))
 		l = g_list_prepend (l, sl->data);
-	l = g_list_reverse (l);
+	if (l)
+		l = g_list_reverse (l);
 
 	e_data_cal_notify_object_list (cal, opid, error, l);
 	g_list_free (l);
@@ -119,12 +121,13 @@ e_data_cal_respond_receive_objects	(EDataCal *cal, EServerMethodContext opid, GE
 void
 e_data_cal_respond_send_objects		(EDataCal *cal, EServerMethodContext opid, GError *error, const GSList *users, const gchar *calobj)
 {
-	GList *l;
+	GList *l = NULL;
 	GSList *sl;
 	
 	for (sl = (GSList *) users; sl != NULL; sl = g_slist_next (sl))
 		l = g_list_prepend (l, sl->data);
-	l = g_list_reverse (l);
+	if (l)
+		l = g_list_reverse (l);
 
 
 	e_data_cal_notify_objects_sent	(cal, opid, error, l, calobj);
