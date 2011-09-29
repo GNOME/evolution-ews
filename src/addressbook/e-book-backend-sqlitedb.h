@@ -51,6 +51,14 @@ typedef struct _EBookBackendSqliteDB EBookBackendSqliteDB;
 typedef struct _EBookBackendSqliteDBClass EBookBackendSqliteDBClass;
 typedef struct _EBookBackendSqliteDBPrivate EBookBackendSqliteDBPrivate;
 
+/**
+ * EBookBackendSqliteDB:
+ *
+ * Contains only private data that should be read and manipulated using the
+ * functions below.
+ *
+ * Since: 3.2
+ **/
 struct _EBookBackendSqliteDB {
 	GObject parent;
 	EBookBackendSqliteDBPrivate *priv;
@@ -62,6 +70,13 @@ struct _EBookBackendSqliteDBClass {
 	/* virtual methods */
 };
 
+/**
+ * EbSdbSearchData:
+ *
+ * FIXME: Document me.
+ *
+ * Since: 3.2
+ **/
 typedef struct {
 	gchar *vcard;
 	gchar *uid;
@@ -100,25 +115,33 @@ gboolean	e_book_backend_sqlitedb_has_contact	(EBookBackendSqliteDB *ebsdb,
 							 const gchar *uid,
 							 gboolean *partial_content,
 							 GError **error);
-EContact *	e_book_backend_sqlitedb_get_contact
-							(EBookBackendSqliteDB *ebsdb,
+EContact *	e_book_backend_sqlitedb_get_contact     (EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,
 							 const gchar *uid,
-							 GError **error);
-gchar *		e_book_backend_sqlitedb_get_vcard_string
-							(EBookBackendSqliteDB *ebsdb,
-							 const gchar *folderid,
-							 const gchar *uid,
-							 GError **error);
+							 GHashTable  *fields_of_interest,
+							 gboolean    *with_all_required_fields,
+							 GError     **error);
+gchar *         e_book_backend_sqlitedb_get_vcard_string
+                                                        (EBookBackendSqliteDB *ebsdb,
+							 const gchar          *folderid,
+							 const gchar          *uid,
+							 GHashTable           *fields_of_interest,
+							 gboolean             *with_all_required_fields,
+							 GError              **error);
+
 GSList *		e_book_backend_sqlitedb_search	(EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,
 							 const gchar *sexp,
-							 GSList *fields_of_interest,
-							 GError **error);
-GSList *		e_book_backend_sqlitedb_search_uids	
+							 /* const */ GHashTable *fields_of_interest,
+							 gboolean    *searched,
+							 gboolean    *with_all_required_fields,
+							 GError     **error);
+
+GSList *		e_book_backend_sqlitedb_search_uids
 							(EBookBackendSqliteDB *ebsdb,
 							 const gchar *folderid,
 							 const gchar *sexp,
+							 gboolean    *searched,
 							 GError **error);
 gboolean	e_book_backend_sqlitedb_get_is_populated
 							(EBookBackendSqliteDB *ebsdb,
@@ -188,10 +211,12 @@ gboolean	e_book_backend_sqlitedb_create_addressbook
 							 GError **error);
 gboolean	e_book_backend_sqlitedb_remove		(EBookBackendSqliteDB *ebsdb,
 							 GError **error);
-void		e_book_backend_sqlitedb_search_data_free	
+void		e_book_backend_sqlitedb_search_data_free
 							(EbSdbSearchData *s_data);
-gboolean	e_book_backend_sqlitedb_is_summary_query
-							(const gchar *query);
+
+gboolean        e_book_backend_sqlitedb_is_summary_query (const gchar *query);
+gboolean        e_book_backend_sqlitedb_is_summary_fields (GHashTable *fields_of_interest);
+
 G_END_DECLS
 
 #endif /* E_BOOK_BACKEND_SQLITEDB_H */

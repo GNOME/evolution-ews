@@ -1060,7 +1060,7 @@ e_book_backend_ews_modify_contact	(EBookBackend *backend,
 		}
 
 		old_contact = e_book_backend_sqlitedb_get_contact ( priv->ebsdb, priv->folder_id,
-					 id->id, &error); 
+					 id->id, NULL, NULL, &error); 
 		if (!old_contact) {
 			g_object_unref (contact);
 			e_data_book_respond_modify (book, opid, EDB_ERROR (NOT_SUPPORTED), NULL);
@@ -1985,7 +1985,7 @@ fetch_from_offline (EBookBackendEws *ews, EDataBookView *book_view, const gchar 
 		return;
 	}
 
-	contacts = e_book_backend_sqlitedb_search (priv->ebsdb, priv->folder_id, query, NULL, &error);
+	contacts = e_book_backend_sqlitedb_search (priv->ebsdb, priv->folder_id, query, NULL, NULL, NULL, &error);
 	for (l = contacts; l != NULL; l = g_slist_next (l)) {
 		EbSdbSearchData *s_data = (EbSdbSearchData *) l->data;
 
