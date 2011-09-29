@@ -39,7 +39,7 @@
 #include "libedata-book/e-book-backend-sexp.h"
 #include "libedata-book/e-data-book.h"
 #include "libedata-book/e-data-book-view.h"
-
+#include <libedataserver/eds-version.h>
 
 /**
  * e_book_backend_ews_utils_get_book_view:
@@ -49,6 +49,8 @@
  *
  * Returns: An #EDataBookView object.
  **/
+
+#if ! EDS_CHECK_VERSION (3,1,0)	
 EDataBookView *
 e_book_backend_ews_utils_get_book_view (EBookBackend *backend)
 {
@@ -77,6 +79,27 @@ e_book_backend_ews_utils_get_book_view (EBookBackend *backend)
 
 	g_object_unref (iter);
 	g_object_unref (views);
-
 	return rv;
 }
+#else
+
+static gboolean
+get_book_view (EDataBookView *view, gpointer user_data)
+{
+	EDataBookView **ret = (EDataBookView **) user_data;
+	
+	*ret = view;
+
+	return FALSE;
+}
+EDataBookView *
+e_book_backend_ews_utils_get_book_view (EBookBackend *backend)
+{
+	EDataBookView *ret;
+
+	e_book_backend_foreach_view (backend, get_book_view, &ret);
+
+	return ret;
+}
+
+#endif
