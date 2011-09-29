@@ -35,6 +35,7 @@
 #include <glib/gstdio.h>
 #include <glib/gi18n-lib.h>
 
+#include <libedataserver/eds-version.h>
 #include "libedataserver/e-sexp.h"
 #include "libedataserver/e-data-server-util.h"
 #include "libedataserver/e-flag.h"
@@ -95,6 +96,17 @@ struct _EBookBackendEwsPrivate {
 	GStaticRecMutex rec_mutex;
 	GThread *dthread;
 	SyncDelta *dlock;
+
+#if EDS_CHECK_VERSION (3,1,0)
+	ECredentials *credentials;
+#endif
+};
+
+/* using this for backward compatibility with E_DATA_BOOK_MODE */
+enum {
+	MODE_LOCAL,
+	MODE_REMOTE,
+	MODE_ANY
 };
 
 #define EWS_MAX_FETCH_COUNT 500
@@ -738,7 +750,7 @@ e_book_backend_ews_create_contact	(EBookBackend *backend,
 	priv = ebews->priv;
 
 	switch (ebews->priv->mode) {
-	case E_DATA_BOOK_MODE_LOCAL :
+	case MODE_LOCAL :
 		if (!priv->is_writable) {
 			e_data_book_respond_modify (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
 			return;
@@ -747,7 +759,7 @@ e_book_backend_ews_create_contact	(EBookBackend *backend,
 		e_data_book_respond_create (book, opid, EDB_ERROR (REPOSITORY_OFFLINE), NULL);
 		return;
 
-	case  E_DATA_BOOK_MODE_REMOTE :
+	case  MODE_REMOTE :
 
 		if (ebews->priv->cnc == NULL) {
 			e_data_book_respond_create (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
@@ -853,7 +865,7 @@ e_book_backend_ews_remove_contacts	(EBookBackend *backend,
 	priv = ebews->priv;
 
 	switch (ebews->priv->mode) {
-	case E_DATA_BOOK_MODE_LOCAL :
+	case MODE_LOCAL :
 		if (!priv->is_writable) {
 			e_data_book_respond_modify (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
 			return;
@@ -862,7 +874,7 @@ e_book_backend_ews_remove_contacts	(EBookBackend *backend,
 		e_data_book_respond_remove_contacts (book, opid, EDB_ERROR (REPOSITORY_OFFLINE), NULL);
 		return;
 
-	case E_DATA_BOOK_MODE_REMOTE :
+	case MODE_REMOTE :
 		if (ebews->priv->cnc == NULL) {
 			e_data_book_respond_remove_contacts (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
 			return;
@@ -1014,7 +1026,7 @@ e_book_backend_ews_modify_contact	(EBookBackend *backend,
 
 	switch (priv->mode) {
 
-	case E_DATA_BOOK_MODE_LOCAL :
+	case MODE_LOCAL :
 		if (!priv->is_writable) {
 			e_data_book_respond_modify (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
 			return;
@@ -1022,7 +1034,7 @@ e_book_backend_ews_modify_contact	(EBookBackend *backend,
 
 		e_data_book_respond_modify (book, opid, EDB_ERROR (REPOSITORY_OFFLINE), NULL);
 		return;
-	case E_DATA_BOOK_MODE_REMOTE :
+	case MODE_REMOTE :
 
 		if (priv->cnc == NULL) {
 			e_data_book_respond_modify (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
@@ -1087,11 +1099,11 @@ e_book_backend_ews_get_contact	(EBookBackend *backend,
 
 	switch (gwb->priv->mode) {
 
-	case E_DATA_BOOK_MODE_LOCAL :
+	case MODE_LOCAL :
 		e_data_book_respond_get_contact (book, opid, EDB_ERROR (CONTACT_NOT_FOUND), "");
 		return;
 
-	case E_DATA_BOOK_MODE_REMOTE :
+	case MODE_REMOTE :
 		if (gwb->priv->cnc == NULL) {
 			e_data_book_respond_get_contact (book, opid, e_data_book_create_error_fmt (E_DATA_BOOK_STATUS_OTHER_ERROR, "Not connected"), NULL);
 			return;
@@ -1117,12 +1129,12 @@ e_book_backend_ews_get_contact_list	(EBookBackend *backend,
 
 	switch (egwb->priv->mode) {
 
-	case E_DATA_BOOK_MODE_LOCAL :
+	case MODE_LOCAL :
 
 		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (SUCCESS), vcard_list);
 		return;
 
-	case E_DATA_BOOK_MODE_REMOTE:
+	case MODE_REMOTE:
 
 		if (egwb->priv->cnc == NULL) {
 			e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
@@ -1951,7 +1963,7 @@ ebews_start_refreshing (EBookBackendEws *ebews)
 
 	PRIV_LOCK (priv);
 
-	if	(priv->mode == E_DATA_BOOK_MODE_REMOTE &&
+	if	(priv->mode == MODE_REMOTE &&
 		 priv->cnc && priv->marked_for_offline)
 				fetch_deltas (ebews);
 
@@ -2013,7 +2025,7 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 	e_data_book_view_notify_status_message (book_view, _("Searching..."));
 
 	switch (priv->mode) {
-	case E_DATA_BOOK_MODE_LOCAL:
+	case MODE_LOCAL:
 		if (e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
 			fetch_from_offline (ebews, book_view, query, error);
 			return;
@@ -2023,7 +2035,7 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 		e_data_book_view_notify_complete (book_view, error);
 		g_error_free (error);
 		return;
-	case E_DATA_BOOK_MODE_REMOTE:
+	case MODE_REMOTE:
 		if (!priv->cnc) {
 			error = EDB_ERROR (AUTHENTICATION_REQUIRED);
 			e_book_backend_notify_auth_required (backend);
@@ -2119,120 +2131,6 @@ e_book_backend_ews_stop_book_view (EBookBackend  *backend,
 }
 
 static void
-e_book_backend_ews_get_changes (EBookBackend *backend,
-				      EDataBook    *book,
-				      guint32       opid,
-				      const gchar *change_id)
-{
-}
-
-static void
-e_book_backend_ews_authenticate_user (EBookBackend *backend,
-					    EDataBook    *book,
-					    guint32       opid,
-					    const gchar *user,
-					    const gchar *passwd,
-					    const gchar *auth_method)
-{
-	EBookBackendEws *ebgw;
-	EBookBackendEwsPrivate *priv;
-	ESource *esource;
-	GError *error = NULL;
-	const gchar *host_url;
-	const gchar *read_only;
-
-	ebgw = E_BOOK_BACKEND_EWS (backend);
-	priv = ebgw->priv;
-
-	switch (ebgw->priv->mode) {
-	case E_DATA_BOOK_MODE_LOCAL:
-		e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (SUCCESS));
-		return;
-
-	case E_DATA_BOOK_MODE_REMOTE:
-		if (priv->cnc) {
-			e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (SUCCESS));
-			return;
-		}
-
-		esource = e_book_backend_get_source (backend);
-		host_url = e_source_get_property (esource, "hosturl");
-		read_only = e_source_get_property (esource, "read_only");
-
-		priv->cnc = e_ews_connection_new (host_url, user, passwd,
-						  NULL, NULL, &error);
-
-		if ((read_only && !strcmp (read_only, "true")) || priv->is_gal) {
-			priv->is_writable = FALSE;
-		} else 
-			priv->is_writable = TRUE;
-
-		priv->username = e_source_get_duped_property (esource, "username");
-		priv->password = g_strdup (passwd);
-	
-		/* FIXME: Do some dummy request to ensure that the password is actually
-		   correct; don't just blindly return success */
-		e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (SUCCESS));
-		e_book_backend_notify_writable (backend, priv->is_writable);
-		return;
-	default :
-		break;
-	}
-}
-
-static void
-e_book_backend_ews_get_required_fields (EBookBackend *backend,
-					       EDataBook    *book,
-					       guint32       opid)
-{
-	GList *fields = NULL;
-
-	fields = g_list_append (fields, (gchar *)e_contact_field_name (E_CONTACT_FILE_AS));
-	e_data_book_respond_get_supported_fields (book, opid,
-						  EDB_ERROR (SUCCESS),
-						  fields);
-	g_list_free (fields);
-
-}
-
-static void
-e_book_backend_ews_get_supported_fields (EBookBackend *backend,
-					       EDataBook    *book,
-					       guint32       opid)
-{
-	GList *fields = NULL;
-	gint i;
-	
-	for (i = 0; i < G_N_ELEMENTS (mappings); i++)
-		if (mappings [i].element_type == ELEMENT_TYPE_SIMPLE)
-			fields = g_list_append (fields, g_strdup (e_contact_field_name (mappings[i].field_id)));
-	
-	for (i = 0; i < G_N_ELEMENTS (phone_field_map); i++)
-		fields = g_list_append (fields, g_strdup (e_contact_field_name (phone_field_map[i].field)));
-	
-	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_FULL_NAME)));
-	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_NICKNAME)));
-	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_FAMILY_NAME)));
-	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_EMAIL_1)));
-	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_EMAIL_2)));
-	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_EMAIL_3)));
-	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_ADDRESS_WORK)));
-	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_ADDRESS_HOME)));
-	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_ADDRESS_OTHER)));
-	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_BIRTH_DATE)));
-	e_data_book_respond_get_supported_fields (book, opid,
-						  EDB_ERROR (SUCCESS),
-						  fields);
-	g_list_free (fields);
-}
-
-static void
-e_book_backend_ews_cancel_operation (EBookBackend *backend, EDataBook *book, GError **perror)
-{
-
-}
-
-static void
 e_book_backend_ews_load_source 	(EBookBackend           *backend,
 				 ESource                *source,
 				 gboolean                only_if_exists,
@@ -2291,7 +2189,7 @@ e_book_backend_ews_load_source 	(EBookBackend           *backend,
 	}
 	
 	e_book_backend_set_is_loaded (backend, TRUE);
-	if (priv->mode == E_DATA_BOOK_MODE_REMOTE)
+	if (priv->mode == MODE_REMOTE)
 		e_book_backend_notify_connection_status (backend, TRUE);
 }
 
@@ -2302,6 +2200,124 @@ e_book_backend_ews_remove	(EBookBackend *backend,
 {
 	e_data_book_respond_remove (book,  opid, EDB_ERROR (SUCCESS));
 }
+
+#if ! EDS_CHECK_VERSION (3,1,0)
+
+static void
+e_book_backend_ews_authenticate_user (EBookBackend *backend,
+					    EDataBook    *book,
+					    guint32       opid,
+					    const gchar *user,
+					    const gchar *passwd,
+					    const gchar *auth_method)
+{
+	EBookBackendEws *ebgw;
+	EBookBackendEwsPrivate *priv;
+	ESource *esource;
+	GError *error = NULL;
+	const gchar *host_url;
+	const gchar *read_only;
+
+	ebgw = E_BOOK_BACKEND_EWS (backend);
+	priv = ebgw->priv;
+
+	switch (ebgw->priv->mode) {
+	case MODE_LOCAL:
+		e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (SUCCESS));
+		return;
+
+	case MODE_REMOTE:
+		if (priv->cnc) {
+			e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (SUCCESS));
+			return;
+		}
+
+		esource = e_book_backend_get_source (backend);
+		host_url = e_source_get_property (esource, "hosturl");
+		read_only = e_source_get_property (esource, "read_only");
+
+		priv->cnc = e_ews_connection_new (host_url, user, passwd,
+						  NULL, NULL, &error);
+
+		if ((read_only && !strcmp (read_only, "true")) || priv->is_gal) {
+			priv->is_writable = FALSE;
+		} else 
+			priv->is_writable = TRUE;
+
+		priv->username = e_source_get_duped_property (esource, "username");
+		priv->password = g_strdup (passwd);
+	
+		/* FIXME: Do some dummy request to ensure that the password is actually
+		   correct; don't just blindly return success */
+		e_data_book_respond_authenticate_user (book, opid, EDB_ERROR (SUCCESS));
+		e_book_backend_notify_writable (backend, priv->is_writable);
+		return;
+	default :
+		break;
+	}
+}
+
+static void
+e_book_backend_ews_cancel_operation (EBookBackend *backend, EDataBook *book, GError **perror)
+{
+
+}
+
+static void
+e_book_backend_ews_get_changes (EBookBackend *backend,
+				      EDataBook    *book,
+				      guint32       opid,
+				      const gchar *change_id)
+{
+}
+
+
+static void
+e_book_backend_ews_get_required_fields (EBookBackend *backend,
+					       EDataBook    *book,
+					       guint32       opid)
+{
+	GList *fields = NULL;
+
+	fields = g_list_append (fields, (gchar *)e_contact_field_name (E_CONTACT_FILE_AS));
+	e_data_book_respond_get_supported_fields (book, opid,
+						  EDB_ERROR (SUCCESS),
+						  fields);
+	g_list_free (fields);
+
+}
+
+static void
+e_book_backend_ews_get_supported_fields (EBookBackend *backend,
+					       EDataBook    *book,
+					       guint32       opid)
+{
+	GList *fields = NULL;
+	gint i;
+	
+	for (i = 0; i < G_N_ELEMENTS (mappings); i++)
+		if (mappings [i].element_type == ELEMENT_TYPE_SIMPLE)
+			fields = g_list_append (fields, g_strdup (e_contact_field_name (mappings[i].field_id)));
+	
+	for (i = 0; i < G_N_ELEMENTS (phone_field_map); i++)
+		fields = g_list_append (fields, g_strdup (e_contact_field_name (phone_field_map[i].field)));
+	
+	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_FULL_NAME)));
+	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_NICKNAME)));
+	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_FAMILY_NAME)));
+	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_EMAIL_1)));
+	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_EMAIL_2)));
+	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_EMAIL_3)));
+	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_ADDRESS_WORK)));
+	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_ADDRESS_HOME)));
+	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_ADDRESS_OTHER)));
+	fields = g_list_append (fields, g_strdup (e_contact_field_name (E_CONTACT_BIRTH_DATE)));
+	e_data_book_respond_get_supported_fields (book, opid,
+						  EDB_ERROR (SUCCESS),
+						  fields);
+	g_list_free (fields);
+}
+
 
 static gchar *
 e_book_backend_ews_get_static_capabilities (EBookBackend *backend)
@@ -2341,7 +2357,7 @@ e_book_backend_ews_set_mode (EBookBackend *backend,
 	priv->mode = mode;
 
 	if (e_book_backend_is_loaded (backend)) {
-		if (mode == E_DATA_BOOK_MODE_LOCAL) {
+		if (mode == MODE_LOCAL) {
 			e_book_backend_notify_writable (backend, FALSE);
 			e_book_backend_notify_connection_status (backend, FALSE);
 			
@@ -2358,13 +2374,167 @@ e_book_backend_ews_set_mode (EBookBackend *backend,
 				priv->cnc=NULL;
 			}
 		}
-		else if (mode == E_DATA_BOOK_MODE_REMOTE) {
+		else if (mode == MODE_REMOTE) {
 			e_book_backend_notify_writable (backend, ebews->priv->is_writable);
 			e_book_backend_notify_connection_status (backend, TRUE);
 			e_book_backend_notify_auth_required (backend);
 		}
 	}
 }
+
+
+#else
+
+static void
+e_book_backend_ews_authenticate_user (EBookBackend *backend,
+                                      GCancellable *cancellable,
+                                      ECredentials *credentials)
+{
+	EBookBackendEws *ebgw;
+	EBookBackendEwsPrivate *priv;
+	ESource *esource;
+	GError *error = NULL;
+	const gchar *host_url;
+	const gchar *read_only;
+
+	ebgw = E_BOOK_BACKEND_EWS (backend);
+	priv = ebgw->priv;
+
+	switch (ebgw->priv->mode) {
+	case MODE_LOCAL:
+		e_book_backend_notify_opened (backend, EDB_ERROR (SUCCESS));
+		return;
+
+	case MODE_REMOTE:
+		if (priv->cnc) {
+			e_book_backend_notify_opened (backend, EDB_ERROR (SUCCESS));
+			return;
+		}
+
+		esource = e_book_backend_get_source (backend);
+		host_url = e_source_get_property (esource, "hosturl");
+		read_only = e_source_get_property (esource, "read_only");
+
+		priv->cnc = e_ews_connection_new (host_url, e_credentials_peek (credentials, E_CREDENTIALS_KEY_USERNAME), 
+						  e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD),
+						  NULL, NULL, &error);
+
+		if ((read_only && !strcmp (read_only, "true")) || priv->is_gal) {
+			priv->is_writable = FALSE;
+		} else 
+			priv->is_writable = TRUE;
+
+		priv->username = e_source_get_duped_property (esource, "username");
+		priv->password = g_strdup (e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD));
+	
+		/* FIXME: Do some dummy request to ensure that the password is actually
+		   correct; don't just blindly return success */
+		e_book_backend_notify_opened (backend, EDB_ERROR (SUCCESS));
+		e_book_backend_notify_readonly (backend, !priv->is_writable);
+		return;
+	default :
+		break;
+	}
+}	
+
+static void
+e_book_backend_ews_set_online (EBookBackend *backend,
+                                     gboolean is_online)
+{
+	EBookBackendEws *ebews;
+
+	ebews = E_BOOK_BACKEND_EWS (backend);
+	
+	if (is_online)
+		ebews->priv->mode = MODE_REMOTE;
+	else
+		ebews->priv->mode = MODE_LOCAL;
+	if (e_book_backend_is_opened (backend)) {
+		if (!is_online) {
+			e_book_backend_notify_readonly (backend, TRUE);
+			e_book_backend_notify_online (backend, FALSE);
+			if (ebews->priv->cnc) {
+				g_object_unref (ebews->priv->cnc);
+				ebews->priv->cnc = NULL;
+			}
+		} else {
+			e_book_backend_notify_readonly (backend, !ebews->priv->is_writable);
+			e_book_backend_notify_online (backend, TRUE);
+			e_book_backend_notify_auth_required (backend, TRUE, NULL);
+		}
+	}
+}
+
+static void
+e_book_backend_ews_get_backend_property	(EBookBackend *backend,
+                                         EDataBook *book,
+                                         guint32 opid,
+                                         GCancellable *cancellable,
+                                         const gchar *prop_name)
+{
+	g_return_if_fail (prop_name != NULL);
+
+	if (g_str_equal (prop_name, CLIENT_BACKEND_PROPERTY_CAPABILITIES)) {
+		/* do-initialy-query is enabled for system address book also, so that we get the
+		 * book_view, which is needed for displaying cache update progress.
+		 * and null query is handled for system address book.
+		 */
+		e_data_book_respond_get_backend_property (book, opid, NULL, "net,bulk-removes,do-initial-query,contact-lists");
+	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_REQUIRED_FIELDS)) {
+		e_data_book_respond_get_backend_property (book, opid, NULL, e_contact_field_name (E_CONTACT_FILE_AS));
+	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_SUPPORTED_FIELDS)) {
+		gchar *fields_str;
+		GSList *fields = NULL;
+		gint i;
+
+		for (i = 0; i < G_N_ELEMENTS (mappings); i++)
+			if (mappings [i].element_type == ELEMENT_TYPE_SIMPLE)
+				fields = g_slist_append (fields, g_strdup (e_contact_field_name (mappings[i].field_id)));
+
+		for (i = 0; i < G_N_ELEMENTS (phone_field_map); i++)
+			fields = g_slist_append (fields, g_strdup (e_contact_field_name (phone_field_map[i].field)));
+
+		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_FULL_NAME)));
+		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_NICKNAME)));
+		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_FAMILY_NAME)));
+		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_EMAIL_1)));
+		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_EMAIL_2)));
+		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_EMAIL_3)));
+		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_ADDRESS_WORK)));
+		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_ADDRESS_HOME)));
+		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_ADDRESS_OTHER)));
+		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_BIRTH_DATE)));
+
+		fields_str = e_data_book_string_slist_to_comma_string (fields);
+
+		e_data_book_respond_get_backend_property (book, opid, NULL, fields_str);
+
+		g_slist_free (fields);
+		g_free (fields_str);
+	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_SUPPORTED_AUTH_METHODS)) {
+		e_data_book_respond_get_backend_property (book, opid, NULL, "plain/password");
+	} else {
+		E_BOOK_BACKEND_CLASS (e_book_backend_ews_parent_class)->get_backend_property (backend, book, opid, cancellable, prop_name);
+	}
+}
+
+static void
+e_book_backend_ews_open (EBookBackend *backend,
+                         EDataBook *book,
+                         guint opid,
+                         GCancellable *cancellable,
+                         gboolean only_if_exists)
+{
+	GError *error = NULL;
+	ESource *source;
+
+	source = e_book_backend_get_source (backend);
+	e_book_backend_ews_load_source (backend, source, only_if_exists, &error);
+	e_data_book_respond_open (book, opid, error);
+}
+
+#endif
+
 
 /**
  * e_book_backend_ews_new:
@@ -2444,6 +2614,10 @@ e_book_backend_ews_dispose (GObject *object)
 		priv->ebsdb = NULL;
 	}
 
+#if EDS_CHECK_VERSION (3,1,0)
+	e_credentials_free (priv->credentials);
+	priv->credentials = NULL;
+#endif	
 	g_static_rec_mutex_free (&priv->rec_mutex);
 
 	g_free (priv);
@@ -2462,20 +2636,26 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 	parent_class = E_BOOK_BACKEND_CLASS (klass);
 
 	/* Set the virtual methods. */
+#if ! EDS_CHECK_VERSION (3,1,0)	
 	parent_class->load_source             = e_book_backend_ews_load_source;
 	parent_class->get_static_capabilities = e_book_backend_ews_get_static_capabilities;
-	parent_class->remove                  = e_book_backend_ews_remove;
 
 	parent_class->set_mode                = e_book_backend_ews_set_mode;
 	parent_class->get_required_fields     = e_book_backend_ews_get_required_fields;
 	parent_class->get_supported_fields    = e_book_backend_ews_get_supported_fields;
 	parent_class->get_supported_auth_methods = e_book_backend_ews_get_supported_auth_methods;
-
+	parent_class->cancel_operation        = e_book_backend_ews_cancel_operation;
+	parent_class->get_changes             = e_book_backend_ews_get_changes;
+#else
+	parent_class->open		      = e_book_backend_ews_open;
+	parent_class->get_backend_property    = e_book_backend_ews_get_backend_property;
+	parent_class->set_online	      = e_book_backend_ews_set_online;
+#endif	
+	parent_class->remove                  = e_book_backend_ews_remove;
 	parent_class->authenticate_user       = e_book_backend_ews_authenticate_user;
 
 	parent_class->start_book_view         = e_book_backend_ews_start_book_view;
 	parent_class->stop_book_view          = e_book_backend_ews_stop_book_view;
-	parent_class->cancel_operation        = e_book_backend_ews_cancel_operation;
 
 	parent_class->create_contact          = e_book_backend_ews_create_contact;
 	parent_class->remove_contacts         = e_book_backend_ews_remove_contacts;
@@ -2483,7 +2663,6 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 	parent_class->get_contact             = e_book_backend_ews_get_contact;
 	parent_class->get_contact_list        = e_book_backend_ews_get_contact_list;
 
-	parent_class->get_changes             = e_book_backend_ews_get_changes;
 
 	object_class->dispose                 = e_book_backend_ews_dispose;
 }
