@@ -1769,7 +1769,7 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	}
 
 	e_cal_component_commit_sequence (modify_data->comp);
-	id = e_cal_component_get_id (modify_data->oldcomp);
+	id = e_cal_component_get_id (modify_data->comp);
 	e_cal_backend_store_remove_component (cbews->priv->store, id->uid, id->rid);
 	put_component_to_store (cbews, modify_data->comp);
 
@@ -1901,7 +1901,7 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 	}
 
 	org_email_address = e_ews_collect_organizer (icalcomp);
-	if (g_ascii_strcasecmp (org_email_address, modify_data->cbews->priv->user_email)) {
+	if (org_email_address && g_ascii_strcasecmp (org_email_address, modify_data->cbews->priv->user_email)) {
 		e_ews_message_end_item_change (msg);
 		return;
 	}
