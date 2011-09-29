@@ -1132,17 +1132,17 @@ e_book_backend_ews_get_contact_list	(EBookBackend *backend,
 
 	case MODE_LOCAL :
 
-		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (SUCCESS), vcard_list);
+		e_data_book_respond_get_contact_list_compat (book, opid, EDB_ERROR (SUCCESS), vcard_list);
 		return;
 
 	case MODE_REMOTE:
 
 		if (egwb->priv->cnc == NULL) {
-			e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
+			e_data_book_respond_get_contact_list_compat (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
 			return;
 		}
 
-		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (SUCCESS), vcard_list);
+		e_data_book_respond_get_contact_list_compat (book, opid, EDB_ERROR (SUCCESS), vcard_list);
 		return;
 	default :
 		break;
@@ -2359,7 +2359,7 @@ e_book_backend_ews_set_mode (EBookBackend *backend,
 	priv->mode = mode;
 
 	if (e_book_backend_is_loaded (backend)) {
-		if (mode == MODE_LOCAL) {
+		if (mode == E_DATA_BOOK_MODE_LOCAL) {
 			e_book_backend_notify_writable (backend, FALSE);
 			e_book_backend_notify_connection_status (backend, FALSE);
 			
@@ -2376,7 +2376,7 @@ e_book_backend_ews_set_mode (EBookBackend *backend,
 				priv->cnc=NULL;
 			}
 		}
-		else if (mode == MODE_REMOTE) {
+		else if (mode == E_DATA_BOOK_MODE_REMOTE) {
 			e_book_backend_notify_writable (backend, ebews->priv->is_writable);
 			e_book_backend_notify_connection_status (backend, TRUE);
 			e_book_backend_notify_auth_required (backend);
@@ -2435,7 +2435,7 @@ e_book_backend_ews_get_contact_list_compat(EBookBackend *backend,
 					   guint32       opid,
 					   const gchar   *query )
 {
-	e_book_backend_get_contact_list (backend, book, opid, NULL, query);
+	e_book_backend_ews_get_contact_list (backend, book, opid, NULL, query);
 }
 
 static void
@@ -2710,12 +2710,12 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 	parent_class->cancel_operation        = e_book_backend_ews_cancel_operation;
 	parent_class->get_changes             = e_book_backend_ews_get_changes;
 
-	parent_class->create_contact          = e_book_backend_ews_create_contact;
-	parent_class->remove_contacts         = e_book_backend_ews_remove_contacts;
-	parent_class->modify_contact          = e_book_backend_ews_modify_contact;
-	parent_class->get_contact             = e_book_backend_ews_get_contact;
-	parent_class->get_contact_list        = e_book_backend_ews_get_contact_list;
-	parent_class->remove                  = e_book_backend_ews_remove;
+	parent_class->create_contact          = e_book_backend_ews_create_contact_compat;
+	parent_class->remove_contacts         = e_book_backend_ews_remove_contacts_compat;
+	parent_class->modify_contact          = e_book_backend_ews_modify_contact_compat;
+	parent_class->get_contact             = e_book_backend_ews_get_contact_compat;
+	parent_class->get_contact_list        = e_book_backend_ews_get_contact_list_compat;
+	parent_class->remove                  = e_book_backend_ews_remove_compat;
 #else
 	parent_class->open		      = e_book_backend_ews_open;
 	parent_class->get_backend_property    = e_book_backend_ews_get_backend_property;
