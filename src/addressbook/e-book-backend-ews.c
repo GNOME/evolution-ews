@@ -749,13 +749,13 @@ static void
 e_book_backend_ews_create_contact	(EBookBackend *backend,
 					 EDataBook *book,
 					 guint32 opid,
+					 GCancellable *cancellable,
 					 const gchar *vcard )
 {
 	EContact *contact = NULL;
 	EBookBackendEws *ebews;
 	EwsCreateContact *create_contact;
 	EBookBackendEwsPrivate *priv;
-	GCancellable *cancellable = NULL;
  
 	ebews = E_BOOK_BACKEND_EWS (backend);
 	priv = ebews->priv;
@@ -855,13 +855,12 @@ static void
 e_book_backend_ews_remove_contacts	(EBookBackend *backend,
 					 EDataBook    *book,
 					 guint32 opid,
-					 GList *id_list)
+					 GCancellable *cancellable,
+					 const GSList *id_list)
 {
 	EBookBackendEws *ebews;
 	EwsRemoveContact *remove_contact;
 	EBookBackendEwsPrivate *priv;
-	GSList *deleted_ids = NULL;
-	GList *dl;
  
 	ebews = E_BOOK_BACKEND_EWS (backend);
  
@@ -888,18 +887,15 @@ e_book_backend_ews_remove_contacts	(EBookBackend *backend,
 			return;
 		}
 
-		for (dl = id_list; dl != NULL; dl = g_list_next (dl))
-			deleted_ids = g_slist_prepend (NULL, g_strdup (dl->data));
-
 		remove_contact = g_new0(EwsRemoveContact, 1);
 		remove_contact->ebews = g_object_ref(ebews);
 		remove_contact->book = g_object_ref(book);
 		remove_contact->opid = opid;
-		remove_contact->sl_ids = deleted_ids;
+		remove_contact->sl_ids = (GSList *) id_list;
 
-		e_ews_connection_delete_items_start (priv->cnc, EWS_PRIORITY_MEDIUM, deleted_ids,
+		e_ews_connection_delete_items_start (priv->cnc, EWS_PRIORITY_MEDIUM, (GSList *) id_list,
 						     EWS_HARD_DELETE, 0 , FALSE,
-						     ews_book_remove_contact_cb, NULL,
+						     ews_book_remove_contact_cb, cancellable,
 						     remove_contact);
 		return;
 	default :
@@ -1013,6 +1009,7 @@ static void
 e_book_backend_ews_modify_contact	(EBookBackend *backend,
 					 EDataBook    *book,
 					 guint32       opid,
+					 GCancellable *cancellable,
 					 const gchar   *vcard)
 {
 	EContact *contact = NULL, *old_contact;
@@ -1020,7 +1017,6 @@ e_book_backend_ews_modify_contact	(EBookBackend *backend,
 	EBookBackendEws *ebews;
 	EwsId *id;
 	EBookBackendEwsPrivate *priv;
-	GCancellable *cancellable = NULL;
 	GError *error;
 
 
@@ -1094,6 +1090,7 @@ static void
 e_book_backend_ews_get_contact	(EBookBackend *backend,
 				 EDataBook    *book,
 				 guint32       opid,
+				 GCancellable *cancellable,
 				 const gchar   *id)
 {
 	EBookBackendEws *gwb;
@@ -1122,6 +1119,7 @@ static void
 e_book_backend_ews_get_contact_list	(EBookBackend *backend,
 					 EDataBook    *book,
 					 guint32       opid,
+					 GCancellable *cancellable,
 					 const gchar   *query )
 {
 	GSList *vcard_list;
@@ -2199,7 +2197,8 @@ e_book_backend_ews_load_source 	(EBookBackend           *backend,
 static void
 e_book_backend_ews_remove	(EBookBackend *backend,
 				 EDataBook        *book,
-				 guint32           opid)
+				 guint32           opid,
+				 GCancellable *cancellable)
 {
 	e_data_book_respond_remove (book,  opid, EDB_ERROR (SUCCESS));
 }
@@ -2385,6 +2384,67 @@ e_book_backend_ews_set_mode (EBookBackend *backend,
 	}
 }
 
+static void
+e_book_backend_ews_create_contact_compat (EBookBackend *backend,
+					  EDataBook *book,
+					  guint32 opid,
+					  const gchar *vcard )
+{
+	e_book_backend_ews_create_contact (backend, book, opid, NULL, vcard);
+}
+
+static void
+e_book_backend_ews_remove_contacts_compat (EBookBackend *backend,
+					   EDataBook    *book,
+					   guint32 opid,
+					   GList *id_list)
+{
+	GList *l;
+	GSList *sl = NULL;
+
+	for (l = id_list; l != NULL; l = g_list_next (l))
+		sl = g_slist_prepend (sl, l->data);
+	
+	sl = g_slist_reverse (sl);
+	e_book_backend_ews_remove_contacts (backend, book, opid, NULL, sl);
+	
+	g_slist_free (sl);
+}
+
+static void
+e_book_backend_ews_modify_contact_compat (EBookBackend *backend,
+					  EDataBook    *book,
+					  guint32       opid,
+					  const gchar   *vcard)
+{
+	e_book_backend_ews_modify_contact (backend, book, opid, NULL, vcard);
+}
+
+static void
+e_book_backend_ews_get_contact_compat	(EBookBackend *backend,
+				 	 EDataBook    *book,
+				 	 guint32       opid,
+				 	 const gchar   *id)
+{
+	e_book_backend_ews_get_contact (backend, book, opid, NULL, id);
+}
+
+static void
+e_book_backend_ews_get_contact_list_compat(EBookBackend *backend,
+					   EDataBook    *book,
+					   guint32       opid,
+					   const gchar   *query )
+{
+	e_book_backend_get_contact_list (backend, book, opid, NULL, query);
+}
+
+static void
+e_book_backend_ews_remove_compat (EBookBackend *backend,
+				  EDataBook        *book,
+				  guint32           opid)
+{
+	e_book_backend_ews_remove (backend, book, opid, NULL);
+}
 
 #else
 
@@ -2649,23 +2709,28 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 	parent_class->get_supported_auth_methods = e_book_backend_ews_get_supported_auth_methods;
 	parent_class->cancel_operation        = e_book_backend_ews_cancel_operation;
 	parent_class->get_changes             = e_book_backend_ews_get_changes;
-#else
-	parent_class->open		      = e_book_backend_ews_open;
-	parent_class->get_backend_property    = e_book_backend_ews_get_backend_property;
-	parent_class->set_online	      = e_book_backend_ews_set_online;
-#endif	
-	parent_class->remove                  = e_book_backend_ews_remove;
-	parent_class->authenticate_user       = e_book_backend_ews_authenticate_user;
-
-	parent_class->start_book_view         = e_book_backend_ews_start_book_view;
-	parent_class->stop_book_view          = e_book_backend_ews_stop_book_view;
 
 	parent_class->create_contact          = e_book_backend_ews_create_contact;
 	parent_class->remove_contacts         = e_book_backend_ews_remove_contacts;
 	parent_class->modify_contact          = e_book_backend_ews_modify_contact;
 	parent_class->get_contact             = e_book_backend_ews_get_contact;
 	parent_class->get_contact_list        = e_book_backend_ews_get_contact_list;
+	parent_class->remove                  = e_book_backend_ews_remove;
+#else
+	parent_class->open		      = e_book_backend_ews_open;
+	parent_class->get_backend_property    = e_book_backend_ews_get_backend_property;
+	parent_class->set_online	      = e_book_backend_ews_set_online;
 
+	parent_class->create_contact          = e_book_backend_ews_create_contact;
+	parent_class->remove_contacts         = e_book_backend_ews_remove_contacts;
+	parent_class->modify_contact          = e_book_backend_ews_modify_contact;
+	parent_class->get_contact             = e_book_backend_ews_get_contact;
+	parent_class->get_contact_list        = e_book_backend_ews_get_contact_list;
+	parent_class->remove                  = e_book_backend_ews_remove;
+#endif	
+	parent_class->authenticate_user       = e_book_backend_ews_authenticate_user;
+	parent_class->start_book_view         = e_book_backend_ews_start_book_view;
+	parent_class->stop_book_view          = e_book_backend_ews_stop_book_view;
 
 	object_class->dispose                 = e_book_backend_ews_dispose;
 }
