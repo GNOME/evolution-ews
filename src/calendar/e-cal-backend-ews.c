@@ -672,8 +672,42 @@ add_comps_to_item_id_hash (ECalBackendEws *cbews)
 	g_slist_free (comps);
 }
 
+static gboolean
+connect_to_server (ECalBackendEws *cbews, const gchar *username, const gchar *password, GError **error)
+{
+	ECalBackendEwsPrivate *priv;
+	ESource *esource;
+	
+	priv = cbews->priv;
+	esource = e_cal_backend_get_source (E_CAL_BACKEND (cbews));
+	
+	PRIV_LOCK (priv);
 
-static void
+	if (priv->mode != CAL_MODE_LOCAL && !priv->cnc && password) {
+		const gchar *host_url;
+
+		/* If we can be called a second time while the first is still
+		   "outstanding", we need a bit of a rethink... */
+		g_assert (!priv->opening_ctx && !priv->opening_cal);
+
+		priv->user_email = e_source_get_duped_property (esource, "email");
+
+		host_url = e_source_get_property (esource, "hosturl");
+		priv->cnc = e_ews_connection_new (host_url, username, password,
+						  NULL, NULL, error);
+		/* Trigger an update request, which will test our authentication */
+		if (priv->cnc) {
+			ews_start_sync (cbews);
+			PRIV_UNLOCK (priv);
+			return TRUE;
+		}
+	}
+
+	PRIV_UNLOCK (priv);
+	return FALSE;
+}
+
+static gboolean
 e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable,
 			gboolean only_if_exists, const gchar *username, const gchar *password, GError **error)
 {
@@ -696,36 +730,20 @@ e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal, EServerMethodContex
 		priv->store = e_cal_backend_file_store_new (priv->storage_path);
 		e_cal_backend_store_load (priv->store);
 		add_comps_to_item_id_hash (cbews);
-		e_cal_backend_store_set_default_timezone (priv->store, priv->default_zone);
+		
+		if (priv->default_zone)
+			e_cal_backend_store_set_default_timezone (priv->store, priv->default_zone);
 	}
+	PRIV_UNLOCK (priv);
 
-	if (priv->mode != CAL_MODE_LOCAL && !priv->cnc) {
-		const gchar *host_url;
-
-		/* If we can be called a second time while the first is still
-		   "outstanding", we need a bit of a rethink... */
-		g_assert (!priv->opening_ctx && !priv->opening_cal);
-
-		priv->user_email = e_source_get_duped_property (esource, "email");
-
-		host_url = e_source_get_property (esource, "hosturl");
-
+	if (connect_to_server (cbews, username, password, error)) {
 		priv->opening_cal = cal;
 		priv->opening_ctx = context;
 
-		priv->cnc = e_ews_connection_new (host_url, username, password,
-						  NULL, NULL, error);
-		if (priv->cnc) {
-			/* Trigger an update request, which will test our authentication */
-			ews_start_sync (cbews);
-
-			PRIV_UNLOCK (priv);
-			return;
-		}
+		return TRUE;
 	}
 	
-	PRIV_UNLOCK (priv);
-	e_data_cal_respond_open (cal, context, *error);
+	return FALSE;
 }
 
 #if ! EDS_CHECK_VERSION (3,1,0)
@@ -735,7 +753,8 @@ e_cal_backend_ews_open_compat	(ECalBackend *backend, EDataCal *cal, EServerMetho
 {
 	GError *error = NULL;
 	
-	e_cal_backend_ews_open (backend, cal, context, NULL, only_if_exists, username, password, &error);
+	if (!e_cal_backend_ews_open (backend, cal, context, NULL, only_if_exists, username, password, &error))
+		e_data_cal_respond_open (cal, context, *error);
 }
 #else
 
@@ -745,9 +764,22 @@ e_cal_backend_ews_open_compat (ECalBackend *backend, EDataCal *cal, guint32 opid
 	GError *error = NULL;
 	ECalBackendEws *cbews = E_CAL_BACKEND_EWS (backend);
 	ECalBackendEwsPrivate *priv = cbews->priv;
+	const gchar *user_name = NULL, *password = NULL;
+	gboolean ret;
 
-	e_cal_backend_ews_open (backend, cal, opid, cancellable, only_if_exists, e_credentials_peek (priv->credentials, E_CREDENTIALS_KEY_USERNAME), 
-				e_credentials_peek (priv->credentials, E_CREDENTIALS_KEY_PASSWORD), &error);
+	if (priv->credentials)	{
+		user_name = e_credentials_peek (priv->credentials, E_CREDENTIALS_KEY_USERNAME); 
+		password = e_credentials_peek (priv->credentials, E_CREDENTIALS_KEY_PASSWORD);
+	}
+
+	ret = e_cal_backend_ews_open (backend, cal, opid, cancellable, only_if_exists, user_name, 
+				password, &error);
+
+	if (!priv->credentials)
+		e_cal_backend_notify_auth_required (backend, TRUE, priv->credentials);
+	
+	e_cal_backend_notify_opened (backend, NULL);
+	e_data_cal_respond_open (cal, opid, error);
 }
 
 static void
@@ -774,10 +806,13 @@ e_cal_backend_ews_authenticate_user (ECalBackend *backend,
 	}
 
 	priv->credentials = e_credentials_new_clone (credentials);
+	
+	connect_to_server (cbews, e_credentials_peek (priv->credentials, E_CREDENTIALS_KEY_USERNAME),
+			   e_credentials_peek (priv->credentials, E_CREDENTIALS_KEY_PASSWORD), &error);
 
 	PRIV_UNLOCK (priv);
 
-	e_cal_backend_notify_opened (backend, error);
+	g_clear_error (&error);
 }
 
 #endif
@@ -3303,8 +3338,9 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 							 &items_created, &items_updated,
 							 &items_deleted, &error);
 
+	/*FIXME invoke a dummy request in authenticate user to ensure we have a valid connection to avoid this mess */
+#if ! EDS_CHECK_VERSION (3,1,0)
 	PRIV_LOCK (priv);
-
 	if (priv->opening_ctx) {
 		/* Report success/failure for calendar open if pending,
 		   translating an authentication failure into something that
@@ -3326,6 +3362,10 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 
 	}
 	PRIV_UNLOCK (priv);
+#else
+	if (!(error && error->domain == EWS_CONNECTION_ERROR && error->code == EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED))
+		e_cal_backend_notify_readonly (E_CAL_BACKEND (cbews), FALSE);
+#endif	
 
 	if (error != NULL) {
 		g_warning ("Unable to Sync changes %s \n", error->message);
@@ -3856,7 +3896,7 @@ e_cal_backend_ews_finalize (GObject *object)
 		priv->storage_path = NULL;
 	}
 
-	if (priv->default_zone) {
+	if (priv->default_zone && priv->default_zone != icaltimezone_get_utc_timezone ()) {
 		icaltimezone_free (priv->default_zone, 1);
 		priv->default_zone = NULL;
 	}
@@ -3894,6 +3934,7 @@ e_cal_backend_ews_init (ECalBackendEws *cbews)
 						(g_str_hash, g_str_equal,
 						 (GDestroyNotify) g_free,
 						 (GDestroyNotify) g_object_unref);
+	priv->default_zone = icaltimezone_get_utc_timezone ();
 
 	cbews->priv = priv;
 }
@@ -4018,7 +4059,6 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->set_mode = e_cal_backend_ews_set_mode;
 	backend_class->get_ldap_attribute = e_cal_backend_ews_get_ldap_attribute;
 	backend_class->get_default_object = e_cal_backend_ews_get_default_object;
-	backend_class->internal_get_timezone = e_cal_backend_ews_internal_get_timezone;
 	
 	backend_class->start_query = e_cal_backend_ews_start_query;
 
@@ -4075,4 +4115,5 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->get_free_busy = e_cal_backend_ews_get_free_busy;
 //	backend_class->get_changes = e_cal_backend_ews_get_changes;
 #endif
+	backend_class->internal_get_timezone = e_cal_backend_ews_internal_get_timezone;
 }
