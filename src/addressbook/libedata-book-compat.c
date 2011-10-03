@@ -38,7 +38,7 @@ convert_slist_to_list (GSList *slist)
 void	e_data_book_respond_remove_contacts_compat (EDataBook *book, guint32 opid, GError *error, const GSList *ids)
 {
 #if ! EDS_CHECK_VERSION (3,1,0)
-	GList *l = convert_slist_to_list (ids);
+	GList *l = convert_slist_to_list ((GSList *) ids);
 	e_data_book_respond_remove_contacts (book, opid, error, l);
 	g_list_free (l);
 #else
@@ -49,7 +49,7 @@ void	e_data_book_respond_remove_contacts_compat (EDataBook *book, guint32 opid, 
 void	e_data_book_respond_get_contact_list_compat (EDataBook *book, guint32 opid, GError *error, const GSList *cards)
 {
 #if ! EDS_CHECK_VERSION (3,1,0)
-	GList *l = convert_slist_to_list (cards);
+	GList *l = convert_slist_to_list ((GSList *) cards);
 	e_data_book_respond_get_contact_list (book, opid, error, l);
 	g_list_free (l);
 #else

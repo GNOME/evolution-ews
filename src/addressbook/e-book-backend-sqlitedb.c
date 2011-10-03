@@ -31,7 +31,7 @@
 
 #include "libedataserver/e-sexp.h"
 #include "libedata-book/e-book-backend-sexp.h"
-#include "libebackend/e-sqlite3-vfs.h"
+#include "e-sqlite3-vfs.h"
 #include "e-book-backend-sqlitedb.h"
 
 #define d(x)
