@@ -754,7 +754,7 @@ e_cal_backend_ews_open_compat	(ECalBackend *backend, EDataCal *cal, EServerMetho
 	GError *error = NULL;
 	
 	if (!e_cal_backend_ews_open (backend, cal, context, NULL, only_if_exists, username, password, &error))
-		e_data_cal_respond_open (cal, context, *error);
+		e_data_cal_respond_open (cal, context, error);
 }
 #else
 
