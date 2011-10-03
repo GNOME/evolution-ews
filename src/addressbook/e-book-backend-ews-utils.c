@@ -88,6 +88,7 @@ get_book_view (EDataBookView *view, gpointer user_data)
 {
 	EDataBookView **ret = (EDataBookView **) user_data;
 	
+	e_data_book_view_ref (view);
 	*ret = view;
 
 	return FALSE;
@@ -95,7 +96,7 @@ get_book_view (EDataBookView *view, gpointer user_data)
 EDataBookView *
 e_book_backend_ews_utils_get_book_view (EBookBackend *backend)
 {
-	EDataBookView *ret;
+	EDataBookView *ret = NULL;
 
 	e_book_backend_foreach_view (backend, get_book_view, &ret);
 
