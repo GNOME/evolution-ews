@@ -156,7 +156,10 @@ ews_account_removed (EAccountList *account_listener, EAccount *account)
 	g_free (storage_path);
 	g_free (summary_file);
 	ews_account_info_free (info);
+
+#if ! EDS_CHECK_VERSION (3,1,0)
 	g_object_unref (service);
+#endif	
 }
 
 static gboolean
