@@ -290,7 +290,7 @@ e_cal_backend_ews_set_default_zone (ECalBackend *backend, EDataCal *cal, EServer
 
 	PRIV_LOCK (priv);
 
-	if (priv->default_zone)
+	if (priv->default_zone && priv->default_zone != icaltimezone_get_utc_timezone ())
 		icaltimezone_free (priv->default_zone, 1);
 
 	/* Set the default timezone to it. */
