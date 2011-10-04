@@ -79,7 +79,6 @@ AS_COMPILER_FLAGS(WARNING_FLAGS,
 	-DPANGO_DISABLE_DEPRECATED
 	-DGDK_DISABLE_DEPRECATED
 	-DGDK_PIXBUF_DISABLE_DEPRECATED
-	-DGTK_DISABLE_DEPRECATED
 	-DGNOME_DISABLE_DEPRECATED
 	-DGSEAL_ENABLE
 	-Wall -Wextra
@@ -207,6 +206,11 @@ dnl ****************************
 dnl Check for sqlite3 
 dnl ****************************
 PKG_CHECK_MODULES(SQLITE3, sqlite3)
+
+dnl ****************************
+dnl Check for libical
+dnl ****************************
+PKG_CHECK_MODULES(LIBICAL, libical)
 
 dnl ****************************
 dnl Expose version information

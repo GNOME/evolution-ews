@@ -28,18 +28,15 @@
 #include "libebackend/e-data-server-module.h"
 #include "libedata-book/e-book-backend-factory.h"
 #include "e-book-backend-ews.h"
-#include "e-book-backend-ews-gal.h"
 
 E_BOOK_BACKEND_FACTORY_SIMPLE (ews, Ews, e_book_backend_ews_new)
-E_BOOK_BACKEND_FACTORY_SIMPLE (ewsgal, EwsGal, e_book_backend_ews_gal_new)
 
-static GType  ews_types [2];
+static GType  ews_types [1];
 
 void
 eds_module_initialize (GTypeModule *module)
 {
 	ews_types[0] = _ews_factory_get_type (module);
-	ews_types[1] = _ewsgal_factory_get_type (module);
 }
 
 void
@@ -53,4 +50,3 @@ eds_module_list_types (const GType **types, gint *num_types)
 	*types = ews_types;
 	*num_types = G_N_ELEMENTS (ews_types);
 }
-

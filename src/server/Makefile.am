@@ -24,6 +24,7 @@ libeews_1_2_la_CPPFLAGS = \
 	-I$(top_builddir)/src/server			\
 	$(SOUP_CFLAGS)					\
 	$(LIBECAL_CFLAGS)				\
+	$(LIBICAL_CFLAGS)				\
 	$(LIBEDATASERVER_CFLAGS)			\
 	$(DEBUG_CFLAGS)
 
@@ -47,6 +48,7 @@ libeews_1_2_la_SOURCES =		\
 libeews_1_2_la_LIBADD =						\
 	$(SOUP_LIBS)						\
 	$(LIBECAL_LIBS)						\
+	$(LIBICAL_LIBS)						\
 	$(LIBEDATASERVER_LIBS)					\
 	$(SOCKET_LIBS)
 

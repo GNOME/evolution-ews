@@ -44,12 +44,14 @@
 #include <glib-2.0/glib/glist.h>
 #include <camel/camel.h>
 #include <ews-camel-common.h>
+#include <libedataserver/eds-version.h>
 #include "e-cal-backend-ews.h"
 #include "e-cal-backend-ews-utils.h"
 #include "e-ews-connection.h"
 #include "e-soap-response.h"
 #include "e-ews-message.h"
 #include "e-ews-item-change.h"
+#include "libedata-cal-compat.h"
 
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -75,7 +77,7 @@ struct _ECalBackendEwsPrivate {
 	EEwsConnection *cnc;
 	gchar *folder_id;
 	gchar *user_email;
-	gchar *cache_dir;
+	gchar *storage_path;
 
 	EDataCal *opening_cal;
 
@@ -89,6 +91,10 @@ struct _ECalBackendEwsPrivate {
 	guint refresh_timeout;
 	gboolean refreshing;
 	GHashTable *item_id_hash;
+
+#if EDS_CHECK_VERSION (3,1,0)
+	ECredentials *credentials;
+#endif
 };
 
 static GQuark
@@ -181,6 +187,8 @@ switch_offline (ECalBackendEws *cbews)
 }
 
 /* Property Accessors */
+
+#if ! EDS_CHECK_VERSION (3, 1, 0)	
 static void
 e_cal_backend_ews_is_read_only (ECalBackend *backend, EDataCal *cal)
 {
@@ -324,7 +332,7 @@ e_cal_backend_ews_set_default_zone (ECalBackend *backend, EDataCal *cal, const g
 
 	PRIV_LOCK (priv);
 
-	if (priv->default_zone)
+	if (priv->default_zone && priv->default_zone != icaltimezone_get_utc_timezone ())
 		icaltimezone_free (priv->default_zone, 1);
 
 	/* Set the default timezone to it. */
@@ -335,6 +343,47 @@ e_cal_backend_ews_set_default_zone (ECalBackend *backend, EDataCal *cal, const g
 exit:
 	e_data_cal_notify_default_timezone_set (cal, EDC_ER_CODE(error));
 }
+
+static void 
+e_cal_backend_ews_get_ldap_attribute (ECalBackend *backend, EDataCal *cal, EServerMethodContext context)
+{
+	e_data_cal_notify_ldap_attribute (cal, context, NULL, NULL);
+}
+
+static void
+e_cal_backend_ews_get_default_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context)
+{
+
+	ECalComponent *comp;
+	GError *error = NULL;
+	gchar *object = NULL;
+
+	comp = e_cal_component_new ();
+
+	switch (e_cal_backend_get_kind (backend)) {
+	case ICAL_VEVENT_COMPONENT:
+		e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_EVENT);
+		break;
+	case ICAL_VTODO_COMPONENT:
+		e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_TODO);
+		break;
+	default:
+		g_object_unref (comp);
+		g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
+		goto exit;
+	}
+
+	object = e_cal_component_get_as_string (comp);
+	g_object_unref (comp);
+
+exit:
+	e_data_cal_notify_default_object (cal, context, error, object);
+	g_free (object);
+}
+
+
+
+#endif
 
 static icaltimezone *
 e_cal_backend_ews_internal_get_timezone (ECalBackend *backend, const gchar *tzid)
@@ -570,38 +619,6 @@ e_cal_backend_ews_get_timezone (ECalBackend *backend, EDataCal *cal, const gchar
 	g_free (object);
 }
 
-
-static void
-e_cal_backend_ews_get_default_object (ECalBackend *backend, EDataCal *cal)
-{
-
-	ECalComponent *comp;
-	GError *error = NULL;
-	gchar *object = NULL;
-
-	comp = e_cal_component_new ();
-
-	switch (e_cal_backend_get_kind (backend)) {
-	case ICAL_VEVENT_COMPONENT:
-		e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_EVENT);
-		break;
-	case ICAL_VTODO_COMPONENT:
-		e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_TODO);
-		break;
-	default:
-		g_object_unref (comp);
-		g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
-		goto exit;
-	}
-
-	object = e_cal_component_get_as_string (comp);
-	g_object_unref (comp);
-
-exit:
-	e_data_cal_notify_default_object (cal, EDC_ER_CODE(error), object);
-	g_free (object);
-}
-
 /* changekey can be NULL if you don't want it. itemid cannot. */
 static void
 ews_cal_component_get_item_id (ECalComponent *comp, gchar **itemid, gchar **changekey)
@@ -719,21 +736,57 @@ source_type_from_kind (icalcomponent_kind kind)
 	return source_type;
 }
 
+static gboolean
+connect_to_server (ECalBackendEws *cbews, const gchar *username, const gchar *password, GError **error)
+{
+	ECalBackendEwsPrivate *priv;
+	ESource *esource;
+	
+	priv = cbews->priv;
+	esource = e_cal_backend_get_source (E_CAL_BACKEND (cbews));
+	
+	PRIV_LOCK (priv);
+
+	if (priv->mode != GNOME_Evolution_Calendar_MODE_LOCAL && !priv->cnc && password) {
+		const gchar *host_url;
+
+		/* If we can be called a second time while the first is still
+		   "outstanding", we need a bit of a rethink... */
+		g_assert (!priv->opening_ctx && !priv->opening_cal);
+
+		priv->user_email = e_source_get_duped_property (esource, "email");
+
+		host_url = e_source_get_property (esource, "hosturl");
+		priv->cnc = e_ews_connection_new (host_url, username, password,
+						  NULL, NULL, error);
+		/* Trigger an update request, which will test our authentication */
+		if (priv->cnc) {
+			ews_start_sync (cbews);
+			PRIV_UNLOCK (priv);
+			return TRUE;
+		}
+	}
+
+	PRIV_UNLOCK (priv);
+	return FALSE;
+}
+
 static void
 e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal, 
 			gboolean only_if_exists, const gchar *username, const gchar *password)
 {
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
-	GError *error = NULL;
+	ESource *esource;
+	const gchar *cache_dir;
 
 	cbews = (ECalBackendEws *) backend;
 	priv = cbews->priv;
-
+	esource = e_cal_backend_get_source (E_CAL_BACKEND (cbews));
 
 	PRIV_LOCK (priv);
 	if (!priv->store) {
-		const gchar *uri;
+		const gchar *uri, *full_uri;
 		icalcomponent_kind kind;
 		ECalSourceType source_type;
 
@@ -741,44 +794,34 @@ e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal,
 		source_type = source_type_from_kind (kind);
 		uri = e_cal_backend_get_uri (backend);
 		
-		priv->store = (ECalBackendStore *) e_cal_backend_file_store_new (uri, source_type);
-		priv->cache_dir = g_strdup (e_cal_backend_store_get_path (priv->store));
+		priv->folder_id = e_source_get_duped_property (esource, "folder-id");
+		path = g_strconcat (uri, ";", priv->folder_id, NULL);
+		
+		priv->store = (ECalBackendStore *) e_cal_backend_file_store_new (path, source_type);
+		priv->storage_path = g_strdup (e_cal_backend_store_get_path (priv->store));
 
 		e_cal_backend_store_load (priv->store);
 		add_comps_to_item_id_hash (cbews);
-		e_cal_backend_store_set_default_timezone (priv->store, priv->default_zone);
+		
+		if (priv->default_zone)
+			e_cal_backend_store_set_default_timezone (priv->store, priv->default_zone);
+		g_free (path);
 	}
+	PRIV_UNLOCK (priv);
 
-	if (priv->mode != CAL_MODE_LOCAL && !priv->cnc) {
-		ESource *esource;
-		const gchar *host_url;
+	if (connect_to_server (cbews, username, password, error)) {
+		priv->opening_cal = cal;
+		priv->opening_ctx = context;
 
 		/* If we can be called a second time while the first is still
 		   "outstanding", we need a bit of a rethink... */
 		g_assert (!priv->opening_cal);
-
-		esource = e_cal_backend_get_source (E_CAL_BACKEND (cbews));
-
-		priv->folder_id = e_source_get_duped_property (esource, "folder-id");
-		priv->user_email = e_source_get_duped_property (esource, "email");
-
-		host_url = e_source_get_property (esource, "hosturl");
-
-		priv->opening_cal = cal;
-
-		priv->cnc = e_ews_connection_new (host_url, username, password,
-						  NULL, NULL, &error);
-		if (priv->cnc) {
-			/* Trigger an update request, which will test our authentication */
-			ews_start_sync (cbews);
-
-			PRIV_UNLOCK (priv);
-			return;
-		}
+		return;
 	}
-
-	PRIV_UNLOCK (priv);
+	
 	e_data_cal_notify_open (cal, EDC_ER_CODE(error));
+	
+	return;
 }
 
 static void
@@ -894,7 +937,7 @@ e_cal_backend_ews_get_object_list (ECalBackend *backend, EDataCal *cal, const gc
 
 	e_data_cal_notify_object_list (cal, EDC_ER_CODE(error), objects);
 	if (objects) {
-		for (l = objects; l != NULL; l = l->next)
+		for (l = objects; l != NULL; l = g_list_next (l))
 			g_free (l->data);
 		g_list_free (objects);
 	}
@@ -1539,6 +1582,9 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 
 	comp_str = e_cal_component_get_as_string(create_data->comp);
 	e_data_cal_notify_object_created (create_data->cal, EDC_ER_CODE(error), comp_uid, comp_str);
+	
+	/* notify the backend and the application that a new object was created */
+	e_cal_backend_notify_object_created (E_CAL_BACKEND(create_data->cbews), comp_str);
 	g_free (comp_str);
 
 	/* place new component in our cache */
@@ -1616,7 +1662,6 @@ e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, const gchar
 	ECalComponent *comp;
 	struct icaltimetype current;
 	GError *error = NULL;
-	GCancellable *cancellable = NULL;
 	const char *send_meeting_invitations;
 	struct TzidCbData cbd;
 
@@ -1752,7 +1797,7 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	}
 
 	e_cal_component_commit_sequence (modify_data->comp);
-	id = e_cal_component_get_id (modify_data->oldcomp);
+	id = e_cal_component_get_id (modify_data->comp);
 	e_cal_backend_store_remove_component (cbews->priv->store, id->uid, id->rid);
 	put_component_to_store (cbews, modify_data->comp);
 
@@ -1885,7 +1930,7 @@ convert_vevent_component_to_updatexml(ESoapMessage *msg, gpointer user_data)
 	}
 
 	org_email_address = e_ews_collect_organizer (icalcomp);
-	if (g_ascii_strcasecmp (org_email_address, modify_data->cbews->priv->user_email)) {
+	if (org_email_address && g_ascii_strcasecmp (org_email_address, modify_data->cbews->priv->user_email)) {
 		e_ews_message_end_item_change (msg);
 		return;
 	}
@@ -2081,7 +2126,6 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal,
 	gchar *itemid = NULL, *changekey = NULL;
 	struct icaltimetype current;
 	GError *error = NULL;
-	GCancellable *cancellable = NULL;
 	GSList *original_attachments = NULL, *modified_attachments = NULL, *added_attachments = NULL, *removed_attachments = NULL, *removed_attachments_ids = NULL, *i;
 	EwsAttachmentsData *attach_data;
 	struct TzidCbData cbd;
@@ -2368,7 +2412,6 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, const gc
 	GError *error = NULL;
 	icalproperty_method method;
 	EwsAcceptData *accept_data;
-	GCancellable *cancellable = NULL;
 
 	cbews = E_CAL_BACKEND_EWS(backend);
 	priv = cbews->priv;
@@ -2821,7 +2864,7 @@ ews_get_attachments (ECalBackendEws *cbews, EEwsItem *item)
 							EWS_PRIORITY_MEDIUM,
 							uid,
 							attachment_ids,
-							cbews->priv->cache_dir,
+							cbews->priv->storage_path,
 							TRUE,
 							ews_get_attachments_ready_callback,
 							NULL, NULL,
@@ -3286,6 +3329,7 @@ ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data
 							 &items_created, &items_updated,
 							 &items_deleted, &error);
 
+	/*FIXME invoke a dummy request in authenticate user to ensure we have a valid connection to avoid this mess */
 	PRIV_LOCK (priv);
 
 	if (priv->opening_cal) {
@@ -3477,7 +3521,7 @@ e_cal_backend_ews_start_query (ECalBackend *backend, EDataCalView *query)
 
 	/* notify listeners of all objects */
 	if (objects) {
-		e_data_cal_view_notify_objects_added (query, (const GList *) objects);
+		e_data_cal_view_notify_objects_added (query, objects);
 
 		/* free memory */
 		g_list_foreach (objects, (GFunc) g_free, NULL);
@@ -3524,7 +3568,7 @@ static void
 prepare_free_busy_request (ESoapMessage *msg, gpointer user_data)
 {
 	EwsFreeBusyData *free_busy_data = user_data;
-	GList *addr;
+	GSList *addr;
 	icaltimetype t_start, t_end;
 
 	ewscal_set_availability_timezone (msg, free_busy_data->timezone);
@@ -3569,6 +3613,7 @@ ews_cal_get_free_busy_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 	GSList *free_busy_sl = NULL, *i;
 	GList *free_busy = NULL, *j;
 	GError *error = NULL;
+	GList *fb = NULL;
 
 	if (!e_ews_connection_get_free_busy_finish (cnc, res, &free_busy_sl, &error)) {
 		error->code = EDC_CODE (OtherError);
@@ -3586,6 +3631,9 @@ ews_cal_get_free_busy_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 done:
 	e_data_cal_notify_free_busy (free_busy_data->cal, EDC_ER_CODE(error), free_busy);
 
+	/* FIXME free free_busy_sl ? */
+	g_list_foreach (free_busy, (GFunc) g_free, NULL);
+	g_list_free (free_busy);
 	g_list_foreach (free_busy_data->users, (GFunc)free, NULL);
 	g_list_free (free_busy_data->users);
 	g_object_unref (free_busy_data->cal);
@@ -3602,7 +3650,6 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend, EDataCal *cal,
 	ECalBackendEwsPrivate *priv = cbews->priv;
 	GError *error = NULL;
 	EwsFreeBusyData *free_busy_data;
-	GCancellable *cancellable = NULL;
 	GList *users_copy = NULL;
 
 	/* make sure we're not offline */
@@ -3614,7 +3661,7 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend, EDataCal *cal,
 
 	/* EWS can support only 100 identities, which is the maximum number of identities that the Web service method can request
 	 see http://msdn.microsoft.com/en-us/library/aa564001%28v=EXCHG.140%29.aspx*/
-	if (g_list_length (users) > 100)
+	if (g_list_length ((GSList *) users) > 100)
 	{
 		g_propagate_error (&error, EDC_ERROR (SearchSizeLimitExceeded));
 		goto exit;
@@ -3689,12 +3736,12 @@ e_cal_backend_ews_finalize (GObject *object)
 		priv->user_email = NULL;
 	}
 
-	if (priv->cache_dir) {
-		g_free (priv->cache_dir);
-		priv->cache_dir = NULL;
+	if (priv->storage_path) {
+		g_free (priv->storage_path);
+		priv->storage_path = NULL;
 	}
 
-	if (priv->default_zone) {
+	if (priv->default_zone && priv->default_zone != icaltimezone_get_utc_timezone ()) {
 		icaltimezone_free (priv->default_zone, 1);
 		priv->default_zone = NULL;
 	}
@@ -3706,6 +3753,11 @@ e_cal_backend_ews_finalize (GObject *object)
 
 	g_hash_table_destroy (priv->item_id_hash);
 
+#if EDS_CHECK_VERSION (3,1,0)
+	e_credentials_free (priv->credentials);
+	priv->credentials = NULL;
+#endif	
+	
 	g_free (priv);
 	cbews->priv = NULL;
 
@@ -3727,6 +3779,7 @@ e_cal_backend_ews_init (ECalBackendEws *cbews)
 						(g_str_hash, g_str_equal,
 						 (GDestroyNotify) g_free,
 						 (GDestroyNotify) g_object_unref);
+	priv->default_zone = icaltimezone_get_utc_timezone ();
 
 	cbews->priv = priv;
 }
@@ -3756,20 +3809,18 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->get_mode = e_cal_backend_ews_get_mode;
 	backend_class->set_mode = e_cal_backend_ews_set_mode;
 	backend_class->get_ldap_attribute = e_cal_backend_ews_get_ldap_attribute;
-
-	/* Many of these can be moved to Base class */
-	backend_class->add_timezone = e_cal_backend_ews_add_timezone;
 	backend_class->get_default_object = e_cal_backend_ews_get_default_object;
+	
+	backend_class->start_query = e_cal_backend_ews_start_query;
+
+	backend_class->add_timezone = e_cal_backend_ews_add_timezone;
 	backend_class->get_timezone = e_cal_backend_ews_get_timezone;
 
-	backend_class->internal_get_timezone = e_cal_backend_ews_internal_get_timezone;
-
 	backend_class->open = e_cal_backend_ews_open;
+	backend_class->refresh = e_cal_backend_ews_refresh;
 	backend_class->get_object = e_cal_backend_ews_get_object;
 	backend_class->get_object_list = e_cal_backend_ews_get_object_list;
 	backend_class->remove = e_cal_backend_ews_remove;
-
-	backend_class->start_query = e_cal_backend_ews_start_query;
 
 	backend_class->discard_alarm = e_cal_backend_ews_discard_alarm;
 

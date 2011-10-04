@@ -21,6 +21,8 @@ libebookbackendews_la_CPPFLAGS = \
 	$(SOUP_CFLAGS)	
 
 libebookbackendews_la_SOURCES =			\
+	libedata-book-compat.h			\
+	libedata-book-compat.c			\
 	e-book-backend-sqlitedb.c		\
 	e-book-backend-sqlitedb.h		\
 	e-book-backend-ews-utils.c		\
@@ -30,8 +32,6 @@ libebookbackendews_la_SOURCES =			\
 	ews-oab-decoder.h			\
 	e-book-backend-ews.c			\
 	e-book-backend-ews.h			\
-	e-book-backend-ews-gal.c		\
-	e-book-backend-ews-gal.h		\
 	e-book-backend-ews-factory.c
 
 libebookbackendews_la_LIBADD =					\

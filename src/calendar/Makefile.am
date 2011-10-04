@@ -22,6 +22,8 @@ libecalbackendews_la_CPPFLAGS = \
 	$(DEBUG_CFLAGS)
 
 libecalbackendews_la_SOURCES =				\
+	libedata-cal-compat.h				\
+	libedata-cal-compat.c				\
 	e-cal-backend-ews-factory.c			\
 	e-cal-backend-ews-factory.h			\
 	e-cal-backend-ews.c				\

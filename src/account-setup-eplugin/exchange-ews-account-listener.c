@@ -144,7 +144,10 @@ ews_account_removed (EAccountList *account_listener, EAccount *account)
 	g_free (storage_path);
 	g_free (summary_file);
 	ews_account_info_free (info);
+
+#if ! EDS_CHECK_VERSION (3,1,0)
 	g_object_unref (service);
+#endif	
 }
 
 static gboolean
@@ -214,7 +217,8 @@ add_gal_esource (CamelURL *url)
 	GConfClient* client;
 	const gchar *conf_key, *email_id;
 	const gchar *oal_sel, *tmp, *oal_name;
-	gchar *source_uri, *oal_id = NULL;
+	gchar *oal_id = NULL;
+	gchar *account_uri, *source_uri;
 
 	conf_key = CONTACT_SOURCES;
 	client = gconf_client_get_default ();
@@ -230,9 +234,9 @@ add_gal_esource (CamelURL *url)
 	} else
 		oal_name = _("Global Address list");
 
-	/* hmm is it the right way to do ? */
-	source_uri = g_strdup_printf("ewsgal://%s/gal", oal_id ? oal_id : "nodownload");
-	source = e_source_new_with_absolute_uri (oal_name, source_uri);
+	account_uri = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
+	source_uri = g_strdup_printf ("%s?gal=1", account_uri + strlen (EWS_BASE_URI));
+	source = e_source_new (oal_name, source_uri);
 	
 	/* set properties */
 	e_source_set_property (source, "username", url->user);
@@ -262,6 +266,7 @@ add_gal_esource (CamelURL *url)
 	g_object_unref (source_list);
 	g_object_unref (client);
 	g_free (oal_id);
+	g_free (account_uri);
 	g_free (source_uri);
 
 	return;

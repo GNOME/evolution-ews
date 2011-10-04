@@ -96,7 +96,7 @@ search_db (EBookBackendSqliteDB *ebsdb, const gchar *type, const gchar *sexp)
 	
 	g_print ("%s - query: %s \n", type, sexp);
 	op = type;
-	vcards = e_book_backend_sqlitedb_search (ebsdb, folderid, sexp, NULL, &error);
+	vcards = e_book_backend_sqlitedb_search (ebsdb, folderid, sexp, NULL, NULL, NULL, &error);
 	if (error)
 		return;
 
@@ -148,7 +148,7 @@ start_tests (gpointer data)
 	
 	g_print ("Get Vcard string \n");
 	op = "get vcard string";
-	vcard_str = e_book_backend_sqlitedb_get_vcard_string (ebsdb, folderid, uid, &error);
+	vcard_str = e_book_backend_sqlitedb_get_vcard_string (ebsdb, folderid, uid, NULL, NULL, &error);
 	if (error)
 		goto exit;
 	g_print ("VCard: %s \n", vcard_str);

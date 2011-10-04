@@ -111,6 +111,7 @@ static void autodiscover_callback (EwsUrls *urls, gpointer user_data, GError *er
 	
 	if (error) {
 		g_warning ("Autodiscover failed: %s", error->message);
+		e_notice (NULL, GTK_MESSAGE_ERROR, _("Autodiscover failed: %s"), error->message);
 		g_clear_error (&error);
 	}
 	if (urls) {
@@ -185,25 +186,15 @@ url_changed (GtkWidget *entry, EConfig *config, const gchar *param)
 {
 	EMConfigTargetAccount *target = (EMConfigTargetAccount *)(config->target);
 	CamelURL *url = NULL;
-	const gchar *domain = NULL;
+	const gchar *uri_str = NULL;
 	gchar *url_string = NULL;
 	EAccount *account;
 
 	account = get_modified_account (target);
 	url = camel_url_new (e_account_get_string(account, E_ACCOUNT_SOURCE_URL), NULL);
-	domain = gtk_entry_get_text (GTK_ENTRY(entry));
+	uri_str = gtk_entry_get_text (GTK_ENTRY(entry));
 
-	if (domain && domain[0]) {
-		CamelURL *hosturl;
-		camel_url_set_param (url, param, domain);
-		hosturl = camel_url_new (domain, NULL);
-		if (hosturl) {
-			camel_url_set_host (url, hosturl->host);
-			camel_url_free (hosturl);
-		}
-	} else
-		camel_url_set_param (url, param, NULL);
-
+	camel_url_set_param (url, param, uri_str);
 	url_string = camel_url_to_string (url, 0);
 	e_account_set_string (account, E_ACCOUNT_SOURCE_URL, url_string);
 	e_account_set_string (account, E_ACCOUNT_TRANSPORT_URL, url_string);
@@ -268,7 +259,7 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		g_free (url_string);
 		
 		/* OAB url entry */
-		oab_label = gtk_label_new_with_mnemonic (_("OA_B URL:"));
+		oab_label = gtk_label_new_with_mnemonic (_("OAB U_RL:"));
 		gtk_widget_show (oab_label);
 
 		oab_url = gtk_entry_new ();
@@ -293,7 +284,7 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		cbdata->config = data->config;
 		cbdata->host_entry = host_url;
 		cbdata->oab_entry = oab_url;
-		auto_discover = gtk_button_new_with_mnemonic (_("_Fetch URL"));
+		auto_discover = gtk_button_new_with_mnemonic (_("Fetch _URL"));
 		gtk_box_pack_start (GTK_BOX (hbox), auto_discover, FALSE, FALSE, 0);
 		g_signal_connect (G_OBJECT(auto_discover), "clicked",  G_CALLBACK(validate_credentials), cbdata);
 
@@ -651,9 +642,10 @@ org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 		/* OAL combo and fetch OAL button */	
 		hbox = gtk_hbox_new (FALSE, 6);
 		oal_combo = gtk_combo_box_text_new ();
+		gtk_label_set_mnemonic_widget (GTK_LABEL(label), oal_combo);
 		gtk_box_pack_start (GTK_BOX (hbox), oal_combo, TRUE, TRUE, 0);
 
-		fetch_button = gtk_button_new_with_mnemonic (_("Fetch list"));
+		fetch_button = gtk_button_new_with_mnemonic (_("Fetch _list"));
 		gtk_box_pack_start (GTK_BOX (hbox), fetch_button, FALSE, FALSE, 0);
 
 		/* Add hbox to table */
