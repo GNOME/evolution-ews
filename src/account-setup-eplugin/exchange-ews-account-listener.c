@@ -252,7 +252,7 @@ add_gal_esource (CamelURL *url)
 	
 	/* set properties */
 	e_source_set_property (source, "username", url->user);
-	e_source_set_property (source, "auth-domain", "Ews");
+	e_source_set_property (source, "auth-domain", "Exchange Web Services");
 	e_source_set_property (source, "email", email_id);
 	e_source_set_property (source, "gal", "1");
 	e_source_set_property (source, "hosturl", camel_url_get_param (url, "hosturl"));

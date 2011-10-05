@@ -146,7 +146,7 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 
 	source = e_source_new (source_name, source_uri);
 	e_source_set_property (source, "username", username);
-	e_source_set_property (source, "auth-domain", "Ews");
+	e_source_set_property (source, "auth-domain", "Exchange Web Services");
 	e_source_set_property (source, "folder-id", fid->id);
 	e_source_set_property (source, "change-key", fid->change_key);
 	e_source_set_property (source, "email", email_id);
