@@ -842,9 +842,6 @@ ews_book_remove_contact_cb (GObject *object, GAsyncResult *res, gpointer user_da
 		g_warning ("\nError removing contact %s \n", error->message);
 	}
 
-	g_slist_foreach (remove_contact->sl_ids, (GFunc) g_free, NULL);
-	g_slist_free (remove_contact->sl_ids);
-	
 	g_object_unref (remove_contact->ebews);
 	g_object_unref (remove_contact->book);
 	g_free (remove_contact);
