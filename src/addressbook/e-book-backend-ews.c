@@ -120,16 +120,7 @@ enum {
 #define PRIV_LOCK(p)   (g_static_rec_mutex_lock (&(p)->rec_mutex))
 #define PRIV_UNLOCK(p) (g_static_rec_mutex_unlock (&(p)->rec_mutex))
 
-static void
-ews_auth_required (EBookBackend *backend)
-{
-#if EDS_CHECK_VERSION (3,1,0)
-	e_book_backend_notify_auth_required (backend, TRUE, NULL);
-
-#else
-	e_book_backend_notify_auth_required (backend);
-#endif	
-}
+static gchar * ews_get_cache_dir (EBookBackend *backend, ESource *source);
 
 static gboolean
 ews_remove_attachments (const gchar *attachment_dir)
@@ -846,9 +837,6 @@ ews_book_remove_contact_cb (GObject *object, GAsyncResult *res, gpointer user_da
 		g_warning ("\nError removing contact %s \n", error->message);
 	}
 
-	g_slist_foreach (remove_contact->sl_ids, (GFunc) g_free, NULL);
-	g_slist_free (remove_contact->sl_ids);
-	
 	g_object_unref (remove_contact->ebews);
 	g_object_unref (remove_contact->book);
 	g_free (remove_contact);
@@ -1126,7 +1114,7 @@ e_book_backend_ews_get_contact_list	(EBookBackend *backend,
 					 GCancellable *cancellable,
 					 const gchar   *query )
 {
-	GSList *vcard_list;
+	GList *vcard_list;
 	EBookBackendEws *egwb;
 
 	egwb = E_BOOK_BACKEND_EWS (backend);
@@ -1367,13 +1355,15 @@ ews_download_full_gal (EBookBackendEws *cbews, EwsOALDetails *full, GCancellable
 	EBookBackendEwsPrivate *priv = cbews->priv;
 	EEwsConnection *oab_cnc;
 	gchar *full_url, *oab_url, *cache_file = NULL;
-	const gchar *cache_dir;
+	gchar *cache_dir;
 	gchar *comp_cache_file = NULL, *uncompress_file = NULL;
+	ESource *source;
 
 	/* oab url with oab.xml removed from the suffix */
 	oab_url = g_strndup (priv->oab_url, strlen (priv->oab_url) - 7);
 	full_url = g_strconcat (oab_url, full->filename, NULL);
-	cache_dir = e_book_backend_get_cache_dir (E_BOOK_BACKEND (cbews));
+	source = e_book_backend_get_source (E_BOOK_BACKEND (cbews));
+	cache_dir = ews_get_cache_dir (E_BOOK_BACKEND (cbews), source);
 	comp_cache_file = g_build_filename (cache_dir, full->filename, NULL);
 
 	oab_cnc = e_ews_connection_new (full_url, priv->username, priv->password, NULL, NULL, NULL);
@@ -1393,6 +1383,7 @@ ews_download_full_gal (EBookBackendEws *cbews, EwsOALDetails *full, GCancellable
 exit:	
 	if (comp_cache_file)
 		g_unlink (comp_cache_file);
+	g_free (cache_dir);
 	g_object_unref (oab_cnc);
 	g_free (oab_url);
 	g_free (full_url);
@@ -1442,7 +1433,7 @@ ews_gal_store_contact (EContact *contact, goffset offset, guint percent, gpointe
 
 		status_message = g_strdup_printf (_("Downloading contacts in %s %d%% completed... "), priv->folder_name, percent);
 		if (book_view)
-			e_data_book_view_notify_progress (book_view, -1, status_message);
+			e_data_book_view_notify_status_message (book_view, status_message);
 
 		data->contact_collector = g_slist_reverse (data->contact_collector);
 		e_book_backend_sqlitedb_add_contacts (priv->ebsdb, priv->folder_id, data->contact_collector, FALSE, error);
@@ -1833,7 +1824,7 @@ ebews_start_sync	(gpointer data)
 	status_message = g_strdup (_("Syncing contacts..."));
 	book_view = e_book_backend_ews_utils_get_book_view (E_BOOK_BACKEND (ebews));
 	if (book_view)
-		e_data_book_view_notify_progress (book_view, -1, status_message);
+		e_data_book_view_notify_status_message (book_view, status_message);
 
 	sync_state = e_book_backend_sqlitedb_get_sync_data (priv->ebsdb, priv->folder_id, NULL);
 	do
@@ -1984,7 +1975,7 @@ fetch_from_offline (EBookBackendEws *ews, EDataBookView *book_view, const gchar 
 	priv = ews->priv;
 
 	if (priv->is_gal && !g_strcmp0 (query, "(contains \"x-evolution-any-field\" \"\")")) {
-		e_data_book_view_notify_complete (book_view, error);
+		e_data_book_view_notify_complete (book_view, error ? EDB_ERROR (OtherError) : 0);
 		e_data_book_view_unref (book_view);
 		return;
 	}
@@ -2027,7 +2018,7 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 	query = e_data_book_view_get_card_query (book_view);
 
 	e_data_book_view_ref (book_view);
-	e_data_book_view_notify_progress (book_view, -1, _("Searching..."));
+	e_data_book_view_notify_status_message (book_view, _("Searching..."));
 
 	switch (priv->mode) {
 	case GNOME_Evolution_Addressbook_MODE_LOCAL:
@@ -2190,12 +2181,6 @@ e_book_backend_ews_authenticate_user (EBookBackend *backend,
 }
 
 static void
-e_book_backend_ews_cancel_operation (EBookBackend *backend, EDataBook *book, GError **perror)
-{
-
-}
-
-static void
 e_book_backend_ews_get_changes (EBookBackend *backend,
 				      EDataBook    *book,
 				      guint32       opid,
@@ -2282,7 +2267,7 @@ e_book_backend_ews_load_source 	(EBookBackend           *backend,
 	EBookBackendEwsPrivate *priv;
 	const gchar *email;
 	const gchar *folder_name;
-	const gchar *offline;
+	const gchar *offline, *is_gal;
 	gchar *cache_dir;
 	GError *err = NULL;
 
@@ -2291,19 +2276,46 @@ e_book_backend_ews_load_source 	(EBookBackend           *backend,
 
 	cache_dir = ews_get_cache_dir (backend, source);
 	email = e_source_get_property (source, "email");
-	priv->folder_id = e_source_get_duped_property (source, "folder-id");
-	folder_name = e_source_peek_name (source);
+	is_gal = e_source_get_property (source, "gal");
+	
+	if (is_gal && !strcmp (is_gal, "1"))
+		priv->is_gal = TRUE;
 
-	priv->ebsdb = e_book_backend_sqlitedb_new (cache_dir, email, priv->folder_id, folder_name, TRUE, &err);
-	g_free (cache_dir);
-	if (err) {
-		g_clear_error (&err);
-		return EDB_ERROR (OtherError);
+	if (!priv->is_gal) {
+		priv->folder_id = e_source_get_duped_property (source, "folder-id");
+		folder_name = e_source_peek_name (source);
+
+		priv->ebsdb = e_book_backend_sqlitedb_new (cache_dir, email, priv->folder_id, folder_name, TRUE, &err);
+		g_free (cache_dir);
+		if (err) {
+			g_clear_error (&err);
+			return EDB_ERROR (OtherError);
+		}
+
+		offline = e_source_get_property (source, "offline_sync");
+		if (offline  && g_str_equal (offline, "1"))
+			priv->marked_for_offline = TRUE;
+	} else {
+		priv->folder_id = e_source_get_duped_property (source, "oal_id");
+	
+		/* If folder_id is present it means the GAL is marked for offline usage, we do not check for offline_sync property */
+		if (priv->folder_id) {
+			priv->folder_name = g_strdup (e_source_peek_name (source));
+			priv->oab_url = e_source_get_duped_property (source, "oab_url");
+
+			/* setup stagging dir, remove any old files from there */
+			priv->attachment_dir = g_build_filename (cache_dir, "attachments", NULL);
+			g_mkdir_with_parents (priv->attachment_dir, 0777);
+
+			priv->ebsdb = e_book_backend_sqlitedb_new (cache_dir, email, priv->folder_id, priv->folder_name, TRUE, &err);
+			if (err) {
+				g_clear_error (&err);
+				return EDB_ERROR (OtherError);
+			}
+			priv->marked_for_offline = TRUE;
+			priv->is_writable = FALSE;
+		}	
 	}
-
-	offline = e_source_get_property (source, "offline_sync");
-	if (offline  && g_str_equal (offline, "1"))
-		priv->marked_for_offline = TRUE;
 	
 	e_book_backend_set_is_loaded (backend, TRUE);
 	
@@ -2446,7 +2458,7 @@ e_book_backend_ews_remove_compat (EBookBackend *backend,
 				  EDataBook        *book,
 				  guint32           opid)
 {
-	e_book_backend_ews_remove (backend, book, opid, NULL);
+	e_book_backend_ews_remove (backend, book, opid);
 }
 
 #else
