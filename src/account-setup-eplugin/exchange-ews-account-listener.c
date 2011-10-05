@@ -146,7 +146,7 @@ ews_account_removed (EAccountList *account_listener, EAccount *account)
 	ews_account_info_free (info);
 
 #if ! EDS_CHECK_VERSION (3,1,0)
-	g_object_unref (service);
+	camel_object_unref (service);
 #endif	
 }
 
@@ -240,7 +240,7 @@ add_gal_esource (CamelURL *url)
 	
 	/* set properties */
 	e_source_set_property (source, "username", url->user);
-	e_source_set_property (source, "auth-domain", "Ews");
+	e_source_set_property (source, "auth-domain", "Exchange Web Services");
 	e_source_set_property (source, "email", email_id);
 	e_source_set_property (source, "gal", "1");
 	e_source_set_property (source, "hosturl", camel_url_get_param (url, "hosturl"));

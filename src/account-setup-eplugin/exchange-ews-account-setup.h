@@ -24,7 +24,7 @@
 #include "exchange-ews-account-listener.h"
 
 /* This definition should be in-sync with the definition in camel-ews-store.c */
-#define EXCHANGE_EWS_PASSWORD_COMPONENT "ExchangeEWS"
+#define EXCHANGE_EWS_PASSWORD_COMPONENT "Exchange Web Services"
 
 #define EWS_URI_PREFIX   "ews://"
 #define EWS_PREFIX_LENGTH 6
