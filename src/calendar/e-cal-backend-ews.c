@@ -51,7 +51,6 @@
 #include "e-soap-response.h"
 #include "e-ews-message.h"
 #include "e-ews-item-change.h"
-#include "libedata-cal-compat.h"
 
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -344,14 +343,8 @@ exit:
 	e_data_cal_notify_default_timezone_set (cal, EDC_ER_CODE(error));
 }
 
-static void 
-e_cal_backend_ews_get_ldap_attribute (ECalBackend *backend, EDataCal *cal, EServerMethodContext context)
-{
-	e_data_cal_notify_ldap_attribute (cal, context, NULL, NULL);
-}
-
 static void
-e_cal_backend_ews_get_default_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context)
+e_cal_backend_ews_get_default_object (ECalBackend *backend, EDataCal *cal)
 {
 
 	ECalComponent *comp;
@@ -377,7 +370,7 @@ e_cal_backend_ews_get_default_object (ECalBackend *backend, EDataCal *cal, EServ
 	g_object_unref (comp);
 
 exit:
-	e_data_cal_notify_default_object (cal, context, error, object);
+	e_data_cal_notify_default_object (cal, EDC_ER_CODE (error), object);
 	g_free (object);
 }
 
@@ -442,7 +435,8 @@ exit:
 	e_data_cal_notify_timezone_added (cal, EDC_ER_CODE(error), tzobj);
 }
 
-static void e_cal_backend_ews_get_ldap_attribute (ECalBackend *backend, EDataCal *cal)
+static void 
+e_cal_backend_ews_get_ldap_attribute (ECalBackend *backend, EDataCal *cal)
 {
 	e_data_cal_notify_ldap_attribute (cal, 0, NULL);
 }
@@ -752,7 +746,7 @@ connect_to_server (ECalBackendEws *cbews, const gchar *username, const gchar *pa
 
 		/* If we can be called a second time while the first is still
 		   "outstanding", we need a bit of a rethink... */
-		g_assert (!priv->opening_ctx && !priv->opening_cal);
+		g_assert (!priv->opening_cal);
 
 		priv->user_email = e_source_get_duped_property (esource, "email");
 
@@ -778,7 +772,7 @@ e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal,
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
 	ESource *esource;
-	const gchar *cache_dir;
+	GError *error = NULL;
 
 	cbews = (ECalBackendEws *) backend;
 	priv = cbews->priv;
@@ -786,7 +780,8 @@ e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal,
 
 	PRIV_LOCK (priv);
 	if (!priv->store) {
-		const gchar *uri, *full_uri;
+		const gchar *uri;
+		gchar *path;
 		icalcomponent_kind kind;
 		ECalSourceType source_type;
 
@@ -809,13 +804,8 @@ e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal,
 	}
 	PRIV_UNLOCK (priv);
 
-	if (connect_to_server (cbews, username, password, error)) {
+	if (connect_to_server (cbews, username, password, &error)) {
 		priv->opening_cal = cal;
-		priv->opening_ctx = context;
-
-		/* If we can be called a second time while the first is still
-		   "outstanding", we need a bit of a rethink... */
-		g_assert (!priv->opening_cal);
 		return;
 	}
 	
@@ -1744,7 +1734,7 @@ e_cal_backend_ews_create_object(ECalBackend *backend, EDataCal *cal, const gchar
 					     convert_calcomp_to_xml,
 					     convert_data,
 					     ews_create_object_cb,
-					     cancellable,
+					     NULL,
 					     create_data);
 	return;
 
@@ -2207,7 +2197,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal,
 			icalprop = icalcomponent_get_next_property (icalcomp, ICAL_ATTACH_PROPERTY);
 		}
 
-		items = e_ews_connection_delete_attachments (priv->cnc, EWS_PRIORITY_MEDIUM, removed_attachments_ids, cancellable, &error);
+		items = e_ews_connection_delete_attachments (priv->cnc, EWS_PRIORITY_MEDIUM, removed_attachments_ids, NULL, &error);
 
 		changekey = items->data;
 
@@ -2269,7 +2259,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal,
 						     convert_component_to_updatexml,
 						     modify_data,
 						     ews_cal_modify_object_cb,
-						     cancellable,
+						     NULL,
 						     modify_data);
 	}
 	return;
@@ -2468,14 +2458,14 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, const gc
 
 				/*in case we do not have item id we will create item with mime content only*/
 				if (item_id == NULL)
-					e_ews_receive_objects_no_exchange_mail (priv, subcomp, ids, cancellable, error);
+					e_ews_receive_objects_no_exchange_mail (priv, subcomp, ids, NULL, error);
 				else
 					e_ews_connection_create_items (priv->cnc, EWS_PRIORITY_MEDIUM,
 								       "SendAndSaveCopy",
 								       NULL, NULL,
 								       prepare_accept_item_request,
 								       accept_data,
-								       &ids, cancellable, &error);
+								       &ids, NULL, &error);
 				if (error)
 					/* The calendar UI doesn't *display* errors unless they have
 					 * the OtherError code */
@@ -2502,7 +2492,7 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, const gc
 								       prepare_set_free_busy_status,
 								       accept_data,
 								       &ids,
-								       cancellable,
+								       NULL,
 								       &error);
 					if (error)
 						error->code = EDC_CODE (OtherError);
@@ -3568,7 +3558,7 @@ static void
 prepare_free_busy_request (ESoapMessage *msg, gpointer user_data)
 {
 	EwsFreeBusyData *free_busy_data = user_data;
-	GSList *addr;
+	GList *addr;
 	icaltimetype t_start, t_end;
 
 	ewscal_set_availability_timezone (msg, free_busy_data->timezone);
@@ -3613,7 +3603,6 @@ ews_cal_get_free_busy_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
 	GSList *free_busy_sl = NULL, *i;
 	GList *free_busy = NULL, *j;
 	GError *error = NULL;
-	GList *fb = NULL;
 
 	if (!e_ews_connection_get_free_busy_finish (cnc, res, &free_busy_sl, &error)) {
 		error->code = EDC_CODE (OtherError);
@@ -3661,7 +3650,7 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend, EDataCal *cal,
 
 	/* EWS can support only 100 identities, which is the maximum number of identities that the Web service method can request
 	 see http://msdn.microsoft.com/en-us/library/aa564001%28v=EXCHG.140%29.aspx*/
-	if (g_list_length ((GSList *) users) > 100)
+	if (g_list_length (users) > 100)
 	{
 		g_propagate_error (&error, EDC_ERROR (SearchSizeLimitExceeded));
 		goto exit;
@@ -3683,7 +3672,7 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend, EDataCal *cal,
 					      prepare_free_busy_request,
 					      free_busy_data,
 					      ews_cal_get_free_busy_cb,
-					      cancellable,
+					      NULL,
 					      free_busy_data);
 
 	return;
@@ -3810,6 +3799,7 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->set_mode = e_cal_backend_ews_set_mode;
 	backend_class->get_ldap_attribute = e_cal_backend_ews_get_ldap_attribute;
 	backend_class->get_default_object = e_cal_backend_ews_get_default_object;
+	backend_class->internal_get_timezone = e_cal_backend_ews_internal_get_timezone;
 	
 	backend_class->start_query = e_cal_backend_ews_start_query;
 
@@ -3817,7 +3807,6 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->get_timezone = e_cal_backend_ews_get_timezone;
 
 	backend_class->open = e_cal_backend_ews_open;
-	backend_class->refresh = e_cal_backend_ews_refresh;
 	backend_class->get_object = e_cal_backend_ews_get_object;
 	backend_class->get_object_list = e_cal_backend_ews_get_object_list;
 	backend_class->remove = e_cal_backend_ews_remove;
