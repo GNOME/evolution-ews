@@ -1,0 +1,331 @@
+# Spanish translation for evolution-ews.
+# Copyright (C) 2011 evolution-ews's COPYRIGHT HOLDER
+# This file is distributed under the same license as the evolution-ews package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Daniel Mustieles <daniel.mustieles@gmail.com>, 2011.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: evolution-ews master\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-ews&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2011-10-10 07:41+0000\n"
+"PO-Revision-Date: 2011-10-10 09:49+0200\n"
+"Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
+"Language-Team: Español <gnome-es-list@gnome.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:247
+msgid "Global Address list"
+msgstr "Lista global de direcciones"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:114
+#, c-format
+msgid "Autodiscover failed: %s"
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:149
+#, c-format
+msgid "Enter Password for %s"
+msgstr "Introduzca la contraseña para %s"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:158
+msgid "Could not get password."
+msgstr "No se pudo obtener la contraseña."
+
+#. OAB url entry
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:262
+msgid "OAB U_RL:"
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:274
+msgid "_Host URL:"
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:287
+msgid "Fetch _URL"
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:453
+msgid "Could not fetch oal list: "
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:495
+msgid "Fetching..."
+msgstr ""
+
+#. Add cache check box
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:632
+msgid "Cache o_ffline address book"
+msgstr ""
+
+#. Add label
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:638
+msgid "Select Ad_dress list: "
+msgstr ""
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:648
+msgid "Fetch _list"
+msgstr ""
+
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:1
+#: ../src/camel/camel-ews-provider.c:69
+msgid "Exchange Web Services"
+msgstr ""
+
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:2
+msgid "Exchange Web Services Plugin"
+msgstr ""
+
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:3
+msgid "GAL settings"
+msgstr ""
+
+#: ../src/addressbook/e-book-backend-ews.c:1436
+#, c-format
+msgid "Downloading contacts in %s %d%% completed... "
+msgstr ""
+
+#: ../src/addressbook/e-book-backend-ews.c:1826
+msgid "Syncing contacts..."
+msgstr ""
+
+#: ../src/addressbook/e-book-backend-ews.c:2023
+msgid "Searching..."
+msgstr ""
+
+#: ../src/addressbook/e-book-backend-sqlitedb.c:470
+#, c-format
+msgid "Insufficient memory"
+msgstr "Memoria insuficiente"
+
+#: ../src/calendar/e-cal-backend-ews.c:3793
+#, c-format
+msgid "Unknown calendar property '%s'"
+msgstr ""
+
+#: ../src/camel/camel-ews-folder.c:200
+#, c-format
+msgid "Unable to open mimecontent temporary file!"
+msgstr ""
+
+#: ../src/camel/camel-ews-folder.c:207
+#, c-format
+msgid "Unable to generate parser from mimecontent!"
+msgstr ""
+
+#: ../src/camel/camel-ews-folder.c:215
+#, c-format
+msgid "Unable to parse meeting request mimecontent!"
+msgstr ""
+
+#: ../src/camel/camel-ews-folder.c:272
+#, c-format
+msgid "Unable to create cache file"
+msgstr ""
+
+#: ../src/camel/camel-ews-folder.c:372 ../src/camel/camel-ews-folder.c:441
+#, c-format
+msgid "Unable to create cache path"
+msgstr ""
+
+#: ../src/camel/camel-ews-folder.c:450
+#, c-format
+msgid "Failed to move message cache file"
+msgstr ""
+
+#: ../src/camel/camel-ews-folder.c:798
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "No se pudo cargar el resumen para %s"
+
+#: ../src/camel/camel-ews-folder.c:1124 ../src/camel/camel-ews-store.c:575
+#: ../src/camel/camel-ews-store.c:632 ../src/camel/camel-ews-store.c:701
+#, c-format
+msgid "Cant perform actions on the folder while in offline mode"
+msgstr ""
+
+#: ../src/camel/camel-ews-provider.c:48
+msgid "Checking for new mail"
+msgstr "Comprobar si hay correo nuevo"
+
+#: ../src/camel/camel-ews-provider.c:50
+msgid "C_heck for new messages in all folders"
+msgstr ""
+
+#: ../src/camel/camel-ews-provider.c:53
+msgid "Options"
+msgstr "Opciones"
+
+#: ../src/camel/camel-ews-provider.c:55
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr ""
+
+#: ../src/camel/camel-ews-provider.c:57
+msgid "Check new messages for Jun_k contents"
+msgstr ""
+
+#: ../src/camel/camel-ews-provider.c:59
+msgid "Only check for Junk messages in the IN_BOX folder"
+msgstr ""
+
+#: ../src/camel/camel-ews-provider.c:61
+msgid "Automatically synchroni_ze remote mail locally"
+msgstr ""
+
+#: ../src/camel/camel-ews-provider.c:71
+msgid "For accessing Exchange servers using Web Services"
+msgstr "Para acceder a servidores Exchange usando servicios web"
+
+#: ../src/camel/camel-ews-provider.c:87
+msgid "Password"
+msgstr "Contraseña"
+
+#: ../src/camel/camel-ews-provider.c:89
+msgid ""
+"This option will connect to the Exchange server using a plaintext password."
+msgstr ""
+"Esta opción conectará al servidor de Exchange unsado una contraseña de texto "
+"plano."
+
+#: ../src/camel/camel-ews-store.c:174
+#, c-format
+msgid "Session has no storage path"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:184
+#, c-format
+msgid "EWS service has no host URL"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:359
+#, c-format
+msgid "No such folder: %s"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:568
+#, c-format
+msgid "Parent folder %s does not exist"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:626
+#, c-format
+msgid "Folder does not exist"
+msgstr "La carpeta no existe"
+
+#: ../src/camel/camel-ews-store.c:709
+#, c-format
+msgid "Folder %s does not exist"
+msgstr "La carpeta %s no existe"
+
+#: ../src/camel/camel-ews-store.c:718
+#, c-format
+msgid "No change key record for folder %s"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:757
+#, c-format
+msgid "Cannot both rename and move a folder at the same time"
+msgstr "No se puede renombrar y mover una carpeta al mismo tiempo"
+
+#: ../src/camel/camel-ews-store.c:788
+#, c-format
+msgid "Cannot find folder ID for parent folder %s"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:817 ../src/camel/camel-ews-transport.c:61
+#, c-format
+msgid "Exchange server %s"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:819
+#, c-format
+msgid "Exchange service for %s on %s"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:856
+#, c-format
+msgid "You must be working online to complete this operation"
+msgstr "Debe estar conectado para completar esta operación"
+
+#: ../src/camel/camel-ews-transport.c:65
+#, c-format
+msgid "Exchange mail delivery via %s"
+msgstr ""
+
+#: ../src/camel/camel-ews-transport.c:92
+#, c-format
+msgid "Service not connected"
+msgstr "Servicio no conectado"
+
+#: ../src/server/e-ews-connection.c:354
+msgid "Operation Cancelled"
+msgstr "Operación cancelada"
+
+#: ../src/server/e-ews-connection.c:408
+msgid "Authentication failed"
+msgstr "Falló la autenticación"
+
+#: ../src/server/e-ews-connection.c:416
+#, c-format
+msgid "No response: %s"
+msgstr "Sin respuesta: %s"
+
+#: ../src/server/e-ews-connection.c:1072 ../src/server/e-ews-connection.c:1388
+#: ../src/server/e-ews-connection.c:1625
+#, c-format
+msgid "Code: %d - Unexpected response from server"
+msgstr ""
+
+#: ../src/server/e-ews-connection.c:1084
+#, c-format
+msgid "Failed to parse autodiscover response XML"
+msgstr ""
+
+#: ../src/server/e-ews-connection.c:1092
+#, c-format
+msgid "Failed to find <Autodiscover> element\n"
+msgstr "Falló al buscar el elemento <Autodiscover>\n"
+
+#: ../src/server/e-ews-connection.c:1104
+#, c-format
+msgid "Failed to find <Response> element\n"
+msgstr "Falló al buscar el elemento<Response>\n"
+
+#: ../src/server/e-ews-connection.c:1116
+#, c-format
+msgid "Failed to find <Account> element\n"
+msgstr ""
+
+#: ../src/server/e-ews-connection.c:1135
+#, c-format
+msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
+msgstr ""
+
+#: ../src/server/e-ews-connection.c:1231
+#, c-format
+msgid "Both email and password must be provided"
+msgstr "Se deben proporcionar el correo-e y la contraseña"
+
+#: ../src/server/e-ews-connection.c:1238
+#, c-format
+msgid "Wrong email id"
+msgstr ""
+
+#: ../src/server/e-ews-connection.c:1398
+#, c-format
+msgid "Failed to parse oab XML"
+msgstr ""
+
+#: ../src/server/e-ews-connection.c:1405
+#, c-format
+msgid "Failed to find <OAB> element\n"
+msgstr "Falló al buscar el elemento <OAB>\n"
+
+#: ../src/utils/ews-camel-common.c:139
+#, c-format
+msgid "CreateItem call failed to return ID for new message"
+msgstr ""
