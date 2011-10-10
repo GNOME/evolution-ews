@@ -6,6 +6,7 @@ src/account-setup-eplugin/exchange-ews-account-setup.c
 src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml
 src/addressbook/e-book-backend-ews.c
 src/addressbook/e-book-backend-sqlitedb.c
+src/calendar/e-cal-backend-ews.c
 src/camel/camel-ews-folder.c
 src/camel/camel-ews-provider.c
 src/camel/camel-ews-store.c
