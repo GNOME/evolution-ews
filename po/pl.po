@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-09-21 22:47+0200\n"
-"PO-Revision-Date: 2011-09-21 22:48+0200\n"
+"POT-Creation-Date: 2011-10-10 19:05+0200\n"
+"PO-Revision-Date: 2011-10-10 19:06+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -21,7 +21,7 @@ msgstr ""
 "X-Poedit-Language: Polish\n"
 "X-Poedit-Country: Poland\n"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:244
+#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:247
 msgid "Global Address list"
 msgstr "Ogólna lista adresowa"
 
@@ -88,23 +88,28 @@ msgstr "Wtyczka usługi Exchange Web Services"
 msgid "GAL settings"
 msgstr "Ustawienia GAL"
 
-#: ../src/addressbook/e-book-backend-ews.c:1426
+#: ../src/addressbook/e-book-backend-ews.c:1436
 #, c-format
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr "Pobieranie kontaktów w %s %d%% ukończono... "
 
-#: ../src/addressbook/e-book-backend-ews.c:1816
+#: ../src/addressbook/e-book-backend-ews.c:1826
 msgid "Syncing contacts..."
 msgstr "Synchronizowanie kontaktów..."
 
-#: ../src/addressbook/e-book-backend-ews.c:2013
+#: ../src/addressbook/e-book-backend-ews.c:2023
 msgid "Searching..."
 msgstr "Wyszukiwanie..."
 
-#: ../src/addressbook/e-book-backend-sqlitedb.c:425
+#: ../src/addressbook/e-book-backend-sqlitedb.c:470
 #, c-format
 msgid "Insufficient memory"
 msgstr "Brak pamięci"
+
+#: ../src/calendar/e-cal-backend-ews.c:3793
+#, c-format
+msgid "Unknown calendar property '%s'"
+msgstr "Nieznana właściwość kalendarza \"%s\""
 
 #: ../src/camel/camel-ews-folder.c:200
 #, c-format
