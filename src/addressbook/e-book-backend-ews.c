@@ -842,6 +842,8 @@ ews_book_remove_contact_cb (GObject *object, GAsyncResult *res, gpointer user_da
 		g_warning ("\nError removing contact %s \n", error->message);
 	}
 
+	g_slist_foreach (remove_contact->sl_ids, (GFunc) g_free, NULL);
+	g_slist_free (remove_contact->sl_ids);
 	g_object_unref (remove_contact->ebews);
 	g_object_unref (remove_contact->book);
 	g_free (remove_contact);
@@ -2400,12 +2402,10 @@ e_book_backend_ews_remove_contacts_compat (EBookBackend *backend,
 	GSList *sl = NULL;
 
 	for (l = id_list; l != NULL; l = g_list_next (l))
-		sl = g_slist_prepend (sl, l->data);
+		sl = g_slist_prepend (sl, g_strdup (l->data));
 	
 	sl = g_slist_reverse (sl);
 	e_book_backend_ews_remove_contacts (backend, book, opid, NULL, sl);
-	
-	g_slist_free (sl);
 }
 
 static void
