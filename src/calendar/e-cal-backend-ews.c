@@ -1074,6 +1074,9 @@ e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal,
 	PRIV_LOCK (priv);
 
 	comp = e_cal_backend_store_get_component (priv->store, uid, rid);
+	
+	if (!rid || !*rid)
+		rid = NULL;
 
 	if (rid) {
 		parent = e_cal_backend_store_get_component (priv->store, uid, NULL);
