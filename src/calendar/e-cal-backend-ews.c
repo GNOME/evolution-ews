@@ -790,7 +790,7 @@ e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal,
 		uri = e_cal_backend_get_uri (backend);
 		
 		priv->folder_id = e_source_get_duped_property (esource, "folder-id");
-		path = g_strconcat (uri, ";", priv->folder_id, NULL);
+		path = g_strconcat (uri, ";folderid=", priv->folder_id, NULL);
 		
 		priv->store = (ECalBackendStore *) e_cal_backend_file_store_new (path, source_type);
 		priv->storage_path = g_strdup (e_cal_backend_store_get_path (priv->store));
