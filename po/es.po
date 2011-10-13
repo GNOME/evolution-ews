@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2011-10-10 07:41+0000\n"
-"PO-Revision-Date: 2011-10-10 09:49+0200\n"
+"POT-Creation-Date: 2011-10-10 07:51+0000\n"
+"PO-Revision-Date: 2011-10-13 11:28+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -82,7 +82,7 @@ msgstr ""
 
 #: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:3
 msgid "GAL settings"
-msgstr ""
+msgstr "Configuración de GAL"
 
 #: ../src/addressbook/e-book-backend-ews.c:1436
 #, c-format
@@ -91,11 +91,11 @@ msgstr ""
 
 #: ../src/addressbook/e-book-backend-ews.c:1826
 msgid "Syncing contacts..."
-msgstr ""
+msgstr "Sincronizando contactos…"
 
 #: ../src/addressbook/e-book-backend-ews.c:2023
 msgid "Searching..."
-msgstr ""
+msgstr "Buscando…"
 
 #: ../src/addressbook/e-book-backend-sqlitedb.c:470
 #, c-format
@@ -154,7 +154,7 @@ msgstr "Comprobar si hay correo nuevo"
 
 #: ../src/camel/camel-ews-provider.c:50
 msgid "C_heck for new messages in all folders"
-msgstr ""
+msgstr "C_omprobar si hay mensajes nuevos en todas las carpetas"
 
 #: ../src/camel/camel-ews-provider.c:53
 msgid "Options"
@@ -204,12 +204,12 @@ msgstr ""
 #: ../src/camel/camel-ews-store.c:359
 #, c-format
 msgid "No such folder: %s"
-msgstr ""
+msgstr "No existe la carpeta: %s"
 
 #: ../src/camel/camel-ews-store.c:568
 #, c-format
 msgid "Parent folder %s does not exist"
-msgstr ""
+msgstr "La carpeta padre %s no existe"
 
 #: ../src/camel/camel-ews-store.c:626
 #, c-format
