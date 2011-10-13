@@ -118,6 +118,7 @@ struct _EEwsContactFields {
 	time_t birthday;
 	time_t wedding_anniversary;
 	
+	gchar *profession;
 	gchar *spouse_name;
 	gchar *culture;
 	gchar *surname;
@@ -397,6 +398,7 @@ ews_free_contact_fields (struct _EEwsContactFields *con_fields)
 		g_free (con_fields->manager);
 		g_free (con_fields->office_location);
 		g_free (con_fields->business_homepage);
+		g_free (con_fields->profession);
 		g_free (con_fields->spouse_name);
 		g_free (con_fields->culture);
 		g_free (con_fields->surname);
@@ -777,6 +779,8 @@ parse_contact_field (EEwsItem *item, const gchar *name, ESoapParameter *subparam
 		priv->contact_fields->manager = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "OfficeLocation")) {
 		priv->contact_fields->office_location = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "Profession")) {
+		priv->contact_fields->profession = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "SpouseName")) {
 		priv->contact_fields->spouse_name = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "Surname")) {
@@ -1622,6 +1626,15 @@ e_ews_item_get_business_homepage (EEwsItem *item)
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
 
 	return (const gchar*) item->priv->contact_fields->business_homepage;
+}
+
+const gchar *
+e_ews_item_get_profession (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+
+	return (const gchar*) item->priv->contact_fields->profession;
 }
 
 const gchar *
