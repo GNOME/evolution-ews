@@ -192,6 +192,7 @@ const gchar *	e_ews_item_get_business_homepage
 time_t		e_ews_item_get_birthday		(EEwsItem *item);
 time_t		e_ews_item_get_wedding_anniversary
 						(EEwsItem *item);
+const gchar *	e_ews_item_get_profession	(EEwsItem *item);
 const gchar *	e_ews_item_get_spouse_name	(EEwsItem *item);
 const gchar *	e_ews_item_get_culture		(EEwsItem *item);
 const gchar *	e_ews_item_get_surname		(EEwsItem *item);

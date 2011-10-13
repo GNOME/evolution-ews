@@ -236,6 +236,27 @@ ebews_populate_birth_date	(EContact *contact, EEwsItem *item)
 	}
 }
 
+static void
+ebews_populate_anniversary	(EContact *contact, EEwsItem *item)
+{
+	time_t bdate;
+	GDate date;
+	EContactDate edate;
+
+	bdate = e_ews_item_get_wedding_anniversary (item);
+
+	if (bdate) {
+		g_date_clear (&date, 1);
+		g_date_set_time_t (&date, bdate);
+	
+		edate.year = date.year;
+		edate.month = date.month;
+		edate.day = date.day;
+
+		if (g_date_valid (&date))
+			e_contact_set (contact, E_CONTACT_ANNIVERSARY, &edate);
+	}
+}
 
 static void
 set_phone_number (EContact *contact, EContactField field, EEwsItem *item, const gchar *item_field)
@@ -341,9 +362,15 @@ ebews_set_full_name		(ESoapMessage *msg, EContact *contact)
 
 	e_contact_name_free (name);
 }
-
+/* TODO Set birth and anniversary dates */
 static void
 ebews_set_birth_date		(ESoapMessage *message, EContact *contact)
+{
+	
+}
+
+static void
+ebews_set_anniversary		(ESoapMessage *message, EContact *contact)
 {
 	
 }
@@ -498,6 +525,12 @@ ebews_set_full_name_changes	(ESoapMessage *message, EContact *new, EContact *old
 
 static void
 ebews_set_birth_date_changes	(ESoapMessage *message, EContact *new, EContact *old)
+{
+
+}
+
+static void
+ebews_set_anniversary_changes	(ESoapMessage *message, EContact *new, EContact *old)
 {
 
 }
@@ -658,8 +691,11 @@ static const struct field_element_mapping {
 	{ E_CONTACT_IM_AIM, ELEMENT_TYPE_COMPLEX, "ImAddresses", NULL, ebews_populate_ims, ebews_set_ims, ebews_set_im_changes },
 	{ E_CONTACT_TITLE, ELEMENT_TYPE_SIMPLE, "JobTitle", e_ews_item_get_job_title},
 	{ E_CONTACT_MANAGER, ELEMENT_TYPE_SIMPLE, "Manager", e_ews_item_get_manager},
+	{ E_CONTACT_MANAGER, ELEMENT_TYPE_SIMPLE, "OfficeLocation", e_ews_item_get_office_location},
+	{ E_CONTACT_SPOUSE, ELEMENT_TYPE_SIMPLE, "Profession", e_ews_item_get_profession},
 	{ E_CONTACT_SPOUSE, ELEMENT_TYPE_SIMPLE, "SpouseName", e_ews_item_get_spouse_name},
 	{ E_CONTACT_FAMILY_NAME, ELEMENT_TYPE_SIMPLE, "Surname", e_ews_item_get_surname},
+	{ E_CONTACT_BIRTH_DATE, ELEMENT_TYPE_COMPLEX, "WeddingAnniversary", NULL,  ebews_populate_anniversary, ebews_set_anniversary, ebews_set_anniversary_changes },
 
 	/* Should take of uid and changekey (REV) */
 	{ E_CONTACT_UID, ELEMENT_TYPE_COMPLEX, "ItemId", NULL,  ebews_populate_uid, ebews_set_item_id},
