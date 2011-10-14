@@ -986,7 +986,7 @@ ews_modify_contact_cb (GObject *object, GAsyncResult *res, gpointer user_data)
 	}
 	
 	if (error) {
-		g_warning("Error while Creating contact: %s", error->message);
+		g_warning("Error while Modifying contact: %s", error->message);
 		e_data_book_respond_modify (modify_contact->book, modify_contact->opid, EDB_ERROR_EX (OTHER_ERROR, error->message), modify_contact->new_contact);
 	}
 
