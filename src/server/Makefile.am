@@ -42,8 +42,7 @@ libeews_1_2_la_SOURCES =		\
 	e-soap-message.c		\
 	e-soap-message.h		\
 	e-soap-response.c		\
-	e-soap-response.h		\
-	e-ews-compat.h
+	e-soap-response.h
 
 libeews_1_2_la_LIBADD =						\
 	$(SOUP_LIBS)						\
