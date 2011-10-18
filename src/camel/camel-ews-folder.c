@@ -53,7 +53,6 @@ which needs to be better organized via functions */
 #include "camel-ews-store.h"
 #include "camel-ews-summary.h"
 #include "camel-ews-utils.h"
-#include "ews-camel-compat.h"
 #include <ews-camel-common.h>
 
 #define EWS_MAX_FETCH_COUNT 100

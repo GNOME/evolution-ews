@@ -34,7 +34,6 @@
 #include "camel-ews-transport.h"
 #include "camel-ews-utils.h"
 #include <ews-camel-common.h>
-#include "ews-camel-compat.h"
 
 #define REPLY_VIEW "default message attachments threading"
 
