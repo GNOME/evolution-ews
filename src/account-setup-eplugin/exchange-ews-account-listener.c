@@ -21,17 +21,11 @@
 #include <config.h>
 #endif
 
-#include "e-ews-compat.h"
-
 #include <string.h>
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 #include <shell/e-shell.h>
-#if EDS_CHECK_VERSION(2,33,0)
 #include <mail/e-mail-session.h>
-#else
-#include <mail/mail-session.h>
-#endif
 #include <mail/e-mail-backend.h>
 
 #include <camel/camel.h>
@@ -44,7 +38,6 @@
 #include "exchange-ews-account-setup.h"
 #include "camel-ews-store-summary.h"
 #include "ews-esource-utils.h"
-#include "ews-camel-compat.h"
 
 #define d(x) x
 
@@ -118,18 +111,16 @@ ews_account_info_free (EwsAccountInfo *info)
 	}
 }
 
-EVO2 (CamelSession *session;)
-
 static void
 ews_account_removed (EAccountList *account_listener, EAccount *account)
 {
-	EVO3(EShell *shell;)
-	EVO3(EShellBackend *shell_backend;)
-	EVO3(CamelSession *session;)
+	EShell *shell;
+	EShellBackend *shell_backend;
+	CamelSession *session;
 	EwsAccountInfo *info = NULL;
 	CamelService *service;
+	CamelURL *url;
 	gchar *summary_file, *storage_path;
-	
 
 	if (!is_ews_account (account))
 		return;
@@ -141,13 +132,15 @@ ews_account_removed (EAccountList *account_listener, EAccount *account)
 	ews_esource_utils_remove_groups (account->id->address);
 	ews_accounts = g_list_remove (ews_accounts, info);
 
-	EVO3(shell = e_shell_get_default ();)
-	EVO3(shell_backend = e_shell_get_backend_by_name (shell, "mail");)
-	EVO3 (session = (CamelSession *) e_mail_backend_get_session (E_MAIL_BACKEND (shell_backend));)
-	service = camel_session_get_service_compat (session, account->source->url, CAMEL_PROVIDER_STORE);
+	shell = e_shell_get_default ();
+	shell_backend = e_shell_get_backend_by_name (shell, "mail");
+	session = (CamelSession *) e_mail_backend_get_session (E_MAIL_BACKEND (shell_backend));
+	url = camel_url_new (account->source->url, NULL);
+	service = camel_session_get_service_by_url (session, url, CAMEL_PROVIDER_STORE);
+	camel_url_free (url);
 
 	/* FIXME  Use this until CamelStore gets camel_store_remove_storage API which would be available eds 3.2 onwards */
-	storage_path = camel_session_get_storage_path (session, service, NULL);
+	storage_path = g_strdup (camel_service_get_user_data_dir (service));
 	summary_file = g_build_filename (storage_path, "folder-tree-v2", NULL);
 	g_unlink (summary_file);
 	
@@ -157,9 +150,9 @@ ews_account_removed (EAccountList *account_listener, EAccount *account)
 	g_free (summary_file);
 	ews_account_info_free (info);
 
-#if ! EDS_CHECK_VERSION (3,1,0)
-	g_object_unref (service);
-#endif	
+	/* FIXME: This wasn't done for EDS 3.2+?  Is that right? 
+	   g_object_unref (service);
+	*/
 }
 
 static gboolean

@@ -86,11 +86,7 @@ e_plugin_lib_enable (EPlugin *ep, gint enable)
 static EAccount *
 get_modified_account (EMConfigTargetAccount *target)
 {
-#if EDS_CHECK_VERSION(3,1,0)	
 	return target->modified_account;
-#else
-	return target->account;
-#endif	
 }
 
 ExchangeEWSAccountListener *
