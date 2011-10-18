@@ -44,7 +44,6 @@
 #include "camel-ews-store.h"
 #include "camel-ews-summary.h"
 #include "camel-ews-utils.h"
-#include "ews-camel-compat.h"
 #include "ews-esource-utils.h"
 
 #ifdef G_OS_WIN32
@@ -133,7 +132,7 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 	((CamelStore *)ews_store)->flags &= ~(CAMEL_STORE_VTRASH|CAMEL_STORE_VJUNK);
 
 	/*storage path*/
-	session_storage_path = camel_session_get_storage_path (session, service, error);
+	session_storage_path = g_strdup (camel_service_get_user_data_dir (service));
 	if (!session_storage_path) {
 		g_set_error (
 			error, CAMEL_STORE_ERROR,
@@ -197,11 +196,10 @@ ews_store_authenticate	(EEwsConnection *cnc,
 
 		prompt = camel_session_build_password_prompt ("Exchange Web Services",
 				      url->user, url->host);
-		url->passwd =
-		camel_session_get_password_compat (session, service, "Exchange Web Services",
-						    prompt, "password",
-						    CAMEL_SESSION_PASSWORD_SECRET,
-						    &error);
+		url->passwd = camel_session_get_password (session, service,
+						prompt, "password",
+						CAMEL_SESSION_PASSWORD_SECRET,
+						&error);
 		g_free (prompt);
 	}
 
