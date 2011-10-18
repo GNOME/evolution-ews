@@ -47,7 +47,6 @@ which needs to be better organized via functions */
 #include <e-ews-connection.h>
 #include <e-ews-item-change.h>
 #include <e-ews-message.h>
-#include <e-ews-compat.h>
 
 #include "camel-ews-folder.h"
 #include "camel-ews-private.h"
@@ -105,18 +104,6 @@ ews_get_filename (CamelFolder *folder, const gchar *uid, GError **error)
 
 	return camel_data_cache_get_filename (ews_folder->cache, "cache", uid, error);
 }
-
-#if ! EDS_CHECK_VERSION(2,33,0)
-static gboolean camel_data_wrapper_construct_from_stream_sync(CamelDataWrapper *data_wrapper,
-							     CamelStream *stream,
-							     GCancellable *cancellable,
-							     GError **error)
-{
-	/* In 2.32 this returns an int, which is zero for success */
-	return !camel_data_wrapper_construct_from_stream(data_wrapper, stream, error);
-}
-
-#endif
 
 
 static CamelMimeMessage *
@@ -209,8 +196,9 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId
 	}
 
 	msg = camel_mime_message_new ();
-	if (EVO3_sync(camel_mime_part_construct_from_parser) (CAMEL_MIME_PART(msg),
-							      mimeparser, EVO3(NULL,) error) == -1) {
+	if (camel_mime_part_construct_from_parser_sync (CAMEL_MIME_PART(msg),
+							mimeparser, NULL,
+							error) == -1) {
 		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 			     _("Unable to parse meeting request mimecontent!"));
 		goto exit_msg;
@@ -230,8 +218,8 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId
 
 		dw = camel_medium_get_content (CAMEL_MEDIUM (mimepart));
 		tmpstream = camel_stream_mem_new ();
-		if (EVO3_sync(camel_data_wrapper_decode_to_stream) (dw,
-								    tmpstream, EVO3(NULL,) error) == -1) {
+		if (camel_data_wrapper_decode_to_stream_sync (dw, tmpstream,
+							      NULL, error) == -1) {
 			g_object_unref (tmpstream);
 			goto exit_msg;
 		}
@@ -273,12 +261,12 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId
 			goto exit_save;
 		}
 		newstream = camel_stream_fs_new_with_fd (fd);
-		if (EVO3_sync(camel_data_wrapper_write_to_stream) (CAMEL_DATA_WRAPPER (msg),
-								   newstream, EVO3(NULL,) error) == -1)
+		if (camel_data_wrapper_write_to_stream_sync (CAMEL_DATA_WRAPPER (msg),
+							     newstream, NULL, error) == -1)
 			goto exit_save;
-		if (camel_stream_flush (newstream, EVO3(NULL,) error) == -1)
+		if (camel_stream_flush (newstream, NULL, error) == -1)
 			goto exit_save;
-		if (camel_stream_close (newstream, EVO3(NULL,) error) == -1)
+		if (camel_stream_close (newstream, NULL, error) == -1)
 			goto exit_save;
 		g_remove (mime_fname);
 		success = TRUE;
@@ -321,7 +309,6 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	gchar *cache_file;
 	gchar *dir;
 	const gchar *temp;
-	gpointer progress_data;
 	gboolean res;
 	gchar *mime_fname_new = NULL;
 
@@ -360,8 +347,6 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 
 	cnc = camel_ews_store_get_connection (ews_store);
 	ids = g_slist_append (ids, (gchar *) uid);
-	EVO3(progress_data = cancellable);
-	EVO2(progress_data = camel_operation_registered ());
 
 	mime_dir = g_build_filename (camel_data_cache_get_path (ews_folder->cache),
 				     "mimecontent", NULL);
@@ -378,7 +363,7 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 					  TRUE, mime_dir,
 					  &items,
 					  (ESoapProgressFn)camel_operation_progress,
-					  progress_data,
+					  (gpointer) cancellable,
 					  cancellable, error);
 	g_free (mime_dir);
 
@@ -406,7 +391,7 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 						  FALSE, NULL,
 						  &items_req,
 						  (ESoapProgressFn)camel_operation_progress,
-						  progress_data,
+						  (gpointer) cancellable,
 						  cancellable, error);
 		if (!res) {
 			if (items_req) {
@@ -483,10 +468,9 @@ exit:
 
 /* Get the message from cache if available otherwise get it from server */
 static CamelMimeMessage *
-ews_folder_get_message_sync (CamelFolder *folder, const gchar *uid, EVO3(GCancellable *cancellable,) GError **error )
+ews_folder_get_message_sync (CamelFolder *folder, const gchar *uid, GCancellable *cancellable, GError **error )
 {
 	CamelMimeMessage *message;
-	EVO2(GCancellable *cancellable = NULL);
 
 	message = camel_ews_folder_get_message_from_cache ((CamelEwsFolder *)folder, uid, cancellable, NULL);
 	if (!message)
@@ -703,7 +687,7 @@ ews_sync_mi_flags (CamelFolder *folder, GSList *mi_list, GCancellable *cancellab
 					      cancellable, error);
 }
 static gboolean
-ews_synchronize_sync (CamelFolder *folder, gboolean expunge, EVO3(GCancellable *cancellable,) GError **error)
+ews_synchronize_sync (CamelFolder *folder, gboolean expunge, GCancellable *cancellable, GError **error)
 {
 	CamelEwsStore *ews_store;
 	GPtrArray *uids;
@@ -711,7 +695,6 @@ ews_synchronize_sync (CamelFolder *folder, gboolean expunge, EVO3(GCancellable *
 	int mi_list_len = 0;
 	gboolean success = TRUE;
 	int i;
-	EVO2(GCancellable *cancellable = NULL);
 
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
 
@@ -779,10 +762,7 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 
 	folder = g_object_new (
 		CAMEL_TYPE_EWS_FOLDER,
-#if EDS_CHECK_VERSION(3,1,0)
-                "display_" /* Evo 3.1 calls it "display_name" */
-#endif
-		"name", short_name, "full-name", folder_name,
+		"display_name", short_name, "full-name", folder_name,
 		"parent_store", store, NULL);
 
 	ews_folder = CAMEL_EWS_FOLDER(folder);
@@ -983,7 +963,7 @@ exit:
 }
 
 static gboolean
-ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GError **error)
+ews_refresh_info_sync (CamelFolder *folder, GCancellable *cancellable, GError **error)
 {
 	CamelEwsFolder *ews_folder;
 	CamelEwsFolderPrivate *priv;
@@ -994,7 +974,6 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 	gchar *sync_state;
 	gboolean includes_last_item = FALSE;
 	GError *rerror = NULL;
-	EVO2(GCancellable *cancellable = NULL);
 
 	full_name = camel_folder_get_full_name (folder);
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
@@ -1095,11 +1074,10 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 
 static gboolean
 ews_append_message_sync (CamelFolder *folder, CamelMimeMessage *message,
-	 		 EVO2(const) CamelMessageInfo *info,
+	 		 CamelMessageInfo *info,
 			 gchar **appended_uid,
-	 		 EVO3(GCancellable *cancellable,) GError **error)
+	 		 GCancellable *cancellable, GError **error)
 {
-	EVO2(GCancellable *cancellable = NULL;)
 	gchar *itemid, *changekey;
 	const gchar *folder_name;
 	gchar *folder_id;
@@ -1154,10 +1132,9 @@ static gboolean
 ews_transfer_messages_to_sync	(CamelFolder *source,
 				 GPtrArray *uids,
 				 CamelFolder *destination,
-				 EVO2(GPtrArray **transferred_uids,)
 				 gboolean delete_originals,
-				 EVO3(GPtrArray **transferred_uids,)
-				 EVO3(GCancellable *cancellable,)
+				 GPtrArray **transferred_uids,
+				 GCancellable *cancellable,
 				 GError **error)
 {
 	EEwsConnection *cnc;
@@ -1168,7 +1145,6 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 	GError *rerror = NULL;
 	GSList *ids = NULL, *ret_items = NULL;
 	gint i = 0;
-	EVO2(GCancellable *cancellable = NULL);
 
 	dst_full_name = camel_folder_get_full_name (destination);
 	dst_ews_store = (CamelEwsStore *) camel_folder_get_parent_store (destination);
@@ -1200,8 +1176,8 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 		}
 
 		/*update the store about the content of the source and destination folders*/
-		ews_refresh_info_sync (source, EVO3(cancellable,) NULL);
-		ews_refresh_info_sync (destination, EVO3(cancellable,) NULL);
+		ews_refresh_info_sync (source, cancellable, NULL);
+		ews_refresh_info_sync (destination, cancellable, NULL);
 	}
 	g_free (dst_id);
 
@@ -1250,7 +1226,7 @@ ews_delete_messages (CamelFolder *folder, GSList *deleted_items, gboolean expung
 			   trigger folder info refresh and then go on to clear the
 			   cache of the deleted items anyway. */
 			g_clear_error(&rerror);
-			status = ews_refresh_info_sync (folder, EVO3(cancellable,) &rerror);
+			status = ews_refresh_info_sync (folder, cancellable, &rerror);
 		}
 
 		if (status) {
@@ -1280,14 +1256,13 @@ ews_delete_messages (CamelFolder *folder, GSList *deleted_items, gboolean expung
 }
 
 static gboolean
-ews_expunge_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GError **error)
+ews_expunge_sync (CamelFolder *folder, GCancellable *cancellable, GError **error)
 {
 	CamelEwsStore *ews_store;
 	CamelEwsMessageInfo *ews_info;
 	CamelMessageInfo *info;
 	CamelStore *parent_store;
 	GSList *deleted_items = NULL;
-	EVO2(GCancellable *cancellable = NULL;)
 	gint i, count;
 
 	parent_store = camel_folder_get_parent_store (folder);
@@ -1378,18 +1353,17 @@ camel_ews_folder_class_init (CamelEwsFolderClass *class)
 	object_class->constructed = ews_folder_constructed;
 
 	folder_class = CAMEL_FOLDER_CLASS (class);
-	folder_class->EVO3_sync(get_message) = ews_folder_get_message_sync;
+	folder_class->get_message_sync = ews_folder_get_message_sync;
 	folder_class->search_by_expression = ews_folder_search_by_expression;
 	folder_class->count_by_expression = ews_folder_count_by_expression;
 	folder_class->cmp_uids = ews_cmp_uids;
 	folder_class->search_by_uids = ews_folder_search_by_uids;
 	folder_class->search_free = ews_folder_search_free;
-	folder_class->EVO3_sync(append_message) = ews_append_message_sync;
-	folder_class->EVO3_sync(refresh_info) = ews_refresh_info_sync;
-	EVO3(folder_class->synchronize_sync = ews_synchronize_sync);
-	EVO2(folder_class->sync = ews_synchronize_sync);
-	folder_class->EVO3_sync(expunge) = ews_expunge_sync;
-	folder_class->EVO3_sync(transfer_messages_to) = ews_transfer_messages_to_sync;
+	folder_class->append_message_sync = ews_append_message_sync;
+	folder_class->refresh_info_sync = ews_refresh_info_sync;
+	folder_class->synchronize_sync = ews_synchronize_sync;
+	folder_class->expunge_sync = ews_expunge_sync;
+	folder_class->transfer_messages_to_sync = ews_transfer_messages_to_sync;
 	folder_class->get_filename = ews_get_filename;
 }
 
