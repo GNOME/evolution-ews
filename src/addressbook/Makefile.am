@@ -21,8 +21,6 @@ libebookbackendews_la_CPPFLAGS = \
 	$(SOUP_CFLAGS)	
 
 libebookbackendews_la_SOURCES =			\
-	libedata-book-compat.h			\
-	libedata-book-compat.c			\
 	e-book-backend-sqlitedb.c		\
 	e-book-backend-sqlitedb.h		\
 	e-book-backend-ews-utils.c		\

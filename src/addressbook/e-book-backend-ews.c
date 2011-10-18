@@ -50,7 +50,6 @@
 #include "lzx/ews-oal-decompress.h"
 #include "ews-oab-decoder.h"
 #include "e-ews-item-change.h"
-#include "libedata-book-compat.h"
 
 #include "e-ews-message.h"
 #include "e-ews-connection.h"
@@ -863,9 +862,9 @@ ews_book_remove_contact_cb (GObject *object, GAsyncResult *res, gpointer user_da
 		deleted = e_book_backend_sqlitedb_remove_contacts (priv->ebsdb, priv->folder_id, remove_contact->sl_ids, &error);
 
 	if (deleted)
-		e_data_book_respond_remove_contacts_compat (remove_contact->book, remove_contact->opid, EDB_ERROR (SUCCESS),  remove_contact->sl_ids);
+		e_data_book_respond_remove_contacts (remove_contact->book, remove_contact->opid, EDB_ERROR (SUCCESS),  remove_contact->sl_ids);
 	else {
-		e_data_book_respond_remove_contacts_compat (remove_contact->book, remove_contact->opid, EDB_ERROR_EX (OTHER_ERROR, error->message), NULL);
+		e_data_book_respond_remove_contacts (remove_contact->book, remove_contact->opid, EDB_ERROR_EX (OTHER_ERROR, error->message), NULL);
 		
 		g_warning ("\nError removing contact %s \n", error->message);
 	}
@@ -1159,17 +1158,17 @@ e_book_backend_ews_get_contact_list	(EBookBackend *backend,
 
 	case MODE_LOCAL :
 
-		e_data_book_respond_get_contact_list_compat (book, opid, EDB_ERROR (SUCCESS), vcard_list);
+		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (SUCCESS), vcard_list);
 		return;
 
 	case MODE_REMOTE:
 
 		if (egwb->priv->cnc == NULL) {
-			e_data_book_respond_get_contact_list_compat (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
+			e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
 			return;
 		}
 
-		e_data_book_respond_get_contact_list_compat (book, opid, EDB_ERROR (SUCCESS), vcard_list);
+		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (SUCCESS), vcard_list);
 		return;
 	default :
 		break;
