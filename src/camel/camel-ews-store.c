@@ -37,7 +37,6 @@
 #include <glib/gstdio.h>
 
 #include <libedataserver/e-flag.h>
-#include <e-ews-compat.h>
 #include <e-ews-item-change.h>
 #include <e-ews-message.h>
 
@@ -70,30 +69,11 @@ struct _CamelEwsStorePrivate {
 	EEwsConnection *cnc;
 };
 
-#if ! EDS_CHECK_VERSION(2,33,0)
-static inline void camel_offline_store_set_online_sync(CamelOfflineStore *store,
-						       gboolean online,
-						       GCancellable *cancellable,
-						       GError *error)
-{
-	camel_offline_store_set_network_state(store,
-			online ? CAMEL_OFFLINE_STORE_NETWORK_AVAIL :
-				 CAMEL_OFFLINE_STORE_NETWORK_UNAVAIL,
-			NULL);
-}
-
-static inline gboolean camel_offline_store_get_online(CamelOfflineStore *store)
-{
-	return (camel_offline_store_get_network_state(store, NULL) ==
-		CAMEL_OFFLINE_STORE_NETWORK_AVAIL);
-}
-#endif
-
 extern CamelServiceAuthType camel_ews_password_authtype; /*for the query_auth_types function*/
 static gboolean	ews_store_construct	(CamelService *service, CamelSession *session,
 			 		 CamelProvider *provider, CamelURL *url,
 		 			 GError **error);
-#if EDS_CHECK_VERSION(3,1,0)
+
 static void camel_ews_store_initable_init (GInitableIface *interface);
 static GInitableIface *parent_initable_interface;
 
@@ -135,11 +115,6 @@ camel_ews_store_initable_init (GInitableIface *interface)
 	interface->init = ews_store_initable_init;
 }
 
-#else
-G_DEFINE_TYPE (CamelEwsStore, camel_ews_store, CAMEL_TYPE_OFFLINE_STORE)
-
-#endif
-
 static gboolean
 ews_store_construct	(CamelService *service, CamelSession *session,
 			 CamelProvider *provider, CamelURL *url,
@@ -149,15 +124,7 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 	CamelEwsStorePrivate *priv;
 	gchar *summary_file, *session_storage_path;
 
-#if ! EDS_CHECK_VERSION(3,1,0)
-	CamelServiceClass *service_class;
 
-	/* Chain up to parent's construct() method. */
-	service_class = CAMEL_SERVICE_CLASS (camel_ews_store_parent_class);
-	if (!service_class->construct (service, session, provider, url, error))
-		return FALSE;
-#endif	
-	
 	ews_store = (CamelEwsStore *) service;
 	priv = ews_store->priv;
 
@@ -243,9 +210,8 @@ ews_store_authenticate	(EEwsConnection *cnc,
 }
 
 static gboolean
-ews_connect_sync (CamelService *service, EVO3(GCancellable *cancellable,) GError **error)
+ews_connect_sync (CamelService *service, GCancellable *cancellable, GError **error)
 {
-	EVO2(GCancellable *cancellable = NULL;)
 	CamelEwsStore *ews_store;
 	CamelEwsStorePrivate *priv;
 	CamelURL *url;
@@ -270,7 +236,7 @@ ews_connect_sync (CamelService *service, EVO3(GCancellable *cancellable,) GError
 
 	if (!priv->cnc) {
 		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-		EVO3_sync(camel_service_disconnect) (service, TRUE, NULL);
+		camel_service_disconnect_sync (service, TRUE, NULL);
 		return FALSE;
 	}
 
@@ -283,13 +249,13 @@ ews_connect_sync (CamelService *service, EVO3(GCancellable *cancellable,) GError
 }
 
 static gboolean
-ews_disconnect_sync (CamelService *service, gboolean clean, EVO3(GCancellable *cancellable,) GError **error)
+ews_disconnect_sync (CamelService *service, gboolean clean, GCancellable *cancellable, GError **error)
 {
 	CamelEwsStore *ews_store = (CamelEwsStore *) service;
 	CamelServiceClass *service_class;
 
 	service_class = CAMEL_SERVICE_CLASS (camel_ews_store_parent_class);
-	if (!service_class->EVO3_sync(disconnect) (service, clean, EVO3(cancellable,) error))
+	if (!service_class->disconnect_sync (service, clean, cancellable, error))
 		return FALSE;
 
 	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
@@ -304,7 +270,7 @@ ews_disconnect_sync (CamelService *service, gboolean clean, EVO3(GCancellable *c
 }
 
 static  GList*
-ews_store_query_auth_types_sync (CamelService *service, EVO3(GCancellable *cancellable,) GError **error)
+ews_store_query_auth_types_sync (CamelService *service, GCancellable *cancellable, GError **error)
 {
 	GList *auth_types = NULL;
 
@@ -313,12 +279,11 @@ ews_store_query_auth_types_sync (CamelService *service, EVO3(GCancellable *cance
 	return auth_types;
 }
 
-static CamelFolderInfo* ews_create_folder_sync (CamelStore *store, const gchar *parent_name,const gchar *folder_name,EVO3(GCancellable *cancellable,)GError **error);
+static CamelFolderInfo* ews_create_folder_sync (CamelStore *store, const gchar *parent_name,const gchar *folder_name, GCancellable *cancellable, GError **error);
 
 static CamelFolder *
-ews_get_folder_sync (CamelStore *store, const gchar *folder_name, guint32 flags, EVO3(GCancellable *cancellable,) GError **error)
+ews_get_folder_sync (CamelStore *store, const gchar *folder_name, guint32 flags, GCancellable *cancellable, GError **error)
 {
-	EVO2(GCancellable *cancellable = NULL;)
 	CamelEwsStore *ews_store;
 	CamelFolder *folder = NULL;
 	gchar *fid, *folder_dir;
@@ -346,7 +311,7 @@ ews_get_folder_sync (CamelStore *store, const gchar *folder_name, guint32 flags,
 			top = folder_name;
 		}
 
-		fi = ews_create_folder_sync (store, parent, top, EVO3(cancellable,) error);
+		fi = ews_create_folder_sync (store, parent, top, cancellable, error);
 		g_free (copy);
 
 		if (!fi)
@@ -470,7 +435,7 @@ ews_refresh_finfo (CamelEwsStore *ews_store)
 	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (ews_store)))
 		return FALSE;
 
-	if (!EVO3_sync(camel_service_connect) ((CamelService *) ews_store, NULL))
+	if (!camel_service_connect_sync ((CamelService *) ews_store, NULL))
 		return FALSE;
 
 	sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
@@ -484,9 +449,8 @@ ews_refresh_finfo (CamelEwsStore *ews_store)
 }
 
 static CamelFolderInfo *
-ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, EVO3(GCancellable *cancellable,) GError **error)
+ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, GCancellable *cancellable, GError **error)
 {
-	EVO2(GCancellable *cancellable = NULL;)
 	CamelEwsStore *ews_store;
 	CamelEwsStorePrivate *priv;
 	CamelFolderInfo *fi = NULL;
@@ -501,7 +465,7 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, EV
 
 	g_mutex_lock (priv->get_finfo_lock);
 	if (!(camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))
-	      && EVO3_sync(camel_service_connect) ((CamelService *)store, error))) {
+	      && camel_service_connect_sync ((CamelService *)store, error))) {
 		g_mutex_unlock (priv->get_finfo_lock);
 		goto offline;
 	}
@@ -547,7 +511,7 @@ static CamelFolderInfo*
 ews_create_folder_sync (CamelStore *store,
 		const gchar *parent_name,
 		const gchar *folder_name,
-		EVO3(GCancellable *cancellable,)
+		GCancellable *cancellable,
 		GError **error)
 {
 	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
@@ -555,7 +519,6 @@ ews_create_folder_sync (CamelStore *store,
 	gchar *fid = NULL;
 	gchar *full_name;
 	EwsFolderId *folder_id;
-	EVO2(GCancellable *cancellable = NULL;)
 	CamelFolderInfo *fi = NULL;
 
 	
@@ -610,13 +573,12 @@ ews_create_folder_sync (CamelStore *store,
 static gboolean
 ews_delete_folder_sync	(CamelStore *store,
 			 const gchar *folder_name,
-			 EVO3(GCancellable *cancellable,)
+			 GCancellable *cancellable,
 			 GError **error)
 {
 	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
 	CamelEwsStoreSummary *ews_summary = ews_store->summary;
 	gchar *fid;
-	EVO2(GCancellable *cancellable = NULL;)
 	CamelFolderInfo *fi = NULL;
 
 	fid = camel_ews_store_summary_get_folder_id_from_name (ews_summary,
@@ -682,13 +644,12 @@ static gboolean
 ews_rename_folder_sync	(CamelStore *store,
 			const gchar *old_name,
 			const gchar *new_name,
-			EVO3(GCancellable *cancellable,)
+			GCancellable *cancellable,
 			GError **error)
 {
 	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
 	CamelEwsStoreSummary *ews_summary = ews_store->summary;
 	const gchar *old_slash, *new_slash;
-	EVO2(GCancellable *cancellable = NULL;)
 	gchar *fid;
 	gchar *changekey;
 	gboolean res = FALSE;
@@ -826,13 +787,11 @@ camel_ews_store_get_connection (CamelEwsStore *ews_store)
 	return g_object_ref (ews_store->priv->cnc);
 }
 
-#if EDS_CHECK_VERSION (2,33,0)
 static CamelFolder *
-ews_get_trash_folder_sync (CamelStore *store, EVO3(GCancellable *cancellable,) GError **error)
+ews_get_trash_folder_sync (CamelStore *store, GCancellable *cancellable, GError **error)
 {
 	return NULL;
 }
-#endif
 
 static gboolean
 ews_can_refresh_folder (CamelStore *store, CamelFolderInfo *info, GError **error)
@@ -857,7 +816,7 @@ camel_ews_store_connected (CamelEwsStore *ews_store, GError **error)
 		return FALSE;
 	}
 
-	if (!EVO3_sync(camel_service_connect) ((CamelService *) ews_store, error))
+	if (!camel_service_connect_sync ((CamelService *) ews_store, error))
 		return FALSE;
 
 	return TRUE;
@@ -915,25 +874,22 @@ camel_ews_store_class_init (CamelEwsStoreClass *class)
 
 	service_class = CAMEL_SERVICE_CLASS (class);
 
-#if ! EDS_CHECK_VERSION(3,1,0)
-	service_class->construct = ews_store_construct;
-#endif	
-	service_class->EVO3_sync(query_auth_types) = ews_store_query_auth_types_sync;
+	service_class->query_auth_types_sync = ews_store_query_auth_types_sync;
 	service_class->get_name = ews_get_name;
-	service_class->EVO3_sync(connect) = ews_connect_sync;
-	service_class->EVO3_sync(disconnect) = ews_disconnect_sync;
+	service_class->connect_sync = ews_connect_sync;
+	service_class->disconnect_sync = ews_disconnect_sync;
 
 	store_class = CAMEL_STORE_CLASS (class);
 	store_class->hash_folder_name = ews_hash_folder_name;
 	store_class->compare_folder_name = ews_compare_folder_name;
-	store_class->EVO3_sync(get_folder) = ews_get_folder_sync;
-	store_class->EVO3_sync(create_folder) = ews_create_folder_sync;
-	store_class->EVO3_sync(delete_folder) = ews_delete_folder_sync;
-	store_class->EVO3_sync(rename_folder) = ews_rename_folder_sync;
-	store_class->EVO3_sync(get_folder_info) = ews_get_folder_info_sync;
+	store_class->get_folder_sync = ews_get_folder_sync;
+	store_class->create_folder_sync = ews_create_folder_sync;
+	store_class->delete_folder_sync = ews_delete_folder_sync;
+	store_class->rename_folder_sync = ews_rename_folder_sync;
+	store_class->get_folder_info_sync = ews_get_folder_info_sync;
 	store_class->free_folder_info = camel_store_free_folder_info_full;
 
-	EVO3(store_class->get_trash_folder_sync = ews_get_trash_folder_sync;)
+	store_class->get_trash_folder_sync = ews_get_trash_folder_sync;
 	store_class->can_refresh_folder = ews_can_refresh_folder;
 }
 
