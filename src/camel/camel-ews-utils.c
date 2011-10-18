@@ -32,8 +32,6 @@
 
 #include "camel-ews-utils.h"
 #include "ews-esource-utils.h"
-#include "e-ews-compat.h"
-#include "ews-camel-compat.h"
 #include "e-ews-message.h"
 
 #define SUBFOLDER_DIR_NAME     "subfolders"
@@ -313,13 +311,7 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store, const gchar *fid)
 	fi = camel_folder_info_new ();
 	fi->full_name = camel_ews_store_summary_get_folder_full_name (ews_summary,
 								      fid, NULL);
-#if ! EDS_CHECK_VERSION(3,1,0)	
-	fi->name = camel_ews_store_summary_get_folder_name (ews_summary,
-							    fid, NULL);
-	fi->uri = g_strconcat (url, fi->full_name, NULL);
-#else
 	fi->display_name = camel_ews_store_summary_get_folder_name (ews_summary, fid, NULL);
-#endif
 
 	fi->flags = camel_ews_store_summary_get_folder_flags (ews_summary,
 							      fid, NULL);
