@@ -51,7 +51,6 @@
 #include "e-soap-response.h"
 #include "e-ews-message.h"
 #include "e-ews-item-change.h"
-#include "libedata-cal-compat.h"
 
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -77,7 +76,7 @@ struct _ECalBackendEwsPrivate {
 	gchar *storage_path;
 
 	EDataCal *opening_cal;
-	EServerMethodContext opening_ctx;
+	guint32 opening_ctx;
 
 	gboolean is_online;
 	ECalBackendStore *store;
@@ -165,7 +164,7 @@ e_cal_backend_ews_internal_get_timezone (ECalBackend *backend, const gchar *tzid
 }
 
 static void
-e_cal_backend_ews_add_timezone (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable, const gchar *tzobj)
+e_cal_backend_ews_add_timezone (ECalBackend *backend, EDataCal *cal, guint32 context, GCancellable *cancellable, const gchar *tzobj)
 {
 	icalcomponent *tz_comp;
 	ECalBackendEws *cbews;
@@ -200,13 +199,13 @@ e_cal_backend_ews_add_timezone (ECalBackend *backend, EDataCal *cal, EServerMeth
 
 exit:
 	/*FIXME pass tzid here */
-	e_data_cal_respond_add_timezone_compat (cal, context, tzobj, error);
+	e_data_cal_respond_add_timezone (cal, context, error);
 }
 
 typedef struct {
 	ECalBackendEws *cbews;
 	EDataCal *cal;
-	EServerMethodContext context;
+	guint32 context;
 	gchar *itemid;
 	gchar *changekey;
 	gboolean is_occurrence;
@@ -259,7 +258,7 @@ ews_cal_discard_alarm_cb (GObject *object, GAsyncResult *res, gpointer user_data
 }
 
 static void
-e_cal_backend_ews_discard_alarm (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable, const gchar *uid, const gchar *rid, const gchar *auid)
+e_cal_backend_ews_discard_alarm (ECalBackend *backend, EDataCal *cal, guint32 context, GCancellable *cancellable, const gchar *uid, const gchar *rid, const gchar *auid)
 {
 	ECalBackendEws *cbews = (ECalBackendEws *) backend;
 	ECalBackendEwsPrivate *priv;
@@ -318,7 +317,7 @@ e_cal_backend_ews_discard_alarm (ECalBackend *backend, EDataCal *cal, EServerMet
 }
 
 static void
-e_cal_backend_ews_get_timezone (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable, const gchar *tzid)
+e_cal_backend_ews_get_timezone (ECalBackend *backend, EDataCal *cal, guint32 context, GCancellable *cancellable, const gchar *tzid)
 {
 	icalcomponent *icalcomp;
 	icaltimezone *zone;
@@ -510,7 +509,7 @@ connect_to_server (ECalBackendEws *cbews, const gchar *username, const gchar *pa
 }
 
 static gboolean
-e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable,
+e_cal_backend_ews_open (ECalBackend *backend, EDataCal *cal, guint32 context, GCancellable *cancellable,
 			gboolean only_if_exists, const gchar *username, const gchar *password, GError **error)
 {
 	ECalBackendEws *cbews;
@@ -606,7 +605,7 @@ e_cal_backend_ews_authenticate_user (ECalBackend *backend,
 }
 
 static void
-e_cal_backend_ews_remove (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable)
+e_cal_backend_ews_remove (ECalBackend *backend, EDataCal *cal, guint32 context, GCancellable *cancellable)
 {
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
@@ -626,7 +625,7 @@ e_cal_backend_ews_remove (ECalBackend *backend, EDataCal *cal, EServerMethodCont
 }
 
 static void
-e_cal_backend_ews_get_object	(ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable,
+e_cal_backend_ews_get_object	(ECalBackend *backend, EDataCal *cal, guint32 context, GCancellable *cancellable,
 	 			 const gchar *uid, const gchar *rid)
 {
 	ECalComponent *comp;
@@ -718,7 +717,7 @@ cal_backend_ews_get_object_list (ECalBackend *backend, const gchar *sexp, GSList
 }
 
 static void
-e_cal_backend_ews_get_object_list (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable, const gchar *sexp)
+e_cal_backend_ews_get_object_list (ECalBackend *backend, EDataCal *cal, guint32 context, GCancellable *cancellable, const gchar *sexp)
 {
 	GSList *objects = NULL, *l;
 	GError *error = NULL;
@@ -774,7 +773,7 @@ typedef struct {
 	ECalBackendEws *cbews;
 	EDataCal *cal;
 	ECalComponent *comp, *parent;
-	EServerMethodContext context;
+	guint32 context;
 	EwsId item_id;
 	guint index;
 	gchar *rid;
@@ -850,7 +849,7 @@ e_cal_rid_to_index (ECalBackend *backend, const char *rid, icalcomponent *comp, 
 }
 
 static void
-e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable,
+e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, guint32 context, GCancellable *cancellable,
 				 const gchar *uid, const gchar *rid, CalObjModType mod)
 {
 	EwsRemoveData *remove_data;
@@ -948,7 +947,7 @@ typedef struct {
 	ECalBackendEws *cbews;
 	EDataCal *cal;
 	ECalComponent *comp;
-	EServerMethodContext context;
+	guint32 context;
 } EwsCreateData;
 
 typedef struct {
@@ -1143,7 +1142,7 @@ convert_calcomp_to_xml(ESoapMessage *msg, gpointer user_data)
 }
 
 static void
-e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable,
+e_cal_backend_ews_remove_object (ECalBackend *backend, EDataCal *cal, guint32 context, GCancellable *cancellable,
 				 const gchar *uid, const gchar *rid, CalObjModType mod);
 /*I will unate both type, they are same now*/
 typedef struct {
@@ -1151,7 +1150,7 @@ typedef struct {
 	ECalComponent *comp;
 	int cb_type; /* 0 - nothing, 1 - create, 2 - update */
 	EDataCal *cal;
-	EServerMethodContext context;
+	guint32 context;
 	ECalComponent *oldcomp;
 	gchar *itemid;
 	gchar *changekey;
@@ -1163,13 +1162,13 @@ typedef struct {
 	EDataCal *cal;
 	ECalComponent *comp;
 	ECalComponent *oldcomp;
-	EServerMethodContext context;
+	guint32 context;
 	gchar *itemid;
 	gchar *changekey;
 } EwsModifyData;
 
 static void
-e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable,
+e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, guint32 context, GCancellable *cancellable,
 				 const gchar *calobj, CalObjModType mod);
 
 static void convert_component_to_updatexml (ESoapMessage *msg, gpointer user_data);
@@ -1446,7 +1445,7 @@ static void tzid_cb(icalparameter *param, void *data)
 }
 
 static void
-e_cal_backend_ews_create_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable, const gchar *calobj)
+e_cal_backend_ews_create_object (ECalBackend *backend, EDataCal *cal, guint32 context, GCancellable *cancellable, const gchar *calobj)
 {
 	EwsCreateData *create_data;
 	EwsConvertData *convert_data;
@@ -1907,7 +1906,7 @@ convert_component_to_updatexml (ESoapMessage *msg, gpointer user_data)
 }
 
 static void
-e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable,
+e_cal_backend_ews_modify_object (ECalBackend *backend, EDataCal *cal, guint32 context, GCancellable *cancellable,
 				 const gchar *calobj, CalObjModType mod)
 {
 	EwsModifyData *modify_data;
@@ -2193,7 +2192,7 @@ prepare_set_free_busy_status (ESoapMessage *msg, gpointer user_data)
 }
 
 static void
-e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable, const gchar *calobj)
+e_cal_backend_ews_receive_objects (ECalBackend *backend, EDataCal *cal, guint32 context, GCancellable *cancellable, const gchar *calobj)
 {
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
@@ -2442,7 +2441,7 @@ ewscal_send_cancellation_email (ECalBackend *backend, EEwsConnection *cnc, Camel
 }
 
 static void
-e_cal_backend_ews_send_objects (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable, const gchar *calobj)
+e_cal_backend_ews_send_objects (ECalBackend *backend, EDataCal *cal, guint32 context, GCancellable *cancellable, const gchar *calobj)
 {
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
@@ -3302,7 +3301,7 @@ e_cal_backend_ews_start_query (ECalBackend *backend, EDataCalView *query)
 
 	/* notify listeners of all objects */
 	if (objects) {
-		e_data_cal_view_notify_objects_added_compat (query, objects);
+		e_data_cal_view_notify_objects_added (query, objects);
 
 		/* free memory */
 		g_slist_foreach (objects, (GFunc) g_free, NULL);
@@ -3313,7 +3312,7 @@ e_cal_backend_ews_start_query (ECalBackend *backend, EDataCalView *query)
 }
 
 static void
-e_cal_backend_ews_refresh (ECalBackend *backend, EDataCal *cal, EServerMethodContext context, GCancellable *cancellable) 
+e_cal_backend_ews_refresh (ECalBackend *backend, EDataCal *cal, guint32 context, GCancellable *cancellable) 
 {
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
@@ -3339,7 +3338,7 @@ exit:
 typedef struct {
 	ECalBackendEws *cbews;
 	EDataCal *cal;
-	EServerMethodContext context;
+	guint32 context;
 	GSList *users;
 	time_t start;
 	time_t end;
@@ -3426,7 +3425,7 @@ done:
 
 static void
 e_cal_backend_ews_get_free_busy (ECalBackend *backend, EDataCal *cal,
-				 EServerMethodContext context, GCancellable *cancellable, const GSList *users,
+				 guint32 context, GCancellable *cancellable, const GSList *users,
 				 time_t start, time_t end)
 {
 	ECalBackendEws *cbews = E_CAL_BACKEND_EWS (backend);
