@@ -50,6 +50,7 @@ which needs to be better organized via functions */
 
 #include "camel-ews-folder.h"
 #include "camel-ews-private.h"
+#include "camel-ews-settings.h"
 #include "camel-ews-store.h"
 #include "camel-ews-summary.h"
 #include "camel-ews-utils.h"
@@ -708,7 +709,7 @@ ews_synchronize_sync (CamelFolder *folder, gboolean expunge, GCancellable *cance
 
 	for (i = 0; success && i < uids->len; i++) {
 		guint32 flags_changed;
-		CamelEwsMessageInfo *mi = (void *)camel_folder_summary_uid (folder->summary, uids->pdata[i]);
+		CamelEwsMessageInfo *mi = (void *)camel_folder_summary_get (folder->summary, uids->pdata[i]);
 		if (!mi)
 			continue;
 
@@ -743,6 +744,38 @@ ews_synchronize_sync (CamelFolder *folder, gboolean expunge, GCancellable *cance
 
 	camel_folder_free_uids (folder, uids);
 	return success;
+}
+
+static void
+ews_folder_count_notify_cb (CamelFolderSummary *folder_summary, GParamSpec *param, CamelFolder *folder)
+{
+	gint count;
+	CamelEwsStore *ews_store;
+	CamelEwsStoreSummary *store_summary;
+	gchar *folder_id;
+
+	g_return_if_fail (folder_summary != NULL);
+	g_return_if_fail (param != NULL);
+	g_return_if_fail (folder != NULL);
+	g_return_if_fail (folder->summary == folder_summary);
+
+	ews_store = CAMEL_EWS_STORE (camel_folder_get_parent_store (folder));
+	g_return_if_fail (ews_store != NULL);
+
+	store_summary = ews_store->summary;
+	folder_id = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, camel_folder_get_full_name (folder));
+
+	if (g_strcmp0 (g_param_spec_get_name (param), "saved-count") == 0) {
+		count = camel_folder_summary_get_saved_count (folder_summary);
+		camel_ews_store_summary_set_folder_total (store_summary, folder_id, count);
+	} else if (g_strcmp0 (g_param_spec_get_name (param), "unread-count") == 0) {
+		count = camel_folder_summary_get_unread_count (folder_summary);
+		camel_ews_store_summary_set_folder_unread (store_summary, folder_id, count);
+	} else {
+		g_warn_if_reached ();
+	}
+
+	g_free (folder_id);
 }
 
 CamelFolder *
@@ -791,7 +824,9 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 	}
 
 	if (!g_ascii_strcasecmp (folder_name, "Inbox")) {
-		if (camel_url_get_param (camel_service_get_camel_url ((CamelService *) store), "filter"))
+		CamelStoreSettings *settings = CAMEL_STORE_SETTINGS (camel_service_get_settings (CAMEL_SERVICE (store)));
+
+		if (camel_store_settings_get_filter_inbox (settings))
 			folder->folder_flags |= CAMEL_FOLDER_FILTER_RECENT;
 	}
 
@@ -800,6 +835,9 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 		g_object_unref (folder);
 		return NULL;
 	}
+
+	g_signal_connect (folder->summary, "notify::saved-count", G_CALLBACK (ews_folder_count_notify_cb), folder);
+	g_signal_connect (folder->summary, "notify::unread-count", G_CALLBACK (ews_folder_count_notify_cb), folder);
 
 	return folder;
 }
@@ -819,7 +857,7 @@ sync_updated_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *upd
 
 		/* Compare the item_type from summary as the updated items seems to
 		   arrive as generic types while its not the case */
-		mi = camel_folder_summary_uid (folder->summary, id->id);
+		mi = camel_folder_summary_get (folder->summary, id->id);
 		if (!mi) {
 			g_object_unref (item);
 			continue;
@@ -1044,7 +1082,7 @@ ews_refresh_info_sync (CamelFolder *folder, GCancellable *cancellable, GError **
 			break;
 
 		total = camel_folder_summary_count (folder->summary);
-		unread = folder->summary->unread_count;
+		unread = camel_folder_summary_get_unread_count (folder->summary);
 
 		camel_ews_store_summary_set_folder_total (ews_store->summary, id, total);
 		camel_ews_store_summary_set_folder_unread (ews_store->summary, id, unread);
@@ -1262,7 +1300,8 @@ ews_expunge_sync (CamelFolder *folder, GCancellable *cancellable, GError **error
 	CamelMessageInfo *info;
 	CamelStore *parent_store;
 	GSList *deleted_items = NULL;
-	gint i, count;
+	gint i;
+	GPtrArray *known_uids;
 
 	parent_store = camel_folder_get_parent_store (folder);
 	ews_store = CAMEL_EWS_STORE (parent_store);
@@ -1272,17 +1311,24 @@ ews_expunge_sync (CamelFolder *folder, GCancellable *cancellable, GError **error
 	
 	/* FIXME Run expunge on just trash folder once we are able to identify the exact trash */
 
-	/*Collect UIDs of deleted messages.*/
-	count = camel_folder_summary_count (folder->summary);
-	for (i = 0; i < count; i++) {
-		info = camel_folder_summary_index (folder->summary, i);
+	camel_folder_summary_prepare_fetch_all (folder->summary, NULL);
+	known_uids = camel_folder_summary_get_array (folder->summary);
+	if (!known_uids)
+		return TRUE;
+
+	/* Collect UIDs of deleted messages. */
+	for (i = 0; i < known_uids->len; i++) {
+		const gchar *uid = g_ptr_array_index (known_uids, i);
+
+		info = camel_folder_summary_get (folder->summary, uid);
 		ews_info = (CamelEwsMessageInfo *) info;
-		if (ews_info && (ews_info->info.flags & CAMEL_MESSAGE_DELETED)) {
-			const gchar *uid = camel_message_info_uid (info);
+		if (ews_info && (ews_info->info.flags & CAMEL_MESSAGE_DELETED))
 			deleted_items = g_slist_prepend (deleted_items, (gpointer) camel_pstring_strdup (uid));
-		}
+
 		camel_message_info_free (info);
 	}
+
+	camel_folder_summary_free_array (known_uids);
 
 	return ews_delete_messages (folder, deleted_items, TRUE, cancellable, error);
 }
@@ -1314,6 +1360,9 @@ ews_folder_dispose (GObject *object)
 	g_mutex_free (ews_folder->priv->search_lock);
 	g_hash_table_destroy (ews_folder->priv->uid_eflags);
 	g_cond_free (ews_folder->priv->fetch_cond);
+
+	if (CAMEL_FOLDER (ews_folder)->summary)
+		g_signal_handlers_disconnect_by_func (CAMEL_FOLDER (ews_folder)->summary, G_CALLBACK (ews_folder_count_notify_cb), ews_folder);
 
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (camel_ews_folder_parent_class)->dispose (object);

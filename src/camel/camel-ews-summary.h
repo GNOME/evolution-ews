@@ -97,9 +97,6 @@ void	camel_ews_summary_add_message_info
 					(CamelFolderSummary *summary,
 					 guint32 server_flags,
 					 CamelMessageInfo *info);
-void
-camel_ews_summary_delete_id		(CamelFolderSummary *summary,
-					 const gchar *id);
 void	ews_summary_clear		(CamelFolderSummary *summary,
 					 gboolean uncache);
 

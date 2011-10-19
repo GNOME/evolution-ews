@@ -85,7 +85,7 @@ struct _EBookBackendEwsPrivate {
 	gboolean marked_for_offline;
 	gboolean cache_ready;
 	gboolean is_gal;
-	gint mode;
+	gboolean is_online;
 
 	GHashTable *ops;
 
@@ -753,8 +753,13 @@ ews_create_contact_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 		e_contact_set (create_contact->contact, E_CONTACT_REV, item_id->change_key);
 		e_book_backend_sqlitedb_add_contact (ebews->priv->ebsdb, ebews->priv->folder_id, create_contact->contact, FALSE, &error);
 
-		if (error == NULL)
-			e_data_book_respond_create (create_contact->book, create_contact->opid, EDB_ERROR (SUCCESS), create_contact->contact);
+		if (error == NULL) {
+			GSList *contacts;
+
+			contacts = g_slist_append (NULL, create_contact->contact);
+			e_data_book_respond_create_contacts (create_contact->book, create_contact->opid, EDB_ERROR (SUCCESS), contacts);
+			g_slist_free (contacts);
+		}
 
 		g_object_unref (item);
 		g_slist_free (items);
@@ -762,7 +767,7 @@ ews_create_contact_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	
 	if (error) {
 		g_warning("Error while Creating contact: %s", error->message);
-		e_data_book_respond_create (create_contact->book, create_contact->opid, EDB_ERROR_EX (OTHER_ERROR, error->message), create_contact->contact);
+		e_data_book_respond_create_contacts (create_contact->book, create_contact->opid, EDB_ERROR_EX (OTHER_ERROR, error->message), NULL);
 	}
 
 	/* free memory allocated for create_contact & unref contained objects */
@@ -773,70 +778,72 @@ ews_create_contact_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 }
 
 static void
-e_book_backend_ews_create_contact	(EBookBackend *backend,
+e_book_backend_ews_create_contacts	(EBookBackend *backend,
 					 EDataBook *book,
 					 guint32 opid,
 					 GCancellable *cancellable,
-					 const gchar *vcard )
+					 const GSList *vcards)
 {
 	EContact *contact = NULL;
 	EBookBackendEws *ebews;
 	EwsCreateContact *create_contact;
 	EBookBackendEwsPrivate *priv;
  
+	if (vcards->next != NULL) {
+		e_data_book_respond_create_contacts (book, opid,
+		                                     EDB_ERROR_EX (NOT_SUPPORTED,
+		                                     _("The backend does not support bulk additions")),
+		                                     NULL);
+		return;
+	}
+
 	ebews = E_BOOK_BACKEND_EWS (backend);
 	priv = ebews->priv;
 
-	switch (ebews->priv->mode) {
-	case MODE_LOCAL :
+	if (!priv->is_online) {
 		if (!priv->is_writable) {
-			e_data_book_respond_modify (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
+			e_data_book_respond_create_contacts (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
 			return;
 		}
 
-		e_data_book_respond_create (book, opid, EDB_ERROR (REPOSITORY_OFFLINE), NULL);
+		e_data_book_respond_create_contacts (book, opid, EDB_ERROR (REPOSITORY_OFFLINE), NULL);
 		return;
-
-	case  MODE_REMOTE :
-
-		if (ebews->priv->cnc == NULL) {
-			e_data_book_respond_create (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
-			return;
-		}
-
-		if (!ebews->priv->is_writable) {
-			e_data_book_respond_create (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
-			return;
-		}
-
-		contact = e_contact_new_from_vcard (vcard);
-		
-		if (e_contact_get (contact, E_CONTACT_IS_LIST)) {
-			g_object_unref (contact);
-			e_data_book_respond_create (book, opid, EDB_ERROR (NOT_SUPPORTED), NULL);
-			return;
-		}
-
-		create_contact = g_new0(EwsCreateContact, 1);
-		create_contact->ebews = g_object_ref(ebews);
-		create_contact->book = g_object_ref(book);
-		create_contact->opid = opid;
-		create_contact->contact = g_object_ref(contact);
-
-		/* pass new contact component data to the exchange server and expect response in the callback */
-		e_ews_connection_create_items_start (priv->cnc,
-						     EWS_PRIORITY_MEDIUM, NULL,
-						     NULL,
-						     priv->folder_id,
-						     convert_contact_to_xml,
-						     contact,
-						     ews_create_contact_cb,
-						     cancellable,
-						     create_contact);
-		return;
-	default:
-		break;
 	}
+
+	if (ebews->priv->cnc == NULL) {
+		e_data_book_respond_create_contacts (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
+		return;
+	}
+
+	if (!ebews->priv->is_writable) {
+		e_data_book_respond_create_contacts (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
+		return;
+	}
+
+	contact = e_contact_new_from_vcard (vcards->data);
+	
+	if (e_contact_get (contact, E_CONTACT_IS_LIST)) {
+		g_object_unref (contact);
+		e_data_book_respond_create_contacts (book, opid, EDB_ERROR (NOT_SUPPORTED), NULL);
+		return;
+	}
+
+	create_contact = g_new0(EwsCreateContact, 1);
+	create_contact->ebews = g_object_ref(ebews);
+	create_contact->book = g_object_ref(book);
+	create_contact->opid = opid;
+	create_contact->contact = g_object_ref(contact);
+
+	/* pass new contact component data to the exchange server and expect response in the callback */
+	e_ews_connection_create_items_start (priv->cnc,
+					     EWS_PRIORITY_MEDIUM, NULL,
+					     NULL,
+					     priv->folder_id,
+					     convert_contact_to_xml,
+					     contact,
+					     ews_create_contact_cb,
+					     cancellable,
+					     create_contact);
 }
 
 typedef struct {
@@ -892,41 +899,36 @@ e_book_backend_ews_remove_contacts	(EBookBackend *backend,
  
 	priv = ebews->priv;
 
-	switch (ebews->priv->mode) {
-	case MODE_LOCAL :
+	if (!priv->is_online) {
 		if (!priv->is_writable) {
-			e_data_book_respond_modify (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
+			e_data_book_respond_remove_contacts (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
 			return;
 		}
 
 		e_data_book_respond_remove_contacts (book, opid, EDB_ERROR (REPOSITORY_OFFLINE), NULL);
 		return;
-
-	case MODE_REMOTE :
-		if (ebews->priv->cnc == NULL) {
-			e_data_book_respond_remove_contacts (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
-			return;
-		}
-
-		if (!ebews->priv->is_writable) {
-			e_data_book_respond_remove_contacts (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
-			return;
-		}
-
-		remove_contact = g_new0(EwsRemoveContact, 1);
-		remove_contact->ebews = g_object_ref(ebews);
-		remove_contact->book = g_object_ref(book);
-		remove_contact->opid = opid;
-		remove_contact->sl_ids = (GSList *) id_list;
-
-		e_ews_connection_delete_items_start (priv->cnc, EWS_PRIORITY_MEDIUM, (GSList *) id_list,
-						     EWS_HARD_DELETE, 0 , FALSE,
-						     ews_book_remove_contact_cb, cancellable,
-						     remove_contact);
-		return;
-	default :
-		break;
 	}
+
+	if (ebews->priv->cnc == NULL) {
+		e_data_book_respond_remove_contacts (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
+		return;
+	}
+
+	if (!ebews->priv->is_writable) {
+		e_data_book_respond_remove_contacts (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
+		return;
+	}
+
+	remove_contact = g_new0(EwsRemoveContact, 1);
+	remove_contact->ebews = g_object_ref(ebews);
+	remove_contact->book = g_object_ref(book);
+	remove_contact->opid = opid;
+	remove_contact->sl_ids = (GSList *) id_list;
+
+	e_ews_connection_delete_items_start (priv->cnc, EWS_PRIORITY_MEDIUM, (GSList *) id_list,
+					     EWS_HARD_DELETE, 0 , FALSE,
+					     ews_book_remove_contact_cb, cancellable,
+					     remove_contact);
 }
 
 typedef struct {
@@ -969,8 +971,13 @@ ews_modify_contact_cb (GObject *object, GAsyncResult *res, gpointer user_data)
 		e_book_backend_sqlitedb_remove_contact (priv->ebsdb, priv->folder_id, id, &error);
 		e_book_backend_sqlitedb_add_contact (ebews->priv->ebsdb, ebews->priv->folder_id, modify_contact->new_contact, FALSE, &error);
 
-		if (error == NULL)
-			e_data_book_respond_modify (modify_contact->book, modify_contact->opid, EDB_ERROR (SUCCESS), modify_contact->new_contact);
+		if (error == NULL) {
+			GSList *new_contacts;
+
+			new_contacts = g_slist_append (NULL, modify_contact->new_contact);
+			e_data_book_respond_modify_contacts (modify_contact->book, modify_contact->opid, EDB_ERROR (SUCCESS), new_contacts);
+			g_slist_free (new_contacts);
+		}
 
 		g_object_unref (item);
 		g_slist_free (items);
@@ -978,7 +985,8 @@ ews_modify_contact_cb (GObject *object, GAsyncResult *res, gpointer user_data)
 	
 	if (error) {
 		g_warning("Error while Modifying contact: %s", error->message);
-		e_data_book_respond_modify (modify_contact->book, modify_contact->opid, EDB_ERROR_EX (OTHER_ERROR, error->message), modify_contact->new_contact);
+
+		e_data_book_respond_modify_contacts (modify_contact->book, modify_contact->opid, EDB_ERROR_EX (OTHER_ERROR, error->message), NULL);
 	}
 
 	/* free memory allocated for create_contact & unref contained objects */
@@ -1032,11 +1040,11 @@ convert_contact_to_updatexml (ESoapMessage *msg, gpointer user_data)
 }
 
 static void
-e_book_backend_ews_modify_contact	(EBookBackend *backend,
+e_book_backend_ews_modify_contacts	(EBookBackend *backend,
 					 EDataBook    *book,
 					 guint32       opid,
 					 GCancellable *cancellable,
-					 const gchar   *vcard)
+					 const GSList *vcards)
 {
 	EContact *contact = NULL, *old_contact;
 	EwsModifyContact *modify_contact;
@@ -1045,71 +1053,72 @@ e_book_backend_ews_modify_contact	(EBookBackend *backend,
 	EBookBackendEwsPrivate *priv;
 	GError *error;
 
+	if (vcards->next != NULL) {
+		e_data_book_respond_modify_contacts (book, opid,
+		                                     EDB_ERROR_EX (NOT_SUPPORTED,
+		                                     _("The backend does not support bulk modifications")),
+		                                     NULL);
+		return;
+	}
 
 	ebews = E_BOOK_BACKEND_EWS (backend);
 	priv = ebews->priv;
 
-	switch (priv->mode) {
-
-	case MODE_LOCAL :
+	if (!priv->is_online) {
 		if (!priv->is_writable) {
-			e_data_book_respond_modify (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
+			e_data_book_respond_modify_contacts (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
 			return;
 		}
 
-		e_data_book_respond_modify (book, opid, EDB_ERROR (REPOSITORY_OFFLINE), NULL);
+		e_data_book_respond_modify_contacts (book, opid, EDB_ERROR (REPOSITORY_OFFLINE), NULL);
 		return;
-	case MODE_REMOTE :
-
-		if (priv->cnc == NULL) {
-			e_data_book_respond_modify (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
-			return;
-		}
-		
-		if (!priv->is_writable) {
-			e_data_book_respond_modify (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
-			return;
-		}
-		
-		contact = e_contact_new_from_vcard (vcard);
-
-		id = g_new0 (EwsId, 1);
-		id->id = e_contact_get (contact, E_CONTACT_UID);
-		id->change_key = e_contact_get (contact, E_CONTACT_REV);
-
-		/*get item id and change key from contact and fetch old contact and assign.*/
-
-		if (e_contact_get (contact, E_CONTACT_IS_LIST)) {
-			g_object_unref (contact);
-			e_data_book_respond_modify (book, opid, EDB_ERROR (NOT_SUPPORTED), NULL);
-			return;
-		}
-
-		old_contact = e_book_backend_sqlitedb_get_contact ( priv->ebsdb, priv->folder_id,
-					 id->id, NULL, NULL, &error); 
-		if (!old_contact) {
-			g_object_unref (contact);
-			e_data_book_respond_modify (book, opid, EDB_ERROR (NOT_SUPPORTED), NULL);
-			return;
-		}
-
-		/* TODO implement */
-		modify_contact = g_new0 (EwsModifyContact, 1);
-		modify_contact->ebews = g_object_ref(ebews);
-		modify_contact->book = g_object_ref(book);
-		modify_contact->opid = opid;
-		modify_contact->old_contact = g_object_ref(old_contact);
-		modify_contact->new_contact = g_object_ref(contact);
-		e_ews_connection_update_items_start (priv->cnc, EWS_PRIORITY_MEDIUM,
-							"AlwaysOverwrite", "SendAndSaveCopy",
-							"SendToAllAndSaveCopy", priv->folder_id,
-							convert_contact_to_updatexml, modify_contact,
-							ews_modify_contact_cb, cancellable,
-							modify_contact);
-		return;
-	default :
-		break;
 	}
+
+	if (priv->cnc == NULL) {
+		e_data_book_respond_modify_contacts (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
+		return;
+	}
+	
+	if (!priv->is_writable) {
+		e_data_book_respond_modify_contacts (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
+		return;
+	}
+	
+	contact = e_contact_new_from_vcard (vcards->data);
+
+	id = g_new0 (EwsId, 1);
+	id->id = e_contact_get (contact, E_CONTACT_UID);
+	id->change_key = e_contact_get (contact, E_CONTACT_REV);
+
+	/*get item id and change key from contact and fetch old contact and assign.*/
+
+	if (e_contact_get (contact, E_CONTACT_IS_LIST)) {
+		g_object_unref (contact);
+		e_data_book_respond_modify_contacts (book, opid, EDB_ERROR (NOT_SUPPORTED), NULL);
+		return;
+	}
+
+	old_contact = e_book_backend_sqlitedb_get_contact ( priv->ebsdb, priv->folder_id,
+				 id->id, NULL, NULL, &error); 
+	if (!old_contact) {
+		g_object_unref (contact);
+		e_data_book_respond_modify_contacts (book, opid, EDB_ERROR (NOT_SUPPORTED), NULL);
+		return;
+	}
+
+	/* TODO implement */
+	modify_contact = g_new0 (EwsModifyContact, 1);
+	modify_contact->ebews = g_object_ref(ebews);
+	modify_contact->book = g_object_ref(book);
+	modify_contact->opid = opid;
+	modify_contact->old_contact = g_object_ref(old_contact);
+	modify_contact->new_contact = g_object_ref(contact);
+	e_ews_connection_update_items_start (priv->cnc, EWS_PRIORITY_MEDIUM,
+						"AlwaysOverwrite", "SendAndSaveCopy",
+						"SendToAllAndSaveCopy", priv->folder_id,
+						convert_contact_to_updatexml, modify_contact,
+						ews_modify_contact_cb, cancellable,
+						modify_contact);
 }
 
 static void
@@ -1123,22 +1132,16 @@ e_book_backend_ews_get_contact	(EBookBackend *backend,
 
 	gwb =  E_BOOK_BACKEND_EWS (backend);
 
-	switch (gwb->priv->mode) {
-
-	case MODE_LOCAL :
+	if (!gwb->priv->is_online) {
 		e_data_book_respond_get_contact (book, opid, EDB_ERROR (CONTACT_NOT_FOUND), "");
 		return;
-
-	case MODE_REMOTE :
-		if (gwb->priv->cnc == NULL) {
-			e_data_book_respond_get_contact (book, opid, e_data_book_create_error_fmt (E_DATA_BOOK_STATUS_OTHER_ERROR, "Not connected"), NULL);
-			return;
-		}
-		e_data_book_respond_get_contact (book, opid, EDB_ERROR (CONTACT_NOT_FOUND), "");
-		return;
-	default :
-		break;
 	}
+
+	if (gwb->priv->cnc == NULL) {
+		e_data_book_respond_get_contact (book, opid, e_data_book_create_error_fmt (E_DATA_BOOK_STATUS_OTHER_ERROR, "Not connected"), NULL);
+		return;
+	}
+	e_data_book_respond_get_contact (book, opid, EDB_ERROR (CONTACT_NOT_FOUND), "");
 }
 
 static void
@@ -1154,26 +1157,17 @@ e_book_backend_ews_get_contact_list	(EBookBackend *backend,
 	egwb = E_BOOK_BACKEND_EWS (backend);
 	vcard_list = NULL;
 
-	switch (egwb->priv->mode) {
-
-	case MODE_LOCAL :
-
+	if (!egwb->priv->is_online) {
 		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (SUCCESS), vcard_list);
 		return;
-
-	case MODE_REMOTE:
-
-		if (egwb->priv->cnc == NULL) {
-			e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
-			return;
-		}
-
-		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (SUCCESS), vcard_list);
-		return;
-	default :
-		break;
-
 	}
+
+	if (egwb->priv->cnc == NULL) {
+		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
+		return;
+	}
+
+	e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (SUCCESS), vcard_list);
 }
 
 typedef struct {
@@ -1990,9 +1984,8 @@ ebews_start_refreshing (EBookBackendEws *ebews)
 
 	PRIV_LOCK (priv);
 
-	if	(priv->mode == MODE_REMOTE &&
-		 priv->cnc && priv->marked_for_offline)
-				fetch_deltas (ebews);
+	if (priv->is_online && priv->cnc && priv->marked_for_offline)
+		fetch_deltas (ebews);
 
 	PRIV_UNLOCK (priv);
 }
@@ -2051,8 +2044,7 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 	e_data_book_view_ref (book_view);
 	e_data_book_view_notify_progress (book_view, -1, _("Searching..."));
 
-	switch (priv->mode) {
-	case MODE_LOCAL:
+	if (!priv->is_online) {
 		if (e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
 			fetch_from_offline (ebews, book_view, query, error);
 			return;
@@ -2062,84 +2054,82 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 		e_data_book_view_notify_complete (book_view, error);
 		g_error_free (error);
 		return;
-	case MODE_REMOTE:
-		if (!priv->cnc) {
-			error = EDB_ERROR (AUTHENTICATION_REQUIRED);
-			ews_auth_required (backend);
-			e_data_book_view_notify_complete (book_view, error);
-			e_data_book_view_unref (book_view);
-			g_error_free (error);
-			return;
-		}
+	}
 
-		ebews_start_refreshing (ebews);
-
-		if (e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
-			fetch_from_offline (ebews, book_view, query, error);
-			return;
-		}
-
-		e_book_backend_ews_build_restriction (query, &is_autocompletion, &auto_comp_str);
-		if (!is_autocompletion || !auto_comp_str) {
-			g_free (auto_comp_str);
-			e_data_book_view_notify_complete (book_view, error);
-			e_data_book_view_unref (book_view);
-			return;
-		}
-
-		source = e_book_backend_get_source (backend);
-		cancellable = g_cancellable_new ();
-
-		/* FIXME Need to convert the Ids from EwsLegacyId format to EwsId format using
-		   convert_id operation before using it as the schema has changed between Exchange
-		   2007 and 2007_SP1 */
-		fid = g_new0 (EwsFolderId, 1);
-		fid->id = g_strdup (priv->folder_id);
-		fid->change_key = e_source_get_duped_property (source, "change-key");
-		ids = g_slist_append (ids, fid);
-
-		/* We do not scan until we reach the last_item as it might be good enough to show first 100
-		   items during auto-completion. Change it if needed. TODO, Personal Address-book should start using
-		   find_items rather than resolve_names to support all queries */
-		g_hash_table_insert (priv->ops, book_view, cancellable);
-		e_ews_connection_resolve_names	(priv->cnc, EWS_PRIORITY_MEDIUM, auto_comp_str,
-						 EWS_SEARCH_AD, NULL, FALSE, &mailboxes, NULL,
-						 &includes_last_item, cancellable, &error);
-		g_free (auto_comp_str);
-		g_hash_table_remove (priv->ops, book_view);
-		e_ews_folder_free_fid (fid);
-		if (error != NULL) {
-			e_data_book_view_notify_complete (book_view, error);
-			e_data_book_view_unref (book_view);
-			g_clear_error (&error);
-			return;
-		}
-
-		for (l = mailboxes; l != NULL; l = g_slist_next (l)) {
-			EwsMailbox *mb = l->data;
-			EContact *contact;
-
-			contact = e_contact_new ();
-
-			/* We do not get an id from the server, so just using email_id as uid for now */
-			e_contact_set (contact, E_CONTACT_UID, mb->email);
-			e_contact_set (contact, E_CONTACT_FULL_NAME, mb->name);
-			e_contact_set (contact, E_CONTACT_EMAIL_1, mb->email);
-
-			e_data_book_view_notify_update (book_view, contact);
-
-			g_free (mb->email);
-			g_free (mb->name);
-			g_free (mb);
-			g_object_unref (contact);
-		}
-
-		g_slist_free (mailboxes);
+	if (!priv->cnc) {
+		error = EDB_ERROR (AUTHENTICATION_REQUIRED);
+		ews_auth_required (backend);
 		e_data_book_view_notify_complete (book_view, error);
 		e_data_book_view_unref (book_view);
-	default:
-		break;
+		g_error_free (error);
+		return;
 	}
+
+	ebews_start_refreshing (ebews);
+
+	if (e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
+		fetch_from_offline (ebews, book_view, query, error);
+		return;
+	}
+
+	e_book_backend_ews_build_restriction (query, &is_autocompletion, &auto_comp_str);
+	if (!is_autocompletion || !auto_comp_str) {
+		g_free (auto_comp_str);
+		e_data_book_view_notify_complete (book_view, error);
+		e_data_book_view_unref (book_view);
+		return;
+	}
+
+	source = e_backend_get_source (E_BACKEND (backend));
+	cancellable = g_cancellable_new ();
+
+	/* FIXME Need to convert the Ids from EwsLegacyId format to EwsId format using
+	   convert_id operation before using it as the schema has changed between Exchange
+	   2007 and 2007_SP1 */
+	fid = g_new0 (EwsFolderId, 1);
+	fid->id = g_strdup (priv->folder_id);
+	fid->change_key = e_source_get_duped_property (source, "change-key");
+	ids = g_slist_append (ids, fid);
+
+	/* We do not scan until we reach the last_item as it might be good enough to show first 100
+	   items during auto-completion. Change it if needed. TODO, Personal Address-book should start using
+	   find_items rather than resolve_names to support all queries */
+	g_hash_table_insert (priv->ops, book_view, cancellable);
+	e_ews_connection_resolve_names	(priv->cnc, EWS_PRIORITY_MEDIUM, auto_comp_str,
+					 EWS_SEARCH_AD, NULL, FALSE, &mailboxes, NULL,
+					 &includes_last_item, cancellable, &error);
+	g_free (auto_comp_str);
+	g_hash_table_remove (priv->ops, book_view);
+	e_ews_folder_free_fid (fid);
+	if (error != NULL) {
+		e_data_book_view_notify_complete (book_view, error);
+		e_data_book_view_unref (book_view);
+		g_clear_error (&error);
+		return;
+	}
+
+	for (l = mailboxes; l != NULL; l = g_slist_next (l)) {
+		EwsMailbox *mb = l->data;
+		EContact *contact;
+
+		contact = e_contact_new ();
+
+		/* We do not get an id from the server, so just using email_id as uid for now */
+		e_contact_set (contact, E_CONTACT_UID, mb->email);
+		e_contact_set (contact, E_CONTACT_FULL_NAME, mb->name);
+		e_contact_set (contact, E_CONTACT_EMAIL_1, mb->email);
+
+		e_data_book_view_notify_update (book_view, contact);
+
+		g_free (mb->email);
+		g_free (mb->name);
+		g_free (mb);
+		g_object_unref (contact);
+	}
+
+	g_slist_free (mailboxes);
+	e_data_book_view_notify_complete (book_view, error);
+	e_data_book_view_unref (book_view);
 }
 
 static void
@@ -2216,8 +2206,8 @@ e_book_backend_ews_load_source 	(EBookBackend           *backend,
 	}
 	
 	e_book_backend_notify_opened (backend, NULL);
-	if (priv->mode == MODE_REMOTE)
-		e_book_backend_set_online (backend, TRUE);
+	if (priv->is_online)
+		e_backend_set_online (E_BACKEND (backend), TRUE);
 }
 
 static void
@@ -2245,55 +2235,54 @@ e_book_backend_ews_authenticate_user (EBookBackend *backend,
 	ebgw = E_BOOK_BACKEND_EWS (backend);
 	priv = ebgw->priv;
 
-	switch (ebgw->priv->mode) {
-	case MODE_LOCAL:
+	if (!ebgw->priv->is_online) {
 		e_book_backend_notify_opened (backend, EDB_ERROR (SUCCESS));
 		return;
-
-	case MODE_REMOTE:
-		if (priv->cnc) {
-			e_book_backend_notify_opened (backend, EDB_ERROR (SUCCESS));
-			return;
-		}
-
-		esource = e_book_backend_get_source (backend);
-		host_url = e_source_get_property (esource, "hosturl");
-		read_only = e_source_get_property (esource, "read_only");
-
-		priv->cnc = e_ews_connection_new (host_url, e_credentials_peek (credentials, E_CREDENTIALS_KEY_USERNAME), 
-						  e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD),
-						  NULL, NULL, &error);
-
-		if ((read_only && !strcmp (read_only, "true")) || priv->is_gal) {
-			priv->is_writable = FALSE;
-		} else 
-			priv->is_writable = TRUE;
-
-		priv->username = e_source_get_duped_property (esource, "username");
-		priv->password = g_strdup (e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD));
-	
-		/* FIXME: Do some dummy request to ensure that the password is actually
-		   correct; don't just blindly return success */
-		e_book_backend_notify_opened (backend, EDB_ERROR (SUCCESS));
-		e_book_backend_notify_readonly (backend, !priv->is_writable);
-		return;
-	default :
-		break;
 	}
+
+	if (priv->cnc) {
+		e_book_backend_notify_opened (backend, EDB_ERROR (SUCCESS));
+		return;
+	}
+
+	esource = e_backend_get_source (E_BACKEND (backend));
+	host_url = e_source_get_property (esource, "hosturl");
+	read_only = e_source_get_property (esource, "read_only");
+
+	priv->cnc = e_ews_connection_new (host_url, e_credentials_peek (credentials, E_CREDENTIALS_KEY_USERNAME), 
+					  e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD),
+					  NULL, NULL, &error);
+
+	if ((read_only && !strcmp (read_only, "true")) || priv->is_gal) {
+		priv->is_writable = FALSE;
+	} else 
+		priv->is_writable = TRUE;
+
+	priv->username = e_source_get_duped_property (esource, "username");
+	priv->password = g_strdup (e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD));
+
+	/* FIXME: Do some dummy request to ensure that the password is actually
+	   correct; don't just blindly return success */
+	e_book_backend_notify_opened (backend, EDB_ERROR (SUCCESS));
+	e_book_backend_notify_readonly (backend, !priv->is_writable);
 }	
 
 static void
-e_book_backend_ews_set_online (EBookBackend *backend,
-                                     gboolean is_online)
+e_book_backend_ews_notify_online_cb (EBookBackend *backend,
+				     GParamSpec *spec)
 {
 	EBookBackendEws *ebews;
+	gboolean is_online;
 
 	ebews = E_BOOK_BACKEND_EWS (backend);
-	
-	if (is_online)
-		ebews->priv->mode = MODE_REMOTE;
-	else
-		ebews->priv->mode = MODE_LOCAL;
+
+	is_online = e_backend_get_online (E_BACKEND (backend));
+
+	if ((ebews->priv->is_online ? 1 : 0) == (is_online ? 1 : 0))
+		return;
+
+	ebews->priv->is_online = is_online;
+
 	if (e_book_backend_is_opened (backend)) {
 		if (!is_online) {
 			e_book_backend_notify_readonly (backend, TRUE);
@@ -2373,7 +2362,7 @@ e_book_backend_ews_open (EBookBackend *backend,
 	GError *error = NULL;
 	ESource *source;
 
-	source = e_book_backend_get_source (backend);
+	source = e_backend_get_source (E_BACKEND (backend));
 	e_book_backend_ews_load_source (backend, source, only_if_exists, &error);
 	e_data_book_respond_open (book, opid, error);
 }
@@ -2480,11 +2469,10 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 	/* Set the virtual methods. */
 	parent_class->open		      = e_book_backend_ews_open;
 	parent_class->get_backend_property    = e_book_backend_ews_get_backend_property;
-	parent_class->set_online	      = e_book_backend_ews_set_online;
 
-	parent_class->create_contact          = e_book_backend_ews_create_contact;
+	parent_class->create_contacts         = e_book_backend_ews_create_contacts;
 	parent_class->remove_contacts         = e_book_backend_ews_remove_contacts;
-	parent_class->modify_contact          = e_book_backend_ews_modify_contact;
+	parent_class->modify_contacts         = e_book_backend_ews_modify_contacts;
 	parent_class->get_contact             = e_book_backend_ews_get_contact;
 	parent_class->get_contact_list        = e_book_backend_ews_get_contact_list;
 	parent_class->remove                  = e_book_backend_ews_remove;
@@ -2508,4 +2496,8 @@ e_book_backend_ews_init (EBookBackendEws *backend)
 
 	bews->priv = priv;
 	g_static_rec_mutex_init (&priv->rec_mutex);
+
+	g_signal_connect (
+		bews, "notify::online",
+		G_CALLBACK (e_book_backend_ews_notify_online_cb), NULL);
 }

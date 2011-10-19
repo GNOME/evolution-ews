@@ -130,10 +130,6 @@ camel_ews_summary_class_init (CamelEwsSummaryClass *class)
 static void
 camel_ews_summary_init (CamelEwsSummary *ews_summary)
 {
-	CamelFolderSummary *summary = CAMEL_FOLDER_SUMMARY (ews_summary);
-
-	/* Meta-summary - Overriding UID len */
-	summary->meta_summary->uid_len = 2048;
 }
 
 /**
@@ -150,8 +146,7 @@ camel_ews_summary_new (struct _CamelFolder *folder, const gchar *filename)
 {
 	CamelFolderSummary *summary;
 
-	summary = g_object_new (CAMEL_TYPE_EWS_SUMMARY, NULL);
-	summary->folder = folder;
+	summary = g_object_new (CAMEL_TYPE_EWS_SUMMARY, "folder", folder, NULL);
 	camel_folder_summary_set_build_content (summary, TRUE);
 	camel_folder_summary_set_filename (summary, filename);
 
@@ -326,65 +321,7 @@ content_info_to_db (CamelFolderSummary *s, CamelMessageContentInfo *info, CamelM
 static gboolean
 ews_info_set_flags (CamelMessageInfo *info, guint32 flags, guint32 set)
 {
-		guint32 old;
-		CamelMessageInfoBase *mi = (CamelMessageInfoBase *)info;
-		gint read = 0 , deleted = 0;
-
-		gint junk_flag = 0, junk_learn_flag = 0;
-
-		/* TODO: locking? */
-
-		if (flags & CAMEL_MESSAGE_SEEN && ((set & CAMEL_MESSAGE_SEEN) != (mi->flags & CAMEL_MESSAGE_SEEN)))
-		{ read = set & CAMEL_MESSAGE_SEEN ? 1 : -1; d(printf("Setting read as %d\n", set & CAMEL_MESSAGE_SEEN ? 1 : 0));}
-
-		if (flags & CAMEL_MESSAGE_DELETED && ((set & CAMEL_MESSAGE_DELETED) != (mi->flags & CAMEL_MESSAGE_DELETED)))
-		{ deleted = set & CAMEL_MESSAGE_DELETED ? 1 : -1; d(printf("Setting deleted as %d\n", set & CAMEL_MESSAGE_DELETED ? 1 : 0));}
-
-		old = mi->flags;
-		mi->flags = (old & ~flags) | (set & flags);
-
-		if (old != mi->flags) {
-				mi->flags |= CAMEL_MESSAGE_FOLDER_FLAGGED;
-				mi->dirty = TRUE;
-
-				if (((old & ~CAMEL_MESSAGE_SYSTEM_MASK) == (mi->flags & ~CAMEL_MESSAGE_SYSTEM_MASK)) )
-						return FALSE;
-
-				if (mi->summary) {
-						mi->summary->deleted_count += deleted;
-						mi->summary->unread_count -= read;
-						camel_folder_summary_touch(mi->summary);
-				}
-		}
-
-		junk_flag = ((flags & CAMEL_MESSAGE_JUNK) && (set & CAMEL_MESSAGE_JUNK));
-		junk_learn_flag = ((flags & CAMEL_MESSAGE_JUNK_LEARN) && (set & CAMEL_MESSAGE_JUNK_LEARN));
-
-		/* This is a hack, we are using CAMEL_MESSAGE_JUNK justo to hide the item
-		 * we make sure this doesn't have any side effects*/
-
-		if (junk_learn_flag && !junk_flag  && (old & CAMEL_GW_MESSAGE_JUNK)) {
-				/*
-				   This has ugly side-effects. Evo will never learn unjunk.
-				   We need to create one CAMEL_MESSAGE_HIDDEN flag which must be
-				   used for all hiding operations. We must also get rid of the seperate file
-				   that is maintained somewhere in evolution/mail/em-folder-browser.c for hidden messages
-				 */
-				mi->flags |= CAMEL_GW_MESSAGE_NOJUNK | CAMEL_MESSAGE_JUNK | CAMEL_MESSAGE_JUNK_LEARN;
-		} else if (junk_learn_flag && junk_flag && !(old & CAMEL_GW_MESSAGE_JUNK)) {
-				mi->flags |= CAMEL_GW_MESSAGE_JUNK | CAMEL_MESSAGE_JUNK | CAMEL_MESSAGE_JUNK_LEARN;
-		}
-
-		if (mi->summary && mi->summary->folder && mi->uid) {
-				CamelFolderChangeInfo *changes = camel_folder_change_info_new();
-
-				camel_folder_change_info_change_uid(changes, camel_message_info_uid(info));
-				camel_folder_changed (mi->summary->folder, changes);
-				camel_folder_change_info_free(changes);
-				camel_folder_summary_touch(mi->summary);
-		}
-
-		return TRUE;
+	return CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->info_set_flags (info, flags, set);
 }
 
 void
@@ -397,7 +334,7 @@ camel_ews_summary_add_message	(CamelFolderSummary *summary,
 	const CamelFlag *flag;
 	const CamelTag *tag;
 
-	info = camel_folder_summary_uid (summary, uid);
+	info = camel_folder_summary_get (summary, uid);
 
 	/* Create summary entry */
 	mi = (CamelEwsMessageInfo *)camel_folder_summary_info_new_from_message (summary, message, NULL);
@@ -430,82 +367,14 @@ camel_ews_summary_add_message_info	(CamelFolderSummary *summary,
 {
 	CamelMessageInfoBase *binfo = (CamelMessageInfoBase *) mi;
 	CamelEwsMessageInfo *einfo = (CamelEwsMessageInfo *) mi;
-	gint unread=0, junk=0;
-	guint32 flags;
 
 	binfo->flags |= server_flags;
 	einfo->server_flags = server_flags;
 
 	/* TODO update user flags */
 
-	/* update the summary count */
-	flags = binfo->flags;
-
-	if (!(flags & CAMEL_MESSAGE_SEEN))
-		unread = 1;
-
-	if (flags & CAMEL_MESSAGE_JUNK)
-		junk = 1;
-
-	if (summary) {
-		if (unread)
-			summary->unread_count += unread;
-		if (junk)
-			summary->junk_count += junk;
-		summary->visible_count++;
-		if (junk)
-			summary->visible_count -= junk;
-
-		summary->saved_count++;
-		camel_folder_summary_touch (summary);
-	}
-
 	binfo->flags &= ~CAMEL_MESSAGE_FOLDER_FLAGGED;
 	camel_folder_summary_add (summary, (CamelMessageInfo *)mi);
-}
-
-/* Caller should use camel_db_delete_uids to permanently delete the mi
-   from summary */
-void
-camel_ews_summary_delete_id	(CamelFolderSummary *summary,
-				 const gchar *uid)
-{
-	CamelMessageInfo *mi;
-
-	mi = camel_folder_summary_uid (summary, uid);
-	if (mi) {
-		CamelMessageInfoBase *dinfo = (CamelMessageInfoBase *) mi;
-		gint unread=0, deleted=0, junk=0;
-		guint32 flags;
-
-		flags = dinfo->flags;
-		if (!(flags & CAMEL_MESSAGE_SEEN))
-			unread = 1;
-
-		if (flags & CAMEL_MESSAGE_DELETED)
-			deleted = 1;
-
-		if (flags & CAMEL_MESSAGE_JUNK)
-			junk = 1;
-
-		if (unread)
-			summary->unread_count--;
-
-		if (deleted)
-			summary->deleted_count--;
-		if (junk)
-			summary->junk_count--;
-
-		if (junk && !deleted)
-			summary->junk_not_deleted_count--;
-
-		if (!junk &&  !deleted)
-			summary->visible_count--;
-
-		summary->saved_count--;
-		camel_message_info_free (mi);
-	}
-	camel_folder_summary_remove_uid_fast (summary, uid);
 }
 
 static gboolean
@@ -536,44 +405,14 @@ camel_ews_update_message_info_flags	(CamelFolderSummary *summary,
 	CamelEwsMessageInfo *einfo = (CamelEwsMessageInfo *) info;
 	gboolean changed = FALSE;
 
-	if (server_flags != einfo->server_flags)
-	{
+	if (server_flags != einfo->server_flags) {
 		guint32 server_set, server_cleared;
-		gint read=0, deleted=0, junk=0;
 
 		server_set = server_flags & ~einfo->server_flags;
 		server_cleared = einfo->server_flags & ~server_flags;
 
-		if (server_set & CAMEL_MESSAGE_SEEN)
-			read = 1;
-		else if (server_cleared & CAMEL_MESSAGE_SEEN)
-			read = -1;
-
-		if (server_set & CAMEL_MESSAGE_DELETED)
-			deleted = 1;
-		else if (server_cleared & CAMEL_MESSAGE_DELETED)
-			deleted = -1;
-
-		if (server_set & CAMEL_MESSAGE_JUNK)
-			junk = 1;
-		else if (server_cleared & CAMEL_MESSAGE_JUNK)
-			junk = -1;
-
-		if (read) {
-			summary->unread_count -= read;
-		}
-		if (deleted)
-			summary->deleted_count += deleted;
-		if (junk)
-			summary->junk_count += junk;
-		if (junk && !deleted)
-			summary->junk_not_deleted_count += junk;
-		if (junk ||  deleted)
-			summary->visible_count -= junk ? junk : deleted;
-
-		einfo->info.flags = (einfo->info.flags | server_set) & ~server_cleared;
+		camel_message_info_set_flags (info, server_set | server_cleared, (einfo->info.flags | server_set) & ~server_cleared);
 		einfo->server_flags = server_flags;
-		einfo->info.dirty = TRUE;
 		if (info->summary)
 			camel_folder_summary_touch (info->summary);
 		changed = TRUE;
@@ -591,27 +430,27 @@ ews_summary_clear	(CamelFolderSummary *summary,
 			 gboolean uncache)
 {
 	CamelFolderChangeInfo *changes;
-	CamelMessageInfo *info;
-	gint i, count;
-	const gchar *uid;
+	GPtrArray *known_uids;
+	gint i;
 
 	changes = camel_folder_change_info_new ();
-	count = camel_folder_summary_count (summary);
-	for (i = 0; i < count; i++) {
-		if (!(info = camel_folder_summary_index (summary, i)))
+	known_uids = camel_folder_summary_get_array (summary);
+	for (i = 0; i < known_uids->len; i++) {
+		const gchar *uid = g_ptr_array_index (known_uids, i);
+
+		if (!uid)
 			continue;
 
-		uid = camel_message_info_uid (info);
 		camel_folder_change_info_remove_uid (changes, uid);
 		camel_folder_summary_remove_uid (summary, uid);
-		camel_message_info_free(info);
 	}
 
-	camel_folder_summary_clear_db (summary);
+	camel_folder_summary_clear (summary, NULL);
 	/*camel_folder_summary_save (summary);*/
 
 	if (camel_folder_change_info_changed (changes))
-		camel_folder_changed (summary->folder, changes);
+		camel_folder_changed (camel_folder_summary_get_folder (summary), changes);
 	camel_folder_change_info_free (changes);
+	camel_folder_summary_free_array (known_uids);
 }
 

@@ -239,7 +239,7 @@ add_gal_esource (CamelURL *url)
 	} else
 		oal_name = _("Global Address list");
 
-	account_uri = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
+	account_uri = camel_url_to_string (url, CAMEL_URL_HIDE_PARAMS);
 	source_uri = g_strdup_printf ("%s;gal=1", account_uri + strlen (EWS_BASE_URI));
 	source = e_source_new (oal_name, source_uri);
 	

@@ -135,7 +135,7 @@ get_password (EMConfigTargetAccount *target_account)
 	account = get_modified_account (target_account);
 	url = camel_url_new (e_account_get_string (account, E_ACCOUNT_SOURCE_URL), NULL);
 
-	key = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
+	key = camel_url_to_string (url, CAMEL_URL_HIDE_PARAMS);
 	password = e_passwords_get_password (EXCHANGE_EWS_PASSWORD_COMPONENT, key);
 	if (!password || !*password) {
 		gboolean remember = e_account_get_bool (account, E_ACCOUNT_SOURCE_SAVE_PASSWD);

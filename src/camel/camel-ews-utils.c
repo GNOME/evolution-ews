@@ -296,9 +296,8 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store, const gchar *fid)
 
 	curl = camel_service_get_camel_url (CAMEL_SERVICE (store));
 	url = camel_url_to_string (curl,
-			(CAMEL_URL_HIDE_PASSWORD|
 			 CAMEL_URL_HIDE_PARAMS|
-			 CAMEL_URL_HIDE_AUTH) );
+			 CAMEL_URL_HIDE_AUTH);
 
 	if ( url[strlen (url) - 1] != '/') {
 		gchar *temp_url;
@@ -575,7 +574,7 @@ sync_created_folders (CamelEwsStore *ews_store, GSList *created_folders)
 			CamelURL *url = camel_service_get_camel_url (CAMEL_SERVICE (ews_store));
 
 			add_data->folder = g_object_ref (folder);
-			add_data->account_uri = camel_url_to_string (url, CAMEL_URL_HIDE_PASSWORD | CAMEL_URL_HIDE_PARAMS);
+			add_data->account_uri = camel_url_to_string (url, CAMEL_URL_HIDE_PARAMS);
 			add_data->account_name = g_strdup (camel_url_get_param (url, "email"));
 			add_data->username = g_strdup (url->user);
 			/* Duplicate... for now */
@@ -630,6 +629,7 @@ camel_ews_utils_sync_deleted_items (CamelEwsFolder *ews_folder, GSList *items_de
 	CamelFolderChangeInfo *ci;
 	CamelEwsStore *ews_store;
 	GSList *l;
+	GList *items_deleted_list = NULL;
 
 	ci = camel_folder_change_info_new ();
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store ((CamelFolder *) ews_folder);
@@ -638,12 +638,17 @@ camel_ews_utils_sync_deleted_items (CamelEwsFolder *ews_folder, GSList *items_de
 	full_name = camel_folder_get_full_name (folder);
 
 	for (l = items_deleted; l != NULL; l = g_slist_next (l)) {
-		gchar *id = (gchar *) l->data;
+		const gchar *id = l->data;
 
-		camel_ews_summary_delete_id (folder->summary, id);
+		items_deleted_list = g_list_prepend (items_deleted_list, (gpointer) id);
+
+		camel_folder_summary_remove_uid (folder->summary, id);
 		camel_folder_change_info_remove_uid (ci, id);
 	}
-	camel_db_delete_uids (((CamelStore *)ews_store)->cdb_w, full_name, items_deleted, NULL);
+
+	items_deleted_list = g_list_reverse (items_deleted_list);
+	camel_db_delete_uids (((CamelStore *)ews_store)->cdb_w, full_name, items_deleted_list, NULL);
+	g_list_free (items_deleted_list);
 
 	camel_folder_changed ((CamelFolder *) ews_folder, ci);
 	camel_folder_change_info_free (ci);
@@ -911,7 +916,7 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder, GSList *items_up
 		CamelEwsMessageInfo *mi;
 
 		id = e_ews_item_get_id (item);
-		mi = (CamelEwsMessageInfo *) camel_folder_summary_uid (folder->summary, id->id);
+		mi = (CamelEwsMessageInfo *) camel_folder_summary_get (folder->summary, id->id);
 		if (mi) {
 			gint server_flags;
 
@@ -966,7 +971,7 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder, GSList *items_cr
 			continue;
 
 		id = e_ews_item_get_id (item);
-		mi = (CamelEwsMessageInfo *) camel_folder_summary_uid (folder->summary, id->id);
+		mi = (CamelEwsMessageInfo *) camel_folder_summary_get (folder->summary, id->id);
 		if (mi) {
 			camel_message_info_free (mi);
 			g_object_unref (item);

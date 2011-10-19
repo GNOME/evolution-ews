@@ -41,6 +41,7 @@
 #include <e-ews-message.h>
 
 #include "camel-ews-folder.h"
+#include "camel-ews-settings.h"
 #include "camel-ews-store.h"
 #include "camel-ews-summary.h"
 #include "camel-ews-utils.h"
@@ -189,22 +190,23 @@ ews_store_authenticate	(EEwsConnection *cnc,
 	url = camel_service_get_camel_url (service);
 
 	if (retrying)
-		url->passwd = NULL;
+		camel_service_set_password (service, NULL);
 
-	if (!url->passwd) {
+	if (!camel_service_get_password (service)) {
 		gchar *prompt;
 
 		prompt = camel_session_build_password_prompt ("Exchange Web Services",
 				      url->user, url->host);
-		url->passwd = camel_session_get_password (session, service,
+		camel_service_set_password (service,
+					camel_session_get_password (session, service,
 						prompt, "password",
 						CAMEL_SESSION_PASSWORD_SECRET,
-						&error);
+						&error));
 		g_free (prompt);
 	}
 
 	e_ews_connection_authenticate (cnc, auth, url->user,
-				       url->passwd, error);
+				       camel_service_get_password (service), error);
 }
 
 static gboolean
@@ -799,7 +801,7 @@ ews_can_refresh_folder (CamelStore *store, CamelFolderInfo *info, GError **error
 
 	/* Delegate decision to parent class */
 	return CAMEL_STORE_CLASS(camel_ews_store_parent_class)->can_refresh_folder (store, info, error) ||
-			(camel_url_get_param (camel_service_get_camel_url ((CamelService *)store), "check_all") != NULL);
+		camel_ews_settings_get_check_all (CAMEL_EWS_SETTINGS (camel_service_get_settings (CAMEL_SERVICE (store))));
 }
 
 gboolean
@@ -871,7 +873,7 @@ camel_ews_store_class_init (CamelEwsStoreClass *class)
 	object_class->finalize = ews_store_finalize;
 
 	service_class = CAMEL_SERVICE_CLASS (class);
-
+	service_class->settings_type = CAMEL_TYPE_EWS_SETTINGS;
 	service_class->query_auth_types_sync = ews_store_query_auth_types_sync;
 	service_class->get_name = ews_get_name;
 	service_class->connect_sync = ews_connect_sync;

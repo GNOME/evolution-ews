@@ -147,7 +147,7 @@ PKG_CHECK_MODULES(LIBECAL, libecal-1.2 >= eds_minimum_version)
 PKG_CHECK_MODULES(LIBEDATACAL, libedata-cal-1.2 >= eds_minimum_version)
 PKG_CHECK_MODULES(LIBBOOK, libebook-1.2 >= eds_minimum_version)
 PKG_CHECK_MODULES(LIBEDATABOOK, libedata-book-1.2 >= eds_minimum_version)
-PKG_CHECK_MODULES(CAMEL, camel-provider-1.2 >= eds_minimum_version)
+PKG_CHECK_MODULES(CAMEL, camel-1.2 >= eds_minimum_version)
 
 dnl ****************************
 dnl Check for evolution plugins 
@@ -193,7 +193,7 @@ dnl *******************
 plugindir=`$PKG_CONFIG --variable=plugindir evolution-plugin-3.0`
 AC_SUBST(plugindir)
 
-camel_providerdir=`$PKG_CONFIG --variable=camel_providerdir camel-provider-1.2`
+camel_providerdir=`$PKG_CONFIG --variable=camel_providerdir camel-1.2`
 AC_SUBST(camel_providerdir) 
 
 privincludedir=`$PKG_CONFIG --variable=privincludedir libedataserver-1.2`
