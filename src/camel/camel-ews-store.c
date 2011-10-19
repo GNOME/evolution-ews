@@ -44,6 +44,7 @@
 #include "camel-ews-store.h"
 #include "camel-ews-summary.h"
 #include "camel-ews-utils.h"
+#include "camel-ews-settings.h"
 #include "ews-esource-utils.h"
 
 #ifdef G_OS_WIN32
@@ -799,7 +800,8 @@ ews_can_refresh_folder (CamelStore *store, CamelFolderInfo *info, GError **error
 
 	/* Delegate decision to parent class */
 	return CAMEL_STORE_CLASS(camel_ews_store_parent_class)->can_refresh_folder (store, info, error) ||
-			(camel_url_get_param (camel_service_get_camel_url ((CamelService *)store), "check_all") != NULL);
+		camel_ews_settings_get_check_all (CAMEL_EWS_SETTINGS (camel_service_get_settings (CAMEL_SERVICE (store))));
+
 }
 
 gboolean
@@ -872,6 +874,7 @@ camel_ews_store_class_init (CamelEwsStoreClass *class)
 
 	service_class = CAMEL_SERVICE_CLASS (class);
 
+	service_class->settings_type = CAMEL_TYPE_EWS_SETTINGS;
 	service_class->query_auth_types_sync = ews_store_query_auth_types_sync;
 	service_class->get_name = ews_get_name;
 	service_class->connect_sync = ews_connect_sync;

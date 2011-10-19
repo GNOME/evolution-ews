@@ -53,6 +53,7 @@ which needs to be better organized via functions */
 #include "camel-ews-store.h"
 #include "camel-ews-summary.h"
 #include "camel-ews-utils.h"
+#include "camel-ews-settings.h"
 #include <ews-camel-common.h>
 
 #define EWS_MAX_FETCH_COUNT 100
@@ -791,7 +792,9 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 	}
 
 	if (!g_ascii_strcasecmp (folder_name, "Inbox")) {
-		if (camel_url_get_param (camel_service_get_camel_url ((CamelService *) store), "filter"))
+		CamelStoreSettings *settings = CAMEL_STORE_SETTINGS (camel_service_get_settings (CAMEL_SERVICE (store)));
+
+		if (camel_store_settings_get_filter_inbox (settings))
 			folder->folder_flags |= CAMEL_FOLDER_FILTER_RECENT;
 	}
 
