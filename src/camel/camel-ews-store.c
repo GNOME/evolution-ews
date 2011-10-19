@@ -178,35 +178,37 @@ ews_compare_folder_name (gconstpointer a, gconstpointer b)
 }
 
 static void
+ews_update_folder_hierarchy (CamelEwsStore *ews_store, gchar *sync_state,
+			     gboolean includes_last_folder, GSList *folders_created,
+			     GSList *folders_deleted, GSList *folders_updated)
+{
+	ews_utils_sync_folders (ews_store, folders_created, folders_deleted, folders_updated);
+	camel_ews_store_summary_store_string_val (ews_store->summary, "sync_state", sync_state);
+	camel_ews_store_summary_save (ews_store->summary, NULL);
+
+	g_slist_foreach (folders_created, (GFunc) g_object_unref, NULL);
+	g_slist_foreach (folders_updated, (GFunc) g_object_unref, NULL);
+	g_slist_foreach (folders_deleted, (GFunc) g_free, NULL);
+	g_slist_free (folders_created);
+	g_slist_free (folders_deleted);
+	g_slist_free (folders_updated);
+	g_free (sync_state);
+}
+
+static void
 ews_store_authenticate	(EEwsConnection *cnc,
 			 SoupMessage *msg, SoupAuth *auth,
 			 gboolean retrying, gpointer data)
 {
 	CamelService *service = data;
-	CamelSession *session = camel_service_get_session (service);
-	GError *error = NULL;
 	CamelURL *url;
+	const gchar *password;
 
 	url = camel_service_get_camel_url (service);
+	password = camel_service_get_password (service);
+	g_return_if_fail (password != NULL);
 
-	if (retrying)
-		camel_service_set_password (service, NULL);
-
-	if (!camel_service_get_password (service)) {
-		gchar *prompt;
-
-		prompt = camel_session_build_password_prompt ("Exchange Web Services",
-				      url->user, url->host);
-		camel_service_set_password (service,
-					camel_session_get_password (session, service,
-						prompt, "password",
-						CAMEL_SESSION_PASSWORD_SECRET,
-						&error));
-		g_free (prompt);
-	}
-
-	e_ews_connection_authenticate (cnc, auth, url->user,
-				       camel_service_get_password (service), error);
+	e_ews_connection_authenticate (cnc, auth, url->user, password, NULL);
 }
 
 static gboolean
@@ -214,11 +216,14 @@ ews_connect_sync (CamelService *service, GCancellable *cancellable, GError **err
 {
 	CamelEwsStore *ews_store;
 	CamelEwsStorePrivate *priv;
+	CamelSession *session;
 	CamelURL *url;
+	gboolean success;
 
 	ews_store = (CamelEwsStore *) service;
 	priv = ews_store->priv;
 	url = camel_service_get_camel_url (service);
+	session = camel_service_get_session (service);
 
 	if (camel_service_get_connection_status (service) == CAMEL_SERVICE_DISCONNECTED)
 		return FALSE;
@@ -235,6 +240,19 @@ ews_connect_sync (CamelService *service, GCancellable *cancellable, GError **err
 					  error);
 
 	if (!priv->cnc) {
+		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
+		camel_service_disconnect_sync (service, TRUE, NULL);
+		return FALSE;
+	}
+
+	/* Try running an operation that requires authentication
+	 * to make sure we have a valid password available. */
+	success = camel_session_authenticate_sync (
+		session, service, NULL, cancellable, error);
+
+	if (!success) {
+		g_object_unref (priv->cnc);
+		priv->cnc = NULL;
 		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 		camel_service_disconnect_sync (service, TRUE, NULL);
 		return FALSE;
@@ -267,6 +285,60 @@ ews_disconnect_sync (CamelService *service, gboolean clean, GCancellable *cancel
 	camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	return TRUE;
+}
+
+static CamelAuthenticationResult
+ews_authenticate_sync (CamelService *service, const gchar *mechanism, GCancellable *cancellable, GError **error)
+{
+	CamelAuthenticationResult result;
+	CamelEwsStore *ews_store;
+	CamelEwsStorePrivate *priv;
+	GSList *folders_created = NULL;
+	GSList *folders_updated = NULL;
+	GSList *folders_deleted = NULL;
+	gboolean includes_last_folder = FALSE;
+	gchar *sync_state = NULL;
+	GError *local_error = NULL;
+
+	ews_store = (CamelEwsStore *) service;
+	priv = ews_store->priv;
+
+	/* XXX We need to run some operation that requires authentication
+	 *     but does not change any server-side state, so we can check
+	 *     the error status and determine if our password is valid.
+	 *     David suggested e_ews_connection_sync_folder_hierarchy(),
+	 *     since we have to do that eventually anyway. */
+
+	e_ews_connection_sync_folder_hierarchy (
+		priv->cnc, EWS_PRIORITY_MEDIUM,
+		&sync_state, &includes_last_folder,
+		&folders_created, &folders_updated, &folders_deleted,
+		cancellable, &local_error);
+
+	if (local_error == NULL) {
+		/* This consumes all allocated result data. */
+		ews_update_folder_hierarchy (
+			ews_store, sync_state, includes_last_folder,
+			folders_created, folders_updated, folders_deleted);
+	} else {
+		/* Make sure we're not leaking anything. */
+		g_warn_if_fail (sync_state == NULL);
+		g_warn_if_fail (folders_created == NULL);
+		g_warn_if_fail (folders_updated == NULL);
+		g_warn_if_fail (folders_deleted == NULL);
+	}
+
+	if (local_error == NULL) {
+		result = CAMEL_AUTHENTICATION_ACCEPTED;
+	} else if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED)) {
+		g_clear_error (&local_error);
+		result = CAMEL_AUTHENTICATION_REJECTED;
+	} else {
+		g_propagate_error (error, local_error);
+		result = CAMEL_AUTHENTICATION_ERROR;
+	}
+
+	return result;
 }
 
 static  GList*
@@ -371,24 +443,6 @@ folder_info_from_store_summary (CamelEwsStore *store, const gchar *top, guint32 
 	g_slist_free (folders);
 
 	return root_fi;
-}
-
-static void
-ews_update_folder_hierarchy (CamelEwsStore *ews_store, gchar *sync_state,
-			     gboolean includes_last_folder, GSList *folders_created,
-			     GSList *folders_deleted, GSList *folders_updated)
-{
-	ews_utils_sync_folders (ews_store, folders_created, folders_deleted, folders_updated);
-	camel_ews_store_summary_store_string_val (ews_store->summary, "sync_state", sync_state);
-	camel_ews_store_summary_save (ews_store->summary, NULL);
-
-	g_slist_foreach (folders_created, (GFunc) g_object_unref, NULL);
-	g_slist_foreach (folders_updated, (GFunc) g_object_unref, NULL);
-	g_slist_foreach (folders_deleted, (GFunc) g_free, NULL);
-	g_slist_free (folders_created);
-	g_slist_free (folders_deleted);
-	g_slist_free (folders_updated);
-	g_free (sync_state);
 }
 
 static void
@@ -878,6 +932,7 @@ camel_ews_store_class_init (CamelEwsStoreClass *class)
 	service_class->get_name = ews_get_name;
 	service_class->connect_sync = ews_connect_sync;
 	service_class->disconnect_sync = ews_disconnect_sync;
+	service_class->authenticate_sync = ews_authenticate_sync;
 
 	store_class = CAMEL_STORE_CLASS (class);
 	store_class->hash_folder_name = ews_hash_folder_name;
