@@ -55,7 +55,7 @@ static CamelProviderConfEntry ews_conf_entries[] = {
 	  N_("_Apply filters to new messages in Inbox on this server"), "0" },
 	{ CAMEL_PROVIDER_CONF_CHECKBOX, "filter-junk", NULL,
 	  N_("Check new messages for Jun_k contents"), "0" },
-	{ CAMEL_PROVIDER_CONF_CHECKBOX, "filter-junk-inbox", "filter_junk",
+	{ CAMEL_PROVIDER_CONF_CHECKBOX, "filter-junk-inbox", "filter-junk",
 	  N_("Only check for Junk messages in the IN_BOX folder"), "0" },
 	{ CAMEL_PROVIDER_CONF_CHECKBOX, "stay-synchronized", NULL,
 	  N_("Automatically synchroni_ze remote mail locally"), "0" },
