@@ -1,12 +1,8 @@
 AC_PREREQ(2.58)
-AC_INIT([evolution-ews], [0.31.0], [http://bugzilla.gnome.org/browse.cgi?product=evolution-ews])
+AC_INIT([evolution-ews], [3.2.1], [http://bugzilla.gnome.org/browse.cgi?product=evolution-ews])
 AM_INIT_AUTOMAKE([gnu 1.9])
 AC_CONFIG_SRCDIR(README)
 AC_CONFIG_HEADERS(config.h)
-
-BASE_VERSION=3.0
-m4_define([base_version], [3.0])
-AC_SUBST(BASE_VERSION)
 
 dnl ****************************
 dnl Evolution-EWS API version
@@ -15,16 +11,12 @@ m4_define([EVO_EWS_API_VERSION_MACRO], [1.0])
 EVO_EWS_API_VERSION=EVO_EWS_API_VERSION_MACRO
 AC_SUBST(EVO_EWS_API_VERSION)
 
-dnl Some requirements have versioned package names
-dnl XXX In the spirit of getting rid of versioned
-dnl     files, can we please drop these suffixes?
-EDS_PACKAGE=1.2
 
 dnl *******************
 dnl Required Packages
 dnl *******************
-m4_define([eds_minimum_version], [2.31.1])
-m4_define([evo_minimum_version], [2.31.1])
+m4_define([eds_minimum_version], [3.2.0])
+m4_define([evo_minimum_version], [3.2.0])
 m4_define([glib_minimum_version], [2.16.1])
 m4_define([gconf_minimum_version], [2.0.0])
 m4_define([libsoup_minimum_version], [2.30])
@@ -38,7 +30,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 dnl ****************************
 dnl Initialize maintainer mode
 dnl ****************************
-AM_MAINTAINER_MODE
+AM_MAINTAINER_MODE[enabled]
 
 AC_PROG_CC
 AC_PROG_CPP
@@ -128,49 +120,15 @@ PKG_PROG_PKG_CONFIG
 dnl ********************************
 dnl Check for evolution-data-server
 dnl ********************************
-PKG_CHECK_MODULES(EVOLUTION_DATA_SERVER, evolution-data-server-$EDS_PACKAGE >= eds_minimum_version)
+PKG_CHECK_MODULES(EVOLUTION_DATA_SERVER, evolution-data-server-1.2 >= eds_minimum_version)
 
-dnl **********************************
-dnl Gtk-3 compatibility
-dnl Use the API version 3.0 while compiling with gtk+-3
-dnl **********************************
-if $PKG_CONFIG --atleast-version=3.0 evolution-data-server-$EDS_PACKAGE; then
-	enable_gtk3=yes
-	GTK_PACKAGE="gtk+-3.0"
-	EVO_PLUGIN_PACKAGE="evolution-plugin-3.0"
-	EVO_SHELL_PACKAGE="evolution-shell-3.0"
-	EDS_UI_PACKAGE="libedataserverui-3.0"
-	gtk_minimum_version="2.90.4"
-
-dnl	extensiondir has been replaced with below evolution-3.0 onwards, so use same
-dnl	gtk3 check for this too
-	ecal_backenddir=`$PKG_CONFIG --variable=backenddir libedata-cal-$EDS_PACKAGE`
-	AC_SUBST(ecal_backenddir)
-
-	ebook_backenddir=`$PKG_CONFIG --variable=backenddir libedata-book-$EDS_PACKAGE`
-	AC_SUBST(ebook_backenddir)
-else
-	enable_gtk3=no
-	GTK_PACKAGE="gtk+-2.0"
-	EVO_PLUGIN_PACKAGE="evolution-plugin"
-	EVO_SHELL_PACKAGE="evolution-shell"
-	EDS_UI_PACKAGE="libedataserverui-$EDS_PACKAGE"
-	gtk_minimum_version="2.20.0"
-
-	extensiondir=`$PKG_CONFIG --variable=extensiondir evolution-data-server-$EDS_PACKAGE`
-	AC_SUBST(extensiondir)
-fi
-
-AM_CONDITIONAL([ENABLE_GTK3], [test "$enable_gtk3" = yes])
-GTK_MODULE="$GTK_PACKAGE >= $gtk_minimum_version"
-AC_SUBST(GTK_MODULE)
 
 dnl *****************************
 dnl Check for GNOME Platform
 dnl *****************************
 PKG_CHECK_MODULES(GNOME_PLATFORM,
 	[glib-2.0 >= glib_minimum_version
-	$GTK_MODULE
+	gtk+-3.0 >= 2.90.4
 	gconf-2.0 >= gconf_minimum_version])
 
 PKG_CHECK_MODULES(SOUP, libsoup-2.4 >= libsoup_minimum_version)
@@ -182,24 +140,24 @@ AC_SUBST(LIBSOUP_REQUIRED)
 dnl ********************************
 dnl Check for remaining evolution-data-server modules
 dnl ********************************
-PKG_CHECK_MODULES(LIBEDATASERVER, libedataserver-$EDS_PACKAGE >= eds_minimum_version)
-PKG_CHECK_MODULES(LIBEDATASERVERUI, $EDS_UI_PACKAGE >= eds_minimum_version)
-PKG_CHECK_MODULES(LIBEBACKEND, libebackend-$EDS_PACKAGE >= eds_minimum_version)
-PKG_CHECK_MODULES(LIBECAL, libecal-$EDS_PACKAGE >= eds_minimum_version)
-PKG_CHECK_MODULES(LIBEDATACAL, libedata-cal-$EDS_PACKAGE >= eds_minimum_version)
-PKG_CHECK_MODULES(LIBBOOK, libebook-$EDS_PACKAGE >= eds_minimum_version)
-PKG_CHECK_MODULES(LIBEDATABOOK, libedata-book-$EDS_PACKAGE >= eds_minimum_version)
-PKG_CHECK_MODULES(CAMEL, camel-provider-$EDS_PACKAGE >= eds_minimum_version)
+PKG_CHECK_MODULES(LIBEDATASERVER, libedataserver-1.2 >= eds_minimum_version)
+PKG_CHECK_MODULES(LIBEDATASERVERUI, libedataserverui-3.0 >= eds_minimum_version)
+PKG_CHECK_MODULES(LIBEBACKEND, libebackend-1.2 >= eds_minimum_version)
+PKG_CHECK_MODULES(LIBECAL, libecal-1.2 >= eds_minimum_version)
+PKG_CHECK_MODULES(LIBEDATACAL, libedata-cal-1.2 >= eds_minimum_version)
+PKG_CHECK_MODULES(LIBBOOK, libebook-1.2 >= eds_minimum_version)
+PKG_CHECK_MODULES(LIBEDATABOOK, libedata-book-1.2 >= eds_minimum_version)
+PKG_CHECK_MODULES(CAMEL, camel-provider-1.2 >= eds_minimum_version)
 
 dnl ****************************
 dnl Check for evolution plugins 
 dnl ****************************
-PKG_CHECK_MODULES(EVOLUTION_PLUGIN, $EVO_PLUGIN_PACKAGE >= evo_minimum_version)
+PKG_CHECK_MODULES(EVOLUTION_PLUGIN, evolution-plugin-3.0 >= evo_minimum_version)
 
 dnl ****************************
 dnl Check for evolution shell 
 dnl ****************************
-PKG_CHECK_MODULES(EVOLUTION_SHELL, $EVO_SHELL_PACKAGE >= evo_minimum_version)
+PKG_CHECK_MODULES(EVOLUTION_SHELL, evolution-shell-3.0 >= evo_minimum_version)
 
 dnl ****************************
 dnl Check for sqlite3 
@@ -214,7 +172,7 @@ PKG_CHECK_MODULES(LIBICAL, libical)
 dnl ****************************
 dnl Expose version information
 dnl ****************************
-API_VERSION=$EDS_PACKAGE
+API_VERSION=1.2
 AC_SUBST(API_VERSION)
 
 EDS_REQUIRED=eds_minimum_version
@@ -232,29 +190,27 @@ AC_SUBST_FILE(EVO_PLUGIN_RULE)
 dnl *******************
 dnl Special directories
 dnl *******************
-plugindir=`$PKG_CONFIG --variable=plugindir $EVO_PLUGIN_PACKAGE`
+plugindir=`$PKG_CONFIG --variable=plugindir evolution-plugin-3.0`
 AC_SUBST(plugindir)
 
-camel_providerdir=`$PKG_CONFIG --variable=camel_providerdir camel-provider-$EDS_PACKAGE`
+camel_providerdir=`$PKG_CONFIG --variable=camel_providerdir camel-provider-1.2`
 AC_SUBST(camel_providerdir) 
 
-privdatadir='${datadir}'/evolution-data-server-$BASE_VERSION
-AC_SUBST(privdatadir)
-
-privincludedir='${includedir}'/evolution-data-server-$BASE_VERSION
+privincludedir=`$PKG_CONFIG --variable=privincludedir libedataserver-1.2`
 AC_SUBST(privincludedir)
 
-privlibdir='${libdir}'/evolution-data-server-$BASE_VERSION
+privlibdir=`$PKG_CONFIG --variable=privlibdir evolution-data-server-1.2`
 AC_SUBST(privlibdir)
 
-imagesdir='${datadir}'/pixmaps/evolution-data-server
-AC_SUBST(imagesdir)
-
-uidir="$privdatadir/ui"
-AC_SUBST(uidir)
-
-edataserver_privincludedir=`$PKG_CONFIG --variable=privincludedir libedataserver-$EDS_PACKAGE`
+edataserver_privincludedir=`$PKG_CONFIG --variable=privincludedir libedataserver-1.2`
 AC_SUBST(edataserver_privincludedir)
+
+ecal_backenddir=`$PKG_CONFIG --variable=backenddir libedata-cal-1.2`
+AC_SUBST(ecal_backenddir)
+
+ebook_backenddir=`$PKG_CONFIG --variable=backenddir libedata-book-1.2`
+AC_SUBST(ebook_backenddir)
+
 
 dnl *************
 dnl Gtk Doc stuff
