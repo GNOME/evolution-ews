@@ -1,4 +1,4 @@
-lib_LTLIBRARIES = libewsutils.la
+privlib_LTLIBRARIES = libewsutils.la
 
 libewsutils_la_CPPFLAGS = \
 	$(AM_CPPFLAGS)					\
