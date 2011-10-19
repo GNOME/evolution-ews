@@ -2083,7 +2083,8 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 
 		ebews_start_refreshing (ebews);
 
-		if (e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
+		if (priv->ebsdb &&
+		    e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
 			fetch_from_offline (ebews, book_view, query, error);
 			return;
 		}
