@@ -231,6 +231,7 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		const gchar *host_url_val = camel_url_get_param (url, "hosturl");
 		const gchar *oab_url_val = camel_url_get_param (url, "oaburl");
 		const gchar *temp, *email_id;
+		gchar *temp_host_url_val = NULL;
 		gchar *url_string;
 		struct _AutoDiscCallBackData *cbdata = g_new0 (struct _AutoDiscCallBackData, 1);
 		EAccount *account;
@@ -244,8 +245,15 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		camel_url_set_param (url, "email", email_id);
 		temp = g_strstr_len (email_id, -1, "@");
 		/* Don't overwrite the URL if it's already been set */
-		if (!url->host || !url->host[0])
-			camel_url_set_host (url, g_strdup (temp + 1));
+		if (temp && (!url->host || !url->host[0])) {
+			camel_url_set_host (url, temp + 1);
+		}
+
+		if (temp && (!host_url_val || !*host_url_val)) {
+			temp_host_url_val = g_strdup_printf ("https://exchange.%s/EWS/Exchange.asmx", temp + 1);
+			host_url_val = temp_host_url_val;
+			camel_url_set_param (url, "hosturl", host_url_val);
+		}
 
 		url_string = camel_url_to_string (url, 0);
 		e_account_set_string (account, E_ACCOUNT_SOURCE_URL, url_string);
@@ -272,6 +280,8 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		gtk_label_set_mnemonic_widget (GTK_LABEL (label), host_url);
 		if (host_url_val && *host_url_val)
 			gtk_entry_set_text (GTK_ENTRY (host_url), host_url_val);
+		else
+			gtk_entry_set_text (GTK_ENTRY (host_url), "https://exchange.server.com/EWS/Exchange.asmx");
 		gtk_box_pack_start (GTK_BOX (hbox), host_url, TRUE, TRUE, 0);
 		g_signal_connect (host_url, "changed", G_CALLBACK(host_url_changed), data->config);
 
@@ -292,6 +302,8 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		gtk_table_attach (GTK_TABLE (data->parent), oab_label, 0, 1, row, row+1, 0, 0, 0, 0);
 		gtk_table_attach (GTK_TABLE (data->parent), oab_url, 1, 2, row, row+1, GTK_FILL|GTK_EXPAND, GTK_FILL, 0, 0);
 		row++;
+
+		g_free (temp_host_url_val);
 	}
 
 	camel_url_free (url);
