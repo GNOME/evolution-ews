@@ -161,7 +161,7 @@ summary_header_from_db (CamelFolderSummary *s, CamelFIRecord *mir)
 	CamelEwsSummary *gms = CAMEL_EWS_SUMMARY (s);
 	gchar *part;
 
-	if (CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_from_db (s, mir) == -1)
+	if (!CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_from_db (s, mir))
 		return FALSE;
 
 	part = mir->bdata;
