@@ -39,7 +39,7 @@
 #include "camel-ews-store-summary.h"
 #include "ews-esource-utils.h"
 
-#define d(x) x
+#define d(x)
 
 G_DEFINE_TYPE (ExchangeEWSAccountListener, exchange_ews_account_listener, G_TYPE_OBJECT)
 
@@ -352,8 +352,6 @@ static void
 exchange_ews_account_listener_construct (ExchangeEWSAccountListener *config_listener)
 {
 	EIterator *iter;
-
-	d(g_print ("\n Construct the listener"));
 
 	config_listener->priv->account_list = e_account_list_new (config_listener->priv->gconf_client);
 
