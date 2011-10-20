@@ -102,8 +102,64 @@ static gchar *
 ews_get_filename (CamelFolder *folder, const gchar *uid, GError **error)
 {
 	CamelEwsFolder *ews_folder = CAMEL_EWS_FOLDER(folder);
+	GChecksum *sha = g_checksum_new (G_CHECKSUM_SHA256);
+	gchar *ret;
 
-	return camel_data_cache_get_filename (ews_folder->cache, "cache", uid, error);
+	g_checksum_update(sha, (guchar *)uid, strlen(uid));
+	ret = camel_data_cache_get_filename (ews_folder->cache, "cur",
+					     g_checksum_get_string (sha),
+					     error);
+	g_checksum_free (sha);
+	return ret;
+}
+
+static gint
+ews_data_cache_remove (CamelDataCache *cdc,
+		       const gchar *path,
+		       const gchar *key,
+		       GError **error)
+{
+	GChecksum *sha = g_checksum_new (G_CHECKSUM_SHA256);
+	gint ret;
+
+	g_checksum_update(sha, (guchar *)key, strlen(key));
+	ret = camel_data_cache_remove (cdc, path, g_checksum_get_string (sha),
+				       error);
+	g_checksum_free (sha);
+	return ret;
+}
+
+static CamelStream *
+ews_data_cache_get (CamelDataCache *cdc,
+		    const gchar *path,
+		    const gchar *key,
+		    GError **error)
+{
+	GChecksum *sha = g_checksum_new (G_CHECKSUM_SHA256);
+	CamelStream *ret;
+
+	g_checksum_update(sha, (guchar *)key, strlen(key));
+	ret = camel_data_cache_get (cdc, path, g_checksum_get_string (sha),
+				    error);
+	g_checksum_free (sha);
+	return ret;
+}
+
+static gchar *
+ews_data_cache_get_filename (CamelDataCache *cdc,
+			     const gchar *path,
+			     const gchar *key,
+			     GError **error)
+{
+	GChecksum *sha = g_checksum_new (G_CHECKSUM_SHA256);
+	gchar *ret;
+
+	g_checksum_update(sha, (guchar *)key, strlen(key));
+	ret = camel_data_cache_get_filename (cdc, path,
+					     g_checksum_get_string (sha),
+					     error);
+	g_checksum_free (sha);
+	return ret;
 }
 
 #if ! EDS_CHECK_VERSION(2,33,0)
@@ -129,10 +185,22 @@ camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder, const gchar
 	priv = ews_folder->priv;
 
 	g_static_rec_mutex_lock (&priv->cache_lock);
-	stream = camel_data_cache_get (ews_folder->cache, "cur", uid, error);
+	stream = ews_data_cache_get (ews_folder->cache, "cur", uid, error);
 	if (!stream) {
+		gchar *old_fname = camel_data_cache_get_filename (ews_folder->cache, "cur",
+								  uid, error);
+		if (!g_access (old_fname, R_OK)) {
+			gchar *new_fname = ews_data_cache_get_filename (ews_folder->cache,
+									"cur", uid, error);
+			g_rename (old_fname, new_fname);
+			g_free (new_fname);
+			stream = ews_data_cache_get (ews_folder->cache, "cur", uid, error);
+		}
+		g_free (old_fname);
+		if (!stream) {
 			g_static_rec_mutex_unlock (&priv->cache_lock);
-		return NULL;
+			return NULL;
+		}
 	}
 
 	msg = camel_mime_message_new ();
@@ -431,8 +499,8 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 		}
 	}
 
-	cache_file = camel_data_cache_get_filename  (ews_folder->cache, "cur",
-						     uid, error);
+	cache_file = ews_data_cache_get_filename (ews_folder->cache, "cur",
+						  uid, error);
 	temp = g_strrstr (cache_file, "/");
 	dir = g_strndup (cache_file, temp - cache_file);
 
@@ -1259,7 +1327,7 @@ ews_delete_messages (CamelFolder *folder, GSList *deleted_items, gboolean expung
 				camel_folder_summary_lock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
 				camel_folder_change_info_remove_uid (changes, uid);
 				camel_folder_summary_remove_uid (folder->summary, uid);
-				camel_data_cache_remove(ews_folder->cache, "cache", uid, NULL);
+				ews_data_cache_remove(ews_folder->cache, "cur", uid, NULL);
 				camel_folder_summary_unlock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
 				deleted_items = g_slist_next (deleted_items);
 			}
