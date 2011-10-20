@@ -52,11 +52,11 @@ static CamelMessageInfo *ews_message_info_migrate (CamelFolderSummary *s, FILE *
 static CamelMessageContentInfo * ews_content_info_migrate (CamelFolderSummary *s, FILE *in);
 static gboolean ews_info_set_flags(CamelMessageInfo *info, guint32 flags, guint32 set);
 
-static gint summary_header_from_db (CamelFolderSummary *s, CamelFIRecord *mir);
+static gboolean summary_header_from_db (CamelFolderSummary *s, CamelFIRecord *mir);
 static CamelFIRecord * summary_header_to_db (CamelFolderSummary *s, GError **error);
 static CamelMIRecord * message_info_to_db (CamelFolderSummary *s, CamelMessageInfo *info);
 static CamelMessageInfo * message_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir);
-static gint content_info_to_db (CamelFolderSummary *s, CamelMessageContentInfo *info, CamelMIRecord *mir);
+static gboolean content_info_to_db (CamelFolderSummary *s, CamelMessageContentInfo *info, CamelMIRecord *mir);
 static CamelMessageContentInfo * content_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir);
 
 /*End of Prototypes*/
@@ -155,14 +155,14 @@ camel_ews_summary_new (struct _CamelFolder *folder, const gchar *filename)
 	return summary;
 }
 
-static gint
+static gboolean
 summary_header_from_db (CamelFolderSummary *s, CamelFIRecord *mir)
 {
 	CamelEwsSummary *gms = CAMEL_EWS_SUMMARY (s);
 	gchar *part;
 
 	if (CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_from_db (s, mir) == -1)
-		return -1;
+		return FALSE;
 
 	part = mir->bdata;
 
@@ -173,7 +173,7 @@ summary_header_from_db (CamelFolderSummary *s, CamelFIRecord *mir)
 		gms->sync_state = g_strdup (part);
 	}
 
-	return 0;
+	return TRUE;
 }
 
 static gint
@@ -305,7 +305,7 @@ ews_content_info_migrate (CamelFolderSummary *s, FILE *in)
 		return camel_folder_summary_content_info_new (s);
 }
 
-static gint
+static gboolean
 content_info_to_db (CamelFolderSummary *s, CamelMessageContentInfo *info, CamelMIRecord *mir)
 {
 
@@ -314,7 +314,7 @@ content_info_to_db (CamelFolderSummary *s, CamelMessageContentInfo *info, CamelM
 		return CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->content_info_to_db (s, info, mir);
 	} else {
 		mir->cinfo = g_strdup ("0");
-		return 0;
+		return TRUE;
 	}
 }
 
