@@ -30,6 +30,7 @@
 
 #include <glib/gi18n-lib.h>
 
+#include "camel-ews-settings.h"
 #include "camel-ews-store.h"
 #include "camel-ews-transport.h"
 #include "camel-ews-utils.h"
@@ -49,18 +50,23 @@ ews_transport_connect_sync (CamelService *service,
 
 static gchar *
 ews_transport_get_name (CamelService *service,
-                              gboolean brief)
+                        gboolean brief)
 {
-	CamelURL *url = camel_service_get_camel_url (service);
+	CamelNetworkSettings *network_settings;
+	CamelSettings *settings;
+	const gchar *host;
+
+	settings = camel_service_get_settings (service);
+
+	network_settings = CAMEL_NETWORK_SETTINGS (settings);
+	host = camel_network_settings_get_host (network_settings);
 
 	if (brief)
 		return g_strdup_printf (
-			_("Exchange server %s"),
-			url->host);
+			_("Exchange server %s"), host);
 	else
 		return g_strdup_printf (
-			_("Exchange mail delivery via %s"),
-			url->host);
+			_("Exchange mail delivery via %s"), host);
 }
 
 static gboolean
@@ -71,17 +77,25 @@ ews_send_to_sync (CamelTransport *transport,
 		  GCancellable *cancellable,
 		  GError **error)
 {
+	CamelNetworkSettings *network_settings;
+	CamelEwsSettings *ews_settings;
+	CamelSettings *settings;
 	CamelService *service;
 	EEwsConnection *cnc;
 	const gchar *host_url;
-	CamelURL *url;
+	const gchar *user;
 	gboolean res;
 
 	service = CAMEL_SERVICE (transport);
-	url = camel_service_get_camel_url (service);
-	host_url = camel_url_get_param (url, "hosturl");
+	settings = camel_service_get_settings (service);
 
-	cnc = e_ews_connection_find (host_url, url->user);
+	ews_settings = CAMEL_EWS_SETTINGS (settings);
+	host_url = camel_ews_settings_get_hosturl (ews_settings);
+
+	network_settings = CAMEL_NETWORK_SETTINGS (settings);
+	user = camel_network_settings_get_user (network_settings);
+
+	cnc = e_ews_connection_find (host_url, user);
 	if (!cnc) {
 		g_set_error (error, CAMEL_SERVICE_ERROR,
 			     CAMEL_SERVICE_ERROR_NOT_CONNECTED,

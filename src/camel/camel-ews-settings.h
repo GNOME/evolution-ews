@@ -59,12 +59,19 @@ GType		camel_ews_settings_get_type			(void) G_GNUC_CONST;
 gboolean	camel_ews_settings_get_check_all		(CamelEwsSettings *settings);
 void		camel_ews_settings_set_check_all		(CamelEwsSettings *settings,
 								 gboolean check_all);
+const gchar *	camel_ews_settings_get_email			(CamelEwsSettings *settings);
+void		camel_ews_settings_set_email			(CamelEwsSettings *settings,
+								 const gchar *email);
 gboolean	camel_ews_settings_get_filter_junk		(CamelEwsSettings *settings);
 void		camel_ews_settings_set_filter_junk		(CamelEwsSettings *settings,
 								 gboolean filter_junk);
 gboolean	camel_ews_settings_get_filter_junk_inbox	(CamelEwsSettings *settings);
 void		camel_ews_settings_set_filter_junk_inbox	(CamelEwsSettings *settings,
 								 gboolean filter_junk_inbox);
+const gchar *	camel_ews_settings_get_hosturl			(CamelEwsSettings *settings);
+void		camel_ews_settings_set_hosturl			(CamelEwsSettings *settings,
+								 const gchar *hosturl);
+
 G_END_DECLS
 
 #endif /* CAMEL_EWS_SETTINGS_H */

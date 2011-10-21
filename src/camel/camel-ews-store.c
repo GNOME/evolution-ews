@@ -63,7 +63,6 @@
 
 struct _CamelEwsStorePrivate {
 
-	gchar *host_url;
 	time_t last_refresh_time;
 	GMutex *get_finfo_lock;
 	EEwsConnection *cnc;
@@ -71,8 +70,7 @@ struct _CamelEwsStorePrivate {
 
 extern CamelServiceAuthType camel_ews_password_authtype; /*for the query_auth_types function*/
 static gboolean	ews_store_construct	(CamelService *service, CamelSession *session,
-			 		 CamelProvider *provider, CamelURL *url,
-		 			 GError **error);
+			 		 CamelProvider *provider, GError **error);
 
 static void camel_ews_store_initable_init (GInitableIface *interface);
 static GInitableIface *parent_initable_interface;
@@ -89,18 +87,16 @@ ews_store_initable_init		(GInitable *initable,
 {
 	CamelService *service;
 	CamelSession *session;
-	CamelURL *url;
 	gboolean ret;
 	
 	service = CAMEL_SERVICE (initable);
-	url = camel_service_get_camel_url (service);
 	session = camel_service_get_session (service);
 
 	/* Chain up to parent interface's init() method. */
 	if (!parent_initable_interface->init (initable, cancellable, error))
 		return FALSE;
 
-	ret = ews_store_construct (service, session, NULL, url, error);
+	ret = ews_store_construct (service, session, NULL, error);
 
 	/* Add transport here ? */
 
@@ -117,8 +113,7 @@ camel_ews_store_initable_init (GInitableIface *interface)
 
 static gboolean
 ews_store_construct	(CamelService *service, CamelSession *session,
-			 CamelProvider *provider, CamelURL *url,
-			 GError **error)
+			 CamelProvider *provider, GError **error)
 {
 	CamelEwsStore *ews_store;
 	CamelEwsStorePrivate *priv;
@@ -142,15 +137,6 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 		return FALSE;
 	}
 	ews_store->storage_path = session_storage_path;
-
-	priv->host_url = g_strdup (camel_url_get_param (url, "hosturl"));
-	if (!priv->host_url) {
-		g_set_error (
-			error, CAMEL_STORE_ERROR,
-			CAMEL_STORE_ERROR_INVALID,
-			_("EWS service has no host URL"));
-		return FALSE;
-	}
 
 	/* Note. update account-listener plugin if filename is changed here, as it would remove the summary
 	   by forming the path itself */
@@ -200,15 +186,21 @@ ews_store_authenticate	(EEwsConnection *cnc,
 			 SoupMessage *msg, SoupAuth *auth,
 			 gboolean retrying, gpointer data)
 {
+	CamelNetworkSettings *network_settings;
+	CamelSettings *settings;
 	CamelService *service = data;
-	CamelURL *url;
 	const gchar *password;
+	const gchar *user;
 
-	url = camel_service_get_camel_url (service);
 	password = camel_service_get_password (service);
+	settings = camel_service_get_settings (service);
+
+	network_settings = CAMEL_NETWORK_SETTINGS (settings);
+	user = camel_network_settings_get_user (network_settings);
+
 	g_return_if_fail (password != NULL);
 
-	e_ews_connection_authenticate (cnc, auth, url->user, password, NULL);
+	e_ews_connection_authenticate (cnc, auth, user, password, NULL);
 }
 
 static gboolean
@@ -216,14 +208,24 @@ ews_connect_sync (CamelService *service, GCancellable *cancellable, GError **err
 {
 	CamelEwsStore *ews_store;
 	CamelEwsStorePrivate *priv;
+	CamelEwsSettings *ews_settings;
+	CamelNetworkSettings *network_settings;
+	CamelSettings *settings;
 	CamelSession *session;
-	CamelURL *url;
+	const gchar *hosturl;
+	const gchar *user;
 	gboolean success;
 
 	ews_store = (CamelEwsStore *) service;
 	priv = ews_store->priv;
-	url = camel_service_get_camel_url (service);
 	session = camel_service_get_session (service);
+	settings = camel_service_get_settings (service);
+
+	network_settings = CAMEL_NETWORK_SETTINGS (settings);
+	user = camel_network_settings_get_user (network_settings);
+
+	ews_settings = CAMEL_EWS_SETTINGS (settings);
+	hosturl = camel_ews_settings_get_hosturl (ews_settings);
 
 	if (camel_service_get_connection_status (service) == CAMEL_SERVICE_DISCONNECTED)
 		return FALSE;
@@ -235,7 +237,7 @@ ews_connect_sync (CamelService *service, GCancellable *cancellable, GError **err
 		return TRUE;
 	}
 
-	priv->cnc = e_ews_connection_new (priv->host_url, url->user, NULL,
+	priv->cnc = e_ews_connection_new (hosturl, user, NULL,
 					  G_CALLBACK (ews_store_authenticate), service,
 					  error);
 
@@ -824,15 +826,22 @@ ews_rename_folder_sync	(CamelStore *store,
 gchar *
 ews_get_name (CamelService *service, gboolean brief)
 {
-	CamelURL *url;
+	CamelNetworkSettings *network_settings;
+	CamelSettings *settings;
+	const gchar *host;
+	const gchar *user;
 
-	url = camel_service_get_camel_url (service);
+	settings = camel_service_get_settings (service);
+
+	network_settings = CAMEL_NETWORK_SETTINGS (settings);
+	host = camel_network_settings_get_host (network_settings);
+	user = camel_network_settings_get_user (network_settings);
 
 	if (brief)
-		return g_strdup_printf(_("Exchange server %s"), url->host);
+		return g_strdup_printf(_("Exchange server %s"), host);
 	else
 		return g_strdup_printf(_("Exchange service for %s on %s"),
-				       url->user, url->host);
+				       user, host);
 }
 
 EEwsConnection *
@@ -906,7 +915,6 @@ ews_store_finalize (GObject *object)
 	ews_store = CAMEL_EWS_STORE (object);
 
 	g_free (ews_store->storage_path);
-	g_free (ews_store->priv->host_url);
 	g_mutex_free (ews_store->priv->get_finfo_lock);
 
 	/* Chain up to parent's finalize() method. */

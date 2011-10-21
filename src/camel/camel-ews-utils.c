@@ -30,6 +30,7 @@
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 
+#include "camel-ews-settings.h"
 #include "camel-ews-utils.h"
 #include "ews-esource-utils.h"
 #include "e-ews-message.h"
@@ -291,21 +292,6 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store, const gchar *fid)
 {
 	CamelEwsStoreSummary *ews_summary = store->summary;
 	CamelFolderInfo *fi;
-	gchar *url;
-	CamelURL *curl;
-
-	curl = camel_service_get_camel_url (CAMEL_SERVICE (store));
-	url = camel_url_to_string (curl,
-			 CAMEL_URL_HIDE_PARAMS|
-			 CAMEL_URL_HIDE_AUTH);
-
-	if ( url[strlen (url) - 1] != '/') {
-		gchar *temp_url;
-
-		temp_url = g_strconcat (url, "/", NULL);
-		g_free ((gchar *)url);
-		url = temp_url;
-	}
 
 	fi = camel_folder_info_new ();
 	fi->full_name = camel_ews_store_summary_get_folder_full_name (ews_summary,
@@ -318,8 +304,6 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store, const gchar *fid)
 								fid, NULL);
 	fi->total = camel_ews_store_summary_get_folder_total (ews_summary,
 							      fid, NULL);
-
-	g_free (url);
 
 	return fi;
 }
@@ -349,7 +333,17 @@ static void
 sync_deleted_folders (CamelEwsStore *store, GSList *deleted_folders)
 {
 	CamelEwsStoreSummary *ews_summary = store->summary;
+	CamelEwsSettings *ews_settings;
+	CamelSettings *settings;
+	CamelService *service;
+	const gchar *email;
 	GSList *l;
+
+	service = CAMEL_SERVICE (store);
+	settings = camel_service_get_settings (service);
+
+	ews_settings = CAMEL_EWS_SETTINGS (settings);
+	email = camel_ews_settings_get_email (ews_settings);
 
 	for (l = deleted_folders; l != NULL; l = g_slist_next (l)) {
 		const gchar *fid = l->data;
@@ -370,10 +364,9 @@ sync_deleted_folders (CamelEwsStore *store, GSList *deleted_folders)
 			g_clear_error (&error);
 		} else {
 			struct remove_esrc_data *remove_data = g_new0(struct remove_esrc_data, 1);
-			CamelURL *url = camel_service_get_camel_url (CAMEL_SERVICE (store));
 
 			remove_data->fid = g_strdup (fid);
-			remove_data->account_name = g_strdup (camel_url_get_param (url, "email"));
+			remove_data->account_name = g_strdup (email);
 			remove_data->ftype = ftype;
 
 			/* This uses GConf so has to be done in the main thread */
@@ -558,7 +551,24 @@ static gboolean ews_do_add_esource (gpointer user_data)
 static void
 sync_created_folders (CamelEwsStore *ews_store, GSList *created_folders)
 {
+	CamelNetworkSettings *network_settings;
+	CamelEwsSettings *ews_settings;
+	CamelSettings *settings;
+	CamelService *service;
 	GSList *l;
+	const gchar *email;
+	const gchar *hosturl;
+	const gchar *user;
+
+	service = CAMEL_SERVICE (ews_store);
+	settings = camel_service_get_settings (service);
+
+	ews_settings = CAMEL_EWS_SETTINGS (settings);
+	email = camel_ews_settings_get_email (ews_settings);
+	hosturl = camel_ews_settings_get_hosturl (ews_settings);
+
+	network_settings = CAMEL_NETWORK_SETTINGS (settings);
+	user = camel_network_settings_get_user (network_settings);
 
 	for (l = created_folders; l != NULL; l = g_slist_next (l)) {
 		EEwsFolder *folder = (EEwsFolder *) l->data;
@@ -571,16 +581,18 @@ sync_created_folders (CamelEwsStore *ews_store, GSList *created_folders)
 		    ftype == EWS_FOLDER_TYPE_TASKS ||
 		    ftype == EWS_FOLDER_TYPE_CONTACTS) {
 			struct add_esrc_data *add_data = g_new0 (struct add_esrc_data, 1);
-			CamelURL *url = camel_service_get_camel_url (CAMEL_SERVICE (ews_store));
+			CamelURL *url = camel_service_new_camel_url (service);
 
 			add_data->folder = g_object_ref (folder);
 			add_data->account_uri = camel_url_to_string (url, CAMEL_URL_HIDE_PARAMS);
-			add_data->account_name = g_strdup (camel_url_get_param (url, "email"));
-			add_data->username = g_strdup (url->user);
+			add_data->account_name = g_strdup (email);
+			add_data->username = g_strdup (user);
 			/* Duplicate... for now */
-			add_data->email_id = g_strdup (camel_url_get_param (url, "email"));
-			add_data->hosturl = g_strdup (camel_url_get_param (url, "hosturl"));
+			add_data->email_id = g_strdup (email);
+			add_data->hosturl = g_strdup (hosturl);
 			/* FIXME pass right refresh timeout */
+
+			camel_url_free (url);
 
 			/* This uses GConf so has to be done in the main thread */
 			g_idle_add_full (G_PRIORITY_DEFAULT, ews_do_add_esource, add_data, NULL);

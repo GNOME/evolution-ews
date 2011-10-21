@@ -18,18 +18,30 @@
 
 #include "camel-ews-settings.h"
 
+#define CAMEL_EWS_SETTINGS_GET_PRIVATE(obj) \
+	(G_TYPE_INSTANCE_GET_PRIVATE \
+	((obj), CAMEL_TYPE_EWS_SETTINGS, CamelEwsSettingsPrivate))
+
 struct _CamelEwsSettingsPrivate {
 	gboolean check_all;
 	gboolean filter_junk;
 	gboolean filter_junk_inbox;
+	gchar *email;
+	gchar *hosturl;
 };
 
 enum {
 	PROP_0,
-	PROP_SECURITY_METHOD,
+	PROP_AUTH_MECHANISM,
 	PROP_CHECK_ALL,
+	PROP_EMAIL,
 	PROP_FILTER_JUNK,
-	PROP_FILTER_JUNK_INBOX
+	PROP_FILTER_JUNK_INBOX,
+	PROP_HOST,
+	PROP_HOSTURL,
+	PROP_PORT,
+	PROP_SECURITY_METHOD,
+	PROP_USER
 };
 
 G_DEFINE_TYPE_WITH_CODE (
@@ -46,16 +58,22 @@ ews_settings_set_property (GObject *object,
                             GParamSpec *pspec)
 {
 	switch (property_id) {
-		case PROP_SECURITY_METHOD:
-			camel_network_settings_set_security_method (
+		case PROP_AUTH_MECHANISM:
+			camel_network_settings_set_auth_mechanism (
 				CAMEL_NETWORK_SETTINGS (object),
-				g_value_get_enum (value));
+				g_value_get_string (value));
 			return;
 
 		case PROP_CHECK_ALL:
 			camel_ews_settings_set_check_all (
 				CAMEL_EWS_SETTINGS (object),
 				g_value_get_boolean (value));
+			return;
+
+		case PROP_EMAIL:
+			camel_ews_settings_set_email (
+				CAMEL_EWS_SETTINGS (object),
+				g_value_get_string (value));
 			return;
 
 		case PROP_FILTER_JUNK:
@@ -69,6 +87,36 @@ ews_settings_set_property (GObject *object,
 				CAMEL_EWS_SETTINGS (object),
 				g_value_get_boolean (value));
 			return;
+
+		case PROP_HOST:
+			camel_network_settings_set_host (
+				CAMEL_NETWORK_SETTINGS (object),
+				g_value_get_string (value));
+			return;
+
+		case PROP_HOSTURL:
+			camel_ews_settings_set_hosturl (
+				CAMEL_EWS_SETTINGS (object),
+				g_value_get_string (value));
+			return;
+
+		case PROP_PORT:
+			camel_network_settings_set_port (
+				CAMEL_NETWORK_SETTINGS (object),
+				g_value_get_uint (value));
+			return;
+
+		case PROP_SECURITY_METHOD:
+			camel_network_settings_set_security_method (
+				CAMEL_NETWORK_SETTINGS (object),
+				g_value_get_enum (value));
+			return;
+
+		case PROP_USER:
+			camel_network_settings_set_user (
+				CAMEL_NETWORK_SETTINGS (object),
+				g_value_get_string (value));
+			return;
 	}
 
 	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -81,10 +129,10 @@ ews_settings_get_property (GObject *object,
                             GParamSpec *pspec)
 {
 	switch (property_id) {
-		case PROP_SECURITY_METHOD:
-			g_value_set_enum (
+		case PROP_AUTH_MECHANISM:
+			g_value_set_string (
 				value,
-				camel_network_settings_get_security_method (
+				camel_network_settings_get_auth_mechanism (
 				CAMEL_NETWORK_SETTINGS (object)));
 			return;
 
@@ -92,6 +140,13 @@ ews_settings_get_property (GObject *object,
 			g_value_set_boolean (
 				value,
 				camel_ews_settings_get_check_all (
+				CAMEL_EWS_SETTINGS (object)));
+			return;
+
+		case PROP_EMAIL:
+			g_value_set_string (
+				value,
+				camel_ews_settings_get_email (
 				CAMEL_EWS_SETTINGS (object)));
 			return;
 
@@ -108,6 +163,41 @@ ews_settings_get_property (GObject *object,
 				camel_ews_settings_get_filter_junk_inbox (
 				CAMEL_EWS_SETTINGS (object)));
 			return;
+
+		case PROP_HOST:
+			g_value_set_string (
+				value,
+				camel_network_settings_get_host (
+				CAMEL_NETWORK_SETTINGS (object)));
+			return;
+
+		case PROP_HOSTURL:
+			g_value_set_string (
+				value,
+				camel_ews_settings_get_hosturl (
+				CAMEL_EWS_SETTINGS (object)));
+			return;
+
+		case PROP_PORT:
+			g_value_set_uint (
+				value,
+				camel_network_settings_get_port (
+				CAMEL_NETWORK_SETTINGS (object)));
+			return;
+
+		case PROP_SECURITY_METHOD:
+			g_value_set_enum (
+				value,
+				camel_network_settings_get_security_method (
+				CAMEL_NETWORK_SETTINGS (object)));
+			return;
+
+		case PROP_USER:
+			g_value_set_string (
+				value,
+				camel_network_settings_get_user (
+				CAMEL_NETWORK_SETTINGS (object)));
+			return;
 	}
 
 	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -116,6 +206,13 @@ ews_settings_get_property (GObject *object,
 static void
 ews_settings_finalize (GObject *object)
 {
+	CamelEwsSettingsPrivate *priv;
+
+	priv = CAMEL_EWS_SETTINGS_GET_PRIVATE (object);
+
+	g_free (priv->email);
+	g_free (priv->hosturl);
+
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_ews_settings_parent_class)->finalize (object);
 }
@@ -135,10 +232,9 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 	/* Inherited from CamelNetworkSettings. */
 	g_object_class_override_property (
 		object_class,
-		PROP_SECURITY_METHOD,
-		"security-method");
+		PROP_AUTH_MECHANISM,
+		"auth-mechanism");
 
-	/* Newly added properties */
 	g_object_class_install_property (
 		object_class,
 		PROP_CHECK_ALL,
@@ -147,6 +243,18 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 			"Check All",
 			"Check all folders for new messages",
 			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_EMAIL,
+		g_param_spec_string (
+			"email",
+			"Email",
+			"Email",
+			NULL,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
@@ -174,13 +282,48 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
+
+	/* Inherited from CamelNetworkSettings. */
+	g_object_class_override_property (
+		object_class,
+		PROP_HOST,
+		"host");
+
+	g_object_class_install_property (
+		object_class,
+		PROP_HOSTURL,
+		g_param_spec_string (
+			"hosturl",
+			"Host URL",
+			"Host URL",
+			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	/* Inherited from CamelNetworkSettings. */
+	g_object_class_override_property (
+		object_class,
+		PROP_PORT,
+		"port");
+
+	/* Inherited from CamelNetworkSettings. */
+	g_object_class_override_property (
+		object_class,
+		PROP_SECURITY_METHOD,
+		"security-method");
+
+	/* Inherited from CamelNetworkSettings. */
+	g_object_class_override_property (
+		object_class,
+		PROP_USER,
+		"user");
 }
 
 static void
 camel_ews_settings_init (CamelEwsSettings *settings)
 {
-	settings->priv = G_TYPE_INSTANCE_GET_PRIVATE (settings, CAMEL_TYPE_EWS_SETTINGS, CamelEwsSettingsPrivate);
-
+	settings->priv = CAMEL_EWS_SETTINGS_GET_PRIVATE (settings);
 }
 
 /**
@@ -219,6 +362,26 @@ camel_ews_settings_set_check_all (CamelEwsSettings *settings,
 	settings->priv->check_all = check_all;
 
 	g_object_notify (G_OBJECT (settings), "check-all");
+}
+
+const gchar *
+camel_ews_settings_get_email (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
+
+	return settings->priv->email;
+}
+
+void
+camel_ews_settings_set_email (CamelEwsSettings *settings,
+                              const gchar *email)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	g_free (settings->priv->email);
+	settings->priv->email = g_strdup (email);
+
+	g_object_notify (G_OBJECT (settings), "email");
 }
 
 /**
@@ -299,4 +462,24 @@ camel_ews_settings_set_filter_junk_inbox (CamelEwsSettings *settings,
 	settings->priv->filter_junk_inbox = filter_junk_inbox;
 
 	g_object_notify (G_OBJECT (settings), "filter-junk-inbox");
+}
+
+const gchar *
+camel_ews_settings_get_hosturl (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
+
+	return settings->priv->hosturl;
+}
+
+void
+camel_ews_settings_set_hosturl (CamelEwsSettings *settings,
+                                const gchar *hosturl)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	g_free (settings->priv->hosturl);
+	settings->priv->hosturl = g_strdup (hosturl);
+
+	g_object_notify (G_OBJECT (settings), "hosturl");
 }
