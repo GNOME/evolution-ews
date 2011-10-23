@@ -1,0 +1,12 @@
+Evolution-EWS 3.3.1 2011-10-24
+------------------------------
+
+Miscellaneous Changes:
+	* Adapt to various API changes. (Milan Crha, Matthew Barnes)
+	* Prefill Host URL when creating new account (Milan Crha)
+	* Use SHA256 of EWS ItemId for cache filename, not the ItemId itself.
+	  (David Woodhouse)
+
+Translations:
+	Mario Blättermann (de)
+
