@@ -28,7 +28,7 @@ testews_SOURCES = 				\
 		utils.h
 
 #Fixme: Ugly. Kill me later
-testews_LDADD = -lglib-2.0 $(libeews)
+testews_LDADD = $(LIBEDATASERVER_LIBS) $(libeews)
 testews_CPPFLAGS = $(SERVERS_EWS_CPPFLAGS) -I$(top_srcdir)/src/server/
 
 DISTCLEANFILES = $(TEST_PROGS)
