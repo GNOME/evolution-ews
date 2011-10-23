@@ -8,10 +8,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2011-10-10 07:51+0000\n"
-"PO-Revision-Date: 2011-10-10 19:17+0100\n"
+"POT-Creation-Date: 2011-10-23 14:58+0000\n"
+"PO-Revision-Date: 2011-10-23 19:14+0100\n"
 "Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -20,58 +21,58 @@ msgstr ""
 "X-Poedit-Country: SLOVENIA\n"
 "X-Poedit-SourceCharset: utf-8\n"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:247
+#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:240
 msgid "Global Address list"
 msgstr "Splošni seznam naslovov"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:114
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:108
 #, c-format
 msgid "Autodiscover failed: %s"
 msgstr "Samodejno odkrivanje je spodletelo: %s"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:149
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:143
 #, c-format
 msgid "Enter Password for %s"
 msgstr "Vnesite geslo za %s"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:158
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:152
 msgid "Could not get password."
 msgstr "Ni mogoče pridobiti gesla."
 
 #. OAB url entry
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:262
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:264
 msgid "OAB U_RL:"
 msgstr "OAB U_RL:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:274
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:276
 msgid "_Host URL:"
 msgstr "Naslov URL _gostitelja:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:287
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:291
 msgid "Fetch _URL"
 msgstr "Pridobi naslov _URL"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:453
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:459
 msgid "Could not fetch oal list: "
 msgstr "Ni mogoče pridobiti seznama OAL:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:495
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:501
 msgid "Fetching..."
 msgstr "Pridobivanje ..."
 
 #. Add cache check box
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:632
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:638
 #, fuzzy
 msgid "Cache o_ffline address book"
 msgstr "Ime imenika VCard (GnomeVizitka)"
 
 #. Add label
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:638
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:644
 #, fuzzy
 msgid "Select Ad_dress list: "
 msgstr "Izberi mesto iz seznama"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:648
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:654
 msgid "Fetch _list"
 msgstr "Pridobi _seznam"
 
@@ -81,24 +82,33 @@ msgid "Exchange Web Services"
 msgstr "Spletna storitev Exchange"
 
 #: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:2
-#, fuzzy
 msgid "Exchange Web Services Plugin"
-msgstr "Vstavek grafičnega vmesnika storitve podatkovne  zbirke"
+msgstr "Vstavek spletne storitve Exchange"
 
 #: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:3
 msgid "GAL settings"
 msgstr "Nastavitve GAL"
 
-#: ../src/addressbook/e-book-backend-ews.c:1436
+#: ../src/addressbook/e-book-backend-ews.c:795
+#, fuzzy
+msgid "The backend does not support bulk additions"
+msgstr "Ozadnji program ne podpira množičnega dodajanja"
+
+#: ../src/addressbook/e-book-backend-ews.c:1059
+#, fuzzy
+msgid "The backend does not support bulk modifications"
+msgstr "Ozadnji program ne podpira množičnega spreminjanja"
+
+#: ../src/addressbook/e-book-backend-ews.c:1459
 #, fuzzy, c-format
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr "Uganko ste rešili v %d sekundah"
 
-#: ../src/addressbook/e-book-backend-ews.c:1826
+#: ../src/addressbook/e-book-backend-ews.c:1849
 msgid "Syncing contacts..."
 msgstr "Usklajevanje stikov ..."
 
-#: ../src/addressbook/e-book-backend-ews.c:2023
+#: ../src/addressbook/e-book-backend-ews.c:2045
 msgid "Searching..."
 msgstr "Iskanje ..."
 
@@ -107,53 +117,53 @@ msgstr "Iskanje ..."
 msgid "Insufficient memory"
 msgstr "Nezadostna količina pomnilnika"
 
-#: ../src/calendar/e-cal-backend-ews.c:3793
+#: ../src/calendar/e-cal-backend-ews.c:3534
 #, c-format
 msgid "Unknown calendar property '%s'"
 msgstr "Neznana lastnost koledarja '%s'"
 
-#: ../src/camel/camel-ews-folder.c:200
+#: ../src/camel/camel-ews-folder.c:255
 #, fuzzy, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr ""
 "Ni mogoče odpreti trenutne slikovne datoteke '%s'.\n"
 "Ni mogoče poslati slike."
 
-#: ../src/camel/camel-ews-folder.c:207
+#: ../src/camel/camel-ews-folder.c:262
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr ""
 
-#: ../src/camel/camel-ews-folder.c:215
+#: ../src/camel/camel-ews-folder.c:271
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr ""
 
-#: ../src/camel/camel-ews-folder.c:272
+#: ../src/camel/camel-ews-folder.c:328
 #, fuzzy, c-format
 msgid "Unable to create cache file"
 msgstr "Ni mogoče ustvariti datoteke vira"
 
-#: ../src/camel/camel-ews-folder.c:372
-#: ../src/camel/camel-ews-folder.c:441
+#: ../src/camel/camel-ews-folder.c:425
+#: ../src/camel/camel-ews-folder.c:494
 #, fuzzy, c-format
 msgid "Unable to create cache path"
 msgstr "Ni mogoče ustvariti poti predpomnilnika"
 
-#: ../src/camel/camel-ews-folder.c:450
+#: ../src/camel/camel-ews-folder.c:503
 #, fuzzy, c-format
 msgid "Failed to move message cache file"
 msgstr "Ni mogoče premakniti začasne datoteke \"%s\" na končno mesto \"%s\": %s"
 
-#: ../src/camel/camel-ews-folder.c:798
+#: ../src/camel/camel-ews-folder.c:878
 #, fuzzy, c-format
 msgid "Could not load summary for %s"
 msgstr "Ni mogoče naložiti povzetka za %s"
 
-#: ../src/camel/camel-ews-folder.c:1124
-#: ../src/camel/camel-ews-store.c:575
-#: ../src/camel/camel-ews-store.c:632
-#: ../src/camel/camel-ews-store.c:701
+#: ../src/camel/camel-ews-folder.c:1207
+#: ../src/camel/camel-ews-store.c:592
+#: ../src/camel/camel-ews-store.c:648
+#: ../src/camel/camel-ews-store.c:716
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr ""
@@ -206,73 +216,73 @@ msgstr "Geslo"
 msgid "This option will connect to the Exchange server using a plaintext password."
 msgstr "Ta možnost bo vzpostavila povezavo s strežnikom Exchange ob uporabi običajne overitve z geslom kot navadnim besedilom."
 
-#: ../src/camel/camel-ews-store.c:174
+#: ../src/camel/camel-ews-store.c:141
 #, c-format
 msgid "Session has no storage path"
 msgstr "Seja nima določene poti shrambe"
 
-#: ../src/camel/camel-ews-store.c:184
+#: ../src/camel/camel-ews-store.c:151
 #, c-format
 msgid "EWS service has no host URL"
 msgstr ""
 
-#: ../src/camel/camel-ews-store.c:359
+#: ../src/camel/camel-ews-store.c:396
 #, c-format
 msgid "No such folder: %s"
 msgstr "Ni takšne mape: %s"
 
-#: ../src/camel/camel-ews-store.c:568
+#: ../src/camel/camel-ews-store.c:585
 #, fuzzy, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Nadrejena mapa ne obstaja"
 
-#: ../src/camel/camel-ews-store.c:626
-#, fuzzy, c-format
+#: ../src/camel/camel-ews-store.c:642
+#, c-format
 msgid "Folder does not exist"
 msgstr "Mapa ne obstaja"
 
-#: ../src/camel/camel-ews-store.c:709
+#: ../src/camel/camel-ews-store.c:724
 #, fuzzy, c-format
 msgid "Folder %s does not exist"
 msgstr "Mapa '%s/%s' ne obstaja."
 
-#: ../src/camel/camel-ews-store.c:718
+#: ../src/camel/camel-ews-store.c:733
 #, c-format
 msgid "No change key record for folder %s"
 msgstr ""
 
-#: ../src/camel/camel-ews-store.c:757
+#: ../src/camel/camel-ews-store.c:772
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr ""
 
-#: ../src/camel/camel-ews-store.c:788
+#: ../src/camel/camel-ews-store.c:803
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr ""
 
-#: ../src/camel/camel-ews-store.c:817
-#: ../src/camel/camel-ews-transport.c:61
+#: ../src/camel/camel-ews-store.c:832
+#: ../src/camel/camel-ews-transport.c:58
 #, c-format
 msgid "Exchange server %s"
 msgstr "Strežnik Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:819
+#: ../src/camel/camel-ews-store.c:834
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Storitev Exchange za %s na %s"
 
-#: ../src/camel/camel-ews-store.c:856
+#: ../src/camel/camel-ews-store.c:869
 #, fuzzy, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Za dokončanje tega opravila je treba biti povezan v omrežje"
 
-#: ../src/camel/camel-ews-transport.c:65
+#: ../src/camel/camel-ews-transport.c:62
 #, fuzzy, c-format
 msgid "Exchange mail delivery via %s"
 msgstr "Dostava pošte s SMTP preko %s"
 
-#: ../src/camel/camel-ews-transport.c:92
+#: ../src/camel/camel-ews-transport.c:88
 #, c-format
 msgid "Service not connected"
 msgstr "Storitev ni povezana"
@@ -347,7 +357,7 @@ msgstr "Ni mogoče razčleniti datoteke XML \"%s\""
 msgid "Failed to find <OAB> element\n"
 msgstr "Iskanje podvojenih sporočil je spodletelo."
 
-#: ../src/utils/ews-camel-common.c:139
+#: ../src/utils/ews-camel-common.c:138
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr ""
