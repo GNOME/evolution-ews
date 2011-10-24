@@ -1018,7 +1018,9 @@ main (gint argc, gchar *argv [])
 	struct _db_data data;
 
 	g_type_init ();
+	#if !GLIB_CHECK_VERSION(2,31,0)
 	g_thread_init (NULL);
+	#endif
 
 	if (argc != 3) {
 		g_print ("Pass the oab filename  and cache dir as argument \n");

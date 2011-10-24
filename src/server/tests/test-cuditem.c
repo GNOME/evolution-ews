@@ -130,7 +130,9 @@ idle_cb (gpointer data)
 void cuditem_tests_run ()
 {
 	g_type_init ();
+	#if !GLIB_CHECK_VERSION(2,31,0)
 	g_thread_init (NULL);
+	#endif
 
 	main_loop = g_main_loop_new (NULL, TRUE);
 	g_idle_add ((GSourceFunc) idle_cb, NULL);
