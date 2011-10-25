@@ -140,8 +140,8 @@ ews_account_removed (EAccountList *account_listener, EAccount *account)
 	camel_url_free (url);
 
 	/* FIXME  Use this until CamelStore gets camel_store_remove_storage API which would be available eds 3.2 onwards */
-	storage_path = g_strdup (camel_service_get_user_data_dir (service));
-	summary_file = g_build_filename (storage_path, "folder-tree-v2", NULL);
+	storage_path = g_strdup (camel_service_get_user_cache_dir (service));
+	summary_file = g_build_filename (storage_path, "folder-tree", NULL);
 	g_unlink (summary_file);
 	
 	d(g_print ("Removed ews store summary: %s \n", summary_file);)

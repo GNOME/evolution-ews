@@ -80,6 +80,48 @@ G_DEFINE_TYPE_WITH_CODE (
 	G_IMPLEMENT_INTERFACE (
 		G_TYPE_INITABLE, camel_ews_store_initable_init))
 
+static void
+ews_migrate_to_user_cache_dir (CamelService *service)
+{
+	const gchar *user_data_dir, *user_cache_dir;
+
+	g_return_if_fail (service != NULL);
+	g_return_if_fail (CAMEL_IS_SERVICE (service));
+
+	user_data_dir = camel_service_get_user_data_dir (service);
+	user_cache_dir = camel_service_get_user_cache_dir (service);
+
+	g_return_if_fail (user_data_dir != NULL);
+	g_return_if_fail (user_cache_dir != NULL);
+
+	/* migrate only if the source directory exists and the destination doesn't */
+	if (g_file_test (user_data_dir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR) &&
+	    !g_file_test (user_cache_dir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
+		gchar *parent_dir;
+
+		parent_dir = g_path_get_dirname (user_cache_dir);
+		g_mkdir_with_parents (parent_dir, S_IRWXU);
+		g_free (parent_dir);
+
+		if (g_rename (user_data_dir, user_cache_dir) == -1) {
+			g_debug ("%s: Failed to migrate '%s' to '%s': %s", G_STRFUNC, user_data_dir, user_cache_dir, g_strerror (errno));
+		} else {
+			gchar *old_summary_file = g_build_filename (user_cache_dir, "folder-tree-v2", NULL);
+
+			if (old_summary_file && g_file_test (old_summary_file, G_FILE_TEST_EXISTS)) {
+				gchar *new_summary_file = g_build_filename (user_cache_dir, "folder-tree", NULL);
+
+				if (new_summary_file && g_rename (old_summary_file, new_summary_file) == -1)
+					g_debug ("%s: Failed to migrate '%s' to '%s': %s", G_STRFUNC, old_summary_file, new_summary_file, g_strerror (errno));
+
+				g_free (new_summary_file);
+			}
+
+			g_free (old_summary_file);
+		}
+	}
+}
+
 static gboolean
 ews_store_initable_init		(GInitable *initable,
 				 GCancellable *cancellable,
@@ -87,10 +129,15 @@ ews_store_initable_init		(GInitable *initable,
 {
 	CamelService *service;
 	CamelSession *session;
+	CamelStore *store;
 	gboolean ret;
-	
+
+	store = CAMEL_STORE (initable);
 	service = CAMEL_SERVICE (initable);
 	session = camel_service_get_session (service);
+
+	store->flags |= CAMEL_STORE_USE_CACHE_DIR;
+	ews_migrate_to_user_cache_dir (service);
 
 	/* Chain up to parent interface's init() method. */
 	if (!parent_initable_interface->init (initable, cancellable, error))
@@ -128,7 +175,7 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 	((CamelStore *)ews_store)->flags &= ~(CAMEL_STORE_VTRASH|CAMEL_STORE_VJUNK);
 
 	/*storage path*/
-	session_storage_path = g_strdup (camel_service_get_user_data_dir (service));
+	session_storage_path = g_strdup (camel_service_get_user_cache_dir (service));
 	if (!session_storage_path) {
 		g_set_error (
 			error, CAMEL_STORE_ERROR,
@@ -141,7 +188,7 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 	/* Note. update account-listener plugin if filename is changed here, as it would remove the summary
 	   by forming the path itself */
 	g_mkdir_with_parents (ews_store->storage_path, 0700);
-	summary_file = g_build_filename (ews_store->storage_path, "folder-tree-v2", NULL);
+	summary_file = g_build_filename (ews_store->storage_path, "folder-tree", NULL);
 	ews_store->summary = camel_ews_store_summary_new (summary_file);
 	camel_ews_store_summary_load (ews_store->summary, NULL);
 
