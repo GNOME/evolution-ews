@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2011-10-10 07:51+0000\n"
-"PO-Revision-Date: 2011-10-13 11:28+0200\n"
+"POT-Creation-Date: 2011-10-24 17:14+0000\n"
+"PO-Revision-Date: 2011-10-25 16:31+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -18,58 +18,58 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:247
+#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:240
 msgid "Global Address list"
 msgstr "Lista global de direcciones"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:114
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:108
 #, c-format
 msgid "Autodiscover failed: %s"
 msgstr ""
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:149
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:143
 #, c-format
 msgid "Enter Password for %s"
 msgstr "Introduzca la contraseña para %s"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:158
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:152
 msgid "Could not get password."
 msgstr "No se pudo obtener la contraseña."
 
 #. OAB url entry
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:262
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:264
 msgid "OAB U_RL:"
 msgstr ""
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:274
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:276
 msgid "_Host URL:"
 msgstr ""
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:287
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:291
 msgid "Fetch _URL"
 msgstr ""
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:453
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:459
 msgid "Could not fetch oal list: "
 msgstr ""
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:495
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:501
 msgid "Fetching..."
-msgstr ""
+msgstr "Obteniendo…"
 
 #. Add cache check box
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:632
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:638
 msgid "Cache o_ffline address book"
 msgstr ""
 
 #. Add label
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:638
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:644
 msgid "Select Ad_dress list: "
 msgstr ""
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:648
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:654
 msgid "Fetch _list"
-msgstr ""
+msgstr "Obtener _lista"
 
 #: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:1
 #: ../src/camel/camel-ews-provider.c:69
@@ -84,16 +84,24 @@ msgstr ""
 msgid "GAL settings"
 msgstr "Configuración de GAL"
 
-#: ../src/addressbook/e-book-backend-ews.c:1436
+#: ../src/addressbook/e-book-backend-ews.c:795
+msgid "The backend does not support bulk additions"
+msgstr "El «backend» no soporta adiciones"
+
+#: ../src/addressbook/e-book-backend-ews.c:1059
+msgid "The backend does not support bulk modifications"
+msgstr "El «backend» no soporta modificaciones"
+
+#: ../src/addressbook/e-book-backend-ews.c:1459
 #, c-format
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr ""
 
-#: ../src/addressbook/e-book-backend-ews.c:1826
+#: ../src/addressbook/e-book-backend-ews.c:1849
 msgid "Syncing contacts..."
 msgstr "Sincronizando contactos…"
 
-#: ../src/addressbook/e-book-backend-ews.c:2023
+#: ../src/addressbook/e-book-backend-ews.c:2045
 msgid "Searching..."
 msgstr "Buscando…"
 
@@ -102,48 +110,48 @@ msgstr "Buscando…"
 msgid "Insufficient memory"
 msgstr "Memoria insuficiente"
 
-#: ../src/calendar/e-cal-backend-ews.c:3793
+#: ../src/calendar/e-cal-backend-ews.c:3534
 #, c-format
 msgid "Unknown calendar property '%s'"
 msgstr ""
 
-#: ../src/camel/camel-ews-folder.c:200
+#: ../src/camel/camel-ews-folder.c:255
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr ""
 
-#: ../src/camel/camel-ews-folder.c:207
+#: ../src/camel/camel-ews-folder.c:262
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr ""
 
-#: ../src/camel/camel-ews-folder.c:215
+#: ../src/camel/camel-ews-folder.c:271
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr ""
 
-#: ../src/camel/camel-ews-folder.c:272
+#: ../src/camel/camel-ews-folder.c:328
 #, c-format
 msgid "Unable to create cache file"
 msgstr ""
 
-#: ../src/camel/camel-ews-folder.c:372 ../src/camel/camel-ews-folder.c:441
+#: ../src/camel/camel-ews-folder.c:425 ../src/camel/camel-ews-folder.c:494
 #, c-format
 msgid "Unable to create cache path"
 msgstr ""
 
-#: ../src/camel/camel-ews-folder.c:450
+#: ../src/camel/camel-ews-folder.c:503
 #, c-format
 msgid "Failed to move message cache file"
 msgstr ""
 
-#: ../src/camel/camel-ews-folder.c:798
+#: ../src/camel/camel-ews-folder.c:878
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "No se pudo cargar el resumen para %s"
 
-#: ../src/camel/camel-ews-folder.c:1124 ../src/camel/camel-ews-store.c:575
-#: ../src/camel/camel-ews-store.c:632 ../src/camel/camel-ews-store.c:701
+#: ../src/camel/camel-ews-folder.c:1207 ../src/camel/camel-ews-store.c:594
+#: ../src/camel/camel-ews-store.c:650 ../src/camel/camel-ews-store.c:718
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr ""
@@ -191,72 +199,67 @@ msgstr ""
 "Esta opción conectará al servidor de Exchange unsado una contraseña de texto "
 "plano."
 
-#: ../src/camel/camel-ews-store.c:174
+#: ../src/camel/camel-ews-store.c:136
 #, c-format
 msgid "Session has no storage path"
-msgstr ""
+msgstr "La sesión no tiene ruta de almacenamiento"
 
-#: ../src/camel/camel-ews-store.c:184
-#, c-format
-msgid "EWS service has no host URL"
-msgstr ""
-
-#: ../src/camel/camel-ews-store.c:359
+#: ../src/camel/camel-ews-store.c:398
 #, c-format
 msgid "No such folder: %s"
 msgstr "No existe la carpeta: %s"
 
-#: ../src/camel/camel-ews-store.c:568
+#: ../src/camel/camel-ews-store.c:587
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "La carpeta padre %s no existe"
 
-#: ../src/camel/camel-ews-store.c:626
+#: ../src/camel/camel-ews-store.c:644
 #, c-format
 msgid "Folder does not exist"
 msgstr "La carpeta no existe"
 
-#: ../src/camel/camel-ews-store.c:709
+#: ../src/camel/camel-ews-store.c:726
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "La carpeta %s no existe"
 
-#: ../src/camel/camel-ews-store.c:718
+#: ../src/camel/camel-ews-store.c:735
 #, c-format
 msgid "No change key record for folder %s"
 msgstr ""
 
-#: ../src/camel/camel-ews-store.c:757
+#: ../src/camel/camel-ews-store.c:774
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "No se puede renombrar y mover una carpeta al mismo tiempo"
 
-#: ../src/camel/camel-ews-store.c:788
+#: ../src/camel/camel-ews-store.c:805
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr ""
 
-#: ../src/camel/camel-ews-store.c:817 ../src/camel/camel-ews-transport.c:61
+#: ../src/camel/camel-ews-store.c:841 ../src/camel/camel-ews-transport.c:66
 #, c-format
 msgid "Exchange server %s"
 msgstr ""
 
-#: ../src/camel/camel-ews-store.c:819
+#: ../src/camel/camel-ews-store.c:843
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr ""
 
-#: ../src/camel/camel-ews-store.c:856
+#: ../src/camel/camel-ews-store.c:878
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Debe estar conectado para completar esta operación"
 
-#: ../src/camel/camel-ews-transport.c:65
+#: ../src/camel/camel-ews-transport.c:69
 #, c-format
 msgid "Exchange mail delivery via %s"
 msgstr ""
 
-#: ../src/camel/camel-ews-transport.c:92
+#: ../src/camel/camel-ews-transport.c:102
 #, c-format
 msgid "Service not connected"
 msgstr "Servicio no conectado"
@@ -278,7 +281,7 @@ msgstr "Sin respuesta: %s"
 #: ../src/server/e-ews-connection.c:1625
 #, c-format
 msgid "Code: %d - Unexpected response from server"
-msgstr ""
+msgstr "Código: %d: respuesta inesperada del servidor"
 
 #: ../src/server/e-ews-connection.c:1084
 #, c-format
@@ -298,7 +301,7 @@ msgstr "Falló al buscar el elemento<Response>\n"
 #: ../src/server/e-ews-connection.c:1116
 #, c-format
 msgid "Failed to find <Account> element\n"
-msgstr ""
+msgstr "Falló al buscar el elemento <Account>\n"
 
 #: ../src/server/e-ews-connection.c:1135
 #, c-format
@@ -313,7 +316,7 @@ msgstr "Se deben proporcionar el correo-e y la contraseña"
 #: ../src/server/e-ews-connection.c:1238
 #, c-format
 msgid "Wrong email id"
-msgstr ""
+msgstr "ID del correo-e no válido"
 
 #: ../src/server/e-ews-connection.c:1398
 #, c-format
@@ -325,7 +328,7 @@ msgstr ""
 msgid "Failed to find <OAB> element\n"
 msgstr "Falló al buscar el elemento <OAB>\n"
 
-#: ../src/utils/ews-camel-common.c:139
+#: ../src/utils/ews-camel-common.c:138
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
-msgstr ""
+msgstr "CreateItem falló al devolver el ID para el mensaje nuevo"
