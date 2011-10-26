@@ -109,7 +109,6 @@ idle_cb (gpointer data)
 void get_attachments_tests_run ()
 {
 	g_type_init ();
-	g_thread_init (NULL);
 
 	main_loop = g_main_loop_new (NULL, TRUE);
 	g_idle_add ((GSourceFunc) idle_cb, NULL);

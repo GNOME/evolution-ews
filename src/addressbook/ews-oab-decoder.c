@@ -1018,7 +1018,6 @@ main (gint argc, gchar *argv [])
 	struct _db_data data;
 
 	g_type_init ();
-	g_thread_init (NULL);
 
 	if (argc != 3) {
 		g_print ("Pass the oab filename  and cache dir as argument \n");

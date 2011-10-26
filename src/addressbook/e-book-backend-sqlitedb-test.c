@@ -194,7 +194,6 @@ gint
 main (gint argc, gchar *argv[])
 {
 	g_type_init ();
-	g_thread_init (NULL);
 
 	if (argc != 2) {
 		g_print ("Please enter a path to store the cache \n");

@@ -96,7 +96,6 @@ deletefolder_tests_run (gconstpointer data)
 	g_return_if_fail (*fid != NULL);
 
 	g_type_init ();
-	g_thread_init (NULL);
 
 	main_loop = g_main_loop_new (NULL, TRUE);
 	g_idle_add ((GSourceFunc) idle_cb, fid);

@@ -265,7 +265,6 @@ main (int argc, char *argv [])
 	}
 
 	g_type_init ();
-	g_thread_init (NULL);
 
 	if (oal_decompress_v4_full_detail_file (argv [1], argv [2], NULL))
 		g_print ("Successfully decompressed \n");
