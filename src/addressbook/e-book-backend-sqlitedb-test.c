@@ -194,9 +194,6 @@ gint
 main (gint argc, gchar *argv[])
 {
 	g_type_init ();
-	#if !GLIB_CHECK_VERSION(2,31,0)
-	g_thread_init (NULL);
-	#endif
 
 	if (argc != 2) {
 		g_print ("Please enter a path to store the cache \n");
