@@ -30,7 +30,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 dnl ****************************
 dnl Initialize maintainer mode
 dnl ****************************
-AM_MAINTAINER_MODE[enabled]
+AM_MAINTAINER_MODE([enable])
 
 AC_PROG_CC
 AC_PROG_CPP
