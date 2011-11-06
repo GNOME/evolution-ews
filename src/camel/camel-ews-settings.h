@@ -71,6 +71,15 @@ void		camel_ews_settings_set_filter_junk_inbox	(CamelEwsSettings *settings,
 const gchar *	camel_ews_settings_get_hosturl			(CamelEwsSettings *settings);
 void		camel_ews_settings_set_hosturl			(CamelEwsSettings *settings,
 								 const gchar *hosturl);
+const gchar *	camel_ews_settings_get_oaburl			(CamelEwsSettings *settings);
+void		camel_ews_settings_set_oaburl			(CamelEwsSettings *settings,
+								 const gchar *oaburl);
+gboolean	camel_ews_settings_get_oab_offline		(CamelEwsSettings *settings);
+void		camel_ews_settings_set_oab_offline		(CamelEwsSettings *settings,
+								 gboolean oab_offline);
+const gchar *	camel_ews_settings_get_oal_selected		(CamelEwsSettings *settings);
+void		camel_ews_settings_set_oal_selected		(CamelEwsSettings *settings,
+								 const gchar *oal_selected);
 
 G_END_DECLS
 

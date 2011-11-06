@@ -26,8 +26,11 @@ struct _CamelEwsSettingsPrivate {
 	gboolean check_all;
 	gboolean filter_junk;
 	gboolean filter_junk_inbox;
+	gboolean oab_offline;
 	gchar *email;
 	gchar *hosturl;
+	gchar *oaburl;
+	gchar *oal_selected;
 };
 
 enum {
@@ -39,6 +42,9 @@ enum {
 	PROP_FILTER_JUNK_INBOX,
 	PROP_HOST,
 	PROP_HOSTURL,
+	PROP_OABURL,
+	PROP_OAB_OFFLINE,
+	PROP_OAL_SELECTED,
 	PROP_PORT,
 	PROP_SECURITY_METHOD,
 	PROP_USER
@@ -96,6 +102,24 @@ ews_settings_set_property (GObject *object,
 
 		case PROP_HOSTURL:
 			camel_ews_settings_set_hosturl (
+				CAMEL_EWS_SETTINGS (object),
+				g_value_get_string (value));
+			return;
+
+		case PROP_OABURL:
+			camel_ews_settings_set_oaburl (
+				CAMEL_EWS_SETTINGS (object),
+				g_value_get_string (value));
+			return;
+
+		case PROP_OAB_OFFLINE:
+			camel_ews_settings_set_oab_offline (
+				CAMEL_EWS_SETTINGS (object),
+				g_value_get_boolean (value));
+			return;
+
+		case PROP_OAL_SELECTED:
+			camel_ews_settings_set_oal_selected (
 				CAMEL_EWS_SETTINGS (object),
 				g_value_get_string (value));
 			return;
@@ -178,6 +202,27 @@ ews_settings_get_property (GObject *object,
 				CAMEL_EWS_SETTINGS (object)));
 			return;
 
+		case PROP_OABURL:
+			g_value_set_string (
+				value,
+				camel_ews_settings_get_oaburl (
+				CAMEL_EWS_SETTINGS (object)));
+			return;
+
+		case PROP_OAB_OFFLINE:
+			g_value_set_boolean (
+				value,
+				camel_ews_settings_get_oab_offline (
+				CAMEL_EWS_SETTINGS (object)));
+			return;
+
+		case PROP_OAL_SELECTED:
+			g_value_set_string (
+				value,
+				camel_ews_settings_get_oal_selected (
+				CAMEL_EWS_SETTINGS (object)));
+			return;
+
 		case PROP_PORT:
 			g_value_set_uint (
 				value,
@@ -212,6 +257,8 @@ ews_settings_finalize (GObject *object)
 
 	g_free (priv->email);
 	g_free (priv->hosturl);
+	g_free (priv->oaburl);
+	g_free (priv->oal_selected);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_ews_settings_parent_class)->finalize (object);
@@ -306,6 +353,42 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 		object_class,
 		PROP_PORT,
 		"port");
+
+	g_object_class_install_property (
+		object_class,
+		PROP_OABURL,
+		g_param_spec_string (
+			"oaburl",
+			"OABURL",
+			"OABURL",
+			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_OAB_OFFLINE,
+		g_param_spec_boolean (
+			"oab-offline",
+			"OAB Offline",
+			"OAB Offline",
+			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_OAL_SELECTED,
+		g_param_spec_string (
+			"oal-selected",
+			"OAL Selected",
+			"OAL Selected",
+			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
 
 	/* Inherited from CamelNetworkSettings. */
 	g_object_class_override_property (
@@ -483,3 +566,63 @@ camel_ews_settings_set_hosturl (CamelEwsSettings *settings,
 
 	g_object_notify (G_OBJECT (settings), "hosturl");
 }
+
+const gchar *
+camel_ews_settings_get_oaburl (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
+
+	return settings->priv->oaburl;
+}
+
+void
+camel_ews_settings_set_oaburl (CamelEwsSettings *settings,
+                               const gchar *oaburl)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	g_free (settings->priv->oaburl);
+	settings->priv->oaburl = g_strdup (oaburl);
+
+	g_object_notify (G_OBJECT (settings), "oaburl");
+}
+
+gboolean
+camel_ews_settings_get_oab_offline (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), FALSE);
+
+	return settings->priv->oab_offline;
+}
+
+void
+camel_ews_settings_set_oab_offline (CamelEwsSettings *settings,
+                                    gboolean oab_offline)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	settings->priv->oab_offline = oab_offline;
+
+	g_object_notify (G_OBJECT (settings), "oab-offline");
+}
+
+const gchar *
+camel_ews_settings_get_oal_selected (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
+
+	return settings->priv->oal_selected;
+}
+
+void
+camel_ews_settings_set_oal_selected (CamelEwsSettings *settings,
+                                     const gchar *oal_selected)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	g_free (settings->priv->oal_selected);
+	settings->priv->oal_selected = g_strdup (oal_selected);
+
+	g_object_notify (G_OBJECT (settings), "oal-selected");
+}
+
