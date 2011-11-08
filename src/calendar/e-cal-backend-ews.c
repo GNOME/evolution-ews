@@ -40,8 +40,6 @@
 #include <libical/icalcomponent.h>
 #include <libical/icalproperty.h>
 #include <libical/icalparameter.h>
-#include <glib-2.0/glib/gerror.h>
-#include <glib-2.0/glib/glist.h>
 #include <camel/camel.h>
 #include <ews-camel-common.h>
 #include <libedataserver/eds-version.h>
