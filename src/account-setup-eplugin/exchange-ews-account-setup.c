@@ -74,10 +74,11 @@ free_ews_listener ( void )
 gint
 e_plugin_lib_enable (EPlugin *ep, gint enable)
 {
-	if (!config_listener) {
+	if (!config_listener)
 		config_listener = exchange_ews_account_listener_new ();
-		g_atexit ( free_ews_listener );
-	}
+
+	if (!enable)
+		free_ews_listener ();
 
 	return 0;
 }
