@@ -44,12 +44,6 @@
 #define d(x)
 
 /*Prototypes*/
-static gint ews_summary_header_load (CamelFolderSummary *, FILE *);
-static gint ews_summary_header_save (CamelFolderSummary *, FILE *);
-
-static CamelMessageInfo *ews_message_info_migrate (CamelFolderSummary *s, FILE *in);
-
-static CamelMessageContentInfo * ews_content_info_migrate (CamelFolderSummary *s, FILE *in);
 static gboolean ews_info_set_flags(CamelMessageInfo *info, guint32 flags, guint32 set);
 
 static gboolean summary_header_from_db (CamelFolderSummary *s, CamelFIRecord *mir);
@@ -114,10 +108,6 @@ camel_ews_summary_class_init (CamelEwsSummaryClass *class)
 	folder_summary_class->content_info_size = sizeof (CamelEwsMessageContentInfo);
 	folder_summary_class->message_info_clone = ews_message_info_clone;
 	folder_summary_class->message_info_free = ews_message_info_free;
-	folder_summary_class->summary_header_load = ews_summary_header_load;
-	folder_summary_class->summary_header_save = ews_summary_header_save;
-	folder_summary_class->message_info_migrate = ews_message_info_migrate;
-	folder_summary_class->content_info_migrate = ews_content_info_migrate;
 	folder_summary_class->info_set_flags = ews_info_set_flags;
 	folder_summary_class->summary_header_to_db = summary_header_to_db;
 	folder_summary_class->summary_header_from_db = summary_header_from_db;
@@ -134,7 +124,6 @@ camel_ews_summary_init (CamelEwsSummary *ews_summary)
 
 /**
  * camel_ews_summary_new:
- * @filename: the file to store the summary in.
  *
  * This will create a new CamelEwsSummary object and read in the
  * summary data from disk, if it exists.
@@ -142,13 +131,12 @@ camel_ews_summary_init (CamelEwsSummary *ews_summary)
  * Returns: A new CamelEwsSummary object.
  **/
 CamelFolderSummary *
-camel_ews_summary_new (struct _CamelFolder *folder, const gchar *filename)
+camel_ews_summary_new (struct _CamelFolder *folder)
 {
 	CamelFolderSummary *summary;
 
 	summary = g_object_new (CAMEL_TYPE_EWS_SUMMARY, "folder", folder, NULL);
 	camel_folder_summary_set_build_content (summary, TRUE);
-	camel_folder_summary_set_filename (summary, filename);
 
 	camel_folder_summary_load_from_db (summary, NULL);
 
@@ -176,22 +164,6 @@ summary_header_from_db (CamelFolderSummary *s, CamelFIRecord *mir)
 	return TRUE;
 }
 
-static gint
-ews_summary_header_load (CamelFolderSummary *s, FILE *in)
-{
-	CamelEwsSummary *gms = CAMEL_EWS_SUMMARY (s);
-
-	if (CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_load (s, in) == -1)
-		return -1;
-
-	if (camel_file_util_decode_fixed_int32(in, &gms->version) == -1)
-		return -1;
-
-	if (camel_file_util_decode_string (in, &gms->sync_state) == -1)
-		return -1;
-	return 0;
-}
-
 static CamelFIRecord *
 summary_header_to_db (CamelFolderSummary *s, GError **error)
 {
@@ -206,18 +178,6 @@ summary_header_to_db (CamelFolderSummary *s, GError **error)
 
 	return fir;
 
-}
-
-static gint
-ews_summary_header_save (CamelFolderSummary *s, FILE *out)
-{
-	CamelEwsSummary *gms = CAMEL_EWS_SUMMARY(s);
-
-	if (CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_save (s, out) == -1)
-		return -1;
-
-	camel_file_util_encode_fixed_int32(out, CAMEL_EWS_SUMMARY_VERSION);
-	return camel_file_util_encode_string (out, gms->sync_state);
 }
 
 static CamelMessageInfo *
@@ -242,25 +202,6 @@ message_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
 	}
 
 	return info;
-}
-
-static CamelMessageInfo *
-ews_message_info_migrate (CamelFolderSummary *s, FILE *in)
-{
-	CamelMessageInfo *info;
-	CamelEwsMessageInfo *ews_info;
-
-	info = CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->message_info_migrate (s,in);
-	if (info) {
-		ews_info = (CamelEwsMessageInfo*) info;
-		if (camel_file_util_decode_uint32 (in, &ews_info->server_flags) == -1)
-			goto error;
-	}
-
-	return info;
-error:
-	camel_message_info_free (info);
-	return NULL;
 }
 
 static CamelMIRecord *
@@ -292,15 +233,6 @@ content_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
 	mir->cinfo = part;
 	if (type)
 		return CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->content_info_from_db (s, mir);
-	else
-		return camel_folder_summary_content_info_new (s);
-}
-
-static CamelMessageContentInfo *
-ews_content_info_migrate (CamelFolderSummary *s, FILE *in)
-{
-	if (fgetc (in))
-		return CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->content_info_migrate (s, in);
 	else
 		return camel_folder_summary_content_info_new (s);
 }

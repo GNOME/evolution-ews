@@ -851,7 +851,7 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 {
 	CamelFolder *folder;
 	CamelEwsFolder *ews_folder;
-	gchar *summary_file, *state_file;
+	gchar *state_file;
 	const gchar *short_name;
 
 	short_name = strrchr (folder_name, '/');
@@ -867,9 +867,7 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 
 	ews_folder = CAMEL_EWS_FOLDER(folder);
 
-	summary_file = g_build_filename (folder_dir, "summary", NULL);
-	folder->summary = camel_ews_summary_new (folder, summary_file);
-	g_free(summary_file);
+	folder->summary = camel_ews_summary_new (folder);
 
 	if (!folder->summary) {
 		g_object_unref (CAMEL_OBJECT (folder));
