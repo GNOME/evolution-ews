@@ -1,3 +1,14 @@
+Evolution 3.2.2 2011-11-14
+--------------------------
+
+Bug Fixes:
+	Bug 661972 - Crash in ews_book_remove_contact_cb at e-book-backend-ews.c:881 (Chenthill Palanisamy)
+
+Miscellaneous Fixes:
+	Fix default-enable of AM_MAINTAINER_MODE 
+          (cherry picked from commit 5b4c624f14bbd6f406a278da35299a3475884e03) (David Woodhouse)
+	Distribute 'xz' tar archives instead of gzip. (Matthew Barnes)
+
 Evolution 3.2.1 2011-10-17
 --------------------------
 
