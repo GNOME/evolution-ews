@@ -887,6 +887,7 @@ e_book_backend_ews_remove_contacts	(EBookBackend *backend,
 	EBookBackendEws *ebews;
 	EwsRemoveContact *remove_contact;
 	EBookBackendEwsPrivate *priv;
+	GSList *l, *copy = NULL;
  
 	ebews = E_BOOK_BACKEND_EWS (backend);
  
@@ -917,7 +918,12 @@ e_book_backend_ews_remove_contacts	(EBookBackend *backend,
 		remove_contact->ebews = g_object_ref(ebews);
 		remove_contact->book = g_object_ref(book);
 		remove_contact->opid = opid;
-		remove_contact->sl_ids = (GSList *) id_list;
+		
+		for (l = (GSList *) id_list; l != NULL; l = g_slist_next (id_list))
+			copy = g_slist_prepend (copy, g_strdup ((gchar *)l->data));
+		copy = g_slist_reverse (copy);
+
+		remove_contact->sl_ids = copy;
 
 		e_ews_connection_delete_items_start (priv->cnc, EWS_PRIORITY_MEDIUM, (GSList *) id_list,
 						     EWS_HARD_DELETE, 0 , FALSE,
