@@ -354,6 +354,21 @@ ebews_set_full_name		(ESoapMessage *msg, EContact *contact)
 static void
 ebews_set_birth_date		(ESoapMessage *message, EContact *contact)
 {
+	EContactDate *date;
+	gchar *birthday;
+
+	date = e_contact_get(contact, E_CONTACT_BIRTH_DATE);
+
+	if (!date)
+		return;
+
+	birthday = g_strdup_printf("%04d-%02d-%02dT00:00:00",
+			      date->year, date->month, date->day);
+
+	e_ews_message_write_string_parameter(message, "Birthday", NULL, birthday);
+
+	g_free (birthday);
+
 	
 }
 
@@ -514,7 +529,20 @@ ebews_set_full_name_changes	(ESoapMessage *message, EContact *new, EContact *old
 static void
 ebews_set_birth_date_changes	(ESoapMessage *message, EContact *new, EContact *old)
 {
+	EContactDate *new_date, *old_date;
+	gchar *birthday;
 
+	new_date = e_contact_get(new, E_CONTACT_BIRTH_DATE);
+	old_date = e_contact_get(old, E_CONTACT_BIRTH_DATE);
+
+	if (e_contact_date_equal(new_date, old_date))
+		return;
+
+	birthday = g_strdup_printf("%04d-%02d-%02dT00:00:00",
+			      new_date->year, new_date->month, new_date->day);
+
+	convert_contact_property_to_updatexml(message, "Birthday", birthday, "contacts", NULL, NULL);
+	g_free (birthday);
 }
 
 static void
