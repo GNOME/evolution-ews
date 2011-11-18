@@ -1026,16 +1026,14 @@ convert_contact_to_updatexml (ESoapMessage *msg, gpointer user_data)
 		if (element_type == ELEMENT_TYPE_SIMPLE)  {
 			value =  e_contact_get (new_contact, mappings[i].field_id);
 			old_value =  e_contact_get (old_contact, mappings[i].field_id);
+			if ((value && !old_value) || (!value && old_value) ||(value && old_value && g_ascii_strcasecmp(value, old_value)))
+				convert_contact_property_to_updatexml(msg, mappings[i].element_name, value, "contacts", NULL, NULL);
 			if (value)
-			{
-				if(( *value && !old_value) || g_ascii_strcasecmp (value, old_value))
-					convert_contact_property_to_updatexml(msg, mappings[i].element_name, value, "contacts", NULL, NULL);
 				g_free(value);
-			}
-			if(old_value)
+			if (old_value)
 				g_free(old_value);
 		} else if (element_type == ELEMENT_TYPE_COMPLEX) {
-			if(mappings [i].field_id == E_CONTACT_UID)
+			if (mappings [i].field_id == E_CONTACT_UID)
 				continue;
 			mappings[i].set_changes (msg, new_contact, old_contact);
 		}
