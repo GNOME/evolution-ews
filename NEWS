@@ -1,3 +1,28 @@
+Evolution-EWS 3.3.2 2011-11-21
+------------------------------
+
+Bug Fixes:
+	Bug 657320 - Set/Modify Birthday of Contact (Vibha Yadav)
+	Bug 661528 - g_ascii_strcasecmp: assertion `s2 != NULL' failed
+	             (Vibha Yadav)
+	Bug 661972 - Crash in ews_book_remove_contact_cb at
+	             e-book-backend-ews.c:881 (Chenthill Palanisamy)
+	Bug 662598 - Store server folder cache in user's cache directory
+	             (Milan Crha)
+
+Other Changes:
+	* Remove g_thread_init() calls. (Matthew Barnes)
+	* Distribute 'xz' tar archives instead of gzip. (Matthew Barnes)
+	* Fix default-enable of AM_MAINTAINER_MODE (David Woodhouse)
+	* Do not use deprecated g_atexit. (Chenthill Palanisamy)
+
+Translations:
+	Marek Černocký (cs)
+	Daniel Mustieles (es)
+	Zoltan Mezi (hu)
+	Matej Urbančič (sl)
+
+
 Evolution-EWS 3.3.1 2011-10-24
 ------------------------------
 
