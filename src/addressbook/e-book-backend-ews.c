@@ -2076,7 +2076,7 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 	e_data_book_view_notify_progress (book_view, -1, _("Searching..."));
 
 	if (!priv->is_online) {
-		if (e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
+		if (priv->ebsdb && e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
 			fetch_from_offline (ebews, book_view, query, error);
 			return;
 		}
