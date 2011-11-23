@@ -183,8 +183,10 @@ ebews_populate_uid	(EContact *contact, EEwsItem *item)
 	const EwsId *id;
 
 	id = e_ews_item_get_id (item);
-	e_contact_set (contact, E_CONTACT_UID, id->id);
-	e_contact_set (contact, E_CONTACT_REV, id->change_key);
+	if (id) {
+		e_contact_set (contact, E_CONTACT_UID, id->id);
+		e_contact_set (contact, E_CONTACT_REV, id->change_key);
+	}
 }
 
 static void
@@ -193,7 +195,8 @@ ebews_populate_full_name	(EContact *contact, EEwsItem *item)
 	const EwsCompleteName *cn;
 
 	cn = e_ews_item_get_complete_name (item);
-	e_contact_set (contact, E_CONTACT_FULL_NAME, cn->full_name);
+	if (cn)
+		e_contact_set (contact, E_CONTACT_FULL_NAME, cn->full_name);
 }
 
 static void
@@ -202,7 +205,8 @@ ebews_populate_nick_name	(EContact *contact, EEwsItem *item)
 	const EwsCompleteName *cn;
 
 	cn = e_ews_item_get_complete_name (item);
-	e_contact_set (contact, E_CONTACT_NICKNAME, cn->nick_name);
+	if (cn)
+		e_contact_set (contact, E_CONTACT_NICKNAME, cn->nick_name);
 }
 
 static void
@@ -2062,7 +2066,7 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 	gboolean is_autocompletion = FALSE;
 	gchar *auto_comp_str = NULL;
 	GCancellable *cancellable;
-	GSList *ids = NULL, *mailboxes = NULL, *l;
+	GSList *ids = NULL, *mailboxes = NULL, *l, *contacts = NULL, *c;
 	EwsFolderId *fid;
 	GError *error = NULL;
 	gboolean includes_last_item;
@@ -2128,7 +2132,7 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 	   find_items rather than resolve_names to support all queries */
 	g_hash_table_insert (priv->ops, book_view, cancellable);
 	e_ews_connection_resolve_names	(priv->cnc, EWS_PRIORITY_MEDIUM, auto_comp_str,
-					 EWS_SEARCH_AD, NULL, FALSE, &mailboxes, NULL,
+					 EWS_SEARCH_AD, NULL, TRUE, &mailboxes, &contacts,
 					 &includes_last_item, cancellable, &error);
 	g_free (auto_comp_str);
 	g_hash_table_remove (priv->ops, book_view);
@@ -2140,26 +2144,51 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 		return;
 	}
 
-	for (l = mailboxes; l != NULL; l = g_slist_next (l)) {
+	for (l = mailboxes, c = contacts; l != NULL; l = g_slist_next (l), c = c ? g_slist_next (c) : NULL) {
 		EwsMailbox *mb = l->data;
+		EwsResolveContact *rc = c ? c->data : NULL;
 		EContact *contact;
 
 		contact = e_contact_new ();
 
 		/* We do not get an id from the server, so just using email_id as uid for now */
 		e_contact_set (contact, E_CONTACT_UID, mb->email);
-		e_contact_set (contact, E_CONTACT_FULL_NAME, mb->name);
-		e_contact_set (contact, E_CONTACT_EMAIL_1, mb->email);
+
+		if (rc && rc->display_name && *rc->display_name)
+			e_contact_set (contact, E_CONTACT_FULL_NAME, rc->display_name);
+		else
+			e_contact_set (contact, E_CONTACT_FULL_NAME, mb->name);
+
+		if (rc && g_hash_table_size (rc->email_addresses) > 0) {
+			GList *emails = g_hash_table_get_values (rc->email_addresses), *iter;
+			GList *use_emails = NULL;
+
+			for (iter = emails; iter; iter = iter->next) {
+				if (iter->data && g_str_has_prefix (iter->data, "SMTP:"))
+					use_emails = g_list_prepend (use_emails, ((gchar *) iter->data) + 5);
+			}
+
+			if (!use_emails)
+				use_emails = g_list_prepend (use_emails, mb->email);
+
+			e_contact_set (contact, E_CONTACT_EMAIL, use_emails);
+
+			g_list_free (use_emails);
+			g_list_free (emails);
+		} else
+			e_contact_set (contact, E_CONTACT_EMAIL_1, mb->email);
 
 		e_data_book_view_notify_update (book_view, contact);
 
 		g_free (mb->email);
 		g_free (mb->name);
 		g_free (mb);
+		e_ews_free_resolve_contact (rc);
 		g_object_unref (contact);
 	}
 
 	g_slist_free (mailboxes);
+	g_slist_free (contacts);
 	e_data_book_view_notify_complete (book_view, error);
 	e_data_book_view_unref (book_view);
 }
