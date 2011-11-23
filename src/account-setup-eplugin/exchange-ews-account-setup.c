@@ -195,6 +195,7 @@ GtkWidget *
 org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *data)
 {
 	EMConfigTargetSettings *target_account;
+	EShell *shell;
 	CamelSettings *settings;
 	CamelEwsSettings *ews_settings;
 	CamelNetworkSettings *network_settings;
@@ -294,6 +295,11 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 	gtk_table_attach (GTK_TABLE (data->parent), oab_label, 0, 1, row, row+1, 0, 0, 0, 0);
 	gtk_table_attach (GTK_TABLE (data->parent), oab_url, 1, 2, row, row+1, GTK_FILL|GTK_EXPAND, GTK_FILL, 0, 0);
 	row++;
+
+	/* If evolution is offline, dsensitize fetch button and oab entry */
+	shell = e_shell_get_default ();
+	if (!e_shell_get_online (shell))
+		gtk_widget_set_sensitive (auto_discover, FALSE);
 
 	return hbox;
 }
