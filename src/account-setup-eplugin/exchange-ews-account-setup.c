@@ -191,6 +191,18 @@ oab_url_changed (GtkWidget *entry, EConfig *config)
 	camel_ews_settings_set_oaburl (ews_settings, oaburl);
 }
 
+static void
+host_url_changed (GtkWidget *entry, EConfig *config)
+{
+	EMConfigTargetSettings *target = (EMConfigTargetSettings *)(config->target);
+	CamelEwsSettings *ews_settings;
+	const gchar *hosturl;
+
+	ews_settings = CAMEL_EWS_SETTINGS (target->storage_settings);
+	hosturl = gtk_entry_get_text (GTK_ENTRY (entry));
+	camel_ews_settings_set_hosturl (ews_settings, hosturl);
+}
+
 GtkWidget *
 org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *data)
 {
@@ -276,6 +288,7 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 		gtk_entry_set_text (GTK_ENTRY (host_url), host_url_val);
 	else
 		gtk_entry_set_text (GTK_ENTRY (host_url), "https://exchange.server.com/EWS/Exchange.asmx");
+	g_signal_connect (host_url, "changed", G_CALLBACK (host_url_changed), data->config);
 	gtk_box_pack_start (GTK_BOX (hbox), host_url, TRUE, TRUE, 0);
 
 	cbdata->config = data->config;
