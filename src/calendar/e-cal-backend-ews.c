@@ -734,37 +734,32 @@ static void
 ews_cal_delete_comp (ECalBackendEws *cbews, ECalComponent *comp, const gchar *item_id)
 {
 	ECalBackendEwsPrivate *priv = cbews->priv;
-	gchar *comp_str;
 	ECalComponentId *uid;
 
 	uid = e_cal_component_get_id (comp);
 	e_cal_backend_store_remove_component (priv->store, uid->uid, uid->rid);
 
 	/* TODO test with recurrence handling */
-	comp_str = e_cal_component_get_as_string (comp);
-	e_cal_backend_notify_object_removed (E_CAL_BACKEND (cbews), uid, comp_str, NULL);
+	e_cal_backend_notify_component_removed (E_CAL_BACKEND (cbews), uid, comp, NULL);
 
 	PRIV_LOCK (priv);
 	g_hash_table_remove (priv->item_id_hash, item_id);
 	PRIV_UNLOCK (priv);
 
 	e_cal_component_free_id (uid);
-	g_free (comp_str);
 }
 
 static void
 ews_cal_append_exdate (ECalBackendEws *cbews, ECalComponent *comp, const gchar *rid, CalObjModType mod)
 {
-	gchar *old_comp_str, *comp_str;
+	ECalComponent *old_comp;
 
-	old_comp_str = e_cal_component_get_as_string (comp);
+	old_comp = e_cal_component_clone (comp);
 	e_cal_util_remove_instances (e_cal_component_get_icalcomponent (comp), icaltime_from_string (rid), mod);
-	comp_str = e_cal_component_get_as_string (comp);
-	
-	e_cal_backend_notify_object_modified (E_CAL_BACKEND (cbews), old_comp_str, comp_str);
-	
-	g_free (comp_str);
-	g_free (old_comp_str);
+
+	e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbews), old_comp, comp);
+
+	g_object_unref (old_comp);
 }
 
 typedef struct {
@@ -1287,7 +1282,6 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	guint n_attach;
 	gboolean result;
 	EEwsItem *item;
-	icalcomponent *new_icalcomp;
 
 	/* get a list of ids from server (single item) */
 	e_ews_connection_create_items_finish(cnc, res, &ids, &error);
@@ -1371,14 +1365,12 @@ ews_create_object_cb(GObject *object, GAsyncResult *res, gpointer user_data)
 	e_cal_component_commit_sequence(create_data->comp);
 	put_component_to_store (create_data->cbews, create_data->comp);
 
-	
 	e_cal_component_get_uid(create_data->comp, &comp_uid);
 
-	new_icalcomp = e_cal_component_get_icalcomponent (create_data->comp);
-	e_data_cal_respond_create_object (create_data->cal, create_data->context, error, comp_uid, new_icalcomp);
+	e_data_cal_respond_create_object (create_data->cal, create_data->context, error, comp_uid, create_data->comp);
 	
 	/* notify the backend and the application that a new object was created */
-	e_cal_backend_notify_component_created (E_CAL_BACKEND(create_data->cbews), new_icalcomp);
+	e_cal_backend_notify_component_created (E_CAL_BACKEND(create_data->cbews), create_data->comp);
 
 	/* place new component in our cache */
 	PRIV_LOCK (priv);
@@ -1559,7 +1551,6 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	icalcomponent *icalcomp;
 	ECalComponentId *id = NULL;
 	const gchar *x_name;
-	icalcomponent *old_icalcomp = NULL, *new_icalcomp = NULL;
 
 	if (!e_ews_connection_update_items_finish (cnc, res, &ids, &error)) {
 		/* The calendar UI doesn't *display* errors unless they have
@@ -1594,12 +1585,9 @@ ews_cal_modify_object_cb (GObject *object, GAsyncResult *res, gpointer user_data
 	e_cal_backend_store_remove_component (cbews->priv->store, id->uid, id->rid);
 	put_component_to_store (cbews, modify_data->comp);
 
-	new_icalcomp = e_cal_component_get_icalcomponent (modify_data->comp);
-	old_icalcomp = e_cal_component_get_icalcomponent (modify_data->oldcomp);
-
 	if (modify_data->context) {
-		e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbews), old_icalcomp, new_icalcomp);
-		e_data_cal_respond_modify_object (modify_data->cal, modify_data->context, error, old_icalcomp, new_icalcomp);
+		e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbews), modify_data->oldcomp, modify_data->comp);
+		e_data_cal_respond_modify_object (modify_data->cal, modify_data->context, error, modify_data->oldcomp, modify_data->comp);
 	}
 	else if (error) {
 		g_warning ("Modify object error :  %s\n", error->message);
@@ -2576,7 +2564,7 @@ ews_get_attachments_ready_callback (GObject *object, GAsyncResult *res, gpointer
 	GSList *uris = NULL, *ids, *i;
 	ECalComponentId *id;
 	ECalBackendEws *cbews;
-	gchar *comp_str, *itemid;
+	gchar *itemid;
 	ECalComponent *comp_att, *cache_comp = NULL;
 	icalcomponent *icalcomp;
 	icalproperty *icalprop;
@@ -2609,16 +2597,10 @@ ews_get_attachments_ready_callback (GObject *object, GAsyncResult *res, gpointer
 	cache_comp = e_cal_backend_store_get_component (cbews->priv->store, id->uid, id->rid);
 	e_cal_component_free_id (id);
 
-	comp_str = e_cal_component_get_as_string (comp_att);
 	put_component_to_store (cbews, comp_att);
 
 	if (cache_comp) {
-		gchar *cache_str;
-
-		cache_str = e_cal_component_get_as_string (cache_comp);
-		e_cal_backend_notify_object_modified (E_CAL_BACKEND (cbews), cache_str, comp_str);
-
-		g_free (cache_str);
+		e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbews), cache_comp, comp_att);
 
 		PRIV_LOCK (cbews->priv);
 		g_hash_table_insert (cbews->priv->item_id_hash, g_strdup (itemid), g_object_ref (comp_att));
@@ -2627,7 +2609,6 @@ ews_get_attachments_ready_callback (GObject *object, GAsyncResult *res, gpointer
 
 	g_slist_foreach (uris, (GFunc) g_free, NULL);
 	g_slist_free (uris);
-	g_free(comp_str);
 	g_free(itemid);
 	g_object_unref(att_data->comp);
 	g_free(att_data);
@@ -2852,7 +2833,6 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item)
 		icalproperty *icalprop, *freebusy;
 		const EwsId *item_id;
 		ECalComponentId *id;
-		gchar *comp_str;
 		const GSList *l = NULL;
 		const char *org_email_address = e_ews_collect_organizer(icalcomp);
 		const char *uid = e_ews_item_get_uid (item);
@@ -2990,21 +2970,13 @@ add_item_to_cache (ECalBackendEws *cbews, EEwsItem *item)
 		cache_comp = e_cal_backend_store_get_component (priv->store, id->uid, id->rid);
 		e_cal_component_free_id (id);
 
-		comp_str = e_cal_component_get_as_string (comp);
 		put_component_to_store (cbews, comp);
 
 		if (!cache_comp) {
-			e_cal_backend_notify_object_created (E_CAL_BACKEND (cbews), comp_str);
+			e_cal_backend_notify_component_created (E_CAL_BACKEND (cbews), comp);
 		} else {
-			gchar *cache_str;
-
-			cache_str = e_cal_component_get_as_string (cache_comp);
-			e_cal_backend_notify_object_modified (E_CAL_BACKEND (cbews), cache_str, comp_str);
-
-			g_free (cache_str);
+			e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbews), cache_comp, comp);
 		}
-
-		g_free (comp_str);
 
 		PRIV_LOCK (priv);
 		g_hash_table_insert (priv->item_id_hash, g_strdup (item_id->id), g_object_ref (comp));
@@ -3283,29 +3255,51 @@ static void
 e_cal_backend_ews_start_query (ECalBackend *backend, EDataCalView *query)
 {
 	ECalBackendEws *cbews;
-	GSList *objects = NULL;
+	ECalBackendEwsPrivate *priv;
+	GSList *components, *l;
+	ECalBackendSExp *cbsexp;
+	const gchar *sexp;
+	gboolean search_needed = TRUE;
+	time_t occur_start = -1, occur_end = -1;
+	gboolean prunning_by_time;
 	GError *err = NULL;
 
 	cbews = E_CAL_BACKEND_EWS (backend);
+	priv = cbews->priv;
 
 	ews_cal_start_refreshing (cbews);
-	cal_backend_ews_get_object_list (backend, e_data_cal_view_get_text (query),
-					 &objects, &err);
-	if (err) {
+	cbsexp = e_data_cal_view_get_object_sexp (query);
+	if (!cbsexp) {
+		err = EDC_ERROR (InvalidQuery);
 		e_data_cal_view_notify_complete (query, err);
 		g_error_free (err);
 		return;
 	}
 
-	/* notify listeners of all objects */
-	if (objects) {
-		e_data_cal_view_notify_objects_added (query, objects);
+	sexp = e_data_cal_view_get_text (query);
+	if (!sexp || !strcmp (sexp, "#t"))
+		search_needed = FALSE;
 
-		/* free memory */
-		g_slist_foreach (objects, (GFunc) g_free, NULL);
-		g_slist_free (objects);
+	prunning_by_time = e_cal_backend_sexp_evaluate_occur_times (cbsexp,
+									    &occur_start,
+									    &occur_end);
+	components = prunning_by_time ?
+		e_cal_backend_store_get_components_occuring_in_range (priv->store, occur_start, occur_end)
+		: e_cal_backend_store_get_components (priv->store);
+
+	for (l = components; l != NULL; l = l->next) {
+		ECalComponent *comp = E_CAL_COMPONENT (l->data);
+
+		if (e_cal_backend_get_kind (backend) ==
+		    icalcomponent_isa (e_cal_component_get_icalcomponent (comp))) {
+			if ((!search_needed) ||
+			    (e_cal_backend_sexp_match_comp (cbsexp, comp, backend))) {
+				e_data_cal_view_notify_components_added_1 (query, comp);
+			}
+		}
 	}
 
+	g_slist_free_full (components, g_object_unref);
 	e_data_cal_view_notify_complete (query, NULL);
 }
 
