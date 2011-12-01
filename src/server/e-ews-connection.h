@@ -139,6 +139,26 @@ typedef struct{
 }EwsDelegateInfo;
 
 
+typedef struct {
+	gchar *distinguished_prop_set_id;
+	gchar *prop_set_id;
+	gchar *prop_tag;
+	gchar *prop_name;
+	gchar *prop_id;
+	gchar *prop_type;	
+} EwsExtendedFieldURI;
+
+typedef struct {
+	gchar *field_uri;
+	gchar *field_index;
+} EwsIndexedFieldURI;
+
+typedef struct {
+	gchar *field_uri;
+	GSList *extended_furis;
+	GSList *indexed_furis;
+} EwsAdditionalProps;
+
 GType		e_ews_connection_get_type	(void);
 EEwsConnection *e_ews_connection_new		(const gchar *uri,
 						 const gchar *username,
@@ -172,7 +192,7 @@ void		e_ews_connection_sync_folder_items_start
 						 gint pri,
 						 const gchar *sync_state,
 						 const gchar *fid,
-						 const gchar *props,
+						 const gchar *default_props,
 						 const gchar *additional_props,
 						 guint max_entries,
 						 GAsyncReadyCallback cb,
@@ -513,6 +533,31 @@ gboolean	e_ews_connection_move_folder	(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *to_folder,
 						 const gchar *folder,
+						 GCancellable *cancellable,
+						 GError **error);
+
+void		e_ews_connection_get_folder_start
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *folder_shape,
+						 EwsAdditionalProps *add_props,
+						 GSList *folder_ids,
+						 GAsyncReadyCallback cb,
+						 GCancellable *cancellable,
+						 gpointer user_data);
+
+gboolean	e_ews_connection_get_folder_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GSList **folders,
+						 GError **error);
+
+gboolean	e_ews_connection_get_folder	(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *folder_shape,
+						 EwsAdditionalProps *add_props,
+						 GSList *folder_ids,
+						 GSList **folders,
 						 GCancellable *cancellable,
 						 GError **error);
 

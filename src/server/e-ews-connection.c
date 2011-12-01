@@ -561,6 +561,22 @@ sync_folder_items_response_cb (ESoapParameter *subparam, EwsNode *enode)
 			      "IncludesLastItemInRange", "ItemId");
 }
 
+static void
+get_folder_response_cb  (ESoapParameter *subparam, EwsNode *enode)
+{	ESoapParameter *node;
+	EwsAsyncData *async_data;
+	EEwsFolder *folder;
+
+	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
+
+	for (node = e_soap_parameter_get_first_child_by_name (subparam, "Folders");
+	     node; node = e_soap_parameter_get_next_child_by_name (subparam, "Folders")) {
+		folder = e_ews_folder_new_from_soap_parameter (node);
+		if (!folder) continue;
+		async_data->items = g_slist_append (async_data->items, folder);
+	}
+}
+
 /* Used for CreateItems and GetItems */
 static void
 get_items_response_cb (ESoapParameter *subparam, EwsNode *enode)
@@ -1857,6 +1873,70 @@ e_ews_connection_set_mailbox	(EEwsConnection *cnc,
 	cnc->priv->email = g_strdup (email);
 }
 
+static void
+ews_append_additional_props_to_msg (ESoapMessage *msg, EwsAdditionalProps *add_props)
+{
+	GSList *l;
+
+	if (!add_props)
+		return;
+	
+	e_soap_message_start_element (msg, "AdditionalProperties", NULL, NULL);
+
+	if (add_props->field_uri) {
+		gchar **prop = g_strsplit (add_props->field_uri, " ", 0);
+		gint i = 0;
+	
+		while (prop[i]) {
+			e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", prop [i]);
+			i++;
+		}
+
+		g_strfreev (prop);
+	}
+
+	if (add_props->extended_furis) {
+		for (l = add_props->extended_furis; l != NULL; l = g_slist_next (l)) {
+			EwsExtendedFieldURI *ex_furi = (EwsExtendedFieldURI *) l->data;
+			
+			e_soap_message_start_element (msg, "ExtendedFieldURI", NULL, NULL);
+			
+			if (ex_furi->distinguished_prop_set_id)
+				e_soap_message_add_attribute (msg, "DistinguishedPropertySetId", ex_furi->distinguished_prop_set_id, NULL, NULL);
+
+			if (ex_furi->prop_set_id)
+				e_soap_message_add_attribute (msg, "PropertySetId", ex_furi->prop_set_id, NULL, NULL);
+
+			if (ex_furi->prop_name)
+				e_soap_message_add_attribute (msg, "PropertyName", ex_furi->prop_name, NULL, NULL);
+			
+			if (ex_furi->prop_id)
+				e_soap_message_add_attribute (msg, "PropertyId", ex_furi->prop_id, NULL, NULL);
+			
+			if (ex_furi->prop_type)
+				e_soap_message_add_attribute (msg, "PropertyType", ex_furi->prop_type, NULL, NULL);
+
+			e_soap_message_end_element (msg);
+		}
+	}
+
+	if (add_props->indexed_furis) {
+		for (l = add_props->indexed_furis; l != NULL; l = g_slist_next (l)) {
+			EwsIndexedFieldURI *in_furi = (EwsIndexedFieldURI *) l->data;
+
+			e_soap_message_start_element (msg, "IndexedFieldURI", NULL, NULL);
+			
+			e_soap_message_add_attribute (msg, "FieldURI", in_furi->field_uri, NULL, NULL);
+			e_soap_message_add_attribute (msg, "FieldIndex", in_furi->field_index, NULL, NULL);
+			
+			e_soap_message_end_element (msg);
+		}
+	}
+
+	e_soap_message_end_element (msg);
+}
+
+
 /**
  * e_ews_connection_sync_folder_items_start
  * @cnc: The EWS Connection
@@ -2006,6 +2086,30 @@ e_ews_connection_sync_folder_items	(EEwsConnection *cnc,
 	g_free (sync_data);
 
 	return result;
+}
+
+static void
+ews_append_folder_ids_to_msg (ESoapMessage *msg, const gchar *email, GSList *folder_ids)
+{
+	GSList *l;
+	
+	for (l = folder_ids; l != NULL; l = g_slist_next (l)) {
+		EwsFolderId *fid = (EwsFolderId *) l->data;
+
+		if (fid->is_distinguished_id)
+			e_soap_message_start_element (msg, "DistinguishedFolderId", NULL, NULL);
+		else
+			e_soap_message_start_element (msg, "FolderId", NULL, NULL);
+
+		e_soap_message_add_attribute (msg, "Id", fid->id, NULL, NULL);
+		if (fid->change_key)
+			e_soap_message_add_attribute (msg, "ChangeKey", fid->change_key, NULL, NULL);
+
+		if (fid->is_distinguished_id && email)
+			e_ews_message_write_string_parameter (msg, "Mailbox", NULL, email);
+
+		e_soap_message_end_element (msg);
+	}
 }
 
 void
@@ -2758,6 +2862,7 @@ get_search_scope_str (EwsContactsSearchScope scope)
 	}
 }
 
+
 void
 e_ews_connection_resolve_names_start 	(EEwsConnection *cnc,
 					 gint pri,
@@ -2772,7 +2877,6 @@ e_ews_connection_resolve_names_start 	(EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
-	GSList *l;
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "ResolveNames", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
@@ -2785,25 +2889,7 @@ e_ews_connection_resolve_names_start 	(EEwsConnection *cnc,
 
 	if (parent_folder_ids) {
 		e_soap_message_start_element (msg, "ParentFolderIds", "messages", NULL);
-
-		for (l = parent_folder_ids; l != NULL; l = g_slist_next (l)) {
-			EwsFolderId *fid = (EwsFolderId *) l->data;
-
-			if (fid->is_distinguished_id)
-				e_soap_message_start_element (msg, "DistinguishedFolderId", NULL, NULL);
-			else
-				e_soap_message_start_element (msg, "FolderId", NULL, NULL);
-
-			e_soap_message_add_attribute (msg, "Id", fid->id, NULL, NULL);
-			if (fid->change_key)
-				e_soap_message_add_attribute (msg, "ChangeKey", fid->change_key, NULL, NULL);
-
-			if (fid->is_distinguished_id && cnc->priv->email)
-				e_ews_message_write_string_parameter (msg, "Mailbox", NULL, cnc->priv->email);
-
-			e_soap_message_end_element (msg);
-		}
-
+		ews_append_folder_ids_to_msg (msg, cnc->priv->email, parent_folder_ids);
 		e_soap_message_end_element (msg);
 	}
 
@@ -3182,6 +3268,110 @@ e_ews_connection_move_folder	(EEwsConnection *cnc,
 	g_free (sync_data);
 
 	return result;
+}
+
+
+void		
+e_ews_connection_get_folder_start	(EEwsConnection *cnc,
+					 gint pri,
+					 const gchar *folder_shape,
+					 EwsAdditionalProps *add_props,
+					 GSList *folder_ids,
+					 GAsyncReadyCallback cb,
+					 GCancellable *cancellable,
+					 gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetFolder",
+					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
+
+	e_soap_message_start_element (msg, "FolderShape", "messages", NULL);
+	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, folder_shape);
+	e_soap_message_end_element (msg);
+
+	ews_append_additional_props_to_msg (msg, add_props);
+
+	if (folder_ids) {
+		e_soap_message_start_element (msg, "FolderIds", "messages", NULL);
+		ews_append_folder_ids_to_msg (msg, cnc->priv->email, folder_ids);
+		e_soap_message_end_element (msg);
+	}
+
+	e_ews_message_write_footer (msg);
+
+	simple = g_simple_async_result_new (G_OBJECT (cnc),
+                                      cb,
+                                      user_data,
+                                      e_ews_connection_get_folder_start);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	ews_connection_queue_request (cnc, msg, get_folder_response_cb, pri, cancellable, simple,
+				      cb == ews_sync_reply_cb);
+
+}
+
+gboolean	
+e_ews_connection_get_folder_finish	(EEwsConnection *cnc,
+					 GAsyncResult *result,
+					 GSList **folders,
+					 GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_get_folder_start),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	*folders = async_data->items;
+
+	return TRUE;
+}
+
+gboolean	
+e_ews_connection_get_folder	(EEwsConnection *cnc,
+				 gint pri,
+				 const gchar *folder_shape,
+				 EwsAdditionalProps *add_props,
+				 GSList *folder_ids,
+				 GSList **folders,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	EwsSyncData *sync_data;
+	gboolean result;
+
+	sync_data = g_new0 (EwsSyncData, 1);
+	sync_data->eflag = e_flag_new ();
+
+	e_ews_connection_get_folder_start (cnc, pri, folder_shape, add_props,
+					   folder_ids, ews_sync_reply_cb, cancellable,
+					   (gpointer) sync_data);
+
+	e_flag_wait (sync_data->eflag);
+
+	result = e_ews_connection_get_folder_finish (cnc, sync_data->res,
+						     folders, error);
+
+	e_flag_free (sync_data->eflag);
+	g_object_unref (sync_data->res);
+	g_free (sync_data);
+
+	return result;
+
 }
 
 void
