@@ -120,24 +120,24 @@ con_test_autodiscover()
 	user_data->test_case = g_strdup ("postive case... \n");
 	g_print ("Testing %s \n", user_data->test_case);
 	user_data->positive_case = TRUE;
-	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, email, password);
+	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, email, password, NULL, NULL);
 
 	user_data = g_new0 (struct _cb_data, 1);
 	user_data->test_case =	g_strdup ("wrong password... \n");
 	/* It does respond properly with the url, Check it out */
 	user_data->positive_case = TRUE;
 	g_print ("Testing %s \n", user_data->test_case);
-	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, email, "wrongpassword");
+	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, email, "wrongpassword", NULL, NULL);
 
 	user_data = g_new0 (struct _cb_data, 1);
 	user_data->test_case = g_strdup ("email without domain ... \n");
 	g_print ("Testing %s \n", user_data->test_case);
-	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, "wronguseremail", password);
+	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, "wronguseremail", password, NULL, NULL);
 
 	user_data = g_new0 (struct _cb_data, 1);
 	user_data->test_case = g_strdup ("wrong email address and password... \n");
 	g_print ("Testing %s \n", user_data->test_case);
-	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, "godknows@donknow.com", "wrongpassword");
+	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, "godknows@donknow.com", "wrongpassword", NULL, NULL);
 
 	user_data->test_case = g_strdup ("wrong user name ... \n");
 	g_print ("Testing %s \n", user_data->test_case);
@@ -147,7 +147,7 @@ con_test_autodiscover()
 	user_data->test_case = g_strdup ("wrong user name ... \n");
 	g_print ("Testing %s \n", user_data->test_case);
 	user_data->quit = TRUE;
-	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, wrong_username, password);
+	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, wrong_username, password, NULL, NULL);
 	g_free (wrong_username);
 }
 

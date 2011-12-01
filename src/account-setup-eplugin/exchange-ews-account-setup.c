@@ -167,6 +167,9 @@ validate_credentials (GtkWidget *widget, struct _AutoDiscCallBackData *cbdata)
 	EConfig *config = cbdata->config;
 	EMConfigTargetSettings *target_account = (EMConfigTargetSettings *)(config->target);
 	gchar *password = NULL;
+	CamelEwsSettings *ews_settings;
+
+	ews_settings = CAMEL_EWS_SETTINGS (target_account->storage_settings);
 
 	password = get_password (target_account);
 	/*Can there be a account without password ?*/
@@ -174,7 +177,9 @@ validate_credentials (GtkWidget *widget, struct _AutoDiscCallBackData *cbdata)
 		e_ews_autodiscover_ws_url (
 			autodiscover_callback, cbdata,
 			target_account->email_address,
-			password);
+			password,
+			camel_ews_settings_get_hosturl (ews_settings),
+			camel_network_settings_get_user (CAMEL_NETWORK_SETTINGS (ews_settings)));
 	}
 	g_free (password);
 }
