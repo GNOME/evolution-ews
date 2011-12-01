@@ -313,7 +313,7 @@ org_gnome_exchange_ews_check_options(EPlugin *epl, EConfigHookPageCheckData *dat
 
 	url = camel_url_new (e_account_get_string(get_modified_account (target), E_ACCOUNT_SOURCE_URL), NULL);
 
-	if (url && url->protocol && g_ascii_strcasecmp (url->protocol, "ews") != 0)
+	if (!url || !url->protocol || g_ascii_strcasecmp (url->protocol, "ews") != 0)
 		goto exit;
 
 	/* FIXME pageid is not set while editing an account */
