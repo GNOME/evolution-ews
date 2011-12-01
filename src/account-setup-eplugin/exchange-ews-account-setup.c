@@ -165,14 +165,23 @@ validate_credentials (GtkWidget *widget, struct _AutoDiscCallBackData *cbdata)
 {
 	EConfig *config = cbdata->config;
 	EMConfigTargetAccount *target_account = (EMConfigTargetAccount *)(config->target);
-	gchar *password = NULL;
-
-	password = get_password (target_account);
+	EAccount *account = get_modified_account (target_account);
+	gchar *password = get_password (target_account);
 	/*Can there be a account without password ?*/
 	if (password && *password) {
+		const gchar *hosturl = NULL;
+		const gchar *user = NULL;
+		CamelURL *url = camel_url_new (e_account_get_string (account, E_ACCOUNT_SOURCE_URL), NULL);
+
+		if (url) {
+			hosturl = camel_url_get_param (url, "hosturl");
+			user = url->user;
+		}
+
 		e_ews_autodiscover_ws_url (autodiscover_callback, cbdata,
-					   (get_modified_account (target_account))->id->address,
-					   password);
+					   account->id->address,
+					   password, hosturl, user);
+		camel_url_free (url);
 	}
 	g_free (password);
 }

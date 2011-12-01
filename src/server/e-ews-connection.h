@@ -134,7 +134,9 @@ typedef void (*EEwsAutoDiscoverCallback) (EwsUrls *urls, gpointer user_data, GEr
 void		e_ews_autodiscover_ws_url	(EEwsAutoDiscoverCallback cb,
 						 gpointer cbdata,
 						 const gchar *email,
-						 const gchar *password);
+						 const gchar *password,
+						 const gchar *ews_url,
+						 const gchar *username);
 void		e_ews_connection_set_mailbox	(EEwsConnection *cnc,
 						 const gchar *email);
 /* Sync folder items */
