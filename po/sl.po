@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2011-11-24 23:09+0000\n"
-"PO-Revision-Date: 2011-11-25 17:28+0100\n"
+"POT-Creation-Date: 2011-12-02 10:21+0000\n"
+"PO-Revision-Date: 2011-12-02 16:40+0100\n"
 "Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: \n"
@@ -40,37 +40,37 @@ msgid "Could not get password."
 msgstr "Ni mogoče pridobiti gesla."
 
 #. OAB url entry
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:270
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:275
 msgid "OAB U_RL:"
 msgstr "OAB U_RL:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:282
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:287
 msgid "_Host URL:"
 msgstr "Naslov URL _gostitelja:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:297
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:302
 msgid "Fetch _URL"
 msgstr "Pridobi naslov _URL"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:457
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:462
 msgid "Could not fetch oal list: "
 msgstr "Ni mogoče pridobiti seznama OAL:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:502
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:507
 msgid "Fetching..."
 msgstr "Pridobivanje ..."
 
 #. Add cache check box
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:631
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:636
 msgid "Cache o_ffline address book"
 msgstr "Predpomni _oddaljen imenik stikov"
 
 #. Add label
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:637
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:642
 msgid "Select Ad_dress list: "
 msgstr "Izbor seznama naslovov:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:647
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:652
 msgid "Fetch _list"
 msgstr "Pridobi _seznam"
 
@@ -88,19 +88,17 @@ msgid "GAL settings"
 msgstr "Nastavitve GAL"
 
 #: ../src/addressbook/e-book-backend-ews.c:827
-#, fuzzy
 msgid "The backend does not support bulk additions"
 msgstr "Ozadnji program ne podpira množičnega dodajanja"
 
 #: ../src/addressbook/e-book-backend-ews.c:1094
-#, fuzzy
 msgid "The backend does not support bulk modifications"
 msgstr "Ozadnji program ne podpira množičnega spreminjanja"
 
 #: ../src/addressbook/e-book-backend-ews.c:1494
-#, fuzzy, c-format
+#, c-format
 msgid "Downloading contacts in %s %d%% completed... "
-msgstr "Uganko ste rešili v %d sekundah"
+msgstr "Prejemanje stikov v %s: %d%% končano ..."
 
 #: ../src/addressbook/e-book-backend-ews.c:1884
 msgid "Syncing contacts..."
@@ -121,11 +119,9 @@ msgid "Unknown calendar property '%s'"
 msgstr "Neznana lastnost koledarja '%s'"
 
 #: ../src/camel/camel-ews-folder.c:255
-#, fuzzy, c-format
+#, c-format
 msgid "Unable to open mimecontent temporary file!"
-msgstr ""
-"Ni mogoče odpreti trenutne slikovne datoteke '%s'.\n"
-"Ni mogoče poslati slike."
+msgstr "Ni mogoče odpreti začasne datoteke vsebine MIME."
 
 #: ../src/camel/camel-ews-folder.c:262
 #, c-format
@@ -162,9 +158,9 @@ msgstr "Ni mogoče naložiti povzetka za %s"
 #: ../src/camel/camel-ews-store.c:641
 #: ../src/camel/camel-ews-store.c:697
 #: ../src/camel/camel-ews-store.c:765
-#, fuzzy, c-format
+#, c-format
 msgid "Cant perform actions on the folder while in offline mode"
-msgstr "Cant perform actions on the folder while in offline mode"
+msgstr "Ni mogoče izvesti dejanj v mapah v načinu brez povezave"
 
 #: ../src/camel/camel-ews-provider.c:48
 msgid "Checking for new mail"
@@ -179,37 +175,32 @@ msgid "Options"
 msgstr "Možnosti"
 
 #: ../src/camel/camel-ews-provider.c:55
-#, fuzzy
 msgid "_Apply filters to new messages in Inbox on this server"
-msgstr "Uvelj_avi filtre na novih sporočilih v mapi dohodne pošta na tem strežniku"
+msgstr "Uvelj_avi filtre na novih sporočilih v mapi dohodne pošte na tem strežniku"
 
 #: ../src/camel/camel-ews-provider.c:57
-#, fuzzy
 msgid "Check new messages for Jun_k contents"
-msgstr "Med novimi sporočili preveri za neželeno pošto"
+msgstr "Med novimi sporočili preveri za _neželeno pošto"
 
 #: ../src/camel/camel-ews-provider.c:59
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "Neželeno pošto preveri le v mapi _dohodnih sporočil"
 
 #: ../src/camel/camel-ews-provider.c:61
-#, fuzzy
 msgid "Automatically synchroni_ze remote mail locally"
 msgstr "Samodejno _uskladi oddaljeno in krajevno pošto"
 
 #: ../src/camel/camel-ews-provider.c:71
-#, fuzzy
 msgid "For accessing Exchange servers using Web Services"
-msgstr "Za dostop do Microsoft Exchange / OpenChange strežnikov z uporabo MAPI protokola"
+msgstr "Za dostop do strežnikov Exchange preko spletnih storitev"
 
 #: ../src/camel/camel-ews-provider.c:87
 msgid "Password"
 msgstr "Geslo"
 
 #: ../src/camel/camel-ews-provider.c:89
-#, fuzzy
 msgid "This option will connect to the Exchange server using a plaintext password."
-msgstr "Ta možnost bo vzpostavila povezavo s strežnikom Exchange ob uporabi običajne overitve z geslom kot navadnim besedilom."
+msgstr "Možnost omogoča vzpostavitev povezave s strežnikom Exchange z besedilnim geslom."
 
 #: ../src/camel/camel-ews-store.c:183
 #, c-format
@@ -222,9 +213,9 @@ msgid "No such folder: %s"
 msgstr "Ni takšne mape: %s"
 
 #: ../src/camel/camel-ews-store.c:634
-#, fuzzy, c-format
+#, c-format
 msgid "Parent folder %s does not exist"
-msgstr "Nadrejena mapa ne obstaja"
+msgstr "Nadrejena mapa %s ne obstaja"
 
 #: ../src/camel/camel-ews-store.c:691
 #, c-format
@@ -237,9 +228,9 @@ msgid "Folder %s does not exist"
 msgstr "Mapa %s ne obstaja."
 
 #: ../src/camel/camel-ews-store.c:782
-#, fuzzy, c-format
+#, c-format
 msgid "No change key record for folder %s"
-msgstr "No change key record for folder %s"
+msgstr "Ni zapisa ključa za mapo %s"
 
 #: ../src/camel/camel-ews-store.c:821
 #, c-format
@@ -268,9 +259,9 @@ msgid "You must be working online to complete this operation"
 msgstr "Za dokončanje tega opravila je treba vzpostaviti povezavo v omrežje"
 
 #: ../src/camel/camel-ews-transport.c:69
-#, fuzzy, c-format
+#, c-format
 msgid "Exchange mail delivery via %s"
-msgstr "Dostava pošte s SMTP preko %s"
+msgstr "Dostava pošte Exchange preko %s"
 
 #: ../src/camel/camel-ews-transport.c:102
 #, c-format
@@ -290,60 +281,57 @@ msgstr "Overitev je spodletela"
 msgid "No response: %s"
 msgstr "Brez odgovora: %s"
 
-#: ../src/server/e-ews-connection.c:1079
-#: ../src/server/e-ews-connection.c:1395
-#: ../src/server/e-ews-connection.c:1632
-#, fuzzy, c-format
+#: ../src/server/e-ews-connection.c:1094
+#: ../src/server/e-ews-connection.c:1439
+#: ../src/server/e-ews-connection.c:1676
+#, c-format
 msgid "Code: %d - Unexpected response from server"
-msgstr "Nepričakovan odziv strežnika IMAP: %s"
+msgstr "Koda: %d - Nepričakovan odziv strežnika"
 
-#: ../src/server/e-ews-connection.c:1091
-#, fuzzy, c-format
+#: ../src/server/e-ews-connection.c:1106
+#, c-format
 msgid "Failed to parse autodiscover response XML"
-msgstr ""
-"Razčlenjevanje odgovora XML-RPC ni uspelo. Sporočilo napake:\n"
-"\n"
-"%s"
+msgstr "Razčlenjevanje samodejnega odgovora XML je spodletelo"
 
-#: ../src/server/e-ews-connection.c:1099
-#, fuzzy, c-format
+#: ../src/server/e-ews-connection.c:1114
+#, c-format
 msgid "Failed to find <Autodiscover> element\n"
-msgstr "Iskanje podvojenih sporočil je spodletelo."
+msgstr "Iskanje predmeta <samodejnega zaznavanja> je spodletelo.\n"
 
-#: ../src/server/e-ews-connection.c:1111
-#, fuzzy, c-format
+#: ../src/server/e-ews-connection.c:1126
+#, c-format
 msgid "Failed to find <Response> element\n"
-msgstr "Napaka med razčlenjevanjem odgovora strežnika."
+msgstr "Iskanje predmeta <odziva> je spodletelo.\n"
 
-#: ../src/server/e-ews-connection.c:1123
-#, fuzzy, c-format
+#: ../src/server/e-ews-connection.c:1138
+#, c-format
 msgid "Failed to find <Account> element\n"
-msgstr "Iskanje podvojenih sporočil je spodletelo."
+msgstr "Iskanje predmeta <računa> je spodletelo.\n"
 
-#: ../src/server/e-ews-connection.c:1142
+#: ../src/server/e-ews-connection.c:1157
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr "Samodejno iskanje predmetov odgovora <ASUrl> in <OABUrl> je spodletelo"
 
-#: ../src/server/e-ews-connection.c:1238
+#: ../src/server/e-ews-connection.c:1255
 #, c-format
 msgid "Both email and password must be provided"
 msgstr "Vpisati je treba elektronski naslov in geslo"
 
-#: ../src/server/e-ews-connection.c:1245
+#: ../src/server/e-ews-connection.c:1262
 #, c-format
 msgid "Wrong email id"
 msgstr "Napačen ID elektronskega sporočila"
 
-#: ../src/server/e-ews-connection.c:1405
-#, fuzzy, c-format
+#: ../src/server/e-ews-connection.c:1449
+#, c-format
 msgid "Failed to parse oab XML"
-msgstr "Ni mogoče razčleniti datoteke XML \"%s\""
+msgstr "Razčlenjevanje datoteke OAB XML je spodletelo."
 
-#: ../src/server/e-ews-connection.c:1412
-#, fuzzy, c-format
+#: ../src/server/e-ews-connection.c:1456
+#, c-format
 msgid "Failed to find <OAB> element\n"
-msgstr "Iskanje podvojenih sporočil je spodletelo."
+msgstr "Iskanje predmeta <OAB> je spodletelo.\n"
 
 #: ../src/utils/ews-camel-common.c:138
 #, c-format
