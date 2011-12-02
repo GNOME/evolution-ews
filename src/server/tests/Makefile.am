@@ -20,10 +20,11 @@ testews_SOURCES = 				\
 		test-connection.c		\
 		test-syncfolder.c		\
 		test-cuditem.c 			\
-		test-getattachment.c 		\
+		test-getattachment.c		\
 		test-autocompletion.c		\
 		test-createfolder.c		\
 		test-deletefolder.c		\
+		test-getdelegate.c		\
 		test-libews.c 			\
 		utils.h
 
