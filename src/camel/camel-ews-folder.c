@@ -1143,6 +1143,7 @@ ews_refresh_info_sync (CamelFolder *folder, EVO3(GCancellable *cancellable,) GEr
 		g_free (((CamelEwsSummary *) folder->summary)->sync_state);
 		((CamelEwsSummary *) folder->summary)->sync_state = sync_state;
 
+		camel_folder_summary_touch (folder->summary);
 		camel_folder_summary_save_to_db (folder->summary, NULL);
 
 	} while (!rerror && !includes_last_item);
