@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2011-10-24 17:14+0000\n"
-"PO-Revision-Date: 2011-10-25 16:31+0200\n"
+"POT-Creation-Date: 2011-10-26 19:44+0000\n"
+"PO-Revision-Date: 2011-12-05 16:55+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -43,15 +43,15 @@ msgstr ""
 
 #: ../src/account-setup-eplugin/exchange-ews-account-setup.c:276
 msgid "_Host URL:"
-msgstr ""
+msgstr "URL del _equipo:"
 
 #: ../src/account-setup-eplugin/exchange-ews-account-setup.c:291
 msgid "Fetch _URL"
-msgstr ""
+msgstr "Obtener _URL"
 
 #: ../src/account-setup-eplugin/exchange-ews-account-setup.c:459
 msgid "Could not fetch oal list: "
-msgstr ""
+msgstr "No se pudo obtener la lista oal: "
 
 #: ../src/account-setup-eplugin/exchange-ews-account-setup.c:501
 msgid "Fetching..."
@@ -65,7 +65,7 @@ msgstr ""
 #. Add label
 #: ../src/account-setup-eplugin/exchange-ews-account-setup.c:644
 msgid "Select Ad_dress list: "
-msgstr ""
+msgstr "Seleccionar lista de _direcciones: "
 
 #: ../src/account-setup-eplugin/exchange-ews-account-setup.c:654
 msgid "Fetch _list"
@@ -113,7 +113,7 @@ msgstr "Memoria insuficiente"
 #: ../src/calendar/e-cal-backend-ews.c:3534
 #, c-format
 msgid "Unknown calendar property '%s'"
-msgstr ""
+msgstr "Propiedad «%s» del calendario desconocida"
 
 #: ../src/camel/camel-ews-folder.c:255
 #, c-format
@@ -133,28 +133,30 @@ msgstr ""
 #: ../src/camel/camel-ews-folder.c:328
 #, c-format
 msgid "Unable to create cache file"
-msgstr ""
+msgstr "No se pudo crear el archivo de la caché"
 
 #: ../src/camel/camel-ews-folder.c:425 ../src/camel/camel-ews-folder.c:494
 #, c-format
 msgid "Unable to create cache path"
-msgstr ""
+msgstr "No se pudo crear la ruta de la caché"
 
 #: ../src/camel/camel-ews-folder.c:503
 #, c-format
 msgid "Failed to move message cache file"
-msgstr ""
+msgstr "Falló al mover el archivo de la caché de mensajes"
 
 #: ../src/camel/camel-ews-folder.c:878
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "No se pudo cargar el resumen para %s"
 
-#: ../src/camel/camel-ews-folder.c:1207 ../src/camel/camel-ews-store.c:594
-#: ../src/camel/camel-ews-store.c:650 ../src/camel/camel-ews-store.c:718
+#: ../src/camel/camel-ews-folder.c:1207 ../src/camel/camel-ews-store.c:641
+#: ../src/camel/camel-ews-store.c:697 ../src/camel/camel-ews-store.c:765
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr ""
+"No se pueden realizar las acciones sobre la carpeta estando en modo "
+"desconectado"
 
 #: ../src/camel/camel-ews-provider.c:48
 msgid "Checking for new mail"
@@ -171,6 +173,8 @@ msgstr "Opciones"
 #: ../src/camel/camel-ews-provider.c:55
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr ""
+"_Aplicar filtros a los mensajes nuevos de la Bandeja de entrada en este "
+"servidor"
 
 #: ../src/camel/camel-ews-provider.c:57
 msgid "Check new messages for Jun_k contents"
@@ -199,57 +203,57 @@ msgstr ""
 "Esta opción conectará al servidor de Exchange unsado una contraseña de texto "
 "plano."
 
-#: ../src/camel/camel-ews-store.c:136
+#: ../src/camel/camel-ews-store.c:183
 #, c-format
 msgid "Session has no storage path"
 msgstr "La sesión no tiene ruta de almacenamiento"
 
-#: ../src/camel/camel-ews-store.c:398
+#: ../src/camel/camel-ews-store.c:445
 #, c-format
 msgid "No such folder: %s"
 msgstr "No existe la carpeta: %s"
 
-#: ../src/camel/camel-ews-store.c:587
+#: ../src/camel/camel-ews-store.c:634
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "La carpeta padre %s no existe"
 
-#: ../src/camel/camel-ews-store.c:644
+#: ../src/camel/camel-ews-store.c:691
 #, c-format
 msgid "Folder does not exist"
 msgstr "La carpeta no existe"
 
-#: ../src/camel/camel-ews-store.c:726
+#: ../src/camel/camel-ews-store.c:773
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "La carpeta %s no existe"
 
-#: ../src/camel/camel-ews-store.c:735
+#: ../src/camel/camel-ews-store.c:782
 #, c-format
 msgid "No change key record for folder %s"
 msgstr ""
 
-#: ../src/camel/camel-ews-store.c:774
+#: ../src/camel/camel-ews-store.c:821
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "No se puede renombrar y mover una carpeta al mismo tiempo"
 
-#: ../src/camel/camel-ews-store.c:805
+#: ../src/camel/camel-ews-store.c:852
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr ""
 
-#: ../src/camel/camel-ews-store.c:841 ../src/camel/camel-ews-transport.c:66
+#: ../src/camel/camel-ews-store.c:888 ../src/camel/camel-ews-transport.c:66
 #, c-format
 msgid "Exchange server %s"
 msgstr ""
 
-#: ../src/camel/camel-ews-store.c:843
+#: ../src/camel/camel-ews-store.c:890
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr ""
 
-#: ../src/camel/camel-ews-store.c:878
+#: ../src/camel/camel-ews-store.c:925
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Debe estar conectado para completar esta operación"
@@ -321,7 +325,7 @@ msgstr "ID del correo-e no válido"
 #: ../src/server/e-ews-connection.c:1398
 #, c-format
 msgid "Failed to parse oab XML"
-msgstr ""
+msgstr "Falló al analizar el XML oab"
 
 #: ../src/server/e-ews-connection.c:1405
 #, c-format
