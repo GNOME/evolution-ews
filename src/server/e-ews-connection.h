@@ -164,7 +164,7 @@ void		e_ews_autodiscover_ws_url	(EEwsAutoDiscoverCallback cb,
 void		e_ews_connection_set_mailbox	(EEwsConnection *cnc,
 						 const gchar *email);
 
-void		ews_user_id_free		(EwsUsedId);
+void		ews_user_id_free		(EwsUserId *id);
 
 /* Sync folder items */
 void		e_ews_connection_sync_folder_items_start
