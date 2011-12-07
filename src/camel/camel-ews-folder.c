@@ -734,6 +734,11 @@ msg_update_flags (ESoapMessage *msg, gpointer user_data)
 
 		e_ews_message_end_item_change (msg);
 
+		mi->info.flags = mi->info.flags & (~CAMEL_MESSAGE_FOLDER_FLAGGED);
+		mi->info.dirty = TRUE;
+
+		camel_folder_summary_touch (mi->info.summary);
+
 		camel_message_info_free (mi);
 	}
 	/* Don't think we need to free the list; we already freed every element */
@@ -795,7 +800,7 @@ ews_synchronize_sync (CamelFolder *folder, gboolean expunge, GCancellable *cance
 			/* OK, the change must have been the labels */
 			mi_list = g_slist_append (mi_list, mi);
 			mi_list_len++;
-		}			
+		}
 
 		if (mi_list_len == EWS_MAX_FETCH_COUNT) {
 			success = ews_sync_mi_flags (folder, mi_list, cancellable, error);
@@ -803,14 +808,16 @@ ews_synchronize_sync (CamelFolder *folder, gboolean expunge, GCancellable *cance
 			mi_list_len = 0;
 		}
 	}
-	
+
 	if (mi_list_len)
 		success = ews_sync_mi_flags (folder, mi_list, cancellable, error);
 
 	if (deleted_uids)
 		success = ews_delete_messages (folder, deleted_uids, FALSE, cancellable, error);
 
+	camel_folder_summary_save_to_db (folder->summary, NULL);
 	camel_folder_free_uids (folder, uids);
+
 	return success;
 }
 
