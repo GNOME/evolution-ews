@@ -484,6 +484,10 @@ connect_to_server (ECalBackendEws *cbews, const gchar *username, const gchar *pa
 
 	if (priv->is_online && !priv->cnc && password) {
 		const gchar *host_url;
+		GSList *folders = NULL, *ids = NULL;
+		EwsFolderId *fid = NULL;
+		EEwsConnection *cnc = NULL;
+		GError *err = NULL;
 
 		/* If we can be called a second time while the first is still
 		   "outstanding", we need a bit of a rethink... */
@@ -492,14 +496,38 @@ connect_to_server (ECalBackendEws *cbews, const gchar *username, const gchar *pa
 		priv->user_email = e_source_get_duped_property (esource, "email");
 
 		host_url = e_source_get_property (esource, "hosturl");
-		priv->cnc = e_ews_connection_new (host_url, username, password,
+		cnc = e_ews_connection_new (host_url, username, password,
 						  NULL, NULL, error);
-		/* Trigger an update request, which will test our authentication */
-		if (priv->cnc) {
-			ews_start_sync (cbews);
+		
+		fid = g_new0 (EwsFolderId, 1);
+		fid->id = g_strdup (priv->folder_id);
+		ids = g_slist_append (ids, fid);
+		e_ews_connection_get_folder (cnc, EWS_PRIORITY_MEDIUM, "Default", NULL, ids, &folders, NULL, &err);
+		
+		e_ews_folder_free_fid (fid);
+		g_slist_free (ids);
+		ids = NULL;
+
+		if (err) {
+			g_object_unref (cnc);
+			g_propagate_error (error, err);	
 			PRIV_UNLOCK (priv);
-			return TRUE;
+
+			e_cal_backend_notify_auth_required (E_CAL_BACKEND (cbews), TRUE, priv->credentials);
+
+			return FALSE;
 		}
+		
+		g_object_unref ((EEwsFolder *) folders->data);
+		g_slist_free (folders);
+		folders = NULL;
+
+		priv->cnc = cnc;
+		
+		/* Trigger an update request, which will test our authentication */
+		ews_start_sync (cbews);
+		PRIV_UNLOCK (priv);
+		return TRUE;
 	}
 
 	PRIV_UNLOCK (priv);
@@ -589,6 +617,7 @@ e_cal_backend_ews_authenticate_user (ECalBackend *backend,
 	if (!credentials || !e_credentials_has_key (credentials, E_CREDENTIALS_KEY_USERNAME)) {
 		PRIV_UNLOCK (priv);
 		g_propagate_error (&error, EDC_ERROR (AuthenticationFailed));
+		e_cal_backend_notify_opened (backend, error);
 		return;
 	}
 
@@ -598,8 +627,9 @@ e_cal_backend_ews_authenticate_user (ECalBackend *backend,
 			   e_credentials_peek (priv->credentials, E_CREDENTIALS_KEY_PASSWORD), &error);
 
 	PRIV_UNLOCK (priv);
-
-	g_clear_error (&error);
+	
+	/* This seems in-correct, but thats how authenticate_user_sync works */
+	e_cal_backend_notify_opened (backend, error);
 }
 
 static void
