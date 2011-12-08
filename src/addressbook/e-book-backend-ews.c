@@ -2266,9 +2266,10 @@ e_book_backend_ews_load_source 	(EBookBackend           *backend,
 		}
 	}
 	
-	e_book_backend_notify_opened (backend, NULL);
-	if (priv->is_online)
+	if (priv->is_online) {
 		e_backend_set_online (E_BACKEND (backend), TRUE);
+		e_book_backend_notify_auth_required(backend, TRUE, NULL);
+	}
 }
 
 static void
@@ -2288,8 +2289,12 @@ e_book_backend_ews_authenticate_user (EBookBackend *backend,
 {
 	EBookBackendEws *ebgw;
 	EBookBackendEwsPrivate *priv;
+	EEwsConnection *cnc = NULL;
 	ESource *esource;
 	GError *error = NULL;
+	GSList *folders = NULL, *ids = NULL;
+	EwsFolderId *fid = NULL;
+
 	const gchar *host_url;
 	const gchar *read_only;
 
@@ -2310,7 +2315,7 @@ e_book_backend_ews_authenticate_user (EBookBackend *backend,
 	host_url = e_source_get_property (esource, "hosturl");
 	read_only = e_source_get_property (esource, "read_only");
 
-	priv->cnc = e_ews_connection_new (host_url, e_credentials_peek (credentials, E_CREDENTIALS_KEY_USERNAME), 
+	cnc = e_ews_connection_new (host_url, e_credentials_peek (credentials, E_CREDENTIALS_KEY_USERNAME), 
 					  e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD),
 					  NULL, NULL, &error);
 
@@ -2319,11 +2324,28 @@ e_book_backend_ews_authenticate_user (EBookBackend *backend,
 	} else 
 		priv->is_writable = TRUE;
 
+	/* a dummy request to make sure we have a authenticated connection */
+	fid = g_new0 (EwsFolderId, 1);
+	fid->id = g_strdup ("contacts");
+	fid->is_distinguished_id = TRUE;
+	ids = g_slist_append (ids, fid);
+	e_ews_connection_get_folder (cnc, EWS_PRIORITY_MEDIUM, "Default", NULL, ids, &folders, NULL, &error);
+
+	e_ews_folder_free_fid (fid);
+	g_slist_free (ids);
+	ids = NULL;
+
+	if (error) {
+		e_book_backend_notify_auth_required (backend, TRUE, priv->credentials);
+		e_book_backend_notify_opened (backend, error);
+		g_object_unref (cnc);
+		return;
+	}
+
+	priv->cnc = cnc;
 	priv->username = e_source_get_duped_property (esource, "username");
 	priv->password = g_strdup (e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD));
 
-	/* FIXME: Do some dummy request to ensure that the password is actually
-	   correct; don't just blindly return success */
 	e_book_backend_notify_opened (backend, EDB_ERROR (SUCCESS));
 	e_book_backend_notify_readonly (backend, !priv->is_writable);
 }	
