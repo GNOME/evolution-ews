@@ -183,8 +183,10 @@ ebews_populate_uid	(EContact *contact, EEwsItem *item)
 	const EwsId *id;
 
 	id = e_ews_item_get_id (item);
-	e_contact_set (contact, E_CONTACT_UID, id->id);
-	e_contact_set (contact, E_CONTACT_REV, id->change_key);
+	if (id) {
+		e_contact_set (contact, E_CONTACT_UID, id->id);
+		e_contact_set (contact, E_CONTACT_REV, id->change_key);
+	}
 }
 
 static void
@@ -193,7 +195,8 @@ ebews_populate_full_name	(EContact *contact, EEwsItem *item)
 	const EwsCompleteName *cn;
 
 	cn = e_ews_item_get_complete_name (item);
-	e_contact_set (contact, E_CONTACT_FULL_NAME, cn->full_name);
+	if (cn)
+		e_contact_set (contact, E_CONTACT_FULL_NAME, cn->full_name);
 }
 
 static void
@@ -202,7 +205,8 @@ ebews_populate_nick_name	(EContact *contact, EEwsItem *item)
 	const EwsCompleteName *cn;
 
 	cn = e_ews_item_get_complete_name (item);
-	e_contact_set (contact, E_CONTACT_NICKNAME, cn->nick_name);
+	if (cn)
+		e_contact_set (contact, E_CONTACT_NICKNAME, cn->nick_name);
 }
 
 static void
