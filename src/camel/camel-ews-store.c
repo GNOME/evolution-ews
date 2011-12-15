@@ -310,8 +310,10 @@ ews_disconnect_sync (CamelService *service, gboolean clean, EVO3(GCancellable *c
 	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	/* TODO cancel all operations in the connection */
-	g_object_unref (ews_store->priv->cnc);
-	ews_store->priv->cnc = NULL;
+	if (ews_store->priv->cnc) {
+		g_object_unref (ews_store->priv->cnc);
+		ews_store->priv->cnc = NULL;
+	}
 
 	camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
