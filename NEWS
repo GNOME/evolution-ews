@@ -1,3 +1,31 @@
+Evolution-EWS 3.3.3 2011-12-19
+------------------------------
+
+Bug Fixes:
+	Bug 659679 - Password management- Clicking 'ok' without entering a password doesn't bring up a message (Chenthill Palanisamy)
+	Bug 665065 - Updates changed items forever (Milan Crha)
+	Bug 664637 - Deleted messages appear in Inbox (David Woodhouse)
+	Bug 656376 - Support for delegation (Vibha Yadav)
+	Bug 664116 - "Fetch URL" doesn't always work (Milan Crha)
+	Bug 664572 - Change e_cal_backend_notify_component* to use ECalComponent (Milan Crha)
+	Bug 648877 - Address completion gives mailbox name rather than contact name (Milan Crha)
+	Bug 663379 - Cannot configure EWS account on 3.3.1 (Milan Crha)
+	Bug 654940 - Fetch url even works in offline (Chenthill Palanisamy)
+	Bug 661537 - Crash in e_book_backend_sqlitedb_get_is_populated at e-book-backend-sqlitedb.c:1726 (Chenthill Palanisamy)
+
+Miscellaneous Fixes:
+	Fix address-book to display contents without error. Make a dummy get_folder request on the distinguished folder "contacts" 
+	 to make sure we have a valid connection. The duplicate requests can be avoided once we have a EClientStore implemented or if 
+	 e_ews_connection_new can handle it. (Chenthill Palanisamy)
+	Implement GetFolder request. Refactor the code to request for additional properties. (Chenthill Palanisamy)
+	Remove all *_DISABLE_DEPRECATED_FLAGS. (Matthew Barnes)
+	Remove GSEAL_ENABLE macro. (Matthew Barnes)
+
+Translations:
+	Matej Urbančič (sl)
+	Daniel Mustieles (es)
+
+
 Evolution-EWS 3.3.2 2011-11-21
 ------------------------------
 
