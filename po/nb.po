@@ -1,0 +1,341 @@
+# Norwegian bokmål translation of evolution-ews.
+# Copyright (C) 1998-2004, 2005 Free Software Foundation, Inc.
+#
+# Kjartan Maraas <kmaraas@gnome.org>, 1998-2011.
+# Terance Edward Sola <terance@lyse.net>, 2005.
+# Torstein Adolf Winterseth <kvikende@fsfe.org>, 2010.
+msgid ""
+msgstr ""
+"Project-Id-Version: evolution 3.3.x\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2011-12-21 14:21+0100\n"
+"PO-Revision-Date: 2011-12-21 14:36+0100\n"
+"Last-Translator: Kjartan Maraas <kmaraas@gnome.org>\n"
+"Language-Team: Norwegian Bokmål <i18n-nb@lister.ping.uio.no>\n"
+"Language: Norsk bokmål\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:240
+msgid "Global Address list"
+msgstr "Global adresseliste"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:104
+#, c-format
+msgid "Autodiscover failed: %s"
+msgstr "Automatisk gjenkjenning feilet: %s"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:147
+#, c-format
+msgid "Enter Password for %s"
+msgstr "Skriv inn passord for %s"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:156
+msgid "Could not get password."
+msgstr "Fant ikke passord."
+
+#. OAB url entry
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:275
+msgid "OAB U_RL:"
+msgstr "U_RL til OAB:"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:287
+msgid "_Host URL:"
+msgstr "_Verts-URL:"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:302
+msgid "Fetch _URL"
+msgstr "Hent _URL"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:462
+#, fuzzy
+msgid "Could not fetch oal list: "
+msgstr "Kunne ikke åpne lenken."
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:507
+msgid "Fetching..."
+msgstr "Henter …"
+
+#. Add cache check box
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:636
+#, fuzzy
+msgid "Cache o_ffline address book"
+msgstr "evolution adressebok"
+
+#. Add label
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:642
+msgid "Select Ad_dress list: "
+msgstr "Velg a_dresseliste: "
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:652
+msgid "Fetch _list"
+msgstr "Hent _liste"
+
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:1
+#: ../src/camel/camel-ews-provider.c:69
+msgid "Exchange Web Services"
+msgstr ""
+
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:2
+msgid "Exchange Web Services Plugin"
+msgstr ""
+
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:3
+msgid "GAL settings"
+msgstr "Innstillinger for GAL"
+
+#: ../src/addressbook/e-book-backend-ews.c:827
+msgid "The backend does not support bulk additions"
+msgstr ""
+
+#: ../src/addressbook/e-book-backend-ews.c:1094
+#, fuzzy
+msgid "The backend does not support bulk modifications"
+msgstr "Denne tjeneren støtter ikke LDAPv3 schema-informasjon."
+
+#: ../src/addressbook/e-book-backend-ews.c:1494
+#, c-format
+msgid "Downloading contacts in %s %d%% completed... "
+msgstr ""
+
+#: ../src/addressbook/e-book-backend-ews.c:1884
+#, fuzzy
+msgid "Syncing contacts..."
+msgstr "_Finn i kontakt …"
+
+#: ../src/addressbook/e-book-backend-ews.c:2080
+msgid "Searching..."
+msgstr "Søker …"
+
+#: ../src/addressbook/e-book-backend-sqlitedb.c:470
+#, c-format
+msgid "Insufficient memory"
+msgstr "Ikke nok minne"
+
+#: ../src/calendar/e-cal-backend-ews.c:3556
+#, fuzzy, c-format
+msgid "Unknown calendar property '%s'"
+msgstr "Åpner kalender på %s"
+
+#: ../src/camel/camel-ews-folder.c:255
+#, fuzzy, c-format
+msgid "Unable to open mimecontent temporary file!"
+msgstr "Kan ikke lese lisensfilen."
+
+#: ../src/camel/camel-ews-folder.c:262
+#, fuzzy, c-format
+msgid "Unable to generate parser from mimecontent!"
+msgstr "Kunne ikke lese oppføring"
+
+#: ../src/camel/camel-ews-folder.c:271
+#, c-format
+msgid "Unable to parse meeting request mimecontent!"
+msgstr ""
+
+#: ../src/camel/camel-ews-folder.c:328
+#, fuzzy, c-format
+msgid "Unable to create cache file"
+msgstr "Kan ikke lese lisensfilen."
+
+#: ../src/camel/camel-ews-folder.c:425 ../src/camel/camel-ews-folder.c:494
+#, fuzzy, c-format
+msgid "Unable to create cache path"
+msgstr "Klarte ikke å opprette tråd: %s"
+
+#: ../src/camel/camel-ews-folder.c:503
+#, fuzzy, c-format
+msgid "Failed to move message cache file"
+msgstr "Klarte ikke å lagre meldinger til disk."
+
+#: ../src/camel/camel-ews-folder.c:883
+#, fuzzy, c-format
+msgid "Could not load summary for %s"
+msgstr "Kunne ikke laste «%s»"
+
+#: ../src/camel/camel-ews-folder.c:1213 ../src/camel/camel-ews-store.c:643
+#: ../src/camel/camel-ews-store.c:699 ../src/camel/camel-ews-store.c:767
+#, c-format
+msgid "Cant perform actions on the folder while in offline mode"
+msgstr ""
+
+#: ../src/camel/camel-ews-provider.c:48
+msgid "Checking for new mail"
+msgstr "Ser etter nye meldinger"
+
+#: ../src/camel/camel-ews-provider.c:50
+#, fuzzy
+msgid "C_heck for new messages in all folders"
+msgstr "Se etter nye meldinger ved oppstart"
+
+#: ../src/camel/camel-ews-provider.c:53
+msgid "Options"
+msgstr "Alternativer"
+
+#: ../src/camel/camel-ews-provider.c:55
+#, fuzzy
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr "Im nye meldinger kun skal varsles i innboksen."
+
+#: ../src/camel/camel-ews-provider.c:57
+#, fuzzy
+msgid "Check new messages for Jun_k contents"
+msgstr "Se etter nye meldinger ved oppstart"
+
+#: ../src/camel/camel-ews-provider.c:59
+#, fuzzy
+msgid "Only check for Junk messages in the IN_BOX folder"
+msgstr "Det er ingen meldinger i denne mappen."
+
+#: ../src/camel/camel-ews-provider.c:61
+msgid "Automatically synchroni_ze remote mail locally"
+msgstr ""
+
+#: ../src/camel/camel-ews-provider.c:71
+msgid "For accessing Exchange servers using Web Services"
+msgstr ""
+
+#: ../src/camel/camel-ews-provider.c:87
+msgid "Password"
+msgstr "Passord"
+
+#: ../src/camel/camel-ews-provider.c:89
+#, fuzzy
+msgid ""
+"This option will connect to the Exchange server using a plaintext password."
+msgstr "Dette valget vil koble til tjeneren via GNOME nettkontotjenesten"
+
+#: ../src/camel/camel-ews-store.c:183
+#, c-format
+msgid "Session has no storage path"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:447
+#, c-format
+msgid "No such folder: %s"
+msgstr "Mappen eksisterer ikke: %s"
+
+#: ../src/camel/camel-ews-store.c:636
+#, c-format
+msgid "Parent folder %s does not exist"
+msgstr "Opphavsmappe %s eksisterer ikke"
+
+#: ../src/camel/camel-ews-store.c:693
+#, c-format
+msgid "Folder does not exist"
+msgstr "Mappen eksisterer ikke"
+
+#: ../src/camel/camel-ews-store.c:775
+#, c-format
+msgid "Folder %s does not exist"
+msgstr "Mappen %s eksisterer ikke"
+
+#: ../src/camel/camel-ews-store.c:784
+#, c-format
+msgid "No change key record for folder %s"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:823
+#, c-format
+msgid "Cannot both rename and move a folder at the same time"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:854
+#, c-format
+msgid "Cannot find folder ID for parent folder %s"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:890 ../src/camel/camel-ews-transport.c:66
+#, c-format
+msgid "Exchange server %s"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:892
+#, c-format
+msgid "Exchange service for %s on %s"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:927
+#, c-format
+msgid "You must be working online to complete this operation"
+msgstr ""
+
+#: ../src/camel/camel-ews-transport.c:69
+#, c-format
+msgid "Exchange mail delivery via %s"
+msgstr ""
+
+#: ../src/camel/camel-ews-transport.c:102
+#, fuzzy, c-format
+msgid "Service not connected"
+msgstr "Pros_ent fullført:"
+
+#: ../src/server/e-ews-connection.c:354
+msgid "Operation Cancelled"
+msgstr "Operasjonen ble avbrutt"
+
+#: ../src/server/e-ews-connection.c:408
+msgid "Authentication failed"
+msgstr "Autentisering feilet"
+
+#: ../src/server/e-ews-connection.c:416
+#, c-format
+msgid "No response: %s"
+msgstr "Ikke svar: %s"
+
+#: ../src/server/e-ews-connection.c:1110 ../src/server/e-ews-connection.c:1455
+#: ../src/server/e-ews-connection.c:1692
+#, c-format
+msgid "Code: %d - Unexpected response from server"
+msgstr ""
+
+#: ../src/server/e-ews-connection.c:1122
+#, fuzzy, c-format
+msgid "Failed to parse autodiscover response XML"
+msgstr "Klarte ikke å tolke svar fra tjener."
+
+#: ../src/server/e-ews-connection.c:1130
+#, fuzzy, c-format
+msgid "Failed to find <Autodiscover> element\n"
+msgstr "Klarte ikke å finne duplikatmeldinger."
+
+#: ../src/server/e-ews-connection.c:1142
+#, c-format
+msgid "Failed to find <Response> element\n"
+msgstr ""
+
+#: ../src/server/e-ews-connection.c:1154
+#, c-format
+msgid "Failed to find <Account> element\n"
+msgstr ""
+
+#: ../src/server/e-ews-connection.c:1173
+#, c-format
+msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
+msgstr ""
+
+#: ../src/server/e-ews-connection.c:1271
+#, fuzzy, c-format
+msgid "Both email and password must be provided"
+msgstr "Passord ikke oppgitt"
+
+#: ../src/server/e-ews-connection.c:1278
+#, fuzzy, c-format
+msgid "Wrong email id"
+msgstr "Bruker e-postadresse"
+
+#: ../src/server/e-ews-connection.c:1465
+#, fuzzy, c-format
+msgid "Failed to parse oab XML"
+msgstr "Klarte ikke å åpne mappe."
+
+#: ../src/server/e-ews-connection.c:1472
+#, fuzzy, c-format
+msgid "Failed to find <OAB> element\n"
+msgstr "Klarte ikke å slette kontakt"
+
+#: ../src/utils/ews-camel-common.c:138
+#, c-format
+msgid "CreateItem call failed to return ID for new message"
+msgstr ""
