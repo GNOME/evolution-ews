@@ -229,7 +229,7 @@ add_gal_esource (CamelURL *url)
 	client = gconf_client_get_default ();
 	source_list = e_source_list_new_for_gconf (client, conf_key);
 	email_id = camel_url_get_param (url, "email");
-	oal_sel = camel_url_get_param (url, "oal_selected");
+	oal_sel = camel_url_get_param (url, "oal-selected");
 
 	/* if oal is not selected, gal just performs auto-completion and does not cache GAL */	
 	if (oal_sel) {
@@ -303,8 +303,8 @@ ews_account_changed (EAccountList *account_listener, EAccount *account)
 			old_url = camel_url_new (existing_account_info->source_url, NULL);
 			new_url = camel_url_new (account->source->url, NULL);
 
-			o_oal_sel = camel_url_get_param (old_url, "oal_selected");
-			n_oal_sel = camel_url_get_param (new_url, "oal_selected");
+			o_oal_sel = camel_url_get_param (old_url, "oal-selected");
+			n_oal_sel = camel_url_get_param (new_url, "oal-selected");
 
 			if (!ews_is_str_equal (o_oal_sel, n_oal_sel)) {
 				const gchar *account_name = camel_url_get_param (new_url, "email");
