@@ -1,3 +1,16 @@
+Evolution-EWS 3.3.4 2012-01-16
+------------------------------
+
+Bug Fixes:
+	Bug 665104 - Possible memory leaks (Vibha Yadav)
+	Bug 665533 - OAB caching not working (Punit Jain)
+	Bug 667185 - Menu items from plugins not translated (Milan Crha)
+
+Translations:
+	Nicolás Satragno (es)
+	Kjartan Maraas (nb)
+
+
 Evolution-EWS 3.3.3 2011-12-19
 ------------------------------
 
