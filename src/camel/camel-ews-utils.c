@@ -612,6 +612,7 @@ sync_created_folders (CamelEwsStore *ews_store, GSList *created_folders)
 		if (ftype == EWS_FOLDER_TYPE_MAILBOX) {
 			fi = camel_ews_utils_build_folder_info (ews_store, fid->id);
 			camel_store_folder_created ((CamelStore *) ews_store, fi);
+			camel_folder_info_free (fi);
 		}
 	}
 }
