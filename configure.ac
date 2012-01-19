@@ -141,6 +141,7 @@ PKG_CHECK_MODULES(LIBECAL, libecal-1.2 >= eds_minimum_version)
 PKG_CHECK_MODULES(LIBEDATACAL, libedata-cal-1.2 >= eds_minimum_version)
 PKG_CHECK_MODULES(LIBBOOK, libebook-1.2 >= eds_minimum_version)
 PKG_CHECK_MODULES(LIBEDATABOOK, libedata-book-1.2 >= eds_minimum_version)
+PKG_CHECK_MODULES(LIBEMAIL_ENGINE, libemail-engine >= eds_minimum_version)
 PKG_CHECK_MODULES(CAMEL, camel-1.2 >= eds_minimum_version)
 
 dnl ****************************

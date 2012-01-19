@@ -25,7 +25,6 @@
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 #include <shell/e-shell.h>
-#include <mail/e-mail-session.h>
 #include <mail/e-mail-backend.h>
 
 #include <camel/camel.h>

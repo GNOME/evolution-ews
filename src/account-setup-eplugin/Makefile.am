@@ -38,7 +38,8 @@ liborg_gnome_exchange_ews_la_LIBADD = 			\
 	$(EVOLUTION_PLUGIN_LIBS)			\
 	$(EVOLUTION_SHELL_LIBS) \
 	$(CAMEL_LIBS) 					\
-	$(LIBECAL_LIBS)
+	$(LIBECAL_LIBS)					\
+	$(LIBEMAIL_ENGINE_LIBS)
 
 liborg_gnome_exchange_ews_la_LDFLAGS = -module -avoid-version $(NO_UNDEFINED)
 liborg_gnome_exchange_ews_la_CFLAGS = \
@@ -50,7 +51,8 @@ liborg_gnome_exchange_ews_la_CFLAGS = \
 	-I$(top_srcdir)/src/server			\
 	-I$(top_builddir)/src/server			\
 	-I$(top_srcdir)/src/utils	        	\
-	$(LIBEWS_CFLAGS)
+	$(LIBEWS_CFLAGS)				\
+	$(LIBEMAIL_ENGINE_CFLAGS)
 
 EXTRA_DIST = 						\
 	org-gnome-exchange-ews.eplug.xml
