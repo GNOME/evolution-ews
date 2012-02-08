@@ -1194,7 +1194,7 @@ e_ews_get_msg_for_url (const gchar *url, xmlOutputBuffer *buf)
 
 
 	if (buf) {
-		soup_message_set_request (msg, "application/xml", SOUP_MEMORY_COPY,
+		soup_message_set_request (msg, "text/xml; charset=utf-8", SOUP_MEMORY_COPY,
 					  (gchar *)buf->buffer->content,
 					  buf->buffer->use);
 		g_signal_connect (msg, "restarted",
