@@ -721,9 +721,6 @@ e_ews_connection_dispose (GObject *object)
 	g_signal_handlers_disconnect_by_func	(priv->soup_session, ews_connection_authenticate, cnc);
 
 	if (priv->soup_session) {
-		g_object_unref (priv->soup_session);
-		priv->soup_session = NULL;
-
 		g_main_loop_quit(priv->soup_loop);
 		g_thread_join(priv->soup_thread);
 		priv->soup_thread = NULL;
@@ -820,6 +817,10 @@ static gpointer e_ews_soup_thread (gpointer user_data)
 	g_main_context_push_thread_default (priv->soup_context);
 	g_main_loop_run (priv->soup_loop);
 	g_main_context_pop_thread_default (priv->soup_context);
+
+	g_object_unref (priv->soup_session);
+	priv->soup_session = NULL;
+
 	return NULL;
 }
 
