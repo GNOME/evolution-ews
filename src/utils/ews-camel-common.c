@@ -117,6 +117,7 @@ camel_ews_utils_create_mime_message (EEwsConnection *cnc, const gchar *dispositi
 	GSList *ids;
 	EEwsItem *item;
 	const EwsId *ewsid;
+	gchar *restore_from = NULL;
 	gboolean res;
 
 	create_data = g_new0 (struct _create_mime_msg_data, 1);
@@ -125,10 +126,35 @@ camel_ews_utils_create_mime_message (EEwsConnection *cnc, const gchar *dispositi
 	create_data->message_camel_flags = message_camel_flags;
 	create_data->from = from;
 
+	if (g_strcmp0 (disposition, "SendOnly") == 0) {
+		struct _camel_header_raw *header;
+
+		for (header = CAMEL_MIME_PART (message)->headers; header; header = header->next) {
+			if (header->name && g_ascii_strcasecmp (header->name, "From") == 0) {
+				restore_from = header->value;
+				header->value = g_strdup ("");
+				break;
+			}
+		}
+	}
+
 	res = e_ews_connection_create_items (cnc, EWS_PRIORITY_MEDIUM,
 					     disposition, NULL, save_folder,
 					     create_mime_message_cb, create_data,
 					     &ids, cancellable, error);
+
+	if (restore_from) {
+		struct _camel_header_raw *header;
+
+		for (header = CAMEL_MIME_PART (message)->headers; header; header = header->next) {
+			if (header->name && g_ascii_strcasecmp (header->name, "From") == 0) {
+				g_free (header->value);
+				header->value = restore_from;
+				break;
+			}
+		}
+	}
+
 	if (!res || (!itemid && !changekey))
 		return res;
 

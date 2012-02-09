@@ -79,6 +79,7 @@ ews_send_to_sync (CamelTransport *transport,
 {
 	CamelNetworkSettings *network_settings;
 	CamelEwsSettings *ews_settings;
+	CamelInternetAddress *used_from;
 	CamelSettings *settings;
 	CamelService *service;
 	EEwsConnection *cnc;
@@ -94,6 +95,38 @@ ews_send_to_sync (CamelTransport *transport,
 
 	network_settings = CAMEL_NETWORK_SETTINGS (settings);
 	user = camel_network_settings_get_user (network_settings);
+
+	used_from = camel_mime_message_get_from (message);
+
+	if (!used_from && CAMEL_IS_INTERNET_ADDRESS (from))
+		used_from = CAMEL_INTERNET_ADDRESS (from);
+
+	if (!used_from || camel_address_length (CAMEL_ADDRESS (used_from)) == 0) {
+		g_set_error_literal (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			_("Cannot send message with no From address"));
+		return FALSE;
+	} else if (camel_address_length (CAMEL_ADDRESS (used_from)) > 1) {
+		g_set_error_literal (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			_("Exchange server cannot send message with multiple From addresses"));
+		return FALSE;
+	} else {
+		const gchar *ews_email = NULL, *used_email = NULL;
+
+		ews_email = camel_ews_settings_get_email (ews_settings);
+		if (!camel_internet_address_get (used_from, 0, NULL, &used_email)) {
+			g_set_error_literal (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+				_("Failed to read From address"));
+			return FALSE;
+		}
+
+		if (!ews_email || !used_email || g_ascii_strcasecmp (ews_email, used_email) != 0) {
+			g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+				_("Exchange server cannot send message as '%s', when the account was configured for address '%s'"),
+				used_email ? used_email : "NULL",
+				ews_email ? ews_email : "NULL");
+			return FALSE;
+		}
+	}
 
 	cnc = e_ews_connection_find (host_url, user);
 	if (!cnc) {
@@ -118,6 +151,7 @@ camel_ews_transport_class_init (CamelEwsTransportClass *class)
 	CamelTransportClass *transport_class;
 
 	service_class = CAMEL_SERVICE_CLASS (class);
+	service_class->settings_type = CAMEL_TYPE_EWS_SETTINGS;
 	service_class->connect_sync = ews_transport_connect_sync;
 	service_class->get_name = ews_transport_get_name;
 
