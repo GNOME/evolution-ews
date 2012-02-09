@@ -3,15 +3,15 @@
 # This file is distributed under the same license as the evolution-ews package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # Nicolás Satragno <nicoymatu9@hotmail.com>, 2011.
-# Daniel Mustieles <daniel.mustieles@gmail.com>, 2011.
+# Daniel Mustieles <daniel.mustieles@gmail.com>, 2011, 2012.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2011-12-21 13:37+0000\n"
-"PO-Revision-Date: 2011-12-26 10:27+0100\n"
+"POT-Creation-Date: 2012-02-09 13:13+0000\n"
+"PO-Revision-Date: 2012-02-09 17:22+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:240
+#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:239
 msgid "Global Address list"
 msgstr "Lista global de direcciones"
 
@@ -78,12 +78,12 @@ msgid "Exchange Web Services"
 msgstr "Servicios web Exchange"
 
 #: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:2
-msgid "Exchange Web Services Plugin"
-msgstr "Complemento de servicios web Exchange"
-
-#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:3
 msgid "GAL settings"
 msgstr "Configuración de GAL"
+
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:3
+msgid "Exchange Web Services Plugin"
+msgstr "Complemento de servicios web Exchange"
 
 #: ../src/addressbook/e-book-backend-ews.c:827
 msgid "The backend does not support bulk additions"
@@ -106,7 +106,7 @@ msgstr "Sincronizando contactos…"
 msgid "Searching..."
 msgstr "Buscando…"
 
-#: ../src/addressbook/e-book-backend-sqlitedb.c:470
+#: ../src/addressbook/e-book-backend-sqlitedb.c:474
 #, c-format
 msgid "Insufficient memory"
 msgstr "Memoria insuficiente"
@@ -264,7 +264,30 @@ msgstr "Debe estar conectado para completar esta operación"
 msgid "Exchange mail delivery via %s"
 msgstr "Correo Exchange entregado por %s"
 
-#: ../src/camel/camel-ews-transport.c:102
+#: ../src/camel/camel-ews-transport.c:106
+msgid "Cannot send message with no From address"
+msgstr "No se puede enviar un mensaje sin una dirección en «Para»"
+
+#: ../src/camel/camel-ews-transport.c:110
+msgid "Exchange server cannot send message with multiple From addresses"
+msgstr ""
+"El servidor Exchange no puede enviar un mensaje con varias direcciones «Para»"
+
+#: ../src/camel/camel-ews-transport.c:118
+#| msgid "Failed to parse oab XML"
+msgid "Failed to read From address"
+msgstr "Falló al la dirección «Para»"
+
+#: ../src/camel/camel-ews-transport.c:124
+#, c-format
+msgid ""
+"Exchange server cannot send message as '%s', when the account was configured "
+"for address '%s'"
+msgstr ""
+"El servidor Exchange no puede enviar un mensaje como «%s», cuando la cuenta "
+"se ha configurado para la dirección «%s»"
+
+#: ../src/camel/camel-ews-transport.c:135
 #, c-format
 msgid "Service not connected"
 msgstr "Servicio no conectado"
@@ -282,58 +305,58 @@ msgstr "Falló la autenticación"
 msgid "No response: %s"
 msgstr "Sin respuesta: %s"
 
-#: ../src/server/e-ews-connection.c:1110 ../src/server/e-ews-connection.c:1455
-#: ../src/server/e-ews-connection.c:1692
+#: ../src/server/e-ews-connection.c:1111 ../src/server/e-ews-connection.c:1456
+#: ../src/server/e-ews-connection.c:1693
 #, c-format
 msgid "Code: %d - Unexpected response from server"
 msgstr "Código: %d: respuesta inesperada del servidor"
 
-#: ../src/server/e-ews-connection.c:1122
+#: ../src/server/e-ews-connection.c:1123
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Falló al analizar la respuesta XML de la autodetección"
 
-#: ../src/server/e-ews-connection.c:1130
+#: ../src/server/e-ews-connection.c:1131
 #, c-format
 msgid "Failed to find <Autodiscover> element\n"
 msgstr "Falló al buscar el elemento <Autodiscover>\n"
 
-#: ../src/server/e-ews-connection.c:1142
+#: ../src/server/e-ews-connection.c:1143
 #, c-format
 msgid "Failed to find <Response> element\n"
 msgstr "Falló al buscar el elemento<Response>\n"
 
-#: ../src/server/e-ews-connection.c:1154
+#: ../src/server/e-ews-connection.c:1155
 #, c-format
 msgid "Failed to find <Account> element\n"
 msgstr "Falló al buscar el elemento <Account>\n"
 
-#: ../src/server/e-ews-connection.c:1173
+#: ../src/server/e-ews-connection.c:1174
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr "Falló al buscar <ASUrl> y <OABUrl> en la respuesta de la autodetección"
 
-#: ../src/server/e-ews-connection.c:1271
+#: ../src/server/e-ews-connection.c:1272
 #, c-format
 msgid "Both email and password must be provided"
 msgstr "Se deben proporcionar el correo-e y la contraseña"
 
-#: ../src/server/e-ews-connection.c:1278
+#: ../src/server/e-ews-connection.c:1279
 #, c-format
 msgid "Wrong email id"
 msgstr "ID del correo-e no válido"
 
-#: ../src/server/e-ews-connection.c:1465
+#: ../src/server/e-ews-connection.c:1466
 #, c-format
 msgid "Failed to parse oab XML"
 msgstr "Falló al analizar el XML oab"
 
-#: ../src/server/e-ews-connection.c:1472
+#: ../src/server/e-ews-connection.c:1473
 #, c-format
 msgid "Failed to find <OAB> element\n"
 msgstr "Falló al buscar el elemento <OAB>\n"
 
-#: ../src/utils/ews-camel-common.c:138
+#: ../src/utils/ews-camel-common.c:164
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "CreateItem falló al devolver el ID para el mensaje nuevo"
