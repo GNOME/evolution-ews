@@ -1060,7 +1060,6 @@ static void autodiscover_done_cb (GObject *cnc, GAsyncResult *res,
 	xmlOutputBufferClose (ad->buf);
 
 	ad->cb (urls, ad->cbdata, error);
-	g_object_unref (G_OBJECT (ad->cnc));
 	g_free (ad);
 }
 
@@ -1185,9 +1184,9 @@ autodiscover_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 		}
 	}
 	
-	
 	g_simple_async_result_set_op_res_gpointer (ad->simple, urls, NULL);
 	g_simple_async_result_complete_in_idle (ad->simple);
+	g_object_unref (ad->simple);
 	return;
 
 failed:
@@ -1206,6 +1205,7 @@ failed:
 	   want the *first* error */
 	g_simple_async_result_set_from_error (ad->simple, error);
 	g_simple_async_result_complete_in_idle (ad->simple);
+	g_object_unref (ad->simple);
 }
 
 static void post_restarted (SoupMessage *msg, gpointer data)
