@@ -1,73 +1,74 @@
 # Czech translation for evolution-ews.
 # Copyright (C) 2011 evolution-ews's COPYRIGHT HOLDER
 # This file is distributed under the same license as the evolution-ews package.
-# Marek Černocký <marek@manet.cz>, 2011.
+#
+# Marek Černocký <marek@manet.cz>, 2011, 2012.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2011-11-07 01:15+0000\n"
-"PO-Revision-Date: 2011-11-09 09:50+0100\n"
+"POT-Creation-Date: 2012-02-16 09:25+0000\n"
+"PO-Revision-Date: 2012-02-16 10:57+0100\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: Czech <gnome-cs-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
-"Language: cs\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: cs\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:240
+#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:239
 msgid "Global Address list"
 msgstr "Globální seznam adres"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:103
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:104
 #, c-format
 msgid "Autodiscover failed: %s"
 msgstr "Automatické nalezení selhalo: %s"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:146
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:147
 #, c-format
 msgid "Enter Password for %s"
 msgstr "Zadejte heslo pro server %s"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:155
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:156
 msgid "Could not get password."
 msgstr "Nelze získat heslo."
 
 #. OAB url entry
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:256
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:275
 msgid "OAB U_RL:"
 msgstr "Adresa U_RL s OAB:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:268
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:287
 msgid "_Host URL:"
 msgstr "Adresa URL _počítače:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:282
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:302
 msgid "Fetch _URL"
 msgstr "Získat adresu _URL"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:437
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:462
 msgid "Could not fetch oal list: "
 msgstr "Nelze získat seznam OAL: "
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:482
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:507
 msgid "Fetching..."
 msgstr "Získává se…"
 
 #. Add cache check box
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:611
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:636
 msgid "Cache o_ffline address book"
 msgstr "Uložit adresář off-line do mezipaměti"
 
 #. Add label
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:617
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:642
 msgid "Select Ad_dress list: "
 msgstr "Vyberte seznam adres: "
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:627
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:652
 msgid "Fetch _list"
 msgstr "Získat _seznam"
 
@@ -77,40 +78,40 @@ msgid "Exchange Web Services"
 msgstr "Webové služby Exchange"
 
 #: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:2
-msgid "Exchange Web Services Plugin"
-msgstr "Zásuvný modul webových služeb Exchange"
-
-#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:3
 msgid "GAL settings"
 msgstr "Nastavení GAL"
 
-#: ../src/addressbook/e-book-backend-ews.c:795
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:3
+msgid "Exchange Web Services Plugin"
+msgstr "Zásuvný modul webových služeb Exchange"
+
+#: ../src/addressbook/e-book-backend-ews.c:827
 msgid "The backend does not support bulk additions"
 msgstr "Serverová část nepodporuje hromadné přidávání"
 
-#: ../src/addressbook/e-book-backend-ews.c:1059
+#: ../src/addressbook/e-book-backend-ews.c:1094
 msgid "The backend does not support bulk modifications"
 msgstr "Serverová část nepodporuje hromadné změny"
 
-#: ../src/addressbook/e-book-backend-ews.c:1459
+#: ../src/addressbook/e-book-backend-ews.c:1494
 #, c-format
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr "Stahování kontaktů v %s %d%% dokončeno…"
 
-#: ../src/addressbook/e-book-backend-ews.c:1849
+#: ../src/addressbook/e-book-backend-ews.c:1884
 msgid "Syncing contacts..."
 msgstr "Synchronizují se kontakty…"
 
-#: ../src/addressbook/e-book-backend-ews.c:2045
+#: ../src/addressbook/e-book-backend-ews.c:2080
 msgid "Searching..."
 msgstr "Vyhledává se…"
 
-#: ../src/addressbook/e-book-backend-sqlitedb.c:470
+#: ../src/addressbook/e-book-backend-sqlitedb.c:474
 #, c-format
 msgid "Insufficient memory"
 msgstr "Nedostatek paměti"
 
-#: ../src/calendar/e-cal-backend-ews.c:3534
+#: ../src/calendar/e-cal-backend-ews.c:3556
 #, c-format
 msgid "Unknown calendar property '%s'"
 msgstr "Neznámá vlastnost „%s“ kalendáře"
@@ -145,13 +146,13 @@ msgstr "Nelze vytvořit cestu pro mezipaměť"
 msgid "Failed to move message cache file"
 msgstr "Nelze přesunout soubor s mezipamětí zpráv"
 
-#: ../src/camel/camel-ews-folder.c:878
+#: ../src/camel/camel-ews-folder.c:883
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nelze získat přehled pro složku %s"
 
-#: ../src/camel/camel-ews-folder.c:1207 ../src/camel/camel-ews-store.c:641
-#: ../src/camel/camel-ews-store.c:697 ../src/camel/camel-ews-store.c:765
+#: ../src/camel/camel-ews-folder.c:1213 ../src/camel/camel-ews-store.c:643
+#: ../src/camel/camel-ews-store.c:699 ../src/camel/camel-ews-store.c:767
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr "Akci na složce nelze provádět v režimu off-line"
@@ -173,8 +174,8 @@ msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "Pro nové zprávy na tomto serveru použív_at filtry"
 
 #: ../src/camel/camel-ews-provider.c:57
-msgid "Check new messages for Jun_k contents"
-msgstr "_Kontrolovat nové zprávy, zda nejsou nevyžádané"
+msgid "Check new messages for _Junk contents"
+msgstr "Kontrolovat nové zprávy, zda ne_jsou nevyžádané"
 
 #: ../src/camel/camel-ews-provider.c:59
 msgid "Only check for Junk messages in the IN_BOX folder"
@@ -204,52 +205,52 @@ msgstr ""
 msgid "Session has no storage path"
 msgstr "Sezení nemá žádnou cestu pro ukládání"
 
-#: ../src/camel/camel-ews-store.c:445
+#: ../src/camel/camel-ews-store.c:447
 #, c-format
 msgid "No such folder: %s"
 msgstr "Taková složka neexistuje: %s"
 
-#: ../src/camel/camel-ews-store.c:634
+#: ../src/camel/camel-ews-store.c:636
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Rodičovská složka %s neexistuje"
 
-#: ../src/camel/camel-ews-store.c:691
+#: ../src/camel/camel-ews-store.c:693
 #, c-format
 msgid "Folder does not exist"
 msgstr "Složka neexistuje"
 
-#: ../src/camel/camel-ews-store.c:773
+#: ../src/camel/camel-ews-store.c:775
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Složka %s neexistuje"
 
-#: ../src/camel/camel-ews-store.c:782
+#: ../src/camel/camel-ews-store.c:784
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Neexistuje záznam s klíčem o změně (ChangeKey) pro složku %s"
 
-#: ../src/camel/camel-ews-store.c:821
+#: ../src/camel/camel-ews-store.c:823
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Složku nelze naráz přejmenovat i přesunout"
 
-#: ../src/camel/camel-ews-store.c:852
+#: ../src/camel/camel-ews-store.c:854
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nelze najít ID složky pro rodičovskou složku %s"
 
-#: ../src/camel/camel-ews-store.c:888 ../src/camel/camel-ews-transport.c:66
+#: ../src/camel/camel-ews-store.c:890 ../src/camel/camel-ews-transport.c:66
 #, c-format
 msgid "Exchange server %s"
 msgstr "Server Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:890
+#: ../src/camel/camel-ews-store.c:892
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Služba Exchange pro uživatele %s na počítači %s"
 
-#: ../src/camel/camel-ews-store.c:925
+#: ../src/camel/camel-ews-store.c:927
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "K dokončení této operace je nutné, abyste pracovali on-line"
@@ -259,7 +260,28 @@ msgstr "K dokončení této operace je nutné, abyste pracovali on-line"
 msgid "Exchange mail delivery via %s"
 msgstr "Doručování pošty Exchange přes server %s"
 
-#: ../src/camel/camel-ews-transport.c:102
+#: ../src/camel/camel-ews-transport.c:106
+msgid "Cannot send message with no From address"
+msgstr "Nelze odeslat zprávu, která nemá uvedenu adresu „Od“"
+
+#: ../src/camel/camel-ews-transport.c:110
+msgid "Exchange server cannot send message with multiple From addresses"
+msgstr "Server Exchange nemůže odeslat zprávu s více adresami „Od“"
+
+#: ../src/camel/camel-ews-transport.c:118
+msgid "Failed to read From address"
+msgstr "Selhalo čtení adresy „Od“"
+
+#: ../src/camel/camel-ews-transport.c:124
+#, c-format
+msgid ""
+"Exchange server cannot send message as '%s', when the account was configured "
+"for address '%s'"
+msgstr ""
+"Server Exchange nemůže odeslat zprávu jako „%s“, když je účet nastaven pro "
+"adresu „%s“"
+
+#: ../src/camel/camel-ews-transport.c:135
 #, c-format
 msgid "Service not connected"
 msgstr "Služba není připojena"
@@ -277,59 +299,59 @@ msgstr "Autentizace selhala"
 msgid "No response: %s"
 msgstr "Bez odezvy: %s"
 
-#: ../src/server/e-ews-connection.c:1072 ../src/server/e-ews-connection.c:1388
-#: ../src/server/e-ews-connection.c:1625
+#: ../src/server/e-ews-connection.c:1110 ../src/server/e-ews-connection.c:1456
+#: ../src/server/e-ews-connection.c:1693
 #, c-format
 msgid "Code: %d - Unexpected response from server"
 msgstr "Kód: %d – neočekávaná odezva od serveru"
 
-#: ../src/server/e-ews-connection.c:1084
+#: ../src/server/e-ews-connection.c:1122
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Selhala analýza odpovědi XML na automatické nalezení"
 
-#: ../src/server/e-ews-connection.c:1092
+#: ../src/server/e-ews-connection.c:1130
 #, c-format
 msgid "Failed to find <Autodiscover> element\n"
 msgstr "Selhalo vyhledání prvku <Autodiscover>\n"
 
-#: ../src/server/e-ews-connection.c:1104
+#: ../src/server/e-ews-connection.c:1142
 #, c-format
 msgid "Failed to find <Response> element\n"
 msgstr "Selhalo vyhledání prvku <Response>\n"
 
-#: ../src/server/e-ews-connection.c:1116
+#: ../src/server/e-ews-connection.c:1154
 #, c-format
 msgid "Failed to find <Account> element\n"
 msgstr "Selhalo vyhledání prvku <Account>\n"
 
-#: ../src/server/e-ews-connection.c:1135
+#: ../src/server/e-ews-connection.c:1173
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
 "Selhalo vyhledání <ASUrl> a <OABUrl> v odpovědi na automatické nalezení"
 
-#: ../src/server/e-ews-connection.c:1231
+#: ../src/server/e-ews-connection.c:1272
 #, c-format
 msgid "Both email and password must be provided"
 msgstr "Musí se zadat jak e-mail, tak heslo"
 
-#: ../src/server/e-ews-connection.c:1238
+#: ../src/server/e-ews-connection.c:1279
 #, c-format
 msgid "Wrong email id"
 msgstr "Nesprávné ID e-mailu"
 
-#: ../src/server/e-ews-connection.c:1398
+#: ../src/server/e-ews-connection.c:1466
 #, c-format
 msgid "Failed to parse oab XML"
 msgstr "Selhala analýza XML OAB"
 
-#: ../src/server/e-ews-connection.c:1405
+#: ../src/server/e-ews-connection.c:1473
 #, c-format
 msgid "Failed to find <OAB> element\n"
 msgstr "Selhalo vyhledání prvku <OAB>\n"
 
-#: ../src/utils/ews-camel-common.c:138
+#: ../src/utils/ews-camel-common.c:164
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr ""
