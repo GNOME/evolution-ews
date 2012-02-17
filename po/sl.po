@@ -2,14 +2,14 @@
 # Copyright (C) 2011 evolution-ews's COPYRIGHT HOLDER
 # This file is distributed under the same license as the evolution-ews package.
 #
-# Matej Urbančič <mateju@svn.gnome.org>, 2011.
+# Matej Urbančič <mateju@svn.gnome.org>, 2011 - 2012.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2011-12-02 10:21+0000\n"
-"PO-Revision-Date: 2011-12-02 16:40+0100\n"
+"POT-Creation-Date: 2012-02-17 10:52+0000\n"
+"PO-Revision-Date: 2012-02-17 21:05+0100\n"
 "Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: \n"
@@ -21,7 +21,7 @@ msgstr ""
 "X-Poedit-Country: SLOVENIA\n"
 "X-Poedit-SourceCharset: utf-8\n"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:240
+#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:239
 msgid "Global Address list"
 msgstr "Splošni seznam naslovov"
 
@@ -80,43 +80,42 @@ msgid "Exchange Web Services"
 msgstr "Spletna storitev Exchange"
 
 #: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:2
-msgid "Exchange Web Services Plugin"
-msgstr "Vstavek spletne storitve Exchange"
-
-#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:3
 msgid "GAL settings"
 msgstr "Nastavitve GAL"
 
-#: ../src/addressbook/e-book-backend-ews.c:827
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:3
+msgid "Exchange Web Services Plugin"
+msgstr "Vstavek spletne storitve Exchange"
+
+#: ../src/addressbook/e-book-backend-ews.c:830
 msgid "The backend does not support bulk additions"
 msgstr "Ozadnji program ne podpira množičnega dodajanja"
 
-#: ../src/addressbook/e-book-backend-ews.c:1094
+#: ../src/addressbook/e-book-backend-ews.c:1097
 msgid "The backend does not support bulk modifications"
 msgstr "Ozadnji program ne podpira množičnega spreminjanja"
 
-#: ../src/addressbook/e-book-backend-ews.c:1494
+#: ../src/addressbook/e-book-backend-ews.c:1271
+msgid "Wait till syncing is done"
+msgstr "Počakaj na konec usklajevanja"
+
+#: ../src/addressbook/e-book-backend-ews.c:1561
 #, c-format
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr "Prejemanje stikov v %s: %d%% končano ..."
 
-#: ../src/addressbook/e-book-backend-ews.c:1884
+#: ../src/addressbook/e-book-backend-ews.c:2038
 msgid "Syncing contacts..."
 msgstr "Usklajevanje stikov ..."
 
-#: ../src/addressbook/e-book-backend-ews.c:2080
+#: ../src/addressbook/e-book-backend-ews.c:2234
 msgid "Searching..."
 msgstr "Iskanje ..."
 
-#: ../src/addressbook/e-book-backend-sqlitedb.c:470
+#: ../src/addressbook/e-book-backend-sqlitedb.c:474
 #, c-format
 msgid "Insufficient memory"
 msgstr "Nezadostna količina pomnilnika"
-
-#: ../src/calendar/e-cal-backend-ews.c:3526
-#, c-format
-msgid "Unknown calendar property '%s'"
-msgstr "Neznana lastnost koledarja '%s'"
 
 #: ../src/camel/camel-ews-folder.c:255
 #, c-format
@@ -149,15 +148,15 @@ msgstr "Ni mogoče ustvariti poti predpomnilnika"
 msgid "Failed to move message cache file"
 msgstr "Ni mogoče premakniti predpomnilniške datoteke sporočil"
 
-#: ../src/camel/camel-ews-folder.c:876
+#: ../src/camel/camel-ews-folder.c:883
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Ni mogoče naložiti povzetka za %s"
 
-#: ../src/camel/camel-ews-folder.c:1205
-#: ../src/camel/camel-ews-store.c:641
-#: ../src/camel/camel-ews-store.c:697
-#: ../src/camel/camel-ews-store.c:765
+#: ../src/camel/camel-ews-folder.c:1213
+#: ../src/camel/camel-ews-store.c:729
+#: ../src/camel/camel-ews-store.c:785
+#: ../src/camel/camel-ews-store.c:853
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr "Ni mogoče izvesti dejanj v mapah v načinu brez povezave"
@@ -179,7 +178,7 @@ msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "Uvelj_avi filtre na novih sporočilih v mapi dohodne pošte na tem strežniku"
 
 #: ../src/camel/camel-ews-provider.c:57
-msgid "Check new messages for Jun_k contents"
+msgid "Check new messages for _Junk contents"
 msgstr "Med novimi sporočili preveri za _neželeno pošto"
 
 #: ../src/camel/camel-ews-provider.c:59
@@ -207,53 +206,53 @@ msgstr "Možnost omogoča vzpostavitev povezave s strežnikom Exchange z besedil
 msgid "Session has no storage path"
 msgstr "Seja nima določene poti shrambe"
 
-#: ../src/camel/camel-ews-store.c:445
+#: ../src/camel/camel-ews-store.c:533
 #, c-format
 msgid "No such folder: %s"
 msgstr "Ni takšne mape: %s"
 
-#: ../src/camel/camel-ews-store.c:634
+#: ../src/camel/camel-ews-store.c:722
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Nadrejena mapa %s ne obstaja"
 
-#: ../src/camel/camel-ews-store.c:691
+#: ../src/camel/camel-ews-store.c:779
 #, c-format
 msgid "Folder does not exist"
 msgstr "Mapa ne obstaja"
 
-#: ../src/camel/camel-ews-store.c:773
+#: ../src/camel/camel-ews-store.c:861
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Mapa %s ne obstaja."
 
-#: ../src/camel/camel-ews-store.c:782
+#: ../src/camel/camel-ews-store.c:870
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Ni zapisa ključa za mapo %s"
 
-#: ../src/camel/camel-ews-store.c:821
+#: ../src/camel/camel-ews-store.c:909
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Ni mogoče hkrati preimenovati in premakniti mape"
 
-#: ../src/camel/camel-ews-store.c:852
+#: ../src/camel/camel-ews-store.c:940
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Ni mogoče najti ID mape za nadrejeno mapo %s"
 
-#: ../src/camel/camel-ews-store.c:888
+#: ../src/camel/camel-ews-store.c:976
 #: ../src/camel/camel-ews-transport.c:66
 #, c-format
 msgid "Exchange server %s"
 msgstr "Strežnik Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:890
+#: ../src/camel/camel-ews-store.c:978
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Storitev Exchange za %s na %s"
 
-#: ../src/camel/camel-ews-store.c:925
+#: ../src/camel/camel-ews-store.c:1013
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Za dokončanje tega opravila je treba vzpostaviti povezavo v omrežje"
@@ -263,78 +262,97 @@ msgstr "Za dokončanje tega opravila je treba vzpostaviti povezavo v omrežje"
 msgid "Exchange mail delivery via %s"
 msgstr "Dostava pošte Exchange preko %s"
 
-#: ../src/camel/camel-ews-transport.c:102
+#: ../src/camel/camel-ews-transport.c:106
+msgid "Cannot send message with no From address"
+msgstr "Ni mogoče poslati sporočila brez naslova pošiljatelja"
+
+#: ../src/camel/camel-ews-transport.c:110
+msgid "Exchange server cannot send message with multiple From addresses"
+msgstr "Strežnik Exchange ne podpira pošiljanja sporočil z več naslovi pošiljateljev"
+
+#: ../src/camel/camel-ews-transport.c:118
+msgid "Failed to read From address"
+msgstr "Branje iz naslova je spodletelo"
+
+#: ../src/camel/camel-ews-transport.c:124
+#, c-format
+msgid "Exchange server cannot send message as '%s', when the account was configured for address '%s'"
+msgstr "Strežnik Exchange ne podpira pošiljanja sporočil kot '%s', če je račun nastavljen za naslov '%s'."
+
+#: ../src/camel/camel-ews-transport.c:135
 #, c-format
 msgid "Service not connected"
 msgstr "Storitev ni povezana"
 
-#: ../src/server/e-ews-connection.c:354
+#: ../src/server/e-ews-connection.c:355
 msgid "Operation Cancelled"
 msgstr "Opravilo je preklicano"
 
-#: ../src/server/e-ews-connection.c:408
+#: ../src/server/e-ews-connection.c:409
 msgid "Authentication failed"
 msgstr "Overitev je spodletela"
 
-#: ../src/server/e-ews-connection.c:416
+#: ../src/server/e-ews-connection.c:417
 #, c-format
 msgid "No response: %s"
 msgstr "Brez odgovora: %s"
 
-#: ../src/server/e-ews-connection.c:1094
-#: ../src/server/e-ews-connection.c:1439
-#: ../src/server/e-ews-connection.c:1676
+#: ../src/server/e-ews-connection.c:1143
+#: ../src/server/e-ews-connection.c:1489
+#: ../src/server/e-ews-connection.c:1726
 #, c-format
 msgid "Code: %d - Unexpected response from server"
 msgstr "Koda: %d - Nepričakovan odziv strežnika"
 
-#: ../src/server/e-ews-connection.c:1106
+#: ../src/server/e-ews-connection.c:1155
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Razčlenjevanje samodejnega odgovora XML je spodletelo"
 
-#: ../src/server/e-ews-connection.c:1114
+#: ../src/server/e-ews-connection.c:1163
 #, c-format
 msgid "Failed to find <Autodiscover> element\n"
 msgstr "Iskanje predmeta <samodejnega zaznavanja> je spodletelo.\n"
 
-#: ../src/server/e-ews-connection.c:1126
+#: ../src/server/e-ews-connection.c:1175
 #, c-format
 msgid "Failed to find <Response> element\n"
 msgstr "Iskanje predmeta <odziva> je spodletelo.\n"
 
-#: ../src/server/e-ews-connection.c:1138
+#: ../src/server/e-ews-connection.c:1187
 #, c-format
 msgid "Failed to find <Account> element\n"
 msgstr "Iskanje predmeta <računa> je spodletelo.\n"
 
-#: ../src/server/e-ews-connection.c:1157
+#: ../src/server/e-ews-connection.c:1206
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr "Samodejno iskanje predmetov odgovora <ASUrl> in <OABUrl> je spodletelo"
 
-#: ../src/server/e-ews-connection.c:1255
+#: ../src/server/e-ews-connection.c:1305
 #, c-format
 msgid "Both email and password must be provided"
 msgstr "Vpisati je treba elektronski naslov in geslo"
 
-#: ../src/server/e-ews-connection.c:1262
+#: ../src/server/e-ews-connection.c:1312
 #, c-format
 msgid "Wrong email id"
 msgstr "Napačen ID elektronskega sporočila"
 
-#: ../src/server/e-ews-connection.c:1449
+#: ../src/server/e-ews-connection.c:1499
 #, c-format
 msgid "Failed to parse oab XML"
 msgstr "Razčlenjevanje datoteke OAB XML je spodletelo."
 
-#: ../src/server/e-ews-connection.c:1456
+#: ../src/server/e-ews-connection.c:1506
 #, c-format
 msgid "Failed to find <OAB> element\n"
 msgstr "Iskanje predmeta <OAB> je spodletelo.\n"
 
-#: ../src/utils/ews-camel-common.c:138
+#: ../src/utils/ews-camel-common.c:164
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "Klic predmeta CreateItem je spodletel pri iskanju vrednosti ID novega sporočila"
 
+#~ msgid "Unknown calendar property '%s'"
+#~ msgstr "Neznana lastnost koledarja '%s'"
