@@ -862,12 +862,60 @@ static gboolean
 e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 {
 	EEwsItemPrivate *priv = item->priv;
-	ESoapParameter *subparam, *node;
+	ESoapParameter *subparam, *node=NULL;
 	gboolean contact = FALSE, task = FALSE;
+	const gchar *name;
 
 	g_return_val_if_fail (param != NULL, FALSE);
 
-	if ((node = e_soap_parameter_get_first_child_by_name (param, "AttachmentId"))) {
+	name = e_soap_parameter_get_name (param);
+
+	/*We get two types of response for items from server like below from two apis
+	 *  Syncfolderitems			and  		Finditem
+	 * <m:Changes>							<t:Items>
+            <t:Create>							  <t:Contact>
+              <t:Contact>						    <t:ItemId Id="AS4AUn=" ChangeKey="fsVU4==" />
+                <t:ItemId Id="AAA=" ChangeKey="NAgws"/>			  </t:Contact>
+              </t:Contact>						  <t:Contact>
+            </t:Create>							    <t:ItemId Id="AS4BS=" ChangeKey="fjidU4==" />
+	      <t:Contact>						  </t:Contact>
+                <t:ItemId Id="ABB=" ChangeKey="GCDab"/>			  ...
+              </t:Contact>						</t:Items>
+	    </t:Create>
+	    ...
+	   </m:Changes> 
+	   So check param is the node we want to use, by comparing name or is it child of the param */
+
+	if (!g_ascii_strcasecmp (name, "Message") || (node = e_soap_parameter_get_first_child_by_name (param, "Message")))
+		priv->item_type = E_EWS_ITEM_TYPE_MESSAGE;
+	else if (!g_ascii_strcasecmp (name, "PostItem") || (node = e_soap_parameter_get_first_child_by_name (param, "PostItem")))
+		priv->item_type = E_EWS_ITEM_TYPE_POST_ITEM;
+	else if (!g_ascii_strcasecmp (name, "CalendarItem") || (node = e_soap_parameter_get_first_child_by_name (param, "CalendarItem")))
+		priv->item_type = E_EWS_ITEM_TYPE_CALENDAR_ITEM;
+	else if (!g_ascii_strcasecmp (name, "Contact") || (node = e_soap_parameter_get_first_child_by_name (param, "Contact"))) {
+		contact = TRUE;	
+		priv->item_type = E_EWS_ITEM_TYPE_CONTACT;
+		priv->contact_fields = g_new0 (struct _EEwsContactFields, 1);
+	} else if (!g_ascii_strcasecmp (name, "DistributionList") || (node = e_soap_parameter_get_first_child_by_name (param, "DistributionList")))
+		priv->item_type = E_EWS_ITEM_TYPE_GROUP;
+	else if (!g_ascii_strcasecmp (name, "MeetingMessage") || (node = e_soap_parameter_get_first_child_by_name (param, "MeetingMessage")))
+		priv->item_type = E_EWS_ITEM_TYPE_MEETING_MESSAGE;
+	else if (!g_ascii_strcasecmp (name, "MeetingRequest") || (node = e_soap_parameter_get_first_child_by_name (param, "MeetingRequest")))
+		priv->item_type = E_EWS_ITEM_TYPE_MEETING_REQUEST;
+	else if (!g_ascii_strcasecmp (name, "MeetingResponse") || (node = e_soap_parameter_get_first_child_by_name (param, "MeetingResponse")))
+		priv->item_type = E_EWS_ITEM_TYPE_MEETING_RESPONSE;
+	else if (!g_ascii_strcasecmp (name, "MeetingCancellation") || (node = e_soap_parameter_get_first_child_by_name (param, "MeetingCancellation")))
+		priv->item_type = E_EWS_ITEM_TYPE_MEETING_CANCELLATION;
+	else if (!g_ascii_strcasecmp (name, "Task") || (node = e_soap_parameter_get_first_child_by_name (param, "Task"))) {
+		task = TRUE;
+		priv->item_type = E_EWS_ITEM_TYPE_TASK;
+		priv->task_fields = g_new0 (struct _EEwsTaskFields, 1);
+		priv->task_fields->has_due_date = FALSE;
+		priv->task_fields->has_start_date = FALSE;
+		priv->task_fields->has_complete_date = FALSE;
+	} else if (!g_ascii_strcasecmp (name, "Item") || (node = e_soap_parameter_get_first_child_by_name (param, "Item")))
+		priv->item_type = E_EWS_ITEM_TYPE_GENERIC_ITEM;
+	else if ((node = e_soap_parameter_get_first_child_by_name (param, "AttachmentId"))) {
 		priv->attachment_id = g_new0 (EwsId, 1);
 		priv->attachment_id->id = e_soap_parameter_get_property (node, "Id");
 		priv->attachment_id->change_key = e_soap_parameter_get_property (node, "ChangeKey");
@@ -877,40 +925,13 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 		priv->item_id->id = e_soap_parameter_get_property (node, "Id");
 		priv->item_id->change_key = e_soap_parameter_get_property (node, "ChangeKey");
 		return TRUE;
-	} else if ((node = e_soap_parameter_get_first_child_by_name (param, "Message")))
-		priv->item_type = E_EWS_ITEM_TYPE_MESSAGE;
-	else if ((node = e_soap_parameter_get_first_child_by_name (param, "PostItem")))
-		priv->item_type = E_EWS_ITEM_TYPE_POST_ITEM;
-	else if ((node = e_soap_parameter_get_first_child_by_name (param, "CalendarItem")))
-		priv->item_type = E_EWS_ITEM_TYPE_CALENDAR_ITEM;
-	else if ((node = e_soap_parameter_get_first_child_by_name (param, "Contact"))) {
-		contact = TRUE;	
-		priv->item_type = E_EWS_ITEM_TYPE_CONTACT;
-		priv->contact_fields = g_new0 (struct _EEwsContactFields, 1);
-	} else if ((node = e_soap_parameter_get_first_child_by_name (param, "DistributionList")))
-		priv->item_type = E_EWS_ITEM_TYPE_GROUP;
-	else if ((node = e_soap_parameter_get_first_child_by_name (param, "MeetingMessage")))
-		priv->item_type = E_EWS_ITEM_TYPE_MEETING_MESSAGE;
-	else if ((node = e_soap_parameter_get_first_child_by_name (param, "MeetingRequest")))
-		priv->item_type = E_EWS_ITEM_TYPE_MEETING_REQUEST;
-	else if ((node = e_soap_parameter_get_first_child_by_name (param, "MeetingResponse")))
-		priv->item_type = E_EWS_ITEM_TYPE_MEETING_RESPONSE;
-	else if ((node = e_soap_parameter_get_first_child_by_name (param, "MeetingCancellation")))
-		priv->item_type = E_EWS_ITEM_TYPE_MEETING_CANCELLATION;
-	else if ((node = e_soap_parameter_get_first_child_by_name (param, "Task"))) {
-		task = TRUE;
-		priv->item_type = E_EWS_ITEM_TYPE_TASK;
-		priv->task_fields = g_new0 (struct _EEwsTaskFields, 1);
-		priv->task_fields->has_due_date = FALSE;
-		priv->task_fields->has_start_date = FALSE;
-		priv->task_fields->has_complete_date = FALSE;
-	}
-	else if ((node = e_soap_parameter_get_first_child_by_name (param, "Item")))
-		priv->item_type = E_EWS_ITEM_TYPE_GENERIC_ITEM;
-	else {
+	} else {
 		g_warning ("Unable to find the Item type \n");
 		return FALSE;
 	}
+
+	if (!node)
+		node = param;
 
 	for (subparam = e_soap_parameter_get_first_child (node);
 			subparam != NULL;

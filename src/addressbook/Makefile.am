@@ -34,11 +34,11 @@ libebookbackendews_la_LIBADD =					\
 	$(top_builddir)/src/addressbook/lzx/liblzx.la		\
 	$(LIBEBACKEND_LIBS)					\
 	$(LIBEDATASERVER_LIBS)					\
-	$(LIBEDATABOOK_LIBS) \
+	$(LIBEDATABOOK_LIBS) 					\
 	$(LIBEBOOK_LIBS)					\
 	$(DB_LIBS)						\
 	$(EVOLUTION_ADDRESSBOOK_LIBS)				\
-	$(SQLITE3_LIBS)	\
+	$(SQLITE3_LIBS)						\
 	$(SOUP_LIBS)
 
 libebookbackendews_la_LDFLAGS =		\

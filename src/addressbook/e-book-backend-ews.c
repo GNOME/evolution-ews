@@ -54,6 +54,7 @@
 #include "e-ews-message.h"
 #include "e-ews-connection.h"
 #include "e-ews-item.h"
+#include <e-ews-query-to-restriction.h>
 
 #define d(x) x
 
@@ -62,6 +63,8 @@
 #define EDB_ERROR_FAILED_STATUS(_code, _status) e_data_book_create_error_fmt (E_DATA_BOOK_STATUS_ ## _code, "Failed with status 0x%x", _status)
 
 G_DEFINE_TYPE (EBookBackendEws, e_book_backend_ews, E_TYPE_BOOK_BACKEND)
+
+static gboolean ebews_fetch_items (EBookBackendEws *ebews,  GSList *items, gboolean store_to_cache, GSList **vcards, GError **error);
 
 typedef struct {
 	GCond *cond;
@@ -1163,16 +1166,16 @@ e_book_backend_ews_get_contact	(EBookBackend *backend,
 				 GCancellable *cancellable,
 				 const gchar   *id)
 {
-	EBookBackendEws *gwb;
+	EBookBackendEws *ebews;
 
-	gwb =  E_BOOK_BACKEND_EWS (backend);
+	ebews =  E_BOOK_BACKEND_EWS (backend);
 
-	if (!gwb->priv->is_online) {
+	if (!ebews->priv->is_online) {
 		e_data_book_respond_get_contact (book, opid, EDB_ERROR (CONTACT_NOT_FOUND), "");
 		return;
 	}
 
-	if (gwb->priv->cnc == NULL) {
+	if (ebews->priv->cnc == NULL) {
 		e_data_book_respond_get_contact (book, opid, e_data_book_create_error_fmt (E_DATA_BOOK_STATUS_OTHER_ERROR, "Not connected"), NULL);
 		return;
 	}
@@ -1186,23 +1189,87 @@ e_book_backend_ews_get_contact_list	(EBookBackend *backend,
 					 GCancellable *cancellable,
 					 const gchar   *query )
 {
-	GSList *vcard_list;
-	EBookBackendEws *egwb;
+	GSList *vcard_list = NULL;
+	GSList *list, *l;
+	GError *error = NULL;
+	EBookBackendEws *ebews;
+	EBookBackendEwsPrivate *priv;
 
-	egwb = E_BOOK_BACKEND_EWS (backend);
-	vcard_list = NULL;
+	ebews = E_BOOK_BACKEND_EWS (backend);
+	priv = ebews->priv;
+	
+	if (!priv->is_online) {
+		if (e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
+			list = e_book_backend_sqlitedb_search (priv->ebsdb, priv->folder_id, query, NULL, NULL, NULL, &error);
+			l = list;
+			while (l) {
+				EbSdbSearchData *s_data = (EbSdbSearchData *) l->data;
 
-	if (!egwb->priv->is_online) {
-		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (SUCCESS), vcard_list);
-		return;
+				vcard_list = g_slist_append (vcard_list, g_strdup (s_data->vcard));
+				e_book_backend_sqlitedb_search_data_free (s_data);
+				l = l->next;
+			}
+			e_data_book_respond_get_contact_list (book, opid, error, vcard_list);
+			
+			g_slist_free (list);
+			g_slist_foreach (vcard_list, (GFunc) g_free, NULL);
+			g_slist_free (vcard_list);
+			return;
+		} else
+			e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (OFFLINE_UNAVAILABLE), vcard_list);
+			return;
 	}
 
-	if (egwb->priv->cnc == NULL) {
+	if (priv->cnc == NULL) {
 		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
 		return;
 	}
 
-	e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (SUCCESS), vcard_list);
+	if (e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
+		list = e_book_backend_sqlitedb_search (priv->ebsdb, priv->folder_id, query, NULL, NULL, NULL, &error);
+		l = list;
+		while (l) {
+			EbSdbSearchData *s_data = (EbSdbSearchData *) l->data;
+
+			vcard_list = g_slist_append (vcard_list, g_strdup (s_data->vcard));
+			e_book_backend_sqlitedb_search_data_free (s_data);
+			l = l->next;
+		}
+
+		e_data_book_respond_get_contact_list (book, opid, error, vcard_list);
+		
+		g_slist_free (list);
+		g_slist_foreach (vcard_list, (GFunc) g_free, NULL);
+		g_slist_free (vcard_list);
+		return;
+
+	} else if (!priv->marked_for_offline) {
+		GSList *items=NULL;
+		EwsFolderId *fid=NULL;
+		gboolean includes_last_item;
+
+		fid = g_new0 (EwsFolderId, 1);
+		fid->id = g_strdup (priv->folder_id);
+		fid->is_distinguished_id = FALSE;
+		
+		e_ews_connection_find_folder_items (priv->cnc, EWS_PRIORITY_MEDIUM,
+							fid, "IdOnly", NULL, NULL, query,
+							EWS_FOLDER_TYPE_CONTACTS,
+							&includes_last_item,
+						 	&items, (EwsConvertQueryCallback) (e_ews_query_to_restriction),
+							NULL, &error);
+
+		/*we have got Id for items lets fetch them using getitem operation*/
+		ebews_fetch_items (ebews, items, FALSE, &vcard_list, &error);
+		e_data_book_respond_get_contact_list (book, opid, error, vcard_list);
+
+		e_ews_folder_free_fid (fid);
+		g_slist_foreach (vcard_list, (GFunc) g_free, NULL);
+		g_slist_free (vcard_list);
+		return;
+	} else
+		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR_EX (OTHER_ERROR, _("Wait till syncing is done")), vcard_list);
+		return;
 }
 
 typedef struct {
@@ -1711,6 +1778,38 @@ ebews_store_contact_items (EBookBackendEws *ebews, GSList *new_items, gboolean d
 }
 
 static void
+ebews_get_vcards_list (GSList *new_items, GSList **vcards)
+{
+	GSList *l;
+
+	for (l = new_items; l != NULL; l = g_slist_next (l)) {
+		EContact *contact;
+		gint i, element_type;
+		EEwsItem *item;
+		gchar *vcard_string=NULL;
+	
+		item = (EEwsItem *) l->data;
+		contact = e_contact_new ();
+
+		for (i = 0; i < G_N_ELEMENTS (mappings); i++) {
+			element_type = mappings[i].element_type;
+			if (element_type == ELEMENT_TYPE_SIMPLE && !mappings [i].populate_contact_func) {
+				const char *val = mappings [i].get_simple_prop_func (item);
+				if (val != NULL)
+					e_contact_set (contact, mappings [i].field_id, val);
+			} else
+				mappings[i].populate_contact_func (contact, item);
+		}
+		vcard_string = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
+		*vcards = g_slist_append (*vcards, g_strdup(vcard_string));
+		g_free (vcard_string);
+		g_object_unref (item);
+		g_object_unref (contact);
+	}
+	g_slist_free (new_items);
+}
+
+static void
 ews_mb_free (EwsMailbox *mb)
 {
 	if (mb) {
@@ -1772,7 +1871,52 @@ ebews_store_distribution_list_items (EBookBackendEws *ebews, const EwsId *id, co
 }
 
 static void
-ebews_sync_items (EBookBackendEws *ebews, GSList *items, GError **error)
+ebews_vcards_append_dl (const EwsId *id, const gchar *d_name, GSList *members, GSList **vcards)
+{
+	GSList *l;
+	EContact *contact;
+	gchar *vcard_string=NULL;
+
+	contact = e_contact_new ();
+	e_contact_set (contact, E_CONTACT_UID, id->id);
+	e_contact_set (contact, E_CONTACT_REV, id->change_key);
+	
+	e_contact_set (contact, E_CONTACT_IS_LIST, GINT_TO_POINTER (TRUE));
+	e_contact_set (contact, E_CONTACT_LIST_SHOW_ADDRESSES, GINT_TO_POINTER (TRUE));
+	e_contact_set (contact, E_CONTACT_FULL_NAME, d_name);
+
+	for (l = members; l != NULL; l = g_slist_next (l)) {
+		EwsMailbox *mb = (EwsMailbox *)	l->data;
+		EVCardAttribute *attr;
+
+		attr = e_vcard_attribute_new (NULL, EVC_EMAIL);
+		if (mb->name) {
+			gint len = strlen (mb->name);
+			gchar *value;
+
+			if (mb->name [0] == '\"' && mb->name [len - 1] == '\"')
+				value = g_strdup_printf ("%s <%s>", mb->name, mb->email);
+			else
+				value = g_strdup_printf ("\"%s\" <%s>", mb->name, mb->email);
+
+			e_vcard_attribute_add_value (attr, value);
+			g_free (value);
+		} else
+			e_vcard_attribute_add_value (attr, mb->email);
+
+		e_vcard_add_attribute (E_VCARD (contact), attr);
+		ews_mb_free (mb);
+	}
+	vcard_string = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
+	*vcards = g_slist_append (*vcards, g_strdup(vcard_string));
+	g_free (vcard_string);
+	g_slist_free (members);
+	g_object_unref (contact);
+}
+
+
+static gboolean
+ebews_fetch_items (EBookBackendEws *ebews, GSList *items, gboolean store_to_cache, GSList **vcards, GError **error)
 {
 	EBookBackendEwsPrivate *priv;
 	EEwsConnection *cnc;
@@ -1809,8 +1953,12 @@ ebews_sync_items (EBookBackendEws *ebews, GSList *items, GError **error)
 	if (*error)
 		goto cleanup;
 
-	if (new_items)
-		ebews_store_contact_items (ebews, new_items, FALSE, error);
+	if (new_items) {
+		if (store_to_cache)
+			ebews_store_contact_items (ebews, new_items, FALSE, error);
+		else
+			ebews_get_vcards_list (new_items, vcards);
+	}
 	new_items = NULL;
 
 	/* Get the display names of the distribution lists */
@@ -1843,8 +1991,12 @@ ebews_sync_items (EBookBackendEws *ebews, GSList *items, GError **error)
 		e_ews_connection_expand_dl (cnc, EWS_PRIORITY_MEDIUM, mb, &members, &includes_last, NULL, error);
 		if (*error)
 			goto cleanup;
+
+		if (store_to_cache)
+			ebews_store_distribution_list_items (ebews, id, d_name, members, error);
+		else
+			ebews_vcards_append_dl (id, d_name, members, vcards);
 		
-		ebews_store_distribution_list_items (ebews, id, d_name, members, error);
 		g_free (mb);
 
 		if (*error)
@@ -1866,6 +2018,8 @@ cleanup:
 		g_slist_foreach (contact_item_ids, (GFunc) g_free, NULL);
 		g_slist_free (contact_item_ids);
 	}
+
+	return TRUE;
 }
 
 static gboolean
@@ -1906,7 +2060,7 @@ ebews_start_sync	(gpointer data)
 			ebews_sync_deleted_items (ebews, items_deleted, &error);
 
 		if (items_created)
-			ebews_sync_items (ebews, items_created, &error);
+			ebews_fetch_items (ebews, items_created, TRUE, NULL, &error);
 
 		if (error) {
 			if (items_updated) {
@@ -1918,7 +2072,7 @@ ebews_start_sync	(gpointer data)
 		}
 
 		if (items_updated)
-			ebews_sync_items (ebews, items_updated, &error);
+			ebews_fetch_items (ebews, items_updated, TRUE, NULL, &error);
 
 		if (error)
 			break;
@@ -2087,6 +2241,7 @@ e_book_backend_ews_start_book_view (EBookBackend  *backend,
 
 		error = EDB_ERROR (OFFLINE_UNAVAILABLE);
 		e_data_book_view_notify_complete (book_view, error);
+		e_data_book_view_unref (book_view);
 		g_error_free (error);
 		return;
 	}
