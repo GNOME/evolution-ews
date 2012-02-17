@@ -3553,7 +3553,7 @@ e_cal_backend_ews_get_backend_property	(ECalBackend *backend,
 		prop_value = e_cal_component_get_as_string (comp);
 		g_object_unref (comp);
 	} else {
-		e_data_cal_respond_get_backend_property (cal, opid, e_data_cal_create_error_fmt (NotSupported, _("Unknown calendar property '%s'"), prop_name), NULL);
+		E_CAL_BACKEND_CLASS (parent_class)->get_backend_property (backend, cal, opid, cancellable, prop_name);
 		return;
 	}
 
