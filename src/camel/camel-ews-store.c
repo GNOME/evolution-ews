@@ -338,6 +338,50 @@ ews_disconnect_sync (CamelService *service, gboolean clean, GCancellable *cancel
 	return TRUE;
 }
 
+typedef struct {
+	const gchar *dist_folder_id;
+	gint info_flags;
+} SystemFolder;
+
+static SystemFolder system_folder [] = {
+	{"calendar", CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_EVENTS},
+	{"contacts", CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_CONTACTS},
+	{"deleteditems", CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_TRASH},
+	{"drafts", CAMEL_FOLDER_SYSTEM},
+	{"inbox", CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_INBOX},
+	{"journal", CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_MEMOS},
+	{"notes", CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_MEMOS},
+	{"outbox", CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_OUTBOX},
+	{"sentitems", CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_SENT},
+	{"tasks", CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_TASKS},
+	{"msgfolderroot", CAMEL_FOLDER_SYSTEM},
+	{"root", CAMEL_FOLDER_SYSTEM},
+	{"junkemail", CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_JUNK},
+	{"searchfolders", CAMEL_FOLDER_SYSTEM},
+};
+
+
+static void
+ews_store_set_flags (CamelEwsStore *ews_store, GSList *folders)
+{
+	GSList *temp=NULL;
+	EEwsFolder *folder = NULL;
+	const EwsFolderId *fid = NULL;
+	gint n = 0;
+
+	temp = folders;
+	while (temp != NULL) {
+		folder = (EEwsFolder *) temp->data;
+		fid = e_ews_folder_get_id (folder);
+
+		if (camel_ews_store_summary_has_folder (ews_store->summary, fid->id))
+			camel_ews_store_summary_set_folder_flags (ews_store->summary, fid->id, system_folder[n].info_flags);
+		
+		temp = temp->next;
+		n++;
+	}
+}
+
 static CamelAuthenticationResult
 ews_authenticate_sync (CamelService *service, const gchar *mechanism, GCancellable *cancellable, GError **error)
 {
@@ -347,9 +391,12 @@ ews_authenticate_sync (CamelService *service, const gchar *mechanism, GCancellab
 	GSList *folders_created = NULL;
 	GSList *folders_updated = NULL;
 	GSList *folders_deleted = NULL;
+	GSList *folder_ids = NULL, *folders = NULL;
 	gboolean includes_last_folder = FALSE;
+	gboolean initial_setup = FALSE;
 	gchar *sync_state = NULL;
-	GError *local_error = NULL;
+	GError *local_error = NULL, *folder_err = NULL;
+	gint n = 0;
 
 	ews_store = (CamelEwsStore *) service;
 	priv = ews_store->priv;
@@ -359,6 +406,11 @@ ews_authenticate_sync (CamelService *service, const gchar *mechanism, GCancellab
 	 *     the error status and determine if our password is valid.
 	 *     David suggested e_ews_connection_sync_folder_hierarchy(),
 	 *     since we have to do that eventually anyway. */
+
+	/*use old sync_state from summary*/
+	sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
+	if (!sync_state)
+		initial_setup = TRUE;
 
 	e_ews_connection_sync_folder_hierarchy (
 		priv->cnc, EWS_PRIORITY_MEDIUM,
@@ -377,6 +429,40 @@ ews_authenticate_sync (CamelService *service, const gchar *mechanism, GCancellab
 		g_warn_if_fail (folders_created == NULL);
 		g_warn_if_fail (folders_updated == NULL);
 		g_warn_if_fail (folders_deleted == NULL);
+	}
+
+	/*get folders using distinguished id by GetFolder operation and set system flags to folders, only for first time*/
+	if (initial_setup && local_error == NULL) {
+		while (n < G_N_ELEMENTS (system_folder)) {
+			EwsFolderId *fid = NULL;
+
+			fid = g_new0 (EwsFolderId, 1);
+			fid->id = g_strdup (system_folder[n].dist_folder_id);
+			fid->is_distinguished_id = TRUE;
+			folder_ids = g_slist_append (folder_ids, fid);
+			n++;
+		}
+
+		/* fetch system folders first using getfolder operation*/
+		e_ews_connection_get_folder (ews_store->priv->cnc, EWS_PRIORITY_MEDIUM, "IdOnly",
+						     NULL, folder_ids, &folders,
+						     cancellable, &folder_err);
+
+		if (g_slist_length (folders) && (g_slist_length (folders) != G_N_ELEMENTS (system_folder)))
+			d(printf("Error : not all folders are returned by getfolder operation"));
+		else if (folder_err == NULL && folders != NULL)
+			ews_store_set_flags (ews_store, folders);
+		else if (folder_err) {
+			/*report error and make sure we are not leaking anything*/
+			g_warn_if_fail (folders == NULL);
+		} else
+			d(printf ("folders for respective distinguished ids don't exist"));
+
+		g_slist_foreach (folders, (GFunc) g_object_unref, NULL);
+		g_slist_foreach (folder_ids, (GFunc) e_ews_folder_free_fid, NULL);
+		g_slist_free (folders);
+		g_slist_free (folder_ids);
+		g_clear_error (&folder_err);
 	}
 
 	if (local_error == NULL) {
