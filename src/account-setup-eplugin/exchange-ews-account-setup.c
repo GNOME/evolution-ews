@@ -36,7 +36,9 @@
 #include "exchange-ews-account-setup.h"
 #include <addressbook/gui/widgets/eab-config.h>
 #include <calendar/gui/e-cal-config.h>
+#include <exchange-ews-account-out-of-office.h>
 
+#include <camel/camel.h>
 #include <camel-ews-folder.h>
 #include <camel-ews-settings.h>
 #include <e-ews-connection.h>
@@ -62,6 +64,10 @@ gboolean org_gnome_exchange_ews_check_options(EPlugin *epl, EConfigHookPageCheck
 
 /* OAB receiving options */
 GtkWidget * org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data);
+
+/*Ews Settings Page*/
+GtkWidget * org_gnome_ews_settings (EPlugin *epl, EConfigHookItemFactoryData *data);
+void	org_gnome_exchange_ews_commit ( EPlugin *epl, EMConfigTargetSettings *target_account);
 
 static ExchangeEWSAccountListener *config_listener = NULL;
 
@@ -106,7 +112,7 @@ static void autodiscover_callback (EwsUrls *urls, gpointer user_data, GError *er
 	}
 	if (urls) {
 		char *oab_url;
-		
+
 		gtk_entry_set_text (GTK_ENTRY (cbdata->host_entry), urls->as_url);
 
 		oab_url = g_strconcat (urls->oab_url, "oab.xml", NULL);
@@ -642,8 +648,8 @@ org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 	label = gtk_label_new_with_mnemonic (_("Select Ad_dress list: "));
 	gtk_widget_show (label);
 	gtk_table_attach (GTK_TABLE (data->parent), label, 0, 1, row, row+1, 0, 0, 0, 0);
-	
-	/* OAL combo and fetch OAL button */	
+
+	/* OAL combo and fetch OAL button */
 	hbox = gtk_hbox_new (FALSE, 6);
 	oal_combo = gtk_combo_box_text_new ();
 	gtk_label_set_mnemonic_widget (GTK_LABEL(label), oal_combo);
@@ -687,4 +693,54 @@ org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 	g_signal_connect (GTK_WIDGET (data->config->widget), "destroy", G_CALLBACK (table_deleted_cb), cbdata);
 
 		return check;
+}
+
+void
+org_gnome_exchange_ews_commit ( EPlugin *epl,
+                           	EMConfigTargetSettings *target_account)
+{
+	/*return if it is not a ews account*/
+	if (!CAMEL_IS_EWS_SETTINGS (target_account->storage_settings))
+		return;
+	
+	/* Verify the storage and transport settings are shared. */
+	g_warn_if_fail (
+		target_account->storage_settings ==
+		target_account->transport_settings);
+
+	/* Set oof data in exchange account */
+	ews_set_oof_settings (target_account);
+}
+
+GtkWidget *
+org_gnome_ews_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
+{
+	EMConfigTargetSettings *target_account;
+	GtkVBox *vbox_settings;
+	GtkWidget *oof;
+
+	target_account = (EMConfigTargetSettings *) data->config->target;
+
+	/*return if it is not a ews account*/
+	if (!CAMEL_IS_EWS_SETTINGS (target_account->storage_settings))
+		return NULL;
+
+	if (data->old)
+		return data->old;
+
+	/* Verify the storage and transport settings are shared. */
+	g_warn_if_fail (
+		target_account->storage_settings ==
+		target_account->transport_settings);
+
+	vbox_settings = (GtkVBox*) g_object_new (GTK_TYPE_VBOX, "homogeneous", FALSE, "spacing", 6, NULL);
+	gtk_container_set_border_width (GTK_CONTAINER (vbox_settings), 12);
+
+	/*Get Out of office widget*/
+	oof = ews_get_outo_office_widget (target_account);
+	gtk_box_pack_start (GTK_BOX (vbox_settings), oof, FALSE, FALSE, 0);
+
+	gtk_widget_show_all (GTK_WIDGET (vbox_settings));
+	gtk_notebook_insert_page (GTK_NOTEBOOK (data->parent), GTK_WIDGET (vbox_settings), gtk_label_new(_("EWS Settings")), 4);
+	return GTK_WIDGET (vbox_settings);
 }

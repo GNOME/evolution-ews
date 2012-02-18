@@ -170,6 +170,15 @@ typedef struct {
 	gpointer field_uri;
 } EwsSortOrder;
 
+typedef struct {
+	gchar *state;		/*Out of office state*/
+	gchar *ext_aud;		/*external audience*/
+	time_t start_tm;	/*Start time*/
+	time_t end_tm;		/*End time*/
+	gchar *int_reply;	/*Internal Reply*/
+	gchar *ext_reply;	/*External Reply*/
+} OOFSettings;
+
 GType		e_ews_connection_get_type	(void);
 EEwsConnection *e_ews_connection_new		(const gchar *uri,
 						 const gchar *username,
@@ -811,8 +820,41 @@ gboolean e_ews_connection_get_delegate
 						 GCancellable *cancellable,
 						 GError **error);
 
+void		e_ews_connection_get_oof_settings_start	(EEwsConnection *cnc,
+							 gint pri,
+							 GAsyncReadyCallback cb,
+							 GCancellable *cancellable,
+							 gpointer user_data);
 
+gboolean	e_ews_connection_get_oof_settings_finish (EEwsConnection *cnc,
+							  GAsyncResult *result,
+							  OOFSettings **oof_settings,
+							  GError **error);
 
+gboolean	e_ews_connection_get_oof_settings (EEwsConnection *cnc,
+						   gint pri,
+						   OOFSettings **oof_settings,
+						   GCancellable *cancellable,
+						   GError **error);
+
+void		e_ews_connection_set_oof_settings_start	(EEwsConnection *cnc,
+							 gint pri,
+							 OOFSettings *oof_settings,
+							 GAsyncReadyCallback cb,
+							 GCancellable *cancellable,
+							 gpointer user_data);
+
+gboolean	e_ews_connection_set_oof_settings_finish (EEwsConnection *cnc,
+							  GAsyncResult *result,
+						 	  GError **error);
+
+gboolean	e_ews_connection_set_oof_settings (EEwsConnection *cnc,
+					 	   gint pri,
+					 	   OOFSettings *oof_settings,
+					 	   GCancellable *cancellable,
+					 	   GError **error);
+
+void		e_ews_connection_free_oof_settings (OOFSettings *oof_settings);
 
 G_END_DECLS
 
