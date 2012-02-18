@@ -31,8 +31,8 @@ G_BEGIN_DECLS
 #define MINUTES_IN_HOUR 60
 #define SECS_IN_MINUTE 60
 
-const char *e_ews_collect_organizer(icalcomponent *comp);
-void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **optional, GSList **resource);
+const gchar *e_ews_collect_organizer (icalcomponent *comp);
+void e_ews_collect_attendees (icalcomponent *comp, GSList **required, GSList **optional, GSList **resource);
 
 void ewscal_set_time (ESoapMessage *msg, const gchar *name, icaltimetype *t);
 void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *icaltz);

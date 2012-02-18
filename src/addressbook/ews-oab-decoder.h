@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-
 #ifndef _EWS_OAB_DECODER
 #define _EWS_OAB_DECODER
 
@@ -59,27 +58,27 @@ GType ews_oab_decoder_get_type (void);
 
 typedef void (*EwsOabContactAddedCb) (EContact *contact, goffset offset, guint percent_complete, gpointer user_data, GError **error);
 
-EwsOabDecoder*	ews_oab_decoder_new	(const gchar *oab_filename,
-					 const gchar *cache_dir,
-					 GError **error);
-gboolean	ews_oab_decoder_decode	(EwsOabDecoder *eod,
-					 EwsOabContactAddedCb cb,
-					 gpointer user_data,
-					 GCancellable *cancellable,
-					 GError **error);
+EwsOabDecoder *	ews_oab_decoder_new		(const gchar *oab_filename,
+						 const gchar *cache_dir,
+						 GError **error);
+gboolean	ews_oab_decoder_decode		(EwsOabDecoder *eod,
+						 EwsOabContactAddedCb cb,
+						 gpointer user_data,
+						 GCancellable *cancellable,
+						 GError **error);
 EContact *	ews_oab_decoder_get_contact_from_offset
-					(EwsOabDecoder *eod,
-					 goffset offset,
-					 GSList *oab_props,
-					 GCancellable *cancellable,
-					 GError **error);
-gchar *		ews_oab_decoder_get_oab_prop_string	
-					(EwsOabDecoder *eod, 
-					 GError **error);
-gboolean	ews_oab_decoder_set_oab_prop_string	
-					(EwsOabDecoder *eod,
-					 const gchar *prop_str,
-					 GError **error);
+						(EwsOabDecoder *eod,
+						 goffset offset,
+						 GSList *oab_props,
+						 GCancellable *cancellable,
+						 GError **error);
+gchar *		ews_oab_decoder_get_oab_prop_string
+						(EwsOabDecoder *eod,
+						 GError **error);
+gboolean	ews_oab_decoder_set_oab_prop_string
+						(EwsOabDecoder *eod,
+						 const gchar *prop_str,
+						 GError **error);
 
 G_END_DECLS
 

@@ -45,7 +45,8 @@ typedef struct {
 } ESqlite3File;
 
 static gint
-call_old_file_Sync (ESqlite3File *cFile, gint flags)
+call_old_file_Sync (ESqlite3File *cFile,
+                    gint flags)
 {
 	g_return_val_if_fail (old_vfs != NULL, SQLITE_ERROR);
 	g_return_val_if_fail (cFile != NULL, SQLITE_ERROR);
@@ -62,7 +63,8 @@ struct SyncRequestData
 };
 
 static void
-sync_request_thread_cb (gpointer task_data, gpointer null_data)
+sync_request_thread_cb (gpointer task_data,
+                        gpointer null_data)
 {
 	struct SyncRequestData *sync_data = task_data;
 	EFlag *sync_op;
@@ -80,7 +82,8 @@ sync_request_thread_cb (gpointer task_data, gpointer null_data)
 }
 
 static void
-sync_push_request (ESqlite3File *cFile, gboolean wait_for_finish)
+sync_push_request (ESqlite3File *cFile,
+                   gboolean wait_for_finish)
 {
 	struct SyncRequestData *data;
 	EFlag *sync_op = NULL;
@@ -163,7 +166,8 @@ def_subclassed (xDeviceCharacteristics, (sqlite3_file *pFile), (cFile->old_vfs_f
 #undef def_subclassed
 
 static gint
-e_sqlite3_file_xCheckReservedLock (sqlite3_file *pFile, gint *pResOut)
+e_sqlite3_file_xCheckReservedLock (sqlite3_file *pFile,
+                                   gint *pResOut)
 {
 	ESqlite3File *cFile;
 
@@ -218,7 +222,8 @@ e_sqlite3_file_xClose (sqlite3_file *pFile)
 }
 
 static gint
-e_sqlite3_file_xSync (sqlite3_file *pFile, gint flags)
+e_sqlite3_file_xSync (sqlite3_file *pFile,
+                      gint flags)
 {
 	ESqlite3File *cFile;
 
@@ -247,7 +252,11 @@ e_sqlite3_file_xSync (sqlite3_file *pFile, gint flags)
 }
 
 static gint
-e_sqlite3_vfs_xOpen (sqlite3_vfs *pVfs, const gchar *zPath, sqlite3_file *pFile, gint flags, gint *pOutFlags)
+e_sqlite3_vfs_xOpen (sqlite3_vfs *pVfs,
+                     const gchar *zPath,
+                     sqlite3_file *pFile,
+                     gint flags,
+                     gint *pOutFlags)
 {
 	static GStaticRecMutex only_once_lock = G_STATIC_REC_MUTEX_INIT;
 	static sqlite3_io_methods io_methods = {0};
@@ -257,7 +266,7 @@ e_sqlite3_vfs_xOpen (sqlite3_vfs *pVfs, const gchar *zPath, sqlite3_file *pFile,
 	g_return_val_if_fail (old_vfs != NULL, -1);
 	g_return_val_if_fail (pFile != NULL, -1);
 
-	cFile = (ESqlite3File *)pFile;
+	cFile = (ESqlite3File *) pFile;
 	cFile->old_vfs_file = g_malloc0 (old_vfs->szOsFile);
 
 	res = old_vfs->xOpen (old_vfs, zPath, cFile->old_vfs_file, flags, pOutFlags);
@@ -274,7 +283,7 @@ e_sqlite3_vfs_xOpen (sqlite3_vfs *pVfs, const gchar *zPath, sqlite3_file *pFile,
 		sync_pool = g_thread_pool_new (sync_request_thread_cb, NULL, 2, FALSE, NULL);
 
 	/* cFile->old_vfs_file->pMethods is NULL when open failed for some reason,
-	   thus do not initialize our structure when do not know the version */
+	 * thus do not initialize our structure when do not know the version */
 	if (io_methods.xClose == NULL && cFile->old_vfs_file->pMethods) {
 		/* initialize our subclass function only once */
 		io_methods.iVersion = cFile->old_vfs_file->pMethods->iVersion;

@@ -37,15 +37,16 @@
 #ifdef G_OS_WIN32
 
 static gchar *
-g_mkdtemp (gchar *tmpl, int mode)
+g_mkdtemp (gchar *tmpl,
+           gint mode)
 {
 	static const char letters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-	static const int NLETTERS = sizeof (letters) - 1;
-	static int counter = 0;
-	char *XXXXXX;
+	static const gint NLETTERS = sizeof (letters) - 1;
+	static gint counter = 0;
+	gchar *XXXXXX;
 	GTimeVal tv;
 	glong value;
-	int count;
+	gint count;
 
 	/* find the last occurrence of "XXXXXX" */
 	XXXXXX = g_strrstr (tmpl, "XXXXXX");
@@ -100,7 +101,7 @@ G_DEFINE_TYPE (EEwsItem, e_ews_item, G_TYPE_OBJECT)
 struct _EEwsContactFields {
 	gchar *fileas;
 	EwsCompleteName *complete_name;
-	
+
 	GHashTable *email_addresses;
 	GHashTable *physical_addresses;
 	GHashTable *phone_numbers;
@@ -112,12 +113,12 @@ struct _EEwsContactFields {
 	gchar *assistant_name;
 	gchar *manager;
 	gchar *office_location;
-	
+
 	gchar *business_homepage;
-	
+
 	time_t birthday;
 	time_t wedding_anniversary;
-	
+
 	gchar *profession;
 	gchar *spouse_name;
 	gchar *culture;
@@ -145,12 +146,12 @@ struct _EEwsItemPrivate {
 
 	/* MAPI properties */
 	/* The Exchange server is so fundamentally misdesigned that it doesn't expose
-	   certain information in a coherent way; the \Answered, and \Deleted message
-	   flags don't even seem to work properly. It looks like the only way to work
-	   it out is from the PidTagIconIndex field. Quite what the hell an *icon*
-	   selector is doing in the database, I have absolutely no fucking idea; a
-	   database is supposed to represent the *data*, not do bizarre things that
-	   live in the client. But that's typical Exchange brain damage for you... */
+	 * certain information in a coherent way; the \Answered, and \Deleted message
+	 * flags don't even seem to work properly. It looks like the only way to work
+	 * it out is from the PidTagIconIndex field. Quite what the hell an *icon*
+	 * selector is doing in the database, I have absolutely no fucking idea; a
+	 * database is supposed to represent the *data*, not do bizarre things that
+	 * live in the client. But that's typical Exchange brain damage for you... */
 	guint32 mapi_icon_index;		/* http://msdn.microsoft.com/en-us/library/cc815472.aspx */
 	guint32 mapi_last_verb_executed;	/* http://msdn.microsoft.com/en-us/library/cc841968.aspx */
 	guint32 mapi_message_status;		/* http://msdn.microsoft.com/en-us/library/cc839915.aspx */
@@ -365,7 +366,7 @@ ews_free_contact_fields (struct _EEwsContactFields *con_fields)
 	if (con_fields) {
 		if (con_fields->complete_name) {
 			EwsCompleteName *cn = con_fields->complete_name;
-			
+
 			g_free (cn->title);
 			g_free (cn->first_name);
 			g_free (cn->middle_name);
@@ -380,16 +381,16 @@ ews_free_contact_fields (struct _EEwsContactFields *con_fields)
 
 		if (con_fields->email_addresses)
 			g_hash_table_destroy (con_fields->email_addresses);
-		
+
 		if (con_fields->physical_addresses)
 			g_hash_table_destroy (con_fields->physical_addresses);
-		
+
 		if (con_fields->phone_numbers)
 			g_hash_table_destroy (con_fields->phone_numbers);
-		
+
 		if (con_fields->im_addresses)
 			g_hash_table_destroy (con_fields->im_addresses);
-		
+
 		g_free (con_fields->fileas);
 		g_free (con_fields->company_name);
 		g_free (con_fields->department);
@@ -403,7 +404,7 @@ ews_free_contact_fields (struct _EEwsContactFields *con_fields)
 		g_free (con_fields->culture);
 		g_free (con_fields->surname);
 		g_free (con_fields);
-	}	
+	}
 }
 
 static void
@@ -466,7 +467,9 @@ ews_item_parse_date (const gchar *dtstring)
 	return t;
 }
 
-static void parse_extended_property (EEwsItemPrivate *priv, ESoapParameter *param)
+static void
+parse_extended_property (EEwsItemPrivate *priv,
+                         ESoapParameter *param)
 {
 	ESoapParameter *subparam;
 	gchar *str;
@@ -528,7 +531,9 @@ static void parse_extended_property (EEwsItemPrivate *priv, ESoapParameter *para
 	}
 }
 
-static void parse_categories (EEwsItemPrivate *priv, ESoapParameter *param)
+static void
+parse_categories (EEwsItemPrivate *priv,
+                  ESoapParameter *param)
 {
 	gchar *value;
 	ESoapParameter *subparam;
@@ -541,12 +546,12 @@ static void parse_categories (EEwsItemPrivate *priv, ESoapParameter *param)
 	}
 
 	/* categories are an array of <string> */
-	for (subparam = e_soap_parameter_get_first_child(param);
+	for (subparam = e_soap_parameter_get_first_child (param);
 	     subparam != NULL;
-	     subparam = e_soap_parameter_get_next_child(subparam)) {
+	     subparam = e_soap_parameter_get_next_child (subparam)) {
 		value = e_soap_parameter_get_string_value (subparam);
 
-		priv->categories = g_slist_append(priv->categories, value);
+		priv->categories = g_slist_append (priv->categories, value);
 	}
 
 }
@@ -568,22 +573,27 @@ parse_importance (ESoapParameter *param)
 	return importance;
 }
 
-static void process_modified_occurrences(EEwsItemPrivate *priv, ESoapParameter *param) {
+static void
+process_modified_occurrences (EEwsItemPrivate *priv,
+                              ESoapParameter *param)
+{
 	ESoapParameter *subparam, *subparam1;
 	gchar *modified_occurrence_id;
 
-	for (subparam = e_soap_parameter_get_first_child(param); subparam != NULL; subparam = e_soap_parameter_get_next_child(subparam)) {
+	for (subparam = e_soap_parameter_get_first_child (param); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
 
 		subparam1 = e_soap_parameter_get_first_child_by_name(subparam, "ItemId");
 		modified_occurrence_id = e_soap_parameter_get_property(subparam1, "Id");
-		priv->modified_occurrences = g_slist_append(priv->modified_occurrences, modified_occurrence_id);
+		priv->modified_occurrences = g_slist_append (priv->modified_occurrences, modified_occurrence_id);
 	}
 
 	return;
 }
 
-static void process_attachments_list(EEwsItemPrivate *priv, ESoapParameter *param) {
-
+static void
+process_attachments_list (EEwsItemPrivate *priv,
+                          ESoapParameter *param)
+{
 	ESoapParameter *subparam, *subparam1;
 
 	GSList *list = NULL;
@@ -599,17 +609,21 @@ static void process_attachments_list(EEwsItemPrivate *priv, ESoapParameter *para
 	return;
 }
 
-static void process_attendees(EEwsItemPrivate *priv, ESoapParameter *param, const gchar *type) {
+static void
+process_attendees (EEwsItemPrivate *priv,
+                   ESoapParameter *param,
+                   const gchar *type)
+{
 	ESoapParameter *subparam, *subparam1;
 	EwsAttendee *attendee;
 
-	for (subparam = e_soap_parameter_get_first_child(param); subparam != NULL; subparam = e_soap_parameter_get_next_child(subparam)) {
+	for (subparam = e_soap_parameter_get_first_child (param); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
 		EwsMailbox *mailbox = NULL;
 
 		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Mailbox");
 		mailbox = e_ews_item_mailbox_from_soap_param (subparam1);
 		/* Ignore attendee if mailbox is not valid,
-		   for instance, ppl that does not exists any more */
+		 * for instance, ppl that does not exists any more */
 		if (!mailbox)
 			continue;
 
@@ -620,7 +634,7 @@ static void process_attendees(EEwsItemPrivate *priv, ESoapParameter *param, cons
 		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "ResponseType");
 		attendee->responsetype = e_soap_parameter_get_string_value (subparam1);
 
-		attendee->attendeetype = (gchar *)type;
+		attendee->attendeetype = (gchar *) type;
 
 		priv->attendees = g_slist_append (priv->attendees, attendee);
 	}
@@ -629,7 +643,8 @@ static void process_attendees(EEwsItemPrivate *priv, ESoapParameter *param, cons
 }
 
 static void
-parse_complete_name (struct _EEwsContactFields *con_fields, ESoapParameter *param)
+parse_complete_name (struct _EEwsContactFields *con_fields,
+                     ESoapParameter *param)
 {
 	ESoapParameter *subparam;
 	EwsCompleteName *cn;
@@ -637,34 +652,34 @@ parse_complete_name (struct _EEwsContactFields *con_fields, ESoapParameter *para
 	cn = g_new0 (EwsCompleteName, 1);
 
 	subparam = e_soap_parameter_get_first_child_by_name (param, "Title");
-	if (subparam)	
+	if (subparam)
 		cn->title = e_soap_parameter_get_string_value (subparam);
 	subparam = e_soap_parameter_get_first_child_by_name (param, "FirstName");
-	if (subparam)	
+	if (subparam)
 		cn->first_name = e_soap_parameter_get_string_value (subparam);
 	subparam = e_soap_parameter_get_first_child_by_name (param, "MiddleName");
-	if (subparam)	
+	if (subparam)
 		cn->middle_name = e_soap_parameter_get_string_value (subparam);
 	subparam = e_soap_parameter_get_first_child_by_name (param, "LastName");
-	if (subparam)	
+	if (subparam)
 		cn->last_name = e_soap_parameter_get_string_value (subparam);
 	subparam = e_soap_parameter_get_first_child_by_name (param, "Suffix");
-	if (subparam)	
+	if (subparam)
 		cn->suffix = e_soap_parameter_get_string_value (subparam);
 	subparam = e_soap_parameter_get_first_child_by_name (param, "Initials");
-	if (subparam)	
+	if (subparam)
 		cn->initials = e_soap_parameter_get_string_value (subparam);
 	subparam = e_soap_parameter_get_first_child_by_name (param, "FullName");
-	if (subparam)	
+	if (subparam)
 		cn->full_name = e_soap_parameter_get_string_value (subparam);
 	subparam = e_soap_parameter_get_first_child_by_name (param, "Nickname");
-	if (subparam)	
+	if (subparam)
 		cn->nick_name = e_soap_parameter_get_string_value (subparam);
 	subparam = e_soap_parameter_get_first_child_by_name (param, "YomiFirstName");
-	if (subparam)	
+	if (subparam)
 		cn->yomi_first_name = e_soap_parameter_get_string_value (subparam);
 	subparam = e_soap_parameter_get_first_child_by_name (param, "YomiLastName");
-	if (subparam)	
+	if (subparam)
 		cn->yomi_last_name = e_soap_parameter_get_string_value (subparam);
 
 	con_fields->complete_name = cn;
@@ -679,30 +694,32 @@ ews_get_physical_address (ESoapParameter *param)
 	address = g_new0 (EwsAddress, 1);
 
 	subparam = e_soap_parameter_get_first_child_by_name (param, "Street");
-	if (subparam)	
+	if (subparam)
 		address->street = e_soap_parameter_get_string_value (subparam);
 
 	subparam = e_soap_parameter_get_first_child_by_name (param, "City");
-	if (subparam)	
+	if (subparam)
 		address->city = e_soap_parameter_get_string_value (subparam);
 
 	subparam = e_soap_parameter_get_first_child_by_name (param, "State");
-	if (subparam)	
+	if (subparam)
 		address->state = e_soap_parameter_get_string_value (subparam);
 
 	subparam = e_soap_parameter_get_first_child_by_name (param, "Country");
-	if (subparam)	
+	if (subparam)
 		address->country = e_soap_parameter_get_string_value (subparam);
 
 	subparam = e_soap_parameter_get_first_child_by_name (param, "PostalCode");
-	if (subparam)	
+	if (subparam)
 		address->postal_code = e_soap_parameter_get_string_value (subparam);
 
 	return address;
 }
 
 static void
-parse_entries (GHashTable *hash_table, ESoapParameter *param, EwsGetValFunc get_val_func)
+parse_entries (GHashTable *hash_table,
+               ESoapParameter *param,
+               EwsGetValFunc get_val_func)
 {
 	ESoapParameter *subparam;
 
@@ -711,10 +728,10 @@ parse_entries (GHashTable *hash_table, ESoapParameter *param, EwsGetValFunc get_
 			subparam = e_soap_parameter_get_next_child_by_name (subparam, "Entry")) {
 		gchar *key;
 		gpointer value;
-			
+
 		key = e_soap_parameter_get_property (subparam, "Key");
 		value = get_val_func (subparam);
-	
+
 		if (value)
 			g_hash_table_insert (hash_table, key, value);
 		else
@@ -738,11 +755,13 @@ ews_free_physical_address (gpointer value)
 }
 
 static void
-parse_contact_field (EEwsItem *item, const gchar *name, ESoapParameter *subparam)
+parse_contact_field (EEwsItem *item,
+                     const gchar *name,
+                     ESoapParameter *subparam)
 {
 	EEwsItemPrivate *priv = item->priv;
 	gchar *value = NULL;
-	
+
 	if (!g_ascii_strcasecmp (name, "Culture")) {
 		priv->contact_fields->culture = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "FileAs")) {
@@ -813,7 +832,9 @@ strip_html_tags (const gchar *html_text)
 }
 
 static void
-parse_task_field (EEwsItem *item, const gchar *name, ESoapParameter *subparam)
+parse_task_field (EEwsItem *item,
+                  const gchar *name,
+                  ESoapParameter *subparam)
 {
 	EEwsItemPrivate *priv = item->priv;
 	gchar *value = NULL;
@@ -859,10 +880,11 @@ parse_task_field (EEwsItem *item, const gchar *name, ESoapParameter *subparam)
 }
 
 static gboolean
-e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
+e_ews_item_set_from_soap_parameter (EEwsItem *item,
+                                    ESoapParameter *param)
 {
 	EEwsItemPrivate *priv = item->priv;
-	ESoapParameter *subparam, *node=NULL;
+	ESoapParameter *subparam, *node = NULL;
 	gboolean contact = FALSE, task = FALSE;
 	const gchar *name;
 
@@ -873,18 +895,18 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 	/*We get two types of response for items from server like below from two apis
 	 *  Syncfolderitems			and  		Finditem
 	 * <m:Changes>							<t:Items>
-            <t:Create>							  <t:Contact>
-              <t:Contact>						    <t:ItemId Id="AS4AUn=" ChangeKey="fsVU4==" />
-                <t:ItemId Id="AAA=" ChangeKey="NAgws"/>			  </t:Contact>
-              </t:Contact>						  <t:Contact>
-            </t:Create>							    <t:ItemId Id="AS4BS=" ChangeKey="fjidU4==" />
-	      <t:Contact>						  </t:Contact>
-                <t:ItemId Id="ABB=" ChangeKey="GCDab"/>			  ...
-              </t:Contact>						</t:Items>
-	    </t:Create>
-	    ...
-	   </m:Changes> 
-	   So check param is the node we want to use, by comparing name or is it child of the param */
+ *          <t:Create>							  <t:Contact>
+ *            <t:Contact>						    <t:ItemId Id="AS4AUn=" ChangeKey="fsVU4==" />
+ *              <t:ItemId Id="AAA=" ChangeKey="NAgws"/>			  </t:Contact>
+ *            </t:Contact>						  <t:Contact>
+ *          </t:Create>							    <t:ItemId Id="AS4BS=" ChangeKey="fjidU4==" />
+	 *    <t:Contact>						  </t:Contact>
+ *              <t:ItemId Id="ABB=" ChangeKey="GCDab"/>			  ...
+ *            </t:Contact>						</t:Items>
+	 *  </t:Create>
+	 *  ...
+	 * </m:Changes> 
+	 * So check param is the node we want to use, by comparing name or is it child of the param */
 
 	if (!g_ascii_strcasecmp (name, "Message") || (node = e_soap_parameter_get_first_child_by_name (param, "Message")))
 		priv->item_type = E_EWS_ITEM_TYPE_MESSAGE;
@@ -893,7 +915,7 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 	else if (!g_ascii_strcasecmp (name, "CalendarItem") || (node = e_soap_parameter_get_first_child_by_name (param, "CalendarItem")))
 		priv->item_type = E_EWS_ITEM_TYPE_CALENDAR_ITEM;
 	else if (!g_ascii_strcasecmp (name, "Contact") || (node = e_soap_parameter_get_first_child_by_name (param, "Contact"))) {
-		contact = TRUE;	
+		contact = TRUE;
 		priv->item_type = E_EWS_ITEM_TYPE_CONTACT;
 		priv->contact_fields = g_new0 (struct _EEwsContactFields, 1);
 	} else if (!g_ascii_strcasecmp (name, "DistributionList") || (node = e_soap_parameter_get_first_child_by_name (param, "DistributionList")))
@@ -988,7 +1010,7 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 			priv->has_attachments = (!g_ascii_strcasecmp (value, "true"));
 			g_free (value);
 		} else if (!g_ascii_strcasecmp (name, "Attachments")) {
-			process_attachments_list(priv, subparam);
+			process_attachments_list (priv, subparam);
 		} else if (contact)
 			parse_contact_field (item, name, subparam);
 			/* fields below are not relevant for contacts, so skip them */	
@@ -1043,7 +1065,7 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item, ESoapParameter *param)
 		} else if (!g_ascii_strcasecmp (name, "ExtendedProperty")) {
 			parse_extended_property (priv, subparam);
 		} else if (!g_ascii_strcasecmp (name, "ModifiedOccurrences")) {
-			process_modified_occurrences(priv, subparam);
+			process_modified_occurrences (priv, subparam);
 		} else if (!g_ascii_strcasecmp (name, "RequiredAttendees")) {
 			process_attendees (priv, subparam, "Required");
 		} else if (!g_ascii_strcasecmp (name, "OptionalAttendees")) {
@@ -1085,7 +1107,8 @@ e_ews_item_get_item_type (EEwsItem *item)
 }
 
 void
-e_ews_item_set_item_type (EEwsItem *item, EEwsItemType new_type)
+e_ews_item_set_item_type (EEwsItem *item,
+                          EEwsItemType new_type)
 {
 	g_return_if_fail (E_IS_EWS_ITEM (item));
 
@@ -1101,7 +1124,8 @@ e_ews_item_get_subject (EEwsItem *item)
 }
 
 void
-e_ews_item_set_subject (EEwsItem *item, const gchar *new_subject)
+e_ews_item_set_subject (EEwsItem *item,
+                        const gchar *new_subject)
 {
 	g_return_if_fail (E_IS_EWS_ITEM (item));
 
@@ -1119,7 +1143,8 @@ e_ews_item_get_mime_content (EEwsItem *item)
 }
 
 void
-e_ews_item_set_mime_content (EEwsItem *item, const gchar *new_mime_content)
+e_ews_item_set_mime_content (EEwsItem *item,
+                             const gchar *new_mime_content)
 {
 	g_return_if_fail (E_IS_EWS_ITEM (item));
 
@@ -1129,7 +1154,7 @@ e_ews_item_set_mime_content (EEwsItem *item, const gchar *new_mime_content)
 }
 
 const EwsId *
-e_ews_item_get_id	(EEwsItem *item)
+e_ews_item_get_id (EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
@@ -1137,7 +1162,7 @@ e_ews_item_get_id	(EEwsItem *item)
 }
 
 const EwsId *
-e_ews_item_get_attachment_id	(EEwsItem *item)
+e_ews_item_get_attachment_id (EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
@@ -1145,7 +1170,7 @@ e_ews_item_get_attachment_id	(EEwsItem *item)
 }
 
 gsize
-e_ews_item_get_size	(EEwsItem *item)
+e_ews_item_get_size (EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
 
@@ -1153,7 +1178,7 @@ e_ews_item_get_size	(EEwsItem *item)
 }
 
 const gchar *
-e_ews_item_get_msg_id	(EEwsItem *item)
+e_ews_item_get_msg_id (EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
@@ -1161,7 +1186,7 @@ e_ews_item_get_msg_id	(EEwsItem *item)
 }
 
 const gchar *
-e_ews_item_get_uid	(EEwsItem *item)
+e_ews_item_get_uid (EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
@@ -1184,7 +1209,7 @@ e_ews_item_get_references (EEwsItem *item)
 }
 
 time_t
-e_ews_item_get_date_received	(EEwsItem *item)
+e_ews_item_get_date_received (EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
 
@@ -1192,7 +1217,7 @@ e_ews_item_get_date_received	(EEwsItem *item)
 }
 
 time_t
-e_ews_item_get_date_sent	(EEwsItem *item)
+e_ews_item_get_date_sent (EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
 
@@ -1200,7 +1225,7 @@ e_ews_item_get_date_sent	(EEwsItem *item)
 }
 
 time_t
-e_ews_item_get_date_created	(EEwsItem *item)
+e_ews_item_get_date_created (EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
 
@@ -1208,7 +1233,8 @@ e_ews_item_get_date_created	(EEwsItem *item)
 }
 
 gboolean
-e_ews_item_has_attachments	(EEwsItem *item, gboolean *has_attachments)
+e_ews_item_has_attachments (EEwsItem *item,
+                            gboolean *has_attachments)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), FALSE);
 
@@ -1218,7 +1244,8 @@ e_ews_item_has_attachments	(EEwsItem *item, gboolean *has_attachments)
 }
 
 gboolean
-e_ews_item_is_read		(EEwsItem *item, gboolean *read)
+e_ews_item_is_read (EEwsItem *item,
+                    gboolean *read)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), FALSE);
 
@@ -1228,7 +1255,8 @@ e_ews_item_is_read		(EEwsItem *item, gboolean *read)
 }
 
 gboolean
-e_ews_item_is_forwarded		(EEwsItem *item, gboolean *forwarded)
+e_ews_item_is_forwarded (EEwsItem *item,
+                         gboolean *forwarded)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), FALSE);
 
@@ -1238,7 +1266,8 @@ e_ews_item_is_forwarded		(EEwsItem *item, gboolean *forwarded)
 }
 
 gboolean
-e_ews_item_is_answered		(EEwsItem *item, gboolean *answered)
+e_ews_item_is_answered (EEwsItem *item,
+                        gboolean *answered)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), FALSE);
 
@@ -1247,9 +1276,8 @@ e_ews_item_is_answered		(EEwsItem *item, gboolean *answered)
 	return TRUE;
 }
 
-
 const GSList *
-e_ews_item_get_to_recipients	(EEwsItem *item)
+e_ews_item_get_to_recipients (EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
@@ -1257,7 +1285,7 @@ e_ews_item_get_to_recipients	(EEwsItem *item)
 }
 
 const GSList *
-e_ews_item_get_cc_recipients	(EEwsItem *item)
+e_ews_item_get_cc_recipients (EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
@@ -1265,7 +1293,7 @@ e_ews_item_get_cc_recipients	(EEwsItem *item)
 }
 
 const GSList *
-e_ews_item_get_bcc_recipients	(EEwsItem *item)
+e_ews_item_get_bcc_recipients (EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
@@ -1273,7 +1301,7 @@ e_ews_item_get_bcc_recipients	(EEwsItem *item)
 }
 
 const EwsMailbox *
-e_ews_item_get_sender		(EEwsItem *item)
+e_ews_item_get_sender (EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
@@ -1281,7 +1309,7 @@ e_ews_item_get_sender		(EEwsItem *item)
 }
 
 const EwsMailbox *
-e_ews_item_get_from		(EEwsItem *item)
+e_ews_item_get_from (EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
@@ -1289,7 +1317,7 @@ e_ews_item_get_from		(EEwsItem *item)
 }
 
 const GSList *
-e_ews_item_get_categories	(EEwsItem *item)
+e_ews_item_get_categories (EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
@@ -1297,7 +1325,7 @@ e_ews_item_get_categories	(EEwsItem *item)
 }
 
 EwsImportance
-e_ews_item_get_importance	(EEwsItem *item)
+e_ews_item_get_importance (EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), EWS_ITEM_LOW);
 
@@ -1311,7 +1339,7 @@ e_ews_item_mailbox_from_soap_param (ESoapParameter *param)
 	ESoapParameter *subparam;
 
 	/* Return NULL if RoutingType of Mailbox is not SMTP
-		   For instance, people who don't exist any more	*/
+		 * For instance, people who don't exist any more	*/
 	subparam = e_soap_parameter_get_first_child_by_name (param, "RoutingType");
 	if (subparam) {
 		gchar *routingtype;
@@ -1337,23 +1365,24 @@ e_ews_item_mailbox_from_soap_param (ESoapParameter *param)
 }
 
 const GSList *
-e_ews_item_get_modified_occurrences(EEwsItem *item)
+e_ews_item_get_modified_occurrences (EEwsItem *item)
 {
-	g_return_val_if_fail(E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
 	return item->priv->modified_occurrences;
 }
 
 GSList *
-e_ews_item_get_attachments_ids(EEwsItem *item)
+e_ews_item_get_attachments_ids (EEwsItem *item)
 {
-	g_return_val_if_fail(E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
 	return item->priv->attachments_list;
 }
 
 gchar *
-e_ews_embed_attachment_id_in_uri (const gchar *olduri, const char *attach_id)
+e_ews_embed_attachment_id_in_uri (const gchar *olduri,
+                                  const gchar *attach_id)
 {
 	gchar *tmpdir, *tmpfilename, filename[350], dirname[350], *name;
 
@@ -1372,13 +1401,16 @@ e_ews_embed_attachment_id_in_uri (const gchar *olduri, const char *attach_id)
 		g_warning("Failed to move attachment cache file [%s -> %s]: %s\n", tmpfilename, filename, strerror (errno));
 	}
 
-	g_free(tmpdir);
+	g_free (tmpdir);
 
-	return g_filename_to_uri(filename, NULL, NULL);
+	return g_filename_to_uri (filename, NULL, NULL);
 }
 
 gchar *
-e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gchar *cache, const gchar *comp_uid, gchar **attach_id)
+e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param,
+                                                const gchar *cache,
+                                                const gchar *comp_uid,
+                                                gchar **attach_id)
 {
 	ESoapParameter *subparam;
 	const gchar *param_name;
@@ -1391,11 +1423,11 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 
 	/* Parse element, look for filename and content */
 	*attach_id = NULL;
-	for (subparam = e_soap_parameter_get_first_child(param); subparam != NULL; subparam = e_soap_parameter_get_next_child(subparam)) {
-		param_name = e_soap_parameter_get_name(subparam);
+	for (subparam = e_soap_parameter_get_first_child (param); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
+		param_name = e_soap_parameter_get_name (subparam);
 
 		if (g_ascii_strcasecmp(param_name, "Name") == 0) {
-			value = e_soap_parameter_get_string_value(subparam);
+			value = e_soap_parameter_get_string_value (subparam);
 			name = g_uri_escape_string(value, "", TRUE);
 			g_free (value);
 		} else if (g_ascii_strcasecmp(param_name, "Content") == 0) {
@@ -1409,9 +1441,9 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 
 	/* Make sure we have needed data */
 	if (!content || !name || !*attach_id) {
-		g_free(name);
-		g_free(content);
-		g_free(*attach_id);
+		g_free (name);
+		g_free (content);
+		g_free (*attach_id);
 		return NULL;
 	}
 
@@ -1429,18 +1461,20 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gch
 	}
 
 	g_free (dirname);
-	g_free(tmpdir);
-	g_free(name);
-	g_free(content);
+	g_free (tmpdir);
+	g_free (name);
+	g_free (content);
 
 	/* Return URI to saved file */
-	name = g_filename_to_uri(filename, NULL, NULL);
+	name = g_filename_to_uri (filename, NULL, NULL);
 	g_free (filename);
 	return name;
 }
 
 gchar *
-e_ews_item_dump_mime_content(EEwsItem *item, const gchar *cache) {
+e_ews_item_dump_mime_content (EEwsItem *item,
+                              const gchar *cache)
+{
 	gchar *filename, *surename, *dirname;
 	gchar *tmpdir, *tmpfilename;
 
@@ -1450,30 +1484,30 @@ e_ews_item_dump_mime_content(EEwsItem *item, const gchar *cache) {
 	tmpdir = g_strndup(tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
 
 	dirname = g_build_filename (tmpdir, "XXXXXX", NULL);
-	if (!mkdtemp(dirname))
+	if (!mkdtemp (dirname))
 		g_warning ("Failed to create directory for attachment cache");
 
 	surename = g_uri_escape_string(item->priv->subject, "", TRUE);
 	filename = g_build_filename (dirname, surename, NULL);
 
-	if (g_rename ((const gchar *)item->priv->mime_content, filename) != 0) {
+	if (g_rename ((const gchar *) item->priv->mime_content, filename) != 0) {
 		g_warning("Failed to move attachment cache file");
 	}
 
 	g_free (filename);
 	g_free (dirname);
-	g_free(tmpdir);
-	g_free(tmpfilename);
-	g_free(surename);
+	g_free (tmpdir);
+	g_free (tmpfilename);
+	g_free (surename);
 
 	/* Return URI to saved file */
-	return g_filename_to_uri(filename, NULL, NULL);
+	return g_filename_to_uri (filename, NULL, NULL);
 }
 
 const GSList *
 e_ews_item_get_attendees (EEwsItem *item)
 {
-	g_return_val_if_fail(E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
 	return item->priv->attendees;
 }
@@ -1481,24 +1515,24 @@ e_ews_item_get_attendees (EEwsItem *item)
 const EwsId *
 e_ews_item_get_calendar_item_accept_id (EEwsItem *item)
 {
-	g_return_val_if_fail(E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
-	return (const EwsId*) item->priv->calendar_item_accept_id;
+	return (const EwsId *) item->priv->calendar_item_accept_id;
 }
 
 const gchar *
 e_ews_item_get_fileas (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
 
-	return (const gchar*) item->priv->contact_fields->fileas;
+	return (const gchar *) item->priv->contact_fields->fileas;
 }
 
 const EwsCompleteName *
 e_ews_item_get_complete_name (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
 
 	return (const EwsCompleteName *) item->priv->contact_fields->complete_name;
@@ -1513,11 +1547,12 @@ e_ews_item_get_complete_name (EEwsItem *item)
  * Returns: 
  **/
 const gchar *
-e_ews_item_get_email_address (EEwsItem *item, const gchar *field)
+e_ews_item_get_email_address (EEwsItem *item,
+                              const gchar *field)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
-	
+
 	if (item->priv->contact_fields->email_addresses)
 		return g_hash_table_lookup (item->priv->contact_fields->email_addresses, field);
 
@@ -1533,11 +1568,12 @@ e_ews_item_get_email_address (EEwsItem *item, const gchar *field)
  * Returns: 
  **/
 const EwsAddress *
-e_ews_item_get_physical_address (EEwsItem *item, const gchar *field)
+e_ews_item_get_physical_address (EEwsItem *item,
+                                 const gchar *field)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
-	
+
 	if (item->priv->contact_fields->physical_addresses)
 		return g_hash_table_lookup (item->priv->contact_fields->physical_addresses, field);
 
@@ -1555,11 +1591,12 @@ e_ews_item_get_physical_address (EEwsItem *item, const gchar *field)
  * Returns: 
  **/
 const gchar *
-e_ews_item_get_phone_number (EEwsItem *item, const gchar *field)
+e_ews_item_get_phone_number (EEwsItem *item,
+                             const gchar *field)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
-	
+
 	if (item->priv->contact_fields->phone_numbers)
 		return g_hash_table_lookup (item->priv->contact_fields->phone_numbers, field);
 
@@ -1575,11 +1612,12 @@ e_ews_item_get_phone_number (EEwsItem *item, const gchar *field)
  * Returns: 
  **/
 const gchar *
-e_ews_item_get_im_address (EEwsItem *item, const gchar *field)
+e_ews_item_get_im_address (EEwsItem *item,
+                           const gchar *field)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
-	
+
 	if (item->priv->contact_fields->im_addresses)
 		return g_hash_table_lookup (item->priv->contact_fields->im_addresses, field);
 
@@ -1589,97 +1627,97 @@ e_ews_item_get_im_address (EEwsItem *item, const gchar *field)
 const gchar *
 e_ews_item_get_company_name (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
 
-	return (const gchar*) item->priv->contact_fields->company_name;
+	return (const gchar *) item->priv->contact_fields->company_name;
 }
 
 const gchar *
 e_ews_item_get_department (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
 
-	return (const gchar*) item->priv->contact_fields->department;
+	return (const gchar *) item->priv->contact_fields->department;
 }
 
 const gchar *
 e_ews_item_get_job_title (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
 
-	return (const gchar*) item->priv->contact_fields->job_title;
+	return (const gchar *) item->priv->contact_fields->job_title;
 }
 
 const gchar *
 e_ews_item_get_assistant_name (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
 
-	return (const gchar*) item->priv->contact_fields->assistant_name;
+	return (const gchar *) item->priv->contact_fields->assistant_name;
 }
 
 const gchar *
 e_ews_item_get_manager (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
 
-	return (const gchar*) item->priv->contact_fields->manager;
+	return (const gchar *) item->priv->contact_fields->manager;
 }
 
 const gchar *
 e_ews_item_get_office_location (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
 
-	return (const gchar*) item->priv->contact_fields->office_location;
+	return (const gchar *) item->priv->contact_fields->office_location;
 }
 
 const gchar *
 e_ews_item_get_business_homepage (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
 
-	return (const gchar*) item->priv->contact_fields->business_homepage;
+	return (const gchar *) item->priv->contact_fields->business_homepage;
 }
 
 const gchar *
 e_ews_item_get_profession (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
 
-	return (const gchar*) item->priv->contact_fields->profession;
+	return (const gchar *) item->priv->contact_fields->profession;
 }
 
 const gchar *
 e_ews_item_get_spouse_name (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
 
-	return (const gchar*) item->priv->contact_fields->spouse_name;
+	return (const gchar *) item->priv->contact_fields->spouse_name;
 }
 
 const gchar *
 e_ews_item_get_surname (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
 
-	return (const gchar*) item->priv->contact_fields->surname;
+	return (const gchar *) item->priv->contact_fields->surname;
 }
-	
+
 time_t
 e_ews_item_get_birthday (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), -1);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, -1);
 
 	return item->priv->contact_fields->birthday;
@@ -1688,7 +1726,7 @@ e_ews_item_get_birthday (EEwsItem *item)
 time_t
 e_ews_item_get_wedding_anniversary (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), -1);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, -1);
 
 	return item->priv->contact_fields->wedding_anniversary;
@@ -1697,7 +1735,7 @@ e_ews_item_get_wedding_anniversary (EEwsItem *item)
 const gchar *
 e_ews_item_get_status (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->task_fields != NULL, NULL);
 
 	return item->priv->task_fields->status;
@@ -1705,7 +1743,7 @@ e_ews_item_get_status (EEwsItem *item)
 
 const gchar *	e_ews_item_get_percent_complete (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->task_fields != NULL, NULL);
 
 	return item->priv->task_fields->percent_complete;
@@ -1714,7 +1752,7 @@ const gchar *	e_ews_item_get_percent_complete (EEwsItem *item)
 time_t
 e_ews_item_get_due_date (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), -1);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
 	g_return_val_if_fail (item->priv->task_fields != NULL, -1);
 
 	return item->priv->task_fields->due_date;
@@ -1723,7 +1761,7 @@ e_ews_item_get_due_date (EEwsItem *item)
 time_t
 e_ews_item_get_start_date (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), -1);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
 	g_return_val_if_fail (item->priv->task_fields != NULL, -1);
 
 	return item->priv->task_fields->start_date;
@@ -1732,7 +1770,7 @@ e_ews_item_get_start_date (EEwsItem *item)
 time_t
 e_ews_item_get_complete_date (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), -1);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
 	g_return_val_if_fail (item->priv->task_fields != NULL, -1);
 
 	return item->priv->task_fields->complete_date;
@@ -1741,7 +1779,7 @@ e_ews_item_get_complete_date (EEwsItem *item)
 const gchar *
 e_ews_item_get_sensitivity (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->task_fields != NULL, NULL);
 
 	return item->priv->task_fields->sensitivity;
@@ -1750,7 +1788,7 @@ e_ews_item_get_sensitivity (EEwsItem *item)
 const gchar *
 e_ews_item_get_body (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->task_fields != NULL, NULL);
 
 	return item->priv->task_fields->body;
@@ -1759,7 +1797,7 @@ e_ews_item_get_body (EEwsItem *item)
 const gchar *
 e_ews_item_get_owner (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->task_fields != NULL, NULL);
 
 	return item->priv->task_fields->owner;
@@ -1768,16 +1806,17 @@ e_ews_item_get_owner (EEwsItem *item)
 const gchar *
 e_ews_item_get_delegator (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->task_fields != NULL, NULL);
 
 	return item->priv->task_fields->delegator;
 }
 
 gboolean
-e_ews_item_task_has_start_date (EEwsItem *item, gboolean *has_date)
+e_ews_item_task_has_start_date (EEwsItem *item,
+                                gboolean *has_date)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), FALSE);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), FALSE);
 	g_return_val_if_fail (item->priv->task_fields != NULL, FALSE);
 
 	*has_date =  item->priv->task_fields->has_start_date;
@@ -1786,9 +1825,10 @@ e_ews_item_task_has_start_date (EEwsItem *item, gboolean *has_date)
 }
 
 gboolean
-e_ews_item_task_has_due_date (EEwsItem *item,  gboolean *has_date)
+e_ews_item_task_has_due_date (EEwsItem *item,
+                              gboolean *has_date)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), FALSE);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), FALSE);
 	g_return_val_if_fail (item->priv->task_fields != NULL, FALSE);
 
 	*has_date =  item->priv->task_fields->has_due_date;
@@ -1797,9 +1837,10 @@ e_ews_item_task_has_due_date (EEwsItem *item,  gboolean *has_date)
 }
 
 gboolean
-e_ews_item_task_has_complete_date (EEwsItem *item,  gboolean *has_date)
+e_ews_item_task_has_complete_date (EEwsItem *item,
+                                   gboolean *has_date)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), FALSE);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), FALSE);
 	g_return_val_if_fail (item->priv->task_fields != NULL, FALSE);
 
 	*has_date =  item->priv->task_fields->has_complete_date;
@@ -1810,7 +1851,7 @@ e_ews_item_task_has_complete_date (EEwsItem *item,  gboolean *has_date)
 const gchar *
 e_ews_item_get_tzid (EEwsItem *item)
 {
-	g_return_val_if_fail (E_IS_EWS_ITEM(item), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->timezone != NULL, NULL);
 
 	return item->priv->timezone;

@@ -56,7 +56,7 @@ typedef struct {
 } flags_diff_t;
 
 /* FIXME: deprecated
-   This is used exclusively for the legacy imap cache code.  DO NOT use this in any new code */
+ * This is used exclusively for the legacy imap cache code.  DO NOT use this in any new code */
 
 typedef gboolean (*EPathFindFoldersCallback) (const gchar *physical_path,
 					      const gchar *path,
@@ -91,7 +91,6 @@ void	camel_ews_utils_sync_updated_items	(CamelEwsFolder *ews_folder,
 						 GSList *items_updated);
 void	ews_utils_replace_server_user_flags	(ESoapMessage *msg,
 						 CamelEwsMessageInfo *mi);
-
 
 G_END_DECLS
 

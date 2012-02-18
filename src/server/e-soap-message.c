@@ -34,7 +34,7 @@ typedef struct {
 
 	gint steal_b64_state;
 	guint steal_b64_save;
-	int steal_fd;
+	gint steal_fd;
 
 	/* Progress callbacks */
 	gsize response_size;
@@ -60,9 +60,9 @@ finalize (GObject *object)
 	if (priv->action)
 		g_free (priv->action);
 	if (priv->env_uri)
-                xmlFree (priv->env_uri);
+		xmlFree (priv->env_uri);
 	if (priv->env_prefix)
-                xmlFree (priv->env_prefix);
+		xmlFree (priv->env_prefix);
 
 	g_free (priv->steal_node);
 	g_free (priv->steal_dir);
@@ -94,35 +94,41 @@ e_soap_message_init (ESoapMessage *msg)
 }
 
 static xmlNsPtr
-fetch_ns (ESoapMessage *msg, const gchar *prefix, const gchar *ns_uri)
+fetch_ns (ESoapMessage *msg,
+          const gchar *prefix,
+          const gchar *ns_uri)
 {
 	ESoapMessagePrivate *priv = E_SOAP_MESSAGE_GET_PRIVATE (msg);
-        xmlNsPtr ns = NULL;
+	xmlNsPtr ns = NULL;
 
-        if (prefix && ns_uri)
-                ns = xmlNewNs (priv->last_node, (const xmlChar *)ns_uri, (const xmlChar *)prefix);
-        else if (prefix && !ns_uri) {
-                ns = xmlSearchNs (priv->doc, priv->last_node, (const xmlChar *)prefix);
-                if (!ns)
+	if (prefix && ns_uri)
+		ns = xmlNewNs (priv->last_node, (const xmlChar *) ns_uri, (const xmlChar *) prefix);
+	else if (prefix && !ns_uri) {
+		ns = xmlSearchNs (priv->doc, priv->last_node, (const xmlChar *) prefix);
+		if (!ns)
 			ns = xmlNewNs (priv->last_node, (const xmlChar *)"", (const xmlChar *)prefix);
-        }
+	}
 
-        return ns;
+	return ns;
 }
 
-static void soap_got_headers (SoupMessage *msg, gpointer data)
+static void
+soap_got_headers (SoupMessage *msg,
+                  gpointer data)
 {
 	ESoapMessagePrivate *priv = E_SOAP_MESSAGE_GET_PRIVATE (msg);
-	const char *size;
+	const gchar *size;
 
 	size = soup_message_headers_get_one (msg->response_headers,
 					     "Content-Length");
 
 	if (size)
-		priv->response_size = strtol(size, NULL, 10);
+		priv->response_size = strtol (size, NULL, 10);
 }
 
-static void soap_restarted (SoupMessage *msg, gpointer data)
+static void
+soap_restarted (SoupMessage *msg,
+                gpointer data)
 {
 	ESoapMessagePrivate *priv = E_SOAP_MESSAGE_GET_PRIVATE (msg);
 
@@ -138,15 +144,16 @@ static void soap_restarted (SoupMessage *msg, gpointer data)
 	}
 }
 
-static void soap_sax_startElementNs (void * _ctxt,
-				     const xmlChar *localname,
-				     const xmlChar *prefix,
-				     const xmlChar *uri,
-				     int nb_namespaces,
-				     const xmlChar **namespaces,
-				     int nb_attributes,
-				     int nb_defaulted,
-				     const xmlChar **attributes)
+static void
+soap_sax_startElementNs (gpointer _ctxt,
+                         const xmlChar *localname,
+                         const xmlChar *prefix,
+                         const xmlChar *uri,
+                         gint nb_namespaces,
+                         const xmlChar **namespaces,
+                         gint nb_attributes,
+                         gint nb_defaulted,
+                         const xmlChar **attributes)
 {
 	xmlParserCtxt *ctxt = _ctxt;
 	ESoapMessagePrivate *priv = ctxt->_private;
@@ -163,7 +170,7 @@ static void soap_sax_startElementNs (void * _ctxt,
 		gboolean isnode = FALSE;
 
 		while (prop[i]) {
-			if (strcmp ((const char *)localname, prop [i]) == 0) {
+			if (strcmp ((const gchar *) localname, prop[i]) == 0) {
 				isnode = TRUE;
 				break;
 			}
@@ -179,19 +186,20 @@ static void soap_sax_startElementNs (void * _ctxt,
 	priv->steal_fd = g_mkstemp (fname);
 	if (priv->steal_fd != -1) {
 		if (priv->steal_base64) {
-			gchar *enc = g_base64_encode ((guchar *)fname, strlen(fname));
-			xmlSAX2Characters (ctxt, (xmlChar *)enc, strlen (enc));
+			gchar *enc = g_base64_encode ((guchar *) fname, strlen (fname));
+			xmlSAX2Characters (ctxt, (xmlChar *) enc, strlen (enc));
 			g_free (enc);
 		} else
-			xmlSAX2Characters (ctxt, (xmlChar *)fname, strlen (fname));
+			xmlSAX2Characters (ctxt, (xmlChar *) fname, strlen (fname));
 	}
 	g_free (fname);
 }
 
-static void soap_sax_endElementNs (void *_ctxt,
-				   const xmlChar *localname,
-				   const xmlChar *prefix,
-				   const xmlChar *uri)
+static void
+soap_sax_endElementNs (gpointer _ctxt,
+                       const xmlChar *localname,
+                       const xmlChar *prefix,
+                       const xmlChar *uri)
 {
 	xmlParserCtxt *ctxt = _ctxt;
 	ESoapMessagePrivate *priv = ctxt->_private;
@@ -207,7 +215,10 @@ static void soap_sax_endElementNs (void *_ctxt,
 	xmlSAX2EndElementNs (ctxt, localname, prefix, uri);
 }
 
-static void soap_sax_characters (void *_ctxt, const xmlChar *ch, int len)
+static void
+soap_sax_characters (gpointer _ctxt,
+                     const xmlChar *ch,
+                     gint len)
 {
 	xmlParserCtxt *ctxt = _ctxt;
 	ESoapMessagePrivate *priv = ctxt->_private;
@@ -215,7 +226,7 @@ static void soap_sax_characters (void *_ctxt, const xmlChar *ch, int len)
 	if (priv->steal_fd == -1)
 		xmlSAX2Characters (ctxt, ch, len);
 	else if (!priv->steal_base64) {
-		if (write (priv->steal_fd, (const gchar*)ch, len) != len) {
+		if (write (priv->steal_fd, (const gchar *) ch, len) != len) {
 		write_err:
 			/* Handle error better */
 			g_warning ("Failed to write streaming data to file");
@@ -224,17 +235,21 @@ static void soap_sax_characters (void *_ctxt, const xmlChar *ch, int len)
 		guchar *bdata = g_malloc (len);
 		gsize blen;
 
-		blen = g_base64_decode_step ((const gchar *)ch, len,
+		blen = g_base64_decode_step ((const gchar *) ch, len,
 					     bdata, &priv->steal_b64_state,
 					     &priv->steal_b64_save);
-		if (write (priv->steal_fd, (const gchar*)bdata, blen) != blen) {
+		if (write (priv->steal_fd, (const gchar *) bdata, blen) != blen) {
 			g_free (bdata);
 			goto write_err;
 		}
 		g_free (bdata);
 	}
 }
-static void soap_got_chunk (SoupMessage *msg, SoupBuffer *chunk, gpointer data)
+
+static void
+soap_got_chunk (SoupMessage *msg,
+                SoupBuffer *chunk,
+                gpointer data)
 {
 	ESoapMessagePrivate *priv = E_SOAP_MESSAGE_GET_PRIVATE (msg);
 
@@ -244,7 +259,7 @@ static void soap_got_chunk (SoupMessage *msg, SoupBuffer *chunk, gpointer data)
 	priv->response_received += chunk->length;
 
 	if (priv->response_size && priv->progress_fn) {
-		int pc = priv->response_received * 100 / priv->response_size;
+		gint pc = priv->response_received * 100 / priv->response_size;
 		priv->progress_fn (priv->progress_data, pc);
 	}
 
@@ -277,9 +292,12 @@ static void soap_got_chunk (SoupMessage *msg, SoupBuffer *chunk, gpointer data)
  * Since: 2.92
  */
 ESoapMessage *
-e_soap_message_new (const gchar *method, const gchar *uri_string,
-		       gboolean standalone, const gchar *xml_encoding,
-		       const gchar *env_prefix, const gchar *env_uri)
+e_soap_message_new (const gchar *method,
+                    const gchar *uri_string,
+                    gboolean standalone,
+                    const gchar *xml_encoding,
+                    const gchar *env_prefix,
+                    const gchar *env_uri)
 {
 	ESoapMessage *msg;
 	SoupURI *uri;
@@ -294,7 +312,7 @@ e_soap_message_new (const gchar *method, const gchar *uri_string,
 	soup_uri_free (uri);
 
 	/* Don't accumulate body data into a huge buffer.
-	   Instead, parse it as it arrives. */
+	 * Instead, parse it as it arrives. */
 	soup_message_body_set_accumulate (SOUP_MESSAGE (msg)->response_body,
 					  FALSE);
 	g_signal_connect (msg, "got-headers", G_CALLBACK (soap_got_headers), NULL);
@@ -320,9 +338,12 @@ e_soap_message_new (const gchar *method, const gchar *uri_string,
  * Since: 2.92
  */
 ESoapMessage *
-e_soap_message_new_from_uri (const gchar *method, SoupURI *uri,
-				gboolean standalone, const gchar *xml_encoding,
-				const gchar *env_prefix, const gchar *env_uri)
+e_soap_message_new_from_uri (const gchar *method,
+                             SoupURI *uri,
+                             gboolean standalone,
+                             const gchar *xml_encoding,
+                             const gchar *env_prefix,
+                             const gchar *env_uri)
 {
 	ESoapMessage *msg;
 	ESoapMessagePrivate *priv;
@@ -337,7 +358,7 @@ e_soap_message_new_from_uri (const gchar *method, SoupURI *uri,
 	priv->doc->standalone = standalone;
 
 	if (xml_encoding) {
-		xmlFree ((xmlChar *)priv->doc->encoding);
+		xmlFree ((xmlChar *) priv->doc->encoding);
 		priv->doc->encoding = xmlCharStrdup (xml_encoding);
 	}
 
@@ -365,9 +386,9 @@ e_soap_message_new_from_uri (const gchar *method, SoupURI *uri,
 
 void
 e_soap_message_store_node_data (ESoapMessage *msg,
-				const gchar *nodename,
-				const gchar *directory,
-				gboolean base64)
+                                const gchar *nodename,
+                                const gchar *directory,
+                                gboolean base64)
 {
 	ESoapMessagePrivate *priv;
 
@@ -389,9 +410,10 @@ e_soap_message_store_node_data (ESoapMessage *msg,
  *
  * Since: xxx
  */
-void		  e_soap_message_set_progress_fn (ESoapMessage *msg,
-						  ESoapProgressFn fn,
-						  gpointer object)
+void
+e_soap_message_set_progress_fn (ESoapMessage *msg,
+                                ESoapProgressFn fn,
+                                gpointer object)
 {
 	ESoapMessagePrivate *priv;
 
@@ -529,16 +551,16 @@ e_soap_message_end_body (ESoapMessage *msg)
  */
 void
 e_soap_message_start_element (ESoapMessage *msg,
-				 const gchar *name,
-				 const gchar *prefix,
-				 const gchar *ns_uri)
+                              const gchar *name,
+                              const gchar *prefix,
+                              const gchar *ns_uri)
 {
 	ESoapMessagePrivate *priv;
 
 	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
 	priv = E_SOAP_MESSAGE_GET_PRIVATE (msg);
 
-	priv->last_node = xmlNewChild (priv->last_node, NULL, (const xmlChar *)name, NULL);
+	priv->last_node = xmlNewChild (priv->last_node, NULL, (const xmlChar *) name, NULL);
 
 	xmlSetNs (priv->last_node, fetch_ns (msg, prefix, ns_uri));
 
@@ -584,9 +606,9 @@ e_soap_message_end_element (ESoapMessage *msg)
  */
 void
 e_soap_message_start_fault (ESoapMessage *msg,
-			       const gchar *faultcode,
-			       const gchar *faultstring,
-			       const gchar *faultfactor)
+                            const gchar *faultcode,
+                            const gchar *faultstring,
+                            const gchar *faultfactor)
 {
 	ESoapMessagePrivate *priv;
 
@@ -618,7 +640,7 @@ e_soap_message_start_fault (ESoapMessage *msg,
 void
 e_soap_message_end_fault (ESoapMessage *msg)
 {
-        e_soap_message_end_element (msg);
+	e_soap_message_end_element (msg);
 }
 
 /**
@@ -636,10 +658,10 @@ e_soap_message_start_fault_detail (ESoapMessage *msg)
 {
 	ESoapMessagePrivate *priv;
 
-        g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
+	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
 	priv = E_SOAP_MESSAGE_GET_PRIVATE (msg);
 
-        priv->last_node = xmlNewChild (priv->last_node,
+	priv->last_node = xmlNewChild (priv->last_node,
 				       priv->soap_ns,
 				       (const xmlChar *)"detail",
 				       NULL);
@@ -715,11 +737,11 @@ e_soap_message_end_header (ESoapMessage *msg)
  */
 void
 e_soap_message_start_header_element (ESoapMessage *msg,
-					const gchar *name,
-					gboolean must_understand,
-					const gchar *actor_uri,
-					const gchar *prefix,
-					const gchar *ns_uri)
+                                     const gchar *name,
+                                     gboolean must_understand,
+                                     const gchar *actor_uri,
+                                     const gchar *prefix,
+                                     const gchar *ns_uri)
 {
 	ESoapMessagePrivate *priv;
 
@@ -757,7 +779,8 @@ e_soap_message_end_header_element (ESoapMessage *msg)
  * Since: 2.92
  */
 void
-e_soap_message_write_int (ESoapMessage *msg, glong i)
+e_soap_message_write_int (ESoapMessage *msg,
+                          glong i)
 {
 	gchar *str = g_strdup_printf ("%ld", i);
 	e_soap_message_write_string (msg, str);
@@ -774,7 +797,8 @@ e_soap_message_write_int (ESoapMessage *msg, glong i)
  * Since: 2.92
  */
 void
-e_soap_message_write_double (ESoapMessage *msg, gdouble d)
+e_soap_message_write_double (ESoapMessage *msg,
+                             gdouble d)
 {
 	gchar *str = g_strdup_printf ("%f", d);
 	e_soap_message_write_string (msg, str);
@@ -793,11 +817,13 @@ e_soap_message_write_double (ESoapMessage *msg, gdouble d)
  * Since: 2.92
  **/
 void
-e_soap_message_write_base64 (ESoapMessage *msg, const gchar *string, gint len)
+e_soap_message_write_base64 (ESoapMessage *msg,
+                             const gchar *string,
+                             gint len)
 {
-        gchar *str = g_base64_encode ((const guchar *)string, len);
-        e_soap_message_write_string (msg, str);
-        g_free (str);
+	gchar *str = g_base64_encode ((const guchar *) string, len);
+	e_soap_message_write_string (msg, str);
+	g_free (str);
 }
 
 /**
@@ -811,10 +837,11 @@ e_soap_message_write_base64 (ESoapMessage *msg, const gchar *string, gint len)
  * Since: 2.92
  **/
 void
-e_soap_message_write_time (ESoapMessage *msg, const time_t *timeval)
+e_soap_message_write_time (ESoapMessage *msg,
+                           const time_t *timeval)
 {
-        gchar *str = g_strchomp (ctime (timeval));
-        e_soap_message_write_string (msg, str);
+	gchar *str = g_strchomp (ctime (timeval));
+	e_soap_message_write_string (msg, str);
 }
 
 /**
@@ -827,14 +854,15 @@ e_soap_message_write_time (ESoapMessage *msg, const time_t *timeval)
  * Since: 2.92
  */
 void
-e_soap_message_write_string (ESoapMessage *msg, const gchar *string)
+e_soap_message_write_string (ESoapMessage *msg,
+                             const gchar *string)
 {
 	ESoapMessagePrivate *priv;
 
 	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
 	priv = E_SOAP_MESSAGE_GET_PRIVATE (msg);
 
-	xmlNodeAddContent (priv->last_node, (const xmlChar *)string);
+	xmlNodeAddContent (priv->last_node, (const xmlChar *) string);
 }
 
 /**
@@ -849,14 +877,16 @@ e_soap_message_write_string (ESoapMessage *msg, const gchar *string)
  * Since: 2.92
  */
 void
-e_soap_message_write_buffer (ESoapMessage *msg, const gchar *buffer, gint len)
+e_soap_message_write_buffer (ESoapMessage *msg,
+                             const gchar *buffer,
+                             gint len)
 {
 	ESoapMessagePrivate *priv;
 
 	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
 	priv = E_SOAP_MESSAGE_GET_PRIVATE (msg);
 
-	xmlNodeAddContentLen (priv->last_node, (const xmlChar *)buffer, len);
+	xmlNodeAddContentLen (priv->last_node, (const xmlChar *) buffer, len);
 }
 
 /**
@@ -870,7 +900,8 @@ e_soap_message_write_buffer (ESoapMessage *msg, const gchar *buffer, gint len)
  * Since: 2.92
  */
 void
-e_soap_message_set_element_type (ESoapMessage *msg, const gchar *xsi_type)
+e_soap_message_set_element_type (ESoapMessage *msg,
+                                 const gchar *xsi_type)
 {
 	ESoapMessagePrivate *priv;
 
@@ -913,10 +944,10 @@ e_soap_message_set_null (ESoapMessage *msg)
  */
 void
 e_soap_message_add_attribute (ESoapMessage *msg,
-				 const gchar *name,
-				 const gchar *value,
-				 const gchar *prefix,
-				 const gchar *ns_uri)
+                              const gchar *name,
+                              const gchar *value,
+                              const gchar *prefix,
+                              const gchar *ns_uri)
 {
 	ESoapMessagePrivate *priv;
 
@@ -925,7 +956,7 @@ e_soap_message_add_attribute (ESoapMessage *msg,
 
 	xmlNewNsProp (priv->last_node,
 		      fetch_ns (msg, prefix, ns_uri),
-		      (const xmlChar *)name, (const xmlChar *)value);
+		      (const xmlChar *) name, (const xmlChar *) value);
 }
 
 /**
@@ -939,7 +970,9 @@ e_soap_message_add_attribute (ESoapMessage *msg,
  * Since: 2.92
  */
 void
-e_soap_message_add_namespace (ESoapMessage *msg, const gchar *prefix, const gchar *ns_uri)
+e_soap_message_add_namespace (ESoapMessage *msg,
+                              const gchar *prefix,
+                              const gchar *ns_uri)
 {
 	ESoapMessagePrivate *priv;
 
@@ -961,7 +994,8 @@ e_soap_message_add_namespace (ESoapMessage *msg, const gchar *prefix, const gcha
  * Since: 2.92
  */
 void
-e_soap_message_set_default_namespace (ESoapMessage *msg, const gchar *ns_uri)
+e_soap_message_set_default_namespace (ESoapMessage *msg,
+                                      const gchar *ns_uri)
 {
 	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
 
@@ -979,7 +1013,8 @@ e_soap_message_set_default_namespace (ESoapMessage *msg, const gchar *ns_uri)
  * Since: 2.92
  */
 void
-e_soap_message_set_encoding_style (ESoapMessage *msg, const gchar *enc_style)
+e_soap_message_set_encoding_style (ESoapMessage *msg,
+                                   const gchar *enc_style)
 {
 	ESoapMessagePrivate *priv;
 
@@ -1044,7 +1079,7 @@ e_soap_message_persist (ESoapMessage *msg)
 
 	/* serialize to SoupMessage class */
 	soup_message_set_request (SOUP_MESSAGE (msg), "text/xml",
-				  SOUP_MEMORY_TAKE, (gchar *)body, len);
+				  SOUP_MEMORY_TAKE, (gchar *) body, len);
 }
 
 /**
@@ -1061,7 +1096,8 @@ e_soap_message_persist (ESoapMessage *msg)
  * Since: 2.92
  */
 const gchar *
-e_soap_message_get_namespace_prefix (ESoapMessage *msg, const gchar *ns_uri)
+e_soap_message_get_namespace_prefix (ESoapMessage *msg,
+                                     const gchar *ns_uri)
 {
 	ESoapMessagePrivate *priv;
 	xmlNsPtr ns = NULL;
@@ -1070,10 +1106,10 @@ e_soap_message_get_namespace_prefix (ESoapMessage *msg, const gchar *ns_uri)
 	priv = E_SOAP_MESSAGE_GET_PRIVATE (msg);
 	g_return_val_if_fail (ns_uri != NULL, NULL);
 
-	ns = xmlSearchNsByHref (priv->doc, priv->last_node, (const xmlChar *)ns_uri);
+	ns = xmlSearchNsByHref (priv->doc, priv->last_node, (const xmlChar *) ns_uri);
 	if (ns) {
 		if (ns->prefix)
-			return (const gchar *)ns->prefix;
+			return (const gchar *) ns->prefix;
 		else
 			return "";
 	}

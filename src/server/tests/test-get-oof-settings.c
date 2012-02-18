@@ -34,7 +34,9 @@ void get_oof_settings_test_run ();
 static GMainLoop *main_loop;
 
 static void
-get_oof_settings_cb (GObject *object, GAsyncResult *res, gpointer data)
+get_oof_settings_cb (GObject *object,
+                     GAsyncResult *res,
+                     gpointer data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	OOFSettings *oof_settings;
@@ -51,7 +53,7 @@ get_oof_settings_cb (GObject *object, GAsyncResult *res, gpointer data)
 	g_print ("Success : Fetched out of office settings successfully \n");
 
 quit:
-	g_main_loop_quit(main_loop);
+	g_main_loop_quit (main_loop);
 }
 
 static void

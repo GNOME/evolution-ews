@@ -38,7 +38,9 @@ static GMainLoop *main_loop;
 EwsFolderId *folder_id;
 
 static void
-create_folder_cb (GObject *object, GAsyncResult *res, gpointer data)
+create_folder_cb (GObject *object,
+                  GAsyncResult *res,
+                  gpointer data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	GError *error = NULL;
@@ -62,7 +64,7 @@ create_folder_cb (GObject *object, GAsyncResult *res, gpointer data)
 	e_ews_folder_free_fid (fid);
 
 quit:
-	g_main_loop_quit(main_loop);
+	g_main_loop_quit (main_loop);
 }
 
 static void

@@ -41,7 +41,9 @@ GMainLoop *main_loop;
 static gint iter = 0;
 
 static void
-find_folder_item_callback (GObject *object, GAsyncResult *res, gpointer user_data)
+find_folder_item_callback (GObject *object,
+                           GAsyncResult *res,
+                           gpointer user_data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	GError *error = NULL;
@@ -52,13 +54,13 @@ find_folder_item_callback (GObject *object, GAsyncResult *res, gpointer user_dat
 
 	if (error != NULL) {
 		g_print ("Unable to find items in %s folder: %s :%d \n", (gchar *) user_data, error->message, error->code);
-		
+
 		++iter;
 
 		/*Check whether we have got responses of all three folder requests*/
 		if (iter == 3)
 			g_main_loop_quit (main_loop);
-		
+
 		return;
 	}
 
@@ -82,7 +84,9 @@ find_folder_item_callback (GObject *object, GAsyncResult *res, gpointer user_dat
 }
 
 static void
-get_login_info_from_env (const gchar **username, const gchar **password, const gchar **uri)
+get_login_info_from_env (const gchar **username,
+                         const gchar **password,
+                         const gchar **uri)
 {
 	*username = g_getenv ("EWS_TEST_USERNAME");
 	*password = g_getenv ("EWS_TEST_PASSWORD");

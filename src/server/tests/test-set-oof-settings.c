@@ -35,20 +35,24 @@ static GMainLoop *main_loop;
 OOFSettings *oof_settings = NULL;
 
 static void
-set_arbit_values () {
+set_arbit_values (void)
+{
 	time_t tm;
+
 	oof_settings = g_new0 (OOFSettings, 1);
 	oof_settings->state = g_strdup ("Enabled");
 	oof_settings->ext_aud = g_strdup ("All");
 	tm = time (NULL);
-	oof_settings->start_tm = tm - (24*60*60);
-	oof_settings->end_tm = tm + (24*60*60);
+	oof_settings->start_tm = tm - (24 * 60 * 60);
+	oof_settings->end_tm = tm + (24 * 60 * 60);
 	oof_settings->int_reply = g_strdup ("My Internal Reply");
 	oof_settings->ext_reply = g_strdup ("My External Reply");
 }
 
 static void
-set_oof_settings_cb (GObject *object, GAsyncResult *res, gpointer data)
+set_oof_settings_cb (GObject *object,
+                     GAsyncResult *res,
+                     gpointer data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	GError *error = NULL;
@@ -64,7 +68,7 @@ set_oof_settings_cb (GObject *object, GAsyncResult *res, gpointer data)
 	g_print ("Success : Set out office successfully \n");
 
 quit:
-	g_main_loop_quit(main_loop);
+	g_main_loop_quit (main_loop);
 }
 
 static void

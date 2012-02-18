@@ -22,4 +22,4 @@
 
 #include "libedata-book/e-data-book-view.h"
 
-EDataBookView*		e_book_backend_ews_utils_get_book_view (EBookBackend *backend);
+EDataBookView *	e_book_backend_ews_utils_get_book_view (EBookBackend *backend);

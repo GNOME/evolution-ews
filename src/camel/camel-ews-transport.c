@@ -43,7 +43,7 @@ G_DEFINE_TYPE (CamelEwsTransport, camel_ews_transport, CAMEL_TYPE_TRANSPORT)
 static gboolean
 ews_transport_connect_sync (CamelService *service,
                             GCancellable *cancellable,
-			    GError **error)
+                            GError **error)
 {
 	return TRUE;
 }
@@ -71,11 +71,11 @@ ews_transport_get_name (CamelService *service,
 
 static gboolean
 ews_send_to_sync (CamelTransport *transport,
-		  CamelMimeMessage *message,
-		  CamelAddress *from,
-		  CamelAddress *recipients,
-		  GCancellable *cancellable,
-		  GError **error)
+                  CamelMimeMessage *message,
+                  CamelAddress *from,
+                  CamelAddress *recipients,
+                  GCancellable *cancellable,
+                  GError **error)
 {
 	CamelNetworkSettings *network_settings;
 	CamelEwsSettings *ews_settings;

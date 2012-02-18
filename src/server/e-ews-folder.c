@@ -113,7 +113,8 @@ e_ews_folder_init (EEwsFolder *folder)
 
 /* FIXME pick it from folder_type and make it set folder_type */
 static void
-e_ews_folder_set_folder_class (EEwsFolder *folder, const gchar *folder_class)
+e_ews_folder_set_folder_class (EEwsFolder *folder,
+                               const gchar *folder_class)
 {
 	EEwsFolderPrivate *priv;
 
@@ -127,9 +128,9 @@ e_ews_folder_set_folder_class (EEwsFolder *folder, const gchar *folder_class)
 	priv->folder_class = g_strdup (folder_class);
 }
 
-
 static gboolean
-e_ews_folder_set_from_soap_parameter (EEwsFolder *folder, ESoapParameter *param)
+e_ews_folder_set_from_soap_parameter (EEwsFolder *folder,
+                                      ESoapParameter *param)
 {
 	EEwsFolderPrivate *priv = folder->priv;
 	gchar *value;
@@ -225,7 +226,8 @@ e_ews_folder_get_name (EEwsFolder *folder)
 }
 
 void
-e_ews_folder_set_name (EEwsFolder *folder, const gchar *new_name)
+e_ews_folder_set_name (EEwsFolder *folder,
+                       const gchar *new_name)
 {
 	EEwsFolderPrivate *priv;
 
@@ -238,7 +240,6 @@ e_ews_folder_set_name (EEwsFolder *folder, const gchar *new_name)
 		g_free (priv->name);
 	priv->name = g_strdup (new_name);
 }
-
 
 const EwsFolderId *
 e_ews_folder_get_id (EEwsFolder *folder)
@@ -257,7 +258,8 @@ e_ews_folder_get_parent_id (EEwsFolder *folder)
 }
 
 void
-e_ews_folder_set_parent_id (EEwsFolder *folder, EwsFolderId *parent_fid)
+e_ews_folder_set_parent_id (EEwsFolder *folder,
+                            EwsFolderId *parent_fid)
 {
 	EEwsFolderPrivate *priv;
 
@@ -284,7 +286,8 @@ e_ews_folder_get_folder_type (EEwsFolder *folder)
 }
 
 void
-e_ews_folder_set_folder_type (EEwsFolder *folder, EwsFolderType folder_type)
+e_ews_folder_set_folder_type (EEwsFolder *folder,
+                              EwsFolderType folder_type)
 {
 	g_return_if_fail (E_IS_EWS_FOLDER (folder));
 

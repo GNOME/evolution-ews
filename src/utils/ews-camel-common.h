@@ -34,7 +34,6 @@ camel_ews_utils_create_mime_message (EEwsConnection *cnc, const gchar *dispositi
 
 G_END_DECLS
 
-
 #ifdef	__cplusplus
 }
 #endif

@@ -34,7 +34,9 @@ void autocompletion_tests_run ();
 static GMainLoop *main_loop;
 
 static void
-resolve_names_cb (GObject *object, GAsyncResult *res, gpointer data)
+resolve_names_cb (GObject *object,
+                  GAsyncResult *res,
+                  gpointer data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	GSList *mailboxes = NULL, *contact_items = NULL, *l;
@@ -67,7 +69,7 @@ resolve_names_cb (GObject *object, GAsyncResult *res, gpointer data)
 	/* FIXME once we fetch contact items free them as well */
 
 quit:
-	g_main_loop_quit(main_loop);
+	g_main_loop_quit (main_loop);
 }
 
 static void

@@ -22,7 +22,9 @@
 #include "ews-esource-utils.h"
 
 ESource *
-ews_find_source_by_matched_prop (GSList *sources, const gchar *prop, const gchar *value)
+ews_find_source_by_matched_prop (GSList *sources,
+                                 const gchar *prop,
+                                 const gchar *value)
 {
 	GSList *s;
 
@@ -44,7 +46,8 @@ ews_find_source_by_matched_prop (GSList *sources, const gchar *prop, const gchar
 }
 
 static ESourceGroup *
-ews_find_group (GSList *groups, const gchar *account_name)
+ews_find_group (GSList *groups,
+                const gchar *account_name)
 {
 	GSList *p;
 	gint len;
@@ -65,7 +68,8 @@ ews_find_group (GSList *groups, const gchar *account_name)
 }
 
 ESourceGroup *
-ews_esource_utils_ensure_group (ESourceList *source_list, const gchar *account_name)
+ews_esource_utils_ensure_group (ESourceList *source_list,
+                                const gchar *account_name)
 {
 	ESourceGroup *group = NULL;
 	GSList *groups;
@@ -89,20 +93,20 @@ ews_esource_utils_ensure_group (ESourceList *source_list, const gchar *account_n
 }
 
 gboolean
-ews_esource_utils_add_esource	(EEwsFolder *folder,
-				 const gchar *account_uri,
-				 const gchar *account_name,
-				 const gchar *username,
-				 const gchar *email_id,
-				 const gchar *hosturl,
-				 gint refresh_timeout)
+ews_esource_utils_add_esource (EEwsFolder *folder,
+                               const gchar *account_uri,
+                               const gchar *account_name,
+                               const gchar *username,
+                               const gchar *email_id,
+                               const gchar *hosturl,
+                               gint refresh_timeout)
 {
 	ESourceList *source_list;
 	ESourceGroup *group;
 	ESource *source;
 	EwsFolderType ftype;
 	const EwsFolderId *fid;
-	GConfClient* client;
+	GConfClient * client;
 	const gchar *conf_key, *selection_key = NULL;
 	const gchar *source_name;
 	gchar *source_uri;
@@ -116,7 +120,7 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 	if (ftype == EWS_FOLDER_TYPE_CALENDAR) {
 		conf_key = CALENDAR_SOURCES;
 		selection_key = SELECTED_CALENDARS;
-	} else if (ftype == EWS_FOLDER_TYPE_TASKS){
+	} else if (ftype == EWS_FOLDER_TYPE_TASKS) {
 		conf_key = TASKS_SOURCES;
 		selection_key = SELECTED_TASKS;
 	} else if (ftype == EWS_FOLDER_TYPE_CONTACTS) {
@@ -135,10 +139,10 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 	}
 
 	/* We use the same URI for all calendars as for the mail, since
-	   there's no other way to set the key used for password storage
-	   in *either* calendar or mail code. Note the tricks we have to
-	   play in the calendar back end to make the cache directory
-	   unique again. */
+	 * there's no other way to set the key used for password storage
+	 * in *either* calendar or mail code. Note the tricks we have to
+	 * play in the calendar back end to make the cache directory
+	 * unique again. */
 	if (ftype == EWS_FOLDER_TYPE_CONTACTS)
 		source_uri = g_strdup_printf ("%s;folderid=%s", account_uri + strlen (EWS_BASE_URI), fid->id);
 	else
@@ -188,21 +192,21 @@ exit:
 
 /* FIXME remove cache */
 gboolean
-ews_esource_utils_remove_esource	(const gchar *fid,
-					 const gchar *account_name,
-					 EwsFolderType ftype)
+ews_esource_utils_remove_esource (const gchar *fid,
+                                  const gchar *account_name,
+                                  EwsFolderType ftype)
 {
 	ESourceList *source_list;
 	ESourceGroup *group;
 	ESource *source;
-	GConfClient* client;
+	GConfClient * client;
 	const gchar *conf_key;
 	GSList *sources;
 	gboolean ret = TRUE;
 
 	if (ftype == EWS_FOLDER_TYPE_CALENDAR) {
 		conf_key = CALENDAR_SOURCES;
-	} else if (ftype == EWS_FOLDER_TYPE_TASKS){
+	} else if (ftype == EWS_FOLDER_TYPE_TASKS) {
 		conf_key = TASKS_SOURCES;
 	} else if (ftype == EWS_FOLDER_TYPE_CONTACTS) {
 		conf_key = CONTACT_SOURCES;
@@ -231,18 +235,19 @@ exit:
 }
 
 gboolean
-ews_source_utils_remove_group (const gchar *account_name, EwsFolderType ftype)
+ews_source_utils_remove_group (const gchar *account_name,
+                               EwsFolderType ftype)
 {
 	ESourceList *source_list;
 	ESourceGroup *group;
 	GSList *groups;
-	GConfClient* client;
+	GConfClient * client;
 	const gchar *conf_key;
 	gboolean ret = TRUE;
 
 	if (ftype == EWS_FOLDER_TYPE_CALENDAR) {
 		conf_key = CALENDAR_SOURCES;
-	} else if (ftype == EWS_FOLDER_TYPE_TASKS){
+	} else if (ftype == EWS_FOLDER_TYPE_TASKS) {
 		conf_key = TASKS_SOURCES;
 	} else if (ftype == EWS_FOLDER_TYPE_CONTACTS) {
 		conf_key = CONTACT_SOURCES;
@@ -260,7 +265,6 @@ ews_source_utils_remove_group (const gchar *account_name, EwsFolderType ftype)
 	} else
 		ret = FALSE;
 
-
 	g_object_unref (source_list);
 	g_object_unref (client);
 
@@ -269,7 +273,7 @@ ews_source_utils_remove_group (const gchar *account_name, EwsFolderType ftype)
 }
 
 void
-ews_esource_utils_remove_groups	(const gchar *account_name)
+ews_esource_utils_remove_groups (const gchar *account_name)
 {
 	ews_source_utils_remove_group (account_name, EWS_FOLDER_TYPE_CALENDAR);
 	ews_source_utils_remove_group (account_name, EWS_FOLDER_TYPE_CONTACTS);

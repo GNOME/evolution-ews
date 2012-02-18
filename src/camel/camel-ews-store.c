@@ -68,9 +68,9 @@ struct _CamelEwsStorePrivate {
 	EEwsConnection *cnc;
 };
 
-extern CamelServiceAuthType camel_ews_password_authtype; /*for the query_auth_types function*/
+extern CamelServiceAuthType camel_ews_password_authtype; /*for the query_auth_types function */
 static gboolean	ews_store_construct	(CamelService *service, CamelSession *session,
-			 		 CamelProvider *provider, GError **error);
+					 CamelProvider *provider, GError **error);
 
 static void camel_ews_store_initable_init (GInitableIface *interface);
 static GInitableIface *parent_initable_interface;
@@ -123,9 +123,9 @@ ews_migrate_to_user_cache_dir (CamelService *service)
 }
 
 static gboolean
-ews_store_initable_init		(GInitable *initable,
-				 GCancellable *cancellable,
-				 GError **error)
+ews_store_initable_init (GInitable *initable,
+                         GCancellable *cancellable,
+                         GError **error)
 {
 	CamelService *service;
 	CamelSession *session;
@@ -159,20 +159,21 @@ camel_ews_store_initable_init (GInitableIface *interface)
 }
 
 static gboolean
-ews_store_construct	(CamelService *service, CamelSession *session,
-			 CamelProvider *provider, GError **error)
+ews_store_construct (CamelService *service,
+                     CamelSession *session,
+                     CamelProvider *provider,
+                     GError **error)
 {
 	CamelEwsStore *ews_store;
 	CamelEwsStorePrivate *priv;
 	gchar *summary_file, *session_storage_path;
 
-
 	ews_store = (CamelEwsStore *) service;
 	priv = ews_store->priv;
 
 	/* Disable virtual trash and junk folders. Exchange has real
-	   folders for that */
-	((CamelStore *)ews_store)->flags &= ~(CAMEL_STORE_VTRASH|CAMEL_STORE_VJUNK);
+	 * folders for that */
+	((CamelStore *) ews_store)->flags &= ~(CAMEL_STORE_VTRASH | CAMEL_STORE_VJUNK);
 
 	/*storage path*/
 	session_storage_path = g_strdup (camel_service_get_user_cache_dir (service));
@@ -186,7 +187,7 @@ ews_store_construct	(CamelService *service, CamelSession *session,
 	ews_store->storage_path = session_storage_path;
 
 	/* Note. update account-listener plugin if filename is changed here, as it would remove the summary
-	   by forming the path itself */
+	 * by forming the path itself */
 	g_mkdir_with_parents (ews_store->storage_path, 0700);
 	summary_file = g_build_filename (ews_store->storage_path, "folder-tree", NULL);
 	ews_store->summary = camel_ews_store_summary_new (summary_file);
@@ -203,7 +204,8 @@ ews_hash_folder_name (gconstpointer key)
 }
 
 static gint
-ews_compare_folder_name (gconstpointer a, gconstpointer b)
+ews_compare_folder_name (gconstpointer a,
+                         gconstpointer b)
 {
 	gconstpointer aname = a, bname = b;
 
@@ -211,9 +213,12 @@ ews_compare_folder_name (gconstpointer a, gconstpointer b)
 }
 
 static void
-ews_update_folder_hierarchy (CamelEwsStore *ews_store, gchar *sync_state,
-			     gboolean includes_last_folder, GSList *folders_created,
-			     GSList *folders_deleted, GSList *folders_updated)
+ews_update_folder_hierarchy (CamelEwsStore *ews_store,
+                             gchar *sync_state,
+                             gboolean includes_last_folder,
+                             GSList *folders_created,
+                             GSList *folders_deleted,
+                             GSList *folders_updated)
 {
 	ews_utils_sync_folders (ews_store, folders_created, folders_deleted, folders_updated);
 	camel_ews_store_summary_store_string_val (ews_store->summary, "sync_state", sync_state);
@@ -229,9 +234,11 @@ ews_update_folder_hierarchy (CamelEwsStore *ews_store, gchar *sync_state,
 }
 
 static void
-ews_store_authenticate	(EEwsConnection *cnc,
-			 SoupMessage *msg, SoupAuth *auth,
-			 gboolean retrying, gpointer data)
+ews_store_authenticate (EEwsConnection *cnc,
+                        SoupMessage *msg,
+                        SoupAuth *auth,
+                        gboolean retrying,
+                        gpointer data)
 {
 	CamelNetworkSettings *network_settings;
 	CamelSettings *settings;
@@ -251,7 +258,9 @@ ews_store_authenticate	(EEwsConnection *cnc,
 }
 
 static gboolean
-ews_connect_sync (CamelService *service, GCancellable *cancellable, GError **error)
+ews_connect_sync (CamelService *service,
+                  GCancellable *cancellable,
+                  GError **error)
 {
 	CamelEwsStore *ews_store;
 	CamelEwsStorePrivate *priv;
@@ -316,7 +325,10 @@ ews_connect_sync (CamelService *service, GCancellable *cancellable, GError **err
 }
 
 static gboolean
-ews_disconnect_sync (CamelService *service, gboolean clean, GCancellable *cancellable, GError **error)
+ews_disconnect_sync (CamelService *service,
+                     gboolean clean,
+                     GCancellable *cancellable,
+                     GError **error)
 {
 	CamelEwsStore *ews_store = (CamelEwsStore *) service;
 	CamelServiceClass *service_class;
@@ -343,7 +355,7 @@ typedef struct {
 	gint info_flags;
 } SystemFolder;
 
-static SystemFolder system_folder [] = {
+static SystemFolder system_folder[] = {
 	{"calendar", CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_EVENTS},
 	{"contacts", CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_CONTACTS},
 	{"deleteditems", CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_TRASH},
@@ -360,11 +372,11 @@ static SystemFolder system_folder [] = {
 	{"searchfolders", CAMEL_FOLDER_SYSTEM},
 };
 
-
 static void
-ews_store_set_flags (CamelEwsStore *ews_store, GSList *folders)
+ews_store_set_flags (CamelEwsStore *ews_store,
+                     GSList *folders)
 {
-	GSList *temp=NULL;
+	GSList *temp = NULL;
 	EEwsFolder *folder = NULL;
 	const EwsFolderId *fid = NULL;
 	gint n = 0;
@@ -376,14 +388,17 @@ ews_store_set_flags (CamelEwsStore *ews_store, GSList *folders)
 
 		if (camel_ews_store_summary_has_folder (ews_store->summary, fid->id))
 			camel_ews_store_summary_set_folder_flags (ews_store->summary, fid->id, system_folder[n].info_flags);
-		
+
 		temp = temp->next;
 		n++;
 	}
 }
 
 static CamelAuthenticationResult
-ews_authenticate_sync (CamelService *service, const gchar *mechanism, GCancellable *cancellable, GError **error)
+ews_authenticate_sync (CamelService *service,
+                       const gchar *mechanism,
+                       GCancellable *cancellable,
+                       GError **error)
 {
 	CamelAuthenticationResult result;
 	CamelEwsStore *ews_store;
@@ -478,8 +493,10 @@ ews_authenticate_sync (CamelService *service, const gchar *mechanism, GCancellab
 	return result;
 }
 
-static  GList*
-ews_store_query_auth_types_sync (CamelService *service, GCancellable *cancellable, GError **error)
+static  GList *
+ews_store_query_auth_types_sync (CamelService *service,
+                                 GCancellable *cancellable,
+                                 GError **error)
 {
 	GList *auth_types = NULL;
 
@@ -488,10 +505,14 @@ ews_store_query_auth_types_sync (CamelService *service, GCancellable *cancellabl
 	return auth_types;
 }
 
-static CamelFolderInfo* ews_create_folder_sync (CamelStore *store, const gchar *parent_name,const gchar *folder_name, GCancellable *cancellable, GError **error);
+static CamelFolderInfo * ews_create_folder_sync (CamelStore *store, const gchar *parent_name,const gchar *folder_name, GCancellable *cancellable, GError **error);
 
 static CamelFolder *
-ews_get_folder_sync (CamelStore *store, const gchar *folder_name, guint32 flags, GCancellable *cancellable, GError **error)
+ews_get_folder_sync (CamelStore *store,
+                     const gchar *folder_name,
+                     guint32 flags,
+                     GCancellable *cancellable,
+                     GError **error)
 {
 	CamelEwsStore *ews_store;
 	CamelFolder *folder = NULL;
@@ -546,7 +567,10 @@ ews_get_folder_sync (CamelStore *store, const gchar *folder_name, guint32 flags,
 }
 
 static CamelFolderInfo *
-folder_info_from_store_summary (CamelEwsStore *store, const gchar *top, guint32 flags, GError **error)
+folder_info_from_store_summary (CamelEwsStore *store,
+                                const gchar *top,
+                                guint32 flags,
+                                GError **error)
 {
 	CamelEwsStoreSummary *ews_summary;
 	GSList *folders, *l;
@@ -583,7 +607,9 @@ folder_info_from_store_summary (CamelEwsStore *store, const gchar *top, guint32 
 }
 
 static void
-ews_folder_hierarchy_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data)
+ews_folder_hierarchy_ready_cb (GObject *obj,
+                               GAsyncResult *res,
+                               gpointer user_data)
 {
 	GSList *folders_created = NULL, *folders_updated = NULL;
 	GSList *folders_deleted = NULL;
@@ -622,7 +648,7 @@ static gboolean
 ews_refresh_finfo (CamelEwsStore *ews_store)
 {
 	gchar *sync_state;
-	
+
 	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (ews_store)))
 		return FALSE;
 
@@ -630,7 +656,6 @@ ews_refresh_finfo (CamelEwsStore *ews_store)
 		return FALSE;
 
 	sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
-
 
 	e_ews_connection_sync_folder_hierarchy_start	(ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
 							 sync_state, ews_folder_hierarchy_ready_cb,
@@ -640,7 +665,11 @@ ews_refresh_finfo (CamelEwsStore *ews_store)
 }
 
 static CamelFolderInfo *
-ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, GCancellable *cancellable, GError **error)
+ews_get_folder_info_sync (CamelStore *store,
+                          const gchar *top,
+                          guint32 flags,
+                          GCancellable *cancellable,
+                          GError **error)
 {
 	CamelEwsStore *ews_store;
 	CamelEwsStorePrivate *priv;
@@ -656,7 +685,7 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, GC
 
 	g_mutex_lock (priv->get_finfo_lock);
 	if (!(camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))
-	      && camel_service_connect_sync ((CamelService *)store, error))) {
+	      && camel_service_connect_sync ((CamelService *) store, error))) {
 		g_mutex_unlock (priv->get_finfo_lock);
 		goto offline;
 	}
@@ -667,7 +696,7 @@ ews_get_folder_info_sync (CamelStore *store, const gchar *top, guint32 flags, GC
 
 	if (!initial_setup && flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIBED) {
 		time_t now = time (NULL);
-		
+
 		g_free (sync_state);
 		if (now - priv->last_refresh_time > FINFO_REFRESH_INTERVAL && ews_refresh_finfo (ews_store))
 			ews_store->priv->last_refresh_time = time (NULL);
@@ -698,12 +727,12 @@ offline:
 	return fi;
 }
 
-static CamelFolderInfo*
+static CamelFolderInfo *
 ews_create_folder_sync (CamelStore *store,
-		const gchar *parent_name,
-		const gchar *folder_name,
-		GCancellable *cancellable,
-		GError **error)
+                        const gchar *parent_name,
+                        const gchar *folder_name,
+                        GCancellable *cancellable,
+                        GError **error)
 {
 	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
 	CamelEwsStoreSummary *ews_summary = ews_store->summary;
@@ -712,7 +741,6 @@ ews_create_folder_sync (CamelStore *store,
 	EwsFolderId *folder_id;
 	CamelFolderInfo *fi = NULL;
 
-	
 	/* Get Parent folder ID */
 	if (parent_name && parent_name[0]) {
 		fid = camel_ews_store_summary_get_folder_id_from_name (ews_summary,
@@ -762,10 +790,10 @@ ews_create_folder_sync (CamelStore *store,
 }
 
 static gboolean
-ews_delete_folder_sync	(CamelStore *store,
-			 const gchar *folder_name,
-			 GCancellable *cancellable,
-			 GError **error)
+ews_delete_folder_sync (CamelStore *store,
+                        const gchar *folder_name,
+                        GCancellable *cancellable,
+                        GError **error)
 {
 	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
 	CamelEwsStoreSummary *ews_summary = ews_store->summary;
@@ -812,7 +840,9 @@ struct _rename_cb_data {
 	const gchar *folder_id;
 };
 
-static void rename_folder_cb (ESoapMessage *msg, gpointer user_data)
+static void
+rename_folder_cb (ESoapMessage *msg,
+                  gpointer user_data)
 {
 	struct _rename_cb_data *rename_data = user_data;
 
@@ -832,11 +862,11 @@ static void rename_folder_cb (ESoapMessage *msg, gpointer user_data)
 }
 
 static gboolean
-ews_rename_folder_sync	(CamelStore *store,
-			const gchar *old_name,
-			const gchar *new_name,
-			GCancellable *cancellable,
-			GError **error)
+ews_rename_folder_sync (CamelStore *store,
+                        const gchar *old_name,
+                        const gchar *new_name,
+                        GCancellable *cancellable,
+                        GError **error)
 {
 	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
 	CamelEwsStoreSummary *ews_summary = ews_store->summary;
@@ -885,22 +915,22 @@ ews_rename_folder_sync	(CamelStore *store,
 		new_slash = new_name;
 
 	if (strcmp (old_slash, new_slash)) {
-		int parent_len = old_slash - old_name;
+		gint parent_len = old_slash - old_name;
 		struct _rename_cb_data *rename_data;
 
 		/* Folder basename changed (i.e. UpdateFolder needed).
-		   Therefore, we can only do it if the folder hasn't also
-		   been moved from one parent folder to another.
-
-		   Strictly speaking, we could probably handle this, even
-		   if there are name collisions. We could UpdateFolder to
-		   a new temporary name that doesn't exist in either the
-		   old or new parent folders, then MoveFolder, then issue
-		   another UpdateFolder to the name we actually wanted.
-		   But since the Evolution UI doesn't seem to let us
-		   make both changes at the same time anyway, we'll just
-		   bail out for now; we can deal with it later if we need
-		   to.
+		 * Therefore, we can only do it if the folder hasn't also
+		 * been moved from one parent folder to another.
+ *
+		 * Strictly speaking, we could probably handle this, even
+		 * if there are name collisions. We could UpdateFolder to
+		 * a new temporary name that doesn't exist in either the
+		 * old or new parent folders, then MoveFolder, then issue
+		 * another UpdateFolder to the name we actually wanted.
+		 * But since the Evolution UI doesn't seem to let us
+		 * make both changes at the same time anyway, we'll just
+		 * bail out for now; we can deal with it later if we need
+		 * to.
 		*/
 		if (new_slash - new_name != parent_len ||
 		    strncmp (old_name, new_name, parent_len)) {
@@ -928,7 +958,7 @@ ews_rename_folder_sync	(CamelStore *store,
 		gchar *parent_name;
 
 		/* If we are not moving to the root folder, work out the ItemId of
-		   the new parent folder */
+		 * the new parent folder */
 		if (new_slash != new_name) {
 			parent_name = g_strndup (new_name, new_slash - new_name - 1);
 			pfid = camel_ews_store_summary_get_folder_id_from_name (ews_summary,
@@ -959,7 +989,8 @@ ews_rename_folder_sync	(CamelStore *store,
 }
 
 gchar *
-ews_get_name (CamelService *service, gboolean brief)
+ews_get_name (CamelService *service,
+              gboolean brief)
 {
 	CamelNetworkSettings *network_settings;
 	CamelSettings *settings;
@@ -986,24 +1017,29 @@ camel_ews_store_get_connection (CamelEwsStore *ews_store)
 }
 
 static CamelFolder *
-ews_get_trash_folder_sync (CamelStore *store, GCancellable *cancellable, GError **error)
+ews_get_trash_folder_sync (CamelStore *store,
+                           GCancellable *cancellable,
+                           GError **error)
 {
 	return NULL;
 }
 
 static gboolean
-ews_can_refresh_folder (CamelStore *store, CamelFolderInfo *info, GError **error)
+ews_can_refresh_folder (CamelStore *store,
+                        CamelFolderInfo *info,
+                        GError **error)
 {
 	/* Skip unselectable folders from automatic refresh */
 	if (info && (info->flags & CAMEL_FOLDER_NOSELECT) != 0) return FALSE;
 
 	/* Delegate decision to parent class */
-	return CAMEL_STORE_CLASS(camel_ews_store_parent_class)->can_refresh_folder (store, info, error) ||
+	return CAMEL_STORE_CLASS (camel_ews_store_parent_class)->can_refresh_folder (store, info, error) ||
 		camel_ews_settings_get_check_all (CAMEL_EWS_SETTINGS (camel_service_get_settings (CAMEL_SERVICE (store))));
 }
 
 gboolean
-camel_ews_store_connected (CamelEwsStore *ews_store, GError **error)
+camel_ews_store_connected (CamelEwsStore *ews_store,
+                           GError **error)
 {
 
 	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (ews_store))) {

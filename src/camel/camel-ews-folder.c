@@ -24,7 +24,7 @@
 
 /* This file is broken and suffers from multiple author syndrome.
 This needs to be rewritten with a lot of functions cleaned up.
-
+ *
 There are a lot of places where code is unneccesarily duplicated,
 which needs to be better organized via functions */
 
@@ -98,13 +98,15 @@ ews_delete_messages (CamelFolder *folder, GSList *deleted_items, gboolean expung
 G_DEFINE_TYPE (CamelEwsFolder, camel_ews_folder, CAMEL_TYPE_OFFLINE_FOLDER)
 
 static gchar *
-ews_get_filename (CamelFolder *folder, const gchar *uid, GError **error)
+ews_get_filename (CamelFolder *folder,
+                  const gchar *uid,
+                  GError **error)
 {
-	CamelEwsFolder *ews_folder = CAMEL_EWS_FOLDER(folder);
+	CamelEwsFolder *ews_folder = CAMEL_EWS_FOLDER (folder);
 	GChecksum *sha = g_checksum_new (G_CHECKSUM_SHA256);
 	gchar *ret;
 
-	g_checksum_update(sha, (guchar *)uid, strlen(uid));
+	g_checksum_update (sha, (guchar *) uid, strlen (uid));
 	ret = camel_data_cache_get_filename (ews_folder->cache, "cur",
 					     g_checksum_get_string (sha),
 					     error);
@@ -114,14 +116,14 @@ ews_get_filename (CamelFolder *folder, const gchar *uid, GError **error)
 
 static gint
 ews_data_cache_remove (CamelDataCache *cdc,
-		       const gchar *path,
-		       const gchar *key,
-		       GError **error)
+                       const gchar *path,
+                       const gchar *key,
+                       GError **error)
 {
 	GChecksum *sha = g_checksum_new (G_CHECKSUM_SHA256);
 	gint ret;
 
-	g_checksum_update(sha, (guchar *)key, strlen(key));
+	g_checksum_update (sha, (guchar *) key, strlen (key));
 	ret = camel_data_cache_remove (cdc, path, g_checksum_get_string (sha),
 				       error);
 	g_checksum_free (sha);
@@ -130,14 +132,14 @@ ews_data_cache_remove (CamelDataCache *cdc,
 
 static CamelStream *
 ews_data_cache_get (CamelDataCache *cdc,
-		    const gchar *path,
-		    const gchar *key,
-		    GError **error)
+                    const gchar *path,
+                    const gchar *key,
+                    GError **error)
 {
 	GChecksum *sha = g_checksum_new (G_CHECKSUM_SHA256);
 	CamelStream *ret;
 
-	g_checksum_update(sha, (guchar *)key, strlen(key));
+	g_checksum_update (sha, (guchar *) key, strlen (key));
 	ret = camel_data_cache_get (cdc, path, g_checksum_get_string (sha),
 				    error);
 	g_checksum_free (sha);
@@ -146,14 +148,14 @@ ews_data_cache_get (CamelDataCache *cdc,
 
 static gchar *
 ews_data_cache_get_filename (CamelDataCache *cdc,
-			     const gchar *path,
-			     const gchar *key,
-			     GError **error)
+                             const gchar *path,
+                             const gchar *key,
+                             GError **error)
 {
 	GChecksum *sha = g_checksum_new (G_CHECKSUM_SHA256);
 	gchar *ret;
 
-	g_checksum_update(sha, (guchar *)key, strlen(key));
+	g_checksum_update (sha, (guchar *) key, strlen (key));
 	ret = camel_data_cache_get_filename (cdc, path,
 					     g_checksum_get_string (sha),
 					     error);
@@ -161,9 +163,11 @@ ews_data_cache_get_filename (CamelDataCache *cdc,
 	return ret;
 }
 
-
 static CamelMimeMessage *
-camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder, const gchar *uid, GCancellable *cancellable, GError **error)
+camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder,
+                                         const gchar *uid,
+                                         GCancellable *cancellable,
+                                         GError **error)
 {
 	CamelStream *stream;
 	CamelMimeMessage *msg;
@@ -193,7 +197,7 @@ camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder, const gchar
 	msg = camel_mime_message_new ();
 
 	if (!camel_data_wrapper_construct_from_stream_sync (
-				(CamelDataWrapper *)msg, stream, cancellable, error)) {
+				(CamelDataWrapper *) msg, stream, cancellable, error)) {
 		g_object_unref (msg);
 		msg = NULL;
 	}
@@ -205,7 +209,7 @@ camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder, const gchar
 }
 
 static CamelMimePart *
-ews_get_calendar_mime_part (CamelMimePart* mimepart)
+ews_get_calendar_mime_part (CamelMimePart *mimepart)
 {
 	guint partnumber, i;
 	CamelDataWrapper *datawrapper;
@@ -221,7 +225,7 @@ ews_get_calendar_mime_part (CamelMimePart* mimepart)
 			if (!child_mimepart)
 				goto exit;
 
-			ret_mimepart = ews_get_calendar_mime_part (child_mimepart) ;
+			ret_mimepart = ews_get_calendar_mime_part (child_mimepart);
 			if (ret_mimepart)
 				return ret_mimepart;
 		}
@@ -240,12 +244,15 @@ ews_get_calendar_mime_part (CamelMimePart* mimepart)
 }
 
 static gchar *
-ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId* item_id, gboolean is_calendar_UID, GError **error)
+ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
+                                            const EwsId *item_id,
+                                            gboolean is_calendar_UID,
+                                            GError **error)
 {
 	CamelMimeParser *mimeparser;
 	CamelMimeMessage *msg;
 	CamelMimePart *mimepart = NULL;
-	int fd_old;
+	gint fd_old;
 	gchar *mime_fname_new = NULL;
 
 	// original mime file
@@ -264,7 +271,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId
 	}
 
 	msg = camel_mime_message_new ();
-	if (camel_mime_part_construct_from_parser_sync (CAMEL_MIME_PART(msg),
+	if (camel_mime_part_construct_from_parser_sync (CAMEL_MIME_PART (msg),
 							mimeparser, NULL,
 							error) == -1) {
 		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
@@ -281,7 +288,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId
 		icalproperty *icalprop;
 		gchar *calstring_new, *dir;
 		const gchar *temp;
-		int fd;
+		gint fd;
 		gboolean success = FALSE;
 
 		dw = camel_medium_get_content (CAMEL_MEDIUM (mimepart));
@@ -301,7 +308,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId
 		/* In order to accept items we have to store AssociatedCalendarItemId (X-EVOLUTION-ITEMID)
 		 * or mail id (X-EVOLUTION-ACCEPT-ID ) when we do not have AssociatedCalendarItemId */
 		icalcomponent_add_property (subcomp, icalprop);
-		if (is_calendar_UID){
+		if (is_calendar_UID) {
 			icalprop = icalproperty_new_x (item_id->id);
 			icalproperty_set_x_name (icalprop, "X-EVOLUTION-ITEMID");
 			icalcomponent_add_property (subcomp, icalprop);
@@ -312,7 +319,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId
 		}
 		calstring_new = icalcomponent_as_ical_string_r (icalcomp);
 		camel_mime_part_set_content (mimepart,
-					     (const gchar*) calstring_new, strlen (calstring_new),
+					     (const gchar *) calstring_new, strlen (calstring_new),
 					     "text/calendar");
 		g_free (calstring_new);
 		icalcomponent_free (icalcomp);
@@ -363,7 +370,11 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar* mime_fname, const EwsId
 }
 
 static CamelMimeMessage *
-camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, GCancellable *cancellable, GError **error)
+camel_ews_folder_get_message (CamelFolder *folder,
+                              const gchar *uid,
+                              gint pri,
+                              GCancellable *cancellable,
+                              GError **error)
 {
 	CamelEwsFolder *ews_folder;
 	CamelEwsFolderPrivate *priv;
@@ -392,10 +403,10 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	/* If another thread is already fetching this message, wait for it */
 
 	/* FIXME: We might end up refetching a message anyway, if another
-	   thread has already finished fetching it by the time we get to
-	   this point in the code — ews_folder_get_message_sync() doesn't
-	   hold any locks when it calls get_message_from_cache() and then
-	   falls back to this function. */
+	 * thread has already finished fetching it by the time we get to
+	 * this point in the code — ews_folder_get_message_sync() doesn't
+	 * hold any locks when it calls get_message_from_cache() and then
+	 * falls back to this function. */
 	if (g_hash_table_lookup (priv->uid_eflags, uid)) {
 		do {
 			g_cond_wait (priv->fetch_cond, priv->state_lock);
@@ -408,9 +419,9 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	}
 
 	/* Because we're using this as a form of mutex, we *know* that
-	   we won't be inserting where an entry already exists. So it's
-	   OK to insert uid itself, not g_strdup (uid) */
-	g_hash_table_insert (priv->uid_eflags, (gchar *)uid, (gchar *)uid);
+	 * we won't be inserting where an entry already exists. So it's
+	 * OK to insert uid itself, not g_strdup (uid) */
+	g_hash_table_insert (priv->uid_eflags, (gchar *) uid, (gchar *) uid);
 	g_mutex_unlock (priv->state_lock);
 
 	cnc = camel_ews_store_get_connection (ews_store);
@@ -430,7 +441,7 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 	res = e_ews_connection_get_items (cnc, pri, ids, "IdOnly", "item:MimeContent",
 					  TRUE, mime_dir,
 					  &items,
-					  (ESoapProgressFn)camel_operation_progress,
+					  (ESoapProgressFn) camel_operation_progress,
 					  (gpointer) cancellable,
 					  cancellable, error);
 	g_free (mime_dir);
@@ -439,13 +450,13 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 		goto exit;
 
 	/* The mime_content actually contains the *filename*, due to the
-	   streaming hack in ESoapMessage */
+	 * streaming hack in ESoapMessage */
 	mime_content = e_ews_item_get_mime_content (items->data);
 
 	/* Exchange returns random UID for associated calendar item, which has no way
-	   to match with calendar components saved in calendar cache. So manually get
-	   AssociatedCalendarItemId, replace the random UID with this ItemId,
-	   And save updated message data to a new temp file */
+	 * to match with calendar components saved in calendar cache. So manually get
+	 * AssociatedCalendarItemId, replace the random UID with this ItemId,
+	 * And save updated message data to a new temp file */
 	if (e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_MEETING_REQUEST ||
 		e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_MEETING_CANCELLATION ||
 		e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_MEETING_MESSAGE ||
@@ -458,7 +469,7 @@ camel_ews_folder_get_message (CamelFolder *folder, const gchar *uid, gint pri, G
 		res = e_ews_connection_get_items (cnc, pri, ids, "IdOnly", "meeting:AssociatedCalendarItemId",
 						  FALSE, NULL,
 						  &items_req,
-						  (ESoapProgressFn)camel_operation_progress,
+						  (ESoapProgressFn) camel_operation_progress,
 						  (gpointer) cancellable,
 						  cancellable, error);
 		if (!res) {
@@ -536,11 +547,14 @@ exit:
 
 /* Get the message from cache if available otherwise get it from server */
 static CamelMimeMessage *
-ews_folder_get_message_sync (CamelFolder *folder, const gchar *uid, GCancellable *cancellable, GError **error )
+ews_folder_get_message_sync (CamelFolder *folder,
+                             const gchar *uid,
+                             GCancellable *cancellable,
+                             GError **error)
 {
 	CamelMimeMessage *message;
 
-	message = camel_ews_folder_get_message_from_cache ((CamelEwsFolder *)folder, uid, cancellable, NULL);
+	message = camel_ews_folder_get_message_from_cache ((CamelEwsFolder *) folder, uid, cancellable, NULL);
 	if (!message)
 		message = camel_ews_folder_get_message (folder, uid, EWS_ITEM_HIGH, cancellable, error);
 
@@ -548,7 +562,9 @@ ews_folder_get_message_sync (CamelFolder *folder, const gchar *uid, GCancellable
 }
 
 static GPtrArray *
-ews_folder_search_by_expression (CamelFolder *folder, const gchar *expression, GError **error)
+ews_folder_search_by_expression (CamelFolder *folder,
+                                 const gchar *expression,
+                                 GError **error)
 {
 	CamelEwsFolder *ews_folder;
 	CamelEwsFolderPrivate *priv;
@@ -568,7 +584,9 @@ ews_folder_search_by_expression (CamelFolder *folder, const gchar *expression, G
 }
 
 static guint32
-ews_folder_count_by_expression (CamelFolder *folder, const gchar *expression, GError **error)
+ews_folder_count_by_expression (CamelFolder *folder,
+                                const gchar *expression,
+                                GError **error)
 {
 	CamelEwsFolder *ews_folder;
 	CamelEwsFolderPrivate *priv;
@@ -588,7 +606,10 @@ ews_folder_count_by_expression (CamelFolder *folder, const gchar *expression, GE
 }
 
 static GPtrArray *
-ews_folder_search_by_uids(CamelFolder *folder, const gchar *expression, GPtrArray *uids, GError **error)
+ews_folder_search_by_uids (CamelFolder *folder,
+                           const gchar *expression,
+                           GPtrArray *uids,
+                           GError **error)
 {
 	CamelEwsFolder *ews_folder;
 	CamelEwsFolderPrivate *priv;
@@ -611,7 +632,8 @@ ews_folder_search_by_uids(CamelFolder *folder, const gchar *expression, GPtrArra
 }
 
 static void
-ews_folder_search_free (CamelFolder *folder, GPtrArray *uids)
+ews_folder_search_free (CamelFolder *folder,
+                        GPtrArray *uids)
 {
 	CamelEwsFolder *ews_folder;
 	CamelEwsFolderPrivate *priv;
@@ -632,9 +654,9 @@ ews_folder_search_free (CamelFolder *folder, GPtrArray *uids)
 
 /********************* folder functions*************************/
 
-
 static void
-msg_update_flags (ESoapMessage *msg, gpointer user_data)
+msg_update_flags (ESoapMessage *msg,
+                  gpointer user_data)
 {
 	GSList *mi_list = user_data;
 	CamelEwsMessageInfo *mi;
@@ -649,7 +671,7 @@ msg_update_flags (ESoapMessage *msg, gpointer user_data)
 		e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
 						 mi->info.uid, mi->change_key, 0);
 		if (flags_changed & CAMEL_MESSAGE_FLAGGED) {
-			const char *flag;
+			const gchar *flag;
 
 			if (mi->info.flags & CAMEL_MESSAGE_FLAGGED)
 				flag = "High";
@@ -685,8 +707,8 @@ msg_update_flags (ESoapMessage *msg, gpointer user_data)
 			e_soap_message_end_element (msg); /* SetItemField */
 		}
 		/* Ick Ick Ick. Why in hell is there a field in the database for the Icon
-		   *anyway*? Why isn't there a better place for forwarded/answered status? */
-		if (flags_changed & (CAMEL_MESSAGE_FORWARDED|CAMEL_MESSAGE_ANSWERED)) {
+		 * *anyway*? Why isn't there a better place for forwarded/answered status? */
+		if (flags_changed & (CAMEL_MESSAGE_FORWARDED | CAMEL_MESSAGE_ANSWERED)) {
 			gint icon = (mi->info.flags & CAMEL_MESSAGE_SEEN) ? 0x100 : 0x101;
 
 			if (mi->info.flags & CAMEL_MESSAGE_ANSWERED)
@@ -726,7 +748,7 @@ msg_update_flags (ESoapMessage *msg, gpointer user_data)
 		e_soap_message_start_element (msg, "Message", NULL, NULL);
 		e_soap_message_start_element (msg, "Categories", NULL, NULL);
 
-		ews_utils_replace_server_user_flags(msg, mi);
+		ews_utils_replace_server_user_flags (msg, mi);
 
 		e_soap_message_end_element (msg); /* Categories */
 		e_soap_message_end_element (msg); /* Message */
@@ -745,7 +767,10 @@ msg_update_flags (ESoapMessage *msg, gpointer user_data)
 }
 
 static gboolean
-ews_sync_mi_flags (CamelFolder *folder, GSList *mi_list, GCancellable *cancellable, GError **error)
+ews_sync_mi_flags (CamelFolder *folder,
+                   GSList *mi_list,
+                   GCancellable *cancellable,
+                   GError **error)
 {
 	CamelEwsStore *ews_store;
 	EEwsConnection *cnc;
@@ -760,14 +785,17 @@ ews_sync_mi_flags (CamelFolder *folder, GSList *mi_list, GCancellable *cancellab
 					      cancellable, error);
 }
 static gboolean
-ews_synchronize_sync (CamelFolder *folder, gboolean expunge, GCancellable *cancellable, GError **error)
+ews_synchronize_sync (CamelFolder *folder,
+                      gboolean expunge,
+                      GCancellable *cancellable,
+                      GError **error)
 {
 	CamelEwsStore *ews_store;
 	GPtrArray *uids;
 	GSList *mi_list = NULL, *deleted_uids = NULL;
-	int mi_list_len = 0;
+	gint mi_list_len = 0;
 	gboolean success = TRUE;
-	int i;
+	gint i;
 
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
 
@@ -782,19 +810,19 @@ ews_synchronize_sync (CamelFolder *folder, gboolean expunge, GCancellable *cance
 
 	for (i = 0; success && i < uids->len; i++) {
 		guint32 flags_changed;
-		CamelEwsMessageInfo *mi = (void *)camel_folder_summary_get (folder->summary, uids->pdata[i]);
+		CamelEwsMessageInfo *mi = (gpointer) camel_folder_summary_get (folder->summary, uids->pdata[i]);
 		if (!mi)
 			continue;
 
 		flags_changed = mi->server_flags ^ mi->info.flags;
 
 		/* Exchange doesn't seem to have a sane representation
-		   for most flags — not even replied/forwarded. */
-		if (flags_changed & (CAMEL_MESSAGE_SEEN|CAMEL_MESSAGE_ANSWERED|CAMEL_MESSAGE_FORWARDED|CAMEL_MESSAGE_FLAGGED)) {
+		 * for most flags — not even replied/forwarded. */
+		if (flags_changed & (CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_FORWARDED | CAMEL_MESSAGE_FLAGGED)) {
 			mi_list = g_slist_append (mi_list, mi);
 			mi_list_len++;
 		} else if (flags_changed & CAMEL_MESSAGE_DELETED) {
-			deleted_uids = g_slist_prepend (deleted_uids, (gpointer) camel_pstring_strdup (uids->pdata [i]));
+			deleted_uids = g_slist_prepend (deleted_uids, (gpointer) camel_pstring_strdup (uids->pdata[i]));
 			camel_message_info_free (mi);
 		} else {
 			/* OK, the change must have been the labels */
@@ -822,7 +850,9 @@ ews_synchronize_sync (CamelFolder *folder, gboolean expunge, GCancellable *cance
 }
 
 static void
-ews_folder_count_notify_cb (CamelFolderSummary *folder_summary, GParamSpec *param, CamelFolder *folder)
+ews_folder_count_notify_cb (CamelFolderSummary *folder_summary,
+                            GParamSpec *param,
+                            CamelFolder *folder)
 {
 	gint count;
 	CamelEwsStore *ews_store;
@@ -854,7 +884,11 @@ ews_folder_count_notify_cb (CamelFolderSummary *folder_summary, GParamSpec *para
 }
 
 CamelFolder *
-camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *folder_dir, GCancellable *cancellable, GError **error)
+camel_ews_folder_new (CamelStore *store,
+                      const gchar *folder_name,
+                      const gchar *folder_dir,
+                      GCancellable *cancellable,
+                      GError **error)
 {
 	CamelFolder *folder;
 	CamelEwsFolder *ews_folder;
@@ -872,7 +906,7 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 		"display_name", short_name, "full-name", folder_name,
 		"parent_store", store, NULL);
 
-	ews_folder = CAMEL_EWS_FOLDER(folder);
+	ews_folder = CAMEL_EWS_FOLDER (folder);
 
 	folder->summary = camel_ews_summary_new (folder);
 
@@ -888,7 +922,7 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 	state_file = g_build_filename (folder_dir, "cmeta", NULL);
 	camel_object_set_state_filename (CAMEL_OBJECT (folder), state_file);
 	camel_object_state_read (CAMEL_OBJECT (folder));
-	g_free(state_file);
+	g_free (state_file);
 
 	ews_folder->cache = camel_data_cache_new (folder_dir, error);
 	if (!ews_folder->cache) {
@@ -916,12 +950,15 @@ camel_ews_folder_new (CamelStore *store, const gchar *folder_name, const gchar *
 }
 
 static void
-sync_updated_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *updated_items, GCancellable *cancellable, GError **error)
+sync_updated_items (CamelEwsFolder *ews_folder,
+                    EEwsConnection *cnc,
+                    GSList *updated_items,
+                    GCancellable *cancellable,
+                    GError **error)
 {
 	CamelFolder *folder = (CamelFolder *) ews_folder;
 	GSList *items = NULL, *l;
 	GSList *generic_item_ids = NULL, *msg_ids = NULL;
-
 
 	for (l = updated_items; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;
@@ -929,7 +966,7 @@ sync_updated_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *upd
 		CamelMessageInfo *mi;
 
 		/* Compare the item_type from summary as the updated items seems to
-		   arrive as generic types while its not the case */
+		 * arrive as generic types while its not the case */
 		mi = camel_folder_summary_get (folder->summary, id->id);
 		if (!mi) {
 			g_object_unref (item);
@@ -937,13 +974,13 @@ sync_updated_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *upd
 		}
 
 		/* Check if the item has really changed */
-		if (!strcmp (((CamelEwsMessageInfo *)mi)->change_key, id->change_key)) {
+		if (!strcmp (((CamelEwsMessageInfo *) mi)->change_key, id->change_key)) {
 			camel_message_info_free (mi);
 			g_object_unref (item);
 			continue;
 		}
 
-		if (((CamelEwsMessageInfo *)mi)->item_type == E_EWS_ITEM_TYPE_GENERIC_ITEM)
+		if (((CamelEwsMessageInfo *) mi)->item_type == E_EWS_ITEM_TYPE_GENERIC_ITEM)
 			generic_item_ids = g_slist_append (generic_item_ids, g_strdup (id->id));
 		else
 			msg_ids = g_slist_append (msg_ids, g_strdup (id->id));
@@ -986,7 +1023,11 @@ exit:
 }
 
 static void
-sync_created_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *created_items, GCancellable *cancellable, GError **error)
+sync_created_items (CamelEwsFolder *ews_folder,
+                    EEwsConnection *cnc,
+                    GSList *created_items,
+                    GCancellable *cancellable,
+                    GError **error)
 {
 	GSList *items = NULL, *l;
 	GSList *generic_item_ids = NULL, *msg_ids = NULL, *post_item_ids = NULL;
@@ -1002,9 +1043,9 @@ sync_created_items (CamelEwsFolder *ews_folder, EEwsConnection *cnc, GSList *cre
 		id = e_ews_item_get_id (item);
 		item_type = e_ews_item_get_item_type (item);
 		/* created_msg_ids are items other than generic item. We fetch them
-		   separately since the property sets vary */
+		 * separately since the property sets vary */
 		/* FIXME: Do we need to handle any other item types
-		   "specially"? */
+		 * "specially"? */
 		if (item_type == E_EWS_ITEM_TYPE_MESSAGE ||
 			item_type == E_EWS_ITEM_TYPE_MEETING_REQUEST ||
 			item_type == E_EWS_ITEM_TYPE_MEETING_MESSAGE ||
@@ -1073,7 +1114,9 @@ exit:
 }
 
 static gboolean
-ews_refresh_info_sync (CamelFolder *folder, GCancellable *cancellable, GError **error)
+ews_refresh_info_sync (CamelFolder *folder,
+                       GCancellable *cancellable,
+                       GError **error)
 {
 	CamelEwsFolder *ews_folder;
 	CamelEwsFolderPrivate *priv;
@@ -1110,11 +1153,11 @@ ews_refresh_info_sync (CamelFolder *folder, GCancellable *cancellable, GError **
 						 full_name);
 
 	/* Sync folder items does not return the fields ToRecipients,
-	   CCRecipients. With the item_type unknown, its not possible
-	   to fetch the right properties which are valid for an item type.
-	   Due to these reasons we just get the item ids and its type in
-	   SyncFolderItem request and fetch the item using the
-	   GetItem request. */
+	 * CCRecipients. With the item_type unknown, its not possible
+	 * to fetch the right properties which are valid for an item type.
+	 * Due to these reasons we just get the item ids and its type in
+	 * SyncFolderItem request and fetch the item using the
+	 * GetItem request. */
 	sync_state = ((CamelEwsSummary *) folder->summary)->sync_state;
 	do
 	{
@@ -1176,7 +1219,7 @@ ews_refresh_info_sync (CamelFolder *folder, GCancellable *cancellable, GError **
 	priv->refreshing = FALSE;
 	g_mutex_unlock (priv->state_lock);
 	if (sync_state != ((CamelEwsSummary *) folder->summary)->sync_state)
-		g_free(sync_state);
+		g_free (sync_state);
 	g_object_unref (cnc);
 	g_free (id);
 
@@ -1184,10 +1227,12 @@ ews_refresh_info_sync (CamelFolder *folder, GCancellable *cancellable, GError **
 }
 
 static gboolean
-ews_append_message_sync (CamelFolder *folder, CamelMimeMessage *message,
-	 		 CamelMessageInfo *info,
-			 gchar **appended_uid,
-	 		 GCancellable *cancellable, GError **error)
+ews_append_message_sync (CamelFolder *folder,
+                         CamelMimeMessage *message,
+                         CamelMessageInfo *info,
+                         gchar **appended_uid,
+                         GCancellable *cancellable,
+                         GError **error)
 {
 	gchar *itemid, *changekey;
 	const gchar *folder_name;
@@ -1196,7 +1241,7 @@ ews_append_message_sync (CamelFolder *folder, CamelMimeMessage *message,
 	CamelEwsStore *ews_store;
 	EEwsConnection *cnc;
 
-	ews_store = (CamelEwsStore *)camel_folder_get_parent_store(folder);
+	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
 
 	folder_name = camel_folder_get_full_name (folder);
 	folder_id = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary,
@@ -1206,7 +1251,7 @@ ews_append_message_sync (CamelFolder *folder, CamelMimeMessage *message,
 
 	from = CAMEL_ADDRESS (camel_mime_message_get_from (message));
 
-	cnc = camel_ews_store_get_connection(ews_store);
+	cnc = camel_ews_store_get_connection (ews_store);
 
 	if (!cnc) {
 		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
@@ -1226,7 +1271,7 @@ ews_append_message_sync (CamelFolder *folder, CamelMimeMessage *message,
 	g_free (folder_id);
 
 	/* FIXME: Do we have to add it to the summary info ourselves?
-	   Hopefully, since we need to store the changekey with it... */
+	 * Hopefully, since we need to store the changekey with it... */
 	if (appended_uid)
 		*appended_uid = itemid;
 	else
@@ -1240,13 +1285,13 @@ ews_append_message_sync (CamelFolder *folder, CamelMimeMessage *message,
 
 /* move messages */
 static gboolean
-ews_transfer_messages_to_sync	(CamelFolder *source,
-				 GPtrArray *uids,
-				 CamelFolder *destination,
-				 gboolean delete_originals,
-				 GPtrArray **transferred_uids,
-				 GCancellable *cancellable,
-				 GError **error)
+ews_transfer_messages_to_sync (CamelFolder *source,
+                               GPtrArray *uids,
+                               CamelFolder *destination,
+                               gboolean delete_originals,
+                               GPtrArray **transferred_uids,
+                               GCancellable *cancellable,
+                               GError **error)
 {
 	EEwsConnection *cnc;
 	CamelEwsStore *dst_ews_store;
@@ -1269,7 +1314,7 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 						 dst_full_name);
 
 	for (i = 0; i < uids->len; i++) {
-		ids = g_slist_append(ids, (gchar *)uids->pdata[i]);
+		ids = g_slist_append (ids, (gchar *) uids->pdata[i]);
 	}
 
 	if (e_ews_connection_move_items	(cnc, EWS_PRIORITY_MEDIUM,
@@ -1278,7 +1323,7 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 					 cancellable, &rerror)) {
 		if (delete_originals) {
 			changes = camel_folder_change_info_new ();
-			for (i=0; i < uids->len; i++) {
+			for (i = 0; i < uids->len; i++) {
 				camel_folder_summary_remove_uid (source->summary, uids->pdata[i]);
 				camel_folder_change_info_remove_uid (changes, uids->pdata[i]);
 			}
@@ -1303,7 +1348,11 @@ ews_transfer_messages_to_sync	(CamelFolder *source,
 }
 
 static gboolean
-ews_delete_messages (CamelFolder *folder, GSList *deleted_items, gboolean expunge, GCancellable *cancellable, GError **error)
+ews_delete_messages (CamelFolder *folder,
+                     GSList *deleted_items,
+                     gboolean expunge,
+                     GCancellable *cancellable,
+                     GError **error)
 {
 	CamelEwsFolder *ews_folder;
 	CamelStore *parent_store;
@@ -1312,7 +1361,7 @@ ews_delete_messages (CamelFolder *folder, GSList *deleted_items, gboolean expung
 	EEwsConnection *cnc;
 	gboolean status = TRUE;
 	GSList *deleted_head = NULL;
-	
+
 	parent_store = camel_folder_get_parent_store (folder);
 	ews_folder = CAMEL_EWS_FOLDER (folder);
 	ews_store = CAMEL_EWS_STORE (parent_store);
@@ -1334,15 +1383,15 @@ ews_delete_messages (CamelFolder *folder, GSList *deleted_items, gboolean expung
 
 		if (!status && rerror->code == EWS_CONNECTION_ERROR_ITEMNOTFOUND) {
 			/* If delete failed due to the item not found, ignore the error,
-			   trigger folder info refresh and then go on to clear the
-			   cache of the deleted items anyway. */
-			g_clear_error(&rerror);
+			 * trigger folder info refresh and then go on to clear the
+			 * cache of the deleted items anyway. */
+			g_clear_error (&rerror);
 			status = ews_refresh_info_sync (folder, cancellable, &rerror);
 		}
 
 		if (status) {
 			while (deleted_items) {
-				const gchar *uid = (gchar *)deleted_items->data;
+				const gchar *uid = (gchar *) deleted_items->data;
 				camel_folder_summary_lock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
 				camel_folder_change_info_remove_uid (changes, uid);
 				camel_folder_summary_remove_uid (folder->summary, uid);
@@ -1362,12 +1411,14 @@ ews_delete_messages (CamelFolder *folder, GSList *deleted_items, gboolean expung
 	}
 
 	camel_folder_change_info_free (changes);
-	
+
 	return status;
 }
 
 static gboolean
-ews_expunge_sync (CamelFolder *folder, GCancellable *cancellable, GError **error)
+ews_expunge_sync (CamelFolder *folder,
+                  GCancellable *cancellable,
+                  GError **error)
 {
 	CamelEwsStore *ews_store;
 	CamelEwsMessageInfo *ews_info;
@@ -1382,7 +1433,7 @@ ews_expunge_sync (CamelFolder *folder, GCancellable *cancellable, GError **error
 
 	if (!camel_ews_store_connected (ews_store, error))
 		return FALSE;
-	
+
 	/* FIXME Run expunge on just trash folder once we are able to identify the exact trash */
 
 	camel_folder_summary_prepare_fetch_all (folder->summary, NULL);
@@ -1408,7 +1459,9 @@ ews_expunge_sync (CamelFolder *folder, GCancellable *cancellable, GError **error
 }
 
 static gint
-ews_cmp_uids (CamelFolder *folder, const gchar *uid1, const gchar *uid2)
+ews_cmp_uids (CamelFolder *folder,
+              const gchar *uid1,
+              const gchar *uid2)
 {
 	g_return_val_if_fail (uid1 != NULL, 0);
 	g_return_val_if_fail (uid2 != NULL, 0);
@@ -1514,7 +1567,7 @@ camel_ews_folder_init (CamelEwsFolder *ews_folder)
 
 	ews_folder->priv->search_lock = g_mutex_new ();
 	ews_folder->priv->state_lock = g_mutex_new ();
-	g_static_rec_mutex_init(&ews_folder->priv->cache_lock);
+	g_static_rec_mutex_init (&ews_folder->priv->cache_lock);
 
 	ews_folder->priv->refreshing = FALSE;
 

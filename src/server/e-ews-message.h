@@ -53,7 +53,7 @@ void		e_ews_message_write_base64_parameter
 						 const gchar *name,
 						 const gchar *prefix,
 						 const gchar *value);
-void 		e_ews_message_write_int_parameter
+void		e_ews_message_write_int_parameter
 						(ESoapMessage *msg,
 						 const gchar *name,
 						 const gchar *prefix,

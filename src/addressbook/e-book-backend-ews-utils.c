@@ -50,10 +50,11 @@
  **/
 
 static gboolean
-get_book_view (EDataBookView *view, gpointer user_data)
+get_book_view (EDataBookView *view,
+               gpointer user_data)
 {
 	EDataBookView **ret = (EDataBookView **) user_data;
-	
+
 	e_data_book_view_ref (view);
 	*ret = view;
 

@@ -19,7 +19,6 @@
  *
  */
 
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -97,7 +96,7 @@ update_audience (void)
 
 static void
 update_audience_cb (GtkComboBoxText *combo,
-			gpointer data)
+                    gpointer data)
 {
 	gint active;
 
@@ -112,7 +111,7 @@ update_audience_cb (GtkComboBoxText *combo,
 
 static void
 update_int_msg_cb (GtkTextBuffer *buffer,
-			gpointer data)
+                   gpointer data)
 {
 	if (gtk_text_buffer_get_modified (buffer)) {
 		GtkTextIter start, end;
@@ -127,7 +126,7 @@ update_int_msg_cb (GtkTextBuffer *buffer,
 
 static void
 update_ext_msg_cb (GtkTextBuffer *buffer,
-			gpointer data)
+                   gpointer data)
 {
 	if (gtk_text_buffer_get_modified (buffer)) {
 		GtkTextIter start, end;
@@ -142,7 +141,7 @@ update_ext_msg_cb (GtkTextBuffer *buffer,
 
 static void
 toggled_state_cb (GtkToggleButton *button,
-               gpointer data)
+                  gpointer data)
 {
 	gboolean current_oof_state;
 
@@ -159,7 +158,8 @@ toggled_state_cb (GtkToggleButton *button,
 }
 
 static void
-from_time_changed_cb (EDateEdit *date_tm, gpointer data)
+from_time_changed_cb (EDateEdit *date_tm,
+                      gpointer data)
 {
 	if (e_date_edit_date_is_valid (date_tm) && e_date_edit_time_is_valid (date_tm)) {
 		oof_data->from_time = e_date_edit_get_time (date_tm);
@@ -167,7 +167,8 @@ from_time_changed_cb (EDateEdit *date_tm, gpointer data)
 }
 
 static void
-to_time_changed_cb (EDateEdit *date_tm, gpointer data)
+to_time_changed_cb (EDateEdit *date_tm,
+                    gpointer data)
 {
 	if (e_date_edit_date_is_valid (date_tm) && e_date_edit_time_is_valid (date_tm)) {
 		oof_data->to_time = e_date_edit_get_time (date_tm);
@@ -218,7 +219,7 @@ destroy_oof_data (void)
 	}
 }
 
-static char *
+static gchar *
 get_password (CamelSettings *settings)
 {
 	gchar *key, *password = NULL;
@@ -234,7 +235,6 @@ get_password (CamelSettings *settings)
 	g_free (key);
 	return password;
 }
-
 
 static EEwsConnection *
 get_connection (EMConfigTargetSettings *target)
@@ -271,7 +271,8 @@ get_connection (EMConfigTargetSettings *target)
 }
 
 static void
-set_oof_error_to_frame (GtkWidget *oof_frame, GError *error)
+set_oof_error_to_frame (GtkWidget *oof_frame,
+                        GError *error)
 {
 	GtkHBox *error_box;
 	GtkLabel *error_msg;
@@ -283,7 +284,7 @@ set_oof_error_to_frame (GtkWidget *oof_frame, GError *error)
 	error_box = (GtkHBox*) g_object_new (GTK_TYPE_HBOX, NULL, "homogeneous", FALSE, "spacing", 6, NULL);
 	error_img = gtk_image_new_from_stock (GTK_STOCK_DIALOG_ERROR, GTK_ICON_SIZE_SMALL_TOOLBAR);
 	message = g_strdup_printf (_("Unable to fetch out of office settings: \n%s"), error->message);
-	error_msg = (GtkLabel*) gtk_label_new (message);
+	error_msg = (GtkLabel *) gtk_label_new (message);
 	gtk_label_set_use_markup (error_msg, TRUE);
 	gtk_box_pack_start (GTK_BOX (error_box), GTK_WIDGET (error_img), FALSE, FALSE, 12);
 	gtk_box_pack_start (GTK_BOX (error_box), GTK_WIDGET (error_msg), FALSE, FALSE, 0);
@@ -359,7 +360,7 @@ set_oof_settings_to_frame (GtkWidget *oof_frame)
 	gtk_label_set_mnemonic_widget (to_label, GTK_WIDGET (to_date));
 	gtk_misc_set_alignment (GTK_MISC (to_label), 0, 0.5);
 	gtk_misc_set_padding (GTK_MISC (to_label), 0, 0);
-	
+
 	scrwnd_oof_int = (GtkScrolledWindow*) g_object_new (GTK_TYPE_SCROLLED_WINDOW, "hscrollbar-policy", GTK_POLICY_AUTOMATIC, "vscrollbar-policy", GTK_POLICY_AUTOMATIC, "shadow-type", GTK_SHADOW_IN, NULL);
 	txtview_oof_int = (GtkTextView*) g_object_new (GTK_TYPE_TEXT_VIEW, "justification", GTK_JUSTIFY_LEFT, "wrap-mode", GTK_WRAP_WORD, "editable", TRUE, NULL);
 
@@ -377,7 +378,6 @@ set_oof_settings_to_frame (GtkWidget *oof_frame)
 	gtk_widget_set_tooltip_text (GTK_WIDGET (lbl_internal), _("Message to be sent inside organization"));
 	gtk_misc_set_alignment (GTK_MISC (lbl_internal), 0, 0.5);
 	gtk_misc_set_padding (GTK_MISC (lbl_internal), 0, 0);
-
 
 	/*Select External Audience*/
 	hbox_ext = g_object_new (GTK_TYPE_HBOX, NULL, "homogeneous", FALSE, "spacing", 6, NULL);	
@@ -415,8 +415,6 @@ set_oof_settings_to_frame (GtkWidget *oof_frame)
 	g_signal_connect (buffer_int, "changed", G_CALLBACK (update_int_msg_cb), NULL);
 	g_signal_connect (buffer_ext, "changed", G_CALLBACK (update_ext_msg_cb), NULL);
 
-
-	
 	gtk_table_attach (tbl_oof_status, GTK_WIDGET (lbl_status), 0, 1, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
 	gtk_table_attach (tbl_oof_status, GTK_WIDGET (hbox_state), 1, 2, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
 	gtk_table_attach (tbl_oof_status, GTK_WIDGET (from_label), 0, 1, 1, 2, GTK_FILL, GTK_FILL, 0, 0);
@@ -428,9 +426,7 @@ set_oof_settings_to_frame (GtkWidget *oof_frame)
 	gtk_table_attach (tbl_oof_status, GTK_WIDGET (lbl_external), 0, 1, 4, 5, GTK_FILL, GTK_FILL, 0, 0);
 	gtk_table_attach (tbl_oof_status, GTK_WIDGET (hbox_ext), 1, 2, 4, 5, GTK_FILL, GTK_FILL, 0, 0);
 
-
 	gtk_box_pack_start (GTK_BOX (vbox_oof), GTK_WIDGET (tbl_oof_status), FALSE, FALSE, 0);
-
 
 	if (!oof_data->state) {
 		gtk_widget_set_sensitive (GTK_WIDGET (txtview_oof_int), FALSE);
@@ -447,7 +443,9 @@ set_oof_settings_to_frame (GtkWidget *oof_frame)
 }
 
 static void
-get_oof_settings_cb (GObject *object, GAsyncResult *res, gpointer user_data)
+get_oof_settings_cb (GObject *object,
+                     GAsyncResult *res,
+                     gpointer user_data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	GtkWidget *oof_frame = GTK_WIDGET (user_data);
@@ -482,7 +480,8 @@ get_oof_settings_cb (GObject *object, GAsyncResult *res, gpointer user_data)
 }
 
 static void
-set_oof_data_from_settings (EMConfigTargetSettings *target, GtkWidget *oof_frame)
+set_oof_data_from_settings (EMConfigTargetSettings *target,
+                            GtkWidget *oof_frame)
 {
 	GCancellable *cancellable = NULL;
 	EEwsConnection *cnc = NULL;
@@ -492,13 +491,13 @@ set_oof_data_from_settings (EMConfigTargetSettings *target, GtkWidget *oof_frame
 		return;
 
 	cancellable = g_cancellable_new ();
-	
+
 	e_ews_connection_get_oof_settings_start (cnc, EWS_PRIORITY_MEDIUM,
-					   	 get_oof_settings_cb, cancellable,
-					   	 oof_frame);
+						 get_oof_settings_cb, cancellable,
+						 oof_frame);
 }
 
-static OOFSettings*
+static OOFSettings *
 get_settings_from_data (void)
 {
 	OOFSettings *oof_settings = NULL;
@@ -576,7 +575,7 @@ ews_get_outo_office_widget (EMConfigTargetSettings *target_account)
 	frm_oof = (GtkFrame*) g_object_new (GTK_TYPE_FRAME, "label", _("Out of Office"), NULL);
 
 	oof_data_new ();
-	
+
 	stat_box = (GtkHBox*) g_object_new (GTK_TYPE_HBOX, NULL, "homogeneous", FALSE, "spacing", 6, NULL);
 	spinner = gtk_spinner_new ();
 	stat_msg = (GtkLabel*) g_object_new (GTK_TYPE_LABEL, "label", _("Fetching out of office settings..."), "use-markup", TRUE, NULL);
@@ -585,10 +584,10 @@ ews_get_outo_office_widget (EMConfigTargetSettings *target_account)
 
 	gtk_box_pack_start (GTK_BOX (stat_box), GTK_WIDGET (spinner), FALSE, FALSE, 12);
 	gtk_box_pack_start (GTK_BOX (stat_box), GTK_WIDGET (stat_msg), FALSE, FALSE, 0);
-	gtk_spinner_start ((GtkSpinner*) spinner);
+	gtk_spinner_start ((GtkSpinner *) spinner);
 	gtk_container_add (GTK_CONTAINER (frm_oof), GTK_WIDGET (stat_box));
 
-	set_oof_data_from_settings (target_account, (GtkWidget*) frm_oof);
+	set_oof_data_from_settings (target_account, (GtkWidget *) frm_oof);
 
 	return (GtkWidget *) frm_oof;
 }

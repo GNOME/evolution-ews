@@ -39,7 +39,9 @@ EwsFolderId *folder_id;
 GMainLoop *main_loop;
 
 static void
-folder_items_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
+folder_items_ready_callback (GObject *object,
+                             GAsyncResult *res,
+                             gpointer user_data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	GSList *items_created = NULL, *items_updated = NULL;
@@ -61,7 +63,7 @@ folder_items_ready_callback (GObject *object, GAsyncResult *res, gpointer user_d
 	g_print ("Sync state for folder is\n  %s \n", sync_state);
 
 	g_print ("Items created \n");
-	for (l = items_created; l != NULL;l = g_slist_next (l)) {
+	for (l = items_created; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = l->data;
 		const EwsId *item_id = e_ews_item_get_id (item);
 
@@ -107,7 +109,9 @@ op_test_sync_folder_items ()
 }
 
 static void
-folder_hierarchy_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
+folder_hierarchy_ready_callback (GObject *object,
+                                 GAsyncResult *res,
+                                 gpointer user_data)
 {
 	GSList *folders_created = NULL, *folders_updated = NULL;
 	GSList *folders_deleted = NULL, *l;
@@ -128,7 +132,7 @@ folder_hierarchy_ready_callback (GObject *object, GAsyncResult *res, gpointer us
 	g_print ("Sync state \n  %s \n", sync_state);
 
 	g_print ("Folders created \n");
-	for (l = folders_created; l != NULL;l = g_slist_next (l)) {
+	for (l = folders_created; l != NULL; l = g_slist_next (l)) {
 		EEwsFolder *folder = l->data;
 		const EwsFolderId *fid = e_ews_folder_get_id (folder);
 
@@ -176,7 +180,9 @@ op_test_sync_folder_hierarchy ()
 }
 
 static void
-get_item_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
+get_item_ready_callback (GObject *object,
+                         GAsyncResult *res,
+                         gpointer user_data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	GError *error = NULL;

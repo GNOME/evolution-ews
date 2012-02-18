@@ -36,7 +36,9 @@ static GMainLoop *main_loop;
 void deletefolder_tests_run (gconstpointer data);
 
 static void
-delete_folder_cb (GObject *object, GAsyncResult *res, gpointer data)
+delete_folder_cb (GObject *object,
+                  GAsyncResult *res,
+                  gpointer data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	GError *error = NULL;
@@ -52,7 +54,7 @@ delete_folder_cb (GObject *object, GAsyncResult *res, gpointer data)
 	g_print ("Folder is successfully Deleted. \n");
 
 quit:
-	g_main_loop_quit(main_loop);
+	g_main_loop_quit (main_loop);
 }
 
 static void

@@ -111,11 +111,11 @@ typedef struct {
 	gchar *postal_code;
 } EwsAddress;
 
-GType       	e_ews_item_get_type (void);
+GType		e_ews_item_get_type (void);
 EEwsItem *	e_ews_item_new_from_soap_parameter
 						(ESoapParameter *param);
 
-EEwsItemType 	e_ews_item_get_item_type	(EEwsItem *item);
+EEwsItemType	e_ews_item_get_item_type	(EEwsItem *item);
 void		e_ews_item_set_item_type	(EEwsItem *item,
 						 EEwsItemType new_type);
 const gchar *	e_ews_item_get_subject		(EEwsItem *item);
@@ -125,7 +125,7 @@ const gchar *	e_ews_item_get_mime_content	(EEwsItem *item);
 void		e_ews_item_set_mime_content	(EEwsItem *item,
 						 const gchar *new_mime_content);
 const EwsId *	e_ews_item_get_id		(EEwsItem *item);
-const EwsId *	e_ews_item_get_attachment_id		(EEwsItem *item);
+const EwsId *	e_ews_item_get_attachment_id	(EEwsItem *item);
 gsize		e_ews_item_get_size		(EEwsItem *item);
 const gchar *	e_ews_item_get_msg_id		(EEwsItem *item);
 const gchar *	e_ews_item_get_uid		(EEwsItem *item);
@@ -162,17 +162,17 @@ void		e_ews_free_resolve_contact	(/*EwsResolveContact * */ gpointer rc);
 
 const GSList *	e_ews_item_get_modified_occurrences
 						(EEwsItem *item);
-gchar *		e_ews_embed_attachment_id_in_uri (const gchar *olduri, const char *attach_id);
+gchar *		e_ews_embed_attachment_id_in_uri (const gchar *olduri, const gchar *attach_id);
 GSList *	e_ews_item_get_attachments_ids
 						(EEwsItem *item);
 gchar *
 e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gchar *cache, const gchar *comp_uid, gchar **attach_id);
 
 gchar *
-e_ews_item_ical_dump(EEwsItem *item);
+e_ews_item_ical_dump (EEwsItem *item);
 
 gchar *
-e_ews_item_dump_mime_content(EEwsItem *item, const gchar *cache);
+e_ews_item_dump_mime_content (EEwsItem *item, const gchar *cache);
 
 const GSList *	e_ews_item_get_attendees	(EEwsItem *item);
 
@@ -181,10 +181,10 @@ const EwsId *	e_ews_item_get_calendar_item_accept_id
 
 /* Contact fields */
 const gchar *	e_ews_item_get_fileas		(EEwsItem *item);
-const EwsCompleteName *	
+const EwsCompleteName *
 		e_ews_item_get_complete_name	(EEwsItem *item);
 const gchar *	e_ews_item_get_email_address	(EEwsItem *item, const gchar *type);
-const EwsAddress *	
+const EwsAddress *
 		e_ews_item_get_physical_address	(EEwsItem *item, const gchar *type);
 const gchar *	e_ews_item_get_phone_number	(EEwsItem *item, const gchar *type);
 const gchar *	e_ews_item_get_im_address	(EEwsItem *item, const gchar *type);
@@ -220,8 +220,8 @@ gboolean	e_ews_item_task_has_start_date	(EEwsItem *item,
 gboolean	e_ews_item_task_has_due_date	(EEwsItem *item,
 						 gboolean *has_date);
 gboolean	e_ews_item_task_has_complete_date
-						(EEwsItem* item,
-						 gboolean* has_date);
+						(EEwsItem * item,
+						 gboolean * has_date);
 const gchar *	e_ews_item_get_tzid		(EEwsItem *item);
 
 G_END_DECLS

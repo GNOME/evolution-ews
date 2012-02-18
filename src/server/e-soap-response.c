@@ -134,7 +134,8 @@ e_soap_response_new_from_xmldoc (xmlDoc *xmldoc)
 }
 
 static void
-parse_parameters (ESoapResponsePrivate *priv, xmlNodePtr xml_method)
+parse_parameters (ESoapResponsePrivate *priv,
+                  xmlNodePtr xml_method)
 {
 	xmlNodePtr tmp;
 
@@ -164,7 +165,8 @@ parse_parameters (ESoapResponsePrivate *priv, xmlNodePtr xml_method)
  * Since: 2.92
  */
 gboolean
-e_soap_response_from_string (ESoapResponse *response, const gchar *xmlstr)
+e_soap_response_from_string (ESoapResponse *response,
+                             const gchar *xmlstr)
 {
 	xmlDocPtr xmldoc;
 
@@ -179,7 +181,6 @@ e_soap_response_from_string (ESoapResponse *response, const gchar *xmlstr)
 	return e_soap_response_from_xmldoc (response, xmldoc);
 }
 
-
 /**
  * e_soap_response_from_xmldoc:
  * @response: the #ESoapResponse object.
@@ -191,7 +192,9 @@ e_soap_response_from_string (ESoapResponse *response, const gchar *xmlstr)
  *
  * Since: xxx
  */
-gboolean e_soap_response_from_xmldoc (ESoapResponse *response, xmlDoc *xmldoc)
+gboolean
+e_soap_response_from_xmldoc (ESoapResponse *response,
+                             xmlDoc *xmldoc)
 {
 	ESoapResponsePrivate *priv;
 	xmlNodePtr xml_root, xml_body, xml_method = NULL;
@@ -269,7 +272,8 @@ e_soap_response_get_method_name (ESoapResponse *response)
  * Since: 2.92
  */
 void
-e_soap_response_set_method_name (ESoapResponse *response, const gchar *method_name)
+e_soap_response_set_method_name (ESoapResponse *response,
+                                 const gchar *method_name)
 {
 	ESoapResponsePrivate *priv;
 
@@ -278,7 +282,7 @@ e_soap_response_set_method_name (ESoapResponse *response, const gchar *method_na
 	g_return_if_fail (priv->xml_method != NULL);
 	g_return_if_fail (method_name != NULL);
 
-	xmlNodeSetName (priv->xml_method, (const xmlChar *)method_name);
+	xmlNodeSetName (priv->xml_method, (const xmlChar *) method_name);
 }
 
 /**
@@ -318,7 +322,7 @@ e_soap_parameter_get_int_value (ESoapParameter *param)
 
 	s = xmlNodeGetContent (param);
 	if (s) {
-		i = atoi ((gchar *)s);
+		i = atoi ((gchar *) s);
 		xmlFree (s);
 
 		return i;
@@ -346,7 +350,7 @@ e_soap_parameter_get_string_value (ESoapParameter *param)
 	g_return_val_if_fail (param != NULL, NULL);
 
 	xml_s = xmlNodeGetContent (param);
-	s = g_strdup ((gchar *)xml_s);
+	s = g_strdup ((gchar *) xml_s);
 	xmlFree (xml_s);
 
 	return s;
@@ -386,7 +390,8 @@ e_soap_parameter_get_first_child (ESoapParameter *param)
  * Since: 2.92
  */
 ESoapParameter *
-e_soap_parameter_get_first_child_by_name (ESoapParameter *param, const gchar *name)
+e_soap_parameter_get_first_child_by_name (ESoapParameter *param,
+                                          const gchar *name)
 {
 	ESoapParameter *tmp;
 
@@ -396,7 +401,7 @@ e_soap_parameter_get_first_child_by_name (ESoapParameter *param, const gchar *na
 	for (tmp = e_soap_parameter_get_first_child (param);
 	     tmp != NULL;
 	     tmp = e_soap_parameter_get_next_child (tmp)) {
-		if (!strcmp (name, (const gchar *)tmp->name))
+		if (!strcmp (name, (const gchar *) tmp->name))
 			return tmp;
 	}
 
@@ -442,7 +447,7 @@ e_soap_parameter_get_next_child (ESoapParameter *param)
  */
 ESoapParameter *
 e_soap_parameter_get_next_child_by_name (ESoapParameter *param,
-					    const gchar *name)
+                                         const gchar *name)
 {
 	ESoapParameter *tmp;
 
@@ -452,7 +457,7 @@ e_soap_parameter_get_next_child_by_name (ESoapParameter *param,
 	for (tmp = e_soap_parameter_get_next_child (param);
 	     tmp != NULL;
 	     tmp = e_soap_parameter_get_next_child (tmp)) {
-		if (!strcmp (name, (const gchar *)tmp->name))
+		if (!strcmp (name, (const gchar *) tmp->name))
 			return tmp;
 	}
 
@@ -471,7 +476,8 @@ e_soap_parameter_get_next_child_by_name (ESoapParameter *param,
  * Since: 2.92
  */
 gchar *
-e_soap_parameter_get_property (ESoapParameter *param, const gchar *prop_name)
+e_soap_parameter_get_property (ESoapParameter *param,
+                               const gchar *prop_name)
 {
 	xmlChar *xml_s;
 	gchar *s;
@@ -479,8 +485,8 @@ e_soap_parameter_get_property (ESoapParameter *param, const gchar *prop_name)
 	g_return_val_if_fail (param != NULL, NULL);
 	g_return_val_if_fail (prop_name != NULL, NULL);
 
-	xml_s = xmlGetProp (param, (const xmlChar *)prop_name);
-	s = g_strdup ((gchar *)xml_s);
+	xml_s = xmlGetProp (param, (const xmlChar *) prop_name);
+	s = g_strdup ((gchar *) xml_s);
 	xmlFree (xml_s);
 
 	return s;
@@ -544,7 +550,7 @@ e_soap_response_get_first_parameter (ESoapResponse *response)
  */
 ESoapParameter *
 e_soap_response_get_first_parameter_by_name (ESoapResponse *response,
-						const gchar *name)
+                                             const gchar *name)
 {
 	ESoapResponsePrivate *priv;
 	GList *l;
@@ -556,7 +562,7 @@ e_soap_response_get_first_parameter_by_name (ESoapResponse *response,
 	for (l = priv->parameters; l != NULL; l = l->next) {
 		ESoapParameter *param = (ESoapParameter *) l->data;
 
-		if (!strcmp (name, (const gchar *)param->name))
+		if (!strcmp (name, (const gchar *) param->name))
 			return param;
 	}
 
@@ -577,7 +583,7 @@ e_soap_response_get_first_parameter_by_name (ESoapResponse *response,
  */
 ESoapParameter *
 e_soap_response_get_next_parameter (ESoapResponse *response,
-				       ESoapParameter *from)
+                                    ESoapParameter *from)
 {
 	ESoapResponsePrivate *priv;
 	GList *l;
@@ -608,8 +614,8 @@ e_soap_response_get_next_parameter (ESoapResponse *response,
  */
 ESoapParameter *
 e_soap_response_get_next_parameter_by_name (ESoapResponse *response,
-					       ESoapParameter *from,
-					       const gchar *name)
+                                            ESoapParameter *from,
+                                            const gchar *name)
 {
 	ESoapParameter *param;
 
@@ -647,7 +653,8 @@ soup_xml_real_node (xmlNode *node)
  * Since: 2.92
  **/
 gint
-e_soap_response_dump_response (ESoapResponse *response, FILE *buffer)
+e_soap_response_dump_response (ESoapResponse *response,
+                               FILE *buffer)
 {
 	xmlChar *xmlbuff;
 	gint buffersize, ret;

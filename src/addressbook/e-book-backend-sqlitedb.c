@@ -1141,7 +1141,10 @@ e_book_backend_sqlitedb_is_summary_query (const gchar *query)
 }
 
 static ESExpResult *
-func_and (ESExp *f, gint argc, struct _ESExpTerm **argv, gpointer data)
+func_and (ESExp *f,
+          gint argc,
+          struct _ESExpTerm **argv,
+          gpointer data)
 {
 	ESExpResult *r, *r1;
 	GString *string;
@@ -2110,11 +2113,11 @@ e_book_backend_sqlitedb_search_data_free (EbSdbSearchData *s_data)
 }
 
 gboolean
-e_book_backend_sqlitedb_create_addressbook	(EBookBackendSqliteDB *ebsdb,
-						 const gchar *folderid,
-						 const gchar *folder_name,
-						 gboolean store_vcard,
-						 GError **error)
+e_book_backend_sqlitedb_create_addressbook (EBookBackendSqliteDB *ebsdb,
+                                            const gchar *folderid,
+                                            const gchar *folder_name,
+                                            gboolean store_vcard,
+                                            GError **error)
 {
 	GError *err = NULL;
 	gboolean ret = TRUE;

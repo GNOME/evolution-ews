@@ -27,7 +27,7 @@ finalize_test_data ()
 	}
 }
 
-int main (int argc, char *argv[])
+gint main (gint argc, gchar *argv[])
 {
 	gint ret;
 

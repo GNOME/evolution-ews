@@ -43,11 +43,16 @@
 /*
  * Iterate over the icalcomponent properties and collect attendees
  */
-void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **optional, GSList **resource) {
+void
+e_ews_collect_attendees (icalcomponent *comp,
+                         GSList **required,
+                         GSList **optional,
+                         GSList **resource)
+{
 	icalproperty *prop;
 	icalparameter *param;
 	const gchar *str = NULL;
-	const char *org_email_address = NULL;
+	const gchar *org_email_address = NULL;
 
 	/* we need to know who the orgenizer is so we wont duplicate him/her */
 	org_email_address = e_ews_collect_organizer (comp);
@@ -62,7 +67,7 @@ void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **op
 		if (!g_ascii_strncasecmp (str, "mailto:", 7)) str = (str) + 7;
 
 		/* if this attenddee is the orgenizer - dont add him/her
-		 in some cases there is no maito for email if meeting orginazer*/
+		 in some cases there is no maito for email if meeting orginazer */
 		if (g_ascii_strcasecmp (org_email_address, str) == 0) continue;
 
 		/* figure type of attendee, add to relevant list */
@@ -71,7 +76,7 @@ void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **op
 		/*in case of new time proposal the role parameter is not a part of ical*/
 		if (!param) continue;
 
-		switch (icalparameter_get_role(param)) {
+		switch (icalparameter_get_role (param)) {
 		case ICAL_ROLE_OPTPARTICIPANT:
 			*optional = g_slist_append (*optional, (gpointer)str);
 			break;
@@ -90,7 +95,8 @@ void e_ews_collect_attendees(icalcomponent *comp, GSList **required, GSList **op
 	}
 }
 
-gint ews_get_alarm (ECalComponent *comp)
+gint
+ews_get_alarm (ECalComponent *comp)
 {
 	GList *alarm_uids = e_cal_component_get_alarm_uids (comp);
 	ECalComponentAlarm *alarm = e_cal_component_get_alarm (comp, (const gchar *) (alarm_uids->data));
@@ -114,7 +120,9 @@ gint ews_get_alarm (ECalComponent *comp)
 	return dur_int;
 }
 
-void ews_set_alarm (ESoapMessage *msg, ECalComponent *comp)
+void
+ews_set_alarm (ESoapMessage *msg,
+               ECalComponent *comp)
 {
 	/* We know there would be only a single alarm in EWS calendar item */
 	GList *alarm_uids = e_cal_component_get_alarm_uids (comp);
@@ -125,7 +133,7 @@ void ews_set_alarm (ESoapMessage *msg, ECalComponent *comp)
 	e_cal_component_alarm_get_action (alarm, &action);
 	if (action == E_CAL_COMPONENT_ALARM_DISPLAY) {
 		ECalComponentAlarmTrigger trigger;
-		char buf[20];
+		gchar buf[20];
 		gint dur_int = 0;
 		e_cal_component_alarm_get_trigger (alarm, &trigger);
 		switch (trigger.type) {
@@ -143,52 +151,58 @@ void ews_set_alarm (ESoapMessage *msg, ECalComponent *comp)
 
 }
 
-void ewscal_set_time (ESoapMessage *msg, const gchar *name, icaltimetype *t)
+void
+ewscal_set_time (ESoapMessage *msg,
+                 const gchar *name,
+                 icaltimetype *t)
 {
-	char *str;
+	gchar *str;
 
 	str = g_strdup_printf("%04d-%02d-%02dT%02d:%02d:%02d",
 			      t->year, t->month, t->day,
 			      t->hour, t->minute, t->second);
 
-	e_ews_message_write_string_parameter(msg, name, NULL, str);
+	e_ews_message_write_string_parameter (msg, name, NULL, str);
 	g_free (str);
 }
 
-static void ewscal_set_date (ESoapMessage *msg, const gchar *name, icaltimetype *t)
+static void
+ewscal_set_date (ESoapMessage *msg,
+                 const gchar *name,
+                 icaltimetype *t)
 {
-	char *str;
+	gchar *str;
 
 	str = g_strdup_printf("%04d-%02d-%02d",
 			      t->year, t->month, t->day);
 
-	e_ews_message_write_string_parameter(msg, name, NULL, str);
+	e_ews_message_write_string_parameter (msg, name, NULL, str);
 	g_free (str);
 }
 
-static const char *number_to_month(int num) {
-	static const char *months[] = {
+static const gchar *number_to_month (gint num) {
+	static const gchar *months[] = {
 		"January", "February", "March", "April", "May", "June", "July",
 		"August", "September", "October", "November", "December"
 	};
 
-	return months[num-1];
+	return months[num - 1];
 }
 
-static const char *number_to_weekday(int num) {
-	static const char *days[] = {
+static const gchar *number_to_weekday (gint num) {
+	static const gchar *days[] = {
 		"Sunday", "Monday", "Tuesday", "Wednesday",
 		"Thursday", "Friday", "Saturday",
 		"Day", "Weekday", "WeekendDay"
 	};
 
-	return days[num-1];
+	return days[num - 1];
 }
 
-static const char *weekindex_to_ical(int index) {
+static const gchar *weekindex_to_ical (gint index) {
 	static struct {
-		const char *exch;
-		int index;
+		const gchar *exch;
+		gint index;
 	} table[] = {
 		{ "First", 1 },
 		{ "Second", 2 },
@@ -197,7 +211,7 @@ static const char *weekindex_to_ical(int index) {
 		{ "Fifth", 5 },
 		{ "Last", -1 }
 	};
-	int i;
+	gint i;
 
 	for (i = 0; i < 6; i++) {
 		if (index == table[i].index)
@@ -207,9 +221,11 @@ static const char *weekindex_to_ical(int index) {
 	return 0;
 }
 
-static void ewscal_add_rrule (ESoapMessage *msg, icalproperty *prop)
+static void
+ewscal_add_rrule (ESoapMessage *msg,
+                  icalproperty *prop)
 {
-	struct icalrecurrencetype recur = icalproperty_get_rrule(prop);
+	struct icalrecurrencetype recur = icalproperty_get_rrule (prop);
 
 	e_soap_message_start_element(msg, "RelativeYearlyRecurrence", NULL, NULL);
 
@@ -220,70 +236,76 @@ static void ewscal_add_rrule (ESoapMessage *msg, icalproperty *prop)
 	e_soap_message_end_element(msg); /* "RelativeYearlyRecurrence" */
 }
 
-static void ewscal_add_timechange (ESoapMessage *msg, icalcomponent *comp, int baseoffs)
+static void
+ewscal_add_timechange (ESoapMessage *msg,
+                       icalcomponent *comp,
+                       gint baseoffs)
 {
-	char buffer[16], *offset;
+	gchar buffer[16], *offset;
 	const gchar *tzname;
 	icalproperty *prop;
 	struct icaltimetype dtstart;
-	int utcoffs;
+	gint utcoffs;
 
-	prop = icalcomponent_get_first_property(comp, ICAL_TZNAME_PROPERTY);
+	prop = icalcomponent_get_first_property (comp, ICAL_TZNAME_PROPERTY);
 	if (prop) {
 		tzname = icalproperty_get_tzname (prop);
 		e_soap_message_add_attribute(msg, "TimeZoneName", tzname, NULL, NULL);
 	}
 
 	/* Calculate zone Offset from BaseOffset */
-	prop = icalcomponent_get_first_property(comp, ICAL_TZOFFSETTO_PROPERTY);
+	prop = icalcomponent_get_first_property (comp, ICAL_TZOFFSETTO_PROPERTY);
 	if (prop) {
-		utcoffs = -icalproperty_get_tzoffsetto(prop);
+		utcoffs = -icalproperty_get_tzoffsetto (prop);
 		utcoffs -= baseoffs;
-		offset = icaldurationtype_as_ical_string_r(icaldurationtype_from_int(utcoffs));
+		offset = icaldurationtype_as_ical_string_r (icaldurationtype_from_int (utcoffs));
 		e_ews_message_write_string_parameter(msg, "Offset", NULL, offset);
-		free(offset);
+		free (offset);
 	}
 
-	prop = icalcomponent_get_first_property(comp, ICAL_RRULE_PROPERTY);
+	prop = icalcomponent_get_first_property (comp, ICAL_RRULE_PROPERTY);
 	if (prop)
 		ewscal_add_rrule (msg, prop);
 
-	prop = icalcomponent_get_first_property(comp, ICAL_DTSTART_PROPERTY);
+	prop = icalcomponent_get_first_property (comp, ICAL_DTSTART_PROPERTY);
 	if (prop) {
-		dtstart = icalproperty_get_dtstart(prop);
+		dtstart = icalproperty_get_dtstart (prop);
 		snprintf(buffer, 16, "%02d:%02d:%02d", dtstart.hour, dtstart.minute, dtstart.second);
 		e_ews_message_write_string_parameter(msg, "Time", NULL, buffer);
 	}
 }
 
-void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *icaltz)
+void
+ewscal_set_timezone (ESoapMessage *msg,
+                     const gchar *name,
+                     icaltimezone *icaltz)
 {
 	icalcomponent *comp;
 	icalproperty *prop;
 	const gchar *location;
 	icalcomponent *xstd, *xdaylight;
-	int std_utcoffs;
+	gint std_utcoffs;
 	gchar *offset;
 
 	if (!icaltz)
 		return;
 
-	comp = icaltimezone_get_component(icaltz);
+	comp = icaltimezone_get_component (icaltz);
 
 	/* Exchange needs a BaseOffset, followed by either *both*
-	   Standard and Daylight zones, or neither of them. If there's
-	   more than one STANDARD or DAYLIGHT component in the VTIMEZONE,
-	   we ignore the extra. So fully-specified timezones including
-	   historical DST rules cannot be handled by Exchange. */
+	 * Standard and Daylight zones, or neither of them. If there's
+	 * more than one STANDARD or DAYLIGHT component in the VTIMEZONE,
+	 * we ignore the extra. So fully-specified timezones including
+	 * historical DST rules cannot be handled by Exchange. */
 
 	/* FIXME: Walk through them all to find the *latest* ones, like
-	   icaltimezone_get_tznames_from_vtimezone() does. */
-	xstd = icalcomponent_get_first_component(comp, ICAL_XSTANDARD_COMPONENT);
-	xdaylight = icalcomponent_get_first_component(comp, ICAL_XDAYLIGHT_COMPONENT);
+	 * icaltimezone_get_tznames_from_vtimezone() does. */
+	xstd = icalcomponent_get_first_component (comp, ICAL_XSTANDARD_COMPONENT);
+	xdaylight = icalcomponent_get_first_component (comp, ICAL_XDAYLIGHT_COMPONENT);
 
 	/* If there was only a DAYLIGHT component, swap them over and pretend
-	   it was the STANDARD component. We're only going to give the server
-	   the BaseOffset anyway. */
+	 * it was the STANDARD component. We're only going to give the server
+	 * the BaseOffset anyway. */
 	if (!xstd) {
 		xstd = xdaylight;
 		xdaylight = NULL;
@@ -296,30 +318,30 @@ void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *ic
 	if (!location)
 		location = icaltimezone_get_tznames (icaltz);
 
-	e_soap_message_start_element(msg, name, NULL, NULL);
+	e_soap_message_start_element (msg, name, NULL, NULL);
 	e_soap_message_add_attribute(msg, "TimeZoneName", location, NULL, NULL);
 
 	/* Fetch the timezone offsets for the standard (or only) zone.
-	   Negate it, because Exchange does it backwards */
+	 * Negate it, because Exchange does it backwards */
 	if (xstd) {
-		prop = icalcomponent_get_first_property(xstd, ICAL_TZOFFSETTO_PROPERTY);
-		std_utcoffs = -icalproperty_get_tzoffsetto(prop);
+		prop = icalcomponent_get_first_property (xstd, ICAL_TZOFFSETTO_PROPERTY);
+		std_utcoffs = -icalproperty_get_tzoffsetto (prop);
 	} else {
 		/* UTC has no properties at all, so just set manually */
 		std_utcoffs = 0;
 	}
 
 	/* This is the overall BaseOffset tag, which the Standard and Daylight
-	   zones are offset from. It's redundant, but Exchange always sets it
-	   to the offset of the Standard zone, and the Offset in the Standard
-	   zone to zero. So try to avoid problems by doing the same. */
-	offset = icaldurationtype_as_ical_string_r(icaldurationtype_from_int(std_utcoffs));
+	 * zones are offset from. It's redundant, but Exchange always sets it
+	 * to the offset of the Standard zone, and the Offset in the Standard
+	 * zone to zero. So try to avoid problems by doing the same. */
+	offset = icaldurationtype_as_ical_string_r (icaldurationtype_from_int (std_utcoffs));
 	e_ews_message_write_string_parameter(msg, "BaseOffset", NULL, offset);
 	free (offset);
 
 	/* Only write the full TimeChangeType information, including the
-	   recurrence rules for the DST changes, if there is more than
-	   one. */
+	 * recurrence rules for the DST changes, if there is more than
+	 * one. */
 	if (xdaylight) {
 		/* Standard */
 		e_soap_message_start_element(msg, "Standard", NULL, NULL);
@@ -334,10 +356,12 @@ void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, icaltimezone *ic
 	e_soap_message_end_element(msg); /* "MeetingTimeZone" */
 }
 
-static void ewscal_add_availability_rrule (ESoapMessage *msg, icalproperty *prop)
+static void
+ewscal_add_availability_rrule (ESoapMessage *msg,
+                               icalproperty *prop)
 {
-	struct icalrecurrencetype recur = icalproperty_get_rrule(prop);
-	char buffer[16];
+	struct icalrecurrencetype recur = icalproperty_get_rrule (prop);
+	gchar buffer[16];
 
 	snprintf (buffer, 16, "%d", icalrecurrencetype_day_position(recur.by_day[0]));
 	e_ews_message_write_string_parameter(msg, "DayOrder", NULL, buffer);
@@ -348,49 +372,54 @@ static void ewscal_add_availability_rrule (ESoapMessage *msg, icalproperty *prop
 	e_ews_message_write_string_parameter(msg, "DayOfWeek", NULL, number_to_weekday(icalrecurrencetype_day_day_of_week(recur.by_day[0])));
 }
 
-static void ewscal_add_availability_timechange (ESoapMessage *msg, icalcomponent *comp, int baseoffs)
+static void
+ewscal_add_availability_timechange (ESoapMessage *msg,
+                                    icalcomponent *comp,
+                                    gint baseoffs)
 {
-	char buffer[16];
+	gchar buffer[16];
 	icalproperty *prop;
 	struct icaltimetype dtstart;
-	int utcoffs;
+	gint utcoffs;
 
 	/* Calculate zone Offset from BaseOffset */
-	prop = icalcomponent_get_first_property(comp, ICAL_TZOFFSETTO_PROPERTY);
+	prop = icalcomponent_get_first_property (comp, ICAL_TZOFFSETTO_PROPERTY);
 	if (prop) {
-		utcoffs = -icalproperty_get_tzoffsetto(prop)/60;
+		utcoffs = -icalproperty_get_tzoffsetto (prop) / 60;
 		utcoffs -= baseoffs;
 		snprintf (buffer, 16, "%d", utcoffs);
 		e_ews_message_write_string_parameter(msg, "Bias", NULL, buffer);
 	}
 
-	prop = icalcomponent_get_first_property(comp, ICAL_DTSTART_PROPERTY);
+	prop = icalcomponent_get_first_property (comp, ICAL_DTSTART_PROPERTY);
 	if (prop) {
-		dtstart = icalproperty_get_dtstart(prop);
+		dtstart = icalproperty_get_dtstart (prop);
 		snprintf(buffer, 16, "%02d:%02d:%02d", dtstart.hour, dtstart.minute, dtstart.second);
 		e_ews_message_write_string_parameter(msg, "Time", NULL, buffer);
 	}
 
-	prop = icalcomponent_get_first_property(comp, ICAL_RRULE_PROPERTY);
+	prop = icalcomponent_get_first_property (comp, ICAL_RRULE_PROPERTY);
 	if (prop)
 		ewscal_add_availability_rrule (msg, prop);
 }
 
-void ewscal_set_availability_timezone (ESoapMessage *msg, icaltimezone *icaltz)
+void
+ewscal_set_availability_timezone (ESoapMessage *msg,
+                                  icaltimezone *icaltz)
 {
 	icalcomponent *comp;
 	icalproperty *prop;
 	icalcomponent *xstd, *xdaylight;
-	int std_utcoffs;
+	gint std_utcoffs;
 	gchar *offset;
 
 	if (!icaltz)
 		return;
 
-	comp = icaltimezone_get_component(icaltz);
+	comp = icaltimezone_get_component (icaltz);
 
-	xstd = icalcomponent_get_first_component(comp, ICAL_XSTANDARD_COMPONENT);
-	xdaylight = icalcomponent_get_first_component(comp, ICAL_XDAYLIGHT_COMPONENT);
+	xstd = icalcomponent_get_first_component (comp, ICAL_XSTANDARD_COMPONENT);
+	xdaylight = icalcomponent_get_first_component (comp, ICAL_XDAYLIGHT_COMPONENT);
 
 	/* Should never happen. Exchange will bail out */
 	if (!xstd || !xdaylight)
@@ -399,14 +428,14 @@ void ewscal_set_availability_timezone (ESoapMessage *msg, icaltimezone *icaltz)
 	e_soap_message_start_element(msg, "TimeZone", NULL, NULL);
 
 	/* Fetch the timezone offsets for the standard (or only) zone.
-	   Negate it, because Exchange does it backwards */
-	prop = icalcomponent_get_first_property(xstd, ICAL_TZOFFSETTO_PROPERTY);
-	std_utcoffs = -icalproperty_get_tzoffsetto(prop)/60;
+	 * Negate it, because Exchange does it backwards */
+	prop = icalcomponent_get_first_property (xstd, ICAL_TZOFFSETTO_PROPERTY);
+	std_utcoffs = -icalproperty_get_tzoffsetto (prop) / 60;
 
 	/* This is the overall BaseOffset tag, which the Standard and Daylight
-	   zones are offset from. It's redundant, but Exchange always sets it
-	   to the offset of the Standard zone, and the Offset in the Standard
-	   zone to zero. So try to avoid problems by doing the same. */
+	 * zones are offset from. It's redundant, but Exchange always sets it
+	 * to the offset of the Standard zone, and the Offset in the Standard
+	 * zone to zero. So try to avoid problems by doing the same. */
 	offset = g_strdup_printf ("%d", std_utcoffs);
 	e_ews_message_write_string_parameter(msg, "Bias", NULL, offset);
 	g_free (offset);
@@ -425,10 +454,13 @@ void ewscal_set_availability_timezone (ESoapMessage *msg, icaltimezone *icaltz)
 	e_soap_message_end_element(msg); /* "TimeZone" */
 }
 
-void ewscal_set_reccurence (ESoapMessage *msg, icalproperty *rrule, icaltimetype *dtstart)
+void
+ewscal_set_reccurence (ESoapMessage *msg,
+                       icalproperty *rrule,
+                       icaltimetype *dtstart)
 {
-	char buffer[256];
-	int i, len;
+	gchar buffer[256];
+	gint i, len;
 	gboolean is_relative = FALSE;
 
 	/* MSDN reference: http://msdn.microsoft.com/en-us/library/aa580471%28v=EXCHG.80%29.aspx
@@ -452,10 +484,10 @@ void ewscal_set_reccurence (ESoapMessage *msg, icalproperty *rrule, icaltimetype
 			e_ews_message_write_string_parameter (msg, "Interval", NULL, buffer);
 
 			len = snprintf (buffer, 256, "%s",
-				number_to_weekday(icalrecurrencetype_day_day_of_week(recur.by_day[0])));
+				number_to_weekday (icalrecurrencetype_day_day_of_week (recur.by_day[0])));
 			for (i = 1; recur.by_day[i] != ICAL_RECURRENCE_ARRAY_MAX; i++) {
 				len += snprintf (buffer+len, 256-len, " %s",
-					number_to_weekday(icalrecurrencetype_day_day_of_week(recur.by_day[i])));
+					number_to_weekday (icalrecurrencetype_day_day_of_week (recur.by_day[i])));
 			}
 			e_ews_message_write_string_parameter(msg, "DaysOfWeek", NULL, buffer);
 
@@ -471,10 +503,10 @@ void ewscal_set_reccurence (ESoapMessage *msg, icalproperty *rrule, icaltimetype
 				 TODO: extend the code with all possible monthly recurrence settings */
 				snprintf (buffer, 32, "%d", recur.interval);
 				e_ews_message_write_string_parameter(msg, "Interval", NULL, buffer);
-				
+
 				e_ews_message_write_string_parameter(msg, "DaysOfWeek", NULL,
-					number_to_weekday (icalrecurrencetype_day_day_of_week(recur.by_day[0])));
-				
+					number_to_weekday (icalrecurrencetype_day_day_of_week (recur.by_day[0])));
+
 				e_ews_message_write_string_parameter(msg, "DayOfWeekIndex", NULL, weekindex_to_ical ((recur.by_set_pos[0] == 5 ? -1 : recur.by_set_pos[0])));
 
 				e_soap_message_end_element (msg); /* "RelativeMonthlyRecurrence" */
@@ -557,17 +589,18 @@ exit:
 }
 
 static struct icaltimetype
-icalcomponent_get_datetime(icalcomponent *comp, icalproperty *prop)
+icalcomponent_get_datetime (icalcomponent *comp,
+                            icalproperty *prop)
 {
 	/* Extract datetime with proper timezone */
 	icalcomponent *c;
 	icalparameter *param;
 	struct icaltimetype ret;
 
-	ret = icalvalue_get_datetime (icalproperty_get_value(prop));
+	ret = icalvalue_get_datetime (icalproperty_get_value (prop));
 
 	if ((param = icalproperty_get_first_parameter (prop, ICAL_TZID_PARAMETER)) != NULL) {
-		const char *tzid = icalparameter_get_tzid (param);
+		const gchar *tzid = icalparameter_get_tzid (param);
 		icaltimezone *tz = NULL;
 
 		for (c = comp; c != NULL; c = icalcomponent_get_parent (c)) {
@@ -576,16 +609,18 @@ icalcomponent_get_datetime(icalcomponent *comp, icalproperty *prop)
 		}
 
 		if (tz == NULL)
-			tz = icaltimezone_get_builtin_timezone_from_tzid(tzid);
+			tz = icaltimezone_get_builtin_timezone_from_tzid (tzid);
 
 		if (tz != NULL)
-			ret = icaltime_set_timezone(&ret, tz);
+			ret = icaltime_set_timezone (&ret, tz);
 	}
 
 	return ret;
 }
 
-void ewscal_set_reccurence_exceptions (ESoapMessage *msg, icalcomponent *comp)
+void
+ewscal_set_reccurence_exceptions (ESoapMessage *msg,
+                                  icalcomponent *comp)
 {
 	icalproperty *exdate;
 
@@ -596,7 +631,7 @@ void ewscal_set_reccurence_exceptions (ESoapMessage *msg, icalcomponent *comp)
 	e_soap_message_start_element (msg, "DeletedOccurrences", NULL, NULL);
 
 	for (; exdate; exdate = icalcomponent_get_next_property (comp, ICAL_EXDATE_PROPERTY)) {
-		struct icaltimetype exdatetime = icalcomponent_get_datetime(comp, exdate);
+		struct icaltimetype exdatetime = icalcomponent_get_datetime (comp, exdate);
 
 		e_soap_message_start_element (msg, "DeletedOccurrence", NULL, NULL);
 
@@ -608,12 +643,16 @@ void ewscal_set_reccurence_exceptions (ESoapMessage *msg, icalcomponent *comp)
 	e_soap_message_end_element (msg); /* "DeletedOccurrences" */
 }
 
-void ewscal_get_attach_differences (const GSList *original, const GSList *modified, GSList **removed, GSList **added)
+void
+ewscal_get_attach_differences (const GSList *original,
+                               const GSList *modified,
+                               GSList **removed,
+                               GSList **added)
 {
 	gboolean flag;
 	GSList *i, *i_next, *j, *j_next, *original_copy, *modified_copy;
-	original_copy = g_slist_copy ((GSList *)original);
-	modified_copy = g_slist_copy ((GSList *)modified);
+	original_copy = g_slist_copy ((GSList *) original);
+	modified_copy = g_slist_copy ((GSList *) modified);
 
 	for (j = modified_copy; j; j = j_next) {
 		j_next = j->next;
@@ -637,14 +676,15 @@ void ewscal_get_attach_differences (const GSList *original, const GSList *modifi
 /*
  * get meeting organizer e-mail address
  */
-const char *e_ews_collect_organizer(icalcomponent *comp)
+const gchar *
+e_ews_collect_organizer (icalcomponent *comp)
 {
 	icalproperty *org_prop = NULL;
 	const gchar *org = NULL;
-	const char *org_email_address = NULL;
+	const gchar *org_email_address = NULL;
 
 	org_prop = icalcomponent_get_first_property (comp, ICAL_ORGANIZER_PROPERTY);
-	org = icalproperty_get_organizer(org_prop);
+	org = icalproperty_get_organizer (org_prop);
 	if (!org)
 		org = "";
 	else
@@ -655,22 +695,24 @@ const char *e_ews_collect_organizer(icalcomponent *comp)
 	return org_email_address;
 }
 
-gchar *e_ews_extract_attachment_id_from_uri (const gchar *uri)
+gchar *
+e_ews_extract_attachment_id_from_uri (const gchar *uri)
 {
 	gchar *attachment_id, *filepath = g_filename_from_uri (uri, NULL, NULL);
 	gchar **dirs = g_strsplit (filepath, "/", 0);
-	int n = 0;
+	gint n = 0;
 
 	while (dirs[n]) n++;
 
-	attachment_id = g_strdup (dirs[n-1]);
+	attachment_id = g_strdup (dirs[n - 1]);
 
 	g_strfreev (dirs);
 
 	return attachment_id;
 }
 
-void e_ews_clean_icalcomponent (icalcomponent *icalcomp)
+void
+e_ews_clean_icalcomponent (icalcomponent *icalcomp)
 {
 	icalproperty *prop, *item_id_prop = NULL, *changekey_prop = NULL;
 

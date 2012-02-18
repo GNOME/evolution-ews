@@ -60,7 +60,7 @@ gint e_plugin_lib_enable (EPlugin *ep, gint enable);
 
 /* Account Setup */
 GtkWidget *org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *data);
-gboolean org_gnome_exchange_ews_check_options(EPlugin *epl, EConfigHookPageCheckData *data);
+gboolean org_gnome_exchange_ews_check_options (EPlugin *epl, EConfigHookPageCheckData *data);
 
 /* OAB receiving options */
 GtkWidget * org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data);
@@ -72,13 +72,14 @@ void	org_gnome_exchange_ews_commit ( EPlugin *epl, EMConfigTargetSettings *targe
 static ExchangeEWSAccountListener *config_listener = NULL;
 
 static void
-free_ews_listener ( void )
+free_ews_listener (void)
 {
 	g_object_unref (config_listener);
 }
 
 gint
-e_plugin_lib_enable (EPlugin *ep, gint enable)
+e_plugin_lib_enable (EPlugin *ep,
+                     gint enable)
 {
 	if (!config_listener)
 		config_listener = exchange_ews_account_listener_new ();
@@ -104,28 +105,28 @@ struct _AutoDiscCallBackData {
 static void autodiscover_callback (EwsUrls *urls, gpointer user_data, GError *error)
 {
 	struct _AutoDiscCallBackData *cbdata = (struct _AutoDiscCallBackData *) user_data;
-	
+
 	if (error) {
 		g_warning ("Autodiscover failed: %s", error->message);
 		e_notice (NULL, GTK_MESSAGE_ERROR, _("Autodiscover failed: %s"), error->message);
 		g_clear_error (&error);
 	}
 	if (urls) {
-		char *oab_url;
+		gchar *oab_url;
 
 		gtk_entry_set_text (GTK_ENTRY (cbdata->host_entry), urls->as_url);
 
 		oab_url = g_strconcat (urls->oab_url, "oab.xml", NULL);
 		gtk_entry_set_text (GTK_ENTRY (cbdata->oab_entry), oab_url);
 		g_free (oab_url);
-		
+
 		g_free (urls->as_url);
 		g_free (urls->oab_url);
 		g_free (urls);
 	}
 }
 
-static char *
+static gchar *
 get_password (EMConfigTargetSettings *target_account)
 {
 	gchar *key, *password = NULL;
@@ -152,7 +153,7 @@ get_password (EMConfigTargetSettings *target_account)
 		g_free (password);
 		title = g_strdup_printf (_("Enter Password for %s"), host);
 		password = e_passwords_ask_password (title, EXCHANGE_EWS_PASSWORD_COMPONENT, key, title,
-                                                    E_PASSWORDS_REMEMBER_FOREVER|E_PASSWORDS_SECRET,
+						    E_PASSWORDS_REMEMBER_FOREVER | E_PASSWORDS_SECRET,
 						     &remember, NULL);
 		g_free (title);
 	}
@@ -168,7 +169,8 @@ get_password (EMConfigTargetSettings *target_account)
 }
 
 static void
-validate_credentials (GtkWidget *widget, struct _AutoDiscCallBackData *cbdata)
+validate_credentials (GtkWidget *widget,
+                      struct _AutoDiscCallBackData *cbdata)
 {
 	EConfig *config = cbdata->config;
 	EMConfigTargetSettings *target_account = (EMConfigTargetSettings *)(config->target);
@@ -191,7 +193,8 @@ validate_credentials (GtkWidget *widget, struct _AutoDiscCallBackData *cbdata)
 }
 
 static void
-oab_url_changed (GtkWidget *entry, EConfig *config)
+oab_url_changed (GtkWidget *entry,
+                 EConfig *config)
 {
 	EMConfigTargetSettings *target = (EMConfigTargetSettings *)(config->target);
 	CamelEwsSettings *ews_settings;
@@ -203,7 +206,8 @@ oab_url_changed (GtkWidget *entry, EConfig *config)
 }
 
 static void
-host_url_changed (GtkWidget *entry, EConfig *config)
+host_url_changed (GtkWidget *entry,
+                  EConfig *config)
 {
 	EMConfigTargetSettings *target = (EMConfigTargetSettings *)(config->target);
 	CamelEwsSettings *ews_settings;
@@ -215,7 +219,8 @@ host_url_changed (GtkWidget *entry, EConfig *config)
 }
 
 GtkWidget *
-org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *data)
+org_gnome_exchange_ews_account_setup (EPlugin *epl,
+                                      EConfigHookItemFactoryData *data)
 {
 	EMConfigTargetSettings *target_account;
 	EShell *shell;
@@ -233,7 +238,7 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 	const gchar *temp, *email_id;
 	struct _AutoDiscCallBackData *cbdata;
 
-	target_account = (EMConfigTargetSettings *)data->config->target;
+	target_account = (EMConfigTargetSettings *) data->config->target;
 	settings = target_account->storage_settings;
 
 	if (!CAMEL_IS_EWS_SETTINGS (settings))
@@ -310,14 +315,14 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 	g_signal_connect (G_OBJECT(auto_discover), "clicked",  G_CALLBACK(validate_credentials), cbdata);
 
 	/* Add Host entry */
-	gtk_table_attach (GTK_TABLE (data->parent), label, 0, 1, row, row+1, 0, 0, 0, 0);
+	gtk_table_attach (GTK_TABLE (data->parent), label, 0, 1, row, row + 1, 0, 0, 0, 0);
 	gtk_widget_show_all (GTK_WIDGET (hbox));
-	gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (hbox), 1, 2, row, row+1, GTK_FILL|GTK_EXPAND, GTK_FILL, 0, 0);
+	gtk_table_attach (GTK_TABLE (data->parent), GTK_WIDGET (hbox), 1, 2, row, row + 1, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
 	row++;
 
 	/* Add OAB entry */
-	gtk_table_attach (GTK_TABLE (data->parent), oab_label, 0, 1, row, row+1, 0, 0, 0, 0);
-	gtk_table_attach (GTK_TABLE (data->parent), oab_url, 1, 2, row, row+1, GTK_FILL|GTK_EXPAND, GTK_FILL, 0, 0);
+	gtk_table_attach (GTK_TABLE (data->parent), oab_label, 0, 1, row, row + 1, 0, 0, 0, 0);
+	gtk_table_attach (GTK_TABLE (data->parent), oab_url, 1, 2, row, row + 1, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
 	row++;
 
 	/* If evolution is offline, dsensitize fetch button and oab entry */
@@ -329,7 +334,8 @@ org_gnome_exchange_ews_account_setup (EPlugin *epl, EConfigHookItemFactoryData *
 }
 
 gboolean
-org_gnome_exchange_ews_check_options(EPlugin *epl, EConfigHookPageCheckData *data)
+org_gnome_exchange_ews_check_options (EPlugin *epl,
+                                      EConfigHookPageCheckData *data)
 {
 	EMConfigTargetSettings *target = (EMConfigTargetSettings *)(data->config->target);
 	CamelEwsSettings *ews_settings;
@@ -401,14 +407,14 @@ update_camel_url (struct _oab_setting_data *cbdata)
 	CamelEwsSettings *ews_settings;
 
 	ews_settings = CAMEL_EWS_SETTINGS (target->storage_settings);
-	
+
 	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (cbdata->check))) {
 		gint num;
-		
+
 		gtk_widget_set_sensitive (cbdata->hbox, TRUE);
 		camel_ews_settings_set_oab_offline (ews_settings, TRUE);
 		num = gtk_combo_box_get_active (GTK_COMBO_BOX (cbdata->combo_text));
-		
+
 		/* Set the active oal */
 		if (cbdata->oals && num != -1) {
 			gchar *mangled_oal;
@@ -429,7 +435,8 @@ update_camel_url (struct _oab_setting_data *cbdata)
 }
 
 static void
-cache_setting_toggled (GtkToggleButton *check, gpointer user_data)
+cache_setting_toggled (GtkToggleButton *check,
+                       gpointer user_data)
 {
 	struct _oab_setting_data *cbdata = (struct _oab_setting_data *) user_data;
 
@@ -437,7 +444,8 @@ cache_setting_toggled (GtkToggleButton *check, gpointer user_data)
 }
 
 static void
-combo_selection_changed (GtkComboBox *combo, gpointer user_data)
+combo_selection_changed (GtkComboBox *combo,
+                         gpointer user_data)
 {
 	struct _oab_setting_data *cbdata = (struct _oab_setting_data *) user_data;
 
@@ -445,7 +453,9 @@ combo_selection_changed (GtkComboBox *combo, gpointer user_data)
 }
 
 static void
-ews_oal_list_ready (GObject *obj, GAsyncResult *res, gpointer user_data)
+ews_oal_list_ready (GObject *obj,
+                    GAsyncResult *res,
+                    gpointer user_data)
 {
 	struct _oab_setting_data *cbdata = (struct _oab_setting_data *) user_data;
 	EEwsConnection *cnc = E_EWS_CONNECTION (obj);
@@ -462,7 +472,7 @@ ews_oal_list_ready (GObject *obj, GAsyncResult *res, gpointer user_data)
 
 		if (cancelled) {
 			g_clear_error (&error);
-			return;	
+			return;
 		}
 
 		e_notice (NULL, GTK_MESSAGE_ERROR, "%s%s", _("Could not fetch oal list: "), error->message);
@@ -479,7 +489,7 @@ ews_oal_list_ready (GObject *obj, GAsyncResult *res, gpointer user_data)
 
 	for (l = oals; l != NULL; l = g_slist_next (l)) {
 		EwsOAL *oal = l->data;
-		
+
 		gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (cbdata->combo_text), oal->name);
 	}
 
@@ -489,7 +499,8 @@ ews_oal_list_ready (GObject *obj, GAsyncResult *res, gpointer user_data)
 }
 
 static void
-fetch_button_clicked_cb (GtkButton *button, gpointer user_data)
+fetch_button_clicked_cb (GtkButton *button,
+                         gpointer user_data)
 {
 	struct _oab_setting_data *cbdata = (struct _oab_setting_data *) user_data;
 	EMConfigTargetSettings *target = (EMConfigTargetSettings *) cbdata->config->target;
@@ -500,7 +511,7 @@ fetch_button_clicked_cb (GtkButton *button, gpointer user_data)
 	const gchar *oab_url;
 	const gchar *user;
 	gchar *password;
-	
+
 	cancellable = g_cancellable_new ();
 
 	ews_settings = CAMEL_EWS_SETTINGS (target->storage_settings);
@@ -508,14 +519,13 @@ fetch_button_clicked_cb (GtkButton *button, gpointer user_data)
 
 	/* De-sensitize fetch_button and get the list from the server */
 	g_signal_handlers_block_by_func (cbdata->combo_text, combo_selection_changed, cbdata);
-	
+
 	clear_combo (GTK_COMBO_BOX_TEXT (cbdata->combo_text));
 	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (cbdata->combo_text), _("Fetching..."));
 	gtk_combo_box_set_active (GTK_COMBO_BOX (cbdata->combo_text), 0);
 	gtk_widget_set_sensitive (GTK_WIDGET (button), FALSE);
 
 	g_signal_handlers_unblock_by_func (cbdata->combo_text, combo_selection_changed, cbdata);
-	
 
 	/* Fetch the oab lists from server */
 	oab_url = camel_ews_settings_get_oaburl (ews_settings);
@@ -531,7 +541,8 @@ fetch_button_clicked_cb (GtkButton *button, gpointer user_data)
 }
 
 static void
-ews_oal_free (gpointer data, gpointer user_data)
+ews_oal_free (gpointer data,
+              gpointer user_data)
 {
 	EwsOAL *oal = (EwsOAL *) data;
 
@@ -542,18 +553,19 @@ ews_oal_free (gpointer data, gpointer user_data)
 }
 
 static gboolean
-table_deleted_cb (GtkWidget *widget, gpointer user_data)
+table_deleted_cb (GtkWidget *widget,
+                  gpointer user_data)
 {
 	struct _oab_setting_data *cbdata = (struct _oab_setting_data *) user_data;
-	
+
 	if (cbdata->cancellable)
 		g_cancellable_cancel (cbdata->cancellable);
-	
+
 	if (cbdata->oals) {
 		g_slist_foreach (cbdata->oals, (GFunc) ews_oal_free, NULL);
 		g_slist_free (cbdata->oals);
 	}
-	
+
 	g_free (cbdata);
 	return FALSE;
 }
@@ -580,10 +592,10 @@ init_widgets (struct _oab_setting_data *cbdata)
 		/* selected list will be of form "id:name" */
 		if (selected_list && gtk_combo_box_get_active (GTK_COMBO_BOX (cbdata->combo_text)) == -1) {
 			const gchar *tmp;
-			
+
 			tmp = strrchr (selected_list, ':');
-			gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (cbdata->combo_text), tmp+1);
-			
+			gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (cbdata->combo_text), tmp + 1);
+
 			g_signal_handlers_block_by_func (cbdata->combo_text, combo_selection_changed, cbdata);
 			gtk_combo_box_set_active (GTK_COMBO_BOX (cbdata->combo_text), 0);
 			g_signal_handlers_unblock_by_func (cbdata->combo_text, combo_selection_changed, cbdata);
@@ -600,7 +612,8 @@ init_widgets (struct _oab_setting_data *cbdata)
 }
 
 static void
-ews_prepare_receive_options_page (GtkWidget *page, gpointer user_data)
+ews_prepare_receive_options_page (GtkWidget *page,
+                                  gpointer user_data)
 {
 	struct _oab_setting_data *cbdata = (struct _oab_setting_data *) user_data;
 	GtkWidget *receive_options;
@@ -611,19 +624,25 @@ ews_prepare_receive_options_page (GtkWidget *page, gpointer user_data)
 }
 
 static void
-ews_assistant_page_changed_cb (GtkAssistant *assistant, GtkWidget *page, gpointer user_data)
+ews_assistant_page_changed_cb (GtkAssistant *assistant,
+                               GtkWidget *page,
+                               gpointer user_data)
 {
 	ews_prepare_receive_options_page (page, user_data);
 }
 
 static void
-ews_page_switched_cb (GtkNotebook *notebook, GtkWidget *page, guint page_num, gpointer user_data)
+ews_page_switched_cb (GtkNotebook *notebook,
+                      GtkWidget *page,
+                      guint page_num,
+                      gpointer user_data)
 {
 	ews_prepare_receive_options_page (page, user_data);
 }
 
 GtkWidget *
-org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
+org_gnome_ews_oab_settings (EPlugin *epl,
+                            EConfigHookItemFactoryData *data)
 {
 	EMConfigTargetSettings *target_account;
 	GtkWidget *check = NULL;
@@ -633,7 +652,7 @@ org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 	EShell *shell;
 	struct _oab_setting_data *cbdata;
 
-	target_account = (EMConfigTargetSettings *)data->config->target;
+	target_account = (EMConfigTargetSettings *) data->config->target;
 
 	if (!CAMEL_IS_EWS_SETTINGS (target_account->storage_settings))
 		return NULL;
@@ -641,25 +660,25 @@ org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 	/* Add cache check box */
 	check = gtk_check_button_new_with_mnemonic (_("Cache o_ffline address book"));
 	gtk_widget_show (check);
-	gtk_table_attach (GTK_TABLE (data->parent), check, 0, 1, row, row+1, 0, 0, 0, 0);
+	gtk_table_attach (GTK_TABLE (data->parent), check, 0, 1, row, row + 1, 0, 0, 0, 0);
 	row++;
 
 	/* Add label */	
 	label = gtk_label_new_with_mnemonic (_("Select Ad_dress list: "));
 	gtk_widget_show (label);
-	gtk_table_attach (GTK_TABLE (data->parent), label, 0, 1, row, row+1, 0, 0, 0, 0);
+	gtk_table_attach (GTK_TABLE (data->parent), label, 0, 1, row, row + 1, 0, 0, 0, 0);
 
 	/* OAL combo and fetch OAL button */
 	hbox = gtk_hbox_new (FALSE, 6);
 	oal_combo = gtk_combo_box_text_new ();
-	gtk_label_set_mnemonic_widget (GTK_LABEL(label), oal_combo);
+	gtk_label_set_mnemonic_widget (GTK_LABEL (label), oal_combo);
 	gtk_box_pack_start (GTK_BOX (hbox), oal_combo, TRUE, TRUE, 0);
 
 	fetch_button = gtk_button_new_with_mnemonic (_("Fetch _list"));
 	gtk_box_pack_start (GTK_BOX (hbox), fetch_button, FALSE, FALSE, 0);
 
 	/* Add hbox to table */
-	gtk_table_attach (GTK_TABLE (data->parent), hbox, 1, 2, row, row+1, GTK_FILL|GTK_EXPAND, GTK_FILL, 0, 0);
+	gtk_table_attach (GTK_TABLE (data->parent), hbox, 1, 2, row, row + 1, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
 	gtk_widget_show_all (hbox);
 	row++;
 
@@ -670,13 +689,13 @@ org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 		gtk_widget_set_sensitive (hbox, FALSE);
 		return check;
 	}
-	
+
 	cbdata = g_new0 (struct _oab_setting_data, 1);
 	cbdata->check = check;
 	cbdata->combo_text = oal_combo;
 	cbdata->hbox = hbox;
 	cbdata->fetch_button = fetch_button;
-	cbdata->config = data->config; 
+	cbdata->config = data->config;
 
 	/* Connect the signals */
 	g_signal_connect (check, "toggled", G_CALLBACK (cache_setting_toggled), cbdata);
@@ -696,13 +715,13 @@ org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 }
 
 void
-org_gnome_exchange_ews_commit ( EPlugin *epl,
-                           	EMConfigTargetSettings *target_account)
+org_gnome_exchange_ews_commit (EPlugin *epl,
+                               EMConfigTargetSettings *target_account)
 {
 	/*return if it is not a ews account*/
 	if (!CAMEL_IS_EWS_SETTINGS (target_account->storage_settings))
 		return;
-	
+
 	/* Verify the storage and transport settings are shared. */
 	g_warn_if_fail (
 		target_account->storage_settings ==
@@ -713,7 +732,8 @@ org_gnome_exchange_ews_commit ( EPlugin *epl,
 }
 
 GtkWidget *
-org_gnome_ews_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
+org_gnome_ews_settings (EPlugin *epl,
+                        EConfigHookItemFactoryData *data)
 {
 	EMConfigTargetSettings *target_account;
 	GtkVBox *vbox_settings;

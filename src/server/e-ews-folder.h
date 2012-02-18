@@ -74,7 +74,7 @@ guint32		e_ews_folder_get_child_count (EEwsFolder *folder);
 gboolean	e_ews_folder_get_is_writable (EEwsFolder *folder);
 void		e_ews_folder_set_is_writable (EEwsFolder *folder, gboolean writable);
 EwsFolderType	e_ews_folder_get_folder_type (EEwsFolder *folder);
-void 		e_ews_folder_set_folder_type (EEwsFolder *folder, EwsFolderType folder_type);
+void		e_ews_folder_set_folder_type (EEwsFolder *folder, EwsFolderType folder_type);
 
 void		e_ews_folder_free_fid (EwsFolderId *fid);
 

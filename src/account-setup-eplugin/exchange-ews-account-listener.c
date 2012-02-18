@@ -69,7 +69,7 @@ is_ews_account (EAccount *account)
 	return (account->source->url && (g_ascii_strncasecmp (account->source->url, EWS_URI_PREFIX, EWS_PREFIX_LENGTH) == 0));
 }
 
-static EwsAccountInfo*
+static EwsAccountInfo *
 lookup_account_info (const gchar *key)
 {
 	GList *list;
@@ -111,7 +111,8 @@ ews_account_info_free (EwsAccountInfo *info)
 }
 
 static void
-ews_account_removed (EAccountList *account_listener, EAccount *account)
+ews_account_removed (EAccountList *account_listener,
+                     EAccount *account)
 {
 	EShell *shell;
 	EShellBackend *shell_backend;
@@ -142,20 +143,21 @@ ews_account_removed (EAccountList *account_listener, EAccount *account)
 	storage_path = g_strdup (camel_service_get_user_cache_dir (service));
 	summary_file = g_build_filename (storage_path, "folder-tree", NULL);
 	g_unlink (summary_file);
-	
+
 	d(g_print ("Removed ews store summary: %s \n", summary_file);)
-	
+
 	g_free (storage_path);
 	g_free (summary_file);
 	ews_account_info_free (info);
 
 	/* FIXME: This wasn't done for EDS 3.2+?  Is that right? 
-	   g_object_unref (service);
+	 * g_object_unref (service);
 	*/
 }
 
 static gboolean
-ews_is_str_equal (const gchar *str1, const gchar *str2)
+ews_is_str_equal (const gchar *str1,
+                  const gchar *str2)
 {
 	if (str1 && str2 && !strcmp (str1, str2))
 		return TRUE;
@@ -171,7 +173,7 @@ remove_gal_esource (const gchar *account_name)
 	ESourceList *source_list;
 	ESourceGroup *group;
 	ESource *source;
-	GConfClient* client;
+	GConfClient *client;
 	const gchar *conf_key;
 	GSList *sources;
 	gboolean ret = TRUE;
@@ -218,7 +220,7 @@ add_gal_esource (CamelURL *url)
 	ESourceList *source_list;
 	ESourceGroup *group;
 	ESource *source;
-	GConfClient* client;
+	GConfClient *client;
 	const gchar *conf_key, *email_id;
 	const gchar *oal_sel, *tmp, *oal_name;
 	gchar *oal_id = NULL;
@@ -241,7 +243,7 @@ add_gal_esource (CamelURL *url)
 	account_uri = camel_url_to_string (url, CAMEL_URL_HIDE_PARAMS);
 	source_uri = g_strdup_printf ("%s;gal=1", account_uri + strlen (EWS_BASE_URI));
 	source = e_source_new (oal_name, source_uri);
-	
+
 	/* set properties */
 	e_source_set_property (source, "username", url->user);
 	e_source_set_property (source, "auth-domain", "Exchange Web Services");
@@ -277,7 +279,8 @@ add_gal_esource (CamelURL *url)
 }
 
 static void
-ews_account_changed (EAccountList *account_listener, EAccount *account)
+ews_account_changed (EAccountList *account_listener,
+                     EAccount *account)
 {
 	gboolean ews_account = FALSE;
 	EwsAccountInfo *existing_account_info = NULL;
@@ -297,7 +300,7 @@ ews_account_changed (EAccountList *account_listener, EAccount *account)
 		else {
 			CamelURL *old_url, *new_url;
 			const gchar *o_oal_sel, *n_oal_sel;
-			
+
 			/* TODO update props like refresh timeout */
 			old_url = camel_url_new (existing_account_info->source_url, NULL);
 			new_url = camel_url_new (account->source->url, NULL);
@@ -307,14 +310,14 @@ ews_account_changed (EAccountList *account_listener, EAccount *account)
 
 			if (!ews_is_str_equal (o_oal_sel, n_oal_sel)) {
 				const gchar *account_name = camel_url_get_param (new_url, "email");
-				
+
 				/* remove gal esource and cache associated with it */
 				remove_gal_esource (account_name);
-			
+
 				/* add gal esource */
 				add_gal_esource (new_url);
 			}
-			
+
 			g_free (existing_account_info->name);
 			g_free (existing_account_info->source_url);
 			existing_account_info->name = g_strdup (account->name);
@@ -327,7 +330,8 @@ ews_account_changed (EAccountList *account_listener, EAccount *account)
 }
 
 static void
-ews_account_added (EAccountList *account_listener, EAccount *account)
+ews_account_added (EAccountList *account_listener,
+                   EAccount *account)
 {
 	gboolean ews_account = FALSE;
 
@@ -339,7 +343,7 @@ ews_account_added (EAccountList *account_listener, EAccount *account)
 		EwsAccountInfo *info = ews_account_info_from_eaccount (account);
 		ews_accounts = g_list_append (ews_accounts, info);
 		url = camel_url_new (account->source->url, NULL);
-		
+
 		/* add gal esource */
 		add_gal_esource (url);
 
@@ -354,7 +358,7 @@ exchange_ews_account_listener_construct (ExchangeEWSAccountListener *config_list
 
 	config_listener->priv->account_list = e_account_list_new (config_listener->priv->gconf_client);
 
-	for (iter = e_list_get_iterator (E_LIST(config_listener->priv->account_list)); e_iterator_is_valid (iter); e_iterator_next (iter)) {
+	for (iter = e_list_get_iterator (E_LIST (config_listener->priv->account_list)); e_iterator_is_valid (iter); e_iterator_next (iter)) {
 		EAccount *account = E_ACCOUNT (e_iterator_get (iter));
 		if (is_ews_account (account) && account->enabled) {
 			EwsAccountInfo *info;
@@ -425,7 +429,7 @@ exchange_ews_account_listener_new (void)
 	ExchangeEWSAccountListener *config_listener;
 
 	config_listener = g_object_new (EXCHANGE_EWS_ACCOUNT_LISTENER_TYPE, NULL);
-	config_listener->priv->gconf_client = gconf_client_get_default();
+	config_listener->priv->gconf_client = gconf_client_get_default ();
 
 	exchange_ews_account_listener_construct (config_listener);
 

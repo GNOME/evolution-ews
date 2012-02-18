@@ -28,10 +28,10 @@
 
 ESoapMessage *
 e_ews_message_new_with_header (const gchar *uri,
-			      const gchar *method_name,
-			      const gchar *attribute_name,
-			      const gchar *attribute_value,
-			      EwsServerVersion server_info)
+                               const gchar *method_name,
+                               const gchar *attribute_name,
+                               const gchar *attribute_value,
+                               EwsServerVersion server_info)
 {
 	ESoapMessage *msg;
 	const gchar *server_ver;
@@ -64,11 +64,11 @@ e_ews_message_new_with_header (const gchar *uri,
 
 	e_soap_message_end_header (msg);
 
-	e_soap_message_start_body(msg);
+	e_soap_message_start_body (msg);
 	e_soap_message_add_namespace(msg, "messages",
 				       "http://schemas.microsoft.com/exchange/services/2006/messages");
 	e_soap_message_start_element(msg, method_name, "messages", NULL);
-	e_soap_message_set_default_namespace(msg,
+	e_soap_message_set_default_namespace (msg,
 						"http://schemas.microsoft.com/exchange/services/2006/types");
 	if (attribute_name)
 		e_soap_message_add_attribute (msg, attribute_name, attribute_value, NULL, NULL);
@@ -76,7 +76,10 @@ e_ews_message_new_with_header (const gchar *uri,
 }
 
 void
-e_ews_message_write_string_parameter (ESoapMessage *msg, const gchar *name, const gchar *prefix, const gchar *value)
+e_ews_message_write_string_parameter (ESoapMessage *msg,
+                                      const gchar *name,
+                                      const gchar *prefix,
+                                      const gchar *value)
 {
 	e_soap_message_start_element (msg, name, prefix, NULL);
 	e_soap_message_write_string (msg, value);
@@ -85,11 +88,11 @@ e_ews_message_write_string_parameter (ESoapMessage *msg, const gchar *name, cons
 
 void
 e_ews_message_write_string_parameter_with_attribute (ESoapMessage *msg,
-						    const gchar *name,
-						    const gchar *prefix,
-						    const gchar *value,
-						    const gchar *attribute_name,
-						    const gchar *attribute_value)
+                                                     const gchar *name,
+                                                     const gchar *prefix,
+                                                     const gchar *value,
+                                                     const gchar *attribute_name,
+                                                     const gchar *attribute_value)
 {
 	e_soap_message_start_element (msg, name, prefix, NULL);
 	e_soap_message_add_attribute (msg, attribute_name, attribute_value, NULL, NULL);
@@ -98,7 +101,10 @@ e_ews_message_write_string_parameter_with_attribute (ESoapMessage *msg,
 }
 
 void
-e_ews_message_write_base64_parameter (ESoapMessage *msg, const gchar *name, const gchar *prefix, const gchar *value)
+e_ews_message_write_base64_parameter (ESoapMessage *msg,
+                                      const gchar *name,
+                                      const gchar *prefix,
+                                      const gchar *value)
 {
 	e_soap_message_start_element (msg, name, prefix, NULL);
 	e_soap_message_write_base64 (msg, value, strlen (value));
@@ -106,7 +112,10 @@ e_ews_message_write_base64_parameter (ESoapMessage *msg, const gchar *name, cons
 }
 
 void
-e_ews_message_write_int_parameter (ESoapMessage *msg, const gchar *name, const gchar *prefix, glong value)
+e_ews_message_write_int_parameter (ESoapMessage *msg,
+                                   const gchar *name,
+                                   const gchar *prefix,
+                                   glong value)
 {
 	e_soap_message_start_element (msg, name, prefix, NULL);
 	e_soap_message_write_int (msg, value);

@@ -32,11 +32,11 @@
 
 /* endian-neutral reading of little-endian data */
 #define __egi32(a,n) ( ((((unsigned char *) a)[n+3]) << 24) | \
-                       ((((unsigned char *) a)[n+2]) << 16) | \
-                       ((((unsigned char *) a)[n+1]) <<  8) | \
-                       ((((unsigned char *) a)[n+0])))
+                       ((((guchar *) a)[n + 2]) << 16) | \
+                       ((((guchar *) a)[n + 1]) <<  8) | \
+                       ((((guchar *) a)[n + 0])))
 #define EndGetI64(a) ((((unsigned long long int) __egi32(a,4)) << 32) | \
-                      ((unsigned int) __egi32(a,0)))
+                      ((guint) __egi32 (a,0)))
 #define EndGetI32(a) __egi32(a,0)
 #define EndGetI16(a) ((((a)[1])<<8)|((a)[0]))
 
@@ -55,19 +55,21 @@ typedef struct {
 } LzxBlockHeader;
 
 static gboolean
-read_uint32 (FILE *input, guint32 *val)
+read_uint32 (FILE *input,
+             guint32 *val)
 {
-	gchar buf [4];
+	gchar buf[4];
 
 	if (fread (buf, 1, 4, input) == 4) {
 		*val = EndGetI32 (buf);
-		return TRUE;	
-	} else 
+		return TRUE;
+	} else
 		return FALSE;
 }
 
 static LzxHeader *
-read_headers (FILE *input, GError **error)
+read_headers (FILE *input,
+              GError **error)
 {
 	LzxHeader *lzx_h;
 	gboolean success;
@@ -99,7 +101,7 @@ exit:
 	if (!success) {
 		/* set the right domain later */
 		g_set_error_literal (error, g_quark_from_string ("lzx"), 1, "Unable to read lzx main header");
-		
+
 		g_free (lzx_h);
 		lzx_h = NULL;
 	}
@@ -108,7 +110,8 @@ exit:
 }
 
 static LzxBlockHeader *
-read_block_header (FILE *input, GError **error)
+read_block_header (FILE *input,
+                   GError **error)
 {
 	LzxBlockHeader *lzx_b;
 	gboolean success;
@@ -122,27 +125,29 @@ read_block_header (FILE *input, GError **error)
 	success = read_uint32 (input, &lzx_b->comp_size);
 	if (!success)
 		goto exit;
-	
+
 	success = read_uint32 (input, &lzx_b->ucomp_size);
 	if (!success)
 		goto exit;
-	
+
 	success = read_uint32 (input, &lzx_b->crc);
 
 exit:
 	if (!success) {
 		/* set the right domain later */
 		g_set_error_literal (error, g_quark_from_string ("lzx"), 1, "Unable to read lzx block header");
-		
+
 		g_free (lzx_b);
 		lzx_b = NULL;
 	}
 
-	return	lzx_b; 
+	return	lzx_b;
 }
 
 gboolean
-oal_decompress_v4_full_detail_file (const gchar *filename, const gchar *output_filename, GError **error)
+oal_decompress_v4_full_detail_file (const gchar *filename,
+                                    const gchar *output_filename,
+                                    GError **error)
 {
 	LzxHeader *lzx_h = NULL;
 	guint total_decomp_size = 0;
@@ -154,14 +159,14 @@ oal_decompress_v4_full_detail_file (const gchar *filename, const gchar *output_f
 	if (!input) {
 		g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "unable to open the input file");
 		ret = FALSE;
-		goto exit;	
+		goto exit;
 	}
-	
+
 	output = fopen (output_filename, "wb");
 	if (!input) {
 		g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "unable to open the output file");
 		ret = FALSE;
-		goto exit;	
+		goto exit;
 	}
 
 	lzx_h = read_headers (input, &err);
@@ -169,11 +174,11 @@ oal_decompress_v4_full_detail_file (const gchar *filename, const gchar *output_f
 		ret = FALSE;
 		goto exit;
 	}
-	
+
 	/* TODO decompressing multiple lzx_blocks has not been tested yet. Will need to get a setup and test it. */
 	do {
 		LzxBlockHeader *lzx_b;
-        	struct lzxd_stream *lzs;
+		struct lzxd_stream *lzs;
 		goffset offset;
 
 		lzx_b = read_block_header (input, &err);
@@ -200,11 +205,11 @@ oal_decompress_v4_full_detail_file (const gchar *filename, const gchar *output_f
 		} else {
 			/* round to multiples of 32768 */
 			guint mul, round, set, window_bits;
-	
+
 			mul = ceil (lzx_b->ucomp_size / 32768.0);
 			round = mul * 32768;
 			set = g_bit_nth_lsf ((round >> 17), -1);
-			
+
 			if (set > 8)
 				window_bits = 25;
 			else if (set == 0 && !(round >> 17))
@@ -227,9 +232,8 @@ oal_decompress_v4_full_detail_file (const gchar *filename, const gchar *output_f
 			}
 		}
 
-
 		/* Set the fp to beggining of next block. This is a HACK, looks like decompress reads beyond the block.
-		   Since we can identify the next block start from block header, we just reset the offset */
+		 * Since we can identify the next block start from block header, we just reset the offset */
 		offset += lzx_b->comp_size;
 		fseek (input, offset, SEEK_SET);
 
@@ -240,7 +244,7 @@ oal_decompress_v4_full_detail_file (const gchar *filename, const gchar *output_f
 exit:
 	if (input)
 		fclose (input);
-	
+
 	if (output)
 		fclose (output);
 
@@ -256,20 +260,21 @@ exit:
 }
 
 /*
-int
-main (int argc, char *argv [])
+gint
+main (gint argc,
+      gchar *argv[])
 {
 	if (argc != 3) {
 		g_print ("Pass an lzx file and an output filename as argument \n");
 		return;
 	}
-
+ *
 	g_type_init ();
-
-	if (oal_decompress_v4_full_detail_file (argv [1], argv [2], NULL))
+ *
+	if (oal_decompress_v4_full_detail_file (argv[1], argv[2], NULL))
 		g_print ("Successfully decompressed \n");
 	else
 		g_print ("decompression failed \n");
-
+ *
 	return 0;
 } */

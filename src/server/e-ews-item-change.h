@@ -34,14 +34,14 @@ typedef enum {
 	E_EWS_ITEMCHANGE_TYPE_RECURRINGMASTER,
 } EEwsItemChangeType;
 
-void e_ews_message_start_item_change(ESoapMessage *msg, EEwsItemChangeType type,
+void e_ews_message_start_item_change (ESoapMessage *msg, EEwsItemChangeType type,
 				     const gchar *itemid, const gchar *changekey,
 				     gint instance_index);
 void e_ews_message_end_item_change (ESoapMessage *msg);
 
-void e_ews_message_start_set_item_field (ESoapMessage *msg, const gchar *name, const gchar * fielduri_prefix, const char *field_kind);
+void e_ews_message_start_set_item_field (ESoapMessage *msg, const gchar *name, const gchar * fielduri_prefix, const gchar *field_kind);
 
-void e_ews_message_start_set_indexed_item_field (ESoapMessage *msg, const gchar *name, const gchar * fielduri_prefix, const char *field_kind, const char *field_index, gboolean delete_field);
+void e_ews_message_start_set_indexed_item_field (ESoapMessage *msg, const gchar *name, const gchar * fielduri_prefix, const gchar *field_kind, const gchar *field_index, gboolean delete_field);
 
 void e_ews_message_end_set_indexed_item_field (ESoapMessage *msg, gboolean delete_field);
 

@@ -39,27 +39,28 @@ struct _create_mime_msg_data {
 #define MAPI_MSGFLAG_UNSENT	0x08
 
 static void
-create_mime_message_cb (ESoapMessage *msg, gpointer user_data)
+create_mime_message_cb (ESoapMessage *msg,
+                        gpointer user_data)
 {
 	struct _create_mime_msg_data *create_data = user_data;
 	CamelStream *mem, *filtered;
 	CamelMimeFilter *filter;
 	GByteArray *bytes;
 	gchar *base64;
-	int msgflag;
+	gint msgflag;
 
 	e_soap_message_start_element (msg, "Message", NULL, NULL);
 	e_soap_message_start_element (msg, "MimeContent", NULL, NULL);
 
 	/* This is horrid. We really need to extend ESoapMessage to allow us
-	   to stream this directly rather than storing it in RAM. Which right
-	   now we are doing about four times: the GByteArray in the mem stream,
-	   then the base64 version, then the xmlDoc, then the soup request. */
+	 * to stream this directly rather than storing it in RAM. Which right
+	 * now we are doing about four times: the GByteArray in the mem stream,
+	 * then the base64 version, then the xmlDoc, then the soup request. */
 	camel_mime_message_set_best_encoding (create_data->message,
 					      CAMEL_BESTENC_GET_ENCODING,
 					      CAMEL_BESTENC_8BIT);
 
-	mem = camel_stream_mem_new();
+	mem = camel_stream_mem_new ();
 	filtered = camel_stream_filter_new (mem);
 
 	filter = camel_mime_filter_crlf_new (CAMEL_MIME_FILTER_CRLF_ENCODE,
@@ -107,11 +108,16 @@ create_mime_message_cb (ESoapMessage *msg, gpointer user_data)
 }
 
 gboolean
-camel_ews_utils_create_mime_message (EEwsConnection *cnc, const gchar *disposition,
-				     const gchar *save_folder, CamelMimeMessage *message,
-				     gint32 message_camel_flags, CamelAddress *from,
-				     gchar **itemid, gchar **changekey,
-				     GCancellable *cancellable, GError **error)
+camel_ews_utils_create_mime_message (EEwsConnection *cnc,
+                                     const gchar *disposition,
+                                     const gchar *save_folder,
+                                     CamelMimeMessage *message,
+                                     gint32 message_camel_flags,
+                                     CamelAddress *from,
+                                     gchar **itemid,
+                                     gchar **changekey,
+                                     GCancellable *cancellable,
+                                     GError **error)
 {
 	struct _create_mime_msg_data *create_data;
 	GSList *ids;
@@ -158,9 +164,9 @@ camel_ews_utils_create_mime_message (EEwsConnection *cnc, const gchar *dispositi
 	if (!res || (!itemid && !changekey))
 		return res;
 
-	item = (EEwsItem *)ids->data;
+	item = (EEwsItem *) ids->data;
 	if (!item || !(ewsid = e_ews_item_get_id (item))) {
-		g_set_error(error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 			    _("CreateItem call failed to return ID for new message"));
 		return FALSE;
 	}

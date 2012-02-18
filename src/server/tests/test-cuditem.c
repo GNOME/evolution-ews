@@ -31,14 +31,15 @@
 #include <e-ews-item.h>
 #include <e-ews-message.h>
 
-
 static void op_test_create_item ();
 void cuditem_tests_run ();
 
 static GMainLoop *main_loop;
 
 static void
-create_item_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
+create_item_ready_callback (GObject *object,
+                            GAsyncResult *res,
+                            gpointer user_data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	GError *error = NULL;
@@ -53,21 +54,22 @@ create_item_ready_callback (GObject *object, GAsyncResult *res, gpointer user_da
 
 	for (l = ids; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = l->data;
-		const EwsId *itemid = e_ews_item_get_id(item);
+		const EwsId *itemid = e_ews_item_get_id (item);
 		g_print ("CreateItem: Id is %s \n", itemid->id);
 		break;
 	}
 
 quit:
-	g_main_loop_quit(main_loop);
+	g_main_loop_quit (main_loop);
 }
 
 static void
-op_test_create_item_get_soap_msg(ESoapMessage *msg, gpointer user_data)
+op_test_create_item_get_soap_msg (ESoapMessage *msg,
+                                  gpointer user_data)
 {
 	xmlDocPtr doc;
 	xmlChar *xmlbuff;
-	int size;
+	gint size;
 
 	//creating XML node for create item
 	e_soap_message_start_element (msg, "CalendarItem", NULL, NULL);
@@ -81,14 +83,14 @@ op_test_create_item_get_soap_msg(ESoapMessage *msg, gpointer user_data)
 	e_soap_message_end_element (msg);
 
 	g_printf("\nSOAP Request message:\n");
-	doc = e_soap_message_get_xml_doc(msg);
-	xmlDocDumpFormatMemory(doc, &xmlbuff,&size,1);
+	doc = e_soap_message_get_xml_doc (msg);
+	xmlDocDumpFormatMemory (doc, &xmlbuff,&size,1);
 	g_printf("%s\n", (gchar *)xmlbuff);
-	xmlFree(xmlbuff);
+	xmlFree (xmlbuff);
 }
 
 static void
-op_test_create_item()
+op_test_create_item ()
 {
 	const gchar *username;
 	const gchar *password;

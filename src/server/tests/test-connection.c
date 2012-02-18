@@ -29,7 +29,6 @@
 #include "utils.h"
 #include <e-ews-connection.h>
 
-
 static void con_test_create_new_connection ();
 void connection_tests_run ();
 void autodiscovery_tests_run ();
@@ -69,7 +68,9 @@ struct _cb_data {
 };
 
 static void
-autodiscover_cb (EwsUrls *urls, gpointer user_data, GError *error)
+autodiscover_cb (EwsUrls *urls,
+                 gpointer user_data,
+                 GError *error)
 {
 	struct _cb_data *data = (struct _cb_data *) user_data;
 	gboolean quit = data->quit;
@@ -80,10 +81,10 @@ autodiscover_cb (EwsUrls *urls, gpointer user_data, GError *error)
 		g_assert (urls != NULL);
 	} else
 		g_assert (urls == NULL);
-	
+
 	if (error)
 		g_print ("Error code:%d desc: %s \n", error->code, error->message);
-	
+
 	g_clear_error (&error);
 	g_free (data->test_case);
 	g_free (data);
@@ -99,7 +100,7 @@ autodiscover_cb (EwsUrls *urls, gpointer user_data, GError *error)
 }
 
 static void
-con_test_autodiscover()
+con_test_autodiscover ()
 {
 	const gchar *username;
 	const gchar *password;
@@ -160,8 +161,8 @@ idle_cb (gpointer data)
 	con_test_create_new_connection ();
 
 	g_printf ("Testing Autodiscovery.... \n");
-	con_test_autodiscover();
-	
+	con_test_autodiscover ();
+
 	return FALSE;
 }
 

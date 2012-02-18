@@ -31,14 +31,15 @@
 #include <e-ews-item.h>
 #include <e-ews-message.h>
 
-
 static void op_test_get_attachments ();
 void get_attachments_tests_run ();
 
 static GMainLoop *main_loop;
 
 static void
-get_attachments_ready_callback (GObject *object, GAsyncResult *res, gpointer user_data)
+get_attachments_ready_callback (GObject *object,
+                                GAsyncResult *res,
+                                gpointer user_data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	GError *error = NULL;
@@ -57,11 +58,11 @@ get_attachments_ready_callback (GObject *object, GAsyncResult *res, gpointer use
 	}
 
 quit:
-	g_main_loop_quit(main_loop);
+	g_main_loop_quit (main_loop);
 }
 
 static void
-op_test_get_attachments()
+op_test_get_attachments ()
 {
 	const gchar *username;
 	const gchar *password;
@@ -82,9 +83,9 @@ op_test_get_attachments()
 	g_assert (cnc != NULL);
 
 	attachmentid = "AAASAG1hbmR5Lnd1QGludGVsLmNvbQBGAAAAAACdSXexmsgJTpd3WpdX6ulXBwAm9E+BClHfQqEnvCoGvhheAAAAjpb6AACIeDU1D80fTrC3245yXdhOADUAPRB8AAABEgAQAIlh9YZzdzdMtvWW9ZI7+vM=";
-	ids = g_slist_append (ids, (gpointer *)attachmentid);
+	ids = g_slist_append (ids, (gpointer *) attachmentid);
 	attachmentid = "AAASAG1hbmR5Lnd1QGludGVsLmNvbQBGAAAAAACdSXexmsgJTpd3WpdX6ulXBwAm9E+BClHfQqEnvCoGvhheAAAAjpb6AACIeDU1D80fTrC3245yXdhOADUAPRB8AAABEgAQADgh/XHkRSZEoCsn9BHi5Fc=";
-	ids = g_slist_append (ids, (gpointer *)attachmentid);
+	ids = g_slist_append (ids, (gpointer *) attachmentid);
 
 	tmpdir = g_build_filename ("/home/xwu1/evo-cache", NULL); //a test directory that exists already
 
@@ -93,7 +94,7 @@ op_test_get_attachments()
 						 get_attachments_ready_callback,
 						 NULL, NULL,
 						 cancellable, NULL);
-	g_free(tmpdir);
+	g_free (tmpdir);
 }
 
 static gboolean

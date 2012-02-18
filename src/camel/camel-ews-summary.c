@@ -44,7 +44,7 @@
 #define d(x)
 
 /*Prototypes*/
-static gboolean ews_info_set_flags(CamelMessageInfo *info, guint32 flags, guint32 set);
+static gboolean ews_info_set_flags (CamelMessageInfo *info, guint32 flags, guint32 set);
 
 static gboolean summary_header_from_db (CamelFolderSummary *s, CamelFIRecord *mir);
 static CamelFIRecord * summary_header_to_db (CamelFolderSummary *s, GError **error);
@@ -58,26 +58,28 @@ static CamelMessageContentInfo * content_info_from_db (CamelFolderSummary *s, Ca
 G_DEFINE_TYPE (CamelEwsSummary, camel_ews_summary, CAMEL_TYPE_FOLDER_SUMMARY)
 
 static CamelMessageInfo *
-ews_message_info_clone(CamelFolderSummary *s, const CamelMessageInfo *mi)
+ews_message_info_clone (CamelFolderSummary *s,
+                        const CamelMessageInfo *mi)
 {
 	CamelEwsMessageInfo *to;
-	const CamelEwsMessageInfo *from = (const CamelEwsMessageInfo *)mi;
+	const CamelEwsMessageInfo *from = (const CamelEwsMessageInfo *) mi;
 
-	to = (CamelEwsMessageInfo *)CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->message_info_clone(s, mi);
+	to = (CamelEwsMessageInfo *) CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->message_info_clone (s, mi);
 	to->server_flags = from->server_flags;
 	to->item_type = from->item_type;
 	to->change_key = g_strdup (from->change_key);
 
 	/* FIXME: parent clone should do this */
-	to->info.content = camel_folder_summary_content_info_new(s);
+	to->info.content = camel_folder_summary_content_info_new (s);
 
-	return (CamelMessageInfo *)to;
+	return (CamelMessageInfo *) to;
 }
 
 static void
-ews_message_info_free (CamelFolderSummary *s, CamelMessageInfo *mi)
+ews_message_info_free (CamelFolderSummary *s,
+                       CamelMessageInfo *mi)
 {
-	CamelEwsMessageInfo *emi = (void *)mi;
+	CamelEwsMessageInfo *emi = (gpointer) mi;
 
 	g_free (emi->change_key);
 	CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->message_info_free (s, mi);
@@ -144,7 +146,8 @@ camel_ews_summary_new (struct _CamelFolder *folder)
 }
 
 static gboolean
-summary_header_from_db (CamelFolderSummary *s, CamelFIRecord *mir)
+summary_header_from_db (CamelFolderSummary *s,
+                        CamelFIRecord *mir)
 {
 	CamelEwsSummary *gms = CAMEL_EWS_SUMMARY (s);
 	gchar *part;
@@ -155,7 +158,7 @@ summary_header_from_db (CamelFolderSummary *s, CamelFIRecord *mir)
 	part = mir->bdata;
 
 	if (part)
-		EXTRACT_FIRST_DIGIT(gms->version);
+		EXTRACT_FIRST_DIGIT (gms->version);
 
 	if (part && part++ && strcmp (part, "(null)")) {
 		gms->sync_state = g_strdup (part);
@@ -165,9 +168,10 @@ summary_header_from_db (CamelFolderSummary *s, CamelFIRecord *mir)
 }
 
 static CamelFIRecord *
-summary_header_to_db (CamelFolderSummary *s, GError **error)
+summary_header_to_db (CamelFolderSummary *s,
+                      GError **error)
 {
-	CamelEwsSummary *ims = CAMEL_EWS_SUMMARY(s);
+	CamelEwsSummary *ims = CAMEL_EWS_SUMMARY (s);
 	struct _CamelFIRecord *fir;
 
 	fir = CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_to_db (s, error);
@@ -181,7 +185,8 @@ summary_header_to_db (CamelFolderSummary *s, GError **error)
 }
 
 static CamelMessageInfo *
-message_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
+message_info_from_db (CamelFolderSummary *s,
+                      CamelMIRecord *mir)
 {
 	CamelMessageInfo *info;
 	CamelEwsMessageInfo *iinfo;
@@ -191,12 +196,12 @@ message_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
 		gchar *part = mir->bdata;
 		gchar **values;
 
-		iinfo = (CamelEwsMessageInfo *)info;
+		iinfo = (CamelEwsMessageInfo *) info;
 		values = g_strsplit (part, " ", -1);
 
-		iinfo->server_flags = g_ascii_strtoll (values [0], NULL, 10);
-		iinfo->item_type = g_ascii_strtoll (values [1], NULL, 10);
-		iinfo->change_key = g_strdup (values [2]);
+		iinfo->server_flags = g_ascii_strtoll (values[0], NULL, 10);
+		iinfo->item_type = g_ascii_strtoll (values[1], NULL, 10);
+		iinfo->change_key = g_strdup (values[2]);
 
 		g_strfreev (values);
 	}
@@ -205,9 +210,10 @@ message_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
 }
 
 static CamelMIRecord *
-message_info_to_db (CamelFolderSummary *s, CamelMessageInfo *info)
+message_info_to_db (CamelFolderSummary *s,
+                    CamelMessageInfo *info)
 {
-	CamelEwsMessageInfo *iinfo = (CamelEwsMessageInfo *)info;
+	CamelEwsMessageInfo *iinfo = (CamelEwsMessageInfo *) info;
 	struct _CamelMIRecord *mir;
 
 	mir = CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->message_info_to_db (s, info);
@@ -218,10 +224,11 @@ message_info_to_db (CamelFolderSummary *s, CamelMessageInfo *info)
 }
 
 static CamelMessageContentInfo *
-content_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
+content_info_from_db (CamelFolderSummary *s,
+                      CamelMIRecord *mir)
 {
 	gchar *part = mir->cinfo;
-	guint32 type=0;
+	guint32 type = 0;
 
 	if (part) {
 		if (*part == ' ')
@@ -238,7 +245,9 @@ content_info_from_db (CamelFolderSummary *s, CamelMIRecord *mir)
 }
 
 static gboolean
-content_info_to_db (CamelFolderSummary *s, CamelMessageContentInfo *info, CamelMIRecord *mir)
+content_info_to_db (CamelFolderSummary *s,
+                    CamelMessageContentInfo *info,
+                    CamelMIRecord *mir)
 {
 
 	if (info->type) {
@@ -251,15 +260,17 @@ content_info_to_db (CamelFolderSummary *s, CamelMessageContentInfo *info, CamelM
 }
 
 static gboolean
-ews_info_set_flags (CamelMessageInfo *info, guint32 flags, guint32 set)
+ews_info_set_flags (CamelMessageInfo *info,
+                    guint32 flags,
+                    guint32 set)
 {
 	return CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->info_set_flags (info, flags, set);
 }
 
 void
-camel_ews_summary_add_message	(CamelFolderSummary *summary,
-				 const gchar *uid,
-				 CamelMimeMessage *message)
+camel_ews_summary_add_message (CamelFolderSummary *summary,
+                               const gchar *uid,
+                               CamelMimeMessage *message)
 {
 	CamelEwsMessageInfo *mi;
 	CamelMessageInfo *info;
@@ -269,33 +280,33 @@ camel_ews_summary_add_message	(CamelFolderSummary *summary,
 	info = camel_folder_summary_get (summary, uid);
 
 	/* Create summary entry */
-	mi = (CamelEwsMessageInfo *)camel_folder_summary_info_new_from_message (summary, message, NULL);
+	mi = (CamelEwsMessageInfo *) camel_folder_summary_info_new_from_message (summary, message, NULL);
 
 	/* Copy flags 'n' tags */
-	mi->info.flags = camel_message_info_flags(info);
+	mi->info.flags = camel_message_info_flags (info);
 
-	flag = camel_message_info_user_flags(info);
+	flag = camel_message_info_user_flags (info);
 	while (flag) {
-		camel_message_info_set_user_flag((CamelMessageInfo *)mi, flag->name, TRUE);
+		camel_message_info_set_user_flag ((CamelMessageInfo *) mi, flag->name, TRUE);
 		flag = flag->next;
 	}
-	tag = camel_message_info_user_tags(info);
+	tag = camel_message_info_user_tags (info);
 	while (tag) {
-		camel_message_info_set_user_tag((CamelMessageInfo *)mi, tag->name, tag->value);
+		camel_message_info_set_user_tag ((CamelMessageInfo *) mi, tag->name, tag->value);
 		tag = tag->next;
 	}
 
-	mi->info.size = camel_message_info_size(info);
+	mi->info.size = camel_message_info_size (info);
 	mi->info.uid = camel_pstring_strdup (uid);
 
-	camel_folder_summary_add (summary, (CamelMessageInfo *)mi);
+	camel_folder_summary_add (summary, (CamelMessageInfo *) mi);
 	camel_message_info_free (info);
 }
 
 void
-camel_ews_summary_add_message_info	(CamelFolderSummary *summary,
-					 guint32 server_flags,
-					 CamelMessageInfo *mi)
+camel_ews_summary_add_message_info (CamelFolderSummary *summary,
+                                    guint32 server_flags,
+                                    CamelMessageInfo *mi)
 {
 	CamelMessageInfoBase *binfo = (CamelMessageInfoBase *) mi;
 	CamelEwsMessageInfo *einfo = (CamelEwsMessageInfo *) mi;
@@ -306,11 +317,12 @@ camel_ews_summary_add_message_info	(CamelFolderSummary *summary,
 	/* TODO update user flags */
 
 	binfo->flags &= ~CAMEL_MESSAGE_FOLDER_FLAGGED;
-	camel_folder_summary_add (summary, (CamelMessageInfo *)mi);
+	camel_folder_summary_add (summary, (CamelMessageInfo *) mi);
 }
 
 static gboolean
-ews_update_user_flags (CamelMessageInfo *info, CamelFlag *server_user_flags)
+ews_update_user_flags (CamelMessageInfo *info,
+                       CamelFlag *server_user_flags)
 {
 	gboolean changed = FALSE;
 	CamelMessageInfoBase *binfo = (CamelMessageInfoBase *) info;
@@ -329,10 +341,10 @@ ews_update_user_flags (CamelMessageInfo *info, CamelFlag *server_user_flags)
 }
 
 gboolean
-camel_ews_update_message_info_flags	(CamelFolderSummary *summary,
-					 CamelMessageInfo *info,
-					 guint32 server_flags,
-					 CamelFlag *server_user_flags)
+camel_ews_update_message_info_flags (CamelFolderSummary *summary,
+                                     CamelMessageInfo *info,
+                                     guint32 server_flags,
+                                     CamelFlag *server_user_flags)
 {
 	CamelEwsMessageInfo *einfo = (CamelEwsMessageInfo *) info;
 	gboolean changed = FALSE;
@@ -358,8 +370,8 @@ camel_ews_update_message_info_flags	(CamelFolderSummary *summary,
 }
 
 void
-ews_summary_clear	(CamelFolderSummary *summary,
-			 gboolean uncache)
+ews_summary_clear (CamelFolderSummary *summary,
+                   gboolean uncache)
 {
 	CamelFolderChangeInfo *changes;
 	GPtrArray *known_uids;

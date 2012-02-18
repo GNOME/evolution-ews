@@ -71,7 +71,7 @@ struct _CamelEwsFolderClass {
 GType camel_ews_folder_get_type (void);
 
 /* implemented */
-CamelFolder * camel_ews_folder_new(CamelStore *store, const gchar *folder_dir, const gchar *folder_name, GCancellable *cancellable, GError **error);
+CamelFolder * camel_ews_folder_new (CamelStore *store, const gchar *folder_dir, const gchar *folder_name, GCancellable *cancellable, GError **error);
 void ews_update_summary ( CamelFolder *folder, GList *item_list, GCancellable *cancellable, GError **error);
 
 G_END_DECLS

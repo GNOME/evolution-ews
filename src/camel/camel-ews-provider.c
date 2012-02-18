@@ -94,7 +94,7 @@ CamelServiceAuthType camel_ews_password_authtype = {
 };
 
 void
-camel_provider_module_init(void)
+camel_provider_module_init (void)
 {
 	ews_provider.url_hash = ews_url_hash;
 	ews_provider.url_equal = ews_url_equal;
@@ -108,7 +108,8 @@ camel_provider_module_init(void)
 }
 
 static void
-add_hash (guint *hash, gchar *s)
+add_hash (guint *hash,
+          gchar *s)
 {
 	if (s)
 		*hash ^= g_str_hash(s);
@@ -117,7 +118,7 @@ add_hash (guint *hash, gchar *s)
 static guint
 ews_url_hash (gconstpointer key)
 {
-	const CamelURL *u = (CamelURL *)key;
+	const CamelURL *u = (CamelURL *) key;
 	guint hash = 0;
 
 	add_hash (&hash, u->user);
@@ -128,7 +129,8 @@ ews_url_hash (gconstpointer key)
 }
 
 static gint
-check_equal (gchar *s1, gchar *s2)
+check_equal (gchar *s1,
+             gchar *s2)
 {
 	if (s1 == NULL) {
 		if (s2 == NULL)
@@ -144,7 +146,8 @@ check_equal (gchar *s1, gchar *s2)
 }
 
 static gint
-ews_url_equal (gconstpointer a, gconstpointer b)
+ews_url_equal (gconstpointer a,
+               gconstpointer b)
 {
 	const CamelURL *u1 = a, *u2 = b;
 

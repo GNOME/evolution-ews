@@ -34,7 +34,9 @@ util_get_email_from_env (const gchar **email)
 }
 
 void
-util_get_login_info_from_env (const gchar **username, const gchar **password, const gchar **uri)
+util_get_login_info_from_env (const gchar **username,
+                              const gchar **password,
+                              const gchar **uri)
 {
 	*username = g_getenv ("EWS_TEST_USERNAME");
 	*password = g_getenv ("EWS_TEST_PASSWORD");

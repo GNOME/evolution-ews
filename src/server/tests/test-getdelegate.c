@@ -38,7 +38,9 @@ static GMainLoop *main_loop;
 EwsFolderId *folder_id;
 
 static void
-get_delegate_cb (GObject *object, GAsyncResult *res, gpointer data)
+get_delegate_cb (GObject *object,
+                 GAsyncResult *res,
+                 gpointer data)
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	GError *error = NULL;
@@ -52,17 +54,16 @@ get_delegate_cb (GObject *object, GAsyncResult *res, gpointer data)
 		g_clear_error (&error);
 		goto quit;
 	}
-	if(get_delegate !=NULL && get_delegate->user_id != NULL)
+	if (get_delegate !=NULL && get_delegate->user_id != NULL)
 		g_print ("Delegate is %s", get_delegate->user_id->display_name);
 
-
 quit:
-	if(get_delegate)
+	if (get_delegate)
 	{
-		ews_user_id_free(get_delegate->user_id);
-		g_free(get_delegate);
+		ews_user_id_free (get_delegate->user_id);
+		g_free (get_delegate);
 	}
-	g_main_loop_quit(main_loop);
+	g_main_loop_quit (main_loop);
 }
 
 static void
@@ -93,7 +94,7 @@ op_test_get_delegate ()
 static gboolean
 idle_cb (gpointer data)
 {
-	op_test_get_delegate();
+	op_test_get_delegate ();
 	return FALSE;
 }
 

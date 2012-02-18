@@ -25,9 +25,11 @@
 #include "e-ews-item-change.h"
 
 void
-e_ews_message_start_item_change(ESoapMessage *msg, EEwsItemChangeType type,
-				const gchar *itemid, const gchar *changekey,
-				gint instance_index)
+e_ews_message_start_item_change (ESoapMessage *msg,
+                                 EEwsItemChangeType type,
+                                 const gchar *itemid,
+                                 const gchar *changekey,
+                                 gint instance_index)
 {
 	gchar *instance;
 
@@ -57,7 +59,7 @@ e_ews_message_start_item_change(ESoapMessage *msg, EEwsItemChangeType type,
 		instance = g_strdup_printf("%d", instance_index);
 		e_soap_message_add_attribute (msg, "InstanceIndex", instance,
 					      NULL, NULL);
-		g_free(instance);
+		g_free (instance);
 		break;
 
 	case E_EWS_ITEMCHANGE_TYPE_RECURRINGMASTER:
@@ -84,7 +86,10 @@ e_ews_message_end_item_change (ESoapMessage *msg)
 }
 
 void
-e_ews_message_start_set_item_field (ESoapMessage *msg, const gchar *name, const gchar * fielduri_prefix, const char *field_kind)
+e_ews_message_start_set_item_field (ESoapMessage *msg,
+                                    const gchar *name,
+                                    const gchar *fielduri_prefix,
+                                    const gchar *field_kind)
 {
 	gchar * fielduri = NULL;
 	fielduri = g_strconcat (fielduri_prefix, ":", name, NULL);
@@ -97,12 +102,17 @@ e_ews_message_start_set_item_field (ESoapMessage *msg, const gchar *name, const 
 }
 
 void
-e_ews_message_start_set_indexed_item_field (ESoapMessage *msg, const gchar *name, const gchar * fielduri_prefix, const char *field_kind, const char *field_index, gboolean delete_field)
+e_ews_message_start_set_indexed_item_field (ESoapMessage *msg,
+                                            const gchar *name,
+                                            const gchar *fielduri_prefix,
+                                            const gchar *field_kind,
+                                            const gchar *field_index,
+                                            gboolean delete_field)
 {
 	gchar * fielduri = NULL;
 	fielduri = g_strconcat (fielduri_prefix, ":", name, NULL);
 
-	if(delete_field)
+	if (delete_field)
 		e_soap_message_start_element (msg, "DeleteItemField", NULL, NULL);
 	else
 		e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
@@ -112,16 +122,17 @@ e_ews_message_start_set_indexed_item_field (ESoapMessage *msg, const gchar *name
 	e_soap_message_add_attribute (msg, "FieldIndex", field_index, NULL, NULL);
 	e_soap_message_end_element (msg);
 
-	if(!delete_field)
+	if (!delete_field)
 		e_soap_message_start_element (msg, field_kind, NULL, NULL);
 
 	g_free (fielduri);
 }
 
 void
-e_ews_message_end_set_indexed_item_field (ESoapMessage *msg, gboolean delete_field)
+e_ews_message_end_set_indexed_item_field (ESoapMessage *msg,
+                                          gboolean delete_field)
 {
-	if(!delete_field)
+	if (!delete_field)
 		e_soap_message_end_element (msg); /* CalendarItem */
 	e_soap_message_end_element (msg); /* SetItemField */
 }

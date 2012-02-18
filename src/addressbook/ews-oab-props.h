@@ -33,14 +33,12 @@
 #define EWS_PTYP_MULTIPLESTRING		0x101F
 #define EWS_PTYP_MULTIPLEBINARY		0x1102
 
-
 /* Ews OAB hdr property tags */
 #define EWS_PT_NAME			0x6800001F
 #define EWS_PT_DN			0x6804001E
 #define EWS_PT_SEQUENCE			0x68010003
 #define EWS_PT_GUID			0x6802001E
 #define	EWS_PT_ROOT_DEPARTMENT		0x8C98001E
-
 
 /* Ews OAB address-book record property tags that we are or may be interested in */
 #define EWS_PT_EMAIL_ADDRESS		0x3003001E

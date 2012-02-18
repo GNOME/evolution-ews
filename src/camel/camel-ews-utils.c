@@ -54,7 +54,8 @@
  * Returns: the expanded path
  **/
 gchar *
-e_path_to_physical (const gchar *prefix, const gchar *vpath)
+e_path_to_physical (const gchar *prefix,
+                    const gchar *vpath)
 {
 	const gchar *p, *newp;
 	gchar *dp;
@@ -129,8 +130,10 @@ e_path_to_physical (const gchar *prefix, const gchar *vpath)
 }
 
 static gboolean
-find_folders_recursive (const gchar *physical_path, const gchar *path,
-			EPathFindFoldersCallback callback, gpointer data)
+find_folders_recursive (const gchar *physical_path,
+                        const gchar *path,
+                        EPathFindFoldersCallback callback,
+                        gpointer data)
 {
 	GDir *dir;
 	gchar *subfolder_directory_path;
@@ -202,8 +205,8 @@ find_folders_recursive (const gchar *physical_path, const gchar *path,
  **/
 gboolean
 e_path_find_folders (const gchar *prefix,
-		     EPathFindFoldersCallback callback,
-		     gpointer data)
+                     EPathFindFoldersCallback callback,
+                     gpointer data)
 {
 	return find_folders_recursive (prefix, "", callback, data);
 }
@@ -222,7 +225,8 @@ e_path_find_folders (const gchar *prefix,
  * the parent directory.
  **/
 gint
-e_path_rmdir (const gchar *prefix, const gchar *vpath)
+e_path_rmdir (const gchar *prefix,
+              const gchar *vpath)
 {
 	gchar *physical_path, *p;
 
@@ -255,14 +259,17 @@ e_path_rmdir (const gchar *prefix, const gchar *vpath)
 }
 
 void
-do_flags_diff (flags_diff_t *diff, guint32 old, guint32 _new)
+do_flags_diff (flags_diff_t *diff,
+               guint32 old,
+               guint32 _new)
 {
 	diff->changed = old ^ _new;
 	diff->bits = _new & diff->changed;
 }
 
 gchar *
-ews_concat ( const gchar *prefix, const gchar *suffix)
+ews_concat (const gchar *prefix,
+            const gchar *suffix)
 {
 	gsize len;
 
@@ -274,7 +281,9 @@ ews_concat ( const gchar *prefix, const gchar *suffix)
 }
 
 void
-strip_lt_gt (gchar **string, gint s_offset, gint e_offset)
+strip_lt_gt (gchar **string,
+             gint s_offset,
+             gint e_offset)
 {
 	gchar *temp = NULL;
 	gint len;
@@ -288,7 +297,8 @@ strip_lt_gt (gchar **string, gint s_offset, gint e_offset)
 }
 
 CamelFolderInfo *
-camel_ews_utils_build_folder_info (CamelEwsStore *store, const gchar *fid)
+camel_ews_utils_build_folder_info (CamelEwsStore *store,
+                                   const gchar *fid)
 {
 	CamelEwsStoreSummary *ews_summary = store->summary;
 	CamelFolderInfo *fi;
@@ -318,7 +328,6 @@ static gboolean ews_do_remove_esource (gpointer user_data)
 {
 	struct remove_esrc_data *remove_data = user_data;
 
-
 	ews_esource_utils_remove_esource (remove_data->fid,
 					  remove_data->account_name,
 					  remove_data->ftype);
@@ -330,7 +339,8 @@ static gboolean ews_do_remove_esource (gpointer user_data)
 }
 
 static void
-sync_deleted_folders (CamelEwsStore *store, GSList *deleted_folders)
+sync_deleted_folders (CamelEwsStore *store,
+                      GSList *deleted_folders)
 {
 	CamelEwsStoreSummary *ews_summary = store->summary;
 	CamelEwsSettings *ews_settings;
@@ -363,7 +373,7 @@ sync_deleted_folders (CamelEwsStore *store, GSList *deleted_folders)
 
 			g_clear_error (&error);
 		} else {
-			struct remove_esrc_data *remove_data = g_new0(struct remove_esrc_data, 1);
+			struct remove_esrc_data *remove_data = g_new0 (struct remove_esrc_data, 1);
 
 			remove_data->fid = g_strdup (fid);
 			remove_data->account_name = g_strdup (email);
@@ -398,7 +408,8 @@ static gboolean ews_utils_rename_folder (CamelEwsStore *store, EwsFolderType fty
 }
 
 static void
-sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
+sync_updated_folders (CamelEwsStore *store,
+                      GSList *updated_folders)
 {
 	CamelEwsStoreSummary *ews_summary = store->summary;
 	GSList *l;
@@ -415,7 +426,7 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 		    ftype == EWS_FOLDER_TYPE_TASKS ||
 		    ftype == EWS_FOLDER_TYPE_CONTACTS) {
 			/* TODO Update esource */
-		} else 	if (ftype != EWS_FOLDER_TYPE_MAILBOX)
+		} else if (ftype != EWS_FOLDER_TYPE_MAILBOX)
 			continue;
 
 		fid = e_ews_folder_get_id (ews_folder);
@@ -425,8 +436,8 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 		display_name = g_strdup (e_ews_folder_get_name (ews_folder));
 
 		/* If the folder is moved or renamed (which are separate
-		   operations in Exchange, unfortunately, then the name
-		   or parent folder will change. Handle both... */
+		 * operations in Exchange, unfortunately, then the name
+		 * or parent folder will change. Handle both... */
 		if (pfid || display_name) {
 			GError *error = NULL;
 			gchar *new_fname = NULL;
@@ -435,7 +446,7 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 				gchar *pfname;
 
 				/* If the display name wasn't changed, its basename is still
-				   the same as it was before... */
+				 * the same as it was before... */
 				if (!display_name)
 					display_name = camel_ews_store_summary_get_folder_name (ews_summary,
 										fid->id, NULL);
@@ -445,7 +456,7 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 				pfname = camel_ews_store_summary_get_folder_full_name (ews_summary, pfid->id, NULL);
 
 				/* If the lookup failed, it'll be because the new parent folder
-				   is the message folder root. */
+				 * is the message folder root. */
 				if (pfname) {
 					new_fname = g_strconcat (pfname, "/", display_name, NULL);
 					g_free (pfname);
@@ -464,10 +475,10 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 					new_fname = g_strdup (display_name);
 			}
 
-			if (strcmp(new_fname, folder_name))
+			if (strcmp (new_fname, folder_name))
 				ews_utils_rename_folder (store, ftype,
 							 fid->id, fid->change_key,
-							 pfid?pfid->id:NULL,
+							 pfid ? pfid->id : NULL,
 							 display_name, folder_name, &error);
 			g_free (new_fname);
 			g_clear_error (&error);
@@ -479,9 +490,10 @@ sync_updated_folders (CamelEwsStore *store, GSList *updated_folders)
 }
 
 /* FIXME get the real folder ids of the system folders using
-   by fetching them using distinguished folder ids once */
+ * by fetching them using distinguished folder ids once */
 static void
-add_folder_to_summary (CamelEwsStore *store, EEwsFolder *folder)
+add_folder_to_summary (CamelEwsStore *store,
+                       EEwsFolder *folder)
 {
 	CamelEwsStoreSummary *ews_summary = store->summary;
 	const EwsFolderId *pfid, *fid;
@@ -515,7 +527,6 @@ static gboolean ews_do_add_esource (gpointer user_data)
 {
 	struct add_esrc_data *add_data = user_data;
 
-
 	ews_esource_utils_add_esource (add_data->folder, add_data->account_uri,
 				       add_data->account_name,
 				       add_data->username, add_data->email_id,
@@ -532,9 +543,9 @@ static gboolean ews_do_add_esource (gpointer user_data)
 	return FALSE;
 }
 
-
 static void
-sync_created_folders (CamelEwsStore *ews_store, GSList *created_folders)
+sync_created_folders (CamelEwsStore *ews_store,
+                      GSList *created_folders)
 {
 	CamelNetworkSettings *network_settings;
 	CamelEwsSettings *ews_settings;
@@ -582,16 +593,16 @@ sync_created_folders (CamelEwsStore *ews_store, GSList *created_folders)
 			/* This uses GConf so has to be done in the main thread */
 			g_idle_add_full (G_PRIORITY_DEFAULT, ews_do_add_esource, add_data, NULL);
 
-		} else 	if (ftype != EWS_FOLDER_TYPE_MAILBOX)
+		} else	if (ftype != EWS_FOLDER_TYPE_MAILBOX)
 			continue;
 
 		fid = e_ews_folder_get_id (folder);
 
 		/* FIXME: Sort folders so that a child is always added *after*
-		   its parent. But since the old code was already completely
-		   broken and would just go into an endless loop if the server
-		   didn't return the folders in the 'right' order for that,
-		   let's worry about that in a later commit. */
+		 * its parent. But since the old code was already completely
+		 * broken and would just go into an endless loop if the server
+		 * didn't return the folders in the 'right' order for that,
+		 * let's worry about that in a later commit. */
 		add_folder_to_summary (ews_store, folder);
 
 		if (ftype == EWS_FOLDER_TYPE_MAILBOX) {
@@ -603,7 +614,10 @@ sync_created_folders (CamelEwsStore *ews_store, GSList *created_folders)
 }
 
 void
-ews_utils_sync_folders (CamelEwsStore *ews_store, GSList *created_folders, GSList *deleted_folders, GSList *updated_folders)
+ews_utils_sync_folders (CamelEwsStore *ews_store,
+                        GSList *created_folders,
+                        GSList *deleted_folders,
+                        GSList *updated_folders)
 {
 	GError *error = NULL;
 
@@ -620,7 +634,8 @@ ews_utils_sync_folders (CamelEwsStore *ews_store, GSList *created_folders, GSLis
 }
 
 void
-camel_ews_utils_sync_deleted_items (CamelEwsFolder *ews_folder, GSList *items_deleted)
+camel_ews_utils_sync_deleted_items (CamelEwsFolder *ews_folder,
+                                    GSList *items_deleted)
 {
 	CamelFolder *folder;
 	const gchar *full_name;
@@ -645,7 +660,7 @@ camel_ews_utils_sync_deleted_items (CamelEwsFolder *ews_folder, GSList *items_de
 	}
 
 	items_deleted_list = g_list_reverse (items_deleted_list);
-	camel_db_delete_uids (((CamelStore *)ews_store)->cdb_w, full_name, items_deleted_list, NULL);
+	camel_db_delete_uids (((CamelStore *) ews_store)->cdb_w, full_name, items_deleted_list, NULL);
 	g_list_free (items_deleted_list);
 
 	camel_folder_changed ((CamelFolder *) ews_folder, ci);
@@ -655,8 +670,9 @@ camel_ews_utils_sync_deleted_items (CamelEwsFolder *ews_folder, GSList *items_de
 	g_slist_free (items_deleted);
 }
 
-static const gchar*
-ews_utils_rename_label (const gchar *cat, int from_cat)
+static const gchar *
+ews_utils_rename_label (const gchar *cat,
+                        gint from_cat)
 {
 	gint i;
 
@@ -687,7 +703,8 @@ ews_utils_rename_label (const gchar *cat, int from_cat)
 }
 
 void
-ews_utils_replace_server_user_flags (ESoapMessage *msg, CamelEwsMessageInfo *mi)
+ews_utils_replace_server_user_flags (ESoapMessage *msg,
+                                     CamelEwsMessageInfo *mi)
 {
 	const CamelFlag *flag;
 
@@ -710,7 +727,8 @@ ews_utils_replace_server_user_flags (ESoapMessage *msg, CamelEwsMessageInfo *mi)
 }
 
 static void
-ews_utils_merge_server_user_flags (EEwsItem *item, CamelEwsMessageInfo *mi)
+ews_utils_merge_server_user_flags (EEwsItem *item,
+                                   CamelEwsMessageInfo *mi)
 {
 	GSList *list = NULL;
 	const GSList *p;
@@ -719,19 +737,19 @@ ews_utils_merge_server_user_flags (EEwsItem *item, CamelEwsMessageInfo *mi)
 	/* transfer camel flags to a list */
 	for (flag = camel_message_info_user_flags (&mi->info); flag;
 	     flag = flag->next)
-		list = g_slist_append (list, (gchar *)flag->name);
+		list = g_slist_append (list, (gchar *) flag->name);
 
 	/* we're transferring from server only, so just dump them */
 	for (p = list; p; p = p->next) {
 		camel_flag_set (&mi->info.user_flags, p->data, 0);
 	}
-	//g_slist_foreach(list, (GFunc)g_free, NULL);
-	g_slist_free(list);
+	//g_slist_foreach (list, (GFunc) g_free, NULL);
+	g_slist_free (list);
 
 	/* now transfer over all the categories */
 	for (p = e_ews_item_get_categories (item); p; p = p->next) {
 		camel_flag_set (&mi->info.user_flags,
-				ews_utils_rename_label(p->data, 1), 1);
+				ews_utils_rename_label (p->data, 1), 1);
 	}
 }
 
@@ -847,7 +865,8 @@ get_md5_digest (const guchar *str)
 }
 
 static void
-ews_set_threading_data (CamelEwsMessageInfo *mi, EEwsItem *item)
+ews_set_threading_data (CamelEwsMessageInfo *mi,
+                        EEwsItem *item)
 {
 	const gchar *references, *inreplyto;
 	gint count = 0;
@@ -860,7 +879,7 @@ ews_set_threading_data (CamelEwsMessageInfo *mi, EEwsItem *item)
 	message_id = e_ews_item_get_msg_id (item);
 	msgid = camel_header_msgid_decode (message_id);
 	if (msgid) {
-		digest = get_md5_digest ((const guchar *)msgid);
+		digest = get_md5_digest ((const guchar *) msgid);
 		memcpy (mi->info.message_id.id.hash, digest, sizeof (mi->info.message_id.id.hash));
 		g_free (digest);
 		g_free (msgid);
@@ -881,7 +900,7 @@ ews_set_threading_data (CamelEwsMessageInfo *mi, EEwsItem *item)
 		return;
 
 	count = camel_header_references_list_size (&refs);
-	mi->info.references = g_malloc (sizeof (*mi->info.references) + ((count-1) * sizeof (mi->info.references->references[0])));
+	mi->info.references = g_malloc (sizeof (*mi->info.references) + ((count - 1) * sizeof (mi->info.references->references[0])));
 	scan = refs;
 	count = 0;
 
@@ -899,7 +918,8 @@ ews_set_threading_data (CamelEwsMessageInfo *mi, EEwsItem *item)
 }
 
 void
-camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder, GSList *items_updated)
+camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
+                                    GSList *items_updated)
 {
 	CamelFolder *folder;
 	CamelFolderChangeInfo *ci;
@@ -920,7 +940,7 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder, GSList *items_up
 
 			server_flags = ews_utils_get_server_flags (item);
 			ews_utils_merge_server_user_flags (item, mi);
-			if (camel_ews_update_message_info_flags (folder->summary, (CamelMessageInfo *)mi,
+			if (camel_ews_update_message_info_flags (folder->summary, (CamelMessageInfo *) mi,
 								 server_flags, NULL))
 				camel_folder_change_info_change_uid (ci, mi->info.uid);
 
@@ -943,7 +963,8 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder, GSList *items_up
 }
 
 void
-camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder, GSList *items_created)
+camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
+                                    GSList *items_created)
 {
 	CamelFolder *folder;
 	CamelFolderChangeInfo *ci;
@@ -976,7 +997,7 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder, GSList *items_cr
 			continue;
 		}
 
-		mi = (CamelEwsMessageInfo *)camel_message_info_new (folder->summary);
+		mi = (CamelEwsMessageInfo *) camel_message_info_new (folder->summary);
 
 		if (mi->info.content == NULL) {
 			mi->info.content = camel_folder_summary_content_info_new (folder->summary);

@@ -122,7 +122,6 @@ GSList *	camel_ews_store_summary_get_folders
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *prefix);
 
-
 void		camel_ews_store_summary_store_string_val
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *key,

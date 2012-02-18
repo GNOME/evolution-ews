@@ -21,5 +21,5 @@
 #include <gtk/gtk.h>
 #include "mail/em-config.h"
 
-GtkWidget*		ews_get_outo_office_widget (EMConfigTargetSettings *target_account);
+GtkWidget *		ews_get_outo_office_widget (EMConfigTargetSettings *target_account);
 gboolean		ews_set_oof_settings (EMConfigTargetSettings *target);

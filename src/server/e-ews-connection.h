@@ -150,7 +150,7 @@ typedef struct {
 	gchar *prop_tag;
 	gchar *prop_name;
 	gchar *prop_id;
-	gchar *prop_type;	
+	gchar *prop_type;
 } EwsExtendedFieldURI;
 
 typedef struct {
@@ -171,12 +171,12 @@ typedef struct {
 } EwsSortOrder;
 
 typedef struct {
-	gchar *state;		/*Out of office state*/
-	gchar *ext_aud;		/*external audience*/
-	time_t start_tm;	/*Start time*/
-	time_t end_tm;		/*End time*/
-	gchar *int_reply;	/*Internal Reply*/
-	gchar *ext_reply;	/*External Reply*/
+	gchar *state;		/*Out of office state */
+	gchar *ext_aud;		/*external audience */
+	time_t start_tm;	/*Start time */
+	time_t end_tm;		/*End time */
+	gchar *int_reply;	/*Internal Reply */
+	gchar *ext_reply;	/*External Reply */
 } OOFSettings;
 
 GType		e_ews_connection_get_type	(void);
@@ -222,7 +222,7 @@ void		e_ews_connection_sync_folder_items_start
 gboolean	e_ews_connection_sync_folder_items_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
-					 	 gchar **sync_state,
+						 gchar **sync_state,
 						 gboolean *includes_last_item,
 						 GSList **items_created,
 						 GSList **items_updated,
@@ -282,7 +282,6 @@ gboolean	e_ews_connection_find_folder_items
 						 EwsConvertQueryCallback convert_query_cb,
 						 GCancellable *cancellable,
 						 GError **error);
-
 
 /* Get folder items */
 void		e_ews_connection_get_items_start
@@ -749,7 +748,7 @@ gboolean	e_ews_connection_get_oal_detail_finish
 						 GAsyncResult *result,
 						 GSList **elements,
 						 GError **error);
-gboolean	e_ews_connection_get_oal_detail 
+gboolean	e_ews_connection_get_oal_detail
 						(EEwsConnection *cnc,
 						 const gchar *oal_id,
 						 const gchar *oal_element,
@@ -792,7 +791,7 @@ gboolean	e_ews_connection_download_oal_file_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 GError **error);
-gboolean	e_ews_connection_download_oal_file	
+gboolean	e_ews_connection_download_oal_file
 						(EEwsConnection *cnc,
 						 const gchar *cache_filename,
 						 EwsProgressFn progress_fn,
@@ -811,7 +810,7 @@ gboolean e_ews_connection_get_delegate_finish	(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 EwsDelegateInfo **get_delegate,
 						 GError **error);
-gboolean e_ews_connection_get_delegate	
+gboolean e_ews_connection_get_delegate
 						(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *mail_id,
@@ -846,13 +845,13 @@ void		e_ews_connection_set_oof_settings_start	(EEwsConnection *cnc,
 
 gboolean	e_ews_connection_set_oof_settings_finish (EEwsConnection *cnc,
 							  GAsyncResult *result,
-						 	  GError **error);
+							  GError **error);
 
 gboolean	e_ews_connection_set_oof_settings (EEwsConnection *cnc,
-					 	   gint pri,
-					 	   OOFSettings *oof_settings,
-					 	   GCancellable *cancellable,
-					 	   GError **error);
+						   gint pri,
+						   OOFSettings *oof_settings,
+						   GCancellable *cancellable,
+						   GError **error);
 
 void		e_ews_connection_free_oof_settings (OOFSettings *oof_settings);
 
