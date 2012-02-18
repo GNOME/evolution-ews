@@ -2,6 +2,7 @@
 # Please keep this list in alphabetic order.
 [encoding: UTF-8]
 src/account-setup-eplugin/exchange-ews-account-listener.c
+src/account-setup-eplugin/exchange-ews-account-out-of-office.c
 src/account-setup-eplugin/exchange-ews-account-setup.c
 src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml
 src/addressbook/e-book-backend-ews.c
