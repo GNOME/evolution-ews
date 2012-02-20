@@ -1,3 +1,27 @@
+Evolution-EWS 3.3.90 2012-02-20
+-------------------------------
+
+Bug Fixes:
+        Bug 656375 Out of Office Implementation (Punit Jain)
+        Bug 668174 unable to create appointments and meetings (Punit Jain)
+        Bug 654810 conversion of evolution query to ews restriction and test function (Punit Jain)
+        Bug 654810 finditem API implementation (Punit Jain)
+        Bug 654822 set system folder flags using getfolder operation (Punit Jain)
+        Bug 658347 - Harmonize mnemonic for "Check new messages for Junk contents" (Milan Crha)
+        Bug 664749 - Cannot send message "Service not connected" (Milan Crha)
+        Bug 665801 - Crash in SoupSessionAsync::finalize (David Woodhouse)
+        Bug 669338 - Wrong Content-Type in Autodiscover xml soap (David Woodhouse)
+
+Miscellaneous Fixes:
+        Updated POTFILES.in (Piotr Drąg)
+
+Translations:
+        Matej Urbančič (sl)
+        Marek Černocký (cs)
+        Daniel Mustieles (es)
+        Gonzalo Sanhueza (es)
+
+
 Evolution-EWS 3.3.5 2012-02-05
 ------------------------------
 
