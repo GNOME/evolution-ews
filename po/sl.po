@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-ews&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2012-02-28 20:25+0000\n"
-"PO-Revision-Date: 2012-02-28 21:36+0100\n"
+"PO-Revision-Date: 2012-02-29 14:36+0100\n"
 "Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: \n"
@@ -35,12 +35,16 @@ msgid ""
 "Unable to fetch out of office settings: \n"
 "%s"
 msgstr ""
+"Ni mogoče pridobiti nastavitev pisarne: \n"
+"%s"
 
 #: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:318
 msgid ""
 "The messages specified below will be automatically sent to \n"
 " each internal and external personal who sends a mail to you."
 msgstr ""
+"Sporočilo, ki je določeno spodaj, bo samodejno poslano vsem\n"
+" notranjim ali zunanjim stikom, ki pošljejo sporočilo na ta elektronski naslov."
 
 #: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:323
 msgid "Status:"
@@ -66,11 +70,11 @@ msgstr "_Za:"
 
 #: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:376
 msgid "I_nternal:"
-msgstr ""
+msgstr "_Notranji:"
 
 #: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:378
 msgid "Message to be sent inside organization"
-msgstr ""
+msgstr "Sporočilo za prejemnike notranjim stikom v ustanovi"
 
 #: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:385
 msgid "None"
@@ -90,11 +94,11 @@ msgstr "Pošlji sporočilo za"
 
 #: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:409
 msgid "E_xternal:"
-msgstr ""
+msgstr "_Zunanji:"
 
 #: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:411
 msgid "Message to be sent outside organization"
-msgstr ""
+msgstr "Sporočilo za prejemnike zunanjim stikom"
 
 #: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:575
 msgid "Out of Office"
@@ -102,7 +106,7 @@ msgstr "Izven pisarne"
 
 #: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:581
 msgid "Fetching out of office settings..."
-msgstr ""
+msgstr "Pridobivanje nastavitev pisarne ..."
 
 #: ../src/account-setup-eplugin/exchange-ews-account-setup.c:111
 #, c-format
