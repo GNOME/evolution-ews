@@ -129,13 +129,14 @@ ews_account_removed (EAccountList *account_listener,
 	if (!info)
 		return;
 
-	ews_esource_utils_remove_groups (account->id->address);
+	url = camel_url_new (account->source->url, NULL);
+
+	ews_esource_utils_remove_groups (url);
 	ews_accounts = g_list_remove (ews_accounts, info);
 
 	shell = e_shell_get_default ();
 	shell_backend = e_shell_get_backend_by_name (shell, "mail");
 	session = (CamelSession *) e_mail_backend_get_session (E_MAIL_BACKEND (shell_backend));
-	url = camel_url_new (account->source->url, NULL);
 	service = camel_session_get_service_by_url (session, url, CAMEL_PROVIDER_STORE);
 	camel_url_free (url);
 
@@ -168,7 +169,7 @@ ews_is_str_equal (const gchar *str1,
 }
 
 static gboolean
-remove_gal_esource (const gchar *account_name)
+remove_gal_esource (CamelURL *account_url)
 {
 	ESourceList *source_list;
 	ESourceGroup *group;
@@ -183,7 +184,7 @@ remove_gal_esource (const gchar *account_name)
 	conf_key = CONTACT_SOURCES;
 	client = gconf_client_get_default ();
 	source_list = e_source_list_new_for_gconf (client, conf_key);
-	group = ews_esource_utils_ensure_group (source_list, account_name);
+	group = ews_esource_utils_ensure_group (source_list, account_url);
 
 	sources = e_source_group_peek_sources (group);
 	if (!(source = ews_find_source_by_matched_prop (sources, "gal", "1"))) {
@@ -251,7 +252,6 @@ add_gal_esource (CamelURL *url)
 	e_source_set_property (source, "gal", "1");
 	e_source_set_property (source, "hosturl", camel_url_get_param (url, "hosturl"));
 	e_source_set_property (source, "delete", "no");
-	e_source_set_color_spec (source, "#EEBC60");
 
 	/* If oal_id is present it means the GAL is marked for offline usage, we do not check for offline_sync property */
 	if (oal_sel) {
@@ -263,7 +263,7 @@ add_gal_esource (CamelURL *url)
 	e_source_set_property (source, "completion", "true");
 
 	/* add the source to group and sync */
-	group = ews_esource_utils_ensure_group (source_list, email_id);
+	group = ews_esource_utils_ensure_group (source_list, url);
 	e_source_group_add_source (group, source, -1);
 	e_source_list_sync (source_list, NULL);
 
@@ -309,10 +309,8 @@ ews_account_changed (EAccountList *account_listener,
 			n_oal_sel = camel_url_get_param (new_url, "oal-selected");
 
 			if (!ews_is_str_equal (o_oal_sel, n_oal_sel)) {
-				const gchar *account_name = camel_url_get_param (new_url, "email");
-
 				/* remove gal esource and cache associated with it */
-				remove_gal_esource (account_name);
+				remove_gal_esource (new_url);
 
 				/* add gal esource */
 				add_gal_esource (new_url);

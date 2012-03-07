@@ -21,6 +21,7 @@
 #define EWS_ESOURCE_UTILS_H
 
 #include <libedataserver/e-source-list.h>
+#include <camel/camel.h>
 #include <e-ews-folder.h>
 
 G_BEGIN_DECLS
@@ -43,20 +44,20 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 gboolean
 ews_esource_utils_remove_esource
 				(const gchar *fid,
-				 const gchar *account_name,
+				 CamelURL *account_url,
 				 EwsFolderType ftype);
 
 void
-ews_esource_utils_remove_groups	(const gchar *account_name);
+ews_esource_utils_remove_groups	(CamelURL *account_url);
 
 gboolean
-ews_source_utils_remove_group (const gchar *account_name, EwsFolderType ftype);
+ews_source_utils_remove_group (CamelURL *account_url, EwsFolderType ftype);
 
 ESource *
 ews_find_source_by_matched_prop (GSList *sources, const gchar *prop, const gchar *val);
 
 ESourceGroup *
-ews_esource_utils_ensure_group (ESourceList *source_list, const gchar *account_name);
+ews_esource_utils_ensure_group (ESourceList *source_list, CamelURL *account_url);
 
 G_END_DECLS
 

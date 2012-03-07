@@ -320,7 +320,7 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store,
 
 struct remove_esrc_data {
 	gchar *fid;
-	gchar *account_name;
+	CamelURL *account_url;
 	EwsFolderType ftype;
 };
 
@@ -329,10 +329,11 @@ static gboolean ews_do_remove_esource (gpointer user_data)
 	struct remove_esrc_data *remove_data = user_data;
 
 	ews_esource_utils_remove_esource (remove_data->fid,
-					  remove_data->account_name,
+					  remove_data->account_url,
 					  remove_data->ftype);
+
+	camel_url_free (remove_data->account_url);
 	g_free (remove_data->fid);
-	g_free (remove_data->account_name);
 	g_free (remove_data);
 
 	return FALSE;
@@ -376,7 +377,7 @@ sync_deleted_folders (CamelEwsStore *store,
 			struct remove_esrc_data *remove_data = g_new0 (struct remove_esrc_data, 1);
 
 			remove_data->fid = g_strdup (fid);
-			remove_data->account_name = g_strdup (email);
+			remove_data->account_url = camel_service_new_camel_url (service);
 			remove_data->ftype = ftype;
 
 			/* This uses GConf so has to be done in the main thread */

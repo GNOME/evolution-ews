@@ -45,42 +45,52 @@ ews_find_source_by_matched_prop (GSList *sources,
 	return NULL;
 }
 
-static ESourceGroup *
-ews_find_group (GSList *groups,
-                const gchar *account_name)
+static gchar *
+ews_construct_base_uri (CamelURL *account_url)
 {
-	GSList *p;
-	gint len;
+	gchar *base_uri;
+	CamelURL *base_curi;
 
-	len = strlen (EWS_BASE_URI);
+	g_return_val_if_fail (account_url != NULL, NULL);
 
-	for (p = groups; p != NULL; p = g_slist_next (p)) {
-		ESourceGroup *group = E_SOURCE_GROUP (p->data);
-		const gchar *buri = e_source_group_peek_base_uri (group);
-		const gchar *name = e_source_group_peek_name (group);
+	base_curi = camel_url_new ("ews://", NULL);
+	g_return_val_if_fail (base_curi != NULL, NULL);
 
-		if (buri && !g_ascii_strncasecmp (buri, EWS_BASE_URI, len) &&
-		    !g_ascii_strcasecmp (name, account_name))
-			return group;
-	}
+	camel_url_set_user (base_curi, account_url->user);
+	camel_url_set_host (base_curi, account_url->host);
 
-	return NULL;
+	base_uri = camel_url_to_string (base_curi, 0);
+
+	camel_url_free (base_curi);
+
+	return base_uri;
 }
 
 ESourceGroup *
 ews_esource_utils_ensure_group (ESourceList *source_list,
-                                const gchar *account_name)
+                                CamelURL *account_url)
 {
 	ESourceGroup *group = NULL;
-	GSList *groups;
+	gchar *base_uri;
 
-	groups = e_source_list_peek_groups (source_list);
-	group = ews_find_group (groups, account_name);
-	if (group)
-		return g_object_ref (group);
+	base_uri = ews_construct_base_uri (account_url);
+	g_return_val_if_fail (base_uri != NULL, NULL);
 
-	group = e_source_group_new (account_name, EWS_BASE_URI);
+	group = e_source_list_peek_group_by_base_uri (source_list, base_uri);
+	if (group) {
+		/* update group description, if base uri is "too short" */
+		if (g_strcmp0 (e_source_group_peek_base_uri (group), EWS_BASE_URI) == 0) {
+			e_source_list_remove_group (source_list, group);
+		} else {
+			g_free (base_uri);
+			return g_object_ref (group);
+		}
+	}
+
+	group = e_source_group_new (camel_url_get_param (account_url, "email"), base_uri);
 	e_source_group_set_property (group, "create_source", "no");
+
+	g_free (base_uri);
 
 	if (!e_source_list_add_group (source_list, group, -1)) {
 		g_warning ("Unable to add the group to the source list \n");
@@ -111,6 +121,7 @@ ews_esource_utils_add_esource (EEwsFolder *folder,
 	const gchar *source_name;
 	gchar *source_uri;
 	GSList *sources;
+	CamelURL *account_url;
 	gboolean ret = TRUE;
 
 	ftype = e_ews_folder_get_folder_type (folder);
@@ -128,9 +139,16 @@ ews_esource_utils_add_esource (EEwsFolder *folder,
 	} else
 		return FALSE;
 
+	account_url = camel_url_new (account_uri, NULL);
+	g_return_val_if_fail (account_url != NULL, FALSE);
+
+	camel_url_set_param (account_url, "email", account_name);
+
 	client = gconf_client_get_default ();
 	source_list = e_source_list_new_for_gconf (client, conf_key);
-	group = ews_esource_utils_ensure_group (source_list, account_name);
+	group = ews_esource_utils_ensure_group (source_list, account_url);
+
+	camel_url_free (account_url);
 
 	sources = e_source_group_peek_sources (group);
 	if (ews_find_source_by_matched_prop (sources, "folder-id", fid->id)) {
@@ -144,7 +162,7 @@ ews_esource_utils_add_esource (EEwsFolder *folder,
 	 * play in the calendar back end to make the cache directory
 	 * unique again. */
 	if (ftype == EWS_FOLDER_TYPE_CONTACTS)
-		source_uri = g_strdup_printf ("%s;folderid=%s", account_uri + strlen (EWS_BASE_URI), fid->id);
+		source_uri = g_strdup_printf ("%s/;folderid=%s", account_uri + strlen (EWS_BASE_URI), fid->id);
 	else
 		source_uri = g_strdup (account_uri + strlen (EWS_BASE_URI));
 
@@ -157,7 +175,8 @@ ews_esource_utils_add_esource (EEwsFolder *folder,
 	e_source_set_property (source, "hosturl", hosturl);
 	e_source_set_property (source, "delete", "no");
 	e_source_set_property (source, "offline_sync", "1");
-	e_source_set_color_spec (source, "#EEBC60");
+	if (ftype != EWS_FOLDER_TYPE_CONTACTS)
+		e_source_set_color_spec (source, "#EEBC60");
 
 	g_free (source_uri);
 	/* set props required for contacts */
@@ -193,7 +212,7 @@ exit:
 /* FIXME remove cache */
 gboolean
 ews_esource_utils_remove_esource (const gchar *fid,
-                                  const gchar *account_name,
+                                  CamelURL *account_url,
                                   EwsFolderType ftype)
 {
 	ESourceList *source_list;
@@ -215,7 +234,7 @@ ews_esource_utils_remove_esource (const gchar *fid,
 
 	client = gconf_client_get_default ();
 	source_list = e_source_list_new_for_gconf (client, conf_key);
-	group = ews_esource_utils_ensure_group (source_list, account_name);
+	group = ews_esource_utils_ensure_group (source_list, account_url);
 
 	sources = e_source_group_peek_sources (group);
 	if (!(source = ews_find_source_by_matched_prop (sources, "folder-id", fid))) {
@@ -235,15 +254,15 @@ exit:
 }
 
 gboolean
-ews_source_utils_remove_group (const gchar *account_name,
+ews_source_utils_remove_group (CamelURL *account_url,
                                EwsFolderType ftype)
 {
 	ESourceList *source_list;
 	ESourceGroup *group;
-	GSList *groups;
 	GConfClient * client;
 	const gchar *conf_key;
 	gboolean ret = TRUE;
+	gchar *base_uri;
 
 	if (ftype == EWS_FOLDER_TYPE_CALENDAR) {
 		conf_key = CALENDAR_SOURCES;
@@ -254,10 +273,16 @@ ews_source_utils_remove_group (const gchar *account_name,
 	} else
 		return FALSE;
 
+	base_uri = ews_construct_base_uri (account_url);
+	g_return_val_if_fail (base_uri != NULL, FALSE);
+
 	client = gconf_client_get_default ();
 	source_list = e_source_list_new_for_gconf (client, conf_key);
-	groups = e_source_list_peek_groups (source_list);
-	group = ews_find_group (groups, account_name);
+	group = e_source_list_peek_group_by_base_uri (source_list, base_uri);
+
+	/* there were done a change in base_uri, thus remove the old group, if any */
+	if (!group)
+		group = e_source_list_peek_group_by_base_uri (source_list, EWS_BASE_URI);
 
 	if (group) {
 		e_source_list_remove_group (source_list, group);
@@ -267,15 +292,16 @@ ews_source_utils_remove_group (const gchar *account_name,
 
 	g_object_unref (source_list);
 	g_object_unref (client);
+	g_free (base_uri);
 
 	return ret;
 
 }
 
 void
-ews_esource_utils_remove_groups (const gchar *account_name)
+ews_esource_utils_remove_groups (CamelURL *account_url)
 {
-	ews_source_utils_remove_group (account_name, EWS_FOLDER_TYPE_CALENDAR);
-	ews_source_utils_remove_group (account_name, EWS_FOLDER_TYPE_CONTACTS);
-	ews_source_utils_remove_group (account_name, EWS_FOLDER_TYPE_TASKS);
+	ews_source_utils_remove_group (account_url, EWS_FOLDER_TYPE_CALENDAR);
+	ews_source_utils_remove_group (account_url, EWS_FOLDER_TYPE_CONTACTS);
+	ews_source_utils_remove_group (account_url, EWS_FOLDER_TYPE_TASKS);
 }
