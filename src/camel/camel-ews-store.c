@@ -1,5 +1,5 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
-/* camel-ews-store.c : class for an groupwise store */
+/* camel-ews-store.c : class for an ews store */
 
 /*
  *  Authors:

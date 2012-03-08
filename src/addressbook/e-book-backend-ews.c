@@ -2565,7 +2565,7 @@ e_book_backend_ews_authenticate_user (EBookBackend *backend,
                                       GCancellable *cancellable,
                                       ECredentials *credentials)
 {
-	EBookBackendEws *ebgw;
+	EBookBackendEws *ebews;
 	EBookBackendEwsPrivate *priv;
 	EEwsConnection *cnc = NULL;
 	ESource *esource;
@@ -2576,10 +2576,10 @@ e_book_backend_ews_authenticate_user (EBookBackend *backend,
 	const gchar *host_url;
 	const gchar *read_only;
 
-	ebgw = E_BOOK_BACKEND_EWS (backend);
-	priv = ebgw->priv;
+	ebews = E_BOOK_BACKEND_EWS (backend);
+	priv = ebews->priv;
 
-	if (!ebgw->priv->is_online) {
+	if (!ebews->priv->is_online) {
 		e_book_backend_notify_opened (backend, EDB_ERROR (SUCCESS));
 		return;
 	}
@@ -2744,11 +2744,11 @@ e_book_backend_ews_new (void)
 static void
 e_book_backend_ews_dispose (GObject *object)
 {
-	EBookBackendEws *bgw;
+	EBookBackendEws *bews;
 	EBookBackendEwsPrivate *priv;
 
-	bgw = E_BOOK_BACKEND_EWS (object);
-	priv = bgw->priv;
+	bews = E_BOOK_BACKEND_EWS (object);
+	priv = bews->priv;
 
 	if (priv->cnc) {
 		g_object_unref (priv->cnc);

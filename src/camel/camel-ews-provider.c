@@ -1,5 +1,5 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
-/* camel-ews-provider.c: GroupWise provider registration code */
+/* camel-ews-provider.c: EWS provider registration code */
 
 /*
  *  Authors: Jeffrey Stedfast <fejj@ximian.com>

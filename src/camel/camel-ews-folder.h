@@ -1,5 +1,5 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
-/* camel-ews-folder.h: class for an groupwise folder */
+/* camel-ews-folder.h: class for an ews folder */
 
 /*
  * Authors:

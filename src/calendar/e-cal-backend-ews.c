@@ -3678,7 +3678,7 @@ e_cal_backend_ews_get_backend_property (ECalBackend *backend,
 
 		prop_value = g_strdup (priv->user_email);
 	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_ALARM_EMAIL_ADDRESS)) {
-		/* group wise does not support email based alarms */
+		/* ews does not support email based alarms */
 		prop_value = NULL;
 	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_DEFAULT_OBJECT)) {
 		ECalComponent *comp;
@@ -3713,12 +3713,12 @@ static void
 e_cal_backend_ews_notify_online_cb (ECalBackend *backend,
                                     GParamSpec *spec)
 {
-	ECalBackendEws *cbgw;
+	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
 	gboolean is_online;
 
-	cbgw = E_CAL_BACKEND_EWS (backend);
-	priv = cbgw->priv;
+	cbews = E_CAL_BACKEND_EWS (backend);
+	priv = cbews->priv;
 
 	is_online = e_backend_get_online (E_BACKEND (backend));
 
@@ -3840,7 +3840,7 @@ e_cal_backend_ews_init (ECalBackendEws *cbews)
 		G_CALLBACK (e_cal_backend_ews_notify_online_cb), NULL);
 }
 
-/* Class initialization function for the gw backend */
+/* Class initialization function for the ews backend */
 static void
 e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 {

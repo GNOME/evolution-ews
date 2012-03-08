@@ -19,8 +19,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef CAMEL_GW_SUMMARY_H
-#define CAMEL_GW_SUMMARY_H
+#ifndef CAMEL_EWS_SUMMARY_H
+#define CAMEL_EWS_SUMMARY_H
 
 #include <camel/camel.h>
 
@@ -52,8 +52,8 @@ typedef struct _CamelEwsMessageContentInfo CamelEwsMessageContentInfo;
 
 /* extra summary flags*/
 enum {
-	CAMEL_GW_MESSAGE_JUNK = 1 << 17,
-	CAMEL_GW_MESSAGE_NOJUNK = 1 << 18
+	CAMEL_EWS_MESSAGE_JUNK = 1 << 17,
+	CAMEL_EWS_MESSAGE_NOJUNK = 1 << 18
 };
 
 struct _CamelEwsMessageInfo {
@@ -101,4 +101,4 @@ void	ews_summary_clear		(CamelFolderSummary *summary,
 
 G_END_DECLS
 
-#endif /* CAMEL_GW_SUMMARY_H */
+#endif /* CAMEL_EWS_SUMMARY_H */

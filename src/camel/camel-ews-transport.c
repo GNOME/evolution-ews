@@ -1,5 +1,5 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
-/* camel-ews-transport.c : class for an groupwise transport */
+/* camel-ews-transport.c : class for an ews transport */
 
 /*
  * Authors: Sivaiah Nallagatla <snallagatla@novell.com>

@@ -1,5 +1,5 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
-/* camel-ews-store.h : class for an groupwise store */
+/* camel-ews-store.h : class for an ews store */
 
 /*
  * Authors: Chenthill Palanisamy <pchenthill@novell.com>
@@ -48,7 +48,7 @@
 	(G_TYPE_INSTANCE_GET_CLASS \
 	((obj), CAMEL_TYPE_EWS_STORE, CamelEwsStoreClass))
 
-#define GW_PARAM_FILTER_INBOX		(1 << 0)
+#define EWS_PARAM_FILTER_INBOX		(1 << 0)
 
 G_BEGIN_DECLS
 
