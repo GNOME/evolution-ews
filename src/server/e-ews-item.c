@@ -1795,4 +1795,38 @@ e_ews_item_get_tzid (EEwsItem *item)
 	return item->priv->timezone;
 }
 
+EwsResolveContact *
+e_ews_item_resolve_contact_from_soap_param (ESoapParameter *param)
+{
+	ESoapParameter *subparam;
+	EwsResolveContact *rc;
 
+	if (!param)
+		return NULL;
+
+	rc = g_new0 (EwsResolveContact, 1);
+	rc->email_addresses = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+
+	subparam = e_soap_parameter_get_first_child_by_name (param, "DisplayName");
+	if (subparam)
+		rc->display_name = e_soap_parameter_get_string_value (subparam);
+
+	subparam = e_soap_parameter_get_first_child_by_name (param, "EmailAddresses");
+	if (subparam)
+		parse_entries (rc->email_addresses, subparam, (EwsGetValFunc) e_soap_parameter_get_string_value);
+
+	return rc;
+}
+
+void
+e_ews_free_resolve_contact (gpointer rc)
+{
+	EwsResolveContact *resc = rc;
+
+	if (!resc)
+		return;
+
+	g_free (resc->display_name);
+	g_hash_table_unref (resc->email_addresses);
+	g_free (resc);
+}

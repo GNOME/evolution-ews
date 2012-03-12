@@ -602,18 +602,25 @@ resolve_names_response_cb (ESoapParameter *subparam, EwsNode *enode)
 
 		node = e_soap_parameter_get_first_child_by_name (subparam, "Mailbox");
 		mb = e_ews_item_mailbox_from_soap_param (node);
-		if (mb)
-			mailboxes = g_slist_append (mailboxes, mb);
+		if (mb) {
+			EwsResolveContact *rc;
 
-		/* TODO parse contacts */
+			mailboxes = g_slist_prepend (mailboxes, mb);
+
+			/* 'mailboxes' and 'contact_items' match 1:1, but if the contact information
+			   wasn't found, then NULL is stored in the corresponding position */
+			node = e_soap_parameter_get_first_child_by_name (subparam, "Contact");
+			rc = e_ews_item_resolve_contact_from_soap_param (node);
+			contact_items = g_slist_prepend (contact_items, rc);
+		}
 	}
 
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
 
 	/* Reuse existing variables */
-	async_data->items = mailboxes;
+	async_data->items = g_slist_reverse (mailboxes);
 	async_data->includes_last_item = includes_last_item;
-	async_data->items_created = contact_items;
+	async_data->items_created = g_slist_reverse (contact_items);
 }
 
 static void
@@ -2800,6 +2807,11 @@ e_ews_connection_resolve_names_finish	(EEwsConnection *cnc,
 
 	if (contact_items)
 		*contact_items = async_data->items_created;
+	else {
+		g_slist_foreach (async_data->items_created, (GFunc)e_ews_free_resolve_contact, NULL);
+		g_slist_free (async_data->items_created);
+	}
+
 	*mailboxes = async_data->items;
 
 	return TRUE;

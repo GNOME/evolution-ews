@@ -80,6 +80,11 @@ typedef struct {
 } EwsMailbox;
 
 typedef struct {
+	gchar *display_name;
+	GHashTable *email_addresses;
+} EwsResolveContact;
+
+typedef struct {
 	EwsMailbox *mailbox;
 	gchar *attendeetype;
 	gchar *responsetype;
@@ -151,6 +156,9 @@ const GSList *
 EwsMailbox *
 		e_ews_item_mailbox_from_soap_param
 						(ESoapParameter *param);
+EwsResolveContact *
+		e_ews_item_resolve_contact_from_soap_param (ESoapParameter *param);
+void		e_ews_free_resolve_contact	(/*EwsResolveContact * */ gpointer rc);
 
 const GSList *	e_ews_item_get_modified_occurrences
 						(EEwsItem *item);
