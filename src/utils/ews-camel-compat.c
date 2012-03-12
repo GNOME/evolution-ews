@@ -65,6 +65,26 @@ camel_data_cache_get_filename_compat	(CamelDataCache *cdc,
 #endif
 }
 
+gint
+camel_data_cache_remove_compat (CamelDataCache *cdc,
+				const gchar *path,
+				const gchar *key,
+				GError **error)
+{
+#if EDS_CHECK_VERSION(2,29,0)
+	return camel_data_cache_remove (cdc, path, key, error);
+#else
+	CamelException ex;
+	gint ret;
+	
+	camel_exception_init (&ex);
+	ret = camel_data_cache_remove (cdc, path, key, &ex);
+	ews_compat_propagate_exception_to_gerror (&ex, error);
+
+	return ret;
+#endif
+}
+
 CamelDataCache *
 camel_data_cache_new_compat	(const gchar *path,
 		                 GError **error)

@@ -38,6 +38,10 @@ gchar *		camel_data_cache_get_filename_compat
 	                                         const gchar *path,
         	                                 const gchar *key,
                 	                         GError **error);
+gint		camel_data_cache_remove_compat (CamelDataCache *cdc,
+						const gchar *path,
+						const gchar *key,
+						GError **error);
 CamelDataCache *camel_data_cache_new_compat     (const gchar *path,
                 		                 GError **error);
 CamelStream *	camel_data_cache_get_compat     (CamelDataCache *cdc,

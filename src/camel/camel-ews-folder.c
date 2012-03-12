@@ -105,9 +105,9 @@ ews_get_filename (CamelFolder *folder, const gchar *uid, GError **error)
 	gchar *ret;
 
 	g_checksum_update(sha, (guchar *)uid, strlen(uid));
-	ret = camel_data_cache_get_filename (ews_folder->cache, "cur",
-					     g_checksum_get_string (sha),
-					     error);
+	ret = camel_data_cache_get_filename_compat (ews_folder->cache, "cur",
+						    g_checksum_get_string (sha),
+						    error);
 	g_checksum_free (sha);
 	return ret;
 }
@@ -122,8 +122,8 @@ ews_data_cache_remove (CamelDataCache *cdc,
 	gint ret;
 
 	g_checksum_update(sha, (guchar *)key, strlen(key));
-	ret = camel_data_cache_remove (cdc, path, g_checksum_get_string (sha),
-				       error);
+	ret = camel_data_cache_remove_compat (cdc, path, g_checksum_get_string (sha),
+					      error);
 	g_checksum_free (sha);
 	return ret;
 }
@@ -138,8 +138,8 @@ ews_data_cache_get (CamelDataCache *cdc,
 	CamelStream *ret;
 
 	g_checksum_update(sha, (guchar *)key, strlen(key));
-	ret = camel_data_cache_get (cdc, path, g_checksum_get_string (sha),
-				    error);
+	ret = camel_data_cache_get_compat (cdc, path, g_checksum_get_string (sha),
+					   error);
 	g_checksum_free (sha);
 	return ret;
 }
@@ -154,9 +154,9 @@ ews_data_cache_get_filename (CamelDataCache *cdc,
 	gchar *ret;
 
 	g_checksum_update(sha, (guchar *)key, strlen(key));
-	ret = camel_data_cache_get_filename (cdc, path,
-					     g_checksum_get_string (sha),
-					     error);
+	ret = camel_data_cache_get_filename_compat (cdc, path,
+						    g_checksum_get_string (sha),
+						    error);
 	g_checksum_free (sha);
 	return ret;
 }
@@ -173,8 +173,8 @@ camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder, const gchar
 	g_static_rec_mutex_lock (&priv->cache_lock);
 	stream = ews_data_cache_get (ews_folder->cache, "cur", uid, error);
 	if (!stream) {
-		gchar *old_fname = camel_data_cache_get_filename (ews_folder->cache, "cur",
-								  uid, error);
+		gchar *old_fname = camel_data_cache_get_filename_compat (ews_folder->cache, "cur",
+									 uid, error);
 		if (!g_access (old_fname, R_OK)) {
 			gchar *new_fname = ews_data_cache_get_filename (ews_folder->cache,
 									"cur", uid, error);
