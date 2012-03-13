@@ -1008,7 +1008,7 @@ struct _autodiscover_data {
 	EEwsConnection *cnc;
 	xmlOutputBuffer *buf;
 	GSimpleAsyncResult *simple;
-	SoupMessage *msgs[2];
+	SoupMessage *msgs[4];
 	EEwsAutoDiscoverCallback cb;
 	gpointer cbdata;
 };
@@ -1062,11 +1062,11 @@ autodiscover_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 	int idx;
 	gboolean success = FALSE;
 
-	for (idx = 0; idx < 2; idx++) {
+	for (idx = 0; idx < 4; idx++) {
 		if (ad->msgs[idx] == msg)
 			break;
 	}
-	if (idx == 2) {
+	if (idx == 4) {
 		/* We already got removed (cancelled). Do nothing */
 		return;
 	}
@@ -1145,7 +1145,7 @@ autodiscover_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 	}
 
 	/* We have a good response; cancel all the others */
-	for (idx = 0; idx < 2; idx++) {
+	for (idx = 0; idx < 4; idx++) {
 		if (ad->msgs[idx]) {
 			SoupMessage *m = ad->msgs[idx];
 			ad->msgs[idx] = NULL;
@@ -1160,7 +1160,7 @@ autodiscover_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 	return;
 
 failed:
-	for (idx = 0; idx < 2; idx++) {
+	for (idx = 0; idx < 4; idx++) {
 		if (ad->msgs[idx]) {
 			/* There's another request outstanding.
 			   Hope that it has better luck. */
@@ -1224,15 +1224,17 @@ e_ews_get_msg_for_url (const gchar *url, xmlOutputBuffer *buf)
 
 void
 e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb, gpointer cbdata,
-			   const gchar *email, const gchar *password)
+			   const gchar *email, const gchar *password,
+			   const gchar *ews_url, const gchar *username)
 {
 	struct _autodiscover_data *ad;
 	xmlOutputBuffer *buf;
 	GError *error = NULL;
-	gchar *url;
+	gchar *url1, *url2, *url3, *url4;
 	gchar *domain;
 	xmlDoc *doc;
 	EEwsConnection *cnc;
+	gboolean use_secure = TRUE;
 
 	if (!password || !email) {
 		g_set_error (&error, EWS_CONNECTION_ERROR,
@@ -1253,11 +1255,33 @@ e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb, gpointer cbdata,
 	xmlNodeDumpOutput(buf, doc, xmlDocGetRootElement(doc), 0, 1, NULL);
 	xmlOutputBufferFlush(buf);
 
-	url = g_strdup_printf("https://%s/autodiscover/autodiscover.xml", domain);
+	url1 = NULL;
+	url2 = NULL;
+	url3 = NULL;
+	url4 = NULL;
+	if (ews_url) {
+		SoupURI *uri = soup_uri_new (ews_url);
 
-	/* FIXME: Get username from config; don't assume same as email */
-	cnc = e_ews_connection_new (url, email, password, NULL, NULL, &error);
+		if (uri) {
+			use_secure = g_strcmp0 (soup_uri_get_scheme (uri), "https") == 0;
+
+			url1 = g_strdup_printf ("http%s://%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", soup_uri_get_host (uri));
+			url2 = g_strdup_printf ("http%s://autodiscover.%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", soup_uri_get_host (uri));
+			soup_uri_free (uri);
+		}
+	} 
+
+	url3 = g_strdup_printf ("http%s://%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", domain);
+	url4 = g_strdup_printf ("http%s://autodiscover.%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", domain);
+
+	cnc = e_ews_connection_new (url3, (username && *username) ? username : email, password, NULL, NULL, &error);
 	if (!cnc) {
+		g_free (url1);
+		g_free (url2);
+		g_free (url3);
+		g_free (url4);
+		xmlOutputBufferClose (buf);
+		xmlFreeDoc (doc);
 	err:
 		cb (NULL, cbdata, error);
 		return;
@@ -1278,12 +1302,10 @@ e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb, gpointer cbdata,
 	ad->buf = buf;
 	ad->simple = g_simple_async_result_new (G_OBJECT (cnc), autodiscover_done_cb,
 					    ad, e_ews_autodiscover_ws_url);
-	ad->msgs[0] = e_ews_get_msg_for_url (url, buf);
-	g_free (url);
-
-	url = g_strdup_printf("https://autodiscover.%s/autodiscover/autodiscover.xml", domain);
-	ad->msgs[1] = e_ews_get_msg_for_url (url, buf);
-	g_free (url);
+	ad->msgs[0] = url1 ? e_ews_get_msg_for_url (url1, buf) : NULL;
+	ad->msgs[1] = url2 ? e_ews_get_msg_for_url (url2, buf) : NULL;
+	ad->msgs[2] = url3 ? e_ews_get_msg_for_url (url3, buf) : NULL;
+	ad->msgs[3] = url4 ? e_ews_get_msg_for_url (url4, buf) : NULL;
 
 	/* These have to be submitted only after they're both set in ad->msgs[]
 	   or there will be races with fast completion */
@@ -1291,12 +1313,19 @@ e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb, gpointer cbdata,
 				    autodiscover_response_cb, ad);
 	soup_session_queue_message (cnc->priv->soup_session, ad->msgs[1],
 				    autodiscover_response_cb, ad);
+	soup_session_queue_message (cnc->priv->soup_session, ad->msgs[2],
+				    autodiscover_response_cb, ad);
+	soup_session_queue_message (cnc->priv->soup_session, ad->msgs[3],
+				    autodiscover_response_cb, ad);
 
 	g_object_unref (cnc); /* the GSimpleAsyncResult holds it now */
 
 	xmlFreeDoc (doc);
+	g_free (url1);
+	g_free (url2);
+	g_free (url3);
+	g_free (url4);
 }
-
 
 struct _oal_req_data {
 	EEwsConnection *cnc;
