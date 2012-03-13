@@ -14,6 +14,7 @@ void autocompletion_tests_run ();
 void createfolder_tests_run ();
 void deletefolder_tests_run (gconstpointer data);
 void get_attachments_tests_run ();
+void get_delegate_tests_run ();
 
 static void
 finalize_test_data ()
@@ -45,6 +46,7 @@ int main (int argc, char *argv[])
 	g_test_add_data_func ("/libews/deletefolder", &folder_id, deletefolder_tests_run);
 
 	g_test_add_func ("/libews/cuditem", cuditem_tests_run);
+	g_test_add_func ("/libews/getdelegate", get_delegate_tests_run);
 
 
 	ret = g_test_run ();

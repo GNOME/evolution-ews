@@ -115,6 +115,30 @@ typedef struct {
 	gchar *filename;
 } EwsOALDetails;
 
+typedef struct{
+	gchar *sid;
+	gchar *primary_smtp_add;
+	gchar *display_name;
+	gchar *distinguished_user;
+	gchar *external_user;
+}EwsUserId;
+
+typedef enum{
+	NONE,
+	EWS_PERM_EDITOR,
+	EWS_PERM_REVIEWER,
+	EWS_PERM_AUTHOR,
+	CUSTOM
+}EwsPermissionLevel;
+
+typedef struct{
+	EwsUserId *user_id;
+	EwsPermissionLevel calendar, contact, inbox, tasks, notes, journal;
+	gboolean meetingcopies;
+	gboolean view_priv_items;
+}EwsDelegateInfo;
+
+
 GType		e_ews_connection_get_type	(void);
 EEwsConnection *e_ews_connection_new		(const gchar *uri,
 						 const gchar *username,
@@ -139,6 +163,9 @@ void		e_ews_autodiscover_ws_url	(EEwsAutoDiscoverCallback cb,
 						 const gchar *username);
 void		e_ews_connection_set_mailbox	(EEwsConnection *cnc,
 						 const gchar *email);
+
+void		ews_user_id_free		(EwsUserId *id);
+
 /* Sync folder items */
 void		e_ews_connection_sync_folder_items_start
 						(EEwsConnection *cnc,
@@ -666,6 +693,29 @@ gboolean	e_ews_connection_download_oal_file
 						 gpointer progress_data,
 						 GCancellable *cancellable,
 						 GError **error);
+/*Get Delegation*/
+void e_ews_connection_get_delegate_start	(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *mail_id,
+						 const gchar *include_permissions,
+						 GAsyncReadyCallback cb,
+						 GCancellable *cancellable,
+						 gpointer user_data);
+gboolean e_ews_connection_get_delegate_finish	(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 EwsDelegateInfo **get_delegate,
+						 GError **error);
+gboolean e_ews_connection_get_delegate	
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *mail_id,
+						 const gchar *include_permissions,
+						 EwsDelegateInfo **get_delegate,
+						 GCancellable *cancellable,
+						 GError **error);
+
+
+
 
 G_END_DECLS
 

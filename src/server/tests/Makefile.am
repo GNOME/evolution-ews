@@ -23,6 +23,7 @@ testews_SOURCES = 				\
 		test-autocompletion.c		\
 		test-createfolder.c		\
 		test-deletefolder.c		\
+		test-getdelegate.c		\
 		test-libews.c 			\
 		utils.h
 
