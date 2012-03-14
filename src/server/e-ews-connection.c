@@ -1257,6 +1257,7 @@ autodiscover_response_cb (SoupSession *session,
 	xmlNode *node;
 	gint idx;
 	gboolean success = FALSE;
+	GSimpleAsyncResult *simple;
 
 	for (idx = 0; idx < 4; idx++) {
 		if (ad->msgs[idx] == msg)
@@ -1268,6 +1269,13 @@ autodiscover_response_cb (SoupSession *session,
 	}
 
 	ad->msgs[idx] = NULL;
+
+	/* Take 'simple' from 'ad' before actual call
+	   to g_simple_async_result_complete_in_idle(),
+	   for cases where the 'ad' is freed in autodiscover_done_cb()
+	   before this function finishes. Suggested by Dan Winship.
+	*/
+	simple = ad->simple;
 
 	if (status != 200) {
 		g_set_error (
@@ -1352,7 +1360,7 @@ autodiscover_response_cb (SoupSession *session,
 
 	g_simple_async_result_set_op_res_gpointer (ad->simple, urls, NULL);
 	g_simple_async_result_complete_in_idle (ad->simple);
-	g_object_unref (ad->simple);
+	g_object_unref (simple);
 	return;
 
 failed:
@@ -1371,7 +1379,7 @@ failed:
 	 * want the *first* error */
 	g_simple_async_result_set_from_error (ad->simple, error);
 	g_simple_async_result_complete_in_idle (ad->simple);
-	g_object_unref (ad->simple);
+	g_object_unref (simple);
 }
 
 static void post_restarted (SoupMessage *msg, gpointer data)
