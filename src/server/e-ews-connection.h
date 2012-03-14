@@ -138,6 +138,11 @@ typedef struct{
 	gboolean view_priv_items;
 }EwsDelegateInfo;
 
+typedef enum {
+	NORMAL_FIELD_URI,
+	INDEXED_FIELD_URI,
+	EXTENDED_FIELD_URI
+} EwsFieldURIType;
 
 typedef struct {
 	gchar *distinguished_prop_set_id;
@@ -158,6 +163,12 @@ typedef struct {
 	GSList *extended_furis;
 	GSList *indexed_furis;
 } EwsAdditionalProps;
+
+typedef struct {
+	gchar *order;
+	gint uri_type;
+	gpointer field_uri;
+} EwsSortOrder;
 
 GType		e_ews_connection_get_type	(void);
 EEwsConnection *e_ews_connection_new		(const gchar *uri,
@@ -222,6 +233,47 @@ gboolean	e_ews_connection_sync_folder_items
 						 GSList **items_deleted,
 						 GCancellable *cancellable,
 						 GError **error);
+
+typedef void	(*EwsConvertQueryCallback) (ESoapMessage *msg,
+						 const gchar *query,
+						 EwsFolderType type);
+
+void		e_ews_connection_find_folder_items_start
+						(EEwsConnection *cnc,
+						 gint pri,
+						 EwsFolderId *fid,
+						 const gchar *props,
+						 EwsAdditionalProps *add_props,
+						 EwsSortOrder *sort_order,
+						 const gchar *query,
+						 EwsFolderType type,
+						 EwsConvertQueryCallback convert_query_cb,
+						 GAsyncReadyCallback cb,
+						 GCancellable *cancellable,
+						 gpointer user_data);
+
+gboolean	e_ews_connection_find_folder_items_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 gboolean *includes_last_item,
+						 GSList **items,
+						 GError **error);
+
+gboolean	e_ews_connection_find_folder_items
+						(EEwsConnection *cnc,
+						 gint pri,
+						 EwsFolderId *fid,
+						 const gchar *default_props,
+						 EwsAdditionalProps *add_props,
+						 EwsSortOrder *sort_order,
+						 const gchar *query,
+						 EwsFolderType type,
+						 gboolean *includes_last_item,
+						 GSList **items,
+						 EwsConvertQueryCallback convert_query_cb,
+						 GCancellable *cancellable,
+						 GError **error);
+
 
 /* Get folder items */
 void		e_ews_connection_get_items_start

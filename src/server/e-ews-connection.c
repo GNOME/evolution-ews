@@ -97,6 +97,7 @@ struct _EwsAsyncData {
 	GSList *items_updated;
 	GSList *items_deleted;
 
+	gint total_items;
 	const gchar *directory;
 	GSList *items;
 	gchar *sync_state;
@@ -576,6 +577,38 @@ get_folder_response_cb  (ESoapParameter *subparam, EwsNode *enode)
 		if (!folder) continue;
 		async_data->items = g_slist_append (async_data->items, folder);
 	}
+}
+
+static void 
+find_folder_items_response_cb (ESoapParameter *subparam, EwsNode *enode)
+{
+	ESoapParameter *node, *subparam1;
+	EwsAsyncData *async_data;
+	gchar *last, *total;
+	gint total_items;
+	EEwsItem *item;
+	gboolean includes_last_item = FALSE;
+
+	node = e_soap_parameter_get_first_child_by_name (subparam, "RootFolder");
+	total = e_soap_parameter_get_property (node, "TotalItemsInView");
+	total_items = atoi (total);
+	g_free (total);
+	last = e_soap_parameter_get_property (node, "IncludesLastItemInRange");
+	if (!strcmp (last, "true"))
+		includes_last_item = TRUE;
+	g_free (last);
+
+	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
+
+	node = e_soap_parameter_get_first_child_by_name (node, "Items");
+	for (subparam1 = e_soap_parameter_get_first_child (node);
+	     subparam1; subparam1 = e_soap_parameter_get_next_child (subparam1)) {
+		item = e_ews_item_new_from_soap_parameter (subparam1);
+		if (!item) continue;
+		async_data->items = g_slist_append (async_data->items, item);
+	}
+	async_data->total_items = total_items;
+	async_data->includes_last_item = includes_last_item;
 }
 
 /* Used for CreateItems and GetItems */
@@ -1938,6 +1971,47 @@ ews_append_additional_props_to_msg (ESoapMessage *msg, EwsAdditionalProps *add_p
 	e_soap_message_end_element (msg);
 }
 
+static void
+ews_write_sort_order_to_msg (ESoapMessage *msg, EwsSortOrder *sort_order)
+{
+	if (!sort_order)
+		return;
+
+	e_soap_message_start_element (msg, "SortOrder", NULL, NULL);
+	e_soap_message_start_element (msg, "FieldOrder", NULL, NULL);
+	e_soap_message_add_attribute (msg, "Order", sort_order->order, NULL, NULL);
+
+	if (sort_order->uri_type == NORMAL_FIELD_URI)
+		e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", (gchar *) sort_order->field_uri);
+	else if (sort_order->uri_type == INDEXED_FIELD_URI) {
+		EwsIndexedFieldURI *in_furi = (EwsIndexedFieldURI *) sort_order->field_uri;
+
+		e_soap_message_start_element (msg, "IndexedFieldURI", NULL, NULL);
+		e_soap_message_add_attribute (msg, "FieldURI", in_furi->field_uri, NULL, NULL);
+		e_soap_message_add_attribute (msg, "FieldIndex", in_furi->field_index, NULL, NULL);
+		e_soap_message_end_element (msg);
+	} else if (sort_order->uri_type == EXTENDED_FIELD_URI) {
+		EwsExtendedFieldURI *ex_furi = (EwsExtendedFieldURI *) sort_order->field_uri;
+			
+		e_soap_message_start_element (msg, "ExtendedFieldURI", NULL, NULL);
+		
+		if (ex_furi->distinguished_prop_set_id)
+			e_soap_message_add_attribute (msg, "DistinguishedPropertySetId", ex_furi->distinguished_prop_set_id, NULL, NULL);
+		if (ex_furi->prop_set_id)
+			e_soap_message_add_attribute (msg, "PropertySetId", ex_furi->prop_set_id, NULL, NULL);
+		if (ex_furi->prop_name)
+			e_soap_message_add_attribute (msg, "PropertyName", ex_furi->prop_name, NULL, NULL);
+		if (ex_furi->prop_id)
+			e_soap_message_add_attribute (msg, "PropertyId", ex_furi->prop_id, NULL, NULL);
+		if (ex_furi->prop_type)
+			e_soap_message_add_attribute (msg, "PropertyType", ex_furi->prop_type, NULL, NULL);
+
+		e_soap_message_end_element (msg);
+	}
+
+	e_soap_message_end_element (msg);
+	e_soap_message_end_element (msg);
+}
 
 /**
  * e_ews_connection_sync_folder_items_start
@@ -2113,6 +2187,148 @@ ews_append_folder_ids_to_msg (ESoapMessage *msg, const gchar *email, GSList *fol
 		e_soap_message_end_element (msg);
 	}
 }
+
+/**
+ * e_ews_connection_find_folder_items_start
+ * @cnc: The EWS Connection
+ * @pri: The priority associated with the request
+ * @fid: The folder id to which the items belong
+ * @default_props: Can take one of the values: IdOnly,Default or AllProperties
+ * @add_props: Specify any additional properties to be fetched
+ * @sort_order: Specific sorting order for items
+ * @query: evo query based on which items will be fetched
+ * @type: type of folder
+ * @convert_query_cb: a callback method to convert query to ews restiction
+ * @cb: Responses are parsed and returned to this callback
+ * @cancellable: a GCancellable to monitor cancelled operations
+ * @user_data: user data passed to callback
+ **/
+void
+e_ews_connection_find_folder_items_start	(EEwsConnection *cnc,
+						 gint pri,
+						 EwsFolderId *fid,
+						 const gchar *default_props,
+						 EwsAdditionalProps *add_props,
+						 EwsSortOrder *sort_order,
+						 const gchar *query,
+						 EwsFolderType type,
+						 EwsConvertQueryCallback convert_query_cb,
+						 GAsyncReadyCallback cb,
+						 GCancellable *cancellable,
+						 gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "FindItem", "Traversal", "Shallow", EWS_EXCHANGE_2007_SP1);
+	e_soap_message_start_element (msg, "ItemShape", "messages", NULL);
+	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, default_props);
+
+	ews_append_additional_props_to_msg (msg, add_props);
+
+	e_soap_message_end_element (msg);
+
+	/*write restriction message based on query*/
+	if (convert_query_cb)
+		convert_query_cb (msg, query, type);
+
+	if (sort_order)
+		ews_write_sort_order_to_msg (msg, sort_order);
+
+	e_soap_message_start_element (msg, "ParentFolderIds", "messages", NULL);
+
+	if (fid->is_distinguished_id)
+		e_ews_message_write_string_parameter_with_attribute (msg, "DistinguishedFolderId", NULL, NULL, "Id", fid->id);
+	else
+		e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", NULL, NULL, "Id", fid->id);
+
+	e_soap_message_end_element (msg);
+
+	/* Complete the footer and print the request */
+	e_ews_message_write_footer (msg);
+
+      	simple = g_simple_async_result_new (G_OBJECT (cnc),
+                                      cb,
+                                      user_data,
+                                      e_ews_connection_find_folder_items_start);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	ews_connection_queue_request (cnc, msg, find_folder_items_response_cb, pri,
+				      cancellable, simple, cb == ews_sync_reply_cb);
+}
+
+gboolean
+e_ews_connection_find_folder_items_finish	(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 gboolean *includes_last_item,
+						 GSList **items,
+						 GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_find_folder_items_start),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	*includes_last_item = async_data->includes_last_item;
+	*items = async_data->items;
+
+	return TRUE;
+}
+
+gboolean
+e_ews_connection_find_folder_items	(EEwsConnection *cnc,
+					 gint pri,
+					 EwsFolderId *fid,
+					 const gchar *default_props,
+					 EwsAdditionalProps *add_props,
+					 EwsSortOrder *sort_order,
+					 const gchar *query,
+					 EwsFolderType type,
+					 gboolean *includes_last_item,
+					 GSList **items,
+					 EwsConvertQueryCallback convert_query_cb,
+					 GCancellable *cancellable,
+					 GError **error)
+{
+	EwsSyncData *sync_data;
+	gboolean result;
+
+	sync_data = g_new0 (EwsSyncData, 1);
+	sync_data->eflag = e_flag_new ();
+
+	e_ews_connection_find_folder_items_start	(cnc, pri, fid, default_props,
+							 add_props, sort_order, query,
+							 type, convert_query_cb,
+							 ews_sync_reply_cb, NULL,
+							 (gpointer) sync_data);
+
+	e_flag_wait (sync_data->eflag);
+
+	result = e_ews_connection_find_folder_items_finish (cnc, sync_data->res,
+							    includes_last_item,
+							    items,
+							    error);
+
+	e_flag_free (sync_data->eflag);
+	g_object_unref (sync_data->res);
+	g_free (sync_data);
+
+	return result;
+}
+
 
 void
 e_ews_connection_sync_folder_hierarchy_start	(EEwsConnection *cnc,
@@ -3276,7 +3492,7 @@ e_ews_connection_move_folder	(EEwsConnection *cnc,
 }
 
 
-void		
+void
 e_ews_connection_get_folder_start	(EEwsConnection *cnc,
 					 gint pri,
 					 const gchar *folder_shape,

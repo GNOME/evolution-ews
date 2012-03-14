@@ -665,7 +665,7 @@ message_func_system_flag (ESExp *f,
 			WRITE_EXISTS_MESSAGE (msg, "item:HasAttachments")
 		} else if (!g_ascii_strcasecmp(name, "deleted") || !g_ascii_strcasecmp(name, "junk")) {
 			r = e_sexp_result_new (f, ESEXP_RES_BOOL);
-			r->value.boolean = FALSE;
+			r->value.bool = FALSE;
 			return r;
 		}
 	}
@@ -717,6 +717,23 @@ message_func_current_date (ESExp *f,
 	return r;
 }
 
+/* slightly modified version from master */
+static time_t
+ews_add_months (time_t t,
+		gint months)
+{
+	time_t res;
+
+	if (!months)
+		return t;
+
+	/* just for issues, to return something inaccurate, but sane */
+	res = t + (60 * 60 * 24 * 30 * months);
+
+	return res;
+}
+
+
 static ESExpResult *
 message_func_relative_months (ESExp *f,
 				gint argc,
@@ -728,11 +745,11 @@ message_func_relative_months (ESExp *f,
 
 	if (argc != 1 || argv[0]->type != ESEXP_RES_INT) {
 		r = e_sexp_result_new (f, ESEXP_RES_BOOL);
-		r->value.boolean = FALSE;
+		r->value.bool = FALSE;
 
 	} else {
 		r = e_sexp_result_new (f, ESEXP_RES_INT);
-		r->value.number = camel_folder_search_util_add_months (time (NULL), argv[0]->value.number);
+		r->value.number = ews_add_months (time (NULL), argv[0]->value.number);
 	}
 
 	return r;
