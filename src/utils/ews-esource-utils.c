@@ -84,7 +84,6 @@ ews_esource_utils_ensure_group (ESourceList *source_list, const gchar *account_n
 		return NULL;
 	}
 
-	e_source_list_sync (source_list, NULL);
 	return group;
 }
 
