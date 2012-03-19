@@ -1,3 +1,19 @@
+Evolution-EWS 3.3.92 2012-03-19
+-------------------------------
+
+Bug Fixes:
+	Bug 665801 - Fix a corner case for a leak fix from bug #665801 (Milan Crha)
+	Bug 660428 - Some calendars/task lists are missing after reconfiguring account (Milan Crha)
+	Bug 667849 - Unable to open Contacts address book (Milan Crha)
+
+Miscellaneous Fixes:
+	Use e_book_backend_foreach_view for notifying status messages to all the views. (Chenthill Palanisamy)
+	Suppress deprecation warnings. (Matthew Barnes)
+
+Translations:
+	Gabor Kelemen (hu)
+	Piotr Drąg (pl)
+
 Evolution-EWS 3.3.90 2012-02-20
 -------------------------------
 
