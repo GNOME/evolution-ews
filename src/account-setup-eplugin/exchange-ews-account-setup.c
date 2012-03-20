@@ -37,7 +37,9 @@
 #include "ews-plugin-compat.h"
 #include <addressbook/gui/widgets/eab-config.h>
 #include <calendar/gui/e-cal-config.h>
+#include <exchange-ews-account-out-of-office.h>
 
+#include <camel/camel.h>
 #include <camel-ews-folder.h>
 #include <e-ews-connection.h>
 #include <camel-ews-utils.h>
@@ -61,6 +63,10 @@ gboolean org_gnome_exchange_ews_check_options(EPlugin *epl, EConfigHookPageCheck
 
 /* OAB receiving options */
 GtkWidget * org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data);
+
+/*Ews Settings Page*/
+GtkWidget * org_gnome_ews_settings (EPlugin *epl, EConfigHookItemFactoryData *data);
+void	org_gnome_exchange_ews_commit ( EPlugin *epl, EConfigHookItemFactoryData *data);
 
 static ExchangeEWSAccountListener *config_listener = NULL;
 
@@ -116,7 +122,7 @@ static void autodiscover_callback (EwsUrls *urls, gpointer user_data, GError *er
 	}
 	if (urls) {
 		char *oab_url;
-		
+
 		gtk_entry_set_text (GTK_ENTRY (cbdata->host_entry), urls->as_url);
 
 		oab_url = g_strconcat (urls->oab_url, "oab.xml", NULL);
@@ -705,4 +711,76 @@ org_gnome_ews_oab_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
 
 	camel_url_free (url);
 	return NULL;
+}
+
+void
+org_gnome_exchange_ews_commit ( EPlugin *epl,
+				EConfigHookItemFactoryData *data)
+{
+	EMConfigTargetAccount *target_account;
+	const gchar *source_url;
+	CamelURL *url = NULL;
+
+	target_account = (EMConfigTargetAccount *) data->config->target;
+
+	/*return if it is not a ews account*/
+	source_url = e_account_get_string (target_account->account,  E_ACCOUNT_SOURCE_URL);
+	url = camel_url_new(source_url, NULL);
+	if (url == NULL
+	    || g_strcmp0 (url->protocol, "ews") != 0) {
+		if (url)
+			camel_url_free(url);
+		return;
+	}
+
+	if (!ews_plugin_get_online_status ()) {
+		camel_url_free (url);
+		return;
+	}
+
+	/* Set oof data in exchange account */
+	ews_set_oof_settings (target_account);
+}
+
+GtkWidget *
+org_gnome_ews_settings (EPlugin *epl, EConfigHookItemFactoryData *data)
+{
+	EMConfigTargetAccount *target_account;
+	CamelURL *url = NULL;
+	const gchar *source_url;
+	GtkVBox *vbox_settings;
+	GtkWidget *oof;
+
+	target_account = (EMConfigTargetAccount *) data->config->target;
+
+	/*return if it is not a ews account*/
+	source_url = e_account_get_string (target_account->account,  E_ACCOUNT_SOURCE_URL);
+	url = camel_url_new(source_url, NULL);
+	if (url == NULL
+	    || g_strcmp0 (url->protocol, "ews") != 0) {
+		if (url)
+			camel_url_free(url);
+		return NULL;
+	}
+
+	if (data->old) {
+		camel_url_free(url);
+		return data->old;
+	}
+
+	if (!ews_plugin_get_online_status ()) {
+		camel_url_free (url);
+		return NULL;
+	}
+
+	vbox_settings = (GtkVBox*) g_object_new (GTK_TYPE_VBOX, "homogeneous", FALSE, "spacing", 6, NULL);
+	gtk_container_set_border_width (GTK_CONTAINER (vbox_settings), 12);
+
+	/*Get Out of office widget*/
+	oof = ews_get_outo_office_widget (target_account);
+	gtk_box_pack_start (GTK_BOX (vbox_settings), oof, FALSE, FALSE, 0);
+
+	gtk_widget_show_all (GTK_WIDGET (vbox_settings));
+	gtk_notebook_insert_page (GTK_NOTEBOOK (data->parent), GTK_WIDGET (vbox_settings), gtk_label_new(_("EWS Settings")), 4);
+	return GTK_WIDGET (vbox_settings);
 }

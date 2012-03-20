@@ -56,6 +56,8 @@ con_test_create_new_connection ()
 	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
 
+	g_print ("\nSuccess : Created a new connection\n");
+
 	/* Quit the test suite */
 	//g_signal_connect (cnc, "shutdown", G_CALLBACK (ews_conn_shutdown), NULL);
 }

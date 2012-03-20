@@ -7,6 +7,8 @@
 /* Test result of created folder id */
 extern EwsFolderId *folder_id;
 
+void set_oof_settings_test_run ();
+void get_oof_settings_test_run ();
 void connection_tests_run ();
 void op_tests_run ();
 void cuditem_tests_run ();
@@ -40,6 +42,8 @@ int main (int argc, char *argv[])
 	g_test_add_func ("/libews/autocompletion", autocompletion_tests_run);
 
 	g_test_add_func ("/libews/syncfolder", op_tests_run);
+	g_test_add_func ("/libews/setoofsettings", set_oof_settings_test_run);
+	g_test_add_func ("/libews/getoofsettings", get_oof_settings_test_run);
 
 	/* delete folder uses the data from create_folder test. */
 	g_test_add_func ("/libews/createfolder", createfolder_tests_run);

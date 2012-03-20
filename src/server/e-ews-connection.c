@@ -426,7 +426,9 @@ ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 			e_soap_response_dump_response (response, stdout);
 
 		param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
-		if (!param) param = e_soap_response_get_first_parameter_by_name (response, "FreeBusyResponseArray");
+		if (!param) 
+			param = e_soap_response_get_first_parameter_by_name (response, "FreeBusyResponseArray");
+
 		if (param) {
 			/* Iterate over all "*ResponseMessage" elements. */
 			for (subparam = e_soap_parameter_get_first_child (param);
@@ -446,6 +448,15 @@ ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data)
 					g_simple_async_result_set_from_error (enode->simple, error);
 					break;
 				}
+				if (enode->cb)
+					enode->cb (subparam, enode);
+			}
+		} else if ((param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessage"))) {
+			/*Parse GetUserOofSettingsResponse and SetUserOofSettingsResponse*/
+			if (!ews_get_response_status (param, &error)) {
+					g_simple_async_result_set_from_error (enode->simple, error);
+			} else {
+				subparam = e_soap_parameter_get_next_child (param);
 				if (enode->cb)
 					enode->cb (subparam, enode);
 			}
@@ -627,6 +638,95 @@ get_items_response_cb (ESoapParameter *subparam, EwsNode *enode)
 		if (!item) continue;
 		async_data->items = g_slist_append (async_data->items, item);
 	}
+}
+
+static gchar *
+get_text_from_html (gchar *html_text)
+{
+	gssize haystack_len = strlen (html_text);
+	gchar *plain_text, *ret_text;
+	gchar *start = g_strstr_len (html_text, haystack_len, "<body"),
+		*end = g_strstr_len (html_text, haystack_len, "</body>"),
+		*i, *j;
+
+	plain_text = g_malloc (end - start);
+	i = start;
+	for (j = plain_text; i < end; i++) {
+		if (*i == '<') {
+			while (*i != '>')
+				i++;
+		} else {
+			*j = *i;
+			j++;
+		}
+	}
+
+	*j = '\0';
+	ret_text = g_strdup (plain_text);
+
+	g_free (html_text);
+	g_free (plain_text);
+
+	return ret_text;
+}
+
+static void
+get_oof_settings_response_cb (ESoapParameter *subparam, EwsNode *enode)
+{
+	ESoapParameter *node, *node_1;
+	EwsAsyncData *async_data;
+	OOFSettings *oof_settings;
+	gchar *state = NULL, *ext_aud = NULL;
+	gchar *start_tm = NULL, *end_tm = NULL;
+	gchar *ext_msg = NULL, *int_msg = NULL;
+	GTimeVal time_val;
+
+	node = e_soap_parameter_get_first_child_by_name (subparam, "OofState");
+	state = e_soap_parameter_get_string_value (node);
+
+	node = e_soap_parameter_get_first_child_by_name (subparam, "ExternalAudience");
+	ext_aud = e_soap_parameter_get_string_value (node);
+
+	node = e_soap_parameter_get_first_child_by_name (subparam, "Duration");
+
+	node_1 = e_soap_parameter_get_first_child_by_name (node, "StartTime");
+	start_tm = e_soap_parameter_get_string_value (node_1);
+
+	node_1 = e_soap_parameter_get_first_child_by_name (node, "EndTime");
+	end_tm = e_soap_parameter_get_string_value (node_1);
+
+	node = e_soap_parameter_get_first_child_by_name (subparam, "InternalReply");
+	node_1 = e_soap_parameter_get_first_child_by_name (node, "Message");
+	int_msg = e_soap_parameter_get_string_value (node_1);
+	if (g_strrstr (int_msg, "</body>"))
+		int_msg = get_text_from_html (int_msg);
+
+	node = e_soap_parameter_get_first_child_by_name (subparam, "ExternalReply");
+	node_1 = e_soap_parameter_get_first_child_by_name (node, "Message");
+	ext_msg = e_soap_parameter_get_string_value (node_1);
+	if (g_strrstr (ext_msg, "</body>"))
+		ext_msg = get_text_from_html (ext_msg);
+
+	oof_settings = g_new0 (OOFSettings, 1);
+
+	oof_settings->state = state;
+	oof_settings->ext_aud = ext_aud;
+
+	if (g_time_val_from_iso8601 (start_tm, &time_val))
+		oof_settings->start_tm = time_val.tv_sec;
+
+	if (g_time_val_from_iso8601 (end_tm, &time_val))
+		oof_settings->end_tm = time_val.tv_sec;
+	
+	oof_settings->int_reply = int_msg;
+	oof_settings->ext_reply = ext_msg;
+
+
+	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
+	async_data->items = g_slist_append (async_data->items, oof_settings);
+
+	g_free (start_tm);
+	g_free (end_tm);
 }
 
 static void
@@ -1261,7 +1361,7 @@ e_ews_get_msg_for_url (const gchar *url, xmlOutputBuffer *buf)
 {
 	SoupMessage *msg;
 
-	msg = soup_message_new(buf?"POST":"GET", url);
+	msg = soup_message_new (buf?"POST":"GET", url);
 	soup_message_headers_append (msg->request_headers,
 				     "User-Agent", "libews/0.1");
 
@@ -1374,14 +1474,18 @@ e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb, gpointer cbdata,
 
 	/* These have to be submitted only after they're both set in ad->msgs[]
 	   or there will be races with fast completion */
-	soup_session_queue_message (cnc->priv->soup_session, ad->msgs[0],
-				    autodiscover_response_cb, ad);
-	soup_session_queue_message (cnc->priv->soup_session, ad->msgs[1],
-				    autodiscover_response_cb, ad);
-	soup_session_queue_message (cnc->priv->soup_session, ad->msgs[2],
-				    autodiscover_response_cb, ad);
-	soup_session_queue_message (cnc->priv->soup_session, ad->msgs[3],
-				    autodiscover_response_cb, ad);
+	if (ad->msgs[0])
+		soup_session_queue_message (cnc->priv->soup_session, ad->msgs[0],
+					    autodiscover_response_cb, ad);
+	if (ad->msgs[1])
+		soup_session_queue_message (cnc->priv->soup_session, ad->msgs[1],
+					    autodiscover_response_cb, ad);
+	if (ad->msgs[2])
+		soup_session_queue_message (cnc->priv->soup_session, ad->msgs[2],
+					    autodiscover_response_cb, ad);
+	if (ad->msgs[3])
+		soup_session_queue_message (cnc->priv->soup_session, ad->msgs[3],
+					    autodiscover_response_cb, ad);
 
 	g_object_unref (cnc); /* the GSimpleAsyncResult holds it now */
 
@@ -4691,7 +4795,6 @@ e_ews_connection_get_delegate_finish	(EEwsConnection *cnc,
 	return TRUE;
 }
 
-gboolean
 /**
  * e_ews_connection_get_delegate
  * @cnc:
@@ -4701,6 +4804,7 @@ gboolean
  * @cancellable:
  * @error:
  **/
+gboolean
 e_ews_connection_get_delegate	(EEwsConnection *cnc,
 				 gint pri,
 				 const gchar *mail_id,
@@ -4734,3 +4838,249 @@ e_ews_connection_get_delegate	(EEwsConnection *cnc,
 
 }
 
+/**
+ * e_ews_connection__get_oof_settings_start
+ * @cnc: The EWS Connection
+ * @pri: The priority associated with the request
+ * @cb: Responses are parsed and returned to this callback
+ * @cancellable: a GCancellable to monitor cancelled operations
+ * @user_data: user data passed to callback
+ **/
+void
+e_ews_connection_get_oof_settings_start	(EEwsConnection *cnc,
+					 gint pri,
+					 GAsyncReadyCallback cb,
+					 GCancellable *cancellable,
+					 gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetUserOofSettingsRequest", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+
+	e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
+	e_ews_message_write_string_parameter (msg, "Address", NULL, cnc->priv->email);
+	e_soap_message_end_element (msg);
+
+	/* Complete the footer and print the request */
+	e_ews_message_write_footer (msg);
+
+      	simple = g_simple_async_result_new (G_OBJECT (cnc),
+					    cb, user_data,
+					    e_ews_connection_get_oof_settings_start);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	ews_connection_queue_request (cnc, msg, get_oof_settings_response_cb, pri,
+				      cancellable, simple, cb == ews_sync_reply_cb);
+}
+
+gboolean
+e_ews_connection_get_oof_settings_finish	(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 OOFSettings **oof_settings,
+						 GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_get_oof_settings_start),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	*oof_settings = (OOFSettings *) async_data->items->data;
+
+	return TRUE;
+}
+
+gboolean
+e_ews_connection_get_oof_settings	(EEwsConnection *cnc,
+					 gint pri,
+					 OOFSettings **oof_settings,
+					 GCancellable *cancellable,
+					 GError **error)
+{
+	EwsSyncData *sync_data;
+	gboolean result;
+
+	sync_data = g_new0 (EwsSyncData, 1);
+	sync_data->eflag = e_flag_new ();
+
+	e_ews_connection_get_oof_settings_start	(cnc, pri,
+						 ews_sync_reply_cb, cancellable,
+						 (gpointer) sync_data);
+
+	e_flag_wait (sync_data->eflag);
+
+	result = e_ews_connection_get_oof_settings_finish (cnc, sync_data->res,
+							    oof_settings, error);
+
+	e_flag_free (sync_data->eflag);
+	g_object_unref (sync_data->res);
+	g_free (sync_data);
+
+	return result;
+}
+
+/**
+ * e_ews_connection__set_oof_settings_start
+ * @cnc: The EWS Connection
+ * @pri: The priority associated with the request
+ * @oof_settings: Details to set for ooof
+ * @cb: Responses are parsed and returned to this callback
+ * @cancellable: a GCancellable to monitor cancelled operations
+ * @user_data: user data passed to callback
+ **/
+void
+e_ews_connection_set_oof_settings_start	(EEwsConnection *cnc,
+					 gint pri,
+					 OOFSettings *oof_settings,
+					 GAsyncReadyCallback cb,
+					 GCancellable *cancellable,
+					 gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+	gchar *start_tm = NULL, *end_tm = NULL;
+	GTimeVal *time_val;
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "SetUserOofSettingsRequest", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+
+	/*Set Mailbox to user Address we want to set*/
+	e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
+	e_ews_message_write_string_parameter (msg, "Address", NULL, cnc->priv->email);
+	e_soap_message_end_element (msg);
+
+	/*Write out of office settings to message*/
+	e_soap_message_start_element (msg, "UserOofSettings", NULL, NULL);
+	e_ews_message_write_string_parameter (msg, "OofState", NULL, oof_settings->state);
+	e_ews_message_write_string_parameter (msg, "ExternalAudience", NULL, oof_settings->ext_aud);
+
+	time_val = g_new0 (GTimeVal, 1);
+	time_val->tv_sec = oof_settings->start_tm;
+	start_tm = g_time_val_to_iso8601 (time_val);
+
+	time_val->tv_sec = oof_settings->end_tm;
+	end_tm = g_time_val_to_iso8601 (time_val);
+
+	e_soap_message_start_element (msg, "Duration", NULL, NULL);
+	e_ews_message_write_string_parameter (msg, "StartTime", NULL, start_tm);
+	e_ews_message_write_string_parameter (msg, "EndTime", NULL, end_tm);
+	e_soap_message_end_element (msg);
+
+	e_soap_message_start_element (msg, "InternalReply", NULL, NULL);
+	e_ews_message_write_string_parameter (msg, "Message", NULL, oof_settings->int_reply);
+	e_soap_message_end_element (msg);
+
+	e_soap_message_start_element (msg, "ExternalReply", NULL, NULL);
+	e_ews_message_write_string_parameter (msg, "Message", NULL, oof_settings->ext_reply);
+	e_soap_message_end_element (msg);
+
+	e_soap_message_end_element (msg);
+
+	/* Complete the footer and print the request */
+	e_ews_message_write_footer (msg);
+
+      	simple = g_simple_async_result_new (G_OBJECT (cnc),
+					    cb, user_data,
+					    e_ews_connection_set_oof_settings_start);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	ews_connection_queue_request (cnc, msg, NULL, pri,
+				      cancellable, simple, cb == ews_sync_reply_cb);
+
+	g_free (time_val);
+	g_free (start_tm);
+	g_free (end_tm);
+}
+
+gboolean
+e_ews_connection_set_oof_settings_finish	(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_set_oof_settings_start),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	return TRUE;
+}
+
+gboolean
+e_ews_connection_set_oof_settings	(EEwsConnection *cnc,
+					 gint pri,
+					 OOFSettings *oof_settings,
+					 GCancellable *cancellable,
+					 GError **error)
+{
+	EwsSyncData *sync_data;
+	gboolean result;
+
+	sync_data = g_new0 (EwsSyncData, 1);
+	sync_data->eflag = e_flag_new ();
+
+	e_ews_connection_set_oof_settings_start	(cnc, pri, oof_settings,
+						 ews_sync_reply_cb, cancellable,
+						 (gpointer) sync_data);
+
+	e_flag_wait (sync_data->eflag);
+
+	result = e_ews_connection_set_oof_settings_finish (cnc, sync_data->res,
+							    error);
+
+	e_flag_free (sync_data->eflag);
+	g_object_unref (sync_data->res);
+	g_free (sync_data);
+
+	return result;
+}
+
+void
+e_ews_connection_free_oof_settings (OOFSettings *oof_settings)
+{
+	if (oof_settings->state) {
+		g_free (oof_settings->state);
+		oof_settings->state = NULL;
+	}
+	if (oof_settings->ext_aud) {
+		g_free (oof_settings->ext_aud);
+		oof_settings->ext_aud = NULL;
+	}
+	if (oof_settings->int_reply) {
+		g_free (oof_settings->int_reply);
+		oof_settings->int_reply = NULL;
+	}
+	if (oof_settings->ext_reply) {
+		g_free (oof_settings->ext_reply);
+		oof_settings->ext_reply = NULL;
+	}
+
+	if (oof_settings) {
+		g_free (oof_settings);
+		oof_settings = NULL;
+	}
+}

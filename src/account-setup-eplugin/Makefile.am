@@ -31,7 +31,9 @@ liborg_gnome_exchange_ews_la_SOURCES = 		\
 	exchange-ews-account-setup.c		\
 	exchange-ews-account-setup.h		\
 	exchange-ews-account-listener.c		\
-	exchange-ews-account-listener.h
+	exchange-ews-account-listener.h		\
+	exchange-ews-account-out-of-office.c	\
+	exchange-ews-account-out-of-office.h
 
 liborg_gnome_exchange_ews_la_LIBADD = 			\
 	$(top_builddir)/src/server/libeews-1.2.la	\

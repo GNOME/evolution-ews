@@ -25,6 +25,8 @@ testews_SOURCES = 				\
 		test-deletefolder.c		\
 		test-getdelegate.c		\
 		test-libews.c 			\
+		test-get-oof-settings.c		\
+		test-set-oof-settings.c		\
 		utils.h
 
 #Fixme: Ugly. Kill me later
