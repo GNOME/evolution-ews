@@ -23,8 +23,6 @@ libebookbackendews_la_CPPFLAGS = \
 libebookbackendews_la_SOURCES =			\
 	e-book-backend-sqlitedb.c		\
 	e-book-backend-sqlitedb.h		\
-	e-book-backend-ews-utils.c		\
-	e-book-backend-ews-utils.h		\
 	ews-oab-props.h				\
 	ews-oab-decoder.c			\
 	ews-oab-decoder.h			\
