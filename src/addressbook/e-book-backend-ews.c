@@ -178,6 +178,9 @@ ews_book_view_each_notify_status (EBookBackend *backend,
 		e_iterator_next (iter);
 	}
 
+	g_object_unref (iter);
+	g_object_unref (views);
+
 	return TRUE;
 }
 
