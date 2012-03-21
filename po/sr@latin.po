@@ -1,0 +1,444 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Miroslav Nikolić <miroslavnikolic@rocketmail.com>, 2012.
+msgid ""
+msgstr ""
+"Project-Id-Version: evolution-ews\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product"
+"=evolution-ews&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2012-03-09 11:36+0000\n"
+"PO-Revision-Date: 2012-03-20 20:38+0200\n"
+"Last-Translator: Miroslav Nikolić <miroslavnikolic@rocketmail.com>\n"
+"Language-Team: Serbian <gnom@prevod.org>\n"
+"Language: sr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=n==1? 3 : n%10==1 && n%100!=11 ? 0 : "
+"n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Project-Style: gnome\n"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:242
+msgid "Global Address list"
+msgstr "Spisak opštih adresa"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:177
+msgid "Select a valid time range"
+msgstr "Izaberite ispravan vremenski opseg"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:286
+#, c-format
+msgid ""
+"Unable to fetch out of office settings: \n"
+"%s"
+msgstr ""
+"Ne mogu da dovučem kancelarijska podešavanja: \n"
+"%s"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:318
+msgid ""
+"The messages specified below will be automatically sent to \n"
+" each internal and external personal who sends a mail to you."
+msgstr ""
+"Dole navedene poruke će biti samostalno poslate svakom\n"
+" unutrašnjem i spoljnom osoblju koje vam pošalje poruku."
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:323
+msgid "Status:"
+msgstr "Stanje:"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:328
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:333
+msgid "I am _out of the office"
+msgstr "_Nisam u kancelariji"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:329
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:332
+msgid "I am _in the office"
+msgstr "U kancelariji _sam"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:354
+msgid "_From:"
+msgstr "_Šalje:"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:359
+msgid "_To:"
+msgstr "_Prima:"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:376
+msgid "I_nternal:"
+msgstr "_Unutrašnja:"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:378
+msgid "Message to be sent inside organization"
+msgstr "Poruka koja će biti poslata unutar organizacije"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:385
+msgid "None"
+msgstr "Ništa"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:386
+msgid "Known"
+msgstr "Poznat"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:387
+msgid "All"
+msgstr "Sve"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:389
+msgid "Send Message to"
+msgstr "Pošalji poruku"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:409
+msgid "E_xternal:"
+msgstr "_Spoljna:"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:411
+msgid "Message to be sent outside organization"
+msgstr "Poruka koja će biti poslata van organizacije"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:575
+msgid "Out of Office"
+msgstr "Van kancelarije"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:581
+msgid "Fetching out of office settings..."
+msgstr "Dovlačim podešavanja za van kancelarije..."
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:111
+#, c-format
+msgid "Autodiscover failed: %s"
+msgstr "Samootkrivanje nije uspelo: %s"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:154
+#, c-format
+msgid "Enter Password for %s"
+msgstr "Unesite lozinku za „%s“"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:163
+msgid "Could not get password."
+msgstr "Ne mogu da dobavim lozinku."
+
+#. OAB url entry
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:286
+msgid "OAB U_RL:"
+msgstr "OAB _adresa:"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:298
+msgid "_Host URL:"
+msgstr "Adresa _domaćina:"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:313
+msgid "Fetch _URL"
+msgstr "Dovuci _adresu"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:478
+msgid "Could not fetch oal list: "
+msgstr "Ne mogu da dovučem oal spisak: "
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:524
+msgid "Fetching..."
+msgstr "Dovlačim..."
+
+#. Add cache check box
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:661
+msgid "Cache o_ffline address book"
+msgstr "Ubaci u ostavu adresar van _mreže"
+
+#. Add label
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:667
+msgid "Select Ad_dress list: "
+msgstr "Izaberi spisak _adresa: "
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:677
+msgid "Fetch _list"
+msgstr "Dovuci _spisak"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:764
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:3
+msgid "EWS Settings"
+msgstr "VUR podešavanja"
+
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:1
+#: ../src/camel/camel-ews-provider.c:69
+msgid "Exchange Web Services"
+msgstr "Veb usluge razmene"
+
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:2
+msgid "GAL settings"
+msgstr "Podešavanja GAL-a"
+
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:4
+msgid "Exchange Web Services Plugin"
+msgstr "Priključak usluga veb razmene"
+
+#: ../src/addressbook/e-book-backend-ews.c:913
+msgid "The backend does not support bulk additions"
+msgstr "Pozadinac ne podržava grupno dodavanje"
+
+#: ../src/addressbook/e-book-backend-ews.c:1184
+msgid "The backend does not support bulk modifications"
+msgstr "Pozadinac ne podržava grupno uređivanje"
+
+#: ../src/addressbook/e-book-backend-ews.c:1358
+msgid "Wait till syncing is done"
+msgstr "Sačekaj dok se usklađivanje ne obavi"
+
+#: ../src/addressbook/e-book-backend-ews.c:1676
+#, c-format
+msgid "Downloading contacts in %s %d%% completed... "
+msgstr "Preuzimanje kontakata u %s je obavljeno %d%%... "
+
+#: ../src/addressbook/e-book-backend-ews.c:2165
+msgid "Syncing contacts..."
+msgstr "Usaglašavam kontakte..."
+
+#: ../src/addressbook/e-book-backend-ews.c:2357
+msgid "Searching..."
+msgstr "Pretražujem..."
+
+#: ../src/addressbook/e-book-backend-sqlitedb.c:474
+#, c-format
+msgid "Insufficient memory"
+msgstr "Nedovoljno memorije"
+
+#: ../src/camel/camel-ews-folder.c:262
+#, c-format
+msgid "Unable to open mimecontent temporary file!"
+msgstr "Ne mogu da otvorim privremenu datoteku mime sadržaja!"
+
+#: ../src/camel/camel-ews-folder.c:269
+#, c-format
+msgid "Unable to generate parser from mimecontent!"
+msgstr "Ne mogu da stvorim obrađivač iz mime sadržaja!"
+
+#: ../src/camel/camel-ews-folder.c:278
+#, c-format
+msgid "Unable to parse meeting request mimecontent!"
+msgstr "Ne mogu da obradim mime sadržaj zahteva za sastanak!"
+
+#: ../src/camel/camel-ews-folder.c:335
+#, c-format
+msgid "Unable to create cache file"
+msgstr "Ne mogu da napravim datoteku ostave"
+
+#: ../src/camel/camel-ews-folder.c:436 ../src/camel/camel-ews-folder.c:505
+#, c-format
+msgid "Unable to create cache path"
+msgstr "Ne mogu da napravim putanju privremenog čuvanja"
+
+#: ../src/camel/camel-ews-folder.c:514
+#, c-format
+msgid "Failed to move message cache file"
+msgstr "Nisam uspeo da premestim datoteku ostave poruke"
+
+#: ../src/camel/camel-ews-folder.c:917
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "Ne mogu da učitam pregled za „%s“"
+
+#: ../src/camel/camel-ews-folder.c:1258 ../src/camel/camel-ews-store.c:757
+#: ../src/camel/camel-ews-store.c:813 ../src/camel/camel-ews-store.c:883
+#, c-format
+msgid "Cant perform actions on the folder while in offline mode"
+msgstr "Ne mogu da izvršim radnje nad fasciklama u režimu van mreže"
+
+#: ../src/camel/camel-ews-provider.c:48
+msgid "Checking for new mail"
+msgstr "Proveravam novu poštu"
+
+#: ../src/camel/camel-ews-provider.c:50
+msgid "C_heck for new messages in all folders"
+msgstr "P_otraži nove poruke u svim fasciklama"
+
+#: ../src/camel/camel-ews-provider.c:53
+msgid "Options"
+msgstr "Opcije"
+
+#: ../src/camel/camel-ews-provider.c:55
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr "_Primeni propusnike na nove poruke u sandučetu ovog servera"
+
+#: ../src/camel/camel-ews-provider.c:57
+msgid "Check new messages for _Junk contents"
+msgstr "Proveri ima li _neželjenih među novim porukama"
+
+#: ../src/camel/camel-ews-provider.c:59
+msgid "Only check for Junk messages in the IN_BOX folder"
+msgstr "Proveri da nema đubreta samo u fascikli SAN_DUČE"
+
+#: ../src/camel/camel-ews-provider.c:61
+msgid "Automatically synchroni_ze remote mail locally"
+msgstr "Sam uskladi ud_aljenu poštu sa lokalnom"
+
+#: ../src/camel/camel-ews-provider.c:71
+msgid "For accessing Exchange servers using Web Services"
+msgstr "Za pristupanje serverima razmene upotreboom veb usluga"
+
+#: ../src/camel/camel-ews-provider.c:87
+msgid "Password"
+msgstr "Lozinka"
+
+#: ../src/camel/camel-ews-provider.c:89
+msgid ""
+"This option will connect to the Exchange server using a plaintext password."
+msgstr ""
+"Ova opcija će vas povezati na server razmene koristeći lozinku običnog "
+"teksta."
+
+#: ../src/camel/camel-ews-store.c:184
+#, c-format
+msgid "Session has no storage path"
+msgstr "Sesija nema putanju skladišta"
+
+#: ../src/camel/camel-ews-store.c:554
+#, c-format
+msgid "No such folder: %s"
+msgstr "Nema takve fascikle: %s"
+
+#: ../src/camel/camel-ews-store.c:750
+#, c-format
+msgid "Parent folder %s does not exist"
+msgstr "Ne postoji roditeljska fascikla „%s“"
+
+#: ../src/camel/camel-ews-store.c:807
+#, c-format
+msgid "Folder does not exist"
+msgstr "Fascikla ne postoji"
+
+#: ../src/camel/camel-ews-store.c:891
+#, c-format
+msgid "Folder %s does not exist"
+msgstr "Ne postoji fascikla „%s“"
+
+#: ../src/camel/camel-ews-store.c:900
+#, c-format
+msgid "No change key record for folder %s"
+msgstr "Nema zapisa izmene ključa za fasciklu „%s“"
+
+#: ../src/camel/camel-ews-store.c:939
+#, c-format
+msgid "Cannot both rename and move a folder at the same time"
+msgstr "Ne mogu u isto vreme da preimenujem i da premestim fasciklu"
+
+#: ../src/camel/camel-ews-store.c:970
+#, c-format
+msgid "Cannot find folder ID for parent folder %s"
+msgstr "Ne mogu da pronađem IB fascikle za roditeljsku fasciklu „%s“"
+
+#: ../src/camel/camel-ews-store.c:1007 ../src/camel/camel-ews-transport.c:66
+#, c-format
+msgid "Exchange server %s"
+msgstr "Server razmene %s"
+
+#: ../src/camel/camel-ews-store.c:1009
+#, c-format
+msgid "Exchange service for %s on %s"
+msgstr "Usluga razmene za „%s“ na „%s“"
+
+#: ../src/camel/camel-ews-store.c:1049
+#, c-format
+msgid "You must be working online to complete this operation"
+msgstr "Morate da budete na mreži da biste završili ovu operaciju"
+
+#: ../src/camel/camel-ews-transport.c:69
+#, c-format
+msgid "Exchange mail delivery via %s"
+msgstr "Isporuka pošte razmene putem „%s“"
+
+#: ../src/camel/camel-ews-transport.c:106
+msgid "Cannot send message with no From address"
+msgstr "Ne mogu da pošaljem poruku bez adrese pošiljaoca"
+
+#: ../src/camel/camel-ews-transport.c:110
+msgid "Exchange server cannot send message with multiple From addresses"
+msgstr "Server razmene ne može da pošalje poruku sa nekoliko adresa pošiljaoca"
+
+#: ../src/camel/camel-ews-transport.c:118
+msgid "Failed to read From address"
+msgstr "Nisam uspeo da pročitam adresu pošiljaoca"
+
+#: ../src/camel/camel-ews-transport.c:124
+#, c-format
+msgid ""
+"Exchange server cannot send message as '%s', when the account was configured "
+"for address '%s'"
+msgstr ""
+"Server razmene ne može da pošalje poruku kao „%s“, kada je nalog podešen za "
+"adresu „%s“"
+
+#: ../src/camel/camel-ews-transport.c:135
+#, c-format
+msgid "Service not connected"
+msgstr "Usluga nije povezana"
+
+#: ../src/server/e-ews-connection.c:360
+msgid "Operation Cancelled"
+msgstr "Radnja je obustavljena"
+
+#: ../src/server/e-ews-connection.c:422
+msgid "Authentication failed"
+msgstr "Neuspešna prijava"
+
+#: ../src/server/e-ews-connection.c:430
+#, c-format
+msgid "No response: %s"
+msgstr "Nema odgovora: %s"
+
+#: ../src/server/e-ews-connection.c:1276 ../src/server/e-ews-connection.c:1634
+#: ../src/server/e-ews-connection.c:1873
+#, c-format
+msgid "Code: %d - Unexpected response from server"
+msgstr "Kod: %d — Neočekivani odgovor sa servera"
+
+#: ../src/server/e-ews-connection.c:1288
+#, c-format
+msgid "Failed to parse autodiscover response XML"
+msgstr "Nisam uspeo da obradim samootkrivajući odgovor IksML"
+
+#: ../src/server/e-ews-connection.c:1296
+#, c-format
+msgid "Failed to find <Autodiscover> element\n"
+msgstr "Nisam uspeo da pronađem element <Samootkrivanje>\n"
+
+#: ../src/server/e-ews-connection.c:1308
+#, c-format
+msgid "Failed to find <Response> element\n"
+msgstr "Nisam uspeo da pronađem element <Odgovor>\n"
+
+#: ../src/server/e-ews-connection.c:1320
+#, c-format
+msgid "Failed to find <Account> element\n"
+msgstr "Nisam uspeo da pronađem element <Nalog>\n"
+
+#: ../src/server/e-ews-connection.c:1339
+#, c-format
+msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
+msgstr ""
+"Nisam uspeo da pronađem <ASadresu> i <OABadresu> u odgovoru samootkrivanja"
+
+#: ../src/server/e-ews-connection.c:1441
+#, c-format
+msgid "Both email and password must be provided"
+msgstr "Mora biti dostavljena i el. pošta i lozinka"
+
+#: ../src/server/e-ews-connection.c:1448
+#, c-format
+msgid "Wrong email id"
+msgstr "Pogrešan ib el. pošte"
+
+#: ../src/server/e-ews-connection.c:1644
+#, c-format
+msgid "Failed to parse oab XML"
+msgstr "Nisam uspeo da obradim oab IksML"
+
+#: ../src/server/e-ews-connection.c:1651
+#, c-format
+msgid "Failed to find <OAB> element\n"
+msgstr "Nisam uspeo da pronađem element <OAB>\n"
+
+#: ../src/utils/ews-camel-common.c:170
+#, c-format
+msgid "CreateItem call failed to return ID for new message"
+msgstr "Poziv „Napravi stavku“ nije uspeo da vrati IB za novu poruku"
