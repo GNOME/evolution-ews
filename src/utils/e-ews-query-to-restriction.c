@@ -786,7 +786,7 @@ func_eq (ESExp *f,
 	}
 
 	if (argv[0]->type == ESEXP_RES_STRING) {
-		gchar *name, *field_uri;
+		gchar *name, *field_uri = NULL;
 		name = argv[0]->value.string;
 
 		if (!g_strcmp0 (name, "sent-date")) {
@@ -795,7 +795,7 @@ func_eq (ESExp *f,
 			field_uri = g_strdup ("item:DateTimeReceived");
 		}
 
-		if (argv[1]->type == ESEXP_RES_INT && argv[1]->value.number != 0) {
+		if (field_uri && argv[1]->type == ESEXP_RES_INT && argv[1]->value.number != 0) {
 			time_t time;
 			gchar *date;
 			time = argv[1]->value.number;
@@ -822,13 +822,13 @@ func_gt (ESExp *f,
 	msg = (ESoapMessage *) data;
 
 	if (argc != 2) {
-		e_sexp_fatal_error (f, "two arguments are required for this operation");		
+		e_sexp_fatal_error (f, "two arguments are required for this operation");
 		return NULL;
 	}
 
 	if (argv[0]->type == ESEXP_RES_STRING) {
-		gchar *name, *field_uri;
-		gboolean is_time;
+		gchar *name, *field_uri = NULL;
+		gboolean is_time = FALSE;
 		name = argv[0]->value.string;
 
 		if (!g_strcmp0 (name, "sent-date")) {
@@ -842,7 +842,7 @@ func_gt (ESExp *f,
 			is_time = FALSE;
 		}
 
-		if (argv[1]->type == ESEXP_RES_INT && argv[1]->value.number != 0) {
+		if (field_uri && argv[1]->type == ESEXP_RES_INT && argv[1]->value.number != 0) {
 			if (is_time) {
 				time_t time;
 				gchar *date;
@@ -885,8 +885,8 @@ func_lt (ESExp *f,
 	}
 
 	if (argv[0]->type == ESEXP_RES_STRING) {
-		gchar *name, *field_uri;
-		gboolean is_time;
+		gchar *name, *field_uri = NULL;
+		gboolean is_time = FALSE;
 		name = argv[0]->value.string;
 
 		if (!g_strcmp0 (name, "sent-date")) {
@@ -900,7 +900,7 @@ func_lt (ESExp *f,
 			is_time = FALSE;
 		}
 
-		if (argv[1]->type == ESEXP_RES_INT && argv[1]->value.number != 0) {
+		if (field_uri && argv[1]->type == ESEXP_RES_INT && argv[1]->value.number != 0) {
 			if (is_time) {
 				time_t time;
 				gchar *date;
