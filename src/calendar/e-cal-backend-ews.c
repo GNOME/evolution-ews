@@ -3196,7 +3196,7 @@ ews_cal_get_items_ready_cb (GObject *obj,
 			const EwsId *item_id = e_ews_item_get_id (l->data);
 
 			sub_sync_data = g_new0 (struct _ews_sync_data, 1);
-			sub_sync_data->cbews = sync_data->cbews;
+			sub_sync_data->cbews = g_object_ref (sync_data->cbews);
 			sub_sync_data->master_uid = g_strdup (item_id->id);
 
 			e_ews_connection_get_items_start (g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
@@ -3230,9 +3230,10 @@ ews_cal_get_items_ready_cb (GObject *obj,
 						 "IdOnly", NULL,
 						 EWS_MAX_FETCH_COUNT,
 						 ews_cal_sync_items_ready_cb,
-						 NULL, cbews);
+						 NULL, g_object_ref (cbews));
 
 exit:
+	g_object_unref (sync_data->cbews);
 	g_free (sync_data->master_uid);
 	g_free (sync_data->sync_state);
 	g_free (sync_data);
@@ -3274,6 +3275,7 @@ ews_cal_sync_items_ready_cb (GObject *obj,
 		PRIV_UNLOCK (priv);
 
 		g_clear_error (&error);
+		g_object_unref (cbews);
 		return;
 	}
 
@@ -3319,14 +3321,14 @@ ews_cal_sync_items_ready_cb (GObject *obj,
 						 "IdOnly", NULL,
 						 EWS_MAX_FETCH_COUNT,
 						 ews_cal_sync_items_ready_cb,
-						 NULL, cbews);
+						 NULL, g_object_ref (cbews));
 		g_free (sync_state);
 		goto exit;
 	}
 
 	if (cal_item_ids || task_item_ids) {
 		sync_data = g_new0 (struct _ews_sync_data, 1);
-		sync_data->cbews = cbews;
+		sync_data->cbews = g_object_ref (cbews);
 		sync_data->sync_state = sync_state;
 		sync_data->sync_pending = !includes_last_item;
 	}
@@ -3369,6 +3371,8 @@ exit:
 		g_slist_free (items_updated);
 	if (items_deleted)
 		g_slist_free (items_deleted);
+
+	g_object_unref (cbews);
 }
 
 static gboolean
@@ -3392,7 +3396,7 @@ ews_start_sync (gpointer data)
 						 "IdOnly", NULL,
 						 EWS_MAX_FETCH_COUNT,
 						 ews_cal_sync_items_ready_cb,
-						 NULL, cbews);
+						 NULL, g_object_ref (cbews));
 	return TRUE;
 }
 
