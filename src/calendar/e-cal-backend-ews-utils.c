@@ -373,6 +373,27 @@ ewscal_add_availability_rrule (ESoapMessage *msg,
 }
 
 static void
+ewscal_add_availability_default_timechange (ESoapMessage *msg)
+{
+
+	e_soap_message_start_element(msg, "StandardTime", NULL, NULL);
+	e_ews_message_write_string_parameter(msg, "Bias", NULL, "0");
+	e_ews_message_write_string_parameter(msg, "Time", NULL, "00:00:00");
+	e_ews_message_write_string_parameter(msg, "DayOrder", NULL, "0");
+	e_ews_message_write_string_parameter(msg, "Month", NULL, "0");
+	e_ews_message_write_string_parameter(msg, "DayOfWeek", NULL, "Sunday");
+	e_soap_message_end_element (msg);
+
+	e_soap_message_start_element(msg, "DaylightTime", NULL, NULL);
+	e_ews_message_write_string_parameter(msg, "Bias", NULL, "0");
+	e_ews_message_write_string_parameter(msg, "Time", NULL, "00:00:00");
+	e_ews_message_write_string_parameter(msg, "DayOrder", NULL, "0");
+	e_ews_message_write_string_parameter(msg, "Month", NULL, "0");
+	e_ews_message_write_string_parameter(msg, "DayOfWeek", NULL, "Sunday");
+	e_soap_message_end_element (msg);
+}
+
+static void
 ewscal_add_availability_timechange (ESoapMessage *msg,
                                     icalcomponent *comp,
                                     gint baseoffs)
@@ -421,16 +442,16 @@ ewscal_set_availability_timezone (ESoapMessage *msg,
 	xstd = icalcomponent_get_first_component (comp, ICAL_XSTANDARD_COMPONENT);
 	xdaylight = icalcomponent_get_first_component (comp, ICAL_XDAYLIGHT_COMPONENT);
 
-	/* Should never happen. Exchange will bail out */
-	if (!xstd || !xdaylight)
-		return;
-
+	/*TimeZone is the root element of GetUserAvailabilityRequest*/
 	e_soap_message_start_element(msg, "TimeZone", NULL, NULL);
 
 	/* Fetch the timezone offsets for the standard (or only) zone.
 	 * Negate it, because Exchange does it backwards */
-	prop = icalcomponent_get_first_property (xstd, ICAL_TZOFFSETTO_PROPERTY);
-	std_utcoffs = -icalproperty_get_tzoffsetto (prop) / 60;
+	if (xstd) {
+		prop = icalcomponent_get_first_property(xstd, ICAL_TZOFFSETTO_PROPERTY);
+		std_utcoffs = -icalproperty_get_tzoffsetto(prop)/60;
+	} else
+		std_utcoffs = 0;
 
 	/* This is the overall BaseOffset tag, which the Standard and Daylight
 	 * zones are offset from. It's redundant, but Exchange always sets it
@@ -450,7 +471,10 @@ ewscal_set_availability_timezone (ESoapMessage *msg,
 		e_soap_message_start_element(msg, "DaylightTime", NULL, NULL);
 		ewscal_add_availability_timechange (msg, xdaylight, std_utcoffs);
 		e_soap_message_end_element(msg); /* "DaylightTime" */
-	}
+	} else 
+		/* Set default values*/
+		ewscal_add_availability_default_timechange (msg);
+
 	e_soap_message_end_element(msg); /* "TimeZone" */
 }
 
