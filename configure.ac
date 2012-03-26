@@ -1,5 +1,5 @@
 AC_PREREQ(2.58)
-AC_INIT([evolution-ews], [3.4.0], [http://bugzilla.gnome.org/browse.cgi?product=evolution-ews])
+AC_INIT([evolution-ews], [3.5.1], [http://bugzilla.gnome.org/browse.cgi?product=evolution-ews])
 AM_INIT_AUTOMAKE([gnu 1.9 dist-xz no-dist-gzip])
 AC_CONFIG_SRCDIR(README)
 AC_CONFIG_HEADERS(config.h)
