@@ -564,6 +564,7 @@ ews_folder_get_message_sync (CamelFolder *folder,
 static GPtrArray *
 ews_folder_search_by_expression (CamelFolder *folder,
                                  const gchar *expression,
+				 GCancellable *cancellable,
                                  GError **error)
 {
 	CamelEwsFolder *ews_folder;
@@ -576,7 +577,7 @@ ews_folder_search_by_expression (CamelFolder *folder,
 	g_mutex_lock (priv->search_lock);
 
 	camel_folder_search_set_folder (ews_folder->search, folder);
-	matches = camel_folder_search_search (ews_folder->search, expression, NULL, error);
+	matches = camel_folder_search_search (ews_folder->search, expression, NULL, cancellable, error);
 
 	g_mutex_unlock (priv->search_lock);
 
@@ -586,6 +587,7 @@ ews_folder_search_by_expression (CamelFolder *folder,
 static guint32
 ews_folder_count_by_expression (CamelFolder *folder,
                                 const gchar *expression,
+				GCancellable *cancellable,
                                 GError **error)
 {
 	CamelEwsFolder *ews_folder;
@@ -598,7 +600,7 @@ ews_folder_count_by_expression (CamelFolder *folder,
 	g_mutex_lock (priv->search_lock);
 
 	camel_folder_search_set_folder (ews_folder->search, folder);
-	matches = camel_folder_search_count (ews_folder->search, expression, error);
+	matches = camel_folder_search_count (ews_folder->search, expression, cancellable, error);
 
 	g_mutex_unlock (priv->search_lock);
 
@@ -609,6 +611,7 @@ static GPtrArray *
 ews_folder_search_by_uids (CamelFolder *folder,
                            const gchar *expression,
                            GPtrArray *uids,
+			   GCancellable *cancellable,
                            GError **error)
 {
 	CamelEwsFolder *ews_folder;
@@ -624,7 +627,7 @@ ews_folder_search_by_uids (CamelFolder *folder,
 	g_mutex_lock (priv->search_lock);
 
 	camel_folder_search_set_folder (ews_folder->search, folder);
-	matches = camel_folder_search_search (ews_folder->search, expression, uids, error);
+	matches = camel_folder_search_search (ews_folder->search, expression, uids, cancellable, error);
 
 	g_mutex_unlock (priv->search_lock);
 
