@@ -173,7 +173,7 @@ ews_book_view_each_notify_status (EBookBackend *backend,
 		EDataBookView *view = (EDataBookView*)e_iterator_get (iter);
 
 		if (view)
-			e_data_book_view_notify_progress (view, -1, status);
+			e_data_book_view_notify_status_message (view, status);
 
 		e_iterator_next (iter);
 	}
