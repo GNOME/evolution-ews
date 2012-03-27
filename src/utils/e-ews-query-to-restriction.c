@@ -34,69 +34,84 @@
 #define d(x) x
 
 #define WRITE_CONTAINS_MESSAGE(msg, mode, compare, uri, val) \
-	e_soap_message_start_element (msg, "Contains", NULL, NULL); \
-	e_soap_message_add_attribute (msg, "ContainmentMode", mode, NULL, NULL); \
-	e_soap_message_add_attribute (msg, "ContainmentComparison", compare, NULL, NULL); \
-	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", uri); \
-	e_ews_message_write_string_parameter_with_attribute (msg, "Constant", NULL, NULL, "Value", val); \
-	e_soap_message_end_element (msg);
+	G_STMT_START { \
+		e_soap_message_start_element (msg, "Contains", NULL, NULL); \
+		e_soap_message_add_attribute (msg, "ContainmentMode", mode, NULL, NULL); \
+		e_soap_message_add_attribute (msg, "ContainmentComparison", compare, NULL, NULL); \
+		e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", uri); \
+		e_ews_message_write_string_parameter_with_attribute (msg, "Constant", NULL, NULL, "Value", val); \
+		e_soap_message_end_element (msg); \
+	} G_STMT_END
 
 #define WRITE_CONTAINS_MESSAGE_INDEXED(msg, mode, compare, uri, index, val) \
-	e_soap_message_start_element (msg, "Contains", NULL, NULL); \
-	e_soap_message_add_attribute (msg, "ContainmentMode", mode, NULL, NULL); \
-	e_soap_message_add_attribute (msg, "ContainmentComparison", compare, NULL, NULL); \
-	e_soap_message_start_element (msg, "IndexedFieldURI", NULL, NULL); \
-	e_soap_message_add_attribute (msg, "FieldURI", uri, NULL, NULL); \
-	e_soap_message_add_attribute (msg, "FieldIndex", index, NULL, NULL); \
-	e_soap_message_end_element (msg); \
-	e_ews_message_write_string_parameter_with_attribute (msg, "Constant", NULL, NULL, "Value", val); \
-	e_soap_message_end_element (msg);
+	G_STMT_START { \
+		e_soap_message_start_element (msg, "Contains", NULL, NULL); \
+		e_soap_message_add_attribute (msg, "ContainmentMode", mode, NULL, NULL); \
+		e_soap_message_add_attribute (msg, "ContainmentComparison", compare, NULL, NULL); \
+		e_soap_message_start_element (msg, "IndexedFieldURI", NULL, NULL); \
+		e_soap_message_add_attribute (msg, "FieldURI", uri, NULL, NULL); \
+		e_soap_message_add_attribute (msg, "FieldIndex", index, NULL, NULL); \
+		e_soap_message_end_element (msg); \
+		e_ews_message_write_string_parameter_with_attribute (msg, "Constant", NULL, NULL, "Value", val); \
+		e_soap_message_end_element (msg); \
+	} G_STMT_END
 
 #define WRITE_EXISTS_MESSAGE(msg, uri) \
-	e_soap_message_start_element (msg, "Exists", NULL, NULL); \
-	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", uri);\
-	e_soap_message_end_element (msg);
-	
+	G_STMT_START { \
+		e_soap_message_start_element (msg, "Exists", NULL, NULL); \
+		e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", uri);\
+		e_soap_message_end_element (msg); \
+	} G_STMT_END
+
 #define WRITE_GREATER_THAN_OR_EQUAL_TO_MESSAGE(msg, uri, val) \
-	e_soap_message_start_element (msg, "IsGreaterThanOrEqualTo", NULL, NULL); \
-	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", uri); \
-	e_soap_message_start_element (msg, "FieldURIOrConstant", NULL, NULL); \
-	e_ews_message_write_string_parameter_with_attribute (msg, "Constant", NULL, NULL, "Value", val); \
-	e_soap_message_end_element (msg); \
-	e_soap_message_end_element (msg);
+	G_STMT_START { \
+		e_soap_message_start_element (msg, "IsGreaterThanOrEqualTo", NULL, NULL); \
+		e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", uri); \
+		e_soap_message_start_element (msg, "FieldURIOrConstant", NULL, NULL); \
+		e_ews_message_write_string_parameter_with_attribute (msg, "Constant", NULL, NULL, "Value", val); \
+		e_soap_message_end_element (msg); \
+		e_soap_message_end_element (msg); \
+	} G_STMT_END
 
 #define WRITE_LESS_THAN_OR_EQUAL_TO_MESSAGE(msg, uri, val) \
-	e_soap_message_start_element (msg, "IsLessThanOrEqualTo", NULL, NULL); \
-	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", uri); \
-	e_soap_message_start_element (msg, "FieldURIOrConstant", NULL, NULL); \
-	e_ews_message_write_string_parameter_with_attribute (msg, "Constant", NULL, NULL, "Value", val); \
-	e_soap_message_end_element (msg); \
-	e_soap_message_end_element (msg);
+	G_STMT_START { \
+		e_soap_message_start_element (msg, "IsLessThanOrEqualTo", NULL, NULL); \
+		e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", uri); \
+		e_soap_message_start_element (msg, "FieldURIOrConstant", NULL, NULL); \
+		e_ews_message_write_string_parameter_with_attribute (msg, "Constant", NULL, NULL, "Value", val); \
+		e_soap_message_end_element (msg); \
+		e_soap_message_end_element (msg); \
+	} G_STMT_END
 
 #define WRITE_GREATER_THAN_MESSAGE(msg, uri, val) \
-	e_soap_message_start_element (msg, "IsGreaterThan", NULL, NULL); \
-	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", uri); \
-	e_soap_message_start_element (msg, "FieldURIOrConstant", NULL, NULL); \
-	e_ews_message_write_string_parameter_with_attribute (msg, "Constant", NULL, NULL, "Value", val); \
-	e_soap_message_end_element (msg); \
-	e_soap_message_end_element (msg);
+	G_STMT_START { \
+		e_soap_message_start_element (msg, "IsGreaterThan", NULL, NULL); \
+		e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", uri); \
+		e_soap_message_start_element (msg, "FieldURIOrConstant", NULL, NULL); \
+		e_ews_message_write_string_parameter_with_attribute (msg, "Constant", NULL, NULL, "Value", val); \
+		e_soap_message_end_element (msg); \
+		e_soap_message_end_element (msg); \
+	} G_STMT_END
 
 #define WRITE_LESS_THAN_MESSAGE(msg, uri, val) \
-	e_soap_message_start_element (msg, "IsLessThan", NULL, NULL); \
-	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", uri); \
-	e_soap_message_start_element (msg, "FieldURIOrConstant", NULL, NULL); \
-	e_ews_message_write_string_parameter_with_attribute (msg, "Constant", NULL, NULL, "Value", val); \
-	e_soap_message_end_element (msg); \
-	e_soap_message_end_element (msg);
+	G_STMT_START { \
+		e_soap_message_start_element (msg, "IsLessThan", NULL, NULL); \
+		e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", uri); \
+		e_soap_message_start_element (msg, "FieldURIOrConstant", NULL, NULL); \
+		e_ews_message_write_string_parameter_with_attribute (msg, "Constant", NULL, NULL, "Value", val); \
+		e_soap_message_end_element (msg); \
+		e_soap_message_end_element (msg); \
+	} G_STMT_END
 
 #define WRITE_IS_EQUAL_TO_MESSAGE(msg, uri, val) \
-	e_soap_message_start_element (msg, "IsEqualTo", NULL, NULL); \
-	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", uri); \
-	e_soap_message_start_element (msg, "FieldURIOrConstant", NULL, NULL); \
-	e_ews_message_write_string_parameter_with_attribute (msg, "Constant", NULL, NULL, "Value", val); \
-	e_soap_message_end_element (msg); \
-	e_soap_message_end_element (msg);
-
+	G_STMT_START { \
+		e_soap_message_start_element (msg, "IsEqualTo", NULL, NULL); \
+		e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", uri); \
+		e_soap_message_start_element (msg, "FieldURIOrConstant", NULL, NULL); \
+		e_ews_message_write_string_parameter_with_attribute (msg, "Constant", NULL, NULL, "Value", val); \
+		e_soap_message_end_element (msg); \
+		e_soap_message_end_element (msg); \
+	} G_STMT_END
 
 typedef enum {
 	MATCH_CONTAINS,
@@ -204,10 +219,11 @@ struct EmailIndex {
 };
 
 static ESExpResult *
-e_ews_implement_contact_contains ( ESExp *f,
-          				gint argc,
-					ESExpResult **argv,
-					gpointer data, match_type type)
+e_ews_implement_contact_contains (ESExp *f,
+                                  gint argc,
+                                  ESExpResult **argv,
+                                  gpointer data,
+                                  match_type type)
 {
 	ESExpResult *r;
 	ESoapMessage *msg;
@@ -215,11 +231,11 @@ e_ews_implement_contact_contains ( ESExp *f,
 	msg = (ESoapMessage *) data;
 
 	if (argc > 1 && argv[0]->type == ESEXP_RES_STRING) {
-		gchar *field;
+		const gchar *field;
 		field = argv[0]->value.string;
 
 		if (argv[1]->type == ESEXP_RES_STRING && argv[1]->value.string != NULL) {
-			gchar *mode=NULL;
+			gchar *mode = NULL;
 
 			if (type == MATCH_CONTAINS || type == MATCH_ENDS_WITH)
 				mode = g_strdup ("Substring");
@@ -232,8 +248,8 @@ e_ews_implement_contact_contains ( ESExp *f,
 
 			if (!strcmp (field, "full_name")) {
 				gint n = 0;
-				gchar *value = NULL;
-				value = g_strdup (argv[1]->value.string);
+				const gchar *value;
+				value = argv[1]->value.string;
 
 				e_soap_message_start_element (msg, "Or", NULL, NULL);
 				while (n < G_N_ELEMENTS (contact_field)) {
@@ -246,8 +262,8 @@ e_ews_implement_contact_contains ( ESExp *f,
 
 			} else if (!strcmp (field, "x-evolution-any-field")) {
 				gint n = 0;
-				gchar *value = NULL;
-				value = g_strdup (argv[1]->value.string);
+				const gchar *value;
+				value = argv[1]->value.string;
 
 				e_soap_message_start_element (msg, "Or", NULL, NULL);
 				while (n < G_N_ELEMENTS (contact_field)) {
@@ -264,9 +280,9 @@ e_ews_implement_contact_contains ( ESExp *f,
 				}
 				e_soap_message_end_element (msg);
 			} else if (!strcmp (field, "email")) {
-				gchar *value = NULL;
+				const gchar *value;
 				gint n = 0;
-				value = g_strdup (argv[1]->value.string);
+				value = argv[1]->value.string;
 
 				e_soap_message_start_element (msg, "Or", NULL, NULL);
 				while (n < G_N_ELEMENTS (email_index)) {
@@ -275,12 +291,13 @@ e_ews_implement_contact_contains ( ESExp *f,
 				}
 				e_soap_message_end_element (msg);
 			} else if (!strcmp (field, "category_list")) {
-				gchar *value = NULL;
-
-				value = g_strdup (argv[1]->value.string);
+				const gchar *value;
+				value = argv[1]->value.string;
 
 				WRITE_CONTAINS_MESSAGE (msg, mode, "IgnoreCase", "item:Categories", value);
 			}
+			
+			g_free (mode);
 		}
 	}
 
@@ -289,12 +306,12 @@ e_ews_implement_contact_contains ( ESExp *f,
 	return r;
 }
 
-
 static ESExpResult *
 e_ews_func_and_or_not (ESExp *f,
-			gint argc,
-			ESExpTerm **argv,
-			gpointer data, match_type type)
+                       gint argc,
+                       ESExpTerm **argv,
+                       gpointer data,
+                       match_type type)
 {
 	ESExpResult *r, *r1;
 	ESoapMessage *msg;
@@ -314,7 +331,7 @@ e_ews_func_and_or_not (ESExp *f,
 	} else if (type == MATCH_OR) {
 		if (argc >= 2)
 			e_soap_message_start_element (msg, "Or", NULL, NULL);
-	
+
 	} else if (type == MATCH_NOT)
 		e_soap_message_start_element (msg, "Not", NULL, NULL);
 
@@ -334,9 +351,9 @@ result:
 
 static ESExpResult *
 calendar_func_contains (ESExp *f,
-            		gint argc,
-			ESExpResult **argv,
-			gpointer data)
+                        gint argc,
+                        ESExpResult **argv,
+                        gpointer data)
 {
 	ESExpResult *r;
 	ESoapMessage *msg;
@@ -344,53 +361,52 @@ calendar_func_contains (ESExp *f,
 	msg = (ESoapMessage *) data;
 
 	if (argc > 1 && argv[0]->type == ESEXP_RES_STRING) {
-		gchar *field;
+		const gchar *field;
 		field = argv[0]->value.string;
 
 		if (argv[1]->type == ESEXP_RES_STRING && argv[1]->value.string[0] != 0) {
 			if (!g_strcmp0 (field, "summary")) {
-				gchar *value = NULL;
-				value = g_strdup (argv[1]->value.string);
+				const gchar *value;
+				value = argv[1]->value.string;
 
 				WRITE_CONTAINS_MESSAGE (msg, "Substring", "IgnoreCase", "item:Subject", value);
 			} else if (!g_strcmp0 (field, "description")) {
-				gchar *value = NULL;
-				value = g_strdup (argv[1]->value.string);
+				const gchar *value;
+				value = argv[1]->value.string;
 
 				WRITE_CONTAINS_MESSAGE (msg, "Substring", "IgnoreCase", "item:Body", value);
 			} else if (!g_strcmp0 (field, "location")) {
-				gchar *value = NULL;
-				value = g_strdup (argv[1]->value.string);
+				const gchar *value;
+				value = argv[1]->value.string;
 
 				WRITE_CONTAINS_MESSAGE (msg, "Substring", "IgnoreCase", "calendar:Location", value);
 			} else if (!g_strcmp0 (field, "attendee")) {
-				gchar *value = NULL;
-				value = g_strdup (argv[1]->value.string);
+				const gchar *value;
+				value = argv[1]->value.string;
 
 				e_soap_message_start_element (msg, "Or", NULL, NULL);
 				WRITE_CONTAINS_MESSAGE (msg, "Substring", "IgnoreCase", "calendar:RequiredAttendees", value);
 				WRITE_CONTAINS_MESSAGE (msg, "Substring", "IgnoreCase", "calendar:OptionalAttendees", value);
 				e_soap_message_end_element (msg);
 			} else if (!g_strcmp0 (field, "organizer")) {
-				gchar *value = NULL;
-				value = g_strdup (argv[1]->value.string);
+				const gchar *value;
+				value = argv[1]->value.string;
 
 				WRITE_CONTAINS_MESSAGE (msg, "Substring", "IgnoreCase", "calendar:Organizer", value);
 			} else if (!g_strcmp0 (field, "classification")) {
-				gchar *value = NULL;
-				value = g_strdup (argv[1]->value.string);
+				const gchar *value;
+				value = argv[1]->value.string;
 
 				WRITE_CONTAINS_MESSAGE (msg, "Substring", "IgnoreCase", "item:Sensitivity", value);
 			} else if (!g_strcmp0 (field, "priority")) {
-				gchar *value = NULL;
-				value = g_strdup (argv[1]->value.string);
+				const gchar *value;
+				value = argv[1]->value.string;
 
 				WRITE_CONTAINS_MESSAGE (msg, "Substring", "IgnoreCase", "item:Importance", value);
 			} else if (!g_strcmp0 (field, "any")) {
-				gchar *value = NULL;
+				const gchar *value;
 				gint n = 0;
-
-				value = g_strdup (argv[1]->value.string);
+				value = argv[1]->value.string;
 
 				e_soap_message_start_element (msg, "Or", NULL, NULL);
 				while (n < G_N_ELEMENTS (calendar_field)) {
@@ -418,9 +434,9 @@ calendar_func_contains (ESExp *f,
 
 static ESExpResult *
 calendar_func_has_categories (ESExp *f,
-				gint argc,
-				ESExpResult **argv,
-				gpointer data)
+                              gint argc,
+                              ESExpResult **argv,
+                              gpointer data)
 {
 	ESExpResult *r;
 	ESoapMessage *msg;
@@ -428,7 +444,7 @@ calendar_func_has_categories (ESExp *f,
 	msg = (ESoapMessage *) data;
 
 	if (argc == 1 && argv[0]->type == ESEXP_RES_STRING) {
-		gchar *value;
+		const gchar *value;
 		value = argv[0]->value.string;
 
 		WRITE_CONTAINS_MESSAGE (msg, "Substring", "IgnoreCase", "item:Categories", value);
@@ -441,15 +457,15 @@ calendar_func_has_categories (ESExp *f,
 
 static ESExpResult *
 calendar_func_has_attachment (ESExp *f,
-				gint argc,
-				ESExpResult **argv,
-				gpointer data)
+                              gint argc,
+                              ESExpResult **argv,
+                              gpointer data)
 {
 	ESExpResult *r;
 	ESoapMessage *msg;
 
 	msg = (ESoapMessage *) data;
-	
+
 	if (argc == 0) {
 		WRITE_EXISTS_MESSAGE (msg, "item:HasAttachments");
 	}
@@ -461,9 +477,9 @@ calendar_func_has_attachment (ESExp *f,
 
 static ESExpResult *
 calendar_func_has_recurrence (ESExp *f,
-				gint argc,
-				ESExpResult **argv,
-				gpointer data)
+                              gint argc,
+                              ESExpResult **argv,
+                              gpointer data)
 {
 	ESExpResult *r;
 	ESoapMessage *msg;
@@ -492,9 +508,9 @@ e_ews_make_timestamp (time_t when)
 
 static ESExpResult *
 calendar_func_occur_in_time_range (ESExp *f,
-               				gint argc,
-              				ESExpResult **argv,
-            				gpointer data)
+                                   gint argc,
+                                   ESExpResult **argv,
+                                   gpointer data)
 {
 	ESExpResult *r;
 	ESoapMessage *msg;
@@ -524,14 +540,17 @@ calendar_func_occur_in_time_range (ESExp *f,
 
 	r = e_sexp_result_new (f, ESEXP_RES_UNDEFINED);
 
+	g_free (start);
+	g_free (end);
+
 	return r;
 }
 
 static ESExpResult *
 calendar_func_occurrences_count (ESExp *f,
-				 gint argc,
-				 ESExpResult **argv,
-				 gpointer data)
+                                 gint argc,
+                                 ESExpResult **argv,
+                                 gpointer data)
 {
 	ESExpResult *r;
 
@@ -543,9 +562,9 @@ calendar_func_occurrences_count (ESExp *f,
 
 static ESExpResult *
 message_func_body_contains (ESExp *f,
-				gint argc,
-				ESExpResult **argv,
-				gpointer data)
+                            gint argc,
+                            ESExpResult **argv,
+                            gpointer data)
 
 {
 	ESExpResult *r;
@@ -554,7 +573,7 @@ message_func_body_contains (ESExp *f,
 	msg = (ESoapMessage *) data;
 
 	if (argv[0]->type == ESEXP_RES_STRING) {
-		gchar *value;
+		const gchar *value;
 		value = argv[0]->value.string;
 
 		WRITE_CONTAINS_MESSAGE (msg, "Substring", "IgnoreCase", "item:Body", value);
@@ -567,9 +586,10 @@ message_func_body_contains (ESExp *f,
 
 static ESExpResult *
 common_message_func_header_contains (ESExp *f,
-				gint argc,
-				ESExpResult **argv,
-				gpointer data, match_type type)
+                                     gint argc,
+                                     ESExpResult **argv,
+                                     gpointer data,
+                                     match_type type)
 
 {
 	ESExpResult *r;
@@ -588,11 +608,11 @@ common_message_func_header_contains (ESExp *f,
 		mode = g_strdup ("Substring");
 
 	if (argv[0]->type == ESEXP_RES_STRING) {
-		gchar *headername;
+		const gchar *headername;
 		headername = argv[0]->value.string;
-		
+
 		if (argv[1]->type == ESEXP_RES_STRING) {
-			gchar *value;
+			const gchar *value;
 			value = argv[1]->value.string;
 
 			if (!g_ascii_strcasecmp(headername, "subject")) {
@@ -611,14 +631,16 @@ common_message_func_header_contains (ESExp *f,
 
 	r = e_sexp_result_new (f, ESEXP_RES_UNDEFINED);
 
+	g_free (mode);
+
 	return r;
 }
 
 static ESExpResult *
 message_func_header_exists (ESExp *f,
-				gint argc,
-				ESExpResult **argv,
-				gpointer data)
+                            gint argc,
+                            ESExpResult **argv,
+                            gpointer data)
 {
 	ESExpResult *r;
 	ESoapMessage *msg;
@@ -626,9 +648,9 @@ message_func_header_exists (ESExp *f,
 	msg = (ESoapMessage *) data;
 
 	if (argv[0]->type == ESEXP_RES_STRING) {
-		gchar *headername;
+		const gchar *headername;
 		headername = argv[0]->value.string;
-		
+
 		if (!g_ascii_strcasecmp(headername, "subject")) {
 			WRITE_EXISTS_MESSAGE (msg, "item:Subject");
 		} else if (!g_ascii_strcasecmp(headername, "from")) {
@@ -649,9 +671,9 @@ message_func_header_exists (ESExp *f,
 
 static ESExpResult *
 message_func_system_flag (ESExp *f,
-				gint argc,
-				ESExpResult **argv,
-				gpointer data)
+                          gint argc,
+                          ESExpResult **argv,
+                          gpointer data)
 {
 	ESExpResult *r;
 	ESoapMessage *msg;
@@ -659,10 +681,10 @@ message_func_system_flag (ESExp *f,
 	msg = (ESoapMessage *) data;
 
 	if (argv[0]->type == ESEXP_RES_STRING) {
-		gchar *name;
+		const gchar *name;
 		name = argv[0]->value.string;
 		if (!g_ascii_strcasecmp(name, "Attachments")) {
-			WRITE_EXISTS_MESSAGE (msg, "item:HasAttachments")
+			WRITE_EXISTS_MESSAGE (msg, "item:HasAttachments");
 		} else if (!g_ascii_strcasecmp(name, "deleted") || !g_ascii_strcasecmp(name, "junk")) {
 			r = e_sexp_result_new (f, ESEXP_RES_BOOL);
 			r->value.bool = FALSE;
@@ -678,9 +700,9 @@ message_func_system_flag (ESExp *f,
 
 static ESExpResult *
 message_func_sent_date (ESExp *f,
-				gint argc,
-				ESExpResult **argv,
-				gpointer data)
+                        gint argc,
+                        ESExpResult **argv,
+                        gpointer data)
 {
 	ESExpResult *r;
 
@@ -692,9 +714,9 @@ message_func_sent_date (ESExp *f,
 
 static ESExpResult *
 message_func_received_date (ESExp *f,
-				gint argc,
-				ESExpResult **argv,
-				gpointer data)
+                            gint argc,
+                            ESExpResult **argv,
+                            gpointer data)
 {
 	ESExpResult *r;
 
@@ -706,9 +728,9 @@ message_func_received_date (ESExp *f,
 
 static ESExpResult *
 message_func_current_date (ESExp *f,
-				gint argc,
-				ESExpResult **argv,
-				gpointer data)
+                           gint argc,
+                           ESExpResult **argv,
+                           gpointer data)
 {
 	ESExpResult *r;
 
@@ -736,12 +758,11 @@ ews_add_months (time_t t,
 
 static ESExpResult *
 message_func_relative_months (ESExp *f,
-				gint argc,
-				ESExpResult **argv,
-				gpointer data)
+                              gint argc,
+                              ESExpResult **argv,
+                              gpointer data)
 {
 	ESExpResult *r;
-
 
 	if (argc != 1 || argv[0]->type != ESEXP_RES_INT) {
 		r = e_sexp_result_new (f, ESEXP_RES_BOOL);
@@ -756,10 +777,10 @@ message_func_relative_months (ESExp *f,
 }
 
 static ESExpResult *
-message_func_get_size  (ESExp *f,
-			gint argc,
-			ESExpResult **argv,
-			gpointer data)
+message_func_get_size (ESExp *f,
+                       gint argc,
+                       ESExpResult **argv,
+                       gpointer data)
 {
 	ESExpResult *r;
 
@@ -771,9 +792,9 @@ message_func_get_size  (ESExp *f,
 
 static ESExpResult *
 func_eq (ESExp *f,
-		gint argc,
-		ESExpResult **argv,
-		gpointer data)
+         gint argc,
+         ESExpResult **argv,
+         gpointer data)
 {
 	ESExpResult *r;
 	ESoapMessage *msg;
@@ -786,7 +807,9 @@ func_eq (ESExp *f,
 	}
 
 	if (argv[0]->type == ESEXP_RES_STRING) {
-		gchar *name, *field_uri = NULL;
+		const gchar *name;
+	       	gchar *field_uri = NULL;
+
 		name = argv[0]->value.string;
 
 		if (!g_strcmp0 (name, "sent-date")) {
@@ -802,7 +825,9 @@ func_eq (ESExp *f,
 			date = e_ews_make_timestamp (time);
 
 			WRITE_IS_EQUAL_TO_MESSAGE (msg, field_uri, date);
+			g_free (date);
 		}
+		g_free (field_uri);
 	}
 
 	r = e_sexp_result_new (f, ESEXP_RES_UNDEFINED);
@@ -812,9 +837,9 @@ func_eq (ESExp *f,
 
 static ESExpResult *
 func_gt (ESExp *f,
-		gint argc,
-		ESExpResult **argv,
-		gpointer data)
+         gint argc,
+         ESExpResult **argv,
+         gpointer data)
 {
 	ESExpResult *r;
 	ESoapMessage *msg;
@@ -827,8 +852,10 @@ func_gt (ESExp *f,
 	}
 
 	if (argv[0]->type == ESEXP_RES_STRING) {
-		gchar *name, *field_uri = NULL;
+		const gchar *name;
+		gchar *field_uri = NULL;
 		gboolean is_time = FALSE;
+
 		name = argv[0]->value.string;
 
 		if (!g_strcmp0 (name, "sent-date")) {
@@ -850,6 +877,7 @@ func_gt (ESExp *f,
 				date = e_ews_make_timestamp (time);
 
 				WRITE_GREATER_THAN_MESSAGE (msg, field_uri, date);
+				g_free (date);
 			} else {
 				gint value;
 				gchar val_str[16];
@@ -861,6 +889,7 @@ func_gt (ESExp *f,
 				WRITE_GREATER_THAN_MESSAGE (msg, field_uri, val_str);
 			}
 		}
+		g_free (field_uri);
 	}
 
 	r = e_sexp_result_new (f, ESEXP_RES_UNDEFINED);
@@ -870,9 +899,9 @@ func_gt (ESExp *f,
 
 static ESExpResult *
 func_lt (ESExp *f,
-		gint argc,
-		ESExpResult **argv,
-		gpointer data)
+         gint argc,
+         ESExpResult **argv,
+         gpointer data)
 {
 	ESExpResult *r;
 	ESoapMessage *msg;
@@ -885,7 +914,8 @@ func_lt (ESExp *f,
 	}
 
 	if (argv[0]->type == ESEXP_RES_STRING) {
-		gchar *name, *field_uri = NULL;
+		const gchar *name;
+		gchar *field_uri = NULL;
 		gboolean is_time = FALSE;
 		name = argv[0]->value.string;
 
@@ -908,6 +938,7 @@ func_lt (ESExp *f,
 				date = e_ews_make_timestamp (time);
 
 				WRITE_LESS_THAN_MESSAGE (msg, field_uri, date);
+				g_free (date);
 			} else {
 				gint value;
 				gchar val_str[16];
@@ -919,6 +950,7 @@ func_lt (ESExp *f,
 				WRITE_LESS_THAN_MESSAGE (msg, field_uri, val_str);
 			}
 		}
+		g_free (field_uri);
 	}
 
 	r = e_sexp_result_new (f, ESEXP_RES_UNDEFINED);
@@ -928,9 +960,9 @@ func_lt (ESExp *f,
 
 static ESExpResult *
 message_func_match_all (ESExp *f,
-				gint argc,
-				ESExpResult **argv,
-				gpointer data)
+                        gint argc,
+                        ESExpResult **argv,
+                        gpointer data)
 {
 	ESExpResult *r;
 
@@ -941,99 +973,99 @@ message_func_match_all (ESExp *f,
 
 static ESExpResult *
 message_func_header_contains (ESExp *f,
-				gint argc,
-				ESExpResult **argv,
-				gpointer data)
+                              gint argc,
+                              ESExpResult **argv,
+                              gpointer data)
 {
 	return common_message_func_header_contains (f, argc, argv, data, MATCH_CONTAINS);
 }
 
 static ESExpResult *
-message_func_header_matches  (ESExp *f,
-				gint argc,
-				ESExpResult **argv,
-				gpointer data)
+message_func_header_matches (ESExp *f,
+                             gint argc,
+                             ESExpResult **argv,
+                             gpointer data)
 {
 	return common_message_func_header_contains (f, argc, argv, data, MATCH_IS);
 }
 
 static ESExpResult *
-message_func_header_starts_with  (ESExp *f,
-					gint argc,
-					ESExpResult **argv,
-					gpointer data)
+message_func_header_starts_with (ESExp *f,
+                                 gint argc,
+                                 ESExpResult **argv,
+                                 gpointer data)
 {
 	return common_message_func_header_contains (f, argc, argv, data, MATCH_BEGINS_WITH);
 }
 
-static ESExpResult *  
+static ESExpResult *
 message_func_header_ends_with (ESExp *f,
-				gint argc,
-				ESExpResult **argv,
-				gpointer data)
+                               gint argc,
+                               ESExpResult **argv,
+                               gpointer data)
 {
 	return common_message_func_header_contains (f, argc, argv, data, MATCH_ENDS_WITH);
 }
 
 static ESExpResult *
 contact_func_contains (ESExp *f,
-			gint argc,
-			ESExpResult **argv,
-			gpointer data)
+                       gint argc,
+                       ESExpResult **argv,
+                       gpointer data)
 {
 	return e_ews_implement_contact_contains (f, argc, argv, data, MATCH_CONTAINS);
 }
 
 static ESExpResult *
 contact_func_is (ESExp *f,
-			gint argc,
-			ESExpResult **argv,
-			gpointer data)
+                 gint argc,
+                 ESExpResult **argv,
+                 gpointer data)
 {
 	return e_ews_implement_contact_contains (f, argc, argv, data, MATCH_IS);
 }
 
 static ESExpResult *
 contact_func_beginswith (ESExp *f,
-				gint argc,
-				ESExpResult **argv,
-				gpointer data)
+                         gint argc,
+                         ESExpResult **argv,
+                         gpointer data)
 {
 	return e_ews_implement_contact_contains (f, argc, argv, data, MATCH_BEGINS_WITH);
 }
 
 static ESExpResult *
 contact_func_endswith (ESExp *f,
-			gint argc,
-			ESExpResult **argv,
-			gpointer data)
+                       gint argc,
+                       ESExpResult **argv,
+                       gpointer data)
 {
 	return e_ews_implement_contact_contains (f, argc, argv, data, MATCH_ENDS_WITH);
 }
 
 static ESExpResult *
 func_or (ESExp *f,
-               gint argc,
-               ESExpTerm **argv,
-               gpointer data)
+         gint argc,
+         ESExpTerm **argv,
+         gpointer data)
 {
 	return e_ews_func_and_or_not (f, argc, argv, data, MATCH_OR);
 }
 
 static ESExpResult *
 func_and (ESExp *f,
-               gint argc,
-               ESExpTerm **argv,
-               gpointer data)
+          gint argc,
+          ESExpTerm **argv,
+          gpointer data)
 {
 	return e_ews_func_and_or_not (f, argc, argv, data, MATCH_AND);
 }
 
 static ESExpResult *
 func_not (ESExp *f,
-               gint argc,
-               ESExpTerm **argv,
-               gpointer data)
+          gint argc,
+          ESExpTerm **argv,
+          gpointer data)
 {
 	return e_ews_func_and_or_not (f, argc, argv, data, MATCH_NOT);
 }
@@ -1051,7 +1083,7 @@ static struct {
 	{ "is", contact_func_is, 0 },
 	{ "beginswith", contact_func_beginswith, 0 },
 	{ "endswith", contact_func_endswith, 0 },
-}; 
+};
 
 static struct {
 	const gchar *name;
@@ -1103,7 +1135,9 @@ static struct {
 };
 
 static void
-e_ews_convert_sexp_to_restriction (ESoapMessage *msg, const gchar *query, EwsFolderType type)
+e_ews_convert_sexp_to_restriction (ESoapMessage *msg,
+                                   const gchar *query,
+                                   EwsFolderType type)
 {
 	ESExp *sexp;
 	ESExpResult *r;
@@ -1154,7 +1188,8 @@ e_ews_convert_sexp_to_restriction (ESoapMessage *msg, const gchar *query, EwsFol
 }
 
 static gboolean
-e_ews_check_is_query (const gchar *query, EwsFolderType type)
+e_ews_check_is_query (const gchar *query,
+                      EwsFolderType type)
 {
 
 	if (!query)
@@ -1163,9 +1198,9 @@ e_ews_check_is_query (const gchar *query, EwsFolderType type)
 	if (type == EWS_FOLDER_TYPE_CONTACTS) {
 		if (!g_strcmp0 (query, "(contains \"x-evolution-any-field\" \"\")"))
 			return FALSE;
-		else 
+		else
 			return TRUE;
-	
+
 	} else if (type == EWS_FOLDER_TYPE_CALENDAR || type == EWS_FOLDER_TYPE_TASKS) {
 		if (!g_strcmp0 (query, "(contains? \"summary\"  \"\")"))
 			return FALSE;
@@ -1178,7 +1213,9 @@ e_ews_check_is_query (const gchar *query, EwsFolderType type)
 }
 
 void
-e_ews_query_to_restriction (ESoapMessage *msg, const gchar *query, EwsFolderType type)
+e_ews_query_to_restriction (ESoapMessage *msg,
+                            const gchar *query,
+                            EwsFolderType type)
 {
 	gboolean is_query;
 
