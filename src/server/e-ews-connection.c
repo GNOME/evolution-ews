@@ -33,6 +33,7 @@
 #include <glib/gstdio.h>
 #include <libical/icalcomponent.h>
 #include <libical/icalproperty.h>
+#include <libical/ical.h>
 #include "e-ews-connection.h"
 #include <libedataserver/e-flag.h>
 #include "e-ews-message.h"
@@ -4510,7 +4511,7 @@ get_free_busy_response_cb (ESoapParameter *param, EwsNode *enode)
 	ESoapParameter *viewparam, *eventarray, *event_param, *subparam;
 	GTimeVal t_val;
 	const gchar *name;
-	gchar *value;
+	gchar *value, *new_val = NULL;
 	EwsAsyncData *async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
 
 	viewparam = e_soap_parameter_get_first_child_by_name (param, "FreeBusyView");
@@ -4523,17 +4524,41 @@ get_free_busy_response_cb (ESoapParameter *param, EwsNode *enode)
 
 			if (!g_ascii_strcasecmp (name, "StartTime")) {
 				value = e_soap_parameter_get_string_value (subparam);
-				g_time_val_from_iso8601 (value, &t_val);
-				g_free (value);
+				/*We are sending UTC timezone and expect server to return in same*/
+				
+				/*Remove leading and trailing whitespace*/
+				g_strstrip (value);
 
-				ipt.start = icaltime_from_timet (t_val.tv_sec, 0);
+				if (g_utf8_strlen (value, -1) == 19) {
+					/*If server returns time without zone add Z to treat it in UTC*/
+					new_val = g_strdup_printf ("%sZ", value);
+					g_free (value);
+				} else
+					new_val = value;
+				
+				g_time_val_from_iso8601 (new_val, &t_val);
+				g_free (new_val);
+
+				ipt.start = icaltime_from_timet_with_zone (t_val.tv_sec, 0, NULL);
 
 			} else if (!g_ascii_strcasecmp (name, "EndTime")) {
 				value = e_soap_parameter_get_string_value (subparam);
-				g_time_val_from_iso8601 (value, &t_val);
-				g_free (value);
+				/*We are sending UTC timezone and expect server to return in same*/
+				
+				/*Remove leading and trailing whitespace*/
+				g_strstrip (value);
 
-				ipt.end = icaltime_from_timet (t_val.tv_sec, 0);
+				if (g_utf8_strlen (value, -1) == 19) {
+					/*If server returns time without zone add Z to treat it in UTC*/
+					new_val = g_strdup_printf ("%sZ", value);
+					g_free (value);
+				} else
+					new_val = value;
+
+				g_time_val_from_iso8601 (new_val, &t_val);
+				g_free (new_val);
+
+				ipt.end = icaltime_from_timet_with_zone (t_val.tv_sec, 0, NULL);
 
 				icalprop = icalproperty_new_freebusy (ipt);
 			} else if (!g_ascii_strcasecmp (name, "BusyType")) {
