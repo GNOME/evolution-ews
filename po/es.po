@@ -12,8 +12,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2012-02-20 15:04+0000\n"
-"PO-Revision-Date: 2012-02-21 17:53+0100\n"
+"POT-Creation-Date: 2012-03-28 13:20+0000\n"
+"PO-Revision-Date: 2012-03-28 18:26+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:241
+#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:242
 msgid "Global Address list"
 msgstr "Lista global de direcciones"
 
@@ -159,7 +159,6 @@ msgstr "Obtener _lista"
 
 #: ../src/account-setup-eplugin/exchange-ews-account-setup.c:764
 #: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:3
-#| msgid "GAL settings"
 msgid "EWS Settings"
 msgstr "Configuración de EWS"
 
@@ -176,28 +175,28 @@ msgstr "Configuración de GAL"
 msgid "Exchange Web Services Plugin"
 msgstr "Complemento de servicios web Exchange"
 
-#: ../src/addressbook/e-book-backend-ews.c:901
+#: ../src/addressbook/e-book-backend-ews.c:913
 msgid "The backend does not support bulk additions"
 msgstr "El «backend» no soporta adiciones"
 
-#: ../src/addressbook/e-book-backend-ews.c:1172
+#: ../src/addressbook/e-book-backend-ews.c:1184
 msgid "The backend does not support bulk modifications"
 msgstr "El «backend» no soporta modificaciones"
 
-#: ../src/addressbook/e-book-backend-ews.c:1346
+#: ../src/addressbook/e-book-backend-ews.c:1358
 msgid "Wait till syncing is done"
 msgstr "Esperar a que termine la sincronización"
 
-#: ../src/addressbook/e-book-backend-ews.c:1665
+#: ../src/addressbook/e-book-backend-ews.c:1676
 #, c-format
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr "Descarga de contactos en %s %d%% completada… "
 
-#: ../src/addressbook/e-book-backend-ews.c:2159
+#: ../src/addressbook/e-book-backend-ews.c:2165
 msgid "Syncing contacts..."
 msgstr "Sincronizando contactos…"
 
-#: ../src/addressbook/e-book-backend-ews.c:2358
+#: ../src/addressbook/e-book-backend-ews.c:2357
 msgid "Searching..."
 msgstr "Buscando…"
 
@@ -205,6 +204,21 @@ msgstr "Buscando…"
 #, c-format
 msgid "Insufficient memory"
 msgstr "Memoria insuficiente"
+
+#: ../src/calendar/e-cal-backend-ews.c:1047
+#| msgid "The backend does not support bulk modifications"
+msgid "EWS does not support bulk removals"
+msgstr "EWS no soporta eliminaciones"
+
+#: ../src/calendar/e-cal-backend-ews.c:1614
+#| msgid "The backend does not support bulk additions"
+msgid "EWS does not support bulk additions"
+msgstr "EWS no soporta adiciones"
+
+#: ../src/calendar/e-cal-backend-ews.c:2103
+#| msgid "The backend does not support bulk modifications"
+msgid "EWS does not support bulk modifications"
+msgstr "EWS no soporta modificaciones"
 
 #: ../src/camel/camel-ews-folder.c:262
 #, c-format
@@ -236,12 +250,12 @@ msgstr "No se pudo crear la ruta de la caché"
 msgid "Failed to move message cache file"
 msgstr "Falló al mover el archivo de la caché de mensajes"
 
-#: ../src/camel/camel-ews-folder.c:917
+#: ../src/camel/camel-ews-folder.c:920
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "No se pudo cargar el resumen para %s"
 
-#: ../src/camel/camel-ews-folder.c:1258 ../src/camel/camel-ews-store.c:757
+#: ../src/camel/camel-ews-folder.c:1261 ../src/camel/camel-ews-store.c:757
 #: ../src/camel/camel-ews-store.c:813 ../src/camel/camel-ews-store.c:883
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
@@ -381,66 +395,66 @@ msgstr ""
 msgid "Service not connected"
 msgstr "Servicio no conectado"
 
-#: ../src/server/e-ews-connection.c:360
+#: ../src/server/e-ews-connection.c:361
 msgid "Operation Cancelled"
 msgstr "Operación cancelada"
 
-#: ../src/server/e-ews-connection.c:422
+#: ../src/server/e-ews-connection.c:423
 msgid "Authentication failed"
 msgstr "Falló la autenticación"
 
-#: ../src/server/e-ews-connection.c:430
+#: ../src/server/e-ews-connection.c:431
 #, c-format
 msgid "No response: %s"
 msgstr "Sin respuesta: %s"
 
-#: ../src/server/e-ews-connection.c:1276 ../src/server/e-ews-connection.c:1634
-#: ../src/server/e-ews-connection.c:1873
+#: ../src/server/e-ews-connection.c:1285 ../src/server/e-ews-connection.c:1643
+#: ../src/server/e-ews-connection.c:1882
 #, c-format
 msgid "Code: %d - Unexpected response from server"
 msgstr "Código: %d: respuesta inesperada del servidor"
 
-#: ../src/server/e-ews-connection.c:1288
+#: ../src/server/e-ews-connection.c:1297
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Falló al analizar la respuesta XML de la autodetección"
 
-#: ../src/server/e-ews-connection.c:1296
+#: ../src/server/e-ews-connection.c:1305
 #, c-format
 msgid "Failed to find <Autodiscover> element\n"
 msgstr "Falló al buscar el elemento <Autodiscover>\n"
 
-#: ../src/server/e-ews-connection.c:1308
+#: ../src/server/e-ews-connection.c:1317
 #, c-format
 msgid "Failed to find <Response> element\n"
 msgstr "Falló al buscar el elemento<Response>\n"
 
-#: ../src/server/e-ews-connection.c:1320
+#: ../src/server/e-ews-connection.c:1329
 #, c-format
 msgid "Failed to find <Account> element\n"
 msgstr "Falló al buscar el elemento <Account>\n"
 
-#: ../src/server/e-ews-connection.c:1339
+#: ../src/server/e-ews-connection.c:1348
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr "Falló al buscar <ASUrl> y <OABUrl> en la respuesta de la autodetección"
 
-#: ../src/server/e-ews-connection.c:1441
+#: ../src/server/e-ews-connection.c:1450
 #, c-format
 msgid "Both email and password must be provided"
 msgstr "Se deben proporcionar el correo-e y la contraseña"
 
-#: ../src/server/e-ews-connection.c:1448
+#: ../src/server/e-ews-connection.c:1457
 #, c-format
 msgid "Wrong email id"
 msgstr "ID del correo-e no válido"
 
-#: ../src/server/e-ews-connection.c:1644
+#: ../src/server/e-ews-connection.c:1653
 #, c-format
 msgid "Failed to parse oab XML"
 msgstr "Falló al analizar el XML oab"
 
-#: ../src/server/e-ews-connection.c:1651
+#: ../src/server/e-ews-connection.c:1660
 #, c-format
 msgid "Failed to find <OAB> element\n"
 msgstr "Falló al buscar el elemento <OAB>\n"
