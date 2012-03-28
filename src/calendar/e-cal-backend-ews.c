@@ -874,7 +874,7 @@ ews_cal_remove_object_cb (GObject *object,
 	} else error->code = OtherError;
 
 	if (remove_data->context)
-		e_data_cal_respond_remove (remove_data->cal, remove_data->context, error);
+		e_data_cal_respond_remove_objects (remove_data->cal, remove_data->context, error, NULL, NULL, NULL);
 	else if (error) {
 		g_warning ("Remove object error :  %s\n", error->message);
 		g_clear_error (&error);
@@ -1016,11 +1016,50 @@ errorlvl1:
 
 exit:
 	if (context)
-		e_data_cal_respond_remove (cal, context, error);
+		e_data_cal_respond_remove_objects (cal, context, error, NULL, NULL, NULL);
 	else if (error) {
 		g_warning ("Remove object error :  %s\n", error->message);
 		g_clear_error (&error);
 	}
+}
+
+static void
+e_cal_backend_ews_remove_objects (ECalBackend *backend,
+                                  EDataCal *cal,
+                                  guint32 context,
+                                  GCancellable *cancellable,
+                                  const GSList *ids,
+                                  CalObjModType mod)
+{
+	GError *error = NULL;
+	const ECalComponentId *id;
+
+	if (!ids) {
+		if (context) {
+			g_propagate_error (&error, EDC_ERROR (InvalidArg));
+			e_data_cal_respond_remove_objects (cal, context, error, NULL, NULL, NULL);
+		}
+		return;
+	}
+
+	if (ids->next) {
+		if (context) {
+			g_propagate_error (&error, EDC_ERROR_EX (UnsupportedMethod, _("EWS does not support bulk removals")));
+			e_data_cal_respond_remove_objects (cal, context, error, NULL, NULL, NULL);
+		}
+		return;
+	}
+
+	id = ids->data;
+	if (!id) {
+		if (context) {
+			g_propagate_error (&error, EDC_ERROR (InvalidArg));
+			e_data_cal_respond_remove_objects (cal, context, error, NULL, NULL, NULL);
+		}
+		return;
+	}
+
+	e_cal_backend_ews_remove_object (backend, cal, context, cancellable, id->uid, id->rid, mod);
 }
 
 static icaltimezone * resolve_tzid (const gchar *tzid, gpointer user_data);
@@ -1231,14 +1270,6 @@ convert_calcomp_to_xml (ESoapMessage *msg,
 	g_free (convert_data);
 }
 
-static void
-e_cal_backend_ews_remove_object (ECalBackend *backend,
-                                 EDataCal *cal,
-                                 guint32 context,
-                                 GCancellable *cancellable,
-                                 const gchar *uid,
-                                 const gchar *rid,
-                                 CalObjModType mod);
 /*I will unate both type, they are same now*/
 typedef struct {
         ECalBackendEws *cbews;
@@ -1390,6 +1421,7 @@ ews_create_object_cb (GObject *object,
 	ECalBackendEwsPrivate *priv = cbews->priv;
 	GError *error = NULL;
 	GSList *ids = NULL, *attachments = NULL, *i, *exceptions = NULL, *items_req = NULL, *items = NULL;
+	GSList *new_uids, *new_comps;
 	const gchar *comp_uid;
 	const EwsId *item_id;
 	icalproperty *icalprop;
@@ -1403,7 +1435,7 @@ ews_create_object_cb (GObject *object,
 
 	/* make sure there was no error */
 	if (error != NULL) {
-		e_data_cal_respond_create_object (create_data->cal, create_data->context, error, NULL, NULL);
+		e_data_cal_respond_create_objects (create_data->cal, create_data->context, error, NULL, NULL);
 		return;
 	}
 
@@ -1426,7 +1458,7 @@ ews_create_object_cb (GObject *object,
 		if (!res && error != NULL) {
 			if (items_req)
 				g_slist_free (items_req);
-			e_data_cal_respond_create_object (create_data->cal, create_data->context, error, NULL, NULL);
+			e_data_cal_respond_create_objects (create_data->cal, create_data->context, error, NULL, NULL);
 			return;
 		}
 
@@ -1482,7 +1514,13 @@ ews_create_object_cb (GObject *object,
 
 	e_cal_component_get_uid (create_data->comp, &comp_uid);
 
-	e_data_cal_respond_create_object (create_data->cal, create_data->context, error, comp_uid, create_data->comp);
+	new_uids = g_slist_append (NULL, (gpointer) comp_uid);
+	new_comps = g_slist_append (NULL, create_data->comp);
+
+	e_data_cal_respond_create_objects (create_data->cal, create_data->context, error, new_uids, new_comps);
+
+	g_slist_free (new_uids);
+	g_slist_free (new_comps);
 
 	/* notify the backend and the application that a new object was created */
 	e_cal_backend_notify_component_created (E_CAL_BACKEND (create_data->cbews), create_data->comp);
@@ -1550,11 +1588,11 @@ static void tzid_cb (icalparameter *param, gpointer data)
 }
 
 static void
-e_cal_backend_ews_create_object (ECalBackend *backend,
-                                 EDataCal *cal,
-                                 guint32 context,
-                                 GCancellable *cancellable,
-                                 const gchar *calobj)
+e_cal_backend_ews_create_objects (ECalBackend *backend,
+                                  EDataCal *cal,
+                                  guint32 context,
+                                  GCancellable *cancellable,
+                                  const GSList *calobjs)
 {
 	EwsCreateData *create_data;
 	EwsConvertData *convert_data;
@@ -1565,11 +1603,19 @@ e_cal_backend_ews_create_object (ECalBackend *backend,
 	ECalComponent *comp;
 	struct icaltimetype current;
 	GError *error = NULL;
-	const gchar *send_meeting_invitations;
+	const gchar *send_meeting_invitations, *calobj;
 	struct TzidCbData cbd;
 
 	/* sanity check */
 	e_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (backend), InvalidArg);
+	e_data_cal_error_if_fail (calobjs != NULL, InvalidArg);
+
+	if (calobjs->next) {
+		g_propagate_error (&error, EDC_ERROR_EX (UnsupportedMethod, _("EWS does not support bulk additions")));
+		goto exit;
+	}
+
+	calobj = calobjs->data;
 	e_data_cal_error_if_fail (calobj != NULL && *calobj != '\0', InvalidArg);
 
 	cbews = E_CAL_BACKEND_EWS (backend);
@@ -1653,7 +1699,7 @@ e_cal_backend_ews_create_object (ECalBackend *backend,
 	return;
 
 exit:
-	e_data_cal_respond_create_object (cal, context, error, NULL, NULL);
+	e_data_cal_respond_create_objects (cal, context, error, NULL, NULL);
 }
 
 static void
@@ -1678,7 +1724,7 @@ ews_cal_modify_object_cb (GObject *object,
 		 * the OtherError code */
 		error->code = OtherError;
 		if (modify_data->context)
-			e_data_cal_respond_modify_object (modify_data->cal, modify_data->context, error, NULL, NULL);
+			e_data_cal_respond_modify_objects (modify_data->cal, modify_data->context, error, NULL, NULL);
 		goto exit;
 	}
 
@@ -1707,8 +1753,17 @@ ews_cal_modify_object_cb (GObject *object,
 	put_component_to_store (cbews, modify_data->comp);
 
 	if (modify_data->context) {
+		GSList *old_components, *new_components;
+
 		e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbews), modify_data->oldcomp, modify_data->comp);
-		e_data_cal_respond_modify_object (modify_data->cal, modify_data->context, error, modify_data->oldcomp, modify_data->comp);
+
+		old_components = g_slist_append (NULL, modify_data->oldcomp);
+		new_components = g_slist_append (NULL, modify_data->comp);
+
+		e_data_cal_respond_modify_objects (modify_data->cal, modify_data->context, error, old_components, new_components);
+
+		g_slist_free (old_components);
+		g_slist_free (new_components);
 	}
 	else if (error) {
 		g_warning ("Modify object error :  %s\n", error->message);
@@ -2026,6 +2081,35 @@ convert_component_to_updatexml (ESoapMessage *msg,
 }
 
 static void
+e_cal_backend_ews_modify_objects (ECalBackend *backend,
+                                  EDataCal *cal,
+                                  guint32 context,
+                                  GCancellable *cancellable,
+                                  const GSList *calobjs,
+                                  CalObjModType mod)
+{
+	GError *error = NULL;
+
+	if (!calobjs) {
+		if (context) {
+			g_propagate_error (&error, EDC_ERROR (InvalidArg));
+			e_data_cal_respond_modify_objects (cal, context, error, NULL, NULL);
+		}
+		return;
+	}
+
+	if (calobjs->next) {
+		if (context) {
+			g_propagate_error (&error, EDC_ERROR_EX (UnsupportedMethod, _("EWS does not support bulk modifications")));
+			e_data_cal_respond_modify_objects (cal, context, error, NULL, NULL);
+		}
+		return;
+	}
+
+	e_cal_backend_ews_modify_object (backend, cal, context, cancellable, calobjs->data, mod);
+}
+
+static void
 e_cal_backend_ews_modify_object (ECalBackend *backend,
                                  EDataCal *cal,
                                  guint32 context,
@@ -2149,7 +2233,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 		attach_data->changekey = changekey;
 
 		if (context)
-			e_data_cal_respond_modify_object (cal, context, error, NULL, NULL);
+			e_data_cal_respond_modify_objects (cal, context, error, NULL, NULL);
 
 		e_ews_connection_create_attachments_start (priv->cnc, EWS_PRIORITY_MEDIUM,
 							   item_id, added_attachments,
@@ -2190,7 +2274,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 
 exit:
 	if (context)
-		e_data_cal_respond_modify_object (cal, context, error, NULL, NULL);
+		e_data_cal_respond_modify_objects (cal, context, error, NULL, NULL);
 	else if (error) {
 		g_warning ("Modify object error :  %s\n", error->message);
 		g_clear_error (&error);
@@ -3877,10 +3961,9 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 
 	backend_class->discard_alarm = e_cal_backend_ews_discard_alarm;
 
-	backend_class->create_object = e_cal_backend_ews_create_object;
-	backend_class->modify_object = e_cal_backend_ews_modify_object;
-
-	backend_class->remove_object = e_cal_backend_ews_remove_object;
+	backend_class->create_objects = e_cal_backend_ews_create_objects;
+	backend_class->modify_objects = e_cal_backend_ews_modify_objects;
+	backend_class->remove_objects = e_cal_backend_ews_remove_objects;
 
 	backend_class->receive_objects = e_cal_backend_ews_receive_objects;
 	backend_class->send_objects = e_cal_backend_ews_send_objects;
