@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2012-02-28 20:25+0000\n"
-"PO-Revision-Date: 2012-02-29 14:36+0100\n"
+"POT-Creation-Date: 2012-03-28 16:28+0000\n"
+"PO-Revision-Date: 2012-03-29 20:11+0100\n"
 "Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: \n"
@@ -21,7 +21,7 @@ msgstr ""
 "X-Poedit-Country: SLOVENIA\n"
 "X-Poedit-SourceCharset: utf-8\n"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:241
+#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:242
 msgid "Global Address list"
 msgstr "Splošni seznam naslovov"
 
@@ -175,28 +175,28 @@ msgstr "Nastavitve GAL"
 msgid "Exchange Web Services Plugin"
 msgstr "Vstavek spletne storitve Exchange"
 
-#: ../src/addressbook/e-book-backend-ews.c:901
+#: ../src/addressbook/e-book-backend-ews.c:913
 msgid "The backend does not support bulk additions"
 msgstr "Ozadnji program ne podpira množičnega dodajanja"
 
-#: ../src/addressbook/e-book-backend-ews.c:1172
+#: ../src/addressbook/e-book-backend-ews.c:1184
 msgid "The backend does not support bulk modifications"
 msgstr "Ozadnji program ne podpira množičnega spreminjanja"
 
-#: ../src/addressbook/e-book-backend-ews.c:1346
+#: ../src/addressbook/e-book-backend-ews.c:1358
 msgid "Wait till syncing is done"
 msgstr "Počakaj na konec usklajevanja"
 
-#: ../src/addressbook/e-book-backend-ews.c:1665
+#: ../src/addressbook/e-book-backend-ews.c:1676
 #, c-format
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr "Prejemanje stikov v %s: %d%% končano ..."
 
-#: ../src/addressbook/e-book-backend-ews.c:2159
+#: ../src/addressbook/e-book-backend-ews.c:2165
 msgid "Syncing contacts..."
 msgstr "Usklajevanje stikov ..."
 
-#: ../src/addressbook/e-book-backend-ews.c:2358
+#: ../src/addressbook/e-book-backend-ews.c:2357
 msgid "Searching..."
 msgstr "Iskanje ..."
 
@@ -204,6 +204,18 @@ msgstr "Iskanje ..."
 #, c-format
 msgid "Insufficient memory"
 msgstr "Nezadostna količina pomnilnika"
+
+#: ../src/calendar/e-cal-backend-ews.c:1047
+msgid "EWS does not support bulk removals"
+msgstr "Sistem EWS ne podpira množičnega odstranjevanja"
+
+#: ../src/calendar/e-cal-backend-ews.c:1614
+msgid "EWS does not support bulk additions"
+msgstr "Sistem EWS ne podpira množičnega dodajanja"
+
+#: ../src/calendar/e-cal-backend-ews.c:2103
+msgid "EWS does not support bulk modifications"
+msgstr "Sistem EWS ne podpira množičnega spreminjanja"
 
 #: ../src/camel/camel-ews-folder.c:262
 #, c-format
@@ -236,12 +248,12 @@ msgstr "Ni mogoče ustvariti poti predpomnilnika"
 msgid "Failed to move message cache file"
 msgstr "Ni mogoče premakniti predpomnilniške datoteke sporočil"
 
-#: ../src/camel/camel-ews-folder.c:917
+#: ../src/camel/camel-ews-folder.c:920
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Ni mogoče naložiti povzetka za %s"
 
-#: ../src/camel/camel-ews-folder.c:1258
+#: ../src/camel/camel-ews-folder.c:1261
 #: ../src/camel/camel-ews-store.c:757
 #: ../src/camel/camel-ews-store.c:813
 #: ../src/camel/camel-ews-store.c:883
@@ -372,67 +384,67 @@ msgstr "Strežnik Exchange ne podpira pošiljanja sporočil kot '%s', če je ra�
 msgid "Service not connected"
 msgstr "Storitev ni povezana"
 
-#: ../src/server/e-ews-connection.c:360
+#: ../src/server/e-ews-connection.c:361
 msgid "Operation Cancelled"
 msgstr "Opravilo je preklicano"
 
-#: ../src/server/e-ews-connection.c:422
+#: ../src/server/e-ews-connection.c:423
 msgid "Authentication failed"
 msgstr "Overitev je spodletela"
 
-#: ../src/server/e-ews-connection.c:430
+#: ../src/server/e-ews-connection.c:431
 #, c-format
 msgid "No response: %s"
 msgstr "Brez odgovora: %s"
 
-#: ../src/server/e-ews-connection.c:1276
-#: ../src/server/e-ews-connection.c:1634
-#: ../src/server/e-ews-connection.c:1873
+#: ../src/server/e-ews-connection.c:1285
+#: ../src/server/e-ews-connection.c:1643
+#: ../src/server/e-ews-connection.c:1882
 #, c-format
 msgid "Code: %d - Unexpected response from server"
 msgstr "Koda: %d - Nepričakovan odziv strežnika"
 
-#: ../src/server/e-ews-connection.c:1288
+#: ../src/server/e-ews-connection.c:1297
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Razčlenjevanje samodejnega odgovora XML je spodletelo"
 
-#: ../src/server/e-ews-connection.c:1296
+#: ../src/server/e-ews-connection.c:1305
 #, c-format
 msgid "Failed to find <Autodiscover> element\n"
 msgstr "Iskanje predmeta <samodejnega zaznavanja> je spodletelo.\n"
 
-#: ../src/server/e-ews-connection.c:1308
+#: ../src/server/e-ews-connection.c:1317
 #, c-format
 msgid "Failed to find <Response> element\n"
 msgstr "Iskanje predmeta <odziva> je spodletelo.\n"
 
-#: ../src/server/e-ews-connection.c:1320
+#: ../src/server/e-ews-connection.c:1329
 #, c-format
 msgid "Failed to find <Account> element\n"
 msgstr "Iskanje predmeta <računa> je spodletelo.\n"
 
-#: ../src/server/e-ews-connection.c:1339
+#: ../src/server/e-ews-connection.c:1348
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr "Samodejno iskanje predmetov odgovora <ASUrl> in <OABUrl> je spodletelo"
 
-#: ../src/server/e-ews-connection.c:1441
+#: ../src/server/e-ews-connection.c:1450
 #, c-format
 msgid "Both email and password must be provided"
 msgstr "Vpisati je treba elektronski naslov in geslo"
 
-#: ../src/server/e-ews-connection.c:1448
+#: ../src/server/e-ews-connection.c:1457
 #, c-format
 msgid "Wrong email id"
 msgstr "Napačen ID elektronskega sporočila"
 
-#: ../src/server/e-ews-connection.c:1644
+#: ../src/server/e-ews-connection.c:1653
 #, c-format
 msgid "Failed to parse oab XML"
 msgstr "Razčlenjevanje datoteke OAB XML je spodletelo."
 
-#: ../src/server/e-ews-connection.c:1651
+#: ../src/server/e-ews-connection.c:1660
 #, c-format
 msgid "Failed to find <OAB> element\n"
 msgstr "Iskanje predmeta <OAB> je spodletelo.\n"
