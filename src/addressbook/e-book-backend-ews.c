@@ -2669,11 +2669,20 @@ e_book_backend_ews_get_backend_property (EBookBackend *backend,
 	g_return_if_fail (prop_name != NULL);
 
 	if (g_str_equal (prop_name, CLIENT_BACKEND_PROPERTY_CAPABILITIES)) {
-		/* do-initialy-query is enabled for system address book also, so that we get the
-		 * book_view, which is needed for displaying cache update progress.
-		 * and null query is handled for system address book.
-		 */
-		e_data_book_respond_get_backend_property (book, opid, NULL, "net,bulk-removes,do-initial-query,contact-lists");
+		EBookBackendEws *ebews;
+
+		ebews = E_BOOK_BACKEND_EWS (backend);
+		g_return_if_fail (ebews != NULL);
+
+		if (ebews->priv->is_gal) {
+			e_data_book_respond_get_backend_property (book, opid, NULL, "net,bulk-removes,contact-lists");
+		} else {
+			/* do-initialy-query is enabled for system address book also, so that we get the
+			 * book_view, which is needed for displaying cache update progress.
+			 * and null query is handled for system address book.
+			 */
+			e_data_book_respond_get_backend_property (book, opid, NULL, "net,bulk-removes,do-initial-query,contact-lists");
+		}
 	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_REQUIRED_FIELDS)) {
 		e_data_book_respond_get_backend_property (book, opid, NULL, e_contact_field_name (E_CONTACT_FILE_AS));
 	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_SUPPORTED_FIELDS)) {
