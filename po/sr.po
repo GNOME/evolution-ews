@@ -7,8 +7,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product"
 "=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2012-03-09 11:36+0000\n"
-"PO-Revision-Date: 2012-03-20 20:38+0200\n"
+"POT-Creation-Date: 2012-03-28 13:20+0000\n"
+"PO-Revision-Date: 2012-03-31 14:03+0200\n"
 "Last-Translator: Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: Serbian <gnom@prevod.org>\n"
 "Language: sr\n"
@@ -203,6 +203,21 @@ msgstr "Претражујем..."
 msgid "Insufficient memory"
 msgstr "Недовољно меморије"
 
+#: ../src/calendar/e-cal-backend-ews.c:1047
+#| msgid "The backend does not support bulk modifications"
+msgid "EWS does not support bulk removals"
+msgstr "ВУР не подржава групно уклањање"
+
+#: ../src/calendar/e-cal-backend-ews.c:1614
+#| msgid "The backend does not support bulk additions"
+msgid "EWS does not support bulk additions"
+msgstr "ВУР не подржава групно додавање"
+
+#: ../src/calendar/e-cal-backend-ews.c:2103
+#| msgid "The backend does not support bulk modifications"
+msgid "EWS does not support bulk modifications"
+msgstr "ВУР не подржава групно уређивање"
+
 #: ../src/camel/camel-ews-folder.c:262
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
@@ -233,12 +248,12 @@ msgstr "Не могу да направим путању привременог 
 msgid "Failed to move message cache file"
 msgstr "Нисам успео да преместим датотеку оставе поруке"
 
-#: ../src/camel/camel-ews-folder.c:917
+#: ../src/camel/camel-ews-folder.c:920
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Не могу да учитам преглед за „%s“"
 
-#: ../src/camel/camel-ews-folder.c:1258 ../src/camel/camel-ews-store.c:757
+#: ../src/camel/camel-ews-folder.c:1261 ../src/camel/camel-ews-store.c:757
 #: ../src/camel/camel-ews-store.c:813 ../src/camel/camel-ews-store.c:883
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
@@ -373,67 +388,67 @@ msgstr ""
 msgid "Service not connected"
 msgstr "Услуга није повезана"
 
-#: ../src/server/e-ews-connection.c:360
+#: ../src/server/e-ews-connection.c:361
 msgid "Operation Cancelled"
 msgstr "Радња је обустављена"
 
-#: ../src/server/e-ews-connection.c:422
+#: ../src/server/e-ews-connection.c:423
 msgid "Authentication failed"
 msgstr "Неуспешна пријава"
 
-#: ../src/server/e-ews-connection.c:430
+#: ../src/server/e-ews-connection.c:431
 #, c-format
 msgid "No response: %s"
 msgstr "Нема одговора: %s"
 
-#: ../src/server/e-ews-connection.c:1276 ../src/server/e-ews-connection.c:1634
-#: ../src/server/e-ews-connection.c:1873
+#: ../src/server/e-ews-connection.c:1285 ../src/server/e-ews-connection.c:1643
+#: ../src/server/e-ews-connection.c:1882
 #, c-format
 msgid "Code: %d - Unexpected response from server"
 msgstr "Код: %d — Неочекивани одговор са сервера"
 
-#: ../src/server/e-ews-connection.c:1288
+#: ../src/server/e-ews-connection.c:1297
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Нисам успео да обрадим самооткривајући одговор ИксМЛ"
 
-#: ../src/server/e-ews-connection.c:1296
+#: ../src/server/e-ews-connection.c:1305
 #, c-format
 msgid "Failed to find <Autodiscover> element\n"
 msgstr "Нисам успео да пронађем елемент <Самооткривање>\n"
 
-#: ../src/server/e-ews-connection.c:1308
+#: ../src/server/e-ews-connection.c:1317
 #, c-format
 msgid "Failed to find <Response> element\n"
 msgstr "Нисам успео да пронађем елемент <Одговор>\n"
 
-#: ../src/server/e-ews-connection.c:1320
+#: ../src/server/e-ews-connection.c:1329
 #, c-format
 msgid "Failed to find <Account> element\n"
 msgstr "Нисам успео да пронађем елемент <Налог>\n"
 
-#: ../src/server/e-ews-connection.c:1339
+#: ../src/server/e-ews-connection.c:1348
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
 "Нисам успео да пронађем <АСадресу> и <ОАБадресу> у одговору самооткривања"
 
-#: ../src/server/e-ews-connection.c:1441
+#: ../src/server/e-ews-connection.c:1450
 #, c-format
 msgid "Both email and password must be provided"
 msgstr "Мора бити достављена и ел. пошта и лозинка"
 
-#: ../src/server/e-ews-connection.c:1448
+#: ../src/server/e-ews-connection.c:1457
 #, c-format
 msgid "Wrong email id"
 msgstr "Погрешан иб ел. поште"
 
-#: ../src/server/e-ews-connection.c:1644
+#: ../src/server/e-ews-connection.c:1653
 #, c-format
 msgid "Failed to parse oab XML"
 msgstr "Нисам успео да обрадим оаб ИксМЛ"
 
-#: ../src/server/e-ews-connection.c:1651
+#: ../src/server/e-ews-connection.c:1660
 #, c-format
 msgid "Failed to find <OAB> element\n"
 msgstr "Нисам успео да пронађем елемент <ОАБ>\n"
