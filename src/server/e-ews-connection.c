@@ -1445,7 +1445,7 @@ static void post_restarted (SoupMessage *msg, gpointer data)
 	printf("Working around libsoup bug with redirect\n");
 	g_object_set (msg, SOUP_MESSAGE_METHOD, "POST", NULL);
 
-	soup_message_set_request(msg, "text/xml", SOUP_MEMORY_COPY,
+	soup_message_set_request(msg, "text/xml; charset=utf-8", SOUP_MEMORY_COPY,
 				 (gchar *) buf->buffer->content,
 				 buf->buffer->use);
 }

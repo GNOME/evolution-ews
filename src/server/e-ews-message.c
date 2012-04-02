@@ -42,7 +42,7 @@ e_ews_message_new_with_header (const gchar *uri,
 		return NULL;
 	}
 
-	soup_message_headers_append (SOUP_MESSAGE (msg)->request_headers, "Content-Type", "text/xml");
+	soup_message_headers_append (SOUP_MESSAGE (msg)->request_headers, "Content-Type", "text/xml; charset=utf-8");
 	soup_message_headers_append (SOUP_MESSAGE (msg)->request_headers, "User-Agent",
 				     "Evolution/" VERSION);
 	soup_message_headers_append (SOUP_MESSAGE (msg)->request_headers,"Connection",  "Keep-Alive");

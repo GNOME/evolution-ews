@@ -1078,7 +1078,7 @@ e_soap_message_persist (ESoapMessage *msg)
 	xmlDocDumpMemory (priv->doc, &body, &len);
 
 	/* serialize to SoupMessage class */
-	soup_message_set_request (SOUP_MESSAGE (msg), "text/xml",
+	soup_message_set_request (SOUP_MESSAGE (msg), "text/xml; charset=utf-8",
 				  SOUP_MEMORY_TAKE, (gchar *) body, len);
 }
 
