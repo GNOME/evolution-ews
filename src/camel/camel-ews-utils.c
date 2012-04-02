@@ -504,8 +504,7 @@ add_folder_to_summary (CamelEwsStore *store, EEwsFolder *folder)
 	CamelEwsStoreSummary *ews_summary = store->summary;
 	const EwsFolderId *pfid, *fid;
 	const gchar *dname;
-	gchar *fname;
-	gint64 flags = 0, unread, total, ftype;
+	gint64 unread, total, ftype;
 
 	fid = e_ews_folder_get_id (folder);
 	pfid = e_ews_folder_get_parent_id (folder);
@@ -518,20 +517,6 @@ add_folder_to_summary (CamelEwsStore *store, EEwsFolder *folder)
 					    pfid->id, fid->change_key,
 					    dname, ftype, 0, total);
 	camel_ews_store_summary_set_folder_unread (ews_summary, fid->id, unread);
-
-	fname = camel_ews_store_summary_get_folder_full_name (ews_summary, fid->id, NULL);
-	if (!g_ascii_strcasecmp (fname, "Inbox")) {
-		flags |= CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_INBOX;
-	} else if (!g_ascii_strcasecmp (fname, "Drafts")) {
-		flags |= CAMEL_FOLDER_SYSTEM;
-	} else if (!g_ascii_strcasecmp (fname, "Deleted items")) {
-		flags |= CAMEL_FOLDER_SYSTEM |CAMEL_FOLDER_TYPE_TRASH;
-	} else if (!g_ascii_strcasecmp (fname, "Outbox")) {
-		flags |= CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_OUTBOX;
-	}
-	g_free (fname);
-
-	camel_ews_store_summary_set_folder_flags (ews_summary, fid->id, flags);
 }
 
 struct add_esrc_data {
