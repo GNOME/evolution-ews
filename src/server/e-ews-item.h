@@ -49,7 +49,8 @@ typedef enum {
 	E_EWS_ITEM_TYPE_MEETING_RESPONSE,
 	E_EWS_ITEM_TYPE_MEETING_CANCELLATION,
 	E_EWS_ITEM_TYPE_TASK,
-	E_EWS_ITEM_TYPE_GENERIC_ITEM
+	E_EWS_ITEM_TYPE_GENERIC_ITEM,
+	E_EWS_ITEM_TYPE_ERROR
 } EEwsItemType;
 
 typedef enum {
@@ -114,10 +115,14 @@ typedef struct {
 GType		e_ews_item_get_type (void);
 EEwsItem *	e_ews_item_new_from_soap_parameter
 						(ESoapParameter *param);
+EEwsItem *	e_ews_item_new_from_error	(const GError *error);
 
 EEwsItemType	e_ews_item_get_item_type	(EEwsItem *item);
 void		e_ews_item_set_item_type	(EEwsItem *item,
 						 EEwsItemType new_type);
+const GError *	e_ews_item_get_error		(EEwsItem *item);
+void		e_ews_item_set_error		(EEwsItem *item,
+						 const GError *error);
 const gchar *	e_ews_item_get_subject		(EEwsItem *item);
 void		e_ews_item_set_subject		(EEwsItem *item,
 						 const gchar *new_subject);
