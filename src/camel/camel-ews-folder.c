@@ -472,7 +472,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 						  (ESoapProgressFn) camel_operation_progress,
 						  (gpointer) cancellable,
 						  cancellable, error);
-		if (!res) {
+		if (!res || (items_req && e_ews_item_get_item_type (items_req->data) == E_EWS_ITEM_TYPE_ERROR)) {
 			if (items_req) {
 				g_object_unref (items_req->data);
 				g_slist_free (items_req);

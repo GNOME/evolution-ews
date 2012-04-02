@@ -934,6 +934,11 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
 		const EwsId *id;
 		CamelEwsMessageInfo *mi;
 
+		if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR) {
+			g_object_unref (item);
+			continue;
+		}
+
 		id = e_ews_item_get_id (item);
 		mi = (CamelEwsMessageInfo *) camel_folder_summary_get (folder->summary, id->id);
 		if (mi) {
@@ -989,6 +994,11 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 
 		if (!item)
 			continue;
+
+		if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR) {
+			g_object_unref (item);
+			continue;
+		}
 
 		id = e_ews_item_get_id (item);
 		mi = (CamelEwsMessageInfo *) camel_folder_summary_get (folder->summary, id->id);

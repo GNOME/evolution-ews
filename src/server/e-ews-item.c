@@ -143,6 +143,7 @@ struct _EEwsTaskFields {
 struct _EEwsItemPrivate {
 	EwsId *attachment_id;
 	EEwsItemType item_type;
+	GError *error;
 
 	/* MAPI properties */
 	/* The Exchange server is so fundamentally misdesigned that it doesn't expose
@@ -216,6 +217,8 @@ e_ews_item_dispose (GObject *object)
 	g_return_if_fail (E_IS_EWS_ITEM (item));
 
 	priv = item->priv;
+
+	g_clear_error (&priv->error);
 
 	if (priv->item_id) {
 		g_free (priv->item_id->id);
@@ -1098,6 +1101,19 @@ e_ews_item_new_from_soap_parameter (ESoapParameter *param)
 	return item;
 }
 
+EEwsItem *
+e_ews_item_new_from_error (const GError *error)
+{
+	EEwsItem *item;
+
+	g_return_val_if_fail (error != NULL, NULL);
+
+	item = g_object_new (E_TYPE_EWS_ITEM, NULL);
+	e_ews_item_set_error (item, error);
+
+	return item;
+}
+
 EEwsItemType
 e_ews_item_get_item_type (EEwsItem *item)
 {
@@ -1112,7 +1128,37 @@ e_ews_item_set_item_type (EEwsItem *item,
 {
 	g_return_if_fail (E_IS_EWS_ITEM (item));
 
-	item->priv->item_type = new_type;
+	/* once the type is set to error type it stays as error type */
+	if (item->priv->item_type != E_EWS_ITEM_TYPE_ERROR)
+		item->priv->item_type = new_type;
+}
+
+const GError *
+e_ews_item_get_error (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	return item->priv->error;
+}
+
+void
+e_ews_item_set_error (EEwsItem *item,
+		      const GError *error)
+{
+	GError *new_error;
+
+	g_return_if_fail (E_IS_EWS_ITEM (item));
+
+	if (error)
+		new_error = g_error_copy (error);
+	else
+		new_error = NULL;
+
+	g_clear_error (&item->priv->error);
+	item->priv->error = new_error;
+
+	if (item->priv->error)
+		e_ews_item_set_item_type (item, E_EWS_ITEM_TYPE_ERROR);
 }
 
 const gchar *

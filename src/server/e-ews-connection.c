@@ -56,7 +56,7 @@ static GHashTable *loaded_connections_permissions = NULL;
 static gboolean ews_next_request (gpointer _cnc);
 static gint comp_func (gconstpointer a, gconstpointer b);
 
-typedef void (*response_cb) (ESoapParameter *param, struct _EwsNode *enode);
+typedef void (*response_cb) (ESoapParameter *param, struct _EwsNode *enode, GError **in_error);
 static void ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data);
 
 static void	ews_connection_authenticate	(SoupSession *sess,
@@ -458,20 +458,24 @@ ews_response_cb (SoupSession *session,
 
 				if ((strcmp((char *)subparam->name, "FreeBusyResponse") == 0 && !ews_get_response_status (e_soap_parameter_get_first_child (subparam), &error)) ||
 				 (strcmp((char *)subparam->name, "FreeBusyResponse") && !ews_get_response_status (subparam, &error))) {
-					g_simple_async_result_set_from_error (enode->simple, error);
-					break;
-				}
-				if (enode->cb)
-					enode->cb (subparam, enode);
+					if (enode->cb) {
+						enode->cb (subparam, enode, &error);
+					} else {
+						g_simple_async_result_set_from_error (enode->simple, error);
+						break;
+					}
+				} else if (enode->cb)
+					enode->cb (subparam, enode, &error);
 			}
 		} else if ((param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessage"))) {
 			/*Parse GetUserOofSettingsResponse and SetUserOofSettingsResponse*/
 			if (!ews_get_response_status (param, &error)) {
-					g_simple_async_result_set_from_error (enode->simple, error);
+				if (enode->cb)
+					enode->cb (NULL, enode, &error);
 			} else {
 				subparam = e_soap_parameter_get_next_child (param);
 				if (enode->cb)
-					enode->cb (subparam, enode);
+					enode->cb (subparam, enode, &error);
 			}
 		} else
 			ews_parse_soap_fault (response, &error);
@@ -578,27 +582,42 @@ sync_xxx_response_cb (ESoapParameter *subparam,
 
 static void
 sync_hierarchy_response_cb (ESoapParameter *subparam,
-                            EwsNode *enode)
+                            EwsNode *enode,
+			    GError **error)
 {
+	/* stop on errors */
+	if (error && *error)
+		return;
+
 	sync_xxx_response_cb (subparam, enode, (ItemParser) e_ews_folder_new_from_soap_parameter,
 			      "IncludesLastFolderInRange", "FolderId");
 }
 
 static void
 sync_folder_items_response_cb (ESoapParameter *subparam,
-                               EwsNode *enode)
+                               EwsNode *enode,
+			       GError **error)
 {
+	/* stop on errors */
+	if (error && *error)
+		return;
+
 	sync_xxx_response_cb (subparam, enode, (ItemParser) e_ews_item_new_from_soap_parameter,
 			      "IncludesLastItemInRange", "ItemId");
 }
 
 static void
 get_folder_response_cb (ESoapParameter *subparam,
-                        EwsNode *enode)
+                        EwsNode *enode,
+			GError **error)
 {
 	ESoapParameter *node;
 	EwsAsyncData *async_data;
 	EEwsFolder *folder;
+
+	/* stop on errors */
+	if (error && *error)
+		return;
 
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
 
@@ -612,7 +631,8 @@ get_folder_response_cb (ESoapParameter *subparam,
 
 static void
 find_folder_items_response_cb (ESoapParameter *subparam,
-                               EwsNode *enode)
+                               EwsNode *enode,
+			       GError **error)
 {
 	ESoapParameter *node, *subparam1;
 	EwsAsyncData *async_data;
@@ -620,6 +640,10 @@ find_folder_items_response_cb (ESoapParameter *subparam,
 	gint total_items;
 	EEwsItem *item;
 	gboolean includes_last_item = FALSE;
+
+	/* stop on errors */
+	if (error && *error)
+		return;
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "RootFolder");
 	total = e_soap_parameter_get_property (node, "TotalItemsInView");
@@ -646,7 +670,8 @@ find_folder_items_response_cb (ESoapParameter *subparam,
 /* Used for CreateItems and GetItems */
 static void
 get_items_response_cb (ESoapParameter *subparam,
-                       EwsNode *enode)
+                       EwsNode *enode,
+		       GError **error)
 {
 	ESoapParameter *node;
 	EwsAsyncData *async_data;
@@ -656,10 +681,18 @@ get_items_response_cb (ESoapParameter *subparam,
 
 	for (node = e_soap_parameter_get_first_child_by_name (subparam, "Items");
 	     node; node = e_soap_parameter_get_next_child_by_name (subparam, "Items")) {
-		item = e_ews_item_new_from_soap_parameter (node);
+		if (node->children)
+			item = e_ews_item_new_from_soap_parameter (node);
+		else
+			item = NULL;
+		if (!item && error && *error)
+			item = e_ews_item_new_from_error (*error);
 		if (!item) continue;
 		async_data->items = g_slist_append (async_data->items, item);
 	}
+
+	/* do not stop on errors here, just use it above */
+	g_clear_error (error);
 }
 
 static gchar *
@@ -694,7 +727,8 @@ get_text_from_html (gchar *html_text)
 
 static void
 get_oof_settings_response_cb (ESoapParameter *subparam,
-                              EwsNode *enode)
+                              EwsNode *enode,
+			      GError **error)
 {
 	ESoapParameter *node, *node_1;
 	EwsAsyncData *async_data;
@@ -703,6 +737,10 @@ get_oof_settings_response_cb (ESoapParameter *subparam,
 	gchar *start_tm = NULL, *end_tm = NULL;
 	gchar *ext_msg = NULL, *int_msg = NULL;
 	GTimeVal time_val;
+
+	/* stop on errors */
+	if (error && *error)
+		return;
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "OofState");
 	state = e_soap_parameter_get_string_value (node);
@@ -753,13 +791,18 @@ get_oof_settings_response_cb (ESoapParameter *subparam,
 
 static void
 resolve_names_response_cb (ESoapParameter *subparam,
-                           EwsNode *enode)
+                           EwsNode *enode,
+			   GError **error)
 {
 	ESoapParameter *node;
 	gboolean includes_last_item;
 	GSList *mailboxes = NULL, *contact_items = NULL;
 	EwsAsyncData *async_data;
 	gchar *prop;
+
+	/* stop on errors */
+	if (error && *error)
+		return;
 
 	subparam = e_soap_parameter_get_first_child_by_name (subparam, "ResolutionSet");
 	prop = e_soap_parameter_get_property (subparam, "IncludesLastItemInRange");
@@ -798,12 +841,17 @@ resolve_names_response_cb (ESoapParameter *subparam,
 
 static void
 expand_dl_response_cb (ESoapParameter *subparam,
-                       EwsNode *enode)
+                       EwsNode *enode,
+		       GError **error)
 {
 	gboolean includes_last_item;
 	GSList *mailboxes = NULL;
 	EwsAsyncData *async_data;
 	gchar *prop;
+
+	/* stop on errors */
+	if (error && *error)
+		return;
 
 	subparam = e_soap_parameter_get_first_child_by_name (subparam, "DLExpansion");
 	prop = e_soap_parameter_get_property (subparam, "IncludesLastItemInRange");
@@ -831,13 +879,18 @@ expand_dl_response_cb (ESoapParameter *subparam,
 
 /* TODO scan all folders if we support creating multiple folders in the request */
 static void
-ews_create_folder_cb (ESoapParameter *soapparam,
-                      EwsNode *enode)
+ews_create_folder_response_cb (ESoapParameter *soapparam,
+			       EwsNode *enode,
+			       GError **error)
 {
 	ESoapParameter *param, *node;
 	EwsAsyncData *async_data;
 	EwsFolderId *fid = NULL;
 	GSList *fids = NULL;
+
+	/* stop on errors */
+	if (error && *error)
+		return;
 
 	node = e_soap_parameter_get_first_child_by_name (soapparam, "Folders");
 	node = e_soap_parameter_get_first_child_by_name (node, "Folder");
@@ -3799,7 +3852,7 @@ e_ews_connection_create_folder_start (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (cnc, msg, ews_create_folder_cb, pri, cancellable, simple, cb == ews_sync_reply_cb);
+	ews_connection_queue_request (cnc, msg, ews_create_folder_response_cb, pri, cancellable, simple, cb == ews_sync_reply_cb);
 }
 
 gboolean
@@ -4091,11 +4144,16 @@ e_ews_connection_delete_folder (EEwsConnection *cnc,
 
 static void
 create_attachments_response_cb (ESoapParameter *param,
-                                EwsNode *enode)
+                                EwsNode *enode,
+				GError **error)
 {
 	/* http://msdn.microsoft.com/en-us/library/aa565877%28v=EXCHG.80%29.aspx */
 	ESoapParameter *subparam, *attspara, *last_relevant = NULL, *attparam;
 	EwsAsyncData *async_data;
+
+	/* stop on errors */
+	if (error && *error)
+		return;
 
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
 
@@ -4275,11 +4333,16 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
 /* Delete attachemnts */
 static void
 delete_attachments_response_cb (ESoapParameter *subparam,
-                                EwsNode *enode)
+                                EwsNode *enode,
+				GError **error)
 {
 	/* http://msdn.microsoft.com/en-us/library/aa580782%28v=EXCHG.80%29.aspx */
 	ESoapParameter *attspara;
 	EwsAsyncData *async_data;
+
+	/* stop on errors */
+	if (error && *error)
+		return;
 
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
 
@@ -4385,7 +4448,7 @@ e_ews_connection_delete_attachments (EEwsConnection *cnc,
 	return parents;
 }
 
-static void get_attachments_response_cb (ESoapParameter *subparam, EwsNode *enode);
+static void get_attachments_response_cb (ESoapParameter *subparam, EwsNode *enode, GError **error);
 
 void
 e_ews_connection_get_attachments_start (EEwsConnection *cnc,
@@ -4510,13 +4573,18 @@ e_ews_connection_get_attachments (EEwsConnection *cnc,
 
 static void
 get_attachments_response_cb (ESoapParameter *param,
-                             EwsNode *enode)
+                             EwsNode *enode,
+			     GError **error)
 {
 	ESoapParameter *subparam, *attspara;
 	EwsAsyncData *async_data;
 	gchar *uri = NULL, *attach_id = NULL;
 	EEwsItem *item;
 	const gchar *name;
+
+	/* stop on errors */
+	if (error && *error)
+		return;
 
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
 
@@ -4545,7 +4613,8 @@ get_attachments_response_cb (ESoapParameter *param,
 
 static void
 get_free_busy_response_cb (ESoapParameter *param,
-                           EwsNode *enode)
+                           EwsNode *enode,
+			   GError **error)
 {
        /*parse the response to create a free_busy data
 	http://msdn.microsoft.com / en - us / library / aa564001 % 28v = EXCHG.140 % 29.aspx */
@@ -4557,6 +4626,10 @@ get_free_busy_response_cb (ESoapParameter *param,
 	const gchar *name;
 	gchar *value, *new_val = NULL;
 	EwsAsyncData *async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
+
+	/* stop on errors */
+	if (error && *error)
+		return;
 
 	viewparam = e_soap_parameter_get_first_child_by_name (param, "FreeBusyView");
 	if (!viewparam) return;
@@ -4733,12 +4806,17 @@ get_permission_from_string (gchar *permission)
 
 static void
 get_delegate_response_cb (ESoapParameter *param,
-                          EwsNode *enode)
+                          EwsNode *enode,
+			  GError **error)
 {
 	ESoapParameter *subparam, *node, *child;
 	EwsAsyncData *async_data;
 	EwsDelegateInfo *data;
 	gchar *value;
+
+	/* stop on errors */
+	if (error && *error)
+		return;
 
 	async_data = g_simple_async_result_get_op_res_gpointer (enode->simple);
 

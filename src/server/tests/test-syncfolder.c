@@ -197,9 +197,16 @@ get_item_ready_callback (GObject *object,
 
 	for (l = items; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = l->data;
-		const EwsId *id = e_ews_item_get_id (item);
 
-		g_print ("GetItem: Id is %s \n", id->id);
+		if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR) {
+			const GError *error = e_ews_item_get_error (item);
+
+			g_print ("GetItem: Error '%s'\n", error ? error->message : "Unknown error");
+		} else {
+			const EwsId *id = e_ews_item_get_id (item);
+
+			g_print ("GetItem: Id is %s\n", id->id);
+		}
 	}
 
 	g_slist_foreach (items, (GFunc) g_object_unref, NULL);

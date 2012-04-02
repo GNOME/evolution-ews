@@ -1457,12 +1457,20 @@ ews_create_object_cb (GObject *object,
 			NULL, NULL, NULL, &error);
 		if (!res && error != NULL) {
 			if (items_req)
-				g_slist_free (items_req);
+				g_slist_free_full (items_req, g_object_unref);
 			e_data_cal_respond_create_objects (create_data->cal, create_data->context, error, NULL, NULL);
 			return;
 		}
 
 		item = (EEwsItem *) items_req->data;
+		if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR) {
+			error = g_error_copy (e_ews_item_get_error (item));
+			g_slist_free_full (items_req, g_object_unref);
+
+			e_data_cal_respond_create_objects (create_data->cal, create_data->context, error, NULL, NULL);
+			return;
+		}
+
 		item_id = e_ews_item_get_id (item);
 
 		g_slist_free (items);
@@ -3260,7 +3268,7 @@ ews_cal_get_items_ready_cb (GObject *obj,
 	priv = cbews->priv;
 	cnc = (EEwsConnection *) obj;
 
-	e_ews_connection_get_items_finish	(cnc, res, &items, &error);
+	e_ews_connection_get_items_finish (cnc, res, &items, &error);
 	if (error != NULL) {
 		g_warning ("Unable to get items %s \n", error->message);
 
@@ -3274,8 +3282,13 @@ ews_cal_get_items_ready_cb (GObject *obj,
 
 	/* fetch modified occurrences */
 	for (l = items; l != NULL; l = g_slist_next (l)) {
-		const GSList *modified_occurrences = e_ews_item_get_modified_occurrences (l->data);
+		EEwsItem *item = l->data;
+		const GSList *modified_occurrences;
 
+		if (!item || e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR)
+			continue;
+
+		modified_occurrences = e_ews_item_get_modified_occurrences (item);
 		if (modified_occurrences) {
 			const EwsId *item_id = e_ews_item_get_id (l->data);
 
@@ -3297,7 +3310,7 @@ ews_cal_get_items_ready_cb (GObject *obj,
 	for (l = items; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;
 
-		if (item) {
+		if (item && e_ews_item_get_item_type (item) != E_EWS_ITEM_TYPE_ERROR) {
 			add_item_to_cache (cbews, item);
 			ews_get_attachments (cbews, item);
 			g_object_unref (item);

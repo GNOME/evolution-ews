@@ -1866,6 +1866,11 @@ ebews_store_contact_items (EBookBackendEws *ebews,
 		EEwsItem *item;
 
 		item = (EEwsItem *) l->data;
+		if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR) {
+			g_object_unref (item);
+			continue;
+		}
+
 		contact = e_contact_new ();
 
 		if (!distribution_list) {
@@ -1907,6 +1912,11 @@ ebews_get_vcards_list (GSList *new_items,
 		gchar *vcard_string = NULL;
 
 		item = (EEwsItem *) l->data;
+		if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR) {
+			g_object_unref (item);
+			continue;
+		}
+
 		contact = e_contact_new ();
 
 		for (i = 0; i < G_N_ELEMENTS (mappings); i++) {
@@ -2103,9 +2113,12 @@ ebews_fetch_items (EBookBackendEws *ebews,
 		EEwsItem *item = (EEwsItem *) l->data;
 		const gchar *d_name;
 		const EwsId *id;
-		EwsMailbox *mb = g_new0 (EwsMailbox, 1);
+		EwsMailbox *mb;
 		GSList *members = NULL;
 		gboolean includes_last;
+
+		if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR)
+			continue;
 
 		id = e_ews_item_get_id (item);
 		mb = g_new0 (EwsMailbox, 1);
