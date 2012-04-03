@@ -316,6 +316,25 @@ static void ews_trigger_next_request (EEwsConnection *cnc)
 	g_source_attach (source, cnc->priv->soup_context);
 }
 
+static gpointer
+ews_unref_in_thread_func (gpointer data)
+{
+	g_return_val_if_fail (data != NULL, NULL);
+
+	g_object_unref (data);
+
+	return NULL;
+}
+
+static void
+ews_unref_in_thread (GObject *object)
+{
+	g_return_if_fail (object != NULL);
+	g_return_if_fail (G_IS_OBJECT (object));
+
+	g_thread_create (ews_unref_in_thread_func, object, FALSE, NULL);
+}
+
 /**
  * ews_active_job_done
  * @cnc:
@@ -337,7 +356,10 @@ ews_active_job_done (EEwsConnection *cnc,
 	QUEUE_UNLOCK (cnc);
 
 	ews_trigger_next_request (cnc);
-	g_object_unref (ews_node->simple);
+	/* the 'simple' holds reference on 'cnc' and this function
+	   is called in a dedicated thread, which 'cnc' joins on dispose,
+	   thus to avoid race condition, unref the object in its own thread */
+	ews_unref_in_thread (G_OBJECT (ews_node->simple));
 	g_free (ews_node);
 }
 
