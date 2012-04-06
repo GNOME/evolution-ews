@@ -725,6 +725,12 @@ get_text_from_html (gchar *html_text)
 	gchar *start = g_strstr_len (html_text, haystack_len, "<body"),
 		*end = g_strstr_len (html_text, haystack_len, "</body>"),
 		*i, *j;
+	
+	/*parse the status set by owa*/
+	if  (g_strrstr (html_text, "BodyFragment") && !start) {
+		start = html_text;
+		end = html_text + haystack_len;
+	}
 
 	plain_text = g_malloc (end - start);
 	i = start;
@@ -781,13 +787,13 @@ get_oof_settings_response_cb (ESoapParameter *subparam,
 	node = e_soap_parameter_get_first_child_by_name (subparam, "InternalReply");
 	node_1 = e_soap_parameter_get_first_child_by_name (node, "Message");
 	int_msg = e_soap_parameter_get_string_value (node_1);
-	if (g_strrstr (int_msg, "</body>"))
+	if (g_strrstr (int_msg, "</body>") || g_strrstr (int_msg, "BodyFragment"))
 		int_msg = get_text_from_html (int_msg);
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "ExternalReply");
 	node_1 = e_soap_parameter_get_first_child_by_name (node, "Message");
 	ext_msg = e_soap_parameter_get_string_value (node_1);
-	if (g_strrstr (ext_msg, "</body>"))
+	if (g_strrstr (ext_msg, "</body>") || g_strrstr (ext_msg, "BodyFragment"))
 		ext_msg = get_text_from_html (ext_msg);
 
 	oof_settings = g_new0 (OOFSettings, 1);

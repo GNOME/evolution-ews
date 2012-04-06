@@ -46,6 +46,10 @@ typedef enum {
 typedef struct {
 	gboolean state;
 
+	/*to set duration or not*/
+	gboolean set_range;
+	GtkWidget *range_wt;
+
 	/*duration for out of office*/
 	time_t from_time;
 	time_t to_time;
@@ -149,19 +153,38 @@ toggled_state_cb (GtkToggleButton *button,
 	if (current_oof_state == oof_data->state)
 		return;
 	oof_data->state = current_oof_state;
+	gtk_widget_set_sensitive (oof_data->range_wt, current_oof_state);
 	gtk_widget_set_sensitive (oof_data->internal_view, current_oof_state);
 	gtk_widget_set_sensitive (oof_data->external_view, current_oof_state);
-	gtk_widget_set_sensitive ((GtkWidget *) oof_data->from_date, current_oof_state);
-	gtk_widget_set_sensitive ((GtkWidget *) oof_data->to_date, current_oof_state);
+	gtk_widget_set_sensitive ((GtkWidget *) oof_data->from_date, current_oof_state && oof_data->set_range);
+	gtk_widget_set_sensitive ((GtkWidget *) oof_data->to_date, current_oof_state && oof_data->set_range);
 	gtk_widget_set_sensitive (oof_data->aud_box, current_oof_state);
 
+}
+
+static void
+toggled_set_date_cb (GtkToggleButton *button,
+		     gpointer data)
+{
+	gboolean current_state;
+
+	current_state = gtk_toggle_button_get_active (button);
+	if (current_state == oof_data->set_range)
+		return;
+
+	oof_data->set_range = current_state;
+	gtk_widget_set_sensitive ((GtkWidget *) oof_data->from_date, current_state);
+	gtk_widget_set_sensitive ((GtkWidget *) oof_data->to_date, current_state);
 }
 
 static void
 from_time_changed_cb (EDateEdit *date_tm,
                       gpointer data)
 {
-	if (e_date_edit_date_is_valid (date_tm) && e_date_edit_time_is_valid (date_tm)) {
+	if (e_date_edit_get_time (date_tm) < time (NULL)) {
+		e_notice (NULL, GTK_MESSAGE_WARNING, _("Cannot set Date-Time in Past"));
+		e_date_edit_set_time (date_tm, time (NULL) + 60);
+	} else if (e_date_edit_date_is_valid (date_tm) && e_date_edit_time_is_valid (date_tm)) {
 		oof_data->from_time = e_date_edit_get_time (date_tm);
 	}
 }
@@ -170,10 +193,14 @@ static void
 to_time_changed_cb (EDateEdit *date_tm,
                     gpointer data)
 {
-	if (e_date_edit_date_is_valid (date_tm) && e_date_edit_time_is_valid (date_tm)) {
+	if (e_date_edit_get_time (date_tm) < time (NULL)) {
+		e_notice (NULL, GTK_MESSAGE_WARNING, _("Cannot set Date-Time in Past"));
+		e_date_edit_set_time (date_tm, time (NULL) + 60);
+		return;
+	} else if (e_date_edit_date_is_valid (date_tm) && e_date_edit_time_is_valid (date_tm)) {
 		oof_data->to_time = e_date_edit_get_time (date_tm);
 	}
-	if (oof_data->from_time >= oof_data->to_time)
+	if (oof_data->from_time > oof_data->to_time)
 		e_notice (NULL, GTK_MESSAGE_WARNING, _("Select a valid time range"));
 }
 
@@ -182,6 +209,8 @@ oof_data_new (void)
 {
 	oof_data = g_new0 (OOFData, 1);
 	oof_data->state = FALSE;
+	oof_data->set_range = FALSE;
+	oof_data->range_wt = NULL;
 	oof_data->audience_type = EXTERNAL_AUDIENCE_ALL;
 	oof_data->audience = NULL;
 	oof_data->external_message = NULL;
@@ -307,7 +336,7 @@ set_oof_settings_to_frame (GtkWidget *oof_frame)
 	GtkScrolledWindow *scrwnd_oof_int, *scrwnd_oof_ext;
 	GtkTextView *txtview_oof_int, *txtview_oof_ext;
 	GtkTextBuffer *buffer_int, *buffer_ext;
-	GtkWidget *from_date, *to_date, *aud_box;
+	GtkWidget *from_date, *to_date, *aud_box, *set_range;
 
 	gtk_widget_destroy (oof_data->stat_box);
 
@@ -335,8 +364,15 @@ set_oof_settings_to_frame (GtkWidget *oof_frame)
 	g_signal_connect (radio_oof, "toggled", G_CALLBACK (toggled_state_cb), NULL);
 
 	hbox_state = g_object_new (GTK_TYPE_HBOX, NULL, "homogeneous", FALSE, "spacing", 6, NULL);
-	gtk_box_pack_start (GTK_BOX (hbox_state), GTK_WIDGET (radio_iof), FALSE, FALSE, 12);
-	gtk_box_pack_start (GTK_BOX (hbox_state), GTK_WIDGET (radio_oof), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox_state), GTK_WIDGET (radio_iof), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox_state), GTK_WIDGET (radio_oof), FALSE, FALSE, 12);
+
+	/*Check box for setting date*/
+	set_range = gtk_check_button_new_with_mnemonic (_("_Send only during this time period"));
+	oof_data->range_wt = set_range;
+	gtk_toggle_button_set_active ((GtkToggleButton*) set_range, oof_data->set_range);
+	g_signal_connect ((GtkToggleButton*) set_range, "toggled", G_CALLBACK (toggled_set_date_cb), NULL);
+
 
 	/*Selectable Dates*/
 	from_date = e_date_edit_new ();
@@ -417,23 +453,29 @@ set_oof_settings_to_frame (GtkWidget *oof_frame)
 
 	gtk_table_attach (tbl_oof_status, GTK_WIDGET (lbl_status), 0, 1, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
 	gtk_table_attach (tbl_oof_status, GTK_WIDGET (hbox_state), 1, 2, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
-	gtk_table_attach (tbl_oof_status, GTK_WIDGET (from_label), 0, 1, 1, 2, GTK_FILL, GTK_FILL, 0, 0);
-	gtk_table_attach (tbl_oof_status, GTK_WIDGET (from_date), 1, 2, 1, 2, GTK_FILL, GTK_FILL, 0, 0);
-	gtk_table_attach (tbl_oof_status, GTK_WIDGET (to_label), 0, 1, 2, 3, GTK_FILL, GTK_FILL, 0, 0);
-	gtk_table_attach (tbl_oof_status, GTK_WIDGET (to_date), 1, 2, 2, 3, GTK_FILL, GTK_FILL, 0, 0);
-	gtk_table_attach (tbl_oof_status, GTK_WIDGET (lbl_internal), 0, 1, 3, 4, GTK_FILL, GTK_FILL, 0, 0);
-	gtk_table_attach (tbl_oof_status, GTK_WIDGET (scrwnd_oof_int), 1, 2, 3, 4, GTK_FILL, GTK_FILL, 0, 0);
-	gtk_table_attach (tbl_oof_status, GTK_WIDGET (lbl_external), 0, 1, 4, 5, GTK_FILL, GTK_FILL, 0, 0);
-	gtk_table_attach (tbl_oof_status, GTK_WIDGET (hbox_ext), 1, 2, 4, 5, GTK_FILL, GTK_FILL, 0, 0);
+	gtk_table_attach (tbl_oof_status, GTK_WIDGET (set_range), 1, 2, 1, 2, GTK_FILL, GTK_FILL, 0, 0);
+	gtk_table_attach (tbl_oof_status, GTK_WIDGET (from_label), 0, 1, 2, 3, GTK_FILL, GTK_FILL, 0, 0);
+	gtk_table_attach (tbl_oof_status, GTK_WIDGET (from_date), 1, 2, 2, 3, GTK_FILL, GTK_FILL, 0, 0);
+	gtk_table_attach (tbl_oof_status, GTK_WIDGET (to_label), 0, 1, 3, 4, GTK_FILL, GTK_FILL, 0, 0);
+	gtk_table_attach (tbl_oof_status, GTK_WIDGET (to_date), 1, 2, 3, 4, GTK_FILL, GTK_FILL, 0, 0);
+	gtk_table_attach (tbl_oof_status, GTK_WIDGET (lbl_internal), 0, 1, 4, 5, GTK_FILL, GTK_FILL, 0, 0);
+	gtk_table_attach (tbl_oof_status, GTK_WIDGET (scrwnd_oof_int), 1, 2, 4, 5, GTK_FILL, GTK_FILL, 0, 0);
+	gtk_table_attach (tbl_oof_status, GTK_WIDGET (lbl_external), 0, 1, 5, 6, GTK_FILL, GTK_FILL, 0, 0);
+	gtk_table_attach (tbl_oof_status, GTK_WIDGET (hbox_ext), 1, 2, 5, 6, GTK_FILL, GTK_FILL, 0, 0);
 
 	gtk_box_pack_start (GTK_BOX (vbox_oof), GTK_WIDGET (tbl_oof_status), FALSE, FALSE, 0);
 
 	if (!oof_data->state) {
+		gtk_widget_set_sensitive ((GtkWidget *) set_range, FALSE);
 		gtk_widget_set_sensitive (GTK_WIDGET (txtview_oof_int), FALSE);
 		gtk_widget_set_sensitive (GTK_WIDGET (txtview_oof_ext), FALSE);
 		gtk_widget_set_sensitive ((GtkWidget *) from_date, FALSE);
 		gtk_widget_set_sensitive ((GtkWidget *) to_date, FALSE);
 		gtk_widget_set_sensitive (aud_box, FALSE);
+	}
+	if (!oof_data->set_range) {
+		gtk_widget_set_sensitive ((GtkWidget *) from_date, FALSE);
+		gtk_widget_set_sensitive ((GtkWidget *) to_date, FALSE);
 	}
 
 	oof_data->internal_view = GTK_WIDGET (txtview_oof_int);
@@ -469,8 +511,11 @@ get_oof_settings_cb (GObject *object,
 
 	oof_data->audience = g_strdup (oof_settings->ext_aud);
 	update_audience_type ();
-	oof_data->from_time = oof_settings->start_tm;
-	oof_data->to_time = oof_settings->end_tm;
+	if (!g_ascii_strcasecmp (oof_settings->state, "Scheduled")) {
+		oof_data->from_time = oof_settings->start_tm;
+		oof_data->to_time = oof_settings->end_tm;
+		oof_data->set_range = TRUE;
+	}
 	oof_data->internal_message = g_strdup (oof_settings->int_reply);
 	oof_data->external_message = g_strdup (oof_settings->ext_reply);
 
@@ -504,8 +549,8 @@ get_settings_from_data (void)
 
 	oof_settings = g_new0 (OOFSettings, 1);
 
-	if (oof_data->from_time >= oof_data->to_time) {
-		g_warning ("Set valid time range");
+	if (oof_data->from_time >= oof_data->to_time || !oof_data->set_range) {
+		d (printf ("not a valid time range or set duration is not available"));
 		oof_data->from_time = 0;
 		oof_data->to_time = 0;
 	}
@@ -570,9 +615,14 @@ ews_get_outo_office_widget (EMConfigTargetSettings *target_account)
 	GtkFrame *frm_oof;
 	GtkHBox *stat_box;
 	GtkLabel *stat_msg;
-	GtkWidget *spinner;
+	GtkWidget *spinner, *label;
+	gchar *txt;
 
-	frm_oof = (GtkFrame*) g_object_new (GTK_TYPE_FRAME, "label", _("Out of Office"), NULL);
+	txt = g_markup_printf_escaped ("<span weight=\"bold\">%s</span>", _("Out of Office"));
+	label = gtk_label_new (NULL);
+	gtk_label_set_markup ((GtkLabel *) label, txt);
+	g_free (txt);
+	frm_oof = (GtkFrame*) g_object_new (GTK_TYPE_FRAME, "label-widget", label, NULL);
 
 	oof_data_new ();
 
