@@ -437,7 +437,7 @@ ews_authenticate_sync (CamelService *service,
 		/* This consumes all allocated result data. */
 		ews_update_folder_hierarchy (
 			ews_store, sync_state, includes_last_folder,
-			folders_created, folders_updated, folders_deleted);
+			folders_created, folders_deleted, folders_updated);
 	} else {
 		/* Make sure we're not leaking anything. */
 		g_warn_if_fail (sync_state == NULL);
