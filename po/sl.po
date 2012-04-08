@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2012-03-28 16:28+0000\n"
-"PO-Revision-Date: 2012-03-29 20:11+0100\n"
+"POT-Creation-Date: 2012-04-08 11:24+0000\n"
+"PO-Revision-Date: 2012-04-08 20:06+0100\n"
 "Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: \n"
@@ -25,11 +25,16 @@ msgstr ""
 msgid "Global Address list"
 msgstr "Splošni seznam naslovov"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:177
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:185
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:197
+msgid "Cannot set Date-Time in Past"
+msgstr "Datum in čas ne moreta biti v preteklosti"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:204
 msgid "Select a valid time range"
 msgstr "Izbor veljavnega datuma in časa"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:286
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:315
 #, c-format
 msgid ""
 "Unable to fetch out of office settings: \n"
@@ -38,7 +43,7 @@ msgstr ""
 "Ni mogoče pridobiti nastavitev pisarne: \n"
 "%s"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:318
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:347
 msgid ""
 "The messages specified below will be automatically sent to \n"
 " each internal and external personal who sends a mail to you."
@@ -46,65 +51,70 @@ msgstr ""
 "Sporočilo, ki je določeno spodaj, bo samodejno poslano vsem\n"
 " notranjim ali zunanjim stikom, ki pošljejo sporočilo na ta elektronski naslov."
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:323
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:352
 msgid "Status:"
 msgstr "Stanje:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:328
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:333
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:357
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:362
 msgid "I am _out of the office"
 msgstr "Sam _izven pisarne"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:329
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:332
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:358
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:361
 msgid "I am _in the office"
 msgstr "Sem _v pisarni"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:354
+#. Check box for setting date
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:371
+msgid "_Send only during this time period"
+msgstr "_Pošlji le med obdobjem tega časa"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:390
 msgid "_From:"
 msgstr "_Od:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:359
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:395
 msgid "_To:"
 msgstr "_Za:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:376
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:412
 msgid "I_nternal:"
 msgstr "_Notranji:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:378
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:414
 msgid "Message to be sent inside organization"
 msgstr "Sporočilo za prejemnike notranjim stikom v ustanovi"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:385
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:421
 msgid "None"
 msgstr "Brez"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:386
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:422
 msgid "Known"
 msgstr "Znano"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:387
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:423
 msgid "All"
 msgstr "Vse"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:389
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:425
 msgid "Send Message to"
 msgstr "Pošlji sporočilo za"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:409
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:445
 msgid "E_xternal:"
 msgstr "_Zunanji:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:411
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:447
 msgid "Message to be sent outside organization"
 msgstr "Sporočilo za prejemnike zunanjim stikom"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:575
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:621
 msgid "Out of Office"
 msgstr "Izven pisarne"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:581
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:631
 msgid "Fetching out of office settings..."
 msgstr "Pridobivanje nastavitev pisarne ..."
 
@@ -192,11 +202,11 @@ msgstr "Počakaj na konec usklajevanja"
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr "Prejemanje stikov v %s: %d%% končano ..."
 
-#: ../src/addressbook/e-book-backend-ews.c:2165
+#: ../src/addressbook/e-book-backend-ews.c:2178
 msgid "Syncing contacts..."
 msgstr "Usklajevanje stikov ..."
 
-#: ../src/addressbook/e-book-backend-ews.c:2357
+#: ../src/addressbook/e-book-backend-ews.c:2370
 msgid "Searching..."
 msgstr "Iskanje ..."
 
@@ -209,11 +219,11 @@ msgstr "Nezadostna količina pomnilnika"
 msgid "EWS does not support bulk removals"
 msgstr "Sistem EWS ne podpira množičnega odstranjevanja"
 
-#: ../src/calendar/e-cal-backend-ews.c:1614
+#: ../src/calendar/e-cal-backend-ews.c:1622
 msgid "EWS does not support bulk additions"
 msgstr "Sistem EWS ne podpira množičnega dodajanja"
 
-#: ../src/calendar/e-cal-backend-ews.c:2103
+#: ../src/calendar/e-cal-backend-ews.c:2111
 msgid "EWS does not support bulk modifications"
 msgstr "Sistem EWS ne podpira množičnega spreminjanja"
 
@@ -384,67 +394,67 @@ msgstr "Strežnik Exchange ne podpira pošiljanja sporočil kot '%s', če je ra�
 msgid "Service not connected"
 msgstr "Storitev ni povezana"
 
-#: ../src/server/e-ews-connection.c:361
+#: ../src/server/e-ews-connection.c:383
 msgid "Operation Cancelled"
 msgstr "Opravilo je preklicano"
 
-#: ../src/server/e-ews-connection.c:423
+#: ../src/server/e-ews-connection.c:445
 msgid "Authentication failed"
 msgstr "Overitev je spodletela"
 
-#: ../src/server/e-ews-connection.c:431
+#: ../src/server/e-ews-connection.c:453
 #, c-format
 msgid "No response: %s"
 msgstr "Brez odgovora: %s"
 
-#: ../src/server/e-ews-connection.c:1285
-#: ../src/server/e-ews-connection.c:1643
-#: ../src/server/e-ews-connection.c:1882
+#: ../src/server/e-ews-connection.c:1366
+#: ../src/server/e-ews-connection.c:1724
+#: ../src/server/e-ews-connection.c:1963
 #, c-format
 msgid "Code: %d - Unexpected response from server"
 msgstr "Koda: %d - Nepričakovan odziv strežnika"
 
-#: ../src/server/e-ews-connection.c:1297
+#: ../src/server/e-ews-connection.c:1378
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Razčlenjevanje samodejnega odgovora XML je spodletelo"
 
-#: ../src/server/e-ews-connection.c:1305
+#: ../src/server/e-ews-connection.c:1386
 #, c-format
 msgid "Failed to find <Autodiscover> element\n"
 msgstr "Iskanje predmeta <samodejnega zaznavanja> je spodletelo.\n"
 
-#: ../src/server/e-ews-connection.c:1317
+#: ../src/server/e-ews-connection.c:1398
 #, c-format
 msgid "Failed to find <Response> element\n"
 msgstr "Iskanje predmeta <odziva> je spodletelo.\n"
 
-#: ../src/server/e-ews-connection.c:1329
+#: ../src/server/e-ews-connection.c:1410
 #, c-format
 msgid "Failed to find <Account> element\n"
 msgstr "Iskanje predmeta <računa> je spodletelo.\n"
 
-#: ../src/server/e-ews-connection.c:1348
+#: ../src/server/e-ews-connection.c:1429
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr "Samodejno iskanje predmetov odgovora <ASUrl> in <OABUrl> je spodletelo"
 
-#: ../src/server/e-ews-connection.c:1450
+#: ../src/server/e-ews-connection.c:1531
 #, c-format
 msgid "Both email and password must be provided"
 msgstr "Vpisati je treba elektronski naslov in geslo"
 
-#: ../src/server/e-ews-connection.c:1457
+#: ../src/server/e-ews-connection.c:1538
 #, c-format
 msgid "Wrong email id"
 msgstr "Napačen ID elektronskega sporočila"
 
-#: ../src/server/e-ews-connection.c:1653
+#: ../src/server/e-ews-connection.c:1734
 #, c-format
 msgid "Failed to parse oab XML"
 msgstr "Razčlenjevanje datoteke OAB XML je spodletelo."
 
-#: ../src/server/e-ews-connection.c:1660
+#: ../src/server/e-ews-connection.c:1741
 #, c-format
 msgid "Failed to find <OAB> element\n"
 msgstr "Iskanje predmeta <OAB> je spodletelo.\n"
