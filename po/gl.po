@@ -7,12 +7,12 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2012-03-26 11:53+0000\n"
-"PO-Revision-Date: 2012-03-26 14:55+0200\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-04-13 15:48+0200\n"
+"PO-Revision-Date: 2012-04-13 15:49+0200\n"
 "Last-Translator: Fran Dieguez <frandieguez@gnome.org>\n"
 "Language-Team: Galician <gnome-l10n-gl@gnome.org>\n"
+"Language: gl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -22,11 +22,16 @@ msgstr ""
 msgid "Global Address list"
 msgstr "Lista global de enderezos"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:177
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:185
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:197
+msgid "Cannot set Date-Time in Past"
+msgstr "No é posíbel estabelecer unha data/hora pasadas"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:204
 msgid "Select a valid time range"
 msgstr "Seleccionar un rango de tempo válido"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:286
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:315
 #, c-format
 msgid ""
 "Unable to fetch out of office settings: \n"
@@ -35,7 +40,7 @@ msgstr ""
 "Non foi posiel obter a configuración de oficina:\n"
 "%s"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:318
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:347
 msgid ""
 "The messages specified below will be automatically sent to \n"
 " each internal and external personal who sends a mail to you."
@@ -43,65 +48,70 @@ msgstr ""
 "As mensaxes que se especifican máis abaixo enviaranse automaticamente\n"
 "a todo o persoal interno e externo que lle envíe un correo."
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:323
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:352
 msgid "Status:"
 msgstr "Estado:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:328
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:333
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:357
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:362
 msgid "I am _out of the office"
 msgstr "Estou _fóra da oficina"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:329
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:332
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:358
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:361
 msgid "I am _in the office"
 msgstr "Estou _na oficina"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:354
+#. Check box for setting date
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:371
+msgid "_Send only during this time period"
+msgstr "_Enviar só durante este período de tempo"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:390
 msgid "_From:"
 msgstr "_De:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:359
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:395
 msgid "_To:"
 msgstr "_Para:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:376
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:412
 msgid "I_nternal:"
 msgstr "I_nterno:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:378
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:414
 msgid "Message to be sent inside organization"
 msgstr "Mensaxe que enviar dentro da organización"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:385
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:421
 msgid "None"
 msgstr "Nadie"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:386
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:422
 msgid "Known"
 msgstr "Coñecidos"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:387
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:423
 msgid "All"
 msgstr "Todos"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:389
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:425
 msgid "Send Message to"
 msgstr "Envair mensaxe a"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:409
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:445
 msgid "E_xternal:"
 msgstr "E_xterno:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:411
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:447
 msgid "Message to be sent outside organization"
 msgstr "Mensaxe que envair fóra da organización"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:575
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:621
 msgid "Out of Office"
 msgstr "Fóra da oficina"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:581
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:631
 msgid "Fetching out of office settings..."
 msgstr "Obtendo a configuración de oficina…"
 
@@ -189,11 +199,11 @@ msgstr "Agarde a que termine a sincronización"
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr "Descarga de contactos en %s %d%% completada…"
 
-#: ../src/addressbook/e-book-backend-ews.c:2165
+#: ../src/addressbook/e-book-backend-ews.c:2178
 msgid "Syncing contacts..."
 msgstr "Sincronizando contactos…"
 
-#: ../src/addressbook/e-book-backend-ews.c:2357
+#: ../src/addressbook/e-book-backend-ews.c:2370
 msgid "Searching..."
 msgstr "Buscando…"
 
@@ -201,6 +211,18 @@ msgstr "Buscando…"
 #, c-format
 msgid "Insufficient memory"
 msgstr "Memoria insuficiente"
+
+#: ../src/calendar/e-cal-backend-ews.c:1047
+msgid "EWS does not support bulk removals"
+msgstr "EWS non admite eliminacións en lote"
+
+#: ../src/calendar/e-cal-backend-ews.c:1622
+msgid "EWS does not support bulk additions"
+msgstr "EWS non admite adicións en lote"
+
+#: ../src/calendar/e-cal-backend-ews.c:2111
+msgid "EWS does not support bulk modifications"
+msgstr "EWS non admite modificacións en lote"
 
 #: ../src/camel/camel-ews-folder.c:262
 #, c-format
@@ -232,12 +254,12 @@ msgstr "Non foi posíbel crear a ruta da caché"
 msgid "Failed to move message cache file"
 msgstr "Produciuse un fallo ao mover o ficheiro da caché de mensaxes"
 
-#: ../src/camel/camel-ews-folder.c:917
+#: ../src/camel/camel-ews-folder.c:920
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Non foi posíbel cargar o resumo para %s"
 
-#: ../src/camel/camel-ews-folder.c:1258 ../src/camel/camel-ews-store.c:757
+#: ../src/camel/camel-ews-folder.c:1261 ../src/camel/camel-ews-store.c:757
 #: ../src/camel/camel-ews-store.c:813 ../src/camel/camel-ews-store.c:883
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
@@ -376,67 +398,67 @@ msgstr ""
 msgid "Service not connected"
 msgstr "Servizo non conectado"
 
-#: ../src/server/e-ews-connection.c:360
+#: ../src/server/e-ews-connection.c:383
 msgid "Operation Cancelled"
 msgstr "Operación cancelada"
 
-#: ../src/server/e-ews-connection.c:422
+#: ../src/server/e-ews-connection.c:445
 msgid "Authentication failed"
 msgstr "Produciuse un fallo na autenticación"
 
-#: ../src/server/e-ews-connection.c:430
+#: ../src/server/e-ews-connection.c:453
 #, c-format
 msgid "No response: %s"
 msgstr "Sen resposta: %s"
 
-#: ../src/server/e-ews-connection.c:1284 ../src/server/e-ews-connection.c:1642
-#: ../src/server/e-ews-connection.c:1881
+#: ../src/server/e-ews-connection.c:1366 ../src/server/e-ews-connection.c:1724
+#: ../src/server/e-ews-connection.c:1963
 #, c-format
 msgid "Code: %d - Unexpected response from server"
 msgstr "Código: %d: resposta non agardada do servidor"
 
-#: ../src/server/e-ews-connection.c:1296
+#: ../src/server/e-ews-connection.c:1378
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Produciuse un fallo ao analizar a resposta XML da autodetección"
 
-#: ../src/server/e-ews-connection.c:1304
+#: ../src/server/e-ews-connection.c:1386
 #, c-format
 msgid "Failed to find <Autodiscover> element\n"
 msgstr "Produciuse un fallo ao buscar o elemento <Autodiscover>\n"
 
-#: ../src/server/e-ews-connection.c:1316
+#: ../src/server/e-ews-connection.c:1398
 #, c-format
 msgid "Failed to find <Response> element\n"
 msgstr "Produciuse un fallo ao buscar o elemento<Response>\n"
 
-#: ../src/server/e-ews-connection.c:1328
+#: ../src/server/e-ews-connection.c:1410
 #, c-format
 msgid "Failed to find <Account> element\n"
 msgstr "Produciuse un fallo ao buscar o elemento <Account>\n"
 
-#: ../src/server/e-ews-connection.c:1347
+#: ../src/server/e-ews-connection.c:1429
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
 "Produciuse un fallo ao buscar <ASUrl> e <OABUrl> na resposta da autodetección"
 
-#: ../src/server/e-ews-connection.c:1449
+#: ../src/server/e-ews-connection.c:1531
 #, c-format
 msgid "Both email and password must be provided"
 msgstr "Débese fornecer o correo-e e o contrasinal"
 
-#: ../src/server/e-ews-connection.c:1456
+#: ../src/server/e-ews-connection.c:1538
 #, c-format
 msgid "Wrong email id"
 msgstr "ID de correo-e non válida"
 
-#: ../src/server/e-ews-connection.c:1652
+#: ../src/server/e-ews-connection.c:1734
 #, c-format
 msgid "Failed to parse oab XML"
 msgstr "Produciuse un fallo ao analizar o XML oab"
 
-#: ../src/server/e-ews-connection.c:1659
+#: ../src/server/e-ews-connection.c:1741
 #, c-format
 msgid "Failed to find <OAB> element\n"
 msgstr "Produciuse un fallo ao buscar o elemento <OAB>\n"
