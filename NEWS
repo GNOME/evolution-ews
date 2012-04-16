@@ -1,3 +1,12 @@
+Evolution-EWS 3.4.1 2012-04-16
+------------------------------
+
+Bug Fixes:
+	Bug #671969 - Crash in g_thread_join, e_ews_connection_dispose (Milan Crha)
+	Bug #673349 - Missing charset breaks setting of utf-8 strings (Milan Crha)
+	Bug #670217 - Doesn't show all calendar events (Milan Crha)
+	Bug #661436 - Search is required for GAL (Milan Crha)
+
 Evolution-EWS 3.4.0 2012-03-26
 ------------------------------
 
