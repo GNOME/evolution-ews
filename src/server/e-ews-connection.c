@@ -1442,7 +1442,10 @@ autodiscover_response_cb (SoupSession *session,
 
 	g_simple_async_result_set_op_res_gpointer (ad->simple, urls, NULL);
 	g_simple_async_result_complete_in_idle (ad->simple);
-	g_object_unref (simple);
+	/* the 'simple' holds reference on 'cnc' and this function
+	   is called in a dedicated thread, which 'cnc' joins on dispose,
+	   thus to avoid race condition, unref the object in its own thread */
+	ews_unref_in_thread (G_OBJECT (simple));
 	return;
 
 failed:
@@ -1461,7 +1464,10 @@ failed:
 	 * want the *first* error */
 	g_simple_async_result_set_from_error (ad->simple, error);
 	g_simple_async_result_complete_in_idle (ad->simple);
-	g_object_unref (simple);
+	/* the 'simple' holds reference on 'cnc' and this function
+	   is called in a dedicated thread, which 'cnc' joins on dispose,
+	   thus to avoid race condition, unref the object in its own thread */
+	ews_unref_in_thread (G_OBJECT (simple));
 }
 
 static void post_restarted (SoupMessage *msg, gpointer data)
