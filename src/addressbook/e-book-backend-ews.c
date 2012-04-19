@@ -59,7 +59,6 @@
 
 #define EDB_ERROR(_code) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, NULL)
 #define EDB_ERROR_EX(_code,_msg) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, _msg)
-#define EDB_ERROR_FAILED_STATUS(_code, _status) e_data_book_create_error_fmt (E_DATA_BOOK_STATUS_ ## _code, "Failed with status 0x%x", _status)
 
 G_DEFINE_TYPE (EBookBackendEws, e_book_backend_ews, E_TYPE_BOOK_BACKEND)
 
@@ -120,6 +119,43 @@ enum {
 
 #define PRIV_LOCK(p)   (g_static_rec_mutex_lock (&(p)->rec_mutex))
 #define PRIV_UNLOCK(p) (g_static_rec_mutex_unlock (&(p)->rec_mutex))
+
+static void
+convert_error_to_edb_error (GError **perror)
+{
+	GError *error = NULL;
+
+	g_return_if_fail (perror != NULL);
+
+	if (!*perror || (*perror)->domain == E_DATA_BOOK_ERROR)
+		return;
+
+	if ((*perror)->domain == EWS_CONNECTION_ERROR) {
+		switch ((*perror)->code) {
+		case EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED:
+			error = EDB_ERROR (AUTHENTICATION_FAILED);
+			break;
+		case EWS_CONNECTION_ERROR_CANCELLED:
+			break;
+		case EWS_CONNECTION_ERROR_FOLDERNOTFOUND:
+		case EWS_CONNECTION_ERROR_MANAGEDFOLDERNOTFOUND:
+		case EWS_CONNECTION_ERROR_PARENTFOLDERNOTFOUND:
+		case EWS_CONNECTION_ERROR_PUBLICFOLDERSERVERNOTFOUND:
+			error = EDB_ERROR (NO_SUCH_BOOK);
+			break;
+		case EWS_CONNECTION_ERROR_EVENTNOTFOUND:
+		case EWS_CONNECTION_ERROR_ITEMNOTFOUND:
+			error = EDB_ERROR (CONTACT_NOT_FOUND);
+			break;
+		}
+	}
+
+	if (!error)
+		error = EDB_ERROR_EX (OTHER_ERROR, (*perror)->message);
+
+	g_error_free (*perror);
+	*perror = error;
+}
 
 static void
 ews_auth_required (EBookBackend *backend)
@@ -1296,6 +1332,7 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 				e_book_backend_sqlitedb_search_data_free (s_data);
 				l = l->next;
 			}
+			convert_error_to_edb_error (&error);
 			e_data_book_respond_get_contact_list (book, opid, error, vcard_list);
 
 			g_slist_free (list);
@@ -1323,6 +1360,7 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 			l = l->next;
 		}
 
+		convert_error_to_edb_error (&error);
 		e_data_book_respond_get_contact_list (book, opid, error, vcard_list);
 
 		g_slist_free (list);
@@ -1348,6 +1386,7 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 
 		/*we have got Id for items lets fetch them using getitem operation*/
 		ebews_fetch_items (ebews, items, FALSE, &vcard_list, &error);
+		convert_error_to_edb_error (&error);
 		e_data_book_respond_get_contact_list (book, opid, error, vcard_list);
 
 		e_ews_folder_free_fid (fid);
@@ -2614,18 +2653,22 @@ e_book_backend_ews_authenticate_user (EBookBackend *backend,
 	} else
 		priv->is_writable = TRUE;
 
-	/* a dummy request to make sure we have a authenticated connection */
-	fid = g_new0 (EwsFolderId, 1);
-	fid->id = g_strdup ("contacts");
-	fid->is_distinguished_id = TRUE;
-	ids = g_slist_append (ids, fid);
-	e_ews_connection_get_folder (cnc, EWS_PRIORITY_MEDIUM, "Default", NULL, ids, &folders, NULL, &error);
+	if (!error && cnc) {
+		/* a dummy request to make sure we have a authenticated connection */
+		fid = g_new0 (EwsFolderId, 1);
+		fid->id = g_strdup ("contacts");
+		fid->is_distinguished_id = TRUE;
+		ids = g_slist_append (ids, fid);
+		e_ews_connection_get_folder (cnc, EWS_PRIORITY_MEDIUM, "Default", NULL, ids, &folders, NULL, &error);
 
-	e_ews_folder_free_fid (fid);
-	g_slist_free (ids);
-	ids = NULL;
+		e_ews_folder_free_fid (fid);
+		g_slist_free (ids);
+		ids = NULL;
+	}
 
 	if (error) {
+		convert_error_to_edb_error (&error);
+
 		e_book_backend_notify_auth_required (backend, TRUE, priv->credentials);
 		e_book_backend_notify_opened (backend, error);
 		g_object_unref (cnc);
@@ -2746,6 +2789,7 @@ e_book_backend_ews_open (EBookBackend *backend,
 
 	source = e_backend_get_source (E_BACKEND (backend));
 	e_book_backend_ews_load_source (backend, source, only_if_exists, &error);
+	convert_error_to_edb_error (&error);
 	e_data_book_respond_open (book, opid, error);
 }
 
