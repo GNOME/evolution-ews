@@ -123,6 +123,43 @@ static gboolean ews_start_sync	(gpointer data);
 static icaltimezone * e_cal_get_timezone_from_ical_component (ECalBackend *backend, icalcomponent *comp);
 
 static void
+convert_error_to_edc_error (GError **perror)
+{
+	GError *error = NULL;
+
+	g_return_if_fail (perror != NULL);
+
+	if (!*perror || (*perror)->domain == E_DATA_CAL_ERROR)
+		return;
+
+	if ((*perror)->domain == EWS_CONNECTION_ERROR) {
+		switch ((*perror)->code) {
+		case EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED:
+			error = EDC_ERROR (AuthenticationFailed);
+			break;
+		case EWS_CONNECTION_ERROR_CANCELLED:
+			break;
+		case EWS_CONNECTION_ERROR_FOLDERNOTFOUND:
+		case EWS_CONNECTION_ERROR_MANAGEDFOLDERNOTFOUND:
+		case EWS_CONNECTION_ERROR_PARENTFOLDERNOTFOUND:
+		case EWS_CONNECTION_ERROR_PUBLICFOLDERSERVERNOTFOUND:
+			error = EDC_ERROR (NoSuchCal);
+			break;
+		case EWS_CONNECTION_ERROR_EVENTNOTFOUND:
+		case EWS_CONNECTION_ERROR_ITEMNOTFOUND:
+			error = EDC_ERROR (ObjectNotFound);
+			break;
+		}
+	}
+
+	if (!error)
+		error = EDC_ERROR_EX (OtherError, (*perror)->message);
+
+	g_error_free (*perror);
+	*perror = error;
+}
+
+static void
 switch_offline (ECalBackendEws *cbews)
 {
 	ECalBackendEwsPrivate *priv;
@@ -202,6 +239,7 @@ e_cal_backend_ews_add_timezone (ECalBackend *backend,
 
 exit:
 	/*FIXME pass tzid here */
+	convert_error_to_edc_error (&error);
 	e_data_cal_respond_add_timezone (cal, context, error);
 }
 
@@ -247,11 +285,10 @@ ews_cal_discard_alarm_cb (GObject *object,
 	GError *error = NULL;
 
 	if (!e_ews_connection_update_items_finish (cnc, res, NULL, &error)) {
-		/* The calendar UI doesn't *display* errors unless they have
-		 * the OtherError code */
-		error->code = OtherError;
+		convert_error_to_edc_error (&error);
 	}
 
+	convert_error_to_edc_error (&error);
 	e_data_cal_respond_discard_alarm (edad->cal, edad->context, error);
 
 	g_free (edad->itemid);
@@ -387,6 +424,7 @@ e_cal_backend_ews_get_timezone (ECalBackend *backend,
 		}
 	}
 
+	convert_error_to_edc_error (&error);
 	e_data_cal_respond_get_timezone (cal, context, error, object);
 	g_free (object);
 
@@ -625,6 +663,7 @@ e_cal_backend_ews_open_compat (ECalBackend *backend,
 		e_cal_backend_notify_auth_required (backend, TRUE, priv->credentials);
 
 	e_cal_backend_notify_opened (backend, NULL);
+	convert_error_to_edc_error (&error);
 	e_data_cal_respond_open (cal, opid, error);
 }
 
@@ -659,7 +698,7 @@ e_cal_backend_ews_authenticate_user (ECalBackend *backend,
 
 	PRIV_UNLOCK (priv);
 
-	/* This seems in-correct, but thats how authenticate_user_sync works */
+	convert_error_to_edc_error (&error);
 	e_cal_backend_notify_opened (backend, error);
 }
 
@@ -729,6 +768,7 @@ e_cal_backend_ews_get_object (ECalBackend *backend,
 	g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
 
 exit:
+	convert_error_to_edc_error (&error);
 	e_data_cal_respond_get_object (cal, context, error, object);
 	g_free (object);
 }
@@ -797,6 +837,7 @@ e_cal_backend_ews_get_object_list (ECalBackend *backend,
 
 	cal_backend_ews_get_object_list (backend, sexp, &objects, &error);
 
+	convert_error_to_edc_error (&error);
 	e_data_cal_respond_get_object_list (cal, context, error, objects);
 	if (objects) {
 		for (l = objects; l != NULL; l = g_slist_next (l))
@@ -871,7 +912,8 @@ ews_cal_remove_object_cb (GObject *object,
 		if (remove_data->comp) ews_cal_delete_comp (remove_data->cbews, remove_data->comp, remove_data->item_id.id);
 		if (remove_data->parent) ews_cal_append_exdate (remove_data->cbews, remove_data->parent, remove_data->rid, remove_data->mod);
 
-	} else error->code = OtherError;
+	}
+	convert_error_to_edc_error (&error);
 
 	if (remove_data->context)
 		e_data_cal_respond_remove (remove_data->cal, remove_data->context, error);
@@ -1015,6 +1057,7 @@ errorlvl1:
 	if (parent) g_object_unref (parent);
 
 exit:
+	convert_error_to_edc_error (&error);
 	if (context)
 		e_data_cal_respond_remove (cal, context, error);
 	else if (error) {
@@ -1403,6 +1446,7 @@ ews_create_object_cb (GObject *object,
 
 	/* make sure there was no error */
 	if (error != NULL) {
+		convert_error_to_edc_error (&error);
 		e_data_cal_respond_create_object (create_data->cal, create_data->context, error, NULL, NULL);
 		return;
 	}
@@ -1426,6 +1470,7 @@ ews_create_object_cb (GObject *object,
 		if (!res && error != NULL) {
 			if (items_req)
 				g_slist_free_full (items_req, g_object_unref);
+			convert_error_to_edc_error (&error);
 			e_data_cal_respond_create_object (create_data->cal, create_data->context, error, NULL, NULL);
 			return;
 		}
@@ -1435,6 +1480,7 @@ ews_create_object_cb (GObject *object,
 			error = g_error_copy (e_ews_item_get_error (item));
 			g_slist_free_full (items_req, g_object_unref);
 
+			convert_error_to_edc_error (&error);
 			e_data_cal_respond_create_object (create_data->cal, create_data->context, error, NULL, NULL);
 			return;
 		}
@@ -1490,6 +1536,7 @@ ews_create_object_cb (GObject *object,
 
 	e_cal_component_get_uid (create_data->comp, &comp_uid);
 
+	convert_error_to_edc_error (&error);
 	e_data_cal_respond_create_object (create_data->cal, create_data->context, error, comp_uid, create_data->comp);
 
 	/* notify the backend and the application that a new object was created */
@@ -1661,6 +1708,7 @@ e_cal_backend_ews_create_object (ECalBackend *backend,
 	return;
 
 exit:
+	convert_error_to_edc_error (&error);
 	e_data_cal_respond_create_object (cal, context, error, NULL, NULL);
 }
 
@@ -1682,9 +1730,7 @@ ews_cal_modify_object_cb (GObject *object,
 	const gchar *x_name;
 
 	if (!e_ews_connection_update_items_finish (cnc, res, &ids, &error)) {
-		/* The calendar UI doesn't *display* errors unless they have
-		 * the OtherError code */
-		error->code = OtherError;
+		convert_error_to_edc_error (&error);
 		if (modify_data->context)
 			e_data_cal_respond_modify_object (modify_data->cal, modify_data->context, error, NULL, NULL);
 		goto exit;
@@ -1716,6 +1762,7 @@ ews_cal_modify_object_cb (GObject *object,
 
 	if (modify_data->context) {
 		e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbews), modify_data->oldcomp, modify_data->comp);
+		convert_error_to_edc_error (&error);
 		e_data_cal_respond_modify_object (modify_data->cal, modify_data->context, error, modify_data->oldcomp, modify_data->comp);
 	}
 	else if (error) {
@@ -2156,8 +2203,10 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 		attach_data->itemid = itemid;
 		attach_data->changekey = changekey;
 
-		if (context)
+		if (context) {
+			convert_error_to_edc_error (&error);
 			e_data_cal_respond_modify_object (cal, context, error, NULL, NULL);
+		}
 
 		e_ews_connection_create_attachments_start (priv->cnc, EWS_PRIORITY_MEDIUM,
 							   item_id, added_attachments,
@@ -2197,6 +2246,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 	return;
 
 exit:
+	convert_error_to_edc_error (&error);
 	if (context)
 		e_data_cal_respond_modify_object (cal, context, error, NULL, NULL);
 	else if (error) {
@@ -2408,11 +2458,7 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend,
 								       prepare_accept_item_request,
 								       accept_data,
 								       &ids, cancellable, &error);
-				if (error)
-					/* The calendar UI doesn't *display* errors unless they have
-					 * the OtherError code */
-					error->code = OtherError;
-			else {
+			if (!error) {
 				transp = icalcomponent_get_first_property (subcomp, ICAL_TRANSP_PROPERTY);
 				if (!g_strcmp0 (icalproperty_get_value_as_string (transp), "TRANSPARENT") &&
 				    !g_strcmp0 (response_type, "ACCEPTED")) {
@@ -2436,8 +2482,6 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend,
 								       &ids,
 								       cancellable,
 								       &error);
-					if (error)
-						error->code = OtherError;
 				}
 			}
 				g_free (item_id);
@@ -2474,6 +2518,7 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend,
 	icalcomponent_free (icalcomp);
 
 exit:
+	convert_error_to_edc_error (&error);
 	e_data_cal_respond_receive_objects (cal, context, error);
 }
 
@@ -2584,7 +2629,7 @@ ewscal_send_cancellation_email (ECalBackend *backend,
 	camel_ews_utils_create_mime_message (cnc, "SendOnly", NULL, message, 0, from, NULL, NULL, NULL, &error);
 
 	if (error) {
-		g_warning ("Failed to send cancellation email\n");
+		g_warning ("Failed to send cancellation email: %s", error->message);
 		g_clear_error (&error);
 	}
 
@@ -2683,6 +2728,7 @@ e_cal_backend_ews_send_objects (ECalBackend *backend,
 	icalcomponent_free (icalcomp);
 
 exit:
+	convert_error_to_edc_error (&error);
 	e_data_cal_respond_send_objects (cal, context, error,  NULL, calobj);
 }
 
@@ -2745,7 +2791,7 @@ ews_get_attachments_ready_callback (GObject *object,
 	ids = e_ews_connection_get_attachments_finish	(cnc, res, &uris, &error);
 
 	if (error != NULL) {
-		error->code = OtherError;
+		g_clear_error (&error);
 		return;
 	}
 
@@ -3508,6 +3554,7 @@ e_cal_backend_ews_refresh (ECalBackend *backend,
 	PRIV_UNLOCK (priv);
 
 exit:
+	convert_error_to_edc_error (&error);
 	e_data_cal_respond_refresh (cal, context, error);
 }
 
@@ -3575,7 +3622,6 @@ ews_cal_get_free_busy_cb (GObject *obj,
 	GError *error = NULL;
 
 	if (!e_ews_connection_get_free_busy_finish (cnc, res, &free_busy_sl, &error)) {
-		error->code = OtherError;
 		goto done;
 	}
 
@@ -3590,6 +3636,7 @@ ews_cal_get_free_busy_cb (GObject *obj,
 done:
 	if (free_busy)
 		e_data_cal_report_free_busy_data (free_busy_data->cal, free_busy);
+	convert_error_to_edc_error (&error);
 	e_data_cal_respond_get_free_busy (free_busy_data->cal, free_busy_data->context, error);
 
 	/* FIXME free free_busy_sl ? */
@@ -3654,6 +3701,7 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend,
 	return;
 
 exit:
+	convert_error_to_edc_error (&error);
 	e_data_cal_respond_get_free_busy (cal, context, error);
 
 }
@@ -3718,6 +3766,7 @@ e_cal_backend_ews_get_backend_property (ECalBackend *backend,
 		return;
 	}
 
+	convert_error_to_edc_error (&error);
 	e_data_cal_respond_get_backend_property (cal, opid, error, prop_value);
 	g_free (prop_value);
 }
