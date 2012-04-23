@@ -310,6 +310,8 @@ static void ews_trigger_next_request (EEwsConnection *cnc)
 {
 	GSource *source;
 
+	g_return_if_fail (cnc != NULL);
+
 	source = g_idle_source_new ();
 	g_source_set_priority (source, G_PRIORITY_DEFAULT);
 	g_source_set_callback (source, ews_next_request, cnc, NULL);
@@ -347,6 +349,9 @@ static void
 ews_active_job_done (EEwsConnection *cnc,
                      EwsNode *ews_node)
 {
+	g_return_if_fail (cnc != NULL);
+	g_return_if_fail (ews_node != NULL);
+
 	QUEUE_LOCK (cnc);
 
 	cnc->priv->active_job_queue = g_slist_remove (cnc->priv->active_job_queue, ews_node);
@@ -402,6 +407,8 @@ ews_connection_queue_request (EEwsConnection *cnc,
                               gboolean complete_sync)
 {
 	EwsNode *node;
+
+	g_return_if_fail (cnc != NULL);
 
 	node = ews_node_new ();
 	node->msg = msg;
@@ -1100,6 +1107,8 @@ ews_connection_authenticate (SoupSession *sess,
 {
 	EEwsConnection *cnc = data;
 
+	g_return_if_fail (cnc != NULL);
+
 	if (retrying) {
 		g_free (cnc->priv->password);
 		cnc->priv->password = NULL;
@@ -1135,6 +1144,8 @@ e_ews_connection_authenticate (EEwsConnection *cnc,
                                const gchar *passwd,
                                GError *error)
 {
+	g_return_if_fail (cnc != NULL);
+
 	if (error) {
 		g_warning ("Auth error: %s", error->message);
 		g_clear_error (&error);
@@ -1811,6 +1822,8 @@ e_ews_connection_get_oal_list_start (EEwsConnection *cnc,
 	SoupMessage *msg;
 	struct _oal_req_data *data;
 
+	g_return_if_fail (cnc != NULL);
+
 	msg = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
@@ -1838,6 +1851,8 @@ e_ews_connection_get_oal_list_finish (EEwsConnection *cnc,
 {
 	GSimpleAsyncResult *simple;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
+
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_get_oal_list_start),
@@ -1864,6 +1879,8 @@ e_ews_connection_get_oal_detail_start (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	SoupMessage *msg;
 	struct _oal_req_data *data;
+
+	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
 
@@ -1895,6 +1912,7 @@ e_ews_connection_get_oal_detail_finish (EEwsConnection *cnc,
 {
 	GSimpleAsyncResult *simple;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_get_oal_detail_start),
@@ -1933,6 +1951,8 @@ e_ews_connection_get_oal_detail (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	gboolean result;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -2061,6 +2081,8 @@ e_ews_connection_download_oal_file_start (EEwsConnection *cnc,
 	SoupMessage *msg;
 	struct _oal_req_data *data;
 
+	g_return_if_fail (cnc != NULL);
+
 	msg = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
@@ -2097,6 +2119,7 @@ e_ews_connection_download_oal_file_finish (EEwsConnection *cnc,
 {
 	GSimpleAsyncResult *simple;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 			g_simple_async_result_is_valid (
 				result, G_OBJECT (cnc), e_ews_connection_download_oal_file_start),
@@ -2120,6 +2143,8 @@ e_ews_connection_download_oal_file (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	gboolean result;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -2147,7 +2172,7 @@ void
 e_ews_connection_set_mailbox (EEwsConnection *cnc,
                               const gchar *email)
 {
-
+	g_return_if_fail (cnc != NULL);
 	g_return_if_fail (email != NULL);
 
 	g_free (cnc->priv->email);
@@ -2290,6 +2315,8 @@ e_ews_connection_sync_folder_items_start (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_if_fail (cnc != NULL);
+
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "SyncFolderItems", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 	e_soap_message_start_element (msg, "ItemShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, default_props);
@@ -2348,6 +2375,7 @@ e_ews_connection_sync_folder_items_finish (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_sync_folder_items_start),
@@ -2385,6 +2413,8 @@ e_ews_connection_sync_folder_items (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	gboolean result;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -2471,6 +2501,8 @@ e_ews_connection_find_folder_items_start (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_if_fail (cnc != NULL);
+
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "FindItem", "Traversal", "Shallow", EWS_EXCHANGE_2007_SP1);
 	e_soap_message_start_element (msg, "ItemShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, default_props);
@@ -2521,6 +2553,7 @@ e_ews_connection_find_folder_items_finish (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_find_folder_items_start),
@@ -2556,6 +2589,8 @@ e_ews_connection_find_folder_items (EEwsConnection *cnc,
 	EwsSyncData *sync_data;
 	gboolean result;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
+
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
@@ -2590,6 +2625,8 @@ e_ews_connection_sync_folder_hierarchy_start (EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
+
+	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "SyncFolderHierarchy", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 	e_soap_message_start_element (msg, "FolderShape", "messages", NULL);
@@ -2627,6 +2664,7 @@ e_ews_connection_sync_folder_hierarchy_finish (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_sync_folder_hierarchy_start),
@@ -2660,6 +2698,8 @@ e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	gboolean result;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -2703,6 +2743,8 @@ e_ews_connection_get_items_start (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 	const GSList *l;
+
+	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetItem", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
@@ -2772,6 +2814,7 @@ e_ews_connection_get_items_finish (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_get_items_start),
@@ -2804,6 +2847,8 @@ e_ews_connection_get_items (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	gboolean result;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -2885,6 +2930,8 @@ e_ews_connection_delete_items_start (EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 	GSList *l;
 
+	g_return_if_fail (cnc != NULL);
+
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "DeleteItem",
 					     "DeleteType", ews_delete_type_to_str (delete_type), EWS_EXCHANGE_2007_SP1);
 
@@ -2934,6 +2981,8 @@ e_ews_connection_delete_item_start (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 	gchar buffer[32];
+
+	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "DeleteItem",
 					     "DeleteType", ews_delete_type_to_str (delete_type), EWS_EXCHANGE_2007_SP1);
@@ -2988,6 +3037,7 @@ e_ews_connection_delete_items_finish (EEwsConnection *cnc,
 {
 	GSimpleAsyncResult *simple;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_delete_items_start),
@@ -3013,6 +3063,8 @@ e_ews_connection_delete_items (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	gboolean result;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -3047,6 +3099,8 @@ e_ews_connection_delete_item (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	gboolean result;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -3084,6 +3138,8 @@ e_ews_connection_update_items_start (EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
+
+	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "UpdateItem",
 					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
@@ -3135,6 +3191,7 @@ e_ews_connection_update_items_finish (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_update_items_start),
@@ -3173,6 +3230,8 @@ e_ews_connection_update_items (EEwsConnection *cnc,
 	EwsSyncData *sync_data;
 	gboolean result;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
+
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
@@ -3210,6 +3269,8 @@ e_ews_connection_create_items_start (EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
+
+	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "CreateItem",
 					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
@@ -3258,6 +3319,7 @@ e_ews_connection_create_items_finish (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_create_items_start),
@@ -3287,6 +3349,8 @@ e_ews_connection_create_items (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	gboolean result;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -3343,6 +3407,8 @@ e_ews_connection_resolve_names_start (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_if_fail (cnc != NULL);
+
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "ResolveNames", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_add_attribute (msg, "SearchScope", get_search_scope_str (scope), NULL, NULL);
@@ -3386,6 +3452,7 @@ e_ews_connection_resolve_names_finish (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_resolve_names_start),
@@ -3424,6 +3491,8 @@ e_ews_connection_resolve_names (EEwsConnection *cnc,
 	EwsSyncData *sync_data;
 	gboolean result;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
+
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
@@ -3457,6 +3526,8 @@ e_ews_connection_expand_dl_start (EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
+
+	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "ExpandDL", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
@@ -3502,6 +3573,7 @@ e_ews_connection_expand_dl_finish (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_expand_dl_start),
@@ -3531,6 +3603,8 @@ e_ews_connection_expand_dl (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	gboolean result;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -3564,6 +3638,8 @@ e_ews_connection_update_folder_start (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_if_fail (cnc != NULL);
+
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "UpdateFolder",
 					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
@@ -3595,6 +3671,7 @@ e_ews_connection_update_folder_finish (EEwsConnection *cnc,
 {
 	GSimpleAsyncResult *simple;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_update_folder_start),
@@ -3618,6 +3695,8 @@ e_ews_connection_update_folder (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	gboolean result;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -3651,6 +3730,8 @@ e_ews_connection_move_folder_start (EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
+
+	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "MoveFolder",
 					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
@@ -3692,6 +3773,7 @@ e_ews_connection_move_folder_finish (EEwsConnection *cnc,
 {
 	GSimpleAsyncResult *simple;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_move_folder_start),
@@ -3715,6 +3797,8 @@ e_ews_connection_move_folder (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	gboolean result;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -3748,6 +3832,8 @@ e_ews_connection_get_folder_start (EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
+
+	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetFolder",
 					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
@@ -3789,6 +3875,7 @@ e_ews_connection_get_folder_finish (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_get_folder_start),
@@ -3817,6 +3904,8 @@ e_ews_connection_get_folder (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	gboolean result;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -3851,6 +3940,8 @@ e_ews_connection_create_folder_start (EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
+
+	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "CreateFolder", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
@@ -3898,6 +3989,7 @@ e_ews_connection_create_folder_finish (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_create_folder_start),
@@ -3927,6 +4019,8 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	gboolean result;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -3966,6 +4060,8 @@ e_ews_connection_move_items_start (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 	GSList *l;
+
+	g_return_if_fail (cnc != NULL);
 
 	if (docopy)
 		msg = e_ews_message_new_with_header (cnc->priv->uri, "CopyItem",
@@ -4009,6 +4105,7 @@ e_ews_connection_move_items_finish (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_move_items_start),
@@ -4038,6 +4135,8 @@ e_ews_connection_move_items (EEwsConnection *cnc,
 	EwsSyncData *sync_data;
 	gboolean result;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
+
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
@@ -4057,7 +4156,6 @@ e_ews_connection_move_items (EEwsConnection *cnc,
 	return result;
 }
 
-void
 /**
  * e_ews_connection_delete_folder_start
  * @cnc:
@@ -4069,6 +4167,7 @@ void
  * @cancellable:
  * @user_data:
  **/
+void
 e_ews_connection_delete_folder_start (EEwsConnection *cnc,
                                       gint pri,
                                       const gchar *folder_id,
@@ -4081,6 +4180,8 @@ e_ews_connection_delete_folder_start (EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
+
+	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "DeleteFolder", "DeleteType", delete_type, EWS_EXCHANGE_2007_SP1);
 
@@ -4118,6 +4219,7 @@ e_ews_connection_delete_folder_finish (EEwsConnection *cnc,
 {
 	GSimpleAsyncResult *simple;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_delete_folder_start),
@@ -4152,6 +4254,8 @@ e_ews_connection_delete_folder (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	gboolean result;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -4272,6 +4376,8 @@ e_ews_connection_create_attachments_start (EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 	const GSList *l;
 
+	g_return_if_fail (cnc != NULL);
+
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "CreateAttachment", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_start_element (msg, "ParentItemId", "messages", NULL);
@@ -4313,6 +4419,7 @@ e_ews_connection_create_attachments_finish (EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 	GSList *ids = NULL;
 
+	g_return_val_if_fail (cnc != NULL, NULL);
 	g_return_val_if_fail (
 			g_simple_async_result_is_valid (
 					result, G_OBJECT (cnc), e_ews_connection_create_attachments_start),
@@ -4341,6 +4448,8 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	GSList *ids;
+
+	g_return_val_if_fail (cnc != NULL, NULL);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -4400,6 +4509,8 @@ e_ews_connection_delete_attachments_start (EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 	const GSList *l;
 
+	g_return_if_fail (cnc != NULL);
+
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "DeleteAttachment", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	/* start interation over all items to get the attachemnts */
@@ -4435,6 +4546,7 @@ e_ews_connection_delete_attachments_finish (EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 	GSList *ids = NULL;
 
+	g_return_val_if_fail (cnc != NULL, NULL);
 	g_return_val_if_fail (
 			g_simple_async_result_is_valid (
 					result, G_OBJECT (cnc), e_ews_connection_delete_attachments_start),
@@ -4460,6 +4572,8 @@ e_ews_connection_delete_attachments (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	GSList *parents;
+
+	g_return_val_if_fail (cnc != NULL, NULL);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -4501,6 +4615,8 @@ e_ews_connection_get_attachments_start (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 	const GSList *l;
+
+	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetAttachment", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
@@ -4550,6 +4666,7 @@ e_ews_connection_get_attachments_finish (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_val_if_fail (cnc != NULL, NULL);
 	g_return_val_if_fail (
 			g_simple_async_result_is_valid (
 					result, G_OBJECT (cnc), e_ews_connection_get_attachments_start),
@@ -4581,6 +4698,8 @@ e_ews_connection_get_attachments (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	GSList *attachments_ids;
+
+	g_return_val_if_fail (cnc != NULL, NULL);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -4744,6 +4863,8 @@ e_ews_connection_get_free_busy_start (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_if_fail (cnc != NULL);
+
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetUserAvailabilityRequest",
 					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
@@ -4773,6 +4894,7 @@ e_ews_connection_get_free_busy_finish (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 			      g_simple_async_result_is_valid (
 							      result, G_OBJECT (cnc), e_ews_connection_get_free_busy_start),
@@ -4799,6 +4921,8 @@ e_ews_connection_get_free_busy (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	gboolean result;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -4937,6 +5061,8 @@ e_ews_connection_get_delegate_start (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_if_fail (cnc != NULL);
+
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetDelegate", "IncludePermissions", include_permissions, EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_start_element (msg, "Mailbox", "messages", NULL);
@@ -4968,6 +5094,7 @@ e_ews_connection_get_delegate_finish (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_get_delegate_start),
@@ -5004,6 +5131,8 @@ e_ews_connection_get_delegate (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	gboolean result;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -5046,6 +5175,8 @@ e_ews_connection_get_oof_settings_start (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_if_fail (cnc != NULL);
+
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetUserOofSettingsRequest", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
@@ -5076,6 +5207,7 @@ e_ews_connection_get_oof_settings_finish (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_get_oof_settings_start),
@@ -5101,6 +5233,8 @@ e_ews_connection_get_oof_settings (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	gboolean result;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
@@ -5143,6 +5277,8 @@ e_ews_connection_set_oof_settings_start (EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 	gchar *start_tm = NULL, *end_tm = NULL;
 	GTimeVal *time_val;
+
+	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, "SetUserOofSettingsRequest", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
@@ -5205,6 +5341,7 @@ e_ews_connection_set_oof_settings_finish (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_set_oof_settings_start),
@@ -5228,6 +5365,8 @@ e_ews_connection_set_oof_settings (EEwsConnection *cnc,
 {
 	EwsSyncData *sync_data;
 	gboolean result;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();

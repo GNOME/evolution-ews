@@ -88,6 +88,7 @@ struct _ECalBackendEwsPrivate {
 	GHashTable *item_id_hash;
 
 	ECredentials *credentials;
+	GCancellable *cancellable;
 };
 
 #define PRIV_LOCK(p)   (g_static_rec_mutex_lock (&(p)->rec_mutex))
@@ -170,6 +171,12 @@ switch_offline (ECalBackendEws *cbews)
 	if (priv->refresh_timeout) {
 		g_source_remove (priv->refresh_timeout);
 		priv->refresh_timeout = 0;
+	}
+
+	if (priv->cancellable) {
+		g_cancellable_cancel (priv->cancellable);
+		g_object_unref (priv->cancellable);
+		priv->cancellable = NULL;
 	}
 
 	if (priv->cnc) {
@@ -359,7 +366,7 @@ e_cal_backend_ews_discard_alarm (ECalBackend *backend,
 					     "AlwaysOverwrite", NULL,
 					     "SendToNone", NULL,
 					     clear_reminder_is_set, edad,
-					     ews_cal_discard_alarm_cb, NULL,
+					     ews_cal_discard_alarm_cb, priv->cancellable,
 					     edad);
 }
 
@@ -561,7 +568,7 @@ connect_to_server (ECalBackendEws *cbews,
 		fid = g_new0 (EwsFolderId, 1);
 		fid->id = g_strdup (priv->folder_id);
 		ids = g_slist_append (ids, fid);
-		e_ews_connection_get_folder (cnc, EWS_PRIORITY_MEDIUM, "Default", NULL, ids, &folders, NULL, &err);
+		e_ews_connection_get_folder (cnc, EWS_PRIORITY_MEDIUM, "Default", NULL, ids, &folders, priv->cancellable, &err);
 
 		e_ews_folder_free_fid (fid);
 		g_slist_free (ids);
@@ -1046,7 +1053,7 @@ e_cal_backend_ews_remove_object (ECalBackend *backend,
 
 	e_ews_connection_delete_item_start (priv->cnc, EWS_PRIORITY_MEDIUM, &remove_data->item_id, index,
 					     EWS_HARD_DELETE, EWS_SEND_TO_NONE, EWS_ALL_OCCURRENCES,
-					     ews_cal_remove_object_cb, NULL,
+					     ews_cal_remove_object_cb, priv->cancellable,
 					     remove_data);
 	return;
 
@@ -1440,7 +1447,7 @@ ews_create_attachments_cb (GObject *object,
 						     convert_component_to_updatexml,
 						     modify_data,
 						     ews_cal_modify_object_cb,
-						     NULL,
+						     priv->cancellable,
 						     modify_data);
 	}
 
@@ -1498,7 +1505,7 @@ ews_create_object_cb (GObject *object,
 			"calendar:UID",
 			FALSE, NULL,
 			&items_req,
-			NULL, NULL, NULL, &error);
+			NULL, NULL, priv->cancellable, &error);
 		if (!res && error != NULL) {
 			if (items_req)
 				g_slist_free_full (items_req, g_object_unref);
@@ -1537,7 +1544,7 @@ ews_create_object_cb (GObject *object,
 		e_cal_component_get_attachment_list (create_data->comp, &attachments);
 		e_ews_connection_create_attachments_start (cnc, EWS_PRIORITY_MEDIUM,
 							   item_id, attachments,
-							   ews_create_attachments_cb, NULL, attach_data);
+							   ews_create_attachments_cb, priv->cancellable, attach_data);
 
 		for (i = attachments; i; i = i->next) g_free (i->data);
 		g_slist_free (attachments);
@@ -2294,7 +2301,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 
 		e_ews_connection_create_attachments_start (priv->cnc, EWS_PRIORITY_MEDIUM,
 							   item_id, added_attachments,
-							   ews_create_attachments_cb, NULL, attach_data);
+							   ews_create_attachments_cb, cancellable, attach_data);
 
 		g_slist_free (added_attachments);
 		g_free (item_id);
@@ -2874,14 +2881,12 @@ ews_get_attachments_ready_callback (GObject *object,
 
 	ids = e_ews_connection_get_attachments_finish	(cnc, res, &uris, &error);
 
-	if (error != NULL) {
-		g_clear_error (&error);
-		return;
-	}
-
 	comp_att = att_data->comp;
 	cbews = att_data->cbews;
 	itemid = att_data->itemid;
+
+	if (error)
+		goto exit;
 
 	e_cal_component_set_attachment_list (comp_att, uris);
 
@@ -2909,11 +2914,14 @@ ews_get_attachments_ready_callback (GObject *object,
 		PRIV_UNLOCK (cbews->priv);
 	}
 
+ exit:
+	g_clear_error (&error);
 	g_slist_foreach (uris, (GFunc) g_free, NULL);
 	g_slist_free (uris);
 	g_free (itemid);
 	g_object_unref (att_data->comp);
 	g_free (att_data);
+	g_object_unref (cbews);
 }
 
 static void
@@ -2933,7 +2941,7 @@ ews_get_attachments (ECalBackendEws *cbews,
 		item_id = e_ews_item_get_id (item);
 		att_data = g_new0 (EwsAttachmentData, 1);
 		att_data->comp = g_hash_table_lookup (cbews->priv->item_id_hash, item_id->id);
-		att_data->cbews = cbews;
+		att_data->cbews = g_object_ref (cbews);
 		att_data->itemid = g_strdup (item_id->id);
 		e_cal_component_get_uid (att_data->comp, &uid);
 
@@ -2945,7 +2953,7 @@ ews_get_attachments (ECalBackendEws *cbews,
 							TRUE,
 							ews_get_attachments_ready_callback,
 							NULL, NULL,
-							NULL, att_data);
+							cbews->priv->cancellable, att_data);
 	}
 
 }
@@ -3074,7 +3082,7 @@ add_item_to_cache (ECalBackendEws *cbews,
 			/* get delegator mail box*/
 			e_ews_connection_resolve_names	(priv->cnc, EWS_PRIORITY_MEDIUM, task_owner,
 						 EWS_SEARCH_AD, NULL, FALSE, &mailboxes, NULL,
-						 &includes_last_item, NULL, &error);
+						 &includes_last_item, priv->cancellable, &error);
 
 			for (l = mailboxes; l != NULL; l = g_slist_next (l)) {
 				EwsMailbox *mb = l->data;
@@ -3345,7 +3353,7 @@ ews_cal_get_items_ready_cb (GObject *obj,
 			e_ews_connection_get_items_start (g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
 					modified_occurrences,
 					"IdOnly", "item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:UID calendar:Resources calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
-					FALSE, NULL, ews_cal_get_items_ready_cb, NULL, NULL, NULL,
+					FALSE, NULL, ews_cal_get_items_ready_cb, NULL, NULL, priv->cancellable,
 					(gpointer) sub_sync_data);
 
 			g_object_unref (cnc);
@@ -3373,13 +3381,14 @@ ews_cal_get_items_ready_cb (GObject *obj,
 						 "IdOnly", NULL,
 						 EWS_MAX_FETCH_COUNT,
 						 ews_cal_sync_items_ready_cb,
-						 NULL, g_object_ref (cbews));
+						 priv->cancellable, g_object_ref (cbews));
 
 exit:
 	g_object_unref (sync_data->cbews);
 	g_free (sync_data->master_uid);
 	g_free (sync_data->sync_state);
 	g_free (sync_data);
+	g_object_unref (cbews);
 }
 
 static void
@@ -3406,8 +3415,15 @@ ews_cal_sync_items_ready_cb (GObject *obj,
 							 &items_created, &items_updated,
 							 &items_deleted, &error);
 
+	if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED) ||
+	    g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_CANCELLED)) {
+		g_clear_error (&error);
+		g_object_unref (cbews);
+		return;
+	}
+
 	/*FIXME invoke a dummy request in authenticate user to ensure we have a valid connection to avoid this mess */
-	if (!(error && error->domain == EWS_CONNECTION_ERROR && error->code == EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED))
+	if (!g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED))
 		e_cal_backend_notify_readonly (E_CAL_BACKEND (cbews), FALSE);
 
 	if (error != NULL) {
@@ -3464,7 +3480,7 @@ ews_cal_sync_items_ready_cb (GObject *obj,
 						 "IdOnly", NULL,
 						 EWS_MAX_FETCH_COUNT,
 						 ews_cal_sync_items_ready_cb,
-						 NULL, g_object_ref (cbews));
+						 priv->cancellable, g_object_ref (cbews));
 		g_free (sync_state);
 		goto exit;
 	}
@@ -3484,7 +3500,7 @@ ews_cal_sync_items_ready_cb (GObject *obj,
 						  "item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:UID calendar:Resources calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
 						  FALSE, NULL,
 						  ews_cal_get_items_ready_cb,
-						  NULL, NULL, NULL,
+						  NULL, NULL, priv->cancellable,
 						  (gpointer) sync_data);
 
 	if (task_item_ids)
@@ -3495,7 +3511,7 @@ ews_cal_sync_items_ready_cb (GObject *obj,
 						  FALSE,
 						  NULL,
 						  ews_cal_get_items_ready_cb,
-						  NULL, NULL, NULL,
+						  NULL, NULL, priv->cancellable,
 						  (gpointer) sync_data);
 
 exit:
@@ -3539,7 +3555,7 @@ ews_start_sync (gpointer data)
 						 "IdOnly", NULL,
 						 EWS_MAX_FETCH_COUNT,
 						 ews_cal_sync_items_ready_cb,
-						 NULL, g_object_ref (cbews));
+						 priv->cancellable, g_object_ref (cbews));
 	return TRUE;
 }
 
@@ -3882,11 +3898,18 @@ e_cal_backend_ews_notify_online_cb (ECalBackend *backend,
 	priv->is_online = is_online;
 
 	if (is_online) {
+		if (priv->cancellable) {
+			g_cancellable_cancel (priv->cancellable);
+			g_object_unref (priv->cancellable);
+			priv->cancellable = NULL;
+		}
+		priv->cancellable = g_cancellable_new ();
+
 		priv->read_only = FALSE;
 		e_cal_backend_notify_online (backend, TRUE);
 		e_cal_backend_notify_readonly (backend, priv->read_only);
 		if (e_cal_backend_is_opened (backend))
-			      e_cal_backend_notify_auth_required (backend, TRUE, priv->credentials);
+		      e_cal_backend_notify_auth_required (backend, TRUE, priv->credentials);
 	} else {
 		switch_offline (E_CAL_BACKEND_EWS (backend));
 		e_cal_backend_notify_readonly (backend, priv->read_only);
@@ -3899,6 +3922,26 @@ e_cal_backend_ews_notify_online_cb (ECalBackend *backend,
 static void
 e_cal_backend_ews_dispose (GObject *object)
 {
+	ECalBackendEws *cbews;
+	ECalBackendEwsPrivate *priv;
+
+	g_return_if_fail (object != NULL);
+	g_return_if_fail (E_IS_CAL_BACKEND_EWS (object));
+
+	cbews = E_CAL_BACKEND_EWS (object);
+	priv = cbews->priv;
+
+	if (priv->cancellable) {
+		g_cancellable_cancel (priv->cancellable);
+		g_object_unref (priv->cancellable);
+		priv->cancellable = NULL;
+	}
+
+	if (priv->cnc) {
+		g_object_unref (priv->cnc);
+		priv->cnc = NULL;
+	}
+
 	if (G_OBJECT_CLASS (parent_class)->dispose)
 		(* G_OBJECT_CLASS (parent_class)->dispose) (object);
 }
@@ -3918,12 +3961,6 @@ e_cal_backend_ews_finalize (GObject *object)
 
 	/* Clean up */
 	g_static_rec_mutex_free (&priv->rec_mutex);
-
-	/* TODO Cancel all the server requests */
-	if (priv->cnc) {
-		g_object_unref (priv->cnc);
-		priv->cnc = NULL;
-	}
 
 	if (priv->store) {
 		g_object_unref (priv->store);
@@ -3982,6 +4019,7 @@ e_cal_backend_ews_init (ECalBackendEws *cbews)
 						 (GDestroyNotify) g_free,
 						 (GDestroyNotify) g_object_unref);
 	priv->default_zone = icaltimezone_get_utc_timezone ();
+	priv->cancellable = g_cancellable_new ();
 
 	cbews->priv = priv;
 

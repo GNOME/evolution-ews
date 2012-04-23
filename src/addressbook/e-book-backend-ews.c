@@ -62,7 +62,7 @@
 
 G_DEFINE_TYPE (EBookBackendEws, e_book_backend_ews, E_TYPE_BOOK_BACKEND)
 
-static gboolean ebews_fetch_items (EBookBackendEws *ebews,  GSList *items, gboolean store_to_cache, GSList **vcards, GError **error);
+static gboolean ebews_fetch_items (EBookBackendEws *ebews,  GSList *items, gboolean store_to_cache, GSList **vcards, GCancellable *cancellable, GError **error);
 
 typedef struct {
 	GCond *cond;
@@ -98,6 +98,7 @@ struct _EBookBackendEwsPrivate {
 	SyncDelta *dlock;
 
 	ECredentials *credentials;
+	GCancellable *cancellable;
 };
 
 /* using this for backward compatibility with E_DATA_BOOK_MODE */
@@ -1382,10 +1383,10 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 							EWS_FOLDER_TYPE_CONTACTS,
 							&includes_last_item,
 							&items, (EwsConvertQueryCallback) (e_ews_query_to_restriction),
-							NULL, &error);
+							cancellable, &error);
 
 		/*we have got Id for items lets fetch them using getitem operation*/
-		ebews_fetch_items (ebews, items, FALSE, &vcard_list, &error);
+		ebews_fetch_items (ebews, items, FALSE, &vcard_list, cancellable, &error);
 		convert_error_to_edb_error (&error);
 		e_data_book_respond_get_contact_list (book, opid, error, vcard_list);
 
@@ -1783,17 +1784,15 @@ ebews_start_gal_sync (gpointer data)
 	GSList *full_l = NULL;
 	gboolean ret = TRUE;
 	gchar *uncompressed_filename = NULL;
-	GCancellable *cancellable;
 
 	cbews = (EBookBackendEws *) data;
 	priv = cbews->priv;
 
-	cancellable = g_cancellable_new ();
 	oab_cnc = e_ews_connection_new (priv->oab_url, priv->username, priv->password, NULL, NULL, NULL);
 
 	d(printf ("Ewsgal: Fetching oal full details file \n");)
 
-	if (!e_ews_connection_get_oal_detail (oab_cnc, priv->folder_id, "Full", &full_l, cancellable, &error)) {
+	if (!e_ews_connection_get_oal_detail (oab_cnc, priv->folder_id, "Full", &full_l, priv->cancellable, &error)) {
 		ret = FALSE;
 		goto exit;
 	}
@@ -1804,7 +1803,7 @@ ebews_start_gal_sync (gpointer data)
 		gchar *seq;
 
 		d(printf ("Ewsgal: Downloading full gal \n");)
-		uncompressed_filename = ews_download_full_gal (cbews, full, cancellable, &error);
+		uncompressed_filename = ews_download_full_gal (cbews, full, priv->cancellable, &error);
 		if (error) {
 			ret = FALSE;
 			goto exit;
@@ -1818,7 +1817,7 @@ ebews_start_gal_sync (gpointer data)
 		}
 
 		d(printf ("Ewsgal: Replacing old gal with new gal contents in db \n");)
-		ret = ews_replace_gal_in_db (cbews, uncompressed_filename, cancellable, &error);
+		ret = ews_replace_gal_in_db (cbews, uncompressed_filename, priv->cancellable, &error);
 		if (!ret)
 			goto exit;
 
@@ -2093,6 +2092,7 @@ ebews_fetch_items (EBookBackendEws *ebews,
                    GSList *items,
                    gboolean store_to_cache,
                    GSList **vcards,
+		   GCancellable *cancellable,
                    GError **error)
 {
 	EBookBackendEwsPrivate *priv;
@@ -2126,7 +2126,7 @@ ebews_fetch_items (EBookBackendEws *ebews,
 			(cnc, EWS_PRIORITY_MEDIUM,
 			 contact_item_ids, "Default", CONTACT_ITEM_PROPS,
 			 FALSE, NULL, &new_items, NULL, NULL,
-			 NULL, error);
+			 cancellable, error);
 	if (*error)
 		goto cleanup;
 
@@ -2144,7 +2144,7 @@ ebews_fetch_items (EBookBackendEws *ebews,
 			(cnc, EWS_PRIORITY_MEDIUM,
 			 dl_ids, "Default", NULL,
 			 FALSE, NULL, &new_items, NULL, NULL,
-			 NULL, error);
+			 cancellable, error);
 	if (*error)
 		goto cleanup;
 
@@ -2168,7 +2168,7 @@ ebews_fetch_items (EBookBackendEws *ebews,
 			goto cleanup;
 
 		d_name = e_ews_item_get_subject (item);
-		e_ews_connection_expand_dl (cnc, EWS_PRIORITY_MEDIUM, mb, &members, &includes_last, NULL, error);
+		e_ews_connection_expand_dl (cnc, EWS_PRIORITY_MEDIUM, mb, &members, &includes_last, priv->cancellable, error);
 		if (*error)
 			goto cleanup;
 
@@ -2229,7 +2229,7 @@ ebews_start_sync (gpointer data)
 							 "IdOnly", NULL,
 							 EWS_MAX_FETCH_COUNT, &includes_last_item,
 							 &items_created, &items_updated,
-							 &items_deleted, NULL, &error);
+							 &items_deleted, priv->cancellable, &error);
 
 		if (error)
 			break;
@@ -2238,7 +2238,7 @@ ebews_start_sync (gpointer data)
 			ebews_sync_deleted_items (ebews, items_deleted, &error);
 
 		if (items_created)
-			ebews_fetch_items (ebews, items_created, TRUE, NULL, &error);
+			ebews_fetch_items (ebews, items_created, TRUE, NULL, priv->cancellable, &error);
 
 		if (error) {
 			if (items_updated) {
@@ -2250,7 +2250,7 @@ ebews_start_sync (gpointer data)
 		}
 
 		if (items_updated)
-			ebews_fetch_items (ebews, items_updated, TRUE, NULL, &error);
+			ebews_fetch_items (ebews, items_updated, TRUE, NULL, priv->cancellable, &error);
 
 		if (error)
 			break;
@@ -2659,7 +2659,7 @@ e_book_backend_ews_authenticate_user (EBookBackend *backend,
 		fid->id = g_strdup ("contacts");
 		fid->is_distinguished_id = TRUE;
 		ids = g_slist_append (ids, fid);
-		e_ews_connection_get_folder (cnc, EWS_PRIORITY_MEDIUM, "Default", NULL, ids, &folders, NULL, &error);
+		e_ews_connection_get_folder (cnc, EWS_PRIORITY_MEDIUM, "Default", NULL, ids, &folders, cancellable, &error);
 
 		e_ews_folder_free_fid (fid);
 		g_slist_free (ids);
@@ -2700,6 +2700,12 @@ e_book_backend_ews_notify_online_cb (EBookBackend *backend,
 	ebews->priv->is_online = is_online;
 
 	if (e_book_backend_is_opened (backend)) {
+		if (ebews->priv->cancellable) {
+			g_cancellable_cancel (ebews->priv->cancellable);
+			g_object_unref (ebews->priv->cancellable);
+			ebews->priv->cancellable = NULL;
+		}
+
 		if (!is_online) {
 			e_book_backend_notify_readonly (backend, TRUE);
 			e_book_backend_notify_online (backend, FALSE);
@@ -2708,6 +2714,8 @@ e_book_backend_ews_notify_online_cb (EBookBackend *backend,
 				ebews->priv->cnc = NULL;
 			}
 		} else {
+			ebews->priv->cancellable = g_cancellable_new ();
+
 			e_book_backend_notify_readonly (backend, !ebews->priv->is_writable);
 			e_book_backend_notify_online (backend, TRUE);
 			e_book_backend_notify_auth_required (backend, TRUE, NULL);
@@ -2815,6 +2823,12 @@ e_book_backend_ews_dispose (GObject *object)
 	bews = E_BOOK_BACKEND_EWS (object);
 	priv = bews->priv;
 
+	if (priv->cancellable) {
+		g_cancellable_cancel (priv->cancellable);
+		g_object_unref (priv->cancellable);
+		priv->cancellable = NULL;
+	}
+
 	if (priv->cnc) {
 		g_object_unref (priv->cnc);
 		priv->cnc = NULL;
@@ -2921,6 +2935,7 @@ e_book_backend_ews_init (EBookBackendEws *backend)
 
 	bews->priv = priv;
 	g_static_rec_mutex_init (&priv->rec_mutex);
+	priv->cancellable = g_cancellable_new ();
 
 	g_signal_connect (
 		bews, "notify::online",
