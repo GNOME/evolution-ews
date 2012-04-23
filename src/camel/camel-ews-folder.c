@@ -821,6 +821,9 @@ ews_synchronize_sync (CamelFolder *folder,
 		if (flags_changed & (CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_FORWARDED | CAMEL_MESSAGE_FLAGGED)) {
 			mi_list = g_slist_append (mi_list, mi);
 			mi_list_len++;
+
+			if (flags_changed & CAMEL_MESSAGE_DELETED)
+				deleted_uids = g_slist_prepend (deleted_uids, (gpointer) camel_pstring_strdup (uids->pdata[i]));
 		} else if (flags_changed & CAMEL_MESSAGE_DELETED) {
 			deleted_uids = g_slist_prepend (deleted_uids, (gpointer) camel_pstring_strdup (uids->pdata[i]));
 			camel_message_info_free (mi);
