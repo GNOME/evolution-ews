@@ -787,6 +787,30 @@ ews_sync_mi_flags (CamelFolder *folder,
 					      msg_update_flags, mi_list, NULL,
 					      cancellable, error);
 }
+
+static gboolean
+ews_folder_is_trash (CamelFolder *folder)
+{
+	CamelStore *parent_store;
+	CamelEwsStore *ews_store;
+	gboolean is_deleted_items;
+	gchar *folder_id;
+
+	g_return_val_if_fail (folder != NULL, FALSE);
+
+	parent_store = camel_folder_get_parent_store (folder);
+	ews_store = CAMEL_EWS_STORE (parent_store);
+
+	g_return_val_if_fail (ews_store != NULL, FALSE);
+
+	folder_id = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, camel_folder_get_full_name (folder));
+	is_deleted_items = folder_id &&
+		(camel_ews_store_summary_get_folder_flags (ews_store->summary, folder_id, NULL) & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH;
+	g_free (folder_id);
+
+	return is_deleted_items;
+}
+
 static gboolean
 ews_synchronize_sync (CamelFolder *folder,
                       gboolean expunge,
@@ -847,7 +871,7 @@ ews_synchronize_sync (CamelFolder *folder,
 		success = ews_sync_mi_flags (folder, mi_list, cancellable, error);
 
 	if (deleted_uids)
-		success = ews_delete_messages (folder, deleted_uids, FALSE, cancellable, error);
+		success = ews_delete_messages (folder, deleted_uids, ews_folder_is_trash (folder), cancellable, error);
 
 	camel_folder_summary_save_to_db (folder->summary, NULL);
 	camel_folder_free_uids (folder, uids);
@@ -1432,6 +1456,7 @@ ews_expunge_sync (CamelFolder *folder,
 	CamelStore *parent_store;
 	GSList *deleted_items = NULL;
 	gint i;
+	gboolean is_trash;
 	GPtrArray *known_uids;
 
 	parent_store = camel_folder_get_parent_store (folder);
@@ -1440,7 +1465,7 @@ ews_expunge_sync (CamelFolder *folder,
 	if (!camel_ews_store_connected (ews_store, error))
 		return FALSE;
 
-	/* FIXME Run expunge on just trash folder once we are able to identify the exact trash */
+	is_trash = ews_folder_is_trash (folder);
 
 	camel_folder_summary_prepare_fetch_all (folder->summary, NULL);
 	known_uids = camel_folder_summary_get_array (folder->summary);
@@ -1453,7 +1478,7 @@ ews_expunge_sync (CamelFolder *folder,
 
 		info = camel_folder_summary_get (folder->summary, uid);
 		ews_info = (CamelEwsMessageInfo *) info;
-		if (ews_info && (ews_info->info.flags & CAMEL_MESSAGE_DELETED))
+		if (ews_info && (is_trash || (ews_info->info.flags & CAMEL_MESSAGE_DELETED) != 0))
 			deleted_items = g_slist_prepend (deleted_items, (gpointer) camel_pstring_strdup (uid));
 
 		camel_message_info_free (info);
