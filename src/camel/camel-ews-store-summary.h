@@ -151,6 +151,10 @@ gchar *		camel_ews_store_summary_get_folder_id_from_name
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_name);
 
+gchar *		camel_ews_store_summary_get_folder_id_from_folder_type
+						(CamelEwsStoreSummary *ews_summary,
+						 guint64 folder_type);
+
 gboolean	camel_ews_store_summary_has_folder
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *id);

@@ -724,11 +724,49 @@ camel_ews_store_summary_get_folder_id_from_name (CamelEwsStoreSummary *ews_summa
 {
 	gchar *folder_id;
 
+	g_return_val_if_fail (ews_summary != NULL, NULL);
+	g_return_val_if_fail (folder_name != NULL, NULL);
+
 	S_LOCK (ews_summary);
 
 	folder_id = g_hash_table_lookup (ews_summary->priv->fname_id_hash, folder_name);
 	if (folder_id)
 		folder_id = g_strdup (folder_id);
+
+	S_UNLOCK (ews_summary);
+
+	return folder_id;
+}
+
+gchar *
+camel_ews_store_summary_get_folder_id_from_folder_type (CamelEwsStoreSummary *ews_summary,
+							guint64 folder_type)
+{
+	gchar *folder_id = NULL;
+	GSList *folders, *l;
+
+	g_return_val_if_fail (ews_summary != NULL, NULL);
+	g_return_val_if_fail ((folder_type & CAMEL_FOLDER_TYPE_MASK) != 0, NULL);
+
+	folder_type = folder_type & CAMEL_FOLDER_TYPE_MASK;
+
+	S_LOCK (ews_summary);
+
+	folders = camel_ews_store_summary_get_folders (ews_summary, NULL);
+
+	for (l = folders; l != NULL; l = g_slist_next (l)) {
+		gchar *id = l->data;
+		guint64 folder_flags;
+
+		folder_flags = camel_ews_store_summary_get_folder_flags (ews_summary, id, NULL);
+		if ((folder_flags & CAMEL_FOLDER_TYPE_MASK) == folder_type) {
+			folder_id = id;
+			l->data = NULL;
+			break;
+		}
+	}
+
+	g_slist_free_full (folders, g_free);
 
 	S_UNLOCK (ews_summary);
 

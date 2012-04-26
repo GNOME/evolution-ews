@@ -1021,7 +1021,26 @@ ews_get_trash_folder_sync (CamelStore *store,
                            GCancellable *cancellable,
                            GError **error)
 {
-	return NULL;
+	CamelEwsStore *ews_store;
+	CamelFolder *trash = NULL;
+	gchar *folder_id, *folder_name;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_STORE (store), NULL);
+
+	ews_store = CAMEL_EWS_STORE (store);
+	folder_id = camel_ews_store_summary_get_folder_id_from_folder_type (ews_store->summary, CAMEL_FOLDER_TYPE_TRASH);
+
+	if (!folder_id)
+		return NULL;
+
+	folder_name = camel_ews_store_summary_get_folder_full_name (ews_store->summary, folder_id, NULL);
+
+	trash = ews_get_folder_sync (store, folder_name, 0, cancellable, error);
+
+	g_free (folder_name);
+	g_free (folder_id);
+
+	return trash;
 }
 
 static gboolean
