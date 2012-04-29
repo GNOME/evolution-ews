@@ -1,3 +1,41 @@
+Evolution-EWS 3.5.1 2012-04-30
+------------------------------
+
+Bug Fixes:
+	Bug 653631 - Empty trash doesn't work (Milan Crha)
+	Bug 659717 - free busy not working (Punit Jain)
+	Bug 661436 - Search is required for GAL (Milan Crha)
+	Bug 661979 - Crash in e_ews_connection_sync_folder_items_start
+	             (Milan Crha)
+	Bug 664637 - Deleted messages appear in Inbox (Milan Crha)
+	Bug 668555 - Crash in ews_cal_sync_items_ready_cb (Punit Jain)
+	Bug 670217 - Doesn't show all calendar events (Milan Crha)
+	Bug 670457 - Add bulk methods to ECalClient (Milan Crha)
+	Bug 670944 - Option to handle out of office without date range
+	             (Punit Jain)
+	Bug 671624 - crash in e_ews_folder_get_folder_type (Punit Jain)
+	Bug 671969 - Crash in g_thread_join, e_ews_connection_dispose
+	             (Milan Crha)
+	Bug 672175 - Make CamelFolderSearch cancellable (Milan Crha)
+	Bug 672448 - compiler warnings when flag is set to O2 (Punit Jain)
+	Bug 672448 - memory corruption related and other issues (Punit Jain)
+	Bug 673349 - Missing charset breaks setting of utf-8 strings
+	             (Milan Crha)
+
+Miscellaneous Changes:
+	Fix compiler warning for portability (Vibha Yadav)
+	Fix possible crash at the end of autodiscovery (Milan Crha)
+	Report errors from backends in their error domain (Milan Crha)
+
+Translations:
+	Marek Černocký (cs)
+	Daniel Mustieles (es)
+	Bruno Brouard (fr)
+	Fran Diéguez (gl)
+	Matej Urbančič (sl)
+	Мирослав Николић (sr)
+
+
 Evolution-EWS 3.4.0 2012-03-26
 ------------------------------
 
