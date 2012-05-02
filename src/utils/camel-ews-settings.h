@@ -55,31 +55,46 @@ struct _CamelEwsSettingsClass {
 	CamelOfflineSettingsClass parent_class;
 };
 
-GType		camel_ews_settings_get_type			(void) G_GNUC_CONST;
-gboolean	camel_ews_settings_get_check_all		(CamelEwsSettings *settings);
-void		camel_ews_settings_set_check_all		(CamelEwsSettings *settings,
-								 gboolean check_all);
-const gchar *	camel_ews_settings_get_email			(CamelEwsSettings *settings);
-void		camel_ews_settings_set_email			(CamelEwsSettings *settings,
-								 const gchar *email);
-gboolean	camel_ews_settings_get_filter_junk		(CamelEwsSettings *settings);
-void		camel_ews_settings_set_filter_junk		(CamelEwsSettings *settings,
-								 gboolean filter_junk);
-gboolean	camel_ews_settings_get_filter_junk_inbox	(CamelEwsSettings *settings);
-void		camel_ews_settings_set_filter_junk_inbox	(CamelEwsSettings *settings,
-								 gboolean filter_junk_inbox);
-const gchar *	camel_ews_settings_get_hosturl			(CamelEwsSettings *settings);
-void		camel_ews_settings_set_hosturl			(CamelEwsSettings *settings,
-								 const gchar *hosturl);
-const gchar *	camel_ews_settings_get_oaburl			(CamelEwsSettings *settings);
-void		camel_ews_settings_set_oaburl			(CamelEwsSettings *settings,
-								 const gchar *oaburl);
-gboolean	camel_ews_settings_get_oab_offline		(CamelEwsSettings *settings);
-void		camel_ews_settings_set_oab_offline		(CamelEwsSettings *settings,
-								 gboolean oab_offline);
-const gchar *	camel_ews_settings_get_oal_selected		(CamelEwsSettings *settings);
-void		camel_ews_settings_set_oal_selected		(CamelEwsSettings *settings,
-								 const gchar *oal_selected);
+GType		camel_ews_settings_get_type	(void) G_GNUC_CONST;
+gboolean	camel_ews_settings_get_check_all
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_check_all
+						(CamelEwsSettings *settings,
+						 gboolean check_all);
+const gchar *	camel_ews_settings_get_email	(CamelEwsSettings *settings);
+gchar *		camel_ews_settings_dup_email	(CamelEwsSettings *settings);
+void		camel_ews_settings_set_email	(CamelEwsSettings *settings,
+						 const gchar *email);
+gboolean	camel_ews_settings_get_filter_junk
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_filter_junk
+						(CamelEwsSettings *settings,
+						 gboolean filter_junk);
+gboolean	camel_ews_settings_get_filter_junk_inbox
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_filter_junk_inbox
+						(CamelEwsSettings *settings,
+						 gboolean filter_junk_inbox);
+const gchar *	camel_ews_settings_get_hosturl	(CamelEwsSettings *settings);
+gchar *		camel_ews_settings_dup_hosturl	(CamelEwsSettings *settings);
+void		camel_ews_settings_set_hosturl	(CamelEwsSettings *settings,
+						 const gchar *hosturl);
+const gchar *	camel_ews_settings_get_oaburl	(CamelEwsSettings *settings);
+gchar *		camel_ews_settings_dup_oaburl	(CamelEwsSettings *settings);
+void		camel_ews_settings_set_oaburl	(CamelEwsSettings *settings,
+						 const gchar *oaburl);
+gboolean	camel_ews_settings_get_oab_offline
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_oab_offline
+						(CamelEwsSettings *settings,
+						 gboolean oab_offline);
+const gchar *	camel_ews_settings_get_oal_selected
+						(CamelEwsSettings *settings);
+gchar *		camel_ews_settings_dup_oal_selected
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_oal_selected
+						(CamelEwsSettings *settings,
+						 const gchar *oal_selected);
 
 G_END_DECLS
 
