@@ -19,7 +19,6 @@ libcamelews_la_CPPFLAGS = \
 
 libcamelews_la_SOURCES = 			\
 	camel-ews-folder.c                	\
-	camel-ews-settings.c               	\
 	camel-ews-store-summary.c              	\
 	camel-ews-store.c                 	\
 	camel-ews-summary.c               	\
@@ -30,7 +29,6 @@ libcamelews_la_SOURCES = 			\
 noinst_HEADERS =         			\
 	camel-ews-folder.h			\
 	camel-ews-private.h			\
-	camel-ews-settings.h              	\
 	camel-ews-store-summary.h              	\
 	camel-ews-store.h			\
 	camel-ews-summary.h			\

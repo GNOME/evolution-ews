@@ -14,6 +14,8 @@ libewsutils_la_CPPFLAGS = \
 	$(LIBEDATACAL_CFLAGS)
 
 libewsutils_la_SOURCES =				\
+	camel-ews-settings.c				\
+	camel-ews-settings.h				\
 	ews-esource-utils.h				\
 	ews-esource-utils.c				\
 	e-sqlite3-vfs.c					\
