@@ -28,8 +28,10 @@
 #include <mail/e-mail-backend.h>
 
 #include <camel/camel.h>
+#if 0  /* ACCOUNT_MGMT */
 #include <libedataserver/e-account.h>
 #include <libedataserver/e-account-list.h>
+#endif /* ACCOUNT_MGMT */
 #include <libebook/e-book.h>
 
 #include "camel/camel-ews-store-summary.h"

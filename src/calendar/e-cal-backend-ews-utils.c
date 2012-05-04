@@ -35,7 +35,6 @@
 #include <libecal/e-cal-recur.h>
 #include <libecal/e-cal-time-util.h>
 #include <libsoup/soup-misc.h>
-#include <libedataserver/e-source-list.h>
 
 #include "server/e-ews-connection.h"
 #include "server/e-ews-message.h"

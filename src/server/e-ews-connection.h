@@ -31,6 +31,7 @@
 #include "ews-errors.h"
 #include "e-ews-folder.h"
 #include "e-ews-item.h"
+#include "camel-ews-settings.h"
 
 G_BEGIN_DECLS
 
@@ -179,6 +180,9 @@ typedef struct {
 	gchar *ext_reply;	/*External Reply */
 } OOFSettings;
 
+void		ews_oal_free			(EwsOAL *oal);
+void		ews_oal_details_free		(EwsOALDetails *details);
+
 GType		e_ews_connection_get_type	(void);
 EEwsConnection *e_ews_connection_new		(const gchar *uri,
 						 const gchar *username,
@@ -194,13 +198,21 @@ void		e_ews_connection_authenticate	(EEwsConnection *cnc,
 						 const gchar *passwd,
 						 GError *error);
 
-typedef void (*EEwsAutoDiscoverCallback) (EwsUrls *urls, gpointer user_data, GError *error);
-void		e_ews_autodiscover_ws_url	(EEwsAutoDiscoverCallback callback,
-						 gpointer cbdata,
-						 const gchar *email,
+gboolean	e_ews_autodiscover_ws_url_sync	(CamelEwsSettings *settings,
+						 const gchar *email_address,
 						 const gchar *password,
-						 const gchar *ews_url,
-						 const gchar *username);
+						 GCancellable *cancellable,
+						 GError **error);
+void		e_ews_autodiscover_ws_url	(CamelEwsSettings *settings,
+						 const gchar *email_address,
+						 const gchar *password,
+						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
+						 gpointer user_data);
+gboolean	e_ews_autodiscover_ws_url_finish
+						(CamelEwsSettings *settings,
+						 GAsyncResult *result,
+						 GError **error);
 void		e_ews_connection_set_mailbox	(EEwsConnection *cnc,
 						 const gchar *email);
 
@@ -683,6 +695,11 @@ GSList *	e_ews_connection_get_attachments_sync
 						 GCancellable *cancellable,
 						 GError **error);
 
+gboolean	e_ews_connection_get_oal_list_sync
+						(EEwsConnection *cnc,
+						 GSList **oals,
+						 GCancellable *cancellable,
+						 GError **error);
 void		e_ews_connection_get_oal_list	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GAsyncReadyCallback callback,
@@ -692,7 +709,13 @@ gboolean	e_ews_connection_get_oal_list_finish
 						 GAsyncResult *result,
 						 GSList **oals,
 						 GError **error);
-
+gboolean	e_ews_connection_get_oal_detail_sync
+						(EEwsConnection *cnc,
+						 const gchar *oal_id,
+						 const gchar *oal_element,
+						 GSList **elements,
+						 GCancellable *cancellable,
+						 GError **error);
 void		e_ews_connection_get_oal_detail	(EEwsConnection *cnc,
 						 const gchar *oal_id,
 						 const gchar *oal_element,
@@ -703,13 +726,6 @@ gboolean	e_ews_connection_get_oal_detail_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 GSList **elements,
-						 GError **error);
-gboolean	e_ews_connection_get_oal_detail_sync
-						(EEwsConnection *cnc,
-						 const gchar *oal_id,
-						 const gchar *oal_element,
-						 GSList **elements,
-						 GCancellable *cancellable,
 						 GError **error);
 
 void		e_ews_connection_get_free_busy	(EEwsConnection *cnc,
@@ -732,25 +748,24 @@ gboolean	e_ews_connection_get_free_busy_sync
 						 GSList **free_busy,
 						 GCancellable *cancellable,
 						 GError **error);
-
-void		e_ews_connection_download_oal_file
-						(EEwsConnection *cnc,
-						 const gchar *cache_filename,
-						 EwsProgressFn progress_fn,
-						 gpointer progress_data,
-						 GCancellable *cancellable,
-						 GAsyncReadyCallback callback,
-						 gpointer user_data);
-gboolean	e_ews_connection_download_oal_file_finish
-						(EEwsConnection *cnc,
-						 GAsyncResult *result,
-						 GError **error);
 gboolean	e_ews_connection_download_oal_file_sync
 						(EEwsConnection *cnc,
 						 const gchar *cache_filename,
 						 EwsProgressFn progress_fn,
 						 gpointer progress_data,
 						 GCancellable *cancellable,
+						 GError **error);
+void		e_ews_connection_download_oal_file
+						(EEwsConnection *cnc,
+						 const gchar *cache_filename,
+						 EwsProgressFn progress_fn,
+						 gpointer progress_data,
+						 GCancellable *cancellable,
+						 GAsyncReadyCallback cb,
+						 gpointer user_data);
+gboolean	e_ews_connection_download_oal_file_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
 						 GError **error);
 
 void		e_ews_connection_get_delegate	(EEwsConnection *cnc,

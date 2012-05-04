@@ -13,5 +13,10 @@ src/camel/camel-ews-provider.c
 src/camel/camel-ews-store.c
 src/camel/camel-ews-transport.c
 src/camel/camel-ews-utils.c
+src/modules/e-mail-config-ews-autodiscover.c
+src/modules/e-mail-config-ews-backend.c
+src/modules/e-mail-config-ews-gal.c
+src/modules/e-mail-config-ews-ooo-page.c
+src/modules/module-ews-backend.c
 src/server/e-ews-connection.c
 src/utils/ews-camel-common.c

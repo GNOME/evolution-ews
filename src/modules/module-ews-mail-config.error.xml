@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<error-list domain="ews">
+
+  <error type="warning" id="autodiscovery-error">
+    <primary>Autodiscovery query failed.</primary>
+    <secondary>The reported error was &quot;{0}&quot;.</secondary>
+  </error>
+
+  <error type="warning" id="query-oal-error">
+    <primary>Failed to locate offline address books.</primary>
+    <secondary>The reported error was &quot;{0}&quot;.</secondary>
+  </error>
+
+</error-list>

@@ -75,6 +75,10 @@ gboolean	camel_ews_settings_get_filter_junk_inbox
 void		camel_ews_settings_set_filter_junk_inbox
 						(CamelEwsSettings *settings,
 						 gboolean filter_junk_inbox);
+const gchar *	camel_ews_settings_get_gal_uid	(CamelEwsSettings *settings);
+gchar *		camel_ews_settings_dup_gal_uid	(CamelEwsSettings *settings);
+void		camel_ews_settings_set_gal_uid	(CamelEwsSettings *settings,
+						 const gchar *gal_uid);
 const gchar *	camel_ews_settings_get_hosturl	(CamelEwsSettings *settings);
 gchar *		camel_ews_settings_dup_hosturl	(CamelEwsSettings *settings);
 void		camel_ews_settings_set_hosturl	(CamelEwsSettings *settings,

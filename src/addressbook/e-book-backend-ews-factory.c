@@ -26,6 +26,9 @@
 #endif
 
 #include <libedata-book/e-book-backend-factory.h>
+
+#include "server/e-source-ews-folder.h"
+
 #include "e-book-backend-ews.h"
 
 typedef EBookBackendFactory EBookBackendEwsFactory;
@@ -63,6 +66,8 @@ e_book_backend_ews_factory_init (EBookBackendFactory *factory)
 G_MODULE_EXPORT void
 e_module_load (GTypeModule *type_module)
 {
+	e_source_ews_folder_type_register (type_module);
+
 	e_book_backend_ews_factory_register_type (type_module);
 }
 

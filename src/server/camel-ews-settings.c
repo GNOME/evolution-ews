@@ -18,6 +18,8 @@
 
 #include "camel-ews-settings.h"
 
+#include <libedataserver/e-data-server-util.h>
+
 #define CAMEL_EWS_SETTINGS_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE \
 	((obj), CAMEL_TYPE_EWS_SETTINGS, CamelEwsSettingsPrivate))
@@ -29,6 +31,7 @@ struct _CamelEwsSettingsPrivate {
 	gboolean filter_junk_inbox;
 	gboolean oab_offline;
 	gchar *email;
+	gchar *gal_uid;
 	gchar *hosturl;
 	gchar *oaburl;
 	gchar *oal_selected;
@@ -41,6 +44,7 @@ enum {
 	PROP_EMAIL,
 	PROP_FILTER_JUNK,
 	PROP_FILTER_JUNK_INBOX,
+	PROP_GAL_UID,
 	PROP_HOST,
 	PROP_HOSTURL,
 	PROP_OABURL,
@@ -93,6 +97,12 @@ ews_settings_set_property (GObject *object,
 			camel_ews_settings_set_filter_junk_inbox (
 				CAMEL_EWS_SETTINGS (object),
 				g_value_get_boolean (value));
+			return;
+
+		case PROP_GAL_UID:
+			camel_ews_settings_set_gal_uid (
+				CAMEL_EWS_SETTINGS (object),
+				g_value_get_string (value));
 			return;
 
 		case PROP_HOST:
@@ -189,6 +199,13 @@ ews_settings_get_property (GObject *object,
 				CAMEL_EWS_SETTINGS (object)));
 			return;
 
+		case PROP_GAL_UID:
+			g_value_take_string (
+				value,
+				camel_ews_settings_dup_gal_uid (
+				CAMEL_EWS_SETTINGS (object)));
+			return;
+
 		case PROP_HOST:
 			g_value_take_string (
 				value,
@@ -259,6 +276,7 @@ ews_settings_finalize (GObject *object)
 	g_mutex_free (priv->property_lock);
 
 	g_free (priv->email);
+	g_free (priv->gal_uid);
 	g_free (priv->hosturl);
 	g_free (priv->oaburl);
 	g_free (priv->oal_selected);
@@ -329,6 +347,18 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 			"Filter Junk Inbox",
 			"Whether to filter junk from Inbox only",
 			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_GAL_UID,
+		g_param_spec_string (
+			"gal-uid",
+			"GAL UID",
+			"Global Address List data source UID",
+			NULL,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
@@ -486,7 +516,7 @@ camel_ews_settings_set_email (CamelEwsSettings *settings,
 	g_mutex_lock (settings->priv->property_lock);
 
 	g_free (settings->priv->email);
-	settings->priv->email = g_strdup (email);
+	settings->priv->email = e_util_strdup_strip (email);
 
 	g_mutex_unlock (settings->priv->property_lock);
 
@@ -574,6 +604,48 @@ camel_ews_settings_set_filter_junk_inbox (CamelEwsSettings *settings,
 }
 
 const gchar *
+camel_ews_settings_get_gal_uid (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
+
+	return settings->priv->gal_uid;
+}
+
+gchar *
+camel_ews_settings_dup_gal_uid (CamelEwsSettings *settings)
+{
+	const gchar *protected;
+	gchar *duplicate;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
+
+	g_mutex_lock (settings->priv->property_lock);
+
+	protected = camel_ews_settings_get_gal_uid (settings);
+	duplicate = g_strdup (protected);
+
+	g_mutex_unlock (settings->priv->property_lock);
+
+	return duplicate;
+}
+
+void
+camel_ews_settings_set_gal_uid (CamelEwsSettings *settings,
+                                const gchar *gal_uid)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	g_mutex_lock (settings->priv->property_lock);
+
+	g_free (settings->priv->gal_uid);
+	settings->priv->gal_uid = e_util_strdup_strip (gal_uid);
+
+	g_mutex_unlock (settings->priv->property_lock);
+
+	g_object_notify (G_OBJECT (settings), "gal-uid");
+}
+
+const gchar *
 camel_ews_settings_get_hosturl (CamelEwsSettings *settings)
 {
 	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
@@ -608,7 +680,7 @@ camel_ews_settings_set_hosturl (CamelEwsSettings *settings,
 	g_mutex_lock (settings->priv->property_lock);
 
 	g_free (settings->priv->hosturl);
-	settings->priv->hosturl = g_strdup (hosturl);
+	settings->priv->hosturl = e_util_strdup_strip (hosturl);
 
 	g_mutex_unlock (settings->priv->property_lock);
 
@@ -650,7 +722,7 @@ camel_ews_settings_set_oaburl (CamelEwsSettings *settings,
 	g_mutex_lock (settings->priv->property_lock);
 
 	g_free (settings->priv->oaburl);
-	settings->priv->oaburl = g_strdup (oaburl);
+	settings->priv->oaburl = e_util_strdup_strip (oaburl);
 
 	g_mutex_unlock (settings->priv->property_lock);
 
@@ -711,7 +783,7 @@ camel_ews_settings_set_oal_selected (CamelEwsSettings *settings,
 	g_mutex_lock (settings->priv->property_lock);
 
 	g_free (settings->priv->oal_selected);
-	settings->priv->oal_selected = g_strdup (oal_selected);
+	settings->priv->oal_selected = e_util_strdup_strip (oal_selected);
 
 	g_mutex_unlock (settings->priv->property_lock);
 

@@ -12,6 +12,9 @@
 #include <string.h>
 
 #include <libedata-cal/e-cal-backend-factory.h>
+
+#include "server/e-source-ews-folder.h"
+
 #include "e-cal-backend-ews.h"
 
 #define FACTORY_NAME "ews"
@@ -106,6 +109,8 @@ e_cal_backend_ews_todos_factory_init (ECalBackendFactory *factory)
 G_MODULE_EXPORT void
 e_module_load (GTypeModule *type_module)
 {
+	e_source_ews_folder_type_register (type_module);
+
 	e_cal_backend_ews_events_factory_register_type (type_module);
 	e_cal_backend_ews_journal_factory_register_type (type_module);
 	e_cal_backend_ews_todos_factory_register_type (type_module);

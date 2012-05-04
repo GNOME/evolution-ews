@@ -45,12 +45,12 @@ which needs to be better organized via functions */
 #include <libical/icalcomponent.h>
 #include <libical/icalparser.h>
 
+#include "server/camel-ews-settings.h"
 #include "server/e-ews-connection.h"
 #include "server/e-ews-item-change.h"
 #include "server/e-ews-message.h"
 
 #include "utils/ews-camel-common.h"
-#include "utils/camel-ews-settings.h"
 
 #include "camel-ews-folder.h"
 #include "camel-ews-private.h"

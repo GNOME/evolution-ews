@@ -35,33 +35,38 @@
 #include <glib/gstdio.h>
 #include <glib/gi18n-lib.h>
 
-#include "libedataserver/e-sexp.h"
-#include "libedataserver/e-data-server-util.h"
-#include "libedataserver/e-flag.h"
-#include "libedataserver/e-url.h"
-#include "libebook/e-contact.h"
-#include "libebook/e-destination.h"
-#include "libedata-book/e-book-backend-sexp.h"
-#include "libedata-book/e-data-book.h"
-#include "libedata-book/e-data-book-view.h"
-#include "e-book-backend-ews.h"
-#include "e-book-backend-sqlitedb.h"
+#include <libedataserver/e-data-server-util.h>
+#include <libedataserver/e-flag.h>
+#include <libedataserver/e-sexp.h>
+#include <libedataserver/e-source-camel.h>
+#include <libedataserver/e-source-offline.h>
+#include <libedataserver/e-url.h>
+
+#include <libebook/e-contact.h>
+#include <libebook/e-destination.h>
+
+#include <libedata-book/e-book-backend-sexp.h>
+#include <libedata-book/e-data-book.h>
+#include <libedata-book/e-data-book-view.h>
+
 #include "lzx/ews-oal-decompress.h"
-#include "ews-oab-decoder.h"
 
 #include "server/e-ews-item-change.h"
 #include "server/e-ews-message.h"
 #include "server/e-ews-connection.h"
 #include "server/e-ews-item.h"
+#include "server/e-source-ews-folder.h"
 
 #include "utils/e-ews-query-to-restriction.h"
+
+#include "e-book-backend-ews.h"
+#include "e-book-backend-sqlitedb.h"
+#include "ews-oab-decoder.h"
 
 #define d(x) x
 
 #define EDB_ERROR(_code) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, NULL)
 #define EDB_ERROR_EX(_code,_msg) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, _msg)
-
-G_DEFINE_TYPE (EBookBackendEws, e_book_backend_ews, E_TYPE_BOOK_BACKEND)
 
 static gboolean ebews_fetch_items (EBookBackendEws *ebews,  GSList *items, gboolean store_to_cache, GSList **vcards, GCancellable *cancellable, GError **error);
 
@@ -97,7 +102,6 @@ struct _EBookBackendEwsPrivate {
 	GThread *dthread;
 	SyncDelta *dlock;
 
-	ECredentials *credentials;
 	GCancellable *cancellable;
 };
 
@@ -120,6 +124,47 @@ enum {
 
 #define PRIV_LOCK(p)   (g_static_rec_mutex_lock (&(p)->rec_mutex))
 #define PRIV_UNLOCK(p) (g_static_rec_mutex_unlock (&(p)->rec_mutex))
+
+/* Forward Declarations */
+static void	e_book_backend_ews_authenticator_init
+				(ESourceAuthenticatorInterface *interface);
+
+G_DEFINE_TYPE_WITH_CODE (
+	EBookBackendEws,
+	e_book_backend_ews,
+	E_TYPE_BOOK_BACKEND,
+	G_IMPLEMENT_INTERFACE (
+		E_TYPE_SOURCE_AUTHENTICATOR,
+		e_book_backend_ews_authenticator_init))
+
+static CamelEwsSettings *
+book_backend_ews_get_collection_settings (EBookBackendEws *backend)
+{
+	ESource *source;
+	ESource *collection;
+	ESourceCamel *extension;
+	ESourceRegistry *registry;
+	CamelSettings *settings;
+	const gchar *extension_name;
+
+	source = e_backend_get_source (E_BACKEND (backend));
+	registry = e_book_backend_get_registry (E_BOOK_BACKEND (backend));
+
+	extension_name = e_source_camel_get_extension_name ("ews");
+	e_source_camel_generate_subtype ("ews", CAMEL_TYPE_EWS_SETTINGS);
+
+	/* The collection settings live in our parent data source. */
+	collection = e_source_registry_find_extension (
+		registry, source, extension_name);
+	g_return_val_if_fail (collection != NULL, NULL);
+
+	extension = e_source_get_extension (collection, extension_name);
+	settings = e_source_camel_get_settings (extension);
+
+	g_object_unref (collection);
+
+	return CAMEL_EWS_SETTINGS (settings);
+}
 
 static void
 convert_error_to_edb_error (GError **perror)
@@ -156,12 +201,6 @@ convert_error_to_edb_error (GError **perror)
 
 	g_error_free (*perror);
 	*perror = error;
-}
-
-static void
-ews_auth_required (EBookBackend *backend)
-{
-	e_book_backend_notify_auth_required (backend, TRUE, NULL);
 }
 
 static gboolean
@@ -2358,7 +2397,7 @@ ebews_start_refreshing (EBookBackendEws *ebews)
 	PRIV_LOCK (priv);
 
 	if (e_backend_get_online (E_BACKEND (ebews)) &&
-	    priv->cnc != NULL&& priv->marked_for_offline)
+	    priv->cnc != NULL && priv->marked_for_offline)
 		fetch_deltas (ebews);
 
 	PRIV_UNLOCK (priv);
@@ -2410,13 +2449,19 @@ e_book_backend_ews_start_book_view (EBookBackend *backend,
 	GCancellable *cancellable;
 	GSList *ids = NULL, *mailboxes = NULL, *l, *contacts = NULL, *c;
 	EwsFolderId *fid;
+	ESource *source;
+	ESourceRegistry *registry;
+	ESourceEwsFolder *extension;
+	const gchar *extension_name;
 	GError *error = NULL;
 	gboolean includes_last_item;
-	ESource *source;
 
 	ebews = E_BOOK_BACKEND_EWS (backend);
 	priv = ebews->priv;
 	query = e_data_book_view_get_card_query (book_view);
+
+	registry = e_book_backend_get_registry (backend);
+	source = e_backend_get_source (E_BACKEND (backend));
 
 	e_data_book_view_ref (book_view);
 	e_data_book_view_notify_progress (book_view, -1, _("Searching..."));
@@ -2434,14 +2479,22 @@ e_book_backend_ews_start_book_view (EBookBackend *backend,
 		return;
 	}
 
-	if (!priv->cnc) {
-		error = EDB_ERROR (AUTHENTICATION_REQUIRED);
-		ews_auth_required (backend);
-		e_data_book_view_notify_complete (book_view, error);
-		e_data_book_view_unref (book_view);
-		g_error_free (error);
-		return;
+	if (priv->cnc == NULL) {
+		/* XXX Why doesn't start_book_view()
+		 *     get passed a GCancellable? */
+		e_source_registry_authenticate_sync (
+			registry, source,
+			E_SOURCE_AUTHENTICATOR (backend),
+			NULL, &error);
+		if (error != NULL) {
+			e_data_book_view_notify_complete (book_view, error);
+			e_data_book_view_unref (book_view);
+			g_error_free (error);
+			return;
+		}
 	}
+
+	g_return_if_fail (priv->cnc != NULL);
 
 	ebews_start_refreshing (ebews);
 
@@ -2459,7 +2512,9 @@ e_book_backend_ews_start_book_view (EBookBackend *backend,
 		return;
 	}
 
-	source = e_backend_get_source (E_BACKEND (backend));
+	extension_name = E_SOURCE_EXTENSION_EWS_FOLDER;
+	extension = e_source_get_extension (source, extension_name);
+
 	cancellable = g_cancellable_new ();
 
 	/* FIXME Need to convert the Ids from EwsLegacyId format to EwsId format using
@@ -2467,7 +2522,7 @@ e_book_backend_ews_start_book_view (EBookBackend *backend,
 	 * 2007 and 2007_SP1 */
 	fid = g_new0 (EwsFolderId, 1);
 	fid->id = g_strdup (priv->folder_id);
-	fid->change_key = e_source_get_duped_property (source, "change-key");
+	fid->change_key = e_source_ews_folder_dup_change_key (extension);
 	ids = g_slist_append (ids, fid);
 
 	/* We do not scan until we reach the last_item as it might be good enough to show first 100
@@ -2560,58 +2615,62 @@ e_book_backend_ews_load_source (EBookBackend *backend,
 {
 	EBookBackendEws *cbews;
 	EBookBackendEwsPrivate *priv;
+	CamelEwsSettings *settings;
+	ESourceExtension *extension;
 	const gchar *cache_dir, *email;
-	const gchar *folder_name;
-	const gchar *offline, *is_gal;
-	GError *err = NULL;
+	const gchar *display_name;
+	const gchar *extension_name;
+	const gchar *gal_uid;
+	const gchar *uid;
 
 	cbews = E_BOOK_BACKEND_EWS (backend);
 	priv = cbews->priv;
 
 	cache_dir = e_book_backend_get_cache_dir (backend);
-	email = e_source_get_property (source, "email");
-	is_gal = e_source_get_property (source, "gal");
+	settings = book_backend_ews_get_collection_settings (cbews);
+	email = camel_ews_settings_get_email (settings);
 
-	if (is_gal && !strcmp (is_gal, "1"))
-		priv->is_gal = TRUE;
+	uid = e_source_get_uid (source);
+	gal_uid = camel_ews_settings_get_gal_uid (settings);
+	priv->is_gal = (g_strcmp0 (uid, gal_uid) == 0);
+
+	display_name = e_source_get_display_name (source);
+
+	extension_name = E_SOURCE_EXTENSION_EWS_FOLDER;
+	extension = e_source_get_extension (source, extension_name);
+
+	priv->folder_id = e_source_ews_folder_dup_id (
+		E_SOURCE_EWS_FOLDER (extension));
+
+	priv->ebsdb = e_book_backend_sqlitedb_new (
+		cache_dir, email, priv->folder_id,
+		display_name, TRUE, perror);
+
+	if (priv->ebsdb == NULL)
+		return;
 
 	if (!priv->is_gal) {
-		priv->folder_id = e_source_get_duped_property (source, "folder-id");
-		folder_name = e_source_peek_name (source);
+		extension_name = E_SOURCE_EXTENSION_OFFLINE;
+		extension = e_source_get_extension (source, extension_name);
 
-		priv->ebsdb = e_book_backend_sqlitedb_new (cache_dir, email, priv->folder_id, folder_name, TRUE, &err);
-		if (err) {
-			g_propagate_error (perror, err);
-			return;
-		}
+		priv->marked_for_offline =
+			e_source_offline_get_stay_synchronized (
+			E_SOURCE_OFFLINE (extension));
 
-		offline = e_source_get_property (source, "offline_sync");
-		if (offline  && g_str_equal (offline, "1"))
-			priv->marked_for_offline = TRUE;
-	} else {
-		priv->folder_id = e_source_get_duped_property (source, "oal_id");
+	/* If folder_id is present it means the GAL is marked for
+	 * offline usage, we do not check for offline_sync property */
+	} else if (priv->folder_id != NULL) {
+		priv->folder_name = g_strdup (display_name);
+		priv->oab_url = camel_ews_settings_dup_oaburl (settings);
 
-		/* If folder_id is present it means the GAL is marked for offline usage, we do not check for offline_sync property */
-		if (priv->folder_id) {
-			priv->folder_name = g_strdup (e_source_peek_name (source));
-			priv->oab_url = e_source_get_duped_property (source, "oab_url");
+		/* setup stagging dir, remove any old files from there */
+		priv->attachment_dir = g_build_filename (
+			cache_dir, "attachments", NULL);
+		g_mkdir_with_parents (priv->attachment_dir, 0777);
 
-			/* setup stagging dir, remove any old files from there */
-			priv->attachment_dir = g_build_filename (cache_dir, "attachments", NULL);
-			g_mkdir_with_parents (priv->attachment_dir, 0777);
-
-			priv->ebsdb = e_book_backend_sqlitedb_new (cache_dir, email, priv->folder_id, priv->folder_name, TRUE, &err);
-			if (err) {
-				g_propagate_error (perror, err);
-				return;
-			}
-			priv->marked_for_offline = TRUE;
-			priv->is_writable = FALSE;
-		}
+		priv->marked_for_offline = TRUE;
+		priv->is_writable = FALSE;
 	}
-
-	if (e_backend_get_online (E_BACKEND (backend)))
-		e_book_backend_notify_auth_required (backend, TRUE, NULL);
 }
 
 static void
@@ -2621,80 +2680,6 @@ e_book_backend_ews_remove (EBookBackend *backend,
                            GCancellable *cancellable)
 {
 	e_data_book_respond_remove (book,  opid, EDB_ERROR (SUCCESS));
-}
-
-static void
-e_book_backend_ews_authenticate_user (EBookBackend *backend,
-                                      GCancellable *cancellable,
-                                      ECredentials *credentials)
-{
-	EBookBackendEws *ebews;
-	EBookBackendEwsPrivate *priv;
-	EEwsConnection *cnc = NULL;
-	ESource *esource;
-	GError *error = NULL;
-	GSList *folders = NULL, *ids = NULL;
-	EwsFolderId *fid = NULL;
-
-	const gchar *host_url;
-	const gchar *read_only;
-
-	ebews = E_BOOK_BACKEND_EWS (backend);
-	priv = ebews->priv;
-
-	if (!e_backend_get_online (E_BACKEND (backend))) {
-		e_book_backend_notify_opened (backend, EDB_ERROR (SUCCESS));
-		return;
-	}
-
-	if (priv->cnc) {
-		e_book_backend_notify_opened (backend, EDB_ERROR (SUCCESS));
-		return;
-	}
-
-	esource = e_backend_get_source (E_BACKEND (backend));
-	host_url = e_source_get_property (esource, "hosturl");
-	read_only = e_source_get_property (esource, "read_only");
-
-	cnc = e_ews_connection_new (host_url, e_credentials_peek (credentials, E_CREDENTIALS_KEY_USERNAME),
-					  e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD),
-					  NULL, NULL, &error);
-
-	if ((read_only && !strcmp (read_only, "true")) || priv->is_gal) {
-		priv->is_writable = FALSE;
-	} else
-		priv->is_writable = TRUE;
-
-	if (!error && cnc) {
-		/* a dummy request to make sure we have a authenticated connection */
-		fid = g_new0 (EwsFolderId, 1);
-		fid->id = g_strdup ("contacts");
-		fid->is_distinguished_id = TRUE;
-		ids = g_slist_append (ids, fid);
-		e_ews_connection_get_folder_sync (
-			cnc, EWS_PRIORITY_MEDIUM, "Default",
-			NULL, ids, &folders, cancellable, &error);
-
-		e_ews_folder_free_fid (fid);
-		g_slist_free (ids);
-		ids = NULL;
-	}
-
-	if (error) {
-		convert_error_to_edb_error (&error);
-
-		e_book_backend_notify_auth_required (backend, TRUE, priv->credentials);
-		e_book_backend_notify_opened (backend, error);
-		g_object_unref (cnc);
-		return;
-	}
-
-	priv->cnc = cnc;
-	priv->username = e_source_get_duped_property (esource, "username");
-	priv->password = g_strdup (e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD));
-
-	e_book_backend_notify_opened (backend, EDB_ERROR (SUCCESS));
-	e_book_backend_notify_readonly (backend, !priv->is_writable);
 }
 
 static void
@@ -2724,7 +2709,6 @@ e_book_backend_ews_notify_online_cb (EBookBackend *backend,
 
 			e_book_backend_notify_readonly (backend, !ebews->priv->is_writable);
 			e_book_backend_notify_online (backend, TRUE);
-			e_book_backend_notify_auth_required (backend, TRUE, NULL);
 		}
 	}
 }
@@ -2798,13 +2782,35 @@ e_book_backend_ews_open (EBookBackend *backend,
                          GCancellable *cancellable,
                          gboolean only_if_exists)
 {
-	GError *error = NULL;
+	EBookBackendEws *cbews;
+	ESourceRegistry *registry;
 	ESource *source;
+	GError *error = NULL;
 
+	cbews = E_BOOK_BACKEND_EWS (backend);
+
+	registry = e_book_backend_get_registry (backend);
 	source = e_backend_get_source (E_BACKEND (backend));
 	e_book_backend_ews_load_source (backend, source, only_if_exists, &error);
+
+	if (error == NULL) {
+		gboolean need_to_authenticate;
+
+		PRIV_LOCK (cbews->priv);
+		need_to_authenticate =
+			(cbews->priv->cnc == NULL) &&
+			(e_backend_get_online (E_BACKEND (backend)));
+		PRIV_UNLOCK (cbews->priv);
+
+		if (need_to_authenticate)
+			e_source_registry_authenticate_sync (
+				registry, source,
+				E_SOURCE_AUTHENTICATOR (backend),
+				cancellable, &error);
+	}
+
 	convert_error_to_edb_error (&error);
-	e_data_book_respond_open (book, opid, error);
+	e_book_backend_respond_opened (backend, book, opid, error);
 }
 
 /**
@@ -2891,15 +2897,104 @@ e_book_backend_ews_dispose (GObject *object)
 		priv->ebsdb = NULL;
 	}
 
-	e_credentials_free (priv->credentials);
-	priv->credentials = NULL;
-
 	g_static_rec_mutex_free (&priv->rec_mutex);
 
 	g_free (priv);
 	priv = NULL;
 
 	G_OBJECT_CLASS (e_book_backend_ews_parent_class)->dispose (object);
+}
+
+static ESourceAuthenticationResult
+book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
+                                    const GString *password,
+                                    GCancellable *cancellable,
+                                    GError **error)
+{
+	EBookBackendEws *backend;
+	EEwsConnection *connection;
+	ESourceAuthenticationResult result;
+	CamelEwsSettings *ews_settings;
+	CamelNetworkSettings *network_settings;
+	EwsFolderId *fid = NULL;
+	GSList *folders = NULL;
+	GSList *ids = NULL;
+	gchar *hosturl;
+	gchar *user;
+	GError *local_error = NULL;
+
+	/* This tests the password by fetching the contacts folder. */
+
+	backend = E_BOOK_BACKEND_EWS (authenticator);
+	ews_settings = book_backend_ews_get_collection_settings (backend);
+	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
+
+	network_settings = CAMEL_NETWORK_SETTINGS (ews_settings);
+	user = camel_network_settings_dup_user (network_settings);
+
+	connection = e_ews_connection_new (
+		hosturl, user, password->str, NULL, NULL, error);
+
+	if (connection == NULL) {
+		result = E_SOURCE_AUTHENTICATION_ERROR;
+		goto exit;
+	}
+
+	fid = g_new0 (EwsFolderId, 1);
+	fid->id = g_strdup ("contacts");
+	fid->is_distinguished_id = TRUE;
+	ids = g_slist_append (ids, fid);
+
+	e_ews_connection_get_folder_sync (
+		connection, EWS_PRIORITY_MEDIUM, "Default",
+		NULL, ids, &folders, cancellable, &local_error);
+
+	e_ews_folder_free_fid (fid);
+	g_slist_free (ids);
+	ids = NULL;
+
+	if (local_error == NULL) {
+
+		PRIV_LOCK (backend->priv);
+
+		if (backend->priv->cnc != NULL)
+			g_object_unref (backend->priv->cnc);
+		backend->priv->cnc = g_object_ref (connection);
+
+		/* Stash the username and password for later
+		 * reuse in Offline Address Book connections. */
+		g_free (backend->priv->username);
+		g_free (backend->priv->password);
+		backend->priv->username = g_strdup (user);
+		backend->priv->password = g_strdup (password->str);
+
+		PRIV_UNLOCK (backend->priv);
+
+		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
+
+	} else {
+		gboolean auth_failed;
+
+		auth_failed = g_error_matches (
+			local_error, EWS_CONNECTION_ERROR,
+			EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED);
+
+		if (auth_failed) {
+			g_clear_error (&local_error);
+			result = E_SOURCE_AUTHENTICATION_REJECTED;
+		} else {
+			g_propagate_error (error, local_error);
+			result = E_SOURCE_AUTHENTICATION_ERROR;
+		}
+	}
+
+	g_object_unref (connection);
+
+exit:
+	g_free (hosturl);
+	g_free (user);
+
+	return result;
 }
 
 static void
@@ -2921,11 +3016,16 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 	parent_class->get_contact             = e_book_backend_ews_get_contact;
 	parent_class->get_contact_list        = e_book_backend_ews_get_contact_list;
 	parent_class->remove                  = e_book_backend_ews_remove;
-	parent_class->authenticate_user       = e_book_backend_ews_authenticate_user;
 	parent_class->start_book_view         = e_book_backend_ews_start_book_view;
 	parent_class->stop_book_view          = e_book_backend_ews_stop_book_view;
 
 	object_class->dispose                 = e_book_backend_ews_dispose;
+}
+
+static void
+e_book_backend_ews_authenticator_init (ESourceAuthenticatorInterface *interface)
+{
+	interface->try_password_sync = book_backend_ews_try_password_sync;
 }
 
 static void

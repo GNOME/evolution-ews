@@ -74,7 +74,6 @@ AS_COMPILER_FLAGS(WARNING_FLAGS,
 	-Wno-unused-parameter
 	-Wno-deprecated-declarations
 	-Wdeclaration-after-statement
-	-Wno-unused-but-set-variable
 	-Werror-implicit-function-declaration
 	-Wformat-nonliteral -Wformat-security -Winit-self
 	-Wmissing-declarations -Wmissing-include-dirs
@@ -157,6 +156,11 @@ dnl ****************************
 PKG_CHECK_MODULES(EVOLUTION_SHELL, evolution-shell-3.0 >= evo_minimum_version)
 
 dnl ****************************
+dnl Check for evolution mail
+dnl ****************************
+PKG_CHECK_MODULES(EVOLUTION_MAIL, evolution-mail-3.0 >= evo_minimum_version)
+
+dnl ****************************
 dnl Check for sqlite3 
 dnl ****************************
 PKG_CHECK_MODULES(SQLITE3, sqlite3)
@@ -192,6 +196,9 @@ AC_SUBST_FILE(EVO_PLUGIN_RULE)
 dnl *******************
 dnl Special directories
 dnl *******************
+errordir=`$PKG_CONFIG --variable=errordir evolution-plugin-3.0`
+AC_SUBST(errordir)
+
 plugindir=`$PKG_CONFIG --variable=plugindir evolution-plugin-3.0`
 AC_SUBST(plugindir)
 
@@ -213,6 +220,11 @@ AC_SUBST(ecal_backenddir)
 ebook_backenddir=`$PKG_CONFIG --variable=backenddir libedata-book-1.2`
 AC_SUBST(ebook_backenddir)
 
+eds_moduledir=`$PKG_CONFIG --variable=moduledir libebackend-1.2`
+AC_SUBST(eds_moduledir)
+
+evo_moduledir=`$PKG_CONFIG --variable=moduledir evolution-shell-3.0`
+AC_SUBST(evo_moduledir)
 
 dnl *************
 dnl Gtk Doc stuff
@@ -229,11 +241,11 @@ src/server/Makefile
 src/server/tests/Makefile
 src/server/libeews.pc
 src/utils/Makefile
-src/account-setup-eplugin/Makefile
 src/addressbook/Makefile
 src/addressbook/lzx/Makefile
 src/calendar/Makefile
 src/camel/Makefile
+src/modules/Makefile
 po/Makefile.in
 ])
 AC_OUTPUT

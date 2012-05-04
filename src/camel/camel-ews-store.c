@@ -38,11 +38,9 @@
 
 #include <libedataserver/e-flag.h>
 
+#include "server/camel-ews-settings.h"
 #include "server/e-ews-item-change.h"
 #include "server/e-ews-message.h"
-
-#include "utils/camel-ews-settings.h"
-#include "utils/ews-esource-utils.h"
 
 #include "camel-ews-folder.h"
 #include "camel-ews-store.h"
@@ -167,11 +165,9 @@ ews_store_construct (CamelService *service,
                      GError **error)
 {
 	CamelEwsStore *ews_store;
-	CamelEwsStorePrivate *priv;
 	gchar *summary_file, *session_storage_path;
 
 	ews_store = (CamelEwsStore *) service;
-	priv = ews_store->priv;
 
 	/* Disable virtual trash and junk folders. Exchange has real
 	 * folders for that */

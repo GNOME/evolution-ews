@@ -30,7 +30,8 @@
 
 #include <glib/gi18n-lib.h>
 
-#include "utils/camel-ews-settings.h"
+#include "server/camel-ews-settings.h"
+
 #include "utils/ews-camel-common.h"
 
 #include "camel-ews-store.h"

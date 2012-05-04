@@ -42,6 +42,8 @@ libeews_1_2_la_CPPFLAGS = \
 	$(NULL)
 
 libeews_1_2_la_SOURCES = \
+	camel-ews-settings.h \
+	camel-ews-settings.c \
 	ews-errors.h \
 	ews-errors.c \
 	ews-marshal.h \
@@ -57,6 +59,8 @@ libeews_1_2_la_SOURCES = \
 	e-soap-message.h \
 	e-soap-response.c \
 	e-soap-response.h \
+	e-source-ews-folder.c \
+	e-source-ews-folder.h \
 	$(NULL)
 
 libeews_1_2_la_LIBADD = \

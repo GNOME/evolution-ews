@@ -35,6 +35,7 @@
 #include <libical/ical.h>
 #include "e-ews-connection.h"
 #include <libedataserver/e-flag.h>
+#include <libedataserver/e-data-server-util.h>
 #include "e-ews-message.h"
 #include "e-ews-item-change.h"
 #include "ews-marshal.h"
@@ -1124,6 +1125,27 @@ ews_connection_authenticate (SoupSession *sess,
 }
 
 void
+ews_oal_free (EwsOAL *oal)
+{
+	if (oal != NULL) {
+		g_free (oal->id);
+		g_free (oal->dn);
+		g_free (oal->name);
+		g_free (oal);
+	}
+}
+
+void
+ews_oal_details_free (EwsOALDetails *details)
+{
+	if (details != NULL) {
+		g_free (details->sha);
+		g_free (details->filename);
+		g_free (details);
+	}
+}
+
+void
 ews_user_id_free (EwsUserId *id)
 {
 	if (id)
@@ -1271,7 +1293,7 @@ e_ews_connection_new (const gchar *uri,
 }
 
 static xmlDoc *
-e_ews_autodiscover_ws_xml (const gchar *email)
+e_ews_autodiscover_ws_xml (const gchar *email_address)
 {
 	xmlDoc *doc;
 	xmlNode *node;
@@ -1285,7 +1307,7 @@ e_ews_autodiscover_ws_xml (const gchar *email)
 
 	node = xmlNewChild(node, ns, (xmlChar *)"Request", NULL);
 	xmlNewChild(node, ns, (xmlChar *)"EMailAddress",
-			    (xmlChar *) email);
+			    (xmlChar *) email_address);
 	xmlNewChild(node, ns, (xmlChar *)"AcceptableResponseSchema",
 			    (xmlChar *)"http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a");
 
@@ -1295,29 +1317,31 @@ e_ews_autodiscover_ws_xml (const gchar *email)
 struct _autodiscover_data {
 	EEwsConnection *cnc;
 	xmlOutputBuffer *buf;
-	GSimpleAsyncResult *simple;
 	SoupMessage *msgs[4];
-	EEwsAutoDiscoverCallback cb;
-	gpointer cbdata;
+
+	GCancellable *cancellable;
+	gulong cancel_id;
+
+	/* Results */
+	gchar *as_url;
+	gchar *oab_url;
 };
 
-/* Called in the context e_ews_autodiscover_ws_url() was called from,
- * with the final result. */
-static void autodiscover_done_cb (GObject *cnc, GAsyncResult *res,
-				  gpointer user_data)
+static void
+autodiscover_data_free (struct _autodiscover_data *ad)
 {
-	struct _autodiscover_data *ad = user_data;
-	EwsUrls *urls = NULL;
-	GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (res);
-	GError *error = NULL;
-
-	if (!g_simple_async_result_propagate_error (simple, &error))
-		urls = g_simple_async_result_get_op_res_gpointer (simple);
-
+	g_object_unref (ad->cnc);
 	xmlOutputBufferClose (ad->buf);
 
-	ad->cb (urls, ad->cbdata, error);
-	g_free (ad);
+	if (ad->cancellable != NULL) {
+		g_cancellable_disconnect (ad->cancellable, ad->cancel_id);
+		g_object_unref (ad->cancellable);
+	}
+
+	g_free (ad->as_url);
+	g_free (ad->oab_url);
+
+	g_slice_free (struct _autodiscover_data, ad);
 }
 
 static void
@@ -1335,6 +1359,13 @@ ews_dump_raw_soup_response (SoupMessage *msg)
 
 }
 
+static void
+autodiscover_cancelled_cb (GCancellable *cancellable,
+                           SoupSession *soup_session)
+{
+	soup_session_abort (soup_session);
+}
+
 /* Called when each soup message completes */
 static void
 autodiscover_response_cb (SoupSession *session,
@@ -1342,15 +1373,17 @@ autodiscover_response_cb (SoupSession *session,
                           gpointer data)
 
 {
-	GError *error = NULL;
-	struct _autodiscover_data *ad = data;
+	GSimpleAsyncResult *simple = data;
+	struct _autodiscover_data *ad;
 	EwsUrls *urls = NULL;
 	guint status = msg->status_code;
 	xmlDoc *doc;
 	xmlNode *node;
 	gint idx;
 	gboolean success = FALSE;
-	GSimpleAsyncResult *simple;
+	GError *error = NULL;
+
+	ad = g_simple_async_result_get_op_res_gpointer (simple);
 
 	for (idx = 0; idx < 4; idx++) {
 		if (ad->msgs[idx] == msg)
@@ -1363,38 +1396,29 @@ autodiscover_response_cb (SoupSession *session,
 
 	ad->msgs[idx] = NULL;
 
-	/* Take 'simple' from 'ad' before actual call
-	 * to g_simple_async_result_complete_in_idle(),
-	 * for cases where the 'ad' is freed in autodiscover_done_cb()
-	 * before this function finishes. Suggested by Dan Winship.
-	*/
-	simple = ad->simple;
-
 	if (status != 200) {
 		g_set_error (
-			     &error, EWS_CONNECTION_ERROR,
-			     status,
-			     _("Code: %d - Unexpected response from server"),
-			     status);
+			&error, SOUP_HTTP_ERROR, status,
+			"%d %s", status, msg->reason_phrase);
 		goto failed;
 	}
 
 	ews_dump_raw_soup_response (msg);
-	doc = xmlReadMemory (msg->response_body->data, msg->response_body->length,
-			     "autodiscover.xml", NULL, 0);
+	doc = xmlReadMemory (
+		msg->response_body->data,
+		msg->response_body->length,
+		"autodiscover.xml", NULL, 0);
 	if (!doc) {
 		g_set_error (
-			     &error, EWS_CONNECTION_ERROR,
-			     -1,
-			     _("Failed to parse autodiscover response XML"));
+			&error, EWS_CONNECTION_ERROR, -1,
+			_("Failed to parse autodiscover response XML"));
 		goto failed;
 	}
 	node = xmlDocGetRootElement (doc);
 	if (strcmp((char *)node->name, "Autodiscover")) {
 		g_set_error (
-			     &error, EWS_CONNECTION_ERROR,
-			     -1,
-			     _("Failed to find <Autodiscover> element\n"));
+			&error, EWS_CONNECTION_ERROR, -1,
+			_("Failed to find <Autodiscover> element"));
 		goto failed;
 	}
 	for (node = node->children; node; node = node->next) {
@@ -1404,9 +1428,8 @@ autodiscover_response_cb (SoupSession *session,
 	}
 	if (!node) {
 		g_set_error (
-			     &error, EWS_CONNECTION_ERROR,
-			     -1,
-			     _("Failed to find <Response> element\n"));
+			&error, EWS_CONNECTION_ERROR, -1,
+			_("Failed to find <Response> element"));
 		goto failed;
 	}
 	for (node = node->children; node; node = node->next) {
@@ -1416,9 +1439,8 @@ autodiscover_response_cb (SoupSession *session,
 	}
 	if (!node) {
 		g_set_error (
-			     &error, EWS_CONNECTION_ERROR,
-			     -1,
-			     _("Failed to find <Account> element\n"));
+			&error, EWS_CONNECTION_ERROR, -1,
+			_("Failed to find <Account> element"));
 		goto failed;
 	}
 
@@ -1435,9 +1457,9 @@ autodiscover_response_cb (SoupSession *session,
 		g_free (urls->as_url);
 		g_free (urls->oab_url);
 		g_free (urls);
-		g_set_error	(&error, EWS_CONNECTION_ERROR,
-				-1,
-				_("Failed to find <ASUrl> and <OABUrl> in autodiscover response"));
+		g_set_error (
+			&error, EWS_CONNECTION_ERROR, -1,
+			_("Failed to find <ASUrl> and <OABUrl> in autodiscover response"));
 		goto failed;
 	}
 
@@ -1446,18 +1468,21 @@ autodiscover_response_cb (SoupSession *session,
 		if (ad->msgs[idx]) {
 			SoupMessage *m = ad->msgs[idx];
 			ad->msgs[idx] = NULL;
-			soup_session_cancel_message (ad->cnc->priv->soup_session,
-						     m, SOUP_STATUS_CANCELLED);
+			soup_session_cancel_message (
+				ad->cnc->priv->soup_session,
+				m, SOUP_STATUS_CANCELLED);
 		}
 	}
 
-	g_simple_async_result_set_op_res_gpointer (ad->simple, urls, NULL);
-	g_simple_async_result_complete_in_idle (ad->simple);
-	/* the 'simple' holds reference on 'cnc' and this function
-	 * is called in a dedicated thread, which 'cnc' joins on dispose,
-	 * thus to avoid race condition, unref the object in its own thread */
-	ews_unref_in_thread (G_OBJECT (simple));
-	return;
+	ad->as_url = urls->as_url;
+	urls->as_url = NULL;
+
+	ad->oab_url = urls->oab_url;
+	urls->oab_url = NULL;
+
+	g_free (urls);
+
+	goto exit;
 
 failed:
 	for (idx = 0; idx < 4; idx++) {
@@ -1473,12 +1498,11 @@ failed:
 	 * and in some cases (stupid firewalls causing timeouts)
 	 * that's going to be the least interesting one. We probably
 	 * want the *first* error */
-	g_simple_async_result_set_from_error (ad->simple, error);
-	g_simple_async_result_complete_in_idle (ad->simple);
-	/* the 'simple' holds reference on 'cnc' and this function
-	 * is called in a dedicated thread, which 'cnc' joins on dispose,
-	 * thus to avoid race condition, unref the object in its own thread */
-	ews_unref_in_thread (G_OBJECT (simple));
+	g_simple_async_result_take_error (simple, error);
+
+exit:
+	g_simple_async_result_complete_in_idle (simple);
+	g_object_unref (simple);
 }
 
 static void post_restarted (SoupMessage *msg, gpointer data)
@@ -1501,20 +1525,28 @@ e_ews_get_msg_for_url (const gchar *url,
 {
 	SoupMessage *msg;
 
-	msg = soup_message_new (buf?"POST":"GET", url);
-	soup_message_headers_append (msg->request_headers,
-				     "User-Agent", "libews/0.1");
+	if (url == NULL)
+		return NULL;
 
-	if (buf) {
-		soup_message_set_request (msg, "text/xml; charset=utf-8", SOUP_MEMORY_COPY,
-					  (gchar *) buf->buffer->content,
-					  buf->buffer->use);
-		g_signal_connect (msg, "restarted",
-				  G_CALLBACK (post_restarted), buf);
+	msg = soup_message_new (buf != NULL ? "POST" : "GET", url);
+
+	soup_message_headers_append (
+		msg->request_headers,
+		"User-Agent", "libews/0.1");
+
+	if (buf != NULL) {
+		soup_message_set_request (
+			msg, "text/xml; charset=utf-8", SOUP_MEMORY_COPY,
+			(gchar *) buf->buffer->content, buf->buffer->use);
+		g_signal_connect (
+			msg, "restarted",
+			G_CALLBACK (post_restarted), buf);
 	}
 
 	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1)) {
-		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->request_body));
+		soup_buffer_free (
+			soup_message_body_flatten (
+			SOUP_MESSAGE (msg)->request_body));
 		/* print request's body */
 		printf ("\n The request headers");
 		printf ("\n ===================");
@@ -1526,38 +1558,78 @@ e_ews_get_msg_for_url (const gchar *url,
 	return msg;
 }
 
-void
-e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb,
-                           gpointer cbdata,
-                           const gchar *email,
-                           const gchar *password,
-                           const gchar *ews_url,
-                           const gchar *username)
+gboolean
+e_ews_autodiscover_ws_url_sync (CamelEwsSettings *settings,
+                                const gchar *email_address,
+                                const gchar *password,
+                                GCancellable *cancellable,
+                                GError **error)
 {
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), FALSE);
+	g_return_val_if_fail (email_address != NULL, FALSE);
+	g_return_val_if_fail (password != NULL, FALSE);
+
+	closure = e_async_closure_new ();
+
+	e_ews_autodiscover_ws_url (
+		settings, email_address, password, cancellable,
+		e_async_closure_callback, closure);
+
+	result = e_async_closure_wait (closure);
+
+	success = e_ews_autodiscover_ws_url_finish (settings, result, error);
+
+	e_async_closure_free (closure);
+
+	return success;
+}
+
+void
+e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
+                           const gchar *email_address,
+                           const gchar *password,
+                           GCancellable *cancellable,
+                           GAsyncReadyCallback callback,
+                           gpointer user_data)
+{
+	CamelNetworkSettings *network_settings;
+	GSimpleAsyncResult *simple;
 	struct _autodiscover_data *ad;
 	xmlOutputBuffer *buf;
-	GError *error = NULL;
 	gchar *url1, *url2, *url3, *url4;
 	gchar *domain;
 	xmlDoc *doc;
 	EEwsConnection *cnc;
+	SoupURI *soup_uri = NULL;
 	gboolean use_secure = TRUE;
+	const gchar *host_url;
+	const gchar *user;
+	GError *error = NULL;
 
-	if (!password || !email) {
-		g_set_error (&error, EWS_CONNECTION_ERROR,
-			     -1, _("Both email and password must be provided"));
-		goto err;
-	}
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+	g_return_if_fail (email_address != NULL);
+	g_return_if_fail (password != NULL);
 
-	domain = strchr (email, '@');
-	if (!(domain && *domain)) {
-		g_set_error (&error, EWS_CONNECTION_ERROR,
-			     -1, _("Wrong email id"));
-		goto err;
+	simple = g_simple_async_result_new (
+		G_OBJECT (settings), callback,
+		user_data, e_ews_autodiscover_ws_url);
+
+	domain = strchr (email_address, '@');
+	if (domain == NULL || *domain == '\0') {
+		g_simple_async_result_set_error (
+			simple, EWS_CONNECTION_ERROR, -1,
+			"%s", _("Email address is missing a domain part"));
+		g_simple_async_result_complete_in_idle (simple);
+		g_object_unref (simple);
+		return;
 	}
 	domain++;
 
-	doc = e_ews_autodiscover_ws_xml (email);
+	doc = e_ews_autodiscover_ws_xml (email_address);
 	buf = xmlAllocOutputBuffer (NULL);
 	xmlNodeDumpOutput (buf, doc, xmlDocGetRootElement (doc), 0, 1, NULL);
 	xmlOutputBufferFlush (buf);
@@ -1566,31 +1638,43 @@ e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb,
 	url2 = NULL;
 	url3 = NULL;
 	url4 = NULL;
-	if (ews_url) {
-		SoupURI *uri = soup_uri_new (ews_url);
 
-		if (uri) {
-			use_secure = g_strcmp0 (soup_uri_get_scheme (uri), "https") == 0;
+	host_url = camel_ews_settings_get_hosturl (settings);
+	if (host_url != NULL)
+		soup_uri = soup_uri_new (host_url);
 
-			url1 = g_strdup_printf ("http%s://%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", soup_uri_get_host (uri));
-			url2 = g_strdup_printf ("http%s://autodiscover.%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", soup_uri_get_host (uri));
-			soup_uri_free (uri);
-		}
+	if (soup_uri != NULL) {
+		const gchar *host = soup_uri_get_host (soup_uri);
+		const gchar *scheme = soup_uri_get_scheme (soup_uri);
+
+		use_secure = g_strcmp0 (scheme, "https") == 0;
+
+		url1 = g_strdup_printf ("http%s://%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", host);
+		url2 = g_strdup_printf ("http%s://autodiscover.%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", host);
+
+		soup_uri_free (soup_uri);
 	}
 
 	url3 = g_strdup_printf ("http%s://%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", domain);
 	url4 = g_strdup_printf ("http%s://autodiscover.%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", domain);
 
-	cnc = e_ews_connection_new (url3, (username && *username) ? username : email, password, NULL, NULL, &error);
-	if (!cnc) {
+	network_settings = CAMEL_NETWORK_SETTINGS (settings);
+	user = camel_network_settings_get_user (network_settings);
+	if (user == NULL || *user == '\0')
+		user = email_address;
+
+	cnc = e_ews_connection_new (url3, user, password, NULL, NULL, &error);
+	if (cnc == NULL) {
 		g_free (url1);
 		g_free (url2);
 		g_free (url3);
 		g_free (url4);
 		xmlOutputBufferClose (buf);
 		xmlFreeDoc (doc);
-	err:
-		cb (NULL, cbdata, error);
+
+		g_simple_async_result_take_error (simple, error);
+		g_simple_async_result_complete_in_idle (simple);
+		g_object_unref (simple);
 		return;
 	}
 
@@ -1602,34 +1686,46 @@ e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb,
 	 * to time out. So run both queries in parallel and let the fastest
 	 * (successful) one win.
 	 */
-	ad = g_new0 (struct _autodiscover_data, 1);
-	ad->cb = cb;
-	ad->cbdata = cbdata;
-	ad->cnc = cnc;
-	ad->buf = buf;
-	ad->simple = g_simple_async_result_new (G_OBJECT (cnc), autodiscover_done_cb,
-					    ad, e_ews_autodiscover_ws_url);
-	ad->msgs[0] = url1 ? e_ews_get_msg_for_url (url1, buf) : NULL;
-	ad->msgs[1] = url2 ? e_ews_get_msg_for_url (url2, buf) : NULL;
-	ad->msgs[2] = url3 ? e_ews_get_msg_for_url (url3, buf) : NULL;
-	ad->msgs[3] = url4 ? e_ews_get_msg_for_url (url4, buf) : NULL;
+	ad = g_slice_new0 (struct _autodiscover_data);
+	ad->cnc = cnc;  /* takes ownership */
+	ad->buf = buf;  /* takes ownership */
+
+	if (G_IS_CANCELLABLE (cancellable)) {
+		ad->cancellable = g_object_ref (cancellable);
+		ad->cancel_id = g_cancellable_connect (
+			ad->cancellable,
+			G_CALLBACK (autodiscover_cancelled_cb),
+			g_object_ref (cnc->priv->soup_session),
+			(GDestroyNotify) g_object_unref);
+	}
+
+	g_simple_async_result_set_op_res_gpointer (
+		simple, ad, (GDestroyNotify) autodiscover_data_free);
+
+	/* Passing a NULL URL string returns NULL. */
+	ad->msgs[0] = e_ews_get_msg_for_url (url1, buf);
+	ad->msgs[1] = e_ews_get_msg_for_url (url2, buf);
+	ad->msgs[2] = e_ews_get_msg_for_url (url3, buf);
+	ad->msgs[3] = e_ews_get_msg_for_url (url4, buf);
 
 	/* These have to be submitted only after they're both set in ad->msgs[]
 	 * or there will be races with fast completion */
-	if (ad->msgs[0])
-		soup_session_queue_message (cnc->priv->soup_session, ad->msgs[0],
-					    autodiscover_response_cb, ad);
-	if (ad->msgs[1])
-		soup_session_queue_message (cnc->priv->soup_session, ad->msgs[1],
-					    autodiscover_response_cb, ad);
-	if (ad->msgs[2])
-		soup_session_queue_message (cnc->priv->soup_session, ad->msgs[2],
-					    autodiscover_response_cb, ad);
-	if (ad->msgs[3])
-		soup_session_queue_message (cnc->priv->soup_session, ad->msgs[3],
-					    autodiscover_response_cb, ad);
-
-	g_object_unref (cnc); /* the GSimpleAsyncResult holds it now */
+	if (ad->msgs[0] != NULL)
+		soup_session_queue_message (
+			cnc->priv->soup_session, ad->msgs[0],
+			autodiscover_response_cb, simple);
+	if (ad->msgs[1] != NULL)
+		soup_session_queue_message (
+			cnc->priv->soup_session, ad->msgs[1],
+			autodiscover_response_cb, simple);
+	if (ad->msgs[2] != NULL)
+		soup_session_queue_message (
+			cnc->priv->soup_session, ad->msgs[2],
+			autodiscover_response_cb, simple);
+	if (ad->msgs[3] != NULL)
+		soup_session_queue_message (
+			cnc->priv->soup_session, ad->msgs[3],
+			autodiscover_response_cb, simple);
 
 	xmlFreeDoc (doc);
 	g_free (url1);
@@ -1638,14 +1734,45 @@ e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb,
 	g_free (url4);
 }
 
-struct _oal_req_data {
-	EEwsConnection *cnc;
+gboolean
+e_ews_autodiscover_ws_url_finish (CamelEwsSettings *settings,
+                                  GAsyncResult *result,
+                                  GError **error)
+{
 	GSimpleAsyncResult *simple;
-	SoupMessage *msg;
-	GCancellable *cancellable;
-	gulong cancel_handler_id;
+	struct _autodiscover_data *ad;
+
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (settings),
+		e_ews_autodiscover_ws_url), FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	ad = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	g_warn_if_fail (ad->as_url != NULL);
+	g_warn_if_fail (ad->oab_url != NULL);
+
+	camel_ews_settings_set_hosturl (settings, ad->as_url);
+	camel_ews_settings_set_oaburl (settings, ad->oab_url);
+
+	return TRUE;
+}
+
+struct _oal_req_data {
+	SoupSession *soup_session;
+	SoupMessage *soup_message;
 	gchar *oal_id;
 	gchar *oal_element;
+
+	GSList *oals;
+	GSList *elements;
+
+	GCancellable *cancellable;
+	gulong cancel_id;
 
 	/* for dowloading oal file */
 	gchar *cache_filename;
@@ -1655,6 +1782,28 @@ struct _oal_req_data {
 	gsize response_size;
 	gsize received_size;
 };
+
+static void
+oal_req_data_free (struct _oal_req_data *data)
+{
+	/* The SoupMessage is owned by the SoupSession. */
+	g_object_ref (data->soup_session);
+
+	g_free (data->oal_id);
+	g_free (data->oal_element);
+
+	g_slist_free_full (data->oals, (GDestroyNotify) ews_oal_free);
+	g_slist_free_full (data->elements, (GDestroyNotify) ews_oal_details_free);
+
+	if (data->cancellable != NULL) {
+		g_cancellable_disconnect (data->cancellable, data->cancel_id);
+		g_object_unref (data->cancellable);
+	}
+
+	g_free (data->cache_filename);
+
+	g_slice_free (struct _oal_req_data, data);
+}
 
 static gchar *
 get_property (xmlNodePtr node_ptr,
@@ -1725,56 +1874,65 @@ parse_oal_full_details (xmlNode *node,
 }
 
 static void
-oal_response_cb (SoupSession *session,
-                 SoupMessage *msg,
+oal_response_cb (SoupSession *soup_session,
+                 SoupMessage *soup_message,
                  gpointer user_data)
 {
-	GError *error = NULL;
-	guint status = msg->status_code;
+	GSimpleAsyncResult *simple;
+	struct _oal_req_data *data;
 	xmlDoc *doc;
 	xmlNode *node;
-	struct _oal_req_data *data = (struct _oal_req_data *) user_data;
-	GSList *oals = NULL;
 
-	if (status != 200) {
-		g_set_error (&error, EWS_CONNECTION_ERROR, status,
-			     _("Code: %d - Unexpected response from server"),
-			     status);
+	simple = G_SIMPLE_ASYNC_RESULT (user_data);
+	data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (soup_message->status_code != 200) {
+		g_simple_async_result_set_error (
+			simple, SOUP_HTTP_ERROR,
+			soup_message->status_code,
+			"%d %s",
+			soup_message->status_code,
+			soup_message->reason_phrase);
 		goto exit;
 	}
-	ews_dump_raw_soup_response (msg);
 
-	doc = xmlReadMemory (msg->response_body->data, msg->response_body->length,
-			     "oab.xml", NULL, 0);
-	if (!doc) {
-		g_set_error (&error, EWS_CONNECTION_ERROR,
-			     -1, _("Failed to parse oab XML"));
+	ews_dump_raw_soup_response (soup_message);
+
+	doc = xmlReadMemory (
+		soup_message->response_body->data,
+		soup_message->response_body->length,
+		"oab.xml", NULL, 0);
+	if (doc == NULL) {
+		g_simple_async_result_set_error (
+			simple, EWS_CONNECTION_ERROR, -1,
+			"%s", _("Failed to parse oab XML"));
 		goto exit;
 	}
 
 	node = xmlDocGetRootElement (doc);
-	if (strcmp((char *)node->name, "OAB")) {
-		g_set_error (&error, EWS_CONNECTION_ERROR, -1,
-			     _("Failed to find <OAB> element\n"));
+	if (strcmp ((gchar *) node->name, "OAB") != 0) {
+		g_simple_async_result_set_error (
+			simple, EWS_CONNECTION_ERROR, -1,
+			"%s", _("Failed to find <OAB> element\n"));
 		goto exit;
 	}
 
 	for (node = node->children; node; node = node->next) {
-		if (node->type == XML_ELEMENT_NODE && !strcmp((char *)node->name, "OAL")) {
-			if (!data->oal_id) {
+		if (node->type == XML_ELEMENT_NODE && strcmp((gchar *) node->name, "OAL") == 0) {
+			if (data->oal_id != NULL) {
 				EwsOAL *oal = g_new0 (EwsOAL, 1);
 
 				oal->id = get_property (node, "id");
 				oal->dn = get_property (node, "dn");
 				oal->name = get_property (node, "name");
 
-				oals = g_slist_prepend (oals, oal);
+				data->oals = g_slist_prepend (data->oals, oal);
 			} else {
 				gchar *id = get_property (node, "id");
 
-				if (!strcmp (id, data->oal_id)) {
+				if (strcmp (id, data->oal_id) == 0) {
 					/* parse details of full_details file */
-					oals = parse_oal_full_details (node, data->oal_element);
+					data->elements = parse_oal_full_details (node, data->oal_element);
 
 					g_free (id);
 					break;
@@ -1785,31 +1943,48 @@ oal_response_cb (SoupSession *session,
 		}
 	}
 
-	oals = g_slist_reverse (oals);
-	g_simple_async_result_set_op_res_gpointer (data->simple, oals, NULL);
+	data->oals = g_slist_reverse (data->oals);
 
 exit:
-	if (data->cancellable)
-		g_signal_handler_disconnect (data->cancellable, data->cancel_handler_id);
-
-	if (error) {
-		g_simple_async_result_set_from_error (data->simple, error);
-		g_clear_error (&error);
-	}
-
-	g_simple_async_result_complete_in_idle (data->simple);
-	g_free (data->oal_id);
-	g_free (data->oal_element);
-	g_free (data);
+	g_simple_async_result_complete_in_idle (simple);
+	g_object_unref (simple);
 }
 
 static void
 ews_cancel_msg (GCancellable *cancellable,
-                gpointer user_data)
+                struct _oal_req_data *data)
 {
-	struct _oal_req_data *data = (struct _oal_req_data *) user_data;
+	soup_session_cancel_message (
+		data->soup_session,
+		data->soup_message,
+		SOUP_STATUS_CANCELLED);
+}
 
-	soup_session_cancel_message (data->cnc->priv->soup_session, SOUP_MESSAGE (data->msg), SOUP_STATUS_CANCELLED);
+gboolean
+e_ews_connection_get_oal_list_sync (EEwsConnection *cnc,
+                                    GSList **oals,
+                                    GCancellable *cancellable,
+                                    GError **error)
+{
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
+
+	closure = e_async_closure_new ();
+
+	e_ews_connection_get_oal_list (
+		cnc, cancellable, e_async_closure_callback, closure);
+
+	result = e_async_closure_wait (closure);
+
+	success = e_ews_connection_get_oal_list_finish (
+		cnc, result, oals, error);
+
+	e_async_closure_free (closure);
+
+	return success;
 }
 
 void
@@ -1819,28 +1994,37 @@ e_ews_connection_get_oal_list (EEwsConnection *cnc,
                                gpointer user_data)
 {
 	GSimpleAsyncResult *simple;
-	SoupMessage *msg;
+	SoupSession *soup_session;
+	SoupMessage *soup_message;
 	struct _oal_req_data *data;
 
-	g_return_if_fail (cnc != NULL);
+	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
-	msg = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
+	soup_session = cnc->priv->soup_session;
+	soup_message = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_get_oal_list);
-	data = g_new0 (struct _oal_req_data, 1);
-	data->cnc = cnc;
-	data->simple = simple;
-	data->cancellable = cancellable;
-	data->msg = msg;
+	data = g_slice_new0 (struct _oal_req_data);
+	data->soup_session = g_object_ref (soup_session);
+	data->soup_message = soup_message;  /* the session owns this */
 
-	if (cancellable)
-		data->cancel_handler_id = g_cancellable_connect	(cancellable,
-								 G_CALLBACK (ews_cancel_msg), (gpointer) data, NULL);
-	soup_session_queue_message (cnc->priv->soup_session, msg,
-				    oal_response_cb, data);
+	if (G_IS_CANCELLABLE (cancellable)) {
+		data->cancellable = g_object_ref (cancellable);
+		data->cancel_id = g_cancellable_connect (
+			data->cancellable,
+			G_CALLBACK (ews_cancel_msg),
+			data, (GDestroyNotify) NULL);
+	}
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_get_oal_list);
+
+	g_simple_async_result_set_op_res_gpointer (
+		simple, data, (GDestroyNotify) oal_req_data_free);
+
+	soup_session_queue_message (
+		soup_session, soup_message,
+		oal_response_cb, simple);
 }
 
 gboolean
@@ -1850,8 +2034,9 @@ e_ews_connection_get_oal_list_finish (EEwsConnection *cnc,
                                       GError **error)
 {
 	GSimpleAsyncResult *simple;
+	struct _oal_req_data *data;
 
-	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
 
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
@@ -1859,78 +2044,21 @@ e_ews_connection_get_oal_list_finish (EEwsConnection *cnc,
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
+	data = g_simple_async_result_get_op_res_gpointer (simple);
 
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
 
-	*oals= g_simple_async_result_get_op_res_gpointer (simple);
+	if (oals != NULL) {
+		*oals = data->oals;
+		data->oals = NULL;
+	}
 
 	return TRUE;
-}
-
-void
-e_ews_connection_get_oal_detail (EEwsConnection *cnc,
-                                 const gchar *oal_id,
-                                 const gchar *oal_element,
-                                 GCancellable *cancellable,
-                                 GAsyncReadyCallback callback,
-                                 gpointer user_data)
-{
-	GSimpleAsyncResult *simple;
-	SoupMessage *msg;
-	struct _oal_req_data *data;
-
-	g_return_if_fail (cnc != NULL);
-
-	msg = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
-
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_get_oal_detail);
-	data = g_new0 (struct _oal_req_data, 1);
-	data->cnc = cnc;
-	data->simple = simple;
-	data->cancellable = cancellable;
-	data->msg = msg;
-	data->oal_id = g_strdup (oal_id);
-	data->oal_element = g_strdup (oal_element);
-
-	if (cancellable)
-		data->cancel_handler_id = g_cancellable_connect	(cancellable,
-								 G_CALLBACK (ews_cancel_msg), (gpointer) data, NULL);
-	soup_session_queue_message (cnc->priv->soup_session, msg,
-				    oal_response_cb, data);
-
-}
-
-gboolean
-e_ews_connection_get_oal_detail_finish (EEwsConnection *cnc,
-                                        GAsyncResult *result,
-                                        GSList **elements,
-                                        GError **error)
-{
-	GSimpleAsyncResult *simple;
-
-	g_return_val_if_fail (cnc != NULL, FALSE);
-	g_return_val_if_fail (
-		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_get_oal_detail),
-		FALSE);
-
-	simple = G_SIMPLE_ASYNC_RESULT (result);
-
-	if (g_simple_async_result_propagate_error (simple, error))
-		return FALSE;
-
-	*elements = g_simple_async_result_get_op_res_gpointer (simple);
-
-	return TRUE;
-
 }
 
 /**
- * e_ews_connection_get_oal_detail_sync:
+ * e_ews_connection_get_oal_detail 
  * @cnc: 
  * @oal_id: 
  * @oal_element: 
@@ -1949,65 +2077,130 @@ e_ews_connection_get_oal_detail_sync (EEwsConnection *cnc,
                                       GCancellable *cancellable,
                                       GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
-	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_get_oal_detail (
-		cnc, oal_id, oal_element,
-		cancellable,
-		ews_sync_reply_cb,
-		sync_data);
+		cnc, oal_id, oal_element, cancellable,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_get_oal_detail_finish
-						(cnc, sync_data->res,
-						 elements, error);
+	success = e_ews_connection_get_oal_detail_finish (
+		cnc, result, elements, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
+	return success;
+}
+
+void
+e_ews_connection_get_oal_detail (EEwsConnection *cnc,
+                                 const gchar *oal_id,
+                                 const gchar *oal_element,
+                                 GCancellable *cancellable,
+                                 GAsyncReadyCallback callback,
+                                 gpointer user_data)
+{
+	GSimpleAsyncResult *simple;
+	SoupSession *soup_session;
+	SoupMessage *soup_message;
+	struct _oal_req_data *data;
+
+	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
+
+	soup_session = cnc->priv->soup_session;
+	soup_message = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
+
+	data = g_slice_new0 (struct _oal_req_data);
+	data->soup_session = g_object_ref (soup_session);
+	data->soup_message = soup_message;  /* the session owns this */
+	data->oal_id = g_strdup (oal_id);
+	data->oal_element = g_strdup (oal_element);
+
+	if (G_IS_CANCELLABLE (cancellable)) {
+		data->cancellable = g_object_ref (cancellable);
+		data->cancel_id = g_cancellable_connect (
+			data->cancellable,
+			G_CALLBACK (ews_cancel_msg),
+			data, (GDestroyNotify) NULL);
+	}
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_get_oal_detail);
+
+	g_simple_async_result_set_op_res_gpointer (
+		simple, data, (GDestroyNotify) oal_req_data_free);
+
+	soup_session_queue_message (
+		soup_session, soup_message,
+		oal_response_cb, simple);
+}
+
+gboolean
+e_ews_connection_get_oal_detail_finish (EEwsConnection *cnc,
+                                        GAsyncResult *result,
+                                        GSList **elements,
+                                        GError **error)
+{
+	GSimpleAsyncResult *simple;
+	struct _oal_req_data *data;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_get_oal_detail),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	if (elements != NULL) {
+		*elements = data->elements;
+		data->elements = NULL;
+	}
+
+	return TRUE;
+
 }
 
 static void
-oal_download_response_cb (SoupSession *session,
-                          SoupMessage *msg,
+oal_download_response_cb (SoupSession *soup_session,
+                          SoupMessage *soup_message,
                           gpointer user_data)
 {
-	GError *error = NULL;
-	guint status = msg->status_code;
-	struct _oal_req_data *data = (struct _oal_req_data *) user_data;
+	GSimpleAsyncResult *simple;
+	struct _oal_req_data *data;
 
-	if (status != 200) {
-		g_set_error (&error, EWS_CONNECTION_ERROR, status,
-			     _("Code: %d - Unexpected response from server"),
-			     status);
+	simple = G_SIMPLE_ASYNC_RESULT (user_data);
+	data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (soup_message->status_code != 200) {
+		g_simple_async_result_set_error (
+			simple, SOUP_HTTP_ERROR,
+			soup_message->status_code,
+			"%d %s",
+			soup_message->status_code,
+			soup_message->reason_phrase);
 		g_unlink (data->cache_filename);
-		goto exit;
+
 	} else if (data->error != NULL) {
-		g_propagate_error (&error, data->error);
+		g_simple_async_result_take_error (simple, data->error);
+		data->error = NULL;
 		g_unlink (data->cache_filename);
-		goto exit;
 	}
 
-	g_simple_async_result_set_op_res_gpointer (data->simple, NULL, NULL);
-
-exit:
-	if (error) {
-		g_simple_async_result_set_from_error (data->simple, error);
-		g_clear_error (&error);
-	}
-
-	g_simple_async_result_complete_in_idle (data->simple);
-	g_free (data->cache_filename);
-	g_free (data);
+	g_simple_async_result_complete_in_idle (simple);
+	g_object_unref (simple);
 }
 
 static void
@@ -2069,6 +2262,37 @@ ews_soup_got_chunk (SoupMessage *msg,
 	}
 }
 
+gboolean
+e_ews_connection_download_oal_file_sync (EEwsConnection *cnc,
+                                         const gchar *cache_filename,
+                                         EwsProgressFn progress_fn,
+                                         gpointer progress_data,
+                                         GCancellable *cancellable,
+                                         GError **error)
+{
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
+
+	closure = e_async_closure_new ();
+
+	e_ews_connection_download_oal_file (
+		cnc, cache_filename,
+		progress_fn, progress_data, cancellable,
+		e_async_closure_callback, closure);
+
+	result = e_async_closure_wait (closure);
+
+	success = e_ews_connection_download_oal_file_finish (
+		cnc, result, error);
+
+	e_async_closure_free (closure);
+
+	return success;
+}
+
 void
 e_ews_connection_download_oal_file (EEwsConnection *cnc,
                                     const gchar *cache_filename,
@@ -2079,38 +2303,52 @@ e_ews_connection_download_oal_file (EEwsConnection *cnc,
                                     gpointer user_data)
 {
 	GSimpleAsyncResult *simple;
-	SoupMessage *msg;
+	SoupSession *soup_session;
+	SoupMessage *soup_message;
 	struct _oal_req_data *data;
 
-	g_return_if_fail (cnc != NULL);
+	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
-	msg = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
+	soup_session = cnc->priv->soup_session;
+	soup_message = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-			callback,
-			user_data,
-			e_ews_connection_download_oal_file);
-	data = g_new0 (struct _oal_req_data, 1);
-	data->cnc = cnc;
-	data->simple = simple;
-	data->cancellable = cancellable;
-	data->msg = SOUP_MESSAGE (msg);
+	data = g_slice_new0 (struct _oal_req_data);
+	data->soup_session = g_object_ref (soup_session);
+	data->soup_message = soup_message;  /* the session owns this */
 	data->cache_filename = g_strdup (cache_filename);
 	data->progress_fn = progress_fn;
 	data->progress_data = progress_data;
 
-	if (cancellable)
-		data->cancel_handler_id = g_cancellable_connect	(cancellable,
-						G_CALLBACK (ews_cancel_msg), (gpointer) data, NULL);
+	if (G_IS_CANCELLABLE (cancellable)) {
+		data->cancellable = g_object_ref (cancellable);
+		data->cancel_id = g_cancellable_connect (
+			data->cancellable,
+			G_CALLBACK (ews_cancel_msg),
+			data, (GDestroyNotify) NULL);
+	}
 
-	soup_message_body_set_accumulate (SOUP_MESSAGE (msg)->response_body,
-					  FALSE);
-	g_signal_connect (msg, "got-headers", G_CALLBACK (ews_soup_got_headers), data);
-	g_signal_connect (msg, "got-chunk", G_CALLBACK (ews_soup_got_chunk), data);
-	g_signal_connect (msg, "restarted", G_CALLBACK (ews_soup_restarted), data);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_download_oal_file);
 
-	soup_session_queue_message	(cnc->priv->soup_session, SOUP_MESSAGE (msg),
-					 oal_download_response_cb, data);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, data, (GDestroyNotify) oal_req_data_free);
+
+	soup_message_body_set_accumulate (soup_message->response_body, FALSE);
+
+	g_signal_connect (
+		soup_message, "got-headers",
+		G_CALLBACK (ews_soup_got_headers), data);
+	g_signal_connect (
+		soup_message, "got-chunk",
+		G_CALLBACK (ews_soup_got_chunk), data);
+	g_signal_connect (
+		soup_message, "restarted",
+		G_CALLBACK (ews_soup_restarted), data);
+
+	soup_session_queue_message (
+		soup_session, soup_message,
+		oal_download_response_cb, simple);
 }
 
 gboolean
@@ -2122,50 +2360,14 @@ e_ews_connection_download_oal_file_finish (EEwsConnection *cnc,
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
-			g_simple_async_result_is_valid (
-				result, G_OBJECT (cnc), e_ews_connection_download_oal_file),
-			FALSE);
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc),
+		e_ews_connection_download_oal_file), FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
 
-	if (g_simple_async_result_propagate_error (simple, error))
-		return FALSE;
-
-	return TRUE;
-}
-
-gboolean
-e_ews_connection_download_oal_file_sync (EEwsConnection *cnc,
-                                         const gchar *cache_filename,
-                                         EwsProgressFn progress_fn,
-                                         gpointer progress_data,
-                                         GCancellable *cancellable,
-                                         GError **error)
-{
-	EwsSyncData *sync_data;
-	gboolean result;
-
-	g_return_val_if_fail (cnc != NULL, FALSE);
-
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
-
-	e_ews_connection_download_oal_file (
-		cnc, cache_filename,
-		progress_fn, progress_data,
-		cancellable, ews_sync_reply_cb, sync_data);
-
-	e_flag_wait (sync_data->eflag);
-
-	result = e_ews_connection_download_oal_file_finish
-						(cnc, sync_data->res,
-						 error);
-
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
-
-	return result;
+	/* Assume success unless a GError is set. */
+	return !g_simple_async_result_propagate_error (simple, error);
 }
 
 void
@@ -5359,7 +5561,6 @@ e_ews_connection_set_oof_settings_finish (EEwsConnection *cnc,
                                           GError **error)
 {
 	GSimpleAsyncResult *simple;
-	EwsAsyncData *async_data;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
@@ -5368,7 +5569,6 @@ e_ews_connection_set_oof_settings_finish (EEwsConnection *cnc,
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
-	async_data = g_simple_async_result_get_op_res_gpointer (simple);
 
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;

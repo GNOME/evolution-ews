@@ -30,10 +30,8 @@
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 
+#include "server/camel-ews-settings.h"
 #include "server/e-ews-message.h"
-
-#include "utils/camel-ews-settings.h"
-#include "utils/ews-esource-utils.h"
 
 #include "camel-ews-utils.h"
 
@@ -320,43 +318,12 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store,
 	return fi;
 }
 
-struct remove_esrc_data {
-	gchar *fid;
-	CamelURL *account_url;
-	EwsFolderType ftype;
-};
-
-static gboolean ews_do_remove_esource (gpointer user_data)
-{
-	struct remove_esrc_data *remove_data = user_data;
-
-	ews_esource_utils_remove_esource (remove_data->fid,
-					  remove_data->account_url,
-					  remove_data->ftype);
-
-	camel_url_free (remove_data->account_url);
-	g_free (remove_data->fid);
-	g_free (remove_data);
-
-	return FALSE;
-}
-
 static void
 sync_deleted_folders (CamelEwsStore *store,
                       GSList *deleted_folders)
 {
 	CamelEwsStoreSummary *ews_summary = store->summary;
-	CamelEwsSettings *ews_settings;
-	CamelSettings *settings;
-	CamelService *service;
-	const gchar *email;
 	GSList *l;
-
-	service = CAMEL_SERVICE (store);
-	settings = camel_service_get_settings (service);
-
-	ews_settings = CAMEL_EWS_SETTINGS (settings);
-	email = camel_ews_settings_get_email (ews_settings);
 
 	for (l = deleted_folders; l != NULL; l = g_slist_next (l)) {
 		const gchar *fid = l->data;
@@ -375,15 +342,6 @@ sync_deleted_folders (CamelEwsStore *store,
 			camel_store_folder_deleted ((CamelStore *) store, fi);
 
 			g_clear_error (&error);
-		} else {
-			struct remove_esrc_data *remove_data = g_new0 (struct remove_esrc_data, 1);
-
-			remove_data->fid = g_strdup (fid);
-			remove_data->account_url = camel_service_new_camel_url (service);
-			remove_data->ftype = ftype;
-
-			/* This uses GConf so has to be done in the main thread */
-			g_idle_add_full (G_PRIORITY_DEFAULT, ews_do_remove_esource, remove_data, NULL);
 		}
 	}
 }
@@ -425,11 +383,7 @@ sync_updated_folders (CamelEwsStore *store,
 		const EwsFolderId *fid, *pfid;
 
 		ftype = e_ews_folder_get_folder_type (ews_folder);
-		if (ftype == EWS_FOLDER_TYPE_CALENDAR ||
-		    ftype == EWS_FOLDER_TYPE_TASKS ||
-		    ftype == EWS_FOLDER_TYPE_CONTACTS) {
-			/* TODO Update esource */
-		} else if (ftype != EWS_FOLDER_TYPE_MAILBOX)
+		if (ftype != EWS_FOLDER_TYPE_MAILBOX)
 			continue;
 
 		fid = e_ews_folder_get_id (ews_folder);
@@ -516,58 +470,11 @@ add_folder_to_summary (CamelEwsStore *store,
 	camel_ews_store_summary_set_folder_unread (ews_summary, fid->id, unread);
 }
 
-struct add_esrc_data {
-	EEwsFolder *folder;
-	gchar *account_uri;
-	gchar *account_name;
-	gchar *username;
-	gchar *email_id;
-	gchar *hosturl;
-	gint refresh_timeout;
-};
-
-static gboolean ews_do_add_esource (gpointer user_data)
-{
-	struct add_esrc_data *add_data = user_data;
-
-	ews_esource_utils_add_esource (add_data->folder, add_data->account_uri,
-				       add_data->account_name,
-				       add_data->username, add_data->email_id,
-				       add_data->hosturl, add_data->refresh_timeout);
-
-	g_object_unref (add_data->folder);
-	g_free (add_data->account_uri);
-	g_free (add_data->account_name);
-	g_free (add_data->username);
-	g_free (add_data->email_id);
-	g_free (add_data->hosturl);
-	g_free (add_data);
-
-	return FALSE;
-}
-
 static void
 sync_created_folders (CamelEwsStore *ews_store,
                       GSList *created_folders)
 {
-	CamelNetworkSettings *network_settings;
-	CamelEwsSettings *ews_settings;
-	CamelSettings *settings;
-	CamelService *service;
 	GSList *l;
-	const gchar *email;
-	const gchar *hosturl;
-	const gchar *user;
-
-	service = CAMEL_SERVICE (ews_store);
-	settings = camel_service_get_settings (service);
-
-	ews_settings = CAMEL_EWS_SETTINGS (settings);
-	email = camel_ews_settings_get_email (ews_settings);
-	hosturl = camel_ews_settings_get_hosturl (ews_settings);
-
-	network_settings = CAMEL_NETWORK_SETTINGS (settings);
-	user = camel_network_settings_get_user (network_settings);
 
 	for (l = created_folders; l != NULL; l = g_slist_next (l)) {
 		EEwsFolder *folder = (EEwsFolder *) l->data;
@@ -576,27 +483,7 @@ sync_created_folders (CamelEwsStore *ews_store,
 		const EwsFolderId *fid;
 
 		ftype = e_ews_folder_get_folder_type (folder);
-		if (ftype == EWS_FOLDER_TYPE_CALENDAR ||
-		    ftype == EWS_FOLDER_TYPE_TASKS ||
-		    ftype == EWS_FOLDER_TYPE_CONTACTS) {
-			struct add_esrc_data *add_data = g_new0 (struct add_esrc_data, 1);
-			CamelURL *url = camel_service_new_camel_url (service);
-
-			add_data->folder = g_object_ref (folder);
-			add_data->account_uri = camel_url_to_string (url, CAMEL_URL_HIDE_PARAMS);
-			add_data->account_name = g_strdup (email);
-			add_data->username = g_strdup (user);
-			/* Duplicate... for now */
-			add_data->email_id = g_strdup (email);
-			add_data->hosturl = g_strdup (hosturl);
-			/* FIXME pass right refresh timeout */
-
-			camel_url_free (url);
-
-			/* This uses GConf so has to be done in the main thread */
-			g_idle_add_full (G_PRIORITY_DEFAULT, ews_do_add_esource, add_data, NULL);
-
-		} else	if (ftype != EWS_FOLDER_TYPE_MAILBOX)
+		if (ftype != EWS_FOLDER_TYPE_MAILBOX)
 			continue;
 
 		fid = e_ews_folder_get_id (folder);

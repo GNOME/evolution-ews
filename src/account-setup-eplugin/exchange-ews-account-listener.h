@@ -44,8 +44,6 @@ struct _ExchangeEWSAccountListenerClass {
 	GObjectClass parent_class;
 };
 
-void				exchange_ews_add_esource (CamelURL *url, const gchar *folder_name, const gchar *fid, gint folder_type);
-void				exchange_ews_remove_esource (CamelURL *url, const gchar *folder_name, const gchar *fid, gint folder_type);
 GType				exchange_ews_account_listener_get_type (void);
 ExchangeEWSAccountListener *	exchange_ews_account_listener_new (void);
 
