@@ -22,7 +22,8 @@
 
 #include <libedataserver/e-source-list.h>
 #include <camel/camel.h>
-#include <e-ews-folder.h>
+
+#include "server/e-ews-folder.h"
 
 G_BEGIN_DECLS
 

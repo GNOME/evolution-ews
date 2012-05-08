@@ -20,7 +20,7 @@
  * USA
  */
 
-#include "e-soap-message.h"
-#include "e-ews-folder.h"
+#include "server/e-soap-message.h"
+#include "server/e-ews-folder.h"
 
 void		e_ews_query_to_restriction (ESoapMessage *msg, const gchar *query, EwsFolderType type);

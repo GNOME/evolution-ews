@@ -26,10 +26,11 @@
 #include <ctype.h>
 #include <glib.h>
 #include <glib/gprintf.h>
-#include <e-ews-connection.h>
-#include <e-ews-folder.h>
-#include <e-ews-item.h>
-#include <e-ews-query-to-restriction.h>
+
+#include "server/e-ews-connection.h"
+#include "server/e-ews-folder.h"
+#include "server/e-ews-item.h"
+#include "utils/e-ews-query-to-restriction.h"
 
 /*Some simple queries are defined here we can replace them to more complex ones;
  * based on these restriction you might not get items at all, to get all items use NULL */

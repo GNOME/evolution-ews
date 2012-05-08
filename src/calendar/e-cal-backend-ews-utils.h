@@ -21,11 +21,13 @@
 #ifndef E_CAL_BACKEND_EWS_UTILS_H
 #define E_CAL_BACKEND_EWS_UTILS_H
 
-#include <e-ews-connection.h>
 #include <libecal/e-cal-component.h>
-#include <e-cal-backend-ews.h>
 #include <libical/icaltime.h>
 #include <libical/icaltimezone.h>
+
+#include "server/e-ews-connection.h"
+
+#include "e-cal-backend-ews.h"
 
 G_BEGIN_DECLS
 #define MINUTES_IN_HOUR 60

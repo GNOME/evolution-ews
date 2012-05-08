@@ -32,13 +32,15 @@
 #include <glib/gstdio.h>
 #include <gio/gio.h>
 
-#include <e-ews-connection.h>
-#include <e-ews-message.h>
 #include <libecal/e-cal-recur.h>
 #include <libecal/e-cal-time-util.h>
 #include <libsoup/soup-misc.h>
+#include <libedataserver/e-source-list.h>
+
+#include "server/e-ews-connection.h"
+#include "server/e-ews-message.h"
+
 #include "e-cal-backend-ews-utils.h"
-#include "libedataserver/e-source-list.h"
 
 /*
  * Iterate over the icalcomponent properties and collect attendees

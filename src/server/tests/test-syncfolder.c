@@ -26,10 +26,12 @@
 #include <ctype.h>
 #include <glib.h>
 #include <glib/gprintf.h>
+
+#include "server/e-ews-connection.h"
+#include "server/e-ews-folder.h"
+#include "server/e-ews-item.h"
+
 #include "utils.h"
-#include <e-ews-connection.h>
-#include <e-ews-folder.h>
-#include <e-ews-item.h>
 
 static void op_test_get_item ();
 void op_tests_run ();

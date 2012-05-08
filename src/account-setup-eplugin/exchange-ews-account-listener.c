@@ -31,12 +31,14 @@
 #include <libedataserver/e-account.h>
 #include <libedataserver/e-account-list.h>
 #include <libebook/e-book.h>
-#include <camel-ews-utils.h>
+
+#include "camel/camel-ews-store-summary.h"
+#include "camel/camel-ews-utils.h"
+
+#include "utils/ews-esource-utils.h"
 
 #include "exchange-ews-account-listener.h"
 #include "exchange-ews-account-setup.h"
-#include "camel-ews-store-summary.h"
-#include "ews-esource-utils.h"
 
 #define d(x)
 

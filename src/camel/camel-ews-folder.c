@@ -44,17 +44,19 @@ which needs to be better organized via functions */
 #include <libedataserver/e-flag.h>
 #include <libical/icalcomponent.h>
 #include <libical/icalparser.h>
-#include <e-ews-connection.h>
-#include <e-ews-item-change.h>
-#include <e-ews-message.h>
+
+#include "server/e-ews-connection.h"
+#include "server/e-ews-item-change.h"
+#include "server/e-ews-message.h"
+
+#include "utils/ews-camel-common.h"
+#include "utils/camel-ews-settings.h"
 
 #include "camel-ews-folder.h"
 #include "camel-ews-private.h"
-#include "camel-ews-settings.h"
 #include "camel-ews-store.h"
 #include "camel-ews-summary.h"
 #include "camel-ews-utils.h"
-#include <ews-camel-common.h>
 
 #define EWS_MAX_FETCH_COUNT 100
 

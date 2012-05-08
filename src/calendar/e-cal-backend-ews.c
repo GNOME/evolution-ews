@@ -41,14 +41,16 @@
 #include <libical/icalproperty.h>
 #include <libical/icalparameter.h>
 #include <camel/camel.h>
-#include <ews-camel-common.h>
 #include <libedataserver/eds-version.h>
+
+#include "server/e-ews-item-change.h"
+#include "server/e-ews-message.h"
+#include "server/e-soap-response.h"
+
+#include "utils/ews-camel-common.h"
+
 #include "e-cal-backend-ews.h"
 #include "e-cal-backend-ews-utils.h"
-#include "e-ews-connection.h"
-#include "e-soap-response.h"
-#include "e-ews-message.h"
-#include "e-ews-item-change.h"
 
 #ifndef O_BINARY
 #define O_BINARY 0

@@ -5,7 +5,9 @@ NULL =
 SERVERS_EWS_CPPFLAGS= \
 	-DG_LOG_DOMAIN=\"libeews\" \
 	-I$(top_srcdir) \
+	-I$(top_srcdir)/src \
 	-I$(top_builddir) \
+	-I$(top_builddir)/src \
 	$(SOUP_CFLAGS) \
 	$(EVOLUTION_DATA_SERVER_CFLAGS) \
 	$(LIBEDATASERVER_CFLAGS) \
@@ -36,7 +38,7 @@ testews_SOURCES =  \
 
 #Fixme: Ugly. Kill me later
 testews_LDADD = $(LIBEDATASERVER_LIBS) $(libeews)
-testews_CPPFLAGS = $(SERVERS_EWS_CPPFLAGS) -I$(top_srcdir)/src/server/
+testews_CPPFLAGS = $(SERVERS_EWS_CPPFLAGS)
 
 DISTCLEANFILES = $(TEST_PROGS)
 

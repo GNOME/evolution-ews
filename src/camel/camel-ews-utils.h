@@ -21,7 +21,9 @@
 #define CAMEL_EWS_UTILS_H
 
 #include <camel/camel.h>
-#include <e-ews-connection.h>
+
+#include "server/e-ews-connection.h"
+
 #include "camel-ews-store.h"
 #include "camel-ews-folder.h"
 

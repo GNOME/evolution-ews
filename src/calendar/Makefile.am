@@ -5,12 +5,9 @@ ecal_backend_LTLIBRARIES = libecalbackendews.la
 libecalbackendews_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-I$(top_srcdir) \
+	-I$(top_srcdir)/src \
 	-I$(top_builddir) \
-	-I$(top_srcdir)/src/calendar \
-	-I$(top_builddir)/src/calendar \
-	-I$(top_srcdir)/src/server \
-	-I$(top_builddir)/src/server \
-	-I$(top_srcdir)/src/utils \
+	-I$(top_builddir)/src \
 	$(EVOLUTION_CALENDAR_CFLAGS) \
 	$(LIBEBACKEND_CFLAGS) \
 	$(LIBECAL_CFLAGS) \

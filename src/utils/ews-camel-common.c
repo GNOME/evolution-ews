@@ -26,7 +26,8 @@
 #include <glib/gstdio.h>
 
 #include "ews-camel-common.h"
-#include "e-ews-message.h"
+
+#include "server/e-ews-message.h"
 
 struct _create_mime_msg_data {
 	CamelMimeMessage *message;

@@ -22,8 +22,9 @@ libeews_1_2_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-DG_LOG_DOMAIN=\"libeews\" \
 	-I$(top_srcdir) \
+	-I$(top_srcdir)/src \
 	-I$(top_builddir) \
-	-I$(top_builddir)/src/server \
+	-I$(top_builddir)/src \
 	$(SOUP_CFLAGS) \
 	$(LIBECAL_CFLAGS) \
 	$(LIBICAL_CFLAGS) \

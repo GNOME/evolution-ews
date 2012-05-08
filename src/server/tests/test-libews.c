@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <glib.h>
 #include <glib-object.h>
-#include <e-ews-folder.h>
+
+#include "server/e-ews-folder.h"
 
 /* Test result of created folder id */
 extern EwsFolderId *folder_id;

@@ -27,23 +27,29 @@
 #include <glib/gi18n-lib.h>
 
 #include <gtk/gtk.h>
+
 #include <libedataserver/e-xml-hash-utils.h>
 #include <libedataserverui/e-passwords.h>
 #include <libedataserver/e-account.h>
 #include <libedataserver/eds-version.h>
+
 #include <e-util/e-dialog-utils.h>
-#include "mail/em-config.h"
-#include "exchange-ews-account-setup.h"
+#include <mail/em-config.h>
 #include <addressbook/gui/widgets/eab-config.h>
 #include <calendar/gui/e-cal-config.h>
-#include <exchange-ews-account-out-of-office.h>
 
 #include <camel/camel.h>
-#include <camel-ews-folder.h>
-#include <camel-ews-settings.h>
-#include <e-ews-connection.h>
-#include <camel-ews-utils.h>
 #include <shell/e-shell.h>
+
+#include "camel/camel-ews-folder.h"
+#include "camel/camel-ews-utils.h"
+
+#include "server/e-ews-connection.h"
+
+#include "utils/camel-ews-settings.h"
+
+#include "exchange-ews-account-out-of-office.h"
+#include "exchange-ews-account-setup.h"
 
 #define d(x) x
 

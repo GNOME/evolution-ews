@@ -30,10 +30,12 @@
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 
-#include "camel-ews-settings.h"
+#include "server/e-ews-message.h"
+
+#include "utils/camel-ews-settings.h"
+#include "utils/ews-esource-utils.h"
+
 #include "camel-ews-utils.h"
-#include "ews-esource-utils.h"
-#include "e-ews-message.h"
 
 #define SUBFOLDER_DIR_NAME     "subfolders"
 #define SUBFOLDER_DIR_NAME_LEN 10

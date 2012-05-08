@@ -53,12 +53,9 @@ liborg_gnome_exchange_ews_la_LDFLAGS = -module -avoid-version $(NO_UNDEFINED)
 liborg_gnome_exchange_ews_la_CFLAGS = \
 	$(AM_CPPFLAGS) \
 	-I$(top_srcdir) \
+	-I$(top_srcdir)/src \
 	-I$(top_builddir) \
-	-I$(top_srcdir)/src/camel \
-	-I$(top_builddir)/src/camel \
-	-I$(top_srcdir)/src/server \
-	-I$(top_builddir)/src/server \
-	-I$(top_srcdir)/src/utils \
+	-I$(top_builddir)/src \
 	$(LIBEWS_CFLAGS) \
 	$(LIBEMAIL_ENGINE_CFLAGS) \
 	$(NULL)

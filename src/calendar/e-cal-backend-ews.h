@@ -22,7 +22,8 @@
 #define E_CAL_BACKEND_EWS_H
 
 #include <libedata-cal/e-cal-backend-sync.h>
-#include <e-ews-connection.h>
+
+#include "server/e-ews-connection.h"
 
 G_BEGIN_DECLS
 

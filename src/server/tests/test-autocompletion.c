@@ -26,8 +26,10 @@
 #include <ctype.h>
 #include <glib.h>
 #include <glib/gprintf.h>
+
+#include "server/e-ews-connection.h"
+
 #include "utils.h"
-#include <e-ews-connection.h>
 
 void autocompletion_tests_run ();
 

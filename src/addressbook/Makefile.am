@@ -7,9 +7,10 @@ ebook_backend_LTLIBRARIES = libebookbackendews.la
 libebookbackendews_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-DG_LOG_DOMAIN=\"libebookbackend\" \
-	-I$(top_srcdir)/src/addressbook \
-	-I$(top_srcdir)/src/server \
-	-I$(top_srcdir)/src/utils \
+	-I$(top_srcdir) \
+	-I$(top_srcdir)/src \
+	-I$(top_builddir) \
+	-I$(top_builddir)/src \
 	$(LIBEBACKEND_CFLAGS) \
 	$(LIBEDATASERVER_CFLAGS) \
 	$(LIBEBOOK_CFLAGS) \

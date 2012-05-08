@@ -33,9 +33,11 @@
 
 #include <sqlite3.h>
 
-#include "libedataserver/e-sexp.h"
-#include "libedata-book/e-book-backend-sexp.h"
-#include "e-sqlite3-vfs.h"
+#include <libedataserver/e-sexp.h>
+#include <libedata-book/e-book-backend-sexp.h>
+
+#include "utils/e-sqlite3-vfs.h"
+
 #include "e-book-backend-sqlitedb.h"
 
 #define d(x)

@@ -21,7 +21,8 @@
 #define	EWS_CAMEL_COMMON_H
 
 #include <camel/camel.h>
-#include <e-ews-connection.h>
+
+#include "server/e-ews-connection.h"
 
 G_BEGIN_DECLS
 

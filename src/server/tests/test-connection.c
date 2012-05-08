@@ -26,8 +26,10 @@
 #include <ctype.h>
 #include <glib.h>
 #include <glib/gprintf.h>
+
+#include "server/e-ews-connection.h"
+
 #include "utils.h"
-#include <e-ews-connection.h>
 
 static void con_test_create_new_connection ();
 void connection_tests_run ();

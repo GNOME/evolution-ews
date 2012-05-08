@@ -48,12 +48,13 @@
 #include "e-book-backend-sqlitedb.h"
 #include "lzx/ews-oal-decompress.h"
 #include "ews-oab-decoder.h"
-#include "e-ews-item-change.h"
 
-#include "e-ews-message.h"
-#include "e-ews-connection.h"
-#include "e-ews-item.h"
-#include <e-ews-query-to-restriction.h>
+#include "server/e-ews-item-change.h"
+#include "server/e-ews-message.h"
+#include "server/e-ews-connection.h"
+#include "server/e-ews-item.h"
+
+#include "utils/e-ews-query-to-restriction.h"
 
 #define d(x) x
 

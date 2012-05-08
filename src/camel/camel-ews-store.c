@@ -37,15 +37,17 @@
 #include <glib/gstdio.h>
 
 #include <libedataserver/e-flag.h>
-#include <e-ews-item-change.h>
-#include <e-ews-message.h>
+
+#include "server/e-ews-item-change.h"
+#include "server/e-ews-message.h"
+
+#include "utils/camel-ews-settings.h"
+#include "utils/ews-esource-utils.h"
 
 #include "camel-ews-folder.h"
-#include "camel-ews-settings.h"
 #include "camel-ews-store.h"
 #include "camel-ews-summary.h"
 #include "camel-ews-utils.h"
-#include "ews-esource-utils.h"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>

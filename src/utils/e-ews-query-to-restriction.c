@@ -28,8 +28,9 @@
 #include <libedata-cal/e-cal-backend-sexp.h>
 #include "libedataserver/e-sexp.h"
 #include "e-ews-query-to-restriction.h"
-#include "e-ews-message.h"
 #include <camel/camel.h>
+
+#include "server/e-ews-message.h"
 
 #define d(x) x
 

@@ -23,17 +23,20 @@
 #include "config.h"
 #endif
 
+#include "exchange-ews-account-out-of-office.h"
+
 #include <string.h>
 #include <unistd.h>
 #include <glib/gi18n-lib.h>
 
 #include <gtk/gtk.h>
-#include <e-ews-connection.h>
 #include <misc/e-dateedit.h>
-#include <camel-ews-settings.h>
 #include <e-util/e-dialog-utils.h>
 #include <libedataserverui/e-passwords.h>
-#include <exchange-ews-account-out-of-office.h>
+
+#include "server/e-ews-connection.h"
+
+#include "utils/camel-ews-settings.h"
 
 #define d(x) x
 

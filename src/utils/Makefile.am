@@ -6,9 +6,9 @@ libewsutils_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-DG_LOG_DOMAIN=\"libeews\" \
 	-I$(top_srcdir) \
-	-I$(top_srcdir)/src/server \
+	-I$(top_srcdir)/src \
 	-I$(top_builddir) \
-	-I$(top_builddir)/src/server \
+	-I$(top_builddir)/src \
 	$(LIBEDATASERVER_CFLAGS) \
 	$(SQLITE3_CFLAGS) \
 	$(DEBUG_CFLAGS) \

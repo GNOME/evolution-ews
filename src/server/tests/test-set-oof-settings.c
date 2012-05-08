@@ -26,9 +26,11 @@
 #include <ctype.h>
 #include <glib.h>
 #include <glib/gprintf.h>
+
+#include "server/e-ews-connection.h"
+#include "server/e-ews-message.h"
+
 #include "utils.h"
-#include <e-ews-connection.h>
-#include <e-ews-message.h>
 
 void set_oof_settings_test_run ();
 static GMainLoop *main_loop;

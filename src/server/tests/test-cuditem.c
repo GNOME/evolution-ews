@@ -26,10 +26,12 @@
 #include <ctype.h>
 #include <glib.h>
 #include <glib/gprintf.h>
+
+#include "server/e-ews-connection.h"
+#include "server/e-ews-item.h"
+#include "server/e-ews-message.h"
+
 #include "utils.h"
-#include <e-ews-connection.h>
-#include <e-ews-item.h>
-#include <e-ews-message.h>
 
 static void op_test_create_item ();
 void cuditem_tests_run ();
