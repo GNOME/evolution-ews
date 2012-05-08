@@ -195,7 +195,7 @@ void		e_ews_connection_authenticate	(EEwsConnection *cnc,
 						 GError *error);
 
 typedef void (*EEwsAutoDiscoverCallback) (EwsUrls *urls, gpointer user_data, GError *error);
-void		e_ews_autodiscover_ws_url	(EEwsAutoDiscoverCallback cb,
+void		e_ews_autodiscover_ws_url	(EEwsAutoDiscoverCallback callback,
 						 gpointer cbdata,
 						 const gchar *email,
 						 const gchar *password,
@@ -206,7 +206,7 @@ void		e_ews_connection_set_mailbox	(EEwsConnection *cnc,
 
 void		ews_user_id_free		(EwsUserId *id);
 
-void		e_ews_connection_sync_folder_items_start
+void		e_ews_connection_sync_folder_items
 						(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *sync_state,
@@ -214,8 +214,8 @@ void		e_ews_connection_sync_folder_items_start
 						 const gchar *default_props,
 						 const gchar *additional_props,
 						 guint max_entries,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_sync_folder_items_finish
 						(EEwsConnection *cnc,
@@ -226,7 +226,7 @@ gboolean	e_ews_connection_sync_folder_items_finish
 						 GSList **items_updated,
 						 GSList **items_deleted,
 						 GError **error);
-gboolean	e_ews_connection_sync_folder_items
+gboolean	e_ews_connection_sync_folder_items_sync
 						(EEwsConnection *cnc,
 						 gint pri,
 						 gchar **sync_state,
@@ -245,7 +245,7 @@ typedef void	(*EwsConvertQueryCallback)	(ESoapMessage *msg,
 						 const gchar *query,
 						 EwsFolderType type);
 
-void		e_ews_connection_find_folder_items_start
+void		e_ews_connection_find_folder_items
 						(EEwsConnection *cnc,
 						 gint pri,
 						 EwsFolderId *fid,
@@ -255,8 +255,8 @@ void		e_ews_connection_find_folder_items_start
 						 const gchar *query,
 						 EwsFolderType type,
 						 EwsConvertQueryCallback convert_query_cb,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_find_folder_items_finish
 						(EEwsConnection *cnc,
@@ -264,7 +264,7 @@ gboolean	e_ews_connection_find_folder_items_finish
 						 gboolean *includes_last_item,
 						 GSList **items,
 						 GError **error);
-gboolean	e_ews_connection_find_folder_items
+gboolean	e_ews_connection_find_folder_items_sync
 						(EEwsConnection *cnc,
 						 gint pri,
 						 EwsFolderId *fid,
@@ -279,25 +279,24 @@ gboolean	e_ews_connection_find_folder_items
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_get_items_start
-						(EEwsConnection *cnc,
+void		e_ews_connection_get_items	(EEwsConnection *cnc,
 						 gint pri,
 						 const GSList *ids,
 						 const gchar *default_props,
 						 const gchar *additional_props,
 						 gboolean include_mime,
 						 const gchar *mime_directory,
-						 GAsyncReadyCallback cb,
 						 ESoapProgressFn progress_fn,
 						 gpointer progress_data,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_get_items_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 GSList **items,
 						 GError **error);
-gboolean	e_ews_connection_get_items	(EEwsConnection *cnc,
+gboolean	e_ews_connection_get_items_sync	(EEwsConnection *cnc,
 						 gint pri,
 						 const GSList *ids,
 						 const gchar *default_props,
@@ -310,34 +309,21 @@ gboolean	e_ews_connection_get_items	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_delete_items_start
-						(EEwsConnection *cnc,
+void		e_ews_connection_delete_items	(EEwsConnection *cnc,
 						 gint pri,
 						 GSList *ids,
 						 EwsDeleteType delete_type,
 						 EwsSendMeetingCancellationsType send_cancels,
 						 EwsAffectedTaskOccurrencesType affected_tasks,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
-void		e_ews_connection_delete_item_start
-						(EEwsConnection *cnc,
-						 gint pri,
-						 EwsId *id,
-						 guint index,
-						 EwsDeleteType delete_type,
-						 EwsSendMeetingCancellationsType send_cancels,
-						 EwsAffectedTaskOccurrencesType affected_tasks,
-						 GAsyncReadyCallback cb,
-						 GCancellable *cancellable,
-						 gpointer user_data);
-
 gboolean	e_ews_connection_delete_items_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 GError **error);
-
-gboolean	e_ews_connection_delete_items	(EEwsConnection *cnc,
+gboolean	e_ews_connection_delete_items_sync
+						(EEwsConnection *cnc,
 						 gint pri,
 						 GSList *ids,
 						 EwsDeleteType delete_type,
@@ -346,7 +332,18 @@ gboolean	e_ews_connection_delete_items	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 
-gboolean	e_ews_connection_delete_item	(EEwsConnection *cnc,
+void		e_ews_connection_delete_item	(EEwsConnection *cnc,
+						 gint pri,
+						 EwsId *id,
+						 guint index,
+						 EwsDeleteType delete_type,
+						 EwsSendMeetingCancellationsType send_cancels,
+						 EwsAffectedTaskOccurrencesType affected_tasks,
+						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
+						 gpointer user_data);
+gboolean	e_ews_connection_delete_item_sync
+						(EEwsConnection *cnc,
 						 gint pri,
 						 EwsId *id,
 						 guint index,
@@ -356,8 +353,7 @@ gboolean	e_ews_connection_delete_item	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_update_items_start
-						(EEwsConnection *cnc,
+void		e_ews_connection_update_items	(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *conflict_res,
 						 const gchar *msg_disposition,
@@ -365,15 +361,16 @@ void		e_ews_connection_update_items_start
 						 const gchar *folder_id,
 						 EEwsRequestCreationCallback create_cb,
 						 gpointer create_user_data,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_update_items_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 GSList **ids,
 						 GError **error);
-gboolean	e_ews_connection_update_items	(EEwsConnection *cnc,
+gboolean	e_ews_connection_update_items_sync
+						(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *conflict_res,
 						 const gchar *msg_disposition,
@@ -385,23 +382,23 @@ gboolean	e_ews_connection_update_items	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_create_items_start
-						(EEwsConnection *cnc,
+void		e_ews_connection_create_items	(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *msg_disposition,
 						 const gchar *send_invites,
 						 const gchar *folder_id,
 						 EEwsRequestCreationCallback create_cb,
 						 gpointer create_user_data,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_create_items_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 GSList **ids,
 						 GError **error);
-gboolean	e_ews_connection_create_items	(EEwsConnection *cnc,
+gboolean	e_ews_connection_create_items_sync
+						(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *msg_disposition,
 						 const gchar *send_invites,
@@ -412,22 +409,12 @@ gboolean	e_ews_connection_create_items	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 
-gboolean	e_ews_connection_sync_folder_hierarchy
-						(EEwsConnection *cnc,
-						 gint pri,
-						 gchar **sync_state,
-						 gboolean *includes_last_folder,
-						 GSList **folders_created,
-						 GSList **folders_updated,
-						 GSList **folders_deleted,
-						 GCancellable *cancellable,
-						 GError **error);
-void		e_ews_connection_sync_folder_hierarchy_start
+void		e_ews_connection_sync_folder_hierarchy
 						(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *sync_state,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_sync_folder_hierarchy_finish
 						(EEwsConnection *cnc,
@@ -438,16 +425,25 @@ gboolean	e_ews_connection_sync_folder_hierarchy_finish
 						 GSList **folders_updated,
 						 GSList **folders_deleted,
 						 GError **error);
-
-void		e_ews_connection_resolve_names_start
+gboolean	e_ews_connection_sync_folder_hierarchy_sync
 						(EEwsConnection *cnc,
+						 gint pri,
+						 gchar **sync_state,
+						 gboolean *includes_last_folder,
+						 GSList **folders_created,
+						 GSList **folders_updated,
+						 GSList **folders_deleted,
+						 GCancellable *cancellable,
+						 GError **error);
+
+void		e_ews_connection_resolve_names	(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *resolve_name,
 						 EwsContactsSearchScope scope,
 						 GSList *parent_folder_ids,
 						 gboolean fetch_contact_data,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_resolve_names_finish
 						(EEwsConnection *cnc,
@@ -456,7 +452,8 @@ gboolean	e_ews_connection_resolve_names_finish
 						 GSList **contact_items,
 						 gboolean *includes_last_item,
 						 GError **error);
-gboolean	e_ews_connection_resolve_names	(EEwsConnection *cnc,
+gboolean	e_ews_connection_resolve_names_sync
+						(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *resolve_name,
 						 EwsContactsSearchScope scope,
@@ -468,12 +465,11 @@ gboolean	e_ews_connection_resolve_names	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_expand_dl_start
-						(EEwsConnection *cnc,
+void		e_ews_connection_expand_dl	(EEwsConnection *cnc,
 						 gint pri,
 						 const EwsMailbox *mb,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_expand_dl_finish
 						(EEwsConnection *cnc,
@@ -481,7 +477,7 @@ gboolean	e_ews_connection_expand_dl_finish
 						 GSList **mailboxes,
 						 gboolean *includes_last_item,
 						 GError **error);
-gboolean	e_ews_connection_expand_dl	(EEwsConnection *cnc,
+gboolean	e_ews_connection_expand_dl_sync	(EEwsConnection *cnc,
 						 gint pri,
 						 const EwsMailbox *mb,
 						 GSList **mailboxes,
@@ -489,21 +485,21 @@ gboolean	e_ews_connection_expand_dl	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_create_folder_start
-						(EEwsConnection *cnc,
+void		e_ews_connection_create_folder	(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *parent_folder_id,
 						 gboolean is_distinguished_id,
 						 const gchar *folder_name,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_create_folder_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 EwsFolderId **folder_id,
 						 GError **error);
-gboolean	e_ews_connection_create_folder	(EEwsConnection *cnc,
+gboolean	e_ews_connection_create_folder_sync
+						(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *parent_folder_id,
 						 gboolean is_distinguished_id,
@@ -512,20 +508,20 @@ gboolean	e_ews_connection_create_folder	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_delete_folder_start
-						(EEwsConnection *cnc,
+void		e_ews_connection_delete_folder	(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *folder_id,
 						 gboolean is_distinguished_id,
 						 const gchar *delete_type,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_delete_folder_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 GError **error);
-gboolean	e_ews_connection_delete_folder	(EEwsConnection *cnc,
+gboolean	e_ews_connection_delete_folder_sync
+						(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *folder_id,
 						 gboolean is_distinguished_id,
@@ -533,59 +529,59 @@ gboolean	e_ews_connection_delete_folder	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_update_folder_start
-						(EEwsConnection *cnc,
+void		e_ews_connection_update_folder	(EEwsConnection *cnc,
 						 gint pri,
 						 EEwsRequestCreationCallback create_cb,
 						 gpointer create_user_data,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_update_folder_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 GError **error);
-gboolean	e_ews_connection_update_folder	(EEwsConnection *cnc,
+gboolean	e_ews_connection_update_folder_sync
+						(EEwsConnection *cnc,
 						 gint pri,
 						 EEwsRequestCreationCallback create_cb,
 						 gpointer create_user_data,
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_move_folder_start
-						(EEwsConnection *cnc,
+void		e_ews_connection_move_folder	(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *to_folder,
 						 const gchar *folder,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_move_folder_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 GError **error);
-gboolean	e_ews_connection_move_folder	(EEwsConnection *cnc,
+gboolean	e_ews_connection_move_folder_sync
+						(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *to_folder,
 						 const gchar *folder,
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_get_folder_start
-						(EEwsConnection *cnc,
+void		e_ews_connection_get_folder	(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *folder_shape,
 						 EwsAdditionalProps *add_props,
 						 GSList *folder_ids,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_get_folder_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 GSList **folders,
 						 GError **error);
-gboolean	e_ews_connection_get_folder	(EEwsConnection *cnc,
+gboolean	e_ews_connection_get_folder_sync
+						(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *folder_shape,
 						 EwsAdditionalProps *add_props,
@@ -594,21 +590,21 @@ gboolean	e_ews_connection_get_folder	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_move_items_start
-						(EEwsConnection *cnc,
+void		e_ews_connection_move_items	(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *folder_id,
 						 gboolean docopy,
 						 GSList *ids,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_move_items_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 GSList **items,
 						 GError **error);
-gboolean	e_ews_connection_move_items	(EEwsConnection *cnc,
+gboolean	e_ews_connection_move_items_sync
+						(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *folder_id,
 						 gboolean docopy,
@@ -617,20 +613,20 @@ gboolean	e_ews_connection_move_items	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_create_attachments_start
+void		e_ews_connection_create_attachments
 						(EEwsConnection *cnc,
 						 gint pri,
 						 const EwsId *parent,
 						 const GSList *files,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 GSList *	e_ews_connection_create_attachments_finish
 						(EEwsConnection *cnc,
 						 gchar **change_key,
 						 GAsyncResult *result,
 						 GError **error);
-GSList *	e_ews_connection_create_attachments
+GSList *	e_ews_connection_create_attachments_sync
 						(EEwsConnection *cnc,
 						 gint pri,
 						 const EwsId *parent,
@@ -639,42 +635,42 @@ GSList *	e_ews_connection_create_attachments
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_delete_attachments_start
+void		e_ews_connection_delete_attachments
 						(EEwsConnection *cnc,
 						 gint pri,
 						 const GSList *ids,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 GSList *	e_ews_connection_delete_attachments_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 GError **error);
-GSList *	e_ews_connection_delete_attachments
+GSList *	e_ews_connection_delete_attachments_sync
 						(EEwsConnection *cnc,
 						 gint pri,
 						 const GSList *ids,
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_get_attachments_start
+void		e_ews_connection_get_attachments
 						(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *comp_uid,
 						 const GSList *ids,
 						 const gchar *cache,
 						 gboolean include_mime,
-						 GAsyncReadyCallback cb,
 						 ESoapProgressFn progress_fn,
 						 gpointer progress_data,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 GSList *	e_ews_connection_get_attachments_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 GSList **items,
 						 GError **error);
-GSList *	e_ews_connection_get_attachments
+GSList *	e_ews_connection_get_attachments_sync
 						(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *comp_uid,
@@ -687,29 +683,28 @@ GSList *	e_ews_connection_get_attachments
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_get_oal_list_start
-						(EEwsConnection *cnc,
-						 GAsyncReadyCallback cb,
+void		e_ews_connection_get_oal_list	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_get_oal_list_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 GSList **oals,
 						 GError **error);
-void		e_ews_connection_get_oal_detail_start
-						(EEwsConnection *cnc,
+
+void		e_ews_connection_get_oal_detail	(EEwsConnection *cnc,
 						 const gchar *oal_id,
 						 const gchar *oal_element,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_get_oal_detail_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 GSList **elements,
 						 GError **error);
-gboolean	e_ews_connection_get_oal_detail
+gboolean	e_ews_connection_get_oal_detail_sync
 						(EEwsConnection *cnc,
 						 const gchar *oal_id,
 						 const gchar *oal_element,
@@ -717,20 +712,19 @@ gboolean	e_ews_connection_get_oal_detail
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_get_free_busy_start
-						(EEwsConnection *cnc,
+void		e_ews_connection_get_free_busy	(EEwsConnection *cnc,
 						 gint pri,
 						 EEwsRequestCreationCallback free_busy_cb,
 						 gpointer free_busy_user_data,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_get_free_busy_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 GSList **free_busy,
 						 GError **error);
-gboolean	e_ews_connection_get_free_busy
+gboolean	e_ews_connection_get_free_busy_sync
 						(EEwsConnection *cnc,
 						 gint pri,
 						 EEwsRequestCreationCallback free_busy_cb,
@@ -739,19 +733,19 @@ gboolean	e_ews_connection_get_free_busy
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_download_oal_file_start
+void		e_ews_connection_download_oal_file
 						(EEwsConnection *cnc,
 						 const gchar *cache_filename,
-						 GAsyncReadyCallback cb,
 						 EwsProgressFn progress_fn,
 						 gpointer progress_data,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_download_oal_file_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 GError **error);
-gboolean	e_ews_connection_download_oal_file
+gboolean	e_ews_connection_download_oal_file_sync
 						(EEwsConnection *cnc,
 						 const gchar *cache_filename,
 						 EwsProgressFn progress_fn,
@@ -759,20 +753,20 @@ gboolean	e_ews_connection_download_oal_file
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_get_delegate_start
-						(EEwsConnection *cnc,
+void		e_ews_connection_get_delegate	(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *mail_id,
 						 const gchar *include_permissions,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_get_delegate_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 EwsDelegateInfo **get_delegate,
 						 GError **error);
-gboolean	e_ews_connection_get_delegate	(EEwsConnection *cnc,
+gboolean	e_ews_connection_get_delegate_sync
+						(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *mail_id,
 						 const gchar *include_permissions,
@@ -780,36 +774,36 @@ gboolean	e_ews_connection_get_delegate	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_get_oof_settings_start
+void		e_ews_connection_get_oof_settings
 						(EEwsConnection *cnc,
 						 gint pri,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_get_oof_settings_finish
 						(EEwsConnection *cnc,
 						  GAsyncResult *result,
 						  OOFSettings **oof_settings,
 						  GError **error);
-gboolean	e_ews_connection_get_oof_settings
+gboolean	e_ews_connection_get_oof_settings_sync
 						(EEwsConnection *cnc,
 						 gint pri,
 						 OOFSettings **oof_settings,
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_set_oof_settings_start
+void		e_ews_connection_set_oof_settings
 						(EEwsConnection *cnc,
 						 gint pri,
 						 OOFSettings *oof_settings,
-						 GAsyncReadyCallback cb,
 						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_set_oof_settings_finish
 						(EEwsConnection *cnc,
 						  GAsyncResult *result,
 						  GError **error);
-gboolean	e_ews_connection_set_oof_settings
+gboolean	e_ews_connection_set_oof_settings_sync
 						(EEwsConnection *cnc,
 						 gint pri,
 						 OOFSettings *oof_settings,

@@ -991,15 +991,16 @@ e_book_backend_ews_create_contacts (EBookBackend *backend,
 	create_contact->contact = g_object_ref (contact);
 
 	/* pass new contact component data to the exchange server and expect response in the callback */
-	e_ews_connection_create_items_start (priv->cnc,
-					     EWS_PRIORITY_MEDIUM, NULL,
-					     NULL,
-					     priv->folder_id,
-					     convert_contact_to_xml,
-					     contact,
-					     ews_create_contact_cb,
-					     cancellable,
-					     create_contact);
+	e_ews_connection_create_items (
+		priv->cnc,
+		EWS_PRIORITY_MEDIUM, NULL,
+		NULL,
+		priv->folder_id,
+		convert_contact_to_xml,
+		contact,
+		cancellable,
+		ews_create_contact_cb,
+		create_contact);
 }
 
 typedef struct {
@@ -1088,10 +1089,12 @@ e_book_backend_ews_remove_contacts (EBookBackend *backend,
 	remove_contact->opid = opid;
 	remove_contact->sl_ids = copy;
 
-	e_ews_connection_delete_items_start (priv->cnc, EWS_PRIORITY_MEDIUM, (GSList *) id_list,
-					     EWS_HARD_DELETE, 0 , FALSE,
-					     ews_book_remove_contact_cb, cancellable,
-					     remove_contact);
+	e_ews_connection_delete_items (
+		priv->cnc, EWS_PRIORITY_MEDIUM, (GSList *) id_list,
+		EWS_HARD_DELETE, 0 , FALSE,
+		cancellable,
+		ews_book_remove_contact_cb,
+		remove_contact);
 }
 
 typedef struct {
@@ -1276,12 +1279,14 @@ e_book_backend_ews_modify_contacts (EBookBackend *backend,
 	modify_contact->opid = opid;
 	modify_contact->old_contact = g_object_ref (old_contact);
 	modify_contact->new_contact = g_object_ref (contact);
-	e_ews_connection_update_items_start (priv->cnc, EWS_PRIORITY_MEDIUM,
-						"AlwaysOverwrite", "SendAndSaveCopy",
-						"SendToAllAndSaveCopy", priv->folder_id,
-						convert_contact_to_updatexml, modify_contact,
-						ews_modify_contact_cb, cancellable,
-						modify_contact);
+	e_ews_connection_update_items (
+		priv->cnc, EWS_PRIORITY_MEDIUM,
+		"AlwaysOverwrite", "SendAndSaveCopy",
+		"SendToAllAndSaveCopy", priv->folder_id,
+		convert_contact_to_updatexml, modify_contact,
+		cancellable,
+		ews_modify_contact_cb,
+		modify_contact);
 }
 
 static void
@@ -1379,12 +1384,13 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 		fid->id = g_strdup (priv->folder_id);
 		fid->is_distinguished_id = FALSE;
 
-		e_ews_connection_find_folder_items (priv->cnc, EWS_PRIORITY_MEDIUM,
-							fid, "IdOnly", NULL, NULL, query,
-							EWS_FOLDER_TYPE_CONTACTS,
-							&includes_last_item,
-							&items, (EwsConvertQueryCallback) (e_ews_query_to_restriction),
-							cancellable, &error);
+		e_ews_connection_find_folder_items_sync (
+			priv->cnc, EWS_PRIORITY_MEDIUM,
+			fid, "IdOnly", NULL, NULL, query,
+			EWS_FOLDER_TYPE_CONTACTS,
+			&includes_last_item,
+			&items, (EwsConvertQueryCallback) (e_ews_query_to_restriction),
+			cancellable, &error);
 
 		/*we have got Id for items lets fetch them using getitem operation*/
 		ebews_fetch_items (ebews, items, FALSE, &vcard_list, cancellable, &error);
@@ -1647,7 +1653,8 @@ ews_download_full_gal (EBookBackendEws *cbews,
 	comp_cache_file = g_build_filename (cache_dir, full->filename, NULL);
 
 	oab_cnc = e_ews_connection_new (full_url, priv->username, priv->password, NULL, NULL, NULL);
-	if (!e_ews_connection_download_oal_file (oab_cnc, comp_cache_file, NULL, NULL, cancellable, error))
+	if (!e_ews_connection_download_oal_file_sync (
+		oab_cnc, comp_cache_file, NULL, NULL, cancellable, error))
 		goto exit;
 
 	cache_file = g_strdup_printf ("%s-%d.oab", priv->folder_name, full->seq);
@@ -1793,7 +1800,9 @@ ebews_start_gal_sync (gpointer data)
 
 	d(printf ("Ewsgal: Fetching oal full details file \n");)
 
-	if (!e_ews_connection_get_oal_detail (oab_cnc, priv->folder_id, "Full", &full_l, priv->cancellable, &error)) {
+	if (!e_ews_connection_get_oal_detail_sync (
+		oab_cnc, priv->folder_id, "Full", &full_l,
+		priv->cancellable, &error)) {
 		ret = FALSE;
 		goto exit;
 	}
@@ -2123,11 +2132,11 @@ ebews_fetch_items (EBookBackendEws *ebews,
 
 	/* TODO fetch attachments */
 	if (contact_item_ids)
-		e_ews_connection_get_items
-			(cnc, EWS_PRIORITY_MEDIUM,
-			 contact_item_ids, "Default", CONTACT_ITEM_PROPS,
-			 FALSE, NULL, &new_items, NULL, NULL,
-			 cancellable, error);
+		e_ews_connection_get_items_sync (
+			cnc, EWS_PRIORITY_MEDIUM,
+			contact_item_ids, "Default", CONTACT_ITEM_PROPS,
+			FALSE, NULL, &new_items, NULL, NULL,
+			cancellable, error);
 	if (*error)
 		goto cleanup;
 
@@ -2141,11 +2150,11 @@ ebews_fetch_items (EBookBackendEws *ebews,
 
 	/* Get the display names of the distribution lists */
 	if (dl_ids)
-		e_ews_connection_get_items
-			(cnc, EWS_PRIORITY_MEDIUM,
-			 dl_ids, "Default", NULL,
-			 FALSE, NULL, &new_items, NULL, NULL,
-			 cancellable, error);
+		e_ews_connection_get_items_sync (
+			cnc, EWS_PRIORITY_MEDIUM,
+			dl_ids, "Default", NULL,
+			FALSE, NULL, &new_items, NULL, NULL,
+			cancellable, error);
 	if (*error)
 		goto cleanup;
 
@@ -2169,7 +2178,9 @@ ebews_fetch_items (EBookBackendEws *ebews,
 			goto cleanup;
 
 		d_name = e_ews_item_get_subject (item);
-		e_ews_connection_expand_dl (cnc, EWS_PRIORITY_MEDIUM, mb, &members, &includes_last, priv->cancellable, error);
+		e_ews_connection_expand_dl_sync (
+			cnc, EWS_PRIORITY_MEDIUM, mb, &members,
+			&includes_last, priv->cancellable, error);
 		if (*error)
 			goto cleanup;
 
@@ -2225,12 +2236,13 @@ ebews_start_sync (gpointer data)
 		GSList *items_created = NULL, *items_updated = NULL;
 		GSList *items_deleted = NULL;
 
-		e_ews_connection_sync_folder_items	(priv->cnc, EWS_PRIORITY_MEDIUM,
-							 &sync_state, priv->folder_id,
-							 "IdOnly", NULL,
-							 EWS_MAX_FETCH_COUNT, &includes_last_item,
-							 &items_created, &items_updated,
-							 &items_deleted, priv->cancellable, &error);
+		e_ews_connection_sync_folder_items_sync (
+			priv->cnc, EWS_PRIORITY_MEDIUM,
+			&sync_state, priv->folder_id,
+			"IdOnly", NULL,
+			EWS_MAX_FETCH_COUNT, &includes_last_item,
+			&items_created, &items_updated,
+			&items_deleted, priv->cancellable, &error);
 
 		if (error)
 			break;
@@ -2462,9 +2474,10 @@ e_book_backend_ews_start_book_view (EBookBackend *backend,
 	 * items during auto-completion. Change it if needed. TODO, Personal Address-book should start using
 	 * find_items rather than resolve_names to support all queries */
 	g_hash_table_insert (priv->ops, book_view, cancellable);
-	e_ews_connection_resolve_names	(priv->cnc, EWS_PRIORITY_MEDIUM, auto_comp_str,
-					 EWS_SEARCH_AD, NULL, TRUE, &mailboxes, &contacts,
-					 &includes_last_item, cancellable, &error);
+	e_ews_connection_resolve_names_sync (
+		priv->cnc, EWS_PRIORITY_MEDIUM, auto_comp_str,
+		EWS_SEARCH_AD, NULL, TRUE, &mailboxes, &contacts,
+		&includes_last_item, cancellable, &error);
 	g_free (auto_comp_str);
 	g_hash_table_remove (priv->ops, book_view);
 	e_ews_folder_free_fid (fid);
@@ -2660,7 +2673,9 @@ e_book_backend_ews_authenticate_user (EBookBackend *backend,
 		fid->id = g_strdup ("contacts");
 		fid->is_distinguished_id = TRUE;
 		ids = g_slist_append (ids, fid);
-		e_ews_connection_get_folder (cnc, EWS_PRIORITY_MEDIUM, "Default", NULL, ids, &folders, cancellable, &error);
+		e_ews_connection_get_folder_sync (
+			cnc, EWS_PRIORITY_MEDIUM, "Default",
+			NULL, ids, &folders, cancellable, &error);
 
 		e_ews_folder_free_fid (fid);
 		g_slist_free (ids);

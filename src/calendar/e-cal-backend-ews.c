@@ -364,12 +364,14 @@ e_cal_backend_ews_discard_alarm (ECalBackend *backend,
 
 	ews_cal_component_get_item_id (comp, &edad->itemid, &edad->changekey);
 
-	e_ews_connection_update_items_start (priv->cnc, EWS_PRIORITY_MEDIUM,
-					     "AlwaysOverwrite", NULL,
-					     "SendToNone", NULL,
-					     clear_reminder_is_set, edad,
-					     ews_cal_discard_alarm_cb, priv->cancellable,
-					     edad);
+	e_ews_connection_update_items (
+		priv->cnc, EWS_PRIORITY_MEDIUM,
+		"AlwaysOverwrite", NULL,
+		"SendToNone", NULL,
+		clear_reminder_is_set, edad,
+		priv->cancellable,
+		ews_cal_discard_alarm_cb,
+		edad);
 }
 
 static void
@@ -570,7 +572,9 @@ connect_to_server (ECalBackendEws *cbews,
 		fid = g_new0 (EwsFolderId, 1);
 		fid->id = g_strdup (priv->folder_id);
 		ids = g_slist_append (ids, fid);
-		e_ews_connection_get_folder (cnc, EWS_PRIORITY_MEDIUM, "Default", NULL, ids, &folders, priv->cancellable, &err);
+		e_ews_connection_get_folder_sync (
+			cnc, EWS_PRIORITY_MEDIUM, "Default", NULL,
+			ids, &folders, priv->cancellable, &err);
 
 		e_ews_folder_free_fid (fid);
 		g_slist_free (ids);
@@ -1053,10 +1057,12 @@ e_cal_backend_ews_remove_object (ECalBackend *backend,
 	remove_data->rid = (rid ? g_strdup (rid) : NULL);
 	remove_data->mod = mod;
 
-	e_ews_connection_delete_item_start (priv->cnc, EWS_PRIORITY_MEDIUM, &remove_data->item_id, index,
-					     EWS_HARD_DELETE, EWS_SEND_TO_NONE, EWS_ALL_OCCURRENCES,
-					     ews_cal_remove_object_cb, priv->cancellable,
-					     remove_data);
+	e_ews_connection_delete_item (
+		priv->cnc, EWS_PRIORITY_MEDIUM, &remove_data->item_id, index,
+		EWS_HARD_DELETE, EWS_SEND_TO_NONE, EWS_ALL_OCCURRENCES,
+		priv->cancellable,
+		ews_cal_remove_object_cb,
+		remove_data);
 	return;
 
 errorlvl2:
@@ -1441,16 +1447,17 @@ ews_create_attachments_cb (GObject *object,
 			/*In case of appointment we have to set SendMeetingInvites to SendToNone */
 			send_meeting_invitations = "SendToNone";
 
-		e_ews_connection_update_items_start (priv->cnc, EWS_PRIORITY_MEDIUM,
-						     "AlwaysOverwrite",
-						     "SendAndSaveCopy",
-						     send_meeting_invitations,
-						     priv->folder_id,
-						     convert_component_to_updatexml,
-						     modify_data,
-						     ews_cal_modify_object_cb,
-						     priv->cancellable,
-						     modify_data);
+		e_ews_connection_update_items (
+			priv->cnc, EWS_PRIORITY_MEDIUM,
+			"AlwaysOverwrite",
+			"SendAndSaveCopy",
+			send_meeting_invitations,
+			priv->folder_id,
+			convert_component_to_updatexml,
+			modify_data,
+			priv->cancellable,
+			ews_cal_modify_object_cb,
+			modify_data);
 	}
 
 	g_slist_free (ids);
@@ -1501,7 +1508,8 @@ ews_create_object_cb (GObject *object,
 		items = g_slist_append (items, item_id->id);
 
 		/* get calender uid from server*/
-		result = e_ews_connection_get_items (cnc, EWS_PRIORITY_MEDIUM,
+		result = e_ews_connection_get_items_sync (
+			cnc, EWS_PRIORITY_MEDIUM,
 			items,
 			"IdOnly",
 			"calendar:UID",
@@ -1544,9 +1552,12 @@ ews_create_object_cb (GObject *object,
 		attach_data->cb_type = 1;
 
 		e_cal_component_get_attachment_list (create_data->comp, &attachments);
-		e_ews_connection_create_attachments_start (cnc, EWS_PRIORITY_MEDIUM,
-							   item_id, attachments,
-							   ews_create_attachments_cb, priv->cancellable, attach_data);
+		e_ews_connection_create_attachments (
+			cnc, EWS_PRIORITY_MEDIUM,
+			item_id, attachments,
+			priv->cancellable,
+			ews_create_attachments_cb,
+			attach_data);
 
 		for (i = attachments; i; i = i->next) g_free (i->data);
 		g_slist_free (attachments);
@@ -1750,16 +1761,17 @@ e_cal_backend_ews_create_objects (ECalBackend *backend,
 		/*In case of appointment we have to set SendMeetingInvites to SendToNone */
 		send_meeting_invitations = "SendToNone";
 
-	e_ews_connection_create_items_start (priv->cnc,
-					     EWS_PRIORITY_MEDIUM,
-					     "SaveOnly",
-					     send_meeting_invitations,
-					     priv->folder_id,
-					     convert_calcomp_to_xml,
-					     convert_data,
-					     ews_create_object_cb,
-					     cancellable,
-					     create_data);
+	e_ews_connection_create_items (
+		priv->cnc,
+		EWS_PRIORITY_MEDIUM,
+		"SaveOnly",
+		send_meeting_invitations,
+		priv->folder_id,
+		convert_calcomp_to_xml,
+		convert_data,
+		cancellable,
+		ews_create_object_cb,
+		create_data);
 	return;
 
 exit:
@@ -2271,7 +2283,9 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 			icalprop = icalcomponent_get_next_property (icalcomp, ICAL_ATTACH_PROPERTY);
 		}
 
-		items = e_ews_connection_delete_attachments (priv->cnc, EWS_PRIORITY_MEDIUM, removed_attachments_ids, cancellable, &error);
+		items = e_ews_connection_delete_attachments_sync (
+			priv->cnc, EWS_PRIORITY_MEDIUM,
+			removed_attachments_ids, cancellable, &error);
 
 		changekey = items->data;
 
@@ -2301,9 +2315,12 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 			e_data_cal_respond_modify_objects (cal, context, error, NULL, NULL);
 		}
 
-		e_ews_connection_create_attachments_start (priv->cnc, EWS_PRIORITY_MEDIUM,
-							   item_id, added_attachments,
-							   ews_create_attachments_cb, cancellable, attach_data);
+		e_ews_connection_create_attachments (
+			priv->cnc, EWS_PRIORITY_MEDIUM,
+			item_id, added_attachments,
+			cancellable,
+			ews_create_attachments_cb,
+			attach_data);
 
 		g_slist_free (added_attachments);
 		g_free (item_id);
@@ -2325,16 +2342,17 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 			/*In case of appointment we have to set SendMeetingInvites to SendToNone */
 			send_meeting_invitations = "SendToNone";
 
-		e_ews_connection_update_items_start (priv->cnc, EWS_PRIORITY_MEDIUM,
-						     "AlwaysOverwrite",
-						     "SendAndSaveCopy",
-						     send_meeting_invitations,
-						     priv->folder_id,
-						     convert_component_to_updatexml,
-						     modify_data,
-						     ews_cal_modify_object_cb,
-						     cancellable,
-						     modify_data);
+		e_ews_connection_update_items (
+			priv->cnc, EWS_PRIORITY_MEDIUM,
+			"AlwaysOverwrite",
+			"SendAndSaveCopy",
+			send_meeting_invitations,
+			priv->folder_id,
+			convert_component_to_updatexml,
+			modify_data,
+			cancellable,
+			ews_cal_modify_object_cb,
+			modify_data);
 	}
 	return;
 
@@ -2394,13 +2412,11 @@ e_ews_receive_objects_no_exchange_mail (ECalBackendEwsPrivate *priv,
                                         GError *error)
 {
 	gchar *mime_content = e_ews_get_icalcomponent_as_mime_content (subcomp);
-	e_ews_connection_create_items (priv->cnc, EWS_PRIORITY_MEDIUM,
-							       "SendAndSaveCopy", "SendToNone", NULL,
-							       prepare_create_item_with_mime_content_request,
-							       mime_content,
-							       &ids,
-							       cancellable,
-							       &error);
+	e_ews_connection_create_items_sync (
+		priv->cnc, EWS_PRIORITY_MEDIUM,
+		"SendAndSaveCopy", "SendToNone", NULL,
+		prepare_create_item_with_mime_content_request,
+		mime_content, &ids, cancellable, &error);
 	g_free (mime_content);
 	/*we still have to send a mail with accept to meeting organizer*/
 }
@@ -2545,12 +2561,13 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend,
 				if (item_id == NULL)
 					e_ews_receive_objects_no_exchange_mail (priv, subcomp, ids, cancellable, error);
 				else
-					e_ews_connection_create_items (priv->cnc, EWS_PRIORITY_MEDIUM,
-								       "SendAndSaveCopy",
-								       NULL, NULL,
-								       prepare_accept_item_request,
-								       accept_data,
-								       &ids, cancellable, &error);
+					e_ews_connection_create_items_sync (
+						priv->cnc, EWS_PRIORITY_MEDIUM,
+						"SendAndSaveCopy",
+						NULL, NULL,
+						prepare_accept_item_request,
+						accept_data,
+						&ids, cancellable, &error);
 			if (!error) {
 				transp = icalcomponent_get_first_property (subcomp, ICAL_TRANSP_PROPERTY);
 				if (!g_strcmp0 (icalproperty_get_value_as_string (transp), "TRANSPARENT") &&
@@ -2565,16 +2582,17 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend,
 							break;
 						}
 					}
-					e_ews_connection_update_items (priv->cnc,
-								       EWS_PRIORITY_MEDIUM,
-								       "AlwaysOverwrite",
-								       NULL, "SendToNone",
-								       NULL,
-								       prepare_set_free_busy_status,
-								       accept_data,
-								       &ids,
-								       cancellable,
-								       &error);
+					e_ews_connection_update_items_sync (
+						priv->cnc,
+						EWS_PRIORITY_MEDIUM,
+						"AlwaysOverwrite",
+						NULL, "SendToNone",
+						NULL,
+						prepare_set_free_busy_status,
+						accept_data,
+						&ids,
+						cancellable,
+						&error);
 				}
 			}
 				g_free (item_id);
@@ -2947,15 +2965,17 @@ ews_get_attachments (ECalBackendEws *cbews,
 		att_data->itemid = g_strdup (item_id->id);
 		e_cal_component_get_uid (att_data->comp, &uid);
 
-		e_ews_connection_get_attachments_start (cbews->priv->cnc,
-							EWS_PRIORITY_MEDIUM,
-							uid,
-							attachment_ids,
-							cbews->priv->storage_path,
-							TRUE,
-							ews_get_attachments_ready_callback,
-							NULL, NULL,
-							cbews->priv->cancellable, att_data);
+		e_ews_connection_get_attachments (
+			cbews->priv->cnc,
+			EWS_PRIORITY_MEDIUM,
+			uid,
+			attachment_ids,
+			cbews->priv->storage_path,
+			TRUE,
+			NULL, NULL,
+			cbews->priv->cancellable,
+			ews_get_attachments_ready_callback,
+			att_data);
 	}
 
 }
@@ -3082,9 +3102,10 @@ add_item_to_cache (ECalBackendEws *cbews,
 			icalcomponent_add_property (icalcomp, icalprop);
 
 			/* get delegator mail box*/
-			e_ews_connection_resolve_names	(priv->cnc, EWS_PRIORITY_MEDIUM, task_owner,
-						 EWS_SEARCH_AD, NULL, FALSE, &mailboxes, NULL,
-						 &includes_last_item, priv->cancellable, &error);
+			e_ews_connection_resolve_names_sync (
+				priv->cnc, EWS_PRIORITY_MEDIUM, task_owner,
+				EWS_SEARCH_AD, NULL, FALSE, &mailboxes, NULL,
+				&includes_last_item, priv->cancellable, &error);
 
 			for (l = mailboxes; l != NULL; l = g_slist_next (l)) {
 				EwsMailbox *mb = l->data;
@@ -3352,11 +3373,13 @@ ews_cal_get_items_ready_cb (GObject *obj,
 			sub_sync_data->cbews = g_object_ref (sync_data->cbews);
 			sub_sync_data->master_uid = g_strdup (item_id->id);
 
-			e_ews_connection_get_items_start (g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
-					modified_occurrences,
-					"IdOnly", "item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:UID calendar:Resources calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
-					FALSE, NULL, ews_cal_get_items_ready_cb, NULL, NULL, priv->cancellable,
-					(gpointer) sub_sync_data);
+			e_ews_connection_get_items (
+				g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
+				modified_occurrences,
+				"IdOnly", "item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:UID calendar:Resources calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
+				FALSE, NULL, NULL, NULL, priv->cancellable,
+				ews_cal_get_items_ready_cb,
+				(gpointer) sub_sync_data);
 
 			g_object_unref (cnc);
 		}
@@ -3377,13 +3400,14 @@ ews_cal_get_items_ready_cb (GObject *obj,
 	if (sync_data->sync_state)
 		e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, sync_data->sync_state);
 	if (sync_data->sync_pending)
-		e_ews_connection_sync_folder_items_start
-						(g_object_ref (priv->cnc), EWS_PRIORITY_MEDIUM,
-						 sync_data->sync_state, priv->folder_id,
-						 "IdOnly", NULL,
-						 EWS_MAX_FETCH_COUNT,
-						 ews_cal_sync_items_ready_cb,
-						 priv->cancellable, g_object_ref (cbews));
+		e_ews_connection_sync_folder_items (
+			g_object_ref (priv->cnc), EWS_PRIORITY_MEDIUM,
+			sync_data->sync_state, priv->folder_id,
+			"IdOnly", NULL,
+			EWS_MAX_FETCH_COUNT,
+			priv->cancellable,
+			ews_cal_sync_items_ready_cb,
+			g_object_ref (cbews));
 
 exit:
 	g_object_unref (sync_data->cbews);
@@ -3476,13 +3500,14 @@ ews_cal_sync_items_ready_cb (GObject *obj,
 
 	if (!cal_item_ids && !task_item_ids && !includes_last_item) {
 		e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, sync_state);
-		e_ews_connection_sync_folder_items_start
-						(g_object_ref (priv->cnc), EWS_PRIORITY_MEDIUM,
-						 sync_state, priv->folder_id,
-						 "IdOnly", NULL,
-						 EWS_MAX_FETCH_COUNT,
-						 ews_cal_sync_items_ready_cb,
-						 priv->cancellable, g_object_ref (cbews));
+		e_ews_connection_sync_folder_items (
+			g_object_ref (priv->cnc), EWS_PRIORITY_MEDIUM,
+			sync_state, priv->folder_id,
+			"IdOnly", NULL,
+			EWS_MAX_FETCH_COUNT,
+			priv->cancellable,
+			ews_cal_sync_items_ready_cb,
+			g_object_ref (cbews));
 		g_free (sync_state);
 		goto exit;
 	}
@@ -3495,26 +3520,28 @@ ews_cal_sync_items_ready_cb (GObject *obj,
 	}
 
 	if (cal_item_ids)
-		e_ews_connection_get_items_start (cnc,
-						  EWS_PRIORITY_MEDIUM,
-						  cal_item_ids,
-						  "IdOnly",
-						  "item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:UID calendar:Resources calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
-						  FALSE, NULL,
-						  ews_cal_get_items_ready_cb,
-						  NULL, NULL, priv->cancellable,
-						  (gpointer) sync_data);
+		e_ews_connection_get_items (
+			cnc,
+			EWS_PRIORITY_MEDIUM,
+			cal_item_ids,
+			"IdOnly",
+			"item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:UID calendar:Resources calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
+			FALSE, NULL,
+			NULL, NULL, priv->cancellable,
+			ews_cal_get_items_ready_cb,
+			(gpointer) sync_data);
 
 	if (task_item_ids)
-		e_ews_connection_get_items_start (cnc, EWS_PRIORITY_MEDIUM,
-						  task_item_ids,
-						  "AllProperties",
-						  NULL,
-						  FALSE,
-						  NULL,
-						  ews_cal_get_items_ready_cb,
-						  NULL, NULL, priv->cancellable,
-						  (gpointer) sync_data);
+		e_ews_connection_get_items (
+			cnc, EWS_PRIORITY_MEDIUM,
+			task_item_ids,
+			"AllProperties",
+			NULL,
+			FALSE,
+			NULL,
+			NULL, NULL, priv->cancellable,
+			ews_cal_get_items_ready_cb,
+			(gpointer) sync_data);
 
 exit:
 	if (cal_item_ids) {
@@ -3551,13 +3578,14 @@ ews_start_sync (gpointer data)
 	PRIV_UNLOCK (priv);
 
 	sync_state = e_cal_backend_store_get_key_value (priv->store, SYNC_KEY);
-	e_ews_connection_sync_folder_items_start
-						(priv->cnc, EWS_PRIORITY_MEDIUM,
-						 sync_state, priv->folder_id,
-						 "IdOnly", NULL,
-						 EWS_MAX_FETCH_COUNT,
-						 ews_cal_sync_items_ready_cb,
-						 priv->cancellable, g_object_ref (cbews));
+	e_ews_connection_sync_folder_items (
+		priv->cnc, EWS_PRIORITY_MEDIUM,
+		sync_state, priv->folder_id,
+		"IdOnly", NULL,
+		EWS_MAX_FETCH_COUNT,
+		priv->cancellable,
+		ews_cal_sync_items_ready_cb,
+		g_object_ref (cbews));
 	return TRUE;
 }
 
@@ -3796,13 +3824,14 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend,
 	free_busy_data->end = end;
 	free_busy_data->timezone = priv->default_zone;
 
-	e_ews_connection_get_free_busy_start (priv->cnc,
-					      EWS_PRIORITY_MEDIUM,
-					      prepare_free_busy_request,
-					      free_busy_data,
-					      ews_cal_get_free_busy_cb,
-					      cancellable,
-					      free_busy_data);
+	e_ews_connection_get_free_busy (
+		priv->cnc,
+		EWS_PRIORITY_MEDIUM,
+		prepare_free_busy_request,
+		free_busy_data,
+		cancellable,
+		ews_cal_get_free_busy_cb,
+		free_busy_data);
 
 	return;
 

@@ -429,7 +429,7 @@ ews_authenticate_sync (CamelService *service,
 	if (!sync_state)
 		initial_setup = TRUE;
 
-	e_ews_connection_sync_folder_hierarchy (
+	e_ews_connection_sync_folder_hierarchy_sync (
 		priv->cnc, EWS_PRIORITY_MEDIUM,
 		&sync_state, &includes_last_folder,
 		&folders_created, &folders_updated, &folders_deleted,
@@ -461,9 +461,10 @@ ews_authenticate_sync (CamelService *service,
 		}
 
 		/* fetch system folders first using getfolder operation*/
-		e_ews_connection_get_folder (ews_store->priv->cnc, EWS_PRIORITY_MEDIUM, "IdOnly",
-						     NULL, folder_ids, &folders,
-						     cancellable, &folder_err);
+		e_ews_connection_get_folder_sync (
+			ews_store->priv->cnc, EWS_PRIORITY_MEDIUM, "IdOnly",
+			NULL, folder_ids, &folders,
+			cancellable, &folder_err);
 
 		if (g_slist_length (folders) && (g_slist_length (folders) != G_N_ELEMENTS (system_folder)))
 			d(printf("Error : not all folders are returned by getfolder operation"));
@@ -659,9 +660,10 @@ ews_refresh_finfo (CamelEwsStore *ews_store)
 
 	sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
 
-	e_ews_connection_sync_folder_hierarchy_start	(ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
-							 sync_state, ews_folder_hierarchy_ready_cb,
-							 NULL, g_object_ref (ews_store));
+	e_ews_connection_sync_folder_hierarchy (
+		ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
+		sync_state, NULL, ews_folder_hierarchy_ready_cb,
+		g_object_ref (ews_store));
 	g_free (sync_state);
 	return TRUE;
 }
@@ -707,10 +709,11 @@ ews_get_folder_info_sync (CamelStore *store,
 		goto offline;
 	}
 
-	if (!e_ews_connection_sync_folder_hierarchy (ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
-						    &sync_state, &includes_last_folder,
-						    &folders_created, &folders_updated,
-						    &folders_deleted, cancellable, error)) {
+	if (!e_ews_connection_sync_folder_hierarchy_sync (
+			ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
+			&sync_state, &includes_last_folder,
+			&folders_created, &folders_updated,
+			&folders_deleted, cancellable, error)) {
 		if (error)
 			g_warning ("Unable to fetch the folder hierarchy: %s :%d \n",
 				   (*error)->message, (*error)->code);
@@ -762,10 +765,11 @@ ews_create_folder_sync (CamelStore *store,
 	}
 
 	/* Make the call */
-	if (!e_ews_connection_create_folder (ews_store->priv->cnc,
-					     EWS_PRIORITY_MEDIUM, fid,
-					     FALSE, folder_name, &folder_id,
-					     cancellable, error)) {
+	if (!e_ews_connection_create_folder_sync (
+			ews_store->priv->cnc,
+			EWS_PRIORITY_MEDIUM, fid,
+			FALSE, folder_name, &folder_id,
+			cancellable, error)) {
 		g_free (fid);
 		return NULL;
 	}
@@ -817,10 +821,11 @@ ews_delete_folder_sync (CamelStore *store,
 		return FALSE;
 	}
 
-	if (!e_ews_connection_delete_folder (ews_store->priv->cnc,
-					     EWS_PRIORITY_MEDIUM,
-					     fid, FALSE, "HardDelete",
-					     cancellable, error)) {
+	if (!e_ews_connection_delete_folder_sync (
+			ews_store->priv->cnc,
+			EWS_PRIORITY_MEDIUM,
+			fid, FALSE, "HardDelete",
+			cancellable, error)) {
 		g_free (fid);
 		return FALSE;
 	}
@@ -948,8 +953,9 @@ ews_rename_folder_sync (CamelStore *store,
 		rename_data->folder_id = fid;
 		rename_data->change_key = changekey;
 
-		if (!e_ews_connection_update_folder (ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
-						     rename_folder_cb, rename_data, cancellable, error)) {
+		if (!e_ews_connection_update_folder_sync (
+				ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
+				rename_folder_cb, rename_data, cancellable, error)) {
 			g_free (rename_data);
 			goto out;
 		}
@@ -974,8 +980,9 @@ ews_rename_folder_sync (CamelStore *store,
 				goto out;
 			}
 		}
-		if (!e_ews_connection_move_folder (ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
-						   pfid, fid, cancellable, error)) {
+		if (!e_ews_connection_move_folder_sync (
+				ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
+				pfid, fid, cancellable, error)) {
 			g_free (pfid);
 			goto out;
 		}

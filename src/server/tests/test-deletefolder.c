@@ -78,10 +78,10 @@ op_test_delete_folder (gpointer data)
 
 	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
-	e_ews_connection_delete_folder_start	(cnc, EWS_PRIORITY_MEDIUM, (*fid)->id,
-						 FALSE ,"HardDelete",
-						 delete_folder_cb,
-						 cancellable, NULL);
+	e_ews_connection_delete_folder (
+		cnc, EWS_PRIORITY_MEDIUM, (*fid)->id,
+		FALSE ,"HardDelete", cancellable,
+		delete_folder_cb, NULL);
 
 }
 

@@ -124,10 +124,11 @@ op_test_finditem_run (void)
 	fid->id = g_strdup (folder_name);
 	fid->is_distinguished_id = TRUE;
 
-	e_ews_connection_find_folder_items_start	(cnc, EWS_PRIORITY_MEDIUM, fid,
-							 "IdOnly", NULL, NULL, CONTACTS_QUERY,
-							 folder_type, (EwsConvertQueryCallback) (e_ews_query_to_restriction),
-							 find_folder_item_callback, cancellable, (gpointer) folder_name);
+	e_ews_connection_find_folder_items (
+		cnc, EWS_PRIORITY_MEDIUM, fid,
+		"IdOnly", NULL, NULL, CONTACTS_QUERY,
+		folder_type, (EwsConvertQueryCallback) (e_ews_query_to_restriction),
+		cancellable, find_folder_item_callback, (gpointer) folder_name);
 	e_ews_folder_free_fid (fid);
 
 	/*Check for calendar folder*/
@@ -137,10 +138,11 @@ op_test_finditem_run (void)
 	fid->id = g_strdup (folder_name);
 	fid->is_distinguished_id = TRUE;
 
-	e_ews_connection_find_folder_items_start	(cnc, EWS_PRIORITY_MEDIUM, fid,
-							 "IdOnly", NULL, NULL, CALENDAR_QUERY,
-							 folder_type, (EwsConvertQueryCallback) (e_ews_query_to_restriction),
-							 find_folder_item_callback, cancellable, (gpointer) folder_name);
+	e_ews_connection_find_folder_items (
+		cnc, EWS_PRIORITY_MEDIUM, fid,
+		"IdOnly", NULL, NULL, CALENDAR_QUERY,
+		folder_type, (EwsConvertQueryCallback) (e_ews_query_to_restriction),
+		cancellable, find_folder_item_callback, (gpointer) folder_name);
 	e_ews_folder_free_fid (fid);
 
 	/*Check for mail folder*/
@@ -150,10 +152,11 @@ op_test_finditem_run (void)
 	fid->id = g_strdup (folder_name);
 	fid->is_distinguished_id = TRUE;
 
-	e_ews_connection_find_folder_items_start	(cnc, EWS_PRIORITY_MEDIUM, fid,
-							 "IdOnly", NULL, NULL, MAIL_QUERY,
-							 folder_type, (EwsConvertQueryCallback) (e_ews_query_to_restriction),
-							 find_folder_item_callback, cancellable, (gpointer) folder_name);
+	e_ews_connection_find_folder_items (
+		cnc, EWS_PRIORITY_MEDIUM, fid,
+		"IdOnly", NULL, NULL, MAIL_QUERY,
+		folder_type, (EwsConvertQueryCallback) (e_ews_query_to_restriction),
+		cancellable, find_folder_item_callback, (gpointer) folder_name);
 	e_ews_folder_free_fid (fid);
 }
 

@@ -91,11 +91,11 @@ op_test_get_attachments ()
 
 	tmpdir = g_build_filename ("/home/xwu1/evo-cache", NULL); //a test directory that exists already
 
-	e_ews_connection_get_attachments_start	(cnc, EWS_PRIORITY_MEDIUM,
-						 "xuidx", ids, tmpdir, TRUE,
-						 get_attachments_ready_callback,
-						 NULL, NULL,
-						 cancellable, NULL);
+	e_ews_connection_get_attachments (
+		cnc, EWS_PRIORITY_MEDIUM,
+		"xuidx", ids, tmpdir, TRUE,
+		NULL, NULL, cancellable,
+		get_attachments_ready_callback, NULL);
 	g_free (tmpdir);
 }
 

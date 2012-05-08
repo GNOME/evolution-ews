@@ -1813,10 +1813,10 @@ ews_cancel_msg (GCancellable *cancellable,
 }
 
 void
-e_ews_connection_get_oal_list_start (EEwsConnection *cnc,
-                                     GAsyncReadyCallback cb,
-                                     GCancellable *cancellable,
-                                     gpointer user_data)
+e_ews_connection_get_oal_list (EEwsConnection *cnc,
+                               GCancellable *cancellable,
+                               GAsyncReadyCallback callback,
+                               gpointer user_data)
 {
 	GSimpleAsyncResult *simple;
 	SoupMessage *msg;
@@ -1827,9 +1827,9 @@ e_ews_connection_get_oal_list_start (EEwsConnection *cnc,
 	msg = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_get_oal_list_start);
+				      e_ews_connection_get_oal_list);
 	data = g_new0 (struct _oal_req_data, 1);
 	data->cnc = cnc;
 	data->simple = simple;
@@ -1855,7 +1855,7 @@ e_ews_connection_get_oal_list_finish (EEwsConnection *cnc,
 
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_get_oal_list_start),
+		result, G_OBJECT (cnc), e_ews_connection_get_oal_list),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -1869,12 +1869,12 @@ e_ews_connection_get_oal_list_finish (EEwsConnection *cnc,
 }
 
 void
-e_ews_connection_get_oal_detail_start (EEwsConnection *cnc,
-                                       const gchar *oal_id,
-                                       const gchar *oal_element,
-                                       GAsyncReadyCallback cb,
-                                       GCancellable *cancellable,
-                                       gpointer user_data)
+e_ews_connection_get_oal_detail (EEwsConnection *cnc,
+                                 const gchar *oal_id,
+                                 const gchar *oal_element,
+                                 GCancellable *cancellable,
+                                 GAsyncReadyCallback callback,
+                                 gpointer user_data)
 {
 	GSimpleAsyncResult *simple;
 	SoupMessage *msg;
@@ -1885,9 +1885,9 @@ e_ews_connection_get_oal_detail_start (EEwsConnection *cnc,
 	msg = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_get_oal_detail_start);
+				      e_ews_connection_get_oal_detail);
 	data = g_new0 (struct _oal_req_data, 1);
 	data->cnc = cnc;
 	data->simple = simple;
@@ -1915,7 +1915,7 @@ e_ews_connection_get_oal_detail_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_get_oal_detail_start),
+		result, G_OBJECT (cnc), e_ews_connection_get_oal_detail),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -1930,7 +1930,7 @@ e_ews_connection_get_oal_detail_finish (EEwsConnection *cnc,
 }
 
 /**
- * e_ews_connection_get_oal_detail 
+ * e_ews_connection_get_oal_detail_sync:
  * @cnc: 
  * @oal_id: 
  * @oal_element: 
@@ -1942,12 +1942,12 @@ e_ews_connection_get_oal_detail_finish (EEwsConnection *cnc,
  * Returns: 
  **/
 gboolean
-e_ews_connection_get_oal_detail (EEwsConnection *cnc,
-                                 const gchar *oal_id,
-                                 const gchar *oal_element,
-                                 GSList **elements,
-                                 GCancellable *cancellable,
-                                 GError **error)
+e_ews_connection_get_oal_detail_sync (EEwsConnection *cnc,
+                                      const gchar *oal_id,
+                                      const gchar *oal_element,
+                                      GSList **elements,
+                                      GCancellable *cancellable,
+                                      GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -1957,10 +1957,11 @@ e_ews_connection_get_oal_detail (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_get_oal_detail_start	(cnc, oal_id, oal_element,
-						 ews_sync_reply_cb,
-						 cancellable,
-						 (gpointer) sync_data);
+	e_ews_connection_get_oal_detail (
+		cnc, oal_id, oal_element,
+		cancellable,
+		ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -2069,13 +2070,13 @@ ews_soup_got_chunk (SoupMessage *msg,
 }
 
 void
-e_ews_connection_download_oal_file_start (EEwsConnection *cnc,
-                                          const gchar *cache_filename,
-                                          GAsyncReadyCallback cb,
-                                          EwsProgressFn progress_fn,
-                                          gpointer progress_data,
-                                          GCancellable *cancellable,
-                                          gpointer user_data)
+e_ews_connection_download_oal_file (EEwsConnection *cnc,
+                                    const gchar *cache_filename,
+                                    EwsProgressFn progress_fn,
+                                    gpointer progress_data,
+                                    GCancellable *cancellable,
+                                    GAsyncReadyCallback callback,
+                                    gpointer user_data)
 {
 	GSimpleAsyncResult *simple;
 	SoupMessage *msg;
@@ -2086,9 +2087,9 @@ e_ews_connection_download_oal_file_start (EEwsConnection *cnc,
 	msg = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-			cb,
+			callback,
 			user_data,
-			e_ews_connection_download_oal_file_start);
+			e_ews_connection_download_oal_file);
 	data = g_new0 (struct _oal_req_data, 1);
 	data->cnc = cnc;
 	data->simple = simple;
@@ -2122,7 +2123,7 @@ e_ews_connection_download_oal_file_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 			g_simple_async_result_is_valid (
-				result, G_OBJECT (cnc), e_ews_connection_download_oal_file_start),
+				result, G_OBJECT (cnc), e_ews_connection_download_oal_file),
 			FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -2134,12 +2135,12 @@ e_ews_connection_download_oal_file_finish (EEwsConnection *cnc,
 }
 
 gboolean
-e_ews_connection_download_oal_file (EEwsConnection *cnc,
-                                    const gchar *cache_filename,
-                                    EwsProgressFn progress_fn,
-                                    gpointer progress_data,
-                                    GCancellable *cancellable,
-                                    GError **error)
+e_ews_connection_download_oal_file_sync (EEwsConnection *cnc,
+                                         const gchar *cache_filename,
+                                         EwsProgressFn progress_fn,
+                                         gpointer progress_data,
+                                         GCancellable *cancellable,
+                                         GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -2149,11 +2150,10 @@ e_ews_connection_download_oal_file (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_download_oal_file_start
-						(cnc, cache_filename,
-						 ews_sync_reply_cb,
-						 progress_fn, progress_data,
-						 cancellable, sync_data);
+	e_ews_connection_download_oal_file (
+		cnc, cache_filename,
+		progress_fn, progress_data,
+		cancellable, ews_sync_reply_cb, sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -2287,7 +2287,7 @@ ews_write_sort_order_to_msg (ESoapMessage *msg,
 }
 
 /**
- * e_ews_connection_sync_folder_items_start
+ * e_ews_connection_sync_folder_items:
  * @cnc: The EWS Connection
  * @pri: The priority associated with the request
  * @sync_state: To sync with the previous requests
@@ -2295,21 +2295,21 @@ ews_write_sort_order_to_msg (ESoapMessage *msg,
  * @default_props: Can take one of the values: IdOnly,Default or AllProperties
  * @additional_props: Specify any additional properties to be fetched
  * @max_entries: Maximum number of items to be returned
- * @cb: Responses are parsed and returned to this callback
  * @cancellable: a GCancellable to monitor cancelled operations
+ * @callback: Responses are parsed and returned to this callback
  * @user_data: user data passed to callback
  **/
 void
-e_ews_connection_sync_folder_items_start (EEwsConnection *cnc,
-                                          gint pri,
-                                          const gchar *sync_state,
-                                          const gchar *fid,
-                                          const gchar *default_props,
-                                          const gchar *additional_props,
-                                          guint max_entries,
-                                          GAsyncReadyCallback cb,
-                                          GCancellable *cancellable,
-                                          gpointer user_data)
+e_ews_connection_sync_folder_items (EEwsConnection *cnc,
+                                    gint pri,
+                                    const gchar *sync_state,
+                                    const gchar *fid,
+                                    const gchar *default_props,
+                                    const gchar *additional_props,
+                                    guint max_entries,
+                                    GCancellable *cancellable,
+                                    GAsyncReadyCallback callback,
+                                    gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -2350,16 +2350,16 @@ e_ews_connection_sync_folder_items_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_sync_folder_items_start);
+				      e_ews_connection_sync_folder_items);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, sync_folder_items_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb);
+				      cancellable, simple, callback == ews_sync_reply_cb);
 }
 
 gboolean
@@ -2378,7 +2378,7 @@ e_ews_connection_sync_folder_items_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_sync_folder_items_start),
+		result, G_OBJECT (cnc), e_ews_connection_sync_folder_items),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -2397,19 +2397,19 @@ e_ews_connection_sync_folder_items_finish (EEwsConnection *cnc,
 }
 
 gboolean
-e_ews_connection_sync_folder_items (EEwsConnection *cnc,
-                                    gint pri,
-                                    gchar **sync_state,
-                                    const gchar *fid,
-                                    const gchar *default_props,
-                                    const gchar *additional_props,
-                                    guint max_entries,
-                                    gboolean *includes_last_item,
-                                    GSList **items_created,
-                                    GSList **items_updated,
-                                    GSList **items_deleted,
-                                    GCancellable *cancellable,
-                                    GError **error)
+e_ews_connection_sync_folder_items_sync (EEwsConnection *cnc,
+                                         gint pri,
+                                         gchar **sync_state,
+                                         const gchar *fid,
+                                         const gchar *default_props,
+                                         const gchar *additional_props,
+                                         guint max_entries,
+                                         gboolean *includes_last_item,
+                                         GSList **items_created,
+                                         GSList **items_updated,
+                                         GSList **items_deleted,
+                                         GCancellable *cancellable,
+                                         GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -2419,11 +2419,12 @@ e_ews_connection_sync_folder_items (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_sync_folder_items_start	(cnc, pri, *sync_state, fid,
-							 default_props, additional_props,
-							 max_entries,
-							 ews_sync_reply_cb, cancellable,
-							 (gpointer) sync_data);
+	e_ews_connection_sync_folder_items (
+		cnc, pri, *sync_state, fid,
+		default_props, additional_props,
+		max_entries,
+		cancellable, ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -2469,7 +2470,7 @@ ews_append_folder_ids_to_msg (ESoapMessage *msg,
 }
 
 /**
- * e_ews_connection_find_folder_items_start
+ * e_ews_connection_find_folder_items:
  * @cnc: The EWS Connection
  * @pri: The priority associated with the request
  * @fid: The folder id to which the items belong
@@ -2479,23 +2480,23 @@ ews_append_folder_ids_to_msg (ESoapMessage *msg,
  * @query: evo query based on which items will be fetched
  * @type: type of folder
  * @convert_query_cb: a callback method to convert query to ews restiction
- * @cb: Responses are parsed and returned to this callback
  * @cancellable: a GCancellable to monitor cancelled operations
+ * @callback: Responses are parsed and returned to this callback
  * @user_data: user data passed to callback
  **/
 void
-e_ews_connection_find_folder_items_start (EEwsConnection *cnc,
-                                          gint pri,
-                                          EwsFolderId *fid,
-                                          const gchar *default_props,
-                                          EwsAdditionalProps *add_props,
-                                          EwsSortOrder *sort_order,
-                                          const gchar *query,
-                                          EwsFolderType type,
-                                          EwsConvertQueryCallback convert_query_cb,
-                                          GAsyncReadyCallback cb,
-                                          GCancellable *cancellable,
-                                          gpointer user_data)
+e_ews_connection_find_folder_items (EEwsConnection *cnc,
+                                    gint pri,
+                                    EwsFolderId *fid,
+                                    const gchar *default_props,
+                                    EwsAdditionalProps *add_props,
+                                    EwsSortOrder *sort_order,
+                                    const gchar *query,
+                                    EwsFolderType type,
+                                    EwsConvertQueryCallback convert_query_cb,
+                                    GCancellable *cancellable,
+                                    GAsyncReadyCallback callback,
+                                    gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -2531,16 +2532,16 @@ e_ews_connection_find_folder_items_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_find_folder_items_start);
+				      e_ews_connection_find_folder_items);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, find_folder_items_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb);
+				      cancellable, simple, callback == ews_sync_reply_cb);
 }
 
 gboolean
@@ -2556,7 +2557,7 @@ e_ews_connection_find_folder_items_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_find_folder_items_start),
+		result, G_OBJECT (cnc), e_ews_connection_find_folder_items),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -2572,19 +2573,19 @@ e_ews_connection_find_folder_items_finish (EEwsConnection *cnc,
 }
 
 gboolean
-e_ews_connection_find_folder_items (EEwsConnection *cnc,
-                                    gint pri,
-                                    EwsFolderId *fid,
-                                    const gchar *default_props,
-                                    EwsAdditionalProps *add_props,
-                                    EwsSortOrder *sort_order,
-                                    const gchar *query,
-                                    EwsFolderType type,
-                                    gboolean *includes_last_item,
-                                    GSList **items,
-                                    EwsConvertQueryCallback convert_query_cb,
-                                    GCancellable *cancellable,
-                                    GError **error)
+e_ews_connection_find_folder_items_sync (EEwsConnection *cnc,
+                                         gint pri,
+                                         EwsFolderId *fid,
+                                         const gchar *default_props,
+                                         EwsAdditionalProps *add_props,
+                                         EwsSortOrder *sort_order,
+                                         const gchar *query,
+                                         EwsFolderType type,
+                                         gboolean *includes_last_item,
+                                         GSList **items,
+                                         EwsConvertQueryCallback convert_query_cb,
+                                         GCancellable *cancellable,
+                                         GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -2594,11 +2595,12 @@ e_ews_connection_find_folder_items (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_find_folder_items_start	(cnc, pri, fid, default_props,
-							 add_props, sort_order, query,
-							 type, convert_query_cb,
-							 ews_sync_reply_cb, NULL,
-							 (gpointer) sync_data);
+	e_ews_connection_find_folder_items (
+		cnc, pri, fid, default_props,
+		add_props, sort_order, query,
+		type, convert_query_cb,
+		NULL, ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -2615,12 +2617,12 @@ e_ews_connection_find_folder_items (EEwsConnection *cnc,
 }
 
 void
-e_ews_connection_sync_folder_hierarchy_start (EEwsConnection *cnc,
-                                              gint pri,
-                                              const gchar *sync_state,
-                                              GAsyncReadyCallback cb,
-                                              GCancellable *cancellable,
-                                              gpointer user_data)
+e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc,
+                                        gint pri,
+                                        const gchar *sync_state,
+                                        GCancellable *cancellable,
+                                        GAsyncReadyCallback callback,
+                                        gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -2639,16 +2641,16 @@ e_ews_connection_sync_folder_hierarchy_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_sync_folder_hierarchy_start);
+				      e_ews_connection_sync_folder_hierarchy);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, sync_hierarchy_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb);
+				      cancellable, simple, callback == ews_sync_reply_cb);
 }
 
 gboolean
@@ -2667,7 +2669,7 @@ e_ews_connection_sync_folder_hierarchy_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_sync_folder_hierarchy_start),
+		result, G_OBJECT (cnc), e_ews_connection_sync_folder_hierarchy),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -2686,15 +2688,15 @@ e_ews_connection_sync_folder_hierarchy_finish (EEwsConnection *cnc,
 }
 
 gboolean
-e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc,
-                                        gint pri,
-                                        gchar **sync_state,
-                                        gboolean *includes_last_folder,
-                                        GSList **folders_created,
-                                        GSList **folders_updated,
-                                        GSList **folders_deleted,
-                                        GCancellable *cancellable,
-                                        GError **error)
+e_ews_connection_sync_folder_hierarchy_sync (EEwsConnection *cnc,
+                                             gint pri,
+                                             gchar **sync_state,
+                                             gboolean *includes_last_folder,
+                                             GSList **folders_created,
+                                             GSList **folders_updated,
+                                             GSList **folders_deleted,
+                                             GCancellable *cancellable,
+                                             GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -2704,9 +2706,10 @@ e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_sync_folder_hierarchy_start	(cnc, pri, *sync_state,
-							 ews_sync_reply_cb, cancellable,
-							 (gpointer) sync_data);
+	e_ews_connection_sync_folder_hierarchy (
+		cnc, pri, *sync_state,
+		cancellable, ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -2726,18 +2729,18 @@ e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc,
 }
 
 void
-e_ews_connection_get_items_start (EEwsConnection *cnc,
-                                  gint pri,
-                                  const GSList *ids,
-                                  const gchar *default_props,
-                                  const gchar *additional_props,
-                                  gboolean include_mime,
-                                  const gchar *mime_directory,
-                                  GAsyncReadyCallback cb,
-                                  ESoapProgressFn progress_fn,
-                                  gpointer progress_data,
-                                  GCancellable *cancellable,
-                                  gpointer user_data)
+e_ews_connection_get_items (EEwsConnection *cnc,
+                            gint pri,
+                            const GSList *ids,
+                            const gchar *default_props,
+                            const gchar *additional_props,
+                            gboolean include_mime,
+                            const gchar *mime_directory,
+                            ESoapProgressFn progress_fn,
+                            gpointer progress_data,
+                            GCancellable *cancellable,
+                            GAsyncReadyCallback callback,
+                            gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -2793,16 +2796,16 @@ e_ews_connection_get_items_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_get_items_start);
+				      e_ews_connection_get_items);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, get_items_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb);
+				      cancellable, simple, callback == ews_sync_reply_cb);
 }
 
 gboolean
@@ -2817,7 +2820,7 @@ e_ews_connection_get_items_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_get_items_start),
+		result, G_OBJECT (cnc), e_ews_connection_get_items),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -2832,18 +2835,18 @@ e_ews_connection_get_items_finish (EEwsConnection *cnc,
 }
 
 gboolean
-e_ews_connection_get_items (EEwsConnection *cnc,
-                            gint pri,
-                            const GSList *ids,
-                            const gchar *default_props,
-                            const gchar *additional_props,
-                            gboolean include_mime,
-                            const gchar *mime_directory,
-                            GSList **items,
-                            ESoapProgressFn progress_fn,
-                            gpointer progress_data,
-                            GCancellable *cancellable,
-                            GError **error)
+e_ews_connection_get_items_sync (EEwsConnection *cnc,
+                                 gint pri,
+                                 const GSList *ids,
+                                 const gchar *default_props,
+                                 const gchar *additional_props,
+                                 gboolean include_mime,
+                                 const gchar *mime_directory,
+                                 GSList **items,
+                                 ESoapProgressFn progress_fn,
+                                 gpointer progress_data,
+                                 GCancellable *cancellable,
+                                 GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -2853,12 +2856,13 @@ e_ews_connection_get_items (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_get_items_start	(cnc, pri,ids, default_props,
-						 additional_props, include_mime,
-						 mime_directory, ews_sync_reply_cb,
-						 progress_fn, progress_data,
-						 cancellable,
-						 (gpointer) sync_data);
+	e_ews_connection_get_items (
+		cnc, pri,ids, default_props,
+		additional_props, include_mime,
+		mime_directory,
+		progress_fn, progress_data,
+		cancellable, ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -2915,15 +2919,15 @@ ews_affected_tasks_to_str (EwsAffectedTaskOccurrencesType affected_tasks)
 }
 
 void
-e_ews_connection_delete_items_start (EEwsConnection *cnc,
-                                     gint pri,
-                                     GSList *ids,
-                                     EwsDeleteType delete_type,
-                                     EwsSendMeetingCancellationsType send_cancels,
-                                     EwsAffectedTaskOccurrencesType affected_tasks,
-                                     GAsyncReadyCallback cb,
-                                     GCancellable *cancellable,
-                                     gpointer user_data)
+e_ews_connection_delete_items (EEwsConnection *cnc,
+                               gint pri,
+                               GSList *ids,
+                               EwsDeleteType delete_type,
+                               EwsSendMeetingCancellationsType send_cancels,
+                               EwsAffectedTaskOccurrencesType affected_tasks,
+                               GCancellable *cancellable,
+                               GAsyncReadyCallback callback,
+                               gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -2953,29 +2957,29 @@ e_ews_connection_delete_items_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_delete_items_start);
+				      e_ews_connection_delete_items);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple,
-				      cb == ews_sync_reply_cb);
+				      callback == ews_sync_reply_cb);
 }
 
 void
-e_ews_connection_delete_item_start (EEwsConnection *cnc,
-                                    gint pri,
-                                    EwsId *item_id,
-                                    guint index,
-                                    EwsDeleteType delete_type,
-                                    EwsSendMeetingCancellationsType send_cancels,
-                                    EwsAffectedTaskOccurrencesType affected_tasks,
-                                    GAsyncReadyCallback cb,
-                                    GCancellable *cancellable,
-                                    gpointer user_data)
+e_ews_connection_delete_item (EEwsConnection *cnc,
+                              gint pri,
+                              EwsId *item_id,
+                              guint index,
+                              EwsDeleteType delete_type,
+                              EwsSendMeetingCancellationsType send_cancels,
+                              EwsAffectedTaskOccurrencesType affected_tasks,
+                              GCancellable *cancellable,
+                              GAsyncReadyCallback callback,
+                              gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -3018,16 +3022,16 @@ e_ews_connection_delete_item_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_delete_items_start);
+				      e_ews_connection_delete_items);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple,
-				      cb == ews_sync_reply_cb);
+				      callback == ews_sync_reply_cb);
 }
 
 gboolean
@@ -3040,7 +3044,7 @@ e_ews_connection_delete_items_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_delete_items_start),
+		result, G_OBJECT (cnc), e_ews_connection_delete_items),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -3052,14 +3056,14 @@ e_ews_connection_delete_items_finish (EEwsConnection *cnc,
 }
 
 gboolean
-e_ews_connection_delete_items (EEwsConnection *cnc,
-                               gint pri,
-                               GSList *ids,
-                               EwsDeleteType delete_type,
-                               EwsSendMeetingCancellationsType send_cancels,
-                               EwsAffectedTaskOccurrencesType affected_tasks,
-                               GCancellable *cancellable,
-                               GError **error)
+e_ews_connection_delete_items_sync (EEwsConnection *cnc,
+                                    gint pri,
+                                    GSList *ids,
+                                    EwsDeleteType delete_type,
+                                    EwsSendMeetingCancellationsType send_cancels,
+                                    EwsAffectedTaskOccurrencesType affected_tasks,
+                                    GCancellable *cancellable,
+                                    GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -3069,10 +3073,11 @@ e_ews_connection_delete_items (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_delete_items_start (cnc, pri, ids, delete_type,
-					     send_cancels, affected_tasks,
-					     ews_sync_reply_cb, cancellable,
-					     (gpointer) sync_data);
+	e_ews_connection_delete_items (
+		cnc, pri, ids, delete_type,
+		send_cancels, affected_tasks,
+		cancellable, ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -3087,15 +3092,15 @@ e_ews_connection_delete_items (EEwsConnection *cnc,
 }
 
 gboolean
-e_ews_connection_delete_item (EEwsConnection *cnc,
-                              gint pri,
-                              EwsId *id,
-                              guint index,
-                              EwsDeleteType delete_type,
-                              EwsSendMeetingCancellationsType send_cancels,
-                              EwsAffectedTaskOccurrencesType affected_tasks,
-                              GCancellable *cancellable,
-                              GError **error)
+e_ews_connection_delete_item_sync (EEwsConnection *cnc,
+                                   gint pri,
+                                   EwsId *id,
+                                   guint index,
+                                   EwsDeleteType delete_type,
+                                   EwsSendMeetingCancellationsType send_cancels,
+                                   EwsAffectedTaskOccurrencesType affected_tasks,
+                                   GCancellable *cancellable,
+                                   GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -3105,10 +3110,11 @@ e_ews_connection_delete_item (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_delete_item_start (cnc, pri, id, index, delete_type,
-					     send_cancels, affected_tasks,
-					     ews_sync_reply_cb, cancellable,
-					     (gpointer) sync_data);
+	e_ews_connection_delete_item (
+		cnc, pri, id, index, delete_type,
+		send_cancels, affected_tasks,
+		cancellable, ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -3123,17 +3129,17 @@ e_ews_connection_delete_item (EEwsConnection *cnc,
 }
 
 void
-e_ews_connection_update_items_start (EEwsConnection *cnc,
-                                     gint pri,
-                                     const gchar *conflict_res,
-                                     const gchar *msg_disposition,
-                                     const gchar *send_invites,
-                                     const gchar *folder_id,
-                                     EEwsRequestCreationCallback create_cb,
-                                     gpointer create_user_data,
-                                     GAsyncReadyCallback cb,
-                                     GCancellable *cancellable,
-                                     gpointer user_data)
+e_ews_connection_update_items (EEwsConnection *cnc,
+                               gint pri,
+                               const gchar *conflict_res,
+                               const gchar *msg_disposition,
+                               const gchar *send_invites,
+                               const gchar *folder_id,
+                               EEwsRequestCreationCallback create_cb,
+                               gpointer create_user_data,
+                               GCancellable *cancellable,
+                               GAsyncReadyCallback callback,
+                               gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -3170,16 +3176,16 @@ e_ews_connection_update_items_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_update_items_start);
+				      e_ews_connection_update_items);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, get_items_response_cb, pri, cancellable, simple,
-				      cb == ews_sync_reply_cb);
+				      callback == ews_sync_reply_cb);
 }
 
 gboolean
@@ -3194,7 +3200,7 @@ e_ews_connection_update_items_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_update_items_start),
+		result, G_OBJECT (cnc), e_ews_connection_update_items),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -3215,17 +3221,17 @@ e_ews_connection_update_items_finish (EEwsConnection *cnc,
 }
 
 gboolean
-e_ews_connection_update_items (EEwsConnection *cnc,
-                               gint pri,
-                               const gchar *conflict_res,
-                               const gchar *msg_disposition,
-                               const gchar *send_invites,
-                               const gchar *folder_id,
-                               EEwsRequestCreationCallback create_cb,
-                               gpointer create_user_data,
-                               GSList **ids,
-                               GCancellable *cancellable,
-                               GError **error)
+e_ews_connection_update_items_sync (EEwsConnection *cnc,
+                                    gint pri,
+                                    const gchar *conflict_res,
+                                    const gchar *msg_disposition,
+                                    const gchar *send_invites,
+                                    const gchar *folder_id,
+                                    EEwsRequestCreationCallback create_cb,
+                                    gpointer create_user_data,
+                                    GSList **ids,
+                                    GCancellable *cancellable,
+                                    GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -3235,12 +3241,13 @@ e_ews_connection_update_items (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_update_items_start (cnc, pri, conflict_res,
-					     msg_disposition, send_invites,
-					     folder_id,
-					     create_cb, create_user_data,
-					     ews_sync_reply_cb, cancellable,
-					     (gpointer) sync_data);
+	e_ews_connection_update_items (
+		cnc, pri, conflict_res,
+		msg_disposition, send_invites,
+		folder_id,
+		create_cb, create_user_data,
+		cancellable, ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -3255,16 +3262,16 @@ e_ews_connection_update_items (EEwsConnection *cnc,
 }
 
 void
-e_ews_connection_create_items_start (EEwsConnection *cnc,
-                                     gint pri,
-                                     const gchar *msg_disposition,
-                                     const gchar *send_invites,
-                                     const gchar *folder_id,
-                                     EEwsRequestCreationCallback create_cb,
-                                     gpointer create_user_data,
-                                     GAsyncReadyCallback cb,
-                                     GCancellable *cancellable,
-                                     gpointer user_data)
+e_ews_connection_create_items (EEwsConnection *cnc,
+                               gint pri,
+                               const gchar *msg_disposition,
+                               const gchar *send_invites,
+                               const gchar *folder_id,
+                               EEwsRequestCreationCallback create_cb,
+                               gpointer create_user_data,
+                               GCancellable *cancellable,
+                               GAsyncReadyCallback callback,
+                               gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -3298,16 +3305,16 @@ e_ews_connection_create_items_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg); /* CreateItem */
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_create_items_start);
+				      e_ews_connection_create_items);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, get_items_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb);
+				      cancellable, simple, callback == ews_sync_reply_cb);
 }
 
 gboolean
@@ -3322,7 +3329,7 @@ e_ews_connection_create_items_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_create_items_start),
+		result, G_OBJECT (cnc), e_ews_connection_create_items),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -3336,16 +3343,16 @@ e_ews_connection_create_items_finish (EEwsConnection *cnc,
 }
 
 gboolean
-e_ews_connection_create_items (EEwsConnection *cnc,
-                               gint pri,
-                               const gchar *msg_disposition,
-                               const gchar *send_invites,
-                               const gchar *folder_id,
-                               EEwsRequestCreationCallback create_cb,
-                               gpointer create_user_data,
-                               GSList **ids,
-                               GCancellable *cancellable,
-                               GError **error)
+e_ews_connection_create_items_sync (EEwsConnection *cnc,
+                                    gint pri,
+                                    const gchar *msg_disposition,
+                                    const gchar *send_invites,
+                                    const gchar *folder_id,
+                                    EEwsRequestCreationCallback create_cb,
+                                    gpointer create_user_data,
+                                    GSList **ids,
+                                    GCancellable *cancellable,
+                                    GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -3355,11 +3362,12 @@ e_ews_connection_create_items (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_create_items_start (cnc, pri, msg_disposition,
-					     send_invites, folder_id,
-					     create_cb, create_user_data,
-					     ews_sync_reply_cb, cancellable,
-					     (gpointer) sync_data);
+	e_ews_connection_create_items (
+		cnc, pri, msg_disposition,
+		send_invites, folder_id,
+		create_cb, create_user_data,
+		cancellable, ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -3393,15 +3401,15 @@ get_search_scope_str (EwsContactsSearchScope scope)
 }
 
 void
-e_ews_connection_resolve_names_start (EEwsConnection *cnc,
-                                      gint pri,
-                                      const gchar *resolve_name,
-                                      EwsContactsSearchScope scope,
-                                      GSList *parent_folder_ids,
-                                      gboolean fetch_contact_data,
-                                      GAsyncReadyCallback cb,
-                                      GCancellable *cancellable,
-                                      gpointer user_data)
+e_ews_connection_resolve_names (EEwsConnection *cnc,
+                                gint pri,
+                                const gchar *resolve_name,
+                                EwsContactsSearchScope scope,
+                                GSList *parent_folder_ids,
+                                gboolean fetch_contact_data,
+                                GCancellable *cancellable,
+                                GAsyncReadyCallback callback,
+                                gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -3429,16 +3437,16 @@ e_ews_connection_resolve_names_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_resolve_names_start);
+				      e_ews_connection_resolve_names);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, resolve_names_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb);
+				      cancellable, simple, callback == ews_sync_reply_cb);
 }
 
 gboolean
@@ -3455,7 +3463,7 @@ e_ews_connection_resolve_names_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_resolve_names_start),
+		result, G_OBJECT (cnc), e_ews_connection_resolve_names),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -3476,17 +3484,17 @@ e_ews_connection_resolve_names_finish (EEwsConnection *cnc,
 }
 
 gboolean
-e_ews_connection_resolve_names (EEwsConnection *cnc,
-                                gint pri,
-                                const gchar *resolve_name,
-                                EwsContactsSearchScope scope,
-                                GSList *parent_folder_ids,
-                                gboolean fetch_contact_data,
-                                GSList **mailboxes,
-                                GSList **contact_items,
-                                gboolean *includes_last_item,
-                                GCancellable *cancellable,
-                                GError **error)
+e_ews_connection_resolve_names_sync (EEwsConnection *cnc,
+                                     gint pri,
+                                     const gchar *resolve_name,
+                                     EwsContactsSearchScope scope,
+                                     GSList *parent_folder_ids,
+                                     gboolean fetch_contact_data,
+                                     GSList **mailboxes,
+                                     GSList **contact_items,
+                                     gboolean *includes_last_item,
+                                     GCancellable *cancellable,
+                                     GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -3496,11 +3504,12 @@ e_ews_connection_resolve_names (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_resolve_names_start (cnc, pri, resolve_name,
-					     scope, parent_folder_ids,
-					     fetch_contact_data,
-					     ews_sync_reply_cb, cancellable,
-					     (gpointer) sync_data);
+	e_ews_connection_resolve_names (
+		cnc, pri, resolve_name,
+		scope, parent_folder_ids,
+		fetch_contact_data,
+		cancellable, ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -3516,12 +3525,12 @@ e_ews_connection_resolve_names (EEwsConnection *cnc,
 }
 
 void
-e_ews_connection_expand_dl_start (EEwsConnection *cnc,
-                                  gint pri,
-                                  const EwsMailbox *mb,
-                                  GAsyncReadyCallback cb,
-                                  GCancellable *cancellable,
-                                  gpointer user_data)
+e_ews_connection_expand_dl (EEwsConnection *cnc,
+                            gint pri,
+                            const EwsMailbox *mb,
+                            GCancellable *cancellable,
+                            GAsyncReadyCallback callback,
+                            gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -3549,16 +3558,16 @@ e_ews_connection_expand_dl_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_expand_dl_start);
+				      e_ews_connection_expand_dl);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, expand_dl_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb);
+				      cancellable, simple, callback == ews_sync_reply_cb);
 }
 
 /* includes_last_item does not make sense as expand_dl does not support recursive 
@@ -3576,7 +3585,7 @@ e_ews_connection_expand_dl_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_expand_dl_start),
+		result, G_OBJECT (cnc), e_ews_connection_expand_dl),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -3593,13 +3602,13 @@ e_ews_connection_expand_dl_finish (EEwsConnection *cnc,
 }
 
 gboolean
-e_ews_connection_expand_dl (EEwsConnection *cnc,
-                            gint pri,
-                            const EwsMailbox *mb,
-                            GSList **mailboxes,
-                            gboolean *includes_last_item,
-                            GCancellable *cancellable,
-                            GError **error)
+e_ews_connection_expand_dl_sync (EEwsConnection *cnc,
+                                 gint pri,
+                                 const EwsMailbox *mb,
+                                 GSList **mailboxes,
+                                 gboolean *includes_last_item,
+                                 GCancellable *cancellable,
+                                 GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -3609,9 +3618,9 @@ e_ews_connection_expand_dl (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_expand_dl_start (cnc, pri, mb,
-					  ews_sync_reply_cb, cancellable,
-					  (gpointer) sync_data);
+	e_ews_connection_expand_dl (
+		cnc, pri, mb, cancellable,
+		ews_sync_reply_cb, sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -3626,13 +3635,13 @@ e_ews_connection_expand_dl (EEwsConnection *cnc,
 }
 
 void
-e_ews_connection_update_folder_start (EEwsConnection *cnc,
-                                      gint pri,
-                                      EEwsRequestCreationCallback create_cb,
-                                      gpointer create_user_data,
-                                      GAsyncReadyCallback cb,
-                                      GCancellable *cancellable,
-                                      gpointer user_data)
+e_ews_connection_update_folder (EEwsConnection *cnc,
+                                gint pri,
+                                EEwsRequestCreationCallback create_cb,
+                                gpointer create_user_data,
+                                GCancellable *cancellable,
+                                GAsyncReadyCallback callback,
+                                gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -3652,16 +3661,16 @@ e_ews_connection_update_folder_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_update_folder_start);
+				      e_ews_connection_update_folder);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple,
-				      cb == ews_sync_reply_cb);
+				      callback == ews_sync_reply_cb);
 }
 
 gboolean
@@ -3674,7 +3683,7 @@ e_ews_connection_update_folder_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_update_folder_start),
+		result, G_OBJECT (cnc), e_ews_connection_update_folder),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -3686,12 +3695,12 @@ e_ews_connection_update_folder_finish (EEwsConnection *cnc,
 }
 
 gboolean
-e_ews_connection_update_folder (EEwsConnection *cnc,
-                                gint pri,
-                                EEwsRequestCreationCallback create_cb,
-                                gpointer create_user_data,
-                                GCancellable *cancellable,
-                                GError **error)
+e_ews_connection_update_folder_sync (EEwsConnection *cnc,
+                                     gint pri,
+                                     EEwsRequestCreationCallback create_cb,
+                                     gpointer create_user_data,
+                                     GCancellable *cancellable,
+                                     GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -3701,10 +3710,10 @@ e_ews_connection_update_folder (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_update_folder_start (cnc, pri,
-					      create_cb, create_user_data,
-					      ews_sync_reply_cb, cancellable,
-					      (gpointer) sync_data);
+	e_ews_connection_update_folder (
+		cnc, pri, create_cb, create_user_data,
+		cancellable, ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -3719,13 +3728,13 @@ e_ews_connection_update_folder (EEwsConnection *cnc,
 }
 
 void
-e_ews_connection_move_folder_start (EEwsConnection *cnc,
-                                    gint pri,
-                                    const gchar *to_folder,
-                                    const gchar *folder,
-                                    GAsyncReadyCallback cb,
-                                    GCancellable *cancellable,
-                                    gpointer user_data)
+e_ews_connection_move_folder (EEwsConnection *cnc,
+                              gint pri,
+                              const gchar *to_folder,
+                              const gchar *folder,
+                              GCancellable *cancellable,
+                              GAsyncReadyCallback callback,
+                              gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -3754,16 +3763,16 @@ e_ews_connection_move_folder_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_move_folder_start);
+				      e_ews_connection_move_folder);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple,
-				      cb == ews_sync_reply_cb);
+				      callback == ews_sync_reply_cb);
 }
 
 gboolean
@@ -3776,7 +3785,7 @@ e_ews_connection_move_folder_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_move_folder_start),
+		result, G_OBJECT (cnc), e_ews_connection_move_folder),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -3788,12 +3797,12 @@ e_ews_connection_move_folder_finish (EEwsConnection *cnc,
 }
 
 gboolean
-e_ews_connection_move_folder (EEwsConnection *cnc,
-                              gint pri,
-                              const gchar *to_folder,
-                              const gchar *folder,
-                              GCancellable *cancellable,
-                              GError **error)
+e_ews_connection_move_folder_sync (EEwsConnection *cnc,
+                                   gint pri,
+                                   const gchar *to_folder,
+                                   const gchar *folder,
+                                   GCancellable *cancellable,
+                                   GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -3803,9 +3812,10 @@ e_ews_connection_move_folder (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_move_folder_start (cnc, pri, to_folder, folder,
-					    ews_sync_reply_cb, cancellable,
-					    (gpointer) sync_data);
+	e_ews_connection_move_folder (
+		cnc, pri, to_folder, folder,
+		cancellable, ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -3820,14 +3830,14 @@ e_ews_connection_move_folder (EEwsConnection *cnc,
 }
 
 void
-e_ews_connection_get_folder_start (EEwsConnection *cnc,
-                                   gint pri,
-                                   const gchar *folder_shape,
-                                   EwsAdditionalProps *add_props,
-                                   GSList *folder_ids,
-                                   GAsyncReadyCallback cb,
-                                   GCancellable *cancellable,
-                                   gpointer user_data)
+e_ews_connection_get_folder (EEwsConnection *cnc,
+                             gint pri,
+                             const gchar *folder_shape,
+                             EwsAdditionalProps *add_props,
+                             GSList *folder_ids,
+                             GCancellable *cancellable,
+                             GAsyncReadyCallback callback,
+                             gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -3853,16 +3863,16 @@ e_ews_connection_get_folder_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_get_folder_start);
+				      e_ews_connection_get_folder);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, get_folder_response_cb, pri, cancellable, simple,
-				      cb == ews_sync_reply_cb);
+				      callback == ews_sync_reply_cb);
 
 }
 
@@ -3878,7 +3888,7 @@ e_ews_connection_get_folder_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_get_folder_start),
+		result, G_OBJECT (cnc), e_ews_connection_get_folder),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -3893,14 +3903,14 @@ e_ews_connection_get_folder_finish (EEwsConnection *cnc,
 }
 
 gboolean
-e_ews_connection_get_folder (EEwsConnection *cnc,
-                             gint pri,
-                             const gchar *folder_shape,
-                             EwsAdditionalProps *add_props,
-                             GSList *folder_ids,
-                             GSList **folders,
-                             GCancellable *cancellable,
-                             GError **error)
+e_ews_connection_get_folder_sync (EEwsConnection *cnc,
+                                  gint pri,
+                                  const gchar *folder_shape,
+                                  EwsAdditionalProps *add_props,
+                                  GSList *folder_ids,
+                                  GSList **folders,
+                                  GCancellable *cancellable,
+                                  GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -3910,9 +3920,10 @@ e_ews_connection_get_folder (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_get_folder_start (cnc, pri, folder_shape, add_props,
-					   folder_ids, ews_sync_reply_cb, cancellable,
-					   (gpointer) sync_data);
+	e_ews_connection_get_folder (
+		cnc, pri, folder_shape, add_props,
+		folder_ids, cancellable,
+		ews_sync_reply_cb, sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -3928,14 +3939,14 @@ e_ews_connection_get_folder (EEwsConnection *cnc,
 }
 
 void
-e_ews_connection_create_folder_start (EEwsConnection *cnc,
-                                      gint pri,
-                                      const gchar *parent_folder_id,
-                                      gboolean is_distinguished_id,
-                                      const gchar *folder_name,
-                                      GAsyncReadyCallback cb,
-                                      GCancellable *cancellable,
-                                      gpointer user_data)
+e_ews_connection_create_folder (EEwsConnection *cnc,
+                                gint pri,
+                                const gchar *parent_folder_id,
+                                gboolean is_distinguished_id,
+                                const gchar *folder_name,
+                                GCancellable *cancellable,
+                                GAsyncReadyCallback callback,
+                                gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -3969,15 +3980,15 @@ e_ews_connection_create_folder_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_create_folder_start);
+				      e_ews_connection_create_folder);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (cnc, msg, ews_create_folder_response_cb, pri, cancellable, simple, cb == ews_sync_reply_cb);
+	ews_connection_queue_request (cnc, msg, ews_create_folder_response_cb, pri, cancellable, simple, callback == ews_sync_reply_cb);
 }
 
 gboolean
@@ -3992,7 +4003,7 @@ e_ews_connection_create_folder_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_create_folder_start),
+		result, G_OBJECT (cnc), e_ews_connection_create_folder),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -4008,14 +4019,14 @@ e_ews_connection_create_folder_finish (EEwsConnection *cnc,
 }
 
 gboolean
-e_ews_connection_create_folder (EEwsConnection *cnc,
-                                gint pri,
-                                const gchar *parent_folder_id,
-                                gboolean is_distinguished_id,
-                                const gchar *folder_name,
-                                EwsFolderId **folder_id,
-                                GCancellable *cancellable,
-                                GError **error)
+e_ews_connection_create_folder_sync (EEwsConnection *cnc,
+                                     gint pri,
+                                     const gchar *parent_folder_id,
+                                     gboolean is_distinguished_id,
+                                     const gchar *folder_name,
+                                     EwsFolderId **folder_id,
+                                     GCancellable *cancellable,
+                                     GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -4025,12 +4036,13 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_create_folder_start	(cnc, pri, parent_folder_id,
-						 is_distinguished_id,
-						 folder_name,
-						 ews_sync_reply_cb,
-						 cancellable,
-						 (gpointer) sync_data);
+	e_ews_connection_create_folder (
+		cnc, pri, parent_folder_id,
+		is_distinguished_id,
+		folder_name,
+		cancellable,
+		ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -4047,14 +4059,14 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 }
 
 void
-e_ews_connection_move_items_start (EEwsConnection *cnc,
-                                   gint pri,
-                                   const gchar *folder_id,
-                                   gboolean docopy,
-                                   GSList *ids,
-                                   GAsyncReadyCallback cb,
-                                   GCancellable *cancellable,
-                                   gpointer user_data)
+e_ews_connection_move_items (EEwsConnection *cnc,
+                             gint pri,
+                             const gchar *folder_id,
+                             gboolean docopy,
+                             GSList *ids,
+                             GCancellable *cancellable,
+                             GAsyncReadyCallback callback,
+                             gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -4084,16 +4096,16 @@ e_ews_connection_move_items_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-					    cb,
+					    callback,
 					    user_data,
-					    e_ews_connection_move_items_start);
+					    e_ews_connection_move_items);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, get_items_response_cb, pri, cancellable, simple,
-				      cb == ews_sync_reply_cb);
+				      callback == ews_sync_reply_cb);
 }
 
 gboolean
@@ -4108,7 +4120,7 @@ e_ews_connection_move_items_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_move_items_start),
+		result, G_OBJECT (cnc), e_ews_connection_move_items),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -4123,14 +4135,14 @@ e_ews_connection_move_items_finish (EEwsConnection *cnc,
 }
 
 gboolean
-e_ews_connection_move_items (EEwsConnection *cnc,
-                             gint pri,
-                             const gchar *folder_id,
-                             gboolean docopy,
-                             GSList *ids,
-                             GSList **items,
-                             GCancellable *cancellable,
-                             GError **error)
+e_ews_connection_move_items_sync (EEwsConnection *cnc,
+                                  gint pri,
+                                  const gchar *folder_id,
+                                  gboolean docopy,
+                                  GSList *ids,
+                                  GSList **items,
+                                  GCancellable *cancellable,
+                                  GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -4140,9 +4152,10 @@ e_ews_connection_move_items (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_move_items_start (cnc, pri, folder_id, docopy, ids,
-					   ews_sync_reply_cb, cancellable,
-					   (gpointer) sync_data);
+	e_ews_connection_move_items (
+		cnc, pri, folder_id, docopy, ids,
+		cancellable, ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -4157,25 +4170,25 @@ e_ews_connection_move_items (EEwsConnection *cnc,
 }
 
 /**
- * e_ews_connection_delete_folder_start
+ * e_ews_connection_delete_folder:
  * @cnc:
  * @pri:
  * @folder_id: folder to be deleted
  * @is_distinguished_id:
  * @delete_type: "HardDelete", "SoftDelete", "MoveToDeletedItems"
- * @cb:
  * @cancellable:
+ * @callback:
  * @user_data:
  **/
 void
-e_ews_connection_delete_folder_start (EEwsConnection *cnc,
-                                      gint pri,
-                                      const gchar *folder_id,
-                                      gboolean is_distinguished_id,
-                                      const gchar *delete_type,
-                                      GAsyncReadyCallback cb,
-                                      GCancellable *cancellable,
-                                      gpointer user_data)
+e_ews_connection_delete_folder (EEwsConnection *cnc,
+                                gint pri,
+                                const gchar *folder_id,
+                                gboolean is_distinguished_id,
+                                const gchar *delete_type,
+                                GCancellable *cancellable,
+                                GAsyncReadyCallback callback,
+                                gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -4201,15 +4214,15 @@ e_ews_connection_delete_folder_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_delete_folder_start);
+				      e_ews_connection_delete_folder);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple, cb == ews_sync_reply_cb);
+	ews_connection_queue_request (cnc, msg, NULL, pri, cancellable, simple, callback == ews_sync_reply_cb);
 }
 
 gboolean
@@ -4222,7 +4235,7 @@ e_ews_connection_delete_folder_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_delete_folder_start),
+		result, G_OBJECT (cnc), e_ews_connection_delete_folder),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -4234,7 +4247,7 @@ e_ews_connection_delete_folder_finish (EEwsConnection *cnc,
 }
 
 /**
- * e_ews_connection_delete_folder
+ * e_ews_connection_delete_folder_sync:
  * @cnc:
  * @pri:
  * @folder_id: folder to be deleted
@@ -4244,13 +4257,13 @@ e_ews_connection_delete_folder_finish (EEwsConnection *cnc,
  * @error:
  **/
 gboolean
-e_ews_connection_delete_folder (EEwsConnection *cnc,
-                                gint pri,
-                                const gchar *folder_id,
-                                gboolean is_distinguished_id,
-                                const gchar *delete_type,
-                                GCancellable *cancellable,
-                                GError **error)
+e_ews_connection_delete_folder_sync (EEwsConnection *cnc,
+                                     gint pri,
+                                     const gchar *folder_id,
+                                     gboolean is_distinguished_id,
+                                     const gchar *delete_type,
+                                     GCancellable *cancellable,
+                                     GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -4260,12 +4273,13 @@ e_ews_connection_delete_folder (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_delete_folder_start	(cnc, pri, folder_id,
-						 is_distinguished_id,
-						 delete_type,
-						 ews_sync_reply_cb,
-						 cancellable,
-						 (gpointer) sync_data);
+	e_ews_connection_delete_folder (
+		cnc, pri, folder_id,
+		is_distinguished_id,
+		delete_type,
+		cancellable,
+		ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -4363,13 +4377,13 @@ e_ews_connection_attach_file (ESoapMessage *msg,
 }
 
 void
-e_ews_connection_create_attachments_start (EEwsConnection *cnc,
-                                           gint pri,
-                                           const EwsId *parent,
-                                           const GSList *files,
-                                           GAsyncReadyCallback cb,
-                                           GCancellable *cancellable,
-                                           gpointer user_data)
+e_ews_connection_create_attachments (EEwsConnection *cnc,
+                                     gint pri,
+                                     const EwsId *parent,
+                                     const GSList *files,
+                                     GCancellable *cancellable,
+                                     GAsyncReadyCallback callback,
+                                     gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -4397,16 +4411,16 @@ e_ews_connection_create_attachments_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_create_attachments_start);
+				      e_ews_connection_create_attachments);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, create_attachments_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb);
+				      cancellable, simple, callback == ews_sync_reply_cb);
 }
 
 GSList *
@@ -4422,7 +4436,7 @@ e_ews_connection_create_attachments_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, NULL);
 	g_return_val_if_fail (
 			g_simple_async_result_is_valid (
-					result, G_OBJECT (cnc), e_ews_connection_create_attachments_start),
+					result, G_OBJECT (cnc), e_ews_connection_create_attachments),
 			NULL);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -4438,13 +4452,13 @@ e_ews_connection_create_attachments_finish (EEwsConnection *cnc,
 }
 
 GSList *
-e_ews_connection_create_attachments (EEwsConnection *cnc,
-                                     gint pri,
-                                     const EwsId *parent,
-                                     const GSList *files,
-                                     gchar **change_key,
-                                     GCancellable *cancellable,
-                                     GError **error)
+e_ews_connection_create_attachments_sync (EEwsConnection *cnc,
+                                          gint pri,
+                                          const EwsId *parent,
+                                          const GSList *files,
+                                          gchar **change_key,
+                                          GCancellable *cancellable,
+                                          GError **error)
 {
 	EwsSyncData *sync_data;
 	GSList *ids;
@@ -4454,12 +4468,13 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_create_attachments_start (cnc, pri,
-						 parent,
-						 files,
-						 ews_sync_reply_cb,
-						 cancellable,
-						 (gpointer) sync_data);
+	e_ews_connection_create_attachments (
+		cnc, pri,
+		parent,
+		files,
+		cancellable,
+		ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -4497,12 +4512,12 @@ delete_attachments_response_cb (ESoapParameter *subparam,
 }
 
 void
-e_ews_connection_delete_attachments_start (EEwsConnection *cnc,
-                                         gint pri,
-                                         const GSList *ids,
-                                         GAsyncReadyCallback cb,
-                                         GCancellable *cancellable,
-                                         gpointer user_data)
+e_ews_connection_delete_attachments (EEwsConnection *cnc,
+                                     gint pri,
+                                     const GSList *ids,
+                                     GCancellable *cancellable,
+                                     GAsyncReadyCallback callback,
+                                     gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -4525,16 +4540,16 @@ e_ews_connection_delete_attachments_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_delete_attachments_start);
+				      e_ews_connection_delete_attachments);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, delete_attachments_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb);
+				      cancellable, simple, callback == ews_sync_reply_cb);
 }
 
 GSList *
@@ -4549,7 +4564,7 @@ e_ews_connection_delete_attachments_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, NULL);
 	g_return_val_if_fail (
 			g_simple_async_result_is_valid (
-					result, G_OBJECT (cnc), e_ews_connection_delete_attachments_start),
+					result, G_OBJECT (cnc), e_ews_connection_delete_attachments),
 			NULL);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -4564,11 +4579,11 @@ e_ews_connection_delete_attachments_finish (EEwsConnection *cnc,
 }
 
 GSList *
-e_ews_connection_delete_attachments (EEwsConnection *cnc,
-                                     gint pri,
-                                     const GSList *ids,
-                                     GCancellable *cancellable,
-                                     GError **error)
+e_ews_connection_delete_attachments_sync (EEwsConnection *cnc,
+                                          gint pri,
+                                          const GSList *ids,
+                                          GCancellable *cancellable,
+                                          GError **error)
 {
 	EwsSyncData *sync_data;
 	GSList *parents;
@@ -4578,11 +4593,12 @@ e_ews_connection_delete_attachments (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_delete_attachments_start (cnc, pri,
-						 ids,
-						 ews_sync_reply_cb,
-						 cancellable,
-						 (gpointer) sync_data);
+	e_ews_connection_delete_attachments (
+		cnc, pri,
+		ids,
+		cancellable,
+		ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -4599,17 +4615,17 @@ e_ews_connection_delete_attachments (EEwsConnection *cnc,
 static void get_attachments_response_cb (ESoapParameter *subparam, EwsNode *enode, GError **error);
 
 void
-e_ews_connection_get_attachments_start (EEwsConnection *cnc,
-                                        gint pri,
-                                        const gchar *uid,
-                                        const GSList *ids,
-                                        const gchar *cache,
-                                        gboolean include_mime,
-                                        GAsyncReadyCallback cb,
-                                        ESoapProgressFn progress_fn,
-                                        gpointer progress_data,
-                                        GCancellable *cancellable,
-                                        gpointer user_data)
+e_ews_connection_get_attachments (EEwsConnection *cnc,
+                                  gint pri,
+                                  const gchar *uid,
+                                  const GSList *ids,
+                                  const gchar *cache,
+                                  gboolean include_mime,
+                                  ESoapProgressFn progress_fn,
+                                  gpointer progress_data,
+                                  GCancellable *cancellable,
+                                  GAsyncReadyCallback callback,
+                                  gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -4643,9 +4659,9 @@ e_ews_connection_get_attachments_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_get_attachments_start);
+				      e_ews_connection_get_attachments);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	async_data->directory = cache;
@@ -4654,7 +4670,7 @@ e_ews_connection_get_attachments_start (EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, get_attachments_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb);
+				      cancellable, simple, callback == ews_sync_reply_cb);
 }
 
 GSList *
@@ -4669,7 +4685,7 @@ e_ews_connection_get_attachments_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, NULL);
 	g_return_val_if_fail (
 			g_simple_async_result_is_valid (
-					result, G_OBJECT (cnc), e_ews_connection_get_attachments_start),
+					result, G_OBJECT (cnc), e_ews_connection_get_attachments),
 			NULL);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -4684,17 +4700,17 @@ e_ews_connection_get_attachments_finish (EEwsConnection *cnc,
 }
 
 GSList *
-e_ews_connection_get_attachments (EEwsConnection *cnc,
-                                  gint pri,
-                                  const gchar *uid,
-                                  GSList *ids,
-                                  const gchar *cache,
-                                  gboolean include_mime,
-                                  GSList **items,
-                                  ESoapProgressFn progress_fn,
-                                  gpointer progress_data,
-                                  GCancellable *cancellable,
-                                  GError **error)
+e_ews_connection_get_attachments_sync (EEwsConnection *cnc,
+                                       gint pri,
+                                       const gchar *uid,
+                                       GSList *ids,
+                                       const gchar *cache,
+                                       gboolean include_mime,
+                                       GSList **items,
+                                       ESoapProgressFn progress_fn,
+                                       gpointer progress_data,
+                                       GCancellable *cancellable,
+                                       GError **error)
 {
 	EwsSyncData *sync_data;
 	GSList *attachments_ids;
@@ -4704,11 +4720,12 @@ e_ews_connection_get_attachments (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_get_attachments_start	(cnc,pri,uid,ids,cache,include_mime,
-						 ews_sync_reply_cb,
-						 progress_fn, progress_data,
-						 cancellable,
-						 (gpointer) sync_data);
+	e_ews_connection_get_attachments (
+		cnc, pri, uid, ids, cache, include_mime,
+		progress_fn, progress_data,
+		cancellable,
+		ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -4851,13 +4868,13 @@ get_free_busy_response_cb (ESoapParameter *param,
 }
 
 void
-e_ews_connection_get_free_busy_start (EEwsConnection *cnc,
-                                      gint pri,
-                                      EEwsRequestCreationCallback free_busy_cb,
-                                      gpointer free_busy_user_data,
-                                      GAsyncReadyCallback cb,
-                                      GCancellable *cancellable,
-                                      gpointer user_data)
+e_ews_connection_get_free_busy (EEwsConnection *cnc,
+                                gint pri,
+                                EEwsRequestCreationCallback free_busy_cb,
+                                gpointer free_busy_user_data,
+                                GCancellable *cancellable,
+                                GAsyncReadyCallback callback,
+                                gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -4873,16 +4890,16 @@ e_ews_connection_get_free_busy_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg); /*GetUserAvailabilityRequest  */
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-					    cb,
+					    callback,
 					    user_data,
-					    e_ews_connection_get_free_busy_start);
+					    e_ews_connection_get_free_busy);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 						   simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, get_free_busy_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb);
+				      cancellable, simple, callback == ews_sync_reply_cb);
 }
 
 gboolean
@@ -4897,7 +4914,7 @@ e_ews_connection_get_free_busy_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 			      g_simple_async_result_is_valid (
-							      result, G_OBJECT (cnc), e_ews_connection_get_free_busy_start),
+							      result, G_OBJECT (cnc), e_ews_connection_get_free_busy),
 			      FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -4911,13 +4928,13 @@ e_ews_connection_get_free_busy_finish (EEwsConnection *cnc,
 }
 
 gboolean
-e_ews_connection_get_free_busy (EEwsConnection *cnc,
-                                gint pri,
-                                EEwsRequestCreationCallback free_busy_cb,
-                                gpointer free_busy_user_data,
-                                GSList **free_busy,
-                                GCancellable *cancellable,
-                                GError **error)
+e_ews_connection_get_free_busy_sync (EEwsConnection *cnc,
+                                     gint pri,
+                                     EEwsRequestCreationCallback free_busy_cb,
+                                     gpointer free_busy_user_data,
+                                     GSList **free_busy,
+                                     GCancellable *cancellable,
+                                     GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -4927,10 +4944,11 @@ e_ews_connection_get_free_busy (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_get_free_busy_start (cnc, pri,
-					      free_busy_cb, free_busy_user_data,
-					      ews_sync_reply_cb, cancellable,
-					      (gpointer) sync_data);
+	e_ews_connection_get_free_busy (
+		cnc, pri,
+		free_busy_cb, free_busy_user_data,
+		cancellable, ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -5038,24 +5056,24 @@ get_delegate_response_cb (ESoapParameter *param,
 }
 
 /**
- * e_ews_connection_get_delegate_start
+ * e_ews_connection_get_delegate:
  * @cnc:
  * @pri:
  * @mail_id: mail is for which delegate is requested
  * @include permission: "true", "false"
  * @delete_type: "HardDelete", "SoftDelete", "MoveToDeletedItems"
- * @cb:
  * @cancellable:
+ * @callback:
  * @user_data:
  **/
 void
-e_ews_connection_get_delegate_start (EEwsConnection *cnc,
-                                     gint pri,
-                                     const gchar *mail_id,
-                                     const gchar *include_permissions,
-                                     GAsyncReadyCallback cb,
-                                     GCancellable *cancellable,
-                                     gpointer user_data)
+e_ews_connection_get_delegate (EEwsConnection *cnc,
+                               gint pri,
+                               const gchar *mail_id,
+                               const gchar *include_permissions,
+                               GCancellable *cancellable,
+                               GAsyncReadyCallback callback,
+                               gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -5074,15 +5092,15 @@ e_ews_connection_get_delegate_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      cb,
+				      callback,
 				      user_data,
-				      e_ews_connection_get_delegate_start);
+				      e_ews_connection_get_delegate);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (cnc, msg, get_delegate_response_cb, pri, cancellable, simple, cb == ews_sync_reply_cb);
+	ews_connection_queue_request (cnc, msg, get_delegate_response_cb, pri, cancellable, simple, callback == ews_sync_reply_cb);
 }
 
 gboolean
@@ -5097,7 +5115,7 @@ e_ews_connection_get_delegate_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_get_delegate_start),
+		result, G_OBJECT (cnc), e_ews_connection_get_delegate),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -5112,7 +5130,7 @@ e_ews_connection_get_delegate_finish (EEwsConnection *cnc,
 }
 
 /**
- * e_ews_connection_get_delegate
+ * e_ews_connection_get_delegate:
  * @cnc:
  * @pri:
  * @mail_id: mail id for which delegate requested
@@ -5121,13 +5139,13 @@ e_ews_connection_get_delegate_finish (EEwsConnection *cnc,
  * @error:
  **/
 gboolean
-e_ews_connection_get_delegate (EEwsConnection *cnc,
-                               gint pri,
-                               const gchar *mail_id,
-                               const gchar *include_permissions,
-                               EwsDelegateInfo **get_delegate,
-                               GCancellable *cancellable,
-                               GError **error)
+e_ews_connection_get_delegate_sync (EEwsConnection *cnc,
+                                    gint pri,
+                                    const gchar *mail_id,
+                                    const gchar *include_permissions,
+                                    EwsDelegateInfo **get_delegate,
+                                    GCancellable *cancellable,
+                                    GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -5137,11 +5155,12 @@ e_ews_connection_get_delegate (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_get_delegate_start	(cnc, pri, mail_id,
-						 include_permissions,
-						 ews_sync_reply_cb,
-						 cancellable,
-						 (gpointer) sync_data);
+	e_ews_connection_get_delegate (
+		cnc, pri, mail_id,
+		include_permissions,
+		cancellable,
+		ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -5157,19 +5176,19 @@ e_ews_connection_get_delegate (EEwsConnection *cnc,
 }
 
 /**
- * e_ews_connection__get_oof_settings_start
+ * e_ews_connection__get_oof_settings:
  * @cnc: The EWS Connection
  * @pri: The priority associated with the request
- * @cb: Responses are parsed and returned to this callback
  * @cancellable: a GCancellable to monitor cancelled operations
+ * @callback: Responses are parsed and returned to this callback
  * @user_data: user data passed to callback
  **/
 void
-e_ews_connection_get_oof_settings_start (EEwsConnection *cnc,
-                                         gint pri,
-                                         GAsyncReadyCallback cb,
-                                         GCancellable *cancellable,
-                                         gpointer user_data)
+e_ews_connection_get_oof_settings (EEwsConnection *cnc,
+                                   gint pri,
+                                   GCancellable *cancellable,
+                                   GAsyncReadyCallback callback,
+                                   gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -5187,15 +5206,15 @@ e_ews_connection_get_oof_settings_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-					    cb, user_data,
-					    e_ews_connection_get_oof_settings_start);
+					    callback, user_data,
+					    e_ews_connection_get_oof_settings);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, get_oof_settings_response_cb, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb);
+				      cancellable, simple, callback == ews_sync_reply_cb);
 }
 
 gboolean
@@ -5210,7 +5229,7 @@ e_ews_connection_get_oof_settings_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_get_oof_settings_start),
+		result, G_OBJECT (cnc), e_ews_connection_get_oof_settings),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -5225,11 +5244,11 @@ e_ews_connection_get_oof_settings_finish (EEwsConnection *cnc,
 }
 
 gboolean
-e_ews_connection_get_oof_settings (EEwsConnection *cnc,
-                                   gint pri,
-                                   OOFSettings **oof_settings,
-                                   GCancellable *cancellable,
-                                   GError **error)
+e_ews_connection_get_oof_settings_sync (EEwsConnection *cnc,
+                                        gint pri,
+                                        OOFSettings **oof_settings,
+                                        GCancellable *cancellable,
+                                        GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -5239,9 +5258,10 @@ e_ews_connection_get_oof_settings (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_get_oof_settings_start	(cnc, pri,
-						 ews_sync_reply_cb, cancellable,
-						 (gpointer) sync_data);
+	e_ews_connection_get_oof_settings (
+		cnc, pri,
+		cancellable, ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 
@@ -5256,21 +5276,21 @@ e_ews_connection_get_oof_settings (EEwsConnection *cnc,
 }
 
 /**
- * e_ews_connection__set_oof_settings_start
+ * e_ews_connection__set_oof_settings:
  * @cnc: The EWS Connection
  * @pri: The priority associated with the request
  * @oof_settings: Details to set for ooof
- * @cb: Responses are parsed and returned to this callback
  * @cancellable: a GCancellable to monitor cancelled operations
+ * @callback: Responses are parsed and returned to this callback
  * @user_data: user data passed to callback
  **/
 void
-e_ews_connection_set_oof_settings_start (EEwsConnection *cnc,
-                                         gint pri,
-                                         OOFSettings *oof_settings,
-                                         GAsyncReadyCallback cb,
-                                         GCancellable *cancellable,
-                                         gpointer user_data)
+e_ews_connection_set_oof_settings (EEwsConnection *cnc,
+                                   gint pri,
+                                   OOFSettings *oof_settings,
+                                   GCancellable *cancellable,
+                                   GAsyncReadyCallback callback,
+                                   gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -5318,15 +5338,15 @@ e_ews_connection_set_oof_settings_start (EEwsConnection *cnc,
 	e_ews_message_write_footer (msg);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc),
-					    cb, user_data,
-					    e_ews_connection_set_oof_settings_start);
+					    callback, user_data,
+					    e_ews_connection_set_oof_settings);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	ews_connection_queue_request (cnc, msg, NULL, pri,
-				      cancellable, simple, cb == ews_sync_reply_cb);
+				      cancellable, simple, callback == ews_sync_reply_cb);
 
 	g_free (time_val);
 	g_free (start_tm);
@@ -5344,7 +5364,7 @@ e_ews_connection_set_oof_settings_finish (EEwsConnection *cnc,
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_set_oof_settings_start),
+		result, G_OBJECT (cnc), e_ews_connection_set_oof_settings),
 		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
@@ -5357,11 +5377,11 @@ e_ews_connection_set_oof_settings_finish (EEwsConnection *cnc,
 }
 
 gboolean
-e_ews_connection_set_oof_settings (EEwsConnection *cnc,
-                                   gint pri,
-                                   OOFSettings *oof_settings,
-                                   GCancellable *cancellable,
-                                   GError **error)
+e_ews_connection_set_oof_settings_sync (EEwsConnection *cnc,
+                                        gint pri,
+                                        OOFSettings *oof_settings,
+                                        GCancellable *cancellable,
+                                        GError **error)
 {
 	EwsSyncData *sync_data;
 	gboolean result;
@@ -5371,9 +5391,10 @@ e_ews_connection_set_oof_settings (EEwsConnection *cnc,
 	sync_data = g_new0 (EwsSyncData, 1);
 	sync_data->eflag = e_flag_new ();
 
-	e_ews_connection_set_oof_settings_start	(cnc, pri, oof_settings,
-						 ews_sync_reply_cb, cancellable,
-						 (gpointer) sync_data);
+	e_ews_connection_set_oof_settings (
+		cnc, pri, oof_settings,
+		cancellable, ews_sync_reply_cb,
+		sync_data);
 
 	e_flag_wait (sync_data->eflag);
 

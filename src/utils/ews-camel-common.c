@@ -145,10 +145,11 @@ camel_ews_utils_create_mime_message (EEwsConnection *cnc,
 		}
 	}
 
-	res = e_ews_connection_create_items (cnc, EWS_PRIORITY_MEDIUM,
-					     disposition, NULL, save_folder,
-					     create_mime_message_cb, create_data,
-					     &ids, cancellable, error);
+	res = e_ews_connection_create_items_sync (
+		cnc, EWS_PRIORITY_MEDIUM,
+		disposition, NULL, save_folder,
+		create_mime_message_cb, create_data,
+		&ids, cancellable, error);
 
 	if (restore_from) {
 		struct _camel_header_raw *header;

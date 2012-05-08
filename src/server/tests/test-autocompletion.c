@@ -92,9 +92,10 @@ op_test_resolve_names ()
 
 	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
-	e_ews_connection_resolve_names_start	(cnc, EWS_PRIORITY_MEDIUM, username,
-						 EWS_SEARCH_AD, NULL, FALSE, resolve_names_cb,
-						 cancellable, NULL);
+	e_ews_connection_resolve_names (
+		cnc, EWS_PRIORITY_MEDIUM, username,
+		EWS_SEARCH_AD, NULL, FALSE, cancellable,
+		resolve_names_cb, NULL);
 
 }
 

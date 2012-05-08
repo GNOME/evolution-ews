@@ -540,9 +540,9 @@ set_oof_data_from_settings (EMConfigTargetSettings *target,
 
 	cancellable = g_cancellable_new ();
 
-	e_ews_connection_get_oof_settings_start (cnc, EWS_PRIORITY_MEDIUM,
-						 get_oof_settings_cb, cancellable,
-						 oof_frame);
+	e_ews_connection_get_oof_settings (
+		cnc, EWS_PRIORITY_MEDIUM, cancellable,
+		get_oof_settings_cb, oof_frame);
 }
 
 static OOFSettings *
@@ -594,9 +594,9 @@ ews_set_oof_settings (EMConfigTargetSettings *target)
 
 	oof_settings = get_settings_from_data ();
 
-	e_ews_connection_set_oof_settings (cnc, EWS_PRIORITY_MEDIUM,
-					   oof_settings, cancellable,
-					   &error);
+	e_ews_connection_set_oof_settings_sync (
+		cnc, EWS_PRIORITY_MEDIUM,
+		oof_settings, cancellable, &error);
 
 	if (error) {
 		g_warning ("Error While setting out of office: %s\n", error->message);

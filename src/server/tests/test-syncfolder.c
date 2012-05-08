@@ -103,11 +103,12 @@ op_test_sync_folder_items ()
 	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
 
-	e_ews_connection_sync_folder_items_start	(cnc, EWS_PRIORITY_MEDIUM,
-							 NULL, folder_id->id,
-							 "Default", "",
-							 500, folder_items_ready_callback,
-							 cancellable, NULL);
+	e_ews_connection_sync_folder_items (
+		cnc, EWS_PRIORITY_MEDIUM,
+		NULL, folder_id->id,
+		"Default", "",
+		500, cancellable,
+		folder_items_ready_callback, NULL);
 }
 
 static void
@@ -175,9 +176,10 @@ op_test_sync_folder_hierarchy ()
 	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
 
-	e_ews_connection_sync_folder_hierarchy_start	(cnc, EWS_PRIORITY_MEDIUM,
-							 NULL, folder_hierarchy_ready_callback,
-							 cancellable, NULL);
+	e_ews_connection_sync_folder_hierarchy (
+		cnc, EWS_PRIORITY_MEDIUM,
+		NULL, cancellable,
+		folder_hierarchy_ready_callback, NULL);
 
 }
 
@@ -236,10 +238,11 @@ op_test_get_item ()
 	g_assert (cnc != NULL);
 
 	ids = g_slist_reverse (ids);
-	e_ews_connection_get_items_start		(cnc, EWS_PRIORITY_MEDIUM,
-						 g_slist_last (ids), "IdOnly", NULL, FALSE, NULL,
-						 get_item_ready_callback, NULL, NULL,
-						 cancellable, NULL);
+	e_ews_connection_get_items (
+		cnc, EWS_PRIORITY_MEDIUM,
+		g_slist_last (ids), "IdOnly", NULL, FALSE, NULL,
+		NULL, NULL, cancellable,
+		get_item_ready_callback, NULL);
 
 	g_slist_foreach (ids, (GFunc) g_free, NULL);
 	g_slist_free (ids);

@@ -86,10 +86,10 @@ op_test_get_delegate ()
 
 	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
-	e_ews_connection_get_delegate_start	(cnc, EWS_PRIORITY_MEDIUM, "abc@xyz.com",
-						 "true" ,
-						 get_delegate_cb,
-						 cancellable, NULL);
+	e_ews_connection_get_delegate (
+		cnc, EWS_PRIORITY_MEDIUM, "abc@xyz.com",
+		"true", cancellable,
+		get_delegate_cb, NULL);
 
 }
 

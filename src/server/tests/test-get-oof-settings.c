@@ -82,9 +82,9 @@ op_test_get_oof_settings ()
 
 	e_ews_connection_set_mailbox (cnc, email);
 
-	e_ews_connection_get_oof_settings_start	(cnc, EWS_PRIORITY_MEDIUM,
-						 get_oof_settings_cb,
-						 cancellable, NULL);
+	e_ews_connection_get_oof_settings (
+		cnc, EWS_PRIORITY_MEDIUM, cancellable,
+		get_oof_settings_cb, NULL);
 }
 
 static gboolean

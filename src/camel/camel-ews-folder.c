@@ -440,12 +440,13 @@ camel_ews_folder_get_message (CamelFolder *folder,
 		goto exit;
 	}
 
-	res = e_ews_connection_get_items (cnc, pri, ids, "IdOnly", "item:MimeContent",
-					  TRUE, mime_dir,
-					  &items,
-					  (ESoapProgressFn) camel_operation_progress,
-					  (gpointer) cancellable,
-					  cancellable, error);
+	res = e_ews_connection_get_items_sync (
+		cnc, pri, ids, "IdOnly", "item:MimeContent",
+		TRUE, mime_dir,
+		&items,
+		(ESoapProgressFn) camel_operation_progress,
+		(gpointer) cancellable,
+		cancellable, error);
 	g_free (mime_dir);
 
 	if (!res)
@@ -468,12 +469,14 @@ camel_ews_folder_get_message (CamelFolder *folder,
 		gboolean is_calendar_UID = TRUE;
 
 		// Get AssociatedCalendarItemId with second get_items call
-		res = e_ews_connection_get_items (cnc, pri, ids, "IdOnly", "meeting:AssociatedCalendarItemId",
-						  FALSE, NULL,
-						  &items_req,
-						  (ESoapProgressFn) camel_operation_progress,
-						  (gpointer) cancellable,
-						  cancellable, error);
+		res = e_ews_connection_get_items_sync (
+			cnc, pri, ids, "IdOnly",
+			"meeting:AssociatedCalendarItemId",
+			FALSE, NULL,
+			&items_req,
+			(ESoapProgressFn) camel_operation_progress,
+			(gpointer) cancellable,
+			cancellable, error);
 		if (!res || (items_req && e_ews_item_get_item_type (items_req->data) == E_EWS_ITEM_TYPE_ERROR)) {
 			if (items_req) {
 				g_object_unref (items_req->data);
@@ -783,11 +786,12 @@ ews_sync_mi_flags (CamelFolder *folder,
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
 	cnc = camel_ews_store_get_connection (ews_store);
 
-	return e_ews_connection_update_items (cnc, EWS_PRIORITY_LOW,
-					      "AlwaysOverwrite", "SaveOnly",
-					      NULL, NULL,
-					      msg_update_flags, mi_list, NULL,
-					      cancellable, error);
+	return e_ews_connection_update_items_sync (
+		cnc, EWS_PRIORITY_LOW,
+		"AlwaysOverwrite", "SaveOnly",
+		NULL, NULL,
+		msg_update_flags, mi_list, NULL,
+		cancellable, error);
 }
 
 static gboolean
@@ -1023,8 +1027,8 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 	g_slist_free (updated_items);
 
 	if (msg_ids)
-		e_ews_connection_get_items
-			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
+		e_ews_connection_get_items_sync (
+			g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
 			 msg_ids, "IdOnly", SUMMARY_MESSAGE_FLAGS,
 			 FALSE, NULL, &items, NULL, NULL,
 			 cancellable, error);
@@ -1035,11 +1039,11 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 		goto exit;
 
 	if (generic_item_ids)
-		e_ews_connection_get_items
-			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
-			 generic_item_ids, "IdOnly", SUMMARY_ITEM_FLAGS,
-			 FALSE, NULL, &items, NULL, NULL,
-			 cancellable, error);
+		e_ews_connection_get_items_sync (
+			g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
+			generic_item_ids, "IdOnly", SUMMARY_ITEM_FLAGS,
+			FALSE, NULL, &items, NULL, NULL,
+			cancellable, error);
 	camel_ews_utils_sync_updated_items (ews_folder, items);
 
 exit:
@@ -1094,11 +1098,11 @@ sync_created_items (CamelEwsFolder *ews_folder,
 	g_slist_free (created_items);
 
 	if (msg_ids)
-		e_ews_connection_get_items
-			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
-			 msg_ids, "IdOnly", SUMMARY_MESSAGE_PROPS,
-			 FALSE, NULL, &items, NULL, NULL,
-			 cancellable, error);
+		e_ews_connection_get_items_sync (
+			g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
+			msg_ids, "IdOnly", SUMMARY_MESSAGE_PROPS,
+			FALSE, NULL, &items, NULL, NULL,
+			cancellable, error);
 
 	if (*error)
 		goto exit;
@@ -1107,11 +1111,11 @@ sync_created_items (CamelEwsFolder *ews_folder,
 	items = NULL;
 
 	if (post_item_ids)
-		e_ews_connection_get_items
-			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
-			 post_item_ids, "IdOnly", SUMMARY_POSTITEM_PROPS,
-			 FALSE, NULL, &items, NULL, NULL,
-			 cancellable, error);
+		e_ews_connection_get_items_sync (
+			g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
+			post_item_ids, "IdOnly", SUMMARY_POSTITEM_PROPS,
+			FALSE, NULL, &items, NULL, NULL,
+			cancellable, error);
 
 	if (*error)
 		goto exit;
@@ -1120,11 +1124,11 @@ sync_created_items (CamelEwsFolder *ews_folder,
 	items = NULL;
 
 	if (generic_item_ids)
-		e_ews_connection_get_items
-			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
-			 generic_item_ids, "IdOnly", SUMMARY_ITEM_PROPS,
-			 FALSE, NULL, &items, NULL, NULL,
-			 cancellable, error);
+		e_ews_connection_get_items_sync (
+			g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
+			generic_item_ids, "IdOnly", SUMMARY_ITEM_PROPS,
+			FALSE, NULL, &items, NULL, NULL,
+			cancellable, error);
 
 	camel_ews_utils_sync_created_items (ews_folder, items);
 
@@ -1197,13 +1201,13 @@ ews_refresh_info_sync (CamelFolder *folder,
 		GSList *items_deleted = NULL;
 		guint32 total, unread;
 
-		e_ews_connection_sync_folder_items
-							(cnc, EWS_PRIORITY_MEDIUM,
-							 &sync_state, id,
-							 "IdOnly", NULL,
-							 EWS_MAX_FETCH_COUNT, &includes_last_item,
-							 &items_created, &items_updated,
-							 &items_deleted, cancellable, &rerror);
+		e_ews_connection_sync_folder_items_sync (
+			cnc, EWS_PRIORITY_MEDIUM,
+			&sync_state, id,
+			"IdOnly", NULL,
+			EWS_MAX_FETCH_COUNT, &includes_last_item,
+			&items_created, &items_updated,
+			&items_deleted, cancellable, &rerror);
 
 		if (rerror)
 			break;
@@ -1349,10 +1353,11 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 		ids = g_slist_append (ids, (gchar *) uids->pdata[i]);
 	}
 
-	if (e_ews_connection_move_items	(cnc, EWS_PRIORITY_MEDIUM,
-					 dst_id, !delete_originals,
-					 ids, &ret_items,
-					 cancellable, &rerror)) {
+	if (e_ews_connection_move_items_sync (
+			cnc, EWS_PRIORITY_MEDIUM,
+			dst_id, !delete_originals,
+			ids, &ret_items,
+			cancellable, &rerror)) {
 		if (delete_originals) {
 			changes = camel_folder_change_info_new ();
 			for (i = 0; i < uids->len; i++) {
@@ -1409,8 +1414,9 @@ ews_delete_messages (CamelFolder *folder,
 		delete_type = expunge ? EWS_HARD_DELETE : EWS_MOVE_TO_DELETED_ITEMS;
 
 		camel_service_lock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
-		status = e_ews_connection_delete_items (cnc, EWS_PRIORITY_MEDIUM, deleted_items, delete_type,
-							EWS_SEND_TO_NONE, FALSE, cancellable, &rerror);
+		status = e_ews_connection_delete_items_sync (
+			cnc, EWS_PRIORITY_MEDIUM, deleted_items, delete_type,
+			EWS_SEND_TO_NONE, FALSE, cancellable, &rerror);
 		camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 		if (!status && rerror->code == EWS_CONNECTION_ERROR_ITEMNOTFOUND) {

@@ -87,10 +87,10 @@ op_test_create_folder ()
 
 	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
-	e_ews_connection_create_folder_start	(cnc, EWS_PRIORITY_MEDIUM, "inbox",
-						 TRUE ,"test",
-						 create_folder_cb,
-						 cancellable, NULL);
+	e_ews_connection_create_folder (
+		cnc, EWS_PRIORITY_MEDIUM, "inbox",
+		TRUE ,"test", cancellable,
+		create_folder_cb, NULL);
 
 }
 

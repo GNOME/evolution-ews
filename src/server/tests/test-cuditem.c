@@ -114,11 +114,11 @@ op_test_create_item ()
 	//to check how to change to real data
 	folderid = "AQASAG1hbmR5Lnd1QGludGVsLmNvbQAuAAADnUl3sZrICU6Xd1qXV+rpVwEAJvRPgQpR30KhJ7wqBr4YXgAAAY6W+gAAAA==";
 
-	e_ews_connection_create_items_start	(cnc, EWS_PRIORITY_MEDIUM,
-						 NULL, "SendToAllAndSaveCopy", folderid,
-						 op_test_create_item_get_soap_msg, NULL,
-						 create_item_ready_callback,
-						 cancellable, NULL);
+	e_ews_connection_create_items (
+		cnc, EWS_PRIORITY_MEDIUM,
+		NULL, "SendToAllAndSaveCopy", folderid,
+		op_test_create_item_get_soap_msg, NULL,
+		cancellable, create_item_ready_callback, NULL);
 }
 
 static gboolean
