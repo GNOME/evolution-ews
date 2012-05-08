@@ -1,3 +1,5 @@
+NULL =
+
 DIST_SUBDIRS = tests
 
 privlib_LTLIBRARIES = libeews-1.2.la
@@ -17,54 +19,58 @@ ews-marshal.c: ews-marshal.h
 e-ews-connection.c: $(MARSHAL_GENERATED)
 
 libeews_1_2_la_CPPFLAGS = \
-	$(AM_CPPFLAGS)					\
-	-DG_LOG_DOMAIN=\"libeews\"			\
-	-I$(top_srcdir)					\
-	-I$(top_builddir)				\
-	-I$(top_builddir)/src/server			\
-	$(SOUP_CFLAGS)					\
-	$(LIBECAL_CFLAGS)				\
-	$(LIBICAL_CFLAGS)				\
-	$(LIBEDATASERVER_CFLAGS)			\
-	$(DEBUG_CFLAGS)
+	$(AM_CPPFLAGS) \
+	-DG_LOG_DOMAIN=\"libeews\" \
+	-I$(top_srcdir) \
+	-I$(top_builddir) \
+	-I$(top_builddir)/src/server \
+	$(SOUP_CFLAGS) \
+	$(LIBECAL_CFLAGS) \
+	$(LIBICAL_CFLAGS) \
+	$(LIBEDATASERVER_CFLAGS) \
+	$(DEBUG_CFLAGS) \
+	$(NULL)
 
-libeews_1_2_la_SOURCES =		\
-        ews-errors.h			\
-        ews-errors.c			\
-	ews-marshal.h			\
-	ews-marshal.c			\
-	e-ews-connection.c		\
-	e-ews-connection.h		\
-	e-ews-folder.c			\
-	e-ews-item.c			\
-	e-ews-item-change.c		\
-	e-ews-message.c			\
-	e-soap-message.c		\
-	e-soap-message.h		\
-	e-soap-response.c		\
-	e-soap-response.h
+libeews_1_2_la_SOURCES = \
+	ews-errors.h \
+	ews-errors.c \
+	ews-marshal.h \
+	ews-marshal.c \
+	e-ews-connection.c \
+	e-ews-connection.h \
+	e-ews-folder.c \
+	e-ews-item.c \
+	e-ews-item-change.c \
+	e-ews-message.c \
+	e-soap-message.c \
+	e-soap-message.h \
+	e-soap-response.c \
+	e-soap-response.h \
+	$(NULL)
 
-libeews_1_2_la_LIBADD =						\
-	$(SOUP_LIBS)						\
-	$(LIBECAL_LIBS)						\
-	$(LIBICAL_LIBS)						\
-	$(LIBEDATASERVER_LIBS)					\
-	$(SOCKET_LIBS)
+libeews_1_2_la_LIBADD = \
+	$(SOUP_LIBS) \
+	$(LIBECAL_LIBS) \
+	$(LIBICAL_LIBS) \
+	$(LIBEDATASERVER_LIBS) \
+	$(SOCKET_LIBS) \
+	$(NULL)
 
 libeews_1_2_la_LDFLAGS = $(NO_UNDEFINED)
 
 libeewsincludedir = $(privincludedir)/ews
 
-libeewsinclude_HEADERS =		\
-        ews-errors.h			\
-        e-ews-connection.h		\
-	e-ews-folder.h			\
-	e-ews-item.h			\
-	e-ews-item-change.h		\
-	e-ews-message.h			
+libeewsinclude_HEADERS = \
+	ews-errors.h \
+	e-ews-connection.h \
+	e-ews-folder.h \
+	e-ews-item.h \
+	e-ews-item-change.h \
+	e-ews-message.h \
+	$(NULL)
 
 %-$(API_VERSION).pc: %.pc
-	 cp $< $@
+	cp $< $@
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libeews-$(API_VERSION).pc
