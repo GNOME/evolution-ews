@@ -1,3 +1,15 @@
+Evolution-EWS 3.4.2 2012-05-14
+------------------------------
+
+Bug Fixes:
+	Bug 653631 - Empty trash doesn't work (no trash folder returned) (Milan Crha)
+	Bug 653631 - Empty trash doesn't work (Milan Crha)
+	Bug 664637 - Deleted messages appear in Inbox (Milan Crha)
+
+Miscellaneous Fixes:
+	Report errors from backends in their error domain (Milan Crha)
+	Fix possible crash at the end of autodiscovery (Milan Crha)
+
 Evolution-EWS 3.4.1 2012-04-16
 ------------------------------
 
