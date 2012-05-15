@@ -1,0 +1,465 @@
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+#
+# Rūdolfs Mazurs <rudolfs.mazurs@gmail.com>, 2012.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-ews&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2012-05-13 14:10+0000\n"
+"PO-Revision-Date: 2012-05-13 23:22+0300\n"
+"Last-Translator: Rūdolfs Mazurs <rudolfs.mazurs@gmail.com>\n"
+"Language-Team: Latvian <lata-l10n@googlegroups.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: lv\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : "
+"2);\n"
+"X-Generator: Lokalize 1.4\n"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:244
+msgid "Global Address list"
+msgstr "Globāls adrešu saraksts"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:188
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:200
+msgid "Cannot set Date-Time in Past"
+msgstr "Nevar iestatīt datumu un laiku pagātnē"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:207
+msgid "Select a valid time range"
+msgstr "Izvēlieties derīgu laika apgabalu"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:318
+#, c-format
+msgid ""
+"Unable to fetch out of office settings: \n"
+"%s"
+msgstr ""
+"Nevar saņemt “ārpus biroja” iestatījumus: \n"
+"%s"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:350
+msgid ""
+"The messages specified below will be automatically sent to \n"
+" each internal and external personal who sends a mail to you."
+msgstr ""
+"Zemāk uzrakstītais ziņojums tiks automātiski nosūtīts katrai \n"
+"iekšējai vai ārējai personai, kas nosūtīs jums vēstuli."
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:355
+msgid "Status:"
+msgstr "Statuss:"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:360
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:365
+msgid "I am _out of the office"
+msgstr "Esmu ārpus biroja"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:361
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:364
+msgid "I am _in the office"
+msgstr "Esmu birojā"
+
+#. Check box for setting date
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:374
+msgid "_Send only during this time period"
+msgstr "_Sūtīt tikai šajā laika periodā"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:393
+msgid "_From:"
+msgstr "_No:"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:398
+msgid "_To:"
+msgstr "_Kam:"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:415
+msgid "I_nternal:"
+msgstr "Ie_kšējs:"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:417
+msgid "Message to be sent inside organization"
+msgstr "Ziņojums, ko sūtīt organizācijas iekšienē"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:424
+msgid "None"
+msgstr "Nevienam"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:425
+msgid "Known"
+msgstr "Zināmiem"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:426
+msgid "All"
+msgstr "Visiem"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:428
+msgid "Send Message to"
+msgstr "Sūtīt vēstuli"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:448
+msgid "E_xternal:"
+msgstr "Ā_rējs:"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:450
+msgid "Message to be sent outside organization"
+msgstr "Ziņojums, ko sūtīt ārpus organizācijas"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:624
+msgid "Out of Office"
+msgstr "Neatrodas birojā"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:634
+msgid "Fetching out of office settings..."
+msgstr "Saņem “ārpus biroja” iestatījumus..."
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:117
+#, c-format
+msgid "Autodiscover failed: %s"
+msgstr "Automātiskā atklāšana neveiksmīga — %s"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:160
+#, c-format
+msgid "Enter Password for %s"
+msgstr "Ievadiet %s paroli"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:169
+msgid "Could not get password."
+msgstr "Neizdevās saņemt paroli."
+
+#. OAB url entry
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:292
+msgid "OAB U_RL:"
+msgstr "OAB U_RL:"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:304
+msgid "_Host URL:"
+msgstr "_Servera URL:"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:319
+msgid "Fetch _URL"
+msgstr "Saņemt _URL"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:484
+msgid "Could not fetch oal list: "
+msgstr "Neizdevās saņemt oal sarakstu: "
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:530
+msgid "Fetching..."
+msgstr "Saņem..."
+
+#. Add cache check box
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:668
+msgid "Cache o_ffline address book"
+msgstr "Pieglabāt _nesaistes adrešu grāmatas"
+
+#. Add label
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:674
+msgid "Select Ad_dress list: "
+msgstr "Izvēlieties a_drešu sarakstu: "
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:684
+msgid "Fetch _list"
+msgstr "Saņemt _sarakstu:"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:771
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:3
+msgid "EWS Settings"
+msgstr "EWS iestatījumi"
+
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:1
+#: ../src/camel/camel-ews-provider.c:69
+msgid "Exchange Web Services"
+msgstr "Exchange Web Services"
+
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:2
+msgid "GAL settings"
+msgstr "GAL iestatījumi"
+
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:4
+msgid "Exchange Web Services Plugin"
+msgstr "Exchange Web Services spraudnis"
+
+#: ../src/addressbook/e-book-backend-ews.c:951
+msgid "The backend does not support bulk additions"
+msgstr "Aizmugure neatbalsta masveida pievienošanu"
+
+#: ../src/addressbook/e-book-backend-ews.c:1225
+msgid "The backend does not support bulk modifications"
+msgstr "Aizmugure neatbalsta masveida izmaiņas"
+
+#: ../src/addressbook/e-book-backend-ews.c:1405
+msgid "Wait till syncing is done"
+msgstr "Uzgaidiet līdz sinhronizēšana ir pabeigta"
+
+#: ../src/addressbook/e-book-backend-ews.c:1724
+#, c-format
+msgid "Downloading contacts in %s %d%% completed... "
+msgstr "Lejupielādē kontaktus no %s, %d%% ir pabeigti..."
+
+#: ../src/addressbook/e-book-backend-ews.c:2229
+msgid "Syncing contacts..."
+msgstr "Sinhronizē kontaktus..."
+
+#: ../src/addressbook/e-book-backend-ews.c:2422
+msgid "Searching..."
+msgstr "Meklē..."
+
+#: ../src/addressbook/e-book-backend-sqlitedb.c:476
+#, c-format
+msgid "Insufficient memory"
+msgstr "Nepietiek atmiņas"
+
+#: ../src/calendar/e-cal-backend-ews.c:1105
+msgid "EWS does not support bulk removals"
+msgstr "EWS neatbalsta masveida izņemšanu"
+
+#: ../src/calendar/e-cal-backend-ews.c:1689
+msgid "EWS does not support bulk additions"
+msgstr "EWS neatbalsta masveida pievienošanu"
+
+#: ../src/calendar/e-cal-backend-ews.c:2179
+msgid "EWS does not support bulk modifications"
+msgstr "EWS neatbalsta masveida izmaiņas"
+
+#: ../src/camel/camel-ews-folder.c:264
+#, c-format
+msgid "Unable to open mimecontent temporary file!"
+msgstr "Neizdevās atvērt mimecontent pagaidu failu!"
+
+#: ../src/camel/camel-ews-folder.c:271
+#, c-format
+msgid "Unable to generate parser from mimecontent!"
+msgstr "Neizdevās izveidot parseri no mimecontent!"
+
+#: ../src/camel/camel-ews-folder.c:280
+#, c-format
+msgid "Unable to parse meeting request mimecontent!"
+msgstr "Neizdevās saprast tikšanās pieprasījuma mimecontent!"
+
+#: ../src/camel/camel-ews-folder.c:337
+#, c-format
+msgid "Unable to create cache file"
+msgstr "Nevarē izveidot kešatmiņas failu"
+
+#: ../src/camel/camel-ews-folder.c:438 ../src/camel/camel-ews-folder.c:510
+#, c-format
+msgid "Unable to create cache path"
+msgstr "Nevarē izveidot kešatmiņas ceļu"
+
+#: ../src/camel/camel-ews-folder.c:519
+#, c-format
+msgid "Failed to move message cache file"
+msgstr "Neizdevās pārvietot vēstuļu kešatmiņas failu"
+
+#: ../src/camel/camel-ews-folder.c:953
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "Nevar ielādēt %s kopsavilkumu"
+
+#: ../src/camel/camel-ews-folder.c:1294 ../src/camel/camel-ews-store.c:762
+#: ../src/camel/camel-ews-store.c:819 ../src/camel/camel-ews-store.c:890
+#, c-format
+msgid "Cant perform actions on the folder while in offline mode"
+msgstr "Nevar veikt darbības ar mapi, kamēr atrodas nesaistes režīmā"
+
+#: ../src/camel/camel-ews-provider.c:48
+msgid "Checking for new mail"
+msgstr "Pārbauda jauno pastu"
+
+#: ../src/camel/camel-ews-provider.c:50
+msgid "C_heck for new messages in all folders"
+msgstr "_Pārbaudīt visās mapēs, vai nav jaunu vēstuļu"
+
+#: ../src/camel/camel-ews-provider.c:53
+msgid "Options"
+msgstr "Opcijas"
+
+#: ../src/camel/camel-ews-provider.c:55
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr "_Attiecināt filtrus uz jaunajām vēstulēm iesūtnē šajā serverī"
+
+#: ../src/camel/camel-ews-provider.c:57
+msgid "Check new messages for _Junk contents"
+msgstr "Pārbaudīt, vai jaunās vēstules nav _mēstules"
+
+#: ../src/camel/camel-ews-provider.c:59
+msgid "Only check for Junk messages in the IN_BOX folder"
+msgstr "Pārbaudīt uz mēstulēm tikai iesūtnes mapē"
+
+#: ../src/camel/camel-ews-provider.c:61
+msgid "Automatically synchroni_ze remote mail locally"
+msgstr "Automātiski sinhroni_zēt attālināto pastu lokāli"
+
+#: ../src/camel/camel-ews-provider.c:71
+msgid "For accessing Exchange servers using Web Services"
+msgstr "Lai piekļūtu Exchange serveriem, izmantojot Web Services"
+
+#: ../src/camel/camel-ews-provider.c:87
+msgid "Password"
+msgstr "Parole"
+
+#: ../src/camel/camel-ews-provider.c:89
+msgid ""
+"This option will connect to the Exchange server using a plaintext password."
+msgstr ""
+"Šī opcija savienos ar Exchange serveri, lietojot parasta teksta paroli."
+
+#: ../src/camel/camel-ews-store.c:186
+#, c-format
+msgid "Session has no storage path"
+msgstr "Sesijai nav glabātuves ceļa"
+
+#: ../src/camel/camel-ews-store.c:557
+#, c-format
+msgid "No such folder: %s"
+msgstr "Nav tādas mapes: %s"
+
+#: ../src/camel/camel-ews-store.c:755
+#, c-format
+msgid "Parent folder %s does not exist"
+msgstr "Vecāka mape %s neeksistē"
+
+#: ../src/camel/camel-ews-store.c:813
+#, c-format
+msgid "Folder does not exist"
+msgstr "Mape neeksistē"
+
+#: ../src/camel/camel-ews-store.c:898
+#, c-format
+msgid "Folder %s does not exist"
+msgstr "Mape %s neeksistē"
+
+#: ../src/camel/camel-ews-store.c:907
+#, c-format
+msgid "No change key record for folder %s"
+msgstr "Mapei %s nav maiņas atslēgas ieraksta"
+
+#: ../src/camel/camel-ews-store.c:946
+#, c-format
+msgid "Cannot both rename and move a folder at the same time"
+msgstr "Nevar vienlaicīgi pārsaukt un pārvietot mapi"
+
+#: ../src/camel/camel-ews-store.c:978
+#, c-format
+msgid "Cannot find folder ID for parent folder %s"
+msgstr "Nevar atrast mapes ID vecāka mapei %s"
+
+#: ../src/camel/camel-ews-store.c:1016 ../src/camel/camel-ews-transport.c:67
+#, c-format
+msgid "Exchange server %s"
+msgstr "Exchange serveris %s"
+
+#: ../src/camel/camel-ews-store.c:1018
+#, c-format
+msgid "Exchange service for %s on %s"
+msgstr "%s Exchange serviss %s"
+
+#: ../src/camel/camel-ews-store.c:1077
+#, c-format
+msgid "You must be working online to complete this operation"
+msgstr "Jums ir jāstrādā tiešsaistē, lai izpildītu šo darbību"
+
+#: ../src/camel/camel-ews-transport.c:70
+#, c-format
+msgid "Exchange mail delivery via %s"
+msgstr "Exchange pasta nosūtīšana caur  %s"
+
+#: ../src/camel/camel-ews-transport.c:107
+msgid "Cannot send message with no From address"
+msgstr "Nevar nosūtīt vēstuli bez “No” adreses"
+
+#: ../src/camel/camel-ews-transport.c:111
+msgid "Exchange server cannot send message with multiple From addresses"
+msgstr "Exchange serveris nevar nosūtīt vēstules ar vairākām “No” adresēm"
+
+#: ../src/camel/camel-ews-transport.c:119
+msgid "Failed to read From address"
+msgstr "Neizdevās nolasīt “No” adreses"
+
+#: ../src/camel/camel-ews-transport.c:125
+#, c-format
+msgid ""
+"Exchange server cannot send message as '%s', when the account was configured "
+"for address '%s'"
+msgstr ""
+"Exchange serveris nevar nosūtīt vēstules kā “%s”, kad konts ir konfigurēts "
+"adresei “%s”"
+
+#: ../src/camel/camel-ews-transport.c:136
+#, c-format
+msgid "Service not connected"
+msgstr "Serviss nav savienojies"
+
+#: ../src/server/e-ews-connection.c:388
+msgid "Operation Cancelled"
+msgstr "Darbība atcelta"
+
+#: ../src/server/e-ews-connection.c:452
+msgid "Authentication failed"
+msgstr "Autentifikācija neizdevās"
+
+#: ../src/server/e-ews-connection.c:460
+#, c-format
+msgid "No response: %s"
+msgstr "Nav atbildes — %s"
+
+#: ../src/server/e-ews-connection.c:1377 ../src/server/e-ews-connection.c:1741
+#: ../src/server/e-ews-connection.c:1990
+#, c-format
+msgid "Code: %d - Unexpected response from server"
+msgstr "Kods: %d — negaidīta atbilde no servera"
+
+#: ../src/server/e-ews-connection.c:1389
+#, c-format
+msgid "Failed to parse autodiscover response XML"
+msgstr "Neizdevās saprast automātiskās atklāšanas atbildes XML"
+
+#: ../src/server/e-ews-connection.c:1397
+#, c-format
+msgid "Failed to find <Autodiscover> element\n"
+msgstr "Neizdevās atrast <Autodiscover> elementu\n"
+
+#: ../src/server/e-ews-connection.c:1409
+#, c-format
+msgid "Failed to find <Response> element\n"
+msgstr "Neizdevās atrast <Response> elementu\n"
+
+#: ../src/server/e-ews-connection.c:1421
+#, c-format
+msgid "Failed to find <Account> element\n"
+msgstr "Neizdevās atrast <Account> elementu\n"
+
+#: ../src/server/e-ews-connection.c:1440
+#, c-format
+msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
+msgstr "Neizdevās atrast <ASUrl> un <OABUrl> automātiskās atklāšanas atbildē"
+
+#: ../src/server/e-ews-connection.c:1548
+#, c-format
+msgid "Both email and password must be provided"
+msgstr "Jānorāda gan e-pasts gan parole"
+
+#: ../src/server/e-ews-connection.c:1555
+#, c-format
+msgid "Wrong email id"
+msgstr "Nepareizs e-pasta id"
+
+#: ../src/server/e-ews-connection.c:1751
+#, c-format
+msgid "Failed to parse oab XML"
+msgstr "Neizdevās saprast oab XML"
+
+#: ../src/server/e-ews-connection.c:1758
+#, c-format
+msgid "Failed to find <OAB> element\n"
+msgstr "Neizdevās atrast <OAB> elementu\n"
+
+#: ../src/utils/ews-camel-common.c:172
+#, c-format
+msgid "CreateItem call failed to return ID for new message"
+msgstr "CreateItem izsaukumam neizdevās atgriezt jaunās vēstules ID"
+
