@@ -1602,7 +1602,7 @@ camel_ews_folder_init (CamelEwsFolder *ews_folder)
 		CAMEL_MESSAGE_DRAFT | CAMEL_MESSAGE_FLAGGED | CAMEL_MESSAGE_SEEN |
 		CAMEL_MESSAGE_FORWARDED | CAMEL_MESSAGE_USER;
 
-	folder->folder_flags = CAMEL_FOLDER_HAS_SUMMARY_CAPABILITY | CAMEL_FOLDER_HAS_SEARCH_CAPABILITY;
+	folder->folder_flags = CAMEL_FOLDER_HAS_SUMMARY_CAPABILITY;
 
 	ews_folder->priv->search_lock = g_mutex_new ();
 	ews_folder->priv->state_lock = g_mutex_new ();
