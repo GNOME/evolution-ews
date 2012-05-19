@@ -1413,11 +1413,9 @@ ews_delete_messages (CamelFolder *folder,
 
 		delete_type = expunge ? EWS_HARD_DELETE : EWS_MOVE_TO_DELETED_ITEMS;
 
-		camel_service_lock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		status = e_ews_connection_delete_items_sync (
 			cnc, EWS_PRIORITY_MEDIUM, deleted_items, delete_type,
 			EWS_SEND_TO_NONE, FALSE, cancellable, &rerror);
-		camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 		if (!status && rerror->code == EWS_CONNECTION_ERROR_ITEMNOTFOUND) {
 			/* If delete failed due to the item not found, ignore the error,

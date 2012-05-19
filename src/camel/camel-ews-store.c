@@ -288,20 +288,15 @@ ews_connect_sync (CamelService *service,
 	if (camel_service_get_connection_status (service) == CAMEL_SERVICE_DISCONNECTED)
 		return FALSE;
 
-	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-
-	if (priv->cnc) {
-		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
+	if (priv->cnc)
 		return TRUE;
-	}
 
 	priv->cnc = e_ews_connection_new (hosturl, user, NULL,
 					  G_CALLBACK (ews_store_authenticate), service,
 					  error);
 
 	if (!priv->cnc) {
-		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-		camel_service_disconnect_sync (service, TRUE, NULL);
+		camel_service_disconnect_sync (service, TRUE, cancellable, NULL);
 		return FALSE;
 	}
 
@@ -313,15 +308,12 @@ ews_connect_sync (CamelService *service,
 	if (!success) {
 		g_object_unref (priv->cnc);
 		priv->cnc = NULL;
-		camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-		camel_service_disconnect_sync (service, TRUE, NULL);
+		camel_service_disconnect_sync (service, TRUE, cancellable, NULL);
 		return FALSE;
 	}
 
 	camel_offline_store_set_online_sync (
 		CAMEL_OFFLINE_STORE (ews_store), TRUE, cancellable, NULL);
-
-	camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	return TRUE;
 }
@@ -339,15 +331,11 @@ ews_disconnect_sync (CamelService *service,
 	if (!service_class->disconnect_sync (service, clean, cancellable, error))
 		return FALSE;
 
-	camel_service_lock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
-
 	/* TODO cancel all operations in the connection */
 	if (ews_store->priv->cnc) {
 		g_object_unref (ews_store->priv->cnc);
 		ews_store->priv->cnc = NULL;
 	}
-
-	camel_service_unlock (service, CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 	return TRUE;
 }
@@ -655,7 +643,7 @@ ews_refresh_finfo (CamelEwsStore *ews_store)
 	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (ews_store)))
 		return FALSE;
 
-	if (!camel_service_connect_sync ((CamelService *) ews_store, NULL))
+	if (!camel_service_connect_sync ((CamelService *) ews_store, NULL, NULL))
 		return FALSE;
 
 	sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
@@ -689,7 +677,7 @@ ews_get_folder_info_sync (CamelStore *store,
 
 	g_mutex_lock (priv->get_finfo_lock);
 	if (!(camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))
-	      && camel_service_connect_sync ((CamelService *) store, error))) {
+	      && camel_service_connect_sync ((CamelService *) store, cancellable, error))) {
 		g_mutex_unlock (priv->get_finfo_lock);
 		goto offline;
 	}
@@ -1078,7 +1066,7 @@ camel_ews_store_connected (CamelEwsStore *ews_store,
 		return FALSE;
 	}
 
-	if (!camel_service_connect_sync ((CamelService *) ews_store, error))
+	if (!camel_service_connect_sync ((CamelService *) ews_store, NULL, error))
 		return FALSE;
 
 	return TRUE;
