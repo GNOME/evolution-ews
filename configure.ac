@@ -1,6 +1,7 @@
 AC_PREREQ(2.58)
 AC_INIT([evolution-ews], [3.5.2], [http://bugzilla.gnome.org/browse.cgi?product=evolution-ews])
 AM_INIT_AUTOMAKE([gnu 1.9 dist-xz no-dist-gzip -Wno-portability])
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR(README)
 AC_CONFIG_HEADERS(config.h)
 
@@ -166,6 +167,11 @@ dnl ****************************
 PKG_CHECK_MODULES(LIBICAL, libical)
 
 dnl ****************************
+dnl Check for kerberos
+dnl ****************************
+EVO_KRB5_SUPPORT
+
+dnl ****************************
 dnl Expose version information
 dnl ****************************
 API_VERSION=1.2
@@ -231,3 +237,8 @@ src/camel/Makefile
 po/Makefile.in
 ])
 AC_OUTPUT
+
+AC_MSG_NOTICE([
+	Kerberos 5	: $msg_krb5
+])
+

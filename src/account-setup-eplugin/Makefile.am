@@ -36,6 +36,8 @@ liborg_gnome_exchange_ews_la_SOURCES =  \
 	exchange-ews-account-listener.h \
 	exchange-ews-account-out-of-office.c \
 	exchange-ews-account-out-of-office.h \
+	exchange-ews-change-password.c		\
+	exchange-ews-change-password.h		\
 	$(NULL)
 
 liborg_gnome_exchange_ews_la_LIBADD =  \

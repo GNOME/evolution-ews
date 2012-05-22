@@ -50,6 +50,7 @@
 
 #include "exchange-ews-account-out-of-office.h"
 #include "exchange-ews-account-setup.h"
+#include "exchange-ews-change-password.h"
 
 #define d(x) x
 
@@ -744,7 +745,7 @@ org_gnome_ews_settings (EPlugin *epl,
 {
 	EMConfigTargetSettings *target_account;
 	GtkVBox *vbox_settings;
-	GtkWidget *oof;
+	GtkWidget *oof, *chgpwd;
 
 	target_account = (EMConfigTargetSettings *) data->config->target;
 
@@ -766,6 +767,10 @@ org_gnome_ews_settings (EPlugin *epl,
 	/*Get Out of office widget*/
 	oof = ews_get_outo_office_widget (target_account);
 	gtk_box_pack_start (GTK_BOX (vbox_settings), oof, FALSE, FALSE, 0);
+
+	/*Get Change Password widget*/
+	chgpwd = ews_get_change_pwd_widget (target_account);
+	gtk_box_pack_start (GTK_BOX (vbox_settings), chgpwd, FALSE, FALSE, 0);
 
 	gtk_widget_show_all (GTK_WIDGET (vbox_settings));
 	gtk_notebook_insert_page (GTK_NOTEBOOK (data->parent), GTK_WIDGET (vbox_settings), gtk_label_new(_("EWS Settings")), 4);

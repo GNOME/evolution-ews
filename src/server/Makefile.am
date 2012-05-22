@@ -18,6 +18,14 @@ ews-marshal.c: ews-marshal.h
 
 e-ews-connection.c: $(MARSHAL_GENERATED)
 
+if ENABLE_KRB5
+KERBEROS_FILES = \
+	ews-kerberos.c \
+	ews-kerberos.h
+else
+KERBEROS_FILES =
+endif
+
 libeews_1_2_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-DG_LOG_DOMAIN=\"libeews\" \
@@ -29,6 +37,7 @@ libeews_1_2_la_CPPFLAGS = \
 	$(LIBECAL_CFLAGS) \
 	$(LIBICAL_CFLAGS) \
 	$(LIBEDATASERVER_CFLAGS) \
+	$(KRB5_CFLAGS)	\
 	$(DEBUG_CFLAGS) \
 	$(NULL)
 
@@ -37,6 +46,7 @@ libeews_1_2_la_SOURCES = \
 	ews-errors.c \
 	ews-marshal.h \
 	ews-marshal.c \
+	$(KERBEROS_FILES) \
 	e-ews-connection.c \
 	e-ews-connection.h \
 	e-ews-folder.c \
@@ -54,6 +64,7 @@ libeews_1_2_la_LIBADD = \
 	$(LIBECAL_LIBS) \
 	$(LIBICAL_LIBS) \
 	$(LIBEDATASERVER_LIBS) \
+	$(KRB5_LIBS) \
 	$(SOCKET_LIBS) \
 	$(NULL)
 
