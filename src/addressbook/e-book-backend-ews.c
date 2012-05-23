@@ -87,7 +87,6 @@ struct _EBookBackendEwsPrivate {
 	gboolean marked_for_offline;
 	gboolean cache_ready;
 	gboolean is_gal;
-	gboolean is_online;
 
 	GHashTable *ops;
 
@@ -956,7 +955,7 @@ e_book_backend_ews_create_contacts (EBookBackend *backend,
 	ebews = E_BOOK_BACKEND_EWS (backend);
 	priv = ebews->priv;
 
-	if (!priv->is_online) {
+	if (!e_backend_get_online (E_BACKEND (backend))) {
 		if (!priv->is_writable) {
 			e_data_book_respond_create_contacts (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
 			return;
@@ -1059,7 +1058,7 @@ e_book_backend_ews_remove_contacts (EBookBackend *backend,
 
 	priv = ebews->priv;
 
-	if (!priv->is_online) {
+	if (!e_backend_get_online (E_BACKEND (backend))) {
 		if (!priv->is_writable) {
 			e_data_book_respond_remove_contacts (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
 			return;
@@ -1230,7 +1229,7 @@ e_book_backend_ews_modify_contacts (EBookBackend *backend,
 	ebews = E_BOOK_BACKEND_EWS (backend);
 	priv = ebews->priv;
 
-	if (!priv->is_online) {
+	if (!e_backend_get_online (E_BACKEND (backend))) {
 		if (!priv->is_writable) {
 			e_data_book_respond_modify_contacts (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
 			return;
@@ -1300,7 +1299,7 @@ e_book_backend_ews_get_contact (EBookBackend *backend,
 
 	ebews =  E_BOOK_BACKEND_EWS (backend);
 
-	if (!ebews->priv->is_online) {
+	if (!e_backend_get_online (E_BACKEND (backend))) {
 		e_data_book_respond_get_contact (book, opid, EDB_ERROR (CONTACT_NOT_FOUND), "");
 		return;
 	}
@@ -1328,7 +1327,7 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 	ebews = E_BOOK_BACKEND_EWS (backend);
 	priv = ebews->priv;
 
-	if (!priv->is_online) {
+	if (!e_backend_get_online (E_BACKEND (backend))) {
 		if (e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
 			list = e_book_backend_sqlitedb_search (priv->ebsdb, priv->folder_id, query, NULL, NULL, NULL, &error);
 			l = list;
@@ -2358,7 +2357,8 @@ ebews_start_refreshing (EBookBackendEws *ebews)
 
 	PRIV_LOCK (priv);
 
-	if (priv->is_online && priv->cnc && priv->marked_for_offline)
+	if (e_backend_get_online (E_BACKEND (ebews)) &&
+	    priv->cnc != NULL&& priv->marked_for_offline)
 		fetch_deltas (ebews);
 
 	PRIV_UNLOCK (priv);
@@ -2421,7 +2421,7 @@ e_book_backend_ews_start_book_view (EBookBackend *backend,
 	e_data_book_view_ref (book_view);
 	e_data_book_view_notify_progress (book_view, -1, _("Searching..."));
 
-	if (!priv->is_online) {
+	if (!e_backend_get_online (E_BACKEND (backend))) {
 		if (priv->ebsdb && e_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
 			fetch_from_offline (ebews, book_view, query, error);
 			return;
@@ -2610,10 +2610,8 @@ e_book_backend_ews_load_source (EBookBackend *backend,
 		}
 	}
 
-	if (priv->is_online) {
-		e_backend_set_online (E_BACKEND (backend), TRUE);
+	if (e_backend_get_online (E_BACKEND (backend)))
 		e_book_backend_notify_auth_required (backend, TRUE, NULL);
-	}
 }
 
 static void
@@ -2644,7 +2642,7 @@ e_book_backend_ews_authenticate_user (EBookBackend *backend,
 	ebews = E_BOOK_BACKEND_EWS (backend);
 	priv = ebews->priv;
 
-	if (!ebews->priv->is_online) {
+	if (!e_backend_get_online (E_BACKEND (backend))) {
 		e_book_backend_notify_opened (backend, EDB_ERROR (SUCCESS));
 		return;
 	}
@@ -2704,16 +2702,8 @@ e_book_backend_ews_notify_online_cb (EBookBackend *backend,
                                      GParamSpec *spec)
 {
 	EBookBackendEws *ebews;
-	gboolean is_online;
 
 	ebews = E_BOOK_BACKEND_EWS (backend);
-
-	is_online = e_backend_get_online (E_BACKEND (backend));
-
-	if ((ebews->priv->is_online ? 1 : 0) == (is_online ? 1 : 0))
-		return;
-
-	ebews->priv->is_online = is_online;
 
 	if (e_book_backend_is_opened (backend)) {
 		if (ebews->priv->cancellable) {
@@ -2722,7 +2712,7 @@ e_book_backend_ews_notify_online_cb (EBookBackend *backend,
 			ebews->priv->cancellable = NULL;
 		}
 
-		if (!is_online) {
+		if (!e_backend_get_online (E_BACKEND (backend))) {
 			e_book_backend_notify_readonly (backend, TRUE);
 			e_book_backend_notify_online (backend, FALSE);
 			if (ebews->priv->cnc) {

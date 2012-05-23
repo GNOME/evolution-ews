@@ -78,7 +78,6 @@ struct _ECalBackendEwsPrivate {
 	EDataCal *opening_cal;
 	guint32 opening_ctx;
 
-	gboolean is_online;
 	ECalBackendStore *store;
 	gboolean read_only;
 
@@ -552,7 +551,8 @@ connect_to_server (ECalBackendEws *cbews,
 
 	PRIV_LOCK (priv);
 
-	if (priv->is_online && !priv->cnc && password) {
+	if (e_backend_get_online (E_BACKEND (cbews)) &&
+	    priv->cnc == NULL && password != NULL) {
 		const gchar *host_url;
 		GSList *folders = NULL, *ids = NULL;
 		EwsFolderId *fid = NULL;
@@ -1699,7 +1699,7 @@ e_cal_backend_ews_create_objects (ECalBackend *backend,
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
 
 	/* make sure we're not offline */
-	if (!priv->is_online) {
+	if (!e_backend_get_online (E_BACKEND (backend))) {
 		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
 		goto exit;
 	}
@@ -2213,7 +2213,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 	priv = cbews->priv;
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
 
-	if (!priv->is_online) {
+	if (!e_backend_get_online (E_BACKEND (backend))) {
 		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
 		goto exit;
 	}
@@ -2509,7 +2509,7 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend,
 	priv = cbews->priv;
 
 	/* make sure we're not offline */
-	if (!priv->is_online) {
+	if (!e_backend_get_online (E_BACKEND (backend))) {
 		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
 		goto exit;
 	}
@@ -2766,7 +2766,7 @@ e_cal_backend_ews_send_objects (ECalBackend *backend,
 	priv = cbews->priv;
 
 	/* make sure we're not offline */
-	if (!priv->is_online) {
+	if (!e_backend_get_online (E_BACKEND (backend))) {
 		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
 		goto exit;
 	}
@@ -3599,7 +3599,7 @@ ews_cal_start_refreshing (ECalBackendEws *cbews)
 	PRIV_LOCK (priv);
 
 	if	(!priv->refresh_timeout &&
-		 priv->is_online &&
+		 e_backend_get_online (E_BACKEND (cbews)) &&
 		 priv->cnc) {
 			ews_start_sync (cbews);
 			priv->refresh_timeout = g_timeout_add_seconds
@@ -3678,7 +3678,7 @@ e_cal_backend_ews_refresh (ECalBackend *backend,
 	priv = cbews->priv;
 
 	/* make sure we're not offline */
-	if (!priv->is_online) {
+	if (!e_backend_get_online (E_BACKEND (backend))) {
 		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
 		goto exit;
 	}
@@ -3799,7 +3799,7 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend,
 	GSList *users_copy = NULL;
 
 	/* make sure we're not offline */
-	if (!priv->is_online) {
+	if (!e_backend_get_online (E_BACKEND (backend))) {
 		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
 		goto exit;
 	}
@@ -3912,23 +3912,13 @@ e_cal_backend_ews_notify_online_cb (ECalBackend *backend,
 {
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
-	gboolean is_online;
 
 	cbews = E_CAL_BACKEND_EWS (backend);
 	priv = cbews->priv;
 
-	is_online = e_backend_get_online (E_BACKEND (backend));
-
-	if ((is_online ? 1 : 0) == (priv->is_online ? 1 : 0)) {
-		e_cal_backend_notify_online (backend, is_online);
-		return;
-	}
-
 	PRIV_LOCK (priv);
 
-	priv->is_online = is_online;
-
-	if (is_online) {
+	if (e_backend_get_online (E_BACKEND (backend))) {
 		if (priv->cancellable) {
 			g_cancellable_cancel (priv->cancellable);
 			g_object_unref (priv->cancellable);
