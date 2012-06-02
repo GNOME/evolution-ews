@@ -1143,7 +1143,7 @@ e_ews_item_get_error (EEwsItem *item)
 
 void
 e_ews_item_set_error (EEwsItem *item,
-		      const GError *error)
+                      const GError *error)
 {
 	GError *new_error;
 

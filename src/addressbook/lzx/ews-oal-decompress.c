@@ -268,13 +268,13 @@ main (gint argc,
 		g_print ("Pass an lzx file and an output filename as argument \n");
 		return;
 	}
- *
+
 	g_type_init ();
- *
+
 	if (oal_decompress_v4_full_detail_file (argv[1], argv[2], NULL))
 		g_print ("Successfully decompressed \n");
 	else
 		g_print ("decompression failed \n");
- *
+
 	return 0;
 } */

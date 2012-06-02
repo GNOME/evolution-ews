@@ -297,7 +297,7 @@ e_ews_implement_contact_contains (ESExp *f,
 
 				WRITE_CONTAINS_MESSAGE (msg, mode, "IgnoreCase", "item:Categories", value);
 			}
-			
+
 			g_free (mode);
 		}
 	}
@@ -792,7 +792,7 @@ func_eq (ESExp *f,
 
 	if (argv[0]->type == ESEXP_RES_STRING) {
 		const gchar *name;
-	       	gchar *field_uri = NULL;
+		gchar *field_uri = NULL;
 
 		name = argv[0]->value.string;
 

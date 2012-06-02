@@ -740,7 +740,7 @@ camel_ews_store_summary_get_folder_id_from_name (CamelEwsStoreSummary *ews_summa
 
 gchar *
 camel_ews_store_summary_get_folder_id_from_folder_type (CamelEwsStoreSummary *ews_summary,
-							guint64 folder_type)
+                                                        guint64 folder_type)
 {
 	gchar *folder_id = NULL;
 	GSList *folders, *l;

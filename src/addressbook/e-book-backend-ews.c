@@ -2101,7 +2101,7 @@ ebews_fetch_items (EBookBackendEws *ebews,
                    GSList *items,
                    gboolean store_to_cache,
                    GSList **vcards,
-		   GCancellable *cancellable,
+                   GCancellable *cancellable,
                    GError **error)
 {
 	EBookBackendEwsPrivate *priv;

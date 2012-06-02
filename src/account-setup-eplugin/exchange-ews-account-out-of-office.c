@@ -167,7 +167,7 @@ toggled_state_cb (GtkToggleButton *button,
 
 static void
 toggled_set_date_cb (GtkToggleButton *button,
-		     gpointer data)
+                     gpointer data)
 {
 	gboolean current_state;
 
@@ -373,9 +373,8 @@ set_oof_settings_to_frame (GtkWidget *oof_frame)
 	/*Check box for setting date*/
 	set_range = gtk_check_button_new_with_mnemonic (_("_Send only during this time period"));
 	oof_data->range_wt = set_range;
-	gtk_toggle_button_set_active ((GtkToggleButton*) set_range, oof_data->set_range);
+	gtk_toggle_button_set_active ((GtkToggleButton *) set_range, oof_data->set_range);
 	g_signal_connect ((GtkToggleButton*) set_range, "toggled", G_CALLBACK (toggled_set_date_cb), NULL);
-
 
 	/*Selectable Dates*/
 	from_date = e_date_edit_new ();

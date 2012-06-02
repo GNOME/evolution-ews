@@ -362,8 +362,8 @@ ews_active_job_done (EEwsConnection *cnc,
 
 	ews_trigger_next_request (cnc);
 	/* the 'simple' holds reference on 'cnc' and this function
-	   is called in a dedicated thread, which 'cnc' joins on dispose,
-	   thus to avoid race condition, unref the object in its own thread */
+	 * is called in a dedicated thread, which 'cnc' joins on dispose,
+	 * thus to avoid race condition, unref the object in its own thread */
 	ews_unref_in_thread (G_OBJECT (ews_node->simple));
 	g_free (ews_node);
 }
@@ -612,7 +612,7 @@ sync_xxx_response_cb (ESoapParameter *subparam,
 static void
 sync_hierarchy_response_cb (ESoapParameter *subparam,
                             EwsNode *enode,
-			    GError **error)
+                            GError **error)
 {
 	/* stop on errors */
 	if (error && *error)
@@ -625,7 +625,7 @@ sync_hierarchy_response_cb (ESoapParameter *subparam,
 static void
 sync_folder_items_response_cb (ESoapParameter *subparam,
                                EwsNode *enode,
-			       GError **error)
+                               GError **error)
 {
 	/* stop on errors */
 	if (error && *error)
@@ -638,7 +638,7 @@ sync_folder_items_response_cb (ESoapParameter *subparam,
 static void
 get_folder_response_cb (ESoapParameter *subparam,
                         EwsNode *enode,
-			GError **error)
+                        GError **error)
 {
 	ESoapParameter *node;
 	EwsAsyncData *async_data;
@@ -661,7 +661,7 @@ get_folder_response_cb (ESoapParameter *subparam,
 static void
 find_folder_items_response_cb (ESoapParameter *subparam,
                                EwsNode *enode,
-			       GError **error)
+                               GError **error)
 {
 	ESoapParameter *node, *subparam1;
 	EwsAsyncData *async_data;
@@ -700,7 +700,7 @@ find_folder_items_response_cb (ESoapParameter *subparam,
 static void
 get_items_response_cb (ESoapParameter *subparam,
                        EwsNode *enode,
-		       GError **error)
+                       GError **error)
 {
 	ESoapParameter *node;
 	EwsAsyncData *async_data;
@@ -732,7 +732,7 @@ get_text_from_html (gchar *html_text)
 	gchar *start = g_strstr_len (html_text, haystack_len, "<body"),
 		*end = g_strstr_len (html_text, haystack_len, "</body>"),
 		*i, *j;
-	
+
 	/*parse the status set by owa*/
 	if  (g_strrstr (html_text, "BodyFragment") && !start) {
 		start = html_text;
@@ -763,7 +763,7 @@ get_text_from_html (gchar *html_text)
 static void
 get_oof_settings_response_cb (ESoapParameter *subparam,
                               EwsNode *enode,
-			      GError **error)
+                              GError **error)
 {
 	ESoapParameter *node, *node_1;
 	EwsAsyncData *async_data;
@@ -827,7 +827,7 @@ get_oof_settings_response_cb (ESoapParameter *subparam,
 static void
 resolve_names_response_cb (ESoapParameter *subparam,
                            EwsNode *enode,
-			   GError **error)
+                           GError **error)
 {
 	ESoapParameter *node;
 	gboolean includes_last_item;
@@ -877,7 +877,7 @@ resolve_names_response_cb (ESoapParameter *subparam,
 static void
 expand_dl_response_cb (ESoapParameter *subparam,
                        EwsNode *enode,
-		       GError **error)
+                       GError **error)
 {
 	gboolean includes_last_item;
 	GSList *mailboxes = NULL;
@@ -915,8 +915,8 @@ expand_dl_response_cb (ESoapParameter *subparam,
 /* TODO scan all folders if we support creating multiple folders in the request */
 static void
 ews_create_folder_response_cb (ESoapParameter *soapparam,
-			       EwsNode *enode,
-			       GError **error)
+                               EwsNode *enode,
+                               GError **error)
 {
 	ESoapParameter *param, *node;
 	EwsAsyncData *async_data;
@@ -1364,9 +1364,9 @@ autodiscover_response_cb (SoupSession *session,
 	ad->msgs[idx] = NULL;
 
 	/* Take 'simple' from 'ad' before actual call
-	   to g_simple_async_result_complete_in_idle(),
-	   for cases where the 'ad' is freed in autodiscover_done_cb()
-	   before this function finishes. Suggested by Dan Winship.
+	 * to g_simple_async_result_complete_in_idle(),
+	 * for cases where the 'ad' is freed in autodiscover_done_cb()
+	 * before this function finishes. Suggested by Dan Winship.
 	*/
 	simple = ad->simple;
 
@@ -1454,8 +1454,8 @@ autodiscover_response_cb (SoupSession *session,
 	g_simple_async_result_set_op_res_gpointer (ad->simple, urls, NULL);
 	g_simple_async_result_complete_in_idle (ad->simple);
 	/* the 'simple' holds reference on 'cnc' and this function
-	   is called in a dedicated thread, which 'cnc' joins on dispose,
-	   thus to avoid race condition, unref the object in its own thread */
+	 * is called in a dedicated thread, which 'cnc' joins on dispose,
+	 * thus to avoid race condition, unref the object in its own thread */
 	ews_unref_in_thread (G_OBJECT (simple));
 	return;
 
@@ -1476,8 +1476,8 @@ failed:
 	g_simple_async_result_set_from_error (ad->simple, error);
 	g_simple_async_result_complete_in_idle (ad->simple);
 	/* the 'simple' holds reference on 'cnc' and this function
-	   is called in a dedicated thread, which 'cnc' joins on dispose,
-	   thus to avoid race condition, unref the object in its own thread */
+	 * is called in a dedicated thread, which 'cnc' joins on dispose,
+	 * thus to avoid race condition, unref the object in its own thread */
 	ews_unref_in_thread (G_OBJECT (simple));
 }
 
@@ -4297,7 +4297,7 @@ e_ews_connection_delete_folder_sync (EEwsConnection *cnc,
 static void
 create_attachments_response_cb (ESoapParameter *param,
                                 EwsNode *enode,
-				GError **error)
+                                GError **error)
 {
 	/* http://msdn.microsoft.com/en-us/library/aa565877%28v=EXCHG.80%29.aspx */
 	ESoapParameter *subparam, *attspara, *last_relevant = NULL, *attparam;
@@ -4492,7 +4492,7 @@ e_ews_connection_create_attachments_sync (EEwsConnection *cnc,
 static void
 delete_attachments_response_cb (ESoapParameter *subparam,
                                 EwsNode *enode,
-				GError **error)
+                                GError **error)
 {
 	/* http://msdn.microsoft.com/en-us/library/aa580782%28v=EXCHG.80%29.aspx */
 	ESoapParameter *attspara;
@@ -4744,7 +4744,7 @@ e_ews_connection_get_attachments_sync (EEwsConnection *cnc,
 static void
 get_attachments_response_cb (ESoapParameter *param,
                              EwsNode *enode,
-			     GError **error)
+                             GError **error)
 {
 	ESoapParameter *subparam, *attspara;
 	EwsAsyncData *async_data;
@@ -4784,7 +4784,7 @@ get_attachments_response_cb (ESoapParameter *param,
 static void
 get_free_busy_response_cb (ESoapParameter *param,
                            EwsNode *enode,
-			   GError **error)
+                           GError **error)
 {
        /*parse the response to create a free_busy data
 	http://msdn.microsoft.com / en - us / library / aa564001 % 28v = EXCHG.140 % 29.aspx */
@@ -4812,7 +4812,7 @@ get_free_busy_response_cb (ESoapParameter *param,
 			if (!g_ascii_strcasecmp (name, "StartTime")) {
 				value = e_soap_parameter_get_string_value (subparam);
 				/*We are sending UTC timezone and expect server to return in same*/
-				
+
 				/*Remove leading and trailing whitespace*/
 				g_strstrip (value);
 
@@ -4822,7 +4822,7 @@ get_free_busy_response_cb (ESoapParameter *param,
 					g_free (value);
 				} else
 					new_val = value;
-				
+
 				g_time_val_from_iso8601 (new_val, &t_val);
 				g_free (new_val);
 
@@ -4831,7 +4831,7 @@ get_free_busy_response_cb (ESoapParameter *param,
 			} else if (!g_ascii_strcasecmp (name, "EndTime")) {
 				value = e_soap_parameter_get_string_value (subparam);
 				/*We are sending UTC timezone and expect server to return in same*/
-				
+
 				/*Remove leading and trailing whitespace*/
 				g_strstrip (value);
 
@@ -4983,7 +4983,7 @@ get_permission_from_string (gchar *permission)
 static void
 get_delegate_response_cb (ESoapParameter *param,
                           EwsNode *enode,
-			  GError **error)
+                          GError **error)
 {
 	ESoapParameter *subparam, *node, *child;
 	EwsAsyncData *async_data;

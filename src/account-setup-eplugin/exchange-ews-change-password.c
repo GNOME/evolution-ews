@@ -36,7 +36,6 @@
 #include "exchange-ews-change-password.h"
 #include <gtk/gtk.h>
 
-
 #ifdef HAVE_KRB5
 static void
 entry_changed (GtkEntry *entry,
@@ -109,8 +108,8 @@ get_password (EMConfigTargetSettings *target_account)
 
 static gboolean
 e_ews_set_password (EMConfigTargetSettings *account,
-		    const gchar *old_pwd,
-		    const gchar *new_pwd)
+                    const gchar *old_pwd,
+                    const gchar *new_pwd)
 {
 	CamelSettings *settings;
 	CamelNetworkSettings *network_settings;
@@ -142,7 +141,7 @@ e_ews_set_password (EMConfigTargetSettings *account,
 
 	result = ews_kerberos_change_password (user, domain, old_pwd, new_pwd);
 
-	if(result != EWS_KERBEROS_OK)
+	if (result != EWS_KERBEROS_OK)
 		return FALSE;
 
 	/*On Success add new password to the keyring*/
@@ -304,7 +303,6 @@ run_dialog_again:
 	return new_pass;
 }
 
-
 static void
 btn_chpass_clicked (GtkButton *button,
                     gpointer data)
@@ -312,11 +310,11 @@ btn_chpass_clicked (GtkButton *button,
 #ifdef HAVE_KRB5
 	EMConfigTargetSettings *target_account = (EMConfigTargetSettings *) data;
 	gchar *password, *new_password;
-	password = get_password(target_account);
+	password = get_password (target_account);
 	new_password = e_ews_get_new_password ( password, TRUE);
 	g_print("Password is %s \n New password is %s", password, new_password);
 
-	if(e_ews_set_password(target_account, password, new_password))
+	if (e_ews_set_password (target_account, password, new_password))
 		e_notice(button, GTK_MESSAGE_INFO, "Password changed successfully. Please remember the same.");
 	else
 #endif
@@ -340,7 +338,7 @@ ews_get_change_pwd_widget (EMConfigTargetSettings *target_account)
 	gtk_label_set_markup ((GtkLabel *) label, txt);
 	g_free (txt);
 	frame = (GtkFrame*) g_object_new (GTK_TYPE_FRAME, "label-widget", label, NULL);
-	
+
 	/*Create a VBox*/
 	vbox_auth = (GtkVBox*) g_object_new (GTK_TYPE_VBOX, "homogeneous", FALSE, "spacing", 6, NULL);
 	gtk_container_set_border_width (GTK_CONTAINER (vbox_auth), 6);

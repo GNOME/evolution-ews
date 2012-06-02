@@ -569,7 +569,7 @@ ews_folder_get_message_sync (CamelFolder *folder,
 static GPtrArray *
 ews_folder_search_by_expression (CamelFolder *folder,
                                  const gchar *expression,
-				 GCancellable *cancellable,
+                                 GCancellable *cancellable,
                                  GError **error)
 {
 	CamelEwsFolder *ews_folder;
@@ -592,7 +592,7 @@ ews_folder_search_by_expression (CamelFolder *folder,
 static guint32
 ews_folder_count_by_expression (CamelFolder *folder,
                                 const gchar *expression,
-				GCancellable *cancellable,
+                                GCancellable *cancellable,
                                 GError **error)
 {
 	CamelEwsFolder *ews_folder;
@@ -616,7 +616,7 @@ static GPtrArray *
 ews_folder_search_by_uids (CamelFolder *folder,
                            const gchar *expression,
                            GPtrArray *uids,
-			   GCancellable *cancellable,
+                           GCancellable *cancellable,
                            GError **error)
 {
 	CamelEwsFolder *ews_folder;
