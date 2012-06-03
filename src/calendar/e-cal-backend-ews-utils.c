@@ -32,8 +32,7 @@
 #include <glib/gstdio.h>
 #include <gio/gio.h>
 
-#include <libecal/e-cal-recur.h>
-#include <libecal/e-cal-time-util.h>
+#include <libecal/libecal.h>
 #include <libsoup/soup-misc.h>
 
 #include "server/e-ews-connection.h"

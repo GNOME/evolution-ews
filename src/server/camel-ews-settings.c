@@ -18,7 +18,7 @@
 
 #include "camel-ews-settings.h"
 
-#include <libedataserver/e-data-server-util.h>
+#include <libedataserver/libedataserver.h>
 
 #define CAMEL_EWS_SETTINGS_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE \

@@ -36,8 +36,6 @@
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 
-#include <libedataserver/e-flag.h>
-
 #include "server/camel-ews-settings.h"
 #include "server/e-ews-item-change.h"
 #include "server/e-ews-message.h"

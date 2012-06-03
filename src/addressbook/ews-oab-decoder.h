@@ -22,8 +22,7 @@
 #ifndef _EWS_OAB_DECODER
 #define _EWS_OAB_DECODER
 
-#include <gio/gio.h>
-#include <libebook/e-contact.h>
+#include <libebook/libebook.h>
 
 G_BEGIN_DECLS
 

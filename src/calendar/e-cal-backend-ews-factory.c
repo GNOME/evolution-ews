@@ -11,7 +11,7 @@
 
 #include <string.h>
 
-#include <libedata-cal/e-cal-backend-factory.h>
+#include <libedata-cal/libedata-cal.h>
 
 #include "server/e-source-ews-folder.h"
 

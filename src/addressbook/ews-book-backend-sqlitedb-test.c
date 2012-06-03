@@ -1,5 +1,5 @@
 /*-*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
-/* e-book-backend-sqlitedb.c
+/* ews-book-backend-sqlitedb-test.c
  *
  * Copyright (C) 1999-2008 Novell, Inc. (www.novell.com)
  *
@@ -20,10 +20,8 @@
  */
 
 #include <config.h>
-#include <glib.h>
-#include <glib-object.h>
-#include <libebook/e-book-query.h>
-#include "e-book-backend-sqlitedb.h"
+#include <libebook/libebook.h>
+#include "ews-book-backend-sqlitedb.h"
 
 static GMainLoop *main_loop;
 static gchar *cache_path;
@@ -73,7 +71,7 @@ quit_tests (void)
 }
 
 static void
-add_contacts (EBookBackendSqliteDB *ebsdb)
+add_contacts (EwsBookBackendSqliteDB *ebsdb)
 {
 	GSList *contacts = NULL;
 	EContact *con;
@@ -83,34 +81,34 @@ add_contacts (EBookBackendSqliteDB *ebsdb)
 
 	con = e_contact_new_from_vcard (vcard_str);
 	contacts = g_slist_append (contacts, con);
-	e_book_backend_sqlitedb_add_contacts (ebsdb, folderid, contacts, FALSE, &error);
+	ews_book_backend_sqlitedb_add_contacts (ebsdb, folderid, contacts, FALSE, &error);
 
 	g_object_unref (con);
 }
 
 static void
-search_db (EBookBackendSqliteDB *ebsdb,
+search_db (EwsBookBackendSqliteDB *ebsdb,
            const gchar *type,
            const gchar *sexp)
 {
 	GSList *vcards;
-	EbSdbSearchData *s_data;
+	EwsSdbSearchData *s_data;
 
 	g_print ("%s - query: %s \n", type, sexp);
 	op = type;
-	vcards = e_book_backend_sqlitedb_search (ebsdb, folderid, sexp, NULL, NULL, NULL, &error);
+	vcards = ews_book_backend_sqlitedb_search (ebsdb, folderid, sexp, NULL, NULL, NULL, &error);
 	if (error)
 		return;
 
 	s_data = vcards->data;
 	g_print ("Result: %s \n", s_data->vcard);
-	e_book_backend_sqlitedb_search_data_free (s_data);
+	ews_book_backend_sqlitedb_search_data_free (s_data);
 }
 
 static gboolean
 start_tests (gpointer data)
 {
-	EBookBackendSqliteDB *ebsdb;
+	EwsBookBackendSqliteDB *ebsdb;
 	gboolean populated = FALSE;
 	gchar *vcard_str = NULL, *sexp;
 	EBookQuery *q;
@@ -119,7 +117,7 @@ start_tests (gpointer data)
 
 	g_print ("Creating the sqlitedb \n");
 	op = "create sqlitedb";
-	ebsdb = e_book_backend_sqlitedb_new
+	ebsdb = ews_book_backend_sqlitedb_new
 					(cache_path, email, folderid, folder_name,
 					 store_vcard, &error);
 	if (error)
@@ -131,26 +129,26 @@ start_tests (gpointer data)
 
 	g_print ("Getting is_populated \n");
 	op = "set is_populated";
-	e_book_backend_sqlitedb_set_is_populated (ebsdb, folderid, TRUE, &error);
+	ews_book_backend_sqlitedb_set_is_populated (ebsdb, folderid, TRUE, &error);
 	if (error)
 		goto exit;
 
 	g_print ("Setting is_populated \n");
 	op = "set is_populated";
-	populated = e_book_backend_sqlitedb_get_is_populated (ebsdb, folderid, &error);
+	populated = ews_book_backend_sqlitedb_get_is_populated (ebsdb, folderid, &error);
 	if (error)
 		goto exit;
 	g_print ("Populated: %d \n", populated);
 
 	g_print ("Setting key value \n");
 	op = "set key/value";
-	e_book_backend_sqlitedb_set_key_value (ebsdb, folderid, "customkey", "stored", &error);
+	ews_book_backend_sqlitedb_set_key_value (ebsdb, folderid, "customkey", "stored", &error);
 	if (error)
 		goto exit;
 
 	g_print ("Get Vcard string \n");
 	op = "get vcard string";
-	vcard_str = e_book_backend_sqlitedb_get_vcard_string (ebsdb, folderid, uid, NULL, NULL, &error);
+	vcard_str = ews_book_backend_sqlitedb_get_vcard_string (ebsdb, folderid, uid, NULL, NULL, &error);
 	if (error)
 		goto exit;
 	g_print ("VCard: %s \n", vcard_str);
@@ -177,14 +175,14 @@ start_tests (gpointer data)
 	g_print ("Delete contact \n");
 	op = "delete contact";
 	uids = g_slist_append (uids, (gchar *) uid);
-	e_book_backend_sqlitedb_remove_contacts (ebsdb, folderid, uids, &error);
+	ews_book_backend_sqlitedb_remove_contacts (ebsdb, folderid, uids, &error);
 	g_slist_free (uids);
 	if (error)
 		goto exit;
 
 	g_print ("Delete addressbook \n");
 	op = "delete addressbook";
-	e_book_backend_sqlitedb_delete_addressbook (ebsdb, folderid, &error);
+	ews_book_backend_sqlitedb_delete_addressbook (ebsdb, folderid, &error);
 
 exit:
 	g_object_unref (ebsdb);

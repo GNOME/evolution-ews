@@ -19,20 +19,7 @@
 #include <config.h>
 #include <glib/gi18n-lib.h>
 
-#include <libedataserver/e-source-address-book.h>
-#include <libedataserver/e-source-authentication.h>
-#include <libedataserver/e-source-autocomplete.h>
-#include <libedataserver/e-source-calendar.h>
-#include <libedataserver/e-source-camel.h>
-#include <libedataserver/e-source-collection.h>
-#include <libedataserver/e-source-mail-account.h>
-#include <libedataserver/e-source-mail-identity.h>
-#include <libedataserver/e-source-mail-transport.h>
-#include <libedataserver/e-source-offline.h>
-
-#include <libebackend/e-collection-backend.h>
-#include <libebackend/e-collection-backend-factory.h>
-#include <libebackend/e-source-registry-server.h>
+#include <libebackend/libebackend.h>
 
 #include "server/e-ews-connection.h"
 #include "server/e-source-ews-folder.h"

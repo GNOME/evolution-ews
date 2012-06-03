@@ -21,7 +21,7 @@
 #ifndef E_CAL_BACKEND_EWS_UTILS_H
 #define E_CAL_BACKEND_EWS_UTILS_H
 
-#include <libecal/e-cal-component.h>
+#include <libecal/libecal.h>
 #include <libical/icaltime.h>
 #include <libical/icaltimezone.h>
 

@@ -25,7 +25,7 @@
 #include <config.h>
 #endif
 
-#include <libedata-book/e-book-backend-factory.h>
+#include <libedata-book/libedata-book.h>
 
 #include "server/e-source-ews-folder.h"
 

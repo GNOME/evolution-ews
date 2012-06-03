@@ -27,7 +27,7 @@
 #include <string.h>
 
 #include <glib/gi18n-lib.h>
-#include <libedataserver/e-flag.h>
+#include <libedataserver/libedataserver.h>
 
 #include "e-sqlite3-vfs.h"
 

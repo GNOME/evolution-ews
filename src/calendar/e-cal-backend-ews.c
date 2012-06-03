@@ -33,17 +33,7 @@
 
 #include <camel/camel.h>
 
-#include <libedataserver/eds-version.h>
-#include <libedataserver/e-source-camel.h>
-#include <libedataserver/e-xml-hash-utils.h>
-#include <libedataserver/e-url.h>
-
-#include <libedata-cal/e-cal-backend-cache.h>
-#include <libedata-cal/e-cal-backend-file-store.h>
-#include <libedata-cal/e-cal-backend-util.h>
-
-#include <libecal/e-cal-component.h>
-#include <libecal/e-cal-time-util.h>
+#include <libedata-cal/libedata-cal.h>
 
 #include <libical/icaltz-util.h>
 #include <libical/icalcomponent.h>

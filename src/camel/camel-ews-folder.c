@@ -41,7 +41,6 @@ which needs to be better organized via functions */
 
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
-#include <libedataserver/e-flag.h>
 #include <libical/icalcomponent.h>
 #include <libical/icalparser.h>
 

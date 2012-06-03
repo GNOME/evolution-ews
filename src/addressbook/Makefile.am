@@ -21,8 +21,8 @@ libebookbackendews_la_CPPFLAGS = \
 	$(NULL)
 
 libebookbackendews_la_SOURCES = \
-	e-book-backend-sqlitedb.c \
-	e-book-backend-sqlitedb.h \
+	ews-book-backend-sqlitedb.c \
+	ews-book-backend-sqlitedb.h \
 	ews-oab-props.h \
 	ews-oab-decoder.c \
 	ews-oab-decoder.h \
@@ -48,19 +48,19 @@ libebookbackendews_la_LIBADD = \
 libebookbackendews_la_LDFLAGS = \
 	-module -avoid-version $(NO_UNDEFINED)
 
-noinst_PROGRAMS = e-book-backend-sqlitedb-test
+noinst_PROGRAMS = ews-book-backend-sqlitedb-test
 
-e_book_backend_sqlitedb_test_CPPFLAGS = \
+ews_book_backend_sqlitedb_test_CPPFLAGS = \
 	$(libebookbackendews_la_CPPFLAGS) \
 	$(NULL)
 
-e_book_backend_sqlitedb_test_SOURCES = \
-	e-book-backend-sqlitedb-test.c \
-	e-book-backend-sqlitedb.c \
-	e-book-backend-sqlitedb.h \
+ews_book_backend_sqlitedb_test_SOURCES = \
+	ews-book-backend-sqlitedb-test.c \
+	ews-book-backend-sqlitedb.c \
+	ews-book-backend-sqlitedb.h \
 	$(NULL)
 
-e_book_backend_sqlitedb_test_LDADD =  \
+ews_book_backend_sqlitedb_test_LDADD =  \
 	$(libebookbackendews_la_LIBADD) \
 	$(NULL)
 

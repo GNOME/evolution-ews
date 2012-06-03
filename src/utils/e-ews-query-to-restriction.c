@@ -25,10 +25,10 @@
 #include <string.h>
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
-#include <libedata-cal/e-cal-backend-sexp.h>
-#include "libedataserver/e-sexp.h"
-#include "e-ews-query-to-restriction.h"
 #include <camel/camel.h>
+#include <libedata-cal/libedata-cal.h>
+
+#include "e-ews-query-to-restriction.h"
 
 #include "server/e-ews-message.h"
 

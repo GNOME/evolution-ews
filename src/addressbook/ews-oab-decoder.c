@@ -24,7 +24,7 @@
 #include <string.h>
 #include <glib/gstdio.h>
 
-#include <libebook/e-vcard.h>
+#include <libebook/libebook.h>
 
 #include "ews-oab-decoder.h"
 #include "ews-oab-props.h"
@@ -1025,12 +1025,12 @@ ews_oab_decoder_get_contact_from_offset (EwsOabDecoder *eod,
 	return contact;
 }
 
-#include "e-book-backend-sqlitedb.h"
+#include "ews-book-backend-sqlitedb.h"
 
 struct _db_data {
 	GSList *contact_collector;
 	guint collected_length;
-	EBookBackendSqliteDB *ebsdb;
+	EwsBookBackendSqliteDB *ebsdb;
 	const gchar *folderid;
 };
 
@@ -1048,7 +1048,7 @@ ews_test_store_contact (EContact *contact,
 
 	if (data->collected_length == 1000 || percent >= 100) {
 		data->contact_collector = g_slist_reverse (data->contact_collector);
-		e_book_backend_sqlitedb_add_contacts (data->ebsdb, data->folderid, data->contact_collector, FALSE, error);
+		ews_book_backend_sqlitedb_add_contacts (data->ebsdb, data->folderid, data->contact_collector, FALSE, error);
 		g_print ("percent complete %d \n", percent);
 
 		g_slist_foreach (data->contact_collector, (GFunc) g_object_unref, NULL);
@@ -1062,7 +1062,7 @@ gint
 main (gint argc,
       gchar *argv[])
 {
-	EBookBackendSqliteDB *ebsdb;
+	EwsBookBackendSqliteDB *ebsdb;
 	EwsOabDecoder *eod;
 	GError *err = NULL;
 	GTimer *timer;
@@ -1075,7 +1075,7 @@ main (gint argc,
 		return -1;
 	}
 
-	ebsdb = e_book_backend_sqlitedb_new (argv [2], "dum", "de", "dum", TRUE, NULL);
+	ebsdb = ews_book_backend_sqlitedb_new (argv [2], "dum", "de", "dum", TRUE, NULL);
 	eod = ews_oab_decoder_new (argv[1], argv[2], &err);
 
 	data.contact_collector = NULL;

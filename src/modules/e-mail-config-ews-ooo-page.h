@@ -22,7 +22,7 @@
 #define E_MAIL_CONFIG_EWS_OOO_PAGE_H
 
 #include <gtk/gtk.h>
-#include <libedataserver/e-source.h>
+#include <libedataserver/libedataserver.h>
 
 #include <mail/e-mail-config-page.h>
 

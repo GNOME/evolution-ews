@@ -22,8 +22,7 @@
 #include <glib/gi18n-lib.h>
 
 #include <camel/camel.h>
-#include <libebackend/e-extension.h>
-#include <libedataserver/e-source-collection.h>
+#include <libebackend/libebackend.h>
 
 #include <mail/e-mail-config-auth-check.h>
 #include <mail/e-mail-config-receiving-page.h>

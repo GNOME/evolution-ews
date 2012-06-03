@@ -33,9 +33,9 @@
 #include <libical/icalcomponent.h>
 #include <libical/icalproperty.h>
 #include <libical/ical.h>
+#include <libedataserver/libedataserver.h>
+
 #include "e-ews-connection.h"
-#include <libedataserver/e-flag.h>
-#include <libedataserver/e-data-server-util.h>
 #include "e-ews-message.h"
 #include "e-ews-item-change.h"
 #include "ews-marshal.h"

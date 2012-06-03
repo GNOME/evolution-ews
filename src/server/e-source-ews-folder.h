@@ -19,7 +19,7 @@
 #ifndef E_SOURCE_EWS_FOLDER_H
 #define E_SOURCE_EWS_FOLDER_H
 
-#include <libedataserver/e-source-extension.h>
+#include <libedataserver/libedataserver.h>
 
 /* Standard GObject macros */
 #define E_TYPE_SOURCE_EWS_FOLDER \
