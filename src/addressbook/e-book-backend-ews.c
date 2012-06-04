@@ -2640,6 +2640,12 @@ e_book_backend_ews_authenticate_user (EBookBackend *backend,
 		return;
 	}
 
+	if (!credentials || !e_credentials_peek (credentials, E_CREDENTIALS_KEY_USERNAME)) {
+		e_book_backend_notify_opened (backend, EDB_ERROR (AUTHENTICATION_REQUIRED));
+		e_book_backend_notify_readonly (backend, TRUE);
+		return;
+	}
+
 	esource = e_backend_get_source (E_BACKEND (backend));
 	host_url = e_source_get_property (esource, "hosturl");
 	read_only = e_source_get_property (esource, "read_only");

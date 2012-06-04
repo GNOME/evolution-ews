@@ -686,7 +686,7 @@ e_cal_backend_ews_authenticate_user (ECalBackend *backend,
 
 	if (!credentials || !e_credentials_has_key (credentials, E_CREDENTIALS_KEY_USERNAME)) {
 		PRIV_UNLOCK (priv);
-		g_propagate_error (&error, EDC_ERROR (AuthenticationFailed));
+		g_propagate_error (&error, EDC_ERROR (AuthenticationRequired));
 		e_cal_backend_notify_opened (backend, error);
 		return;
 	}

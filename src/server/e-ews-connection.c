@@ -1210,6 +1210,11 @@ e_ews_connection_new (const gchar *uri,
 
 	g_static_mutex_lock (&connecting);
 
+	if (!username) {
+		g_static_mutex_unlock (&connecting);
+		return NULL;
+	}
+
 	/* search the connection in our hash table */
 	if (loaded_connections_permissions != NULL) {
 		hash_key = g_strdup_printf ("%s@%s",
