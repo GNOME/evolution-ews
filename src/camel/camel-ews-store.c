@@ -170,6 +170,7 @@ ews_store_construct (CamelService *service,
 	/* Disable virtual trash and junk folders. Exchange has real
 	 * folders for that */
 	((CamelStore *) ews_store)->flags &= ~(CAMEL_STORE_VTRASH | CAMEL_STORE_VJUNK);
+	((CamelStore *) ews_store)->flags |= CAMEL_STORE_REAL_JUNK_FOLDER;
 
 	/*storage path*/
 	session_storage_path = g_strdup (camel_service_get_user_cache_dir (service));
@@ -1008,30 +1009,47 @@ camel_ews_store_get_connection (CamelEwsStore *ews_store)
 }
 
 static CamelFolder *
-ews_get_trash_folder_sync (CamelStore *store,
-                           GCancellable *cancellable,
-                           GError **error)
+ews_get_folder_by_type_sync (CamelStore *store,
+			     guint32 folder_type,
+			     GCancellable *cancellable,
+                             GError **error)
 {
 	CamelEwsStore *ews_store;
-	CamelFolder *trash = NULL;
+	CamelFolder *folder = NULL;
 	gchar *folder_id, *folder_name;
 
 	g_return_val_if_fail (CAMEL_IS_EWS_STORE (store), NULL);
 
 	ews_store = CAMEL_EWS_STORE (store);
-	folder_id = camel_ews_store_summary_get_folder_id_from_folder_type (ews_store->summary, CAMEL_FOLDER_TYPE_TRASH);
+	folder_id = camel_ews_store_summary_get_folder_id_from_folder_type (ews_store->summary, folder_type);
 
 	if (!folder_id)
 		return NULL;
 
 	folder_name = camel_ews_store_summary_get_folder_full_name (ews_store->summary, folder_id, NULL);
 
-	trash = ews_get_folder_sync (store, folder_name, 0, cancellable, error);
+	folder = ews_get_folder_sync (store, folder_name, 0, cancellable, error);
 
 	g_free (folder_name);
 	g_free (folder_id);
 
-	return trash;
+	return folder;
+}
+
+static CamelFolder *
+ews_get_trash_folder_sync (CamelStore *store,
+                           GCancellable *cancellable,
+                           GError **error)
+{
+	return ews_get_folder_by_type_sync (store, CAMEL_FOLDER_TYPE_TRASH, cancellable, error);
+}
+
+static CamelFolder *
+ews_get_junk_folder_sync (CamelStore *store,
+                          GCancellable *cancellable,
+                          GError **error)
+{
+	return ews_get_folder_by_type_sync (store, CAMEL_FOLDER_TYPE_JUNK, cancellable, error);
 }
 
 static gboolean
@@ -1134,6 +1152,7 @@ camel_ews_store_class_init (CamelEwsStoreClass *class)
 	store_class->free_folder_info = camel_store_free_folder_info_full;
 
 	store_class->get_trash_folder_sync = ews_get_trash_folder_sync;
+	store_class->get_junk_folder_sync = ews_get_junk_folder_sync;
 	store_class->can_refresh_folder = ews_can_refresh_folder;
 }
 
