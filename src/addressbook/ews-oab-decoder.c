@@ -864,10 +864,12 @@ ews_decode_and_store_oab_records (EwsOabDecoder *eod,
 
 		/* set the smtp address as contact's uid */
 		uid = (gchar *) e_contact_get (contact, E_CONTACT_EMAIL_1);
-		e_contact_set (contact, E_CONTACT_UID, uid);
+		if (uid && *uid) {
+			e_contact_set (contact, E_CONTACT_UID, uid);
 
-		cb (contact, offset, ((gfloat) (i + 1) / priv->total_records) * 100, user_data, error);
-		d(g_print ("%s \n", e_vcard_to_string ((EVCard *) contact, EVC_FORMAT_VCARD_30));)
+			cb (contact, offset, ((gfloat) (i + 1) / priv->total_records) * 100, user_data, error);
+			d(g_print ("%s \n", e_vcard_to_string ((EVCard *) contact, EVC_FORMAT_VCARD_30));)
+		}
 
 error:
 		g_object_unref (contact);
