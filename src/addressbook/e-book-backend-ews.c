@@ -925,6 +925,8 @@ ews_create_contact_cb (GObject *object,
 	/* get a list of ids from server (single item) */
 	e_ews_connection_create_items_finish (cnc, res, &items, &error);
 
+	g_return_if_fail (ebews->priv->ebsdb != NULL);
+
 	if (error == NULL) {
 		EEwsItem *item = (EEwsItem *) items->data;
 
@@ -1050,6 +1052,8 @@ ews_book_remove_contact_cb (GObject *object,
 
 	simple = G_SIMPLE_ASYNC_RESULT (res);
 
+	g_return_if_fail (priv->ebsdb != NULL);
+
 	if (!g_simple_async_result_propagate_error (simple, &error))
 		deleted = ews_book_backend_sqlitedb_remove_contacts (priv->ebsdb, priv->folder_id, remove_contact->sl_ids, &error);
 
@@ -1149,6 +1153,8 @@ ews_modify_contact_cb (GObject *object,
 	g_object_ref (modify_contact->old_contact);
 
 	e_ews_connection_update_items_finish (cnc, res, &items, &error);
+
+	g_return_if_fail (priv->ebsdb != NULL);
 
 	if (error == NULL) {
 		EEwsItem *item = (EEwsItem *) items->data;
@@ -1276,6 +1282,8 @@ e_book_backend_ews_modify_contacts (EBookBackend *backend,
 		return;
 	}
 
+	g_return_if_fail (priv->ebsdb != NULL);
+
 	contact = e_contact_new_from_vcard (vcards->data);
 
 	id = g_new0 (EwsId, 1);
@@ -1355,7 +1363,7 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 	priv = ebews->priv;
 
 	if (!e_backend_get_online (E_BACKEND (backend))) {
-		if (ews_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
+		if (priv->ebsdb && ews_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
 			list = ews_book_backend_sqlitedb_search (priv->ebsdb, priv->folder_id, query, NULL, NULL, NULL, &error);
 			l = list;
 			while (l) {
@@ -1382,7 +1390,7 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 		return;
 	}
 
-	if (ews_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
+	if (priv->ebsdb && ews_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
 		list = ews_book_backend_sqlitedb_search (priv->ebsdb, priv->folder_id, query, NULL, NULL, NULL, &error);
 		l = list;
 		while (l) {
@@ -1646,6 +1654,9 @@ ews_gal_needs_update (EBookBackendEws *cbews,
 	gboolean ret = FALSE;
 	gchar *tmp;
 
+	if (!priv->ebsdb)
+		return FALSE;
+
 	tmp = ews_book_backend_sqlitedb_get_key_value (priv->ebsdb, priv->folder_id, "seq", error);
 	if (error)
 		goto exit;
@@ -1712,12 +1723,16 @@ ews_remove_old_gal_file (EBookBackendEws *cbews,
 	EBookBackendEwsPrivate *priv = cbews->priv;
 	gchar *filename;
 
+	if (!priv->ebsdb)
+		return FALSE;
+
 	filename = ews_book_backend_sqlitedb_get_key_value (priv->ebsdb, priv->folder_id, "oab-filename", error);
 	if (*error)
 		return FALSE;
 
 	if (filename)
 		g_unlink (filename);
+	g_free (filename);
 
 	return TRUE;
 }
@@ -1737,6 +1752,8 @@ ews_gal_store_contact (EContact *contact,
 {
 	struct _db_data *data = (struct _db_data *) user_data;
 	EBookBackendEwsPrivate *priv = data->cbews->priv;
+
+	g_return_if_fail (priv->ebsdb != NULL);
 
 	data->contact_collector = g_slist_prepend (data->contact_collector, g_object_ref (contact));
 	data->collected_length += 1;
@@ -1777,6 +1794,8 @@ ews_replace_gal_in_db (EBookBackendEws *cbews,
 	EwsOabDecoder *eod;
 	gboolean ret = TRUE;
 	struct _db_data data;
+
+	g_return_val_if_fail (priv->ebsdb != NULL, FALSE);
 
 	/* remove the old address-book and create a new one in db */
 	if (ews_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL)) {
@@ -1832,6 +1851,10 @@ ebews_start_gal_sync (gpointer data)
 		ret = FALSE;
 		goto exit;
 	}
+
+	g_warn_if_fail (priv->ebsdb != NULL);
+	if (!priv->ebsdb)
+		goto exit;
 
 	full = (EwsOALDetails *) full_l->data;
 	/* TODO fetch differential updates if available instead of downloading the whole GAL */
@@ -1910,6 +1933,8 @@ ebews_sync_deleted_items (EBookBackendEws *ebews,
 
 	priv = ebews->priv;
 
+	g_return_if_fail (priv->ebsdb != NULL);
+
 	for (l = deleted_ids; l != NULL; l = g_slist_next (l)) {
 		gchar *id = (gchar *) l->data;
 		gboolean partial_content;
@@ -1933,6 +1958,8 @@ ebews_store_contact_items (EBookBackendEws *ebews,
 	GSList *l;
 
 	priv = ebews->priv;
+
+	g_return_if_fail (priv->ebsdb != NULL);
 
 	for (l = new_items; l != NULL; l = g_slist_next (l)) {
 		EContact *contact;
@@ -2037,6 +2064,8 @@ ebews_store_distribution_list_items (EBookBackendEws *ebews,
 {
 	GSList *l;
 	EContact *contact;
+
+	g_return_if_fail (ebews->priv->ebsdb != NULL);
 
 	contact = e_contact_new ();
 	e_contact_set (contact, E_CONTACT_UID, id->id);
@@ -2252,6 +2281,8 @@ ebews_start_sync (gpointer data)
 	ebews = (EBookBackendEws *) data;
 	priv = ebews->priv;
 
+	g_return_val_if_fail (priv->ebsdb != NULL, FALSE);
+
 	status_message = g_strdup (_("Syncing contacts..."));
 	e_book_backend_foreach_view (E_BOOK_BACKEND (ebews), book_view_notify_status, status_message);
 	g_free (status_message);
@@ -2407,6 +2438,8 @@ fetch_from_offline (EBookBackendEws *ews,
 		e_data_book_view_unref (book_view);
 		return;
 	}
+
+	g_return_if_fail (priv->ebsdb != NULL);
 
 	contacts = ews_book_backend_sqlitedb_search (priv->ebsdb, priv->folder_id, query, NULL, NULL, NULL, &error);
 	for (l = contacts; l != NULL; l = g_slist_next (l)) {
@@ -2637,6 +2670,9 @@ e_book_backend_ews_load_source (EBookBackend *backend,
 	if (priv->ebsdb == NULL)
 		return;
 
+	priv->marked_for_offline = FALSE;
+	priv->is_writable = FALSE;
+
 	if (!priv->is_gal) {
 		extension_name = E_SOURCE_EXTENSION_OFFLINE;
 		extension = e_source_get_extension (source, extension_name);
@@ -2657,7 +2693,6 @@ e_book_backend_ews_load_source (EBookBackend *backend,
 		g_mkdir_with_parents (priv->attachment_dir, 0777);
 
 		priv->marked_for_offline = TRUE;
-		priv->is_writable = FALSE;
 	}
 }
 
