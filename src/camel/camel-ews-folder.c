@@ -90,8 +90,8 @@ struct _CamelEwsFolderPrivate {
 
 extern gint camel_application_is_exiting;
 
-static gboolean
-ews_delete_messages (CamelFolder *folder, GSList *deleted_items, gboolean expunge, GCancellable *cancellable, GError **error);
+static gboolean ews_delete_messages (CamelFolder *folder, GSList *deleted_items, gboolean expunge, GCancellable *cancellable, GError **error);
+static gboolean ews_refresh_info_sync (CamelFolder *folder, GCancellable *cancellable, GError **error);
 
 #define d(x)
 
@@ -786,11 +786,12 @@ ews_sync_mi_flags (CamelFolder *folder,
 }
 
 static gboolean
-ews_folder_is_trash (CamelFolder *folder)
+ews_folder_is_of_type (CamelFolder *folder,
+		       guint32 folder_type)
 {
 	CamelStore *parent_store;
 	CamelEwsStore *ews_store;
-	gboolean is_deleted_items;
+	gboolean is_of_type;
 	gchar *folder_id;
 
 	g_return_val_if_fail (folder != NULL, FALSE);
@@ -800,12 +801,96 @@ ews_folder_is_trash (CamelFolder *folder)
 
 	g_return_val_if_fail (ews_store != NULL, FALSE);
 
+	folder_type = folder_type & CAMEL_FOLDER_TYPE_MASK;
 	folder_id = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, camel_folder_get_full_name (folder));
-	is_deleted_items = folder_id &&
-		(camel_ews_store_summary_get_folder_flags (ews_store->summary, folder_id, NULL) & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_TRASH;
+	is_of_type = folder_id &&
+		(camel_ews_store_summary_get_folder_flags (ews_store->summary, folder_id, NULL) & CAMEL_FOLDER_TYPE_MASK) == folder_type;
 	g_free (folder_id);
 
-	return is_deleted_items;
+	return is_of_type;
+}
+
+static gboolean
+ews_move_to_junk_folder (CamelFolder *folder,
+			 GSList *junk_uids,
+			 GCancellable *cancellable,
+			 GError **error)
+{
+	CamelEwsFolder *ews_folder;
+	CamelStore *parent_store;
+	CamelEwsStore *ews_store;
+	EEwsConnection *cnc;
+	gboolean status = TRUE;
+
+	if (ews_folder_is_of_type (folder, CAMEL_FOLDER_TYPE_JUNK)) {
+		/* cannot move to itself, but treat it as success */
+		g_slist_free_full (junk_uids, (GDestroyNotify) camel_pstring_free);
+		return TRUE;
+	}
+
+	ews_store = CAMEL_EWS_STORE (camel_folder_get_parent_store (folder));
+	cnc = camel_ews_store_get_connection (ews_store);
+
+	parent_store = camel_folder_get_parent_store (folder);
+	ews_folder = CAMEL_EWS_FOLDER (folder);
+	ews_store = CAMEL_EWS_STORE (parent_store);
+
+	cnc = camel_ews_store_get_connection (ews_store);
+
+	if (junk_uids) {
+		GSList *moved_items = NULL;
+		GError *local_error = NULL;
+		gchar *folder_id;
+
+		folder_id = camel_ews_store_summary_get_folder_id_from_folder_type (
+			ews_store->summary, CAMEL_FOLDER_TYPE_JUNK);
+
+		camel_service_lock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+		status = e_ews_connection_move_items (cnc, EWS_PRIORITY_MEDIUM, folder_id, FALSE,
+			junk_uids, &moved_items, cancellable, &local_error);
+		camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+
+		if (!status && local_error && local_error->code == EWS_CONNECTION_ERROR_ITEMNOTFOUND) {
+			/* If move failed due to the item not found, ignore the error,
+			 * trigger folder info refresh and then go on to clear the
+			 * cache of the remove items anyway. */
+			g_clear_error (&local_error);
+			status = ews_refresh_info_sync (folder, cancellable, &local_error);
+		}
+
+		g_slist_free_full (moved_items, g_object_unref);
+		g_free (folder_id);
+
+		if (status) {
+			CamelFolderChangeInfo *changes;
+			GSList *iter;
+
+			changes = camel_folder_change_info_new ();
+
+			for (iter = junk_uids; iter; iter = g_slist_next (iter)) {
+				const gchar *uid = iter->data;
+
+				camel_folder_summary_lock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+
+				camel_folder_change_info_remove_uid (changes, uid);
+				camel_folder_summary_remove_uid (folder->summary, uid);
+				ews_data_cache_remove (ews_folder->cache, "cur", uid, NULL);
+
+				camel_folder_summary_unlock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+			}
+
+			if (camel_folder_change_info_changed (changes))
+				camel_folder_changed (folder, changes);
+			camel_folder_change_info_free (changes);
+		}
+
+		if (local_error)
+			g_propagate_error (error, local_error);
+
+		g_slist_free_full (junk_uids, (GDestroyNotify) camel_pstring_free);
+	}
+
+	return status;
 }
 
 static gboolean
@@ -816,7 +901,7 @@ ews_synchronize_sync (CamelFolder *folder,
 {
 	CamelEwsStore *ews_store;
 	GPtrArray *uids;
-	GSList *mi_list = NULL, *deleted_uids = NULL;
+	GSList *mi_list = NULL, *deleted_uids = NULL, *junk_uids = NULL;
 	gint mi_list_len = 0;
 	gboolean success = TRUE;
 	gint i;
@@ -826,7 +911,8 @@ ews_synchronize_sync (CamelFolder *folder,
 	if (!camel_ews_store_connected (ews_store, error))
 		return FALSE;
 
-	if (camel_folder_summary_get_deleted_count (folder->summary) > 0) {
+	if (camel_folder_summary_get_deleted_count (folder->summary) > 0 ||
+	    camel_folder_summary_get_junk_count (folder->summary) > 0) {
 		camel_folder_summary_prepare_fetch_all (folder->summary, NULL);
 		uids = camel_folder_summary_get_array (folder->summary);
 	} else {
@@ -838,12 +924,13 @@ ews_synchronize_sync (CamelFolder *folder,
 	}
 
 	for (i = 0; success && i < uids->len; i++) {
-		guint32 flags_changed;
+		guint32 flags_changed, flags_set;
 		CamelEwsMessageInfo *mi = (gpointer) camel_folder_summary_get (folder->summary, uids->pdata[i]);
 		if (!mi)
 			continue;
 
-		flags_changed = mi->server_flags ^ mi->info.flags;
+		flags_set = camel_message_info_flags (mi);
+		flags_changed = mi->server_flags ^ flags_set;
 
 		/* Exchange doesn't seem to have a sane representation
 		 * for most flags — not even replied/forwarded. */
@@ -851,12 +938,17 @@ ews_synchronize_sync (CamelFolder *folder,
 			mi_list = g_slist_append (mi_list, mi);
 			mi_list_len++;
 
-			if (flags_changed & CAMEL_MESSAGE_DELETED)
+			if (flags_set & CAMEL_MESSAGE_DELETED)
 				deleted_uids = g_slist_prepend (deleted_uids, (gpointer) camel_pstring_strdup (uids->pdata[i]));
-		} else if (flags_changed & CAMEL_MESSAGE_DELETED) {
+			else if (flags_set & CAMEL_MESSAGE_JUNK)
+				junk_uids = g_slist_prepend (junk_uids, (gpointer) camel_pstring_strdup (uids->pdata[i]));
+		} else if (flags_set & CAMEL_MESSAGE_DELETED) {
 			deleted_uids = g_slist_prepend (deleted_uids, (gpointer) camel_pstring_strdup (uids->pdata[i]));
 			camel_message_info_free (mi);
-		} else if (mi->info.dirty || (mi->info.flags & CAMEL_MESSAGE_FOLDER_FLAGGED) != 0) {
+		} else if (flags_set & CAMEL_MESSAGE_JUNK) {
+			junk_uids = g_slist_prepend (junk_uids, (gpointer) camel_pstring_strdup (uids->pdata[i]));
+			camel_message_info_free (mi);
+		} else if (mi->info.dirty || (flags_set & CAMEL_MESSAGE_FOLDER_FLAGGED) != 0) {
 			/* OK, the change must have been the labels */
 			mi_list = g_slist_append (mi_list, mi);
 			mi_list_len++;
@@ -874,8 +966,15 @@ ews_synchronize_sync (CamelFolder *folder,
 	if (mi_list_len)
 		success = ews_sync_mi_flags (folder, mi_list, cancellable, error);
 
-	if (deleted_uids)
-		success = ews_delete_messages (folder, deleted_uids, ews_folder_is_trash (folder), cancellable, error);
+	if (deleted_uids && success)
+		success = ews_delete_messages (folder, deleted_uids, ews_folder_is_of_type (folder, CAMEL_FOLDER_TYPE_TRASH), cancellable, error);
+	else
+		g_slist_free_full (deleted_uids, (GDestroyNotify) camel_pstring_free);
+
+	if (junk_uids && success)
+		success = ews_move_to_junk_folder (folder, junk_uids, cancellable, error);
+	else
+		g_slist_free_full (junk_uids, (GDestroyNotify) camel_pstring_free);
 
 	camel_folder_summary_save_to_db (folder->summary, NULL);
 	camel_folder_summary_free_array (uids);
@@ -1351,10 +1450,13 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 		ids = g_slist_append (ids, (gchar *) uids->pdata[i]);
 	}
 
+	camel_service_lock (CAMEL_SERVICE (dst_ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	if (e_ews_connection_move_items	(cnc, EWS_PRIORITY_MEDIUM,
 					 dst_id, !delete_originals,
 					 ids, &ret_items,
 					 cancellable, &rerror)) {
+		camel_service_unlock (CAMEL_SERVICE (dst_ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
+
 		if (delete_originals) {
 			changes = camel_folder_change_info_new ();
 			for (i = 0; i < uids->len; i++) {
@@ -1368,6 +1470,8 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 		/*update the store about the content of the source and destination folders*/
 		ews_refresh_info_sync (source, cancellable, NULL);
 		ews_refresh_info_sync (destination, cancellable, NULL);
+	} else {
+		camel_service_unlock (CAMEL_SERVICE (dst_ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 	}
 	g_free (dst_id);
 
@@ -1376,7 +1480,7 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 
 	g_object_unref (cnc);
 	g_slist_free (ids);
-	g_slist_free (ret_items);
+	g_slist_free_full (ret_items, g_object_unref);
 
 	return !rerror;
 }
@@ -1469,7 +1573,7 @@ ews_expunge_sync (CamelFolder *folder,
 	if (!camel_ews_store_connected (ews_store, error))
 		return FALSE;
 
-	is_trash = ews_folder_is_trash (folder);
+	is_trash = ews_folder_is_of_type (folder, CAMEL_FOLDER_TYPE_TRASH);
 
 	camel_folder_summary_prepare_fetch_all (folder->summary, NULL);
 	known_uids = camel_folder_summary_get_array (folder->summary);
