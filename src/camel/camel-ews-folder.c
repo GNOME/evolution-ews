@@ -826,9 +826,14 @@ ews_synchronize_sync (CamelFolder *folder,
 	if (!camel_ews_store_connected (ews_store, error))
 		return FALSE;
 
-	uids = camel_folder_summary_get_changed (folder->summary);
-	if (!uids->len) {
-		camel_folder_free_uids (folder, uids);
+	if (camel_folder_summary_get_deleted_count (folder->summary) > 0) {
+		camel_folder_summary_prepare_fetch_all (folder->summary, NULL);
+		uids = camel_folder_summary_get_array (folder->summary);
+	} else {
+		uids = camel_folder_summary_get_changed (folder->summary);
+	}
+	if (!uids || !uids->len) {
+		camel_folder_summary_free_array (uids);
 		return TRUE;
 	}
 
@@ -851,10 +856,12 @@ ews_synchronize_sync (CamelFolder *folder,
 		} else if (flags_changed & CAMEL_MESSAGE_DELETED) {
 			deleted_uids = g_slist_prepend (deleted_uids, (gpointer) camel_pstring_strdup (uids->pdata[i]));
 			camel_message_info_free (mi);
-		} else {
+		} else if (mi->info.dirty || (mi->info.flags & CAMEL_MESSAGE_FOLDER_FLAGGED) != 0) {
 			/* OK, the change must have been the labels */
 			mi_list = g_slist_append (mi_list, mi);
 			mi_list_len++;
+		} else {
+			camel_message_info_free (mi);
 		}
 
 		if (mi_list_len == EWS_MAX_FETCH_COUNT) {
@@ -871,7 +878,7 @@ ews_synchronize_sync (CamelFolder *folder,
 		success = ews_delete_messages (folder, deleted_uids, ews_folder_is_trash (folder), cancellable, error);
 
 	camel_folder_summary_save_to_db (folder->summary, NULL);
-	camel_folder_free_uids (folder, uids);
+	camel_folder_summary_free_array (uids);
 
 	return success;
 }
