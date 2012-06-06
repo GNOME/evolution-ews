@@ -887,7 +887,7 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
                                     ESoapParameter *param)
 {
 	EEwsItemPrivate *priv = item->priv;
-	ESoapParameter *subparam, *node = NULL;
+	ESoapParameter *subparam, *node = NULL, *attach_id;
 	gboolean contact = FALSE, task = FALSE;
 	const gchar *name;
 
@@ -953,6 +953,13 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 	} else {
 		g_warning ("Unable to find the Item type \n");
 		return FALSE;
+	}
+
+	attach_id = e_soap_parameter_get_first_child_by_name (param, "AttachmentId");
+	if (attach_id) {
+		priv->attachment_id = g_new0 (EwsId, 1);
+		priv->attachment_id->id = e_soap_parameter_get_property (attach_id, "Id");
+		priv->attachment_id->change_key = e_soap_parameter_get_property (attach_id, "ChangeKey");
 	}
 
 	if (!node)
