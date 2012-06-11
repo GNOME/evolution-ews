@@ -79,7 +79,7 @@ op_test_get_attachments ()
 	g_assert_cmpstr (password, !=, NULL);
 	g_assert_cmpstr (uri, !=, NULL);
 
-	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
+	cnc = e_ews_connection_new (uri, username, password, TRUE, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
 
 	attachmentid = "AAASAG1hbmR5Lnd1QGludGVsLmNvbQBGAAAAAACdSXexmsgJTpd3WpdX6ulXBwAm9E+BClHfQqEnvCoGvhheAAAAjpb6AACIeDU1D80fTrC3245yXdhOADUAPRB8AAABEgAQAIlh9YZzdzdMtvWW9ZI7+vM=";

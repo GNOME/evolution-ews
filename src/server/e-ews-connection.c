@@ -1190,6 +1190,7 @@ e_ews_connection_find (const gchar *uri,
  * @uri: Exchange server uri
  * @username:
  * @password:
+ * @use_ntlm: Whether to use NTLM authentication; FALSE for Basic
  * @error: Currently unused, but may require in future. Can take NULL value.
  *
  * This does not authenticate to the server. It merely stores the username and password.
@@ -1201,6 +1202,7 @@ EEwsConnection *
 e_ews_connection_new (const gchar *uri,
                       const gchar *username,
                       const gchar *password,
+		      gboolean use_ntlm,
                       GCallback authenticate_cb,
                       gpointer authenticate_ctx,
                       GError **error)
@@ -1225,6 +1227,7 @@ e_ews_connection_new (const gchar *uri,
 
 		if (E_IS_EWS_CONNECTION (cnc)) {
 			g_object_ref (cnc);
+			g_object_set (G_OBJECT (cnc->priv->soup_session), SOUP_SESSION_USE_NTLM, use_ntlm, NULL);
 			g_static_mutex_unlock (&connecting);
 			return cnc;
 		}
@@ -1232,6 +1235,8 @@ e_ews_connection_new (const gchar *uri,
 
 	/* not found, so create a new connection */
 	cnc = g_object_new (E_TYPE_EWS_CONNECTION, NULL);
+
+	g_object_set (G_OBJECT (cnc->priv->soup_session), SOUP_SESSION_USE_NTLM, use_ntlm, NULL);
 
 	cnc->priv->username = g_strdup (username);
 	cnc->priv->password = g_strdup (password);
@@ -1519,7 +1524,8 @@ e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb,
                            const gchar *email,
                            const gchar *password,
                            const gchar *ews_url,
-                           const gchar *username)
+                           const gchar *username,
+			   gboolean use_ntlm)
 {
 	struct _autodiscover_data *ad;
 	xmlOutputBuffer *buf;
@@ -1568,7 +1574,7 @@ e_ews_autodiscover_ws_url (EEwsAutoDiscoverCallback cb,
 	url3 = g_strdup_printf ("http%s://%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", domain);
 	url4 = g_strdup_printf ("http%s://autodiscover.%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", domain);
 
-	cnc = e_ews_connection_new (url3, (username && *username) ? username : email, password, NULL, NULL, &error);
+	cnc = e_ews_connection_new (url3, (username && *username) ? username : email, password, use_ntlm, NULL, NULL, &error);
 	if (!cnc) {
 		g_free (url1);
 		g_free (url2);

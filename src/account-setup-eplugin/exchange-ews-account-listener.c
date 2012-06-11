@@ -261,6 +261,7 @@ add_gal_esource (CamelURL *url)
 
 	e_source_set_property (source, "auth", "plain/password");
 	e_source_set_property (source, "completion", "true");
+	e_source_set_property (source, "ews-auth-type", camel_url_get_param (url, "auth"));
 
 	/* add the source to group and sync */
 	group = ews_esource_utils_ensure_group (source_list, url);

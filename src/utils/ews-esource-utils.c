@@ -108,7 +108,8 @@ ews_esource_utils_add_esource (EEwsFolder *folder,
                                const gchar *username,
                                const gchar *email_id,
                                const gchar *hosturl,
-                               gint refresh_timeout)
+                               gint refresh_timeout,
+			       const gchar *ews_auth_type)
 {
 	ESourceList *source_list;
 	ESourceGroup *group;
@@ -174,6 +175,7 @@ ews_esource_utils_add_esource (EEwsFolder *folder,
 	e_source_set_property (source, "hosturl", hosturl);
 	e_source_set_property (source, "delete", "no");
 	e_source_set_property (source, "offline_sync", "1");
+	e_source_set_property (source, "ews-auth-type", (ews_auth_type && !*ews_auth_type) ? NULL : ews_auth_type);
 	if (ftype != EWS_FOLDER_TYPE_CONTACTS)
 		e_source_set_color_spec (source, "#EEBC60");
 

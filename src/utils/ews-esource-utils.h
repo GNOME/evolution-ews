@@ -40,7 +40,8 @@ ews_esource_utils_add_esource	(EEwsFolder *folder,
 				 const gchar *username,
 				 const gchar *email_id,
 				 const gchar *hosturl,
-				 gint refresh_timeout);
+				 gint refresh_timeout,
+				 const gchar *ews_auth_type);
 gboolean
 ews_esource_utils_remove_esource
 				(const gchar *fid,

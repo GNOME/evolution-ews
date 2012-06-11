@@ -90,7 +90,7 @@ op_test_set_oof_settings ()
 	g_assert_cmpstr (uri, !=, NULL);
 	g_assert_cmpstr (email, !=, NULL);
 
-	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
+	cnc = e_ews_connection_new (uri, username, password, TRUE, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
 
 	e_ews_connection_set_mailbox (cnc, email);

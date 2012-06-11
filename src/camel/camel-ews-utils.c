@@ -521,6 +521,7 @@ struct add_esrc_data {
 	gchar *username;
 	gchar *email_id;
 	gchar *hosturl;
+	gchar *ews_auth_type;
 	gint refresh_timeout;
 };
 
@@ -531,7 +532,8 @@ static gboolean ews_do_add_esource (gpointer user_data)
 	ews_esource_utils_add_esource (add_data->folder, add_data->account_uri,
 				       add_data->account_name,
 				       add_data->username, add_data->email_id,
-				       add_data->hosturl, add_data->refresh_timeout);
+				       add_data->hosturl, add_data->refresh_timeout,
+				       add_data->ews_auth_type);
 
 	g_object_unref (add_data->folder);
 	g_free (add_data->account_uri);
@@ -539,6 +541,7 @@ static gboolean ews_do_add_esource (gpointer user_data)
 	g_free (add_data->username);
 	g_free (add_data->email_id);
 	g_free (add_data->hosturl);
+	g_free (add_data->ews_auth_type);
 	g_free (add_data);
 
 	return FALSE;
@@ -587,6 +590,7 @@ sync_created_folders (CamelEwsStore *ews_store,
 			/* Duplicate... for now */
 			add_data->email_id = g_strdup (email);
 			add_data->hosturl = g_strdup (hosturl);
+			add_data->ews_auth_type = g_strdup (camel_network_settings_get_auth_mechanism (network_settings));
 			/* FIXME pass right refresh timeout */
 
 			camel_url_free (url);

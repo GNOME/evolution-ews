@@ -182,12 +182,19 @@ validate_credentials (GtkWidget *widget,
 	password = get_password (target_account);
 	/*Can there be a account without password ?*/
 	if (password && *password) {
+		CamelNetworkSettings *network_settings;
+		gboolean use_ntlm;
+
+		network_settings = CAMEL_NETWORK_SETTINGS (ews_settings);
+		use_ntlm = g_strcmp0 ("PLAIN", camel_network_settings_get_auth_mechanism (network_settings)) != 0;
+
 		e_ews_autodiscover_ws_url (
 			autodiscover_callback, cbdata,
 			target_account->email_address,
 			password,
 			camel_ews_settings_get_hosturl (ews_settings),
-			camel_network_settings_get_user (CAMEL_NETWORK_SETTINGS (ews_settings)));
+			camel_network_settings_get_user (network_settings),
+			use_ntlm);
 	}
 	g_free (password);
 }
@@ -511,6 +518,7 @@ fetch_button_clicked_cb (GtkButton *button,
 	const gchar *oab_url;
 	const gchar *user;
 	gchar *password;
+	gboolean use_ntlm;
 
 	cancellable = g_cancellable_new ();
 
@@ -531,9 +539,10 @@ fetch_button_clicked_cb (GtkButton *button,
 	oab_url = camel_ews_settings_get_oaburl (ews_settings);
 	user = camel_network_settings_get_user (network_settings);
 	password = get_password (target);
+	use_ntlm = g_strcmp0 ("PLAIN", camel_network_settings_get_auth_mechanism (network_settings)) != 0;
 
 	/* pass user name while creating connection  to fetch oals */
-	cnc = e_ews_connection_new (oab_url, user, password, NULL, NULL, NULL);
+	cnc = e_ews_connection_new (oab_url, user, password, use_ntlm, NULL, NULL, NULL);
 	cbdata->cancellable = cancellable;
 	e_ews_connection_get_oal_list_start (cnc, ews_oal_list_ready, cancellable, cbdata);
 

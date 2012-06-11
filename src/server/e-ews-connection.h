@@ -183,6 +183,7 @@ GType		e_ews_connection_get_type	(void);
 EEwsConnection *e_ews_connection_new		(const gchar *uri,
 						 const gchar *username,
 						 const gchar *password,
+						 gboolean use_ntlm,
 						 GCallback authenticate_cb,
 						 gpointer authenticate_ctx,
 						 GError **error);
@@ -200,7 +201,8 @@ void		e_ews_autodiscover_ws_url	(EEwsAutoDiscoverCallback cb,
 						 const gchar *email,
 						 const gchar *password,
 						 const gchar *ews_url,
-						 const gchar *username);
+						 const gchar *username,
+						 gboolean use_ntlm);
 void		e_ews_connection_set_mailbox	(EEwsConnection *cnc,
 						 const gchar *email);
 

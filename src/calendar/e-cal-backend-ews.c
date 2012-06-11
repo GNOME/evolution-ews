@@ -528,6 +528,15 @@ add_comps_to_item_id_hash (ECalBackendEws *cbews)
 }
 
 static gboolean
+ews_cal_backend_get_use_ntlm (ECalBackendEws *cbews)
+{
+	ESource *source;
+
+	source = e_backend_get_source (E_BACKEND (cbews));
+	return g_strcmp0 ("PLAIN", e_source_get_property (source, "ews-auth-type")) != 0;
+}
+
+static gboolean
 connect_to_server (ECalBackendEws *cbews,
                    const gchar *username,
                    const gchar *password,
@@ -556,6 +565,7 @@ connect_to_server (ECalBackendEws *cbews,
 
 		host_url = e_source_get_property (esource, "hosturl");
 		cnc = e_ews_connection_new (host_url, username, password,
+						ews_cal_backend_get_use_ntlm (cbews),
 						  NULL, NULL, error);
 
 		fid = g_new0 (EwsFolderId, 1);

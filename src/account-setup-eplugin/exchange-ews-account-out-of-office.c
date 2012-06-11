@@ -246,6 +246,7 @@ get_connection (EMConfigTargetSettings *target)
 	const gchar *user;
 	gchar *email, *password;
 	GError *error = NULL;
+	gboolean use_ntlm;
 
 	ews_settings = CAMEL_EWS_SETTINGS (target->storage_settings);
 	network_settings = CAMEL_NETWORK_SETTINGS (target->storage_settings);
@@ -255,8 +256,9 @@ get_connection (EMConfigTargetSettings *target)
 	user = camel_network_settings_get_user (network_settings);
 	password = get_password (target->storage_settings);
 	email = target->email_address;
+	use_ntlm = g_strcmp0 ("PLAIN", camel_network_settings_get_auth_mechanism (network_settings)) != 0;
 
-	cnc = e_ews_connection_new (host_url, user, password, NULL, NULL, &error);
+	cnc = e_ews_connection_new (host_url, user, password, use_ntlm, NULL, NULL, &error);
 
 	if (!cnc) {
 		g_warning ("Error in connection: %s\n", error->message);

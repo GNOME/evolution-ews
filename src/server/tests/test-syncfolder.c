@@ -98,7 +98,7 @@ op_test_sync_folder_items ()
 	g_assert_cmpstr (password, !=, NULL);
 	g_assert_cmpstr (uri, !=, NULL);
 
-	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
+	cnc = e_ews_connection_new (uri, username, password, TRUE, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
 
 	e_ews_connection_sync_folder_items_start	(cnc, EWS_PRIORITY_MEDIUM,
@@ -170,7 +170,7 @@ op_test_sync_folder_hierarchy ()
 	g_assert_cmpstr (password, !=, NULL);
 	g_assert_cmpstr (uri, !=, NULL);
 
-	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
+	cnc = e_ews_connection_new (uri, username, password, TRUE, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
 
 	e_ews_connection_sync_folder_hierarchy_start	(cnc, EWS_PRIORITY_MEDIUM,
@@ -230,7 +230,7 @@ op_test_get_item ()
 	g_assert_cmpstr (password, !=, NULL);
 	g_assert_cmpstr (uri, !=, NULL);
 
-	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
+	cnc = e_ews_connection_new (uri, username, password, TRUE, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
 
 	ids = g_slist_reverse (ids);

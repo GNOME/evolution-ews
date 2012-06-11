@@ -1637,6 +1637,15 @@ exit:
 	return ret;
 }
 
+static gboolean
+ews_book_backend_get_use_ntlm (EBookBackendEws *cbews)
+{
+	ESource *source;
+
+	source = e_backend_get_source (E_BACKEND (cbews));
+	return g_strcmp0 ("PLAIN", e_source_get_property (source, "ews-auth-type")) != 0;
+}
+
 static gchar *
 ews_download_full_gal (EBookBackendEws *cbews,
                        EwsOALDetails *full,
@@ -1655,7 +1664,7 @@ ews_download_full_gal (EBookBackendEws *cbews,
 	cache_dir = e_book_backend_get_cache_dir (E_BOOK_BACKEND (cbews));
 	comp_cache_file = g_build_filename (cache_dir, full->filename, NULL);
 
-	oab_cnc = e_ews_connection_new (full_url, priv->username, priv->password, NULL, NULL, NULL);
+	oab_cnc = e_ews_connection_new (full_url, priv->username, priv->password, ews_book_backend_get_use_ntlm (cbews), NULL, NULL, NULL);
 	if (!e_ews_connection_download_oal_file (oab_cnc, comp_cache_file, NULL, NULL, cancellable, error))
 		goto exit;
 
@@ -1808,7 +1817,7 @@ ebews_start_gal_sync (gpointer data)
 	priv = cbews->priv;
 
 	cancellable = g_cancellable_new ();
-	oab_cnc = e_ews_connection_new (priv->oab_url, priv->username, priv->password, NULL, NULL, NULL);
+	oab_cnc = e_ews_connection_new (priv->oab_url, priv->username, priv->password, ews_book_backend_get_use_ntlm (cbews), NULL, NULL, NULL);
 
 	d(printf ("Ewsgal: Fetching oal full details file \n");)
 
@@ -2686,6 +2695,7 @@ e_book_backend_ews_authenticate_user (EBookBackend *backend,
 
 	cnc = e_ews_connection_new (host_url, e_credentials_peek (credentials, E_CREDENTIALS_KEY_USERNAME),
 					  e_credentials_peek (credentials, E_CREDENTIALS_KEY_PASSWORD),
+					  ews_book_backend_get_use_ntlm (ebews),
 					  NULL, NULL, &error);
 
 	if ((read_only && !strcmp (read_only, "true")) || priv->is_gal) {
