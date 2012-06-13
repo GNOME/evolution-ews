@@ -245,7 +245,8 @@ src/addressbook/Makefile
 src/addressbook/lzx/Makefile
 src/calendar/Makefile
 src/camel/Makefile
-src/modules/Makefile
+src/collection/Makefile
+src/configuration/Makefile
 po/Makefile.in
 ])
 AC_OUTPUT

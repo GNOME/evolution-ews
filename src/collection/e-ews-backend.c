@@ -1,5 +1,5 @@
 /*
- * module-ews-backend.c
+ * e-ews-backend.c
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,39 +16,21 @@
  *
  */
 
+#include "e-ews-backend.h"
+
 #include <config.h>
 #include <glib/gi18n-lib.h>
-
-#include <libebackend/libebackend.h>
 
 #include "server/e-ews-connection.h"
 #include "server/e-source-ews-folder.h"
 
-/* Standard GObject macros */
-#define E_TYPE_EWS_BACKEND \
-	(e_ews_backend_get_type ())
-#define E_EWS_BACKEND(obj) \
-	(G_TYPE_CHECK_INSTANCE_CAST \
-	((obj), E_TYPE_EWS_BACKEND, EEwsBackend))
-
-typedef struct _EEwsBackend EEwsBackend;
-typedef struct _EEwsBackendClass EEwsBackendClass;
-
-typedef struct _EEwsBackendFactory EEwsBackendFactory;
-typedef struct _EEwsBackendFactoryClass EEwsBackendFactoryClass;
+#define E_EWS_BACKEND_GET_PRIVATE(obj) \
+	(G_TYPE_INSTANCE_GET_PRIVATE \
+	((obj), E_TYPE_EWS_BACKEND, EEwsBackendPrivate))
 
 typedef struct _SyncFoldersClosure SyncFoldersClosure;
 
-struct _SyncFoldersClosure {
-	EEwsBackend *backend;
-	GSList *folders_created;
-	GSList *folders_deleted;
-	GSList *folders_updated;
-};
-
-struct _EEwsBackend {
-	ECollectionBackend parent;
-
+struct _EEwsBackendPrivate {
 	/* Folder ID -> ESource */
 	GHashTable *folders;
 
@@ -59,26 +41,14 @@ struct _EEwsBackend {
 	GMutex *sync_state_lock;
 };
 
-struct _EEwsBackendClass {
-	ECollectionBackendClass parent_class;
+struct _SyncFoldersClosure {
+	EEwsBackend *backend;
+	GSList *folders_created;
+	GSList *folders_deleted;
+	GSList *folders_updated;
 };
-
-struct _EEwsBackendFactory {
-	ECollectionBackendFactory parent;
-};
-
-struct _EEwsBackendFactoryClass {
-	ECollectionBackendFactoryClass parent_class;
-};
-
-/* Module Entry Points */
-void e_module_load (GTypeModule *type_module);
-void e_module_unload (GTypeModule *type_module);
 
 /* Forward Declarations */
-GType e_ews_backend_get_type (void);
-GType e_ews_backend_factory_get_type (void);
-
 static void	e_ews_backend_authenticator_init
 				(ESourceAuthenticatorInterface *interface);
 
@@ -90,11 +60,6 @@ G_DEFINE_DYNAMIC_TYPE_EXTENDED (
 	G_IMPLEMENT_INTERFACE_DYNAMIC (
 		E_TYPE_SOURCE_AUTHENTICATOR,
 		e_ews_backend_authenticator_init))
-
-G_DEFINE_DYNAMIC_TYPE (
-	EEwsBackendFactory,
-	e_ews_backend_factory,
-	E_TYPE_COLLECTION_BACKEND_FACTORY)
 
 static void
 sync_folders_closure_free (SyncFoldersClosure *closure)
@@ -273,7 +238,7 @@ ews_backend_sync_created_folders (EEwsBackend *backend,
 		fid = e_ews_folder_get_id (folder);
 		if (fid->id == NULL)
 			continue;  /* not a valid ID anyway */
-		if (g_hash_table_contains (backend->folders, fid->id))
+		if (g_hash_table_contains (backend->priv->folders, fid->id))
 			continue;
 
 		switch (e_ews_folder_get_folder_type (folder)) {
@@ -319,7 +284,7 @@ ews_backend_sync_deleted_folders (EEwsBackend *backend,
 
 		if (folder_id != NULL)
 			source = g_hash_table_lookup (
-				backend->folders, folder_id);
+				backend->priv->folders, folder_id);
 
 		if (source == NULL)
 			continue;
@@ -386,8 +351,8 @@ ews_backend_add_gal_source (EEwsBackend *backend)
 		oal_id = NULL;
 	}
 
-	g_free (backend->oal_selected);
-	backend->oal_selected = oal_selected;  /* takes ownership */
+	g_free (backend->priv->oal_selected);
+	backend->priv->oal_selected = oal_selected;  /* takes ownership */
 
 	if (oal_id != NULL)
 		source = e_collection_backend_new_child (
@@ -436,9 +401,7 @@ ews_backend_source_changed_cb (ESource *source,
 	gal_uid = camel_ews_settings_get_gal_uid (settings);
 	oal_selected = camel_ews_settings_get_oal_selected (settings);
 
-	g_print ("OAL: '%s' vs '%s'\n", oal_selected, backend->oal_selected);
-
-	if (g_strcmp0 (oal_selected, backend->oal_selected) == 0)
+	if (g_strcmp0 (oal_selected, backend->priv->oal_selected) == 0)
 		return;
 
 	/* Remove the old Global Address List source if present. */
@@ -479,9 +442,11 @@ ews_backend_sync_folders_idle_cb (gpointer user_data)
 static void
 ews_backend_dispose (GObject *object)
 {
-	EEwsBackend *backend = E_EWS_BACKEND (object);
+	EEwsBackendPrivate *priv;
 
-	g_hash_table_remove_all (backend->folders);
+	priv = E_EWS_BACKEND_GET_PRIVATE (object);
+
+	g_hash_table_remove_all (priv->folders);
 
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (e_ews_backend_parent_class)->dispose (object);
@@ -490,14 +455,16 @@ ews_backend_dispose (GObject *object)
 static void
 ews_backend_finalize (GObject *object)
 {
-	EEwsBackend *backend = E_EWS_BACKEND (object);
+	EEwsBackendPrivate *priv;
 
-	g_hash_table_destroy (backend->folders);
+	priv = E_EWS_BACKEND_GET_PRIVATE (object);
 
-	g_free (backend->oal_selected);
+	g_hash_table_destroy (priv->folders);
 
-	g_free (backend->sync_state);
-	g_mutex_free (backend->sync_state_lock);
+	g_free (priv->oal_selected);
+
+	g_free (priv->sync_state);
+	g_mutex_free (priv->sync_state_lock);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (e_ews_backend_parent_class)->finalize (object);
@@ -540,12 +507,12 @@ static void
 ews_backend_child_added (ECollectionBackend *backend,
                          ESource *child_source)
 {
-	EEwsBackend *ews_backend;
+	EEwsBackendPrivate *priv;
 	ESource *collection_source;
 	const gchar *extension_name;
 	gboolean is_mail = FALSE;
 
-	ews_backend = E_EWS_BACKEND (backend);
+	priv = E_EWS_BACKEND_GET_PRIVATE (backend);
 
 	collection_source = e_backend_get_source (E_BACKEND (backend));
 
@@ -596,7 +563,7 @@ ews_backend_child_added (ECollectionBackend *backend,
 		folder_id = e_source_ews_folder_dup_id (extension);
 		if (folder_id != NULL)
 			g_hash_table_insert (
-				ews_backend->folders, folder_id,
+				priv->folders, folder_id,
 				g_object_ref (child_source));
 	}
 
@@ -609,10 +576,10 @@ static void
 ews_backend_child_removed (ECollectionBackend *backend,
                            ESource *child_source)
 {
-	EEwsBackend *ews_backend;
+	EEwsBackendPrivate *priv;
 	const gchar *extension_name;
 
-	ews_backend = E_EWS_BACKEND (backend);
+	priv = E_EWS_BACKEND_GET_PRIVATE (backend);
 
 	/* We track EWS folders in a hash table by folder ID. */
 	extension_name = E_SOURCE_EXTENSION_EWS_FOLDER;
@@ -624,8 +591,7 @@ ews_backend_child_removed (ECollectionBackend *backend,
 			child_source, extension_name);
 		folder_id = e_source_ews_folder_get_id (extension);
 		if (folder_id != NULL)
-			g_hash_table_remove (
-				ews_backend->folders, folder_id);
+			g_hash_table_remove (priv->folders, folder_id);
 	}
 
 	/* Chain up to parent's child_removed() method. */
@@ -676,9 +642,9 @@ ews_backend_try_password_sync (ESourceAuthenticator *authenticator,
 	if (connection == NULL)
 		return E_SOURCE_AUTHENTICATION_ERROR;
 
-	g_mutex_lock (backend->sync_state_lock);
-	sync_state = g_strdup (backend->sync_state);
-	g_mutex_unlock (backend->sync_state_lock);
+	g_mutex_lock (backend->priv->sync_state_lock);
+	sync_state = g_strdup (backend->priv->sync_state);
+	g_mutex_unlock (backend->priv->sync_state_lock);
 
 	/* XXX I think this leaks the old sync_state value when
 	 *     it replaces it with the new sync_state value. */
@@ -711,10 +677,10 @@ ews_backend_try_password_sync (ESourceAuthenticator *authenticator,
 			ews_backend_sync_folders_idle_cb, closure,
 			(GDestroyNotify) sync_folders_closure_free);
 
-		g_mutex_lock (backend->sync_state_lock);
-		g_free (backend->sync_state);
-		backend->sync_state = sync_state;
-		g_mutex_unlock (backend->sync_state_lock);
+		g_mutex_lock (backend->priv->sync_state_lock);
+		g_free (backend->priv->sync_state);
+		backend->priv->sync_state = sync_state;
+		g_mutex_unlock (backend->priv->sync_state_lock);
 
 		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
 
@@ -750,6 +716,8 @@ e_ews_backend_class_init (EEwsBackendClass *class)
 	GObjectClass *object_class;
 	ECollectionBackendClass *backend_class;
 
+	g_type_class_add_private (class, sizeof (EEwsBackendPrivate));
+
 	object_class = G_OBJECT_CLASS (class);
 	object_class->dispose = ews_backend_dispose;
 	object_class->finalize = ews_backend_finalize;
@@ -778,91 +746,23 @@ e_ews_backend_authenticator_init (ESourceAuthenticatorInterface *interface)
 static void
 e_ews_backend_init (EEwsBackend *backend)
 {
-	backend->folders = g_hash_table_new_full (
+	backend->priv = E_EWS_BACKEND_GET_PRIVATE (backend);
+
+	backend->priv->folders = g_hash_table_new_full (
 		(GHashFunc) g_str_hash,
 		(GEqualFunc) g_str_equal,
 		(GDestroyNotify) g_free,
 		(GDestroyNotify) g_object_unref);
 
-	backend->sync_state_lock = g_mutex_new ();
+	backend->priv->sync_state_lock = g_mutex_new ();
 }
 
-static void
-ews_backend_prepare_mail_account_source (ESource *source)
+void
+e_ews_backend_type_register (GTypeModule *type_module)
 {
-	ESourceBackend *extension;
-	const gchar *extension_name;
-
-	extension_name = E_SOURCE_EXTENSION_MAIL_ACCOUNT;
-	extension = e_source_get_extension (source, extension_name);
-	e_source_backend_set_backend_name (extension, "ews");
-}
-
-static void
-ews_backend_prepare_mail_transport_source (ESource *source)
-{
-	ESourceBackend *extension;
-	const gchar *extension_name;
-
-	extension_name = E_SOURCE_EXTENSION_MAIL_TRANSPORT;
-	extension = e_source_get_extension (source, extension_name);
-	e_source_backend_set_backend_name (extension, "ews");
-}
-
-static void
-ews_backend_factory_prepare_mail (ECollectionBackendFactory *factory,
-                                  ESource *mail_account_source,
-                                  ESource *mail_identity_source,
-                                  ESource *mail_transport_source)
-{
-	ECollectionBackendFactoryClass *parent_class;
-
-	/* Chain up to parent's prepare_mail() method. */
-	parent_class =
-		E_COLLECTION_BACKEND_FACTORY_CLASS (
-		e_ews_backend_factory_parent_class);
-	parent_class->prepare_mail (
-		factory,
-		mail_account_source,
-		mail_identity_source,
-		mail_transport_source);
-
-	ews_backend_prepare_mail_account_source (mail_account_source);
-	ews_backend_prepare_mail_transport_source (mail_transport_source);
-}
-
-static void
-e_ews_backend_factory_class_init (EEwsBackendFactoryClass *class)
-{
-	ECollectionBackendFactoryClass *factory_class;
-
-	factory_class = E_COLLECTION_BACKEND_FACTORY_CLASS (class);
-	factory_class->factory_name = "ews";
-	factory_class->backend_type = E_TYPE_EWS_BACKEND;
-	factory_class->prepare_mail = ews_backend_factory_prepare_mail;
-}
-
-static void
-e_ews_backend_factory_class_finalize (EEwsBackendFactoryClass *class)
-{
-}
-
-static void
-e_ews_backend_factory_init (EEwsBackendFactory *factory)
-{
-}
-
-G_MODULE_EXPORT void
-e_module_load (GTypeModule *type_module)
-{
+	/* XXX G_DEFINE_DYNAMIC_TYPE declares a static type registration
+	 *     function, so we have to wrap it with a public function in
+	 *     order to register types from a separate compilation unit. */
 	e_ews_backend_register_type (type_module);
-	e_ews_backend_factory_register_type (type_module);
-
-	e_source_ews_folder_type_register (type_module);
-}
-
-G_MODULE_EXPORT void
-e_module_unload (GTypeModule *type_module)
-{
 }
 
