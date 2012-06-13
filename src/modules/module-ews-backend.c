@@ -523,6 +523,19 @@ ews_backend_populate (ECollectionBackend *backend)
 		G_CALLBACK (ews_backend_source_changed_cb), backend);
 }
 
+static gchar *
+ews_backend_dup_resource_id (ECollectionBackend *backend,
+                             ESource *child_source)
+{
+	ESourceEwsFolder *extension;
+	const gchar *extension_name;
+
+	extension_name = E_SOURCE_EXTENSION_EWS_FOLDER;
+	extension = e_source_get_extension (child_source, extension_name);
+
+	return e_source_ews_folder_dup_id (extension);
+}
+
 static void
 ews_backend_child_added (ECollectionBackend *backend,
                          ESource *child_source)
@@ -743,6 +756,7 @@ e_ews_backend_class_init (EEwsBackendClass *class)
 
 	backend_class = E_COLLECTION_BACKEND_CLASS (class);
 	backend_class->populate = ews_backend_populate;
+	backend_class->dup_resource_id = ews_backend_dup_resource_id;
 	backend_class->child_added = ews_backend_child_added;
 	backend_class->child_removed = ews_backend_child_removed;
 
