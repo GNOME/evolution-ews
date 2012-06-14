@@ -345,15 +345,14 @@ ews_oab_read_uint16 (GInputStream *is,
                      GCancellable *cancellable,
                      GError **error)
 {
-	gchar *str = g_malloc0 (2);
+	guchar str[2];
 	guint16 ret = 0;
 
 	g_input_stream_read (is, str, 2, cancellable, error);
 	if (!*error)
 		ret = EndGetI16 (str);
 
-	g_free (str);
-	return ret;
+	return ret;	
 }
 
 static gint
