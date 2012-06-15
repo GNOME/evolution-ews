@@ -176,38 +176,16 @@ static ESource *
 ews_backend_new_calendar (EEwsBackend *backend,
                           EEwsFolder *folder)
 {
-	ESourceExtension *extension;
-	ESource *source;
-	const gchar *extension_name;
-
-	source = ews_backend_new_child (backend, folder);
-
-	/* XXX The Exchange server does not provide a color? */
-	extension_name = E_SOURCE_EXTENSION_CALENDAR;
-	extension = e_source_get_extension (source, extension_name);
-	e_source_selectable_set_color (
-		E_SOURCE_SELECTABLE (extension), "#EEBC60");
-
-	return source;
+	/* No extra configuration to do. */
+	return ews_backend_new_child (backend, folder);
 }
 
 static ESource *
 ews_backend_new_task_list (EEwsBackend *backend,
                            EEwsFolder *folder)
 {
-	ESourceExtension *extension;
-	ESource *source;
-	const gchar *extension_name;
-
-	source = ews_backend_new_child (backend, folder);
-
-	/* XXX The Exchange server does not provide a color? */
-	extension_name = E_SOURCE_EXTENSION_TASK_LIST;
-	extension = e_source_get_extension (source, extension_name);
-	e_source_selectable_set_color (
-		E_SOURCE_SELECTABLE (extension), "#EEBC60");
-
-	return source;
+	/* No extra configuration to do. */
+	return ews_backend_new_child (backend, folder);
 }
 
 static ESource *
