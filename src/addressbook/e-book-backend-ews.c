@@ -1856,6 +1856,9 @@ ebews_start_gal_sync (gpointer data)
 	if (!priv->ebsdb)
 		goto exit;
 
+	if (full_l == NULL)
+		goto exit;
+
 	full = (EwsOALDetails *) full_l->data;
 	/* TODO fetch differential updates if available instead of downloading the whole GAL */
 	if (!ews_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL) || ews_gal_needs_update (cbews, full, &error)) {
