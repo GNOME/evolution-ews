@@ -19,7 +19,6 @@ dnl *******************
 m4_define([eds_minimum_version], [3.2.0])
 m4_define([evo_minimum_version], [3.2.0])
 m4_define([glib_minimum_version], [2.16.1])
-m4_define([gconf_minimum_version], [2.0.0])
 m4_define([libsoup_minimum_version], [2.30])
 
 
@@ -123,8 +122,7 @@ dnl Check for GNOME Platform
 dnl *****************************
 PKG_CHECK_MODULES(GNOME_PLATFORM,
 	[glib-2.0 >= glib_minimum_version
-	gtk+-3.0 >= 2.90.4
-	gconf-2.0 >= gconf_minimum_version])
+	 gtk+-3.0 >= 2.90.4])
 
 PKG_CHECK_MODULES(SOUP, libsoup-2.4 >= libsoup_minimum_version)
 AC_SUBST(SOUP_CFLAGS)
