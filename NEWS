@@ -1,3 +1,16 @@
+Evolution-EWS 3.4.3 2012-06-18
+
+Bug Fixes:
+	Bug 654543 - Mark as junk doesn't work (Milan Crha)
+	Bug 673408 - Crash in get_attachments_response_cb() (Milan Crha)
+	Bug 674599 - Crash on contact view open (Milan Crha)
+	Bug 676081 - Deleted message not deleted from server (Milan Crha)
+	Bug 677007 - Add Basic authentication type (Milan Crha)
+	Bug 677398 - Can get stuck in e_book_backend_ews_authenticate_user()
+	             (Milan Crha)
+	Bug 677531 - May skip empty vCards in GAL (Milan Crha)
+
+
 Evolution-EWS 3.4.2 2012-05-14
 ------------------------------
 
