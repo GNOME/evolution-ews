@@ -476,6 +476,9 @@ camel_ews_settings_set_check_all (CamelEwsSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
+	if ((settings->priv->check_all ? 1 : 0) == (check_all ? 1 : 0))
+		return;
+
 	settings->priv->check_all = check_all;
 
 	g_object_notify (G_OBJECT (settings), "check-all");
@@ -514,6 +517,11 @@ camel_ews_settings_set_email (CamelEwsSettings *settings,
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
 	g_mutex_lock (settings->priv->property_lock);
+
+	if (g_strcmp0 (settings->priv->email, email) == 0) {
+		g_mutex_unlock (settings->priv->property_lock);
+		return;
+	}
 
 	g_free (settings->priv->email);
 	settings->priv->email = e_util_strdup_strip (email);
@@ -558,6 +566,9 @@ camel_ews_settings_set_filter_junk (CamelEwsSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
+	if ((settings->priv->filter_junk ? 1 : 0) == (filter_junk ? 1 : 0))
+		return;
+
 	settings->priv->filter_junk = filter_junk;
 
 	g_object_notify (G_OBJECT (settings), "filter-junk");
@@ -598,6 +609,9 @@ camel_ews_settings_set_filter_junk_inbox (CamelEwsSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
+	if ((settings->priv->filter_junk_inbox ? 1 : 0) == (filter_junk_inbox ? 1 : 0))
+		return;
+
 	settings->priv->filter_junk_inbox = filter_junk_inbox;
 
 	g_object_notify (G_OBJECT (settings), "filter-junk-inbox");
@@ -636,6 +650,11 @@ camel_ews_settings_set_gal_uid (CamelEwsSettings *settings,
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
 	g_mutex_lock (settings->priv->property_lock);
+
+	if (g_strcmp0 (settings->priv->gal_uid, gal_uid) == 0) {
+		g_mutex_unlock (settings->priv->property_lock);
+		return;
+	}
 
 	g_free (settings->priv->gal_uid);
 	settings->priv->gal_uid = e_util_strdup_strip (gal_uid);
@@ -679,6 +698,11 @@ camel_ews_settings_set_hosturl (CamelEwsSettings *settings,
 
 	g_mutex_lock (settings->priv->property_lock);
 
+	if (g_strcmp0 (settings->priv->hosturl, hosturl) == 0) {
+		g_mutex_unlock (settings->priv->property_lock);
+		return;
+	}
+
 	g_free (settings->priv->hosturl);
 	settings->priv->hosturl = e_util_strdup_strip (hosturl);
 
@@ -721,6 +745,11 @@ camel_ews_settings_set_oaburl (CamelEwsSettings *settings,
 
 	g_mutex_lock (settings->priv->property_lock);
 
+	if (g_strcmp0 (settings->priv->oaburl, oaburl) == 0) {
+		g_mutex_unlock (settings->priv->property_lock);
+		return;
+	}
+
 	g_free (settings->priv->oaburl);
 	settings->priv->oaburl = e_util_strdup_strip (oaburl);
 
@@ -742,6 +771,9 @@ camel_ews_settings_set_oab_offline (CamelEwsSettings *settings,
                                     gboolean oab_offline)
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	if ((settings->priv->oab_offline ? 1 : 0) == (oab_offline ? 1 : 0))
+		return;
 
 	settings->priv->oab_offline = oab_offline;
 
@@ -781,6 +813,11 @@ camel_ews_settings_set_oal_selected (CamelEwsSettings *settings,
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
 	g_mutex_lock (settings->priv->property_lock);
+
+	if (g_strcmp0 (settings->priv->oal_selected, oal_selected) == 0) {
+		g_mutex_unlock (settings->priv->property_lock);
+		return;
+	}
 
 	g_free (settings->priv->oal_selected);
 	settings->priv->oal_selected = e_util_strdup_strip (oal_selected);

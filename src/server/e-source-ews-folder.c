@@ -202,6 +202,11 @@ e_source_ews_folder_set_change_key (ESourceEwsFolder *extension,
 
 	g_mutex_lock (extension->priv->property_lock);
 
+	if (g_strcmp0 (extension->priv->change_key, change_key) == 0) {
+		g_mutex_unlock (extension->priv->property_lock);
+		return;
+	}
+
 	g_free (extension->priv->change_key);
 	extension->priv->change_key = g_strdup (change_key);
 
@@ -243,6 +248,11 @@ e_source_ews_folder_set_id (ESourceEwsFolder *extension,
 	g_return_if_fail (E_IS_SOURCE_EWS_FOLDER (extension));
 
 	g_mutex_lock (extension->priv->property_lock);
+
+	if (g_strcmp0 (extension->priv->id, id) == 0) {
+		g_mutex_unlock (extension->priv->property_lock);
+		return;
+	}
 
 	g_free (extension->priv->id);
 	extension->priv->id = g_strdup (id);
