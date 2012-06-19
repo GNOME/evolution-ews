@@ -105,14 +105,14 @@ ews_get_filename (CamelFolder *folder,
 {
 	CamelEwsFolder *ews_folder = CAMEL_EWS_FOLDER (folder);
 	GChecksum *sha = g_checksum_new (G_CHECKSUM_SHA256);
-	gchar *ret;
+	gchar *filename;
 
 	g_checksum_update (sha, (guchar *) uid, strlen (uid));
-	ret = camel_data_cache_get_filename (ews_folder->cache, "cur",
-					     g_checksum_get_string (sha),
-					     error);
+	filename = camel_data_cache_get_filename (
+		ews_folder->cache, "cur", g_checksum_get_string (sha));
 	g_checksum_free (sha);
-	return ret;
+
+	return filename;
 }
 
 static gint
@@ -154,14 +154,14 @@ ews_data_cache_get_filename (CamelDataCache *cdc,
                              GError **error)
 {
 	GChecksum *sha = g_checksum_new (G_CHECKSUM_SHA256);
-	gchar *ret;
+	gchar *filename;
 
 	g_checksum_update (sha, (guchar *) key, strlen (key));
-	ret = camel_data_cache_get_filename (cdc, path,
-					     g_checksum_get_string (sha),
-					     error);
+	filename = camel_data_cache_get_filename (
+		cdc, path, g_checksum_get_string (sha));
 	g_checksum_free (sha);
-	return ret;
+
+	return filename;
 }
 
 static CamelMimeMessage *
@@ -179,8 +179,8 @@ camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder,
 	g_static_rec_mutex_lock (&priv->cache_lock);
 	stream = ews_data_cache_get (ews_folder->cache, "cur", uid, error);
 	if (!stream) {
-		gchar *old_fname = camel_data_cache_get_filename (ews_folder->cache, "cur",
-								  uid, error);
+		gchar *old_fname = camel_data_cache_get_filename (
+			ews_folder->cache, "cur", uid);
 		if (!g_access (old_fname, R_OK)) {
 			gchar *new_fname = ews_data_cache_get_filename (ews_folder->cache,
 									"cur", uid, error);
