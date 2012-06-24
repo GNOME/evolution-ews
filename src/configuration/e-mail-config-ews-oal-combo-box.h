@@ -75,7 +75,6 @@ gboolean	e_mail_config_ews_oal_combo_box_update_finish
 						 GAsyncResult *result,
 						 GError **error);
 
-
 G_END_DECLS
 
 #endif /* E_MAIL_CONFIG_EWS_OAL_COMBO_BOX_H */

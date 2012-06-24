@@ -1010,8 +1010,8 @@ camel_ews_store_get_connection (CamelEwsStore *ews_store)
 
 static CamelFolder *
 ews_get_folder_by_type_sync (CamelStore *store,
-			     guint32 folder_type,
-			     GCancellable *cancellable,
+                             guint32 folder_type,
+                             GCancellable *cancellable,
                              GError **error)
 {
 	CamelEwsStore *ews_store;

@@ -795,7 +795,7 @@ ews_sync_mi_flags (CamelFolder *folder,
 
 static gboolean
 ews_folder_is_of_type (CamelFolder *folder,
-		       guint32 folder_type)
+                       guint32 folder_type)
 {
 	CamelStore *parent_store;
 	CamelEwsStore *ews_store;
@@ -820,9 +820,9 @@ ews_folder_is_of_type (CamelFolder *folder,
 
 static gboolean
 ews_move_to_junk_folder (CamelFolder *folder,
-			 GSList *junk_uids,
-			 GCancellable *cancellable,
-			 GError **error)
+                         GSList *junk_uids,
+                         GCancellable *cancellable,
+                         GError **error)
 {
 	CamelEwsFolder *ews_folder;
 	CamelStore *parent_store;

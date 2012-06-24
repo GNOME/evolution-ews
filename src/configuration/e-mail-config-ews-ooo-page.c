@@ -193,7 +193,7 @@ toggled_state_cb (GtkToggleButton *button,
 
 static void
 toggled_set_date_cb (GtkToggleButton *button,
-		     gpointer data)
+                     gpointer data)
 {
 #if 0  /* ACCOUNT_MGMT */
 	gboolean current_state;
@@ -717,10 +717,9 @@ mail_config_ews_ooo_page_constructed (GObject *object)
 	set_range = gtk_check_button_new_with_mnemonic (_("_Send only during this time period"));
 #if 0  /* ACCOUNT_MGMT */
 	oof_data->range_wt = set_range;
-	gtk_toggle_button_set_active ((GtkToggleButton*) set_range, oof_data->set_range);
+	gtk_toggle_button_set_active ((GtkToggleButton *) set_range, oof_data->set_range);
 #endif /* ACCOUNT_MGMT */
 	g_signal_connect ((GtkToggleButton*) set_range, "toggled", G_CALLBACK (toggled_set_date_cb), NULL);
-
 
 	/*Selectable Dates*/
 	from_date = e_date_edit_new ();
