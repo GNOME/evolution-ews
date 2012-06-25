@@ -1,6 +1,33 @@
-Evolution-EWS 3.5.2 2012-06-04
+Evolution-EWS 3.5.3 2012-06-25
 ------------------------------
 
+Bug Fixes:
+	Bug 654543 - Mark as junk doesn't work (Milan Crha)
+	Bug 673408 - Crash in get_attachments_response_cb() (Milan Crha)
+	Bug 674599 - Crash on contact view open (Milan Crha)
+	Bug 676081 - Deleted message not deleted from server (network issue)
+	             (Milan Crha)
+	Bug 677398 - Can get stuck in e_book_backend_ews_authenticate_user()
+	             (Milan Crha)
+	Bug 677531 - May skip empty vCards in GAL (Milan Crha)
+	Bug 678321 - Bug in usage of signed/unsigned crashes downloading of
+	             GAL (derolf)
+
+Other Changes:
+	* Adapt to the new ESource API. (Matthew Barnes)
+	* Adapt to single-include E-D-S libraries. (Matthew Barnes)
+	* ebews_start_gal_sync(): Avoid crash when EwsOALDetails list is NULL.
+	  (Matthew Barnes)
+	* Drop gconf-2.0 dependency. (Matthew Barnes)
+	* Bump minimum gtk+-3.0 requirement to 3.0. (Matthew Barnes)
+	* Do not call g_object_notify() when property didn't change
+	  (Milan Crha)
+
+Translations:
+	Daniel Mustieles (es)
+	Bruno Brouard (fr)
+	Rūdolfs Mazurs (lv)
+	Matej Urbančič (sl)
 
 
 Evolution-EWS 3.5.1 2012-04-30
