@@ -75,6 +75,9 @@ EEwsConnection *
 
 gboolean	camel_ews_store_connected	(CamelEwsStore *store,
 						 GError **error);
+void		camel_ews_store_maybe_disconnect
+						(CamelEwsStore *store,
+						 const GError *error);
 
 G_END_DECLS
 

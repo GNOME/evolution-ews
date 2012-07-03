@@ -390,6 +390,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	const gchar *temp;
 	gboolean res;
 	gchar *mime_fname_new = NULL;
+	GError *local_error = NULL;
 
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
 	ews_folder = (CamelEwsFolder *) folder;
@@ -443,11 +444,14 @@ camel_ews_folder_get_message (CamelFolder *folder,
 					  &items,
 					  (ESoapProgressFn) camel_operation_progress,
 					  (gpointer) cancellable,
-					  cancellable, error);
+					  cancellable, &local_error);
 	g_free (mime_dir);
 
-	if (!res)
+	if (!res) {
+		camel_ews_store_maybe_disconnect (ews_store, local_error);
+		g_propagate_error (error, local_error);
 		goto exit;
+	}
 
 	/* The mime_content actually contains the *filename*, due to the
 	 * streaming hack in ESoapMessage */
@@ -471,11 +475,15 @@ camel_ews_folder_get_message (CamelFolder *folder,
 						  &items_req,
 						  (ESoapProgressFn) camel_operation_progress,
 						  (gpointer) cancellable,
-						  cancellable, error);
+						  cancellable, &local_error);
 		if (!res || (items_req && e_ews_item_get_item_type (items_req->data) == E_EWS_ITEM_TYPE_ERROR)) {
 			if (items_req) {
 				g_object_unref (items_req->data);
 				g_slist_free (items_req);
+			}
+			if (local_error) {
+				camel_ews_store_maybe_disconnect (ews_store, local_error);
+				g_propagate_error (error, local_error);
 			}
 			goto exit;
 		}
@@ -774,15 +782,29 @@ ews_sync_mi_flags (CamelFolder *folder,
 {
 	CamelEwsStore *ews_store;
 	EEwsConnection *cnc;
+	GError *local_error = NULL;
+	gboolean res;
 
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
+
+	if (!camel_ews_store_connected (ews_store, error)) {
+		return FALSE;
+	}
+
 	cnc = camel_ews_store_get_connection (ews_store);
 
-	return e_ews_connection_update_items (cnc, EWS_PRIORITY_LOW,
+	res = e_ews_connection_update_items (cnc, EWS_PRIORITY_LOW,
 					      "AlwaysOverwrite", "SaveOnly",
 					      NULL, NULL,
 					      msg_update_flags, mi_list, NULL,
-					      cancellable, error);
+					      cancellable, &local_error);
+
+	if (local_error) {
+		camel_ews_store_maybe_disconnect (ews_store, local_error);
+		g_propagate_error (error, local_error);
+	}
+
+	return res;
 }
 
 static gboolean
@@ -835,6 +857,9 @@ ews_move_to_junk_folder (CamelFolder *folder,
 	ews_folder = CAMEL_EWS_FOLDER (folder);
 	ews_store = CAMEL_EWS_STORE (parent_store);
 
+	if (!camel_ews_store_connected (ews_store, error))
+		return FALSE;
+
 	cnc = camel_ews_store_get_connection (ews_store);
 
 	if (junk_uids) {
@@ -884,8 +909,10 @@ ews_move_to_junk_folder (CamelFolder *folder,
 			camel_folder_change_info_free (changes);
 		}
 
-		if (local_error)
+		if (local_error) {
+			camel_ews_store_maybe_disconnect (ews_store, local_error);
 			g_propagate_error (error, local_error);
+		}
 
 		g_slist_free_full (junk_uids, (GDestroyNotify) camel_pstring_free);
 	}
@@ -1089,9 +1116,13 @@ sync_updated_items (CamelEwsFolder *ews_folder,
                     GCancellable *cancellable,
                     GError **error)
 {
+	CamelEwsStore *ews_store;
 	CamelFolder *folder = (CamelFolder *) ews_folder;
 	GSList *items = NULL, *l;
 	GSList *generic_item_ids = NULL, *msg_ids = NULL;
+	GError *local_error = NULL;
+
+	ews_store = CAMEL_EWS_STORE (camel_folder_get_parent_store (folder));
 
 	for (l = updated_items; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;
@@ -1128,20 +1159,28 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
 			 msg_ids, "IdOnly", SUMMARY_MESSAGE_FLAGS,
 			 FALSE, NULL, &items, NULL, NULL,
-			 cancellable, error);
+			 cancellable, &local_error);
 
 	camel_ews_utils_sync_updated_items (ews_folder, items);
 	items = NULL;
-	if (*error)
+	if (local_error) {
+		camel_ews_store_maybe_disconnect (ews_store, local_error);
+		g_propagate_error (error, local_error);
 		goto exit;
+	}
 
 	if (generic_item_ids)
 		e_ews_connection_get_items
 			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
 			 generic_item_ids, "IdOnly", SUMMARY_ITEM_FLAGS,
 			 FALSE, NULL, &items, NULL, NULL,
-			 cancellable, error);
+			 cancellable, &local_error);
 	camel_ews_utils_sync_updated_items (ews_folder, items);
+
+	if (local_error) {
+		camel_ews_store_maybe_disconnect (ews_store, local_error);
+		g_propagate_error (error, local_error);
+	}
 
 exit:
 	if (msg_ids) {
@@ -1162,8 +1201,12 @@ sync_created_items (CamelEwsFolder *ews_folder,
                     GCancellable *cancellable,
                     GError **error)
 {
+	CamelEwsStore *ews_store;
 	GSList *items = NULL, *l;
 	GSList *generic_item_ids = NULL, *msg_ids = NULL, *post_item_ids = NULL;
+	GError *local_error = NULL;
+
+	ews_store = CAMEL_EWS_STORE (camel_folder_get_parent_store (CAMEL_FOLDER (ews_folder)));
 
 	for (l = created_items; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;
@@ -1199,10 +1242,13 @@ sync_created_items (CamelEwsFolder *ews_folder,
 			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
 			 msg_ids, "IdOnly", SUMMARY_MESSAGE_PROPS,
 			 FALSE, NULL, &items, NULL, NULL,
-			 cancellable, error);
+			 cancellable, &local_error);
 
-	if (*error)
+	if (local_error) {
+		camel_ews_store_maybe_disconnect (ews_store, local_error);
+		g_propagate_error (error, local_error);
 		goto exit;
+	}
 
 	camel_ews_utils_sync_created_items (ews_folder, cnc, items);
 	items = NULL;
@@ -1212,10 +1258,13 @@ sync_created_items (CamelEwsFolder *ews_folder,
 			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
 			 post_item_ids, "IdOnly", SUMMARY_POSTITEM_PROPS,
 			 FALSE, NULL, &items, NULL, NULL,
-			 cancellable, error);
+			 cancellable, &local_error);
 
-	if (*error)
+	if (local_error) {
+		camel_ews_store_maybe_disconnect (ews_store, local_error);
+		g_propagate_error (error, local_error);
 		goto exit;
+	}
 
 	camel_ews_utils_sync_created_items (ews_folder, cnc, items);
 	items = NULL;
@@ -1225,10 +1274,14 @@ sync_created_items (CamelEwsFolder *ews_folder,
 			(g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
 			 generic_item_ids, "IdOnly", SUMMARY_ITEM_PROPS,
 			 FALSE, NULL, &items, NULL, NULL,
-			 cancellable, error);
+			 cancellable, &local_error);
 
 	camel_ews_utils_sync_created_items (ews_folder, cnc, items);
 
+	if (local_error) {
+		camel_ews_store_maybe_disconnect (ews_store, local_error);
+		g_propagate_error (error, local_error);
+	}
 exit:
 	if (msg_ids) {
 		g_slist_foreach (msg_ids, (GFunc) g_free, NULL);
@@ -1259,7 +1312,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 	gchar *id;
 	gchar *sync_state;
 	gboolean includes_last_item = FALSE;
-	GError *rerror = NULL;
+	GError *local_error = NULL;
 
 	full_name = camel_folder_get_full_name (folder);
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
@@ -1304,18 +1357,20 @@ ews_refresh_info_sync (CamelFolder *folder,
 							 "IdOnly", NULL,
 							 EWS_MAX_FETCH_COUNT, &includes_last_item,
 							 &items_created, &items_updated,
-							 &items_deleted, cancellable, &rerror);
+							 &items_deleted, cancellable, &local_error);
 
-		if (rerror)
+		if (local_error) {
+			camel_ews_store_maybe_disconnect (ews_store, local_error);
 			break;
+		}
 
 		if (items_deleted)
 			camel_ews_utils_sync_deleted_items (ews_folder, items_deleted);
 
 		if (items_created)
-			sync_created_items (ews_folder, cnc, items_created, cancellable, &rerror);
+			sync_created_items (ews_folder, cnc, items_created, cancellable, &local_error);
 
-		if (rerror) {
+		if (local_error) {
 			if (items_updated) {
 				g_slist_foreach (items_updated, (GFunc) g_object_unref, NULL);
 				g_slist_free (items_updated);
@@ -1325,9 +1380,9 @@ ews_refresh_info_sync (CamelFolder *folder,
 		}
 
 		if (items_updated)
-			sync_updated_items (ews_folder, cnc, items_updated, cancellable, &rerror);
+			sync_updated_items (ews_folder, cnc, items_updated, cancellable, &local_error);
 
-		if (rerror)
+		if (local_error)
 			break;
 
 		total = camel_folder_summary_count (folder->summary);
@@ -1343,10 +1398,10 @@ ews_refresh_info_sync (CamelFolder *folder,
 		camel_folder_summary_touch (folder->summary);
 		camel_folder_summary_save_to_db (folder->summary, NULL);
 
-	} while (!rerror && !includes_last_item);
+	} while (!local_error && !includes_last_item);
 
-	if (rerror)
-		g_propagate_error (error, rerror);
+	if (local_error)
+		g_propagate_error (error, local_error);
 
 	g_mutex_lock (priv->state_lock);
 	priv->refreshing = FALSE;
@@ -1356,7 +1411,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 	g_object_unref (cnc);
 	g_free (id);
 
-	return !rerror;
+	return !local_error;
 }
 
 static gboolean
@@ -1373,6 +1428,7 @@ ews_append_message_sync (CamelFolder *folder,
 	CamelAddress *from;
 	CamelEwsStore *ews_store;
 	EEwsConnection *cnc;
+	GError *local_error = NULL;
 
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
 
@@ -1383,6 +1439,10 @@ ews_append_message_sync (CamelFolder *folder,
 		return FALSE;
 
 	from = CAMEL_ADDRESS (camel_mime_message_get_from (message));
+
+	if (!camel_ews_store_connected (ews_store, error)) {
+		return FALSE;
+	}
 
 	cnc = camel_ews_store_get_connection (ews_store);
 
@@ -1396,7 +1456,9 @@ ews_append_message_sync (CamelFolder *folder,
 						  message,
 						  camel_message_info_flags (info),
 						  from, &itemid, &changekey,
-						  cancellable, error)) {
+						  cancellable, &local_error)) {
+		camel_ews_store_maybe_disconnect (ews_store, local_error);
+		g_propagate_error (error, local_error);
 		g_free (folder_id);
 		g_object_unref (cnc);
 		return FALSE;
@@ -1431,7 +1493,7 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 	CamelFolderChangeInfo *changes = NULL;
 	const gchar *dst_full_name;
 	gchar *dst_id;
-	GError *rerror = NULL;
+	GError *local_error = NULL;
 	GSList *ids = NULL, *ret_items = NULL;
 	gint i = 0;
 
@@ -1454,7 +1516,7 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 	if (e_ews_connection_move_items	(cnc, EWS_PRIORITY_MEDIUM,
 					 dst_id, !delete_originals,
 					 ids, &ret_items,
-					 cancellable, &rerror)) {
+					 cancellable, &local_error)) {
 		camel_service_unlock (CAMEL_SERVICE (dst_ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
 		if (delete_originals) {
@@ -1475,14 +1537,16 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 	}
 	g_free (dst_id);
 
-	if (rerror)
-		g_propagate_error (error, rerror);
+	if (local_error) {
+		camel_ews_store_maybe_disconnect (dst_ews_store, local_error);
+		g_propagate_error (error, local_error);
+	}
 
 	g_object_unref (cnc);
 	g_slist_free (ids);
 	g_slist_free_full (ret_items, g_object_unref);
 
-	return !rerror;
+	return !local_error;
 }
 
 static gboolean
@@ -1505,26 +1569,30 @@ ews_delete_messages (CamelFolder *folder,
 	ews_store = CAMEL_EWS_STORE (parent_store);
 	deleted_head = deleted_items;
 
+	if (!camel_ews_store_connected (ews_store, error)) {
+		return FALSE;
+	}
+
 	cnc = camel_ews_store_get_connection (ews_store);
 	changes = camel_folder_change_info_new ();
 
 	if (deleted_items) {
-		GError *rerror = NULL;
+		GError *local_error = NULL;
 		EwsDeleteType delete_type;
 
 		delete_type = expunge ? EWS_HARD_DELETE : EWS_MOVE_TO_DELETED_ITEMS;
 
 		camel_service_lock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 		status = e_ews_connection_delete_items (cnc, EWS_PRIORITY_MEDIUM, deleted_items, delete_type,
-							EWS_SEND_TO_NONE, FALSE, cancellable, &rerror);
+							EWS_SEND_TO_NONE, FALSE, cancellable, &local_error);
 		camel_service_unlock (CAMEL_SERVICE (ews_store), CAMEL_SERVICE_REC_CONNECT_LOCK);
 
-		if (!status && rerror->code == EWS_CONNECTION_ERROR_ITEMNOTFOUND) {
+		if (!status && local_error->code == EWS_CONNECTION_ERROR_ITEMNOTFOUND) {
 			/* If delete failed due to the item not found, ignore the error,
 			 * trigger folder info refresh and then go on to clear the
 			 * cache of the deleted items anyway. */
-			g_clear_error (&rerror);
-			status = ews_refresh_info_sync (folder, cancellable, &rerror);
+			g_clear_error (&local_error);
+			status = ews_refresh_info_sync (folder, cancellable, &local_error);
 		}
 
 		if (status) {
@@ -1539,8 +1607,10 @@ ews_delete_messages (CamelFolder *folder,
 			}
 		}
 
-		if (rerror)
-			g_propagate_error (error, rerror);
+		if (local_error) {
+			camel_ews_store_maybe_disconnect (ews_store, local_error);
+			g_propagate_error (error, local_error);
+		}
 
 		camel_folder_changed (folder, changes);
 
