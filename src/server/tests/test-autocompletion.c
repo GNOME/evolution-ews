@@ -56,9 +56,7 @@ resolve_names_cb (GObject *object,
 			EwsMailbox *mb = (EwsMailbox *) l->data;
 			g_print ("%s:%s \n", mb->name, mb->email);
 
-			g_free (mb->name);
-			g_free (mb->email);
-			g_free (mb);
+			e_ews_mailbox_free (mb);
 		}
 
 		g_slist_free (mailboxes);

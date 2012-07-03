@@ -482,6 +482,14 @@ gboolean	e_ews_connection_resolve_names	(EEwsConnection *cnc,
 						 gboolean *includes_last_item,
 						 GCancellable *cancellable,
 						 GError **error);
+gboolean	e_ews_connection_ex_to_smtp_sync
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *ex_address,
+						 gchar **smtp_address,
+						 GCancellable *cancellable,
+						 GError **error);
+
 /* Expand distribution lists */
 void		e_ews_connection_expand_dl_start
 						(EEwsConnection *cnc,

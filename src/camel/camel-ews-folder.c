@@ -1204,7 +1204,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 	if (*error)
 		goto exit;
 
-	camel_ews_utils_sync_created_items (ews_folder, items);
+	camel_ews_utils_sync_created_items (ews_folder, cnc, items);
 	items = NULL;
 
 	if (post_item_ids)
@@ -1217,7 +1217,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 	if (*error)
 		goto exit;
 
-	camel_ews_utils_sync_created_items (ews_folder, items);
+	camel_ews_utils_sync_created_items (ews_folder, cnc, items);
 	items = NULL;
 
 	if (generic_item_ids)
@@ -1227,7 +1227,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 			 FALSE, NULL, &items, NULL, NULL,
 			 cancellable, error);
 
-	camel_ews_utils_sync_created_items (ews_folder, items);
+	camel_ews_utils_sync_created_items (ews_folder, cnc, items);
 
 exit:
 	if (msg_ids) {

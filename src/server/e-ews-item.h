@@ -161,6 +161,7 @@ const GSList *
 EwsMailbox *
 		e_ews_item_mailbox_from_soap_param
 						(ESoapParameter *param);
+void		e_ews_mailbox_free		(EwsMailbox *mailbox);
 EwsResolveContact *
 		e_ews_item_resolve_contact_from_soap_param (ESoapParameter *param);
 void		e_ews_free_resolve_contact	(/*EwsResolveContact * */ gpointer rc);
