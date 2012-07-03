@@ -3731,6 +3731,132 @@ e_ews_connection_resolve_names_sync (EEwsConnection *cnc,
 	return result;
 }
 
+gboolean
+e_ews_connection_ex_to_smtp_sync (EEwsConnection *cnc,
+				  gint pri,
+				  const gchar *ex_address,
+				  gchar **smtp_address,
+				  GCancellable *cancellable,
+				  GError **error)
+{
+	GSList *mailboxes = NULL;
+	GSList *contacts = NULL;
+	gboolean includes_last_item = FALSE;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (ex_address != NULL, FALSE);
+	g_return_val_if_fail (smtp_address != NULL, FALSE);
+
+	*smtp_address = NULL;
+
+	e_ews_connection_resolve_names_sync (
+		cnc, pri, ex_address,
+		EWS_SEARCH_AD_CONTACTS, NULL, TRUE, &mailboxes, &contacts,
+		&includes_last_item, cancellable, error);
+
+	/* only one mailbox matches */
+	if (mailboxes && !mailboxes->next && mailboxes->data) {
+		const EwsMailbox *mailbox = mailboxes->data;
+		if (mailbox->email && *mailbox->email && g_strcmp0 (mailbox->mb_type, "EX") != 0) {
+			*smtp_address = g_strdup (mailbox->email);
+		} else if (contacts && !contacts->next && contacts->data) {
+			const EwsResolveContact *resolved = contacts->data;
+			gint ii;
+
+			for (ii = 0; ii < g_hash_table_size (resolved->email_addresses); ii++) {
+				gchar *key, *value;
+
+				key = g_strdup_printf ("EmailAddress%d", ii + 1);
+				value = g_hash_table_lookup (resolved->email_addresses, key);
+				g_free (key);
+
+				if (value && g_str_has_prefix (value, "SMTP:")) {
+					/* pick the first available SMTP address */
+					*smtp_address = g_strdup (value + 5);
+					break;
+				}
+			}
+		}
+	}
+
+	g_slist_free_full (mailboxes, (GDestroyNotify) e_ews_mailbox_free);
+	g_slist_free_full (contacts, (GDestroyNotify) e_ews_free_resolve_contact);
+
+	if (!*smtp_address) {
+		const gchar *usename;
+
+		usename = strrchr (ex_address, '/');
+		if (usename && g_ascii_strncasecmp (usename, "/cn=", 4) == 0) {
+			GSList *miter;
+			gint len;
+
+			usename += 4;
+			len = strlen (usename);
+			mailboxes = NULL;
+			contacts = NULL;
+
+			/* use the first error, not the guess-part error */
+			e_ews_connection_resolve_names_sync (
+				cnc, pri, usename,
+				EWS_SEARCH_AD_CONTACTS, NULL, TRUE, &mailboxes, &contacts,
+				&includes_last_item, cancellable, NULL);
+
+			/* try to guess from common name of the EX address */
+			for (miter = mailboxes; miter; miter = miter->next) {
+				const EwsMailbox *mailbox = miter->data;
+				if (mailbox->email && *mailbox->email && g_strcmp0 (mailbox->mb_type, "EX") != 0
+				    && g_str_has_prefix (mailbox->email, usename) && mailbox->email[len] == '@') {
+					*smtp_address = g_strdup (mailbox->email);
+					break;
+				} else if (contacts && !contacts->next && contacts->data) {
+					const EwsResolveContact *resolved = contacts->data;
+					GList *emails = g_hash_table_get_values (resolved->email_addresses), *iter;
+					gboolean found = FALSE;
+
+					for (iter = emails; iter && !found; iter = iter->next) {
+						const gchar *it_email = iter->data;
+
+						if (it_email && g_str_has_prefix (it_email, "SMTP:")
+						    && g_str_has_prefix (it_email, usename) && it_email[len] == '@') {
+							found = TRUE;
+							break;
+						}
+					}
+
+					g_list_free (emails);
+
+					if (found) {
+						gint ii;
+
+						for (ii = 0; ii < g_hash_table_size (resolved->email_addresses); ii++) {
+							gchar *key, *value;
+
+							key = g_strdup_printf ("EmailAddress%d", ii + 1);
+							value = g_hash_table_lookup (resolved->email_addresses, key);
+							g_free (key);
+
+							if (value && g_str_has_prefix (value, "SMTP:")) {
+								/* pick the first available SMTP address */
+								*smtp_address = g_strdup (value + 5);
+								break;
+							}
+						}
+						break;
+					}
+				}
+			}
+
+			g_slist_free_full (mailboxes, (GDestroyNotify) e_ews_mailbox_free);
+			g_slist_free_full (contacts, (GDestroyNotify) e_ews_free_resolve_contact);
+		}
+	}
+
+	if (*smtp_address)
+		g_clear_error (error);
+
+	return *smtp_address != NULL;
+}
+
 void
 e_ews_connection_expand_dl (EEwsConnection *cnc,
                             gint pri,

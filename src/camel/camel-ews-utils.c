@@ -678,38 +678,44 @@ ews_utils_get_server_flags (EEwsItem *item)
 }
 
 static const gchar *
-form_email_string_from_mb (const EwsMailbox *mb)
+form_email_string_from_mb (EEwsConnection *cnc,
+			   const EwsMailbox *mb,
+			   GCancellable *cancellable)
 {
-	const gchar *ret = NULL;
-
 	if (mb) {
 		GString *str;
+		gchar *email = NULL;
+
+		if (g_strcmp0 (mb->mb_type, "EX") == 0) {
+			e_ews_connection_ex_to_smtp_sync (
+				cnc, EWS_PRIORITY_MEDIUM,
+				mb->email, &email,
+				cancellable, NULL);
+		}
 
 		str = g_string_new ("");
 		if (mb->name && mb->name[0]) {
-			str = g_string_append (str, mb->name);
-			str = g_string_append (str, " ");
-		} else {
-			str = g_string_append (str, mb->email);
-			str = g_string_append (str, " ");
+			g_string_append (str, mb->name);
+			g_string_append (str, " ");
 		}
 
-		if (mb->email) {
+		if (mb->email || email) {
 			g_string_append (str, "<");
-			str = g_string_append (str, mb->email);
+			g_string_append (str, email ? email : mb->email);
 			g_string_append (str, ">");
 		}
 
-		ret = camel_pstring_add (str->str, TRUE);
-		g_string_free (str, FALSE);
+		g_free (email);
 
-		return ret;
+		return camel_pstring_add (g_string_free (str, FALSE), TRUE);
 	} else
 	       return camel_pstring_strdup ("");
 }
 
 static const gchar *
-form_recipient_list (const GSList *recipients)
+form_recipient_list (EEwsConnection *cnc,
+		     const GSList *recipients,
+		     GCancellable *cancellable)
 {
 	const GSList *l;
 	GString *str = NULL;
@@ -720,7 +726,7 @@ form_recipient_list (const GSList *recipients)
 
 	for (l = recipients; l != NULL; l = g_slist_next (l)) {
 		EwsMailbox *mb = (EwsMailbox *) l->data;
-		const gchar *mb_str = form_email_string_from_mb (mb);
+		const gchar *mb_str = form_email_string_from_mb (cnc, mb, cancellable);
 
 		if (!str)
 			str = g_string_new ("");
@@ -859,6 +865,7 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
 
 void
 camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
+				    EEwsConnection *cnc,
                                     GSList *items_created)
 {
 	CamelFolder *folder;
@@ -922,13 +929,15 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 		mi->info.date_received = e_ews_item_get_date_received (item);
 
 		from = e_ews_item_get_from (item);
-		mi->info.from = form_email_string_from_mb (from);
+		if (!from)
+			from = e_ews_item_get_sender (item);
+		mi->info.from = form_email_string_from_mb (cnc, from, NULL);
 
 		to = e_ews_item_get_to_recipients (item);
-		mi->info.to = form_recipient_list (to);
+		mi->info.to = form_recipient_list (cnc, to, NULL);
 
 		cc = e_ews_item_get_cc_recipients (item);
-		mi->info.cc = form_recipient_list (cc);
+		mi->info.cc = form_recipient_list (cnc, cc, NULL);
 
 		e_ews_item_has_attachments (item, &has_attachments);
 		if (has_attachments)

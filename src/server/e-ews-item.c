@@ -202,7 +202,6 @@ struct _EEwsItemPrivate {
 };
 
 static GObjectClass *parent_class = NULL;
-static void	ews_item_free_mailbox (EwsMailbox *mb);
 static void	ews_item_free_attendee (EwsAttendee *attendee);
 static void	ews_free_contact_fields (struct _EEwsContactFields *con_fields);
 
@@ -255,19 +254,19 @@ e_ews_item_dispose (GObject *object)
 	priv->timezone = NULL;
 
 	if (priv->to_recipients) {
-		g_slist_foreach (priv->to_recipients, (GFunc) ews_item_free_mailbox, NULL);
+		g_slist_foreach (priv->to_recipients, (GFunc) e_ews_mailbox_free, NULL);
 		g_slist_free (priv->to_recipients);
 		priv->to_recipients = NULL;
 	}
 
 	if (priv->cc_recipients) {
-		g_slist_foreach (priv->cc_recipients, (GFunc) ews_item_free_mailbox, NULL);
+		g_slist_foreach (priv->cc_recipients, (GFunc) e_ews_mailbox_free, NULL);
 		g_slist_free (priv->cc_recipients);
 		priv->cc_recipients = NULL;
 	}
 
 	if (priv->bcc_recipients) {
-		g_slist_foreach (priv->bcc_recipients, (GFunc) ews_item_free_mailbox, NULL);
+		g_slist_foreach (priv->bcc_recipients, (GFunc) e_ews_mailbox_free, NULL);
 		g_slist_free (priv->bcc_recipients);
 		priv->bcc_recipients = NULL;
 	}
@@ -298,8 +297,8 @@ e_ews_item_dispose (GObject *object)
 		priv->calendar_item_accept_id = NULL;
 	}
 
-	ews_item_free_mailbox (priv->sender);
-	ews_item_free_mailbox (priv->from);
+	e_ews_mailbox_free (priv->sender);
+	e_ews_mailbox_free (priv->from);
 
 	if (priv->item_type == E_EWS_ITEM_TYPE_CONTACT)
 		ews_free_contact_fields (priv->contact_fields);
@@ -411,20 +410,10 @@ ews_free_contact_fields (struct _EEwsContactFields *con_fields)
 }
 
 static void
-ews_item_free_mailbox (EwsMailbox *mb)
-{
-	if (mb) {
-		g_free (mb->name);
-		g_free (mb->email);
-		g_free (mb);
-	}
-}
-
-static void
 ews_item_free_attendee (EwsAttendee *attendee)
 {
 	if (attendee) {
-		ews_item_free_mailbox (attendee->mailbox);
+		e_ews_mailbox_free (attendee->mailbox);
 		g_free (attendee->responsetype);
 		g_free (attendee);
 	}
@@ -1391,19 +1380,6 @@ e_ews_item_mailbox_from_soap_param (ESoapParameter *param)
 	EwsMailbox *mb;
 	ESoapParameter *subparam;
 
-	/* Return NULL if RoutingType of Mailbox is not SMTP
-		 * For instance, people who don't exist any more	*/
-	subparam = e_soap_parameter_get_first_child_by_name (param, "RoutingType");
-	if (subparam) {
-		gchar *routingtype;
-		routingtype = e_soap_parameter_get_string_value (subparam);
-		if (g_ascii_strcasecmp (routingtype, "SMTP")) {
-			g_free (routingtype);
-			return NULL;
-		}
-		g_free (routingtype);
-	}
-
 	mb = g_new0 (EwsMailbox, 1);
 
 	subparam = e_soap_parameter_get_first_child_by_name (param, "Name");
@@ -1414,7 +1390,35 @@ e_ews_item_mailbox_from_soap_param (ESoapParameter *param)
 	if (subparam)
 		mb->email = e_soap_parameter_get_string_value (subparam);
 
+	subparam = e_soap_parameter_get_first_child_by_name (param, "RoutingType");
+	if (subparam)
+		mb->mb_type = e_soap_parameter_get_string_value (subparam);
+
+	if (!mb->email) {
+		e_ews_mailbox_free (mb);
+		mb = NULL;
+	}
+
 	return mb;
+}
+
+void
+e_ews_mailbox_free (EwsMailbox *mailbox)
+{
+	if (!mailbox)
+		return;
+
+	g_free (mailbox->name);
+	g_free (mailbox->email);
+	g_free (mailbox->mb_type);
+
+	if (mailbox->item_id) {
+		g_free (mailbox->item_id->id);
+		g_free (mailbox->item_id->change_key);
+		g_free (mailbox->item_id);
+	}
+
+	g_free (mailbox);
 }
 
 const GSList *

@@ -2042,23 +2042,6 @@ ebews_get_vcards_list (GSList *new_items,
 }
 
 static void
-ews_mb_free (EwsMailbox *mb)
-{
-	if (mb) {
-		g_free (mb->name);
-		g_free (mb->email);
-
-		if (mb->item_id) {
-			g_free (mb->item_id->id);
-			g_free (mb->item_id->change_key);
-			g_free (mb->item_id);
-		}
-
-		g_free (mb);
-	}
-}
-
-static void
 ebews_store_distribution_list_items (EBookBackendEws *ebews,
                                      const EwsId *id,
                                      const gchar *d_name,
@@ -2098,7 +2081,7 @@ ebews_store_distribution_list_items (EBookBackendEws *ebews,
 			e_vcard_attribute_add_value (attr, mb->email);
 
 		e_vcard_add_attribute (E_VCARD (contact), attr);
-		ews_mb_free (mb);
+		e_ews_mailbox_free (mb);
 	}
 
 	g_slist_free (members);
@@ -2146,7 +2129,7 @@ ebews_vcards_append_dl (const EwsId *id,
 			e_vcard_attribute_add_value (attr, mb->email);
 
 		e_vcard_add_attribute (E_VCARD (contact), attr);
-		ews_mb_free (mb);
+		e_ews_mailbox_free (mb);
 	}
 	vcard_string = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
 	*vcards = g_slist_append (*vcards, g_strdup(vcard_string));
@@ -2603,9 +2586,7 @@ e_book_backend_ews_start_book_view (EBookBackend *backend,
 
 		e_data_book_view_notify_update (book_view, contact);
 
-		g_free (mb->email);
-		g_free (mb->name);
-		g_free (mb);
+		e_ews_mailbox_free (mb);
 		e_ews_free_resolve_contact (rc);
 		g_object_unref (contact);
 	}

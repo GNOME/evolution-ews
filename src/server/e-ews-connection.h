@@ -497,6 +497,14 @@ gboolean	e_ews_connection_expand_dl_sync	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GError **error);
 
+gboolean	e_ews_connection_ex_to_smtp_sync
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *ex_address,
+						 gchar **smtp_address,
+						 GCancellable *cancellable,
+						 GError **error);
+
 void		e_ews_connection_create_folder	(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *parent_folder_id,

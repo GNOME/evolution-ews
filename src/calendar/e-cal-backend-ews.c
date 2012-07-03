@@ -2930,6 +2930,7 @@ ews_get_attachments (ECalBackendEws *cbews,
 
 static void
 add_item_to_cache (ECalBackendEws *cbews,
+		   EEwsConnection *cnc,
                    EEwsItem *item)
 {
 	ECalBackendEwsPrivate *priv;
@@ -3065,9 +3066,7 @@ add_item_to_cache (ECalBackendEws *cbews,
 				icalcomponent_add_property (icalcomp, icalprop);
 
 				g_free (mailtoname);
-				g_free (mb->email);
-				g_free (mb->name);
-				g_free (mb);
+				e_ews_mailbox_free (mb);
 			}
 			g_slist_free (mailboxes);
 		}
@@ -3124,15 +3123,29 @@ add_item_to_cache (ECalBackendEws *cbews,
 		/* Attendees */
 		for (l = e_ews_item_get_attendees (item); l != NULL; l = g_slist_next (l)) {
 			icalparameter *param, *cu_type;
-			gchar *mailtoname;
+			gchar *mailtoname, *email = NULL;
 			EwsAttendee *attendee = (EwsAttendee *) l->data;
-			/*remove organizer for attendees list*/
-			if (g_ascii_strcasecmp (org_email_address, attendee->mailbox->email)== 0)
+
+			if (!attendee->mailbox)
 				continue;
 
-			mailtoname = g_strdup_printf("mailto:%s", attendee->mailbox->email);
+			if (g_strcmp0 (attendee->mailbox->mb_type, "EX") == 0) {
+				e_ews_connection_ex_to_smtp_sync (
+					cnc, EWS_PRIORITY_MEDIUM,
+					attendee->mailbox->email, &email,
+					NULL, NULL);
+			}
+
+			/*remove organizer for attendees list*/
+			if (g_ascii_strcasecmp (org_email_address, email ? email : attendee->mailbox->email) == 0) {
+				g_free (email);
+				continue;
+			}
+
+			mailtoname = g_strdup_printf ("mailto:%s", email ? email : attendee->mailbox->email);
 			icalprop = icalproperty_new_attendee (mailtoname);
 			g_free (mailtoname);
+			g_free (email);
 
 			param = icalparameter_new_cn (attendee->mailbox->name);
 			icalproperty_add_parameter (icalprop, param);
@@ -3338,7 +3351,7 @@ ews_cal_get_items_ready_cb (GObject *obj,
 		EEwsItem *item = (EEwsItem *) l->data;
 
 		if (item && e_ews_item_get_item_type (item) != E_EWS_ITEM_TYPE_ERROR) {
-			add_item_to_cache (cbews, item);
+			add_item_to_cache (cbews, cnc, item);
 			ews_get_attachments (cbews, item);
 			g_object_unref (item);
 		}
