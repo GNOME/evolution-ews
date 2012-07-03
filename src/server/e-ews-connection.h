@@ -190,6 +190,9 @@ EEwsConnection *e_ews_connection_new		(const gchar *uri,
 						 GCallback authenticate_cb,
 						 gpointer authenticate_ctx,
 						 GError **error);
+void		e_ews_connection_forget_password
+						(EEwsConnection *cnc);
+
 EEwsConnection *e_ews_connection_find		(const gchar *uri,
 						 const gchar *username);
 void		e_ews_connection_authenticate	(EEwsConnection *cnc,

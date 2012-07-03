@@ -988,10 +988,7 @@ e_ews_connection_dispose (GObject *object)
 		priv->username = NULL;
 	}
 
-	if (priv->password) {
-		g_free (priv->password);
-		priv->password = NULL;
-	}
+	e_ews_connection_forget_password (cnc);
 
 	if (priv->email) {
 		g_free (priv->email);
@@ -1111,8 +1108,7 @@ ews_connection_authenticate (SoupSession *sess,
 	g_return_if_fail (cnc != NULL);
 
 	if (retrying) {
-		g_free (cnc->priv->password);
-		cnc->priv->password = NULL;
+		e_ews_connection_forget_password (cnc);
 	}
 
 	if (cnc->priv->password) {
@@ -1179,7 +1175,7 @@ e_ews_connection_authenticate (EEwsConnection *cnc,
 		cnc->priv->username = g_strdup (user);
 	}
 
-	g_free (cnc->priv->password);
+	e_ews_connection_forget_password (cnc);
 	cnc->priv->password = g_strdup (passwd);
 
 	soup_auth_authenticate (auth, cnc->priv->username,
@@ -1295,6 +1291,19 @@ e_ews_connection_new (const gchar *uri,
 	g_static_mutex_unlock (&connecting);
 	return cnc;
 
+}
+
+void
+e_ews_connection_forget_password (EEwsConnection *cnc)
+{
+	g_return_if_fail (cnc != NULL);
+
+	if (cnc->priv->password && *cnc->priv->password) {
+		memset (cnc->priv->password, 0, strlen (cnc->priv->password));
+	}
+
+	g_free (cnc->priv->password);
+	cnc->priv->password = NULL;
 }
 
 static xmlDoc *
