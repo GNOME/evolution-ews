@@ -60,7 +60,6 @@
 #define FINFO_REFRESH_INTERVAL 60
 
 struct _CamelEwsStorePrivate {
-
 	time_t last_refresh_time;
 	GMutex *get_finfo_lock;
 	EEwsConnection *cnc;
@@ -291,7 +290,6 @@ ews_connect_sync (CamelService *service,
 					  error);
 
 	if (!priv->cnc) {
-		camel_service_disconnect_sync (service, TRUE, cancellable, NULL);
 		return FALSE;
 	}
 
@@ -303,7 +301,6 @@ ews_connect_sync (CamelService *service,
 	if (!success) {
 		g_object_unref (priv->cnc);
 		priv->cnc = NULL;
-		camel_service_disconnect_sync (service, TRUE, cancellable, NULL);
 		return FALSE;
 	}
 

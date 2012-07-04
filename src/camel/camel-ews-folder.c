@@ -553,6 +553,7 @@ exit:
 
 	if (mime_fname_new)
 		g_free (mime_fname_new);
+	g_object_unref (cnc);
 
 	return message;
 }
@@ -812,6 +813,8 @@ ews_sync_mi_flags (CamelFolder *folder,
 		g_propagate_error (error, local_error);
 	}
 
+	g_object_unref (cnc);
+
 	return res;
 }
 
@@ -859,7 +862,6 @@ ews_move_to_junk_folder (CamelFolder *folder,
 	}
 
 	ews_store = CAMEL_EWS_STORE (camel_folder_get_parent_store (folder));
-	cnc = camel_ews_store_get_connection (ews_store);
 
 	parent_store = camel_folder_get_parent_store (folder);
 	ews_folder = CAMEL_EWS_FOLDER (folder);
@@ -922,6 +924,8 @@ ews_move_to_junk_folder (CamelFolder *folder,
 
 		g_slist_free_full (junk_uids, (GDestroyNotify) camel_pstring_free);
 	}
+
+	g_object_unref (cnc);
 
 	return status;
 }
@@ -1162,7 +1166,7 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 
 	if (msg_ids)
 		e_ews_connection_get_items_sync (
-			g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
+			cnc, EWS_PRIORITY_MEDIUM,
 			 msg_ids, "IdOnly", SUMMARY_MESSAGE_FLAGS,
 			 FALSE, NULL, &items, NULL, NULL,
 			 cancellable, &local_error);
@@ -1177,7 +1181,7 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 
 	if (generic_item_ids)
 		e_ews_connection_get_items_sync (
-			g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
+			cnc, EWS_PRIORITY_MEDIUM,
 			generic_item_ids, "IdOnly", SUMMARY_ITEM_FLAGS,
 			FALSE, NULL, &items, NULL, NULL,
 			cancellable, &local_error);
@@ -1245,7 +1249,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 
 	if (msg_ids)
 		e_ews_connection_get_items_sync (
-			g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
+			cnc, EWS_PRIORITY_MEDIUM,
 			msg_ids, "IdOnly", SUMMARY_MESSAGE_PROPS,
 			FALSE, NULL, &items, NULL, NULL,
 			cancellable, &local_error);
@@ -1261,7 +1265,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 
 	if (post_item_ids)
 		e_ews_connection_get_items_sync (
-			g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
+			cnc, EWS_PRIORITY_MEDIUM,
 			post_item_ids, "IdOnly", SUMMARY_POSTITEM_PROPS,
 			FALSE, NULL, &items, NULL, NULL,
 			cancellable, &local_error);
@@ -1277,7 +1281,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 
 	if (generic_item_ids)
 		e_ews_connection_get_items_sync (
-			g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
+			cnc, EWS_PRIORITY_MEDIUM,
 			generic_item_ids, "IdOnly", SUMMARY_ITEM_PROPS,
 			FALSE, NULL, &items, NULL, NULL,
 			cancellable, &local_error);
@@ -1340,6 +1344,8 @@ ews_refresh_info_sync (CamelFolder *folder,
 	g_mutex_unlock (priv->state_lock);
 
 	cnc = camel_ews_store_get_connection (ews_store);
+	g_return_val_if_fail (cnc != NULL, FALSE);
+
 	id = camel_ews_store_summary_get_folder_id_from_name
 						(ews_store->summary,
 						 full_name);
@@ -1402,9 +1408,9 @@ ews_refresh_info_sync (CamelFolder *folder,
 		((CamelEwsSummary *) folder->summary)->sync_state = sync_state;
 
 		camel_folder_summary_touch (folder->summary);
-		camel_folder_summary_save_to_db (folder->summary, NULL);
-
 	} while (!local_error && !includes_last_item);
+
+	camel_folder_summary_save_to_db (folder->summary, NULL);
 
 	if (local_error)
 		g_propagate_error (error, local_error);
@@ -1621,6 +1627,7 @@ ews_delete_messages (CamelFolder *folder,
 	}
 
 	camel_folder_change_info_free (changes);
+	g_object_unref (cnc);
 
 	return status;
 }
