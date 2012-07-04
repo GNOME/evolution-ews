@@ -689,8 +689,12 @@ form_email_string_from_mb (EEwsConnection *cnc,
 		if (g_strcmp0 (mb->mb_type, "EX") == 0) {
 			e_ews_connection_ex_to_smtp_sync (
 				cnc, EWS_PRIORITY_MEDIUM,
-				mb->email, &email,
+				mb->name, mb->email, &email,
 				cancellable, NULL);
+
+			/* do not scare users with EX addresses */
+			if (!email)
+				email = g_strdup ("");
 		}
 
 		str = g_string_new ("");

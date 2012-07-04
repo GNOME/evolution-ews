@@ -1394,7 +1394,7 @@ e_ews_item_mailbox_from_soap_param (ESoapParameter *param)
 	if (subparam)
 		mb->mb_type = e_soap_parameter_get_string_value (subparam);
 
-	if (!mb->email) {
+	if (!mb->email && !mb->name) {
 		e_ews_mailbox_free (mb);
 		mb = NULL;
 	}

@@ -3740,9 +3740,91 @@ e_ews_connection_resolve_names_sync (EEwsConnection *cnc,
 	return result;
 }
 
+static void
+ews_connection_resolve_by_name (EEwsConnection *cnc,
+				gint pri,
+				const gchar *usename,
+				gboolean is_user_name,
+				gchar **smtp_address,
+				GCancellable *cancellable)
+{
+	GSList *mailboxes = NULL;
+	GSList *contacts = NULL;
+	gboolean includes_last_item = FALSE;
+	GSList *miter;
+	gint len;
+
+	g_return_if_fail (cnc != NULL);
+	g_return_if_fail (usename != NULL);
+	g_return_if_fail (smtp_address != NULL);
+
+	if (!*usename)
+		return;
+
+	len = strlen (usename);
+	mailboxes = NULL;
+	contacts = NULL;
+
+	/* use the first error, not the guess-part error */
+	e_ews_connection_resolve_names_sync (
+		cnc, pri, usename,
+		EWS_SEARCH_AD_CONTACTS, NULL, TRUE, &mailboxes, &contacts,
+		&includes_last_item, cancellable, NULL);
+
+	for (miter = mailboxes; miter; miter = miter->next) {
+		const EwsMailbox *mailbox = miter->data;
+		if (mailbox->email && *mailbox->email && g_strcmp0 (mailbox->mb_type, "EX") != 0
+		    && ((!is_user_name && g_str_has_prefix (mailbox->email, usename) && mailbox->email[len] == '@') ||
+		    (is_user_name && g_str_equal (usename, mailbox->name)))) {
+			*smtp_address = g_strdup (mailbox->email);
+			break;
+		} else if (contacts && !contacts->next && contacts->data) {
+			const EwsResolveContact *resolved = contacts->data;
+			GList *emails = g_hash_table_get_values (resolved->email_addresses), *iter;
+			gboolean found = FALSE;
+
+			for (iter = emails; iter && !found; iter = iter->next) {
+				const gchar *it_email = iter->data;
+
+				if (it_email && g_str_has_prefix (it_email, "SMTP:")
+				    && ((!is_user_name && g_str_has_prefix (it_email, usename) && it_email[len] == '@') ||
+				    (is_user_name && g_str_equal (usename, resolved->display_name)))) {
+					found = TRUE;
+					break;
+				}
+			}
+
+			g_list_free (emails);
+
+			if (found) {
+				gint ii;
+
+				for (ii = 0; ii < g_hash_table_size (resolved->email_addresses); ii++) {
+					gchar *key, *value;
+
+					key = g_strdup_printf ("EmailAddress%d", ii + 1);
+					value = g_hash_table_lookup (resolved->email_addresses, key);
+					g_free (key);
+
+					if (value && g_str_has_prefix (value, "SMTP:")) {
+						/* pick the first available SMTP address */
+						*smtp_address = g_strdup (value + 5);
+						break;
+					}
+				}
+				break;
+			}
+		}
+	}
+
+	g_slist_free_full (mailboxes, (GDestroyNotify) e_ews_mailbox_free);
+	g_slist_free_full (contacts, (GDestroyNotify) e_ews_free_resolve_contact);
+}
+
 gboolean
 e_ews_connection_ex_to_smtp_sync (EEwsConnection *cnc,
 				  gint pri,
+				  const gchar *name,
 				  const gchar *ex_address,
 				  gchar **smtp_address,
 				  GCancellable *cancellable,
@@ -3796,67 +3878,15 @@ e_ews_connection_ex_to_smtp_sync (EEwsConnection *cnc,
 
 		usename = strrchr (ex_address, '/');
 		if (usename && g_ascii_strncasecmp (usename, "/cn=", 4) == 0) {
-			GSList *miter;
-			gint len;
-
 			usename += 4;
-			len = strlen (usename);
-			mailboxes = NULL;
-			contacts = NULL;
-
-			/* use the first error, not the guess-part error */
-			e_ews_connection_resolve_names_sync (
-				cnc, pri, usename,
-				EWS_SEARCH_AD_CONTACTS, NULL, TRUE, &mailboxes, &contacts,
-				&includes_last_item, cancellable, NULL);
 
 			/* try to guess from common name of the EX address */
-			for (miter = mailboxes; miter; miter = miter->next) {
-				const EwsMailbox *mailbox = miter->data;
-				if (mailbox->email && *mailbox->email && g_strcmp0 (mailbox->mb_type, "EX") != 0
-				    && g_str_has_prefix (mailbox->email, usename) && mailbox->email[len] == '@') {
-					*smtp_address = g_strdup (mailbox->email);
-					break;
-				} else if (contacts && !contacts->next && contacts->data) {
-					const EwsResolveContact *resolved = contacts->data;
-					GList *emails = g_hash_table_get_values (resolved->email_addresses), *iter;
-					gboolean found = FALSE;
+			ews_connection_resolve_by_name (cnc, pri, usename, FALSE, smtp_address, cancellable);
+		}
 
-					for (iter = emails; iter && !found; iter = iter->next) {
-						const gchar *it_email = iter->data;
-
-						if (it_email && g_str_has_prefix (it_email, "SMTP:")
-						    && g_str_has_prefix (it_email, usename) && it_email[len] == '@') {
-							found = TRUE;
-							break;
-						}
-					}
-
-					g_list_free (emails);
-
-					if (found) {
-						gint ii;
-
-						for (ii = 0; ii < g_hash_table_size (resolved->email_addresses); ii++) {
-							gchar *key, *value;
-
-							key = g_strdup_printf ("EmailAddress%d", ii + 1);
-							value = g_hash_table_lookup (resolved->email_addresses, key);
-							g_free (key);
-
-							if (value && g_str_has_prefix (value, "SMTP:")) {
-								/* pick the first available SMTP address */
-								*smtp_address = g_strdup (value + 5);
-								break;
-							}
-						}
-						break;
-					}
-				}
-			}
-
-			g_slist_free_full (mailboxes, (GDestroyNotify) e_ews_mailbox_free);
-			g_slist_free_full (contacts, (GDestroyNotify) e_ews_free_resolve_contact);
+		if (!*smtp_address && name && *name) {
+			/* try to guess from mailbox name */
+			ews_connection_resolve_by_name (cnc, pri, name, TRUE, smtp_address, cancellable);
 		}
 	}
 
