@@ -3079,8 +3079,12 @@ add_item_to_cache (ECalBackendEws *cbews,
 			if (g_strcmp0 (attendee->mailbox->mb_type, "EX") == 0) {
 				e_ews_connection_ex_to_smtp_sync (
 					cnc, EWS_PRIORITY_MEDIUM,
-					attendee->mailbox->email, &email,
+					attendee->mailbox->name, attendee->mailbox->email, &email,
 					NULL, NULL);
+
+				/* do not scare users with EX addresses */
+				if (!email)
+					email = g_strdup ("");
 			}
 
 			/*remove organizer for attendees list*/

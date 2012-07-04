@@ -488,6 +488,7 @@ gboolean	e_ews_connection_resolve_names	(EEwsConnection *cnc,
 gboolean	e_ews_connection_ex_to_smtp_sync
 						(EEwsConnection *cnc,
 						 gint pri,
+						 const gchar *name,
 						 const gchar *ex_address,
 						 gchar **smtp_address,
 						 GCancellable *cancellable,
