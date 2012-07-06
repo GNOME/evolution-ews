@@ -1933,7 +1933,7 @@ oal_response_cb (SoupSession *soup_session,
 
 	for (node = node->children; node; node = node->next) {
 		if (node->type == XML_ELEMENT_NODE && strcmp((gchar *) node->name, "OAL") == 0) {
-			if (data->oal_id != NULL) {
+			if (data->oal_id == NULL) {
 				EwsOAL *oal = g_new0 (EwsOAL, 1);
 
 				oal->id = get_property (node, "id");
