@@ -193,21 +193,6 @@ ews_store_construct (CamelService *service,
 	return TRUE;
 }
 
-static guint
-ews_hash_folder_name (gconstpointer key)
-{
-	return g_str_hash (key);
-}
-
-static gint
-ews_compare_folder_name (gconstpointer a,
-                         gconstpointer b)
-{
-	gconstpointer aname = a, bname = b;
-
-	return g_str_equal (aname, bname);
-}
-
 static void
 ews_update_folder_hierarchy (CamelEwsStore *ews_store,
                              gchar *sync_state,
@@ -1173,8 +1158,6 @@ camel_ews_store_class_init (CamelEwsStoreClass *class)
 	service_class->authenticate_sync = ews_authenticate_sync;
 
 	store_class = CAMEL_STORE_CLASS (class);
-	store_class->hash_folder_name = ews_hash_folder_name;
-	store_class->compare_folder_name = ews_compare_folder_name;
 	store_class->get_folder_sync = ews_get_folder_sync;
 	store_class->create_folder_sync = ews_create_folder_sync;
 	store_class->delete_folder_sync = ews_delete_folder_sync;
