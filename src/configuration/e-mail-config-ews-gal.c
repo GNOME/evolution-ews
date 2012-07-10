@@ -208,7 +208,8 @@ mail_config_ews_gal_fetch_list (EMailConfigEwsGal *extension)
 
 	page = mail_config_ews_gal_get_provider_page (extension);
 
-	activity = e_mail_config_activity_page_new_activity (E_MAIL_CONFIG_ACTIVITY_PAGE (page));
+	activity = e_mail_config_activity_page_new_activity (
+		E_MAIL_CONFIG_ACTIVITY_PAGE (page));
 	cancellable = e_activity_get_cancellable (activity);
 
 	e_activity_set_text (activity, _("Locating offline address books"));
