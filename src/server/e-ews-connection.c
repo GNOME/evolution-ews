@@ -950,7 +950,7 @@ e_ews_connection_dispose (GObject *object)
 		g_free (hash_key);
 	}
 
-	g_signal_handlers_disconnect_by_func	(priv->soup_session, ews_connection_authenticate, cnc);
+	g_signal_handlers_disconnect_by_func (priv->soup_session, ews_connection_authenticate, cnc);
 
 	if (priv->soup_session) {
 		g_main_loop_quit (priv->soup_loop);
@@ -1038,16 +1038,17 @@ e_ews_connection_class_init (EEwsConnectionClass *klass)
 	      SOUP_TYPE_MESSAGE, SOUP_TYPE_AUTH, G_TYPE_BOOLEAN);
 }
 
-static gpointer e_ews_soup_thread (gpointer user_data)
+static gpointer
+e_ews_soup_thread (gpointer user_data)
 {
-	EEwsConnectionPrivate *priv = user_data;
+	EEwsConnection *cnc = user_data;
 
-	g_main_context_push_thread_default (priv->soup_context);
-	g_main_loop_run (priv->soup_loop);
-	g_main_context_pop_thread_default (priv->soup_context);
+	g_main_context_push_thread_default (cnc->priv->soup_context);
+	g_main_loop_run (cnc->priv->soup_loop);
+	g_main_context_pop_thread_default (cnc->priv->soup_context);
 
-	g_object_unref (priv->soup_session);
-	priv->soup_session = NULL;
+	g_object_unref (cnc->priv->soup_session);
+	cnc->priv->soup_session = NULL;
 
 	return NULL;
 }
@@ -1064,7 +1065,7 @@ e_ews_connection_init (EEwsConnection *cnc)
 	priv->soup_context = g_main_context_new ();
 	priv->soup_loop = g_main_loop_new (priv->soup_context, FALSE);
 
-	priv->soup_thread = g_thread_create (e_ews_soup_thread, priv, TRUE, NULL);
+	priv->soup_thread = g_thread_create (e_ews_soup_thread, cnc, TRUE, NULL);
 
 	/* create the SoupSession for this connection */
 	priv->soup_session = soup_session_async_new_with_options (SOUP_SESSION_USE_NTLM, TRUE,
