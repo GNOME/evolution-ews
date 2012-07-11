@@ -1057,6 +1057,7 @@ static void
 e_ews_connection_init (EEwsConnection *cnc)
 {
 	EEwsConnectionPrivate *priv;
+	gint timeout;
 
 	/* allocate internal structure */
 	priv = g_new0 (EEwsConnectionPrivate, 1);
@@ -1067,11 +1068,21 @@ e_ews_connection_init (EEwsConnection *cnc)
 
 	priv->soup_thread = g_thread_create (e_ews_soup_thread, cnc, TRUE, NULL);
 
+	/* default timeout is two minutes */
+	timeout = 120;
+	if (g_getenv ("EWS_CONN_TIMEOUT")) {
+		timeout = atoi (g_getenv ("EWS_CONN_TIMEOUT"));
+		if (timeout <= 0)
+			timeout = 120;
+	}
+
 	/* create the SoupSession for this connection */
 	priv->soup_session = soup_session_async_new_with_options (SOUP_SESSION_USE_NTLM, TRUE,
-								  SOUP_SESSION_ASYNC_CONTEXT, priv->soup_context, NULL);
+								  SOUP_SESSION_ASYNC_CONTEXT, priv->soup_context,
+								  SOUP_SESSION_TIMEOUT, timeout,
+								  NULL);
 
-        if (getenv("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 2)) {
+        if (g_getenv("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 2)) {
 		SoupLogger *logger;
 		logger = soup_logger_new (SOUP_LOGGER_LOG_BODY, -1);
 		soup_session_add_feature (priv->soup_session, SOUP_SESSION_FEATURE (logger));
