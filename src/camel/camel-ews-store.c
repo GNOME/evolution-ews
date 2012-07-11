@@ -215,6 +215,19 @@ ews_update_folder_hierarchy (CamelEwsStore *ews_store,
 }
 
 static void
+ews_store_update_cnc_timeout_cb (CamelEwsSettings *settings,
+				 GParamSpec *spec,
+				 CamelEwsStore *store)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+	g_return_if_fail (CAMEL_IS_EWS_STORE (store));
+
+	if (store->priv->cnc)
+		e_ews_connection_set_timeout (store->priv->cnc,
+			camel_ews_settings_get_timeout (settings));
+}
+
+static void
 ews_store_authenticate (EEwsConnection *cnc,
                         SoupMessage *msg,
                         SoupAuth *auth,
@@ -271,6 +284,7 @@ ews_connect_sync (CamelService *service,
 		return TRUE;
 
 	priv->cnc = e_ews_connection_new (hosturl, user, NULL,
+					  camel_ews_settings_get_timeout (ews_settings),
 					  G_CALLBACK (ews_store_authenticate), service,
 					  error);
 
@@ -289,6 +303,8 @@ ews_connect_sync (CamelService *service,
 		return FALSE;
 	}
 
+	g_signal_connect (ews_settings, "notify::timeout", G_CALLBACK (ews_store_update_cnc_timeout_cb), service);
+
 	camel_offline_store_set_online_sync (
 		CAMEL_OFFLINE_STORE (ews_store), TRUE, cancellable, NULL);
 
@@ -306,6 +322,7 @@ ews_disconnect_sync (CamelService *service,
 
 	/* TODO cancel all operations in the connection */
 	if (ews_store->priv->cnc) {
+		g_signal_handlers_disconnect_by_data (camel_service_get_settings (service), service);
 		e_ews_connection_forget_password (ews_store->priv->cnc);
 		g_object_unref (ews_store->priv->cnc);
 		ews_store->priv->cnc = NULL;

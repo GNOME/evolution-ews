@@ -612,7 +612,9 @@ ews_backend_try_password_sync (ESourceAuthenticator *authenticator,
 	user = e_source_collection_dup_identity (collection_extension);
 
 	connection = e_ews_connection_new (
-		hosturl, user, password->str, NULL, NULL, error);
+		hosturl, user, password->str,
+		camel_ews_settings_get_timeout (settings),
+		NULL, NULL, error);
 
 	g_free (hosturl);
 	g_free (user);

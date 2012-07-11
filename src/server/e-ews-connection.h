@@ -187,12 +187,14 @@ GType		e_ews_connection_get_type	(void);
 EEwsConnection *e_ews_connection_new		(const gchar *uri,
 						 const gchar *username,
 						 const gchar *password,
+						 guint timeout,
 						 GCallback authenticate_cb,
 						 gpointer authenticate_ctx,
 						 GError **error);
 void		e_ews_connection_forget_password
 						(EEwsConnection *cnc);
-
+void		e_ews_connection_set_timeout	(EEwsConnection *cnc,
+						 guint timeout);
 EEwsConnection *e_ews_connection_find		(const gchar *uri,
 						 const gchar *username);
 void		e_ews_connection_authenticate	(EEwsConnection *cnc,

@@ -99,7 +99,9 @@ gchar *		camel_ews_settings_dup_oal_selected
 void		camel_ews_settings_set_oal_selected
 						(CamelEwsSettings *settings,
 						 const gchar *oal_selected);
-
+guint		camel_ews_settings_get_timeout	(CamelEwsSettings *settings);
+void		camel_ews_settings_set_timeout	(CamelEwsSettings *settings,
+						 guint timeout);
 G_END_DECLS
 
 #endif /* CAMEL_EWS_SETTINGS_H */

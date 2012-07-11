@@ -1084,9 +1084,10 @@ e_ews_connection_init (EEwsConnection *cnc)
 
 	/* create the SoupSession for this connection */
 	priv->soup_session = soup_session_async_new_with_options (SOUP_SESSION_USE_NTLM, TRUE,
-								  SOUP_SESSION_ASYNC_CONTEXT, priv->soup_context, NULL);
+								  SOUP_SESSION_ASYNC_CONTEXT, priv->soup_context,
+								  NULL);
 
-        if (getenv("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 2)) {
+        if (g_getenv("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 2)) {
 		SoupLogger *logger;
 		logger = soup_logger_new (SOUP_LOGGER_LOG_BODY, -1);
 		soup_session_add_feature (priv->soup_session, SOUP_SESSION_FEATURE (logger));
@@ -1227,6 +1228,7 @@ e_ews_connection_find (const gchar *uri,
  * @uri: Exchange server uri
  * @username:
  * @password:
+ * @timeout: connection timeout to use, in seconds
  * @error: Currently unused, but may require in future. Can take NULL value.
  *
  * This does not authenticate to the server. It merely stores the username and password.
@@ -1238,6 +1240,7 @@ EEwsConnection *
 e_ews_connection_new (const gchar *uri,
                       const gchar *username,
                       const gchar *password,
+		      guint timeout,
                       GCallback authenticate_cb,
                       gpointer authenticate_ctx,
                       GError **error)
@@ -1274,6 +1277,10 @@ e_ews_connection_new (const gchar *uri,
 	cnc->priv->password = g_strdup (password);
 	cnc->priv->uri = g_strdup (uri);
 
+	g_object_set (G_OBJECT (cnc->priv->soup_session),
+		SOUP_SESSION_TIMEOUT, timeout,
+		NULL);
+
 	/* register a handler to the authenticate signal */
 	if (authenticate_cb)
 		g_signal_connect (cnc, "authenticate",
@@ -1305,6 +1312,18 @@ e_ews_connection_forget_password (EEwsConnection *cnc)
 
 	g_free (cnc->priv->password);
 	cnc->priv->password = NULL;
+}
+
+void
+e_ews_connection_set_timeout (EEwsConnection *cnc,
+			      guint timeout)
+{
+	g_return_if_fail (cnc != NULL);
+
+	if (cnc->priv->soup_session)
+		g_object_set (G_OBJECT (cnc->priv->soup_session),
+			SOUP_SESSION_TIMEOUT, timeout,
+			NULL);
 }
 
 static xmlDoc *
@@ -1678,7 +1697,8 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 	if (user == NULL || *user == '\0')
 		user = email_address;
 
-	cnc = e_ews_connection_new (url3, user, password, NULL, NULL, &error);
+	cnc = e_ews_connection_new (url3, user, password,
+		camel_ews_settings_get_timeout (settings), NULL, NULL, &error);
 	if (cnc == NULL) {
 		g_free (url1);
 		g_free (url2);

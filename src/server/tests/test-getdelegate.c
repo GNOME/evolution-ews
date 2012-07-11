@@ -84,7 +84,7 @@ op_test_get_delegate ()
 	g_assert_cmpstr (password, !=, NULL);
 	g_assert_cmpstr (uri, !=, NULL);
 
-	cnc = e_ews_connection_new (uri, username, password, NULL, NULL, NULL);
+	cnc = e_ews_connection_new (uri, username, password, 0, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
 	e_ews_connection_get_delegate (
 		cnc, EWS_PRIORITY_MEDIUM, "abc@xyz.com",

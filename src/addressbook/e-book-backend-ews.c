@@ -1682,6 +1682,9 @@ ews_download_full_gal (EBookBackendEws *cbews,
 	gchar *full_url, *oab_url, *cache_file = NULL;
 	const gchar *cache_dir;
 	gchar *comp_cache_file = NULL, *uncompress_file = NULL;
+	CamelEwsSettings *settings;
+
+	settings = book_backend_ews_get_collection_settings (cbews);
 
 	/* oab url with oab.xml removed from the suffix */
 	oab_url = g_strndup (priv->oab_url, strlen (priv->oab_url) - 7);
@@ -1689,7 +1692,9 @@ ews_download_full_gal (EBookBackendEws *cbews,
 	cache_dir = e_book_backend_get_cache_dir (E_BOOK_BACKEND (cbews));
 	comp_cache_file = g_build_filename (cache_dir, full->filename, NULL);
 
-	oab_cnc = e_ews_connection_new (full_url, priv->username, priv->password, NULL, NULL, NULL);
+	oab_cnc = e_ews_connection_new (full_url, priv->username, priv->password,
+		camel_ews_settings_get_timeout (settings),
+		NULL, NULL, NULL);
 	if (!e_ews_connection_download_oal_file_sync (
 		oab_cnc, comp_cache_file, NULL, NULL, cancellable, error))
 		goto exit;
@@ -1837,11 +1842,15 @@ ebews_start_gal_sync (gpointer data)
 	GSList *full_l = NULL;
 	gboolean ret = TRUE;
 	gchar *uncompressed_filename = NULL;
+	CamelEwsSettings *settings;
 
 	cbews = (EBookBackendEws *) data;
+	settings = book_backend_ews_get_collection_settings (cbews);
 	priv = cbews->priv;
 
-	oab_cnc = e_ews_connection_new (priv->oab_url, priv->username, priv->password, NULL, NULL, NULL);
+	oab_cnc = e_ews_connection_new (priv->oab_url, priv->username, priv->password,
+		camel_ews_settings_get_timeout (settings),
+		NULL, NULL, NULL);
 
 	d(printf ("Ewsgal: Fetching oal full details file \n");)
 
@@ -2940,7 +2949,9 @@ book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 	user = camel_network_settings_dup_user (network_settings);
 
 	connection = e_ews_connection_new (
-		hosturl, user, password->str, NULL, NULL, error);
+		hosturl, user, password->str,
+		camel_ews_settings_get_timeout (ews_settings),
+		NULL, NULL, error);
 
 	if (connection == NULL) {
 		result = E_SOURCE_AUTHENTICATION_ERROR;

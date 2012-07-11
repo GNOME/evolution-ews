@@ -35,6 +35,7 @@ struct _CamelEwsSettingsPrivate {
 	gchar *hosturl;
 	gchar *oaburl;
 	gchar *oal_selected;
+	guint timeout;
 };
 
 enum {
@@ -52,6 +53,7 @@ enum {
 	PROP_OAL_SELECTED,
 	PROP_PORT,
 	PROP_SECURITY_METHOD,
+	PROP_TIMEOUT,
 	PROP_USER
 };
 
@@ -145,6 +147,12 @@ ews_settings_set_property (GObject *object,
 			camel_network_settings_set_security_method (
 				CAMEL_NETWORK_SETTINGS (object),
 				g_value_get_enum (value));
+			return;
+
+		case PROP_TIMEOUT:
+			camel_ews_settings_set_timeout (
+				CAMEL_EWS_SETTINGS (object),
+				g_value_get_uint (value));
 			return;
 
 		case PROP_USER:
@@ -253,6 +261,13 @@ ews_settings_get_property (GObject *object,
 				value,
 				camel_network_settings_get_security_method (
 				CAMEL_NETWORK_SETTINGS (object)));
+			return;
+
+		case PROP_TIMEOUT:
+			g_value_set_uint (
+				value,
+				camel_ews_settings_get_timeout (
+				CAMEL_EWS_SETTINGS (object)));
 			return;
 
 		case PROP_USER:
@@ -419,6 +434,18 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 			"OAL Selected",
 			"OAL Selected",
 			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_TIMEOUT,
+		g_param_spec_uint (
+			"timeout",
+			"timeout",
+			"Connection timeout in seconds",
+			0, G_MAXUINT, 120,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
@@ -827,3 +854,24 @@ camel_ews_settings_set_oal_selected (CamelEwsSettings *settings,
 	g_object_notify (G_OBJECT (settings), "oal-selected");
 }
 
+guint
+camel_ews_settings_get_timeout (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), 0);
+
+	return settings->priv->timeout;
+}
+
+void
+camel_ews_settings_set_timeout (CamelEwsSettings *settings,
+				guint timeout)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	if (settings->priv->timeout == timeout)
+		return;
+
+	settings->priv->timeout = timeout;
+
+	g_object_notify (G_OBJECT (settings), "timeout");
+}

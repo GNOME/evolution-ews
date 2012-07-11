@@ -61,6 +61,12 @@ static CamelProviderConfEntry ews_conf_entries[] = {
 	  N_("Automatically synchroni_ze remote mail locally"), "0" },
 	{ CAMEL_PROVIDER_CONF_SECTION_END },
 
+	{ CAMEL_PROVIDER_CONF_SECTION_START, "connection", NULL, N_("Connection") },
+	{ CAMEL_PROVIDER_CONF_CHECKSPIN, "timeout", NULL,
+	  /* Translators: '%s' is preplaced with a widget, where user can select how long the timeout should be */
+	  N_("Connection _timeout (in seconds) %s"), "0:1:0:32768" },
+	{ CAMEL_PROVIDER_CONF_SECTION_END },
+
 	{ CAMEL_PROVIDER_CONF_END }
 };
 
