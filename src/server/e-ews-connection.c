@@ -1309,6 +1309,14 @@ e_ews_connection_new (const gchar *uri,
 
 }
 
+const gchar *
+e_ews_connection_get_uri (EEwsConnection *cnc)
+{
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
+
+	return cnc->priv->uri;
+}
+
 void
 e_ews_connection_forget_password (EEwsConnection *cnc)
 {

@@ -192,6 +192,7 @@ EEwsConnection *e_ews_connection_new		(const gchar *uri,
 						 GCallback authenticate_cb,
 						 gpointer authenticate_ctx,
 						 GError **error);
+const gchar *	e_ews_connection_get_uri	(EEwsConnection *cnc);
 void		e_ews_connection_forget_password
 						(EEwsConnection *cnc);
 void		e_ews_connection_set_timeout	(EEwsConnection *cnc,
