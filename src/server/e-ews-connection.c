@@ -1317,6 +1317,14 @@ e_ews_connection_get_uri (EEwsConnection *cnc)
 	return cnc->priv->uri;
 }
 
+SoupSession *
+e_ews_connection_ref_soup_session (EEwsConnection *cnc)
+{
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
+
+	return g_object_ref (cnc->priv->soup_session);
+}
+
 void
 e_ews_connection_forget_password (EEwsConnection *cnc)
 {
