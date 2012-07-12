@@ -36,16 +36,22 @@ e_ews_message_new_with_header (const gchar *uri,
 	ESoapMessage *msg;
 	const gchar *server_ver;
 
-	msg = e_soap_message_new (SOUP_METHOD_POST, uri, FALSE, NULL, NULL, NULL);
-	if (!msg) {
+	msg = e_soap_message_new (
+		SOUP_METHOD_POST, uri, FALSE, NULL, NULL, NULL);
+	if (msg == NULL) {
 		g_warning (G_STRLOC ": Could not build SOAP message");
 		return NULL;
 	}
 
-	soup_message_headers_append (SOUP_MESSAGE (msg)->request_headers, "Content-Type", "text/xml; charset=utf-8");
-	soup_message_headers_append (SOUP_MESSAGE (msg)->request_headers, "User-Agent",
-				     "Evolution/" VERSION);
-	soup_message_headers_append (SOUP_MESSAGE (msg)->request_headers,"Connection",  "Keep-Alive");
+	soup_message_headers_append (
+		SOUP_MESSAGE (msg)->request_headers,
+		"Content-Type", "text/xml; charset=utf-8");
+	soup_message_headers_append (
+		SOUP_MESSAGE (msg)->request_headers,
+		"User-Agent", "Evolution/" VERSION);
+	soup_message_headers_append (
+		SOUP_MESSAGE (msg)->request_headers,
+		"Connection", "Keep-Alive");
 
 	e_soap_message_start_envelope (msg);
 
@@ -57,21 +63,26 @@ e_ews_message_new_with_header (const gchar *uri,
 
 	e_soap_message_start_header (msg);
 
-	e_soap_message_start_element (msg, "RequestServerVersion", "types",
-					"http://schemas.microsoft.com/exchange/services/2006/types");
+	e_soap_message_start_element (
+		msg, "RequestServerVersion", "types",
+		"http://schemas.microsoft.com/exchange/services/2006/types");
 	e_soap_message_add_attribute (msg, "Version", server_ver, NULL, NULL);
 	e_soap_message_end_element (msg);
 
 	e_soap_message_end_header (msg);
 
 	e_soap_message_start_body (msg);
-	e_soap_message_add_namespace(msg, "messages",
-				       "http://schemas.microsoft.com/exchange/services/2006/messages");
+	e_soap_message_add_namespace(
+		msg, "messages",
+		"http://schemas.microsoft.com/exchange/services/2006/messages");
 	e_soap_message_start_element(msg, method_name, "messages", NULL);
-	e_soap_message_set_default_namespace (msg,
-						"http://schemas.microsoft.com/exchange/services/2006/types");
-	if (attribute_name)
-		e_soap_message_add_attribute (msg, attribute_name, attribute_value, NULL, NULL);
+	e_soap_message_set_default_namespace (
+		msg,
+		"http://schemas.microsoft.com/exchange/services/2006/types");
+	if (attribute_name != NULL)
+		e_soap_message_add_attribute (
+			msg, attribute_name, attribute_value, NULL, NULL);
+
 	return msg;
 }
 
@@ -95,7 +106,8 @@ e_ews_message_write_string_parameter_with_attribute (ESoapMessage *msg,
                                                      const gchar *attribute_value)
 {
 	e_soap_message_start_element (msg, name, prefix, NULL);
-	e_soap_message_add_attribute (msg, attribute_name, attribute_value, NULL, NULL);
+	e_soap_message_add_attribute (
+		msg, attribute_name, attribute_value, NULL, NULL);
 	e_soap_message_write_string (msg, value);
 	e_soap_message_end_element (msg);
 }
