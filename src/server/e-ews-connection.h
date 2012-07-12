@@ -220,6 +220,7 @@ gboolean	e_ews_autodiscover_ws_url_finish
 						(CamelEwsSettings *settings,
 						 GAsyncResult *result,
 						 GError **error);
+const gchar *	e_ews_connection_get_mailbox	(EEwsConnection *cnc);
 void		e_ews_connection_set_mailbox	(EEwsConnection *cnc,
 						 const gchar *email);
 

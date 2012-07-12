@@ -2423,11 +2423,19 @@ e_ews_connection_download_oal_file_finish (EEwsConnection *cnc,
 	return !g_simple_async_result_propagate_error (simple, error);
 }
 
+const gchar *
+e_ews_connection_get_mailbox (EEwsConnection *cnc)
+{
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
+
+	return cnc->priv->email;
+}
+
 void
 e_ews_connection_set_mailbox (EEwsConnection *cnc,
                               const gchar *email)
 {
-	g_return_if_fail (cnc != NULL);
+	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 	g_return_if_fail (email != NULL);
 
 	g_free (cnc->priv->email);
