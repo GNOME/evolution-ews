@@ -1,7 +1,7 @@
 #ifndef EWS_ERRORS_H
 #define EWS_ERRORS_H
 
-#include <glib.h>
+#include <server/e-soap-response.h>
 
 G_BEGIN_DECLS
 
@@ -309,8 +309,10 @@ struct EwsErrorMap {
 	gint error_code;
 };
 
-gint ews_get_error_code (const gchar *str);
+gint		ews_get_error_code		(const gchar *str);
+gboolean	ews_get_response_status		(ESoapParameter *param,
+						 GError **error);
 
 G_END_DECLS
 
-#endif
+#endif /* EWS_ERRORS_H */

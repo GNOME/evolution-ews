@@ -220,57 +220,6 @@ ews_parse_soap_fault (ESoapResponse *response,
 }
 
 static gboolean
-ews_get_response_status (ESoapParameter *param,
-                         GError **error)
-{
-	ESoapParameter *subparam;
-	gchar *value;
-	gboolean ret = TRUE;
-
-	value = e_soap_parameter_get_property (param, "ResponseClass");
-
-	if (!g_ascii_strcasecmp (value, "Error")) {
-		gchar *desc, *res;
-		gint error_code = EWS_CONNECTION_ERROR_UNKNOWN;
-
-		subparam = e_soap_parameter_get_first_child_by_name (param, "MessageText");
-		desc = e_soap_parameter_get_string_value (subparam);
-
-		subparam = e_soap_parameter_get_first_child_by_name (param, "ResponseCode");
-		res = e_soap_parameter_get_string_value (subparam);
-
-		error_code = ews_get_error_code ((const gchar *) res);
-
-		/* FIXME: This happens because of a bug in the Exchange server,
-		 * which doesn't like returning <Recurrence> for any appointment
-		 * without a timezone, even if it's an all day event like a
-		 * birthday. We need to handle the error and correctly report it
-		 * to the user, but for now we'll just ignore it... */
-		if (error_code != EWS_CONNECTION_ERROR_CORRUPTDATA &&
-		/* Ick, another one. If we try to set the IsRead flag on certain
-		 * types of item (task requests, those stupid 'recall' requests),
-		 * it complains. We really need to find a better way to return
-		 * individual errors for each response to a multiple request; it
-		 * isn't necessarily the case that a single error should be reported
-		 * as an error for the whole transaction */
-		    error_code != EWS_CONNECTION_ERROR_INVALIDPROPERTYREQUEST) {
-			g_set_error	(error,
-					 EWS_CONNECTION_ERROR,
-					 error_code,
-					 "%s", desc);
-			ret = FALSE;
-		}
-
-		g_free (desc);
-		g_free (res);
-	}
-
-	g_free (value);
-
-	return ret;
-}
-
-static gboolean
 ews_next_request (gpointer _cnc)
 {
 	EEwsConnection *cnc = _cnc;
