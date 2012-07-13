@@ -511,16 +511,22 @@ e_soap_response_get_first_parameter (ESoapResponse *response)
  * e_soap_response_get_first_parameter_by_name:
  * @response: the #ESoapResponse object.
  * @name: the name of the parameter to look for.
+ * @error: return location for a #GError, or %NULL
  *
  * Retrieves the first parameter contained in the SOAP response whose
- * name is @name.
+ * name is @name.  If no parameter is found, the function sets @error
+ * and returns %NULL.
+ *
+ * The function also checks for a SOAP "faultstring" parameter and,
+ * if found, uses it to set the #GError message.
  *
  * Returns: a #ESoapParameter representing the first parameter
  * with the given name, or %NULL.
  */
 ESoapParameter *
 e_soap_response_get_first_parameter_by_name (ESoapResponse *response,
-                                             const gchar *name)
+                                             const gchar *name,
+                                             GError **error)
 {
 	GList *l;
 
@@ -530,9 +536,38 @@ e_soap_response_get_first_parameter_by_name (ESoapResponse *response,
 	for (l = response->priv->parameters; l != NULL; l = l->next) {
 		ESoapParameter *param = (ESoapParameter *) l->data;
 
-		if (!strcmp (name, (const gchar *) param->name))
+		if (strcmp (name, (const gchar *) param->name) == 0)
 			return param;
 	}
+
+	/* XXX These are probably not the best error codes, but
+	 *     wanted to avoid EWS_CONNECTION_ERROR codes since
+	 *     this class is potentially reusable. */
+
+	for (l = response->priv->parameters; l != NULL; l = l->next) {
+		ESoapParameter *param = (ESoapParameter *) l->data;
+
+		if (strcmp ("faultstring", (const gchar *) param->name) == 0) {
+			gchar *string;
+
+			string = e_soap_parameter_get_string_value (param);
+
+			g_set_error (
+				error,
+				SOUP_HTTP_ERROR, SOUP_STATUS_IO_ERROR,
+				"%s", (string != NULL) ? string :
+				"<faultstring> in SOAP response");
+
+			g_free (string);
+
+			return NULL;
+		}
+	}
+
+	g_set_error (
+		error,
+		SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED,
+		"Missing <%s> in SOAP response", name);
 
 	return NULL;
 }

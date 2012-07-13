@@ -84,7 +84,8 @@ ESoapParameter *
 ESoapParameter *
 		e_soap_response_get_first_parameter_by_name
 						(ESoapResponse *response,
-						 const gchar *name);
+						 const gchar *name,
+						 GError **error);
 ESoapParameter *
 		e_soap_response_get_next_parameter
 						(ESoapResponse *response,

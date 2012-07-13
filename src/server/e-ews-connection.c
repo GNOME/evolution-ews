@@ -202,23 +202,6 @@ comp_func (gconstpointer a,
 		return 0;
 }
 
-static void
-ews_parse_soap_fault (ESoapResponse *response,
-                      GError **error)
-{
-	ESoapParameter *param;
-	gchar *faultstring = NULL;
-
-	param = e_soap_response_get_first_parameter_by_name(response, "faultstring");
-	if (param)
-		faultstring = e_soap_parameter_get_string_value (param);
-
-	g_set_error (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_UNKNOWN,
-		     "%s", faultstring?:"No <ResponseMessages> or <FreeBusyResponseArray> or SOAP <faultstring> in response");
-
-	g_free (faultstring);
-}
-
 static gboolean
 ews_next_request (gpointer _cnc)
 {
@@ -426,10 +409,10 @@ ews_response_cb (SoupSession *session,
 		e_soap_response_dump_response (response, stdout);
 
 	param = e_soap_response_get_first_parameter_by_name (
-		response, "ResponseMessages");
+		response, "ResponseMessages", NULL);
 	if (param == NULL)
 		param = e_soap_response_get_first_parameter_by_name (
-			response, "FreeBusyResponseArray");
+			response, "FreeBusyResponseArray", NULL);
 
 	if (param != NULL) {
 		/* Iterate over all "*ResponseMessage" elements. */
@@ -458,7 +441,7 @@ ews_response_cb (SoupSession *session,
 		}
 	} else {
 		param = e_soap_response_get_first_parameter_by_name (
-			response, "ResponseMessage");
+			response, "ResponseMessage", &error);
 
 		if (param != NULL) {
 			/*Parse GetUserOofSettingsResponse and SetUserOofSettingsResponse*/
@@ -470,8 +453,6 @@ ews_response_cb (SoupSession *session,
 				if (enode->cb)
 					enode->cb (subparam, enode->simple, &error);
 			}
-		} else {
-			ews_parse_soap_fault (response, &error);
 		}
 	}
 
