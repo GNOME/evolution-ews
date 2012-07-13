@@ -4059,6 +4059,7 @@ cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 
 	connection = e_ews_connection_new (
 		hosturl, user, password->str,
+		camel_network_settings_get_auth_mechanism (network_settings),
 		camel_ews_settings_get_timeout (ews_settings),
 		NULL, NULL, error);
 

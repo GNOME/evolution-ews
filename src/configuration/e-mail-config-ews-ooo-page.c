@@ -327,7 +327,10 @@ get_connection (EMConfigTargetSettings *target)
 	password = get_password (target->storage_settings);
 	email = target->email_address;
 
-	cnc = e_ews_connection_new (host_url, user, password, NULL, NULL, &error);
+	cnc = e_ews_connection_new (host_url, user, password,
+		camel_network_settings_get_auth_mechanism (network_settings),
+		camel_ews_settings_get_timeout (ews_settings),
+		NULL, NULL, &error);
 
 	if (!cnc) {
 		g_warning ("Error in connection: %s\n", error->message);

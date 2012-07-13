@@ -88,14 +88,23 @@ static CamelProvider ews_provider = {
 	/* ... */
 };
 
-/*TODO support more auth types */
-CamelServiceAuthType camel_ews_password_authtype = {
-	N_("Password"),
+CamelServiceAuthType camel_ews_ntlm_authtype = {
+	N_("NTLM"),
 
 	N_("This option will connect to the Exchange server using a "
-	   "plaintext password."),
+	   "plaintext password with NTLM authentication."),
 
 	"",
+	TRUE
+};
+
+CamelServiceAuthType camel_ews_basic_authtype = {
+	N_("Basic"),
+
+	N_("This option will connect to the Exchange server using a "
+	   "plaintext password with Basic authentication."),
+
+	"PLAIN",
 	TRUE
 };
 
@@ -104,7 +113,7 @@ camel_provider_module_init (void)
 {
 	ews_provider.url_hash = ews_url_hash;
 	ews_provider.url_equal = ews_url_equal;
-	ews_provider.authtypes = g_list_prepend (ews_provider.authtypes, &camel_ews_password_authtype);
+	ews_provider.authtypes = g_list_prepend (g_list_prepend (NULL, &camel_ews_basic_authtype), &camel_ews_ntlm_authtype);
 	ews_provider.translation_domain = GETTEXT_PACKAGE;
 
 	ews_provider.object_types[CAMEL_PROVIDER_STORE] =  camel_ews_store_get_type ();

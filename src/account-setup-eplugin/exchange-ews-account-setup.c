@@ -276,7 +276,10 @@ fetch_button_clicked_cb (GtkButton *button,
 	password = get_password (target);
 
 	/* pass user name while creating connection  to fetch oals */
-	cnc = e_ews_connection_new (oab_url, user, password, 30, NULL, NULL, NULL);
+	cnc = e_ews_connection_new (oab_url, user, password,
+		camel_network_settings_get_auth_mechanism (network_settings),
+		camel_ews_settings_get_timeout (ews_settings),
+		NULL, NULL, NULL);
 	cbdata->cancellable = cancellable;
 	e_ews_connection_get_oal_list (
 		cnc, cancellable, ews_oal_list_ready, cbdata);

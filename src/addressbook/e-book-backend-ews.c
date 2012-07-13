@@ -1693,6 +1693,7 @@ ews_download_full_gal (EBookBackendEws *cbews,
 	comp_cache_file = g_build_filename (cache_dir, full->filename, NULL);
 
 	oab_cnc = e_ews_connection_new (full_url, priv->username, priv->password,
+		camel_network_settings_get_auth_mechanism (CAMEL_NETWORK_SETTINGS (settings)),
 		camel_ews_settings_get_timeout (settings),
 		NULL, NULL, NULL);
 	if (!e_ews_connection_download_oal_file_sync (
@@ -1849,6 +1850,7 @@ ebews_start_gal_sync (gpointer data)
 	priv = cbews->priv;
 
 	oab_cnc = e_ews_connection_new (priv->oab_url, priv->username, priv->password,
+		camel_network_settings_get_auth_mechanism (CAMEL_NETWORK_SETTINGS (settings)),
 		camel_ews_settings_get_timeout (settings),
 		NULL, NULL, NULL);
 
@@ -2950,6 +2952,7 @@ book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 
 	connection = e_ews_connection_new (
 		hosturl, user, password->str,
+		camel_network_settings_get_auth_mechanism (network_settings),
 		camel_ews_settings_get_timeout (ews_settings),
 		NULL, NULL, error);
 

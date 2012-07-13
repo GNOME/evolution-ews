@@ -162,6 +162,7 @@ mail_config_ews_oal_combo_box_try_password_sync (ESourceAuthenticator *auth,
 	/* XXX This takes a GError but never fails, so skip it. */
 	cnc = e_ews_connection_new (
 		oab_url, user, password->str,
+		camel_network_settings_get_auth_mechanism (network_settings),
 		camel_ews_settings_get_timeout (ews_settings),
 		NULL, NULL, NULL);
 

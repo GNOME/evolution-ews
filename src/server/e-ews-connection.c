@@ -1240,6 +1240,7 @@ EEwsConnection *
 e_ews_connection_new (const gchar *uri,
                       const gchar *username,
                       const gchar *password,
+		      const gchar *auth_mechanism,
 		      guint timeout,
                       GCallback authenticate_cb,
                       gpointer authenticate_ctx,
@@ -1265,6 +1266,12 @@ e_ews_connection_new (const gchar *uri,
 
 		if (E_IS_EWS_CONNECTION (cnc)) {
 			g_object_ref (cnc);
+
+			g_object_set (G_OBJECT (cnc->priv->soup_session),
+				SOUP_SESSION_TIMEOUT, timeout,
+				SOUP_SESSION_USE_NTLM, g_strcmp0 (auth_mechanism, "PLAIN") != 0,
+				NULL);
+
 			g_static_mutex_unlock (&connecting);
 			return cnc;
 		}
@@ -1279,6 +1286,7 @@ e_ews_connection_new (const gchar *uri,
 
 	g_object_set (G_OBJECT (cnc->priv->soup_session),
 		SOUP_SESSION_TIMEOUT, timeout,
+		SOUP_SESSION_USE_NTLM, g_strcmp0 (auth_mechanism, "PLAIN") != 0,
 		NULL);
 
 	/* register a handler to the authenticate signal */
@@ -1698,7 +1706,9 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 		user = email_address;
 
 	cnc = e_ews_connection_new (url3, user, password,
-		camel_ews_settings_get_timeout (settings), NULL, NULL, &error);
+		camel_network_settings_get_auth_mechanism (network_settings),
+		camel_ews_settings_get_timeout (settings),
+		NULL, NULL, &error);
 	if (cnc == NULL) {
 		g_free (url1);
 		g_free (url2);

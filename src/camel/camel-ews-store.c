@@ -65,7 +65,6 @@ struct _CamelEwsStorePrivate {
 	EEwsConnection *cnc;
 };
 
-extern CamelServiceAuthType camel_ews_password_authtype; /*for the query_auth_types function */
 static gboolean	ews_store_construct	(CamelService *service, CamelSession *session,
 					 CamelProvider *provider, GError **error);
 
@@ -284,6 +283,7 @@ ews_connect_sync (CamelService *service,
 		return TRUE;
 
 	priv->cnc = e_ews_connection_new (hosturl, user, NULL,
+					  camel_network_settings_get_auth_mechanism (network_settings),
 					  camel_ews_settings_get_timeout (ews_settings),
 					  G_CALLBACK (ews_store_authenticate), service,
 					  error);
@@ -484,11 +484,9 @@ ews_store_query_auth_types_sync (CamelService *service,
                                  GCancellable *cancellable,
                                  GError **error)
 {
-	GList *auth_types = NULL;
+	g_set_error_literal (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC, _("Query for authentication types is not supported"));
 
-	d(printf("in query auth types\n"));
-	auth_types = g_list_prepend (auth_types,  &camel_ews_password_authtype);
-	return auth_types;
+	return NULL;
 }
 
 static CamelFolderInfo * ews_create_folder_sync (CamelStore *store, const gchar *parent_name,const gchar *folder_name, GCancellable *cancellable, GError **error);
