@@ -444,62 +444,74 @@ ews_response_cb (SoupSession *session,
 {
 	EwsNode *enode = (EwsNode *) data;
 	ESoapResponse *response;
+	ESoapParameter *param;
+	ESoapParameter *subparam;
+	GError *error = NULL;
 
 	if (g_cancellable_is_cancelled (enode->cancellable))
 		goto exit;
 
 	if (msg->status_code == SOUP_STATUS_UNAUTHORIZED) {
-		g_simple_async_result_set_error (enode->simple,
-						 EWS_CONNECTION_ERROR,
-						 EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED,
-						 _("Authentication failed"));
+		g_simple_async_result_set_error (
+			enode->simple,
+			EWS_CONNECTION_ERROR,
+			EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED,
+			_("Authentication failed"));
 		goto exit;
 	}
+
 	response = e_soap_message_parse_response ((ESoapMessage *) msg);
-	if (!response) {
-		g_simple_async_result_set_error	(enode->simple,
-						 EWS_CONNECTION_ERROR,
-						 EWS_CONNECTION_ERROR_NORESPONSE,
-						 _("No response: %s"), msg->reason_phrase);
-	} else {
-		ESoapParameter *param, *subparam;
-		GError *error = NULL;
 
-		/* TODO: The stdout can be replaced with Evolution's
-		 * Logging framework also */
-		if (response && g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1))
-			e_soap_response_dump_response (response, stdout);
+	if (response == NULL) {
+		g_simple_async_result_set_error (
+			enode->simple,
+			EWS_CONNECTION_ERROR,
+			EWS_CONNECTION_ERROR_NORESPONSE,
+			_("No response: %s"), msg->reason_phrase);
+		goto exit;
+	}
 
-		param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages");
-		if (!param)
-			param = e_soap_response_get_first_parameter_by_name (response, "FreeBusyResponseArray");
+	/* TODO: The stdout can be replaced with Evolution's
+	 * Logging framework also */
+	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1))
+		e_soap_response_dump_response (response, stdout);
 
-		if (param) {
-			/* Iterate over all "*ResponseMessage" elements. */
-			for (subparam = e_soap_parameter_get_first_child (param);
-			     subparam;
-			     subparam = e_soap_parameter_get_next_child (subparam)) {
-				gint l = strlen ((gchar *) subparam->name);
-				if (l < 15 || (strcmp((char *)subparam->name + l - 15, "ResponseMessage") &&
-				    strcmp((char *)subparam->name, "FreeBusyResponse")&&
-						strcmp((char *)subparam->name, "DelegateUserResponseMessageType"))) {
-					g_warning ("Unexpected element '%s' in place of ResponseMessage or FreeBusyResponse or DelegateUserResponseMessageType",
-						   subparam->name);
-					continue;
-				}
+	param = e_soap_response_get_first_parameter_by_name (
+		response, "ResponseMessages");
+	if (param == NULL)
+		param = e_soap_response_get_first_parameter_by_name (
+			response, "FreeBusyResponseArray");
 
-				if ((strcmp((char *)subparam->name, "FreeBusyResponse") == 0 && !ews_get_response_status (e_soap_parameter_get_first_child (subparam), &error)) ||
-				 (strcmp((char *)subparam->name, "FreeBusyResponse") && !ews_get_response_status (subparam, &error))) {
-					if (enode->cb) {
-						enode->cb (subparam, enode->simple, &error);
-					} else {
-						g_simple_async_result_set_from_error (enode->simple, error);
-						break;
-					}
-				} else if (enode->cb)
-					enode->cb (subparam, enode->simple, &error);
+	if (param != NULL) {
+		/* Iterate over all "*ResponseMessage" elements. */
+		for (subparam = e_soap_parameter_get_first_child (param);
+		     subparam != NULL;
+		     subparam = e_soap_parameter_get_next_child (subparam)) {
+			gint l = strlen ((gchar *) subparam->name);
+			if (l < 15 || (strcmp((char *)subparam->name + l - 15, "ResponseMessage") &&
+			    strcmp((char *)subparam->name, "FreeBusyResponse")&&
+					strcmp((char *)subparam->name, "DelegateUserResponseMessageType"))) {
+				g_warning ("Unexpected element '%s' in place of ResponseMessage or FreeBusyResponse or DelegateUserResponseMessageType",
+					   subparam->name);
+				continue;
 			}
-		} else if ((param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessage"))) {
+
+			if ((strcmp((char *)subparam->name, "FreeBusyResponse") == 0 && !ews_get_response_status (e_soap_parameter_get_first_child (subparam), &error)) ||
+			 (strcmp((char *)subparam->name, "FreeBusyResponse") && !ews_get_response_status (subparam, &error))) {
+				if (enode->cb) {
+					enode->cb (subparam, enode->simple, &error);
+				} else {
+					g_simple_async_result_set_from_error (enode->simple, error);
+					break;
+				}
+			} else if (enode->cb)
+				enode->cb (subparam, enode->simple, &error);
+		}
+	} else {
+		param = e_soap_response_get_first_parameter_by_name (
+			response, "ResponseMessage");
+
+		if (param != NULL) {
 			/*Parse GetUserOofSettingsResponse and SetUserOofSettingsResponse*/
 			if (!ews_get_response_status (param, &error)) {
 				if (enode->cb)
@@ -509,16 +521,15 @@ ews_response_cb (SoupSession *session,
 				if (enode->cb)
 					enode->cb (subparam, enode->simple, &error);
 			}
-		} else
+		} else {
 			ews_parse_soap_fault (response, &error);
-
-		if (error) {
-			g_simple_async_result_set_from_error (enode->simple, error);
-			g_clear_error (&error);
 		}
-
-		g_object_unref (response);
 	}
+
+	if (error != NULL)
+		g_simple_async_result_take_error (enode->simple, error);
+
+	g_object_unref (response);
 
 exit:
 	if (enode->complete_sync) {
@@ -534,6 +545,7 @@ exit:
 	} else {
 		g_simple_async_result_complete_in_idle (enode->simple);
 	}
+
 	ews_active_job_done (enode->cnc, enode);
 }
 
