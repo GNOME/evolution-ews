@@ -114,7 +114,6 @@ struct _EwsNode {
 	ESoapMessage *msg;
 	EEwsConnection *cnc;
 	GSimpleAsyncResult *simple;
-	gboolean complete_sync;
 
 	gint pri;                /* the command priority */
 	response_cb cb;
@@ -122,11 +121,6 @@ struct _EwsNode {
 	GCancellable *cancellable;
 	gulong cancel_handler_id;
 };
-
-typedef struct {
-	GAsyncResult *res;
-	EFlag *eflag;
-} EwsSyncData;
 
 /* Static Functions */
 
@@ -168,18 +162,6 @@ check_element (const gchar *function_name,
 	}
 
 	return TRUE;
-}
-
-static void
-ews_sync_reply_cb (GObject *object,
-                   GAsyncResult *res,
-                   gpointer user_data)
-{
-
-  EwsSyncData *sync_data = user_data;
-
-  sync_data->res = g_object_ref (res);
-  e_flag_set (sync_data->eflag);
 }
 
 static EwsNode *
@@ -361,8 +343,7 @@ ews_connection_queue_request (EEwsConnection *cnc,
                               response_cb cb,
                               gint pri,
                               GCancellable *cancellable,
-                              GSimpleAsyncResult *simple,
-                              gboolean complete_sync)
+                              GSimpleAsyncResult *simple)
 {
 	EwsNode *node;
 
@@ -374,7 +355,6 @@ ews_connection_queue_request (EEwsConnection *cnc,
 	node->pri = pri;
 	node->cb = cb;
 	node->cnc = cnc;
-	node->complete_sync = complete_sync;
 	node->simple = simple;
 
 	QUEUE_LOCK (cnc);
@@ -435,19 +415,7 @@ ews_response_cb (SoupSession *session,
 	g_object_unref (response);
 
 exit:
-	if (enode->complete_sync) {
-		GAsyncResult *async = G_ASYNC_RESULT (enode->simple);
-
-		/* If we just call g_simple_async_result_complete() then it
-		 * will bitch about being called in the wrong context, even
-		 * though we *know* it's OK. So instead, just call the
-		 * callback directly. We *know* it's ews_sync_reply_cb(),
-		 * because that's the only way the complete_sync flag gets
-		 * set */
-		ews_sync_reply_cb (NULL, async, g_async_result_get_user_data (async));
-	} else {
-		g_simple_async_result_complete_in_idle (enode->simple);
-	}
+	g_simple_async_result_complete_in_idle (enode->simple);
 
 	ews_active_job_done (enode->cnc, enode);
 }
@@ -2842,8 +2810,7 @@ e_ews_connection_sync_folder_items (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, sync_folder_items_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 gboolean
@@ -2895,36 +2862,28 @@ e_ews_connection_sync_folder_items_sync (EEwsConnection *cnc,
                                          GCancellable *cancellable,
                                          GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_sync_folder_items (
-		cnc, pri, *sync_state, fid,
-		default_props, additional_props,
-		max_entries,
-		cancellable, ews_sync_reply_cb,
-		sync_data);
+		cnc, pri, *sync_state, fid, default_props,
+		additional_props, max_entries, cancellable,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_sync_folder_items_finish (cnc, sync_data->res,
-							    sync_state,
-							    includes_last_item,
-							    items_created,
-							    items_updated,
-							    items_deleted,
-							    error);
+	success = e_ews_connection_sync_folder_items_finish (
+		cnc, result, sync_state, includes_last_item,
+		items_created, items_updated, items_deleted, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
+	return success;
 }
 
 static void
@@ -3026,8 +2985,7 @@ e_ews_connection_find_folder_items (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, find_folder_items_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 gboolean
@@ -3073,33 +3031,28 @@ e_ews_connection_find_folder_items_sync (EEwsConnection *cnc,
                                          GCancellable *cancellable,
                                          GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_find_folder_items (
 		cnc, pri, fid, default_props,
 		add_props, sort_order, query,
-		type, convert_query_cb,
-		NULL, ews_sync_reply_cb,
-		sync_data);
+		type, convert_query_cb, NULL,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_find_folder_items_finish (cnc, sync_data->res,
-							    includes_last_item,
-							    items,
-							    error);
+	success = e_ews_connection_find_folder_items_finish (
+		cnc, result, includes_last_item, items, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
+	return success;
 }
 
 void
@@ -3137,8 +3090,7 @@ e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, sync_hierarchy_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 gboolean
@@ -3186,34 +3138,31 @@ e_ews_connection_sync_folder_hierarchy_sync (EEwsConnection *cnc,
                                              GCancellable *cancellable,
                                              GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_sync_folder_hierarchy (
-		cnc, pri, *sync_state,
-		cancellable, ews_sync_reply_cb,
-		sync_data);
+		cnc, pri, *sync_state, cancellable,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_sync_folder_hierarchy_finish (cnc, sync_data->res,
-								sync_state,
-								includes_last_folder,
-								folders_created,
-								folders_updated,
-								folders_deleted,
-								error);
+	success = e_ews_connection_sync_folder_hierarchy_finish (
+		cnc, result, sync_state,
+		includes_last_folder,
+		folders_created,
+		folders_updated,
+		folders_deleted,
+		error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
+	return success;
 }
 
 void
@@ -3294,8 +3243,7 @@ e_ews_connection_get_items (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, get_items_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 gboolean
@@ -3338,34 +3286,29 @@ e_ews_connection_get_items_sync (EEwsConnection *cnc,
                                  GCancellable *cancellable,
                                  GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_get_items (
 		cnc, pri,ids, default_props,
 		additional_props, include_mime,
-		mime_directory,
-		progress_fn, progress_data,
-		cancellable, ews_sync_reply_cb,
-		sync_data);
+		mime_directory, progress_fn,
+		progress_data, cancellable,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_get_items_finish (cnc,
-						    sync_data->res,
-						    items,
-						    error);
+	success = e_ews_connection_get_items_finish (
+		cnc, result, items, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
+	return success;
 }
 
 static const gchar *
@@ -3490,8 +3433,7 @@ e_ews_connection_delete_items (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, delete_item_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 void
@@ -3557,8 +3499,7 @@ e_ews_connection_delete_item (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, delete_item_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 gboolean
@@ -3592,30 +3533,26 @@ e_ews_connection_delete_items_sync (EEwsConnection *cnc,
                                     GCancellable *cancellable,
                                     GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_delete_items (
 		cnc, pri, ids, delete_type,
-		send_cancels, affected_tasks,
-		cancellable, ews_sync_reply_cb,
-		sync_data);
+		send_cancels, affected_tasks, cancellable,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_delete_items_finish (cnc, sync_data->res,
-						       error);
+	success = e_ews_connection_delete_items_finish (cnc, result, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
+	return success;
 }
 
 gboolean
@@ -3629,30 +3566,26 @@ e_ews_connection_delete_item_sync (EEwsConnection *cnc,
                                    GCancellable *cancellable,
                                    GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_delete_item (
 		cnc, pri, id, index, delete_type,
-		send_cancels, affected_tasks,
-		cancellable, ews_sync_reply_cb,
-		sync_data);
+		send_cancels, affected_tasks, cancellable,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_delete_items_finish (cnc, sync_data->res,
-						       error);
+	success = e_ews_connection_delete_items_finish (cnc, result, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
+	return success;
 }
 
 void
@@ -3713,8 +3646,7 @@ e_ews_connection_update_items (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, get_items_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 gboolean
@@ -3762,32 +3694,29 @@ e_ews_connection_update_items_sync (EEwsConnection *cnc,
                                     GCancellable *cancellable,
                                     GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_update_items (
 		cnc, pri, conflict_res,
 		msg_disposition, send_invites,
-		folder_id,
-		create_cb, create_user_data,
-		cancellable, ews_sync_reply_cb,
-		sync_data);
+		folder_id, create_cb,
+		create_user_data, cancellable,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_update_items_finish (cnc, sync_data->res,
-						       ids, error);
+	success = e_ews_connection_update_items_finish (
+		cnc, result, ids, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
+	return success;
 }
 
 void
@@ -3844,8 +3773,7 @@ e_ews_connection_create_items (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, get_items_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 gboolean
@@ -3885,31 +3813,29 @@ e_ews_connection_create_items_sync (EEwsConnection *cnc,
                                     GCancellable *cancellable,
                                     GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_create_items (
 		cnc, pri, msg_disposition,
 		send_invites, folder_id,
 		create_cb, create_user_data,
-		cancellable, ews_sync_reply_cb,
-		sync_data);
+		cancellable,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_create_items_finish (cnc, sync_data->res,
-						       ids, error);
+	success = e_ews_connection_create_items_finish (
+		cnc, result, ids, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
+	return success;
 }
 
 static const gchar *
@@ -3978,8 +3904,7 @@ e_ews_connection_resolve_names (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, resolve_names_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 gboolean
@@ -4029,32 +3954,31 @@ e_ews_connection_resolve_names_sync (EEwsConnection *cnc,
                                      GCancellable *cancellable,
                                      GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_resolve_names (
 		cnc, pri, resolve_name,
 		scope, parent_folder_ids,
 		fetch_contact_data,
-		cancellable, ews_sync_reply_cb,
-		sync_data);
+		cancellable,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_resolve_names_finish (cnc, sync_data->res,
-						       mailboxes, contact_items,
-						       includes_last_item, error);
+	success = e_ews_connection_resolve_names_finish (
+		cnc, result,
+		mailboxes, contact_items,
+		includes_last_item, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
+	return success;
 }
 
 static void
@@ -4257,8 +4181,7 @@ e_ews_connection_expand_dl (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, expand_dl_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 /* includes_last_item does not make sense as expand_dl does not support recursive 
@@ -4301,28 +4224,26 @@ e_ews_connection_expand_dl_sync (EEwsConnection *cnc,
                                  GCancellable *cancellable,
                                  GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_expand_dl (
 		cnc, pri, mb, cancellable,
-		ews_sync_reply_cb, sync_data);
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_expand_dl_finish (cnc, sync_data->res,
-						       mailboxes, includes_last_item, error);
+	success = e_ews_connection_expand_dl_finish (
+		cnc, result, mailboxes, includes_last_item, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
+	return success;
 }
 
 static void
@@ -4395,8 +4316,7 @@ e_ews_connection_update_folder (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, update_folder_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 gboolean
@@ -4428,29 +4348,25 @@ e_ews_connection_update_folder_sync (EEwsConnection *cnc,
                                      GCancellable *cancellable,
                                      GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_update_folder (
-		cnc, pri, create_cb, create_user_data,
-		cancellable, ews_sync_reply_cb,
-		sync_data);
+		cnc, pri, create_cb, create_user_data, cancellable,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_update_folder_finish (cnc, sync_data->res,
-							error);
+	success = e_ews_connection_update_folder_finish (cnc, result, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
+	return success;
 }
 
 static void
@@ -4532,8 +4448,7 @@ e_ews_connection_move_folder (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, move_folder_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 gboolean
@@ -4565,29 +4480,25 @@ e_ews_connection_move_folder_sync (EEwsConnection *cnc,
                                    GCancellable *cancellable,
                                    GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_move_folder (
-		cnc, pri, to_folder, folder,
-		cancellable, ews_sync_reply_cb,
-		sync_data);
+		cnc, pri, to_folder, folder, cancellable,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_move_folder_finish (cnc, sync_data->res,
-						      error);
+	success = e_ews_connection_move_folder_finish (cnc, result, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
+	return success;
 }
 
 void
@@ -4634,8 +4545,7 @@ e_ews_connection_get_folder (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, get_folder_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 
 }
 
@@ -4675,30 +4585,27 @@ e_ews_connection_get_folder_sync (EEwsConnection *cnc,
                                   GCancellable *cancellable,
                                   GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_get_folder (
 		cnc, pri, folder_shape, add_props,
 		folder_ids, cancellable,
-		ews_sync_reply_cb, sync_data);
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_get_folder_finish (cnc, sync_data->res,
-						     folders, error);
+	success = e_ews_connection_get_folder_finish (
+		cnc, result, folders, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
-
+	return success;
 }
 
 void
@@ -4753,8 +4660,7 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, create_folder_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 gboolean
@@ -4794,34 +4700,28 @@ e_ews_connection_create_folder_sync (EEwsConnection *cnc,
                                      GCancellable *cancellable,
                                      GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_create_folder (
 		cnc, pri, parent_folder_id,
 		is_distinguished_id,
-		folder_name,
-		cancellable,
-		ews_sync_reply_cb,
-		sync_data);
+		folder_name, cancellable,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_create_folder_finish (cnc, sync_data->res,
-							folder_id,
-							error);
+	success = e_ews_connection_create_folder_finish (
+		cnc, result, folder_id, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
-
+	return success;
 }
 
 void
@@ -4872,8 +4772,7 @@ e_ews_connection_move_items (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, get_items_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 gboolean
@@ -4912,29 +4811,26 @@ e_ews_connection_move_items_sync (EEwsConnection *cnc,
                                   GCancellable *cancellable,
                                   GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_move_items (
-		cnc, pri, folder_id, docopy, ids,
-		cancellable, ews_sync_reply_cb,
-		sync_data);
+		cnc, pri, folder_id, docopy, ids, cancellable,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_move_items_finish (cnc, sync_data->res,
-						     items, error);
+	success = e_ews_connection_move_items_finish (
+		cnc, result, items, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
+	return success;
 }
 
 static void
@@ -5025,8 +4921,7 @@ e_ews_connection_delete_folder (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, delete_folder_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 gboolean
@@ -5069,33 +4964,28 @@ e_ews_connection_delete_folder_sync (EEwsConnection *cnc,
                                      GCancellable *cancellable,
                                      GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_delete_folder (
 		cnc, pri, folder_id,
 		is_distinguished_id,
 		delete_type,
 		cancellable,
-		ews_sync_reply_cb,
-		sync_data);
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_delete_folder_finish (cnc, sync_data->res,
-							error);
+	success = e_ews_connection_delete_folder_finish (cnc, result, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
-
+	return success;
 }
 
 static void
@@ -5258,8 +5148,7 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, create_attachments_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 GSList *
@@ -5299,30 +5188,24 @@ e_ews_connection_create_attachments_sync (EEwsConnection *cnc,
                                           GCancellable *cancellable,
                                           GError **error)
 {
-	EwsSyncData *sync_data;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
 	GSList *ids;
 
 	g_return_val_if_fail (cnc != NULL, NULL);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_create_attachments (
-		cnc, pri,
-		parent,
-		files,
-		cancellable,
-		ews_sync_reply_cb,
-		sync_data);
+		cnc, pri, parent, files, cancellable,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	ids = e_ews_connection_create_attachments_finish (cnc, change_key, sync_data->res,
-							error);
+	ids = e_ews_connection_create_attachments_finish (
+		cnc, change_key, result, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
 	return ids;
 }
@@ -5426,8 +5309,7 @@ e_ews_connection_delete_attachments (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, delete_attachments_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 GSList *
@@ -5463,29 +5345,24 @@ e_ews_connection_delete_attachments_sync (EEwsConnection *cnc,
                                           GCancellable *cancellable,
                                           GError **error)
 {
-	EwsSyncData *sync_data;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
 	GSList *parents;
 
 	g_return_val_if_fail (cnc != NULL, NULL);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_delete_attachments (
-		cnc, pri,
-		ids,
-		cancellable,
-		ews_sync_reply_cb,
-		sync_data);
+		cnc, pri, ids, cancellable,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	parents = e_ews_connection_delete_attachments_finish (cnc, sync_data->res,
-							error);
+	parents = e_ews_connection_delete_attachments_finish (
+		cnc, result, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
 	return parents;
 }
@@ -5620,8 +5497,7 @@ e_ews_connection_get_attachments (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, get_attachments_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 GSList *
@@ -5663,31 +5539,25 @@ e_ews_connection_get_attachments_sync (EEwsConnection *cnc,
                                        GCancellable *cancellable,
                                        GError **error)
 {
-	EwsSyncData *sync_data;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
 	GSList *attachments_ids;
 
 	g_return_val_if_fail (cnc != NULL, NULL);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_get_attachments (
 		cnc, pri, uid, ids, cache, include_mime,
-		progress_fn, progress_data,
-		cancellable,
-		ews_sync_reply_cb,
-		sync_data);
+		progress_fn, progress_data, cancellable,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	attachments_ids = e_ews_connection_get_attachments_finish (cnc,
-						    sync_data->res,
-						    items,
-						    error);
+	attachments_ids = e_ews_connection_get_attachments_finish (
+		cnc, result, items, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
 	return attachments_ids;
 }
@@ -5858,8 +5728,7 @@ e_ews_connection_get_free_busy (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, get_free_busy_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 gboolean
@@ -5896,30 +5765,27 @@ e_ews_connection_get_free_busy_sync (EEwsConnection *cnc,
                                      GCancellable *cancellable,
                                      GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_get_free_busy (
-		cnc, pri,
-		free_busy_cb, free_busy_user_data,
-		cancellable, ews_sync_reply_cb,
-		sync_data);
+		cnc, pri, free_busy_cb,
+		free_busy_user_data, cancellable,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_get_free_busy_finish (cnc, sync_data->res,
-							free_busy, error);
+	success = e_ews_connection_get_free_busy_finish (
+		cnc, result, free_busy, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
+	return success;
 }
 
 static EwsPermissionLevel
@@ -6095,8 +5961,7 @@ e_ews_connection_get_delegate (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, get_delegate_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 gboolean
@@ -6143,31 +6008,27 @@ e_ews_connection_get_delegate_sync (EEwsConnection *cnc,
                                     GCancellable *cancellable,
                                     GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_get_delegate (
 		cnc, pri, mail_id,
-		include_permissions,
-		cancellable,
-		ews_sync_reply_cb,
-		sync_data);
+		include_permissions, cancellable,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_get_delegate_finish (cnc, sync_data->res,
-							get_delegate, error);
+	success = e_ews_connection_get_delegate_finish (
+		cnc, result, get_delegate, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
+	return success;
 
 }
 
@@ -6211,8 +6072,7 @@ e_ews_connection_get_oof_settings (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, get_oof_settings_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 }
 
 gboolean
@@ -6248,29 +6108,26 @@ e_ews_connection_get_oof_settings_sync (EEwsConnection *cnc,
                                         GCancellable *cancellable,
                                         GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_get_oof_settings (
-		cnc, pri,
-		cancellable, ews_sync_reply_cb,
-		sync_data);
+		cnc, pri, cancellable,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_get_oof_settings_finish (cnc, sync_data->res,
-							    oof_settings, error);
+	success = e_ews_connection_get_oof_settings_finish (
+		cnc, result, oof_settings, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
+	return success;
 }
 
 static void
@@ -6367,8 +6224,7 @@ e_ews_connection_set_oof_settings (EEwsConnection *cnc,
 
 	ews_connection_queue_request (
 		cnc, msg, set_oof_settings_response_cb,
-		pri, cancellable, simple,
-		callback == ews_sync_reply_cb);
+		pri, cancellable, simple);
 
 	g_free (time_val);
 	g_free (start_tm);
@@ -6403,29 +6259,26 @@ e_ews_connection_set_oof_settings_sync (EEwsConnection *cnc,
                                         GCancellable *cancellable,
                                         GError **error)
 {
-	EwsSyncData *sync_data;
-	gboolean result;
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
-	sync_data = g_new0 (EwsSyncData, 1);
-	sync_data->eflag = e_flag_new ();
+	closure = e_async_closure_new ();
 
 	e_ews_connection_set_oof_settings (
-		cnc, pri, oof_settings,
-		cancellable, ews_sync_reply_cb,
-		sync_data);
+		cnc, pri, oof_settings, cancellable,
+		e_async_closure_callback, closure);
 
-	e_flag_wait (sync_data->eflag);
+	result = e_async_closure_wait (closure);
 
-	result = e_ews_connection_set_oof_settings_finish (cnc, sync_data->res,
-							    error);
+	success = e_ews_connection_set_oof_settings_finish (
+		cnc, result, error);
 
-	e_flag_free (sync_data->eflag);
-	g_object_unref (sync_data->res);
-	g_free (sync_data);
+	e_async_closure_free (closure);
 
-	return result;
+	return success;
 }
 
 void
