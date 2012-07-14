@@ -209,6 +209,12 @@ void		e_ews_connection_authenticate	(EEwsConnection *cnc,
 						 const gchar *user,
 						 const gchar *passwd,
 						 GError *error);
+void		e_ews_connection_queue_request	(EEwsConnection *cnc,
+						 ESoapMessage *msg,
+						 EEwsResponseCallback cb,
+						 gint pri,
+						 GCancellable *cancellable,
+						 GSimpleAsyncResult *simple);
 
 gboolean	e_ews_autodiscover_ws_url_sync	(CamelEwsSettings *settings,
 						 const gchar *email_address,

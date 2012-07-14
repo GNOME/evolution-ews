@@ -335,13 +335,13 @@ ews_cancel_request (GCancellable *cancellable,
 	}
 }
 
-static void
-ews_connection_queue_request (EEwsConnection *cnc,
-                              ESoapMessage *msg,
-                              EEwsResponseCallback cb,
-                              gint pri,
-                              GCancellable *cancellable,
-                              GSimpleAsyncResult *simple)
+void
+e_ews_connection_queue_request (EEwsConnection *cnc,
+                                ESoapMessage *msg,
+                                EEwsResponseCallback cb,
+                                gint pri,
+                                GCancellable *cancellable,
+                                GSimpleAsyncResult *simple)
 {
 	EwsNode *node;
 
@@ -2806,7 +2806,7 @@ e_ews_connection_sync_folder_items (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, sync_folder_items_response_cb,
 		pri, cancellable, simple);
 }
@@ -2981,7 +2981,7 @@ e_ews_connection_find_folder_items (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, find_folder_items_response_cb,
 		pri, cancellable, simple);
 }
@@ -3086,7 +3086,7 @@ e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, sync_hierarchy_response_cb,
 		pri, cancellable, simple);
 }
@@ -3239,7 +3239,7 @@ e_ews_connection_get_items (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, get_items_response_cb,
 		pri, cancellable, simple);
 }
@@ -3429,7 +3429,7 @@ e_ews_connection_delete_items (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, delete_item_response_cb,
 		pri, cancellable, simple);
 }
@@ -3495,7 +3495,7 @@ e_ews_connection_delete_item (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, delete_item_response_cb,
 		pri, cancellable, simple);
 }
@@ -3642,7 +3642,7 @@ e_ews_connection_update_items (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, get_items_response_cb,
 		pri, cancellable, simple);
 }
@@ -3769,7 +3769,7 @@ e_ews_connection_create_items (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, get_items_response_cb,
 		pri, cancellable, simple);
 }
@@ -3900,7 +3900,7 @@ e_ews_connection_resolve_names (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, resolve_names_response_cb,
 		pri, cancellable, simple);
 }
@@ -4177,7 +4177,7 @@ e_ews_connection_expand_dl (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, expand_dl_response_cb,
 		pri, cancellable, simple);
 }
@@ -4312,7 +4312,7 @@ e_ews_connection_update_folder (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, update_folder_response_cb,
 		pri, cancellable, simple);
 }
@@ -4444,7 +4444,7 @@ e_ews_connection_move_folder (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, move_folder_response_cb,
 		pri, cancellable, simple);
 }
@@ -4541,7 +4541,7 @@ e_ews_connection_get_folder (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, get_folder_response_cb,
 		pri, cancellable, simple);
 
@@ -4656,7 +4656,7 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, create_folder_response_cb,
 		pri, cancellable, simple);
 }
@@ -4768,7 +4768,7 @@ e_ews_connection_move_items (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, get_items_response_cb,
 		pri, cancellable, simple);
 }
@@ -4917,7 +4917,7 @@ e_ews_connection_delete_folder (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, delete_folder_response_cb,
 		pri, cancellable, simple);
 }
@@ -5144,7 +5144,7 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, create_attachments_response_cb,
 		pri, cancellable, simple);
 }
@@ -5305,7 +5305,7 @@ e_ews_connection_delete_attachments (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, delete_attachments_response_cb,
 		pri, cancellable, simple);
 }
@@ -5493,7 +5493,7 @@ e_ews_connection_get_attachments (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, get_attachments_response_cb,
 		pri, cancellable, simple);
 }
@@ -5724,7 +5724,7 @@ e_ews_connection_get_free_busy (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 						   simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, get_free_busy_response_cb,
 		pri, cancellable, simple);
 }
@@ -5957,7 +5957,7 @@ e_ews_connection_get_delegate (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, get_delegate_response_cb,
 		pri, cancellable, simple);
 }
@@ -6068,7 +6068,7 @@ e_ews_connection_get_oof_settings (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, get_oof_settings_response_cb,
 		pri, cancellable, simple);
 }
@@ -6220,7 +6220,7 @@ e_ews_connection_set_oof_settings (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	ews_connection_queue_request (
+	e_ews_connection_queue_request (
 		cnc, msg, set_oof_settings_response_cb,
 		pri, cancellable, simple);
 
