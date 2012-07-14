@@ -62,9 +62,12 @@ enum {
 	EWS_PRIORITY_HIGH
 };
 
-typedef void (*EEwsRequestCreationCallback) (ESoapMessage *msg,
-					     gpointer user_data);
-typedef void (*EwsProgressFn) (gpointer object, gint percent);
+typedef void	(*EEwsRequestCreationCallback)	(ESoapMessage *msg,
+						 gpointer user_data);
+typedef void	(*EwsProgressFn)		(gpointer object,
+						 gint percent);
+typedef void	(*EEwsResponseCallback)		(ESoapResponse *response,
+						 GSimpleAsyncResult *simple);
 
 typedef enum {
 	EWS_SEARCH_AD,

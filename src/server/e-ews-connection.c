@@ -60,8 +60,6 @@ static GHashTable *loaded_connections_permissions = NULL;
 static gboolean ews_next_request (gpointer _cnc);
 static gint comp_func (gconstpointer a, gconstpointer b);
 
-typedef void		(*response_cb)		(ESoapResponse *response,
-						 GSimpleAsyncResult *simple);
 static void ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data);
 
 static void	ews_connection_authenticate	(SoupSession *sess,
@@ -116,7 +114,7 @@ struct _EwsNode {
 	GSimpleAsyncResult *simple;
 
 	gint pri;                /* the command priority */
-	response_cb cb;
+	EEwsResponseCallback cb;
 
 	GCancellable *cancellable;
 	gulong cancel_handler_id;
@@ -340,7 +338,7 @@ ews_cancel_request (GCancellable *cancellable,
 static void
 ews_connection_queue_request (EEwsConnection *cnc,
                               ESoapMessage *msg,
-                              response_cb cb,
+                              EEwsResponseCallback cb,
                               gint pri,
                               GCancellable *cancellable,
                               GSimpleAsyncResult *simple)
