@@ -1,3 +1,20 @@
+Evolution-EWS 3.5.4 2012-07-16
+------------------------------
+
+Bug Fixes:
+	Bug 663383 - Doesn't allow to quit (Milan Crha)
+	Bug 677007 - Add Basic authentication type (Milan Crha)
+	Bug 679303 - Doesn't detect when password has changed (Milan Crha)
+	Bug 679305 - EX addresses not decoded in folder summary (Milan Crha)
+	Bug 679305 - EX addresses not decoded in folder summary (Milan Crha)
+
+Other Changes:
+	* Fix crasher in oal_response_cb(). (Matthew Barnes)
+	* Add "Connection timeout" option into mail account properties
+	  (Milan Crha)
+	* Rework SOAP response handling. (Matthew Barnes)
+
+
 Evolution-EWS 3.5.3 2012-06-25
 ------------------------------
 
