@@ -259,20 +259,17 @@ static void ews_trigger_next_request (EEwsConnection *cnc)
 static gpointer
 ews_unref_in_thread_func (gpointer data)
 {
-	g_return_val_if_fail (data != NULL, NULL);
-
-	g_object_unref (data);
+	g_object_unref (G_SIMPLE_ASYNC_RESULT (data));
 
 	return NULL;
 }
 
 static void
-ews_unref_in_thread (GObject *object)
+ews_unref_in_thread (GSimpleAsyncResult *simple)
 {
-	g_return_if_fail (object != NULL);
-	g_return_if_fail (G_IS_OBJECT (object));
+	g_return_if_fail (G_IS_SIMPLE_ASYNC_RESULT (simple));
 
-	g_thread_create (ews_unref_in_thread_func, object, FALSE, NULL);
+	g_thread_create (ews_unref_in_thread_func, simple, FALSE, NULL);
 }
 
 /**
@@ -302,7 +299,7 @@ ews_active_job_done (EEwsConnection *cnc,
 	/* the 'simple' holds reference on 'cnc' and this function
 	 * is called in a dedicated thread, which 'cnc' joins on dispose,
 	 * thus to avoid race condition, unref the object in its own thread */
-	ews_unref_in_thread (G_OBJECT (ews_node->simple));
+	ews_unref_in_thread (ews_node->simple);
 	g_free (ews_node);
 }
 
@@ -347,13 +344,14 @@ e_ews_connection_queue_request (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 	g_return_if_fail (cb != NULL);
+	g_return_if_fail (G_IS_SIMPLE_ASYNC_RESULT (simple));
 
 	node = ews_node_new ();
 	node->msg = msg;
 	node->pri = pri;
 	node->cb = cb;
 	node->cnc = cnc;
-	node->simple = simple;
+	node->simple = g_object_ref (simple);
 
 	QUEUE_LOCK (cnc);
 	cnc->priv->jobs = g_slist_insert_sorted (cnc->priv->jobs, (gpointer *) node, (GCompareFunc) comp_func);
@@ -2809,6 +2807,8 @@ e_ews_connection_sync_folder_items (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, sync_folder_items_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 gboolean
@@ -2984,6 +2984,8 @@ e_ews_connection_find_folder_items (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, find_folder_items_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 gboolean
@@ -3089,6 +3091,8 @@ e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, sync_hierarchy_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 gboolean
@@ -3242,6 +3246,8 @@ e_ews_connection_get_items (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, get_items_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 gboolean
@@ -3432,6 +3438,8 @@ e_ews_connection_delete_items (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, delete_item_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 void
@@ -3498,6 +3506,8 @@ e_ews_connection_delete_item (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, delete_item_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 gboolean
@@ -3645,6 +3655,8 @@ e_ews_connection_update_items (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, get_items_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 gboolean
@@ -3772,6 +3784,8 @@ e_ews_connection_create_items (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, get_items_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 gboolean
@@ -3903,6 +3917,8 @@ e_ews_connection_resolve_names (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, resolve_names_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 gboolean
@@ -4180,6 +4196,8 @@ e_ews_connection_expand_dl (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, expand_dl_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 /* includes_last_item does not make sense as expand_dl does not support recursive 
@@ -4315,6 +4333,8 @@ e_ews_connection_update_folder (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, update_folder_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 gboolean
@@ -4447,6 +4467,8 @@ e_ews_connection_move_folder (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, move_folder_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 gboolean
@@ -4545,6 +4567,7 @@ e_ews_connection_get_folder (EEwsConnection *cnc,
 		cnc, msg, get_folder_response_cb,
 		pri, cancellable, simple);
 
+	g_object_unref (simple);
 }
 
 gboolean
@@ -4659,6 +4682,8 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, create_folder_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 gboolean
@@ -4771,6 +4796,8 @@ e_ews_connection_move_items (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, get_items_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 gboolean
@@ -4920,6 +4947,8 @@ e_ews_connection_delete_folder (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, delete_folder_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 gboolean
@@ -5147,6 +5176,8 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, create_attachments_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 GSList *
@@ -5308,6 +5339,8 @@ e_ews_connection_delete_attachments (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, delete_attachments_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 GSList *
@@ -5496,6 +5529,8 @@ e_ews_connection_get_attachments (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, get_attachments_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 GSList *
@@ -5727,6 +5762,8 @@ e_ews_connection_get_free_busy (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, get_free_busy_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 gboolean
@@ -5960,6 +5997,8 @@ e_ews_connection_get_delegate (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, get_delegate_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 gboolean
@@ -6071,6 +6110,8 @@ e_ews_connection_get_oof_settings (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, get_oof_settings_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 }
 
 gboolean
@@ -6223,6 +6264,8 @@ e_ews_connection_set_oof_settings (EEwsConnection *cnc,
 	e_ews_connection_queue_request (
 		cnc, msg, set_oof_settings_response_cb,
 		pri, cancellable, simple);
+
+	g_object_unref (simple);
 
 	g_free (time_val);
 	g_free (start_tm);
