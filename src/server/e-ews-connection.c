@@ -937,6 +937,8 @@ e_ews_connection_dispose (GObject *object)
 
 	priv = cnc->priv;
 
+	g_static_mutex_lock (&connecting);
+
 	/* remove the connection from the hash table */
 	if (loaded_connections_permissions != NULL) {
 		hash_key = g_strdup_printf ("%s@%s",
@@ -950,9 +952,11 @@ e_ews_connection_dispose (GObject *object)
 		g_free (hash_key);
 	}
 
-	g_signal_handlers_disconnect_by_func (priv->soup_session, ews_connection_authenticate, cnc);
+	g_static_mutex_unlock (&connecting);
 
 	if (priv->soup_session) {
+		g_signal_handlers_disconnect_by_func (priv->soup_session, ews_connection_authenticate, cnc);
+
 		g_main_loop_quit (priv->soup_loop);
 		g_thread_join (priv->soup_thread);
 		priv->soup_thread = NULL;
