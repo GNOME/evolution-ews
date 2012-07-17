@@ -57,7 +57,6 @@ struct _EwsNode;
 static GObjectClass *parent_class = NULL;
 static GStaticMutex connecting = G_STATIC_MUTEX_INIT;
 static GHashTable *loaded_connections_permissions = NULL;
-static gboolean ews_next_request (gpointer _cnc);
 static gint comp_func (gconstpointer a, gconstpointer b);
 
 static void ews_response_cb (SoupSession *session, SoupMessage *msg, gpointer data);
@@ -205,6 +204,117 @@ comp_func (gconstpointer a,
 		return 0;
 }
 
+typedef enum _EwsScheduleOp {
+	EWS_SCHEDULE_OP_QUEUE_MESSAGE,
+	EWS_SCHEDULE_OP_CANCEL,
+	EWS_SCHEDULE_OP_ABORT
+} EwsScheduleOp;
+
+typedef struct _EwsScheduleData
+{
+	EEwsConnection *cnc;
+	SoupMessage *message;
+
+	EwsScheduleOp op;
+
+	SoupSessionCallback queue_callback;
+	gpointer queue_user_data;
+} EwsScheduleData;
+
+/* this is run in priv->soup_thread */
+static gboolean
+ews_connection_scheduled_cb (gpointer user_data)
+{
+	EwsScheduleData *sd = user_data;
+
+	g_return_val_if_fail (sd != NULL, FALSE);
+
+	switch (sd->op) {
+	case EWS_SCHEDULE_OP_QUEUE_MESSAGE:
+		soup_session_queue_message (sd->cnc->priv->soup_session, sd->message,
+			sd->queue_callback, sd->queue_user_data);
+		break;
+	case EWS_SCHEDULE_OP_CANCEL:
+		soup_session_cancel_message (sd->cnc->priv->soup_session, sd->message, SOUP_STATUS_CANCELLED);
+		break;
+	case EWS_SCHEDULE_OP_ABORT:
+		soup_session_abort (sd->cnc->priv->soup_session);
+		break;
+	}
+
+	if (sd->message)
+		g_object_unref (sd->message);
+	g_object_unref (sd->cnc);
+	g_free (sd);
+
+	return FALSE;
+}
+
+static void
+ews_connection_schedule_queue_message (EEwsConnection *cnc,
+				       SoupMessage *message,
+				       SoupSessionCallback callback,
+				       gpointer user_data)
+{
+	EwsScheduleData *sd;
+	GSource *source;
+
+	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
+	g_return_if_fail (SOUP_IS_MESSAGE (message));
+
+	sd = g_new0 (EwsScheduleData, 1);
+	sd->cnc = g_object_ref (cnc);
+	sd->message = g_object_ref (message);
+	sd->op = EWS_SCHEDULE_OP_QUEUE_MESSAGE;
+	sd->queue_callback = callback;
+	sd->queue_user_data = user_data;
+
+	source = g_idle_source_new ();
+	g_source_set_priority (source, G_PRIORITY_DEFAULT);
+	g_source_set_callback (source, ews_connection_scheduled_cb, sd, NULL);
+	g_source_attach (source, cnc->priv->soup_context);
+}
+
+static void
+ews_connection_schedule_cancel_message (EEwsConnection *cnc,
+					SoupMessage *message)
+{
+	EwsScheduleData *sd;
+	GSource *source;
+
+	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
+	g_return_if_fail (SOUP_IS_MESSAGE (message));
+
+	sd = g_new0 (EwsScheduleData, 1);
+	sd->cnc = g_object_ref (cnc);
+	sd->message = g_object_ref (message);
+	sd->op = EWS_SCHEDULE_OP_CANCEL;
+
+	source = g_idle_source_new ();
+	g_source_set_priority (source, G_PRIORITY_DEFAULT);
+	g_source_set_callback (source, ews_connection_scheduled_cb, sd, NULL);
+	g_source_attach (source, cnc->priv->soup_context);
+}
+
+static void
+ews_connection_schedule_abort (EEwsConnection *cnc)
+{
+	EwsScheduleData *sd;
+	GSource *source;
+
+	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
+
+	sd = g_new0 (EwsScheduleData, 1);
+	sd->cnc = g_object_ref (cnc);
+	sd->op = EWS_SCHEDULE_OP_ABORT;
+
+	source = g_idle_source_new ();
+	g_source_set_priority (source, G_PRIORITY_DEFAULT);
+	g_source_set_callback (source, ews_connection_scheduled_cb, sd, NULL);
+	g_source_attach (source, cnc->priv->soup_context);
+}
+
+/* this is run in priv->soup_thread */
 static gboolean
 ews_next_request (gpointer _cnc)
 {
@@ -244,7 +354,8 @@ ews_next_request (gpointer _cnc)
 	return FALSE;
 }
 
-static void ews_trigger_next_request (EEwsConnection *cnc)
+static void
+ews_trigger_next_request (EEwsConnection *cnc)
 {
 	GSource *source;
 
@@ -321,9 +432,9 @@ ews_cancel_request (GCancellable *cancellable,
 			EWS_CONNECTION_ERROR,
 			EWS_CONNECTION_ERROR_CANCELLED,
 			_("Operation Cancelled"));
-	if (found)
-		soup_session_cancel_message (cnc->priv->soup_session, SOUP_MESSAGE (msg), SOUP_STATUS_CANCELLED);
-	else {
+	if (found) {
+		ews_connection_schedule_cancel_message (cnc, SOUP_MESSAGE (msg));
+	} else {
 		QUEUE_LOCK (cnc);
 		cnc->priv->jobs = g_slist_remove (cnc->priv->jobs, (gconstpointer) node);
 		QUEUE_UNLOCK (cnc);
@@ -1598,9 +1709,9 @@ ews_dump_raw_soup_response (SoupMessage *msg)
 
 static void
 autodiscover_cancelled_cb (GCancellable *cancellable,
-                           SoupSession *soup_session)
+                           EEwsConnection *cnc)
 {
-	soup_session_abort (soup_session);
+	ews_connection_schedule_abort (cnc);
 }
 
 /* Called when each soup message completes */
@@ -1705,9 +1816,7 @@ autodiscover_response_cb (SoupSession *session,
 		if (ad->msgs[idx]) {
 			SoupMessage *m = ad->msgs[idx];
 			ad->msgs[idx] = NULL;
-			soup_session_cancel_message (
-				ad->cnc->priv->soup_session,
-				m, SOUP_STATUS_CANCELLED);
+			ews_connection_schedule_cancel_message (ad->cnc, m);
 		}
 	}
 
@@ -1935,7 +2044,7 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 		ad->cancel_id = g_cancellable_connect (
 			ad->cancellable,
 			G_CALLBACK (autodiscover_cancelled_cb),
-			g_object_ref (cnc->priv->soup_session),
+			g_object_ref (cnc),
 			(GDestroyNotify) g_object_unref);
 	}
 
@@ -1951,21 +2060,13 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 	/* These have to be submitted only after they're both set in ad->msgs[]
 	 * or there will be races with fast completion */
 	if (ad->msgs[0] != NULL)
-		soup_session_queue_message (
-			cnc->priv->soup_session, ad->msgs[0],
-			autodiscover_response_cb, simple);
+		ews_connection_schedule_queue_message (cnc, ad->msgs[0], autodiscover_response_cb, simple);
 	if (ad->msgs[1] != NULL)
-		soup_session_queue_message (
-			cnc->priv->soup_session, ad->msgs[1],
-			autodiscover_response_cb, simple);
+		ews_connection_schedule_queue_message (cnc, ad->msgs[1], autodiscover_response_cb, simple);
 	if (ad->msgs[2] != NULL)
-		soup_session_queue_message (
-			cnc->priv->soup_session, ad->msgs[2],
-			autodiscover_response_cb, simple);
+		ews_connection_schedule_queue_message (cnc, ad->msgs[2], autodiscover_response_cb, simple);
 	if (ad->msgs[3] != NULL)
-		soup_session_queue_message (
-			cnc->priv->soup_session, ad->msgs[3],
-			autodiscover_response_cb, simple);
+		ews_connection_schedule_queue_message (cnc, ad->msgs[3], autodiscover_response_cb, simple);
 
 	xmlFreeDoc (doc);
 	g_free (url1);
@@ -2003,7 +2104,7 @@ e_ews_autodiscover_ws_url_finish (CamelEwsSettings *settings,
 }
 
 struct _oal_req_data {
-	SoupSession *soup_session;
+	EEwsConnection *cnc;
 	SoupMessage *soup_message;
 	gchar *oal_id;
 	gchar *oal_element;
@@ -2027,7 +2128,7 @@ static void
 oal_req_data_free (struct _oal_req_data *data)
 {
 	/* The SoupMessage is owned by the SoupSession. */
-	g_object_ref (data->soup_session);
+	g_object_unref (data->cnc);
 
 	g_free (data->oal_id);
 	g_free (data->oal_element);
@@ -2194,10 +2295,7 @@ static void
 ews_cancel_msg (GCancellable *cancellable,
                 struct _oal_req_data *data)
 {
-	soup_session_cancel_message (
-		data->soup_session,
-		data->soup_message,
-		SOUP_STATUS_CANCELLED);
+	ews_connection_schedule_cancel_message (data->cnc, data->soup_message);
 }
 
 gboolean
@@ -2234,17 +2332,15 @@ e_ews_connection_get_oal_list (EEwsConnection *cnc,
                                gpointer user_data)
 {
 	GSimpleAsyncResult *simple;
-	SoupSession *soup_session;
 	SoupMessage *soup_message;
 	struct _oal_req_data *data;
 
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
-	soup_session = cnc->priv->soup_session;
 	soup_message = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
 
 	data = g_slice_new0 (struct _oal_req_data);
-	data->soup_session = g_object_ref (soup_session);
+	data->cnc = g_object_ref (cnc);
 	data->soup_message = soup_message;  /* the session owns this */
 
 	if (G_IS_CANCELLABLE (cancellable)) {
@@ -2262,9 +2358,7 @@ e_ews_connection_get_oal_list (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, data, (GDestroyNotify) oal_req_data_free);
 
-	soup_session_queue_message (
-		soup_session, soup_message,
-		oal_response_cb, simple);
+	ews_connection_schedule_queue_message (cnc, soup_message, oal_response_cb, simple);
 }
 
 gboolean
@@ -2348,17 +2442,15 @@ e_ews_connection_get_oal_detail (EEwsConnection *cnc,
                                  gpointer user_data)
 {
 	GSimpleAsyncResult *simple;
-	SoupSession *soup_session;
 	SoupMessage *soup_message;
 	struct _oal_req_data *data;
 
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
-	soup_session = cnc->priv->soup_session;
 	soup_message = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
 
 	data = g_slice_new0 (struct _oal_req_data);
-	data->soup_session = g_object_ref (soup_session);
+	data->cnc = g_object_ref (cnc);
 	data->soup_message = soup_message;  /* the session owns this */
 	data->oal_id = g_strdup (oal_id);
 	data->oal_element = g_strdup (oal_element);
@@ -2378,9 +2470,7 @@ e_ews_connection_get_oal_detail (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, data, (GDestroyNotify) oal_req_data_free);
 
-	soup_session_queue_message (
-		soup_session, soup_message,
-		oal_response_cb, simple);
+	ews_connection_schedule_queue_message (cnc, soup_message, oal_response_cb, simple);
 }
 
 gboolean
@@ -2543,17 +2633,15 @@ e_ews_connection_download_oal_file (EEwsConnection *cnc,
                                     gpointer user_data)
 {
 	GSimpleAsyncResult *simple;
-	SoupSession *soup_session;
 	SoupMessage *soup_message;
 	struct _oal_req_data *data;
 
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
-	soup_session = cnc->priv->soup_session;
 	soup_message = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
 
 	data = g_slice_new0 (struct _oal_req_data);
-	data->soup_session = g_object_ref (soup_session);
+	data->cnc = g_object_ref (cnc);
 	data->soup_message = soup_message;  /* the session owns this */
 	data->cache_filename = g_strdup (cache_filename);
 	data->progress_fn = progress_fn;
@@ -2586,9 +2674,7 @@ e_ews_connection_download_oal_file (EEwsConnection *cnc,
 		soup_message, "restarted",
 		G_CALLBACK (ews_soup_restarted), data);
 
-	soup_session_queue_message (
-		soup_session, soup_message,
-		oal_download_response_cb, simple);
+	ews_connection_schedule_queue_message (cnc, soup_message, oal_download_response_cb, simple);
 }
 
 gboolean
