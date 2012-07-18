@@ -433,6 +433,10 @@ ews_active_job_done (EEwsConnection *cnc,
 	QUEUE_UNLOCK (cnc);
 
 	ews_trigger_next_request (cnc);
+
+	if (ews_node->cancellable)
+		g_object_unref (ews_node->cancellable);
+
 	/* the 'simple' holds reference on 'cnc' and this function
 	   is called in a dedicated thread, which 'cnc' joins on dispose,
 	   thus to avoid race condition, unref the object in its own thread */
@@ -493,7 +497,7 @@ ews_connection_queue_request (EEwsConnection *cnc,
 	QUEUE_UNLOCK (cnc);
 
 	if (cancellable) {
-		node->cancellable = cancellable;
+		node->cancellable = g_object_ref (cancellable);
 		node->cancel_handler_id = g_cancellable_connect	(cancellable,
 								 G_CALLBACK (ews_cancel_request),
 								 (gpointer) node, NULL);
@@ -1880,8 +1884,10 @@ oal_response_cb (SoupSession *session,
 	g_simple_async_result_set_op_res_gpointer (data->simple, oals, NULL);
 
 exit:
-	if (data->cancellable)
+	if (data->cancellable) {
 		g_signal_handler_disconnect (data->cancellable, data->cancel_handler_id);
+		g_object_unref (data->cancellable);
+	}
 
 	if (error) {
 		g_simple_async_result_set_from_error (data->simple, error);
@@ -1922,12 +1928,14 @@ e_ews_connection_get_oal_list_start (EEwsConnection *cnc,
 	data = g_new0 (struct _oal_req_data, 1);
 	data->cnc = cnc;
 	data->simple = simple;
-	data->cancellable = cancellable;
 	data->msg = msg;
 
-	if (cancellable)
+	if (cancellable) {
+		data->cancellable = g_object_ref (cancellable);
 		data->cancel_handler_id = g_cancellable_connect	(cancellable,
 								 G_CALLBACK (ews_cancel_msg), (gpointer) data, NULL);
+	}
+
 	ews_connection_schedule_queue_message (cnc, msg, oal_response_cb, data);
 }
 
@@ -1975,14 +1983,15 @@ e_ews_connection_get_oal_detail_start (EEwsConnection *cnc,
 	data = g_new0 (struct _oal_req_data, 1);
 	data->cnc = cnc;
 	data->simple = simple;
-	data->cancellable = cancellable;
 	data->msg = msg;
 	data->oal_id = g_strdup (oal_id);
 	data->oal_element = g_strdup (oal_element);
 
-	if (cancellable)
+	if (cancellable) {
+		data->cancellable = g_object_ref (cancellable);
 		data->cancel_handler_id = g_cancellable_connect	(cancellable,
 								 G_CALLBACK (ews_cancel_msg), (gpointer) data, NULL);
+	}
 
 	ews_connection_schedule_queue_message (cnc, msg, oal_response_cb, data);
 }
@@ -2170,15 +2179,16 @@ e_ews_connection_download_oal_file_start (EEwsConnection *cnc,
 	data = g_new0 (struct _oal_req_data, 1);
 	data->cnc = cnc;
 	data->simple = simple;
-	data->cancellable = cancellable;
 	data->msg = SOUP_MESSAGE (msg);
 	data->cache_filename = g_strdup (cache_filename);
 	data->progress_fn = progress_fn;
 	data->progress_data = progress_data;
 
-	if (cancellable)
+	if (cancellable) {
+		data->cancellable = g_object_ref (cancellable);
 		data->cancel_handler_id = g_cancellable_connect	(cancellable,
 						G_CALLBACK (ews_cancel_msg), (gpointer) data, NULL);
+	}
 
 	soup_message_body_set_accumulate (SOUP_MESSAGE (msg)->response_body,
 					  FALSE);
