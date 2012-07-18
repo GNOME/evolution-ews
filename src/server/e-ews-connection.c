@@ -6036,28 +6036,3 @@ e_ews_connection_get_delegate_sync (EEwsConnection *cnc,
 
 }
 
-void
-e_ews_connection_free_oof_settings (OOFSettings *oof_settings)
-{
-	if (oof_settings->state) {
-		g_free (oof_settings->state);
-		oof_settings->state = NULL;
-	}
-	if (oof_settings->ext_aud) {
-		g_free (oof_settings->ext_aud);
-		oof_settings->ext_aud = NULL;
-	}
-	if (oof_settings->int_reply) {
-		g_free (oof_settings->int_reply);
-		oof_settings->int_reply = NULL;
-	}
-	if (oof_settings->ext_reply) {
-		g_free (oof_settings->ext_reply);
-		oof_settings->ext_reply = NULL;
-	}
-
-	if (oof_settings) {
-		g_free (oof_settings);
-		oof_settings = NULL;
-	}
-}

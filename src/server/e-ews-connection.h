@@ -174,15 +174,6 @@ typedef struct {
 	gpointer field_uri;
 } EwsSortOrder;
 
-typedef struct {
-	gchar *state;		/*Out of office state */
-	gchar *ext_aud;		/*external audience */
-	time_t start_tm;	/*Start time */
-	time_t end_tm;		/*End time */
-	gchar *int_reply;	/*Internal Reply */
-	gchar *ext_reply;	/*External Reply */
-} OOFSettings;
-
 void		ews_oal_free			(EwsOAL *oal);
 void		ews_oal_details_free		(EwsOALDetails *details);
 
@@ -816,9 +807,6 @@ gboolean	e_ews_connection_get_delegate_sync
 						 EwsDelegateInfo **get_delegate,
 						 GCancellable *cancellable,
 						 GError **error);
-
-void		e_ews_connection_free_oof_settings
-						(OOFSettings *oof_settings);
 
 G_END_DECLS
 
