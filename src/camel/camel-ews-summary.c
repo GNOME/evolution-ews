@@ -197,11 +197,15 @@ message_info_from_db (CamelFolderSummary *s,
 		gchar **values;
 
 		iinfo = (CamelEwsMessageInfo *) info;
-		values = g_strsplit (part, " ", -1);
+		if (part) {
+			values = g_strsplit (part, " ", -1);
 
-		iinfo->server_flags = g_ascii_strtoll (values[0], NULL, 10);
-		iinfo->item_type = g_ascii_strtoll (values[1], NULL, 10);
-		iinfo->change_key = g_strdup (values[2]);
+			if (values && values[0] && values[1] && values[2]) {
+				iinfo->server_flags = g_ascii_strtoll (values[0], NULL, 10);
+				iinfo->item_type = g_ascii_strtoll (values[1], NULL, 10);
+				iinfo->change_key = g_strdup (values[2]);
+			}
+		}
 
 		g_strfreev (values);
 	}
