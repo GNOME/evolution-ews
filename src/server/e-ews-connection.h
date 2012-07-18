@@ -817,24 +817,6 @@ gboolean	e_ews_connection_get_delegate_sync
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_get_oof_settings
-						(EEwsConnection *cnc,
-						 gint pri,
-						 GCancellable *cancellable,
-						 GAsyncReadyCallback callback,
-						 gpointer user_data);
-gboolean	e_ews_connection_get_oof_settings_finish
-						(EEwsConnection *cnc,
-						  GAsyncResult *result,
-						  OOFSettings **oof_settings,
-						  GError **error);
-gboolean	e_ews_connection_get_oof_settings_sync
-						(EEwsConnection *cnc,
-						 gint pri,
-						 OOFSettings **oof_settings,
-						 GCancellable *cancellable,
-						 GError **error);
-
 void		e_ews_connection_set_oof_settings
 						(EEwsConnection *cnc,
 						 gint pri,
