@@ -1,10 +1,6 @@
 # List of source files containing translatable strings.
 # Please keep this list in alphabetic order.
 [encoding: UTF-8]
-src/account-setup-eplugin/exchange-ews-account-listener.c
-src/account-setup-eplugin/exchange-ews-account-out-of-office.c
-src/account-setup-eplugin/exchange-ews-account-setup.c
-src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml
 src/addressbook/e-book-backend-ews.c
 src/addressbook/ews-book-backend-sqlitedb.c
 src/calendar/e-cal-backend-ews.c
@@ -19,5 +15,6 @@ src/configuration/e-mail-config-ews-autodiscover.c
 src/configuration/e-mail-config-ews-backend.c
 src/configuration/e-mail-config-ews-gal.c
 src/configuration/e-mail-config-ews-ooo-page.c
+src/configuration/module-ews-configuration.error.xml
 src/server/e-ews-connection.c
 src/utils/ews-camel-common.c
