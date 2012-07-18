@@ -16,6 +16,19 @@ ews-marshal.c: ews-marshal.h
 	&& mv ews-marshal.tmp ews-marshal.c ) \
 	|| ( rm -f ews-marshal.tmp && exit 1 )
 
+ENUM_TYPES = e-ews-enums.h
+
+e-ews-enumtypes.h: e-ews-enumtypes.h.template $(ENUM_TYPES)
+	$(AM_V_GEN) (cd $(srcdir) && $(GLIB_MKENUMS) --template e-ews-enumtypes.h.template $(ENUM_TYPES)) > $@
+
+e-ews-enumtypes.c: e-ews-enumtypes.c.template $(ENUM_TYPES)
+	$(AM_V_GEN) (cd $(srcdir) && $(GLIB_MKENUMS) --template e-ews-enumtypes.c.template $(ENUM_TYPES)) > $@
+
+ENUM_GENERATED = \
+	e-ews-enumtypes.h \
+	e-ews-enumtypes.c \
+	$(NULL)
+
 e-ews-connection.c: $(MARSHAL_GENERATED)
 
 if ENABLE_KRB5
@@ -91,7 +104,17 @@ libeewsinclude_HEADERS = \
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libeews-$(API_VERSION).pc
 
-EXTRA_DIST = $(pkgconfig_DATA:-$(API_VERSION).pc=.pc.in) ews-marshal.list
+BUILT_SOURCES = \
+	$(ENUM_GENERATED) \
+	$(MARSHAL_GENERATED) \
+	$(NULL)
+
+EXTRA_DIST = \
+	$(pkgconfig_DATA:-$(API_VERSION).pc=.pc.in) \
+	e-ews-enumtypes.h.template \
+	e-ews-enumtypes.c.template \
+	ews-marshal.list \
+	$(NULL)
 
 DISTCLEANFILES = $(pkgconfig_DATA)
 CLEANFILES = $(MARSHAL_GENERATED)
