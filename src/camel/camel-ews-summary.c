@@ -205,9 +205,9 @@ message_info_from_db (CamelFolderSummary *s,
 				iinfo->item_type = g_ascii_strtoll (values[1], NULL, 10);
 				iinfo->change_key = g_strdup (values[2]);
 			}
-		}
 
-		g_strfreev (values);
+			g_strfreev (values);
+		}
 	}
 
 	return info;
