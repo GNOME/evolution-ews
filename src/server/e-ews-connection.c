@@ -408,6 +408,10 @@ ews_active_job_done (EEwsConnection *cnc,
 	QUEUE_UNLOCK (cnc);
 
 	ews_trigger_next_request (cnc);
+
+	if (ews_node->cancellable)
+		g_object_unref (ews_node->cancellable);
+
 	/* the 'simple' holds reference on 'cnc' and this function
 	 * is called in a dedicated thread, which 'cnc' joins on dispose,
 	 * thus to avoid race condition, unref the object in its own thread */
@@ -470,7 +474,7 @@ e_ews_connection_queue_request (EEwsConnection *cnc,
 	QUEUE_UNLOCK (cnc);
 
 	if (cancellable) {
-		node->cancellable = cancellable;
+		node->cancellable = g_object_ref (cancellable);
 		node->cancel_handler_id = g_cancellable_connect	(cancellable,
 								 G_CALLBACK (ews_cancel_request),
 								 (gpointer) node, NULL);
