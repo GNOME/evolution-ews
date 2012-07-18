@@ -326,7 +326,7 @@ ews_backend_add_gal_source (EEwsBackend *backend)
 
 	if (oal_selected == NULL) {
 		display_name = _("Global Address List");
-		oal_id = NULL;
+		oal_id = "global-address-list";
 	}
 
 	g_free (backend->priv->oal_selected);
