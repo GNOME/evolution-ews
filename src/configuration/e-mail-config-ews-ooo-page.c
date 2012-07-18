@@ -27,525 +27,229 @@
 
 #include <misc/e-dateedit.h>
 #include <e-util/e-dialog-utils.h>
+#include <libevolution-utils/e-alert-sink.h>
+#include <libevolution-utils/e-alert-dialog.h>
+#include <misc/e-activity-bar.h>
+#include <misc/e-alert-bar.h>
 
 #include "server/camel-ews-settings.h"
 #include "server/e-ews-connection.h"
+#include "server/e-ews-oof-settings.h"
 
 #define E_MAIL_CONFIG_EWS_OOO_PAGE_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE \
 	((obj), E_TYPE_MAIL_CONFIG_EWS_OOO_PAGE, EMailConfigEwsOooPagePrivate))
 
-typedef enum {
-	EXTERNAL_AUDIENCE_NONE,
-	EXTERNAL_AUDIENCE_KNOWN,
-	EXTERNAL_AUDIENCE_ALL
-} ExternalAudience;
+typedef struct _AsyncContext AsyncContext;
 
 struct _EMailConfigEwsOooPagePrivate {
+	ESourceRegistry *registry;
 	ESource *account_source;
 	ESource *identity_source;
+	ESource *collection_source;
 
-	gboolean state;
+	/* The try_password() method deposits results here.
+	 * This avoids calling GTK+ functions from multiple threads. */
+	EEwsOofSettings *oof_settings;
+	GMutex *oof_settings_lock;
 
-	/*to set duration or not*/
-	gboolean set_range;
-	GtkWidget *range_wt;
+	GtkWidget *enabled_radio_button;	/* not referenced */
+	GtkWidget *disabled_radio_button;	/* not referenced */
+	GtkWidget *scheduled_radio_button;	/* not referenced */
+	GtkWidget *start_time;			/* not referenced */
+	GtkWidget *end_time;			/* not referenced */
+	GtkWidget *external_audience;		/* not referenced */
+	GtkTextBuffer *internal_reply;		/* not referenced */
+	GtkTextBuffer *external_reply;		/* not referenced */
+};
 
-	/*duration for out of office*/
-	time_t from_time;
-	time_t to_time;
-	EDateEdit *from_date;
-	EDateEdit *to_date;
-
-	/*External Audience type*/
-	gchar *audience;
-	gint audience_type;
-	GtkWidget *aud_box;
-
-	/*Internal and External messages*/
-	gchar *external_message;
-	gchar *internal_message;
-	GtkWidget *external_view;
-	GtkWidget *internal_view;
-
-	/*Update box*/
-	GtkWidget *stat_box;
+struct _AsyncContext {
+	EMailConfigEwsOooPage *page;
+	EActivity *activity;
 };
 
 enum {
 	PROP_0,
 	PROP_ACCOUNT_SOURCE,
-	PROP_IDENTITY_SOURCE
+	PROP_COLLECTION_SOURCE,
+	PROP_IDENTITY_SOURCE,
+	PROP_REGISTRY
 };
 
 /* Forward Declarations */
 static void	e_mail_config_ews_ooo_page_interface_init
-					(EMailConfigPageInterface *interface);
+				(EMailConfigPageInterface *interface);
+static void	e_mail_config_ews_ooo_page_authenticator_init
+				(ESourceAuthenticatorInterface *interface);
 
 G_DEFINE_DYNAMIC_TYPE_EXTENDED (
 	EMailConfigEwsOooPage,
 	e_mail_config_ews_ooo_page,
-	GTK_TYPE_BOX,
+	E_TYPE_MAIL_CONFIG_ACTIVITY_PAGE,
 	0,
 	G_IMPLEMENT_INTERFACE_DYNAMIC (
 		E_TYPE_MAIL_CONFIG_PAGE,
-		e_mail_config_ews_ooo_page_interface_init))
+		e_mail_config_ews_ooo_page_interface_init)
+	G_IMPLEMENT_INTERFACE_DYNAMIC (
+		E_TYPE_SOURCE_AUTHENTICATOR,
+		e_mail_config_ews_ooo_page_authenticator_init))
 
 static void
-update_audience_type (void)
+async_context_free (AsyncContext *async_context)
 {
-#if 0  /* ACCOUNT_MGMT */
-	if (!g_ascii_strcasecmp (oof_data->audience, "None"))
-		oof_data->audience_type = EXTERNAL_AUDIENCE_NONE;
-	else if (!g_ascii_strcasecmp (oof_data->audience, "Known"))
-		oof_data->audience_type = EXTERNAL_AUDIENCE_KNOWN;
-	else
-		oof_data->audience_type = EXTERNAL_AUDIENCE_ALL;
-#endif /* ACCOUNT_MGMT */
+	if (async_context->page != NULL)
+		g_object_unref (async_context->page);
+
+	if (async_context->activity != NULL)
+		g_object_unref (async_context->activity);
+
+	g_slice_free (AsyncContext, async_context);
 }
 
-static void
-update_audience (void)
+static CamelSettings *
+mail_config_ews_ooo_page_get_settings (EMailConfigEwsOooPage *page)
 {
-#if 0  /* ACCOUNT_MGMT */
-	g_free (oof_data->audience);
-	oof_data->audience = NULL;
+	ESource *source;
+	ESourceCamel *extension;
+	const gchar *extension_name;
 
-	if (oof_data->audience_type == EXTERNAL_AUDIENCE_NONE)
-		oof_data->audience = g_strdup ("None");
-	else if (oof_data->audience_type == EXTERNAL_AUDIENCE_KNOWN)
-		oof_data->audience = g_strdup ("Known");
-	else
-		oof_data->audience = g_strdup ("All");
-#endif /* ACCOUNT_MGMT */
+	source = e_mail_config_ews_ooo_page_get_collection_source (page);
+
+	extension_name = e_source_camel_get_extension_name ("ews");
+	extension = e_source_get_extension (source, extension_name);
+
+	return e_source_camel_get_settings (extension);
 }
 
-static void
-update_audience_cb (GtkComboBoxText *combo,
-                    gpointer data)
+static const gchar *
+mail_config_ews_ooo_page_get_mailbox (EMailConfigEwsOooPage *page)
 {
-#if 0  /* ACCOUNT_MGMT */
-	gint active;
+	ESourceRegistry *registry;
+	ESource *collection_source;
+	GList *list, *link;
+	const gchar *collection_uid;
+	const gchar *extension_name;
+	const gchar *mailbox = NULL;
 
-	active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
-	if (active == oof_data->audience_type)
-		return;
-	else
-		oof_data->audience_type = active;
+	/* Find the mail identity source that belongs to
+	 * our collection and return its email address. */
 
-	update_audience ();
-#endif /* ACCOUNT_MGMT */
-}
+	collection_source =
+		e_mail_config_ews_ooo_page_get_collection_source (page);
+	collection_uid = e_source_get_uid (collection_source);
 
-static void
-update_int_msg_cb (GtkTextBuffer *buffer,
-                   gpointer data)
-{
-#if 0  /* ACCOUNT_MGMT */
-	if (gtk_text_buffer_get_modified (buffer)) {
-		GtkTextIter start, end;
-		if (oof_data->internal_message)
-			g_free (oof_data->internal_message);
-		gtk_text_buffer_get_bounds (buffer, &start, &end);
-		oof_data->internal_message =  gtk_text_buffer_get_text (buffer, &start,
-							       &end, FALSE);
-		gtk_text_buffer_set_modified (buffer, FALSE);
-	}
-#endif /* ACCOUNT_MGMT */
-}
+	extension_name = E_SOURCE_EXTENSION_MAIL_IDENTITY;
+	registry = e_mail_config_ews_ooo_page_get_registry (page);
+	list = e_source_registry_list_sources (registry, extension_name);
 
-static void
-update_ext_msg_cb (GtkTextBuffer *buffer,
-                   gpointer data)
-{
-#if 0  /* ACCOUNT_MGMT */
-	if (gtk_text_buffer_get_modified (buffer)) {
-		GtkTextIter start, end;
-		if (oof_data->external_message)
-			g_free (oof_data->external_message);
-		gtk_text_buffer_get_bounds (buffer, &start, &end);
-		oof_data->external_message =  gtk_text_buffer_get_text (buffer, &start,
-							       &end, FALSE);
-		gtk_text_buffer_set_modified (buffer, FALSE);
-	}
-#endif /* ACCOUNT_MGMT */
-}
+	for (link = list; link != NULL; link = g_list_next (link)) {
+		ESource *source = E_SOURCE (link->data);
+		ESourceMailIdentity *extension;
+		const gchar *parent_uid;
 
-static void
-toggled_state_cb (GtkToggleButton *button,
-                  gpointer data)
-{
-#if 0  /* ACCOUNT_MGMT */
-	gboolean current_oof_state;
+		parent_uid = e_source_get_parent (source);
+		if (g_strcmp0 (parent_uid, collection_uid) != 0)
+			continue;
 
-	current_oof_state = gtk_toggle_button_get_active (button);
-	if (current_oof_state == oof_data->state)
-		return;
-	oof_data->state = current_oof_state;
-	gtk_widget_set_sensitive (oof_data->range_wt, current_oof_state);
-	gtk_widget_set_sensitive (oof_data->internal_view, current_oof_state);
-	gtk_widget_set_sensitive (oof_data->external_view, current_oof_state);
-	gtk_widget_set_sensitive ((GtkWidget *) oof_data->from_date, current_oof_state && oof_data->set_range);
-	gtk_widget_set_sensitive ((GtkWidget *) oof_data->to_date, current_oof_state && oof_data->set_range);
-	gtk_widget_set_sensitive (oof_data->aud_box, current_oof_state);
-#endif /* ACCOUNT_MGMT */
-}
-
-static void
-toggled_set_date_cb (GtkToggleButton *button,
-                     gpointer data)
-{
-#if 0  /* ACCOUNT_MGMT */
-	gboolean current_state;
-
-	current_state = gtk_toggle_button_get_active (button);
-	if (current_state == oof_data->set_range)
-		return;
-
-	oof_data->set_range = current_state;
-	gtk_widget_set_sensitive ((GtkWidget *) oof_data->from_date, current_state);
-	gtk_widget_set_sensitive ((GtkWidget *) oof_data->to_date, current_state);
-#endif /* ACCOUNT_MGMT */
-}
-
-static void
-from_time_changed_cb (EDateEdit *date_tm,
-                      gpointer data)
-{
-#if 0  /* ACCOUNT_MGMT */
-	if (e_date_edit_get_time (date_tm) < time (NULL)) {
-		e_notice (NULL, GTK_MESSAGE_WARNING, _("Cannot set Date-Time in Past"));
-		e_date_edit_set_time (date_tm, time (NULL) + 60);
-	} else if (e_date_edit_date_is_valid (date_tm) && e_date_edit_time_is_valid (date_tm)) {
-		oof_data->from_time = e_date_edit_get_time (date_tm);
-	}
-#endif /* ACCOUNT_MGMT */
-}
-
-static void
-to_time_changed_cb (EDateEdit *date_tm,
-                    gpointer data)
-{
-#if 0  /* ACCOUNT_MGMT */
-	if (e_date_edit_get_time (date_tm) < time (NULL)) {
-		e_notice (NULL, GTK_MESSAGE_WARNING, _("Cannot set Date-Time in Past"));
-		e_date_edit_set_time (date_tm, time (NULL) + 60);
-		return;
-	} else if (e_date_edit_date_is_valid (date_tm) && e_date_edit_time_is_valid (date_tm)) {
-		oof_data->to_time = e_date_edit_get_time (date_tm);
-	}
-	if (oof_data->from_time > oof_data->to_time)
-		e_notice (NULL, GTK_MESSAGE_WARNING, _("Select a valid time range"));
-#endif /* ACCOUNT_MGMT */
-}
-
-static void
-oof_data_new (void)
-{
-#if 0  /* ACCOUNT_MGMT */
-	oof_data = g_new0 (OOFData, 1);
-	oof_data->state = FALSE;
-	oof_data->set_range = FALSE;
-	oof_data->range_wt = NULL;
-	oof_data->audience_type = EXTERNAL_AUDIENCE_ALL;
-	oof_data->audience = NULL;
-	oof_data->external_message = NULL;
-	oof_data->internal_message = NULL;
-	oof_data->internal_view = NULL;
-	oof_data->external_view = NULL;
-	oof_data->from_time = 0;
-	oof_data->to_time = 0;
-	oof_data->from_date = NULL;
-	oof_data->to_date = NULL;
-	oof_data->stat_box = NULL;
-#endif /* ACCOUNT_MGMT */
-}
-
-static void
-destroy_oof_data (void)
-{
-#if 0  /* ACCOUNT_MGMT */
-	if (oof_data->audience) {
-		g_free (oof_data->audience);
-		oof_data->audience = NULL;
+		extension = e_source_get_extension (source, extension_name);
+		mailbox = e_source_mail_identity_get_address (extension);
+		break;
 	}
 
-	if (oof_data->external_message) {
-		g_free (oof_data->external_message);
-		oof_data->external_message = NULL;
-	}
+	g_list_free_full (list, (GDestroyNotify) g_object_unref);
 
-	if (oof_data->internal_message) {
-		g_free (oof_data->internal_message);
-		oof_data->internal_message = NULL;
-	}
-
-	if (oof_data) {
-		g_free (oof_data);
-		oof_data = NULL;
-	}
-#endif /* ACCOUNT_MGMT */
+	return mailbox;
 }
 
-#if 0  /* ACCOUNT_MGMT */
-static gchar *
-get_password (CamelSettings *settings)
+static void
+mail_config_ews_ooo_page_display_settings (EMailConfigEwsOooPage *page,
+                                           EEwsOofSettings *oof_settings)
 {
-	gchar *key, *password = NULL;
-	CamelURL *url;
+	GtkWidget *button;
+	GDateTime *date_time;
 
-	url = g_new0 (CamelURL, 1);
-	camel_settings_save_to_url (settings, url);
-	key = camel_url_to_string (url, CAMEL_URL_HIDE_PARAMS);
-	camel_url_free (url);
+	switch (e_ews_oof_settings_get_state (oof_settings)) {
+		default:
+			/* fall through */
+		case E_EWS_OOF_STATE_DISABLED:
+			button = page->priv->disabled_radio_button;
+			break;
+		case E_EWS_OOF_STATE_ENABLED:
+			button = page->priv->enabled_radio_button;
+			break;
+		case E_EWS_OOF_STATE_SCHEDULED:
+			button = page->priv->scheduled_radio_button;
+			break;
+	}
 
-	password = e_passwords_get_password ("Exchange Web Services", key);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), TRUE);
 
-	g_free (key);
-	return password;
+	gtk_combo_box_set_active (
+		GTK_COMBO_BOX (page->priv->external_audience),
+		e_ews_oof_settings_get_external_audience (oof_settings));
+
+	date_time = e_ews_oof_settings_ref_start_time (oof_settings);
+	e_date_edit_set_time (
+		E_DATE_EDIT (page->priv->start_time),
+		(time_t) g_date_time_to_unix (date_time));
+	g_date_time_unref (date_time);
+
+	date_time = e_ews_oof_settings_ref_end_time (oof_settings);
+	e_date_edit_set_time (
+		E_DATE_EDIT (page->priv->end_time),
+		(time_t) g_date_time_to_unix (date_time));
+	g_date_time_unref (date_time);
+
+	gtk_text_buffer_set_text (
+		page->priv->internal_reply,
+		e_ews_oof_settings_get_internal_reply (oof_settings), -1);
+
+	gtk_text_buffer_set_text (
+		page->priv->external_reply,
+		e_ews_oof_settings_get_external_reply (oof_settings), -1);
 }
-#endif /* ACCOUNT_MGMT */
 
-#if 0  /* ACCOUNT_MGMT */
-static EEwsConnection *
-get_connection (EMConfigTargetSettings *target)
+static void
+mail_config_ews_ooo_page_refresh_cb (GObject *source_object,
+                                     GAsyncResult *result,
+                                     gpointer user_data)
 {
-	CamelEwsSettings *ews_settings;
-	CamelNetworkSettings *network_settings;
-	EEwsConnection *cnc;
-	const gchar *host_url;
-	const gchar *user;
-	gchar *email, *password;
+	ESourceRegistry *registry;
+	AsyncContext *async_context;
+	EAlertSink *alert_sink;
 	GError *error = NULL;
 
-	ews_settings = CAMEL_EWS_SETTINGS (target->storage_settings);
-	network_settings = CAMEL_NETWORK_SETTINGS (target->storage_settings);
+	registry = E_SOURCE_REGISTRY (source_object);
+	async_context = (AsyncContext *) user_data;
 
-	/* Create a new connection */
-	host_url = camel_ews_settings_get_hosturl (ews_settings);
-	user = camel_network_settings_get_user (network_settings);
-	password = get_password (target->storage_settings);
-	email = target->email_address;
+	alert_sink = e_activity_get_alert_sink (async_context->activity);
 
-	cnc = e_ews_connection_new (host_url, user, password,
-		camel_network_settings_get_auth_mechanism (network_settings),
-		camel_ews_settings_get_timeout (ews_settings),
-		NULL, NULL, &error);
+	e_source_registry_authenticate_finish (registry, result, &error);
 
-	if (!cnc) {
-		g_warning ("Error in connection: %s\n", error->message);
-		g_clear_error (&error);
-		return NULL;
+	if (e_activity_handle_cancellation (async_context->activity, error)) {
+		g_error_free (error);
+
+	} else if (error != NULL) {
+		e_alert_submit (
+			alert_sink,
+			"ews:query-ooo-error",
+			error->message, NULL);
+		g_error_free (error);
+
+	} else {
+		EMailConfigEwsOooPage *page = async_context->page;
+
+		g_mutex_lock (page->priv->oof_settings_lock);
+
+		if (page->priv->oof_settings != NULL)
+			mail_config_ews_ooo_page_display_settings (
+				page, page->priv->oof_settings);
+
+		g_mutex_unlock (page->priv->oof_settings_lock);
 	}
 
-	e_ews_connection_set_mailbox (cnc, email);
-
-	g_free (password);
-	return cnc;
+	async_context_free (async_context);
 }
-#endif /* ACCOUNT_MGMT */
-
-static void
-set_oof_error_to_frame (GtkWidget *oof_frame,
-                        GError *error)
-{
-#if 0  /* ACCOUNT_MGMT */
-	GtkHBox *error_box;
-	GtkLabel *error_msg;
-	GtkWidget *error_img;
-	gchar *message;
-
-	gtk_widget_destroy (oof_data->stat_box);
-
-	error_box = (GtkHBox*) g_object_new (GTK_TYPE_HBOX, NULL, "homogeneous", FALSE, "spacing", 6, NULL);
-	error_img = gtk_image_new_from_stock (GTK_STOCK_DIALOG_ERROR, GTK_ICON_SIZE_SMALL_TOOLBAR);
-	message = g_strdup_printf (_("Unable to fetch out of office settings: \n%s"), error->message);
-	error_msg = (GtkLabel *) gtk_label_new (message);
-	gtk_label_set_use_markup (error_msg, TRUE);
-	gtk_box_pack_start (GTK_BOX (error_box), GTK_WIDGET (error_img), FALSE, FALSE, 12);
-	gtk_box_pack_start (GTK_BOX (error_box), GTK_WIDGET (error_msg), FALSE, FALSE, 0);
-	gtk_container_add (GTK_CONTAINER (oof_frame), GTK_WIDGET (error_box));
-	gtk_widget_show_all (GTK_WIDGET (error_box));
-
-	g_free (message);
-#endif /* ACCOUNT_MGMT */
-}
-
-static void
-set_oof_settings_to_frame (GtkWidget *oof_frame)
-{
-#if 0  /* ACCOUNT_MGMT */
-	gtk_widget_destroy (oof_data->stat_box);
-#endif /* ACCOUNT_MGMT */
-}
-
-static void
-get_oof_settings_cb (GObject *object,
-                     GAsyncResult *res,
-                     gpointer user_data)
-{
-	EEwsConnection *cnc = E_EWS_CONNECTION (object);
-	GtkWidget *oof_frame = GTK_WIDGET (user_data);
-	OOFSettings *oof_settings = NULL;
-	GError *error = NULL;
-
-	e_ews_connection_get_oof_settings_finish (cnc, res, &oof_settings, &error);
-
-	if (error) {
-		g_warning ("Error Unable to get out of office settings: %s\n", error->message);
-		set_oof_error_to_frame (oof_frame, error);
-		g_object_unref (cnc);
-		g_clear_error (&error);
-		return;
-	}
-
-#if 0  /* ACCOUNT_MGMT */
-	if (!g_ascii_strcasecmp (oof_settings->state, "Disabled"))
-		oof_data->state = FALSE;
-	else
-		oof_data->state = TRUE;
-
-	oof_data->audience = g_strdup (oof_settings->ext_aud);
-	update_audience_type ();
-	if (!g_ascii_strcasecmp (oof_settings->state, "Scheduled")) {
-		oof_data->from_time = oof_settings->start_tm;
-		oof_data->to_time = oof_settings->end_tm;
-		oof_data->set_range = TRUE;
-	}
-	oof_data->internal_message = g_strdup (oof_settings->int_reply);
-	oof_data->external_message = g_strdup (oof_settings->ext_reply);
-#endif /* ACCOUNT_MGMT */
-
-	set_oof_settings_to_frame (oof_frame);
-	e_ews_connection_free_oof_settings (oof_settings);
-	g_object_unref (cnc);
-}
-
-#if 0  /* ACCOUNT_MGMT */
-static void
-set_oof_data_from_settings (EMConfigTargetSettings *target,
-                            GtkWidget *oof_frame)
-{
-	GCancellable *cancellable = NULL;
-	EEwsConnection *cnc = NULL;
-
-	cnc = get_connection (target);
-	if (!cnc)
-		return;
-
-	cancellable = g_cancellable_new ();
-
-	e_ews_connection_get_oof_settings (
-		cnc, EWS_PRIORITY_MEDIUM, cancellable,
-		get_oof_settings_cb, oof_frame);
-}
-#endif /* ACCOUNT_MGMT */
-
-static OOFSettings *
-get_settings_from_data (void)
-{
-	OOFSettings *oof_settings = NULL;
-
-	oof_settings = g_new0 (OOFSettings, 1);
-
-#if 0  /* ACCOUNT_MGMT */
-	if (oof_data->from_time >= oof_data->to_time || !oof_data->set_range) {
-		d (printf ("not a valid time range or set duration is not available"));
-		oof_data->from_time = 0;
-		oof_data->to_time = 0;
-	}
-
-	if (oof_data->state) {
-		if (oof_data->from_time && oof_data->to_time)
-			oof_settings->state = g_strdup ("Scheduled");
-		else
-			oof_settings->state = g_strdup ("Enabled");
-	} else
-		oof_settings->state = g_strdup ("Disabled");
-
-	oof_settings->ext_aud = g_strdup (oof_data->audience);
-	oof_settings->start_tm = oof_data->from_time;
-	oof_settings->end_tm = oof_data->to_time;
-	oof_settings->int_reply = g_strdup (oof_data->internal_message);
-	oof_settings->ext_reply = g_strdup (oof_data->external_message);
-#endif /* ACCOUNT_MGMT */
-
-	return oof_settings;
-}
-
-#if 0  /* ACCOUNT_MGMT */
-gboolean
-ews_set_oof_settings (EMConfigTargetSettings *target)
-{
-	GCancellable *cancellable = NULL;
-	OOFSettings *oof_settings = NULL;
-	EEwsConnection *cnc = NULL;
-	GError *error = NULL;
-	gboolean ret_val;
-
-	cnc = get_connection (target);
-	if (!cnc) {
-		destroy_oof_data ();
-		return FALSE;
-	}
-
-	cancellable = g_cancellable_new ();
-
-	oof_settings = get_settings_from_data ();
-
-	e_ews_connection_set_oof_settings_sync (
-		cnc, EWS_PRIORITY_MEDIUM,
-		oof_settings, cancellable, &error);
-
-	if (error) {
-		g_warning ("Error While setting out of office: %s\n", error->message);
-		g_clear_error (&error);
-		ret_val = FALSE;
-	} else
-		ret_val = TRUE;
-
-	destroy_oof_data ();
-	e_ews_connection_free_oof_settings (oof_settings);
-	g_object_unref (cnc);
-
-	return ret_val;
-}
-#endif /* ACCOUNT_MGMT */
-
-#if 0  /* ACCOUNT_MGMT */
-GtkWidget *
-ews_get_outo_office_widget (EMConfigTargetSettings *target_account)
-{
-	GtkFrame *frm_oof;
-	GtkHBox *stat_box;
-	GtkLabel *stat_msg;
-	GtkWidget *spinner, *label;
-	gchar *txt;
-
-	txt = g_markup_printf_escaped ("<span weight=\"bold\">%s</span>", _("Out of Office"));
-	label = gtk_label_new (NULL);
-	gtk_label_set_markup ((GtkLabel *) label, txt);
-	g_free (txt);
-	frm_oof = (GtkFrame*) g_object_new (GTK_TYPE_FRAME, "label-widget", label, NULL);
-
-	oof_data_new ();
-
-	stat_box = (GtkHBox*) g_object_new (GTK_TYPE_HBOX, NULL, "homogeneous", FALSE, "spacing", 6, NULL);
-	spinner = gtk_spinner_new ();
-	stat_msg = (GtkLabel*) g_object_new (GTK_TYPE_LABEL, "label", _("Fetching out of office settings..."), "use-markup", TRUE, NULL);
-
-	oof_data->stat_box = GTK_WIDGET (stat_box);
-
-	gtk_box_pack_start (GTK_BOX (stat_box), GTK_WIDGET (spinner), FALSE, FALSE, 12);
-	gtk_box_pack_start (GTK_BOX (stat_box), GTK_WIDGET (stat_msg), FALSE, FALSE, 0);
-	gtk_spinner_start ((GtkSpinner *) spinner);
-	gtk_container_add (GTK_CONTAINER (frm_oof), GTK_WIDGET (stat_box));
-
-	set_oof_data_from_settings (target_account, (GtkWidget *) frm_oof);
-
-	return (GtkWidget *) frm_oof;
-}
-#endif /* ACCOUNT_MGMT */
 
 static void
 mail_config_ews_ooo_page_set_account_source (EMailConfigEwsOooPage *page,
@@ -558,6 +262,16 @@ mail_config_ews_ooo_page_set_account_source (EMailConfigEwsOooPage *page,
 }
 
 static void
+mail_config_ews_ooo_page_set_collection_source (EMailConfigEwsOooPage *page,
+                                                ESource *collection_source)
+{
+	g_return_if_fail (E_IS_SOURCE (collection_source));
+	g_return_if_fail (page->priv->collection_source == NULL);
+
+	page->priv->collection_source = g_object_ref (collection_source);
+}
+
+static void
 mail_config_ews_ooo_page_set_identity_source (EMailConfigEwsOooPage *page,
                                               ESource *identity_source)
 {
@@ -565,6 +279,16 @@ mail_config_ews_ooo_page_set_identity_source (EMailConfigEwsOooPage *page,
 	g_return_if_fail (page->priv->identity_source == NULL);
 
 	page->priv->identity_source = g_object_ref (identity_source);
+}
+
+static void
+mail_config_ews_ooo_page_set_registry (EMailConfigEwsOooPage *page,
+                                       ESourceRegistry *registry)
+{
+	g_return_if_fail (E_IS_SOURCE_REGISTRY (registry));
+	g_return_if_fail (page->priv->registry == NULL);
+
+	page->priv->registry = g_object_ref (registry);
 }
 
 static void
@@ -580,8 +304,20 @@ mail_config_ews_ooo_page_set_property (GObject *object,
 				g_value_get_object (value));
 			return;
 
+		case PROP_COLLECTION_SOURCE:
+			mail_config_ews_ooo_page_set_collection_source (
+				E_MAIL_CONFIG_EWS_OOO_PAGE (object),
+				g_value_get_object (value));
+			return;
+
 		case PROP_IDENTITY_SOURCE:
 			mail_config_ews_ooo_page_set_identity_source (
+				E_MAIL_CONFIG_EWS_OOO_PAGE (object),
+				g_value_get_object (value));
+			return;
+
+		case PROP_REGISTRY:
+			mail_config_ews_ooo_page_set_registry (
 				E_MAIL_CONFIG_EWS_OOO_PAGE (object),
 				g_value_get_object (value));
 			return;
@@ -604,10 +340,24 @@ mail_config_ews_ooo_page_get_property (GObject *object,
 				E_MAIL_CONFIG_EWS_OOO_PAGE (object)));
 			return;
 
+		case PROP_COLLECTION_SOURCE:
+			g_value_set_object (
+				value,
+				e_mail_config_ews_ooo_page_get_collection_source (
+				E_MAIL_CONFIG_EWS_OOO_PAGE (object)));
+			return;
+
 		case PROP_IDENTITY_SOURCE:
 			g_value_set_object (
 				value,
 				e_mail_config_ews_ooo_page_get_identity_source (
+				E_MAIL_CONFIG_EWS_OOO_PAGE (object)));
+			return;
+
+		case PROP_REGISTRY:
+			g_value_set_object (
+				value,
+				e_mail_config_ews_ooo_page_get_registry (
 				E_MAIL_CONFIG_EWS_OOO_PAGE (object)));
 			return;
 	}
@@ -622,14 +372,29 @@ mail_config_ews_ooo_page_dispose (GObject *object)
 
 	priv = E_MAIL_CONFIG_EWS_OOO_PAGE_GET_PRIVATE (object);
 
+	if (priv->registry != NULL) {
+		g_object_unref (priv->registry);
+		priv->registry = NULL;
+	}
+
 	if (priv->account_source != NULL) {
 		g_object_unref (priv->account_source);
 		priv->account_source = NULL;
 	}
 
+	if (priv->collection_source != NULL) {
+		g_object_unref (priv->collection_source);
+		priv->collection_source = NULL;
+	}
+
 	if (priv->identity_source != NULL) {
 		g_object_unref (priv->identity_source);
 		priv->identity_source = NULL;
+	}
+
+	if (priv->oof_settings != NULL) {
+		g_object_unref (priv->oof_settings);
+		priv->oof_settings = NULL;
 	}
 
 	/* Chain up to parent's dispose() method. */
@@ -638,29 +403,42 @@ mail_config_ews_ooo_page_dispose (GObject *object)
 }
 
 static void
+mail_config_ews_ooo_page_finalize (GObject *object)
+{
+	EMailConfigEwsOooPagePrivate *priv;
+
+	priv = E_MAIL_CONFIG_EWS_OOO_PAGE_GET_PRIVATE (object);
+
+	g_mutex_free (priv->oof_settings_lock);
+
+	/* Chain up to parent's finalize() method. */
+	G_OBJECT_CLASS (e_mail_config_ews_ooo_page_parent_class)->
+		finalize (object);
+}
+
+static void
 mail_config_ews_ooo_page_constructed (GObject *object)
 {
 	EMailConfigEwsOooPage *page;
+	GtkLabel *label;
+	GtkWidget *grid;
 	GtkWidget *widget;
 	GtkWidget *container;
+	GtkSizeGroup *size_group;
+	GtkTextBuffer *text_buffer;
+	GSList *group = NULL;
 	const gchar *text;
 	gchar *markup;
-
-	GtkHBox *hbox_ext, *hbox_state;
-	GtkLabel *lbl_oof_desc, *from_label, *to_label;
-	GtkTable *tbl_oof_status;
-	GtkLabel *lbl_status, *lbl_external, *lbl_internal;
-	GtkRadioButton *radio_iof, *radio_oof;
-	GtkScrolledWindow *scrwnd_oof_int, *scrwnd_oof_ext;
-	GtkTextView *txtview_oof_int, *txtview_oof_ext;
-	GtkTextBuffer *buffer_int, *buffer_ext;
-	GtkWidget *from_date, *to_date, *aud_box, *set_range;
 
 	page = E_MAIL_CONFIG_EWS_OOO_PAGE (object);
 
 	/* Chain up to parent's constructed() method. */
 	G_OBJECT_CLASS (e_mail_config_ews_ooo_page_parent_class)->
 		constructed (object);
+
+	size_group = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
+
+	gtk_box_set_spacing (GTK_BOX (page), 12);
 
 	text = _("Out of Office");
 	markup = g_markup_printf_escaped ("<b>%s</b>", text);
@@ -671,175 +449,395 @@ mail_config_ews_ooo_page_constructed (GObject *object)
 	gtk_widget_show (widget);
 	g_free (markup);
 
-	widget = gtk_grid_new ();
+	widget = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
 	gtk_widget_set_margin_left (widget, 12);
-	gtk_grid_set_row_spacing (GTK_GRID (widget), 6);
-	gtk_grid_set_column_spacing (GTK_GRID (widget), 6);
 	gtk_box_pack_start (GTK_BOX (page), widget, FALSE, FALSE, 0);
 	gtk_widget_show (widget);
 
 	container = widget;
 
-	text = _("The messages specified below will be automatically sent "
-		 "to each internal and external personal who sends a mail "
-		 "to you.");
+	text = _("The messages specified below will be automatically sent to "
+		 "each internal and external person who sends a mail to you.");
 	widget = gtk_label_new (text);
 	gtk_label_set_line_wrap (GTK_LABEL (widget), TRUE);
 	gtk_misc_set_alignment (GTK_MISC (widget), 0.0, 0.5);
-	gtk_grid_attach (GTK_GRID (container), widget, 0, 0, 1, 1);
+	gtk_box_pack_start (GTK_BOX (container), widget, FALSE, FALSE, 0);
 	gtk_widget_show (widget);
 
-	/* XXX Crap starts here */
+	text = _("Do _not send Out of Office replies");
+	widget = gtk_radio_button_new_with_mnemonic (group, text);
+	gtk_box_pack_start (GTK_BOX (container), widget, FALSE, FALSE, 0);
+	page->priv->disabled_radio_button = widget;  /* do not reference */
+	gtk_widget_show (widget);
 
-	tbl_oof_status = (GtkTable*) g_object_new (GTK_TYPE_TABLE, "n-rows", 7, "n-columns", 2, "homogeneous", FALSE, "row-spacing", 6, "column-spacing", 6, NULL);
-	gtk_grid_attach (GTK_GRID (container), GTK_WIDGET (tbl_oof_status), 0, 1, 1, 1);
-	gtk_widget_show (GTK_WIDGET (tbl_oof_status));
+	group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (widget));
 
-	lbl_status = (GtkLabel*) g_object_new (GTK_TYPE_LABEL, "label", _("Status:"), "use-markup", TRUE, NULL);
-	gtk_misc_set_alignment (GTK_MISC (lbl_status), 0, 0.5);
-	gtk_misc_set_padding (GTK_MISC (lbl_status), 0, 0);
+	text = _("_Send Out of Office replies");
+	widget = gtk_radio_button_new_with_mnemonic (group, text);
+	gtk_box_pack_start (GTK_BOX (container), widget, FALSE, FALSE, 0);
+	page->priv->enabled_radio_button = widget;  /* do not reference */
+	gtk_widget_show (widget);
 
-#if 0  /* ACCOUNT_MGMT */
-	if (oof_data->state) {
-#endif /* ACCOUNT_MGMT */
-		radio_oof = (GtkRadioButton*) g_object_new (GTK_TYPE_RADIO_BUTTON, "label", _("I am _out of the office"), "use-underline", TRUE, NULL);
-		radio_iof = (GtkRadioButton*) g_object_new (GTK_TYPE_RADIO_BUTTON, "label", _("I am _in the office"), "use-underline", TRUE, "group", radio_oof, NULL);
-#if 0  /* ACCOUNT_MGMT */
+	group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (widget));
+
+	text = _("Send Out of Office replies only _during this time period:");
+	widget = gtk_radio_button_new_with_mnemonic (group, text);
+	gtk_box_pack_start (GTK_BOX (container), widget, FALSE, FALSE, 0);
+	page->priv->scheduled_radio_button = widget;  /* do not reference */
+	gtk_widget_show (widget);
+
+	widget = gtk_grid_new ();
+	gtk_grid_set_row_spacing (GTK_GRID (widget), 6);
+	gtk_grid_set_column_spacing (GTK_GRID (widget), 6);
+	gtk_box_pack_start (GTK_BOX (page), widget, TRUE, TRUE, 0);
+	gtk_widget_show (widget);
+
+	g_object_bind_property (
+		page->priv->disabled_radio_button, "active",
+		widget, "sensitive",
+		G_BINDING_SYNC_CREATE |
+		G_BINDING_INVERT_BOOLEAN);
+
+	grid = widget;
+
+	widget = gtk_label_new_with_mnemonic (_("_From:"));
+	gtk_widget_set_margin_left (widget, 12);
+	gtk_misc_set_alignment (GTK_MISC (widget), 1.0, 0.5);
+	gtk_grid_attach (GTK_GRID (grid), widget, 0, 1, 1, 1);
+	gtk_size_group_add_widget (size_group, widget);
+	gtk_widget_show (widget);
+
+	g_object_bind_property (
+		page->priv->scheduled_radio_button, "active",
+		widget, "sensitive",
+		G_BINDING_SYNC_CREATE);
+
+	label = GTK_LABEL (widget);
+
+	widget = e_date_edit_new ();
+	gtk_label_set_mnemonic_widget (label, widget);
+	gtk_grid_attach (GTK_GRID (grid), widget, 1, 1, 1, 1);
+	page->priv->start_time = widget;  /* do not reference */
+	gtk_widget_show (widget);
+
+	g_object_bind_property (
+		page->priv->scheduled_radio_button, "active",
+		widget, "sensitive",
+		G_BINDING_SYNC_CREATE);
+
+	widget = gtk_label_new_with_mnemonic (_("_To:"));
+	gtk_widget_set_margin_left (widget, 12);
+	gtk_misc_set_alignment (GTK_MISC (widget), 1.0, 0.5);
+	gtk_grid_attach (GTK_GRID (grid), widget, 0, 2, 1, 1);
+	gtk_size_group_add_widget (size_group, widget);
+	gtk_widget_show (widget);
+
+	g_object_bind_property (
+		page->priv->scheduled_radio_button, "active",
+		widget, "sensitive",
+		G_BINDING_SYNC_CREATE);
+
+	label = GTK_LABEL (widget);
+
+	widget = e_date_edit_new ();
+	gtk_label_set_mnemonic_widget (label, widget);
+	gtk_grid_attach (GTK_GRID (grid), widget, 1, 2, 1, 1);
+	page->priv->end_time = widget;  /* do not reference */
+	gtk_widget_show (widget);
+
+	g_object_bind_property (
+		page->priv->scheduled_radio_button, "active",
+		widget, "sensitive",
+		G_BINDING_SYNC_CREATE);
+
+	widget = gtk_label_new_with_mnemonic (_("I_nternal:"));
+	gtk_widget_set_margin_top (widget, 12);
+	gtk_widget_set_margin_left (widget, 12);
+	gtk_widget_set_valign (widget, GTK_ALIGN_START);
+	gtk_misc_set_alignment (GTK_MISC (widget), 1.0, 0.5);
+	gtk_grid_attach (GTK_GRID (grid), widget, 0, 3, 1, 1);
+	gtk_size_group_add_widget (size_group, widget);
+	gtk_widget_show (widget);
+
+	text = _("Message to be sent within the organization");
+	gtk_widget_set_tooltip_text (widget, text);
+
+	label = GTK_LABEL (widget);
+
+	widget = gtk_scrolled_window_new (NULL, NULL);
+	gtk_scrolled_window_set_policy (
+		GTK_SCROLLED_WINDOW (widget),
+		GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_shadow_type (
+		GTK_SCROLLED_WINDOW (widget), GTK_SHADOW_IN);
+	gtk_widget_set_margin_top (widget, 12);
+	gtk_widget_set_hexpand (widget, TRUE);
+	gtk_widget_set_vexpand (widget, TRUE);
+	gtk_grid_attach (GTK_GRID (grid), widget, 1, 3, 1, 1);
+	gtk_widget_show (widget);
+
+	container = widget;
+
+	widget = gtk_text_view_new ();
+	gtk_label_set_mnemonic_widget (label, widget);
+	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (widget), GTK_WRAP_WORD);
+	gtk_container_add (GTK_CONTAINER (container), widget);
+	text_buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (widget));
+	page->priv->internal_reply = text_buffer;  /* do not reference */
+	gtk_widget_show (widget);
+
+	widget = gtk_label_new_with_mnemonic (_("E_xternal:"));
+	gtk_widget_set_margin_top (widget, 12);
+	gtk_widget_set_margin_left (widget, 12);
+	gtk_misc_set_alignment (GTK_MISC (widget), 1.0, 0.5);
+	gtk_grid_attach (GTK_GRID (grid), widget, 0, 4, 1, 1);
+	gtk_size_group_add_widget (size_group, widget);
+	gtk_widget_show (widget);
+
+	text = _("Message to be sent outside the organization");
+	gtk_widget_set_tooltip_text (widget, text);
+
+	label = GTK_LABEL (widget);
+
+	/* The order of the combo box items needs to stay
+	 * syncrhonized with the EEwsExternalAudience enum. */
+	widget = gtk_combo_box_text_new ();
+	gtk_combo_box_text_append_text (
+		GTK_COMBO_BOX_TEXT (widget),
+		_("Do not reply to senders outside the organization"));
+	gtk_combo_box_text_append_text (
+		GTK_COMBO_BOX_TEXT (widget),
+		_("Reply only to known senders outside the organization"));
+	gtk_combo_box_text_append_text (
+		GTK_COMBO_BOX_TEXT (widget),
+		_("Reply to any sender outside the organization"));
+	gtk_widget_set_margin_top (widget, 12);
+	gtk_grid_attach (GTK_GRID (grid), widget, 1, 4, 1, 1);
+	page->priv->external_audience = widget;  /* do not reference */
+	gtk_widget_show (widget);
+
+	widget = gtk_scrolled_window_new (NULL, NULL);
+	gtk_scrolled_window_set_policy (
+		GTK_SCROLLED_WINDOW (widget),
+		GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_shadow_type (
+		GTK_SCROLLED_WINDOW (widget), GTK_SHADOW_IN);
+	gtk_widget_set_hexpand (widget, TRUE);
+	gtk_widget_set_vexpand (widget, TRUE);
+	gtk_grid_attach (GTK_GRID (grid), widget, 1, 5, 1, 1);
+	gtk_widget_show (widget);
+
+	container = widget;
+
+	widget = gtk_text_view_new ();
+	gtk_label_set_mnemonic_widget (label, widget);
+	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (widget), GTK_WRAP_WORD);
+	gtk_container_add (GTK_CONTAINER (container), widget);
+	text_buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (widget));
+	page->priv->external_reply = text_buffer;  /* do not reference */
+	gtk_widget_show (widget);
+
+	/* XXX Bit of a hack.  Since the enum value for "none" is zero,
+	 *     sensitize the text view if the combo box has a non-zero
+	 *     "active" value (in other words, anything but "none"). */
+	g_object_bind_property (
+		page->priv->external_audience, "active",
+		widget, "sensitive",
+		G_BINDING_SYNC_CREATE);
+
+	g_object_unref (size_group);
+
+	e_mail_config_ews_ooo_page_refresh (page);
+}
+
+/* Helper for mail_config_ews_ooo_page_submit() */
+static void
+mail_config_ews_ooo_page_submit_cb (GObject *source_object,
+                                    GAsyncResult *result,
+                                    gpointer user_data)
+{
+	GSimpleAsyncResult *simple;
+	GError *error = NULL;
+
+	simple = G_SIMPLE_ASYNC_RESULT (user_data);
+
+	e_ews_oof_settings_submit_finish (
+		E_EWS_OOF_SETTINGS (source_object), result, &error);
+
+	if (error != NULL)
+		g_simple_async_result_take_error (simple, error);
+
+	g_simple_async_result_complete (simple);
+
+	g_object_unref (simple);
+}
+
+static void
+mail_config_ews_ooo_page_submit (EMailConfigPage *page,
+                                 GCancellable *cancellable,
+                                 GAsyncReadyCallback callback,
+                                 gpointer user_data)
+{
+	EMailConfigEwsOooPagePrivate *priv;
+	GSimpleAsyncResult *simple;
+	GtkToggleButton *toggle_button;
+	GtkTextBuffer *text_buffer;
+	GtkTextIter start, end;
+	GDateTime *date_time;
+	gchar *text;
+	time_t tm;
+
+	priv = E_MAIL_CONFIG_EWS_OOO_PAGE_GET_PRIVATE (page);
+
+	g_mutex_lock (priv->oof_settings_lock);
+
+	/* It may be that the Out of Office settings are still
+	 * loading or have failed to load, in which case there
+	 * are obviously no changes to submit. */
+	if (priv->oof_settings == NULL) {
+		g_mutex_unlock (priv->oof_settings_lock);
+		return;
+	}
+
+	toggle_button = GTK_TOGGLE_BUTTON (priv->enabled_radio_button);
+	if (gtk_toggle_button_get_active (toggle_button))
+		e_ews_oof_settings_set_state (
+			priv->oof_settings,
+			E_EWS_OOF_STATE_DISABLED);
+
+	toggle_button = GTK_TOGGLE_BUTTON (priv->disabled_radio_button);
+	if (gtk_toggle_button_get_active (toggle_button))
+		e_ews_oof_settings_set_state (
+			priv->oof_settings,
+			E_EWS_OOF_STATE_ENABLED);
+
+	toggle_button = GTK_TOGGLE_BUTTON (priv->scheduled_radio_button);
+	if (gtk_toggle_button_get_active (toggle_button))
+		e_ews_oof_settings_set_state (
+			priv->oof_settings,
+			E_EWS_OOF_STATE_SCHEDULED);
+
+	tm = e_date_edit_get_time (E_DATE_EDIT (priv->start_time));
+	date_time = g_date_time_new_from_unix_utc ((gint64) tm);
+	e_ews_oof_settings_set_start_time (priv->oof_settings, date_time);
+	g_date_time_unref (date_time);
+
+	tm = e_date_edit_get_time (E_DATE_EDIT (priv->end_time));
+	date_time = g_date_time_new_from_unix_utc ((gint64) tm);
+	e_ews_oof_settings_set_end_time (priv->oof_settings, date_time);
+	g_date_time_unref (date_time);
+
+	text_buffer = priv->internal_reply;
+	gtk_text_buffer_get_bounds (text_buffer, &start, &end);
+	text = gtk_text_buffer_get_text (text_buffer, &start, &end, FALSE);
+	e_ews_oof_settings_set_internal_reply (priv->oof_settings, text);
+	g_free (text);
+
+	text_buffer = priv->external_reply;
+	gtk_text_buffer_get_bounds (text_buffer, &start, &end);
+	text = gtk_text_buffer_get_text (text_buffer, &start, &end, FALSE);
+	e_ews_oof_settings_set_external_reply (priv->oof_settings, text);
+	g_free (text);
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (page), callback, user_data,
+		mail_config_ews_ooo_page_submit);
+
+	g_simple_async_result_set_check_cancellable (simple, cancellable);
+
+	e_ews_oof_settings_submit (
+		priv->oof_settings, cancellable,
+		mail_config_ews_ooo_page_submit_cb,
+		g_object_ref (simple));
+
+	g_object_unref (simple);
+
+	g_mutex_unlock (priv->oof_settings_lock);
+}
+
+static gboolean
+mail_config_ews_ooo_page_submit_finish (EMailConfigPage *page,
+                                        GAsyncResult *result,
+                                        GError **error)
+{
+	GSimpleAsyncResult *simple;
+
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (page),
+		mail_config_ews_ooo_page_submit), FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+
+	/* Assume success unless a GError is set. */
+	return !g_simple_async_result_propagate_error (simple, error);
+}
+
+static ESourceAuthenticationResult
+mail_config_ews_ooo_page_try_password_sync (ESourceAuthenticator *auth,
+                                            const GString *password,
+                                            GCancellable *cancellable,
+                                            GError **error)
+{
+	EMailConfigEwsOooPage *page;
+	CamelSettings *settings;
+	CamelEwsSettings *ews_settings;
+	CamelNetworkSettings *network_settings;
+	ESourceAuthenticationResult result;
+	EEwsConnection *connection;
+	EEwsOofSettings *oof_settings;
+	const gchar *hosturl;
+	const gchar *mailbox;
+	const gchar *mech;
+	const gchar *user;
+	guint timeout;
+	GError *local_error = NULL;
+
+	page = E_MAIL_CONFIG_EWS_OOO_PAGE (auth);
+	mailbox = mail_config_ews_ooo_page_get_mailbox (page);
+	settings = mail_config_ews_ooo_page_get_settings (page);
+
+	ews_settings = CAMEL_EWS_SETTINGS (settings);
+	hosturl = camel_ews_settings_get_hosturl (ews_settings);
+	timeout = camel_ews_settings_get_timeout (ews_settings);
+
+	network_settings = CAMEL_NETWORK_SETTINGS (settings);
+	user = camel_network_settings_get_user (network_settings);
+	mech = camel_network_settings_get_auth_mechanism (network_settings);
+
+	/* XXX This takes a GError but never fails, so skip it. */
+	connection = e_ews_connection_new (
+		hosturl, user, password->str,
+		mech, timeout, NULL, NULL, NULL);
+
+	e_ews_connection_set_mailbox (connection, mailbox);
+
+	oof_settings = e_ews_oof_settings_new_sync (
+		connection, cancellable, &local_error);
+
+	g_object_unref (connection);
+
+	if (oof_settings != NULL) {
+		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
+		g_warn_if_fail (local_error == NULL);
+
+		/* The page takes ownership of the settings. */
+		g_mutex_lock (page->priv->oof_settings_lock);
+		if (page->priv->oof_settings != NULL)
+			g_object_unref (oof_settings);
+		page->priv->oof_settings = oof_settings;
+		g_mutex_unlock (page->priv->oof_settings_lock);
+
+	} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
+		result = E_SOURCE_AUTHENTICATION_REJECTED;
+		g_error_free (local_error);
+
 	} else {
-		radio_iof = (GtkRadioButton*) g_object_new (GTK_TYPE_RADIO_BUTTON, "label", _("I am _in the office"), "use-underline", TRUE, NULL);
-		radio_oof = (GtkRadioButton*) g_object_new (GTK_TYPE_RADIO_BUTTON, "label", _("I am _out of the office"), "use-underline", TRUE, "group", radio_iof, NULL);
-	}
-#endif /* ACCOUNT_MGMT */
-	g_signal_connect (radio_oof, "toggled", G_CALLBACK (toggled_state_cb), NULL);
-
-	hbox_state = g_object_new (GTK_TYPE_HBOX, NULL, "homogeneous", FALSE, "spacing", 6, NULL);
-	gtk_box_pack_start (GTK_BOX (hbox_state), GTK_WIDGET (radio_iof), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (hbox_state), GTK_WIDGET (radio_oof), FALSE, FALSE, 12);
-
-	/*Check box for setting date*/
-	set_range = gtk_check_button_new_with_mnemonic (_("_Send only during this time period"));
-#if 0  /* ACCOUNT_MGMT */
-	oof_data->range_wt = set_range;
-	gtk_toggle_button_set_active ((GtkToggleButton *) set_range, oof_data->set_range);
-#endif /* ACCOUNT_MGMT */
-	g_signal_connect ((GtkToggleButton*) set_range, "toggled", G_CALLBACK (toggled_set_date_cb), NULL);
-
-	/*Selectable Dates*/
-	from_date = e_date_edit_new ();
-	to_date = e_date_edit_new ();
-
-#if 0  /* ACCOUNT_MGMT */
-	e_date_edit_set_time ((EDateEdit *) from_date, oof_data->from_time);
-	e_date_edit_set_time ((EDateEdit *) to_date, oof_data->to_time);
-
-	oof_data->from_date = (EDateEdit *) from_date;
-	oof_data->to_date = (EDateEdit *) to_date;
-#endif /* ACCOUNT_MGMT */
-
-	g_signal_connect (from_date, "changed", G_CALLBACK (from_time_changed_cb), NULL);
-	g_signal_connect (to_date, "changed", G_CALLBACK (to_time_changed_cb), NULL);
-
-	from_label = (GtkLabel*) g_object_new (GTK_TYPE_LABEL, "label", _("_From:"), "use-underline", TRUE, "use-markup", TRUE, NULL);
-	gtk_label_set_mnemonic_widget (from_label, GTK_WIDGET (from_date));
-	gtk_misc_set_alignment (GTK_MISC (from_label), 0, 0.5);
-	gtk_misc_set_padding (GTK_MISC (from_label), 0, 0);
-
-	to_label = (GtkLabel*) g_object_new (GTK_TYPE_LABEL, "label", _("_To:"), "use-markup", TRUE, "use-underline", TRUE, NULL);
-	gtk_label_set_mnemonic_widget (to_label, GTK_WIDGET (to_date));
-	gtk_misc_set_alignment (GTK_MISC (to_label), 0, 0.5);
-	gtk_misc_set_padding (GTK_MISC (to_label), 0, 0);
-
-	scrwnd_oof_int = (GtkScrolledWindow*) g_object_new (GTK_TYPE_SCROLLED_WINDOW, "hscrollbar-policy", GTK_POLICY_AUTOMATIC, "vscrollbar-policy", GTK_POLICY_AUTOMATIC, "shadow-type", GTK_SHADOW_IN, NULL);
-	txtview_oof_int = (GtkTextView*) g_object_new (GTK_TYPE_TEXT_VIEW, "justification", GTK_JUSTIFY_LEFT, "wrap-mode", GTK_WRAP_WORD, "editable", TRUE, NULL);
-
-	buffer_int = gtk_text_view_get_buffer (txtview_oof_int);
-#if 0  /* ACCOUNT_MGMT */
-	if (oof_data->internal_message) {
-		/* previuosly set message */
-		gtk_text_buffer_set_text (buffer_int, oof_data->internal_message, -1);
-		gtk_text_view_set_buffer (txtview_oof_int, buffer_int);
-	}
-#endif /* ACCOUNT_MGMT */
-	gtk_text_buffer_set_modified (buffer_int, FALSE);
-	gtk_container_add (GTK_CONTAINER (scrwnd_oof_int), GTK_WIDGET (txtview_oof_int));
-
-	lbl_internal = (GtkLabel*) g_object_new (GTK_TYPE_LABEL, "label", _("I_nternal:"), "use-underline", TRUE, "use-markup", TRUE, NULL);
-	gtk_label_set_mnemonic_widget (lbl_internal, GTK_WIDGET (txtview_oof_int));
-	gtk_widget_set_tooltip_text (GTK_WIDGET (lbl_internal), _("Message to be sent inside organization"));
-	gtk_misc_set_alignment (GTK_MISC (lbl_internal), 0, 0.5);
-	gtk_misc_set_padding (GTK_MISC (lbl_internal), 0, 0);
-
-	/*Select External Audience*/
-	hbox_ext = g_object_new (GTK_TYPE_HBOX, NULL, "homogeneous", FALSE, "spacing", 6, NULL);	
-	aud_box = gtk_combo_box_text_new ();
-	gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (aud_box), EXTERNAL_AUDIENCE_NONE, _("None"));
-	gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (aud_box), EXTERNAL_AUDIENCE_KNOWN, _("Known"));
-	gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (aud_box), EXTERNAL_AUDIENCE_ALL, _("All"));
-#if 0  /* ACCOUNT_MGMT */
-	gtk_combo_box_set_active (GTK_COMBO_BOX (aud_box), oof_data->audience_type);
-#endif /* ACCOUNT_MGMT */
-	gtk_widget_set_tooltip_text (GTK_WIDGET (aud_box), _("Send Message to"));
-
-#if 0  /* ACCOUNT_MGMT */
-	oof_data->aud_box = aud_box;
-#endif /* ACCOUNT_MGMT */
-	gtk_box_pack_start (GTK_BOX (hbox_ext), GTK_WIDGET (aud_box), FALSE, FALSE, 0);
-	g_signal_connect (GTK_COMBO_BOX (aud_box), "changed", G_CALLBACK (update_audience_cb), NULL);
-
-	scrwnd_oof_ext = (GtkScrolledWindow*) g_object_new (GTK_TYPE_SCROLLED_WINDOW, "hscrollbar-policy", GTK_POLICY_AUTOMATIC, "vscrollbar-policy", GTK_POLICY_AUTOMATIC, "shadow-type", GTK_SHADOW_IN, NULL);
-	gtk_box_pack_start (GTK_BOX (hbox_ext), GTK_WIDGET (scrwnd_oof_ext), TRUE, TRUE, 0);
-	txtview_oof_ext = (GtkTextView*) g_object_new (GTK_TYPE_TEXT_VIEW, "justification", GTK_JUSTIFY_LEFT, "wrap-mode", GTK_WRAP_WORD, "editable", TRUE, NULL);
-
-	buffer_ext = gtk_text_view_get_buffer (txtview_oof_ext);
-#if 0  /* ACCOUNT_MGMT */
-	if (oof_data->external_message) {
-		/* previuosly set message */
-		gtk_text_buffer_set_text (buffer_ext, oof_data->external_message, -1);
-		gtk_text_view_set_buffer (txtview_oof_ext, buffer_ext);
-
-	}
-#endif /* ACCOUNT_MGMT */
-	gtk_text_buffer_set_modified (buffer_ext, FALSE);
-	gtk_container_add (GTK_CONTAINER (scrwnd_oof_ext), GTK_WIDGET (txtview_oof_ext));
-
-	lbl_external = (GtkLabel*) g_object_new (GTK_TYPE_LABEL, "label", _("E_xternal:"), "use-underline", TRUE, "use-markup", TRUE, NULL);
-	gtk_label_set_mnemonic_widget (lbl_external, GTK_WIDGET (txtview_oof_ext));
-	gtk_widget_set_tooltip_text (GTK_WIDGET (lbl_external), _("Message to be sent outside organization"));
-	gtk_misc_set_alignment (GTK_MISC (lbl_external), 0, 0.5);
-	gtk_misc_set_padding (GTK_MISC (lbl_external), 0, 0);
-
-	g_signal_connect (buffer_int, "changed", G_CALLBACK (update_int_msg_cb), NULL);
-	g_signal_connect (buffer_ext, "changed", G_CALLBACK (update_ext_msg_cb), NULL);
-
-	gtk_table_attach (tbl_oof_status, GTK_WIDGET (lbl_status), 0, 1, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
-	gtk_table_attach (tbl_oof_status, GTK_WIDGET (hbox_state), 1, 2, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
-	gtk_table_attach (tbl_oof_status, GTK_WIDGET (set_range), 1, 2, 1, 2, GTK_FILL, GTK_FILL, 0, 0);
-	gtk_table_attach (tbl_oof_status, GTK_WIDGET (from_label), 0, 1, 2, 3, GTK_FILL, GTK_FILL, 0, 0);
-	gtk_table_attach (tbl_oof_status, GTK_WIDGET (from_date), 1, 2, 2, 3, GTK_FILL, GTK_FILL, 0, 0);
-	gtk_table_attach (tbl_oof_status, GTK_WIDGET (to_label), 0, 1, 3, 4, GTK_FILL, GTK_FILL, 0, 0);
-	gtk_table_attach (tbl_oof_status, GTK_WIDGET (to_date), 1, 2, 3, 4, GTK_FILL, GTK_FILL, 0, 0);
-	gtk_table_attach (tbl_oof_status, GTK_WIDGET (lbl_internal), 0, 1, 4, 5, GTK_FILL, GTK_FILL, 0, 0);
-	gtk_table_attach (tbl_oof_status, GTK_WIDGET (scrwnd_oof_int), 1, 2, 4, 5, GTK_FILL, GTK_FILL, 0, 0);
-	gtk_table_attach (tbl_oof_status, GTK_WIDGET (lbl_external), 0, 1, 5, 6, GTK_FILL, GTK_FILL, 0, 0);
-	gtk_table_attach (tbl_oof_status, GTK_WIDGET (hbox_ext), 1, 2, 5, 6, GTK_FILL, GTK_FILL, 0, 0);
-
-#if 0  /* ACCOUNT_MGMT */
-	if (!oof_data->state) {
-		gtk_widget_set_sensitive ((GtkWidget *) set_range, FALSE);
-		gtk_widget_set_sensitive (GTK_WIDGET (txtview_oof_int), FALSE);
-		gtk_widget_set_sensitive (GTK_WIDGET (txtview_oof_ext), FALSE);
-		gtk_widget_set_sensitive ((GtkWidget *) from_date, FALSE);
-		gtk_widget_set_sensitive ((GtkWidget *) to_date, FALSE);
-		gtk_widget_set_sensitive (aud_box, FALSE);
-	}
-	if (!oof_data->set_range) {
-		gtk_widget_set_sensitive ((GtkWidget *) from_date, FALSE);
-		gtk_widget_set_sensitive ((GtkWidget *) to_date, FALSE);
+		result = E_SOURCE_AUTHENTICATION_ERROR;
+		g_propagate_error (error, local_error);
 	}
 
-	oof_data->internal_view = GTK_WIDGET (txtview_oof_int);
-	oof_data->external_view = GTK_WIDGET (txtview_oof_ext);
-#endif /* ACCOUNT_MGMT */
+	return result;
 }
 
 static void
@@ -854,6 +852,7 @@ e_mail_config_ews_ooo_page_class_init (EMailConfigEwsOooPageClass *class)
 	object_class->set_property = mail_config_ews_ooo_page_set_property;
 	object_class->get_property = mail_config_ews_ooo_page_get_property;
 	object_class->dispose = mail_config_ews_ooo_page_dispose;
+	object_class->finalize = mail_config_ews_ooo_page_finalize;
 	object_class->constructed = mail_config_ews_ooo_page_constructed;
 
 	g_object_class_install_property (
@@ -865,8 +864,18 @@ e_mail_config_ews_ooo_page_class_init (EMailConfigEwsOooPageClass *class)
 			"Mail account source being edited",
 			E_TYPE_SOURCE,
 			G_PARAM_READWRITE |
-			G_PARAM_CONSTRUCT_ONLY |
-			G_PARAM_STATIC_STRINGS));
+			G_PARAM_CONSTRUCT_ONLY));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_COLLECTION_SOURCE,
+		g_param_spec_object (
+			"collection-source",
+			"Collection Source",
+			"Collection source being edited",
+			E_TYPE_SOURCE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT_ONLY));
 
 	g_object_class_install_property (
 		object_class,
@@ -877,15 +886,34 @@ e_mail_config_ews_ooo_page_class_init (EMailConfigEwsOooPageClass *class)
 			"Mail identity source being edited",
 			E_TYPE_SOURCE,
 			G_PARAM_READWRITE |
-			G_PARAM_CONSTRUCT_ONLY |
-			G_PARAM_STATIC_STRINGS));
+			G_PARAM_CONSTRUCT_ONLY));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_REGISTRY,
+		g_param_spec_object (
+			"registry",
+			"Registry",
+			"Data source registry",
+			E_TYPE_SOURCE_REGISTRY,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT_ONLY));
 }
 
 static void
 e_mail_config_ews_ooo_page_interface_init (EMailConfigPageInterface *interface)
 {
-	interface->title = _("EWS Settings");
+	interface->title = _("Out of Office");
 	interface->sort_order = E_MAIL_CONFIG_EWS_OOO_PAGE_SORT_ORDER;
+	interface->submit = mail_config_ews_ooo_page_submit;
+	interface->submit_finish = mail_config_ews_ooo_page_submit_finish;
+}
+
+static void
+e_mail_config_ews_ooo_page_authenticator_init (ESourceAuthenticatorInterface *interface)
+{
+	interface->try_password_sync =
+		mail_config_ews_ooo_page_try_password_sync;
 }
 
 static void
@@ -897,6 +925,8 @@ static void
 e_mail_config_ews_ooo_page_init (EMailConfigEwsOooPage *page)
 {
 	page->priv = E_MAIL_CONFIG_EWS_OOO_PAGE_GET_PRIVATE (page);
+
+	page->priv->oof_settings_lock = g_mutex_new ();
 }
 
 void
@@ -909,16 +939,63 @@ e_mail_config_ews_ooo_page_type_register (GTypeModule *type_module)
 }
 
 EMailConfigPage *
-e_mail_config_ews_ooo_page_new (ESource *account_source,
-                                ESource *identity_source)
+e_mail_config_ews_ooo_page_new (ESourceRegistry *registry,
+                                ESource *account_source,
+                                ESource *identity_source,
+                                ESource *collection_source)
 {
+	g_return_val_if_fail (E_IS_SOURCE_REGISTRY (registry), NULL);
 	g_return_val_if_fail (E_IS_SOURCE (account_source), NULL);
 	g_return_val_if_fail (E_IS_SOURCE (identity_source), NULL);
+	g_return_val_if_fail (E_IS_SOURCE (collection_source), NULL);
 
 	return g_object_new (
 		E_TYPE_MAIL_CONFIG_EWS_OOO_PAGE,
+		"registry", registry,
 		"account-source", account_source,
-		"identity-source", identity_source, NULL);
+		"identity-source", identity_source,
+		"collection-source", collection_source,
+		NULL);
+}
+
+void
+e_mail_config_ews_ooo_page_refresh (EMailConfigEwsOooPage *page)
+{
+	ESourceAuthenticator *authenticator;
+	ESourceRegistry *registry;
+	ESource *source;
+	EActivity *activity;
+	GCancellable *cancellable;
+	AsyncContext *async_context;
+
+	g_return_if_fail (E_IS_MAIL_CONFIG_EWS_OOO_PAGE (page));
+
+	registry = e_mail_config_ews_ooo_page_get_registry (page);
+	source = e_mail_config_ews_ooo_page_get_collection_source (page);
+	authenticator = E_SOURCE_AUTHENTICATOR (page);
+
+	activity = e_mail_config_activity_page_new_activity (
+		E_MAIL_CONFIG_ACTIVITY_PAGE (page));
+	cancellable = e_activity_get_cancellable (activity);
+
+	e_activity_set_text (
+		activity, _("Retrieving \"Out of Office\" settings"));
+
+	async_context = g_slice_new0 (AsyncContext);
+	async_context->page = g_object_ref (page);
+	async_context->activity = activity;  /* takes ownership */
+
+	e_source_registry_authenticate (
+		registry, source, authenticator, cancellable,
+		mail_config_ews_ooo_page_refresh_cb, async_context);
+}
+
+ESourceRegistry *
+e_mail_config_ews_ooo_page_get_registry (EMailConfigEwsOooPage *page)
+{
+	g_return_val_if_fail (E_IS_MAIL_CONFIG_EWS_OOO_PAGE (page), NULL);
+
+	return page->priv->registry;
 }
 
 ESource *
@@ -935,5 +1012,13 @@ e_mail_config_ews_ooo_page_get_identity_source (EMailConfigEwsOooPage *page)
 	g_return_val_if_fail (E_IS_MAIL_CONFIG_EWS_OOO_PAGE (page), NULL);
 
 	return page->priv->identity_source;
+}
+
+ESource *
+e_mail_config_ews_ooo_page_get_collection_source (EMailConfigEwsOooPage *page)
+{
+	g_return_val_if_fail (E_IS_MAIL_CONFIG_EWS_OOO_PAGE (page), NULL);
+
+	return page->priv->collection_source;
 }
 

@@ -25,6 +25,7 @@
 #include <libedataserver/libedataserver.h>
 
 #include <mail/e-mail-config-page.h>
+#include <mail/e-mail-config-activity-page.h>
 
 /* Standard GObject macros */
 #define E_TYPE_MAIL_CONFIG_EWS_OOO_PAGE \
@@ -54,12 +55,12 @@ typedef struct _EMailConfigEwsOooPageClass EMailConfigEwsOooPageClass;
 typedef struct _EMailConfigEwsOooPagePrivate EMailConfigEwsOooPagePrivate;
 
 struct _EMailConfigEwsOooPage {
-	GtkBox parent;
+	EMailConfigActivityPage parent;
 	EMailConfigEwsOooPagePrivate *priv;
 };
 
 struct _EMailConfigEwsOooPageClass {
-	GtkBoxClass parent_class;
+	EMailConfigActivityPageClass parent_class;
 };
 
 GType		e_mail_config_ews_ooo_page_get_type
@@ -67,11 +68,20 @@ GType		e_mail_config_ews_ooo_page_get_type
 void		e_mail_config_ews_ooo_page_type_register
 						(GTypeModule *type_module);
 EMailConfigPage *
-		e_mail_config_ews_ooo_page_new	(ESource *account_source,
-						 ESource *identity_source);
+		e_mail_config_ews_ooo_page_new	(ESourceRegistry *registry,
+						 ESource *account_source,
+						 ESource *identity_source,
+						 ESource *collection_source);
+void		e_mail_config_ews_ooo_page_refresh
+						(EMailConfigEwsOooPage *page);
+ESourceRegistry *
+		e_mail_config_ews_ooo_page_get_registry
+						(EMailConfigEwsOooPage *page);
 ESource *	e_mail_config_ews_ooo_page_get_account_source
 						(EMailConfigEwsOooPage *page);
 ESource *	e_mail_config_ews_ooo_page_get_identity_source
+						(EMailConfigEwsOooPage *page);
+ESource *	e_mail_config_ews_ooo_page_get_collection_source
 						(EMailConfigEwsOooPage *page);
 
 G_END_DECLS

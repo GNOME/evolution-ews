@@ -6140,7 +6140,7 @@ e_ews_connection_get_delegate_sync (EEwsConnection *cnc,
 	GAsyncResult *result;
 	gboolean success;
 
-	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
 
 	closure = e_async_closure_new ();
 
@@ -6181,20 +6181,24 @@ e_ews_connection_get_oof_settings (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetUserOofSettingsRequest", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+		cnc->priv->uri, "GetUserOofSettingsRequest",
+		NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
-	e_ews_message_write_string_parameter (msg, "Address", NULL, cnc->priv->email);
+	e_ews_message_write_string_parameter (
+		msg, "Address", NULL, cnc->priv->email);
 	e_soap_message_end_element (msg);
 
 	/* Complete the footer and print the request */
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-					    callback, user_data,
-					    e_ews_connection_get_oof_settings);
-
 	async_data = g_new0 (EwsAsyncData, 1);
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_get_oof_settings);
+
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -6214,7 +6218,6 @@ e_ews_connection_get_oof_settings_finish (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
-	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_get_oof_settings),

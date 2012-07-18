@@ -21,6 +21,8 @@ module_ews_configuration_la_SOURCES = \
 	e-mail-config-ews-backend.h \
 	e-mail-config-ews-gal.c \
 	e-mail-config-ews-gal.h \
+	e-mail-config-ews-notebook.c \
+	e-mail-config-ews-notebook.h \
 	e-mail-config-ews-oal-combo-box.c \
 	e-mail-config-ews-oal-combo-box.h \
 	e-mail-config-ews-ooo-page.c \

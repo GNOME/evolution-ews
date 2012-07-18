@@ -64,10 +64,12 @@ libeews_1_2_la_SOURCES = \
 	$(KERBEROS_FILES) \
 	e-ews-connection.c \
 	e-ews-connection.h \
+	e-ews-enumtypes.c \
 	e-ews-folder.c \
 	e-ews-item.c \
 	e-ews-item-change.c \
 	e-ews-message.c \
+	e-ews-oof-settings.c \
 	e-soap-message.c \
 	e-soap-message.h \
 	e-soap-response.c \
@@ -92,10 +94,13 @@ libeewsincludedir = $(privincludedir)/ews
 libeewsinclude_HEADERS = \
 	ews-errors.h \
 	e-ews-connection.h \
+	e-ews-enums.h \
+	e-ews-enumtypes.h \
 	e-ews-folder.h \
 	e-ews-item.h \
 	e-ews-item-change.h \
 	e-ews-message.h \
+	e-ews-oof-settings.h \
 	$(NULL)
 
 %-$(API_VERSION).pc: %.pc
@@ -116,7 +121,7 @@ EXTRA_DIST = \
 	ews-marshal.list \
 	$(NULL)
 
+CLEANFILES = $(BUILT_SOURCES)
 DISTCLEANFILES = $(pkgconfig_DATA)
-CLEANFILES = $(MARSHAL_GENERATED)
 
 -include $(top_srcdir)/git.mk

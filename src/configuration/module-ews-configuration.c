@@ -21,6 +21,7 @@
 #include "e-mail-config-ews-autodiscover.h"
 #include "e-mail-config-ews-backend.h"
 #include "e-mail-config-ews-gal.h"
+#include "e-mail-config-ews-notebook.h"
 #include "e-mail-config-ews-oal-combo-box.h"
 #include "e-mail-config-ews-ooo-page.h"
 
@@ -36,6 +37,7 @@ e_module_load (GTypeModule *type_module)
 	e_mail_config_ews_autodiscover_type_register (type_module);
 	e_mail_config_ews_backend_type_register (type_module);
 	e_mail_config_ews_gal_type_register (type_module);
+	e_mail_config_ews_notebook_type_register (type_module);
 	e_mail_config_ews_oal_combo_box_type_register (type_module);
 	e_mail_config_ews_ooo_page_type_register (type_module);
 }
