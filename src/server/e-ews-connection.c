@@ -134,6 +134,22 @@ ews_connection_error_quark (void)
 	return quark;
 }
 
+static gpointer
+ews_unref_in_thread_func (gpointer data)
+{
+	g_object_unref (G_OBJECT (data));
+
+	return NULL;
+}
+
+static void
+ews_unref_in_thread (gpointer object)
+{
+	g_return_if_fail (G_IS_OBJECT (object));
+
+	g_thread_create (ews_unref_in_thread_func, object, FALSE, NULL);
+}
+
 static void
 async_data_free (EwsAsyncData *async_data)
 {
@@ -244,7 +260,8 @@ ews_connection_scheduled_cb (gpointer user_data)
 
 	if (sd->message)
 		g_object_unref (sd->message);
-	g_object_unref (sd->cnc);
+	/* in case this is the last reference */
+	ews_unref_in_thread (sd->cnc);
 	g_free (sd);
 
 	return FALSE;
@@ -365,22 +382,6 @@ ews_trigger_next_request (EEwsConnection *cnc)
 	g_source_set_priority (source, G_PRIORITY_DEFAULT);
 	g_source_set_callback (source, ews_next_request, cnc, NULL);
 	g_source_attach (source, cnc->priv->soup_context);
-}
-
-static gpointer
-ews_unref_in_thread_func (gpointer data)
-{
-	g_object_unref (G_SIMPLE_ASYNC_RESULT (data));
-
-	return NULL;
-}
-
-static void
-ews_unref_in_thread (GSimpleAsyncResult *simple)
-{
-	g_return_if_fail (G_IS_SIMPLE_ASYNC_RESULT (simple));
-
-	g_thread_create (ews_unref_in_thread_func, simple, FALSE, NULL);
 }
 
 /**
