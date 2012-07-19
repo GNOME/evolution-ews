@@ -307,23 +307,6 @@ camel_ews_summary_add_message (CamelFolderSummary *summary,
 	camel_message_info_free (info);
 }
 
-void
-camel_ews_summary_add_message_info (CamelFolderSummary *summary,
-                                    guint32 server_flags,
-                                    CamelMessageInfo *mi)
-{
-	CamelMessageInfoBase *binfo = (CamelMessageInfoBase *) mi;
-	CamelEwsMessageInfo *einfo = (CamelEwsMessageInfo *) mi;
-
-	binfo->flags |= server_flags;
-	einfo->server_flags = server_flags;
-
-	/* TODO update user flags */
-
-	binfo->flags &= ~CAMEL_MESSAGE_FOLDER_FLAGGED;
-	camel_folder_summary_add (summary, (CamelMessageInfo *) mi);
-}
-
 static gboolean
 ews_update_user_flags (CamelMessageInfo *info,
                        CamelFlag *server_user_flags)

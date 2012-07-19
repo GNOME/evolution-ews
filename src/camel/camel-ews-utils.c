@@ -553,7 +553,11 @@ camel_ews_utils_sync_deleted_items (CamelEwsFolder *ews_folder,
 	camel_db_delete_uids (((CamelStore *) ews_store)->cdb_w, full_name, items_deleted_list, NULL);
 	g_list_free (items_deleted_list);
 
-	camel_folder_changed ((CamelFolder *) ews_folder, ci);
+	if (camel_folder_change_info_changed (ci)) {
+		camel_folder_summary_touch (folder->summary);
+		camel_folder_summary_save_to_db (folder->summary, NULL);
+		camel_folder_changed (folder, ci);
+	}
 	camel_folder_change_info_free (ci);
 
 	g_slist_foreach (items_deleted, (GFunc) g_free, NULL);
@@ -861,8 +865,11 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
 		g_object_unref (item);
 	}
 
-	camel_folder_summary_save_to_db (folder->summary, NULL);
-	camel_folder_changed ((CamelFolder *) ews_folder, ci);
+	if (camel_folder_change_info_changed (ci)) {
+		camel_folder_summary_touch (folder->summary);
+		camel_folder_summary_save_to_db (folder->summary, NULL);
+		camel_folder_changed ((CamelFolder *) ews_folder, ci);
+	}
 	camel_folder_change_info_free (ci);
 	g_slist_free (items_updated);
 }
@@ -951,16 +958,29 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 		server_flags = ews_utils_get_server_flags (item);
 		ews_utils_merge_server_user_flags (item, mi);
 
-		camel_ews_summary_add_message_info (folder->summary, server_flags,
-						    (CamelMessageInfo *) mi);
+		mi->info.flags |= server_flags;
+		mi->server_flags = server_flags;
+
+		camel_folder_summary_add (folder->summary, (CamelMessageInfo *) mi);
+
+		/* camel_folder_summary_add() sets folder_flagged flag
+		   on the message info, but this is a fresh item downloaded
+		   from the server, thus unset it, to avoid resync up to the server
+		   on folder leave/store
+		*/
+		mi->info.flags &= ~CAMEL_MESSAGE_FOLDER_FLAGGED;
+
 		camel_folder_change_info_add_uid (ci, id->id);
 		camel_folder_change_info_recent_uid (ci, id->id);
 
 		g_object_unref (item);
 	}
 
-	camel_folder_summary_save_to_db (folder->summary, NULL);
-	camel_folder_changed ((CamelFolder *) ews_folder, ci);
+	if (camel_folder_change_info_changed (ci)) {
+		camel_folder_summary_touch (folder->summary);
+		camel_folder_summary_save_to_db (folder->summary, NULL);
+		camel_folder_changed ((CamelFolder *) ews_folder, ci);
+	}
 	camel_folder_change_info_free (ci);
 	g_slist_free (items_created);
 }
