@@ -906,8 +906,10 @@ ews_move_to_junk_folder (CamelFolder *folder,
 				camel_folder_summary_unlock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
 			}
 
-			if (camel_folder_change_info_changed (changes))
+			if (camel_folder_change_info_changed (changes)) {
+				camel_folder_summary_touch (folder->summary);
 				camel_folder_changed (folder, changes);
+			}
 			camel_folder_change_info_free (changes);
 		}
 
@@ -965,7 +967,8 @@ ews_synchronize_sync (CamelFolder *folder,
 
 		/* Exchange doesn't seem to have a sane representation
 		 * for most flags — not even replied/forwarded. */
-		if (flags_changed & (CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_FORWARDED | CAMEL_MESSAGE_FLAGGED)) {
+		if ((flags_set & CAMEL_MESSAGE_FOLDER_FLAGGED) != 0 &&
+		    (flags_changed & (CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_FORWARDED | CAMEL_MESSAGE_FLAGGED)) != 0) {
 			mi_list = g_slist_append (mi_list, mi);
 			mi_list_len++;
 
@@ -979,7 +982,7 @@ ews_synchronize_sync (CamelFolder *folder,
 		} else if (flags_set & CAMEL_MESSAGE_JUNK) {
 			junk_uids = g_slist_prepend (junk_uids, (gpointer) camel_pstring_strdup (uids->pdata[i]));
 			camel_message_info_free (mi);
-		} else if (mi->info.dirty || (flags_set & CAMEL_MESSAGE_FOLDER_FLAGGED) != 0) {
+		} else if ((flags_set & CAMEL_MESSAGE_FOLDER_FLAGGED) != 0) {
 			/* OK, the change must have been the labels */
 			mi_list = g_slist_append (mi_list, mi);
 			mi_list_len++;
@@ -1340,6 +1343,8 @@ ews_refresh_info_sync (CamelFolder *folder,
 	cnc = camel_ews_store_get_connection (ews_store);
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
+	camel_folder_summary_prepare_fetch_all (folder->summary, NULL);
+
 	id = camel_ews_store_summary_get_folder_id_from_name
 						(ews_store->summary,
 						 full_name);
@@ -1531,7 +1536,10 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 				camel_folder_summary_remove_uid (source->summary, uids->pdata[i]);
 				camel_folder_change_info_remove_uid (changes, uids->pdata[i]);
 			}
-			camel_folder_changed (source, changes);
+			if (camel_folder_change_info_changed (changes)) {
+				camel_folder_summary_touch (source->summary);
+				camel_folder_changed (source, changes);
+			}
 			camel_folder_change_info_free (changes);
 		}
 
@@ -1618,7 +1626,10 @@ ews_delete_messages (CamelFolder *folder,
 			g_propagate_error (error, local_error);
 		}
 
-		camel_folder_changed (folder, changes);
+		if (camel_folder_change_info_changed (changes)) {
+			camel_folder_summary_touch (folder->summary);
+			camel_folder_changed (folder, changes);
+		}
 
 		g_slist_foreach (deleted_head, (GFunc) camel_pstring_free, NULL);
 		g_slist_free (deleted_head);
