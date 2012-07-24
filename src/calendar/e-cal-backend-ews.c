@@ -320,6 +320,7 @@ e_cal_backend_ews_discard_alarm (ECalBackend *backend,
 	if (!comp) {
 		e_data_cal_respond_discard_alarm (cal, context,
 						   EDC_ERROR (ObjectNotFound));
+		PRIV_UNLOCK (priv);
 		return;
 	}
 
@@ -1017,6 +1018,7 @@ e_cal_backend_ews_remove_object (ECalBackend *backend,
 		if (!parent) {
 			g_warning ("EEE Cant find master component with uid:%s\n", uid);
 			g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
+			PRIV_UNLOCK (priv);
 			goto exit;
 		}
 	}
@@ -1024,6 +1026,7 @@ e_cal_backend_ews_remove_object (ECalBackend *backend,
 	if (!comp && !parent) {
 		g_warning ("EEE Cant find component with uid:%s & rid:%s\n", uid, rid);
 		g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
+		PRIV_UNLOCK (priv);
 		goto errorlvl1;
 	}
 
@@ -2158,6 +2161,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 	if (!oldcomp) {
 		g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
 		g_object_unref (comp);
+		PRIV_UNLOCK (priv);
 		goto exit;
 	}
 	PRIV_UNLOCK (priv);
