@@ -447,7 +447,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 					  cancellable, &local_error);
 	g_free (mime_dir);
 
-	if (!res) {
+	if (!res || !items) {
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
 		g_propagate_error (error, local_error);
 		goto exit;
