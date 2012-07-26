@@ -3651,14 +3651,9 @@ e_ews_connection_update_items_finish (EEwsConnection *cnc,
 
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
-	if (ids) {
-		if (!async_data->items) {
-			g_set_error_literal (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ITEMNOTFOUND, _("No items found"));
-			return FALSE;
-		}
-
+	if (ids)
 		*ids = async_data->items;
-	} else {
+	else {
 		while (async_data->items) {
 			g_object_unref (async_data->items->data);
 			async_data->items = g_slist_remove (async_data->items,
@@ -3785,12 +3780,6 @@ e_ews_connection_create_items_finish (EEwsConnection *cnc,
 
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
-
-	if (!async_data->items) {
-		g_set_error_literal (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ITEMNOTFOUND, _("No items found"));
-		return FALSE;
-	}
-
 	*ids = async_data->items;
 
 	return TRUE;
@@ -4803,11 +4792,6 @@ e_ews_connection_move_items_finish (EEwsConnection *cnc,
 
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
-
-	if (!async_data->items) {
-		g_set_error_literal (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ITEMNOTFOUND, _("No items found"));
-		return FALSE;
-	}
 
 	*items = async_data->items;
 
