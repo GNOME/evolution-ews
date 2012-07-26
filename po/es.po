@@ -12,15 +12,15 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2012-07-18 21:06+0000\n"
-"PO-Revision-Date: 2012-07-21 17:55+0200\n"
+"POT-Creation-Date: 2012-07-24 18:08+0000\n"
+"PO-Revision-Date: 2012-07-26 10:47+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 "X-Generator: Gtranslator 2.91.5\n"
 
 #: ../src/addressbook/e-book-backend-ews.c:979
@@ -53,15 +53,15 @@ msgstr "Buscando…"
 msgid "Insufficient memory"
 msgstr "Memoria insuficiente"
 
-#: ../src/calendar/e-cal-backend-ews.c:1054
+#: ../src/calendar/e-cal-backend-ews.c:1057
 msgid "EWS does not support bulk removals"
 msgstr "EWS no soporta eliminaciones"
 
-#: ../src/calendar/e-cal-backend-ews.c:1637
+#: ../src/calendar/e-cal-backend-ews.c:1640
 msgid "EWS does not support bulk additions"
 msgstr "EWS no soporta adiciones"
 
-#: ../src/calendar/e-cal-backend-ews.c:2127
+#: ../src/calendar/e-cal-backend-ews.c:2130
 msgid "EWS does not support bulk modifications"
 msgstr "EWS no soporta modificaciones"
 
@@ -95,12 +95,12 @@ msgstr "No se pudo crear la ruta de la caché"
 msgid "Failed to move message cache file"
 msgstr "Falló al mover el archivo de la caché de mensajes"
 
-#: ../src/camel/camel-ews-folder.c:1087
+#: ../src/camel/camel-ews-folder.c:1090
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "No se pudo cargar el resumen para %s"
 
-#: ../src/camel/camel-ews-folder.c:1463
+#: ../src/camel/camel-ews-folder.c:1468
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr ""
@@ -325,9 +325,6 @@ msgid "Out of Office"
 msgstr "Fuera de la oficina"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:459
-#| msgid ""
-#| "The messages specified below will be automatically sent to each internal "
-#| "and external personal who sends a mail to you."
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
@@ -340,12 +337,10 @@ msgid "Do _not send Out of Office replies"
 msgstr "_No enviar respuestas «Estoy fuera de la oficina»"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:475
-#| msgid "Out of Office"
 msgid "_Send Out of Office replies"
 msgstr "_Enviar respuestas «Estoy fuera de la oficina»"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:483
-#| msgid "_Send only during this time period"
 msgid "Send Out of Office replies only _during this time period:"
 msgstr ""
 "_Enviar respuestas «Estoy fuera de la oficina» solo durante este período de "
@@ -364,7 +359,6 @@ msgid "I_nternal:"
 msgstr "I_nterno:"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:562
-#| msgid "Message to be sent inside organization"
 msgid "Message to be sent within the organization"
 msgstr "Mensaje que enviar dentro de la organización"
 
@@ -373,32 +367,26 @@ msgid "E_xternal:"
 msgstr "E_xterno:"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:597
-#| msgid "Message to be sent outside organization"
 msgid "Message to be sent outside the organization"
 msgstr "Mensaje que enviar fuera de la organización"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:607
-#| msgid "Message to be sent outside organization"
 msgid "Do not reply to senders outside the organization"
 msgstr "No responder a los remitentes fuera de la organización"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:610
-#| msgid "Message to be sent outside organization"
 msgid "Reply only to known senders outside the organization"
 msgstr "Responder sólo a los remitentes fuera de la organización"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:613
-#| msgid "Message to be sent outside organization"
 msgid "Reply to any sender outside the organization"
 msgstr "Responder a cualquier remitente fuera de la organización"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:982
-#| msgid "Fetching out of office settings..."
 msgid "Retrieving \"Out of Office\" settings"
 msgstr "Obteniendo la configuración de «Estoy fuera de la oficina»"
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:1
-#| msgid "Autodiscover failed: %s"
 msgid "Autodiscovery query failed."
 msgstr "Falló la consulta de autodetección."
 
@@ -407,14 +395,10 @@ msgid "The reported error was &quot;{0}&quot;."
 msgstr "El error devuelto fue «{0}»."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:3
-#| msgid "Locating offline address books"
 msgid "Failed to locate offline address books."
 msgstr "Falló al buscar libretas de direcciones sin conexión."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:4
-#| msgid ""
-#| "Unable to fetch out of office settings: \n"
-#| "%s"
 msgid "Failed to retrieve &quot;Out of Office&quot; settings."
 msgstr "Falló al obtener la configuración de «Estoy fuera de la oficina»."
 
@@ -467,6 +451,11 @@ msgstr "Falló al analizar el XML oab"
 #: ../src/server/e-ews-connection.c:2134
 msgid "Failed to find <OAB> element\n"
 msgstr "Falló al buscar el elemento <OAB>\n"
+
+#: ../src/server/e-ews-connection.c:3242 ../src/server/e-ews-connection.c:3656
+#: ../src/server/e-ews-connection.c:3790 ../src/server/e-ews-connection.c:4808
+msgid "No items found"
+msgstr "No se encontraron elementos"
 
 #: ../src/utils/ews-camel-common.c:172
 #, c-format
