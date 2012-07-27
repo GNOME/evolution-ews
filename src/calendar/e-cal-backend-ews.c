@@ -3575,8 +3575,8 @@ ews_cal_sync_items_ready_cb (GObject *source_object,
 	g_object_unref (backend);
 }
 
-static gboolean
-ews_start_sync (gpointer data)
+static gpointer
+ews_start_sync_thread (gpointer data)
 {
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
@@ -3598,6 +3598,22 @@ ews_start_sync (gpointer data)
 		priv->cancellable,
 		ews_cal_sync_items_ready_cb,
 		g_object_ref (cbews));
+
+	g_object_unref (cbews);
+
+	return NULL;
+}
+
+static gboolean
+ews_start_sync (gpointer data)
+{
+	GThread *thread;
+
+	/* run the actual operation in thread,
+	   to not block main thread of the factory */
+	thread = g_thread_new (NULL, ews_start_sync_thread, g_object_ref (data));
+	g_thread_unref (thread);
+
 	return TRUE;
 }
 
@@ -3610,14 +3626,12 @@ ews_cal_start_refreshing (ECalBackendEws *cbews)
 
 	PRIV_LOCK (priv);
 
-	if	(!priv->refresh_timeout &&
-		 e_backend_get_online (E_BACKEND (cbews)) &&
-		 priv->cnc) {
-			ews_start_sync (cbews);
-			priv->refresh_timeout = g_timeout_add_seconds
-							(REFRESH_INTERVAL,
-							 (GSourceFunc) ews_start_sync,
-							  cbews);
+	if (!priv->refresh_timeout &&
+	    e_backend_get_online (E_BACKEND (cbews)) &&
+	    priv->cnc) {
+		ews_start_sync (cbews);
+		priv->refresh_timeout = g_timeout_add_seconds (
+			REFRESH_INTERVAL, (GSourceFunc) ews_start_sync, cbews);
 	}
 
 	PRIV_UNLOCK (priv);
