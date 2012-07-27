@@ -167,7 +167,7 @@ convert_error_to_edb_error (GError **perror)
 	if ((*perror)->domain == EWS_CONNECTION_ERROR) {
 		switch ((*perror)->code) {
 		case EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED:
-			error = EDB_ERROR (AUTHENTICATION_FAILED);
+			error = EDB_ERROR_EX (AUTHENTICATION_FAILED, (*perror)->message);
 			break;
 		case EWS_CONNECTION_ERROR_CANCELLED:
 			break;
@@ -175,11 +175,11 @@ convert_error_to_edb_error (GError **perror)
 		case EWS_CONNECTION_ERROR_MANAGEDFOLDERNOTFOUND:
 		case EWS_CONNECTION_ERROR_PARENTFOLDERNOTFOUND:
 		case EWS_CONNECTION_ERROR_PUBLICFOLDERSERVERNOTFOUND:
-			error = EDB_ERROR (NO_SUCH_BOOK);
+			error = EDB_ERROR_EX (NO_SUCH_BOOK, (*perror)->message);
 			break;
 		case EWS_CONNECTION_ERROR_EVENTNOTFOUND:
 		case EWS_CONNECTION_ERROR_ITEMNOTFOUND:
-			error = EDB_ERROR (CONTACT_NOT_FOUND);
+			error = EDB_ERROR_EX (CONTACT_NOT_FOUND, (*perror)->message);
 			break;
 		}
 	}
