@@ -135,7 +135,7 @@ convert_error_to_edc_error (GError **perror)
 	if ((*perror)->domain == EWS_CONNECTION_ERROR) {
 		switch ((*perror)->code) {
 		case EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED:
-			error = EDC_ERROR (AuthenticationFailed);
+			error = EDC_ERROR_EX (AuthenticationFailed, (*perror)->message);
 			break;
 		case EWS_CONNECTION_ERROR_CANCELLED:
 			break;
@@ -143,11 +143,11 @@ convert_error_to_edc_error (GError **perror)
 		case EWS_CONNECTION_ERROR_MANAGEDFOLDERNOTFOUND:
 		case EWS_CONNECTION_ERROR_PARENTFOLDERNOTFOUND:
 		case EWS_CONNECTION_ERROR_PUBLICFOLDERSERVERNOTFOUND:
-			error = EDC_ERROR (NoSuchCal);
+			error = EDC_ERROR_EX (NoSuchCal, (*perror)->message);
 			break;
 		case EWS_CONNECTION_ERROR_EVENTNOTFOUND:
 		case EWS_CONNECTION_ERROR_ITEMNOTFOUND:
-			error = EDC_ERROR (ObjectNotFound);
+			error = EDC_ERROR_EX (ObjectNotFound, (*perror)->message);
 			break;
 		}
 	}

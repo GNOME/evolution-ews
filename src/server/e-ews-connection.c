@@ -3259,6 +3259,22 @@ e_ews_connection_update_items_finish (EEwsConnection *cnc,
 
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
+
+	/* if there is only one item, then check whether it's an error */
+	if (async_data->items && !async_data->items->next) {
+		EEwsItem *item = async_data->items->data;
+
+		if (item && e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR) {
+			if (error)
+				*error = g_error_copy (e_ews_item_get_error (item));
+
+			g_slist_free_full (async_data->items, g_object_unref);
+			async_data->items = NULL;
+
+			return FALSE;
+		}
+	}
+
 	if (ids)
 		*ids = async_data->items;
 	else {
@@ -3382,6 +3398,22 @@ e_ews_connection_create_items_finish (EEwsConnection *cnc,
 
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
+
+	/* if there is only one item, then check whether it's an error */
+	if (async_data->items && !async_data->items->next) {
+		EEwsItem *item = async_data->items->data;
+
+		if (item && e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR) {
+			if (error)
+				*error = g_error_copy (e_ews_item_get_error (item));
+
+			g_slist_free_full (async_data->items, g_object_unref);
+			async_data->items = NULL;
+
+			return FALSE;
+		}
+	}
+
 	*ids = async_data->items;
 
 	return TRUE;
@@ -4289,6 +4321,21 @@ e_ews_connection_move_items_finish (EEwsConnection *cnc,
 
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
+
+	/* if there is only one item, then check whether it's an error */
+	if (async_data->items && !async_data->items->next) {
+		EEwsItem *item = async_data->items->data;
+
+		if (item && e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR) {
+			if (error)
+				*error = g_error_copy (e_ews_item_get_error (item));
+
+			g_slist_free_full (async_data->items, g_object_unref);
+			async_data->items = NULL;
+
+			return FALSE;
+		}
+	}
 
 	*items = async_data->items;
 
