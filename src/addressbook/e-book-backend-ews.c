@@ -2330,6 +2330,9 @@ ebews_start_sync (gpointer data)
 
 	g_free (sync_state);
 
+	/* hide progress message when done */
+	e_book_backend_foreach_view (E_BOOK_BACKEND (ebews), book_view_notify_status, NULL);
+
 	if (error) {
 		g_warning ("Error Syncing Contacts: Folder %s Error: %s", priv->folder_id, error->message);
 		g_clear_error (&error);
