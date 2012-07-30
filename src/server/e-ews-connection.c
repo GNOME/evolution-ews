@@ -42,6 +42,10 @@
 
 #define d(x) x
 
+#define E_EWS_CONNECTION_GET_PRIVATE(obj) \
+	(G_TYPE_INSTANCE_GET_PRIVATE \
+	((obj), E_TYPE_EWS_CONNECTION, EEwsConnectionPrivate))
+
 /* For the number of connections */
 #define EWS_CONNECTION_MAX_REQUESTS 10
 
@@ -51,10 +55,7 @@
 #define CHECK_ELEMENT(element_name, expected_name) \
 	(check_element (G_STRFUNC, (element_name), (expected_name)))
 
-G_DEFINE_TYPE (EEwsConnection, e_ews_connection, G_TYPE_OBJECT)
-
 struct _EwsNode;
-static GObjectClass *parent_class = NULL;
 static GStaticMutex connecting = G_STATIC_MUTEX_INIT;
 static GHashTable *loaded_connections_permissions = NULL;
 static gint comp_func (gconstpointer a, gconstpointer b);
@@ -118,6 +119,11 @@ struct _EwsNode {
 	GCancellable *cancellable;
 	gulong cancel_handler_id;
 };
+
+G_DEFINE_TYPE (
+	EEwsConnection,
+	e_ews_connection,
+	G_TYPE_OBJECT)
 
 /* Static Functions */
 
@@ -192,10 +198,10 @@ autodiscover_parse_protocol (xmlNode *node,
 {
 	for (node = node->children; node; node = node->next) {
 		if (node->type == XML_ELEMENT_NODE &&
-		    !strcmp((char *)node->name, "ASUrl")) {
+		    !strcmp ((gchar *) node->name, "ASUrl")) {
 			urls->as_url = (gchar *) xmlNodeGetContent (node);
 		} else if (node->type == XML_ELEMENT_NODE &&
-		    !strcmp((char *)node->name, "OABUrl"))
+		    !strcmp ((gchar *) node->name, "OABUrl"))
 			urls->oab_url = (gchar *) xmlNodeGetContent (node);
 
 		if (urls->as_url && urls->oab_url)
@@ -247,7 +253,8 @@ ews_connection_scheduled_cb (gpointer user_data)
 
 	switch (sd->op) {
 	case EWS_SCHEDULE_OP_QUEUE_MESSAGE:
-		soup_session_queue_message (sd->cnc->priv->soup_session, sd->message,
+		soup_session_queue_message (
+			sd->cnc->priv->soup_session, sd->message,
 			sd->queue_callback, sd->queue_user_data);
 		break;
 	case EWS_SCHEDULE_OP_CANCEL:
@@ -269,9 +276,9 @@ ews_connection_scheduled_cb (gpointer user_data)
 
 static void
 ews_connection_schedule_queue_message (EEwsConnection *cnc,
-				       SoupMessage *message,
-				       SoupSessionCallback callback,
-				       gpointer user_data)
+                                       SoupMessage *message,
+                                       SoupSessionCallback callback,
+                                       gpointer user_data)
 {
 	EwsScheduleData *sd;
 	GSource *source;
@@ -294,7 +301,7 @@ ews_connection_schedule_queue_message (EEwsConnection *cnc,
 
 static void
 ews_connection_schedule_cancel_message (EEwsConnection *cnc,
-					SoupMessage *message)
+                                        SoupMessage *message)
 {
 	EwsScheduleData *sd;
 	GSource *source;
@@ -433,10 +440,11 @@ ews_cancel_request (GCancellable *cancellable,
 	found = g_slist_find (cnc->priv->active_job_queue, node);
 	QUEUE_UNLOCK (cnc);
 
-	g_simple_async_result_set_error	(simple,
-			EWS_CONNECTION_ERROR,
-			EWS_CONNECTION_ERROR_CANCELLED,
-			_("Operation Cancelled"));
+	g_simple_async_result_set_error (
+		simple,
+		EWS_CONNECTION_ERROR,
+		EWS_CONNECTION_ERROR_CANCELLED,
+		_("Operation Cancelled"));
 	if (found) {
 		ews_connection_schedule_cancel_message (cnc, SOUP_MESSAGE (msg));
 	} else {
@@ -475,9 +483,10 @@ e_ews_connection_queue_request (EEwsConnection *cnc,
 
 	if (cancellable) {
 		node->cancellable = g_object_ref (cancellable);
-		node->cancel_handler_id = g_cancellable_connect	(cancellable,
-								 G_CALLBACK (ews_cancel_request),
-								 (gpointer) node, NULL);
+		node->cancel_handler_id = g_cancellable_connect (
+			cancellable,
+			G_CALLBACK (ews_cancel_request),
+			(gpointer) node, NULL);
 	}
 
 	ews_trigger_next_request (cnc);
@@ -1105,23 +1114,21 @@ create_folder_response_cb (ESoapResponse *response,
 }
 
 static void
-e_ews_connection_dispose (GObject *object)
+ews_connection_dispose (GObject *object)
 {
-	EEwsConnection *cnc = (EEwsConnection *) object;
 	EEwsConnectionPrivate *priv;
 	gchar *hash_key;
 
-	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
-
-	priv = cnc->priv;
+	priv = E_EWS_CONNECTION_GET_PRIVATE (object);
 
 	g_static_mutex_lock (&connecting);
 
 	/* remove the connection from the hash table */
 	if (loaded_connections_permissions != NULL) {
-		hash_key = g_strdup_printf ("%s@%s",
-					    priv->username ? priv->username : "",
-					    priv->uri ? priv->uri : "");
+		hash_key = g_strdup_printf (
+			"%s@%s",
+			priv->username ? priv->username : "",
+			priv->uri ? priv->uri : "");
 		g_hash_table_remove (loaded_connections_permissions, hash_key);
 		if (g_hash_table_size (loaded_connections_permissions) == 0) {
 			g_hash_table_destroy (loaded_connections_permissions);
@@ -1133,7 +1140,9 @@ e_ews_connection_dispose (GObject *object)
 	g_static_mutex_unlock (&connecting);
 
 	if (priv->soup_session) {
-		g_signal_handlers_disconnect_by_func (priv->soup_session, ews_connection_authenticate, cnc);
+		g_signal_handlers_disconnect_by_func (
+			priv->soup_session,
+			ews_connection_authenticate, object);
 
 		g_main_loop_quit (priv->soup_loop);
 		g_thread_join (priv->soup_thread);
@@ -1145,22 +1154,7 @@ e_ews_connection_dispose (GObject *object)
 		priv->soup_context = NULL;
 	}
 
-	if (priv->uri) {
-		g_free (priv->uri);
-		priv->uri = NULL;
-	}
-
-	if (priv->username) {
-		g_free (priv->username);
-		priv->username = NULL;
-	}
-
-	e_ews_connection_forget_password (cnc);
-
-	if (priv->email) {
-		g_free (priv->email);
-		priv->email = NULL;
-	}
+	e_ews_connection_forget_password (E_EWS_CONNECTION (object));
 
 	if (priv->jobs) {
 		g_slist_free (priv->jobs);
@@ -1172,52 +1166,53 @@ e_ews_connection_dispose (GObject *object)
 		priv->active_job_queue = NULL;
 	}
 
-	if (parent_class->dispose)
-		(* parent_class->dispose) (object);
+	/* Chain up to parent's dispose() method. */
+	G_OBJECT_CLASS (e_ews_connection_parent_class)->dispose (object);
 }
 
 static void
-e_ews_connection_finalize (GObject *object)
+ews_connection_finalize (GObject *object)
 {
-	EEwsConnection *cnc = (EEwsConnection *) object;
 	EEwsConnectionPrivate *priv;
 
-	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
+	priv = E_EWS_CONNECTION_GET_PRIVATE (object);
 
-	priv = cnc->priv;
+	g_free (priv->uri);
+	g_free (priv->username);
+	g_free (priv->password);
+	g_free (priv->email);
+
 	g_static_rec_mutex_free (&priv->queue_lock);
 
-	g_free (priv);
-	cnc->priv = NULL;
-
-	if (parent_class->finalize)
-		(* parent_class->finalize) (object);
+	/* Chain up to parent's finalize() method. */
+	G_OBJECT_CLASS (e_ews_connection_parent_class)->finalize (object);
 }
 
 static void
-e_ews_connection_class_init (EEwsConnectionClass *klass)
+e_ews_connection_class_init (EEwsConnectionClass *class)
 {
-	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+	GObjectClass *object_class;
 
-	parent_class = g_type_class_peek_parent (klass);
+	g_type_class_add_private (class, sizeof (EEwsConnectionPrivate));
 
-	object_class->dispose = e_ews_connection_dispose;
-	object_class->finalize = e_ews_connection_finalize;
+	object_class = G_OBJECT_CLASS (class);
+	object_class->dispose = ews_connection_dispose;
+	object_class->finalize = ews_connection_finalize;
 
-	klass->authenticate = NULL;
+	class->authenticate = NULL;
 
-       /**
-        * EEwsConnection::authenticate
-        **/
+	/**
+	 * EEwsConnection::authenticate
+	 **/
 	signals[AUTHENTICATE] = g_signal_new (
-	      "authenticate",
-	      G_OBJECT_CLASS_TYPE (klass),
-	      G_SIGNAL_RUN_FIRST,
-	      G_STRUCT_OFFSET (EEwsConnectionClass, authenticate),
-	      NULL, NULL,
-	      ews_marshal_VOID__OBJECT_OBJECT_BOOLEAN,
-	      G_TYPE_NONE, 3,
-	      SOUP_TYPE_MESSAGE, SOUP_TYPE_AUTH, G_TYPE_BOOLEAN);
+		"authenticate",
+		G_OBJECT_CLASS_TYPE (class),
+		G_SIGNAL_RUN_FIRST,
+		G_STRUCT_OFFSET (EEwsConnectionClass, authenticate),
+		NULL, NULL,
+		ews_marshal_VOID__OBJECT_OBJECT_BOOLEAN,
+		G_TYPE_NONE, 3,
+		SOUP_TYPE_MESSAGE, SOUP_TYPE_AUTH, G_TYPE_BOOLEAN);
 }
 
 static gpointer
@@ -1238,31 +1233,33 @@ e_ews_soup_thread (gpointer user_data)
 static void
 e_ews_connection_init (EEwsConnection *cnc)
 {
-	EEwsConnectionPrivate *priv;
+	cnc->priv = E_EWS_CONNECTION_GET_PRIVATE (cnc);
 
-	/* allocate internal structure */
-	priv = g_new0 (EEwsConnectionPrivate, 1);
-	cnc->priv = priv;
+	cnc->priv->soup_context = g_main_context_new ();
+	cnc->priv->soup_loop = g_main_loop_new (cnc->priv->soup_context, FALSE);
 
-	priv->soup_context = g_main_context_new ();
-	priv->soup_loop = g_main_loop_new (priv->soup_context, FALSE);
-
-	priv->soup_thread = g_thread_create (e_ews_soup_thread, cnc, TRUE, NULL);
+	cnc->priv->soup_thread = g_thread_create (e_ews_soup_thread, cnc, TRUE, NULL);
 
 	/* create the SoupSession for this connection */
-	priv->soup_session = soup_session_async_new_with_options (SOUP_SESSION_USE_NTLM, TRUE,
-								  SOUP_SESSION_ASYNC_CONTEXT, priv->soup_context,
-								  NULL);
+	cnc->priv->soup_session = soup_session_async_new_with_options (
+		SOUP_SESSION_USE_NTLM, TRUE,
+		SOUP_SESSION_ASYNC_CONTEXT,
+		cnc->priv->soup_context,
+		NULL);
 
-        if (g_getenv("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 2)) {
+	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 2)) {
 		SoupLogger *logger;
 		logger = soup_logger_new (SOUP_LOGGER_LOG_BODY, -1);
-		soup_session_add_feature (priv->soup_session, SOUP_SESSION_FEATURE (logger));
+		soup_session_add_feature (
+			cnc->priv->soup_session,
+			SOUP_SESSION_FEATURE (logger));
 	}
 
-	g_static_rec_mutex_init (&priv->queue_lock);
+	g_static_rec_mutex_init (&cnc->priv->queue_lock);
 
-	g_signal_connect (priv->soup_session, "authenticate", G_CALLBACK(ews_connection_authenticate), cnc);
+	g_signal_connect (
+		cnc->priv->soup_session, "authenticate",
+		G_CALLBACK (ews_connection_authenticate), cnc);
 }
 
 static void
@@ -1281,8 +1278,9 @@ ews_connection_authenticate (SoupSession *sess,
 	}
 
 	if (cnc->priv->password) {
-		soup_auth_authenticate (auth, cnc->priv->username,
-					cnc->priv->password);
+		soup_auth_authenticate (
+			auth, cnc->priv->username,
+			cnc->priv->password);
 		return;
 	}
 
@@ -1347,8 +1345,9 @@ e_ews_connection_authenticate (EEwsConnection *cnc,
 	e_ews_connection_forget_password (cnc);
 	cnc->priv->password = g_strdup (passwd);
 
-	soup_auth_authenticate (auth, cnc->priv->username,
-				cnc->priv->password);
+	soup_auth_authenticate (
+		auth, cnc->priv->username,
+		cnc->priv->password);
 }
 /* Connection APIS */
 
@@ -1372,9 +1371,10 @@ e_ews_connection_find (const gchar *uri,
 
 	/* search the connection in our hash table */
 	if (loaded_connections_permissions) {
-		hash_key = g_strdup_printf ("%s@%s",
-				username ? username : "",
-				uri);
+		hash_key = g_strdup_printf (
+			"%s@%s",
+			username ? username : "",
+			uri);
 		cnc = g_hash_table_lookup (loaded_connections_permissions, hash_key);
 		g_free (hash_key);
 
@@ -1407,8 +1407,8 @@ EEwsConnection *
 e_ews_connection_new (const gchar *uri,
                       const gchar *username,
                       const gchar *password,
-		      const gchar *auth_mechanism,
-		      guint timeout,
+                      const gchar *auth_mechanism,
+                      guint timeout,
                       GCallback authenticate_cb,
                       gpointer authenticate_ctx,
                       GError **error)
@@ -1425,16 +1425,18 @@ e_ews_connection_new (const gchar *uri,
 
 	/* search the connection in our hash table */
 	if (loaded_connections_permissions != NULL) {
-		hash_key = g_strdup_printf ("%s@%s",
-				username ? username : "",
-				uri);
+		hash_key = g_strdup_printf (
+			"%s@%s",
+			username ? username : "",
+			uri);
 		cnc = g_hash_table_lookup (loaded_connections_permissions, hash_key);
 		g_free (hash_key);
 
 		if (E_IS_EWS_CONNECTION (cnc)) {
 			g_object_ref (cnc);
 
-			g_object_set (G_OBJECT (cnc->priv->soup_session),
+			g_object_set (
+				G_OBJECT (cnc->priv->soup_session),
 				SOUP_SESSION_TIMEOUT, timeout,
 				SOUP_SESSION_USE_NTLM, g_strcmp0 (auth_mechanism, "PLAIN") != 0,
 				NULL);
@@ -1451,23 +1453,27 @@ e_ews_connection_new (const gchar *uri,
 	cnc->priv->password = g_strdup (password);
 	cnc->priv->uri = g_strdup (uri);
 
-	g_object_set (G_OBJECT (cnc->priv->soup_session),
+	g_object_set (
+		G_OBJECT (cnc->priv->soup_session),
 		SOUP_SESSION_TIMEOUT, timeout,
 		SOUP_SESSION_USE_NTLM, g_strcmp0 (auth_mechanism, "PLAIN") != 0,
 		NULL);
 
 	/* register a handler to the authenticate signal */
 	if (authenticate_cb)
-		g_signal_connect (cnc, "authenticate",
-				  authenticate_cb, authenticate_ctx);
+		g_signal_connect (
+			cnc, "authenticate",
+			authenticate_cb, authenticate_ctx);
 
 	/* add the connection to the loaded_connections_permissions hash table */
-	hash_key = g_strdup_printf ("%s@%s",
-			cnc->priv->username ? cnc->priv->username : "",
-			cnc->priv->uri);
+	hash_key = g_strdup_printf (
+		"%s@%s",
+		cnc->priv->username ? cnc->priv->username : "",
+		cnc->priv->uri);
 	if (loaded_connections_permissions == NULL)
-		loaded_connections_permissions = g_hash_table_new_full (g_str_hash, g_str_equal,
-				g_free, NULL);
+		loaded_connections_permissions = g_hash_table_new_full (
+			g_str_hash, g_str_equal,
+			g_free, NULL);
 	g_hash_table_insert (loaded_connections_permissions, hash_key, cnc);
 
 	/* free memory */
@@ -1507,12 +1513,13 @@ e_ews_connection_forget_password (EEwsConnection *cnc)
 
 void
 e_ews_connection_set_timeout (EEwsConnection *cnc,
-			      guint timeout)
+                              guint timeout)
 {
 	g_return_if_fail (cnc != NULL);
 
 	if (cnc->priv->soup_session)
-		g_object_set (G_OBJECT (cnc->priv->soup_session),
+		g_object_set (
+			G_OBJECT (cnc->priv->soup_session),
 			SOUP_SESSION_TIMEOUT, timeout,
 			NULL);
 }
@@ -1524,17 +1531,20 @@ e_ews_autodiscover_ws_xml (const gchar *email_address)
 	xmlNode *node;
 	xmlNs *ns;
 
-	doc = xmlNewDoc((xmlChar *) "1.0");
-	node = xmlNewDocNode(doc, NULL, (xmlChar *)"Autodiscover", NULL);
+	doc = xmlNewDoc ((xmlChar *) "1.0");
+	node = xmlNewDocNode (doc, NULL, (xmlChar *)"Autodiscover", NULL);
 	xmlDocSetRootElement (doc, node);
-	ns = xmlNewNs (node,
-		       (xmlChar *)"http://schemas.microsoft.com/exchange/autodiscover/outlook/requestschema/2006", NULL);
+	ns = xmlNewNs (
+		node,
+		(xmlChar *)"http://schemas.microsoft.com/exchange/autodiscover/outlook/requestschema/2006", NULL);
 
-	node = xmlNewChild(node, ns, (xmlChar *)"Request", NULL);
-	xmlNewChild(node, ns, (xmlChar *)"EMailAddress",
-			    (xmlChar *) email_address);
-	xmlNewChild(node, ns, (xmlChar *)"AcceptableResponseSchema",
-			    (xmlChar *)"http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a");
+	node = xmlNewChild (node, ns, (xmlChar *)"Request", NULL);
+	xmlNewChild (
+		node, ns, (xmlChar *)"EMailAddress",
+		(xmlChar *) email_address);
+	xmlNewChild (
+		node, ns, (xmlChar *)"AcceptableResponseSchema",
+		(xmlChar *)"http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a");
 
 	return doc;
 }
@@ -1640,7 +1650,7 @@ autodiscover_response_cb (SoupSession *session,
 		goto failed;
 	}
 	node = xmlDocGetRootElement (doc);
-	if (strcmp((char *)node->name, "Autodiscover")) {
+	if (strcmp ((gchar *) node->name, "Autodiscover")) {
 		g_set_error (
 			&error, EWS_CONNECTION_ERROR, -1,
 			_("Failed to find <Autodiscover> element"));
@@ -1648,7 +1658,7 @@ autodiscover_response_cb (SoupSession *session,
 	}
 	for (node = node->children; node; node = node->next) {
 		if (node->type == XML_ELEMENT_NODE &&
-		    !strcmp((char *)node->name, "Response"))
+		    !strcmp ((gchar *) node->name, "Response"))
 			break;
 	}
 	if (!node) {
@@ -1659,7 +1669,7 @@ autodiscover_response_cb (SoupSession *session,
 	}
 	for (node = node->children; node; node = node->next) {
 		if (node->type == XML_ELEMENT_NODE &&
-		    !strcmp((char *)node->name, "Account"))
+		    !strcmp ((gchar *) node->name, "Account"))
 			break;
 	}
 	if (!node) {
@@ -1672,7 +1682,7 @@ autodiscover_response_cb (SoupSession *session,
 	urls = g_new0 (EwsUrls, 1);
 	for (node = node->children; node; node = node->next) {
 		if (node->type == XML_ELEMENT_NODE &&
-		    !strcmp((char *)node->name, "Protocol")) {
+		    !strcmp ((gchar *) node->name, "Protocol")) {
 			success = autodiscover_parse_protocol (node, urls);
 			break;
 		}
@@ -1734,12 +1744,13 @@ static void post_restarted (SoupMessage *msg, gpointer data)
 
 	/* In violation of RFC2616, libsoup will change a POST request to
 	 * a GET on receiving a 302 redirect. */
-	printf("Working around libsoup bug with redirect\n");
+	printf ("Working around libsoup bug with redirect\n");
 	g_object_set (msg, SOUP_MESSAGE_METHOD, "POST", NULL);
 
-	soup_message_set_request(msg, "text/xml; charset=utf-8", SOUP_MEMORY_COPY,
-				 (gchar *) buf->buffer->content,
-				 buf->buffer->use);
+	soup_message_set_request (
+		msg, "text/xml; charset=utf-8", SOUP_MEMORY_COPY,
+		(gchar *) buf->buffer->content,
+		buf->buffer->use);
 }
 
 static SoupMessage *
@@ -1886,7 +1897,8 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 	if (user == NULL || *user == '\0')
 		user = email_address;
 
-	cnc = e_ews_connection_new (url3, user, password,
+	cnc = e_ews_connection_new (
+		url3, user, password,
 		camel_network_settings_get_auth_mechanism (network_settings),
 		camel_ews_settings_get_timeout (settings),
 		NULL, NULL, &error);
@@ -2136,7 +2148,7 @@ oal_response_cb (SoupSession *soup_session,
 	}
 
 	for (node = node->children; node; node = node->next) {
-		if (node->type == XML_ELEMENT_NODE && strcmp((gchar *) node->name, "OAL") == 0) {
+		if (node->type == XML_ELEMENT_NODE && strcmp ((gchar *) node->name, "OAL") == 0) {
 			if (data->oal_id == NULL) {
 				EwsOAL *oal = g_new0 (EwsOAL, 1);
 
@@ -2417,8 +2429,9 @@ ews_soup_got_headers (SoupMessage *msg,
 	struct _oal_req_data *data = (struct _oal_req_data *) user_data;
 	const gchar *size;
 
-	size = soup_message_headers_get_one (msg->response_headers,
-					     "Content-Length");
+	size = soup_message_headers_get_one (
+		msg->response_headers,
+		"Content-Length");
 
 	if (size)
 		data->response_size = strtol (size, NULL, 10);
@@ -2455,8 +2468,9 @@ ews_soup_got_chunk (SoupMessage *msg,
 	fd = g_open (data->cache_filename, O_RDONLY | O_WRONLY | O_APPEND | O_CREAT, 0600);
 	if (fd != -1) {
 		if (write (fd, (const gchar *) chunk->data, chunk->length) != chunk->length) {
-			g_set_error (&data->error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_UNKNOWN,
-					"Failed to write streaming data to file : %d ", errno);
+			g_set_error (
+				&data->error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_UNKNOWN,
+				"Failed to write streaming data to file : %d ", errno);
 		}
 #ifdef G_OS_WIN32
 		closesocket (fd);
@@ -2464,7 +2478,8 @@ ews_soup_got_chunk (SoupMessage *msg,
 		close (fd);
 #endif
 	} else {
-		g_set_error (&data->error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_UNKNOWN,
+		g_set_error (
+			&data->error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_UNKNOWN,
 			"Failed to open the cache file : %d ", errno);
 	}
 }
@@ -2608,7 +2623,7 @@ ews_append_additional_props_to_msg (ESoapMessage *msg,
 		gint i = 0;
 
 		while (prop[i]) {
-			e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", prop [i]);
+			e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", prop[i]);
 			i++;
 		}
 
@@ -2740,7 +2755,7 @@ e_ews_connection_sync_folder_items (EEwsConnection *cnc,
 
 		e_soap_message_start_element (msg, "AdditionalProperties", NULL, NULL);
 		while (prop[i]) {
-			e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", prop [i]);
+			e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", prop[i]);
 			i++;
 		}
 		g_strfreev (prop);
@@ -2762,10 +2777,9 @@ e_ews_connection_sync_folder_items (EEwsConnection *cnc,
 	/* Complete the footer and print the request */
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_sync_folder_items);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_sync_folder_items);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -2939,10 +2953,9 @@ e_ews_connection_find_folder_items (EEwsConnection *cnc,
 	/* Complete the footer and print the request */
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_find_folder_items);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_find_folder_items);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -3046,10 +3059,9 @@ e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc,
 
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_sync_folder_hierarchy);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_sync_folder_hierarchy);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -3183,7 +3195,7 @@ e_ews_connection_get_items (EEwsConnection *cnc,
 				e_soap_message_add_attribute (msg, "PropertyType", "Integer", NULL, NULL);
 				e_soap_message_end_element (msg);
 			} else {
-				e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", prop [i]);
+				e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", prop[i]);
 			}
 			i++;
 		}
@@ -3201,10 +3213,9 @@ e_ews_connection_get_items (EEwsConnection *cnc,
 
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_get_items);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_get_items);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -3378,16 +3389,19 @@ e_ews_connection_delete_items (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "DeleteItem",
-					     "DeleteType", ews_delete_type_to_str (delete_type), EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+		cnc->priv->uri, "DeleteItem",
+		"DeleteType", ews_delete_type_to_str (delete_type), EWS_EXCHANGE_2007_SP1);
 
 	if (send_cancels)
-		e_soap_message_add_attribute (msg, "SendMeetingCancellations",
-					      ews_send_cancels_to_str (send_cancels), NULL, NULL);
+		e_soap_message_add_attribute (
+			msg, "SendMeetingCancellations",
+			ews_send_cancels_to_str (send_cancels), NULL, NULL);
 
 	if (affected_tasks)
-		e_soap_message_add_attribute (msg, "AffectedTaskOccurrences",
-					      ews_affected_tasks_to_str (affected_tasks), NULL, NULL);
+		e_soap_message_add_attribute (
+			msg, "AffectedTaskOccurrences",
+			ews_affected_tasks_to_str (affected_tasks), NULL, NULL);
 
 	e_soap_message_start_element (msg, "ItemIds", "messages", NULL);
 
@@ -3398,10 +3412,9 @@ e_ews_connection_delete_items (EEwsConnection *cnc,
 
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_delete_items);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_delete_items);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -3433,16 +3446,19 @@ e_ews_connection_delete_item (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "DeleteItem",
-					     "DeleteType", ews_delete_type_to_str (delete_type), EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+		cnc->priv->uri, "DeleteItem",
+		"DeleteType", ews_delete_type_to_str (delete_type), EWS_EXCHANGE_2007_SP1);
 
 	if (send_cancels)
-		e_soap_message_add_attribute (msg, "SendMeetingCancellations",
-					      ews_send_cancels_to_str (send_cancels), NULL, NULL);
+		e_soap_message_add_attribute (
+			msg, "SendMeetingCancellations",
+			ews_send_cancels_to_str (send_cancels), NULL, NULL);
 
 	if (affected_tasks)
-		e_soap_message_add_attribute (msg, "AffectedTaskOccurrences",
-					      ews_affected_tasks_to_str (affected_tasks), NULL, NULL);
+		e_soap_message_add_attribute (
+			msg, "AffectedTaskOccurrences",
+			ews_affected_tasks_to_str (affected_tasks), NULL, NULL);
 
 	e_soap_message_start_element (msg, "ItemIds", "messages", NULL);
 
@@ -3466,10 +3482,9 @@ e_ews_connection_delete_item (EEwsConnection *cnc,
 
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_delete_items);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_delete_items);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -3587,23 +3602,28 @@ e_ews_connection_update_items (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "UpdateItem",
-					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+		cnc->priv->uri, "UpdateItem",
+		NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	if (conflict_res)
-		e_soap_message_add_attribute (msg, "ConflictResolution",
-					      conflict_res, NULL, NULL);
+		e_soap_message_add_attribute (
+			msg, "ConflictResolution",
+			conflict_res, NULL, NULL);
 	if (msg_disposition)
-		e_soap_message_add_attribute (msg, "MessageDisposition",
-					      msg_disposition, NULL, NULL);
+		e_soap_message_add_attribute (
+			msg, "MessageDisposition",
+			msg_disposition, NULL, NULL);
 	if (send_invites)
-		e_soap_message_add_attribute (msg, "SendMeetingInvitationsOrCancellations",
-					      send_invites, NULL, NULL);
+		e_soap_message_add_attribute (
+			msg, "SendMeetingInvitationsOrCancellations",
+			send_invites, NULL, NULL);
 
 	if (folder_id) {
 		e_soap_message_start_element (msg, "SavedItemFolderId", "messages", NULL);
-		e_ews_message_write_string_parameter_with_attribute (msg, "FolderId",
-						     NULL, NULL, "Id", folder_id);
+		e_ews_message_write_string_parameter_with_attribute (
+			msg, "FolderId",
+			NULL, NULL, "Id", folder_id);
 		e_soap_message_end_element (msg);
 	}
 
@@ -3615,10 +3635,9 @@ e_ews_connection_update_items (EEwsConnection *cnc,
 
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_update_items);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_update_items);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -3672,8 +3691,9 @@ e_ews_connection_update_items_finish (EEwsConnection *cnc,
 	else {
 		while (async_data->items) {
 			g_object_unref (async_data->items->data);
-			async_data->items = g_slist_remove (async_data->items,
-							    async_data->items->data);
+			async_data->items = g_slist_remove (
+				async_data->items,
+				async_data->items->data);
 		}
 	}
 	return TRUE;
@@ -3735,20 +3755,24 @@ e_ews_connection_create_items (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "CreateItem",
-					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+		cnc->priv->uri, "CreateItem",
+		NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	if (msg_disposition)
-		e_soap_message_add_attribute (msg, "MessageDisposition",
-					      msg_disposition, NULL, NULL);
+		e_soap_message_add_attribute (
+			msg, "MessageDisposition",
+			msg_disposition, NULL, NULL);
 	if (send_invites)
-		e_soap_message_add_attribute (msg, "SendMeetingInvitations",
-					      send_invites, NULL, NULL);
+		e_soap_message_add_attribute (
+			msg, "SendMeetingInvitations",
+			send_invites, NULL, NULL);
 
 	if (folder_id) {
 		e_soap_message_start_element (msg, "SavedItemFolderId", "messages", NULL);
-		e_ews_message_write_string_parameter_with_attribute (msg, "FolderId",
-						     NULL, NULL, "Id", folder_id);
+		e_ews_message_write_string_parameter_with_attribute (
+			msg, "FolderId",
+			NULL, NULL, "Id", folder_id);
 		e_soap_message_end_element (msg);
 	}
 
@@ -3760,10 +3784,9 @@ e_ews_connection_create_items (EEwsConnection *cnc,
 
 	e_ews_message_write_footer (msg); /* CreateItem */
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_create_items);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_create_items);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -3909,10 +3932,9 @@ e_ews_connection_resolve_names (EEwsConnection *cnc,
 
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_resolve_names);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_resolve_names);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -4001,11 +4023,11 @@ e_ews_connection_resolve_names_sync (EEwsConnection *cnc,
 
 static void
 ews_connection_resolve_by_name (EEwsConnection *cnc,
-				gint pri,
-				const gchar *usename,
-				gboolean is_user_name,
-				gchar **smtp_address,
-				GCancellable *cancellable)
+                                gint pri,
+                                const gchar *usename,
+                                gboolean is_user_name,
+                                gchar **smtp_address,
+                                GCancellable *cancellable)
 {
 	GSList *mailboxes = NULL;
 	GSList *contacts = NULL;
@@ -4082,12 +4104,12 @@ ews_connection_resolve_by_name (EEwsConnection *cnc,
 
 gboolean
 e_ews_connection_ex_to_smtp_sync (EEwsConnection *cnc,
-				  gint pri,
-				  const gchar *name,
-				  const gchar *ex_address,
-				  gchar **smtp_address,
-				  GCancellable *cancellable,
-				  GError **error)
+                                  gint pri,
+                                  const gchar *name,
+                                  const gchar *ex_address,
+                                  gchar **smtp_address,
+                                  GCancellable *cancellable,
+                                  GError **error)
 {
 	GSList *mailboxes = NULL;
 	GSList *contacts = NULL;
@@ -4188,10 +4210,9 @@ e_ews_connection_expand_dl (EEwsConnection *cnc,
 
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_expand_dl);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_expand_dl);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -4314,8 +4335,9 @@ e_ews_connection_update_folder (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "UpdateFolder",
-					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+		cnc->priv->uri, "UpdateFolder",
+		NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_start_element (msg, "FolderChanges", "messages", NULL);
 
@@ -4325,10 +4347,9 @@ e_ews_connection_update_folder (EEwsConnection *cnc,
 
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_update_folder);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_update_folder);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -4439,30 +4460,33 @@ e_ews_connection_move_folder (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "MoveFolder",
-					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+		cnc->priv->uri, "MoveFolder",
+		NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_start_element (msg, "ToFolderId", "messages", NULL);
 	if (to_folder)
-		e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", NULL,
-								     NULL, "Id", to_folder);
+		e_ews_message_write_string_parameter_with_attribute (
+			msg, "FolderId", NULL,
+			NULL, "Id", to_folder);
 	else
-		e_ews_message_write_string_parameter_with_attribute (msg, "DistinguishedFolderId", NULL,
-								     NULL, "Id", "msgfolderroot");
+		e_ews_message_write_string_parameter_with_attribute (
+			msg, "DistinguishedFolderId", NULL,
+			NULL, "Id", "msgfolderroot");
 
 	e_soap_message_end_element (msg);
 
 	e_soap_message_start_element (msg, "FolderIds", "messages", NULL);
-	e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", NULL,
-							     NULL, "Id", folder);
+	e_ews_message_write_string_parameter_with_attribute (
+		msg, "FolderId", NULL,
+		NULL, "Id", folder);
 	e_soap_message_end_element (msg);
 
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_move_folder);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_move_folder);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -4541,8 +4565,9 @@ e_ews_connection_get_folder (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetFolder",
-					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+		cnc->priv->uri, "GetFolder",
+		NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_start_element (msg, "FolderShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, folder_shape);
@@ -4558,10 +4583,9 @@ e_ews_connection_get_folder (EEwsConnection *cnc,
 
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_get_folder);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_get_folder);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -4655,8 +4679,9 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 
 	/* If NULL passed for parent_folder_id, use "msgfolderroot" */
 	if (is_distinguished_id || !parent_folder_id)
-		e_ews_message_write_string_parameter_with_attribute (msg, "DistinguishedFolderId", NULL, NULL, "Id",
-								     parent_folder_id?:"msgfolderroot");
+		e_ews_message_write_string_parameter_with_attribute (
+			msg, "DistinguishedFolderId", NULL, NULL, "Id",
+			parent_folder_id?:"msgfolderroot");
 	else
 		e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", NULL, NULL, "Id", parent_folder_id);
 
@@ -4666,7 +4691,7 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 	e_soap_message_end_element (msg);
 
 	e_soap_message_start_element (msg, "Folders", "messages", NULL);
-	e_soap_message_start_element(msg, "Folder", NULL, NULL);
+	e_soap_message_start_element (msg, "Folder", NULL, NULL);
 	e_ews_message_write_string_parameter (msg, "DisplayName", NULL, folder_name);
 
 	e_soap_message_end_element (msg);
@@ -4674,10 +4699,9 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_create_folder);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_create_folder);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -4769,11 +4793,13 @@ e_ews_connection_move_items (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	if (docopy)
-		msg = e_ews_message_new_with_header (cnc->priv->uri, "CopyItem",
-					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
+		msg = e_ews_message_new_with_header (
+			cnc->priv->uri, "CopyItem",
+			NULL, NULL, EWS_EXCHANGE_2007_SP1);
 	else
-		msg = e_ews_message_new_with_header (cnc->priv->uri, "MoveItem",
-					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
+		msg = e_ews_message_new_with_header (
+			cnc->priv->uri, "MoveItem",
+			NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_start_element (msg, "ToFolderId", "messages", NULL);
 	e_soap_message_start_element (msg, "FolderId", NULL, NULL);
@@ -4788,10 +4814,9 @@ e_ews_connection_move_items (EEwsConnection *cnc,
 
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-					    callback,
-					    user_data,
-					    e_ews_connection_move_items);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_move_items);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -4954,10 +4979,9 @@ e_ews_connection_delete_folder (EEwsConnection *cnc,
 
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_delete_folder);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_delete_folder);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -5044,7 +5068,7 @@ ews_handle_create_attachments_param (ESoapParameter *param,
 	attspara = e_soap_parameter_get_first_child_by_name (param, "Attachments");
 
 	for (subparam = e_soap_parameter_get_first_child (attspara); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
-		if (!g_ascii_strcasecmp (e_soap_parameter_get_name(subparam), "FileAttachment")) {
+		if (!g_ascii_strcasecmp (e_soap_parameter_get_name (subparam), "FileAttachment")) {
 			attparam = e_soap_parameter_get_first_child (subparam);
 			last_relevant = attparam;
 
@@ -5125,7 +5149,7 @@ e_ews_connection_attach_file (ESoapMessage *msg,
 
 	buffer = malloc (st.st_size);
 	if (read (fd, buffer, st.st_size) != st.st_size) {
-		g_warning ("Error reading %u bytes from %s\n", (unsigned int)st.st_size, filepath);
+		g_warning ("Error reading %u bytes from %s\n", (guint) st.st_size, filepath);
 		close (fd);
 		return;
 	}
@@ -5141,9 +5165,9 @@ e_ews_connection_attach_file (ESoapMessage *msg,
 
 	e_soap_message_start_element (msg, "Content", NULL, NULL);
 	e_soap_message_write_base64 (msg, buffer, st.st_size);
-	e_soap_message_end_element(msg); /* "Content" */
+	e_soap_message_end_element (msg); /* "Content" */
 
-	e_soap_message_end_element(msg); /* "FileAttachment" */
+	e_soap_message_end_element (msg); /* "FileAttachment" */
 
 	free (filepath);
 	free (buffer);
@@ -5183,10 +5207,9 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
 
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_create_attachments);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_create_attachments);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -5211,9 +5234,9 @@ e_ews_connection_create_attachments_finish (EEwsConnection *cnc,
 
 	g_return_val_if_fail (cnc != NULL, NULL);
 	g_return_val_if_fail (
-			g_simple_async_result_is_valid (
-					result, G_OBJECT (cnc), e_ews_connection_create_attachments),
-			NULL);
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_create_attachments),
+		NULL);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
 	async_data = g_simple_async_result_get_op_res_gpointer (simple);
@@ -5346,10 +5369,9 @@ e_ews_connection_delete_attachments (EEwsConnection *cnc,
 
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_delete_attachments);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_delete_attachments);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -5373,9 +5395,9 @@ e_ews_connection_delete_attachments_finish (EEwsConnection *cnc,
 
 	g_return_val_if_fail (cnc != NULL, NULL);
 	g_return_val_if_fail (
-			g_simple_async_result_is_valid (
-					result, G_OBJECT (cnc), e_ews_connection_delete_attachments),
-			NULL);
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_delete_attachments),
+		NULL);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
 	async_data = g_simple_async_result_get_op_res_gpointer (simple);
@@ -5534,10 +5556,9 @@ e_ews_connection_get_attachments (EEwsConnection *cnc,
 
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_get_attachments);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_get_attachments);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	async_data->directory = cache;
@@ -5563,9 +5584,9 @@ e_ews_connection_get_attachments_finish (EEwsConnection *cnc,
 
 	g_return_val_if_fail (cnc != NULL, NULL);
 	g_return_val_if_fail (
-			g_simple_async_result_is_valid (
-					result, G_OBJECT (cnc), e_ews_connection_get_attachments),
-			NULL);
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_get_attachments),
+		NULL);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
 	async_data = g_simple_async_result_get_op_res_gpointer (simple);
@@ -5762,21 +5783,21 @@ e_ews_connection_get_free_busy (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetUserAvailabilityRequest",
-					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+		cnc->priv->uri, "GetUserAvailabilityRequest",
+		NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	free_busy_cb (msg, free_busy_user_data);
 
 	e_ews_message_write_footer (msg); /*GetUserAvailabilityRequest  */
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-					    callback,
-					    user_data,
-					    e_ews_connection_get_free_busy);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_get_free_busy);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
-						   simple, async_data, (GDestroyNotify) async_data_free);
+		simple, async_data, (GDestroyNotify) async_data_free);
 
 	e_ews_connection_queue_request (
 		cnc, msg, get_free_busy_response_cb,
@@ -5796,9 +5817,9 @@ e_ews_connection_get_free_busy_finish (EEwsConnection *cnc,
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
-			      g_simple_async_result_is_valid (
-							      result, G_OBJECT (cnc), e_ews_connection_get_free_busy),
-			      FALSE);
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_get_free_busy),
+		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
 	async_data = g_simple_async_result_get_op_res_gpointer (simple);
@@ -5873,50 +5894,50 @@ ews_handle_delegate_user_param (ESoapParameter *param,
 	data = g_new (EwsDelegateInfo, 1);
 	data->user_id = g_new0 (EwsUserId, 1);
 
-	subparam = e_soap_parameter_get_first_child_by_name(node, "UserId");
+	subparam = e_soap_parameter_get_first_child_by_name (node, "UserId");
 
 	/*Parse User Id*/
 
-	child = e_soap_parameter_get_first_child_by_name(subparam, "SID");
+	child = e_soap_parameter_get_first_child_by_name (subparam, "SID");
 	data->user_id->sid = e_soap_parameter_get_string_value (child);
 
-	child = e_soap_parameter_get_first_child_by_name(subparam, "PrimarySmtpAddress");
+	child = e_soap_parameter_get_first_child_by_name (subparam, "PrimarySmtpAddress");
 	data->user_id->primary_smtp_add = e_soap_parameter_get_string_value (child);
 
-	child = e_soap_parameter_get_first_child_by_name(subparam, "DisplayName");
+	child = e_soap_parameter_get_first_child_by_name (subparam, "DisplayName");
 	data->user_id->display_name = e_soap_parameter_get_string_value (child);
 
-	subparam = e_soap_parameter_get_first_child_by_name(node, "DelegatePermissions");
+	subparam = e_soap_parameter_get_first_child_by_name (node, "DelegatePermissions");
 	/*Parse Delegate Permissions*/
 
-	child = e_soap_parameter_get_first_child_by_name(subparam, "CalendarFolderPermissionLevel");
+	child = e_soap_parameter_get_first_child_by_name (subparam, "CalendarFolderPermissionLevel");
 	data->calendar = get_permission_from_string (e_soap_parameter_get_string_value (child));
 
-	child = e_soap_parameter_get_first_child_by_name(subparam, "ContactsFolderPermissionLevel");
+	child = e_soap_parameter_get_first_child_by_name (subparam, "ContactsFolderPermissionLevel");
 	data->contact = get_permission_from_string (e_soap_parameter_get_string_value (child));
 
-	child = e_soap_parameter_get_first_child_by_name(subparam, "InboxFolderPermissionLevel");
+	child = e_soap_parameter_get_first_child_by_name (subparam, "InboxFolderPermissionLevel");
 	data->inbox = get_permission_from_string (e_soap_parameter_get_string_value (child));
 
-	child = e_soap_parameter_get_first_child_by_name(subparam, "TasksFolderPermissionLevel");
+	child = e_soap_parameter_get_first_child_by_name (subparam, "TasksFolderPermissionLevel");
 	data->tasks = get_permission_from_string (e_soap_parameter_get_string_value (child));
 
-	child = e_soap_parameter_get_first_child_by_name(subparam, "NotesFolderPermissionLevel");
+	child = e_soap_parameter_get_first_child_by_name (subparam, "NotesFolderPermissionLevel");
 	data->notes = get_permission_from_string (e_soap_parameter_get_string_value (child));
 
-	child = e_soap_parameter_get_first_child_by_name(subparam, "JournalFolderPermissionLevel");
+	child = e_soap_parameter_get_first_child_by_name (subparam, "JournalFolderPermissionLevel");
 	data->journal = get_permission_from_string (e_soap_parameter_get_string_value (child));
 
-	subparam = e_soap_parameter_get_first_child_by_name(node, "ReceiveCopiesOfMeetingMessages");
+	subparam = e_soap_parameter_get_first_child_by_name (node, "ReceiveCopiesOfMeetingMessages");
 
 	value = e_soap_parameter_get_string_value (subparam);
-	if(!g_ascii_strcasecmp(value, "true"))
+	if (!g_ascii_strcasecmp (value, "true"))
 		data->meetingcopies = TRUE;
 
-	subparam = e_soap_parameter_get_first_child_by_name(node, "ViewPrivateItems");
+	subparam = e_soap_parameter_get_first_child_by_name (node, "ViewPrivateItems");
 
 	value = e_soap_parameter_get_string_value (subparam);
-	if(!g_ascii_strcasecmp(value, "true"))
+	if (!g_ascii_strcasecmp (value, "true"))
 		data->view_priv_items = TRUE;
 	else
 		data->view_priv_items = FALSE;
@@ -6004,10 +6025,9 @@ e_ews_connection_get_delegate (EEwsConnection *cnc,
 
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_get_delegate);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_get_delegate);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
