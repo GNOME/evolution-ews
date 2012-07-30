@@ -979,8 +979,10 @@ ews_get_name (CamelService *service,
 }
 
 EEwsConnection *
-camel_ews_store_get_connection (CamelEwsStore *ews_store)
+camel_ews_store_ref_connection (CamelEwsStore *ews_store)
 {
+	g_return_val_if_fail (CAMEL_IS_EWS_STORE (ews_store), NULL);
+
 	return g_object_ref (ews_store->priv->cnc);
 }
 

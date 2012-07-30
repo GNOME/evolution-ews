@@ -426,7 +426,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	g_hash_table_insert (priv->uid_eflags, (gchar *) uid, (gchar *) uid);
 	g_mutex_unlock (priv->state_lock);
 
-	cnc = camel_ews_store_get_connection (ews_store);
+	cnc = camel_ews_store_ref_connection (ews_store);
 	ids = g_slist_append (ids, (gchar *) uid);
 
 	mime_dir = g_build_filename (camel_data_cache_get_path (ews_folder->cache),
@@ -799,7 +799,7 @@ ews_sync_mi_flags (CamelFolder *folder,
 		return FALSE;
 	}
 
-	cnc = camel_ews_store_get_connection (ews_store);
+	cnc = camel_ews_store_ref_connection (ews_store);
 
 	res = e_ews_connection_update_items_sync (
 		cnc, EWS_PRIORITY_LOW,
@@ -870,7 +870,7 @@ ews_move_to_junk_folder (CamelFolder *folder,
 	if (!camel_ews_store_connected (ews_store, error))
 		return FALSE;
 
-	cnc = camel_ews_store_get_connection (ews_store);
+	cnc = camel_ews_store_ref_connection (ews_store);
 
 	if (junk_uids) {
 		GSList *moved_items = NULL;
@@ -1346,7 +1346,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 	priv->refreshing = TRUE;
 	g_mutex_unlock (priv->state_lock);
 
-	cnc = camel_ews_store_get_connection (ews_store);
+	cnc = camel_ews_store_ref_connection (ews_store);
 	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	camel_folder_summary_prepare_fetch_all (folder->summary, NULL);
@@ -1461,7 +1461,7 @@ ews_append_message_sync (CamelFolder *folder,
 		return FALSE;
 	}
 
-	cnc = camel_ews_store_get_connection (ews_store);
+	cnc = camel_ews_store_ref_connection (ews_store);
 
 	if (!cnc) {
 		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
@@ -1520,7 +1520,7 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 	if (!camel_ews_store_connected (dst_ews_store, error))
 		return FALSE;
 
-	cnc = camel_ews_store_get_connection (dst_ews_store);
+	cnc = camel_ews_store_ref_connection (dst_ews_store);
 	dst_id = camel_ews_store_summary_get_folder_id_from_name
 						(dst_ews_store->summary,
 						 dst_full_name);
@@ -1590,7 +1590,7 @@ ews_delete_messages (CamelFolder *folder,
 		return FALSE;
 	}
 
-	cnc = camel_ews_store_get_connection (ews_store);
+	cnc = camel_ews_store_ref_connection (ews_store);
 	changes = camel_folder_change_info_new ();
 
 	if (deleted_items) {

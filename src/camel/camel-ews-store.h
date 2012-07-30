@@ -72,7 +72,7 @@ struct _CamelEwsStoreClass {
 GType camel_ews_store_get_type (void);
 gchar *		ews_get_name	(CamelService *service, gboolean brief);
 EEwsConnection *
-		camel_ews_store_get_connection	(CamelEwsStore *ews_store);
+		camel_ews_store_ref_connection	(CamelEwsStore *ews_store);
 
 gboolean	camel_ews_store_connected	(CamelEwsStore *store,
 						 GError **error);
