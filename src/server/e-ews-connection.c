@@ -78,6 +78,9 @@ struct _EEwsConnectionPrivate {
 
 	GMutex *password_lock;
 
+	/* Hash key for the loaded_connections_permissions table. */
+	gchar *hash_key;
+
 	gchar *uri;
 	gchar *username;
 	gchar *password;
@@ -1126,7 +1129,6 @@ static void
 ews_connection_dispose (GObject *object)
 {
 	EEwsConnectionPrivate *priv;
-	gchar *hash_key;
 
 	priv = E_EWS_CONNECTION_GET_PRIVATE (object);
 
@@ -1134,16 +1136,12 @@ ews_connection_dispose (GObject *object)
 
 	/* remove the connection from the hash table */
 	if (loaded_connections_permissions != NULL) {
-		hash_key = g_strdup_printf (
-			"%s@%s",
-			priv->username ? priv->username : "",
-			priv->uri ? priv->uri : "");
-		g_hash_table_remove (loaded_connections_permissions, hash_key);
+		g_hash_table_remove (
+			loaded_connections_permissions, priv->hash_key);
 		if (g_hash_table_size (loaded_connections_permissions) == 0) {
 			g_hash_table_destroy (loaded_connections_permissions);
 			loaded_connections_permissions = NULL;
 		}
-		g_free (hash_key);
 	}
 
 	g_static_mutex_unlock (&connecting);
@@ -1190,6 +1188,7 @@ ews_connection_finalize (GObject *object)
 	g_free (priv->username);
 	g_free (priv->password);
 	g_free (priv->email);
+	g_free (priv->hash_key);
 
 	g_mutex_free (priv->password_lock);
 	g_static_rec_mutex_free (&priv->queue_lock);
@@ -1455,12 +1454,13 @@ e_ews_connection_find (const gchar *uri,
 	g_static_mutex_lock (&connecting);
 
 	/* search the connection in our hash table */
-	if (loaded_connections_permissions) {
+	if (loaded_connections_permissions != NULL) {
 		hash_key = g_strdup_printf (
 			"%s@%s",
 			username ? username : "",
 			uri);
-		cnc = g_hash_table_lookup (loaded_connections_permissions, hash_key);
+		cnc = g_hash_table_lookup (
+			loaded_connections_permissions, hash_key);
 		g_free (hash_key);
 
 		if (E_IS_EWS_CONNECTION (cnc)) {
@@ -1501,21 +1501,17 @@ e_ews_connection_new (const gchar *uri,
 	EEwsConnection *cnc;
 	gchar *hash_key;
 
+	g_return_val_if_fail (uri != NULL, NULL);
+	g_return_val_if_fail (username != NULL, NULL);
+
 	g_static_mutex_lock (&connecting);
 
-	if (!username) {
-		g_static_mutex_unlock (&connecting);
-		return NULL;
-	}
+	hash_key = g_strdup_printf ("%s@%s", username, uri);
 
 	/* search the connection in our hash table */
 	if (loaded_connections_permissions != NULL) {
-		hash_key = g_strdup_printf (
-			"%s@%s",
-			username ? username : "",
-			uri);
-		cnc = g_hash_table_lookup (loaded_connections_permissions, hash_key);
-		g_free (hash_key);
+		cnc = g_hash_table_lookup (
+			loaded_connections_permissions, hash_key);
 
 		if (E_IS_EWS_CONNECTION (cnc)) {
 			g_object_ref (cnc);
@@ -1525,6 +1521,8 @@ e_ews_connection_new (const gchar *uri,
 				SOUP_SESSION_TIMEOUT, timeout,
 				SOUP_SESSION_USE_NTLM, g_strcmp0 (auth_mechanism, "PLAIN") != 0,
 				NULL);
+
+			g_free (hash_key);
 
 			g_static_mutex_unlock (&connecting);
 			return cnc;
@@ -1537,6 +1535,7 @@ e_ews_connection_new (const gchar *uri,
 	cnc->priv->username = g_strdup (username);
 	cnc->priv->password = g_strdup (password);
 	cnc->priv->uri = g_strdup (uri);
+	cnc->priv->hash_key = hash_key;  /* takes ownership */
 
 	g_object_set (
 		G_OBJECT (cnc->priv->soup_session),
@@ -1551,15 +1550,13 @@ e_ews_connection_new (const gchar *uri,
 			authenticate_cb, authenticate_ctx);
 
 	/* add the connection to the loaded_connections_permissions hash table */
-	hash_key = g_strdup_printf (
-		"%s@%s",
-		cnc->priv->username ? cnc->priv->username : "",
-		cnc->priv->uri);
 	if (loaded_connections_permissions == NULL)
 		loaded_connections_permissions = g_hash_table_new_full (
 			g_str_hash, g_str_equal,
 			g_free, NULL);
-	g_hash_table_insert (loaded_connections_permissions, hash_key, cnc);
+	g_hash_table_insert (
+		loaded_connections_permissions,
+		g_strdup (cnc->priv->hash_key), cnc);
 
 	/* free memory */
 	g_static_mutex_unlock (&connecting);
