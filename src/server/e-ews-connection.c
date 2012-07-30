@@ -1541,7 +1541,6 @@ e_ews_connection_find (const gchar *uri,
  * @uri: Exchange server uri
  * @password:
  * @settings: a #CamelEwsSettings
- * @error: Currently unused, but may require in future. Can take NULL value.
  *
  * This does not authenticate to the server. It merely stores the username and password.
  * Authentication happens when a request is made to the server.
@@ -1551,8 +1550,7 @@ e_ews_connection_find (const gchar *uri,
 EEwsConnection *
 e_ews_connection_new (const gchar *uri,
                       const gchar *password,
-                      CamelEwsSettings *settings,
-                      GError **error)
+                      CamelEwsSettings *settings)
 {
 	CamelNetworkSettings *network_settings;
 	EEwsConnection *cnc;
@@ -1980,7 +1978,6 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 	gboolean use_secure = TRUE;
 	const gchar *host_url;
 	const gchar *user;
-	GError *error = NULL;
 
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 	g_return_if_fail (email_address != NULL);
@@ -2035,20 +2032,7 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 	if (user == NULL || *user == '\0')
 		user = email_address;
 
-	cnc = e_ews_connection_new (url3, password, settings, &error);
-	if (cnc == NULL) {
-		g_free (url1);
-		g_free (url2);
-		g_free (url3);
-		g_free (url4);
-		xmlOutputBufferClose (buf);
-		xmlFreeDoc (doc);
-
-		g_simple_async_result_take_error (simple, error);
-		g_simple_async_result_complete_in_idle (simple);
-		g_object_unref (simple);
-		return;
-	}
+	cnc = e_ews_connection_new (url3, password, settings);
 
 	/*
 	 * http://msdn.microsoft.com/en-us/library/ee332364.aspx says we are

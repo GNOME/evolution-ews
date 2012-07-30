@@ -4071,12 +4071,9 @@ cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
 
 	connection = e_ews_connection_new (
-		hosturl, password->str, ews_settings, error);
+		hosturl, password->str, ews_settings);
 
 	g_free (hosturl);
-
-	if (connection == NULL)
-		return E_SOURCE_AUTHENTICATION_ERROR;
 
 	store = backend->priv->store;
 	sync_state = e_cal_backend_store_get_key_value (store, SYNC_KEY);

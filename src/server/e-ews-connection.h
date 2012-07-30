@@ -180,8 +180,7 @@ void		ews_oal_details_free		(EwsOALDetails *details);
 GType		e_ews_connection_get_type	(void);
 EEwsConnection *e_ews_connection_new		(const gchar *uri,
 						 const gchar *password,
-						 CamelEwsSettings *settings,
-						 GError **error);
+						 CamelEwsSettings *settings);
 const gchar *	e_ews_connection_get_uri	(EEwsConnection *cnc);
 CamelEwsSettings *
 		e_ews_connection_ref_settings	(EEwsConnection *cnc);

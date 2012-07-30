@@ -97,8 +97,7 @@ op_test_set_oof_settings ()
 		CAMEL_TYPE_EWS_SETTINGS,
 		"user", username, NULL);
 
-	cnc = e_ews_connection_new (uri, password, settings, NULL);
-	g_assert (cnc != NULL);
+	cnc = e_ews_connection_new (uri, password, settings);
 
 	g_object_unref (settings);
 

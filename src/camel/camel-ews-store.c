@@ -350,7 +350,7 @@ ews_authenticate_sync (CamelService *service,
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
 
 	connection = e_ews_connection_new (
-		hosturl, password, ews_settings, NULL);
+		hosturl, password, ews_settings);
 
 	g_free (hosturl);
 

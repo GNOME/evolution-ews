@@ -154,9 +154,8 @@ mail_config_ews_oal_combo_box_try_password_sync (ESourceAuthenticator *auth,
 	ews_settings = CAMEL_EWS_SETTINGS (settings);
 	oab_url = camel_ews_settings_get_oaburl (ews_settings);
 
-	/* XXX This takes a GError but never fails, so skip it. */
 	cnc = e_ews_connection_new (
-		oab_url, password->str, ews_settings, NULL);
+		oab_url, password->str, ews_settings);
 
 	e_ews_connection_get_oal_list_sync (
 		cnc, &oal_items, cancellable, &local_error);

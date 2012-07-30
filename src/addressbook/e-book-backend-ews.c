@@ -1692,7 +1692,7 @@ ews_download_full_gal (EBookBackendEws *cbews,
 	comp_cache_file = g_build_filename (cache_dir, full->filename, NULL);
 
 	oab_cnc = e_ews_connection_new (
-		full_url, priv->password, ews_settings, NULL);
+		full_url, priv->password, ews_settings);
 	if (!e_ews_connection_download_oal_file_sync (
 		oab_cnc, comp_cache_file, NULL, NULL, cancellable, error))
 		goto exit;
@@ -1847,7 +1847,7 @@ ebews_start_gal_sync (gpointer data)
 	priv = cbews->priv;
 
 	oab_cnc = e_ews_connection_new (
-		priv->oab_url, priv->password, ews_settings, NULL);
+		priv->oab_url, priv->password, ews_settings);
 
 	d(printf ("Ewsgal: Fetching oal full details file \n");)
 
@@ -2939,12 +2939,9 @@ book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
 
 	connection = e_ews_connection_new (
-		hosturl, password->str, ews_settings, error);
+		hosturl, password->str, ews_settings);
 
 	g_free (hosturl);
-
-	if (connection == NULL)
-		return E_SOURCE_AUTHENTICATION_ERROR;
 
 	fid = g_new0 (EwsFolderId, 1);
 	fid->id = g_strdup ("contacts");

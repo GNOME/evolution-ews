@@ -606,12 +606,9 @@ ews_backend_try_password_sync (ESourceAuthenticator *authenticator,
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
 
 	connection = e_ews_connection_new (
-		hosturl, password->str, ews_settings, error);
+		hosturl, password->str, ews_settings);
 
 	g_free (hosturl);
-
-	if (connection == NULL)
-		return E_SOURCE_AUTHENTICATION_ERROR;
 
 	g_mutex_lock (backend->priv->sync_state_lock);
 	sync_state = g_strdup (backend->priv->sync_state);
