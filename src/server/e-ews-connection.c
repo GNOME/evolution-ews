@@ -1494,41 +1494,6 @@ ews_user_id_free (EwsUserId *id)
 	}
 }
 
-void
-e_ews_connection_authenticate (EEwsConnection *cnc,
-                               SoupAuth *auth,
-                               const gchar *passwd,
-                               GError *error)
-{
-	CamelEwsSettings *ews_settings;
-	CamelNetworkSettings *network_settings;
-	gchar *user;
-
-	g_return_if_fail (cnc != NULL);
-
-	if (error) {
-		g_warning ("Auth error: %s", error->message);
-		g_clear_error (&error);
-		return;
-	}
-
-	e_ews_connection_forget_password (cnc);
-
-	g_mutex_lock (cnc->priv->password_lock);
-	g_free (cnc->priv->password);
-	cnc->priv->password = g_strdup (passwd);
-	g_mutex_unlock (cnc->priv->password_lock);
-
-	ews_settings = e_ews_connection_ref_settings (cnc);
-	network_settings = CAMEL_NETWORK_SETTINGS (ews_settings);
-	user = camel_network_settings_dup_user (network_settings);
-	g_object_unref (ews_settings);
-
-	soup_auth_authenticate (auth, user, passwd);
-
-	g_free (user);
-}
-
 /* Connection APIS */
 
 /**

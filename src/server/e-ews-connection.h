@@ -191,10 +191,6 @@ void		e_ews_connection_forget_password
 						(EEwsConnection *cnc);
 EEwsConnection *e_ews_connection_find		(const gchar *uri,
 						 const gchar *username);
-void		e_ews_connection_authenticate	(EEwsConnection *cnc,
-						 SoupAuth *auth,
-						 const gchar *passwd,
-						 GError *error);
 void		e_ews_connection_queue_request	(EEwsConnection *cnc,
 						 ESoapMessage *msg,
 						 EEwsResponseCallback cb,
