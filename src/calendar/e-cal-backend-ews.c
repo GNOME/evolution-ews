@@ -4055,7 +4055,6 @@ cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 	EEwsConnection *connection;
 	ESourceAuthenticationResult result;
 	CamelEwsSettings *ews_settings;
-	CamelNetworkSettings *network_settings;
 	GSList *items_created = NULL;
 	GSList *items_updated = NULL;
 	GSList *items_deleted = NULL;
@@ -4063,7 +4062,6 @@ cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 	const gchar *sync_state;
 	gchar *sync_state_inout;
 	gchar *hosturl;
-	gchar *user;
 	GError *local_error = NULL;
 
 	/* This tests the password by synchronizing the folder. */
@@ -4072,17 +4070,11 @@ cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 	ews_settings = cal_backend_ews_get_collection_settings (backend);
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
 
-	network_settings = CAMEL_NETWORK_SETTINGS (ews_settings);
-	user = camel_network_settings_dup_user (network_settings);
-
 	connection = e_ews_connection_new (
-		hosturl, user, password->str,
-		camel_network_settings_get_auth_mechanism (network_settings),
-		camel_ews_settings_get_timeout (ews_settings),
-		NULL, NULL, error);
+		hosturl, password->str,
+		ews_settings, NULL, NULL, error);
 
 	g_free (hosturl);
-	g_free (user);
 
 	if (connection == NULL)
 		return E_SOURCE_AUTHENTICATION_ERROR;

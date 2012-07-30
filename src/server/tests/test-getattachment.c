@@ -72,8 +72,10 @@ op_test_get_attachments ()
 	const gchar *attachmentid;
 	EEwsConnection *cnc;
 	GCancellable *cancellable;
+	CamelEwsSettings *settings;
 	GSList *ids = NULL;
 	gchar *tmpdir;
+
 	cancellable = g_cancellable_new ();
 
 	util_get_login_info_from_env (&username, &password, &uri);
@@ -81,8 +83,15 @@ op_test_get_attachments ()
 	g_assert_cmpstr (password, !=, NULL);
 	g_assert_cmpstr (uri, !=, NULL);
 
-	cnc = e_ews_connection_new (uri, username, password, NULL, 30, NULL, NULL, NULL);
+	settings = g_object_new (
+		CAMEL_TYPE_EWS_SETTINGS,
+		"user", username, NULL);
+
+	cnc = e_ews_connection_new (
+		uri, password, settings, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
+
+	g_object_unref (settings);
 
 	attachmentid = "AAASAG1hbmR5Lnd1QGludGVsLmNvbQBGAAAAAACdSXexmsgJTpd3WpdX6ulXBwAm9E+BClHfQqEnvCoGvhheAAAAjpb6AACIeDU1D80fTrC3245yXdhOADUAPRB8AAABEgAQAIlh9YZzdzdMtvWW9ZI7+vM=";
 	ids = g_slist_append (ids, (gpointer *) attachmentid);

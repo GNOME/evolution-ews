@@ -70,7 +70,6 @@ struct _EBookBackendEwsPrivate {
 	gchar *oab_url;
 	gchar *folder_name;
 
-	gchar *username;
 	gchar *password;
 
 	EwsBookBackendSqliteDB *ebsdb;
@@ -1682,9 +1681,9 @@ ews_download_full_gal (EBookBackendEws *cbews,
 	gchar *full_url, *oab_url, *cache_file = NULL;
 	const gchar *cache_dir;
 	gchar *comp_cache_file = NULL, *uncompress_file = NULL;
-	CamelEwsSettings *settings;
+	CamelEwsSettings *ews_settings;
 
-	settings = book_backend_ews_get_collection_settings (cbews);
+	ews_settings = book_backend_ews_get_collection_settings (cbews);
 
 	/* oab url with oab.xml removed from the suffix */
 	oab_url = g_strndup (priv->oab_url, strlen (priv->oab_url) - 7);
@@ -1692,10 +1691,8 @@ ews_download_full_gal (EBookBackendEws *cbews,
 	cache_dir = e_book_backend_get_cache_dir (E_BOOK_BACKEND (cbews));
 	comp_cache_file = g_build_filename (cache_dir, full->filename, NULL);
 
-	oab_cnc = e_ews_connection_new (full_url, priv->username, priv->password,
-		camel_network_settings_get_auth_mechanism (CAMEL_NETWORK_SETTINGS (settings)),
-		camel_ews_settings_get_timeout (settings),
-		NULL, NULL, NULL);
+	oab_cnc = e_ews_connection_new (
+		full_url, priv->password, ews_settings, NULL, NULL, NULL);
 	if (!e_ews_connection_download_oal_file_sync (
 		oab_cnc, comp_cache_file, NULL, NULL, cancellable, error))
 		goto exit;
@@ -1843,16 +1840,15 @@ ebews_start_gal_sync (gpointer data)
 	GSList *full_l = NULL;
 	gboolean ret = TRUE;
 	gchar *uncompressed_filename = NULL;
-	CamelEwsSettings *settings;
+	CamelEwsSettings *ews_settings;
 
 	cbews = (EBookBackendEws *) data;
-	settings = book_backend_ews_get_collection_settings (cbews);
+	ews_settings = book_backend_ews_get_collection_settings (cbews);
 	priv = cbews->priv;
 
-	oab_cnc = e_ews_connection_new (priv->oab_url, priv->username, priv->password,
-		camel_network_settings_get_auth_mechanism (CAMEL_NETWORK_SETTINGS (settings)),
-		camel_ews_settings_get_timeout (settings),
-		NULL, NULL, NULL);
+	oab_cnc = e_ews_connection_new (
+		priv->oab_url, priv->password,
+		ews_settings, NULL, NULL, NULL);
 
 	d(printf ("Ewsgal: Fetching oal full details file \n");)
 
@@ -2882,11 +2878,6 @@ e_book_backend_ews_dispose (GObject *object)
 		priv->folder_name = NULL;
 	}
 
-	if (priv->username) {
-		g_free (priv->username);
-		priv->username = NULL;
-	}
-
 	if (priv->password) {
 		g_free (priv->password);
 		priv->password = NULL;
@@ -2936,12 +2927,10 @@ book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 	EEwsConnection *connection;
 	ESourceAuthenticationResult result;
 	CamelEwsSettings *ews_settings;
-	CamelNetworkSettings *network_settings;
 	EwsFolderId *fid = NULL;
 	GSList *folders = NULL;
 	GSList *ids = NULL;
 	gchar *hosturl;
-	gchar *user;
 	GError *local_error = NULL;
 
 	/* This tests the password by fetching the contacts folder. */
@@ -2950,19 +2939,14 @@ book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 	ews_settings = book_backend_ews_get_collection_settings (backend);
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
 
-	network_settings = CAMEL_NETWORK_SETTINGS (ews_settings);
-	user = camel_network_settings_dup_user (network_settings);
-
 	connection = e_ews_connection_new (
-		hosturl, user, password->str,
-		camel_network_settings_get_auth_mechanism (network_settings),
-		camel_ews_settings_get_timeout (ews_settings),
-		NULL, NULL, error);
+		hosturl, password->str,
+		ews_settings, NULL, NULL, error);
 
-	if (connection == NULL) {
-		result = E_SOURCE_AUTHENTICATION_ERROR;
-		goto exit;
-	}
+	g_free (hosturl);
+
+	if (connection == NULL)
+		return E_SOURCE_AUTHENTICATION_ERROR;
 
 	fid = g_new0 (EwsFolderId, 1);
 	fid->id = g_strdup ("contacts");
@@ -2985,11 +2969,9 @@ book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 			g_object_unref (backend->priv->cnc);
 		backend->priv->cnc = g_object_ref (connection);
 
-		/* Stash the username and password for later
-		 * reuse in Offline Address Book connections. */
-		g_free (backend->priv->username);
+		/* Stash the password for later reuse
+		 * in Offline Address Book connections. */
 		g_free (backend->priv->password);
-		backend->priv->username = g_strdup (user);
 		backend->priv->password = g_strdup (password->str);
 
 		PRIV_UNLOCK (backend->priv);
@@ -3013,10 +2995,6 @@ book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 	}
 
 	g_object_unref (connection);
-
-exit:
-	g_free (hosturl);
-	g_free (user);
 
 	return result;
 }

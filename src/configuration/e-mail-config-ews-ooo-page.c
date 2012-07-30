@@ -782,15 +782,11 @@ mail_config_ews_ooo_page_try_password_sync (ESourceAuthenticator *auth,
 	EMailConfigEwsOooPage *page;
 	CamelSettings *settings;
 	CamelEwsSettings *ews_settings;
-	CamelNetworkSettings *network_settings;
 	ESourceAuthenticationResult result;
 	EEwsConnection *connection;
 	EEwsOofSettings *oof_settings;
 	const gchar *hosturl;
 	const gchar *mailbox;
-	const gchar *mech;
-	const gchar *user;
-	guint timeout;
 	GError *local_error = NULL;
 
 	page = E_MAIL_CONFIG_EWS_OOO_PAGE (auth);
@@ -799,16 +795,11 @@ mail_config_ews_ooo_page_try_password_sync (ESourceAuthenticator *auth,
 
 	ews_settings = CAMEL_EWS_SETTINGS (settings);
 	hosturl = camel_ews_settings_get_hosturl (ews_settings);
-	timeout = camel_ews_settings_get_timeout (ews_settings);
-
-	network_settings = CAMEL_NETWORK_SETTINGS (settings);
-	user = camel_network_settings_get_user (network_settings);
-	mech = camel_network_settings_get_auth_mechanism (network_settings);
 
 	/* XXX This takes a GError but never fails, so skip it. */
 	connection = e_ews_connection_new (
-		hosturl, user, password->str,
-		mech, timeout, NULL, NULL, NULL);
+		hosturl, password->str,
+		ews_settings, NULL, NULL, NULL);
 
 	e_ews_connection_set_mailbox (connection, mailbox);
 

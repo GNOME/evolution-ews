@@ -214,40 +214,19 @@ ews_update_folder_hierarchy (CamelEwsStore *ews_store,
 }
 
 static void
-ews_store_update_cnc_timeout_cb (CamelEwsSettings *settings,
-				 GParamSpec *spec,
-				 CamelEwsStore *store)
-{
-	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
-	g_return_if_fail (CAMEL_IS_EWS_STORE (store));
-
-	if (store->priv->cnc)
-		e_ews_connection_set_timeout (store->priv->cnc,
-			camel_ews_settings_get_timeout (settings));
-}
-
-static void
 ews_store_authenticate (EEwsConnection *cnc,
                         SoupMessage *msg,
                         SoupAuth *auth,
                         gboolean retrying,
                         gpointer data)
 {
-	CamelNetworkSettings *network_settings;
-	CamelSettings *settings;
 	CamelService *service = data;
 	const gchar *password;
-	const gchar *user;
 
 	password = camel_service_get_password (service);
-	settings = camel_service_get_settings (service);
-
-	network_settings = CAMEL_NETWORK_SETTINGS (settings);
-	user = camel_network_settings_get_user (network_settings);
-
 	g_return_if_fail (password != NULL);
 
-	e_ews_connection_authenticate (cnc, auth, user, password, NULL);
+	e_ews_connection_authenticate (cnc, auth, password, NULL);
 }
 
 static gboolean
@@ -258,20 +237,15 @@ ews_connect_sync (CamelService *service,
 	CamelEwsStore *ews_store;
 	CamelEwsStorePrivate *priv;
 	CamelEwsSettings *ews_settings;
-	CamelNetworkSettings *network_settings;
 	CamelSettings *settings;
 	CamelSession *session;
 	const gchar *hosturl;
-	const gchar *user;
 	gboolean success;
 
 	ews_store = (CamelEwsStore *) service;
 	priv = ews_store->priv;
 	session = camel_service_get_session (service);
 	settings = camel_service_get_settings (service);
-
-	network_settings = CAMEL_NETWORK_SETTINGS (settings);
-	user = camel_network_settings_get_user (network_settings);
 
 	ews_settings = CAMEL_EWS_SETTINGS (settings);
 	hosturl = camel_ews_settings_get_hosturl (ews_settings);
@@ -282,11 +256,10 @@ ews_connect_sync (CamelService *service,
 	if (priv->cnc)
 		return TRUE;
 
-	priv->cnc = e_ews_connection_new (hosturl, user, NULL,
-					  camel_network_settings_get_auth_mechanism (network_settings),
-					  camel_ews_settings_get_timeout (ews_settings),
-					  G_CALLBACK (ews_store_authenticate), service,
-					  error);
+	priv->cnc = e_ews_connection_new (
+		hosturl, NULL, ews_settings,
+		G_CALLBACK (ews_store_authenticate), service,
+		error);
 
 	if (!priv->cnc) {
 		return FALSE;
@@ -302,8 +275,6 @@ ews_connect_sync (CamelService *service,
 		priv->cnc = NULL;
 		return FALSE;
 	}
-
-	g_signal_connect (ews_settings, "notify::timeout", G_CALLBACK (ews_store_update_cnc_timeout_cb), service);
 
 	camel_offline_store_set_online_sync (
 		CAMEL_OFFLINE_STORE (ews_store), TRUE, cancellable, NULL);

@@ -48,14 +48,22 @@ con_test_create_new_connection ()
 	const gchar *password;
 	const gchar *uri;
 	EEwsConnection *cnc;
+	CamelEwsSettings *settings;
 
 	util_get_login_info_from_env (&username, &password, &uri);
 	g_assert_cmpstr (username, !=, NULL);
 	g_assert_cmpstr (password, !=, NULL);
 	g_assert_cmpstr (uri, !=, NULL);
 
-	cnc = e_ews_connection_new (uri, username, password, NULL, 30, NULL, NULL, NULL);
+	settings = g_object_new (
+		CAMEL_TYPE_EWS_SETTINGS,
+		"user", username, NULL);
+
+	cnc = e_ews_connection_new (
+		uri, password, settings, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
+
+	g_object_unref (settings);
 
 	g_print ("\nSuccess : Created a new connection\n");
 

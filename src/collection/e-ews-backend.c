@@ -588,46 +588,28 @@ ews_backend_try_password_sync (ESourceAuthenticator *authenticator,
 {
 	EEwsBackend *backend;
 	EEwsConnection *connection;
-	ESource *source;
-	ESourceCollection *collection_extension;
 	ESourceAuthenticationResult result;
 	CamelEwsSettings *ews_settings;
-	CamelNetworkSettings *network_settings;
 	GSList *folders_created = NULL;
 	GSList *folders_updated = NULL;
 	GSList *folders_deleted = NULL;
 	gboolean includes_last_folder = FALSE;
-	const gchar *extension_name;
-	gchar *auth_mech;
 	gchar *sync_state;
 	gchar *hosturl;
-	gchar *user;
-	guint timeout;
 	GError *local_error = NULL;
 
 	/* This tests the password by updating the folder hierarchy. */
 
 	backend = E_EWS_BACKEND (authenticator);
-	source = e_backend_get_source (E_BACKEND (backend));
 
 	ews_settings = ews_backend_get_settings (backend);
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
-	timeout = camel_ews_settings_get_timeout (ews_settings);
-
-	network_settings = CAMEL_NETWORK_SETTINGS (ews_settings);
-	auth_mech = camel_network_settings_dup_auth_mechanism (network_settings);
-
-	extension_name = E_SOURCE_EXTENSION_COLLECTION;
-	collection_extension = e_source_get_extension (source, extension_name);
-	user = e_source_collection_dup_identity (collection_extension);
 
 	connection = e_ews_connection_new (
-		hosturl, user, password->str,
-		auth_mech, timeout, NULL, NULL, error);
+		hosturl, password->str,
+		ews_settings, NULL, NULL, error);
 
-	g_free (auth_mech);
 	g_free (hosturl);
-	g_free (user);
 
 	if (connection == NULL)
 		return E_SOURCE_AUTHENTICATION_ERROR;

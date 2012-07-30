@@ -81,6 +81,7 @@ op_test_set_oof_settings ()
 	const gchar *uri, *email;
 	EEwsConnection *cnc;
 	GCancellable *cancellable;
+	CamelEwsSettings *settings;
 
 	cancellable = g_cancellable_new ();
 
@@ -92,8 +93,15 @@ op_test_set_oof_settings ()
 	g_assert_cmpstr (uri, !=, NULL);
 	g_assert_cmpstr (email, !=, NULL);
 
-	cnc = e_ews_connection_new (uri, username, password, NULL, 30, NULL, NULL, NULL);
+	settings = g_object_new (
+		CAMEL_TYPE_EWS_SETTINGS,
+		"user", username, NULL);
+
+	cnc = e_ews_connection_new (
+		uri, password, settings, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
+
+	g_object_unref (settings);
 
 	e_ews_connection_set_mailbox (cnc, email);
 

@@ -77,6 +77,7 @@ op_test_create_folder ()
 	const gchar *uri;
 	EEwsConnection *cnc;
 	GCancellable *cancellable;
+	CamelEwsSettings *settings;
 
 	cancellable = g_cancellable_new ();
 
@@ -85,8 +86,16 @@ op_test_create_folder ()
 	g_assert_cmpstr (password, !=, NULL);
 	g_assert_cmpstr (uri, !=, NULL);
 
-	cnc = e_ews_connection_new (uri, username, password, NULL, 30, NULL, NULL, NULL);
+	settings = g_object_new (
+		CAMEL_TYPE_EWS_SETTINGS,
+		"user", username, NULL);
+
+	cnc = e_ews_connection_new (
+		uri, password, settings, NULL, NULL, NULL);
 	g_assert (cnc != NULL);
+
+	g_object_unref (settings);
+
 	e_ews_connection_create_folder (
 		cnc, EWS_PRIORITY_MEDIUM, "inbox",
 		TRUE ,"test", cancellable,

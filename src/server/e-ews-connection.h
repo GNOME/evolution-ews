@@ -179,25 +179,22 @@ void		ews_oal_details_free		(EwsOALDetails *details);
 
 GType		e_ews_connection_get_type	(void);
 EEwsConnection *e_ews_connection_new		(const gchar *uri,
-						 const gchar *username,
 						 const gchar *password,
-						 const gchar *auth_mechanism,
-						 guint timeout,
+						 CamelEwsSettings *settings,
 						 GCallback authenticate_cb,
 						 gpointer authenticate_ctx,
 						 GError **error);
 const gchar *	e_ews_connection_get_uri	(EEwsConnection *cnc);
+CamelEwsSettings *
+		e_ews_connection_ref_settings	(EEwsConnection *cnc);
 SoupSession *	e_ews_connection_ref_soup_session
 						(EEwsConnection *cnc);
 void		e_ews_connection_forget_password
 						(EEwsConnection *cnc);
-void		e_ews_connection_set_timeout	(EEwsConnection *cnc,
-						 guint timeout);
 EEwsConnection *e_ews_connection_find		(const gchar *uri,
 						 const gchar *username);
 void		e_ews_connection_authenticate	(EEwsConnection *cnc,
 						 SoupAuth *auth,
-						 const gchar *user,
 						 const gchar *passwd,
 						 GError *error);
 void		e_ews_connection_queue_request	(EEwsConnection *cnc,

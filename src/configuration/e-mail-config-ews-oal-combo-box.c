@@ -141,12 +141,10 @@ mail_config_ews_oal_combo_box_try_password_sync (ESourceAuthenticator *auth,
 	EMailConfigServiceBackend *backend;
 	CamelSettings *settings;
 	CamelEwsSettings *ews_settings;
-	CamelNetworkSettings *network_settings;
 	ESourceAuthenticationResult result;
 	EEwsConnection *cnc;
 	GSList *oal_items = NULL;
 	const gchar *oab_url;
-	const gchar *user;
 	GError *local_error = NULL;
 
 	combo_box = E_MAIL_CONFIG_EWS_OAL_COMBO_BOX (auth);
@@ -156,15 +154,10 @@ mail_config_ews_oal_combo_box_try_password_sync (ESourceAuthenticator *auth,
 	ews_settings = CAMEL_EWS_SETTINGS (settings);
 	oab_url = camel_ews_settings_get_oaburl (ews_settings);
 
-	network_settings = CAMEL_NETWORK_SETTINGS (settings);
-	user = camel_network_settings_get_user (network_settings);
-
 	/* XXX This takes a GError but never fails, so skip it. */
 	cnc = e_ews_connection_new (
-		oab_url, user, password->str,
-		camel_network_settings_get_auth_mechanism (network_settings),
-		camel_ews_settings_get_timeout (ews_settings),
-		NULL, NULL, NULL);
+		oab_url, password->str,
+		ews_settings, NULL, NULL, NULL);
 
 	e_ews_connection_get_oal_list_sync (
 		cnc, &oal_items, cancellable, &local_error);

@@ -275,9 +275,7 @@ ews_config_utils_authenticator_try_password_sync (ESourceAuthenticator *auth,
 	user = camel_network_settings_dup_user (network_settings);
 
 	authenticator->conn = e_ews_connection_new (
-		hosturl, user, password->str,
-		camel_network_settings_get_auth_mechanism (network_settings),
-		camel_ews_settings_get_timeout (authenticator->ews_settings),
+		hosturl, password->str, authenticator->ews_settings,
 		NULL, NULL, &local_error);
 
 	g_free (hosturl);

@@ -76,19 +76,24 @@ struct _EEwsConnectionPrivate {
 	GMainLoop *soup_loop;
 	GMainContext *soup_context;
 
+	CamelEwsSettings *settings;
 	GMutex *password_lock;
 
 	/* Hash key for the loaded_connections_permissions table. */
 	gchar *hash_key;
 
 	gchar *uri;
-	gchar *username;
 	gchar *password;
 	gchar *email;
 
 	GSList *jobs;
 	GSList *active_job_queue;
 	GStaticRecMutex queue_lock;
+};
+
+enum {
+	PROP_0,
+	PROP_SETTINGS
 };
 
 enum {
@@ -150,6 +155,23 @@ ews_connection_error_quark (void)
 	}
 
 	return quark;
+}
+
+static gboolean
+ews_auth_mech_to_use_ntlm (GBinding *binding,
+                           const GValue *source_value,
+                           GValue *target_value,
+                           gpointer user_data)
+{
+	const gchar *auth_mechanism;
+	gboolean use_ntlm;
+
+	/* Use NTLM unless the auth mechanism is "PLAIN". */
+	auth_mechanism = g_value_get_string (source_value);
+	use_ntlm = (g_strcmp0 (auth_mechanism, "PLAIN") != 0);
+	g_value_set_boolean (target_value, use_ntlm);
+
+	return TRUE;
 }
 
 static gpointer
@@ -1126,6 +1148,51 @@ create_folder_response_cb (ESoapResponse *response,
 }
 
 static void
+ews_connection_set_settings (EEwsConnection *connection,
+                             CamelEwsSettings *settings)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+	g_return_if_fail (connection->priv->settings == NULL);
+
+	connection->priv->settings = g_object_ref (settings);
+}
+
+static void
+ews_connection_set_property (GObject *object,
+                             guint property_id,
+                             const GValue *value,
+                             GParamSpec *pspec)
+{
+	switch (property_id) {
+		case PROP_SETTINGS:
+			ews_connection_set_settings (
+				E_EWS_CONNECTION (object),
+				g_value_get_object (value));
+			return;
+	}
+
+	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+}
+
+static void
+ews_connection_get_property (GObject *object,
+                             guint property_id,
+                             GValue *value,
+                             GParamSpec *pspec)
+{
+	switch (property_id) {
+		case PROP_SETTINGS:
+			g_value_take_object (
+				value,
+				e_ews_connection_ref_settings (
+				E_EWS_CONNECTION (object)));
+			return;
+	}
+
+	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+}
+
+static void
 ews_connection_dispose (GObject *object)
 {
 	EEwsConnectionPrivate *priv;
@@ -1161,6 +1228,11 @@ ews_connection_dispose (GObject *object)
 		priv->soup_context = NULL;
 	}
 
+	if (priv->settings != NULL) {
+		g_object_unref (priv->settings);
+		priv->settings = NULL;
+	}
+
 	e_ews_connection_forget_password (E_EWS_CONNECTION (object));
 
 	if (priv->jobs) {
@@ -1185,7 +1257,6 @@ ews_connection_finalize (GObject *object)
 	priv = E_EWS_CONNECTION_GET_PRIVATE (object);
 
 	g_free (priv->uri);
-	g_free (priv->username);
 	g_free (priv->password);
 	g_free (priv->email);
 	g_free (priv->hash_key);
@@ -1266,10 +1337,24 @@ e_ews_connection_class_init (EEwsConnectionClass *class)
 	g_type_class_add_private (class, sizeof (EEwsConnectionPrivate));
 
 	object_class = G_OBJECT_CLASS (class);
+	object_class->set_property = ews_connection_set_property;
+	object_class->get_property = ews_connection_get_property;
 	object_class->dispose = ews_connection_dispose;
 	object_class->finalize = ews_connection_finalize;
 
 	class->authenticate = NULL;
+
+	g_object_class_install_property (
+		object_class,
+		PROP_SETTINGS,
+		g_param_spec_object (
+			"settings",
+			"Settings",
+			"Connection settings",
+			CAMEL_TYPE_EWS_SETTINGS,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT_ONLY |
+			G_PARAM_STATIC_STRINGS));
 
 	/**
 	 * EEwsConnection::authenticate
@@ -1347,7 +1432,8 @@ ews_connection_authenticate (SoupSession *sess,
                              gpointer data)
 {
 	EEwsConnection *cnc = data;
-	gchar *password;
+	CamelNetworkSettings *network_settings;
+	gchar *user, *password;
 
 	g_return_if_fail (cnc != NULL);
 
@@ -1355,17 +1441,22 @@ ews_connection_authenticate (SoupSession *sess,
 		e_ews_connection_forget_password (cnc);
 	}
 
+	network_settings = CAMEL_NETWORK_SETTINGS (cnc->priv->settings);
+	user = camel_network_settings_dup_user (network_settings);
+
 	g_mutex_lock (cnc->priv->password_lock);
 	password = g_strdup (cnc->priv->password);
 	g_mutex_unlock (cnc->priv->password_lock);
 
-	if (password != NULL) {
-		soup_auth_authenticate (auth, cnc->priv->username, password);
-		g_free (password);
-		return;
-	}
+	if (password != NULL)
+		soup_auth_authenticate (auth, user, password);
+	else
+		g_signal_emit (
+			cnc, signals[AUTHENTICATE], 0,
+			msg, auth, retrying);
 
-	g_signal_emit (cnc, signals[AUTHENTICATE], 0, msg, auth, retrying);
+	g_free (password);
+	g_free (user);
 }
 
 void
@@ -1406,21 +1497,19 @@ ews_user_id_free (EwsUserId *id)
 void
 e_ews_connection_authenticate (EEwsConnection *cnc,
                                SoupAuth *auth,
-                               const gchar *user,
                                const gchar *passwd,
                                GError *error)
 {
+	CamelEwsSettings *ews_settings;
+	CamelNetworkSettings *network_settings;
+	gchar *user;
+
 	g_return_if_fail (cnc != NULL);
 
 	if (error) {
 		g_warning ("Auth error: %s", error->message);
 		g_clear_error (&error);
 		return;
-	}
-
-	if (user) {
-		g_free (cnc->priv->username);
-		cnc->priv->username = g_strdup (user);
 	}
 
 	e_ews_connection_forget_password (cnc);
@@ -1430,7 +1519,14 @@ e_ews_connection_authenticate (EEwsConnection *cnc,
 	cnc->priv->password = g_strdup (passwd);
 	g_mutex_unlock (cnc->priv->password_lock);
 
+	ews_settings = e_ews_connection_ref_settings (cnc);
+	network_settings = CAMEL_NETWORK_SETTINGS (ews_settings);
+	user = camel_network_settings_dup_user (network_settings);
+	g_object_unref (ews_settings);
+
 	soup_auth_authenticate (auth, user, passwd);
+
+	g_free (user);
 }
 
 /* Connection APIS */
@@ -1478,9 +1574,8 @@ e_ews_connection_find (const gchar *uri,
 /**
  * e_ews_connection_new
  * @uri: Exchange server uri
- * @username:
  * @password:
- * @timeout: connection timeout to use, in seconds
+ * @settings: a #CamelEwsSettings
  * @error: Currently unused, but may require in future. Can take NULL value.
  *
  * This does not authenticate to the server. It merely stores the username and password.
@@ -1490,23 +1585,26 @@ e_ews_connection_find (const gchar *uri,
  **/
 EEwsConnection *
 e_ews_connection_new (const gchar *uri,
-                      const gchar *username,
                       const gchar *password,
-                      const gchar *auth_mechanism,
-                      guint timeout,
+                      CamelEwsSettings *settings,
                       GCallback authenticate_cb,
                       gpointer authenticate_ctx,
                       GError **error)
 {
+	CamelNetworkSettings *network_settings;
 	EEwsConnection *cnc;
 	gchar *hash_key;
+	gchar *user;
 
 	g_return_val_if_fail (uri != NULL, NULL);
-	g_return_val_if_fail (username != NULL, NULL);
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
+
+	network_settings = CAMEL_NETWORK_SETTINGS (settings);
+	user = camel_network_settings_dup_user (network_settings);
+	hash_key = g_strdup_printf ("%s@%s", user, uri);
+	g_free (user);
 
 	g_static_mutex_lock (&connecting);
-
-	hash_key = g_strdup_printf ("%s@%s", username, uri);
 
 	/* search the connection in our hash table */
 	if (loaded_connections_permissions != NULL) {
@@ -1516,12 +1614,6 @@ e_ews_connection_new (const gchar *uri,
 		if (E_IS_EWS_CONNECTION (cnc)) {
 			g_object_ref (cnc);
 
-			g_object_set (
-				G_OBJECT (cnc->priv->soup_session),
-				SOUP_SESSION_TIMEOUT, timeout,
-				SOUP_SESSION_USE_NTLM, g_strcmp0 (auth_mechanism, "PLAIN") != 0,
-				NULL);
-
 			g_free (hash_key);
 
 			g_static_mutex_unlock (&connecting);
@@ -1530,18 +1622,26 @@ e_ews_connection_new (const gchar *uri,
 	}
 
 	/* not found, so create a new connection */
-	cnc = g_object_new (E_TYPE_EWS_CONNECTION, NULL);
+	cnc = g_object_new (
+		E_TYPE_EWS_CONNECTION,
+		"settings", settings, NULL);
 
-	cnc->priv->username = g_strdup (username);
 	cnc->priv->password = g_strdup (password);
 	cnc->priv->uri = g_strdup (uri);
 	cnc->priv->hash_key = hash_key;  /* takes ownership */
 
-	g_object_set (
-		G_OBJECT (cnc->priv->soup_session),
-		SOUP_SESSION_TIMEOUT, timeout,
-		SOUP_SESSION_USE_NTLM, g_strcmp0 (auth_mechanism, "PLAIN") != 0,
-		NULL);
+	g_object_bind_property_full (
+		settings, "auth-mechanism",
+		cnc->priv->soup_session, "use-ntlm",
+		G_BINDING_SYNC_CREATE,
+		ews_auth_mech_to_use_ntlm,
+		NULL,
+		NULL, (GDestroyNotify) NULL);
+
+	g_object_bind_property (
+		settings, "timeout",
+		cnc->priv->soup_session, "timeout",
+		G_BINDING_SYNC_CREATE);
 
 	/* register a handler to the authenticate signal */
 	if (authenticate_cb)
@@ -1572,6 +1672,14 @@ e_ews_connection_get_uri (EEwsConnection *cnc)
 	return cnc->priv->uri;
 }
 
+CamelEwsSettings *
+e_ews_connection_ref_settings (EEwsConnection *cnc)
+{
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
+
+	return g_object_ref (cnc->priv->settings);
+}
+
 SoupSession *
 e_ews_connection_ref_soup_session (EEwsConnection *cnc)
 {
@@ -1595,19 +1703,6 @@ e_ews_connection_forget_password (EEwsConnection *cnc)
 	cnc->priv->password = NULL;
 
 	g_mutex_unlock (cnc->priv->password_lock);
-}
-
-void
-e_ews_connection_set_timeout (EEwsConnection *cnc,
-                              guint timeout)
-{
-	g_return_if_fail (cnc != NULL);
-
-	if (cnc->priv->soup_session)
-		g_object_set (
-			G_OBJECT (cnc->priv->soup_session),
-			SOUP_SESSION_TIMEOUT, timeout,
-			NULL);
 }
 
 static xmlDoc *
@@ -1984,10 +2079,7 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 		user = email_address;
 
 	cnc = e_ews_connection_new (
-		url3, user, password,
-		camel_network_settings_get_auth_mechanism (network_settings),
-		camel_ews_settings_get_timeout (settings),
-		NULL, NULL, &error);
+		url3, password, settings, NULL, NULL, &error);
 	if (cnc == NULL) {
 		g_free (url1);
 		g_free (url2);
