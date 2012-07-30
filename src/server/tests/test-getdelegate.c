@@ -89,8 +89,7 @@ op_test_get_delegate ()
 		CAMEL_TYPE_EWS_SETTINGS,
 		"user", username, NULL);
 
-	cnc = e_ews_connection_new (
-		uri, password, settings, NULL, NULL, NULL);
+	cnc = e_ews_connection_new (uri, password, settings, NULL);
 	g_assert (cnc != NULL);
 
 	g_object_unref (settings);

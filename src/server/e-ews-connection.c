@@ -1587,8 +1587,6 @@ EEwsConnection *
 e_ews_connection_new (const gchar *uri,
                       const gchar *password,
                       CamelEwsSettings *settings,
-                      GCallback authenticate_cb,
-                      gpointer authenticate_ctx,
                       GError **error)
 {
 	CamelNetworkSettings *network_settings;
@@ -1642,12 +1640,6 @@ e_ews_connection_new (const gchar *uri,
 		settings, "timeout",
 		cnc->priv->soup_session, "timeout",
 		G_BINDING_SYNC_CREATE);
-
-	/* register a handler to the authenticate signal */
-	if (authenticate_cb)
-		g_signal_connect (
-			cnc, "authenticate",
-			authenticate_cb, authenticate_ctx);
 
 	/* add the connection to the loaded_connections_permissions hash table */
 	if (loaded_connections_permissions == NULL)
@@ -2078,8 +2070,7 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 	if (user == NULL || *user == '\0')
 		user = email_address;
 
-	cnc = e_ews_connection_new (
-		url3, password, settings, NULL, NULL, &error);
+	cnc = e_ews_connection_new (url3, password, settings, &error);
 	if (cnc == NULL) {
 		g_free (url1);
 		g_free (url2);

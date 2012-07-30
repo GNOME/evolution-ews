@@ -181,8 +181,6 @@ GType		e_ews_connection_get_type	(void);
 EEwsConnection *e_ews_connection_new		(const gchar *uri,
 						 const gchar *password,
 						 CamelEwsSettings *settings,
-						 GCallback authenticate_cb,
-						 gpointer authenticate_ctx,
 						 GError **error);
 const gchar *	e_ews_connection_get_uri	(EEwsConnection *cnc);
 CamelEwsSettings *

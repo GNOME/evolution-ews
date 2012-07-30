@@ -276,7 +276,7 @@ ews_config_utils_authenticator_try_password_sync (ESourceAuthenticator *auth,
 
 	authenticator->conn = e_ews_connection_new (
 		hosturl, password->str, authenticator->ews_settings,
-		NULL, NULL, &local_error);
+		&local_error);
 
 	g_free (hosturl);
 	g_free (user);
