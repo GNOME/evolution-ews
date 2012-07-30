@@ -76,6 +76,8 @@ struct _EEwsConnectionPrivate {
 	GMainLoop *soup_loop;
 	GMainContext *soup_context;
 
+	GMutex *password_lock;
+
 	gchar *uri;
 	gchar *username;
 	gchar *password;
@@ -120,10 +122,17 @@ struct _EwsNode {
 	gulong cancel_handler_id;
 };
 
-G_DEFINE_TYPE (
+/* Forward Declarations */
+static void	e_ews_connection_authenticator_init
+				(ESourceAuthenticatorInterface *interface);
+
+G_DEFINE_TYPE_WITH_CODE (
 	EEwsConnection,
 	e_ews_connection,
-	G_TYPE_OBJECT)
+	G_TYPE_OBJECT,
+	G_IMPLEMENT_INTERFACE (
+		E_TYPE_SOURCE_AUTHENTICATOR,
+		e_ews_connection_authenticator_init))
 
 /* Static Functions */
 
@@ -1182,10 +1191,72 @@ ews_connection_finalize (GObject *object)
 	g_free (priv->password);
 	g_free (priv->email);
 
+	g_mutex_free (priv->password_lock);
 	g_static_rec_mutex_free (&priv->queue_lock);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (e_ews_connection_parent_class)->finalize (object);
+}
+
+static ESourceAuthenticationResult
+ews_connection_try_password_sync (ESourceAuthenticator *authenticator,
+                                  const GString *password,
+                                  GCancellable *cancellable,
+                                  GError **error)
+{
+	EEwsConnection *connection;
+	ESourceAuthenticationResult result;
+	EwsFolderId *fid = NULL;
+	GSList *folders = NULL;
+	GSList *ids = NULL;
+	GError *local_error = NULL;
+
+	connection = E_EWS_CONNECTION (authenticator);
+
+	g_mutex_lock (connection->priv->password_lock);
+	g_free (connection->priv->password);
+	connection->priv->password = g_strdup (password->str);
+	g_mutex_unlock (connection->priv->password_lock);
+
+	fid = g_new0 (EwsFolderId, 1);
+	fid->id = g_strdup ("inbox");
+	fid->is_distinguished_id = TRUE;
+	ids = g_slist_append (ids, fid);
+
+	/* FIXME Should be able to pass NULL for folders since we're
+	 *       not interested.  Currently the code assumes non-NULL. */
+	e_ews_connection_get_folder_sync (
+		connection, EWS_PRIORITY_MEDIUM, "Default",
+		NULL, ids, &folders, cancellable, &local_error);
+
+	g_slist_free_full (folders, (GDestroyNotify) g_object_unref);
+	g_slist_free_full (ids, (GDestroyNotify) e_ews_folder_id_free);
+
+	if (local_error == NULL) {
+		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
+
+	} else {
+		gboolean auth_failed;
+
+		auth_failed = g_error_matches (
+			local_error, EWS_CONNECTION_ERROR,
+			EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED);
+
+		if (auth_failed) {
+			g_clear_error (&local_error);
+			result = E_SOURCE_AUTHENTICATION_REJECTED;
+		} else {
+			g_propagate_error (error, local_error);
+			result = E_SOURCE_AUTHENTICATION_ERROR;
+		}
+
+		g_mutex_lock (connection->priv->password_lock);
+		g_free (connection->priv->password);
+		connection->priv->password = NULL;
+		g_mutex_unlock (connection->priv->password_lock);
+	}
+
+	return result;
 }
 
 static void
@@ -1213,6 +1284,12 @@ e_ews_connection_class_init (EEwsConnectionClass *class)
 		ews_marshal_VOID__OBJECT_OBJECT_BOOLEAN,
 		G_TYPE_NONE, 3,
 		SOUP_TYPE_MESSAGE, SOUP_TYPE_AUTH, G_TYPE_BOOLEAN);
+}
+
+static void
+e_ews_connection_authenticator_init (ESourceAuthenticatorInterface *interface)
+{
+	interface->try_password_sync = ews_connection_try_password_sync;
 }
 
 static gpointer
@@ -1255,6 +1332,7 @@ e_ews_connection_init (EEwsConnection *cnc)
 			SOUP_SESSION_FEATURE (logger));
 	}
 
+	cnc->priv->password_lock = g_mutex_new ();
 	g_static_rec_mutex_init (&cnc->priv->queue_lock);
 
 	g_signal_connect (
@@ -1270,6 +1348,7 @@ ews_connection_authenticate (SoupSession *sess,
                              gpointer data)
 {
 	EEwsConnection *cnc = data;
+	gchar *password;
 
 	g_return_if_fail (cnc != NULL);
 
@@ -1277,10 +1356,13 @@ ews_connection_authenticate (SoupSession *sess,
 		e_ews_connection_forget_password (cnc);
 	}
 
-	if (cnc->priv->password) {
-		soup_auth_authenticate (
-			auth, cnc->priv->username,
-			cnc->priv->password);
+	g_mutex_lock (cnc->priv->password_lock);
+	password = g_strdup (cnc->priv->password);
+	g_mutex_unlock (cnc->priv->password_lock);
+
+	if (password != NULL) {
+		soup_auth_authenticate (auth, cnc->priv->username, password);
+		g_free (password);
 		return;
 	}
 
@@ -1343,12 +1425,15 @@ e_ews_connection_authenticate (EEwsConnection *cnc,
 	}
 
 	e_ews_connection_forget_password (cnc);
-	cnc->priv->password = g_strdup (passwd);
 
-	soup_auth_authenticate (
-		auth, cnc->priv->username,
-		cnc->priv->password);
+	g_mutex_lock (cnc->priv->password_lock);
+	g_free (cnc->priv->password);
+	cnc->priv->password = g_strdup (passwd);
+	g_mutex_unlock (cnc->priv->password_lock);
+
+	soup_auth_authenticate (auth, user, passwd);
 }
+
 /* Connection APIS */
 
 /**
@@ -1503,12 +1588,16 @@ e_ews_connection_forget_password (EEwsConnection *cnc)
 {
 	g_return_if_fail (cnc != NULL);
 
+	g_mutex_lock (cnc->priv->password_lock);
+
 	if (cnc->priv->password && *cnc->priv->password) {
 		memset (cnc->priv->password, 0, strlen (cnc->priv->password));
 	}
 
 	g_free (cnc->priv->password);
 	cnc->priv->password = NULL;
+
+	g_mutex_unlock (cnc->priv->password_lock);
 }
 
 void
