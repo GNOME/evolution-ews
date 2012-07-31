@@ -112,6 +112,36 @@ typedef struct {
 	gchar *postal_code;
 } EwsAddress;
 
+typedef enum {
+	E_EWS_PERMISSION_BIT_FREE_BUSY_DETAILED	= 0x00001000,
+	E_EWS_PERMISSION_BIT_FREE_BUSY_SIMPLE	= 0x00000800,
+	E_EWS_PERMISSION_BIT_FOLDER_VISIBLE	= 0x00000400,
+	E_EWS_PERMISSION_BIT_FOLDER_CONTACT	= 0x00000200,
+	E_EWS_PERMISSION_BIT_FOLDER_OWNER	= 0x00000100,
+	E_EWS_PERMISSION_BIT_CREATE_SUBFOLDER	= 0x00000080,
+	E_EWS_PERMISSION_BIT_DELETE_ANY		= 0x00000040,
+	E_EWS_PERMISSION_BIT_EDIT_ANY		= 0x00000020,
+	E_EWS_PERMISSION_BIT_DELETE_OWNED	= 0x00000010,
+	E_EWS_PERMISSION_BIT_EDIT_OWNED		= 0x00000008,
+	E_EWS_PERMISSION_BIT_CREATE		= 0x00000002,
+	E_EWS_PERMISSION_BIT_READ_ANY		= 0x00000001
+} EEwsPermissionBits;
+
+typedef enum {
+	E_EWS_PERMISSION_USER_TYPE_NONE		= 0,
+	E_EWS_PERMISSION_USER_TYPE_ANONYMOUS	= 1 << 1, /* anonymous user */
+	E_EWS_PERMISSION_USER_TYPE_DEFAULT	= 1 << 2, /* default rights for any users */
+	E_EWS_PERMISSION_USER_TYPE_REGULAR	= 1 << 3  /* regular user, the EEwsPermission::user_smtp member is valid */
+} EEwsPermissionUserType;
+
+typedef struct {
+	EEwsPermissionUserType user_type;	/* whether is distinguished name, if 'true' */
+	gchar *display_name;			/* display name for a user */
+	gchar *primary_smtp;			/* valid only for E_EWS_PERMISSION_USER_TYPE_REGULAR */
+	gchar *sid;				/* security identifier (SID), if any */
+	guint32 rights;				/* EEwsPermissionBits for the user */
+} EEwsPermission;
+
 GType		e_ews_item_get_type (void);
 EEwsItem *	e_ews_item_new_from_soap_parameter
 						(ESoapParameter *param);
@@ -229,6 +259,23 @@ gboolean	e_ews_item_task_has_complete_date
 						(EEwsItem * item,
 						 gboolean * has_date);
 const gchar *	e_ews_item_get_tzid		(EEwsItem *item);
+
+/* Folder Permissions */
+EEwsPermission *e_ews_permission_new		(EEwsPermissionUserType user_type,
+						 const gchar *display_name,
+						 const gchar *primary_smtp,
+						 const gchar *sid,
+						 guint32 rights);
+void		e_ews_permission_free		(EEwsPermission *perm);
+
+const gchar *	e_ews_permission_rights_to_level_name
+						(guint32 rights);
+guint32		e_ews_permission_level_name_to_rights
+						(const gchar *level_name);
+
+GSList *	e_ews_permissions_from_soap_param
+						(ESoapParameter *param);
+void		e_ews_permissions_free (GSList *permissions);
 
 G_END_DECLS
 

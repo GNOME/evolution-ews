@@ -11,6 +11,9 @@ src/camel/camel-ews-transport.c
 src/camel/camel-ews-utils.c
 src/collection/e-ews-backend.c
 src/collection/module-ews-backend.c
+src/configuration/e-ews-config-utils.c
+src/configuration/e-ews-edit-folder-permissions.c
+src/configuration/e-ews-search-user.c
 src/configuration/e-mail-config-ews-autodiscover.c
 src/configuration/e-mail-config-ews-backend.c
 src/configuration/e-mail-config-ews-gal.c

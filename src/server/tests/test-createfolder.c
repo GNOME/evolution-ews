@@ -63,7 +63,7 @@ create_folder_cb (GObject *object,
 	folder_id->id = g_strdup (fid->id);
 	folder_id->change_key = g_strdup (fid->change_key);
 
-	e_ews_folder_free_fid (fid);
+	e_ews_folder_id_free (fid);
 
 quit:
 	g_main_loop_quit (main_loop);

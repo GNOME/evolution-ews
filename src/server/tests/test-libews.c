@@ -23,7 +23,7 @@ static void
 finalize_test_data ()
 {
 	if (folder_id) {
-		e_ews_folder_free_fid (folder_id);
+		e_ews_folder_id_free (folder_id);
 		folder_id = NULL;
 	}
 }

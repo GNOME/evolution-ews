@@ -20,6 +20,7 @@
 #define E_SOURCE_EWS_FOLDER_H
 
 #include <libedataserver/libedataserver.h>
+#include "server/e-ews-folder.h"
 
 /* Standard GObject macros */
 #define E_TYPE_SOURCE_EWS_FOLDER \
@@ -71,6 +72,9 @@ const gchar *	e_source_ews_folder_get_id	(ESourceEwsFolder *extension);
 gchar *		e_source_ews_folder_dup_id	(ESourceEwsFolder *extension);
 void		e_source_ews_folder_set_id	(ESourceEwsFolder *extension,
 						 const gchar *id);
+
+EwsFolderId *	e_source_ews_folder_dup_folder_id
+						(ESourceEwsFolder *extension);
 
 G_END_DECLS
 

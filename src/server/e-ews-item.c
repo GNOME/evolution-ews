@@ -21,6 +21,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+
 #include <string.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -1948,4 +1949,345 @@ e_ews_free_resolve_contact (gpointer rc)
 	g_free (resc->display_name);
 	g_hash_table_unref (resc->email_addresses);
 	g_free (resc);
+}
+
+/* free returned pointer with e_ews_permission_free() */
+EEwsPermission *
+e_ews_permission_new (EEwsPermissionUserType user_type,
+		      const gchar *display_name,
+		      const gchar *primary_smtp,
+		      const gchar *sid,
+		      guint32 rights)
+{
+	EEwsPermission *perm;
+
+	perm = g_new0 (EEwsPermission, 1);
+	perm->user_type = user_type;
+	perm->display_name = g_strdup (display_name);
+	perm->primary_smtp = g_strdup (primary_smtp);
+	perm->sid = g_strdup (sid);
+	perm->rights = rights;
+
+	return perm;
+}
+
+void
+e_ews_permission_free (EEwsPermission *perm)
+{
+	if (!perm)
+		return;
+
+	g_free (perm->display_name);
+	g_free (perm->primary_smtp);
+	g_free (perm->sid);
+	g_free (perm);
+}
+
+static void
+ews_level_rights_converter (const gchar **plevel_name,
+			    guint32 *prights,
+			    gboolean level_to_rights)
+{
+	struct _known {
+		const gchar *level_name;
+		guint32 rights;
+	} known[] = {
+		{ "None", 0 },
+		{ "Owner",	E_EWS_PERMISSION_BIT_READ_ANY |
+				E_EWS_PERMISSION_BIT_CREATE |
+				E_EWS_PERMISSION_BIT_CREATE_SUBFOLDER |
+				E_EWS_PERMISSION_BIT_EDIT_OWNED |
+				E_EWS_PERMISSION_BIT_EDIT_ANY |
+				E_EWS_PERMISSION_BIT_DELETE_OWNED |
+				E_EWS_PERMISSION_BIT_DELETE_ANY |
+				E_EWS_PERMISSION_BIT_FOLDER_OWNER |
+				E_EWS_PERMISSION_BIT_FOLDER_CONTACT |
+				E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
+		{ "PublishingEditor", 
+				E_EWS_PERMISSION_BIT_READ_ANY |
+				E_EWS_PERMISSION_BIT_CREATE |
+				E_EWS_PERMISSION_BIT_CREATE_SUBFOLDER |
+				E_EWS_PERMISSION_BIT_EDIT_OWNED |
+				E_EWS_PERMISSION_BIT_EDIT_ANY |
+				E_EWS_PERMISSION_BIT_DELETE_OWNED |
+				E_EWS_PERMISSION_BIT_DELETE_ANY |
+				E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
+		{ "Editor",
+				E_EWS_PERMISSION_BIT_READ_ANY |
+				E_EWS_PERMISSION_BIT_CREATE |
+				E_EWS_PERMISSION_BIT_EDIT_OWNED |
+				E_EWS_PERMISSION_BIT_EDIT_ANY |
+				E_EWS_PERMISSION_BIT_DELETE_OWNED |
+				E_EWS_PERMISSION_BIT_DELETE_ANY |
+				E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
+		{ "PublishingAuthor",
+				E_EWS_PERMISSION_BIT_READ_ANY |
+				E_EWS_PERMISSION_BIT_CREATE |
+				E_EWS_PERMISSION_BIT_CREATE_SUBFOLDER |
+				E_EWS_PERMISSION_BIT_EDIT_OWNED |
+				E_EWS_PERMISSION_BIT_DELETE_OWNED |
+				E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
+		{ "Author",
+				E_EWS_PERMISSION_BIT_READ_ANY |
+				E_EWS_PERMISSION_BIT_CREATE |
+				E_EWS_PERMISSION_BIT_EDIT_OWNED |
+				E_EWS_PERMISSION_BIT_DELETE_OWNED |
+				E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
+		{ "NoneditingAuthor",
+				E_EWS_PERMISSION_BIT_READ_ANY |
+				E_EWS_PERMISSION_BIT_CREATE |
+				E_EWS_PERMISSION_BIT_DELETE_OWNED |
+				E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
+		{ "Reviewer",
+				E_EWS_PERMISSION_BIT_READ_ANY |
+				E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
+		{ "Contributor",
+				E_EWS_PERMISSION_BIT_CREATE |
+				E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
+		{ "FreeBusyTimeOnly",
+				E_EWS_PERMISSION_BIT_FREE_BUSY_SIMPLE },
+		{ "FreeBusyTimeAndSubjectAndLocation",
+				E_EWS_PERMISSION_BIT_FREE_BUSY_DETAILED }
+				
+	};
+	gint ii;
+	guint32 rights;
+
+	g_return_if_fail (plevel_name != NULL);
+	g_return_if_fail (prights != NULL);
+
+	rights = (*prights) & ~(E_EWS_PERMISSION_BIT_FREE_BUSY_SIMPLE | E_EWS_PERMISSION_BIT_FREE_BUSY_DETAILED);
+
+	for (ii = 0; ii < G_N_ELEMENTS (known); ii++) {
+		if (level_to_rights) {
+			if (g_strcmp0 (*plevel_name, known[ii].level_name) == 0) {
+				*prights = known[ii].rights;
+				return;
+			}
+		} else {
+			if (*prights == known[ii].rights || (rights && rights == known[ii].rights)) {
+				*plevel_name = known[ii].level_name;
+				return;
+			}
+		}
+	}
+
+	/* here lefts only "Custom" */
+	if (level_to_rights)
+		*prights = 0;
+	else
+		*plevel_name = "Custom";
+}
+
+/* converts user rights to level name suitable for PermissionLevel/CalendarPermissionLevel */
+const gchar *
+e_ews_permission_rights_to_level_name (guint32 rights)
+{
+	const gchar *level_name = NULL;
+
+	ews_level_rights_converter (&level_name, &rights, FALSE);
+
+	return level_name;
+}
+
+/* converts PermissionLevel/CalendarPermissionLevel name to user rights */
+guint32
+e_ews_permission_level_name_to_rights (const gchar *level_name)
+{
+	guint32 rights = 0;
+
+	ews_level_rights_converter (&level_name, &rights, TRUE);
+
+	return rights;
+}
+
+static EEwsPermission *
+ews_permissions_parse (ESoapParameter *param)
+{
+	EEwsPermission *res;
+	ESoapParameter *node, *subnode;
+	EEwsPermissionUserType user_type;
+	gchar *value, *display_name = NULL, *primary_smtp = NULL, *sid = NULL;
+	guint32 rights = 0;
+
+	g_return_val_if_fail (param != NULL, NULL);
+
+	node = e_soap_parameter_get_first_child_by_name (param, "UserId");
+	if (!node)
+		return NULL;
+
+	subnode = e_soap_parameter_get_first_child_by_name (node, "DistinguishedUser");
+	if (subnode) {
+		value = e_soap_parameter_get_string_value (subnode);
+		if (g_strcmp0 (value, "Anonymous") == 0) {
+			user_type = E_EWS_PERMISSION_USER_TYPE_ANONYMOUS;
+		} else if (g_strcmp0 (value, "Default") == 0) {
+			user_type = E_EWS_PERMISSION_USER_TYPE_DEFAULT;
+		} else {
+			g_free (value);
+			return NULL;
+		}
+
+		g_free (value);
+	} else {
+		user_type = E_EWS_PERMISSION_USER_TYPE_REGULAR;
+	}
+
+	subnode = e_soap_parameter_get_first_child_by_name (node, "SID");
+	if (subnode)
+		sid = e_soap_parameter_get_string_value (subnode);
+
+	subnode = e_soap_parameter_get_first_child_by_name (node, "PrimarySmtpAddress");
+	if (subnode)
+		primary_smtp = e_soap_parameter_get_string_value (subnode);
+
+	subnode = e_soap_parameter_get_first_child_by_name (node, "DisplayName");
+	if (subnode)
+		display_name = e_soap_parameter_get_string_value (subnode);
+
+	node = e_soap_parameter_get_first_child_by_name (param, "PermissionLevel");
+	if (!node)
+		node = e_soap_parameter_get_first_child_by_name (param, "CalendarPermissionLevel");
+
+	if (node) {
+		value = e_soap_parameter_get_string_value (node);
+		rights = e_ews_permission_level_name_to_rights (value);
+		g_free (value);
+	}
+
+	node = e_soap_parameter_get_first_child_by_name (param, "CanCreateItems");
+	if (node) {
+		value = e_soap_parameter_get_string_value (node);
+		if (g_strcmp0 (value, "true") == 0)
+			rights |= E_EWS_PERMISSION_BIT_CREATE;
+		g_free (value);
+	}
+
+	node = e_soap_parameter_get_first_child_by_name (param, "CanCreateSubFolders");
+	if (node) {
+		value = e_soap_parameter_get_string_value (node);
+		if (g_strcmp0 (value, "true") == 0)
+			rights |= E_EWS_PERMISSION_BIT_CREATE_SUBFOLDER;
+		g_free (value);
+	}
+
+	node = e_soap_parameter_get_first_child_by_name (param, "IsFolderOwner");
+	if (node) {
+		value = e_soap_parameter_get_string_value (node);
+		if (g_strcmp0 (value, "true") == 0)
+			rights |= E_EWS_PERMISSION_BIT_FOLDER_OWNER;
+		g_free (value);
+	}
+
+	node = e_soap_parameter_get_first_child_by_name (param, "IsFolderVisible");
+	if (node) {
+		value = e_soap_parameter_get_string_value (node);
+		if (g_strcmp0 (value, "true") == 0)
+			rights |= E_EWS_PERMISSION_BIT_FOLDER_VISIBLE;
+		g_free (value);
+	}
+
+	node = e_soap_parameter_get_first_child_by_name (param, "IsFolderContact");
+	if (node) {
+		value = e_soap_parameter_get_string_value (node);
+		if (g_strcmp0 (value, "true") == 0)
+			rights |= E_EWS_PERMISSION_BIT_FOLDER_CONTACT;
+		g_free (value);
+	}
+
+	node = e_soap_parameter_get_first_child_by_name (param, "EditItems");
+	if (node) {
+		value = e_soap_parameter_get_string_value (node);
+		if (g_strcmp0 (value, "None") == 0)
+			rights |= 0;
+		else if (g_strcmp0 (value, "Owned") == 0)
+			rights |= E_EWS_PERMISSION_BIT_EDIT_OWNED;
+		else if (g_strcmp0 (value, "All") == 0)
+			rights |= E_EWS_PERMISSION_BIT_EDIT_ANY;
+		g_free (value);
+	}
+
+	node = e_soap_parameter_get_first_child_by_name (param, "DeleteItems");
+	if (node) {
+		value = e_soap_parameter_get_string_value (node);
+		if (g_strcmp0 (value, "None") == 0)
+			rights |= 0;
+		else if (g_strcmp0 (value, "Owned") == 0)
+			rights |= E_EWS_PERMISSION_BIT_DELETE_OWNED;
+		else if (g_strcmp0 (value, "All") == 0)
+			rights |= E_EWS_PERMISSION_BIT_DELETE_ANY;
+		g_free (value);
+	}
+
+	node = e_soap_parameter_get_first_child_by_name (param, "ReadItems");
+	if (node) {
+		value = e_soap_parameter_get_string_value (node);
+		if (g_strcmp0 (value, "None") == 0)
+			rights |= 0;
+		else if (g_strcmp0 (value, "TimeOnly") == 0)
+			rights |= E_EWS_PERMISSION_BIT_FREE_BUSY_SIMPLE;
+		else if (g_strcmp0 (value, "TimeAndSubjectAndLocation") == 0)
+			rights |= E_EWS_PERMISSION_BIT_FREE_BUSY_DETAILED;
+		else if (g_strcmp0 (value, "FullDetails") == 0)
+			rights |= E_EWS_PERMISSION_BIT_READ_ANY;
+		g_free (value);
+	}
+
+	res = e_ews_permission_new (user_type, display_name, primary_smtp, sid, rights);
+
+	g_free (display_name);
+	g_free (primary_smtp);
+	g_free (sid);
+
+	return res;
+}
+
+/* Returns GSList of EEwsPermission * objects, as read from @param.
+   Returned GSList should be freed with e_ews_permissions_free()
+   when done with it. Returns NULL when no permissions recognized
+   from @param.
+*/
+GSList *
+e_ews_permissions_from_soap_param (ESoapParameter *param)
+{
+	GSList *perms = NULL;
+	ESoapParameter *node;
+	const gchar *name;
+
+	g_return_val_if_fail (param != NULL, NULL);
+
+	name = e_soap_parameter_get_name (param);
+	if (g_ascii_strcasecmp (name, "Permissions") == 0 ||
+	    g_ascii_strcasecmp (name, "CalendarPermissions") == 0) {
+		node = param;
+	} else {
+		node = e_soap_parameter_get_first_child_by_name (param, "Permissions");
+		if (!node)
+			node = e_soap_parameter_get_first_child_by_name (param, "CalendarPermissions");
+		if (!node)
+			return NULL;
+	}
+
+	for (node = e_soap_parameter_get_first_child (node);
+	     node;
+	     node = e_soap_parameter_get_next_child (node)) {
+		name = e_soap_parameter_get_name (node);
+		if (g_ascii_strcasecmp (name, "Permission") == 0 ||
+		    g_ascii_strcasecmp (name, "CalendarPermission") == 0) {
+			EEwsPermission *perm;
+
+			perm = ews_permissions_parse (node);
+			if (perm) {
+				perms = g_slist_prepend (perms, perm);
+			}
+		}
+	}
+
+	return perms ? g_slist_reverse (perms) : NULL;
+}
+
+void
+e_ews_permissions_free (GSList *permissions)
+{
+	g_slist_free_full (permissions, (GDestroyNotify) e_ews_permission_free);
 }

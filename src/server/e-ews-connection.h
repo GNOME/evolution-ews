@@ -807,6 +807,46 @@ gboolean	e_ews_connection_get_delegate_sync
 						 EwsDelegateInfo **get_delegate,
 						 GCancellable *cancellable,
 						 GError **error);
+void		e_ews_connection_get_folder_permissions
+						(EEwsConnection *cnc,
+						 gint pri,
+						 EwsFolderId *folder_id,
+						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
+						 gpointer user_data);
+gboolean	e_ews_connection_get_folder_permissions_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GSList **permissions,
+						 GError **error);
+gboolean	e_ews_connection_get_folder_permissions_sync
+						(EEwsConnection *cnc,
+						 gint pri,
+						 EwsFolderId *folder_id,
+						 GSList **permissions,
+						 GCancellable *cancellable,
+						 GError **error);
+void		e_ews_connection_set_folder_permissions
+						(EEwsConnection *cnc,
+						 gint pri,
+						 EwsFolderId *folder_id,
+						 EwsFolderType folder_type,
+						 const GSList *permissions,
+						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
+						 gpointer user_data);
+gboolean	e_ews_connection_set_folder_permissions_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GError **error);
+gboolean	e_ews_connection_set_folder_permissions_sync
+						(EEwsConnection *cnc,
+						 gint pri,
+						 EwsFolderId *folder_id,
+						 EwsFolderType folder_type,
+						 const GSList *permissions,
+						 GCancellable *cancellable,
+						 GError **error);
 
 G_END_DECLS
 

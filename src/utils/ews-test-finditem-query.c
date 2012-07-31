@@ -129,7 +129,7 @@ op_test_finditem_run (void)
 		"IdOnly", NULL, NULL, CONTACTS_QUERY,
 		folder_type, (EwsConvertQueryCallback) (e_ews_query_to_restriction),
 		cancellable, find_folder_item_callback, (gpointer) folder_name);
-	e_ews_folder_free_fid (fid);
+	e_ews_folder_id_free (fid);
 
 	/*Check for calendar folder*/
 	folder_name = "calendar";
@@ -143,7 +143,7 @@ op_test_finditem_run (void)
 		"IdOnly", NULL, NULL, CALENDAR_QUERY,
 		folder_type, (EwsConvertQueryCallback) (e_ews_query_to_restriction),
 		cancellable, find_folder_item_callback, (gpointer) folder_name);
-	e_ews_folder_free_fid (fid);
+	e_ews_folder_id_free (fid);
 
 	/*Check for mail folder*/
 	folder_name = "inbox";
@@ -157,7 +157,7 @@ op_test_finditem_run (void)
 		"IdOnly", NULL, NULL, MAIL_QUERY,
 		folder_type, (EwsConvertQueryCallback) (e_ews_query_to_restriction),
 		cancellable, find_folder_item_callback, (gpointer) folder_name);
-	e_ews_folder_free_fid (fid);
+	e_ews_folder_id_free (fid);
 }
 
 static gboolean

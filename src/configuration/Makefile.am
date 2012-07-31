@@ -27,6 +27,14 @@ module_ews_configuration_la_SOURCES = \
 	e-mail-config-ews-oal-combo-box.h \
 	e-mail-config-ews-ooo-page.c \
 	e-mail-config-ews-ooo-page.h \
+	e-ews-config-ui-extension.c \
+	e-ews-config-ui-extension.h \
+	e-ews-config-utils.c \
+	e-ews-config-utils.h \
+	e-ews-edit-folder-permissions.c \
+	e-ews-edit-folder-permissions.h \
+	e-ews-search-user.c \
+	e-ews-search-user.h \
 	$(NULL)
 
 module_ews_configuration_la_LIBADD = \

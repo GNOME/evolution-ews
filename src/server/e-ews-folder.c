@@ -207,8 +207,23 @@ e_ews_folder_new_from_soap_parameter (ESoapParameter *param)
 	return folder;
 }
 
+EwsFolderId *
+e_ews_folder_id_new (const gchar *id,
+		     const gchar *change_key,
+		     gboolean is_distinguished_id)
+{
+	EwsFolderId *fid;
+
+	fid = g_new0 (EwsFolderId, 1);
+	fid->id = g_strdup (id);
+	fid->change_key = g_strdup (change_key);
+	fid->is_distinguished_id = is_distinguished_id;
+
+	return fid;
+}
+
 void
-e_ews_folder_free_fid (EwsFolderId *fid)
+e_ews_folder_id_free (EwsFolderId *fid)
 {
 	if (fid) {
 		g_free (fid->id);
@@ -319,4 +334,3 @@ e_ews_folder_get_child_count (EEwsFolder *folder)
 	return folder->priv->child_count;
 
 }
-

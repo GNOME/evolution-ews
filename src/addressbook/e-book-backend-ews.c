@@ -1431,7 +1431,7 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 		convert_error_to_edb_error (&error);
 		e_data_book_respond_get_contact_list (book, opid, error, vcard_list);
 
-		e_ews_folder_free_fid (fid);
+		e_ews_folder_id_free (fid);
 		g_slist_foreach (vcard_list, (GFunc) g_free, NULL);
 		g_slist_free (vcard_list);
 		return;
@@ -2556,7 +2556,7 @@ e_book_backend_ews_start_book_view (EBookBackend *backend,
 		&includes_last_item, cancellable, &error);
 	g_free (auto_comp_str);
 	g_hash_table_remove (priv->ops, book_view);
-	e_ews_folder_free_fid (fid);
+	e_ews_folder_id_free (fid);
 	if (error != NULL) {
 		e_data_book_view_notify_complete (book_view, error);
 		e_data_book_view_unref (book_view);
@@ -2973,7 +2973,7 @@ book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 		connection, EWS_PRIORITY_MEDIUM, "Default",
 		NULL, ids, &folders, cancellable, &local_error);
 
-	e_ews_folder_free_fid (fid);
+	e_ews_folder_id_free (fid);
 	g_slist_free (ids);
 	ids = NULL;
 

@@ -458,7 +458,7 @@ ews_authenticate_sync (CamelService *service,
 			d(printf ("folders for respective distinguished ids don't exist"));
 
 		g_slist_foreach (folders, (GFunc) g_object_unref, NULL);
-		g_slist_foreach (folder_ids, (GFunc) e_ews_folder_free_fid, NULL);
+		g_slist_foreach (folder_ids, (GFunc) e_ews_folder_id_free, NULL);
 		g_slist_free (folders);
 		g_slist_free (folder_ids);
 		g_clear_error (&folder_err);
@@ -774,7 +774,7 @@ ews_create_folder_sync (CamelStore *store,
 					    EWS_FOLDER_TYPE_MAILBOX,
 					    0, 0);
 	fi = camel_ews_utils_build_folder_info (ews_store, folder_id->id);
-	e_ews_folder_free_fid (folder_id);
+	e_ews_folder_id_free (folder_id);
 
 	camel_store_folder_created (store, fi);
 

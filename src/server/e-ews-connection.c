@@ -4546,9 +4546,9 @@ e_ews_connection_get_folder (EEwsConnection *cnc,
 
 	e_soap_message_start_element (msg, "FolderShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, folder_shape);
-	e_soap_message_end_element (msg);
 
 	ews_append_additional_props_to_msg (msg, add_props);
+	e_soap_message_end_element (msg);
 
 	if (folder_ids) {
 		e_soap_message_start_element (msg, "FolderIds", "messages", NULL);
@@ -6085,6 +6085,368 @@ e_ews_connection_get_delegate_sync (EEwsConnection *cnc,
 	e_async_closure_free (closure);
 
 	return success;
-
 }
 
+static void
+get_folder_permissions_response_cb (ESoapResponse *response,
+				    GSimpleAsyncResult *simple)
+{
+	EwsAsyncData *async_data;
+	ESoapParameter *param;
+	ESoapParameter *subparam;
+	GError *error = NULL;
+
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	param = e_soap_response_get_first_parameter_by_name (
+		response, "ResponseMessages", &error);
+
+	/* Sanity check */
+	g_return_if_fail (
+		(param != NULL && error == NULL) ||
+		(param == NULL && error != NULL));
+
+	if (error != NULL) {
+		g_simple_async_result_take_error (simple, error);
+		return;
+	}
+
+	subparam = e_soap_parameter_get_first_child (param);
+
+	while (subparam != NULL) {
+		const gchar *name = (const gchar *) subparam->name;
+
+		if (!ews_get_response_status (subparam, &error)) {
+			g_simple_async_result_take_error (simple, error);
+			return;
+		}
+
+		if (CHECK_ELEMENT (name, "GetFolderResponseMessage")) {
+			ESoapParameter *node;
+
+			node = e_soap_parameter_get_first_child_by_name (subparam, "Folders");
+			if (node) {
+				subparam = node;
+
+				node = e_soap_parameter_get_first_child (subparam);
+				if (node && node->name && g_str_has_suffix ((const gchar *) node->name, "Folder")) {
+					node = e_soap_parameter_get_first_child_by_name (node, "PermissionSet");
+					if (node) {
+						async_data->items = e_ews_permissions_from_soap_param (node);
+					}
+				}
+			}
+
+			break;
+		}
+
+		subparam = e_soap_parameter_get_next_child (subparam);
+	}
+}
+
+void
+e_ews_connection_get_folder_permissions (EEwsConnection *cnc,
+					 gint pri,
+					 EwsFolderId *folder_id,
+					 GCancellable *cancellable,
+					 GAsyncReadyCallback callback,
+					 gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+	GSList *folder_ids;
+
+	g_return_if_fail (cnc != NULL);
+	g_return_if_fail (folder_id != NULL);
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetFolder",
+					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
+
+	e_soap_message_start_element (msg, "FolderShape", "messages", NULL);
+	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, "IdOnly");
+	e_soap_message_start_element (msg, "AdditionalProperties", NULL, NULL);
+	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", "folder:PermissionSet");
+	e_soap_message_end_element (msg); /* AdditionalProperties */
+	e_soap_message_end_element (msg); /* FolderShape */
+
+	folder_ids = g_slist_append (NULL, folder_id);
+	e_soap_message_start_element (msg, "FolderIds", "messages", NULL);
+	ews_append_folder_ids_to_msg (msg, cnc->priv->email, folder_ids);
+	e_soap_message_end_element (msg);
+	g_slist_free (folder_ids);
+
+	e_ews_message_write_footer (msg);
+
+	simple = g_simple_async_result_new (G_OBJECT (cnc),
+				      callback,
+				      user_data,
+				      e_ews_connection_get_folder_permissions);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	e_ews_connection_queue_request (
+		cnc, msg, get_folder_permissions_response_cb,
+		pri, cancellable, simple);
+
+	g_object_unref (simple);
+}
+
+/* free permissions with e_ews_permissions_free() */
+gboolean
+e_ews_connection_get_folder_permissions_finish (EEwsConnection *cnc,
+						GAsyncResult *result,
+						GSList **permissions,
+						GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (permissions != NULL, FALSE);
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_get_folder_permissions),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	*permissions = async_data->items;
+
+	return TRUE;
+}
+
+/* free permissions with e_ews_permissions_free() */
+gboolean
+e_ews_connection_get_folder_permissions_sync (EEwsConnection *cnc,
+					      gint pri,
+					      EwsFolderId *folder_id,
+					      GSList **permissions,
+					      GCancellable *cancellable,
+					      GError **error)
+{
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (folder_id != NULL, FALSE);
+	g_return_val_if_fail (permissions != NULL, FALSE);
+
+	closure = e_async_closure_new ();
+
+	e_ews_connection_get_folder_permissions (
+		cnc, pri, folder_id, cancellable,
+		e_async_closure_callback, closure);
+
+	result = e_async_closure_wait (closure);
+
+	success = e_ews_connection_get_folder_permissions_finish (
+		cnc, result, permissions, error);
+
+	e_async_closure_free (closure);
+
+	return success;
+}
+
+void
+e_ews_connection_set_folder_permissions (EEwsConnection *cnc,
+					 gint pri,
+					 EwsFolderId *folder_id,
+					 EwsFolderType folder_type,
+					 const GSList *permissions,
+					 GCancellable *cancellable,
+					 GAsyncReadyCallback callback,
+					 gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+	const GSList *iter;
+
+	g_return_if_fail (cnc != NULL);
+	g_return_if_fail (folder_id != NULL);
+	g_return_if_fail (permissions != NULL);
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "UpdateFolder",
+					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
+
+	e_soap_message_start_element (msg, "FolderChanges", "messages", NULL);
+	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_FOLDER,
+					 folder_id->id, folder_id->change_key, 0);
+
+	e_soap_message_start_element (msg, "SetFolderField", NULL, NULL);
+	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", "folder:PermissionSet");
+
+	switch (folder_type) {
+	default:
+	case EWS_FOLDER_TYPE_MAILBOX:
+		e_soap_message_start_element (msg, "Folder", NULL, NULL);
+		break;
+	case EWS_FOLDER_TYPE_CALENDAR:
+		e_soap_message_start_element (msg, "CalendarFolder", NULL, NULL);
+		break;
+	case EWS_FOLDER_TYPE_CONTACTS:
+		e_soap_message_start_element (msg, "ContactsFolder", NULL, NULL);
+		break;
+	case EWS_FOLDER_TYPE_QUERY:
+		e_soap_message_start_element (msg, "SearchFolder", NULL, NULL);
+		break;
+	case EWS_FOLDER_TYPE_TASKS:
+		e_soap_message_start_element (msg, "TasksFolder", NULL, NULL);
+		break;
+	}
+
+	e_soap_message_start_element (msg, "PermissionSet", NULL, NULL);
+	e_soap_message_start_element (msg, "Permissions", NULL, NULL);
+
+	for (iter = permissions; iter; iter = iter->next) {
+		EEwsPermission *perm = iter->data;
+		const gchar *perm_level_name;
+
+		if (!perm)
+			continue;
+
+		if (folder_type == EWS_FOLDER_TYPE_CALENDAR)
+			e_soap_message_start_element (msg, "CalendarPermission", NULL, NULL);
+		else
+			e_soap_message_start_element (msg, "Permission", NULL, NULL);
+
+		e_soap_message_start_element (msg, "UserId", NULL, NULL);
+
+		switch (perm->user_type) {
+		case E_EWS_PERMISSION_USER_TYPE_NONE:
+			g_return_if_reached ();
+			break;
+		case E_EWS_PERMISSION_USER_TYPE_ANONYMOUS:
+			e_ews_message_write_string_parameter (msg, "DistinguishedUser", NULL, "Anonymous");
+			break;
+		case E_EWS_PERMISSION_USER_TYPE_DEFAULT:
+			e_ews_message_write_string_parameter (msg, "DistinguishedUser", NULL, "Default");
+			break;
+		case E_EWS_PERMISSION_USER_TYPE_REGULAR:
+			e_ews_message_write_string_parameter (msg, "PrimarySmtpAddress", NULL, perm->primary_smtp);
+			break;
+		}
+
+		e_soap_message_end_element (msg); /* UserId */
+
+		e_ews_permission_rights_to_level_name (perm->rights);
+
+		perm_level_name = e_ews_permission_rights_to_level_name (perm->rights);
+
+		if (g_strcmp0 (perm_level_name, "Custom") == 0) {
+			e_ews_message_write_string_parameter (msg, "CanCreateItems", NULL,
+				(perm->rights & E_EWS_PERMISSION_BIT_CREATE) != 0 ? "true" : "false");
+			e_ews_message_write_string_parameter (msg, "CanCreateSubFolders", NULL,
+				(perm->rights & E_EWS_PERMISSION_BIT_CREATE_SUBFOLDER) != 0 ? "true" : "false");
+			e_ews_message_write_string_parameter (msg, "IsFolderOwner", NULL,
+				(perm->rights & E_EWS_PERMISSION_BIT_FOLDER_OWNER) != 0 ? "true" : "false");
+			e_ews_message_write_string_parameter (msg, "IsFolderVisible", NULL,
+				(perm->rights & E_EWS_PERMISSION_BIT_FOLDER_VISIBLE) != 0 ? "true" : "false");
+			e_ews_message_write_string_parameter (msg, "IsFolderContact", NULL,
+				(perm->rights & E_EWS_PERMISSION_BIT_FOLDER_CONTACT) != 0 ? "true" : "false");
+			e_ews_message_write_string_parameter (msg, "EditItems", NULL,
+				(perm->rights & E_EWS_PERMISSION_BIT_EDIT_ANY) != 0 ? "All" :
+				(perm->rights & E_EWS_PERMISSION_BIT_EDIT_OWNED) != 0 ? "Owned" : "None");
+			e_ews_message_write_string_parameter (msg, "DeleteItems", NULL,
+				(perm->rights & E_EWS_PERMISSION_BIT_DELETE_ANY) != 0 ? "All" :
+				(perm->rights & E_EWS_PERMISSION_BIT_DELETE_OWNED) != 0 ? "Owned" : "None");
+			if (folder_type == EWS_FOLDER_TYPE_CALENDAR)
+				e_ews_message_write_string_parameter (msg, "ReadItems", NULL,
+					(perm->rights & E_EWS_PERMISSION_BIT_READ_ANY) != 0 ? "FullDetails" :
+					(perm->rights & E_EWS_PERMISSION_BIT_FREE_BUSY_DETAILED) != 0 ? "TimeAndSubjectAndLocation" :
+					(perm->rights & E_EWS_PERMISSION_BIT_FREE_BUSY_SIMPLE) != 0 ? "TimeOnly" : "None");
+			else
+				e_ews_message_write_string_parameter (msg, "ReadItems", NULL,
+					(perm->rights & E_EWS_PERMISSION_BIT_READ_ANY) != 0 ? "FullDetails" : "None");
+		}
+
+		e_ews_message_write_string_parameter (msg,
+			folder_type == EWS_FOLDER_TYPE_CALENDAR ? "CalendarPermissionLevel" : "PermissionLevel", NULL,
+			perm_level_name);
+
+		e_soap_message_end_element (msg); /* Permission/CalendarPermission */
+	}
+
+	e_soap_message_end_element (msg); /* Permissions */
+	e_soap_message_end_element (msg); /* PermissionSet */
+	e_soap_message_end_element (msg); /* Folder/CalendarFolder/... */
+	e_soap_message_end_element (msg); /* SetFolderField */
+
+	e_ews_message_end_item_change (msg);
+
+	e_ews_message_write_footer (msg);
+
+	simple = g_simple_async_result_new (G_OBJECT (cnc),
+				      callback,
+				      user_data,
+				      e_ews_connection_set_folder_permissions);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	e_ews_connection_queue_request (
+		cnc, msg, update_folder_response_cb,
+		pri, cancellable, simple);
+
+	g_object_unref (simple);
+}
+
+gboolean
+e_ews_connection_set_folder_permissions_finish (EEwsConnection *cnc,
+						GAsyncResult *result,
+						GError **error)
+{
+	GSimpleAsyncResult *simple;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_set_folder_permissions),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+
+	return !g_simple_async_result_propagate_error (simple, error);
+}
+
+gboolean
+e_ews_connection_set_folder_permissions_sync (EEwsConnection *cnc,
+					      gint pri,
+					      EwsFolderId *folder_id,
+					      EwsFolderType folder_type,
+					      const GSList *permissions,
+					      GCancellable *cancellable,
+					      GError **error)
+{
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (folder_id != NULL, FALSE);
+	g_return_val_if_fail (permissions != NULL, FALSE);
+
+	closure = e_async_closure_new ();
+
+	e_ews_connection_set_folder_permissions (
+		cnc, pri, folder_id, folder_type, permissions, cancellable,
+		e_async_closure_callback, closure);
+
+	result = e_async_closure_wait (closure);
+
+	success = e_ews_connection_set_folder_permissions_finish (
+		cnc, result, error);
+
+	e_async_closure_free (closure);
+
+	return success;
+}

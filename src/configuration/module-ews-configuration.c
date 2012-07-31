@@ -25,6 +25,9 @@
 #include "e-mail-config-ews-oal-combo-box.h"
 #include "e-mail-config-ews-ooo-page.h"
 
+#include "e-ews-config-ui-extension.h"
+#include "server/e-source-ews-folder.h"
+
 /* Module Entry Points */
 void e_module_load (GTypeModule *type_module);
 void e_module_unload (GTypeModule *type_module);
@@ -40,6 +43,9 @@ e_module_load (GTypeModule *type_module)
 	e_mail_config_ews_notebook_type_register (type_module);
 	e_mail_config_ews_oal_combo_box_type_register (type_module);
 	e_mail_config_ews_ooo_page_type_register (type_module);
+	e_ews_config_ui_extension_type_register (type_module);
+
+	e_source_ews_folder_type_register (type_module);
 }
 
 G_MODULE_EXPORT void
