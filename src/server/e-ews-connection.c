@@ -93,6 +93,7 @@ struct _EEwsConnectionPrivate {
 
 enum {
 	PROP_0,
+	PROP_PASSWORD,
 	PROP_SETTINGS
 };
 
@@ -1164,6 +1165,12 @@ ews_connection_set_property (GObject *object,
                              GParamSpec *pspec)
 {
 	switch (property_id) {
+		case PROP_PASSWORD:
+			e_ews_connection_set_password (
+				E_EWS_CONNECTION (object),
+				g_value_get_string (value));
+			return;
+
 		case PROP_SETTINGS:
 			ews_connection_set_settings (
 				E_EWS_CONNECTION (object),
@@ -1181,6 +1188,13 @@ ews_connection_get_property (GObject *object,
                              GParamSpec *pspec)
 {
 	switch (property_id) {
+		case PROP_PASSWORD:
+			g_value_take_string (
+				value,
+				e_ews_connection_dup_password (
+				E_EWS_CONNECTION (object)));
+			return;
+
 		case PROP_SETTINGS:
 			g_value_take_object (
 				value,
@@ -1283,10 +1297,7 @@ ews_connection_try_password_sync (ESourceAuthenticator *authenticator,
 
 	connection = E_EWS_CONNECTION (authenticator);
 
-	g_mutex_lock (connection->priv->password_lock);
-	g_free (connection->priv->password);
-	connection->priv->password = g_strdup (password->str);
-	g_mutex_unlock (connection->priv->password_lock);
+	e_ews_connection_set_password (connection, password->str);
 
 	fid = g_new0 (EwsFolderId, 1);
 	fid->id = g_strdup ("inbox");
@@ -1320,10 +1331,7 @@ ews_connection_try_password_sync (ESourceAuthenticator *authenticator,
 			result = E_SOURCE_AUTHENTICATION_ERROR;
 		}
 
-		g_mutex_lock (connection->priv->password_lock);
-		g_free (connection->priv->password);
-		connection->priv->password = NULL;
-		g_mutex_unlock (connection->priv->password_lock);
+		e_ews_connection_set_password (connection, NULL);
 	}
 
 	return result;
@@ -1343,6 +1351,17 @@ e_ews_connection_class_init (EEwsConnectionClass *class)
 	object_class->finalize = ews_connection_finalize;
 
 	class->authenticate = NULL;
+
+	g_object_class_install_property (
+		object_class,
+		PROP_PASSWORD,
+		g_param_spec_string (
+			"password",
+			"Password",
+			"Authentication password",
+			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_STATIC_STRINGS));
 
 	g_object_class_install_property (
 		object_class,
@@ -1444,9 +1463,7 @@ ews_connection_authenticate (SoupSession *sess,
 	network_settings = CAMEL_NETWORK_SETTINGS (cnc->priv->settings);
 	user = camel_network_settings_dup_user (network_settings);
 
-	g_mutex_lock (cnc->priv->password_lock);
-	password = g_strdup (cnc->priv->password);
-	g_mutex_unlock (cnc->priv->password_lock);
+	password = e_ews_connection_dup_password (cnc);
 
 	if (password != NULL)
 		soup_auth_authenticate (auth, user, password);
@@ -1625,6 +1642,52 @@ e_ews_connection_get_uri (EEwsConnection *cnc)
 	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
 
 	return cnc->priv->uri;
+}
+
+const gchar *
+e_ews_connection_get_password (EEwsConnection *cnc)
+{
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
+
+	return cnc->priv->password;
+}
+
+gchar *
+e_ews_connection_dup_password (EEwsConnection *cnc)
+{
+	const gchar *protected;
+	gchar *duplicate;
+
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
+
+	g_mutex_lock (cnc->priv->password_lock);
+
+	protected = e_ews_connection_get_password (cnc);
+	duplicate = g_strdup (protected);
+
+	g_mutex_unlock (cnc->priv->password_lock);
+
+	return duplicate;
+}
+
+void
+e_ews_connection_set_password (EEwsConnection *cnc,
+                               const gchar *password)
+{
+	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
+
+	g_mutex_lock (cnc->priv->password_lock);
+
+	/* Zero-fill the old password before freeing it. */
+	if (cnc->priv->password != NULL && *cnc->priv->password != '\0')
+		memset (cnc->priv->password, 0, strlen (cnc->priv->password));
+
+	g_free (cnc->priv->password);
+	cnc->priv->password = g_strdup (password);
+
+	g_mutex_unlock (cnc->priv->password_lock);
+
+	g_object_notify (G_OBJECT (cnc), "password");
 }
 
 CamelEwsSettings *

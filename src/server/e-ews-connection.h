@@ -182,6 +182,10 @@ EEwsConnection *e_ews_connection_new		(const gchar *uri,
 						 const gchar *password,
 						 CamelEwsSettings *settings);
 const gchar *	e_ews_connection_get_uri	(EEwsConnection *cnc);
+const gchar *	e_ews_connection_get_password	(EEwsConnection *cnc);
+gchar *		e_ews_connection_dup_password	(EEwsConnection *cnc);
+void		e_ews_connection_set_password	(EEwsConnection *cnc,
+						 const gchar *password);
 CamelEwsSettings *
 		e_ews_connection_ref_settings	(EEwsConnection *cnc);
 SoupSession *	e_ews_connection_ref_soup_session
