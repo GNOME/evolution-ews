@@ -59,7 +59,8 @@ con_test_create_new_connection ()
 		CAMEL_TYPE_EWS_SETTINGS,
 		"user", username, NULL);
 
-	cnc = e_ews_connection_new (uri, password, settings);
+	cnc = e_ews_connection_new (uri, settings);
+	e_ews_connection_set_password (cnc, password);
 
 	g_object_unref (settings);
 

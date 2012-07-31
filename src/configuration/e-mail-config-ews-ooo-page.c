@@ -796,8 +796,8 @@ mail_config_ews_ooo_page_try_password_sync (ESourceAuthenticator *auth,
 	ews_settings = CAMEL_EWS_SETTINGS (settings);
 	hosturl = camel_ews_settings_get_hosturl (ews_settings);
 
-	connection = e_ews_connection_new (
-		hosturl, password->str, ews_settings);
+	connection = e_ews_connection_new (hosturl, ews_settings);
+	e_ews_connection_set_password (connection, password->str);
 
 	e_ews_connection_set_mailbox (connection, mailbox);
 

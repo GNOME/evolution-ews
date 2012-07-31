@@ -1555,7 +1555,6 @@ e_ews_connection_find (const gchar *uri,
 /**
  * e_ews_connection_new
  * @uri: Exchange server uri
- * @password:
  * @settings: a #CamelEwsSettings
  *
  * This does not authenticate to the server. It merely stores the username and password.
@@ -1565,7 +1564,6 @@ e_ews_connection_find (const gchar *uri,
  **/
 EEwsConnection *
 e_ews_connection_new (const gchar *uri,
-                      const gchar *password,
                       CamelEwsSettings *settings)
 {
 	CamelNetworkSettings *network_settings;
@@ -1603,7 +1601,6 @@ e_ews_connection_new (const gchar *uri,
 		E_TYPE_EWS_CONNECTION,
 		"settings", settings, NULL);
 
-	cnc->priv->password = g_strdup (password);
 	cnc->priv->uri = g_strdup (uri);
 	cnc->priv->hash_key = hash_key;  /* takes ownership */
 
@@ -2077,7 +2074,8 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 	if (user == NULL || *user == '\0')
 		user = email_address;
 
-	cnc = e_ews_connection_new (url3, password, settings);
+	cnc = e_ews_connection_new (url3, settings);
+	e_ews_connection_set_password (cnc, password);
 
 	/*
 	 * http://msdn.microsoft.com/en-us/library/ee332364.aspx says we are

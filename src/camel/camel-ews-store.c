@@ -360,8 +360,8 @@ ews_authenticate_sync (CamelService *service,
 	ews_settings = CAMEL_EWS_SETTINGS (settings);
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
 
-	connection = e_ews_connection_new (
-		hosturl, password, ews_settings);
+	connection = e_ews_connection_new (hosturl, ews_settings);
+	e_ews_connection_set_password (connection, password);
 
 	g_free (hosturl);
 

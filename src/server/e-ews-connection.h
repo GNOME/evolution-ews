@@ -179,7 +179,6 @@ void		ews_oal_details_free		(EwsOALDetails *details);
 
 GType		e_ews_connection_get_type	(void);
 EEwsConnection *e_ews_connection_new		(const gchar *uri,
-						 const gchar *password,
 						 CamelEwsSettings *settings);
 const gchar *	e_ews_connection_get_uri	(EEwsConnection *cnc);
 const gchar *	e_ews_connection_get_password	(EEwsConnection *cnc);

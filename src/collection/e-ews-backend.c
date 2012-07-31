@@ -605,8 +605,8 @@ ews_backend_try_password_sync (ESourceAuthenticator *authenticator,
 	ews_settings = ews_backend_get_settings (backend);
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
 
-	connection = e_ews_connection_new (
-		hosturl, password->str, ews_settings);
+	connection = e_ews_connection_new (hosturl, ews_settings);
+	e_ews_connection_set_password (connection, password->str);
 
 	g_free (hosturl);
 
