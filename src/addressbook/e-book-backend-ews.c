@@ -2927,11 +2927,7 @@ book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 	EEwsConnection *connection;
 	ESourceAuthenticationResult result;
 	CamelEwsSettings *ews_settings;
-	EwsFolderId *fid = NULL;
-	GSList *folders = NULL;
-	GSList *ids = NULL;
 	gchar *hosturl;
-	GError *local_error = NULL;
 
 	/* This tests the password by fetching the contacts folder. */
 
@@ -2940,24 +2936,12 @@ book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
 
 	connection = e_ews_connection_new (hosturl, ews_settings);
-	e_ews_connection_set_password (connection, password->str);
 
-	g_free (hosturl);
+	result = e_source_authenticator_try_password_sync (
+		E_SOURCE_AUTHENTICATOR (connection),
+		password, cancellable, error);
 
-	fid = g_new0 (EwsFolderId, 1);
-	fid->id = g_strdup ("contacts");
-	fid->is_distinguished_id = TRUE;
-	ids = g_slist_append (ids, fid);
-
-	e_ews_connection_get_folder_sync (
-		connection, EWS_PRIORITY_MEDIUM, "Default",
-		NULL, ids, &folders, cancellable, &local_error);
-
-	e_ews_folder_id_free (fid);
-	g_slist_free (ids);
-	ids = NULL;
-
-	if (local_error == NULL) {
+	if (result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
 
 		PRIV_LOCK (backend->priv);
 
@@ -2971,26 +2955,11 @@ book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 		backend->priv->password = g_strdup (password->str);
 
 		PRIV_UNLOCK (backend->priv);
-
-		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
-
-	} else {
-		gboolean auth_failed;
-
-		auth_failed = g_error_matches (
-			local_error, EWS_CONNECTION_ERROR,
-			EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED);
-
-		if (auth_failed) {
-			g_clear_error (&local_error);
-			result = E_SOURCE_AUTHENTICATION_REJECTED;
-		} else {
-			g_propagate_error (error, local_error);
-			result = E_SOURCE_AUTHENTICATION_ERROR;
-		}
 	}
 
 	g_object_unref (connection);
+
+	g_free (hosturl);
 
 	return result;
 }
