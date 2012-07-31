@@ -62,7 +62,8 @@
 struct _CamelEwsStorePrivate {
 	time_t last_refresh_time;
 	GMutex *get_finfo_lock;
-	EEwsConnection *cnc;
+	EEwsConnection *connection;
+	GMutex *connection_lock;
 };
 
 static gboolean	ews_store_construct	(CamelService *service, CamelSession *session,
@@ -218,6 +219,7 @@ ews_connect_sync (CamelService *service,
                   GCancellable *cancellable,
                   GError **error)
 {
+	EEwsConnection *connection;
 	CamelEwsStore *ews_store;
 	CamelSession *session;
 	gboolean success;
@@ -228,8 +230,11 @@ ews_connect_sync (CamelService *service,
 	if (camel_service_get_connection_status (service) == CAMEL_SERVICE_DISCONNECTED)
 		return FALSE;
 
-	if (ews_store->priv->cnc != NULL)
+	connection = camel_ews_store_ref_connection (ews_store);
+	if (connection != NULL) {
+		g_object_unref (connection);
 		return TRUE;
+	}
 
 	/* Try running an operation that requires authentication
 	 * to make sure we have a valid password available. */
@@ -253,13 +258,18 @@ ews_disconnect_sync (CamelService *service,
 	CamelEwsStore *ews_store = (CamelEwsStore *) service;
 	CamelServiceClass *service_class;
 
+	g_mutex_lock (ews_store->priv->connection_lock);
+
 	/* TODO cancel all operations in the connection */
-	if (ews_store->priv->cnc) {
-		g_signal_handlers_disconnect_by_data (camel_service_get_settings (service), service);
-		e_ews_connection_forget_password (ews_store->priv->cnc);
-		g_object_unref (ews_store->priv->cnc);
-		ews_store->priv->cnc = NULL;
+	if (ews_store->priv->connection != NULL) {
+		g_signal_handlers_disconnect_by_data (
+			camel_service_get_settings (service), service);
+		e_ews_connection_forget_password (ews_store->priv->connection);
+		g_object_unref (ews_store->priv->connection);
+		ews_store->priv->connection = NULL;
 	}
+
+	g_mutex_unlock (ews_store->priv->connection_lock);
 
 	service_class = CAMEL_SERVICE_CLASS (camel_ews_store_parent_class);
 	return service_class->disconnect_sync (service, clean, cancellable, error);
@@ -372,20 +382,23 @@ ews_authenticate_sync (CamelService *service,
 		cancellable, &local_error);
 
 	if (local_error == NULL) {
-		/* FIXME Protect this with a mutex. */
-		if (ews_store->priv->cnc != NULL)
-			g_object_unref (ews_store->priv->cnc);
-		ews_store->priv->cnc = g_object_ref (connection);
+		g_mutex_lock (ews_store->priv->connection_lock);
+		if (ews_store->priv->connection != NULL)
+			g_object_unref (ews_store->priv->connection);
+		ews_store->priv->connection = g_object_ref (connection);
+		g_mutex_unlock (ews_store->priv->connection_lock);
 
 		/* This consumes all allocated result data. */
 		ews_update_folder_hierarchy (
 			ews_store, sync_state, includes_last_folder,
 			folders_created, folders_deleted, folders_updated);
 	} else {
-		/* FIXME Protect this with a mutex. */
-		if (ews_store->priv->cnc != NULL)
-			g_object_unref (ews_store->priv->cnc);
-		ews_store->priv->cnc = NULL;
+		g_mutex_lock (ews_store->priv->connection_lock);
+		if (ews_store->priv->connection != NULL) {
+			g_object_unref (ews_store->priv->connection);
+			ews_store->priv->connection = NULL;
+		}
+		g_mutex_unlock (ews_store->priv->connection_lock);
 
 		g_free (sync_state);
 
@@ -599,6 +612,7 @@ exit:
 static gboolean
 ews_refresh_finfo (CamelEwsStore *ews_store)
 {
+	EEwsConnection *connection;
 	gchar *sync_state;
 
 	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (ews_store)))
@@ -609,11 +623,17 @@ ews_refresh_finfo (CamelEwsStore *ews_store)
 
 	sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
 
+	connection = camel_ews_store_ref_connection (ews_store);
+
 	e_ews_connection_sync_folder_hierarchy (
-		ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
+		connection, EWS_PRIORITY_MEDIUM,
 		sync_state, NULL, ews_folder_hierarchy_ready_cb,
 		g_object_ref (ews_store));
+
+	g_object_unref (connection);
+
 	g_free (sync_state);
+
 	return TRUE;
 }
 
@@ -627,11 +647,13 @@ ews_get_folder_info_sync (CamelStore *store,
 	CamelEwsStore *ews_store;
 	CamelEwsStorePrivate *priv;
 	CamelFolderInfo *fi = NULL;
+	EEwsConnection *connection;
 	gchar *sync_state;
 	gboolean initial_setup = FALSE;
 	GSList *folders_created = NULL, *folders_updated = NULL;
 	GSList *folders_deleted = NULL;
 	gboolean includes_last_folder;
+	gboolean success;
 	GError *local_error = NULL;
 
 	ews_store = (CamelEwsStore *) store;
@@ -659,11 +681,17 @@ ews_get_folder_info_sync (CamelStore *store,
 		goto offline;
 	}
 
-	if (!e_ews_connection_sync_folder_hierarchy_sync (
-			ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
-			&sync_state, &includes_last_folder,
-			&folders_created, &folders_updated,
-			&folders_deleted, cancellable, &local_error)) {
+	connection = camel_ews_store_ref_connection (ews_store);
+
+	success = e_ews_connection_sync_folder_hierarchy_sync (
+		connection, EWS_PRIORITY_MEDIUM,
+		&sync_state, &includes_last_folder,
+		&folders_created, &folders_updated,
+		&folders_deleted, cancellable, &local_error);
+
+	g_object_unref (connection);
+
+	if (!success) {
 		if (local_error)
 			g_warning ("Unable to fetch the folder hierarchy: %s :%d \n",
 				   local_error->message, local_error->code);
@@ -697,7 +725,9 @@ ews_create_folder_sync (CamelStore *store,
 	gchar *fid = NULL;
 	gchar *full_name;
 	EwsFolderId *folder_id;
+	EEwsConnection *connection;
 	CamelFolderInfo *fi = NULL;
+	gboolean success;
 	GError *local_error = NULL;
 
 	/* Get Parent folder ID */
@@ -716,12 +746,17 @@ ews_create_folder_sync (CamelStore *store,
 		return NULL;
 	}
 
-	/* Make the call */
-	if (!e_ews_connection_create_folder_sync (
-			ews_store->priv->cnc,
-			EWS_PRIORITY_MEDIUM, fid,
-			FALSE, folder_name, &folder_id,
-			cancellable, &local_error)) {
+	connection = camel_ews_store_ref_connection (ews_store);
+
+	success = e_ews_connection_create_folder_sync (
+		connection,
+		EWS_PRIORITY_MEDIUM, fid,
+		FALSE, folder_name, &folder_id,
+		cancellable, &local_error);
+
+	g_object_unref (connection);
+
+	if (!success) {
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
 		g_propagate_error (error, local_error);
 		g_free (fid);
@@ -759,6 +794,8 @@ ews_delete_folder_sync (CamelStore *store,
 	CamelEwsStoreSummary *ews_summary = ews_store->summary;
 	gchar *fid;
 	CamelFolderInfo *fi = NULL;
+	EEwsConnection *connection;
+	gboolean success;
 	GError *local_error = NULL;
 
 	fid = camel_ews_store_summary_get_folder_id_from_name (ews_summary,
@@ -774,11 +811,17 @@ ews_delete_folder_sync (CamelStore *store,
 		return FALSE;
 	}
 
-	if (!e_ews_connection_delete_folder_sync (
-			ews_store->priv->cnc,
-			EWS_PRIORITY_MEDIUM,
-			fid, FALSE, "HardDelete",
-			cancellable, &local_error)) {
+	connection = camel_ews_store_ref_connection (ews_store);
+
+	success = e_ews_connection_delete_folder_sync (
+		connection,
+		EWS_PRIORITY_MEDIUM,
+		fid, FALSE, "HardDelete",
+		cancellable, &local_error);
+
+	g_object_unref (connection);
+
+	if (!success) {
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
 		g_propagate_error (error, local_error);
 		g_free (fid);
@@ -832,6 +875,7 @@ ews_rename_folder_sync (CamelStore *store,
 {
 	CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
 	CamelEwsStoreSummary *ews_summary = ews_store->summary;
+	EEwsConnection *connection;
 	const gchar *old_slash, *new_slash;
 	gchar *fid;
 	gchar *changekey;
@@ -861,6 +905,8 @@ ews_rename_folder_sync (CamelStore *store,
 			     _("No change key record for folder %s"), fid);
 		return FALSE;
 	}
+
+	connection = camel_ews_store_ref_connection (ews_store);
 
 	old_slash = g_strrstr (old_name, "/");
 	new_slash = g_strrstr (new_name, "/");
@@ -907,9 +953,12 @@ ews_rename_folder_sync (CamelStore *store,
 		rename_data->folder_id = fid;
 		rename_data->change_key = changekey;
 
-		if (!e_ews_connection_update_folder_sync (
-				ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
-				rename_folder_cb, rename_data, cancellable, &local_error)) {
+		res = e_ews_connection_update_folder_sync (
+			connection, EWS_PRIORITY_MEDIUM,
+			rename_folder_cb, rename_data,
+			cancellable, &local_error);
+
+		if (!res) {
 			g_free (rename_data);
 			goto out;
 		}
@@ -934,9 +983,12 @@ ews_rename_folder_sync (CamelStore *store,
 				goto out;
 			}
 		}
-		if (!e_ews_connection_move_folder_sync (
-				ews_store->priv->cnc, EWS_PRIORITY_MEDIUM,
-				pfid, fid, cancellable, &local_error)) {
+
+		res = e_ews_connection_move_folder_sync (
+			connection, EWS_PRIORITY_MEDIUM,
+			pfid, fid, cancellable, &local_error);
+
+		if (!res) {
 			g_free (pfid);
 			goto out;
 		}
@@ -950,6 +1002,8 @@ ews_rename_folder_sync (CamelStore *store,
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
 		g_propagate_error (error, local_error);
 	}
+
+	g_object_unref (connection);
 
 	g_free (changekey);
 	g_free (fid);
@@ -983,7 +1037,7 @@ camel_ews_store_ref_connection (CamelEwsStore *ews_store)
 {
 	g_return_val_if_fail (CAMEL_IS_EWS_STORE (ews_store), NULL);
 
-	return g_object_ref (ews_store->priv->cnc);
+	return g_object_ref (ews_store->priv->connection);
 }
 
 static CamelFolder *
@@ -1096,9 +1150,9 @@ ews_store_dispose (GObject *object)
 		ews_store->summary = NULL;
 	}
 
-	if (ews_store->priv->cnc != NULL) {
-		g_object_unref (ews_store->priv->cnc);
-		ews_store->priv->cnc = NULL;
+	if (ews_store->priv->connection != NULL) {
+		g_object_unref (ews_store->priv->connection);
+		ews_store->priv->connection = NULL;
 	}
 
 	/* Chain up to parent's dispose() method. */
@@ -1114,6 +1168,7 @@ ews_store_finalize (GObject *object)
 
 	g_free (ews_store->storage_path);
 	g_mutex_free (ews_store->priv->get_finfo_lock);
+	g_mutex_free (ews_store->priv->connection_lock);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_ews_store_parent_class)->finalize (object);
@@ -1159,7 +1214,7 @@ camel_ews_store_init (CamelEwsStore *ews_store)
 	ews_store->priv =
 		CAMEL_EWS_STORE_GET_PRIVATE (ews_store);
 
-	ews_store->priv->cnc = NULL;
 	ews_store->priv->last_refresh_time = time (NULL) - (FINFO_REFRESH_INTERVAL + 10);
 	ews_store->priv->get_finfo_lock = g_mutex_new ();
+	ews_store->priv->connection_lock = g_mutex_new ();
 }
