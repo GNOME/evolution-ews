@@ -103,24 +103,12 @@ ews_backend_get_settings (EEwsBackend *backend)
 static void
 ews_backend_queue_auth_session (ECollectionBackend *backend)
 {
-	ESourceRegistryServer *server;
-	EAuthenticationSession *session;
-	ESource *source;
-
-	server = e_collection_backend_ref_server (backend);
-	source = e_backend_get_source (E_BACKEND (backend));
-
-	session = e_authentication_session_new (
-		server, E_SOURCE_AUTHENTICATOR (backend),
-		e_source_get_uid (source));
-
 	/* For now at least, we don't need to know the
 	 * results, so no callback function is needed. */
-	e_source_registry_server_authenticate (
-		server, session, NULL, NULL, NULL);
-
-	g_object_unref (session);
-	g_object_unref (server);
+	e_backend_authenticate (
+		E_BACKEND (backend),
+		E_SOURCE_AUTHENTICATOR (backend),
+		NULL, NULL, NULL);
 }
 
 static ESource *

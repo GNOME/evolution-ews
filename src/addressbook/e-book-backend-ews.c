@@ -2505,8 +2505,8 @@ e_book_backend_ews_start_book_view (EBookBackend *backend,
 	if (priv->cnc == NULL) {
 		/* XXX Why doesn't start_book_view()
 		 *     get passed a GCancellable? */
-		e_source_registry_authenticate_sync (
-			registry, source,
+		e_backend_authenticate_sync (
+			E_BACKEND (backend),
 			E_SOURCE_AUTHENTICATOR (backend),
 			NULL, &error);
 		if (error != NULL) {
@@ -2826,8 +2826,8 @@ e_book_backend_ews_open (EBookBackend *backend,
 		PRIV_UNLOCK (cbews->priv);
 
 		if (need_to_authenticate)
-			e_source_registry_authenticate_sync (
-				registry, source,
+			e_backend_authenticate_sync (
+				E_BACKEND (backend),
 				E_SOURCE_AUTHENTICATOR (backend),
 				cancellable, &error);
 	}

@@ -656,8 +656,8 @@ e_cal_backend_ews_open (ECalBackend *backend,
 	PRIV_UNLOCK (priv);
 
 	if (need_to_authenticate)
-		e_source_registry_authenticate_sync (
-			registry, source,
+		e_backend_authenticate_sync (
+			E_BACKEND (backend),
 			E_SOURCE_AUTHENTICATOR (backend),
 			cancellable, &error);
 
