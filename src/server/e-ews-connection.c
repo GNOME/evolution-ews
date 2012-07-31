@@ -1247,7 +1247,7 @@ ews_connection_dispose (GObject *object)
 		priv->settings = NULL;
 	}
 
-	e_ews_connection_forget_password (E_EWS_CONNECTION (object));
+	e_ews_connection_set_password (E_EWS_CONNECTION (object), NULL);
 
 	if (priv->jobs) {
 		g_slist_free (priv->jobs);
@@ -1456,9 +1456,8 @@ ews_connection_authenticate (SoupSession *sess,
 
 	g_return_if_fail (cnc != NULL);
 
-	if (retrying) {
-		e_ews_connection_forget_password (cnc);
-	}
+	if (retrying)
+		e_ews_connection_set_password (cnc, NULL);
 
 	network_settings = CAMEL_NETWORK_SETTINGS (cnc->priv->settings);
 	user = camel_network_settings_dup_user (network_settings);
@@ -1704,23 +1703,6 @@ e_ews_connection_ref_soup_session (EEwsConnection *cnc)
 	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
 
 	return g_object_ref (cnc->priv->soup_session);
-}
-
-void
-e_ews_connection_forget_password (EEwsConnection *cnc)
-{
-	g_return_if_fail (cnc != NULL);
-
-	g_mutex_lock (cnc->priv->password_lock);
-
-	if (cnc->priv->password && *cnc->priv->password) {
-		memset (cnc->priv->password, 0, strlen (cnc->priv->password));
-	}
-
-	g_free (cnc->priv->password);
-	cnc->priv->password = NULL;
-
-	g_mutex_unlock (cnc->priv->password_lock);
 }
 
 static xmlDoc *

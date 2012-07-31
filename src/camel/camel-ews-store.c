@@ -264,7 +264,8 @@ ews_disconnect_sync (CamelService *service,
 	if (ews_store->priv->connection != NULL) {
 		g_signal_handlers_disconnect_by_data (
 			camel_service_get_settings (service), service);
-		e_ews_connection_forget_password (ews_store->priv->connection);
+		e_ews_connection_set_password (
+			ews_store->priv->connection, NULL);
 		g_object_unref (ews_store->priv->connection);
 		ews_store->priv->connection = NULL;
 	}

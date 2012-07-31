@@ -190,8 +190,6 @@ CamelEwsSettings *
 		e_ews_connection_ref_settings	(EEwsConnection *cnc);
 SoupSession *	e_ews_connection_ref_soup_session
 						(EEwsConnection *cnc);
-void		e_ews_connection_forget_password
-						(EEwsConnection *cnc);
 EEwsConnection *e_ews_connection_find		(const gchar *uri,
 						 const gchar *username);
 void		e_ews_connection_queue_request	(EEwsConnection *cnc,
