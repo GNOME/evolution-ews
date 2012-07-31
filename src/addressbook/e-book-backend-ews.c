@@ -70,8 +70,6 @@ struct _EBookBackendEwsPrivate {
 	gchar *oab_url;
 	gchar *folder_name;
 
-	gchar *password;
-
 	EwsBookBackendSqliteDB *ebsdb;
 
 	gboolean only_if_exists;
@@ -1681,6 +1679,7 @@ ews_download_full_gal (EBookBackendEws *cbews,
 	gchar *full_url, *oab_url, *cache_file = NULL;
 	const gchar *cache_dir;
 	gchar *comp_cache_file = NULL, *uncompress_file = NULL;
+	gchar *password;
 	CamelEwsSettings *ews_settings;
 
 	ews_settings = book_backend_ews_get_collection_settings (cbews);
@@ -1692,7 +1691,10 @@ ews_download_full_gal (EBookBackendEws *cbews,
 	comp_cache_file = g_build_filename (cache_dir, full->filename, NULL);
 
 	oab_cnc = e_ews_connection_new (full_url, ews_settings);
-	e_ews_connection_set_password (oab_cnc, priv->password);
+
+	password = e_ews_connection_dup_password (priv->cnc);
+	e_ews_connection_set_password (oab_cnc, password);
+	g_free (password);
 
 	if (!e_ews_connection_download_oal_file_sync (
 		oab_cnc, comp_cache_file, NULL, NULL, cancellable, error))
@@ -1841,6 +1843,7 @@ ebews_start_gal_sync (gpointer data)
 	GSList *full_l = NULL;
 	gboolean ret = TRUE;
 	gchar *uncompressed_filename = NULL;
+	gchar *password;
 	CamelEwsSettings *ews_settings;
 
 	cbews = (EBookBackendEws *) data;
@@ -1848,7 +1851,10 @@ ebews_start_gal_sync (gpointer data)
 	priv = cbews->priv;
 
 	oab_cnc = e_ews_connection_new (priv->oab_url, ews_settings);
-	e_ews_connection_set_password (oab_cnc, priv->password);
+
+	password = e_ews_connection_dup_password (priv->cnc);
+	e_ews_connection_set_password (oab_cnc, password);
+	g_free (password);
 
 	d(printf ("Ewsgal: Fetching oal full details file \n");)
 
@@ -2878,11 +2884,6 @@ e_book_backend_ews_dispose (GObject *object)
 		priv->folder_name = NULL;
 	}
 
-	if (priv->password) {
-		g_free (priv->password);
-		priv->password = NULL;
-	}
-
 	if (priv->attachment_dir) {
 		g_free (priv->attachment_dir);
 		priv->attachment_dir = NULL;
@@ -2948,11 +2949,6 @@ book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 		if (backend->priv->cnc != NULL)
 			g_object_unref (backend->priv->cnc);
 		backend->priv->cnc = g_object_ref (connection);
-
-		/* Stash the password for later reuse
-		 * in Offline Address Book connections. */
-		g_free (backend->priv->password);
-		backend->priv->password = g_strdup (password->str);
 
 		PRIV_UNLOCK (backend->priv);
 	}
