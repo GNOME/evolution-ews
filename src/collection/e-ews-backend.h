@@ -73,6 +73,17 @@ EEwsConnection *
 						(EEwsBackend *backend,
 						 GAsyncResult *result,
 						 GError **error);
+gboolean	e_ews_backend_sync_folders_sync	(EEwsBackend *backend,
+						 GCancellable *cancellable,
+						 GError **error);
+void		e_ews_backend_sync_folders	(EEwsBackend *backend,
+						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
+						 gpointer user_data);
+gboolean	e_ews_backend_sync_folders_finish
+						(EEwsBackend *backend,
+						 GAsyncResult *result,
+						 GError **error);
 
 G_END_DECLS
 

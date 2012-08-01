@@ -921,3 +921,124 @@ e_ews_backend_ref_connection_finish (EEwsBackend *backend,
 	return g_object_ref (connection);
 }
 
+static void
+ews_backend_sync_folders_thread (GSimpleAsyncResult *simple,
+                                 GObject *object,
+                                 GCancellable *cancellable)
+{
+	GError *error = NULL;
+
+	e_ews_backend_sync_folders_sync (
+		E_EWS_BACKEND (object), cancellable, &error);
+
+	if (error != NULL)
+		g_simple_async_result_take_error (simple, error);
+}
+
+gboolean
+e_ews_backend_sync_folders_sync (EEwsBackend *backend,
+                                 GCancellable *cancellable,
+                                 GError **error)
+{
+	EEwsConnection *connection;
+	GSList *folders_created = NULL;
+	GSList *folders_updated = NULL;
+	GSList *folders_deleted = NULL;
+	gboolean includes_last_folder = FALSE;
+	gchar *sync_state;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_EWS_BACKEND (backend), FALSE);
+
+	connection = e_ews_backend_ref_connection_sync (
+		backend, cancellable, error);
+
+	if (connection == NULL)
+		return FALSE;
+
+	g_mutex_lock (backend->priv->sync_state_lock);
+	sync_state = g_strdup (backend->priv->sync_state);
+	g_mutex_unlock (backend->priv->sync_state_lock);
+
+	/* XXX I think this leaks the old sync_state value when
+	 *     it replaces it with the new sync_state value. */
+	success = e_ews_connection_sync_folder_hierarchy_sync (
+		connection, EWS_PRIORITY_MEDIUM,
+		&sync_state, &includes_last_folder,
+		&folders_created, &folders_updated, &folders_deleted,
+		cancellable, error);
+
+	if (success) {
+		SyncFoldersClosure *closure;
+
+		/* This takes ownership of the folder lists. */
+		closure = g_slice_new0 (SyncFoldersClosure);
+		closure->backend = g_object_ref (backend);
+		closure->folders_created = folders_created;
+		closure->folders_deleted = folders_deleted;
+		closure->folders_updated = folders_updated;
+
+		/* Process the results from an idle callback. */
+		g_idle_add_full (
+			G_PRIORITY_DEFAULT_IDLE,
+			ews_backend_sync_folders_idle_cb, closure,
+			(GDestroyNotify) sync_folders_closure_free);
+
+		g_mutex_lock (backend->priv->sync_state_lock);
+		g_free (backend->priv->sync_state);
+		backend->priv->sync_state = g_strdup (sync_state);
+		g_mutex_unlock (backend->priv->sync_state_lock);
+
+	} else {
+		/* Make sure we're not leaking anything. */
+		g_warn_if_fail (folders_created == NULL);
+		g_warn_if_fail (folders_updated == NULL);
+		g_warn_if_fail (folders_deleted == NULL);
+	}
+
+	g_free (sync_state);
+
+	g_object_unref (connection);
+
+	return success;
+}
+
+void
+e_ews_backend_sync_folders (EEwsBackend *backend,
+                            GCancellable *cancellable,
+                            GAsyncReadyCallback callback,
+                            gpointer user_data)
+{
+	GSimpleAsyncResult *simple;
+
+	g_return_if_fail (E_IS_EWS_BACKEND (backend));
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (backend), callback,
+		user_data, e_ews_backend_sync_folders);
+
+	g_simple_async_result_run_in_thread (
+		simple, ews_backend_sync_folders_thread,
+		G_PRIORITY_DEFAULT, cancellable);
+
+	g_object_unref (simple);
+}
+
+gboolean
+e_ews_backend_sync_folders_finish (EEwsBackend *backend,
+                                   GAsyncResult *result,
+                                   GError **error)
+{
+	GSimpleAsyncResult *simple;
+
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (backend),
+		e_ews_backend_sync_folders), FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+
+	/* Assume success unless a GError is set. */
+	return !g_simple_async_result_propagate_error (simple, error);
+}
+
