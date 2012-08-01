@@ -1036,9 +1036,18 @@ ews_get_name (CamelService *service,
 EEwsConnection *
 camel_ews_store_ref_connection (CamelEwsStore *ews_store)
 {
+	EEwsConnection *connection = NULL;
+
 	g_return_val_if_fail (CAMEL_IS_EWS_STORE (ews_store), NULL);
 
-	return g_object_ref (ews_store->priv->connection);
+	g_mutex_lock (ews_store->priv->connection_lock);
+
+	if (ews_store->priv->connection != NULL)
+		connection = g_object_ref (ews_store->priv->connection);
+
+	g_mutex_unlock (ews_store->priv->connection_lock);
+
+	return connection;
 }
 
 static CamelFolder *
