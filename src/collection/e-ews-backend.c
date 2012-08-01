@@ -51,18 +51,10 @@ struct _SyncFoldersClosure {
 	GSList *folders_updated;
 };
 
-/* Forward Declarations */
-static void	e_ews_backend_authenticator_init
-				(ESourceAuthenticatorInterface *interface);
-
-G_DEFINE_DYNAMIC_TYPE_EXTENDED (
+G_DEFINE_DYNAMIC_TYPE (
 	EEwsBackend,
 	e_ews_backend,
-	E_TYPE_COLLECTION_BACKEND,
-	0,
-	G_IMPLEMENT_INTERFACE_DYNAMIC (
-		E_TYPE_SOURCE_AUTHENTICATOR,
-		e_ews_backend_authenticator_init))
+	E_TYPE_COLLECTION_BACKEND)
 
 static void
 sync_folders_closure_free (SyncFoldersClosure *closure)
@@ -173,17 +165,6 @@ ews_backend_get_settings (EEwsBackend *backend)
 	settings = e_source_camel_get_settings (extension);
 
 	return CAMEL_EWS_SETTINGS (settings);
-}
-
-static void
-ews_backend_queue_auth_session (ECollectionBackend *backend)
-{
-	/* For now at least, we don't need to know the
-	 * results, so no callback function is needed. */
-	e_backend_authenticate (
-		E_BACKEND (backend),
-		E_SOURCE_AUTHENTICATOR (backend),
-		NULL, NULL, NULL);
 }
 
 static ESource *
@@ -529,11 +510,10 @@ ews_backend_populate (ECollectionBackend *backend)
 {
 	ESource *source;
 
-	/* We test authentication passwords by attempting to synchronize
-	 * the folder hierarchy.  Since we want to synchronize the folder
-	 * hierarchy immediately on startup, schedule an authentication
-	 * session first thing. */
-	ews_backend_queue_auth_session (backend);
+	/* For now at least, we don't need to know the
+	 * results, so no callback function is needed. */
+	e_ews_backend_sync_folders (
+		E_EWS_BACKEND (backend), NULL, NULL, NULL);
 
 	ews_backend_add_gal_source (E_EWS_BACKEND (backend));
 
@@ -650,104 +630,6 @@ ews_backend_child_removed (ECollectionBackend *backend,
 		child_removed (backend, child_source);
 }
 
-static ESourceAuthenticationResult
-ews_backend_try_password_sync (ESourceAuthenticator *authenticator,
-                               const GString *password,
-                               GCancellable *cancellable,
-                               GError **error)
-{
-	EEwsBackend *backend;
-	EEwsConnection *connection;
-	ESourceAuthenticationResult result;
-	CamelEwsSettings *ews_settings;
-	GSList *folders_created = NULL;
-	GSList *folders_updated = NULL;
-	GSList *folders_deleted = NULL;
-	gboolean includes_last_folder = FALSE;
-	gchar *sync_state;
-	gchar *hosturl;
-	GError *local_error = NULL;
-
-	/* This tests the password by updating the folder hierarchy. */
-
-	backend = E_EWS_BACKEND (authenticator);
-
-	ews_settings = ews_backend_get_settings (backend);
-	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
-
-	connection = e_ews_connection_new (hosturl, ews_settings);
-	e_ews_connection_set_password (connection, password->str);
-
-	g_free (hosturl);
-
-	g_mutex_lock (backend->priv->sync_state_lock);
-	sync_state = g_strdup (backend->priv->sync_state);
-	g_mutex_unlock (backend->priv->sync_state_lock);
-
-	/* XXX I think this leaks the old sync_state value when
-	 *     it replaces it with the new sync_state value. */
-	e_ews_connection_sync_folder_hierarchy_sync (
-		connection, EWS_PRIORITY_MEDIUM,
-		&sync_state, &includes_last_folder,
-		&folders_created, &folders_updated, &folders_deleted,
-		cancellable, &local_error);
-
-	g_object_unref (connection);
-
-	if (local_error == NULL) {
-		SyncFoldersClosure *closure;
-
-		/* We can now report the password was accepted.
-		 * Because a password dialog may be stuck in a busy
-		 * state, process the synchronization results from an
-		 * idle callback so we don't delay the authentication
-		 * session any longer than necessary. */
-
-		/* This takes ownership of the folder lists. */
-		closure = g_slice_new0 (SyncFoldersClosure);
-		closure->backend = g_object_ref (backend);
-		closure->folders_created = folders_created;
-		closure->folders_deleted = folders_deleted;
-		closure->folders_updated = folders_updated;
-
-		g_idle_add_full (
-			G_PRIORITY_DEFAULT_IDLE,
-			ews_backend_sync_folders_idle_cb, closure,
-			(GDestroyNotify) sync_folders_closure_free);
-
-		g_mutex_lock (backend->priv->sync_state_lock);
-		g_free (backend->priv->sync_state);
-		backend->priv->sync_state = sync_state;
-		g_mutex_unlock (backend->priv->sync_state_lock);
-
-		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
-
-	} else {
-		gboolean auth_failed;
-
-		/* Make sure we're not leaking anything. */
-		g_warn_if_fail (folders_created == NULL);
-		g_warn_if_fail (folders_updated == NULL);
-		g_warn_if_fail (folders_deleted == NULL);
-
-		auth_failed = g_error_matches (
-			local_error, EWS_CONNECTION_ERROR,
-			EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED);
-
-		if (auth_failed) {
-			g_clear_error (&local_error);
-			result = E_SOURCE_AUTHENTICATION_REJECTED;
-		} else {
-			g_propagate_error (error, local_error);
-			result = E_SOURCE_AUTHENTICATION_ERROR;
-		}
-
-		g_free (sync_state);
-	}
-
-	return result;
-}
-
 static void
 e_ews_backend_class_init (EEwsBackendClass *class)
 {
@@ -773,12 +655,6 @@ e_ews_backend_class_init (EEwsBackendClass *class)
 static void
 e_ews_backend_class_finalize (EEwsBackendClass *class)
 {
-}
-
-static void
-e_ews_backend_authenticator_init (ESourceAuthenticatorInterface *interface)
-{
-	interface->try_password_sync = ews_backend_try_password_sync;
 }
 
 static void
