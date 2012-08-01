@@ -21,6 +21,8 @@
 
 #include <libebackend/libebackend.h>
 
+#include "server/e-ews-connection.h"
+
 /* Standard GObject macros */
 #define E_TYPE_EWS_BACKEND \
 	(e_ews_backend_get_type ())
@@ -57,6 +59,20 @@ struct _EEwsBackendClass {
 
 GType		e_ews_backend_get_type		(void) G_GNUC_CONST;
 void		e_ews_backend_type_register	(GTypeModule *type_module);
+EEwsConnection *
+		e_ews_backend_ref_connection_sync
+						(EEwsBackend *backend,
+						 GCancellable *cancellable,
+						 GError **error);
+void		e_ews_backend_ref_connection	(EEwsBackend *backend,
+						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
+						 gpointer user_data);
+EEwsConnection *
+		e_ews_backend_ref_connection_finish
+						(EEwsBackend *backend,
+						 GAsyncResult *result,
+						 GError **error);
 
 G_END_DECLS
 

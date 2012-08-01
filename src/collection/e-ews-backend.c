@@ -21,7 +21,6 @@
 #include <config.h>
 #include <glib/gi18n-lib.h>
 
-#include "server/e-ews-connection.h"
 #include "server/e-source-ews-folder.h"
 
 #define E_EWS_BACKEND_GET_PRIVATE(obj) \
@@ -39,6 +38,9 @@ struct _EEwsBackendPrivate {
 
 	gchar *sync_state;
 	GMutex *sync_state_lock;
+
+	EEwsConnection *connection;
+	GMutex *connection_lock;
 };
 
 struct _SyncFoldersClosure {
@@ -417,6 +419,11 @@ ews_backend_dispose (GObject *object)
 
 	g_hash_table_remove_all (priv->folders);
 
+	if (priv->connection != NULL) {
+		g_object_unref (priv->connection);
+		priv->connection = NULL;
+	}
+
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (e_ews_backend_parent_class)->dispose (object);
 }
@@ -434,6 +441,8 @@ ews_backend_finalize (GObject *object)
 
 	g_free (priv->sync_state);
 	g_mutex_free (priv->sync_state_lock);
+
+	g_mutex_free (priv->connection_lock);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (e_ews_backend_parent_class)->finalize (object);
@@ -711,6 +720,7 @@ e_ews_backend_init (EEwsBackend *backend)
 		(GDestroyNotify) g_object_unref);
 
 	backend->priv->sync_state_lock = g_mutex_new ();
+	backend->priv->connection_lock = g_mutex_new ();
 }
 
 void
@@ -720,5 +730,120 @@ e_ews_backend_type_register (GTypeModule *type_module)
 	 *     function, so we have to wrap it with a public function in
 	 *     order to register types from a separate compilation unit. */
 	e_ews_backend_register_type (type_module);
+}
+
+static void
+ews_backend_ref_connection_thread (GSimpleAsyncResult *simple,
+                                   GObject *object,
+                                   GCancellable *cancellable)
+{
+	EEwsConnection *connection;
+	GError *error = NULL;
+
+	connection = e_ews_backend_ref_connection_sync (
+		E_EWS_BACKEND (object), cancellable, &error);
+
+	/* Sanity check. */
+	g_return_if_fail (
+		((connection != NULL) && (error == NULL)) ||
+		((connection == NULL) && (error != NULL)));
+
+	if (connection != NULL)
+		g_simple_async_result_set_op_res_gpointer (
+			simple, connection, (GDestroyNotify) g_object_unref);
+
+	if (error != NULL)
+		g_simple_async_result_take_error (simple, error);
+}
+
+EEwsConnection *
+e_ews_backend_ref_connection_sync (EEwsBackend *backend,
+                                   GCancellable *cancellable,
+                                   GError **error)
+{
+	EEwsConnection *connection = NULL;
+	CamelEwsSettings *settings;
+	gchar *hosturl;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_EWS_BACKEND (backend), NULL);
+
+	g_mutex_lock (backend->priv->connection_lock);
+	if (backend->priv->connection != NULL)
+		connection = g_object_ref (backend->priv->connection);
+	g_mutex_unlock (backend->priv->connection_lock);
+
+	/* If we already have an authenticated
+	 * connection object, just return that. */
+	if (connection != NULL)
+		return connection;
+
+	settings = ews_backend_get_settings (backend);
+	hosturl = camel_ews_settings_dup_hosturl (settings);
+	connection = e_ews_connection_new (hosturl, settings);
+	g_free (hosturl);
+
+	success = e_backend_authenticate_sync (
+		E_BACKEND (backend),
+		E_SOURCE_AUTHENTICATOR (connection),
+		cancellable, error);
+
+	if (success) {
+		g_mutex_lock (backend->priv->connection_lock);
+		if (backend->priv->connection != NULL)
+			g_object_unref (backend->priv->connection);
+		backend->priv->connection = g_object_ref (connection);
+		g_mutex_unlock (backend->priv->connection_lock);
+	} else {
+		g_object_unref (connection);
+		connection = NULL;
+	}
+
+	return connection;
+}
+
+void
+e_ews_backend_ref_connection (EEwsBackend *backend,
+                              GCancellable *cancellable,
+                              GAsyncReadyCallback callback,
+                              gpointer user_data)
+{
+	GSimpleAsyncResult *simple;
+
+	g_return_if_fail (E_IS_EWS_BACKEND (backend));
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (backend), callback,
+		user_data, e_ews_backend_ref_connection);
+
+	g_simple_async_result_run_in_thread (
+		simple, ews_backend_ref_connection_thread,
+		G_PRIORITY_DEFAULT, cancellable);
+
+	g_object_unref (simple);
+}
+
+EEwsConnection *
+e_ews_backend_ref_connection_finish (EEwsBackend *backend,
+                                     GAsyncResult *result,
+                                     GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EEwsConnection *connection;
+
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (backend),
+		e_ews_backend_ref_connection), NULL);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return NULL;
+
+	connection = g_simple_async_result_get_op_res_gpointer (simple);
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (connection), NULL);
+
+	return g_object_ref (connection);
 }
 
