@@ -32,6 +32,7 @@ typedef struct _SyncFoldersClosure SyncFoldersClosure;
 struct _EEwsBackendPrivate {
 	/* Folder ID -> ESource */
 	GHashTable *folders;
+	GMutex *folders_lock;
 
 	ESource *gal_source;
 	gchar *oal_selected;
@@ -84,6 +85,78 @@ sync_folders_closure_free (SyncFoldersClosure *closure)
 		(GDestroyNotify) g_object_unref);
 
 	g_slice_free (SyncFoldersClosure, closure);
+}
+
+static gboolean
+ews_backend_folders_contains (EEwsBackend *backend,
+                              const gchar *folder_id)
+{
+	gboolean contains;
+
+	g_return_val_if_fail (folder_id != NULL, FALSE);
+
+	g_mutex_lock (backend->priv->folders_lock);
+
+	contains = g_hash_table_contains (backend->priv->folders, folder_id);
+
+	g_mutex_unlock (backend->priv->folders_lock);
+
+	return contains;
+}
+
+static void
+ews_backend_folders_insert (EEwsBackend *backend,
+                            const gchar *folder_id,
+                            ESource *source)
+{
+	g_return_if_fail (folder_id != NULL);
+	g_return_if_fail (E_IS_SOURCE (source));
+
+	g_mutex_lock (backend->priv->folders_lock);
+
+	g_hash_table_insert (
+		backend->priv->folders,
+		g_strdup (folder_id),
+		g_object_ref (source));
+
+	g_mutex_unlock (backend->priv->folders_lock);
+}
+
+static ESource *
+ews_backend_folders_lookup (EEwsBackend *backend,
+                            const gchar *folder_id)
+{
+	ESource *source;
+
+	g_return_val_if_fail (folder_id != NULL, NULL);
+
+	g_mutex_lock (backend->priv->folders_lock);
+
+	source = g_hash_table_lookup (backend->priv->folders, folder_id);
+
+	if (source != NULL)
+		g_object_ref (source);
+
+	g_mutex_unlock (backend->priv->folders_lock);
+
+	return source;
+}
+
+static gboolean
+ews_backend_folders_remove (EEwsBackend *backend,
+                            const gchar *folder_id)
+{
+	gboolean removed;
+
+	g_return_val_if_fail (folder_id != NULL, FALSE);
+
+	g_mutex_lock (backend->priv->folders_lock);
+
+	removed = g_hash_table_remove (backend->priv->folders, folder_id);
+
+	g_mutex_unlock (backend->priv->folders_lock);
+
+	return removed;
 }
 
 static CamelEwsSettings *
@@ -209,7 +282,7 @@ ews_backend_sync_created_folders (EEwsBackend *backend,
 		fid = e_ews_folder_get_id (folder);
 		if (fid->id == NULL)
 			continue;  /* not a valid ID anyway */
-		if (g_hash_table_contains (backend->priv->folders, fid->id))
+		if (ews_backend_folders_contains (backend, fid->id))
 			continue;
 
 		switch (e_ews_folder_get_folder_type (folder)) {
@@ -254,8 +327,8 @@ ews_backend_sync_deleted_folders (EEwsBackend *backend,
 		ESource *source = NULL;
 
 		if (folder_id != NULL)
-			source = g_hash_table_lookup (
-				backend->priv->folders, folder_id);
+			source = ews_backend_folders_lookup (
+				backend, folder_id);
 
 		if (source == NULL)
 			continue;
@@ -263,6 +336,8 @@ ews_backend_sync_deleted_folders (EEwsBackend *backend,
 		/* This will trigger a "child-removed" signal and
 		 * our handler will remove the hash table entry. */
 		e_source_registry_server_remove_source (server, source);
+
+		g_object_unref (source);
 	}
 
 	g_object_unref (server);
@@ -436,6 +511,7 @@ ews_backend_finalize (GObject *object)
 	priv = E_EWS_BACKEND_GET_PRIVATE (object);
 
 	g_hash_table_destroy (priv->folders);
+	g_mutex_free (priv->folders_lock);
 
 	g_free (priv->oal_selected);
 
@@ -485,12 +561,9 @@ static void
 ews_backend_child_added (ECollectionBackend *backend,
                          ESource *child_source)
 {
-	EEwsBackendPrivate *priv;
 	ESource *collection_source;
 	const gchar *extension_name;
 	gboolean is_mail = FALSE;
-
-	priv = E_EWS_BACKEND_GET_PRIVATE (backend);
 
 	collection_source = e_backend_get_source (E_BACKEND (backend));
 
@@ -539,10 +612,12 @@ ews_backend_child_added (ECollectionBackend *backend,
 		extension = e_source_get_extension (
 			child_source, extension_name);
 		folder_id = e_source_ews_folder_dup_id (extension);
-		if (folder_id != NULL)
-			g_hash_table_insert (
-				priv->folders, folder_id,
-				g_object_ref (child_source));
+		if (folder_id != NULL) {
+			ews_backend_folders_insert (
+				E_EWS_BACKEND (backend),
+				folder_id, child_source);
+			g_free (folder_id);
+		}
 	}
 
 	/* Chain up to parent's child_added() method. */
@@ -554,10 +629,7 @@ static void
 ews_backend_child_removed (ECollectionBackend *backend,
                            ESource *child_source)
 {
-	EEwsBackendPrivate *priv;
 	const gchar *extension_name;
-
-	priv = E_EWS_BACKEND_GET_PRIVATE (backend);
 
 	/* We track EWS folders in a hash table by folder ID. */
 	extension_name = E_SOURCE_EXTENSION_EWS_FOLDER;
@@ -569,7 +641,8 @@ ews_backend_child_removed (ECollectionBackend *backend,
 			child_source, extension_name);
 		folder_id = e_source_ews_folder_get_id (extension);
 		if (folder_id != NULL)
-			g_hash_table_remove (priv->folders, folder_id);
+			ews_backend_folders_remove (
+				E_EWS_BACKEND (backend), folder_id);
 	}
 
 	/* Chain up to parent's child_removed() method. */
@@ -719,6 +792,7 @@ e_ews_backend_init (EEwsBackend *backend)
 		(GDestroyNotify) g_free,
 		(GDestroyNotify) g_object_unref);
 
+	backend->priv->folders_lock = g_mutex_new ();
 	backend->priv->sync_state_lock = g_mutex_new ();
 	backend->priv->connection_lock = g_mutex_new ();
 }
