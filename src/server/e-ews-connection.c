@@ -373,6 +373,8 @@ ews_connection_schedule_abort (EEwsConnection *cnc)
 	g_source_attach (source, cnc->priv->soup_context);
 }
 
+static void ews_cancel_request (GCancellable *cancellable, gpointer user_data);
+
 /* this is run in priv->soup_thread */
 static gboolean
 ews_next_request (gpointer _cnc)
@@ -407,9 +409,15 @@ ews_next_request (gpointer _cnc)
 	/* Add to active job queue */
 	cnc->priv->active_job_queue = g_slist_append (cnc->priv->active_job_queue, node);
 
-	soup_session_queue_message (cnc->priv->soup_session, SOUP_MESSAGE (node->msg), ews_response_cb, node);
+	if (cnc->priv->soup_session) {
+		soup_session_queue_message (cnc->priv->soup_session, SOUP_MESSAGE (node->msg), ews_response_cb, node);
+		QUEUE_UNLOCK (cnc);
+	} else {
+		QUEUE_UNLOCK (cnc);
 
-	QUEUE_UNLOCK (cnc);
+		ews_cancel_request (NULL, node);
+	}
+
 	return FALSE;
 }
 
@@ -420,10 +428,14 @@ ews_trigger_next_request (EEwsConnection *cnc)
 
 	g_return_if_fail (cnc != NULL);
 
-	source = g_idle_source_new ();
-	g_source_set_priority (source, G_PRIORITY_DEFAULT);
-	g_source_set_callback (source, ews_next_request, cnc, NULL);
-	g_source_attach (source, cnc->priv->soup_context);
+	if (cnc->priv->soup_session) {
+		source = g_idle_source_new ();
+		g_source_set_priority (source, G_PRIORITY_DEFAULT);
+		g_source_set_callback (source, ews_next_request, cnc, NULL);
+		g_source_attach (source, cnc->priv->soup_context);
+	} else {
+		ews_next_request (cnc);
+	}
 }
 
 /**
@@ -1403,6 +1415,9 @@ e_ews_soup_thread (gpointer user_data)
 	g_main_context_push_thread_default (cnc->priv->soup_context);
 	g_main_loop_run (cnc->priv->soup_loop);
 	g_main_context_pop_thread_default (cnc->priv->soup_context);
+
+	/* abort any pending operations */
+	soup_session_abort (cnc->priv->soup_session);
 
 	g_object_unref (cnc->priv->soup_session);
 	cnc->priv->soup_session = NULL;
