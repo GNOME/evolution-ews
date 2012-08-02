@@ -216,6 +216,9 @@ ews_backend_new_child (EEwsBackend *backend,
 	e_source_offline_set_stay_synchronized (
 		E_SOURCE_OFFLINE (extension), TRUE);
 
+	e_server_side_source_set_remote_deletable (
+		E_SERVER_SIDE_SOURCE (source), TRUE);
+
 	return source;
 }
 
@@ -506,6 +509,23 @@ ews_backend_finalize (GObject *object)
 }
 
 static void
+ews_backend_constructed (GObject *object)
+{
+	ESource *source;
+
+	/* Chain up to parent's constructed() method. */
+	G_OBJECT_CLASS (e_ews_backend_parent_class)->constructed (object);
+
+	source = e_backend_get_source (E_BACKEND (object));
+
+	/* XXX Wondering if we ought to delay this until after folders
+	 *     are initially populated, just to remove the possibility
+	 *     of weird races with clients trying to create folders. */
+	e_server_side_source_set_remote_creatable (
+		E_SERVER_SIDE_SOURCE (source), TRUE);
+}
+
+static void
 ews_backend_populate (ECollectionBackend *backend)
 {
 	ESource *source;
@@ -630,6 +650,158 @@ ews_backend_child_removed (ECollectionBackend *backend,
 		child_removed (backend, child_source);
 }
 
+static gboolean
+ews_backend_create_resource_sync (ECollectionBackend *backend,
+                                  ESource *source,
+                                  GCancellable *cancellable,
+                                  GError **error)
+{
+	EEwsConnection *connection;
+	EwsFolderId *out_folder_id = NULL;
+	EwsFolderType folder_type = EWS_FOLDER_TYPE_UNKNOWN;
+	const gchar *extension_name;
+	const gchar *parent_folder_id = NULL;
+	gchar *folder_name;
+	gboolean success = FALSE;
+
+	connection = e_ews_backend_ref_connection_sync (
+		E_EWS_BACKEND (backend), cancellable, error);
+	if (connection == NULL)
+		return FALSE;
+
+	extension_name = E_SOURCE_EXTENSION_ADDRESS_BOOK;
+	if (e_source_has_extension (source, extension_name)) {
+		folder_type = EWS_FOLDER_TYPE_CONTACTS;
+		parent_folder_id = "contacts";
+	}
+
+	extension_name = E_SOURCE_EXTENSION_CALENDAR;
+	if (e_source_has_extension (source, extension_name)) {
+		folder_type = EWS_FOLDER_TYPE_CALENDAR;
+		parent_folder_id = "calendar";
+	}
+
+	extension_name = E_SOURCE_EXTENSION_TASK_LIST;
+	if (e_source_has_extension (source, extension_name)) {
+		folder_type = EWS_FOLDER_TYPE_TASKS;
+		parent_folder_id = "tasks";
+	}
+
+	/* FIXME No support for memo lists. */
+
+	if (parent_folder_id == NULL) {
+		g_set_error (
+			error, G_IO_ERROR,
+			G_IO_ERROR_INVALID_ARGUMENT,
+			_("Could not determine a suitable folder "
+			  "class for a new folder named '%s'"),
+			e_source_get_display_name (source));
+		goto exit;
+	}
+
+	folder_name = e_source_dup_display_name (source);
+
+	success = e_ews_connection_create_folder_sync (
+		connection, EWS_PRIORITY_MEDIUM,
+		parent_folder_id, TRUE,
+		folder_name, folder_type,
+		&out_folder_id, cancellable, error);
+
+	g_free (folder_name);
+
+	/* Sanity check */
+	g_warn_if_fail (
+		(success && out_folder_id != NULL) ||
+		(!success && out_folder_id == NULL));
+
+	if (out_folder_id != NULL) {
+		ESourceEwsFolder *extension;
+		const gchar *extension_name;
+
+		extension_name = E_SOURCE_EXTENSION_EWS_FOLDER;
+		extension = e_source_get_extension (source, extension_name);
+		e_source_ews_folder_set_id (
+			extension, out_folder_id->id);
+		e_source_ews_folder_set_change_key (
+			extension, out_folder_id->change_key);
+
+		e_ews_folder_id_free (out_folder_id);
+	}
+
+	if (success) {
+		ESourceRegistryServer *server;
+		ESource *parent_source;
+		const gchar *parent_uid;
+
+		parent_source = e_backend_get_source (E_BACKEND (backend));
+		parent_uid = e_source_get_uid (parent_source);
+		e_source_set_parent (source, parent_uid);
+
+		e_server_side_source_set_writable (
+			E_SERVER_SIDE_SOURCE (source), TRUE);
+
+		e_server_side_source_set_remote_deletable (
+			E_SERVER_SIDE_SOURCE (source), TRUE);
+
+		server = e_collection_backend_ref_server (backend);
+		e_source_registry_server_add_source (server, source);
+		g_object_unref (server);
+	}
+
+exit:
+	g_object_unref (connection);
+
+	return success;
+}
+
+static gboolean
+ews_backend_delete_resource_sync (ECollectionBackend *backend,
+                                  ESource *source,
+                                  GCancellable *cancellable,
+                                  GError **error)
+{
+	EEwsConnection *connection;
+	ESourceEwsFolder *extension;
+	const gchar *extension_name;
+	gchar *folder_id;
+	gboolean success = FALSE;
+
+	connection = e_ews_backend_ref_connection_sync (
+		E_EWS_BACKEND (backend), cancellable, error);
+	if (connection == NULL)
+		return FALSE;
+
+	extension_name = E_SOURCE_EXTENSION_EWS_FOLDER;
+	if (!e_source_has_extension (source, extension_name)) {
+		g_set_error (
+			error, G_IO_ERROR,
+			G_IO_ERROR_INVALID_ARGUMENT,
+			_("Data source '%s' does not represent "
+			  "an Exchange Web Services folder"),
+			e_source_get_display_name (source));
+		goto exit;
+	}
+	extension = e_source_get_extension (source, extension_name);
+	folder_id = e_source_ews_folder_dup_id (extension);
+
+	success = e_ews_connection_delete_folder_sync (
+		connection, EWS_PRIORITY_MEDIUM, folder_id,
+		FALSE, "HardDelete", cancellable, error);
+
+	if (success) {
+		ESourceRegistryServer *server;
+
+		server = e_collection_backend_ref_server (backend);
+		e_source_registry_server_remove_source (server, source);
+		g_object_unref (server);
+	}
+
+exit:
+	g_object_unref (connection);
+
+	return success;
+}
+
 static void
 e_ews_backend_class_init (EEwsBackendClass *class)
 {
@@ -641,12 +813,15 @@ e_ews_backend_class_init (EEwsBackendClass *class)
 	object_class = G_OBJECT_CLASS (class);
 	object_class->dispose = ews_backend_dispose;
 	object_class->finalize = ews_backend_finalize;
+	object_class->constructed = ews_backend_constructed;
 
 	backend_class = E_COLLECTION_BACKEND_CLASS (class);
 	backend_class->populate = ews_backend_populate;
 	backend_class->dup_resource_id = ews_backend_dup_resource_id;
 	backend_class->child_added = ews_backend_child_added;
 	backend_class->child_removed = ews_backend_child_removed;
+	backend_class->create_resource_sync = ews_backend_create_resource_sync;
+	backend_class->delete_resource_sync = ews_backend_delete_resource_sync;
 
 	/* This generates an ESourceCamel subtype for CamelEwsSettings. */
 	e_source_camel_generate_subtype ("ews", CAMEL_TYPE_EWS_SETTINGS);
