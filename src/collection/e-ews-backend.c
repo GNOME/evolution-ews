@@ -731,11 +731,16 @@ ews_backend_create_resource_sync (ECollectionBackend *backend,
 	if (success) {
 		ESourceRegistryServer *server;
 		ESource *parent_source;
+		const gchar *cache_dir;
 		const gchar *parent_uid;
 
 		parent_source = e_backend_get_source (E_BACKEND (backend));
 		parent_uid = e_source_get_uid (parent_source);
 		e_source_set_parent (source, parent_uid);
+
+		cache_dir = e_collection_backend_get_cache_dir (backend);
+		e_server_side_source_set_write_directory (
+			E_SERVER_SIDE_SOURCE (source), cache_dir);
 
 		e_server_side_source_set_writable (
 			E_SERVER_SIDE_SOURCE (source), TRUE);
