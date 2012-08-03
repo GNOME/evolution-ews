@@ -4912,7 +4912,7 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 		case EWS_FOLDER_TYPE_CONTACTS:
 			folder_element = "ContactsFolder";
 			break;
-		case EWS_FOLDER_TYPE_QUERY:
+		case EWS_FOLDER_TYPE_SEARCH:
 			folder_element = "SearchFolder";
 			break;
 		case EWS_FOLDER_TYPE_TASKS:
@@ -7008,7 +7008,7 @@ e_ews_connection_set_folder_permissions (EEwsConnection *cnc,
 	case EWS_FOLDER_TYPE_CONTACTS:
 		e_soap_message_start_element (msg, "ContactsFolder", NULL, NULL);
 		break;
-	case EWS_FOLDER_TYPE_QUERY:
+	case EWS_FOLDER_TYPE_SEARCH:
 		e_soap_message_start_element (msg, "SearchFolder", NULL, NULL);
 		break;
 	case EWS_FOLDER_TYPE_TASKS:
