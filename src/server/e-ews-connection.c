@@ -118,6 +118,7 @@ struct _EwsAsyncData {
 	gchar *sync_state;
 	gboolean includes_last_item;
 	EwsDelegateDeliver deliver_to;
+	EwsFolderType folder_type;
 };
 
 struct _EwsNode {
@@ -1107,9 +1108,32 @@ ews_handle_create_folders_param (ESoapParameter *soapparam,
 	ESoapParameter *param, *node;
 	EwsFolderId *fid = NULL;
 	GSList *fids = NULL;
+	const gchar *folder_element;
+
+	switch (async_data->folder_type) {
+		case EWS_FOLDER_TYPE_MAILBOX:
+			folder_element = "Folder";
+			break;
+		case EWS_FOLDER_TYPE_CALENDAR:
+			folder_element = "CalendarFolder";
+			break;
+		case EWS_FOLDER_TYPE_CONTACTS:
+			folder_element = "ContactsFolder";
+			break;
+		case EWS_FOLDER_TYPE_SEARCH:
+			folder_element = "SearchFolder";
+			break;
+		case EWS_FOLDER_TYPE_TASKS:
+			folder_element = "TasksFolder";
+			break;
+		default:
+			g_warn_if_reached ();
+			folder_element = "Folder";
+			break;
+	}
 
 	node = e_soap_parameter_get_first_child_by_name (soapparam, "Folders");
-	node = e_soap_parameter_get_first_child_by_name (node, "Folder");
+	node = e_soap_parameter_get_first_child_by_name (node, folder_element);
 	param = e_soap_parameter_get_first_child_by_name (node, "FolderId");
 
 	fid = g_new0 (EwsFolderId, 1);
@@ -4849,6 +4873,7 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
                                 const gchar *parent_folder_id,
                                 gboolean is_distinguished_id,
                                 const gchar *folder_name,
+                                EwsFolderType folder_type,
                                 GCancellable *cancellable,
                                 GAsyncReadyCallback callback,
                                 gpointer user_data)
@@ -4856,6 +4881,7 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
+	const gchar *folder_element;
 
 	g_return_if_fail (cnc != NULL);
 
@@ -4876,8 +4902,30 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 
 	e_soap_message_end_element (msg);
 
+	switch (folder_type) {
+		case EWS_FOLDER_TYPE_MAILBOX:
+			folder_element = "Folder";
+			break;
+		case EWS_FOLDER_TYPE_CALENDAR:
+			folder_element = "CalendarFolder";
+			break;
+		case EWS_FOLDER_TYPE_CONTACTS:
+			folder_element = "ContactsFolder";
+			break;
+		case EWS_FOLDER_TYPE_QUERY:
+			folder_element = "SearchFolder";
+			break;
+		case EWS_FOLDER_TYPE_TASKS:
+			folder_element = "TasksFolder";
+			break;
+		default:
+			g_warn_if_reached ();
+			folder_element = "Folder";
+			break;
+	}
+
 	e_soap_message_start_element (msg, "Folders", "messages", NULL);
-	e_soap_message_start_element (msg, "Folder", NULL, NULL);
+	e_soap_message_start_element (msg, folder_element, NULL, NULL);
 	e_ews_message_write_string_parameter (msg, "DisplayName", NULL, folder_name);
 
 	e_soap_message_end_element (msg);
@@ -4890,6 +4938,8 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 		e_ews_connection_create_folder);
 
 	async_data = g_new0 (EwsAsyncData, 1);
+	async_data->folder_type = folder_type;
+
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -4933,6 +4983,7 @@ e_ews_connection_create_folder_sync (EEwsConnection *cnc,
                                      const gchar *parent_folder_id,
                                      gboolean is_distinguished_id,
                                      const gchar *folder_name,
+                                     EwsFolderType folder_type,
                                      EwsFolderId **folder_id,
                                      GCancellable *cancellable,
                                      GError **error)
@@ -4947,8 +4998,8 @@ e_ews_connection_create_folder_sync (EEwsConnection *cnc,
 
 	e_ews_connection_create_folder (
 		cnc, pri, parent_folder_id,
-		is_distinguished_id,
-		folder_name, cancellable,
+		is_distinguished_id, folder_name,
+		folder_type, cancellable,
 		e_async_closure_callback, closure);
 
 	result = e_async_closure_wait (closure);

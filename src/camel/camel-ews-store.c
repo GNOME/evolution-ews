@@ -752,8 +752,8 @@ ews_create_folder_sync (CamelStore *store,
 	success = e_ews_connection_create_folder_sync (
 		connection,
 		EWS_PRIORITY_MEDIUM, fid,
-		FALSE, folder_name, &folder_id,
-		cancellable, &local_error);
+		FALSE, folder_name, EWS_FOLDER_TYPE_MAILBOX,
+		&folder_id, cancellable, &local_error);
 
 	g_object_unref (connection);
 

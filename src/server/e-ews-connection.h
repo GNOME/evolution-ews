@@ -520,6 +520,7 @@ void		e_ews_connection_create_folder	(EEwsConnection *cnc,
 						 const gchar *parent_folder_id,
 						 gboolean is_distinguished_id,
 						 const gchar *folder_name,
+						 EwsFolderType folder_type,
 						 GCancellable *cancellable,
 						 GAsyncReadyCallback callback,
 						 gpointer user_data);
@@ -534,6 +535,7 @@ gboolean	e_ews_connection_create_folder_sync
 						 const gchar *parent_folder_id,
 						 gboolean is_distinguished_id,
 						 const gchar *folder_name,
+						 EwsFolderType folder_type,
 						 EwsFolderId **folder_id,
 						 GCancellable *cancellable,
 						 GError **error);
