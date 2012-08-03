@@ -615,7 +615,6 @@ e_cal_backend_ews_open (ECalBackend *backend,
 {
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
-	ESourceRegistry *registry;
 	ESource *source;
 	const gchar *cache_dir;
 	gboolean need_to_authenticate;
@@ -624,7 +623,6 @@ e_cal_backend_ews_open (ECalBackend *backend,
 	cbews = (ECalBackendEws *) backend;
 	priv = cbews->priv;
 
-	registry = e_cal_backend_get_registry (backend);
 	cache_dir = e_cal_backend_get_cache_dir (backend);
 	source = e_backend_get_source (E_BACKEND (cbews));
 

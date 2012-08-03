@@ -2473,7 +2473,6 @@ e_book_backend_ews_start_book_view (EBookBackend *backend,
 	GSList *ids = NULL, *mailboxes = NULL, *l, *contacts = NULL, *c;
 	EwsFolderId *fid;
 	ESource *source;
-	ESourceRegistry *registry;
 	ESourceEwsFolder *extension;
 	const gchar *extension_name;
 	GError *error = NULL;
@@ -2483,7 +2482,6 @@ e_book_backend_ews_start_book_view (EBookBackend *backend,
 	priv = ebews->priv;
 	query = e_data_book_view_get_card_query (book_view);
 
-	registry = e_book_backend_get_registry (backend);
 	source = e_backend_get_source (E_BACKEND (backend));
 
 	e_data_book_view_ref (book_view);
@@ -2806,13 +2804,11 @@ e_book_backend_ews_open (EBookBackend *backend,
                          gboolean only_if_exists)
 {
 	EBookBackendEws *cbews;
-	ESourceRegistry *registry;
 	ESource *source;
 	GError *error = NULL;
 
 	cbews = E_BOOK_BACKEND_EWS (backend);
 
-	registry = e_book_backend_get_registry (backend);
 	source = e_backend_get_source (E_BACKEND (backend));
 	e_book_backend_ews_load_source (backend, source, only_if_exists, &error);
 
