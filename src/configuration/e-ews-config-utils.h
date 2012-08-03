@@ -49,8 +49,7 @@ void			e_ews_config_utils_run_in_thread_with_feedback_modal	(GtkWindow *parent,
 										 gpointer user_data,
 										 GDestroyNotify free_user_data);
 
-EEwsConnection	*	e_ews_config_utils_open_connection_for			(GtkWindow *parent,
-										 ESourceRegistry *registry,
+EEwsConnection	*	e_ews_config_utils_open_connection_for			(ESourceRegistry *registry,
 										 ESource *source,
 										 CamelEwsSettings *ews_settings,
 										 GCancellable *cancellable,

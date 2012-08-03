@@ -16,4 +16,9 @@
     <_secondary>The reported error was &quot;{0}&quot;.</_secondary>
   </error>
 
+  <error type="warning" id="query-delegates-error">
+    <_primary>Failed to retrieve &quot;Delegates&quot; settings.</_primary>
+    <_secondary>The reported error was &quot;{0}&quot;.</_secondary>
+  </error>
+
 </error-list>

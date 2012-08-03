@@ -368,8 +368,7 @@ e_ews_config_utils_authenticator_init (EEwsConfigUtilsAuthenticator *authenticat
 }
 
 EEwsConnection	*
-e_ews_config_utils_open_connection_for (GtkWindow *parent,
-					ESourceRegistry *registry,
+e_ews_config_utils_open_connection_for (ESourceRegistry *registry,
 					ESource *source,
 					CamelEwsSettings *ews_settings,
 					GCancellable *cancellable,

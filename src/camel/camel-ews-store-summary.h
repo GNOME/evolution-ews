@@ -22,6 +22,9 @@
 	(G_TYPE_INSTANCE_GET_CLASS \
 	((obj), CAMEL_TYPE_EWS_STORE_SUMMARY, CamelEwsStoreSummaryClass))
 
+/* the last possible value from CAMEL_FOLDER_TYPE_MASK range */
+#define CAMEL_EWS_FOLDER_TYPE_JOURNAL (((CAMEL_FOLDER_TYPE_MASK >> CAMEL_FOLDER_TYPE_BIT) - 1) << CAMEL_FOLDER_TYPE_BIT)
+
 G_BEGIN_DECLS
 
 typedef struct _CamelEwsStoreSummary CamelEwsStoreSummary;

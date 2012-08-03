@@ -759,7 +759,8 @@ camel_ews_store_summary_get_folder_id_from_folder_type (CamelEwsStoreSummary *ew
 		guint64 folder_flags;
 
 		folder_flags = camel_ews_store_summary_get_folder_flags (ews_summary, id, NULL);
-		if ((folder_flags & CAMEL_FOLDER_TYPE_MASK) == folder_type) {
+		if ((folder_flags & CAMEL_FOLDER_TYPE_MASK) == folder_type &&
+		    (folder_flags & CAMEL_FOLDER_SYSTEM) != 0) {
 			folder_id = id;
 			l->data = NULL;
 			break;

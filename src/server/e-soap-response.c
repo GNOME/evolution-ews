@@ -487,6 +487,14 @@ e_soap_response_get_parameters (ESoapResponse *response)
 	return (const GList *) response->priv->parameters;
 }
 
+ESoapParameter *
+e_soap_response_get_parameter (ESoapResponse *response)
+{
+	g_return_val_if_fail (E_IS_SOAP_RESPONSE (response), NULL);
+
+	return response->priv->xml_method;
+}
+
 /**
  * e_soap_response_get_first_parameter:
  * @response: the #ESoapResponse object.

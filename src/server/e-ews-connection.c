@@ -117,6 +117,7 @@ struct _EwsAsyncData {
 	GSList *items;
 	gchar *sync_state;
 	gboolean includes_last_item;
+	EwsDelegateDeliver deliver_to;
 };
 
 struct _EwsNode {
@@ -1514,15 +1515,24 @@ ews_oal_details_free (EwsOALDetails *details)
 void
 ews_user_id_free (EwsUserId *id)
 {
-	if (id)
-	{
+	if (id) {
 		g_free (id->sid);
-		g_free (id->primary_smtp_add);
+		g_free (id->primary_smtp);
 		g_free (id->display_name);
 		g_free (id->distinguished_user);
 		g_free (id->external_user);
 		g_free (id);
 	}
+}
+
+void
+ews_delegate_info_free (EwsDelegateInfo *info)
+{
+	if (!info)
+		return;
+
+	ews_user_id_free (info->user_id);
+	g_free (info);
 }
 
 /* Connection APIS */
@@ -4230,7 +4240,7 @@ ews_connection_resolve_by_name (EEwsConnection *cnc,
 
 	for (miter = mailboxes; miter; miter = miter->next) {
 		const EwsMailbox *mailbox = miter->data;
-		if (mailbox->email && *mailbox->email && g_strcmp0 (mailbox->mb_type, "EX") != 0
+		if (mailbox->email && *mailbox->email && g_strcmp0 (mailbox->routing_type, "EX") != 0
 		    && ((!is_user_name && g_str_has_prefix (mailbox->email, usename) && mailbox->email[len] == '@') ||
 		    (is_user_name && g_str_equal (usename, mailbox->name)))) {
 			*smtp_address = g_strdup (mailbox->email);
@@ -4305,7 +4315,7 @@ e_ews_connection_ex_to_smtp_sync (EEwsConnection *cnc,
 	/* only one mailbox matches */
 	if (mailboxes && !mailboxes->next && mailboxes->data) {
 		const EwsMailbox *mailbox = mailboxes->data;
-		if (mailbox->email && *mailbox->email && g_strcmp0 (mailbox->mb_type, "EX") != 0) {
+		if (mailbox->email && *mailbox->email && g_strcmp0 (mailbox->routing_type, "EX") != 0) {
 			*smtp_address = g_strdup (mailbox->email);
 		} else if (contacts && !contacts->next && contacts->data) {
 			const EwsResolveContact *resolved = contacts->data;
@@ -6040,20 +6050,20 @@ e_ews_connection_get_free_busy_sync (EEwsConnection *cnc,
 }
 
 static EwsPermissionLevel
-get_permission_from_string (gchar *permission)
+get_permission_from_string (const gchar *permission)
 {
-	g_return_val_if_fail (permission != NULL, NONE);
+	g_return_val_if_fail (permission != NULL, EwsPermissionLevel_Unknown);
 
 	if (!g_ascii_strcasecmp (permission, "Editor"))
-		return EWS_PERM_EDITOR;
+		return EwsPermissionLevel_Editor;
 	else if (!g_ascii_strcasecmp (permission, "Author"))
-		return EWS_PERM_AUTHOR;
+		return EwsPermissionLevel_Author;
 	else if (!g_ascii_strcasecmp (permission, "Reviewer"))
-		return EWS_PERM_REVIEWER;
+		return EwsPermissionLevel_Reviewer;
 	else if (!g_ascii_strcasecmp (permission, "Custom"))
-		return CUSTOM;
+		return EwsPermissionLevel_Custom;
 	else
-		return NONE;
+		return EwsPermissionLevel_None;
 
 }
 
@@ -6066,11 +6076,15 @@ ews_handle_delegate_user_param (ESoapParameter *param,
 	gchar *value;
 
 	node = e_soap_parameter_get_first_child_by_name (param, "DelegateUser");
-
-	data = g_new (EwsDelegateInfo, 1);
-	data->user_id = g_new0 (EwsUserId, 1);
+	if (!node)
+		return;
 
 	subparam = e_soap_parameter_get_first_child_by_name (node, "UserId");
+	if (!subparam)
+		return;
+
+	data = g_new0 (EwsDelegateInfo, 1);
+	data->user_id = g_new0 (EwsUserId, 1);
 
 	/*Parse User Id*/
 
@@ -6078,50 +6092,71 @@ ews_handle_delegate_user_param (ESoapParameter *param,
 	data->user_id->sid = e_soap_parameter_get_string_value (child);
 
 	child = e_soap_parameter_get_first_child_by_name (subparam, "PrimarySmtpAddress");
-	data->user_id->primary_smtp_add = e_soap_parameter_get_string_value (child);
+	data->user_id->primary_smtp = e_soap_parameter_get_string_value (child);
 
 	child = e_soap_parameter_get_first_child_by_name (subparam, "DisplayName");
 	data->user_id->display_name = e_soap_parameter_get_string_value (child);
 
 	subparam = e_soap_parameter_get_first_child_by_name (node, "DelegatePermissions");
-	/*Parse Delegate Permissions*/
 
+	/*Parse Delegate Permissions*/
 	child = e_soap_parameter_get_first_child_by_name (subparam, "CalendarFolderPermissionLevel");
-	data->calendar = get_permission_from_string (e_soap_parameter_get_string_value (child));
+	if (child) {
+		value = e_soap_parameter_get_string_value (child);
+		data->calendar = get_permission_from_string (value);
+		g_free (value);
+	}
 
 	child = e_soap_parameter_get_first_child_by_name (subparam, "ContactsFolderPermissionLevel");
-	data->contact = get_permission_from_string (e_soap_parameter_get_string_value (child));
+	if (child) {
+		value = e_soap_parameter_get_string_value (child);
+		data->contacts = get_permission_from_string (value);
+		g_free (value);
+	}
 
 	child = e_soap_parameter_get_first_child_by_name (subparam, "InboxFolderPermissionLevel");
-	data->inbox = get_permission_from_string (e_soap_parameter_get_string_value (child));
+	if (child) {
+		value = e_soap_parameter_get_string_value (child);
+		data->inbox = get_permission_from_string (value);
+		g_free (value);
+	}
 
 	child = e_soap_parameter_get_first_child_by_name (subparam, "TasksFolderPermissionLevel");
-	data->tasks = get_permission_from_string (e_soap_parameter_get_string_value (child));
+	if (child) {
+		value = e_soap_parameter_get_string_value (child);
+		data->tasks = get_permission_from_string (value);
+		g_free (value);
+	}
 
 	child = e_soap_parameter_get_first_child_by_name (subparam, "NotesFolderPermissionLevel");
-	data->notes = get_permission_from_string (e_soap_parameter_get_string_value (child));
+	if (child) {
+		value = e_soap_parameter_get_string_value (child);
+		data->notes = get_permission_from_string (value);
+		g_free (value);
+	}
 
 	child = e_soap_parameter_get_first_child_by_name (subparam, "JournalFolderPermissionLevel");
-	data->journal = get_permission_from_string (e_soap_parameter_get_string_value (child));
+	if (child) {
+		value = e_soap_parameter_get_string_value (child);
+		data->journal = get_permission_from_string (value);
+		g_free (value);
+	}
 
 	subparam = e_soap_parameter_get_first_child_by_name (node, "ReceiveCopiesOfMeetingMessages");
-
-	value = e_soap_parameter_get_string_value (subparam);
-	if (!g_ascii_strcasecmp (value, "true"))
-		data->meetingcopies = TRUE;
+	if (subparam) {
+		value = e_soap_parameter_get_string_value (subparam);
+		data->meetingcopies = g_strcmp0 (value, "true") == 0;
+		g_free (value);
+	}
 
 	subparam = e_soap_parameter_get_first_child_by_name (node, "ViewPrivateItems");
-
-	value = e_soap_parameter_get_string_value (subparam);
-	if (!g_ascii_strcasecmp (value, "true"))
-		data->view_priv_items = TRUE;
-	else
-		data->view_priv_items = FALSE;
+	if (subparam) {
+		value = e_soap_parameter_get_string_value (subparam);
+		data->view_priv_items = g_strcmp0 (value, "true") == 0;
+		g_free (value);
+	}
 
 	async_data->items = g_slist_append (async_data->items, data);
-	async_data->items_created = g_slist_append (async_data->items_created, data);
-
-	return;
 }
 
 static void
@@ -6131,12 +6166,45 @@ get_delegate_response_cb (ESoapResponse *response,
 	EwsAsyncData *async_data;
 	ESoapParameter *param;
 	ESoapParameter *subparam;
+	gchar *value;
 	GError *error = NULL;
 
 	async_data = g_simple_async_result_get_op_res_gpointer (simple);
 
+	if (ews_get_response_status (e_soap_response_get_parameter (response), &error))
+		param = e_soap_response_get_first_parameter_by_name (
+			response, "DeliverMeetingRequests", &error);
+	else
+		param = NULL;
+
+	/* Sanity check */
+	g_return_if_fail (
+		(param != NULL && error == NULL) ||
+		(param == NULL && error != NULL));
+
+	if (error != NULL) {
+		g_simple_async_result_take_error (simple, error);
+		return;
+	}
+
+	value = e_soap_parameter_get_string_value (param);
+	if (g_strcmp0 (value, "DelegatesOnly") == 0)
+		async_data->deliver_to = EwsDelegateDeliver_DelegatesOnly;
+	else if (g_strcmp0 (value, "DelegatesAndMe") == 0)
+		async_data->deliver_to = EwsDelegateDeliver_DelegatesAndMe;
+	else if (g_strcmp0 (value, "DelegatesAndSendInformationToMe") == 0)
+		async_data->deliver_to = EwsDelegateDeliver_DelegatesAndSendInformationToMe;
+	else {
+		g_message ("%s: Unknown deliver-to value '%s'", G_STRFUNC, value ? value : "[null]");
+		async_data->deliver_to = EwsDelegateDeliver_DelegatesAndSendInformationToMe;
+	}
+	g_free (value);
+
 	param = e_soap_response_get_first_parameter_by_name (
-		response, "ResponseMessages", &error);
+		response, "ResponseMessages", NULL);
+	/* it's OK to not have set any delegate */
+	if (!param)
+		return;
 
 	/* Sanity check */
 	g_return_if_fail (
@@ -6165,22 +6233,11 @@ get_delegate_response_cb (ESoapResponse *response,
 	}
 }
 
-/**
- * e_ews_connection_get_delegate:
- * @cnc:
- * @pri:
- * @mail_id: mail is for which delegate is requested
- * @include permission: "true", "false"
- * @delete_type: "HardDelete", "SoftDelete", "MoveToDeletedItems"
- * @cancellable:
- * @callback:
- * @user_data:
- **/
 void
 e_ews_connection_get_delegate (EEwsConnection *cnc,
                                gint pri,
                                const gchar *mail_id,
-                               const gchar *include_permissions,
+                               gboolean include_permissions,
                                GCancellable *cancellable,
                                GAsyncReadyCallback callback,
                                gpointer user_data)
@@ -6191,11 +6248,11 @@ e_ews_connection_get_delegate (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetDelegate", "IncludePermissions", include_permissions, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetDelegate", "IncludePermissions", include_permissions ? "true" : "false", EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_start_element (msg, "Mailbox", "messages", NULL);
 
-	e_ews_message_write_string_parameter (msg, "EmailAddress", NULL, mail_id);
+	e_ews_message_write_string_parameter (msg, "EmailAddress", NULL, mail_id ? mail_id : cnc->priv->email);
 
 	e_soap_message_end_element (msg);
 
@@ -6219,13 +6276,16 @@ e_ews_connection_get_delegate (EEwsConnection *cnc,
 gboolean
 e_ews_connection_get_delegate_finish (EEwsConnection *cnc,
                                       GAsyncResult *result,
-                                      EwsDelegateInfo **get_delegate,
+				      EwsDelegateDeliver *deliver_to,
+				      GSList **delegates, /* EwsDelegateInfo * */
                                       GError **error)
 {
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (delegates != NULL, FALSE);
+	g_return_val_if_fail (deliver_to != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_get_delegate),
@@ -6236,27 +6296,21 @@ e_ews_connection_get_delegate_finish (EEwsConnection *cnc,
 
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
-	*get_delegate = (EwsDelegateInfo *) async_data->items_created->data;
-	g_slist_free (async_data->items_created);
+
+	*deliver_to = async_data->deliver_to;
+	*delegates = async_data->items;
+	async_data->items = NULL;
 
 	return TRUE;
 }
 
-/**
- * e_ews_connection_get_delegate:
- * @cnc:
- * @pri:
- * @mail_id: mail id for which delegate requested
- * @include_permissions: "true", "false"
- * @cancellable:
- * @error:
- **/
 gboolean
 e_ews_connection_get_delegate_sync (EEwsConnection *cnc,
                                     gint pri,
                                     const gchar *mail_id,
-                                    const gchar *include_permissions,
-                                    EwsDelegateInfo **get_delegate,
+                                    gboolean include_permissions,
+				    EwsDelegateDeliver *deliver_to,
+				    GSList **delegates, /* EwsDelegateInfo * */
                                     GCancellable *cancellable,
                                     GError **error)
 {
@@ -6265,6 +6319,8 @@ e_ews_connection_get_delegate_sync (EEwsConnection *cnc,
 	gboolean success;
 
 	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (deliver_to != NULL, FALSE);
+	g_return_val_if_fail (delegates != NULL, FALSE);
 
 	closure = e_async_closure_new ();
 
@@ -6276,7 +6332,417 @@ e_ews_connection_get_delegate_sync (EEwsConnection *cnc,
 	result = e_async_closure_wait (closure);
 
 	success = e_ews_connection_get_delegate_finish (
-		cnc, result, get_delegate, error);
+		cnc, result, deliver_to, delegates, error);
+
+	e_async_closure_free (closure);
+
+	return success;
+}
+
+static void
+update_delegate_response_cb (ESoapResponse *response,
+                             GSimpleAsyncResult *simple)
+{
+	ESoapParameter *param;
+	ESoapParameter *subparam;
+	GError *error = NULL;
+
+	if (ews_get_response_status (e_soap_response_get_parameter (response), &error)) {
+		param = e_soap_response_get_first_parameter_by_name (
+			response, "ResponseMessages", NULL);
+		/* that's OK to not receive any ResponseMessages here */
+		if (!param)
+			return;
+	} else
+		param = NULL;
+
+	/* Sanity check */
+	g_return_if_fail (
+		(param != NULL && error == NULL) ||
+		(param == NULL && error != NULL));
+
+	if (error != NULL) {
+		g_simple_async_result_take_error (simple, error);
+		return;
+	}
+
+	subparam = e_soap_parameter_get_first_child (param);
+
+	while (subparam != NULL) {
+		if (!ews_get_response_status (subparam, &error)) {
+			g_simple_async_result_take_error (simple, error);
+			return;
+		}
+
+		subparam = e_soap_parameter_get_next_child (param);
+	}
+}
+
+static void
+set_delegate_permission (ESoapMessage *msg,
+			 const gchar *elem_name,
+			 EwsPermissionLevel perm_level)
+{
+	const gchar *level_name = NULL;
+
+	if (perm_level == EwsPermissionLevel_None)
+		level_name = "None";
+	else if (perm_level == EwsPermissionLevel_Reviewer)
+		level_name = "Reviewer";
+	else if (perm_level == EwsPermissionLevel_Author)
+		level_name = "Author";
+	else if (perm_level == EwsPermissionLevel_Editor)
+		level_name = "Editor";
+
+	if (!level_name)
+		return;
+
+	e_ews_message_write_string_parameter (msg, elem_name, NULL, level_name);
+}
+
+void
+e_ews_connection_add_delegate (EEwsConnection *cnc,
+			       gint pri,
+			       const gchar *mail_id,
+			       const GSList *delegates, /* EwsDelegateInfo * */
+			       GCancellable *cancellable,
+			       GAsyncReadyCallback callback,
+			       gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+	const GSList *iter;
+
+	g_return_if_fail (cnc != NULL);
+	g_return_if_fail (delegates != NULL);
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "AddDelegate", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+
+	e_soap_message_start_element (msg, "Mailbox", "messages", NULL);
+	e_ews_message_write_string_parameter (msg, "EmailAddress", NULL, mail_id ? mail_id : cnc->priv->email);
+	e_soap_message_end_element (msg);
+
+	e_soap_message_start_element (msg, "DelegateUsers", "messages", NULL);
+	for (iter = delegates; iter; iter = iter->next) {
+		const EwsDelegateInfo *di = iter->data;
+
+		if (!di)
+			continue;
+
+		e_soap_message_start_element (msg, "DelegateUser", NULL, NULL);
+
+		e_soap_message_start_element (msg, "UserId", NULL, NULL);
+		e_ews_message_write_string_parameter (msg, "PrimarySmtpAddress", NULL, di->user_id->primary_smtp);
+		e_soap_message_end_element (msg); /* UserId */
+
+		e_soap_message_start_element (msg, "DelegatePermissions", NULL, NULL);
+		set_delegate_permission (msg, "CalendarFolderPermissionLevel", di->calendar);
+		set_delegate_permission (msg, "TasksFolderPermissionLevel", di->tasks);
+		set_delegate_permission (msg, "InboxFolderPermissionLevel", di->inbox);
+		set_delegate_permission (msg, "ContactsFolderPermissionLevel", di->contacts);
+		set_delegate_permission (msg, "NotesFolderPermissionLevel", di->notes);
+		set_delegate_permission (msg, "JournalFolderPermissionLevel", di->journal);
+		e_soap_message_end_element (msg); /* DelegatePermissions */
+
+		e_ews_message_write_string_parameter (msg, "ReceiveCopiesOfMeetingMessages", NULL,
+			di->meetingcopies ? "true" : "false");
+		e_ews_message_write_string_parameter (msg, "ViewPrivateItems", NULL,
+			di->view_priv_items ? "true" : "false");
+
+		e_soap_message_end_element (msg); /* DelegateUser */
+	}
+
+	e_soap_message_end_element (msg); /* DelegateUsers */
+
+	e_ews_message_write_footer (msg);
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_add_delegate);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	e_ews_connection_queue_request (
+		cnc, msg, update_delegate_response_cb,
+		pri, cancellable, simple);
+
+	g_object_unref (simple);
+}
+
+gboolean
+e_ews_connection_add_delegate_finish (EEwsConnection *cnc,
+				      GAsyncResult *result,
+				      GError **error)
+{
+	GSimpleAsyncResult *simple;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_add_delegate),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+
+	return !g_simple_async_result_propagate_error (simple, error);
+}
+
+gboolean
+e_ews_connection_add_delegate_sync (EEwsConnection *cnc,
+				    gint pri,
+				    const gchar *mail_id,
+				    const GSList *delegates, /* EwsDelegateInfo * */
+				    GCancellable *cancellable,
+                                    GError **error)
+{
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (delegates != NULL, FALSE);
+
+	closure = e_async_closure_new ();
+
+	e_ews_connection_add_delegate (
+		cnc, pri, mail_id, delegates, cancellable,
+		e_async_closure_callback, closure);
+
+	result = e_async_closure_wait (closure);
+
+	success = e_ews_connection_add_delegate_finish (cnc, result, error);
+
+	e_async_closure_free (closure);
+
+	return success;
+}
+
+void
+e_ews_connection_remove_delegate (EEwsConnection *cnc,
+				  gint pri,
+				  const gchar *mail_id,
+				  const GSList *delegate_ids, /* EwsUserId * */
+				  GCancellable *cancellable,
+				  GAsyncReadyCallback callback,
+				  gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+	const GSList *iter;
+
+	g_return_if_fail (cnc != NULL);
+	g_return_if_fail (delegate_ids != NULL);
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "RemoveDelegate", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+
+	e_soap_message_start_element (msg, "Mailbox", "messages", NULL);
+	e_ews_message_write_string_parameter (msg, "EmailAddress", NULL, mail_id ? mail_id : cnc->priv->email);
+	e_soap_message_end_element (msg);
+
+	e_soap_message_start_element (msg, "UserIds", "messages", NULL);
+	for (iter = delegate_ids; iter; iter = iter->next) {
+		const EwsUserId *user_id = iter->data;
+
+		if (!user_id)
+			continue;
+
+		e_soap_message_start_element (msg, "UserId", NULL, NULL);
+		e_ews_message_write_string_parameter (msg, "PrimarySmtpAddress", NULL, user_id->primary_smtp);
+		e_soap_message_end_element (msg); /* UserId */
+	}
+
+	e_soap_message_end_element (msg); /* UserIds */
+
+	e_ews_message_write_footer (msg);
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_remove_delegate);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	e_ews_connection_queue_request (
+		cnc, msg, update_delegate_response_cb,
+		pri, cancellable, simple);
+
+	g_object_unref (simple);
+}
+
+gboolean
+e_ews_connection_remove_delegate_finish (EEwsConnection *cnc,
+					 GAsyncResult *result,
+					 GError **error)
+{
+	GSimpleAsyncResult *simple;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_remove_delegate),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+
+	return !g_simple_async_result_propagate_error (simple, error);
+}
+
+gboolean
+e_ews_connection_remove_delegate_sync (EEwsConnection *cnc,
+				       gint pri,
+                                       const gchar *mail_id,
+				       const GSList *delegate_ids, /* EwsUserId * */
+                                       GCancellable *cancellable,
+                                       GError **error)
+{
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (delegate_ids != NULL, FALSE);
+
+	closure = e_async_closure_new ();
+
+	e_ews_connection_remove_delegate (
+		cnc, pri, mail_id, delegate_ids, cancellable,
+		e_async_closure_callback, closure);
+
+	result = e_async_closure_wait (closure);
+
+	success = e_ews_connection_remove_delegate_finish (cnc, result, error);
+
+	e_async_closure_free (closure);
+
+	return success;
+}
+
+void
+e_ews_connection_update_delegate (EEwsConnection *cnc,
+				  gint pri,
+				  const gchar *mail_id,
+				  EwsDelegateDeliver deliver_to,
+				  const GSList *delegates, /* EwsDelegateInfo * */
+				  GCancellable *cancellable,
+				  GAsyncReadyCallback callback,
+				  gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+	const GSList *iter;
+
+	g_return_if_fail (cnc != NULL);
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "UpdateDelegate", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+
+	e_soap_message_start_element (msg, "Mailbox", "messages", NULL);
+	e_ews_message_write_string_parameter (msg, "EmailAddress", NULL, mail_id ? mail_id : cnc->priv->email);
+	e_soap_message_end_element (msg);
+
+	if (delegates) {
+		e_soap_message_start_element (msg, "DelegateUsers", "messages", NULL);
+		for (iter = delegates; iter; iter = iter->next) {
+			const EwsDelegateInfo *di = iter->data;
+
+			if (!di)
+				continue;
+
+			e_soap_message_start_element (msg, "DelegateUser", NULL, NULL);
+
+			e_soap_message_start_element (msg, "UserId", NULL, NULL);
+			e_ews_message_write_string_parameter (msg, "PrimarySmtpAddress", NULL, di->user_id->primary_smtp);
+			e_soap_message_end_element (msg); /* UserId */
+
+			e_soap_message_start_element (msg, "DelegatePermissions", NULL, NULL);
+			set_delegate_permission (msg, "CalendarFolderPermissionLevel", di->calendar);
+			set_delegate_permission (msg, "TasksFolderPermissionLevel", di->tasks);
+			set_delegate_permission (msg, "InboxFolderPermissionLevel", di->inbox);
+			set_delegate_permission (msg, "ContactsFolderPermissionLevel", di->contacts);
+			set_delegate_permission (msg, "NotesFolderPermissionLevel", di->notes);
+			set_delegate_permission (msg, "JournalFolderPermissionLevel", di->journal);
+			e_soap_message_end_element (msg); /* DelegatePermissions */
+
+			e_ews_message_write_string_parameter (msg, "ReceiveCopiesOfMeetingMessages", NULL,
+				di->meetingcopies ? "true" : "false");
+			e_ews_message_write_string_parameter (msg, "ViewPrivateItems", NULL,
+				di->view_priv_items ? "true" : "false");
+
+			e_soap_message_end_element (msg); /* DelegateUser */
+		}
+
+		e_soap_message_end_element (msg); /* DelegateUsers */
+	}
+
+	e_ews_message_write_string_parameter (msg, "DeliverMeetingRequests", "messages",
+		deliver_to == EwsDelegateDeliver_DelegatesOnly ? "DelegatesOnly" :
+		deliver_to == EwsDelegateDeliver_DelegatesAndMe ? "DelegatesAndMe" :
+		"DelegatesAndSendInformationToMe");
+
+	e_ews_message_write_footer (msg);
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_update_delegate);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	e_ews_connection_queue_request (
+		cnc, msg, update_delegate_response_cb,
+		pri, cancellable, simple);
+
+	g_object_unref (simple);
+}
+
+gboolean
+e_ews_connection_update_delegate_finish (EEwsConnection *cnc,
+					 GAsyncResult *result,
+					 GError **error)
+{
+	GSimpleAsyncResult *simple;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_update_delegate),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+
+	return !g_simple_async_result_propagate_error (simple, error);
+}
+
+gboolean
+e_ews_connection_update_delegate_sync (EEwsConnection *cnc,
+				       gint pri,
+                                       const gchar *mail_id,
+				       EwsDelegateDeliver deliver_to,
+				       const GSList *delegates, /* EwsDelegateInfo * */
+                                       GCancellable *cancellable,
+                                       GError **error)
+{
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
+
+	closure = e_async_closure_new ();
+
+	e_ews_connection_update_delegate (
+		cnc, pri, mail_id, deliver_to, delegates, cancellable,
+		e_async_closure_callback, closure);
+
+	result = e_async_closure_wait (closure);
+
+	success = e_ews_connection_update_delegate_finish (cnc, result, error);
 
 	e_async_closure_free (closure);
 

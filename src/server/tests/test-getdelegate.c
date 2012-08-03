@@ -46,25 +46,25 @@ get_delegate_cb (GObject *object,
 {
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	GError *error = NULL;
-	EwsDelegateInfo *get_delegate;
+	GSList *delegates = NULL;
+	EwsDelegateDeliver deliver_to;
 
-	e_ews_connection_get_delegate_finish	(cnc, res, &get_delegate,
-						 &error);
+	e_ews_connection_get_delegate_finish (cnc, res, &deliver_to, &delegates, &error);
 
 	if (error != NULL) {
 		g_warning ("Unable to get delegate: %s \n", error->message);
 		g_clear_error (&error);
 		goto quit;
 	}
-	if (get_delegate !=NULL && get_delegate->user_id != NULL)
-		g_print ("Delegate is %s", get_delegate->user_id->display_name);
 
-quit:
-	if (get_delegate)
-	{
-		ews_user_id_free (get_delegate->user_id);
-		g_free (get_delegate);
+	if (delegates != NULL && delegates->data) {
+		EwsDelegateInfo *info = delegates->data;
+		if (info->user_id != NULL)
+			g_print ("Delegate is %s\n", get_delegate->user_id->display_name);
 	}
+
+ quit:
+	g_slist_free_full (delegates, (GDestroyNotify) ews_delegate_info_free);
 	g_main_loop_quit (main_loop);
 }
 
@@ -96,7 +96,7 @@ op_test_get_delegate ()
 
 	e_ews_connection_get_delegate (
 		cnc, EWS_PRIORITY_MEDIUM, "abc@xyz.com",
-		"true", cancellable,
+		TRUE, cancellable,
 		get_delegate_cb, NULL);
 
 }

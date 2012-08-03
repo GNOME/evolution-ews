@@ -23,6 +23,7 @@
 #include "e-mail-config-ews-gal.h"
 #include "e-mail-config-ews-notebook.h"
 #include "e-mail-config-ews-oal-combo-box.h"
+#include "e-mail-config-ews-delegates-page.h"
 #include "e-mail-config-ews-ooo-page.h"
 
 #include "e-ews-config-ui-extension.h"
@@ -42,6 +43,7 @@ e_module_load (GTypeModule *type_module)
 	e_mail_config_ews_gal_type_register (type_module);
 	e_mail_config_ews_notebook_type_register (type_module);
 	e_mail_config_ews_oal_combo_box_type_register (type_module);
+	e_mail_config_ews_delegates_page_type_register (type_module);
 	e_mail_config_ews_ooo_page_type_register (type_module);
 	e_ews_config_ui_extension_type_register (type_module);
 

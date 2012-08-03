@@ -681,7 +681,7 @@ read_folder_permissions_thread (GObject *dialog,
 	g_return_if_fail (widgets->source != NULL);
 	g_return_if_fail (widgets->ews_settings != NULL);
 
-	widgets->conn = e_ews_config_utils_open_connection_for (GTK_WINDOW (dialog),
+	widgets->conn = e_ews_config_utils_open_connection_for (
 		widgets->registry,
 		widgets->source,
 		widgets->ews_settings,

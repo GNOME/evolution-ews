@@ -76,7 +76,8 @@ typedef struct {
 typedef struct {
 	gchar *name;
 	gchar *email;
-	gchar *mb_type;
+	gchar *routing_type;
+	gchar *mailbox_type;
 	EwsId *item_id;
 } EwsMailbox;
 

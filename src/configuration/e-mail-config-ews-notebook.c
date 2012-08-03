@@ -20,6 +20,7 @@
 
 #include <mail/e-mail-config-notebook.h>
 
+#include "e-mail-config-ews-delegates-page.h"
 #include "e-mail-config-ews-ooo-page.h"
 
 G_DEFINE_DYNAMIC_TYPE (
@@ -76,6 +77,13 @@ mail_config_ews_notebook_constructed (GObject *object)
 		EMailConfigPage *page;
 
 		page = e_mail_config_ews_ooo_page_new (
+			registry,
+			account_source,
+			identity_source,
+			collection_source);
+		e_mail_config_notebook_add_page (notebook, page);
+
+		page = e_mail_config_ews_delegates_page_new (
 			registry,
 			account_source,
 			identity_source,

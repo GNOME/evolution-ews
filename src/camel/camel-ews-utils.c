@@ -690,7 +690,7 @@ form_email_string_from_mb (EEwsConnection *cnc,
 		GString *str;
 		gchar *email = NULL;
 
-		if (g_strcmp0 (mb->mb_type, "EX") == 0) {
+		if (g_strcmp0 (mb->routing_type, "EX") == 0) {
 			e_ews_connection_ex_to_smtp_sync (
 				cnc, EWS_PRIORITY_MEDIUM,
 				mb->name, mb->email, &email,

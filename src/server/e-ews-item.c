@@ -1393,7 +1393,11 @@ e_ews_item_mailbox_from_soap_param (ESoapParameter *param)
 
 	subparam = e_soap_parameter_get_first_child_by_name (param, "RoutingType");
 	if (subparam)
-		mb->mb_type = e_soap_parameter_get_string_value (subparam);
+		mb->routing_type = e_soap_parameter_get_string_value (subparam);
+
+	subparam = e_soap_parameter_get_first_child_by_name (param, "MailboxType");
+	if (subparam)
+		mb->mailbox_type = e_soap_parameter_get_string_value (subparam);
 
 	if (!mb->email && !mb->name) {
 		e_ews_mailbox_free (mb);
@@ -1411,7 +1415,8 @@ e_ews_mailbox_free (EwsMailbox *mailbox)
 
 	g_free (mailbox->name);
 	g_free (mailbox->email);
-	g_free (mailbox->mb_type);
+	g_free (mailbox->routing_type);
+	g_free (mailbox->mailbox_type);
 
 	if (mailbox->item_id) {
 		g_free (mailbox->item_id->id);

@@ -79,6 +79,8 @@ gchar *		e_soap_parameter_get_property	(ESoapParameter *param,
 
 const GList *	e_soap_response_get_parameters	(ESoapResponse *response);
 ESoapParameter *
+		e_soap_response_get_parameter	(ESoapResponse *response);
+ESoapParameter *
 		e_soap_response_get_first_parameter
 						(ESoapResponse *response);
 ESoapParameter *

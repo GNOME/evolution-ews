@@ -112,7 +112,8 @@ struct EEwsSearchIdleData
 	GCancellable *cancellable;
 
 	GObject *dialog;
-	GSList *found_users; /* struct EEwsSearchUser * */
+	GSList *found_users; /* struct EEwsSearchUser *, for 'Mailbox' MailboxType */
+	guint found_contacts; /* how many other than 'Mailbox' were found */
 	gboolean includes_last_item;
 };
 
@@ -200,7 +201,15 @@ search_finish_idle (gpointer user_data)
 		}
 
 		if (!added) {
-			gtk_label_set_text (GTK_LABEL (pgu->info_label), _("No users found"));
+			if (sid->found_contacts > 0) {
+				gchar *str;
+				str = g_strdup_printf (ngettext ("No users found, only one contact", "No users found, only %d contacts",
+					sid->found_contacts), sid->found_contacts);
+				gtk_label_set_text (GTK_LABEL (pgu->info_label), str);
+				g_free (str);
+			} else {
+				gtk_label_set_text (GTK_LABEL (pgu->info_label), _("No users found"));
+			}
 		} else if (sid->includes_last_item) {
 			gchar *str;
 			str = g_strdup_printf (ngettext ("Found one user", "Found %d users", added), added);
@@ -208,7 +217,9 @@ search_finish_idle (gpointer user_data)
 			g_free (str);
 		} else {
 			gchar *str;
-			str = g_strdup_printf (ngettext ("Found more than 100 users, but showing only first %d", "Found more than 100 users, but showing only first %d", added), added);
+			str = g_strdup_printf (ngettext (
+				"Found more than 100 users, but showing only first %d",
+				"Found more than 100 users, but showing only first %d", added), added);
 			gtk_label_set_text (GTK_LABEL (pgu->info_label), str);
 			g_free (str);
 		}
@@ -236,11 +247,16 @@ search_thread (gpointer user_data)
 			&sid->includes_last_item, sid->cancellable, &error)) {
 			GSList *iter;
 
+			sid->found_contacts = 0;
+
 			for (iter = mailboxes; iter != NULL; iter = iter->next) {
 				EwsMailbox *mb = iter->data;
 
-				if (!mb || !mb->email || !*mb->email)
+				if (!mb || !mb->email || !*mb->email
+				    || g_strcmp0 (mb->mailbox_type, "Mailbox") != 0) {
+					sid->found_contacts++;
 					continue;
+				}
 
 				sid->found_users = g_slist_prepend (sid->found_users,
 					e_ews_search_user_new (mb->name, mb->email));
@@ -424,6 +440,7 @@ create_users_tree_view (GtkWidget *dialog,
 	return pgu->tree_view;
 }
 
+/* for non-NULL @info populates also permission levels for given user */
 gboolean
 e_ews_search_user_modal (GtkWindow *parent,
 			 EEwsConnection *conn,

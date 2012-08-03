@@ -119,28 +119,35 @@ typedef struct {
 	gchar *filename;
 } EwsOALDetails;
 
-typedef struct{
+typedef struct {
 	gchar *sid;
-	gchar *primary_smtp_add;
+	gchar *primary_smtp;
 	gchar *display_name;
 	gchar *distinguished_user;
 	gchar *external_user;
-}EwsUserId;
+} EwsUserId;
 
-typedef enum{
-	NONE,
-	EWS_PERM_EDITOR,
-	EWS_PERM_REVIEWER,
-	EWS_PERM_AUTHOR,
-	CUSTOM
-}EwsPermissionLevel;
+typedef enum {
+	EwsPermissionLevel_Unknown = 0,
+	EwsPermissionLevel_None,
+	EwsPermissionLevel_Reviewer,
+	EwsPermissionLevel_Author,
+	EwsPermissionLevel_Editor,
+	EwsPermissionLevel_Custom
+} EwsPermissionLevel;
 
-typedef struct{
+typedef struct {
 	EwsUserId *user_id;
-	EwsPermissionLevel calendar, contact, inbox, tasks, notes, journal;
+	EwsPermissionLevel calendar, tasks, inbox, contacts, notes, journal;
 	gboolean meetingcopies;
 	gboolean view_priv_items;
-}EwsDelegateInfo;
+} EwsDelegateInfo;
+
+typedef enum {
+	EwsDelegateDeliver_DelegatesOnly,
+	EwsDelegateDeliver_DelegatesAndMe,
+	EwsDelegateDeliver_DelegatesAndSendInformationToMe
+} EwsDelegateDeliver;
 
 typedef enum {
 	NORMAL_FIELD_URI,
@@ -218,6 +225,7 @@ void		e_ews_connection_set_mailbox	(EEwsConnection *cnc,
 						 const gchar *email);
 
 void		ews_user_id_free		(EwsUserId *id);
+void		ews_delegate_info_free		(EwsDelegateInfo *info);
 
 void		e_ews_connection_sync_folder_items
 						(EEwsConnection *cnc,
@@ -781,21 +789,81 @@ gboolean	e_ews_connection_download_oal_file_finish
 void		e_ews_connection_get_delegate	(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *mail_id,
-						 const gchar *include_permissions,
+						 gboolean include_permissions,
 						 GCancellable *cancellable,
 						 GAsyncReadyCallback callback,
 						 gpointer user_data);
 gboolean	e_ews_connection_get_delegate_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
-						 EwsDelegateInfo **get_delegate,
+						 EwsDelegateDeliver *deliver_to,
+						 GSList **delegates, /* EwsDelegateInfo * */
 						 GError **error);
 gboolean	e_ews_connection_get_delegate_sync
 						(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *mail_id,
-						 const gchar *include_permissions,
-						 EwsDelegateInfo **get_delegate,
+						 gboolean include_permissions,
+						 EwsDelegateDeliver *deliver_to,
+						 GSList **delegates, /* EwsDelegateInfo * */
+						 GCancellable *cancellable,
+						 GError **error);
+void		e_ews_connection_add_delegate	(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *mail_id,
+						 const GSList *delegates, /* EwsDelegateInfo * */
+						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
+						 gpointer user_data);
+gboolean	e_ews_connection_add_delegate_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GError **error);
+gboolean	e_ews_connection_add_delegate_sync
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *mail_id,
+						 const GSList *delegates, /* EwsDelegateInfo * */
+						 GCancellable *cancellable,
+						 GError **error);
+void		e_ews_connection_remove_delegate
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *mail_id,
+						 const GSList *delegate_ids, /* EwsUserId * */
+						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
+						 gpointer user_data);
+gboolean	e_ews_connection_remove_delegate_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GError **error);
+gboolean	e_ews_connection_remove_delegate_sync
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *mail_id,
+						 const GSList *delegate_ids, /* EwsUserId * */
+						 GCancellable *cancellable,
+						 GError **error);
+void		e_ews_connection_update_delegate
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *mail_id,
+						 EwsDelegateDeliver deliver_to,
+						 const GSList *delegates, /* EwsDelegateInfo * */
+						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
+						 gpointer user_data);
+gboolean	e_ews_connection_update_delegate_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GError **error);
+gboolean	e_ews_connection_update_delegate_sync
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *mail_id,
+						 EwsDelegateDeliver deliver_to,
+						 const GSList *delegates, /* EwsDelegateInfo * */
 						 GCancellable *cancellable,
 						 GError **error);
 void		e_ews_connection_get_folder_permissions

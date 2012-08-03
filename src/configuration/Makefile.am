@@ -7,6 +7,7 @@ module_ews_configuration_la_CPPFLAGS = \
 	-I$(top_srcdir) \
 	-I$(top_srcdir)/src \
 	$(EVOLUTION_MAIL_CFLAGS) \
+	$(EVOLUTION_SHELL_CFLAGS) \
 	$(NULL)
 
 module_ews_configuration_la_SOURCES = \
@@ -25,6 +26,8 @@ module_ews_configuration_la_SOURCES = \
 	e-mail-config-ews-notebook.h \
 	e-mail-config-ews-oal-combo-box.c \
 	e-mail-config-ews-oal-combo-box.h \
+	e-mail-config-ews-delegates-page.c \
+	e-mail-config-ews-delegates-page.h \
 	e-mail-config-ews-ooo-page.c \
 	e-mail-config-ews-ooo-page.h \
 	e-ews-config-ui-extension.c \
@@ -41,6 +44,7 @@ module_ews_configuration_la_LIBADD = \
 	$(top_builddir)/src/server/libeews-1.2.la \
 	$(top_builddir)/src/utils/libewsutils.la \
 	$(EVOLUTION_MAIL_LIBS) \
+	$(EVOLUTION_SHELL_LIBS) \
 	$(NULL)
 
 module_ews_configuration_la_LDFLAGS = \

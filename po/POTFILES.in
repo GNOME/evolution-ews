@@ -17,6 +17,7 @@ src/configuration/e-ews-search-user.c
 src/configuration/e-mail-config-ews-autodiscover.c
 src/configuration/e-mail-config-ews-backend.c
 src/configuration/e-mail-config-ews-gal.c
+src/configuration/e-mail-config-ews-delegates-page.c
 src/configuration/e-mail-config-ews-ooo-page.c
 src/configuration/module-ews-configuration.error.xml
 src/server/e-ews-connection.c
