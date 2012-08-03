@@ -1157,8 +1157,8 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	dtstart = icalcomponent_get_dtstart (icalcomp);
 	dtend = icalcomponent_get_dtend (icalcomp);
 
-	ewscal_set_time (msg, "Start", &dtstart);
-	ewscal_set_time (msg, "End", &dtend);
+	ewscal_set_time (msg, "Start", &dtstart, FALSE);
+	ewscal_set_time (msg, "End", &dtend, FALSE);
 	/* We have to do the time zone(s) later, or the server rejects the request */
 
 	/* All day event ? */
@@ -1233,7 +1233,7 @@ convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_DUE_PROPERTY);
 	if (prop) {
 		dt = icalproperty_get_due (prop);
-		ewscal_set_time (msg, "DueDate", &dt);
+		ewscal_set_time (msg, "DueDate", &dt, TRUE);
 	}
 
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_PERCENTCOMPLETE_PROPERTY);
@@ -1246,7 +1246,7 @@ convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_DTSTART_PROPERTY);
 	if (prop) {
 		dt = icalproperty_get_dtstart (prop);
-		ewscal_set_time (msg, "StartDate", &dt);
+		ewscal_set_time (msg, "StartDate", &dt, TRUE);
 	}
 
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_STATUS_PROPERTY);
@@ -1915,14 +1915,14 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 	dtend_old = icalcomponent_get_dtend (icalcomp_old);
 	if (icaltime_compare (dtstart, dtstart_old) != 0) {
 		e_ews_message_start_set_item_field (msg, "Start", "calendar","CalendarItem");
-		ewscal_set_time (msg, "Start", &dtstart);
+		ewscal_set_time (msg, "Start", &dtstart, FALSE);
 		e_ews_message_end_set_item_field (msg);
 		dt_changed = TRUE;
 	}
 
 	if (icaltime_compare (dtend, dtend_old) != 0) {
 		e_ews_message_start_set_item_field (msg, "End", "calendar", "CalendarItem");
-		ewscal_set_time (msg, "End", &dtend);
+		ewscal_set_time (msg, "End", &dtend, FALSE);
 		e_ews_message_end_set_item_field (msg);
 		dt_changed = TRUE;
 	}
@@ -2032,8 +2032,10 @@ convert_vtodo_component_to_updatexml (ESoapMessage *msg,
 	if (prop) {
 		dt = icalproperty_get_due (prop);
 		e_ews_message_start_set_item_field (msg, "DueDate", "task", "Task");
-		ewscal_set_time (msg, "DueDate", &dt);
+		ewscal_set_time (msg, "DueDate", &dt, TRUE);
 		e_ews_message_end_set_item_field (msg);
+	} else {
+		e_ews_message_add_delete_item_field (msg, "DueDate", "task");
 	}
 
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_PERCENTCOMPLETE_PROPERTY);
@@ -2049,8 +2051,10 @@ convert_vtodo_component_to_updatexml (ESoapMessage *msg,
 	if (prop) {
 		dt = icalproperty_get_dtstart (prop);
 		e_ews_message_start_set_item_field (msg, "StartDate", "task", "Task");
-		ewscal_set_time (msg, "StartDate", &dt);
+		ewscal_set_time (msg, "StartDate", &dt, TRUE);
 		e_ews_message_end_set_item_field (msg);
+	} else {
+		e_ews_message_add_delete_item_field (msg, "StartDate", "task");
 	}
 
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_STATUS_PROPERTY);
@@ -2930,6 +2934,7 @@ add_item_to_cache (ECalBackendEws *cbews,
 		e_ews_item_task_has_due_date (item, &has_this_date);
 		if (has_this_date) {
 			due_date = icaltime_from_timet_with_zone (e_ews_item_get_due_date (item), 0, priv->default_zone);
+			due_date.is_date = 1;
 			icalprop = icalproperty_new_due (due_date);
 			icalcomponent_add_property (icalcomp, icalprop);
 		}
@@ -2939,6 +2944,7 @@ add_item_to_cache (ECalBackendEws *cbews,
 		e_ews_item_task_has_start_date (item, &has_this_date);
 		if (has_this_date) {
 			start_date = icaltime_from_timet_with_zone (e_ews_item_get_start_date (item), 0, priv->default_zone);
+			start_date.is_date = 1;
 			icalprop = icalproperty_new_dtstart (start_date);
 			icalcomponent_add_property (icalcomp, icalprop);
 		}
@@ -2948,6 +2954,7 @@ add_item_to_cache (ECalBackendEws *cbews,
 		e_ews_item_task_has_complete_date (item, &has_this_date);
 		if (has_this_date) {
 			complete_date = icaltime_from_timet_with_zone (e_ews_item_get_complete_date (item), 0, priv->default_zone);
+			complete_date.is_date = 1;
 			icalprop = icalproperty_new_completed (complete_date);
 			icalcomponent_add_property (icalcomp, icalprop);
 		}
@@ -3649,8 +3656,8 @@ prepare_free_busy_request (ESoapMessage *msg,
 	e_soap_message_start_element(msg, "TimeWindow", NULL, NULL);
 	t_start = icaltime_from_timet_with_zone (free_busy_data->start, 0, free_busy_data->timezone);
 	t_end = icaltime_from_timet_with_zone (free_busy_data->end, 0, free_busy_data->timezone);
-	ewscal_set_time (msg, "StartTime", &t_start);
-	ewscal_set_time (msg, "EndTime", &t_end);
+	ewscal_set_time (msg, "StartTime", &t_start, FALSE);
+	ewscal_set_time (msg, "EndTime", &t_end, FALSE);
 	e_soap_message_end_element(msg); /* "TimeWindow" */
 
 	e_ews_message_write_string_parameter (msg, "MergedFreeBusyIntervalInMinutes", NULL, "60");

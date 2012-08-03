@@ -143,3 +143,39 @@ e_ews_message_end_set_item_field (ESoapMessage *msg)
 	e_soap_message_end_element (msg); /* CalendarItem */
 	e_soap_message_end_element (msg); /* SetItemField */
 }
+
+void
+e_ews_message_add_delete_item_field (ESoapMessage *msg,
+				     const gchar *name,
+				     const gchar *fielduri_prefix)
+{
+	gchar *fielduri;
+
+	fielduri = g_strconcat (fielduri_prefix, ":", name, NULL);
+
+	e_soap_message_start_element (msg, "DeleteItemField", NULL, NULL);
+	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", fielduri);
+	e_soap_message_end_element (msg); /* DeleteItemField */
+
+	g_free (fielduri);
+}
+
+void
+e_ews_message_add_delete_item_field_indexed (ESoapMessage *msg,
+					     const gchar *name,
+					     const gchar *fielduri_prefix,
+					     const gchar *field_index)
+{
+	gchar *fielduri;
+
+	fielduri = g_strconcat (fielduri_prefix, ":", name, NULL);
+
+	e_soap_message_start_element (msg, "DeleteItemField", NULL, NULL);
+	e_soap_message_start_element (msg, "IndexedFieldURI", NULL, NULL);
+	e_soap_message_add_attribute (msg, "FieldURI", fielduri, NULL, NULL);
+	e_soap_message_add_attribute (msg, "FieldIndex", field_index, NULL, NULL);
+	e_soap_message_end_element (msg); /* IndexedFieldURI */
+	e_soap_message_end_element (msg); /* DeleteItemField */
+
+	g_free (fielduri);
+}

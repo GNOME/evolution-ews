@@ -154,15 +154,42 @@ ews_set_alarm (ESoapMessage *msg,
 void
 ewscal_set_time (ESoapMessage *msg,
                  const gchar *name,
-                 icaltimetype *t)
+                 icaltimetype *t,
+		 gboolean with_timezone)
 {
 	gchar *str;
+	gchar *tz_ident = NULL;
 
-	str = g_strdup_printf("%04d-%02d-%02dT%02d:%02d:%02d",
-			      t->year, t->month, t->day,
-			      t->hour, t->minute, t->second);
+	if (with_timezone) {
+		if (t->is_utc || !t->zone || t->zone == icaltimezone_get_utc_timezone ()) {
+			tz_ident = g_strdup ("Z");
+		} else {
+			gint offset, is_daylight, hrs, mins;
+
+			offset = icaltimezone_get_utc_offset (
+				icaltimezone_get_utc_timezone (), t, &is_daylight);
+
+			offset = offset * (-1);
+			hrs = offset / 60;
+			mins = offset % 60;
+
+			if (hrs < 0)
+				hrs *= -1;
+			if (mins < 0)
+				mins *= -1;
+
+			tz_ident = g_strdup_printf ("%s%02d:%02d", offset > 0 ? "+" : "-", hrs, mins);
+		}
+	}
+
+	str = g_strdup_printf ("%04d-%02d-%02dT%02d:%02d:%02d%s",
+			       t->year, t->month, t->day,
+			       t->hour, t->minute, t->second,
+			       tz_ident ? tz_ident : "");
 
 	e_ews_message_write_string_parameter (msg, name, NULL, str);
+
+	g_free (tz_ident);
 	g_free (str);
 }
 
