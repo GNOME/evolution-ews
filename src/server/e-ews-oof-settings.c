@@ -697,6 +697,9 @@ e_ews_oof_settings_set_state (EEwsOofSettings *settings,
 {
 	g_return_if_fail (E_IS_EWS_OOF_SETTINGS (settings));
 
+	if (settings->priv->state == state)
+		return;
+
 	settings->priv->state = state;
 
 	g_object_notify (G_OBJECT (settings), "state");
@@ -717,6 +720,9 @@ e_ews_oof_settings_set_external_audience (EEwsOofSettings *settings,
                                           EEwsExternalAudience external_audience)
 {
 	g_return_if_fail (E_IS_EWS_OOF_SETTINGS (settings));
+
+	if (settings->priv->external_audience == external_audience)
+		return;
 
 	settings->priv->external_audience = external_audience;
 
@@ -739,6 +745,11 @@ e_ews_oof_settings_set_start_time (EEwsOofSettings *settings,
 	g_return_if_fail (start_time != NULL);
 
 	g_mutex_lock (settings->priv->property_lock);
+
+	if (g_date_time_compare (settings->priv->start_time, start_time) == 0) {
+		g_mutex_unlock (settings->priv->property_lock);
+		return;
+	}
 
 	if (start_time != settings->priv->start_time) {
 		g_date_time_unref (settings->priv->start_time);
@@ -766,6 +777,11 @@ e_ews_oof_settings_set_end_time (EEwsOofSettings *settings,
 	g_return_if_fail (end_time != NULL);
 
 	g_mutex_lock (settings->priv->property_lock);
+
+	if (g_date_time_compare (settings->priv->end_time, end_time) == 0) {
+		g_mutex_unlock (settings->priv->property_lock);
+		return;
+	}
 
 	if (end_time != settings->priv->end_time) {
 		g_date_time_unref (settings->priv->end_time);
@@ -811,6 +827,11 @@ e_ews_oof_settings_set_internal_reply (EEwsOofSettings *settings,
 
 	g_mutex_lock (settings->priv->property_lock);
 
+	if (g_strcmp0 (internal_reply, settings->priv->internal_reply) == 0) {
+		g_mutex_unlock (settings->priv->property_lock);
+		return;
+	}
+
 	g_free (settings->priv->internal_reply);
 	settings->priv->internal_reply = g_strdup (internal_reply);
 
@@ -852,6 +873,11 @@ e_ews_oof_settings_set_external_reply (EEwsOofSettings *settings,
 	g_return_if_fail (E_IS_EWS_OOF_SETTINGS (settings));
 
 	g_mutex_lock (settings->priv->property_lock);
+
+	if (g_strcmp0 (external_reply, settings->priv->external_reply) == 0) {
+		g_mutex_unlock (settings->priv->property_lock);
+		return;
+	}
 
 	g_free (settings->priv->external_reply);
 	settings->priv->external_reply = g_strdup (external_reply);

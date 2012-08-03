@@ -53,6 +53,9 @@ struct _EMailConfigEwsOooPagePrivate {
 	EEwsOofSettings *oof_settings;
 	GMutex *oof_settings_lock;
 
+	/* to not save unchanged state */
+	gboolean changed;
+
 	GtkWidget *enabled_radio_button;	/* not referenced */
 	GtkWidget *disabled_radio_button;	/* not referenced */
 	GtkWidget *scheduled_radio_button;	/* not referenced */
@@ -673,6 +676,14 @@ mail_config_ews_ooo_page_submit_cb (GObject *source_object,
 }
 
 static void
+ews_oof_settings_changed (gboolean *pchanged)
+{
+	g_return_if_fail (pchanged != NULL);
+
+	*pchanged = TRUE;
+}
+
+static void
 mail_config_ews_ooo_page_submit (EMailConfigPage *page,
                                  GCancellable *cancellable,
                                  GAsyncReadyCallback callback,
@@ -686,6 +697,7 @@ mail_config_ews_ooo_page_submit (EMailConfigPage *page,
 	GDateTime *date_time;
 	gchar *text;
 	time_t tm;
+	gulong signal_id;
 
 	priv = E_MAIL_CONFIG_EWS_OOO_PAGE_GET_PRIVATE (page);
 
@@ -696,20 +708,30 @@ mail_config_ews_ooo_page_submit (EMailConfigPage *page,
 	 * are obviously no changes to submit. */
 	if (priv->oof_settings == NULL) {
 		g_mutex_unlock (priv->oof_settings_lock);
+
+		simple = g_simple_async_result_new (
+			G_OBJECT (page), callback, user_data,
+			mail_config_ews_ooo_page_submit);
+		g_simple_async_result_complete (simple);
+		g_object_unref (simple);
+
 		return;
 	}
+
+	signal_id = g_signal_connect_swapped (priv->oof_settings, "notify",
+		G_CALLBACK (ews_oof_settings_changed), &priv->changed);
 
 	toggle_button = GTK_TOGGLE_BUTTON (priv->enabled_radio_button);
 	if (gtk_toggle_button_get_active (toggle_button))
 		e_ews_oof_settings_set_state (
 			priv->oof_settings,
-			E_EWS_OOF_STATE_DISABLED);
+			E_EWS_OOF_STATE_ENABLED);
 
 	toggle_button = GTK_TOGGLE_BUTTON (priv->disabled_radio_button);
 	if (gtk_toggle_button_get_active (toggle_button))
 		e_ews_oof_settings_set_state (
 			priv->oof_settings,
-			E_EWS_OOF_STATE_ENABLED);
+			E_EWS_OOF_STATE_DISABLED);
 
 	toggle_button = GTK_TOGGLE_BUTTON (priv->scheduled_radio_button);
 	if (gtk_toggle_button_get_active (toggle_button))
@@ -743,12 +765,18 @@ mail_config_ews_ooo_page_submit (EMailConfigPage *page,
 		G_OBJECT (page), callback, user_data,
 		mail_config_ews_ooo_page_submit);
 
-	g_simple_async_result_set_check_cancellable (simple, cancellable);
+	g_signal_handler_disconnect (priv->oof_settings, signal_id);
 
-	e_ews_oof_settings_submit (
-		priv->oof_settings, cancellable,
-		mail_config_ews_ooo_page_submit_cb,
-		g_object_ref (simple));
+	if (priv->changed) {
+		g_simple_async_result_set_check_cancellable (simple, cancellable);
+
+		e_ews_oof_settings_submit (
+			priv->oof_settings, cancellable,
+			mail_config_ews_ooo_page_submit_cb,
+			g_object_ref (simple));
+	} else {
+		g_simple_async_result_complete (simple);
+	}
 
 	g_object_unref (simple);
 
@@ -815,6 +843,7 @@ mail_config_ews_ooo_page_try_password_sync (ESourceAuthenticator *auth,
 		if (page->priv->oof_settings != NULL)
 			g_object_unref (oof_settings);
 		page->priv->oof_settings = oof_settings;
+		page->priv->changed = FALSE;
 		g_mutex_unlock (page->priv->oof_settings_lock);
 
 	} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
