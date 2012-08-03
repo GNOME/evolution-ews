@@ -28,7 +28,27 @@ G_DEFINE_DYNAMIC_TYPE (
 static gboolean
 cal_config_ews_allow_creation (ESourceConfigBackend *backend)
 {
-	return FALSE;
+	ESourceConfig *config;
+	ECalSourceConfig *cal_config;
+	ECalClientSourceType source_type;
+	gboolean allow_creation = FALSE;
+
+	config = e_source_config_backend_get_config (backend);
+
+	cal_config = E_CAL_SOURCE_CONFIG (config);
+	source_type = e_cal_source_config_get_source_type (cal_config);
+
+	switch (source_type) {
+		case E_CAL_CLIENT_SOURCE_TYPE_EVENTS:
+		case E_CAL_CLIENT_SOURCE_TYPE_TASKS:
+			allow_creation = TRUE;
+			break;
+
+		default:
+			break;
+	}
+
+	return allow_creation;
 }
 
 static void

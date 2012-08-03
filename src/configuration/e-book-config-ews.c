@@ -28,7 +28,7 @@ G_DEFINE_DYNAMIC_TYPE (
 static gboolean
 book_config_ews_allow_creation (ESourceConfigBackend *backend)
 {
-	return FALSE;
+	return TRUE;
 }
 
 static void
