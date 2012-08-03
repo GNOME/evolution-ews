@@ -41,7 +41,7 @@ static gchar *
 g_mkdtemp (gchar *tmpl,
            gint mode)
 {
-	static const char letters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	static const gchar letters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	static const gint NLETTERS = sizeof (letters) - 1;
 	static gint counter = 0;
 	gchar *XXXXXX;
@@ -519,8 +519,9 @@ parse_extended_property (EEwsItemPrivate *priv,
 		break;
 
 	default:
-		g_print ("Fetched unrecognised MAPI property 0x%x, value %d\n",
-			 tag, value);
+		g_print (
+			"Fetched unrecognised MAPI property 0x%x, value %d\n",
+			tag, value);
 	}
 }
 
@@ -575,8 +576,8 @@ process_modified_occurrences (EEwsItemPrivate *priv,
 
 	for (subparam = e_soap_parameter_get_first_child (param); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
 
-		subparam1 = e_soap_parameter_get_first_child_by_name(subparam, "ItemId");
-		modified_occurrence_id = e_soap_parameter_get_property(subparam1, "Id");
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "ItemId");
+		modified_occurrence_id = e_soap_parameter_get_property (subparam1, "Id");
 		priv->modified_occurrences = g_slist_append (priv->modified_occurrences, modified_occurrence_id);
 	}
 
@@ -717,8 +718,8 @@ parse_entries (GHashTable *hash_table,
 	ESoapParameter *subparam;
 
 	for (subparam = e_soap_parameter_get_first_child_by_name (param, "Entry");
-			subparam != NULL;
-			subparam = e_soap_parameter_get_next_child_by_name (subparam, "Entry")) {
+		subparam != NULL;
+		subparam = e_soap_parameter_get_next_child_by_name (subparam, "Entry")) {
 		gchar *key;
 		gpointer value;
 
@@ -775,9 +776,9 @@ parse_contact_field (EEwsItem *item,
 	} else if (!g_ascii_strcasecmp (name, "AssistantName")) {
 		priv->contact_fields->assistant_name = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "Birthday")) {
-			value = e_soap_parameter_get_string_value (subparam);
-			priv->contact_fields->birthday = ews_item_parse_date (value);
-			g_free (value);
+		value = e_soap_parameter_get_string_value (subparam);
+		priv->contact_fields->birthday = ews_item_parse_date (value);
+		g_free (value);
 	} else if (!g_ascii_strcasecmp (name, "BusinessHomePage")) {
 		priv->contact_fields->business_homepage = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "Department")) {
@@ -798,9 +799,9 @@ parse_contact_field (EEwsItem *item,
 	} else if (!g_ascii_strcasecmp (name, "Surname")) {
 		priv->contact_fields->surname = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "WeddingAnniversary")) {
-			value = e_soap_parameter_get_string_value (subparam);
-			priv->contact_fields->wedding_anniversary = ews_item_parse_date (value);
-			g_free (value);
+		value = e_soap_parameter_get_string_value (subparam);
+		priv->contact_fields->wedding_anniversary = ews_item_parse_date (value);
+		g_free (value);
 	}
 }
 
@@ -956,8 +957,8 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 		node = param;
 
 	for (subparam = e_soap_parameter_get_first_child (node);
-			subparam != NULL;
-			subparam = e_soap_parameter_get_next_child (subparam)) {
+		subparam != NULL;
+		subparam = e_soap_parameter_get_next_child (subparam)) {
 		ESoapParameter *subparam1;
 		const gchar *name;
 		gchar *value = NULL;
@@ -1451,17 +1452,17 @@ e_ews_embed_attachment_id_in_uri (const gchar *olduri,
 
 	tmpfilename = g_filename_from_uri (olduri, NULL, NULL);
 
-	name = g_strrstr (tmpfilename, "/")+1;
-	tmpdir = g_strndup(tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
+	name = g_strrstr (tmpfilename, "/") + 1;
+	tmpdir = g_strndup (tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
 
 	snprintf (dirname, 350, "%s/%s", tmpdir, attach_id);
 	if (g_mkdir (dirname, 0775) == -1) {
-		g_warning("Failed create directory to place file in [%s]: %s\n", dirname, strerror (errno));
+		g_warning ("Failed create directory to place file in [%s]: %s\n", dirname, strerror (errno));
 	}
 
-	snprintf(filename, 350, "%s/%s", dirname, name);
+	snprintf (filename, 350, "%s/%s", dirname, name);
 	if (g_rename (tmpfilename, filename) != 0) {
-		g_warning("Failed to move attachment cache file [%s -> %s]: %s\n", tmpfilename, filename, strerror (errno));
+		g_warning ("Failed to move attachment cache file [%s -> %s]: %s\n", tmpfilename, filename, strerror (errno));
 	}
 
 	g_free (tmpdir);
@@ -1489,15 +1490,15 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param,
 	for (subparam = e_soap_parameter_get_first_child (param); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
 		param_name = e_soap_parameter_get_name (subparam);
 
-		if (g_ascii_strcasecmp(param_name, "Name") == 0) {
+		if (g_ascii_strcasecmp (param_name, "Name") == 0) {
 			value = e_soap_parameter_get_string_value (subparam);
-			name = g_uri_escape_string(value, "", TRUE);
+			name = g_uri_escape_string (value, "", TRUE);
 			g_free (value);
-		} else if (g_ascii_strcasecmp(param_name, "Content") == 0) {
+		} else if (g_ascii_strcasecmp (param_name, "Content") == 0) {
 			value = e_soap_parameter_get_string_value (subparam);
 			content = g_base64_decode (value, &data_len);
 			g_free (value);
-		} else if (g_ascii_strcasecmp(param_name, "AttachmentId") == 0) {
+		} else if (g_ascii_strcasecmp (param_name, "AttachmentId") == 0) {
 			*attach_id = e_soap_parameter_get_property (subparam, "Id");
 		}
 	}
@@ -1511,16 +1512,16 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param,
 	}
 
 	tmpfilename = (gchar *) content;
-	tmpdir = g_strndup(tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
+	tmpdir = g_strndup (tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
 
 	dirname = g_build_filename (tmpdir, comp_uid, NULL);
 	if (g_mkdir_with_parents (dirname, 0775) == -1) {
-		g_warning("Failed create directory to place file in [%s]: %s\n", dirname, strerror (errno));
+		g_warning ("Failed create directory to place file in [%s]: %s\n", dirname, strerror (errno));
 	}
 
 	filename = g_build_filename (dirname, name, NULL);
 	if (g_rename (tmpfilename, filename) != 0) {
-		g_warning("Failed to move attachment cache file [%s -> %s]: %s\n", tmpfilename, filename, strerror (errno));
+		g_warning ("Failed to move attachment cache file [%s -> %s]: %s\n", tmpfilename, filename, strerror (errno));
 	}
 
 	g_free (dirname);
@@ -1544,17 +1545,17 @@ e_ews_item_dump_mime_content (EEwsItem *item,
 	g_return_val_if_fail (item->priv->mime_content != NULL, NULL);
 
 	tmpfilename = (gchar *) item->priv->mime_content;
-	tmpdir = g_strndup(tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
+	tmpdir = g_strndup (tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
 
 	dirname = g_build_filename (tmpdir, "XXXXXX", NULL);
 	if (!mkdtemp (dirname))
 		g_warning ("Failed to create directory for attachment cache");
 
-	surename = g_uri_escape_string(item->priv->subject, "", TRUE);
+	surename = g_uri_escape_string (item->priv->subject, "", TRUE);
 	filename = g_build_filename (dirname, surename, NULL);
 
 	if (g_rename ((const gchar *) item->priv->mime_content, filename) != 0) {
-		g_warning("Failed to move attachment cache file");
+		g_warning ("Failed to move attachment cache file");
 	}
 
 	g_free (filename);
@@ -1959,10 +1960,10 @@ e_ews_free_resolve_contact (gpointer rc)
 /* free returned pointer with e_ews_permission_free() */
 EEwsPermission *
 e_ews_permission_new (EEwsPermissionUserType user_type,
-		      const gchar *display_name,
-		      const gchar *primary_smtp,
-		      const gchar *sid,
-		      guint32 rights)
+                      const gchar *display_name,
+                      const gchar *primary_smtp,
+                      const gchar *sid,
+                      guint32 rights)
 {
 	EEwsPermission *perm;
 
@@ -1990,8 +1991,8 @@ e_ews_permission_free (EEwsPermission *perm)
 
 static void
 ews_level_rights_converter (const gchar **plevel_name,
-			    guint32 *prights,
-			    gboolean level_to_rights)
+                            guint32 *prights,
+                            gboolean level_to_rights)
 {
 	struct _known {
 		const gchar *level_name;
@@ -1999,61 +2000,61 @@ ews_level_rights_converter (const gchar **plevel_name,
 	} known[] = {
 		{ "None", 0 },
 		{ "Owner",	E_EWS_PERMISSION_BIT_READ_ANY |
-				E_EWS_PERMISSION_BIT_CREATE |
-				E_EWS_PERMISSION_BIT_CREATE_SUBFOLDER |
-				E_EWS_PERMISSION_BIT_EDIT_OWNED |
-				E_EWS_PERMISSION_BIT_EDIT_ANY |
-				E_EWS_PERMISSION_BIT_DELETE_OWNED |
-				E_EWS_PERMISSION_BIT_DELETE_ANY |
-				E_EWS_PERMISSION_BIT_FOLDER_OWNER |
-				E_EWS_PERMISSION_BIT_FOLDER_CONTACT |
-				E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
-		{ "PublishingEditor", 
-				E_EWS_PERMISSION_BIT_READ_ANY |
-				E_EWS_PERMISSION_BIT_CREATE |
-				E_EWS_PERMISSION_BIT_CREATE_SUBFOLDER |
-				E_EWS_PERMISSION_BIT_EDIT_OWNED |
-				E_EWS_PERMISSION_BIT_EDIT_ANY |
-				E_EWS_PERMISSION_BIT_DELETE_OWNED |
-				E_EWS_PERMISSION_BIT_DELETE_ANY |
-				E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
+			E_EWS_PERMISSION_BIT_CREATE |
+			E_EWS_PERMISSION_BIT_CREATE_SUBFOLDER |
+			E_EWS_PERMISSION_BIT_EDIT_OWNED |
+			E_EWS_PERMISSION_BIT_EDIT_ANY |
+			E_EWS_PERMISSION_BIT_DELETE_OWNED |
+			E_EWS_PERMISSION_BIT_DELETE_ANY |
+			E_EWS_PERMISSION_BIT_FOLDER_OWNER |
+			E_EWS_PERMISSION_BIT_FOLDER_CONTACT |
+			E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
+		{ "PublishingEditor",
+			E_EWS_PERMISSION_BIT_READ_ANY |
+			E_EWS_PERMISSION_BIT_CREATE |
+			E_EWS_PERMISSION_BIT_CREATE_SUBFOLDER |
+			E_EWS_PERMISSION_BIT_EDIT_OWNED |
+			E_EWS_PERMISSION_BIT_EDIT_ANY |
+			E_EWS_PERMISSION_BIT_DELETE_OWNED |
+			E_EWS_PERMISSION_BIT_DELETE_ANY |
+			E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
 		{ "Editor",
-				E_EWS_PERMISSION_BIT_READ_ANY |
-				E_EWS_PERMISSION_BIT_CREATE |
-				E_EWS_PERMISSION_BIT_EDIT_OWNED |
-				E_EWS_PERMISSION_BIT_EDIT_ANY |
-				E_EWS_PERMISSION_BIT_DELETE_OWNED |
-				E_EWS_PERMISSION_BIT_DELETE_ANY |
-				E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
+			E_EWS_PERMISSION_BIT_READ_ANY |
+			E_EWS_PERMISSION_BIT_CREATE |
+			E_EWS_PERMISSION_BIT_EDIT_OWNED |
+			E_EWS_PERMISSION_BIT_EDIT_ANY |
+			E_EWS_PERMISSION_BIT_DELETE_OWNED |
+			E_EWS_PERMISSION_BIT_DELETE_ANY |
+			E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
 		{ "PublishingAuthor",
-				E_EWS_PERMISSION_BIT_READ_ANY |
-				E_EWS_PERMISSION_BIT_CREATE |
-				E_EWS_PERMISSION_BIT_CREATE_SUBFOLDER |
-				E_EWS_PERMISSION_BIT_EDIT_OWNED |
-				E_EWS_PERMISSION_BIT_DELETE_OWNED |
-				E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
+			E_EWS_PERMISSION_BIT_READ_ANY |
+			E_EWS_PERMISSION_BIT_CREATE |
+			E_EWS_PERMISSION_BIT_CREATE_SUBFOLDER |
+			E_EWS_PERMISSION_BIT_EDIT_OWNED |
+			E_EWS_PERMISSION_BIT_DELETE_OWNED |
+			E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
 		{ "Author",
-				E_EWS_PERMISSION_BIT_READ_ANY |
-				E_EWS_PERMISSION_BIT_CREATE |
-				E_EWS_PERMISSION_BIT_EDIT_OWNED |
-				E_EWS_PERMISSION_BIT_DELETE_OWNED |
-				E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
+			E_EWS_PERMISSION_BIT_READ_ANY |
+			E_EWS_PERMISSION_BIT_CREATE |
+			E_EWS_PERMISSION_BIT_EDIT_OWNED |
+			E_EWS_PERMISSION_BIT_DELETE_OWNED |
+			E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
 		{ "NoneditingAuthor",
-				E_EWS_PERMISSION_BIT_READ_ANY |
-				E_EWS_PERMISSION_BIT_CREATE |
-				E_EWS_PERMISSION_BIT_DELETE_OWNED |
-				E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
+			E_EWS_PERMISSION_BIT_READ_ANY |
+			E_EWS_PERMISSION_BIT_CREATE |
+			E_EWS_PERMISSION_BIT_DELETE_OWNED |
+			E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
 		{ "Reviewer",
-				E_EWS_PERMISSION_BIT_READ_ANY |
-				E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
+			E_EWS_PERMISSION_BIT_READ_ANY |
+			E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
 		{ "Contributor",
-				E_EWS_PERMISSION_BIT_CREATE |
-				E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
+			E_EWS_PERMISSION_BIT_CREATE |
+			E_EWS_PERMISSION_BIT_FOLDER_VISIBLE },
 		{ "FreeBusyTimeOnly",
-				E_EWS_PERMISSION_BIT_FREE_BUSY_SIMPLE },
+			E_EWS_PERMISSION_BIT_FREE_BUSY_SIMPLE },
 		{ "FreeBusyTimeAndSubjectAndLocation",
-				E_EWS_PERMISSION_BIT_FREE_BUSY_DETAILED }
-				
+			E_EWS_PERMISSION_BIT_FREE_BUSY_DETAILED }
+
 	};
 	gint ii;
 	guint32 rights;
@@ -2248,9 +2249,9 @@ ews_permissions_parse (ESoapParameter *param)
 }
 
 /* Returns GSList of EEwsPermission * objects, as read from @param.
-   Returned GSList should be freed with e_ews_permissions_free()
-   when done with it. Returns NULL when no permissions recognized
-   from @param.
+ * Returned GSList should be freed with e_ews_permissions_free()
+ * when done with it. Returns NULL when no permissions recognized
+ * from @param.
 */
 GSList *
 e_ews_permissions_from_soap_param (ESoapParameter *param)

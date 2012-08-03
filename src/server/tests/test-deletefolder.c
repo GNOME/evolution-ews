@@ -45,8 +45,7 @@ delete_folder_cb (GObject *object,
 	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	GError *error = NULL;
 
-	e_ews_connection_delete_folder_finish	(cnc, res,
-						 &error);
+	e_ews_connection_delete_folder_finish (cnc, res, &error);
 	if (error != NULL) {
 		g_warning ("Unable to create: %s \n", error->message);
 		g_clear_error (&error);

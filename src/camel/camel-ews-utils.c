@@ -304,16 +304,16 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store,
 	CamelFolderInfo *fi;
 
 	fi = camel_folder_info_new ();
-	fi->full_name = camel_ews_store_summary_get_folder_full_name (ews_summary,
-								      fid, NULL);
-	fi->display_name = camel_ews_store_summary_get_folder_name (ews_summary, fid, NULL);
-
-	fi->flags = camel_ews_store_summary_get_folder_flags (ews_summary,
-							      fid, NULL);
-	fi->unread = camel_ews_store_summary_get_folder_unread (ews_summary,
-								fid, NULL);
-	fi->total = camel_ews_store_summary_get_folder_total (ews_summary,
-							      fid, NULL);
+	fi->full_name = camel_ews_store_summary_get_folder_full_name (
+		ews_summary, fid, NULL);
+	fi->display_name = camel_ews_store_summary_get_folder_name (
+		ews_summary, fid, NULL);
+	fi->flags = camel_ews_store_summary_get_folder_flags (
+		ews_summary, fid, NULL);
+	fi->unread = camel_ews_store_summary_get_folder_unread (
+		ews_summary, fid, NULL);
+	fi->total = camel_ews_store_summary_get_folder_total (
+		ews_summary, fid, NULL);
 
 	return fi;
 }
@@ -346,10 +346,15 @@ sync_deleted_folders (CamelEwsStore *store,
 	}
 }
 
-static gboolean ews_utils_rename_folder (CamelEwsStore *store, EwsFolderType ftype,
-					 const gchar *fid, const gchar *changekey,
-					 const gchar *pfid, const gchar *display_name,
-					 const gchar *old_fname, GError **error)
+static gboolean
+ews_utils_rename_folder (CamelEwsStore *store,
+                         EwsFolderType ftype,
+                         const gchar *fid,
+                         const gchar *changekey,
+                         const gchar *pfid,
+                         const gchar *display_name,
+                         const gchar *old_fname,
+                         GError **error)
 {
 	CamelEwsStoreSummary *ews_summary = store->summary;
 	CamelFolderInfo *fi;
@@ -405,8 +410,8 @@ sync_updated_folders (CamelEwsStore *store,
 				/* If the display name wasn't changed, its basename is still
 				 * the same as it was before... */
 				if (!display_name)
-					display_name = camel_ews_store_summary_get_folder_name (ews_summary,
-										fid->id, NULL);
+					display_name = camel_ews_store_summary_get_folder_name (
+						ews_summary, fid->id, NULL);
 				if (!display_name)
 					goto done;
 
@@ -426,17 +431,20 @@ sync_updated_folders (CamelEwsStore *store,
 				/* Append new display_name to old parent directory name... */
 				last_slash = g_strrstr (folder_name, "/");
 				if (last_slash)
-					new_fname = g_strdup_printf ("%.*s/%s", (int)(last_slash - folder_name),
-								     folder_name, display_name);
+					new_fname = g_strdup_printf (
+						"%.*s/%s",
+						(gint)(last_slash - folder_name),
+						folder_name, display_name);
 				else /* ...unless it was a child of the root folder */
 					new_fname = g_strdup (display_name);
 			}
 
 			if (strcmp (new_fname, folder_name))
-				ews_utils_rename_folder (store, ftype,
-							 fid->id, fid->change_key,
-							 pfid ? pfid->id : NULL,
-							 display_name, folder_name, &error);
+				ews_utils_rename_folder (
+					store, ftype,
+					fid->id, fid->change_key,
+					pfid ? pfid->id : NULL,
+					display_name, folder_name, &error);
 			g_free (new_fname);
 			g_clear_error (&error);
 		}
@@ -464,9 +472,10 @@ add_folder_to_summary (CamelEwsStore *store,
 	unread = e_ews_folder_get_unread_count (folder);
 	ftype = e_ews_folder_get_folder_type (folder);
 
-	camel_ews_store_summary_new_folder (ews_summary, fid->id,
-					    pfid->id, fid->change_key,
-					    dname, ftype, 0, total);
+	camel_ews_store_summary_new_folder (
+		ews_summary, fid->id,
+		pfid->id, fid->change_key,
+		dname, ftype, 0, total);
 	camel_ews_store_summary_set_folder_unread (ews_summary, fid->id, unread);
 }
 
@@ -642,8 +651,9 @@ ews_utils_merge_server_user_flags (EEwsItem *item,
 
 	/* now transfer over all the categories */
 	for (p = e_ews_item_get_categories (item); p; p = p->next) {
-		camel_flag_set (&mi->info.user_flags,
-				ews_utils_rename_label (p->data, 1), 1);
+		camel_flag_set (
+			&mi->info.user_flags,
+			ews_utils_rename_label (p->data, 1), 1);
 	}
 }
 
@@ -683,8 +693,8 @@ ews_utils_get_server_flags (EEwsItem *item)
 
 static const gchar *
 form_email_string_from_mb (EEwsConnection *cnc,
-			   const EwsMailbox *mb,
-			   GCancellable *cancellable)
+                           const EwsMailbox *mb,
+                           GCancellable *cancellable)
 {
 	if (mb) {
 		GString *str;
@@ -722,8 +732,8 @@ form_email_string_from_mb (EEwsConnection *cnc,
 
 static const gchar *
 form_recipient_list (EEwsConnection *cnc,
-		     const GSList *recipients,
-		     GCancellable *cancellable)
+                     const GSList *recipients,
+                     GCancellable *cancellable)
 {
 	const GSList *l;
 	GString *str = NULL;
@@ -849,8 +859,9 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
 
 			server_flags = ews_utils_get_server_flags (item);
 			ews_utils_merge_server_user_flags (item, mi);
-			if (camel_ews_update_message_info_flags (folder->summary, (CamelMessageInfo *) mi,
-								 server_flags, NULL))
+			if (camel_ews_update_message_info_flags (
+				folder->summary, (CamelMessageInfo *) mi,
+				server_flags, NULL))
 				camel_folder_change_info_change_uid (ci, mi->info.uid);
 
 			g_free (mi->change_key);
@@ -876,7 +887,7 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
 
 void
 camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
-				    EEwsConnection *cnc,
+                                    EEwsConnection *cnc,
                                     GSList *items_created)
 {
 	CamelFolder *folder;
@@ -923,12 +934,12 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 		}
 
 		item_type = e_ews_item_get_item_type (item);
-		if	(item_type == E_EWS_ITEM_TYPE_CALENDAR_ITEM ||
+		if (item_type == E_EWS_ITEM_TYPE_CALENDAR_ITEM ||
 			 item_type == E_EWS_ITEM_TYPE_MEETING_MESSAGE ||
 			 item_type == E_EWS_ITEM_TYPE_MEETING_REQUEST ||
 			 item_type == E_EWS_ITEM_TYPE_MEETING_RESPONSE ||
 			 item_type == E_EWS_ITEM_TYPE_MEETING_RESPONSE)
-			camel_message_info_set_user_flag ((CamelMessageInfo*)mi, "$has_cal", TRUE);
+			camel_message_info_set_user_flag ((CamelMessageInfo *) mi, "$has_cal", TRUE);
 
 		mi->info.uid = camel_pstring_strdup (id->id);
 		mi->info.size = e_ews_item_get_size (item);
@@ -964,9 +975,9 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 		camel_folder_summary_add (folder->summary, (CamelMessageInfo *) mi);
 
 		/* camel_folder_summary_add() sets folder_flagged flag
-		   on the message info, but this is a fresh item downloaded
-		   from the server, thus unset it, to avoid resync up to the server
-		   on folder leave/store
+		 * on the message info, but this is a fresh item downloaded
+		 * from the server, thus unset it, to avoid resync up to the server
+		 * on folder leave/store
 		*/
 		mi->info.flags &= ~CAMEL_MESSAGE_FOLDER_FLAGGED;
 

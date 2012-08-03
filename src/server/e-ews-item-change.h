@@ -51,7 +51,6 @@ void e_ews_message_add_delete_item_field (ESoapMessage *msg, const gchar *name, 
 
 void e_ews_message_add_delete_item_field_indexed (ESoapMessage *msg, const gchar *name, const gchar *fielduri_prefix, const gchar *field_index);
 
-
 G_END_DECLS
 
 #endif

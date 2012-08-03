@@ -31,7 +31,7 @@ static xmlNode *
 soup_xml_real_node (xmlNode *node)
 {
 	while (node && (node->type == XML_COMMENT_NODE ||
-			xmlIsBlankNode (node)))
+		xmlIsBlankNode (node)))
 		node = node->next;
 	return node;
 }
@@ -150,7 +150,7 @@ parse_parameters (ESoapResponse *response,
 	for (tmp = soup_xml_real_node (xml_method->children);
 	     tmp != NULL;
 	     tmp = soup_xml_real_node (tmp->next)) {
-		if (!strcmp ((const gchar *)tmp->name, "Fault")) {
+		if (!strcmp ((const gchar *) tmp->name, "Fault")) {
 			response->priv->soap_fault = tmp;
 			continue;
 		} else {
@@ -212,16 +212,16 @@ e_soap_response_from_xmldoc (ESoapResponse *response,
 		return FALSE;
 	}
 
-	if (strcmp ((const gchar *)xml_root->name, "Envelope") != 0) {
+	if (strcmp ((const gchar *) xml_root->name, "Envelope") != 0) {
 		xmlFreeDoc (xmldoc);
 		return FALSE;
 	}
 
 	xml_body = soup_xml_real_node (xml_root->children);
 	if (xml_body != NULL) {
-		if (strcmp ((const gchar *)xml_body->name, "Header") == 0)
+		if (strcmp ((const gchar *) xml_body->name, "Header") == 0)
 			xml_body = soup_xml_real_node (xml_body->next);
-		if (strcmp ((const gchar *)xml_body->name, "Body") != 0) {
+		if (strcmp ((const gchar *) xml_body->name, "Body") != 0) {
 			xmlFreeDoc (xmldoc);
 			return FALSE;
 		}

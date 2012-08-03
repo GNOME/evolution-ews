@@ -48,8 +48,7 @@ create_folder_cb (GObject *object,
 	GError *error = NULL;
 	EwsFolderId *fid = NULL;
 
-	e_ews_connection_create_folder_finish	(cnc, res, &fid,
-						 &error);
+	e_ews_connection_create_folder_finish (cnc, res, &fid, &error);
 	if (error != NULL) {
 		g_warning ("Unable to create: %s \n", error->message);
 		g_clear_error (&error);

@@ -209,8 +209,8 @@ e_ews_folder_new_from_soap_parameter (ESoapParameter *param)
 
 EwsFolderId *
 e_ews_folder_id_new (const gchar *id,
-		     const gchar *change_key,
-		     gboolean is_distinguished_id)
+                     const gchar *change_key,
+                     gboolean is_distinguished_id)
 {
 	EwsFolderId *fid;
 

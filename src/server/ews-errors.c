@@ -300,10 +300,11 @@ setup_error_map (gpointer data)
 {
 	gint i;
 
-	ews_error_hash = g_hash_table_new	(g_str_hash, g_str_equal);
+	ews_error_hash = g_hash_table_new (g_str_hash, g_str_equal);
 	for (i = 0; i < G_N_ELEMENTS (ews_conn_errors); i++)
-		g_hash_table_insert	(ews_error_hash, (gpointer) ews_conn_errors[i].error_id,
-					 GINT_TO_POINTER (ews_conn_errors[i].error_code));
+		g_hash_table_insert (
+			ews_error_hash, (gpointer) ews_conn_errors[i].error_id,
+			GINT_TO_POINTER (ews_conn_errors[i].error_code));
 	return NULL;
 }
 

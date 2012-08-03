@@ -44,8 +44,9 @@ get_oof_settings_cb (GObject *object,
 	OOFSettings *oof_settings;
 	GError *error = NULL;
 
-	e_ews_connection_get_oof_settings_finish (cnc, res, &oof_settings,
-						  &error);
+	e_ews_connection_get_oof_settings_finish (
+		cnc, res, &oof_settings,
+		&error);
 	if (error != NULL) {
 		g_warning ("Unable to get out of office settings: %s \n", error->message);
 		g_clear_error (&error);

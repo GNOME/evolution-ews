@@ -36,7 +36,7 @@ G_DEFINE_DYNAMIC_TYPE (
 
 static void
 e_ews_config_ui_extension_shell_view_toggled_cb (EShellView *shell_view,
-						 EEwsConfigUIExtension *ui_ext)
+                                                 EEwsConfigUIExtension *ui_ext)
 {
 	EShellViewClass *shell_view_class;
 	EShellWindow *shell_window;

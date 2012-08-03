@@ -125,8 +125,8 @@ con_test_autodiscover ()
 
 	util_get_email_from_env (&email);
 	g_assert_cmpstr (email, !=, NULL);
-	g_print("%s %s : password : %s \n", G_STRLOC, G_STRFUNC, password);
-	g_print("%s %s : email : %s \n", G_STRLOC, G_STRFUNC, email);
+	g_print ("%s %s : password : %s \n", G_STRLOC, G_STRFUNC, password);
+	g_print ("%s %s : email : %s \n", G_STRLOC, G_STRFUNC, email);
 
 	user_data = g_new0 (struct _cb_data, 1);
 	user_data->test_case = g_strdup ("postive case... \n");

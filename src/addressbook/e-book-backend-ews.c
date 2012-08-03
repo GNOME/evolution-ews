@@ -447,10 +447,10 @@ ebews_set_full_name (ESoapMessage *msg,
 		return;
 
 	if (name->given)
-		e_ews_message_write_string_parameter(msg, "GivenName", NULL, name->given);
+		e_ews_message_write_string_parameter (msg, "GivenName", NULL, name->given);
 
 	if (name->additional && *name->additional)
-		e_ews_message_write_string_parameter(msg, "MiddleName", NULL, name->additional);
+		e_ews_message_write_string_parameter (msg, "MiddleName", NULL, name->additional);
 
 	e_contact_name_free (name);
 }
@@ -468,10 +468,11 @@ ebews_set_birth_date (ESoapMessage *message,
 	if (!date)
 		return;
 
-	birthday = g_strdup_printf("%04d-%02d-%02dT00:00:00",
-			      date->year, date->month, date->day);
+	birthday = g_strdup_printf (
+		"%04d-%02d-%02dT00:00:00",
+		date->year, date->month, date->day);
 
-	e_ews_message_write_string_parameter(message, "Birthday", NULL, birthday);
+	e_ews_message_write_string_parameter (message, "Birthday", NULL, birthday);
 
 	g_free (birthday);
 
@@ -499,7 +500,7 @@ add_entry (ESoapMessage *msg,
 		if (include_hdr)
 			e_soap_message_start_element (msg, include_hdr, NULL, NULL);
 
-		e_ews_message_write_string_parameter_with_attribute(msg, "Entry", NULL, entry_val, "Key", entry_name);
+		e_ews_message_write_string_parameter_with_attribute (msg, "Entry", NULL, entry_val, "Key", entry_name);
 
 		g_free (entry_val);
 		return TRUE;
@@ -619,14 +620,14 @@ convert_indexed_contact_property_to_updatexml (ESoapMessage *message,
 {
 	gboolean delete_field = FALSE;
 
-	if(!value || !g_strcmp0(value, ""))
+	if (!value || !g_strcmp0 (value, ""))
 		delete_field = TRUE;
 	e_ews_message_start_set_indexed_item_field (message, name , prefix, "Contact", key, delete_field);
 
 	if (!delete_field)
 	{
 		e_soap_message_start_element (message, element_name, NULL, NULL);
-		e_ews_message_write_string_parameter_with_attribute(message, "Entry", NULL, value, "Key", key);
+		e_ews_message_write_string_parameter_with_attribute (message, "Entry", NULL, value, "Key", key);
 		e_soap_message_end_element (message);
 	}
 	e_ews_message_end_set_indexed_item_field (message, delete_field);
@@ -645,10 +646,10 @@ ebews_set_full_name_changes (ESoapMessage *message,
 		return;
 
 	if (g_ascii_strcasecmp (name->given, old_name->given))
-		convert_contact_property_to_updatexml(message, "GivenName", name->given, "contacts", NULL, NULL);
+		convert_contact_property_to_updatexml (message, "GivenName", name->given, "contacts", NULL, NULL);
 
 	if (g_ascii_strcasecmp (name->additional, old_name->additional))
-		convert_contact_property_to_updatexml(message, "MiddleName", name->additional, "contacts", NULL, NULL);
+		convert_contact_property_to_updatexml (message, "MiddleName", name->additional, "contacts", NULL, NULL);
 
 	e_contact_name_free (name);
 	e_contact_name_free (old_name);
@@ -669,10 +670,11 @@ ebews_set_birth_date_changes (ESoapMessage *message,
 	if (e_contact_date_equal (new_date, old_date))
 		return;
 
-	birthday = g_strdup_printf("%04d-%02d-%02dT00:00:00",
-			      new_date->year, new_date->month, new_date->day);
+	birthday = g_strdup_printf (
+		"%04d-%02d-%02dT00:00:00",
+		new_date->year, new_date->month, new_date->day);
 
-	convert_contact_property_to_updatexml(message, "Birthday", birthday, "contacts", NULL, NULL);
+	convert_contact_property_to_updatexml (message, "Birthday", birthday, "contacts", NULL, NULL);
 	g_free (birthday);
 }
 
@@ -717,7 +719,7 @@ convert_indexed_contact_property_to_updatexml_physical_address (ESoapMessage *me
 	gchar * fielduri = NULL;
 	gboolean delete_field = FALSE;
 
-	if(!value || !g_strcmp0(value, ""))
+	if (!value || !g_strcmp0 (value, ""))
 		delete_field = TRUE;
 
 	fielduri = g_strconcat (name, ":", uri_element, NULL);
@@ -781,9 +783,9 @@ ebews_set_address_changes (ESoapMessage *message,
                            EContact *new,
                            EContact *old)
 {
-	compare_address(message, new, old, E_CONTACT_ADDRESS_WORK, "Business");
-	compare_address(message, new, old, E_CONTACT_ADDRESS_HOME, "Home");
-	compare_address(message, new, old, E_CONTACT_ADDRESS_OTHER, "Other");
+	compare_address (message, new, old, E_CONTACT_ADDRESS_WORK, "Business");
+	compare_address (message, new, old, E_CONTACT_ADDRESS_HOME, "Home");
+	compare_address (message, new, old, E_CONTACT_ADDRESS_OTHER, "Other");
 }
 
 static void
@@ -884,7 +886,7 @@ convert_contact_to_xml (ESoapMessage *msg,
 	gint i, element_type;
 
 	/* Prepare Contact node in the SOAP message */
-	e_soap_message_start_element(msg, "Contact", NULL, NULL);
+	e_soap_message_start_element (msg, "Contact", NULL, NULL);
 
 	for (i = 0; i < G_N_ELEMENTS (mappings); i++) {
 		element_type = mappings[i].element_type;
@@ -947,7 +949,7 @@ ews_create_contact_cb (GObject *object,
 	}
 
 	if (error) {
-		g_warning("Error while Creating contact: %s", error->message);
+		g_warning ("Error while Creating contact: %s", error->message);
 		e_data_book_respond_create_contacts (create_contact->book, create_contact->opid, EDB_ERROR_EX (OTHER_ERROR, error->message), NULL);
 	}
 
@@ -971,10 +973,11 @@ e_book_backend_ews_create_contacts (EBookBackend *backend,
 	EBookBackendEwsPrivate *priv;
 
 	if (vcards->next != NULL) {
-		e_data_book_respond_create_contacts (book, opid,
-						     EDB_ERROR_EX (NOT_SUPPORTED,
-						     _("The backend does not support bulk additions")),
-						     NULL);
+		e_data_book_respond_create_contacts (
+			book, opid,
+			EDB_ERROR_EX (NOT_SUPPORTED,
+			_("The backend does not support bulk additions")),
+			NULL);
 		return;
 	}
 
@@ -1180,7 +1183,7 @@ ews_modify_contact_cb (GObject *object,
 	}
 
 	if (error) {
-		g_warning("Error while Modifying contact: %s", error->message);
+		g_warning ("Error while Modifying contact: %s", error->message);
 
 		e_data_book_respond_modify_contacts (modify_contact->book, modify_contact->opid, EDB_ERROR_EX (OTHER_ERROR, error->message), NULL);
 	}
@@ -1208,8 +1211,9 @@ convert_contact_to_updatexml (ESoapMessage *msg,
 	id->id = e_contact_get (old_contact, E_CONTACT_UID);
 	id->change_key = e_contact_get (old_contact, E_CONTACT_REV);
 
-	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
-					 id->id, id->change_key, 0);
+	e_ews_message_start_item_change (
+		msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
+		id->id, id->change_key, 0);
 
 	/*Iterate for each field in contact*/
 
@@ -1219,7 +1223,7 @@ convert_contact_to_updatexml (ESoapMessage *msg,
 			value =  e_contact_get (new_contact, mappings[i].field_id);
 			old_value =  e_contact_get (old_contact, mappings[i].field_id);
 			if ((value && !old_value) || (!value && old_value) ||(value && old_value && g_ascii_strcasecmp (value, old_value)))
-				convert_contact_property_to_updatexml(msg, mappings[i].element_name, value, "contacts", NULL, NULL);
+				convert_contact_property_to_updatexml (msg, mappings[i].element_name, value, "contacts", NULL, NULL);
 			if (value)
 				g_free (value);
 			if (old_value)
@@ -1250,9 +1254,10 @@ e_book_backend_ews_modify_contacts (EBookBackend *backend,
 
 	if (vcards->next != NULL) {
 		e_data_book_respond_modify_contacts (book, opid,
-						     EDB_ERROR_EX (NOT_SUPPORTED,
-		                                     _("The backend does not support bulk modifications")),
-						     NULL);
+			EDB_ERROR_EX (
+			NOT_SUPPORTED,
+			_("The backend does not support bulk modifications")),
+			NULL);
 		return;
 	}
 
@@ -1295,8 +1300,9 @@ e_book_backend_ews_modify_contacts (EBookBackend *backend,
 		return;
 	}
 
-	old_contact = ews_book_backend_sqlitedb_get_contact ( priv->ebsdb, priv->folder_id,
-				 id->id, NULL, NULL, &error);
+	old_contact = ews_book_backend_sqlitedb_get_contact (
+		priv->ebsdb, priv->folder_id,
+		id->id, NULL, NULL, &error);
 	if (!old_contact) {
 		g_object_unref (contact);
 		e_data_book_respond_modify_contacts (book, opid, EDB_ERROR (NOT_SUPPORTED), NULL);
@@ -1618,9 +1624,10 @@ e_book_backend_ews_build_restriction (const gchar *query,
 	sdata->is_query_handled = TRUE;
 
 	for (i = 0; i < G_N_ELEMENTS (symbols); i++) {
-		e_sexp_add_function (sexp, 0, (gchar *) symbols[i].name,
-				     symbols[i].func,
-				     sdata);
+		e_sexp_add_function (
+			sexp, 0, (gchar *) symbols[i].name,
+			symbols[i].func,
+			sdata);
 	}
 
 	e_sexp_input_text (sexp, query, strlen (query));
@@ -1662,7 +1669,7 @@ ews_gal_needs_update (EBookBackendEws *cbews,
 	if (seq < full->seq)
 		ret = TRUE;
 
-	d(printf ("Gal needs update: %d \n", ret);)
+	d (printf ("Gal needs update: %d \n", ret);)
 exit:
 	g_free (tmp);
 	return ret;
@@ -1708,7 +1715,7 @@ ews_download_full_gal (EBookBackendEws *cbews,
 		goto exit;
 	}
 
-	d(g_print ("OAL file decompressed %s \n", uncompress_file);)
+	d (g_print ("OAL file decompressed %s \n", uncompress_file);)
 
 exit:
 	if (comp_cache_file)
@@ -1768,7 +1775,7 @@ ews_gal_store_contact (EContact *contact,
 		GSList *l;
 		gchar *status_message = NULL;
 
-		d(g_print ("GAL adding contacts, percent complete : %d \n", percent);)
+		d (g_print ("GAL adding contacts, percent complete : %d \n", percent);)
 
 		status_message = g_strdup_printf (_("Downloading contacts in %s %d%% completed... "), priv->folder_name, percent);
 		e_book_backend_foreach_view (E_BOOK_BACKEND (data->cbews), book_view_notify_status, status_message);
@@ -1856,7 +1863,7 @@ ebews_start_gal_sync (gpointer data)
 	e_ews_connection_set_password (oab_cnc, password);
 	g_free (password);
 
-	d(printf ("Ewsgal: Fetching oal full details file \n");)
+	d (printf ("Ewsgal: Fetching oal full details file \n");)
 
 	if (!e_ews_connection_get_oal_detail_sync (
 		oab_cnc, priv->folder_id, "Full", &full_l,
@@ -1877,21 +1884,21 @@ ebews_start_gal_sync (gpointer data)
 	if (!ews_book_backend_sqlitedb_get_is_populated (priv->ebsdb, priv->folder_id, NULL) || ews_gal_needs_update (cbews, full, &error)) {
 		gchar *seq;
 
-		d(printf ("Ewsgal: Downloading full gal \n");)
+		d (printf ("Ewsgal: Downloading full gal \n");)
 		uncompressed_filename = ews_download_full_gal (cbews, full, priv->cancellable, &error);
 		if (error) {
 			ret = FALSE;
 			goto exit;
 		}
 
-		d(printf ("Ewsgal: Removing old gal \n");)
+		d (printf ("Ewsgal: Removing old gal \n");)
 		/* remove old_gal_file */
 		ret = ews_remove_old_gal_file (cbews, &error);
 		if (!ret) {
 			goto exit;
 		}
 
-		d(printf ("Ewsgal: Replacing old gal with new gal contents in db \n");)
+		d (printf ("Ewsgal: Replacing old gal with new gal contents in db \n");)
 		ret = ews_replace_gal_in_db (cbews, uncompressed_filename, priv->cancellable, &error);
 		if (!ret)
 			goto exit;
@@ -1906,7 +1913,7 @@ ebews_start_gal_sync (gpointer data)
 		}
 	}
 
-	d(printf ("Ews gal: sync successfull complete \n");)
+	d (printf ("Ews gal: sync successfull complete \n");)
 
 exit:
 	if (error) {
@@ -2083,7 +2090,7 @@ ebews_store_distribution_list_items (EBookBackendEws *ebews,
 			gint len = strlen (mb->name);
 			gchar *value;
 
-			if (mb->name [0] == '\"' && mb->name [len - 1] == '\"')
+			if (mb->name[0] == '\"' && mb->name[len - 1] == '\"')
 				value = g_strdup_printf ("%s <%s>", mb->name, mb->email);
 			else
 				value = g_strdup_printf ("\"%s\" <%s>", mb->name, mb->email);
@@ -2131,7 +2138,7 @@ ebews_vcards_append_dl (const EwsId *id,
 			gint len = strlen (mb->name);
 			gchar *value;
 
-			if (mb->name [0] == '\"' && mb->name [len - 1] == '\"')
+			if (mb->name[0] == '\"' && mb->name[len - 1] == '\"')
 				value = g_strdup_printf ("%s <%s>", mb->name, mb->email);
 			else
 				value = g_strdup_printf ("\"%s\" <%s>", mb->name, mb->email);

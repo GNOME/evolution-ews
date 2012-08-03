@@ -78,7 +78,7 @@ struct EEwsSearchUser
 
 static struct EEwsSearchUser *
 e_ews_search_user_new (const gchar *display_name,
-		       const gchar *email)
+                       const gchar *email)
 {
 	struct EEwsSearchUser *user;
 
@@ -151,15 +151,16 @@ empty_search_tree_view (GtkWidget *tree_view)
 
 static void
 search_add_user (GtkListStore *store,
-		 const gchar *display_name,
-		 const gchar *email)
+                 const gchar *display_name,
+                 const gchar *email)
 {
 	GtkTreeIter iter;
 
 	g_return_if_fail (store != NULL);
 
 	gtk_list_store_append (store, &iter);
-	gtk_list_store_set (store, &iter,
+	gtk_list_store_set (
+		store, &iter,
 		COL_DISPLAY_NAME, display_name,
 		COL_EMAIL, email,
 		-1);
@@ -203,7 +204,8 @@ search_finish_idle (gpointer user_data)
 		if (!added) {
 			if (sid->found_contacts > 0) {
 				gchar *str;
-				str = g_strdup_printf (ngettext ("No users found, only one contact", "No users found, only %d contacts",
+				str = g_strdup_printf (
+					ngettext ("No users found, only one contact", "No users found, only %d contacts",
 					sid->found_contacts), sid->found_contacts);
 				gtk_label_set_text (GTK_LABEL (pgu->info_label), str);
 				g_free (str);
@@ -258,7 +260,8 @@ search_thread (gpointer user_data)
 					continue;
 				}
 
-				sid->found_users = g_slist_prepend (sid->found_users,
+				sid->found_users = g_slist_prepend (
+					sid->found_users,
 					e_ews_search_user_new (mb->name, mb->email));
 			}
 
@@ -317,7 +320,7 @@ schedule_search_cb (gpointer user_data)
 
 static void
 search_term_changed_cb (GtkEntry *entry,
-			GObject *dialog)
+                        GObject *dialog)
 {
 	struct EEwsSearchUserData *pgu;
 
@@ -379,21 +382,22 @@ dialog_realized_cb (GObject *dialog)
 
 static void
 search_user_selection_changed_cb (GtkTreeSelection *selection,
-				  GtkDialog *dialog)
+                                  GtkDialog *dialog)
 {
 	g_return_if_fail (selection != NULL);
 	g_return_if_fail (dialog != NULL);
 
-	gtk_dialog_set_response_sensitive (dialog,
+	gtk_dialog_set_response_sensitive (
+		dialog,
 		GTK_RESPONSE_OK,
 		gtk_tree_selection_get_selected (selection, NULL, NULL));
 }
 
 static void
 search_user_row_activated_cb (GtkTreeView *tree_view,
-			      GtkTreePath *path,
-			      GtkTreeViewColumn *column,
-			      GtkDialog *dialog)
+                              GtkTreePath *path,
+                              GtkTreeViewColumn *column,
+                              GtkDialog *dialog)
 {
 	g_return_if_fail (tree_view != NULL);
 	g_return_if_fail (dialog != NULL);
@@ -404,7 +408,7 @@ search_user_row_activated_cb (GtkTreeView *tree_view,
 
 static GtkWidget *
 create_users_tree_view (GtkWidget *dialog,
-			struct EEwsSearchUserData *pgu)
+                        struct EEwsSearchUserData *pgu)
 {
 	GtkTreeView *tree_view;
 	GtkTreeSelection *selection;
@@ -443,10 +447,10 @@ create_users_tree_view (GtkWidget *dialog,
 /* for non-NULL @info populates also permission levels for given user */
 gboolean
 e_ews_search_user_modal (GtkWindow *parent,
-			 EEwsConnection *conn,
-			 const gchar *search_this,
-			 gchar **display_name,
-			 gchar **email)
+                         EEwsConnection *conn,
+                         const gchar *search_this,
+                         gchar **display_name,
+                         gchar **email)
 {
 	gboolean res = FALSE;
 	struct EEwsSearchUserData *pgu;
@@ -487,14 +491,16 @@ e_ews_search_user_modal (GtkWindow *parent,
 	row = 0;
 
 	label = gtk_label_new_with_mnemonic (_("_Search:"));
-	g_object_set (G_OBJECT (label),
+	g_object_set (
+		G_OBJECT (label),
 		"hexpand", FALSE,
 		"vexpand", FALSE,
 		"xalign", 0.0,
 		NULL);
 
 	widget = gtk_entry_new ();
-	g_object_set (G_OBJECT (widget),
+	g_object_set (
+		G_OBJECT (widget),
 		"hexpand", TRUE,
 		"vexpand", FALSE,
 		NULL);
@@ -516,7 +522,8 @@ e_ews_search_user_modal (GtkWindow *parent,
 	gtk_scrolled_window_set_min_content_width (scrolled_window, 120);
 	gtk_scrolled_window_set_min_content_height (scrolled_window, 120);
 	gtk_container_add (GTK_CONTAINER (widget), create_users_tree_view (dialog, pgu));
-	g_object_set (G_OBJECT (widget),
+	g_object_set (
+		G_OBJECT (widget),
 		"hexpand", TRUE,
 		"vexpand", TRUE,
 		"shadow-type", GTK_SHADOW_IN,
@@ -527,7 +534,8 @@ e_ews_search_user_modal (GtkWindow *parent,
 	row++;
 
 	label = gtk_label_new (_("Search for a user"));
-	g_object_set (G_OBJECT (label),
+	g_object_set (
+		G_OBJECT (label),
 		"hexpand", TRUE,
 		"vexpand", FALSE,
 		"xalign", 0.0,

@@ -47,7 +47,7 @@ create_item_ready_callback (GObject *object,
 	GError *error = NULL;
 	GSList *ids = NULL, *l;
 
-	e_ews_connection_create_items_finish	(cnc, res, &ids, &error);
+	e_ews_connection_create_items_finish (cnc, res, &ids, &error);
 
 	if (error != NULL) {
 		g_print ("Unable to get item: %s :%d \n", error->message, error->code);
@@ -84,10 +84,10 @@ op_test_create_item_get_soap_msg (ESoapMessage *msg,
 
 	e_soap_message_end_element (msg);
 
-	g_printf("\nSOAP Request message:\n");
+	g_printf ("\nSOAP Request message:\n");
 	doc = e_soap_message_get_xml_doc (msg);
 	xmlDocDumpFormatMemory (doc, &xmlbuff,&size,1);
-	g_printf("%s\n", (gchar *)xmlbuff);
+	g_printf ("%s\n", (gchar *) xmlbuff);
 	xmlFree (xmlbuff);
 }
 

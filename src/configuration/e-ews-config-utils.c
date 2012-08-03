@@ -134,8 +134,8 @@ run_with_feedback_thread (gpointer user_data)
 
 static void
 run_with_feedback_response_cb (GtkWidget *dialog,
-			       gint resonse_id,
-			       struct RunWithFeedbackData *rfd)
+                               gint resonse_id,
+                               struct RunWithFeedbackData *rfd)
 {
 	g_return_if_fail (rfd != NULL);
 
@@ -148,13 +148,13 @@ run_with_feedback_response_cb (GtkWidget *dialog,
 
 static void
 e_ews_config_utils_run_in_thread_with_feedback_general (GtkWindow *parent,
-							GObject *with_object,
-							const gchar *description,
-							EEwsSetupFunc thread_func,
-							EEwsSetupFunc idle_func,
-							gpointer user_data,
-							GDestroyNotify free_user_data,
-							gboolean run_modal)
+                                                        GObject *with_object,
+                                                        const gchar *description,
+                                                        EEwsSetupFunc thread_func,
+                                                        EEwsSetupFunc idle_func,
+                                                        gpointer user_data,
+                                                        GDestroyNotify free_user_data,
+                                                        gboolean run_modal)
 {
 	GtkWidget *dialog, *label, *content, *spinner, *box;
 	struct RunWithFeedbackData *rfd;
@@ -163,7 +163,8 @@ e_ews_config_utils_run_in_thread_with_feedback_general (GtkWindow *parent,
 	g_return_if_fail (description != NULL);
 	g_return_if_fail (thread_func != NULL);
 
-	dialog = gtk_dialog_new_with_buttons ("",
+	dialog = gtk_dialog_new_with_buttons (
+		"",
 		parent,
 		GTK_DIALOG_MODAL,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
@@ -219,24 +220,24 @@ e_ews_config_utils_run_in_thread_with_feedback_general (GtkWindow *parent,
 
 void
 e_ews_config_utils_run_in_thread_with_feedback (GtkWindow *parent,
-						GObject *with_object,
-						const gchar *description,
-						EEwsSetupFunc thread_func,
-						EEwsSetupFunc idle_func,
-						gpointer user_data,
-						GDestroyNotify free_user_data)
+                                                GObject *with_object,
+                                                const gchar *description,
+                                                EEwsSetupFunc thread_func,
+                                                EEwsSetupFunc idle_func,
+                                                gpointer user_data,
+                                                GDestroyNotify free_user_data)
 {
 	e_ews_config_utils_run_in_thread_with_feedback_general (parent, with_object, description, thread_func, idle_func, user_data, free_user_data, FALSE);
 }
 
 void
 e_ews_config_utils_run_in_thread_with_feedback_modal (GtkWindow *parent,
-						      GObject *with_object,
-						      const gchar *description,
-						      EEwsSetupFunc thread_func,
-						      EEwsSetupFunc idle_func,
-						      gpointer user_data,
-						      GDestroyNotify free_user_data)
+                                                      GObject *with_object,
+                                                      const gchar *description,
+                                                      EEwsSetupFunc thread_func,
+                                                      EEwsSetupFunc idle_func,
+                                                      gpointer user_data,
+                                                      GDestroyNotify free_user_data)
 {
 	e_ews_config_utils_run_in_thread_with_feedback_general (parent, with_object, description, thread_func, idle_func, user_data, free_user_data, TRUE);
 }
@@ -258,9 +259,9 @@ struct _EEwsConfigUtilsAuthenticatorClass {
 
 static ESourceAuthenticationResult
 ews_config_utils_authenticator_try_password_sync (ESourceAuthenticator *auth,
-						  const GString *password,
-						  GCancellable *cancellable,
-						  GError **error)
+                                                  const GString *password,
+                                                  GCancellable *cancellable,
+                                                  GError **error)
 {
 	EEwsConfigUtilsAuthenticator *authenticator = (EEwsConfigUtilsAuthenticator *) auth;
 	CamelNetworkSettings *network_settings;
@@ -369,10 +370,10 @@ e_ews_config_utils_authenticator_init (EEwsConfigUtilsAuthenticator *authenticat
 
 EEwsConnection	*
 e_ews_config_utils_open_connection_for (ESourceRegistry *registry,
-					ESource *source,
-					CamelEwsSettings *ews_settings,
-					GCancellable *cancellable,
-					GError **perror)
+                                        ESource *source,
+                                        CamelEwsSettings *ews_settings,
+                                        GCancellable *cancellable,
+                                        GError **perror)
 {
 	EEwsConnection *conn = NULL;
 	CamelNetworkSettings *network_settings;
@@ -415,8 +416,8 @@ e_ews_config_utils_open_connection_for (ESourceRegistry *registry,
 
 static gboolean
 get_ews_store_from_folder_tree (EShellView *shell_view,
-				gchar **pfolder_path,
-				CamelStore **pstore)
+                                gchar **pfolder_path,
+                                CamelStore **pstore)
 {
 	EShellSidebar *shell_sidebar;
 	EMFolderTree *folder_tree;
@@ -457,9 +458,10 @@ get_ews_store_from_folder_tree (EShellView *shell_view,
 	return found;
 }
 
-/* static void
+#if 0
+static void
 action_subscribe_foreign_folder_cb (GtkAction *action,
-				    EShellView *shell_view)
+                                    EShellView *shell_view)
 {
 	GtkWindow *parent;
 	EShellBackend *backend;
@@ -478,11 +480,12 @@ action_subscribe_foreign_folder_cb (GtkAction *action,
 	g_object_unref (session);
 	g_object_unref (store);
 	g_free (profile);
-} */
+}
+#endif
 
 static void
 action_folder_permissions_mail_cb (GtkAction *action,
-				   EShellView *shell_view)
+                                   EShellView *shell_view)
 {
 	gchar *folder_path = NULL;
 	EShellWindow *shell_window;
@@ -521,7 +524,8 @@ action_folder_permissions_mail_cb (GtkAction *action,
 
 		folder_id = e_ews_folder_id_new (str_folder_id, str_change_key, FALSE);
 
-		e_ews_edit_folder_permissions (parent,
+		e_ews_edit_folder_permissions (
+			parent,
 			registry,
 			source,
 			CAMEL_EWS_SETTINGS (network_settings),
@@ -542,10 +546,10 @@ action_folder_permissions_mail_cb (GtkAction *action,
 
 static void
 ews_ui_enable_actions (GtkActionGroup *action_group,
-		       const GtkActionEntry *entries,
-		       guint n_entries,
-		       gboolean can_show,
-		       gboolean is_online)
+                       const GtkActionEntry *entries,
+                       guint n_entries,
+                       gboolean can_show,
+                       gboolean is_online)
 {
 	gint ii;
 
@@ -565,7 +569,8 @@ ews_ui_enable_actions (GtkActionGroup *action_group,
 	}
 }
 
-/*static GtkActionEntry mail_account_context_entries[] = {
+#if 0
+static GtkActionEntry mail_account_context_entries[] = {
 
 	{ "mail-ews-subscribe-foreign-folder",
 	  NULL,
@@ -573,7 +578,8 @@ ews_ui_enable_actions (GtkActionGroup *action_group,
 	  NULL,
 	  NULL,  / * XXX Add a tooltip! * /
 	  G_CALLBACK (action_subscribe_foreign_folder_cb) }
-};*/
+};
+#endif
 
 static GtkActionEntry mail_folder_context_entries[] = {
 	{ "mail-ews-folder-permissions",
@@ -594,7 +600,7 @@ static const gchar *ews_ui_mail_def =
 
 static void
 ews_ui_update_actions_mail_cb (EShellView *shell_view,
-			       GtkActionEntry *entries)
+                               GtkActionEntry *entries)
 {
 	EShellWindow *shell_window;
 	GtkActionGroup *action_group;
@@ -649,7 +655,7 @@ ews_ui_update_actions_mail_cb (EShellView *shell_view,
 static void
 ews_ui_init_mail (GtkUIManager *ui_manager,
                   EShellView *shell_view,
-		  gchar **ui_definition)
+                  gchar **ui_definition)
 {
 	EShellWindow *shell_window;
 	GtkActionGroup *action_group;
@@ -664,21 +670,23 @@ ews_ui_init_mail (GtkUIManager *ui_manager,
 	/* Add actions to the "mail" action group. */
 	/*e_action_group_add_actions_localized (action_group, GETTEXT_PACKAGE,
 		mail_account_context_entries, G_N_ELEMENTS (mail_account_context_entries), shell_view);*/
-	e_action_group_add_actions_localized (action_group, GETTEXT_PACKAGE,
+	e_action_group_add_actions_localized (
+		action_group, GETTEXT_PACKAGE,
 		mail_folder_context_entries, G_N_ELEMENTS (mail_folder_context_entries), shell_view);
 
 	/* Decide whether we want this option to be visible or not */
-	g_signal_connect (shell_view, "update-actions",
-			  G_CALLBACK (ews_ui_update_actions_mail_cb),
-			  shell_view);
+	g_signal_connect (
+		shell_view, "update-actions",
+		G_CALLBACK (ews_ui_update_actions_mail_cb),
+		shell_view);
 
 	g_object_unref (action_group);
 }
 
 static gboolean
 get_selected_ews_source (EShellView *shell_view,
-			 ESource **selected_source,
-			 ESourceRegistry **registry)
+                         ESource **selected_source,
+                         ESourceRegistry **registry)
 {
 	ESource *source;
 	EShellSidebar *shell_sidebar;
@@ -728,12 +736,12 @@ get_selected_ews_source (EShellView *shell_view,
 }
 
 /* how many menu entries are defined; all calendar/tasks/memos/contacts
-   actions should have same count */
+ * actions should have same count */
 #define EWS_ESOURCE_NUM_ENTRIES 1
 
 static void
 update_ews_source_entries_cb (EShellView *shell_view,
-			      GtkActionEntry *entries)
+                              GtkActionEntry *entries)
 {
 	GtkActionGroup *action_group;
 	EShell *shell;
@@ -767,9 +775,9 @@ update_ews_source_entries_cb (EShellView *shell_view,
 
 static void
 setup_ews_source_actions (EShellView *shell_view,
-			  GtkUIManager *ui_manager,
-			  GtkActionEntry *entries,
-			  guint n_entries)
+                          GtkUIManager *ui_manager,
+                          GtkActionEntry *entries,
+                          guint n_entries)
 {
 	EShellWindow *shell_window;
 	const gchar *group;
@@ -802,7 +810,7 @@ setup_ews_source_actions (EShellView *shell_view,
 
 static void
 action_folder_permissions_source_cb (GtkAction *action,
-				     EShellView *shell_view)
+                                     EShellView *shell_view)
 {
 	ESourceRegistry *registry = NULL;
 	ESource *source = NULL, *parent_source;
@@ -838,7 +846,8 @@ action_folder_permissions_source_cb (GtkAction *action,
 	else if (strstr (gtk_action_get_name (action), "tasks") != NULL)
 		folder_type = EWS_FOLDER_TYPE_TASKS;
 
-	e_ews_edit_folder_permissions (NULL,
+	e_ews_edit_folder_permissions (
+		NULL,
 		registry,
 		source,
 		CAMEL_EWS_SETTINGS (settings),
@@ -872,14 +881,15 @@ static const gchar *ews_ui_cal_def =
 
 static void
 ews_ui_init_calendar (GtkUIManager *ui_manager,
-		      EShellView *shell_view,
-		      gchar **ui_definition)
+                      EShellView *shell_view,
+                      gchar **ui_definition)
 {
 	g_return_if_fail (ui_definition != NULL);
 
 	*ui_definition = g_strdup (ews_ui_cal_def);
 
-	setup_ews_source_actions (shell_view, ui_manager,
+	setup_ews_source_actions (
+		shell_view, ui_manager,
 		calendar_context_entries, G_N_ELEMENTS (calendar_context_entries));
 }
 
@@ -902,14 +912,15 @@ static const gchar *ews_ui_task_def =
 
 static void
 ews_ui_init_tasks (GtkUIManager *ui_manager,
-		   EShellView *shell_view,
-		   gchar **ui_definition)
+                   EShellView *shell_view,
+                   gchar **ui_definition)
 {
 	g_return_if_fail (ui_definition != NULL);
 
 	*ui_definition = g_strdup (ews_ui_task_def);
 
-	setup_ews_source_actions (shell_view, ui_manager,
+	setup_ews_source_actions (
+		shell_view, ui_manager,
 		tasks_context_entries, G_N_ELEMENTS (tasks_context_entries));
 }
 
@@ -932,14 +943,15 @@ static const gchar *ews_ui_memo_def =
 
 static void
 ews_ui_init_memos (GtkUIManager *ui_manager,
-		   EShellView *shell_view,
-		   gchar **ui_definition)
+                   EShellView *shell_view,
+                   gchar **ui_definition)
 {
 	g_return_if_fail (ui_definition != NULL);
 
 	*ui_definition = g_strdup (ews_ui_memo_def);
 
-	setup_ews_source_actions (shell_view, ui_manager,
+	setup_ews_source_actions (
+		shell_view, ui_manager,
 		memos_context_entries, G_N_ELEMENTS (memos_context_entries));
 }
 
@@ -962,21 +974,22 @@ static const gchar *ews_ui_book_def =
 
 static void
 ews_ui_init_contacts (GtkUIManager *ui_manager,
-		      EShellView *shell_view,
-		      gchar **ui_definition)
+                      EShellView *shell_view,
+                      gchar **ui_definition)
 {
 	g_return_if_fail (ui_definition != NULL);
 
 	*ui_definition = g_strdup (ews_ui_book_def);
 
-	setup_ews_source_actions (shell_view, ui_manager,
+	setup_ews_source_actions (
+		shell_view, ui_manager,
 		contacts_context_entries, G_N_ELEMENTS (contacts_context_entries));
 }
 
 void
 e_ews_config_utils_init_ui (EShellView *shell_view,
-			    const gchar *ui_manager_id,
-			    gchar **ui_definition)
+                            const gchar *ui_manager_id,
+                            gchar **ui_definition)
 {
 	EShellWindow *shell_window;
 	GtkUIManager *ui_manager;

@@ -428,14 +428,14 @@ ews_authenticate_sync (CamelService *service,
 			cancellable, &folder_err);
 
 		if (g_slist_length (folders) && (g_slist_length (folders) != G_N_ELEMENTS (system_folder)))
-			d(printf("Error : not all folders are returned by getfolder operation"));
+			d (printf ("Error : not all folders are returned by getfolder operation"));
 		else if (folder_err == NULL && folders != NULL)
 			ews_store_set_flags (ews_store, folders);
 		else if (folder_err) {
 			/*report error and make sure we are not leaking anything*/
 			g_warn_if_fail (folders == NULL);
 		} else
-			d(printf ("folders for respective distinguished ids don't exist"));
+			d (printf ("folders for respective distinguished ids don't exist"));
 
 		g_slist_foreach (folders, (GFunc) g_object_unref, NULL);
 		g_slist_foreach (folder_ids, (GFunc) e_ews_folder_id_free, NULL);
@@ -513,9 +513,10 @@ ews_get_folder_sync (CamelStore *store,
 
 		camel_folder_info_free (fi);
 	} else if (!fid) {
-		g_set_error (error, CAMEL_STORE_ERROR,
-			     CAMEL_ERROR_GENERIC,
-			     _("No such folder: %s"), folder_name);
+		g_set_error (
+			error, CAMEL_STORE_ERROR,
+			CAMEL_ERROR_GENERIC,
+			_("No such folder: %s"), folder_name);
 		return NULL;
 	} else {
 		/* We don't actually care what it is; only that it exists */
@@ -558,7 +559,7 @@ folder_info_from_store_summary (CamelEwsStore *store,
 			continue;
 
 		fi = camel_ews_utils_build_folder_info (store, l->data);
-		g_ptr_array_add	(folder_infos, fi);
+		g_ptr_array_add (folder_infos, fi);
 	}
 
 	root_fi = camel_folder_info_build (folder_infos, top, '/', TRUE);
@@ -584,9 +585,10 @@ ews_folder_hierarchy_ready_cb (GObject *obj,
 	gboolean includes_last_folder;
 	GError *error = NULL;
 
-	e_ews_connection_sync_folder_hierarchy_finish	(cnc, res, &sync_state, &includes_last_folder,
-							 &folders_created, &folders_updated,
-							 &folders_deleted, &error);
+	e_ews_connection_sync_folder_hierarchy_finish (
+		cnc, res, &sync_state, &includes_last_folder,
+		&folders_created, &folders_updated,
+		&folders_deleted, &error);
 
 	if (error != NULL) {
 		g_warning ("Unable to fetch the folder hierarchy: %s :%d \n", error->message, error->code);
@@ -598,8 +600,9 @@ ews_folder_hierarchy_ready_cb (GObject *obj,
 		g_mutex_unlock (priv->get_finfo_lock);
 		goto exit;
 	}
-	ews_update_folder_hierarchy (ews_store, sync_state, includes_last_folder,
-				     folders_created, folders_deleted, folders_updated);
+	ews_update_folder_hierarchy (
+		ews_store, sync_state, includes_last_folder,
+		folders_created, folders_deleted, folders_updated);
 
 	g_mutex_lock (priv->get_finfo_lock);
 	ews_store->priv->last_refresh_time = time (NULL);
@@ -694,8 +697,9 @@ ews_get_folder_info_sync (CamelStore *store,
 
 	if (!success) {
 		if (local_error)
-			g_warning ("Unable to fetch the folder hierarchy: %s :%d \n",
-				   local_error->message, local_error->code);
+			g_warning (
+				"Unable to fetch the folder hierarchy: %s :%d \n",
+				local_error->message, local_error->code);
 		else
 			g_warning ("Unable to fetch the folder hierarchy.\n");
 
@@ -705,8 +709,9 @@ ews_get_folder_info_sync (CamelStore *store,
 		g_mutex_unlock (priv->get_finfo_lock);
 		return NULL;
 	}
-	ews_update_folder_hierarchy (ews_store, sync_state, includes_last_folder,
-				     folders_created, folders_deleted, folders_updated);
+	ews_update_folder_hierarchy (
+		ews_store, sync_state, includes_last_folder,
+		folders_created, folders_deleted, folders_updated);
 	g_mutex_unlock (priv->get_finfo_lock);
 
 offline:
@@ -733,11 +738,13 @@ ews_create_folder_sync (CamelStore *store,
 
 	/* Get Parent folder ID */
 	if (parent_name && parent_name[0]) {
-		fid = camel_ews_store_summary_get_folder_id_from_name (ews_summary,
-								       parent_name);
+		fid = camel_ews_store_summary_get_folder_id_from_name (
+			ews_summary, parent_name);
 		if (!fid) {
-			g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-				     _("Parent folder %s does not exist"), parent_name);
+			g_set_error (
+				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+				_("Parent folder %s does not exist"),
+				parent_name);
 			return NULL;
 		}
 	}
@@ -770,11 +777,12 @@ ews_create_folder_sync (CamelStore *store,
 	else
 		full_name = g_strdup (folder_name);
 
-	camel_ews_store_summary_new_folder (ews_summary, folder_id->id,
-					    fid, folder_id->change_key,
-					    folder_name,
-					    EWS_FOLDER_TYPE_MAILBOX,
-					    0, 0);
+	camel_ews_store_summary_new_folder (
+		ews_summary, folder_id->id,
+		fid, folder_id->change_key,
+		folder_name,
+		EWS_FOLDER_TYPE_MAILBOX,
+		0, 0);
 	fi = camel_ews_utils_build_folder_info (ews_store, folder_id->id);
 	e_ews_folder_id_free (folder_id);
 
@@ -799,11 +807,12 @@ ews_delete_folder_sync (CamelStore *store,
 	gboolean success;
 	GError *local_error = NULL;
 
-	fid = camel_ews_store_summary_get_folder_id_from_name (ews_summary,
-							       folder_name);
+	fid = camel_ews_store_summary_get_folder_id_from_name (
+		ews_summary, folder_name);
 	if (!fid) {
-		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			     _("Folder does not exist"));
+		g_set_error (
+			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			_("Folder does not exist"));
 		return FALSE;
 	}
 
@@ -852,11 +861,13 @@ rename_folder_cb (ESoapMessage *msg,
 {
 	struct _rename_cb_data *rename_data = user_data;
 
-	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_FOLDER,
-					 rename_data->folder_id, rename_data->change_key, 0);
+	e_ews_message_start_item_change (
+		msg, E_EWS_ITEMCHANGE_TYPE_FOLDER,
+		rename_data->folder_id, rename_data->change_key, 0);
 	e_soap_message_start_element (msg, "SetFolderField", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL,
-							      "FieldURI", "folder:DisplayName");
+	e_ews_message_write_string_parameter_with_attribute (
+		msg, "FieldURI", NULL, NULL,
+		"FieldURI", "folder:DisplayName");
 
 	e_soap_message_start_element (msg, "Folder", NULL, NULL);
 	e_ews_message_write_string_parameter (msg, "DisplayName", NULL, rename_data->display_name);
@@ -892,18 +903,20 @@ ews_rename_folder_sync (CamelStore *store,
 
 	fid = camel_ews_store_summary_get_folder_id_from_name (ews_summary, old_name);
 	if (!fid) {
-		g_set_error (error, CAMEL_STORE_ERROR,
-			     CAMEL_STORE_ERROR_NO_FOLDER,
-			     _("Folder %s does not exist"), old_name);
+		g_set_error (
+			error, CAMEL_STORE_ERROR,
+			CAMEL_STORE_ERROR_NO_FOLDER,
+			_("Folder %s does not exist"), old_name);
 		return FALSE;
 	}
 
 	changekey = camel_ews_store_summary_get_change_key (ews_summary, fid, error);
 	if (!changekey) {
 		g_free (fid);
-		g_set_error (error, CAMEL_STORE_ERROR,
-			     CAMEL_STORE_ERROR_NO_FOLDER,
-			     _("No change key record for folder %s"), fid);
+		g_set_error (
+			error, CAMEL_STORE_ERROR,
+			CAMEL_STORE_ERROR_NO_FOLDER,
+			_("No change key record for folder %s"), fid);
 		return FALSE;
 	}
 
@@ -942,9 +955,10 @@ ews_rename_folder_sync (CamelStore *store,
 		*/
 		if (new_slash - new_name != parent_len ||
 		    strncmp (old_name, new_name, parent_len)) {
-			g_set_error (error, CAMEL_STORE_ERROR,
-				     CAMEL_STORE_ERROR_INVALID,
-				     _("Cannot both rename and move a folder at the same time"));
+			g_set_error (
+				error, CAMEL_STORE_ERROR,
+				CAMEL_STORE_ERROR_INVALID,
+				_("Cannot both rename and move a folder at the same time"));
 			g_free (changekey);
 			goto out;
 		}
@@ -973,14 +987,15 @@ ews_rename_folder_sync (CamelStore *store,
 		 * the new parent folder */
 		if (new_slash != new_name) {
 			parent_name = g_strndup (new_name, new_slash - new_name - 1);
-			pfid = camel_ews_store_summary_get_folder_id_from_name (ews_summary,
-										parent_name);
+			pfid = camel_ews_store_summary_get_folder_id_from_name (
+				ews_summary, parent_name);
 			g_free (parent_name);
 			if (!pfid) {
-				g_set_error (error, CAMEL_STORE_ERROR,
-					     CAMEL_STORE_ERROR_NO_FOLDER,
-					     _("Cannot find folder ID for parent folder %s"),
-					     parent_name);
+				g_set_error (
+					error, CAMEL_STORE_ERROR,
+					CAMEL_STORE_ERROR_NO_FOLDER,
+					_("Cannot find folder ID for parent folder %s"),
+					parent_name);
 				goto out;
 			}
 		}
@@ -1027,10 +1042,11 @@ ews_get_name (CamelService *service,
 	user = camel_network_settings_get_user (network_settings);
 
 	if (brief)
-		return g_strdup_printf(_("Exchange server %s"), host);
+		return g_strdup_printf (
+			_("Exchange server %s"), host);
 	else
-		return g_strdup_printf(_("Exchange service for %s on %s"),
-				       user, host);
+		return g_strdup_printf (
+			_("Exchange service for %s on %s"), user, host);
 }
 
 EEwsConnection *
@@ -1128,7 +1144,7 @@ camel_ews_store_connected (CamelEwsStore *ews_store,
 
 void
 camel_ews_store_maybe_disconnect (CamelEwsStore *store,
-				  const GError *error)
+                                  const GError *error)
 {
 	CamelService *service;
 

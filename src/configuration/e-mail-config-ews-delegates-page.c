@@ -176,7 +176,7 @@ mail_config_ews_delegates_page_get_mailbox (EMailConfigEwsDelegatesPage *page)
 
 static void
 enable_delegates_page_widgets (EMailConfigEwsDelegatesPage *page,
-			       gboolean enable)
+                               gboolean enable)
 {
 	gboolean has_users = FALSE;
 
@@ -230,8 +230,8 @@ copy_delegate_info (const EwsDelegateInfo *src)
 
 static void
 mail_config_ews_delegates_page_refresh_cb (GObject *source_object,
-					   GAsyncResult *result,
-					   gpointer user_data)
+                                           GAsyncResult *result,
+                                           gpointer user_data)
 {
 	ESourceRegistry *registry;
 	AsyncContext *async_context;
@@ -304,7 +304,7 @@ mail_config_ews_delegates_page_refresh_cb (GObject *source_object,
 
 static void
 mail_config_ews_delegates_page_set_account_source (EMailConfigEwsDelegatesPage *page,
-						   ESource *account_source)
+                                                   ESource *account_source)
 {
 	g_return_if_fail (E_IS_SOURCE (account_source));
 	g_return_if_fail (page->priv->account_source == NULL);
@@ -314,7 +314,7 @@ mail_config_ews_delegates_page_set_account_source (EMailConfigEwsDelegatesPage *
 
 static void
 mail_config_ews_delegates_page_set_collection_source (EMailConfigEwsDelegatesPage *page,
-						      ESource *collection_source)
+                                                      ESource *collection_source)
 {
 	g_return_if_fail (E_IS_SOURCE (collection_source));
 	g_return_if_fail (page->priv->collection_source == NULL);
@@ -324,7 +324,7 @@ mail_config_ews_delegates_page_set_collection_source (EMailConfigEwsDelegatesPag
 
 static void
 mail_config_ews_delegates_page_set_identity_source (EMailConfigEwsDelegatesPage *page,
-						    ESource *identity_source)
+                                                    ESource *identity_source)
 {
 	g_return_if_fail (E_IS_SOURCE (identity_source));
 	g_return_if_fail (page->priv->identity_source == NULL);
@@ -334,7 +334,7 @@ mail_config_ews_delegates_page_set_identity_source (EMailConfigEwsDelegatesPage 
 
 static void
 mail_config_ews_delegates_page_set_registry (EMailConfigEwsDelegatesPage *page,
-					     ESourceRegistry *registry)
+                                             ESourceRegistry *registry)
 {
 	g_return_if_fail (E_IS_SOURCE_REGISTRY (registry));
 	g_return_if_fail (page->priv->registry == NULL);
@@ -344,9 +344,9 @@ mail_config_ews_delegates_page_set_registry (EMailConfigEwsDelegatesPage *page,
 
 static void
 mail_config_ews_delegates_page_set_property (GObject *object,
-					     guint property_id,
-					     const GValue *value,
-					     GParamSpec *pspec)
+                                             guint property_id,
+                                             const GValue *value,
+                                             GParamSpec *pspec)
 {
 	switch (property_id) {
 		case PROP_ACCOUNT_SOURCE:
@@ -379,9 +379,9 @@ mail_config_ews_delegates_page_set_property (GObject *object,
 
 static void
 mail_config_ews_delegates_page_get_property (GObject *object,
-					     guint property_id,
-					     GValue *value,
-					     GParamSpec *pspec)
+                                             guint property_id,
+                                             GValue *value,
+                                             GParamSpec *pspec)
 {
 	switch (property_id) {
 		case PROP_ACCOUNT_SOURCE:
@@ -475,7 +475,7 @@ mail_config_ews_delegates_page_finalize (GObject *object)
 
 static void
 delegates_tree_selection_changed_cb (GtkTreeSelection *selection,
-				     EMailConfigEwsDelegatesPage *page)
+                                     EMailConfigEwsDelegatesPage *page)
 {
 	g_return_if_fail (selection != NULL);
 	g_return_if_fail (page != NULL);
@@ -485,10 +485,10 @@ delegates_tree_selection_changed_cb (GtkTreeSelection *selection,
 
 static GtkWidget *
 add_permission_level_combo_row (GtkGrid *grid,
-				gint row,
-				const gchar *icon_name,
-				const gchar *label_text,
-				EwsPermissionLevel preselect)
+                                gint row,
+                                const gchar *icon_name,
+                                const gchar *label_text,
+                                EwsPermissionLevel preselect)
 {
 	GtkWidget *image = NULL, *label;
 	GtkComboBoxText *combo;
@@ -526,7 +526,8 @@ add_permission_level_combo_row (GtkGrid *grid,
 	}
 
 	gtk_combo_box_set_active (GTK_COMBO_BOX (combo), index);
-	g_object_set (G_OBJECT (combo),
+	g_object_set (
+		G_OBJECT (combo),
 		"valign", GTK_ALIGN_CENTER,
 		NULL);
 
@@ -577,14 +578,14 @@ get_permission_level_from_combo (GtkWidget *combo)
 
 static void
 enable_cal_copies_by_combo_index (GtkComboBox *combo,
-				  GtkWidget *check)
+                                  GtkWidget *check)
 {
 	gtk_widget_set_sensitive (check, gtk_combo_box_get_active (combo) >= 3);
 }
 
 static void
 show_delegate_properties_modal (EMailConfigEwsDelegatesPage *page,
-				EwsDelegateInfo *di)
+                                EwsDelegateInfo *di)
 {
 	GtkWidget *dialog, *widget, *content_area;
 	GtkGrid *grid;
@@ -603,7 +604,8 @@ show_delegate_properties_modal (EMailConfigEwsDelegatesPage *page,
 		name = di->user_id->primary_smtp;
 
 	parent = e_ews_config_utils_get_widget_toplevel_window (GTK_WIDGET (page));
-	dialog = gtk_dialog_new_with_buttons (_("Delegate permissions"), parent,
+	dialog = gtk_dialog_new_with_buttons (
+		_("Delegate permissions"), parent,
 		GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		GTK_STOCK_OK, GTK_RESPONSE_OK,
@@ -611,7 +613,8 @@ show_delegate_properties_modal (EMailConfigEwsDelegatesPage *page,
 
 	widget = gtk_grid_new ();
 	grid = GTK_GRID (widget);
-	g_object_set (G_OBJECT (grid),
+	g_object_set (
+		G_OBJECT (grid),
 		"row-spacing", 6,
 		"column-spacing", 6,
 		"orientation", GTK_ORIENTATION_VERTICAL,
@@ -649,7 +652,8 @@ show_delegate_properties_modal (EMailConfigEwsDelegatesPage *page,
 	g_free (text);
 
 	grid = GTK_GRID (gtk_grid_new ());
-	g_object_set (G_OBJECT (grid),
+	g_object_set (
+		G_OBJECT (grid),
 		"row-spacing", 6,
 		"orientation", GTK_ORIENTATION_VERTICAL,
 		"border-width", 12,
@@ -706,9 +710,9 @@ show_delegate_properties_modal (EMailConfigEwsDelegatesPage *page,
 
 static void
 retrieve_user_permissions_idle_cb (GObject *ppage,
-				   gpointer pdi,
-				   GCancellable *cancellable,
-				   GError **perror)
+                                   gpointer pdi,
+                                   GCancellable *cancellable,
+                                   GError **perror)
 {
 	EMailConfigEwsDelegatesPage *page = E_MAIL_CONFIG_EWS_DELEGATES_PAGE (ppage);
 	EwsDelegateInfo *di = pdi;
@@ -721,7 +725,7 @@ retrieve_user_permissions_idle_cb (GObject *ppage,
 
 static EwsPermissionLevel
 get_level_from_permissions (const GSList *permissions,
-			    const gchar *primary_smtp)
+                            const gchar *primary_smtp)
 {
 	EwsPermissionLevel level = EwsPermissionLevel_None;
 	const GSList *iter;
@@ -756,11 +760,11 @@ get_level_from_permissions (const GSList *permissions,
 
 static gboolean
 get_folder_permissions_sync (EEwsConnection *conn,
-			     const gchar *distinguished_folder_name,
-			     CamelEwsStoreSummary *ews_summary,
-			     GSList **permissions,
-			     GCancellable *cancellable,
-			     GError **error)
+                             const gchar *distinguished_folder_name,
+                             CamelEwsStoreSummary *ews_summary,
+                             GSList **permissions,
+                             GCancellable *cancellable,
+                             GError **error)
 {
 	gboolean res;
 	EwsFolderId *folder_id;
@@ -802,9 +806,9 @@ get_folder_permissions_sync (EEwsConnection *conn,
 
 static void
 retrieve_user_permissions_thread_cb (GObject *ppage,
-				     gpointer pdi,
-				     GCancellable *cancellable,
-				     GError **perror)
+                                     gpointer pdi,
+                                     GCancellable *cancellable,
+                                     GError **perror)
 {
 	EMailConfigEwsDelegatesPage *page = E_MAIL_CONFIG_EWS_DELEGATES_PAGE (ppage);
 	EwsDelegateInfo *di = pdi;
@@ -888,8 +892,8 @@ enum {
 
 static gboolean
 page_contains_user (EMailConfigEwsDelegatesPage *page,
-		    const gchar *primary_smtp,
-		    GtkTreeIter *piter)
+                    const gchar *primary_smtp,
+                    GtkTreeIter *piter)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
@@ -918,8 +922,8 @@ page_contains_user (EMailConfigEwsDelegatesPage *page,
 
 static void
 add_to_tree_view (EMailConfigEwsDelegatesPage *page,
-		  EwsDelegateInfo *di,
-		  gboolean select)
+                  EwsDelegateInfo *di,
+                  gboolean select)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
@@ -938,7 +942,8 @@ add_to_tree_view (EMailConfigEwsDelegatesPage *page,
 			name = di->user_id->primary_smtp;
 
 		gtk_list_store_append (GTK_LIST_STORE (model), &iter);
-		gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+		gtk_list_store_set (
+			GTK_LIST_STORE (model), &iter,
 			COL_NAME, name,
 			COL_DELEGATE_INFO, di,
 			-1);
@@ -978,7 +983,8 @@ add_button_clicked_cb (EMailConfigEwsDelegatesPage *page)
 			if (page_contains_user (page, email, NULL))
 				add_to_tree_view (page, di, TRUE);
 			else
-				e_ews_config_utils_run_in_thread_with_feedback_modal (parent, G_OBJECT (page),
+				e_ews_config_utils_run_in_thread_with_feedback_modal (
+					parent, G_OBJECT (page),
 					_("Retrieving current user permissions, please wait..."),
 					retrieve_user_permissions_thread_cb,
 					retrieve_user_permissions_idle_cb,
@@ -1109,7 +1115,8 @@ mail_config_ews_delegates_page_constructed (GObject *object)
 	g_free (markup);
 
 	widget = gtk_grid_new ();
-	g_object_set (G_OBJECT (widget),
+	g_object_set (
+		G_OBJECT (widget),
 		"row-homogeneous", FALSE,
 		"row-spacing", 6,
 		"column-homogeneous", FALSE,
@@ -1124,9 +1131,9 @@ mail_config_ews_delegates_page_constructed (GObject *object)
 
 	widget = gtk_label_new (
 		_("Delegates can send items on your behalf, including creating and "
-		  "responding to meeting requests. If you want to grant folder "
-		  "permissions without giving send-on-behalf-of permissions, close this "
-		  "dialog box, right-click the folder, click Permissions and change the options there."));
+		"responding to meeting requests. If you want to grant folder "
+		"permissions without giving send-on-behalf-of permissions, close this "
+		"dialog box, right-click the folder, click Permissions and change the options there."));
 	gtk_label_set_line_wrap (GTK_LABEL (widget), TRUE);
 	gtk_misc_set_alignment (GTK_MISC (widget), 0.0, 0.5);
 	gtk_grid_attach (grid, widget, 0, row, 2, 1);
@@ -1135,7 +1142,8 @@ mail_config_ews_delegates_page_constructed (GObject *object)
 
 	widget = gtk_scrolled_window_new (NULL, NULL);
 	gtk_container_add (GTK_CONTAINER (widget), create_users_tree_view (page));
-	g_object_set (G_OBJECT (widget),
+	g_object_set (
+		G_OBJECT (widget),
 		"hexpand", TRUE,
 		"vexpand", TRUE,
 		"shadow-type", GTK_SHADOW_IN,
@@ -1147,7 +1155,8 @@ mail_config_ews_delegates_page_constructed (GObject *object)
 	gtk_orientable_set_orientation (GTK_ORIENTABLE (hvgrid), GTK_ORIENTATION_VERTICAL);
 	gtk_grid_set_row_spacing (GTK_GRID (hvgrid), 6);
 	gtk_grid_set_column_homogeneous (GTK_GRID (hvgrid), TRUE);
-	g_object_set (G_OBJECT (hvgrid),
+	g_object_set (
+		G_OBJECT (hvgrid),
 		"hexpand", FALSE,
 		"vexpand", FALSE,
 		"halign", GTK_ALIGN_END,
@@ -1171,7 +1180,7 @@ mail_config_ews_delegates_page_constructed (GObject *object)
 
 	widget = gtk_label_new (
 		_("Deliver meeting requests addressed to me and responses to meeting "
-		  "requests where I am the organizer to:"));
+		"requests where I am the organizer to:"));
 	gtk_label_set_line_wrap (GTK_LABEL (widget), TRUE);
 	gtk_misc_set_alignment (GTK_MISC (widget), 0.0, 0.5);
 	gtk_grid_attach (grid, widget, 0, row, 2, 1);
@@ -1198,11 +1207,14 @@ mail_config_ews_delegates_page_constructed (GObject *object)
 	radio_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (widget));
 	gtk_grid_attach (grid, widget, 0, row, 2, 1);
 
-	g_signal_connect_swapped (page->priv->add_button,
+	g_signal_connect_swapped (
+		page->priv->add_button,
 		"clicked", G_CALLBACK (add_button_clicked_cb), page);
-	g_signal_connect_swapped (page->priv->remove_button,
+	g_signal_connect_swapped (
+		page->priv->remove_button,
 		"clicked", G_CALLBACK (remove_button_clicked_cb), page);
-	g_signal_connect_swapped (page->priv->properties_button,
+	g_signal_connect_swapped (
+		page->priv->properties_button,
 		"clicked", G_CALLBACK (properties_button_clicked_cb), page);
 
 	enable_delegates_page_widgets (page, FALSE);
@@ -1218,8 +1230,8 @@ mail_config_ews_delegates_page_constructed (GObject *object)
 
 static void
 mail_config_ews_delegates_page_add_delegate_cb (GObject *source_object,
-						GAsyncResult *result,
-						gpointer user_data)
+                                                GAsyncResult *result,
+                                                gpointer user_data)
 {
 	GSimpleAsyncResult *simple;
 	GError *error = NULL;
@@ -1239,8 +1251,8 @@ mail_config_ews_delegates_page_add_delegate_cb (GObject *source_object,
 
 static void
 mail_config_ews_delegates_page_remove_delegate_cb (GObject *source_object,
-						   GAsyncResult *result,
-						   gpointer user_data)
+                                                   GAsyncResult *result,
+                                                   gpointer user_data)
 {
 	GSimpleAsyncResult *simple;
 	GError *error = NULL;
@@ -1273,8 +1285,8 @@ mail_config_ews_delegates_page_remove_delegate_cb (GObject *source_object,
 
 static void
 mail_config_ews_delegates_page_update_delegate_cb (GObject *source_object,
-						   GAsyncResult *result,
-						   gpointer user_data)
+                                                   GAsyncResult *result,
+                                                   gpointer user_data)
 {
 	GSimpleAsyncResult *simple;
 	GError *error = NULL;
@@ -1314,7 +1326,7 @@ mail_config_ews_delegates_page_update_delegate_cb (GObject *source_object,
 
 static gboolean
 delegate_infos_equal (const EwsDelegateInfo *di1,
-		       const EwsDelegateInfo *di2)
+                       const EwsDelegateInfo *di2)
 {
 	if (!di1 || !di2)
 		return di1 == di2;
@@ -1332,8 +1344,8 @@ delegate_infos_equal (const EwsDelegateInfo *di1,
 
 static void
 mail_config_ews_delegates_page_submit (EMailConfigPage *page,
-				       GCancellable *cancellable,
-				       GAsyncReadyCallback callback,
+                                       GCancellable *cancellable,
+                                       GAsyncReadyCallback callback,
                                        gpointer user_data)
 {
 	EMailConfigEwsDelegatesPagePrivate *priv;
@@ -1456,7 +1468,7 @@ mail_config_ews_delegates_page_submit (EMailConfigPage *page,
 
 static gboolean
 mail_config_ews_delegates_page_submit_finish (EMailConfigPage *page,
-					      GAsyncResult *result,
+                                              GAsyncResult *result,
                                               GError **error)
 {
 	GSimpleAsyncResult *simple;
@@ -1474,7 +1486,7 @@ mail_config_ews_delegates_page_submit_finish (EMailConfigPage *page,
 
 static gint
 sort_by_display_name_cb (gconstpointer a,
-			 gconstpointer b)
+                         gconstpointer b)
 {
 	const EwsDelegateInfo *dia, *dib;
 	const gchar *aname, *bname;
@@ -1501,9 +1513,9 @@ sort_by_display_name_cb (gconstpointer a,
 
 static ESourceAuthenticationResult
 mail_config_ews_delegates_page_try_password_sync (ESourceAuthenticator *auth,
-						  const GString *password,
-						  GCancellable *cancellable,
-						  GError **error)
+                                                  const GString *password,
+                                                  GCancellable *cancellable,
+                                                  GError **error)
 {
 	EMailConfigEwsDelegatesPage *page;
 	CamelSettings *settings;
@@ -1660,7 +1672,7 @@ e_mail_config_ews_delegates_page_type_register (GTypeModule *type_module)
 
 EMailConfigPage *
 e_mail_config_ews_delegates_page_new (ESourceRegistry *registry,
-				      ESource *account_source,
+                                      ESource *account_source,
                                       ESource *identity_source,
                                       ESource *collection_source)
 {

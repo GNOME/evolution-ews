@@ -718,7 +718,8 @@ mail_config_ews_ooo_page_submit (EMailConfigPage *page,
 		return;
 	}
 
-	signal_id = g_signal_connect_swapped (priv->oof_settings, "notify",
+	signal_id = g_signal_connect_swapped (
+		priv->oof_settings, "notify",
 		G_CALLBACK (ews_oof_settings_changed), &priv->changed);
 
 	toggle_button = GTK_TOGGLE_BUTTON (priv->enabled_radio_button);

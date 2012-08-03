@@ -864,7 +864,7 @@ camel_ews_settings_get_timeout (CamelEwsSettings *settings)
 
 void
 camel_ews_settings_set_timeout (CamelEwsSettings *settings,
-				guint timeout)
+                                guint timeout)
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 

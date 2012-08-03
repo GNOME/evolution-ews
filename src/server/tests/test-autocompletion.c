@@ -45,8 +45,9 @@ resolve_names_cb (GObject *object,
 	gboolean has_last_item = FALSE;
 	GError *error = NULL;
 
-	e_ews_connection_resolve_names_finish	(cnc, res, &mailboxes, &contact_items,
-						 &has_last_item, &error);
+	e_ews_connection_resolve_names_finish (
+		cnc, res, &mailboxes, &contact_items,
+		&has_last_item, &error);
 	if (error != NULL) {
 		g_warning ("Unable to autocomplete: %s \n", error->message);
 		g_clear_error (&error);

@@ -125,9 +125,10 @@ ews_data_cache_remove (CamelDataCache *cdc,
 	gint ret;
 
 	g_checksum_update (sha, (guchar *) key, strlen (key));
-	ret = camel_data_cache_remove (cdc, path, g_checksum_get_string (sha),
-				       error);
+	ret = camel_data_cache_remove (
+		cdc, path, g_checksum_get_string (sha), error);
 	g_checksum_free (sha);
+
 	return ret;
 }
 
@@ -141,9 +142,10 @@ ews_data_cache_get (CamelDataCache *cdc,
 	CamelStream *ret;
 
 	g_checksum_update (sha, (guchar *) key, strlen (key));
-	ret = camel_data_cache_get (cdc, path, g_checksum_get_string (sha),
-				    error);
+	ret = camel_data_cache_get (
+		cdc, path, g_checksum_get_string (sha), error);
 	g_checksum_free (sha);
+
 	return ret;
 }
 
@@ -182,8 +184,9 @@ camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder,
 		gchar *old_fname = camel_data_cache_get_filename (
 			ews_folder->cache, "cur", uid);
 		if (!g_access (old_fname, R_OK)) {
-			gchar *new_fname = ews_data_cache_get_filename (ews_folder->cache,
-									"cur", uid, error);
+			gchar *new_fname = ews_data_cache_get_filename (
+				ews_folder->cache,
+				"cur", uid, error);
 			g_rename (old_fname, new_fname);
 			g_free (new_fname);
 			stream = ews_data_cache_get (ews_folder->cache, "cur", uid, error);
@@ -198,7 +201,7 @@ camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder,
 	msg = camel_mime_message_new ();
 
 	if (!camel_data_wrapper_construct_from_stream_sync (
-				(CamelDataWrapper *) msg, stream, cancellable, error)) {
+		(CamelDataWrapper *) msg, stream, cancellable, error)) {
 		g_object_unref (msg);
 		msg = NULL;
 	}
@@ -259,24 +262,26 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
 	// original mime file
 	fd_old = open (mime_fname, O_RDONLY);
 	if (fd_old == -1) {
-		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			     _("Unable to open mimecontent temporary file!"));
+		g_set_error (
+			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			_("Unable to open mimecontent temporary file!"));
 		return NULL;
 	}
 
 	mimeparser = camel_mime_parser_new ();
 	if (camel_mime_parser_init_with_fd (mimeparser, fd_old) == -1) {
-		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			     _("Unable to generate parser from mimecontent!"));
+		g_set_error (
+			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			_("Unable to generate parser from mimecontent!"));
 		goto exit_parser;
 	}
 
 	msg = camel_mime_message_new ();
-	if (camel_mime_part_construct_from_parser_sync (CAMEL_MIME_PART (msg),
-							mimeparser, NULL,
-							error) == -1) {
-		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			     _("Unable to parse meeting request mimecontent!"));
+	if (camel_mime_part_construct_from_parser_sync (
+		CAMEL_MIME_PART (msg), mimeparser, NULL, error) == -1) {
+		g_set_error (
+			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			_("Unable to parse meeting request mimecontent!"));
 		goto exit_msg;
 	}
 
@@ -294,8 +299,8 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
 
 		dw = camel_medium_get_content (CAMEL_MEDIUM (mimepart));
 		tmpstream = camel_stream_mem_new ();
-		if (camel_data_wrapper_decode_to_stream_sync (dw, tmpstream,
-							      NULL, error) == -1) {
+		if (camel_data_wrapper_decode_to_stream_sync (
+			dw, tmpstream, NULL, error) == -1) {
 			g_object_unref (tmpstream);
 			goto exit_msg;
 		}
@@ -319,9 +324,11 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
 			icalcomponent_add_property (subcomp, icalprop);
 		}
 		calstring_new = icalcomponent_as_ical_string_r (icalcomp);
-		camel_mime_part_set_content (mimepart,
-					     (const gchar *) calstring_new, strlen (calstring_new),
-					     "text/calendar");
+		camel_mime_part_set_content (
+			mimepart,
+			(const gchar *) calstring_new,
+			strlen (calstring_new),
+			"text/calendar");
 		g_free (calstring_new);
 		icalcomponent_free (icalcomp);
 		g_object_unref (tmpstream);
@@ -329,16 +336,18 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
 		// Create a new file to store updated mimecontent
 		temp = g_strrstr (mime_fname, "/");
 		dir = g_strndup (mime_fname, temp - mime_fname);
-		mime_fname_new = g_build_filename ((const gchar*) dir, "XXXXXX", NULL);
+		mime_fname_new = g_build_filename ((const gchar *) dir, "XXXXXX", NULL);
 		fd = g_mkstemp (mime_fname_new);
 		if (fd == -1) {
-			g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-				     _("Unable to create cache file"));
+			g_set_error (
+				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+				_("Unable to create cache file"));
 			goto exit_save;
 		}
 		newstream = camel_stream_fs_new_with_fd (fd);
-		if (camel_data_wrapper_write_to_stream_sync (CAMEL_DATA_WRAPPER (msg),
-							     newstream, NULL, error) == -1)
+		if (camel_data_wrapper_write_to_stream_sync (
+			CAMEL_DATA_WRAPPER (msg),
+			newstream, NULL, error) == -1)
 			goto exit_save;
 		if (camel_stream_flush (newstream, NULL, error) == -1)
 			goto exit_save;
@@ -429,13 +438,15 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	cnc = camel_ews_store_ref_connection (ews_store);
 	ids = g_slist_append (ids, (gchar *) uid);
 
-	mime_dir = g_build_filename (camel_data_cache_get_path (ews_folder->cache),
-				     "mimecontent", NULL);
+	mime_dir = g_build_filename (
+		camel_data_cache_get_path (ews_folder->cache),
+		"mimecontent", NULL);
 
 	if (g_access (mime_dir, F_OK) == -1 &&
 	    g_mkdir_with_parents (mime_dir, 0700) == -1) {
-		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			     _("Unable to create cache path"));
+		g_set_error (
+			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			_("Unable to create cache path"));
 		g_free (mime_dir);
 		goto exit;
 	}
@@ -507,14 +518,15 @@ camel_ews_folder_get_message (CamelFolder *folder,
 		}
 	}
 
-	cache_file = ews_data_cache_get_filename (ews_folder->cache, "cur",
-						  uid, error);
+	cache_file = ews_data_cache_get_filename (
+		ews_folder->cache, "cur", uid, error);
 	temp = g_strrstr (cache_file, "/");
 	dir = g_strndup (cache_file, temp - cache_file);
 
 	if (g_mkdir_with_parents (dir, 0700) == -1) {
-		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			     _("Unable to create cache path"));
+		g_set_error (
+			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			_("Unable to create cache path"));
 		g_free (dir);
 		g_free (cache_file);
 		goto exit;
@@ -522,8 +534,9 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	g_free (dir);
 
 	if (g_rename (mime_content, cache_file) != 0) {
-		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			     _("Failed to move message cache file"));
+		g_set_error (
+			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			_("Failed to move message cache file"));
 		g_free (cache_file);
 		goto exit;
 	}
@@ -684,8 +697,9 @@ msg_update_flags (ESoapMessage *msg,
 
 		flags_changed = mi->server_flags ^ mi->info.flags;
 
-		e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
-						 mi->info.uid, mi->change_key, 0);
+		e_ews_message_start_item_change (
+			msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
+			mi->info.uid, mi->change_key, 0);
 		if (flags_changed & CAMEL_MESSAGE_FLAGGED) {
 			const gchar *flag;
 
@@ -716,8 +730,10 @@ msg_update_flags (ESoapMessage *msg,
 			e_soap_message_end_element (msg);
 
 			e_soap_message_start_element (msg, "Message", NULL, NULL);
-			e_ews_message_write_string_parameter (msg, "IsRead", NULL,
-					      (mi->info.flags & CAMEL_MESSAGE_SEEN)?"true":"false");
+			e_ews_message_write_string_parameter (
+				msg, "IsRead", NULL,
+				(mi->info.flags & CAMEL_MESSAGE_SEEN) ?
+				"true" : "false");
 
 			e_soap_message_end_element (msg); /* Message */
 			e_soap_message_end_element (msg); /* SetItemField */
@@ -880,7 +896,8 @@ ews_move_to_junk_folder (CamelFolder *folder,
 		folder_id = camel_ews_store_summary_get_folder_id_from_folder_type (
 			ews_store->summary, CAMEL_FOLDER_TYPE_JUNK);
 
-		status = e_ews_connection_move_items_sync (cnc, EWS_PRIORITY_MEDIUM, folder_id, FALSE,
+		status = e_ews_connection_move_items_sync (
+			cnc, EWS_PRIORITY_MEDIUM, folder_id, FALSE,
 			junk_uids, &moved_items, cancellable, &local_error);
 
 		if (!status && local_error && local_error->code == EWS_CONNECTION_ERROR_ITEMNOTFOUND) {
@@ -1170,9 +1187,9 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 	if (msg_ids)
 		e_ews_connection_get_items_sync (
 			cnc, EWS_PRIORITY_MEDIUM,
-			 msg_ids, "IdOnly", SUMMARY_MESSAGE_FLAGS,
-			 FALSE, NULL, &items, NULL, NULL,
-			 cancellable, &local_error);
+			msg_ids, "IdOnly", SUMMARY_MESSAGE_FLAGS,
+			FALSE, NULL, &items, NULL, NULL,
+			cancellable, &local_error);
 
 	camel_ews_utils_sync_updated_items (ews_folder, items);
 	items = NULL;
@@ -1351,9 +1368,8 @@ ews_refresh_info_sync (CamelFolder *folder,
 
 	camel_folder_summary_prepare_fetch_all (folder->summary, NULL);
 
-	id = camel_ews_store_summary_get_folder_id_from_name
-						(ews_store->summary,
-						 full_name);
+	id = camel_ews_store_summary_get_folder_id_from_name (
+		ews_store->summary, full_name);
 
 	/* Sync folder items does not return the fields ToRecipients,
 	 * CCRecipients. With the item_type unknown, its not possible
@@ -1362,8 +1378,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 	 * SyncFolderItem request and fetch the item using the
 	 * GetItem request. */
 	sync_state = ((CamelEwsSummary *) folder->summary)->sync_state;
-	do
-	{
+	do {
 		GSList *items_created = NULL, *items_updated = NULL;
 		GSList *items_deleted = NULL;
 		guint32 total, unread;
@@ -1450,8 +1465,9 @@ ews_append_message_sync (CamelFolder *folder,
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
 
 	folder_name = camel_folder_get_full_name (folder);
-	folder_id = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary,
-								     folder_name);
+	folder_id = camel_ews_store_summary_get_folder_id_from_name (
+		ews_store->summary,
+		folder_name);
 	if (!folder_id)
 		return FALSE;
 
@@ -1464,16 +1480,17 @@ ews_append_message_sync (CamelFolder *folder,
 	cnc = camel_ews_store_ref_connection (ews_store);
 
 	if (!cnc) {
-		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			     _("Cant perform actions on the folder while in offline mode"));
+		g_set_error (
+			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			_("Cant perform actions on the folder while in offline mode"));
 		return FALSE;
 	}
 
-	if (!camel_ews_utils_create_mime_message (cnc, "SaveOnly", folder_id,
-						  message,
-						  camel_message_info_flags (info),
-						  from, &itemid, &changekey,
-						  cancellable, &local_error)) {
+	if (!camel_ews_utils_create_mime_message (
+		cnc, "SaveOnly", folder_id, message,
+		camel_message_info_flags (info),
+		from, &itemid, &changekey,
+		cancellable, &local_error)) {
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
 		g_propagate_error (error, local_error);
 		g_free (folder_id);
@@ -1521,19 +1538,18 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 		return FALSE;
 
 	cnc = camel_ews_store_ref_connection (dst_ews_store);
-	dst_id = camel_ews_store_summary_get_folder_id_from_name
-						(dst_ews_store->summary,
-						 dst_full_name);
+	dst_id = camel_ews_store_summary_get_folder_id_from_name (
+		dst_ews_store->summary, dst_full_name);
 
 	for (i = 0; i < uids->len; i++) {
 		ids = g_slist_append (ids, (gchar *) uids->pdata[i]);
 	}
 
 	if (e_ews_connection_move_items_sync (
-			cnc, EWS_PRIORITY_MEDIUM,
-			dst_id, !delete_originals,
-			ids, &ret_items,
-			cancellable, &local_error)) {
+		cnc, EWS_PRIORITY_MEDIUM,
+		dst_id, !delete_originals,
+		ids, &ret_items,
+		cancellable, &local_error)) {
 
 		if (delete_originals) {
 			changes = camel_folder_change_info_new ();
@@ -1617,7 +1633,7 @@ ews_delete_messages (CamelFolder *folder,
 				camel_folder_summary_lock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
 				camel_folder_change_info_remove_uid (changes, uid);
 				camel_folder_summary_remove_uid (folder->summary, uid);
-				ews_data_cache_remove(ews_folder->cache, "cur", uid, NULL);
+				ews_data_cache_remove (ews_folder->cache, "cur", uid, NULL);
 				camel_folder_summary_unlock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
 				deleted_items = g_slist_next (deleted_items);
 			}

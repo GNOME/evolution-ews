@@ -502,9 +502,10 @@ e_ews_make_timestamp (time_t when)
 	struct tm *tm;
 
 	tm = gmtime (&when);
-	return g_strdup_printf ("%04d-%02d-%02dT%02d:%02d:%02dZ",
-				tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-				tm->tm_hour, tm->tm_min, tm->tm_sec);
+	return g_strdup_printf (
+		"%04d-%02d-%02dT%02d:%02d:%02dZ",
+		tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+		tm->tm_hour, tm->tm_min, tm->tm_sec);
 }
 
 static ESExpResult *
@@ -520,14 +521,16 @@ calendar_func_occur_in_time_range (ESExp *f,
 	msg = (ESoapMessage *) data;
 
 	if (argv[0]->type != ESEXP_RES_TIME) {
-		e_sexp_fatal_error (f, "occur-in-time-range? expects argument 1 "
-				    "to be a time_t");
+		e_sexp_fatal_error (
+			f, "occur-in-time-range? expects argument 1 "
+			"to be a time_t");
 		return NULL;
 	}
 
 	if (argv[1]->type != ESEXP_RES_TIME) {
-		e_sexp_fatal_error (f, "occur-in-time-range? expects argument 2 "
-				    "to be a time_t");
+		e_sexp_fatal_error (
+			f, "occur-in-time-range? expects argument 2 "
+			"to be a time_t");
 		return NULL;
 	}
 
@@ -616,15 +619,15 @@ common_message_func_header_contains (ESExp *f,
 			const gchar *value;
 			value = argv[1]->value.string;
 
-			if (!g_ascii_strcasecmp(headername, "subject")) {
+			if (!g_ascii_strcasecmp (headername, "subject")) {
 				WRITE_CONTAINS_MESSAGE (msg, mode, "IgnoreCase", "item:Subject", value);
-			} else if (!g_ascii_strcasecmp(headername, "from")) {
+			} else if (!g_ascii_strcasecmp (headername, "from")) {
 				WRITE_CONTAINS_MESSAGE (msg, mode, "IgnoreCase", "message:From", value);
-			} else if (!g_ascii_strcasecmp(headername, "to")) {
+			} else if (!g_ascii_strcasecmp (headername, "to")) {
 				WRITE_CONTAINS_MESSAGE (msg, mode, "IgnoreCase", "message:ToRecipients", value);
-			} else if (!g_ascii_strcasecmp(headername, "cc")) {
+			} else if (!g_ascii_strcasecmp (headername, "cc")) {
 				WRITE_CONTAINS_MESSAGE (msg, mode, "IgnoreCase", "message:CcRecipients", value);
-			} else if (!g_ascii_strcasecmp(headername, "bcc")) {
+			} else if (!g_ascii_strcasecmp (headername, "bcc")) {
 				WRITE_CONTAINS_MESSAGE (msg, mode, "IgnoreCase", "message:BccRecipients", value);
 			}
 		}
@@ -652,15 +655,15 @@ message_func_header_exists (ESExp *f,
 		const gchar *headername;
 		headername = argv[0]->value.string;
 
-		if (!g_ascii_strcasecmp(headername, "subject")) {
+		if (!g_ascii_strcasecmp (headername, "subject")) {
 			WRITE_EXISTS_MESSAGE (msg, "item:Subject");
-		} else if (!g_ascii_strcasecmp(headername, "from")) {
+		} else if (!g_ascii_strcasecmp (headername, "from")) {
 			WRITE_EXISTS_MESSAGE (msg, "message:From");
-		} else if (!g_ascii_strcasecmp(headername, "to")) {
+		} else if (!g_ascii_strcasecmp (headername, "to")) {
 			WRITE_EXISTS_MESSAGE (msg, "message:ToRecipients");
-		} else if (!g_ascii_strcasecmp(headername, "cc")) {
+		} else if (!g_ascii_strcasecmp (headername, "cc")) {
 			WRITE_EXISTS_MESSAGE (msg, "message:CcRecipients");
-		} else if (!g_ascii_strcasecmp(headername, "bcc")) {
+		} else if (!g_ascii_strcasecmp (headername, "bcc")) {
 			WRITE_EXISTS_MESSAGE (msg, "message:BccRecipients");
 		}
 	}
@@ -684,9 +687,9 @@ message_func_system_flag (ESExp *f,
 	if (argv[0]->type == ESEXP_RES_STRING) {
 		const gchar *name;
 		name = argv[0]->value.string;
-		if (!g_ascii_strcasecmp(name, "Attachments")) {
+		if (!g_ascii_strcasecmp (name, "Attachments")) {
 			WRITE_EXISTS_MESSAGE (msg, "item:HasAttachments");
-		} else if (!g_ascii_strcasecmp(name, "deleted") || !g_ascii_strcasecmp(name, "junk")) {
+		} else if (!g_ascii_strcasecmp (name, "deleted") || !g_ascii_strcasecmp (name, "junk")) {
 			r = e_sexp_result_new (f, ESEXP_RES_BOOL);
 			r->value.boolean = FALSE;
 			return r;
@@ -1132,30 +1135,36 @@ e_ews_convert_sexp_to_restriction (ESoapMessage *msg,
 	if (type == EWS_FOLDER_TYPE_CONTACTS) {
 		for (i = 0; i < G_N_ELEMENTS (contact_symbols); i++) {
 			if (contact_symbols[i].immediate)
-				e_sexp_add_ifunction (sexp, 0, contact_symbols[i].name,
-							     (ESExpIFunc *) contact_symbols[i].func, msg);
+				e_sexp_add_ifunction (
+					sexp, 0, contact_symbols[i].name,
+					(ESExpIFunc *) contact_symbols[i].func, msg);
 			else
-				e_sexp_add_function (sexp, 0, contact_symbols[i].name,
-							    contact_symbols[i].func, msg);
+				e_sexp_add_function (
+					sexp, 0, contact_symbols[i].name,
+					contact_symbols[i].func, msg);
 		}
 
 	} else if (type == EWS_FOLDER_TYPE_CALENDAR || type == EWS_FOLDER_TYPE_TASKS) {
 		for (i = 0; i < G_N_ELEMENTS (calendar_symbols); i++) {
 			if (calendar_symbols[i].immediate)
-				e_sexp_add_ifunction (sexp, 0, calendar_symbols[i].name,
-							     (ESExpIFunc *) calendar_symbols[i].func, msg);
+				e_sexp_add_ifunction (
+					sexp, 0, calendar_symbols[i].name,
+					(ESExpIFunc *) calendar_symbols[i].func, msg);
 			else
-				e_sexp_add_function (sexp, 0, calendar_symbols[i].name,
-							    calendar_symbols[i].func, msg);
+				e_sexp_add_function (
+					sexp, 0, calendar_symbols[i].name,
+					calendar_symbols[i].func, msg);
 		}
 	} else if (type == EWS_FOLDER_TYPE_MAILBOX) {
 		for (i = 0; i < G_N_ELEMENTS (message_symbols); i++) {
 			if (message_symbols[i].immediate)
-				e_sexp_add_ifunction (sexp, 0, message_symbols[i].name,
-							     (ESExpIFunc *) message_symbols[i].func, msg);
+				e_sexp_add_ifunction (
+					sexp, 0, message_symbols[i].name,
+					(ESExpIFunc *) message_symbols[i].func, msg);
 			else
-				e_sexp_add_function (sexp, 0, message_symbols[i].name,
-							    message_symbols[i].func, msg);
+				e_sexp_add_function (
+					sexp, 0, message_symbols[i].name,
+					message_symbols[i].func, msg);
 		}
 
 	}

@@ -47,7 +47,7 @@ get_attachments_ready_callback (GObject *object,
 	GError *error = NULL;
 	GSList *ids = NULL, *l;
 
-	e_ews_connection_get_attachments_finish	(cnc, res, &ids, &error);
+	e_ews_connection_get_attachments_finish (cnc, res, &ids, &error);
 
 	if (error != NULL) {
 		g_print ("Unable to get attachment: %s :%d \n", error->message, error->code);

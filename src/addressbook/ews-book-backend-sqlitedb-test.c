@@ -117,9 +117,9 @@ start_tests (gpointer data)
 
 	g_print ("Creating the sqlitedb \n");
 	op = "create sqlitedb";
-	ebsdb = ews_book_backend_sqlitedb_new
-					(cache_path, email, folderid, folder_name,
-					 store_vcard, &error);
+	ebsdb = ews_book_backend_sqlitedb_new (
+		cache_path, email, folderid,
+		folder_name, store_vcard, &error);
 	if (error)
 		goto exit;
 

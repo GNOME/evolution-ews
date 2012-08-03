@@ -6327,8 +6327,8 @@ e_ews_connection_get_delegate (EEwsConnection *cnc,
 gboolean
 e_ews_connection_get_delegate_finish (EEwsConnection *cnc,
                                       GAsyncResult *result,
-				      EwsDelegateDeliver *deliver_to,
-				      GSList **delegates, /* EwsDelegateInfo * */
+                                      EwsDelegateDeliver *deliver_to,
+                                      GSList **delegates, /* EwsDelegateInfo * */
                                       GError **error)
 {
 	GSimpleAsyncResult *simple;
@@ -6360,8 +6360,8 @@ e_ews_connection_get_delegate_sync (EEwsConnection *cnc,
                                     gint pri,
                                     const gchar *mail_id,
                                     gboolean include_permissions,
-				    EwsDelegateDeliver *deliver_to,
-				    GSList **delegates, /* EwsDelegateInfo * */
+                                    EwsDelegateDeliver *deliver_to,
+                                    GSList **delegates, /* EwsDelegateInfo * */
                                     GCancellable *cancellable,
                                     GError **error)
 {
@@ -6431,8 +6431,8 @@ update_delegate_response_cb (ESoapResponse *response,
 
 static void
 set_delegate_permission (ESoapMessage *msg,
-			 const gchar *elem_name,
-			 EwsPermissionLevel perm_level)
+                         const gchar *elem_name,
+                         EwsPermissionLevel perm_level)
 {
 	const gchar *level_name = NULL;
 
@@ -6453,12 +6453,12 @@ set_delegate_permission (ESoapMessage *msg,
 
 void
 e_ews_connection_add_delegate (EEwsConnection *cnc,
-			       gint pri,
-			       const gchar *mail_id,
-			       const GSList *delegates, /* EwsDelegateInfo * */
-			       GCancellable *cancellable,
-			       GAsyncReadyCallback callback,
-			       gpointer user_data)
+                               gint pri,
+                               const gchar *mail_id,
+                               const GSList *delegates, /* EwsDelegateInfo * */
+                               GCancellable *cancellable,
+                               GAsyncReadyCallback callback,
+                               gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -6496,9 +6496,11 @@ e_ews_connection_add_delegate (EEwsConnection *cnc,
 		set_delegate_permission (msg, "JournalFolderPermissionLevel", di->journal);
 		e_soap_message_end_element (msg); /* DelegatePermissions */
 
-		e_ews_message_write_string_parameter (msg, "ReceiveCopiesOfMeetingMessages", NULL,
+		e_ews_message_write_string_parameter (
+			msg, "ReceiveCopiesOfMeetingMessages", NULL,
 			di->meetingcopies ? "true" : "false");
-		e_ews_message_write_string_parameter (msg, "ViewPrivateItems", NULL,
+		e_ews_message_write_string_parameter (
+			msg, "ViewPrivateItems", NULL,
 			di->view_priv_items ? "true" : "false");
 
 		e_soap_message_end_element (msg); /* DelegateUser */
@@ -6525,8 +6527,8 @@ e_ews_connection_add_delegate (EEwsConnection *cnc,
 
 gboolean
 e_ews_connection_add_delegate_finish (EEwsConnection *cnc,
-				      GAsyncResult *result,
-				      GError **error)
+                                      GAsyncResult *result,
+                                      GError **error)
 {
 	GSimpleAsyncResult *simple;
 
@@ -6543,10 +6545,10 @@ e_ews_connection_add_delegate_finish (EEwsConnection *cnc,
 
 gboolean
 e_ews_connection_add_delegate_sync (EEwsConnection *cnc,
-				    gint pri,
-				    const gchar *mail_id,
-				    const GSList *delegates, /* EwsDelegateInfo * */
-				    GCancellable *cancellable,
+                                    gint pri,
+                                    const gchar *mail_id,
+                                    const GSList *delegates, /* EwsDelegateInfo * */
+                                    GCancellable *cancellable,
                                     GError **error)
 {
 	EAsyncClosure *closure;
@@ -6573,12 +6575,12 @@ e_ews_connection_add_delegate_sync (EEwsConnection *cnc,
 
 void
 e_ews_connection_remove_delegate (EEwsConnection *cnc,
-				  gint pri,
-				  const gchar *mail_id,
-				  const GSList *delegate_ids, /* EwsUserId * */
-				  GCancellable *cancellable,
-				  GAsyncReadyCallback callback,
-				  gpointer user_data)
+                                  gint pri,
+                                  const gchar *mail_id,
+                                  const GSList *delegate_ids, /* EwsUserId * */
+                                  GCancellable *cancellable,
+                                  GAsyncReadyCallback callback,
+                                  gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -6627,8 +6629,8 @@ e_ews_connection_remove_delegate (EEwsConnection *cnc,
 
 gboolean
 e_ews_connection_remove_delegate_finish (EEwsConnection *cnc,
-					 GAsyncResult *result,
-					 GError **error)
+                                         GAsyncResult *result,
+                                         GError **error)
 {
 	GSimpleAsyncResult *simple;
 
@@ -6645,9 +6647,9 @@ e_ews_connection_remove_delegate_finish (EEwsConnection *cnc,
 
 gboolean
 e_ews_connection_remove_delegate_sync (EEwsConnection *cnc,
-				       gint pri,
+                                       gint pri,
                                        const gchar *mail_id,
-				       const GSList *delegate_ids, /* EwsUserId * */
+                                       const GSList *delegate_ids, /* EwsUserId * */
                                        GCancellable *cancellable,
                                        GError **error)
 {
@@ -6675,13 +6677,13 @@ e_ews_connection_remove_delegate_sync (EEwsConnection *cnc,
 
 void
 e_ews_connection_update_delegate (EEwsConnection *cnc,
-				  gint pri,
-				  const gchar *mail_id,
-				  EwsDelegateDeliver deliver_to,
-				  const GSList *delegates, /* EwsDelegateInfo * */
-				  GCancellable *cancellable,
-				  GAsyncReadyCallback callback,
-				  gpointer user_data)
+                                  gint pri,
+                                  const gchar *mail_id,
+                                  EwsDelegateDeliver deliver_to,
+                                  const GSList *delegates, /* EwsDelegateInfo * */
+                                  GCancellable *cancellable,
+                                  GAsyncReadyCallback callback,
+                                  gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -6719,9 +6721,11 @@ e_ews_connection_update_delegate (EEwsConnection *cnc,
 			set_delegate_permission (msg, "JournalFolderPermissionLevel", di->journal);
 			e_soap_message_end_element (msg); /* DelegatePermissions */
 
-			e_ews_message_write_string_parameter (msg, "ReceiveCopiesOfMeetingMessages", NULL,
+			e_ews_message_write_string_parameter (
+				msg, "ReceiveCopiesOfMeetingMessages", NULL,
 				di->meetingcopies ? "true" : "false");
-			e_ews_message_write_string_parameter (msg, "ViewPrivateItems", NULL,
+			e_ews_message_write_string_parameter (
+				msg, "ViewPrivateItems", NULL,
 				di->view_priv_items ? "true" : "false");
 
 			e_soap_message_end_element (msg); /* DelegateUser */
@@ -6730,7 +6734,8 @@ e_ews_connection_update_delegate (EEwsConnection *cnc,
 		e_soap_message_end_element (msg); /* DelegateUsers */
 	}
 
-	e_ews_message_write_string_parameter (msg, "DeliverMeetingRequests", "messages",
+	e_ews_message_write_string_parameter (
+		msg, "DeliverMeetingRequests", "messages",
 		deliver_to == EwsDelegateDeliver_DelegatesOnly ? "DelegatesOnly" :
 		deliver_to == EwsDelegateDeliver_DelegatesAndMe ? "DelegatesAndMe" :
 		"DelegatesAndSendInformationToMe");
@@ -6754,8 +6759,8 @@ e_ews_connection_update_delegate (EEwsConnection *cnc,
 
 gboolean
 e_ews_connection_update_delegate_finish (EEwsConnection *cnc,
-					 GAsyncResult *result,
-					 GError **error)
+                                         GAsyncResult *result,
+                                         GError **error)
 {
 	GSimpleAsyncResult *simple;
 
@@ -6772,10 +6777,10 @@ e_ews_connection_update_delegate_finish (EEwsConnection *cnc,
 
 gboolean
 e_ews_connection_update_delegate_sync (EEwsConnection *cnc,
-				       gint pri,
+                                       gint pri,
                                        const gchar *mail_id,
-				       EwsDelegateDeliver deliver_to,
-				       const GSList *delegates, /* EwsDelegateInfo * */
+                                       EwsDelegateDeliver deliver_to,
+                                       const GSList *delegates, /* EwsDelegateInfo * */
                                        GCancellable *cancellable,
                                        GError **error)
 {
@@ -6802,7 +6807,7 @@ e_ews_connection_update_delegate_sync (EEwsConnection *cnc,
 
 static void
 get_folder_permissions_response_cb (ESoapResponse *response,
-				    GSimpleAsyncResult *simple)
+                                    GSimpleAsyncResult *simple)
 {
 	EwsAsyncData *async_data;
 	ESoapParameter *param;
@@ -6859,11 +6864,11 @@ get_folder_permissions_response_cb (ESoapResponse *response,
 
 void
 e_ews_connection_get_folder_permissions (EEwsConnection *cnc,
-					 gint pri,
-					 EwsFolderId *folder_id,
-					 GCancellable *cancellable,
-					 GAsyncReadyCallback callback,
-					 gpointer user_data)
+                                         gint pri,
+                                         EwsFolderId *folder_id,
+                                         GCancellable *cancellable,
+                                         GAsyncReadyCallback callback,
+                                         gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -6873,8 +6878,9 @@ e_ews_connection_get_folder_permissions (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 	g_return_if_fail (folder_id != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetFolder",
-					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+		cnc->priv->uri, "GetFolder",
+		NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_start_element (msg, "FolderShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, "IdOnly");
@@ -6891,10 +6897,9 @@ e_ews_connection_get_folder_permissions (EEwsConnection *cnc,
 
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_get_folder_permissions);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_get_folder_permissions);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -6910,9 +6915,9 @@ e_ews_connection_get_folder_permissions (EEwsConnection *cnc,
 /* free permissions with e_ews_permissions_free() */
 gboolean
 e_ews_connection_get_folder_permissions_finish (EEwsConnection *cnc,
-						GAsyncResult *result,
-						GSList **permissions,
-						GError **error)
+                                                GAsyncResult *result,
+                                                GSList **permissions,
+                                                GError **error)
 {
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
@@ -6938,11 +6943,11 @@ e_ews_connection_get_folder_permissions_finish (EEwsConnection *cnc,
 /* free permissions with e_ews_permissions_free() */
 gboolean
 e_ews_connection_get_folder_permissions_sync (EEwsConnection *cnc,
-					      gint pri,
-					      EwsFolderId *folder_id,
-					      GSList **permissions,
-					      GCancellable *cancellable,
-					      GError **error)
+                                              gint pri,
+                                              EwsFolderId *folder_id,
+                                              GSList **permissions,
+                                              GCancellable *cancellable,
+                                              GError **error)
 {
 	EAsyncClosure *closure;
 	GAsyncResult *result;
@@ -6970,13 +6975,13 @@ e_ews_connection_get_folder_permissions_sync (EEwsConnection *cnc,
 
 void
 e_ews_connection_set_folder_permissions (EEwsConnection *cnc,
-					 gint pri,
-					 EwsFolderId *folder_id,
-					 EwsFolderType folder_type,
-					 const GSList *permissions,
-					 GCancellable *cancellable,
-					 GAsyncReadyCallback callback,
-					 gpointer user_data)
+                                         gint pri,
+                                         EwsFolderId *folder_id,
+                                         EwsFolderType folder_type,
+                                         const GSList *permissions,
+                                         GCancellable *cancellable,
+                                         GAsyncReadyCallback callback,
+                                         gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -6987,12 +6992,14 @@ e_ews_connection_set_folder_permissions (EEwsConnection *cnc,
 	g_return_if_fail (folder_id != NULL);
 	g_return_if_fail (permissions != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, "UpdateFolder",
-					     NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+		cnc->priv->uri, "UpdateFolder",
+		NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_start_element (msg, "FolderChanges", "messages", NULL);
-	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_FOLDER,
-					 folder_id->id, folder_id->change_key, 0);
+	e_ews_message_start_item_change (
+		msg, E_EWS_ITEMCHANGE_TYPE_FOLDER,
+		folder_id->id, folder_id->change_key, 0);
 
 	e_soap_message_start_element (msg, "SetFolderField", NULL, NULL);
 	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", "folder:PermissionSet");
@@ -7055,33 +7062,43 @@ e_ews_connection_set_folder_permissions (EEwsConnection *cnc,
 		perm_level_name = e_ews_permission_rights_to_level_name (perm->rights);
 
 		if (g_strcmp0 (perm_level_name, "Custom") == 0) {
-			e_ews_message_write_string_parameter (msg, "CanCreateItems", NULL,
+			e_ews_message_write_string_parameter (
+				msg, "CanCreateItems", NULL,
 				(perm->rights & E_EWS_PERMISSION_BIT_CREATE) != 0 ? "true" : "false");
-			e_ews_message_write_string_parameter (msg, "CanCreateSubFolders", NULL,
+			e_ews_message_write_string_parameter (
+				msg, "CanCreateSubFolders", NULL,
 				(perm->rights & E_EWS_PERMISSION_BIT_CREATE_SUBFOLDER) != 0 ? "true" : "false");
-			e_ews_message_write_string_parameter (msg, "IsFolderOwner", NULL,
+			e_ews_message_write_string_parameter (
+				msg, "IsFolderOwner", NULL,
 				(perm->rights & E_EWS_PERMISSION_BIT_FOLDER_OWNER) != 0 ? "true" : "false");
-			e_ews_message_write_string_parameter (msg, "IsFolderVisible", NULL,
+			e_ews_message_write_string_parameter (
+				msg, "IsFolderVisible", NULL,
 				(perm->rights & E_EWS_PERMISSION_BIT_FOLDER_VISIBLE) != 0 ? "true" : "false");
-			e_ews_message_write_string_parameter (msg, "IsFolderContact", NULL,
+			e_ews_message_write_string_parameter (
+				msg, "IsFolderContact", NULL,
 				(perm->rights & E_EWS_PERMISSION_BIT_FOLDER_CONTACT) != 0 ? "true" : "false");
-			e_ews_message_write_string_parameter (msg, "EditItems", NULL,
+			e_ews_message_write_string_parameter (
+				msg, "EditItems", NULL,
 				(perm->rights & E_EWS_PERMISSION_BIT_EDIT_ANY) != 0 ? "All" :
 				(perm->rights & E_EWS_PERMISSION_BIT_EDIT_OWNED) != 0 ? "Owned" : "None");
-			e_ews_message_write_string_parameter (msg, "DeleteItems", NULL,
+			e_ews_message_write_string_parameter (
+				msg, "DeleteItems", NULL,
 				(perm->rights & E_EWS_PERMISSION_BIT_DELETE_ANY) != 0 ? "All" :
 				(perm->rights & E_EWS_PERMISSION_BIT_DELETE_OWNED) != 0 ? "Owned" : "None");
 			if (folder_type == EWS_FOLDER_TYPE_CALENDAR)
-				e_ews_message_write_string_parameter (msg, "ReadItems", NULL,
+				e_ews_message_write_string_parameter (
+					msg, "ReadItems", NULL,
 					(perm->rights & E_EWS_PERMISSION_BIT_READ_ANY) != 0 ? "FullDetails" :
 					(perm->rights & E_EWS_PERMISSION_BIT_FREE_BUSY_DETAILED) != 0 ? "TimeAndSubjectAndLocation" :
 					(perm->rights & E_EWS_PERMISSION_BIT_FREE_BUSY_SIMPLE) != 0 ? "TimeOnly" : "None");
 			else
-				e_ews_message_write_string_parameter (msg, "ReadItems", NULL,
+				e_ews_message_write_string_parameter (
+					msg, "ReadItems", NULL,
 					(perm->rights & E_EWS_PERMISSION_BIT_READ_ANY) != 0 ? "FullDetails" : "None");
 		}
 
-		e_ews_message_write_string_parameter (msg,
+		e_ews_message_write_string_parameter (
+			msg,
 			folder_type == EWS_FOLDER_TYPE_CALENDAR ? "CalendarPermissionLevel" : "PermissionLevel", NULL,
 			perm_level_name);
 
@@ -7097,10 +7114,9 @@ e_ews_connection_set_folder_permissions (EEwsConnection *cnc,
 
 	e_ews_message_write_footer (msg);
 
-	simple = g_simple_async_result_new (G_OBJECT (cnc),
-				      callback,
-				      user_data,
-				      e_ews_connection_set_folder_permissions);
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_set_folder_permissions);
 
 	async_data = g_new0 (EwsAsyncData, 1);
 	g_simple_async_result_set_op_res_gpointer (
@@ -7115,8 +7131,8 @@ e_ews_connection_set_folder_permissions (EEwsConnection *cnc,
 
 gboolean
 e_ews_connection_set_folder_permissions_finish (EEwsConnection *cnc,
-						GAsyncResult *result,
-						GError **error)
+                                                GAsyncResult *result,
+                                                GError **error)
 {
 	GSimpleAsyncResult *simple;
 
@@ -7133,12 +7149,12 @@ e_ews_connection_set_folder_permissions_finish (EEwsConnection *cnc,
 
 gboolean
 e_ews_connection_set_folder_permissions_sync (EEwsConnection *cnc,
-					      gint pri,
-					      EwsFolderId *folder_id,
-					      EwsFolderType folder_type,
-					      const GSList *permissions,
-					      GCancellable *cancellable,
-					      GError **error)
+                                              gint pri,
+                                              EwsFolderId *folder_id,
+                                              EwsFolderType folder_type,
+                                              const GSList *permissions,
+                                              GCancellable *cancellable,
+                                              GError **error)
 {
 	EAsyncClosure *closure;
 	GAsyncResult *result;

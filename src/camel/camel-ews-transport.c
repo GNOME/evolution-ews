@@ -104,11 +104,13 @@ ews_send_to_sync (CamelTransport *transport,
 		used_from = CAMEL_INTERNET_ADDRESS (from);
 
 	if (!used_from || camel_address_length (CAMEL_ADDRESS (used_from)) == 0) {
-		g_set_error_literal (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+		g_set_error_literal (
+			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 			_("Cannot send message with no From address"));
 		return FALSE;
 	} else if (camel_address_length (CAMEL_ADDRESS (used_from)) > 1) {
-		g_set_error_literal (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+		g_set_error_literal (
+			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 			_("Exchange server cannot send message with multiple From addresses"));
 		return FALSE;
 	} else {
@@ -116,13 +118,15 @@ ews_send_to_sync (CamelTransport *transport,
 
 		ews_email = camel_ews_settings_get_email (ews_settings);
 		if (!camel_internet_address_get (used_from, 0, NULL, &used_email)) {
-			g_set_error_literal (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			g_set_error_literal (
+				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 				_("Failed to read From address"));
 			return FALSE;
 		}
 
 		if (!ews_email || !used_email || g_ascii_strcasecmp (ews_email, used_email) != 0) {
-			g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			g_set_error (
+				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 				_("Exchange server cannot send message as '%s', when the account was configured for address '%s'"),
 				used_email ? used_email : "NULL",
 				ews_email ? ews_email : "NULL");
@@ -132,17 +136,18 @@ ews_send_to_sync (CamelTransport *transport,
 
 	cnc = e_ews_connection_find (host_url, user);
 	if (!cnc) {
-		g_set_error (error, CAMEL_SERVICE_ERROR,
-			     CAMEL_SERVICE_ERROR_NOT_CONNECTED,
-			     _("Service not connected"));
+		g_set_error (
+			error, CAMEL_SERVICE_ERROR,
+			CAMEL_SERVICE_ERROR_NOT_CONNECTED,
+			_("Service not connected"));
 		return FALSE;
 	}
 
-	res = camel_ews_utils_create_mime_message (cnc, "SendOnly", NULL,
-						   message, 0, from,
-						   NULL, NULL,
-						   cancellable, error);
+	res = camel_ews_utils_create_mime_message (
+		cnc, "SendOnly", NULL, message, 0,
+		from, NULL, NULL, cancellable, error);
 	g_object_unref (cnc);
+
 	return res;
 }
 

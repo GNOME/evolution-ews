@@ -85,7 +85,7 @@ static const struct EEwsPredefinedLevels {
 	uint32_t rights;
 } predefined_levels[] = {
 	{ NC_("PermissionsLevel", "None"), 0 },
-	{ NC_("PermissionsLevel", "Owner"), 	E_EWS_PERMISSION_BIT_READ_ANY |
+	{ NC_("PermissionsLevel", "Owner"),	E_EWS_PERMISSION_BIT_READ_ANY |
 						E_EWS_PERMISSION_BIT_CREATE |
 						E_EWS_PERMISSION_BIT_CREATE_SUBFOLDER |
 						E_EWS_PERMISSION_BIT_EDIT_OWNED |
@@ -192,9 +192,9 @@ folder_permissions_clear_all_permissions (GObject *dialog)
 
 static void
 write_folder_permissions_thread (GObject *dialog,
-				 gpointer user_data,
-				 GCancellable *cancellable,
-				 GError **perror)
+                                 gpointer user_data,
+                                 GCancellable *cancellable,
+                                 GError **perror)
 {
 	struct EEwsPermissionsDialogWidgets *widgets;
 	const GSList *permissions = user_data;
@@ -208,15 +208,16 @@ write_folder_permissions_thread (GObject *dialog,
 	g_return_if_fail (widgets != NULL);
 	g_return_if_fail (widgets->conn != NULL);
 
-	e_ews_connection_set_folder_permissions_sync (widgets->conn,
+	e_ews_connection_set_folder_permissions_sync (
+		widgets->conn,
 		G_PRIORITY_DEFAULT, widgets->folder_id, widgets->folder_type, permissions, cancellable, perror);
 }
 
 static void
 write_folder_permissions_idle (GObject *dialog,
-			       gpointer user_data,
-			       GCancellable *cancellable,
-			       GError **perror)
+                               gpointer user_data,
+                               GCancellable *cancellable,
+                               GError **perror)
 {
 	/* does this only if no error was raised from the thread function */
 	folder_permissions_clear_all_permissions (dialog);
@@ -225,7 +226,7 @@ write_folder_permissions_idle (GObject *dialog,
 
 static void
 edit_permissions_response_cb (GObject *dialog,
-			      gint response_id)
+                              gint response_id)
 {
 	struct EEwsPermissionsDialogWidgets *widgets;
 	GSList *write_permissions = NULL;
@@ -261,7 +262,8 @@ edit_permissions_response_cb (GObject *dialog,
 		write_permissions = g_slist_reverse (write_permissions);
 	}
 
-	e_ews_config_utils_run_in_thread_with_feedback (GTK_WINDOW (dialog), dialog,
+	e_ews_config_utils_run_in_thread_with_feedback (
+		GTK_WINDOW (dialog), dialog,
 		_("Writing folder permissions, please wait..."),
 		write_folder_permissions_thread,
 		write_folder_permissions_idle,
@@ -270,7 +272,7 @@ edit_permissions_response_cb (GObject *dialog,
 
 static void
 enable_all_widgets (struct EEwsPermissionsDialogWidgets *widgets,
-		    gboolean enabled)
+                    gboolean enabled)
 {
 	g_return_if_fail (widgets != NULL);
 
@@ -337,8 +339,8 @@ folder_permissions_dialog_to_rights (GObject *dialog)
 
 static void
 update_folder_permissions_sensitivity (GObject *dialog,
-				       gboolean member_valid,
-				       EEwsPermissionUserType user_type)
+                                       gboolean member_valid,
+                                       EEwsPermissionUserType user_type)
 {
 	struct EEwsPermissionsDialogWidgets *widgets;
 
@@ -354,7 +356,8 @@ update_folder_permissions_sensitivity (GObject *dialog,
 		gtk_widget_set_sensitive (widgets->other_folder_contact_check, FALSE);
 
 	if (member_valid)
-		gtk_widget_set_sensitive (widgets->remove_button,
+		gtk_widget_set_sensitive (
+			widgets->remove_button,
 			user_type != E_EWS_PERMISSION_USER_TYPE_DEFAULT &&
 			user_type != E_EWS_PERMISSION_USER_TYPE_ANONYMOUS);
 
@@ -366,7 +369,7 @@ update_folder_permissions_sensitivity (GObject *dialog,
 
 static void
 update_folder_permissions_by_rights (GObject *dialog,
-				     uint32_t rights)
+                                     uint32_t rights)
 {
 	struct EEwsPermissionsDialogWidgets *widgets;
 
@@ -411,7 +414,7 @@ update_folder_permissions_by_rights (GObject *dialog,
 
 static void
 update_folder_permissions_tree_view (GObject *dialog,
-				     struct EEwsPermissionsDialogWidgets *widgets)
+                                     struct EEwsPermissionsDialogWidgets *widgets)
 {
 	GtkTreeSelection *selection;
 	GtkTreeModel *model;
@@ -571,7 +574,8 @@ add_button_clicked_cb (GObject *dialog)
 
 				perm = NULL;
 
-				gtk_tree_model_get (model, &iter,
+				gtk_tree_model_get (
+					model, &iter,
 					COL_E_EWS_PERMISSION, &perm,
 					COL_E_EWS_PERMISSION_USER_TYPE, &ut,
 					-1);
@@ -587,12 +591,14 @@ add_button_clicked_cb (GObject *dialog)
 		if (!found) {
 			GtkListStore *store = GTK_LIST_STORE (model);
 
-			perm = e_ews_permission_new (E_EWS_PERMISSION_USER_TYPE_REGULAR,
+			perm = e_ews_permission_new (
+				E_EWS_PERMISSION_USER_TYPE_REGULAR,
 				display_name, primary_smtp, NULL,
 				widgets->read_fb_time_radio ? E_EWS_PERMISSION_BIT_FREE_BUSY_SIMPLE : 0);
 
 			gtk_list_store_append (store, &iter);
-			gtk_list_store_set (store, &iter,
+			gtk_list_store_set (
+				store, &iter,
 				COL_NAME, perm->display_name,
 				COL_PERMISSION_LEVEL, g_dgettext ("PermissionsLevel", predefined_levels[0].name),
 				COL_E_EWS_PERMISSION, perm,
@@ -662,9 +668,9 @@ folder_permissions_free_found_permissions (gpointer ptr)
 
 static void
 read_folder_permissions_thread (GObject *dialog,
-				gpointer user_data,
-				GCancellable *cancellable,
-				GError **perror)
+                                gpointer user_data,
+                                GCancellable *cancellable,
+                                GError **perror)
 {
 	struct EEwsPermissionsDialogWidgets *widgets;
 	GSList **ppermissions = user_data;
@@ -694,15 +700,16 @@ read_folder_permissions_thread (GObject *dialog,
 	if (g_cancellable_is_cancelled (cancellable))
 		return;
 
-	e_ews_connection_get_folder_permissions_sync (widgets->conn,
+	e_ews_connection_get_folder_permissions_sync (
+		widgets->conn,
 		G_PRIORITY_DEFAULT, widgets->folder_id, ppermissions, cancellable, perror);
 }
 
 static void
 read_folder_permissions_idle (GObject *dialog,
-			      gpointer user_data,
-			      GCancellable *cancellable,
-			      GError **perror)
+                              gpointer user_data,
+                              GCancellable *cancellable,
+                              GError **perror)
 {
 	struct EEwsPermissionsDialogWidgets *widgets;
 	GSList **ppermissions = user_data;
@@ -768,7 +775,8 @@ read_folder_permissions_idle (GObject *dialog,
 		perm_level = g_dgettext ("PermissionsLevel", predefined_levels[ii].name);
 
 		gtk_list_store_append (store, &iter);
-		gtk_list_store_set (store, &iter,
+		gtk_list_store_set (
+			store, &iter,
 			COL_NAME, perm->display_name,
 			COL_PERMISSION_LEVEL, perm_level,
 			COL_E_EWS_PERMISSION, perm,
@@ -783,7 +791,7 @@ read_folder_permissions_idle (GObject *dialog,
 
 static void
 folder_permissions_tree_selection_changed_cb (GtkTreeSelection *selection,
-					      struct EEwsPermissionsDialogWidgets *widgets)
+                                              struct EEwsPermissionsDialogWidgets *widgets)
 {
 	GObject *dialog;
 	GtkTreeModel *model = NULL;
@@ -806,7 +814,8 @@ folder_permissions_tree_selection_changed_cb (GtkTreeSelection *selection,
 		EEwsPermissionUserType user_type = E_EWS_PERMISSION_USER_TYPE_NONE;
 		EEwsPermission *perm = NULL;
 
-		gtk_tree_model_get (model, &iter,
+		gtk_tree_model_get (
+			model, &iter,
 			COL_E_EWS_PERMISSION, &perm,
 			COL_E_EWS_PERMISSION_USER_TYPE, &user_type,
 			-1);
@@ -823,7 +832,7 @@ folder_permissions_tree_selection_changed_cb (GtkTreeSelection *selection,
 
 static GtkWidget *
 create_permissions_tree_view (GObject *dialog,
-			      struct EEwsPermissionsDialogWidgets *widgets)
+                              struct EEwsPermissionsDialogWidgets *widgets)
 {
 	GtkTreeView *tree_view;
 	GtkTreeSelection *selection;
@@ -856,16 +865,16 @@ create_permissions_tree_view (GObject *dialog,
 }
 
 /* Opens dialog to subscribe to folders of other
-   users in the given store */
+ * users in the given store */
 void
 e_ews_edit_folder_permissions (GtkWindow *parent,
-			       ESourceRegistry *registry,
-			       ESource *source,
-			       CamelEwsSettings *ews_settings,
-			       const gchar *account_name,
-			       const gchar *folder_name,
-			       const EwsFolderId *folder_id,
-			       EwsFolderType folder_type)
+                               ESourceRegistry *registry,
+                               ESource *source,
+                               CamelEwsSettings *ews_settings,
+                               const gchar *account_name,
+                               const gchar *folder_name,
+                               const EwsFolderId *folder_id,
+                               EwsFolderType folder_type)
 {
 	struct EEwsPermissionsDialogWidgets *widgets;
 	PangoAttrList *attrs;
@@ -922,7 +931,8 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
 	row = 0;
 
 	label = gtk_label_new (_("Account:"));
-	g_object_set (G_OBJECT (label),
+	g_object_set (
+		G_OBJECT (label),
 		"hexpand", FALSE,
 		"vexpand", FALSE,
 		"xalign", 0.0,
@@ -932,7 +942,8 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
 	attrs = pango_attr_list_new ();
 	pango_attr_list_insert (attrs, pango_attr_weight_new (PANGO_WEIGHT_BOLD));
 	widget = gtk_label_new (account_name);
-	g_object_set (G_OBJECT (widget),
+	g_object_set (
+		G_OBJECT (widget),
 		"hexpand", TRUE,
 		"vexpand", FALSE,
 		"use-underline", FALSE,
@@ -948,7 +959,8 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
 	row++;
 
 	label = gtk_label_new (_("Folder name:"));
-	g_object_set (G_OBJECT (label),
+	g_object_set (
+		G_OBJECT (label),
 		"hexpand", FALSE,
 		"vexpand", FALSE,
 		"xalign", 0.0,
@@ -957,7 +969,8 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
 	widget = gtk_label_new (folder_name);
 	gtk_label_set_ellipsize (GTK_LABEL (widget), PANGO_ELLIPSIZE_MIDDLE);
 	gtk_widget_set_tooltip_text (widget, folder_name);
-	g_object_set (G_OBJECT (widget),
+	g_object_set (
+		G_OBJECT (widget),
 		"hexpand", TRUE,
 		"vexpand", FALSE,
 		"xalign", 0.0,
@@ -969,14 +982,16 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
 	row++;
 
 	label = gtk_label_new (_("Folder ID:"));
-	g_object_set (G_OBJECT (label),
+	g_object_set (
+		G_OBJECT (label),
 		"hexpand", FALSE,
 		"vexpand", FALSE,
 		"xalign", 0.0,
 		NULL);
 
 	widget = gtk_entry_new ();
-	g_object_set (G_OBJECT (widget),
+	g_object_set (
+		G_OBJECT (widget),
 		"hexpand", TRUE,
 		"vexpand", FALSE,
 		"xalign", 0.0,
@@ -996,7 +1011,8 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
 	gtk_scrolled_window_set_min_content_width (scrolled_window, 120);
 	gtk_scrolled_window_set_min_content_height (scrolled_window, 120);
 	gtk_container_add (GTK_CONTAINER (widget), create_permissions_tree_view (dialog, widgets));
-	g_object_set (G_OBJECT (widget),
+	g_object_set (
+		G_OBJECT (widget),
 		"hexpand", TRUE,
 		"vexpand", TRUE,
 		"shadow-type", GTK_SHADOW_IN,
@@ -1010,7 +1026,8 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
 	gtk_orientable_set_orientation (GTK_ORIENTABLE (hvbox), GTK_ORIENTATION_HORIZONTAL);
 	gtk_grid_set_column_spacing (GTK_GRID (hvbox), 6);
 	gtk_grid_set_column_homogeneous (GTK_GRID (hvbox), TRUE);
-	g_object_set (G_OBJECT (hvbox),
+	g_object_set (
+		G_OBJECT (hvbox),
 		"hexpand", FALSE,
 		"vexpand", FALSE,
 		"halign", GTK_ALIGN_END,
@@ -1029,7 +1046,8 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
 	row++;
 
 	widget = gtk_frame_new (_("Permissions"));
-	g_object_set (G_OBJECT (widget),
+	g_object_set (
+		G_OBJECT (widget),
 		"hexpand", TRUE,
 		"vexpand", FALSE,
 		NULL);
@@ -1050,13 +1068,15 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
 	gtk_grid_set_column_spacing (GTK_GRID (hvbox), 6);
 
 	label = gtk_label_new_with_mnemonic (_("Permi_ssion level:"));
-	g_object_set (G_OBJECT (label),
+	g_object_set (
+		G_OBJECT (label),
 		"hexpand", FALSE,
 		"vexpand", FALSE,
 		"xalign", 0.0,
 		NULL);
 
-	widget = GTK_WIDGET (g_object_new (gtk_combo_box_text_get_type (),
+	widget = GTK_WIDGET (
+		g_object_new (gtk_combo_box_text_get_type (),
 		"has-entry", FALSE,
 		"entry-text-column", 0,
 		"hexpand", TRUE,
@@ -1082,7 +1102,8 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
 	row++;
 
 	frame = gtk_frame_new (C_("Permissions", "Read"));
-	g_object_set (G_OBJECT (frame),
+	g_object_set (
+		G_OBJECT (frame),
 		"hexpand", FALSE,
 		"vexpand", FALSE,
 		NULL);
@@ -1116,7 +1137,8 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
 	gtk_grid_attach (grid, frame, 0, row, 1, 1);
 
 	frame = gtk_frame_new (C_("Permissions", "Write"));
-	g_object_set (G_OBJECT (frame),
+	g_object_set (
+		G_OBJECT (frame),
 		"hexpand", FALSE,
 		"vexpand", FALSE,
 		NULL);
@@ -1147,7 +1169,8 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
 	row++;
 
 	frame = gtk_frame_new (C_("Permissions", "Delete items"));
-	g_object_set (G_OBJECT (frame),
+	g_object_set (
+		G_OBJECT (frame),
 		"hexpand", FALSE,
 		"vexpand", FALSE,
 		NULL);
@@ -1174,7 +1197,8 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
 	gtk_grid_attach (grid, frame, 0, row, 1, 1);
 
 	frame = gtk_frame_new (C_("Permissions", "Other"));
-	g_object_set (G_OBJECT (frame),
+	g_object_set (
+		G_OBJECT (frame),
 		"hexpand", FALSE,
 		"vexpand", FALSE,
 		NULL);
@@ -1200,41 +1224,58 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
 
 	row++;
 
-	g_signal_connect_swapped (widgets->add_button,
+	g_signal_connect_swapped (
+		widgets->add_button,
 		"clicked", G_CALLBACK (add_button_clicked_cb), dialog);
-	g_signal_connect_swapped (widgets->remove_button,
+	g_signal_connect_swapped (
+		widgets->remove_button,
 		"clicked", G_CALLBACK (remove_button_clicked_cb), dialog);
-	g_signal_connect_swapped (widgets->level_combo,
+	g_signal_connect_swapped (
+		widgets->level_combo,
 		"changed", G_CALLBACK (update_permission_dialog_by_level_combo), dialog);
-	g_signal_connect_swapped (widgets->read_none_radio,
+	g_signal_connect_swapped (
+		widgets->read_none_radio,
 		"toggled", G_CALLBACK (update_permission_level_combo_by_dialog), dialog);
-	g_signal_connect_swapped (widgets->read_full_radio,
+	g_signal_connect_swapped (
+		widgets->read_full_radio,
 		"toggled", G_CALLBACK (update_permission_level_combo_by_dialog), dialog);
 	if (widgets->read_fb_time_radio)
-		g_signal_connect_swapped (widgets->read_fb_time_radio,
+		g_signal_connect_swapped (
+			widgets->read_fb_time_radio,
 			"toggled", G_CALLBACK (update_permission_level_combo_by_dialog), dialog);
 	if (widgets->read_fb_detail_radio)
-		g_signal_connect_swapped (widgets->read_fb_detail_radio,
+		g_signal_connect_swapped (
+			widgets->read_fb_detail_radio,
 			"toggled", G_CALLBACK (update_permission_level_combo_by_dialog), dialog);
-	g_signal_connect_swapped (widgets->write_create_items_check,
+	g_signal_connect_swapped (
+		widgets->write_create_items_check,
 		"toggled", G_CALLBACK (update_permission_level_combo_by_dialog), dialog);
-	g_signal_connect_swapped (widgets->write_create_subfolders_check,
+	g_signal_connect_swapped (
+		widgets->write_create_subfolders_check,
 		"toggled", G_CALLBACK (update_permission_level_combo_by_dialog), dialog);
-	g_signal_connect_swapped (widgets->write_edit_own_check,
+	g_signal_connect_swapped (
+		widgets->write_edit_own_check,
 		"toggled", G_CALLBACK (update_permission_level_combo_by_dialog), dialog);
-	g_signal_connect_swapped (widgets->write_edit_all_check,
+	g_signal_connect_swapped (
+		widgets->write_edit_all_check,
 		"toggled", G_CALLBACK (update_permission_level_combo_by_dialog), dialog);
-	g_signal_connect_swapped (widgets->delete_none_radio,
+	g_signal_connect_swapped (
+		widgets->delete_none_radio,
 		"toggled", G_CALLBACK (update_permission_level_combo_by_dialog), dialog);
-	g_signal_connect_swapped (widgets->delete_own_radio,
+	g_signal_connect_swapped (
+		widgets->delete_own_radio,
 		"toggled", G_CALLBACK (update_permission_level_combo_by_dialog), dialog);
-	g_signal_connect_swapped (widgets->delete_all_radio,
+	g_signal_connect_swapped (
+		widgets->delete_all_radio,
 		"toggled", G_CALLBACK (update_permission_level_combo_by_dialog), dialog);
-	g_signal_connect_swapped (widgets->other_folder_owner_check,
+	g_signal_connect_swapped (
+		widgets->other_folder_owner_check,
 		"toggled", G_CALLBACK (update_permission_level_combo_by_dialog), dialog);
-	g_signal_connect_swapped (widgets->other_folder_contact_check,
+	g_signal_connect_swapped (
+		widgets->other_folder_contact_check,
 		"toggled", G_CALLBACK (update_permission_level_combo_by_dialog), dialog);
-	g_signal_connect_swapped (widgets->other_folder_visible_check,
+	g_signal_connect_swapped (
+		widgets->other_folder_visible_check,
 		"toggled", G_CALLBACK (update_permission_level_combo_by_dialog), dialog);
 
 	enable_all_widgets (widgets, FALSE);
@@ -1246,7 +1287,8 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
 
 	found_permissions = g_new0 (GSList *, 1);
 
-	e_ews_config_utils_run_in_thread_with_feedback (GTK_WINDOW (dialog), dialog,
+	e_ews_config_utils_run_in_thread_with_feedback (
+		GTK_WINDOW (dialog), dialog,
 		_("Reading folder permissions, please wait..."),
 		read_folder_permissions_thread,
 		read_folder_permissions_idle,

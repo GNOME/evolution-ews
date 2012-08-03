@@ -99,10 +99,11 @@ get_init_cred (krb5_context ctx,
 	krb5_get_init_creds_opt_set_forwardable (&opt, 0);
 	krb5_get_init_creds_opt_set_proxiable (&opt, 0);
 
-	result = krb5_get_init_creds_password (ctx, cred, principal,
-					       (gchar *) passwd,
-					       NULL, NULL, 0,
-					       (gchar *) in_tkt_service, &opt);
+	result = krb5_get_init_creds_password (
+		ctx, cred, principal,
+		(gchar *) passwd,
+		NULL, NULL, 0,
+		(gchar *) in_tkt_service, &opt);
 	krb5_free_principal (ctx, principal);
 
 	return krb5_result_to_ews_kerberos_result (result);
@@ -135,17 +136,19 @@ ews_kerberos_change_password (const gchar *user,
 	if (!ctx)
 		return EWS_KERBEROS_FAILED;
 
-	result = get_init_cred (ctx, user, old_password,
-				"kadmin/changepw", &creds);
+	result = get_init_cred (
+		ctx, user, old_password,
+		"kadmin/changepw", &creds);
 	if (result != EWS_KERBEROS_OK) {
 		krb5_free_context (ctx);
 		return result;
 	}
 
-	result = krb5_change_password (ctx, &creds, (gchar *) new_password,
-				       &res_code, &res_code_string, &res_string);
+	result = krb5_change_password (
+		ctx, &creds, (gchar *) new_password,
+		&res_code, &res_code_string, &res_string);
 
-	g_print("%s", res_code_string.data);
+	g_print ("%s", res_code_string.data);
 	krb5_free_cred_contents (ctx, &creds);
 	krb5_free_data_contents (ctx, &res_code_string);
 	krb5_free_data_contents (ctx, &res_string);

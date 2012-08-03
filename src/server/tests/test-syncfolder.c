@@ -53,9 +53,10 @@ folder_items_ready_callback (GObject *object,
 	GError *error = NULL;
 
 	/* Only for test program */
-	e_ews_connection_sync_folder_items_finish	(cnc, res, &sync_state, &last_in_range,
-							 &items_created, &items_updated,
-							 &items_deleted, &error);
+	e_ews_connection_sync_folder_items_finish (
+		cnc, res, &sync_state, &last_in_range,
+		&items_created, &items_updated,
+		&items_deleted, &error);
 
 	if (error != NULL) {
 		g_print ("Unable to sync the folder items: %s :%d \n", error->message, error->code);
@@ -130,9 +131,10 @@ folder_hierarchy_ready_callback (GObject *object,
 	gchar *sync_state = NULL;
 	GError *error = NULL;
 
-	e_ews_connection_sync_folder_hierarchy_finish	(cnc, res, &sync_state, &last_in_range,
-							 &folders_created, &folders_updated,
-							 &folders_deleted, &error);
+	e_ews_connection_sync_folder_hierarchy_finish (
+		cnc, res, &sync_state, &last_in_range,
+		&folders_created, &folders_updated,
+		&folders_deleted, &error);
 
 	if (error != NULL) {
 		g_print ("Unable to fetch the folder hierarchy: %s :%d \n", error->message, error->code);
@@ -206,7 +208,7 @@ get_item_ready_callback (GObject *object,
 	GError *error = NULL;
 	GSList *items = NULL, *l;
 
-	e_ews_connection_get_items_finish	(cnc, res, &items, &error);
+	e_ews_connection_get_items_finish (cnc, res, &items, &error);
 
 	if (error != NULL) {
 		g_print ("Unable to get item: %s :%d \n", error->message, error->code);

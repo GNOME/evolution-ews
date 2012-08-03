@@ -57,21 +57,23 @@ create_mime_message_cb (ESoapMessage *msg,
 	 * to stream this directly rather than storing it in RAM. Which right
 	 * now we are doing about four times: the GByteArray in the mem stream,
 	 * then the base64 version, then the xmlDoc, then the soup request. */
-	camel_mime_message_set_best_encoding (create_data->message,
-					      CAMEL_BESTENC_GET_ENCODING,
-					      CAMEL_BESTENC_8BIT);
+	camel_mime_message_set_best_encoding (
+		create_data->message,
+		CAMEL_BESTENC_GET_ENCODING,
+		CAMEL_BESTENC_8BIT);
 
 	mem = camel_stream_mem_new ();
 	filtered = camel_stream_filter_new (mem);
 
-	filter = camel_mime_filter_crlf_new (CAMEL_MIME_FILTER_CRLF_ENCODE,
-				     CAMEL_MIME_FILTER_CRLF_MODE_CRLF_ONLY);
+	filter = camel_mime_filter_crlf_new (
+		CAMEL_MIME_FILTER_CRLF_ENCODE,
+		CAMEL_MIME_FILTER_CRLF_MODE_CRLF_ONLY);
 	camel_stream_filter_add (CAMEL_STREAM_FILTER (filtered), filter);
 	g_object_unref (filter);
 
-	camel_data_wrapper_write_to_stream_sync
-				(CAMEL_DATA_WRAPPER (create_data->message),
-				 filtered, NULL, NULL);
+	camel_data_wrapper_write_to_stream_sync (
+		CAMEL_DATA_WRAPPER (create_data->message),
+		filtered, NULL, NULL);
 	camel_stream_flush (filtered, NULL, NULL);
 	camel_stream_flush (mem, NULL, NULL);
 	bytes = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (mem));
@@ -168,8 +170,9 @@ camel_ews_utils_create_mime_message (EEwsConnection *cnc,
 
 	item = (EEwsItem *) ids->data;
 	if (!item || !(ewsid = e_ews_item_get_id (item))) {
-		g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			    _("CreateItem call failed to return ID for new message"));
+		g_set_error (
+			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			_("CreateItem call failed to return ID for new message"));
 		return FALSE;
 	}
 

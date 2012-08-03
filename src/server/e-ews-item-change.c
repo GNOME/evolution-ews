@@ -36,43 +36,53 @@ e_ews_message_start_item_change (ESoapMessage *msg,
 	switch (type) {
 	case E_EWS_ITEMCHANGE_TYPE_FOLDER:
 		e_soap_message_start_element (msg, "FolderChange", NULL, NULL);
-		e_soap_message_start_element (msg, "FolderId",
-					      NULL, NULL);
-		e_soap_message_add_attribute (msg, "Id",
-					      itemid, NULL, NULL);
+		e_soap_message_start_element (
+			msg, "FolderId",
+			NULL, NULL);
+		e_soap_message_add_attribute (
+			msg, "Id",
+			itemid, NULL, NULL);
 		break;
 
 	case E_EWS_ITEMCHANGE_TYPE_ITEM:
 		e_soap_message_start_element (msg, "ItemChange", NULL, NULL);
-		e_soap_message_start_element (msg, "ItemId",
-					      NULL, NULL);
-		e_soap_message_add_attribute (msg, "Id",
-					      itemid, NULL, NULL);
+		e_soap_message_start_element (
+			msg, "ItemId",
+			NULL, NULL);
+		e_soap_message_add_attribute (
+			msg, "Id",
+			itemid, NULL, NULL);
 		break;
 
 	case E_EWS_ITEMCHANGE_TYPE_OCCURRENCEITEM:
 		e_soap_message_start_element (msg, "ItemChange", NULL, NULL);
-		e_soap_message_start_element (msg, "OccurrenceItemId",
-					      NULL, NULL);
-		e_soap_message_add_attribute (msg, "RecurringMasterId",
-					      itemid, NULL, NULL);
-		instance = g_strdup_printf("%d", instance_index);
-		e_soap_message_add_attribute (msg, "InstanceIndex", instance,
-					      NULL, NULL);
+		e_soap_message_start_element (
+			msg, "OccurrenceItemId",
+			NULL, NULL);
+		e_soap_message_add_attribute (
+			msg, "RecurringMasterId",
+			itemid, NULL, NULL);
+		instance = g_strdup_printf ("%d", instance_index);
+		e_soap_message_add_attribute (
+			msg, "InstanceIndex", instance,
+			NULL, NULL);
 		g_free (instance);
 		break;
 
 	case E_EWS_ITEMCHANGE_TYPE_RECURRINGMASTER:
 		e_soap_message_start_element (msg, "ItemChange", NULL, NULL);
-		e_soap_message_start_element (msg, "RecurringMasterItemId",
-					      NULL, NULL);
-		e_soap_message_add_attribute (msg, "OccurrenceId",
-					      itemid, NULL, NULL);
+		e_soap_message_start_element (
+			msg, "RecurringMasterItemId",
+			NULL, NULL);
+		e_soap_message_add_attribute (
+			msg, "OccurrenceId",
+			itemid, NULL, NULL);
 		break;
 	}
 	if (changekey)
-		e_soap_message_add_attribute (msg, "ChangeKey",
-					      changekey, NULL, NULL);
+		e_soap_message_add_attribute (
+			msg, "ChangeKey",
+			changekey, NULL, NULL);
 	e_soap_message_end_element (msg);
 
 	e_soap_message_start_element (msg, "Updates", NULL, NULL);
@@ -146,8 +156,8 @@ e_ews_message_end_set_item_field (ESoapMessage *msg)
 
 void
 e_ews_message_add_delete_item_field (ESoapMessage *msg,
-				     const gchar *name,
-				     const gchar *fielduri_prefix)
+                                     const gchar *name,
+                                     const gchar *fielduri_prefix)
 {
 	gchar *fielduri;
 
@@ -162,9 +172,9 @@ e_ews_message_add_delete_item_field (ESoapMessage *msg,
 
 void
 e_ews_message_add_delete_item_field_indexed (ESoapMessage *msg,
-					     const gchar *name,
-					     const gchar *fielduri_prefix,
-					     const gchar *field_index)
+                                             const gchar *name,
+                                             const gchar *fielduri_prefix,
+                                             const gchar *field_index)
 {
 	gchar *fielduri;
 

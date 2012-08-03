@@ -352,7 +352,7 @@ ews_oab_read_uint16 (GInputStream *is,
 	if (!*error)
 		ret = EndGetI16 (str);
 
-	return ret;	
+	return ret;
 }
 
 static gint
@@ -477,7 +477,7 @@ ews_decode_hdr_props (EwsOabDecoder *eod,
 		guint32 prop_id, flags;
 
 		prop_id = ews_oab_read_uint32 (G_INPUT_STREAM (priv->fis), cancellable, error);
-		d(g_print ("%X \n", prop_id);)
+		d (g_print ("%X \n", prop_id);)
 		*props = g_slist_prepend (*props, GUINT_TO_POINTER (prop_id));
 
 		if (*error)
@@ -627,7 +627,7 @@ ews_decode_oab_prop (EwsOabDecoder *eod,
 			val = ews_decode_uint32 (eod, cancellable, error);
 			ret_val = GUINT_TO_POINTER (val);
 
-			d(g_print ("prop id %X prop type: int32 value %d \n", prop_id, val);)
+			d (g_print ("prop id %X prop type: int32 value %d \n", prop_id, val);)
 
 			break;
 		}
@@ -637,7 +637,7 @@ ews_decode_oab_prop (EwsOabDecoder *eod,
 
 			g_input_stream_read (G_INPUT_STREAM (priv->fis), &val, 1, cancellable, error);
 			ret_val = GUINT_TO_POINTER ((guint) val);
-			d(g_print ("prop id %X prop type: bool value %d \n", prop_id, val);)
+			d (g_print ("prop id %X prop type: bool value %d \n", prop_id, val);)
 
 			break;
 		}
@@ -649,13 +649,13 @@ ews_decode_oab_prop (EwsOabDecoder *eod,
 			val = ews_oab_read_upto (G_INPUT_STREAM (priv->fis), '\0', cancellable, error);
 			ret_val = (gpointer) val;
 
-			d(g_print ("prop id %X prop type: string value %s \n", prop_id, val);)
+			d (g_print ("prop id %X prop type: string value %s \n", prop_id, val);)
 			break;
 		}
 		case EWS_PTYP_BINARY:
 		{
 			ret_val = ews_decode_binary (eod, cancellable, error);
-			d(g_print ("prop id %X prop type: binary value %s \n", prop_id, (gchar *) ret_val);)
+			d (g_print ("prop id %X prop type: binary value %s \n", prop_id, (gchar *) ret_val);)
 			break;
 		}
 		case EWS_PTYP_MULTIPLEINTEGER32:
@@ -669,7 +669,7 @@ ews_decode_oab_prop (EwsOabDecoder *eod,
 			num = ews_decode_uint32 (eod, cancellable, error);
 			if (*error)
 				break;
-			d(g_print ("prop id %X prop type: multi-num %d \n", prop_id, num);)
+			d (g_print ("prop id %X prop type: multi-num %d \n", prop_id, num);)
 
 			for (i = 0; i < num; i++) {
 				gpointer val;
@@ -681,7 +681,7 @@ ews_decode_oab_prop (EwsOabDecoder *eod,
 					val = GUINT_TO_POINTER (v);
 					list = g_slist_prepend (list, val);
 
-					d(g_print ("prop id %X prop type: multi-int32 %d \n", prop_id, v);)
+					d (g_print ("prop id %X prop type: multi-int32 %d \n", prop_id, v);)
 					if (*error) {
 						g_slist_free (list);
 						return NULL;
@@ -691,10 +691,10 @@ ews_decode_oab_prop (EwsOabDecoder *eod,
 
 					if (prop_type == EWS_PTYP_MULTIPLEBINARY) {
 						val = ews_decode_binary (eod, cancellable, error);
-						d(g_print ("prop id %X prop type: multi-string %s \n", prop_id, val);)
+						d (g_print ("prop id %X prop type: multi-string %s \n", prop_id, val);)
 					} else {
 						val = ews_oab_read_upto (G_INPUT_STREAM (priv->fis), '\0', cancellable, error);
-						d(g_print ("prop id %X prop type: multi-string %s \n", prop_id, val);)
+						d (g_print ("prop id %X prop type: multi-string %s \n", prop_id, val);)
 					}
 
 					if (*error) {
@@ -867,7 +867,7 @@ ews_decode_and_store_oab_records (EwsOabDecoder *eod,
 			e_contact_set (contact, E_CONTACT_UID, uid);
 
 			cb (contact, offset, ((gfloat) (i + 1) / priv->total_records) * 100, user_data, error);
-			d(g_print ("%s \n", e_vcard_to_string ((EVCard *) contact, EVC_FORMAT_VCARD_30));)
+			d (g_print ("%s \n", e_vcard_to_string ((EVCard *) contact, EVC_FORMAT_VCARD_30));)
 		}
 
 error:
@@ -909,7 +909,7 @@ ews_oab_decoder_get_oab_prop_string (EwsOabDecoder *eod,
 	if (str->len)
 		g_string_erase (str, str->len - 1, 1);
 
-	d(g_print ("Oab prop string: %s \n", str->str);)
+	d (g_print ("Oab prop string: %s \n", str->str);)
 
 	return g_string_free (str, FALSE);
 }
@@ -942,7 +942,7 @@ ews_oab_decoder_set_oab_prop_string (EwsOabDecoder *eod,
 
 		sscanf (vals[i],"%"G_GUINT32_FORMAT,&prop_id);
 		priv->oab_props = g_slist_prepend (priv->oab_props, GUINT_TO_POINTER (prop_id));
-		d(printf ("%X\n", prop_id);)
+		d (printf ("%X\n", prop_id);)
 	}
 
 	priv->oab_props = g_slist_reverse (priv->oab_props);
@@ -1076,7 +1076,7 @@ main (gint argc,
 		return -1;
 	}
 
-	ebsdb = ews_book_backend_sqlitedb_new (argv [2], "dum", "de", "dum", TRUE, NULL);
+	ebsdb = ews_book_backend_sqlitedb_new (argv[2], "dum", "de", "dum", TRUE, NULL);
 	eod = ews_oab_decoder_new (argv[1], argv[2], &err);
 
 	data.contact_collector = NULL;

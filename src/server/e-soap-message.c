@@ -118,7 +118,7 @@ fetch_ns (ESoapMessage *msg,
 	else if (prefix && !ns_uri) {
 		ns = xmlSearchNs (priv->doc, priv->last_node, (const xmlChar *) prefix);
 		if (!ns)
-			ns = xmlNewNs (priv->last_node, (const xmlChar *) "", (const xmlChar *)prefix);
+			ns = xmlNewNs (priv->last_node, (const xmlChar *) "", (const xmlChar *) prefix);
 	}
 
 	return ns;
@@ -131,8 +131,9 @@ soap_got_headers (SoupMessage *msg,
 	ESoapMessagePrivate *priv = E_SOAP_MESSAGE_GET_PRIVATE (msg);
 	const gchar *size;
 
-	size = soup_message_headers_get_one (msg->response_headers,
-					     "Content-Length");
+	size = soup_message_headers_get_one (
+		msg->response_headers,
+		"Content-Length");
 
 	if (size)
 		priv->response_size = strtol (size, NULL, 10);
@@ -171,9 +172,10 @@ soap_sax_startElementNs (gpointer _ctxt,
 	ESoapMessagePrivate *priv = ctxt->_private;
 	gchar *fname;
 
-	xmlSAX2StartElementNs (ctxt, localname, prefix, uri, nb_namespaces,
-			       namespaces, nb_attributes, nb_defaulted,
-			       attributes);
+	xmlSAX2StartElementNs (
+		ctxt, localname, prefix, uri, nb_namespaces,
+		namespaces, nb_attributes, nb_defaulted,
+		attributes);
 
 	/* steal_node can contain multiple node name separated by " " */
 	if (priv->steal_node && *priv->steal_node) {
@@ -247,9 +249,10 @@ soap_sax_characters (gpointer _ctxt,
 		guchar *bdata = g_malloc (len);
 		gsize blen;
 
-		blen = g_base64_decode_step ((const gchar *) ch, len,
-					     bdata, &priv->steal_b64_state,
-					     &priv->steal_b64_save);
+		blen = g_base64_decode_step (
+			(const gchar *) ch, len,
+			bdata, &priv->steal_b64_state,
+			&priv->steal_b64_save);
 		if (write (priv->steal_fd, (const gchar *) bdata, blen) != blen) {
 			g_free (bdata);
 			goto write_err;
@@ -276,8 +279,9 @@ soap_got_chunk (SoupMessage *msg,
 	}
 
 	if (!priv->ctxt) {
-		priv->ctxt = xmlCreatePushParserCtxt (NULL, msg, chunk->data,
-						      chunk->length, NULL);
+		priv->ctxt = xmlCreatePushParserCtxt (
+			NULL, msg, chunk->data,
+			chunk->length, NULL);
 		priv->ctxt->_private = priv;
 		priv->ctxt->sax->startElementNs = soap_sax_startElementNs;
 		priv->ctxt->sax->endElementNs = soap_sax_endElementNs;
@@ -316,15 +320,17 @@ e_soap_message_new (const gchar *method,
 	if (!uri)
 		return NULL;
 
-	msg = e_soap_message_new_from_uri (method, uri, standalone,
-					   xml_encoding, env_prefix, env_uri);
+	msg = e_soap_message_new_from_uri (
+		method, uri, standalone,
+		xml_encoding, env_prefix, env_uri);
 
 	soup_uri_free (uri);
 
 	/* Don't accumulate body data into a huge buffer.
 	 * Instead, parse it as it arrives. */
-	soup_message_body_set_accumulate (SOUP_MESSAGE (msg)->response_body,
-					  FALSE);
+	soup_message_body_set_accumulate (
+		SOUP_MESSAGE (msg)->response_body,
+		FALSE);
 	g_signal_connect (msg, "got-headers", G_CALLBACK (soap_got_headers), NULL);
 	g_signal_connect (msg, "got-chunk", G_CALLBACK (soap_got_chunk), NULL);
 	g_signal_connect (msg, "restarted", G_CALLBACK (soap_restarted), NULL);
