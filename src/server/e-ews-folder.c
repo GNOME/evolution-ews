@@ -25,6 +25,7 @@
 #include <string.h>
 #include "e-ews-folder.h"
 #include "e-ews-message.h"
+#include "e-ews-enumtypes.h"
 
 G_DEFINE_TYPE (EEwsFolder, e_ews_folder, G_TYPE_OBJECT)
 
@@ -189,6 +190,54 @@ e_ews_folder_set_from_soap_parameter (EEwsFolder *folder,
 		priv->child_count = e_soap_parameter_get_int_value (subparam);
 
 	return TRUE;
+}
+
+const gchar *
+e_ews_folder_type_to_nick (EEwsFolderType folder_type)
+{
+	GEnumClass *enum_class;
+	GEnumValue *enum_value;
+	const gchar *folder_type_nick;
+
+	enum_class = g_type_class_ref (E_TYPE_EWS_FOLDER_TYPE);
+	enum_value = g_enum_get_value (enum_class, folder_type);
+
+	if (enum_value == NULL) {
+		folder_type = E_EWS_FOLDER_TYPE_UNKNOWN;
+		enum_value = g_enum_get_value (enum_class, folder_type);
+	}
+
+	g_return_val_if_fail (enum_value != NULL, NULL);
+
+	folder_type_nick = g_intern_string (enum_value->value_nick);
+
+	g_type_class_unref (enum_class);
+
+	return folder_type_nick;
+}
+
+EEwsFolderType
+e_ews_folder_type_from_nick (const gchar *folder_type_nick)
+{
+	GEnumClass *enum_class;
+	GEnumValue *enum_value;
+	EEwsFolderType folder_type;
+
+	g_return_val_if_fail (
+		folder_type_nick != NULL,
+		E_EWS_FOLDER_TYPE_UNKNOWN);
+
+	enum_class = g_type_class_ref (E_TYPE_EWS_FOLDER_TYPE);
+	enum_value = g_enum_get_value_by_nick (enum_class, folder_type_nick);
+
+	if (enum_value != NULL)
+		folder_type = enum_value->value;
+	else
+		folder_type = E_EWS_FOLDER_TYPE_UNKNOWN;
+
+	g_type_class_unref (enum_class);
+
+	return folder_type;
 }
 
 EEwsFolder *

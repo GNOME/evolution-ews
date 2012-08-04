@@ -463,7 +463,8 @@ add_folder_to_summary (CamelEwsStore *store,
 	CamelEwsStoreSummary *ews_summary = store->summary;
 	const EwsFolderId *pfid, *fid;
 	const gchar *dname;
-	gint64 unread, total, ftype;
+	gint64 unread, total;
+	EEwsFolderType ftype;
 
 	fid = e_ews_folder_get_id (folder);
 	pfid = e_ews_folder_get_parent_id (folder);

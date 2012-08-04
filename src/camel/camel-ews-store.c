@@ -552,7 +552,7 @@ folder_info_from_store_summary (CamelEwsStore *store,
 
 	for (l = folders; l != NULL; l = g_slist_next (l)) {
 		CamelFolderInfo *fi;
-		gint64 ftype;
+		EEwsFolderType ftype;
 
 		ftype = camel_ews_store_summary_get_folder_type (ews_summary, l->data, NULL);
 		if (ftype != E_EWS_FOLDER_TYPE_MAILBOX)

@@ -53,6 +53,8 @@ typedef struct {
 } EwsFolderId;
 
 GType		e_ews_folder_get_type (void);
+const gchar *	e_ews_folder_type_to_nick (EEwsFolderType folder_type);
+EEwsFolderType	e_ews_folder_type_from_nick (const gchar *folder_type_nick);
 EEwsFolder *	e_ews_folder_new_from_soap_parameter (ESoapParameter *param);
 const gchar *	e_ews_folder_get_name (EEwsFolder *folder);
 void		e_ews_folder_set_name (EEwsFolder *folder, const gchar *new_name);

@@ -4,6 +4,8 @@
 #include <string.h>
 #include "camel-ews-store-summary.h"
 
+#include "server/e-ews-folder.h"
+
 #define S_LOCK(x) (g_static_rec_mutex_lock(&(x)->priv->s_lock))
 #define S_UNLOCK(x) (g_static_rec_mutex_unlock(&(x)->priv->s_lock))
 
@@ -342,10 +344,16 @@ camel_ews_store_summary_new_folder (CamelEwsStoreSummary *ews_summary,
                                     const gchar *parent_fid,
                                     const gchar *change_key,
                                     const gchar *display_name,
-                                    guint64 folder_type,
+                                    EEwsFolderType folder_type,
                                     guint64 folder_flags,
                                     guint64 total)
 {
+	const gchar *folder_type_nick;
+
+	/* Store the folder type by its nickname. */
+	folder_type_nick = e_ews_folder_type_to_nick (folder_type);
+	g_return_if_fail (folder_type_nick != NULL);
+
 	S_LOCK (ews_summary);
 
 	g_key_file_set_string (
@@ -357,9 +365,9 @@ camel_ews_store_summary_new_folder (CamelEwsStoreSummary *ews_summary,
 	g_key_file_set_string (
 		ews_summary->priv->key_file,
 		folder_id, "DisplayName", display_name);
-	g_key_file_set_uint64 (
+	g_key_file_set_string (
 		ews_summary->priv->key_file,
-		folder_id, "FolderType", folder_type);
+		folder_id, "FolderType", folder_type_nick);
 	g_key_file_set_uint64 (
 		ews_summary->priv->key_file,
 		folder_id, "Flags", folder_flags);
@@ -475,13 +483,19 @@ camel_ews_store_summary_set_folder_total (CamelEwsStoreSummary *ews_summary,
 void
 camel_ews_store_summary_set_folder_type (CamelEwsStoreSummary *ews_summary,
                                          const gchar *folder_id,
-                                         guint64 ews_folder_type)
+                                         EEwsFolderType folder_type)
 {
+	const gchar *folder_type_nick;
+
+	/* Store the folder type by its nickname. */
+	folder_type_nick = e_ews_folder_type_to_nick (folder_type);
+	g_return_if_fail (folder_type_nick != NULL);
+
 	S_LOCK (ews_summary);
 
-	g_key_file_set_uint64 (
+	g_key_file_set_string (
 		ews_summary->priv->key_file,
-		folder_id, "FolderType", ews_folder_type);
+		folder_id, "FolderType", folder_type_nick);
 	ews_summary->priv->dirty = TRUE;
 
 	S_UNLOCK (ews_summary);
@@ -647,22 +661,31 @@ camel_ews_store_summary_get_folder_total (CamelEwsStoreSummary *ews_summary,
 	return ret;
 }
 
-guint64
+EEwsFolderType
 camel_ews_store_summary_get_folder_type (CamelEwsStoreSummary *ews_summary,
                                          const gchar *folder_id,
                                          GError **error)
 {
-	guint64 ret;
+	EEwsFolderType folder_type;
+	gchar *folder_type_nick;
 
 	S_LOCK (ews_summary);
 
-	ret = g_key_file_get_uint64 (
-		ews_summary->priv->key_file, folder_id,
-		"FolderType", error);
+	folder_type_nick = g_key_file_get_string (
+		ews_summary->priv->key_file,
+		folder_id, "FolderType", error);
 
 	S_UNLOCK (ews_summary);
 
-	return ret;
+	/* Look up the folder type by its nickname. */
+	if (folder_type_nick != NULL)
+		folder_type = e_ews_folder_type_from_nick (folder_type_nick);
+	else
+		folder_type = E_EWS_FOLDER_TYPE_UNKNOWN;
+
+	g_free (folder_type_nick);
+
+	return folder_type;
 }
 
 gchar *

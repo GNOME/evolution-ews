@@ -3,6 +3,8 @@
 
 #include <camel/camel.h>
 
+#include "server/e-ews-enums.h"
+
 /* Standard GObject macros */
 #define CAMEL_TYPE_EWS_STORE_SUMMARY \
 	(camel_ews_store_summary_get_type ())
@@ -82,7 +84,7 @@ void		camel_ews_store_summary_set_folder_total
 void		camel_ews_store_summary_set_folder_type
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_id,
-						 guint64 folder_type);
+						 EEwsFolderType folder_type);
 
 gchar *	camel_ews_store_summary_get_folder_name
 						(CamelEwsStoreSummary *ews_summary,
@@ -116,7 +118,7 @@ guint64		camel_ews_store_summary_get_folder_total
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_id,
 						 GError **error);
-guint64		camel_ews_store_summary_get_folder_type
+EEwsFolderType	camel_ews_store_summary_get_folder_type
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_id,
 						 GError **error);
@@ -146,7 +148,7 @@ void		camel_ews_store_summary_new_folder
 						 const gchar *parent_fid,
 						 const gchar *change_key,
 						 const gchar *display_name,
-						 guint64 folder_type,
+						 EEwsFolderType folder_type,
 						 guint64 folder_flags,
 						 guint64 total);
 
