@@ -101,7 +101,7 @@ op_test_finditem_run (void)
 	const gchar *password;
 	const gchar *uri, *folder_name = NULL;
 	EEwsConnection *cnc;
-	EwsFolderType folder_type;
+	EEwsFolderType folder_type;
 	EwsFolderId *fid = NULL;
 	CamelEwsSettings *settings;
 	GCancellable *cancellable;
@@ -126,7 +126,7 @@ op_test_finditem_run (void)
 
 	/*Check for contact folder*/
 	folder_name = "contacts";
-	folder_type = EWS_FOLDER_TYPE_CONTACTS;
+	folder_type = E_EWS_FOLDER_TYPE_CONTACTS;
 	fid = g_new0 (EwsFolderId, 1);
 	fid->id = g_strdup (folder_name);
 	fid->is_distinguished_id = TRUE;
@@ -140,7 +140,7 @@ op_test_finditem_run (void)
 
 	/*Check for calendar folder*/
 	folder_name = "calendar";
-	folder_type = EWS_FOLDER_TYPE_CALENDAR;
+	folder_type = E_EWS_FOLDER_TYPE_CALENDAR;
 	fid = g_new0 (EwsFolderId, 1);
 	fid->id = g_strdup (folder_name);
 	fid->is_distinguished_id = TRUE;
@@ -154,7 +154,7 @@ op_test_finditem_run (void)
 
 	/*Check for mail folder*/
 	folder_name = "inbox";
-	folder_type = EWS_FOLDER_TYPE_MAILBOX;
+	folder_type = E_EWS_FOLDER_TYPE_MAILBOX;
 	fid = g_new0 (EwsFolderId, 1);
 	fid->id = g_strdup (folder_name);
 	fid->is_distinguished_id = TRUE;

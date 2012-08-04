@@ -22,6 +22,7 @@
 #ifndef E_EWS_FOLDER_H
 #define E_EWS_FOLDER_H
 
+#include "e-ews-enums.h"
 #include "e-soap-message.h"
 
 G_BEGIN_DECLS
@@ -45,15 +46,6 @@ struct _EEwsFolderClass {
 	GObjectClass parent_class;
 };
 
-typedef enum {
-	EWS_FOLDER_TYPE_UNKNOWN,
-	EWS_FOLDER_TYPE_MAILBOX,
-	EWS_FOLDER_TYPE_CALENDAR,
-	EWS_FOLDER_TYPE_CONTACTS,
-	EWS_FOLDER_TYPE_SEARCH,
-	EWS_FOLDER_TYPE_TASKS
-} EwsFolderType;
-
 typedef struct {
 	gchar *id;
 	gchar *change_key;
@@ -74,8 +66,8 @@ guint32		e_ews_folder_get_unread_count (EEwsFolder *folder);
 guint32		e_ews_folder_get_child_count (EEwsFolder *folder);
 gboolean	e_ews_folder_get_is_writable (EEwsFolder *folder);
 void		e_ews_folder_set_is_writable (EEwsFolder *folder, gboolean writable);
-EwsFolderType	e_ews_folder_get_folder_type (EEwsFolder *folder);
-void		e_ews_folder_set_folder_type (EEwsFolder *folder, EwsFolderType folder_type);
+EEwsFolderType	e_ews_folder_get_folder_type (EEwsFolder *folder);
+void		e_ews_folder_set_folder_type (EEwsFolder *folder, EEwsFolderType folder_type);
 
 EwsFolderId *	e_ews_folder_id_new (const gchar *id,
 				     const gchar *change_key,

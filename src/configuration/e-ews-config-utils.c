@@ -532,7 +532,7 @@ action_folder_permissions_mail_cb (GtkAction *action,
 			camel_service_get_display_name (CAMEL_SERVICE (store)),
 			folder_path,
 			folder_id,
-			EWS_FOLDER_TYPE_MAILBOX);
+			E_EWS_FOLDER_TYPE_MAILBOX);
 
 		g_object_unref (source);
 		g_free (str_folder_id);
@@ -819,7 +819,7 @@ action_folder_permissions_source_cb (GtkAction *action,
 	CamelSettings *settings;
 	const gchar *extension_name;
 	EwsFolderId *folder_id;
-	EwsFolderType folder_type;
+	EEwsFolderType folder_type;
 
 	g_return_if_fail (action != NULL);
 	g_return_if_fail (shell_view != NULL);
@@ -838,13 +838,13 @@ action_folder_permissions_source_cb (GtkAction *action,
 	extension = e_source_get_extension (parent_source, extension_name);
 	settings = e_source_camel_get_settings (extension);
 
-	folder_type = EWS_FOLDER_TYPE_MAILBOX;
+	folder_type = E_EWS_FOLDER_TYPE_MAILBOX;
 	if (strstr (gtk_action_get_name (action), "calendar") != NULL)
-		folder_type = EWS_FOLDER_TYPE_CALENDAR;
+		folder_type = E_EWS_FOLDER_TYPE_CALENDAR;
 	else if (strstr (gtk_action_get_name (action), "contacts") != NULL)
-		folder_type = EWS_FOLDER_TYPE_CONTACTS;
+		folder_type = E_EWS_FOLDER_TYPE_CONTACTS;
 	else if (strstr (gtk_action_get_name (action), "tasks") != NULL)
-		folder_type = EWS_FOLDER_TYPE_TASKS;
+		folder_type = E_EWS_FOLDER_TYPE_TASKS;
 
 	e_ews_edit_folder_permissions (
 		NULL,

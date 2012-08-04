@@ -555,7 +555,7 @@ folder_info_from_store_summary (CamelEwsStore *store,
 		gint64 ftype;
 
 		ftype = camel_ews_store_summary_get_folder_type (ews_summary, l->data, NULL);
-		if (ftype != EWS_FOLDER_TYPE_MAILBOX)
+		if (ftype != E_EWS_FOLDER_TYPE_MAILBOX)
 			continue;
 
 		fi = camel_ews_utils_build_folder_info (store, l->data);
@@ -759,7 +759,7 @@ ews_create_folder_sync (CamelStore *store,
 	success = e_ews_connection_create_folder_sync (
 		connection,
 		EWS_PRIORITY_MEDIUM, fid,
-		FALSE, folder_name, EWS_FOLDER_TYPE_MAILBOX,
+		FALSE, folder_name, E_EWS_FOLDER_TYPE_MAILBOX,
 		&folder_id, cancellable, &local_error);
 
 	g_object_unref (connection);
@@ -781,7 +781,7 @@ ews_create_folder_sync (CamelStore *store,
 		ews_summary, folder_id->id,
 		fid, folder_id->change_key,
 		folder_name,
-		EWS_FOLDER_TYPE_MAILBOX,
+		E_EWS_FOLDER_TYPE_MAILBOX,
 		0, 0);
 	fi = camel_ews_utils_build_folder_info (ews_store, folder_id->id);
 	e_ews_folder_id_free (folder_id);

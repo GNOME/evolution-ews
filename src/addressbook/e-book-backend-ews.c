@@ -1424,7 +1424,7 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 		e_ews_connection_find_folder_items_sync (
 			priv->cnc, EWS_PRIORITY_MEDIUM,
 			fid, "IdOnly", NULL, NULL, query,
-			EWS_FOLDER_TYPE_CONTACTS,
+			E_EWS_FOLDER_TYPE_CONTACTS,
 			&includes_last_item,
 			&items, (EwsConvertQueryCallback) (e_ews_query_to_restriction),
 			cancellable, &error);

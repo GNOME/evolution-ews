@@ -38,6 +38,6 @@ void	e_ews_edit_folder_permissions	(GtkWindow *parent,
 					 const gchar *account_name,
 					 const gchar *folder_name,
 					 const EwsFolderId *folder_id,
-					 EwsFolderType folder_type);
+					 EEwsFolderType folder_type);
 
 #endif /* E_EWS_EDIT_FOLDER_PERMISSIONS_H */

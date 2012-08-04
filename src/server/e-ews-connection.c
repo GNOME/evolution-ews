@@ -118,7 +118,7 @@ struct _EwsAsyncData {
 	gchar *sync_state;
 	gboolean includes_last_item;
 	EwsDelegateDeliver deliver_to;
-	EwsFolderType folder_type;
+	EEwsFolderType folder_type;
 };
 
 struct _EwsNode {
@@ -1111,19 +1111,19 @@ ews_handle_create_folders_param (ESoapParameter *soapparam,
 	const gchar *folder_element;
 
 	switch (async_data->folder_type) {
-		case EWS_FOLDER_TYPE_MAILBOX:
+		case E_EWS_FOLDER_TYPE_MAILBOX:
 			folder_element = "Folder";
 			break;
-		case EWS_FOLDER_TYPE_CALENDAR:
+		case E_EWS_FOLDER_TYPE_CALENDAR:
 			folder_element = "CalendarFolder";
 			break;
-		case EWS_FOLDER_TYPE_CONTACTS:
+		case E_EWS_FOLDER_TYPE_CONTACTS:
 			folder_element = "ContactsFolder";
 			break;
-		case EWS_FOLDER_TYPE_SEARCH:
+		case E_EWS_FOLDER_TYPE_SEARCH:
 			folder_element = "SearchFolder";
 			break;
-		case EWS_FOLDER_TYPE_TASKS:
+		case E_EWS_FOLDER_TYPE_TASKS:
 			folder_element = "TasksFolder";
 			break;
 		default:
@@ -3124,7 +3124,7 @@ e_ews_connection_find_folder_items (EEwsConnection *cnc,
                                     EwsAdditionalProps *add_props,
                                     EwsSortOrder *sort_order,
                                     const gchar *query,
-                                    EwsFolderType type,
+                                    EEwsFolderType type,
                                     EwsConvertQueryCallback convert_query_cb,
                                     GCancellable *cancellable,
                                     GAsyncReadyCallback callback,
@@ -3214,7 +3214,7 @@ e_ews_connection_find_folder_items_sync (EEwsConnection *cnc,
                                          EwsAdditionalProps *add_props,
                                          EwsSortOrder *sort_order,
                                          const gchar *query,
-                                         EwsFolderType type,
+                                         EEwsFolderType type,
                                          gboolean *includes_last_item,
                                          GSList **items,
                                          EwsConvertQueryCallback convert_query_cb,
@@ -4873,7 +4873,7 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
                                 const gchar *parent_folder_id,
                                 gboolean is_distinguished_id,
                                 const gchar *folder_name,
-                                EwsFolderType folder_type,
+                                EEwsFolderType folder_type,
                                 GCancellable *cancellable,
                                 GAsyncReadyCallback callback,
                                 gpointer user_data)
@@ -4903,19 +4903,19 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 	e_soap_message_end_element (msg);
 
 	switch (folder_type) {
-		case EWS_FOLDER_TYPE_MAILBOX:
+		case E_EWS_FOLDER_TYPE_MAILBOX:
 			folder_element = "Folder";
 			break;
-		case EWS_FOLDER_TYPE_CALENDAR:
+		case E_EWS_FOLDER_TYPE_CALENDAR:
 			folder_element = "CalendarFolder";
 			break;
-		case EWS_FOLDER_TYPE_CONTACTS:
+		case E_EWS_FOLDER_TYPE_CONTACTS:
 			folder_element = "ContactsFolder";
 			break;
-		case EWS_FOLDER_TYPE_SEARCH:
+		case E_EWS_FOLDER_TYPE_SEARCH:
 			folder_element = "SearchFolder";
 			break;
-		case EWS_FOLDER_TYPE_TASKS:
+		case E_EWS_FOLDER_TYPE_TASKS:
 			folder_element = "TasksFolder";
 			break;
 		default:
@@ -4983,7 +4983,7 @@ e_ews_connection_create_folder_sync (EEwsConnection *cnc,
                                      const gchar *parent_folder_id,
                                      gboolean is_distinguished_id,
                                      const gchar *folder_name,
-                                     EwsFolderType folder_type,
+                                     EEwsFolderType folder_type,
                                      EwsFolderId **folder_id,
                                      GCancellable *cancellable,
                                      GError **error)
@@ -6977,7 +6977,7 @@ void
 e_ews_connection_set_folder_permissions (EEwsConnection *cnc,
                                          gint pri,
                                          EwsFolderId *folder_id,
-                                         EwsFolderType folder_type,
+                                         EEwsFolderType folder_type,
                                          const GSList *permissions,
                                          GCancellable *cancellable,
                                          GAsyncReadyCallback callback,
@@ -7006,19 +7006,19 @@ e_ews_connection_set_folder_permissions (EEwsConnection *cnc,
 
 	switch (folder_type) {
 	default:
-	case EWS_FOLDER_TYPE_MAILBOX:
+	case E_EWS_FOLDER_TYPE_MAILBOX:
 		e_soap_message_start_element (msg, "Folder", NULL, NULL);
 		break;
-	case EWS_FOLDER_TYPE_CALENDAR:
+	case E_EWS_FOLDER_TYPE_CALENDAR:
 		e_soap_message_start_element (msg, "CalendarFolder", NULL, NULL);
 		break;
-	case EWS_FOLDER_TYPE_CONTACTS:
+	case E_EWS_FOLDER_TYPE_CONTACTS:
 		e_soap_message_start_element (msg, "ContactsFolder", NULL, NULL);
 		break;
-	case EWS_FOLDER_TYPE_SEARCH:
+	case E_EWS_FOLDER_TYPE_SEARCH:
 		e_soap_message_start_element (msg, "SearchFolder", NULL, NULL);
 		break;
-	case EWS_FOLDER_TYPE_TASKS:
+	case E_EWS_FOLDER_TYPE_TASKS:
 		e_soap_message_start_element (msg, "TasksFolder", NULL, NULL);
 		break;
 	}
@@ -7033,7 +7033,7 @@ e_ews_connection_set_folder_permissions (EEwsConnection *cnc,
 		if (!perm)
 			continue;
 
-		if (folder_type == EWS_FOLDER_TYPE_CALENDAR)
+		if (folder_type == E_EWS_FOLDER_TYPE_CALENDAR)
 			e_soap_message_start_element (msg, "CalendarPermission", NULL, NULL);
 		else
 			e_soap_message_start_element (msg, "Permission", NULL, NULL);
@@ -7085,7 +7085,7 @@ e_ews_connection_set_folder_permissions (EEwsConnection *cnc,
 				msg, "DeleteItems", NULL,
 				(perm->rights & E_EWS_PERMISSION_BIT_DELETE_ANY) != 0 ? "All" :
 				(perm->rights & E_EWS_PERMISSION_BIT_DELETE_OWNED) != 0 ? "Owned" : "None");
-			if (folder_type == EWS_FOLDER_TYPE_CALENDAR)
+			if (folder_type == E_EWS_FOLDER_TYPE_CALENDAR)
 				e_ews_message_write_string_parameter (
 					msg, "ReadItems", NULL,
 					(perm->rights & E_EWS_PERMISSION_BIT_READ_ANY) != 0 ? "FullDetails" :
@@ -7099,7 +7099,7 @@ e_ews_connection_set_folder_permissions (EEwsConnection *cnc,
 
 		e_ews_message_write_string_parameter (
 			msg,
-			folder_type == EWS_FOLDER_TYPE_CALENDAR ? "CalendarPermissionLevel" : "PermissionLevel", NULL,
+			folder_type == E_EWS_FOLDER_TYPE_CALENDAR ? "CalendarPermissionLevel" : "PermissionLevel", NULL,
 			perm_level_name);
 
 		e_soap_message_end_element (msg); /* Permission/CalendarPermission */
@@ -7151,7 +7151,7 @@ gboolean
 e_ews_connection_set_folder_permissions_sync (EEwsConnection *cnc,
                                               gint pri,
                                               EwsFolderId *folder_id,
-                                              EwsFolderType folder_type,
+                                              EEwsFolderType folder_type,
                                               const GSList *permissions,
                                               GCancellable *cancellable,
                                               GError **error)

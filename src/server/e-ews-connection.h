@@ -264,7 +264,7 @@ gboolean	e_ews_connection_sync_folder_items_sync
 
 typedef void	(*EwsConvertQueryCallback)	(ESoapMessage *msg,
 						 const gchar *query,
-						 EwsFolderType type);
+						 EEwsFolderType type);
 
 void		e_ews_connection_find_folder_items
 						(EEwsConnection *cnc,
@@ -274,7 +274,7 @@ void		e_ews_connection_find_folder_items
 						 EwsAdditionalProps *add_props,
 						 EwsSortOrder *sort_order,
 						 const gchar *query,
-						 EwsFolderType type,
+						 EEwsFolderType type,
 						 EwsConvertQueryCallback convert_query_cb,
 						 GCancellable *cancellable,
 						 GAsyncReadyCallback callback,
@@ -293,7 +293,7 @@ gboolean	e_ews_connection_find_folder_items_sync
 						 EwsAdditionalProps *add_props,
 						 EwsSortOrder *sort_order,
 						 const gchar *query,
-						 EwsFolderType type,
+						 EEwsFolderType type,
 						 gboolean *includes_last_item,
 						 GSList **items,
 						 EwsConvertQueryCallback convert_query_cb,
@@ -520,7 +520,7 @@ void		e_ews_connection_create_folder	(EEwsConnection *cnc,
 						 const gchar *parent_folder_id,
 						 gboolean is_distinguished_id,
 						 const gchar *folder_name,
-						 EwsFolderType folder_type,
+						 EEwsFolderType folder_type,
 						 GCancellable *cancellable,
 						 GAsyncReadyCallback callback,
 						 gpointer user_data);
@@ -535,7 +535,7 @@ gboolean	e_ews_connection_create_folder_sync
 						 const gchar *parent_folder_id,
 						 gboolean is_distinguished_id,
 						 const gchar *folder_name,
-						 EwsFolderType folder_type,
+						 EEwsFolderType folder_type,
 						 EwsFolderId **folder_id,
 						 GCancellable *cancellable,
 						 GError **error);
@@ -891,7 +891,7 @@ void		e_ews_connection_set_folder_permissions
 						(EEwsConnection *cnc,
 						 gint pri,
 						 EwsFolderId *folder_id,
-						 EwsFolderType folder_type,
+						 EEwsFolderType folder_type,
 						 const GSList *permissions,
 						 GCancellable *cancellable,
 						 GAsyncReadyCallback callback,
@@ -904,7 +904,7 @@ gboolean	e_ews_connection_set_folder_permissions_sync
 						(EEwsConnection *cnc,
 						 gint pri,
 						 EwsFolderId *folder_id,
-						 EwsFolderType folder_type,
+						 EEwsFolderType folder_type,
 						 const GSList *permissions,
 						 GCancellable *cancellable,
 						 GError **error);

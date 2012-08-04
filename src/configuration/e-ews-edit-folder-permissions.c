@@ -48,7 +48,7 @@ struct EEwsPermissionsDialogWidgets
 	ESource *source;
 	CamelEwsSettings *ews_settings;
 	EwsFolderId *folder_id;
-	EwsFolderType folder_type;
+	EEwsFolderType folder_type;
 
 	EEwsConnection *conn;
 
@@ -874,7 +874,7 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
                                const gchar *account_name,
                                const gchar *folder_name,
                                const EwsFolderId *folder_id,
-                               EwsFolderType folder_type)
+                               EEwsFolderType folder_type)
 {
 	struct EEwsPermissionsDialogWidgets *widgets;
 	PangoAttrList *attrs;
@@ -895,7 +895,7 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
 	g_return_if_fail (folder_name != NULL);
 	g_return_if_fail (folder_id != NULL);
 
-	with_freebusy = folder_type == EWS_FOLDER_TYPE_CALENDAR;
+	with_freebusy = folder_type == E_EWS_FOLDER_TYPE_CALENDAR;
 
 	widgets = g_new0 (struct EEwsPermissionsDialogWidgets, 1);
 	widgets->registry = g_object_ref (registry);

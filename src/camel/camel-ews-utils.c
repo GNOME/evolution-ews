@@ -327,7 +327,7 @@ sync_deleted_folders (CamelEwsStore *store,
 
 	for (l = deleted_folders; l != NULL; l = g_slist_next (l)) {
 		const gchar *fid = l->data;
-		EwsFolderType ftype;
+		EEwsFolderType ftype;
 		CamelFolderInfo *fi;
 		GError *error = NULL;
 
@@ -335,7 +335,7 @@ sync_deleted_folders (CamelEwsStore *store,
 			continue;
 
 		ftype = camel_ews_store_summary_get_folder_type (ews_summary, fid, NULL);
-		if (ftype == EWS_FOLDER_TYPE_MAILBOX) {
+		if (ftype == E_EWS_FOLDER_TYPE_MAILBOX) {
 			fi = camel_ews_utils_build_folder_info (store, fid);
 
 			camel_ews_store_summary_remove_folder (ews_summary, fid, &error);
@@ -348,7 +348,7 @@ sync_deleted_folders (CamelEwsStore *store,
 
 static gboolean
 ews_utils_rename_folder (CamelEwsStore *store,
-                         EwsFolderType ftype,
+                         EEwsFolderType ftype,
                          const gchar *fid,
                          const gchar *changekey,
                          const gchar *pfid,
@@ -365,7 +365,7 @@ ews_utils_rename_folder (CamelEwsStore *store,
 	if (pfid)
 		camel_ews_store_summary_set_parent_folder_id (ews_summary, fid, pfid);
 
-	if (ftype == EWS_FOLDER_TYPE_MAILBOX) {
+	if (ftype == E_EWS_FOLDER_TYPE_MAILBOX) {
 		fi = camel_ews_utils_build_folder_info (store, fid);
 		camel_store_folder_renamed ((CamelStore *) store, old_fname, fi);
 	}
@@ -382,13 +382,13 @@ sync_updated_folders (CamelEwsStore *store,
 
 	for (l = updated_folders; l != NULL; l = g_slist_next (l)) {
 		EEwsFolder *ews_folder = (EEwsFolder *)	l->data;
-		EwsFolderType ftype;
+		EEwsFolderType ftype;
 		gchar *folder_name;
 		gchar *display_name;
 		const EwsFolderId *fid, *pfid;
 
 		ftype = e_ews_folder_get_folder_type (ews_folder);
-		if (ftype != EWS_FOLDER_TYPE_MAILBOX)
+		if (ftype != E_EWS_FOLDER_TYPE_MAILBOX)
 			continue;
 
 		fid = e_ews_folder_get_id (ews_folder);
@@ -487,12 +487,12 @@ sync_created_folders (CamelEwsStore *ews_store,
 
 	for (l = created_folders; l != NULL; l = g_slist_next (l)) {
 		EEwsFolder *folder = (EEwsFolder *) l->data;
-		EwsFolderType ftype;
+		EEwsFolderType ftype;
 		CamelFolderInfo *fi;
 		const EwsFolderId *fid;
 
 		ftype = e_ews_folder_get_folder_type (folder);
-		if (ftype != EWS_FOLDER_TYPE_MAILBOX)
+		if (ftype != E_EWS_FOLDER_TYPE_MAILBOX)
 			continue;
 
 		fid = e_ews_folder_get_id (folder);
@@ -504,7 +504,7 @@ sync_created_folders (CamelEwsStore *ews_store,
 		 * let's worry about that in a later commit. */
 		add_folder_to_summary (ews_store, folder);
 
-		if (ftype == EWS_FOLDER_TYPE_MAILBOX) {
+		if (ftype == E_EWS_FOLDER_TYPE_MAILBOX) {
 			fi = camel_ews_utils_build_folder_info (ews_store, fid->id);
 			camel_store_folder_created ((CamelStore *) ews_store, fi);
 			camel_folder_info_free (fi);

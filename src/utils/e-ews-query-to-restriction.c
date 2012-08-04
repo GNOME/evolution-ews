@@ -1124,7 +1124,7 @@ static struct {
 static void
 e_ews_convert_sexp_to_restriction (ESoapMessage *msg,
                                    const gchar *query,
-                                   EwsFolderType type)
+                                   EEwsFolderType type)
 {
 	ESExp *sexp;
 	ESExpResult *r;
@@ -1132,7 +1132,7 @@ e_ews_convert_sexp_to_restriction (ESoapMessage *msg,
 
 	sexp = e_sexp_new ();
 
-	if (type == EWS_FOLDER_TYPE_CONTACTS) {
+	if (type == E_EWS_FOLDER_TYPE_CONTACTS) {
 		for (i = 0; i < G_N_ELEMENTS (contact_symbols); i++) {
 			if (contact_symbols[i].immediate)
 				e_sexp_add_ifunction (
@@ -1144,7 +1144,7 @@ e_ews_convert_sexp_to_restriction (ESoapMessage *msg,
 					contact_symbols[i].func, msg);
 		}
 
-	} else if (type == EWS_FOLDER_TYPE_CALENDAR || type == EWS_FOLDER_TYPE_TASKS) {
+	} else if (type == E_EWS_FOLDER_TYPE_CALENDAR || type == E_EWS_FOLDER_TYPE_TASKS) {
 		for (i = 0; i < G_N_ELEMENTS (calendar_symbols); i++) {
 			if (calendar_symbols[i].immediate)
 				e_sexp_add_ifunction (
@@ -1155,7 +1155,7 @@ e_ews_convert_sexp_to_restriction (ESoapMessage *msg,
 					sexp, 0, calendar_symbols[i].name,
 					calendar_symbols[i].func, msg);
 		}
-	} else if (type == EWS_FOLDER_TYPE_MAILBOX) {
+	} else if (type == E_EWS_FOLDER_TYPE_MAILBOX) {
 		for (i = 0; i < G_N_ELEMENTS (message_symbols); i++) {
 			if (message_symbols[i].immediate)
 				e_sexp_add_ifunction (
@@ -1182,24 +1182,24 @@ e_ews_convert_sexp_to_restriction (ESoapMessage *msg,
 
 static gboolean
 e_ews_check_is_query (const gchar *query,
-                      EwsFolderType type)
+                      EEwsFolderType type)
 {
 
 	if (!query)
 		return FALSE;
 
-	if (type == EWS_FOLDER_TYPE_CONTACTS) {
+	if (type == E_EWS_FOLDER_TYPE_CONTACTS) {
 		if (!g_strcmp0 (query, "(contains \"x-evolution-any-field\" \"\")"))
 			return FALSE;
 		else
 			return TRUE;
 
-	} else if (type == EWS_FOLDER_TYPE_CALENDAR || type == EWS_FOLDER_TYPE_TASKS) {
+	} else if (type == E_EWS_FOLDER_TYPE_CALENDAR || type == E_EWS_FOLDER_TYPE_TASKS) {
 		if (!g_strcmp0 (query, "(contains? \"summary\"  \"\")"))
 			return FALSE;
 		else
 			return TRUE;
-	} else if (type == EWS_FOLDER_TYPE_MAILBOX) {
+	} else if (type == E_EWS_FOLDER_TYPE_MAILBOX) {
 		return TRUE;
 	} else
 		return FALSE;
@@ -1208,7 +1208,7 @@ e_ews_check_is_query (const gchar *query,
 void
 e_ews_query_to_restriction (ESoapMessage *msg,
                             const gchar *query,
-                            EwsFolderType type)
+                            EEwsFolderType type)
 {
 	gboolean is_query;
 

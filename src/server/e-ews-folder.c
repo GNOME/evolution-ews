@@ -33,7 +33,7 @@ struct _EEwsFolderPrivate {
 	EwsFolderId *fid;
 	EwsFolderId *parent_fid;
 	gchar *folder_class;
-	EwsFolderType folder_type;
+	EEwsFolderType folder_type;
 	guint32 unread;
 	guint32 total;
 	guint32 child_count;
@@ -108,7 +108,7 @@ e_ews_folder_init (EEwsFolder *folder)
 	priv = g_new0 (EEwsFolderPrivate, 1);
 	folder->priv = priv;
 
-	priv->folder_type = EWS_FOLDER_TYPE_MAILBOX;
+	priv->folder_type = E_EWS_FOLDER_TYPE_MAILBOX;
 }
 
 /* FIXME pick it from folder_type and make it set folder_type */
@@ -139,13 +139,13 @@ e_ews_folder_set_from_soap_parameter (EEwsFolder *folder,
 	g_return_val_if_fail (param != NULL, FALSE);
 
 	if ((node = e_soap_parameter_get_first_child_by_name (param, "Folder")))
-		priv->folder_type = EWS_FOLDER_TYPE_MAILBOX;
+		priv->folder_type = E_EWS_FOLDER_TYPE_MAILBOX;
 	else if ((node = e_soap_parameter_get_first_child_by_name (param, "CalendarFolder")))
-		priv->folder_type = EWS_FOLDER_TYPE_CALENDAR;
+		priv->folder_type = E_EWS_FOLDER_TYPE_CALENDAR;
 	else if ((node = e_soap_parameter_get_first_child_by_name (param, "ContactsFolder")))
-		priv->folder_type = EWS_FOLDER_TYPE_CONTACTS;
+		priv->folder_type = E_EWS_FOLDER_TYPE_CONTACTS;
 	else if ((node = e_soap_parameter_get_first_child_by_name (param, "TasksFolder")))
-		priv->folder_type = EWS_FOLDER_TYPE_TASKS;
+		priv->folder_type = E_EWS_FOLDER_TYPE_TASKS;
 	else {
 		g_warning ("Unable to find the Folder node \n");
 		return FALSE;
@@ -292,7 +292,7 @@ e_ews_folder_set_parent_id (EEwsFolder *folder,
 	priv->parent_fid = parent_fid;
 }
 
-EwsFolderType
+EEwsFolderType
 e_ews_folder_get_folder_type (EEwsFolder *folder)
 {
 	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), -1);
@@ -302,7 +302,7 @@ e_ews_folder_get_folder_type (EEwsFolder *folder)
 
 void
 e_ews_folder_set_folder_type (EEwsFolder *folder,
-                              EwsFolderType folder_type)
+                              EEwsFolderType folder_type)
 {
 	g_return_if_fail (E_IS_EWS_FOLDER (folder));
 

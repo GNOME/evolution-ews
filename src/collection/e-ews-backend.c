@@ -187,13 +187,13 @@ ews_backend_new_child (EEwsBackend *backend,
 	e_source_set_display_name (source, display_name);
 
 	switch (e_ews_folder_get_folder_type (folder)) {
-		case EWS_FOLDER_TYPE_CALENDAR:
+		case E_EWS_FOLDER_TYPE_CALENDAR:
 			extension_name = E_SOURCE_EXTENSION_CALENDAR;
 			break;
-		case EWS_FOLDER_TYPE_TASKS:
+		case E_EWS_FOLDER_TYPE_TASKS:
 			extension_name = E_SOURCE_EXTENSION_TASK_LIST;
 			break;
-		case EWS_FOLDER_TYPE_CONTACTS:
+		case E_EWS_FOLDER_TYPE_CONTACTS:
 			extension_name = E_SOURCE_EXTENSION_ADDRESS_BOOK;
 			break;
 		default:
@@ -270,15 +270,15 @@ ews_backend_sync_created_folders (EEwsBackend *backend,
 			continue;
 
 		switch (e_ews_folder_get_folder_type (folder)) {
-			case EWS_FOLDER_TYPE_CALENDAR:
+			case E_EWS_FOLDER_TYPE_CALENDAR:
 				source = ews_backend_new_calendar (
 					backend, folder);
 				break;
-			case EWS_FOLDER_TYPE_TASKS:
+			case E_EWS_FOLDER_TYPE_TASKS:
 				source = ews_backend_new_task_list (
 					backend, folder);
 				break;
-			case EWS_FOLDER_TYPE_CONTACTS:
+			case E_EWS_FOLDER_TYPE_CONTACTS:
 				source = ews_backend_new_address_book (
 					backend, folder);
 				break;
@@ -658,7 +658,7 @@ ews_backend_create_resource_sync (ECollectionBackend *backend,
 {
 	EEwsConnection *connection;
 	EwsFolderId *out_folder_id = NULL;
-	EwsFolderType folder_type = EWS_FOLDER_TYPE_UNKNOWN;
+	EEwsFolderType folder_type = E_EWS_FOLDER_TYPE_UNKNOWN;
 	const gchar *extension_name;
 	const gchar *parent_folder_id = NULL;
 	gchar *folder_name;
@@ -671,19 +671,19 @@ ews_backend_create_resource_sync (ECollectionBackend *backend,
 
 	extension_name = E_SOURCE_EXTENSION_ADDRESS_BOOK;
 	if (e_source_has_extension (source, extension_name)) {
-		folder_type = EWS_FOLDER_TYPE_CONTACTS;
+		folder_type = E_EWS_FOLDER_TYPE_CONTACTS;
 		parent_folder_id = "contacts";
 	}
 
 	extension_name = E_SOURCE_EXTENSION_CALENDAR;
 	if (e_source_has_extension (source, extension_name)) {
-		folder_type = EWS_FOLDER_TYPE_CALENDAR;
+		folder_type = E_EWS_FOLDER_TYPE_CALENDAR;
 		parent_folder_id = "calendar";
 	}
 
 	extension_name = E_SOURCE_EXTENSION_TASK_LIST;
 	if (e_source_has_extension (source, extension_name)) {
-		folder_type = EWS_FOLDER_TYPE_TASKS;
+		folder_type = E_EWS_FOLDER_TYPE_TASKS;
 		parent_folder_id = "tasks";
 	}
 
