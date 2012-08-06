@@ -1,3 +1,40 @@
+Evolution-EWS 3.5.5 2012-08-06
+------------------------------
+
+Bug Fixes:
+	Bug 656376 - Support for delegation (Milan Crha)
+	Bug 656709 - Excessive updates being sent to server (Milan Crha)
+	Bug 665986 - Crash when failed to get a message from a server
+	             (Milan Crha)
+	Bug 669460 - Can pick freed connection (Milan Crha)
+	Bug 670506 - Task is adding time to due date from somewhere
+	             (Milan Crha)
+	Bug 673095 - Should call SoupSessionAsync functions in soup thread
+	             only (Milan Crha)
+	Bug 675285 - Crash on deleted event move (Milan Crha)
+	Bug 675442 - Crash in ews_active_job_done() (Milan Crha)
+	Bug 678464 - Default GAL needs a non-NULL resource ID (Matthew Barnes)
+	Bug 680153 - Crash under message_info_from_db() (Milan Crha)
+	Bug 680525 - Deadlock in calendar when locking priv structure
+	             (Milan Crha)
+	Bug 680683 - Do not block factory's main thread (Milan Crha)
+	Bug 680960 - Invalid g_object_ref() call on evolution start
+	             (Matthew Barnes)
+
+Other Changes:
+	* Support remote folder creation and deletion. (Matthew Barnes)
+	* Use template files to generate GEnumClass types. (Matthew Barnes)
+	* Finish rewriting the "Out of Office" config page. (Matthew Barnes)
+	* Remove the remaining account setup EPlugin code. (Matthew Barnes)
+	* Be able to read/write folder permissions (Milan Crha)
+	* Do not save unchanged Out-Of-Office settings (Milan Crha)
+	* CamelEwsStoreSummary: Store enum values by their nickname.
+	  (Matthew Barnes)
+
+Translations:
+	Daniel Mustieles (es)
+
+
 Evolution-EWS 3.5.4 2012-07-16
 ------------------------------
 
