@@ -1067,10 +1067,9 @@ camel_ews_store_ref_connection (CamelEwsStore *ews_store)
 }
 
 static CamelFolder *
-ews_get_folder_by_type_sync (CamelStore *store,
-                             guint32 folder_type,
-                             GCancellable *cancellable,
-                             GError **error)
+ews_get_trash_folder_sync (CamelStore *store,
+                           GCancellable *cancellable,
+                           GError **error)
 {
 	CamelEwsStore *ews_store;
 	CamelFolder *folder = NULL;
@@ -1079,14 +1078,22 @@ ews_get_folder_by_type_sync (CamelStore *store,
 	g_return_val_if_fail (CAMEL_IS_EWS_STORE (store), NULL);
 
 	ews_store = CAMEL_EWS_STORE (store);
-	folder_id = camel_ews_store_summary_get_folder_id_from_folder_type (ews_store->summary, folder_type);
+	folder_id = camel_ews_store_summary_get_folder_id_from_folder_type (
+		ews_store->summary, CAMEL_FOLDER_TYPE_TRASH);
 
-	if (!folder_id)
+	if (folder_id == NULL) {
+		g_set_error (
+			error, CAMEL_STORE_ERROR,
+			CAMEL_STORE_ERROR_NO_FOLDER,
+			_("Could not locate Trash folder"));
 		return NULL;
+	}
 
-	folder_name = camel_ews_store_summary_get_folder_full_name (ews_store->summary, folder_id, NULL);
+	folder_name = camel_ews_store_summary_get_folder_full_name (
+		ews_store->summary, folder_id, NULL);
 
-	folder = ews_get_folder_sync (store, folder_name, 0, cancellable, error);
+	folder = ews_get_folder_sync (
+		store, folder_name, 0, cancellable, error);
 
 	g_free (folder_name);
 	g_free (folder_id);
@@ -1095,19 +1102,38 @@ ews_get_folder_by_type_sync (CamelStore *store,
 }
 
 static CamelFolder *
-ews_get_trash_folder_sync (CamelStore *store,
-                           GCancellable *cancellable,
-                           GError **error)
-{
-	return ews_get_folder_by_type_sync (store, CAMEL_FOLDER_TYPE_TRASH, cancellable, error);
-}
-
-static CamelFolder *
 ews_get_junk_folder_sync (CamelStore *store,
                           GCancellable *cancellable,
                           GError **error)
 {
-	return ews_get_folder_by_type_sync (store, CAMEL_FOLDER_TYPE_JUNK, cancellable, error);
+	CamelEwsStore *ews_store;
+	CamelFolder *folder = NULL;
+	gchar *folder_id, *folder_name;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_STORE (store), NULL);
+
+	ews_store = CAMEL_EWS_STORE (store);
+	folder_id = camel_ews_store_summary_get_folder_id_from_folder_type (
+		ews_store->summary, CAMEL_FOLDER_TYPE_JUNK);
+
+	if (folder_id == NULL) {
+		g_set_error (
+			error, CAMEL_STORE_ERROR,
+			CAMEL_STORE_ERROR_NO_FOLDER,
+			_("Could not locate Junk folder"));
+		return NULL;
+	}
+
+	folder_name = camel_ews_store_summary_get_folder_full_name (
+		ews_store->summary, folder_id, NULL);
+
+	folder = ews_get_folder_sync (
+		store, folder_name, 0, cancellable, error);
+
+	g_free (folder_name);
+	g_free (folder_id);
+
+	return folder;
 }
 
 static gboolean
