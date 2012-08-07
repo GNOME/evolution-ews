@@ -83,7 +83,8 @@ struct _ECalBackendEwsPrivate {
 	GStaticRecMutex rec_mutex;
 	icaltimezone *default_zone;
 	guint refresh_timeout;
-	gboolean refreshing;
+	guint refreshing;
+	EFlag *refreshing_done;
 	GHashTable *item_id_hash;
 
 	GCancellable *cancellable;
@@ -666,6 +667,9 @@ e_cal_backend_ews_open (ECalBackend *backend,
 			E_SOURCE_AUTHENTICATOR (backend),
 			cancellable, &error);
 
+	if (!error)
+		e_cal_backend_notify_readonly (backend, FALSE);
+
 	convert_error_to_edc_error (&error);
 	e_cal_backend_respond_opened (backend, cal, opid, error);
 }
@@ -713,10 +717,28 @@ e_cal_backend_ews_get_object (ECalBackend *backend,
 
 	PRIV_LOCK (priv);
 
+	/* make sure any pending refreshing is done */
+	while (priv->refreshing) {
+		PRIV_UNLOCK (priv);
+		e_flag_wait (priv->refreshing_done);
+		PRIV_LOCK (priv);
+	}
+
 	/* search the object in the cache */
 	comp = e_cal_backend_store_get_component (priv->store, uid, rid);
-	if (comp) {
+	if (!comp) {
+		/* maybe a meeting invitation, for which the calendar item is not downloaded yet,
+		   thus synchronize local cache first */
+		ews_start_sync (cbews);
+
 		PRIV_UNLOCK (priv);
+		e_flag_wait (priv->refreshing_done);
+		PRIV_LOCK (priv);
+
+		comp = e_cal_backend_store_get_component (priv->store, uid, rid);
+	}
+
+	if (comp) {
 		if (e_cal_backend_get_kind (backend) ==
 		    icalcomponent_isa (e_cal_component_get_icalcomponent (comp)))
 			object = e_cal_component_get_as_string (comp);
@@ -727,15 +749,13 @@ e_cal_backend_ews_get_object (ECalBackend *backend,
 
 		if (!object)
 			g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
-		goto exit;
+	} else {
+		g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
 	}
 
 	PRIV_UNLOCK (priv);
 
-	/* callers will never have a uuid that is in server but not in cache */
-	g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
-
-exit:
+ exit:
 	convert_error_to_edc_error (&error);
 	e_data_cal_respond_get_object (cal, context, error, object);
 	g_free (object);
@@ -3325,6 +3345,34 @@ add_item_to_cache (ECalBackendEws *cbews,
 	icalcomponent_free (vcomp);
 }
 
+static void
+ews_refreshing_inc (ECalBackendEws *cbews)
+{
+	PRIV_LOCK (cbews->priv);
+	if (!cbews->priv->refreshing)
+		e_flag_clear (cbews->priv->refreshing_done);
+	cbews->priv->refreshing++;
+	PRIV_UNLOCK (cbews->priv);
+}
+
+static void
+ews_refreshing_dec (ECalBackendEws *cbews)
+{
+	PRIV_LOCK (cbews->priv);
+	if (!cbews->priv->refreshing) {
+		e_flag_set (cbews->priv->refreshing_done);
+		PRIV_UNLOCK (cbews->priv);
+
+		g_warning ("%s: Invalid call, currently not refreshing", G_STRFUNC);
+		return;
+	}
+	cbews->priv->refreshing--;
+	if (!cbews->priv->refreshing) {
+		e_flag_set (cbews->priv->refreshing_done);
+	}
+	PRIV_UNLOCK (cbews->priv);
+}
+
 struct _ews_sync_data {
 	ECalBackendEws *cbews;
 	gchar *sync_state;
@@ -3353,10 +3401,6 @@ ews_cal_get_items_ready_cb (GObject *obj,
 	if (error != NULL) {
 		g_warning ("Unable to get items %s \n", error->message);
 
-		PRIV_LOCK (priv);
-		priv->refreshing = FALSE;
-		PRIV_UNLOCK (priv);
-
 		g_clear_error (&error);
 		goto exit;
 	}
@@ -3376,6 +3420,8 @@ ews_cal_get_items_ready_cb (GObject *obj,
 			sub_sync_data = g_new0 (struct _ews_sync_data, 1);
 			sub_sync_data->cbews = g_object_ref (sync_data->cbews);
 			sub_sync_data->master_uid = g_strdup (item_id->id);
+
+			ews_refreshing_inc (cbews);
 
 			e_ews_connection_get_items (
 				g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
@@ -3403,7 +3449,8 @@ ews_cal_get_items_ready_cb (GObject *obj,
 
 	if (sync_data->sync_state)
 		e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, sync_data->sync_state);
-	if (sync_data->sync_pending)
+	if (sync_data->sync_pending) {
+		ews_refreshing_inc (cbews);
 		e_ews_connection_sync_folder_items (
 			g_object_ref (priv->cnc), EWS_PRIORITY_MEDIUM,
 			sync_data->sync_state, priv->folder_id,
@@ -3412,8 +3459,11 @@ ews_cal_get_items_ready_cb (GObject *obj,
 			priv->cancellable,
 			ews_cal_sync_items_ready_cb,
 			g_object_ref (cbews));
+	}
 
-exit:
+ exit:
+	ews_refreshing_dec (cbews);
+
 	g_object_unref (sync_data->cbews);
 	g_free (sync_data->master_uid);
 	g_free (sync_data->sync_state);
@@ -3469,6 +3519,7 @@ cal_backend_ews_process_folder_items (ECalBackendEws *backend,
 
 	if (!cal_item_ids && !task_item_ids && !includes_last_item) {
 		e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, sync_state);
+		ews_refreshing_inc (backend);
 		e_ews_connection_sync_folder_items (
 			connection,
 			EWS_PRIORITY_MEDIUM,
@@ -3488,7 +3539,8 @@ cal_backend_ews_process_folder_items (ECalBackendEws *backend,
 		sync_data->sync_pending = !includes_last_item;
 	}
 
-	if (cal_item_ids)
+	if (cal_item_ids) {
+		ews_refreshing_inc (backend);
 		e_ews_connection_get_items (
 			connection,
 			EWS_PRIORITY_MEDIUM,
@@ -3499,8 +3551,10 @@ cal_backend_ews_process_folder_items (ECalBackendEws *backend,
 			NULL, NULL, priv->cancellable,
 			ews_cal_get_items_ready_cb,
 			(gpointer) sync_data);
+	}
 
-	if (task_item_ids)
+	if (task_item_ids) {
+		ews_refreshing_inc (backend);
 		e_ews_connection_get_items (
 			connection,
 			EWS_PRIORITY_MEDIUM,
@@ -3512,6 +3566,7 @@ cal_backend_ews_process_folder_items (ECalBackendEws *backend,
 			NULL, NULL, priv->cancellable,
 			ews_cal_get_items_ready_cb,
 			(gpointer) sync_data);
+	}
 
 exit:
 	if (cal_item_ids) {
@@ -3537,6 +3592,8 @@ cal_backend_ews_sync_items_idle_cb (gpointer user_data)
 		closure->items_created,
 		closure->items_updated,
 		closure->items_deleted);
+
+	ews_refreshing_dec (closure->backend);
 
 	return FALSE;
 }
@@ -3568,6 +3625,7 @@ ews_cal_sync_items_ready_cb (GObject *source_object,
 		&error);
 
 	if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+		ews_refreshing_dec (backend);
 		g_error_free (error);
 		g_object_unref (backend);
 		return;
@@ -3575,6 +3633,7 @@ ews_cal_sync_items_ready_cb (GObject *source_object,
 
 	/* XXX Why are there two different error codes for cancellation? */
 	if (g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_CANCELLED)) {
+		ews_refreshing_dec (backend);
 		g_error_free (error);
 		g_object_unref (backend);
 		return;
@@ -3593,13 +3652,11 @@ ews_cal_sync_items_ready_cb (GObject *source_object,
 		g_warn_if_fail (items_updated == NULL);
 		g_warn_if_fail (items_deleted == NULL);
 
-		PRIV_LOCK (backend->priv);
-		backend->priv->refreshing = FALSE;
-		PRIV_UNLOCK (backend->priv);
-
 		g_warning ("%s: %s", G_STRFUNC, error->message);
 		g_error_free (error);
 	}
+
+	ews_refreshing_dec (backend);
 
 	g_slist_free_full (items_created, (GDestroyNotify) g_object_unref);
 	g_slist_free_full (items_updated, (GDestroyNotify) g_object_unref);
@@ -3620,10 +3677,7 @@ ews_start_sync_thread (gpointer data)
 	cbews = (ECalBackendEws *) data;
 	priv = cbews->priv;
 
-	PRIV_LOCK (priv);
-	priv->refreshing = TRUE;
-	PRIV_UNLOCK (priv);
-
+	/* ews_refreshing_inc() is called within ews_start_sync() */
 	sync_state = e_cal_backend_store_get_key_value (priv->store, SYNC_KEY);
 	e_ews_connection_sync_folder_items (
 		priv->cnc, EWS_PRIORITY_MEDIUM,
@@ -3642,11 +3696,21 @@ ews_start_sync_thread (gpointer data)
 static gboolean
 ews_start_sync (gpointer data)
 {
+	ECalBackendEws *cbews = data;
 	GThread *thread;
+
+	PRIV_LOCK (cbews->priv);
+	if (cbews->priv->refreshing) {
+		PRIV_UNLOCK (cbews->priv);
+		return TRUE;
+	}
+
+	ews_refreshing_inc (cbews);
+	PRIV_UNLOCK (cbews->priv);
 
 	/* run the actual operation in thread,
 	 * to not block main thread of the factory */
-	thread = g_thread_new (NULL, ews_start_sync_thread, g_object_ref (data));
+	thread = g_thread_new (NULL, ews_start_sync_thread, g_object_ref (cbews));
 	g_thread_unref (thread);
 
 	return TRUE;
@@ -4073,6 +4137,11 @@ e_cal_backend_ews_finalize (GObject *object)
 
 	g_hash_table_destroy (priv->item_id_hash);
 
+	if (priv->refreshing_done) {
+		e_flag_free (priv->refreshing_done);
+		priv->refreshing_done = NULL;
+	}
+
 	g_free (priv);
 	cbews->priv = NULL;
 
@@ -4144,6 +4213,8 @@ cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 		closure->items_created = items_created;
 		closure->items_deleted = items_deleted;
 		closure->items_updated = items_updated;
+
+		ews_refreshing_inc (backend);
 
 		g_idle_add_full (
 			G_PRIORITY_DEFAULT_IDLE,
@@ -4241,6 +4312,7 @@ e_cal_backend_ews_init (ECalBackendEws *cbews)
 
 	/* create the mutex for thread safety */
 	g_static_rec_mutex_init (&priv->rec_mutex);
+	priv->refreshing_done = e_flag_new ();
 	priv->item_id_hash = g_hash_table_new_full
 		(g_str_hash, g_str_equal,
 		(GDestroyNotify) g_free,
