@@ -2849,9 +2849,8 @@ put_component_to_store (ECalBackendEws *cbews,
 }
 
 typedef struct {
-	ECalComponent *comp;
 	ECalBackendEws *cbews;
-	gchar * itemid;
+	gchar *itemid;
 } EwsAttachmentData;
 
 static void
@@ -2873,12 +2872,19 @@ ews_get_attachments_ready_callback (GObject *object,
 
 	ids = e_ews_connection_get_attachments_finish (cnc, res, &uris, &error);
 
-	comp_att = att_data->comp;
 	cbews = att_data->cbews;
 	itemid = att_data->itemid;
 
 	if (error)
 		goto exit;
+
+	PRIV_LOCK (cbews->priv);
+	comp_att = g_hash_table_lookup (cbews->priv->item_id_hash, itemid);
+	if (!comp_att) {
+		PRIV_UNLOCK (cbews->priv);
+		goto exit;
+	}
+	PRIV_UNLOCK (cbews->priv);
 
 	e_cal_component_set_attachment_list (comp_att, uris);
 
@@ -2898,22 +2904,15 @@ ews_get_attachments_ready_callback (GObject *object,
 
 	put_component_to_store (cbews, comp_att);
 
-	if (cache_comp) {
+	if (cache_comp)
 		e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbews), cache_comp, comp_att);
-
-		PRIV_LOCK (cbews->priv);
-		g_hash_table_insert (cbews->priv->item_id_hash, g_strdup (itemid), g_object_ref (comp_att));
-		PRIV_UNLOCK (cbews->priv);
-	}
 
  exit:
 	g_clear_error (&error);
-	g_slist_foreach (uris, (GFunc) g_free, NULL);
-	g_slist_free (uris);
-	g_free (itemid);
-	g_object_unref (att_data->comp);
+	g_slist_free_full (uris, g_free);
+	g_object_unref (att_data->cbews);
+	g_free (att_data->itemid);
 	g_free (att_data);
-	g_object_unref (cbews);
 }
 
 static void
@@ -2927,15 +2926,26 @@ ews_get_attachments (ECalBackendEws *cbews,
 		const GSList *attachment_ids;
 		const EwsId *item_id;
 		EwsAttachmentData *att_data;
+		ECalComponent *comp;
 		const gchar *uid;
 
-		attachment_ids = e_ews_item_get_attachments_ids (item);
 		item_id = e_ews_item_get_id (item);
+		g_return_if_fail (item_id != NULL);
+
+		PRIV_LOCK (cbews->priv);
+		comp = g_hash_table_lookup (cbews->priv->item_id_hash, item_id->id);
+		if (!comp) {
+			PRIV_UNLOCK (cbews->priv);
+			g_warning ("%s: Failed to get component from item_id_hash", G_STRFUNC);
+			return;
+		}
+
+		e_cal_component_get_uid (comp, &uid);
+
+		attachment_ids = e_ews_item_get_attachments_ids (item);
 		att_data = g_new0 (EwsAttachmentData, 1);
-		att_data->comp = g_hash_table_lookup (cbews->priv->item_id_hash, item_id->id);
 		att_data->cbews = g_object_ref (cbews);
 		att_data->itemid = g_strdup (item_id->id);
-		e_cal_component_get_uid (att_data->comp, &uid);
 
 		e_ews_connection_get_attachments (
 			cbews->priv->cnc,
@@ -2948,6 +2958,8 @@ ews_get_attachments (ECalBackendEws *cbews,
 			cbews->priv->cancellable,
 			ews_get_attachments_ready_callback,
 			att_data);
+
+		PRIV_UNLOCK (cbews->priv);
 	}
 
 }
