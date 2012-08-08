@@ -3944,6 +3944,20 @@ e_cal_backend_ews_notify_online_cb (ECalBackend *backend,
 static void
 e_cal_backend_ews_dispose (GObject *object)
 {
+	ECalBackendEws *cbews;
+	ECalBackendEwsPrivate *priv;
+
+	g_return_if_fail (object != NULL);
+	g_return_if_fail (E_IS_CAL_BACKEND_EWS (object));
+
+	cbews = E_CAL_BACKEND_EWS (object);
+	priv = cbews->priv;
+
+	if (priv->refresh_timeout) {
+		g_source_remove (priv->refresh_timeout);
+		priv->refresh_timeout = 0;
+	}
+
 	if (G_OBJECT_CLASS (parent_class)->dispose)
 		(* G_OBJECT_CLASS (parent_class)->dispose) (object);
 }
@@ -3993,11 +4007,6 @@ e_cal_backend_ews_finalize (GObject *object)
 	if (priv->default_zone && priv->default_zone != icaltimezone_get_utc_timezone ()) {
 		icaltimezone_free (priv->default_zone, 1);
 		priv->default_zone = NULL;
-	}
-
-	if (priv->refresh_timeout) {
-		g_source_remove (priv->refresh_timeout);
-		priv->refresh_timeout = 0;
 	}
 
 	g_hash_table_destroy (priv->item_id_hash);
