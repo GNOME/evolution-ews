@@ -4075,6 +4075,11 @@ e_cal_backend_ews_dispose (GObject *object)
 	cbews = E_CAL_BACKEND_EWS (object);
 	priv = cbews->priv;
 
+	if (priv->refresh_timeout) {
+		g_source_remove (priv->refresh_timeout);
+		priv->refresh_timeout = 0;
+	}
+
 	if (priv->cancellable) {
 		g_cancellable_cancel (priv->cancellable);
 		g_object_unref (priv->cancellable);
@@ -4128,11 +4133,6 @@ e_cal_backend_ews_finalize (GObject *object)
 	if (priv->default_zone && priv->default_zone != icaltimezone_get_utc_timezone ()) {
 		icaltimezone_free (priv->default_zone, 1);
 		priv->default_zone = NULL;
-	}
-
-	if (priv->refresh_timeout) {
-		g_source_remove (priv->refresh_timeout);
-		priv->refresh_timeout = 0;
 	}
 
 	g_hash_table_destroy (priv->item_id_hash);
