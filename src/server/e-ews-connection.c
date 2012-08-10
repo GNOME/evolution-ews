@@ -1962,7 +1962,14 @@ failed:
 
 exit:
 	g_simple_async_result_complete_in_idle (simple);
-	g_object_unref (simple);
+
+	/* This function is processed within e_ews_soup_thread() and the 'simple'
+	   holds reference to EEwsConnection. For cases when this is the last
+	   reference to 'simple' the unref would cause crash, because of g_thread_join()
+	   in connection's dispose, trying to wait on the end of itself, thus it's
+	   safer to unref the 'simple' in a dedicated thread.
+	*/
+	ews_unref_in_thread (simple);
 }
 
 static void post_restarted (SoupMessage *msg, gpointer data)
