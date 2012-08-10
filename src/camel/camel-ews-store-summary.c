@@ -10,6 +10,7 @@
 #define S_UNLOCK(x) (g_static_rec_mutex_unlock(&(x)->priv->s_lock))
 
 #define STORE_GROUP_NAME "##storepriv"
+#define CURRENT_SUMMARY_VERSION 1
 
 struct _CamelEwsStoreSummaryPrivate {
 	GKeyFile *key_file;
@@ -183,7 +184,15 @@ camel_ews_store_summary_load (CamelEwsStoreSummary *ews_summary,
 	ret = g_key_file_load_from_file (
 		priv->key_file, priv->path, 0, error);
 
-	load_id_fname_hash (ews_summary);
+	if (CURRENT_SUMMARY_VERSION != g_key_file_get_integer (priv->key_file, STORE_GROUP_NAME, "Version", NULL)) {
+		/* version doesn't match, get folders again */
+		camel_ews_store_summary_clear (ews_summary);
+
+		g_key_file_set_integer (priv->key_file, STORE_GROUP_NAME, "Version", CURRENT_SUMMARY_VERSION);
+	} else {
+		load_id_fname_hash (ews_summary);
+	}
+
 	S_UNLOCK (ews_summary);
 
 	return ret;
