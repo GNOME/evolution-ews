@@ -13,8 +13,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2012-08-07 13:21+0000\n"
-"PO-Revision-Date: 2012-08-08 10:26+0200\n"
+"POT-Creation-Date: 2012-08-10 07:08+0000\n"
+"PO-Revision-Date: 2012-08-10 10:09+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "Language: \n"
@@ -436,43 +436,39 @@ msgstr "Nombre"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:856
 msgid "Permission level"
-msgstr ""
+msgstr "Nivel de permisos"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:908
 msgid "Edit EWS folder permissions..."
-msgstr ""
+msgstr "Editar permisos de la carpeta de EWS…"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:933
 msgid "Account:"
-msgstr ""
+msgstr "Cuenta"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:961
-#, fuzzy
-#| msgid "User_name:"
 msgid "Folder name:"
-msgstr "Nombre de _usuario:"
+msgstr "Nombre de carpeta:"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:984
 msgid "Folder ID:"
-msgstr ""
+msgstr "ID de la carpeta:"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1048
 msgid "Permissions"
-msgstr ""
+msgstr "Permisos"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1070
 msgid "Permi_ssion level:"
-msgstr ""
+msgstr "Nivel de permi_sos:"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1104
 msgctxt "Permissions"
 msgid "Read"
-msgstr ""
+msgstr "Leer"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1116
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1183
-#, fuzzy
-#| msgid "None"
 msgctxt "Permissions"
 msgid "None"
 msgstr "Nadie"
@@ -480,56 +476,54 @@ msgstr "Nadie"
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1122
 msgctxt "Permissions"
 msgid "Free/Busy time"
-msgstr ""
+msgstr "Tiempo libre/ocupado"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1127
 msgctxt "Permissions"
 msgid "Free/Busy time, subject, location"
-msgstr ""
+msgstr "Tiempo libre/ocupado, asunto, ubicación"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1133
 msgctxt "Permissions"
 msgid "Full Details"
-msgstr ""
+msgstr "Detalles completos"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1139
 msgctxt "Permissions"
 msgid "Write"
-msgstr ""
+msgstr "Escritura"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1151
 msgctxt "Permissions"
 msgid "Create items"
-msgstr ""
+msgstr "Crear elementos"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1155
 msgctxt "Permissions"
 msgid "Create subfolders"
-msgstr ""
+msgstr "Crear subcarpetas"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1159
 msgctxt "Permissions"
 msgid "Edit own"
-msgstr ""
+msgstr "Edición propia"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1163
 msgctxt "Permissions"
 msgid "Edit all"
-msgstr ""
+msgstr "Editar todo"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1171
 msgctxt "Permissions"
 msgid "Delete items"
-msgstr ""
+msgstr "Eliminar elementos"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1188
 msgctxt "Permissions"
 msgid "Own"
-msgstr ""
+msgstr "Propio"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1193
-#, fuzzy
-#| msgid "All"
 msgctxt "Permissions"
 msgid "All"
 msgstr "Todos"
@@ -537,30 +531,26 @@ msgstr "Todos"
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1199
 msgctxt "Permissions"
 msgid "Other"
-msgstr ""
+msgstr "Otro"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1211
-#, fuzzy
-#| msgid "Folder does not exist"
 msgctxt "Permissions"
 msgid "Folder owner"
-msgstr "La carpeta no existe"
+msgstr "Propietario de la carpeta"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1215
-#, fuzzy
-#| msgid "Folder does not exist"
 msgctxt "Permissions"
 msgid "Folder contact"
-msgstr "La carpeta no existe"
+msgstr "Contacto de la carpeta"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1219
 msgctxt "Permissions"
 msgid "Folder visible"
-msgstr ""
+msgstr "Carpeta visible"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1292
 msgid "Reading folder permissions, please wait..."
-msgstr ""
+msgstr "Leyendo permisos de la carpeta, espere…"
 
 #: ../src/configuration/e-ews-search-user.c:208
 #, c-format
@@ -570,10 +560,8 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: ../src/configuration/e-ews-search-user.c:213
-#, fuzzy
-#| msgid "No items found"
 msgid "No users found"
-msgstr "No se encontraron elementos"
+msgstr "No se encontraron usuarios"
 
 #: ../src/configuration/e-ews-search-user.c:217
 #, c-format
@@ -592,7 +580,7 @@ msgstr[1] ""
 #: ../src/configuration/e-ews-search-user.c:353
 #: ../src/configuration/e-ews-search-user.c:536
 msgid "Search for a user"
-msgstr ""
+msgstr "Buscar un usuario"
 
 #: ../src/configuration/e-ews-search-user.c:433
 msgid "E-mail"
@@ -600,7 +588,7 @@ msgstr ""
 
 #: ../src/configuration/e-ews-search-user.c:470
 msgid "Choose EWS user..."
-msgstr ""
+msgstr "Elegir usuario EWS…"
 
 #: ../src/configuration/e-ews-search-user.c:493
 #, fuzzy
@@ -879,19 +867,19 @@ msgstr "Falló al buscar el elemento <Account>"
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr "Falló al buscar <ASUrl> y <OABUrl> en la respuesta de la autodetección"
 
-#: ../src/server/e-ews-connection.c:2085
+#: ../src/server/e-ews-connection.c:2092
 msgid "Email address is missing a domain part"
 msgstr "Falta el dominio en la dirección de correo-e"
 
-#: ../src/server/e-ews-connection.c:2348
+#: ../src/server/e-ews-connection.c:2355
 msgid "Failed to parse oab XML"
 msgstr "Falló al analizar el XML oab"
 
-#: ../src/server/e-ews-connection.c:2356
+#: ../src/server/e-ews-connection.c:2363
 msgid "Failed to find <OAB> element\n"
 msgstr "Falló al buscar el elemento <OAB>\n"
 
-#: ../src/server/e-ews-connection.c:3463
+#: ../src/server/e-ews-connection.c:3470
 msgid "No items found"
 msgstr "No se encontraron elementos"
 
