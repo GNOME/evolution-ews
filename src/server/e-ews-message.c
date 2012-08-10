@@ -58,6 +58,12 @@ e_ews_message_new_with_header (const gchar *uri,
 	/* server info */
 	if (server_info == EWS_EXCHANGE_2007_SP1)
 		server_ver = "Exchange2007_SP1";
+	else if (server_info == EWS_EXCHANGE_2010)
+		server_ver = "Exchange2010";
+	else if (server_info == EWS_EXCHANGE_2010_SP1)
+		server_ver = "Exchange2010_SP1";
+	else if (server_info == EWS_EXCHANGE_2010_SP2)
+		server_ver = "Exchange2010_SP2";
 	else
 		server_ver = "Exchange2007";
 

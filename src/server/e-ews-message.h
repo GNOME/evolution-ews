@@ -30,7 +30,10 @@ G_BEGIN_DECLS
 
 typedef enum {
 	EWS_EXCHANGE_2007,
-	EWS_EXCHANGE_2007_SP1
+	EWS_EXCHANGE_2007_SP1,
+	EWS_EXCHANGE_2010,
+	EWS_EXCHANGE_2010_SP1,
+	EWS_EXCHANGE_2010_SP2
 } EwsServerVersion;
 
 ESoapMessage *	e_ews_message_new_with_header	(const gchar *uri,

@@ -7179,3 +7179,140 @@ e_ews_connection_set_folder_permissions_sync (EEwsConnection *cnc,
 
 	return success;
 }
+
+static void
+get_password_expiration_response_cb (ESoapResponse *response,
+				     GSimpleAsyncResult *simple)
+{
+	EwsAsyncData *async_data;
+	ESoapParameter *param;
+	gchar *exp_date;
+	GError *error = NULL;
+
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	param = e_soap_response_get_first_parameter_by_name (
+		response, "PasswordExpirationDate", &error);
+
+	/* Sanity check */
+	g_return_if_fail (
+		(param != NULL && error == NULL) ||
+		(param == NULL && error != NULL));
+
+	if (error != NULL) {
+		g_simple_async_result_take_error (simple, error);
+		return;
+	}
+
+	exp_date = e_soap_parameter_get_string_value (param);
+
+	async_data->items = g_slist_append (async_data->items, exp_date);
+}
+
+/**
+ * e_ews_connection_get_password_expiration
+ * @cnc:
+ * @pri:
+ * @mail_id: mail is for which password expiration is requested
+ * @cb:
+ * @cancellable:
+ * @user_data:
+ **/
+void
+e_ews_connection_get_password_expiration (EEwsConnection *cnc,
+					  gint pri,
+					  const gchar *mail_id,
+					  GCancellable *cancellable,
+					  GAsyncReadyCallback callback,
+					  gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetPasswordExpirationDate", NULL, NULL, EWS_EXCHANGE_2010_SP2);
+	e_ews_message_write_string_parameter (msg, "MailboxSmtpAddress", NULL, mail_id ? mail_id : cnc->priv->email);
+	e_ews_message_write_footer (msg);
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_get_password_expiration);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	e_ews_connection_queue_request (
+		cnc, msg, get_password_expiration_response_cb,
+		pri, cancellable, simple);
+
+	g_object_unref (simple);
+}
+
+gboolean
+e_ews_connection_get_password_expiration_finish (EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 gchar **exp_date,
+						 GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (exp_date != NULL, FALSE);
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_get_password_expiration),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	g_return_val_if_fail (async_data->items != NULL, FALSE);
+
+	*exp_date = async_data->items->data;
+	g_slist_free (async_data->items);
+
+	return TRUE;
+}
+
+/**
+ * e_ews_connection_get_password_expiration_sync
+ * @cnc:
+ * @pri:
+ * @mail_id: mail id for which password expiration is requested
+ * @cancellable:
+ * @error:
+ **/
+gboolean
+e_ews_connection_get_password_expiration_sync (EEwsConnection *cnc,
+					       gint pri,
+					       const gchar *mail_id,
+					       gchar **exp_date,
+					       GCancellable *cancellable,
+					       GError **error)
+{
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (exp_date != NULL, FALSE);
+
+	closure = e_async_closure_new ();
+
+	e_ews_connection_get_password_expiration (
+		cnc, pri, mail_id, cancellable,
+		e_async_closure_callback, closure);
+
+	result = e_async_closure_wait (closure);
+
+	success = e_ews_connection_get_password_expiration_finish (
+		cnc, result, exp_date, error);
+
+	e_async_closure_free (closure);
+
+	return success;
+}

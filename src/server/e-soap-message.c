@@ -468,7 +468,7 @@ e_soap_message_start_envelope (ESoapMessage *msg)
 		(const xmlChar *) "SOAP-ENC");
 	xmlNewNs (
 		msg->priv->doc->xmlRootNode,
-		(const xmlChar *) "http://www.w3.org/1999/XMLSchema",
+		(const xmlChar *) "http://www.w3.org/2001/XMLSchema",
 		(const xmlChar *) "xsd");
 	xmlNewNs (
 		msg->priv->doc->xmlRootNode,
@@ -476,7 +476,7 @@ e_soap_message_start_envelope (ESoapMessage *msg)
 		(const xmlChar *) "SOAP-ENV");
 	msg->priv->xsi_ns = xmlNewNs (
 		msg->priv->doc->xmlRootNode,
-		(const xmlChar *) "http://www.w3.org/1999/XMLSchema-instance",
+		(const xmlChar *) "http://www.w3.org/2001/XMLSchema-instance",
 		(const xmlChar *) "xsi");
 }
 
