@@ -831,7 +831,7 @@ retrieve_user_permissions_thread_cb (GObject *ppage,
 
 	session = CAMEL_SESSION (e_mail_backend_get_session (backend));
 	source = e_mail_config_ews_delegates_page_get_account_source (page);
-	service = camel_session_get_service (session, e_source_get_uid (source));
+	service = camel_session_ref_service (session, e_source_get_uid (source));
 
 	g_return_if_fail (service != NULL);
 	g_return_if_fail (CAMEL_IS_EWS_STORE (service));
@@ -846,6 +846,8 @@ retrieve_user_permissions_thread_cb (GObject *ppage,
 			e_mail_config_ews_delegates_page_get_collection_source (page),
 			CAMEL_EWS_SETTINGS (mail_config_ews_delegates_page_get_settings (page)),
 			cancellable, perror);
+
+	g_object_unref (service);
 
 	if (!conn)
 		return;
