@@ -262,8 +262,18 @@ ews_disconnect_sync (CamelService *service,
 
 	/* TODO cancel all operations in the connection */
 	if (ews_store->priv->connection != NULL) {
-		g_signal_handlers_disconnect_by_data (
-			camel_service_get_settings (service), service);
+		CamelSettings *settings;
+
+		/* FIXME This is somewhat broken, since the CamelSettings
+		 *       instance returned here may not be the same instance
+		 *       that we connected a signal handler to.  Need to keep
+		 *       our own reference to that CamelSettings instance, or
+		 *       better yet avoid connecting signal handlers to it in
+		 *       the first place. */
+		settings = camel_service_ref_settings (service);
+		g_signal_handlers_disconnect_by_data (settings, service);
+		g_object_unref (settings);
+
 		e_ews_connection_set_password (
 			ews_store->priv->connection, NULL);
 		g_object_unref (ews_store->priv->connection);
@@ -355,7 +365,7 @@ ews_authenticate_sync (CamelService *service,
 		return CAMEL_AUTHENTICATION_ERROR;
 	}
 
-	settings = camel_service_get_settings (service);
+	settings = camel_service_ref_settings (service);
 
 	ews_settings = CAMEL_EWS_SETTINGS (settings);
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
@@ -364,6 +374,8 @@ ews_authenticate_sync (CamelService *service,
 	e_ews_connection_set_password (connection, password);
 
 	g_free (hosturl);
+
+	g_object_unref (settings);
 
 	/* XXX We need to run some operation that requires authentication
 	 *     but does not change any server-side state, so we can check
@@ -1032,21 +1044,29 @@ ews_get_name (CamelService *service,
 {
 	CamelNetworkSettings *network_settings;
 	CamelSettings *settings;
-	const gchar *host;
-	const gchar *user;
+	gchar *name;
+	gchar *host;
+	gchar *user;
 
-	settings = camel_service_get_settings (service);
+	settings = camel_service_ref_settings (service);
 
 	network_settings = CAMEL_NETWORK_SETTINGS (settings);
-	host = camel_network_settings_get_host (network_settings);
-	user = camel_network_settings_get_user (network_settings);
+	host = camel_network_settings_dup_host (network_settings);
+	user = camel_network_settings_dup_user (network_settings);
+
+	g_object_unref (settings);
 
 	if (brief)
-		return g_strdup_printf (
+		name = g_strdup_printf (
 			_("Exchange server %s"), host);
 	else
-		return g_strdup_printf (
+		name = g_strdup_printf (
 			_("Exchange service for %s on %s"), user, host);
+
+	g_free (host);
+	g_free (user);
+
+	return name;
 }
 
 EEwsConnection *
@@ -1141,12 +1161,27 @@ ews_can_refresh_folder (CamelStore *store,
                         CamelFolderInfo *info,
                         GError **error)
 {
+	CamelSettings *settings;
+	CamelEwsSettings *ews_settings;
+	gboolean check_all;
+
 	/* Skip unselectable folders from automatic refresh */
-	if (info && (info->flags & CAMEL_FOLDER_NOSELECT) != 0) return FALSE;
+	if (info && (info->flags & CAMEL_FOLDER_NOSELECT) != 0)
+		return FALSE;
+
+	settings = camel_service_ref_settings (CAMEL_SERVICE (store));
+
+	ews_settings = CAMEL_EWS_SETTINGS (settings);
+	check_all = camel_ews_settings_get_check_all (ews_settings);
+
+	g_object_unref (settings);
+
+	if (check_all)
+		return TRUE;
 
 	/* Delegate decision to parent class */
-	return CAMEL_STORE_CLASS (camel_ews_store_parent_class)->can_refresh_folder (store, info, error) ||
-		camel_ews_settings_get_check_all (CAMEL_EWS_SETTINGS (camel_service_get_settings (CAMEL_SERVICE (store))));
+	return CAMEL_STORE_CLASS (camel_ews_store_parent_class)->
+		can_refresh_folder (store, info, error);
 }
 
 gboolean

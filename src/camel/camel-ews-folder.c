@@ -1121,10 +1121,18 @@ camel_ews_folder_new (CamelStore *store,
 	}
 
 	if (!g_ascii_strcasecmp (folder_name, "Inbox")) {
-		CamelStoreSettings *settings = CAMEL_STORE_SETTINGS (camel_service_get_settings (CAMEL_SERVICE (store)));
+		CamelSettings *settings;
+		gboolean filter_inbox;
 
-		if (camel_store_settings_get_filter_inbox (settings))
+		settings = camel_service_ref_settings (CAMEL_SERVICE (store));
+
+		filter_inbox = camel_store_settings_get_filter_inbox (
+			CAMEL_STORE_SETTINGS (settings));
+
+		if (filter_inbox)
 			folder->folder_flags |= CAMEL_FOLDER_FILTER_RECENT;
+
+		g_object_unref (settings);
 	}
 
 	ews_folder->search = camel_folder_search_new ();
@@ -1749,25 +1757,31 @@ ews_folder_constructed (GObject *object)
 	CamelService *service;
 	CamelFolder *folder;
 	const gchar *full_name;
-	const gchar *host;
-	const gchar *user;
 	gchar *description;
+	gchar *host;
+	gchar *user;
 
 	folder = CAMEL_FOLDER (object);
 	full_name = camel_folder_get_full_name (folder);
 	parent_store = camel_folder_get_parent_store (folder);
 
 	service = CAMEL_SERVICE (parent_store);
-	settings = camel_service_get_settings (service);
+
+	settings = camel_service_ref_settings (service);
 
 	network_settings = CAMEL_NETWORK_SETTINGS (settings);
-	host = camel_network_settings_get_host (network_settings);
-	user = camel_network_settings_get_user (network_settings);
+	host = camel_network_settings_dup_host (network_settings);
+	user = camel_network_settings_dup_user (network_settings);
+
+	g_object_unref (settings);
 
 	description = g_strdup_printf (
 		"%s@%s:%s", user, host, full_name);
 	camel_folder_set_description (folder, description);
 	g_free (description);
+
+	g_free (host);
+	g_free (user);
 }
 
 static void

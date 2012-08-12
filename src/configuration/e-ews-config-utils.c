@@ -492,7 +492,6 @@ action_folder_permissions_mail_cb (GtkAction *action,
 	GtkWindow *parent;
 	CamelStore *store = NULL;
 	CamelEwsStore *ews_store;
-	CamelNetworkSettings *network_settings;
 	gchar *str_folder_id;
 
 	if (!get_ews_store_from_folder_tree (shell_view, &folder_path, &store))
@@ -502,9 +501,6 @@ action_folder_permissions_mail_cb (GtkAction *action,
 	g_return_if_fail (ews_store != NULL);
 	g_return_if_fail (folder_path != NULL);
 
-	network_settings = CAMEL_NETWORK_SETTINGS (camel_service_get_settings (CAMEL_SERVICE (store)));
-	g_return_if_fail (network_settings != NULL);
-
 	shell_window = e_shell_view_get_shell_window (shell_view);
 	parent = GTK_WINDOW (shell_window);
 
@@ -512,27 +508,42 @@ action_folder_permissions_mail_cb (GtkAction *action,
 	if (!str_folder_id) {
 		e_notice (parent, GTK_MESSAGE_ERROR, _("Cannot edit permissions of folder '%s', choose other folder."), folder_path);
 	} else {
-		ESourceRegistry *registry = e_shell_get_registry (e_shell_window_get_shell (shell_window));
+		EShell *shell;
 		ESource *source;
+		ESourceRegistry *registry;
+		CamelService *service;
+		CamelSettings *settings;
 		EwsFolderId *folder_id;
 		gchar *str_change_key;
+		const gchar *uid;
 
-		source = e_source_registry_ref_source (registry, camel_service_get_uid (CAMEL_SERVICE (store)));
+		shell = e_shell_window_get_shell (shell_window);
+		registry = e_shell_get_registry (shell);
+
+		service = CAMEL_SERVICE (store);
+		uid = camel_service_get_uid (service);
+		source = e_source_registry_ref_source (registry, uid);
 		g_return_if_fail (source != NULL);
 
-		str_change_key = camel_ews_store_summary_get_change_key (ews_store->summary, str_folder_id, NULL);
+		str_change_key = camel_ews_store_summary_get_change_key (
+			ews_store->summary, str_folder_id, NULL);
 
-		folder_id = e_ews_folder_id_new (str_folder_id, str_change_key, FALSE);
+		folder_id = e_ews_folder_id_new (
+			str_folder_id, str_change_key, FALSE);
+
+		settings = camel_service_ref_settings (service);
 
 		e_ews_edit_folder_permissions (
 			parent,
 			registry,
 			source,
-			CAMEL_EWS_SETTINGS (network_settings),
-			camel_service_get_display_name (CAMEL_SERVICE (store)),
+			CAMEL_EWS_SETTINGS (settings),
+			camel_service_get_display_name (service),
 			folder_path,
 			folder_id,
 			E_EWS_FOLDER_TYPE_MAILBOX);
+
+		g_object_unref (settings);
 
 		g_object_unref (source);
 		g_free (str_folder_id);

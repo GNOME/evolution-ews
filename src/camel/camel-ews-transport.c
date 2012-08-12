@@ -56,19 +56,26 @@ ews_transport_get_name (CamelService *service,
 {
 	CamelNetworkSettings *network_settings;
 	CamelSettings *settings;
-	const gchar *host;
+	gchar *host;
+	gchar *name;
 
-	settings = camel_service_get_settings (service);
+	settings = camel_service_ref_settings (service);
 
 	network_settings = CAMEL_NETWORK_SETTINGS (settings);
-	host = camel_network_settings_get_host (network_settings);
+	host = camel_network_settings_dup_host (network_settings);
+
+	g_object_unref (settings);
 
 	if (brief)
-		return g_strdup_printf (
+		name = g_strdup_printf (
 			_("Exchange server %s"), host);
 	else
-		return g_strdup_printf (
+		name = g_strdup_printf (
 			_("Exchange mail delivery via %s"), host);
+
+	g_free (host);
+
+	return name;
 }
 
 static gboolean
@@ -85,18 +92,23 @@ ews_send_to_sync (CamelTransport *transport,
 	CamelSettings *settings;
 	CamelService *service;
 	EEwsConnection *cnc;
-	const gchar *host_url;
-	const gchar *user;
-	gboolean res;
+	gchar *ews_email;
+	gchar *host_url;
+	gchar *user;
+	gboolean success = FALSE;
 
 	service = CAMEL_SERVICE (transport);
-	settings = camel_service_get_settings (service);
+
+	settings = camel_service_ref_settings (service);
 
 	ews_settings = CAMEL_EWS_SETTINGS (settings);
-	host_url = camel_ews_settings_get_hosturl (ews_settings);
+	ews_email = camel_ews_settings_dup_email (ews_settings);
+	host_url = camel_ews_settings_dup_hosturl (ews_settings);
 
 	network_settings = CAMEL_NETWORK_SETTINGS (settings);
-	user = camel_network_settings_get_user (network_settings);
+	user = camel_network_settings_dup_user (network_settings);
+
+	g_object_unref (settings);
 
 	used_from = camel_mime_message_get_from (message);
 
@@ -107,21 +119,22 @@ ews_send_to_sync (CamelTransport *transport,
 		g_set_error_literal (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 			_("Cannot send message with no From address"));
-		return FALSE;
+		goto exit;
+
 	} else if (camel_address_length (CAMEL_ADDRESS (used_from)) > 1) {
 		g_set_error_literal (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 			_("Exchange server cannot send message with multiple From addresses"));
-		return FALSE;
-	} else {
-		const gchar *ews_email = NULL, *used_email = NULL;
+		goto exit;
 
-		ews_email = camel_ews_settings_get_email (ews_settings);
+	} else {
+		const gchar *used_email = NULL;
+
 		if (!camel_internet_address_get (used_from, 0, NULL, &used_email)) {
 			g_set_error_literal (
 				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 				_("Failed to read From address"));
-			return FALSE;
+			goto exit;
 		}
 
 		if (!ews_email || !used_email || g_ascii_strcasecmp (ews_email, used_email) != 0) {
@@ -130,7 +143,7 @@ ews_send_to_sync (CamelTransport *transport,
 				_("Exchange server cannot send message as '%s', when the account was configured for address '%s'"),
 				used_email ? used_email : "NULL",
 				ews_email ? ews_email : "NULL");
-			return FALSE;
+			goto exit;
 		}
 	}
 
@@ -140,15 +153,20 @@ ews_send_to_sync (CamelTransport *transport,
 			error, CAMEL_SERVICE_ERROR,
 			CAMEL_SERVICE_ERROR_NOT_CONNECTED,
 			_("Service not connected"));
-		return FALSE;
+		goto exit;
 	}
 
-	res = camel_ews_utils_create_mime_message (
+	success = camel_ews_utils_create_mime_message (
 		cnc, "SendOnly", NULL, message, 0,
 		from, NULL, NULL, cancellable, error);
 	g_object_unref (cnc);
 
-	return res;
+exit:
+	g_free (ews_email);
+	g_free (host_url);
+	g_free (user);
+
+	return success;
 }
 
 static void
