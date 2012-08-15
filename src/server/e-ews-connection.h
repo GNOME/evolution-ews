@@ -931,6 +931,28 @@ gboolean	e_ews_connection_get_password_expiration_sync
 						 GCancellable *cancellable,
 						 GError **error);
 
+void		e_ews_connection_get_folder_info
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *mail_id,
+						 const EwsFolderId *folder_id,
+						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
+						 gpointer user_data);
+gboolean	e_ews_connection_get_folder_info_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 EEwsFolder **folder,
+						 GError **error);
+gboolean	e_ews_connection_get_folder_info_sync
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *mail_id,
+						 const EwsFolderId *folder_id,
+						 EEwsFolder **folder,
+						 GCancellable *cancellable,
+						 GError **error);
+
 G_END_DECLS
 
 #endif

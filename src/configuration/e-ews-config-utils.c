@@ -47,6 +47,7 @@
 
 #include "e-ews-config-utils.h"
 #include "e-ews-search-user.h"
+#include "e-ews-subscribe-foreign-folder.h"
 
 struct RunWithFeedbackData
 {
@@ -107,8 +108,11 @@ run_with_feedback_idle (gpointer user_data)
 	}
 
 	if (!was_cancelled) {
-		if (rfd->error)
+		if (rfd->error) {
+			g_dbus_error_strip_remote_error (rfd->error);
+
 			e_notice (rfd->parent, GTK_MESSAGE_ERROR, "%s", rfd->error->message);
+		}
 	}
 
 	free_run_with_feedback_data (rfd);
@@ -458,7 +462,6 @@ get_ews_store_from_folder_tree (EShellView *shell_view,
 	return found;
 }
 
-#if 0
 static void
 action_subscribe_foreign_folder_cb (GtkAction *action,
                                     EShellView *shell_view)
@@ -479,9 +482,7 @@ action_subscribe_foreign_folder_cb (GtkAction *action,
 
 	g_object_unref (session);
 	g_object_unref (store);
-	g_free (profile);
 }
-#endif
 
 static void
 action_folder_permissions_mail_cb (GtkAction *action,
@@ -580,17 +581,15 @@ ews_ui_enable_actions (GtkActionGroup *action_group,
 	}
 }
 
-#if 0
 static GtkActionEntry mail_account_context_entries[] = {
 
 	{ "mail-ews-subscribe-foreign-folder",
 	  NULL,
 	  N_("Subscribe to folder of other user..."),
 	  NULL,
-	  NULL,  / * XXX Add a tooltip! * /
+	  NULL,  /* XXX Add a tooltip! */
 	  G_CALLBACK (action_subscribe_foreign_folder_cb) }
 };
-#endif
 
 static GtkActionEntry mail_folder_context_entries[] = {
 	{ "mail-ews-folder-permissions",
@@ -604,7 +603,7 @@ static GtkActionEntry mail_folder_context_entries[] = {
 static const gchar *ews_ui_mail_def =
 	"<popup name=\"mail-folder-popup\">\n"
 	"  <placeholder name=\"mail-folder-popup-actions\">\n"
-	/*"    <menuitem action=\"mail-ews-subscribe-foreign-folder\"/>\n"*/
+	"    <menuitem action=\"mail-ews-subscribe-foreign-folder\"/>\n"
 	"    <menuitem action=\"mail-ews-folder-permissions\"/>\n"
 	"  </placeholder>\n"
 	"</popup>\n";
@@ -659,7 +658,7 @@ ews_ui_update_actions_mail_cb (EShellView *shell_view,
 			g_object_unref (session);
 	}
 
-	/* ews_ui_enable_actions (action_group, mail_account_context_entries, G_N_ELEMENTS (mail_account_context_entries), account_node, online); */
+	ews_ui_enable_actions (action_group, mail_account_context_entries, G_N_ELEMENTS (mail_account_context_entries), account_node, online);
 	ews_ui_enable_actions (action_group, mail_folder_context_entries, G_N_ELEMENTS (mail_folder_context_entries), folder_node, online);
 }
 
@@ -679,8 +678,8 @@ ews_ui_init_mail (GtkUIManager *ui_manager,
 	action_group = e_shell_window_get_action_group (shell_window, "mail");
 
 	/* Add actions to the "mail" action group. */
-	/*e_action_group_add_actions_localized (action_group, GETTEXT_PACKAGE,
-		mail_account_context_entries, G_N_ELEMENTS (mail_account_context_entries), shell_view);*/
+	e_action_group_add_actions_localized (action_group, GETTEXT_PACKAGE,
+		mail_account_context_entries, G_N_ELEMENTS (mail_account_context_entries), shell_view);
 	e_action_group_add_actions_localized (
 		action_group, GETTEXT_PACKAGE,
 		mail_folder_context_entries, G_N_ELEMENTS (mail_folder_context_entries), shell_view);

@@ -26,12 +26,14 @@ struct _ESourceEwsFolderPrivate {
 	GMutex *property_lock;
 	gchar *change_key;
 	gchar *id;
+	gboolean foreign;
 };
 
 enum {
 	PROP_0,
 	PROP_CHANGE_KEY,
-	PROP_ID
+	PROP_ID,
+	PROP_FOREIGN
 };
 
 G_DEFINE_DYNAMIC_TYPE (
@@ -57,6 +59,12 @@ source_ews_folder_set_property (GObject *object,
 				E_SOURCE_EWS_FOLDER (object),
 				g_value_get_string (value));
 			return;
+
+		case PROP_FOREIGN:
+			e_source_ews_folder_set_foreign (
+				E_SOURCE_EWS_FOLDER (object),
+				g_value_get_boolean (value));
+			return;
 	}
 
 	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -80,6 +88,13 @@ source_ews_folder_get_property (GObject *object,
 			g_value_take_string (
 				value,
 				e_source_ews_folder_dup_id (
+				E_SOURCE_EWS_FOLDER (object)));
+			return;
+
+		case PROP_FOREIGN:
+			g_value_set_boolean (
+				value,
+				e_source_ews_folder_get_foreign (
 				E_SOURCE_EWS_FOLDER (object)));
 			return;
 	}
@@ -141,6 +156,19 @@ e_source_ews_folder_class_init (ESourceEwsFolderClass *class)
 			"ID",
 			"The server-assigned folder ID",
 			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS |
+			E_SOURCE_PARAM_SETTING));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_FOREIGN,
+		g_param_spec_boolean (
+			"foreign",
+			"Foreign",
+			"The folder is a foreign folder, aka belongs to other user",
+			FALSE,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS |
@@ -277,4 +305,26 @@ e_source_ews_folder_dup_folder_id (ESourceEwsFolder *extension)
 	g_mutex_unlock (extension->priv->property_lock);
 
 	return folder_id;
+}
+
+gboolean
+e_source_ews_folder_get_foreign (ESourceEwsFolder *extension)
+{
+	g_return_val_if_fail (E_IS_SOURCE_EWS_FOLDER (extension), FALSE);
+
+	return extension->priv->foreign;
+}
+
+void
+e_source_ews_folder_set_foreign (ESourceEwsFolder *extension,
+				 gboolean is_foreign)
+{
+	g_return_if_fail (E_IS_SOURCE_EWS_FOLDER (extension));
+
+	if ((extension->priv->foreign ? 1 : 0) == (is_foreign ? 1 : 0))
+		return;
+
+	extension->priv->foreign = is_foreign;
+
+	g_object_notify (G_OBJECT (extension), "foreign");
 }

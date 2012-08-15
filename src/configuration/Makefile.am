@@ -38,6 +38,8 @@ module_ews_configuration_la_SOURCES = \
 	e-ews-edit-folder-permissions.h \
 	e-ews-search-user.c \
 	e-ews-search-user.h \
+	e-ews-subscribe-foreign-folder.c \
+	e-ews-subscribe-foreign-folder.h \
 	$(NULL)
 
 module_ews_configuration_la_LIBADD = \

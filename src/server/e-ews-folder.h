@@ -22,6 +22,8 @@
 #ifndef E_EWS_FOLDER_H
 #define E_EWS_FOLDER_H
 
+#include <libedataserver/libedataserver.h>
+
 #include "e-ews-enums.h"
 #include "e-soap-message.h"
 
@@ -70,11 +72,53 @@ gboolean	e_ews_folder_get_is_writable (EEwsFolder *folder);
 void		e_ews_folder_set_is_writable (EEwsFolder *folder, gboolean writable);
 EEwsFolderType	e_ews_folder_get_folder_type (EEwsFolder *folder);
 void		e_ews_folder_set_folder_type (EEwsFolder *folder, EEwsFolderType folder_type);
+gboolean	e_ews_folder_get_foreign (EEwsFolder *folder);
+void		e_ews_folder_set_foreign (EEwsFolder *folder, gboolean is_foreign);
 
 EwsFolderId *	e_ews_folder_id_new (const gchar *id,
 				     const gchar *change_key,
 				     gboolean is_distinguished_id);
 void		e_ews_folder_id_free (EwsFolderId *fid);
+
+gchar *		e_ews_folder_utils_pick_color_spec		(gint move_by,
+								 gboolean around_middle);
+gboolean	e_ews_folder_utils_populate_esource		(ESource *source,
+								 const GList *sources,
+								 const gchar *master_hosturl,
+								 const gchar *master_username,
+								 EEwsFolder *folder,
+								 gboolean offline_sync,
+								 gint color_seed,
+								 GCancellable *cancellable,
+								 GError **perror);
+gboolean	e_ews_folder_utils_add_as_esource		(ESourceRegistry *pregistry,
+								 const gchar *master_hosturl,
+								 const gchar *master_username,
+								 EEwsFolder *folder,
+								 gboolean offline_sync,
+								 gint color_seed,
+								 GCancellable *cancellable,
+								 GError **perror);
+gboolean	e_ews_folder_utils_remove_as_esource		(ESourceRegistry *pregistry,
+								 const gchar *master_hosturl,
+								 const gchar *master_username,
+								 const gchar *folder_id,
+								 GCancellable *cancellable,
+								 GError **perror);
+gboolean	e_ews_folder_utils_is_subscribed_as_esource	(const GList *esources,
+								 const gchar *master_hosturl,
+								 const gchar *master_username,
+								 const gchar *folder_id);
+GList *		e_ews_folder_utils_filter_sources_for_account	(const GList *esources,
+								 const gchar *master_hosturl,
+								 const gchar *master_username);
+ESource *	e_ews_folder_utils_get_source_for_folder	(const GList *esources,
+								 const gchar *master_hosturl,
+								 const gchar *master_username,
+								 const gchar *folder_id);
+ESource *	e_ews_folder_utils_get_master_source		(const GList *esources,
+								 const gchar *master_hosturl,
+								 const gchar *master_username);
 
 G_END_DECLS
 

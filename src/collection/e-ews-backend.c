@@ -656,7 +656,7 @@ ews_backend_create_resource_sync (ECollectionBackend *backend,
                                   GCancellable *cancellable,
                                   GError **error)
 {
-	EEwsConnection *connection;
+	EEwsConnection *connection = NULL;
 	EwsFolderId *out_folder_id = NULL;
 	EEwsFolderType folder_type = E_EWS_FOLDER_TYPE_UNKNOWN;
 	const gchar *extension_name;
@@ -664,68 +664,80 @@ ews_backend_create_resource_sync (ECollectionBackend *backend,
 	gchar *folder_name;
 	gboolean success = FALSE;
 
-	connection = e_ews_backend_ref_connection_sync (
-		E_EWS_BACKEND (backend), cancellable, error);
-	if (connection == NULL)
-		return FALSE;
-
-	extension_name = E_SOURCE_EXTENSION_ADDRESS_BOOK;
+	extension_name = E_SOURCE_EXTENSION_EWS_FOLDER;
 	if (e_source_has_extension (source, extension_name)) {
-		folder_type = E_EWS_FOLDER_TYPE_CONTACTS;
-		parent_folder_id = "contacts";
-	}
-
-	extension_name = E_SOURCE_EXTENSION_CALENDAR;
-	if (e_source_has_extension (source, extension_name)) {
-		folder_type = E_EWS_FOLDER_TYPE_CALENDAR;
-		parent_folder_id = "calendar";
-	}
-
-	extension_name = E_SOURCE_EXTENSION_TASK_LIST;
-	if (e_source_has_extension (source, extension_name)) {
-		folder_type = E_EWS_FOLDER_TYPE_TASKS;
-		parent_folder_id = "tasks";
-	}
-
-	/* FIXME No support for memo lists. */
-
-	if (parent_folder_id == NULL) {
-		g_set_error (
-			error, G_IO_ERROR,
-			G_IO_ERROR_INVALID_ARGUMENT,
-			_("Could not determine a suitable folder "
-			"class for a new folder named '%s'"),
-			e_source_get_display_name (source));
-		goto exit;
-	}
-
-	folder_name = e_source_dup_display_name (source);
-
-	success = e_ews_connection_create_folder_sync (
-		connection, EWS_PRIORITY_MEDIUM,
-		parent_folder_id, TRUE,
-		folder_name, folder_type,
-		&out_folder_id, cancellable, error);
-
-	g_free (folder_name);
-
-	/* Sanity check */
-	g_warn_if_fail (
-		(success && out_folder_id != NULL) ||
-		(!success && out_folder_id == NULL));
-
-	if (out_folder_id != NULL) {
 		ESourceEwsFolder *extension;
-		const gchar *extension_name;
 
-		extension_name = E_SOURCE_EXTENSION_EWS_FOLDER;
+		/* foreign folders are just added */
 		extension = e_source_get_extension (source, extension_name);
-		e_source_ews_folder_set_id (
-			extension, out_folder_id->id);
-		e_source_ews_folder_set_change_key (
-			extension, out_folder_id->change_key);
+		if (e_source_ews_folder_get_foreign (extension))
+			success = TRUE;
+	}
 
-		e_ews_folder_id_free (out_folder_id);
+	if (!success) {
+		connection = e_ews_backend_ref_connection_sync (
+			E_EWS_BACKEND (backend), cancellable, error);
+		if (connection == NULL)
+			return FALSE;
+
+		extension_name = E_SOURCE_EXTENSION_ADDRESS_BOOK;
+		if (e_source_has_extension (source, extension_name)) {
+			folder_type = E_EWS_FOLDER_TYPE_CONTACTS;
+			parent_folder_id = "contacts";
+		}
+
+		extension_name = E_SOURCE_EXTENSION_CALENDAR;
+		if (e_source_has_extension (source, extension_name)) {
+			folder_type = E_EWS_FOLDER_TYPE_CALENDAR;
+			parent_folder_id = "calendar";
+		}
+
+		extension_name = E_SOURCE_EXTENSION_TASK_LIST;
+		if (e_source_has_extension (source, extension_name)) {
+			folder_type = E_EWS_FOLDER_TYPE_TASKS;
+			parent_folder_id = "tasks";
+		}
+
+		/* FIXME No support for memo lists. */
+
+		if (parent_folder_id == NULL) {
+			g_set_error (
+				error, G_IO_ERROR,
+				G_IO_ERROR_INVALID_ARGUMENT,
+				_("Could not determine a suitable folder "
+				"class for a new folder named '%s'"),
+				e_source_get_display_name (source));
+			goto exit;
+		}
+
+		folder_name = e_source_dup_display_name (source);
+
+		success = e_ews_connection_create_folder_sync (
+			connection, EWS_PRIORITY_MEDIUM,
+			parent_folder_id, TRUE,
+			folder_name, folder_type,
+			&out_folder_id, cancellable, error);
+
+		g_free (folder_name);
+
+		/* Sanity check */
+		g_warn_if_fail (
+			(success && out_folder_id != NULL) ||
+			(!success && out_folder_id == NULL));
+
+		if (out_folder_id != NULL) {
+			ESourceEwsFolder *extension;
+			const gchar *extension_name;
+
+			extension_name = E_SOURCE_EXTENSION_EWS_FOLDER;
+			extension = e_source_get_extension (source, extension_name);
+			e_source_ews_folder_set_id (
+				extension, out_folder_id->id);
+			e_source_ews_folder_set_change_key (
+				extension, out_folder_id->change_key);
+
+			e_ews_folder_id_free (out_folder_id);
+		}
 	}
 
 	if (success) {
@@ -755,8 +767,9 @@ ews_backend_create_resource_sync (ECollectionBackend *backend,
 		g_object_unref (server);
 	}
 
-exit:
-	g_object_unref (connection);
+ exit:
+	if (connection)
+		g_object_unref (connection);
 
 	return success;
 }
@@ -770,7 +783,6 @@ ews_backend_delete_resource_sync (ECollectionBackend *backend,
 	EEwsConnection *connection;
 	ESourceEwsFolder *extension;
 	const gchar *extension_name;
-	gchar *folder_id;
 	gboolean success = FALSE;
 
 	connection = e_ews_backend_ref_connection_sync (
@@ -789,11 +801,22 @@ ews_backend_delete_resource_sync (ECollectionBackend *backend,
 		goto exit;
 	}
 	extension = e_source_get_extension (source, extension_name);
-	folder_id = e_source_ews_folder_dup_id (extension);
 
-	success = e_ews_connection_delete_folder_sync (
-		connection, EWS_PRIORITY_MEDIUM, folder_id,
-		FALSE, "HardDelete", cancellable, error);
+	if (e_source_ews_folder_get_foreign (extension)) {
+		/* do not delete foreign folders,
+		   just remove them from local store */
+		success = TRUE;
+	} else {
+		gchar *folder_id;
+
+		folder_id = e_source_ews_folder_dup_id (extension);
+
+		success = e_ews_connection_delete_folder_sync (
+			connection, EWS_PRIORITY_MEDIUM, folder_id,
+			FALSE, "HardDelete", cancellable, error);
+
+		g_free (folder_id);
+	}
 
 	if (success) {
 		ESourceRegistryServer *server;

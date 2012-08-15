@@ -3101,8 +3101,11 @@ ews_append_folder_ids_to_msg (ESoapMessage *msg,
 		if (fid->change_key)
 			e_soap_message_add_attribute (msg, "ChangeKey", fid->change_key, NULL, NULL);
 
-		if (fid->is_distinguished_id && email)
-			e_ews_message_write_string_parameter (msg, "Mailbox", NULL, email);
+		if (fid->is_distinguished_id && email) {
+			e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
+			e_ews_message_write_string_parameter (msg, "EmailAddress", NULL, email);
+			e_soap_message_end_element (msg);
+		}
 
 		e_soap_message_end_element (msg);
 	}
@@ -7318,6 +7321,174 @@ e_ews_connection_get_password_expiration_sync (EEwsConnection *cnc,
 
 	success = e_ews_connection_get_password_expiration_finish (
 		cnc, result, exp_date, error);
+
+	e_async_closure_free (closure);
+
+	return success;
+}
+
+static void
+get_folder_info_response_cb (ESoapResponse *response,
+			     GSimpleAsyncResult *simple)
+{
+	EwsAsyncData *async_data;
+	ESoapParameter *param;
+	ESoapParameter *subparam;
+	GError *error = NULL;
+
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	param = e_soap_response_get_first_parameter_by_name (
+		response, "ResponseMessages", &error);
+
+	/* Sanity check */
+	g_return_if_fail (
+		(param != NULL && error == NULL) ||
+		(param == NULL && error != NULL));
+
+	if (error != NULL) {
+		g_simple_async_result_take_error (simple, error);
+		return;
+	}
+
+	subparam = e_soap_parameter_get_first_child (param);
+
+	while (subparam != NULL) {
+		const gchar *name = (const gchar *) subparam->name;
+
+		if (!ews_get_response_status (subparam, &error)) {
+			g_simple_async_result_take_error (simple, error);
+			return;
+		}
+
+		if (CHECK_ELEMENT (name, "GetFolderResponseMessage")) {
+			ESoapParameter *node;
+
+			node = e_soap_parameter_get_first_child_by_name (subparam, "Folders");
+			if (node) {
+				EEwsFolder *folder = e_ews_folder_new_from_soap_parameter (node);
+
+				if (folder)
+					async_data->items = g_slist_prepend (NULL, folder);
+			}
+
+			break;
+		}
+
+		subparam = e_soap_parameter_get_next_child (subparam);
+	}
+}
+
+void
+e_ews_connection_get_folder_info (EEwsConnection *cnc,
+				  gint pri,
+				  const gchar *mail_id,
+				  const EwsFolderId *folder_id,
+				  GCancellable *cancellable,
+				  GAsyncReadyCallback callback,
+				  gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+	GSList *folder_ids;
+
+	g_return_if_fail (cnc != NULL);
+	g_return_if_fail (folder_id != NULL);
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, "GetFolder", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+
+	e_soap_message_start_element (msg, "FolderShape", "messages", NULL);
+	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, "Default");
+	e_soap_message_start_element (msg, "AdditionalProperties", NULL, NULL);
+	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", "folder:FolderClass");
+	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", "folder:ParentFolderId");
+	e_soap_message_end_element (msg); /* AdditionalProperties */
+	e_soap_message_end_element (msg); /* FolderShape */
+
+	folder_ids = g_slist_append (NULL, (gpointer) folder_id);
+	e_soap_message_start_element (msg, "FolderIds", "messages", NULL);
+	ews_append_folder_ids_to_msg (msg, mail_id, folder_ids);
+	e_soap_message_end_element (msg);
+	g_slist_free (folder_ids);
+
+	e_ews_message_write_footer (msg);
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_get_folder_info);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	e_ews_connection_queue_request (
+		cnc, msg, get_folder_info_response_cb,
+		pri, cancellable, simple);
+
+	g_object_unref (simple);
+}
+
+gboolean
+e_ews_connection_get_folder_info_finish (EEwsConnection *cnc,
+					 GAsyncResult *result,
+					 EEwsFolder **folder,
+					 GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (folder != NULL, FALSE);
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_get_folder_info),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	if (!async_data->items)
+		return FALSE;
+
+	*folder = async_data->items ? async_data->items->data : NULL;
+
+	g_slist_free (async_data->items);
+	async_data->items = NULL;
+
+	return TRUE;
+}
+
+gboolean
+e_ews_connection_get_folder_info_sync (EEwsConnection *cnc,
+				       gint pri,
+				       const gchar *mail_id,
+				       const EwsFolderId *folder_id,
+				       EEwsFolder **folder,
+				       GCancellable *cancellable,
+				       GError **error)
+{
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (folder_id != NULL, FALSE);
+	g_return_val_if_fail (folder != NULL, FALSE);
+
+	closure = e_async_closure_new ();
+
+	e_ews_connection_get_folder_info (
+		cnc, pri, mail_id, folder_id, cancellable,
+		e_async_closure_callback, closure);
+
+	result = e_async_closure_wait (closure);
+
+	success = e_ews_connection_get_folder_info_finish (
+		cnc, result, folder, error);
 
 	e_async_closure_free (closure);
 

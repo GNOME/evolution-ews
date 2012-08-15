@@ -76,6 +76,10 @@ void		e_source_ews_folder_set_id	(ESourceEwsFolder *extension,
 EwsFolderId *	e_source_ews_folder_dup_folder_id
 						(ESourceEwsFolder *extension);
 
+gboolean	e_source_ews_folder_get_foreign	(ESourceEwsFolder *extension);
+void		e_source_ews_folder_set_foreign	(ESourceEwsFolder *extension,
+						 gboolean is_foreign);
+
 G_END_DECLS
 
 #endif /* E_SOURCE_EWS_FOLDER_H */

@@ -83,7 +83,7 @@ void	ews_utils_sync_folders	(CamelEwsStore *ews_store,
 
 CamelFolderInfo *
 	camel_ews_utils_build_folder_info	(CamelEwsStore *store,
-						 const gchar *fname);
+						 const gchar *fid);
 
 void	camel_ews_utils_sync_deleted_items	(CamelEwsFolder *ews_folder,
 						 GSList *items_deleted);

@@ -51,6 +51,9 @@
 
 #define EWS_PARAM_FILTER_INBOX		(1 << 0)
 
+#define EWS_FOREIGN_FOLDER_ROOT_ID		"ForeignRoot"
+#define EWS_FOREIGN_FOLDER_ROOT_DISPLAY_NAME	_("Foreign Folders")
+
 G_BEGIN_DECLS
 
 typedef struct _CamelEwsStore CamelEwsStore;
@@ -79,6 +82,11 @@ gboolean	camel_ews_store_connected	(CamelEwsStore *store,
 void		camel_ews_store_maybe_disconnect
 						(CamelEwsStore *store,
 						 const GError *error);
+void		camel_ews_store_ensure_virtual_folders
+						(CamelEwsStore *ews_store);
+void		camel_ews_store_ensure_unique_path
+						(CamelEwsStore *ews_store,
+						 gchar **ppath);
 
 G_END_DECLS
 

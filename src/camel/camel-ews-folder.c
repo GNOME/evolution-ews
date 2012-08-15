@@ -1060,6 +1060,10 @@ ews_folder_count_notify_cb (CamelFolderSummary *folder_summary,
 	store_summary = ews_store->summary;
 	folder_id = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, camel_folder_get_full_name (folder));
 
+	/* this can happen on folder delete/unsubscribe, after folder summary clear */
+	if (!folder_id)
+		return;
+
 	if (g_strcmp0 (g_param_spec_get_name (param), "saved-count") == 0) {
 		count = camel_folder_summary_get_saved_count (folder_summary);
 		camel_ews_store_summary_set_folder_total (store_summary, folder_id, count);
