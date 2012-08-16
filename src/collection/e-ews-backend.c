@@ -454,6 +454,35 @@ ews_backend_source_changed_cb (ESource *source,
 	ews_backend_add_gal_source (backend);
 }
 
+static void
+add_remote_sources (EEwsBackend *backend)
+{
+	GList *old_sources, *iter;
+	ESourceRegistryServer *registry;
+
+	registry = e_collection_backend_ref_server (E_COLLECTION_BACKEND (backend));
+	old_sources = e_collection_backend_claim_all_resources (E_COLLECTION_BACKEND (backend));
+	for (iter = old_sources; iter; iter = iter->next) {
+		ESource *source = iter->data;
+		ESourceEwsFolder *extension;
+
+		if (!e_source_has_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER))
+			continue;
+
+		/* foreign folders are just added */
+		extension = e_source_get_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER);
+		if (e_source_ews_folder_get_foreign (extension)) {
+			e_server_side_source_set_writable (
+				E_SERVER_SIDE_SOURCE (source), TRUE);
+			e_server_side_source_set_remote_deletable (
+				E_SERVER_SIDE_SOURCE (source), TRUE);
+			e_source_registry_server_add_source (registry, source);
+		}
+	}
+	g_list_free_full (old_sources, g_object_unref);
+	g_object_unref (registry);
+}
+
 static gboolean
 ews_backend_sync_folders_idle_cb (gpointer user_data)
 {
@@ -465,6 +494,8 @@ ews_backend_sync_folders_idle_cb (gpointer user_data)
 		closure->backend, closure->folders_deleted);
 	ews_backend_sync_created_folders (
 		closure->backend, closure->folders_created);
+
+	add_remote_sources (closure->backend);
 
 	return FALSE;
 }
