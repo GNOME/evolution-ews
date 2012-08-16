@@ -675,29 +675,6 @@ e_cal_backend_ews_open (ECalBackend *backend,
 }
 
 static void
-e_cal_backend_ews_remove (ECalBackend *backend,
-                          EDataCal *cal,
-                          guint32 context,
-                          GCancellable *cancellable)
-{
-	ECalBackendEws *cbews;
-	ECalBackendEwsPrivate *priv;
-
-	cbews = E_CAL_BACKEND_EWS (backend);
-	priv = cbews->priv;
-
-	PRIV_LOCK (priv);
-
-	/* remove the cache */
-	if (priv->store)
-		e_cal_backend_store_remove (priv->store);
-
-	PRIV_UNLOCK (priv);
-
-	e_data_cal_respond_remove (cal, context, NULL);
-}
-
-static void
 e_cal_backend_ews_get_object (ECalBackend *backend,
                               EDataCal *cal,
                               guint32 context,
@@ -4281,7 +4258,6 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	backend_class->refresh = e_cal_backend_ews_refresh;
 	backend_class->get_object = e_cal_backend_ews_get_object;
 	backend_class->get_object_list = e_cal_backend_ews_get_object_list;
-	backend_class->remove = e_cal_backend_ews_remove;
 
 	backend_class->discard_alarm = e_cal_backend_ews_discard_alarm;
 

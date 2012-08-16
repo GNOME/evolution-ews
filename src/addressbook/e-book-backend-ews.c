@@ -2702,15 +2702,6 @@ e_book_backend_ews_load_source (EBookBackend *backend,
 }
 
 static void
-e_book_backend_ews_remove (EBookBackend *backend,
-                           EDataBook *book,
-                           guint32 opid,
-                           GCancellable *cancellable)
-{
-	e_data_book_respond_remove (book,  opid, EDB_ERROR (SUCCESS));
-}
-
-static void
 e_book_backend_ews_notify_online_cb (EBookBackend *backend,
                                      GParamSpec *spec)
 {
@@ -2981,7 +2972,6 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 	parent_class->modify_contacts         = e_book_backend_ews_modify_contacts;
 	parent_class->get_contact             = e_book_backend_ews_get_contact;
 	parent_class->get_contact_list        = e_book_backend_ews_get_contact_list;
-	parent_class->remove                  = e_book_backend_ews_remove;
 	parent_class->start_book_view         = e_book_backend_ews_start_book_view;
 	parent_class->stop_book_view          = e_book_backend_ews_stop_book_view;
 
