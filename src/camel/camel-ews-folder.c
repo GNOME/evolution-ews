@@ -1077,6 +1077,27 @@ ews_folder_count_notify_cb (CamelFolderSummary *folder_summary,
 	g_free (folder_id);
 }
 
+static gboolean
+folder_has_inbox_type (CamelEwsStore *ews_store,
+		       const gchar *folder_name)
+{
+	gchar *folder_id;
+	guint64 flags;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_STORE( ews_store), FALSE);
+	g_return_val_if_fail (folder_name != NULL, FALSE);
+
+	folder_id = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, folder_name);
+	if (!folder_id)
+		return FALSE;
+
+	flags = camel_ews_store_summary_get_folder_flags (ews_store->summary, folder_id, NULL);
+
+	g_free (folder_id);
+
+	return (flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_INBOX;
+}
+
 CamelFolder *
 camel_ews_folder_new (CamelStore *store,
                       const gchar *folder_name,
@@ -1124,7 +1145,8 @@ camel_ews_folder_new (CamelStore *store,
 		return NULL;
 	}
 
-	if (!g_ascii_strcasecmp (folder_name, "Inbox")) {
+	if (!g_ascii_strcasecmp (folder_name, "Inbox") ||
+	    folder_has_inbox_type (CAMEL_EWS_STORE (store), folder_name)) {
 		CamelSettings *settings;
 		gboolean filter_inbox;
 
