@@ -63,7 +63,8 @@ static CamelProviderConfEntry ews_conf_entries[] = {
 
 	{ CAMEL_PROVIDER_CONF_SECTION_START, "connection", NULL, N_("Connection") },
 	{ CAMEL_PROVIDER_CONF_CHECKSPIN, "timeout", NULL,
-	  /* Translators: '%s' is preplaced with a widget, where user can select how long the timeout should be */
+	  /* Translators: '%s' is preplaced with a widget, where "
+	   * user can select how long the timeout should be. */
 	  N_("Connection _timeout (in seconds) %s"), "0:1:0:32768" },
 	{ CAMEL_PROVIDER_CONF_SECTION_END },
 
@@ -113,11 +114,13 @@ camel_provider_module_init (void)
 {
 	ews_provider.url_hash = ews_url_hash;
 	ews_provider.url_equal = ews_url_equal;
-	ews_provider.authtypes = g_list_prepend (g_list_prepend (NULL, &camel_ews_basic_authtype), &camel_ews_ntlm_authtype);
+	ews_provider.authtypes = g_list_prepend (
+		g_list_prepend (NULL, &camel_ews_basic_authtype),
+		&camel_ews_ntlm_authtype);
 	ews_provider.translation_domain = GETTEXT_PACKAGE;
 
-	ews_provider.object_types[CAMEL_PROVIDER_STORE] =  camel_ews_store_get_type ();
-	ews_provider.object_types[CAMEL_PROVIDER_TRANSPORT] = camel_ews_transport_get_type ();
+	ews_provider.object_types[CAMEL_PROVIDER_STORE] =  CAMEL_TYPE_EWS_STORE;
+	ews_provider.object_types[CAMEL_PROVIDER_TRANSPORT] = CAMEL_TYPE_EWS_TRANSPORT;
 
 	camel_provider_register (&ews_provider);
 }

@@ -19,42 +19,50 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef _EWS_OAB_DECODER
-#define _EWS_OAB_DECODER
+#ifndef EWS_OAB_DECODER_H
+#define EWS_OAB_DECODER_H
 
 #include <libebook/libebook.h>
 
+/* Standard GObject macros */
+#define EWS_TYPE_OAB_DECODER \
+	(ews_oab_decoder_get_type ())
+#define EWS_OAB_DECODER(obj) \
+	(G_TYPE_CHECK_INSTANCE_CAST \
+	((obj), EWS_TYPE_OAB_DECODER, EwsOabDecoder))
+#define EWS_OAB_DECODER_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_CAST \
+	((cls), EWS_TYPE_OAB_DECODER, EwsOabDecoderClass))
+#define EWS_IS_OAB_DECODER(obj) \
+	(G_TYPE_CHECK_INSTANCE_TYPE \
+	((obj), EWS_TYPE_OAB_DECODER))
+#define EWS_IS_OAB_DECODER_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_TYPE \
+	((cls), EWS_TYPE_OAB_DECODER))
+#define EWS_OAB_DECODER_GET_CLASS(obj) \
+	(G_TYPE_INSTANCE_GET_CLASS \
+	((obj), EWS_TYPE_OAB_DECODER, EwsOabDecoderClass))
+
 G_BEGIN_DECLS
 
-#define EWS_TYPE_OAB_DECODER ews_oab_decoder_get_type()
+typedef struct _EwsOabDecoder EwsOabDecoder;
+typedef struct _EwsOabDecoderClass EwsOabDecoderClass;
 
-#define EWS_OAB_DECODER(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), EWS_TYPE_OAB_DECODER, EwsOabDecoder))
+struct _EwsOabDecoder {
+	GObject parent;
+};
 
-#define EWS_OAB_DECODER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), EWS_TYPE_OAB_DECODER, EwsOabDecoderClass))
+struct _EwsOabDecoderClass {
+	GObjectClass parent_class;
+};
 
-#define EWS_IS_OAB_DECODER(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), EWS_TYPE_OAB_DECODER))
+typedef void	(*EwsOabContactAddedCb)		(EContact *contact,
+						 goffset offset,
+						 guint percent_complete,
+						 gpointer user_data,
+						 GError **error);
 
-#define EWS_IS_OAB_DECODER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), EWS_TYPE_OAB_DECODER))
-
-#define EWS_OAB_DECODER_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), EWS_TYPE_OAB_DECODER, EwsOabDecoderClass))
-
-typedef struct {
-  GObject parent;
-} EwsOabDecoder;
-
-typedef struct {
-  GObjectClass parent_class;
-} EwsOabDecoderClass;
-
-GType ews_oab_decoder_get_type (void);
-
-typedef void (*EwsOabContactAddedCb) (EContact *contact, goffset offset, guint percent_complete, gpointer user_data, GError **error);
-
+GType		ews_oab_decoder_get_type	(void);
 EwsOabDecoder *	ews_oab_decoder_new		(const gchar *oab_filename,
 						 const gchar *cache_dir,
 						 GError **error);
@@ -79,4 +87,5 @@ gboolean	ews_oab_decoder_set_oab_prop_string
 
 G_END_DECLS
 
-#endif /* _EWS_OAB_DECODER */
+#endif /* EWS_OAB_DECODER_H */
+

@@ -399,7 +399,7 @@ e_ews_folder_get_foreign (EEwsFolder *folder)
 
 void
 e_ews_folder_set_foreign (EEwsFolder *folder,
-			  gboolean is_foreign)
+                          gboolean is_foreign)
 {
 	g_return_if_fail (E_IS_EWS_FOLDER (folder));
 
@@ -408,7 +408,7 @@ e_ews_folder_set_foreign (EEwsFolder *folder,
 
 gchar *
 e_ews_folder_utils_pick_color_spec (gint move_by,
-				    gboolean around_middle)
+                                    gboolean around_middle)
 {
 	static gint color_mover = 0;
 	static gint color_indexer = -1;
@@ -462,14 +462,14 @@ e_ews_folder_utils_pick_color_spec (gint move_by,
 
 gboolean
 e_ews_folder_utils_populate_esource (ESource *source,
-				     const GList *sources,
-				     const gchar *master_hosturl,
-				     const gchar *master_username,
-				     EEwsFolder *folder,
-				     gboolean offline_sync,
-				     gint color_seed,
-				     GCancellable *cancellable,
-				     GError **perror)
+                                     const GList *sources,
+                                     const gchar *master_hosturl,
+                                     const gchar *master_username,
+                                     EEwsFolder *folder,
+                                     gboolean offline_sync,
+                                     gint color_seed,
+                                     GCancellable *cancellable,
+                                     GError **perror)
 {
 	ESource *master_source;
 	gboolean res = FALSE;
@@ -525,7 +525,8 @@ e_ews_folder_utils_populate_esource (ESource *source,
 			if (folder_type != E_EWS_FOLDER_TYPE_CONTACTS) {
 				gchar *color_str;
 
-				color_str = e_ews_folder_utils_pick_color_spec (1 + g_list_length ((GList *) sources),
+				color_str = e_ews_folder_utils_pick_color_spec (
+					1 + g_list_length ((GList *) sources),
 					folder_type != E_EWS_FOLDER_TYPE_CALENDAR);
 				e_source_selectable_set_color (E_SOURCE_SELECTABLE (backend_ext), color_str);
 				g_free (color_str);
@@ -533,11 +534,13 @@ e_ews_folder_utils_populate_esource (ESource *source,
 
 			res = TRUE;
 		} else {
-			g_propagate_error (perror, g_error_new_literal (EWS_CONNECTION_ERROR,
+			g_propagate_error (
+				perror, g_error_new_literal (EWS_CONNECTION_ERROR,
 				EWS_CONNECTION_ERROR_NORESPONSE, _("Cannot add folder, unsupported folder type")));
 		}
 	} else {
-		g_propagate_error (perror, g_error_new_literal (EWS_CONNECTION_ERROR,
+		g_propagate_error (
+			perror, g_error_new_literal (EWS_CONNECTION_ERROR,
 			EWS_CONNECTION_ERROR_NORESPONSE, _("Cannot add folder, master source not found")));
 	}
 
@@ -546,13 +549,13 @@ e_ews_folder_utils_populate_esource (ESource *source,
 
 gboolean
 e_ews_folder_utils_add_as_esource (ESourceRegistry *pregistry,
-				   const gchar *master_hosturl,
-				   const gchar *master_username,
-				   EEwsFolder *folder,
-				   gboolean offline_sync,
-				   gint color_seed,
-				   GCancellable *cancellable,
-				   GError **perror)
+                                   const gchar *master_hosturl,
+                                   const gchar *master_username,
+                                   EEwsFolder *folder,
+                                   gboolean offline_sync,
+                                   gint color_seed,
+                                   GCancellable *cancellable,
+                                   GError **perror)
 {
 	ESourceRegistry *registry;
 	GList *sources;
@@ -575,7 +578,8 @@ e_ews_folder_utils_add_as_esource (ESourceRegistry *pregistry,
 	if (old_source) {
 		res = FALSE;
 
-		g_propagate_error (perror,
+		g_propagate_error (
+			perror,
 			g_error_new (EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_FOLDEREXISTS,
 			_("Cannot add folder, folder already exists as '%s'"), e_source_get_display_name (old_source)));
 	} else if (e_ews_folder_utils_populate_esource (
@@ -601,11 +605,11 @@ e_ews_folder_utils_add_as_esource (ESourceRegistry *pregistry,
 
 gboolean
 e_ews_folder_utils_remove_as_esource (ESourceRegistry *pregistry,
-				      const gchar *master_hosturl,
-				      const gchar *master_username,
-				      const gchar *folder_id,
-				      GCancellable *cancellable,
-				      GError **perror)
+                                      const gchar *master_hosturl,
+                                      const gchar *master_username,
+                                      const gchar *folder_id,
+                                      GCancellable *cancellable,
+                                      GError **perror)
 {
 	ESourceRegistry *registry;
 	ESource *source;
@@ -634,17 +638,17 @@ e_ews_folder_utils_remove_as_esource (ESourceRegistry *pregistry,
 
 gboolean
 e_ews_folder_utils_is_subscribed_as_esource (const GList *esources,
-					     const gchar *master_hosturl,
-					     const gchar *master_username,
-					     const gchar *folder_id)
+                                             const gchar *master_hosturl,
+                                             const gchar *master_username,
+                                             const gchar *folder_id)
 {
 	return e_ews_folder_utils_get_source_for_folder (esources, master_hosturl, master_username, folder_id) != NULL;
 }
 
 static gboolean
 is_for_account (ESource *source,
-		const gchar *master_hosturl,
-		const gchar *master_username)
+                const gchar *master_hosturl,
+                const gchar *master_username)
 {
 	ESourceCamel *camel_extension;
 	ESourceAuthentication *auth_extension;
@@ -676,11 +680,11 @@ is_for_account (ESource *source,
 }
 
 /* filters @esources thus the resulting list will contain ESource-s only for @profile;
-   free returned list with g_list_free_full (list, g_object_unref); */
+ * free returned list with g_list_free_full (list, g_object_unref); */
 GList *
 e_ews_folder_utils_filter_sources_for_account (const GList *esources,
-					       const gchar *master_hosturl,
-					       const gchar *master_username)
+                                               const gchar *master_hosturl,
+                                               const gchar *master_username)
 {
 	GList *found = NULL;
 	const GList *iter;
@@ -704,13 +708,13 @@ e_ews_folder_utils_filter_sources_for_account (const GList *esources,
 /* returns (not-reffed) member of @esources, which is for @profile and @folder_id */
 ESource *
 e_ews_folder_utils_get_source_for_folder (const GList *esources,
-					  const gchar *master_hosturl,
-					  const gchar *master_username,
-					  const gchar *folder_id)
+                                          const gchar *master_hosturl,
+                                          const gchar *master_username,
+                                          const gchar *folder_id)
 {
 	ESource *master_source;
 	const GList *iter;
-	
+
 	master_source = e_ews_folder_utils_get_master_source (esources, master_hosturl, master_username);
 	if (!master_source)
 		return NULL;
@@ -736,8 +740,8 @@ e_ews_folder_utils_get_source_for_folder (const GList *esources,
 /* returns (not-reffed) member of @esources, which is master (with no parent) source for @profile */
 ESource *
 e_ews_folder_utils_get_master_source (const GList *esources,
-				      const gchar *master_hosturl,
-				      const gchar *master_username)
+                                      const gchar *master_hosturl,
+                                      const gchar *master_username)
 {
 	const GList *iter;
 

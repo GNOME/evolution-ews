@@ -705,7 +705,7 @@ e_cal_backend_ews_get_object (ECalBackend *backend,
 	comp = e_cal_backend_store_get_component (priv->store, uid, rid);
 	if (!comp) {
 		/* maybe a meeting invitation, for which the calendar item is not downloaded yet,
-		   thus synchronize local cache first */
+		 * thus synchronize local cache first */
 		ews_start_sync (cbews);
 
 		PRIV_UNLOCK (priv);

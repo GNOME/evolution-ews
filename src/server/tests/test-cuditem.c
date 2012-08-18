@@ -50,7 +50,9 @@ create_item_ready_callback (GObject *object,
 	e_ews_connection_create_items_finish (cnc, res, &ids, &error);
 
 	if (error != NULL) {
-		g_print ("Unable to get item: %s :%d \n", error->message, error->code);
+		g_print (
+			"Unable to get item: %s :%d \n",
+			error->message, error->code);
 		goto quit;
 	}
 
@@ -73,14 +75,20 @@ op_test_create_item_get_soap_msg (ESoapMessage *msg,
 	xmlChar *xmlbuff;
 	gint size;
 
-	//creating XML node for create item
-	e_soap_message_start_element (msg, "CalendarItem", NULL, NULL);
+	/* creating XML node for create item */
+	e_soap_message_start_element (
+		msg, "CalendarItem", NULL, NULL);
 
-	e_ews_message_write_string_parameter (msg, "Subject", NULL,  "Test Summary");
-	e_ews_message_write_string_parameter_with_attribute (msg, "Body", NULL, "Test Body", "BodyType", "Text");
-	e_ews_message_write_string_parameter (msg, "Start", NULL, "2011-03-01T15:00:00");
-	e_ews_message_write_string_parameter (msg, "End", NULL, "2011-03-01T16:00:00");
-	e_ews_message_write_string_parameter (msg, "Location", NULL,  "Test Location");
+	e_ews_message_write_string_parameter (
+		msg, "Subject", NULL,  "Test Summary");
+	e_ews_message_write_string_parameter_with_attribute (
+		msg, "Body", NULL, "Test Body", "BodyType", "Text");
+	e_ews_message_write_string_parameter (
+		msg, "Start", NULL, "2011-03-01T15:00:00");
+	e_ews_message_write_string_parameter (
+		msg, "End", NULL, "2011-03-01T16:00:00");
+	e_ews_message_write_string_parameter (
+		msg, "Location", NULL,  "Test Location");
 
 	e_soap_message_end_element (msg);
 
@@ -118,7 +126,7 @@ op_test_create_item ()
 
 	g_object_unref (settings);
 
-	//to check how to change to real data
+	/* to check how to change to real data */
 	folderid = "AQASAG1hbmR5Lnd1QGludGVsLmNvbQAuAAADnUl3sZrICU6Xd1qXV+rpVwEAJvRPgQpR30KhJ7wqBr4YXgAAAY6W+gAAAA==";
 
 	e_ews_connection_create_items (

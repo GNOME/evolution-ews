@@ -274,16 +274,18 @@ camel_ews_store_ensure_virtual_folders (CamelEwsStore *ews_store)
 			g_free (use_name);
 
 			/* Translators: This composes a "Foreign Folders" folder name for case when
-			   user has such in his store already. The %s is replaced with "Foreign Folders",
-			   the %d with counter, thus it composes name like "Foreign Folders_1"
+			 * user has such in his store already. The %s is replaced with "Foreign Folders",
+			 * the %d with counter, thus it composes name like "Foreign Folders_1"
 			*/
-			use_name = g_strdup_printf (C_("ForeignFolders", "%s_%d"),
+			use_name = g_strdup_printf (
+				C_("ForeignFolders", "%s_%d"),
 				EWS_FOREIGN_FOLDER_ROOT_DISPLAY_NAME, counter);
 
 			tmp_fid = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, use_name);
 		}
 
-		camel_ews_store_summary_new_folder (ews_store->summary,
+		camel_ews_store_summary_new_folder (
+			ews_store->summary,
 			EWS_FOREIGN_FOLDER_ROOT_ID, NULL, NULL,
 			use_name ? use_name : EWS_FOREIGN_FOLDER_ROOT_DISPLAY_NAME,
 			E_EWS_FOLDER_TYPE_MAILBOX,
@@ -310,7 +312,7 @@ camel_ews_store_ensure_virtual_folders (CamelEwsStore *ews_store)
 
 void
 camel_ews_store_ensure_unique_path (CamelEwsStore *ews_store,
-				    gchar **ppath)
+                                    gchar **ppath)
 {
 	gboolean done;
 	guint counter = 0;
@@ -832,10 +834,11 @@ ews_get_folder_info_sync (CamelStore *store,
 	GError *local_error = NULL;
 
 	if ((flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST) != 0) {
-		g_set_error_literal (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+		g_set_error_literal (
+			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 			_("Cannot list folders available for subscription of Exchange Web Services account, "
-			  "use 'Subscribe to folder of other user' context menu option above the account node "
-			  "in the folder tree instead."));
+			"use 'Subscribe to folder of other user' context menu option above the account node "
+			"in the folder tree instead."));
 		return NULL;
 	}
 
@@ -1041,7 +1044,7 @@ ews_delete_folder_sync (CamelStore *store,
 
 	if (camel_ews_store_summary_get_foreign (ews_store->summary, fid, NULL)) {
 		/* do not delete foreign folders,
-		   just remove them from local store */
+		 * just remove them from local store */
 		success = TRUE;
 	} else {
 		EEwsConnection *connection;
@@ -1404,7 +1407,7 @@ ews_can_refresh_folder (CamelStore *store,
 
 static gboolean
 ews_store_folder_is_subscribed (CamelSubscribable *subscribable,
-				const gchar *folder_name)
+                                const gchar *folder_name)
 {
 	CamelEwsStore *ews_store = CAMEL_EWS_STORE (subscribable);
 	gchar *fid;

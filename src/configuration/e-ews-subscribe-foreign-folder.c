@@ -47,7 +47,7 @@
 
 static void
 announce_new_folder (CamelEwsStore *ews_store,
-		     const gchar *fid)
+                     const gchar *fid)
 {
 	CamelFolderInfo *fi;
 
@@ -63,11 +63,11 @@ announce_new_folder (CamelEwsStore *ews_store,
 
 static gboolean
 add_foreign_folder_to_camel (CamelEwsStore *ews_store,
-			     const gchar *foreign_email,
-			     EEwsFolder *folder,
-			     const gchar *display_username,
-			     const gchar *display_foldername,
-			     GError **perror)
+                             const gchar *foreign_email,
+                             EEwsFolder *folder,
+                             const gchar *display_username,
+                             const gchar *display_foldername,
+                             GError **perror)
 {
 	gchar *foreign_mailbox_id;
 	gchar *mailbox, *fullname;
@@ -90,7 +90,8 @@ add_foreign_folder_to_camel (CamelEwsStore *ews_store,
 	if (camel_ews_store_summary_has_folder (ews_store->summary, fid->id)) {
 		gchar *full_name = camel_ews_store_summary_get_folder_full_name (ews_store->summary, fid->id, NULL);
 
-		g_propagate_error (perror,
+		g_propagate_error (
+			perror,
 			g_error_new (EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_FOLDEREXISTS,
 			_("Cannot add folder, folder already exists as '%s'"), full_name));
 
@@ -100,13 +101,14 @@ add_foreign_folder_to_camel (CamelEwsStore *ews_store,
 	}
 
 	/* Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
-	   Example result: "Mailbox - John Smith"
+	 * Example result: "Mailbox - John Smith"
 	*/
 	mailbox = g_strdup_printf (C_("ForeignFolder", "Mailbox - %s"), display_username);
 
 	foreign_mailbox_id = g_strdup_printf ("ForeignMailbox::%s", foreign_email);
 	if (!camel_ews_store_summary_has_folder (ews_store->summary, foreign_mailbox_id)) {
-		camel_ews_store_summary_new_folder (ews_store->summary,
+		camel_ews_store_summary_new_folder (
+			ews_store->summary,
 			foreign_mailbox_id, EWS_FOREIGN_FOLDER_ROOT_ID, NULL,
 			mailbox, E_EWS_FOLDER_TYPE_MAILBOX,
 			CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_NOSELECT,
@@ -114,7 +116,8 @@ add_foreign_folder_to_camel (CamelEwsStore *ews_store,
 	}
 
 	if (camel_ews_store_summary_has_folder (ews_store->summary, parent_fid->id)) {
-		camel_ews_store_summary_new_folder (ews_store->summary,
+		camel_ews_store_summary_new_folder (
+			ews_store->summary,
 			fid->id, parent_fid->id, fid->change_key,
 			display_foldername, E_EWS_FOLDER_TYPE_MAILBOX,
 			CAMEL_FOLDER_SUBSCRIBED, e_ews_folder_get_total_count (folder), TRUE);
@@ -129,7 +132,8 @@ add_foreign_folder_to_camel (CamelEwsStore *ews_store,
 		displayname = strrchr (fullname, '/');
 		displayname++;
 
-		camel_ews_store_summary_new_folder (ews_store->summary,
+		camel_ews_store_summary_new_folder (
+			ews_store->summary,
 			fid->id, foreign_mailbox_id, fid->change_key,
 			displayname, E_EWS_FOLDER_TYPE_MAILBOX,
 			CAMEL_FOLDER_SUBSCRIBED, e_ews_folder_get_total_count (folder), TRUE);
@@ -168,7 +172,8 @@ enable_ok_button_by_data (GObject *dialog)
 	entry_text = gtk_entry_get_text (entry);
 	combo_text = gtk_combo_box_text_get_active_text (combo);
 
-	gtk_dialog_set_response_sensitive (GTK_DIALOG (dialog), GTK_RESPONSE_OK,
+	gtk_dialog_set_response_sensitive (
+		GTK_DIALOG (dialog), GTK_RESPONSE_OK,
 		entry_text && *entry_text && *entry_text != ' ' && *entry_text != ',' &&
 		combo_text && *combo_text);
 
@@ -222,7 +227,7 @@ e_ews_check_foreign_folder_data_free (gpointer ptr)
 	g_free (cffd->use_foldername);
 
 	/* folder tells whether successfully finished,
-	   then the dialog can be destroyed */
+	 * then the dialog can be destroyed */
 	if (cffd->folder && cffd->dialog)
 		gtk_widget_destroy (cffd->dialog);
 
@@ -234,9 +239,9 @@ e_ews_check_foreign_folder_data_free (gpointer ptr)
 
 static void
 check_foreign_folder_thread (GObject *with_object,
-			     gpointer user_data,
-			     GCancellable *cancellable,
-			     GError **perror)
+                             gpointer user_data,
+                             GCancellable *cancellable,
+                             GError **perror)
 {
 	struct EEwsCheckForeignFolderData *cffd = user_data;
 	GError *local_error = NULL;
@@ -337,7 +342,8 @@ check_foreign_folder_thread (GObject *with_object,
 		if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ITEMNOTFOUND) ||
 		    g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_FOLDERNOTFOUND)) {
 			g_clear_error (&local_error);
-			local_error = g_error_new (EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_FOLDERNOTFOUND,
+			local_error = g_error_new (
+				EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_FOLDERNOTFOUND,
 				_("Folder '%s' not found. Either it does not exist or you do not have permission to access it."),
 				cffd->orig_foldername);
 		}
@@ -354,7 +360,8 @@ check_foreign_folder_thread (GObject *with_object,
 	}
 
 	if (e_ews_folder_get_folder_type (folder) == E_EWS_FOLDER_TYPE_UNKNOWN) {
-		g_propagate_error (perror, g_error_new_literal (EWS_CONNECTION_ERROR,
+		g_propagate_error (
+			perror, g_error_new_literal (EWS_CONNECTION_ERROR,
 			EWS_CONNECTION_ERROR_FOLDERNOTFOUND, _("Cannot add folder, cannot determine folder's type")));
 		g_object_unref (folder);
 		g_object_unref (conn);
@@ -369,9 +376,9 @@ check_foreign_folder_thread (GObject *with_object,
 
 static void
 check_foreign_folder_idle (GObject *with_object,
-			   gpointer user_data,
-			   GCancellable *cancellable,
-			   GError **perror)
+                           gpointer user_data,
+                           GCancellable *cancellable,
+                           GError **perror)
 {
 	struct EEwsCheckForeignFolderData *cffd = user_data;
 	gchar *folder_name;
@@ -396,9 +403,9 @@ check_foreign_folder_idle (GObject *with_object,
 	base_foldername = e_ews_folder_get_name (cffd->folder) ? e_ews_folder_get_name (cffd->folder) : cffd->orig_foldername;
 
 	/* Translators: This is used to name foreign folder.
-	   The first '%s' is replaced with user name to whom the folder belongs,
-	   the second '%s' is replaced with folder name.
-	   Example result: "John Smith - Calendar"
+	 * The first '%s' is replaced with user name to whom the folder belongs,
+	 * the second '%s' is replaced with folder name.
+	 * Example result: "John Smith - Calendar"
 	*/
 	folder_name = g_strdup_printf (C_("ForeignFolder", "%s - %s"), base_username, base_foldername);
 	if (folder_type != E_EWS_FOLDER_TYPE_MAILBOX)
@@ -438,7 +445,7 @@ check_foreign_folder_idle (GObject *with_object,
 
 static void
 subscribe_foreign_response_cb (GObject *dialog,
-			       gint response_id)
+                               gint response_id)
 {
 	struct EEwsCheckForeignFolderData *cffd;
 	ENameSelectorEntry *entry;
@@ -513,7 +520,8 @@ subscribe_foreign_response_cb (GObject *dialog,
 	cffd->use_foldername = use_foldername;
 	cffd->folder = NULL;
 
-	description = g_strdup_printf (_("Testing availability of folder '%s' of user '%s', please wait..."),
+	description = g_strdup_printf (
+		_("Testing availability of folder '%s' of user '%s', please wait..."),
 		show_foldername ? show_foldername : cffd->orig_foldername, cffd->email);
 
 	e_ews_config_utils_run_in_thread_with_feedback (
@@ -531,7 +539,7 @@ subscribe_foreign_response_cb (GObject *dialog,
 
 static void
 pick_gal_user_clicked_cb (GtkButton *button,
-			  GObject *dialog)
+                          GObject *dialog)
 {
 	GtkEntry *entry;
 	CamelEwsStore *ews_store;
@@ -567,11 +575,11 @@ pick_gal_user_clicked_cb (GtkButton *button,
 }
 
 /* Opens dialog to subscribe to folders of other
-   users in the given store */
+ * users in the given store */
 void
 e_ews_subscribe_foreign_folder (GtkWindow *parent,
-				CamelSession *session,
-				CamelStore *store)
+                                CamelSession *session,
+                                CamelStore *store)
 {
 	PangoAttrList *attrs;
 	ENameSelector *name_selector;
@@ -611,7 +619,8 @@ e_ews_subscribe_foreign_folder (GtkWindow *parent,
 	row = 0;
 
 	label = gtk_label_new (_("Account:"));
-	g_object_set (G_OBJECT (label),
+	g_object_set (
+		G_OBJECT (label),
 		"hexpand", FALSE,
 		"vexpand", FALSE,
 		"xalign", 0.0,
@@ -621,7 +630,8 @@ e_ews_subscribe_foreign_folder (GtkWindow *parent,
 	attrs = pango_attr_list_new ();
 	pango_attr_list_insert (attrs, pango_attr_weight_new (PANGO_WEIGHT_BOLD));
 	widget = gtk_label_new (camel_service_get_display_name (CAMEL_SERVICE (store)));
-	g_object_set (G_OBJECT (widget),
+	g_object_set (
+		G_OBJECT (widget),
 		"hexpand", TRUE,
 		"vexpand", FALSE,
 		"use-underline", FALSE,
@@ -646,20 +656,23 @@ e_ews_subscribe_foreign_folder (GtkWindow *parent,
 	g_object_set_data_full (dialog, "e-ews-name-selector", name_selector, g_object_unref);
 
 	label = gtk_label_new_with_mnemonic (_("_User:"));
-	g_object_set (G_OBJECT (label),
+	g_object_set (
+		G_OBJECT (label),
 		"hexpand", FALSE,
 		"vexpand", FALSE,
 		"xalign", 0.0,
 		NULL);
 
 	entry = GTK_WIDGET (e_name_selector_peek_section_entry (name_selector, "User"));
-	g_object_set (G_OBJECT (entry),
+	g_object_set (
+		G_OBJECT (entry),
 		"hexpand", TRUE,
 		"vexpand", FALSE,
 		NULL);
 
 	widget = gtk_button_new_with_mnemonic (_("C_hoose..."));
-	g_object_set (G_OBJECT (entry),
+	g_object_set (
+		G_OBJECT (entry),
 		"hexpand", TRUE,
 		"vexpand", FALSE,
 		NULL);
@@ -674,13 +687,15 @@ e_ews_subscribe_foreign_folder (GtkWindow *parent,
 	row++;
 
 	label = gtk_label_new_with_mnemonic (_("_Folder name:"));
-	g_object_set (G_OBJECT (label),
+	g_object_set (
+		G_OBJECT (label),
 		"hexpand", FALSE,
 		"vexpand", FALSE,
 		"xalign", 0.0,
 		NULL);
 
-	widget = GTK_WIDGET (g_object_new (gtk_combo_box_text_get_type (),
+	widget = GTK_WIDGET (
+		g_object_new (gtk_combo_box_text_get_type (),
 		"has-entry", TRUE,
 		"entry-text-column", 0,
 		"hexpand", TRUE,

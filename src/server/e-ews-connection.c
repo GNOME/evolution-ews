@@ -1964,10 +1964,10 @@ exit:
 	g_simple_async_result_complete_in_idle (simple);
 
 	/* This function is processed within e_ews_soup_thread() and the 'simple'
-	   holds reference to EEwsConnection. For cases when this is the last
-	   reference to 'simple' the unref would cause crash, because of g_thread_join()
-	   in connection's dispose, trying to wait on the end of itself, thus it's
-	   safer to unref the 'simple' in a dedicated thread.
+	 * holds reference to EEwsConnection. For cases when this is the last
+	 * reference to 'simple' the unref would cause crash, because of g_thread_join()
+	 * in connection's dispose, trying to wait on the end of itself, thus it's
+	 * safer to unref the 'simple' in a dedicated thread.
 	*/
 	ews_unref_in_thread (simple);
 }
@@ -7192,7 +7192,7 @@ e_ews_connection_set_folder_permissions_sync (EEwsConnection *cnc,
 
 static void
 get_password_expiration_response_cb (ESoapResponse *response,
-				     GSimpleAsyncResult *simple)
+                                     GSimpleAsyncResult *simple)
 {
 	EwsAsyncData *async_data;
 	ESoapParameter *param;
@@ -7230,11 +7230,11 @@ get_password_expiration_response_cb (ESoapResponse *response,
  **/
 void
 e_ews_connection_get_password_expiration (EEwsConnection *cnc,
-					  gint pri,
-					  const gchar *mail_id,
-					  GCancellable *cancellable,
-					  GAsyncReadyCallback callback,
-					  gpointer user_data)
+                                          gint pri,
+                                          const gchar *mail_id,
+                                          GCancellable *cancellable,
+                                          GAsyncReadyCallback callback,
+                                          gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -7261,9 +7261,9 @@ e_ews_connection_get_password_expiration (EEwsConnection *cnc,
 
 gboolean
 e_ews_connection_get_password_expiration_finish (EEwsConnection *cnc,
-						 GAsyncResult *result,
-						 gchar **exp_date,
-						 GError **error)
+                                                 GAsyncResult *result,
+                                                 gchar **exp_date,
+                                                 GError **error)
 {
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
@@ -7298,11 +7298,11 @@ e_ews_connection_get_password_expiration_finish (EEwsConnection *cnc,
  **/
 gboolean
 e_ews_connection_get_password_expiration_sync (EEwsConnection *cnc,
-					       gint pri,
-					       const gchar *mail_id,
-					       gchar **exp_date,
-					       GCancellable *cancellable,
-					       GError **error)
+                                               gint pri,
+                                               const gchar *mail_id,
+                                               gchar **exp_date,
+                                               GCancellable *cancellable,
+                                               GError **error)
 {
 	EAsyncClosure *closure;
 	GAsyncResult *result;
@@ -7329,7 +7329,7 @@ e_ews_connection_get_password_expiration_sync (EEwsConnection *cnc,
 
 static void
 get_folder_info_response_cb (ESoapResponse *response,
-			     GSimpleAsyncResult *simple)
+                             GSimpleAsyncResult *simple)
 {
 	EwsAsyncData *async_data;
 	ESoapParameter *param;
@@ -7381,12 +7381,12 @@ get_folder_info_response_cb (ESoapResponse *response,
 
 void
 e_ews_connection_get_folder_info (EEwsConnection *cnc,
-				  gint pri,
-				  const gchar *mail_id,
-				  const EwsFolderId *folder_id,
-				  GCancellable *cancellable,
-				  GAsyncReadyCallback callback,
-				  gpointer user_data)
+                                  gint pri,
+                                  const gchar *mail_id,
+                                  const EwsFolderId *folder_id,
+                                  GCancellable *cancellable,
+                                  GAsyncReadyCallback callback,
+                                  gpointer user_data)
 {
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
@@ -7431,9 +7431,9 @@ e_ews_connection_get_folder_info (EEwsConnection *cnc,
 
 gboolean
 e_ews_connection_get_folder_info_finish (EEwsConnection *cnc,
-					 GAsyncResult *result,
-					 EEwsFolder **folder,
-					 GError **error)
+                                         GAsyncResult *result,
+                                         EEwsFolder **folder,
+                                         GError **error)
 {
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
@@ -7464,12 +7464,12 @@ e_ews_connection_get_folder_info_finish (EEwsConnection *cnc,
 
 gboolean
 e_ews_connection_get_folder_info_sync (EEwsConnection *cnc,
-				       gint pri,
-				       const gchar *mail_id,
-				       const EwsFolderId *folder_id,
-				       EEwsFolder **folder,
-				       GCancellable *cancellable,
-				       GError **error)
+                                       gint pri,
+                                       const gchar *mail_id,
+                                       const EwsFolderId *folder_id,
+                                       EEwsFolder **folder,
+                                       GCancellable *cancellable,
+                                       GError **error)
 {
 	EAsyncClosure *closure;
 	GAsyncResult *result;

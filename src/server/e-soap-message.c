@@ -114,11 +114,19 @@ fetch_ns (ESoapMessage *msg,
 	xmlNsPtr ns = NULL;
 
 	if (prefix && ns_uri)
-		ns = xmlNewNs (priv->last_node, (const xmlChar *) ns_uri, (const xmlChar *) prefix);
+		ns = xmlNewNs (
+			priv->last_node,
+			(const xmlChar *) ns_uri,
+			(const xmlChar *) prefix);
 	else if (prefix && !ns_uri) {
-		ns = xmlSearchNs (priv->doc, priv->last_node, (const xmlChar *) prefix);
+		ns = xmlSearchNs (
+			priv->doc, priv->last_node,
+			(const xmlChar *) prefix);
 		if (!ns)
-			ns = xmlNewNs (priv->last_node, (const xmlChar *) "", (const xmlChar *) prefix);
+			ns = xmlNewNs (
+				priv->last_node,
+				(const xmlChar *) "",
+				(const xmlChar *) prefix);
 	}
 
 	return ns;

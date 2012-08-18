@@ -59,7 +59,9 @@ folder_items_ready_callback (GObject *object,
 		&items_deleted, &error);
 
 	if (error != NULL) {
-		g_print ("Unable to sync the folder items: %s :%d \n", error->message, error->code);
+		g_print (
+			"Unable to sync the folder items: %s :%d \n",
+			error->message, error->code);
 		return;
 	}
 
@@ -70,7 +72,10 @@ folder_items_ready_callback (GObject *object,
 		EEwsItem *item = l->data;
 		const EwsId *item_id = e_ews_item_get_id (item);
 
-		g_print ("Subject: %s \n Id: %s  \n ChangeKey: %s \n\n", e_ews_item_get_subject (item), item_id->id, item_id->change_key);
+		g_print (
+			"Subject: %s \n Id: %s  \n ChangeKey: %s \n\n",
+			e_ews_item_get_subject (item),
+			item_id->id, item_id->change_key);
 		ids = g_slist_append (ids, g_strdup (item_id->id));
 		g_object_unref (item);
 	}
@@ -137,7 +142,9 @@ folder_hierarchy_ready_callback (GObject *object,
 		&folders_deleted, &error);
 
 	if (error != NULL) {
-		g_print ("Unable to fetch the folder hierarchy: %s :%d \n", error->message, error->code);
+		g_print (
+			"Unable to fetch the folder hierarchy: %s :%d \n",
+			error->message, error->code);
 		return;
 	}
 
@@ -148,7 +155,10 @@ folder_hierarchy_ready_callback (GObject *object,
 		EEwsFolder *folder = l->data;
 		const EwsFolderId *fid = e_ews_folder_get_id (folder);
 
-		g_print ("Name: %s \n Id: %s  \n ChangeKey: %s \n\n", e_ews_folder_get_name (folder), fid->id, fid->change_key);
+		g_print (
+			"Name: %s \n Id: %s  \n ChangeKey: %s \n\n",
+			e_ews_folder_get_name (folder),
+			fid->id, fid->change_key);
 		if (!strcmp (e_ews_folder_get_name (folder), "Contacts")) {
 			folder_id = g_new0 (EwsFolderId, 1);
 			folder_id->id = g_strdup (fid->id);
@@ -211,7 +221,9 @@ get_item_ready_callback (GObject *object,
 	e_ews_connection_get_items_finish (cnc, res, &items, &error);
 
 	if (error != NULL) {
-		g_print ("Unable to get item: %s :%d \n", error->message, error->code);
+		g_print (
+			"Unable to get item: %s :%d \n",
+			error->message, error->code);
 		return;
 	}
 
@@ -221,7 +233,9 @@ get_item_ready_callback (GObject *object,
 		if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR) {
 			const GError *error = e_ews_item_get_error (item);
 
-			g_print ("GetItem: Error '%s'\n", error ? error->message : "Unknown error");
+			g_print (
+				"GetItem: Error '%s'\n",
+				error ? error->message : "Unknown error");
 		} else {
 			const EwsId *id = e_ews_item_get_id (item);
 

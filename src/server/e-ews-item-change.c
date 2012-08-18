@@ -105,7 +105,8 @@ e_ews_message_start_set_item_field (ESoapMessage *msg,
 	fielduri = g_strconcat (fielduri_prefix, ":", name, NULL);
 
 	e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", fielduri);
+	e_ews_message_write_string_parameter_with_attribute (
+		msg, "FieldURI", NULL, NULL, "FieldURI", fielduri);
 	e_soap_message_start_element (msg, field_kind, NULL, NULL);
 
 	g_free (fielduri);
@@ -164,7 +165,8 @@ e_ews_message_add_delete_item_field (ESoapMessage *msg,
 	fielduri = g_strconcat (fielduri_prefix, ":", name, NULL);
 
 	e_soap_message_start_element (msg, "DeleteItemField", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", fielduri);
+	e_ews_message_write_string_parameter_with_attribute (
+		msg, "FieldURI", NULL, NULL, "FieldURI", fielduri);
 	e_soap_message_end_element (msg); /* DeleteItemField */
 
 	g_free (fielduri);

@@ -459,7 +459,10 @@ ews_decode_hdr_props (EwsOabDecoder *eod,
 	GSList **props;
 
 	/* number of properties */
-	num_props = ews_oab_read_uint32 (G_INPUT_STREAM (priv->fis), cancellable, error);
+	num_props = ews_oab_read_uint32 (
+		G_INPUT_STREAM (priv->fis),
+		cancellable, error);
+
 	if (*error)
 		return FALSE;
 
@@ -474,15 +477,22 @@ ews_decode_hdr_props (EwsOabDecoder *eod,
 	}
 
 	for (i = 0; i < num_props; i++) {
-		guint32 prop_id, flags;
+		guint32 prop_id;
 
-		prop_id = ews_oab_read_uint32 (G_INPUT_STREAM (priv->fis), cancellable, error);
-		d (g_print ("%X \n", prop_id);)
+		prop_id = ews_oab_read_uint32 (
+			G_INPUT_STREAM (priv->fis),
+			cancellable, error);
+
 		*props = g_slist_prepend (*props, GUINT_TO_POINTER (prop_id));
 
 		if (*error)
 			return FALSE;
-		flags = ews_oab_read_uint32 (G_INPUT_STREAM (priv->fis), cancellable, error);
+
+		/* eat the flags */
+		ews_oab_read_uint32 (
+			G_INPUT_STREAM (priv->fis),
+			cancellable, error);
+
 		if (*error)
 			return FALSE;
 
@@ -502,10 +512,12 @@ ews_decode_metadata (EwsOabDecoder *eod,
 {
 	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	gboolean ret = TRUE;
-	guint32 size;
 
-	/* Size */
-	size = ews_oab_read_uint32 (G_INPUT_STREAM (priv->fis), cancellable, error);
+	/* eat the size */
+	ews_oab_read_uint32 (
+		G_INPUT_STREAM (priv->fis),
+		cancellable, error);
+
 	if (*error)
 		return FALSE;
 
@@ -691,10 +703,8 @@ ews_decode_oab_prop (EwsOabDecoder *eod,
 
 					if (prop_type == EWS_PTYP_MULTIPLEBINARY) {
 						val = ews_decode_binary (eod, cancellable, error);
-						d (g_print ("prop id %X prop type: multi-string %s \n", prop_id, val);)
 					} else {
 						val = ews_oab_read_upto (G_INPUT_STREAM (priv->fis), '\0', cancellable, error);
-						d (g_print ("prop id %X prop type: multi-string %s \n", prop_id, val);)
 					}
 
 					if (*error) {
@@ -832,10 +842,16 @@ ews_decode_and_store_oab_records (EwsOabDecoder *eod,
 {
 	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	gboolean ret = TRUE;
-	guint32 size, i;
+	guint32 i;
 
-	size = ews_oab_read_uint32 (G_INPUT_STREAM (priv->fis), cancellable, error);
-	ews_decode_addressbook_record (eod, NULL, NULL, priv->hdr_props, cancellable, error);
+	/* eat the size */
+	ews_oab_read_uint32 (
+		G_INPUT_STREAM (priv->fis),
+		cancellable, error);
+
+	ews_decode_addressbook_record (
+		eod, NULL, NULL, priv->hdr_props, cancellable, error);
+
 	if (*error) {
 		ret = FALSE;
 		goto exit;
@@ -849,25 +865,37 @@ ews_decode_and_store_oab_records (EwsOabDecoder *eod,
 
 		contact = e_contact_new ();
 		dset = g_new0 (EwsDeferredSet, 1);
-		size = ews_oab_read_uint32 (G_INPUT_STREAM (priv->fis), cancellable, error);
+
+		/* eat the size */
+		ews_oab_read_uint32 (
+			G_INPUT_STREAM (priv->fis),
+			cancellable, error);
 
 		/* fetch the offset */
 		offset = g_seekable_tell ((GSeekable *) priv->fis);
 
-		ews_decode_addressbook_record (eod, contact, dset, priv->oab_props, cancellable, error);
+		ews_decode_addressbook_record (
+			eod, contact, dset,
+			priv->oab_props, cancellable, error);
+
 		if (*error)
 			goto error;
 
 		if (dset->addr)
-			e_contact_set (contact, E_CONTACT_ADDRESS_WORK, dset->addr);
+			e_contact_set (
+				contact,
+				E_CONTACT_ADDRESS_WORK,
+				dset->addr);
 
 		/* set the smtp address as contact's uid */
 		uid = (gchar *) e_contact_get (contact, E_CONTACT_EMAIL_1);
 		if (uid && *uid) {
 			e_contact_set (contact, E_CONTACT_UID, uid);
 
-			cb (contact, offset, ((gfloat) (i + 1) / priv->total_records) * 100, user_data, error);
-			d (g_print ("%s \n", e_vcard_to_string ((EVCard *) contact, EVC_FORMAT_VCARD_30));)
+			cb (
+				contact, offset,
+				((gfloat) (i + 1) / priv->total_records) * 100,
+				user_data, error);
 		}
 
 error:
@@ -895,12 +923,14 @@ ews_oab_decoder_get_oab_prop_string (EwsOabDecoder *eod,
 	GSList *l;
 
 	if (!priv->oab_props) {
-		g_set_error_literal (error, EOD_ERROR, 1, "Oab props not found");
+		g_set_error_literal (
+			error, EOD_ERROR, 1,
+			"Oab props not found");
 		return NULL;
 	}
 
-	/* Ideally i would liked to store int as int instead of converting to string,
-	 * but sqlite db doesn't yet support storing keys as blob */
+	/* Ideally i would liked to store int as int instead of converting to
+	 * string, but sqlite db doesn't yet support storing keys as blob. */
 	for (l = priv->oab_props; l != NULL; l = g_slist_next (l)) {
 		guint32 prop_id = GPOINTER_TO_UINT (l->data);
 		g_string_append_printf (str, "%"G_GUINT32_FORMAT, prop_id);
@@ -928,7 +958,9 @@ ews_oab_decoder_set_oab_prop_string (EwsOabDecoder *eod,
 
 	/* hmm is there a better way to check ? */
 	if (len < 2) {
-		g_set_error_literal (error, EOD_ERROR, 1, "Does not contain oab properties");
+		g_set_error_literal (
+			error, EOD_ERROR, 1,
+			"Does not contain oab properties");
 		return FALSE;
 	}
 
@@ -941,7 +973,8 @@ ews_oab_decoder_set_oab_prop_string (EwsOabDecoder *eod,
 		guint32 prop_id;
 
 		sscanf (vals[i],"%"G_GUINT32_FORMAT,&prop_id);
-		priv->oab_props = g_slist_prepend (priv->oab_props, GUINT_TO_POINTER (prop_id));
+		priv->oab_props = g_slist_prepend (
+			priv->oab_props, GUINT_TO_POINTER (prop_id));
 		d (printf ("%X\n", prop_id);)
 	}
 
@@ -987,7 +1020,8 @@ ews_oab_decoder_decode (EwsOabDecoder *eod,
 	if (!ret)
 		goto exit;
 
-	ret = ews_decode_and_store_oab_records (eod, cb, user_data, cancellable, &err);
+	ret = ews_decode_and_store_oab_records (
+		eod, cb, user_data, cancellable, &err);
 exit:
 	if (o_hdr)
 		g_free (o_hdr);

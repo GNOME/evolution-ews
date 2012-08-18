@@ -58,41 +58,55 @@ typedef struct {
 } flags_diff_t;
 
 /* FIXME: deprecated
- * This is used exclusively for the legacy imap cache code.  DO NOT use this in any new code */
+ * This is used exclusively for the legacy imap cache code.
+ * DO NOT use this in any new code. */
 
-typedef gboolean (*EPathFindFoldersCallback) (const gchar *physical_path,
-					      const gchar *path,
-					      gpointer user_data);
+typedef gboolean
+		(*EPathFindFoldersCallback)	(const gchar *physical_path,
+						 const gchar *path,
+						 gpointer user_data);
 
-gchar *   e_path_to_physical  (const gchar *prefix, const gchar *vpath);
+gchar *		e_path_to_physical		(const gchar *prefix,
+						 const gchar *vpath);
 
-gboolean e_path_find_folders (const gchar *prefix,
-			      EPathFindFoldersCallback callback,
-			      gpointer data);
+gboolean	e_path_find_folders		(const gchar *prefix,
+						 EPathFindFoldersCallback callback,
+						 gpointer data);
 
-gint      e_path_rmdir        (const gchar *prefix, const gchar *vpath);
+gint		e_path_rmdir			(const gchar *prefix,
+						 const gchar *vpath);
 
-void do_flags_diff (flags_diff_t *diff, guint32 old, guint32 _new);
-gchar *ews_concat ( const gchar *prefix, const gchar *suffix);
-void strip_lt_gt (gchar **string, gint s_offset, gint e_offset);
+void		do_flags_diff			(flags_diff_t *diff,
+						 guint32 old,
+						 guint32 _new);
+gchar *		ews_concat			(const gchar *prefix,
+						 const gchar *suffix);
+void		strip_lt_gt			(gchar **string,
+						 gint s_offset,
+						 gint e_offset);
 
-void	ews_utils_sync_folders	(CamelEwsStore *ews_store,
-				 GSList *created_folders,
-				 GSList *deleted_folders,
-				 GSList *updated_folders);
+void		ews_utils_sync_folders		(CamelEwsStore *ews_store,
+						 GSList *created_folders,
+						 GSList *deleted_folders,
+						 GSList *updated_folders);
 
 CamelFolderInfo *
-	camel_ews_utils_build_folder_info	(CamelEwsStore *store,
+		camel_ews_utils_build_folder_info
+						(CamelEwsStore *store,
 						 const gchar *fid);
 
-void	camel_ews_utils_sync_deleted_items	(CamelEwsFolder *ews_folder,
+void		camel_ews_utils_sync_deleted_items
+						(CamelEwsFolder *ews_folder,
 						 GSList *items_deleted);
-void	camel_ews_utils_sync_created_items	(CamelEwsFolder *ews_folder,
+void		camel_ews_utils_sync_created_items
+						(CamelEwsFolder *ews_folder,
 						 EEwsConnection *cnc,
 						 GSList *items_created);
-void	camel_ews_utils_sync_updated_items	(CamelEwsFolder *ews_folder,
+void		camel_ews_utils_sync_updated_items
+						(CamelEwsFolder *ews_folder,
 						 GSList *items_updated);
-void	ews_utils_replace_server_user_flags	(ESoapMessage *msg,
+void		ews_utils_replace_server_user_flags
+						(ESoapMessage *msg,
 						 CamelEwsMessageInfo *mi);
 
 G_END_DECLS

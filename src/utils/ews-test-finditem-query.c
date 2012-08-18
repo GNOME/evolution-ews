@@ -32,8 +32,9 @@
 #include "server/e-ews-item.h"
 #include "utils/e-ews-query-to-restriction.h"
 
-/*Some simple queries are defined here we can replace them to more complex ones;
- * based on these restriction you might not get items at all, to get all items use NULL */
+/* Some simple queries are defined here we can replace them to more
+ * complex ones; based on these restriction you might not get items
+ * at all, to get all items use NULL. */
 #define CONTACTS_QUERY "(contains \"x-evolution-any-field\" \"test\")"
 #define CALENDAR_QUERY "(contains? \"summary\"  \"test\")"
 #define MAIL_QUERY "(match-all (header-contains \"Subject\"  \"test\"))" 
@@ -51,14 +52,18 @@ find_folder_item_callback (GObject *object,
 	GSList *items = NULL, *l = NULL;
 	gboolean include_last;
 
-	e_ews_connection_find_folder_items_finish (cnc, res, &include_last, &items, &error);
+	e_ews_connection_find_folder_items_finish (
+		cnc, res, &include_last, &items, &error);
 
 	if (error != NULL) {
-		g_print ("Unable to find items in %s folder: %s :%d \n", (gchar *) user_data, error->message, error->code);
+		g_print (
+			"Unable to find items in %s folder: %s :%d \n",
+			(gchar *) user_data, error->message, error->code);
 
 		++iter;
 
-		/*Check whether we have got responses of all three folder requests*/
+		/* Check whether we got responses
+		 * of all three folder requests. */
 		if (iter == 3)
 			g_main_loop_quit (main_loop);
 
@@ -79,7 +84,8 @@ find_folder_item_callback (GObject *object,
 
 	++iter;
 
-	/*Check whether we have got responses of all three folder requests*/
+	/* Check whether we got responses
+	 * of all three folder requests. */
 	if (iter == 3)
 		g_main_loop_quit (main_loop);
 }
@@ -122,9 +128,9 @@ op_test_finditem_run (void)
 
 	g_object_unref (settings);
 
-	/*Along with finditem api we check query conversion too*/
+	/* Along with finditem api we check query conversion too */
 
-	/*Check for contact folder*/
+	/* Check for contact folder */
 	folder_name = "contacts";
 	folder_type = E_EWS_FOLDER_TYPE_CONTACTS;
 	fid = g_new0 (EwsFolderId, 1);
@@ -134,11 +140,13 @@ op_test_finditem_run (void)
 	e_ews_connection_find_folder_items (
 		cnc, EWS_PRIORITY_MEDIUM, fid,
 		"IdOnly", NULL, NULL, CONTACTS_QUERY,
-		folder_type, (EwsConvertQueryCallback) (e_ews_query_to_restriction),
-		cancellable, find_folder_item_callback, (gpointer) folder_name);
+		folder_type, (EwsConvertQueryCallback)
+		e_ews_query_to_restriction,
+		cancellable, find_folder_item_callback,
+		(gpointer) folder_name);
 	e_ews_folder_id_free (fid);
 
-	/*Check for calendar folder*/
+	/* Check for calendar folder */
 	folder_name = "calendar";
 	folder_type = E_EWS_FOLDER_TYPE_CALENDAR;
 	fid = g_new0 (EwsFolderId, 1);
@@ -148,11 +156,13 @@ op_test_finditem_run (void)
 	e_ews_connection_find_folder_items (
 		cnc, EWS_PRIORITY_MEDIUM, fid,
 		"IdOnly", NULL, NULL, CALENDAR_QUERY,
-		folder_type, (EwsConvertQueryCallback) (e_ews_query_to_restriction),
-		cancellable, find_folder_item_callback, (gpointer) folder_name);
+		folder_type, (EwsConvertQueryCallback)
+		e_ews_query_to_restriction,
+		cancellable, find_folder_item_callback,
+		(gpointer) folder_name);
 	e_ews_folder_id_free (fid);
 
-	/*Check for mail folder*/
+	/* Check for mail folder */
 	folder_name = "inbox";
 	folder_type = E_EWS_FOLDER_TYPE_MAILBOX;
 	fid = g_new0 (EwsFolderId, 1);
@@ -162,8 +172,10 @@ op_test_finditem_run (void)
 	e_ews_connection_find_folder_items (
 		cnc, EWS_PRIORITY_MEDIUM, fid,
 		"IdOnly", NULL, NULL, MAIL_QUERY,
-		folder_type, (EwsConvertQueryCallback) (e_ews_query_to_restriction),
-		cancellable, find_folder_item_callback, (gpointer) folder_name);
+		folder_type, (EwsConvertQueryCallback)
+		e_ews_query_to_restriction,
+		cancellable, find_folder_item_callback,
+		(gpointer) folder_name);
 	e_ews_folder_id_free (fid);
 }
 

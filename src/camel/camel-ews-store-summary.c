@@ -160,13 +160,20 @@ camel_ews_store_summary_new (const gchar *path)
 
 	ews_summary->priv->path = g_strdup (path);
 	file = g_file_new_for_path (path);
-	ews_summary->priv->monitor_delete = g_file_monitor_file (file, G_FILE_MONITOR_SEND_MOVED, NULL, &error);
+	ews_summary->priv->monitor_delete = g_file_monitor_file (
+		file, G_FILE_MONITOR_SEND_MOVED, NULL, &error);
 
-	/* Remove this once we have camel_store_remove_storage api, which should be available from 3.2 */
-	if (!error)
-		g_signal_connect (ews_summary->priv->monitor_delete, "changed", G_CALLBACK (monitor_delete_cb), ews_summary);
-	else {
-		g_warning ("CamelEwsStoreSummary: Error create monitor_delete: %s \n", error->message);
+	/* Remove this once we have camel_store_remove_storage api,
+	 * which should be available from 3.2 */
+	if (!error) {
+		g_signal_connect (
+			ews_summary->priv->monitor_delete, "changed",
+			G_CALLBACK (monitor_delete_cb), ews_summary);
+	} else {
+		g_warning (
+			"CamelEwsStoreSummary: "
+			"Error create monitor_delete: %s \n",
+			error->message);
 		g_clear_error (&error);
 	}
 
@@ -181,17 +188,23 @@ camel_ews_store_summary_load (CamelEwsStoreSummary *ews_summary,
 {
 	CamelEwsStoreSummaryPrivate *priv = ews_summary->priv;
 	gboolean ret;
+	gint version;
 
 	S_LOCK (ews_summary);
 
 	ret = g_key_file_load_from_file (
 		priv->key_file, priv->path, 0, error);
 
-	if (CURRENT_SUMMARY_VERSION != g_key_file_get_integer (priv->key_file, STORE_GROUP_NAME, "Version", NULL)) {
+	version = g_key_file_get_integer (
+		priv->key_file, STORE_GROUP_NAME, "Version", NULL);
+
+	if (version != CURRENT_SUMMARY_VERSION) {
 		/* version doesn't match, get folders again */
 		camel_ews_store_summary_clear (ews_summary);
 
-		g_key_file_set_integer (priv->key_file, STORE_GROUP_NAME, "Version", CURRENT_SUMMARY_VERSION);
+		g_key_file_set_integer (
+			priv->key_file, STORE_GROUP_NAME,
+			"Version", CURRENT_SUMMARY_VERSION);
 	}
 
 	load_id_fname_hash (ews_summary);
@@ -369,7 +382,7 @@ camel_ews_store_summary_new_folder (CamelEwsStoreSummary *ews_summary,
                                     EEwsFolderType folder_type,
                                     guint64 folder_flags,
                                     guint64 total,
-				    gboolean foreign)
+                                    gboolean foreign)
 {
 	const gchar *folder_type_nick;
 
@@ -531,8 +544,8 @@ camel_ews_store_summary_set_folder_type (CamelEwsStoreSummary *ews_summary,
 
 void
 camel_ews_store_summary_set_foreign (CamelEwsStoreSummary *ews_summary,
-				     const gchar *folder_id,
-				     gboolean is_foreign)
+                                     const gchar *folder_id,
+                                     gboolean is_foreign)
 {
 	S_LOCK (ews_summary);
 
@@ -733,14 +746,15 @@ camel_ews_store_summary_get_folder_type (CamelEwsStoreSummary *ews_summary,
 
 gboolean
 camel_ews_store_summary_get_foreign (CamelEwsStoreSummary *ews_summary,
-				     const gchar *folder_id,
-				     GError **error)
+                                     const gchar *folder_id,
+                                     GError **error)
 {
 	gboolean ret;
 
 	S_LOCK (ews_summary);
 
-	ret = g_key_file_get_boolean (ews_summary->priv->key_file, folder_id, "Foreign", error);
+	ret = g_key_file_get_boolean (
+		ews_summary->priv->key_file, folder_id, "Foreign", error);
 
 	S_UNLOCK (ews_summary);
 
@@ -788,7 +802,10 @@ camel_ews_store_summary_get_folders (CamelEwsStoreSummary *ews_summary,
 		if (!g_ascii_strcasecmp (groups[i], STORE_GROUP_NAME))
 			continue;
 		if (prefixlen) {
-			const gchar *fname = g_hash_table_lookup (ews_summary->priv->id_fname_hash, groups[i]);
+			const gchar *fname;
+
+			fname = g_hash_table_lookup (
+				ews_summary->priv->id_fname_hash, groups[i]);
 
 			if (!fname || strncmp (fname, prefix, prefixlen) ||
 			    (fname[prefixlen] && fname[prefixlen] != '/'))
@@ -869,7 +886,8 @@ camel_ews_store_summary_get_folder_id_from_folder_type (CamelEwsStoreSummary *ew
 		gchar *id = l->data;
 		guint64 folder_flags;
 
-		folder_flags = camel_ews_store_summary_get_folder_flags (ews_summary, id, NULL);
+		folder_flags = camel_ews_store_summary_get_folder_flags (
+			ews_summary, id, NULL);
 		if ((folder_flags & CAMEL_FOLDER_TYPE_MASK) == folder_type &&
 		    (folder_flags & CAMEL_FOLDER_SYSTEM) != 0) {
 			folder_id = id;

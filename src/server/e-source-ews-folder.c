@@ -300,7 +300,8 @@ e_source_ews_folder_dup_folder_id (ESourceEwsFolder *extension)
 
 	g_mutex_lock (extension->priv->property_lock);
 
-	folder_id = e_ews_folder_id_new (extension->priv->id, extension->priv->change_key, FALSE);
+	folder_id = e_ews_folder_id_new (
+		extension->priv->id, extension->priv->change_key, FALSE);
 
 	g_mutex_unlock (extension->priv->property_lock);
 
@@ -317,7 +318,7 @@ e_source_ews_folder_get_foreign (ESourceEwsFolder *extension)
 
 void
 e_source_ews_folder_set_foreign (ESourceEwsFolder *extension,
-				 gboolean is_foreign)
+                                 gboolean is_foreign)
 {
 	g_return_if_fail (E_IS_SOURCE_EWS_FOLDER (extension));
 

@@ -1079,12 +1079,12 @@ ews_folder_count_notify_cb (CamelFolderSummary *folder_summary,
 
 static gboolean
 folder_has_inbox_type (CamelEwsStore *ews_store,
-		       const gchar *folder_name)
+                       const gchar *folder_name)
 {
 	gchar *folder_id;
 	guint64 flags;
 
-	g_return_val_if_fail (CAMEL_IS_EWS_STORE( ews_store), FALSE);
+	g_return_val_if_fail (CAMEL_IS_EWS_STORE (ews_store), FALSE);
 	g_return_val_if_fail (folder_name != NULL, FALSE);
 
 	folder_id = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, folder_name);

@@ -81,7 +81,8 @@ add_contacts (EwsBookBackendSqliteDB *ebsdb)
 
 	con = e_contact_new_from_vcard (vcard_str);
 	contacts = g_slist_append (contacts, con);
-	ews_book_backend_sqlitedb_add_contacts (ebsdb, folderid, contacts, FALSE, &error);
+	ews_book_backend_sqlitedb_add_contacts (
+		ebsdb, folderid, contacts, FALSE, &error);
 
 	g_object_unref (con);
 }
@@ -96,7 +97,8 @@ search_db (EwsBookBackendSqliteDB *ebsdb,
 
 	g_print ("%s - query: %s \n", type, sexp);
 	op = type;
-	vcards = ews_book_backend_sqlitedb_search (ebsdb, folderid, sexp, NULL, NULL, NULL, &error);
+	vcards = ews_book_backend_sqlitedb_search (
+		ebsdb, folderid, sexp, NULL, NULL, NULL, &error);
 	if (error)
 		return;
 
@@ -129,32 +131,37 @@ start_tests (gpointer data)
 
 	g_print ("Getting is_populated \n");
 	op = "set is_populated";
-	ews_book_backend_sqlitedb_set_is_populated (ebsdb, folderid, TRUE, &error);
+	ews_book_backend_sqlitedb_set_is_populated (
+		ebsdb, folderid, TRUE, &error);
 	if (error)
 		goto exit;
 
 	g_print ("Setting is_populated \n");
 	op = "set is_populated";
-	populated = ews_book_backend_sqlitedb_get_is_populated (ebsdb, folderid, &error);
+	populated = ews_book_backend_sqlitedb_get_is_populated (
+		ebsdb, folderid, &error);
 	if (error)
 		goto exit;
 	g_print ("Populated: %d \n", populated);
 
 	g_print ("Setting key value \n");
 	op = "set key/value";
-	ews_book_backend_sqlitedb_set_key_value (ebsdb, folderid, "customkey", "stored", &error);
+	ews_book_backend_sqlitedb_set_key_value (
+		ebsdb, folderid, "customkey", "stored", &error);
 	if (error)
 		goto exit;
 
 	g_print ("Get Vcard string \n");
 	op = "get vcard string";
-	vcard_str = ews_book_backend_sqlitedb_get_vcard_string (ebsdb, folderid, uid, NULL, NULL, &error);
+	vcard_str = ews_book_backend_sqlitedb_get_vcard_string (
+		ebsdb, folderid, uid, NULL, NULL, &error);
 	if (error)
 		goto exit;
 	g_print ("VCard: %s \n", vcard_str);
 	g_free (vcard_str);
 
-	q = e_book_query_field_test (E_CONTACT_FULL_NAME, E_BOOK_QUERY_CONTAINS, "test");
+	q = e_book_query_field_test (
+		E_CONTACT_FULL_NAME, E_BOOK_QUERY_CONTAINS, "test");
 	sexp = e_book_query_to_string (q);
 	search_db (ebsdb, "summary query", sexp);
 	e_book_query_unref (q);
@@ -175,7 +182,8 @@ start_tests (gpointer data)
 	g_print ("Delete contact \n");
 	op = "delete contact";
 	uids = g_slist_append (uids, (gchar *) uid);
-	ews_book_backend_sqlitedb_remove_contacts (ebsdb, folderid, uids, &error);
+	ews_book_backend_sqlitedb_remove_contacts (
+		ebsdb, folderid, uids, &error);
 	g_slist_free (uids);
 	if (error)
 		goto exit;

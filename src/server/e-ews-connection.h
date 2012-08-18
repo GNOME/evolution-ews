@@ -33,16 +33,29 @@
 #include "e-ews-item.h"
 #include "camel-ews-settings.h"
 
+/* Standard GObject macros */
+#define E_TYPE_EWS_CONNECTION \
+	(e_ews_connection_get_type ())
+#define E_EWS_CONNECTION(obj) \
+	(G_TYPE_CHECK_INSTANCE_CAST \
+	((obj), E_TYPE_EWS_CONNECTION, EEwsConnection))
+#define E_EWS_CONNECTION_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_CAST \
+	((cls), E_TYPE_EWS_CONNECTION, EEwsConnectionClass))
+#define E_IS_EWS_CONNECTION(obj) \
+	(G_TYPE_CHECK_INSTANCE_TYPE \
+	((obj), E_TYPE_EWS_CONNECTION))
+#define E_IS_EWS_CONNECTION_CLASS(cls) \
+	(G_TYPE_CHECK_CLASS_TYPE \
+	((cls), E_TYPE_EWS_CONNECTION))
+#define E_EWS_CONNECTION_GET_CLASS(obj) \
+	(G_TYPE_INSTANCE_GET_CLASS \
+	((obj), E_TYPE_EWS_CONNECTION, EEwsConnectionClass))
+
 G_BEGIN_DECLS
 
-#define E_TYPE_EWS_CONNECTION            (e_ews_connection_get_type ())
-#define E_EWS_CONNECTION(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), E_TYPE_EWS_CONNECTION, EEwsConnection))
-#define E_EWS_CONNECTION_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), E_TYPE_EWS_CONNECTION, EEwsConnectionClass))
-#define E_IS_EWS_CONNECTION(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), E_TYPE_EWS_CONNECTION))
-#define E_IS_EWS_CONNECTION_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), E_TYPE_EWS_CONNECTION))
-
-typedef struct _EEwsConnection        EEwsConnection;
-typedef struct _EEwsConnectionClass   EEwsConnectionClass;
+typedef struct _EEwsConnection EEwsConnection;
+typedef struct _EEwsConnectionClass EEwsConnectionClass;
 typedef struct _EEwsConnectionPrivate EEwsConnectionPrivate;
 
 struct _EEwsConnection {

@@ -678,7 +678,8 @@ ews_ui_init_mail (GtkUIManager *ui_manager,
 	action_group = e_shell_window_get_action_group (shell_window, "mail");
 
 	/* Add actions to the "mail" action group. */
-	e_action_group_add_actions_localized (action_group, GETTEXT_PACKAGE,
+	e_action_group_add_actions_localized (
+		action_group, GETTEXT_PACKAGE,
 		mail_account_context_entries, G_N_ELEMENTS (mail_account_context_entries), shell_view);
 	e_action_group_add_actions_localized (
 		action_group, GETTEXT_PACKAGE,
