@@ -1,3 +1,25 @@
+Evolution-EWS 3.5.90 2012-08-20
+-------------------------------
+
+Bug Fixes:
+	Bug 670458 - Unable to accept meeting request (Milan Crha)
+	Bug 674321 - Support for password expiration information (Vibha Yadav)
+	Bug 681544 - Crash on failed autodiscovery (Milan Crha)
+
+Other Changes:
+	* Add version information to CamelEwsStoreSummary (Milan Crha)
+	* Implement "Subscribe to folder of other user" feature (Milan Crha)
+	* Set CamelEwsSettings::email on successful autodiscover (Milan Crha)
+	* Re-add foreign calendar/tasks/book sources on initial collection
+	  setup (Milan Crha)
+	* Do not add owner's folders under 'Mailbox - User Name' folder
+	  (Milan Crha)
+
+Translations:
+	Javier Mazorra (es)
+	Matej Urbančič (sl)
+
+
 Evolution-EWS 3.5.5 2012-08-06
 ------------------------------
 
