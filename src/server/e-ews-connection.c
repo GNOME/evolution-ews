@@ -97,13 +97,6 @@ enum {
 	PROP_SETTINGS
 };
 
-enum {
-	AUTHENTICATE,
-	LAST_SIGNAL
-};
-
-static guint signals[LAST_SIGNAL];
-
 typedef struct _EwsNode EwsNode;
 typedef struct _EwsAsyncData EwsAsyncData;
 
@@ -1387,8 +1380,6 @@ e_ews_connection_class_init (EEwsConnectionClass *class)
 	object_class->dispose = ews_connection_dispose;
 	object_class->finalize = ews_connection_finalize;
 
-	class->authenticate = NULL;
-
 	g_object_class_install_property (
 		object_class,
 		PROP_PASSWORD,
@@ -1411,19 +1402,6 @@ e_ews_connection_class_init (EEwsConnectionClass *class)
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT_ONLY |
 			G_PARAM_STATIC_STRINGS));
-
-	/**
-	 * EEwsConnection::authenticate
-	 **/
-	signals[AUTHENTICATE] = g_signal_new (
-		"authenticate",
-		G_OBJECT_CLASS_TYPE (class),
-		G_SIGNAL_RUN_FIRST,
-		G_STRUCT_OFFSET (EEwsConnectionClass, authenticate),
-		NULL, NULL,
-		ews_marshal_VOID__OBJECT_OBJECT_BOOLEAN,
-		G_TYPE_NONE, 3,
-		SOUP_TYPE_MESSAGE, SOUP_TYPE_AUTH, G_TYPE_BOOLEAN);
 }
 
 static void
@@ -1506,10 +1484,6 @@ ews_connection_authenticate (SoupSession *sess,
 
 	if (password != NULL)
 		soup_auth_authenticate (auth, user, password);
-	else
-		g_signal_emit (
-			cnc, signals[AUTHENTICATE], 0,
-			msg, auth, retrying);
 
 	g_free (password);
 	g_free (user);
