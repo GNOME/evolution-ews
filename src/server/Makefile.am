@@ -4,18 +4,6 @@ DIST_SUBDIRS = tests
 
 privlib_LTLIBRARIES = libeews-1.2.la
 
-MARSHAL_GENERATED = ews-marshal.c ews-marshal.h
-
-ews-marshal.h: ews-marshal.list
-	$(AM_V_GEN) ( $(GLIB_GENMARSHAL) --prefix=ews_marshal $(srcdir)/ews-marshal.list --header > ews-marshal.tmp \
-	&& mv ews-marshal.tmp ews-marshal.h ) \
-	|| ( rm -f ews-marshal.tmp && exit 1 )
-
-ews-marshal.c: ews-marshal.h
-	$(AM_V_GEN) ( (echo '#include "ews-marshal.h"'; $(GLIB_GENMARSHAL) --prefix=ews_marshal $(srcdir)/ews-marshal.list --body) > ews-marshal.tmp \
-	&& mv ews-marshal.tmp ews-marshal.c ) \
-	|| ( rm -f ews-marshal.tmp && exit 1 )
-
 ENUM_TYPES = e-ews-enums.h
 
 e-ews-enumtypes.h: e-ews-enumtypes.h.template $(ENUM_TYPES)
@@ -28,8 +16,6 @@ ENUM_GENERATED = \
 	e-ews-enumtypes.h \
 	e-ews-enumtypes.c \
 	$(NULL)
-
-e-ews-connection.c: $(MARSHAL_GENERATED)
 
 if ENABLE_KRB5
 KERBEROS_FILES = \
@@ -59,8 +45,6 @@ libeews_1_2_la_SOURCES = \
 	camel-ews-settings.c \
 	ews-errors.h \
 	ews-errors.c \
-	ews-marshal.h \
-	ews-marshal.c \
 	$(KERBEROS_FILES) \
 	e-ews-connection.c \
 	e-ews-connection.h \
@@ -111,14 +95,12 @@ pkgconfig_DATA = libeews-$(API_VERSION).pc
 
 BUILT_SOURCES = \
 	$(ENUM_GENERATED) \
-	$(MARSHAL_GENERATED) \
 	$(NULL)
 
 EXTRA_DIST = \
 	$(pkgconfig_DATA:-$(API_VERSION).pc=.pc.in) \
 	e-ews-enumtypes.h.template \
 	e-ews-enumtypes.c.template \
-	ews-marshal.list \
 	$(NULL)
 
 CLEANFILES = $(BUILT_SOURCES)

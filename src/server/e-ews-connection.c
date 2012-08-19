@@ -38,7 +38,6 @@
 #include "e-ews-connection.h"
 #include "e-ews-message.h"
 #include "e-ews-item-change.h"
-#include "ews-marshal.h"
 
 #define d(x) x
 
