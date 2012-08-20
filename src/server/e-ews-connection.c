@@ -1956,8 +1956,13 @@ static void post_restarted (SoupMessage *msg, gpointer data)
 
 	soup_message_set_request (
 		msg, "text/xml; charset=utf-8", SOUP_MEMORY_COPY,
-		(gchar *) buf->buffer->content,
-		buf->buffer->use);
+		(gchar *)
+			#ifdef LIBXML2_NEW_BUFFER
+			xmlOutputBufferGetContent (buf), xmlOutputBufferGetSize (buf)
+			#else
+			buf->buffer->content, buf->buffer->use
+			#endif
+		);
 }
 
 static SoupMessage *
@@ -1978,7 +1983,13 @@ e_ews_get_msg_for_url (const gchar *url,
 	if (buf != NULL) {
 		soup_message_set_request (
 			msg, "text/xml; charset=utf-8", SOUP_MEMORY_COPY,
-			(gchar *) buf->buffer->content, buf->buffer->use);
+			(gchar *)
+			#ifdef LIBXML2_NEW_BUFFER
+			xmlOutputBufferGetContent (buf), xmlOutputBufferGetSize (buf)
+			#else
+			buf->buffer->content, buf->buffer->use
+			#endif
+			);
 		g_signal_connect (
 			msg, "restarted",
 			G_CALLBACK (post_restarted), buf);
