@@ -587,6 +587,14 @@ ews_folder_get_message_sync (CamelFolder *folder,
 	return message;
 }
 
+static CamelMimeMessage *
+ews_folder_get_message_cached (CamelFolder *folder,
+			       const gchar *message_uid,
+			       GCancellable *cancellable)
+{
+	return camel_ews_folder_get_message_from_cache ((CamelEwsFolder *) folder, message_uid, cancellable, NULL);
+}
+
 static GPtrArray *
 ews_folder_search_by_expression (CamelFolder *folder,
                                  const gchar *expression,
@@ -1824,6 +1832,7 @@ camel_ews_folder_class_init (CamelEwsFolderClass *class)
 
 	folder_class = CAMEL_FOLDER_CLASS (class);
 	folder_class->get_message_sync = ews_folder_get_message_sync;
+	folder_class->get_message_cached = ews_folder_get_message_cached;
 	folder_class->search_by_expression = ews_folder_search_by_expression;
 	folder_class->count_by_expression = ews_folder_count_by_expression;
 	folder_class->cmp_uids = ews_cmp_uids;
