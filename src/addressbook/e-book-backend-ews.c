@@ -2289,6 +2289,10 @@ ebews_start_sync (gpointer data)
 
 	g_return_val_if_fail (priv->ebsdb != NULL, FALSE);
 
+	/* Not connected? Try again later */
+	if (!priv->cnc)
+		return TRUE;
+
 	status_message = g_strdup (_("Syncing contacts..."));
 	e_book_backend_foreach_view (E_BOOK_BACKEND (ebews), book_view_notify_status, status_message);
 	g_free (status_message);
