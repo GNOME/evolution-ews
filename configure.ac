@@ -175,6 +175,20 @@ dnl ****************************
 EVO_KRB5_SUPPORT
 
 dnl ****************************
+dnl Check for libsoup's SOUP_MESSAGE_IDEMPOTENT SoupMessage flag
+dnl ****************************
+AC_MSG_CHECKING([libsoup SOUP_MESSAGE_IDEMPOTENT flag])
+save_cflags=$CFLAGS; CFLAGS=$SOUP_CFLAGS
+save_libs=$LIBS; LIBS="$SOUP_LIBS"
+AC_LINK_IFELSE([AC_LANG_PROGRAM(
+	[[#include <libsoup/soup.h>]],
+	[[SoupMessageFlags flag; flag = SOUP_MESSAGE_IDEMPOTENT]])],
+	[AC_DEFINE(HAVE_SOUP_MESSAGE_IDEMPOTENT_FLAG, 1, [libsoup provides SOUP_MESSAGE_IDEMPOTENT flag]) ac_cv_have_smi=yes],[ac_cv_have_smi=no])
+CFLAGS=$save_cflags
+LIBS=$save_libs
+AC_MSG_RESULT([$ac_cv_have_smi])
+
+dnl ****************************
 dnl Expose version information
 dnl ****************************
 API_VERSION=1.2

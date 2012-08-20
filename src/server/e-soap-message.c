@@ -3,6 +3,10 @@
  * Copyright (C) 1999-2008 Novell, Inc. (www.novell.com)
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <libedataserver/eds-version.h>
 
 #include <string.h>
@@ -103,6 +107,10 @@ e_soap_message_init (ESoapMessage *msg)
 	msg->priv->doc->standalone = FALSE;
 	msg->priv->doc->encoding = xmlCharStrdup ("UTF-8");
 	msg->priv->steal_fd = -1;
+
+#ifdef HAVE_SOUP_MESSAGE_IDEMPOTENT_FLAG
+	soup_message_set_flags (SOUP_MESSAGE (msg), SOUP_MESSAGE_IDEMPOTENT);
+#endif
 }
 
 static xmlNsPtr
