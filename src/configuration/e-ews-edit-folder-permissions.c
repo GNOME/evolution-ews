@@ -763,8 +763,7 @@ read_folder_permissions_idle (GObject *dialog,
 		} else if (!perm->display_name || !*perm->display_name) {
 			const gchar *display_name;
 
-			if (!display_name)
-				display_name = perm->primary_smtp;
+			display_name = perm->primary_smtp;
 			if (!display_name)
 				display_name = C_("User", "Unknown");
 
