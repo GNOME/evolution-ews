@@ -1804,7 +1804,7 @@ ews_folder_constructed (GObject *object)
 	settings = camel_service_ref_settings (service);
 
 	network_settings = CAMEL_NETWORK_SETTINGS (settings);
-	host = camel_network_settings_dup_host (network_settings);
+	host = camel_ews_utils_get_host_name (settings);
 	user = camel_network_settings_dup_user (network_settings);
 
 	g_object_unref (settings);

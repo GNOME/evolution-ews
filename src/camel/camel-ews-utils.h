@@ -72,6 +72,7 @@ void		camel_ews_utils_sync_updated_items
 void		ews_utils_replace_server_user_flags
 						(ESoapMessage *msg,
 						 CamelEwsMessageInfo *mi);
+gchar *		camel_ews_utils_get_host_name	(CamelSettings *settings);
 
 G_END_DECLS
 

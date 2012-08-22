@@ -54,15 +54,13 @@ static gchar *
 ews_transport_get_name (CamelService *service,
                         gboolean brief)
 {
-	CamelNetworkSettings *network_settings;
 	CamelSettings *settings;
 	gchar *host;
 	gchar *name;
 
 	settings = camel_service_ref_settings (service);
 
-	network_settings = CAMEL_NETWORK_SETTINGS (settings);
-	host = camel_network_settings_dup_host (network_settings);
+	host = camel_ews_utils_get_host_name (settings);
 
 	g_object_unref (settings);
 

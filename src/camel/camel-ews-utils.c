@@ -776,3 +776,29 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 	camel_folder_change_info_free (ci);
 	g_slist_free (items_created);
 }
+
+gchar *
+camel_ews_utils_get_host_name (CamelSettings *settings)
+{
+	CamelURL *url;
+	gchar *host = NULL, *hosturl;
+
+	g_return_val_if_fail (settings != NULL, NULL);
+
+	hosturl = camel_ews_settings_dup_hosturl (CAMEL_EWS_SETTINGS (settings));
+
+	url = camel_url_new (hosturl, NULL);
+	if (url) {
+		host = g_strdup (url->host);
+		camel_url_free (url);
+	}
+	
+	if (!host || !*host) {
+		g_free (host);
+		host = camel_network_settings_dup_host (CAMEL_NETWORK_SETTINGS (settings));
+	}
+
+	g_free (hosturl);
+
+	return host;
+}
