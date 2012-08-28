@@ -450,7 +450,7 @@ ews_active_job_done (EEwsConnection *cnc,
 	QUEUE_LOCK (cnc);
 
 	cnc->priv->active_job_queue = g_slist_remove (cnc->priv->active_job_queue, ews_node);
-	if (ews_node->cancellable)
+	if (ews_node->cancellable && ews_node->cancel_handler_id)
 		g_signal_handler_disconnect (ews_node->cancellable, ews_node->cancel_handler_id);
 
 	QUEUE_UNLOCK (cnc);
@@ -524,10 +524,13 @@ e_ews_connection_queue_request (EEwsConnection *cnc,
 
 	if (cancellable) {
 		node->cancellable = g_object_ref (cancellable);
-		node->cancel_handler_id = g_cancellable_connect (
-			cancellable,
-			G_CALLBACK (ews_cancel_request),
-			(gpointer) node, NULL);
+		if (g_cancellable_is_cancelled (cancellable))
+			ews_cancel_request (cancellable, node);
+		else
+			node->cancel_handler_id = g_cancellable_connect (
+				cancellable,
+				G_CALLBACK (ews_cancel_request),
+				(gpointer) node, NULL);
 	}
 
 	ews_trigger_next_request (cnc);
