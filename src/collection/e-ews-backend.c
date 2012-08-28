@@ -395,21 +395,25 @@ ews_backend_add_gal_source (EEwsBackend *backend)
 
 	e_source_set_display_name (source, display_name);
 
-	extension_name = E_SOURCE_EXTENSION_ADDRESS_BOOK;
-	backend_extension = e_source_get_extension (source, extension_name);
-	e_source_backend_set_backend_name (backend_extension, "ews");
+	/* do not re-setup previously saved ESource,
+	   that would rewrite user's choice */
+	if (!e_source_has_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER)) {
+		extension_name = E_SOURCE_EXTENSION_ADDRESS_BOOK;
+		backend_extension = e_source_get_extension (source, extension_name);
+		e_source_backend_set_backend_name (backend_extension, "ews");
 
-	extension_name = E_SOURCE_EXTENSION_AUTOCOMPLETE;
-	autocomplete_extension = e_source_get_extension (source, extension_name);
-	e_source_autocomplete_set_include_me (autocomplete_extension, TRUE);
+		extension_name = E_SOURCE_EXTENSION_AUTOCOMPLETE;
+		autocomplete_extension = e_source_get_extension (source, extension_name);
+		e_source_autocomplete_set_include_me (autocomplete_extension, TRUE);
 
-	extension_name = E_SOURCE_EXTENSION_EWS_FOLDER;
-	folder_extension = e_source_get_extension (source, extension_name);
-	e_source_ews_folder_set_id (folder_extension, oal_id);
+		extension_name = E_SOURCE_EXTENSION_EWS_FOLDER;
+		folder_extension = e_source_get_extension (source, extension_name);
+		e_source_ews_folder_set_id (folder_extension, oal_id);
 
-	extension_name = E_SOURCE_EXTENSION_OFFLINE;
-	offline_extension = e_source_get_extension (source, extension_name);
-	e_source_offline_set_stay_synchronized (offline_extension, TRUE);
+		extension_name = E_SOURCE_EXTENSION_OFFLINE;
+		offline_extension = e_source_get_extension (source, extension_name);
+		e_source_offline_set_stay_synchronized (offline_extension, TRUE);
+	}
 
 	server = e_collection_backend_ref_server (collection_backend);
 	e_source_registry_server_add_source (server, source);
