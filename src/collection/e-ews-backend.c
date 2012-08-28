@@ -42,6 +42,8 @@ struct _EEwsBackendPrivate {
 
 	EEwsConnection *connection;
 	GMutex *connection_lock;
+
+	gboolean need_update_folders;
 };
 
 struct _SyncFoldersClosure {
@@ -427,6 +429,15 @@ ews_backend_source_changed_cb (ESource *source,
 	const gchar *oal_selected;
 	const gchar *gal_uid;
 
+	if (!e_source_get_enabled (source)) {
+		backend->priv->need_update_folders = TRUE;
+		return;
+	}
+
+	if (!e_backend_get_online (E_BACKEND (backend)) ||
+	    !backend->priv->need_update_folders)
+		return;
+
 	settings = ews_backend_get_settings (backend);
 	gal_uid = camel_ews_settings_get_gal_uid (settings);
 	oal_selected = camel_ews_settings_get_oal_selected (settings);
@@ -561,25 +572,32 @@ ews_backend_constructed (GObject *object)
 	 *     of weird races with clients trying to create folders. */
 	e_server_side_source_set_remote_creatable (
 		E_SERVER_SIDE_SOURCE (source), TRUE);
+
+	g_signal_connect (
+		source, "changed",
+		G_CALLBACK (ews_backend_source_changed_cb), object);
 }
 
 static void
 ews_backend_populate (ECollectionBackend *backend)
 {
 	ESource *source;
-
-	/* For now at least, we don't need to know the
-	 * results, so no callback function is needed. */
-	e_ews_backend_sync_folders (
-		E_EWS_BACKEND (backend), NULL, NULL, NULL);
-
-	ews_backend_add_gal_source (E_EWS_BACKEND (backend));
+	EEwsBackend *ews_backend = E_EWS_BACKEND (backend);
 
 	source = e_backend_get_source (E_BACKEND (backend));
 
-	g_signal_connect (
-		source, "changed",
-		G_CALLBACK (ews_backend_source_changed_cb), backend);
+	ews_backend->priv->need_update_folders = TRUE;
+
+	/* do not do anything, if account is disabled */
+	if (!e_source_get_enabled (source) ||
+	    !e_backend_get_online (E_BACKEND (backend)))
+		return;
+
+	/* For now at least, we don't need to know the
+	 * results, so no callback function is needed. */
+	e_ews_backend_sync_folders (ews_backend, NULL, NULL, NULL);
+
+	ews_backend_add_gal_source (ews_backend);
 }
 
 static gchar *
@@ -1072,8 +1090,12 @@ e_ews_backend_sync_folders_sync (EEwsBackend *backend,
 	connection = e_ews_backend_ref_connection_sync (
 		backend, cancellable, error);
 
-	if (connection == NULL)
+	if (connection == NULL) {
+		backend->priv->need_update_folders = TRUE;
 		return FALSE;
+	}
+
+	backend->priv->need_update_folders = FALSE;
 
 	g_mutex_lock (backend->priv->sync_state_lock);
 	sync_state = g_strdup (backend->priv->sync_state);
@@ -1113,6 +1135,8 @@ e_ews_backend_sync_folders_sync (EEwsBackend *backend,
 		g_warn_if_fail (folders_created == NULL);
 		g_warn_if_fail (folders_updated == NULL);
 		g_warn_if_fail (folders_deleted == NULL);
+
+		backend->priv->need_update_folders = TRUE;
 	}
 
 	g_free (sync_state);
