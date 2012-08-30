@@ -1970,14 +1970,23 @@ static void post_restarted (SoupMessage *msg, gpointer data)
 
 static SoupMessage *
 e_ews_get_msg_for_url (const gchar *url,
-                       xmlOutputBuffer *buf)
+                       xmlOutputBuffer *buf,
+		       GError **error)
 {
 	SoupMessage *msg;
 
-	if (url == NULL)
+	if (url == NULL) {
+		g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
+			_("URL cannot be NULL"));
 		return NULL;
+	}
 
 	msg = soup_message_new (buf != NULL ? "POST" : "GET", url);
+	if (!msg) {
+		g_set_error (error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
+			_("URL '%s' is not valid"), url);
+		return NULL;
+	}
 
 	soup_message_headers_append (
 		msg->request_headers,
@@ -2063,6 +2072,7 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 	gboolean use_secure = TRUE;
 	const gchar *host_url;
 	const gchar *user;
+	GError *error = NULL;
 
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 	g_return_if_fail (email_address != NULL);
@@ -2145,10 +2155,10 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 		simple, ad, (GDestroyNotify) autodiscover_data_free);
 
 	/* Passing a NULL URL string returns NULL. */
-	ad->msgs[0] = e_ews_get_msg_for_url (url1, buf);
-	ad->msgs[1] = e_ews_get_msg_for_url (url2, buf);
-	ad->msgs[2] = e_ews_get_msg_for_url (url3, buf);
-	ad->msgs[3] = e_ews_get_msg_for_url (url4, buf);
+	ad->msgs[0] = e_ews_get_msg_for_url (url1, buf, &error);
+	ad->msgs[1] = e_ews_get_msg_for_url (url2, buf, NULL);
+	ad->msgs[2] = e_ews_get_msg_for_url (url3, buf, NULL);
+	ad->msgs[3] = e_ews_get_msg_for_url (url4, buf, NULL);
 
 	/* These have to be submitted only after they're both set in ad->msgs[]
 	 * or there will be races with fast completion */
@@ -2166,6 +2176,13 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 	g_free (url2);
 	g_free (url3);
 	g_free (url4);
+
+	if (error && !ad->msgs[0] && !ad->msgs[1] && !ad->msgs[2] && !ad->msgs[3]) {
+		g_simple_async_result_take_error (simple, error);
+		g_simple_async_result_complete_in_idle (simple);
+	} else {
+		g_clear_error (&error);
+	}
 }
 
 gboolean
@@ -2427,10 +2444,21 @@ e_ews_connection_get_oal_list (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	SoupMessage *soup_message;
 	struct _oal_req_data *data;
+	GError *error = NULL;
 
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
-	soup_message = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
+	soup_message = e_ews_get_msg_for_url (cnc->priv->uri, NULL, &error);
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_get_oal_list);
+
+	if (!soup_message) {
+		g_simple_async_result_take_error (simple, error);
+		g_simple_async_result_complete_in_idle (simple);
+		return;
+	}
 
 	data = g_slice_new0 (struct _oal_req_data);
 	data->cnc = g_object_ref (cnc);
@@ -2443,10 +2471,6 @@ e_ews_connection_get_oal_list (EEwsConnection *cnc,
 			G_CALLBACK (ews_cancel_msg),
 			data, (GDestroyNotify) NULL);
 	}
-
-	simple = g_simple_async_result_new (
-		G_OBJECT (cnc), callback, user_data,
-		e_ews_connection_get_oal_list);
 
 	g_simple_async_result_set_op_res_gpointer (
 		simple, data, (GDestroyNotify) oal_req_data_free);
@@ -2537,10 +2561,21 @@ e_ews_connection_get_oal_detail (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	SoupMessage *soup_message;
 	struct _oal_req_data *data;
+	GError *error = NULL;
 
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
-	soup_message = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
+	soup_message = e_ews_get_msg_for_url (cnc->priv->uri, NULL, &error);
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_get_oal_detail);
+
+	if (!soup_message) {
+		g_simple_async_result_take_error (simple, error);
+		g_simple_async_result_complete_in_idle (simple);
+		return;
+	}
 
 	data = g_slice_new0 (struct _oal_req_data);
 	data->cnc = g_object_ref (cnc);
@@ -2555,10 +2590,6 @@ e_ews_connection_get_oal_detail (EEwsConnection *cnc,
 			G_CALLBACK (ews_cancel_msg),
 			data, (GDestroyNotify) NULL);
 	}
-
-	simple = g_simple_async_result_new (
-		G_OBJECT (cnc), callback, user_data,
-		e_ews_connection_get_oal_detail);
 
 	g_simple_async_result_set_op_res_gpointer (
 		simple, data, (GDestroyNotify) oal_req_data_free);
@@ -2731,10 +2762,21 @@ e_ews_connection_download_oal_file (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	SoupMessage *soup_message;
 	struct _oal_req_data *data;
+	GError *error = NULL;
 
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
-	soup_message = e_ews_get_msg_for_url (cnc->priv->uri, NULL);
+	soup_message = e_ews_get_msg_for_url (cnc->priv->uri, NULL, &error);
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_download_oal_file);
+
+	if (!soup_message) {
+		g_simple_async_result_take_error (simple, error);
+		g_simple_async_result_complete_in_idle (simple);
+		return;
+	}
 
 	data = g_slice_new0 (struct _oal_req_data);
 	data->cnc = g_object_ref (cnc);
@@ -2750,10 +2792,6 @@ e_ews_connection_download_oal_file (EEwsConnection *cnc,
 			G_CALLBACK (ews_cancel_msg),
 			data, (GDestroyNotify) NULL);
 	}
-
-	simple = g_simple_async_result_new (
-		G_OBJECT (cnc), callback, user_data,
-		e_ews_connection_download_oal_file);
 
 	g_simple_async_result_set_op_res_gpointer (
 		simple, data, (GDestroyNotify) oal_req_data_free);
