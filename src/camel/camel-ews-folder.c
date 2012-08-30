@@ -1322,7 +1322,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 		goto exit;
 	}
 
-	camel_ews_utils_sync_created_items (ews_folder, cnc, items);
+	camel_ews_utils_sync_created_items (ews_folder, cnc, items, cancellable);
 	items = NULL;
 
 	if (post_item_ids)
@@ -1338,7 +1338,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 		goto exit;
 	}
 
-	camel_ews_utils_sync_created_items (ews_folder, cnc, items);
+	camel_ews_utils_sync_created_items (ews_folder, cnc, items, cancellable);
 	items = NULL;
 
 	if (generic_item_ids)
@@ -1348,7 +1348,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 			FALSE, NULL, &items, NULL, NULL,
 			cancellable, &local_error);
 
-	camel_ews_utils_sync_created_items (ews_folder, cnc, items);
+	camel_ews_utils_sync_created_items (ews_folder, cnc, items, cancellable);
 
 	if (local_error) {
 		camel_ews_store_maybe_disconnect (ews_store, local_error);

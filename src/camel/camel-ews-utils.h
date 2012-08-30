@@ -65,7 +65,8 @@ void		camel_ews_utils_sync_deleted_items
 void		camel_ews_utils_sync_created_items
 						(CamelEwsFolder *ews_folder,
 						 EEwsConnection *cnc,
-						 GSList *items_created);
+						 GSList *items_created,
+						 GCancellable *cancellable);
 void		camel_ews_utils_sync_updated_items
 						(CamelEwsFolder *ews_folder,
 						 GSList *items_updated);

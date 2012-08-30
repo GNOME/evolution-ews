@@ -661,7 +661,8 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
 void
 camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
                                     EEwsConnection *cnc,
-                                    GSList *items_created)
+                                    GSList *items_created,
+				    GCancellable *cancellable)
 {
 	CamelFolder *folder;
 	CamelFolderChangeInfo *ci;
@@ -733,13 +734,13 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 		from = e_ews_item_get_from (item);
 		if (!from)
 			from = e_ews_item_get_sender (item);
-		mi->info.from = form_email_string_from_mb (cnc, from, NULL);
+		mi->info.from = form_email_string_from_mb (cnc, from, cancellable);
 
 		to = e_ews_item_get_to_recipients (item);
-		mi->info.to = form_recipient_list (cnc, to, NULL);
+		mi->info.to = form_recipient_list (cnc, to, cancellable);
 
 		cc = e_ews_item_get_cc_recipients (item);
-		mi->info.cc = form_recipient_list (cnc, cc, NULL);
+		mi->info.cc = form_recipient_list (cnc, cc, cancellable);
 
 		e_ews_item_has_attachments (item, &has_attachments);
 		if (has_attachments)
