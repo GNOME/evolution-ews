@@ -1,3 +1,25 @@
+Evolution-EWS 3.5.91 2012-09-03
+-------------------------------
+
+Bug Fixes:
+	Bug 675730 - Crash on book backend regular update (Milan Crha)
+	Bug 682020 - Crash when fetching GAL list in account properties
+	             (Milan Crha)
+
+Other Changes:
+	* Make use of SOUP_MESSAGE_IDEMPOTENT SoupMessage flag, if
+	  available (Milan Crha)
+	* Support both new and old xmlOutputBuffer APIs (Milan Crha)
+	* Implement CamelFolder::get_message_cached() (Milan Crha)
+	* Do not update folder structure in source registry for disabled
+	  accounts (Milan Crha)
+	* Do not overwrite user's changes on GAL ESource (Milan Crha)
+
+Translations:
+	Javier Mazorra (es)
+	Piotr Drąg (pl)
+
+
 Evolution-EWS 3.5.90 2012-08-20
 -------------------------------
 
