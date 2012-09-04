@@ -600,7 +600,7 @@ add_button_clicked_cb (GObject *dialog)
 			gtk_list_store_set (
 				store, &iter,
 				COL_NAME, perm->display_name,
-				COL_PERMISSION_LEVEL, g_dgettext ("PermissionsLevel", predefined_levels[0].name),
+				COL_PERMISSION_LEVEL, g_dpgettext2 (GETTEXT_PACKAGE, "PermissionsLevel", predefined_levels[0].name),
 				COL_E_EWS_PERMISSION, perm,
 				COL_E_EWS_PERMISSION_USER_TYPE, E_EWS_PERMISSION_USER_TYPE_REGULAR,
 				COL_IS_NEW, TRUE,
@@ -771,7 +771,7 @@ read_folder_permissions_idle (GObject *dialog,
 			perm->display_name = g_strdup (display_name);
 		}
 
-		perm_level = g_dgettext ("PermissionsLevel", predefined_levels[ii].name);
+		perm_level = g_dpgettext2 (GETTEXT_PACKAGE, "PermissionsLevel", predefined_levels[ii].name);
 
 		gtk_list_store_append (store, &iter);
 		gtk_list_store_set (
@@ -1088,7 +1088,7 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
 		if (with_freebusy ||
 		    (predefined_levels[ii].rights != E_EWS_PERMISSION_BIT_FREE_BUSY_SIMPLE &&
 		     predefined_levels[ii].rights != E_EWS_PERMISSION_BIT_FREE_BUSY_DETAILED))
-			gtk_combo_box_text_append_text (combo_text, g_dgettext ("PermissionsLevel", predefined_levels[ii].name));
+			gtk_combo_box_text_append_text (combo_text, g_dpgettext2 (GETTEXT_PACKAGE, "PermissionsLevel", predefined_levels[ii].name));
 	}
 	gtk_combo_box_set_active (GTK_COMBO_BOX (combo_text), 0);
 
