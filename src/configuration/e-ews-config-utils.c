@@ -690,8 +690,6 @@ ews_ui_init_mail (GtkUIManager *ui_manager,
 		shell_view, "update-actions",
 		G_CALLBACK (ews_ui_update_actions_mail_cb),
 		shell_view);
-
-	g_object_unref (action_group);
 }
 
 static gboolean
