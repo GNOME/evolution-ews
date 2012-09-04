@@ -16,6 +16,12 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#include <glib/gi18n-lib.h>
+
 #include "e-cal-config-ews.h"
 #include "e-book-config-ews.h"
 #include "e-mail-config-ews-autodiscover.h"
@@ -36,6 +42,9 @@ void e_module_unload (GTypeModule *type_module);
 G_MODULE_EXPORT void
 e_module_load (GTypeModule *type_module)
 {
+	bindtextdomain (GETTEXT_PACKAGE, EXCHANGE_EWS_LOCALEDIR);
+	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+
 	e_cal_config_ews_type_register (type_module);
 	e_book_config_ews_type_register (type_module);
 	e_mail_config_ews_autodiscover_type_register (type_module);

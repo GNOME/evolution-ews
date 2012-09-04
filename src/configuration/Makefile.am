@@ -4,6 +4,7 @@ evo_module_LTLIBRARIES = module-ews-configuration.la
 
 module_ews_configuration_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
+	-DEXCHANGE_EWS_LOCALEDIR=\"$(localedir)\" \
 	-I$(top_srcdir) \
 	-I$(top_srcdir)/src \
 	$(EVOLUTION_MAIL_CFLAGS) \

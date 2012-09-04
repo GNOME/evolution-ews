@@ -7,6 +7,7 @@ libcamelews_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-I$(top_srcdir) \
 	-I$(top_srcdir)/src \
+	-DEXCHANGE_EWS_LOCALEDIR=\"$(localedir)\" \
 	$(CAMEL_CFLAGS) \
 	$(LIBEDATASERVER_CFLAGS) \
 	$(LIBECAL_CFLAGS) \

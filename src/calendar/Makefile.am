@@ -4,6 +4,7 @@ ecal_backend_LTLIBRARIES = libecalbackendews.la
 
 libecalbackendews_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
+	-DEXCHANGE_EWS_LOCALEDIR=\"$(localedir)\" \
 	-I$(top_srcdir) \
 	-I$(top_srcdir)/src \
 	-I$(top_builddir) \

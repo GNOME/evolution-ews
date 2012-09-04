@@ -16,6 +16,12 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#include <glib/gi18n-lib.h>
+
 #include "server/e-source-ews-folder.h"
 
 #include "e-ews-backend.h"
@@ -28,6 +34,9 @@ void e_module_unload (GTypeModule *type_module);
 G_MODULE_EXPORT void
 e_module_load (GTypeModule *type_module)
 {
+	bindtextdomain (GETTEXT_PACKAGE, EXCHANGE_EWS_LOCALEDIR);
+	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+
 	e_ews_backend_type_register (type_module);
 	e_ews_backend_factory_type_register (type_module);
 

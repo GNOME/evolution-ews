@@ -122,6 +122,9 @@ camel_provider_module_init (void)
 	ews_provider.object_types[CAMEL_PROVIDER_STORE] =  CAMEL_TYPE_EWS_STORE;
 	ews_provider.object_types[CAMEL_PROVIDER_TRANSPORT] = CAMEL_TYPE_EWS_TRANSPORT;
 
+	bindtextdomain (GETTEXT_PACKAGE, EXCHANGE_EWS_LOCALEDIR);
+	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+
 	camel_provider_register (&ews_provider);
 }
 

@@ -4,6 +4,7 @@ eds_module_LTLIBRARIES = module-ews-backend.la
 
 module_ews_backend_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
+	-DEXCHANGE_EWS_LOCALEDIR=\"$(localedir)\" \
 	-I$(top_srcdir) \
 	-I$(top_srcdir)/src \
 	$(LIBEDATASERVER_CFLAGS) \

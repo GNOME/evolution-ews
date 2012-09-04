@@ -7,6 +7,7 @@ ebook_backend_LTLIBRARIES = libebookbackendews.la
 libebookbackendews_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-DG_LOG_DOMAIN=\"libebookbackend\" \
+	-DEXCHANGE_EWS_LOCALEDIR=\"$(localedir)\" \
 	-I$(top_srcdir) \
 	-I$(top_srcdir)/src \
 	-I$(top_builddir) \
