@@ -139,14 +139,14 @@ mail_config_ews_gal_active_id_to_oal_selected (GBinding *binding,
                                                GValue *target_value,
                                                gpointer unused)
 {
-	GObject *source_object;
+	GObject *target_object;
 	GtkComboBoxText *combo_box;
 	const gchar *active_id;
 	const gchar *active_text;
 	gchar *selected = NULL;
 
-	source_object = g_binding_get_source (binding);
-	combo_box = GTK_COMBO_BOX_TEXT (source_object);
+	target_object = g_binding_get_target (binding);
+	combo_box = GTK_COMBO_BOX_TEXT (target_object);
 
 	active_id = g_value_get_string (source_value);
 	active_text = gtk_combo_box_text_get_active_text (combo_box);
