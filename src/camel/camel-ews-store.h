@@ -78,6 +78,7 @@ EEwsConnection *
 		camel_ews_store_ref_connection	(CamelEwsStore *ews_store);
 
 gboolean	camel_ews_store_connected	(CamelEwsStore *store,
+						 GCancellable *cancellable,
 						 GError **error);
 void		camel_ews_store_maybe_disconnect
 						(CamelEwsStore *store,

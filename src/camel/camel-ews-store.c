@@ -960,7 +960,7 @@ ews_create_folder_sync (CamelStore *store,
 		}
 	}
 
-	if (!camel_ews_store_connected (ews_store, error)) {
+	if (!camel_ews_store_connected (ews_store, cancellable, error)) {
 		if (fid) g_free (fid);
 		return NULL;
 	}
@@ -1037,7 +1037,7 @@ ews_delete_folder_sync (CamelStore *store,
 		return FALSE;
 	}
 
-	if (!camel_ews_store_connected (ews_store, error)) {
+	if (!camel_ews_store_connected (ews_store, cancellable, error)) {
 		g_free (fid);
 		return FALSE;
 	}
@@ -1130,7 +1130,7 @@ ews_rename_folder_sync (CamelStore *store,
 	if (!strcmp (old_name, new_name))
 		return TRUE;
 
-	if (!camel_ews_store_connected (ews_store, error)) {
+	if (!camel_ews_store_connected (ews_store, cancellable, error)) {
 		return FALSE;
 	}
 
@@ -1493,6 +1493,7 @@ ews_store_unsubscribe_folder_sync (CamelSubscribable *subscribable,
 
 gboolean
 camel_ews_store_connected (CamelEwsStore *ews_store,
+			   GCancellable *cancellable,
                            GError **error)
 {
 
@@ -1504,7 +1505,7 @@ camel_ews_store_connected (CamelEwsStore *ews_store,
 		return FALSE;
 	}
 
-	if (!camel_service_connect_sync ((CamelService *) ews_store, NULL, error))
+	if (!camel_service_connect_sync ((CamelService *) ews_store, cancellable, error))
 		return FALSE;
 
 	return TRUE;

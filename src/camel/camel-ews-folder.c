@@ -406,7 +406,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	ews_folder = (CamelEwsFolder *) folder;
 	priv = ews_folder->priv;
 
-	if (!camel_ews_store_connected (ews_store, error))
+	if (!camel_ews_store_connected (ews_store, cancellable, error))
 		return NULL;
 
 	g_mutex_lock (priv->state_lock);
@@ -819,7 +819,7 @@ ews_sync_mi_flags (CamelFolder *folder,
 
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
 
-	if (!camel_ews_store_connected (ews_store, error)) {
+	if (!camel_ews_store_connected (ews_store, cancellable, error)) {
 		return FALSE;
 	}
 
@@ -891,7 +891,7 @@ ews_move_to_junk_folder (CamelFolder *folder,
 	ews_folder = CAMEL_EWS_FOLDER (folder);
 	ews_store = CAMEL_EWS_STORE (parent_store);
 
-	if (!camel_ews_store_connected (ews_store, error))
+	if (!camel_ews_store_connected (ews_store, cancellable, error))
 		return FALSE;
 
 	cnc = camel_ews_store_ref_connection (ews_store);
@@ -972,7 +972,7 @@ ews_synchronize_sync (CamelFolder *folder,
 
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
 
-	if (!camel_ews_store_connected (ews_store, error))
+	if (!camel_ews_store_connected (ews_store, cancellable, error))
 		return FALSE;
 
 	if (camel_folder_summary_get_deleted_count (folder->summary) > 0 ||
@@ -1392,7 +1392,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 	ews_folder = (CamelEwsFolder *) folder;
 	priv = ews_folder->priv;
 
-	if (!camel_ews_store_connected (ews_store, error))
+	if (!camel_ews_store_connected (ews_store, cancellable, error))
 		return FALSE;
 
 	g_mutex_lock (priv->state_lock);
@@ -1515,7 +1515,7 @@ ews_append_message_sync (CamelFolder *folder,
 
 	from = CAMEL_ADDRESS (camel_mime_message_get_from (message));
 
-	if (!camel_ews_store_connected (ews_store, error)) {
+	if (!camel_ews_store_connected (ews_store, cancellable, error)) {
 		return FALSE;
 	}
 
@@ -1576,7 +1576,7 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 	dst_full_name = camel_folder_get_full_name (destination);
 	dst_ews_store = (CamelEwsStore *) camel_folder_get_parent_store (destination);
 
-	if (!camel_ews_store_connected (dst_ews_store, error))
+	if (!camel_ews_store_connected (dst_ews_store, cancellable, error))
 		return FALSE;
 
 	cnc = camel_ews_store_ref_connection (dst_ews_store);
@@ -1644,7 +1644,7 @@ ews_delete_messages (CamelFolder *folder,
 	ews_store = CAMEL_EWS_STORE (parent_store);
 	deleted_head = deleted_items;
 
-	if (!camel_ews_store_connected (ews_store, error)) {
+	if (!camel_ews_store_connected (ews_store, cancellable, error)) {
 		return FALSE;
 	}
 
@@ -1718,7 +1718,7 @@ ews_expunge_sync (CamelFolder *folder,
 	parent_store = camel_folder_get_parent_store (folder);
 	ews_store = CAMEL_EWS_STORE (parent_store);
 
-	if (!camel_ews_store_connected (ews_store, error))
+	if (!camel_ews_store_connected (ews_store, cancellable, error))
 		return FALSE;
 
 	is_trash = ews_folder_is_of_type (folder, CAMEL_FOLDER_TYPE_TRASH);
