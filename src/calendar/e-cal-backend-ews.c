@@ -1626,6 +1626,7 @@ e_cal_backend_ews_create_objects (ECalBackend *backend,
 {
 	EwsCreateData *create_data;
 	EwsConvertData *convert_data;
+	EwsFolderId *fid;
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
 	icalcomponent_kind kind;
@@ -1716,17 +1717,22 @@ e_cal_backend_ews_create_objects (ECalBackend *backend,
 		/*In case of appointment we have to set SendMeetingInvites to SendToNone */
 		send_meeting_invitations = "SendToNone";
 
+	fid = e_ews_folder_id_new (priv->folder_id, NULL, FALSE);
+
 	e_ews_connection_create_items (
 		priv->cnc,
 		EWS_PRIORITY_MEDIUM,
 		"SaveOnly",
 		send_meeting_invitations,
-		priv->folder_id,
+		fid,
 		convert_calcomp_to_xml,
 		convert_data,
 		cancellable,
 		ews_create_object_cb,
 		create_data);
+
+	e_ews_folder_id_free (fid);
+
 	return;
 
 exit:

@@ -23,15 +23,21 @@
 #include <camel/camel.h>
 
 #include "server/e-ews-connection.h"
+#include "server/e-ews-folder.h"
 
 G_BEGIN_DECLS
 
 gboolean
-camel_ews_utils_create_mime_message (EEwsConnection *cnc, const gchar *disposition,
-				     const gchar *save_folder, CamelMimeMessage *message,
-				     gint32 message_camel_flags, CamelAddress *from,
-				     gchar **itemid, gchar **changekey,
-				     GCancellable *cancellable, GError **error);
+camel_ews_utils_create_mime_message (EEwsConnection *cnc,
+				     const gchar *disposition,
+				     const EwsFolderId *fid,
+				     CamelMimeMessage *message,
+				     gint32 message_camel_flags,
+				     CamelAddress *from,
+				     gchar **itemid,
+				     gchar **changekey,
+				     GCancellable *cancellable,
+				     GError **error);
 
 G_END_DECLS
 

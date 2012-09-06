@@ -1499,12 +1499,17 @@ ews_append_message_sync (CamelFolder *folder,
 	gchar *itemid, *changekey;
 	const gchar *folder_name;
 	gchar *folder_id;
+	EwsFolderId *fid;
 	CamelAddress *from;
 	CamelEwsStore *ews_store;
 	EEwsConnection *cnc;
 	GError *local_error = NULL;
 
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
+
+	if (!camel_ews_store_connected (ews_store, cancellable, error)) {
+		return FALSE;
+	}
 
 	folder_name = camel_folder_get_full_name (folder);
 	folder_id = camel_ews_store_summary_get_folder_id_from_name (
@@ -1515,30 +1520,30 @@ ews_append_message_sync (CamelFolder *folder,
 
 	from = CAMEL_ADDRESS (camel_mime_message_get_from (message));
 
-	if (!camel_ews_store_connected (ews_store, cancellable, error)) {
-		return FALSE;
-	}
-
 	cnc = camel_ews_store_ref_connection (ews_store);
 
 	if (!cnc) {
+		g_free (folder_id);
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 			_("Cant perform actions on the folder while in offline mode"));
 		return FALSE;
 	}
 
+	fid = e_ews_folder_id_new (folder_id, NULL, FALSE);
 	if (!camel_ews_utils_create_mime_message (
-		cnc, "SaveOnly", folder_id, message,
+		cnc, "SaveOnly", fid, message,
 		camel_message_info_flags (info),
 		from, &itemid, &changekey,
 		cancellable, &local_error)) {
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
 		g_propagate_error (error, local_error);
+		e_ews_folder_id_free (fid);
 		g_free (folder_id);
 		g_object_unref (cnc);
 		return FALSE;
 	}
+	e_ews_folder_id_free (fid);
 	g_free (folder_id);
 
 	/* FIXME: Do we have to add it to the summary info ourselves?

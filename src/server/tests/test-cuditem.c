@@ -107,6 +107,7 @@ op_test_create_item ()
 	const gchar *uri;
 	const gchar *folderid;
 	EEwsConnection *cnc;
+	EwsFolderId *fid;
 	GCancellable *cancellable;
 	CamelEwsSettings *settings;
 
@@ -127,13 +128,17 @@ op_test_create_item ()
 	g_object_unref (settings);
 
 	/* to check how to change to real data */
-	folderid = "AQASAG1hbmR5Lnd1QGludGVsLmNvbQAuAAADnUl3sZrICU6Xd1qXV+rpVwEAJvRPgQpR30KhJ7wqBr4YXgAAAY6W+gAAAA==";
+	fid = e_ews_folder_id_new (
+		"AQASAG1hbmR5Lnd1QGludGVsLmNvbQAuAAADnUl3sZrICU6Xd1qXV+rpVwEAJvRPgQpR30KhJ7wqBr4YXgAAAY6W+gAAAA==",
+		NULL, FALSE);
 
 	e_ews_connection_create_items (
 		cnc, EWS_PRIORITY_MEDIUM,
-		NULL, "SendToAllAndSaveCopy", folderid,
+		NULL, "SendToAllAndSaveCopy", fid,
 		op_test_create_item_get_soap_msg, NULL,
 		cancellable, create_item_ready_callback, NULL);
+
+	e_ews_folder_id_free (fid);
 }
 
 static gboolean

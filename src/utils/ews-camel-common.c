@@ -113,7 +113,7 @@ create_mime_message_cb (ESoapMessage *msg,
 gboolean
 camel_ews_utils_create_mime_message (EEwsConnection *cnc,
                                      const gchar *disposition,
-                                     const gchar *save_folder,
+                                     const EwsFolderId *fid,
                                      CamelMimeMessage *message,
                                      gint32 message_camel_flags,
                                      CamelAddress *from,
@@ -135,7 +135,8 @@ camel_ews_utils_create_mime_message (EEwsConnection *cnc,
 	create_data->message_camel_flags = message_camel_flags;
 	create_data->from = from;
 
-	if (g_strcmp0 (disposition, "SendOnly") == 0) {
+	if (g_strcmp0 (disposition, "SendOnly") == 0 ||
+	    g_strcmp0 (disposition, "SendAndSaveCopy") == 0) {
 		struct _camel_header_raw *header;
 
 		for (header = CAMEL_MIME_PART (message)->headers; header; header = header->next) {
@@ -149,7 +150,7 @@ camel_ews_utils_create_mime_message (EEwsConnection *cnc,
 
 	res = e_ews_connection_create_items_sync (
 		cnc, EWS_PRIORITY_MEDIUM,
-		disposition, NULL, save_folder,
+		disposition, NULL, fid,
 		create_mime_message_cb, create_data,
 		&ids, cancellable, error);
 

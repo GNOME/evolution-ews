@@ -970,6 +970,7 @@ e_book_backend_ews_create_contacts (EBookBackend *backend,
 	EContact *contact = NULL;
 	EBookBackendEws *ebews;
 	EwsCreateContact *create_contact;
+	EwsFolderId *fid;
 	EBookBackendEwsPrivate *priv;
 
 	if (vcards->next != NULL) {
@@ -1018,17 +1019,21 @@ e_book_backend_ews_create_contacts (EBookBackend *backend,
 	create_contact->opid = opid;
 	create_contact->contact = g_object_ref (contact);
 
+	fid = e_ews_folder_id_new (priv->folder_id, NULL, FALSE);
+
 	/* pass new contact component data to the exchange server and expect response in the callback */
 	e_ews_connection_create_items (
 		priv->cnc,
 		EWS_PRIORITY_MEDIUM, NULL,
 		NULL,
-		priv->folder_id,
+		fid,
 		convert_contact_to_xml,
 		contact,
 		cancellable,
 		ews_create_contact_cb,
 		create_contact);
+
+	e_ews_folder_id_free (fid);
 }
 
 typedef struct {
