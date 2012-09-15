@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-ews&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2012-09-12 17:59+0000\n"
-"PO-Revision-Date: 2012-09-15 20:13+0100\n"
+"PO-Revision-Date: 2012-09-15 20:44+0100\n"
 "Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: \n"
@@ -844,7 +844,7 @@ msgstr "Moji pooblaščenci i_n jaz"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1716
 msgid "Retrieving \"Delegates\" settings"
-msgstr "Pridobivanje nastavitev o \"Pooblaščencih""
+msgstr "Pridobivanje nastavitev o \"Pooblaščencih\""
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:446
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:925
