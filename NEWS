@@ -1,3 +1,22 @@
+Evolution-EWS 3.5.92 2012-09-17
+-------------------------------
+
+Bug Fixes:
+	Bug 655774 - Copy sent messages to Sent Items (Milan Crha)
+	Bug 680921 - e_shell_window_get_action_group() doesn't return
+	             reffed pointer (Milan Crha)
+	Bug 682914 - Some messages won't show translated strings
+	             (Jiro Matsuzawa)
+
+Other Changes:
+	* Make translations work in respective modules (Milan Crha)
+
+Translations:
+	Chris Leonard (en_GB)
+	Martin Srebotnjak (sl)
+	Piotr Drąg (pl)
+
+
 Evolution-EWS 3.5.91 2012-09-03
 -------------------------------
 
