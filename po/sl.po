@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2012-09-12 17:59+0000\n"
-"PO-Revision-Date: 2012-09-15 20:44+0100\n"
+"POT-Creation-Date: 2012-09-15 18:46+0000\n"
+"PO-Revision-Date: 2012-09-17 11:19+0100\n"
 "Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: \n"
@@ -185,7 +185,7 @@ msgstr "Geslo za overitev ni na voljo."
 
 #: ../src/camel/camel-ews-store.c:640
 msgid "Query for authentication types is not supported"
-msgstr ""
+msgstr "Poizvedba po vrstah overjanja ni podprta"
 
 #: ../src/camel/camel-ews-store.c:692
 #, c-format
@@ -194,7 +194,7 @@ msgstr "Ni takšne mape: %s"
 
 #: ../src/camel/camel-ews-store.c:839
 msgid "Cannot list folders available for subscription of Exchange Web Services account, use 'Subscribe to folder of other user' context menu option above the account node in the folder tree instead."
-msgstr ""
+msgstr "Map, ki so na voljo za naročnino na račun spletnih storitev Exchange, ni mogoče izpisati, raje uporabite ukaz 'Naroči se na mapo drugega uporabnika' iz vsebinskega menija nad vozliščem računa v drevesu map."
 
 #: ../src/camel/camel-ews-store.c:932
 #, c-format
@@ -209,7 +209,7 @@ msgstr "Nadrejena mapa %s ne obstaja"
 #: ../src/camel/camel-ews-store.c:957
 #, c-format
 msgid "Cannot create folder under '%s', it is used for folders of other users only"
-msgstr ""
+msgstr "Mape pod '%s' ni mogoče ustvariti, uporablja se le za mape drugih uporabnikov"
 
 #: ../src/camel/camel-ews-store.c:1026
 #, c-format
@@ -219,7 +219,7 @@ msgstr "Mapa ne obstaja"
 #: ../src/camel/camel-ews-store.c:1035
 #, c-format
 msgid "Cannot remove folder '%s', it is used for folders of other users only"
-msgstr ""
+msgstr "Mape pod '%s' ni mogoče odstraniti, uporablja se le za mape drugih uporabnikov"
 
 #: ../src/camel/camel-ews-store.c:1142
 #, c-format
@@ -310,12 +310,12 @@ msgstr "Splošni seznam naslovov"
 #: ../src/collection/e-ews-backend.c:767
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named '%s'"
-msgstr ""
+msgstr "Za novo mapo z imenom '%s' ni mogoče določiti ustreznega razreda mape"
 
 #: ../src/collection/e-ews-backend.c:858
 #, c-format
 msgid "Data source '%s' does not represent an Exchange Web Services folder"
-msgstr ""
+msgstr "Vir podatkov '%s' ne predstavlja mape spletnih storitev Exchange"
 
 #: ../src/configuration/e-ews-config-utils.c:510
 #, c-format
@@ -408,7 +408,7 @@ msgstr "Čas zasedenosti"
 #: ../src/configuration/e-ews-edit-folder-permissions.c:141
 msgctxt "PermissionsLevel"
 msgid "Free/Busy time, subject, location"
-msgstr ""
+msgstr "Čas zasedenosti, zadeva, mesto"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:143
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:523
@@ -489,7 +489,7 @@ msgstr "Čas zasedenosti"
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1126
 msgctxt "Permissions"
 msgid "Free/Busy time, subject, location"
-msgstr ""
+msgstr "Čas zasedenosti, zadeva, mesto"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1132
 msgctxt "Permissions"
@@ -564,10 +564,10 @@ msgstr "Poteka branje dovoljenj mape ..."
 #, c-format
 msgid "No users found, only one contact"
 msgid_plural "No users found, only %d contacts"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
+msgstr[0] "Ni najdenih uporabnikov, le %d stikov"
+msgstr[1] "Ni najdenih uporabnikov, le %d stik"
+msgstr[2] "Ni najdenih uporabnikov, le %d stika"
+msgstr[3] "Ni najdenih uporabnikov, le %d stiki"
 
 #: ../src/configuration/e-ews-search-user.c:213
 msgid "No users found"
@@ -586,10 +586,10 @@ msgstr[3] "Najdeni so %d uporabniki."
 #, c-format
 msgid "Found more than 100 users, but showing only first %d"
 msgid_plural "Found more than 100 users, but showing only first %d"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
+msgstr[0] "Najdenih več kot sto uporabnikov, prikazanih je le prvih %d"
+msgstr[1] "Najdenih več kot sto uporabnikov, prikazan je le prvi %d"
+msgstr[2] "Najdenih več kot sto uporabnikov, prikazana sta le prva %d"
+msgstr[3] "Najdenih več kot sto uporabnikov, prikazani so le prvi %d"
 
 #: ../src/configuration/e-ews-search-user.c:353
 #: ../src/configuration/e-ews-search-user.c:536
@@ -635,10 +635,10 @@ msgstr "Uporabnika '%s' ni mogoče najti na strežniku"
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:325
 #, c-format
 msgid "User name '%s' is ambiguous, specify it more precisely, please"
-msgstr ""
+msgstr "Uporabniško ime '%s' ni enoznačno, določite ga natančneje"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:347
-#, fuzzy, c-format
+#, c-format
 msgid "Folder '%s' not found. Either it does not exist or you do not have permission to access it."
 msgstr "Mape '%s' ni mogoče najti. Ali ne obstaja ali pa ni ustreznih dovoljenj za dostop."
 
@@ -753,10 +753,9 @@ msgid "Fetch List"
 msgstr "Pridobi seznam"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:503
-#, fuzzy
 msgctxt "PermissionsLevel"
 msgid "Reviewer (can read items)"
-msgstr "Označi kot _prebrano po"
+msgstr "Pregledovalec (lahko bere vsebine)"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:504
 msgctxt "PermissionsLevel"
@@ -778,7 +777,7 @@ msgstr "Koled_ar"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:629
 msgid "_Delegate receives copies of meeting-related messages sent to me"
-msgstr ""
+msgstr "_Pooblaščenec prejme kopije meni poslanih sporočil, ki se nanašajo na sestanek"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:634
 msgid "_Tasks"
@@ -801,17 +800,17 @@ msgid "_Journal"
 msgstr "_Dnevnik"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:649
-#, fuzzy, c-format
+#, c-format
 msgid "Delegate '%s' has the following permissions"
-msgstr "%s je objavil(a) naslednjo nalogo:"
+msgstr "Pooblaščenec '%s' ima naslednje pravice"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:667
 msgid "Delegate can see my _private items"
-msgstr "Delegat lahko vidi moje _zasebne vsebine"
+msgstr "Pooblaščenec lahko vidi moje _zasebne vsebine"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:990
 msgid "Retrieving current user permissions, please wait..."
-msgstr ""
+msgstr "Pridobivanje pravic trenutnega uporabnika, počakajte trenutek ..."
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1111
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1641
@@ -820,11 +819,11 @@ msgstr "Pooblaščenci"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1135
 msgid "Delegates can send items on your behalf, including creating and responding to meeting requests. If you want to grant folder permissions without giving send-on-behalf-of permissions, close this dialog box, right-click the folder, click Permissions and change the options there."
-msgstr ""
+msgstr "Pooblaščenci lahko pošiljajo vsebine v vašem imenu, vključno z ustvarjanjem in odgovarjanjem na zahtevke za sestanke. Če želite dodeliti dovoljenja za mapo brez pravic za pošiljanje-v-imenu, zaprite to pogovorno okno, desno kliknite mapo, kliknite Dovoljenja in spremenite možnosti."
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1184
 msgid "Deliver meeting requests addressed to me and responses to meeting requests where I am the organizer to:"
-msgstr ""
+msgstr "Dostavi zahteve za sestanek, ki so naslovljene name, in odgovore na zahteve za sestanke, katerih organizator sem, na naslov:"
 
 #. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1193
@@ -832,11 +831,12 @@ msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
 msgstr ""
+"Le moji pooblaščenci, vendar _pošlji kopijo zahtevkov za sestanke\n"
+"in odgovore nanje meni (priporočeno)"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1200
-#, fuzzy
 msgid "My d_elegates only"
-msgstr "Skladanje le _mojih člankov"
+msgstr "Le _moji pooblaščenci"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1207
 msgid "My delegates a_nd me"
@@ -925,7 +925,7 @@ msgstr "Ni mogoče pridobiti nastavitev za sporočila &quot;odsotnosti&quot;"
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:5
 msgid "Failed to retrieve &quot;Delegates&quot; settings."
-msgstr "Pridobivanje nastavitev &quot;Delegatov&quot; je spodletelo."
+msgstr "Pridobivanje nastavitev &quot;Pooblaščencev&quot; je spodletelo."
 
 #: ../src/server/e-ews-connection.c:488
 msgid "Operation Cancelled"
