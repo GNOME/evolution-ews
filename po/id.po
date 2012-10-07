@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2012-09-23 15:44+0000\n"
-"PO-Revision-Date: 2012-10-07 10:31+0700\n"
+"PO-Revision-Date: 2012-10-07 12:56+0700\n"
 "Last-Translator: Andika Triwidada <andika@gmail.com>\n"
 "Language-Team: Indonesian <gnome@i15n.org>\n"
 "Language: id\n"
@@ -203,6 +203,9 @@ msgid ""
 "account, use 'Subscribe to folder of other user' context menu option above "
 "the account node in the folder tree instead."
 msgstr ""
+"Tak bisa mendapat daftar folder yang tersedia untuk dilanggani dari akun "
+"Layanan Web Exchange, gunakan opsi menu konteks 'Berlangganan ke folder dari "
+"pengguna lain' di atas node akun dalam pohon folder saja."
 
 #: ../src/camel/camel-ews-store.c:932
 #, c-format
@@ -241,7 +244,7 @@ msgstr "Folder %s tidak ada"
 #: ../src/camel/camel-ews-store.c:1152
 #, c-format
 msgid "No change key record for folder %s"
-msgstr ""
+msgstr "Tidak ada catatan kunci perubahan bagi folder %s"
 
 #: ../src/camel/camel-ews-store.c:1194
 #, c-format
@@ -723,7 +726,7 @@ msgstr "Nama _folder:"
 
 #: ../src/configuration/e-mail-config-ews-autodiscover.c:126
 msgid "Querying Autodiscover service"
-msgstr ""
+msgstr "Mengquery layanan Autodiscover"
 
 #: ../src/configuration/e-mail-config-ews-autodiscover.c:209
 msgid "Fetch _URL"
@@ -791,6 +794,7 @@ msgstr "K_alender"
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:629
 msgid "_Delegate receives copies of meeting-related messages sent to me"
 msgstr ""
+"Men_delegasikan penerimaan salinan pesan terkait rapat yang dikirim ke saya"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:634
 msgid "_Tasks"
@@ -815,15 +819,15 @@ msgstr "_Jurnal"
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:649
 #, c-format
 msgid "Delegate '%s' has the following permissions"
-msgstr ""
+msgstr "Delegasi '%s' memiliki hak berikut"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:667
 msgid "Delegate can see my _private items"
-msgstr ""
+msgstr "Delegasi dapat melihat butir-butir _pribadi saya"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:990
 msgid "Retrieving current user permissions, please wait..."
-msgstr ""
+msgstr "Mengambil info hak pengguna kini, harap tunggu..."
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1111
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1641
@@ -837,12 +841,18 @@ msgid ""
 "send-on-behalf-of permissions, close this dialog box, right-click the "
 "folder, click Permissions and change the options there."
 msgstr ""
+"Delegasi dapat mengirim butir-butir atas nama Anda, termasuk membuat dan "
+"merespon permintaan rapat. Bila Anda ingin memberi hak folder tanpa memberi "
+"hak kirim-atas-nama, tutup kotak dialog ini, klik kanan pada folder, klik "
+"Hak, dan ubah opsi di sana."
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1184
 msgid ""
 "Deliver meeting requests addressed to me and responses to meeting requests "
 "where I am the organizer to:"
 msgstr ""
+"Kirim permintaan rapat yang dialamatkan ke saya dan respon ke permintaan "
+"rapat dimana saya adalah pengelolanya ke:"
 
 #. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1193
@@ -850,6 +860,8 @@ msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
 msgstr ""
+"Hanya delegasi saya, tapi kirim _salinan permintaan rapat\n"
+"dan respon ke saya (disarankan)"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1200
 msgid "My d_elegates only"
@@ -873,6 +885,8 @@ msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
 msgstr ""
+"Pesan yang dinyatakan di bawah akan secara otomatis dikirim ke setiap orang "
+"internal dan eksternal yang mengirim surel ke Anda."
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:470
 msgid "Do _not send Out of Office replies"
@@ -884,7 +898,7 @@ msgstr "_Kirim jawaban Di Luar Kantor"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:486
 msgid "Send Out of Office replies only _during this time period:"
-msgstr ""
+msgstr "Kirim jawaban Di Luar Kantor hanya selama perio_da ini:"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:506
 msgid "_From:"
@@ -912,11 +926,11 @@ msgstr "Pesan akan dikim di luar organisasi"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:610
 msgid "Do not reply to senders outside the organization"
-msgstr ""
+msgstr "Jangan kirim jawaban ke pengirim di luar organisasi"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:613
 msgid "Reply only to known senders outside the organization"
-msgstr ""
+msgstr "Jawab hanya ke pengirim yang dikenal di luar organisasi"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:616
 msgid "Reply to any sender outside the organization"
@@ -940,7 +954,7 @@ msgstr "Gagal temukan buku alamat luring."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:4
 msgid "Failed to retrieve &quot;Out of Office&quot; settings."
-msgstr ""
+msgstr "Gagal mengambil pengatura &quot;Di Luar Kantor&quot;."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:5
 msgid "Failed to retrieve &quot;Delegates&quot; settings."
@@ -1020,4 +1034,4 @@ msgstr "Tak bisa menambah folder, sumber induk tak ditemukan"
 #: ../src/utils/ews-camel-common.c:176
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
-msgstr ""
+msgstr "Pemanggilan CreateItem gagal mengembalikan ID bagi pesan baru"
