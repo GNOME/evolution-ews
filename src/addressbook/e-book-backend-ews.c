@@ -2477,8 +2477,8 @@ fetch_from_offline (EBookBackendEws *ews,
 }
 
 static void
-e_book_backend_ews_start_book_view (EBookBackend *backend,
-                                    EDataBookView *book_view)
+e_book_backend_ews_start_view (EBookBackend *backend,
+                               EDataBookView *book_view)
 {
 	EBookBackendEws *ebews;
 	EBookBackendEwsPrivate *priv;
@@ -2517,7 +2517,7 @@ e_book_backend_ews_start_book_view (EBookBackend *backend,
 	}
 
 	if (priv->cnc == NULL) {
-		/* XXX Why doesn't start_book_view()
+		/* XXX Why doesn't start_view()
 		 *     get passed a GCancellable? */
 		e_backend_authenticate_sync (
 			E_BACKEND (backend),
@@ -2628,8 +2628,8 @@ e_book_backend_ews_start_book_view (EBookBackend *backend,
 }
 
 static void
-e_book_backend_ews_stop_book_view (EBookBackend *backend,
-                                   EDataBookView *book_view)
+e_book_backend_ews_stop_view (EBookBackend *backend,
+                              EDataBookView *book_view)
 {
 	EBookBackendEws *bews = E_BOOK_BACKEND_EWS (backend);
 	EBookBackendEwsPrivate *priv = bews->priv;
@@ -2981,8 +2981,8 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 	parent_class->modify_contacts         = e_book_backend_ews_modify_contacts;
 	parent_class->get_contact             = e_book_backend_ews_get_contact;
 	parent_class->get_contact_list        = e_book_backend_ews_get_contact_list;
-	parent_class->start_book_view         = e_book_backend_ews_start_book_view;
-	parent_class->stop_book_view          = e_book_backend_ews_stop_book_view;
+	parent_class->start_view              = e_book_backend_ews_start_view;
+	parent_class->stop_view               = e_book_backend_ews_stop_view;
 
 	object_class->dispose                 = e_book_backend_ews_dispose;
 }
