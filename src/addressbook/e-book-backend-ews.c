@@ -2453,7 +2453,7 @@ fetch_from_offline (EBookBackendEws *ews,
 
 	if (priv->is_gal && !g_strcmp0 (query, "(contains \"x-evolution-any-field\" \"\")")) {
 		e_data_book_view_notify_complete (book_view, error);
-		e_data_book_view_unref (book_view);
+		g_object_unref (book_view);
 		return;
 	}
 
@@ -2473,7 +2473,7 @@ fetch_from_offline (EBookBackendEws *ews,
 	if (contacts)
 		g_slist_free (contacts);
 	e_data_book_view_notify_complete (book_view, error);
-	e_data_book_view_unref (book_view);
+	g_object_unref (book_view);
 }
 
 static void
@@ -2500,7 +2500,7 @@ e_book_backend_ews_start_book_view (EBookBackend *backend,
 
 	source = e_backend_get_source (E_BACKEND (backend));
 
-	e_data_book_view_ref (book_view);
+	g_object_ref (book_view);
 	e_data_book_view_notify_progress (book_view, -1, _("Searching..."));
 
 	if (!e_backend_get_online (E_BACKEND (backend))) {
@@ -2511,7 +2511,7 @@ e_book_backend_ews_start_book_view (EBookBackend *backend,
 
 		error = EDB_ERROR (OFFLINE_UNAVAILABLE);
 		e_data_book_view_notify_complete (book_view, error);
-		e_data_book_view_unref (book_view);
+		g_object_unref (book_view);
 		g_error_free (error);
 		return;
 	}
@@ -2525,7 +2525,7 @@ e_book_backend_ews_start_book_view (EBookBackend *backend,
 			NULL, &error);
 		if (error != NULL) {
 			e_data_book_view_notify_complete (book_view, error);
-			e_data_book_view_unref (book_view);
+			g_object_unref (book_view);
 			g_error_free (error);
 			return;
 		}
@@ -2545,7 +2545,7 @@ e_book_backend_ews_start_book_view (EBookBackend *backend,
 	if (!is_autocompletion || !auto_comp_str) {
 		g_free (auto_comp_str);
 		e_data_book_view_notify_complete (book_view, error);
-		e_data_book_view_unref (book_view);
+		g_object_unref (book_view);
 		return;
 	}
 
@@ -2575,7 +2575,7 @@ e_book_backend_ews_start_book_view (EBookBackend *backend,
 	e_ews_folder_id_free (fid);
 	if (error != NULL) {
 		e_data_book_view_notify_complete (book_view, error);
-		e_data_book_view_unref (book_view);
+		g_object_unref (book_view);
 		g_clear_error (&error);
 		return;
 	}
@@ -2624,7 +2624,7 @@ e_book_backend_ews_start_book_view (EBookBackend *backend,
 	g_slist_free (mailboxes);
 	g_slist_free (contacts);
 	e_data_book_view_notify_complete (book_view, error);
-	e_data_book_view_unref (book_view);
+	g_object_unref (book_view);
 }
 
 static void
