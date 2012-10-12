@@ -2482,6 +2482,7 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 {
 	EBookBackendEws *ebews;
 	EBookBackendEwsPrivate *priv;
+	EBookBackendSExp *sexp;
 	const gchar *query;
 	gboolean is_autocompletion = FALSE;
 	gchar *auto_comp_str = NULL;
@@ -2496,7 +2497,9 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 
 	ebews = E_BOOK_BACKEND_EWS (backend);
 	priv = ebews->priv;
-	query = e_data_book_view_get_card_query (book_view);
+
+	sexp = e_data_book_view_get_sexp (book_view);
+	query = e_book_backend_sexp_text (sexp);
 
 	source = e_backend_get_source (E_BACKEND (backend));
 

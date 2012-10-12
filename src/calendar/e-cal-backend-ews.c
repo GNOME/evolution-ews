@@ -3737,7 +3737,7 @@ e_cal_backend_ews_start_query (ECalBackend *backend,
 	priv = cbews->priv;
 
 	ews_cal_start_refreshing (cbews);
-	cbsexp = e_data_cal_view_get_object_sexp (query);
+	cbsexp = e_data_cal_view_get_sexp (query);
 	if (!cbsexp) {
 		err = EDC_ERROR (InvalidQuery);
 		e_data_cal_view_notify_complete (query, err);
@@ -3745,7 +3745,7 @@ e_cal_backend_ews_start_query (ECalBackend *backend,
 		return;
 	}
 
-	sexp = e_data_cal_view_get_text (query);
+	sexp = e_cal_backend_sexp_text (cbsexp);
 	if (!sexp || !strcmp (sexp, "#t"))
 		search_needed = FALSE;
 
