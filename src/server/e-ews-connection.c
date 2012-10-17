@@ -2324,6 +2324,7 @@ parse_oal_full_details (xmlNode *node,
 	return elements;
 }
 
+/* this is run in cnc->priv->soup_thread */
 static void
 oal_response_cb (SoupSession *soup_session,
                  SoupMessage *soup_message,
@@ -2398,7 +2399,11 @@ oal_response_cb (SoupSession *soup_session,
 
 exit:
 	g_simple_async_result_complete_in_idle (simple);
-	g_object_unref (simple);
+	/* This is run in cnc->priv->soup_thread, and the cnc is held by simple, thus
+	   for cases when the complete_in_idle is finished before the unref call, when
+	   the cnc will be left with the last reference and thus cannot join the soup_thread
+	   while still in it, the unref is done in a dedicated thread. */
+	ews_unref_in_thread (simple);
 }
 
 static void
