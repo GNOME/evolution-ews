@@ -1,3 +1,23 @@
+Evolution-EWS 3.7.1 2012-10-22
+------------------------------
+
+Bug Fixes:
+	Bug 686268 - Crash under oal_response_cb() (Milan Crha)
+
+Translations:
+	Mario Blättermann (de)
+	Gabor Kelemen (hu)
+	Andika Triwidada (id)
+	Martin Srebotnjak (sl)
+
+
+Evolution-EWS 3.6.0 2012-09-22
+------------------------------
+
+Translations:
+	Martin Srebotnjak (sl)
+
+
 Evolution-EWS 3.5.92 2012-09-17
 -------------------------------
 
