@@ -4197,18 +4197,22 @@ cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 		closure->items_deleted = items_deleted;
 		closure->items_updated = items_updated;
 
+		PRIV_LOCK (backend->priv);
+		if (backend->priv->user_email)
+			g_free (backend->priv->user_email);
+		backend->priv->user_email = camel_ews_settings_dup_email (ews_settings);
+
+		if (backend->priv->cnc != NULL)
+			g_object_unref (backend->priv->cnc);
+		backend->priv->cnc = g_object_ref (connection);
+		PRIV_UNLOCK (backend->priv);
+
 		ews_refreshing_inc (backend);
 
 		g_idle_add_full (
 			G_PRIORITY_DEFAULT_IDLE,
 			cal_backend_ews_sync_items_idle_cb, closure,
 			(GDestroyNotify) sync_items_closure_free);
-
-		PRIV_LOCK (backend->priv);
-		if (backend->priv->cnc != NULL)
-			g_object_unref (backend->priv->cnc);
-		backend->priv->cnc = g_object_ref (connection);
-		PRIV_UNLOCK (backend->priv);
 
 		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
 
