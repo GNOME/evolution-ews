@@ -2185,6 +2185,30 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 	}
 }
 
+static gboolean
+has_suffix_icmp (const gchar *text,
+		 const gchar *suffix)
+{
+	gint ii, tlen, slen;
+
+	g_return_val_if_fail (text != NULL, FALSE);
+	g_return_val_if_fail (suffix != NULL, FALSE);
+
+	tlen = strlen (text);
+	slen = strlen (suffix);
+
+	if (!*text || !*suffix || tlen < slen)
+		return FALSE;
+
+	for (ii = 0; ii < slen; ii++) {
+		if (g_ascii_tolower (text[tlen - ii - 1]) != 
+		    g_ascii_tolower (suffix[slen - ii - 1]))
+			break;
+	}
+
+	return ii == slen;
+}
+
 gboolean
 e_ews_autodiscover_ws_url_finish (CamelEwsSettings *settings,
                                   GAsyncResult *result,
@@ -2208,7 +2232,20 @@ e_ews_autodiscover_ws_url_finish (CamelEwsSettings *settings,
 	g_warn_if_fail (ad->oab_url != NULL);
 
 	camel_ews_settings_set_hosturl (settings, ad->as_url);
-	camel_ews_settings_set_oaburl (settings, ad->oab_url);
+
+	if (!has_suffix_icmp (ad->oab_url, "oab.xml")) {
+		gchar *tmp;
+
+		if (g_str_has_suffix (ad->oab_url, "/"))
+			tmp = g_strconcat (ad->oab_url, "oab.xml", NULL);
+		else
+			tmp = g_strconcat (ad->oab_url, "/", "oab.xml", NULL);
+
+		camel_ews_settings_set_oaburl (settings, tmp);
+		g_free (tmp);
+	} else {
+		camel_ews_settings_set_oaburl (settings, ad->oab_url);
+	}
 
 	return TRUE;
 }
