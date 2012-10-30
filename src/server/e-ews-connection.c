@@ -1829,7 +1829,7 @@ autodiscover_response_cb (SoupSession *session,
 	}
 	if (idx == 4) {
 		/* We already got removed (cancelled). Do nothing */
-		return;
+		goto unref;
 	}
 
 	ad->msgs[idx] = NULL;
@@ -1920,13 +1920,13 @@ autodiscover_response_cb (SoupSession *session,
 
 	goto exit;
 
-failed:
+ failed:
 	for (idx = 0; idx < 4; idx++) {
 		if (ad->msgs[idx]) {
 			/* There's another request outstanding.
 			 * Hope that it has better luck. */
 			g_clear_error (&error);
-			return;
+			goto unref;
 		}
 	}
 
@@ -1936,9 +1936,10 @@ failed:
 	 * want the *first* error */
 	g_simple_async_result_take_error (simple, error);
 
-exit:
+ exit:
 	g_simple_async_result_complete_in_idle (simple);
 
+ unref:
 	/* This function is processed within e_ews_soup_thread() and the 'simple'
 	 * holds reference to EEwsConnection. For cases when this is the last
 	 * reference to 'simple' the unref would cause crash, because of g_thread_join()
@@ -2163,13 +2164,13 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 	/* These have to be submitted only after they're both set in ad->msgs[]
 	 * or there will be races with fast completion */
 	if (ad->msgs[0] != NULL)
-		ews_connection_schedule_queue_message (cnc, ad->msgs[0], autodiscover_response_cb, simple);
+		ews_connection_schedule_queue_message (cnc, ad->msgs[0], autodiscover_response_cb, g_object_ref (simple));
 	if (ad->msgs[1] != NULL)
-		ews_connection_schedule_queue_message (cnc, ad->msgs[1], autodiscover_response_cb, simple);
+		ews_connection_schedule_queue_message (cnc, ad->msgs[1], autodiscover_response_cb, g_object_ref (simple));
 	if (ad->msgs[2] != NULL)
-		ews_connection_schedule_queue_message (cnc, ad->msgs[2], autodiscover_response_cb, simple);
+		ews_connection_schedule_queue_message (cnc, ad->msgs[2], autodiscover_response_cb, g_object_ref (simple));
 	if (ad->msgs[3] != NULL)
-		ews_connection_schedule_queue_message (cnc, ad->msgs[3], autodiscover_response_cb, simple);
+		ews_connection_schedule_queue_message (cnc, ad->msgs[3], autodiscover_response_cb, g_object_ref (simple));
 
 	xmlFreeDoc (doc);
 	g_free (url1);
@@ -2182,6 +2183,10 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 		g_simple_async_result_complete_in_idle (simple);
 	} else {
 		g_clear_error (&error);
+
+		/* each request holds a reference to 'simple',
+		   thus remove one, to have it actually freed */
+		g_object_unref (simple);
 	}
 }
 
