@@ -73,9 +73,6 @@ struct _ECalBackendEwsPrivate {
 	gchar *user_email;
 	gchar *storage_path;
 
-	EDataCal *opening_cal;
-	guint32 opening_ctx;
-
 	ECalBackendStore *store;
 	gboolean read_only;
 
