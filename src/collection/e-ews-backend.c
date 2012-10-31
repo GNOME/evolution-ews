@@ -369,12 +369,18 @@ ews_backend_add_gal_source (EEwsBackend *backend)
 	if (oal_selected != NULL) {
 		gchar *cp = strrchr (oal_selected, ':');
 		if (cp != NULL) {
-			*cp++ = '\0';
+			/* skip ':' and any leading backslash in the display name */
+			cp++;
+			while (*cp && *cp == '\\')
+				cp++;
+
 			display_name = cp;
 			oal_id = oal_selected;
 		} else {
 			g_free (oal_selected);
 			oal_selected = NULL;
+
+			camel_ews_settings_set_oal_selected (settings, NULL);
 		}
 	}
 
