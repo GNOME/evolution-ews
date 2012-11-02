@@ -322,6 +322,7 @@ e_mail_config_ews_oal_combo_box_update_finish (EMailConfigEwsOalComboBox *combo_
 	GSimpleAsyncResult *simple;
 	GtkComboBoxText *combo_box_text;
 	GSList *list, *link;
+	gchar *active_id;
 
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
@@ -340,19 +341,28 @@ e_mail_config_ews_oal_combo_box_update_finish (EMailConfigEwsOalComboBox *combo_
 	combo_box->priv->oal_items = NULL;
 	g_mutex_unlock (combo_box->priv->oal_items_lock);
 
+	active_id = g_strdup (gtk_combo_box_get_active_id (GTK_COMBO_BOX (combo_box)));
 	combo_box_text = GTK_COMBO_BOX_TEXT (combo_box);
 	gtk_combo_box_text_remove_all (combo_box_text);
 
 	for (link = list; link != NULL; link = g_slist_next (link)) {
 		EwsOAL *oal = link->data;
+		const gchar *name = oal->name;
+
+		while (name && *name == '\\')
+			name++;
 
 		gtk_combo_box_text_append (
-			combo_box_text, oal->id, oal->name);
+			combo_box_text, oal->id, name);
 	}
 
 	g_slist_free_full (list, (GDestroyNotify) ews_oal_free);
 
-	gtk_combo_box_set_active (GTK_COMBO_BOX (combo_box), 0);
+	if (active_id && *active_id)
+		gtk_combo_box_set_active_id (GTK_COMBO_BOX (combo_box), active_id);
+	else
+		gtk_combo_box_set_active (GTK_COMBO_BOX (combo_box), 0);
+	g_free (active_id);
 
 	return TRUE;
 }
