@@ -2608,6 +2608,7 @@ e_ews_connection_get_oal_detail (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	SoupMessage *soup_message;
 	struct _oal_req_data *data;
+	gchar *sep;
 	GError *error = NULL;
 
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
@@ -2629,6 +2630,11 @@ e_ews_connection_get_oal_detail (EEwsConnection *cnc,
 	data->soup_message = soup_message;  /* the session owns this */
 	data->oal_id = g_strdup (oal_id);
 	data->oal_element = g_strdup (oal_element);
+
+	/* oal_id can be of form "GUID:name", but here is compared only GUID */
+	sep = strchr (data->oal_id, ':');
+	if (sep)
+		*sep = '\0';
 
 	if (G_IS_CANCELLABLE (cancellable)) {
 		data->cancellable = g_object_ref (cancellable);

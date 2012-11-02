@@ -110,6 +110,8 @@ mail_config_ews_gal_oal_selected_to_active_id (GBinding *binding,
 
 	if (active_text != NULL) {
 		*active_text++ = '\0';
+		while (*active_text == '\\')
+			active_text++;
 	} else {
 		g_free (active_id);
 		return FALSE;
@@ -128,6 +130,7 @@ mail_config_ews_gal_oal_selected_to_active_id (GBinding *binding,
 		gtk_combo_box_set_active_id (combo_box, active_id);
 	}
 
+	g_value_set_string (target_value, active_id);
 	g_free (active_id);
 
 	return TRUE;
