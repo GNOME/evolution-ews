@@ -90,6 +90,29 @@ dnl	-Wredundant-decls
 
 CFLAGS="$CFLAGS $WARNING_FLAGS"
 
+dnl *******************************
+dnl Check for --enable-strict
+dnl *******************************
+AC_ARG_ENABLE([strict],
+	[AS_HELP_STRING([--enable-strict],
+	[enable strict building, like without deprecated symbols (default=auto); auto enables strict building only if .git subdirectory exists])],
+	[enable_strict=$enableval], [enable_strict=auto])
+
+AC_MSG_CHECKING([if strict building is enabled])
+if test "x$enable_strict" = xauto; then
+	dnl Be strict when compiling with .git subdirectory
+	if test -d .git ; then
+		enable_strict=yes
+	else
+		enable_strict=no
+	fi
+fi
+AC_MSG_RESULT([$enable_strict])
+
+if test "x$enable_strict" = xyes; then
+	CFLAGS="$CFLAGS -DG_DISABLE_DEPRECATED -DE_BOOK_DISABLE_DEPRECATED -DE_CAL_DISABLE_DEPRECATED"
+fi
+
 dnl ************
 dnl i18n stuff
 dnl ************
@@ -266,5 +289,6 @@ AC_OUTPUT
 
 AC_MSG_NOTICE([
 	Kerberos 5	: $msg_krb5
+	Strict building : $enable_strict
 ])
 
