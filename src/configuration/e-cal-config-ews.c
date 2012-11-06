@@ -16,6 +16,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "e-cal-config-ews.h"
 
 #include <misc/e-cal-source-config.h>

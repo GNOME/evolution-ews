@@ -16,6 +16,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "camel-ews-settings.h"
 
 #include <libedataserver/libedataserver.h>
@@ -25,7 +29,7 @@
 	((obj), CAMEL_TYPE_EWS_SETTINGS, CamelEwsSettingsPrivate))
 
 struct _CamelEwsSettingsPrivate {
-	GMutex *property_lock;
+	GMutex property_lock;
 	gboolean check_all;
 	gboolean filter_junk;
 	gboolean filter_junk_inbox;
@@ -288,7 +292,7 @@ ews_settings_finalize (GObject *object)
 
 	priv = CAMEL_EWS_SETTINGS_GET_PRIVATE (object);
 
-	g_mutex_free (priv->property_lock);
+	g_mutex_clear (&priv->property_lock);
 
 	g_free (priv->email);
 	g_free (priv->gal_uid);
@@ -467,7 +471,7 @@ static void
 camel_ews_settings_init (CamelEwsSettings *settings)
 {
 	settings->priv = CAMEL_EWS_SETTINGS_GET_PRIVATE (settings);
-	settings->priv->property_lock = g_mutex_new ();
+	g_mutex_init (&settings->priv->property_lock);
 }
 
 /**
@@ -527,12 +531,12 @@ camel_ews_settings_dup_email (CamelEwsSettings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	protected = camel_ews_settings_get_email (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	return duplicate;
 }
@@ -543,17 +547,17 @@ camel_ews_settings_set_email (CamelEwsSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	if (g_strcmp0 (settings->priv->email, email) == 0) {
-		g_mutex_unlock (settings->priv->property_lock);
+		g_mutex_unlock (&settings->priv->property_lock);
 		return;
 	}
 
 	g_free (settings->priv->email);
 	settings->priv->email = e_util_strdup_strip (email);
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	g_object_notify (G_OBJECT (settings), "email");
 }
@@ -660,12 +664,12 @@ camel_ews_settings_dup_gal_uid (CamelEwsSettings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	protected = camel_ews_settings_get_gal_uid (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	return duplicate;
 }
@@ -676,17 +680,17 @@ camel_ews_settings_set_gal_uid (CamelEwsSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	if (g_strcmp0 (settings->priv->gal_uid, gal_uid) == 0) {
-		g_mutex_unlock (settings->priv->property_lock);
+		g_mutex_unlock (&settings->priv->property_lock);
 		return;
 	}
 
 	g_free (settings->priv->gal_uid);
 	settings->priv->gal_uid = e_util_strdup_strip (gal_uid);
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	g_object_notify (G_OBJECT (settings), "gal-uid");
 }
@@ -707,12 +711,12 @@ camel_ews_settings_dup_hosturl (CamelEwsSettings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	protected = camel_ews_settings_get_hosturl (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	return duplicate;
 }
@@ -723,17 +727,17 @@ camel_ews_settings_set_hosturl (CamelEwsSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	if (g_strcmp0 (settings->priv->hosturl, hosturl) == 0) {
-		g_mutex_unlock (settings->priv->property_lock);
+		g_mutex_unlock (&settings->priv->property_lock);
 		return;
 	}
 
 	g_free (settings->priv->hosturl);
 	settings->priv->hosturl = e_util_strdup_strip (hosturl);
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	g_object_notify (G_OBJECT (settings), "hosturl");
 }
@@ -754,12 +758,12 @@ camel_ews_settings_dup_oaburl (CamelEwsSettings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	protected = camel_ews_settings_get_oaburl (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	return duplicate;
 }
@@ -770,17 +774,17 @@ camel_ews_settings_set_oaburl (CamelEwsSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	if (g_strcmp0 (settings->priv->oaburl, oaburl) == 0) {
-		g_mutex_unlock (settings->priv->property_lock);
+		g_mutex_unlock (&settings->priv->property_lock);
 		return;
 	}
 
 	g_free (settings->priv->oaburl);
 	settings->priv->oaburl = e_util_strdup_strip (oaburl);
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	g_object_notify (G_OBJECT (settings), "oaburl");
 }
@@ -823,12 +827,12 @@ camel_ews_settings_dup_oal_selected (CamelEwsSettings *settings)
 
 	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	protected = camel_ews_settings_get_oal_selected (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	return duplicate;
 }
@@ -839,17 +843,17 @@ camel_ews_settings_set_oal_selected (CamelEwsSettings *settings,
 {
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	if (g_strcmp0 (settings->priv->oal_selected, oal_selected) == 0) {
-		g_mutex_unlock (settings->priv->property_lock);
+		g_mutex_unlock (&settings->priv->property_lock);
 		return;
 	}
 
 	g_free (settings->priv->oal_selected);
 	settings->priv->oal_selected = e_util_strdup_strip (oal_selected);
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	g_object_notify (G_OBJECT (settings), "oal-selected");
 }

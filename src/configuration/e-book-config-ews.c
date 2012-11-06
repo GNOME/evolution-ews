@@ -16,6 +16,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "e-book-config-ews.h"
 
 #include <misc/e-book-source-config.h>

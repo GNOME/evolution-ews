@@ -20,7 +20,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -59,8 +62,8 @@
 static gboolean ebews_fetch_items (EBookBackendEws *ebews,  GSList *items, gboolean store_to_cache, GSList **vcards, GCancellable *cancellable, GError **error);
 
 typedef struct {
-	GCond *cond;
-	GMutex *mutex;
+	GCond cond;
+	GMutex mutex;
 	gboolean exit;
 } SyncDelta;
 
@@ -83,7 +86,7 @@ struct _EBookBackendEwsPrivate {
 	/* used for storing attachments */
 	gchar *attachment_dir;
 
-	GStaticRecMutex rec_mutex;
+	GRecMutex rec_mutex;
 	GThread *dthread;
 	SyncDelta *dlock;
 
@@ -107,8 +110,8 @@ enum {
  * some additional properties that are not return with Default view */
 #define CONTACT_ITEM_PROPS "item:Attachments item:HasAttachments contacts:Manager contacts:Department contacts:SpouseName contacts:AssistantName contacts:BusinessHomePage contacts:Birthday"
 
-#define PRIV_LOCK(p)   (g_static_rec_mutex_lock (&(p)->rec_mutex))
-#define PRIV_UNLOCK(p) (g_static_rec_mutex_unlock (&(p)->rec_mutex))
+#define PRIV_LOCK(p)   (g_rec_mutex_lock (&(p)->rec_mutex))
+#define PRIV_UNLOCK(p) (g_rec_mutex_unlock (&(p)->rec_mutex))
 
 /* Forward Declarations */
 static void	e_book_backend_ews_authenticator_init
@@ -2365,10 +2368,7 @@ delta_thread (gpointer data)
 {
 	EBookBackendEws *ebews = data;
 	EBookBackendEwsPrivate *priv = ebews->priv;
-	GTimeVal timeout;
-
-	timeout.tv_sec = 0;
-	timeout.tv_usec = 0;
+	gint64 end_time;
 
 	while (TRUE)	{
 		gboolean succeeded;
@@ -2378,22 +2378,21 @@ delta_thread (gpointer data)
 		else
 			succeeded = ebews_start_gal_sync (ebews);
 
-		g_mutex_lock (priv->dlock->mutex);
+		g_mutex_lock (&priv->dlock->mutex);
 
 		if (!succeeded || priv->dlock->exit)
 			break;
 
-		g_get_current_time (&timeout);
-		g_time_val_add (&timeout, REFRESH_INTERVAL * 1000);
-		g_cond_timed_wait (priv->dlock->cond, priv->dlock->mutex, &timeout);
+		end_time = g_get_monotonic_time () + REFRESH_INTERVAL * G_TIME_SPAN_SECOND;
+		g_cond_wait_until (&priv->dlock->cond, &priv->dlock->mutex, end_time);
 
 		if (priv->dlock->exit)
 			break;
 
-		g_mutex_unlock (priv->dlock->mutex);
+		g_mutex_unlock (&priv->dlock->mutex);
 	}
 
-	g_mutex_unlock (priv->dlock->mutex);
+	g_mutex_unlock (&priv->dlock->mutex);
 	priv->dthread = NULL;
 	return NULL;
 }
@@ -2410,12 +2409,12 @@ fetch_deltas (EBookBackendEws *ebews)
 
 	if (!priv->dlock) {
 		priv->dlock = g_new0 (SyncDelta, 1);
-		priv->dlock->mutex = g_mutex_new ();
-		priv->dlock->cond = g_cond_new ();
+		g_mutex_init (&priv->dlock->mutex);
+		g_cond_init (&priv->dlock->cond);
 	}
 
 	priv->dlock->exit = FALSE;
-	priv->dthread = g_thread_create ((GThreadFunc) delta_thread, ebews, TRUE, &error);
+	priv->dthread = g_thread_try_new (NULL, (GThreadFunc) delta_thread, ebews, &error);
 	if (!priv->dthread) {
 		g_warning (G_STRLOC ": %s", error->message);
 		g_error_free (error);
@@ -2896,17 +2895,17 @@ e_book_backend_ews_dispose (GObject *object)
 	}
 
 	if (priv->dlock) {
-		g_mutex_lock (priv->dlock->mutex);
+		g_mutex_lock (&priv->dlock->mutex);
 		priv->dlock->exit = TRUE;
-		g_mutex_unlock (priv->dlock->mutex);
+		g_mutex_unlock (&priv->dlock->mutex);
 
-		g_cond_signal (priv->dlock->cond);
+		g_cond_signal (&priv->dlock->cond);
 
 		if (priv->dthread)
 			g_thread_join (priv->dthread);
 
-		g_mutex_free (priv->dlock->mutex);
-		g_cond_free (priv->dlock->cond);
+		g_mutex_clear (&priv->dlock->mutex);
+		g_cond_clear (&priv->dlock->cond);
 		g_free (priv->dlock);
 		priv->dthread = NULL;
 	}
@@ -2916,7 +2915,7 @@ e_book_backend_ews_dispose (GObject *object)
 		priv->ebsdb = NULL;
 	}
 
-	g_static_rec_mutex_free (&priv->rec_mutex);
+	g_rec_mutex_clear (&priv->rec_mutex);
 
 	g_free (priv);
 	priv = NULL;
@@ -3008,7 +3007,7 @@ e_book_backend_ews_init (EBookBackendEws *backend)
 	priv->ops = g_hash_table_new (NULL, NULL);
 
 	bews->priv = priv;
-	g_static_rec_mutex_init (&priv->rec_mutex);
+	g_rec_mutex_init (&priv->rec_mutex);
 	priv->cancellable = g_cancellable_new ();
 
 	g_signal_connect (

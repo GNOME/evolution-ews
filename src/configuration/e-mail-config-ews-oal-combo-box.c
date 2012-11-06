@@ -16,6 +16,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "e-mail-config-ews-oal-combo-box.h"
 
 #include <mail/e-mail-config-service-page.h>
@@ -34,7 +38,7 @@ struct _EMailConfigEwsOalComboBoxPrivate {
 	 * the combo box.  This avoids calling GTK+ functions from
 	 * multiple threads. */
 	GSList *oal_items;
-	GMutex *oal_items_lock;
+	GMutex oal_items_lock;
 };
 
 enum {
@@ -124,7 +128,7 @@ mail_config_ews_oal_combo_box_finalize (GObject *object)
 
 	priv = E_MAIL_CONFIG_EWS_OAL_COMBO_BOX_GET_PRIVATE (object);
 
-	g_mutex_free (priv->oal_items_lock);
+	g_mutex_clear (&priv->oal_items_lock);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (e_mail_config_ews_oal_combo_box_parent_class)->
@@ -167,12 +171,12 @@ mail_config_ews_oal_combo_box_try_password_sync (ESourceAuthenticator *auth,
 
 		/* Deposit results in the private struct for
 		 * the update_finish() function to pick up. */
-		g_mutex_lock (combo_box->priv->oal_items_lock);
+		g_mutex_lock (&combo_box->priv->oal_items_lock);
 		g_slist_free_full (
 			combo_box->priv->oal_items,
 			(GDestroyNotify) ews_oal_free);
 		combo_box->priv->oal_items = oal_items;
-		g_mutex_unlock (combo_box->priv->oal_items_lock);
+		g_mutex_unlock (&combo_box->priv->oal_items_lock);
 
 	} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
 		result = E_SOURCE_AUTHENTICATION_REJECTED;
@@ -230,7 +234,7 @@ e_mail_config_ews_oal_combo_box_init (EMailConfigEwsOalComboBox *combo_box)
 	combo_box->priv =
 		E_MAIL_CONFIG_EWS_OAL_COMBO_BOX_GET_PRIVATE (combo_box);
 
-	combo_box->priv->oal_items_lock = g_mutex_new ();
+	g_mutex_init (&combo_box->priv->oal_items_lock);
 }
 
 void
@@ -336,10 +340,10 @@ e_mail_config_ews_oal_combo_box_update_finish (EMailConfigEwsOalComboBox *combo_
 
 	/* Re-populate the combo box using the cached results. */
 
-	g_mutex_lock (combo_box->priv->oal_items_lock);
+	g_mutex_lock (&combo_box->priv->oal_items_lock);
 	list = combo_box->priv->oal_items;
 	combo_box->priv->oal_items = NULL;
-	g_mutex_unlock (combo_box->priv->oal_items_lock);
+	g_mutex_unlock (&combo_box->priv->oal_items_lock);
 
 	active_id = g_strdup (gtk_combo_box_get_active_id (GTK_COMBO_BOX (combo_box)));
 	combo_box_text = GTK_COMBO_BOX_TEXT (combo_box);

@@ -293,6 +293,7 @@ schedule_search_cb (gpointer user_data)
 
 	if (!g_cancellable_is_cancelled (sid->cancellable)) {
 		struct EEwsSearchUserData *pgu;
+		GThread *thread;
 		GError *error = NULL;
 
 		pgu = g_object_get_data (sid->dialog, E_EWS_SEARCH_DLG_DATA);
@@ -303,8 +304,10 @@ schedule_search_cb (gpointer user_data)
 		sid->conn = g_object_ref (pgu->conn);
 		sid->search_text = g_strdup (pgu->search_text);
 
-		if (g_thread_create (search_thread, sid, FALSE, &error)) {
+		thread = g_thread_try_new (NULL, search_thread, sid, &error);
+		if (thread) {
 			sid = NULL;
+			g_thread_unref (thread);
 		} else {
 			g_object_unref (sid->conn);
 			g_warning ("%s: Failed to create search thread: %s", G_STRFUNC, error ? error->message : "Unknown error");

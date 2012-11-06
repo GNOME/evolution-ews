@@ -78,14 +78,14 @@ which needs to be better organized via functions */
 	((obj), CAMEL_TYPE_EWS_FOLDER, CamelEwsFolderPrivate))
 
 struct _CamelEwsFolderPrivate {
-	GMutex *search_lock;	/* for locking the search object */
-	GStaticRecMutex cache_lock;	/* for locking the cache object */
+	GMutex search_lock;	/* for locking the search object */
+	GRecMutex cache_lock;	/* for locking the cache object */
 
 	/* For syncronizing refresh_info/sync_changes */
 	gboolean refreshing;
 	gboolean fetch_pending;
-	GMutex *state_lock;
-	GCond *fetch_cond;
+	GMutex state_lock;
+	GCond fetch_cond;
 	GHashTable *uid_eflags;
 };
 
@@ -178,7 +178,7 @@ camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder,
 
 	priv = ews_folder->priv;
 
-	g_static_rec_mutex_lock (&priv->cache_lock);
+	g_rec_mutex_lock (&priv->cache_lock);
 	stream = ews_data_cache_get (ews_folder->cache, "cur", uid, error);
 	if (!stream) {
 		gchar *old_fname = camel_data_cache_get_filename (
@@ -193,7 +193,7 @@ camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder,
 		}
 		g_free (old_fname);
 		if (!stream) {
-			g_static_rec_mutex_unlock (&priv->cache_lock);
+			g_rec_mutex_unlock (&priv->cache_lock);
 			return NULL;
 		}
 	}
@@ -206,7 +206,7 @@ camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder,
 		msg = NULL;
 	}
 
-	g_static_rec_mutex_unlock (&priv->cache_lock);
+	g_rec_mutex_unlock (&priv->cache_lock);
 	g_object_unref (stream);
 
 	return msg;
@@ -409,7 +409,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	if (!camel_ews_store_connected (ews_store, cancellable, error))
 		return NULL;
 
-	g_mutex_lock (priv->state_lock);
+	g_mutex_lock (&priv->state_lock);
 
 	/* If another thread is already fetching this message, wait for it */
 
@@ -420,10 +420,10 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	 * falls back to this function. */
 	if (g_hash_table_lookup (priv->uid_eflags, uid)) {
 		do {
-			g_cond_wait (priv->fetch_cond, priv->state_lock);
+			g_cond_wait (&priv->fetch_cond, &priv->state_lock);
 		} while (g_hash_table_lookup (priv->uid_eflags, uid));
 
-		g_mutex_unlock (priv->state_lock);
+		g_mutex_unlock (&priv->state_lock);
 
 		message = camel_ews_folder_get_message_from_cache (ews_folder, uid, cancellable, error);
 		return message;
@@ -433,7 +433,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	 * we won't be inserting where an entry already exists. So it's
 	 * OK to insert uid itself, not g_strdup (uid) */
 	g_hash_table_insert (priv->uid_eflags, (gchar *) uid, (gchar *) uid);
-	g_mutex_unlock (priv->state_lock);
+	g_mutex_unlock (&priv->state_lock);
 
 	cnc = camel_ews_store_ref_connection (ews_store);
 	ids = g_slist_append (ids, (gchar *) uid);
@@ -545,10 +545,10 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	message = camel_ews_folder_get_message_from_cache (ews_folder, uid, cancellable, error);
 
 exit:
-	g_mutex_lock (priv->state_lock);
+	g_mutex_lock (&priv->state_lock);
 	g_hash_table_remove (priv->uid_eflags, uid);
-	g_mutex_unlock (priv->state_lock);
-	g_cond_broadcast (priv->fetch_cond);
+	g_mutex_unlock (&priv->state_lock);
+	g_cond_broadcast (&priv->fetch_cond);
 
 	if (!message && !error)
 		g_set_error (
@@ -608,12 +608,12 @@ ews_folder_search_by_expression (CamelFolder *folder,
 	ews_folder = CAMEL_EWS_FOLDER (folder);
 	priv = ews_folder->priv;
 
-	g_mutex_lock (priv->search_lock);
+	g_mutex_lock (&priv->search_lock);
 
 	camel_folder_search_set_folder (ews_folder->search, folder);
 	matches = camel_folder_search_search (ews_folder->search, expression, NULL, cancellable, error);
 
-	g_mutex_unlock (priv->search_lock);
+	g_mutex_unlock (&priv->search_lock);
 
 	return matches;
 }
@@ -631,12 +631,12 @@ ews_folder_count_by_expression (CamelFolder *folder,
 	ews_folder = CAMEL_EWS_FOLDER (folder);
 	priv = ews_folder->priv;
 
-	g_mutex_lock (priv->search_lock);
+	g_mutex_lock (&priv->search_lock);
 
 	camel_folder_search_set_folder (ews_folder->search, folder);
 	matches = camel_folder_search_count (ews_folder->search, expression, cancellable, error);
 
-	g_mutex_unlock (priv->search_lock);
+	g_mutex_unlock (&priv->search_lock);
 
 	return matches;
 }
@@ -658,12 +658,12 @@ ews_folder_search_by_uids (CamelFolder *folder,
 	if (uids->len == 0)
 		return g_ptr_array_new ();
 
-	g_mutex_lock (priv->search_lock);
+	g_mutex_lock (&priv->search_lock);
 
 	camel_folder_search_set_folder (ews_folder->search, folder);
 	matches = camel_folder_search_search (ews_folder->search, expression, uids, cancellable, error);
 
-	g_mutex_unlock (priv->search_lock);
+	g_mutex_unlock (&priv->search_lock);
 
 	return matches;
 }
@@ -680,11 +680,11 @@ ews_folder_search_free (CamelFolder *folder,
 
 	g_return_if_fail (ews_folder->search);
 
-	g_mutex_lock (priv->search_lock);
+	g_mutex_lock (&priv->search_lock);
 
 	camel_folder_search_free_result (ews_folder->search, uids);
 
-	g_mutex_unlock (priv->search_lock);
+	g_mutex_unlock (&priv->search_lock);
 
 	return;
 }
@@ -1395,15 +1395,15 @@ ews_refresh_info_sync (CamelFolder *folder,
 	if (!camel_ews_store_connected (ews_store, cancellable, error))
 		return FALSE;
 
-	g_mutex_lock (priv->state_lock);
+	g_mutex_lock (&priv->state_lock);
 
 	if (priv->refreshing) {
-		g_mutex_unlock (priv->state_lock);
+		g_mutex_unlock (&priv->state_lock);
 		return TRUE;
 	}
 
 	priv->refreshing = TRUE;
-	g_mutex_unlock (priv->state_lock);
+	g_mutex_unlock (&priv->state_lock);
 
 	cnc = camel_ews_store_ref_connection (ews_store);
 	g_return_val_if_fail (cnc != NULL, FALSE);
@@ -1477,9 +1477,9 @@ ews_refresh_info_sync (CamelFolder *folder,
 	if (local_error)
 		g_propagate_error (error, local_error);
 
-	g_mutex_lock (priv->state_lock);
+	g_mutex_lock (&priv->state_lock);
 	priv->refreshing = FALSE;
-	g_mutex_unlock (priv->state_lock);
+	g_mutex_unlock (&priv->state_lock);
 	if (sync_state != ((CamelEwsSummary *) folder->summary)->sync_state)
 		g_free (sync_state);
 	g_object_unref (cnc);
@@ -1776,9 +1776,9 @@ ews_folder_dispose (GObject *object)
 		ews_folder->search = NULL;
 	}
 
-	g_mutex_free (ews_folder->priv->search_lock);
+	g_mutex_clear (&ews_folder->priv->search_lock);
 	g_hash_table_destroy (ews_folder->priv->uid_eflags);
-	g_cond_free (ews_folder->priv->fetch_cond);
+	g_cond_clear (&ews_folder->priv->fetch_cond);
 
 	if (CAMEL_FOLDER (ews_folder)->summary)
 		g_signal_handlers_disconnect_by_func (CAMEL_FOLDER (ews_folder)->summary, G_CALLBACK (ews_folder_count_notify_cb), ews_folder);
@@ -1864,13 +1864,13 @@ camel_ews_folder_init (CamelEwsFolder *ews_folder)
 
 	folder->folder_flags = CAMEL_FOLDER_HAS_SUMMARY_CAPABILITY;
 
-	ews_folder->priv->search_lock = g_mutex_new ();
-	ews_folder->priv->state_lock = g_mutex_new ();
-	g_static_rec_mutex_init (&ews_folder->priv->cache_lock);
+	g_mutex_init (&ews_folder->priv->search_lock);
+	g_mutex_init (&ews_folder->priv->state_lock);
+	g_rec_mutex_init (&ews_folder->priv->cache_lock);
 
 	ews_folder->priv->refreshing = FALSE;
 
-	ews_folder->priv->fetch_cond = g_cond_new ();
+	g_cond_init (&ews_folder->priv->fetch_cond);
 	ews_folder->priv->uid_eflags = g_hash_table_new (g_str_hash, g_str_equal);
 	camel_folder_set_lock_async (folder, TRUE);
 }

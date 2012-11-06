@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <gio/gio.h>
@@ -6,8 +10,8 @@
 
 #include "server/e-ews-folder.h"
 
-#define S_LOCK(x) (g_static_rec_mutex_lock(&(x)->priv->s_lock))
-#define S_UNLOCK(x) (g_static_rec_mutex_unlock(&(x)->priv->s_lock))
+#define S_LOCK(x) (g_rec_mutex_lock(&(x)->priv->s_lock))
+#define S_UNLOCK(x) (g_rec_mutex_unlock(&(x)->priv->s_lock))
 
 #define STORE_GROUP_NAME "##storepriv"
 #define CURRENT_SUMMARY_VERSION 1
@@ -21,7 +25,7 @@ struct _CamelEwsStoreSummaryPrivate {
 	 * So entries must always be removed from fname_id_hash *first*. */
 	GHashTable *id_fname_hash;
 	GHashTable *fname_id_hash;
-	GStaticRecMutex s_lock;
+	GRecMutex s_lock;
 
 	GFileMonitor *monitor_delete;
 };
@@ -38,7 +42,7 @@ ews_store_summary_finalize (GObject *object)
 	g_free (priv->path);
 	g_hash_table_destroy (priv->fname_id_hash);
 	g_hash_table_destroy (priv->id_fname_hash);
-	g_static_rec_mutex_free (&priv->s_lock);
+	g_rec_mutex_clear (&priv->s_lock);
 	if (priv->monitor_delete)
 		g_object_unref (priv->monitor_delete);
 
@@ -72,7 +76,7 @@ camel_ews_store_summary_init (CamelEwsStoreSummary *ews_summary)
 		g_str_hash, g_str_equal,
 		(GDestroyNotify) g_free,
 		(GDestroyNotify) g_free);
-	g_static_rec_mutex_init (&priv->s_lock);
+	g_rec_mutex_init (&priv->s_lock);
 }
 
 static gchar *build_full_name (CamelEwsStoreSummary *ews_summary, const gchar *fid)

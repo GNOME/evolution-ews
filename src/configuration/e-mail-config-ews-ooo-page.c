@@ -16,9 +16,12 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "e-mail-config-ews-ooo-page.h"
 
-#include <config.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -51,7 +54,7 @@ struct _EMailConfigEwsOooPagePrivate {
 	/* The try_password() method deposits results here.
 	 * This avoids calling GTK+ functions from multiple threads. */
 	EEwsOofSettings *oof_settings;
-	GMutex *oof_settings_lock;
+	GMutex oof_settings_lock;
 
 	/* to not save unchanged state */
 	gboolean changed;
@@ -242,13 +245,13 @@ mail_config_ews_ooo_page_refresh_cb (GObject *source_object,
 	} else {
 		EMailConfigEwsOooPage *page = async_context->page;
 
-		g_mutex_lock (page->priv->oof_settings_lock);
+		g_mutex_lock (&page->priv->oof_settings_lock);
 
 		if (page->priv->oof_settings != NULL)
 			mail_config_ews_ooo_page_display_settings (
 				page, page->priv->oof_settings);
 
-		g_mutex_unlock (page->priv->oof_settings_lock);
+		g_mutex_unlock (&page->priv->oof_settings_lock);
 	}
 
 	async_context_free (async_context);
@@ -412,7 +415,7 @@ mail_config_ews_ooo_page_finalize (GObject *object)
 
 	priv = E_MAIL_CONFIG_EWS_OOO_PAGE_GET_PRIVATE (object);
 
-	g_mutex_free (priv->oof_settings_lock);
+	g_mutex_clear (&priv->oof_settings_lock);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (e_mail_config_ews_ooo_page_parent_class)->
@@ -701,13 +704,13 @@ mail_config_ews_ooo_page_submit (EMailConfigPage *page,
 
 	priv = E_MAIL_CONFIG_EWS_OOO_PAGE_GET_PRIVATE (page);
 
-	g_mutex_lock (priv->oof_settings_lock);
+	g_mutex_lock (&priv->oof_settings_lock);
 
 	/* It may be that the Out of Office settings are still
 	 * loading or have failed to load, in which case there
 	 * are obviously no changes to submit. */
 	if (priv->oof_settings == NULL) {
-		g_mutex_unlock (priv->oof_settings_lock);
+		g_mutex_unlock (&priv->oof_settings_lock);
 
 		simple = g_simple_async_result_new (
 			G_OBJECT (page), callback, user_data,
@@ -781,7 +784,7 @@ mail_config_ews_ooo_page_submit (EMailConfigPage *page,
 
 	g_object_unref (simple);
 
-	g_mutex_unlock (priv->oof_settings_lock);
+	g_mutex_unlock (&priv->oof_settings_lock);
 }
 
 static gboolean
@@ -840,12 +843,12 @@ mail_config_ews_ooo_page_try_password_sync (ESourceAuthenticator *auth,
 		g_warn_if_fail (local_error == NULL);
 
 		/* The page takes ownership of the settings. */
-		g_mutex_lock (page->priv->oof_settings_lock);
+		g_mutex_lock (&page->priv->oof_settings_lock);
 		if (page->priv->oof_settings != NULL)
 			g_object_unref (oof_settings);
 		page->priv->oof_settings = oof_settings;
 		page->priv->changed = FALSE;
-		g_mutex_unlock (page->priv->oof_settings_lock);
+		g_mutex_unlock (&page->priv->oof_settings_lock);
 
 	} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
 		result = E_SOURCE_AUTHENTICATION_REJECTED;
@@ -945,7 +948,7 @@ e_mail_config_ews_ooo_page_init (EMailConfigEwsOooPage *page)
 {
 	page->priv = E_MAIL_CONFIG_EWS_OOO_PAGE_GET_PRIVATE (page);
 
-	page->priv->oof_settings_lock = g_mutex_new ();
+	g_mutex_init (&page->priv->oof_settings_lock);
 }
 
 void

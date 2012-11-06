@@ -21,6 +21,10 @@
 
 /* APIs : e_ews_connection_find_folder_items; e_ews_query_to_restriction; */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>

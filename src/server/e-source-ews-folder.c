@@ -16,6 +16,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "e-source-ews-folder.h"
 
 #define E_SOURCE_EWS_FOLDER_GET_PRIVATE(obj) \
@@ -23,7 +27,7 @@
 	((obj), E_TYPE_SOURCE_EWS_FOLDER, ESourceEwsFolderPrivate))
 
 struct _ESourceEwsFolderPrivate {
-	GMutex *property_lock;
+	GMutex property_lock;
 	gchar *change_key;
 	gchar *id;
 	gboolean foreign;
@@ -109,7 +113,7 @@ source_ews_folder_finalize (GObject *object)
 
 	priv = E_SOURCE_EWS_FOLDER_GET_PRIVATE (object);
 
-	g_mutex_free (priv->property_lock);
+	g_mutex_clear (&priv->property_lock);
 
 	g_free (priv->change_key);
 	g_free (priv->id);
@@ -184,7 +188,7 @@ static void
 e_source_ews_folder_init (ESourceEwsFolder *extension)
 {
 	extension->priv = E_SOURCE_EWS_FOLDER_GET_PRIVATE (extension);
-	extension->priv->property_lock = g_mutex_new ();
+	g_mutex_init (&extension->priv->property_lock);
 }
 
 void
@@ -212,12 +216,12 @@ e_source_ews_folder_dup_change_key (ESourceEwsFolder *extension)
 
 	g_return_val_if_fail (E_IS_SOURCE_EWS_FOLDER (extension), NULL);
 
-	g_mutex_lock (extension->priv->property_lock);
+	g_mutex_lock (&extension->priv->property_lock);
 
 	protected = e_source_ews_folder_get_change_key (extension);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (extension->priv->property_lock);
+	g_mutex_unlock (&extension->priv->property_lock);
 
 	return duplicate;
 }
@@ -228,17 +232,17 @@ e_source_ews_folder_set_change_key (ESourceEwsFolder *extension,
 {
 	g_return_if_fail (E_IS_SOURCE_EWS_FOLDER (extension));
 
-	g_mutex_lock (extension->priv->property_lock);
+	g_mutex_lock (&extension->priv->property_lock);
 
 	if (g_strcmp0 (extension->priv->change_key, change_key) == 0) {
-		g_mutex_unlock (extension->priv->property_lock);
+		g_mutex_unlock (&extension->priv->property_lock);
 		return;
 	}
 
 	g_free (extension->priv->change_key);
 	extension->priv->change_key = g_strdup (change_key);
 
-	g_mutex_unlock (extension->priv->property_lock);
+	g_mutex_unlock (&extension->priv->property_lock);
 
 	g_object_notify (G_OBJECT (extension), "change-key");
 }
@@ -259,12 +263,12 @@ e_source_ews_folder_dup_id (ESourceEwsFolder *extension)
 
 	g_return_val_if_fail (E_IS_SOURCE_EWS_FOLDER (extension), NULL);
 
-	g_mutex_lock (extension->priv->property_lock);
+	g_mutex_lock (&extension->priv->property_lock);
 
 	protected = e_source_ews_folder_get_id (extension);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (extension->priv->property_lock);
+	g_mutex_unlock (&extension->priv->property_lock);
 
 	return duplicate;
 }
@@ -275,17 +279,17 @@ e_source_ews_folder_set_id (ESourceEwsFolder *extension,
 {
 	g_return_if_fail (E_IS_SOURCE_EWS_FOLDER (extension));
 
-	g_mutex_lock (extension->priv->property_lock);
+	g_mutex_lock (&extension->priv->property_lock);
 
 	if (g_strcmp0 (extension->priv->id, id) == 0) {
-		g_mutex_unlock (extension->priv->property_lock);
+		g_mutex_unlock (&extension->priv->property_lock);
 		return;
 	}
 
 	g_free (extension->priv->id);
 	extension->priv->id = g_strdup (id);
 
-	g_mutex_unlock (extension->priv->property_lock);
+	g_mutex_unlock (&extension->priv->property_lock);
 
 	g_object_notify (G_OBJECT (extension), "id");
 }
@@ -298,12 +302,12 @@ e_source_ews_folder_dup_folder_id (ESourceEwsFolder *extension)
 
 	g_return_val_if_fail (E_IS_SOURCE_EWS_FOLDER (extension), NULL);
 
-	g_mutex_lock (extension->priv->property_lock);
+	g_mutex_lock (&extension->priv->property_lock);
 
 	folder_id = e_ews_folder_id_new (
 		extension->priv->id, extension->priv->change_key, FALSE);
 
-	g_mutex_unlock (extension->priv->property_lock);
+	g_mutex_unlock (&extension->priv->property_lock);
 
 	return folder_id;
 }

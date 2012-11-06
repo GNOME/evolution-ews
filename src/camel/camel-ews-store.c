@@ -23,7 +23,9 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include <errno.h>
 #include <stdio.h>
@@ -61,9 +63,9 @@
 
 struct _CamelEwsStorePrivate {
 	time_t last_refresh_time;
-	GMutex *get_finfo_lock;
+	GMutex get_finfo_lock;
 	EEwsConnection *connection;
-	GMutex *connection_lock;
+	GMutex connection_lock;
 };
 
 static gboolean	ews_store_construct	(CamelService *service, CamelSession *session,
@@ -419,7 +421,7 @@ ews_disconnect_sync (CamelService *service,
 	CamelEwsStore *ews_store = (CamelEwsStore *) service;
 	CamelServiceClass *service_class;
 
-	g_mutex_lock (ews_store->priv->connection_lock);
+	g_mutex_lock (&ews_store->priv->connection_lock);
 
 	/* TODO cancel all operations in the connection */
 	if (ews_store->priv->connection != NULL) {
@@ -441,7 +443,7 @@ ews_disconnect_sync (CamelService *service,
 		ews_store->priv->connection = NULL;
 	}
 
-	g_mutex_unlock (ews_store->priv->connection_lock);
+	g_mutex_unlock (&ews_store->priv->connection_lock);
 
 	service_class = CAMEL_SERVICE_CLASS (camel_ews_store_parent_class);
 	return service_class->disconnect_sync (service, clean, cancellable, error);
@@ -556,23 +558,23 @@ ews_authenticate_sync (CamelService *service,
 		cancellable, &local_error);
 
 	if (local_error == NULL) {
-		g_mutex_lock (ews_store->priv->connection_lock);
+		g_mutex_lock (&ews_store->priv->connection_lock);
 		if (ews_store->priv->connection != NULL)
 			g_object_unref (ews_store->priv->connection);
 		ews_store->priv->connection = g_object_ref (connection);
-		g_mutex_unlock (ews_store->priv->connection_lock);
+		g_mutex_unlock (&ews_store->priv->connection_lock);
 
 		/* This consumes all allocated result data. */
 		ews_update_folder_hierarchy (
 			ews_store, sync_state, includes_last_folder,
 			folders_created, folders_deleted, folders_updated);
 	} else {
-		g_mutex_lock (ews_store->priv->connection_lock);
+		g_mutex_lock (&ews_store->priv->connection_lock);
 		if (ews_store->priv->connection != NULL) {
 			g_object_unref (ews_store->priv->connection);
 			ews_store->priv->connection = NULL;
 		}
-		g_mutex_unlock (ews_store->priv->connection_lock);
+		g_mutex_unlock (&ews_store->priv->connection_lock);
 
 		g_free (sync_state);
 
@@ -768,18 +770,18 @@ ews_folder_hierarchy_ready_cb (GObject *obj,
 
 		camel_ews_store_maybe_disconnect (ews_store, error);
 
-		g_mutex_lock (priv->get_finfo_lock);
+		g_mutex_lock (&priv->get_finfo_lock);
 		ews_store->priv->last_refresh_time -= FINFO_REFRESH_INTERVAL;
-		g_mutex_unlock (priv->get_finfo_lock);
+		g_mutex_unlock (&priv->get_finfo_lock);
 		goto exit;
 	}
-	g_mutex_lock (priv->get_finfo_lock);
+	g_mutex_lock (&priv->get_finfo_lock);
 	ews_update_folder_hierarchy (
 		ews_store, sync_state, includes_last_folder,
 		folders_created, folders_deleted, folders_updated);
 
 	ews_store->priv->last_refresh_time = time (NULL);
-	g_mutex_unlock (priv->get_finfo_lock);
+	g_mutex_unlock (&priv->get_finfo_lock);
 
 exit:
 	g_object_unref (ews_store);
@@ -845,11 +847,11 @@ ews_get_folder_info_sync (CamelStore *store,
 	ews_store = (CamelEwsStore *) store;
 	priv = ews_store->priv;
 
-	g_mutex_lock (priv->get_finfo_lock);
+	g_mutex_lock (&priv->get_finfo_lock);
 	if (!(camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))
 	      && camel_service_connect_sync ((CamelService *) store, cancellable, error))) {
 		camel_ews_store_ensure_virtual_folders (ews_store);
-		g_mutex_unlock (priv->get_finfo_lock);
+		g_mutex_unlock (&priv->get_finfo_lock);
 		goto offline;
 	}
 
@@ -864,7 +866,7 @@ ews_get_folder_info_sync (CamelStore *store,
 		if (now - priv->last_refresh_time > FINFO_REFRESH_INTERVAL && ews_refresh_finfo (ews_store))
 			ews_store->priv->last_refresh_time = time (NULL);
 
-		g_mutex_unlock (priv->get_finfo_lock);
+		g_mutex_unlock (&priv->get_finfo_lock);
 		goto offline;
 	}
 
@@ -889,13 +891,13 @@ ews_get_folder_info_sync (CamelStore *store,
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
 		g_propagate_error (error, local_error);
 
-		g_mutex_unlock (priv->get_finfo_lock);
+		g_mutex_unlock (&priv->get_finfo_lock);
 		return NULL;
 	}
 	ews_update_folder_hierarchy (
 		ews_store, sync_state, includes_last_folder,
 		folders_created, folders_deleted, folders_updated);
-	g_mutex_unlock (priv->get_finfo_lock);
+	g_mutex_unlock (&priv->get_finfo_lock);
 
 offline:
 	fi = folder_info_from_store_summary ( (CamelEwsStore *) store, top, flags, error);
@@ -1295,12 +1297,12 @@ camel_ews_store_ref_connection (CamelEwsStore *ews_store)
 
 	g_return_val_if_fail (CAMEL_IS_EWS_STORE (ews_store), NULL);
 
-	g_mutex_lock (ews_store->priv->connection_lock);
+	g_mutex_lock (&ews_store->priv->connection_lock);
 
 	if (ews_store->priv->connection != NULL)
 		connection = g_object_ref (ews_store->priv->connection);
 
-	g_mutex_unlock (ews_store->priv->connection_lock);
+	g_mutex_unlock (&ews_store->priv->connection_lock);
 
 	return connection;
 }
@@ -1562,8 +1564,8 @@ ews_store_finalize (GObject *object)
 	ews_store = CAMEL_EWS_STORE (object);
 
 	g_free (ews_store->storage_path);
-	g_mutex_free (ews_store->priv->get_finfo_lock);
-	g_mutex_free (ews_store->priv->connection_lock);
+	g_mutex_clear (&ews_store->priv->get_finfo_lock);
+	g_mutex_clear (&ews_store->priv->connection_lock);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_ews_store_parent_class)->finalize (object);
@@ -1618,6 +1620,6 @@ camel_ews_store_init (CamelEwsStore *ews_store)
 		CAMEL_EWS_STORE_GET_PRIVATE (ews_store);
 
 	ews_store->priv->last_refresh_time = time (NULL) - (FINFO_REFRESH_INTERVAL + 10);
-	ews_store->priv->get_finfo_lock = g_mutex_new ();
-	ews_store->priv->connection_lock = g_mutex_new ();
+	g_mutex_init (&ews_store->priv->get_finfo_lock);
+	g_mutex_init (&ews_store->priv->connection_lock);
 }

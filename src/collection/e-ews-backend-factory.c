@@ -16,6 +16,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "e-ews-backend-factory.h"
 
 #include "e-ews-backend.h"

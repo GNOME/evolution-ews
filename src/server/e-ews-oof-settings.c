@@ -16,9 +16,12 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "e-ews-oof-settings.h"
 
-#include <config.h>
 #include <glib/gi18n-lib.h>
 
 #include <libedataserver/libedataserver.h>
@@ -38,7 +41,7 @@ static void	e_ews_oof_settings_async_initable_init
 					(GAsyncInitableIface *interface);
 
 struct _EEwsOofSettingsPrivate {
-	GMutex *property_lock;
+	GMutex property_lock;
 	EEwsConnection *connection;
 	EEwsOofState state;
 	EEwsExternalAudience external_audience;
@@ -404,7 +407,7 @@ ews_oof_settings_finalize (GObject *object)
 
 	priv = E_EWS_OOF_SETTINGS_GET_PRIVATE (object);
 
-	g_mutex_free (priv->property_lock);
+	g_mutex_clear (&priv->property_lock);
 
 	g_date_time_unref (priv->start_time);
 	g_date_time_unref (priv->end_time);
@@ -605,7 +608,7 @@ e_ews_oof_settings_init (EEwsOofSettings *settings)
 {
 	settings->priv = E_EWS_OOF_SETTINGS_GET_PRIVATE (settings);
 
-	settings->priv->property_lock = g_mutex_new ();
+	g_mutex_init (&settings->priv->property_lock);
 
 	/* This is just to make sure the values are never NULL.
 	 * They will be destroyed as soon as we get real values. */
@@ -744,10 +747,10 @@ e_ews_oof_settings_set_start_time (EEwsOofSettings *settings,
 	g_return_if_fail (E_IS_EWS_OOF_SETTINGS (settings));
 	g_return_if_fail (start_time != NULL);
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	if (g_date_time_compare (settings->priv->start_time, start_time) == 0) {
-		g_mutex_unlock (settings->priv->property_lock);
+		g_mutex_unlock (&settings->priv->property_lock);
 		return;
 	}
 
@@ -756,7 +759,7 @@ e_ews_oof_settings_set_start_time (EEwsOofSettings *settings,
 		settings->priv->start_time = g_date_time_ref (start_time);
 	}
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	g_object_notify (G_OBJECT (settings), "start-time");
 }
@@ -776,10 +779,10 @@ e_ews_oof_settings_set_end_time (EEwsOofSettings *settings,
 	g_return_if_fail (E_IS_EWS_OOF_SETTINGS (settings));
 	g_return_if_fail (end_time != NULL);
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	if (g_date_time_compare (settings->priv->end_time, end_time) == 0) {
-		g_mutex_unlock (settings->priv->property_lock);
+		g_mutex_unlock (&settings->priv->property_lock);
 		return;
 	}
 
@@ -788,7 +791,7 @@ e_ews_oof_settings_set_end_time (EEwsOofSettings *settings,
 		settings->priv->end_time = g_date_time_ref (end_time);
 	}
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	g_object_notify (G_OBJECT (settings), "end-time");
 }
@@ -809,12 +812,12 @@ e_ews_oof_settings_dup_internal_reply (EEwsOofSettings *settings)
 
 	g_return_val_if_fail (E_IS_EWS_OOF_SETTINGS (settings), NULL);
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	protected = e_ews_oof_settings_get_internal_reply (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	return duplicate;
 }
@@ -825,17 +828,17 @@ e_ews_oof_settings_set_internal_reply (EEwsOofSettings *settings,
 {
 	g_return_if_fail (E_IS_EWS_OOF_SETTINGS (settings));
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	if (g_strcmp0 (internal_reply, settings->priv->internal_reply) == 0) {
-		g_mutex_unlock (settings->priv->property_lock);
+		g_mutex_unlock (&settings->priv->property_lock);
 		return;
 	}
 
 	g_free (settings->priv->internal_reply);
 	settings->priv->internal_reply = g_strdup (internal_reply);
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	g_object_notify (G_OBJECT (settings), "internal-reply");
 }
@@ -856,12 +859,12 @@ e_ews_oof_settings_dup_external_reply (EEwsOofSettings *settings)
 
 	g_return_val_if_fail (E_IS_EWS_OOF_SETTINGS (settings), NULL);
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	protected = e_ews_oof_settings_get_external_reply (settings);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	return duplicate;
 }
@@ -872,17 +875,17 @@ e_ews_oof_settings_set_external_reply (EEwsOofSettings *settings,
 {
 	g_return_if_fail (E_IS_EWS_OOF_SETTINGS (settings));
 
-	g_mutex_lock (settings->priv->property_lock);
+	g_mutex_lock (&settings->priv->property_lock);
 
 	if (g_strcmp0 (external_reply, settings->priv->external_reply) == 0) {
-		g_mutex_unlock (settings->priv->property_lock);
+		g_mutex_unlock (&settings->priv->property_lock);
 		return;
 	}
 
 	g_free (settings->priv->external_reply);
 	settings->priv->external_reply = g_strdup (external_reply);
 
-	g_mutex_unlock (settings->priv->property_lock);
+	g_mutex_unlock (&settings->priv->property_lock);
 
 	g_object_notify (G_OBJECT (settings), "external-reply");
 }

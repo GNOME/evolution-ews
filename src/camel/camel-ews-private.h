@@ -31,13 +31,13 @@
 
 #ifdef ENABLE_THREADS
 #define CAMEL_EWS_FOLDER_LOCK(f, l) \
-	(g_static_mutex_lock (&((CamelEwsFolder *) f)->priv->l))
+	(g_mutex_lock (&((CamelEwsFolder *) f)->priv->l))
 #define CAMEL_EWS_FOLDER_UNLOCK(f, l) \
-	(g_static_mutex_unlock (&((CamelEwsFolder *) f)->priv->l))
+	(g_mutex_unlock (&((CamelEwsFolder *) f)->priv->l))
 #define CAMEL_EWS_FOLDER_REC_LOCK(f, l) \
-	(g_static_rec_mutex_lock (&((CamelEwsFolder *) f)->priv->l))
+	(g_rec_mutex_lock (&((CamelEwsFolder *) f)->priv->l))
 #define CAMEL_EWS_FOLDER_REC_UNLOCK(f, l) \
-	(g_static_rec_mutex_unlock (&((CamelEwsFolder *) f)->priv->l))
+	(g_rec_mutex_unlock (&((CamelEwsFolder *) f)->priv->l))
 #else
 #define CAMEL_EWS_FOLDER_LOCK(f, l)
 #define CAMEL_EWS_FOLDER_UNLOCK(f, l)

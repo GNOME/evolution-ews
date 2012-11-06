@@ -16,9 +16,12 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "e-mail-config-ews-gal.h"
 
-#include <config.h>
 #include <glib/gi18n-lib.h>
 
 #include <mail/e-mail-config-provider-page.h>

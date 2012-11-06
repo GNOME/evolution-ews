@@ -205,20 +205,25 @@ e_ews_config_utils_run_in_thread_with_feedback_general (GtkWindow *parent,
 	g_signal_connect (dialog, "response", G_CALLBACK (run_with_feedback_response_cb), rfd);
 
 	if (run_modal) {
+		GThread *thread;
 		GCancellable *cancellable;
 
 		cancellable = g_object_ref (rfd->cancellable);
 
-		g_return_if_fail (g_thread_create (run_with_feedback_thread, rfd, FALSE, NULL));
+		thread = g_thread_new (NULL, run_with_feedback_thread, rfd);
+		g_thread_unref (thread);
 
 		gtk_dialog_run (GTK_DIALOG (dialog));
 
 		g_cancellable_cancel (cancellable);
 		g_object_unref (cancellable);
 	} else {
+		GThread *thread;
+
 		gtk_widget_show (dialog);
 
-		g_return_if_fail (g_thread_create (run_with_feedback_thread, rfd, FALSE, NULL));
+		thread = g_thread_new (NULL, run_with_feedback_thread, rfd);
+		g_thread_unref (thread);
 	}
 }
 

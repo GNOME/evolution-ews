@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "ews-errors.h"
 
 static GHashTable *ews_error_hash = NULL;

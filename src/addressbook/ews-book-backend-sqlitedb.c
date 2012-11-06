@@ -44,10 +44,10 @@
 #define DB_FILENAME "contacts.db"
 #define FOLDER_VERSION 1
 
-#define READER_LOCK(ebsdb) g_static_rw_lock_reader_lock (&ebsdb->priv->rwlock)
-#define READER_UNLOCK(ebsdb) g_static_rw_lock_reader_unlock (&ebsdb->priv->rwlock)
-#define WRITER_LOCK(ebssdb) g_static_rw_lock_writer_lock (&ebsdb->priv->rwlock)
-#define WRITER_UNLOCK(ebssdb) g_static_rw_lock_writer_unlock (&ebsdb->priv->rwlock)
+#define READER_LOCK(ebsdb) g_rw_lock_reader_lock (&ebsdb->priv->rwlock)
+#define READER_UNLOCK(ebsdb) g_rw_lock_reader_unlock (&ebsdb->priv->rwlock)
+#define WRITER_LOCK(ebssdb) g_rw_lock_writer_lock (&ebsdb->priv->rwlock)
+#define WRITER_UNLOCK(ebssdb) g_rw_lock_writer_unlock (&ebsdb->priv->rwlock)
 
 struct _EwsBookBackendSqliteDBPrivate {
 	sqlite3 *db;
@@ -55,7 +55,7 @@ struct _EwsBookBackendSqliteDBPrivate {
 	gchar *hash_key;
 
 	gboolean store_vcard;
-	GStaticRWLock rwlock;
+	GRWLock rwlock;
 };
 
 G_DEFINE_TYPE (EwsBookBackendSqliteDB, ews_book_backend_sqlitedb, G_TYPE_OBJECT)
@@ -64,7 +64,7 @@ G_DEFINE_TYPE (EwsBookBackendSqliteDB, ews_book_backend_sqlitedb, G_TYPE_OBJECT)
 	(ews_book_backend_sqlitedb_error_quark ())
 
 static GHashTable *db_connections = NULL;
-static GStaticMutex dbcon_lock = G_STATIC_MUTEX_INIT;
+static GMutex dbcon_lock;
 
 typedef struct {
 	EContactField field;            /* The EContact field */
@@ -124,7 +124,7 @@ ews_book_backend_sqlitedb_finalize (GObject *object)
 
 	priv = EWS_BOOK_BACKEND_SQLITEDB (object)->priv;
 
-	g_static_rw_lock_free (&priv->rwlock);
+	g_rw_lock_clear (&priv->rwlock);
 
 	sqlite3_close (priv->db);
 	priv->db = NULL;
@@ -132,7 +132,7 @@ ews_book_backend_sqlitedb_finalize (GObject *object)
 	g_free (priv->path);
 	priv->path = NULL;
 
-	g_static_mutex_lock (&dbcon_lock);
+	g_mutex_lock (&dbcon_lock);
 	if (db_connections != NULL) {
 		g_hash_table_remove (db_connections, priv->hash_key);
 
@@ -144,7 +144,7 @@ ews_book_backend_sqlitedb_finalize (GObject *object)
 		g_free (priv->hash_key);
 		priv->hash_key = NULL;
 	}
-	g_static_mutex_unlock (&dbcon_lock);
+	g_mutex_unlock (&dbcon_lock);
 
 	g_free (priv);
 	priv = NULL;
@@ -170,7 +170,7 @@ ews_book_backend_sqlitedb_init (EwsBookBackendSqliteDB *ebsdb)
 	ebsdb->priv = g_new0 (EwsBookBackendSqliteDBPrivate, 1);
 
 	ebsdb->priv->store_vcard = TRUE;
-	g_static_rw_lock_init (&ebsdb->priv->rwlock);
+	g_rw_lock_init (&ebsdb->priv->rwlock);
 }
 
 static void
@@ -530,7 +530,7 @@ ews_book_backend_sqlitedb_new (const gchar *path,
 	gchar *hash_key, *filename;
 	GError *err = NULL;
 
-	g_static_mutex_lock (&dbcon_lock);
+	g_mutex_lock (&dbcon_lock);
 
 	hash_key = g_strdup_printf ("%s@%s", emailid, path);
 	if (db_connections != NULL) {
@@ -538,7 +538,7 @@ ews_book_backend_sqlitedb_new (const gchar *path,
 
 		if (ebsdb) {
 			g_object_ref (ebsdb);
-			g_static_mutex_unlock (&dbcon_lock);
+			g_mutex_unlock (&dbcon_lock);
 			g_free (hash_key);
 			goto exit;
 		}
@@ -563,7 +563,7 @@ ews_book_backend_sqlitedb_new (const gchar *path,
 	g_hash_table_insert (db_connections, hash_key, ebsdb);
 	ebsdb->priv->hash_key = g_strdup (hash_key);
 
-	g_static_mutex_unlock (&dbcon_lock);
+	g_mutex_unlock (&dbcon_lock);
 
 exit:
 	if (!err)

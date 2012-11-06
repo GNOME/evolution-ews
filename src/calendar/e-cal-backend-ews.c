@@ -77,7 +77,7 @@ struct _ECalBackendEwsPrivate {
 	gboolean read_only;
 
 	/* A mutex to control access to the private structure for the following */
-	GStaticRecMutex rec_mutex;
+	GRecMutex rec_mutex;
 	icaltimezone *default_zone;
 	guint refresh_timeout;
 	guint refreshing;
@@ -97,8 +97,8 @@ struct _SyncItemsClosure {
 	GSList *items_updated;
 };
 
-#define PRIV_LOCK(p)   (g_static_rec_mutex_lock (&(p)->rec_mutex))
-#define PRIV_UNLOCK(p) (g_static_rec_mutex_unlock (&(p)->rec_mutex))
+#define PRIV_LOCK(p)   (g_rec_mutex_lock (&(p)->rec_mutex))
+#define PRIV_UNLOCK(p) (g_rec_mutex_unlock (&(p)->rec_mutex))
 
 #define EDC_ERROR(_code) e_data_cal_create_error (_code, NULL)
 #define EDC_ERROR_EX(_code, _msg) e_data_cal_create_error (_code, _msg)
@@ -4088,7 +4088,7 @@ e_cal_backend_ews_finalize (GObject *object)
 	priv = cbews->priv;
 
 	/* Clean up */
-	g_static_rec_mutex_free (&priv->rec_mutex);
+	g_rec_mutex_clear (&priv->rec_mutex);
 
 	if (priv->store) {
 		g_object_unref (priv->store);
@@ -4294,7 +4294,7 @@ e_cal_backend_ews_init (ECalBackendEws *cbews)
 	priv = g_new0 (ECalBackendEwsPrivate, 1);
 
 	/* create the mutex for thread safety */
-	g_static_rec_mutex_init (&priv->rec_mutex);
+	g_rec_mutex_init (&priv->rec_mutex);
 	priv->refreshing_done = e_flag_new ();
 	priv->item_id_hash = g_hash_table_new_full
 		(g_str_hash, g_str_equal,

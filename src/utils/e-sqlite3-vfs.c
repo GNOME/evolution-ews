@@ -18,9 +18,12 @@
  * USA
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <sqlite3.h>
 #include <glib.h>
-#include <config.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,7 +42,7 @@ static GThreadPool *sync_pool = NULL;
 typedef struct {
 	sqlite3_file parent;
 	sqlite3_file *old_vfs_file; /* pointer to old_vfs' file */
-	GStaticRecMutex sync_mutex;
+	GRecMutex sync_mutex;
 	guint timeout_id;
 	gint flags;
 } ESqlite3File;
@@ -92,7 +95,7 @@ sync_push_request (ESqlite3File *cFile,
 	g_return_if_fail (cFile != NULL);
 	g_return_if_fail (sync_pool != NULL);
 
-	g_static_rec_mutex_lock (&cFile->sync_mutex);
+	g_rec_mutex_lock (&cFile->sync_mutex);
 
 	if (wait_for_finish)
 		sync_op = e_flag_new ();
@@ -104,7 +107,7 @@ sync_push_request (ESqlite3File *cFile,
 
 	cFile->flags = 0;
 
-	g_static_rec_mutex_unlock (&cFile->sync_mutex);
+	g_rec_mutex_unlock (&cFile->sync_mutex);
 
 	g_thread_pool_push (sync_pool, data, &error);
 
@@ -127,14 +130,14 @@ sync_push_request (ESqlite3File *cFile,
 static gboolean
 sync_push_request_timeout (ESqlite3File *cFile)
 {
-	g_static_rec_mutex_lock (&cFile->sync_mutex);
+	g_rec_mutex_lock (&cFile->sync_mutex);
 
 	if (cFile->timeout_id != 0) {
 		sync_push_request (cFile, FALSE);
 		cFile->timeout_id = 0;
 	}
 
-	g_static_rec_mutex_unlock (&cFile->sync_mutex);
+	g_rec_mutex_unlock (&cFile->sync_mutex);
 
 	return FALSE;
 }
@@ -195,7 +198,7 @@ e_sqlite3_file_xClose (sqlite3_file *pFile)
 
 	cFile = (ESqlite3File *) pFile;
 
-	g_static_rec_mutex_lock (&cFile->sync_mutex);
+	g_rec_mutex_lock (&cFile->sync_mutex);
 
 	/* Cancel any pending sync requests. */
 	if (cFile->timeout_id > 0) {
@@ -203,7 +206,7 @@ e_sqlite3_file_xClose (sqlite3_file *pFile)
 		cFile->timeout_id = 0;
 	}
 
-	g_static_rec_mutex_unlock (&cFile->sync_mutex);
+	g_rec_mutex_unlock (&cFile->sync_mutex);
 
 	/* Make the last sync. */
 	sync_push_request (cFile, TRUE);
@@ -216,7 +219,7 @@ e_sqlite3_file_xClose (sqlite3_file *pFile)
 	g_free (cFile->old_vfs_file);
 	cFile->old_vfs_file = NULL;
 
-	g_static_rec_mutex_free (&cFile->sync_mutex);
+	g_rec_mutex_clear (&cFile->sync_mutex);
 
 	return res;
 }
@@ -232,7 +235,7 @@ e_sqlite3_file_xSync (sqlite3_file *pFile,
 
 	cFile = (ESqlite3File *) pFile;
 
-	g_static_rec_mutex_lock (&cFile->sync_mutex);
+	g_rec_mutex_lock (&cFile->sync_mutex);
 
 	/* If a sync request is already scheduled, accumulate flags. */
 	cFile->flags |= flags;
@@ -246,7 +249,7 @@ e_sqlite3_file_xSync (sqlite3_file *pFile,
 		SYNC_TIMEOUT_SECONDS, (GSourceFunc)
 		sync_push_request_timeout, cFile);
 
-	g_static_rec_mutex_unlock (&cFile->sync_mutex);
+	g_rec_mutex_unlock (&cFile->sync_mutex);
 
 	return SQLITE_OK;
 }
@@ -258,7 +261,7 @@ e_sqlite3_vfs_xOpen (sqlite3_vfs *pVfs,
                      gint flags,
                      gint *pOutFlags)
 {
-	static GStaticRecMutex only_once_lock = G_STATIC_REC_MUTEX_INIT;
+	static GRecMutex only_once_lock;
 	static sqlite3_io_methods io_methods = {0};
 	ESqlite3File *cFile;
 	gint res;
@@ -275,9 +278,9 @@ e_sqlite3_vfs_xOpen (sqlite3_vfs *pVfs,
 		return res;
 	}
 
-	g_static_rec_mutex_init (&cFile->sync_mutex);
+	g_rec_mutex_init (&cFile->sync_mutex);
 
-	g_static_rec_mutex_lock (&only_once_lock);
+	g_rec_mutex_lock (&only_once_lock);
 
 	if (!sync_pool)
 		sync_pool = g_thread_pool_new (sync_request_thread_cb, NULL, 2, FALSE, NULL);
@@ -310,7 +313,7 @@ e_sqlite3_vfs_xOpen (sqlite3_vfs *pVfs,
 		#undef use_subclassed
 	}
 
-	g_static_rec_mutex_unlock (&only_once_lock);
+	g_rec_mutex_unlock (&only_once_lock);
 
 	cFile->parent.pMethods = &io_methods;
 

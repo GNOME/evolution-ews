@@ -22,6 +22,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -48,14 +49,14 @@
 /* For the number of connections */
 #define EWS_CONNECTION_MAX_REQUESTS 1
 
-#define QUEUE_LOCK(x) (g_static_rec_mutex_lock(&(x)->priv->queue_lock))
-#define QUEUE_UNLOCK(x) (g_static_rec_mutex_unlock(&(x)->priv->queue_lock))
+#define QUEUE_LOCK(x) (g_rec_mutex_lock(&(x)->priv->queue_lock))
+#define QUEUE_UNLOCK(x) (g_rec_mutex_unlock(&(x)->priv->queue_lock))
 
 #define CHECK_ELEMENT(element_name, expected_name) \
 	(check_element (G_STRFUNC, (element_name), (expected_name)))
 
 struct _EwsNode;
-static GStaticMutex connecting = G_STATIC_MUTEX_INIT;
+static GMutex connecting;
 static GHashTable *loaded_connections_permissions = NULL;
 static gint comp_func (gconstpointer a, gconstpointer b);
 
@@ -76,7 +77,7 @@ struct _EEwsConnectionPrivate {
 	GMainContext *soup_context;
 
 	CamelEwsSettings *settings;
-	GMutex *password_lock;
+	GMutex password_lock;
 
 	/* Hash key for the loaded_connections_permissions table. */
 	gchar *hash_key;
@@ -87,7 +88,7 @@ struct _EEwsConnectionPrivate {
 
 	GSList *jobs;
 	GSList *active_job_queue;
-	GStaticRecMutex queue_lock;
+	GRecMutex queue_lock;
 };
 
 enum {
@@ -180,9 +181,12 @@ ews_unref_in_thread_func (gpointer data)
 static void
 ews_unref_in_thread (gpointer object)
 {
+	GThread *thread;
+
 	g_return_if_fail (G_IS_OBJECT (object));
 
-	g_thread_create (ews_unref_in_thread_func, object, FALSE, NULL);
+	thread = g_thread_new (NULL, ews_unref_in_thread_func, object);
+	g_thread_unref (thread);
 }
 
 static void
@@ -1245,7 +1249,7 @@ ews_connection_dispose (GObject *object)
 
 	priv = E_EWS_CONNECTION_GET_PRIVATE (object);
 
-	g_static_mutex_lock (&connecting);
+	g_mutex_lock (&connecting);
 
 	/* remove the connection from the hash table */
 	if (loaded_connections_permissions != NULL) {
@@ -1257,7 +1261,7 @@ ews_connection_dispose (GObject *object)
 		}
 	}
 
-	g_static_mutex_unlock (&connecting);
+	g_mutex_unlock (&connecting);
 
 	if (priv->soup_session) {
 		g_signal_handlers_disconnect_by_func (
@@ -1307,8 +1311,8 @@ ews_connection_finalize (GObject *object)
 	g_free (priv->email);
 	g_free (priv->hash_key);
 
-	g_mutex_free (priv->password_lock);
-	g_static_rec_mutex_free (&priv->queue_lock);
+	g_mutex_clear (&priv->password_lock);
+	g_rec_mutex_clear (&priv->queue_lock);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (e_ews_connection_parent_class)->finalize (object);
@@ -1438,7 +1442,7 @@ e_ews_connection_init (EEwsConnection *cnc)
 	cnc->priv->soup_context = g_main_context_new ();
 	cnc->priv->soup_loop = g_main_loop_new (cnc->priv->soup_context, FALSE);
 
-	cnc->priv->soup_thread = g_thread_create (e_ews_soup_thread, cnc, TRUE, NULL);
+	cnc->priv->soup_thread = g_thread_new (NULL, e_ews_soup_thread, cnc);
 
 	/* create the SoupSession for this connection */
 	cnc->priv->soup_session = soup_session_async_new_with_options (
@@ -1455,8 +1459,8 @@ e_ews_connection_init (EEwsConnection *cnc)
 			SOUP_SESSION_FEATURE (logger));
 	}
 
-	cnc->priv->password_lock = g_mutex_new ();
-	g_static_rec_mutex_init (&cnc->priv->queue_lock);
+	g_mutex_init (&cnc->priv->password_lock);
+	g_rec_mutex_init (&cnc->priv->queue_lock);
 
 	g_signal_connect (
 		cnc->priv->soup_session, "authenticate",
@@ -1553,7 +1557,7 @@ e_ews_connection_find (const gchar *uri,
 	EEwsConnection *cnc;
 	gchar *hash_key;
 
-	g_static_mutex_lock (&connecting);
+	g_mutex_lock (&connecting);
 
 	/* search the connection in our hash table */
 	if (loaded_connections_permissions != NULL) {
@@ -1567,12 +1571,12 @@ e_ews_connection_find (const gchar *uri,
 
 		if (E_IS_EWS_CONNECTION (cnc)) {
 			g_object_ref (cnc);
-			g_static_mutex_unlock (&connecting);
+			g_mutex_unlock (&connecting);
 			return cnc;
 		}
 	}
 
-	g_static_mutex_unlock (&connecting);
+	g_mutex_unlock (&connecting);
 
 	return NULL;
 }
@@ -1604,7 +1608,7 @@ e_ews_connection_new (const gchar *uri,
 	hash_key = g_strdup_printf ("%s@%s", user, uri);
 	g_free (user);
 
-	g_static_mutex_lock (&connecting);
+	g_mutex_lock (&connecting);
 
 	/* search the connection in our hash table */
 	if (loaded_connections_permissions != NULL) {
@@ -1616,7 +1620,7 @@ e_ews_connection_new (const gchar *uri,
 
 			g_free (hash_key);
 
-			g_static_mutex_unlock (&connecting);
+			g_mutex_unlock (&connecting);
 			return cnc;
 		}
 	}
@@ -1652,7 +1656,7 @@ e_ews_connection_new (const gchar *uri,
 		g_strdup (cnc->priv->hash_key), cnc);
 
 	/* free memory */
-	g_static_mutex_unlock (&connecting);
+	g_mutex_unlock (&connecting);
 	return cnc;
 
 }
@@ -1681,12 +1685,12 @@ e_ews_connection_dup_password (EEwsConnection *cnc)
 
 	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
 
-	g_mutex_lock (cnc->priv->password_lock);
+	g_mutex_lock (&cnc->priv->password_lock);
 
 	protected = e_ews_connection_get_password (cnc);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (cnc->priv->password_lock);
+	g_mutex_unlock (&cnc->priv->password_lock);
 
 	return duplicate;
 }
@@ -1697,7 +1701,7 @@ e_ews_connection_set_password (EEwsConnection *cnc,
 {
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
-	g_mutex_lock (cnc->priv->password_lock);
+	g_mutex_lock (&cnc->priv->password_lock);
 
 	/* Zero-fill the old password before freeing it. */
 	if (cnc->priv->password != NULL && *cnc->priv->password != '\0')
@@ -1706,7 +1710,7 @@ e_ews_connection_set_password (EEwsConnection *cnc,
 	g_free (cnc->priv->password);
 	cnc->priv->password = g_strdup (password);
 
-	g_mutex_unlock (cnc->priv->password_lock);
+	g_mutex_unlock (&cnc->priv->password_lock);
 
 	g_object_notify (G_OBJECT (cnc), "password");
 }

@@ -16,9 +16,12 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "e-ews-backend.h"
 
-#include <config.h>
 #include <glib/gi18n-lib.h>
 
 #include "server/e-source-ews-folder.h"
@@ -32,16 +35,16 @@ typedef struct _SyncFoldersClosure SyncFoldersClosure;
 struct _EEwsBackendPrivate {
 	/* Folder ID -> ESource */
 	GHashTable *folders;
-	GMutex *folders_lock;
+	GMutex folders_lock;
 
 	ESource *gal_source;
 	gchar *oal_selected;
 
 	gchar *sync_state;
-	GMutex *sync_state_lock;
+	GMutex sync_state_lock;
 
 	EEwsConnection *connection;
-	GMutex *connection_lock;
+	GMutex connection_lock;
 
 	gboolean need_update_folders;
 };
@@ -89,11 +92,11 @@ ews_backend_folders_contains (EEwsBackend *backend,
 
 	g_return_val_if_fail (folder_id != NULL, FALSE);
 
-	g_mutex_lock (backend->priv->folders_lock);
+	g_mutex_lock (&backend->priv->folders_lock);
 
 	contains = g_hash_table_contains (backend->priv->folders, folder_id);
 
-	g_mutex_unlock (backend->priv->folders_lock);
+	g_mutex_unlock (&backend->priv->folders_lock);
 
 	return contains;
 }
@@ -106,14 +109,14 @@ ews_backend_folders_insert (EEwsBackend *backend,
 	g_return_if_fail (folder_id != NULL);
 	g_return_if_fail (E_IS_SOURCE (source));
 
-	g_mutex_lock (backend->priv->folders_lock);
+	g_mutex_lock (&backend->priv->folders_lock);
 
 	g_hash_table_insert (
 		backend->priv->folders,
 		g_strdup (folder_id),
 		g_object_ref (source));
 
-	g_mutex_unlock (backend->priv->folders_lock);
+	g_mutex_unlock (&backend->priv->folders_lock);
 }
 
 static ESource *
@@ -124,14 +127,14 @@ ews_backend_folders_lookup (EEwsBackend *backend,
 
 	g_return_val_if_fail (folder_id != NULL, NULL);
 
-	g_mutex_lock (backend->priv->folders_lock);
+	g_mutex_lock (&backend->priv->folders_lock);
 
 	source = g_hash_table_lookup (backend->priv->folders, folder_id);
 
 	if (source != NULL)
 		g_object_ref (source);
 
-	g_mutex_unlock (backend->priv->folders_lock);
+	g_mutex_unlock (&backend->priv->folders_lock);
 
 	return source;
 }
@@ -144,11 +147,11 @@ ews_backend_folders_remove (EEwsBackend *backend,
 
 	g_return_val_if_fail (folder_id != NULL, FALSE);
 
-	g_mutex_lock (backend->priv->folders_lock);
+	g_mutex_lock (&backend->priv->folders_lock);
 
 	removed = g_hash_table_remove (backend->priv->folders, folder_id);
 
-	g_mutex_unlock (backend->priv->folders_lock);
+	g_mutex_unlock (&backend->priv->folders_lock);
 
 	return removed;
 }
@@ -554,14 +557,14 @@ ews_backend_finalize (GObject *object)
 	priv = E_EWS_BACKEND_GET_PRIVATE (object);
 
 	g_hash_table_destroy (priv->folders);
-	g_mutex_free (priv->folders_lock);
+	g_mutex_clear (&priv->folders_lock);
 
 	g_free (priv->oal_selected);
 
 	g_free (priv->sync_state);
-	g_mutex_free (priv->sync_state_lock);
+	g_mutex_clear (&priv->sync_state_lock);
 
-	g_mutex_free (priv->connection_lock);
+	g_mutex_clear (&priv->connection_lock);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (e_ews_backend_parent_class)->finalize (object);
@@ -939,9 +942,9 @@ e_ews_backend_init (EEwsBackend *backend)
 		(GDestroyNotify) g_free,
 		(GDestroyNotify) g_object_unref);
 
-	backend->priv->folders_lock = g_mutex_new ();
-	backend->priv->sync_state_lock = g_mutex_new ();
-	backend->priv->connection_lock = g_mutex_new ();
+	g_mutex_init (&backend->priv->folders_lock);
+	g_mutex_init (&backend->priv->sync_state_lock);
+	g_mutex_init (&backend->priv->connection_lock);
 }
 
 void
@@ -989,10 +992,10 @@ e_ews_backend_ref_connection_sync (EEwsBackend *backend,
 
 	g_return_val_if_fail (E_IS_EWS_BACKEND (backend), NULL);
 
-	g_mutex_lock (backend->priv->connection_lock);
+	g_mutex_lock (&backend->priv->connection_lock);
 	if (backend->priv->connection != NULL)
 		connection = g_object_ref (backend->priv->connection);
-	g_mutex_unlock (backend->priv->connection_lock);
+	g_mutex_unlock (&backend->priv->connection_lock);
 
 	/* If we already have an authenticated
 	 * connection object, just return that. */
@@ -1010,11 +1013,11 @@ e_ews_backend_ref_connection_sync (EEwsBackend *backend,
 		cancellable, error);
 
 	if (success) {
-		g_mutex_lock (backend->priv->connection_lock);
+		g_mutex_lock (&backend->priv->connection_lock);
 		if (backend->priv->connection != NULL)
 			g_object_unref (backend->priv->connection);
 		backend->priv->connection = g_object_ref (connection);
-		g_mutex_unlock (backend->priv->connection_lock);
+		g_mutex_unlock (&backend->priv->connection_lock);
 	} else {
 		g_object_unref (connection);
 		connection = NULL;
@@ -1107,9 +1110,9 @@ e_ews_backend_sync_folders_sync (EEwsBackend *backend,
 
 	backend->priv->need_update_folders = FALSE;
 
-	g_mutex_lock (backend->priv->sync_state_lock);
+	g_mutex_lock (&backend->priv->sync_state_lock);
 	sync_state = g_strdup (backend->priv->sync_state);
-	g_mutex_unlock (backend->priv->sync_state_lock);
+	g_mutex_unlock (&backend->priv->sync_state_lock);
 
 	/* XXX I think this leaks the old sync_state value when
 	 *     it replaces it with the new sync_state value. */
@@ -1135,10 +1138,10 @@ e_ews_backend_sync_folders_sync (EEwsBackend *backend,
 			ews_backend_sync_folders_idle_cb, closure,
 			(GDestroyNotify) sync_folders_closure_free);
 
-		g_mutex_lock (backend->priv->sync_state_lock);
+		g_mutex_lock (&backend->priv->sync_state_lock);
 		g_free (backend->priv->sync_state);
 		backend->priv->sync_state = g_strdup (sync_state);
-		g_mutex_unlock (backend->priv->sync_state_lock);
+		g_mutex_unlock (&backend->priv->sync_state_lock);
 
 	} else {
 		/* Make sure we're not leaking anything. */

@@ -19,6 +19,10 @@
  * USA
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "e-soap-message.h"
 #include "e-soap-response.h"
 #include "e-ews-message.h"
