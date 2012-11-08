@@ -7121,7 +7121,10 @@ e_ews_connection_set_folder_permissions (EEwsConnection *cnc,
 	}
 
 	e_soap_message_start_element (msg, "PermissionSet", NULL, NULL);
-	e_soap_message_start_element (msg, "Permissions", NULL, NULL);
+	if (folder_type == E_EWS_FOLDER_TYPE_CALENDAR)
+		e_soap_message_start_element (msg, "CalendarPermissions", NULL, NULL);
+	else
+		e_soap_message_start_element (msg, "Permissions", NULL, NULL);
 
 	for (iter = permissions; iter; iter = iter->next) {
 		EEwsPermission *perm = iter->data;
