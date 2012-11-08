@@ -22,8 +22,6 @@ libebookbackendews_la_CPPFLAGS = \
 	$(NULL)
 
 libebookbackendews_la_SOURCES = \
-	ews-book-backend-sqlitedb.c \
-	ews-book-backend-sqlitedb.h \
 	ews-oab-props.h \
 	ews-oab-decoder.c \
 	ews-oab-decoder.h \
@@ -48,21 +46,5 @@ libebookbackendews_la_LIBADD = \
 
 libebookbackendews_la_LDFLAGS = \
 	-module -avoid-version $(NO_UNDEFINED)
-
-noinst_PROGRAMS = ews-book-backend-sqlitedb-test
-
-ews_book_backend_sqlitedb_test_CPPFLAGS = \
-	$(libebookbackendews_la_CPPFLAGS) \
-	$(NULL)
-
-ews_book_backend_sqlitedb_test_SOURCES = \
-	ews-book-backend-sqlitedb-test.c \
-	ews-book-backend-sqlitedb.c \
-	ews-book-backend-sqlitedb.h \
-	$(NULL)
-
-ews_book_backend_sqlitedb_test_LDADD =  \
-	$(libebookbackendews_la_LIBADD) \
-	$(NULL)
 
 -include $(top_srcdir)/git.mk
