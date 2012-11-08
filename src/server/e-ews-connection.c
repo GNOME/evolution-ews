@@ -6081,25 +6081,17 @@ get_free_busy_response_cb (ESoapResponse *response,
 	while (subparam != NULL) {
 		ESoapParameter *subsubparam;
 
-		subsubparam = e_soap_response_get_first_parameter_by_name (
-			response, "ResponseMessage", &error);
+		subsubparam = e_soap_parameter_get_first_child_by_name (
+			subparam, "ResponseMessage");
 
-		/* Sanity check */
-		g_return_if_fail (
-			(subsubparam != NULL && error == NULL) ||
-			(subsubparam == NULL && error != NULL));
+		if (subsubparam) {
+			if (!ews_get_response_status (subsubparam, &error)) {
+				g_simple_async_result_take_error (simple, error);
+				return;
+			}
 
-		if (error != NULL) {
-			g_simple_async_result_take_error (simple, error);
-			return;
+			ews_handle_free_busy_view (subparam, async_data);
 		}
-
-		if (!ews_get_response_status (subsubparam, &error)) {
-			g_simple_async_result_take_error (simple, error);
-			return;
-		}
-
-		ews_handle_free_busy_view (subparam, async_data);
 
 		subparam = e_soap_parameter_get_next_child (subparam);
 	}
