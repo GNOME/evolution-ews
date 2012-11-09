@@ -3020,7 +3020,7 @@ ews_write_sort_order_to_msg (ESoapMessage *msg,
  * e_ews_connection_sync_folder_items:
  * @cnc: The EWS Connection
  * @pri: The priority associated with the request
- * @sync_state: To sync with the previous requests
+ * @last_sync_state: To sync with the previous requests
  * @folder_id: The folder to which the items belong
  * @default_props: Can take one of the values: IdOnly,Default or AllProperties
  * @additional_props: Specify any additional properties to be fetched
@@ -3032,7 +3032,7 @@ ews_write_sort_order_to_msg (ESoapMessage *msg,
 void
 e_ews_connection_sync_folder_items (EEwsConnection *cnc,
                                     gint pri,
-                                    const gchar *sync_state,
+                                    const gchar *last_sync_state,
                                     const gchar *fid,
                                     const gchar *default_props,
                                     const gchar *additional_props,
@@ -3070,8 +3070,8 @@ e_ews_connection_sync_folder_items (EEwsConnection *cnc,
 	e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", NULL, NULL, "Id", fid);
 	e_soap_message_end_element (msg);
 
-	if (sync_state)
-		e_ews_message_write_string_parameter (msg, "SyncState", "messages", sync_state);
+	if (last_sync_state)
+		e_ews_message_write_string_parameter (msg, "SyncState", "messages", last_sync_state);
 
 	/* Max changes requested */
 	e_ews_message_write_int_parameter (msg, "MaxChangesReturned", "messages", max_entries);
@@ -3097,7 +3097,7 @@ e_ews_connection_sync_folder_items (EEwsConnection *cnc,
 gboolean
 e_ews_connection_sync_folder_items_finish (EEwsConnection *cnc,
                                            GAsyncResult *result,
-                                           gchar **sync_state,
+                                           gchar **new_sync_state,
                                            gboolean *includes_last_item,
                                            GSList **items_created,
                                            GSList **items_updated,
@@ -3119,7 +3119,7 @@ e_ews_connection_sync_folder_items_finish (EEwsConnection *cnc,
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
 
-	*sync_state = async_data->sync_state;
+	*new_sync_state = async_data->sync_state;
 	*includes_last_item = async_data->includes_last_item;
 	*items_created = async_data->items_created;
 	*items_updated = async_data->items_updated;
@@ -3131,11 +3131,12 @@ e_ews_connection_sync_folder_items_finish (EEwsConnection *cnc,
 gboolean
 e_ews_connection_sync_folder_items_sync (EEwsConnection *cnc,
                                          gint pri,
-                                         gchar **sync_state,
+                                         const gchar *old_sync_state,
                                          const gchar *fid,
                                          const gchar *default_props,
                                          const gchar *additional_props,
                                          guint max_entries,
+					 gchar **new_sync_state,
                                          gboolean *includes_last_item,
                                          GSList **items_created,
                                          GSList **items_updated,
@@ -3152,14 +3153,14 @@ e_ews_connection_sync_folder_items_sync (EEwsConnection *cnc,
 	closure = e_async_closure_new ();
 
 	e_ews_connection_sync_folder_items (
-		cnc, pri, *sync_state, fid, default_props,
+		cnc, pri, old_sync_state, fid, default_props,
 		additional_props, max_entries, cancellable,
 		e_async_closure_callback, closure);
 
 	result = e_async_closure_wait (closure);
 
 	success = e_ews_connection_sync_folder_items_finish (
-		cnc, result, sync_state, includes_last_item,
+		cnc, result, new_sync_state, includes_last_item,
 		items_created, items_updated, items_deleted, error);
 
 	e_async_closure_free (closure);
@@ -5944,7 +5945,7 @@ GSList *
 e_ews_connection_get_attachments_sync (EEwsConnection *cnc,
                                        gint pri,
                                        const gchar *uid,
-                                       GSList *ids,
+                                       const GSList *ids,
                                        const gchar *cache,
                                        gboolean include_mime,
                                        GSList **items,
