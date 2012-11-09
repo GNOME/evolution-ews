@@ -1427,9 +1427,10 @@ ews_refresh_info_sync (CamelFolder *folder,
 
 		e_ews_connection_sync_folder_items_sync (
 			cnc, EWS_PRIORITY_MEDIUM,
-			&sync_state, id,
+			sync_state, id,
 			"IdOnly", NULL,
-			EWS_MAX_FETCH_COUNT, &includes_last_item,
+			EWS_MAX_FETCH_COUNT,
+			&sync_state, &includes_last_item,
 			&items_created, &items_updated,
 			&items_deleted, cancellable, &local_error);
 

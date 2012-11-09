@@ -63,8 +63,6 @@
 #define gmtime_r(tp,tmp) (gmtime(tp)?(*(tmp)=*gmtime(tp),(tmp)):0)
 #endif
 
-typedef struct _SyncItemsClosure SyncItemsClosure;
-
 /* Private part of the CalBackendEws structure */
 struct _ECalBackendEwsPrivate {
 	/* Fields required for online server requests */
@@ -88,16 +86,6 @@ struct _ECalBackendEwsPrivate {
 	GHashTable *item_id_hash;
 
 	GCancellable *cancellable;
-};
-
-struct _SyncItemsClosure {
-	ECalBackendEws *backend;
-	EEwsConnection *connection;
-	gchar *sync_state;
-	gboolean includes_last_item;
-	GSList *items_created;
-	GSList *items_deleted;
-	GSList *items_updated;
 };
 
 #define PRIV_LOCK(p)   (g_static_rec_mutex_lock (&(p)->rec_mutex))
@@ -125,7 +113,6 @@ struct _SyncItemsClosure {
 		}								\
 	} G_STMT_END
 
-static void ews_cal_sync_items_ready_cb (GObject *obj, GAsyncResult *res, gpointer user_data);
 static void ews_cal_component_get_item_id (ECalComponent *comp, gchar **itemid, gchar **changekey);
 static gboolean ews_start_sync	(gpointer data);
 static icaltimezone * e_cal_get_timezone_from_ical_component (ECalBackend *backend, icalcomponent *comp);
@@ -141,28 +128,6 @@ G_DEFINE_TYPE_WITH_CODE (
 	G_IMPLEMENT_INTERFACE (
 		E_TYPE_SOURCE_AUTHENTICATOR,
 		e_cal_backend_ews_authenticator_init))
-
-static void
-sync_items_closure_free (SyncItemsClosure *closure)
-{
-	g_object_unref (closure->backend);
-	g_object_unref (closure->connection);
-	g_free (closure->sync_state);
-
-	g_slist_free_full (
-		closure->items_created,
-		(GDestroyNotify) g_object_unref);
-
-	g_slist_free_full (
-		closure->items_updated,
-		(GDestroyNotify) g_object_unref);
-
-	g_slist_free_full (
-		closure->items_deleted,
-		(GDestroyNotify) g_free);
-
-	g_slice_free (SyncItemsClosure, closure);
-}
 
 static CamelEwsSettings *
 cal_backend_ews_get_collection_settings (ECalBackendEws *backend)
@@ -2851,126 +2816,82 @@ put_component_to_store (ECalBackendEws *cbews,
 	e_cal_backend_store_put_component_with_time_range (priv->store, comp, time_start, time_end);
 }
 
-typedef struct {
-	ECalBackendEws *cbews;
-	gchar *itemid;
-} EwsAttachmentData;
-
-static void
-ews_get_attachments_ready_callback (GObject *object,
-                                    GAsyncResult *res,
-                                    gpointer user_data)
-{
-	EEwsConnection *cnc = E_EWS_CONNECTION (object);
-	EwsAttachmentData *att_data = user_data;
-	GError *error = NULL;
-	GSList *uris = NULL, *ids, *i;
-	ECalComponentId *id;
-	ECalBackendEws *cbews;
-	gchar *itemid;
-	ECalComponent *comp_att, *cache_comp = NULL;
-	icalcomponent *icalcomp;
-	icalproperty *icalprop;
-	icalparameter *icalparam;
-
-	ids = e_ews_connection_get_attachments_finish (cnc, res, &uris, &error);
-
-	cbews = att_data->cbews;
-	itemid = att_data->itemid;
-
-	if (error)
-		goto exit;
-
-	PRIV_LOCK (cbews->priv);
-	comp_att = g_hash_table_lookup (cbews->priv->item_id_hash, itemid);
-	if (!comp_att) {
-		PRIV_UNLOCK (cbews->priv);
-		goto exit;
-	}
-	PRIV_UNLOCK (cbews->priv);
-
-	e_cal_component_set_attachment_list (comp_att, uris);
-
-	icalcomp = e_cal_component_get_icalcomponent (comp_att);
-	icalprop = icalcomponent_get_first_property (icalcomp, ICAL_ATTACH_PROPERTY);
-	i = ids;
-	for (; i && icalprop; i = i->next, icalprop = icalcomponent_get_next_property (icalcomp, ICAL_ATTACH_PROPERTY)) {
-		icalparam = icalparameter_new_x (i->data);
-		icalparameter_set_xname (icalparam, "X-EWS-ATTACHMENTID");
-		icalproperty_add_parameter (icalprop, icalparam);
-		g_free (i->data);
-	}
-
-	id = e_cal_component_get_id (comp_att);
-	cache_comp = e_cal_backend_store_get_component (cbews->priv->store, id->uid, id->rid);
-	e_cal_component_free_id (id);
-
-	put_component_to_store (cbews, comp_att);
-
-	if (cache_comp)
-		e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbews), cache_comp, comp_att);
-
- exit:
-	g_clear_error (&error);
-	g_slist_free_full (uris, g_free);
-	g_object_unref (att_data->cbews);
-	g_free (att_data->itemid);
-	g_free (att_data);
-}
-
 static void
 ews_get_attachments (ECalBackendEws *cbews,
                      EEwsItem *item)
 {
 	gboolean has_attachment = FALSE;
+	const GSList *attachment_ids, *aid;
+	const EwsId *item_id;
+	ECalComponent *comp;
+	const gchar *uid;
+	GSList *uris = NULL;
 
-	e_ews_item_has_attachments (item, & has_attachment);
-	if (has_attachment) {
-		const GSList *attachment_ids;
-		const EwsId *item_id;
-		EwsAttachmentData *att_data;
-		ECalComponent *comp;
-		const gchar *uid;
+	e_ews_item_has_attachments (item, &has_attachment);
+	if (!has_attachment)
+		return;
 
-		item_id = e_ews_item_get_id (item);
-		g_return_if_fail (item_id != NULL);
+	item_id = e_ews_item_get_id (item);
+	g_return_if_fail (item_id != NULL);
 
-		PRIV_LOCK (cbews->priv);
-		comp = g_hash_table_lookup (cbews->priv->item_id_hash, item_id->id);
-		if (!comp) {
-			PRIV_UNLOCK (cbews->priv);
-			g_warning ("%s: Failed to get component from item_id_hash", G_STRFUNC);
-			return;
-		}
-
-		e_cal_component_get_uid (comp, &uid);
-
-		attachment_ids = e_ews_item_get_attachments_ids (item);
-		att_data = g_new0 (EwsAttachmentData, 1);
-		att_data->cbews = g_object_ref (cbews);
-		att_data->itemid = g_strdup (item_id->id);
-
-		e_ews_connection_get_attachments (
-			cbews->priv->cnc,
-			EWS_PRIORITY_MEDIUM,
-			uid,
-			attachment_ids,
-			cbews->priv->storage_path,
-			TRUE,
-			NULL, NULL,
-			cbews->priv->cancellable,
-			ews_get_attachments_ready_callback,
-			att_data);
-
+	PRIV_LOCK (cbews->priv);
+	comp = g_hash_table_lookup (cbews->priv->item_id_hash, item_id->id);
+	if (!comp) {
 		PRIV_UNLOCK (cbews->priv);
+		g_warning ("%s: Failed to get component from item_id_hash", G_STRFUNC);
+		return;
 	}
 
+	e_cal_component_get_uid (comp, &uid);
+
+	attachment_ids = e_ews_item_get_attachments_ids (item);
+
+	if (e_ews_connection_get_attachments_sync (
+		cbews->priv->cnc,
+		EWS_PRIORITY_MEDIUM,
+		uid,
+		attachment_ids,
+		cbews->priv->storage_path,
+		TRUE,
+		&uris,
+		NULL, NULL,
+		cbews->priv->cancellable,
+		NULL)) {
+		icalcomponent *icalcomp;
+		icalproperty *icalprop;
+		icalparameter *icalparam;
+		ECalComponentId *id;
+		ECalComponent *cache_comp;
+
+		e_cal_component_set_attachment_list (comp, uris);
+
+		icalcomp = e_cal_component_get_icalcomponent (comp);
+		icalprop = icalcomponent_get_first_property (icalcomp, ICAL_ATTACH_PROPERTY);
+		for (aid = attachment_ids; aid && icalprop; aid = aid->next, icalprop = icalcomponent_get_next_property (icalcomp, ICAL_ATTACH_PROPERTY)) {
+			icalparam = icalparameter_new_x (aid->data);
+			icalparameter_set_xname (icalparam, "X-EWS-ATTACHMENTID");
+			icalproperty_add_parameter (icalprop, icalparam);
+		}
+
+		id = e_cal_component_get_id (comp);
+		cache_comp = e_cal_backend_store_get_component (cbews->priv->store, id->uid, id->rid);
+		e_cal_component_free_id (id);
+
+		put_component_to_store (cbews, comp);
+
+		if (cache_comp)
+			e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbews), cache_comp, comp);
+
+		g_slist_free_full (uris, g_free);
+	}
+
+	PRIV_UNLOCK (cbews->priv);
 }
 
 static void
 add_item_to_cache (ECalBackendEws *cbews,
-                   EEwsConnection *cnc,
-                   EEwsItem *item)
+                   EEwsItem *item,
+		   GHashTable *ex_to_smtp)
 {
 	ECalBackendEwsPrivate *priv;
 	icalcomponent_kind kind;
@@ -3172,14 +3093,22 @@ add_item_to_cache (ECalBackendEws *cbews,
 				continue;
 
 			if (g_strcmp0 (attendee->mailbox->routing_type, "EX") == 0) {
-				e_ews_connection_ex_to_smtp_sync (
-					cnc, EWS_PRIORITY_MEDIUM,
-					attendee->mailbox->name, attendee->mailbox->email, &email,
-					NULL, NULL);
+				email = g_hash_table_lookup (ex_to_smtp, attendee->mailbox->email);
+				if (email) {
+					email = g_strdup (email);
+				} else {
+					e_ews_connection_ex_to_smtp_sync (
+						priv->cnc, EWS_PRIORITY_MEDIUM,
+						attendee->mailbox->name, attendee->mailbox->email, &email,
+						NULL, NULL);
 
-				/* do not scare users with EX addresses */
-				if (!email)
-					email = g_strdup ("");
+					/* do not scare users with EX addresses */
+					if (!email)
+						email = g_strdup ("");
+
+					/* cache value for reuse, because ResolveNames is slow */
+					g_hash_table_insert (ex_to_smtp, g_strdup (attendee->mailbox->email), g_strdup (email));
+				}
 			}
 
 			/*remove organizer for attendees list*/
@@ -3356,36 +3285,36 @@ ews_refreshing_dec (ECalBackendEws *cbews)
 	PRIV_UNLOCK (cbews->priv);
 }
 
-struct _ews_sync_data {
-	ECalBackendEws *cbews;
-	gchar *sync_state;
-	gboolean sync_pending;
-	gchar *master_uid;
-};
-
 static void
-ews_cal_get_items_ready_cb (GObject *obj,
-                            GAsyncResult *res,
-                            gpointer user_data)
+ews_cal_sync_get_items_sync (ECalBackendEws *cbews,
+			     const GSList *item_ids,
+			     const gchar *default_props,
+			     const gchar *additional_props,
+			     GHashTable *ex_to_smtp)
 {
-	EEwsConnection *cnc;
-	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
 	GSList *items = NULL, *l;
-	struct _ews_sync_data *sync_data, *sub_sync_data;
 	GError *error = NULL;
 
-	sync_data = (struct _ews_sync_data *) user_data;
-	cbews = sync_data->cbews;
 	priv = cbews->priv;
-	cnc = (EEwsConnection *) obj;
 
-	e_ews_connection_get_items_finish (cnc, res, &items, &error);
-	if (error != NULL) {
-		g_warning ("Unable to get items %s \n", error->message);
+	e_ews_connection_get_items_sync (priv->cnc,
+		EWS_PRIORITY_MEDIUM,
+		item_ids,
+		default_props,
+		additional_props,
+		FALSE,
+		NULL,
+		&items,
+		NULL, NULL,
+		priv->cancellable,
+		&error);
 
+	if (error) {
+		g_debug ("%s: Unable to get items: %s", G_STRFUNC, error->message);
 		g_clear_error (&error);
-		goto exit;
+
+		return;
 	}
 
 	/* fetch modified occurrences */
@@ -3398,23 +3327,10 @@ ews_cal_get_items_ready_cb (GObject *obj,
 
 		modified_occurrences = e_ews_item_get_modified_occurrences (item);
 		if (modified_occurrences) {
-			const EwsId *item_id = e_ews_item_get_id (l->data);
-
-			sub_sync_data = g_new0 (struct _ews_sync_data, 1);
-			sub_sync_data->cbews = g_object_ref (sync_data->cbews);
-			sub_sync_data->master_uid = g_strdup (item_id->id);
-
-			ews_refreshing_inc (cbews);
-
-			e_ews_connection_get_items (
-				g_object_ref (cnc), EWS_PRIORITY_MEDIUM,
-				modified_occurrences,
-				"IdOnly", "item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:UID calendar:Resources calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
-				FALSE, NULL, NULL, NULL, priv->cancellable,
-				ews_cal_get_items_ready_cb,
-				(gpointer) sub_sync_data);
-
-			g_object_unref (cnc);
+			ews_cal_sync_get_items_sync (cbews, modified_occurrences,
+				"IdOnly",
+				"item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:UID calendar:Resources calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
+				ex_to_smtp);
 		}
 	}
 
@@ -3422,52 +3338,34 @@ ews_cal_get_items_ready_cb (GObject *obj,
 	for (l = items; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;
 
-		if (item && e_ews_item_get_item_type (item) != E_EWS_ITEM_TYPE_ERROR) {
-			add_item_to_cache (cbews, cnc, item);
+		if (!item)
+			continue;
+
+		if (e_ews_item_get_item_type (item) != E_EWS_ITEM_TYPE_ERROR) {
+			add_item_to_cache (cbews, item, ex_to_smtp);
 			ews_get_attachments (cbews, item);
-			g_object_unref (item);
 		}
+
+		g_object_unref (item);
 	}
 	e_cal_backend_store_thaw_changes (priv->store);
 
-	if (sync_data->sync_state)
-		e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, sync_data->sync_state);
-	if (sync_data->sync_pending) {
-		ews_refreshing_inc (cbews);
-		e_ews_connection_sync_folder_items (
-			g_object_ref (priv->cnc), EWS_PRIORITY_MEDIUM,
-			sync_data->sync_state, priv->folder_id,
-			"IdOnly", NULL,
-			EWS_MAX_FETCH_COUNT,
-			priv->cancellable,
-			ews_cal_sync_items_ready_cb,
-			g_object_ref (cbews));
-	}
-
- exit:
-	ews_refreshing_dec (cbews);
-
-	g_object_unref (sync_data->cbews);
-	g_free (sync_data->master_uid);
-	g_free (sync_data->sync_state);
-	g_free (sync_data);
+	g_slist_free (items);
 }
 
 static void
-cal_backend_ews_process_folder_items (ECalBackendEws *backend,
-                                      EEwsConnection *connection,
+cal_backend_ews_process_folder_items (ECalBackendEws *cbews,
                                       const gchar *sync_state,
-                                      gboolean includes_last_item,
                                       GSList *items_created,
                                       GSList *items_updated,
-                                      GSList *items_deleted)
+                                      GSList *items_deleted,
+				      GHashTable *ex_to_smtp)
 {
 	ECalBackendEwsPrivate *priv;
 	GSList *l[2], *m, *cal_item_ids = NULL, *task_item_ids = NULL;
-	struct _ews_sync_data *sync_data = NULL;
 	gint i;
 
-	priv = backend->priv;
+	priv = cbews->priv;
 
 	l[0] = items_created;
 	l[1] = items_updated;
@@ -3480,9 +3378,9 @@ cal_backend_ews_process_folder_items (ECalBackendEws *backend,
 
 			id = e_ews_item_get_id (item);
 			if (type == E_EWS_ITEM_TYPE_CALENDAR_ITEM)
-				cal_item_ids = g_slist_append (cal_item_ids, g_strdup (id->id));
+				cal_item_ids = g_slist_prepend (cal_item_ids, id->id);
 			else if (type == E_EWS_ITEM_TYPE_TASK)
-				task_item_ids = g_slist_append (task_item_ids, g_strdup (id->id));
+				task_item_ids = g_slist_prepend (task_item_ids, id->id);
 		}
 	}
 
@@ -3496,158 +3394,28 @@ cal_backend_ews_process_folder_items (ECalBackendEws *backend,
 		PRIV_UNLOCK (priv);
 
 		if (comp)
-			ews_cal_delete_comp (backend, comp, item_id);
+			ews_cal_delete_comp (cbews, comp, item_id);
 	}
 	e_cal_backend_store_thaw_changes (priv->store);
 
-	if (!cal_item_ids && !task_item_ids && !includes_last_item) {
-		e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, sync_state);
-		ews_refreshing_inc (backend);
-		e_ews_connection_sync_folder_items (
-			connection,
-			EWS_PRIORITY_MEDIUM,
-			sync_state, priv->folder_id,
-			"IdOnly", NULL,
-			EWS_MAX_FETCH_COUNT,
-			priv->cancellable,
-			ews_cal_sync_items_ready_cb,
-			g_object_ref (backend));
-		goto exit;
-	}
-
-	if (cal_item_ids || task_item_ids) {
-		sync_data = g_new0 (struct _ews_sync_data, 1);
-		sync_data->cbews = g_object_ref (backend);
-		sync_data->sync_state = g_strdup (sync_state);
-		sync_data->sync_pending = !includes_last_item;
-	}
-
 	if (cal_item_ids) {
-		ews_refreshing_inc (backend);
-		e_ews_connection_get_items (
-			connection,
-			EWS_PRIORITY_MEDIUM,
+		ews_cal_sync_get_items_sync (cbews,
 			cal_item_ids,
 			"IdOnly",
 			"item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:UID calendar:Resources calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
-			FALSE, NULL,
-			NULL, NULL, priv->cancellable,
-			ews_cal_get_items_ready_cb,
-			(gpointer) sync_data);
+			ex_to_smtp);
 	}
 
 	if (task_item_ids) {
-		ews_refreshing_inc (backend);
-		e_ews_connection_get_items (
-			connection,
-			EWS_PRIORITY_MEDIUM,
+		ews_cal_sync_get_items_sync (cbews,
 			task_item_ids,
 			"AllProperties",
 			NULL,
-			FALSE,
-			NULL,
-			NULL, NULL, priv->cancellable,
-			ews_cal_get_items_ready_cb,
-			(gpointer) sync_data);
+			ex_to_smtp);
 	}
 
-exit:
-	if (cal_item_ids) {
-		g_slist_foreach (cal_item_ids, (GFunc) g_free, NULL);
-		g_slist_free (cal_item_ids);
-	}
-	if (task_item_ids) {
-		g_slist_foreach (task_item_ids, (GFunc) g_free, NULL);
-		g_slist_free (task_item_ids);
-	}
-}
-
-static gboolean
-cal_backend_ews_sync_items_idle_cb (gpointer user_data)
-{
-	SyncItemsClosure *closure = user_data;
-
-	cal_backend_ews_process_folder_items (
-		closure->backend,
-		closure->connection,
-		closure->sync_state,
-		closure->includes_last_item,
-		closure->items_created,
-		closure->items_updated,
-		closure->items_deleted);
-
-	ews_refreshing_dec (closure->backend);
-
-	return FALSE;
-}
-
-static void
-ews_cal_sync_items_ready_cb (GObject *source_object,
-                             GAsyncResult *result,
-                             gpointer user_data)
-{
-	ECalBackendEws *backend;
-	EEwsConnection *connection;
-	GSList *items_created = NULL;
-	GSList *items_updated = NULL;
-	GSList *items_deleted = NULL;
-	gboolean includes_last_item;
-	gchar *sync_state = NULL;
-	GError *error = NULL;
-
-	connection = E_EWS_CONNECTION (source_object);
-	backend = E_CAL_BACKEND_EWS (user_data);
-
-	e_ews_connection_sync_folder_items_finish (
-		connection, result,
-		&sync_state,
-		&includes_last_item,
-		&items_created,
-		&items_updated,
-		&items_deleted,
-		&error);
-
-	if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
-		ews_refreshing_dec (backend);
-		g_error_free (error);
-		g_object_unref (backend);
-		return;
-	}
-
-	/* XXX Why are there two different error codes for cancellation? */
-	if (g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_CANCELLED)) {
-		ews_refreshing_dec (backend);
-		g_error_free (error);
-		g_object_unref (backend);
-		return;
-	}
-
-	if (!g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED))
-		e_cal_backend_notify_readonly (E_CAL_BACKEND (backend), FALSE);
-
-	if (error == NULL) {
-		cal_backend_ews_process_folder_items (
-			backend, connection,
-			sync_state, includes_last_item,
-			items_created, items_updated, items_deleted);
-	} else {
-		g_warn_if_fail (items_created == NULL);
-		g_warn_if_fail (items_updated == NULL);
-		g_warn_if_fail (items_deleted == NULL);
-
-		g_warning ("%s: %s", G_STRFUNC, error->message);
-		g_error_free (error);
-	}
-
-	ews_refreshing_dec (backend);
-
-	g_slist_free_full (items_created, (GDestroyNotify) g_object_unref);
-	g_slist_free_full (items_updated, (GDestroyNotify) g_object_unref);
-	g_slist_free_full (items_deleted, (GDestroyNotify) g_free);
-
-	g_free (sync_state);
-
-	g_object_unref (backend);
+	g_slist_free (cal_item_ids);
+	g_slist_free (task_item_ids);
 }
 
 static gpointer
@@ -3655,21 +3423,81 @@ ews_start_sync_thread (gpointer data)
 {
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
-	const gchar *sync_state;
+	GSList *items_created = NULL;
+	GSList *items_updated = NULL;
+	GSList *items_deleted = NULL;
+	gboolean includes_last_item;
+	gchar *old_sync_state = NULL;
+	gchar *new_sync_state = NULL;
+	GHashTable *ex_to_smtp;
+	GError *error = NULL;
 
 	cbews = (ECalBackendEws *) data;
 	priv = cbews->priv;
 
-	/* ews_refreshing_inc() is called within ews_start_sync() */
-	sync_state = e_cal_backend_store_get_key_value (priv->store, SYNC_KEY);
-	e_ews_connection_sync_folder_items (
-		priv->cnc, EWS_PRIORITY_MEDIUM,
-		sync_state, priv->folder_id,
-		"IdOnly", NULL,
-		EWS_MAX_FETCH_COUNT,
-		priv->cancellable,
-		ews_cal_sync_items_ready_cb,
-		g_object_ref (cbews));
+	ex_to_smtp = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+	old_sync_state = g_strdup (e_cal_backend_store_get_key_value (priv->store, SYNC_KEY));
+	do {
+		includes_last_item = TRUE;
+
+		e_ews_connection_sync_folder_items_sync (
+			priv->cnc, EWS_PRIORITY_MEDIUM,
+			old_sync_state, priv->folder_id,
+			"IdOnly", NULL,
+			EWS_MAX_FETCH_COUNT,
+			&new_sync_state,
+			&includes_last_item,
+			&items_created,
+			&items_updated,
+			&items_deleted,
+			priv->cancellable,
+			&error);
+
+		if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED) ||
+		    g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_CANCELLED)) {
+			break;
+		}
+
+		if (!g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED))
+			e_cal_backend_notify_readonly (E_CAL_BACKEND (cbews), FALSE);
+
+		if (error == NULL) {
+			cal_backend_ews_process_folder_items (cbews, new_sync_state,
+				items_created, items_updated, items_deleted,
+				ex_to_smtp);
+
+			g_slist_free_full (items_created, (GDestroyNotify) g_object_unref);
+			g_slist_free_full (items_updated, (GDestroyNotify) g_object_unref);
+			g_slist_free_full (items_deleted, (GDestroyNotify) g_free);
+			items_created = NULL;
+			items_updated = NULL;
+			items_deleted = NULL;
+		} else {
+			g_warn_if_fail (items_created == NULL);
+			g_warn_if_fail (items_updated == NULL);
+			g_warn_if_fail (items_deleted == NULL);
+
+			g_warning ("%s: %s", G_STRFUNC, error->message);
+			g_error_free (error);
+			break;
+		}
+
+		g_free (old_sync_state);
+		old_sync_state = new_sync_state;
+		e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, new_sync_state);
+		new_sync_state = NULL;
+	} while (!includes_last_item);
+
+	ews_refreshing_dec (cbews);
+
+	g_hash_table_destroy (ex_to_smtp);
+
+	g_slist_free_full (items_created, (GDestroyNotify) g_object_unref);
+	g_slist_free_full (items_updated, (GDestroyNotify) g_object_unref);
+	g_slist_free_full (items_deleted, (GDestroyNotify) g_free);
+
+	g_free (new_sync_state);
+	g_free (old_sync_state);
 
 	g_object_unref (cbews);
 
@@ -4146,8 +3974,8 @@ cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 	GSList *items_updated = NULL;
 	GSList *items_deleted = NULL;
 	gboolean includes_last_item = FALSE;
-	const gchar *sync_state;
-	gchar *sync_state_inout;
+	const gchar *old_sync_state;
+	gchar *new_sync_state = NULL;
 	gchar *hosturl;
 	GError *local_error = NULL;
 
@@ -4163,16 +3991,16 @@ cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 	g_free (hosturl);
 
 	store = backend->priv->store;
-	sync_state = e_cal_backend_store_get_key_value (store, SYNC_KEY);
-	sync_state_inout = g_strdup (sync_state);
+	old_sync_state = e_cal_backend_store_get_key_value (store, SYNC_KEY);
 
+	/* fetch only up to one item, it's to check whether connection works */
 	e_ews_connection_sync_folder_items_sync (
 		connection,
 		EWS_PRIORITY_MEDIUM,
-		&sync_state_inout,
+		old_sync_state,
 		backend->priv->folder_id,
-		"IdOnly", NULL,
-		EWS_MAX_FETCH_COUNT,
+		"IdOnly", NULL, 1,
+		&new_sync_state,
 		&includes_last_item,
 		&items_created,
 		&items_updated,
@@ -4180,23 +4008,6 @@ cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 		cancellable, &local_error);
 
 	if (local_error == NULL) {
-		SyncItemsClosure *closure;
-
-		/* We can now report the password was accepted.
-		 * Because a password dialog may be stuck in a busy
-		 * state, process the synchronization results from an
-		 * idle callback so we don't delay the authentication
-		 * session any longer than neccessary. */
-
-		/* This takes ownership of the item lists. */
-		closure = g_slice_new0 (SyncItemsClosure);
-		closure->backend = g_object_ref (backend);
-		closure->connection = g_object_ref (connection);
-		closure->includes_last_item = includes_last_item;
-		closure->items_created = items_created;
-		closure->items_deleted = items_deleted;
-		closure->items_updated = items_updated;
-
 		PRIV_LOCK (backend->priv);
 		if (backend->priv->user_email)
 			g_free (backend->priv->user_email);
@@ -4207,12 +4018,11 @@ cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 		backend->priv->cnc = g_object_ref (connection);
 		PRIV_UNLOCK (backend->priv);
 
-		ews_refreshing_inc (backend);
+		g_slist_free_full (items_created, (GDestroyNotify) g_object_unref);
+		g_slist_free_full (items_updated, (GDestroyNotify) g_object_unref);
+		g_slist_free_full (items_deleted, (GDestroyNotify) g_free);
 
-		g_idle_add_full (
-			G_PRIORITY_DEFAULT_IDLE,
-			cal_backend_ews_sync_items_idle_cb, closure,
-			(GDestroyNotify) sync_items_closure_free);
+		ews_start_sync (backend);
 
 		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
 
@@ -4237,7 +4047,7 @@ cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 		}
 	}
 
-	g_free (sync_state_inout);
+	g_free (new_sync_state);
 	g_object_unref (connection);
 
 	return result;

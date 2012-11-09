@@ -2307,14 +2307,20 @@ ebews_start_sync (gpointer data)
 	{
 		GSList *items_created = NULL, *items_updated = NULL;
 		GSList *items_deleted = NULL;
+		gchar *old_sync_state = sync_state;
+
+		sync_state = NULL;
 
 		e_ews_connection_sync_folder_items_sync (
 			priv->cnc, EWS_PRIORITY_MEDIUM,
-			&sync_state, priv->folder_id,
-			"IdOnly", NULL,
-			EWS_MAX_FETCH_COUNT, &includes_last_item,
+			old_sync_state, priv->folder_id,
+			"IdOnly", NULL, EWS_MAX_FETCH_COUNT,
+			&sync_state,
+			&includes_last_item,
 			&items_created, &items_updated,
 			&items_deleted, priv->cancellable, &error);
+
+		g_free (old_sync_state);
 
 		if (error)
 			break;
