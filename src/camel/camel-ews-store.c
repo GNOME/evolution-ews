@@ -1495,7 +1495,7 @@ ews_store_unsubscribe_folder_sync (CamelSubscribable *subscribable,
 
 gboolean
 camel_ews_store_connected (CamelEwsStore *ews_store,
-			   GCancellable *cancellable,
+                           GCancellable *cancellable,
                            GError **error)
 {
 

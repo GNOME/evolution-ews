@@ -405,7 +405,7 @@ ews_backend_add_gal_source (EEwsBackend *backend)
 	e_source_set_display_name (source, display_name);
 
 	/* do not re-setup previously saved ESource,
-	   that would rewrite user's choice */
+	 * that would rewrite user's choice */
 	if (!e_source_has_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER)) {
 		extension_name = E_SOURCE_EXTENSION_ADDRESS_BOOK;
 		backend_extension = e_source_get_extension (source, extension_name);

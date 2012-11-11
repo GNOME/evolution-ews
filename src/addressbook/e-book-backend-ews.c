@@ -1826,7 +1826,7 @@ ews_replace_gal_in_db (EBookBackendEws *cbews,
 			e_book_backend_sqlitedb_remove_contacts (priv->summary, priv->folder_id, uids, NULL);
 			g_slist_free_full (uids, g_free);
 		}
-		
+
 		ews_remove_attachments (priv->attachment_dir);
 	}
 

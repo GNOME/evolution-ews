@@ -662,7 +662,7 @@ void
 camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
                                     EEwsConnection *cnc,
                                     GSList *items_created,
-				    GCancellable *cancellable)
+                                    GCancellable *cancellable)
 {
 	CamelFolder *folder;
 	CamelFolderChangeInfo *ci;
@@ -793,7 +793,7 @@ camel_ews_utils_get_host_name (CamelSettings *settings)
 		host = g_strdup (url->host);
 		camel_url_free (url);
 	}
-	
+
 	if (!host || !*host) {
 		g_free (host);
 		host = camel_network_settings_dup_host (CAMEL_NETWORK_SETTINGS (settings));
