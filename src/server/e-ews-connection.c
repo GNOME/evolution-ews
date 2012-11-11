@@ -1972,19 +1972,21 @@ static void post_restarted (SoupMessage *msg, gpointer data)
 static SoupMessage *
 e_ews_get_msg_for_url (const gchar *url,
                        xmlOutputBuffer *buf,
-		       GError **error)
+                       GError **error)
 {
 	SoupMessage *msg;
 
 	if (url == NULL) {
-		g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
+		g_set_error_literal (
+			error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
 			_("URL cannot be NULL"));
 		return NULL;
 	}
 
 	msg = soup_message_new (buf != NULL ? "POST" : "GET", url);
 	if (!msg) {
-		g_set_error (error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
+		g_set_error (
+			error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
 			_("URL '%s' is not valid"), url);
 		return NULL;
 	}
@@ -2185,14 +2187,14 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 		g_clear_error (&error);
 
 		/* each request holds a reference to 'simple',
-		   thus remove one, to have it actually freed */
+		 * thus remove one, to have it actually freed */
 		g_object_unref (simple);
 	}
 }
 
 static gboolean
 has_suffix_icmp (const gchar *text,
-		 const gchar *suffix)
+                 const gchar *suffix)
 {
 	gint ii, tlen, slen;
 
@@ -2206,7 +2208,7 @@ has_suffix_icmp (const gchar *text,
 		return FALSE;
 
 	for (ii = 0; ii < slen; ii++) {
-		if (g_ascii_tolower (text[tlen - ii - 1]) != 
+		if (g_ascii_tolower (text[tlen - ii - 1]) !=
 		    g_ascii_tolower (suffix[slen - ii - 1]))
 			break;
 	}
@@ -2442,9 +2444,9 @@ oal_response_cb (SoupSession *soup_session,
 exit:
 	g_simple_async_result_complete_in_idle (simple);
 	/* This is run in cnc->priv->soup_thread, and the cnc is held by simple, thus
-	   for cases when the complete_in_idle is finished before the unref call, when
-	   the cnc will be left with the last reference and thus cannot join the soup_thread
-	   while still in it, the unref is done in a dedicated thread. */
+	 * for cases when the complete_in_idle is finished before the unref call, when
+	 * the cnc will be left with the last reference and thus cannot join the soup_thread
+	 * while still in it, the unref is done in a dedicated thread. */
 	ews_unref_in_thread (simple);
 }
 
@@ -3132,7 +3134,7 @@ e_ews_connection_sync_folder_items_sync (EEwsConnection *cnc,
                                          const gchar *default_props,
                                          const gchar *additional_props,
                                          guint max_entries,
-					 gchar **new_sync_state,
+                                         gchar **new_sync_state,
                                          gboolean *includes_last_item,
                                          GSList **items_created,
                                          GSList **items_updated,

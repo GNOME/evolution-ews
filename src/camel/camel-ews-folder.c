@@ -589,8 +589,8 @@ ews_folder_get_message_sync (CamelFolder *folder,
 
 static CamelMimeMessage *
 ews_folder_get_message_cached (CamelFolder *folder,
-			       const gchar *message_uid,
-			       GCancellable *cancellable)
+                               const gchar *message_uid,
+                               GCancellable *cancellable)
 {
 	return camel_ews_folder_get_message_from_cache ((CamelEwsFolder *) folder, message_uid, cancellable, NULL);
 }

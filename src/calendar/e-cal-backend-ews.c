@@ -2891,7 +2891,7 @@ ews_get_attachments (ECalBackendEws *cbews,
 static void
 add_item_to_cache (ECalBackendEws *cbews,
                    EEwsItem *item,
-		   GHashTable *ex_to_smtp)
+                   GHashTable *ex_to_smtp)
 {
 	ECalBackendEwsPrivate *priv;
 	icalcomponent_kind kind;
@@ -3287,10 +3287,10 @@ ews_refreshing_dec (ECalBackendEws *cbews)
 
 static void
 ews_cal_sync_get_items_sync (ECalBackendEws *cbews,
-			     const GSList *item_ids,
-			     const gchar *default_props,
-			     const gchar *additional_props,
-			     GHashTable *ex_to_smtp)
+                             const GSList *item_ids,
+                             const gchar *default_props,
+                             const gchar *additional_props,
+                             GHashTable *ex_to_smtp)
 {
 	ECalBackendEwsPrivate *priv;
 	GSList *items = NULL, *l;
@@ -3298,7 +3298,8 @@ ews_cal_sync_get_items_sync (ECalBackendEws *cbews,
 
 	priv = cbews->priv;
 
-	e_ews_connection_get_items_sync (priv->cnc,
+	e_ews_connection_get_items_sync (
+		priv->cnc,
 		EWS_PRIORITY_MEDIUM,
 		item_ids,
 		default_props,
@@ -3327,7 +3328,8 @@ ews_cal_sync_get_items_sync (ECalBackendEws *cbews,
 
 		modified_occurrences = e_ews_item_get_modified_occurrences (item);
 		if (modified_occurrences) {
-			ews_cal_sync_get_items_sync (cbews, modified_occurrences,
+			ews_cal_sync_get_items_sync (
+				cbews, modified_occurrences,
 				"IdOnly",
 				"item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:UID calendar:Resources calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
 				ex_to_smtp);
@@ -3359,7 +3361,7 @@ cal_backend_ews_process_folder_items (ECalBackendEws *cbews,
                                       GSList *items_created,
                                       GSList *items_updated,
                                       GSList *items_deleted,
-				      GHashTable *ex_to_smtp)
+                                      GHashTable *ex_to_smtp)
 {
 	ECalBackendEwsPrivate *priv;
 	GSList *l[2], *m, *cal_item_ids = NULL, *task_item_ids = NULL;
@@ -3399,7 +3401,8 @@ cal_backend_ews_process_folder_items (ECalBackendEws *cbews,
 	e_cal_backend_store_thaw_changes (priv->store);
 
 	if (cal_item_ids) {
-		ews_cal_sync_get_items_sync (cbews,
+		ews_cal_sync_get_items_sync (
+			cbews,
 			cal_item_ids,
 			"IdOnly",
 			"item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:UID calendar:Resources calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
@@ -3407,7 +3410,8 @@ cal_backend_ews_process_folder_items (ECalBackendEws *cbews,
 	}
 
 	if (task_item_ids) {
-		ews_cal_sync_get_items_sync (cbews,
+		ews_cal_sync_get_items_sync (
+			cbews,
 			task_item_ids,
 			"AllProperties",
 			NULL,
@@ -3462,7 +3466,8 @@ ews_start_sync_thread (gpointer data)
 			e_cal_backend_notify_readonly (E_CAL_BACKEND (cbews), FALSE);
 
 		if (error == NULL) {
-			cal_backend_ews_process_folder_items (cbews, new_sync_state,
+			cal_backend_ews_process_folder_items (
+				cbews, new_sync_state,
 				items_created, items_updated, items_deleted,
 				ex_to_smtp);
 
