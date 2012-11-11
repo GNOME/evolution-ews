@@ -1,3 +1,27 @@
+Evolution-EWS 3.6.1 2012-11-12
+------------------------------
+
+Bug Fixes:
+	Bug 681665 - Crash during fetch of the OAB url (Milan Crha)
+	Bug 686024 - Accepted meeting request sent as tentative (Milan Crha)
+	Bug 686227 - Calendar does repeated ResolveNames requests for the same
+	             people (Milan Crha)
+	Bug 686228 - Cannot fetch list of addressbooks (Milan Crha)
+	Bug 686268 - Crash under oal_response_cb() (Milan Crha)
+	Bug 687228 - Master's ESource change causes rewrite of GAL ESource
+	             (Milan Crha)
+
+Other Changes:
+	* Allow changing permissions of a Calendar folder (Milan Crha)
+	* Fix XML parsing failure during Free/Busy fetching (Milan Crha)
+
+Translations:
+	Andika Triwidada (id)
+	Mario Blättermann (de)
+	Rafael Ferreira (pt_BR)
+	Мирослав Николић (sr)
+
+
 Evolution-EWS 3.6.0 2012-09-22
 ------------------------------
 
