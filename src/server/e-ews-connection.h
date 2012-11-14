@@ -203,6 +203,8 @@ const gchar *	e_ews_connection_get_password	(EEwsConnection *cnc);
 gchar *		e_ews_connection_dup_password	(EEwsConnection *cnc);
 void		e_ews_connection_set_password	(EEwsConnection *cnc,
 						 const gchar *password);
+const gchar *	e_ews_connection_get_impersonate_user
+						(EEwsConnection *cnc);
 CamelEwsSettings *
 		e_ews_connection_ref_settings	(EEwsConnection *cnc);
 SoupSession *	e_ews_connection_ref_soup_session
@@ -461,7 +463,8 @@ gboolean	e_ews_connection_sync_folder_hierarchy_finish
 gboolean	e_ews_connection_sync_folder_hierarchy_sync
 						(EEwsConnection *cnc,
 						 gint pri,
-						 gchar **sync_state,
+						 const gchar *old_sync_state,
+						 gchar **new_sync_state,
 						 gboolean *includes_last_folder,
 						 GSList **folders_created,
 						 GSList **folders_updated,

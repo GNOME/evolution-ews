@@ -1371,6 +1371,45 @@ exit:
 	}
 }
 
+static void
+ews_folder_forget_all_mails (CamelEwsFolder *ews_folder)
+{
+	CamelFolder *folder;
+	CamelFolderChangeInfo *changes;
+	GPtrArray *known_uids;
+	gint ii;
+
+	g_return_if_fail (CAMEL_IS_EWS_FOLDER (ews_folder));
+
+	folder = CAMEL_FOLDER (ews_folder);
+	g_return_if_fail (folder != NULL);
+
+	known_uids = camel_folder_summary_get_array (folder->summary);
+	if (!known_uids)
+		return;
+
+	changes = camel_folder_change_info_new ();
+
+	camel_folder_summary_lock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+	for (ii = 0; ii < known_uids->len; ii++) {
+		const gchar *uid = g_ptr_array_index (known_uids, ii);
+
+		camel_folder_change_info_remove_uid (changes, uid);
+		camel_folder_summary_remove_uid (folder->summary, uid);
+		ews_data_cache_remove (ews_folder->cache, "cur", uid, NULL);
+	}
+	camel_folder_summary_unlock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+
+	if (camel_folder_change_info_changed (changes)) {
+		camel_folder_summary_touch (folder->summary);
+		camel_folder_summary_save_to_db (folder->summary, NULL);
+		camel_folder_changed (folder, changes);
+	}
+
+	camel_folder_change_info_free (changes);
+	camel_folder_summary_free_array (known_uids);
+}
+
 static gboolean
 ews_refresh_info_sync (CamelFolder *folder,
                        GCancellable *cancellable,
@@ -1425,14 +1464,21 @@ ews_refresh_info_sync (CamelFolder *folder,
 		GSList *items_deleted = NULL;
 		guint32 total, unread;
 
-		e_ews_connection_sync_folder_items_sync (
-			cnc, EWS_PRIORITY_MEDIUM,
-			sync_state, id,
-			"IdOnly", NULL,
-			EWS_MAX_FETCH_COUNT,
-			&sync_state, &includes_last_item,
-			&items_created, &items_updated,
-			&items_deleted, cancellable, &local_error);
+		e_ews_connection_sync_folder_items_sync (cnc, EWS_PRIORITY_MEDIUM, sync_state, id, "IdOnly", NULL, EWS_MAX_FETCH_COUNT,
+			&sync_state, &includes_last_item, &items_created, &items_updated, &items_deleted,
+			cancellable, &local_error);
+
+		if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_INVALIDSYNCSTATEDATA)) {
+			g_clear_error (&local_error);
+			g_free (((CamelEwsSummary *) folder->summary)->sync_state);
+			((CamelEwsSummary *) folder->summary)->sync_state = NULL;
+			sync_state = NULL;
+			ews_folder_forget_all_mails (ews_folder);
+
+			e_ews_connection_sync_folder_items_sync (cnc, EWS_PRIORITY_MEDIUM, NULL, id, "IdOnly", NULL, EWS_MAX_FETCH_COUNT,
+				&sync_state, &includes_last_item, &items_created, &items_updated, &items_deleted,
+				cancellable, &local_error);
+		}
 
 		if (local_error) {
 			camel_ews_store_maybe_disconnect (ews_store, local_error);

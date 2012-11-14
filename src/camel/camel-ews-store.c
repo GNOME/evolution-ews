@@ -493,6 +493,39 @@ ews_store_set_flags (CamelEwsStore *ews_store,
 	}
 }
 
+static void
+ews_store_forget_all_folders (CamelEwsStore *ews_store)
+{
+	CamelStore *store;
+	CamelSubscribable *subscribable;
+	GSList *folders, *l;
+
+	g_return_if_fail (CAMEL_IS_EWS_STORE (ews_store));
+
+	store = CAMEL_STORE (ews_store);
+	subscribable = CAMEL_SUBSCRIBABLE (ews_store);
+	folders = camel_ews_store_summary_get_folders (ews_store->summary, NULL);
+
+	if (!folders)
+		return;
+
+	for (l = folders; l != NULL; l = g_slist_next (l)) {
+		CamelFolderInfo *fi;
+		EEwsFolderType ftype;
+
+		ftype = camel_ews_store_summary_get_folder_type (ews_store->summary, l->data, NULL);
+		if (ftype != E_EWS_FOLDER_TYPE_MAILBOX)
+			continue;
+
+		fi = camel_ews_utils_build_folder_info (ews_store, l->data);
+		camel_subscribable_folder_unsubscribed (subscribable, fi);
+		camel_store_folder_deleted (store, fi);
+		camel_folder_info_free (fi);
+	}
+
+	g_slist_free_full (folders, g_free);
+}
+
 static CamelAuthenticationResult
 ews_authenticate_sync (CamelService *service,
                        const gchar *mechanism,
@@ -512,7 +545,7 @@ ews_authenticate_sync (CamelService *service,
 	gboolean initial_setup = FALSE;
 	const gchar *password;
 	gchar *hosturl;
-	gchar *sync_state = NULL;
+	gchar *old_sync_state = NULL, *new_sync_state = NULL;
 	GError *local_error = NULL, *folder_err = NULL;
 	gint n = 0;
 
@@ -547,15 +580,29 @@ ews_authenticate_sync (CamelService *service,
 	 *     since we have to do that eventually anyway. */
 
 	/*use old sync_state from summary*/
-	sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
-	if (!sync_state)
+	old_sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
+	if (!old_sync_state)
 		initial_setup = TRUE;
 
-	e_ews_connection_sync_folder_hierarchy_sync (
-		connection, EWS_PRIORITY_MEDIUM,
-		&sync_state, &includes_last_folder,
-		&folders_created, &folders_updated, &folders_deleted,
+	e_ews_connection_sync_folder_hierarchy_sync (connection, EWS_PRIORITY_MEDIUM, old_sync_state,
+		&new_sync_state, &includes_last_folder, &folders_created, &folders_updated, &folders_deleted,
 		cancellable, &local_error);
+
+	g_free (old_sync_state);
+	old_sync_state = NULL;
+
+	if (!initial_setup && g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_INVALIDSYNCSTATEDATA)) {
+		g_clear_error (&local_error);
+		ews_store_forget_all_folders (ews_store);
+		camel_ews_store_summary_store_string_val (ews_store->summary, "sync_state", "");
+		camel_ews_store_summary_clear (ews_store->summary);
+
+		initial_setup = TRUE;
+
+		e_ews_connection_sync_folder_hierarchy_sync (connection, EWS_PRIORITY_MEDIUM, NULL,
+			&new_sync_state, &includes_last_folder, &folders_created, &folders_updated, &folders_deleted,
+			cancellable, &local_error);
+	}
 
 	if (local_error == NULL) {
 		g_mutex_lock (&ews_store->priv->connection_lock);
@@ -566,7 +613,7 @@ ews_authenticate_sync (CamelService *service,
 
 		/* This consumes all allocated result data. */
 		ews_update_folder_hierarchy (
-			ews_store, sync_state, includes_last_folder,
+			ews_store, new_sync_state, includes_last_folder,
 			folders_created, folders_deleted, folders_updated);
 	} else {
 		g_mutex_lock (&ews_store->priv->connection_lock);
@@ -576,7 +623,7 @@ ews_authenticate_sync (CamelService *service,
 		}
 		g_mutex_unlock (&ews_store->priv->connection_lock);
 
-		g_free (sync_state);
+		g_free (new_sync_state);
 
 		/* Make sure we're not leaking anything. */
 		g_warn_if_fail (folders_created == NULL);
@@ -827,7 +874,7 @@ ews_get_folder_info_sync (CamelStore *store,
 	CamelEwsStorePrivate *priv;
 	CamelFolderInfo *fi = NULL;
 	EEwsConnection *connection;
-	gchar *sync_state;
+	gchar *old_sync_state, *new_sync_state = NULL;
 	gboolean initial_setup = FALSE;
 	GSList *folders_created = NULL, *folders_updated = NULL;
 	GSList *folders_deleted = NULL;
@@ -855,14 +902,14 @@ ews_get_folder_info_sync (CamelStore *store,
 		goto offline;
 	}
 
-	sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
-	if (!sync_state)
+	old_sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
+	if (!old_sync_state)
 		initial_setup = TRUE;
 
-	if (!initial_setup && flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIBED) {
+	if (!initial_setup && (flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIBED) != 0) {
 		time_t now = time (NULL);
 
-		g_free (sync_state);
+		g_free (old_sync_state);
 		if (now - priv->last_refresh_time > FINFO_REFRESH_INTERVAL && ews_refresh_finfo (ews_store))
 			ews_store->priv->last_refresh_time = time (NULL);
 
@@ -872,11 +919,25 @@ ews_get_folder_info_sync (CamelStore *store,
 
 	connection = camel_ews_store_ref_connection (ews_store);
 
-	success = e_ews_connection_sync_folder_hierarchy_sync (
-		connection, EWS_PRIORITY_MEDIUM,
-		&sync_state, &includes_last_folder,
-		&folders_created, &folders_updated,
-		&folders_deleted, cancellable, &local_error);
+	success = e_ews_connection_sync_folder_hierarchy_sync (connection, EWS_PRIORITY_MEDIUM, old_sync_state,
+		&new_sync_state, &includes_last_folder, &folders_created, &folders_updated, &folders_deleted,
+		cancellable, &local_error);
+
+	g_free (old_sync_state);
+	old_sync_state = NULL;
+
+	if (!initial_setup && g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_INVALIDSYNCSTATEDATA)) {
+		g_clear_error (&local_error);
+		ews_store_forget_all_folders (ews_store);
+		camel_ews_store_summary_store_string_val (ews_store->summary, "sync_state", "");
+		camel_ews_store_summary_clear (ews_store->summary);
+
+		initial_setup = TRUE;
+
+		success = e_ews_connection_sync_folder_hierarchy_sync (connection, EWS_PRIORITY_MEDIUM, NULL,
+			&new_sync_state, &includes_last_folder, &folders_created, &folders_updated, &folders_deleted,
+			cancellable, &local_error);
+	}
 
 	g_object_unref (connection);
 
@@ -895,7 +956,7 @@ ews_get_folder_info_sync (CamelStore *store,
 		return NULL;
 	}
 	ews_update_folder_hierarchy (
-		ews_store, sync_state, includes_last_folder,
+		ews_store, new_sync_state, includes_last_folder,
 		folders_created, folders_deleted, folders_updated);
 	g_mutex_unlock (&priv->get_finfo_lock);
 

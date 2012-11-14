@@ -31,6 +31,7 @@
 
 ESoapMessage *
 e_ews_message_new_with_header (const gchar *uri,
+			       const gchar *impersonate_user,
                                const gchar *method_name,
                                const gchar *attribute_name,
                                const gchar *attribute_value,
@@ -77,6 +78,24 @@ e_ews_message_new_with_header (const gchar *uri,
 		"http://schemas.microsoft.com/exchange/services/2006/types");
 	e_soap_message_add_attribute (msg, "Version", server_ver, NULL, NULL);
 	e_soap_message_end_element (msg);
+
+	if (impersonate_user && *impersonate_user) {
+		e_soap_message_start_element (msg, "ExchangeImpersonation", "types",
+			"http://schemas.microsoft.com/exchange/services/2006/types");
+
+		e_soap_message_start_element (msg, "ConnectingSID", "types", NULL);
+
+		if (strchr (impersonate_user, '@') != 0)
+			e_soap_message_start_element (msg, "PrimarySmtpAddress", "types", NULL);
+		else
+			e_soap_message_start_element (msg, "PrincipalName", "types", NULL);
+		e_soap_message_write_string (msg, impersonate_user);
+		e_soap_message_end_element (msg); /* PrimarySmtpAddress or PrincipalName */
+
+		e_soap_message_end_element (msg); /* ConnectingSID */
+
+		e_soap_message_end_element (msg); /* ExchangeImpersonation */
+	}
 
 	e_soap_message_end_header (msg);
 

@@ -3419,6 +3419,31 @@ cal_backend_ews_process_folder_items (ECalBackendEws *cbews,
 	g_slist_free (task_item_ids);
 }
 
+static void
+cbews_forget_all_components (ECalBackendEws *cbews)
+{
+	ECalBackend *backend;
+	GSList *ids, *ii;
+
+	g_return_if_fail (E_IS_CAL_BACKEND_EWS (cbews));
+
+	backend = E_CAL_BACKEND (cbews);
+	g_return_if_fail (backend != NULL);
+
+	ids = e_cal_backend_store_get_component_ids (cbews->priv->store);
+	for (ii = ids; ii; ii = ii->next) {
+		ECalComponentId *id = ii->data;
+
+		if (!id)
+			continue;
+
+		e_cal_backend_store_remove_component (cbews->priv->store, id->uid, id->rid);
+		e_cal_backend_notify_component_removed (backend, id, NULL, NULL);
+	}
+
+	g_slist_free_full (ids, (GDestroyNotify) e_cal_component_free_id);
+}
+
 static gpointer
 ews_start_sync_thread (gpointer data)
 {
@@ -3453,6 +3478,16 @@ ews_start_sync_thread (gpointer data)
 			&items_deleted,
 			priv->cancellable,
 			&error);
+
+		if (g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_INVALIDSYNCSTATEDATA)) {
+			g_clear_error (&error);
+			e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, NULL);
+			cbews_forget_all_components (cbews);
+
+			e_ews_connection_sync_folder_items_sync (priv->cnc, EWS_PRIORITY_MEDIUM, NULL, priv->folder_id, "IdOnly", NULL, EWS_MAX_FETCH_COUNT,
+				&new_sync_state, &includes_last_item, &items_created, &items_updated, &items_deleted,
+				priv->cancellable, &error);
+		}
 
 		if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED) ||
 		    g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_CANCELLED)) {
@@ -4008,6 +4043,16 @@ cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 		&items_updated,
 		&items_deleted,
 		cancellable, &local_error);
+
+	if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_INVALIDSYNCSTATEDATA)) {
+		g_clear_error (&local_error);
+		e_cal_backend_store_put_key_value (store, SYNC_KEY, NULL);
+		cbews_forget_all_components (backend);
+
+		e_ews_connection_sync_folder_items_sync (connection, EWS_PRIORITY_MEDIUM, NULL, backend->priv->folder_id, "IdOnly", NULL, 1,
+			&new_sync_state, &includes_last_item, &items_created, &items_updated, &items_deleted,
+			cancellable, &local_error);
+	}
 
 	if (local_error == NULL) {
 		PRIV_LOCK (backend->priv);

@@ -102,6 +102,19 @@ void		camel_ews_settings_set_oal_selected
 guint		camel_ews_settings_get_timeout	(CamelEwsSettings *settings);
 void		camel_ews_settings_set_timeout	(CamelEwsSettings *settings,
 						 guint timeout);
+gboolean	camel_ews_settings_get_use_impersonation
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_use_impersonation
+						(CamelEwsSettings *settings,
+						 gboolean use_impersonation);
+const gchar *	camel_ews_settings_get_impersonate_user
+						(CamelEwsSettings *settings);
+gchar *		camel_ews_settings_dup_impersonate_user
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_impersonate_user
+						(CamelEwsSettings *settings,
+						 const gchar *impersonate_user);
+
 G_END_DECLS
 
 #endif /* CAMEL_EWS_SETTINGS_H */

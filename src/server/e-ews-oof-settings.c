@@ -456,17 +456,18 @@ ews_oof_settings_initable_init_async (GAsyncInitable *initable,
 	EEwsOofSettings *settings;
 	EEwsConnection *connection;
 	ESoapMessage *message;
-	const gchar *uri;
+	const gchar *uri, *impersonate_user;
 	const gchar *mailbox;
 
 	settings = E_EWS_OOF_SETTINGS (initable);
 	connection = e_ews_oof_settings_get_connection (settings);
 
 	uri = e_ews_connection_get_uri (connection);
+	impersonate_user = e_ews_connection_get_impersonate_user (connection);
 	mailbox = e_ews_connection_get_mailbox (connection);
 
 	message = e_ews_message_new_with_header (
-		uri, "GetUserOofSettingsRequest",
+		uri, impersonate_user, "GetUserOofSettingsRequest",
 		NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	e_soap_message_start_element (message, "Mailbox", NULL, NULL);
@@ -949,7 +950,7 @@ e_ews_oof_settings_submit (EEwsOofSettings *settings,
 	GDateTime *date_time;
 	const gchar *mailbox;
 	const gchar *string;
-	const gchar *uri;
+	const gchar *uri, *impersonate_user;
 	gchar *internal_reply;
 	gchar *external_reply;
 	gchar *start_time;
@@ -960,6 +961,7 @@ e_ews_oof_settings_submit (EEwsOofSettings *settings,
 	connection = e_ews_oof_settings_get_connection (settings);
 	mailbox = e_ews_connection_get_mailbox (connection);
 	uri = e_ews_connection_get_uri (connection);
+	impersonate_user = e_ews_connection_get_impersonate_user (connection);
 
 	internal_reply = e_ews_oof_settings_dup_internal_reply (settings);
 	external_reply = e_ews_oof_settings_dup_external_reply (settings);
@@ -973,7 +975,7 @@ e_ews_oof_settings_submit (EEwsOofSettings *settings,
 	g_date_time_unref (date_time);
 
 	message = e_ews_message_new_with_header (
-		uri, "SetUserOofSettingsRequest",
+		uri, impersonate_user, "SetUserOofSettingsRequest",
 		NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
 	/* <Mailbox> */

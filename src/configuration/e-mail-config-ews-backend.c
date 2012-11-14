@@ -33,6 +33,8 @@
 #include "server/camel-ews-settings.h"
 
 #include "e-mail-config-ews-autodiscover.h"
+#include "e-ews-config-utils.h"
+#include "e-ews-search-user.h"
 
 #define E_MAIL_CONFIG_EWS_BACKEND_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE \
@@ -44,6 +46,7 @@ struct _EMailConfigEwsBackendPrivate {
 	GtkWidget *url_button;		/* not referenced */
 	GtkWidget *oab_entry;		/* not referenced */
 	GtkWidget *auth_check;		/* not referenced */
+	GtkWidget *impersonate_user_entry; /* not referenced */
 };
 
 G_DEFINE_DYNAMIC_TYPE (
@@ -76,6 +79,31 @@ mail_config_ews_backend_new_collection (EMailConfigServiceBackend *backend)
 	e_source_backend_set_backend_name (extension, class->backend_name);
 
 	return source;
+}
+
+static void
+search_for_impersonate_user_clicked_cb (GtkButton *button,
+					EMailConfigServiceBackend *backend)
+{
+	EMailConfigEwsBackendPrivate *priv;
+	CamelSettings *settings;
+	EEwsConnection *conn;
+	GtkWindow *parent;
+	gchar *email = NULL;
+
+	g_return_if_fail (E_IS_MAIL_CONFIG_SERVICE_BACKEND (backend));
+
+	priv = E_MAIL_CONFIG_EWS_BACKEND_GET_PRIVATE (backend);
+	settings = e_mail_config_service_backend_get_settings (backend);
+	conn = e_ews_connection_new (gtk_entry_get_text (GTK_ENTRY (priv->host_entry)), CAMEL_EWS_SETTINGS (settings));
+	parent = e_ews_config_utils_get_widget_toplevel_window (GTK_WIDGET (button));
+
+	if (e_ews_search_user_modal (parent, conn, NULL, NULL, &email)) {
+		gtk_entry_set_text (GTK_ENTRY (priv->impersonate_user_entry), email);
+	}
+
+	g_object_unref (conn);
+	g_free (email);
 }
 
 static void
@@ -173,6 +201,51 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_grid_attach (GTK_GRID (container), widget, 1, 2, 2, 1);
 	priv->oab_entry = widget;  /* do not reference */
 	gtk_widget_show (widget);
+
+	widget = gtk_check_button_new_with_mnemonic (_("Open _Mailbox of other user"));
+	gtk_grid_attach (GTK_GRID (container), widget, 1, 3, 1, 1);
+	gtk_widget_show (widget);
+
+	if (camel_ews_settings_get_use_impersonation (CAMEL_EWS_SETTINGS (settings))) {
+		const gchar *impersonate_user = camel_ews_settings_get_impersonate_user (CAMEL_EWS_SETTINGS (settings));
+
+		if (impersonate_user && !*impersonate_user) {
+			camel_ews_settings_set_impersonate_user (CAMEL_EWS_SETTINGS (settings), NULL);
+			camel_ews_settings_set_use_impersonation (CAMEL_EWS_SETTINGS (settings), FALSE);
+		}
+	}
+
+	g_object_bind_property (
+		settings, "use-impersonation",
+		widget, "active",
+		G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
+
+	widget = gtk_entry_new ();
+	gtk_widget_set_hexpand (widget, TRUE);
+	gtk_grid_attach (GTK_GRID (container), widget, 1, 4, 1, 1);
+	gtk_widget_show (widget);
+	priv->impersonate_user_entry = widget;  /* do not reference */
+
+	g_object_bind_property (
+		settings, "impersonate-user",
+		widget, "text",
+		G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
+
+	g_object_bind_property (
+		settings, "use-impersonation",
+		widget, "sensitive",
+		G_BINDING_SYNC_CREATE);
+
+	widget = gtk_button_new_with_mnemonic (_("S_earch..."));
+	gtk_grid_attach (GTK_GRID (container), widget, 2, 4, 1, 1);
+	gtk_widget_show (widget);
+
+	g_object_bind_property (
+		priv->impersonate_user_entry, "sensitive",
+		widget, "sensitive",
+		G_BINDING_SYNC_CREATE);
+
+	g_signal_connect (widget, "clicked", G_CALLBACK (search_for_impersonate_user_clicked_cb), backend);
 
 	text = _("Authentication");
 	markup = g_markup_printf_escaped ("<b>%s</b>", text);

@@ -37,6 +37,7 @@ typedef enum {
 } EwsServerVersion;
 
 ESoapMessage *	e_ews_message_new_with_header	(const gchar *uri,
+						 const gchar *impersonate_user,
 						 const gchar *method_name,
 						 const gchar *attribute_name,
 						 const gchar *attribute_value,

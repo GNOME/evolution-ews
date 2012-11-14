@@ -1085,6 +1085,36 @@ ews_backend_sync_folders_thread (GSimpleAsyncResult *simple,
 		g_simple_async_result_take_error (simple, error);
 }
 
+static void
+ews_backend_delete_each_source_cb (gpointer data,
+				   gpointer user_data)
+{
+	ESource *source = data;
+	ECollectionBackend *backend = user_data;
+
+	e_collection_backend_delete_resource_sync (backend, source, NULL, NULL);
+}
+
+static void
+ews_backend_forget_all_sources (EEwsBackend *backend)
+{
+	GList *sources;
+
+	g_return_if_fail (E_IS_EWS_BACKEND (backend));
+
+	sources = e_collection_backend_list_calendar_sources (E_COLLECTION_BACKEND (backend));
+	g_list_foreach (sources, ews_backend_delete_each_source_cb, backend);
+	g_list_free_full (sources, g_object_unref);
+
+	sources = e_collection_backend_list_contacts_sources (E_COLLECTION_BACKEND (backend));
+	g_list_foreach (sources, ews_backend_delete_each_source_cb, backend);
+	g_list_free_full (sources, g_object_unref);
+
+	sources = e_collection_backend_list_mail_sources (E_COLLECTION_BACKEND (backend));
+	g_list_foreach (sources, ews_backend_delete_each_source_cb, backend);
+	g_list_free_full (sources, g_object_unref);
+}
+
 gboolean
 e_ews_backend_sync_folders_sync (EEwsBackend *backend,
                                  GCancellable *cancellable,
@@ -1095,8 +1125,9 @@ e_ews_backend_sync_folders_sync (EEwsBackend *backend,
 	GSList *folders_updated = NULL;
 	GSList *folders_deleted = NULL;
 	gboolean includes_last_folder = FALSE;
-	gchar *sync_state;
+	gchar *old_sync_state, *new_sync_state = NULL;
 	gboolean success;
+	GError *local_error = NULL;
 
 	g_return_val_if_fail (E_IS_EWS_BACKEND (backend), FALSE);
 
@@ -1111,16 +1142,33 @@ e_ews_backend_sync_folders_sync (EEwsBackend *backend,
 	backend->priv->need_update_folders = FALSE;
 
 	g_mutex_lock (&backend->priv->sync_state_lock);
-	sync_state = g_strdup (backend->priv->sync_state);
+	old_sync_state = g_strdup (backend->priv->sync_state);
 	g_mutex_unlock (&backend->priv->sync_state_lock);
 
-	/* XXX I think this leaks the old sync_state value when
-	 *     it replaces it with the new sync_state value. */
-	success = e_ews_connection_sync_folder_hierarchy_sync (
-		connection, EWS_PRIORITY_MEDIUM,
-		&sync_state, &includes_last_folder,
-		&folders_created, &folders_updated, &folders_deleted,
-		cancellable, error);
+	success = e_ews_connection_sync_folder_hierarchy_sync (connection, EWS_PRIORITY_MEDIUM, old_sync_state,
+		&new_sync_state, &includes_last_folder, &folders_created, &folders_updated, &folders_deleted,
+		cancellable, &local_error);
+
+	if (old_sync_state && g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_INVALIDSYNCSTATEDATA)) {
+		g_clear_error (&local_error);
+
+		g_mutex_lock (&backend->priv->sync_state_lock);
+		g_free (backend->priv->sync_state);
+		backend->priv->sync_state = NULL;
+		g_mutex_unlock (&backend->priv->sync_state_lock);
+
+		ews_backend_forget_all_sources (backend);
+
+		success = e_ews_connection_sync_folder_hierarchy_sync (connection, EWS_PRIORITY_MEDIUM, NULL,
+			&new_sync_state, &includes_last_folder, &folders_created, &folders_updated, &folders_deleted,
+			cancellable, &local_error);
+	} else if (local_error) {
+		g_propagate_error (error, local_error);
+		local_error = NULL;
+	}
+
+	g_free (old_sync_state);
+	old_sync_state = NULL;
 
 	if (success) {
 		SyncFoldersClosure *closure;
@@ -1140,7 +1188,7 @@ e_ews_backend_sync_folders_sync (EEwsBackend *backend,
 
 		g_mutex_lock (&backend->priv->sync_state_lock);
 		g_free (backend->priv->sync_state);
-		backend->priv->sync_state = g_strdup (sync_state);
+		backend->priv->sync_state = g_strdup (new_sync_state);
 		g_mutex_unlock (&backend->priv->sync_state_lock);
 
 	} else {
@@ -1152,7 +1200,7 @@ e_ews_backend_sync_folders_sync (EEwsBackend *backend,
 		backend->priv->need_update_folders = TRUE;
 	}
 
-	g_free (sync_state);
+	g_free (new_sync_state);
 
 	g_object_unref (connection);
 

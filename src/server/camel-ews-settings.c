@@ -34,12 +34,14 @@ struct _CamelEwsSettingsPrivate {
 	gboolean filter_junk;
 	gboolean filter_junk_inbox;
 	gboolean oab_offline;
+	gboolean use_impersonation;
 	gchar *email;
 	gchar *gal_uid;
 	gchar *hosturl;
 	gchar *oaburl;
 	gchar *oal_selected;
 	guint timeout;
+	gchar *impersonate_user;
 };
 
 enum {
@@ -58,7 +60,9 @@ enum {
 	PROP_PORT,
 	PROP_SECURITY_METHOD,
 	PROP_TIMEOUT,
-	PROP_USER
+	PROP_USER,
+	PROP_USE_IMPERSONATION,
+	PROP_IMPERSONATE_USER
 };
 
 G_DEFINE_TYPE_WITH_CODE (
@@ -162,6 +166,18 @@ ews_settings_set_property (GObject *object,
 		case PROP_USER:
 			camel_network_settings_set_user (
 				CAMEL_NETWORK_SETTINGS (object),
+				g_value_get_string (value));
+			return;
+
+		case PROP_USE_IMPERSONATION:
+			camel_ews_settings_set_use_impersonation (
+				CAMEL_EWS_SETTINGS (object),
+				g_value_get_boolean (value));
+			return;
+
+		case PROP_IMPERSONATE_USER:
+			camel_ews_settings_set_impersonate_user (
+				CAMEL_EWS_SETTINGS (object),
 				g_value_get_string (value));
 			return;
 	}
@@ -280,6 +296,20 @@ ews_settings_get_property (GObject *object,
 				camel_network_settings_dup_user (
 				CAMEL_NETWORK_SETTINGS (object)));
 			return;
+
+		case PROP_USE_IMPERSONATION:
+			g_value_set_boolean (
+				value,
+				camel_ews_settings_get_use_impersonation (
+				CAMEL_EWS_SETTINGS (object)));
+			return;
+
+		case PROP_IMPERSONATE_USER:
+			g_value_take_string (
+				value,
+				camel_ews_settings_dup_impersonate_user (
+				CAMEL_EWS_SETTINGS (object)));
+			return;
 	}
 
 	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -299,6 +329,7 @@ ews_settings_finalize (GObject *object)
 	g_free (priv->hosturl);
 	g_free (priv->oaburl);
 	g_free (priv->oal_selected);
+	g_free (priv->impersonate_user);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_ews_settings_parent_class)->finalize (object);
@@ -465,6 +496,30 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 		object_class,
 		PROP_USER,
 		"user");
+
+	g_object_class_install_property (
+		object_class,
+		PROP_USE_IMPERSONATION,
+		g_param_spec_boolean (
+			"use-impersonation",
+			"Use Impersonation",
+			"Use Impersonation",
+			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_IMPERSONATE_USER,
+		g_param_spec_string (
+			"impersonate-user",
+			"Impersonate User",
+			"Impersonate User",
+			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
 }
 
 static void
@@ -878,4 +933,73 @@ camel_ews_settings_set_timeout (CamelEwsSettings *settings,
 	settings->priv->timeout = timeout;
 
 	g_object_notify (G_OBJECT (settings), "timeout");
+}
+
+gboolean
+camel_ews_settings_get_use_impersonation (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), FALSE);
+
+	return settings->priv->use_impersonation;
+}
+
+void
+camel_ews_settings_set_use_impersonation (CamelEwsSettings *settings,
+					  gboolean use_impersonation)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	if ((settings->priv->use_impersonation ? 1 : 0) == (use_impersonation ? 1 : 0))
+		return;
+
+	settings->priv->use_impersonation = use_impersonation;
+
+	g_object_notify (G_OBJECT (settings), "use-impersonation");
+}
+
+const gchar *
+camel_ews_settings_get_impersonate_user (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
+
+	return settings->priv->impersonate_user;
+}
+
+gchar *
+camel_ews_settings_dup_impersonate_user (CamelEwsSettings *settings)
+{
+	const gchar *protected;
+	gchar *duplicate;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
+
+	g_mutex_lock (&settings->priv->property_lock);
+
+	protected = camel_ews_settings_get_impersonate_user (settings);
+	duplicate = g_strdup (protected);
+
+	g_mutex_unlock (&settings->priv->property_lock);
+
+	return duplicate;
+}
+
+void
+camel_ews_settings_set_impersonate_user (CamelEwsSettings *settings,
+					 const gchar *impersonate_user)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	g_mutex_lock (&settings->priv->property_lock);
+
+	if (g_strcmp0 (settings->priv->impersonate_user, impersonate_user) == 0) {
+		g_mutex_unlock (&settings->priv->property_lock);
+		return;
+	}
+
+	g_free (settings->priv->impersonate_user);
+	settings->priv->impersonate_user = e_util_strdup_strip (impersonate_user);
+
+	g_mutex_unlock (&settings->priv->property_lock);
+
+	g_object_notify (G_OBJECT (settings), "impersonate-user");
 }
