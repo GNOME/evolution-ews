@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2012-11-09 22:36+0000\n"
-"PO-Revision-Date: 2012-11-10 18:06+0200\n"
+"POT-Creation-Date: 2012-11-14 15:30+0000\n"
+"PO-Revision-Date: 2012-11-15 07:14+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: Czech <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -36,11 +36,11 @@ msgstr "Vyčkejte, než se dokončí synchronizace"
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr "Stahování kontaktů v %s %d%% dokončeno…"
 
-#: ../src/addressbook/e-book-backend-ews.c:2308
+#: ../src/addressbook/e-book-backend-ews.c:2332
 msgid "Syncing contacts..."
 msgstr "Synchronizují se kontakty…"
 
-#: ../src/addressbook/e-book-backend-ews.c:2516
+#: ../src/addressbook/e-book-backend-ews.c:2550
 #: ../src/configuration/e-ews-search-user.c:364
 msgid "Searching..."
 msgstr "Vyhledává se…"
@@ -92,7 +92,7 @@ msgstr "Nelze přesunout soubor s mezipamětí zpráv"
 msgid "Could not load summary for %s"
 msgstr "Nelze získat přehled pro složku %s"
 
-#: ../src/camel/camel-ews-folder.c:1530
+#: ../src/camel/camel-ews-folder.c:1576
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr "Akci na složce nelze provádět v režimu off-line"
@@ -179,20 +179,20 @@ msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:527
+#: ../src/camel/camel-ews-store.c:560
 msgid "Authentication password not available"
 msgstr "Autentizační heslo není k dispozici"
 
-#: ../src/camel/camel-ews-store.c:642
+#: ../src/camel/camel-ews-store.c:689
 msgid "Query for authentication types is not supported"
 msgstr "Dotaz na typy autentizace není podporován"
 
-#: ../src/camel/camel-ews-store.c:694
+#: ../src/camel/camel-ews-store.c:741
 #, c-format
 msgid "No such folder: %s"
 msgstr "Taková složka neexistuje: %s"
 
-#: ../src/camel/camel-ews-store.c:841
+#: ../src/camel/camel-ews-store.c:888
 msgid ""
 "Cannot list folders available for subscription of Exchange Web Services "
 "account, use 'Subscribe to folder of other user' context menu option above "
@@ -202,16 +202,17 @@ msgstr ""
 "Services. Použijte místo toho položku „Přihlásit odběr složky jiného "
 "uživatele…“ v kontextové nabídce nad uzlem účtu ve stromu složek."
 
-#: ../src/camel/camel-ews-store.c:934
+#: ../src/camel/camel-ews-store.c:995
+#, c-format
 msgid "Cannot create folder '%s', folder already exists"
 msgstr "Nelze vytvořit složku „%s“, složka již existuje"
 
-#: ../src/camel/camel-ews-store.c:949
+#: ../src/camel/camel-ews-store.c:1010
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Rodičovská složka %s neexistuje"
 
-#: ../src/camel/camel-ews-store.c:959
+#: ../src/camel/camel-ews-store.c:1020
 #, c-format
 msgid ""
 "Cannot create folder under '%s', it is used for folders of other users only"
@@ -219,67 +220,67 @@ msgstr ""
 "Nelze vytvořit složku pod složkou „%s“, jenž je použita pouze pro složky "
 "ostatních uživatelů"
 
-#: ../src/camel/camel-ews-store.c:1028
+#: ../src/camel/camel-ews-store.c:1089
 #, c-format
 msgid "Folder does not exist"
 msgstr "Složka neexistuje"
 
-#: ../src/camel/camel-ews-store.c:1037
+#: ../src/camel/camel-ews-store.c:1098
 #, c-format
 msgid "Cannot remove folder '%s', it is used for folders of other users only"
 msgstr ""
 "Nelze odstranit složku „%s“, jenž je použita pouze pro složky ostatních "
 "uživatelů"
 
-#: ../src/camel/camel-ews-store.c:1144
+#: ../src/camel/camel-ews-store.c:1205
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Složka %s neexistuje"
 
-#: ../src/camel/camel-ews-store.c:1154
+#: ../src/camel/camel-ews-store.c:1215
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Neexistuje záznam s klíčem o změně (ChangeKey) pro složku %s"
 
-#: ../src/camel/camel-ews-store.c:1196
+#: ../src/camel/camel-ews-store.c:1257
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Složku nelze naráz přejmenovat i přesunout"
 
-#: ../src/camel/camel-ews-store.c:1232
+#: ../src/camel/camel-ews-store.c:1293
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nelze najít ID složky pro rodičovskou složku %s"
 
-#: ../src/camel/camel-ews-store.c:1282 ../src/camel/camel-ews-transport.c:69
+#: ../src/camel/camel-ews-store.c:1343 ../src/camel/camel-ews-transport.c:69
 #, c-format
 msgid "Exchange server %s"
 msgstr "Server Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:1285
+#: ../src/camel/camel-ews-store.c:1346
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Služba Exchange pro uživatele %s na počítači %s"
 
-#: ../src/camel/camel-ews-store.c:1329
+#: ../src/camel/camel-ews-store.c:1390
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Nelze vyhledat složku Koš"
 
-#: ../src/camel/camel-ews-store.c:1364
+#: ../src/camel/camel-ews-store.c:1425
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Nelze vyhledat složku Nevyžádaná pošta"
 
-#: ../src/camel/camel-ews-store.c:1442
+#: ../src/camel/camel-ews-store.c:1503
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "K odběru složek EWS se nelze přihlásit v režimu off-line"
 
-#: ../src/camel/camel-ews-store.c:1464
+#: ../src/camel/camel-ews-store.c:1525
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Z odběru složek EWS se nelze odhlásit v režimu off-line"
 
-#: ../src/camel/camel-ews-store.c:1506
+#: ../src/camel/camel-ews-store.c:1567
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "K dokončení této operace je nutné, abyste pracovali on-line"
@@ -730,23 +731,31 @@ msgstr "Dotazuje se služby automatického vyhledávání"
 msgid "Fetch _URL"
 msgstr "Získat adresu _URL"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:112
+#: ../src/configuration/e-mail-config-ews-backend.c:140
 msgid "Configuration"
 msgstr "Nastavení"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:130
+#: ../src/configuration/e-mail-config-ews-backend.c:158
 msgid "User_name:"
 msgstr "Jmé_no uživatele:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:144
+#: ../src/configuration/e-mail-config-ews-backend.c:172
 msgid "_Host URL:"
 msgstr "Adresa URL _počítače:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:163
+#: ../src/configuration/e-mail-config-ews-backend.c:191
 msgid "OAB U_RL:"
 msgstr "Adresa U_RL s OAB:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:177
+#: ../src/configuration/e-mail-config-ews-backend.c:205
+msgid "Open _Mailbox of other user"
+msgstr "Otevřít _schránku jiného uživatele"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:239
+msgid "S_earch..."
+msgstr "Hl_edat…"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:250
 msgid "Authentication"
 msgstr "Autentizace"
 
@@ -957,67 +966,67 @@ msgstr "Selhalo získání nastavení „Mimo kancelář“."
 msgid "Failed to retrieve &quot;Delegates&quot; settings."
 msgstr "Selhalo získání nastavení „Delegátů“."
 
-#: ../src/server/e-ews-connection.c:492
+#: ../src/server/e-ews-connection.c:493
 msgid "Operation Cancelled"
 msgstr "Operace zrušena"
 
-#: ../src/server/e-ews-connection.c:561
+#: ../src/server/e-ews-connection.c:562
 msgid "Authentication failed"
 msgstr "Autentizace selhala"
 
-#: ../src/server/e-ews-connection.c:572
+#: ../src/server/e-ews-connection.c:573
 #, c-format
 msgid "No response: %s"
 msgstr "Bez odezvy: %s"
 
-#: ../src/server/e-ews-connection.c:1856
+#: ../src/server/e-ews-connection.c:1877
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Selhala analýza odpovědi XML na automatické nalezení"
 
-#: ../src/server/e-ews-connection.c:1863
+#: ../src/server/e-ews-connection.c:1884
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Selhalo vyhledání prvku <Autodiscover>"
 
-#: ../src/server/e-ews-connection.c:1874
+#: ../src/server/e-ews-connection.c:1895
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Selhalo vyhledání prvku <Response>"
 
-#: ../src/server/e-ews-connection.c:1885
+#: ../src/server/e-ews-connection.c:1906
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Selhalo vyhledání prvku <Account>"
 
-#: ../src/server/e-ews-connection.c:1904
+#: ../src/server/e-ews-connection.c:1925
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
 "Selhalo vyhledání <ASUrl> a <OABUrl> v odpovědi na automatické nalezení"
 
-#: ../src/server/e-ews-connection.c:1985
+#: ../src/server/e-ews-connection.c:2007
 msgid "URL cannot be NULL"
 msgstr "Adresa URL nesmí být prázdná"
 
-#: ../src/server/e-ews-connection.c:1992
+#: ../src/server/e-ews-connection.c:2015
 #, c-format
 msgid "URL '%s' is not valid"
 msgstr "Adresa URL „%s“ není platná"
 
-#: ../src/server/e-ews-connection.c:2094
+#: ../src/server/e-ews-connection.c:2117
 msgid "Email address is missing a domain part"
 msgstr "U e-mailové adresy schází doménová část"
 
-#: ../src/server/e-ews-connection.c:2406
+#: ../src/server/e-ews-connection.c:2429
 msgid "Failed to parse oab XML"
 msgstr "Selhala analýza XML OAB"
 
-#: ../src/server/e-ews-connection.c:2414
+#: ../src/server/e-ews-connection.c:2437
 msgid "Failed to find <OAB> element\n"
 msgstr "Selhalo vyhledání prvku <OAB>\n"
 
-#: ../src/server/e-ews-connection.c:3570
+#: ../src/server/e-ews-connection.c:3594
 msgid "No items found"
 msgstr "Nenalezeny žádné položky"
 
