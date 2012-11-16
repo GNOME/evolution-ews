@@ -2842,8 +2842,6 @@ e_book_backend_ews_get_backend_property (EBookBackend *backend,
 
 		g_slist_free (fields);
 		g_free (fields_str);
-	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_SUPPORTED_AUTH_METHODS)) {
-		e_data_book_respond_get_backend_property (book, opid, NULL, "plain/password");
 	} else {
 		E_BOOK_BACKEND_CLASS (e_book_backend_ews_parent_class)->get_backend_property (backend, book, opid, cancellable, prop_name);
 	}
