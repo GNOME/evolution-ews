@@ -147,7 +147,19 @@ e_ews_folder_set_from_soap_parameter (EEwsFolder *folder,
 
 	g_return_val_if_fail (param != NULL, FALSE);
 
-	if ((node = e_soap_parameter_get_first_child_by_name (param, "Folder")))
+	if (g_strcmp0 (e_soap_parameter_get_name (param), "Folder") == 0) {
+		node = param;
+		priv->folder_type = E_EWS_FOLDER_TYPE_MAILBOX;
+	} else if (g_strcmp0 (e_soap_parameter_get_name (param), "CalendarFolder") == 0) {
+		node = param;
+		priv->folder_type = E_EWS_FOLDER_TYPE_CALENDAR;
+	} else if (g_strcmp0 (e_soap_parameter_get_name (param), "ContactsFolder") == 0) {
+		node = param;
+		priv->folder_type = E_EWS_FOLDER_TYPE_CONTACTS;
+	} else if (g_strcmp0 (e_soap_parameter_get_name (param), "TasksFolder") == 0) {
+		node = param;
+		priv->folder_type = E_EWS_FOLDER_TYPE_TASKS;
+	} else if ((node = e_soap_parameter_get_first_child_by_name (param, "Folder")))
 		priv->folder_type = E_EWS_FOLDER_TYPE_MAILBOX;
 	else if ((node = e_soap_parameter_get_first_child_by_name (param, "CalendarFolder")))
 		priv->folder_type = E_EWS_FOLDER_TYPE_CALENDAR;
@@ -467,6 +479,7 @@ e_ews_folder_utils_populate_esource (ESource *source,
                                      const gchar *master_hosturl,
                                      const gchar *master_username,
                                      EEwsFolder *folder,
+				     gboolean include_subfolders,
                                      gboolean offline_sync,
                                      gint color_seed,
                                      GCancellable *cancellable,
@@ -518,6 +531,7 @@ e_ews_folder_utils_populate_esource (ESource *source,
 			e_source_ews_folder_set_id (folder_ext, folder_id->id);
 			e_source_ews_folder_set_change_key (folder_ext, NULL);
 			e_source_ews_folder_set_foreign (folder_ext, e_ews_folder_get_foreign (folder));
+			e_source_ews_folder_set_foreign_subfolders (folder_ext, include_subfolders);
 
 			offline_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_OFFLINE);
 			e_source_offline_set_stay_synchronized (offline_ext, offline_sync);
@@ -553,6 +567,7 @@ e_ews_folder_utils_add_as_esource (ESourceRegistry *pregistry,
                                    const gchar *master_hosturl,
                                    const gchar *master_username,
                                    EEwsFolder *folder,
+				   gboolean include_subfolders,
                                    gboolean offline_sync,
                                    gint color_seed,
                                    GCancellable *cancellable,
@@ -589,6 +604,7 @@ e_ews_folder_utils_add_as_esource (ESourceRegistry *pregistry,
 		master_hosturl,
 		master_username,
 		folder,
+		include_subfolders,
 		offline_sync,
 		color_seed,
 		cancellable,

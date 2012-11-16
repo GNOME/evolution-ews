@@ -808,8 +808,8 @@ get_folder_response_cb (ESoapResponse *response,
 }
 
 static void
-ews_handle_root_folder_param (ESoapParameter *subparam,
-                              EwsAsyncData *async_data)
+ews_handle_root_folder_param_items (ESoapParameter *subparam,
+				    EwsAsyncData *async_data)
 {
 	ESoapParameter *node, *subparam1;
 	gchar *last, *total;
@@ -872,7 +872,7 @@ find_folder_items_response_cb (ESoapResponse *response,
 		}
 
 		if (CHECK_ELEMENT (name, "FindItemResponseMessage"))
-			ews_handle_root_folder_param (subparam, async_data);
+			ews_handle_root_folder_param_items (subparam, async_data);
 
 		subparam = e_soap_parameter_get_next_child (subparam);
 	}
@@ -7583,6 +7583,180 @@ e_ews_connection_get_folder_info_sync (EEwsConnection *cnc,
 
 	success = e_ews_connection_get_folder_info_finish (
 		cnc, result, folder, error);
+
+	e_async_closure_free (closure);
+
+	return success;
+}
+
+static void
+ews_handle_root_folder_param_folders (ESoapParameter *subparam,
+				      EwsAsyncData *async_data)
+{
+	ESoapParameter *node, *subparam1;
+	gchar *last, *total;
+	gint total_items;
+	EEwsFolder *folder;
+	gboolean includes_last_item = FALSE;
+
+	node = e_soap_parameter_get_first_child_by_name (subparam, "RootFolder");
+	total = e_soap_parameter_get_property (node, "TotalItemsInView");
+	total_items = atoi (total);
+	g_free (total);
+	last = e_soap_parameter_get_property (node, "IncludesLastItemInRange");
+	if (!strcmp (last, "true"))
+		includes_last_item = TRUE;
+	g_free (last);
+
+	node = e_soap_parameter_get_first_child_by_name (node, "Folders");
+	for (subparam1 = e_soap_parameter_get_first_child (node);
+	     subparam1; subparam1 = e_soap_parameter_get_next_child (subparam1)) {
+		folder = e_ews_folder_new_from_soap_parameter (subparam1);
+		if (!folder) continue;
+		async_data->items = g_slist_append (async_data->items, folder);
+	}
+	async_data->total_items = total_items;
+	async_data->includes_last_item = includes_last_item;
+}
+
+static void
+find_folder_response_cb (ESoapResponse *response,
+			 GSimpleAsyncResult *simple)
+{
+	EwsAsyncData *async_data;
+	ESoapParameter *param;
+	ESoapParameter *subparam;
+	GError *error = NULL;
+
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	param = e_soap_response_get_first_parameter_by_name (
+		response, "ResponseMessages", &error);
+
+	/* Sanity check */
+	g_return_if_fail (
+		(param != NULL && error == NULL) ||
+		(param == NULL && error != NULL));
+
+	if (error != NULL) {
+		g_simple_async_result_take_error (simple, error);
+		return;
+	}
+
+	subparam = e_soap_parameter_get_first_child (param);
+
+	while (subparam != NULL) {
+		const gchar *name = (const gchar *) subparam->name;
+
+		if (!ews_get_response_status (subparam, &error)) {
+			g_simple_async_result_take_error (simple, error);
+			return;
+		}
+
+		if (CHECK_ELEMENT (name, "FindFolderResponseMessage"))
+			ews_handle_root_folder_param_folders (subparam, async_data);
+
+		subparam = e_soap_parameter_get_next_child (subparam);
+	}
+}
+
+void
+e_ews_connection_find_folder (EEwsConnection *cnc,
+			      gint pri,
+			      const EwsFolderId *fid,
+			      GCancellable *cancellable,
+			      GAsyncReadyCallback callback,
+			      gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_if_fail (cnc != NULL);
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "FindFolder", "Traversal", "Shallow", EWS_EXCHANGE_2007_SP1);
+	e_soap_message_start_element (msg, "FolderShape", "messages", NULL);
+	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, "Default");
+	e_soap_message_end_element (msg);
+
+	e_soap_message_start_element (msg, "ParentFolderIds", "messages", NULL);
+
+	if (fid->is_distinguished_id)
+		e_ews_message_write_string_parameter_with_attribute (msg, "DistinguishedFolderId", NULL, NULL, "Id", fid->id);
+	else
+		e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", NULL, NULL, "Id", fid->id);
+
+	e_soap_message_end_element (msg);
+
+	/* Complete the footer and print the request */
+	e_ews_message_write_footer (msg);
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_find_folder);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	e_ews_connection_queue_request (
+		cnc, msg, find_folder_response_cb,
+		pri, cancellable, simple);
+
+	g_object_unref (simple);
+}
+
+gboolean
+e_ews_connection_find_folder_finish (EEwsConnection *cnc,
+				     GAsyncResult *result,
+				     gboolean *includes_last_item,
+				     GSList **folders,
+				     GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_find_folder),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	*includes_last_item = async_data->includes_last_item;
+	*folders = async_data->items;
+
+	return TRUE;
+}
+
+gboolean
+e_ews_connection_find_folder_sync (EEwsConnection *cnc,
+				   gint pri,
+				   const EwsFolderId *fid,
+				   gboolean *includes_last_item,
+				   GSList **folders,
+				   GCancellable *cancellable,
+				   GError **error)
+{
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+
+	closure = e_async_closure_new ();
+
+	e_ews_connection_find_folder (cnc, pri, fid, cancellable, e_async_closure_callback, closure);
+
+	result = e_async_closure_wait (closure);
+
+	success = e_ews_connection_find_folder_finish (
+		cnc, result, includes_last_item, folders, error);
 
 	e_async_closure_free (closure);
 

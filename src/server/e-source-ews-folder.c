@@ -31,13 +31,15 @@ struct _ESourceEwsFolderPrivate {
 	gchar *change_key;
 	gchar *id;
 	gboolean foreign;
+	gboolean foreign_subfolders;
 };
 
 enum {
 	PROP_0,
 	PROP_CHANGE_KEY,
 	PROP_ID,
-	PROP_FOREIGN
+	PROP_FOREIGN,
+	PROP_FOREIGN_SUBFOLDERS
 };
 
 G_DEFINE_DYNAMIC_TYPE (
@@ -66,6 +68,12 @@ source_ews_folder_set_property (GObject *object,
 
 		case PROP_FOREIGN:
 			e_source_ews_folder_set_foreign (
+				E_SOURCE_EWS_FOLDER (object),
+				g_value_get_boolean (value));
+			return;
+
+		case PROP_FOREIGN_SUBFOLDERS:
+			e_source_ews_folder_set_foreign_subfolders (
 				E_SOURCE_EWS_FOLDER (object),
 				g_value_get_boolean (value));
 			return;
@@ -99,6 +107,13 @@ source_ews_folder_get_property (GObject *object,
 			g_value_set_boolean (
 				value,
 				e_source_ews_folder_get_foreign (
+				E_SOURCE_EWS_FOLDER (object)));
+			return;
+
+		case PROP_FOREIGN_SUBFOLDERS:
+			g_value_set_boolean (
+				value,
+				e_source_ews_folder_get_foreign_subfolders (
 				E_SOURCE_EWS_FOLDER (object)));
 			return;
 	}
@@ -172,6 +187,19 @@ e_source_ews_folder_class_init (ESourceEwsFolderClass *class)
 			"foreign",
 			"Foreign",
 			"The folder is a foreign folder, aka belongs to other user",
+			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS |
+			E_SOURCE_PARAM_SETTING));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_FOREIGN_SUBFOLDERS,
+		g_param_spec_boolean (
+			"foreign-subfolders",
+			"ForeignSubfolders",
+			"Whether to search for subfolders of (this) foreign folder",
 			FALSE,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
@@ -332,4 +360,26 @@ e_source_ews_folder_set_foreign (ESourceEwsFolder *extension,
 	extension->priv->foreign = is_foreign;
 
 	g_object_notify (G_OBJECT (extension), "foreign");
+}
+
+gboolean
+e_source_ews_folder_get_foreign_subfolders (ESourceEwsFolder *extension)
+{
+	g_return_val_if_fail (E_IS_SOURCE_EWS_FOLDER (extension), FALSE);
+
+	return extension->priv->foreign_subfolders;
+}
+
+void
+e_source_ews_folder_set_foreign_subfolders (ESourceEwsFolder *extension,
+					    gboolean foreign_subfolders)
+{
+	g_return_if_fail (E_IS_SOURCE_EWS_FOLDER (extension));
+
+	if ((extension->priv->foreign_subfolders ? 1 : 0) == (foreign_subfolders ? 1 : 0))
+		return;
+
+	extension->priv->foreign_subfolders = foreign_subfolders;
+
+	g_object_notify (G_OBJECT (extension), "foreign-subfolders");
 }

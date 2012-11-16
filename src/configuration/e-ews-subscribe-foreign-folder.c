@@ -41,6 +41,7 @@
 
 #define STR_USER_NAME_SELECTOR_ENTRY	"e-ews-name-selector-entry"
 #define STR_FOLDER_NAME_COMBO		"e-ews-folder-name-combo"
+#define STR_SUBFOLDERS_CHECK		"e-ews-subfolders-check"
 #define STR_EWS_CAMEL_SESSION		"e-ews-camel-session"
 #define STR_EWS_CAMEL_STORE		"e-ews-camel-store"
 #define STR_EWS_DIRECT_EMAIL		"e-ews-direct-email"
@@ -65,6 +66,7 @@ static gboolean
 add_foreign_folder_to_camel (CamelEwsStore *ews_store,
                              const gchar *foreign_email,
                              EEwsFolder *folder,
+			     gboolean include_subfolders,
                              const gchar *display_username,
                              const gchar *display_foldername,
                              GError **perror)
@@ -142,6 +144,8 @@ add_foreign_folder_to_camel (CamelEwsStore *ews_store,
 	}
 
 	camel_ews_store_ensure_virtual_folders (ews_store);
+	camel_ews_store_summary_set_foreign_subfolders (ews_store->summary, fid->id, include_subfolders);
+	camel_ews_store_summary_save (ews_store->summary, perror);
 
 	announce_new_folder (ews_store, EWS_FOREIGN_FOLDER_ROOT_ID);
 	announce_new_folder (ews_store, foreign_mailbox_id);
@@ -196,7 +200,8 @@ name_entry_changed_cb (GObject *dialog)
 }
 
 static void
-folder_name_combo_changed_cb (GObject *dialog)
+folder_name_combo_changed_cb (GObject *dialog,
+			      GtkComboBox *combo)
 {
 	enable_ok_button_by_data (dialog);
 }
@@ -204,6 +209,7 @@ folder_name_combo_changed_cb (GObject *dialog)
 struct EEwsCheckForeignFolderData
 {
 	GtkWidget *dialog;
+	gboolean include_subfolders;
 	gchar *email;
 	gchar *direct_email;
 	gchar *user_displayname;
@@ -422,6 +428,7 @@ check_foreign_folder_idle (GObject *with_object,
 	     !add_foreign_folder_to_camel (ews_store,
 		cffd->email,
 		cffd->folder,
+		cffd->include_subfolders,
 		base_username,
 		base_foldername,
 		perror)) ||
@@ -429,6 +436,7 @@ check_foreign_folder_idle (GObject *with_object,
 		camel_ews_settings_get_hosturl (ews_settings),
 		camel_network_settings_get_user (CAMEL_NETWORK_SETTINGS (ews_settings)),
 		cffd->folder,
+		cffd->include_subfolders,
 		TRUE,
 		0,
 		cancellable,
@@ -450,6 +458,7 @@ subscribe_foreign_response_cb (GObject *dialog,
 	struct EEwsCheckForeignFolderData *cffd;
 	ENameSelectorEntry *entry;
 	GtkComboBoxText *combo_text;
+	GtkToggleButton *subfolders_check;
 	EDestinationStore *dest_store;
 	CamelStore *cstore;
 	gchar *description;
@@ -465,6 +474,7 @@ subscribe_foreign_response_cb (GObject *dialog,
 
 	entry = g_object_get_data (dialog, STR_USER_NAME_SELECTOR_ENTRY);
 	combo_text = g_object_get_data (dialog, STR_FOLDER_NAME_COMBO);
+	subfolders_check = g_object_get_data (dialog, STR_SUBFOLDERS_CHECK);
 	cstore = g_object_get_data (dialog, STR_EWS_CAMEL_STORE);
 
 	g_return_if_fail (entry != NULL);
@@ -518,6 +528,7 @@ subscribe_foreign_response_cb (GObject *dialog,
 	cffd->direct_email = g_strdup (g_object_get_data (G_OBJECT (entry), STR_EWS_DIRECT_EMAIL));
 	cffd->orig_foldername = orig_foldername;
 	cffd->use_foldername = use_foldername;
+	cffd->include_subfolders = gtk_toggle_button_get_active (subfolders_check);
 	cffd->folder = NULL;
 
 	description = g_strdup_printf (
@@ -587,7 +598,7 @@ e_ews_subscribe_foreign_folder (GtkWindow *parent,
 	ENameSelectorDialog *name_selector_dialog;
 	GObject *dialog;
 	GtkWidget *content;
-	GtkWidget *label, *widget, *entry;
+	GtkWidget *label, *widget, *entry, *check;
 	GtkGrid *grid;
 	GtkComboBoxText *combo_text;
 	gint row;
@@ -714,9 +725,15 @@ e_ews_subscribe_foreign_folder (GtkWindow *parent,
 	gtk_grid_attach (grid, label, 0, row, 1, 1);
 	gtk_grid_attach (grid, widget, 1, row, 2, 1);
 
+	row++;
+
+	check = gtk_check_button_new_with_mnemonic (_("Include _subfolders"));
+	gtk_grid_attach (grid, check, 1, row, 2, 1);
+
 	/* remember widgets for later use */
 	g_object_set_data (dialog, STR_USER_NAME_SELECTOR_ENTRY, entry);
 	g_object_set_data (dialog, STR_FOLDER_NAME_COMBO, widget);
+	g_object_set_data (dialog, STR_SUBFOLDERS_CHECK, check);
 
 	g_object_set_data_full (dialog, STR_EWS_CAMEL_SESSION, g_object_ref (session), g_object_unref);
 	g_object_set_data_full (dialog, STR_EWS_CAMEL_STORE, g_object_ref (store), g_object_unref);

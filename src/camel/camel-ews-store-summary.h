@@ -93,6 +93,10 @@ void		camel_ews_store_summary_set_foreign
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_id,
 						 gboolean is_foreign);
+void		camel_ews_store_summary_set_foreign_subfolders
+						(CamelEwsStoreSummary *ews_summary,
+						 const gchar *folder_id,
+						 gboolean foreign_subfolders);
 
 gchar *	camel_ews_store_summary_get_folder_name
 						(CamelEwsStoreSummary *ews_summary,
@@ -134,8 +138,15 @@ gboolean	camel_ews_store_summary_get_foreign
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_id,
 						 GError **error);
+gboolean	camel_ews_store_summary_get_foreign_subfolders
+						(CamelEwsStoreSummary *ews_summary,
+						 const gchar *folder_id,
+						 GError **error);
 
 GSList *	camel_ews_store_summary_get_folders
+						(CamelEwsStoreSummary *ews_summary,
+						 const gchar *prefix);
+GSList *	camel_ews_store_summary_get_foreign_folders
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *prefix);
 

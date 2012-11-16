@@ -562,6 +562,21 @@ camel_ews_store_summary_set_foreign (CamelEwsStoreSummary *ews_summary,
 }
 
 void
+camel_ews_store_summary_set_foreign_subfolders (CamelEwsStoreSummary *ews_summary,
+						const gchar *folder_id,
+						gboolean foreign_subfolders)
+{
+	S_LOCK (ews_summary);
+
+	g_key_file_set_boolean (
+		ews_summary->priv->key_file,
+		folder_id, "ForeignSubfolders", foreign_subfolders);
+	ews_summary->priv->dirty = TRUE;
+
+	S_UNLOCK (ews_summary);
+}
+
+void
 camel_ews_store_summary_store_string_val (CamelEwsStoreSummary *ews_summary,
                                           const gchar *key,
                                           const gchar *value)
@@ -765,6 +780,23 @@ camel_ews_store_summary_get_foreign (CamelEwsStoreSummary *ews_summary,
 	return ret;
 }
 
+gboolean
+camel_ews_store_summary_get_foreign_subfolders (CamelEwsStoreSummary *ews_summary,
+						const gchar *folder_id,
+						GError **error)
+{
+	gboolean ret;
+
+	S_LOCK (ews_summary);
+
+	ret = g_key_file_get_boolean (
+		ews_summary->priv->key_file, folder_id, "ForeignSubfolders", error);
+
+	S_UNLOCK (ews_summary);
+
+	return ret;
+}
+
 gchar *
 camel_ews_store_summary_get_string_val (CamelEwsStoreSummary *ews_summary,
                                          const gchar *key,
@@ -819,6 +851,52 @@ camel_ews_store_summary_get_folders (CamelEwsStoreSummary *ews_summary,
 	}
 
 	g_strfreev (groups);
+	return folders;
+}
+
+/* get list of folder IDs, which are foreign folders */
+GSList *
+camel_ews_store_summary_get_foreign_folders (CamelEwsStoreSummary *ews_summary,
+					     const gchar *prefix)
+{
+	GSList *folders = NULL;
+	gchar **groups = NULL;
+	gsize length;
+	gint prefixlen = 0;
+	gint i;
+
+	if (prefix)
+		prefixlen = strlen (prefix);
+
+	S_LOCK (ews_summary);
+
+	groups = g_key_file_get_groups (ews_summary->priv->key_file, &length);
+
+	S_UNLOCK (ews_summary);
+
+	for (i = 0; i < length; i++) {
+		if (!g_ascii_strcasecmp (groups[i], STORE_GROUP_NAME))
+			continue;
+
+		if (!camel_ews_store_summary_get_foreign (ews_summary, groups[i], NULL))
+			continue;
+
+		if (prefixlen) {
+			const gchar *fname;
+
+			fname = g_hash_table_lookup (
+				ews_summary->priv->id_fname_hash, groups[i]);
+
+			if (!fname || strncmp (fname, prefix, prefixlen) ||
+			    (fname[prefixlen] && fname[prefixlen] != '/'))
+				continue;
+		}
+
+		folders = g_slist_append (folders, g_strdup (groups[i]));
+	}
+
+	g_strfreev (groups);
+
 	return folders;
 }
 

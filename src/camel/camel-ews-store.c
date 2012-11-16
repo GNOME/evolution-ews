@@ -526,6 +526,166 @@ ews_store_forget_all_folders (CamelEwsStore *ews_store)
 	g_slist_free_full (folders, g_free);
 }
 
+struct EwsUpdateForeignSubfoldersData
+{
+	CamelEwsStore *ews_store;
+	gchar *folder_id;
+};
+
+static void
+ews_update_foreign_subfolders_data_free (gpointer data)
+{
+	struct EwsUpdateForeignSubfoldersData *euf = data;
+
+	if (euf) {
+		g_object_unref (euf->ews_store);
+		g_free (euf->folder_id);
+		g_free (euf);
+	}
+}
+
+static void
+ews_store_update_foreign_subfolders (CamelSession *session,
+				     GCancellable *cancellable,
+				     gpointer user_data,
+				     GError **error)
+{
+	struct EwsUpdateForeignSubfoldersData *euf = user_data;
+	CamelEwsStore *ews_store;
+	EEwsConnection *conn;
+	GSList *tocheck = NULL, *remote_folders = NULL, *local_folders = NULL;
+	const gchar *fid;
+	GError *local_error = NULL;
+
+	g_return_if_fail (euf != NULL);
+
+	ews_store = euf->ews_store;
+	fid = euf->folder_id;
+
+	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (ews_store)))
+		return;
+
+	conn = camel_ews_store_ref_connection (ews_store);
+	g_return_if_fail (conn != NULL);
+
+	camel_operation_push_message (cancellable, _("Updating foreign folder structure"));
+
+	/* read remote folder structure at the server */
+	while (fid && !g_cancellable_is_cancelled (cancellable) && !local_error) {
+		gboolean includes_last_item = FALSE;
+		EwsFolderId *folder_id = e_ews_folder_id_new (fid, NULL, FALSE);
+
+		while (!includes_last_item && !g_cancellable_is_cancelled (cancellable) && !local_error) {
+			GSList *folders = NULL, *ff;
+
+			if (!e_ews_connection_find_folder_sync (conn, EWS_PRIORITY_MEDIUM, folder_id,
+				&includes_last_item, &folders, cancellable, &local_error))
+				break;
+
+			for (ff = folders; ff != NULL; ff = ff->next) {
+				EEwsFolder *folder = ff->data;
+
+				e_ews_folder_set_parent_id (folder, e_ews_folder_id_new (fid, NULL, FALSE));
+
+				remote_folders = g_slist_prepend (remote_folders, folder);
+
+				if (e_ews_folder_get_child_count (folder) > 0 && e_ews_folder_get_id (folder))
+					tocheck = g_slist_prepend (tocheck, e_ews_folder_get_id (folder)->id);
+			}
+		}
+
+		e_ews_folder_id_free (folder_id);
+
+		if (tocheck) {
+			fid = g_slist_last (tocheck)->data;
+			tocheck = g_slist_remove (tocheck, fid);
+		} else {
+			fid = NULL;
+		}
+	}
+
+	/* get local folder structure */
+	if (!local_error && !g_cancellable_is_cancelled (cancellable)) {
+		gchar *full_name = camel_ews_store_summary_get_folder_full_name (ews_store->summary, euf->folder_id, NULL);
+		if (full_name) {
+			local_folders = camel_ews_store_summary_get_folders (ews_store->summary, full_name);
+		}
+		g_free (full_name);
+	}
+
+	/* merge local and remote folder structures */
+	if (!local_error && !g_cancellable_is_cancelled (cancellable)) {
+		GHashTable *locals = g_hash_table_new (g_str_hash, g_str_equal);
+		GSList *ii;
+
+		remote_folders = g_slist_reverse (remote_folders);
+
+		for (ii = local_folders; ii; ii = ii->next) {
+			g_hash_table_insert (locals, ii->data, ii->data);
+		}
+
+		for (ii = remote_folders; ii; ii = ii->next) {
+			EEwsFolder *folder = ii->data;
+			const EwsFolderId *folder_id = e_ews_folder_get_id (folder);
+			const EwsFolderId *parent_fid = e_ews_folder_get_parent_id (folder);
+
+			if (e_ews_folder_get_folder_type (folder) == E_EWS_FOLDER_TYPE_MAILBOX &&
+			    folder_id && folder_id->id) {
+				if (!g_hash_table_remove (locals, folder_id->id)) {
+					CamelFolderInfo *fi;
+
+					/* it's a new folder, add it */
+					camel_ews_store_summary_new_folder (
+						ews_store->summary,
+						folder_id->id, parent_fid ? parent_fid->id : euf->folder_id, folder_id->change_key,
+						e_ews_folder_get_name (folder), E_EWS_FOLDER_TYPE_MAILBOX,
+						CAMEL_FOLDER_SUBSCRIBED, e_ews_folder_get_total_count (folder), TRUE);
+
+					fi = camel_ews_utils_build_folder_info (ews_store, folder_id->id);
+					camel_store_folder_created (CAMEL_STORE (ews_store), fi);
+					camel_subscribable_folder_subscribed (CAMEL_SUBSCRIBABLE (ews_store), fi);
+					camel_folder_info_free (fi);
+				}
+			}
+		}
+
+		/* to not remove the parent */
+		g_hash_table_remove (locals, euf->folder_id);
+
+		/* and now the locals contains only folders which were removed */
+		if (g_hash_table_size (locals) > 0) {
+			CamelSubscribable *subscribable = CAMEL_SUBSCRIBABLE (ews_store);
+			CamelStore *store = CAMEL_STORE (ews_store);
+			GHashTableIter iter;
+			gpointer key, value;
+
+			g_hash_table_iter_init (&iter, locals);
+			while (g_hash_table_iter_next (&iter, &key, &value)) {
+				CamelFolderInfo *fi;
+
+				fi = camel_ews_utils_build_folder_info (ews_store, key);
+				camel_subscribable_folder_unsubscribed (subscribable, fi);
+				camel_store_folder_deleted (store, fi);
+				camel_folder_info_free (fi);
+			}
+		}
+
+		g_hash_table_destroy (locals);
+
+		camel_ews_store_summary_save (ews_store->summary, &local_error);
+	}
+
+	if (local_error)
+		g_propagate_error (error, local_error);
+
+	camel_operation_pop_message (cancellable);
+
+	g_slist_free_full (remote_folders, g_object_unref);
+	g_slist_free_full (local_folders, g_free);
+	g_slist_free (tocheck);
+	g_object_unref (conn);
+}
+
 static CamelAuthenticationResult
 ews_authenticate_sync (CamelService *service,
                        const gchar *mechanism,
@@ -605,6 +765,9 @@ ews_authenticate_sync (CamelService *service,
 	}
 
 	if (local_error == NULL) {
+		GSList *foreign_fids, *ff;
+		CamelSession *session;
+
 		g_mutex_lock (&ews_store->priv->connection_lock);
 		if (ews_store->priv->connection != NULL)
 			g_object_unref (ews_store->priv->connection);
@@ -615,6 +778,27 @@ ews_authenticate_sync (CamelService *service,
 		ews_update_folder_hierarchy (
 			ews_store, new_sync_state, includes_last_folder,
 			folders_created, folders_deleted, folders_updated);
+
+		/* Also update folder structures of foreign folders,
+		   those which are subscribed with subfolders */
+		session = camel_service_get_session (service);
+		foreign_fids = camel_ews_store_summary_get_foreign_folders (ews_store->summary, NULL);
+		for (ff = foreign_fids; ff != NULL; ff = ff->next) {
+			const gchar *fid = ff->data;
+
+			if (camel_ews_store_summary_get_foreign_subfolders (ews_store->summary, fid, NULL)) {
+				struct EwsUpdateForeignSubfoldersData *euf;
+
+				euf = g_new0 (struct EwsUpdateForeignSubfoldersData, 1);
+				euf->ews_store = g_object_ref (ews_store);
+				euf->folder_id = g_strdup (fid);
+
+				camel_session_submit_job (session, ews_store_update_foreign_subfolders,
+					euf, ews_update_foreign_subfolders_data_free);
+			}
+		}
+
+		g_slist_free_full (foreign_fids, g_free);
 	} else {
 		g_mutex_lock (&ews_store->priv->connection_lock);
 		if (ews_store->priv->connection != NULL) {

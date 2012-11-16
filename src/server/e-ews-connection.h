@@ -967,6 +967,26 @@ gboolean	e_ews_connection_get_folder_info_sync
 						 EEwsFolder **folder,
 						 GCancellable *cancellable,
 						 GError **error);
+void		e_ews_connection_find_folder	(EEwsConnection *cnc,
+						 gint pri,
+						 const EwsFolderId *fid,
+						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
+						 gpointer user_data);
+gboolean	e_ews_connection_find_folder_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 gboolean *includes_last_item,
+						 GSList **folders,
+						 GError **error);
+gboolean	e_ews_connection_find_folder_sync
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const EwsFolderId *fid,
+						 gboolean *includes_last_item,
+						 GSList **folders,
+						 GCancellable *cancellable,
+						 GError **error);
 
 G_END_DECLS
 
