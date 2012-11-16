@@ -284,9 +284,6 @@ soap_got_chunk (SoupMessage *msg,
 {
 	ESoapMessagePrivate *priv = E_SOAP_MESSAGE_GET_PRIVATE (msg);
 
-	if (msg->status_code != 200)
-		return;
-
 	priv->response_received += chunk->length;
 
 	if (priv->response_size && priv->progress_fn) {
