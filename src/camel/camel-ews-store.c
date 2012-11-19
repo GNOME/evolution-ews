@@ -686,6 +686,27 @@ ews_store_update_foreign_subfolders (CamelSession *session,
 	g_object_unref (conn);
 }
 
+void
+camel_ews_store_update_foreign_subfolders (CamelEwsStore *ews_store,
+					   const gchar *fid)
+{
+	struct EwsUpdateForeignSubfoldersData *euf;
+	CamelSession *session;
+
+	g_return_if_fail (CAMEL_IS_EWS_STORE (ews_store));
+	g_return_if_fail (fid != NULL);
+
+	session = camel_service_get_session (CAMEL_SERVICE (ews_store));
+	g_return_if_fail (CAMEL_IS_SESSION (session));
+
+	euf = g_new0 (struct EwsUpdateForeignSubfoldersData, 1);
+	euf->ews_store = g_object_ref (ews_store);
+	euf->folder_id = g_strdup (fid);
+
+	camel_session_submit_job (session, ews_store_update_foreign_subfolders,
+		euf, ews_update_foreign_subfolders_data_free);
+}
+
 static CamelAuthenticationResult
 ews_authenticate_sync (CamelService *service,
                        const gchar *mechanism,
@@ -766,7 +787,6 @@ ews_authenticate_sync (CamelService *service,
 
 	if (local_error == NULL) {
 		GSList *foreign_fids, *ff;
-		CamelSession *session;
 
 		g_mutex_lock (&ews_store->priv->connection_lock);
 		if (ews_store->priv->connection != NULL)
@@ -781,20 +801,12 @@ ews_authenticate_sync (CamelService *service,
 
 		/* Also update folder structures of foreign folders,
 		   those which are subscribed with subfolders */
-		session = camel_service_get_session (service);
 		foreign_fids = camel_ews_store_summary_get_foreign_folders (ews_store->summary, NULL);
 		for (ff = foreign_fids; ff != NULL; ff = ff->next) {
 			const gchar *fid = ff->data;
 
 			if (camel_ews_store_summary_get_foreign_subfolders (ews_store->summary, fid, NULL)) {
-				struct EwsUpdateForeignSubfoldersData *euf;
-
-				euf = g_new0 (struct EwsUpdateForeignSubfoldersData, 1);
-				euf->ews_store = g_object_ref (ews_store);
-				euf->folder_id = g_strdup (fid);
-
-				camel_session_submit_job (session, ews_store_update_foreign_subfolders,
-					euf, ews_update_foreign_subfolders_data_free);
+				camel_ews_store_update_foreign_subfolders (ews_store, fid);
 			}
 		}
 
@@ -1721,6 +1733,37 @@ ews_store_unsubscribe_folder_sync (CamelSubscribable *subscribable,
 		res = TRUE;
 	} else {
 		CamelFolderInfo *fi;
+
+		if (camel_ews_store_summary_get_foreign_subfolders (ews_store->summary, fid, NULL)) {
+			/* when subscribed with subfolders, then unsubscribe with subfolders as well */
+			GSList *local_folders = NULL, *ii;
+			gchar *full_name = camel_ews_store_summary_get_folder_full_name (ews_store->summary, fid, NULL);
+			if (full_name) {
+				local_folders = camel_ews_store_summary_get_folders (ews_store->summary, full_name);
+			}
+			g_free (full_name);
+
+			for (ii = local_folders; ii != NULL; ii = ii->next) {
+				const gchar *lfid = ii->data;
+				EEwsFolderType ftype;
+
+				if (g_strcmp0 (lfid, fid) == 0)
+					continue;
+
+				ftype = camel_ews_store_summary_get_folder_type (ews_store->summary, lfid, NULL);
+				if (ftype != E_EWS_FOLDER_TYPE_MAILBOX)
+					continue;
+
+				fi = camel_ews_utils_build_folder_info (ews_store, lfid);
+				camel_ews_store_summary_remove_folder (ews_store->summary, lfid, NULL);
+
+				camel_subscribable_folder_unsubscribed (CAMEL_SUBSCRIBABLE (ews_store), fi);
+				camel_store_folder_deleted (CAMEL_STORE (ews_store), fi);
+				camel_folder_info_free (fi);
+			}
+
+			g_slist_free_full (local_folders, g_free);
+		}
 
 		fi = camel_ews_utils_build_folder_info (ews_store, fid);
 		camel_ews_store_summary_remove_folder (ews_store->summary, fid, error);

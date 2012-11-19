@@ -154,6 +154,9 @@ add_foreign_folder_to_camel (CamelEwsStore *ews_store,
 	g_free (foreign_mailbox_id);
 	g_free (mailbox);
 
+	if (include_subfolders)
+		camel_ews_store_update_foreign_subfolders (ews_store, fid->id);
+
 	return TRUE;
 }
 

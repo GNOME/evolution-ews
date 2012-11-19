@@ -88,6 +88,9 @@ void		camel_ews_store_ensure_virtual_folders
 void		camel_ews_store_ensure_unique_path
 						(CamelEwsStore *ews_store,
 						 gchar **ppath);
+void		camel_ews_store_update_foreign_subfolders
+						(CamelEwsStore *ews_store,
+						 const gchar *fid);
 
 G_END_DECLS
 
