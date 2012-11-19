@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2012-11-14 15:30+0000\n"
-"PO-Revision-Date: 2012-11-14 19:55+0100\n"
+"POT-Creation-Date: 2012-11-17 16:24+0000\n"
+"PO-Revision-Date: 2012-11-19 13:39+0100\n"
 "Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
@@ -183,20 +183,24 @@ msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:560
+#: ../src/camel/camel-ews-store.c:571
+msgid "Updating foreign folder structure"
+msgstr "Posodabljanje tuje strukture map"
+
+#: ../src/camel/camel-ews-store.c:720
 msgid "Authentication password not available"
 msgstr "Geslo za overitev ni na voljo."
 
-#: ../src/camel/camel-ews-store.c:689
+#: ../src/camel/camel-ews-store.c:873
 msgid "Query for authentication types is not supported"
 msgstr "Poizvedba po vrstah overjanja ni podprta"
 
-#: ../src/camel/camel-ews-store.c:741
+#: ../src/camel/camel-ews-store.c:925
 #, c-format
 msgid "No such folder: %s"
 msgstr "Ni takšne mape: %s"
 
-#: ../src/camel/camel-ews-store.c:888
+#: ../src/camel/camel-ews-store.c:1072
 msgid ""
 "Cannot list folders available for subscription of Exchange Web Services "
 "account, use 'Subscribe to folder of other user' context menu option above "
@@ -206,84 +210,84 @@ msgstr ""
 "mogoče izpisati, raje uporabite ukaz 'Naroči se na mapo drugega uporabnika' "
 "iz vsebinskega menija nad vozliščem računa v drevesu map."
 
-#: ../src/camel/camel-ews-store.c:995
+#: ../src/camel/camel-ews-store.c:1179
 #, c-format
 msgid "Cannot create folder '%s', folder already exists"
 msgstr "Mape '%s' ni mogoče ustvarite, že obstaja"
 
-#: ../src/camel/camel-ews-store.c:1010
+#: ../src/camel/camel-ews-store.c:1194
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Nadrejena mapa %s ne obstaja"
 
-#: ../src/camel/camel-ews-store.c:1020
+#: ../src/camel/camel-ews-store.c:1204
 #, c-format
 msgid ""
 "Cannot create folder under '%s', it is used for folders of other users only"
 msgstr ""
 "Mape pod '%s' ni mogoče ustvariti, uporablja se le za mape drugih uporabnikov"
 
-#: ../src/camel/camel-ews-store.c:1089
+#: ../src/camel/camel-ews-store.c:1273
 #, c-format
 msgid "Folder does not exist"
 msgstr "Mapa ne obstaja"
 
-#: ../src/camel/camel-ews-store.c:1098
+#: ../src/camel/camel-ews-store.c:1282
 #, c-format
 msgid "Cannot remove folder '%s', it is used for folders of other users only"
 msgstr ""
 "Mape pod '%s' ni mogoče odstraniti, uporablja se le za mape drugih "
 "uporabnikov"
 
-#: ../src/camel/camel-ews-store.c:1205
+#: ../src/camel/camel-ews-store.c:1389
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Mapa %s ne obstaja."
 
-#: ../src/camel/camel-ews-store.c:1215
+#: ../src/camel/camel-ews-store.c:1399
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Ni zapisa ključa za mapo %s"
 
-#: ../src/camel/camel-ews-store.c:1257
+#: ../src/camel/camel-ews-store.c:1441
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Ni mogoče hkrati preimenovati in premakniti mape"
 
-#: ../src/camel/camel-ews-store.c:1293
+#: ../src/camel/camel-ews-store.c:1477
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Ni mogoče najti ID mape za nadrejeno mapo %s"
 
-#: ../src/camel/camel-ews-store.c:1343 ../src/camel/camel-ews-transport.c:69
+#: ../src/camel/camel-ews-store.c:1527 ../src/camel/camel-ews-transport.c:69
 #, c-format
 msgid "Exchange server %s"
 msgstr "Strežnik Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:1346
+#: ../src/camel/camel-ews-store.c:1530
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Storitev Exchange za %s na %s"
 
-#: ../src/camel/camel-ews-store.c:1390
+#: ../src/camel/camel-ews-store.c:1574
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Mape Smeti ni mogoče najti"
 
-#: ../src/camel/camel-ews-store.c:1425
+#: ../src/camel/camel-ews-store.c:1609
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Mape neželene pošte ni mogoče najti."
 
-#: ../src/camel/camel-ews-store.c:1503
+#: ../src/camel/camel-ews-store.c:1687
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "V načinu brez povezave se ni mogoče naročiti na mape EWS"
 
-#: ../src/camel/camel-ews-store.c:1525
+#: ../src/camel/camel-ews-store.c:1709
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "V načinu brez povezave ni mogoče preklicati naročil na mape EWS"
 
-#: ../src/camel/camel-ews-store.c:1567
+#: ../src/camel/camel-ews-store.c:1751
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Za dokončanje tega opravila je treba vzpostaviti povezavo v omrežje"
@@ -468,7 +472,7 @@ msgid "Edit EWS folder permissions..."
 msgstr "Uredi dovoljenja map EWS ..."
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:932
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:621
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:632
 msgid "Account:"
 msgstr "Račun:"
 
@@ -626,8 +630,8 @@ msgstr "Izbor uporabnika EWS ..."
 msgid "_Search:"
 msgstr "_Poišči:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:96
-#: ../src/server/e-ews-folder.c:585
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:98
+#: ../src/server/e-ews-folder.c:600
 #, c-format
 msgid "Cannot add folder, folder already exists as '%s'"
 msgstr "Mape ni mogoče dodati, ker že obstaja kot '%s'"
@@ -635,27 +639,27 @@ msgstr "Mape ni mogoče dodati, ker že obstaja kot '%s'"
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
 #. * Example result: "Mailbox - John Smith"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:106
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:108
 #, c-format
 msgctxt "ForeignFolder"
 msgid "Mailbox - %s"
 msgstr "Poštni predal - %s"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:264
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:270
 msgid "Cannot test foreign folder availability while in offline mode"
 msgstr "Dosegljivosti tujih map v načinu brez povezave ni mogoče preizkusiti"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:289
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:295
 #, c-format
 msgid "User '%s' was not found on the server"
 msgstr "Uporabnika '%s' ni mogoče najti na strežniku"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:325
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:331
 #, c-format
 msgid "User name '%s' is ambiguous, specify it more precisely, please"
 msgstr "Uporabniško ime '%s' ni enoznačno, določite ga natančneje"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:347
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:353
 #, c-format
 msgid ""
 "Folder '%s' not found. Either it does not exist or you do not have "
@@ -664,7 +668,7 @@ msgstr ""
 "Mape '%s' ni mogoče najti. Ali ne obstaja ali pa ni ustreznih dovoljenj za "
 "dostop."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:365
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:371
 msgid "Cannot add folder, cannot determine folder's type"
 msgstr "Mape ni mogoče dodati, ker ni mogoče določiti vrste"
 
@@ -673,63 +677,67 @@ msgstr "Mape ni mogoče dodati, ker ni mogoče določiti vrste"
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith - Calendar"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:410
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:416
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s - %s"
 msgstr "%s - %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:500
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:706
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:510
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:717
 msgid "Inbox"
 msgstr "Prejeto"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:502
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:707
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:512
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:718
 msgid "Contacts"
 msgstr "Stiki"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:504
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:708
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:514
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:719
 msgid "Calendar"
 msgstr "Koledar"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:506
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:709
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:516
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:720
 msgid "Memos"
 msgstr "Opomniki"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:508
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:710
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:518
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
 msgid "Tasks"
 msgstr "Naloge"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:524
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:535
 #, c-format
 msgid "Testing availability of folder '%s' of user '%s', please wait..."
 msgstr ""
 "Preizkušanje dosegljivosti mape '%s' uporabnika '%s', počakajte trenutek ..."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:600
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:611
 msgid "Subscribe to folder of other EWS user..."
 msgstr "Naročilo na mapo drugega uporabnika EWS ..."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:651
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:662
 msgid "User"
 msgstr "Uporabnik"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:658
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:669
 msgid "_User:"
 msgstr "_Uporabnik:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:673
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:684
 msgid "C_hoose..."
 msgstr "Iz_beri ..."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:689
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:700
 msgid "_Folder name:"
 msgstr "I_me mape:"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:730
+msgid "Include _subfolders"
+msgstr "_Upoštevaj podmape"
 
 #: ../src/configuration/e-mail-config-ews-autodiscover.c:129
 msgid "Querying Autodiscover service"
@@ -1039,11 +1047,11 @@ msgstr "Iskanje predmeta <OAB> je spodletelo.\n"
 msgid "No items found"
 msgstr "Ni zadetkov"
 
-#: ../src/server/e-ews-folder.c:540
+#: ../src/server/e-ews-folder.c:554
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Mape ni mogoče dodati, ker vrsta mape ni podprta"
 
-#: ../src/server/e-ews-folder.c:545
+#: ../src/server/e-ews-folder.c:559
 msgid "Cannot add folder, master source not found"
 msgstr "Mape ni mogoče dodati, ker izvornega vira ni mogoče najti"
 
