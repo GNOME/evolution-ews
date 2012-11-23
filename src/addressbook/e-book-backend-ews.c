@@ -2867,16 +2867,15 @@ e_book_backend_ews_open (EBookBackend *backend,
 		gboolean need_to_authenticate;
 
 		PRIV_LOCK (cbews->priv);
-		need_to_authenticate =
-			(cbews->priv->cnc == NULL) &&
-			(e_backend_get_online (E_BACKEND (backend)));
+		need_to_authenticate = cbews->priv->cnc == NULL && e_backend_get_online (E_BACKEND (backend));
 		PRIV_UNLOCK (cbews->priv);
 
-		if (need_to_authenticate)
+		if (need_to_authenticate) {
 			e_backend_authenticate_sync (
 				E_BACKEND (backend),
 				E_SOURCE_AUTHENTICATOR (backend),
 				cancellable, &error);
+		}
 	}
 
 	convert_error_to_edb_error (&error);
@@ -2996,9 +2995,17 @@ book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 		if (backend->priv->cnc != NULL)
 			g_object_unref (backend->priv->cnc);
 		backend->priv->cnc = g_object_ref (connection);
+		backend->priv->is_writable = !backend->priv->is_gal;
 
 		PRIV_UNLOCK (backend->priv);
+
+		e_book_backend_notify_online (E_BOOK_BACKEND (backend), TRUE);
+	} else {
+		backend->priv->is_writable = FALSE;
+		e_book_backend_notify_online (E_BOOK_BACKEND (backend), FALSE);
 	}
+
+	e_book_backend_notify_readonly (E_BOOK_BACKEND (backend), !backend->priv->is_writable);
 
 	g_object_unref (connection);
 
