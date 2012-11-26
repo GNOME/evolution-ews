@@ -5987,7 +5987,7 @@ ews_handle_free_busy_view (ESoapParameter *param,
 	ESoapParameter *viewparam, *eventarray, *event_param, *subparam;
 	GTimeVal t_val;
 	const gchar *name;
-	gchar *value, *new_val = NULL;
+	gchar *value, *new_val = NULL, *summary = NULL, *location = NULL;
 
 	viewparam = e_soap_parameter_get_first_child_by_name (param, "FreeBusyView");
 	if (!viewparam) return;
@@ -6047,9 +6047,30 @@ ews_handle_free_busy_view (ESoapParameter *param,
 				else if (!strcmp (value, "Free"))
 					icalproperty_set_parameter_from_string (icalprop, "FBTYPE", "FREE");
 				g_free (value);
+			} else if (!g_ascii_strcasecmp (name, "CalendarEventDetails")) {
+				ESoapParameter *dparam;
+
+				dparam = e_soap_parameter_get_first_child_by_name (subparam, "Subject");
+				if (dparam)
+					summary = e_soap_parameter_get_string_value (dparam);
+
+				dparam = e_soap_parameter_get_first_child_by_name (subparam, "Location");
+				if (dparam)
+					location = e_soap_parameter_get_string_value (dparam);
 			}
 		}
-		if (icalprop != NULL) icalcomponent_add_property (vfb, icalprop);
+		if (icalprop != NULL) {
+			if (summary)
+				icalproperty_set_parameter_from_string (icalprop, "X-SUMMARY", summary);
+			if (location)
+				icalproperty_set_parameter_from_string (icalprop, "X-LOCATION", location);
+			icalcomponent_add_property (vfb, icalprop);
+		}
+
+		g_free (summary);
+		g_free (location);
+		summary = NULL;
+		location = NULL;
 	}
 
 	async_data->items = g_slist_append (async_data->items, vfb);
