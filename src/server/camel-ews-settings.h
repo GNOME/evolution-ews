@@ -102,6 +102,11 @@ void		camel_ews_settings_set_oal_selected
 guint		camel_ews_settings_get_timeout	(CamelEwsSettings *settings);
 void		camel_ews_settings_set_timeout	(CamelEwsSettings *settings,
 						 guint timeout);
+gboolean	camel_ews_settings_get_folders_initialized
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_folders_initialized
+						(CamelEwsSettings *settings,
+						 gboolean folders_initialized);
 G_END_DECLS
 
 #endif /* CAMEL_EWS_SETTINGS_H */

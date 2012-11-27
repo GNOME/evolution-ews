@@ -90,7 +90,6 @@ ews_send_to_sync (CamelTransport *transport,
 	CamelSettings *settings;
 	CamelService *service;
 	EEwsConnection *cnc;
-	EwsFolderId *fid;
 	gchar *ews_email;
 	gchar *host_url;
 	gchar *user;
@@ -164,13 +163,10 @@ ews_send_to_sync (CamelTransport *transport,
 		goto exit;
 	}
 
-	fid = e_ews_folder_id_new ("sentitems", NULL, TRUE);
-
 	success = camel_ews_utils_create_mime_message (
-		cnc, "SendAndSaveCopy", fid, message, 0,
+		cnc, "SendOnly", NULL, message, 0,
 		from, NULL, NULL, cancellable, error);
 
-	e_ews_folder_id_free (fid);
 	g_object_unref (cnc);
 
 exit:
