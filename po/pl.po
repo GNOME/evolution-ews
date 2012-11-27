@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-09-02 22:53+0200\n"
-"PO-Revision-Date: 2012-09-02 22:54+0200\n"
+"POT-Creation-Date: 2012-11-27 16:40+0100\n"
+"PO-Revision-Date: 2012-11-27 16:42+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -23,46 +23,41 @@ msgstr ""
 "X-Poedit-Language: Polish\n"
 "X-Poedit-Country: Poland\n"
 
-#: ../src/addressbook/e-book-backend-ews.c:979
+#: ../src/addressbook/e-book-backend-ews.c:982
 msgid "The backend does not support bulk additions"
 msgstr "Mechanizm nie obsługuje dodawania całości"
 
-#: ../src/addressbook/e-book-backend-ews.c:1259
+#: ../src/addressbook/e-book-backend-ews.c:1266
 msgid "The backend does not support bulk modifications"
 msgstr "Mechanizm nie obsługuje modyfikacji całości"
 
-#: ../src/addressbook/e-book-backend-ews.c:1442
+#: ../src/addressbook/e-book-backend-ews.c:1449
 msgid "Wait till syncing is done"
 msgstr "Oczekiwanie na ukończenie synchronizacji"
 
-#: ../src/addressbook/e-book-backend-ews.c:1780
+#: ../src/addressbook/e-book-backend-ews.c:1787
 #, c-format
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr "Pobieranie kontaktów w %s %d%% ukończono... "
 
-#: ../src/addressbook/e-book-backend-ews.c:2296
+#: ../src/addressbook/e-book-backend-ews.c:2332
 msgid "Syncing contacts..."
 msgstr "Synchronizowanie kontaktów..."
 
-#: ../src/addressbook/e-book-backend-ews.c:2499
-#: ../src/configuration/e-ews-search-user.c:361
+#: ../src/addressbook/e-book-backend-ews.c:2550
+#: ../src/configuration/e-ews-search-user.c:364
 msgid "Searching..."
 msgstr "Wyszukiwanie..."
 
-#: ../src/addressbook/ews-book-backend-sqlitedb.c:478
-#, c-format
-msgid "Insufficient memory"
-msgstr "Brak pamięci"
-
-#: ../src/calendar/e-cal-backend-ews.c:1060
+#: ../src/calendar/e-cal-backend-ews.c:1022
 msgid "EWS does not support bulk removals"
 msgstr "EWS nie obsługuje usuwania całości"
 
-#: ../src/calendar/e-cal-backend-ews.c:1644
+#: ../src/calendar/e-cal-backend-ews.c:1607
 msgid "EWS does not support bulk additions"
 msgstr "EWS nie obsługuje dodawania całości"
 
-#: ../src/calendar/e-cal-backend-ews.c:2141
+#: ../src/calendar/e-cal-backend-ews.c:2109
 msgid "EWS does not support bulk modifications"
 msgstr "EWS nie obsługuje modyfikacji całości"
 
@@ -101,7 +96,7 @@ msgstr "Przeniesienie pliku bufora wiadomości się nie powiodło"
 msgid "Could not load summary for %s"
 msgstr "Nie można wczytać zestawienia dla %s"
 
-#: ../src/camel/camel-ews-folder.c:1527
+#: ../src/camel/camel-ews-folder.c:1576
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr "Nie można wykonać działań na katalogu w trybie offline"
@@ -178,31 +173,35 @@ msgstr ""
 "Ta opcja spowoduje połączenie z serwerem Exchange używając hasła tekstowego "
 "za pomocą uwierzytelniania podstawowego."
 
-#: ../src/camel/camel-ews-store.c:183
+#: ../src/camel/camel-ews-store.c:185
 #, c-format
 msgid "Session has no storage path"
 msgstr "Sesja nie powiada ścieżki do pamięci masowej"
 
-#: ../src/camel/camel-ews-store.c:281
+#: ../src/camel/camel-ews-store.c:283
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:525
+#: ../src/camel/camel-ews-store.c:571
+msgid "Updating foreign folder structure"
+msgstr "Aktualizowanie obcej struktury katalogów"
+
+#: ../src/camel/camel-ews-store.c:741
 msgid "Authentication password not available"
 msgstr "Hasło uwierzytelniania jest niedostępne"
 
-#: ../src/camel/camel-ews-store.c:640
+#: ../src/camel/camel-ews-store.c:885
 msgid "Query for authentication types is not supported"
 msgstr "Odpytywanie typu uwierzytelniania jest nieobsługiwane"
 
-#: ../src/camel/camel-ews-store.c:692
+#: ../src/camel/camel-ews-store.c:937
 #, c-format
 msgid "No such folder: %s"
 msgstr "Nie ma takiego katalogu: %s"
 
-#: ../src/camel/camel-ews-store.c:839
+#: ../src/camel/camel-ews-store.c:1084
 msgid ""
 "Cannot list folders available for subscription of Exchange Web Services "
 "account, use 'Subscribe to folder of other user' context menu option above "
@@ -213,17 +212,17 @@ msgstr ""
 "\"Subskrybuj katalog innego użytkownika\" powyżej węzła konta w drzewie "
 "katalogów."
 
-#: ../src/camel/camel-ews-store.c:932
+#: ../src/camel/camel-ews-store.c:1191
 #, c-format
 msgid "Cannot create folder '%s', folder already exists"
 msgstr "Nie można utworzyć katalogu \"%s\". Katalog już istnieje"
 
-#: ../src/camel/camel-ews-store.c:947
+#: ../src/camel/camel-ews-store.c:1206
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Katalog nadrzędny %s nie istnieje"
 
-#: ../src/camel/camel-ews-store.c:957
+#: ../src/camel/camel-ews-store.c:1216
 #, c-format
 msgid ""
 "Cannot create folder under '%s', it is used for folders of other users only"
@@ -231,67 +230,67 @@ msgstr ""
 "Nie można utworzyć katalogu w \"%s\", jest on używany tylko dla katalogów "
 "innych użytkowników"
 
-#: ../src/camel/camel-ews-store.c:1026
+#: ../src/camel/camel-ews-store.c:1285
 #, c-format
 msgid "Folder does not exist"
 msgstr "Katalog nie istnieje"
 
-#: ../src/camel/camel-ews-store.c:1035
+#: ../src/camel/camel-ews-store.c:1294
 #, c-format
 msgid "Cannot remove folder '%s', it is used for folders of other users only"
 msgstr ""
 "Nie można usunąć katalogu \"%s\", jest on używany tylko dla katalogów innych "
 "użytkowników"
 
-#: ../src/camel/camel-ews-store.c:1142
+#: ../src/camel/camel-ews-store.c:1401
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Katalog %s nie istnieje"
 
-#: ../src/camel/camel-ews-store.c:1152
+#: ../src/camel/camel-ews-store.c:1411
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Brak wpisu klucza zmiany dla katalogu %s"
 
-#: ../src/camel/camel-ews-store.c:1194
+#: ../src/camel/camel-ews-store.c:1453
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Nie można zmienić nazwy i przenieść katalogu w tym samym czasie"
 
-#: ../src/camel/camel-ews-store.c:1230
+#: ../src/camel/camel-ews-store.c:1489
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nie można odnaleźć identyfikatora katalogu dla katalogu nadrzędnego %s"
 
-#: ../src/camel/camel-ews-store.c:1280 ../src/camel/camel-ews-transport.c:69
+#: ../src/camel/camel-ews-store.c:1539 ../src/camel/camel-ews-transport.c:69
 #, c-format
 msgid "Exchange server %s"
 msgstr "Serwer Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:1283
+#: ../src/camel/camel-ews-store.c:1542
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Usługa Exchange dla %s na %s"
 
-#: ../src/camel/camel-ews-store.c:1327
+#: ../src/camel/camel-ews-store.c:1586
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Nie można ustalić położenia katalogu Kosz"
 
-#: ../src/camel/camel-ews-store.c:1362
+#: ../src/camel/camel-ews-store.c:1621
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Nie można ustalić położenia katalogu Niechciane"
 
-#: ../src/camel/camel-ews-store.c:1440
+#: ../src/camel/camel-ews-store.c:1699
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Nie można subskrybować katalogów EWS w trybie offline"
 
-#: ../src/camel/camel-ews-store.c:1462
+#: ../src/camel/camel-ews-store.c:1721
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Nie można usuwać subskrypcji katalogów EWS w trybie offline"
 
-#: ../src/camel/camel-ews-store.c:1503
+#: ../src/camel/camel-ews-store.c:1794
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Należy pracować w trybie online, aby ukończyć to działanie"
@@ -301,19 +300,19 @@ msgstr "Należy pracować w trybie online, aby ukończyć to działanie"
 msgid "Exchange mail delivery via %s"
 msgstr "Dostarczanie poczty Exchange przez %s"
 
-#: ../src/camel/camel-ews-transport.c:119
+#: ../src/camel/camel-ews-transport.c:120
 msgid "Cannot send message with no From address"
 msgstr "Nie można wysłać wiadomości bez adresata"
 
-#: ../src/camel/camel-ews-transport.c:125
+#: ../src/camel/camel-ews-transport.c:126
 msgid "Exchange server cannot send message with multiple From addresses"
 msgstr "Serwer Exchange nie może wysłać wiadomości z wieloma adresatami"
 
-#: ../src/camel/camel-ews-transport.c:136
+#: ../src/camel/camel-ews-transport.c:137
 msgid "Failed to read From address"
 msgstr "Odczytanie adresata się nie powiodło"
 
-#: ../src/camel/camel-ews-transport.c:148
+#: ../src/camel/camel-ews-transport.c:149
 #, c-format
 msgid ""
 "Exchange server cannot send message as '%s', when the account was configured "
@@ -322,68 +321,68 @@ msgstr ""
 "Serwer Exchange nie może wysłać wiadomości jako \"%s\", podczas gdy konto "
 "zostało skonfigurowane dla adresu \"%s\""
 
-#: ../src/camel/camel-ews-transport.c:162
+#: ../src/camel/camel-ews-transport.c:163
 #, c-format
 msgid "Service not connected"
 msgstr "Usługa nie jest połączona"
 
-#: ../src/collection/e-ews-backend.c:382
-#: ../src/configuration/e-mail-config-ews-gal.c:268
+#: ../src/collection/e-ews-backend.c:391
+#: ../src/configuration/e-mail-config-ews-gal.c:274
 msgid "Global Address List"
 msgstr "Ogólna lista adresowa"
 
-#: ../src/collection/e-ews-backend.c:767
+#: ../src/collection/e-ews-backend.c:776
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named '%s'"
 msgstr ""
 "Nie można ustalić odpowiedniej klasy katalogów dla nowego katalogu o nazwie "
 "\"%s\""
 
-#: ../src/collection/e-ews-backend.c:858
+#: ../src/collection/e-ews-backend.c:867
 #, c-format
 msgid "Data source '%s' does not represent an Exchange Web Services folder"
 msgstr "Źródło danych \"%s\" nie przedstawia katalog Exchange Web Services"
 
-#: ../src/configuration/e-ews-config-utils.c:510
+#: ../src/configuration/e-ews-config-utils.c:515
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr ""
 "Nie można modyfikować uprawnień katalogu \"%s\". Proszę wybrać inny katalog."
 
-#: ../src/configuration/e-ews-config-utils.c:588
+#: ../src/configuration/e-ews-config-utils.c:593
 msgid "Subscribe to folder of other user..."
 msgstr "Subskrybuj katalog innego użytkownika..."
 
-#: ../src/configuration/e-ews-config-utils.c:597
-#: ../src/configuration/e-ews-config-utils.c:880
-#: ../src/configuration/e-ews-config-utils.c:911
-#: ../src/configuration/e-ews-config-utils.c:942
-#: ../src/configuration/e-ews-config-utils.c:973
+#: ../src/configuration/e-ews-config-utils.c:602
+#: ../src/configuration/e-ews-config-utils.c:883
+#: ../src/configuration/e-ews-config-utils.c:914
+#: ../src/configuration/e-ews-config-utils.c:945
+#: ../src/configuration/e-ews-config-utils.c:976
 msgid "Permissions..."
 msgstr "Uprawnienia..."
 
-#: ../src/configuration/e-ews-config-utils.c:599
+#: ../src/configuration/e-ews-config-utils.c:604
 msgid "Edit EWS folder permissions"
 msgstr "Modyfikuj uprawnienia katalogu EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:882
+#: ../src/configuration/e-ews-config-utils.c:885
 msgid "Edit EWS calendar permissions"
 msgstr "Modyfikuj uprawnienia kalendarza EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:913
+#: ../src/configuration/e-ews-config-utils.c:916
 msgid "Edit EWS tasks permissions"
 msgstr "Modyfikuj uprawnienia zadań EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:944
+#: ../src/configuration/e-ews-config-utils.c:947
 msgid "Edit EWS memos permissions"
 msgstr "Modyfikuj uprawnienia notatek EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:975
+#: ../src/configuration/e-ews-config-utils.c:978
 msgid "Edit EWS contacts permissions"
 msgstr "Modyfikuj uprawnienia kontaktów EWS"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:87
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:502
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:504
 msgctxt "PermissionsLevel"
 msgid "None"
 msgstr "Brak"
@@ -439,7 +438,7 @@ msgid "Free/Busy time, subject, location"
 msgstr "Informacje o zajętości, temat, położenie"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:143
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:523
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:525
 msgctxt "PermissionsLevel"
 msgid "Custom"
 msgstr "Własny"
@@ -464,8 +463,8 @@ msgid "Unknown"
 msgstr "Nieznany"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:849
-#: ../src/configuration/e-ews-search-user.c:427
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1078
+#: ../src/configuration/e-ews-search-user.c:430
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1080
 msgid "Name"
 msgstr "Nazwa"
 
@@ -478,7 +477,7 @@ msgid "Edit EWS folder permissions..."
 msgstr "Modyfikuj uprawnienia katalogów EWS..."
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:932
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:621
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:635
 msgid "Account:"
 msgstr "Konto:"
 
@@ -619,25 +618,25 @@ msgstr[1] ""
 msgstr[2] ""
 "Odnaleziono więcej niż 100 użytkowników, ale wyświetlanie tylko pierwszych %d"
 
-#: ../src/configuration/e-ews-search-user.c:353
-#: ../src/configuration/e-ews-search-user.c:536
+#: ../src/configuration/e-ews-search-user.c:356
+#: ../src/configuration/e-ews-search-user.c:539
 msgid "Search for a user"
 msgstr "Wyszukiwanie użytkownika"
 
-#: ../src/configuration/e-ews-search-user.c:433
+#: ../src/configuration/e-ews-search-user.c:436
 msgid "E-mail"
 msgstr "E-mail"
 
-#: ../src/configuration/e-ews-search-user.c:470
+#: ../src/configuration/e-ews-search-user.c:473
 msgid "Choose EWS user..."
 msgstr "Wybierz użytkownika EWS..."
 
-#: ../src/configuration/e-ews-search-user.c:493
+#: ../src/configuration/e-ews-search-user.c:496
 msgid "_Search:"
 msgstr "Wy_szukiwanie:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:96
-#: ../src/server/e-ews-folder.c:584
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:98
+#: ../src/server/e-ews-folder.c:600
 #, c-format
 msgid "Cannot add folder, folder already exists as '%s'"
 msgstr "Nie można dodać katalogu. Katalog już istnieje jako \"%s\""
@@ -645,28 +644,28 @@ msgstr "Nie można dodać katalogu. Katalog już istnieje jako \"%s\""
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
 #. * Example result: "Mailbox - John Smith"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:106
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:108
 #, c-format
 msgctxt "ForeignFolder"
 msgid "Mailbox - %s"
 msgstr "Skrzynka pocztowa - %s"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:264
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:273
 msgid "Cannot test foreign folder availability while in offline mode"
 msgstr "Nie można wykonać testu dostępności obcego katalogu w trybie offline"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:289
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:298
 #, c-format
 msgid "User '%s' was not found on the server"
 msgstr "Nie odnaleziono użytkownika \"%s\" na serwerze"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:325
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:334
 #, c-format
 msgid "User name '%s' is ambiguous, specify it more precisely, please"
 msgstr ""
 "Nazwa użytkownika \"%s\" jest niejednoznaczna. Proszę określić ją dokładniej"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:347
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:356
 #, c-format
 msgid ""
 "Folder '%s' not found. Either it does not exist or you do not have "
@@ -675,7 +674,7 @@ msgstr ""
 "Nie odnaleziono katalogu \"%s\". Nie istnieje lub brak uprawnień do jego "
 "dostępu."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:365
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:374
 msgid "Cannot add folder, cannot determine folder's type"
 msgstr "Nie można dodać katalogu, nie można ustalić jego typu"
 
@@ -684,177 +683,172 @@ msgstr "Nie można dodać katalogu, nie można ustalić jego typu"
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith - Calendar"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:410
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:419
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s - %s"
 msgstr "%s - %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:500
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:706
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:513
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:720
 msgid "Inbox"
 msgstr "Odebrane"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:502
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:707
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:515
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
 msgid "Contacts"
 msgstr "Kontakty"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:504
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:708
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:517
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:722
 msgid "Calendar"
 msgstr "Kalendarz"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:506
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:709
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:519
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:723
 msgid "Memos"
 msgstr "Notatki"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:508
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:710
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:521
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:724
 msgid "Tasks"
 msgstr "Zadania"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:524
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:538
 #, c-format
 msgid "Testing availability of folder '%s' of user '%s', please wait..."
 msgstr ""
 "Testowanie dostępności katalogu \"%s\" użytkownika \"%s\", proszę czekać..."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:600
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:614
 msgid "Subscribe to folder of other EWS user..."
 msgstr "Subskrybuj katalog innego użytkownika EWS..."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:651
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:665
 msgid "User"
 msgstr "Użytkownik"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:658
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:672
 msgid "_User:"
 msgstr "_Użytkownik"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:673
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:687
 msgid "C_hoose..."
 msgstr "_Wybierz..."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:689
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:703
 msgid "_Folder name:"
 msgstr "Nazwa _katalogu:"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:126
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:733
+msgid "Include _subfolders"
+msgstr "Dołączenie po_dkatalogów"
+
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:129
 msgid "Querying Autodiscover service"
 msgstr "Odpytywanie usługi automatycznego wykrywania"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:209
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:212
 msgid "Fetch _URL"
 msgstr "Pobierz adres _URL"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:109
+#: ../src/configuration/e-mail-config-ews-backend.c:140
 msgid "Configuration"
 msgstr "Konfiguracja"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:127
+#: ../src/configuration/e-mail-config-ews-backend.c:158
 msgid "User_name:"
 msgstr "_Nazwa użytkownika:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:141
+#: ../src/configuration/e-mail-config-ews-backend.c:172
 msgid "_Host URL:"
 msgstr "Adres URL _komputera:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:160
+#: ../src/configuration/e-mail-config-ews-backend.c:191
 msgid "OAB U_RL:"
 msgstr "Adres U_RL OAB:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:174
+#: ../src/configuration/e-mail-config-ews-backend.c:205
+msgid "Open _Mailbox of other user"
+msgstr "Otwórz _skrzynkę pocztową innego użytkownika"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:239
+msgid "S_earch..."
+msgstr "Wysz_ukiwanie..."
+
+#: ../src/configuration/e-mail-config-ews-backend.c:250
 msgid "Authentication"
 msgstr "Uwierzytelnianie"
 
-#: ../src/configuration/e-mail-config-ews-gal.c:215
-msgid "Locating offline address books"
-msgstr "Ustalanie położenia książek adresowych w trybie offline"
-
-#: ../src/configuration/e-mail-config-ews-gal.c:295
-msgid "Cache o_ffline address book"
-msgstr ""
-"_Przechowywanie książki adresowej w buforze podczas pracy w trybie offline"
-
-#: ../src/configuration/e-mail-config-ews-gal.c:321
-msgid "Select ad_dress list:"
-msgstr "Wybór listy a_dresów:"
-
-#: ../src/configuration/e-mail-config-ews-gal.c:345
-msgid "Fetch List"
-msgstr "Pobierz listę"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:503
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:505
 msgctxt "PermissionsLevel"
 msgid "Reviewer (can read items)"
 msgstr "Recenzent (może odczytywać elementy)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:504
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:506
 msgctxt "PermissionsLevel"
 msgid "Author (can read and create items)"
 msgstr "Autor (może odczytywać i tworzyć elementy)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:505
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:507
 msgctxt "PermissionsLevel"
 msgid "Editor (can read, create and modify items)"
 msgstr "Redaktor (może odczytywać, tworzyć i modyfikować elementy)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:608
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:610
 msgid "Delegate permissions"
 msgstr "Delegowanie uprawnień"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:626
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:628
 msgid "C_alendar"
 msgstr "K_alendarz"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:629
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:631
 msgid "_Delegate receives copies of meeting-related messages sent to me"
 msgstr ""
 "_Delegat otrzymuje kopie wiadomości związanych ze spotkaniami wysłanych do "
 "mnie"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:634
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:636
 msgid "_Tasks"
 msgstr "_Zadania"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:637
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:639
 msgid "_Inbox"
 msgstr "_Odebrane"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:640
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:642
 msgid "C_ontacts"
 msgstr "K_ontakty"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:643
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:645
 msgid "_Notes"
 msgstr "_Notatki"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:646
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:648
 msgid "_Journal"
 msgstr "_Dziennik"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:649
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:651
 #, c-format
 msgid "Delegate '%s' has the following permissions"
 msgstr "Delegat \"%s\" posiada poniższe uprawnienia"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:667
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:669
 msgid "Delegate can see my _private items"
 msgstr "Delegat może wyświetlać prywatne _elementy"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:990
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:992
 msgid "Retrieving current user permissions, please wait..."
 msgstr "Pobieranie obecnych uprawnień użytkowników, proszę czekać..."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1111
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1641
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1113
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1643
 msgid "Delegates"
 msgstr "Delegaci"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1135
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1137
 msgid ""
 "Delegates can send items on your behalf, including creating and responding "
 "to meeting requests. If you want to grant folder permissions without giving "
@@ -867,7 +861,7 @@ msgstr ""
 "prawym przyciskiem myszy na katalogu, kliknąć Uprawnienia i w tym miejscu "
 "zmienić opcje."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1184
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1186
 msgid ""
 "Deliver meeting requests addressed to me and responses to meeting requests "
 "where I am the organizer to:"
@@ -876,7 +870,7 @@ msgstr ""
 "których jestem organizatorem do:"
 
 #. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1193
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1195
 msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
@@ -884,24 +878,41 @@ msgstr ""
 "Tylko moich delegatów, ale wy_syłanie kopii prośby o\n"
 "spotkanie i odpowiedzi do mnie (zalecane)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1200
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1202
 msgid "My d_elegates only"
 msgstr "Tylko moich d_elegatów"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1207
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1209
 msgid "My delegates a_nd me"
 msgstr "_Moich delegatów i mnie"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1716
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1718
 msgid "Retrieving \"Delegates\" settings"
 msgstr "Pobieranie ustawień delegatów"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:446
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:925
+#: ../src/configuration/e-mail-config-ews-gal.c:221
+msgid "Locating offline address books"
+msgstr "Ustalanie położenia książek adresowych w trybie offline"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:301
+msgid "Cache o_ffline address book"
+msgstr ""
+"_Przechowywanie książki adresowej w buforze podczas pracy w trybie offline"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:327
+msgid "Select ad_dress list:"
+msgstr "Wybór listy a_dresów:"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:351
+msgid "Fetch List"
+msgstr "Pobierz listę"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:449
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:928
 msgid "Out of Office"
 msgstr "Poza biurem"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:462
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:465
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
@@ -909,56 +920,56 @@ msgstr ""
 "Wiadomość wprowadzona poniżej będzie automatycznie wysyłana do każdej osoby, "
 "która przyśle wiadomość podczas nieobecności użytkownika w biurze."
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:470
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:473
 msgid "Do _not send Out of Office replies"
 msgstr "_Bez wysyłania odpowiedzi podczas obecności poza biurem"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:478
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:481
 msgid "_Send Out of Office replies"
 msgstr "Wy_syłanie odpowiedzi podczas obecności poza biurem"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:486
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:489
 msgid "Send Out of Office replies only _during this time period:"
 msgstr ""
 "Wysyłanie odpowiedzi podczas _obecności poza biurem tylko w tym czasie:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:506
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:509
 msgid "_From:"
 msgstr "_Od:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:531
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:534
 msgid "_To:"
 msgstr "_Do:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:556
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:559
 msgid "I_nternal:"
 msgstr "W_ewnętrzna:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:565
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:568
 msgid "Message to be sent within the organization"
 msgstr "Wiadomość wysyłana wewnątrz organizacji"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:592
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:595
 msgid "E_xternal:"
 msgstr "_Zewnętrzna:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:600
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:603
 msgid "Message to be sent outside the organization"
 msgstr "Wiadomość wysyłana poza organizację"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:610
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:613
 msgid "Do not reply to senders outside the organization"
 msgstr "Bez odpowiadania nadawcom spoza organizacji"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:613
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:616
 msgid "Reply only to known senders outside the organization"
 msgstr "Odpowiadanie tylko znanym nadawcom spoza organizacji"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:616
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:619
 msgid "Reply to any sender outside the organization"
 msgstr "Odpowiadanie wszystkim nadawcom spoza organizacji"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:1001
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:1004
 msgid "Retrieving \"Out of Office\" settings"
 msgstr "Pobieranie ustawień obecności poza biurem..."
 
@@ -983,81 +994,81 @@ msgstr "Pobrać ustawień obecności poza biurem się nie powiodło."
 msgid "Failed to retrieve &quot;Delegates&quot; settings."
 msgstr "Pobranie ustawień delegatów się nie powiodło."
 
-#: ../src/server/e-ews-connection.c:488
+#: ../src/server/e-ews-connection.c:493
 msgid "Operation Cancelled"
 msgstr "Anulowano działanie"
 
-#: ../src/server/e-ews-connection.c:557
+#: ../src/server/e-ews-connection.c:562
 msgid "Authentication failed"
 msgstr "Uwierzytelnienie się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:568
+#: ../src/server/e-ews-connection.c:573
 #, c-format
 msgid "No response: %s"
 msgstr "Brak odpowiedzi: %s"
 
-#: ../src/server/e-ews-connection.c:1852
+#: ../src/server/e-ews-connection.c:1877
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr ""
 "Przetworzenie XML odpowiedzi automatycznego wykrywania się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:1859
+#: ../src/server/e-ews-connection.c:1884
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Odnalezienie elementu <Autodiscover> się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:1870
+#: ../src/server/e-ews-connection.c:1895
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Odnalezienie elementu <Response> się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:1881
+#: ../src/server/e-ews-connection.c:1906
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Odnalezienie elementu <Account> się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:1900
+#: ../src/server/e-ews-connection.c:1925
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
 "Odnalezienie elementów <ASUrl> i <OABUrl> w odpowiedzi automatycznego "
 "wykrywania się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:1980
+#: ../src/server/e-ews-connection.c:2007
 msgid "URL cannot be NULL"
 msgstr "Adres URL nie może wynosić NULL"
 
-#: ../src/server/e-ews-connection.c:1987
+#: ../src/server/e-ews-connection.c:2015
 #, c-format
 msgid "URL '%s' is not valid"
 msgstr "Adres URL \"%s\" nie jest prawidłowy"
 
-#: ../src/server/e-ews-connection.c:2089
+#: ../src/server/e-ews-connection.c:2117
 msgid "Email address is missing a domain part"
 msgstr "W adresie e-mail brakuje części domeny"
 
-#: ../src/server/e-ews-connection.c:2359
+#: ../src/server/e-ews-connection.c:2429
 msgid "Failed to parse oab XML"
 msgstr "Przetworzenie XML oab się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:2367
+#: ../src/server/e-ews-connection.c:2437
 msgid "Failed to find <OAB> element\n"
 msgstr "Odnalezienie elementu <OAB> się nie powiodło\n"
 
-#: ../src/server/e-ews-connection.c:3498
+#: ../src/server/e-ews-connection.c:3594
 msgid "No items found"
 msgstr "Nie odnaleziono elementów"
 
-#: ../src/server/e-ews-folder.c:539
+#: ../src/server/e-ews-folder.c:554
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Nie można dodać katalogu. Nieobsługiwany typ katalogu"
 
-#: ../src/server/e-ews-folder.c:544
+#: ../src/server/e-ews-folder.c:559
 msgid "Cannot add folder, master source not found"
 msgstr "Nie można dodać katalogu. Nie odnaleziono głównego źródła"
 
-#: ../src/utils/ews-camel-common.c:175
+#: ../src/utils/ews-camel-common.c:176
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr ""
