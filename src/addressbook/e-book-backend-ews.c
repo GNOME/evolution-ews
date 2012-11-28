@@ -218,19 +218,6 @@ ews_remove_attachments (const gchar *attachment_dir)
 	return TRUE;
 }
 
-static gboolean
-book_view_notify_status (EDataBookView *view,
-                         gpointer user_data)
-{
-	const gchar *status = (const gchar *) user_data;
-
-	if (!view)
-		return TRUE;
-	e_data_book_view_notify_progress (view, -1, status);
-
-	return TRUE;
-}
-
 static const struct phone_field_mapping {
 	EContactField field;
 	const gchar *element;
@@ -1780,12 +1767,16 @@ ews_gal_store_contact (EContact *contact,
 
 	if (data->collected_length == 1000 || percent >= 100) {
 		GSList *l;
+		GList *list, *link;
 		gchar *status_message = NULL;
 
 		d (g_print ("GAL adding contacts, percent complete : %d \n", percent);)
 
 		status_message = g_strdup_printf (_("Downloading contacts in %s %d%% completed... "), priv->folder_name, percent);
-		e_book_backend_foreach_view (E_BOOK_BACKEND (data->cbews), book_view_notify_status, status_message);
+		list = e_book_backend_list_views (E_BOOK_BACKEND (data->cbews));
+		for (link = list; link != NULL; link = g_list_next (link))
+			e_data_book_view_notify_progress (E_DATA_BOOK_VIEW (link->data), -1, status_message);
+		g_list_free_full (list, (GDestroyNotify) g_object_unref);
 		g_free (status_message);
 
 		data->contact_collector = g_slist_reverse (data->contact_collector);
@@ -2316,6 +2307,7 @@ ebews_start_sync (gpointer data)
 {
 	EBookBackendEws *ebews;
 	EBookBackendEwsPrivate *priv;
+	GList *list, *link;
 	gchar *sync_state, *status_message = NULL;
 	gboolean includes_last_item;
 	GError *error = NULL;
@@ -2330,7 +2322,10 @@ ebews_start_sync (gpointer data)
 		return TRUE;
 
 	status_message = g_strdup (_("Syncing contacts..."));
-	e_book_backend_foreach_view (E_BOOK_BACKEND (ebews), book_view_notify_status, status_message);
+	list = e_book_backend_list_views (E_BOOK_BACKEND (ebews));
+	for (link = list; link != NULL; link = g_list_next (link))
+		e_data_book_view_notify_progress (E_DATA_BOOK_VIEW (link->data), -1, status_message);
+	g_list_free_full (list, (GDestroyNotify) g_object_unref);
 	g_free (status_message);
 
 	sync_state = e_book_backend_sqlitedb_get_sync_data (priv->summary, priv->folder_id, NULL);
@@ -2396,7 +2391,10 @@ ebews_start_sync (gpointer data)
 	g_free (sync_state);
 
 	/* hide progress message when done */
-	e_book_backend_foreach_view (E_BOOK_BACKEND (ebews), book_view_notify_status, NULL);
+	list = e_book_backend_list_views (E_BOOK_BACKEND (ebews));
+	for (link = list; link != NULL; link = g_list_next (link))
+		e_data_book_view_notify_progress (E_DATA_BOOK_VIEW (link->data), -1, NULL);
+	g_list_free_full (list, (GDestroyNotify) g_object_unref);
 
 	if (error) {
 		g_warning ("Error Syncing Contacts: Folder %s Error: %s", priv->folder_id, error->message);

@@ -117,7 +117,7 @@ fi
 AC_MSG_RESULT([$enable_strict])
 
 if test "x$enable_strict" = xyes; then
-	CFLAGS="$CFLAGS -DG_DISABLE_DEPRECATED -DE_BOOK_DISABLE_DEPRECATED -DE_CAL_DISABLE_DEPRECATED"
+	CFLAGS="$CFLAGS -DG_DISABLE_DEPRECATED -DEDS_DISABLE_DEPRECATED"
 fi
 
 dnl Warn about GLib/GTK+ API usage that violates our minimum requirements.
