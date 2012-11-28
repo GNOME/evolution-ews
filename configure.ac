@@ -20,8 +20,8 @@ m4_define([eds_minimum_version], [3.2.0])
 m4_define([evo_minimum_version], [3.2.0])
 
 dnl Keep these two definitions in agreement.
-m4_define([glib_minimum_version], [2.28])
-m4_define([glib_encoded_version], [GLIB_VERSION_2_28])
+m4_define([glib_minimum_version], [2.32])
+m4_define([glib_encoded_version], [GLIB_VERSION_2_32])
 
 dnl Keep these two definitions in agreement.
 m4_define([gdk_minimum_version], [3.0])
