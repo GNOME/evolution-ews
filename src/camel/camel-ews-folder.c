@@ -571,6 +571,38 @@ exit:
 	return message;
 }
 
+static void
+ews_folder_maybe_update_mlist (CamelFolder *folder,
+			       const gchar *uid,
+			       CamelMimeMessage *message)
+{
+	CamelEwsMessageInfo *mi;
+
+	g_return_if_fail (CAMEL_IS_FOLDER (folder));
+	g_return_if_fail (uid != NULL);
+	g_return_if_fail (message != NULL);
+
+	mi = (CamelEwsMessageInfo *) camel_folder_summary_get (folder->summary, uid);
+	if (!mi)
+		return;
+
+	if (!mi->info.mlist || !*mi->info.mlist) {
+		/* update mailing list information, if necessary */
+		gchar *mlist = camel_header_raw_check_mailing_list (&(CAMEL_MIME_PART (message)->headers));
+
+		if (mlist) {
+			if (mi->info.mlist)
+				camel_pstring_free (mi->info.mlist);
+			mi->info.mlist = camel_pstring_add (mlist, TRUE);
+			mi->info.dirty = TRUE;
+
+			camel_folder_summary_touch (folder->summary);
+		}
+	}
+
+	camel_message_info_free ((CamelMessageInfo *) mi);
+}
+
 /* Get the message from cache if available otherwise get it from server */
 static CamelMimeMessage *
 ews_folder_get_message_sync (CamelFolder *folder,
@@ -581,8 +613,10 @@ ews_folder_get_message_sync (CamelFolder *folder,
 	CamelMimeMessage *message;
 
 	message = camel_ews_folder_get_message_from_cache ((CamelEwsFolder *) folder, uid, cancellable, NULL);
-	if (!message)
+	if (!message) {
 		message = camel_ews_folder_get_message (folder, uid, EWS_ITEM_HIGH, cancellable, error);
+		ews_folder_maybe_update_mlist (folder, uid, message);
+	}
 
 	return message;
 }
