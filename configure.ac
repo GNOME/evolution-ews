@@ -18,8 +18,15 @@ dnl Required Packages
 dnl *******************
 m4_define([eds_minimum_version], [3.2.0])
 m4_define([evo_minimum_version], [3.2.0])
+
+dnl Keep these two definitions in agreement.
 m4_define([glib_minimum_version], [2.28])
-m4_define([gtk_minimum_version], [3.0])
+m4_define([glib_encoded_version], [GLIB_VERSION_2_28])
+
+dnl Keep these two definitions in agreement.
+m4_define([gdk_minimum_version], [3.0])
+m4_define([gdk_encoded_version], [GDK_VERSION_3_0])
+
 m4_define([libsoup_minimum_version], [2.30])
 
 
@@ -69,10 +76,10 @@ dnl Compiler Warning Flags
 dnl ***********************
 AS_COMPILER_FLAGS(WARNING_FLAGS,
 	"-Wall -Wextra
+	-Wdeprecated-declarations
 	-Wno-missing-field-initializers
 	-Wno-sign-compare
 	-Wno-unused-parameter
-	-Wno-deprecated-declarations
 	-Wdeclaration-after-statement
 	-Werror-implicit-function-declaration
 	-Wformat-nonliteral -Wformat-security -Winit-self
@@ -113,6 +120,17 @@ if test "x$enable_strict" = xyes; then
 	CFLAGS="$CFLAGS -DG_DISABLE_DEPRECATED -DE_BOOK_DISABLE_DEPRECATED -DE_CAL_DISABLE_DEPRECATED"
 fi
 
+dnl Warn about GLib/GTK+ API usage that violates our minimum requirements.
+CFLAGS="$CFLAGS -DGLIB_VERSION_MAX_ALLOWED=glib_encoded_version"
+CFLAGS="$CFLAGS -DGDK_VERSION_MAX_ALLOWED=gdk_encoded_version"
+
+dnl These will suppress warnings about newly-deprecated symbols.  Ideally
+dnl these settings should match our minimum requirements and we will clean
+dnl up any new deprecation warnings after bumping our minimum requirements.
+dnl But if the warnings get to be overwhelming, use fixed versions instead.
+CFLAGS="$CFLAGS -DGLIB_VERSION_MIN_REQUIRED=glib_encoded_version"
+CFLAGS="$CFLAGS -DGDK_VERSION_MIN_REQUIRED=gdk_encoded_version"
+
 dnl ************
 dnl i18n stuff
 dnl ************
@@ -146,7 +164,7 @@ dnl Check for GNOME Platform
 dnl *****************************
 PKG_CHECK_MODULES(GNOME_PLATFORM,
 	[glib-2.0 >= glib_minimum_version
-	 gtk+-3.0 >= gtk_minimum_version])
+	 gtk+-3.0 >= gdk_minimum_version])
 
 PKG_CHECK_MODULES(SOUP, libsoup-2.4 >= libsoup_minimum_version)
 AC_SUBST(SOUP_CFLAGS)
