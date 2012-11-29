@@ -1075,6 +1075,28 @@ add_attendees_list_to_message (ESoapMessage *msg,
 }
 
 static void
+convert_sensitivity_calcomp_to_xml (ESoapMessage *msg,
+				    icalcomponent *icalcomp)
+{
+	icalproperty *prop;
+
+	g_return_if_fail (msg != NULL);
+	g_return_if_fail (icalcomp != NULL);
+
+	prop = icalcomponent_get_first_property (icalcomp, ICAL_CLASS_PROPERTY);
+	if (prop) {
+		icalproperty_class classify = icalproperty_get_class (prop);
+		if (classify == ICAL_CLASS_PUBLIC) {
+			e_ews_message_write_string_parameter (msg, "Sensitivity", NULL, "Normal");
+		} else if (classify == ICAL_CLASS_PRIVATE) {
+			e_ews_message_write_string_parameter (msg, "Sensitivity", NULL, "Private");
+		} else if (classify == ICAL_CLASS_CONFIDENTIAL) {
+			e_ews_message_write_string_parameter (msg, "Sensitivity", NULL, "Personal");
+		}
+	}
+}
+
+static void
 convert_vevent_calcomp_to_xml (ESoapMessage *msg,
                                gpointer user_data)
 {
@@ -1098,6 +1120,8 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	value = icalcomponent_get_summary (icalcomp);
 	if (value)
 		e_ews_message_write_string_parameter (msg, "Subject", NULL, value);
+
+	convert_sensitivity_calcomp_to_xml (msg, icalcomp);
 
 	/* description */
 	value = icalcomponent_get_description (icalcomp);
@@ -1186,6 +1210,8 @@ convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
 
 	e_ews_message_write_string_parameter (msg, "Subject", NULL, icalcomponent_get_summary (icalcomp));
 
+	convert_sensitivity_calcomp_to_xml (msg, icalcomp);
+
 	e_ews_message_write_string_parameter_with_attribute (msg, "Body", NULL, icalcomponent_get_description (icalcomp), "BodyType", "Text");
 
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_DUE_PROPERTY);
@@ -1225,6 +1251,29 @@ convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
 }
 
 static void
+convert_vjournal_calcomp_to_xml (ESoapMessage *msg,
+				 gpointer user_data)
+{
+	EwsConvertData *convert_data = user_data;
+	icalcomponent *icalcomp = convert_data->icalcomp;
+	const gchar *text;
+
+	e_soap_message_start_element (msg, "Message", NULL, NULL);
+	e_ews_message_write_string_parameter (msg, "ItemClass", NULL, "IPM.StickyNote");
+
+	e_ews_message_write_string_parameter (msg, "Subject", NULL, icalcomponent_get_summary (icalcomp));
+
+	convert_sensitivity_calcomp_to_xml (msg, icalcomp);
+
+	text = icalcomponent_get_description (icalcomp);
+	if (!text || !*text)
+		text = icalcomponent_get_summary (icalcomp);
+	e_ews_message_write_string_parameter_with_attribute (msg, "Body", NULL, text, "BodyType", "Text");
+
+	e_soap_message_end_element (msg); /* Message */
+}
+
+static void
 convert_calcomp_to_xml (ESoapMessage *msg,
                         gpointer user_data)
 {
@@ -1237,7 +1286,11 @@ convert_calcomp_to_xml (ESoapMessage *msg,
 	case ICAL_VTODO_COMPONENT:
 		convert_vtodo_calcomp_to_xml (msg, user_data);
 		break;
+	case ICAL_VJOURNAL_COMPONENT:
+		convert_vjournal_calcomp_to_xml (msg, user_data);
+		break;
 	default:
+		g_warn_if_reached ();
 		break;
 	}
 
@@ -1348,7 +1401,9 @@ ews_create_attachments_cb (GObject *object,
 		}
 	} else if (create_data->cb_type == 2) {
 		const gchar *send_meeting_invitations;
+		const gchar *send_or_save;
 		EwsModifyData * modify_data;
+
 		modify_data = g_new0 (EwsModifyData, 1);
 		modify_data->cbews = g_object_ref (create_data->cbews);
 		modify_data->comp = create_data->comp;
@@ -1358,16 +1413,19 @@ ews_create_attachments_cb (GObject *object,
 		modify_data->itemid = create_data->itemid;
 		modify_data->changekey = change_key;
 
-		if (e_cal_component_has_attendees (create_data->comp))
+		if (e_cal_component_has_attendees (create_data->comp)) {
 			send_meeting_invitations = "SendToAllAndSaveCopy";
-		else
+			send_or_save = "SendAndSaveCopy";
+		} else {
 			/*In case of appointment we have to set SendMeetingInvites to SendToNone */
 			send_meeting_invitations = "SendToNone";
+			send_or_save = "SaveOnly";
+		}
 
 		e_ews_connection_update_items (
 			priv->cnc, EWS_PRIORITY_MEDIUM,
 			"AlwaysOverwrite",
-			"SendAndSaveCopy",
+			send_or_save,
 			send_meeting_invitations,
 			priv->folder_id,
 			convert_component_to_updatexml,
@@ -1419,7 +1477,7 @@ ews_create_object_cb (GObject *object,
 	item_id = e_ews_item_get_id (item);
 	g_slist_free (ids);
 
-	if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_CALENDAR_ITEM) {
+	if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_EVENT) {
 
 		items = g_slist_append (items, item_id->id);
 
@@ -1429,7 +1487,7 @@ ews_create_object_cb (GObject *object,
 			items,
 			"IdOnly",
 			"calendar:UID",
-			FALSE, NULL,
+			FALSE, NULL, E_EWS_BODY_TYPE_TEXT,
 			&items_req,
 			NULL, NULL, priv->cancellable, &error);
 		if (!res && error != NULL) {
@@ -1483,7 +1541,7 @@ ews_create_object_cb (GObject *object,
 	e_cal_backend_store_freeze_changes (priv->store);
 
 	/* set a new ical property containing the change key we got from the exchange server for future use */
-	if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_CALENDAR_ITEM)
+	if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_EVENT)
 		e_cal_component_set_uid (create_data->comp, e_ews_item_get_uid (item));
 	else
 		e_cal_component_set_uid (create_data->comp, item_id->id);
@@ -1844,6 +1902,18 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 	} else if (!value && old_value)
 		convert_vevent_property_to_updatexml (msg, "Subject", "", "item", NULL, NULL);
 
+	prop = icalcomponent_get_first_property (icalcomp, ICAL_CLASS_PROPERTY);
+	if (prop) {
+		icalproperty_class classify = icalproperty_get_class (prop);
+		if (classify == ICAL_CLASS_PUBLIC) {
+			convert_vevent_property_to_updatexml (msg, "Sensitivity", "Normal", "item", NULL, NULL);
+		} else if (classify == ICAL_CLASS_PRIVATE) {
+			convert_vevent_property_to_updatexml (msg, "Sensitivity", "Private", "item", NULL, NULL);
+		} else if (classify == ICAL_CLASS_CONFIDENTIAL) {
+			convert_vevent_property_to_updatexml (msg, "Sensitivity", "Personal", "item", NULL, NULL);
+		}
+	}
+
 	/*description*/
 	value = icalcomponent_get_description (icalcomp);
 	old_value = icalcomponent_get_description (icalcomp_old);
@@ -2015,6 +2085,18 @@ convert_vtodo_component_to_updatexml (ESoapMessage *msg,
 
 	convert_vtodo_property_to_updatexml (msg, "Subject", icalcomponent_get_summary (icalcomp), "item", NULL, NULL);
 
+	prop = icalcomponent_get_first_property (icalcomp, ICAL_CLASS_PROPERTY);
+	if (prop) {
+		icalproperty_class classify = icalproperty_get_class (prop);
+		if (classify == ICAL_CLASS_PUBLIC) {
+			convert_vtodo_property_to_updatexml (msg, "Sensitivity", "Normal", "item", NULL, NULL);
+		} else if (classify == ICAL_CLASS_PRIVATE) {
+			convert_vtodo_property_to_updatexml (msg, "Sensitivity", "Private", "item", NULL, NULL);
+		} else if (classify == ICAL_CLASS_CONFIDENTIAL) {
+			convert_vtodo_property_to_updatexml (msg, "Sensitivity", "Personal", "item", NULL, NULL);
+		}
+	}
+
 	convert_vtodo_property_to_updatexml (msg, "Body", icalcomponent_get_description (icalcomp), "item", "BodyType", "Text");
 
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_DUE_PROPERTY);
@@ -2068,6 +2150,56 @@ convert_vtodo_component_to_updatexml (ESoapMessage *msg,
 }
 
 static void
+convert_vjournal_property_to_updatexml (ESoapMessage *msg,
+                                     const gchar *name,
+                                     const gchar *value,
+                                     const gchar *prefix,
+                                     const gchar *attr_name,
+                                     const gchar *attr_value)
+{
+	e_ews_message_start_set_item_field (msg, name, prefix, "Message");
+	e_ews_message_write_string_parameter_with_attribute (msg, name, NULL, value, attr_name, attr_value);
+	e_ews_message_end_set_item_field (msg);
+}
+
+static void
+convert_vjournal_component_to_updatexml (ESoapMessage *msg,
+					 gpointer user_data)
+{
+	EwsModifyData *modify_data = user_data;
+	icalcomponent *icalcomp = e_cal_component_get_icalcomponent (modify_data->comp);
+	icalproperty *prop;
+	const gchar *text;
+
+	e_ews_message_start_item_change (
+		msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
+		modify_data->itemid, modify_data->changekey, 0);
+
+	convert_vjournal_property_to_updatexml (msg, "ItemClass", "IPM.StickyNote", "item", NULL, NULL);
+	convert_vjournal_property_to_updatexml (msg, "Subject", icalcomponent_get_summary (icalcomp), "item", NULL, NULL);
+
+	prop = icalcomponent_get_first_property (icalcomp, ICAL_CLASS_PROPERTY);
+	if (prop) {
+		icalproperty_class classify = icalproperty_get_class (prop);
+		if (classify == ICAL_CLASS_PUBLIC) {
+			convert_vjournal_property_to_updatexml (msg, "Sensitivity", "Normal", "item", NULL, NULL);
+		} else if (classify == ICAL_CLASS_PRIVATE) {
+			convert_vjournal_property_to_updatexml (msg, "Sensitivity", "Private", "item", NULL, NULL);
+		} else if (classify == ICAL_CLASS_CONFIDENTIAL) {
+			convert_vjournal_property_to_updatexml (msg, "Sensitivity", "Personal", "item", NULL, NULL);
+		}
+	}
+
+	text = icalcomponent_get_description (icalcomp);
+	if (!text || !*text)
+		text = icalcomponent_get_summary (icalcomp);
+
+	convert_vjournal_property_to_updatexml (msg, "Body", text, "item", "BodyType", "Text");
+
+	e_ews_message_end_item_change (msg);
+}
+
+static void
 convert_component_to_updatexml (ESoapMessage *msg,
                                 gpointer user_data)
 {
@@ -2080,6 +2212,9 @@ convert_component_to_updatexml (ESoapMessage *msg,
 		break;
 	case ICAL_VTODO_COMPONENT:
 		convert_vtodo_component_to_updatexml (msg, user_data);
+		break;
+	case ICAL_VJOURNAL_COMPONENT:
+		convert_vjournal_component_to_updatexml (msg, user_data);
 		break;
 	default:
 		break;
@@ -2259,6 +2394,8 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 
 	} else {
 		const gchar *send_meeting_invitations;
+		const gchar *send_or_save;
+
 		modify_data = g_new0 (EwsModifyData, 1);
 		modify_data->cbews = g_object_ref (cbews);
 		modify_data->comp = g_object_ref (comp);
@@ -2268,16 +2405,19 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 		modify_data->itemid = itemid;
 		modify_data->changekey = changekey;
 
-		if (e_cal_component_has_attendees (comp))
+		if (e_cal_component_has_attendees (comp)) {
 			send_meeting_invitations = "SendToAllAndSaveCopy";
-		else
+			send_or_save = "SendAndSaveCopy";
+		} else {
 			/*In case of appointment we have to set SendMeetingInvites to SendToNone */
 			send_meeting_invitations = "SendToNone";
+			send_or_save = "SaveOnly";
+		}
 
 		e_ews_connection_update_items (
 			priv->cnc, EWS_PRIORITY_MEDIUM,
 			"AlwaysOverwrite",
-			"SendAndSaveCopy",
+			send_or_save,
 			send_meeting_invitations,
 			priv->folder_id,
 			convert_component_to_updatexml,
@@ -2892,13 +3032,15 @@ add_item_to_cache (ECalBackendEws *cbews,
 {
 	ECalBackendEwsPrivate *priv;
 	icalcomponent_kind kind;
+	EEwsItemType item_type;
 	icalcomponent *vtimezone, *icalcomp, *vcomp;
 	const gchar *mime_content;
 
 	kind = e_cal_backend_get_kind ((ECalBackend *) cbews);
 	priv = cbews->priv;
 
-	if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_TASK) {
+	item_type = e_ews_item_get_item_type (item);
+	if (item_type == E_EWS_ITEM_TYPE_TASK || item_type == E_EWS_ITEM_TYPE_MEMO) {
 		icalproperty *icalprop;
 		icaltimetype due_date, start_date, complete_date, created;
 		icalproperty_status status  = ICAL_STATUS_NONE;
@@ -2910,68 +3052,13 @@ add_item_to_cache (ECalBackendEws *cbews,
 
 		vcomp = icalcomponent_new (ICAL_VCALENDAR_COMPONENT);
 		/*subject*/
-		icalcomp = icalcomponent_new (ICAL_VTODO_COMPONENT);
+		icalcomp = icalcomponent_new (item_type == E_EWS_ITEM_TYPE_TASK ? ICAL_VTODO_COMPONENT : ICAL_VJOURNAL_COMPONENT);
 		icalprop = icalproperty_new_summary (e_ews_item_get_subject (item));
 		icalcomponent_add_property (icalcomp, icalprop);
-		/*status*/
-		ews_task_status = e_ews_item_get_status (item);
-		if (!g_strcmp0 (ews_task_status, "NotStarted") == 0) {
-			if (g_strcmp0 (ews_task_status, "Completed") == 0)
-				status = ICAL_STATUS_COMPLETED;
-			else if (g_strcmp0 (ews_task_status, "InProgress") == 0)
-				status = ICAL_STATUS_INPROCESS;
-			else if (g_strcmp0 (ews_task_status, "WaitingOnOthers") == 0)
-				status = ICAL_STATUS_NEEDSACTION;
-			else if (g_strcmp0 (ews_task_status, "Deferred") == 0)
-				status = ICAL_STATUS_CANCELLED;
-			icalprop = icalproperty_new_status (status);
-			icalcomponent_add_property (icalcomp, icalprop);
-			}
-		/*precent complete*/
-		icalprop  = icalproperty_new_percentcomplete (atoi (e_ews_item_get_percent_complete (item)));
-		icalcomponent_add_property (icalcomp, icalprop);
-
-		/*due date*/
-		e_ews_item_task_has_due_date (item, &has_this_date);
-		if (has_this_date) {
-			due_date = icaltime_from_timet_with_zone (e_ews_item_get_due_date (item), 0, priv->default_zone);
-			due_date.is_date = 1;
-			icalprop = icalproperty_new_due (due_date);
-			icalcomponent_add_property (icalcomp, icalprop);
-		}
-
-		/*start date*/
-		has_this_date = FALSE;
-		e_ews_item_task_has_start_date (item, &has_this_date);
-		if (has_this_date) {
-			start_date = icaltime_from_timet_with_zone (e_ews_item_get_start_date (item), 0, priv->default_zone);
-			start_date.is_date = 1;
-			icalprop = icalproperty_new_dtstart (start_date);
-			icalcomponent_add_property (icalcomp, icalprop);
-		}
-
-		/*complete date*/
-		has_this_date = FALSE;
-		e_ews_item_task_has_complete_date (item, &has_this_date);
-		if (has_this_date) {
-			complete_date = icaltime_from_timet_with_zone (e_ews_item_get_complete_date (item), 0, priv->default_zone);
-			complete_date.is_date = 1;
-			icalprop = icalproperty_new_completed (complete_date);
-			icalcomponent_add_property (icalcomp, icalprop);
-		}
 
 		/*date time created*/
 		created = icaltime_from_timet_with_zone (e_ews_item_get_date_created (item), 0, priv->default_zone);
 		icalprop = icalproperty_new_created (created);
-		icalcomponent_add_property (icalcomp, icalprop);
-
-		/*priority*/
-		item_importance = e_ews_item_get_importance (item);
-		if (item_importance == EWS_ITEM_HIGH)
-			priority = 3;
-		else if (item_importance == EWS_ITEM_LOW)
-			priority = 7;
-		icalprop = icalproperty_new_priority (priority);
 		icalcomponent_add_property (icalcomp, icalprop);
 
 		/*sensitivity*/
@@ -2991,7 +3078,7 @@ add_item_to_cache (ECalBackendEws *cbews,
 		icalcomponent_add_property (icalcomp, icalprop);
 
 		/*task assaingments*/
-		if (e_ews_item_get_delegator (item)!= NULL) {
+		if (e_ews_item_get_delegator (item) != NULL) {
 			const gchar *task_owner = e_ews_item_get_delegator (item);
 			GSList *mailboxes = NULL, *l;
 			GError *error = NULL;
@@ -3029,6 +3116,65 @@ add_item_to_cache (ECalBackendEws *cbews,
 				e_ews_mailbox_free (mb);
 			}
 			g_slist_free (mailboxes);
+		}
+
+		if (item_type == E_EWS_ITEM_TYPE_TASK) {
+			/*start date*/
+			has_this_date = FALSE;
+			e_ews_item_task_has_start_date (item, &has_this_date);
+			if (has_this_date) {
+				start_date = icaltime_from_timet_with_zone (e_ews_item_get_start_date (item), 0, priv->default_zone);
+				start_date.is_date = 1;
+				icalprop = icalproperty_new_dtstart (start_date);
+				icalcomponent_add_property (icalcomp, icalprop);
+			}
+
+			/*status*/
+			ews_task_status = e_ews_item_get_status (item);
+			if (!g_strcmp0 (ews_task_status, "NotStarted") == 0) {
+				if (g_strcmp0 (ews_task_status, "Completed") == 0)
+					status = ICAL_STATUS_COMPLETED;
+				else if (g_strcmp0 (ews_task_status, "InProgress") == 0)
+					status = ICAL_STATUS_INPROCESS;
+				else if (g_strcmp0 (ews_task_status, "WaitingOnOthers") == 0)
+					status = ICAL_STATUS_NEEDSACTION;
+				else if (g_strcmp0 (ews_task_status, "Deferred") == 0)
+					status = ICAL_STATUS_CANCELLED;
+				icalprop = icalproperty_new_status (status);
+				icalcomponent_add_property (icalcomp, icalprop);
+			}
+
+			/*precent complete*/
+			icalprop  = icalproperty_new_percentcomplete (atoi (e_ews_item_get_percent_complete (item)));
+			icalcomponent_add_property (icalcomp, icalprop);
+
+			/*due date*/
+			e_ews_item_task_has_due_date (item, &has_this_date);
+			if (has_this_date) {
+				due_date = icaltime_from_timet_with_zone (e_ews_item_get_due_date (item), 0, priv->default_zone);
+				due_date.is_date = 1;
+				icalprop = icalproperty_new_due (due_date);
+				icalcomponent_add_property (icalcomp, icalprop);
+			}
+
+			/*complete date*/
+			has_this_date = FALSE;
+			e_ews_item_task_has_complete_date (item, &has_this_date);
+			if (has_this_date) {
+				complete_date = icaltime_from_timet_with_zone (e_ews_item_get_complete_date (item), 0, priv->default_zone);
+				complete_date.is_date = 1;
+				icalprop = icalproperty_new_completed (complete_date);
+				icalcomponent_add_property (icalcomp, icalprop);
+			}
+
+			/*priority*/
+			item_importance = e_ews_item_get_importance (item);
+			if (item_importance == EWS_ITEM_HIGH)
+				priority = 3;
+			else if (item_importance == EWS_ITEM_LOW)
+				priority = 7;
+			icalprop = icalproperty_new_priority (priority);
+			icalcomponent_add_property (icalcomp, icalprop);
 		}
 
 		icalcomponent_add_component (vcomp,icalcomp);
@@ -3303,6 +3449,7 @@ ews_cal_sync_get_items_sync (ECalBackendEws *cbews,
 		additional_props,
 		FALSE,
 		NULL,
+		E_EWS_BODY_TYPE_TEXT,
 		&items,
 		NULL, NULL,
 		priv->cancellable,
@@ -3361,7 +3508,7 @@ cal_backend_ews_process_folder_items (ECalBackendEws *cbews,
                                       GHashTable *ex_to_smtp)
 {
 	ECalBackendEwsPrivate *priv;
-	GSList *l[2], *m, *cal_item_ids = NULL, *task_item_ids = NULL;
+	GSList *l[2], *m, *cal_item_ids = NULL, *task_memo_item_ids = NULL;
 	gint i;
 
 	priv = cbews->priv;
@@ -3376,10 +3523,10 @@ cal_backend_ews_process_folder_items (ECalBackendEws *cbews,
 			const EwsId *id;
 
 			id = e_ews_item_get_id (item);
-			if (type == E_EWS_ITEM_TYPE_CALENDAR_ITEM)
+			if (type == E_EWS_ITEM_TYPE_EVENT)
 				cal_item_ids = g_slist_prepend (cal_item_ids, id->id);
-			else if (type == E_EWS_ITEM_TYPE_TASK)
-				task_item_ids = g_slist_prepend (task_item_ids, id->id);
+			else if (type == E_EWS_ITEM_TYPE_TASK || type == E_EWS_ITEM_TYPE_MEMO)
+				task_memo_item_ids = g_slist_prepend (task_memo_item_ids, id->id);
 		}
 	}
 
@@ -3406,17 +3553,17 @@ cal_backend_ews_process_folder_items (ECalBackendEws *cbews,
 			ex_to_smtp);
 	}
 
-	if (task_item_ids) {
+	if (task_memo_item_ids) {
 		ews_cal_sync_get_items_sync (
 			cbews,
-			task_item_ids,
+			task_memo_item_ids,
 			"AllProperties",
 			NULL,
 			ex_to_smtp);
 	}
 
 	g_slist_free (cal_item_ids);
-	g_slist_free (task_item_ids);
+	g_slist_free (task_memo_item_ids);
 }
 
 static void
@@ -3469,7 +3616,7 @@ ews_start_sync_thread (gpointer data)
 		e_ews_connection_sync_folder_items_sync (
 			priv->cnc, EWS_PRIORITY_MEDIUM,
 			old_sync_state, priv->folder_id,
-			"IdOnly", NULL,
+			"IdOnly", "item:ItemClass",
 			EWS_MAX_FETCH_COUNT,
 			&new_sync_state,
 			&includes_last_item,
@@ -3860,6 +4007,9 @@ e_cal_backend_ews_get_backend_property (ECalBackend *backend,
 			break;
 		case ICAL_VTODO_COMPONENT:
 			e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_TODO);
+			break;
+		case ICAL_VJOURNAL_COMPONENT:
+			e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_JOURNAL);
 			break;
 		default:
 			g_object_unref (comp);

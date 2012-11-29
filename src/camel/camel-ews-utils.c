@@ -713,7 +713,7 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 		}
 
 		item_type = e_ews_item_get_item_type (item);
-		if (item_type == E_EWS_ITEM_TYPE_CALENDAR_ITEM ||
+		if (item_type == E_EWS_ITEM_TYPE_EVENT ||
 			 item_type == E_EWS_ITEM_TYPE_MEETING_MESSAGE ||
 			 item_type == E_EWS_ITEM_TYPE_MEETING_REQUEST ||
 			 item_type == E_EWS_ITEM_TYPE_MEETING_RESPONSE ||

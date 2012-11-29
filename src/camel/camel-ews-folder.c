@@ -453,7 +453,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 
 	res = e_ews_connection_get_items_sync (
 		cnc, pri, ids, "IdOnly", "item:MimeContent",
-		TRUE, mime_dir,
+		TRUE, mime_dir, E_EWS_BODY_TYPE_ANY,
 		&items,
 		(ESoapProgressFn) camel_operation_progress,
 		(gpointer) cancellable,
@@ -486,7 +486,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 		res = e_ews_connection_get_items_sync (
 			cnc, pri, ids, "IdOnly",
 			"meeting:AssociatedCalendarItemId",
-			FALSE, NULL,
+			FALSE, NULL, E_EWS_BODY_TYPE_ANY,
 			&items_req,
 			(ESoapProgressFn) camel_operation_progress,
 			(gpointer) cancellable,
@@ -1264,7 +1264,7 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 		e_ews_connection_get_items_sync (
 			cnc, EWS_PRIORITY_MEDIUM,
 			msg_ids, "IdOnly", SUMMARY_MESSAGE_FLAGS,
-			FALSE, NULL, &items, NULL, NULL,
+			FALSE, NULL, E_EWS_BODY_TYPE_ANY, &items, NULL, NULL,
 			cancellable, &local_error);
 
 	camel_ews_utils_sync_updated_items (ews_folder, items);
@@ -1279,7 +1279,7 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 		e_ews_connection_get_items_sync (
 			cnc, EWS_PRIORITY_MEDIUM,
 			generic_item_ids, "IdOnly", SUMMARY_ITEM_FLAGS,
-			FALSE, NULL, &items, NULL, NULL,
+			FALSE, NULL, E_EWS_BODY_TYPE_ANY, &items, NULL, NULL,
 			cancellable, &local_error);
 	camel_ews_utils_sync_updated_items (ews_folder, items);
 
@@ -1347,7 +1347,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 		e_ews_connection_get_items_sync (
 			cnc, EWS_PRIORITY_MEDIUM,
 			msg_ids, "IdOnly", SUMMARY_MESSAGE_PROPS,
-			FALSE, NULL, &items, NULL, NULL,
+			FALSE, NULL, E_EWS_BODY_TYPE_ANY, &items, NULL, NULL,
 			cancellable, &local_error);
 
 	if (local_error) {
@@ -1363,7 +1363,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 		e_ews_connection_get_items_sync (
 			cnc, EWS_PRIORITY_MEDIUM,
 			post_item_ids, "IdOnly", SUMMARY_POSTITEM_PROPS,
-			FALSE, NULL, &items, NULL, NULL,
+			FALSE, NULL, E_EWS_BODY_TYPE_ANY, &items, NULL, NULL,
 			cancellable, &local_error);
 
 	if (local_error) {
@@ -1379,7 +1379,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 		e_ews_connection_get_items_sync (
 			cnc, EWS_PRIORITY_MEDIUM,
 			generic_item_ids, "IdOnly", SUMMARY_ITEM_PROPS,
-			FALSE, NULL, &items, NULL, NULL,
+			FALSE, NULL, E_EWS_BODY_TYPE_ANY, &items, NULL, NULL,
 			cancellable, &local_error);
 
 	camel_ews_utils_sync_created_items (ews_folder, cnc, items, cancellable);

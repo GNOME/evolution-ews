@@ -879,7 +879,6 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 {
 	EEwsItemPrivate *priv = item->priv;
 	ESoapParameter *subparam, *node = NULL, *attach_id;
-	gboolean contact = FALSE, task = FALSE;
 	const gchar *name;
 
 	g_return_val_if_fail (param != NULL, FALSE);
@@ -902,14 +901,27 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 	 * </m:Changes> 
 	 * So check param is the node we want to use, by comparing name or is it child of the param */
 
-	if (!g_ascii_strcasecmp (name, "Message") || (node = e_soap_parameter_get_first_child_by_name (param, "Message")))
+	if (!g_ascii_strcasecmp (name, "Message") || (node = e_soap_parameter_get_first_child_by_name (param, "Message"))) {
 		priv->item_type = E_EWS_ITEM_TYPE_MESSAGE;
-	else if (!g_ascii_strcasecmp (name, "PostItem") || (node = e_soap_parameter_get_first_child_by_name (param, "PostItem")))
+		subparam = e_soap_parameter_get_first_child_by_name (node ? node : param, "ItemClass");
+		if (subparam) {
+			gchar *folder_class = e_soap_parameter_get_string_value (subparam);
+
+			if (g_strcmp0 (folder_class, "IPM.StickyNote") == 0) {
+				priv->item_type = E_EWS_ITEM_TYPE_MEMO;
+				priv->task_fields = g_new0 (struct _EEwsTaskFields, 1);
+				priv->task_fields->has_due_date = FALSE;
+				priv->task_fields->has_start_date = FALSE;
+				priv->task_fields->has_complete_date = FALSE;
+			}
+
+			g_free (folder_class);
+		}
+	} else if (!g_ascii_strcasecmp (name, "PostItem") || (node = e_soap_parameter_get_first_child_by_name (param, "PostItem")))
 		priv->item_type = E_EWS_ITEM_TYPE_POST_ITEM;
 	else if (!g_ascii_strcasecmp (name, "CalendarItem") || (node = e_soap_parameter_get_first_child_by_name (param, "CalendarItem")))
-		priv->item_type = E_EWS_ITEM_TYPE_CALENDAR_ITEM;
+		priv->item_type = E_EWS_ITEM_TYPE_EVENT;
 	else if (!g_ascii_strcasecmp (name, "Contact") || (node = e_soap_parameter_get_first_child_by_name (param, "Contact"))) {
-		contact = TRUE;
 		priv->item_type = E_EWS_ITEM_TYPE_CONTACT;
 		priv->contact_fields = g_new0 (struct _EEwsContactFields, 1);
 	} else if (!g_ascii_strcasecmp (name, "DistributionList") || (node = e_soap_parameter_get_first_child_by_name (param, "DistributionList")))
@@ -923,7 +935,6 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 	else if (!g_ascii_strcasecmp (name, "MeetingCancellation") || (node = e_soap_parameter_get_first_child_by_name (param, "MeetingCancellation")))
 		priv->item_type = E_EWS_ITEM_TYPE_MEETING_CANCELLATION;
 	else if (!g_ascii_strcasecmp (name, "Task") || (node = e_soap_parameter_get_first_child_by_name (param, "Task"))) {
-		task = TRUE;
 		priv->item_type = E_EWS_ITEM_TYPE_TASK;
 		priv->task_fields = g_new0 (struct _EEwsTaskFields, 1);
 		priv->task_fields->has_due_date = FALSE;
@@ -1012,7 +1023,7 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 			g_free (value);
 		} else if (!g_ascii_strcasecmp (name, "Attachments")) {
 			process_attachments_list (priv, subparam);
-		} else if (contact)
+		} else if (priv->item_type == E_EWS_ITEM_TYPE_CONTACT)
 			parse_contact_field (item, name, subparam);
 			/* fields below are not relevant for contacts, so skip them */	
 		else if (!g_ascii_strcasecmp (name, "Sender")) {
@@ -1058,7 +1069,7 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 			g_free (value);
 		} else if (!g_ascii_strcasecmp (name, "TimeZone")) {
 			priv->timezone = e_soap_parameter_get_string_value (subparam);
-		} else if (task) {
+		} else if (priv->item_type == E_EWS_ITEM_TYPE_TASK || priv->item_type == E_EWS_ITEM_TYPE_MEMO) {
 			parse_task_field (item, name, subparam);
 			/* fields below are not relevant for task, so skip them */
 		} else if (!g_ascii_strcasecmp (name, "References")) {

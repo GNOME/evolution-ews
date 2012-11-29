@@ -3495,6 +3495,7 @@ e_ews_connection_get_items (EEwsConnection *cnc,
                             const gchar *additional_props,
                             gboolean include_mime,
                             const gchar *mime_directory,
+			    EEwsBodyType body_type,
                             ESoapProgressFn progress_fn,
                             gpointer progress_data,
                             GCancellable *cancellable,
@@ -3522,6 +3523,20 @@ e_ews_connection_get_items (EEwsConnection *cnc,
 		e_ews_message_write_string_parameter (msg, "IncludeMimeContent", NULL, "false");
 	if (mime_directory)
 		e_soap_message_store_node_data (msg, "MimeContent", mime_directory, TRUE);
+
+	switch (body_type) {
+	case E_EWS_BODY_TYPE_BEST:
+		e_ews_message_write_string_parameter (msg, "BodyType", NULL, "Best");
+		break;
+	case E_EWS_BODY_TYPE_HTML:
+		e_ews_message_write_string_parameter (msg, "BodyType", NULL, "HTML");
+		break;
+	case E_EWS_BODY_TYPE_TEXT:
+		e_ews_message_write_string_parameter (msg, "BodyType", NULL, "Text");
+		break;
+	case E_EWS_BODY_TYPE_ANY:
+		break;
+	}
 
 	if (additional_props && *additional_props) {
 		gchar **prop = g_strsplit (additional_props, " ", 0);
@@ -3608,6 +3623,7 @@ e_ews_connection_get_items_sync (EEwsConnection *cnc,
                                  const gchar *additional_props,
                                  gboolean include_mime,
                                  const gchar *mime_directory,
+				 EEwsBodyType body_type,
                                  GSList **items,
                                  ESoapProgressFn progress_fn,
                                  gpointer progress_data,
@@ -3625,7 +3641,7 @@ e_ews_connection_get_items_sync (EEwsConnection *cnc,
 	e_ews_connection_get_items (
 		cnc, pri,ids, default_props,
 		additional_props, include_mime,
-		mime_directory, progress_fn,
+		mime_directory, body_type, progress_fn,
 		progress_data, cancellable,
 		e_async_closure_callback, closure);
 

@@ -105,6 +105,13 @@ typedef enum {
 	EWS_SPECIFIED_OCCURRENCE_ONLY
 } EwsAffectedTaskOccurrencesType;
 
+typedef enum {
+	E_EWS_BODY_TYPE_ANY,
+	E_EWS_BODY_TYPE_BEST,
+	E_EWS_BODY_TYPE_HTML,
+	E_EWS_BODY_TYPE_TEXT
+} EEwsBodyType;
+
 typedef struct {
 	gchar *as_url;
 	gchar *oab_url;
@@ -321,6 +328,7 @@ void		e_ews_connection_get_items	(EEwsConnection *cnc,
 						 const gchar *additional_props,
 						 gboolean include_mime,
 						 const gchar *mime_directory,
+						 EEwsBodyType body_type,
 						 ESoapProgressFn progress_fn,
 						 gpointer progress_data,
 						 GCancellable *cancellable,
@@ -338,6 +346,7 @@ gboolean	e_ews_connection_get_items_sync	(EEwsConnection *cnc,
 						 const gchar *additional_props,
 						 gboolean include_mime,
 						 const gchar *mime_directory,
+						 EEwsBodyType body_type,
 						 GSList **items,
 						 ESoapProgressFn progress_fn,
 						 gpointer progress_data,

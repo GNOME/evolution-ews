@@ -39,7 +39,6 @@ struct _EEwsFolderPrivate {
 	gchar *name;
 	EwsFolderId *fid;
 	EwsFolderId *parent_fid;
-	gchar *folder_class;
 	EEwsFolderType folder_type;
 	guint32 unread;
 	guint32 total;
@@ -120,29 +119,11 @@ e_ews_folder_init (EEwsFolder *folder)
 	priv->foreign = FALSE;
 }
 
-/* FIXME pick it from folder_type and make it set folder_type */
-static void
-e_ews_folder_set_folder_class (EEwsFolder *folder,
-                               const gchar *folder_class)
-{
-	EEwsFolderPrivate *priv;
-
-	g_return_if_fail (E_IS_EWS_FOLDER (folder));
-	g_return_if_fail (folder_class != NULL);
-
-	priv = folder->priv;
-
-	if (priv->folder_class)
-		g_free (priv->folder_class);
-	priv->folder_class = g_strdup (folder_class);
-}
-
 static gboolean
 e_ews_folder_set_from_soap_parameter (EEwsFolder *folder,
                                       ESoapParameter *param)
 {
 	EEwsFolderPrivate *priv = folder->priv;
-	gchar *value;
 	ESoapParameter *subparam, *node;
 
 	g_return_val_if_fail (param != NULL, FALSE);
@@ -172,6 +153,25 @@ e_ews_folder_set_from_soap_parameter (EEwsFolder *folder,
 		return FALSE;
 	}
 
+	if (priv->folder_type == E_EWS_FOLDER_TYPE_MAILBOX) {
+		subparam = e_soap_parameter_get_first_child_by_name (node, "FolderClass");
+		if (subparam) {
+			gchar *folder_class = e_soap_parameter_get_string_value (subparam);
+
+			if (g_strcmp0 (folder_class, "IPF.Contact") == 0) {
+				priv->folder_type = E_EWS_FOLDER_TYPE_CONTACTS;
+			} else if (g_strcmp0 (folder_class, "IPF.Appointment") == 0) {
+				priv->folder_type = E_EWS_FOLDER_TYPE_CALENDAR;
+			} else if (g_strcmp0 (folder_class, "IPF.Task") == 0) {
+				priv->folder_type = E_EWS_FOLDER_TYPE_TASKS;
+			} else if (g_strcmp0 (folder_class, "IPF.StickyNote") == 0) {
+				priv->folder_type = E_EWS_FOLDER_TYPE_MEMOS;
+			}
+
+			g_free (folder_class);
+		}
+	}
+
 	subparam = e_soap_parameter_get_first_child_by_name (node, "FolderId");
 	if (subparam) {
 		priv->fid = g_new0 (EwsFolderId, 1);
@@ -184,13 +184,6 @@ e_ews_folder_set_from_soap_parameter (EEwsFolder *folder,
 		priv->parent_fid = g_new0 (EwsFolderId, 1);
 		priv->parent_fid->id = e_soap_parameter_get_property (subparam, "Id");
 		priv->parent_fid->change_key = e_soap_parameter_get_property (subparam, "ChangeKey");
-	}
-
-	subparam = e_soap_parameter_get_first_child_by_name (node, "FolderClass");
-	if (subparam) {
-		value = e_soap_parameter_get_string_value (subparam);
-		e_ews_folder_set_folder_class (folder, (const gchar *) value);
-		g_free (value);
 	}
 
 	subparam = e_soap_parameter_get_first_child_by_name (node, "DisplayName");

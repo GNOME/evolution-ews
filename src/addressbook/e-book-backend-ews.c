@@ -2199,7 +2199,7 @@ ebews_fetch_items (EBookBackendEws *ebews,
 		e_ews_connection_get_items_sync (
 			cnc, EWS_PRIORITY_MEDIUM,
 			contact_item_ids, "Default", CONTACT_ITEM_PROPS,
-			FALSE, NULL, &new_items, NULL, NULL,
+			FALSE, NULL, E_EWS_BODY_TYPE_TEXT, &new_items, NULL, NULL,
 			cancellable, error);
 	if (*error)
 		goto cleanup;
@@ -2217,7 +2217,7 @@ ebews_fetch_items (EBookBackendEws *ebews,
 		e_ews_connection_get_items_sync (
 			cnc, EWS_PRIORITY_MEDIUM,
 			dl_ids, "Default", NULL,
-			FALSE, NULL, &new_items, NULL, NULL,
+			FALSE, NULL, E_EWS_BODY_TYPE_TEXT, &new_items, NULL, NULL,
 			cancellable, error);
 	if (*error)
 		goto cleanup;

@@ -198,6 +198,9 @@ ews_backend_new_child (EEwsBackend *backend,
 		case E_EWS_FOLDER_TYPE_TASKS:
 			extension_name = E_SOURCE_EXTENSION_TASK_LIST;
 			break;
+		case E_EWS_FOLDER_TYPE_MEMOS:
+			extension_name = E_SOURCE_EXTENSION_MEMO_LIST;
+			break;
 		case E_EWS_FOLDER_TYPE_CONTACTS:
 			extension_name = E_SOURCE_EXTENSION_ADDRESS_BOOK;
 			break;
@@ -244,6 +247,14 @@ ews_backend_new_task_list (EEwsBackend *backend,
 }
 
 static ESource *
+ews_backend_new_memo_list (EEwsBackend *backend,
+                           EEwsFolder *folder)
+{
+	/* No extra configuration to do. */
+	return ews_backend_new_child (backend, folder);
+}
+
+static ESource *
 ews_backend_new_address_book (EEwsBackend *backend,
                               EEwsFolder *folder)
 {
@@ -281,6 +292,10 @@ ews_backend_sync_created_folders (EEwsBackend *backend,
 				break;
 			case E_EWS_FOLDER_TYPE_TASKS:
 				source = ews_backend_new_task_list (
+					backend, folder);
+				break;
+			case E_EWS_FOLDER_TYPE_MEMOS:
+				source = ews_backend_new_memo_list (
 					backend, folder);
 				break;
 			case E_EWS_FOLDER_TYPE_CONTACTS:

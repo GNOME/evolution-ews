@@ -1145,7 +1145,7 @@ e_ews_convert_sexp_to_restriction (ESoapMessage *msg,
 					contact_symbols[i].func, msg);
 		}
 
-	} else if (type == E_EWS_FOLDER_TYPE_CALENDAR || type == E_EWS_FOLDER_TYPE_TASKS) {
+	} else if (type == E_EWS_FOLDER_TYPE_CALENDAR || type == E_EWS_FOLDER_TYPE_TASKS || type == E_EWS_FOLDER_TYPE_MEMOS) {
 		for (i = 0; i < G_N_ELEMENTS (calendar_symbols); i++) {
 			if (calendar_symbols[i].immediate)
 				e_sexp_add_ifunction (
@@ -1195,7 +1195,7 @@ e_ews_check_is_query (const gchar *query,
 		else
 			return TRUE;
 
-	} else if (type == E_EWS_FOLDER_TYPE_CALENDAR || type == E_EWS_FOLDER_TYPE_TASKS) {
+	} else if (type == E_EWS_FOLDER_TYPE_CALENDAR || type == E_EWS_FOLDER_TYPE_TASKS || type == E_EWS_FOLDER_TYPE_MEMOS) {
 		if (!g_strcmp0 (query, "(contains? \"summary\"  \"\")"))
 			return FALSE;
 		else

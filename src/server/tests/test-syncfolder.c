@@ -277,7 +277,7 @@ op_test_get_item ()
 	ids = g_slist_reverse (ids);
 	e_ews_connection_get_items (
 		cnc, EWS_PRIORITY_MEDIUM,
-		g_slist_last (ids), "IdOnly", NULL, FALSE, NULL,
+		g_slist_last (ids), "IdOnly", NULL, FALSE, NULL, E_EWS_BODY_TYPE_ANY,
 		NULL, NULL, cancellable,
 		get_item_ready_callback, NULL);
 
