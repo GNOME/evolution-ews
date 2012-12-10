@@ -46,6 +46,7 @@ create_mime_message_cb (ESoapMessage *msg,
 	struct _create_mime_msg_data *create_data = user_data;
 	CamelStream *mem, *filtered;
 	CamelMimeFilter *filter;
+	CamelContentType *content_type;
 	GByteArray *bytes;
 	gchar *base64;
 	gint msgflag;
@@ -86,6 +87,16 @@ create_mime_message_cb (ESoapMessage *msg,
 	g_free (base64);
 
 	e_soap_message_end_element (msg); /* MimeContent */
+
+	content_type = camel_mime_part_get_content_type (CAMEL_MIME_PART (create_data->message));
+	if (content_type && camel_content_type_is (content_type, "multipart", "report") &&
+	    camel_content_type_param (content_type, "report-type") &&
+	    g_ascii_strcasecmp (camel_content_type_param (content_type, "report-type"), "disposition-notification") == 0) {
+		/* it's a disposition notification reply, set ItemClass too */
+		e_soap_message_start_element (msg, "ItemClass", NULL, NULL);
+		e_soap_message_write_string (msg, "REPORT.IPM.NOTE.IPNRN");
+		e_soap_message_end_element (msg); /* ItemClass */
+	}
 
 	/* more MAPI crap.  You can't just set the IsDraft property
 	 * here you have to use the MAPI MSGFLAG_UNSENT extended
