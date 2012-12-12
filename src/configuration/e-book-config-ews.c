@@ -22,8 +22,6 @@
 
 #include "e-book-config-ews.h"
 
-#include <misc/e-book-source-config.h>
-
 G_DEFINE_DYNAMIC_TYPE (
 	EBookConfigEws,
 	e_book_config_ews,

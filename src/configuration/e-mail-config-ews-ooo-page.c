@@ -28,12 +28,7 @@
 #include <gtk/gtk.h>
 #include <glib/gi18n-lib.h>
 
-#include <misc/e-dateedit.h>
-#include <e-util/e-dialog-utils.h>
-#include <libevolution-utils/e-alert-sink.h>
-#include <libevolution-utils/e-alert-dialog.h>
-#include <misc/e-activity-bar.h>
-#include <misc/e-alert-bar.h>
+#include <e-util/e-util.h>
 
 #include "server/camel-ews-settings.h"
 #include "server/e-ews-connection.h"

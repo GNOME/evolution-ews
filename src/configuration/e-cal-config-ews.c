@@ -22,8 +22,6 @@
 
 #include "e-cal-config-ews.h"
 
-#include <misc/e-cal-source-config.h>
-
 G_DEFINE_DYNAMIC_TYPE (
 	ECalConfigEws,
 	e_cal_config_ews,

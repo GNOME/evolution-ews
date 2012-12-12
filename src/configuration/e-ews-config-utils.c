@@ -26,12 +26,8 @@
 
 #include <gtk/gtk.h>
 #include <libedataserver/libedataserver.h>
-#include <libedataserverui/libedataserverui.h>
-#include <e-util/e-dialog-utils.h>
-#include <e-util/e-util.h>
+
 #include <mail/em-folder-tree.h>
-#include <misc/e-book-source-config.h>
-#include <misc/e-cal-source-config.h>
 #include <shell/e-shell.h>
 #include <shell/e-shell-sidebar.h>
 #include <shell/e-shell-view.h>

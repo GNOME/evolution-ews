@@ -28,7 +28,6 @@
 #include <glib/gi18n-lib.h>
 #include <gtk/gtk.h>
 
-#include <libedataserverui/libedataserverui.h>
 #include <libemail-engine/e-mail-session.h>
 
 #include "camel/camel-ews-store.h"

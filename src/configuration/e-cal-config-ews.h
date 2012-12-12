@@ -19,7 +19,7 @@
 #ifndef E_CAL_CONFIG_EWS_H
 #define E_CAL_CONFIG_EWS_H
 
-#include <misc/e-source-config-backend.h>
+#include <e-util/e-util.h>
 
 /* Standard GObject macros */
 #define E_TYPE_CAL_CONFIG_EWS \
