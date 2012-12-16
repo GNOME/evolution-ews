@@ -1,3 +1,28 @@
+Evolution-EWS 3.7.3 2012-12-16
+------------------------------
+
+Bug Fixes:
+	Bug 671893 - Filter by 'Mailing list' doesn't work (Milan Crha)
+	Bug 677888 - Notes on Exchange do not show up as Memos (Milan Crha)
+	Bug 687874 - Be able to select Sent folder again (Milan Crha)
+	Bug 689521 - Delivery notification reply fails to send (Milan Crha)
+
+Other Changes:
+	* Unsubscribe should remove also subfolders, if subscribed with
+	  them (Milan Crha)
+	* Read also CalendarEventDetails from Free/Busy response (Milan Crha)
+	* Use version-based GLib/GDK/GTK+ warnings. (Matthew Barnes)
+	* Bump GLib requirement to 2.32. (Matthew Barnes)
+	* Do not generate a ChangeLog file from 'git log' (Milan Crha)
+
+Translations:
+	Marek Černocký (cs)
+	Daniel Mustieles (es)
+	Sandeep Sheshrao Shedmake (mr)
+	Piotr Drąg (pl)
+	Matej Urbančič (sl)
+
+
 Evolution-EWS 3.7.2 2012-11-17
 ------------------------------
 
