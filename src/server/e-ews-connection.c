@@ -393,7 +393,7 @@ ews_next_request (gpointer _cnc)
 
 	node = (EwsNode *) l->data;
 
-	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1)) {
+	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) == 1)) {
 		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (node->msg)->request_body));
 		/* print request's body */
 		printf ("\n The request headers");
