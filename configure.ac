@@ -176,7 +176,6 @@ dnl ********************************
 dnl Check for remaining evolution-data-server modules
 dnl ********************************
 PKG_CHECK_MODULES(LIBEDATASERVER, libedataserver-1.2 >= eds_minimum_version)
-PKG_CHECK_MODULES(LIBEDATASERVERUI, libedataserverui-3.0 >= eds_minimum_version)
 PKG_CHECK_MODULES(LIBEBACKEND, libebackend-1.2 >= eds_minimum_version)
 PKG_CHECK_MODULES(LIBECAL, libecal-1.2 >= eds_minimum_version)
 PKG_CHECK_MODULES(LIBEDATACAL, libedata-cal-1.2 >= eds_minimum_version)
