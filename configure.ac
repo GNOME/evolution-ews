@@ -27,8 +27,9 @@ dnl Keep these two definitions in agreement.
 m4_define([gdk_minimum_version], [3.0])
 m4_define([gdk_encoded_version], [GDK_VERSION_3_0])
 
-m4_define([libsoup_minimum_version], [2.30])
-
+dnl Keep these two definitions in agreement.
+m4_define([soup_minimum_version], [2.38.1])
+m4_define([soup_encoded_version], [SOUP_VERSION_2_38])
 
 dnl ***********************************
 dnl Automake 1.11 - Silent Build Rules
@@ -120,9 +121,10 @@ if test "x$enable_strict" = xyes; then
 	CFLAGS="$CFLAGS -DG_DISABLE_DEPRECATED -DEDS_DISABLE_DEPRECATED"
 fi
 
-dnl Warn about GLib/GTK+ API usage that violates our minimum requirements.
+dnl Warn about API usage that violates our minimum requirements.
 CFLAGS="$CFLAGS -DGLIB_VERSION_MAX_ALLOWED=glib_encoded_version"
 CFLAGS="$CFLAGS -DGDK_VERSION_MAX_ALLOWED=gdk_encoded_version"
+CFLAGS="$CFLAGS -DSOUP_VERSION_MAX_ALLOWED=soup_encoded_version"
 
 dnl These will suppress warnings about newly-deprecated symbols.  Ideally
 dnl these settings should match our minimum requirements and we will clean
@@ -130,6 +132,7 @@ dnl up any new deprecation warnings after bumping our minimum requirements.
 dnl But if the warnings get to be overwhelming, use fixed versions instead.
 CFLAGS="$CFLAGS -DGLIB_VERSION_MIN_REQUIRED=glib_encoded_version"
 CFLAGS="$CFLAGS -DGDK_VERSION_MIN_REQUIRED=gdk_encoded_version"
+CFLAGS="$CFLAGS -DSOUP_VERSION_MIN_REQUIRED=soup_encoded_version"
 
 dnl ************
 dnl i18n stuff
@@ -166,10 +169,10 @@ PKG_CHECK_MODULES(GNOME_PLATFORM,
 	[glib-2.0 >= glib_minimum_version
 	 gtk+-3.0 >= gdk_minimum_version])
 
-PKG_CHECK_MODULES(SOUP, libsoup-2.4 >= libsoup_minimum_version)
+PKG_CHECK_MODULES(SOUP, libsoup-2.4 >= soup_minimum_version)
 AC_SUBST(SOUP_CFLAGS)
 AC_SUBST(SOUP_LIBS)
-LIBSOUP_REQUIRED=libsoup_minimum_version
+LIBSOUP_REQUIRED=soup_minimum_version
 AC_SUBST(LIBSOUP_REQUIRED)
 
 dnl ********************************
