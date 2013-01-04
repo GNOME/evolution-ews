@@ -217,27 +217,6 @@ switch_offline (ECalBackendEws *cbews)
 	}
 }
 
-/* Property Accessors */
-static icaltimezone *
-e_cal_backend_ews_internal_get_timezone (ECalBackend *backend,
-                                         const gchar *tzid)
-{
-	icaltimezone *zone = NULL;
-	ECalBackendEws *cbews;
-
-	cbews = E_CAL_BACKEND_EWS (backend);
-	g_return_val_if_fail (cbews != NULL, NULL);
-	g_return_val_if_fail (cbews->priv != NULL, NULL);
-
-	if (cbews->priv->store)
-		zone = (icaltimezone *) e_cal_backend_store_get_timezone (cbews->priv->store, tzid);
-
-	if (!zone && E_CAL_BACKEND_CLASS (e_cal_backend_ews_parent_class)->internal_get_timezone)
-		zone = E_CAL_BACKEND_CLASS (e_cal_backend_ews_parent_class)->internal_get_timezone (backend, tzid);
-
-	return zone;
-}
-
 static void
 e_cal_backend_ews_add_timezone (ECalBackend *backend,
                                 EDataCal *cal,
@@ -245,17 +224,16 @@ e_cal_backend_ews_add_timezone (ECalBackend *backend,
                                 GCancellable *cancellable,
                                 const gchar *tzobj)
 {
+	ETimezoneCache *timezone_cache;
 	icalcomponent *tz_comp;
 	ECalBackendEws *cbews;
-	ECalBackendEwsPrivate *priv;
 	GError *error = NULL;
 
 	cbews = (ECalBackendEws *) backend;
+	timezone_cache = E_TIMEZONE_CACHE (backend);
 
 	e_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
 	e_data_cal_error_if_fail (tzobj != NULL, InvalidArg);
-
-	priv = cbews->priv;
 
 	tz_comp = icalparser_parse_string (tzobj);
 	if (!tz_comp) {
@@ -268,11 +246,7 @@ e_cal_backend_ews_add_timezone (ECalBackend *backend,
 
 		zone = icaltimezone_new ();
 		icaltimezone_set_component (zone, tz_comp);
-		if (e_cal_backend_store_put_timezone (priv->store, zone) == FALSE) {
-			icaltimezone_free (zone, 1);
-			g_propagate_error (&error, EDC_ERROR_EX (OtherError, "Put timezone failed"));
-			goto exit;
-		}
+		e_timezone_cache_add_timezone (timezone_cache, zone);
 		icaltimezone_free (zone, 1);
 	}
 
@@ -414,12 +388,15 @@ e_cal_backend_ews_get_timezone (ECalBackend *backend,
                                 GCancellable *cancellable,
                                 const gchar *tzid)
 {
+	ETimezoneCache *timezone_cache;
 	icalcomponent *icalcomp;
 	icaltimezone *zone;
 	gchar *object = NULL;
 	GError *error = NULL;
 
-	zone = e_cal_backend_ews_internal_get_timezone (backend, tzid);
+	timezone_cache = E_TIMEZONE_CACHE (backend);
+
+	zone = e_timezone_cache_get_timezone (timezone_cache, tzid);
 	if (zone) {
 		icalcomp = icaltimezone_get_component (zone);
 
@@ -608,7 +585,9 @@ e_cal_backend_ews_open (ECalBackend *backend,
 
 		priv->storage_path = g_build_filename (cache_dir, priv->folder_id, NULL);
 
-		priv->store = e_cal_backend_file_store_new (priv->storage_path);
+		priv->store = e_cal_backend_store_new (
+			priv->storage_path,
+			E_TIMEZONE_CACHE (backend));
 		e_cal_backend_store_load (priv->store);
 		add_comps_to_item_id_hash (cbews);
 
@@ -740,7 +719,7 @@ cal_backend_ews_get_object_list (ECalBackend *backend,
 		if (e_cal_backend_get_kind (backend) ==
 		    icalcomponent_isa (e_cal_component_get_icalcomponent (comp))) {
 			if ((!search_needed) ||
-			    (e_cal_backend_sexp_match_comp (cbsexp, comp, backend))) {
+			    (e_cal_backend_sexp_match_comp (cbsexp, comp, E_TIMEZONE_CACHE (backend)))) {
 				*objects = g_slist_append (*objects, e_cal_component_get_as_string (comp));
 			}
 		}
@@ -2731,21 +2710,23 @@ static icaltimezone *
 e_cal_get_timezone_from_ical_component (ECalBackend *backend,
                                         icalcomponent *comp)
 {
+	ETimezoneCache *timezone_cache;
 	icalproperty *prop;
 	icalparameter *param;
 
+	timezone_cache = E_TIMEZONE_CACHE (backend);
+
 	prop = icalcomponent_get_first_property (
 		comp, ICAL_DTSTART_PROPERTY);
-	if ((param = icalproperty_get_first_parameter (prop,
-		ICAL_TZID_PARAMETER))) {
-		const gchar *tzid = icalparameter_get_tzid (param);
-		icaltimezone *zone;
+	param = icalproperty_get_first_parameter (
+		prop, ICAL_TZID_PARAMETER);
 
-		zone = icaltimezone_get_builtin_timezone_from_tzid (tzid);
-		if (zone)
-			return zone;
+	if (param != NULL) {
+		const gchar *tzid;
 
-		return e_cal_backend_ews_internal_get_timezone (E_CAL_BACKEND (backend), tzid);
+		tzid = icalparameter_get_tzid (param);
+
+		return e_timezone_cache_get_timezone (timezone_cache, tzid);
 	}
 
 	g_warning ("EEE Cant figure the relevant timezone of the component\n");
@@ -2924,16 +2905,11 @@ static icaltimezone *
 resolve_tzid (const gchar *tzid,
               gpointer user_data)
 {
-	icaltimezone *zone;
+	ETimezoneCache *timezone_cache;
 
-	zone = (!strcmp (tzid, "UTC"))
-		? icaltimezone_get_utc_timezone ()
-		: icaltimezone_get_builtin_timezone_from_tzid (tzid);
+	timezone_cache = E_TIMEZONE_CACHE (user_data);
 
-	if (!zone)
-		zone = e_cal_backend_internal_get_timezone (E_CAL_BACKEND (user_data), tzid);
-
-	return zone;
+	return e_timezone_cache_get_timezone (timezone_cache, tzid);
 }
 
 static void
@@ -3031,10 +3007,13 @@ add_item_to_cache (ECalBackendEws *cbews,
                    GHashTable *ex_to_smtp)
 {
 	ECalBackendEwsPrivate *priv;
+	ETimezoneCache *timezone_cache;
 	icalcomponent_kind kind;
 	EEwsItemType item_type;
 	icalcomponent *vtimezone, *icalcomp, *vcomp;
 	const gchar *mime_content;
+
+	timezone_cache = E_TIMEZONE_CACHE (cbews);
 
 	kind = e_cal_backend_get_kind ((ECalBackend *) cbews);
 	priv = cbews->priv;
@@ -3181,25 +3160,30 @@ add_item_to_cache (ECalBackendEws *cbews,
 	} else {
 		struct icaltimetype dt;
 		icaltimezone *zone;
+		const gchar *tzid;
+
 		mime_content = e_ews_item_get_mime_content (item);
 		vcomp = icalparser_parse_string (mime_content);
 
 		/* Add the timezone */
 		vtimezone = icalcomponent_get_first_component (vcomp, ICAL_VTIMEZONE_COMPONENT);
-		if (vtimezone) {
+		if (vtimezone != NULL) {
 			zone = icaltimezone_new ();
-			icaltimezone_set_component (zone, icalcomponent_new_clone (vtimezone));
-			if (icaltimezone_get_tzid (zone))
-				e_cal_backend_store_put_timezone (priv->store, zone);
-
+			vtimezone = icalcomponent_new_clone (vtimezone);
+			icaltimezone_set_component (zone, vtimezone);
+			e_timezone_cache_add_timezone (timezone_cache, zone);
 			icaltimezone_free (zone, TRUE);
 		}
 
 		zone = NULL;
-		if (e_ews_item_get_tzid (item) && (zone = (icaltimezone *) e_cal_backend_store_get_timezone (priv->store, e_ews_item_get_tzid (item))) == NULL)
-			zone = (icaltimezone *) icaltimezone_get_builtin_timezone (e_ews_item_get_tzid (item));
+		tzid = e_ews_item_get_tzid (item);
+		if (tzid != NULL)
+			zone = e_timezone_cache_get_timezone (
+				timezone_cache, tzid);
+		if (zone == NULL)
+			zone = icaltimezone_get_builtin_timezone (tzid);
 
-		if (zone) {
+		if (zone != NULL) {
 			icalcomp = icalcomponent_get_first_component (vcomp, kind);
 
 			icalcomponent_add_component (vcomp, icalcomponent_new_clone (icaltimezone_get_component (zone)));
@@ -3773,7 +3757,7 @@ e_cal_backend_ews_start_query (ECalBackend *backend,
 		if (e_cal_backend_get_kind (backend) ==
 		    icalcomponent_isa (e_cal_component_get_icalcomponent (comp))) {
 			if ((!search_needed) ||
-			    (e_cal_backend_sexp_match_comp (cbsexp, comp, backend))) {
+			    (e_cal_backend_sexp_match_comp (cbsexp, comp, E_TIMEZONE_CACHE (backend)))) {
 				e_data_cal_view_notify_components_added_1 (query, comp);
 			}
 		}
@@ -4287,7 +4271,6 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	/* backend_class->get_attachment_list = e_cal_backend_ews_get_attachment_list; */
 	backend_class->get_free_busy = e_cal_backend_ews_get_free_busy;
 	/* backend_class->get_changes = e_cal_backend_ews_get_changes; */
-	backend_class->internal_get_timezone = e_cal_backend_ews_internal_get_timezone;
 }
 
 static void
