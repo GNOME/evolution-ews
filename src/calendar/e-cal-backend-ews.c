@@ -4073,6 +4073,12 @@ e_cal_backend_ews_dispose (GObject *object)
 		priv->cnc = NULL;
 	}
 
+	if (priv->store) {
+		e_cal_backend_store_save (priv->store);
+		g_object_unref (priv->store);
+		priv->store = NULL;
+	}
+
 	G_OBJECT_CLASS (e_cal_backend_ews_parent_class)->dispose (object);
 }
 
@@ -4091,11 +4097,6 @@ e_cal_backend_ews_finalize (GObject *object)
 
 	/* Clean up */
 	g_rec_mutex_clear (&priv->rec_mutex);
-
-	if (priv->store) {
-		g_object_unref (priv->store);
-		priv->store = NULL;
-	}
 
 	if (priv->folder_id) {
 		g_free (priv->folder_id);
