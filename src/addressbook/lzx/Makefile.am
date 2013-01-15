@@ -20,6 +20,7 @@ liblzx_la_LDFLAGS = $(NO_UNDEFINED)
 
 liblzx_la_LIBADD = \
 	$(GNOME_PLATFORM_LIBS) \
+	$(LIBM) \
 	$(NULL)
 
 -include $(top_srcdir)/git.mk
