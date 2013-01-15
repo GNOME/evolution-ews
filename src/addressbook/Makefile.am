@@ -44,6 +44,7 @@ libebookbackendews_la_LIBADD = \
 	$(EVOLUTION_ADDRESSBOOK_LIBS) \
 	$(SQLITE3_LIBS) \
 	$(SOUP_LIBS) \
+	$(LIBM) \
 	$(NULL)
 
 libebookbackendews_la_LDFLAGS = \

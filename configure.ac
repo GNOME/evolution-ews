@@ -64,6 +64,9 @@ AM_CONDITIONAL(OS_WIN32, [test "x$os_win32" = "xyes"])
 AC_SUBST(NO_UNDEFINED)
 AC_SUBST(SOCKET_LIBS)
 
+AC_CHECK_LIBM
+AC_SUBST(LIBM)
+
 dnl ***********************
 dnl Compiler Warning Flags
 dnl ***********************
