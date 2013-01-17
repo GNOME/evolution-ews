@@ -113,7 +113,7 @@ add_foreign_folder_to_camel (CamelEwsStore *ews_store,
 			foreign_mailbox_id, EWS_FOREIGN_FOLDER_ROOT_ID, NULL,
 			mailbox, E_EWS_FOLDER_TYPE_MAILBOX,
 			CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_NOSELECT,
-			0, FALSE);
+			0, FALSE, FALSE);
 	}
 
 	if (camel_ews_store_summary_has_folder (ews_store->summary, parent_fid->id)) {
@@ -121,7 +121,7 @@ add_foreign_folder_to_camel (CamelEwsStore *ews_store,
 			ews_store->summary,
 			fid->id, parent_fid->id, fid->change_key,
 			display_foldername, E_EWS_FOLDER_TYPE_MAILBOX,
-			CAMEL_FOLDER_SUBSCRIBED, e_ews_folder_get_total_count (folder), TRUE);
+			CAMEL_FOLDER_SUBSCRIBED, e_ews_folder_get_total_count (folder), TRUE, FALSE);
 	} else {
 		const gchar *displayname;
 
@@ -137,7 +137,7 @@ add_foreign_folder_to_camel (CamelEwsStore *ews_store,
 			ews_store->summary,
 			fid->id, foreign_mailbox_id, fid->change_key,
 			displayname, E_EWS_FOLDER_TYPE_MAILBOX,
-			CAMEL_FOLDER_SUBSCRIBED, e_ews_folder_get_total_count (folder), TRUE);
+			CAMEL_FOLDER_SUBSCRIBED, e_ews_folder_get_total_count (folder), TRUE, FALSE);
 
 		g_free (fullname);
 	}
@@ -438,8 +438,7 @@ check_foreign_folder_idle (GObject *with_object,
 		camel_ews_settings_get_hosturl (ews_settings),
 		camel_network_settings_get_user (CAMEL_NETWORK_SETTINGS (ews_settings)),
 		cffd->folder,
-		cffd->include_subfolders,
-		TRUE,
+		(cffd->include_subfolders ? E_EWS_ESOURCE_FLAG_INCLUDE_SUBFOLDERS : 0) | E_EWS_ESOURCE_FLAG_OFFLINE_SYNC,
 		0,
 		cancellable,
 		perror))

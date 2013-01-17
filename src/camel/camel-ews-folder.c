@@ -1003,6 +1003,7 @@ ews_synchronize_sync (CamelFolder *folder,
 	gint mi_list_len = 0;
 	gboolean success = TRUE;
 	gint i;
+	GError *local_error = NULL;
 
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
 
@@ -1056,27 +1057,38 @@ ews_synchronize_sync (CamelFolder *folder,
 		}
 
 		if (mi_list_len == EWS_MAX_FETCH_COUNT) {
-			success = ews_sync_mi_flags (folder, mi_list, cancellable, error);
+			success = ews_sync_mi_flags (folder, mi_list, cancellable, &local_error);
 			mi_list = NULL;
 			mi_list_len = 0;
 		}
 	}
 
-	if (mi_list_len)
-		success = ews_sync_mi_flags (folder, mi_list, cancellable, error);
+	if (mi_list_len && success) {
+		success = ews_sync_mi_flags (folder, mi_list, cancellable, &local_error);
+		if (local_error && g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ACCESSDENIED)) {
+			/* if cannot save flags, then it can be a public or
+			   a foreign folder with no write access;
+			   the flags will be saved locally, at least */
+			g_clear_error (&local_error);
+			success = TRUE;
+		}			
+	}
 
 	if (deleted_uids && success)
-		success = ews_delete_messages (folder, deleted_uids, ews_folder_is_of_type (folder, CAMEL_FOLDER_TYPE_TRASH), cancellable, error);
+		success = ews_delete_messages (folder, deleted_uids, ews_folder_is_of_type (folder, CAMEL_FOLDER_TYPE_TRASH), cancellable, &local_error);
 	else
 		g_slist_free_full (deleted_uids, (GDestroyNotify) camel_pstring_free);
 
 	if (junk_uids && success)
-		success = ews_move_to_junk_folder (folder, junk_uids, cancellable, error);
+		success = ews_move_to_junk_folder (folder, junk_uids, cancellable, &local_error);
 	else
 		g_slist_free_full (junk_uids, (GDestroyNotify) camel_pstring_free);
 
 	camel_folder_summary_save_to_db (folder->summary, NULL);
 	camel_folder_summary_free_array (uids);
+
+	if (local_error)
+		g_propagate_error (error, local_error);
 
 	return success;
 }

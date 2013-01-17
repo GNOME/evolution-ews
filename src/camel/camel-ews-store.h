@@ -53,6 +53,8 @@
 
 #define EWS_FOREIGN_FOLDER_ROOT_ID		"ForeignRoot"
 #define EWS_FOREIGN_FOLDER_ROOT_DISPLAY_NAME	_("Foreign Folders")
+#define EWS_PUBLIC_FOLDER_ROOT_ID		"PublicRoot"
+#define EWS_PUBLIC_FOLDER_ROOT_DISPLAY_NAME	_("Public Folders")
 
 G_BEGIN_DECLS
 

@@ -97,6 +97,10 @@ void		camel_ews_store_summary_set_foreign_subfolders
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_id,
 						 gboolean foreign_subfolders);
+void		camel_ews_store_summary_set_public
+						(CamelEwsStoreSummary *ews_summary,
+						 const gchar *folder_id,
+						 gboolean is_public);
 
 gchar *	camel_ews_store_summary_get_folder_name
 						(CamelEwsStoreSummary *ews_summary,
@@ -142,6 +146,10 @@ gboolean	camel_ews_store_summary_get_foreign_subfolders
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *folder_id,
 						 GError **error);
+gboolean	camel_ews_store_summary_get_public
+						(CamelEwsStoreSummary *ews_summary,
+						 const gchar *folder_id,
+						 GError **error);
 
 GSList *	camel_ews_store_summary_get_folders
 						(CamelEwsStoreSummary *ews_summary,
@@ -174,7 +182,8 @@ void		camel_ews_store_summary_new_folder
 						 EEwsFolderType folder_type,
 						 guint64 folder_flags,
 						 guint64 total,
-						 gboolean foreign);
+						 gboolean foreign,
+						 gboolean public_folder);
 
 gchar *		camel_ews_store_summary_get_folder_id_from_name
 						(CamelEwsStoreSummary *ews_summary,

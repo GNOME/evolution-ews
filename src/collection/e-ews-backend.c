@@ -514,9 +514,10 @@ add_remote_sources (EEwsBackend *backend)
 		if (!e_source_has_extension (source, extension_name))
 			continue;
 
-		/* foreign folders are just added */
+		/* foreign or public folders are just added */
 		extension = e_source_get_extension (source, extension_name);
-		if (e_source_ews_folder_get_foreign (extension)) {
+		if (e_source_ews_folder_get_foreign (extension) ||
+		    e_source_ews_folder_get_public (extension)) {
 			e_server_side_source_set_writable (
 				E_SERVER_SIDE_SOURCE (source), TRUE);
 			e_server_side_source_set_remote_deletable (
@@ -752,9 +753,10 @@ ews_backend_create_resource_sync (ECollectionBackend *backend,
 	if (e_source_has_extension (source, extension_name)) {
 		ESourceEwsFolder *extension;
 
-		/* foreign folders are just added */
+		/* foreign and public folders are just added */
 		extension = e_source_get_extension (source, extension_name);
-		if (e_source_ews_folder_get_foreign (extension))
+		if (e_source_ews_folder_get_foreign (extension) ||
+		    e_source_ews_folder_get_public (extension))
 			success = TRUE;
 	}
 
@@ -841,10 +843,8 @@ ews_backend_create_resource_sync (ECollectionBackend *backend,
 			E_SERVER_SIDE_SOURCE (source), cache_dir);
 
 		/* Set permissions for clients. */
-		e_server_side_source_set_writable (
-			E_SERVER_SIDE_SOURCE (source), TRUE);
-		e_server_side_source_set_remote_deletable (
-			E_SERVER_SIDE_SOURCE (source), TRUE);
+		e_server_side_source_set_writable (E_SERVER_SIDE_SOURCE (source), TRUE);
+		e_server_side_source_set_remote_deletable (E_SERVER_SIDE_SOURCE (source), TRUE);
 
 		server = e_collection_backend_ref_server (backend);
 		e_source_registry_server_add_source (server, source);
@@ -886,8 +886,9 @@ ews_backend_delete_resource_sync (ECollectionBackend *backend,
 	}
 	extension = e_source_get_extension (source, extension_name);
 
-	if (e_source_ews_folder_get_foreign (extension)) {
-		/* do not delete foreign folders,
+	if (e_source_ews_folder_get_foreign (extension) ||
+	    e_source_ews_folder_get_public (extension)) {
+		/* do not delete foreign or public folders,
 		 * just remove them from local store */
 		success = TRUE;
 	} else {

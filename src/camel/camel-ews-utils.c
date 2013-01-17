@@ -48,6 +48,14 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store,
 	fi = camel_folder_info_new ();
 	fi->full_name = camel_ews_store_summary_get_folder_full_name (
 		ews_summary, fid, NULL);
+
+	if (!fi->full_name) {
+		camel_folder_info_free (fi);
+		g_warn_if_reached ();
+
+		return NULL;
+	}
+
 	fi->display_name = camel_ews_store_summary_get_folder_name (
 		ews_summary, fid, NULL);
 	fi->flags = camel_ews_store_summary_get_folder_flags (
@@ -56,6 +64,25 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store,
 		ews_summary, fid, NULL);
 	fi->total = camel_ews_store_summary_get_folder_total (
 		ews_summary, fid, NULL);
+
+	if (!(fi->flags & CAMEL_FOLDER_TYPE_MASK)) {
+		switch (camel_ews_store_summary_get_folder_type (ews_summary, fid, NULL)) {
+		case E_EWS_FOLDER_TYPE_CALENDAR:
+			fi->flags |= CAMEL_FOLDER_TYPE_EVENTS;
+			break;
+		case E_EWS_FOLDER_TYPE_CONTACTS:
+			fi->flags |= CAMEL_FOLDER_TYPE_CONTACTS;
+			break;
+		case E_EWS_FOLDER_TYPE_TASKS:
+			fi->flags |= CAMEL_FOLDER_TYPE_TASKS;
+			break;
+		case E_EWS_FOLDER_TYPE_MEMOS:
+			fi->flags |= CAMEL_FOLDER_TYPE_MEMOS;
+			break;
+		default:
+			break;
+		}
+	}
 
 	return fi;
 }
@@ -81,12 +108,12 @@ sync_deleted_folders (CamelEwsStore *store,
 		if (ftype == E_EWS_FOLDER_TYPE_MAILBOX) {
 			fi = camel_ews_utils_build_folder_info (store, fid);
 
-			camel_ews_store_summary_remove_folder (
-				ews_summary, fid, &error);
+			camel_ews_store_summary_remove_folder (ews_summary, fid, &error);
 
-			camel_subscribable_folder_unsubscribed (
-				CAMEL_SUBSCRIBABLE (store), fi);
-			camel_store_folder_deleted (CAMEL_STORE (store), fi);
+			if ((fi->flags & CAMEL_FOLDER_SUBSCRIBED) != 0) {
+				camel_subscribable_folder_unsubscribed (CAMEL_SUBSCRIBABLE (store), fi);
+				camel_store_folder_deleted (CAMEL_STORE (store), fi);
+			}
 
 			g_clear_error (&error);
 		}
@@ -227,9 +254,10 @@ add_folder_to_summary (CamelEwsStore *store,
 
 	camel_ews_store_summary_new_folder (
 		ews_summary, fid->id,
-		pfid->id, fid->change_key,
+		pfid ? pfid->id : NULL, fid->change_key,
 		dname, ftype, 0, total,
-		e_ews_folder_get_foreign (folder));
+		e_ews_folder_get_foreign (folder),
+		FALSE);
 	camel_ews_store_summary_set_folder_unread (
 		ews_summary, fid->id, unread);
 }

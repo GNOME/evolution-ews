@@ -386,7 +386,8 @@ camel_ews_store_summary_new_folder (CamelEwsStoreSummary *ews_summary,
                                     EEwsFolderType folder_type,
                                     guint64 folder_flags,
                                     guint64 total,
-                                    gboolean foreign)
+                                    gboolean foreign,
+				    gboolean public_folder)
 {
 	const gchar *folder_type_nick;
 
@@ -410,15 +411,19 @@ camel_ews_store_summary_new_folder (CamelEwsStoreSummary *ews_summary,
 	g_key_file_set_string (
 		ews_summary->priv->key_file,
 		folder_id, "FolderType", folder_type_nick);
-	g_key_file_set_uint64 (
-		ews_summary->priv->key_file,
-		folder_id, "Flags", folder_flags);
+	if (folder_flags)
+		g_key_file_set_uint64 (
+			ews_summary->priv->key_file,
+			folder_id, "Flags", folder_flags);
 	g_key_file_set_uint64 (
 		ews_summary->priv->key_file,
 		folder_id, "Total", total);
 	g_key_file_set_boolean (
 		ews_summary->priv->key_file,
 		folder_id, "Foreign", foreign);
+	g_key_file_set_boolean (
+		ews_summary->priv->key_file,
+		folder_id, "Public", public_folder);
 
 	ews_ss_hash_replace (ews_summary, g_strdup (folder_id), NULL, FALSE);
 
@@ -571,6 +576,21 @@ camel_ews_store_summary_set_foreign_subfolders (CamelEwsStoreSummary *ews_summar
 	g_key_file_set_boolean (
 		ews_summary->priv->key_file,
 		folder_id, "ForeignSubfolders", foreign_subfolders);
+	ews_summary->priv->dirty = TRUE;
+
+	S_UNLOCK (ews_summary);
+}
+
+void
+camel_ews_store_summary_set_public (CamelEwsStoreSummary *ews_summary,
+                                    const gchar *folder_id,
+                                    gboolean is_public)
+{
+	S_LOCK (ews_summary);
+
+	g_key_file_set_boolean (
+		ews_summary->priv->key_file,
+		folder_id, "Public", is_public);
 	ews_summary->priv->dirty = TRUE;
 
 	S_UNLOCK (ews_summary);
@@ -791,6 +811,23 @@ camel_ews_store_summary_get_foreign_subfolders (CamelEwsStoreSummary *ews_summar
 
 	ret = g_key_file_get_boolean (
 		ews_summary->priv->key_file, folder_id, "ForeignSubfolders", error);
+
+	S_UNLOCK (ews_summary);
+
+	return ret;
+}
+
+gboolean
+camel_ews_store_summary_get_public (CamelEwsStoreSummary *ews_summary,
+                                    const gchar *folder_id,
+                                    GError **error)
+{
+	gboolean ret;
+
+	S_LOCK (ews_summary);
+
+	ret = g_key_file_get_boolean (
+		ews_summary->priv->key_file, folder_id, "Public", error);
 
 	S_UNLOCK (ews_summary);
 

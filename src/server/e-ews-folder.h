@@ -80,6 +80,13 @@ EwsFolderId *	e_ews_folder_id_new (const gchar *id,
 				     gboolean is_distinguished_id);
 void		e_ews_folder_id_free (EwsFolderId *fid);
 
+typedef enum {
+	E_EWS_ESOURCE_FLAG_NONE			= 0,
+	E_EWS_ESOURCE_FLAG_INCLUDE_SUBFOLDERS	= 1 << 0,
+	E_EWS_ESOURCE_FLAG_OFFLINE_SYNC		= 1 << 1,
+	E_EWS_ESOURCE_FLAG_PUBLIC_FOLDER	= 1 << 2
+} EEwsESourceFlags;
+
 gchar *		e_ews_folder_utils_pick_color_spec		(gint move_by,
 								 gboolean around_middle);
 gboolean	e_ews_folder_utils_populate_esource		(ESource *source,
@@ -87,8 +94,7 @@ gboolean	e_ews_folder_utils_populate_esource		(ESource *source,
 								 const gchar *master_hosturl,
 								 const gchar *master_username,
 								 EEwsFolder *folder,
-								 gboolean include_subfolders,
-								 gboolean offline_sync,
+								 EEwsESourceFlags flags,
 								 gint color_seed,
 								 GCancellable *cancellable,
 								 GError **perror);
@@ -96,8 +102,7 @@ gboolean	e_ews_folder_utils_add_as_esource		(ESourceRegistry *pregistry,
 								 const gchar *master_hosturl,
 								 const gchar *master_username,
 								 EEwsFolder *folder,
-								 gboolean include_subfolders,
-								 gboolean offline_sync,
+								 EEwsESourceFlags flags,
 								 gint color_seed,
 								 GCancellable *cancellable,
 								 GError **perror);
@@ -105,6 +110,11 @@ gboolean	e_ews_folder_utils_remove_as_esource		(ESourceRegistry *pregistry,
 								 const gchar *master_hosturl,
 								 const gchar *master_username,
 								 const gchar *folder_id,
+								 GCancellable *cancellable,
+								 GError **perror);
+GList *		e_ews_folder_utils_get_esources			(ESourceRegistry *pregistry,
+								 const gchar *master_hosturl,
+								 const gchar *master_username,
 								 GCancellable *cancellable,
 								 GError **perror);
 gboolean	e_ews_folder_utils_is_subscribed_as_esource	(const GList *esources,

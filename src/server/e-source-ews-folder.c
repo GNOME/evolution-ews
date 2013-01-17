@@ -32,6 +32,7 @@ struct _ESourceEwsFolderPrivate {
 	gchar *id;
 	gboolean foreign;
 	gboolean foreign_subfolders;
+	gboolean is_public;
 };
 
 enum {
@@ -39,7 +40,8 @@ enum {
 	PROP_CHANGE_KEY,
 	PROP_ID,
 	PROP_FOREIGN,
-	PROP_FOREIGN_SUBFOLDERS
+	PROP_FOREIGN_SUBFOLDERS,
+	PROP_PUBLIC
 };
 
 G_DEFINE_DYNAMIC_TYPE (
@@ -74,6 +76,12 @@ source_ews_folder_set_property (GObject *object,
 
 		case PROP_FOREIGN_SUBFOLDERS:
 			e_source_ews_folder_set_foreign_subfolders (
+				E_SOURCE_EWS_FOLDER (object),
+				g_value_get_boolean (value));
+			return;
+
+		case PROP_PUBLIC:
+			e_source_ews_folder_set_public (
 				E_SOURCE_EWS_FOLDER (object),
 				g_value_get_boolean (value));
 			return;
@@ -114,6 +122,13 @@ source_ews_folder_get_property (GObject *object,
 			g_value_set_boolean (
 				value,
 				e_source_ews_folder_get_foreign_subfolders (
+				E_SOURCE_EWS_FOLDER (object)));
+			return;
+
+		case PROP_PUBLIC:
+			g_value_set_boolean (
+				value,
+				e_source_ews_folder_get_public (
 				E_SOURCE_EWS_FOLDER (object)));
 			return;
 	}
@@ -200,6 +215,19 @@ e_source_ews_folder_class_init (ESourceEwsFolderClass *class)
 			"foreign-subfolders",
 			"ForeignSubfolders",
 			"Whether to search for subfolders of (this) foreign folder",
+			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS |
+			E_SOURCE_PARAM_SETTING));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_PUBLIC,
+		g_param_spec_boolean (
+			"public",
+			"Public",
+			"The folder is a public folder, part of Public Folders",
 			FALSE,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
@@ -382,4 +410,26 @@ e_source_ews_folder_set_foreign_subfolders (ESourceEwsFolder *extension,
 	extension->priv->foreign_subfolders = foreign_subfolders;
 
 	g_object_notify (G_OBJECT (extension), "foreign-subfolders");
+}
+
+gboolean
+e_source_ews_folder_get_public (ESourceEwsFolder *extension)
+{
+	g_return_val_if_fail (E_IS_SOURCE_EWS_FOLDER (extension), FALSE);
+
+	return extension->priv->is_public;
+}
+
+void
+e_source_ews_folder_set_public (ESourceEwsFolder *extension,
+                                 gboolean is_public)
+{
+	g_return_if_fail (E_IS_SOURCE_EWS_FOLDER (extension));
+
+	if ((extension->priv->is_public ? 1 : 0) == (is_public ? 1 : 0))
+		return;
+
+	extension->priv->is_public = is_public;
+
+	g_object_notify (G_OBJECT (extension), "public");
 }

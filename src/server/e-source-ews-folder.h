@@ -84,6 +84,9 @@ gboolean	e_source_ews_folder_get_foreign_subfolders
 void		e_source_ews_folder_set_foreign_subfolders
 						(ESourceEwsFolder *extension,
 						 gboolean foreign_subfolders);
+gboolean	e_source_ews_folder_get_public	(ESourceEwsFolder *extension);
+void		e_source_ews_folder_set_public	(ESourceEwsFolder *extension,
+						 gboolean is_public);
 
 G_END_DECLS
 

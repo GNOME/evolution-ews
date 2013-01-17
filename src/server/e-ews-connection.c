@@ -7714,6 +7714,10 @@ e_ews_connection_find_folder (EEwsConnection *cnc,
 	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "FindFolder", "Traversal", "Shallow", EWS_EXCHANGE_2007_SP1);
 	e_soap_message_start_element (msg, "FolderShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, "Default");
+	e_soap_message_start_element (msg, "AdditionalProperties", NULL, NULL);
+	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", "folder:FolderClass");
+	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", "folder:ChildFolderCount");
+	e_soap_message_end_element (msg); /* AdditionalProperties */
 	e_soap_message_end_element (msg);
 
 	e_soap_message_start_element (msg, "ParentFolderIds", "messages", NULL);

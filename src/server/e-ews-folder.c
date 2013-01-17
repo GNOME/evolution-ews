@@ -472,8 +472,7 @@ e_ews_folder_utils_populate_esource (ESource *source,
                                      const gchar *master_hosturl,
                                      const gchar *master_username,
                                      EEwsFolder *folder,
-				     gboolean include_subfolders,
-                                     gboolean offline_sync,
+				     EEwsESourceFlags flags,
                                      gint color_seed,
                                      GCancellable *cancellable,
                                      GError **perror)
@@ -499,10 +498,9 @@ e_ews_folder_utils_populate_esource (ESource *source,
 			case E_EWS_FOLDER_TYPE_CALENDAR:
 				backend_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_CALENDAR);
 				break;
-			/*case E_EWS_FOLDER_TYPE_JOURNAL:
-			case E_EWS_FOLDER_TYPE_MEMO:
+			case E_EWS_FOLDER_TYPE_MEMOS:
 				backend_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_MEMO_LIST);
-				break;*/
+				break;
 			case E_EWS_FOLDER_TYPE_TASKS:
 				backend_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_TASK_LIST);
 				break;
@@ -524,10 +522,11 @@ e_ews_folder_utils_populate_esource (ESource *source,
 			e_source_ews_folder_set_id (folder_ext, folder_id->id);
 			e_source_ews_folder_set_change_key (folder_ext, NULL);
 			e_source_ews_folder_set_foreign (folder_ext, e_ews_folder_get_foreign (folder));
-			e_source_ews_folder_set_foreign_subfolders (folder_ext, include_subfolders);
+			e_source_ews_folder_set_foreign_subfolders (folder_ext, (flags & E_EWS_ESOURCE_FLAG_INCLUDE_SUBFOLDERS) != 0);
+			e_source_ews_folder_set_public (folder_ext, (flags & E_EWS_ESOURCE_FLAG_PUBLIC_FOLDER) != 0);
 
 			offline_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_OFFLINE);
-			e_source_offline_set_stay_synchronized (offline_ext, offline_sync);
+			e_source_offline_set_stay_synchronized (offline_ext, (flags & E_EWS_ESOURCE_FLAG_OFFLINE_SYNC) != 0);
 
 			/* set also color for calendar-like sources */
 			if (folder_type != E_EWS_FOLDER_TYPE_CONTACTS) {
@@ -560,8 +559,7 @@ e_ews_folder_utils_add_as_esource (ESourceRegistry *pregistry,
                                    const gchar *master_hosturl,
                                    const gchar *master_username,
                                    EEwsFolder *folder,
-				   gboolean include_subfolders,
-                                   gboolean offline_sync,
+				   EEwsESourceFlags flags,
                                    gint color_seed,
                                    GCancellable *cancellable,
                                    GError **perror)
@@ -597,8 +595,7 @@ e_ews_folder_utils_add_as_esource (ESourceRegistry *pregistry,
 		master_hosturl,
 		master_username,
 		folder,
-		include_subfolders,
-		offline_sync,
+		flags,
 		color_seed,
 		cancellable,
 		perror)) {
@@ -636,14 +633,45 @@ e_ews_folder_utils_remove_as_esource (ESourceRegistry *pregistry,
 	sources = e_source_registry_list_sources (registry, NULL);
 	source = e_ews_folder_utils_get_source_for_folder (sources, master_hosturl, master_username, folder_id);
 
-	if (source)
-		res = e_source_remove_sync (source, cancellable, perror);
+	if (source) {
+		if (e_source_get_removable (source))
+			res = e_source_remove_sync (source, cancellable, perror);
+		else
+			res = e_source_remote_delete_sync (source, cancellable, perror);
+	}
 
 	g_list_free_full (sources, g_object_unref);
 	if (!pregistry)
 		g_object_unref (registry);
 
 	return res;
+}
+
+GList *
+e_ews_folder_utils_get_esources (ESourceRegistry *pregistry,
+				 const gchar *master_hosturl,
+				 const gchar *master_username,
+				 GCancellable *cancellable,
+				 GError **perror)
+{
+	ESourceRegistry *registry;
+	GList *all_sources, *esources = NULL;
+
+	registry = pregistry;
+	if (!registry) {
+		registry = e_source_registry_new_sync (cancellable, perror);
+		if (!registry)
+			return NULL;
+	}
+
+	all_sources = e_source_registry_list_sources (registry, NULL);
+	esources = e_ews_folder_utils_filter_sources_for_account (all_sources, master_hosturl, master_username);
+
+	g_list_free_full (all_sources, g_object_unref);
+	if (!pregistry)
+		g_object_unref (registry);
+
+	return esources;
 }
 
 gboolean
