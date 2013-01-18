@@ -6,15 +6,15 @@
 # 
 # 
 # Javier Mazorra Rodríguez <mazi.debian@gmail.com>, 2012.
-# Daniel Mustieles <daniel.mustieles@gmail.com>, 2011, 2012., 2012.
+# Daniel Mustieles <daniel.mustieles@gmail.com>, 2011, 2012., 2013.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2012-11-16 16:17+0000\n"
-"PO-Revision-Date: 2012-11-19 13:41+0100\n"
+"POT-Creation-Date: 2013-01-17 11:11+0000\n"
+"PO-Revision-Date: 2013-01-18 10:33+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "Language: \n"
@@ -24,41 +24,41 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n!=1);\n"
 "X-Generator: Gtranslator 2.91.5\n"
 
-#: ../src/addressbook/e-book-backend-ews.c:982
+#: ../src/addressbook/e-book-backend-ews.c:969
 msgid "The backend does not support bulk additions"
 msgstr "El «backend» no soporta adiciones"
 
-#: ../src/addressbook/e-book-backend-ews.c:1266
+#: ../src/addressbook/e-book-backend-ews.c:1253
 msgid "The backend does not support bulk modifications"
 msgstr "El «backend» no soporta modificaciones"
 
-#: ../src/addressbook/e-book-backend-ews.c:1449
+#: ../src/addressbook/e-book-backend-ews.c:1436
 msgid "Wait till syncing is done"
 msgstr "Esperar a que termine la sincronización"
 
-#: ../src/addressbook/e-book-backend-ews.c:1787
+#: ../src/addressbook/e-book-backend-ews.c:1775
 #, c-format
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr "Descarga de contactos en %s %d%% completada… "
 
-#: ../src/addressbook/e-book-backend-ews.c:2332
+#: ../src/addressbook/e-book-backend-ews.c:2324
 msgid "Syncing contacts..."
 msgstr "Sincronizando contactos…"
 
-#: ../src/addressbook/e-book-backend-ews.c:2550
+#: ../src/addressbook/e-book-backend-ews.c:2548
 #: ../src/configuration/e-ews-search-user.c:364
 msgid "Searching..."
 msgstr "Buscando…"
 
-#: ../src/calendar/e-cal-backend-ews.c:1022
+#: ../src/calendar/e-cal-backend-ews.c:1001
 msgid "EWS does not support bulk removals"
 msgstr "EWS no soporta eliminaciones"
 
-#: ../src/calendar/e-cal-backend-ews.c:1607
+#: ../src/calendar/e-cal-backend-ews.c:1644
 msgid "EWS does not support bulk additions"
 msgstr "EWS no soporta adiciones"
 
-#: ../src/calendar/e-cal-backend-ews.c:2109
+#: ../src/calendar/e-cal-backend-ews.c:2223
 msgid "EWS does not support bulk modifications"
 msgstr "EWS no soporta modificaciones"
 
@@ -92,12 +92,12 @@ msgstr "No se pudo crear la ruta de la caché"
 msgid "Failed to move message cache file"
 msgstr "Falló al mover el archivo de la caché de mensajes"
 
-#: ../src/camel/camel-ews-folder.c:1140
+#: ../src/camel/camel-ews-folder.c:1186
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "No se pudo cargar el resumen para %s"
 
-#: ../src/camel/camel-ews-folder.c:1576
+#: ../src/camel/camel-ews-folder.c:1622
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr ""
@@ -177,56 +177,63 @@ msgstr ""
 "Esta opción conectará al servidor de Exchange usando una contraseña de texto "
 "plano con autenticación básica."
 
-#: ../src/camel/camel-ews-store.c:185
+#: ../src/camel/camel-ews-store.c:189
 #, c-format
 msgid "Session has no storage path"
 msgstr "La sesión no tiene ruta de almacenamiento"
 
-#: ../src/camel/camel-ews-store.c:283
+#: ../src/camel/camel-ews-store.c:226
+#, c-format
+#| msgctxt "ForeignFolders"
+#| msgid "%s_%d"
+msgctxt "PublicFolders"
+msgid "%s_%d"
+msgstr "%s_%d"
+
+#: ../src/camel/camel-ews-store.c:355
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:571
+#: ../src/camel/camel-ews-store.c:678
 msgid "Updating foreign folder structure"
 msgstr "Actualizando la estructura de carpetas externas"
 
-#: ../src/camel/camel-ews-store.c:720
+#: ../src/camel/camel-ews-store.c:957
 msgid "Authentication password not available"
 msgstr "Autenticación de contraseña no disponible"
 
-#: ../src/camel/camel-ews-store.c:873
+#: ../src/camel/camel-ews-store.c:1109
 msgid "Query for authentication types is not supported"
 msgstr "La petición de tipos de autenticación no está soportada"
 
-#: ../src/camel/camel-ews-store.c:925
+#: ../src/camel/camel-ews-store.c:1161
 #, c-format
 msgid "No such folder: %s"
 msgstr "No existe la carpeta: %s"
 
-#: ../src/camel/camel-ews-store.c:1072
-msgid ""
-"Cannot list folders available for subscription of Exchange Web Services "
-"account, use 'Subscribe to folder of other user' context menu option above "
-"the account node in the folder tree instead."
-msgstr ""
-"No se pueden listar las carpetas disponibles para suscripción de la cuenta "
-"de servicios web de Exchange, utilice en su lugar la opción de menú de "
-"contexto «Suscribir a una carpeta de otro usuario» encima del nodo de cuenta "
-"en el árbol de carpetas."
+#: ../src/camel/camel-ews-store.c:1472
+#| msgid "Cannot subscribe EWS folders in offline mode"
+msgid "Cannot list EWS public folders in offline mode"
+msgstr "No se pueden listar las carpetas EWS en modo desconectado"
 
-#: ../src/camel/camel-ews-store.c:1179
+#: ../src/camel/camel-ews-store.c:1545
+#| msgid "No such folder: %s"
+msgid "Cannot find any EWS public folders"
+msgstr "No se puede encontrar ninguna carpeta EWS pública"
+
+#: ../src/camel/camel-ews-store.c:1650
 #, c-format
 msgid "Cannot create folder '%s', folder already exists"
 msgstr "No se puede crear la carpeta «%s», la carpeta ya existe"
 
-#: ../src/camel/camel-ews-store.c:1194
+#: ../src/camel/camel-ews-store.c:1665
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "La carpeta padre %s no existe"
 
-#: ../src/camel/camel-ews-store.c:1204
+#: ../src/camel/camel-ews-store.c:1675
 #, c-format
 msgid ""
 "Cannot create folder under '%s', it is used for folders of other users only"
@@ -234,66 +241,96 @@ msgstr ""
 "No se puede crear la carpeta bajo «%s», sólo la usan carpetas de otros "
 "usuarios"
 
-#: ../src/camel/camel-ews-store.c:1273
+#: ../src/camel/camel-ews-store.c:1685
+#, c-format
+#| msgid ""
+#| "Cannot create folder under '%s', it is used for folders of other users "
+#| "only"
+msgid "Cannot create folder under '%s', it is used for public folders only"
+msgstr ""
+"No se puede crear la carpeta bajo «%s», se usa sólo para carpetas públicas"
+
+#: ../src/camel/camel-ews-store.c:1754
 #, c-format
 msgid "Folder does not exist"
 msgstr "La carpeta no existe"
 
-#: ../src/camel/camel-ews-store.c:1282
+#: ../src/camel/camel-ews-store.c:1763
 #, c-format
 msgid "Cannot remove folder '%s', it is used for folders of other users only"
 msgstr ""
-"No se puede borrar la carpeta «%s», sólo la usan carpetas de otros usuarios"
+"No se puede eliminar la carpeta «%s», sólo la usan carpetas de otros usuarios"
 
-#: ../src/camel/camel-ews-store.c:1389
+#: ../src/camel/camel-ews-store.c:1773
+#, c-format
+#| msgid ""
+#| "Cannot remove folder '%s', it is used for folders of other users only"
+msgid "Cannot remove folder '%s', it is used for public folders only"
+msgstr "No se puede quitar la carpeta «%s», se usa sólo para carpetas públicas"
+
+#: ../src/camel/camel-ews-store.c:1881
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "La carpeta %s no existe"
 
-#: ../src/camel/camel-ews-store.c:1399
+#: ../src/camel/camel-ews-store.c:1891
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "No hay cambios en registros clave de la carpeta %s"
 
-#: ../src/camel/camel-ews-store.c:1441
+#: ../src/camel/camel-ews-store.c:1933
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "No se puede renombrar y mover una carpeta al mismo tiempo"
 
-#: ../src/camel/camel-ews-store.c:1477
+#: ../src/camel/camel-ews-store.c:1969
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "No se puede encontrar el ID de carpeta para la carpeta padre %s"
 
-#: ../src/camel/camel-ews-store.c:1527 ../src/camel/camel-ews-transport.c:69
+#: ../src/camel/camel-ews-store.c:2019 ../src/camel/camel-ews-transport.c:69
 #, c-format
 msgid "Exchange server %s"
 msgstr "Servidor Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:1530
+#: ../src/camel/camel-ews-store.c:2022
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Servicio Exchange para %s en %s"
 
-#: ../src/camel/camel-ews-store.c:1574
+#: ../src/camel/camel-ews-store.c:2066
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "No se pudo localizar la carpeta de la Papelera"
 
-#: ../src/camel/camel-ews-store.c:1609
+#: ../src/camel/camel-ews-store.c:2101
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "No se puedo encontrar la carpeta de Correo no deseado"
 
-#: ../src/camel/camel-ews-store.c:1687
+#: ../src/camel/camel-ews-store.c:2291
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "No se puede suscribir a las carpetas EWS en modo desconectado"
 
-#: ../src/camel/camel-ews-store.c:1709
+#: ../src/camel/camel-ews-store.c:2309
+#, c-format
+#| msgid "Cannot create folder '%s', folder already exists"
+msgid "Cannot subscribe folder '%s', no public folder available"
+msgstr ""
+"No se puede suscribir a la carpeta «%s», no hay ninguna carpeta pública "
+"disponible"
+
+#: ../src/camel/camel-ews-store.c:2319
+#, c-format
+#| msgid "No such folder: %s"
+msgid "Cannot subscribe folder '%s', folder not found"
+msgstr "No se puede suscribir a la carpeta «%s», no se ha encontrado la carpeta"
+
+#: ../src/camel/camel-ews-store.c:2409
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "No se puede desuscribir de las carpetas EWS en modo desconectado"
 
-#: ../src/camel/camel-ews-store.c:1751
+#: ../src/camel/camel-ews-store.c:2525
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Debe estar conectado para completar esta operación"
@@ -303,20 +340,20 @@ msgstr "Debe estar conectado para completar esta operación"
 msgid "Exchange mail delivery via %s"
 msgstr "Correo Exchange entregado por %s"
 
-#: ../src/camel/camel-ews-transport.c:120
+#: ../src/camel/camel-ews-transport.c:119
 msgid "Cannot send message with no From address"
 msgstr "No se puede enviar un mensaje sin una dirección en «Para»"
 
-#: ../src/camel/camel-ews-transport.c:126
+#: ../src/camel/camel-ews-transport.c:125
 msgid "Exchange server cannot send message with multiple From addresses"
 msgstr ""
 "El servidor Exchange no puede enviar un mensaje con varias direcciones «Para»"
 
-#: ../src/camel/camel-ews-transport.c:137
+#: ../src/camel/camel-ews-transport.c:136
 msgid "Failed to read From address"
 msgstr "Falló al la dirección «Para»"
 
-#: ../src/camel/camel-ews-transport.c:149
+#: ../src/camel/camel-ews-transport.c:148
 #, c-format
 msgid ""
 "Exchange server cannot send message as '%s', when the account was configured "
@@ -325,70 +362,70 @@ msgstr ""
 "El servidor Exchange no puede enviar un mensaje como «%s», cuando la cuenta "
 "se ha configurado para la dirección «%s»"
 
-#: ../src/camel/camel-ews-transport.c:163
+#: ../src/camel/camel-ews-transport.c:162
 #, c-format
 msgid "Service not connected"
 msgstr "Servicio no conectado"
 
-#: ../src/collection/e-ews-backend.c:391
+#: ../src/collection/e-ews-backend.c:406
 #: ../src/configuration/e-mail-config-ews-gal.c:274
 msgid "Global Address List"
 msgstr "Lista global de direcciones"
 
-#: ../src/collection/e-ews-backend.c:776
+#: ../src/collection/e-ews-backend.c:793
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named '%s'"
 msgstr ""
 "No se pudo determinar una clase de carpeta apropiada para una nueva carpeta "
 "llamada «%s»"
 
-#: ../src/collection/e-ews-backend.c:867
+#: ../src/collection/e-ews-backend.c:882
 #, c-format
 msgid "Data source '%s' does not represent an Exchange Web Services folder"
 msgstr ""
 "El origen de los datos «%s» no representa una carpeta de servicios web de "
 "Exchange"
 
-#: ../src/configuration/e-ews-config-utils.c:515
+#: ../src/configuration/e-ews-config-utils.c:511
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr ""
 "No se pueden editar los permisos de la carpeta «%s», elija otra carpeta."
 
-#: ../src/configuration/e-ews-config-utils.c:593
+#: ../src/configuration/e-ews-config-utils.c:589
 msgid "Subscribe to folder of other user..."
 msgstr "Suscribirse a la carpeta de otro usuario…"
 
-#: ../src/configuration/e-ews-config-utils.c:602
-#: ../src/configuration/e-ews-config-utils.c:883
-#: ../src/configuration/e-ews-config-utils.c:914
-#: ../src/configuration/e-ews-config-utils.c:945
-#: ../src/configuration/e-ews-config-utils.c:976
+#: ../src/configuration/e-ews-config-utils.c:598
+#: ../src/configuration/e-ews-config-utils.c:879
+#: ../src/configuration/e-ews-config-utils.c:910
+#: ../src/configuration/e-ews-config-utils.c:941
+#: ../src/configuration/e-ews-config-utils.c:972
 msgid "Permissions..."
 msgstr "Permisos…"
 
-#: ../src/configuration/e-ews-config-utils.c:604
+#: ../src/configuration/e-ews-config-utils.c:600
 msgid "Edit EWS folder permissions"
 msgstr "Editar permisos de la carpeta EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:885
+#: ../src/configuration/e-ews-config-utils.c:881
 msgid "Edit EWS calendar permissions"
 msgstr "Editar permisos del calendario EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:916
+#: ../src/configuration/e-ews-config-utils.c:912
 msgid "Edit EWS tasks permissions"
 msgstr "Editar permisos de las tareas EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:947
+#: ../src/configuration/e-ews-config-utils.c:943
 msgid "Edit EWS memos permissions"
 msgstr "Editar permisos de notas EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:978
+#: ../src/configuration/e-ews-config-utils.c:974
 msgid "Edit EWS contacts permissions"
 msgstr "Editar permisos de contactos EWS"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:87
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:504
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:499
 msgctxt "PermissionsLevel"
 msgid "None"
 msgstr "Nadie"
@@ -444,7 +481,7 @@ msgid "Free/Busy time, subject, location"
 msgstr "Tiempo libre/ocupado, asunto, ubicación"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:143
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:525
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:520
 msgctxt "PermissionsLevel"
 msgid "Custom"
 msgstr "Personalizado"
@@ -470,7 +507,7 @@ msgstr "Desconocido"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:849
 #: ../src/configuration/e-ews-search-user.c:430
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1080
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1075
 msgid "Name"
 msgstr "Nombre"
 
@@ -483,7 +520,7 @@ msgid "Edit EWS folder permissions..."
 msgstr "Editar permisos de la carpeta de EWS…"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:932
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:632
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:633
 msgid "Account:"
 msgstr "Cuenta"
 
@@ -639,8 +676,8 @@ msgstr "Elegir usuario EWS…"
 msgid "_Search:"
 msgstr "Bu_scar:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:98
-#: ../src/server/e-ews-folder.c:600
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
+#: ../src/server/e-ews-folder.c:591
 #, c-format
 msgid "Cannot add folder, folder already exists as '%s'"
 msgstr "No se puede añadir la carpeta, la carpeta ya existe como «%s»"
@@ -648,30 +685,30 @@ msgstr "No se puede añadir la carpeta, la carpeta ya existe como «%s»"
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
 #. * Example result: "Mailbox - John Smith"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:108
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:107
 #, c-format
 msgctxt "ForeignFolder"
 msgid "Mailbox - %s"
 msgstr "Buzón - %s"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:270
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:272
 msgid "Cannot test foreign folder availability while in offline mode"
 msgstr ""
 "No se puede probar la disponibilidad de la carpeta externa en modo "
 "desconectado"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:295
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:297
 #, c-format
 msgid "User '%s' was not found on the server"
 msgstr "No se encontró el usuario «%s» en el servidor"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:331
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:333
 #, c-format
 msgid "User name '%s' is ambiguous, specify it more precisely, please"
 msgstr ""
 "El nombre de usuario «%s» es ambiguo, especifíquelo de forma más precisa"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:353
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:355
 #, c-format
 msgid ""
 "Folder '%s' not found. Either it does not exist or you do not have "
@@ -680,7 +717,7 @@ msgstr ""
 "No se encontró la carpeta «%s». O no existe o no tiene permiso para acceder a "
 "ella."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:371
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:373
 msgid "Cannot add folder, cannot determine folder's type"
 msgstr ""
 "No se puede añadir la carpeta, no se puede determinar el tipo de carpeta"
@@ -690,66 +727,64 @@ msgstr ""
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith - Calendar"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:416
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:418
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s - %s"
 msgstr "%s - %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:510
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:717
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:511
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:718
 msgid "Inbox"
 msgstr "Bandeja de entrada"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:512
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:718
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:513
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:719
 msgid "Contacts"
 msgstr "Contactos"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:514
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:719
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:515
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:720
 msgid "Calendar"
 msgstr "Calendario"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:516
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:720
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:517
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
 msgid "Memos"
 msgstr "Notas"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:518
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:519
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:722
 msgid "Tasks"
 msgstr "Tareas"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:535
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:536
 #, c-format
 msgid "Testing availability of folder '%s' of user '%s', please wait..."
 msgstr "Probando la disponibilidad de la carpeta «%s» del usuario «%s», espere…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:611
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:612
 msgid "Subscribe to folder of other EWS user..."
 msgstr "Suscribirse a la carpeta de otro usuario EWS…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:662
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:663
 msgid "User"
 msgstr "Usuario"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:669
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:670
 msgid "_User:"
 msgstr "_Usuario:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:684
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:685
 msgid "C_hoose..."
 msgstr "E_legir…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:700
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:701
 msgid "_Folder name:"
 msgstr "Nombre de la _carpeta:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:730
-#| msgctxt "Permissions"
-#| msgid "Create subfolders"
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:731
 msgid "Include _subfolders"
 msgstr "Incluir _subcarpetas"
 
@@ -782,7 +817,6 @@ msgid "Open _Mailbox of other user"
 msgstr "Abrir la b_andeja de entrada de otro usuario"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:239
-#| msgid "Searching..."
 msgid "S_earch..."
 msgstr "_Buscar…"
 
@@ -790,74 +824,74 @@ msgstr "_Buscar…"
 msgid "Authentication"
 msgstr "Autenticación"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:505
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:500
 msgctxt "PermissionsLevel"
 msgid "Reviewer (can read items)"
 msgstr "Revisor (puede leer elementos)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:506
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:501
 msgctxt "PermissionsLevel"
 msgid "Author (can read and create items)"
 msgstr "Autor (puede leer y crear elementos)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:507
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:502
 msgctxt "PermissionsLevel"
 msgid "Editor (can read, create and modify items)"
 msgstr "Editor (puede leer, crear y modificar elementos)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:610
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:605
 msgid "Delegate permissions"
 msgstr "Permisos de delegado"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:628
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:623
 msgid "C_alendar"
 msgstr "C_alendario"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:631
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:626
 msgid "_Delegate receives copies of meeting-related messages sent to me"
 msgstr ""
 "El _delegado recibe copias de los mensajes relacionados con la reunión que "
 "me envían"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:636
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:631
 msgid "_Tasks"
 msgstr "_Tareas"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:639
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:634
 msgid "_Inbox"
 msgstr "_Bandeja de entrada"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:642
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:637
 msgid "C_ontacts"
 msgstr "C_ontactos"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:645
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:640
 msgid "_Notes"
 msgstr "_Notas"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:648
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:643
 msgid "_Journal"
 msgstr "_Diario"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:651
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:646
 #, c-format
 msgid "Delegate '%s' has the following permissions"
 msgstr "El delegado «%s» tiene los siguientes permisos"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:669
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:664
 msgid "Delegate can see my _private items"
 msgstr "El delegado puede ver mis elementos _privados"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:992
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:987
 msgid "Retrieving current user permissions, please wait..."
 msgstr "Obteniendo los permisos actuales del usuario, espere…"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1113
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1643
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1108
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1638
 msgid "Delegates"
 msgstr "Delegados"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1137
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1132
 msgid ""
 "Delegates can send items on your behalf, including creating and responding "
 "to meeting requests. If you want to grant folder permissions without giving "
@@ -870,7 +904,7 @@ msgstr ""
 "pulse con el botón derecho en la carpeta, pulse en Permisos y cambie las ahí "
 "opciones."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1186
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1181
 msgid ""
 "Deliver meeting requests addressed to me and responses to meeting requests "
 "where I am the organizer to:"
@@ -879,7 +913,7 @@ msgstr ""
 "solicitudes de reunión donde yo soy el organizador:"
 
 #. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1195
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1190
 msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
@@ -887,15 +921,15 @@ msgstr ""
 "Sólo mis delegados, pero _enviar una copia de las peticiones de reunión\n"
 "y responderme (recomendado)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1202
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1197
 msgid "My d_elegates only"
 msgstr "Sólo mis _delegados "
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1209
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1204
 msgid "My delegates a_nd me"
 msgstr "Mis delegados _y yo"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1718
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1713
 msgid "Retrieving \"Delegates\" settings"
 msgstr "Obteniendo la configuración de «Delegados»"
 
@@ -915,12 +949,12 @@ msgstr "Seleccionar lista de _direcciones:"
 msgid "Fetch List"
 msgstr "Obtener lista"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:449
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:928
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:444
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:923
 msgid "Out of Office"
 msgstr "Fuera de la oficina"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:465
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:460
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
@@ -928,57 +962,57 @@ msgstr ""
 "Los mensajes especificados más abajo se enviarán a todo el personal interno "
 "y externo que le envíe un correo."
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:473
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:468
 msgid "Do _not send Out of Office replies"
 msgstr "_No enviar respuestas «Estoy fuera de la oficina»"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:481
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:476
 msgid "_Send Out of Office replies"
 msgstr "_Enviar respuestas «Estoy fuera de la oficina»"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:489
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:484
 msgid "Send Out of Office replies only _during this time period:"
 msgstr ""
 "_Enviar respuestas «Estoy fuera de la oficina» solo durante este período de "
 "tiempo:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:509
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:504
 msgid "_From:"
 msgstr "_De:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:534
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:529
 msgid "_To:"
 msgstr "_Para:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:559
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:554
 msgid "I_nternal:"
 msgstr "I_nterno:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:568
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:563
 msgid "Message to be sent within the organization"
 msgstr "Mensaje que enviar dentro de la organización"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:595
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:590
 msgid "E_xternal:"
 msgstr "E_xterno:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:603
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:598
 msgid "Message to be sent outside the organization"
 msgstr "Mensaje que enviar fuera de la organización"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:613
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:608
 msgid "Do not reply to senders outside the organization"
 msgstr "No responder a los remitentes fuera de la organización"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:616
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:611
 msgid "Reply only to known senders outside the organization"
 msgstr "Responder sólo a los remitentes fuera de la organización"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:619
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:614
 msgid "Reply to any sender outside the organization"
 msgstr "Responder a cualquier remitente fuera de la organización"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:1004
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:999
 msgid "Retrieving \"Out of Office\" settings"
 msgstr "Obteniendo la configuración de «Estoy fuera de la oficina»"
 
@@ -1061,22 +1095,32 @@ msgstr "Falló al analizar el XML oab"
 msgid "Failed to find <OAB> element\n"
 msgstr "Falló al buscar el elemento <OAB>\n"
 
-#: ../src/server/e-ews-connection.c:3594
+#: ../src/server/e-ews-connection.c:3609
 msgid "No items found"
 msgstr "No se encontraron elementos"
 
-#: ../src/server/e-ews-folder.c:554
+#: ../src/server/e-ews-folder.c:546
 msgid "Cannot add folder, unsupported folder type"
 msgstr "No se puede añadir la carpeta, tipo de carpeta no soportado"
 
-#: ../src/server/e-ews-folder.c:559
+#: ../src/server/e-ews-folder.c:551
 msgid "Cannot add folder, master source not found"
 msgstr "No se puede añadir la carpeta, fuente principal no encontrada"
 
-#: ../src/utils/ews-camel-common.c:176
+#: ../src/utils/ews-camel-common.c:187
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "CreateItem falló al devolver el ID para el mensaje nuevo"
+
+#~ msgid ""
+#~ "Cannot list folders available for subscription of Exchange Web Services "
+#~ "account, use 'Subscribe to folder of other user' context menu option "
+#~ "above the account node in the folder tree instead."
+#~ msgstr ""
+#~ "No se pueden listar las carpetas disponibles para suscripción de la "
+#~ "cuenta de servicios web de Exchange, utilice en su lugar la opción de "
+#~ "menú de contexto «Suscribir a una carpeta de otro usuario» encima del nodo "
+#~ "de cuenta en el árbol de carpetas."
 
 #~ msgid "Insufficient memory"
 #~ msgstr "Memoria insuficiente"
@@ -1092,11 +1136,6 @@ msgstr "CreateItem falló al devolver el ID para el mensaje nuevo"
 #~| msgid "Folder %s does not exist"
 #~ msgid "Folder '%s' not found"
 #~ msgstr "La carpeta %s no existe"
-
-#, fuzzy
-#~| msgid "No such folder: %s"
-#~ msgid "Cannot subscribe EWS folder '%s'"
-#~ msgstr "No existe la carpeta: %s"
 
 #~ msgid "Global Address list"
 #~ msgstr "Lista global de direcciones"
