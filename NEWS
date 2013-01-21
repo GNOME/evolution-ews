@@ -1,3 +1,18 @@
+Evolution-EWS 3.6.3 2012-01-21
+------------------------------
+
+Bug Fixes:
+	Bug 671893 - Filter by 'Mailing list' doesn't work (Milan Crha)
+	Bug 687874 - Be able to select Sent folder again (Milan Crha)
+	Bug 689521 - Delivery notification reply fails to send (Milan Crha)
+	Bug 690474 - Explicitly link to libm (Alexandre Rostovtsev)
+
+Translations:
+	Balázs Úr (hu)
+	Marek Černocký (cs)
+	Sandeep Sheshrao Shedmake (mr)
+
+
 Evolution-EWS 3.6.1 2012-11-12
 ------------------------------
 
