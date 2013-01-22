@@ -923,7 +923,7 @@ ews_create_contact_cb (GObject *object,
 
 		e_contact_set (create_contact->contact, E_CONTACT_UID, item_id->id);
 		e_contact_set (create_contact->contact, E_CONTACT_REV, item_id->change_key);
-		e_book_backend_sqlitedb_add_contact (ebews->priv->summary, ebews->priv->folder_id, create_contact->contact, FALSE, &error);
+		e_book_backend_sqlitedb_new_contact (ebews->priv->summary, ebews->priv->folder_id, create_contact->contact, TRUE, &error);
 
 		if (error == NULL) {
 			GSList *contacts;
@@ -1162,7 +1162,7 @@ ews_modify_contact_cb (GObject *object,
 		id = e_contact_get (modify_contact->old_contact, E_CONTACT_UID);
 
 		e_book_backend_sqlitedb_remove_contact (priv->summary, priv->folder_id, id, &error);
-		e_book_backend_sqlitedb_add_contact (ebews->priv->summary, ebews->priv->folder_id, modify_contact->new_contact, FALSE, &error);
+		e_book_backend_sqlitedb_new_contact (ebews->priv->summary, ebews->priv->folder_id, modify_contact->new_contact, TRUE, &error);
 
 		if (error == NULL) {
 			GSList *new_contacts;
@@ -1780,7 +1780,7 @@ ews_gal_store_contact (EContact *contact,
 		g_free (status_message);
 
 		data->contact_collector = g_slist_reverse (data->contact_collector);
-		e_book_backend_sqlitedb_add_contacts (priv->summary, priv->folder_id, data->contact_collector, FALSE, error);
+		e_book_backend_sqlitedb_new_contacts (priv->summary, priv->folder_id, data->contact_collector, TRUE, error);
 
 		for (l = data->contact_collector; l != NULL; l = g_slist_next (l))
 			e_book_backend_notify_update (E_BOOK_BACKEND (data->cbews), E_CONTACT (l->data));
@@ -2016,7 +2016,7 @@ ebews_store_contact_items (EBookBackendEws *ebews,
 			/* store display_name, fileas, item id */	
 		}
 
-		e_book_backend_sqlitedb_add_contact (priv->summary, priv->folder_id, contact, FALSE, error);
+		e_book_backend_sqlitedb_new_contact (priv->summary, priv->folder_id, contact, TRUE, error);
 		e_book_backend_notify_update (E_BOOK_BACKEND (ebews), contact);
 
 		g_object_unref (item);
@@ -2108,7 +2108,7 @@ ebews_store_distribution_list_items (EBookBackendEws *ebews,
 	}
 
 	g_slist_free (members);
-	e_book_backend_sqlitedb_add_contact (ebews->priv->summary, ebews->priv->folder_id, contact, FALSE, error);
+	e_book_backend_sqlitedb_new_contact (ebews->priv->summary, ebews->priv->folder_id, contact, TRUE, error);
 	e_book_backend_notify_update (E_BOOK_BACKEND (ebews), contact);
 
 	g_object_unref (contact);
