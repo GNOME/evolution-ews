@@ -810,14 +810,46 @@ strip_html_tags (const gchar *html_text)
 {
 	gssize haystack_len = strlen (html_text);
 	gchar *plain_text = g_malloc (haystack_len);
-	gchar *start = g_strstr_len (html_text, haystack_len, "<body>"),
-		*end = g_strstr_len (html_text, haystack_len, "</body>"),
+	gchar *start = g_strstr_len (html_text, haystack_len, "<body"),
+		*end = g_strstr_len (html_text, haystack_len, "</body"),
 		*i, *j;
 
-	for (j = plain_text, i = start + 6; i < end; i++) {
-		if (*i == '&') i = i + 6;
-		if (*i == '<') while (*i != '>') i++;
-		else { *j = *i; j++; }
+	if (!start || !end) {
+		g_free (plain_text);
+		return g_strdup (html_text);
+	}
+
+	i = start;
+	while (i < end && *i != '>') {
+		i++;
+	}
+
+	for (j = plain_text; i < end; i++) {
+		if (*i == '&') {
+			gchar *from = i;
+
+			while (i < end && *i != ';' && *i != '<' && *i != '>')
+				i++;
+
+			if (i >= end)
+				break;
+
+			if (*i != ';')
+				i = from;
+			else
+				continue;
+		}
+
+		if (*i == '<') {
+			while (i < end && *i != '>')
+				i++;
+
+			if (i >= end)
+				break;
+		} else {
+			*j = *i;
+			j++;
+		}
 	}
 
 	*j = '\0';
