@@ -776,7 +776,7 @@ static void
 ews_cal_append_exdate (ECalBackendEws *cbews,
                        ECalComponent *comp,
                        const gchar *rid,
-                       CalObjModType mod)
+                       ECalObjModType mod)
 {
 	ECalComponent *old_comp;
 
@@ -797,7 +797,7 @@ typedef struct {
 	guint index;
 	gchar *rid;
 	gboolean modified;
-	CalObjModType mod;
+	ECalObjModType mod;
 } EwsRemoveData;
 
 static void
@@ -881,7 +881,7 @@ e_cal_backend_ews_remove_object (ECalBackend *backend,
                                  GCancellable *cancellable,
                                  const gchar *uid,
                                  const gchar *rid,
-                                 CalObjModType mod)
+                                 ECalObjModType mod)
 {
 	EwsRemoveData *remove_data;
 	ECalBackendEws *cbews = (ECalBackendEws *) backend;
@@ -983,7 +983,7 @@ e_cal_backend_ews_remove_objects (ECalBackend *backend,
                                   guint32 context,
                                   GCancellable *cancellable,
                                   const GSList *ids,
-                                  CalObjModType mod)
+                                  ECalObjModType mod)
 {
 	GError *error = NULL;
 	const ECalComponentId *id;
@@ -1308,7 +1308,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
                                  guint32 context,
                                  GCancellable *cancellable,
                                  const gchar *calobj,
-                                 CalObjModType mod);
+                                 ECalObjModType mod);
 
 static void convert_component_to_updatexml (ESoapMessage *msg,
                                  gpointer user_data);
@@ -1376,7 +1376,7 @@ ews_create_attachments_cb (GObject *object,
 		* this is the only way to pass attachments in meeting invite mail*/
 		if (e_cal_component_has_attendees (create_data->comp)) {
 			icalcomponent *icalcomp = e_cal_component_get_icalcomponent (create_data->comp);
-			e_cal_backend_ews_modify_object ((ECalBackend *) create_data->cbews, create_data->cal, 0, NULL, icalcomponent_as_ical_string (icalcomp), CALOBJ_MOD_ALL);
+			e_cal_backend_ews_modify_object ((ECalBackend *) create_data->cbews, create_data->cal, 0, NULL, icalcomponent_as_ical_string (icalcomp), E_CAL_OBJ_MOD_ALL);
 		}
 	} else if (create_data->cb_type == 2) {
 		const gchar *send_meeting_invitations;
@@ -1573,7 +1573,7 @@ ews_create_object_cb (GObject *object,
 		for (i = exceptions; i; i = i->next) {
 			e_cal_backend_ews_remove_object (
 				E_CAL_BACKEND (create_data->cbews), create_data->cal, 0, NULL,
-				comp_uid, i->data, CALOBJ_MOD_THIS);
+				comp_uid, i->data, E_CAL_OBJ_MOD_THIS);
 		}
 
 		g_slist_foreach (exceptions, (GFunc) g_free, NULL);
@@ -2206,7 +2206,7 @@ e_cal_backend_ews_modify_objects (ECalBackend *backend,
                                   guint32 context,
                                   GCancellable *cancellable,
                                   const GSList *calobjs,
-                                  CalObjModType mod)
+                                  ECalObjModType mod)
 {
 	GError *error = NULL;
 
@@ -2235,7 +2235,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
                                  guint32 context,
                                  GCancellable *cancellable,
                                  const gchar *calobj,
-                                 CalObjModType mod)
+                                 ECalObjModType mod)
 {
 	EwsModifyData *modify_data;
 	ECalBackendEws *cbews;
@@ -2654,7 +2654,7 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend,
 				break;
 			case ICAL_METHOD_CANCEL:
 				recurrence_id = icalcomponent_get_first_property (subcomp, ICAL_RECURRENCEID_PROPERTY);
-				e_cal_backend_ews_remove_object (backend, cal, 0, cancellable, item_id, icalproperty_get_value_as_string (recurrence_id), CALOBJ_MOD_ALL);
+				e_cal_backend_ews_remove_object (backend, cal, 0, cancellable, item_id, icalproperty_get_value_as_string (recurrence_id), E_CAL_OBJ_MOD_ALL);
 				break;
 			case ICAL_METHOD_COUNTER:
 				/*this is a new time proposal mail from one of the attendees
@@ -2667,7 +2667,7 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend,
 					icalproperty_set_value_from_string (summary, split_subject[1] , "NO");
 					g_strfreev (split_subject);
 
-					e_cal_backend_ews_modify_object (backend, cal, 0, cancellable, icalcomponent_as_ical_string (subcomp), CALOBJ_MOD_ALL);
+					e_cal_backend_ews_modify_object (backend, cal, 0, cancellable, icalcomponent_as_ical_string (subcomp), E_CAL_OBJ_MOD_ALL);
 				}
 				break;
 			default:
