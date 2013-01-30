@@ -212,6 +212,28 @@ ews_backend_new_child (EEwsBackend *backend,
 	e_source_backend_set_backend_name (
 		E_SOURCE_BACKEND (extension), "ews");
 
+	if (e_ews_folder_get_folder_type (folder) != E_EWS_FOLDER_TYPE_CONTACTS &&
+	    !e_source_has_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER) &&
+	    !e_source_has_extension (source, E_SOURCE_EXTENSION_ALARMS)) {
+		/* a completely new ESource, do not notify with too old reminders */
+		ESourceAlarms *alarms;
+		gchar *today;
+		GTimeVal today_tv;
+		GDate dt;
+
+		g_date_clear (&dt, 1);
+		g_get_current_time (&today_tv);
+		g_date_set_time_val (&dt, &today_tv);
+
+		/* midnight UTC */
+		today = g_strdup_printf ("%04d-%02d-%02dT00:00:00Z", g_date_get_year (&dt), g_date_get_month (&dt), g_date_get_day (&dt));
+
+		alarms = e_source_get_extension (source, E_SOURCE_EXTENSION_ALARMS);
+		e_source_alarms_set_last_notified (alarms, today);
+
+		g_free (today);
+	}
+
 	extension_name = E_SOURCE_EXTENSION_EWS_FOLDER;
 	extension = e_source_get_extension (source, extension_name);
 	e_source_ews_folder_set_id (
