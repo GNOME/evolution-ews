@@ -511,7 +511,7 @@ e_ews_folder_utils_populate_esource (ESource *source,
 			ESourceEwsFolder *folder_ext;
 			ESourceOffline *offline_ext;
 
-			e_source_backend_set_backend_name (backend_ext , "ews");
+			e_source_backend_set_backend_name (backend_ext, "ews");
 
 			folder_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER);
 			e_source_ews_folder_set_id (folder_ext, folder_id->id);
@@ -523,6 +523,7 @@ e_ews_folder_utils_populate_esource (ESource *source,
 
 			/* set also color for calendar-like sources */
 			if (folder_type != E_EWS_FOLDER_TYPE_CONTACTS) {
+				ESourceAlarms *alarms;
 				gchar *color_str;
 
 				color_str = e_ews_folder_utils_pick_color_spec (
@@ -530,6 +531,9 @@ e_ews_folder_utils_populate_esource (ESource *source,
 					folder_type != E_EWS_FOLDER_TYPE_CALENDAR);
 				e_source_selectable_set_color (E_SOURCE_SELECTABLE (backend_ext), color_str);
 				g_free (color_str);
+
+				alarms = e_source_get_extension (source, E_SOURCE_EXTENSION_ALARMS);
+				e_source_alarms_set_include_me (alarms, FALSE);
 			}
 
 			res = TRUE;
