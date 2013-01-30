@@ -609,10 +609,10 @@ e_cal_backend_ews_open (ECalBackend *backend,
 			cancellable, &error);
 
 	if (!error)
-		e_cal_backend_notify_readonly (backend, FALSE);
+		e_cal_backend_set_writable (backend, TRUE);
 
 	convert_error_to_edc_error (&error);
-	e_cal_backend_respond_opened (backend, cal, opid, error);
+	e_data_cal_respond_open (cal, opid, error);
 }
 
 static void
@@ -3626,7 +3626,7 @@ ews_start_sync_thread (gpointer data)
 		}
 
 		if (!g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED))
-			e_cal_backend_notify_readonly (E_CAL_BACKEND (cbews), FALSE);
+			e_cal_backend_set_writable (E_CAL_BACKEND (cbews), TRUE);
 
 		if (error == NULL) {
 			cal_backend_ews_process_folder_items (
@@ -4034,12 +4034,10 @@ e_cal_backend_ews_notify_online_cb (ECalBackend *backend,
 		priv->cancellable = g_cancellable_new ();
 
 		priv->read_only = FALSE;
-		e_cal_backend_notify_online (backend, TRUE);
-		e_cal_backend_notify_readonly (backend, priv->read_only);
+		e_cal_backend_set_writable (backend, !priv->read_only);
 	} else {
 		switch_offline (E_CAL_BACKEND_EWS (backend));
-		e_cal_backend_notify_readonly (backend, priv->read_only);
-		e_cal_backend_notify_online (backend, FALSE);
+		e_cal_backend_set_writable (backend, !priv->read_only);
 	}
 
 	PRIV_UNLOCK (priv);

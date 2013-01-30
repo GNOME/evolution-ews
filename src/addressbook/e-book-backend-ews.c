@@ -2770,8 +2770,7 @@ e_book_backend_ews_notify_online_cb (EBookBackend *backend,
 		}
 
 		if (!e_backend_get_online (E_BACKEND (backend))) {
-			e_book_backend_notify_readonly (backend, TRUE);
-			e_book_backend_notify_online (backend, FALSE);
+			e_book_backend_set_writable (backend, FALSE);
 			if (ebews->priv->cnc) {
 				g_object_unref (ebews->priv->cnc);
 				ebews->priv->cnc = NULL;
@@ -2779,8 +2778,7 @@ e_book_backend_ews_notify_online_cb (EBookBackend *backend,
 		} else {
 			ebews->priv->cancellable = g_cancellable_new ();
 
-			e_book_backend_notify_readonly (backend, !ebews->priv->is_writable);
-			e_book_backend_notify_online (backend, TRUE);
+			e_book_backend_set_writable (backend, ebews->priv->is_writable);
 		}
 	}
 }
@@ -2877,7 +2875,7 @@ e_book_backend_ews_open (EBookBackend *backend,
 	}
 
 	convert_error_to_edb_error (&error);
-	e_book_backend_respond_opened (backend, book, opid, error);
+	e_data_book_respond_open (book, opid, error);
 }
 
 /**
@@ -2997,13 +2995,13 @@ book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 
 		PRIV_UNLOCK (backend->priv);
 
-		e_book_backend_notify_online (E_BOOK_BACKEND (backend), TRUE);
+		e_backend_set_online (E_BACKEND (backend), TRUE);
 	} else {
 		backend->priv->is_writable = FALSE;
-		e_book_backend_notify_online (E_BOOK_BACKEND (backend), FALSE);
+		e_backend_set_online (E_BACKEND (backend), FALSE);
 	}
 
-	e_book_backend_notify_readonly (E_BOOK_BACKEND (backend), !backend->priv->is_writable);
+	e_book_backend_set_writable (E_BOOK_BACKEND (backend), backend->priv->is_writable);
 
 	g_object_unref (connection);
 
