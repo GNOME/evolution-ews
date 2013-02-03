@@ -1,3 +1,20 @@
+Evolution-EWS 3.7.5 2013-02-04
+------------------------------
+
+Bug Fixes:
+	Bug 656377 - Support for public folders (Milan Crha)
+	Bug 690474 - Explicitly link to libm (Alexandre Rostovtsev)
+	Bug 692688 - Crash in strip_html_tags() (Milan Crha)
+	Bug 692705 - Disable reminders for subscribed calendars of other
+	             users (Milan Crha)
+
+Translations:
+	Marek Černocký (cs)
+	Daniel Mustieles (es)
+	Piotr Drąg (pl)
+	Matej Urbančič (sl)
+
+
 Evolution-EWS 3.7.4 2013-01-14
 ------------------------------
 
