@@ -488,10 +488,12 @@ ews_cal_component_get_item_id (ECalComponent *comp,
 static void
 ews_cal_component_get_calendar_item_accept_id (ECalComponent *comp,
                                                gchar **itemid,
-                                               gchar **changekey)
+                                               gchar **changekey,
+					       gchar **mail_id)
 {
 	icalproperty *prop;
-	gchar *id = NULL;
+	gchar *id_item = NULL;
+	gchar *id_accept = NULL;
 	gchar *ck = NULL;
 
 	prop = icalcomponent_get_first_property (
@@ -502,8 +504,10 @@ ews_cal_component_get_calendar_item_accept_id (ECalComponent *comp,
 
 		x_name = icalproperty_get_x_name (prop);
 		x_val = icalproperty_get_x (prop);
-		if (!id && (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-ITEMID") || !g_ascii_strcasecmp (x_name, "X-EVOLUTION-ACCEPT-ID")))
-			id = g_strdup (x_val);
+		if (!id_item && g_ascii_strcasecmp (x_name, "X-EVOLUTION-ITEMID") == 0)
+			id_item = g_strdup (x_val);
+		else if (!id_accept && g_ascii_strcasecmp (x_name, "X-EVOLUTION-ACCEPT-ID") == 0)
+			id_accept = g_strdup (x_val);
 		else if (changekey && !ck && !g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY"))
 			ck = g_strdup (x_val);
 
@@ -512,7 +516,11 @@ ews_cal_component_get_calendar_item_accept_id (ECalComponent *comp,
 			ICAL_X_PROPERTY);
 	}
 
-	*itemid = g_strdup (id);
+	if (!id_item)
+		id_item = g_strdup (id_accept);
+
+	*itemid = id_item;
+	*mail_id = id_accept;
 	if (changekey)
 		*changekey = ck;
 }
@@ -2460,14 +2468,14 @@ e_ews_receive_objects_no_exchange_mail (ECalBackendEwsPrivate *priv,
                                         icalcomponent *subcomp,
                                         GSList *ids,
                                         GCancellable *cancellable,
-                                        GError *error)
+                                        GError **error)
 {
 	gchar *mime_content = e_ews_get_icalcomponent_as_mime_content (subcomp);
 	e_ews_connection_create_items_sync (
 		priv->cnc, EWS_PRIORITY_MEDIUM,
 		"SendAndSaveCopy", "SendToNone", NULL,
 		prepare_create_item_with_mime_content_request,
-		mime_content, &ids, cancellable, &error);
+		mime_content, &ids, cancellable, error);
 	g_free (mime_content);
 	/*we still have to send a mail with accept to meeting organizer*/
 }
@@ -2587,17 +2595,18 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend,
 	while (subcomp) {
 		ECalComponent *comp = e_cal_component_new ();
 		const gchar *response_type;
-		gchar *item_id = NULL, *change_key = NULL;
+		gchar *item_id = NULL, *change_key = NULL, *mail_id = NULL;
 		GSList *ids = NULL, *l;
 		icalproperty *recurrence_id, *transp, *summary;
 		gchar **split_subject;
+		gint pass = 0;
 
 		/* duplicate the ical component */
 		e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (subcomp));
 
 		/*getting a data for meeting request response*/
 		response_type = e_ews_get_current_user_meeting_reponse (e_cal_component_get_icalcomponent (comp), priv->user_email);
-		ews_cal_component_get_calendar_item_accept_id (comp, &item_id, &change_key);
+		ews_cal_component_get_calendar_item_accept_id (comp, &item_id, &change_key, &mail_id);
 
 		switch (method) {
 			case ICAL_METHOD_REQUEST:
@@ -2608,17 +2617,60 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend,
 				accept_data->item_id = item_id;
 				accept_data->change_key = change_key;
 
-				/*in case we do not have item id we will create item with mime content only*/
-				if (item_id == NULL)
-					e_ews_receive_objects_no_exchange_mail (priv, subcomp, ids, cancellable, error);
-				else
-					e_ews_connection_create_items_sync (
-						priv->cnc, EWS_PRIORITY_MEDIUM,
-						"SendAndSaveCopy",
-						NULL, NULL,
-						prepare_accept_item_request,
-						accept_data,
-						&ids, cancellable, &error);
+				while (pass < 2) {
+					/*in case we do not have item id we will create item with mime content only*/
+					if (item_id == NULL)
+						e_ews_receive_objects_no_exchange_mail (priv, subcomp, ids, cancellable, &error);
+					else
+						e_ews_connection_create_items_sync (
+							priv->cnc, EWS_PRIORITY_MEDIUM,
+							"SendAndSaveCopy",
+							NULL, NULL,
+							prepare_accept_item_request,
+							accept_data,
+							&ids, cancellable, &error);
+					if (pass == 0 && mail_id && item_id &&
+					    g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ITEMNOTFOUND)) {
+						/* maybe the associated accept calendar item changed
+						   on the server, thus retry with updated values */
+						GSList *my_ids;
+
+						my_ids = g_slist_append (NULL, mail_id);
+						ids = NULL;
+						if (e_ews_connection_get_items_sync (priv->cnc, EWS_PRIORITY_MEDIUM, my_ids,
+								"AllProperties", NULL, FALSE, NULL, E_EWS_BODY_TYPE_ANY, &ids, NULL, NULL,
+								cancellable, NULL)
+						    && ids && ids->data) {
+							EEwsItem *item = ids->data;
+							if (e_ews_item_get_id (item) &&
+							    g_strcmp0 (e_ews_item_get_id (item)->id, mail_id) == 0) {
+								const EwsId *calendar_item_accept_id = e_ews_item_get_calendar_item_accept_id (item);
+
+								if (calendar_item_accept_id) {
+									g_clear_error (&error);
+									pass++;
+
+									g_free (item_id);
+									g_free (change_key);
+									item_id = g_strdup (calendar_item_accept_id->id);
+									change_key = g_strdup (calendar_item_accept_id->change_key);
+
+									accept_data->item_id = item_id;
+									accept_data->change_key = change_key;
+								}
+							}
+						}
+
+						g_slist_free (my_ids);
+						g_slist_free_full (ids, g_object_unref);
+						ids = NULL;
+
+						if (pass == 0)
+							break;
+					} else {
+						break;
+					}
+				}
 			if (!error) {
 				transp = icalcomponent_get_first_property (subcomp, ICAL_TRANSP_PROPERTY);
 				if (!g_strcmp0 (icalproperty_get_value_as_string (transp), "TRANSPARENT") &&
@@ -2648,6 +2700,7 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend,
 			}
 				g_free (item_id);
 				g_free (change_key);
+				g_free (mail_id);
 				g_free (accept_data);
 				/*We have to run sync before any other operations */
 				ews_start_sync (cbews);

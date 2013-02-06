@@ -249,8 +249,9 @@ ews_get_calendar_mime_part (CamelMimePart *mimepart)
 
 static gchar *
 ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
-                                            const EwsId *item_id,
+                                            const EwsId *calendar_item_id,
                                             gboolean is_calendar_UID,
+					    const EwsId *mail_item_id,
                                             GError **error)
 {
 	CamelMimeParser *mimeparser;
@@ -308,21 +309,22 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
 		g_byte_array_append (ba, (guint8 *) "\0", 1);
 		icalcomp = icalparser_parse_string ((gchar *) ba->data);
 		subcomp = icalcomponent_get_first_component (icalcomp, ICAL_VEVENT_COMPONENT);
-		icalprop = icalproperty_new_x (item_id->change_key);
+		icalprop = icalproperty_new_x (calendar_item_id->change_key);
 		icalproperty_set_x_name (icalprop, "X-EVOLUTION-CHANGEKEY");
 
 		/* In order to accept items we have to store AssociatedCalendarItemId (X-EVOLUTION-ITEMID)
-		 * or mail id (X-EVOLUTION-ACCEPT-ID ) when we do not have AssociatedCalendarItemId */
+		 * or mail id (X-EVOLUTION-ACCEPT-ID) when we do not have AssociatedCalendarItemId */
 		icalcomponent_add_property (subcomp, icalprop);
 		if (is_calendar_UID) {
-			icalprop = icalproperty_new_x (item_id->id);
+			icalprop = icalproperty_new_x (calendar_item_id->id);
 			icalproperty_set_x_name (icalprop, "X-EVOLUTION-ITEMID");
 			icalcomponent_add_property (subcomp, icalprop);
-		} else {
-			icalprop = icalproperty_new_x (item_id->id);
-			icalproperty_set_x_name (icalprop, "X-EVOLUTION-ACCEPT-ID");
-			icalcomponent_add_property (subcomp, icalprop);
 		}
+
+		icalprop = icalproperty_new_x (mail_item_id->id);
+		icalproperty_set_x_name (icalprop, "X-EVOLUTION-ACCEPT-ID");
+		icalcomponent_add_property (subcomp, icalprop);
+
 		calstring_new = icalcomponent_as_ical_string_r (icalcomp);
 		camel_mime_part_set_content (
 			mimepart,
@@ -508,7 +510,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 			calendar_item_accept_id = e_ews_item_get_id (items->data);
 			is_calendar_UID = FALSE;
 		}
-		mime_fname_new = ews_update_mgtrequest_mime_calendar_itemid (mime_content, calendar_item_accept_id, is_calendar_UID, error);
+		mime_fname_new = ews_update_mgtrequest_mime_calendar_itemid (mime_content, calendar_item_accept_id, is_calendar_UID, e_ews_item_get_id (items->data), error);
 		if (mime_fname_new)
 			mime_content = (const gchar *) mime_fname_new;
 
