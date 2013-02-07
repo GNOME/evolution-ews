@@ -791,11 +791,14 @@ get_folder_response_cb (ESoapResponse *response,
 		const gchar *name = (const gchar *) subparam->name;
 
 		if (!ews_get_response_status (subparam, &error)) {
-			g_simple_async_result_take_error (simple, error);
-			return;
-		}
-
-		if (CHECK_ELEMENT (name, "GetFolderResponseMessage"))
+			if (g_strcmp0 (name, "GetFolderResponseMessage") == 0) {
+				async_data->items = g_slist_append (async_data->items, e_ews_folder_new_from_error (error));
+				g_clear_error (&error);
+			} else {
+				g_simple_async_result_take_error (simple, error);
+				return;
+			}
+		} else if (CHECK_ELEMENT (name, "GetFolderResponseMessage"))
 			ews_handle_folders_param (subparam, async_data);
 
 		subparam = e_soap_parameter_get_next_child (subparam);

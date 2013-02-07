@@ -360,9 +360,10 @@ ews_update_folder_hierarchy (CamelEwsStore *ews_store,
                              gboolean includes_last_folder,
                              GSList *folders_created,
                              GSList *folders_deleted,
-                             GSList *folders_updated)
+                             GSList *folders_updated,
+			     GSList **created_folder_ids)
 {
-	ews_utils_sync_folders (ews_store, folders_created, folders_deleted, folders_updated);
+	ews_utils_sync_folders (ews_store, folders_created, folders_deleted, folders_updated, created_folder_ids);
 	camel_ews_store_ensure_virtual_folders (ews_store);
 
 	camel_ews_store_summary_store_string_val (ews_store->summary, "sync_state", sync_state);
@@ -483,10 +484,13 @@ ews_store_set_flags (CamelEwsStore *ews_store,
 	temp = folders;
 	while (temp != NULL) {
 		folder = (EEwsFolder *) temp->data;
-		fid = e_ews_folder_get_id (folder);
 
-		if (camel_ews_store_summary_has_folder (ews_store->summary, fid->id))
-			camel_ews_store_summary_set_folder_flags (ews_store->summary, fid->id, system_folder[n].info_flags);
+		if (folder && !e_ews_folder_is_error (folder)) {
+			fid = e_ews_folder_get_id (folder);
+
+			if (camel_ews_store_summary_has_folder (ews_store->summary, fid->id))
+				camel_ews_store_summary_set_folder_flags (ews_store->summary, fid->id, system_folder[n].info_flags);
+		}
 
 		temp = temp->next;
 		n++;
@@ -581,11 +585,13 @@ ews_store_maybe_update_sent_and_drafts (CamelEwsStore *ews_store,
 
 					if (ii < G_N_ELEMENTS (system_folder)) {
 						EEwsFolder *drafts = g_slist_nth (ews_folders, ii)->data;
-						const EwsFolderId *fid = drafts ? e_ews_folder_get_id (drafts) : NULL;
+						if (drafts && !e_ews_folder_is_error (drafts)) {
+							const EwsFolderId *fid = e_ews_folder_get_id (drafts);
 
-						if (fid && fid->id) {
-							changed = TRUE;
-							ews_store_update_source_extension_folder (ews_store, fid->id, coms_extension, "drafts-folder");
+							if (fid && fid->id) {
+								changed = TRUE;
+								ews_store_update_source_extension_folder (ews_store, fid->id, coms_extension, "drafts-folder");
+							}
 						}
 					}
 				}
@@ -618,6 +624,7 @@ ews_authenticate_sync (CamelService *service,
 	GSList *folders_updated = NULL;
 	GSList *folders_deleted = NULL;
 	GSList *folder_ids = NULL, *folders = NULL;
+	GSList *created_folder_ids = NULL;
 	gboolean includes_last_folder = FALSE;
 	gboolean initial_setup = FALSE;
 	const gchar *password;
@@ -676,7 +683,7 @@ ews_authenticate_sync (CamelService *service,
 		/* This consumes all allocated result data. */
 		ews_update_folder_hierarchy (
 			ews_store, sync_state, includes_last_folder,
-			folders_created, folders_deleted, folders_updated);
+			folders_created, folders_deleted, folders_updated, &created_folder_ids);
 	} else {
 		g_mutex_lock (ews_store->priv->connection_lock);
 		if (ews_store->priv->connection != NULL) {
@@ -713,7 +720,7 @@ ews_authenticate_sync (CamelService *service,
 			NULL, folder_ids, &folders,
 			cancellable, &folder_err);
 
-		if (g_slist_length (folders) && (g_slist_length (folders) != G_N_ELEMENTS (system_folder)))
+		if (folders && (g_slist_length (folders) != G_N_ELEMENTS (system_folder)))
 			d (printf ("Error : not all folders are returned by getfolder operation"));
 		else if (folder_err == NULL && folders != NULL)
 			ews_store_set_flags (ews_store, folders);
@@ -735,6 +742,19 @@ ews_authenticate_sync (CamelService *service,
 		g_slist_free (folder_ids);
 		g_clear_error (&folder_err);
 	}
+
+	/* postpone notification of new folders to time when also folder flags are known,
+	   thus the view in evolution sows Inbox with an Inbox icon. */
+	for (folder_ids = created_folder_ids; folder_ids; folder_ids = folder_ids->next) {
+		CamelFolderInfo *fi;
+
+		fi = camel_ews_utils_build_folder_info (ews_store, folder_ids->data);
+		camel_store_folder_created (CAMEL_STORE (ews_store), fi);
+		camel_subscribable_folder_subscribed (CAMEL_SUBSCRIBABLE (ews_store), fi);
+		camel_folder_info_free (fi);
+	}
+
+	g_slist_free_full (created_folder_ids, g_free);
 
 	if (local_error == NULL) {
 		result = CAMEL_AUTHENTICATION_ACCEPTED;
@@ -895,7 +915,7 @@ ews_folder_hierarchy_ready_cb (GObject *obj,
 	g_mutex_lock (priv->get_finfo_lock);
 	ews_update_folder_hierarchy (
 		ews_store, sync_state, includes_last_folder,
-		folders_created, folders_deleted, folders_updated);
+		folders_created, folders_deleted, folders_updated, NULL);
 
 	ews_store->priv->last_refresh_time = time (NULL);
 	g_mutex_unlock (priv->get_finfo_lock);
@@ -1013,7 +1033,7 @@ ews_get_folder_info_sync (CamelStore *store,
 	}
 	ews_update_folder_hierarchy (
 		ews_store, sync_state, includes_last_folder,
-		folders_created, folders_deleted, folders_updated);
+		folders_created, folders_deleted, folders_updated, NULL);
 	g_mutex_unlock (priv->get_finfo_lock);
 
 offline:
