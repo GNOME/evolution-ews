@@ -54,7 +54,8 @@ G_BEGIN_DECLS
 void		ews_utils_sync_folders		(CamelEwsStore *ews_store,
 						 GSList *created_folders,
 						 GSList *deleted_folders,
-						 GSList *updated_folders);
+						 GSList *updated_folders,
+						 GSList **created_folder_ids);
 CamelFolderInfo *
 		camel_ews_utils_build_folder_info
 						(CamelEwsStore *store,

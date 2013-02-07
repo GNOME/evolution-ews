@@ -264,7 +264,8 @@ add_folder_to_summary (CamelEwsStore *store,
 
 static void
 sync_created_folders (CamelEwsStore *ews_store,
-                      GSList *created_folders)
+                      GSList *created_folders,
+		      GSList **created_folder_ids)
 {
 	GSList *l;
 
@@ -287,7 +288,12 @@ sync_created_folders (CamelEwsStore *ews_store,
 		 * let's worry about that in a later commit. */
 		add_folder_to_summary (ews_store, folder);
 
-		if (ftype == E_EWS_FOLDER_TYPE_MAILBOX) {
+		if (ftype != E_EWS_FOLDER_TYPE_MAILBOX)
+			continue;
+
+		if (created_folder_ids) {
+			*created_folder_ids = g_slist_append (*created_folder_ids, g_strdup (fid->id));
+		} else {
 			fi = camel_ews_utils_build_folder_info (
 				ews_store, fid->id);
 			camel_store_folder_created (
@@ -303,13 +309,14 @@ void
 ews_utils_sync_folders (CamelEwsStore *ews_store,
                         GSList *created_folders,
                         GSList *deleted_folders,
-                        GSList *updated_folders)
+                        GSList *updated_folders,
+			GSList **created_folder_ids)
 {
 	GError *error = NULL;
 
 	sync_deleted_folders (ews_store, deleted_folders);
 	sync_updated_folders (ews_store, updated_folders);
-	sync_created_folders (ews_store, created_folders);
+	sync_created_folders (ews_store, created_folders, created_folder_ids);
 
 	camel_ews_store_summary_save (ews_store->summary, &error);
 	if (error != NULL) {

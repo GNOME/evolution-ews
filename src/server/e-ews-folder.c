@@ -36,6 +36,7 @@
 G_DEFINE_TYPE (EEwsFolder, e_ews_folder, G_TYPE_OBJECT)
 
 struct _EEwsFolderPrivate {
+	GError *error;
 	gchar *name;
 	EwsFolderId *fid;
 	EwsFolderId *parent_fid;
@@ -68,6 +69,8 @@ e_ews_folder_finalize (GObject *object)
 	g_return_if_fail (E_IS_EWS_FOLDER (folder));
 
 	priv = folder->priv;
+
+	g_clear_error (&priv->error);
 
 	if (priv->name) {
 		g_free (priv->name);
@@ -115,6 +118,7 @@ e_ews_folder_init (EEwsFolder *folder)
 	priv = g_new0 (EEwsFolderPrivate, 1);
 	folder->priv = priv;
 
+	priv->error = NULL;
 	priv->folder_type = E_EWS_FOLDER_TYPE_MAILBOX;
 	priv->foreign = FALSE;
 }
@@ -267,6 +271,35 @@ e_ews_folder_new_from_soap_parameter (ESoapParameter *param)
 	}
 
 	return folder;
+}
+
+EEwsFolder *
+e_ews_folder_new_from_error (const GError *error)
+{
+	EEwsFolder *folder;
+
+	g_return_val_if_fail (error != NULL, NULL);
+
+	folder = g_object_new (E_TYPE_EWS_FOLDER, NULL);
+	folder->priv->error = g_error_copy (error);
+
+	return folder;
+}
+
+gboolean
+e_ews_folder_is_error (EEwsFolder *folder)
+{
+	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), TRUE);
+
+	return folder->priv->error != NULL;
+}
+
+const GError *
+e_ews_folder_get_error (EEwsFolder *folder)
+{
+	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), NULL);
+
+	return folder->priv->error;
 }
 
 EwsFolderId *
