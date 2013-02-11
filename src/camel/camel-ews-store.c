@@ -140,7 +140,6 @@ ews_store_initable_init (GInitable *initable,
 
 	store = CAMEL_STORE (initable);
 	service = CAMEL_SERVICE (initable);
-	session = camel_service_get_session (service);
 
 	store->flags |= CAMEL_STORE_USE_CACHE_DIR;
 	ews_migrate_to_user_cache_dir (service);
@@ -149,7 +148,11 @@ ews_store_initable_init (GInitable *initable,
 	if (!parent_initable_interface->init (initable, cancellable, error))
 		return FALSE;
 
+	session = camel_service_ref_session (service);
+
 	ret = ews_store_construct (service, session, NULL, error);
+
+	g_object_unref (session);
 
 	/* Add transport here ? */
 
@@ -496,7 +499,6 @@ ews_connect_sync (CamelService *service,
 	gboolean success;
 
 	ews_store = CAMEL_EWS_STORE (service);
-	session = camel_service_get_session (service);
 
 	if (camel_service_get_connection_status (service) == CAMEL_SERVICE_DISCONNECTED)
 		return FALSE;
@@ -507,10 +509,14 @@ ews_connect_sync (CamelService *service,
 		return TRUE;
 	}
 
+	session = camel_service_ref_session (service);
+
 	/* Try running an operation that requires authentication
 	 * to make sure we have a valid password available. */
 	success = camel_session_authenticate_sync (
 		session, service, NULL, cancellable, error);
+
+	g_object_unref (session);
 
 	if (success)
 		camel_offline_store_set_online_sync (
@@ -807,15 +813,18 @@ camel_ews_store_update_foreign_subfolders (CamelEwsStore *ews_store,
 	g_return_if_fail (CAMEL_IS_EWS_STORE (ews_store));
 	g_return_if_fail (fid != NULL);
 
-	session = camel_service_get_session (CAMEL_SERVICE (ews_store));
-	g_return_if_fail (CAMEL_IS_SESSION (session));
+	session = camel_service_ref_session (CAMEL_SERVICE (ews_store));
+	g_return_if_fail (session != NULL);
 
 	euf = g_new0 (struct EwsUpdateForeignSubfoldersData, 1);
 	euf->ews_store = g_object_ref (ews_store);
 	euf->folder_id = g_strdup (fid);
 
-	camel_session_submit_job (session, ews_store_update_foreign_subfolders,
+	camel_session_submit_job (
+		session, ews_store_update_foreign_subfolders,
 		euf, ews_update_foreign_subfolders_data_free);
+
+	g_object_unref (session);
 }
 
 static void
@@ -1325,7 +1334,7 @@ folder_info_from_store_summary (CamelEwsStore *store,
 
 					settings = camel_service_ref_settings (CAMEL_SERVICE (store));
 					ews_settings = CAMEL_EWS_SETTINGS (settings);
-					session = camel_service_get_session (CAMEL_SERVICE (store));
+					session = camel_service_ref_session (CAMEL_SERVICE (store));
 					if (E_IS_MAIL_SESSION (session))
 						registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
 
@@ -1334,6 +1343,7 @@ folder_info_from_store_summary (CamelEwsStore *store,
 					esources = e_ews_folder_utils_get_esources (registry, hosturl, username, cancellable, NULL);
 
 					g_object_unref (settings);
+					g_object_unref (session);
 				}
 
 				if (e_ews_folder_utils_is_subscribed_as_esource (esources, hosturl, username, fid->id))
@@ -2363,7 +2373,7 @@ ews_store_subscribe_folder_sync (CamelSubscribable *subscribable,
 
 		settings = camel_service_ref_settings (CAMEL_SERVICE (ews_store));
 		ews_settings = CAMEL_EWS_SETTINGS (settings);
-		session = camel_service_get_session (CAMEL_SERVICE (ews_store));
+		session = camel_service_ref_session (CAMEL_SERVICE (ews_store));
 		if (E_IS_MAIL_SESSION (session))
 			registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
 
@@ -2376,6 +2386,7 @@ ews_store_subscribe_folder_sync (CamelSubscribable *subscribable,
 			cancellable,
 			error);
 
+		g_object_unref (session);
 		g_object_unref (settings);
 	}
 
@@ -2497,7 +2508,7 @@ ews_store_unsubscribe_folder_sync (CamelSubscribable *subscribable,
 
 			settings = camel_service_ref_settings (CAMEL_SERVICE (ews_store));
 			ews_settings = CAMEL_EWS_SETTINGS (settings);
-			session = camel_service_get_session (CAMEL_SERVICE (ews_store));
+			session = camel_service_ref_session (CAMEL_SERVICE (ews_store));
 			if (E_IS_MAIL_SESSION (session))
 				registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
 
@@ -2508,6 +2519,7 @@ ews_store_unsubscribe_folder_sync (CamelSubscribable *subscribable,
 				cancellable,
 				error);
 
+			g_object_unref (session);
 			g_object_unref (settings);
 		}
 

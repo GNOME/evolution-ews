@@ -422,7 +422,7 @@ check_foreign_folder_idle (GObject *with_object,
 	ews_store = CAMEL_EWS_STORE (with_object);
 	settings = camel_service_ref_settings (CAMEL_SERVICE (ews_store));
 	ews_settings = CAMEL_EWS_SETTINGS (settings);
-	session = camel_service_get_session (CAMEL_SERVICE (ews_store));
+	session = camel_service_ref_session (CAMEL_SERVICE (ews_store));
 	if (E_IS_MAIL_SESSION (session))
 		registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
 
@@ -449,6 +449,7 @@ check_foreign_folder_idle (GObject *with_object,
 	}
 
 	g_free (folder_name);
+	g_object_unref (session);
 	g_object_unref (settings);
 }
 
