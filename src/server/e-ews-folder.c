@@ -119,7 +119,7 @@ e_ews_folder_init (EEwsFolder *folder)
 	folder->priv = priv;
 
 	priv->error = NULL;
-	priv->folder_type = E_EWS_FOLDER_TYPE_MAILBOX;
+	priv->folder_type = E_EWS_FOLDER_TYPE_UNKNOWN;
 	priv->foreign = FALSE;
 }
 
@@ -162,7 +162,11 @@ e_ews_folder_set_from_soap_parameter (EEwsFolder *folder,
 		if (subparam) {
 			gchar *folder_class = e_soap_parameter_get_string_value (subparam);
 
-			if (g_strcmp0 (folder_class, "IPF.Contact") == 0) {
+			priv->folder_type = E_EWS_FOLDER_TYPE_UNKNOWN;
+
+			if (g_strcmp0 (folder_class, "IPF.Note") == 0 || (folder_class && g_str_has_prefix (folder_class, "IPF.Note."))) {
+				priv->folder_type = E_EWS_FOLDER_TYPE_MAILBOX;
+			} else if (g_strcmp0 (folder_class, "IPF.Contact") == 0) {
 				priv->folder_type = E_EWS_FOLDER_TYPE_CONTACTS;
 			} else if (g_strcmp0 (folder_class, "IPF.Appointment") == 0) {
 				priv->folder_type = E_EWS_FOLDER_TYPE_CALENDAR;
