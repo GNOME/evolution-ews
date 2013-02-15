@@ -119,7 +119,7 @@ e_ews_folder_init (EEwsFolder *folder)
 	folder->priv = priv;
 
 	priv->error = NULL;
-	priv->folder_type = E_EWS_FOLDER_TYPE_MAILBOX;
+	priv->folder_type = E_EWS_FOLDER_TYPE_UNKNOWN;
 	priv->foreign = FALSE;
 }
 
@@ -181,6 +181,12 @@ e_ews_folder_set_from_soap_parameter (EEwsFolder *folder,
 	if (subparam) {
 		value = e_soap_parameter_get_string_value (subparam);
 		e_ews_folder_set_folder_class (folder, (const gchar *) value);
+
+		if (value && priv->folder_type == E_EWS_FOLDER_TYPE_MAILBOX &&
+		    g_strcmp0 (value, "IPF.Note") != 0 && !g_str_has_prefix (value, "IPF.Note.")) {
+			priv->folder_type = E_EWS_FOLDER_TYPE_UNKNOWN;
+		}
+
 		g_free (value);
 	}
 
