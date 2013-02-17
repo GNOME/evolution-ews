@@ -1,3 +1,18 @@
+Evolution-EWS 3.7.90 2012-02-18
+-------------------------------
+
+Bug Fixes:
+	Bug 668489 - Hide other than mail folders from mailer (Milan Crha)
+	Bug 693012 - Meeting invitation update works only the first time
+	             (Milan Crha)
+	Bug 693306 - Folder types not set when any standard folder is missing
+	             (Milan Crha)
+
+Translations:
+	Piotr Drąg (pl)
+	Enrico Nicoletto (pt_BR)
+
+
 Evolution-EWS 3.7.5 2013-02-04
 ------------------------------
 
