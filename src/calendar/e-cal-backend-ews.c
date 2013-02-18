@@ -2362,9 +2362,11 @@ e_ews_get_current_user_meeting_reponse (icalcomponent *icalcomp,
 {
 	icalproperty *attendee;
 	const gchar *attendee_str = NULL, *attendee_mail = NULL;
+	gint attendees_count = 0;
+
 	for (attendee = icalcomponent_get_first_property (icalcomp, ICAL_ATTENDEE_PROPERTY);
 		attendee != NULL;
-		attendee = icalcomponent_get_next_property (icalcomp, ICAL_ATTENDEE_PROPERTY)) {
+		attendee = icalcomponent_get_next_property (icalcomp, ICAL_ATTENDEE_PROPERTY), attendees_count++) {
 		attendee_str = icalproperty_get_attendee (attendee);
 
 		if (attendee_str != NULL) {
@@ -2372,10 +2374,20 @@ e_ews_get_current_user_meeting_reponse (icalcomponent *icalcomp,
 				attendee_mail = attendee_str + 7;
 			else
 				attendee_mail = attendee_str;
-			if (g_strcmp0 (attendee_mail, current_user_mail) == 0)
+			if (attendee_mail && current_user_mail && g_ascii_strcasecmp (attendee_mail, current_user_mail) == 0)
 				return icalproperty_get_parameter_as_string (attendee, "PARTSTAT");
 		}
 	}
+
+	/* this should not happen, but if the user's configured email does not match the one
+	   used in the invitation, like when the invitation comes to a mailing list... */
+	if (attendees_count == 1) {
+		attendee = icalcomponent_get_first_property (icalcomp, ICAL_ATTENDEE_PROPERTY);
+		g_return_val_if_fail (attendee != NULL, NULL);
+
+		return icalproperty_get_parameter_as_string (attendee, "PARTSTAT");
+	}
+
 	return NULL;
 }
 
