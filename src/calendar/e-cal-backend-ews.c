@@ -4079,7 +4079,7 @@ e_cal_backend_ews_get_backend_property (ECalBackend *backend,
 }
 
 static void
-e_cal_backend_ews_notify_online_cb (ECalBackend *backend,
+e_cal_backend_ews_notify_online_cb (EBackend *backend,
                                     GParamSpec *spec)
 {
 	ECalBackendEws *cbews;
@@ -4090,7 +4090,7 @@ e_cal_backend_ews_notify_online_cb (ECalBackend *backend,
 
 	PRIV_LOCK (priv);
 
-	if (e_backend_get_online (E_BACKEND (backend))) {
+	if (e_backend_get_online (backend)) {
 		if (priv->cancellable) {
 			g_cancellable_cancel (priv->cancellable);
 			g_object_unref (priv->cancellable);
@@ -4099,13 +4099,66 @@ e_cal_backend_ews_notify_online_cb (ECalBackend *backend,
 		priv->cancellable = g_cancellable_new ();
 
 		priv->read_only = FALSE;
-		e_cal_backend_set_writable (backend, !priv->read_only);
 	} else {
-		switch_offline (E_CAL_BACKEND_EWS (backend));
-		e_cal_backend_set_writable (backend, !priv->read_only);
+		switch_offline (cbews);
 	}
 
+	e_cal_backend_set_writable (E_CAL_BACKEND (backend), !priv->read_only);
+
 	PRIV_UNLOCK (priv);
+}
+
+static gboolean
+e_cal_backend_ews_get_destination_address (EBackend *backend,
+					   gchar **host,
+					   guint16 *port)
+{
+	CamelEwsSettings *ews_settings;
+	SoupURI *soup_uri;
+	gchar *host_url;
+	gboolean result = FALSE;
+
+	g_return_val_if_fail (port != NULL, FALSE);
+	g_return_val_if_fail (host != NULL, FALSE);
+
+	/* Sanity checking */
+	if (!e_cal_backend_get_registry (E_CAL_BACKEND (backend)) ||
+	    !e_backend_get_source (backend))
+		return FALSE;
+
+	ews_settings = cal_backend_ews_get_collection_settings (E_CAL_BACKEND_EWS (backend));
+	g_return_val_if_fail (ews_settings != NULL, FALSE);
+
+	host_url = camel_ews_settings_dup_hosturl (ews_settings);
+	g_return_val_if_fail (host_url != NULL, FALSE);
+
+	soup_uri = soup_uri_new (host_url);
+	if (soup_uri) {
+		*host = g_strdup (soup_uri_get_host (soup_uri));
+		*port = soup_uri_get_port (soup_uri);
+
+		result = *host && **host;
+		if (!result) {
+			g_free (*host);
+			*host = NULL;
+		}
+
+		soup_uri_free (soup_uri);
+	}
+
+	g_free (host_url);
+
+	return result;
+}
+
+static void
+e_cal_backend_ews_constructed (GObject *object)
+{
+	G_OBJECT_CLASS (e_cal_backend_ews_parent_class)->constructed (object);
+
+	/* Reset the connectable, it steals data from Authentication extension,
+	   where is written incorrect address */
+	e_backend_set_connectable (E_BACKEND (object), NULL);
 }
 
 static void
@@ -4301,39 +4354,42 @@ static void
 e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 {
 	GObjectClass *object_class;
-	ECalBackendClass *backend_class;
+	EBackendClass *backend_class;
+	ECalBackendClass *cal_backend_class;
 
-	object_class = (GObjectClass *) class;
-	backend_class = (ECalBackendClass *) class;
+	object_class = G_OBJECT_CLASS (class);
+	backend_class = E_BACKEND_CLASS (class);
+	cal_backend_class = E_CAL_BACKEND_CLASS (class);
 
+	object_class->constructed = e_cal_backend_ews_constructed;
 	object_class->dispose = e_cal_backend_ews_dispose;
 	object_class->finalize = e_cal_backend_ews_finalize;
 
-	/* Property accessors */
-	backend_class->get_backend_property = e_cal_backend_ews_get_backend_property;
+	backend_class->get_destination_address = e_cal_backend_ews_get_destination_address;
 
-	backend_class->start_view = e_cal_backend_ews_start_query;
+	/* Property accessors */
+	cal_backend_class->get_backend_property = e_cal_backend_ews_get_backend_property;
+
+	cal_backend_class->start_view = e_cal_backend_ews_start_query;
 
 	/* Many of these can be moved to Base class */
-	backend_class->add_timezone = e_cal_backend_ews_add_timezone;
-	backend_class->get_timezone = e_cal_backend_ews_get_timezone;
+	cal_backend_class->add_timezone = e_cal_backend_ews_add_timezone;
+	cal_backend_class->get_timezone = e_cal_backend_ews_get_timezone;
 
-	backend_class->open = e_cal_backend_ews_open;
-	backend_class->refresh = e_cal_backend_ews_refresh;
-	backend_class->get_object = e_cal_backend_ews_get_object;
-	backend_class->get_object_list = e_cal_backend_ews_get_object_list;
+	cal_backend_class->open = e_cal_backend_ews_open;
+	cal_backend_class->refresh = e_cal_backend_ews_refresh;
+	cal_backend_class->get_object = e_cal_backend_ews_get_object;
+	cal_backend_class->get_object_list = e_cal_backend_ews_get_object_list;
 
-	backend_class->discard_alarm = e_cal_backend_ews_discard_alarm;
+	cal_backend_class->discard_alarm = e_cal_backend_ews_discard_alarm;
 
-	backend_class->create_objects = e_cal_backend_ews_create_objects;
-	backend_class->modify_objects = e_cal_backend_ews_modify_objects;
-	backend_class->remove_objects = e_cal_backend_ews_remove_objects;
+	cal_backend_class->create_objects = e_cal_backend_ews_create_objects;
+	cal_backend_class->modify_objects = e_cal_backend_ews_modify_objects;
+	cal_backend_class->remove_objects = e_cal_backend_ews_remove_objects;
 
-	backend_class->receive_objects = e_cal_backend_ews_receive_objects;
-	backend_class->send_objects = e_cal_backend_ews_send_objects;
-	/* backend_class->get_attachment_list = e_cal_backend_ews_get_attachment_list; */
-	backend_class->get_free_busy = e_cal_backend_ews_get_free_busy;
-	/* backend_class->get_changes = e_cal_backend_ews_get_changes; */
+	cal_backend_class->receive_objects = e_cal_backend_ews_receive_objects;
+	cal_backend_class->send_objects = e_cal_backend_ews_send_objects;
+	cal_backend_class->get_free_busy = e_cal_backend_ews_get_free_busy;
 }
 
 static void

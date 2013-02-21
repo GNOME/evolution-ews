@@ -627,6 +627,10 @@ ews_backend_constructed (GObject *object)
 	g_signal_connect (
 		source, "changed",
 		G_CALLBACK (ews_backend_source_changed_cb), object);
+
+	/* Reset the connectable, it steals data from Authentication extension,
+	   where is written incorrect address */
+	e_backend_set_connectable (E_BACKEND (object), NULL);
 }
 
 static void
@@ -939,11 +943,50 @@ exit:
 	return success;
 }
 
+static gboolean
+ews_backend_get_destination_address (EBackend *backend,
+				     gchar **host,
+				     guint16 *port)
+{
+	CamelEwsSettings *ews_settings;
+	SoupURI *soup_uri;
+	gchar *host_url;
+	gboolean result = FALSE;
+
+	g_return_val_if_fail (port != NULL, FALSE);
+	g_return_val_if_fail (host != NULL, FALSE);
+
+	ews_settings = ews_backend_get_settings (E_EWS_BACKEND (backend));
+	g_return_val_if_fail (ews_settings != NULL, FALSE);
+
+	host_url = camel_ews_settings_dup_hosturl (ews_settings);
+	g_return_val_if_fail (host_url != NULL, FALSE);
+
+	soup_uri = soup_uri_new (host_url);
+	if (soup_uri) {
+		*host = g_strdup (soup_uri_get_host (soup_uri));
+		*port = soup_uri_get_port (soup_uri);
+
+		result = *host && **host;
+		if (!result) {
+			g_free (*host);
+			*host = NULL;
+		}
+
+		soup_uri_free (soup_uri);
+	}
+
+	g_free (host_url);
+
+	return result;
+}
+
 static void
 e_ews_backend_class_init (EEwsBackendClass *class)
 {
 	GObjectClass *object_class;
-	ECollectionBackendClass *backend_class;
+	EBackendClass *backend_class;
+	ECollectionBackendClass *collection_backend_class;
 
 	g_type_class_add_private (class, sizeof (EEwsBackendPrivate));
 
@@ -952,13 +995,16 @@ e_ews_backend_class_init (EEwsBackendClass *class)
 	object_class->finalize = ews_backend_finalize;
 	object_class->constructed = ews_backend_constructed;
 
-	backend_class = E_COLLECTION_BACKEND_CLASS (class);
-	backend_class->populate = ews_backend_populate;
-	backend_class->dup_resource_id = ews_backend_dup_resource_id;
-	backend_class->child_added = ews_backend_child_added;
-	backend_class->child_removed = ews_backend_child_removed;
-	backend_class->create_resource_sync = ews_backend_create_resource_sync;
-	backend_class->delete_resource_sync = ews_backend_delete_resource_sync;
+	collection_backend_class = E_COLLECTION_BACKEND_CLASS (class);
+	collection_backend_class->populate = ews_backend_populate;
+	collection_backend_class->dup_resource_id = ews_backend_dup_resource_id;
+	collection_backend_class->child_added = ews_backend_child_added;
+	collection_backend_class->child_removed = ews_backend_child_removed;
+	collection_backend_class->create_resource_sync = ews_backend_create_resource_sync;
+	collection_backend_class->delete_resource_sync = ews_backend_delete_resource_sync;
+
+	backend_class = E_BACKEND_CLASS (class);
+	backend_class->get_destination_address = ews_backend_get_destination_address;
 
 	/* This generates an ESourceCamel subtype for CamelEwsSettings. */
 	e_source_camel_generate_subtype ("ews", CAMEL_TYPE_EWS_SETTINGS);
@@ -983,6 +1029,10 @@ e_ews_backend_init (EEwsBackend *backend)
 	g_mutex_init (&backend->priv->folders_lock);
 	g_mutex_init (&backend->priv->sync_state_lock);
 	g_mutex_init (&backend->priv->connection_lock);
+
+	g_signal_connect (
+		backend, "notify::online",
+		G_CALLBACK (ews_backend_populate), NULL);
 }
 
 void

@@ -2891,6 +2891,59 @@ e_book_backend_ews_new (void)
 	return E_BOOK_BACKEND (backend);
 }
 
+static gboolean
+e_book_backend_ews_get_destination_address (EBackend *backend,
+					    gchar **host,
+					    guint16 *port)
+{
+	CamelEwsSettings *ews_settings;
+	SoupURI *soup_uri;
+	gchar *host_url;
+	gboolean result = FALSE;
+
+	g_return_val_if_fail (port != NULL, FALSE);
+	g_return_val_if_fail (host != NULL, FALSE);
+
+	/* Sanity checking */
+	if (!e_book_backend_get_registry (E_BOOK_BACKEND (backend)) ||
+	    !e_backend_get_source (backend))
+		return FALSE;
+
+	ews_settings = book_backend_ews_get_collection_settings (E_BOOK_BACKEND_EWS (backend));
+	g_return_val_if_fail (ews_settings != NULL, FALSE);
+
+	host_url = camel_ews_settings_dup_hosturl (ews_settings);
+	g_return_val_if_fail (host_url != NULL, FALSE);
+
+	soup_uri = soup_uri_new (host_url);
+	if (soup_uri) {
+		*host = g_strdup (soup_uri_get_host (soup_uri));
+		*port = soup_uri_get_port (soup_uri);
+
+		result = *host && **host;
+		if (!result) {
+			g_free (*host);
+			*host = NULL;
+		}
+
+		soup_uri_free (soup_uri);
+	}
+
+	g_free (host_url);
+
+	return result;
+}
+
+static void
+e_book_backend_ews_constructed (GObject *object)
+{
+	G_OBJECT_CLASS (e_book_backend_ews_parent_class)->constructed (object);
+
+	/* Reset the connectable, it steals data from Authentication extension,
+	   where is written incorrect address */
+	e_backend_set_connectable (E_BACKEND (object), NULL);
+}
+
 static void
 e_book_backend_ews_dispose (GObject *object)
 {
@@ -3015,8 +3068,10 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 {
 
 	GObjectClass  *object_class = G_OBJECT_CLASS (klass);
+	EBackendClass *backend_class;
 	EBookBackendClass *parent_class;
 
+	backend_class = E_BACKEND_CLASS (klass);
 	parent_class = E_BOOK_BACKEND_CLASS (klass);
 
 	/* Set the virtual methods. */
@@ -3031,6 +3086,9 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 	parent_class->start_view              = e_book_backend_ews_start_view;
 	parent_class->stop_view               = e_book_backend_ews_stop_view;
 
+	backend_class->get_destination_address = e_book_backend_ews_get_destination_address;
+
+	object_class->constructed             = e_book_backend_ews_constructed;
 	object_class->dispose                 = e_book_backend_ews_dispose;
 }
 
