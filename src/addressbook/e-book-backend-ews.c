@@ -191,6 +191,37 @@ convert_error_to_edb_error (GError **perror)
 }
 
 static gboolean
+book_backend_ews_ensure_connected (EBookBackendEws *bbews,
+				   GCancellable *cancellable,
+				   GError **perror)
+{
+	GError *local_error = NULL;
+
+	g_return_val_if_fail (E_IS_BOOK_BACKEND_EWS (bbews), FALSE);
+
+	PRIV_LOCK (bbews->priv);
+
+	if (bbews->priv->cnc) {
+		PRIV_UNLOCK (bbews->priv);
+		return TRUE;
+	}
+
+	PRIV_UNLOCK (bbews->priv);
+
+	e_backend_authenticate_sync (
+		E_BACKEND (bbews),
+		E_SOURCE_AUTHENTICATOR (bbews),
+		cancellable, &local_error);
+
+	if (!local_error)
+		return TRUE;
+
+	g_propagate_error (perror, local_error);
+
+	return FALSE;
+}
+
+static gboolean
 ews_remove_attachments (const gchar *attachment_dir)
 {
 	GDir *dir;
@@ -961,6 +992,7 @@ e_book_backend_ews_create_contacts (EBookBackend *backend,
 	EwsCreateContact *create_contact;
 	EwsFolderId *fid;
 	EBookBackendEwsPrivate *priv;
+	GError *error = NULL;
 
 	if (vcards->next != NULL) {
 		e_data_book_respond_create_contacts (
@@ -984,8 +1016,9 @@ e_book_backend_ews_create_contacts (EBookBackend *backend,
 		return;
 	}
 
-	if (ebews->priv->cnc == NULL) {
-		e_data_book_respond_create_contacts (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
+	if (!book_backend_ews_ensure_connected (ebews, cancellable, &error)) {
+		convert_error_to_edb_error (&error);
+		e_data_book_respond_create_contacts (book, opid, error, NULL);
 		return;
 	}
 
@@ -1078,6 +1111,7 @@ e_book_backend_ews_remove_contacts (EBookBackend *backend,
 	EwsRemoveContact *remove_contact;
 	EBookBackendEwsPrivate *priv;
 	GSList *l, *copy = NULL;
+	GError *error = NULL;
 
 	ebews = E_BOOK_BACKEND_EWS (backend);
 
@@ -1093,8 +1127,9 @@ e_book_backend_ews_remove_contacts (EBookBackend *backend,
 		return;
 	}
 
-	if (ebews->priv->cnc == NULL) {
-		e_data_book_respond_remove_contacts (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
+	if (!book_backend_ews_ensure_connected (ebews, cancellable, &error)) {
+		convert_error_to_edb_error (&error);
+		e_data_book_respond_remove_contacts (book, opid, error, NULL);
 		return;
 	}
 
@@ -1268,8 +1303,9 @@ e_book_backend_ews_modify_contacts (EBookBackend *backend,
 		return;
 	}
 
-	if (priv->cnc == NULL) {
-		e_data_book_respond_modify_contacts (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
+	if (!book_backend_ews_ensure_connected (ebews, cancellable, &error)) {
+		convert_error_to_edb_error (&error);
+		e_data_book_respond_modify_contacts (book, opid, error, NULL);
 		return;
 	}
 
@@ -1328,18 +1364,21 @@ e_book_backend_ews_get_contact (EBookBackend *backend,
                                 const gchar *id)
 {
 	EBookBackendEws *ebews;
+	GError *error = NULL;
 
 	ebews =  E_BOOK_BACKEND_EWS (backend);
 
 	if (!e_backend_get_online (E_BACKEND (backend))) {
-		e_data_book_respond_get_contact (book, opid, EDB_ERROR (CONTACT_NOT_FOUND), "");
+		e_data_book_respond_get_contact (book, opid, EDB_ERROR (REPOSITORY_OFFLINE), NULL);
 		return;
 	}
 
-	if (ebews->priv->cnc == NULL) {
-		e_data_book_respond_get_contact (book, opid, e_data_book_create_error_fmt (E_DATA_BOOK_STATUS_OTHER_ERROR, "Not connected"), NULL);
+	if (!book_backend_ews_ensure_connected (ebews, cancellable, &error)) {
+		convert_error_to_edb_error (&error);
+		e_data_book_respond_get_contact (book, opid, error, NULL);
 		return;
 	}
+
 	e_data_book_respond_get_contact (book, opid, EDB_ERROR (CONTACT_NOT_FOUND), "");
 }
 
@@ -1382,8 +1421,9 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 			return;
 	}
 
-	if (priv->cnc == NULL) {
-		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (AUTHENTICATION_REQUIRED), NULL);
+	if (!book_backend_ews_ensure_connected (ebews, cancellable, &error)) {
+		convert_error_to_edb_error (&error);
+		e_data_book_respond_get_contact_list (book, opid, error, NULL);
 		return;
 	}
 
@@ -2175,6 +2215,10 @@ ebews_fetch_items (EBookBackendEws *ebews,
 	GSList *contact_item_ids = NULL, *dl_ids = NULL;
 	GSList *new_items = NULL;
 
+	if (!book_backend_ews_ensure_connected (ebews, cancellable, error)) {
+		return FALSE;
+	}
+
 	priv = ebews->priv;
 	cnc = priv->cnc;
 
@@ -2777,6 +2821,7 @@ e_book_backend_ews_notify_online_cb (EBookBackend *backend,
 			}
 		} else {
 			ebews->priv->cancellable = g_cancellable_new ();
+			ebews->priv->is_writable = !ebews->priv->is_gal;
 
 			e_book_backend_set_writable (backend, ebews->priv->is_writable);
 		}

@@ -217,6 +217,37 @@ switch_offline (ECalBackendEws *cbews)
 	}
 }
 
+static gboolean
+cal_backend_ews_ensure_connected (ECalBackendEws *cbews,
+				  GCancellable *cancellable,
+				  GError **perror)
+{
+	GError *local_error = NULL;
+
+	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (cbews), FALSE);
+
+	PRIV_LOCK (cbews->priv);
+
+	if (cbews->priv->cnc) {
+		PRIV_UNLOCK (cbews->priv);
+		return TRUE;
+	}
+
+	PRIV_UNLOCK (cbews->priv);
+
+	e_backend_authenticate_sync (
+		E_BACKEND (cbews),
+		E_SOURCE_AUTHENTICATOR (cbews),
+		cancellable, &local_error);
+
+	if (!local_error)
+		return TRUE;
+
+	g_propagate_error (perror, local_error);
+
+	return FALSE;
+}
+
 static void
 e_cal_backend_ews_add_timezone (ECalBackend *backend,
                                 EDataCal *cal,
@@ -325,6 +356,7 @@ e_cal_backend_ews_discard_alarm (ECalBackend *backend,
 	ECalBackendEwsPrivate *priv;
 	EwsDiscardAlarmData *edad;
 	ECalComponent *comp;
+	GError *local_error = NULL;
 
 	priv = cbews->priv;
 
@@ -340,6 +372,12 @@ e_cal_backend_ews_discard_alarm (ECalBackend *backend,
 	}
 
 	PRIV_UNLOCK (priv);
+
+	if (!cal_backend_ews_ensure_connected (cbews, cancellable, &local_error)) {
+		convert_error_to_edc_error (&local_error);
+		e_data_cal_respond_discard_alarm (cal, context, local_error);
+		return;
+	}
 
 	/* FIXME: Can't there be multiple alarms for each event? Or does
 	 * Exchange not support that? */
@@ -643,16 +681,18 @@ e_cal_backend_ews_get_object (ECalBackend *backend,
 
 	PRIV_LOCK (priv);
 
-	/* make sure any pending refreshing is done */
-	while (priv->refreshing) {
-		PRIV_UNLOCK (priv);
-		e_flag_wait (priv->refreshing_done);
-		PRIV_LOCK (priv);
+	if (e_backend_get_online (E_BACKEND (backend))) {
+		/* make sure any pending refreshing is done */
+		while (priv->refreshing) {
+			PRIV_UNLOCK (priv);
+			e_flag_wait (priv->refreshing_done);
+			PRIV_LOCK (priv);
+		}
 	}
 
 	/* search the object in the cache */
 	comp = e_cal_backend_store_get_component (priv->store, uid, rid);
-	if (!comp) {
+	if (!comp && e_backend_get_online (E_BACKEND (backend))) {
 		/* maybe a meeting invitation, for which the calendar item is not downloaded yet,
 		 * thus synchronize local cache first */
 		ews_start_sync (cbews);
@@ -906,6 +946,12 @@ e_cal_backend_ews_remove_object (ECalBackend *backend,
 	 *        This is actually an update event where an exception date will have to be appended to the master. 
 	 */
 	e_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
+
+	if (!cal_backend_ews_ensure_connected (cbews, cancellable, &error)) {
+		convert_error_to_edc_error (&error);
+		e_data_cal_respond_remove_objects (cal, context, error, NULL, NULL, NULL);
+		return;
+	}
 
 	priv = cbews->priv;
 
@@ -1667,11 +1713,15 @@ e_cal_backend_ews_create_objects (ECalBackend *backend,
 		goto exit;
 	}
 
+	if (!cal_backend_ews_ensure_connected (cbews, cancellable, &error)) {
+		goto exit;
+	}
+
 	/* parse ical data */
 	comp =  e_cal_component_new_from_string (calobj);
 	if (comp == NULL) {
 		g_propagate_error (&error, EDC_ERROR (InvalidObject));
-		return;
+		goto exit;
 	}
 	icalcomp = e_cal_component_get_icalcomponent (comp);
 
@@ -2270,6 +2320,10 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 		goto exit;
 	}
 
+	if (!cal_backend_ews_ensure_connected (cbews, cancellable, &error)) {
+		goto exit;
+	}
+
 	icalcomp = icalparser_parse_string (calobj);
 	if (!icalcomp) {
 		g_propagate_error (&error, EDC_ERROR (InvalidObject));
@@ -2585,6 +2639,10 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend,
 		goto exit;
 	}
 
+	if (!cal_backend_ews_ensure_connected (cbews, cancellable, &error)) {
+		goto exit;
+	}
+
 	icalcomp = icalparser_parse_string (calobj);
 
 	/* make sure data was parsed properly */
@@ -2890,6 +2948,10 @@ e_cal_backend_ews_send_objects (ECalBackend *backend,
 	/* make sure we're not offline */
 	if (!e_backend_get_online (E_BACKEND (backend))) {
 		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
+		goto exit;
+	}
+
+	if (!cal_backend_ews_ensure_connected (cbews, cancellable, &error)) {
 		goto exit;
 	}
 
@@ -3750,6 +3812,12 @@ ews_start_sync (gpointer data)
 	}
 
 	ews_refreshing_inc (cbews);
+
+	if (!cbews->priv->cnc) {
+		ews_refreshing_dec (cbews);
+		PRIV_UNLOCK (cbews->priv);
+		return FALSE;
+	}
 	PRIV_UNLOCK (cbews->priv);
 
 	/* run the actual operation in thread,
@@ -3969,6 +4037,10 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend,
 	/* make sure we're not offline */
 	if (!e_backend_get_online (E_BACKEND (backend))) {
 		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
+		goto exit;
+	}
+
+	if (!cal_backend_ews_ensure_connected (cbews, cancellable, &error)) {
 		goto exit;
 	}
 

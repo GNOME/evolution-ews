@@ -545,6 +545,8 @@ add_remote_sources (EEwsBackend *backend)
 			e_server_side_source_set_remote_deletable (
 				E_SERVER_SIDE_SOURCE (source), TRUE);
 			e_source_registry_server_add_source (registry, source);
+		} else {
+			e_source_registry_server_add_source (registry, source);
 		}
 	}
 
@@ -644,8 +646,7 @@ ews_backend_populate (ECollectionBackend *backend)
 	ews_backend->priv->need_update_folders = TRUE;
 
 	/* do not do anything, if account is disabled */
-	if (!e_source_get_enabled (source) ||
-	    !e_backend_get_online (E_BACKEND (backend)))
+	if (!e_source_get_enabled (source))
 		return;
 
 	/* For now at least, we don't need to know the
@@ -1218,6 +1219,22 @@ e_ews_backend_sync_folders_sync (EEwsBackend *backend,
 	GError *local_error = NULL;
 
 	g_return_val_if_fail (E_IS_EWS_BACKEND (backend), FALSE);
+
+	if (!e_backend_get_online (E_BACKEND (backend))) {
+		SyncFoldersClosure *closure;
+
+		/* This takes ownership of the folder lists. */
+		closure = g_slice_new0 (SyncFoldersClosure);
+		closure->backend = g_object_ref (backend);
+
+		/* Process the results from an idle callback. */
+		g_idle_add_full (
+			G_PRIORITY_DEFAULT_IDLE,
+			ews_backend_sync_folders_idle_cb, closure,
+			(GDestroyNotify) sync_folders_closure_free);
+
+		return TRUE;
+	}
 
 	connection = e_ews_backend_ref_connection_sync (
 		backend, cancellable, error);
