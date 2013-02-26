@@ -205,7 +205,7 @@ search_finish_idle (gpointer user_data)
 			if (sid->found_contacts > 0) {
 				gchar *str;
 				str = g_strdup_printf (
-					ngettext ("No users found, only one contact", "No users found, only %d contacts",
+					dngettext (GETTEXT_PACKAGE, "No users found, only one contact", "No users found, only %d contacts",
 					sid->found_contacts), sid->found_contacts);
 				gtk_label_set_text (GTK_LABEL (pgu->info_label), str);
 				g_free (str);
@@ -214,12 +214,12 @@ search_finish_idle (gpointer user_data)
 			}
 		} else if (sid->includes_last_item) {
 			gchar *str;
-			str = g_strdup_printf (ngettext ("Found one user", "Found %d users", added), added);
+			str = g_strdup_printf (dngettext (GETTEXT_PACKAGE, "Found one user", "Found %d users", added), added);
 			gtk_label_set_text (GTK_LABEL (pgu->info_label), str);
 			g_free (str);
 		} else {
 			gchar *str;
-			str = g_strdup_printf (ngettext (
+			str = g_strdup_printf (dngettext (GETTEXT_PACKAGE,
 				"Found more than 100 users, but showing only first %d",
 				"Found more than 100 users, but showing only first %d", added), added);
 			gtk_label_set_text (GTK_LABEL (pgu->info_label), str);
