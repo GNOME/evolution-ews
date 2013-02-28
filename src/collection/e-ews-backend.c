@@ -688,13 +688,6 @@ ews_backend_child_added (ECollectionBackend *backend,
 	extension_name = E_SOURCE_EXTENSION_MAIL_TRANSPORT;
 	is_mail |= e_source_has_extension (child_source, extension_name);
 
-	/* Synchronize mail-related display names with the collection. */
-	if (is_mail)
-		g_object_bind_property (
-			collection_source, "display-name",
-			child_source, "display-name",
-			G_BINDING_SYNC_CREATE);
-
 	/* Synchronize mail-related user with the collection identity. */
 	extension_name = E_SOURCE_EXTENSION_AUTHENTICATION;
 	if (is_mail && e_source_has_extension (child_source, extension_name)) {
