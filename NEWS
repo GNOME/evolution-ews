@@ -1,3 +1,19 @@
+Evolution-EWS 3.7.91 2012-03-04
+-------------------------------
+
+Bug Fixes:
+	Bug 693345 - dngettext should be used instead of ngettext (Milan Crha)
+
+Other Changes:
+	* Be more forgiving with the invitation response status pairing
+	  (Milan Crha)
+	* Listen and act on EBackend's online state changes (Milan Crha)
+	* Claim sources even when in offline (Milan Crha)
+
+Translations:
+	Мирослав Николић (sr)
+
+
 Evolution-EWS 3.7.90 2012-02-18
 -------------------------------
 
