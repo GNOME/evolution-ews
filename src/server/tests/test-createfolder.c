@@ -33,7 +33,7 @@
 
 #include "utils.h"
 
-void createfolder_tests_run ();
+void createfolder_tests_run (void);
 
 static GMainLoop *main_loop;
 
@@ -69,7 +69,7 @@ quit:
 }
 
 static void
-op_test_create_folder ()
+op_test_create_folder (void)
 {
 	const gchar *username;
 	const gchar *password;
@@ -96,9 +96,8 @@ op_test_create_folder ()
 
 	e_ews_connection_create_folder (
 		cnc, EWS_PRIORITY_MEDIUM, "inbox",
-		TRUE ,"test", cancellable,
-		create_folder_cb, NULL);
-
+		TRUE, "test", E_EWS_FOLDER_TYPE_MAILBOX,
+		cancellable, create_folder_cb, NULL);
 }
 
 static gboolean
@@ -109,7 +108,7 @@ idle_cb (gpointer data)
 }
 
 void
-createfolder_tests_run ()
+createfolder_tests_run (void)
 {
 	g_type_init ();
 

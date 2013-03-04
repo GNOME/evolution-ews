@@ -31,7 +31,7 @@
 
 #include "utils.h"
 
-void autocompletion_tests_run ();
+void autocompletion_tests_run (void);
 
 static GMainLoop *main_loop;
 
@@ -74,7 +74,7 @@ quit:
 }
 
 static void
-op_test_resolve_names ()
+op_test_resolve_names (void)
 {
 	const gchar *username;
 	const gchar *password;
@@ -115,7 +115,7 @@ idle_cb (gpointer data)
 }
 
 void
-autocompletion_tests_run ()
+autocompletion_tests_run (void)
 {
 	g_print ("Testing autocompletion... \n");
 

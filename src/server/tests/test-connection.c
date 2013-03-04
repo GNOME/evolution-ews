@@ -42,7 +42,7 @@ GMainLoop *main_loop;
 /*Test cases*/
 
 static void
-con_test_create_new_connection ()
+con_test_create_new_connection (void)
 {
 	const gchar *username;
 	const gchar *password;
@@ -77,40 +77,46 @@ struct _cb_data {
 };
 
 static void
-autodiscover_cb (EwsUrls *urls,
-                 gpointer user_data,
-                 GError *error)
+autodiscover_cb (GObject *object,
+                 GAsyncResult *res,
+                 gpointer user_data)
 {
+	CamelEwsSettings *settings = CAMEL_EWS_SETTINGS (object);
 	struct _cb_data *data = (struct _cb_data *) user_data;
 	gboolean quit = data->quit;
+	const gchar *host_url, *oab_url;
+	GError *error = NULL;
 
 	g_print ("Response for test case : %s \n", data->test_case);
+	e_ews_autodiscover_ws_url_finish (settings, res, &error);
 
-	if (data->positive_case) {
-		g_assert (urls != NULL);
-	} else
-		g_assert (urls == NULL);
+	host_url = camel_ews_settings_get_hosturl (settings);
+	oab_url = camel_ews_settings_get_oaburl (settings);
 
-	if (error)
-		g_print ("Error code:%d desc: %s \n", error->code, error->message);
+	if (data->positive_case)
+		g_assert (host_url != NULL && oab_url != NULL);
+	else
+		g_assert (host_url == NULL || oab_url == NULL);
 
-	g_clear_error (&error);
+	if (error != NULL) {
+		g_print ("Error code: %d desc: %s\n", error->code, error->message);
+		g_clear_error (&error);
+	}
+
+	if (host_url || oab_url)
+		g_print ("ASUrl: %s\nOABUrl: %s\n", host_url, oab_url);
+
 	g_free (data->test_case);
 	g_free (data);
-
-	if (urls) {
-		g_print ("ASUrl - %s \nOABUrl - %s \n", urls->as_url, urls->oab_url);
-		g_free (urls->as_url);
-		g_free (urls->oab_url);
-	}
 
 	if (quit)
 		g_main_loop_quit (main_loop);
 }
 
 static void
-con_test_autodiscover ()
+con_test_autodiscover (void)
 {
+	CamelEwsSettings *settings;
 	const gchar *username;
 	const gchar *password;
 	const gchar *email;
@@ -128,38 +134,75 @@ con_test_autodiscover ()
 	g_print ("%s %s : password : %s \n", G_STRLOC, G_STRFUNC, password);
 	g_print ("%s %s : email : %s \n", G_STRLOC, G_STRFUNC, email);
 
-	user_data = g_new0 (struct _cb_data, 1);
-	user_data->test_case = g_strdup ("postive case... \n");
-	g_print ("Testing %s \n", user_data->test_case);
-	user_data->positive_case = TRUE;
-	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, email, password, NULL, NULL);
+	settings = g_object_new (
+		CAMEL_TYPE_EWS_SETTINGS,
+		"user", username,
+		NULL);
+	camel_ews_settings_set_hosturl (settings, uri);
 
 	user_data = g_new0 (struct _cb_data, 1);
-	user_data->test_case =	g_strdup ("wrong password... \n");
+	user_data->test_case = g_strdup ("positive case... \n");
+	user_data->positive_case = TRUE;
+	g_print ("Testing %s \n", user_data->test_case);
+	e_ews_autodiscover_ws_url (
+			settings,
+			email,
+			password,
+			NULL,
+			autodiscover_cb,
+			user_data);
+
+	user_data = g_new0 (struct _cb_data, 1);
+	user_data->test_case = g_strdup ("wrong password... \n");
 	/* It does respond properly with the url, Check it out */
 	user_data->positive_case = TRUE;
 	g_print ("Testing %s \n", user_data->test_case);
-	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, email, "wrongpassword", NULL, NULL);
+	e_ews_autodiscover_ws_url (
+			settings,
+			email,
+			"wrongpassword",
+			NULL,
+			autodiscover_cb,
+			user_data);
 
 	user_data = g_new0 (struct _cb_data, 1);
 	user_data->test_case = g_strdup ("email without domain ... \n");
+	user_data->positive_case = FALSE;
 	g_print ("Testing %s \n", user_data->test_case);
-	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, "wronguseremail", password, NULL, NULL);
+	e_ews_autodiscover_ws_url (
+			settings,
+			"wronguseremail",
+			password,
+			NULL,
+			autodiscover_cb,
+			user_data);
 
 	user_data = g_new0 (struct _cb_data, 1);
 	user_data->test_case = g_strdup ("wrong email address and password... \n");
+	user_data->positive_case = FALSE;
 	g_print ("Testing %s \n", user_data->test_case);
-	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, "godknows@donknow.com", "wrongpassword", NULL, NULL);
+	e_ews_autodiscover_ws_url (
+			settings,
+			"godknows@dontknow.com",
+			"wrongpassword",
+			NULL,
+			autodiscover_cb,
+			user_data);
 
-	user_data->test_case = g_strdup ("wrong user name ... \n");
-	g_print ("Testing %s \n", user_data->test_case);
 	domain = g_strstr_len (email, -1, "@");
 	wrong_username = g_strconcat ("godknows", domain, NULL);
 	user_data = g_new0 (struct _cb_data, 1);
 	user_data->test_case = g_strdup ("wrong user name ... \n");
+	user_data->positive_case = TRUE;
 	g_print ("Testing %s \n", user_data->test_case);
 	user_data->quit = TRUE;
-	e_ews_autodiscover_ws_url (autodiscover_cb, user_data, wrong_username, password, NULL, NULL);
+	e_ews_autodiscover_ws_url (
+			settings,
+			wrong_username,
+			password,
+			NULL,
+			autodiscover_cb,
+			user_data);
 	g_free (wrong_username);
 }
 
@@ -176,7 +219,7 @@ idle_cb (gpointer data)
 }
 
 /*Run tests*/
-void connection_tests_run ()
+void connection_tests_run (void)
 {
 	g_type_init ();
 

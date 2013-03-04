@@ -33,8 +33,8 @@
 
 #include "utils.h"
 
-static void op_test_get_attachments ();
-void get_attachments_tests_run ();
+static void op_test_get_attachments (void);
+void get_attachments_tests_run (void);
 
 static GMainLoop *main_loop;
 
@@ -64,7 +64,7 @@ quit:
 }
 
 static void
-op_test_get_attachments ()
+op_test_get_attachments (void)
 {
 	const gchar *username;
 	const gchar *password;
@@ -97,7 +97,7 @@ op_test_get_attachments ()
 	attachmentid = "AAASAG1hbmR5Lnd1QGludGVsLmNvbQBGAAAAAACdSXexmsgJTpd3WpdX6ulXBwAm9E+BClHfQqEnvCoGvhheAAAAjpb6AACIeDU1D80fTrC3245yXdhOADUAPRB8AAABEgAQADgh/XHkRSZEoCsn9BHi5Fc=";
 	ids = g_slist_append (ids, (gpointer *) attachmentid);
 
-	tmpdir = g_build_filename ("/home/xwu1/evo-cache", NULL); //a test directory that exists already
+	tmpdir = g_build_filename (g_get_tmp_dir (), NULL);
 
 	e_ews_connection_get_attachments (
 		cnc, EWS_PRIORITY_MEDIUM,
@@ -110,14 +110,14 @@ op_test_get_attachments ()
 static gboolean
 idle_cb (gpointer data)
 {
-	g_printf ("Testing get attachments..... \n");
+	g_print ("Testing get attachments..... \n");
 	op_test_get_attachments ();
 
 	return FALSE;
 }
 
 /*Run tests*/
-void get_attachments_tests_run ()
+void get_attachments_tests_run (void)
 {
 	g_type_init ();
 

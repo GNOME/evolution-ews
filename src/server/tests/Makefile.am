@@ -31,8 +31,8 @@ testews_SOURCES =  \
 	test-deletefolder.c \
 	test-getdelegate.c \
 	test-libews.c  \
-	test-get-oof-settings.c \
-	test-set-oof-settings.c \
+	test-oof-settings-submit.c \
+	test-oof-settings-new.c \
 	utils.h \
 	$(NULL)
 

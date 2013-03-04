@@ -19,7 +19,7 @@
  * USA
  */
 
-/* API : e_ews_connection_get_oof_settings */
+/* API : e_ews_oof_settings_submit */
 
 #include <stdio.h>
 #include <string.h>
@@ -29,38 +29,55 @@
 
 #include "server/e-ews-connection.h"
 #include "server/e-ews-message.h"
+#include "server/e-ews-oof-settings.h"
 
 #include "utils.h"
 
-void get_oof_settings_test_run ();
+void oof_settings_submit_test_run (void);
 static GMainLoop *main_loop;
+EEwsOofSettings *oof_settings = NULL;
 
 static void
-get_oof_settings_cb (GObject *object,
+set_arbit_values (EEwsConnection *cnc)
+{
+	GDateTime *tm = g_date_time_new_now_local ();
+
+	oof_settings = e_ews_oof_settings_new_sync (cnc, NULL, NULL);
+
+	e_ews_oof_settings_set_state (oof_settings, E_EWS_OOF_STATE_ENABLED);
+	e_ews_oof_settings_set_external_audience (oof_settings,
+			E_EWS_EXTERNAL_AUDIENCE_ALL);
+	e_ews_oof_settings_set_start_time (oof_settings,
+			g_date_time_add_days (tm, -1));
+	e_ews_oof_settings_set_end_time (oof_settings,
+			g_date_time_add_days (tm, 1));
+	e_ews_oof_settings_set_internal_reply (oof_settings, "My Internal Reply");
+	e_ews_oof_settings_set_external_reply (oof_settings, "My External Reply");
+}
+
+static void
+oof_settings_submit_cb (GObject *object,
                      GAsyncResult *res,
                      gpointer data)
 {
-	EEwsConnection *cnc = E_EWS_CONNECTION (object);
-	OOFSettings *oof_settings;
 	GError *error = NULL;
 
-	e_ews_connection_get_oof_settings_finish (
-		cnc, res, &oof_settings,
-		&error);
+	e_ews_oof_settings_submit_finish (E_EWS_OOF_SETTINGS (object), res, &error);
+
 	if (error != NULL) {
-		g_warning ("Unable to get out of office settings: %s \n", error->message);
+		g_warning ("Unable to set out of office settings: %s \n", error->message);
 		g_clear_error (&error);
 		goto quit;
 	}
 
-	g_print ("Success : Fetched out of office settings successfully \n");
+	g_print ("Success : Set out office successfully \n");
 
 quit:
 	g_main_loop_quit (main_loop);
 }
 
 static void
-op_test_get_oof_settings ()
+op_test_oof_settings_submit (void)
 {
 	const gchar *username;
 	const gchar *password;
@@ -81,7 +98,7 @@ op_test_get_oof_settings ()
 
 	settings = g_object_new (
 		CAMEL_TYPE_EWS_SETTINGS,
-		"username", username, NULL);
+		"user", username, NULL);
 
 	cnc = e_ews_connection_new (uri, settings);
 	e_ews_connection_set_password (cnc, password);
@@ -90,20 +107,21 @@ op_test_get_oof_settings ()
 
 	e_ews_connection_set_mailbox (cnc, email);
 
-	e_ews_connection_get_oof_settings (
-		cnc, EWS_PRIORITY_MEDIUM, cancellable,
-		get_oof_settings_cb, NULL);
+	set_arbit_values (cnc);
+	e_ews_oof_settings_submit (
+		oof_settings, cancellable,
+		oof_settings_submit_cb, NULL);
 }
 
 static gboolean
 idle_cb (gpointer data)
 {
-	op_test_get_oof_settings ();
+	op_test_oof_settings_submit ();
 	return FALSE;
 }
 
 void
-get_oof_settings_test_run ()
+oof_settings_submit_test_run (void)
 {
 	g_type_init ();
 

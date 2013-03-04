@@ -19,7 +19,7 @@
  * USA
  */
 
-/* API : e_ews_connection_create_folders */
+/* API : e_ews_connection_get_delegate */
 
 #include <stdio.h>
 #include <string.h>
@@ -33,7 +33,7 @@
 
 #include "utils.h"
 
-void get_delegate_tests_run ();
+void get_delegate_tests_run (void);
 
 static GMainLoop *main_loop;
 
@@ -60,7 +60,7 @@ get_delegate_cb (GObject *object,
 	if (delegates != NULL && delegates->data) {
 		EwsDelegateInfo *info = delegates->data;
 		if (info->user_id != NULL)
-			g_print ("Delegate is %s\n", get_delegate->user_id->display_name);
+			g_print ("Delegate is %s\n", info->user_id->display_name);
 	}
 
  quit:
@@ -69,11 +69,12 @@ get_delegate_cb (GObject *object,
 }
 
 static void
-op_test_get_delegate ()
+op_test_get_delegate (void)
 {
 	const gchar *username;
 	const gchar *password;
 	const gchar *uri;
+	const gchar *email;
 	EEwsConnection *cnc;
 	GCancellable *cancellable;
 	CamelEwsSettings *settings;
@@ -94,11 +95,13 @@ op_test_get_delegate ()
 
 	g_object_unref (settings);
 
+	util_get_email_from_env (&email);
+	g_assert_cmpstr (email, !=, NULL);
+
 	e_ews_connection_get_delegate (
-		cnc, EWS_PRIORITY_MEDIUM, "abc@xyz.com",
+		cnc, EWS_PRIORITY_MEDIUM, email,
 		TRUE, cancellable,
 		get_delegate_cb, NULL);
-
 }
 
 static gboolean
@@ -109,10 +112,9 @@ idle_cb (gpointer data)
 }
 
 void
-get_delegate_tests_run ()
+get_delegate_tests_run (void)
 {
 	g_type_init ();
-	g_thread_init (NULL);
 
 	main_loop = g_main_loop_new (NULL, TRUE);
 	g_idle_add ((GSourceFunc) idle_cb, NULL);

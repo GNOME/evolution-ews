@@ -33,8 +33,8 @@
 
 #include "utils.h"
 
-static void op_test_get_item ();
-void op_tests_run ();
+static void op_test_get_item (void);
+void op_tests_run (void);
 
 GSList *ids;
 EwsFolderId *folder_id;
@@ -90,7 +90,7 @@ folder_items_ready_callback (GObject *object,
 }
 
 static void
-op_test_sync_folder_items ()
+op_test_sync_folder_items (void)
 {
 	const gchar *username;
 	const gchar *password;
@@ -177,7 +177,7 @@ folder_hierarchy_ready_callback (GObject *object,
 }
 
 static void
-op_test_sync_folder_hierarchy ()
+op_test_sync_folder_hierarchy (void)
 {
 	const gchar *username;
 	const gchar *password;
@@ -249,7 +249,7 @@ get_item_ready_callback (GObject *object,
 }
 
 static void
-op_test_get_item ()
+op_test_get_item (void)
 {
 	const gchar *username;
 	const gchar *password;
@@ -295,7 +295,7 @@ idle_cb (gpointer data)
 	return FALSE;
 }
 
-void op_tests_run ()
+void op_tests_run (void)
 {
 	g_print ("Testing operations... \n");
 

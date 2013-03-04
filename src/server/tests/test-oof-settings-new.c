@@ -19,7 +19,7 @@
  * USA
  */
 
-/* API : e_ews_connection_set_oof_settings */
+/* API : e_ews_oof_settings_new */
 
 #include <stdio.h>
 #include <string.h>
@@ -29,52 +29,35 @@
 
 #include "server/e-ews-connection.h"
 #include "server/e-ews-message.h"
+#include "server/e-ews-oof-settings.h"
 
 #include "utils.h"
 
-void set_oof_settings_test_run ();
+void oof_settings_new_test_run (void);
 static GMainLoop *main_loop;
-OOFSettings *oof_settings = NULL;
 
 static void
-set_arbit_values (void)
-{
-	time_t tm;
-
-	oof_settings = g_new0 (OOFSettings, 1);
-	oof_settings->state = g_strdup ("Enabled");
-	oof_settings->ext_aud = g_strdup ("All");
-	tm = time (NULL);
-	oof_settings->start_tm = tm - (24 * 60 * 60);
-	oof_settings->end_tm = tm + (24 * 60 * 60);
-	oof_settings->int_reply = g_strdup ("My Internal Reply");
-	oof_settings->ext_reply = g_strdup ("My External Reply");
-}
-
-static void
-set_oof_settings_cb (GObject *object,
+oof_settings_new_cb (GObject *object,
                      GAsyncResult *res,
                      gpointer data)
 {
-	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 	GError *error = NULL;
 
-	e_ews_connection_set_oof_settings_finish (cnc, res, &error);
-
+	e_ews_oof_settings_new_finish (res, &error);
 	if (error != NULL) {
-		g_warning ("Unable to set out of office settings: %s \n", error->message);
+		g_warning ("Unable to get out of office settings: %s \n", error->message);
 		g_clear_error (&error);
 		goto quit;
 	}
 
-	g_print ("Success : Set out office successfully \n");
+	g_print ("Success : Fetched out of office settings successfully \n");
 
 quit:
 	g_main_loop_quit (main_loop);
 }
 
 static void
-op_test_set_oof_settings ()
+op_test_oof_settings_new (void)
 {
 	const gchar *username;
 	const gchar *password;
@@ -104,22 +87,20 @@ op_test_set_oof_settings ()
 
 	e_ews_connection_set_mailbox (cnc, email);
 
-	set_arbit_values ();
-	e_ews_connection_set_oof_settings (
-		cnc, EWS_PRIORITY_MEDIUM,
-		oof_settings, cancellable,
-		set_oof_settings_cb, NULL);
+	e_ews_oof_settings_new (
+		cnc, EWS_PRIORITY_MEDIUM, cancellable,
+		oof_settings_new_cb, NULL);
 }
 
 static gboolean
 idle_cb (gpointer data)
 {
-	op_test_set_oof_settings ();
+	op_test_oof_settings_new ();
 	return FALSE;
 }
 
 void
-set_oof_settings_test_run ()
+oof_settings_new_test_run (void)
 {
 	g_type_init ();
 

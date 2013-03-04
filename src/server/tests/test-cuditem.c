@@ -33,8 +33,8 @@
 
 #include "utils.h"
 
-static void op_test_create_item ();
-void cuditem_tests_run ();
+static void op_test_create_item (void);
+void cuditem_tests_run (void);
 
 static GMainLoop *main_loop;
 
@@ -63,6 +63,10 @@ create_item_ready_callback (GObject *object,
 		break;
 	}
 
+	e_ews_connection_delete_folder_sync (
+			cnc, EWS_PRIORITY_MEDIUM,
+			"evolution-test-folder", TRUE,
+			"HardDelete", NULL, NULL);
 quit:
 	g_main_loop_quit (main_loop);
 }
@@ -88,7 +92,7 @@ op_test_create_item_get_soap_msg (ESoapMessage *msg,
 	e_ews_message_write_string_parameter (
 		msg, "End", NULL, "2011-03-01T16:00:00");
 	e_ews_message_write_string_parameter (
-		msg, "Location", NULL,  "Test Location");
+		msg, "Location", NULL, "Test Location");
 
 	e_soap_message_end_element (msg);
 
@@ -100,12 +104,11 @@ op_test_create_item_get_soap_msg (ESoapMessage *msg,
 }
 
 static void
-op_test_create_item ()
+op_test_create_item (void)
 {
 	const gchar *username;
 	const gchar *password;
 	const gchar *uri;
-	const gchar *folderid;
 	EEwsConnection *cnc;
 	EwsFolderId *fid;
 	GCancellable *cancellable;
@@ -127,18 +130,18 @@ op_test_create_item ()
 
 	g_object_unref (settings);
 
-	/* to check how to change to real data */
-	fid = e_ews_folder_id_new (
-		"AQASAG1hbmR5Lnd1QGludGVsLmNvbQAuAAADnUl3sZrICU6Xd1qXV+rpVwEAJvRPgQpR30KhJ7wqBr4YXgAAAY6W+gAAAA==",
-		NULL, FALSE);
+	e_ews_connection_create_folder_sync (
+			cnc, EWS_PRIORITY_MEDIUM,
+			"calendar", TRUE,
+			"evolution-test-folder", E_EWS_FOLDER_TYPE_CALENDAR,
+			&fid, cancellable, NULL);
 
+	/* to check how to change to real data */
 	e_ews_connection_create_items (
 		cnc, EWS_PRIORITY_MEDIUM,
 		NULL, "SendToAllAndSaveCopy", fid,
 		op_test_create_item_get_soap_msg, NULL,
 		cancellable, create_item_ready_callback, NULL);
-
-	e_ews_folder_id_free (fid);
 }
 
 static gboolean
@@ -151,7 +154,7 @@ idle_cb (gpointer data)
 }
 
 /*Run tests*/
-void cuditem_tests_run ()
+void cuditem_tests_run (void)
 {
 	g_type_init ();
 
