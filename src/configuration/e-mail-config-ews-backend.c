@@ -340,6 +340,7 @@ mail_config_ews_backend_setup_defaults (EMailConfigServiceBackend *backend)
 
 		ews_settings = CAMEL_EWS_SETTINGS (settings);
 		camel_ews_settings_set_hosturl (ews_settings, hosturl);
+		camel_ews_settings_set_email (ews_settings, email_address);
 
 		network_settings = CAMEL_NETWORK_SETTINGS (settings);
 		camel_network_settings_set_user (network_settings, parts[0]);
@@ -390,6 +391,35 @@ mail_config_ews_backend_check_complete (EMailConfigServiceBackend *backend)
 }
 
 static void
+mail_config_ews_backend_commit_changes (EMailConfigServiceBackend *backend)
+{
+	CamelSettings *settings;
+	CamelEwsSettings *ews_settings;
+	EMailConfigServicePage *page;
+	const gchar *email_address;
+
+	page = e_mail_config_service_backend_get_page (backend);
+
+	/* This backend serves double duty.  One instance holds the
+	 * mail account source, another holds the mail transport source.
+	 * We can differentiate by examining the EMailConfigServicePage
+	 * the backend is associated with.  This method only applies to
+	 * the Receiving Page. */
+	if (!E_IS_MAIL_CONFIG_RECEIVING_PAGE (page))
+		return;
+
+	/* This needs to come _after_ the page type check so we don't
+	 * introduce a backend extension in the mail transport source. */
+	settings = e_mail_config_service_backend_get_settings (backend);
+
+	email_address = e_mail_config_service_page_get_email_address (page);
+	if (email_address != NULL) {
+		ews_settings = CAMEL_EWS_SETTINGS (settings);
+		camel_ews_settings_set_email (ews_settings, email_address);
+	}
+}
+
+static void
 e_mail_config_ews_backend_class_init (EMailConfigEwsBackendClass *class)
 {
 	EMailConfigServiceBackendClass *backend_class;
@@ -403,6 +433,7 @@ e_mail_config_ews_backend_class_init (EMailConfigEwsBackendClass *class)
 	backend_class->insert_widgets = mail_config_ews_backend_insert_widgets;
 	backend_class->setup_defaults = mail_config_ews_backend_setup_defaults;
 	backend_class->check_complete = mail_config_ews_backend_check_complete;
+	backend_class->commit_changes = mail_config_ews_backend_commit_changes;
 }
 
 static void

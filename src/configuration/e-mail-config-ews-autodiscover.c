@@ -257,8 +257,6 @@ mail_config_ews_autodiscover_try_password_sync (ESourceAuthenticator *auth,
 
 	if (local_error == NULL) {
 		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
-		camel_ews_settings_set_email (ews_settings, email_address);
-
 	} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
 		result = E_SOURCE_AUTHENTICATION_REJECTED;
 		g_error_free (local_error);
