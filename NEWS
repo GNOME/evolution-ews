@@ -1,4 +1,20 @@
-Evolution-EWS 3.6.3 2012-01-21
+Evolution-EWS 3.6.4 2013-03-06
+------------------------------
+
+Bug Fixes:
+	Bug 668489 - Hide other than mail folders from mailer (Milan Crha)
+	Bug 692688 - Crash in strip_html_tags() (Milan Crha)
+	Bug 692705 - Disable reminders for subscribed calendars of other users
+	             (Milan Crha)
+	Bug 693306 - Folder types not set when any standard folder is missing
+	             (Milan Crha)
+
+Other Changes:
+	* Be more forgiving with the invitation response status pairing
+	  (Milan Crha)
+
+
+Evolution-EWS 3.6.3 2013-01-21
 ------------------------------
 
 Bug Fixes:
