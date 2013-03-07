@@ -24,11 +24,11 @@
 #ifndef E_EWS_SUBSCRIBE_FOREIGN_FOLDER_H
 #define E_EWS_SUBSCRIBE_FOREIGN_FOLDER_H
 
-#include <gtk/gtk.h>
-#include <camel/camel.h>
+#include <e-util/e-util.h>
 
 void	e_ews_subscribe_foreign_folder	(GtkWindow *parent,
 					 CamelSession *session,
-					 CamelStore *store);
+					 CamelStore *store,
+					 EClientCache *client_cache);
 
 #endif /* E_EWS_SUBSCRIBE_FOREIGN_FOLDER_H */

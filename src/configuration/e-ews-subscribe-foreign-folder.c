@@ -592,7 +592,8 @@ pick_gal_user_clicked_cb (GtkButton *button,
 void
 e_ews_subscribe_foreign_folder (GtkWindow *parent,
                                 CamelSession *session,
-                                CamelStore *store)
+                                CamelStore *store,
+                                EClientCache *client_cache)
 {
 	PangoAttrList *attrs;
 	ENameSelector *name_selector;
@@ -659,7 +660,7 @@ e_ews_subscribe_foreign_folder (GtkWindow *parent,
 
 	row++;
 
-	name_selector = e_name_selector_new (e_mail_session_get_registry (E_MAIL_SESSION (session)));
+	name_selector = e_name_selector_new (client_cache);
 	name_selector_model = e_name_selector_peek_model (name_selector);
 	e_name_selector_model_add_section (name_selector_model, "User", _("User"), NULL);
 	name_selector_dialog = e_name_selector_peek_dialog (name_selector);
