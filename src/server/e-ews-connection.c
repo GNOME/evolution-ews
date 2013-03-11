@@ -5031,15 +5031,20 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 	e_soap_message_start_element (msg, "ParentFolderId", "messages", NULL);
 
 	/* If NULL passed for parent_folder_id, use "msgfolderroot" */
-	if (is_distinguished_id || !parent_folder_id)
-		e_ews_message_write_string_parameter_with_attribute (
-			msg, "DistinguishedFolderId", NULL, NULL, "Id",
-			parent_folder_id?:"msgfolderroot");
-	else
+	if (is_distinguished_id || !parent_folder_id) {
+		e_soap_message_start_element (msg, "DistinguishedFolderId", NULL, NULL);
+		e_soap_message_add_attribute (
+				msg, "Id", parent_folder_id ?: "msgfolderroot", NULL, NULL);
+		if (is_distinguished_id && cnc->priv->email) {
+			e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
+			e_ews_message_write_string_parameter(
+					msg, "EmailAddress", NULL, cnc->priv->email);
+			e_soap_message_end_element (msg);
+		}
+		e_soap_message_end_element (msg);
+	} else {
 		e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", NULL, NULL, "Id", parent_folder_id);
-
-	if (is_distinguished_id && cnc->priv->email)
-		e_ews_message_write_string_parameter (msg, "Mailbox", NULL, cnc->priv->email);
+	}
 
 	e_soap_message_end_element (msg);
 
@@ -5342,16 +5347,24 @@ e_ews_connection_delete_folder (EEwsConnection *cnc,
 
 	e_soap_message_start_element (msg, "FolderIds", "messages", NULL);
 
-	if (is_distinguished_id)
-		e_ews_message_write_string_parameter_with_attribute (msg, "DistinguishedFolderId", NULL, NULL, "Id", folder_id);
-	else
-		e_ews_message_write_string_parameter_with_attribute (msg, "FolderId", NULL, NULL, "Id", folder_id);
+	e_soap_message_start_element (
+			msg,
+			is_distinguished_id ? "DistinguishedFolderId" : "FolderId",
+			NULL,
+			NULL);
+	e_soap_message_add_attribute (msg, "Id", folder_id, NULL, NULL);
 
-	/*This element is required for delegate access*/
-	if (is_distinguished_id && cnc->priv->email)
-		e_ews_message_write_string_parameter (msg, "Mailbox", NULL, cnc->priv->email);
+	/* This element is required for delegate access */
+	if (is_distinguished_id && cnc->priv->email) {
+		e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
+		e_ews_message_write_string_parameter(
+				msg, "EmailAddress", NULL, cnc->priv->email);
+		e_soap_message_end_element (msg);
+	}
 
-	e_soap_message_end_element (msg);
+	e_soap_message_end_element (msg); /* </DistinguishedFolderId> || </FolderId> */
+
+	e_soap_message_end_element (msg); /* </FolderIds> */
 
 	e_ews_message_write_footer (msg);
 
