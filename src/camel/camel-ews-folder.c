@@ -1706,9 +1706,11 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 			camel_folder_change_info_free (changes);
 		}
 
-		/*update the store about the content of the source and destination folders*/
-		ews_refresh_info_sync (source, cancellable, NULL);
-		ews_refresh_info_sync (destination, cancellable, NULL);
+		/* update destination folder only if not frozen, to not update
+		   for each single message transfer during filtering
+		 */
+		if (!camel_folder_is_frozen (destination))
+			ews_refresh_info_sync (destination, cancellable, NULL);
 	}
 	g_free (dst_id);
 
