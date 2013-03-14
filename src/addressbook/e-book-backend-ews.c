@@ -107,7 +107,7 @@ enum {
 
 /* passing field uris for PhysicalAddress, PhoneNumbers causes error, so we use Default view to fetch them. Thus the summary props just have attachments  and 
  * some additional properties that are not return with Default view */
-#define CONTACT_ITEM_PROPS "item:Attachments item:HasAttachments contacts:Manager contacts:Department contacts:SpouseName contacts:AssistantName contacts:BusinessHomePage contacts:Birthday"
+#define CONTACT_ITEM_PROPS "item:Attachments item:HasAttachments item:Body contacts:Manager contacts:Department contacts:SpouseName contacts:AssistantName contacts:BusinessHomePage contacts:Birthday"
 
 #define PRIV_LOCK(p)   (g_rec_mutex_lock (&(p)->rec_mutex))
 #define PRIV_UNLOCK(p) (g_rec_mutex_unlock (&(p)->rec_mutex))
@@ -428,6 +428,17 @@ ebews_populate_ims (EContact *contact,
 }
 
 static void
+ebews_populate_notes (EContact *contact,
+                      EEwsItem *item)
+{
+	const gchar *notes = e_ews_item_get_notes (item);
+	if (!notes)
+		return;
+
+	e_contact_set (contact, E_CONTACT_NOTE, notes);
+}
+
+static void
 set_email_address (EContact *contact,
                    EContactField field,
                    EEwsItem *item,
@@ -598,6 +609,19 @@ ebews_set_ims (ESoapMessage *message,
                EContact *contact)
 {
 
+}
+
+static void
+ebews_set_notes (ESoapMessage *msg,
+                 EContact *contact)
+{
+	gchar *notes = e_contact_get (contact, E_CONTACT_NOTE);
+	if (!notes)
+		return;
+
+	e_ews_message_write_string_parameter_with_attribute (msg, "Body", NULL, notes, "BodyType", "Text");
+
+	g_free (notes);
 }
 
 static void
@@ -817,6 +841,25 @@ ebews_set_im_changes (ESoapMessage *message,
 }
 
 static void
+ebews_set_notes_changes (ESoapMessage *message,
+                         EContact *new,
+                         EContact *old)
+{
+	gchar *old_notes, *new_notes;
+
+	old_notes = e_contact_get (old, E_CONTACT_NOTE);
+	new_notes = e_contact_get (new, E_CONTACT_NOTE);
+
+	if (g_strcmp0 (old_notes, new_notes)) {
+		convert_contact_property_to_updatexml (
+				message, "Body", new_notes ?: "", "item", "BodyType", "Text");
+	}
+
+	g_free (old_notes);
+	g_free (new_notes);
+}
+
+static void
 ebews_set_email_changes (ESoapMessage *message,
                          EContact *new,
                          EContact *old)
@@ -863,6 +906,7 @@ static const struct field_element_mapping {
 
 } mappings[] = {
 	/* The order should be maintained for create contacts to work */
+	{ E_CONTACT_NOTE, ELEMENT_TYPE_COMPLEX, "Notes", NULL, ebews_populate_notes, ebews_set_notes, ebews_set_notes_changes },
 	{ E_CONTACT_FILE_AS, ELEMENT_TYPE_SIMPLE, "FileAs", e_ews_item_get_fileas},
 	{ E_CONTACT_FULL_NAME, ELEMENT_TYPE_COMPLEX, "CompleteName", NULL, ebews_populate_full_name, ebews_set_full_name, ebews_set_full_name_changes},
 	{ E_CONTACT_NICKNAME, ELEMENT_TYPE_SIMPLE, "Nickname", NULL, ebews_populate_nick_name},
@@ -2876,6 +2920,8 @@ e_book_backend_ews_get_backend_property (EBookBackend *backend,
 		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_ADDRESS_HOME)));
 		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_ADDRESS_OTHER)));
 		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_BIRTH_DATE)));
+
+		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_NOTE)));
 
 		fields_str = e_data_book_string_slist_to_comma_string (fields);
 

@@ -124,6 +124,7 @@ struct _EEwsContactFields {
 	gchar *spouse_name;
 	gchar *culture;
 	gchar *surname;
+	gchar *notes;
 };
 
 struct _EEwsTaskFields {
@@ -406,6 +407,7 @@ ews_free_contact_fields (struct _EEwsContactFields *con_fields)
 		g_free (con_fields->spouse_name);
 		g_free (con_fields->culture);
 		g_free (con_fields->surname);
+		g_free (con_fields->notes);
 		g_free (con_fields);
 	}
 }
@@ -1027,6 +1029,13 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 			priv->item_id = g_new0 (EwsId, 1);
 			priv->item_id->id = e_soap_parameter_get_property (subparam, "Id");
 			priv->item_id->change_key = e_soap_parameter_get_property (subparam, "ChangeKey");
+		} else if (!g_ascii_strcasecmp (name, "Body")) {
+			/*
+			 * For Exchange versions >= 2010_SP2 Notes property can be get
+			 * directly from contacts:Notes. But for backward compatibility
+			 * with old servers (< 2010_SP2) we prefer use item:Body.
+			 */
+			priv->contact_fields->notes = e_soap_parameter_get_string_value (subparam);
 		} else if (!g_ascii_strcasecmp (name, "Subject")) {
 			priv->subject = e_soap_parameter_get_string_value (subparam);
 		} else if (!g_ascii_strcasecmp (name, "DateTimeReceived")) {
@@ -1819,6 +1828,15 @@ e_ews_item_get_surname (EEwsItem *item)
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
 
 	return (const gchar *) item->priv->contact_fields->surname;
+}
+
+const gchar *
+e_ews_item_get_notes (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+
+	return item->priv->contact_fields->notes;
 }
 
 time_t

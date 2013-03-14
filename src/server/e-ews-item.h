@@ -242,6 +242,7 @@ const gchar *	e_ews_item_get_profession	(EEwsItem *item);
 const gchar *	e_ews_item_get_spouse_name	(EEwsItem *item);
 const gchar *	e_ews_item_get_culture		(EEwsItem *item);
 const gchar *	e_ews_item_get_surname		(EEwsItem *item);
+const gchar *	e_ews_item_get_notes		(EEwsItem *item);
 
 /*Task fields*/
 const gchar *	e_ews_item_get_status		(EEwsItem *item);
