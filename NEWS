@@ -1,3 +1,18 @@
+Evolution-EWS 3.7.92 2012-03-18
+-------------------------------
+
+Bug Fixes:
+	Bug 654953 - Fetch Notes in contact (Fabiano Fidêncio)
+	Bug 690433 - Do not refresh folder on every message transfer
+	             (Milan Crha)
+	Bug 695177 - server/tests: fix make check (Fabiano Fidêncio)
+	Bug 695311 - Fill email address even when autodiscovery process is not
+	             called (Fabiano Fidêncio)
+	Bug 695707 - Mailbox field should be inside the DistinguishedFolderId
+	             field in e_ews_connection_{create,delete}_folder ()
+	             (Fabiano Fidêncio)
+
+
 Evolution-EWS 3.7.91 2012-03-04
 -------------------------------
 
