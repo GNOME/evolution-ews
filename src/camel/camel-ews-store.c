@@ -2322,6 +2322,11 @@ ews_store_subscribe_folder_sync (CamelSubscribable *subscribable,
 		return FALSE;
 	}
 
+	/* Folder's name is not stored with the "/" in the beginning, even when the
+	   folder is in the root (same level as "Inbox", "Drafts", etc. */
+	if (*folder_name == '/')
+		folder_name++;
+
 	/* can subscribe only public folders,
 	   thus skip anything known */
 	tmp = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, folder_name);
