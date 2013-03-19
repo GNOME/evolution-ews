@@ -804,6 +804,13 @@ parse_contact_field (EEwsItem *item,
 		value = e_soap_parameter_get_string_value (subparam);
 		priv->contact_fields->wedding_anniversary = ews_item_parse_date (value);
 		g_free (value);
+	} else if (!g_ascii_strcasecmp (name, "Body")) {
+		/*
+		 * For Exchange versions >= 2010_SP2 Notes property can be get
+		 * directly from contacts:Notes. But for backward compatibility
+		 * with old servers (< 2010_SP2) we prefer use item:Body.
+		 */
+		priv->contact_fields->notes = e_soap_parameter_get_string_value (subparam);
 	}
 }
 
@@ -1029,13 +1036,6 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 			priv->item_id = g_new0 (EwsId, 1);
 			priv->item_id->id = e_soap_parameter_get_property (subparam, "Id");
 			priv->item_id->change_key = e_soap_parameter_get_property (subparam, "ChangeKey");
-		} else if (!g_ascii_strcasecmp (name, "Body")) {
-			/*
-			 * For Exchange versions >= 2010_SP2 Notes property can be get
-			 * directly from contacts:Notes. But for backward compatibility
-			 * with old servers (< 2010_SP2) we prefer use item:Body.
-			 */
-			priv->contact_fields->notes = e_soap_parameter_get_string_value (subparam);
 		} else if (!g_ascii_strcasecmp (name, "Subject")) {
 			priv->subject = e_soap_parameter_get_string_value (subparam);
 		} else if (!g_ascii_strcasecmp (name, "DateTimeReceived")) {
