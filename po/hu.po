@@ -4,14 +4,14 @@
 #
 # Mézi Zoltán <mezi dot zoltan at gmail dot com>, 2011.
 # Gabor Kelemen <kelemeng at gnome dot hu>, 2011, 2012.
-# Balázs Úr <urbalazs at gmail dot com>, 2012.
+# Balázs Úr <urbalazs at gmail dot com>, 2012, 2013.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2012-12-12 19:35+0000\n"
-"PO-Revision-Date: 2012-12-29 13:37+0100\n"
+"POT-Creation-Date: 2013-03-07 11:53+0000\n"
+"PO-Revision-Date: 2013-03-20 21:09+0100\n"
 "Last-Translator: Balázs Úr <urbalazs at gmail dot com>\n"
 "Language-Team: Hungarian <gnome-hu-list at gnome dot org>\n"
 "Language: hu\n"
@@ -23,80 +23,80 @@ msgstr ""
 "Plural-Forms:  nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.2\n"
 
-#: ../src/addressbook/e-book-backend-ews.c:969
+#: ../src/addressbook/e-book-backend-ews.c:1001
 msgid "The backend does not support bulk additions"
 msgstr "A háttérprogram nem támogatja a tömeges hozzáadásokat"
 
-#: ../src/addressbook/e-book-backend-ews.c:1253
+#: ../src/addressbook/e-book-backend-ews.c:1288
 msgid "The backend does not support bulk modifications"
 msgstr "A háttérprogram nem támogatja a tömeges módosításokat"
 
-#: ../src/addressbook/e-book-backend-ews.c:1436
+#: ../src/addressbook/e-book-backend-ews.c:1476
 msgid "Wait till syncing is done"
 msgstr "Várakozás a szinkronizálás befejeződésére"
 
-#: ../src/addressbook/e-book-backend-ews.c:1775
+#: ../src/addressbook/e-book-backend-ews.c:1815
 #, c-format
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr "Kapcsolatok letöltése itt: %s %d%%-ban kész…"
 
-#: ../src/addressbook/e-book-backend-ews.c:2324
+#: ../src/addressbook/e-book-backend-ews.c:2368
 msgid "Syncing contacts..."
 msgstr "Névjegyek szinkronizálása…"
 
-#: ../src/addressbook/e-book-backend-ews.c:2548
+#: ../src/addressbook/e-book-backend-ews.c:2592
 #: ../src/configuration/e-ews-search-user.c:364
 msgid "Searching..."
 msgstr "Keresés…"
 
-#: ../src/calendar/e-cal-backend-ews.c:1022
+#: ../src/calendar/e-cal-backend-ews.c:1055
 msgid "EWS does not support bulk removals"
 msgstr "Az EWS nem támogatja a tömeges módosításokat"
 
-#: ../src/calendar/e-cal-backend-ews.c:1665
+#: ../src/calendar/e-cal-backend-ews.c:1698
 msgid "EWS does not support bulk additions"
 msgstr "Az EWS nem támogatja a tömeges hozzáadásokat"
 
-#: ../src/calendar/e-cal-backend-ews.c:2244
+#: ../src/calendar/e-cal-backend-ews.c:2281
 msgid "EWS does not support bulk modifications"
 msgstr "Az EWS nem támogatja a tömeges módosításokat"
 
-#: ../src/camel/camel-ews-folder.c:267
+#: ../src/camel/camel-ews-folder.c:268
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Nem nyitható meg a MIME-tartalom átmeneti fájlja!"
 
-#: ../src/camel/camel-ews-folder.c:275
+#: ../src/camel/camel-ews-folder.c:276
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Nem hozható létre a MIME-tartalom feldolgozója!"
 
-#: ../src/camel/camel-ews-folder.c:284
+#: ../src/camel/camel-ews-folder.c:285
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Nem dolgozható fel a találkozókérés MIME-tartalma!"
 
-#: ../src/camel/camel-ews-folder.c:344
+#: ../src/camel/camel-ews-folder.c:346
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Nem hozató létre gyorsítótárfájl"
 
-#: ../src/camel/camel-ews-folder.c:449 ../src/camel/camel-ews-folder.c:529
+#: ../src/camel/camel-ews-folder.c:451 ../src/camel/camel-ews-folder.c:531
 #, c-format
 msgid "Unable to create cache path"
 msgstr "Nem hozható létre a gyorsítótár útvonala"
 
-#: ../src/camel/camel-ews-folder.c:539
+#: ../src/camel/camel-ews-folder.c:541
 #, c-format
 msgid "Failed to move message cache file"
 msgstr "Sikertelen az üzenetgyorsítótár-fájl áthelyezése"
 
-#: ../src/camel/camel-ews-folder.c:1174
+#: ../src/camel/camel-ews-folder.c:1188
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "„%s” összefoglalása nem tölthető be"
 
-#: ../src/camel/camel-ews-folder.c:1610
+#: ../src/camel/camel-ews-folder.c:1624
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr "Kapcsolat nélküli módban nem lehet végrehajtani a műveleteket a mappán"
@@ -172,55 +172,63 @@ msgstr ""
 "Ezzel az opcióval az Exchange kiszolgálóhoz sima szöveges jelszóval fog "
 "kapcsolódni alap hitelesítés használatával."
 
-#: ../src/camel/camel-ews-store.c:187
+#: ../src/camel/camel-ews-store.c:192
 #, c-format
 msgid "Session has no storage path"
 msgstr "A munkamenet nem rendelkezik tárolási útvonallal"
 
-#: ../src/camel/camel-ews-store.c:285
+#: ../src/camel/camel-ews-store.c:229
+#, c-format
+#| msgctxt "ForeignFolders"
+#| msgid "%s_%d"
+msgctxt "PublicFolders"
+msgid "%s_%d"
+msgstr "%s_%d"
+
+#: ../src/camel/camel-ews-store.c:358
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:573
+#: ../src/camel/camel-ews-store.c:688
 msgid "Updating foreign folder structure"
 msgstr "Idegen mappaszerkezet frissítése"
 
-#: ../src/camel/camel-ews-store.c:852
+#: ../src/camel/camel-ews-store.c:973
 msgid "Authentication password not available"
 msgstr "A hitelesítési jelszó nem érhető el"
 
-#: ../src/camel/camel-ews-store.c:1004
+#: ../src/camel/camel-ews-store.c:1138
 msgid "Query for authentication types is not supported"
 msgstr "A hitelesítési típusok lekérése nem támogatott"
 
-#: ../src/camel/camel-ews-store.c:1056
+#: ../src/camel/camel-ews-store.c:1190
 #, c-format
 msgid "No such folder: %s"
 msgstr "Nincs %s nevű mappa"
 
-#: ../src/camel/camel-ews-store.c:1203
-msgid ""
-"Cannot list folders available for subscription of Exchange Web Services "
-"account, use 'Subscribe to folder of other user' context menu option above "
-"the account node in the folder tree instead."
-msgstr ""
-"Nem sorolhatók fel az Exchange webszolgáltatások fiókkal feliratkozáshoz "
-"elérhető mappák, használja inkább a mappafa fiókcsomópontja fölötti helyi "
-"menü „Feliratkozás más felhasználó mappájára” menüpontját."
+#: ../src/camel/camel-ews-store.c:1502
+#| msgid "Cannot subscribe EWS folders in offline mode"
+msgid "Cannot list EWS public folders in offline mode"
+msgstr "Nem lehet listázni a nyilvános EWS mappákat kapcsolat nélküli módban"
 
-#: ../src/camel/camel-ews-store.c:1310
+#: ../src/camel/camel-ews-store.c:1575
+#| msgid "Cannot find folder ID for parent folder %s"
+msgid "Cannot find any EWS public folders"
+msgstr "Nem található egyetlen EWS nyilvános mappa sem"
+
+#: ../src/camel/camel-ews-store.c:1680
 #, c-format
 msgid "Cannot create folder '%s', folder already exists"
 msgstr "A mappa („%s”) nem hozható létre, mert már létezik"
 
-#: ../src/camel/camel-ews-store.c:1325
+#: ../src/camel/camel-ews-store.c:1695
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "A szülő mappa (%s) nem létezik"
 
-#: ../src/camel/camel-ews-store.c:1335
+#: ../src/camel/camel-ews-store.c:1705
 #, c-format
 msgid ""
 "Cannot create folder under '%s', it is used for folders of other users only"
@@ -228,67 +236,99 @@ msgstr ""
 "Nem hozható létre mappa a(z) „%s” alatt, mert az csak más felhasználók "
 "mappáihoz van használatban"
 
-#: ../src/camel/camel-ews-store.c:1404
+#: ../src/camel/camel-ews-store.c:1715
+#, c-format
+#| msgid ""
+#| "Cannot create folder under '%s', it is used for folders of other users "
+#| "only"
+msgid "Cannot create folder under '%s', it is used for public folders only"
+msgstr ""
+"Nem hozható létre mappa a(z) „%s” alatt, mert az csak a nyilvános mappákhoz "
+"van használatban"
+
+#: ../src/camel/camel-ews-store.c:1784
 #, c-format
 msgid "Folder does not exist"
 msgstr "A mappa nem létezik"
 
-#: ../src/camel/camel-ews-store.c:1413
+#: ../src/camel/camel-ews-store.c:1793
 #, c-format
 msgid "Cannot remove folder '%s', it is used for folders of other users only"
 msgstr ""
-"Nem távolítható el mappa a(z) „%s” alól, mert az csak más felhasználók "
-"mappáihoz van használatban"
+"Nem távolítható el a(z) „%s” mappa, mert az csak más felhasználók mappáihoz "
+"van használatban"
 
-#: ../src/camel/camel-ews-store.c:1520
+#: ../src/camel/camel-ews-store.c:1803
+#, c-format
+#| msgid ""
+#| "Cannot remove folder '%s', it is used for folders of other users only"
+msgid "Cannot remove folder '%s', it is used for public folders only"
+msgstr ""
+"Nem távolítható el a(z) „%s” mappa, mert az csak a nyilvános mappákhoz van "
+"használatban"
+
+#: ../src/camel/camel-ews-store.c:1911
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "A(z) %s mappa nem létezik"
 
-#: ../src/camel/camel-ews-store.c:1530
+#: ../src/camel/camel-ews-store.c:1921
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Nem változott a(z) %s mappa fő rekordja"
 
-#: ../src/camel/camel-ews-store.c:1572
+#: ../src/camel/camel-ews-store.c:1963
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Nem lehet egyszerre átnevezni és mozgatni a mappát"
 
-#: ../src/camel/camel-ews-store.c:1608
+#: ../src/camel/camel-ews-store.c:1999
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nem található a(z) %s szülőmappa mappaazonosítója"
 
-#: ../src/camel/camel-ews-store.c:1658 ../src/camel/camel-ews-transport.c:69
+#: ../src/camel/camel-ews-store.c:2049 ../src/camel/camel-ews-transport.c:69
 #, c-format
 msgid "Exchange server %s"
 msgstr "%s Exchange kiszolgáló"
 
-#: ../src/camel/camel-ews-store.c:1661
+#: ../src/camel/camel-ews-store.c:2052
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Exchange szolgáltatás %s számára ezen: %s"
 
-#: ../src/camel/camel-ews-store.c:1705
+#: ../src/camel/camel-ews-store.c:2096
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "A Kuka mappa nem található"
 
-#: ../src/camel/camel-ews-store.c:1740
+#: ../src/camel/camel-ews-store.c:2131
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "A Levélszemét mappa nem található"
 
-#: ../src/camel/camel-ews-store.c:1818
+#: ../src/camel/camel-ews-store.c:2321
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Nem lehet EWS mappákra feliratkozni kapcsolat nélküli módban"
 
-#: ../src/camel/camel-ews-store.c:1840
+#: ../src/camel/camel-ews-store.c:2339
+#, c-format
+#| msgid "Cannot create folder '%s', folder already exists"
+msgid "Cannot subscribe folder '%s', no public folder available"
+msgstr ""
+"Nem lehet feliratkozni a(z) „%s” mappára, nem érhető el nyilvános mappa"
+
+#: ../src/camel/camel-ews-store.c:2349
+#, c-format
+#| msgid "Cannot subscribe EWS folders in offline mode"
+msgid "Cannot subscribe folder '%s', folder not found"
+msgstr "Nem lehet feliratkozni a(z) „%s” mappára, a mappa nem található"
+
+#: ../src/camel/camel-ews-store.c:2440
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Nem lehet EWS mappákról leiratkozni kapcsolat nélküli módban"
 
-#: ../src/camel/camel-ews-store.c:1913
+#: ../src/camel/camel-ews-store.c:2557
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "A művelet befejezéséhez online kell dolgoznia"
@@ -325,58 +365,58 @@ msgstr ""
 msgid "Service not connected"
 msgstr "Nem kapcsolódott a szolgáltatáshoz"
 
-#: ../src/collection/e-ews-backend.c:406
+#: ../src/collection/e-ews-backend.c:428
 #: ../src/configuration/e-mail-config-ews-gal.c:274
 msgid "Global Address List"
 msgstr "Globális címlista"
 
-#: ../src/collection/e-ews-backend.c:791
+#: ../src/collection/e-ews-backend.c:813
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named '%s'"
 msgstr "Nem határozható meg megfelelő mappaosztály a(z) „%s” nevű új mappához"
 
-#: ../src/collection/e-ews-backend.c:882
+#: ../src/collection/e-ews-backend.c:902
 #, c-format
 msgid "Data source '%s' does not represent an Exchange Web Services folder"
 msgstr ""
 "A(z) „%s” adatforrás nem az Exchange webszolgáltatások egyik mappáját "
 "képviseli"
 
-#: ../src/configuration/e-ews-config-utils.c:511
+#: ../src/configuration/e-ews-config-utils.c:516
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr ""
 "Nem szerkeszthetők a(z) „%s” mappa jogosultságai, válasszon másik mappát."
 
-#: ../src/configuration/e-ews-config-utils.c:589
+#: ../src/configuration/e-ews-config-utils.c:594
 msgid "Subscribe to folder of other user..."
 msgstr "Feliratkozás más felhasználó mappájára…"
 
-#: ../src/configuration/e-ews-config-utils.c:598
-#: ../src/configuration/e-ews-config-utils.c:879
-#: ../src/configuration/e-ews-config-utils.c:910
-#: ../src/configuration/e-ews-config-utils.c:941
-#: ../src/configuration/e-ews-config-utils.c:972
+#: ../src/configuration/e-ews-config-utils.c:603
+#: ../src/configuration/e-ews-config-utils.c:884
+#: ../src/configuration/e-ews-config-utils.c:915
+#: ../src/configuration/e-ews-config-utils.c:946
+#: ../src/configuration/e-ews-config-utils.c:977
 msgid "Permissions..."
 msgstr "Jogosultságok…"
 
-#: ../src/configuration/e-ews-config-utils.c:600
+#: ../src/configuration/e-ews-config-utils.c:605
 msgid "Edit EWS folder permissions"
 msgstr "EWS mappajogosultságok szerkesztése"
 
-#: ../src/configuration/e-ews-config-utils.c:881
+#: ../src/configuration/e-ews-config-utils.c:886
 msgid "Edit EWS calendar permissions"
 msgstr "EWS naptárjogosultságok szerkesztése"
 
-#: ../src/configuration/e-ews-config-utils.c:912
+#: ../src/configuration/e-ews-config-utils.c:917
 msgid "Edit EWS tasks permissions"
 msgstr "EWS feladatjogosultságok szerkesztése"
 
-#: ../src/configuration/e-ews-config-utils.c:943
+#: ../src/configuration/e-ews-config-utils.c:948
 msgid "Edit EWS memos permissions"
 msgstr "EWS feljegyzésjogosultságok szerkesztése"
 
-#: ../src/configuration/e-ews-config-utils.c:974
+#: ../src/configuration/e-ews-config-utils.c:979
 msgid "Edit EWS contacts permissions"
 msgstr "EWS névjegyjogosultságok szerkesztése"
 
@@ -476,7 +516,7 @@ msgid "Edit EWS folder permissions..."
 msgstr "EWS mappajogosultságok szerkesztése…"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:932
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:634
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:635
 msgid "Account:"
 msgstr "Fiók:"
 
@@ -629,7 +669,7 @@ msgid "_Search:"
 msgstr "_Keresés:"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
-#: ../src/server/e-ews-folder.c:593
+#: ../src/server/e-ews-folder.c:632
 #, c-format
 msgid "Cannot add folder, folder already exists as '%s'"
 msgstr "A mappa nem vehető fel, mert már létezik „%s” néven"
@@ -684,27 +724,27 @@ msgstr "%s – %s"
 
 #. convert well-known names to their non-localized form
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:512
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:719
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:720
 msgid "Inbox"
 msgstr "Beérkezett üzenetek"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:514
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:720
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
 msgid "Contacts"
 msgstr "Névjegyek"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:516
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:722
 msgid "Calendar"
 msgstr "Naptár"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:518
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:722
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:723
 msgid "Memos"
 msgstr "Feljegyzések"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:520
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:723
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:724
 msgid "Tasks"
 msgstr "Feladatok"
 
@@ -715,29 +755,27 @@ msgstr ""
 "„%2$s” felhasználó „%1$s” mappájának elérhetőségének tesztelése, kis "
 "türelmet…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:613
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:614
 msgid "Subscribe to folder of other EWS user..."
 msgstr "Feliratkozás más EWS felhasználó mappájára…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:664
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:665
 msgid "User"
 msgstr "Felhasználó"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:671
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:672
 msgid "_User:"
 msgstr "_Felhasználó:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:686
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:687
 msgid "C_hoose..."
 msgstr "_Válasszon…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:702
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:703
 msgid "_Folder name:"
 msgstr "_Mappa neve:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:732
-#| msgctxt "Permissions"
-#| msgid "Create subfolders"
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:733
 msgid "Include _subfolders"
 msgstr "_Almappákat beleértve"
 
@@ -770,7 +808,6 @@ msgid "Open _Mailbox of other user"
 msgstr "_Más felhasználó postafiókjának megnyitása"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:239
-#| msgid "Searching..."
 msgid "S_earch..."
 msgstr "_Keresés…"
 
@@ -1001,63 +1038,63 @@ msgstr "A hitelesítés sikertelen"
 msgid "No response: %s"
 msgstr "Nincs válasz: %s"
 
-#: ../src/server/e-ews-connection.c:1877
+#: ../src/server/e-ews-connection.c:1880
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Az automatikus felderítésre adott válasz XML feldolgozása sikertelen"
 
-#: ../src/server/e-ews-connection.c:1884
+#: ../src/server/e-ews-connection.c:1887
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Nem sikerült megtalálni az <Autodiscover> elemet"
 
-#: ../src/server/e-ews-connection.c:1895
+#: ../src/server/e-ews-connection.c:1898
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Nem sikerült megtalálni a <Response> elemet"
 
-#: ../src/server/e-ews-connection.c:1906
+#: ../src/server/e-ews-connection.c:1909
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Nem sikerült megtalálni az <Account> elemet"
 
-#: ../src/server/e-ews-connection.c:1925
+#: ../src/server/e-ews-connection.c:1928
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
 "Az <ASUrl> és <OABUrl> nem található az automatikus felderítésre adott "
 "válaszban"
 
-#: ../src/server/e-ews-connection.c:2007
+#: ../src/server/e-ews-connection.c:2010
 msgid "URL cannot be NULL"
 msgstr "Az URL nem lehet NULL"
 
-#: ../src/server/e-ews-connection.c:2015
+#: ../src/server/e-ews-connection.c:2018
 #, c-format
 msgid "URL '%s' is not valid"
 msgstr "A(z) „%s” URL nem érvényes"
 
-#: ../src/server/e-ews-connection.c:2117
+#: ../src/server/e-ews-connection.c:2120
 msgid "Email address is missing a domain part"
 msgstr "Az e-mail címből hiányzik a tartomány rész"
 
-#: ../src/server/e-ews-connection.c:2429
+#: ../src/server/e-ews-connection.c:2432
 msgid "Failed to parse oab XML"
 msgstr "Nem sikerült feldolgozni az oab XML-t"
 
-#: ../src/server/e-ews-connection.c:2437
+#: ../src/server/e-ews-connection.c:2440
 msgid "Failed to find <OAB> element\n"
 msgstr "Nem sikerült megtalálni az <OAB> elemet\n"
 
-#: ../src/server/e-ews-connection.c:3609
+#: ../src/server/e-ews-connection.c:3612
 msgid "No items found"
 msgstr "Nem találhatók elemek"
 
-#: ../src/server/e-ews-folder.c:547
+#: ../src/server/e-ews-folder.c:587
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Nem vehető fel a mappa, nem támogatott a mappa típusa"
 
-#: ../src/server/e-ews-folder.c:552
+#: ../src/server/e-ews-folder.c:592
 msgid "Cannot add folder, master source not found"
 msgstr "Nem vehető fel a mappa, nem található az elsődleges forrás"
 
@@ -1065,6 +1102,15 @@ msgstr "Nem vehető fel a mappa, nem található az elsődleges forrás"
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "A CreateItem hívás nem adott vissza új üzenetazonosítót"
+
+#~ msgid ""
+#~ "Cannot list folders available for subscription of Exchange Web Services "
+#~ "account, use 'Subscribe to folder of other user' context menu option "
+#~ "above the account node in the folder tree instead."
+#~ msgstr ""
+#~ "Nem sorolhatók fel az Exchange webszolgáltatások fiókkal feliratkozáshoz "
+#~ "elérhető mappák, használja inkább a mappafa fiókcsomópontja fölötti helyi "
+#~ "menü „Feliratkozás más felhasználó mappájára” menüpontját."
 
 #~ msgid "Insufficient memory"
 #~ msgstr "Nincs elég memória"
