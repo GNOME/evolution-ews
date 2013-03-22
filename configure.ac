@@ -291,14 +291,13 @@ dnl *************
 GTK_DOC_CHECK(1.9)
 
 dnl **************************
-dnl Makefiles, generated .pc's
+dnl Makefiles
 dnl **************************
 AC_CONFIG_FILES([
 Makefile 
 src/Makefile
 src/server/Makefile
 src/server/tests/Makefile
-src/server/libeews.pc
 src/utils/Makefile
 src/addressbook/Makefile
 src/addressbook/lzx/Makefile

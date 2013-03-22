@@ -87,23 +87,15 @@ libeewsinclude_HEADERS = \
 	e-ews-oof-settings.h \
 	$(NULL)
 
-%-$(API_VERSION).pc: %.pc
-	cp $< $@
-
-pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libeews-$(API_VERSION).pc
-
 BUILT_SOURCES = \
 	$(ENUM_GENERATED) \
 	$(NULL)
 
 EXTRA_DIST = \
-	$(pkgconfig_DATA:-$(API_VERSION).pc=.pc.in) \
 	e-ews-enumtypes.h.template \
 	e-ews-enumtypes.c.template \
 	$(NULL)
 
 CLEANFILES = $(BUILT_SOURCES)
-DISTCLEANFILES = $(pkgconfig_DATA)
 
 -include $(top_srcdir)/git.mk
