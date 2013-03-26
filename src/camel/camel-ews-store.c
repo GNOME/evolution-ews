@@ -44,11 +44,13 @@
 #include "server/camel-ews-settings.h"
 #include "server/e-ews-item-change.h"
 #include "server/e-ews-message.h"
+#include "server/e-ews-oof-settings.h"
 
 #include "camel-ews-folder.h"
 #include "camel-ews-store.h"
 #include "camel-ews-summary.h"
 #include "camel-ews-utils.h"
+#include "camel-ews-enumtypes.h"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>
@@ -69,6 +71,8 @@ struct _CamelEwsStorePrivate {
 	GMutex get_finfo_lock;
 	EEwsConnection *connection;
 	GMutex connection_lock;
+	gboolean has_ooo_set;
+	CamelEwsStoreOooAlertState ooo_alert_state;
 	GSList *public_folders; /* EEwsFolder * objects */
 };
 
@@ -79,12 +83,108 @@ static void camel_ews_store_initable_init (GInitableIface *interface);
 static void camel_ews_subscribable_init (CamelSubscribableInterface *interface);
 static GInitableIface *parent_initable_interface;
 
+enum {
+	PROP_0,
+	PROP_HAS_OOO_SET,
+	PROP_OOO_ALERT_STATE
+};
+
 G_DEFINE_TYPE_WITH_CODE (
 	CamelEwsStore, camel_ews_store, CAMEL_TYPE_OFFLINE_STORE,
 	G_IMPLEMENT_INTERFACE (
 		G_TYPE_INITABLE, camel_ews_store_initable_init)
 	G_IMPLEMENT_INTERFACE (
 		CAMEL_TYPE_SUBSCRIBABLE, camel_ews_subscribable_init))
+
+static void
+ews_store_set_property (GObject *object,
+                        guint property_id,
+                        const GValue *value,
+                        GParamSpec *pspec)
+{
+	switch (property_id) {
+		case PROP_HAS_OOO_SET:
+			camel_ews_store_set_has_ooo_set (
+				CAMEL_EWS_STORE (object),
+				g_value_get_boolean (value));
+			return;
+		case PROP_OOO_ALERT_STATE:
+			camel_ews_store_set_ooo_alert_state (
+				CAMEL_EWS_STORE (object),
+				g_value_get_enum (value));
+			return;
+	}
+
+	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+}
+
+static void
+ews_store_get_property (GObject *object,
+                        guint property_id,
+                        GValue *value,
+                        GParamSpec *pspec)
+{
+	switch (property_id) {
+		case PROP_HAS_OOO_SET:
+			g_value_set_boolean (
+				value,
+				camel_ews_store_get_has_ooo_set (
+				CAMEL_EWS_STORE (object)));
+			return;
+		case PROP_OOO_ALERT_STATE:
+			g_value_set_enum (
+				value,
+				camel_ews_store_get_ooo_alert_state (
+				CAMEL_EWS_STORE (object)));
+			return;
+	}
+
+	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+}
+
+void
+camel_ews_store_set_has_ooo_set (CamelEwsStore *ews_store,
+                                 gboolean has_ooo_set)
+{
+	g_return_if_fail (CAMEL_IS_EWS_STORE (ews_store));
+
+	if ((ews_store->priv->has_ooo_set ? 1 : 0) == (has_ooo_set ? 1 : 0))
+		return;
+
+	ews_store->priv->has_ooo_set = has_ooo_set;
+	g_object_notify (G_OBJECT (ews_store), "has-ooo-set");
+}
+
+gboolean
+camel_ews_store_get_has_ooo_set (const CamelEwsStore *ews_store)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_STORE (ews_store), FALSE);
+
+	return ews_store->priv->has_ooo_set;
+}
+
+void
+camel_ews_store_set_ooo_alert_state (CamelEwsStore *ews_store,
+                                     CamelEwsStoreOooAlertState state)
+{
+	g_return_if_fail (CAMEL_IS_EWS_STORE (ews_store));
+
+	if (ews_store->priv->ooo_alert_state == state)
+		return;
+
+	ews_store->priv->ooo_alert_state = state;
+	g_object_notify (G_OBJECT (ews_store), "ooo-alert-state");
+}
+
+CamelEwsStoreOooAlertState
+camel_ews_store_get_ooo_alert_state (const CamelEwsStore *ews_store)
+{
+	g_return_val_if_fail (
+			CAMEL_IS_EWS_STORE (ews_store),
+			CAMEL_EWS_STORE_OOO_ALERT_STATE_UNKNOWN);
+
+	return ews_store->priv->ooo_alert_state;
+}
 
 static void
 ews_migrate_to_user_cache_dir (CamelService *service)
@@ -488,6 +588,43 @@ ews_update_folder_hierarchy (CamelEwsStore *ews_store,
 	g_free (sync_state);
 }
 
+static void
+ews_update_has_ooo_set (CamelSession *session,
+			GCancellable *cancellable,
+			gpointer user_data,
+			GError **error)
+{
+
+	CamelEwsStore *ews_store = user_data;
+	EEwsOofSettings *oof_settings;
+	EEwsOofState oof_state;
+	GError *local_error = NULL;
+
+	camel_operation_push_message (cancellable, _("Checking \"Out of Office\" settings"));
+
+	oof_settings = e_ews_oof_settings_new_sync (ews_store->priv->connection, cancellable, &local_error);
+	if (local_error != NULL) {
+		g_propagate_error (error, local_error);
+		camel_operation_pop_message (cancellable);
+		return;
+	}
+
+	oof_state = e_ews_oof_settings_get_state (oof_settings);
+	switch (oof_state) {
+		case E_EWS_OOF_STATE_ENABLED:
+			camel_ews_store_set_has_ooo_set (ews_store, TRUE);
+			break;
+		case E_EWS_OOF_STATE_DISABLED:
+		case E_EWS_OOF_STATE_SCHEDULED:
+			camel_ews_store_set_has_ooo_set (ews_store, FALSE);
+			break;
+		default:
+			break;
+	}
+
+	camel_operation_pop_message (cancellable);
+}
+
 static gboolean
 ews_connect_sync (CamelService *service,
                   GCancellable *cancellable,
@@ -516,13 +653,23 @@ ews_connect_sync (CamelService *service,
 	success = camel_session_authenticate_sync (
 		session, service, NULL, cancellable, error);
 
-	g_object_unref (session);
+	if (success) {
+		CamelEwsStoreOooAlertState state;
 
-	if (success)
+		state = camel_ews_store_get_ooo_alert_state (ews_store);
+		if (state == CAMEL_EWS_STORE_OOO_ALERT_STATE_UNKNOWN)
+			camel_session_submit_job (
+				session,
+				ews_update_has_ooo_set,
+				g_object_ref (ews_store),
+				g_object_unref);
+
 		camel_offline_store_set_online_sync (
 			CAMEL_OFFLINE_STORE (ews_store),
 			TRUE, cancellable, NULL);
+	}
 
+	g_object_unref (session);
 	return success;
 }
 
@@ -2591,6 +2738,67 @@ camel_ews_store_maybe_disconnect (CamelEwsStore *store,
 }
 
 static void
+ews_store_unset_oof_settings_state (CamelSession *session,
+				    GCancellable *cancellable,
+				    gpointer user_data,
+				    GError **error)
+{
+
+	CamelEwsStore *ews_store = user_data;
+	EEwsConnection *connection;
+	EEwsOofSettings *oof_settings;
+	EEwsOofState state;
+	GError *local_error = NULL;
+
+	camel_operation_push_message (cancellable, _("Unsetting the \"Out of Office\" status"));
+
+	connection = camel_ews_store_ref_connection (ews_store);
+	oof_settings = e_ews_oof_settings_new_sync (connection, cancellable, &local_error);
+	g_object_unref (connection);
+	if (local_error != NULL) {
+		g_propagate_error (error, local_error);
+		camel_operation_pop_message (cancellable);
+		return;
+	}
+
+	state = e_ews_oof_settings_get_state (oof_settings);
+	if (state == E_EWS_OOF_STATE_DISABLED) {
+		g_object_unref (oof_settings);
+		camel_operation_pop_message (cancellable);
+		return;
+	}
+
+	e_ews_oof_settings_set_state (oof_settings, E_EWS_OOF_STATE_DISABLED);
+	e_ews_oof_settings_submit_sync (oof_settings, cancellable, error);
+	g_object_unref (oof_settings);
+	if (local_error != NULL)
+		g_propagate_error (error, local_error);
+
+	camel_operation_pop_message (cancellable);
+
+}
+
+void
+camel_ews_store_unset_oof_settings_state (CamelEwsStore *ews_store)
+{
+	CamelService *service;
+	CamelSession *session;
+
+	g_return_if_fail (CAMEL_IS_EWS_STORE (ews_store));
+
+	service = CAMEL_SERVICE (ews_store);
+	session = camel_service_ref_session (service);
+
+	camel_session_submit_job (
+		session,
+		ews_store_unset_oof_settings_state,
+		g_object_ref (ews_store),
+		g_object_unref);
+
+	g_object_unref (session);
+}
+
+static void
 ews_store_dispose (GObject *object)
 {
 	CamelEwsStore *ews_store;
@@ -2642,8 +2850,35 @@ camel_ews_store_class_init (CamelEwsStoreClass *class)
 	g_type_class_add_private (class, sizeof (CamelEwsStorePrivate));
 
 	object_class = G_OBJECT_CLASS (class);
+	object_class->set_property = ews_store_set_property;
+	object_class->get_property = ews_store_get_property;
 	object_class->dispose = ews_store_dispose;
 	object_class->finalize = ews_store_finalize;
+
+	g_object_class_install_property (
+		object_class,
+		PROP_HAS_OOO_SET,
+		g_param_spec_boolean (
+			"has-ooo-set",
+			"Has OOO Set",
+			"Has Out of Office state set",
+			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_OOO_ALERT_STATE,
+		g_param_spec_enum (
+			"ooo-alert-state",
+			"Out of Office Alert State",
+			"The state of the Out of Office Alert",
+			E_TYPE_EWS_STORE_OOO_ALERT_STATE,
+			CAMEL_EWS_STORE_OOO_ALERT_STATE_UNKNOWN,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
 
 	service_class = CAMEL_SERVICE_CLASS (class);
 	service_class->settings_type = CAMEL_TYPE_EWS_SETTINGS;

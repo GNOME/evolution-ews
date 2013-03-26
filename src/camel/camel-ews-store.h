@@ -25,6 +25,7 @@
 #define CAMEL_EWS_STORE_H
 
 #include <camel/camel.h>
+#include <camel/camel-ews-enums.h>
 
 #include "server/e-ews-connection.h"
 
@@ -93,6 +94,20 @@ void		camel_ews_store_ensure_unique_path
 void		camel_ews_store_update_foreign_subfolders
 						(CamelEwsStore *ews_store,
 						 const gchar *fid);
+void		camel_ews_store_set_has_ooo_set
+						(CamelEwsStore *ews_store,
+						 gboolean has_ooo_set);
+gboolean	camel_ews_store_get_has_ooo_set
+						(const CamelEwsStore *ews_store);
+void		camel_ews_store_set_ooo_alert_state
+						(CamelEwsStore *ews_store,
+						 CamelEwsStoreOooAlertState state);
+CamelEwsStoreOooAlertState
+		camel_ews_store_get_ooo_alert_state
+						(const CamelEwsStore *ews_store);
+void		camel_ews_store_unset_oof_settings_state
+						(CamelEwsStore *ews_store);
+
 
 G_END_DECLS
 

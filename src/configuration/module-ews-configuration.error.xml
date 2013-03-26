@@ -21,4 +21,8 @@
     <_secondary>The reported error was &quot;{0}&quot;.</_secondary>
   </error>
 
+  <error type="info" id="has-ooo-set">
+    <_primary>Your Exchange account "{0}" has the status set as "Out of Office".</_primary>
+  </error>
+
 </error-list>

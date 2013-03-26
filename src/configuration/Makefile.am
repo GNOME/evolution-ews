@@ -41,6 +41,8 @@ module_ews_configuration_la_SOURCES = \
 	e-ews-search-user.h \
 	e-ews-subscribe-foreign-folder.c \
 	e-ews-subscribe-foreign-folder.h \
+	e-ews-ooo-notificator.c \
+	e-ews-ooo-notificator.h \
 	$(NULL)
 
 module_ews_configuration_la_LIBADD = \
