@@ -2872,66 +2872,75 @@ e_book_backend_ews_notify_online_cb (EBookBackend *backend,
 	}
 }
 
-static void
+static gchar *
 e_book_backend_ews_get_backend_property (EBookBackend *backend,
-                                         EDataBook *book,
-                                         guint32 opid,
-                                         GCancellable *cancellable,
                                          const gchar *prop_name)
 {
-	g_return_if_fail (prop_name != NULL);
+	g_return_val_if_fail (prop_name != NULL, NULL);
 
 	if (g_str_equal (prop_name, CLIENT_BACKEND_PROPERTY_CAPABILITIES)) {
 		EBookBackendEws *ebews;
 
 		ebews = E_BOOK_BACKEND_EWS (backend);
-		g_return_if_fail (ebews != NULL);
+		g_return_val_if_fail (ebews != NULL, NULL);
 
 		if (ebews->priv->is_gal) {
-			e_data_book_respond_get_backend_property (book, opid, NULL, "net,bulk-removes,contact-lists");
+			return g_strdup ("net,bulk-removes,contact-lists");
 		} else {
 			/* do-initialy-query is enabled for system address book also, so that we get the
 			 * book_view, which is needed for displaying cache update progress.
 			 * and null query is handled for system address book.
 			 */
-			e_data_book_respond_get_backend_property (book, opid, NULL, "net,bulk-removes,do-initial-query,contact-lists");
+			return g_strdup ("net,bulk-removes,do-initial-query,contact-lists");
 		}
 	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_REQUIRED_FIELDS)) {
-		e_data_book_respond_get_backend_property (book, opid, NULL, e_contact_field_name (E_CONTACT_FILE_AS));
+		return g_strdup (e_contact_field_name (E_CONTACT_FILE_AS));
 	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_SUPPORTED_FIELDS)) {
-		gchar *fields_str;
-		GSList *fields = NULL;
-		gint i;
+		GString *buffer;
+		gchar *fields;
+		gint ii;
 
-		for (i = 0; i < G_N_ELEMENTS (mappings); i++)
-			if (mappings[i].element_type == ELEMENT_TYPE_SIMPLE)
-				fields = g_slist_append (fields, g_strdup (e_contact_field_name (mappings[i].field_id)));
+		buffer = g_string_sized_new (1024);
 
-		for (i = 0; i < G_N_ELEMENTS (phone_field_map); i++)
-			fields = g_slist_append (fields, g_strdup (e_contact_field_name (phone_field_map[i].field)));
+		for (ii = 0; ii < G_N_ELEMENTS (mappings); ii++) {
+			if (mappings[ii].element_type != ELEMENT_TYPE_SIMPLE)
+				continue;
 
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_FULL_NAME)));
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_NICKNAME)));
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_FAMILY_NAME)));
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_EMAIL_1)));
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_EMAIL_2)));
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_EMAIL_3)));
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_ADDRESS_WORK)));
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_ADDRESS_HOME)));
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_ADDRESS_OTHER)));
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_BIRTH_DATE)));
+			if (buffer->len > 0)
+				g_string_append_c (buffer, ',');
+			g_string_append (buffer, e_contact_field_name (mappings[ii].field_id));
+		}
 
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_NOTE)));
+		for (ii = 0; ii < G_N_ELEMENTS (phone_field_map); ii++) {
+			if (buffer->len > 0)
+				g_string_append_c (buffer, ',');
+			g_string_append (buffer, e_contact_field_name (phone_field_map[ii].field));
+		}
 
-		fields_str = e_data_book_string_slist_to_comma_string (fields);
+		fields = g_strjoin (
+			",",
+			buffer->str,
+			e_contact_field_name (E_CONTACT_FULL_NAME),
+			e_contact_field_name (E_CONTACT_NICKNAME),
+			e_contact_field_name (E_CONTACT_FAMILY_NAME),
+			e_contact_field_name (E_CONTACT_EMAIL_1),
+			e_contact_field_name (E_CONTACT_EMAIL_2),
+			e_contact_field_name (E_CONTACT_EMAIL_3),
+			e_contact_field_name (E_CONTACT_ADDRESS_WORK),
+			e_contact_field_name (E_CONTACT_ADDRESS_HOME),
+			e_contact_field_name (E_CONTACT_ADDRESS_OTHER),
+			e_contact_field_name (E_CONTACT_BIRTH_DATE),
+			e_contact_field_name (E_CONTACT_NOTE),
+			NULL);
 
-		e_data_book_respond_get_backend_property (book, opid, NULL, fields_str);
+		g_string_free (buffer, TRUE);
 
-		g_slist_free (fields);
-		g_free (fields_str);
-	} else {
-		E_BOOK_BACKEND_CLASS (e_book_backend_ews_parent_class)->get_backend_property (backend, book, opid, cancellable, prop_name);
+		return fields;
 	}
+
+	/* Chain up to parent's get_backend_property() method. */
+	return E_BOOK_BACKEND_CLASS (e_book_backend_ews_parent_class)->
+		get_backend_property (backend, prop_name);
 }
 
 static void
