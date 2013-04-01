@@ -4081,44 +4081,39 @@ exit:
 
 }
 
-static void
+static gchar *
 e_cal_backend_ews_get_backend_property (ECalBackend *backend,
-                                         EDataCal *cal,
-                                         guint32 opid,
-                                         GCancellable *cancellable,
-                                         const gchar *prop_name)
+                                        const gchar *prop_name)
 {
-	gchar *prop_value = NULL;
-	GError *error = NULL;
-
-	g_return_if_fail (prop_name != NULL);
+	g_return_val_if_fail (prop_name != NULL, NULL);
 
 	if (g_str_equal (prop_name, CLIENT_BACKEND_PROPERTY_CAPABILITIES)) {
-		prop_value = g_strdup (
-			CAL_STATIC_CAPABILITY_NO_EMAIL_ALARMS ","
-			CAL_STATIC_CAPABILITY_ONE_ALARM_ONLY ","
-			CAL_STATIC_CAPABILITY_REMOVE_ALARMS ","
-			CAL_STATIC_CAPABILITY_REFRESH_SUPPORTED ","
-			CAL_STATIC_CAPABILITY_NO_THISANDPRIOR ","
-			CAL_STATIC_CAPABILITY_NO_THISANDFUTURE ","
-			CAL_STATIC_CAPABILITY_NO_CONV_TO_ASSIGN_TASK ","
-			//	 CAL_STATIC_CAPABILITY_NO_CONV_TO_RECUR ","
-			CAL_STATIC_CAPABILITY_NO_TASK_ASSIGNMENT ","
-			CAL_STATIC_CAPABILITY_SAVE_SCHEDULES);
+		return g_strjoin (
+			",",
+			CAL_STATIC_CAPABILITY_NO_EMAIL_ALARMS,
+			CAL_STATIC_CAPABILITY_ONE_ALARM_ONLY,
+			CAL_STATIC_CAPABILITY_REMOVE_ALARMS,
+			CAL_STATIC_CAPABILITY_REFRESH_SUPPORTED,
+			CAL_STATIC_CAPABILITY_NO_THISANDPRIOR,
+			CAL_STATIC_CAPABILITY_NO_THISANDFUTURE,
+			CAL_STATIC_CAPABILITY_NO_CONV_TO_ASSIGN_TASK,
+			//	 CAL_STATIC_CAPABILITY_NO_CONV_TO_RECUR,
+			CAL_STATIC_CAPABILITY_NO_TASK_ASSIGNMENT,
+			CAL_STATIC_CAPABILITY_SAVE_SCHEDULES,
+			NULL);
 	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_CAL_EMAIL_ADDRESS)) {
 		/* return email address of the person who opened the calendar */
 		ECalBackendEws *cbews;
-		ECalBackendEwsPrivate *priv;
 
 		cbews = E_CAL_BACKEND_EWS (backend);
-		priv = cbews->priv;
 
-		prop_value = g_strdup (priv->user_email);
+		return g_strdup (cbews->priv->user_email);
 	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_ALARM_EMAIL_ADDRESS)) {
 		/* ews does not support email based alarms */
-		prop_value = NULL;
+		return NULL;
 	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_DEFAULT_OBJECT)) {
 		ECalComponent *comp;
+		gchar *prop_value;
 
 		comp = e_cal_component_new ();
 
@@ -4134,20 +4129,19 @@ e_cal_backend_ews_get_backend_property (ECalBackend *backend,
 			break;
 		default:
 			g_object_unref (comp);
-			e_data_cal_respond_get_backend_property (cal, opid, EDC_ERROR (ObjectNotFound), NULL);
-			return;
+			return NULL;
 		}
 
 		prop_value = e_cal_component_get_as_string (comp);
+
 		g_object_unref (comp);
-	} else {
-		E_CAL_BACKEND_CLASS (e_cal_backend_ews_parent_class)->get_backend_property (backend, cal, opid, cancellable, prop_name);
-		return;
+
+		return prop_value;
 	}
 
-	convert_error_to_edc_error (&error);
-	e_data_cal_respond_get_backend_property (cal, opid, error, prop_value);
-	g_free (prop_value);
+	/* Chain up to parent's get_backend_property() method. */
+	return E_CAL_BACKEND_CLASS (e_cal_backend_ews_parent_class)->
+		get_backend_property (backend, prop_name);
 }
 
 static void
