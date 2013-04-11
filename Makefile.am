@@ -9,6 +9,8 @@ changelogs = \
 
 EXTRA_DIST =  \
 	$(changelog) \
+	enumtypes.c.template \
+	enumtypes.h.template \
 	intltool-merge.in \
 	intltool-update.in \
 	intltool-extract.in \

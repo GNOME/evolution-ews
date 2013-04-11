@@ -104,8 +104,6 @@ BUILT_SOURCES = \
 
 EXTRA_DIST = \
 	$(pkgconfig_DATA:-$(API_VERSION).pc=.pc.in) \
-	e-ews-enumtypes.h.template \
-	e-ews-enumtypes.c.template \
 	$(NULL)
 
 CLEANFILES = $(BUILT_SOURCES)
