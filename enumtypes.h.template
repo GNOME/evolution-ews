@@ -1,14 +1,12 @@
 /*** BEGIN file-header ***/
-#ifndef E_EWS_ENUMTYPES_H
-#define E_EWS_ENUMTYPES_H
+/*** END file-header ***/
+
+/*** BEGIN file-production ***/
 
 #include <glib-object.h>
 
 G_BEGIN_DECLS
 
-/*** END file-header ***/
-
-/*** BEGIN file-production ***/
 /* Enumerations from "@filename@" */
 
 /*** END file-production ***/
@@ -22,6 +20,5 @@ GType @enum_name@_get_type	(void) G_GNUC_CONST;
 /*** BEGIN file-tail ***/
 G_END_DECLS
 
-#endif /* E_EWS_ENUMTYPES_H */
 /*** END file-tail ***/
 

@@ -6,11 +6,16 @@ privlib_LTLIBRARIES = libeews-1.2.la
 
 ENUM_TYPES = e-ews-enums.h
 
-e-ews-enumtypes.h: e-ews-enumtypes.h.template $(ENUM_TYPES)
-	$(AM_V_GEN) (cd $(srcdir) && $(GLIB_MKENUMS) --template e-ews-enumtypes.h.template $(ENUM_TYPES)) > $@
+e-ews-enumtypes.h: $(top_srcdir)/enumtypes.h.template $(ENUM_TYPES)
+	$(AM_V_GEN) (cd $(srcdir) && $(GLIB_MKENUMS) --template $(top_srcdir)/enumtypes.h.template \
+		--fhead "#ifndef E_EWS_ENUMTYPES_H\n#define E_EWS_ENUMTYPES_H\n" \
+		--ftail "#endif /* E_EWS_ENUMTYPES_H */\n" \
+		$(ENUM_TYPES)) > $@
 
-e-ews-enumtypes.c: e-ews-enumtypes.c.template $(ENUM_TYPES)
-	$(AM_V_GEN) (cd $(srcdir) && $(GLIB_MKENUMS) --template e-ews-enumtypes.c.template $(ENUM_TYPES)) > $@
+e-ews-enumtypes.c: $(top_srcdir)/enumtypes.h.template $(ENUM_TYPES)
+	$(AM_V_GEN) (cd $(srcdir) && $(GLIB_MKENUMS) --template $(top_srcdir)/enumtypes.c.template \
+		--fhead "#include \"e-ews-enumtypes.h\"" \
+		$(ENUM_TYPES)) > $@
 
 ENUM_GENERATED = \
 	e-ews-enumtypes.h \
