@@ -96,11 +96,6 @@ BUILT_SOURCES = \
 	$(ENUM_GENERATED) \
 	$(NULL)
 
-EXTRA_DIST = \
-	e-ews-enumtypes.h.template \
-	e-ews-enumtypes.c.template \
-	$(NULL)
-
 CLEANFILES = $(BUILT_SOURCES)
 
 -include $(top_srcdir)/git.mk
