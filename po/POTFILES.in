@@ -12,6 +12,7 @@ src/collection/e-ews-backend.c
 src/collection/module-ews-backend.c
 src/configuration/e-ews-config-utils.c
 src/configuration/e-ews-edit-folder-permissions.c
+src/configuration/e-ews-ooo-notificator.c
 src/configuration/e-ews-search-user.c
 src/configuration/e-ews-subscribe-foreign-folder.c
 src/configuration/e-mail-config-ews-autodiscover.c
