@@ -2874,7 +2874,7 @@ camel_ews_store_class_init (CamelEwsStoreClass *class)
 			"ooo-alert-state",
 			"Out of Office Alert State",
 			"The state of the Out of Office Alert",
-			E_TYPE_EWS_STORE_OOO_ALERT_STATE,
+			CAMEL_TYPE_EWS_STORE_OOO_ALERT_STATE,
 			CAMEL_EWS_STORE_OOO_ALERT_STATE_UNKNOWN,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
