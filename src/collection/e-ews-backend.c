@@ -923,13 +923,8 @@ ews_backend_delete_resource_sync (ECollectionBackend *backend,
 		g_free (folder_id);
 	}
 
-	if (success) {
-		ESourceRegistryServer *server;
-
-		server = e_collection_backend_ref_server (backend);
-		e_source_registry_server_remove_source (server, source);
-		g_object_unref (server);
-	}
+	if (success)
+		success = e_source_remove_sync (source, cancellable, error);
 
 exit:
 	g_object_unref (connection);
