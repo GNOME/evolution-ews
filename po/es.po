@@ -13,8 +13,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2013-04-11 20:47+0000\n"
-"PO-Revision-Date: 2013-04-12 12:06+0200\n"
+"POT-Creation-Date: 2013-04-14 19:24+0000\n"
+"PO-Revision-Date: 2013-04-16 12:29+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "Language: \n"
@@ -195,7 +195,6 @@ msgid "%s_%d"
 msgstr "%s_%d"
 
 #: ../src/camel/camel-ews-store.c:603
-#| msgid "Retrieving \"Out of Office\" settings"
 msgid "Checking \"Out of Office\" settings"
 msgstr "Comprobando la configuración de «Estoy fuera de la oficina»"
 
@@ -330,7 +329,6 @@ msgid "You must be working online to complete this operation"
 msgstr "Debe estar conectado para completar esta operación"
 
 #: ../src/camel/camel-ews-store.c:2753
-#| msgid "Retrieving \"Out of Office\" settings"
 msgid "Unsetting the \"Out of Office\" status"
 msgstr "Quitando el estado de «Estoy fuera de la oficina»."
 
@@ -628,6 +626,15 @@ msgstr "Carpeta visible"
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1291
 msgid "Reading folder permissions, please wait..."
 msgstr "Leyendo permisos de la carpeta, espere…"
+
+#: ../src/configuration/e-ews-ooo-notificator.c:186
+msgid "Unset on Server"
+msgstr "Quitar del servidor"
+
+#: ../src/configuration/e-ews-ooo-notificator.c:187
+#| msgid "Unsetting the \"Out of Office\" status"
+msgid "Unset the \"Out of Office\" status"
+msgstr "Quitar el estado de «Estoy fuera de la oficina»"
 
 #: ../src/configuration/e-ews-search-user.c:208
 #, c-format
