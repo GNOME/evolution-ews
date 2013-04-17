@@ -274,8 +274,11 @@ static const struct phone_field_mapping {
 };
 
 static void
-ebews_populate_uid (EContact *contact,
-                    EEwsItem *item)
+ebews_populate_uid (EBookBackendEws *ebews,
+		    EContact *contact,
+                    EEwsItem *item,
+		    GCancellable *cancellable,
+		    GError **error)
 {
 	const EwsId *id;
 
@@ -287,8 +290,11 @@ ebews_populate_uid (EContact *contact,
 }
 
 static void
-ebews_populate_full_name (EContact *contact,
-                          EEwsItem *item)
+ebews_populate_full_name (EBookBackendEws *ebews,
+			  EContact *contact,
+			  EEwsItem *item,
+			  GCancellable *cancellable,
+			  GError **error)
 {
 	const EwsCompleteName *cn;
 
@@ -298,8 +304,11 @@ ebews_populate_full_name (EContact *contact,
 }
 
 static void
-ebews_populate_nick_name (EContact *contact,
-                          EEwsItem *item)
+ebews_populate_nick_name (EBookBackendEws *ebews,
+			  EContact *contact,
+			  EEwsItem *item,
+			  GCancellable *cancellable,
+			  GError **error)
 {
 	const EwsCompleteName *cn;
 
@@ -309,8 +318,11 @@ ebews_populate_nick_name (EContact *contact,
 }
 
 static void
-ebews_populate_birth_date (EContact *contact,
-                           EEwsItem *item)
+ebews_populate_birth_date (EBookBackendEws *ebews,
+			   EContact *contact,
+			   EEwsItem *item,
+			   GCancellable *cancellable,
+			   GError **error)
 {
 	time_t bdate;
 	GDate date;
@@ -332,8 +344,11 @@ ebews_populate_birth_date (EContact *contact,
 }
 
 static void
-ebews_populate_anniversary (EContact *contact,
-                            EEwsItem *item)
+ebews_populate_anniversary (EBookBackendEws *ebews,
+			    EContact *contact,
+			    EEwsItem *item,
+			    GCancellable *cancellable,
+			    GError **error)
 {
 	time_t bdate;
 	GDate date;
@@ -354,6 +369,88 @@ ebews_populate_anniversary (EContact *contact,
 	}
 }
 
+static EContactPhoto *
+get_photo (EBookBackendEws *ebews,
+	   EEwsItem *item,
+	   GCancellable *cancellable,
+	   GError **error)
+{
+	EContactPhoto *photo = NULL;
+	EEwsAttachmentInfo *info;
+	GSList *contact_item_ids = NULL, *new_items = NULL;
+	GSList *attachments = NULL,  *attachments_ids = NULL, *items = NULL;
+	const guchar *content;
+	const gchar *contact_photo_id;
+	const EwsId *id;
+	gsize len;
+
+	id = e_ews_item_get_id (item);
+	contact_item_ids = g_slist_prepend (contact_item_ids, g_strdup (id->id));
+	if (!e_ews_connection_get_photo_attachment_id_sync (
+			ebews->priv->cnc,
+			EWS_PRIORITY_MEDIUM,
+			contact_item_ids,
+			&new_items,
+			cancellable,
+			error))
+		goto exit;
+
+	contact_photo_id = e_ews_item_get_contact_photo_id (new_items->data);
+	if (!contact_photo_id)
+		goto exit;
+
+	attachments_ids = g_slist_prepend (attachments_ids, g_strdup (contact_photo_id));
+	items = e_ews_connection_get_attachments_sync (
+		ebews->priv->cnc,
+		EWS_PRIORITY_MEDIUM,
+		NULL,
+		attachments_ids,
+		NULL,
+		FALSE,
+		&attachments,
+		NULL,
+		NULL,
+		cancellable,
+		error);
+
+	if (!items)
+		goto exit;
+
+	info = attachments->data;
+	content = (guchar *) e_ews_attachment_info_get_inlined_data (info, &len);
+
+	photo = e_contact_photo_new ();
+	photo->type = E_CONTACT_PHOTO_TYPE_INLINED;
+	e_contact_photo_set_inlined (photo, content, len);
+
+exit:
+	g_slist_free_full (contact_item_ids, g_free);
+	g_slist_free_full (new_items, g_object_unref);
+	g_slist_free_full (attachments_ids, g_free);
+	g_slist_free_full (items, g_free);
+	g_slist_free_full (attachments, (GDestroyNotify) e_ews_attachment_info_free);
+
+	return photo;
+}
+
+static void
+ebews_populate_photo (EBookBackendEws *ebews,
+		      EContact *contact,
+		      EEwsItem *item,
+		      GCancellable *cancellable,
+		      GError **error)
+{
+	EContactPhoto *photo;
+
+	photo = get_photo (ebews, item, cancellable, error);
+	if (!photo) {
+		return;
+	}
+
+	e_contact_set (contact, E_CONTACT_PHOTO, photo);
+	e_contact_photo_free (photo);
+}
+
 static void
 set_phone_number (EContact *contact,
                   EContactField field,
@@ -368,8 +465,11 @@ set_phone_number (EContact *contact,
 }
 
 static void
-ebews_populate_phone_numbers (EContact *contact,
-                              EEwsItem *item)
+ebews_populate_phone_numbers (EBookBackendEws *ebews,
+			      EContact *contact,
+			      EEwsItem *item,
+			      GCancellable *cancellable,
+			      GError **error)
 {
 	gint i;
 
@@ -410,8 +510,11 @@ set_address (EContact *contact,
 }
 
 static void
-ebews_populate_address (EContact *contact,
-                        EEwsItem *item)
+ebews_populate_address (EBookBackendEws *ebews,
+			EContact *contact,
+			EEwsItem *item,
+			GCancellable *cancellable,
+			GError **error)
 {
 
 	set_address (contact, E_CONTACT_ADDRESS_WORK, item, "Business");
@@ -420,16 +523,22 @@ ebews_populate_address (EContact *contact,
 }
 
 static void
-ebews_populate_ims (EContact *contact,
-                    EEwsItem *item)
+ebews_populate_ims (EBookBackendEws *ebews,
+		    EContact *contact,
+		    EEwsItem *item,
+		    GCancellable *cancellable,
+		    GError **error)
 {
 	/* TODO : The fields returned by server does not match with the EContact fields
 	 * for the IMS, handle it later */
 }
 
 static void
-ebews_populate_notes (EContact *contact,
-                      EEwsItem *item)
+ebews_populate_notes (EBookBackendEws *ebews,
+		      EContact *contact,
+		      EEwsItem *item,
+		      GCancellable *cancellable,
+		      GError **error)
 {
 	const gchar *notes = e_ews_item_get_notes (item);
 	if (!notes)
@@ -452,8 +561,11 @@ set_email_address (EContact *contact,
 }
 
 static void
-ebews_populate_emails (EContact *contact,
-                       EEwsItem *item)
+ebews_populate_emails (EBookBackendEws *ebews,
+		       EContact *contact,
+		       EEwsItem *item,
+		       GCancellable *cancellable,
+		       GError **errror)
 {
 	set_email_address (contact, E_CONTACT_EMAIL_1, item, "EmailAddress1");
 	set_email_address (contact, E_CONTACT_EMAIL_2, item, "EmailAddress2");
@@ -512,6 +624,13 @@ ebews_set_birth_date (ESoapMessage *message,
 static void
 ebews_set_anniversary (ESoapMessage *message,
                        EContact *contact)
+{
+
+}
+
+static void
+ebews_set_photo (ESoapMessage *message,
+                 EContact *contact)
 {
 
 }
@@ -678,9 +797,12 @@ convert_indexed_contact_property_to_updatexml (ESoapMessage *message,
 }
 
 static void
-ebews_set_full_name_changes (ESoapMessage *message,
-                             EContact *new,
-                             EContact *old)
+ebews_set_full_name_changes (EBookBackendEws *ebews,
+			     ESoapMessage *message,
+			     EContact *new,
+			     EContact *old,
+			     GCancellable *cancellable,
+			     GError **error)
 {
 	EContactName *name, *old_name;
 
@@ -701,9 +823,12 @@ ebews_set_full_name_changes (ESoapMessage *message,
 }
 
 static void
-ebews_set_birth_date_changes (ESoapMessage *message,
-                              EContact *new,
-                              EContact *old)
+ebews_set_birth_date_changes (EBookBackendEws *ebews,
+			      ESoapMessage *message,
+			      EContact *new,
+			      EContact *old,
+			      GCancellable *cancellable,
+			      GError **error)
 {
 	EContactDate *new_date, *old_date;
 	gchar *birthday;
@@ -723,17 +848,144 @@ ebews_set_birth_date_changes (ESoapMessage *message,
 }
 
 static void
-ebews_set_anniversary_changes (ESoapMessage *message,
-                               EContact *new,
-                               EContact *old)
+ebews_set_anniversary_changes (EBookBackendEws *ebews,
+			       ESoapMessage *message,
+			       EContact *new,
+			       EContact *old,
+			       GCancellable *cancellable,
+			       GError **error)
 {
 
 }
 
 static void
-ebews_set_phone_number_changes (ESoapMessage *message,
-                                EContact *new,
-                                EContact *old)
+set_photo (EBookBackendEws *ebews,
+	   EContact *contact,
+	   EContactPhoto *photo,
+	   GCancellable *cancellable,
+	   GError **error)
+{
+	EEwsAttachmentInfo *info;
+	EwsId *id;
+	GSList *files = NULL;
+	const guchar *data;
+	gsize len;
+
+	id = g_new0 (EwsId, 1);
+	id->id = e_contact_get (contact, E_CONTACT_UID);
+	id->change_key = e_contact_get (contact, E_CONTACT_REV);
+
+	data = e_contact_photo_get_inlined (photo, &len);
+
+	info = e_ews_attachment_info_new (E_EWS_ATTACHMENT_INFO_TYPE_INLINED);
+	e_ews_attachment_info_set_inlined_data (info, data, len);
+	e_ews_attachment_info_set_mime_type (info, "image/jpeg");
+	e_ews_attachment_info_set_filename (info, "ContactPicture.jpg");
+
+	files = g_slist_append (files, info);
+
+	e_ews_connection_create_photo_attachment_sync (
+			ebews->priv->cnc,
+			EWS_PRIORITY_MEDIUM,
+			id,
+			files,
+			cancellable,
+			error);
+
+	g_free (id->change_key);
+	g_free (id->id);
+	g_free (id);
+
+	g_slist_free_full (files, (GDestroyNotify) e_ews_attachment_info_free);
+}
+
+static gboolean
+photos_equal (EContactPhoto *old,
+		EContactPhoto *new)
+{
+	const guchar *old_content, *new_content;
+	gsize old_len, new_len;
+
+	if (!old && !new)
+		return TRUE;
+
+	if (!old || !new)
+		return FALSE;
+
+	old_content = e_contact_photo_get_inlined (old, &old_len);
+	new_content = e_contact_photo_get_inlined (new, &new_len);
+
+	if (old_len != new_len)
+		return FALSE;
+
+	if (memcmp (old_content, new_content, old_len) != 0)
+		return FALSE;
+
+	return TRUE;
+}
+
+static void
+ebews_set_photo_changes (EBookBackendEws *ebews,
+			 ESoapMessage *message,
+			 EContact *new,
+			 EContact *old,
+			 GCancellable *cancellable,
+			 GError **error)
+{
+	EContactPhoto *old_photo, *new_photo;
+	GSList *contact_item_ids = NULL, *new_items = NULL, *attachments_ids = NULL, *deleted_attachments = NULL;
+	gchar *id = e_contact_get (old, E_CONTACT_UID);
+	const gchar *contact_photo_id;
+
+	old_photo = e_contact_get (old, E_CONTACT_PHOTO);
+	new_photo = e_contact_get (new, E_CONTACT_PHOTO);
+
+	if (photos_equal (old_photo, new_photo))
+		goto exit;
+
+	contact_item_ids = g_slist_append (contact_item_ids, id);
+	if (!e_ews_connection_get_photo_attachment_id_sync (
+			ebews->priv->cnc,
+			EWS_PRIORITY_MEDIUM,
+			contact_item_ids,
+			&new_items,
+			cancellable,
+			error))
+		goto exit;
+
+	contact_photo_id = e_ews_item_get_contact_photo_id (new_items->data);
+	if (contact_photo_id) {
+		attachments_ids = g_slist_prepend (attachments_ids, g_strdup (contact_photo_id));
+		deleted_attachments = e_ews_connection_delete_attachments_sync (
+					ebews->priv->cnc,
+					EWS_PRIORITY_MEDIUM,
+					attachments_ids,
+					cancellable,
+					error);
+
+		if (!deleted_attachments)
+			goto exit;
+	}
+
+	if (new_photo)
+		set_photo (ebews, new, new_photo, cancellable, error);
+
+exit:
+	e_contact_photo_free (old_photo);
+	e_contact_photo_free (new_photo);
+	g_slist_free_full (contact_item_ids, g_free);
+	g_slist_free_full (new_items, g_object_unref);
+	g_slist_free_full (attachments_ids, g_free);
+	g_slist_free_full (deleted_attachments, g_free);
+}
+
+static void
+ebews_set_phone_number_changes (EBookBackendEws *ebews,
+				ESoapMessage *message,
+				EContact *new,
+				EContact *old,
+				GCancellable *cancellable,
+				GError **error)
 {
 	gint i;
 	gchar *new_value, *old_value;
@@ -823,9 +1075,12 @@ compare_address (ESoapMessage *message,
 }
 
 static void
-ebews_set_address_changes (ESoapMessage *message,
-                           EContact *new,
-                           EContact *old)
+ebews_set_address_changes (EBookBackendEws *ebews,
+			   ESoapMessage *message,
+			   EContact *new,
+			   EContact *old,
+			   GCancellable *cancellable,
+			   GError **error)
 {
 	compare_address (message, new, old, E_CONTACT_ADDRESS_WORK, "Business");
 	compare_address (message, new, old, E_CONTACT_ADDRESS_HOME, "Home");
@@ -833,17 +1088,23 @@ ebews_set_address_changes (ESoapMessage *message,
 }
 
 static void
-ebews_set_im_changes (ESoapMessage *message,
-                      EContact *new,
-                      EContact *old)
+ebews_set_im_changes (EBookBackendEws *ebews,
+		      ESoapMessage *message,
+		      EContact *new,
+		      EContact *old,
+		      GCancellable *cancellable,
+		      GError **error)
 {
 
 }
 
 static void
-ebews_set_notes_changes (ESoapMessage *message,
-                         EContact *new,
-                         EContact *old)
+ebews_set_notes_changes (EBookBackendEws *ebews,
+			 ESoapMessage *message,
+			 EContact *new,
+			 EContact *old,
+			 GCancellable *cancellable,
+			 GError **error)
 {
 	gchar *old_notes, *new_notes;
 
@@ -860,9 +1121,12 @@ ebews_set_notes_changes (ESoapMessage *message,
 }
 
 static void
-ebews_set_email_changes (ESoapMessage *message,
-                         EContact *new,
-                         EContact *old)
+ebews_set_email_changes (EBookBackendEws *ebews,
+			 ESoapMessage *message,
+			 EContact *new,
+			 EContact *old,
+			 GCancellable *cancellable,
+			 GError **error)
 {
 	gchar *new_value, *old_value;
 
@@ -900,9 +1164,9 @@ static const struct field_element_mapping {
 	const gchar *element_name;
 	/* set function for simple string type values */
 	const gchar * (*get_simple_prop_func) (EEwsItem *item);
-	void (*populate_contact_func)(EContact *contact, EEwsItem *item);
+	void (*populate_contact_func)(EBookBackendEws *ebews, EContact *contact, EEwsItem *item, GCancellable *cancellable, GError **error);
 	void (*set_value_in_soap_message) (ESoapMessage *message, EContact *contact);
-	void (*set_changes) (ESoapMessage *message, EContact *new, EContact *old);
+	void (*set_changes) (EBookBackendEws *ebews, ESoapMessage *message, EContact *new, EContact *old, GCancellable *cancellable, GError **error);
 
 } mappings[] = {
 	/* The order should be maintained for create contacts to work */
@@ -930,6 +1194,7 @@ static const struct field_element_mapping {
 	{ E_CONTACT_SPOUSE, ELEMENT_TYPE_SIMPLE, "SpouseName", e_ews_item_get_spouse_name},
 	{ E_CONTACT_FAMILY_NAME, ELEMENT_TYPE_SIMPLE, "Surname", e_ews_item_get_surname},
 	{ E_CONTACT_BIRTH_DATE, ELEMENT_TYPE_COMPLEX, "WeddingAnniversary", NULL,  ebews_populate_anniversary, ebews_set_anniversary, ebews_set_anniversary_changes },
+	{ E_CONTACT_PHOTO, ELEMENT_TYPE_COMPLEX, "Photo", NULL,  ebews_populate_photo, ebews_set_photo, ebews_set_photo_changes },
 
 	/* Should take of uid and changekey (REV) */
 	{ E_CONTACT_UID, ELEMENT_TYPE_COMPLEX, "ItemId", NULL,  ebews_populate_uid, ebews_set_item_id},
@@ -940,6 +1205,7 @@ typedef struct {
 	EDataBook *book;
 	EContact *contact;
 	guint32 opid;
+	GCancellable *cancellable;
 } EwsCreateContact;
 
 static void
@@ -992,6 +1258,7 @@ ews_create_contact_cb (GObject *object,
 
 	if (error == NULL) {
 		EEwsItem *item = (EEwsItem *) items->data;
+		EContactPhoto *photo;
 
 		/* set item id */
 		item_id = e_ews_item_get_id ((EEwsItem *) items->data);
@@ -1008,6 +1275,17 @@ ews_create_contact_cb (GObject *object,
 			g_slist_free (contacts);
 		}
 
+		/*
+		 * The contact photo is basically an attachment with a special name.
+		 * Considering this, we only can set the contact photo after create the contact itself.
+		 * Then we are able to attach the picture to the "Contact Item".
+		 */
+		photo = e_contact_get (create_contact->contact, E_CONTACT_PHOTO);
+		if (photo) {
+			set_photo (ebews, create_contact->contact, photo, create_contact->cancellable, &error);
+			e_contact_photo_free (photo);
+		}
+
 		g_object_unref (item);
 		g_slist_free (items);
 	}
@@ -1020,6 +1298,7 @@ ews_create_contact_cb (GObject *object,
 	/* free memory allocated for create_contact & unref contained objects */
 	g_object_unref (create_contact->ebews);
 	g_object_unref (create_contact->contact);
+	g_object_unref (create_contact->cancellable);
 	g_free (create_contact);
 	g_clear_error (&error);
 }
@@ -1084,6 +1363,7 @@ e_book_backend_ews_create_contacts (EBookBackend *backend,
 	create_contact->book = g_object_ref (book);
 	create_contact->opid = opid;
 	create_contact->contact = g_object_ref (contact);
+	create_contact->cancellable = g_object_ref (cancellable);
 
 	fid = e_ews_folder_id_new (priv->folder_id, NULL, FALSE);
 
@@ -1206,6 +1486,7 @@ typedef struct {
 	EContact *new_contact;
 	EContact *old_contact;
 	guint32 opid;
+	GCancellable *cancellable;
 } EwsModifyContact;
 
 static void
@@ -1230,18 +1511,27 @@ ews_modify_contact_cb (GObject *object,
 	g_return_if_fail (priv->summary != NULL);
 
 	if (error == NULL) {
-		EEwsItem *item = (EEwsItem *) items->data;
+		if (items != NULL) {
+			EEwsItem *item = (EEwsItem *) items->data;
 
-		/* set item id */
-		item_id = e_ews_item_get_id ((EEwsItem *) items->data);
+			/* set item id */
+			item_id = e_ews_item_get_id (item);
 
-		e_contact_set (modify_contact->new_contact, E_CONTACT_UID, item_id->id);
-		e_contact_set (modify_contact->new_contact, E_CONTACT_REV, item_id->change_key);
+			e_contact_set (modify_contact->new_contact, E_CONTACT_UID, item_id->id);
+			e_contact_set (modify_contact->new_contact, E_CONTACT_REV, item_id->change_key);
+
+			g_object_unref (item);
+		}
 
 		id = e_contact_get (modify_contact->old_contact, E_CONTACT_UID);
 
 		e_book_backend_sqlitedb_remove_contact (priv->summary, priv->folder_id, id, &error);
-		e_book_backend_sqlitedb_new_contact (ebews->priv->summary, ebews->priv->folder_id, modify_contact->new_contact, TRUE, &error);
+		e_book_backend_sqlitedb_new_contact (
+				ebews->priv->summary,
+				ebews->priv->folder_id,
+				modify_contact->new_contact,
+				TRUE,
+				&error);
 
 		if (error == NULL) {
 			GSList *new_contacts;
@@ -1251,7 +1541,6 @@ ews_modify_contact_cb (GObject *object,
 			g_slist_free (new_contacts);
 		}
 
-		g_object_unref (item);
 		g_slist_free (items);
 	}
 
@@ -1265,6 +1554,7 @@ ews_modify_contact_cb (GObject *object,
 	g_object_unref (modify_contact->ebews);
 	g_object_unref (modify_contact->new_contact);
 	g_object_unref (modify_contact->old_contact);
+	g_object_unref (modify_contact->cancellable);
 	g_free (modify_contact);
 	g_clear_error (&error);
 }
@@ -1279,6 +1569,7 @@ convert_contact_to_updatexml (ESoapMessage *msg,
 	EContact *new_contact = modify_contact->new_contact;
 	gchar *value = NULL, *old_value = NULL;
 	gint i, element_type;
+	GError *error = NULL;
 
 	id = g_new0 (EwsId, 1);
 	id->id = e_contact_get (old_contact, E_CONTACT_UID);
@@ -1304,7 +1595,20 @@ convert_contact_to_updatexml (ESoapMessage *msg,
 		} else if (element_type == ELEMENT_TYPE_COMPLEX) {
 			if (mappings[i].field_id == E_CONTACT_UID)
 				continue;
-			mappings[i].set_changes (msg, new_contact, old_contact);
+			mappings[i].set_changes (
+					modify_contact->ebews, msg,
+					new_contact, old_contact,
+					modify_contact->cancellable,
+					&error);
+
+			if (error != NULL) {
+				e_data_book_respond_modify_contacts (
+						modify_contact->book,
+						modify_contact->opid,
+						EDB_ERROR_EX (OTHER_ERROR, error->message),
+						NULL);
+				g_clear_error (&error);
+			}
 		}
 	}
 
@@ -1390,6 +1694,8 @@ e_book_backend_ews_modify_contacts (EBookBackend *backend,
 	modify_contact->opid = opid;
 	modify_contact->old_contact = g_object_ref (old_contact);
 	modify_contact->new_contact = g_object_ref (contact);
+	modify_contact->cancellable = g_object_ref (cancellable);
+
 	e_ews_connection_update_items (
 		priv->cnc, EWS_PRIORITY_MEDIUM,
 		"AlwaysOverwrite", "SendAndSaveCopy",
@@ -2062,6 +2368,7 @@ static void
 ebews_store_contact_items (EBookBackendEws *ebews,
                            GSList *new_items,
                            gboolean distribution_list,
+			   GCancellable *cancellable,
                            GError **error)
 {
 	EBookBackendEwsPrivate *priv;
@@ -2094,7 +2401,7 @@ ebews_store_contact_items (EBookBackendEws *ebews,
 					if (val != NULL)
 						e_contact_set (contact, mappings[i].field_id, val);
 				} else
-					mappings[i].populate_contact_func (contact, item);
+					mappings[i].populate_contact_func (ebews, contact, item, cancellable, error);
 			}
 		} else {
 			/* store display_name, fileas, item id */	
@@ -2111,8 +2418,11 @@ ebews_store_contact_items (EBookBackendEws *ebews,
 }
 
 static void
-ebews_get_vcards_list (GSList *new_items,
-                       GSList **vcards)
+ebews_get_vcards_list (EBookBackendEws *ebews,
+		       GSList *new_items,
+                       GSList **vcards,
+		       GCancellable *cancellable,
+		       GError **error)
 {
 	GSList *l;
 
@@ -2137,7 +2447,7 @@ ebews_get_vcards_list (GSList *new_items,
 				if (val != NULL)
 					e_contact_set (contact, mappings[i].field_id, val);
 			} else
-				mappings[i].populate_contact_func (contact, item);
+				mappings[i].populate_contact_func (ebews, contact, item, cancellable, error);
 		}
 		vcard_string = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
 		*vcards = g_slist_append (*vcards, g_strdup(vcard_string));
@@ -2289,14 +2599,15 @@ ebews_fetch_items (EBookBackendEws *ebews,
 			contact_item_ids, "Default", CONTACT_ITEM_PROPS,
 			FALSE, NULL, E_EWS_BODY_TYPE_TEXT, &new_items, NULL, NULL,
 			cancellable, error);
+
 	if (*error)
 		goto cleanup;
 
 	if (new_items) {
 		if (store_to_cache)
-			ebews_store_contact_items (ebews, new_items, FALSE, error);
+			ebews_store_contact_items (ebews, new_items, FALSE, cancellable, error);
 		else
-			ebews_get_vcards_list (new_items, vcards);
+			ebews_get_vcards_list (ebews, new_items, vcards, cancellable, error);
 	}
 	new_items = NULL;
 
@@ -2931,6 +3242,7 @@ e_book_backend_ews_get_backend_property (EBookBackend *backend,
 			e_contact_field_name (E_CONTACT_ADDRESS_OTHER),
 			e_contact_field_name (E_CONTACT_BIRTH_DATE),
 			e_contact_field_name (E_CONTACT_NOTE),
+			e_contact_field_name (E_CONTACT_PHOTO),
 			NULL);
 
 		g_string_free (buffer, TRUE);

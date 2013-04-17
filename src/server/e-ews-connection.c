@@ -36,6 +36,11 @@
 #include <libical/ical.h>
 #include <libedataserver/libedataserver.h>
 
+#include <libxml/parser.h>
+#include <libxml/xpath.h>
+#include <libxml/xpathInternals.h>
+#include <libxml/tree.h>
+
 #include "e-ews-connection.h"
 #include "e-ews-message.h"
 #include "e-ews-item-change.h"
@@ -109,6 +114,7 @@ struct _EwsAsyncData {
 	gint total_items;
 	const gchar *directory;
 	GSList *items;
+	EwsPhotoAttachmentInfo *photo;
 	gchar *sync_state;
 	gboolean includes_last_item;
 	EwsDelegateDeliver deliver_to;
@@ -904,28 +910,10 @@ ews_handle_items_param (ESoapParameter *subparam,
 }
 
 static void
-get_items_response_cb (ESoapResponse *response,
-                       GSimpleAsyncResult *simple)
+handle_get_items_response_cb (EwsAsyncData *async_data, ESoapParameter *param)
 {
-	EwsAsyncData *async_data;
-	ESoapParameter *param;
 	ESoapParameter *subparam;
 	GError *error = NULL;
-
-	async_data = g_simple_async_result_get_op_res_gpointer (simple);
-
-	param = e_soap_response_get_first_parameter_by_name (
-		response, "ResponseMessages", &error);
-
-	/* Sanity check */
-	g_return_if_fail (
-		(param != NULL && error == NULL) ||
-		(param == NULL && error != NULL));
-
-	if (error != NULL) {
-		g_simple_async_result_take_error (simple, error);
-		return;
-	}
 
 	subparam = e_soap_parameter_get_first_child (param);
 
@@ -947,6 +935,32 @@ get_items_response_cb (ESoapResponse *response,
 
 		subparam = e_soap_parameter_get_next_child (subparam);
 	}
+}
+
+static void
+get_items_response_cb (ESoapResponse *response,
+                       GSimpleAsyncResult *simple)
+{
+	EwsAsyncData *async_data;
+	ESoapParameter *param;
+	GError *error = NULL;
+
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	param = e_soap_response_get_first_parameter_by_name (
+		response, "ResponseMessages", &error);
+
+	/* Sanity check */
+	g_return_if_fail (
+		(param != NULL && error == NULL) ||
+		(param == NULL && error != NULL));
+
+	if (error != NULL) {
+		g_simple_async_result_take_error (simple, error);
+		return;
+	}
+
+	handle_get_items_response_cb (async_data, param);
 }
 
 static void
@@ -4065,6 +4079,86 @@ e_ews_connection_delete_item_sync (EEwsConnection *cnc,
 	return success;
 }
 
+static xmlXPathObjectPtr
+xpath_eval (xmlXPathContextPtr ctx,
+	    const gchar *format,
+	    ...)
+{
+	xmlXPathObjectPtr result;
+	va_list args;
+	gchar *expr;
+
+	if (ctx == NULL)
+		return NULL;
+
+	va_start (args, format);
+	expr = g_strdup_vprintf (format, args);
+	va_end (args);
+
+	result = xmlXPathEvalExpression ((xmlChar *) expr, ctx);
+	g_free (expr);
+
+	if (result == NULL)
+		return NULL;
+
+	if (result->type == XPATH_NODESET && xmlXPathNodeSetIsEmpty (result->nodesetval)) {
+		xmlXPathFreeObject (result);
+		return NULL;
+	}
+
+	return result;
+}
+
+static gboolean
+element_has_child (ESoapMessage *message,
+		   const gchar *path)
+{
+	xmlDocPtr doc;
+	xmlXPathContextPtr xpctx;
+	xmlXPathObjectPtr result;
+	xmlNodeSetPtr nodeset;
+	xmlNodePtr node;
+	gboolean ret = FALSE;
+
+	doc = e_soap_message_get_xml_doc (message);
+	xpctx = xmlXPathNewContext (doc);
+
+	xmlXPathRegisterNs (
+			xpctx,
+			(xmlChar *) "s",
+			(xmlChar *) "http://schemas.xmlsoap.org/soap/envelope/");
+
+	xmlXPathRegisterNs (
+			xpctx,
+			(xmlChar *) "m",
+			(xmlChar *) "http://schemas.microsoft.com/exchange/services/2006/messages");
+
+	xmlXPathRegisterNs (
+			xpctx,
+			(xmlChar *) "t",
+			(xmlChar *) "http://schemas.microsoft.com/exchange/services/2006/types");
+
+	result = xpath_eval (xpctx, path);
+
+	if (result == NULL)
+		goto exit;
+
+	if (!xmlXPathNodeSetGetLength (result->nodesetval))
+		goto exit;
+
+	nodeset = result->nodesetval;
+	node = nodeset->nodeTab[0];
+	if (!node->children)
+		goto exit;
+
+	ret = TRUE;
+
+exit:
+	xmlXPathFreeObject (result);
+	xmlXPathFreeContext (xpctx);
+	return ret;
+}
+
 void
 e_ews_connection_update_items (EEwsConnection *cnc,
                                gint pri,
@@ -4124,9 +4218,18 @@ e_ews_connection_update_items (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	e_ews_connection_queue_request (
-		cnc, msg, get_items_response_cb,
-		pri, cancellable, simple);
+	/*
+	 * We need to check for both namespaces, because, the message is being wrote without use the types
+	 * namespace. Maybe it is wrong, but the server doesn't complain about that. But this is the reason
+	 * for the first check. The second one, is related to "how it should be" accord with EWS specifications.
+	 */
+	if (!element_has_child (msg, "/s:Envelope/s:Body/m:UpdateItem/m:ItemChanges/ItemChange/Updates") &&
+		!element_has_child (msg, "/s:Envelope/s:Body/m:UpdateItem/m:ItemChanges/t:ItemChange/t:Updates"))
+		g_simple_async_result_complete_in_idle (simple);
+	else
+		e_ews_connection_queue_request (
+			cnc, msg, get_items_response_cb,
+			pri, cancellable, simple);
 
 	g_object_unref (simple);
 }
@@ -5638,6 +5741,7 @@ create_attachments_response_cb (ESoapResponse *response,
 static gboolean
 e_ews_connection_attach_file (ESoapMessage *msg,
                               EEwsAttachmentInfo *info,
+			      gboolean contact_photo,
 			      GError **error)
 {
 	EEwsAttachmentInfoType type = e_ews_attachment_info_get_type (info);
@@ -5690,11 +5794,11 @@ e_ews_connection_attach_file (ESoapMessage *msg,
 	e_soap_message_start_element (msg, "FileAttachment", NULL, NULL);
 
 	e_ews_message_write_string_parameter (msg, "Name", NULL, filename);
-
+	if (contact_photo)
+		e_ews_message_write_string_parameter (msg, "IsContactPhoto", NULL, "true");
 	e_soap_message_start_element (msg, "Content", NULL, NULL);
 	e_soap_message_write_base64 (msg, content, length);
 	e_soap_message_end_element (msg); /* "Content" */
-
 	e_soap_message_end_element (msg); /* "FileAttachment" */
 
 	g_free (filename);
@@ -5740,7 +5844,7 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
 	e_soap_message_start_element (msg, "Attachments", "messages", NULL);
 
 	for (l = files; l != NULL; l = g_slist_next (l))
-		if (!e_ews_connection_attach_file (msg, l->data, &local_error)) {
+		if (!e_ews_connection_attach_file (msg, l->data, FALSE, &local_error)) {
 			if (local_error != NULL)
 				g_simple_async_result_take_error (simple, local_error);
 			g_simple_async_result_complete_in_idle (simple);
@@ -5998,7 +6102,11 @@ ews_handle_attachments_param (ESoapParameter *param,
 			info = e_ews_item_dump_mime_content (item, async_data->directory);
 
 		} else if (!g_ascii_strcasecmp (name, "FileAttachment")) {
-			info = e_ews_dump_file_attachment_from_soap_parameter (subparam, async_data->directory, async_data->sync_state, &attach_id);
+			info = e_ews_dump_file_attachment_from_soap_parameter (
+					subparam,
+					async_data->directory,
+					async_data->sync_state,
+					&attach_id);
 		}
 
 		if (info && attach_id) {
@@ -6175,6 +6283,227 @@ e_ews_connection_get_attachments_sync (EEwsConnection *cnc,
 	e_async_closure_free (closure);
 
 	return attachments_ids;
+}
+
+void
+e_ews_connection_get_photo_attachment_id (EEwsConnection *cnc,
+					  gint pri,
+					  const GSList *ids,
+					  GCancellable *cancellable,
+					  GAsyncReadyCallback callback,
+					  gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+	const GSList *l;
+
+	g_return_if_fail (cnc != NULL);
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "GetItem", NULL, NULL, EWS_EXCHANGE_2010_SP2);
+
+	e_soap_message_start_element (msg, "ItemShape", "messages", NULL);
+	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, "IdOnly");
+	e_ews_message_write_string_parameter (msg, "IncludeMimeContent", NULL, "false");
+	e_soap_message_start_element (msg, "AdditionalProperties", NULL, NULL);
+	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", "item:Attachments");
+	e_soap_message_end_element (msg);
+	e_soap_message_end_element (msg);
+
+	e_soap_message_start_element (msg, "ItemIds", "messages", NULL);
+
+	for (l = ids; l != NULL; l = g_slist_next (l))
+		e_ews_message_write_string_parameter_with_attribute (msg, "ItemId", NULL, NULL, "Id", l->data);
+
+	e_soap_message_end_element (msg);
+
+	e_ews_message_write_footer (msg);
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_get_photo_attachment_id);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	e_ews_connection_queue_request (
+		cnc, msg, get_items_response_cb,
+		pri, cancellable, simple);
+
+	g_object_unref (simple);
+}
+
+gboolean
+e_ews_connection_get_photo_attachment_id_finish (EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GSList **items,
+						 GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_get_photo_attachment_id),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	if (!async_data->items) {
+		g_set_error_literal (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ITEMNOTFOUND, _("No items found"));
+		return FALSE;
+	}
+
+	*items = async_data->items;
+
+	return TRUE;
+}
+
+gboolean
+e_ews_connection_get_photo_attachment_id_sync (EEwsConnection *cnc,
+					       gint pri,
+					       const GSList *ids,
+					       GSList **items,
+					       GCancellable *cancellable,
+					       GError **error)
+{
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+
+	closure = e_async_closure_new ();
+
+	e_ews_connection_get_photo_attachment_id (
+		cnc, pri, ids, cancellable,
+		e_async_closure_callback, closure);
+
+	result = e_async_closure_wait (closure);
+
+	success = e_ews_connection_get_photo_attachment_id_finish (
+		cnc, result, items, error);
+
+	e_async_closure_free (closure);
+
+	return success;
+}
+
+void
+e_ews_connection_create_photo_attachment (EEwsConnection *cnc,
+					  gint pri,
+					  const EwsId *parent,
+					  const GSList *files,
+					  GCancellable *cancellable,
+					  GAsyncReadyCallback callback,
+					  gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	const GSList *l;
+	EwsAsyncData *async_data;
+	GError *local_error = NULL;
+
+	g_return_if_fail (cnc != NULL);
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_create_photo_attachment);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "CreateAttachment", NULL, NULL, EWS_EXCHANGE_2010_SP2);
+
+	e_soap_message_start_element (msg, "ParentItemId", "messages", NULL);
+	e_soap_message_add_attribute (msg, "Id", parent->id, NULL, NULL);
+	if (parent->change_key)
+		e_soap_message_add_attribute (msg, "ChangeKey", parent->change_key, NULL, NULL);
+	e_soap_message_end_element (msg);
+
+	/* start interation over all items to get the attachemnts */
+	e_soap_message_start_element (msg, "Attachments", "messages", NULL);
+
+	for (l = files; l != NULL; l = g_slist_next (l))
+		if (!e_ews_connection_attach_file (msg, l->data, TRUE, &local_error)) {
+			if (local_error != NULL)
+				g_simple_async_result_take_error (simple, local_error);
+			g_simple_async_result_complete_in_idle (simple);
+			g_object_unref (simple);
+
+			return;
+		}
+
+	e_soap_message_end_element (msg); /* "Attachments" */
+
+	e_ews_message_write_footer (msg);
+
+	e_ews_connection_queue_request (
+		cnc, msg, create_attachments_response_cb,
+		pri, cancellable, simple);
+
+	g_object_unref (simple);
+}
+
+GSList *
+e_ews_connection_create_photo_attachment_finish (EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+	GSList *ids;
+
+	g_return_val_if_fail (cnc != NULL, NULL);
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_create_photo_attachment),
+		NULL);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return NULL;
+
+	ids = async_data->items;
+	return ids;
+}
+
+GSList *
+e_ews_connection_create_photo_attachment_sync (EEwsConnection *cnc,
+					       gint pri,
+					       const EwsId *parent,
+					       const GSList *files,
+					       GCancellable *cancellable,
+					       GError **error)
+{
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	GSList *ids;
+
+	g_return_val_if_fail (cnc != NULL, NULL);
+
+	closure = e_async_closure_new ();
+
+	e_ews_connection_create_photo_attachment (
+		cnc, pri, parent, files, cancellable,
+		e_async_closure_callback, closure);
+
+	result = e_async_closure_wait (closure);
+
+	ids = e_ews_connection_create_photo_attachment_finish (cnc, result, error);
+
+	e_async_closure_free (closure);
+
+	return ids;
 }
 
 static void

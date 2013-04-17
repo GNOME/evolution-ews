@@ -199,6 +199,11 @@ typedef struct {
 	gpointer field_uri;
 } EwsSortOrder;
 
+typedef struct {
+	gchar *id;
+	gsize len;
+} EwsPhotoAttachmentInfo;
+
 void		ews_oal_free			(EwsOAL *oal);
 void		ews_oal_details_free		(EwsOALDetails *details);
 
@@ -318,6 +323,46 @@ gboolean	e_ews_connection_find_folder_items_sync
 						 gboolean *includes_last_item,
 						 GSList **items,
 						 EwsConvertQueryCallback convert_query_cb,
+						 GCancellable *cancellable,
+						 GError **error);
+
+void		e_ews_connection_get_photo_attachment_id
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const GSList *ids,
+						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
+						 gpointer user_data);
+gboolean	e_ews_connection_get_photo_attachment_id_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GSList **items,
+						 GError **error);
+gboolean	e_ews_connection_get_photo_attachment_id_sync
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const GSList *ids,
+						 GSList **items,
+						 GCancellable *cancellable,
+						 GError **error);
+
+void		e_ews_connection_create_photo_attachment
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const EwsId *parent,
+						 const GSList *files,
+						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
+						 gpointer user_data);
+GSList *	e_ews_connection_create_photo_attachment_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GError **error);
+GSList *	e_ews_connection_create_photo_attachment_sync
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const EwsId *parent,
+						 const GSList *files,
 						 GCancellable *cancellable,
 						 GError **error);
 

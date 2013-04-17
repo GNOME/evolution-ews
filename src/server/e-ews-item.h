@@ -223,6 +223,7 @@ const GSList *	e_ews_item_get_modified_occurrences
 gchar *		e_ews_embed_attachment_id_in_uri (const gchar *olduri, const gchar *attach_id);
 GSList *	e_ews_item_get_attachments_ids
 						(EEwsItem *item);
+
 EEwsAttachmentInfo *
 e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gchar *cache, const gchar *comp_uid, gchar **attach_id);
 
@@ -308,6 +309,8 @@ gboolean	e_ews_item_task_has_complete_date
 						(EEwsItem * item,
 						 gboolean * has_date);
 const gchar *	e_ews_item_get_tzid		(EEwsItem *item);
+const gchar *	e_ews_item_get_contact_photo_id	(EEwsItem *item);
+
 
 /* Folder Permissions */
 EEwsPermission *e_ews_permission_new		(EEwsPermissionUserType user_type,

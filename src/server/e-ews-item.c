@@ -178,6 +178,7 @@ struct _EEwsItemPrivate {
 
 	gchar *uid;
 	gchar *timezone;
+	gchar *contact_photo_id;
 
 	GSList *to_recipients;
 	GSList *cc_recipients;
@@ -254,6 +255,9 @@ e_ews_item_dispose (GObject *object)
 	g_free (priv->timezone);
 	priv->timezone = NULL;
 
+	g_free (priv->contact_photo_id);
+	priv->contact_photo_id = NULL;
+
 	if (priv->to_recipients) {
 		g_slist_foreach (priv->to_recipients, (GFunc) e_ews_mailbox_free, NULL);
 		g_slist_free (priv->to_recipients);
@@ -288,7 +292,6 @@ e_ews_item_dispose (GObject *object)
 		g_slist_foreach (priv->attendees, (GFunc) ews_item_free_attendee, NULL);
 		g_slist_free (priv->attendees);
 		priv->attendees = NULL;
-
 	}
 
 	if (priv->calendar_item_accept_id) {
@@ -594,10 +597,23 @@ process_attachments_list (EEwsItemPrivate *priv,
 	GSList *list = NULL;
 
 	for (subparam = e_soap_parameter_get_first_child (param); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
+		gchar *id;
 
 		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "AttachmentId");
+		id = e_soap_parameter_get_property (subparam1, "Id");
 
-		list = g_slist_append (list, e_soap_parameter_get_property (subparam1, "Id"));
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "IsContactPhoto");
+		if (subparam1) {
+			gchar *value = e_soap_parameter_get_string_value (subparam1);
+			if (g_strcmp0 (value, "true") == 0) {
+				priv->contact_photo_id = id;
+				g_free (value);
+				continue;
+			}
+			g_free (value);
+		}
+
+		list = g_slist_append (list, id);
 	}
 
 	priv->attachments_list = list;
@@ -1993,6 +2009,14 @@ e_ews_item_get_tzid (EEwsItem *item)
 	g_return_val_if_fail (item->priv->timezone != NULL, NULL);
 
 	return item->priv->timezone;
+}
+
+const gchar *
+e_ews_item_get_contact_photo_id (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	return item->priv->contact_photo_id;
 }
 
 EwsResolveContact *
