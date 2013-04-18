@@ -1607,6 +1607,7 @@ ews_create_object_cb (GObject *object,
 	/* attachments */
 	n_attach = e_cal_component_get_num_attachments (create_data->comp);
 	if (n_attach > 0) {
+		GSList *info_attachments = NULL;
 		EwsAttachmentsData *attach_data = g_new0 (EwsAttachmentsData, 1);
 
 		attach_data->cbews = g_object_ref (create_data->cbews);
@@ -1616,15 +1617,22 @@ ews_create_object_cb (GObject *object,
 		attach_data->cb_type = 1;
 
 		e_cal_component_get_attachment_list (create_data->comp, &attachments);
+
+		for (i = attachments; i; i = i->next) {
+			EEwsAttachmentInfo *info = e_ews_attachment_info_new (E_EWS_ATTACHMENT_INFO_TYPE_URI);
+			e_ews_attachment_info_set_uri (info, i->data);
+			info_attachments = g_slist_append (info_attachments, info);
+		}
+
 		e_ews_connection_create_attachments (
 			cnc, EWS_PRIORITY_MEDIUM,
-			item_id, attachments,
+			item_id, info_attachments,
 			priv->cancellable,
 			ews_create_attachments_cb,
 			attach_data);
 
-		for (i = attachments; i; i = i->next) g_free (i->data);
-		g_slist_free (attachments);
+		g_slist_free_full (info_attachments, (GDestroyNotify) e_ews_attachment_info_free);
+		g_slist_free_full (attachments, g_free);
 	}
 
 	/* get exclusive access to the store */
@@ -2461,6 +2469,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 
 	/*in case we have a new attachmetns the update item will be preformed in ews_create_attachments_cb*/
 	if (added_attachments) {
+		GSList *info_attachments = NULL;
 		EwsId *item_id = g_new0 (EwsId, 1);
 		item_id->id = itemid;
 		item_id->change_key = changekey;
@@ -2475,6 +2484,13 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 		attach_data->itemid = itemid;
 		attach_data->changekey = changekey;
 
+		for (i = added_attachments; i; i = i->next) {
+			EEwsAttachmentInfo *info = e_ews_attachment_info_new (E_EWS_ATTACHMENT_INFO_TYPE_URI);
+			e_ews_attachment_info_set_uri (info, i->data);
+
+			info_attachments = g_slist_append (info_attachments, info);
+		}
+
 		if (context) {
 			convert_error_to_edc_error (&error);
 			e_data_cal_respond_modify_objects (cal, context, error, NULL, NULL);
@@ -2482,11 +2498,12 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 
 		e_ews_connection_create_attachments (
 			priv->cnc, EWS_PRIORITY_MEDIUM,
-			item_id, added_attachments,
+			item_id, info_attachments,
 			cancellable,
 			ews_create_attachments_cb,
 			attach_data);
 
+		g_slist_free_full (info_attachments, (GDestroyNotify) e_ews_attachment_info_free);
 		g_slist_free (added_attachments);
 		g_free (item_id);
 
@@ -3109,11 +3126,11 @@ ews_get_attachments (ECalBackendEws *cbews,
                      EEwsItem *item)
 {
 	gboolean has_attachment = FALSE;
-	const GSList *attachment_ids, *aid;
+	const GSList *attachment_ids, *aid, *l;
 	const EwsId *item_id;
 	ECalComponent *comp;
 	const gchar *uid;
-	GSList *uris = NULL;
+	GSList *uris = NULL, *info_attachments = NULL;
 
 	e_ews_item_has_attachments (item, &has_attachment);
 	if (!has_attachment)
@@ -3133,7 +3150,6 @@ ews_get_attachments (ECalBackendEws *cbews,
 	e_cal_component_get_uid (comp, &uid);
 
 	attachment_ids = e_ews_item_get_attachments_ids (item);
-
 	if (e_ews_connection_get_attachments_sync (
 		cbews->priv->cnc,
 		EWS_PRIORITY_MEDIUM,
@@ -3141,7 +3157,7 @@ ews_get_attachments (ECalBackendEws *cbews,
 		attachment_ids,
 		cbews->priv->storage_path,
 		TRUE,
-		&uris,
+		&info_attachments,
 		NULL, NULL,
 		cbews->priv->cancellable,
 		NULL)) {
@@ -3150,6 +3166,13 @@ ews_get_attachments (ECalBackendEws *cbews,
 		icalparameter *icalparam;
 		ECalComponentId *id;
 		ECalComponent *cache_comp;
+
+		for (l = info_attachments; l; l = l->next) {
+			EEwsAttachmentInfo *info = l->data;
+			const gchar *uri = e_ews_attachment_info_get_uri (info);
+
+			uris = g_slist_append (uris, g_strdup (uri));
+		}
 
 		e_cal_component_set_attachment_list (comp, uris);
 
@@ -3171,6 +3194,7 @@ ews_get_attachments (ECalBackendEws *cbews,
 			e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbews), cache_comp, comp);
 
 		g_slist_free_full (uris, g_free);
+		g_slist_free_full (info_attachments, (GDestroyNotify) e_ews_attachment_info_free);
 	}
 
 	PRIV_UNLOCK (cbews->priv);
