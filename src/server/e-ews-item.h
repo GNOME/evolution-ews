@@ -114,6 +114,26 @@ typedef struct {
 	gchar *postal_code;
 } EwsAddress;
 
+typedef struct {
+	gchar *filename;
+	gchar *mime_type;
+	gsize length;
+	gchar *data;
+} EEwsAttachmentInline;
+
+typedef enum {
+	E_EWS_ATTACHMENT_INFO_TYPE_INLINED,
+	E_EWS_ATTACHMENT_INFO_TYPE_URI
+} EEwsAttachmentInfoType;
+
+typedef struct {
+	EEwsAttachmentInfoType type;
+	union {
+		EEwsAttachmentInline inlined;
+		gchar *uri;
+	} data;
+} EEwsAttachmentInfo;
+
 typedef enum {
 	E_EWS_PERMISSION_BIT_FREE_BUSY_DETAILED	= 0x00001000,
 	E_EWS_PERMISSION_BIT_FREE_BUSY_SIMPLE	= 0x00000800,
@@ -203,19 +223,45 @@ const GSList *	e_ews_item_get_modified_occurrences
 gchar *		e_ews_embed_attachment_id_in_uri (const gchar *olduri, const gchar *attach_id);
 GSList *	e_ews_item_get_attachments_ids
 						(EEwsItem *item);
-gchar *
+EEwsAttachmentInfo *
 e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gchar *cache, const gchar *comp_uid, gchar **attach_id);
 
 gchar *
 e_ews_item_ical_dump (EEwsItem *item);
 
-gchar *
+EEwsAttachmentInfo *
 e_ews_item_dump_mime_content (EEwsItem *item, const gchar *cache);
 
 const GSList *	e_ews_item_get_attendees	(EEwsItem *item);
 
 const EwsId *	e_ews_item_get_calendar_item_accept_id
 						(EEwsItem *item);
+
+EEwsAttachmentInfo *
+		e_ews_attachment_info_new		(EEwsAttachmentInfoType type);
+void		e_ews_attachment_info_free	(EEwsAttachmentInfo *info);
+EEwsAttachmentInfoType
+		e_ews_attachment_info_get_type	(EEwsAttachmentInfo *info);
+const gchar *	e_ews_attachment_info_get_inlined_data
+						(EEwsAttachmentInfo *info,
+						 gsize *len);
+void		e_ews_attachment_info_set_inlined_data
+						(EEwsAttachmentInfo *info,
+						 const guchar *data,
+						 gsize len);
+const gchar *	e_ews_attachment_info_get_mime_type
+						(EEwsAttachmentInfo *info);
+void		e_ews_attachment_info_set_mime_type
+						(EEwsAttachmentInfo *info,
+						 const gchar *mime_type);
+const gchar *	e_ews_attachment_info_get_filename
+						(EEwsAttachmentInfo *info);
+void		e_ews_attachment_info_set_filename
+						(EEwsAttachmentInfo *info,
+						 const gchar *filename);
+const gchar *	e_ews_attachment_info_get_uri	(EEwsAttachmentInfo *info);
+void		e_ews_attachment_info_set_uri	(EEwsAttachmentInfo *info,
+						 const gchar *uri);
 
 /* Contact fields */
 const gchar *	e_ews_item_get_fileas		(EEwsItem *item);

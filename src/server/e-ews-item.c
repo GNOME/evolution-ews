@@ -32,7 +32,6 @@
 #include <glib/gprintf.h>
 #include <libsoup/soup-misc.h>
 #include "e-ews-item.h"
-#include "e-ews-connection.h"
 #include "e-ews-message.h"
 
 #ifdef G_OS_WIN32
@@ -1522,18 +1521,19 @@ e_ews_embed_attachment_id_in_uri (const gchar *olduri,
 	return g_filename_to_uri (filename, NULL, NULL);
 }
 
-gchar *
+EEwsAttachmentInfo *
 e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param,
                                                 const gchar *cache,
                                                 const gchar *comp_uid,
                                                 gchar **attach_id)
 {
 	ESoapParameter *subparam;
-	const gchar *param_name;
+	const gchar *param_name, *tmpfilename;
 	gchar *name = NULL, *value, *filename, *dirname;
 	guchar *content = NULL;
 	gsize data_len = 0;
-	gchar *tmpdir, *tmpfilename;
+	gchar *tmpdir;
+	EEwsAttachmentInfo *info;
 
 	g_return_val_if_fail (param != NULL, NULL);
 
@@ -1563,36 +1563,46 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param,
 		return NULL;
 	}
 
-	tmpfilename = (gchar *) content;
-	tmpdir = g_strndup (tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
+	if (cache) {
+		info = e_ews_attachment_info_new (E_EWS_ATTACHMENT_INFO_TYPE_URI);
 
-	dirname = g_build_filename (tmpdir, comp_uid, NULL);
-	if (g_mkdir_with_parents (dirname, 0775) == -1) {
-		g_warning ("Failed create directory to place file in [%s]: %s\n", dirname, strerror (errno));
+		tmpfilename = (gchar *) content;
+		tmpdir = g_strndup (tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
+
+		dirname = g_build_filename (tmpdir, comp_uid, NULL);
+		if (g_mkdir_with_parents (dirname, 0775) == -1) {
+			g_warning ("Failed create directory to place file in [%s]: %s\n", dirname, strerror (errno));
+		}
+
+		filename = g_build_filename (dirname, name, NULL);
+		if (g_rename (tmpfilename, filename) != 0) {
+			g_warning ("Failed to move attachment cache file [%s -> %s]: %s\n",
+					tmpfilename, filename, strerror (errno));
+		}
+
+		g_free (dirname);
+		g_free (tmpdir);
+		g_free (name);
+		g_free (content);
+
+		/* Return URI to saved file */
+		e_ews_attachment_info_set_uri (info, g_filename_to_uri (filename, NULL, NULL));
+		g_free (filename);
+	} else {
+		info = e_ews_attachment_info_new (E_EWS_ATTACHMENT_INFO_TYPE_INLINED);
+		e_ews_attachment_info_set_inlined_data (info, content, data_len);
 	}
-
-	filename = g_build_filename (dirname, name, NULL);
-	if (g_rename (tmpfilename, filename) != 0) {
-		g_warning ("Failed to move attachment cache file [%s -> %s]: %s\n", tmpfilename, filename, strerror (errno));
-	}
-
-	g_free (dirname);
-	g_free (tmpdir);
-	g_free (name);
-	g_free (content);
-
-	/* Return URI to saved file */
-	name = g_filename_to_uri (filename, NULL, NULL);
-	g_free (filename);
-	return name;
+	return info;
 }
 
-gchar *
+EEwsAttachmentInfo *
 e_ews_item_dump_mime_content (EEwsItem *item,
                               const gchar *cache)
 {
+	EEwsAttachmentInfo *info = e_ews_attachment_info_new (E_EWS_ATTACHMENT_INFO_TYPE_URI);
 	gchar *filename, *surename, *dirname;
-	gchar *tmpdir, *tmpfilename;
+	gchar *tmpdir, *uri;
+	const gchar *tmpfilename;
 
 	g_return_val_if_fail (item->priv->mime_content != NULL, NULL);
 
@@ -1610,14 +1620,17 @@ e_ews_item_dump_mime_content (EEwsItem *item,
 		g_warning ("Failed to move attachment cache file");
 	}
 
+	uri = g_filename_to_uri (filename, NULL, NULL);
+	e_ews_attachment_info_set_uri (info, uri);
+
+	g_free (uri);
 	g_free (filename);
 	g_free (dirname);
 	g_free (tmpdir);
-	g_free (tmpfilename);
 	g_free (surename);
 
 	/* Return URI to saved file */
-	return g_filename_to_uri (filename, NULL, NULL);
+	return info;
 }
 
 const GSList *

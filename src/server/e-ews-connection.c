@@ -1544,6 +1544,130 @@ ews_delegate_info_free (EwsDelegateInfo *info)
 	g_free (info);
 }
 
+EEwsAttachmentInfo *
+e_ews_attachment_info_new (EEwsAttachmentInfoType type)
+{
+	EEwsAttachmentInfo *info;
+	info = g_new0 (EEwsAttachmentInfo, 1);
+
+	info->type = type;
+	return info;
+}
+
+void
+e_ews_attachment_info_free (EEwsAttachmentInfo *info)
+{
+	if (!info)
+		return;
+
+	switch (info->type) {
+	case E_EWS_ATTACHMENT_INFO_TYPE_INLINED:
+		g_free (info->data.inlined.filename);
+		g_free (info->data.inlined.mime_type);
+		g_free (info->data.inlined.data);
+		break;
+	case E_EWS_ATTACHMENT_INFO_TYPE_URI:
+		g_free (info->data.uri);
+		break;
+	default:
+		g_warning ("Unknown EEwsAttachmentInfoType %d", info->type);
+		break;
+	}
+
+	g_free (info);
+}
+
+EEwsAttachmentInfoType
+e_ews_attachment_info_get_type (EEwsAttachmentInfo *info)
+{
+	return info->type;
+}
+
+const gchar *
+e_ews_attachment_info_get_inlined_data (EEwsAttachmentInfo *info,
+					gsize *len)
+{
+	g_return_val_if_fail (info != NULL, NULL);
+	g_return_val_if_fail (info->type == E_EWS_ATTACHMENT_INFO_TYPE_INLINED, NULL);
+
+	*len = info->data.inlined.length;
+	return info->data.inlined.data;
+}
+
+void
+e_ews_attachment_info_set_inlined_data (EEwsAttachmentInfo *info,
+					const guchar *data,
+					gsize len)
+{
+	g_return_if_fail (info != NULL);
+	g_return_if_fail (info->type == E_EWS_ATTACHMENT_INFO_TYPE_INLINED);
+
+	info->data.inlined.data = g_malloc (len);
+	memcpy (info->data.inlined.data, data, len);
+	info->data.inlined.length = len;
+}
+
+const gchar *
+e_ews_attachment_info_get_mime_type (EEwsAttachmentInfo *info)
+{
+	g_return_val_if_fail (info != NULL, NULL);
+	g_return_val_if_fail (info->type == E_EWS_ATTACHMENT_INFO_TYPE_INLINED, NULL);
+
+	return info->data.inlined.mime_type;
+}
+
+void
+e_ews_attachment_info_set_mime_type (EEwsAttachmentInfo *info,
+				     const gchar *mime_type)
+{
+	g_return_if_fail (info != NULL);
+	g_return_if_fail (info->type == E_EWS_ATTACHMENT_INFO_TYPE_INLINED);
+
+	g_free (info->data.inlined.mime_type);
+	info->data.inlined.mime_type = g_strdup (mime_type);
+}
+
+const gchar *
+e_ews_attachment_info_get_filename (EEwsAttachmentInfo *info)
+{
+	g_return_val_if_fail (info != NULL, NULL);
+	g_return_val_if_fail (info->type == E_EWS_ATTACHMENT_INFO_TYPE_INLINED, NULL);
+
+	return info->data.inlined.filename;
+}
+
+void
+e_ews_attachment_info_set_filename (EEwsAttachmentInfo *info,
+				    const gchar *filename)
+{
+	g_return_if_fail (info != NULL);
+	g_return_if_fail (info->type == E_EWS_ATTACHMENT_INFO_TYPE_INLINED);
+
+	g_free (info->data.inlined.filename);
+	info->data.inlined.filename = g_strdup (filename);
+}
+
+
+const gchar *
+e_ews_attachment_info_get_uri (EEwsAttachmentInfo *info)
+{
+	g_return_val_if_fail (info != NULL, NULL);
+	g_return_val_if_fail (info->type == E_EWS_ATTACHMENT_INFO_TYPE_URI, NULL);
+
+	return info->data.uri;
+}
+
+void
+e_ews_attachment_info_set_uri (EEwsAttachmentInfo *info,
+			       const gchar *uri)
+{
+	g_return_if_fail (info != NULL);
+	g_return_if_fail (info->type == E_EWS_ATTACHMENT_INFO_TYPE_URI);
+
+	g_free (info->data.uri);
+	info->data.uri = g_strdup (uri);
+}
+
 /* Connection APIS */
 
 /**
@@ -5511,55 +5635,72 @@ create_attachments_response_cb (ESoapResponse *response,
 	}
 }
 
-static void
+static gboolean
 e_ews_connection_attach_file (ESoapMessage *msg,
-                              const gchar *uri)
+                              EEwsAttachmentInfo *info,
+			      GError **error)
 {
-	/* TODO - handle a situation where the file isnt accessible/other problem with it */
-	/* TODO - This is a naive implementation that just uploads the whole content into memory, ie very inefficient */
-	struct stat st;
-	gchar *buffer, *filepath;
-	const gchar *filename;
-	gint fd;
+	EEwsAttachmentInfoType type = e_ews_attachment_info_get_type (info);
+	gchar *filename = NULL, *buffer = NULL;
+	const gchar *content = NULL;
+	gsize length;
 
-	/* convert uri to actual file path */
-	filepath = g_filename_from_uri (uri, NULL, NULL);
+	switch (type) {
+		case E_EWS_ATTACHMENT_INFO_TYPE_URI: {
+			/* TODO - handle a situation where the file isnt accessible/other problem with it */
+			/* TODO - This is a naive implementation that just uploads the whole content into */
+			/*        memory, ie very inefficient */
+			const gchar *uri;
+			gchar *filepath;
+			GError *local_error = NULL;
 
-	if (stat (filepath, &st) == -1) {
-		g_warning ("Error while calling stat() on %s\n", filepath);
-		return;
+			uri = e_ews_attachment_info_get_uri (info);
+
+			/* convert uri to actual file path */
+			filepath = g_filename_from_uri (uri, NULL, &local_error);
+			if (local_error != NULL) {
+				g_propagate_error (error, local_error);
+				return FALSE;
+			}
+
+			g_file_get_contents (uri, &buffer, &length, &local_error);
+			if (local_error != NULL) {
+				g_free (filepath);
+				g_propagate_error (error, local_error);
+				return FALSE;
+			}
+
+			content = buffer;
+
+			filename = strrchr (filepath, G_DIR_SEPARATOR);
+			filename = filename ? g_strdup (++filename) : g_strdup (filepath);
+
+			g_free (filepath);
+			break;
+		}
+		case E_EWS_ATTACHMENT_INFO_TYPE_INLINED:
+			content = e_ews_attachment_info_get_inlined_data (info, &length);
+			filename = g_strdup (e_ews_attachment_info_get_filename (info));
+			break;
+		default:
+			g_warning ("Unknown EwsAttachmentInfoType %d", type);
+			return FALSE;
 	}
-
-	fd = open (filepath, O_RDONLY);
-	if (fd == -1) {
-		g_warning ("Error opening %s for reading\n", filepath);
-		return;
-	}
-
-	buffer = malloc (st.st_size);
-	if (read (fd, buffer, st.st_size) != st.st_size) {
-		g_warning ("Error reading %u bytes from %s\n", (guint) st.st_size, filepath);
-		close (fd);
-		return;
-	}
-	close (fd);
-
-	filename = strrchr (filepath, '/');
-	if (filename) filename++;
-	else filename = filepath;
 
 	e_soap_message_start_element (msg, "FileAttachment", NULL, NULL);
 
 	e_ews_message_write_string_parameter (msg, "Name", NULL, filename);
 
 	e_soap_message_start_element (msg, "Content", NULL, NULL);
-	e_soap_message_write_base64 (msg, buffer, st.st_size);
+	e_soap_message_write_base64 (msg, content, length);
 	e_soap_message_end_element (msg); /* "Content" */
 
 	e_soap_message_end_element (msg); /* "FileAttachment" */
 
-	free (filepath);
-	free (buffer);
+	g_free (filename);
+	g_free (buffer);
+
+	return TRUE;
 }
 
 void
@@ -5575,8 +5716,17 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 	const GSList *l;
+	GError *local_error = NULL;
 
 	g_return_if_fail (cnc != NULL);
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_create_attachments);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
 
 	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "CreateAttachment", NULL, NULL, EWS_EXCHANGE_2007_SP1);
 
@@ -5590,19 +5740,18 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
 	e_soap_message_start_element (msg, "Attachments", "messages", NULL);
 
 	for (l = files; l != NULL; l = g_slist_next (l))
-		e_ews_connection_attach_file (msg, l->data);
+		if (!e_ews_connection_attach_file (msg, l->data, &local_error)) {
+			if (local_error != NULL)
+				g_simple_async_result_take_error (simple, local_error);
+			g_simple_async_result_complete_in_idle (simple);
+			g_object_unref (simple);
+
+			return;
+		}
 
 	e_soap_message_end_element (msg); /* "Attachments" */
 
 	e_ews_message_write_footer (msg);
-
-	simple = g_simple_async_result_new (
-		G_OBJECT (cnc), callback, user_data,
-		e_ews_connection_create_attachments);
-
-	async_data = g_new0 (EwsAsyncData, 1);
-	g_simple_async_result_set_op_res_gpointer (
-		simple, async_data, (GDestroyNotify) async_data_free);
 
 	e_ews_connection_queue_request (
 		cnc, msg, create_attachments_response_cb,
@@ -5833,7 +5982,8 @@ ews_handle_attachments_param (ESoapParameter *param,
                               EwsAsyncData *async_data)
 {
 	ESoapParameter *subparam, *attspara;
-	gchar *uri = NULL, *attach_id = NULL;
+	EEwsAttachmentInfo *info = NULL;
+	gchar *attach_id = NULL;
 	EEwsItem *item;
 	const gchar *name;
 
@@ -5845,18 +5995,21 @@ ews_handle_attachments_param (ESoapParameter *param,
 		if (!g_ascii_strcasecmp (name, "ItemAttachment")) {
 			item = e_ews_item_new_from_soap_parameter (subparam);
 			attach_id = g_strdup (e_ews_item_get_attachment_id (item)->id);
-			uri = e_ews_item_dump_mime_content (item, async_data->directory);
+			info = e_ews_item_dump_mime_content (item, async_data->directory);
 
+		} else if (!g_ascii_strcasecmp (name, "FileAttachment")) {
+			info = e_ews_dump_file_attachment_from_soap_parameter (subparam, async_data->directory, async_data->sync_state, &attach_id);
 		}
-		else if (!g_ascii_strcasecmp (name, "FileAttachment")) {
-			uri = e_ews_dump_file_attachment_from_soap_parameter (subparam, async_data->directory, async_data->sync_state, &attach_id);
-		}
-		if (uri && attach_id) {
-			async_data->items = g_slist_append (async_data->items, uri);
+
+		if (info && attach_id) {
+			async_data->items = g_slist_append (async_data->items, info);
 			async_data->items_created = g_slist_append (async_data->items_created, attach_id);
-			uri = NULL;
-			attach_id = NULL;
+		} else {
+			e_ews_attachment_info_free (info);
+			g_free (attach_id);
 		}
+		info = NULL;
+		attach_id = NULL;
 	}
 }
 
