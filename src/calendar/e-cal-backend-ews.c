@@ -3130,8 +3130,7 @@ ews_get_attachments (ECalBackendEws *cbews,
 
 static void
 add_item_to_cache (ECalBackendEws *cbews,
-                   EEwsItem *item,
-                   GHashTable *ex_to_smtp)
+                   EEwsItem *item)
 {
 	ECalBackendEwsPrivate *priv;
 	ETimezoneCache *timezone_cache;
@@ -3340,41 +3339,24 @@ add_item_to_cache (ECalBackendEws *cbews,
 		/* Attendees */
 		for (l = e_ews_item_get_attendees (item); l != NULL; l = g_slist_next (l)) {
 			icalparameter *param, *cu_type;
-			gchar *mailtoname, *email = NULL;
+			gchar *mailtoname;
+			const gchar *email = NULL;
 			EwsAttendee *attendee = (EwsAttendee *) l->data;
 
 			if (!attendee->mailbox)
 				continue;
 
-			if (g_strcmp0 (attendee->mailbox->routing_type, "EX") == 0) {
-				email = g_hash_table_lookup (ex_to_smtp, attendee->mailbox->email);
-				if (email) {
-					email = g_strdup (email);
-				} else {
-					e_ews_connection_ex_to_smtp_sync (
-						priv->cnc, EWS_PRIORITY_MEDIUM,
-						attendee->mailbox->name, attendee->mailbox->email, &email,
-						NULL, NULL);
-
-					/* do not scare users with EX addresses */
-					if (!email)
-						email = g_strdup ("");
-
-					/* cache value for reuse, because ResolveNames is slow */
-					g_hash_table_insert (ex_to_smtp, g_strdup (attendee->mailbox->email), g_strdup (email));
-				}
-			}
+			if (g_strcmp0 (attendee->mailbox->routing_type, "EX") == 0)
+				email = e_ews_item_util_strip_ex_address (attendee->mailbox->email);
 
 			/*remove organizer for attendees list*/
 			if (g_ascii_strcasecmp (org_email_address, email ? email : attendee->mailbox->email) == 0) {
-				g_free (email);
 				continue;
 			}
 
 			mailtoname = g_strdup_printf ("mailto:%s", email ? email : attendee->mailbox->email);
 			icalprop = icalproperty_new_attendee (mailtoname);
 			g_free (mailtoname);
-			g_free (email);
 
 			param = icalparameter_new_cn (attendee->mailbox->name);
 			icalproperty_add_parameter (icalprop, param);
@@ -3543,8 +3525,7 @@ static void
 ews_cal_sync_get_items_sync (ECalBackendEws *cbews,
                              const GSList *item_ids,
                              const gchar *default_props,
-                             const gchar *additional_props,
-                             GHashTable *ex_to_smtp)
+                             const gchar *additional_props)
 {
 	ECalBackendEwsPrivate *priv;
 	GSList *items = NULL, *l;
@@ -3586,8 +3567,7 @@ ews_cal_sync_get_items_sync (ECalBackendEws *cbews,
 			ews_cal_sync_get_items_sync (
 				cbews, modified_occurrences,
 				"IdOnly",
-				"item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:UID calendar:Resources calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
-				ex_to_smtp);
+				"item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:UID calendar:Resources calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees");
 		}
 	}
 
@@ -3599,7 +3579,7 @@ ews_cal_sync_get_items_sync (ECalBackendEws *cbews,
 			continue;
 
 		if (e_ews_item_get_item_type (item) != E_EWS_ITEM_TYPE_ERROR) {
-			add_item_to_cache (cbews, item, ex_to_smtp);
+			add_item_to_cache (cbews, item);
 			ews_get_attachments (cbews, item);
 		}
 
@@ -3615,8 +3595,7 @@ cal_backend_ews_process_folder_items (ECalBackendEws *cbews,
                                       const gchar *sync_state,
                                       GSList *items_created,
                                       GSList *items_updated,
-                                      GSList *items_deleted,
-                                      GHashTable *ex_to_smtp)
+                                      GSList *items_deleted)
 {
 	ECalBackendEwsPrivate *priv;
 	GSList *l[2], *m, *cal_item_ids = NULL, *task_memo_item_ids = NULL;
@@ -3660,8 +3639,7 @@ cal_backend_ews_process_folder_items (ECalBackendEws *cbews,
 			cbews,
 			cal_item_ids,
 			"IdOnly",
-			"item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:UID calendar:Resources calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees",
-			ex_to_smtp);
+			"item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:UID calendar:Resources calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees");
 	}
 
 	if (task_memo_item_ids) {
@@ -3669,8 +3647,7 @@ cal_backend_ews_process_folder_items (ECalBackendEws *cbews,
 			cbews,
 			task_memo_item_ids,
 			"AllProperties",
-			NULL,
-			ex_to_smtp);
+			NULL);
 	}
 
 	g_slist_free (cal_item_ids);
@@ -3713,13 +3690,11 @@ ews_start_sync_thread (gpointer data)
 	gboolean includes_last_item;
 	gchar *old_sync_state = NULL;
 	gchar *new_sync_state = NULL;
-	GHashTable *ex_to_smtp;
 	GError *error = NULL;
 
 	cbews = (ECalBackendEws *) data;
 	priv = cbews->priv;
 
-	ex_to_smtp = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 	old_sync_state = g_strdup (e_cal_backend_store_get_key_value (priv->store, SYNC_KEY));
 	do {
 		includes_last_item = TRUE;
@@ -3758,8 +3733,7 @@ ews_start_sync_thread (gpointer data)
 		if (error == NULL) {
 			cal_backend_ews_process_folder_items (
 				cbews, new_sync_state,
-				items_created, items_updated, items_deleted,
-				ex_to_smtp);
+				items_created, items_updated, items_deleted);
 
 			g_slist_free_full (items_created, (GDestroyNotify) g_object_unref);
 			g_slist_free_full (items_updated, (GDestroyNotify) g_object_unref);
@@ -3784,8 +3758,6 @@ ews_start_sync_thread (gpointer data)
 	} while (!includes_last_item);
 
 	ews_refreshing_dec (cbews);
-
-	g_hash_table_destroy (ex_to_smtp);
 
 	g_slist_free_full (items_created, (GDestroyNotify) g_object_unref);
 	g_slist_free_full (items_updated, (GDestroyNotify) g_object_unref);
