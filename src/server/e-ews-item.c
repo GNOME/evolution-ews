@@ -2358,3 +2358,21 @@ e_ews_permissions_free (GSList *permissions)
 {
 	g_slist_free_full (permissions, (GDestroyNotify) e_ews_permission_free);
 }
+
+/* strips ex_address by its LDAP-like part, returning position in ex_address where
+   common name begins; returns whole ex_address, if not found */
+const gchar *
+e_ews_item_util_strip_ex_address (const gchar *ex_address)
+{
+	const gchar *ptr;
+
+	if (!ex_address)
+		return ex_address;
+
+	ptr = strrchr (ex_address, '/');
+	if (ptr && g_ascii_strncasecmp (ptr, "/cn=", 4) == 0) {
+		return ptr + 4;
+	}
+
+	return ex_address;
+}

@@ -280,6 +280,10 @@ GSList *	e_ews_permissions_from_soap_param
 						(ESoapParameter *param);
 void		e_ews_permissions_free (GSList *permissions);
 
+/* Utility functions */
+const gchar *	e_ews_item_util_strip_ex_address
+						(const gchar *ex_address);
+
 G_END_DECLS
 
 #endif

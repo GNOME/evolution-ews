@@ -499,18 +499,10 @@ form_email_string_from_mb (EEwsConnection *cnc,
 {
 	if (mb) {
 		GString *str;
-		gchar *email = NULL;
+		const gchar *email = NULL;
 
-		if (g_strcmp0 (mb->routing_type, "EX") == 0) {
-			e_ews_connection_ex_to_smtp_sync (
-				cnc, EWS_PRIORITY_MEDIUM,
-				mb->name, mb->email, &email,
-				cancellable, NULL);
-
-			/* do not scare users with EX addresses */
-			if (!email)
-				email = g_strdup ("");
-		}
+		if (g_strcmp0 (mb->routing_type, "EX") == 0)
+			email = e_ews_item_util_strip_ex_address (mb->email);
 
 		str = g_string_new ("");
 		if (mb->name && mb->name[0]) {
@@ -523,8 +515,6 @@ form_email_string_from_mb (EEwsConnection *cnc,
 			g_string_append (str, email ? email : mb->email);
 			g_string_append (str, ">");
 		}
-
-		g_free (email);
 
 		return camel_pstring_add (g_string_free (str, FALSE), TRUE);
 	} else
