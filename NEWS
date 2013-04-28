@@ -1,4 +1,27 @@
-Evolution-EWS 3.7.92 2012-03-18
+Evolution-EWS 3.9.1 2013-04-29
+------------------------------
+
+Bug Fixes:
+	Bug 670939 - Reminder to change out of office status (Fabiano Fidêncio)
+	Bug 681837 - Make enum type registration thread safe (Milan Crha)
+	Bug 686227 - EX addresses are returned for deleted mailboxes
+	             (Milan Crha)
+	Bug 691937 - Remove resources with e_source_remove_sync().
+	             (Matthew Barnes)
+	Bug 695921 - Error is shown when a folder is created in the root
+	             (same level than "Inbox") (Fabiano Fidêncio)
+	Bug 696092 - Crash when fetching task items (Fabiano Fidêncio)
+	Bug 696221 - Drop libeews.pc.in (Milan Crha)
+
+Translations:
+	Gil Forcada (ca)
+	Marek Černocký (cs)
+	Daniel Mustieles (es)
+	Balázs Úr (hu)
+	Rafael Ferreira (pt_BR)
+
+
+Evolution-EWS 3.7.92 2013-03-18
 -------------------------------
 
 Bug Fixes:
@@ -13,7 +36,7 @@ Bug Fixes:
 	             (Fabiano Fidêncio)
 
 
-Evolution-EWS 3.7.91 2012-03-04
+Evolution-EWS 3.7.91 2013-03-04
 -------------------------------
 
 Bug Fixes:
@@ -29,7 +52,7 @@ Translations:
 	Мирослав Николић (sr)
 
 
-Evolution-EWS 3.7.90 2012-02-18
+Evolution-EWS 3.7.90 2013-02-18
 -------------------------------
 
 Bug Fixes:
