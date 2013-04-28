@@ -1,0 +1,1130 @@
+# Greek translation for evolution-ews.
+# Copyright (C) 2013 evolution-ews's COPYRIGHT HOLDER
+# This file is distributed under the same license as the evolution-ews package.
+# Dimitris Spingos <dmtrs32@gmail.com>, 2013.
+# keratea <dmtrs32@gmail.com>, 2013.
+# Dimitris Spingos (Δημήτρης Σπίγγος) <dmtrs32@gmail.com>, 2013.
+msgid ""
+msgstr ""
+"Project-Id-Version: evolution-ews gnome-3-8\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product"
+"=evolution-ews&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2013-04-28 17:29+0000\n"
+"PO-Revision-Date: 2013-04-28 21:25+0300\n"
+"Last-Translator: Dimitris Spingos (Δημήτρης Σπίγγος) <dmtrs32@gmail.com>\n"
+"Language-Team: team@gnome.gr\n"
+"Language: el\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Virtaal 0.7.1\n"
+"X-Project-Style: gnome\n"
+
+#: ../src/addressbook/e-book-backend-ews.c:1045
+msgid "The backend does not support bulk additions"
+msgstr "Το νωτιαίο σύστημα δεν υποστηρίζει μαζικές προσθήκες"
+
+#: ../src/addressbook/e-book-backend-ews.c:1332
+msgid "The backend does not support bulk modifications"
+msgstr "Το νωτιαίο σύστημα δεν υποστηρίζει μαζικές τροποποιήσεις"
+
+#: ../src/addressbook/e-book-backend-ews.c:1520
+msgid "Wait till syncing is done"
+msgstr "Περιμένετε μέχρι την ολοκλήρωση του συγχρονισμού"
+
+#: ../src/addressbook/e-book-backend-ews.c:1859
+#, c-format
+msgid "Downloading contacts in %s %d%% completed... "
+msgstr "Η μεταφόρτωση επαφών στο %s%d%% ολοκληρώθηκε... "
+
+#: ../src/addressbook/e-book-backend-ews.c:2412
+msgid "Syncing contacts..."
+msgstr "Συγχρονισμός επαφών..."
+
+#: ../src/addressbook/e-book-backend-ews.c:2636
+#: ../src/configuration/e-ews-search-user.c:364
+msgid "Searching..."
+msgstr "Αναζήτηση..."
+
+#: ../src/calendar/e-cal-backend-ews.c:1055
+msgid "EWS does not support bulk removals"
+msgstr "Το EWS δεν υποστηρίζει μαζικές αφαιρέσεις"
+
+#: ../src/calendar/e-cal-backend-ews.c:1698
+msgid "EWS does not support bulk additions"
+msgstr "Το EWS δεν υποστηρίζει μαζικές προσθήκες"
+
+#: ../src/calendar/e-cal-backend-ews.c:2281
+msgid "EWS does not support bulk modifications"
+msgstr "Το EWS δεν υποστηρίζει μαζικές τροποποιήσεις"
+
+#: ../src/camel/camel-ews-folder.c:268
+#, c-format
+msgid "Unable to open mimecontent temporary file!"
+msgstr "Αδύνατο το άνοιγμα περιεχομένου mime προσωρινού αρχείου!"
+
+#: ../src/camel/camel-ews-folder.c:276
+#, c-format
+msgid "Unable to generate parser from mimecontent!"
+msgstr "Αδύνατη η δημιουργία αναλυτή από περιεχόμενο mime!"
+
+#: ../src/camel/camel-ews-folder.c:285
+#, c-format
+msgid "Unable to parse meeting request mimecontent!"
+msgstr "Αδύνατη η ανάλυση αιτήματος συγκέντρωσης περιεχομένου mime!"
+
+#: ../src/camel/camel-ews-folder.c:346
+#, c-format
+msgid "Unable to create cache file"
+msgstr "Αδύνατη η δημιουργία αρχείου κρυφής μνήμης"
+
+#: ../src/camel/camel-ews-folder.c:451 ../src/camel/camel-ews-folder.c:531
+#, c-format
+msgid "Unable to create cache path"
+msgstr "Αδύνατη η δημιουργία διαδρομής κρυφής μνήμης"
+
+#: ../src/camel/camel-ews-folder.c:541
+#, c-format
+msgid "Failed to move message cache file"
+msgstr "Αποτυχία μετακίνησης μηνύματος αρχείου κρυφής μνήμης"
+
+#: ../src/camel/camel-ews-folder.c:1188
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "Αδύνατη η φόρτωση περίληψης για το %s"
+
+#: ../src/camel/camel-ews-folder.c:1624
+#, c-format
+msgid "Cant perform actions on the folder while in offline mode"
+msgstr "Αδύνατη η εκτέλεση ενεργειών στον φάκελο όσο είναι εκτός σύνδεσης"
+
+#: ../src/camel/camel-ews-provider.c:48
+msgid "Checking for new mail"
+msgstr "Έλεγχος για νέα μηνύματα"
+
+#: ../src/camel/camel-ews-provider.c:50
+msgid "C_heck for new messages in all folders"
+msgstr "Έ_λεγχος για νέα μηνύματα σε όλους τους φακέλους"
+
+#: ../src/camel/camel-ews-provider.c:53
+msgid "Options"
+msgstr "Επιλογές"
+
+#: ../src/camel/camel-ews-provider.c:55
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr ""
+"_Εφαρμογή φίλτρων στα εισερχόμενα των νέων μηνυμάτων σε αυτόν τον εξυπηρετητή"
+
+#: ../src/camel/camel-ews-provider.c:57
+msgid "Check new messages for _Junk contents"
+msgstr "Έλεγχος νέων μηνυμάτων για _ανεπιθύμητα περιεχόμενα"
+
+#: ../src/camel/camel-ews-provider.c:59
+msgid "Only check for Junk messages in the IN_BOX folder"
+msgstr "Έλεγχος για ανεπιθύμητα μηνύματα μόνο στον φάκελο Ε_ΙΣΕΡΧΟΜΕΝΩΝ"
+
+#: ../src/camel/camel-ews-provider.c:61
+msgid "Automatically synchroni_ze remote mail locally"
+msgstr "Αυτόματος συγ_χρονισμός απομακρυσμένης αλληλογραφίας τοπικά"
+
+#: ../src/camel/camel-ews-provider.c:64
+msgid "Connection"
+msgstr "Σύνδεση"
+
+#. Translators: '%s' is preplaced with a widget, where "
+#. * user can select how long the timeout should be.
+#: ../src/camel/camel-ews-provider.c:68
+#, c-format
+msgid "Connection _timeout (in seconds) %s"
+msgstr "_Λήξη χρόνου σύνδεσης (σε δευτερόλεπτα) %s"
+
+#: ../src/camel/camel-ews-provider.c:76
+msgid "Exchange Web Services"
+msgstr "Ανταλλαγή υπηρεσιών ιστού"
+
+#: ../src/camel/camel-ews-provider.c:78
+msgid "For accessing Exchange servers using Web Services"
+msgstr "για πρόσβαση εξυπηρετητών Exchange χρησιμοποιώντας υπηρεσίες ιστού"
+
+#: ../src/camel/camel-ews-provider.c:93
+msgid "NTLM"
+msgstr "NTLM"
+
+#: ../src/camel/camel-ews-provider.c:95
+msgid ""
+"This option will connect to the Exchange server using a plaintext password "
+"with NTLM authentication."
+msgstr ""
+"Με αυτήν την επιλογή θα συνδεθείτε με τον διακομιστή Exchange "
+"χρησιμοποιώντας έναν κωδικό απλού κειμένου με πιστοποίηση NTLM."
+
+#: ../src/camel/camel-ews-provider.c:103
+msgid "Basic"
+msgstr "Βασικά"
+
+#: ../src/camel/camel-ews-provider.c:105
+msgid ""
+"This option will connect to the Exchange server using a plaintext password "
+"with Basic authentication."
+msgstr ""
+"Με αυτήν την επιλογή θα συνδεθείτε με τον διακομιστή Exchange "
+"χρησιμοποιώντας έναν κωδικό απλού κειμένου με βασική πιστοποίηση."
+
+#: ../src/camel/camel-ews-store.c:292
+#, c-format
+msgid "Session has no storage path"
+msgstr "Η συνεδρία δεν έχει διαδρομή αποθήκευσης"
+
+#: ../src/camel/camel-ews-store.c:329
+#, c-format
+msgctxt "PublicFolders"
+msgid "%s_%d"
+msgstr "%s_%d"
+
+#: ../src/camel/camel-ews-store.c:458
+#, c-format
+msgctxt "ForeignFolders"
+msgid "%s_%d"
+msgstr "%s_%d"
+
+#: ../src/camel/camel-ews-store.c:603
+#| msgid "Retrieving \"Out of Office\" settings"
+msgid "Checking \"Out of Office\" settings"
+msgstr "Έλεγχος ρυθμίσεων \"Εκτός γραφείου\""
+
+#: ../src/camel/camel-ews-store.c:835
+msgid "Updating foreign folder structure"
+msgstr "Ενημέρωση δομής ξένου φακέλου"
+
+#: ../src/camel/camel-ews-store.c:1120
+msgid "Authentication password not available"
+msgstr "Ο κωδικός πιστοποίησης δεν είναι διαθέσιμος"
+
+#: ../src/camel/camel-ews-store.c:1285
+msgid "Query for authentication types is not supported"
+msgstr "Το ερώτημα για τύπους πιστοποίησης δεν υποστηρίζεται"
+
+#: ../src/camel/camel-ews-store.c:1337
+#, c-format
+msgid "No such folder: %s"
+msgstr "Δεν υπάρχει τέτοιος φάκελος: %s"
+
+#: ../src/camel/camel-ews-store.c:1649
+msgid "Cannot list EWS public folders in offline mode"
+msgstr "Αδύνατη η λίστα δημόσιων φακέλων EWS σε κατάσταση εκτός σύνδεσης"
+
+#: ../src/camel/camel-ews-store.c:1722
+msgid "Cannot find any EWS public folders"
+msgstr "Αδύνατη η εύρεση οποιωνδήποτε δημόσιων φακέλων"
+
+#: ../src/camel/camel-ews-store.c:1827
+#, c-format
+msgid "Cannot create folder '%s', folder already exists"
+msgstr "Αδύνατη η δημιουργία του φακέλου '%s', ο φάκελος υπάρχει ήδη"
+
+#: ../src/camel/camel-ews-store.c:1842
+#, c-format
+msgid "Parent folder %s does not exist"
+msgstr "Ο γονικός φάκελος %s δεν υπάρχει"
+
+#: ../src/camel/camel-ews-store.c:1852
+#, c-format
+msgid ""
+"Cannot create folder under '%s', it is used for folders of other users only"
+msgstr ""
+"Αδύνατη η δημιουργία φακέλου κάτω από τον '%s', χρησιμοποιείται μόνο για "
+"φακέλους άλλων χρηστών"
+
+#: ../src/camel/camel-ews-store.c:1862
+#, c-format
+msgid "Cannot create folder under '%s', it is used for public folders only"
+msgstr ""
+"Αδύνατη η δημιουργία φακέλου κάτω από τον '%s', χρησιμοποιείται μόνο για "
+"δημόσιους φακέλους"
+
+#: ../src/camel/camel-ews-store.c:1931
+#, c-format
+msgid "Folder does not exist"
+msgstr "Ο φάκελος δεν υπάρχει"
+
+#: ../src/camel/camel-ews-store.c:1940
+#, c-format
+msgid "Cannot remove folder '%s', it is used for folders of other users only"
+msgstr ""
+"Αδύνατη η αφαίρεση του φακέλου '%s', χρησιμοποιείται μόνο για φακέλους άλλων "
+"χρηστών"
+
+#: ../src/camel/camel-ews-store.c:1950
+#, c-format
+msgid "Cannot remove folder '%s', it is used for public folders only"
+msgstr ""
+"Αδύνατη η αφαίρεση του φακέλου '%s', χρησιμοποιείται μόνο για δημόσιους "
+"φακέλους"
+
+#: ../src/camel/camel-ews-store.c:2058
+#, c-format
+msgid "Folder %s does not exist"
+msgstr "Ο φάκελος %s δεν υπάρχει"
+
+#: ../src/camel/camel-ews-store.c:2068
+#, c-format
+msgid "No change key record for folder %s"
+msgstr "Καμία εγγραφή κλειδιού αλλαγής για τον φάκελο %s"
+
+#: ../src/camel/camel-ews-store.c:2110
+#, c-format
+msgid "Cannot both rename and move a folder at the same time"
+msgstr "Αδύνατη η ταυτόχρονη μετονομασία και μετακίνηση ενός φακέλου"
+
+#: ../src/camel/camel-ews-store.c:2146
+#, c-format
+msgid "Cannot find folder ID for parent folder %s"
+msgstr "Αδύνατη η εύρεση αναγνωριστικού φακέλου για τον γονικό φάκελο %s"
+
+#: ../src/camel/camel-ews-store.c:2196 ../src/camel/camel-ews-transport.c:69
+#, c-format
+msgid "Exchange server %s"
+msgstr "Εξυπηρετητής Exchange %s"
+
+#: ../src/camel/camel-ews-store.c:2199
+#, c-format
+msgid "Exchange service for %s on %s"
+msgstr "Υπηρεσία Exchange για τον %s σε %s"
+
+#: ../src/camel/camel-ews-store.c:2243
+#, c-format
+msgid "Could not locate Trash folder"
+msgstr "Αδύνατος ο εντοπισμός του φακέλου απορριμμάτων"
+
+#: ../src/camel/camel-ews-store.c:2278
+#, c-format
+msgid "Could not locate Junk folder"
+msgstr "Αδύνατος ο εντοπισμός του φακέλου ανεπιθύμητων"
+
+#: ../src/camel/camel-ews-store.c:2468
+msgid "Cannot subscribe EWS folders in offline mode"
+msgstr "Αδύνατη η εγγραφή σε φακέλους EWS σε λειτουργία χωρίς σύνδεση"
+
+#: ../src/camel/camel-ews-store.c:2491
+#, c-format
+msgid "Cannot subscribe folder '%s', no public folder available"
+msgstr ""
+"Αδύνατη η εγγραφή σε φάκελο '%s', δεν υπάρχει διαθέσιμος δημόσιος φάκελος"
+
+#: ../src/camel/camel-ews-store.c:2501
+#, c-format
+msgid "Cannot subscribe folder '%s', folder not found"
+msgstr "Αδύνατη η εγγραφή σε φάκελο '%s', ο φάκελος δεν βρέθηκε"
+
+#: ../src/camel/camel-ews-store.c:2592
+msgid "Cannot unsubscribe EWS folders in offline mode"
+msgstr "Αδύνατη η απεγγραφή φακέλων EWS σε κατάσταση χωρίς σύνδεση"
+
+#: ../src/camel/camel-ews-store.c:2709
+#, c-format
+msgid "You must be working online to complete this operation"
+msgstr ""
+"Πρέπει να είστε συνδεμένοι στο δίκτυο για να ολοκληρωθεί αυτή η διαδικασία"
+
+#: ../src/camel/camel-ews-store.c:2753
+#| msgid "Retrieving \"Out of Office\" settings"
+msgid "Unsetting the \"Out of Office\" status"
+msgstr "Αναίρεση κατάστασης \"Εκτός γραφείου\""
+
+#: ../src/camel/camel-ews-transport.c:72
+#, c-format
+msgid "Exchange mail delivery via %s"
+msgstr "Παράδοση μηνυμάτων Exchange μέσω %s"
+
+#: ../src/camel/camel-ews-transport.c:119
+msgid "Cannot send message with no From address"
+msgstr "Αδύνατη η αποστολή μηνύματος χωρίς διεύθυνση αποστολέα"
+
+#: ../src/camel/camel-ews-transport.c:125
+msgid "Exchange server cannot send message with multiple From addresses"
+msgstr ""
+"Ο εξυπηρετητής Exchange δεν μπορεί να στείλει μήνυμα με πολλαπλές "
+"διευθύνσεις αποστολέα"
+
+#: ../src/camel/camel-ews-transport.c:136
+msgid "Failed to read From address"
+msgstr "Αποτυχία ανάγνωσης διεύθυνσης αποστολέα"
+
+#: ../src/camel/camel-ews-transport.c:148
+#, c-format
+msgid ""
+"Exchange server cannot send message as '%s', when the account was configured "
+"for address '%s'"
+msgstr ""
+"Ο εξυπηρετητής Exchange δεν μπορεί να στείλει μήνυμα ως '%s', όταν ο "
+"λογαριασμός ρυθμίστηκε για τη διεύθυνση'%s'"
+
+#: ../src/camel/camel-ews-transport.c:162
+#, c-format
+msgid "Service not connected"
+msgstr "Ασύνδετη υπηρεσία"
+
+#: ../src/collection/e-ews-backend.c:428
+#: ../src/configuration/e-mail-config-ews-gal.c:274
+msgid "Global Address List"
+msgstr "Καθολική λίστα διευθύνσεων"
+
+#: ../src/collection/e-ews-backend.c:813
+#, c-format
+msgid "Could not determine a suitable folder class for a new folder named '%s'"
+msgstr ""
+"Αδύνατος ο προσδιορισμός μιας κατάλληλης κλάσης φακέλου για έναν νέο φάκελο "
+"με όνομα '%s'"
+
+#: ../src/collection/e-ews-backend.c:902
+#, c-format
+msgid "Data source '%s' does not represent an Exchange Web Services folder"
+msgstr ""
+"Τα πηγαία δεδομένα '%s' δεν αντιπροσωπεύουν έναν φάκελο υπηρεσιών ιστού "
+"Exchange"
+
+#: ../src/configuration/e-ews-config-utils.c:516
+#, c-format
+msgid "Cannot edit permissions of folder '%s', choose other folder."
+msgstr "Αδύνατη η επεξεργασία αδειών του φακέλου '%s', επιλέξτε άλλον φάκελο."
+
+#: ../src/configuration/e-ews-config-utils.c:594
+msgid "Subscribe to folder of other user..."
+msgstr "Εγγραφείτε στον φάκελο του άλλου χρήστη..."
+
+#: ../src/configuration/e-ews-config-utils.c:603
+#: ../src/configuration/e-ews-config-utils.c:884
+#: ../src/configuration/e-ews-config-utils.c:915
+#: ../src/configuration/e-ews-config-utils.c:946
+#: ../src/configuration/e-ews-config-utils.c:977
+msgid "Permissions..."
+msgstr "Δικαιώματα..."
+
+#: ../src/configuration/e-ews-config-utils.c:605
+msgid "Edit EWS folder permissions"
+msgstr "Επεξεργασία των δικαιωμάτων φακέλου EWS"
+
+#: ../src/configuration/e-ews-config-utils.c:886
+msgid "Edit EWS calendar permissions"
+msgstr "Επεξεργασία των δικαιωμάτων ημερολογίου EWS"
+
+#: ../src/configuration/e-ews-config-utils.c:917
+msgid "Edit EWS tasks permissions"
+msgstr "Επεξεργασία των δικαιωμάτων εργασιών EWS"
+
+#: ../src/configuration/e-ews-config-utils.c:948
+msgid "Edit EWS memos permissions"
+msgstr "Επεξεργασία των δικαιωμάτων υπενθυμίσεων EWS"
+
+#: ../src/configuration/e-ews-config-utils.c:979
+msgid "Edit EWS contacts permissions"
+msgstr "Επεξεργασία των δικαιωμάτων επαφών EWS"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:87
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:499
+msgctxt "PermissionsLevel"
+msgid "None"
+msgstr "Κανένα"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:88
+msgctxt "PermissionsLevel"
+msgid "Owner"
+msgstr "Κάτοχος"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:98
+msgctxt "PermissionsLevel"
+msgid "Publishing Editor"
+msgstr "Επεξεργαστής δημοσιεύσεων"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:107
+msgctxt "PermissionsLevel"
+msgid "Editor"
+msgstr "Συντάκτης"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:115
+msgctxt "PermissionsLevel"
+msgid "Publishing Author"
+msgstr "Συντάκτης δημοσιεύσεων"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:122
+msgctxt "PermissionsLevel"
+msgid "Author"
+msgstr "Συντάκτης"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:128
+msgctxt "PermissionsLevel"
+msgid "Nonediting Author"
+msgstr "Συντάκτης χωρίς δικαιώματα επεξεργασίας"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:133
+msgctxt "PermissionsLevel"
+msgid "Reviewer"
+msgstr "Διορθωτής"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:136
+msgctxt "PermissionsLevel"
+msgid "Contributor"
+msgstr "Συντελεστής"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:139
+msgctxt "PermissionsLevel"
+msgid "Free/Busy time"
+msgstr "Διαθεσιμότητα"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:141
+msgctxt "PermissionsLevel"
+msgid "Free/Busy time, subject, location"
+msgstr "διαθεσιμότητα, θέμα, τοποθεσία"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:143
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:520
+msgctxt "PermissionsLevel"
+msgid "Custom"
+msgstr "Προσαρμογή"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:267
+msgid "Writing folder permissions, please wait..."
+msgstr "Εγγραφή δικαιωμάτων φακέλου, παρακαλούμε περιμένετε..."
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:759
+msgctxt "User"
+msgid "Anonymous"
+msgstr "Ανώνυμος"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:762
+msgctxt "User"
+msgid "Default"
+msgstr "Προεπιλεγμένος"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:768
+msgctxt "User"
+msgid "Unknown"
+msgstr "Άγνωστος"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:849
+#: ../src/configuration/e-ews-search-user.c:430
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1075
+msgid "Name"
+msgstr "Όνομα"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:855
+msgid "Permission level"
+msgstr "Επίπεδο δικαιωμάτων"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:907
+msgid "Edit EWS folder permissions..."
+msgstr "Επεξεργασία των δικαιωμάτων φακέλου EWS..."
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:932
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:635
+msgid "Account:"
+msgstr "Λογαριασμός:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:960
+msgid "Folder name:"
+msgstr "Όνομα φακέλου:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:983
+msgid "Folder ID:"
+msgstr "Αναγνωριστικό φακέλου:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1047
+msgid "Permissions"
+msgstr "Δικαιώματα"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1069
+msgid "Permi_ssion level:"
+msgstr "Ε_πίπεδο δικαιωμάτων:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1103
+msgctxt "Permissions"
+msgid "Read"
+msgstr "Ανάγνωση"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1115
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1182
+msgctxt "Permissions"
+msgid "None"
+msgstr "Καμία"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1121
+msgctxt "Permissions"
+msgid "Free/Busy time"
+msgstr "Διαθεσιμότητα"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1126
+msgctxt "Permissions"
+msgid "Free/Busy time, subject, location"
+msgstr "Διαθεσιμότητα, θέμα, τοποθεσία"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1132
+msgctxt "Permissions"
+msgid "Full Details"
+msgstr "Πλήρεις λεπτομέρειες"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1138
+msgctxt "Permissions"
+msgid "Write"
+msgstr "Εγγραφή"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1150
+msgctxt "Permissions"
+msgid "Create items"
+msgstr "Δημιουργία στοιχείων"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1154
+msgctxt "Permissions"
+msgid "Create subfolders"
+msgstr "Δημιουργία υποφακέλων"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1158
+msgctxt "Permissions"
+msgid "Edit own"
+msgstr "Επεξεργασία ιδιοκτησιών"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1162
+msgctxt "Permissions"
+msgid "Edit all"
+msgstr "Επεξεργασία όλων"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1170
+msgctxt "Permissions"
+msgid "Delete items"
+msgstr "Διαγραφή στοιχείων"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1187
+msgctxt "Permissions"
+msgid "Own"
+msgstr "Ιδιοκτησία"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1192
+msgctxt "Permissions"
+msgid "All"
+msgstr "Όλα"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1198
+msgctxt "Permissions"
+msgid "Other"
+msgstr "Άλλα"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1210
+msgctxt "Permissions"
+msgid "Folder owner"
+msgstr "Ιδιοκτήτης φακέλου"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1214
+msgctxt "Permissions"
+msgid "Folder contact"
+msgstr "Επαφή φακέλου"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1218
+msgctxt "Permissions"
+msgid "Folder visible"
+msgstr "Ορατός Φάκελος"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1291
+msgid "Reading folder permissions, please wait..."
+msgstr "Ανάγνωση δικαιωμάτων φακέλου, παρακαλούμε περιμένετε..."
+
+#: ../src/configuration/e-ews-ooo-notificator.c:186
+msgid "Unset on Server"
+msgstr "Αναίρεση στον εξυπηρετητή"
+
+#: ../src/configuration/e-ews-ooo-notificator.c:187
+#| msgid "Retrieving \"Out of Office\" settings"
+msgid "Unset the \"Out of Office\" status"
+msgstr "Αναίρεση κατάστασης \"Εκτός γραφείου\""
+
+#: ../src/configuration/e-ews-search-user.c:208
+#, c-format
+msgid "No users found, only one contact"
+msgid_plural "No users found, only %d contacts"
+msgstr[0] "Δεν βρέθηκαν χρήστες, μόνο μία επαφή"
+msgstr[1] "Δεν βρέθηκαν χρήστες, μόνο %d επαφές"
+
+#: ../src/configuration/e-ews-search-user.c:213
+msgid "No users found"
+msgstr "Δε βρέθηκαν χρήστες"
+
+#: ../src/configuration/e-ews-search-user.c:217
+#, c-format
+msgid "Found one user"
+msgid_plural "Found %d users"
+msgstr[0] "Βρέθηκε ένας χρήστης"
+msgstr[1] "Βρέθηκαν %d χρήστες"
+
+#: ../src/configuration/e-ews-search-user.c:223
+#, c-format
+msgid "Found more than 100 users, but showing only first %d"
+msgid_plural "Found more than 100 users, but showing only first %d"
+msgstr[0] ""
+"Βρέθηκαν περισσότεροι από 100 χρήστες, αλλά εμφανίζονται μόνο ο πρώτος %d"
+msgstr[1] ""
+"Βρέθηκαν περισσότεροι από 100 χρήστες, αλλά εμφανίζονται μόνο οι πρώτοι %d"
+
+#: ../src/configuration/e-ews-search-user.c:356
+#: ../src/configuration/e-ews-search-user.c:539
+msgid "Search for a user"
+msgstr "Αναζήτηση χρήστη"
+
+#: ../src/configuration/e-ews-search-user.c:436
+msgid "E-mail"
+msgstr "Ηλεκτρονική διεύθυνση"
+
+#: ../src/configuration/e-ews-search-user.c:473
+msgid "Choose EWS user..."
+msgstr "Επιλέξτε χρήστη EWS..."
+
+#: ../src/configuration/e-ews-search-user.c:496
+msgid "_Search:"
+msgstr "_Αναζήτηση:"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
+#: ../src/server/e-ews-folder.c:632
+#, c-format
+msgid "Cannot add folder, folder already exists as '%s'"
+msgstr "Αδύνατη η προσθήκη φακέλου, ο φάκελος υπάρχει ήδη ως '%s'"
+
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. * Example result: "Mailbox - John Smith"
+#.
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:107
+#, c-format
+msgctxt "ForeignFolder"
+msgid "Mailbox - %s"
+msgstr "Γραμματοκιβώτιο του - %s"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:272
+msgid "Cannot test foreign folder availability while in offline mode"
+msgstr ""
+"Αδύνατη η δοκιμή διαθεσιμότητας ξένου φακέλου όσο είναι σε κατάσταση χωρίς "
+"σύνδεση"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:297
+#, c-format
+msgid "User '%s' was not found on the server"
+msgstr "Ο χρήστης '%s' δεν βρέθηκε στον εξυπηρετητή"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:333
+#, c-format
+msgid "User name '%s' is ambiguous, specify it more precisely, please"
+msgstr ""
+"Το όνομα χρήστη '%s' είναι ασαφές, ορίστε το με περισσότερη ακρίβεια, "
+"παρακαλούμε"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:355
+#, c-format
+msgid ""
+"Folder '%s' not found. Either it does not exist or you do not have "
+"permission to access it."
+msgstr ""
+"Ο φάκελος '%s' δεν βρέθηκε. Είτε δεν υπάρχει ή δεν έχετε το δικαίωμα "
+"πρόσβασης του."
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:373
+msgid "Cannot add folder, cannot determine folder's type"
+msgstr ""
+"Αδύνατη η προσθήκη φακέλου, δεν μπορεί να προσδιοριστεί ο τύπος του φακέλου"
+
+#. Translators: This is used to name foreign folder.
+#. * The first '%s' is replaced with user name to whom the folder belongs,
+#. * the second '%s' is replaced with folder name.
+#. * Example result: "John Smith - Calendar"
+#.
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:418
+#, c-format
+msgctxt "ForeignFolder"
+msgid "%s - %s"
+msgstr "%s - %s"
+
+#. convert well-known names to their non-localized form
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:512
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:720
+msgid "Inbox"
+msgstr "Εισερχόμενα"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:514
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
+msgid "Contacts"
+msgstr "Επαφές"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:516
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:722
+msgid "Calendar"
+msgstr "Ημερολόγιο"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:518
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:723
+msgid "Memos"
+msgstr "Υπενθυμίσεις"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:520
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:724
+msgid "Tasks"
+msgstr "Εργασίες"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:537
+#, c-format
+msgid "Testing availability of folder '%s' of user '%s', please wait..."
+msgstr ""
+"Έλεγχος διαθεσιμότητας του φακέλου '%s' του χρήστη '%s', παρακαλούμε "
+"περιμένετε..."
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:614
+msgid "Subscribe to folder of other EWS user..."
+msgstr "Εγγραφείτε στον φάκελο του άλλου χρήστη EWS..."
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:665
+msgid "User"
+msgstr "Χρήστης"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:672
+msgid "_User:"
+msgstr "_Χρήστης:"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:687
+msgid "C_hoose..."
+msgstr "Επι_λογή..."
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:703
+msgid "_Folder name:"
+msgstr "Όνομα _φακέλου:"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:733
+msgid "Include _subfolders"
+msgstr "_Να περιλαμβάνονται οι υποφάκελοι"
+
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:129
+msgid "Querying Autodiscover service"
+msgstr "Ερώτημα υπηρεσίας αυτόματης εύρεσης"
+
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:212
+msgid "Fetch _URL"
+msgstr "Προσκόμιση _URL"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:140
+msgid "Configuration"
+msgstr "Διαμόρφωση"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:158
+msgid "User_name:"
+msgstr "Ό_νομα χρήστη:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:172
+msgid "_Host URL:"
+msgstr "_Οικοδεσπότης URL:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:191
+msgid "OAB U_RL:"
+msgstr "OAB U_RL:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:205
+msgid "Open _Mailbox of other user"
+msgstr "Άνοιγμα _γραμματοκιβωτίου του άλλου χρήστη"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:239
+msgid "S_earch..."
+msgstr "­Α_ναζήτηση..."
+
+#: ../src/configuration/e-mail-config-ews-backend.c:250
+msgid "Authentication"
+msgstr "Πιστοποίηση"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:500
+msgctxt "PermissionsLevel"
+msgid "Reviewer (can read items)"
+msgstr "Αναθεωρητής (μπορεί να διαβάσει στοιχεία)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:501
+msgctxt "PermissionsLevel"
+msgid "Author (can read and create items)"
+msgstr "Συντάκτης (μπορεί να διαβάσει και να δημιουργήσει στοιχεία)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:502
+msgctxt "PermissionsLevel"
+msgid "Editor (can read, create and modify items)"
+msgstr ""
+"Επεξεργαστής (μπορεί να διαβάσει, να δημιουργήσει και να τροποποιήσει "
+"στοιχεία)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:605
+msgid "Delegate permissions"
+msgstr "Δικαιώματα αντιπροσώπου"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:623
+msgid "C_alendar"
+msgstr "Η_μερολόγιο"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:626
+msgid "_Delegate receives copies of meeting-related messages sent to me"
+msgstr ""
+"Ο _αντιπρόσωπος δέχεται αντίγραφα της συγκέντρωσης - σχετικά μηνύματα "
+"στάλθηκαν σε μένα"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:631
+msgid "_Tasks"
+msgstr "_Εργασίες"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:634
+msgid "_Inbox"
+msgstr "Ε_ισερχόμενα"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:637
+msgid "C_ontacts"
+msgstr "Επα_φές"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:640
+msgid "_Notes"
+msgstr "_Σημειώσεις"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:643
+msgid "_Journal"
+msgstr "Ημε_ρολόγιο"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:646
+#, c-format
+msgid "Delegate '%s' has the following permissions"
+msgstr "Ο αντιπρόσωπος '%s' έχει τα ακόλουθα δικαιώματα"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:664
+msgid "Delegate can see my _private items"
+msgstr "Ο αντιπρόσωπος μπορεί να δει τα _ιδιωτικά μου στοιχεία"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:987
+msgid "Retrieving current user permissions, please wait..."
+msgstr "Ανάκτηση τρεχόντων δικαιωμάτων χρήστη, παρακαλούμε περιμένετε..."
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1108
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1638
+msgid "Delegates"
+msgstr "Αντιπρόσωποι"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1132
+msgid ""
+"Delegates can send items on your behalf, including creating and responding "
+"to meeting requests. If you want to grant folder permissions without giving "
+"send-on-behalf-of permissions, close this dialog box, right-click the "
+"folder, click Permissions and change the options there."
+msgstr ""
+"Οι αντιπρόσωποι μπορούν να στείλουν στοιχεία για λογαριασμό σας, "
+"συμπεριλαμβανόμενης της δημιουργίας και απάντησης σε αιτήματα συγκέντρωσης. "
+"Αν θέλετε να παραχωρήσετε δικαιώματα φακέλου χωρίς να δώσετε δικαιώματα "
+"αποστολής ως αντιπροσώπου, κλείστε αυτό το πλαίσιο διαλόγου, δεξιοπατήστε "
+"τον φάκελο, πατήστε δικαιώματα και αλλάξτε τις επιλογές εκεί."
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1181
+msgid ""
+"Deliver meeting requests addressed to me and responses to meeting requests "
+"where I am the organizer to:"
+msgstr ""
+"Η παράδοση αιτημάτων συγκέντρωσης που απευθύνονται σε μένα και απαντήσεις σε "
+"αιτήματα συγκέντρωσης όπου είμαι ο οργανωτής:"
+
+#. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1190
+msgid ""
+"My delegates only, but _send a copy of meeting requests\n"
+"and responses to me (recommended)"
+msgstr ""
+"Οι αντιπρόσωποι μου μόνο, αλλά η _αποστολή ενός αντιγράφου αιτημάτων "
+"συγκέντρωσης\n"
+"και απαντήσεις σε μένα (συνιστάται)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1197
+msgid "My d_elegates only"
+msgstr "Μόνο οι α_ντιπρόσωποι μου"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1204
+msgid "My delegates a_nd me"
+msgstr "Οι αντιπρόσωποι μου _και εγώ"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1713
+msgid "Retrieving \"Delegates\" settings"
+msgstr "Ανάκτηση ρυθμίσεων \"Αντιπροσώπων\""
+
+#: ../src/configuration/e-mail-config-ews-gal.c:221
+msgid "Locating offline address books"
+msgstr "Εντοπισμός βιβλίων διευθύνσεων χωρίς σύνδεση"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:301
+msgid "Cache o_ffline address book"
+msgstr "Απόκρυψη βιβλίου διευθύνσεων _εκτός σύνδεσης"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:327
+msgid "Select ad_dress list:"
+msgstr "Επιλογή λίστας _διεύθυνσης:"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:351
+msgid "Fetch List"
+msgstr "Προσκόμιση λίστας"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:444
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:923
+msgid "Out of Office"
+msgstr "Εκτός γραφείου"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:460
+msgid ""
+"The messages specified below will be automatically sent to each internal and "
+"external person who sends a mail to you."
+msgstr ""
+"Τα παρακάτω συγκεκριμένα μηνύματα θα αποσταλούν αυτόματα σε κάθε εσωτερικό "
+"και εξωτερικό άτομο που στέλνει ένα μήνυμα σε σας."
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:468
+msgid "Do _not send Out of Office replies"
+msgstr "Μην _στέλνετε απαντήσεις εκτός γραφείου"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:476
+msgid "_Send Out of Office replies"
+msgstr "Να _στέλνετε απαντήσεις εκτός γραφείου"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:484
+msgid "Send Out of Office replies only _during this time period:"
+msgstr ""
+"Να στέλνετε απαντήσεις εκτός γραφείου μόνο κατά τη _διάρκεια αυτού του "
+"χρόνου:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:504
+msgid "_From:"
+msgstr "Α_πό:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:529
+msgid "_To:"
+msgstr "Πρ_ος:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:554
+msgid "I_nternal:"
+msgstr "Ε_σωτερικός:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:563
+msgid "Message to be sent within the organization"
+msgstr "Αποστολή μηνύματος μες τον οργανισμό"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:590
+msgid "E_xternal:"
+msgstr "Ε_ξωτερικός:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:598
+msgid "Message to be sent outside the organization"
+msgstr "Αποστολή μηνύματος έξω από τον οργανισμό"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:608
+msgid "Do not reply to senders outside the organization"
+msgstr "Χωρίς απαντήσεις για αποστολείς έξω από τον οργανισμό"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:611
+msgid "Reply only to known senders outside the organization"
+msgstr "Απάντηση μόνο σε γνωστούς αποστολείς έξω από τον οργανισμό"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:614
+msgid "Reply to any sender outside the organization"
+msgstr "Απάντηση σε οποιονδήποτε αποστολέα έξω από τον οργανισμό"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:999
+msgid "Retrieving \"Out of Office\" settings"
+msgstr "Ανάκτηση ρυθμίσεων \"Εκτός γραφείου\""
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:1
+msgid "Autodiscovery query failed."
+msgstr "Αποτυχία ερωτήματος αυτόματης εύρεσης."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:2
+msgid "The reported error was &quot;{0}&quot;."
+msgstr "Το σφάλμα που αναφέρθηκε ήταν &quot;{0}&quot;."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:3
+msgid "Failed to locate offline address books."
+msgstr "Αποτυχία εντοπισμού βιβλίων διευθύνσεων χωρίς σύνδεση."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:4
+msgid "Failed to retrieve &quot;Out of Office&quot; settings."
+msgstr "Αποτυχία ανάκτησης ρυθμίσεων &quot;Εκτός γραφείου&quot;."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:5
+msgid "Failed to retrieve &quot;Delegates&quot; settings."
+msgstr "Αποτυχία ανάκτησης ρυθμίσεων &quot;Αντιπροσώπων&quot;."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:6
+msgid "Your Exchange account \"{0}\" has the status set as \"Out of Office\"."
+msgstr ""
+"Ο λογαριασμός Exchange \"{0}\" έχει την κατάσταση ορισμένη ως \"Εκτός "
+"γραφείου\"."
+
+#: ../src/server/e-ews-connection.c:493
+msgid "Operation Cancelled"
+msgstr "Ακύρωση λειτουργίας"
+
+#: ../src/server/e-ews-connection.c:562
+msgid "Authentication failed"
+msgstr "Αποτυχία πιστοποίησης"
+
+#: ../src/server/e-ews-connection.c:573
+#, c-format
+msgid "No response: %s"
+msgstr "Χωρίς απάντηση: %s"
+
+#: ../src/server/e-ews-connection.c:1880
+#, c-format
+msgid "Failed to parse autodiscover response XML"
+msgstr "Αποτυχία ανάλυσης απάντησης αυτόματης εύρεσης XML"
+
+#: ../src/server/e-ews-connection.c:1887
+#, c-format
+msgid "Failed to find <Autodiscover> element"
+msgstr "Αποτυχία εύρεσης στοιχείου <Autodiscover>"
+
+#: ../src/server/e-ews-connection.c:1898
+#, c-format
+msgid "Failed to find <Response> element"
+msgstr "Αποτυχία εύρεσης στοιχείου <Response>"
+
+#: ../src/server/e-ews-connection.c:1909
+#, c-format
+msgid "Failed to find <Account> element"
+msgstr "Αποτυχία εύρεσης στοιχείου <Account>"
+
+#: ../src/server/e-ews-connection.c:1928
+#, c-format
+msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
+msgstr "Αποτυχία εύρεσης <ASUrl> και <OABUrl> σε απόκριση αυτόματης εύρεσης"
+
+#: ../src/server/e-ews-connection.c:2010
+msgid "URL cannot be NULL"
+msgstr "Το URL δεν μπορεί να είναι NULL"
+
+#: ../src/server/e-ews-connection.c:2018
+#, c-format
+msgid "URL '%s' is not valid"
+msgstr "Το URL '%s' δεν είναι έγκυρο"
+
+#: ../src/server/e-ews-connection.c:2120
+msgid "Email address is missing a domain part"
+msgstr "Στη διεύθυνση αλληλογραφίας λείπει ένα τμήμα τομέα"
+
+#: ../src/server/e-ews-connection.c:2432
+msgid "Failed to parse oab XML"
+msgstr "Αποτυχία ανάλυσης oab XML"
+
+#: ../src/server/e-ews-connection.c:2440
+msgid "Failed to find <OAB> element\n"
+msgstr "Αποτυχία εύρεσης στοιχείου <OAB>\n"
+
+#: ../src/server/e-ews-connection.c:3612
+msgid "No items found"
+msgstr "Δε βρέθηκαν στοιχεία"
+
+#: ../src/server/e-ews-folder.c:587
+msgid "Cannot add folder, unsupported folder type"
+msgstr "Αδύνατη η προσθήκη φακέλου, ανυποστήρικτος τύπος φακέλου"
+
+#: ../src/server/e-ews-folder.c:592
+msgid "Cannot add folder, master source not found"
+msgstr "Αδύνατη η προσθήκη φακέλου, η κύρια πηγή δεν βρέθηκε"
+
+#: ../src/utils/ews-camel-common.c:187
+#, c-format
+msgid "CreateItem call failed to return ID for new message"
+msgstr ""
+"Η κλήση CreateItem απέτυχε να επιστρέψει το αναγνωριστικό για νέο μήνυμα"
