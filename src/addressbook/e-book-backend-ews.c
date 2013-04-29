@@ -783,7 +783,7 @@ convert_indexed_contact_property_to_updatexml (ESoapMessage *message,
 {
 	gboolean delete_field = FALSE;
 
-	if (!value || !g_strcmp0 (value, ""))
+	if (!value || g_strcmp0 (value, "") == 0)
 		delete_field = TRUE;
 	e_ews_message_start_set_indexed_item_field (message, name , prefix, "Contact", key, delete_field);
 
@@ -811,10 +811,10 @@ ebews_set_full_name_changes (EBookBackendEws *ebews,
 	if (!name && !old_name)
 		return;
 
-	if (g_ascii_strcasecmp (name->given, old_name->given))
+	if (g_strcmp0 (name->given, old_name->given) != 0)
 		convert_contact_property_to_updatexml (message, "GivenName", name->given, "contacts", NULL, NULL);
 
-	if (g_ascii_strcasecmp (name->additional, old_name->additional))
+	if (g_strcmp0 (name->additional, old_name->additional) != 0)
 		convert_contact_property_to_updatexml (message, "MiddleName", name->additional, "contacts", NULL, NULL);
 
 	e_contact_name_free (name);
@@ -993,13 +993,12 @@ ebews_set_phone_number_changes (EBookBackendEws *ebews,
 	for (i = 0; i < G_N_ELEMENTS (phone_field_map); i++) {
 		new_value = e_contact_get (new, phone_field_map[i].field);
 		old_value = e_contact_get (old, phone_field_map[i].field);
-		if ((new_value && !old_value) || (!new_value && old_value) ||(new_value && old_value && g_ascii_strcasecmp (new_value, old_value)))
-			convert_indexed_contact_property_to_updatexml (message, "PhoneNumber", new_value, "contacts", "PhoneNumbers", phone_field_map[i].element);
-		if (new_value)
-			g_free (new_value);
 
-		if (old_value)
-			g_free (old_value);
+		if (g_strcmp0 (new_value, old_value) != 0)
+			convert_indexed_contact_property_to_updatexml (message, "PhoneNumber", new_value, "contacts", "PhoneNumbers", phone_field_map[i].element);
+
+		g_free (new_value);
+		g_free (old_value);
 	}
 }
 
@@ -1015,7 +1014,7 @@ convert_indexed_contact_property_to_updatexml_physical_address (ESoapMessage *me
 	gchar * fielduri = NULL;
 	gboolean delete_field = FALSE;
 
-	if (!value || !g_strcmp0 (value, ""))
+	if (!value || g_strcmp0 (value, "") == 0)
 		delete_field = TRUE;
 
 	fielduri = g_strconcat (name, ":", uri_element, NULL);
@@ -1061,13 +1060,13 @@ compare_address (ESoapMessage *message,
 		new_address = g_new0 (EContactAddress, 1);
 	}
 
-	if (set || g_ascii_strcasecmp (new_address->street, old_address->street))
+	if (set || g_strcmp0 (new_address->street, old_address->street) != 0)
 		convert_indexed_contact_property_to_updatexml_physical_address (message, "PhysicalAddress", "Street", new_address->street, "contacts", "PhysicalAddresses", key);
-	if (set || g_ascii_strcasecmp (new_address->locality, old_address->locality))
+	if (set || g_strcmp0 (new_address->locality, old_address->locality) != 0)
 		convert_indexed_contact_property_to_updatexml_physical_address (message, "PhysicalAddress", "City", new_address->locality, "contacts", "PhysicalAddresses", key);
-	if (set || g_ascii_strcasecmp (new_address->region, old_address->region))
+	if (set || g_strcmp0 (new_address->region, old_address->region) != 0)
 		convert_indexed_contact_property_to_updatexml_physical_address (message, "PhysicalAddress", "State", new_address->region, "contacts", "PhysicalAddresses", key);
-	if (set || g_ascii_strcasecmp (new_address->code, old_address->code))
+	if (set || g_strcmp0 (new_address->code, old_address->code) != 0)
 		convert_indexed_contact_property_to_updatexml_physical_address (message, "PhysicalAddress", "PostalCode", new_address->code, "contacts", "PhysicalAddresses", key);
 
 	e_contact_address_free (old_address);
@@ -1111,7 +1110,7 @@ ebews_set_notes_changes (EBookBackendEws *ebews,
 	old_notes = e_contact_get (old, E_CONTACT_NOTE);
 	new_notes = e_contact_get (new, E_CONTACT_NOTE);
 
-	if (g_strcmp0 (old_notes, new_notes)) {
+	if (g_strcmp0 (old_notes, new_notes) != 0) {
 		convert_contact_property_to_updatexml (
 				message, "Body", new_notes ?: "", "item", "BodyType", "Text");
 	}
@@ -1132,30 +1131,24 @@ ebews_set_email_changes (EBookBackendEws *ebews,
 
 	new_value = e_contact_get (new, E_CONTACT_EMAIL_1);
 	old_value = e_contact_get (old, E_CONTACT_EMAIL_1);
-	if ((new_value && !old_value) || (!new_value && old_value) ||(new_value && old_value && g_ascii_strcasecmp (new_value, old_value)))
+	if (g_strcmp0 (new_value, old_value) != 0)
 		convert_indexed_contact_property_to_updatexml (message, "EmailAddress", new_value, "contacts", "EmailAddresses", "EmailAddress1");
-	if (new_value)
-		g_free (new_value);
-	if (old_value)
-		g_free (old_value);
+	g_free (new_value);
+	g_free (old_value);
 
 	new_value = e_contact_get (new, E_CONTACT_EMAIL_2);
 	old_value = e_contact_get (old, E_CONTACT_EMAIL_2);
-	if ((new_value && !old_value) || (!new_value && old_value) ||(new_value && old_value && g_ascii_strcasecmp (new_value, old_value)))
+	if (g_strcmp0 (new_value, old_value) != 0)
 		convert_indexed_contact_property_to_updatexml (message, "EmailAddress", new_value, "contacts", "EmailAddresses", "EmailAddress2");
-	if (new_value)
-		g_free (new_value);
-	if (old_value)
-		g_free (old_value);
+	g_free (new_value);
+	g_free (old_value);
 
 	new_value = e_contact_get (new, E_CONTACT_EMAIL_3);
 	old_value = e_contact_get (old, E_CONTACT_EMAIL_3);
-	if ((new_value && !old_value) || (!new_value && old_value) ||(new_value && old_value && g_ascii_strcasecmp (new_value, old_value)))
+	if (g_strcmp0 (new_value, old_value) != 0)
 		convert_indexed_contact_property_to_updatexml (message, "EmailAddress", new_value, "contacts", "EmailAddresses", "EmailAddress3");
-	if (new_value)
-		g_free (new_value);
-	if (old_value)
-		g_free (old_value);
+	g_free (new_value);
+	g_free (old_value);
 }
 
 static const struct field_element_mapping {
@@ -1586,7 +1579,7 @@ convert_contact_to_updatexml (ESoapMessage *msg,
 		if (element_type == ELEMENT_TYPE_SIMPLE)  {
 			value =  e_contact_get (new_contact, mappings[i].field_id);
 			old_value =  e_contact_get (old_contact, mappings[i].field_id);
-			if ((value && !old_value) || (!value && old_value) ||(value && old_value && g_ascii_strcasecmp (value, old_value)))
+			if (g_strcmp0 (value, old_value) != 0)
 				convert_contact_property_to_updatexml (msg, mappings[i].element_name, value, "contacts", NULL, NULL);
 			if (value)
 				g_free (value);
