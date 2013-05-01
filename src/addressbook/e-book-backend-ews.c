@@ -2039,14 +2039,15 @@ ews_gal_needs_update (EBookBackendEws *cbews,
 		return FALSE;
 
 	tmp = e_book_backend_sqlitedb_get_key_value (priv->summary, priv->folder_id, "seq", error);
-	if (error)
+	if (!tmp)
 		goto exit;
 
 	sscanf (tmp, "%"G_GUINT32_FORMAT, &seq);
 	if (seq < full->seq)
 		ret = TRUE;
 
-	d (printf ("Gal needs update: %d \n", ret);)
+	d (printf ("Gal needs update: %d (local: %d, remote: %d)\n",
+		   ret, seq, full->seq);)
 exit:
 	g_free (tmp);
 	return ret;
