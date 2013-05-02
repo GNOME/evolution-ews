@@ -1445,6 +1445,14 @@ e_ews_item_mailbox_from_soap_param (ESoapParameter *param)
 	if (subparam)
 		mb->mailbox_type = e_soap_parameter_get_string_value (subparam);
 
+	subparam = e_soap_parameter_get_first_child_by_name (param, "ItemId");
+	if (subparam) {
+		EwsId *id = g_new0 (EwsId, 1);
+		id->id = e_soap_parameter_get_property (subparam, "Id");
+		id->change_key = e_soap_parameter_get_property (subparam, "ChangeKey");
+		mb->item_id = id;
+	}
+
 	if (!mb->email && !mb->name) {
 		e_ews_mailbox_free (mb);
 		mb = NULL;

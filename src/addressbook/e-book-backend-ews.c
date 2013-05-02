@@ -1228,6 +1228,61 @@ typedef struct {
 } EwsCreateContact;
 
 static void
+ews_write_dl_members (ESoapMessage *msg,
+		      EContact *contact)
+{
+	GSList *emails, *l;
+
+	e_soap_message_start_element (msg, "Members", NULL, NULL);
+
+	emails = e_contact_get (contact, E_CONTACT_EMAIL);
+	for (l = emails; l; l = l->next) {
+		CamelInternetAddress *addr;
+
+		if (l->data == NULL)
+			continue;
+
+		addr = camel_internet_address_new ();
+		if (camel_address_decode (CAMEL_ADDRESS (addr), l->data) > 0) {
+			const gchar *name = NULL, *email = NULL;
+
+			if (camel_internet_address_get (addr, 0, &name, &email) && email) {
+				e_soap_message_start_element (msg, "Member", NULL, NULL);
+				e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
+				e_ews_message_write_string_parameter (msg, "Name", NULL, name ? : email);
+				e_ews_message_write_string_parameter (msg, "EmailAddress", NULL, email);
+				e_soap_message_end_element (msg); /* Mailbox */
+				e_soap_message_end_element (msg); /* Member */
+			}
+		}
+		g_object_unref (addr);
+	}
+
+	g_slist_free_full (emails, g_free);
+	e_soap_message_end_element (msg); /* Members */
+}
+
+static void
+convert_dl_to_xml (ESoapMessage *msg,
+		   gpointer user_data)
+{
+	EContact *contact = user_data;
+	EVCardAttribute *attribute;
+	GList *values;
+
+	/* Prepare DistributionList node in the SOAP message */
+	e_soap_message_start_element (msg, "DistributionList", NULL, NULL);
+
+	attribute = e_vcard_get_attribute (E_VCARD (contact), EVC_FN);
+	values = e_vcard_attribute_get_values (attribute);
+	e_ews_message_write_string_parameter (msg, "DisplayName", NULL, values->data);
+
+	ews_write_dl_members (msg, contact);
+
+	e_soap_message_end_element (msg); /* DistributionList */
+}
+
+static void
 convert_contact_to_xml (ESoapMessage *msg,
                         gpointer user_data)
 {
@@ -1341,6 +1396,7 @@ e_book_backend_ews_create_contacts (EBookBackend *backend,
 	EwsFolderId *fid;
 	EBookBackendEwsPrivate *priv;
 	GError *error = NULL;
+	gboolean is_dl = FALSE;
 
 	if (vcards->next != NULL) {
 		e_data_book_respond_create_contacts (
@@ -1378,9 +1434,18 @@ e_book_backend_ews_create_contacts (EBookBackend *backend,
 	contact = e_contact_new_from_vcard (vcards->data);
 
 	if (e_contact_get (contact, E_CONTACT_IS_LIST)) {
-		g_object_unref (contact);
-		e_data_book_respond_create_contacts (book, opid, EDB_ERROR (NOT_SUPPORTED), NULL);
-		return;
+		if (!e_ews_connection_satisfies_server_version (ebews->priv->cnc, E_EWS_EXCHANGE_2010)) {
+			g_object_unref (contact);
+			e_data_book_respond_create_contacts (
+				book,
+				opid,
+				EDB_ERROR_EX (
+					NOT_SUPPORTED,
+					_("Cannot save contact list, it's only supported on EWS Server 2010 or later")),
+				NULL);
+			return;
+		}
+		is_dl = TRUE;
 	}
 
 	create_contact = g_new0 (EwsCreateContact, 1);
@@ -1398,7 +1463,7 @@ e_book_backend_ews_create_contacts (EBookBackend *backend,
 		EWS_PRIORITY_MEDIUM, NULL,
 		NULL,
 		fid,
-		convert_contact_to_xml,
+		is_dl ? convert_dl_to_xml : convert_contact_to_xml,
 		contact,
 		cancellable,
 		ews_create_contact_cb,
@@ -1584,6 +1649,26 @@ ews_modify_contact_cb (GObject *object,
 }
 
 static void
+convert_dl_to_updatexml (ESoapMessage *msg,
+			 gpointer user_data)
+{
+	EwsModifyContact *modify_contact = user_data;
+	EwsId *id;
+	EContact *old_contact = modify_contact->old_contact;
+	EContact *new_contact = modify_contact->new_contact;
+
+	id = g_new0 (EwsId, 1);
+	id->id = e_contact_get (old_contact, E_CONTACT_UID);
+	id->change_key = e_contact_get (old_contact, E_CONTACT_REV);
+
+	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM, id->id, id->change_key, 0);
+	e_ews_message_start_set_item_field (msg, "Members", "distributionlist", "DistributionList");
+	ews_write_dl_members (msg, new_contact);
+	e_ews_message_end_set_item_field (msg);
+	e_ews_message_end_item_change (msg);
+}
+
+static void
 convert_contact_to_updatexml (ESoapMessage *msg,
                               gpointer user_data)
 {
@@ -1652,6 +1737,7 @@ e_book_backend_ews_modify_contacts (EBookBackend *backend,
 	EwsId *id;
 	EBookBackendEwsPrivate *priv;
 	GError *error;
+	gboolean is_dl = FALSE;
 
 	if (vcards->next != NULL) {
 		e_data_book_respond_modify_contacts (book, opid,
@@ -1690,17 +1776,26 @@ e_book_backend_ews_modify_contacts (EBookBackend *backend,
 
 	contact = e_contact_new_from_vcard (vcards->data);
 
-	id = g_new0 (EwsId, 1);
-	id->id = e_contact_get (contact, E_CONTACT_UID);
-	id->change_key = e_contact_get (contact, E_CONTACT_REV);
+	if (e_contact_get (contact, E_CONTACT_IS_LIST)) {
+		if (!e_ews_connection_satisfies_server_version (ebews->priv->cnc, E_EWS_EXCHANGE_2010)) {
+			g_object_unref (contact);
+			e_data_book_respond_create_contacts (
+				book,
+				opid,
+				EDB_ERROR_EX (
+					NOT_SUPPORTED,
+					_("Cannot save contact list, it's only supported on EWS Server 2010 or later")),
+				NULL);
+			return;
+		}
+		is_dl = TRUE;
+	}
 
 	/*get item id and change key from contact and fetch old contact and assign.*/
 
-	if (e_contact_get (contact, E_CONTACT_IS_LIST)) {
-		g_object_unref (contact);
-		e_data_book_respond_modify_contacts (book, opid, EDB_ERROR (NOT_SUPPORTED), NULL);
-		return;
-	}
+	id = g_new0 (EwsId, 1);
+	id->id = e_contact_get (contact, E_CONTACT_UID);
+	id->change_key = e_contact_get (contact, E_CONTACT_REV);
 
 	old_contact = e_book_backend_sqlitedb_get_contact (
 		priv->summary, priv->folder_id,
@@ -1721,10 +1816,14 @@ e_book_backend_ews_modify_contacts (EBookBackend *backend,
 	modify_contact->cancellable = g_object_ref (cancellable);
 
 	e_ews_connection_update_items (
-		priv->cnc, EWS_PRIORITY_MEDIUM,
-		"AlwaysOverwrite", "SendAndSaveCopy",
-		"SendToAllAndSaveCopy", priv->folder_id,
-		convert_contact_to_updatexml, modify_contact,
+		priv->cnc,
+		EWS_PRIORITY_MEDIUM,
+		"AlwaysOverwrite",
+		"SendAndSaveCopy",
+		"SendToAllAndSaveCopy",
+		priv->folder_id,
+		is_dl ? convert_dl_to_updatexml : convert_contact_to_updatexml,
+		modify_contact,
 		cancellable,
 		ews_modify_contact_cb,
 		modify_contact);
@@ -2490,6 +2589,108 @@ ebews_get_vcards_list (EBookBackendEws *ebews,
 	g_slist_free (new_items);
 }
 
+static gboolean
+ebews_traverse_dl (EBookBackendEws *ebews,
+		   EContact **contact,
+		   GHashTable *items,
+		   GHashTable *values,
+		   EwsMailbox *mb,
+		   GError **error)
+{
+	if (g_strcmp0 (mb->mailbox_type, "PrivateDL") == 0) {
+		GSList *members = NULL, *l;
+		gboolean includes_last;
+		gboolean ret;
+
+		if (!mb->item_id || !mb->item_id->id)
+			return FALSE;
+
+		if (g_hash_table_lookup (items, mb->item_id->id) != NULL)
+			return TRUE;
+
+		g_hash_table_insert (items, g_strdup (mb->item_id->id), GINT_TO_POINTER (1));
+
+		if (!e_ews_connection_expand_dl_sync (
+			ebews->priv->cnc,
+			EWS_PRIORITY_MEDIUM,
+			mb,
+			&members,
+			&includes_last,
+			ebews->priv->cancellable,
+			error))
+			return FALSE;
+
+		for (l = members; l; l = l->next) {
+			ret = ebews_traverse_dl (ebews, contact, items, values, l->data, error);
+			if (!ret)
+				break;
+		}
+
+		g_slist_free_full (members, (GDestroyNotify) e_ews_mailbox_free);
+		return ret;
+	} else {
+		EVCardAttribute *attr;
+		CamelInternetAddress *addr;
+		gchar *value = NULL;
+
+		if (mb->name == NULL && mb->email == NULL)
+			return TRUE;
+
+		addr = camel_internet_address_new ();
+		attr = e_vcard_attribute_new (NULL, EVC_EMAIL);
+
+		camel_internet_address_add (addr, mb->name, mb->email ? : "");
+		value = camel_address_encode (CAMEL_ADDRESS (addr));
+
+		if (value && g_hash_table_lookup (values, value) == NULL) {
+			e_vcard_attribute_add_value (attr, value);
+			e_vcard_add_attribute (E_VCARD (*contact), attr);
+
+			g_hash_table_insert (values, g_strdup (value), GINT_TO_POINTER (1));
+		}
+
+		g_object_unref (addr);
+
+		return TRUE;
+	}
+}
+
+static EContact *
+ebews_get_dl_info (EBookBackendEws *ebews,
+		   const EwsId *id,
+		   const gchar *d_name,
+		   GSList *members,
+		   GError **error)
+{
+	GHashTable *items, *values;
+	GSList *l;
+	EContact *contact;
+
+	contact = e_contact_new ();
+	e_contact_set (contact, E_CONTACT_UID, id->id);
+	e_contact_set (contact, E_CONTACT_REV, id->change_key);
+
+	e_contact_set (contact, E_CONTACT_IS_LIST, GINT_TO_POINTER (TRUE));
+	e_contact_set (contact, E_CONTACT_LIST_SHOW_ADDRESSES, GINT_TO_POINTER (TRUE));
+	e_contact_set (contact, E_CONTACT_FULL_NAME, d_name);
+
+	items = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+	values = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+
+	for (l = members; l != NULL; l = l->next) {
+		if (!ebews_traverse_dl (ebews, &contact, items, values, l->data, error)) {
+			g_object_unref (contact);
+			contact = NULL;
+			goto exit;
+		}
+	}
+
+exit:
+	g_hash_table_destroy (items);
+	g_hash_table_destroy (values);
+	return contact;
+}
+
 static void
 ebews_store_distribution_list_items (EBookBackendEws *ebews,
                                      const EwsId *id,
@@ -2497,43 +2698,13 @@ ebews_store_distribution_list_items (EBookBackendEws *ebews,
                                      GSList *members,
                                      GError **error)
 {
-	GSList *l;
 	EContact *contact;
-
 	g_return_if_fail (ebews->priv->summary != NULL);
 
-	contact = e_contact_new ();
-	e_contact_set (contact, E_CONTACT_UID, id->id);
-	e_contact_set (contact, E_CONTACT_REV, id->change_key);
+	contact = ebews_get_dl_info (ebews, id, d_name, members, error);
+	if (contact == NULL)
+		return;
 
-	e_contact_set (contact, E_CONTACT_IS_LIST, GINT_TO_POINTER (TRUE));
-	e_contact_set (contact, E_CONTACT_LIST_SHOW_ADDRESSES, GINT_TO_POINTER (TRUE));
-	e_contact_set (contact, E_CONTACT_FULL_NAME, d_name);
-
-	for (l = members; l != NULL; l = g_slist_next (l)) {
-		EwsMailbox *mb = (EwsMailbox *)	l->data;
-		EVCardAttribute *attr;
-
-		attr = e_vcard_attribute_new (NULL, EVC_EMAIL);
-		if (mb->name) {
-			gint len = strlen (mb->name);
-			gchar *value;
-
-			if (mb->name[0] == '\"' && mb->name[len - 1] == '\"')
-				value = g_strdup_printf ("%s <%s>", mb->name, mb->email);
-			else
-				value = g_strdup_printf ("\"%s\" <%s>", mb->name, mb->email);
-
-			e_vcard_attribute_add_value (attr, value);
-			g_free (value);
-		} else
-			e_vcard_attribute_add_value (attr, mb->email);
-
-		e_vcard_add_attribute (E_VCARD (contact), attr);
-		e_ews_mailbox_free (mb);
-	}
-
-	g_slist_free (members);
 	e_book_backend_sqlitedb_new_contact (ebews->priv->summary, ebews->priv->folder_id, contact, TRUE, error);
 	e_book_backend_notify_update (E_BOOK_BACKEND (ebews), contact);
 
@@ -2541,49 +2712,24 @@ ebews_store_distribution_list_items (EBookBackendEws *ebews,
 }
 
 static void
-ebews_vcards_append_dl (const EwsId *id,
+ebews_vcards_append_dl (EBookBackendEws *ebews,
+			const EwsId *id,
                         const gchar *d_name,
                         GSList *members,
-                        GSList **vcards)
+                        GSList **vcards,
+			GError **error)
 {
-	GSList *l;
 	EContact *contact;
 	gchar *vcard_string = NULL;
 
-	contact = e_contact_new ();
-	e_contact_set (contact, E_CONTACT_UID, id->id);
-	e_contact_set (contact, E_CONTACT_REV, id->change_key);
+	contact = ebews_get_dl_info (ebews, id, d_name, members, error);
+	if (contact == NULL)
+		return;
 
-	e_contact_set (contact, E_CONTACT_IS_LIST, GINT_TO_POINTER (TRUE));
-	e_contact_set (contact, E_CONTACT_LIST_SHOW_ADDRESSES, GINT_TO_POINTER (TRUE));
-	e_contact_set (contact, E_CONTACT_FULL_NAME, d_name);
-
-	for (l = members; l != NULL; l = g_slist_next (l)) {
-		EwsMailbox *mb = (EwsMailbox *)	l->data;
-		EVCardAttribute *attr;
-
-		attr = e_vcard_attribute_new (NULL, EVC_EMAIL);
-		if (mb->name) {
-			gint len = strlen (mb->name);
-			gchar *value;
-
-			if (mb->name[0] == '\"' && mb->name[len - 1] == '\"')
-				value = g_strdup_printf ("%s <%s>", mb->name, mb->email);
-			else
-				value = g_strdup_printf ("\"%s\" <%s>", mb->name, mb->email);
-
-			e_vcard_attribute_add_value (attr, value);
-			g_free (value);
-		} else
-			e_vcard_attribute_add_value (attr, mb->email);
-
-		e_vcard_add_attribute (E_VCARD (contact), attr);
-		e_ews_mailbox_free (mb);
-	}
 	vcard_string = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
 	*vcards = g_slist_append (*vcards, g_strdup(vcard_string));
+
 	g_free (vcard_string);
-	g_slist_free (members);
 	g_object_unref (contact);
 }
 
@@ -2682,9 +2828,10 @@ ebews_fetch_items (EBookBackendEws *ebews,
 		if (store_to_cache)
 			ebews_store_distribution_list_items (ebews, id, d_name, members, error);
 		else
-			ebews_vcards_append_dl (id, d_name, members, vcards);
+			ebews_vcards_append_dl (ebews, id, d_name, members, vcards, error);
 
 		g_free (mb);
+		g_slist_free_full (members, (GDestroyNotify) e_ews_mailbox_free);
 
 		if (*error)
 			goto cleanup;
