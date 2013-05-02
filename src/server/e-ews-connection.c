@@ -2431,6 +2431,7 @@ struct _oal_req_data {
 
 	GSList *oals;
 	GSList *elements;
+	gchar *etag;
 
 	GCancellable *cancellable;
 	gulong cancel_id;
@@ -2452,6 +2453,7 @@ oal_req_data_free (struct _oal_req_data *data)
 
 	g_free (data->oal_id);
 	g_free (data->oal_element);
+	g_free (data->etag);
 
 	g_slist_free_full (data->oals, (GDestroyNotify) ews_oal_free);
 	g_slist_free_full (data->elements, (GDestroyNotify) ews_oal_details_free);
@@ -2542,6 +2544,7 @@ oal_response_cb (SoupSession *soup_session,
 {
 	GSimpleAsyncResult *simple;
 	struct _oal_req_data *data;
+	const gchar *etag;
 	xmlDoc *doc;
 	xmlNode *node;
 
@@ -2557,6 +2560,11 @@ oal_response_cb (SoupSession *soup_session,
 			soup_message->reason_phrase);
 		goto exit;
 	}
+
+	etag = soup_message_headers_get_one(soup_message->response_headers,
+					    "ETag");
+	if (etag)
+		data->etag = g_strdup(etag);
 
 	ews_dump_raw_soup_response (soup_message);
 
@@ -2739,7 +2747,9 @@ gboolean
 e_ews_connection_get_oal_detail_sync (EEwsConnection *cnc,
                                       const gchar *oal_id,
                                       const gchar *oal_element,
+				      const gchar *old_etag,
                                       GSList **elements,
+				      gchar **etag,
                                       GCancellable *cancellable,
                                       GError **error)
 {
@@ -2752,13 +2762,13 @@ e_ews_connection_get_oal_detail_sync (EEwsConnection *cnc,
 	closure = e_async_closure_new ();
 
 	e_ews_connection_get_oal_detail (
-		cnc, oal_id, oal_element, cancellable,
-		e_async_closure_callback, closure);
+		cnc, oal_id, oal_element, old_etag,
+		cancellable, e_async_closure_callback, closure);
 
 	result = e_async_closure_wait (closure);
 
 	success = e_ews_connection_get_oal_detail_finish (
-		cnc, result, elements, error);
+		cnc, result, elements, etag, error);
 
 	e_async_closure_free (closure);
 
@@ -2769,6 +2779,7 @@ void
 e_ews_connection_get_oal_detail (EEwsConnection *cnc,
                                  const gchar *oal_id,
                                  const gchar *oal_element,
+				 const gchar *etag,
                                  GCancellable *cancellable,
                                  GAsyncReadyCallback callback,
                                  gpointer user_data)
@@ -2792,6 +2803,10 @@ e_ews_connection_get_oal_detail (EEwsConnection *cnc,
 		g_simple_async_result_complete_in_idle (simple);
 		return;
 	}
+
+	if (etag)
+		soup_message_headers_append (soup_message->request_headers,
+					     "If-None-Match", etag);
 
 	data = g_slice_new0 (struct _oal_req_data);
 	data->cnc = g_object_ref (cnc);
@@ -2822,6 +2837,7 @@ gboolean
 e_ews_connection_get_oal_detail_finish (EEwsConnection *cnc,
                                         GAsyncResult *result,
                                         GSList **elements,
+					gchar **etag,
                                         GError **error)
 {
 	GSimpleAsyncResult *simple;
@@ -2842,6 +2858,10 @@ e_ews_connection_get_oal_detail_finish (EEwsConnection *cnc,
 	if (elements != NULL) {
 		*elements = data->elements;
 		data->elements = NULL;
+	}
+	if (etag != NULL) {
+		*etag = data->etag;
+		data->etag = NULL;
 	}
 
 	return TRUE;
