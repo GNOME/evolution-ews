@@ -2804,7 +2804,7 @@ e_ews_connection_get_oal_detail (EEwsConnection *cnc,
 		return;
 	}
 
-	if (etag)
+	if (etag && *etag)
 		soup_message_headers_append (soup_message->request_headers,
 					     "If-None-Match", etag);
 
