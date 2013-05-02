@@ -207,24 +207,17 @@ oal_decompress_v4_full_detail_file (const gchar *filename,
 			}
 			g_free (buffer);
 		} else {
-			/* round to multiples of 32768 */
-			guint mul, round, set, window_bits;
+			/* The window size should be the smallest power of two between 2^17 and 2^25 that is
+			   greater than or equal to the sum of the size of the reference data rounded up to
+			   a multiple of 32768 and the size of the subject data. Since we have no reference
+			   data, forget that and the rounding. Just the smallest power of two which is large
+			   enough to cover the subject data (lzx_b->ucomp_size). */
 
-			mul = ceil (lzx_b->ucomp_size / 32768.0);
-			round = mul * 32768;
-			set = g_bit_nth_lsf ((round >> 17), -1);
+			guint window_bits = g_bit_nth_msf(lzx_b->ucomp_size - 1, -1) + 1;
 
-			if (set > 8)
-				window_bits = 25;
-			else if (set == 0 && !(round >> 17))
+			if (window_bits < 17)
 				window_bits = 17;
-			else {
-				window_bits = set + 17;
-				if (round % (2^window_bits))
-					window_bits++;
-			}
-
-			if (window_bits > 25)
+			else if (window_bits > 25)
 				window_bits = 25;
 
 			lzs = lzxd_init (input, output, window_bits, 0, 16, lzx_b->ucomp_size);
