@@ -1991,7 +1991,7 @@ ebews_start_gal_sync (gpointer data)
 		if (!ret)
 			goto exit;
 
-		e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id, "etag", etag, NULL);
+		e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id, "etag", etag?:"", NULL);
 
 		seq = g_strdup_printf ("%"G_GUINT32_FORMAT, full->seq);
 		ret = e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id, "seq", seq, &error);
