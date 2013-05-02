@@ -1930,8 +1930,10 @@ ebews_start_gal_sync (gpointer data)
 	EEwsConnection *oab_cnc;
 	GSList *full_l = NULL;
 	gboolean ret = TRUE;
+	gboolean is_populated;
 	gchar *uncompressed_filename = NULL;
 	gchar *password;
+	gchar *old_etag = NULL, *etag = NULL;
 	CamelEwsSettings *ews_settings;
 
 	cbews = (EBookBackendEws *) data;
@@ -1946,8 +1948,13 @@ ebews_start_gal_sync (gpointer data)
 
 	d (printf ("Ewsgal: Fetching oal full details file \n");)
 
+	is_populated = e_book_backend_sqlitedb_get_is_populated (priv->summary, priv->folder_id, NULL);
+	if (is_populated)
+		old_etag = e_book_backend_sqlitedb_get_key_value (
+			priv->summary, priv->folder_id, "etag", NULL);
+
 	if (!e_ews_connection_get_oal_detail_sync (
-		oab_cnc, priv->folder_id, "Full", &full_l,
+		oab_cnc, priv->folder_id, "Full", old_etag, &full_l, &etag,
 		priv->cancellable, &error)) {
 		ret = FALSE;
 		goto exit;
@@ -1962,7 +1969,7 @@ ebews_start_gal_sync (gpointer data)
 
 	full = (EwsOALDetails *) full_l->data;
 	/* TODO fetch differential updates if available instead of downloading the whole GAL */
-	if (!e_book_backend_sqlitedb_get_is_populated (priv->summary, priv->folder_id, NULL) || ews_gal_needs_update (cbews, full, &error)) {
+	if (!is_populated || ews_gal_needs_update (cbews, full, &error)) {
 		gchar *seq;
 
 		d (printf ("Ewsgal: Downloading full gal \n");)
@@ -1984,6 +1991,8 @@ ebews_start_gal_sync (gpointer data)
 		if (!ret)
 			goto exit;
 
+		e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id, "etag", etag, NULL);
+
 		seq = g_strdup_printf ("%"G_GUINT32_FORMAT, full->seq);
 		ret = e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id, "seq", seq, &error);
 		g_free (seq);
@@ -2001,6 +2010,9 @@ exit:
 		g_warning ("Unable to update gal : %s \n", error->message);
 		g_clear_error (&error);
 	}
+
+	g_free (old_etag);
+	g_free (etag);
 
 	/* preserve  the oab file once we are able to decode the differential updates */
 	if (uncompressed_filename) {

@@ -757,12 +757,15 @@ gboolean	e_ews_connection_get_oal_detail_sync
 						(EEwsConnection *cnc,
 						 const gchar *oal_id,
 						 const gchar *oal_element,
+						 const gchar *old_etag,
 						 GSList **elements,
+						 gchar **etag,
 						 GCancellable *cancellable,
 						 GError **error);
 void		e_ews_connection_get_oal_detail	(EEwsConnection *cnc,
 						 const gchar *oal_id,
 						 const gchar *oal_element,
+						 const gchar *etag,
 						 GCancellable *cancellable,
 						 GAsyncReadyCallback callback,
 						 gpointer user_data);
@@ -770,6 +773,7 @@ gboolean	e_ews_connection_get_oal_detail_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 GSList **elements,
+						 gchar **etag,
 						 GError **error);
 
 void		e_ews_connection_get_free_busy	(EEwsConnection *cnc,
