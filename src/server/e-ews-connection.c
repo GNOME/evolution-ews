@@ -2737,7 +2737,7 @@ oal_download_response_cb (SoupSession *soup_session,
 	}
 
 	g_simple_async_result_complete_in_idle (simple);
-	g_object_unref (simple);
+	ews_unref_in_thread (simple);
 }
 
 static void
