@@ -27,5 +27,9 @@
 
 gboolean
 oal_decompress_v4_full_detail_file (const gchar *filename, const gchar *output_filename, GError **error);
+gboolean
+oal_apply_binpatch (const gchar *filename, const gchar *orig_filename,
+                                    const gchar *output_filename,
+		    GError **error);
 
 #endif

@@ -215,6 +215,7 @@ static int pos_slots[9] = {34, 36, 38, 42, 50, 66, 98, 162, 290};
 
 struct lzxd_stream *lzxd_init(FILE *input,
 			      FILE *output,
+			      unsigned char *ref_data, int ref_data_len,
 			      int window_bits,
 			      int reset_interval,
 			      int input_buffer_size,
@@ -226,6 +227,8 @@ struct lzxd_stream *lzxd_init(FILE *input,
   /* LZX supports window sizes of 2^17 (128Kb) through 2^25 (32Mb) */
   if (window_bits < 17 || window_bits > 26) return NULL;
 
+  if (ref_data_len > window_size) return NULL;
+
   input_buffer_size = (input_buffer_size + 1) & -2;
   if (!input_buffer_size) return NULL;
 
@@ -236,6 +239,10 @@ struct lzxd_stream *lzxd_init(FILE *input,
 
   /* allocate decompression window and input buffer */
   lzx->window = malloc((size_t) window_size);
+
+  if (ref_data_len)
+	  memcpy(lzx->window + window_size - ref_data_len, ref_data, ref_data_len);
+
   lzx->inbuf  = malloc((size_t) input_buffer_size);
   if (!lzx->window || !lzx->inbuf) {
     free(lzx->window);
@@ -461,12 +468,6 @@ int lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes) {
 	      R2 = R1; R1 = R0; R0 = match_offset;
 	    }
 
-	    if ((window_posn + match_length) > lzx->window_size) {
-	      D(("match ran over window wrap %lu %d ", ftell (lzx->input), match_length))
-      	      lzx->o_ptr = &lzx->window[lzx->frame_posn];
-	      return lzx->error = LZX_ERR_DECRUNCH;
-	    }
-	   
 	    /* check for extra len */
 	    if (match_length == 257) {
 		READ_BITS (bit, 1);
@@ -496,6 +497,12 @@ int lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes) {
 	    }
 
 	    match_length += extra_len;
+
+	    if ((window_posn + match_length) > lzx->window_size) {
+	      D(("match ran over window wrap %lu %d ", ftell (lzx->input), match_length))
+      	      lzx->o_ptr = &lzx->window[lzx->frame_posn];
+	      return lzx->error = LZX_ERR_DECRUNCH;
+	    } 
 
 	    /* copy match */
 	    rundest = &window[window_posn];
@@ -583,11 +590,6 @@ int lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes) {
 	      R2 = R1; R1 = R0; R0 = match_offset;
 	    }
 
-	    if ((window_posn + match_length) > lzx->window_size) {
-	      D(("match ran over window wrap"))
-	      return lzx->error = LZX_ERR_DECRUNCH;
-	    }
-	    
 	    /* check for extra len */
 	    if (match_length == 257) {
 		READ_BITS (bit, 1);
@@ -614,7 +616,14 @@ int lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes) {
 			/* 0 */
 			READ_BITS (extra_len, 8);
 		}
+		match_length += extra_len;
 	    }
+
+	    if ((window_posn + match_length) > lzx->window_size) {
+	      D(("match ran over window wrap"))
+	      return lzx->error = LZX_ERR_DECRUNCH;
+	    }
+	    
 
 	    /* copy match */
 	    rundest = &window[window_posn];

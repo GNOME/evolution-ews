@@ -166,6 +166,7 @@ struct lzxd_stream {
  */
 extern struct lzxd_stream *lzxd_init(FILE *input,
 				     FILE *output,
+				     unsigned char *ref_data, int ref_data_len,
 				     int window_bits,
 				     int reset_interval,
 				     int input_buffer_size,
