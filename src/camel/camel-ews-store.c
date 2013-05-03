@@ -2247,11 +2247,36 @@ ews_get_trash_folder_sync (CamelStore *store,
 	folder_name = camel_ews_store_summary_get_folder_full_name (
 		ews_store->summary, folder_id, NULL);
 
-	folder = ews_get_folder_sync (
+	folder = camel_store_get_folder_sync (
 		store, folder_name, 0, cancellable, error);
 
 	g_free (folder_name);
 	g_free (folder_id);
+
+	if (folder) {
+		GPtrArray *folders;
+		gboolean can = TRUE;
+		gint ii;
+
+		/* Save content of all opened folders, thus any messages deleted in them
+		   are moved to the Deleted Items folder first, thus in case of the trash
+		   folder instance being used to expunge messages will contain all of them.
+		*/
+		folders = camel_object_bag_list (store->folders);
+		for (ii = 0; ii < folders->len; ii++) {
+			CamelFolder *secfolder = folders->pdata[ii];
+
+			if (secfolder != folder && can)
+			    can = camel_folder_synchronize_sync (secfolder, FALSE, cancellable, NULL);
+
+			g_object_unref (secfolder);
+		}
+		g_ptr_array_free (folders, TRUE);
+
+		/* To return 'Deleted Items' folder with current content,
+		   not with possibly stale locally cached copy. */
+		camel_folder_refresh_info_sync (folder, cancellable, NULL);
+	}
 
 	return folder;
 }
@@ -2282,7 +2307,7 @@ ews_get_junk_folder_sync (CamelStore *store,
 	folder_name = camel_ews_store_summary_get_folder_full_name (
 		ews_store->summary, folder_id, NULL);
 
-	folder = ews_get_folder_sync (
+	folder = camel_store_get_folder_sync (
 		store, folder_name, 0, cancellable, error);
 
 	g_free (folder_name);

@@ -617,7 +617,8 @@ ews_folder_get_message_sync (CamelFolder *folder,
 	message = camel_ews_folder_get_message_from_cache ((CamelEwsFolder *) folder, uid, cancellable, NULL);
 	if (!message) {
 		message = camel_ews_folder_get_message (folder, uid, EWS_ITEM_HIGH, cancellable, error);
-		ews_folder_maybe_update_mlist (folder, uid, message);
+		if (message)
+			ews_folder_maybe_update_mlist (folder, uid, message);
 	}
 
 	return message;
