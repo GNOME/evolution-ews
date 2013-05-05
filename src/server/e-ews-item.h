@@ -225,7 +225,7 @@ GSList *	e_ews_item_get_attachments_ids
 						(EEwsItem *item);
 
 EEwsAttachmentInfo *
-e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gchar *cache, const gchar *comp_uid, gchar **attach_id);
+e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gchar *cache, const gchar *comp_uid);
 
 gchar *
 e_ews_item_ical_dump (EEwsItem *item);

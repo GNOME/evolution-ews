@@ -378,7 +378,7 @@ get_photo (EBookBackendEws *ebews,
 	EContactPhoto *photo = NULL;
 	EEwsAttachmentInfo *info;
 	GSList *contact_item_ids = NULL, *new_items = NULL;
-	GSList *attachments = NULL,  *attachments_ids = NULL, *items = NULL;
+	GSList *attachments = NULL,  *attachments_ids = NULL;
 	const guchar *content;
 	const gchar *contact_photo_id;
 	const EwsId *id;
@@ -400,7 +400,7 @@ get_photo (EBookBackendEws *ebews,
 		goto exit;
 
 	attachments_ids = g_slist_prepend (attachments_ids, g_strdup (contact_photo_id));
-	items = e_ews_connection_get_attachments_sync (
+	if (!e_ews_connection_get_attachments_sync (
 		ebews->priv->cnc,
 		EWS_PRIORITY_MEDIUM,
 		NULL,
@@ -411,9 +411,7 @@ get_photo (EBookBackendEws *ebews,
 		NULL,
 		NULL,
 		cancellable,
-		error);
-
-	if (!items)
+		error))
 		goto exit;
 
 	info = attachments->data;
@@ -427,7 +425,6 @@ exit:
 	g_slist_free_full (contact_item_ids, g_free);
 	g_slist_free_full (new_items, g_object_unref);
 	g_slist_free_full (attachments_ids, g_free);
-	g_slist_free_full (items, g_free);
 	g_slist_free_full (attachments, (GDestroyNotify) e_ews_attachment_info_free);
 
 	return photo;
@@ -889,6 +886,7 @@ set_photo (EBookBackendEws *ebews,
 			EWS_PRIORITY_MEDIUM,
 			id,
 			files,
+			NULL,
 			cancellable,
 			error);
 
@@ -933,7 +931,7 @@ ebews_set_photo_changes (EBookBackendEws *ebews,
 			 GError **error)
 {
 	EContactPhoto *old_photo, *new_photo;
-	GSList *contact_item_ids = NULL, *new_items = NULL, *attachments_ids = NULL, *deleted_attachments = NULL;
+	GSList *contact_item_ids = NULL, *new_items = NULL, *attachments_ids = NULL;
 	gchar *id = e_contact_get (old, E_CONTACT_UID);
 	const gchar *contact_photo_id;
 
@@ -956,14 +954,13 @@ ebews_set_photo_changes (EBookBackendEws *ebews,
 	contact_photo_id = e_ews_item_get_contact_photo_id (new_items->data);
 	if (contact_photo_id) {
 		attachments_ids = g_slist_prepend (attachments_ids, g_strdup (contact_photo_id));
-		deleted_attachments = e_ews_connection_delete_attachments_sync (
+		if (!e_ews_connection_delete_attachments_sync (
 					ebews->priv->cnc,
 					EWS_PRIORITY_MEDIUM,
 					attachments_ids,
+					NULL,
 					cancellable,
-					error);
-
-		if (!deleted_attachments)
+					error))
 			goto exit;
 	}
 
@@ -976,7 +973,6 @@ exit:
 	g_slist_free_full (contact_item_ids, g_free);
 	g_slist_free_full (new_items, g_object_unref);
 	g_slist_free_full (attachments_ids, g_free);
-	g_slist_free_full (deleted_attachments, g_free);
 }
 
 static void
@@ -1409,8 +1405,7 @@ ews_book_remove_contact_cb (GObject *object,
 		g_warning ("\nError removing contact %s \n", error->message);
 	}
 
-	g_slist_foreach (remove_contact->sl_ids, (GFunc) g_free, NULL);
-	g_slist_free (remove_contact->sl_ids);
+	g_slist_free_full (remove_contact->sl_ids, g_free);
 	g_object_unref (remove_contact->ebews);
 	g_object_unref (remove_contact->book);
 	g_free (remove_contact);
@@ -1756,8 +1751,7 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 			e_data_book_respond_get_contact_list (book, opid, error, vcard_list);
 
 			g_slist_free (list);
-			g_slist_foreach (vcard_list, (GFunc) g_free, NULL);
-			g_slist_free (vcard_list);
+			g_slist_free_full (vcard_list, g_free);
 			return;
 		} else
 			e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (OFFLINE_UNAVAILABLE), vcard_list);
@@ -1785,8 +1779,7 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 		e_data_book_respond_get_contact_list (book, opid, error, vcard_list);
 
 		g_slist_free (list);
-		g_slist_foreach (vcard_list, (GFunc) g_free, NULL);
-		g_slist_free (vcard_list);
+		g_slist_free_full (vcard_list, g_free);
 		return;
 
 	} else if (!priv->marked_for_offline) {
@@ -1812,8 +1805,7 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 		e_data_book_respond_get_contact_list (book, opid, error, vcard_list);
 
 		e_ews_folder_id_free (fid);
-		g_slist_foreach (vcard_list, (GFunc) g_free, NULL);
-		g_slist_free (vcard_list);
+		g_slist_free_full (vcard_list, g_free);
 		return;
 	} else
 		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR_EX (OTHER_ERROR, _("Wait till syncing is done")), vcard_list);
@@ -2160,7 +2152,7 @@ ews_gal_store_contact (EContact *contact,
 		list = e_book_backend_list_views (E_BOOK_BACKEND (data->cbews));
 		for (link = list; link != NULL; link = g_list_next (link))
 			e_data_book_view_notify_progress (E_DATA_BOOK_VIEW (link->data), -1, status_message);
-		g_list_free_full (list, (GDestroyNotify) g_object_unref);
+		g_list_free_full (list, g_object_unref);
 		g_free (status_message);
 
 		data->contact_collector = g_slist_reverse (data->contact_collector);
@@ -2169,8 +2161,7 @@ ews_gal_store_contact (EContact *contact,
 		for (l = data->contact_collector; l != NULL; l = g_slist_next (l))
 			e_book_backend_notify_update (E_BOOK_BACKEND (data->cbews), E_CONTACT (l->data));
 
-		g_slist_foreach (data->contact_collector, (GFunc) g_object_unref, NULL);
-		g_slist_free (data->contact_collector);
+		g_slist_free_full (data->contact_collector, g_object_unref);
 		data->contact_collector = NULL;
 		data->collected_length = 0;
 	}
@@ -2366,8 +2357,7 @@ ebews_sync_deleted_items (EBookBackendEws *ebews,
 		e_book_backend_notify_remove (E_BOOK_BACKEND (ebews), id);
 	}
 
-	g_slist_foreach (deleted_ids, (GFunc) g_free, NULL);
-	g_slist_free (deleted_ids);
+	g_slist_free_full (deleted_ids, g_free);
 }
 
 static void
@@ -2665,20 +2655,9 @@ ebews_fetch_items (EBookBackendEws *ebews,
 	}
 
 cleanup:
-	if (new_items) {
-		g_slist_foreach (new_items, (GFunc) g_object_unref, NULL);
-		g_slist_free (new_items);
-	}
-
-	if (dl_ids) {
-		g_slist_foreach (dl_ids, (GFunc) g_free, NULL);
-		g_slist_free (dl_ids);
-	}
-
-	if (contact_item_ids) {
-		g_slist_foreach (contact_item_ids, (GFunc) g_free, NULL);
-		g_slist_free (contact_item_ids);
-	}
+	g_slist_free_full (new_items, g_object_unref);
+	g_slist_free_full (dl_ids, g_free);
+	g_slist_free_full (contact_item_ids, g_free);
 
 	return TRUE;
 }
@@ -2730,7 +2709,7 @@ ebews_start_sync (gpointer data)
 	list = e_book_backend_list_views (E_BOOK_BACKEND (ebews));
 	for (link = list; link != NULL; link = g_list_next (link))
 		e_data_book_view_notify_progress (E_DATA_BOOK_VIEW (link->data), -1, status_message);
-	g_list_free_full (list, (GDestroyNotify) g_object_unref);
+	g_list_free_full (list, g_object_unref);
 	g_free (status_message);
 
 	sync_state = e_book_backend_sqlitedb_get_sync_data (priv->summary, priv->folder_id, NULL);
@@ -2773,10 +2752,7 @@ ebews_start_sync (gpointer data)
 			ebews_fetch_items (ebews, items_created, TRUE, NULL, priv->cancellable, &error);
 
 		if (error) {
-			if (items_updated) {
-				g_slist_foreach (items_updated, (GFunc) g_object_unref, NULL);
-				g_slist_free (items_updated);
-			}
+			g_slist_free_full (items_updated, g_object_unref);
 
 			break;
 		}
@@ -2799,7 +2775,7 @@ ebews_start_sync (gpointer data)
 	list = e_book_backend_list_views (E_BOOK_BACKEND (ebews));
 	for (link = list; link != NULL; link = g_list_next (link))
 		e_data_book_view_notify_progress (E_DATA_BOOK_VIEW (link->data), -1, NULL);
-	g_list_free_full (list, (GDestroyNotify) g_object_unref);
+	g_list_free_full (list, g_object_unref);
 
 	if (error) {
 		g_warning ("Error Syncing Contacts: Folder %s Error: %s", priv->folder_id, error->message);
@@ -3382,25 +3358,17 @@ e_book_backend_ews_dispose (GObject *object)
 		priv->cnc = NULL;
 	}
 
-	if (priv->folder_id) {
-		g_free (priv->folder_id);
-		priv->folder_id = NULL;
-	}
+	g_free (priv->folder_id);
+	priv->folder_id = NULL;
 
-	if (priv->oab_url) {
-		g_free (priv->oab_url);
-		priv->oab_url = NULL;
-	}
+	g_free (priv->oab_url);
+	priv->oab_url = NULL;
 
-	if (priv->folder_name) {
-		g_free (priv->folder_name);
-		priv->folder_name = NULL;
-	}
+	g_free (priv->folder_name);
+	priv->folder_name = NULL;
 
-	if (priv->attachment_dir) {
-		g_free (priv->attachment_dir);
-		priv->attachment_dir = NULL;
-	}
+	g_free (priv->attachment_dir);
+	priv->attachment_dir = NULL;
 
 	if (priv->dlock) {
 		g_mutex_lock (&priv->dlock->mutex);

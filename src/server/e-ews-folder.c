@@ -350,8 +350,7 @@ e_ews_folder_set_name (EEwsFolder *folder,
 
 	priv = folder->priv;
 
-	if (priv->name)
-		g_free (priv->name);
+	g_free (priv->name);
 	priv->name = g_strdup (new_name);
 }
 

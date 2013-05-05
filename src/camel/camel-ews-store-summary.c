@@ -72,10 +72,7 @@ camel_ews_store_summary_init (CamelEwsStoreSummary *ews_summary)
 	priv->key_file = g_key_file_new ();
 	priv->dirty = FALSE;
 	priv->fname_id_hash = g_hash_table_new (g_str_hash, g_str_equal);
-	priv->id_fname_hash = g_hash_table_new_full (
-		g_str_hash, g_str_equal,
-		(GDestroyNotify) g_free,
-		(GDestroyNotify) g_free);
+	priv->id_fname_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 	g_rec_mutex_init (&priv->s_lock);
 }
 

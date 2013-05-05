@@ -774,8 +774,7 @@ cal_backend_ews_get_object_list (ECalBackend *backend,
 	}
 
 	g_object_unref (cbsexp);
-	g_slist_foreach (components, (GFunc) g_object_unref, NULL);
-	g_slist_free (components);
+	g_slist_free_full (components, g_object_unref);
 }
 
 static void
@@ -1386,12 +1385,11 @@ ews_create_attachments_cb (GObject *object,
 	icalparameter *icalparam;
 	const gchar *comp_uid;
 
-	ids = e_ews_connection_create_attachments_finish (cnc, &change_key, res, &error);
+	if (!e_ews_connection_create_attachments_finish (cnc, &change_key, &ids, res, &error)) {
+		g_warning ("Error while creating attachments: %s\n", error ? error->message : "Unknown error");
+		if (error != NULL)
+			g_clear_error (&error);
 
-	/* make sure there was no error */
-	if (error != NULL) {
-		g_warning ("Error while creating attachments: %s\n", error->message);
-		g_clear_error (&error);
 		return;
 	}
 
@@ -1497,12 +1495,14 @@ ews_create_object_cb (GObject *object,
 	EEwsItem *item;
 
 	/* get a list of ids from server (single item) */
-	e_ews_connection_create_items_finish (cnc, res, &ids, &error);
-
-	/* make sure there was no error */
-	if (error != NULL) {
-		convert_error_to_edc_error (&error);
-		e_data_cal_respond_create_objects (create_data->cal, create_data->context, error, NULL, NULL);
+	if (!e_ews_connection_create_items_finish (cnc, res, &ids, &error)) {
+		if (error != NULL) {
+			convert_error_to_edc_error (&error);
+			e_data_cal_respond_create_objects (create_data->cal, create_data->context, error, NULL, NULL);
+		} else {
+			e_data_cal_respond_create_objects (
+					create_data->cal, create_data->context, EDC_ERROR_EX (OtherError, _("Unknown error")), NULL, NULL);
+		}
 		return;
 	}
 
@@ -1638,8 +1638,7 @@ ews_create_object_cb (GObject *object,
 				comp_uid, i->data, E_CAL_OBJ_MOD_THIS);
 		}
 
-		g_slist_foreach (exceptions, (GFunc) g_free, NULL);
-		g_slist_free (exceptions);
+		g_slist_free_full (exceptions, g_free);
 	}
 
 	/* no need to keep reference to the object */
@@ -2399,9 +2398,9 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 			icalprop = icalcomponent_get_next_property (icalcomp, ICAL_ATTACH_PROPERTY);
 		}
 
-		items = e_ews_connection_delete_attachments_sync (
+		e_ews_connection_delete_attachments_sync (
 			priv->cnc, EWS_PRIORITY_MEDIUM,
-			removed_attachments_ids, cancellable, &error);
+			removed_attachments_ids, &items, cancellable, &error);
 
 		changekey = items->data;
 
@@ -3759,9 +3758,9 @@ ews_start_sync_thread (gpointer data)
 				cbews, new_sync_state,
 				items_created, items_updated, items_deleted);
 
-			g_slist_free_full (items_created, (GDestroyNotify) g_object_unref);
-			g_slist_free_full (items_updated, (GDestroyNotify) g_object_unref);
-			g_slist_free_full (items_deleted, (GDestroyNotify) g_free);
+			g_slist_free_full (items_created, g_object_unref);
+			g_slist_free_full (items_updated, g_object_unref);
+			g_slist_free_full (items_deleted, g_free);
 			items_created = NULL;
 			items_updated = NULL;
 			items_deleted = NULL;
@@ -3783,9 +3782,9 @@ ews_start_sync_thread (gpointer data)
 
 	ews_refreshing_dec (cbews);
 
-	g_slist_free_full (items_created, (GDestroyNotify) g_object_unref);
-	g_slist_free_full (items_updated, (GDestroyNotify) g_object_unref);
-	g_slist_free_full (items_deleted, (GDestroyNotify) g_free);
+	g_slist_free_full (items_created, g_object_unref);
+	g_slist_free_full (items_updated, g_object_unref);
+	g_slist_free_full (items_deleted, g_free);
 
 	g_free (new_sync_state);
 	g_free (old_sync_state);
@@ -4006,10 +4005,8 @@ done:
 	e_data_cal_respond_get_free_busy (free_busy_data->cal, free_busy_data->context, error);
 
 	/* FIXME free free_busy_sl ? */
-	g_slist_foreach (free_busy, (GFunc) g_free, NULL);
-	g_slist_free (free_busy);
-	g_slist_foreach (free_busy_data->users, (GFunc) free, NULL);
-	g_slist_free (free_busy_data->users);
+	g_slist_free_full (free_busy, g_free);
+	g_slist_free_full (free_busy_data->users, g_free);
 	g_object_unref (free_busy_data->cal);
 	g_object_unref (free_busy_data->cbews);
 	g_free (free_busy_data);
@@ -4377,9 +4374,9 @@ cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 		backend->priv->cnc = g_object_ref (connection);
 		PRIV_UNLOCK (backend->priv);
 
-		g_slist_free_full (items_created, (GDestroyNotify) g_object_unref);
-		g_slist_free_full (items_updated, (GDestroyNotify) g_object_unref);
-		g_slist_free_full (items_deleted, (GDestroyNotify) g_free);
+		g_slist_free_full (items_created, g_object_unref);
+		g_slist_free_full (items_updated, g_object_unref);
+		g_slist_free_full (items_deleted, g_free);
 
 		ews_start_sync (backend);
 
@@ -4470,10 +4467,7 @@ e_cal_backend_ews_init (ECalBackendEws *cbews)
 	/* create the mutex for thread safety */
 	g_rec_mutex_init (&priv->rec_mutex);
 	priv->refreshing_done = e_flag_new ();
-	priv->item_id_hash = g_hash_table_new_full
-		(g_str_hash, g_str_equal,
-		(GDestroyNotify) g_free,
-		(GDestroyNotify) g_object_unref);
+	priv->item_id_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
 	priv->default_zone = icaltimezone_get_utc_timezone ();
 	priv->cancellable = g_cancellable_new ();
 

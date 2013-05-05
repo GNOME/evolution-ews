@@ -166,7 +166,7 @@ mail_config_ews_delegates_page_get_mailbox (EMailConfigEwsDelegatesPage *page)
 		break;
 	}
 
-	g_list_free_full (list, (GDestroyNotify) g_object_unref);
+	g_list_free_full (list, g_object_unref);
 
 	return mailbox;
 }

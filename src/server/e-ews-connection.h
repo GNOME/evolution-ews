@@ -354,15 +354,17 @@ void		e_ews_connection_create_photo_attachment
 						 GCancellable *cancellable,
 						 GAsyncReadyCallback callback,
 						 gpointer user_data);
-GSList *	e_ews_connection_create_photo_attachment_finish
+gboolean	e_ews_connection_create_photo_attachment_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
+						 GSList **parents_ids,
 						 GError **error);
-GSList *	e_ews_connection_create_photo_attachment_sync
+gboolean	e_ews_connection_create_photo_attachment_sync
 						(EEwsConnection *cnc,
 						 gint pri,
 						 const EwsId *parent,
 						 const GSList *files,
+						 GSList **parents_ids,
 						 GCancellable *cancellable,
 						 GError **error);
 
@@ -722,35 +724,39 @@ void		e_ews_connection_create_attachments
 						 GCancellable *cancellable,
 						 GAsyncReadyCallback callback,
 						 gpointer user_data);
-GSList *	e_ews_connection_create_attachments_finish
+gboolean	e_ews_connection_create_attachments_finish
 						(EEwsConnection *cnc,
 						 gchar **change_key,
+						 GSList **attachments_ids,
 						 GAsyncResult *result,
 						 GError **error);
-GSList *	e_ews_connection_create_attachments_sync
+gboolean	e_ews_connection_create_attachments_sync
 						(EEwsConnection *cnc,
 						 gint pri,
 						 const EwsId *parent,
 						 const GSList *files,
 						 gchar **change_key,
+						 GSList **attachments_ids,
 						 GCancellable *cancellable,
 						 GError **error);
 
 void		e_ews_connection_delete_attachments
 						(EEwsConnection *cnc,
 						 gint pri,
-						 const GSList *ids,
+						 const GSList *attachments_ids,
 						 GCancellable *cancellable,
 						 GAsyncReadyCallback callback,
 						 gpointer user_data);
-GSList *	e_ews_connection_delete_attachments_finish
+gboolean	e_ews_connection_delete_attachments_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
+						 GSList **parents_ids,
 						 GError **error);
-GSList *	e_ews_connection_delete_attachments_sync
+gboolean	e_ews_connection_delete_attachments_sync
 						(EEwsConnection *cnc,
 						 gint pri,
-						 const GSList *ids,
+						 const GSList *attachments_ids,
+						 GSList **parents_ids,
 						 GCancellable *cancellable,
 						 GError **error);
 
@@ -766,12 +772,12 @@ void		e_ews_connection_get_attachments
 						 GCancellable *cancellable,
 						 GAsyncReadyCallback callback,
 						 gpointer user_data);
-GSList *	e_ews_connection_get_attachments_finish
+gboolean	e_ews_connection_get_attachments_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
 						 GSList **items,
 						 GError **error);
-GSList *	e_ews_connection_get_attachments_sync
+gboolean	e_ews_connection_get_attachments_sync
 						(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *comp_uid,

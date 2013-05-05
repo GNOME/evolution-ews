@@ -157,7 +157,7 @@ mail_config_ews_ooo_page_get_mailbox (EMailConfigEwsOooPage *page)
 		break;
 	}
 
-	g_list_free_full (list, (GDestroyNotify) g_object_unref);
+	g_list_free_full (list, g_object_unref);
 
 	return mailbox;
 }

@@ -67,19 +67,13 @@ sync_folders_closure_free (SyncFoldersClosure *closure)
 	g_object_unref (closure->backend);
 
 	/* List of EEwsFolder instances. */
-	g_slist_free_full (
-		closure->folders_created,
-		(GDestroyNotify) g_object_unref);
+	g_slist_free_full (closure->folders_created, g_object_unref);
 
 	/* List of folder ID strings. */
-	g_slist_free_full (
-		closure->folders_deleted,
-		(GDestroyNotify) g_free);
+	g_slist_free_full (closure->folders_deleted, g_free);
 
 	/* List of EEwsFolder instances. */
-	g_slist_free_full (
-		closure->folders_updated,
-		(GDestroyNotify) g_object_unref);
+	g_slist_free_full (closure->folders_updated, g_object_unref);
 
 	g_slice_free (SyncFoldersClosure, closure);
 }
@@ -1009,11 +1003,7 @@ e_ews_backend_init (EEwsBackend *backend)
 {
 	backend->priv = E_EWS_BACKEND_GET_PRIVATE (backend);
 
-	backend->priv->folders = g_hash_table_new_full (
-		(GHashFunc) g_str_hash,
-		(GEqualFunc) g_str_equal,
-		(GDestroyNotify) g_free,
-		(GDestroyNotify) g_object_unref);
+	backend->priv->folders = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
 
 	g_mutex_init (&backend->priv->folders_lock);
 	g_mutex_init (&backend->priv->sync_state_lock);
@@ -1051,7 +1041,7 @@ ews_backend_ref_connection_thread (GSimpleAsyncResult *simple,
 
 	if (connection != NULL)
 		g_simple_async_result_set_op_res_gpointer (
-			simple, connection, (GDestroyNotify) g_object_unref);
+			simple, connection, g_object_unref);
 
 	if (error != NULL)
 		g_simple_async_result_take_error (simple, error);

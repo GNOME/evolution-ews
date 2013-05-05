@@ -1303,15 +1303,11 @@ ews_connection_dispose (GObject *object)
 
 	e_ews_connection_set_password (E_EWS_CONNECTION (object), NULL);
 
-	if (priv->jobs) {
-		g_slist_free (priv->jobs);
-		priv->jobs = NULL;
-	}
+	g_slist_free (priv->jobs);
+	priv->jobs = NULL;
 
-	if (priv->active_job_queue) {
-		g_slist_free (priv->active_job_queue);
-		priv->active_job_queue = NULL;
-	}
+	g_slist_free (priv->active_job_queue);
+	priv->active_job_queue = NULL;
 
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (e_ews_connection_parent_class)->dispose (object);
@@ -1365,7 +1361,7 @@ ews_connection_try_password_sync (ESourceAuthenticator *authenticator,
 		connection, EWS_PRIORITY_MEDIUM, "Default",
 		NULL, ids, &folders, cancellable, &local_error);
 
-	g_slist_free_full (folders, (GDestroyNotify) g_object_unref);
+	g_slist_free_full (folders, g_object_unref);
 	g_slist_free_full (ids, (GDestroyNotify) e_ews_folder_id_free);
 
 	if (local_error == NULL) {
@@ -2317,7 +2313,7 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 			ad->cancellable,
 			G_CALLBACK (autodiscover_cancelled_cb),
 			g_object_ref (cnc),
-			(GDestroyNotify) g_object_unref);
+			g_object_unref);
 	}
 
 	g_simple_async_result_set_op_res_gpointer (
@@ -5884,48 +5880,56 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
 	g_object_unref (simple);
 }
 
-GSList *
+gboolean
 e_ews_connection_create_attachments_finish (EEwsConnection *cnc,
                                             gchar **change_key,
+					    GSList **attachments_ids,
                                             GAsyncResult *result,
                                             GError **error)
 {
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
-	GSList *ids = NULL;
 
-	g_return_val_if_fail (cnc != NULL, NULL);
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_create_attachments),
-		NULL);
+		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
 	async_data = g_simple_async_result_get_op_res_gpointer (simple);
 
 	if (g_simple_async_result_propagate_error (simple, error))
-		return NULL;
+		return FALSE;
 
-	ids = async_data->items;
-	*change_key = async_data->sync_state;
+	if (attachments_ids)
+		*attachments_ids = async_data->items;
+	else
+		g_slist_free_full (async_data->items, g_free);
 
-	return ids;
+	if (change_key)
+		*change_key = async_data->sync_state;
+	else
+		g_free (async_data->sync_state);
+
+	return TRUE;
 }
 
-GSList *
+gboolean
 e_ews_connection_create_attachments_sync (EEwsConnection *cnc,
                                           gint pri,
                                           const EwsId *parent,
                                           const GSList *files,
                                           gchar **change_key,
+					  GSList **attachments_ids,
                                           GCancellable *cancellable,
                                           GError **error)
 {
 	EAsyncClosure *closure;
 	GAsyncResult *result;
-	GSList *ids;
+	gboolean ret;
 
-	g_return_val_if_fail (cnc != NULL, NULL);
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	closure = e_async_closure_new ();
 
@@ -5935,12 +5939,12 @@ e_ews_connection_create_attachments_sync (EEwsConnection *cnc,
 
 	result = e_async_closure_wait (closure);
 
-	ids = e_ews_connection_create_attachments_finish (
-		cnc, change_key, result, error);
+	ret = e_ews_connection_create_attachments_finish (
+		cnc, change_key, attachments_ids, result, error);
 
 	e_async_closure_free (closure);
 
-	return ids;
+	return ret;
 }
 
 /* Delete attachemnts */
@@ -6006,7 +6010,7 @@ delete_attachments_response_cb (ESoapResponse *response,
 void
 e_ews_connection_delete_attachments (EEwsConnection *cnc,
                                      gint pri,
-                                     const GSList *ids,
+                                     const GSList *attachments_ids,
                                      GCancellable *cancellable,
                                      GAsyncReadyCallback callback,
                                      gpointer user_data)
@@ -6023,7 +6027,7 @@ e_ews_connection_delete_attachments (EEwsConnection *cnc,
 	/* start interation over all items to get the attachemnts */
 	e_soap_message_start_element (msg, "AttachmentIds", "messages", NULL);
 
-	for (l = ids; l != NULL; l = g_slist_next (l)) {
+	for (l = attachments_ids; l != NULL; l = l->next) {
 		e_ews_message_write_string_parameter_with_attribute (msg, "AttachmentId", NULL, NULL, "Id", l->data);
 	}
 
@@ -6046,59 +6050,63 @@ e_ews_connection_delete_attachments (EEwsConnection *cnc,
 	g_object_unref (simple);
 }
 
-GSList *
+gboolean
 e_ews_connection_delete_attachments_finish (EEwsConnection *cnc,
                                             GAsyncResult *result,
+					    GSList **parents_ids,
                                             GError **error)
 {
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
-	GSList *ids = NULL;
 
-	g_return_val_if_fail (cnc != NULL, NULL);
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_delete_attachments),
-		NULL);
+		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
 	async_data = g_simple_async_result_get_op_res_gpointer (simple);
 
 	if (g_simple_async_result_propagate_error (simple, error))
-		return NULL;
+		return FALSE;
 
-	ids = async_data->items;
+	if (parents_ids)
+		*parents_ids = async_data->items;
+	else
+		g_slist_free_full (async_data->items, g_free);
 
-	return ids;
+	return TRUE;
 }
 
-GSList *
+gboolean
 e_ews_connection_delete_attachments_sync (EEwsConnection *cnc,
                                           gint pri,
-                                          const GSList *ids,
+                                          const GSList *attachments_ids,
+					  GSList **parents_ids,
                                           GCancellable *cancellable,
                                           GError **error)
 {
 	EAsyncClosure *closure;
 	GAsyncResult *result;
-	GSList *parents;
+	gboolean ret;
 
-	g_return_val_if_fail (cnc != NULL, NULL);
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	closure = e_async_closure_new ();
 
 	e_ews_connection_delete_attachments (
-		cnc, pri, ids, cancellable,
+		cnc, pri, attachments_ids, cancellable,
 		e_async_closure_callback, closure);
 
 	result = e_async_closure_wait (closure);
 
-	parents = e_ews_connection_delete_attachments_finish (
-		cnc, result, error);
+	ret = e_ews_connection_delete_attachments_finish (
+		cnc, result, parents_ids, error);
 
 	e_async_closure_free (closure);
 
-	return parents;
+	return ret;
 }
 
 static void
@@ -6107,7 +6115,6 @@ ews_handle_attachments_param (ESoapParameter *param,
 {
 	ESoapParameter *subparam, *attspara;
 	EEwsAttachmentInfo *info = NULL;
-	gchar *attach_id = NULL;
 	EEwsItem *item;
 	const gchar *name;
 
@@ -6118,26 +6125,21 @@ ews_handle_attachments_param (ESoapParameter *param,
 
 		if (!g_ascii_strcasecmp (name, "ItemAttachment")) {
 			item = e_ews_item_new_from_soap_parameter (subparam);
-			attach_id = g_strdup (e_ews_item_get_attachment_id (item)->id);
 			info = e_ews_item_dump_mime_content (item, async_data->directory);
 
 		} else if (!g_ascii_strcasecmp (name, "FileAttachment")) {
 			info = e_ews_dump_file_attachment_from_soap_parameter (
 					subparam,
 					async_data->directory,
-					async_data->sync_state,
-					&attach_id);
+					async_data->sync_state);
 		}
 
-		if (info && attach_id) {
+		if (info)
 			async_data->items = g_slist_append (async_data->items, info);
-			async_data->items_created = g_slist_append (async_data->items_created, attach_id);
-		} else {
+		else
 			e_ews_attachment_info_free (info);
-			g_free (attach_id);
-		}
+
 		info = NULL;
-		attach_id = NULL;
 	}
 }
 
@@ -6243,7 +6245,7 @@ e_ews_connection_get_attachments (EEwsConnection *cnc,
 	g_object_unref (simple);
 }
 
-GSList *
+gboolean
 e_ews_connection_get_attachments_finish (EEwsConnection *cnc,
                                          GAsyncResult *result,
                                          GSList **items,
@@ -6252,24 +6254,27 @@ e_ews_connection_get_attachments_finish (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
-	g_return_val_if_fail (cnc != NULL, NULL);
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_get_attachments),
-		NULL);
+		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
 	async_data = g_simple_async_result_get_op_res_gpointer (simple);
 
 	if (g_simple_async_result_propagate_error (simple, error))
-		return NULL;
+		return FALSE;
 
-	*items = async_data->items;
+	if (items)
+		*items = async_data->items;
+	else
+		g_slist_free_full (async_data->items, (GDestroyNotify) e_ews_attachment_info_free);
 
-	return async_data->items_created;
+	return TRUE;
 }
 
-GSList *
+gboolean
 e_ews_connection_get_attachments_sync (EEwsConnection *cnc,
                                        gint pri,
                                        const gchar *uid,
@@ -6284,9 +6289,9 @@ e_ews_connection_get_attachments_sync (EEwsConnection *cnc,
 {
 	EAsyncClosure *closure;
 	GAsyncResult *result;
-	GSList *attachments_ids;
+	gboolean ret;
 
-	g_return_val_if_fail (cnc != NULL, NULL);
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	closure = e_async_closure_new ();
 
@@ -6297,12 +6302,12 @@ e_ews_connection_get_attachments_sync (EEwsConnection *cnc,
 
 	result = e_async_closure_wait (closure);
 
-	attachments_ids = e_ews_connection_get_attachments_finish (
+	ret = e_ews_connection_get_attachments_finish (
 		cnc, result, items, error);
 
 	e_async_closure_free (closure);
 
-	return attachments_ids;
+	return ret;
 }
 
 void
@@ -6472,44 +6477,49 @@ e_ews_connection_create_photo_attachment (EEwsConnection *cnc,
 	g_object_unref (simple);
 }
 
-GSList *
+gboolean
 e_ews_connection_create_photo_attachment_finish (EEwsConnection *cnc,
 						 GAsyncResult *result,
+						 GSList **parents_ids,
 						 GError **error)
 {
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
-	GSList *ids;
 
-	g_return_val_if_fail (cnc != NULL, NULL);
+	g_return_val_if_fail (cnc != NULL, FALSE);
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
 		result, G_OBJECT (cnc), e_ews_connection_create_photo_attachment),
-		NULL);
+		FALSE);
 
 	simple = G_SIMPLE_ASYNC_RESULT (result);
 	async_data = g_simple_async_result_get_op_res_gpointer (simple);
 
 	if (g_simple_async_result_propagate_error (simple, error))
-		return NULL;
+		return FALSE;
 
-	ids = async_data->items;
-	return ids;
+	if (parents_ids)
+		*parents_ids = async_data->items;
+	else
+		g_slist_free_full (async_data->items, g_free);
+
+	return TRUE;
 }
 
-GSList *
+gboolean
 e_ews_connection_create_photo_attachment_sync (EEwsConnection *cnc,
 					       gint pri,
 					       const EwsId *parent,
 					       const GSList *files,
+					       GSList **parents_ids,
 					       GCancellable *cancellable,
 					       GError **error)
 {
 	EAsyncClosure *closure;
 	GAsyncResult *result;
-	GSList *ids;
+	gboolean ret;
 
-	g_return_val_if_fail (cnc != NULL, NULL);
+	g_return_val_if_fail (cnc != NULL, FALSE);
 
 	closure = e_async_closure_new ();
 
@@ -6519,11 +6529,11 @@ e_ews_connection_create_photo_attachment_sync (EEwsConnection *cnc,
 
 	result = e_async_closure_wait (closure);
 
-	ids = e_ews_connection_create_photo_attachment_finish (cnc, result, error);
+	ret = e_ews_connection_create_photo_attachment_finish (cnc, result, parents_ids, error);
 
 	e_async_closure_free (closure);
 
-	return ids;
+	return ret;
 }
 
 static void

@@ -188,7 +188,7 @@ struct _EEwsItemPrivate {
 	EwsMailbox *sender;
 
 	GSList *modified_occurrences;
-	GSList *attachments_list;
+	GSList *attachments_ids;
 	GSList *attendees;
 
 	EwsId *calendar_item_accept_id;
@@ -258,41 +258,23 @@ e_ews_item_dispose (GObject *object)
 	g_free (priv->contact_photo_id);
 	priv->contact_photo_id = NULL;
 
-	if (priv->to_recipients) {
-		g_slist_foreach (priv->to_recipients, (GFunc) e_ews_mailbox_free, NULL);
-		g_slist_free (priv->to_recipients);
-		priv->to_recipients = NULL;
-	}
+	g_slist_free_full (priv->to_recipients, (GDestroyNotify) e_ews_mailbox_free);
+	priv->to_recipients = NULL;
 
-	if (priv->cc_recipients) {
-		g_slist_foreach (priv->cc_recipients, (GFunc) e_ews_mailbox_free, NULL);
-		g_slist_free (priv->cc_recipients);
-		priv->cc_recipients = NULL;
-	}
+	g_slist_free_full (priv->cc_recipients, (GDestroyNotify) e_ews_mailbox_free);
+	priv->cc_recipients = NULL;
 
-	if (priv->bcc_recipients) {
-		g_slist_foreach (priv->bcc_recipients, (GFunc) e_ews_mailbox_free, NULL);
-		g_slist_free (priv->bcc_recipients);
-		priv->bcc_recipients = NULL;
-	}
+	g_slist_free_full (priv->bcc_recipients, (GDestroyNotify) e_ews_mailbox_free);
+	priv->bcc_recipients = NULL;
 
-	if (priv->modified_occurrences) {
-		g_slist_foreach (priv->modified_occurrences, (GFunc) g_free, NULL);
-		g_slist_free (priv->modified_occurrences);
-		priv->modified_occurrences = NULL;
-	}
+	g_slist_free_full (priv->modified_occurrences, g_free);
+	priv->modified_occurrences = NULL;
 
-	if (priv->attachments_list) {
-		g_slist_foreach (priv->attachments_list, (GFunc) g_free, NULL);
-		g_slist_free (priv->attachments_list);
-		priv->attachments_list = NULL;
-	}
+	g_slist_free_full (priv->attachments_ids, g_free);
+	priv->attachments_ids = NULL;
 
-	if (priv->attendees) {
-		g_slist_foreach (priv->attendees, (GFunc) ews_item_free_attendee, NULL);
-		g_slist_free (priv->attendees);
-		priv->attendees = NULL;
-	}
+	g_slist_free_full (priv->attendees, (GDestroyNotify) ews_item_free_attendee);
+	priv->attendees = NULL;
 
 	if (priv->calendar_item_accept_id) {
 		g_free (priv->calendar_item_accept_id->id);
@@ -537,11 +519,8 @@ parse_categories (EEwsItemPrivate *priv,
 	ESoapParameter *subparam;
 
 	/* release all the old data (if any) */
-	if (priv->categories) {
-		g_slist_foreach (priv->categories, (GFunc) g_free, NULL);
-		g_slist_free (priv->categories);
-		priv->categories = NULL;
-	}
+	g_slist_free_full (priv->categories, g_free);
+	priv->categories = NULL;
 
 	/* categories are an array of <string> */
 	for (subparam = e_soap_parameter_get_first_child (param);
@@ -594,7 +573,7 @@ process_attachments_list (EEwsItemPrivate *priv,
 {
 	ESoapParameter *subparam, *subparam1;
 
-	GSList *list = NULL;
+	GSList *ids = NULL;
 
 	for (subparam = e_soap_parameter_get_first_child (param); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
 		gchar *id;
@@ -613,10 +592,10 @@ process_attachments_list (EEwsItemPrivate *priv,
 			g_free (value);
 		}
 
-		list = g_slist_append (list, id);
+		ids = g_slist_append (ids, id);
 	}
 
-	priv->attachments_list = list;
+	priv->attachments_ids = ids;
 	return;
 }
 
@@ -1508,7 +1487,7 @@ e_ews_item_get_attachments_ids (EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
-	return item->priv->attachments_list;
+	return item->priv->attachments_ids;
 }
 
 gchar *
@@ -1532,6 +1511,7 @@ e_ews_embed_attachment_id_in_uri (const gchar *olduri,
 		g_warning ("Failed to move attachment cache file [%s -> %s]: %s\n", tmpfilename, filename, strerror (errno));
 	}
 
+	g_free (tmpfilename);
 	g_free (tmpdir);
 
 	return g_filename_to_uri (filename, NULL, NULL);
@@ -1540,8 +1520,7 @@ e_ews_embed_attachment_id_in_uri (const gchar *olduri,
 EEwsAttachmentInfo *
 e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param,
                                                 const gchar *cache,
-                                                const gchar *comp_uid,
-                                                gchar **attach_id)
+                                                const gchar *comp_uid)
 {
 	ESoapParameter *subparam;
 	const gchar *param_name, *tmpfilename;
@@ -1554,7 +1533,6 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param,
 	g_return_val_if_fail (param != NULL, NULL);
 
 	/* Parse element, look for filename and content */
-	*attach_id = NULL;
 	for (subparam = e_soap_parameter_get_first_child (param); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
 		param_name = e_soap_parameter_get_name (subparam);
 
@@ -1566,16 +1544,13 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param,
 			value = e_soap_parameter_get_string_value (subparam);
 			content = g_base64_decode (value, &data_len);
 			g_free (value);
-		} else if (g_ascii_strcasecmp (param_name, "AttachmentId") == 0) {
-			*attach_id = e_soap_parameter_get_property (subparam, "Id");
 		}
 	}
 
 	/* Make sure we have needed data */
-	if (!content || !name || !*attach_id) {
+	if (!content || !name) {
 		g_free (name);
 		g_free (content);
-		g_free (*attach_id);
 		return NULL;
 	}
 
