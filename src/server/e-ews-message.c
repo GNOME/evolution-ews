@@ -31,14 +31,17 @@
 
 ESoapMessage *
 e_ews_message_new_with_header (const gchar *uri,
-			       const gchar *impersonate_user,
+                               const gchar *impersonate_user,
                                const gchar *method_name,
                                const gchar *attribute_name,
                                const gchar *attribute_value,
-                               EwsServerVersion server_info)
+			       EEwsServerVersion server_version,
+                               EEwsServerVersion minimum_version,
+			       gboolean force_minimum_version)
 {
 	ESoapMessage *msg;
 	const gchar *server_ver;
+	EEwsServerVersion version;
 
 	msg = e_soap_message_new (
 		SOUP_METHOD_POST, uri, FALSE, NULL, NULL, NULL);
@@ -59,17 +62,39 @@ e_ews_message_new_with_header (const gchar *uri,
 
 	e_soap_message_start_envelope (msg);
 
-	/* server info */
-	if (server_info == EWS_EXCHANGE_2007_SP1)
-		server_ver = "Exchange2007_SP1";
-	else if (server_info == EWS_EXCHANGE_2010)
-		server_ver = "Exchange2010";
-	else if (server_info == EWS_EXCHANGE_2010_SP1)
-		server_ver = "Exchange2010_SP1";
-	else if (server_info == EWS_EXCHANGE_2010_SP2)
-		server_ver = "Exchange2010_SP2";
+	if (force_minimum_version)
+		version = minimum_version;
 	else
-		server_ver = "Exchange2007";
+		version = server_version >= minimum_version ? server_version : minimum_version;
+
+	/* server info */
+	switch (version) {
+		/*
+		 * If we don't know the server version, let's use the safest possible
+		 */
+		case E_EWS_EXCHANGE_UNKNOWN:
+			server_ver = "Exchange2007_SP1";
+			break;
+		case E_EWS_EXCHANGE_2007:
+			server_ver = "Exchange2007";
+			break;
+		case E_EWS_EXCHANGE_2007_SP1:
+			server_ver = "Exchange2007_SP1";
+			break;
+		case E_EWS_EXCHANGE_2010:
+			server_ver = "Exchange2010";
+			break;
+		case E_EWS_EXCHANGE_2010_SP1:
+			server_ver = "Exchange2010_SP1";
+			break;
+		/*
+		 * If we don't have support for the latest version, let's use the latest possible
+		 */
+		case E_EWS_EXCHANGE_2010_SP2:
+		case E_EWS_EXCHANGE_FUTURE:
+			server_ver = "Exchange2010_SP2";
+			break;
+	}
 
 	e_soap_message_start_header (msg);
 

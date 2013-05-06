@@ -95,6 +95,8 @@ struct _EEwsConnectionPrivate {
 	GSList *jobs;
 	GSList *active_job_queue;
 	GRecMutex queue_lock;
+
+	EEwsServerVersion version;
 };
 
 enum {
@@ -119,6 +121,7 @@ struct _EwsAsyncData {
 	gboolean includes_last_item;
 	EwsDelegateDeliver deliver_to;
 	EEwsFolderType folder_type;
+	EEwsConnection *cnc;
 };
 
 struct _EwsNode {
@@ -379,6 +382,41 @@ ews_connection_schedule_abort (EEwsConnection *cnc)
 }
 
 static void ews_cancel_request (GCancellable *cancellable, gpointer user_data);
+
+static void
+ews_discover_server_version (EEwsConnection *cnc,
+			     ESoapResponse *response)
+{
+	ESoapParameter *param;
+	gchar *version;
+
+	g_return_if_fail (cnc != NULL);
+
+	if (cnc->priv->version != E_EWS_EXCHANGE_UNKNOWN)
+		return;
+
+	param = e_soap_response_get_first_parameter_by_name (
+		response, "ServerVersionInfo", NULL);
+	if (!param)
+		return;
+
+	version = e_soap_parameter_get_property (param, "Version");
+
+	if (g_strcmp0 (version, "Exchange2007") == 0)
+		cnc->priv->version = E_EWS_EXCHANGE_2007;
+	else if (g_strcmp0 (version, "Exchange2007_SP1") == 0)
+		cnc->priv->version = E_EWS_EXCHANGE_2007_SP1;
+	else if (g_strcmp0 (version, "Exchange2010") == 0)
+		cnc->priv->version = E_EWS_EXCHANGE_2010;
+	else if (g_strcmp0 (version, "Exchange2010_SP1") == 0)
+		cnc->priv->version = E_EWS_EXCHANGE_2010_SP1;
+	else if (g_strcmp0 (version, "Exchange2010_SP2") == 0)
+		cnc->priv->version = E_EWS_EXCHANGE_2010_SP2;
+	else
+		cnc->priv->version = E_EWS_EXCHANGE_FUTURE;
+
+	g_free (version);
+}
 
 /* this is run in priv->soup_thread */
 static gboolean
@@ -782,6 +820,14 @@ get_folder_response_cb (ESoapResponse *response,
 	GError *error = NULL;
 
 	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	/*
+	 * During the first connection, we are able to get the current version of the Exchange server.
+	 * We are ensuring it happens during the ews_connection_try_password_sync(), that calls
+	 * ews_connection_get_folder_sync() and then we are able to get the current version of the
+	 * server from this first response.
+	 */
+	ews_discover_server_version (async_data->cnc, response);
 
 	param = e_soap_response_get_first_parameter_by_name (
 		response, "ResponseMessages", &error);
@@ -1465,6 +1511,8 @@ e_ews_connection_init (EEwsConnection *cnc)
 		SOUP_SESSION_ASYNC_CONTEXT,
 		cnc->priv->soup_context,
 		NULL);
+
+	cnc->priv->version = E_EWS_EXCHANGE_UNKNOWN;
 
 	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 2)) {
 		SoupLogger *logger;
@@ -3227,7 +3275,15 @@ e_ews_connection_sync_folder_items (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "SyncFolderItems", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"SyncFolderItems",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 	e_soap_message_start_element (msg, "ItemShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, default_props);
 
@@ -3423,7 +3479,15 @@ e_ews_connection_find_folder_items (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "FindItem", "Traversal", "Shallow", EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"FindItem",
+			"Traversal",
+			"Shallow",
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 	e_soap_message_start_element (msg, "ItemShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, default_props);
 
@@ -3546,7 +3610,15 @@ e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "SyncFolderHierarchy", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"SyncFolderHierarchy",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 	e_soap_message_start_element (msg, "FolderShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, "AllProperties");
 	e_soap_message_end_element (msg);
@@ -3644,6 +3716,31 @@ e_ews_connection_sync_folder_hierarchy_sync (EEwsConnection *cnc,
 	return success;
 }
 
+EEwsServerVersion
+e_ews_connection_get_server_version (EEwsConnection *cnc)
+{
+	g_return_val_if_fail (cnc != NULL, E_EWS_EXCHANGE_UNKNOWN);
+	g_return_val_if_fail (cnc->priv != NULL, E_EWS_EXCHANGE_UNKNOWN);
+
+	return cnc->priv->version;
+}
+
+gboolean
+e_ews_connection_satisfies_server_version (EEwsConnection *cnc,
+					  EEwsServerVersion version)
+{
+	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (cnc->priv != NULL, FALSE);
+
+	/*
+	 * This test always will fail if, for some reason, we were not able to get the server version.
+	 * It occurrs intentionally because we don't want to call any function that expects an EWS
+	 * Server version higher than 2007 SP1 without be sure we using an EWS Server with version
+	 * 2007 SP1 or later.
+	 */
+	return cnc->priv->version >= version;
+}
+
 void
 e_ews_connection_get_items (EEwsConnection *cnc,
                             gint pri,
@@ -3666,7 +3763,15 @@ e_ews_connection_get_items (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "GetItem", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"GetItem",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	if (progress_fn && progress_data)
 		e_soap_message_set_progress_fn (msg, progress_fn, progress_data);
@@ -3903,8 +4008,15 @@ e_ews_connection_delete_items (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "DeleteItem",
-		"DeleteType", ews_delete_type_to_str (delete_type), EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"DeleteItem",
+			"DeleteType",
+			ews_delete_type_to_str (delete_type),
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	if (send_cancels)
 		e_soap_message_add_attribute (
@@ -3959,8 +4071,15 @@ e_ews_connection_delete_item (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "DeleteItem",
-		"DeleteType", ews_delete_type_to_str (delete_type), EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"DeleteItem",
+			"DeleteType",
+			ews_delete_type_to_str (delete_type),
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	if (send_cancels)
 		e_soap_message_add_attribute (
@@ -4194,8 +4313,15 @@ e_ews_connection_update_items (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "UpdateItem",
-		NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"UpdateItem",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	if (conflict_res)
 		e_soap_message_add_attribute (
@@ -4355,8 +4481,15 @@ e_ews_connection_create_items (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "CreateItem",
-		NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"CreateItem",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	if (msg_disposition)
 		e_soap_message_add_attribute (
@@ -4510,7 +4643,15 @@ e_ews_connection_resolve_names (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "ResolveNames", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"ResolveNames",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	e_soap_message_add_attribute (msg, "SearchScope", get_search_scope_str (scope), NULL, NULL);
 
@@ -4788,7 +4929,15 @@ e_ews_connection_expand_dl (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "ExpandDL", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"ExpandDL",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	e_soap_message_start_element (msg, "Mailbox", "messages", NULL);
 
@@ -4932,8 +5081,15 @@ e_ews_connection_update_folder (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "UpdateFolder",
-		NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"UpdateFolder",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	e_soap_message_start_element (msg, "FolderChanges", "messages", NULL);
 
@@ -5056,8 +5212,15 @@ e_ews_connection_move_folder (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "MoveFolder",
-		NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"MoveFolder",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	e_soap_message_start_element (msg, "ToFolderId", "messages", NULL);
 	if (to_folder)
@@ -5160,8 +5323,15 @@ e_ews_connection_get_folder (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "GetFolder",
-		NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"GetFolder",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			TRUE);
 
 	e_soap_message_start_element (msg, "FolderShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, folder_shape);
@@ -5182,6 +5352,7 @@ e_ews_connection_get_folder (EEwsConnection *cnc,
 		e_ews_connection_get_folder);
 
 	async_data = g_new0 (EwsAsyncData, 1);
+	async_data->cnc = cnc;
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -5269,7 +5440,15 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "CreateFolder", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"CreateFolder",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	e_soap_message_start_element (msg, "ParentFolderId", "messages", NULL);
 
@@ -5419,11 +5598,25 @@ e_ews_connection_move_items (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	if (docopy)
-		msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "CopyItem",
-			NULL, NULL, EWS_EXCHANGE_2007_SP1);
+		msg = e_ews_message_new_with_header (
+				cnc->priv->uri,
+				cnc->priv->impersonate_user,
+				"CopyItem",
+				NULL,
+				NULL,
+				cnc->priv->version,
+				E_EWS_EXCHANGE_2007_SP1,
+				FALSE);
 	else
-		msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "MoveItem",
-			NULL, NULL, EWS_EXCHANGE_2007_SP1);
+		msg = e_ews_message_new_with_header (
+				cnc->priv->uri,
+				cnc->priv->impersonate_user,
+				"MoveItem",
+				NULL,
+				NULL,
+				cnc->priv->version,
+				E_EWS_EXCHANGE_2007_SP1,
+				FALSE);
 
 	e_soap_message_start_element (msg, "ToFolderId", "messages", NULL);
 	e_soap_message_start_element (msg, "FolderId", NULL, NULL);
@@ -5586,7 +5779,15 @@ e_ews_connection_delete_folder (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "DeleteFolder", "DeleteType", delete_type, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"DeleteFolder",
+			"DeleteType",
+			delete_type,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	e_soap_message_start_element (msg, "FolderIds", "messages", NULL);
 
@@ -5828,6 +6029,7 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
                                      gint pri,
                                      const EwsId *parent,
                                      const GSList *files,
+				     gboolean is_contact_photo,
                                      GCancellable *cancellable,
                                      GAsyncReadyCallback callback,
                                      gpointer user_data)
@@ -5848,7 +6050,15 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "CreateAttachment", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"CreateAttachment",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	e_soap_message_start_element (msg, "ParentItemId", "messages", NULL);
 	e_soap_message_add_attribute (msg, "Id", parent->id, NULL, NULL);
@@ -5860,7 +6070,7 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
 	e_soap_message_start_element (msg, "Attachments", "messages", NULL);
 
 	for (l = files; l != NULL; l = g_slist_next (l))
-		if (!e_ews_connection_attach_file (msg, l->data, FALSE, &local_error)) {
+		if (!e_ews_connection_attach_file (msg, l->data, is_contact_photo, &local_error)) {
 			if (local_error != NULL)
 				g_simple_async_result_take_error (simple, local_error);
 			g_simple_async_result_complete_in_idle (simple);
@@ -5920,6 +6130,7 @@ e_ews_connection_create_attachments_sync (EEwsConnection *cnc,
                                           gint pri,
                                           const EwsId *parent,
                                           const GSList *files,
+					  gboolean is_contact_photo,
                                           gchar **change_key,
 					  GSList **attachments_ids,
                                           GCancellable *cancellable,
@@ -5934,7 +6145,7 @@ e_ews_connection_create_attachments_sync (EEwsConnection *cnc,
 	closure = e_async_closure_new ();
 
 	e_ews_connection_create_attachments (
-		cnc, pri, parent, files, cancellable,
+		cnc, pri, parent, files, is_contact_photo, cancellable,
 		e_async_closure_callback, closure);
 
 	result = e_async_closure_wait (closure);
@@ -6022,7 +6233,15 @@ e_ews_connection_delete_attachments (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "DeleteAttachment", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"DeleteAttachment",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	/* start interation over all items to get the attachemnts */
 	e_soap_message_start_element (msg, "AttachmentIds", "messages", NULL);
@@ -6204,7 +6423,15 @@ e_ews_connection_get_attachments (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "GetAttachment", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"GetAttachment",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	/* not sure why I need it, need to check */
 	if (progress_fn && progress_data)
@@ -6304,232 +6531,6 @@ e_ews_connection_get_attachments_sync (EEwsConnection *cnc,
 
 	ret = e_ews_connection_get_attachments_finish (
 		cnc, result, items, error);
-
-	e_async_closure_free (closure);
-
-	return ret;
-}
-
-void
-e_ews_connection_get_photo_attachment_id (EEwsConnection *cnc,
-					  gint pri,
-					  const GSList *ids,
-					  GCancellable *cancellable,
-					  GAsyncReadyCallback callback,
-					  gpointer user_data)
-{
-	ESoapMessage *msg;
-	GSimpleAsyncResult *simple;
-	EwsAsyncData *async_data;
-	const GSList *l;
-
-	g_return_if_fail (cnc != NULL);
-
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "GetItem", NULL, NULL, EWS_EXCHANGE_2010_SP2);
-
-	e_soap_message_start_element (msg, "ItemShape", "messages", NULL);
-	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, "IdOnly");
-	e_ews_message_write_string_parameter (msg, "IncludeMimeContent", NULL, "false");
-	e_soap_message_start_element (msg, "AdditionalProperties", NULL, NULL);
-	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", "item:Attachments");
-	e_soap_message_end_element (msg);
-	e_soap_message_end_element (msg);
-
-	e_soap_message_start_element (msg, "ItemIds", "messages", NULL);
-
-	for (l = ids; l != NULL; l = g_slist_next (l))
-		e_ews_message_write_string_parameter_with_attribute (msg, "ItemId", NULL, NULL, "Id", l->data);
-
-	e_soap_message_end_element (msg);
-
-	e_ews_message_write_footer (msg);
-
-	simple = g_simple_async_result_new (
-		G_OBJECT (cnc), callback, user_data,
-		e_ews_connection_get_photo_attachment_id);
-
-	async_data = g_new0 (EwsAsyncData, 1);
-	g_simple_async_result_set_op_res_gpointer (
-		simple, async_data, (GDestroyNotify) async_data_free);
-
-	e_ews_connection_queue_request (
-		cnc, msg, get_items_response_cb,
-		pri, cancellable, simple);
-
-	g_object_unref (simple);
-}
-
-gboolean
-e_ews_connection_get_photo_attachment_id_finish (EEwsConnection *cnc,
-						 GAsyncResult *result,
-						 GSList **items,
-						 GError **error)
-{
-	GSimpleAsyncResult *simple;
-	EwsAsyncData *async_data;
-
-	g_return_val_if_fail (cnc != NULL, FALSE);
-	g_return_val_if_fail (
-		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_get_photo_attachment_id),
-		FALSE);
-
-	simple = G_SIMPLE_ASYNC_RESULT (result);
-	async_data = g_simple_async_result_get_op_res_gpointer (simple);
-
-	if (g_simple_async_result_propagate_error (simple, error))
-		return FALSE;
-
-	if (!async_data->items) {
-		g_set_error_literal (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ITEMNOTFOUND, _("No items found"));
-		return FALSE;
-	}
-
-	*items = async_data->items;
-
-	return TRUE;
-}
-
-gboolean
-e_ews_connection_get_photo_attachment_id_sync (EEwsConnection *cnc,
-					       gint pri,
-					       const GSList *ids,
-					       GSList **items,
-					       GCancellable *cancellable,
-					       GError **error)
-{
-	EAsyncClosure *closure;
-	GAsyncResult *result;
-	gboolean success;
-
-	g_return_val_if_fail (cnc != NULL, FALSE);
-
-	closure = e_async_closure_new ();
-
-	e_ews_connection_get_photo_attachment_id (
-		cnc, pri, ids, cancellable,
-		e_async_closure_callback, closure);
-
-	result = e_async_closure_wait (closure);
-
-	success = e_ews_connection_get_photo_attachment_id_finish (
-		cnc, result, items, error);
-
-	e_async_closure_free (closure);
-
-	return success;
-}
-
-void
-e_ews_connection_create_photo_attachment (EEwsConnection *cnc,
-					  gint pri,
-					  const EwsId *parent,
-					  const GSList *files,
-					  GCancellable *cancellable,
-					  GAsyncReadyCallback callback,
-					  gpointer user_data)
-{
-	ESoapMessage *msg;
-	GSimpleAsyncResult *simple;
-	const GSList *l;
-	EwsAsyncData *async_data;
-	GError *local_error = NULL;
-
-	g_return_if_fail (cnc != NULL);
-
-	simple = g_simple_async_result_new (
-		G_OBJECT (cnc), callback, user_data,
-		e_ews_connection_create_photo_attachment);
-
-	async_data = g_new0 (EwsAsyncData, 1);
-	g_simple_async_result_set_op_res_gpointer (
-		simple, async_data, (GDestroyNotify) async_data_free);
-
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "CreateAttachment", NULL, NULL, EWS_EXCHANGE_2010_SP2);
-
-	e_soap_message_start_element (msg, "ParentItemId", "messages", NULL);
-	e_soap_message_add_attribute (msg, "Id", parent->id, NULL, NULL);
-	if (parent->change_key)
-		e_soap_message_add_attribute (msg, "ChangeKey", parent->change_key, NULL, NULL);
-	e_soap_message_end_element (msg);
-
-	/* start interation over all items to get the attachemnts */
-	e_soap_message_start_element (msg, "Attachments", "messages", NULL);
-
-	for (l = files; l != NULL; l = g_slist_next (l))
-		if (!e_ews_connection_attach_file (msg, l->data, TRUE, &local_error)) {
-			if (local_error != NULL)
-				g_simple_async_result_take_error (simple, local_error);
-			g_simple_async_result_complete_in_idle (simple);
-			g_object_unref (simple);
-
-			return;
-		}
-
-	e_soap_message_end_element (msg); /* "Attachments" */
-
-	e_ews_message_write_footer (msg);
-
-	e_ews_connection_queue_request (
-		cnc, msg, create_attachments_response_cb,
-		pri, cancellable, simple);
-
-	g_object_unref (simple);
-}
-
-gboolean
-e_ews_connection_create_photo_attachment_finish (EEwsConnection *cnc,
-						 GAsyncResult *result,
-						 GSList **parents_ids,
-						 GError **error)
-{
-	GSimpleAsyncResult *simple;
-	EwsAsyncData *async_data;
-
-	g_return_val_if_fail (cnc != NULL, FALSE);
-	g_return_val_if_fail (
-		g_simple_async_result_is_valid (
-		result, G_OBJECT (cnc), e_ews_connection_create_photo_attachment),
-		FALSE);
-
-	simple = G_SIMPLE_ASYNC_RESULT (result);
-	async_data = g_simple_async_result_get_op_res_gpointer (simple);
-
-	if (g_simple_async_result_propagate_error (simple, error))
-		return FALSE;
-
-	if (parents_ids)
-		*parents_ids = async_data->items;
-	else
-		g_slist_free_full (async_data->items, g_free);
-
-	return TRUE;
-}
-
-gboolean
-e_ews_connection_create_photo_attachment_sync (EEwsConnection *cnc,
-					       gint pri,
-					       const EwsId *parent,
-					       const GSList *files,
-					       GSList **parents_ids,
-					       GCancellable *cancellable,
-					       GError **error)
-{
-	EAsyncClosure *closure;
-	GAsyncResult *result;
-	gboolean ret;
-
-	g_return_val_if_fail (cnc != NULL, FALSE);
-
-	closure = e_async_closure_new ();
-
-	e_ews_connection_create_photo_attachment (
-		cnc, pri, parent, files, cancellable,
-		e_async_closure_callback, closure);
-
-	result = e_async_closure_wait (closure);
-
-	ret = e_ews_connection_create_photo_attachment_finish (cnc, result, parents_ids, error);
 
 	e_async_closure_free (closure);
 
@@ -6697,8 +6698,15 @@ e_ews_connection_get_free_busy (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "GetUserAvailabilityRequest",
-		NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"GetUserAvailabilityRequest",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	free_busy_cb (msg, free_busy_user_data);
 
@@ -6975,7 +6983,15 @@ e_ews_connection_get_delegate (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "GetDelegate", "IncludePermissions", include_permissions ? "true" : "false", EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"GetDelegate",
+			"IncludePermissions",
+			include_permissions ? "true" : "false",
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	e_soap_message_start_element (msg, "Mailbox", "messages", NULL);
 
@@ -7144,7 +7160,15 @@ e_ews_connection_add_delegate (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 	g_return_if_fail (delegates != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "AddDelegate", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"AddDelegate",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	e_soap_message_start_element (msg, "Mailbox", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "EmailAddress", NULL, mail_id ? mail_id : cnc->priv->email);
@@ -7266,7 +7290,15 @@ e_ews_connection_remove_delegate (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 	g_return_if_fail (delegate_ids != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "RemoveDelegate", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"RemoveDelegate",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	e_soap_message_start_element (msg, "Mailbox", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "EmailAddress", NULL, mail_id ? mail_id : cnc->priv->email);
@@ -7368,7 +7400,15 @@ e_ews_connection_update_delegate (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "UpdateDelegate", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"UpdateDelegate",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	e_soap_message_start_element (msg, "Mailbox", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "EmailAddress", NULL, mail_id ? mail_id : cnc->priv->email);
@@ -7553,7 +7593,15 @@ e_ews_connection_get_folder_permissions (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 	g_return_if_fail (folder_id != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "GetFolder", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"GetFolder",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	e_soap_message_start_element (msg, "FolderShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, "IdOnly");
@@ -7663,7 +7711,15 @@ e_ews_connection_set_folder_permissions (EEwsConnection *cnc,
 	g_return_if_fail (folder_id != NULL);
 	g_return_if_fail (permissions != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "UpdateFolder", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"UpdateFolder",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	e_soap_message_start_element (msg, "FolderChanges", "messages", NULL);
 	e_ews_message_start_item_change (
@@ -7902,7 +7958,15 @@ e_ews_connection_get_password_expiration (EEwsConnection *cnc,
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "GetPasswordExpirationDate", NULL, NULL, EWS_EXCHANGE_2010_SP2);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"GetPasswordExpirationDate",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2010_SP2,
+			FALSE);
 	e_ews_message_write_string_parameter (msg, "MailboxSmtpAddress", NULL, mail_id ? mail_id : cnc->priv->email);
 	e_ews_message_write_footer (msg);
 
@@ -8057,7 +8121,15 @@ e_ews_connection_get_folder_info (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 	g_return_if_fail (folder_id != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "GetFolder", NULL, NULL, EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"GetFolder",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 
 	e_soap_message_start_element (msg, "FolderShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, "Default");
@@ -8239,7 +8311,15 @@ e_ews_connection_find_folder (EEwsConnection *cnc,
 
 	g_return_if_fail (cnc != NULL);
 
-	msg = e_ews_message_new_with_header (cnc->priv->uri, cnc->priv->impersonate_user, "FindFolder", "Traversal", "Shallow", EWS_EXCHANGE_2007_SP1);
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"FindFolder",
+			"Traversal",
+			"Shallow",
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			FALSE);
 	e_soap_message_start_element (msg, "FolderShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, "Default");
 	e_soap_message_start_element (msg, "AdditionalProperties", NULL, NULL);

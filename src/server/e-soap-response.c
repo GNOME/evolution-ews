@@ -223,8 +223,11 @@ e_soap_response_from_xmldoc (ESoapResponse *response,
 
 	xml_body = soup_xml_real_node (xml_root->children);
 	if (xml_body != NULL) {
-		if (strcmp ((const gchar *) xml_body->name, "Header") == 0)
+		if (strcmp ((const gchar *) xml_body->name, "Header") == 0) {
+			/* read header parameters */
+			parse_parameters (response, xml_body);
 			xml_body = soup_xml_real_node (xml_body->next);
+		}
 		if (strcmp ((const gchar *) xml_body->name, "Body") != 0) {
 			xmlFreeDoc (xmldoc);
 			return FALSE;

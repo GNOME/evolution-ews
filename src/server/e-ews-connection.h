@@ -326,47 +326,12 @@ gboolean	e_ews_connection_find_folder_items_sync
 						 GCancellable *cancellable,
 						 GError **error);
 
-void		e_ews_connection_get_photo_attachment_id
+EEwsServerVersion
+		e_ews_connection_get_server_version
+						(EEwsConnection *cnc);
+gboolean	e_ews_connection_satisfies_server_version
 						(EEwsConnection *cnc,
-						 gint pri,
-						 const GSList *ids,
-						 GCancellable *cancellable,
-						 GAsyncReadyCallback callback,
-						 gpointer user_data);
-gboolean	e_ews_connection_get_photo_attachment_id_finish
-						(EEwsConnection *cnc,
-						 GAsyncResult *result,
-						 GSList **items,
-						 GError **error);
-gboolean	e_ews_connection_get_photo_attachment_id_sync
-						(EEwsConnection *cnc,
-						 gint pri,
-						 const GSList *ids,
-						 GSList **items,
-						 GCancellable *cancellable,
-						 GError **error);
-
-void		e_ews_connection_create_photo_attachment
-						(EEwsConnection *cnc,
-						 gint pri,
-						 const EwsId *parent,
-						 const GSList *files,
-						 GCancellable *cancellable,
-						 GAsyncReadyCallback callback,
-						 gpointer user_data);
-gboolean	e_ews_connection_create_photo_attachment_finish
-						(EEwsConnection *cnc,
-						 GAsyncResult *result,
-						 GSList **parents_ids,
-						 GError **error);
-gboolean	e_ews_connection_create_photo_attachment_sync
-						(EEwsConnection *cnc,
-						 gint pri,
-						 const EwsId *parent,
-						 const GSList *files,
-						 GSList **parents_ids,
-						 GCancellable *cancellable,
-						 GError **error);
+						 EEwsServerVersion versio);
 
 void		e_ews_connection_get_items	(EEwsConnection *cnc,
 						 gint pri,
@@ -721,6 +686,7 @@ void		e_ews_connection_create_attachments
 						 gint pri,
 						 const EwsId *parent,
 						 const GSList *files,
+						 gboolean is_contact_photo,
 						 GCancellable *cancellable,
 						 GAsyncReadyCallback callback,
 						 gpointer user_data);
@@ -735,6 +701,7 @@ gboolean	e_ews_connection_create_attachments_sync
 						 gint pri,
 						 const EwsId *parent,
 						 const GSList *files,
+						 gboolean is_contact_photo,
 						 gchar **change_key,
 						 GSList **attachments_ids,
 						 GCancellable *cancellable,

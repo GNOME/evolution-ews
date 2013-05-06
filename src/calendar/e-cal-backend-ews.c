@@ -1570,7 +1570,7 @@ ews_create_object_cb (GObject *object,
 		e_ews_connection_create_attachments (
 			cnc, EWS_PRIORITY_MEDIUM,
 			item_id, info_attachments,
-			priv->cancellable,
+			FALSE, priv->cancellable,
 			ews_create_attachments_cb,
 			attach_data);
 
@@ -2441,7 +2441,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 		e_ews_connection_create_attachments (
 			priv->cnc, EWS_PRIORITY_MEDIUM,
 			item_id, info_attachments,
-			cancellable,
+			FALSE, cancellable,
 			ews_create_attachments_cb,
 			attach_data);
 

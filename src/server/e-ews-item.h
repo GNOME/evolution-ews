@@ -24,6 +24,7 @@
 
 #include "e-soap-message.h"
 #include "e-soap-response.h"
+#include "e-ews-message.h"
 
 G_BEGIN_DECLS
 

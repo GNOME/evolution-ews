@@ -458,6 +458,7 @@ ews_oof_settings_initable_init_async (GAsyncInitable *initable,
 	ESoapMessage *message;
 	const gchar *uri, *impersonate_user;
 	const gchar *mailbox;
+	EEwsServerVersion version;
 
 	settings = E_EWS_OOF_SETTINGS (initable);
 	connection = e_ews_oof_settings_get_connection (settings);
@@ -465,10 +466,17 @@ ews_oof_settings_initable_init_async (GAsyncInitable *initable,
 	uri = e_ews_connection_get_uri (connection);
 	impersonate_user = e_ews_connection_get_impersonate_user (connection);
 	mailbox = e_ews_connection_get_mailbox (connection);
+	version = e_ews_connection_get_server_version (connection);
 
 	message = e_ews_message_new_with_header (
-		uri, impersonate_user, "GetUserOofSettingsRequest",
-		NULL, NULL, EWS_EXCHANGE_2007_SP1);
+		uri,
+		impersonate_user,
+		"GetUserOofSettingsRequest",
+		NULL,
+		NULL,
+		version,
+		E_EWS_EXCHANGE_2007_SP1,
+		FALSE);
 
 	e_soap_message_start_element (message, "Mailbox", NULL, NULL);
 	e_ews_message_write_string_parameter (
@@ -955,6 +963,7 @@ e_ews_oof_settings_submit (EEwsOofSettings *settings,
 	gchar *external_reply;
 	gchar *start_time;
 	gchar *end_time;
+	EEwsServerVersion version;
 
 	g_return_if_fail (E_IS_EWS_OOF_SETTINGS (settings));
 
@@ -962,6 +971,7 @@ e_ews_oof_settings_submit (EEwsOofSettings *settings,
 	mailbox = e_ews_connection_get_mailbox (connection);
 	uri = e_ews_connection_get_uri (connection);
 	impersonate_user = e_ews_connection_get_impersonate_user (connection);
+	version = e_ews_connection_get_server_version (connection);
 
 	internal_reply = e_ews_oof_settings_dup_internal_reply (settings);
 	external_reply = e_ews_oof_settings_dup_external_reply (settings);
@@ -975,8 +985,14 @@ e_ews_oof_settings_submit (EEwsOofSettings *settings,
 	g_date_time_unref (date_time);
 
 	message = e_ews_message_new_with_header (
-		uri, impersonate_user, "SetUserOofSettingsRequest",
-		NULL, NULL, EWS_EXCHANGE_2007_SP1);
+		uri,
+		impersonate_user,
+		"SetUserOofSettingsRequest",
+		NULL,
+		NULL,
+		version,
+		E_EWS_EXCHANGE_2007_SP1,
+		FALSE);
 
 	/* <Mailbox> */
 

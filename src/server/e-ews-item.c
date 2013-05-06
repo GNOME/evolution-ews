@@ -32,7 +32,6 @@
 #include <glib/gprintf.h>
 #include <libsoup/soup-misc.h>
 #include "e-ews-item.h"
-#include "e-ews-message.h"
 
 #ifdef G_OS_WIN32
 

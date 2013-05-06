@@ -386,11 +386,18 @@ get_photo (EBookBackendEws *ebews,
 
 	id = e_ews_item_get_id (item);
 	contact_item_ids = g_slist_prepend (contact_item_ids, g_strdup (id->id));
-	if (!e_ews_connection_get_photo_attachment_id_sync (
+	if (!e_ews_connection_get_items_sync (
 			ebews->priv->cnc,
 			EWS_PRIORITY_MEDIUM,
 			contact_item_ids,
+			"IdOnly",
+			"item:Attachments",
+			FALSE,
+			NULL,
+			E_EWS_BODY_TYPE_TEXT,
 			&new_items,
+			NULL,
+			NULL,
 			cancellable,
 			error))
 		goto exit;
@@ -438,6 +445,13 @@ ebews_populate_photo (EBookBackendEws *ebews,
 		      GError **error)
 {
 	EContactPhoto *photo;
+
+	/*
+	 * Support for ContactPhoto was added in Exchange 2010 SP2.
+	 * We don't want to try to set/get this property if we are running in older version of the server.
+	 */
+	if (!e_ews_connection_satisfies_server_version (ebews->priv->cnc, E_EWS_EXCHANGE_2010_SP2))
+		return;
 
 	photo = get_photo (ebews, item, cancellable, error);
 	if (!photo) {
@@ -881,11 +895,13 @@ set_photo (EBookBackendEws *ebews,
 
 	files = g_slist_append (files, info);
 
-	e_ews_connection_create_photo_attachment_sync (
+	e_ews_connection_create_attachments_sync (
 			ebews->priv->cnc,
 			EWS_PRIORITY_MEDIUM,
 			id,
 			files,
+			TRUE,
+			NULL,
 			NULL,
 			cancellable,
 			error);
@@ -935,6 +951,13 @@ ebews_set_photo_changes (EBookBackendEws *ebews,
 	gchar *id = e_contact_get (old, E_CONTACT_UID);
 	const gchar *contact_photo_id;
 
+	/*
+	 * Support for ContactPhoto was added in Exchange 2010 SP2.
+	 * We don't want to try to set/get this property if we are running in older version of the server.
+	 */
+	if (!e_ews_connection_satisfies_server_version (ebews->priv->cnc, E_EWS_EXCHANGE_2010_SP2))
+		return;
+
 	old_photo = e_contact_get (old, E_CONTACT_PHOTO);
 	new_photo = e_contact_get (new, E_CONTACT_PHOTO);
 
@@ -942,11 +965,18 @@ ebews_set_photo_changes (EBookBackendEws *ebews,
 		goto exit;
 
 	contact_item_ids = g_slist_append (contact_item_ids, id);
-	if (!e_ews_connection_get_photo_attachment_id_sync (
+	if (!e_ews_connection_get_items_sync (
 			ebews->priv->cnc,
 			EWS_PRIORITY_MEDIUM,
 			contact_item_ids,
+			"IdOnly",
+			"item:Attachments",
+			FALSE,
+			NULL,
+			E_EWS_BODY_TYPE_TEXT,
 			&new_items,
+			NULL,
+			NULL,
 			cancellable,
 			error))
 		goto exit;
@@ -1265,14 +1295,20 @@ ews_create_contact_cb (GObject *object,
 		}
 
 		/*
-		 * The contact photo is basically an attachment with a special name.
-		 * Considering this, we only can set the contact photo after create the contact itself.
-		 * Then we are able to attach the picture to the "Contact Item".
+		 * Support for ContactPhoto was added in Exchange 2010 SP2.
+		 * We don't want to try to set/get this property if we are running in older version of the server.
 		 */
-		photo = e_contact_get (create_contact->contact, E_CONTACT_PHOTO);
-		if (photo) {
-			set_photo (ebews, create_contact->contact, photo, create_contact->cancellable, &error);
-			e_contact_photo_free (photo);
+		if (!e_ews_connection_satifies_server_version (ebews->priv->cnc, E_EWS_EXCHANGE_2010_SP2)) {
+			/*
+			 * The contact photo is basically an attachment with a special name.
+			 * Considering this, we only can set the contact photo after create the contact itself.
+			 * Then we are able to attach the picture to the "Contact Item".
+			 */
+			photo = e_contact_get (create_contact->contact, E_CONTACT_PHOTO);
+			if (photo) {
+				set_photo (ebews, create_contact->contact, photo, create_contact->cancellable, &error);
+				e_contact_photo_free (photo);
+			}
 		}
 
 		g_object_unref (item);

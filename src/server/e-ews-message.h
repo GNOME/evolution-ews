@@ -29,19 +29,23 @@
 G_BEGIN_DECLS
 
 typedef enum {
-	EWS_EXCHANGE_2007,
-	EWS_EXCHANGE_2007_SP1,
-	EWS_EXCHANGE_2010,
-	EWS_EXCHANGE_2010_SP1,
-	EWS_EXCHANGE_2010_SP2
-} EwsServerVersion;
+	E_EWS_EXCHANGE_UNKNOWN = -1,
+	E_EWS_EXCHANGE_2007,
+	E_EWS_EXCHANGE_2007_SP1,
+	E_EWS_EXCHANGE_2010,
+	E_EWS_EXCHANGE_2010_SP1,
+	E_EWS_EXCHANGE_2010_SP2,
+	E_EWS_EXCHANGE_FUTURE
+} EEwsServerVersion;
 
 ESoapMessage *	e_ews_message_new_with_header	(const gchar *uri,
 						 const gchar *impersonate_user,
 						 const gchar *method_name,
 						 const gchar *attribute_name,
 						 const gchar *attribute_value,
-						 EwsServerVersion version);
+						 EEwsServerVersion server_version,
+						 EEwsServerVersion minimum_version,
+						 gboolean force_minimum_version);
 void		e_ews_message_write_string_parameter
 						(ESoapMessage *msg,
 						 const gchar *name,
