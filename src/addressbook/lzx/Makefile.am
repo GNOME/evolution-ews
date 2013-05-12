@@ -34,6 +34,8 @@ gal_lzx_decompress_test_SOURCES = \
 	gal-lzx-decompress-test.c
 
 gal_lzx_decompress_test_LDADD = \
-	liblzx.la
+	liblzx.la \
+	$(GNOME_PLATFORM_LIBS) \
+	$(NULL)
 
 -include $(top_srcdir)/git.mk
