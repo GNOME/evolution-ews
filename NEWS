@@ -1,3 +1,19 @@
+Evolution-EWS 3.8.2 2013-05-12
+------------------------------
+
+Bug Fixes:
+	Bug 673351 - Empty Trash doesn't work without visiting it (Milan Crha)
+	Bug 686227 - EX addresses are returned for deleted mailboxes
+	             (Milan Crha)
+	Bug 691937 - Remove resources with e_source_remove_sync().
+	             (Matthew Barnes)
+	Bug 699231 - Capital letters' changes are not propagated to the server
+	             (Fabiano Fidêncio)
+	Bug 699241 - GAL decompression fails due to invalid window_size
+	             calculation (David Woodhouse)
+	Bug 699481 - Crash on GAL try to replace data (Fabiano Fidêncio)
+
+
 Evolution-EWS 3.8.1 2013-04-15
 ------------------------------
 
