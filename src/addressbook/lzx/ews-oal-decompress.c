@@ -224,11 +224,16 @@ oal_decompress_v4_full_detail_file (const gchar *filename,
 			else if (window_bits > 25)
 				window_bits = 25;
 
-			lzs = lzxd_init (input, output, NULL, 0, window_bits,
-					 0, 16, lzx_b->ucomp_size);
+			lzs = lzxd_init (input, output, window_bits,
+					 0, 16, lzx_b->ucomp_size, 1);
+			if (!lzs) {
+				g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed (lzxd_init)");
+				ret = FALSE;
+				goto exit;
+			}
 
 			if (lzxd_decompress (lzs, lzs->length) != LZX_ERR_OK) {
-				g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed");
+				g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed (lzxd_decompress)");
 				ret = FALSE;
 				goto exit;
 			}
@@ -355,8 +360,6 @@ oal_apply_binpatch (const gchar *filename, const gchar *orig_filename,
 	FILE *input = NULL, *output = NULL, *orig_input = NULL;
 	gboolean ret = TRUE;
 	GError *err = NULL;
-	unsigned char *ref_data = NULL;
-	int ref_data_len = 0;
 
 	input = fopen (filename, "rb");
 	if (!input) {
@@ -403,19 +406,6 @@ oal_apply_binpatch (const gchar *filename, const gchar *orig_filename,
 		/* note the file offset */
 		offset = ftell (input);
 		
-		if (lzx_b->source_size > ref_data_len) {
-			free(ref_data);
-			ref_data_len = lzx_b->source_size;
-			ref_data = malloc(ref_data_len);
-		}
-
-		printf("read %x\n", lzx_b->source_size);
-		if (fread(ref_data, 1, lzx_b->source_size, orig_input) != lzx_b->source_size) {
-			perror("Failed to read original source data\n");
-			ret = FALSE;
-			goto exit;
-		}
-
 		/* The window size should be the smallest power of two between 2^17 and 2^25 that is
 		   greater than or equal to the sum of the size of the reference data rounded up to
 		   a multiple of 32768 and the size of the subject data. Since we have no reference
@@ -429,11 +419,20 @@ oal_apply_binpatch (const gchar *filename, const gchar *orig_filename,
 		else if (window_bits > 25)
 			window_bits = 25;
 
-		lzs = lzxd_init (input, output, ref_data, lzx_b->source_size,
-				 window_bits, 0, 16, lzx_b->ucomp_size);
-
+		lzs = lzxd_init (input, output,
+				 window_bits, 0, 16, lzx_b->ucomp_size, 1);
+		if (!lzs) {
+			g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed (lzxd_init)");
+			ret = FALSE;
+			goto exit;
+		}
+		if (lzxd_set_reference_data(lzs, orig_input, lzx_b->source_size)) {
+			g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed (lzxd_set_reference_data)");
+			ret = FALSE;
+			goto exit;
+		}
 		if (lzxd_decompress (lzs, lzs->length) != LZX_ERR_OK) {
-			g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed");
+			g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed (lzxd_decompress)");
 			ret = FALSE;
 			goto exit;
 		}

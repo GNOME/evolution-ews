@@ -183,6 +183,7 @@ static int read_input(BITS_TYPE *p) {
      * so fake 2 more bytes at the end of input */
     if (read == 0) {
 	if (p->input_end) {
+	    D(("out of input bytes"))
 	    return p->error = LZX_ERR_READ;
 	}
 	else {
