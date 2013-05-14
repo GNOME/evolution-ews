@@ -220,10 +220,16 @@ oal_decompress_v4_full_detail_file (const gchar *filename,
 			else if (window_bits > 25)
 				window_bits = 25;
 
-			lzs = lzxd_init (input, output, window_bits, 0, 16, lzx_b->ucomp_size);
+			lzs = lzxd_init (input, output, window_bits,
+					 0, 16, lzx_b->ucomp_size, 1);
+			if (!lzs) {
+				g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed (lzxd_init)");
+				ret = FALSE;
+				goto exit;
+			}
 
 			if (lzxd_decompress (lzs, lzs->length) != LZX_ERR_OK) {
-				g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed");
+				g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed (lzxd_decompress)");
 				ret = FALSE;
 				goto exit;
 			}
