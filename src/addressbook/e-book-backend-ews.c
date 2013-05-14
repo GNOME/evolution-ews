@@ -1298,7 +1298,7 @@ ews_create_contact_cb (GObject *object,
 		 * Support for ContactPhoto was added in Exchange 2010 SP2.
 		 * We don't want to try to set/get this property if we are running in older version of the server.
 		 */
-		if (!e_ews_connection_satifies_server_version (ebews->priv->cnc, E_EWS_EXCHANGE_2010_SP2)) {
+		if (!e_ews_connection_satisfies_server_version (ebews->priv->cnc, E_EWS_EXCHANGE_2010_SP2)) {
 			/*
 			 * The contact photo is basically an attachment with a special name.
 			 * Considering this, we only can set the contact photo after create the contact itself.
