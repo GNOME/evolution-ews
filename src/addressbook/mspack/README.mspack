@@ -1,0 +1,15 @@
+
+This contains a local copy of parts of libmspack.
+
+Parts (lzxd.c and various header files) were originally lifted from
+libmspack and modified to support the LZX DELTA format.
+
+The "file format" support in oab-decompress.c was developed as part of
+Evolution-EWS, and a mostly rewritten version was later submitted for
+inclusion in libmspack upstream.
+
+If you have a sufficiently recent version of libmspack, none of the
+code in this directory will be used. Instead ews-oab-decompressor.c
+in the parent directory will invoke the decompressor in libmspack.
+
+

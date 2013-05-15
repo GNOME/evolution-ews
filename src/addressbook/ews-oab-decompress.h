@@ -20,16 +20,17 @@
  *
  */
 
-#ifndef __EWS_OAL_DECOMPRESS_H__
-#define __EWS_OAL_DECOMPRESS_H__
+#ifndef __EWS_OAB_DECOMPRESS_H__
+#define __EWS_OAB_DECOMPRESS_H__
 
 #include <glib.h>
 
-gboolean
-oal_decompress_v4_full_detail_file (const gchar *filename, const gchar *output_filename, GError **error);
-gboolean
-oal_apply_binpatch (const gchar *filename, const gchar *orig_filename,
-		    const gchar *output_filename,
-		    GError **error);
+gboolean ews_oab_decompress_full (const gchar *filename,
+				  const gchar *output_filename,
+				  GError **error);
+gboolean ews_oab_decompress_patch (const gchar *filename,
+				   const gchar *orig_filename,
+				   const gchar *output_filename,
+				   GError **error);
 
 #endif
