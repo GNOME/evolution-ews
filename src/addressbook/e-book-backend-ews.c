@@ -40,8 +40,6 @@
 
 #include <libedata-book/libedata-book.h>
 
-#include "lzx/ews-oal-decompress.h"
-
 #include "server/e-ews-item-change.h"
 #include "server/e-ews-message.h"
 #include "server/e-ews-connection.h"
@@ -52,6 +50,8 @@
 
 #include "e-book-backend-ews.h"
 #include "ews-oab-decoder.h"
+#include "ews-oab-decompress.h"
+
 
 #define d(x) x
 
@@ -2115,7 +2115,7 @@ ews_download_full_gal (EBookBackendEws *cbews,
 
 	cache_file = g_strdup_printf ("%s-%d.oab", priv->folder_name, full->seq);
 	uncompress_file = g_build_filename (cache_dir, cache_file, NULL);
-	if (!oal_decompress_v4_full_detail_file (comp_cache_file, uncompress_file, error)) {
+	if (!ews_oab_decompress_full (comp_cache_file, uncompress_file, error)) {
 		g_free (uncompress_file);
 		uncompress_file = NULL;
 		goto exit;
