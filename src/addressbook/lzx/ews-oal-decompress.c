@@ -48,17 +48,13 @@ typedef struct {
 	guint32 h_version;
 	guint32 l_version;
 	guint32 max_block_size;
-	guint32 source_size;
 	guint32 target_size;
-	guint32 source_crc;
-	guint32 target_crc;
 } LzxHeader;
 
 typedef struct {
 	guint32 flags;
 	guint32 comp_size;
 	guint32 ucomp_size;
-	guint32 source_size;
 	guint32 crc;
 } LzxBlockHeader;
 
@@ -171,7 +167,7 @@ oal_decompress_v4_full_detail_file (const gchar *filename,
 	}
 
 	output = fopen (output_filename, "wb");
-	if (!input) {
+	if (!output) {
 		g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "unable to open the output file");
 		ret = FALSE;
 		goto exit;
@@ -225,14 +221,13 @@ oal_decompress_v4_full_detail_file (const gchar *filename,
 				window_bits = 25;
 
 			lzs = lzxd_init (input, output, window_bits,
-					 0, 16, lzx_b->ucomp_size, 1);
+					 0, 4096, lzx_b->ucomp_size, 1);
 			if (!lzs) {
 				g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed (lzxd_init)");
 				ret = FALSE;
 				goto exit;
 			}
-
-			if (lzxd_decompress (lzs, lzs->length) != LZX_ERR_OK) {
+			if (lzxd_decompress (lzs, lzx_b->ucomp_size) != LZX_ERR_OK) {
 				g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed (lzxd_decompress)");
 				ret = FALSE;
 				goto exit;
@@ -265,14 +260,33 @@ exit:
 
 	return ret;
 }
-static LzxHeader *
+
+typedef struct {
+	guint32 h_version;
+	guint32 l_version;
+	guint32 max_block_size;
+	guint32 source_size;
+	guint32 target_size;
+	guint32 source_crc;
+	guint32 target_crc;
+} LzxPatchHeader;
+
+typedef struct {
+	guint32 patch_size;
+	guint32 target_size;
+	guint32 source_size;
+	guint32 crc;
+} LzxPatchBlockHeader;
+
+
+static LzxPatchHeader *
 read_patch_headers (FILE *input,
               GError **error)
 {
-	LzxHeader *lzx_h;
+	LzxPatchHeader *lzx_h;
 	gboolean success;
 
-	lzx_h = g_new0 (LzxHeader, 1);
+	lzx_h = g_new0 (LzxPatchHeader, 1);
 
 	success = read_uint32 (input, &lzx_h->h_version);
 	if (!success)
@@ -315,20 +329,21 @@ exit:
 
 	return lzx_h;
 }
-static LzxBlockHeader *
+
+static LzxPatchBlockHeader *
 read_patch_block_header (FILE *input,
 			 GError **error)
 {
-	LzxBlockHeader *lzx_b;
+	LzxPatchBlockHeader *lzx_b;
 	gboolean success;
 
-	lzx_b = g_new0 (LzxBlockHeader, 1);
+	lzx_b = g_new0 (LzxPatchBlockHeader, 1);
 
-	success = read_uint32 (input, &lzx_b->comp_size);
+	success = read_uint32 (input, &lzx_b->patch_size);
 	if (!success)
 		goto exit;
 
-	success = read_uint32 (input, &lzx_b->ucomp_size);
+	success = read_uint32 (input, &lzx_b->target_size);
 	if (!success)
 		goto exit;
 
@@ -352,10 +367,10 @@ exit:
 
 gboolean
 oal_apply_binpatch (const gchar *filename, const gchar *orig_filename,
-                                    const gchar *output_filename,
-                                    GError **error)
+		    const gchar *output_filename,
+		    GError **error)
 {
-	LzxHeader *lzx_h = NULL;
+	LzxPatchHeader *lzx_h = NULL;
 	guint total_decomp_size = 0;
 	FILE *input = NULL, *output = NULL, *orig_input = NULL;
 	gboolean ret = TRUE;
@@ -370,7 +385,7 @@ oal_apply_binpatch (const gchar *filename, const gchar *orig_filename,
 
 	orig_input = fopen (orig_filename, "rb");
 	if (!orig_input) {
-		g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "unable to open the input file");
+		g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "unable to open the reference input file");
 		ret = FALSE;
 		goto exit;
 	}
@@ -388,10 +403,9 @@ oal_apply_binpatch (const gchar *filename, const gchar *orig_filename,
 		goto exit;
 	}
 
-	printf("patch header: %x %x\n", lzx_h->source_size, lzx_h->target_size);
 	/* TODO decompressing multiple lzx_blocks has not been tested yet. Will need to get a setup and test it. */
 	do {
-		LzxBlockHeader *lzx_b;
+		LzxPatchBlockHeader *lzx_b;
 		struct lzxd_stream *lzs;
 		goffset offset;
 		guint ref_size, window_bits;
@@ -404,23 +418,23 @@ oal_apply_binpatch (const gchar *filename, const gchar *orig_filename,
 		}
 
 		/* note the file offset */
-		offset = ftell (input);
-		
-		/* The window size should be the smallest power of two between 2^17 and 2^25 that is
-		   greater than or equal to the sum of the size of the reference data rounded up to
-		   a multiple of 32768 and the size of the subject data. Since we have no reference
-		   data, forget that and the rounding. Just the smallest power of two which is large
-		   enough to cover the subject data (lzx_b->ucomp_size). */
+		offset = ftell(input);
+
+		/* The window size should be the smallest power of two
+		   between 2^17 and 2^25 that is greater than or equal
+		   to the sum of the size of the reference data
+		   rounded up to a multiple of 32768 and the size of
+		   the subject data. */
 		ref_size = (lzx_b->source_size + 32767) & ~32767;
-		window_bits = g_bit_nth_msf(ref_size + lzx_b->ucomp_size - 1, -1) + 1;
+		window_bits = g_bit_nth_msf(ref_size + lzx_b->target_size - 1, -1) + 1;
 
 		if (window_bits < 17)
 			window_bits = 17;
 		else if (window_bits > 25)
 			window_bits = 25;
 
-		lzs = lzxd_init (input, output,
-				 window_bits, 0, 16, lzx_b->ucomp_size, 1);
+		lzs = lzxd_init (input, output, window_bits,
+				 0, 4096, lzx_b->target_size, 1);
 		if (!lzs) {
 			g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed (lzxd_init)");
 			ret = FALSE;
@@ -439,10 +453,10 @@ oal_apply_binpatch (const gchar *filename, const gchar *orig_filename,
 
 		/* Set the fp to beggining of next block. This is a HACK, looks like decompress reads beyond the block.
 		 * Since we can identify the next block start from block header, we just reset the offset */
-		offset += lzx_b->comp_size;
+		offset += lzx_b->patch_size;
 		fseek (input, offset, SEEK_SET);
 
-		total_decomp_size += lzx_b->ucomp_size;
+		total_decomp_size += lzx_b->target_size;
 		g_free (lzx_b);
 	} while (total_decomp_size < lzx_h->target_size);
 
