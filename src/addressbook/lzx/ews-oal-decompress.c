@@ -31,8 +31,67 @@
 #include <unistd.h>
 #include <glib.h>
 #include <glib/gstdio.h>
+#ifdef USE_MSPACK
+#include <mspack.h>
+#else
 #include "lzx.h"
+#endif
 #include "ews-oal-decompress.h"
+
+#ifdef USE_MSPACK
+
+gboolean
+oal_decompress_v4_full_detail_file (const gchar *filename,
+                                    const gchar *output_filename,
+                                    GError **error)
+{
+	struct msoab_decompressor *msoab;
+	int ret;
+
+	msoab = mspack_create_oab_decompressor (NULL);
+	if (!msoab) {
+		g_set_error_literal (error, g_quark_from_string ("lzx"), 1,
+				     "Unable to create msoab decompressor");
+		return FALSE;
+	}
+	ret = msoab->decompress (msoab, filename, output_filename);
+	mspack_destroy_oab_decompressor (msoab);
+	if (ret != MSPACK_ERR_OK) {
+		g_set_error (error, g_quark_from_string ("lzx"), 1,
+			     "Failed to decompress LZX file: %d", ret);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+
+gboolean
+oal_apply_binpatch (const gchar *filename, const gchar *orig_filename,
+		    const gchar *output_filename, GError **error)
+{
+	struct msoab_decompressor *msoab;
+	int ret;
+
+	msoab = mspack_create_oab_decompressor (NULL);
+	if (!msoab) {
+		g_set_error_literal (error, g_quark_from_string ("lzx"), 1,
+				     "Unable to create msoab decompressor");
+		return FALSE;
+	}
+	ret = msoab->decompress_incremental (msoab, filename,
+					     orig_filename, output_filename);
+	mspack_destroy_oab_decompressor (msoab);
+	if (ret != MSPACK_ERR_OK) {
+		g_set_error (error, g_quark_from_string ("lzx"), 1,
+			     "Failed to apply LZX patch file: %d", ret);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+#else /* USE_MSPACK */
 
 /* endian-neutral reading of little-endian data */
 #define __egi32(a,n) ( ((((unsigned char *) a)[n+3]) << 24) | \
@@ -480,3 +539,4 @@ exit:
 
 	return ret;
 }
+#endif /* USE_MSPACK */
