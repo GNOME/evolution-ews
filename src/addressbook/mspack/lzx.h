@@ -171,7 +171,7 @@ struct lzxd_stream {
  * @return a pointer to an initialised lzxd_stream structure, or NULL if
  * there was not enough memory or parameters to the function were wrong.
  */
-extern struct lzxd_stream *lzxd_init(FILE *input,
+extern struct lzxd_stream *ews_lzxd_init(FILE *input,
 				     FILE *output,
 				     int window_bits,
 				     int reset_interval,
@@ -180,7 +180,7 @@ extern struct lzxd_stream *lzxd_init(FILE *input,
                                      char is_delta);
 
 /* see description of output_length in lzxd_init() */
-extern void lzxd_set_output_length(struct lzxd_stream *lzx,
+extern void ews_lzxd_set_output_length(struct lzxd_stream *lzx,
 				   off_t output_length);
 
 /**
@@ -195,7 +195,7 @@ extern void lzxd_set_output_length(struct lzxd_stream *lzx,
  *               than the LZX window size.
  * @return an error code, or LZX_ERR_OK if successful
  */
-extern int lzxd_set_reference_data(struct lzxd_stream *lzx,
+extern int ews_lzxd_set_reference_data(struct lzxd_stream *lzx,
                                    FILE *input,
                                    unsigned int length);
 
@@ -226,7 +226,7 @@ extern int lzxd_set_reference_data(struct lzxd_stream *lzx,
  * @param out_bytes the number of bytes of data to decompress.
  * @return an error code, or LZX_ERR_OK if successful
  */
-extern int lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes);
+extern int ews_lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes);
 
 /**
  * Frees all state associated with an LZX data stream. This will call
@@ -234,6 +234,6 @@ extern int lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes);
  *
  * @param lzx LZX decompression state to free.
  */
-void lzxd_free(struct lzxd_stream *lzx);
+void ews_lzxd_free(struct lzxd_stream *lzx);
 
 #endif
