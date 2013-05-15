@@ -80,6 +80,7 @@ struct _EEwsConnectionPrivate {
 	GThread *soup_thread;
 	GMainLoop *soup_loop;
 	GMainContext *soup_context;
+	EProxy *proxy;
 
 	CamelEwsSettings *settings;
 	GMutex password_lock;
@@ -1249,6 +1250,24 @@ create_folder_response_cb (ESoapResponse *response,
 }
 
 static void
+proxy_settings_changed (EProxy *proxy,
+                        gpointer user_data)
+{
+	SoupURI *proxy_uri = NULL;
+	EEwsConnection *cnc = (EEwsConnection *) user_data;
+
+	if (!cnc || !cnc->priv || !cnc->priv->uri || !cnc->priv->soup_session)
+		return;
+
+	/* use proxy if necessary */
+	if (e_proxy_require_proxy_for_uri (proxy, cnc->priv->uri)) {
+		proxy_uri = e_proxy_peek_uri_for (proxy, cnc->priv->uri);
+	}
+
+	g_object_set (cnc->priv->soup_session, SOUP_SESSION_PROXY_URI, proxy_uri, NULL);
+}
+
+static void
 ews_connection_set_settings (EEwsConnection *connection,
                              CamelEwsSettings *settings)
 {
@@ -1340,6 +1359,11 @@ ews_connection_dispose (GObject *object)
 		priv->soup_loop = NULL;
 		g_main_context_unref (priv->soup_context);
 		priv->soup_context = NULL;
+	}
+
+	if (priv->proxy) {
+		g_object_unref (priv->proxy);
+		priv->proxy = NULL;
 	}
 
 	if (priv->settings != NULL) {
@@ -1513,6 +1537,10 @@ e_ews_connection_init (EEwsConnection *cnc)
 		NULL);
 
 	cnc->priv->version = E_EWS_EXCHANGE_UNKNOWN;
+
+	cnc->priv->proxy = e_proxy_new ();
+	e_proxy_setup_proxy (cnc->priv->proxy);
+	g_signal_connect (cnc->priv->proxy, "changed", G_CALLBACK (proxy_settings_changed), cnc);
 
 	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 2)) {
 		SoupLogger *logger;
@@ -1852,6 +1880,9 @@ e_ews_connection_new (const gchar *uri,
 	g_hash_table_insert (
 		loaded_connections_permissions,
 		g_strdup (cnc->priv->hash_key), cnc);
+
+	/* update proxy with set 'uri' */
+	proxy_settings_changed (cnc->priv->proxy, cnc);
 
 	/* free memory */
 	g_mutex_unlock (&connecting);
