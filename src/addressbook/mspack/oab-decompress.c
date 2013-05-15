@@ -219,14 +219,14 @@ ews_oab_decompress_full (const gchar *filename, const gchar *output_filename,
 			else if (window_bits > 25)
 				window_bits = 25;
 
-			lzs = lzxd_init (input, output, window_bits,
+			lzs = ews_lzxd_init (input, output, window_bits,
 					 0, 4096, lzx_b->ucomp_size, 1);
 			if (!lzs) {
 				g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed (lzxd_init)");
 				ret = FALSE;
 				goto exit;
 			}
-			if (lzxd_decompress (lzs, lzx_b->ucomp_size) != LZX_ERR_OK) {
+			if (ews_lzxd_decompress (lzs, lzx_b->ucomp_size) != LZX_ERR_OK) {
 				g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed (lzxd_decompress)");
 				ret = FALSE;
 				goto exit;
@@ -431,19 +431,19 @@ ews_oab_decompress_patch (const gchar *filename, const gchar *orig_filename,
 		else if (window_bits > 25)
 			window_bits = 25;
 
-		lzs = lzxd_init (input, output, window_bits,
+		lzs = ews_lzxd_init (input, output, window_bits,
 				 0, 4096, lzx_b->target_size, 1);
 		if (!lzs) {
 			g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed (lzxd_init)");
 			ret = FALSE;
 			goto exit;
 		}
-		if (lzxd_set_reference_data(lzs, orig_input, lzx_b->source_size)) {
+		if (ews_lzxd_set_reference_data(lzs, orig_input, lzx_b->source_size)) {
 			g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed (lzxd_set_reference_data)");
 			ret = FALSE;
 			goto exit;
 		}
-		if (lzxd_decompress (lzs, lzs->length) != LZX_ERR_OK) {
+		if (ews_lzxd_decompress (lzs, lzs->length) != LZX_ERR_OK) {
 			g_set_error_literal (&err, g_quark_from_string ("lzx"), 1, "decompression failed (lzxd_decompress)");
 			ret = FALSE;
 			goto exit;

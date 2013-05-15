@@ -275,7 +275,7 @@ static void lzxd_reset_state(struct lzxd_stream *lzx) {
 
 /*-------- main LZX code --------*/
 
-struct lzxd_stream *lzxd_init(FILE *input,
+struct lzxd_stream *ews_lzxd_init(FILE *input,
 			      FILE *output,
 			      int window_bits,
 			      int reset_interval,
@@ -340,7 +340,7 @@ struct lzxd_stream *lzxd_init(FILE *input,
   return lzx;
 }
 
-int lzxd_set_reference_data(struct lzxd_stream *lzx,
+int ews_lzxd_set_reference_data(struct lzxd_stream *lzx,
 			    FILE *input,
 			    unsigned int length)
 {
@@ -374,11 +374,11 @@ int lzxd_set_reference_data(struct lzxd_stream *lzx,
     return LZX_ERR_OK;
 }
 
-void lzxd_set_output_length(struct lzxd_stream *lzx, off_t out_bytes) {
+void ews_lzxd_set_output_length(struct lzxd_stream *lzx, off_t out_bytes) {
   if (lzx) lzx->length = out_bytes;
 }
 
-int lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes) {
+int ews_lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes) {
   /* bitstream and huffman reading variables */
   register unsigned int bit_buffer;
   register int bits_left, i=0;
@@ -877,7 +877,7 @@ int lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes) {
   return LZX_ERR_OK;
 }
 
-void lzxd_free(struct lzxd_stream *lzx) {
+void ews_lzxd_free(struct lzxd_stream *lzx) {
   if (lzx) {
     free(lzx->inbuf);
     free(lzx->window);
