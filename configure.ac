@@ -221,6 +221,24 @@ dnl ****************************
 EVO_KRB5_SUPPORT
 
 dnl ****************************
+dnl Check for libmspack with OAB support
+dnl ****************************
+PKG_CHECK_MODULES(MSPACK, libmspack,
+		  [oldLIBS="$LIBS"
+		   oldCFLAGS="$CFLAGS"
+		   LIBS="$LIBS $MSPACK_LIBS"
+		   CFLAGS="$CFLAGS $MSPACK_CFLAGS"
+		   AC_CHECK_FUNC(mspack_create_oab_decompressor,
+				 [have_mspack=yes
+				  AC_DEFINE(USE_MSPACK, [1],
+				            [libmspack has OAB support])],
+				 [have_mspack=no])
+		   LIBS="$oldLIBS"
+		   CFLAGS="$oldCFLAGS"],
+		  [have_mspack=no])
+AM_CONDITIONAL(HAVE_MSPACK, [test "$have_mspack" = "yes"])
+
+dnl ****************************
 dnl Check for libsoup's SOUP_MESSAGE_IDEMPOTENT SoupMessage flag
 dnl ****************************
 AC_MSG_CHECKING([libsoup SOUP_MESSAGE_IDEMPOTENT flag])
