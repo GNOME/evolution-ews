@@ -1601,6 +1601,7 @@ void
 ews_oal_details_free (EwsOALDetails *details)
 {
 	if (details != NULL) {
+		g_free (details->type);
 		g_free (details->sha);
 		g_free (details->filename);
 		g_free (details);
@@ -2592,20 +2593,27 @@ parse_oal_full_details (xmlNode *node,
 	GSList *elements = NULL;
 
 	for (node = node->children; node; node = node->next) {
-		if (node->type == XML_ELEMENT_NODE && !strcmp ((gchar *) node->name, element)) {
-			EwsOALDetails *det = g_new0 (EwsOALDetails, 1);
+		EwsOALDetails *det;
+		if (node->type != XML_ELEMENT_NODE)
+			continue;
+		if (element && strcmp ((gchar *) node->name, element))
+			continue;
+		if (!element && strcmp ((gchar *) node->name, "Full") &&
+		    strcmp((gchar *) node->name, "Diff"))
+			continue;
 
-			det->seq = get_property_as_uint32 (node, "seq");
-			det->ver = get_property_as_uint32 (node, "ver");
-			det->size = get_property_as_uint32 (node, "size");
-			det->uncompressed_size = get_property_as_uint32 (node, "uncompressedsize");
-			det->sha = get_property (node, "uncompressedsize");
-			det->filename = g_strstrip (get_content (node));
+		det = g_new0 (EwsOALDetails, 1);
+		det->type = g_strdup((gchar *) node->name);
+		det->seq = get_property_as_uint32 (node, "seq");
+		det->ver = get_property_as_uint32 (node, "ver");
+		det->size = get_property_as_uint32 (node, "size");
+		det->uncompressed_size = get_property_as_uint32 (node, "uncompressedsize");
+		det->sha = get_property (node, "uncompressedsize");
+		det->filename = g_strstrip (get_content (node));
 
-			elements = g_slist_prepend (elements, det);
-			if (!strcmp (element, "Full"))
-				break;
-		}
+		elements = g_slist_prepend (elements, det);
+		if (element && !strcmp (element, "Full"))
+			break;
 	}
 
 	return elements;
