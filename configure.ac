@@ -318,7 +318,6 @@ src/server/Makefile
 src/server/tests/Makefile
 src/utils/Makefile
 src/addressbook/Makefile
-src/addressbook/lzx/Makefile
 src/calendar/Makefile
 src/camel/Makefile
 src/collection/Makefile
