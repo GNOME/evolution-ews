@@ -40,7 +40,7 @@ e_ews_message_new_with_header (const gchar *uri,
 			       gboolean force_minimum_version)
 {
 	ESoapMessage *msg;
-	const gchar *server_ver;
+	const gchar *server_ver = "Exchange2007";
 	EEwsServerVersion version;
 
 	msg = e_soap_message_new (
