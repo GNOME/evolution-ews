@@ -129,6 +129,7 @@ typedef struct {
 } EwsOAL;
 
 typedef struct {
+	gchar *type;
 	guint32 seq;
 	guint32 ver;
 	guint32 size;

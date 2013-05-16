@@ -2020,12 +2020,7 @@ exit:
 		g_free (uncompressed_filename);
 	}
 
-	if (full_l) {
-		g_free (full->sha);
-		g_free (full->filename);
-		g_free (full);
-		g_slist_free (full_l);
-	}
+	g_slist_free_full (full_l, (GDestroyNotify)ews_oal_details_free);
 
 	g_object_unref (oab_cnc);
 	return ret;
