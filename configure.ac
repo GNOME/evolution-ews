@@ -319,7 +319,6 @@ src/server/tests/Makefile
 src/server/libeews.pc
 src/utils/Makefile
 src/addressbook/Makefile
-src/addressbook/lzx/Makefile
 src/calendar/Makefile
 src/camel/Makefile
 src/collection/Makefile
