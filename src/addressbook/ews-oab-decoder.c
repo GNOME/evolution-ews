@@ -764,6 +764,82 @@ ews_destroy_oab_prop (guint32 prop_id,
 	}
 }
 
+static const gchar *
+ews_decode_addressbook_get_display_type (guint32 value)
+{
+	const gchar *display_type = NULL;
+
+	switch (value) {
+		case EWS_DT_MAILUSER:
+		/*
+		 * DT_MAILUSER means that the display type could be, besides itself, one of
+		 * these extended types: DT_ROOM, DT_EQUIPMENT, DT_SEC_DISTLIST. Considering
+		 * this, we can just ignore this case here and treat it properly in the
+		 * ews_decode_addressbook_get_display_type_extended() function.
+		 */
+			break;
+		case EWS_DT_DISTLIST:
+			display_type = "DT_DISTLIST";
+			break;
+		case EWS_DT_FORUM:
+			display_type = "DT_FORUM";
+			break;
+		case EWS_DT_AGENT:
+			display_type = "DT_AGENT";
+			break;
+		case EWS_DT_ORGANIZATION:
+			display_type = "DT_ORGANIZATION";
+			break;
+		case EWS_DT_PRIVATE_DISTLIST:
+			display_type = "DT_PRIVATE_DISTLIST";
+			break;
+		case EWS_DT_REMOTE_MAILUSER:
+			display_type = "DT_PRIVATE_MAILUSER";
+			break;
+	}
+
+	return display_type;
+}
+
+static const gchar *
+ews_decode_addressbook_get_display_type_extended (guint32 value)
+{
+	const gchar *display_type = "DT_MAILUSER";
+
+	switch (value) {
+		case EWS_DT_ROOM:
+			display_type = "DT_ROOM";
+			break;
+		case EWS_DT_EQUIPMENT:
+			display_type = "DT_EQUIPMENT";
+			break;
+		case EWS_DT_SEC_DISTLIST:
+			display_type = "DT_SEC_DISTLIST";
+			break;
+	}
+
+	return display_type;
+}
+
+static void
+ews_decode_addressbook_write_display_type (EContact **contact,
+					   guint32 value,
+					   gboolean extended)
+{
+	EVCardAttribute *attr;
+	const gchar *display_type;
+
+	if (extended)
+		display_type = ews_decode_addressbook_get_display_type_extended (value);
+	else
+		display_type = ews_decode_addressbook_get_display_type (value);
+
+	if (display_type != NULL) {
+		attr = e_vcard_attribute_new (NULL, "X-EWS-KIND");
+		e_vcard_add_attribute_with_value (E_VCARD (*contact), attr, display_type);
+	}
+}
+
 /**
  * ews_decode_addressbook_record 
  * @eod: 
@@ -811,6 +887,12 @@ ews_decode_addressbook_record (EwsOabDecoder *eod,
 		prop_id = GPOINTER_TO_UINT (val);
 
 		val = ews_decode_oab_prop (eod, prop_id, cancellable, error);
+
+		if (prop_id == EWS_PT_DISPLAY_TYPE)
+			ews_decode_addressbook_write_display_type (&contact, GPOINTER_TO_UINT (val), FALSE);
+
+		if (prop_id == EWS_PT_DISPLAY_TYPE_EX)
+			ews_decode_addressbook_write_display_type (&contact, GPOINTER_TO_UINT (val), TRUE);
 
 		/* Check the contact map and store the data in EContact */
 		index = g_hash_table_lookup (priv->prop_index_dict, GINT_TO_POINTER (prop_id));

@@ -1225,6 +1225,7 @@ typedef struct {
 	EContact *contact;
 	guint32 opid;
 	GCancellable *cancellable;
+	gboolean is_dl;
 } EwsCreateContact;
 
 static void
@@ -1331,11 +1332,18 @@ ews_create_contact_cb (GObject *object,
 	g_return_if_fail (ebews->priv->summary != NULL);
 
 	if (error == NULL) {
-		EEwsItem *item = (EEwsItem *) items->data;
+		EEwsItem *item = items->data;
 		EContactPhoto *photo;
+		EVCardAttribute *attr;
+
+		attr = e_vcard_attribute_new (NULL, "X-EWS-KIND");
+		e_vcard_add_attribute_with_value (
+				E_VCARD (create_contact->contact),
+				attr,
+				create_contact->is_dl ? "DT_DISTLIST" : "DT_MAILUSER");
 
 		/* set item id */
-		item_id = e_ews_item_get_id ((EEwsItem *) items->data);
+		item_id = e_ews_item_get_id (item);
 
 		e_contact_set (create_contact->contact, E_CONTACT_UID, item_id->id);
 		e_contact_set (create_contact->contact, E_CONTACT_REV, item_id->change_key);
@@ -1454,6 +1462,7 @@ e_book_backend_ews_create_contacts (EBookBackend *backend,
 	create_contact->opid = opid;
 	create_contact->contact = g_object_ref (contact);
 	create_contact->cancellable = g_object_ref (cancellable);
+	create_contact->is_dl = is_dl;
 
 	fid = e_ews_folder_id_new (priv->folder_id, NULL, FALSE);
 
@@ -2607,10 +2616,36 @@ ebews_sync_deleted_items (EBookBackendEws *ebews,
 	g_slist_free_full (deleted_ids, g_free);
 }
 
+static EContact *
+ebews_get_contact_info (EBookBackendEws *ebews,
+			EEwsItem *item,
+			GCancellable *cancellable,
+			GError **error)
+{
+	EContact *contact;
+	gint i, element_type;
+
+	contact = e_contact_new ();
+
+	for (i = 0; i < G_N_ELEMENTS (mappings); i++) {
+		element_type = mappings[i].element_type;
+
+		if (element_type == ELEMENT_TYPE_SIMPLE && !mappings[i].populate_contact_func) {
+			const gchar *val = mappings[i].get_simple_prop_func (item);
+
+			if (val != NULL)
+				e_contact_set (contact, mappings[i].field_id, val);
+		} else {
+			mappings[i].populate_contact_func (ebews, contact, item, cancellable, error);
+		}
+	}
+
+	return contact;
+}
+
 static void
 ebews_store_contact_items (EBookBackendEws *ebews,
                            GSList *new_items,
-                           gboolean distribution_list,
 			   GCancellable *cancellable,
                            GError **error)
 {
@@ -2623,32 +2658,19 @@ ebews_store_contact_items (EBookBackendEws *ebews,
 
 	for (l = new_items; l != NULL; l = g_slist_next (l)) {
 		EContact *contact;
-		gint i, element_type;
-		EEwsItem *item;
+		EEwsItem *item = l->data;
+		EVCardAttribute *attr;
 
-		item = (EEwsItem *) l->data;
+		item = l->data;
 		if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR) {
 			g_object_unref (item);
 			continue;
 		}
 
-		contact = e_contact_new ();
+		contact = ebews_get_contact_info (ebews, item, cancellable, error);
 
-		if (!distribution_list) {
-			for (i = 0; i < G_N_ELEMENTS (mappings); i++) {
-				element_type = mappings[i].element_type;
-
-				if (element_type == ELEMENT_TYPE_SIMPLE && !mappings[i].populate_contact_func) {
-					const gchar *val = mappings[i].get_simple_prop_func (item);
-
-					if (val != NULL)
-						e_contact_set (contact, mappings[i].field_id, val);
-				} else
-					mappings[i].populate_contact_func (ebews, contact, item, cancellable, error);
-			}
-		} else {
-			/* store display_name, fileas, item id */	
-		}
+		attr = e_vcard_attribute_new (NULL, "X-EWS-KIND");
+		e_vcard_add_attribute_with_value (E_VCARD (contact), attr, "DT_MAILUSER");
 
 		e_book_backend_sqlitedb_new_contact (priv->summary, priv->folder_id, contact, TRUE, error);
 		e_book_backend_notify_update (E_BOOK_BACKEND (ebews), contact);
@@ -2671,27 +2693,20 @@ ebews_get_vcards_list (EBookBackendEws *ebews,
 
 	for (l = new_items; l != NULL; l = g_slist_next (l)) {
 		EContact *contact;
-		gint i, element_type;
-		EEwsItem *item;
+		EEwsItem *item = l->data;
 		gchar *vcard_string = NULL;
+		EVCardAttribute *attr;
 
-		item = (EEwsItem *) l->data;
 		if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR) {
 			g_object_unref (item);
 			continue;
 		}
 
-		contact = e_contact_new ();
+		contact = ebews_get_contact_info (ebews, item, cancellable, error);
 
-		for (i = 0; i < G_N_ELEMENTS (mappings); i++) {
-			element_type = mappings[i].element_type;
-			if (element_type == ELEMENT_TYPE_SIMPLE && !mappings[i].populate_contact_func) {
-				const gchar *val = mappings[i].get_simple_prop_func (item);
-				if (val != NULL)
-					e_contact_set (contact, mappings[i].field_id, val);
-			} else
-				mappings[i].populate_contact_func (ebews, contact, item, cancellable, error);
-		}
+		attr = e_vcard_attribute_new (NULL, "X-EWS-KIND");
+		e_vcard_add_attribute_with_value (E_VCARD (contact), attr, "DT_MAILUSER");
+
 		vcard_string = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
 		*vcards = g_slist_append (*vcards, g_strdup(vcard_string));
 		g_free (vcard_string);
@@ -2811,11 +2826,16 @@ ebews_store_distribution_list_items (EBookBackendEws *ebews,
                                      GError **error)
 {
 	EContact *contact;
+	EVCardAttribute *attr;
+
 	g_return_if_fail (ebews->priv->summary != NULL);
 
 	contact = ebews_get_dl_info (ebews, id, d_name, members, error);
 	if (contact == NULL)
 		return;
+
+	attr = e_vcard_attribute_new (NULL, "X-EWS-KIND");
+	e_vcard_add_attribute_with_value (E_VCARD (contact), attr, "DT_DISTLIST");
 
 	e_book_backend_sqlitedb_new_contact (ebews->priv->summary, ebews->priv->folder_id, contact, TRUE, error);
 	e_book_backend_notify_update (E_BOOK_BACKEND (ebews), contact);
@@ -2832,11 +2852,15 @@ ebews_vcards_append_dl (EBookBackendEws *ebews,
 			GError **error)
 {
 	EContact *contact;
+	EVCardAttribute *attr;
 	gchar *vcard_string = NULL;
 
 	contact = ebews_get_dl_info (ebews, id, d_name, members, error);
 	if (contact == NULL)
 		return;
+
+	attr = e_vcard_attribute_new (NULL, "X-EWS-KIND");
+	e_vcard_add_attribute_with_value (E_VCARD (contact), attr, "DT_DISTLIST");
 
 	vcard_string = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
 	*vcards = g_slist_append (*vcards, g_strdup(vcard_string));
@@ -2895,7 +2919,7 @@ ebews_fetch_items (EBookBackendEws *ebews,
 
 	if (new_items) {
 		if (store_to_cache)
-			ebews_store_contact_items (ebews, new_items, FALSE, cancellable, error);
+			ebews_store_contact_items (ebews, new_items, cancellable, error);
 		else
 			ebews_get_vcards_list (ebews, new_items, vcards, cancellable, error);
 	}
