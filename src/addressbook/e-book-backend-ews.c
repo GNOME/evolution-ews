@@ -3525,8 +3525,26 @@ e_book_backend_ews_dispose (GObject *object)
 	bews = E_BOOK_BACKEND_EWS (object);
 	priv = bews->priv;
 
-	if (priv->cancellable) {
+	if (priv->cancellable)
 		g_cancellable_cancel (priv->cancellable);
+
+	if (priv->dlock) {
+		g_mutex_lock (&priv->dlock->mutex);
+		priv->dlock->exit = TRUE;
+		g_mutex_unlock (&priv->dlock->mutex);
+
+		g_cond_signal (&priv->dlock->cond);
+
+		if (priv->dthread)
+			g_thread_join (priv->dthread);
+
+		g_mutex_clear (&priv->dlock->mutex);
+		g_cond_clear (&priv->dlock->cond);
+		g_free (priv->dlock);
+		priv->dthread = NULL;
+	}
+
+	if (priv->cancellable) {
 		g_object_unref (priv->cancellable);
 		priv->cancellable = NULL;
 	}
@@ -3547,22 +3565,6 @@ e_book_backend_ews_dispose (GObject *object)
 
 	g_free (priv->attachment_dir);
 	priv->attachment_dir = NULL;
-
-	if (priv->dlock) {
-		g_mutex_lock (&priv->dlock->mutex);
-		priv->dlock->exit = TRUE;
-		g_mutex_unlock (&priv->dlock->mutex);
-
-		g_cond_signal (&priv->dlock->cond);
-
-		if (priv->dthread)
-			g_thread_join (priv->dthread);
-
-		g_mutex_clear (&priv->dlock->mutex);
-		g_cond_clear (&priv->dlock->cond);
-		g_free (priv->dlock);
-		priv->dthread = NULL;
-	}
 
 	if (priv->summary) {
 		g_object_unref (priv->summary);
