@@ -1992,6 +1992,13 @@ ebews_start_gal_sync (gpointer data)
 			goto exit;
 
 		e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id, "etag", etag?:"", NULL);
+		if (e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id,
+							   "oal-filename", uncompressed_filename,
+							   NULL)) {
+			/* Don't let it get deleted */
+			g_free(uncompressed_filename);
+			uncompressed_filename = NULL;
+		}
 
 		seq = g_strdup_printf ("%"G_GUINT32_FORMAT, full->seq);
 		ret = e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id, "seq", seq, &error);
