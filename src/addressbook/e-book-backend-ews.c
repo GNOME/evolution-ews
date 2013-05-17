@@ -2181,16 +2181,16 @@ exit:
 }
 
 static gchar *
-ews_download_full_gal (EBookBackendEws *cbews,
+ews_download_gal_file (EBookBackendEws *cbews,
                        EwsOALDetails *full,
                        GCancellable *cancellable,
                        GError **error)
 {
 	EBookBackendEwsPrivate *priv = cbews->priv;
 	EEwsConnection *oab_cnc;
-	gchar *full_url, *oab_url, *cache_file = NULL;
+	gchar *full_url, *oab_url;
 	const gchar *cache_dir;
-	gchar *comp_cache_file = NULL, *uncompress_file = NULL;
+	gchar *download_path = NULL;
 	gchar *password;
 	CamelEwsSettings *ews_settings;
 
@@ -2200,7 +2200,7 @@ ews_download_full_gal (EBookBackendEws *cbews,
 	oab_url = g_strndup (priv->oab_url, strlen (priv->oab_url) - 7);
 	full_url = g_strconcat (oab_url, full->filename, NULL);
 	cache_dir = e_book_backend_get_cache_dir (E_BOOK_BACKEND (cbews));
-	comp_cache_file = g_build_filename (cache_dir, full->filename, NULL);
+	download_path = g_build_filename (cache_dir, full->filename, NULL);
 
 	oab_cnc = e_ews_connection_new (full_url, ews_settings);
 
@@ -2208,30 +2208,55 @@ ews_download_full_gal (EBookBackendEws *cbews,
 	e_ews_connection_set_password (oab_cnc, password);
 	g_free (password);
 
-	if (!e_ews_connection_download_oal_file_sync (
-		oab_cnc, comp_cache_file, NULL, NULL, cancellable, error))
-		goto exit;
-
-	cache_file = g_strdup_printf ("%s-%d.oab", priv->folder_name, full->seq);
-	uncompress_file = g_build_filename (cache_dir, cache_file, NULL);
-	if (!ews_oab_decompress_full (comp_cache_file, uncompress_file, error)) {
-		g_free (uncompress_file);
-		uncompress_file = NULL;
+	if (!e_ews_connection_download_oal_file_sync (oab_cnc, download_path,
+						      NULL, NULL, cancellable, error)) {
+		g_free (download_path);
+		download_path = NULL;
 		goto exit;
 	}
 
-	d (g_print ("OAL file decompressed %s \n", uncompress_file);)
+	d (g_print ("OAL file downloaded %s\n", download_path);)
 
-exit:
-	if (comp_cache_file)
-		g_unlink (comp_cache_file);
+ exit:
 	g_object_unref (oab_cnc);
 	g_free (oab_url);
 	g_free (full_url);
-	g_free (comp_cache_file);
-	g_free (cache_file);
 
-	return uncompress_file;
+	return download_path;
+}
+
+static gchar *
+ews_download_full_gal (EBookBackendEws *cbews,
+                       EwsOALDetails *full,
+                       GCancellable *cancellable,
+                       GError **error)
+{
+	EBookBackendEwsPrivate *priv = cbews->priv;
+	const gchar *cache_dir;
+	gchar *lzx_path, *oab_file, *oab_path;
+
+	lzx_path = ews_download_gal_file (cbews, full, cancellable, error);
+	if (!lzx_path)
+		return NULL;
+
+	cache_dir = e_book_backend_get_cache_dir (E_BOOK_BACKEND (cbews));
+	oab_file = g_strdup_printf ("%s-%d.oab", priv->folder_name, full->seq);
+	oab_path = g_build_filename (cache_dir, oab_file, NULL);
+	if (!ews_oab_decompress_full (lzx_path, oab_path, error)) {
+		g_free (oab_path);
+		oab_path = NULL;
+		goto exit;
+	}
+
+	d (g_print ("OAL file decompressed %s \n", oab_path);)
+
+exit:
+	if (lzx_path) {
+		g_unlink(lzx_path);
+		g_free (lzx_path);
+	}
+	g_free (oab_file);
+	return oab_path;
 }
 
 static gboolean
@@ -2405,7 +2430,7 @@ ebews_start_gal_sync (gpointer data)
 		gchar *seq;
 
 		d (printf ("Ewsgal: Downloading full gal \n");)
-		uncompressed_filename = ews_download_full_gal (cbews, full, priv->cancellable, &error);
+		uncompressed_filename = ews_download_full_gal (cbews, full_l->data, priv->cancellable, &error);
 		if (error) {
 			ret = FALSE;
 			goto exit;
