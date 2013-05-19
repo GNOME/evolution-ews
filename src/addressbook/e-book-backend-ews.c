@@ -1719,34 +1719,6 @@ e_book_backend_ews_build_restriction (const gchar *query,
 
 /************* GAL sync ***********************/
 
-static gboolean
-ews_gal_needs_update (EBookBackendEws *cbews,
-                      EwsOALDetails *full,
-                      GError **error)
-{
-	EBookBackendEwsPrivate *priv = cbews->priv;
-	guint32 seq;
-	gboolean ret = FALSE;
-	gchar *tmp;
-
-	if (!priv->summary)
-		return FALSE;
-
-	tmp = e_book_backend_sqlitedb_get_key_value (priv->summary, priv->folder_id, "seq", error);
-	if (!tmp)
-		goto exit;
-
-	sscanf (tmp, "%"G_GUINT32_FORMAT, &seq);
-	if (seq < full->seq)
-		ret = TRUE;
-
-	d (printf ("Gal needs update: %d (local: %d, remote: %d)\n",
-		   ret, seq, full->seq);)
-exit:
-	g_free (tmp);
-	return ret;
-}
-
 static gchar *
 ews_download_gal_file (EBookBackendEws *cbews,
                        EwsOALDetails *full,
@@ -1776,7 +1748,8 @@ ews_download_gal_file (EBookBackendEws *cbews,
 	g_free (password);
 
 	if (!e_ews_connection_download_oal_file_sync (oab_cnc, download_path,
-						      NULL, NULL, cancellable, error)) {
+						      NULL, NULL,
+						      cancellable, error)) {
 		g_free (download_path);
 		download_path = NULL;
 		goto exit;
@@ -1819,11 +1792,20 @@ ews_download_full_gal (EBookBackendEws *cbews,
 
 exit:
 	if (lzx_path) {
-		g_unlink(lzx_path);
+		g_unlink (lzx_path);
 		g_free (lzx_path);
 	}
 	g_free (oab_file);
 	return oab_path;
+}
+
+static gchar *
+ews_download_gal (EBookBackendEws *cbews, EwsOALDetails *full, GSList *deltas, guint32 old_seq,
+		  GCancellable *cancellable, GError **error)
+{
+	d (printf ("Ewsgal: Downloading full gal \n");)
+
+	return ews_download_full_gal (cbews, full, cancellable, error);
 }
 
 static gboolean
@@ -1898,6 +1880,13 @@ ews_gal_store_contact (EContact *contact,
 		e_book_backend_notify_complete (E_BOOK_BACKEND (data->cbews));
 }
 
+static gint det_sort_func (gconstpointer _a, gconstpointer _b)
+{
+	const EwsOALDetails *a = _a, *b = _b;
+
+	return a->seq - b->seq;
+}
+
 static gboolean
 ews_replace_gal_in_db (EBookBackendEws *cbews,
                        const gchar *filename,
@@ -1954,11 +1943,15 @@ ebews_start_gal_sync (gpointer data)
 	GError *error = NULL;
 	EEwsConnection *oab_cnc;
 	GSList *full_l = NULL;
+	GSList *deltas = NULL;
 	gboolean ret = TRUE;
 	gboolean is_populated;
 	gchar *uncompressed_filename = NULL;
 	gchar *password;
 	gchar *old_etag = NULL, *etag = NULL;
+	gchar *seq;
+	guint32 old_seq = 0;
+	guint32 delta_size = 0;
 	CamelEwsSettings *ews_settings;
 
 	cbews = (EBookBackendEws *) data;
@@ -1974,10 +1967,18 @@ ebews_start_gal_sync (gpointer data)
 	d (printf ("Ewsgal: Fetching oal full details file \n");)
 
 	is_populated = e_book_backend_sqlitedb_get_is_populated (priv->summary, priv->folder_id, NULL);
-	if (is_populated)
+	if (is_populated) {
+		gchar *tmp;
 		old_etag = e_book_backend_sqlitedb_get_key_value (
 			priv->summary, priv->folder_id, "etag", NULL);
-
+		tmp = e_book_backend_sqlitedb_get_key_value (
+			priv->summary, priv->folder_id, "seq", NULL);
+		if (tmp)
+			old_seq = strtoul(tmp, NULL, 10);
+		else
+			is_populated = FALSE;
+		g_free (tmp);
+	}
 	if (!e_ews_connection_get_oal_detail_sync (
 		oab_cnc, priv->folder_id, "Full", old_etag, &full_l, &etag,
 		priv->cancellable, &error)) {
@@ -1992,47 +1993,68 @@ ebews_start_gal_sync (gpointer data)
 	if (full_l == NULL)
 		goto exit;
 
-	full = (EwsOALDetails *) full_l->data;
-	/* TODO fetch differential updates if available instead of downloading the whole GAL */
-	if (!is_populated || ews_gal_needs_update (cbews, full, &error)) {
-		gchar *seq;
+	while (full_l) {
+		EwsOALDetails *det = full_l->data;
 
-		d (printf ("Ewsgal: Downloading full gal \n");)
-		uncompressed_filename = ews_download_full_gal (cbews, full_l->data, priv->cancellable, &error);
-		if (error) {
-			ret = FALSE;
-			goto exit;
+		/* Throw away anything older than we already have */
+		if (det->seq < old_seq) {
+			ews_oal_details_free (det);
+		} else if (!strcmp (det->type, "Full")) {
+			if (full)
+				ews_oal_details_free (full);
+			full = det;
+		} else if (is_populated && !strcmp (det->type, "Diff")) {
+			delta_size += det->size;
+			deltas = g_slist_insert_sorted (deltas, det, det_sort_func);
+		} else {
+			ews_oal_details_free (det);
 		}
+		full_l = g_slist_remove (full_l, det);
+	}
 
-		d (printf ("Ewsgal: Removing old gal \n");)
-		/* remove old_gal_file */
-		ret = ews_remove_old_gal_file (cbews, &error);
-		if (!ret) {
-			goto exit;
-		}
+	if (!full)
+		goto exit;
 
-		d (printf ("Ewsgal: Replacing old gal with new gal contents in db \n");)
-		ret = ews_replace_gal_in_db (cbews, uncompressed_filename, priv->cancellable, &error);
-		if (!ret)
-			goto exit;
+	/* If the deltas would be bigger, just download the new full file */
+	if (delta_size > full->size) {
+		g_slist_free_full (deltas, (GDestroyNotify) ews_oal_details_free);
+		deltas = NULL;
+	}
 
-		e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id, "etag", etag?:"", NULL);
-		if (e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id,
-							   "oal-filename", uncompressed_filename,
-							   NULL)) {
-			/* Don't let it get deleted */
-			g_free(uncompressed_filename);
-			uncompressed_filename = NULL;
-		}
+	uncompressed_filename = ews_download_gal (cbews, full, deltas, old_seq, priv->cancellable, &error);
+	if (!uncompressed_filename) {
+		ret = FALSE;
+		goto exit;
+	}
 
-		seq = g_strdup_printf ("%"G_GUINT32_FORMAT, full->seq);
-		ret = e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id, "seq", seq, &error);
-		g_free (seq);
+	d (printf ("Ewsgal: Removing old gal \n");)
+	/* remove old_gal_file */
+	ret = ews_remove_old_gal_file (cbews, &error);
+	if (!ret) {
+		goto exit;
+	}
 
-		if (!ret) {
-			e_book_backend_sqlitedb_delete_addressbook (priv->summary, priv->folder_id, &error);
-			goto exit;
-		}
+	d (printf ("Ewsgal: Replacing old gal with new gal contents in db \n");)
+	ret = ews_replace_gal_in_db (cbews, uncompressed_filename, priv->cancellable, &error);
+	if (!ret)
+		goto exit;
+
+	e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id, "etag", etag?:"", NULL);
+	if (e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id,
+						   "oal-filename", uncompressed_filename,
+						   NULL)) {
+		/* Don't let it get deleted */
+		g_free (uncompressed_filename);
+		uncompressed_filename = NULL;
+	}
+
+	seq = g_strdup_printf ("%"G_GUINT32_FORMAT, full->seq);
+	ret = e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id, "seq", seq, &error);
+	g_free (seq);
+
+	if (!ret) {
+		e_book_backend_sqlitedb_delete_addressbook (priv->summary, priv->folder_id, &error);
+		goto exit;
 	}
 
 	d (printf ("Ews gal: sync successfull complete \n");)
@@ -2052,7 +2074,12 @@ exit:
 		g_free (uncompressed_filename);
 	}
 
-	g_slist_free_full (full_l, (GDestroyNotify)ews_oal_details_free);
+	if (full)
+		ews_oal_details_free (full);
+	if (deltas)
+		g_slist_free_full (deltas, (GDestroyNotify) ews_oal_details_free);
+	if (full_l)
+		g_slist_free_full (full_l, (GDestroyNotify) ews_oal_details_free);
 
 	g_object_unref (oab_cnc);
 	return ret;
