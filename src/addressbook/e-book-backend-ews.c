@@ -2233,11 +2233,68 @@ exit:
 }
 
 static gchar *
-ews_download_gal (EBookBackendEws *cbews, EwsOALDetails *full, GSList *deltas, guint32 old_seq,
+ews_download_gal (EBookBackendEws *cbews, EwsOALDetails *full, GSList *deltas, guint32 seq,
 		  GCancellable *cancellable, GError **error)
 {
-	d (printf ("Ewsgal: Downloading full gal \n");)
+	EBookBackendEwsPrivate *priv = cbews->priv;
+	GSList *p;
+	gchar *thisoab, *nextoab = NULL;
+	gchar *oab_file = NULL, *lzx_path = NULL;
+	const gchar *cache_dir;
 
+	cache_dir = e_book_backend_get_cache_dir (E_BOOK_BACKEND (cbews));
+
+	thisoab = e_book_backend_sqlitedb_get_key_value (priv->summary, priv->folder_id,
+							 "oab-filename", NULL);
+	if (!thisoab)
+		goto full;
+
+	for (p = deltas; p; p = p->next) {
+		EwsOALDetails *det = p->data;
+		GError *local_error = NULL;
+
+		seq++;
+		if (det->seq != seq)
+			break;
+
+		lzx_path = ews_download_gal_file (cbews, det, cancellable, NULL);
+		if (!lzx_path)
+			break;
+
+		g_free (oab_file);
+		oab_file = g_strdup_printf ("%s-%d.oab", priv->folder_name, seq);
+		nextoab = g_build_filename (cache_dir, oab_file, NULL);
+
+		if (!ews_oab_decompress_patch (lzx_path, thisoab, nextoab, &local_error)) {
+			d (g_print ("Failed to apply incremental patch: %s\n",
+				    local_error->message));
+			g_error_free (local_error);
+			break;
+		}
+		d (g_print ("Created %s from delta\n", oab_file));
+
+		g_unlink (thisoab);
+		g_free (thisoab);
+		thisoab = nextoab;
+		nextoab = NULL;
+
+		if (seq == full->seq)
+			return thisoab;
+	}
+
+	if (nextoab) {
+		g_unlink (nextoab);
+		g_free (nextoab);
+	}
+	if (thisoab) {
+		g_unlink (thisoab);
+		g_free (thisoab);
+	}
+	g_free (oab_file);
+	g_free (lzx_path);
+
+ full:
+	d (printf ("Ewsgal: Downloading full gal \n"));
 	return ews_download_full_gal (cbews, full, cancellable, error);
 }
 
@@ -2411,8 +2468,9 @@ ebews_start_gal_sync (gpointer data)
 			is_populated = FALSE;
 		g_free (tmp);
 	}
+
 	if (!e_ews_connection_get_oal_detail_sync (
-		oab_cnc, priv->folder_id, "Full", old_etag, &full_l, &etag,
+		oab_cnc, priv->folder_id, NULL, old_etag, &full_l, &etag,
 		priv->cancellable, &error)) {
 		ret = FALSE;
 		goto exit;
@@ -2429,7 +2487,7 @@ ebews_start_gal_sync (gpointer data)
 		EwsOALDetails *det = full_l->data;
 
 		/* Throw away anything older than we already have */
-		if (det->seq < old_seq) {
+		if (det->seq <= old_seq) {
 			ews_oal_details_free (det);
 		} else if (!strcmp (det->type, "Full")) {
 			if (full)
@@ -2473,7 +2531,7 @@ ebews_start_gal_sync (gpointer data)
 
 	e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id, "etag", etag?:"", NULL);
 	if (e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id,
-						   "oal-filename", uncompressed_filename,
+						   "oab-filename", uncompressed_filename,
 						   NULL)) {
 		/* Don't let it get deleted */
 		g_free (uncompressed_filename);
@@ -2489,7 +2547,7 @@ ebews_start_gal_sync (gpointer data)
 		goto exit;
 	}
 
-	d (printf ("Ews gal: sync successfull complete \n");)
+	d (printf ("Ews gal: sync successful complete \n");)
 
 exit:
 	if (error) {
