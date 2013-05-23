@@ -38,7 +38,6 @@
 
 static void add_hash (guint *hash, gchar *s);
 static guint ews_url_hash (gconstpointer key);
-static gint check_equal (gchar *s1, gchar *s2);
 static gint ews_url_equal (gconstpointer a, gconstpointer b);
 
 static CamelProviderConfEntry ews_conf_entries[] = {
@@ -150,30 +149,13 @@ ews_url_hash (gconstpointer key)
 }
 
 static gint
-check_equal (gchar *s1,
-             gchar *s2)
-{
-	if (s1 == NULL) {
-		if (s2 == NULL)
-			return TRUE;
-		else
-			return FALSE;
-	}
-
-	if (s2 == NULL)
-		return FALSE;
-
-	return strcmp (s1, s2) == 0;
-}
-
-static gint
 ews_url_equal (gconstpointer a,
                gconstpointer b)
 {
 	const CamelURL *u1 = a, *u2 = b;
 
-	return check_equal (u1->protocol, u2->protocol)
-		&& check_equal (u1->user, u2->user)
-		&& check_equal (u1->host, u2->host)
-		&& u1->port == u2->port;
+	return ((g_strcmp0 (u1->protocol, u2->protocol) == 0)
+		&& (g_strcmp0 (u1->user, u2->user) == 0)
+		&& (g_strcmp0 (u1->host, u2->host) == 0)
+		&& (u1->port == u2->port));
 }
