@@ -2266,6 +2266,10 @@ ews_download_gal (EBookBackendEws *cbews, EwsOALDetails *full, GSList *deltas, g
 		if (det->seq != seq)
 			break;
 
+		if (lzx_path) {
+			g_unlink (lzx_path);
+			g_free (lzx_path);
+		}
 		lzx_path = ews_download_gal_file (cbews, det, cancellable, NULL);
 		if (!lzx_path)
 			break;
@@ -2300,7 +2304,10 @@ ews_download_gal (EBookBackendEws *cbews, EwsOALDetails *full, GSList *deltas, g
 		g_free (thisoab);
 	}
 	g_free (oab_file);
-	g_free (lzx_path);
+	if (lzx_path) {
+		g_unlink (lzx_path);
+		g_free (lzx_path);
+	}
 
  full:
 	d (printf ("Ewsgal: Downloading full gal \n"));
