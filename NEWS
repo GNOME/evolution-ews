@@ -1,3 +1,41 @@
+Evolution-EWS 3.9.2 2013-05-27
+------------------------------
+
+Bug Fixes:
+	Bug 654950 - Contact doesn't fetch photo (Fabiano Fidêncio)
+	Bug 699231 - Capital letters' changes are not propagated to the server
+	             (Fabiano Fidêncio)
+	Bug 699241 - GAL decompression fails due to invalid window_size
+	             calculation (David Woodhouse)
+	Bug 699373 - Refetches full OAB.xml when unchanged (David Woodhouse)
+	Bug 699481 - Crash on GAL try to replace data (Fabiano Fidêncio)
+	Bug 673351 - Empty Trash doesn't work without visiting it (Milan Crha)
+	Bug 699847 - Build requests according to the correct Exchange server
+	             version (Fabiano Fidêncio)
+	Bug 698728 - Use proxy settings to connect to the server (Milan Crha)
+	Bug 658892 - Support contact list creation (Fabiano Fidêncio)
+
+Other Changes:
+	* Handle inlined attachments in
+	  e_ews_connection_{create,get}_attachments (Fabiano Fidêncio)
+	* Handle absence of ETag (David Woodhouse)
+	* Update LZX decompressor (David Woodhouse)
+	* Allow upstream libmspack to be used, if it's new enough
+	  (David Woodhouse)
+	* Allow e_ews_connection_get_oal_detail() to return more than one
+	  type of element (David Woodhouse)
+	* Fix crash on addressbook close (David Woodhouse)
+	* Don't remove OAB file after processing (David Woodhouse)
+	* Implement incremental GAL download (David Woodhouse)
+	* Use "X-EWS-KIND" attribute (Fabiano Fidêncio)
+
+Translations:
+	Marek Černocký (cs)
+	Dimitris Spingos (el)
+	Matej Urbančič (sl)
+	Мирослав Николић (sr)
+
+
 Evolution-EWS 3.9.1 2013-04-29
 ------------------------------
 
