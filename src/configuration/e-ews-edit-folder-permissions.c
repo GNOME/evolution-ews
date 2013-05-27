@@ -686,6 +686,7 @@ read_folder_permissions_thread (GObject *dialog,
 	g_return_if_fail (widgets->registry != NULL);
 	g_return_if_fail (widgets->source != NULL);
 	g_return_if_fail (widgets->ews_settings != NULL);
+	g_return_if_fail (widgets->folder_id != NULL);
 
 	widgets->conn = e_ews_config_utils_open_connection_for (
 		widgets->registry,
@@ -700,9 +701,26 @@ read_folder_permissions_thread (GObject *dialog,
 	if (g_cancellable_is_cancelled (cancellable))
 		return;
 
-	e_ews_connection_get_folder_permissions_sync (
+	if (e_ews_connection_get_folder_permissions_sync (
 		widgets->conn,
-		G_PRIORITY_DEFAULT, widgets->folder_id, ppermissions, cancellable, perror);
+		G_PRIORITY_DEFAULT, widgets->folder_id, ppermissions, cancellable, perror)) {
+		EEwsFolder *folder = NULL;
+
+		e_ews_connection_get_folder_info_sync (widgets->conn,
+			G_PRIORITY_DEFAULT, NULL, widgets->folder_id,
+			&folder, cancellable, NULL);
+
+		if (folder) {
+			const EwsFolderId *folder_id = e_ews_folder_get_id (folder);
+
+			if (folder_id) {
+				g_free (widgets->folder_id->change_key);
+				widgets->folder_id->change_key = g_strdup (folder_id->change_key);
+			}
+
+			g_object_unref (folder);
+		}
+	}
 }
 
 static void
