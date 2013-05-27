@@ -270,7 +270,8 @@ search_thread (gpointer user_data)
 
 		g_slist_free_full (mailboxes, (GDestroyNotify) e_ews_mailbox_free);
 
-		if (error && !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+		if (error && !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED) &&
+		    !g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NAMERESOLUTIONNORESULTS))
 			g_warning ("%s: Failed to search user: %s", G_STRFUNC, error->message);
 
 		g_clear_error (&error);
