@@ -1566,7 +1566,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 		((CamelEwsSummary *) folder->summary)->sync_state = sync_state;
 
 		camel_folder_summary_touch (folder->summary);
-	} while (!local_error && !includes_last_item);
+	} while (!local_error && !includes_last_item && !g_cancellable_is_cancelled (cancellable));
 
 	camel_folder_summary_save_to_db (folder->summary, NULL);
 
