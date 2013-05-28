@@ -223,19 +223,15 @@ EVO_KRB5_SUPPORT
 dnl ****************************
 dnl Check for libmspack with OAB support
 dnl ****************************
-PKG_CHECK_MODULES(MSPACK, libmspack,
-		  [oldLIBS="$LIBS"
-		   oldCFLAGS="$CFLAGS"
-		   LIBS="$LIBS $MSPACK_LIBS"
-		   CFLAGS="$CFLAGS $MSPACK_CFLAGS"
-		   AC_CHECK_FUNC(mspack_create_oab_decompressor,
-				 [have_mspack=yes
-				  AC_DEFINE(USE_MSPACK, [1],
-				            [libmspack has OAB support])],
-				 [have_mspack=no])
-		   LIBS="$oldLIBS"
-		   CFLAGS="$oldCFLAGS"],
-		  [have_mspack=no])
+AC_ARG_WITH([internal-lzx],
+	AS_HELP_STRING([--with-internal-lzx],
+	    [Use internal LZX decompressor instead of libmspack [default=no]]),
+	    [have_mspack=no],
+	    [PKG_CHECK_MODULES(MSPACK, libmspack >= 0.4,
+		[AC_DEFINE(USE_MSPACK, [1], [libmspack has OAB support])
+		 have_mspack=yes],
+		[AC_ERROR([libmspack >= 0.4 not found.]
+[Make sure it is installed or run configure with --with-internal-lzx])])])
 AM_CONDITIONAL(HAVE_MSPACK, [test "$have_mspack" = "yes"])
 
 dnl ****************************
@@ -329,5 +325,6 @@ AC_OUTPUT
 AC_MSG_NOTICE([
 	Kerberos 5	: $msg_krb5
 	Strict building : $enable_strict
+	Use libmspack   : $have_mspack
 ])
 
