@@ -1803,6 +1803,7 @@ static gchar *
 ews_download_gal (EBookBackendEws *cbews, EwsOALDetails *full, GSList *deltas, guint32 seq,
 		  GCancellable *cancellable, GError **error)
 {
+#ifdef USE_MSPACK
 	EBookBackendEwsPrivate *priv = cbews->priv;
 	GSList *p;
 	gchar *thisoab, *nextoab = NULL;
@@ -1868,6 +1869,7 @@ ews_download_gal (EBookBackendEws *cbews, EwsOALDetails *full, GSList *deltas, g
 	}
 
  full:
+#endif
 	d (printf ("Ewsgal: Downloading full gal \n"));
 	return ews_download_full_gal (cbews, full, cancellable, error);
 }
