@@ -36,16 +36,14 @@
 
 typedef gboolean (*EEwsOooNotificationDispatcherFunction) (gpointer data);
 
-struct _EEwsOooNotificatorPrivate
-{
+struct _EEwsOooNotificatorPrivate {
 	EShell *shell;
 	EMailAccountStore *account_store;
 	GList *stores;
 	GHashTable *alerts;
 };
 
-typedef struct _EEwsOooNotificatorDispatcherData
-{
+typedef struct _EEwsOooNotificatorDispatcherData {
 	EEwsOooNotificator *extension;
 	CamelEwsStore *ews_store;
 	guint timeout_id;
