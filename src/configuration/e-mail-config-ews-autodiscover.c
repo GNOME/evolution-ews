@@ -82,12 +82,21 @@ mail_config_ews_autodiscover_run_cb (GObject *source_object,
 	EMailConfigEwsAutodiscover *autodiscover;
 	EAlertSink *alert_sink;
 	GError *error = NULL;
+	EMailConfigServiceBackend *backend;
+	CamelSettings *settings;
 
 	autodiscover = async_context->autodiscover;
 	alert_sink = e_activity_get_alert_sink (async_context->activity);
 
 	e_source_registry_authenticate_finish (
 		E_SOURCE_REGISTRY (source_object), result, &error);
+
+	backend = e_mail_config_ews_autodiscover_get_backend (autodiscover);
+	settings = e_mail_config_service_backend_get_settings (backend);
+	/*
+	 * And unstop since we are back to the main thread.
+	 */
+	g_object_thaw_notify (G_OBJECT (settings));
 
 	if (e_activity_handle_cancellation (async_context->activity, error)) {
 		g_error_free (error);
@@ -111,6 +120,7 @@ mail_config_ews_autodiscover_run (EMailConfigEwsAutodiscover *autodiscover)
 	EActivity *activity;
 	EMailConfigServicePage *page;
 	EMailConfigServiceBackend *backend;
+	CamelSettings *settings;
 	ESourceRegistry *registry;
 	ESource *source;
 	GCancellable *cancellable;
@@ -119,6 +129,7 @@ mail_config_ews_autodiscover_run (EMailConfigEwsAutodiscover *autodiscover)
 	backend = e_mail_config_ews_autodiscover_get_backend (autodiscover);
 	page = e_mail_config_service_backend_get_page (backend);
 	source = e_mail_config_service_backend_get_source (backend);
+	settings = e_mail_config_service_backend_get_settings (backend);
 
 	registry = e_mail_config_service_page_get_registry (page);
 
@@ -134,6 +145,14 @@ mail_config_ews_autodiscover_run (EMailConfigEwsAutodiscover *autodiscover)
 	async_context->autodiscover = g_object_ref (autodiscover);
 	async_context->activity = activity;  /* takes ownership */
 
+	/*
+	 * e_source_registry_authenticate() will be run in a new a thread, which
+	 * one will invoke camel_ews_settings_set_{oaburl,hosturl}(), emiting
+	 * signals that are bound to GTK+ UI signals, causing GTK+ calls in this
+	 * secondary thread and consequently a crash. To avoid this, let's stop
+	 * the property changes notifications while we are not in the main thread.
+	 */
+	g_object_freeze_notify (G_OBJECT (settings));
 	e_source_registry_authenticate (
 		registry, source,
 		E_SOURCE_AUTHENTICATOR (autodiscover),
