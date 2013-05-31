@@ -245,7 +245,6 @@ e_ews_ooo_notificator_service_removed (gpointer user_data)
 			data->extension);
 	data->extension->priv->stores = g_list_remove (
 			data->extension->priv->stores, data->ews_store);
-	g_object_unref (data->ews_store);
 
 	return FALSE;
 }
