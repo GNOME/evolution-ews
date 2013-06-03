@@ -9,53 +9,66 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2013-05-03 22:57+0000\n"
-"PO-Revision-Date: 2013-05-04 20:57+0100\n"
+"POT-Creation-Date: 2013-05-31 22:48+0000\n"
+"PO-Revision-Date: 2013-06-03 21:56+0100\n"
 "Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n%100==1 ? 1 : n%100==2 ? 2 : n%100==3 || n%100==4 ? 3 : 0);\n"
+"Plural-Forms: nplurals=4; plural=(n%100==1 ? 1 : n%100==2 ? 2 : n%100==3 || n"
+"%100==4 ? 3 : 0);\n"
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Generator: Poedit 1.5.4\n"
 
-#: ../src/addressbook/e-book-backend-ews.c:1317
+#: ../src/addressbook/e-book-backend-ews.c:1413
 msgid "The backend does not support bulk additions"
 msgstr "Ozadnji program ne podpira množičnega dodajanja"
 
-#: ../src/addressbook/e-book-backend-ews.c:1629
+#: ../src/addressbook/e-book-backend-ews.c:1452
+#: ../src/addressbook/e-book-backend-ews.c:1796
+msgid ""
+"Cannot save contact list, it's only supported on EWS Server 2010 or later"
+msgstr ""
+"Ni mogoče shraniti seznama stikov. Podprt je le v okolju strežnika EWS 2010 "
+"ali novejšega."
+
+#: ../src/addressbook/e-book-backend-ews.c:1755
 msgid "The backend does not support bulk modifications"
 msgstr "Ozadnji program ne podpira množičnega spreminjanja"
 
-#: ../src/addressbook/e-book-backend-ews.c:1819
+#: ../src/addressbook/e-book-backend-ews.c:1955
 msgid "Wait till syncing is done"
 msgstr "Počakaj na konec usklajevanja"
 
-#: ../src/addressbook/e-book-backend-ews.c:2159
+#: ../src/addressbook/e-book-backend-ews.c:2368
 #, c-format
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr "Prejemanje stikov v %s: %d%% končano ..."
 
-#: ../src/addressbook/e-book-backend-ews.c:2729
+#: ../src/addressbook/e-book-backend-ews.c:3036
 msgid "Syncing contacts..."
 msgstr "Usklajevanje stikov ..."
 
-#: ../src/addressbook/e-book-backend-ews.c:2953
-#: ../src/configuration/e-ews-search-user.c:364
+#: ../src/addressbook/e-book-backend-ews.c:3257
+#: ../src/configuration/e-ews-search-user.c:365
 msgid "Searching..."
 msgstr "Iskanje ..."
 
-#: ../src/calendar/e-cal-backend-ews.c:1055
+#: ../src/calendar/e-cal-backend-ews.c:1054
 msgid "EWS does not support bulk removals"
 msgstr "Sistem EWS ne podpira množičnega odstranjevanja"
 
-#: ../src/calendar/e-cal-backend-ews.c:1706
+#: ../src/calendar/e-cal-backend-ews.c:1504
+msgid "Unknown error"
+msgstr "Neznana napaka"
+
+#: ../src/calendar/e-cal-backend-ews.c:1705
 msgid "EWS does not support bulk additions"
 msgstr "Sistem EWS ne podpira množičnega dodajanja"
 
-#: ../src/calendar/e-cal-backend-ews.c:2289
+#: ../src/calendar/e-cal-backend-ews.c:2288
 msgid "EWS does not support bulk modifications"
 msgstr "Sistem EWS ne podpira množičnega spreminjanja"
 
@@ -355,17 +368,17 @@ msgstr ""
 msgid "Service not connected"
 msgstr "Storitev ni povezana"
 
-#: ../src/collection/e-ews-backend.c:428
+#: ../src/collection/e-ews-backend.c:422
 #: ../src/configuration/e-mail-config-ews-gal.c:274
 msgid "Global Address List"
 msgstr "Splošni seznam naslovov"
 
-#: ../src/collection/e-ews-backend.c:813
+#: ../src/collection/e-ews-backend.c:807
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named '%s'"
 msgstr "Za novo mapo z imenom '%s' ni mogoče določiti ustreznega razreda mape"
 
-#: ../src/collection/e-ews-backend.c:902
+#: ../src/collection/e-ews-backend.c:896
 #, c-format
 msgid "Data source '%s' does not represent an Exchange Web Services folder"
 msgstr "Vir podatkov '%s' ne predstavlja mape spletnih storitev Exchange"
@@ -473,151 +486,151 @@ msgstr "Po meri"
 msgid "Writing folder permissions, please wait..."
 msgstr "Poteka zapisovanje dovoljenj mape ..."
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:759
+#: ../src/configuration/e-ews-edit-folder-permissions.c:777
 msgctxt "User"
 msgid "Anonymous"
 msgstr "Brezimno"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:762
+#: ../src/configuration/e-ews-edit-folder-permissions.c:780
 msgctxt "User"
 msgid "Default"
 msgstr "Privzeto"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:768
+#: ../src/configuration/e-ews-edit-folder-permissions.c:786
 msgctxt "User"
 msgid "Unknown"
 msgstr "Neznano"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:849
-#: ../src/configuration/e-ews-search-user.c:430
+#: ../src/configuration/e-ews-edit-folder-permissions.c:867
+#: ../src/configuration/e-ews-search-user.c:431
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1075
 msgid "Name"
 msgstr "Ime"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:855
+#: ../src/configuration/e-ews-edit-folder-permissions.c:873
 msgid "Permission level"
 msgstr "Raven dovoljenj"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:907
+#: ../src/configuration/e-ews-edit-folder-permissions.c:925
 msgid "Edit EWS folder permissions..."
 msgstr "Uredi dovoljenja map EWS ..."
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:932
+#: ../src/configuration/e-ews-edit-folder-permissions.c:950
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:635
 msgid "Account:"
 msgstr "Račun:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:960
+#: ../src/configuration/e-ews-edit-folder-permissions.c:978
 msgid "Folder name:"
 msgstr "Ime mape:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:983
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1001
 msgid "Folder ID:"
 msgstr "ID mape:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1047
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1065
 msgid "Permissions"
 msgstr "Dovoljenja"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1069
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1087
 msgid "Permi_ssion level:"
 msgstr "Raven _dovoljenj:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1103
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1121
 msgctxt "Permissions"
 msgid "Read"
 msgstr "Preberi"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1115
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1182
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1133
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1200
 msgctxt "Permissions"
 msgid "None"
 msgstr "Brez"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1121
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1139
 msgctxt "Permissions"
 msgid "Free/Busy time"
 msgstr "Čas zasedenosti"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1126
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1144
 msgctxt "Permissions"
 msgid "Free/Busy time, subject, location"
 msgstr "Čas zasedenosti, zadeva, mesto"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1132
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1150
 msgctxt "Permissions"
 msgid "Full Details"
 msgstr "Polne podrobnosti"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1138
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1156
 msgctxt "Permissions"
 msgid "Write"
 msgstr "Zapiši"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1150
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1168
 msgctxt "Permissions"
 msgid "Create items"
 msgstr "Ustvari predmete"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1154
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1172
 msgctxt "Permissions"
 msgid "Create subfolders"
 msgstr "Ustvari podmape"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1158
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1176
 msgctxt "Permissions"
 msgid "Edit own"
 msgstr "Uredi lastne"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1162
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1180
 msgctxt "Permissions"
 msgid "Edit all"
 msgstr "Uredi vse"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1170
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1188
 msgctxt "Permissions"
 msgid "Delete items"
 msgstr "Izbriši predmete"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1187
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1205
 msgctxt "Permissions"
 msgid "Own"
 msgstr "Lastne"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1192
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1210
 msgctxt "Permissions"
 msgid "All"
 msgstr "Vse"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1198
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1216
 msgctxt "Permissions"
 msgid "Other"
 msgstr "Drugo"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1210
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1228
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "Lastnik mape"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1214
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1232
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "Stik mape"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1218
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1236
 msgctxt "Permissions"
 msgid "Folder visible"
 msgstr "Mapa je vidna"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1291
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1309
 msgid "Reading folder permissions, please wait..."
 msgstr "Poteka branje dovoljenj mape ..."
 
-#: ../src/configuration/e-ews-ooo-notificator.c:186
+#: ../src/configuration/e-ews-ooo-notificator.c:184
 msgid "Unset on Server"
 msgstr "Prekliči nastavitev na strežniku"
 
-#: ../src/configuration/e-ews-ooo-notificator.c:187
+#: ../src/configuration/e-ews-ooo-notificator.c:185
 msgid "Unset the \"Out of Office\" status"
 msgstr "Prekliči nastavitev stanja \"Izven pisarne\""
 
@@ -652,25 +665,25 @@ msgstr[1] "Najdenih več kot sto uporabnikov, prikazan je le prvi %d"
 msgstr[2] "Najdenih več kot sto uporabnikov, prikazana sta le prva %d"
 msgstr[3] "Najdenih več kot sto uporabnikov, prikazani so le prvi %d"
 
-#: ../src/configuration/e-ews-search-user.c:356
-#: ../src/configuration/e-ews-search-user.c:539
+#: ../src/configuration/e-ews-search-user.c:357
+#: ../src/configuration/e-ews-search-user.c:540
 msgid "Search for a user"
 msgstr "Iskanje uporabnika"
 
-#: ../src/configuration/e-ews-search-user.c:436
+#: ../src/configuration/e-ews-search-user.c:437
 msgid "E-mail"
 msgstr "Elektronski naslov"
 
-#: ../src/configuration/e-ews-search-user.c:473
+#: ../src/configuration/e-ews-search-user.c:474
 msgid "Choose EWS user..."
 msgstr "Izbor uporabnika EWS ..."
 
-#: ../src/configuration/e-ews-search-user.c:496
+#: ../src/configuration/e-ews-search-user.c:497
 msgid "_Search:"
 msgstr "_Poišči:"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
-#: ../src/server/e-ews-folder.c:632
+#: ../src/server/e-ews-folder.c:631
 #, c-format
 msgid "Cannot add folder, folder already exists as '%s'"
 msgstr "Mape ni mogoče dodati, ker že obstaja kot '%s'"
@@ -778,11 +791,11 @@ msgstr "I_me mape:"
 msgid "Include _subfolders"
 msgstr "_Upoštevaj podmape"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:129
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:140
 msgid "Querying Autodiscover service"
 msgstr "Poizvedovanje storitve samodejnega zaznavanja"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:212
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:231
 msgid "Fetch _URL"
 msgstr "Pridobi naslov _URL"
 
@@ -1027,74 +1040,74 @@ msgstr "Pridobivanje nastavitev &quot;Pooblaščencev&quot; je spodletelo."
 msgid "Your Exchange account \"{0}\" has the status set as \"Out of Office\"."
 msgstr "Na računu Exchange \"{0}\" je določeno stanje \"Izven pisarne\"."
 
-#: ../src/server/e-ews-connection.c:499
+#: ../src/server/e-ews-connection.c:538
 msgid "Operation Cancelled"
 msgstr "Opravilo je preklicano"
 
-#: ../src/server/e-ews-connection.c:568
+#: ../src/server/e-ews-connection.c:607
 msgid "Authentication failed"
 msgstr "Overitev je spodletela"
 
-#: ../src/server/e-ews-connection.c:579
+#: ../src/server/e-ews-connection.c:618
 #, c-format
 msgid "No response: %s"
 msgstr "Brez odgovora: %s"
 
-#: ../src/server/e-ews-connection.c:2018
+#: ../src/server/e-ews-connection.c:2094
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Razčlenjevanje samodejnega odgovora XML je spodletelo"
 
-#: ../src/server/e-ews-connection.c:2025
+#: ../src/server/e-ews-connection.c:2101
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Iskanje predmeta <samodejnega zaznavanja> je spodletelo."
 
-#: ../src/server/e-ews-connection.c:2036
+#: ../src/server/e-ews-connection.c:2112
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Iskanje predmeta <odziva> je spodletelo."
 
-#: ../src/server/e-ews-connection.c:2047
+#: ../src/server/e-ews-connection.c:2123
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Iskanje predmeta <računa> je spodletelo."
 
-#: ../src/server/e-ews-connection.c:2066
+#: ../src/server/e-ews-connection.c:2142
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr "Samodejno iskanje predmetov odgovora <ASUrl> in <OABUrl> je spodletelo"
 
-#: ../src/server/e-ews-connection.c:2148
+#: ../src/server/e-ews-connection.c:2224
 msgid "URL cannot be NULL"
 msgstr "URL ne sme biti NULL"
 
-#: ../src/server/e-ews-connection.c:2156
+#: ../src/server/e-ews-connection.c:2232
 #, c-format
 msgid "URL '%s' is not valid"
 msgstr "URL '%s' ni veljaven"
 
-#: ../src/server/e-ews-connection.c:2258
+#: ../src/server/e-ews-connection.c:2334
 msgid "Email address is missing a domain part"
 msgstr "V elektronskem naslovu manjka del z domeno"
 
-#: ../src/server/e-ews-connection.c:2578
+#: ../src/server/e-ews-connection.c:2661
 msgid "Failed to parse oab XML"
 msgstr "Razčlenjevanje datoteke OAB XML je spodletelo."
 
-#: ../src/server/e-ews-connection.c:2586
+#: ../src/server/e-ews-connection.c:2669
 msgid "Failed to find <OAB> element\n"
 msgstr "Iskanje predmeta <OAB> je spodletelo.\n"
 
-#: ../src/server/e-ews-connection.c:3770 ../src/server/e-ews-connection.c:6379
+#: ../src/server/e-ews-connection.c:3910
 msgid "No items found"
 msgstr "Ni zadetkov"
 
-#: ../src/server/e-ews-folder.c:587
+#: ../src/server/e-ews-folder.c:586
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Mape ni mogoče dodati, ker vrsta mape ni podprta"
 
-#: ../src/server/e-ews-folder.c:592
+#: ../src/server/e-ews-folder.c:591
 msgid "Cannot add folder, master source not found"
 msgstr "Mape ni mogoče dodati, ker izvornega vira ni mogoče najti"
 
