@@ -1,3 +1,19 @@
+Evolution-EWS 3.8.3 2013-06-10
+------------------------------
+
+Bug Fixes:
+	Bug 698728 - Use proxy settings to connect to the server (Milan Crha)
+	Bug 701246 - Crash due to gtk calls in a non-main thread
+	             (Fabiano Fidêncio)
+
+Other Changes:
+	* Update LZX decompressor (David Woodhouse)
+	* Fix crash on addressbook close (David Woodhouse)
+	* Fetch fresh folder's change-key, when reading folder permissions
+	  (Milan Crha)
+	* Check for cancellation when refreshing folder content (Milan Crha)
+
+
 Evolution-EWS 3.8.2 2013-05-12
 ------------------------------
 
