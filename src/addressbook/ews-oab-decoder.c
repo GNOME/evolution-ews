@@ -715,14 +715,17 @@ ews_decode_oab_prop (EwsOabDecoder *eod,
 						val = ews_oab_read_upto (G_INPUT_STREAM (priv->fis), '\0', cancellable, error);
 					}
 
-					if (*error) {
+					if (!val) {
 						g_slist_foreach (list, (GFunc) g_free, NULL);
 						g_slist_free (list);
 						return NULL;
 					}
+
+					list = g_slist_prepend (list, val);
 				}
 
 			}
+			ret_val = list;
 
 			break;
 		}
