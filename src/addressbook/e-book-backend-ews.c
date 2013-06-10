@@ -3209,9 +3209,7 @@ fetch_from_offline (EBookBackendEws *ews,
 	for (l = contacts; l != NULL; l = g_slist_next (l)) {
 		EbSdbSearchData *s_data = (EbSdbSearchData *) l->data;
 
-		/* reset vcard to NULL as it would be free'ed in prefiltered_vcard function */
 		e_data_book_view_notify_update_prefiltered_vcard (book_view, s_data->uid, s_data->vcard);
-		s_data->vcard = NULL;
 
 		e_book_backend_sqlitedb_search_data_free (s_data);
 	}
