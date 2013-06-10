@@ -383,14 +383,16 @@ ews_oab_read_upto (GInputStream *is,
 	GString *str;
 
 	str = g_string_sized_new (size);
-	do {
+	while (1) {
 		gsize len;
 		gsize bytes_read;
 		gchar *c = g_malloc0 (size);
 
-		g_input_stream_read_all (is, c, size, &bytes_read, cancellable, error);
-		if (*error)
+		if (!g_input_stream_read_all (is, c, size, &bytes_read,
+					      cancellable, error)) {
+			g_free (c);
 			break;
+		}
 
 		if (bytes_read != size)
 			size = bytes_read;
@@ -398,6 +400,8 @@ ews_oab_read_upto (GInputStream *is,
 		len = get_pos (c, size, stop);
 		if (len)
 			str = g_string_append_len (str, c, len);
+
+		g_free (c);
 
 		if (len == 0 || len < size) {
 			goffset seek = (goffset) len + 1 - (goffset) size;
@@ -408,8 +412,7 @@ ews_oab_read_upto (GInputStream *is,
 		}
 
 		size *= 2;
-		g_free (c);
-	} while (!*error);
+	}
 
 	return g_string_free (str, FALSE);
 }
