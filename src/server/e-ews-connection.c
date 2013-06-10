@@ -2516,7 +2516,9 @@ oal_response_cb (SoupSession *soup_session,
 
 	data->oals = g_slist_reverse (data->oals);
 
-exit:
+ exit_doc:
+	xmlFreeDoc (doc);
+ exit:
 	g_simple_async_result_complete_in_idle (simple);
 	/* This is run in cnc->priv->soup_thread, and the cnc is held by simple, thus
 	 * for cases when the complete_in_idle is finished before the unref call, when
