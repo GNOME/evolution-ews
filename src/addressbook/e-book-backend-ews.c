@@ -1806,8 +1806,7 @@ ews_download_gal (EBookBackendEws *cbews, EwsOALDetails *full, GSList *deltas, g
 #ifdef USE_MSPACK
 	EBookBackendEwsPrivate *priv = cbews->priv;
 	GSList *p;
-	gchar *thisoab, *nextoab = NULL;
-	gchar *oab_file = NULL, *lzx_path = NULL;
+	gchar *thisoab = NULL;
 	const gchar *cache_dir;
 
 	cache_dir = e_book_backend_get_cache_dir (E_BOOK_BACKEND (cbews));
@@ -1820,54 +1819,51 @@ ews_download_gal (EBookBackendEws *cbews, EwsOALDetails *full, GSList *deltas, g
 	for (p = deltas; p; p = p->next) {
 		EwsOALDetails *det = p->data;
 		GError *local_error = NULL;
+		gchar *oab_file, *lzx_path, *nextoab;
 
 		seq++;
 		if (det->seq != seq)
 			break;
 
-		if (lzx_path) {
-			g_unlink (lzx_path);
-			g_free (lzx_path);
-		}
 		lzx_path = ews_download_gal_file (cbews, det, cancellable, NULL);
 		if (!lzx_path)
 			break;
 
-		g_free (oab_file);
 		oab_file = g_strdup_printf ("%s-%d.oab", priv->folder_name, seq);
 		nextoab = g_build_filename (cache_dir, oab_file, NULL);
+		g_free (oab_file);
 
-		if (!ews_oab_decompress_patch (lzx_path, thisoab, nextoab, &local_error)) {
+		ews_oab_decompress_patch (lzx_path, thisoab, nextoab, &local_error);
+
+		/* Free the LZX file */
+		g_unlink (lzx_path);
+		g_free (lzx_path);
+
+		/* Free the previous OAB file */
+		g_unlink (thisoab);
+		g_free (thisoab);
+
+		thisoab = nextoab;
+
+		/* For once we are *allowed* to use the error instead of having to
+		 * check the return value of the function. It's our *own* error. */
+		if (local_error) {
 			d (g_print ("Failed to apply incremental patch: %s\n",
 				    local_error->message));
 			g_error_free (local_error);
 			break;
 		}
-		d (g_print ("Created %s from delta\n", oab_file));
 
-		g_unlink (thisoab);
-		g_free (thisoab);
-		thisoab = nextoab;
-		nextoab = NULL;
+		d (g_print ("Created %s from delta\n", thisoab));
 
 		if (seq == full->seq)
 			return thisoab;
 	}
 
-	if (nextoab) {
-		g_unlink (nextoab);
-		g_free (nextoab);
-	}
 	if (thisoab) {
 		g_unlink (thisoab);
 		g_free (thisoab);
 	}
-	g_free (oab_file);
-	if (lzx_path) {
-		g_unlink (lzx_path);
-		g_free (lzx_path);
-	}
-
  full:
 #endif
 	d (printf ("Ewsgal: Downloading full gal \n"));
