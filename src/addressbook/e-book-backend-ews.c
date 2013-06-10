@@ -3032,23 +3032,23 @@ e_book_backend_ews_get_backend_property (EBookBackend *backend,
 
 		for (i = 0; i < G_N_ELEMENTS (mappings); i++)
 			if (mappings[i].element_type == ELEMENT_TYPE_SIMPLE)
-				fields = g_slist_append (fields, g_strdup (e_contact_field_name (mappings[i].field_id)));
+				fields = g_slist_append (fields, (gpointer) e_contact_field_name (mappings[i].field_id));
 
 		for (i = 0; i < G_N_ELEMENTS (phone_field_map); i++)
-			fields = g_slist_append (fields, g_strdup (e_contact_field_name (phone_field_map[i].field)));
+			fields = g_slist_append (fields, (gpointer) e_contact_field_name (phone_field_map[i].field));
 
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_FULL_NAME)));
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_NICKNAME)));
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_FAMILY_NAME)));
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_EMAIL_1)));
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_EMAIL_2)));
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_EMAIL_3)));
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_ADDRESS_WORK)));
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_ADDRESS_HOME)));
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_ADDRESS_OTHER)));
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_BIRTH_DATE)));
+		fields = g_slist_append (fields, (gpointer) e_contact_field_name (E_CONTACT_FULL_NAME));
+		fields = g_slist_append (fields, (gpointer) e_contact_field_name (E_CONTACT_NICKNAME));
+		fields = g_slist_append (fields, (gpointer) e_contact_field_name (E_CONTACT_FAMILY_NAME));
+		fields = g_slist_append (fields, (gpointer) e_contact_field_name (E_CONTACT_EMAIL_1));
+		fields = g_slist_append (fields, (gpointer) e_contact_field_name (E_CONTACT_EMAIL_2));
+		fields = g_slist_append (fields, (gpointer) e_contact_field_name (E_CONTACT_EMAIL_3));
+		fields = g_slist_append (fields, (gpointer) e_contact_field_name (E_CONTACT_ADDRESS_WORK));
+		fields = g_slist_append (fields, (gpointer) e_contact_field_name (E_CONTACT_ADDRESS_HOME));
+		fields = g_slist_append (fields, (gpointer) e_contact_field_name (E_CONTACT_ADDRESS_OTHER));
+		fields = g_slist_append (fields, (gpointer) e_contact_field_name (E_CONTACT_BIRTH_DATE));
 
-		fields = g_slist_append (fields, g_strdup (e_contact_field_name (E_CONTACT_NOTE)));
+		fields = g_slist_append (fields, (gpointer) e_contact_field_name (E_CONTACT_NOTE));
 
 		fields_str = e_data_book_string_slist_to_comma_string (fields);
 
