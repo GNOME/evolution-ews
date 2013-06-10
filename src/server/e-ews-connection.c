@@ -2667,7 +2667,7 @@ oal_response_cb (SoupSession *soup_session,
 		g_simple_async_result_set_error (
 			simple, EWS_CONNECTION_ERROR, -1,
 			"%s", _("Failed to find <OAB> element\n"));
-		goto exit;
+		goto exit_doc;
 	}
 
 	for (node = node->children; node; node = node->next) {
