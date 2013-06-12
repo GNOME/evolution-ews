@@ -1412,7 +1412,6 @@ ews_connection_try_password_sync (ESourceAuthenticator *authenticator,
 	EEwsConnection *connection;
 	ESourceAuthenticationResult result;
 	EwsFolderId *fid = NULL;
-	GSList *folders = NULL;
 	GSList *ids = NULL;
 	GError *local_error = NULL;
 
@@ -1425,13 +1424,10 @@ ews_connection_try_password_sync (ESourceAuthenticator *authenticator,
 	fid->is_distinguished_id = TRUE;
 	ids = g_slist_append (ids, fid);
 
-	/* FIXME Should be able to pass NULL for folders since we're
-	 *       not interested.  Currently the code assumes non-NULL. */
 	e_ews_connection_get_folder_sync (
 		connection, EWS_PRIORITY_MEDIUM, "Default",
-		NULL, ids, &folders, cancellable, &local_error);
+		NULL, ids, NULL, cancellable, &local_error);
 
-	g_slist_free_full (folders, g_object_unref);
 	g_slist_free_full (ids, (GDestroyNotify) e_ews_folder_id_free);
 
 	if (local_error == NULL) {
@@ -5425,7 +5421,10 @@ e_ews_connection_get_folder_finish (EEwsConnection *cnc,
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
 
-	*folders = async_data->items;
+	if (folders != NULL)
+		*folders = async_data->items;
+	else
+		g_slist_free_full (async_data->items, g_object_unref);
 
 	return TRUE;
 }
