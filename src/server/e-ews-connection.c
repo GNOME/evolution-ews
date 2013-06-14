@@ -5497,7 +5497,7 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 	if (is_distinguished_id || !parent_folder_id) {
 		e_soap_message_start_element (msg, "DistinguishedFolderId", NULL, NULL);
 		e_soap_message_add_attribute (
-				msg, "Id", parent_folder_id ?: "msgfolderroot", NULL, NULL);
+				msg, "Id", parent_folder_id ? parent_folder_id : "msgfolderroot", NULL, NULL);
 		if (is_distinguished_id && cnc->priv->email) {
 			e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
 			e_ews_message_write_string_parameter(

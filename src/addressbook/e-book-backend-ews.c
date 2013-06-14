@@ -1138,7 +1138,7 @@ ebews_set_notes_changes (EBookBackendEws *ebews,
 
 	if (g_strcmp0 (old_notes, new_notes) != 0) {
 		convert_contact_property_to_updatexml (
-				message, "Body", new_notes ?: "", "item", "BodyType", "Text");
+				message, "Body", new_notes ? new_notes : "", "item", "BodyType", "Text");
 	}
 
 	g_free (old_notes);
@@ -1250,7 +1250,7 @@ ews_write_dl_members (ESoapMessage *msg,
 			if (camel_internet_address_get (addr, 0, &name, &email) && email) {
 				e_soap_message_start_element (msg, "Member", NULL, NULL);
 				e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
-				e_ews_message_write_string_parameter (msg, "Name", NULL, name ? : email);
+				e_ews_message_write_string_parameter (msg, "Name", NULL, name ? name : email);
 				e_ews_message_write_string_parameter (msg, "EmailAddress", NULL, email);
 				e_soap_message_end_element (msg); /* Mailbox */
 				e_soap_message_end_element (msg); /* Member */
@@ -2543,7 +2543,7 @@ ebews_start_gal_sync (gpointer data)
 	if (!ret)
 		goto exit;
 
-	e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id, "etag", etag?:"", NULL);
+	e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id, "etag", etag ? etag : "", NULL);
 	if (e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id,
 						   "oab-filename", uncompressed_filename,
 						   NULL)) {
@@ -2771,7 +2771,7 @@ ebews_traverse_dl (EBookBackendEws *ebews,
 		addr = camel_internet_address_new ();
 		attr = e_vcard_attribute_new (NULL, EVC_EMAIL);
 
-		camel_internet_address_add (addr, mb->name, mb->email ? : "");
+		camel_internet_address_add (addr, mb->name, mb->email ? mb->email : "");
 		value = camel_address_encode (CAMEL_ADDRESS (addr));
 
 		if (value && g_hash_table_lookup (values, value) == NULL) {
