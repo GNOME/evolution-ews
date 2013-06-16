@@ -851,7 +851,7 @@ ebews_set_notes_changes (ESoapMessage *message,
 
 	if (g_strcmp0 (old_notes, new_notes) != 0) {
 		convert_contact_property_to_updatexml (
-				message, "Body", new_notes ?: "", "item", "BodyType", "Text");
+				message, "Body", new_notes ? new_notes : "", "item", "BodyType", "Text");
 	}
 
 	g_free (old_notes);
@@ -2102,7 +2102,7 @@ ebews_start_gal_sync (gpointer data)
 	if (!ret)
 		goto exit;
 
-	e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id, "etag", etag?:"", NULL);
+	e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id, "etag", etag ? etag : "", NULL);
 	if (e_book_backend_sqlitedb_set_key_value (priv->summary, priv->folder_id,
 						   "oab-filename", uncompressed_filename,
 						   NULL)) {
