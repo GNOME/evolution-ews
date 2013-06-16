@@ -1,3 +1,25 @@
+Evolution-EWS 3.9.3 2013-06-17
+------------------------------
+
+Bug Fixes:
+	Bug 701246 - Crash due to gtk calls in a non-main thread
+	             (Fabiano Fidêncio)
+
+Other Changes:
+	* e-ews-search-user: Do not print console error when nothing found
+	  (Milan Crha)
+	* Fetch fresh folder's change-key, when reading folder permissions
+	  (Milan Crha)
+	* Check for cancellation when refreshing folder content (Milan Crha)
+	* Require --with-internal-lzx for libmspack fallback (David Woodhouse)
+	* Disable incremental GAL updates without libmspack (David Woodhouse)
+	* Fix various memory leaks (David Woodhouse)
+	* Make the statements explicit when using ternary if (Fabiano Fidêncio)
+
+Translations:
+	Matej Urbančič (sl)
+
+
 Evolution-EWS 3.9.2 2013-05-27
 ------------------------------
 
