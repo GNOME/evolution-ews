@@ -148,6 +148,7 @@ ews_oof_settings_get_response_cb (ESoapResponse *response,
 	ESoapParameter *subsubparam;
 	GDateTime *date_time;
 	gchar *string;
+	gchar *text;
 	GError *error = NULL;
 
 	param = e_soap_response_get_first_parameter_by_name (
@@ -239,24 +240,30 @@ ews_oof_settings_get_response_cb (ESoapResponse *response,
 	subsubparam = e_soap_parameter_get_first_child_by_name (
 		subparam, "Message");
 	string = e_soap_parameter_get_string_value (subsubparam);
-	if (g_strrstr (string, "</body>") != NULL)
-		string = ews_oof_settings_text_from_html (string);
+	if (string == NULL)
+		text = NULL;
+	else if (g_strrstr (string, "</body>") != NULL)
+		text = ews_oof_settings_text_from_html (string);
 	else if (g_strrstr (string, "BodyFragment") != NULL)
-		string = ews_oof_settings_text_from_html (string);
-	e_ews_oof_settings_set_internal_reply (settings, string);
+		text = ews_oof_settings_text_from_html (string);
+	e_ews_oof_settings_set_internal_reply (settings, text ? text : "");
 	g_free (string);
+	g_free (text);
 
 	subparam = e_soap_parameter_get_first_child_by_name (
 		param, "ExternalReply");
 	subsubparam = e_soap_parameter_get_first_child_by_name (
 		subparam, "Message");
 	string = e_soap_parameter_get_string_value (subsubparam);
-	if (g_strrstr (string, "</body>") != NULL)
-		string = ews_oof_settings_text_from_html (string);
+	if (string == NULL)
+		text = NULL;
+	else if (g_strrstr (string, "</body>") != NULL)
+		text = ews_oof_settings_text_from_html (string);
 	else if (g_strrstr (string, "BodyFragment") != NULL)
-		string = ews_oof_settings_text_from_html (string);
-	e_ews_oof_settings_set_external_reply (settings, string);
+		text = ews_oof_settings_text_from_html (string);
+	e_ews_oof_settings_set_external_reply (settings, text ? text : "");
 	g_free (string);
+	g_free (text);
 
 	g_object_unref (source_object);
 }
