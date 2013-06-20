@@ -246,6 +246,8 @@ ews_oof_settings_get_response_cb (ESoapResponse *response,
 		text = ews_oof_settings_text_from_html (string);
 	else if (g_strrstr (string, "BodyFragment") != NULL)
 		text = ews_oof_settings_text_from_html (string);
+	else
+		text = NULL;
 	e_ews_oof_settings_set_internal_reply (settings, text ? text : "");
 	g_free (string);
 	g_free (text);
@@ -261,6 +263,8 @@ ews_oof_settings_get_response_cb (ESoapResponse *response,
 		text = ews_oof_settings_text_from_html (string);
 	else if (g_strrstr (string, "BodyFragment") != NULL)
 		text = ews_oof_settings_text_from_html (string);
+	else
+		text = NULL;
 	e_ews_oof_settings_set_external_reply (settings, text ? text : "");
 	g_free (string);
 	g_free (text);
