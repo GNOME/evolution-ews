@@ -95,6 +95,9 @@ e_ews_collect_attendees (icalcomponent *comp,
 			break;
 		}
 	}
+
+	if (*required == NULL && *optional == NULL && *resource == NULL && org_email_address != NULL)
+		*required = g_slist_prepend (*required, (gpointer) org_email_address);
 }
 
 gint
