@@ -3354,7 +3354,6 @@ add_item_to_cache (ECalBackendEws *cbews,
 		const EwsId *item_id;
 		ECalComponentId *id;
 		const GSList *l = NULL;
-		const gchar *org_email_address = e_ews_collect_organizer (icalcomp);
 		const gchar *uid = e_ews_item_get_uid (item);
 
 		item_id = e_ews_item_get_id (item);
@@ -3371,11 +3370,6 @@ add_item_to_cache (ECalBackendEws *cbews,
 
 			if (g_strcmp0 (attendee->mailbox->routing_type, "EX") == 0)
 				email = e_ews_item_util_strip_ex_address (attendee->mailbox->email);
-
-			/*remove organizer for attendees list*/
-			if (g_ascii_strcasecmp (org_email_address, email ? email : attendee->mailbox->email) == 0) {
-				continue;
-			}
 
 			mailtoname = g_strdup_printf ("mailto:%s", email ? email : attendee->mailbox->email);
 			icalprop = icalproperty_new_attendee (mailtoname);
