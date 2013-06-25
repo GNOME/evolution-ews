@@ -4070,7 +4070,8 @@ e_cal_backend_ews_get_backend_property (ECalBackend *backend,
 			CAL_STATIC_CAPABILITY_NO_CONV_TO_ASSIGN_TASK ","
 			//	 CAL_STATIC_CAPABILITY_NO_CONV_TO_RECUR ","
 			CAL_STATIC_CAPABILITY_NO_TASK_ASSIGNMENT ","
-			CAL_STATIC_CAPABILITY_SAVE_SCHEDULES);
+			CAL_STATIC_CAPABILITY_SAVE_SCHEDULES ","
+			CAL_STATIC_CAPABILITY_NO_ALARM_AFTER_START);
 	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_CAL_EMAIL_ADDRESS)) {
 		/* return email address of the person who opened the calendar */
 		ECalBackendEws *cbews;
