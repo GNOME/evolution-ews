@@ -3466,6 +3466,29 @@ add_item_to_cache (ECalBackendEws *cbews,
 		comp = e_cal_component_new ();
 		e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (icalcomp));
 
+		/*
+		 * There is no API to set/get alarm description on the server side.
+		 * However, for some reason, the alarm description has been set to "REMINDER"
+		 * automatically (and with no i18n). Instead of show it to the user, let's
+		 * set the summary as the alarm description.
+		 */
+		if (e_cal_component_has_alarms (comp)) {
+			GList *alarm_uids, *l;
+
+			alarm_uids = e_cal_component_get_alarm_uids (comp);
+			for (l = alarm_uids; l != NULL; l = l->next) {
+				ECalComponentAlarm *alarm;
+				ECalComponentText text;
+
+				alarm = e_cal_component_get_alarm (comp, l->data);
+				e_cal_component_get_summary (comp, &text);
+				e_cal_component_alarm_set_description (alarm, &text);
+
+				e_cal_component_alarm_free (alarm);
+			}
+			cal_obj_uid_list_free (alarm_uids);
+		}
+
 		id = e_cal_component_get_id (comp);
 		cache_comp = e_cal_backend_store_get_component (priv->store, id->uid, id->rid);
 		e_cal_component_free_id (id);
@@ -4071,7 +4094,8 @@ e_cal_backend_ews_get_backend_property (ECalBackend *backend,
 			//	 CAL_STATIC_CAPABILITY_NO_CONV_TO_RECUR ","
 			CAL_STATIC_CAPABILITY_NO_TASK_ASSIGNMENT ","
 			CAL_STATIC_CAPABILITY_SAVE_SCHEDULES ","
-			CAL_STATIC_CAPABILITY_NO_ALARM_AFTER_START);
+			CAL_STATIC_CAPABILITY_NO_ALARM_AFTER_START ","
+			CAL_STATIC_CAPABILITY_NO_ALARM_DESCRIPTION);
 	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_CAL_EMAIL_ADDRESS)) {
 		/* return email address of the person who opened the calendar */
 		ECalBackendEws *cbews;
