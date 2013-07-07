@@ -1,3 +1,27 @@
+Evolution-EWS 3.9.4 2013-07-08
+------------------------------
+
+Bug Fixes:
+	Bug 702922 - Meetings with no attendees are treated as Appointment
+	             (Fabiano Fidêncio)
+	Bug 703053 - Error on setting reminder 'after start of appointment'
+	             (Fabiano Fidêncio)
+	Bug 703194 - Custom alarm message is REMINDER (Fabiano Fidêncio)
+
+Other Changes:
+	* Fix leak and avoid to pass NULL to g_strrstr() (Fabiano Fidêncio)
+	* Fix segfault: set text as NULL when both g_strrstr() fails
+	  (Fabiano Fidêncio)
+	* Use g_strcmp0 instead of implement it as check_equal
+	  (Fabiano Fidêncio)
+	* Allow to pass NULL for e_ews_connection_get_folder_sync
+	  (Fabiano Fidêncio)
+
+Translations:
+	Sandeep Sheshrao Shedmake (mr)
+	Rafael Ferreira (pt_BR)
+
+
 Evolution-EWS 3.9.3 2013-06-17
 ------------------------------
 
