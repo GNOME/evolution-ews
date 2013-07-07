@@ -1,5 +1,13 @@
+dnl Evolution-EWS version
+m4_define([ews_major_version], [3])
+m4_define([ews_minor_version], [9])
+m4_define([ews_micro_version], [4])
+
+m4_define([ews_version],
+	[ews_major_version.ews_minor_version.ews_micro_version])
+
 AC_PREREQ(2.58)
-AC_INIT([evolution-ews], [3.9.4], [http://bugzilla.gnome.org/browse.cgi?product=evolution-ews])
+AC_INIT([evolution-ews], [ews_version], [http://bugzilla.gnome.org/browse.cgi?product=evolution-ews])
 AM_INIT_AUTOMAKE([gnu 1.9 dist-xz no-dist-gzip -Wno-portability])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR(README)
@@ -16,8 +24,8 @@ AC_SUBST(EVO_EWS_API_VERSION)
 dnl *******************
 dnl Required Packages
 dnl *******************
-m4_define([eds_minimum_version], [3.2.0])
-m4_define([evo_minimum_version], [3.2.0])
+m4_define([eds_minimum_version], [ews_version])
+m4_define([evo_minimum_version], [ews_version])
 
 dnl Keep these two definitions in agreement.
 m4_define([glib_minimum_version], [2.32])
