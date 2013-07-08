@@ -1,7 +1,5 @@
 NULL =
 
-DIST_SUBDIRS = tests
-
 privlib_LTLIBRARIES = libeews-1.2.la
 
 ENUM_TYPES = e-ews-enums.h

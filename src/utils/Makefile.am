@@ -35,23 +35,4 @@ libewsutils_la_LIBADD = \
 
 libewsutils_la_LDFLAGS = $(NO_UNDEFINED)
 
-noinst_PROGRAMS = ews-test-finditem-query
-
-TESTS = ews-test-finditem-query
-check_PROGRAMS = ews-test-finditem-query
-
-ews_test_finditem_query_CPPFLAGS = \
-	$(libewsutils_la_CPPFLAGS) \
-	$(NULL)
-
-ews_test_finditem_query_SOURCES =  \
-	ews-test-finditem-query.c \
-	e-ews-query-to-restriction.c \
-	e-ews-query-to-restriction.h \
-	$(NULL)
-
-ews_test_finditem_query_LDADD = \
-	$(libewsutils_la_LIBADD) \
-	$(NULL)
-
 -include $(top_srcdir)/git.mk

@@ -319,7 +319,6 @@ AC_CONFIG_FILES([
 Makefile 
 src/Makefile
 src/server/Makefile
-src/server/tests/Makefile
 src/utils/Makefile
 src/addressbook/Makefile
 src/calendar/Makefile
