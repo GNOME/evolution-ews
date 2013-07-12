@@ -1874,15 +1874,28 @@ ews_folder_dispose (GObject *object)
 		ews_folder->search = NULL;
 	}
 
-	g_mutex_clear (&ews_folder->priv->search_lock);
-	g_hash_table_destroy (ews_folder->priv->uid_eflags);
-	g_cond_clear (&ews_folder->priv->fetch_cond);
-
 	if (CAMEL_FOLDER (ews_folder)->summary)
 		g_signal_handlers_disconnect_by_func (CAMEL_FOLDER (ews_folder)->summary, G_CALLBACK (ews_folder_count_notify_cb), ews_folder);
 
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (camel_ews_folder_parent_class)->dispose (object);
+}
+
+static void
+ews_folder_finalize (GObject *object)
+{
+	CamelEwsFolder *ews_folder;
+
+	ews_folder = CAMEL_EWS_FOLDER (object);
+
+	g_mutex_clear (&ews_folder->priv->search_lock);
+	g_mutex_clear (&ews_folder->priv->state_lock);
+	g_rec_mutex_clear (&ews_folder->priv->cache_lock);
+	g_hash_table_destroy (ews_folder->priv->uid_eflags);
+	g_cond_clear (&ews_folder->priv->fetch_cond);
+
+	/* Chain up to parent's finalize() method. */
+	G_OBJECT_CLASS (camel_ews_folder_parent_class)->finalize (object);
 }
 
 static void
@@ -1931,6 +1944,7 @@ camel_ews_folder_class_init (CamelEwsFolderClass *class)
 
 	object_class = G_OBJECT_CLASS (class);
 	object_class->dispose = ews_folder_dispose;
+	object_class->finalize = ews_folder_finalize;
 	object_class->constructed = ews_folder_constructed;
 
 	folder_class = CAMEL_FOLDER_CLASS (class);
