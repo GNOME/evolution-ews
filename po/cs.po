@@ -736,7 +736,7 @@ msgstr "%s – %s"
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:512
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:720
 msgid "Inbox"
-msgstr "Doručená pošta"
+msgstr "Přijatá"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:514
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
@@ -856,7 +856,7 @@ msgstr "Ú_koly"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:634
 msgid "_Inbox"
-msgstr "_Doručená pošta"
+msgstr "_Přijatá"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:637
 msgid "C_ontacts"
