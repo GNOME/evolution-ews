@@ -1,0 +1,1113 @@
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+#
+# Krishnababu Krothapalli <kkrothap@redhat.com>, 2013.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-ews&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2013-07-12 05:44+0000\n"
+"PO-Revision-Date: 2013-07-12 15:52+0000\n"
+"Last-Translator: Krishnababu Krothapalli <kkrothap@redhat.com>\n"
+"Language-Team: American English <fedora-trans-te@redhat.com>\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Lokalize 1.5\n"
+
+#: ../src/addressbook/e-book-backend-ews.c:1413
+msgid "The backend does not support bulk additions"
+msgstr "బ్యాకెండ్ పెద్దమొత్తంలో చేర్పులకు తోడ్పాటునీయదు"
+
+#: ../src/addressbook/e-book-backend-ews.c:1452
+#: ../src/addressbook/e-book-backend-ews.c:1796
+msgid ""
+"Cannot save contact list, it's only supported on EWS Server 2010 or later"
+msgstr ""
+"పరిచయ జాబితాను దాయలేదు, అది EWS సేవిక 2010 లేదా తరువాతి దానిపై మాత్రమే "
+"తోడ్పాటునిచ్చును"
+
+#: ../src/addressbook/e-book-backend-ews.c:1755
+msgid "The backend does not support bulk modifications"
+msgstr "బ్యాకెండ్ పెద్దమొత్తంలో సవరణలకు తోడ్పాటునీయదు"
+
+#: ../src/addressbook/e-book-backend-ews.c:1955
+msgid "Wait till syncing is done"
+msgstr "సింకింగ్ పూర్తయ్యేవరకు వేచివుండు"
+
+#: ../src/addressbook/e-book-backend-ews.c:2364
+#, c-format
+msgid "Downloading contacts in %s %d%% completed... "
+msgstr "%s %d%% నందు పరిచయాలను దింపుకొనుట పూర్తైనది... "
+
+#: ../src/addressbook/e-book-backend-ews.c:3032
+msgid "Syncing contacts..."
+msgstr "పరిచయాలను సింక్ చేస్తోంది..."
+
+#: ../src/addressbook/e-book-backend-ews.c:3251
+#: ../src/configuration/e-ews-search-user.c:365
+msgid "Searching..."
+msgstr "అన్వేషిస్తోంది..."
+
+#: ../src/calendar/e-cal-backend-ews.c:1054
+msgid "EWS does not support bulk removals"
+msgstr "EWS అనునది పెద్దమొత్తంలో తీసివేతలను తోడ్పాటునీయదు"
+
+#: ../src/calendar/e-cal-backend-ews.c:1504
+msgid "Unknown error"
+msgstr "తెలియని దోషం"
+
+#: ../src/calendar/e-cal-backend-ews.c:1705
+msgid "EWS does not support bulk additions"
+msgstr "EWS పెద్దమొత్తంలో చేర్పులను తోడ్పాటునీయదు"
+
+#: ../src/calendar/e-cal-backend-ews.c:2288
+msgid "EWS does not support bulk modifications"
+msgstr "EWS పెద్దమొత్తంలో సవరణలను తోడ్పాటునీయదు"
+
+#: ../src/camel/camel-ews-folder.c:268
+#, c-format
+msgid "Unable to open mimecontent temporary file!"
+msgstr "మైమ్‌కాంటెంట్ తాత్కాలిక ఫైలును తెరువలేకపోయింది!"
+
+#: ../src/camel/camel-ews-folder.c:276
+#, c-format
+msgid "Unable to generate parser from mimecontent!"
+msgstr "మైమ్‌కాంటెంట్ నుండి పార్సర్ జనియింపచేయలేదు!"
+
+#: ../src/camel/camel-ews-folder.c:285
+#, c-format
+msgid "Unable to parse meeting request mimecontent!"
+msgstr "మీటింగ్ అభ్యర్ధన మైమ్‌కాంటెంట్‌ను పార్స్ చేయలేదు!"
+
+#: ../src/camel/camel-ews-folder.c:346
+#, c-format
+msgid "Unable to create cache file"
+msgstr "క్యాచీ ఫైలు సృష్టించ లేకపోయింది"
+
+#: ../src/camel/camel-ews-folder.c:451 ../src/camel/camel-ews-folder.c:531
+#, c-format
+msgid "Unable to create cache path"
+msgstr "క్యాచీ పాత్ సృష్టించ లేకపోయింది"
+
+#: ../src/camel/camel-ews-folder.c:541
+#, c-format
+msgid "Failed to move message cache file"
+msgstr "సందేశం క్యాచీ ఫైలు కదుల్చుటకు విఫలమైంది"
+
+#: ../src/camel/camel-ews-folder.c:1189
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "%s కొరకు "
+
+#: ../src/camel/camel-ews-folder.c:1625
+#, c-format
+msgid "Cant perform actions on the folder while in offline mode"
+msgstr "ఆఫ్‌లైన్ రీతినందు సంచయంపై చర్యలను జరుపలేదు"
+
+#: ../src/camel/camel-ews-provider.c:47
+msgid "Checking for new mail"
+msgstr "కొత్త మెయిల్ కొరకు పరిశీలిస్తోంది"
+
+#: ../src/camel/camel-ews-provider.c:49
+msgid "C_heck for new messages in all folders"
+msgstr "అన్ని సంచయాలనందు కొత్త సందేశముల కొరకు పరిశీలించు (_h)"
+
+#: ../src/camel/camel-ews-provider.c:52
+msgid "Options"
+msgstr "ఐచ్చికాలు"
+
+#: ../src/camel/camel-ews-provider.c:54
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr "ఈ సేవికపై యిన్బాక్స్ నందు కొత్త సందేశాలకు వడపోతలను ఆపాదించు (_A)"
+
+#: ../src/camel/camel-ews-provider.c:56
+msgid "Check new messages for _Junk contents"
+msgstr "నిరర్ధక విషాయల కొత్త సందేశాలను పరిశీలించు (_J)"
+
+#: ../src/camel/camel-ews-provider.c:58
+msgid "Only check for Junk messages in the IN_BOX folder"
+msgstr "నిరర్ధక సందేశాల కొరకు ఇన్బాక్స్ నందు మాత్రమే పరిశీలించు (_B)"
+
+#: ../src/camel/camel-ews-provider.c:60
+msgid "Automatically synchroni_ze remote mail locally"
+msgstr "స్వయంచాలకంగా రిమోట్ సందేశంను స్థానికంగా సింక్‌చేయి (_z)"
+
+#: ../src/camel/camel-ews-provider.c:63
+msgid "Connection"
+msgstr "అనుసంధానం"
+
+#. Translators: '%s' is preplaced with a widget, where "
+#. * user can select how long the timeout should be.
+#: ../src/camel/camel-ews-provider.c:67
+#, c-format
+msgid "Connection _timeout (in seconds) %s"
+msgstr "అనుసంధానం కాలపరిమితి (క్షణాలలో) %s (_t)"
+
+#: ../src/camel/camel-ews-provider.c:75
+msgid "Exchange Web Services"
+msgstr "వినిమయ వెబ్ సేవలు"
+
+#: ../src/camel/camel-ews-provider.c:77
+msgid "For accessing Exchange servers using Web Services"
+msgstr "ఇచ్చిపుచ్చుకొనే సేవికలను వెబ్ సేవలను వుపయోగించి వాడుకొనుటకు"
+
+#: ../src/camel/camel-ews-provider.c:92
+msgid "NTLM"
+msgstr "NTLM"
+
+#: ../src/camel/camel-ews-provider.c:94
+msgid ""
+"This option will connect to the Exchange server using a plaintext password "
+"with NTLM authentication."
+msgstr ""
+"NTLM ధృవీకణతో సాదాపాఠం సంకేతపదం వుపయోగిస్తూ యీ ఐచ్చికం అనునది వినిమయ సేవికకు "
+"అనుసంధానమగును."
+
+#: ../src/camel/camel-ews-provider.c:102
+msgid "Basic"
+msgstr "ప్రాధమిక"
+
+#: ../src/camel/camel-ews-provider.c:104
+msgid ""
+"This option will connect to the Exchange server using a plaintext password "
+"with Basic authentication."
+msgstr ""
+"ప్రాధమిక ధృవీకణతో సాదాపాఠం సంకేతపదం వుపయోగిస్తూ యీ ఐచ్చికం అనునది వినిమయ "
+"సేవికకు అనుసంధానమగును."
+
+#: ../src/camel/camel-ews-store.c:292
+#, c-format
+msgid "Session has no storage path"
+msgstr "సెషన్ యెటువంటి నిల్వ పాత్ కలిగిలేదు"
+
+#: ../src/camel/camel-ews-store.c:329
+#, c-format
+msgctxt "PublicFolders"
+msgid "%s_%d"
+msgstr "%s_%d"
+
+#: ../src/camel/camel-ews-store.c:458
+#, c-format
+msgctxt "ForeignFolders"
+msgid "%s_%d"
+msgstr "%s_%d"
+
+#: ../src/camel/camel-ews-store.c:603
+msgid "Checking \"Out of Office\" settings"
+msgstr "\"కార్యాలయం బయట\" అమరికలను పరిశీలిస్తోంది"
+
+#: ../src/camel/camel-ews-store.c:835
+msgid "Updating foreign folder structure"
+msgstr "ఫారెన్ ఫోల్డర్ స్ట్రక్చర్ నవీకరిస్తోంది"
+
+#: ../src/camel/camel-ews-store.c:1120
+msgid "Authentication password not available"
+msgstr "ధృవీకరణ సంకేతపదం అందుబాటులో లేదు"
+
+#: ../src/camel/camel-ews-store.c:1285
+msgid "Query for authentication types is not supported"
+msgstr "ధృవీకరణ రకాల ప్రశ్నకు తోడ్పాటులేదు"
+
+#: ../src/camel/camel-ews-store.c:1337
+#, c-format
+msgid "No such folder: %s"
+msgstr "అటువంటి సంచయం లేదు: %s"
+
+#: ../src/camel/camel-ews-store.c:1649
+msgid "Cannot list EWS public folders in offline mode"
+msgstr "EWS పబ్లిక్ సంచయాలను ఆఫ్‌లైన్ రీతినందు జాబితా చేయలేదు"
+
+#: ../src/camel/camel-ews-store.c:1722
+msgid "Cannot find any EWS public folders"
+msgstr "ఏ EWS పబ్లిక్ సంచయాలను కనుగొనలేదు"
+
+#: ../src/camel/camel-ews-store.c:1827
+#, c-format
+msgid "Cannot create folder '%s', folder already exists"
+msgstr "సంచయం '%s' సృష్టించలేదు, సంచయం యిప్పటికే వుంది"
+
+#: ../src/camel/camel-ews-store.c:1842
+#, c-format
+msgid "Parent folder %s does not exist"
+msgstr "పేరెంట్ సంచయం %s లేదు"
+
+#: ../src/camel/camel-ews-store.c:1852
+#, c-format
+msgid ""
+"Cannot create folder under '%s', it is used for folders of other users only"
+msgstr ""
+"'%s' కిందన సంచయం సృష్టించలేదు, ఇది యితర వాడుకరుల సంచయాల కొరకు మాత్రమే "
+"వుపయోగించబడును"
+
+#: ../src/camel/camel-ews-store.c:1862
+#, c-format
+msgid "Cannot create folder under '%s', it is used for public folders only"
+msgstr ""
+"'%s' కిందన సంచయం సృష్టించలేదు, ఇది పబ్లిక్ సంచయాల కొరకు మాత్రమే వుపయోగించబడెను"
+
+#: ../src/camel/camel-ews-store.c:1931
+#, c-format
+msgid "Folder does not exist"
+msgstr "సంచయం లేదు"
+
+#: ../src/camel/camel-ews-store.c:1940
+#, c-format
+msgid "Cannot remove folder '%s', it is used for folders of other users only"
+msgstr ""
+"సంచయం '%s' తీసివేయలేదు, ఇది యితర వాడుకరుల సంచయాల కొరకు మాత్రమే వుపయోగించబడును"
+
+#: ../src/camel/camel-ews-store.c:1950
+#, c-format
+msgid "Cannot remove folder '%s', it is used for public folders only"
+msgstr ""
+"సంచయం '%s' తీసివేయలేము, ఇది పబ్లిక్ సంచయాల కొరకు మాత్రమే వుపయోగించబడెను"
+
+#: ../src/camel/camel-ews-store.c:2058
+#, c-format
+msgid "Folder %s does not exist"
+msgstr "సంచయం %s లేదు"
+
+#: ../src/camel/camel-ews-store.c:2068
+#, c-format
+msgid "No change key record for folder %s"
+msgstr "సంచయం %s కొరకు చేంజ్ కీ రికార్డు కాలేదు"
+
+#: ../src/camel/camel-ews-store.c:2110
+#, c-format
+msgid "Cannot both rename and move a folder at the same time"
+msgstr "ఒకేసారి సంచయం పేరు మార్చుట మరియు కదుల్చుట కుదరదు"
+
+#: ../src/camel/camel-ews-store.c:2146
+#, c-format
+msgid "Cannot find folder ID for parent folder %s"
+msgstr "పేరెంట్ సంచయం %s కొరకు సంచయం ఐడి కనుగొనలేదు"
+
+#: ../src/camel/camel-ews-store.c:2196 ../src/camel/camel-ews-transport.c:69
+#, c-format
+msgid "Exchange server %s"
+msgstr "వినిమయ సేవిక %s"
+
+#: ../src/camel/camel-ews-store.c:2199
+#, c-format
+msgid "Exchange service for %s on %s"
+msgstr "%s కొరకు %s పై వినిమయ సేవిక"
+
+#: ../src/camel/camel-ews-store.c:2243
+#, c-format
+msgid "Could not locate Trash folder"
+msgstr "చెత్త సంచయం కనపడలేదు"
+
+#: ../src/camel/camel-ews-store.c:2303
+#, c-format
+msgid "Could not locate Junk folder"
+msgstr "నిరర్ధక సంచయం కనపడలేదు"
+
+#: ../src/camel/camel-ews-store.c:2493
+msgid "Cannot subscribe EWS folders in offline mode"
+msgstr "ఆఫ్‌లైన్ రీతినందు EWS సంచయాలకు సబ్‌స్క్రైబ్ కాలేదు"
+
+#: ../src/camel/camel-ews-store.c:2516
+#, c-format
+msgid "Cannot subscribe folder '%s', no public folder available"
+msgstr "సంచయం '%s' కు సబ్‌స్క్రైబ్ కాలేదు, ఏ పబ్లిక్ సంచయం అందుబాటులో లేదు"
+
+#: ../src/camel/camel-ews-store.c:2526
+#, c-format
+msgid "Cannot subscribe folder '%s', folder not found"
+msgstr "సంచయం '%s' కు సబ్‌స్క్రైబ్ కాలేదు, సంచయం కనబడలేదు"
+
+#: ../src/camel/camel-ews-store.c:2617
+msgid "Cannot unsubscribe EWS folders in offline mode"
+msgstr "ఆఫ్‌లైన్ రీతినందు EWS సంచయాలను అన్‌సబ్‌స్క్రైబ్ చేయలేదు"
+
+#: ../src/camel/camel-ews-store.c:2734
+#, c-format
+msgid "You must be working online to complete this operation"
+msgstr "ఈ ఆపరేషన్ పూర్తిచేయుటకు మీరు ఆన్‌లైన్ నందు పనిచేస్తూవుండాలి"
+
+#: ../src/camel/camel-ews-store.c:2778
+msgid "Unsetting the \"Out of Office\" status"
+msgstr "\"కార్యాలయం బయట\" స్థితిని మార్చుతోంది"
+
+#: ../src/camel/camel-ews-transport.c:72
+#, c-format
+msgid "Exchange mail delivery via %s"
+msgstr "వినిమయ మెయిల్ డెలివరీ %s ద్వారా"
+
+#: ../src/camel/camel-ews-transport.c:119
+msgid "Cannot send message with no From address"
+msgstr "సందేశం పంపుతున్నవారి చిరునామా లేకుండా పంపలేము"
+
+#: ../src/camel/camel-ews-transport.c:125
+msgid "Exchange server cannot send message with multiple From addresses"
+msgstr "ఒకటికన్నా యెక్కువ చిరునామాలనుండి వినిమయ సేవిక సందేశం పంపలేదు"
+
+#: ../src/camel/camel-ews-transport.c:136
+msgid "Failed to read From address"
+msgstr "ఏ చిరునామా నుండి వస్తుందో చదువుటకు విఫలమైంది"
+
+#: ../src/camel/camel-ews-transport.c:148
+#, c-format
+msgid ""
+"Exchange server cannot send message as '%s', when the account was configured "
+"for address '%s'"
+msgstr ""
+"వినిమయ సేవిక '%s' వలె సందేశం పంపలేదు, చిరునామా '%s' కొరకు ఖాతా "
+"ఆకృతీకరించబడినప్పుడు."
+
+#: ../src/camel/camel-ews-transport.c:162
+#, c-format
+msgid "Service not connected"
+msgstr "సేవ అనుసంధానం కాలేదు"
+
+#: ../src/collection/e-ews-backend.c:422
+#: ../src/configuration/e-mail-config-ews-gal.c:274
+msgid "Global Address List"
+msgstr "గ్లోబల్ చిరునామా జాబితా"
+
+#: ../src/collection/e-ews-backend.c:807
+#, c-format
+msgid "Could not determine a suitable folder class for a new folder named '%s'"
+msgstr ""
+"'%s' పేరుతో వున్న కొత్త సంచయం కొరకు సరిపోయే సంచయం తరగతిని నిర్ణయించలేక పోయింది"
+
+#: ../src/collection/e-ews-backend.c:896
+#, c-format
+msgid "Data source '%s' does not represent an Exchange Web Services folder"
+msgstr "దత్తాంశ మూలం '%s' అనునది వినిమయ వెబ్ సేవల సంచయంను సూచించును"
+
+#: ../src/configuration/e-ews-config-utils.c:516
+#, c-format
+msgid "Cannot edit permissions of folder '%s', choose other folder."
+msgstr "'%s' సంచయం యొక్క అనుమతులను సరికూర్చలేదు, వేరే సంచయం యెంచుము."
+
+#: ../src/configuration/e-ews-config-utils.c:594
+msgid "Subscribe to folder of other user..."
+msgstr "వేరే వాడుకరి యొక్క సంచయంకు సబ్‌స్క్రైబ్ అవ్వు ..."
+
+#: ../src/configuration/e-ews-config-utils.c:603
+#: ../src/configuration/e-ews-config-utils.c:884
+#: ../src/configuration/e-ews-config-utils.c:915
+#: ../src/configuration/e-ews-config-utils.c:946
+#: ../src/configuration/e-ews-config-utils.c:977
+msgid "Permissions..."
+msgstr "అనుమతులు..."
+
+#: ../src/configuration/e-ews-config-utils.c:605
+msgid "Edit EWS folder permissions"
+msgstr "EWS సంచయం అనుమతులను సరికూర్చు"
+
+#: ../src/configuration/e-ews-config-utils.c:886
+msgid "Edit EWS calendar permissions"
+msgstr "EWS క్యాలెండర్ అనుమతులను సరికూర్చు"
+
+#: ../src/configuration/e-ews-config-utils.c:917
+msgid "Edit EWS tasks permissions"
+msgstr "EWS కర్తవ్యాల అనుమతులను సరికూర్చు"
+
+#: ../src/configuration/e-ews-config-utils.c:948
+msgid "Edit EWS memos permissions"
+msgstr "EWS మెమోల అనుమతులను సరికూర్చు"
+
+#: ../src/configuration/e-ews-config-utils.c:979
+msgid "Edit EWS contacts permissions"
+msgstr "EWS పరిచయాల అనుమతులను సరికూర్చు"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:87
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:499
+msgctxt "PermissionsLevel"
+msgid "None"
+msgstr "ఏదీకాదు"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:88
+msgctxt "PermissionsLevel"
+msgid "Owner"
+msgstr "యజమాని"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:98
+msgctxt "PermissionsLevel"
+msgid "Publishing Editor"
+msgstr "ప్రచురించు సరికూర్పరి"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:107
+msgctxt "PermissionsLevel"
+msgid "Editor"
+msgstr "సరికూర్పరి"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:115
+msgctxt "PermissionsLevel"
+msgid "Publishing Author"
+msgstr "ప్రచురించు మూలకర్త"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:122
+msgctxt "PermissionsLevel"
+msgid "Author"
+msgstr "మూలకర్త"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:128
+msgctxt "PermissionsLevel"
+msgid "Nonediting Author"
+msgstr "కూర్పుచేయని మూలకర్త"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:133
+msgctxt "PermissionsLevel"
+msgid "Reviewer"
+msgstr "పునఃపరిశీలించువారు"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:136
+msgctxt "PermissionsLevel"
+msgid "Contributor"
+msgstr "సహాయకులు"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:139
+msgctxt "PermissionsLevel"
+msgid "Free/Busy time"
+msgstr "ఖాళీ/వత్తిడి సమయం"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:141
+msgctxt "PermissionsLevel"
+msgid "Free/Busy time, subject, location"
+msgstr "ఖాళీ/వత్తిడి సమయం, సంగతి, స్థానం"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:143
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:520
+msgctxt "PermissionsLevel"
+msgid "Custom"
+msgstr "మలచిన"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:267
+msgid "Writing folder permissions, please wait..."
+msgstr "సంచయం అనుమతులను వ్రాయుచున్నది, దయచేసి వేచివుండు..."
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:777
+msgctxt "User"
+msgid "Anonymous"
+msgstr "పేరులేని"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:780
+msgctxt "User"
+msgid "Default"
+msgstr "అప్రమేయ"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:786
+msgctxt "User"
+msgid "Unknown"
+msgstr "తెలియని"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:867
+#: ../src/configuration/e-ews-search-user.c:431
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1075
+msgid "Name"
+msgstr "పేరు"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:873
+msgid "Permission level"
+msgstr "అనుమతి స్థాయి"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:925
+msgid "Edit EWS folder permissions..."
+msgstr "EWS సంచయం అనుమతులను సరిచేయి..."
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:950
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:635
+msgid "Account:"
+msgstr "ఖాతా:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:978
+msgid "Folder name:"
+msgstr "సంచయం పేరు:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1001
+msgid "Folder ID:"
+msgstr "సంచయం ఐడి:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1065
+msgid "Permissions"
+msgstr "అనుమతులు"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1087
+msgid "Permi_ssion level:"
+msgstr "అనుమతి స్థాయి (_s):"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1121
+msgctxt "Permissions"
+msgid "Read"
+msgstr "చదువు"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1133
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1200
+msgctxt "Permissions"
+msgid "None"
+msgstr "ఏదీకాదు"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1139
+msgctxt "Permissions"
+msgid "Free/Busy time"
+msgstr "ఖాళీ/వత్తిడి సమయం"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1144
+msgctxt "Permissions"
+msgid "Free/Busy time, subject, location"
+msgstr "ఖాళీ/వత్తిడి సమయం, సంగతి, స్థానం"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1150
+msgctxt "Permissions"
+msgid "Full Details"
+msgstr "పూర్తి వివరాలు"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1156
+msgctxt "Permissions"
+msgid "Write"
+msgstr "వ్రాయి"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1168
+msgctxt "Permissions"
+msgid "Create items"
+msgstr "అంశాలను సృష్టించు"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1172
+msgctxt "Permissions"
+msgid "Create subfolders"
+msgstr "ఉపసంచయాలను సృష్టించు"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1176
+msgctxt "Permissions"
+msgid "Edit own"
+msgstr "స్వంతవి సరిచేయి"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1180
+msgctxt "Permissions"
+msgid "Edit all"
+msgstr "అన్నిటినీ సరిచేయి"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1188
+msgctxt "Permissions"
+msgid "Delete items"
+msgstr "అంశాలను తొలగించు"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1205
+msgctxt "Permissions"
+msgid "Own"
+msgstr "స్వంత"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1210
+msgctxt "Permissions"
+msgid "All"
+msgstr "అన్నీ"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1216
+msgctxt "Permissions"
+msgid "Other"
+msgstr "ఇతర"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1228
+msgctxt "Permissions"
+msgid "Folder owner"
+msgstr "సంచయం యజమాని"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1232
+msgctxt "Permissions"
+msgid "Folder contact"
+msgstr "సంచయం పరిచయం"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1236
+msgctxt "Permissions"
+msgid "Folder visible"
+msgstr "సంచయం  దృశ్యనీయత"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1309
+msgid "Reading folder permissions, please wait..."
+msgstr "సంచయం అనుమతులను చదువుతోంది, దయచేసి వేచివుండు..."
+
+#: ../src/configuration/e-ews-ooo-notificator.c:184
+msgid "Unset on Server"
+msgstr "సేవికపై తిప్పివుంచు"
+
+#: ../src/configuration/e-ews-ooo-notificator.c:185
+msgid "Unset the \"Out of Office\" status"
+msgstr "\"కార్యాలయం బయట\" స్థితి తిప్పివుంచు"
+
+#: ../src/configuration/e-ews-search-user.c:208
+#, c-format
+msgid "No users found, only one contact"
+msgid_plural "No users found, only %d contacts"
+msgstr[0] "ఏ వాడుకరులు కనబడలేదు, ఒక పరిచయం మాత్రమే"
+msgstr[1] "ఏ వాడుకరులు కనబడలేదు, %d పరిచయాలు మాత్రమే"
+
+#: ../src/configuration/e-ews-search-user.c:213
+msgid "No users found"
+msgstr "ఏ వాడుకరులు కనబడలేదు"
+
+#: ../src/configuration/e-ews-search-user.c:217
+#, c-format
+msgid "Found one user"
+msgid_plural "Found %d users"
+msgstr[0] "ఒక వాడుకరి కనుగొన్నది"
+msgstr[1] "%d వాడుకరులు కనుగొన్నది"
+
+#: ../src/configuration/e-ews-search-user.c:223
+#, c-format
+msgid "Found more than 100 users, but showing only first %d"
+msgid_plural "Found more than 100 users, but showing only first %d"
+msgstr[0] ""
+"100 కన్నా యెక్కువ వాడుకరులు కనుగొన్నది, అయితే మొదటి %d మాత్రమే చూపుతోంది"
+msgstr[1] ""
+"100 కన్నా యెక్కువ వాడుకరులు కనుగొన్నది, అయితే మొదటి %d మాత్రమే చూపుతోంది"
+
+#: ../src/configuration/e-ews-search-user.c:357
+#: ../src/configuration/e-ews-search-user.c:540
+msgid "Search for a user"
+msgstr "వాడుకరి కొరకు అన్వేషించు"
+
+#: ../src/configuration/e-ews-search-user.c:437
+msgid "E-mail"
+msgstr "ఈ-మెయిల్"
+
+#: ../src/configuration/e-ews-search-user.c:474
+msgid "Choose EWS user..."
+msgstr "EWS వాడుకరి యెంచు..."
+
+#: ../src/configuration/e-ews-search-user.c:497
+msgid "_Search:"
+msgstr "అన్వేషించు (_S):"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
+#: ../src/server/e-ews-folder.c:631
+#, c-format
+msgid "Cannot add folder, folder already exists as '%s'"
+msgstr "సంచయం జతచేయలేదు, సంచయం యిప్పటికే '%s' వలె వుంది"
+
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. * Example result: "Mailbox - John Smith"
+#.
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:107
+#, c-format
+msgctxt "ForeignFolder"
+msgid "Mailbox - %s"
+msgstr "మెయిల్‌బాక్స్ - %s"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:272
+msgid "Cannot test foreign folder availability while in offline mode"
+msgstr "ఆఫ్‌లైన్ రీతినందు ఫారెన్ సంచయం అందుబాటును పరీక్షించలేదు"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:297
+#, c-format
+msgid "User '%s' was not found on the server"
+msgstr "వాడుకరి '%s' సేవికపై కనబడలేదు"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:333
+#, c-format
+msgid "User name '%s' is ambiguous, specify it more precisely, please"
+msgstr ""
+"వాడుకరి పేరు '%s' సందిగ్ధంగా వుంది, దాన్ని మరింత ఖచ్చితంగా తెలుపండి, దయచేసి"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:355
+#, c-format
+msgid ""
+"Folder '%s' not found. Either it does not exist or you do not have "
+"permission to access it."
+msgstr "సంచయం '%s' కనబడలేదు. అది లేదు లేదా దానిని వాడుకొనుటకు మీకు అనుమతిలేదు."
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:373
+msgid "Cannot add folder, cannot determine folder's type"
+msgstr "సంచయం జతచేయలేము, సంచయం రకంను నిర్ణయించలేము"
+
+#. Translators: This is used to name foreign folder.
+#. * The first '%s' is replaced with user name to whom the folder belongs,
+#. * the second '%s' is replaced with folder name.
+#. * Example result: "John Smith - Calendar"
+#.
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:418
+#, c-format
+msgctxt "ForeignFolder"
+msgid "%s - %s"
+msgstr "%s - %s"
+
+#. convert well-known names to their non-localized form
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:512
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:720
+msgid "Inbox"
+msgstr "ఇన్బాక్స్"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:514
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
+msgid "Contacts"
+msgstr "పరిచయాలు"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:516
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:722
+msgid "Calendar"
+msgstr "క్యాలెండర్"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:518
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:723
+msgid "Memos"
+msgstr "మెమోలు"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:520
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:724
+msgid "Tasks"
+msgstr "కర్తవ్యాలు"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:537
+#, c-format
+msgid "Testing availability of folder '%s' of user '%s', please wait..."
+msgstr ""
+"సంచయం '%s' వాడకరి '%s' ది అందుబాటులో వుందోలేదో పరిశీలిస్తోంది, దయచేసి "
+"వేచివుండు..."
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:614
+msgid "Subscribe to folder of other EWS user..."
+msgstr "ఇతర EWS వాడుకరి యొక్క సంచయంకు సబ్‌స్క్రైబ్ అవ్వు..."
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:665
+msgid "User"
+msgstr "వాడుకరి"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:672
+msgid "_User:"
+msgstr "వాడుకరి (_U):"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:687
+msgid "C_hoose..."
+msgstr "ఎంచు (h)..."
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:703
+msgid "_Folder name:"
+msgstr "సంచయం పేరు (_F):"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:733
+msgid "Include _subfolders"
+msgstr "ఉపసంచయాలను చేర్చు (s)"
+
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:140
+msgid "Querying Autodiscover service"
+msgstr "స్వయంచాలకంగాకనుగొను సేవను ప్రశ్నించు"
+
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:231
+msgid "Fetch _URL"
+msgstr "_URL వెతికితెమ్ము"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:140
+msgid "Configuration"
+msgstr "ఆకృతీకరణ"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:158
+msgid "User_name:"
+msgstr "వాడుకరి పేరు (_n):"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:172
+msgid "_Host URL:"
+msgstr "అతిధేయ URL (_H):"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:191
+msgid "OAB U_RL:"
+msgstr "OAB U_RL:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:205
+msgid "Open _Mailbox of other user"
+msgstr "వేరే వాడకరి యొక్క మెయిల్‌బాక్స్ తెరువు (_M)"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:239
+msgid "S_earch..."
+msgstr "అన్వేషించు (_e)..."
+
+#: ../src/configuration/e-mail-config-ews-backend.c:250
+msgid "Authentication"
+msgstr "ధృవీకరణ"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:500
+msgctxt "PermissionsLevel"
+msgid "Reviewer (can read items)"
+msgstr "పునఃపరిశీలించువారు (అంశాలను చదువగలరు)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:501
+msgctxt "PermissionsLevel"
+msgid "Author (can read and create items)"
+msgstr "మూలకర్త (అంశాలను చదువగలరు మరియు సృష్టించగలరు)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:502
+msgctxt "PermissionsLevel"
+msgid "Editor (can read, create and modify items)"
+msgstr "సరికూర్పరి (చదువుట, సృష్టించుట మరియు అంశాలను సవరించుట చేయగలదు)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:605
+msgid "Delegate permissions"
+msgstr "డెలిగేట్ అనుమతులు"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:623
+msgid "C_alendar"
+msgstr "క్యాలెండర్ (_a)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:626
+msgid "_Delegate receives copies of meeting-related messages sent to me"
+msgstr "నాకు పంపిన మీటింగ్-సంబందిత సందేశాల నకళ్ళను డెలిగేట్ స్వీకరించును (_D)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:631
+msgid "_Tasks"
+msgstr "కర్తవ్యాలు (_T)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:634
+msgid "_Inbox"
+msgstr "ఇన్బాక్స్ (_I)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:637
+msgid "C_ontacts"
+msgstr "పరిచయాలు (_o)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:640
+msgid "_Notes"
+msgstr "గమనికలు (_N)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:643
+msgid "_Journal"
+msgstr "జర్నల్ (_J)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:646
+#, c-format
+msgid "Delegate '%s' has the following permissions"
+msgstr "డెలిగేట్ '%s' కింది అనుమతులను కలిగివుంది"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:664
+msgid "Delegate can see my _private items"
+msgstr "డెలిగేట్ నా వ్యక్తిగత అంశాలను చూడగలదు (_p)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:987
+msgid "Retrieving current user permissions, please wait..."
+msgstr "ప్రస్తుత వాడుకరి అనుమతులను పొందుతోంది, దయచేసి వేచివుండు..."
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1108
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1638
+msgid "Delegates"
+msgstr "డెలిగేట్లు"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1132
+msgid ""
+"Delegates can send items on your behalf, including creating and responding "
+"to meeting requests. If you want to grant folder permissions without giving "
+"send-on-behalf-of permissions, close this dialog box, right-click the "
+"folder, click Permissions and change the options there."
+msgstr ""
+"డెలిగేట్స్ మీ తరుపున మీటింగ్ అభ్యర్ధనలను సృష్టించగలరు మరియు స్పందించగలరు "
+"అంశాలను పంపగలరు. మీ-"
+"తరుపున-పంపే అనుమతులు ఇవ్వకుండా సంచయం అనుమతులను ఇవ్వాలంటే, ఈ డైలాగ్ బాక్స్ "
+"మూసి, సంచయంపై "
+"కుడి-నొక్కు నొక్కి, అనుమతులను నొక్కి ఐచ్చికాలను యిక్కడ మార్చండి."
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1181
+msgid ""
+"Deliver meeting requests addressed to me and responses to meeting requests "
+"where I am the organizer to:"
+msgstr ""
+"నేను నిర్వాహకునిగా వున్నప్పుడు నాకు సంబందించిన మీటింగ్ అభ్యర్ధనలను పంపు మరియు "
+"మీటింగ్ అభ్యర్ధనలకు "
+"స్పందించు:"
+
+#. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1190
+msgid ""
+"My delegates only, but _send a copy of meeting requests\n"
+"and responses to me (recommended)"
+msgstr ""
+"నా డెలిగేట్స్ మాత్రమే, అయితే మీటింగ్ అభ్యర్ధనల మరియు స్పందనల\n"
+"నకలు నాకు పంపు (సిఫార్సుచేయబడినది)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1197
+msgid "My d_elegates only"
+msgstr "నా డెలిగేట్స్ మాత్రమే"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1204
+msgid "My delegates a_nd me"
+msgstr "నా డెలిగేట్లు మరియు నేను (_n)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1713
+msgid "Retrieving \"Delegates\" settings"
+msgstr "\"డెలిగేట్స్\" అమరికలను పొందుతోంది"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:221
+msgid "Locating offline address books"
+msgstr "ఆఫ్‌లైన్ చిరునామా పుస్తకాలను గుర్తించుతోంది"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:301
+msgid "Cache o_ffline address book"
+msgstr "ఆఫ్‌లైన్ చిరునామా పుస్తకం క్యాచీ"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:327
+msgid "Select ad_dress list:"
+msgstr "చిరునామా జాబితా యెంపికచేయి:"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:351
+msgid "Fetch List"
+msgstr "జాబితా వెతికితెమ్ము"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:444
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:923
+msgid "Out of Office"
+msgstr "కార్యాలయం బయట"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:460
+msgid ""
+"The messages specified below will be automatically sent to each internal and "
+"external person who sends a mail to you."
+msgstr ""
+"కింద తెలిపిన సందేశాలు అనునవి మీకు మెయిల్ పంపిన అంతర్గత మరియు బాహ్య వ్యక్తికి "
+"స్వయంచాలకంగా పంపబడును."
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:468
+msgid "Do _not send Out of Office replies"
+msgstr "కార్యాలయ ప్రత్యుత్తరములు బయటకి పంపవద్దు (_n)"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:476
+msgid "_Send Out of Office replies"
+msgstr "కార్యాలయ ప్రత్యుత్తరాలు బయటకు పంపు (_S)"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:484
+msgid "Send Out of Office replies only _during this time period:"
+msgstr "ఈ సమయం నందు మాత్రమే కార్యాలయ ప్రత్యుత్తరాలు బయటకు పంపు (_d):"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:504
+msgid "_From:"
+msgstr "నుండి (_F):"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:529
+msgid "_To:"
+msgstr "వీరికి (_T):"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:554
+msgid "I_nternal:"
+msgstr "అంతర్గత (_n):"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:563
+msgid "Message to be sent within the organization"
+msgstr "సంస్థ లోపలే సందేశం పంపాలి"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:590
+msgid "E_xternal:"
+msgstr "బాహ్య (_x):"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:598
+msgid "Message to be sent outside the organization"
+msgstr "సంస్థ బయటకి సందేశం పంపాలి"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:608
+msgid "Do not reply to senders outside the organization"
+msgstr "సంస్థ బయట నుండి స్పందించేవారికి ప్రత్యుత్తరం ఇవ్వొద్దు"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:611
+msgid "Reply only to known senders outside the organization"
+msgstr "సంస్థ బయట నుండి స్పందిచేవారిలో తెలిసినవారికే ప్రత్యుత్తరం యివ్వు"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:614
+msgid "Reply to any sender outside the organization"
+msgstr "సంస్థ బయటనుండి స్పందించిన యెవరికైనా ప్రత్యుత్తరం యివ్వు"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:999
+msgid "Retrieving \"Out of Office\" settings"
+msgstr "\"కార్యాలయం బయట\" అమరికలను పొందుతోంది"
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:1
+msgid "Autodiscovery query failed."
+msgstr "స్వయంచాలకంగాకనుగొను క్వరీ విఫలమైంది."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:2
+msgid "The reported error was &quot;{0}&quot;."
+msgstr "నివేదించిన దోషం &quot;{0}&quot;."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:3
+msgid "Failed to locate offline address books."
+msgstr "ఆఫ్‌లైన్ చిరునామా పుస్తకాలను గుర్తించుటలో విఫలమైంది."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:4
+msgid "Failed to retrieve &quot;Out of Office&quot; settings."
+msgstr "&quot;కార్యాలయం బయట&quot; అమరికలను పొందుటకు విఫలమైంది."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:5
+msgid "Failed to retrieve &quot;Delegates&quot; settings."
+msgstr "&quot;డెలిగేట్స్&quot; అమరికలను పొందుటలో విఫలమైంది."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:6
+msgid "Your Exchange account \"{0}\" has the status set as \"Out of Office\"."
+msgstr ""
+"మీ వినిమయ ఖాతా \"{0}\" అనునది స్థితిని \"కార్యాలయం బయట\" గా అమర్చివుంది."
+
+#: ../src/server/e-ews-connection.c:538
+msgid "Operation Cancelled"
+msgstr "ఆపరేషన్ రద్దైనది"
+
+#: ../src/server/e-ews-connection.c:607
+msgid "Authentication failed"
+msgstr "ధృవీకరణ విఫలమైంది"
+
+#: ../src/server/e-ews-connection.c:618
+#, c-format
+msgid "No response: %s"
+msgstr "స్పందన లేదు: %s"
+
+#: ../src/server/e-ews-connection.c:2090
+#, c-format
+msgid "Failed to parse autodiscover response XML"
+msgstr "స్వయంచాలకంగాకనుగొను స్పందన XML పార్స్ విఫలమైంది"
+
+#: ../src/server/e-ews-connection.c:2097
+#, c-format
+msgid "Failed to find <Autodiscover> element"
+msgstr "<స్వయంచాలకంగాకనుగొను> మూలకం కనుగొనుటలో విఫలమైంది"
+
+#: ../src/server/e-ews-connection.c:2108
+#, c-format
+msgid "Failed to find <Response> element"
+msgstr "<స్పందన> మూలకం కనుగొనుటలో విఫలమైంది"
+
+#: ../src/server/e-ews-connection.c:2119
+#, c-format
+msgid "Failed to find <Account> element"
+msgstr "<ఖాతా> మూలకం కనుగొనుటలో విఫలమైంది"
+
+#: ../src/server/e-ews-connection.c:2138
+#, c-format
+msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
+msgstr ""
+"స్వయంచాలకంగాకనుగొను స్పందనలో <ASUrl> మరియు <OABUrl> కనుగొనుటలో విఫలమైంది"
+
+#: ../src/server/e-ews-connection.c:2220
+msgid "URL cannot be NULL"
+msgstr "URL అనునది NULL కాలేదు"
+
+#: ../src/server/e-ews-connection.c:2228
+#, c-format
+msgid "URL '%s' is not valid"
+msgstr "URL '%s' చెల్లునది కాదు"
+
+#: ../src/server/e-ews-connection.c:2330
+msgid "Email address is missing a domain part"
+msgstr "ఈమెయిల్ చిరునామా నందు డొమైన్ బాగము లేదు"
+
+#: ../src/server/e-ews-connection.c:2657
+msgid "Failed to parse oab XML"
+msgstr "oab XML పార్సు చేయుట విఫలమైంది"
+
+#: ../src/server/e-ews-connection.c:2665
+msgid "Failed to find <OAB> element\n"
+msgstr "<OAB> మూలకం కనుగొనుటలో విఫలమైంది\n"
+
+#: ../src/server/e-ews-connection.c:3908
+msgid "No items found"
+msgstr "ఏ అంశాలు కనబడలేదు"
+
+#: ../src/server/e-ews-folder.c:586
+msgid "Cannot add folder, unsupported folder type"
+msgstr "సంచయం జతచేయలేదు, తోడ్పాటులేని సంచయం రకం"
+
+#: ../src/server/e-ews-folder.c:591
+msgid "Cannot add folder, master source not found"
+msgstr "సంచయం జతచేయ లేదు, మాస్టర్ మూలం కనబడలేదు"
+
+#: ../src/utils/ews-camel-common.c:187
+#, c-format
+msgid "CreateItem call failed to return ID for new message"
+msgstr "కొత్త సందేశం కొరకు ఐడి యిచ్చుటలో అంశముసృష్టించు కాల్ విఫలమైంది"
+
