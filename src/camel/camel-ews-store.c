@@ -518,8 +518,8 @@ ews_connect_sync (CamelService *service,
 	 * to make sure we have valid credentials available. */
 	auth_mech = camel_network_settings_dup_auth_mechanism (
 				       CAMEL_NETWORK_SETTINGS (settings));
-	success = camel_session_authenticate_sync (
-		   session, service, auth_mech?:"NTLM", cancellable, error);
+	success = camel_session_authenticate_sync (session, service,
+			   auth_mech ? auth_mech :"NTLM", cancellable, error);
 
 	g_free (auth_mech);
 	g_object_unref (settings);
