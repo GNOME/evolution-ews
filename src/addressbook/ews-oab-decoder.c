@@ -234,6 +234,7 @@ static const struct prop_field_mapping {
 	{EWS_PT_THUMBNAIL_PHOTO, E_CONTACT_PHOTO, ews_populate_photo},
 	{EWS_PT_OFFICE_LOCATION, E_CONTACT_OFFICE, ews_populate_simple_string},
 	{EWS_PT_X509_CERT, E_CONTACT_X509_CERT, ews_populate_cert},
+	{EWS_PT_SEND_RICH_INFO, E_CONTACT_WANTS_HTML, ews_populate_simple_string},
 };
 
 static void
