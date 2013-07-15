@@ -59,7 +59,7 @@ libebookbackendews_la_LDFLAGS = \
 
 noinst_PROGRAMS = gal-lzx-decompress-test oab-decode-test
 
-oab-decode-test: libebookbackendews.la
+oab-decode-test$(EXEEXT): libebookbackendews.la
 
 oab_decode_test_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
