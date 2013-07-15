@@ -215,7 +215,8 @@ static const struct prop_field_mapping {
 	{EWS_PT_PAGER_NUMBER, E_CONTACT_PHONE_PAGER, ews_populate_simple_string},
 	{EWS_PT_COMMENT, E_CONTACT_NOTE, ews_populate_simple_string},
 	{EWS_PT_DL_MEMBERS, E_CONTACT_EMAIL, ews_populate_string_list},
-	{EWS_PT_THUMBNAIL_PHOTO, E_CONTACT_PHOTO, ews_populate_photo}
+	{EWS_PT_THUMBNAIL_PHOTO, E_CONTACT_PHOTO, ews_populate_photo},
+	{EWS_PT_OFFICE_LOCATION, E_CONTACT_OFFICE, ews_populate_simple_string},
 };
 
 static void
