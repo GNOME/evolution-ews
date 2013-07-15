@@ -143,6 +143,22 @@ ews_populate_string_list (EContact *contact,
 }
 
 static void
+ews_populate_cert (EContact *contact,
+                    EContactField field,
+                    gpointer value,
+                    gpointer user_data)
+{
+	GSList *list = value;
+	GBytes *bytes = list->data;
+	EContactCert cert;
+
+	cert.data = (gpointer) g_bytes_get_data (bytes, &cert.length);
+	cert.length = g_bytes_get_size (bytes);
+
+	e_contact_set (contact, E_CONTACT_X509_CERT, &cert);
+}
+
+static void
 ews_populate_photo (EContact *contact,
                     EContactField field,
                     gpointer value,
@@ -217,6 +233,7 @@ static const struct prop_field_mapping {
 	{EWS_PT_DL_MEMBERS, E_CONTACT_EMAIL, ews_populate_string_list},
 	{EWS_PT_THUMBNAIL_PHOTO, E_CONTACT_PHOTO, ews_populate_photo},
 	{EWS_PT_OFFICE_LOCATION, E_CONTACT_OFFICE, ews_populate_simple_string},
+	{EWS_PT_X509_CERT, E_CONTACT_X509_CERT, ews_populate_cert},
 };
 
 static void
