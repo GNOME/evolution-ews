@@ -57,7 +57,24 @@ libebookbackendews_la_LIBADD = \
 libebookbackendews_la_LDFLAGS = \
 	-module -avoid-version $(NO_UNDEFINED)
 
-noinst_PROGRAMS = gal-lzx-decompress-test
+noinst_PROGRAMS = gal-lzx-decompress-test oab-decode-test
+
+oab_decode_test_CPPFLAGS = \
+	$(AM_CPPFLAGS) \
+	$(LIBEBOOK_CFLAGS) \
+	$(LIBEDATABOOK_CFLAGS)  \
+	$(GNOME_PLATFORM_CFLAGS) \
+	$(NULL)
+
+oab_decode_test_SOURCES = \
+	oab-decode-test.c
+
+oab_decode_test_LDADD = \
+	$(GNOME_PLATFORM_LIBS) \
+	$(LIBEBOOK_LIBS) \
+	$(LIBEDATABOOK_LIBS)  \
+	$(top_builddir)/src/addressbook/libebookbackendews.la
+	$(NULL)
 
 gal_lzx_decompress_test_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
