@@ -633,6 +633,8 @@ ews_connect_sync (CamelService *service,
 	EEwsConnection *connection;
 	CamelEwsStore *ews_store;
 	CamelSession *session;
+	CamelSettings *settings;
+	gchar *auth_mech;
 	gboolean success;
 
 	ews_store = CAMEL_EWS_STORE (service);
@@ -647,11 +649,17 @@ ews_connect_sync (CamelService *service,
 	}
 
 	session = camel_service_ref_session (service);
+	settings = camel_service_ref_settings (service);
 
 	/* Try running an operation that requires authentication
-	 * to make sure we have a valid password available. */
+	 * to make sure we have valid credentials available. */
+	auth_mech = camel_network_settings_dup_auth_mechanism (
+				       CAMEL_NETWORK_SETTINGS (settings));
 	success = camel_session_authenticate_sync (
-		session, service, NULL, cancellable, error);
+		   session, service, auth_mech?:"NTLM", cancellable, error);
+
+	g_free (auth_mech);
+	g_object_unref (settings);
 
 	if (success) {
 		CamelEwsStoreOooAlertState state;
@@ -1112,14 +1120,6 @@ ews_authenticate_sync (CamelService *service,
 	ews_store = CAMEL_EWS_STORE (service);
 
 	password = camel_service_get_password (service);
-
-	if (password == NULL) {
-		g_set_error_literal (
-			error, CAMEL_SERVICE_ERROR,
-			CAMEL_SERVICE_ERROR_CANT_AUTHENTICATE,
-			_("Authentication password not available"));
-		return CAMEL_AUTHENTICATION_ERROR;
-	}
 
 	settings = camel_service_ref_settings (service);
 
