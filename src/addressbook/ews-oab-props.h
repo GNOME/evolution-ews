@@ -77,6 +77,26 @@
 #define EWS_PT_TRUNCATED_PROPS		0x68051003
 #define EWS_PT_THUMBNAIL_PHOTO		0x8C9E0102
 
+/* Extra fields seen in the wild... yes, *three* cert objects */
+#define EWS_PT_DISPLAY_TYPE		0x39000003
+#define EWS_PT_DISPLAY_TYPE_EX		0x39050003
+#define EWS_PT_7BIT_DISPLAY_NAME	0x39ff001e
+#define EWS_PT_USER_CERTIFICATE		0x3a220102
+#define EWS_PT_SEND_RICH_INFO		0x3a40000b
+#define EWS_PT_USER_X509_CERTIFICATE	0x3a701102
+#define EWS_PT_FILE_UNDER		0x8006001e
+#define EWS_PT_PROXY_ADDRESSES		0x800f101f // http://support.microsoft.com/default.aspx?scid=kb;en-us;908496&sd=rss&spid=1773
+//#define EWS_PT_PHONE1_SELECTOR(WTF?)	0x806a0003 // http://www.gregthatcher.com/Scripts/VBA/Outlook/GetListOfContactsUsingPropertyAccessor.aspx
+
+#define EWS_PT_X509_CERT		0x8c6a1102 // http://www.hradeckralove.org/file/163_1_1/
+#define EWS_PT_OBJECT_TYPE		0xffe0003
+//#define EWS_PT_		0x8c6d0102
+//#define EWS_PT_		0x8c8e001f
+//#define EWS_PT_		0x8c8f001f
+//#define EWS_PT_		0x8c92001f
+//#define EWS_PT_		0x8cac101f
+//#define EWS_PT_		0x8cb5000b
+
 /* EWS OAB address-book display types */
 #define EWS_DT_MAILUSER			0x00000000
 #define EWS_DT_DISTLIST			0x00000001
