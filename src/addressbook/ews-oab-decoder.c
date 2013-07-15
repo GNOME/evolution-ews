@@ -597,35 +597,31 @@ ews_decode_uint32 (EwsOabDecoder *eod,
 	return ret;
 }
 
-static gchar *
+static GBytes *
 ews_decode_binary (EwsOabDecoder *eod,
                    GCancellable *cancellable,
                    GError **error)
 {
 	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	guint32 len;
-	gchar *binary, *filename = NULL;
-	gint fd = 0;
+	gchar *binary;
+	GBytes *val = NULL;
 
 	len = ews_decode_uint32 (eod, cancellable, error);
 	if (*error)
 		return NULL;
-
 	binary = g_malloc (len);
 	g_input_stream_read (G_INPUT_STREAM (priv->fis), binary, len, cancellable, error);
-	if (*error)
+	if (*error) {
+		g_free (binary);
 		goto exit;
+	}
 
-	filename = g_build_filename (priv->cache_dir, "XXXXXX", NULL);
-	fd = g_mkstemp (filename);
-	g_file_set_contents (filename, binary, len, error);
+	val = g_bytes_new_take (binary, len);
+	binary = NULL;
 
 exit:
-	if (binary)
-		g_free (binary);
-	close (fd);
-
-	return filename;
+	return val;
 }
 
 static gpointer
@@ -676,7 +672,7 @@ ews_decode_oab_prop (EwsOabDecoder *eod,
 		case EWS_PTYP_BINARY:
 		{
 			ret_val = ews_decode_binary (eod, cancellable, error);
-			d (g_print ("prop id %X prop type: binary value %s \n", prop_id, (gchar *) ret_val);)
+			d (g_print ("prop id %X prop type: binary size %zd \n", prop_id, g_bytes_get_size ((GBytes *)ret_val)));
 			break;
 		}
 		case EWS_PTYP_MULTIPLEINTEGER32:
@@ -707,21 +703,30 @@ ews_decode_oab_prop (EwsOabDecoder *eod,
 						g_slist_free (list);
 						return NULL;
 					}
+				} else if (prop_type == EWS_PTYP_MULTIPLEBINARY) {
+					GBytes *val;
+
+					val = ews_decode_binary (eod, cancellable, error);
+					if (!val) {
+						g_slist_foreach (list, (GFunc) g_bytes_unref, NULL);
+						g_slist_free (list);
+						return NULL;
+					}
+
+					d (g_print ("prop id %X prop type: multi-bin size %zd\n", prop_id, g_bytes_get_size (val)));
+
+					list = g_slist_prepend (list, val);
 				} else {
 					gchar *val;
 
-					if (prop_type == EWS_PTYP_MULTIPLEBINARY) {
-						val = ews_decode_binary (eod, cancellable, error);
-					} else {
-						val = ews_oab_read_upto (G_INPUT_STREAM (priv->fis), '\0', cancellable, error);
-					}
-
+					val = ews_oab_read_upto (G_INPUT_STREAM (priv->fis), '\0', cancellable, error);
 					if (!val) {
 						g_slist_foreach (list, (GFunc) g_free, NULL);
 						g_slist_free (list);
 						return NULL;
 					}
 
+					d (g_print ("prop id %X prop type: multi-str '%s'\n", prop_id, val));
 					list = g_slist_prepend (list, val);
 				}
 
@@ -739,9 +744,7 @@ ews_decode_oab_prop (EwsOabDecoder *eod,
 }
 
 static void
-ews_destroy_oab_prop (guint32 prop_id,
-                      gpointer val,
-                      gboolean delete_files)
+ews_destroy_oab_prop (guint32 prop_id, gpointer val)
 {
 	guint32 prop_type;
 
@@ -751,14 +754,17 @@ ews_destroy_oab_prop (guint32 prop_id,
 		case EWS_PTYP_INTEGER32:
 		case EWS_PTYP_BOOLEAN:
 			break;
+		case EWS_PTYP_BINARY:
+			g_bytes_unref(val);
+			break;
 		case EWS_PTYP_STRING8:
 		case EWS_PTYP_STRING:
-		case EWS_PTYP_BINARY:
 			g_free ((gchar *) val);
 			break;
 		case EWS_PTYP_MULTIPLEBINARY:
-			if (delete_files)
-				g_slist_foreach ((GSList *) val, (GFunc) g_unlink, NULL);
+			g_slist_foreach ((GSList *) val, (GFunc) g_bytes_unref, NULL);
+			g_slist_free ((GSList *) val);
+			break;
 		case EWS_PTYP_MULTIPLESTRING8:
 		case EWS_PTYP_MULTIPLESTRING:
 			g_slist_foreach ((GSList *) val, (GFunc) g_free, NULL);
@@ -911,10 +917,7 @@ ews_decode_addressbook_record (EwsOabDecoder *eod,
 			else
 				prop_map[i - 1].defered_populate_function (dset, prop_id, val);
 		}
-
-		/* delete the binary file if we do not have the property in the index or if there
-		 * was an error */
-		ews_destroy_oab_prop (prop_id, val, (*error || !index) ? TRUE : FALSE);
+		ews_destroy_oab_prop (prop_id, val);
 		if (*error)
 			goto exit;
 	}
