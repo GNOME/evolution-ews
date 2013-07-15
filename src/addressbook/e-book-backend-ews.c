@@ -918,7 +918,7 @@ static const struct field_element_mapping {
 	{ E_CONTACT_IM_AIM, ELEMENT_TYPE_COMPLEX, "ImAddresses", NULL, ebews_populate_ims, ebews_set_ims, ebews_set_im_changes },
 	{ E_CONTACT_TITLE, ELEMENT_TYPE_SIMPLE, "JobTitle", e_ews_item_get_job_title},
 	{ E_CONTACT_MANAGER, ELEMENT_TYPE_SIMPLE, "Manager", e_ews_item_get_manager},
-	{ E_CONTACT_MANAGER, ELEMENT_TYPE_SIMPLE, "OfficeLocation", e_ews_item_get_office_location},
+	{ E_CONTACT_OFFICE, ELEMENT_TYPE_SIMPLE, "OfficeLocation", e_ews_item_get_office_location},
 	{ E_CONTACT_SPOUSE, ELEMENT_TYPE_SIMPLE, "Profession", e_ews_item_get_profession},
 	{ E_CONTACT_SPOUSE, ELEMENT_TYPE_SIMPLE, "SpouseName", e_ews_item_get_spouse_name},
 	{ E_CONTACT_FAMILY_NAME, ELEMENT_TYPE_SIMPLE, "Surname", e_ews_item_get_surname},
