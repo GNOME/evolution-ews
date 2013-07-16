@@ -1175,7 +1175,7 @@ e_book_backend_ews_remove_contacts (EBookBackend *backend,
 		return;
 	}
 
-	for (l = (GSList *) id_list; l != NULL; l = g_slist_next (id_list))
+	for (l = (GSList *) id_list; l != NULL; l = g_slist_next (l))
 		copy = g_slist_prepend (copy, g_strdup ((gchar *) l->data));
 	copy = g_slist_reverse (copy);
 
