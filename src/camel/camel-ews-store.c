@@ -518,10 +518,41 @@ ews_connect_sync (CamelService *service,
 	 * to make sure we have valid credentials available. */
 	auth_mech = camel_network_settings_dup_auth_mechanism (
 				       CAMEL_NETWORK_SETTINGS (settings));
+	if (!auth_mech)
+		auth_mech = g_strdup("NTLM");
+ retry:
 	success = camel_session_authenticate_sync (session, service,
-			   auth_mech ? auth_mech :"NTLM", cancellable, error);
+			   auth_mech, cancellable, error);
 
 	g_free (auth_mech);
+
+#if 1 /* Temporary workaround for Evolution < 3.8.4 */
+	connection = camel_ews_store_ref_connection (ews_store);
+	if (connection) {
+		g_object_unref (connection);
+	} else if (success && auth_mech) {
+		/* This should never happen, but it does with Evolution 3.8.3
+		   and older because it doesn't actually *call* our
+		   authenticate_sync() method if it thinks that Single-Sign-On
+		   *might* work with the selected authentication mechanism.
+		   Fixed with commit 447f7d38 in Evolution, but we work around
+		   it for now for better compatibility.... */
+		CamelAuthenticationResult result;
+
+		g_print("Trying single-sign-on directly.\n");
+		result = camel_service_authenticate_sync(service, NULL,
+							 cancellable, error);
+		/* It appeared to be available, but didn't actually work.
+		   So fall back to actually *asking* for a password... */
+		if (result != CAMEL_AUTHENTICATION_ACCEPTED) {
+			g_print("SSO not working. Falling back to password\n");
+			auth_mech = NULL;
+			goto retry;
+		}
+		g_print("SSO login succeeded\n");
+	}
+#endif
+
 	g_object_unref (settings);
 
 	g_object_unref (session);
