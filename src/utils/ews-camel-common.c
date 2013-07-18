@@ -98,13 +98,21 @@ create_mime_message_cb (ESoapMessage *msg,
 		e_soap_message_end_element (msg); /* ItemClass */
 	}
 
+	e_ews_message_write_string_parameter_with_attribute (
+			msg,
+			"Importance",
+			NULL,
+			(create_data->message_camel_flags & CAMEL_MESSAGE_FLAGGED) != 0 ? "High" : "Normal",
+			NULL,
+			NULL);
+
 	/* more MAPI crap.  You can't just set the IsDraft property
 	 * here you have to use the MAPI MSGFLAG_UNSENT extended
 	 * property Further crap is that Exchange 2007 assumes when it
 	 * sees this property that you're setting the value to 0
 	 * ... it never checks */
 	msgflag  = MAPI_MSGFLAG_READ; /* draft or sent is always read */
-	if (create_data->message_camel_flags & CAMEL_MESSAGE_DRAFT)
+	if ((create_data->message_camel_flags & CAMEL_MESSAGE_DRAFT) != 0)
 		msgflag |= MAPI_MSGFLAG_UNSENT;
 
 	e_soap_message_start_element (msg, "ExtendedProperty", NULL, NULL);
@@ -116,6 +124,32 @@ create_mime_message_cb (ESoapMessage *msg,
 	e_ews_message_write_int_parameter (msg, "Value", NULL, msgflag);
 
 	e_soap_message_end_element (msg); /* ExtendedProperty */
+
+	if ((create_data->message_camel_flags & (CAMEL_MESSAGE_FORWARDED | CAMEL_MESSAGE_ANSWERED)) != 0) {
+		gint icon;
+
+		icon = (create_data->message_camel_flags & CAMEL_MESSAGE_ANSWERED) != 0 ? 0x105 : 0x106;
+
+		e_soap_message_start_element (msg, "ExtendedProperty", NULL, NULL);
+
+		e_soap_message_start_element (msg, "ExtendedFieldURI", NULL, NULL);
+		e_soap_message_add_attribute (msg, "PropertyTag", "0x1080", NULL, NULL);
+		e_soap_message_add_attribute (msg, "PropertyType", "Integer", NULL, NULL);
+		e_soap_message_end_element (msg); /* ExtendedFieldURI */
+
+		e_ews_message_write_int_parameter (msg, "Value", NULL, icon);
+
+		e_soap_message_end_element (msg); /* ExtendedProperty */
+	}
+
+	e_ews_message_write_string_parameter_with_attribute (
+			msg,
+			"IsRead",
+			NULL,
+			(create_data->message_camel_flags & CAMEL_MESSAGE_SEEN) != 0 ? "true" : "false",
+			NULL,
+			NULL);
+
 	e_soap_message_end_element (msg); /* Message */
 
 	g_free (create_data);
