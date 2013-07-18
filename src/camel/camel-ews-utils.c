@@ -88,6 +88,10 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store,
 }
 
 static void
+add_folder_to_summary (CamelEwsStore *store,
+                       EEwsFolder *folder);
+
+static void
 sync_deleted_folders (CamelEwsStore *store,
                       GSList *deleted_folders)
 {
@@ -170,6 +174,13 @@ sync_updated_folders (CamelEwsStore *store,
 		fid = e_ews_folder_get_id (ews_folder);
 		folder_name = camel_ews_store_summary_get_folder_full_name (
 			ews_summary, fid->id, NULL);
+
+		if (!folder_name) {
+			/* in case the folder is not in the local store summary,
+			   just add it as a new folder */
+			add_folder_to_summary (store, ews_folder);
+			continue;
+		}
 
 		pfid = e_ews_folder_get_parent_id (ews_folder);
 		display_name = g_strdup (e_ews_folder_get_name (ews_folder));
