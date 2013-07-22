@@ -669,7 +669,6 @@ e_cal_backend_ews_get_object (ECalBackend *backend,
                               const gchar *uid,
                               const gchar *rid)
 {
-	ECalComponent *comp;
 	ECalBackendEwsPrivate *priv;
 	ECalBackendEws *cbews = (ECalBackendEws *) backend;
 	gchar *object = NULL;
@@ -691,32 +690,48 @@ e_cal_backend_ews_get_object (ECalBackend *backend,
 	}
 
 	/* search the object in the cache */
-	comp = e_cal_backend_store_get_component (priv->store, uid, rid);
-	if (!comp && e_backend_get_online (E_BACKEND (backend))) {
-		/* maybe a meeting invitation, for which the calendar item is not downloaded yet,
-		 * thus synchronize local cache first */
-		ews_start_sync (cbews);
-
-		PRIV_UNLOCK (priv);
-		e_flag_wait (priv->refreshing_done);
-		PRIV_LOCK (priv);
+	if (rid && *rid) {
+		ECalComponent *comp;
 
 		comp = e_cal_backend_store_get_component (priv->store, uid, rid);
-	}
+		if (!comp && e_backend_get_online (E_BACKEND (backend))) {
+			/* maybe a meeting invitation, for which the calendar item is not downloaded yet,
+			 * thus synchronize local cache first */
+			ews_start_sync (cbews);
 
-	if (comp) {
-		if (e_cal_backend_get_kind (backend) ==
-		    icalcomponent_isa (e_cal_component_get_icalcomponent (comp)))
+			PRIV_UNLOCK (priv);
+			e_flag_wait (priv->refreshing_done);
+			PRIV_LOCK (priv);
+
+			comp = e_cal_backend_store_get_component (priv->store, uid, rid);
+		}
+
+		if (comp) {
 			object = e_cal_component_get_as_string (comp);
-		else
-			object = NULL;
 
-		g_object_unref (comp);
+			g_object_unref (comp);
+
+			if (!object)
+				g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
+		} else {
+			g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
+		}
+	} else {
+		object = e_cal_backend_store_get_components_by_uid_as_ical_string (priv->store, uid);
+		if (!object && e_backend_get_online (E_BACKEND (backend))) {
+			/* maybe a meeting invitation, for which the calendar item is not downloaded yet,
+			 * thus synchronize local cache first */
+			ews_start_sync (cbews);
+
+			PRIV_UNLOCK (priv);
+			e_flag_wait (priv->refreshing_done);
+			PRIV_LOCK (priv);
+
+			object = e_cal_backend_store_get_components_by_uid_as_ical_string (priv->store, uid);
+		}
 
 		if (!object)
 			g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
-	} else {
-		g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
 	}
 
 	PRIV_UNLOCK (priv);
