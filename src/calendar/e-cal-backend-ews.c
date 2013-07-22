@@ -661,6 +661,48 @@ e_cal_backend_ews_open (ECalBackend *backend,
 	e_data_cal_respond_open (cal, opid, error);
 }
 
+/* to not depend on added function in 3.8.4 */
+static gchar *
+e_ews_cal_backend_store_get_components_by_uid_as_ical_string (ECalBackendStore *store,
+							      const gchar *uid)
+{
+	GSList *comps;
+	gchar *ical_string = NULL;
+
+	g_return_val_if_fail (E_IS_CAL_BACKEND_STORE (store), NULL);
+	g_return_val_if_fail (uid != NULL, NULL);
+
+	comps = e_cal_backend_store_get_components_by_uid (store, uid);
+	if (!comps)
+		return NULL;
+
+	if (!comps->next) {
+		ical_string = e_cal_component_get_as_string (comps->data);
+	} else {
+		GSList *citer;
+		icalcomponent *icalcomp;
+
+		/* if we have detached recurrences, return a VCALENDAR */
+		icalcomp = e_cal_util_new_top_level ();
+
+		for (citer = comps; citer; citer = g_slist_next (citer)) {
+			ECalComponent *comp = citer->data;
+
+			icalcomponent_add_component (
+				icalcomp,
+				icalcomponent_new_clone (e_cal_component_get_icalcomponent (comp)));
+		}
+
+		ical_string = icalcomponent_as_ical_string_r (icalcomp);
+
+		icalcomponent_free (icalcomp);
+	}
+
+	g_slist_free_full (comps, g_object_unref);
+
+	return ical_string;
+}
+
 static void
 e_cal_backend_ews_get_object (ECalBackend *backend,
                               EDataCal *cal,
@@ -669,7 +711,6 @@ e_cal_backend_ews_get_object (ECalBackend *backend,
                               const gchar *uid,
                               const gchar *rid)
 {
-	ECalComponent *comp;
 	ECalBackendEwsPrivate *priv;
 	ECalBackendEws *cbews = (ECalBackendEws *) backend;
 	gchar *object = NULL;
@@ -691,32 +732,48 @@ e_cal_backend_ews_get_object (ECalBackend *backend,
 	}
 
 	/* search the object in the cache */
-	comp = e_cal_backend_store_get_component (priv->store, uid, rid);
-	if (!comp && e_backend_get_online (E_BACKEND (backend))) {
-		/* maybe a meeting invitation, for which the calendar item is not downloaded yet,
-		 * thus synchronize local cache first */
-		ews_start_sync (cbews);
-
-		PRIV_UNLOCK (priv);
-		e_flag_wait (priv->refreshing_done);
-		PRIV_LOCK (priv);
+	if (rid && *rid) {
+		ECalComponent *comp;
 
 		comp = e_cal_backend_store_get_component (priv->store, uid, rid);
-	}
+		if (!comp && e_backend_get_online (E_BACKEND (backend))) {
+			/* maybe a meeting invitation, for which the calendar item is not downloaded yet,
+			 * thus synchronize local cache first */
+			ews_start_sync (cbews);
 
-	if (comp) {
-		if (e_cal_backend_get_kind (backend) ==
-		    icalcomponent_isa (e_cal_component_get_icalcomponent (comp)))
+			PRIV_UNLOCK (priv);
+			e_flag_wait (priv->refreshing_done);
+			PRIV_LOCK (priv);
+
+			comp = e_cal_backend_store_get_component (priv->store, uid, rid);
+		}
+
+		if (comp) {
 			object = e_cal_component_get_as_string (comp);
-		else
-			object = NULL;
 
-		g_object_unref (comp);
+			g_object_unref (comp);
+
+			if (!object)
+				g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
+		} else {
+			g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
+		}
+	} else {
+		object = e_ews_cal_backend_store_get_components_by_uid_as_ical_string (priv->store, uid);
+		if (!object && e_backend_get_online (E_BACKEND (backend))) {
+			/* maybe a meeting invitation, for which the calendar item is not downloaded yet,
+			 * thus synchronize local cache first */
+			ews_start_sync (cbews);
+
+			PRIV_UNLOCK (priv);
+			e_flag_wait (priv->refreshing_done);
+			PRIV_LOCK (priv);
+
+			object = e_ews_cal_backend_store_get_components_by_uid_as_ical_string (priv->store, uid);
+		}
 
 		if (!object)
 			g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
-	} else {
-		g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
 	}
 
 	PRIV_UNLOCK (priv);
