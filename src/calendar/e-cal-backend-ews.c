@@ -4095,10 +4095,9 @@ e_cal_backend_ews_get_backend_property (ECalBackend *backend,
 			CAL_STATIC_CAPABILITY_NO_TASK_ASSIGNMENT ","
 			CAL_STATIC_CAPABILITY_SAVE_SCHEDULES ","
 			/*
-			 * These capabilities were added after the 3.8.0 release
+			 * This capability was added after the 3.8.0 release
 			 */
-			"no-alarm-after-start" ","
-			"no-alarm-description");
+			"no-alarm-after-start");
 	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_CAL_EMAIL_ADDRESS)) {
 		/* return email address of the person who opened the calendar */
 		ECalBackendEws *cbews;
