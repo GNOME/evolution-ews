@@ -1,3 +1,44 @@
+Evolution-EWS 3.8.4 2013-07-23
+------------------------------
+
+Bug Fixes:
+	Bug 703181 — Asked for password which is never used (David Woodhouse)
+	Bug 699373 - Refetches full OAB.xml when unchanged (David Woodhouse)
+	Bug 702035 - EWS folder rec_mutex leak? (Fabiano Fidêncio)
+	Bug 386113 - Show custom alarm message in pop-up alerts
+	             (Fabiano Fidêncio)
+	Bug 704370 - Crash in sync_updated_folders() (Milan Crha)
+	Bug 704618 - Missing detached instances in get_object() response
+	             (Milan Crha)
+	Bug 659700 - Flags do not stick on message copy (Fabiano Fidêncio)
+	Bug 703194 - Custom alarm message is REMINDER (Fabiano Fidêncio)
+	Bug 702922 - Meetings with no attendees are treated as Appointment
+	             (Fabiano Fidêncio)
+	Bug 703053 - Error on setting reminder 'after start of appointment'
+	             (Fabiano Fidêncio)
+
+Other Changes:
+	* Handle absence of ETag (David Woodhouse)
+	* Merge incremental patch support from master (David Woodhouse)
+	* Allow upstream libmspack to be used, if it's new enough
+	  (David Woodhouse)
+	* Allow e_ews_connection_get_oal_detail() to return more than one
+	  type of element (David Woodhouse)
+	* Split out ews_download_gal_file() which can be used to download
+	  deltas (David Woodhouse)
+	* Disable incremental GAL updates without libmspack (David Woodhouse)
+	* Add E_CONTACT_OFFICE parsing for GAL (David Woodhouse)
+	* Add X509 cert from GAL (David Woodhouse)
+	* Add E_CONTACT_WANTS_HTML from GAL (David Woodhouse)
+	* Fix hang on multiple contacts removal (Milan Crha)
+	* Keep EWS version in lockstep with Evo and EDS. (Matthew Barnes)
+
+Translations:
+	Dimitris Spingos (el)
+	Sandeep Sheshrao Shedmake (mr)
+	Krishnababu Krothapalli (te)
+
+
 Evolution-EWS 3.8.3 2013-06-10
 ------------------------------
 
