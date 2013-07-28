@@ -46,4 +46,10 @@ MAINTAINERCLEANFILES = \
 	$(srcdir)/m4/lt~obsolete.m4 \
 	$(NULL)
 
+# XXX with-internal-lzx is temporary.  Remove this
+#     once libmspack >= 0.4 becomes more widespread.
+DISTCHECK_CONFIGURE_FLAGS = \
+	--with-internal-lzx \
+	$(NULL)
+
 -include $(top_srcdir)/git.mk
