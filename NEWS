@@ -1,3 +1,31 @@
+Evolution-EWS 3.9.5 2013-07-29
+------------------------------
+
+Bug Fixes:
+	Bug 386113 - Show custom alarm message in pop-up alerts
+	             (Fabiano Fidêncio)
+	Bug 659700 - Flags do not stick on message copy (Fabiano Fidêncio)
+	Bug 702035 - EWS folder rec_mutex leak? (Fabiano Fidêncio)
+	Bug 703181 - Asked for password which is never used (David Woodhouse)
+	Bug 703832 - Remove the whole test suit (Fabiano Fidêncio)
+	Bug 704370 - Crash in sync_updated_folders() (Milan Crha)
+	Bug 704618 - Missing detached instances in get_object() response
+	             (Milan Crha)
+
+Other Changes:
+	* Add E_CONTACT_OFFICE parsing for GAL (David Woodhouse)
+	* Add some more GAL field types seen in the wild (David Woodhouse)
+	* Use GBytes for GAL binary properties (David Woodhouse)
+	* Add X509 cert from GAL (David Woodhouse)
+	* Add E_CONTACT_WANTS_HTML from GAL (David Woodhouse)
+	* Fix hang on multiple contacts removal (Milan Crha)
+
+Translations:
+	Nilamdyuti Goswami (as)
+	Marek Černocký (cs)
+	Krishnababu Krothapalli (te)
+
+
 Evolution-EWS 3.9.4 2013-07-08
 ------------------------------
 
