@@ -2409,23 +2409,38 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 		icalcomp = e_cal_component_get_icalcomponent (oldcomp);
 		icalprop = icalcomponent_get_first_property (icalcomp, ICAL_ATTACH_PROPERTY);
 		while (icalprop) {
-			removed_attachments_ids = g_slist_append (removed_attachments_ids, icalproperty_get_parameter_as_string_r (icalprop, "X-EWS-ATTACHMENTID"));
+			const gchar *attachment_url = icalproperty_get_value_as_string (icalprop);
+
+			for (items = removed_attachments; items; items = items->next) {
+				if (g_strcmp0 (attachment_url, items->data) == 0) {
+					break;
+				}
+			}
+
+			/* not NULL means the attachment was found in removed attachments */
+			if (items != NULL)
+				removed_attachments_ids = g_slist_append (removed_attachments_ids, icalproperty_get_parameter_as_string_r (icalprop, "X-EWS-ATTACHMENTID"));
+
 			icalprop = icalcomponent_get_next_property (icalcomp, ICAL_ATTACH_PROPERTY);
 		}
 
-		e_ews_connection_delete_attachments_sync (
-			priv->cnc, EWS_PRIORITY_MEDIUM,
-			removed_attachments_ids, &items, cancellable, &error);
+		items = NULL;
 
-		changekey = items->data;
+		if (removed_attachments_ids) {
+			if (e_ews_connection_delete_attachments_sync (
+				priv->cnc, EWS_PRIORITY_MEDIUM,
+				removed_attachments_ids, &items, cancellable, &error) && items)
+				changekey = items->data;
+		}
 
-		for (i = removed_attachments_ids; i; i = i->next) free (i->data);
-		g_slist_free (removed_attachments_ids);
+		g_slist_free_full (removed_attachments_ids, g_free);
 		g_slist_free (removed_attachments);
 	}
 
 	/*in case we have a new attachmetns the update item will be preformed in ews_create_attachments_cb*/
 	if (added_attachments) {
+		const gchar *old_uid = NULL;
+		gint old_uid_len = 0;
 		GSList *info_attachments = NULL;
 		EwsId *item_id = g_new0 (EwsId, 1);
 		item_id->id = itemid;
@@ -2441,9 +2456,27 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 		attach_data->itemid = itemid;
 		attach_data->changekey = changekey;
 
+		e_cal_component_get_uid (oldcomp, &old_uid);
+		if (old_uid)
+			old_uid_len = strlen (old_uid);
+
 		for (i = added_attachments; i; i = i->next) {
 			EEwsAttachmentInfo *info = e_ews_attachment_info_new (E_EWS_ATTACHMENT_INFO_TYPE_URI);
+
 			e_ews_attachment_info_set_uri (info, i->data);
+
+			if (old_uid) {
+				gchar *filename = g_filename_from_uri (i->data, NULL, NULL);
+				if (filename) {
+					const gchar *slash = strrchr (filename, G_DIR_SEPARATOR);
+					if (slash && g_str_has_prefix (slash + 1, old_uid) &&
+					    slash[1 + old_uid_len] == '-') {
+						e_ews_attachment_info_set_prefer_filename (info, slash + 1 + old_uid_len + 1);
+					}
+
+					g_free (filename);
+				}
+			}
 
 			info_attachments = g_slist_append (info_attachments, info);
 		}

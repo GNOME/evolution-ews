@@ -133,6 +133,7 @@ typedef struct {
 		EEwsAttachmentInline inlined;
 		gchar *uri;
 	} data;
+	gchar *prefer_filename;
 } EEwsAttachmentInfo;
 
 typedef enum {
@@ -240,10 +241,15 @@ const EwsId *	e_ews_item_get_calendar_item_accept_id
 						(EEwsItem *item);
 
 EEwsAttachmentInfo *
-		e_ews_attachment_info_new		(EEwsAttachmentInfoType type);
+		e_ews_attachment_info_new	(EEwsAttachmentInfoType type);
 void		e_ews_attachment_info_free	(EEwsAttachmentInfo *info);
 EEwsAttachmentInfoType
 		e_ews_attachment_info_get_type	(EEwsAttachmentInfo *info);
+const gchar *	e_ews_attachment_info_get_prefer_filename
+						(EEwsAttachmentInfo *info);
+void		e_ews_attachment_info_set_prefer_filename
+						(EEwsAttachmentInfo *info,
+						 const gchar *prefer_filename);
 const gchar *	e_ews_attachment_info_get_inlined_data
 						(EEwsAttachmentInfo *info,
 						 gsize *len);
