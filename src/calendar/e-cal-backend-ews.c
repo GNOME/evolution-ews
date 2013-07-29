@@ -2731,7 +2731,7 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend,
 		const gchar *response_type;
 		gchar *item_id = NULL, *change_key = NULL, *mail_id = NULL;
 		GSList *ids = NULL, *l;
-		icalproperty *recurrence_id, *transp, *summary;
+		icalproperty *transp, *summary;
 		gchar **split_subject;
 		gint pass = 0;
 
@@ -2839,10 +2839,19 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend,
 				/*We have to run sync before any other operations */
 				ews_start_sync (cbews);
 				break;
-			case ICAL_METHOD_CANCEL:
-				recurrence_id = icalcomponent_get_first_property (subcomp, ICAL_RECURRENCEID_PROPERTY);
-				e_cal_backend_ews_remove_object (backend, cal, 0, cancellable, item_id, icalproperty_get_value_as_string (recurrence_id), E_CAL_OBJ_MOD_ALL);
+			case ICAL_METHOD_CANCEL: {
+				const gchar *uid = NULL;
+				gchar *rid = NULL;
+				ECalObjModType mod;
+
+				e_cal_component_get_uid (comp, &uid);
+				rid = e_cal_component_get_recurid_as_string (comp);
+				mod = e_cal_component_is_instance (comp) ? E_CAL_OBJ_MOD_THIS : E_CAL_OBJ_MOD_ALL;
+
+				e_cal_backend_ews_remove_object (backend, cal, 0, cancellable, uid, rid, mod);
+				g_free (rid);
 				break;
+			}
 			case ICAL_METHOD_COUNTER:
 				/*this is a new time proposal mail from one of the attendees
 				 * if we decline the proposal, nothing have to be done
