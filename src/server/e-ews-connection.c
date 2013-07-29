@@ -1603,6 +1603,7 @@ e_ews_attachment_info_free (EEwsAttachmentInfo *info)
 		break;
 	}
 
+	g_free (info->prefer_filename);
 	g_free (info);
 }
 
@@ -1610,6 +1611,27 @@ EEwsAttachmentInfoType
 e_ews_attachment_info_get_type (EEwsAttachmentInfo *info)
 {
 	return info->type;
+}
+
+const gchar *
+e_ews_attachment_info_get_prefer_filename (EEwsAttachmentInfo *info)
+{
+	g_return_val_if_fail (info != NULL, NULL);
+
+	return info->prefer_filename;
+}
+
+void
+e_ews_attachment_info_set_prefer_filename (EEwsAttachmentInfo *info,
+					   const gchar *prefer_filename)
+{
+	g_return_if_fail (info != NULL);
+
+	if (info->prefer_filename == prefer_filename)
+		return;
+
+	g_free (info->prefer_filename);
+	info->prefer_filename = g_strdup (prefer_filename);
 }
 
 const gchar *
@@ -5703,7 +5725,7 @@ e_ews_connection_attach_file (ESoapMessage *msg,
 {
 	EEwsAttachmentInfoType type = e_ews_attachment_info_get_type (info);
 	gchar *filename = NULL, *buffer = NULL;
-	const gchar *content = NULL;
+	const gchar *content = NULL, *prefer_filename;
 	gsize length;
 
 	switch (type) {
@@ -5724,7 +5746,7 @@ e_ews_connection_attach_file (ESoapMessage *msg,
 				return FALSE;
 			}
 
-			g_file_get_contents (uri, &buffer, &length, &local_error);
+			g_file_get_contents (filepath, &buffer, &length, &local_error);
 			if (local_error != NULL) {
 				g_free (filepath);
 				g_propagate_error (error, local_error);
@@ -5750,8 +5772,8 @@ e_ews_connection_attach_file (ESoapMessage *msg,
 
 	e_soap_message_start_element (msg, "FileAttachment", NULL, NULL);
 
-	e_ews_message_write_string_parameter (msg, "Name", NULL, filename);
-
+	prefer_filename = e_ews_attachment_info_get_prefer_filename (info);
+	e_ews_message_write_string_parameter (msg, "Name", NULL, prefer_filename ? prefer_filename : filename);
 	e_soap_message_start_element (msg, "Content", NULL, NULL);
 	e_soap_message_write_base64 (msg, content, length);
 	e_soap_message_end_element (msg); /* "Content" */
@@ -6013,6 +6035,7 @@ GSList *
 e_ews_connection_delete_attachments_sync (EEwsConnection *cnc,
                                           gint pri,
                                           const GSList *ids,
+					  GSList **parents_ids,
                                           GCancellable *cancellable,
                                           GError **error)
 {

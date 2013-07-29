@@ -707,6 +707,7 @@ GSList *	e_ews_connection_delete_attachments_sync
 						(EEwsConnection *cnc,
 						 gint pri,
 						 const GSList *ids,
+						 GSList **parents_ids,
 						 GCancellable *cancellable,
 						 GError **error);
 
