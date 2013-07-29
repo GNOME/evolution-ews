@@ -2091,7 +2091,7 @@ ews_rename_folder_sync (CamelStore *store,
 		/* Folder basename changed (i.e. UpdateFolder needed).
 		 * Therefore, we can only do it if the folder hasn't also
 		 * been moved from one parent folder to another.
- *
+		 *
 		 * Strictly speaking, we could probably handle this, even
 		 * if there are name collisions. We could UpdateFolder to
 		 * a new temporary name that doesn't exist in either the

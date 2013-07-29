@@ -6418,8 +6418,6 @@ ews_handle_attachments_param (ESoapParameter *param,
 
 		if (info)
 			async_data->items = g_slist_append (async_data->items, info);
-		else
-			e_ews_attachment_info_free (info);
 
 		info = NULL;
 	}

@@ -294,7 +294,6 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
 		icalcomponent *icalcomp, *subcomp;
 		icalproperty *icalprop;
 		gchar *calstring_new, *dir;
-		const gchar *temp;
 		gint fd;
 		gboolean success = FALSE;
 
@@ -335,9 +334,8 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
 		icalcomponent_free (icalcomp);
 		g_object_unref (tmpstream);
 
-		// Create a new file to store updated mimecontent
-		temp = g_strrstr (mime_fname, "/");
-		dir = g_strndup (mime_fname, temp - mime_fname);
+		/* Create a new file to store updated mimecontent */
+		dir = g_path_get_dirname (mime_fname);
 		mime_fname_new = g_build_filename ((const gchar *) dir, "XXXXXX", NULL);
 		fd = g_mkstemp (mime_fname_new);
 		if (fd == -1) {
@@ -399,7 +397,6 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	gchar *mime_dir;
 	gchar *cache_file;
 	gchar *dir;
-	const gchar *temp;
 	gboolean res;
 	gchar *mime_fname_new = NULL;
 	GError *local_error = NULL;
@@ -522,8 +519,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 
 	cache_file = ews_data_cache_get_filename (
 		ews_folder->cache, "cur", uid, error);
-	temp = g_strrstr (cache_file, "/");
-	dir = g_strndup (cache_file, temp - cache_file);
+	dir = g_path_get_dirname (cache_file);
 
 	if (g_mkdir_with_parents (dir, 0700) == -1) {
 		g_set_error (
