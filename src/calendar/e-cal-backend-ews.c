@@ -2805,33 +2805,33 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend,
 						break;
 					}
 				}
-			if (!error) {
-				transp = icalcomponent_get_first_property (subcomp, ICAL_TRANSP_PROPERTY);
-				if (!g_strcmp0 (icalproperty_get_value_as_string (transp), "TRANSPARENT") &&
-				    !g_strcmp0 (response_type, "ACCEPTED")) {
-					/*user can accept meeting but mark it as free in it's calendar
-					 the following code is updating the exchange meeting status to free */
-					for (l = ids; l != NULL; l = g_slist_next (l)) {
-						EEwsItem *item = (EEwsItem *) l->data;
-						if (item) {
-							accept_data->item_id = e_ews_item_get_id (item)->id;
-							accept_data->change_key = e_ews_item_get_id (item)->change_key;
-							break;
+				if (!error) {
+					transp = icalcomponent_get_first_property (subcomp, ICAL_TRANSP_PROPERTY);
+					if (!g_strcmp0 (icalproperty_get_value_as_string (transp), "TRANSPARENT") &&
+					    !g_strcmp0 (response_type, "ACCEPTED")) {
+						/*user can accept meeting but mark it as free in it's calendar
+						 the following code is updating the exchange meeting status to free */
+						for (l = ids; l != NULL; l = g_slist_next (l)) {
+							EEwsItem *item = (EEwsItem *) l->data;
+							if (item) {
+								accept_data->item_id = e_ews_item_get_id (item)->id;
+								accept_data->change_key = e_ews_item_get_id (item)->change_key;
+								break;
+							}
 						}
+						e_ews_connection_update_items_sync (
+							priv->cnc,
+							EWS_PRIORITY_MEDIUM,
+							"AlwaysOverwrite",
+							NULL, "SendToNone",
+							NULL,
+							prepare_set_free_busy_status,
+							accept_data,
+							&ids,
+							cancellable,
+							&error);
 					}
-					e_ews_connection_update_items_sync (
-						priv->cnc,
-						EWS_PRIORITY_MEDIUM,
-						"AlwaysOverwrite",
-						NULL, "SendToNone",
-						NULL,
-						prepare_set_free_busy_status,
-						accept_data,
-						&ids,
-						cancellable,
-						&error);
 				}
-			}
 				g_free (item_id);
 				g_free (change_key);
 				g_free (mail_id);
