@@ -6085,13 +6085,9 @@ ews_handle_attachments_param (ESoapParameter *param,
 			info = e_ews_dump_file_attachment_from_soap_parameter (subparam, async_data->directory, async_data->sync_state, &attach_id);
 		}
 
-		if (info && attach_id) {
+		if (info && attach_id)
 			async_data->items = g_slist_append (async_data->items, info);
-			async_data->items_created = g_slist_append (async_data->items_created, attach_id);
-		} else {
-			e_ews_attachment_info_free (info);
-			g_free (attach_id);
-		}
+
 		info = NULL;
 		attach_id = NULL;
 	}

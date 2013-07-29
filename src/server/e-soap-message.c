@@ -11,6 +11,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <errno.h>
 #include <libsoup/soup.h>
 #ifdef G_OS_WIN32
 #include <io.h>
@@ -221,6 +222,10 @@ soap_sax_startElementNs (gpointer _ctxt,
 			g_free (enc);
 		} else
 			xmlSAX2Characters (ctxt, (xmlChar *) fname, strlen (fname));
+	} else {
+		gint err = errno;
+
+		g_warning ("%s: Failed to create temp file '%s': %s\n", G_STRFUNC, fname, g_strerror (err));
 	}
 	g_free (fname);
 }

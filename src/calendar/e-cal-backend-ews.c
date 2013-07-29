@@ -3202,9 +3202,14 @@ ews_get_attachments (ECalBackendEws *cbews,
 
 		for (l = info_attachments; l; l = l->next) {
 			EEwsAttachmentInfo *info = l->data;
-			const gchar *uri = e_ews_attachment_info_get_uri (info);
 
-			uris = g_slist_append (uris, g_strdup (uri));
+			/* ignore non-uri attachments, because it's an exception */
+			if (e_ews_attachment_info_get_type (info) == E_EWS_ATTACHMENT_INFO_TYPE_URI) {
+				const gchar *uri = e_ews_attachment_info_get_uri (info);
+
+				if (uri)
+					uris = g_slist_append (uris, g_strdup (uri));
+			}
 		}
 
 		e_cal_component_set_attachment_list (comp, uris);

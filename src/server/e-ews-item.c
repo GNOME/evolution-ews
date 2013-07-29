@@ -1499,26 +1499,33 @@ gchar *
 e_ews_embed_attachment_id_in_uri (const gchar *olduri,
                                   const gchar *attach_id)
 {
-	gchar *tmpdir, *tmpfilename, filename[350], dirname[350], *name;
+	gchar *tmpdir, *tmpfilename, *filename, *dirname, *name;
 
 	tmpfilename = g_filename_from_uri (olduri, NULL, NULL);
+	g_return_val_if_fail (tmpfilename != NULL, NULL);
 
-	name = g_strrstr (tmpfilename, "/") + 1;
-	tmpdir = g_strndup (tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
+	name = g_path_get_basename (tmpfilename);
+	tmpdir = g_path_get_dirname (tmpfilename);
 
-	snprintf (dirname, 350, "%s/%s", tmpdir, attach_id);
+	dirname = g_build_filename (tmpdir, attach_id, NULL);
 	if (g_mkdir (dirname, 0775) == -1) {
-		g_warning ("Failed create directory to place file in [%s]: %s\n", dirname, strerror (errno));
+		g_warning ("Failed create directory to place file in [%s]: %s\n", dirname, g_strerror (errno));
 	}
 
-	snprintf (filename, 350, "%s/%s", dirname, name);
+	filename = g_build_filename (dirname, name, NULL);
 	if (g_rename (tmpfilename, filename) != 0) {
-		g_warning ("Failed to move attachment cache file [%s -> %s]: %s\n", tmpfilename, filename, strerror (errno));
+		g_warning ("Failed to move attachment cache file [%s -> %s]: %s\n", tmpfilename, filename, g_strerror (errno));
 	}
 
 	g_free (tmpdir);
+	g_free (dirname);
+	g_free (name);
 
-	return g_filename_to_uri (filename, NULL, NULL);
+	tmpfilename = g_filename_to_uri (filename, NULL, NULL);
+
+	g_free (filename);
+
+	return tmpfilename;
 }
 
 EEwsAttachmentInfo *
@@ -1563,21 +1570,21 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param,
 		return NULL;
 	}
 
-	if (cache) {
+	if (cache && content && g_file_test ((const gchar *) content, G_FILE_TEST_IS_REGULAR | G_FILE_TEST_EXISTS)) {
 		info = e_ews_attachment_info_new (E_EWS_ATTACHMENT_INFO_TYPE_URI);
 
 		tmpfilename = (gchar *) content;
-		tmpdir = g_strndup (tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
+		tmpdir = g_path_get_dirname (tmpfilename);
 
 		dirname = g_build_filename (tmpdir, comp_uid, NULL);
 		if (g_mkdir_with_parents (dirname, 0775) == -1) {
-			g_warning ("Failed create directory to place file in [%s]: %s\n", dirname, strerror (errno));
+			g_warning ("Failed create directory to place file in [%s]: %s\n", dirname, g_strerror (errno));
 		}
 
 		filename = g_build_filename (dirname, name, NULL);
 		if (g_rename (tmpfilename, filename) != 0) {
 			g_warning ("Failed to move attachment cache file [%s -> %s]: %s\n",
-					tmpfilename, filename, strerror (errno));
+					tmpfilename, filename, g_strerror (errno));
 		}
 
 		g_free (dirname);
@@ -1599,28 +1606,44 @@ EEwsAttachmentInfo *
 e_ews_item_dump_mime_content (EEwsItem *item,
                               const gchar *cache)
 {
-	EEwsAttachmentInfo *info = e_ews_attachment_info_new (E_EWS_ATTACHMENT_INFO_TYPE_URI);
+	EEwsAttachmentInfo *info;
 	gchar *filename, *surename, *dirname;
 	gchar *tmpdir, *uri;
 	const gchar *tmpfilename;
 
 	g_return_val_if_fail (item->priv->mime_content != NULL, NULL);
+	g_return_val_if_fail (g_file_test ((const gchar *) item->priv->mime_content, G_FILE_TEST_IS_REGULAR | G_FILE_TEST_EXISTS), NULL);
 
 	tmpfilename = (gchar *) item->priv->mime_content;
-	tmpdir = g_strndup (tmpfilename, g_strrstr (tmpfilename, "/") - tmpfilename);
+	tmpdir = g_path_get_dirname (tmpfilename);
 
 	dirname = g_build_filename (tmpdir, "XXXXXX", NULL);
-	if (!mkdtemp (dirname))
-		g_warning ("Failed to create directory for attachment cache");
+	if (!mkdtemp (dirname)) {
+		g_warning ("Failed to create directory for attachment cache '%s': %s", dirname, g_strerror (errno));
+
+		g_free (tmpdir);
+		g_free (dirname);
+
+		return NULL;
+	}
 
 	surename = g_uri_escape_string (item->priv->subject, "", TRUE);
 	filename = g_build_filename (dirname, surename, NULL);
 
 	if (g_rename ((const gchar *) item->priv->mime_content, filename) != 0) {
-		g_warning ("Failed to move attachment cache file");
+		g_warning ("Failed to move attachment cache file '%s': %s", filename, g_strerror (errno));
+
+		g_free (tmpdir);
+		g_free (dirname);
+		g_free (filename);
+		g_free (surename);
+
+		return NULL;
 	}
 
 	uri = g_filename_to_uri (filename, NULL, NULL);
+
+	info = e_ews_attachment_info_new (E_EWS_ATTACHMENT_INFO_TYPE_URI);
 	e_ews_attachment_info_set_uri (info, uri);
 
 	g_free (uri);
