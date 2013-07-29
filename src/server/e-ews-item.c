@@ -1521,6 +1521,7 @@ e_ews_embed_attachment_id_in_uri (const gchar *olduri,
 
 	g_free (tmpfilename);
 	g_free (tmpdir);
+	g_free (dirname);
 	g_free (name);
 
 	tmpfilename = g_filename_to_uri (filename, NULL, NULL);
