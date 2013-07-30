@@ -105,8 +105,6 @@ ews_oof_settings_text_from_html (gchar *html_text)
 	gchar *start, *end;
 	gchar *ii, *jj;
 
-	/* Note, this consumes the input string. */
-
 	g_return_val_if_fail (html_text != NULL, NULL);
 
 	haystack_len = strlen (html_text);
@@ -130,8 +128,6 @@ ews_oof_settings_text_from_html (gchar *html_text)
 		}
 	}
 	*jj = '\0';
-
-	g_free (html_text);
 
 	return plain_text;
 }
