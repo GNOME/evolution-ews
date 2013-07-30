@@ -647,15 +647,15 @@ sync_xxx_response_cb (ESoapParameter *subparam,
 	ESoapParameter *node;
 	gchar *new_sync_state = NULL, *value, *last;
 	GSList *items_created = NULL, *items_updated = NULL, *items_deleted = NULL;
-	gboolean includes_last_item = FALSE;
+	gboolean includes_last_item = TRUE;
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "SyncState");
 	new_sync_state = e_soap_parameter_get_string_value (node);
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, last_tag);
 	last = e_soap_parameter_get_string_value (node);
-	if (!strcmp (last, "true"))
-		includes_last_item = TRUE;
+	if (g_strcmp0 (last, "false") == 0)
+		includes_last_item = FALSE;
 	g_free (last);
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "Changes");
