@@ -20,12 +20,39 @@ m4_define([EVO_EWS_API_VERSION_MACRO], [1.0])
 EVO_EWS_API_VERSION=EVO_EWS_API_VERSION_MACRO
 AC_SUBST(EVO_EWS_API_VERSION)
 
+# Immediately after a release, every package gets a 'Post-release version bump'
+# commit which increases the minor version to whatever the *next* release will
+# be.
+#
+# On a release, the NEWS file is updated with a changelog for that release.
+#
+# Thus, during the development phase between releases, the first line of the
+# NEWS file refers to the previous release, while ews_micro_version refers to
+# the *next* release.
+#
+# If there are fixes in the Evolution-EWS tree which have been made since the
+# latest release, it's useful to be able to build EWS straight from git.
+# However, if we require that EDS and Evo precisely match [ews_version], that
+# means that the user would have to locally rebuild both of those, *just* to
+# pull in the cosmetic "Post-release version bump" commit, before they can
+# build EWS.
+#
+# So don't do that. If the latest version mentioned in the NEWS file is
+# precisely one minor behind [ews_version], then allow building against *that*
+# version of EDS and Evo.
+read x NEWSVER y < NEWS
+PREVVER=ews_major_version.ews_minor_version.$(expr ews_micro_version - 1)
+if test "$PREVVER" = "$NEWSVER"; then
+   EVOREQVER=$PREVVER
+else
+   EVOREQVER=ews_major_version.ews_minor_version.ews_micro_version
+fi
 
 dnl *******************
 dnl Required Packages
 dnl *******************
-m4_define([eds_minimum_version], [ews_version])
-m4_define([evo_minimum_version], [ews_version])
+m4_define([eds_minimum_version], [$EVOREQVER])
+m4_define([evo_minimum_version], [$EVOREQVER])
 
 dnl Keep these two definitions in agreement.
 m4_define([glib_minimum_version], [2.32])
