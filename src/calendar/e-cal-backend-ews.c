@@ -2549,53 +2549,35 @@ typedef struct {
 	const gchar *change_key;
 } EwsAcceptData;
 
-static gchar *
-e_ews_get_icalcomponent_as_mime_content (icalcomponent *vevent)
-{
-	icalcomponent *vcal;
-	gchar *vcal_str;
-
-	vcal = icalcomponent_new (ICAL_VCALENDAR_COMPONENT);
-	icalcomponent_add_property (vcal, icalproperty_new_version ("2.0"));
-	icalcomponent_add_property (vcal, icalproperty_new_method (ICAL_METHOD_REQUEST));
-	icalcomponent_add_component (vcal, icalcomponent_new_clone (vevent));
-
-	vcal_str = icalcomponent_as_ical_string_r ((icalcomponent *) vcal);
-
-	icalcomponent_free (vcal);
-
-	return vcal_str;
-}
-
 static void
-prepare_create_item_with_mime_content_request (ESoapMessage *msg,
-                                               gpointer user_data)
-{
-	gchar *mime_content = (gchar *) user_data;
-
-	/* Prepare CalendarItem node in the SOAP message */
-	e_soap_message_start_element (msg, "CalendarItem", NULL, NULL);
-
-	e_ews_message_write_base64_parameter (msg,"MimeContent",NULL,mime_content);
-	// end of "CalendarItem"
-	e_soap_message_end_element (msg);
-}
-
-static void
-e_ews_receive_objects_no_exchange_mail (ECalBackendEwsPrivate *priv,
+e_ews_receive_objects_no_exchange_mail (ECalBackendEws *cbews,
                                         icalcomponent *subcomp,
-                                        GSList *ids,
+                                        GSList **ids,
                                         GCancellable *cancellable,
                                         GError **error)
 {
-	gchar *mime_content = e_ews_get_icalcomponent_as_mime_content (subcomp);
+	EwsConvertData *convert_data;
+	EwsFolderId *fid;
+
+	convert_data = g_new0 (EwsConvertData, 1);
+	convert_data->cbews = g_object_ref (cbews);
+	convert_data->icalcomp = subcomp;
+
+	fid = e_ews_folder_id_new (cbews->priv->folder_id, NULL, FALSE);
+
 	e_ews_connection_create_items_sync (
-		priv->cnc, EWS_PRIORITY_MEDIUM,
-		"SendAndSaveCopy", "SendToNone", NULL,
-		prepare_create_item_with_mime_content_request,
-		mime_content, &ids, cancellable, error);
-	g_free (mime_content);
-	/*we still have to send a mail with accept to meeting organizer*/
+		cbews->priv->cnc,
+		EWS_PRIORITY_MEDIUM,
+		"SaveOnly",
+		"SendToNone",
+		fid,
+		convert_calcomp_to_xml,
+		convert_data,
+		ids,
+		cancellable,
+		error);
+
+	e_ews_folder_id_free (fid);
 }
 
 static const gchar *
@@ -2754,7 +2736,7 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend,
 				while (pass < 2) {
 					/*in case we do not have item id we will create item with mime content only*/
 					if (item_id == NULL)
-						e_ews_receive_objects_no_exchange_mail (priv, subcomp, ids, cancellable, &error);
+						e_ews_receive_objects_no_exchange_mail (cbews, subcomp, &ids, cancellable, &error);
 					else
 						e_ews_connection_create_items_sync (
 							priv->cnc, EWS_PRIORITY_MEDIUM,
