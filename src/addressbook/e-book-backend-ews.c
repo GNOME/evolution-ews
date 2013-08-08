@@ -2740,7 +2740,7 @@ ebews_traverse_dl (EBookBackendEws *ebews,
 	if (g_strcmp0 (mb->mailbox_type, "PrivateDL") == 0) {
 		GSList *members = NULL, *l;
 		gboolean includes_last;
-		gboolean ret;
+		gboolean ret = FALSE;
 
 		if (!mb->item_id || !mb->item_id->id)
 			return FALSE;
