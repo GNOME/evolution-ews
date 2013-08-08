@@ -519,7 +519,7 @@ ews_connect_sync (CamelService *service,
 	auth_mech = camel_network_settings_dup_auth_mechanism (
 				       CAMEL_NETWORK_SETTINGS (settings));
 	if (!auth_mech)
-		auth_mech = g_strdup("NTLM");
+		auth_mech = g_strdup ("NTLM");
  retry:
 	success = camel_session_authenticate_sync (session, service,
 			   auth_mech, cancellable, error);
@@ -1611,11 +1611,17 @@ ews_get_folder_info_sync (CamelStore *store,
 	}
 
 	g_mutex_lock (&priv->get_finfo_lock);
-	if (!(camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))
-	      && camel_service_connect_sync ((CamelService *) store, cancellable, error))) {
+	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store))) {
 		camel_ews_store_ensure_virtual_folders (ews_store);
 		g_mutex_unlock (&priv->get_finfo_lock);
 		goto offline;
+	}
+
+	if (!camel_service_connect_sync ((CamelService *) store, cancellable, error)) {
+		camel_offline_store_set_online_sync (CAMEL_OFFLINE_STORE (store), FALSE, NULL, NULL);
+		camel_ews_store_ensure_virtual_folders (ews_store);
+		g_mutex_unlock (&priv->get_finfo_lock);
+		return NULL;
 	}
 
 	old_sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
