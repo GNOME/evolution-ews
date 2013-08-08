@@ -647,15 +647,19 @@ sync_xxx_response_cb (ESoapParameter *subparam,
 	ESoapParameter *node;
 	gchar *new_sync_state = NULL, *value, *last;
 	GSList *items_created = NULL, *items_updated = NULL, *items_deleted = NULL;
-	gboolean includes_last_item = TRUE;
+	gboolean includes_last_item;
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "SyncState");
 	new_sync_state = e_soap_parameter_get_string_value (node);
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, last_tag);
 	last = e_soap_parameter_get_string_value (node);
-	if (g_strcmp0 (last, "false") == 0)
-		includes_last_item = FALSE;
+	/*
+	 * Set the includes_last_item to TRUE as default.
+	 * It can avoid an infinite loop in caller, when, for some reason,
+	 * we don't receive the last_tag property from the server.
+	 */
+	includes_last_item = g_strcmp0 (last, "false") != 0;
 	g_free (last);
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "Changes");
@@ -871,15 +875,19 @@ ews_handle_root_folder_param_items (ESoapParameter *subparam,
 	gchar *last, *total;
 	gint total_items;
 	EEwsItem *item;
-	gboolean includes_last_item = FALSE;
+	gboolean includes_last_item;
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "RootFolder");
 	total = e_soap_parameter_get_property (node, "TotalItemsInView");
 	total_items = atoi (total);
 	g_free (total);
 	last = e_soap_parameter_get_property (node, "IncludesLastItemInRange");
-	if (!strcmp (last, "true"))
-		includes_last_item = TRUE;
+	/*
+	 * Set the includes_last_item to TRUE as default.
+	 * It can avoid an infinite loop in caller, when, for some reason,
+	 * we don't receive the last_tag property from the server.
+	 */
+	includes_last_item = g_strcmp0 (last, "false") != 0;
 	g_free (last);
 
 	node = e_soap_parameter_get_first_child_by_name (node, "Items");
@@ -8294,15 +8302,19 @@ ews_handle_root_folder_param_folders (ESoapParameter *subparam,
 	gchar *last, *total;
 	gint total_items;
 	EEwsFolder *folder;
-	gboolean includes_last_item = FALSE;
+	gboolean includes_last_item;
 
 	node = e_soap_parameter_get_first_child_by_name (subparam, "RootFolder");
 	total = e_soap_parameter_get_property (node, "TotalItemsInView");
 	total_items = atoi (total);
 	g_free (total);
 	last = e_soap_parameter_get_property (node, "IncludesLastItemInRange");
-	if (!strcmp (last, "true"))
-		includes_last_item = TRUE;
+	/*
+	 * Set the includes_last_item to TRUE as default.
+	 * It can avoid an infinite loop in caller, when, for some reason,
+	 * we don't receive the last_tag property from the server.
+	 */
+	includes_last_item = g_strcmp0 (last, "false") != 0;
 	g_free (last);
 
 	node = e_soap_parameter_get_first_child_by_name (node, "Folders");
