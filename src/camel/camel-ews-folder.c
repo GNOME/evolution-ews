@@ -475,7 +475,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 		e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_MEETING_MESSAGE ||
 		e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_MEETING_RESPONSE) {
 		GSList *items_req = NULL;
-		const EwsId *calendar_item_accept_id;
+		const EwsId *calendar_item_accept_id = NULL;
 		gboolean is_calendar_UID = TRUE;
 
 		// Get AssociatedCalendarItemId with second get_items call
@@ -498,9 +498,12 @@ camel_ews_folder_get_message (CamelFolder *folder,
 			}
 			goto exit;
 		}
-		calendar_item_accept_id = e_ews_item_get_calendar_item_accept_id (items_req->data);
+
+		if (items_req != NULL)
+			calendar_item_accept_id = e_ews_item_get_calendar_item_accept_id (items_req->data);
+
 		/*In case of non-exchange based meetings invites the calendar backend have to create the meeting*/
-		if (!calendar_item_accept_id) {
+		if (calendar_item_accept_id == NULL) {
 			calendar_item_accept_id = e_ews_item_get_id (items->data);
 			is_calendar_UID = FALSE;
 		}
@@ -508,7 +511,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 		if (mime_fname_new)
 			mime_content = (const gchar *) mime_fname_new;
 
-		if (items_req) {
+		if (items_req != NULL) {
 			g_object_unref (items_req->data);
 			g_slist_free (items_req);
 		}

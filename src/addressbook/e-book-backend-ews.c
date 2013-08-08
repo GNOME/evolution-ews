@@ -686,14 +686,22 @@ ebews_set_full_name_changes (ESoapMessage *message,
 
 	name = e_contact_get (new, E_CONTACT_NAME);
 	old_name = e_contact_get (old, E_CONTACT_NAME);
-	if (!name && !old_name)
+	if (!old_name && !name)
 		return;
 
-	if (g_strcmp0 (name->given, old_name->given) != 0)
+	if (!old_name) {
 		convert_contact_property_to_updatexml (message, "GivenName", name->given, "contacts", NULL, NULL);
-
-	if (g_strcmp0 (name->additional, old_name->additional) != 0)
 		convert_contact_property_to_updatexml (message, "MiddleName", name->additional, "contacts", NULL, NULL);
+	} else if (!name) {
+		convert_contact_property_to_updatexml (message, "GivenName", "", "contacts", NULL, NULL);
+
+		convert_contact_property_to_updatexml (message, "MiddleName", "", "contacts", NULL, NULL);
+	} else {
+		if (g_strcmp0 (name->given, old_name->given) != 0)
+			convert_contact_property_to_updatexml (message, "GivenName", name->given, "contacts", NULL, NULL);
+		if (g_strcmp0 (name->additional, old_name->additional) != 0)
+			convert_contact_property_to_updatexml (message, "MiddleName", name->additional, "contacts", NULL, NULL);
+	}
 
 	e_contact_name_free (name);
 	e_contact_name_free (old_name);
