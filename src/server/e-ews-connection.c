@@ -1021,9 +1021,12 @@ ews_handle_resolution_set_param (ESoapParameter *subparam,
 
 	subparam = e_soap_parameter_get_first_child_by_name (subparam, "ResolutionSet");
 	prop = e_soap_parameter_get_property (subparam, "IncludesLastItemInRange");
-
-	if (prop && !strcmp (prop, "true"))
-		includes_last_item = TRUE;
+	/*
+	 * Set the includes_last_item to TRUE as default.
+	 * It can avoid an infinite loop in caller, when, for some reason,
+	 * we don't receive the last_tag property from the server.
+	 */
+	includes_last_item = g_strcmp0 (prop, "false") != 0;
 	g_free (prop);
 
 	for (subparam = e_soap_parameter_get_first_child_by_name (subparam, "Resolution");
@@ -1103,9 +1106,12 @@ ews_handle_dl_expansion_param (ESoapParameter *subparam,
 
 	subparam = e_soap_parameter_get_first_child_by_name (subparam, "DLExpansion");
 	prop = e_soap_parameter_get_property (subparam, "IncludesLastItemInRange");
-
-	if (prop && !strcmp (prop, "true"))
-		includes_last_item = TRUE;
+	/*
+	 * Set the includes_last_item to TRUE as default.
+	 * It can avoid an infinite loop in caller, when, for some reason,
+	 * we don't receive the last_tag property from the server.
+	 */
+	includes_last_item = g_strcmp0 (prop, "false") != 0;
 	g_free (prop);
 
 	for (subparam = e_soap_parameter_get_first_child_by_name (subparam, "Mailbox");
