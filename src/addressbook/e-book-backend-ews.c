@@ -2666,7 +2666,6 @@ ebews_store_contact_items (EBookBackendEws *ebews,
 		EEwsItem *item = l->data;
 		EVCardAttribute *attr;
 
-		item = l->data;
 		if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR) {
 			g_object_unref (item);
 			continue;
@@ -3231,7 +3230,7 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 	gboolean is_autocompletion = FALSE;
 	gchar *auto_comp_str = NULL;
 	GCancellable *cancellable;
-	GSList *ids = NULL, *mailboxes = NULL, *l, *contacts = NULL, *c;
+	GSList *mailboxes = NULL, *l, *contacts = NULL, *c;
 	EwsFolderId *fid;
 	ESource *source;
 	ESourceEwsFolder *extension;
@@ -3307,7 +3306,6 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 	fid = g_new0 (EwsFolderId, 1);
 	fid->id = g_strdup (priv->folder_id);
 	fid->change_key = e_source_ews_folder_dup_change_key (extension);
-	ids = g_slist_append (ids, fid);
 
 	/* We do not scan until we reach the last_item as it might be good enough to show first 100
 	 * items during auto-completion. Change it if needed. TODO, Personal Address-book should start using

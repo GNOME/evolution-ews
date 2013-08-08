@@ -750,12 +750,11 @@ e_ews_collect_organizer (icalcomponent *comp)
 	org = icalproperty_get_organizer (org_prop);
 	if (!org)
 		org = "";
-	else {
-		if (!g_ascii_strncasecmp (org, "MAILTO:", 7))
-			org_email_address = (org) + 7;
-		else
-			org_email_address = org;
-	}
+
+	if (g_ascii_strncasecmp (org, "MAILTO:", 7) == 0)
+		org_email_address = (org) + 7;
+	else
+		org_email_address = org;
 
 	return org_email_address;
 }

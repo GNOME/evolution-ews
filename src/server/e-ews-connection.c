@@ -2323,7 +2323,6 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
                            GAsyncReadyCallback callback,
                            gpointer user_data)
 {
-	CamelNetworkSettings *network_settings;
 	GSimpleAsyncResult *simple;
 	struct _autodiscover_data *ad;
 	xmlOutputBuffer *buf;
@@ -2334,7 +2333,6 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 	SoupURI *soup_uri = NULL;
 	gboolean use_secure = TRUE;
 	const gchar *host_url;
-	const gchar *user;
 	GError *error = NULL;
 
 	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
@@ -2384,11 +2382,6 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 
 	url3 = g_strdup_printf ("http%s://%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", domain);
 	url4 = g_strdup_printf ("http%s://autodiscover.%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", domain);
-
-	network_settings = CAMEL_NETWORK_SETTINGS (settings);
-	user = camel_network_settings_get_user (network_settings);
-	if (user == NULL || *user == '\0')
-		user = email_address;
 
 	cnc = e_ews_connection_new (url3, settings);
 	e_ews_connection_set_password (cnc, password);
