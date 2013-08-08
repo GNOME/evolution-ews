@@ -356,10 +356,8 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
 		g_remove (mime_fname);
 		success = TRUE;
  exit_save:
-		if (fd != -1) {
+		if (fd != -1)
 			close (fd);
-			fd = -1;
-		}
 		g_free (dir);
 		if (newstream)
 			g_object_unref (newstream);
@@ -373,7 +371,6 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
  exit_parser:
 	g_object_unref (mimeparser);
 	close (fd_old);
-	fd_old = -1;
 
 	// must be freed in the caller
 	return mime_fname_new;
@@ -917,8 +914,6 @@ ews_move_to_junk_folder (CamelFolder *folder,
 		g_slist_free_full (junk_uids, (GDestroyNotify) camel_pstring_free);
 		return TRUE;
 	}
-
-	ews_store = CAMEL_EWS_STORE (camel_folder_get_parent_store (folder));
 
 	parent_store = camel_folder_get_parent_store (folder);
 	ews_folder = CAMEL_EWS_FOLDER (folder);

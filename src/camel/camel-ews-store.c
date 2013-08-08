@@ -1654,8 +1654,6 @@ ews_get_folder_info_sync (CamelStore *store,
 		camel_ews_store_summary_store_string_val (ews_store->summary, "sync_state", "");
 		camel_ews_store_summary_clear (ews_store->summary);
 
-		initial_setup = TRUE;
-
 		success = e_ews_connection_sync_folder_hierarchy_sync (connection, EWS_PRIORITY_MEDIUM, NULL,
 			&new_sync_state, &includes_last_folder, &folders_created, &folders_updated, &folders_deleted,
 			cancellable, &local_error);
