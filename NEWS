@@ -1,3 +1,30 @@
+Evolution-EWS 3.8.5 2013-08-12
+------------------------------
+
+Bug Fixes:
+	Bug 681741 - Meeting cancellation doesn't remove event from calendar
+	             (Fabiano Fidêncio)
+	Bug 704940 - Crash in sync_xxx_response_cb() (Fabiano Fidêncio)
+	Bug 705118 - Double-free in ews_oof_settings_get_response_cb()
+	             (Fabiano Fidêncio)
+	Bug 704772 - Fails to properly import calendar events (Milan Crha)
+	Bug 660748 - Can't save attachment in event (Milan Crha)
+	Bug 704914 - Crash in e_ews_dump_file_attachment_from_soap_parameter()
+	             (Milan Crha)
+	Bug 705617 - Failed connection hides offline data in online mode
+	             (Milan Crha)
+	Bug 705658 - Fix errors found by CLANG (Fabiano Fidêncio)
+	Bug 705337 - OOO message not shown (David Woodhouse)
+
+Other Changes:
+	* Allow building against latest release (David Woodhouse)
+	* Handle inlined attachments (Fabiano Fidêncio)
+
+Translations:
+	Sweta Kothari (gu)
+	Shankar Prasad (kn)
+
+
 Evolution-EWS 3.8.4 2013-07-23
 ------------------------------
 
