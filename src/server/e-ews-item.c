@@ -2011,8 +2011,8 @@ const gchar *
 e_ews_item_get_tzid (EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
-	g_return_val_if_fail (item->priv->timezone != NULL, NULL);
 
+	/* can be NULL */
 	return item->priv->timezone;
 }
 
