@@ -208,6 +208,9 @@ typedef struct {
 void		ews_oal_free			(EwsOAL *oal);
 void		ews_oal_details_free		(EwsOALDetails *details);
 
+void		e_ews_connection_utils_unref_in_thread
+						(gpointer object);
+
 GType		e_ews_connection_get_type	(void);
 EEwsConnection *e_ews_connection_new		(const gchar *uri,
 						 CamelEwsSettings *settings);

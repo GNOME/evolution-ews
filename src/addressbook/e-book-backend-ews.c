@@ -2386,9 +2386,6 @@ ews_gal_store_contact (EContact *contact,
 		data->contact_collector = NULL;
 		data->collected_length = 0;
 	}
-
-	if (percent == 100)
-		e_book_backend_notify_complete (E_BOOK_BACKEND (data->cbews));
 }
 
 static gint det_sort_func (gconstpointer _a, gconstpointer _b)
@@ -2436,6 +2433,11 @@ ews_replace_gal_in_db (EBookBackendEws *cbews,
 	data.cbews = cbews;
 
 	ret = ews_oab_decoder_decode (eod, ews_gal_store_contact, &data, cancellable, error);
+
+	/* always notify views as complete, to not left anything behind,
+	   if the decode was cancelled before full completion */
+	e_book_backend_notify_complete (E_BOOK_BACKEND (cbews));
+
 	if (!ret)
 	       return ret;
 
@@ -2464,10 +2466,13 @@ ebews_start_gal_sync (gpointer data)
 	guint32 old_seq = 0;
 	guint32 delta_size = 0;
 	CamelEwsSettings *ews_settings;
+	GCancellable *cancellable;
 
 	cbews = (EBookBackendEws *) data;
 	ews_settings = book_backend_ews_get_collection_settings (cbews);
 	priv = cbews->priv;
+
+	cancellable = g_object_ref (priv->cancellable);
 
 	oab_cnc = e_ews_connection_new (priv->oab_url, ews_settings);
 
@@ -2493,7 +2498,7 @@ ebews_start_gal_sync (gpointer data)
 
 	if (!e_ews_connection_get_oal_detail_sync (
 		oab_cnc, priv->folder_id, NULL, old_etag, &full_l, &etag,
-		priv->cancellable, &error)) {
+		cancellable, &error)) {
 		ret = FALSE;
 		goto exit;
 	}
@@ -2533,7 +2538,7 @@ ebews_start_gal_sync (gpointer data)
 		deltas = NULL;
 	}
 
-	uncompressed_filename = ews_download_gal (cbews, full, deltas, old_seq, priv->cancellable, &error);
+	uncompressed_filename = ews_download_gal (cbews, full, deltas, old_seq, cancellable, &error);
 	if (!uncompressed_filename) {
 		ret = FALSE;
 		goto exit;
@@ -2547,7 +2552,7 @@ ebews_start_gal_sync (gpointer data)
 	}
 
 	d (printf ("Ewsgal: Replacing old gal with new gal contents in db \n");)
-	ret = ews_replace_gal_in_db (cbews, uncompressed_filename, priv->cancellable, &error);
+	ret = ews_replace_gal_in_db (cbews, uncompressed_filename, cancellable, &error);
 	if (!ret)
 		goto exit;
 
@@ -2572,6 +2577,8 @@ ebews_start_gal_sync (gpointer data)
 	d (printf ("Ews gal: sync successful complete \n");)
 
 exit:
+	g_clear_object (&cancellable);
+
 	if (error) {
 		g_warning ("Unable to update gal : %s \n", error->message);
 		g_clear_error (&error);
@@ -2970,7 +2977,7 @@ ebews_fetch_items (EBookBackendEws *ebews,
 		d_name = e_ews_item_get_subject (item);
 		e_ews_connection_expand_dl_sync (
 			cnc, EWS_PRIORITY_MEDIUM, mb, &members,
-			&includes_last, priv->cancellable, error);
+			&includes_last, cancellable, error);
 		if (*error)
 			goto cleanup;
 
@@ -3026,6 +3033,7 @@ ebews_start_sync (gpointer data)
 	GList *list, *link;
 	gchar *sync_state, *status_message = NULL;
 	gboolean includes_last_item;
+	GCancellable *cancellable;
 	GError *error = NULL;
 
 	ebews = (EBookBackendEws *) data;
@@ -3036,6 +3044,8 @@ ebews_start_sync (gpointer data)
 	/* Not connected? Try again later */
 	if (!priv->cnc)
 		return TRUE;
+
+	cancellable = g_object_ref (priv->cancellable);
 
 	status_message = g_strdup (_("Syncing contacts..."));
 	list = e_book_backend_list_views (E_BOOK_BACKEND (ebews));
@@ -3060,7 +3070,7 @@ ebews_start_sync (gpointer data)
 			&sync_state,
 			&includes_last_item,
 			&items_created, &items_updated,
-			&items_deleted, priv->cancellable, &error);
+			&items_deleted, cancellable, &error);
 
 		g_free (old_sync_state);
 
@@ -3071,7 +3081,7 @@ ebews_start_sync (gpointer data)
 
 			e_ews_connection_sync_folder_items_sync (priv->cnc, EWS_PRIORITY_MEDIUM, NULL, priv->folder_id, "IdOnly", NULL, EWS_MAX_FETCH_COUNT,
 				&sync_state, &includes_last_item, &items_created, &items_updated, &items_deleted,
-				priv->cancellable, &error);
+				cancellable, &error);
 		}
 
 		if (error)
@@ -3081,7 +3091,7 @@ ebews_start_sync (gpointer data)
 			ebews_sync_deleted_items (ebews, items_deleted, &error);
 
 		if (items_created)
-			ebews_fetch_items (ebews, items_created, TRUE, NULL, priv->cancellable, &error);
+			ebews_fetch_items (ebews, items_created, TRUE, NULL, cancellable, &error);
 
 		if (error) {
 			g_slist_free_full (items_updated, g_object_unref);
@@ -3090,7 +3100,7 @@ ebews_start_sync (gpointer data)
 		}
 
 		if (items_updated)
-			ebews_fetch_items (ebews, items_updated, TRUE, NULL, priv->cancellable, &error);
+			ebews_fetch_items (ebews, items_updated, TRUE, NULL, cancellable, &error);
 
 		if (error)
 			break;
@@ -3109,6 +3119,8 @@ ebews_start_sync (gpointer data)
 		e_data_book_view_notify_progress (E_DATA_BOOK_VIEW (link->data), -1, NULL);
 	g_list_free_full (list, g_object_unref);
 
+	g_clear_object (&cancellable);
+
 	if (error) {
 		g_warning ("Error Syncing Contacts: Folder %s Error: %s", priv->folder_id, error->message);
 		g_clear_error (&error);
@@ -3125,6 +3137,10 @@ delta_thread (gpointer data)
 	EBookBackendEwsPrivate *priv = ebews->priv;
 	gint64 end_time;
 
+	g_mutex_lock (&priv->dlock->mutex);
+	g_object_ref (ebews);
+	g_mutex_unlock (&priv->dlock->mutex);
+
 	while (TRUE)	{
 		gboolean succeeded;
 
@@ -3135,6 +3151,10 @@ delta_thread (gpointer data)
 
 		g_mutex_lock (&priv->dlock->mutex);
 
+		/* in case this is the last reference, then this cannot join
+		   the itself thread in dispose */
+		e_ews_connection_utils_unref_in_thread (ebews);
+
 		if (!succeeded || priv->dlock->exit)
 			break;
 
@@ -3143,6 +3163,8 @@ delta_thread (gpointer data)
 
 		if (priv->dlock->exit)
 			break;
+
+		g_object_ref (ebews);
 
 		g_mutex_unlock (&priv->dlock->mutex);
 	}
@@ -3682,9 +3704,8 @@ e_book_backend_ews_dispose (GObject *object)
 	if (priv->dlock) {
 		g_mutex_lock (&priv->dlock->mutex);
 		priv->dlock->exit = TRUE;
-		g_mutex_unlock (&priv->dlock->mutex);
-
 		g_cond_signal (&priv->dlock->cond);
+		g_mutex_unlock (&priv->dlock->mutex);
 
 		if (priv->dthread)
 			g_thread_join (priv->dthread);

@@ -189,8 +189,8 @@ ews_unref_in_thread_func (gpointer data)
 	return NULL;
 }
 
-static void
-ews_unref_in_thread (gpointer object)
+void
+e_ews_connection_utils_unref_in_thread (gpointer object)
 {
 	GThread *thread;
 
@@ -312,7 +312,7 @@ ews_connection_scheduled_cb (gpointer user_data)
 	if (sd->message)
 		g_object_unref (sd->message);
 	/* in case this is the last reference */
-	ews_unref_in_thread (sd->cnc);
+	e_ews_connection_utils_unref_in_thread (sd->cnc);
 	g_free (sd);
 
 	return FALSE;
@@ -513,7 +513,7 @@ ews_active_job_done (EEwsConnection *cnc,
 	/* the 'simple' holds reference on 'cnc' and this function
 	 * is called in a dedicated thread, which 'cnc' joins on dispose,
 	 * thus to avoid race condition, unref the object in its own thread */
-	ews_unref_in_thread (ews_node->simple);
+	e_ews_connection_utils_unref_in_thread (ews_node->simple);
 	g_free (ews_node);
 }
 
@@ -2220,7 +2220,7 @@ autodiscover_response_cb (SoupSession *session,
 	 * in connection's dispose, trying to wait on the end of itself, thus it's
 	 * safer to unref the 'simple' in a dedicated thread.
 	*/
-	ews_unref_in_thread (simple);
+	e_ews_connection_utils_unref_in_thread (simple);
 }
 
 static void post_restarted (SoupMessage *msg, gpointer data)
@@ -2731,7 +2731,7 @@ oal_response_cb (SoupSession *soup_session,
 	 * for cases when the complete_in_idle is finished before the unref call, when
 	 * the cnc will be left with the last reference and thus cannot join the soup_thread
 	 * while still in it, the unref is done in a dedicated thread. */
-	ews_unref_in_thread (simple);
+	e_ews_connection_utils_unref_in_thread (simple);
 }
 
 static void
@@ -3005,7 +3005,7 @@ oal_download_response_cb (SoupSession *soup_session,
 	}
 
 	g_simple_async_result_complete_in_idle (simple);
-	ews_unref_in_thread (simple);
+	e_ews_connection_utils_unref_in_thread (simple);
 }
 
 static void
