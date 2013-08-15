@@ -29,6 +29,8 @@ module_ews_configuration_la_SOURCES = \
 	e-mail-config-ews-oal-combo-box.h \
 	e-mail-config-ews-delegates-page.c \
 	e-mail-config-ews-delegates-page.h \
+	e-mail-config-ews-folder-sizes-page.c \
+	e-mail-config-ews-folder-sizes-page.h \
 	e-mail-config-ews-ooo-page.c \
 	e-mail-config-ews-ooo-page.h \
 	e-ews-config-ui-extension.c \

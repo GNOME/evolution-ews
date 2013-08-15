@@ -26,6 +26,7 @@
 
 #include "e-mail-config-ews-delegates-page.h"
 #include "e-mail-config-ews-ooo-page.h"
+#include "e-mail-config-ews-folder-sizes-page.h"
 
 G_DEFINE_DYNAMIC_TYPE (
 	EMailConfigEwsNotebook,
@@ -92,6 +93,11 @@ mail_config_ews_notebook_constructed (GObject *object)
 			account_source,
 			identity_source,
 			collection_source);
+		e_mail_config_notebook_add_page (notebook, page);
+
+		page = e_mail_config_ews_folder_sizes_page_new (
+			account_source,
+			registry);
 		e_mail_config_notebook_add_page (notebook, page);
 	}
 }

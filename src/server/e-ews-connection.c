@@ -3272,6 +3272,9 @@ ews_append_additional_props_to_msg (ESoapMessage *msg,
 			if (ex_furi->distinguished_prop_set_id)
 				e_soap_message_add_attribute (msg, "DistinguishedPropertySetId", ex_furi->distinguished_prop_set_id, NULL, NULL);
 
+			if (ex_furi->prop_tag)
+				e_soap_message_add_attribute (msg, "PropertyTag", ex_furi->prop_tag, NULL, NULL);
+
 			if (ex_furi->prop_set_id)
 				e_soap_message_add_attribute (msg, "PropertySetId", ex_furi->prop_set_id, NULL, NULL);
 

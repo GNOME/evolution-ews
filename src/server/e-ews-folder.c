@@ -44,6 +44,7 @@ struct _EEwsFolderPrivate {
 	guint32 unread;
 	guint32 total;
 	guint32 child_count;
+	guint64 size;
 	gboolean foreign;
 };
 
@@ -209,6 +210,23 @@ e_ews_folder_set_from_soap_parameter (EEwsFolder *folder,
 	subparam = e_soap_parameter_get_first_child_by_name (node, "ChildFolderCount");
 	if (subparam)
 		priv->child_count = e_soap_parameter_get_int_value (subparam);
+
+	subparam = e_soap_parameter_get_first_child_by_name (node, "ExtendedProperty");
+	if (subparam) {
+		ESoapParameter *subparam1;
+		gchar *prop_tag = NULL;
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "ExtendedFieldURI");
+		if (subparam1) {
+			prop_tag = e_soap_parameter_get_property (subparam1, "PropertyTag");
+			if (g_strcmp0 (prop_tag, "0xe08") == 0) {
+				subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Value");
+				if (subparam1)
+					priv->size = e_soap_parameter_get_int_value (subparam1);
+			}
+			g_free (prop_tag);
+		}
+	}
 
 	return TRUE;
 }
@@ -429,6 +447,14 @@ e_ews_folder_get_child_count (EEwsFolder *folder)
 	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), -1);
 
 	return folder->priv->child_count;
+}
+
+guint64
+e_ews_folder_get_size (EEwsFolder *folder)
+{
+	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), -1);
+
+	return folder->priv->size;
 }
 
 gboolean

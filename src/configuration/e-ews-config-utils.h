@@ -24,7 +24,7 @@
 #include <shell/e-shell-view.h>
 
 #include "server/e-ews-connection.h"
-#include "server/camel-ews-settings.h"
+#include "camel/camel-ews-store.h"
 
 typedef void		(* EEwsSetupFunc)					(GObject *with_object,
 										 gpointer user_data,
@@ -62,5 +62,11 @@ gboolean		e_ews_config_utils_is_online				(void);
 GtkWindow *		e_ews_config_utils_get_widget_toplevel_window		(GtkWidget *widget);
 
 void			e_ews_config_utils_unref_in_thread			(GObject *object);
+
+void			e_ews_config_utils_run_folder_sizes_dialog		(GtkWindow *parent,
+										 ESourceRegistry *registry,
+										 ESource *source,
+										 CamelEwsStore *ews_store);
+
 
 #endif /* E_EWS_CONFIG_UTILS */

@@ -71,6 +71,7 @@ const EwsFolderId *
 guint32		e_ews_folder_get_total_count (EEwsFolder *folder);
 guint32		e_ews_folder_get_unread_count (EEwsFolder *folder);
 guint32		e_ews_folder_get_child_count (EEwsFolder *folder);
+guint64		e_ews_folder_get_size (EEwsFolder *folder);
 gboolean	e_ews_folder_get_is_writable (EEwsFolder *folder);
 void		e_ews_folder_set_is_writable (EEwsFolder *folder, gboolean writable);
 EEwsFolderType	e_ews_folder_get_folder_type (EEwsFolder *folder);

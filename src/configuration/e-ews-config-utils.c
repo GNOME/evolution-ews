@@ -428,6 +428,253 @@ e_ews_config_utils_open_connection_for (ESourceRegistry *registry,
 	return conn;
 }
 
+enum {
+	COL_FOLDERSIZE_NAME = 0,
+	COL_FOLDERSIZE_SIZE,
+	COL_FOLDERSIZE_MAX
+};
+
+typedef struct
+{
+	GtkDialog *dialog;
+	GtkGrid *spinner_grid;
+
+	ESourceRegistry *registry;
+	ESource *source;
+	CamelEwsSettings *ews_settings;
+	CamelEwsStore *ews_store;
+
+	GSList *folder_list;
+	GCancellable *cancellable;
+	GError *error;
+} FolderSizeDialogData;
+
+static gboolean
+ews_settings_get_folder_sizes_idle (gpointer user_data)
+{
+	GtkWidget *widget;
+	GtkCellRenderer *renderer;
+	GtkListStore *store;
+	GtkTreeIter iter;
+	GtkBox *content_area;
+	FolderSizeDialogData *fsd = user_data;
+
+	g_return_val_if_fail (fsd != NULL, FALSE);
+
+	if (g_cancellable_is_cancelled (fsd->cancellable))
+		goto cleanup;
+
+	/* Hide progress bar. Set status */
+	gtk_widget_destroy (GTK_WIDGET (fsd->spinner_grid));
+
+	if (fsd->folder_list) {
+		GtkWidget *scrolledwindow, *tree_view;
+		GSList *fiter;
+
+		scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
+		gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow),
+				GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+		gtk_widget_show (scrolledwindow);
+
+		/* Tree View */
+		tree_view =  gtk_tree_view_new ();
+		renderer = gtk_cell_renderer_text_new ();
+		gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (tree_view),-1,
+				_("Folder"),
+				renderer, "text", COL_FOLDERSIZE_NAME,
+				NULL);
+
+		renderer = gtk_cell_renderer_text_new ();
+		gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (tree_view),-1,
+				_("Size"), renderer,
+				"text", COL_FOLDERSIZE_SIZE,
+				NULL);
+		/* Model for TreeView */
+		store = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
+		gtk_tree_view_set_model (GTK_TREE_VIEW (tree_view), GTK_TREE_MODEL (store));
+
+		/* Populate model with data */
+		for (fiter = fsd->folder_list; fiter;  fiter = fiter->next) {
+			EEwsFolder *folder = fiter->data;
+			gchar *folder_size = g_format_size (e_ews_folder_get_size (folder));
+
+			gtk_list_store_append (store, &iter);
+			gtk_list_store_set (store, &iter,
+					COL_FOLDERSIZE_NAME,
+					e_ews_folder_get_name (folder),
+					COL_FOLDERSIZE_SIZE,
+					folder_size,
+					-1);
+
+			g_free (folder_size);
+		}
+
+		gtk_container_add (GTK_CONTAINER (scrolledwindow), tree_view);
+		widget = scrolledwindow;
+	} else if (fsd->error) {
+		gchar *msg = g_strconcat (_("Unable to retrieve folder size information"), "\n",
+				fsd->error->message, NULL);
+		widget = gtk_label_new (msg);
+		g_free (msg);
+	} else {
+		widget = gtk_label_new (_("Unable to retrieve folder size information"));
+	}
+
+	gtk_widget_show_all (widget);
+
+	/* Pack into content_area */
+	content_area = GTK_BOX (gtk_dialog_get_content_area (fsd->dialog));
+	gtk_box_pack_start (content_area, widget, TRUE, TRUE, 6);
+
+cleanup:
+	g_slist_free_full (fsd->folder_list, g_object_unref);
+	g_object_unref (fsd->registry);
+	g_object_unref (fsd->source);
+	g_object_unref (fsd->ews_settings);
+	g_object_unref (fsd->ews_store);
+	g_object_unref (fsd->cancellable);
+	g_clear_error (&fsd->error);
+	g_free (fsd);
+
+	return FALSE;
+}
+
+static gpointer
+ews_settings_get_folder_sizes_thread (gpointer user_data)
+{
+	FolderSizeDialogData *fsd = user_data;
+	EEwsConnection *cnc;
+
+	g_return_val_if_fail (fsd != NULL, NULL);
+
+	fsd->folder_list = NULL;
+	cnc = e_ews_config_utils_open_connection_for (
+			fsd->registry,
+			fsd->source,
+			fsd->ews_settings,
+			fsd->cancellable,
+			&fsd->error);
+
+	if (cnc) {
+		EwsAdditionalProps *add_props;
+		EwsExtendedFieldURI *ext_uri;
+		GSList *ids, *l, *folders_ids = NULL;
+
+		fsd->folder_list = NULL;
+
+		/* Use MAPI property to retrieve folder size */
+		add_props = g_new0 (EwsAdditionalProps, 1);
+		ext_uri = g_new0 (EwsExtendedFieldURI, 1);
+		ext_uri->prop_tag = g_strdup ("0x0e08"); /* Folder size property tag */
+		ext_uri->prop_type = g_strdup ("Integer");
+		add_props->extended_furis = g_slist_prepend (add_props->extended_furis, ext_uri);
+
+		ids = camel_ews_store_summary_get_folders (fsd->ews_store->summary, NULL);
+		for (l = ids; l != NULL; l = l->next) {
+			EwsFolderId *fid;
+			fid = e_ews_folder_id_new (l->data, NULL, FALSE);
+			folders_ids = g_slist_prepend (folders_ids, fid);
+		}
+		folders_ids = g_slist_reverse (folders_ids);
+
+		e_ews_connection_get_folder_sync (
+				cnc, EWS_PRIORITY_MEDIUM, "Default",
+				add_props, folders_ids, &fsd->folder_list,
+				fsd->cancellable, &fsd->error);
+
+		g_slist_free_full (folders_ids, (GDestroyNotify) e_ews_folder_id_free);
+		g_free (ext_uri->prop_type);
+		g_free (ext_uri->prop_tag);
+		g_free (ext_uri);
+		g_slist_free (add_props->extended_furis);
+		g_free (add_props);
+		g_object_unref (cnc);
+	}
+
+	g_idle_add (ews_settings_get_folder_sizes_idle, fsd);
+
+	return NULL;
+}
+
+static void
+folder_sizes_dialog_response_cb (GObject *dialog,
+				 gint response_id,
+				 gpointer data)
+{
+	GCancellable *cancellable = data;
+
+	g_cancellable_cancel (cancellable);
+	g_object_unref (cancellable);
+
+	gtk_widget_destroy (GTK_WIDGET (dialog));
+}
+
+void
+e_ews_config_utils_run_folder_sizes_dialog (GtkWindow *parent,
+					    ESourceRegistry *registry,
+					    ESource *source,
+					    CamelEwsStore *ews_store)
+{
+	GtkBox *content_area;
+	GtkWidget *spinner, *alignment, *dialog;
+	GtkWidget *spinner_label;
+	GCancellable *cancellable;
+	GThread *thread;
+	FolderSizeDialogData *fsd;
+
+	g_return_if_fail (ews_store != NULL);
+
+	cancellable = g_cancellable_new ();
+
+	dialog = gtk_dialog_new_with_buttons (
+			_("Folder Sizes"),
+			parent,
+			GTK_DIALOG_DESTROY_WITH_PARENT,
+			_("_Close"), GTK_RESPONSE_ACCEPT,
+			NULL);
+
+	g_signal_connect (dialog, "response", G_CALLBACK (folder_sizes_dialog_response_cb), cancellable);
+
+	fsd = g_new0 (FolderSizeDialogData, 1);
+	fsd->dialog = GTK_DIALOG (dialog);
+
+	gtk_window_set_default_size (GTK_WINDOW (fsd->dialog), 250, 300);
+
+	content_area = GTK_BOX (gtk_dialog_get_content_area (fsd->dialog));
+
+	spinner = gtk_spinner_new ();
+	gtk_spinner_start (GTK_SPINNER (spinner));
+	spinner_label = gtk_label_new (_("Fetching folder list…"));
+
+	fsd->spinner_grid = GTK_GRID (gtk_grid_new ());
+	gtk_grid_set_column_spacing (fsd->spinner_grid, 6);
+	gtk_grid_set_column_homogeneous (fsd->spinner_grid, FALSE);
+	gtk_orientable_set_orientation (GTK_ORIENTABLE (fsd->spinner_grid), GTK_ORIENTATION_HORIZONTAL);
+
+	alignment = gtk_alignment_new (1.0, 0.5, 0.0, 1.0);
+	gtk_container_add (GTK_CONTAINER (alignment), spinner);
+	gtk_misc_set_alignment (GTK_MISC (spinner_label), 0.0, 0.5);
+
+	gtk_container_add (GTK_CONTAINER (fsd->spinner_grid), alignment);
+	gtk_container_add (GTK_CONTAINER (fsd->spinner_grid), spinner_label);
+
+	/* Pack the TreeView into dialog's content area */
+	gtk_box_pack_start (content_area, GTK_WIDGET (fsd->spinner_grid), TRUE, TRUE, 6);
+	gtk_widget_show_all (GTK_WIDGET (fsd->dialog));
+
+	fsd->registry = g_object_ref (registry);
+	fsd->source = g_object_ref (source);
+	fsd->ews_store = g_object_ref (ews_store);
+	fsd->ews_settings = CAMEL_EWS_SETTINGS (camel_service_ref_settings (CAMEL_SERVICE (ews_store)));
+	fsd->cancellable = g_object_ref (cancellable);
+
+	thread = g_thread_new (NULL, ews_settings_get_folder_sizes_thread, fsd);
+	g_thread_unref (thread);
+
+	/* Start the dialog */
+	gtk_widget_show (GTK_WIDGET (dialog));
+}
+
 static gboolean
 get_ews_store_from_folder_tree (EShellView *shell_view,
                                 gchar **pfolder_path,
@@ -470,6 +717,34 @@ get_ews_store_from_folder_tree (EShellView *shell_view,
 	g_object_unref (folder_tree);
 
 	return found;
+}
+
+static void
+action_folder_sizes_cb (GtkAction *action,
+			EShellView *shell_view)
+{
+	GtkWindow *parent;
+	CamelSession *session;
+	CamelStore *store = NULL;
+	ESourceRegistry *registry;
+	ESource *source;
+
+	if (!get_ews_store_from_folder_tree (shell_view, NULL, &store))
+		return;
+
+	g_return_if_fail (store != NULL);
+
+	parent = GTK_WINDOW (e_shell_view_get_shell_window (shell_view));
+
+	session = camel_service_ref_session (CAMEL_SERVICE (store));
+	registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
+	source = e_source_registry_ref_source (registry, camel_service_get_uid (CAMEL_SERVICE (store)));
+
+	e_ews_config_utils_run_folder_sizes_dialog (parent, registry, source, CAMEL_EWS_STORE (store));
+
+	g_object_unref (source);
+	g_object_unref (session);
+	g_object_unref (store);
 }
 
 static void
@@ -597,6 +872,12 @@ ews_ui_enable_actions (GtkActionGroup *action_group,
 }
 
 static GtkActionEntry mail_account_context_entries[] = {
+	{ "mail-ews-folder-sizes",
+	  NULL,
+	  N_("Folder Sizes..."),
+	  NULL,
+	  NULL, /* XXX Add a tooltip! */
+	  G_CALLBACK (action_folder_sizes_cb) },
 
 	{ "mail-ews-subscribe-foreign-folder",
 	  NULL,
@@ -618,6 +899,7 @@ static GtkActionEntry mail_folder_context_entries[] = {
 static const gchar *ews_ui_mail_def =
 	"<popup name=\"mail-folder-popup\">\n"
 	"  <placeholder name=\"mail-folder-popup-actions\">\n"
+	"    <menuitem action=\"mail-ews-folder-sizes\"/>\n"
 	"    <menuitem action=\"mail-ews-subscribe-foreign-folder\"/>\n"
 	"    <menuitem action=\"mail-ews-folder-permissions\"/>\n"
 	"  </placeholder>\n"
