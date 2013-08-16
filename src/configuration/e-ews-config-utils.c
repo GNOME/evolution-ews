@@ -262,14 +262,6 @@ struct _EEwsConfigUtilsAuthenticatorClass {
 	GObjectClass parent_class;
 };
 
-static gboolean
-ews_config_utils_authenticator_get_without_password (ESourceAuthenticator *authenticator)
-{
-	EEwsConfigUtilsAuthenticator *ews_authenticator = (EEwsConfigUtilsAuthenticator *) authenticator;
-
-	return e_ews_connection_util_get_authentication_without_password (ews_authenticator->ews_settings);
-}
-
 static ESourceAuthenticationResult
 ews_config_utils_authenticator_try_password_sync (ESourceAuthenticator *auth,
                                                   const GString *password,
@@ -373,7 +365,6 @@ e_ews_config_utils_authenticator_class_init (EEwsConfigUtilsAuthenticatorClass *
 static void
 e_ews_config_utils_authenticator_authenticator_init (ESourceAuthenticatorInterface *interface)
 {
-	interface->get_without_password = ews_config_utils_authenticator_get_without_password;
 	interface->try_password_sync = ews_config_utils_authenticator_try_password_sync;
 }
 

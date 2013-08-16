@@ -3751,18 +3751,6 @@ e_book_backend_ews_dispose (GObject *object)
 	G_OBJECT_CLASS (e_book_backend_ews_parent_class)->dispose (object);
 }
 
-static gboolean
-book_backend_ews_get_without_password (ESourceAuthenticator *authenticator)
-{
-	EBookBackendEws *ews_backend;
-	CamelEwsSettings *ews_settings;
-
-	ews_backend = E_BOOK_BACKEND_EWS (authenticator);
-	ews_settings = book_backend_ews_get_collection_settings (ews_backend);
-
-	return e_ews_connection_util_get_authentication_without_password (ews_settings);
-}
-
 static ESourceAuthenticationResult
 book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
                                     const GString *password,
@@ -3845,7 +3833,6 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 static void
 e_book_backend_ews_authenticator_init (ESourceAuthenticatorInterface *interface)
 {
-	interface->get_without_password = book_backend_ews_get_without_password;
 	interface->try_password_sync = book_backend_ews_try_password_sync;
 }
 
