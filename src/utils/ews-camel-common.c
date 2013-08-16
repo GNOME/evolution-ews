@@ -33,7 +33,74 @@ struct _create_mime_msg_data {
 	CamelMimeMessage *message;
 	gint32 message_camel_flags;
 	CamelAddress *from;
+	CamelAddress *recipients;
 };
+
+static void
+filter_recipients (CamelMimeMessage *message,
+		   CamelAddress *recipients,
+		   GHashTable *recip_to,
+		   GHashTable *recip_cc,
+		   GHashTable *recip_bcc)
+{
+	CamelInternetAddress *addresses, *mime_cc, *mime_bcc;
+	gint ii, len;
+
+	g_return_if_fail (message != NULL);
+	g_return_if_fail (recipients != NULL);
+	g_return_if_fail (CAMEL_IS_INTERNET_ADDRESS (recipients));
+	g_return_if_fail (recip_to != NULL);
+	g_return_if_fail (recip_cc != NULL);
+	g_return_if_fail (recip_bcc != NULL);
+
+	mime_cc = camel_mime_message_get_recipients (message, CAMEL_RECIPIENT_TYPE_CC);
+	mime_bcc = camel_mime_message_get_recipients (message, CAMEL_RECIPIENT_TYPE_BCC);
+
+	addresses = CAMEL_INTERNET_ADDRESS (recipients);
+	len = camel_address_length (recipients);
+	for (ii = 0; ii < len; ii++) {
+		const gchar *name = NULL, *email = NULL;
+
+		if (!camel_internet_address_get (addresses, ii, &name, &email) ||
+		    !email)
+			continue;
+
+		if (mime_bcc && camel_internet_address_find_address (mime_bcc, email, NULL) != -1) {
+			g_hash_table_insert (recip_bcc, (gpointer) email, GINT_TO_POINTER (1));
+		} else if (mime_cc && camel_internet_address_find_address (mime_cc, email, NULL) != -1) {
+			g_hash_table_insert (recip_cc, (gpointer) email, GINT_TO_POINTER (1));
+		} else {
+			g_hash_table_insert (recip_to, (gpointer) email, GINT_TO_POINTER (1));
+		}
+	}
+}
+
+static void
+write_recipients (ESoapMessage *msg,
+		  const gchar *elem_name,
+		  GHashTable *recips)
+{
+	GHashTableIter iter;
+	gpointer key, value;
+
+	g_return_if_fail (msg != NULL);
+	g_return_if_fail (elem_name != NULL);
+	g_return_if_fail (recips != NULL);
+
+	if (!g_hash_table_size (recips))
+		return;
+
+	e_soap_message_start_element (msg, elem_name, NULL, NULL);
+
+	g_hash_table_iter_init (&iter, recips);
+	while (g_hash_table_iter_next (&iter, &key, &value)) {
+		e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
+		e_ews_message_write_string_parameter_with_attribute (msg, "EmailAddress", NULL, key, NULL, NULL);
+		e_soap_message_end_element (msg); /* Mailbox */
+	}
+
+	e_soap_message_end_element (msg); /* elem_name */
+}
 
 /* MAPI flags gleaned from windows header files */
 #define MAPI_MSGFLAG_READ	0x01
@@ -142,6 +209,24 @@ create_mime_message_cb (ESoapMessage *msg,
 		e_soap_message_end_element (msg); /* ExtendedProperty */
 	}
 
+	if (create_data->recipients) {
+		GHashTable *recip_to, *recip_cc, *recip_bcc;
+
+		recip_to = g_hash_table_new (camel_strcase_hash, camel_strcase_equal);
+		recip_cc = g_hash_table_new (camel_strcase_hash, camel_strcase_equal);
+		recip_bcc = g_hash_table_new (camel_strcase_hash, camel_strcase_equal);
+	
+		filter_recipients (create_data->message, create_data->recipients, recip_to, recip_cc, recip_bcc);
+
+		write_recipients (msg, "ToRecipients", recip_to);
+		write_recipients (msg, "CcRecipients", recip_cc);
+		write_recipients (msg, "BccRecipients", recip_bcc);
+
+		g_hash_table_destroy (recip_to);
+		g_hash_table_destroy (recip_cc);
+		g_hash_table_destroy (recip_bcc);
+	}
+
 	e_ews_message_write_string_parameter_with_attribute (
 			msg,
 			"IsRead",
@@ -162,6 +247,7 @@ camel_ews_utils_create_mime_message (EEwsConnection *cnc,
                                      CamelMimeMessage *message,
                                      gint32 message_camel_flags,
                                      CamelAddress *from,
+				     CamelAddress *recipients,
                                      gchar **itemid,
                                      gchar **changekey,
                                      GCancellable *cancellable,
@@ -179,6 +265,7 @@ camel_ews_utils_create_mime_message (EEwsConnection *cnc,
 	create_data->message = message;
 	create_data->message_camel_flags = message_camel_flags;
 	create_data->from = from;
+	create_data->recipients = recipients;
 
 	if (g_strcmp0 (disposition, "SendOnly") == 0 ||
 	    g_strcmp0 (disposition, "SendAndSaveCopy") == 0) {

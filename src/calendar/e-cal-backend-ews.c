@@ -2972,7 +2972,7 @@ ewscal_send_cancellation_email (ECalBackend *backend,
 	camel_medium_set_content ((CamelMedium *) message, (CamelDataWrapper *) multi);
 	g_object_unref (multi);
 
-	camel_ews_utils_create_mime_message (cnc, "SendOnly", NULL, message, 0, from, NULL, NULL, NULL, &error);
+	camel_ews_utils_create_mime_message (cnc, "SendOnly", NULL, message, 0, from, NULL, NULL, NULL, NULL, &error);
 
 	if (error) {
 		g_warning ("Failed to send cancellation email: %s", error->message);

@@ -1624,7 +1624,7 @@ ews_append_message_sync (CamelFolder *folder,
 	if (!camel_ews_utils_create_mime_message (
 		cnc, "SaveOnly", fid, message,
 		camel_message_info_flags (info),
-		from, &itemid, &changekey,
+		from, NULL, &itemid, &changekey,
 		cancellable, &local_error)) {
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
 		g_propagate_error (error, local_error);
