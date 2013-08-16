@@ -65,8 +65,16 @@ e_ews_collect_attendees (icalcomponent *comp,
 		prop = icalcomponent_get_next_property (comp, ICAL_ATTENDEE_PROPERTY)) {
 
 		str = icalproperty_get_attendee (prop);
+
+		if (!str || !*str)
+			continue;
+
 		/* figure the email address of the attendee, discard "mailto:" if it's there */
-		if (!g_ascii_strncasecmp (str, "mailto:", 7)) str = (str) + 7;
+		if (!g_ascii_strncasecmp (str, "mailto:", 7))
+			str = (str) + 7;
+
+		if (!*str)
+			continue;
 
 		/* if this attenddee is the orgenizer - dont add him/her
 		 in some cases there is no maito for email if meeting orginazer */
@@ -755,6 +763,9 @@ e_ews_collect_organizer (icalcomponent *comp)
 		org_email_address = (org) + 7;
 	else
 		org_email_address = org;
+
+	if (org_email_address && !*org_email_address)
+		org_email_address = NULL;
 
 	return org_email_address;
 }
