@@ -18,6 +18,7 @@ src/configuration/e-ews-subscribe-foreign-folder.c
 src/configuration/e-mail-config-ews-autodiscover.c
 src/configuration/e-mail-config-ews-backend.c
 src/configuration/e-mail-config-ews-delegates-page.c
+src/configuration/e-mail-config-ews-folder-sizes-page.c
 src/configuration/e-mail-config-ews-gal.c
 src/configuration/e-mail-config-ews-ooo-page.c
 src/configuration/module-ews-configuration.error.xml
