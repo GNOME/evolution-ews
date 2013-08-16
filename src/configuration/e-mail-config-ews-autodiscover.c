@@ -246,6 +246,20 @@ mail_config_ews_autodiscover_clicked (GtkButton *button)
 	mail_config_ews_autodiscover_run (autodiscover);
 }
 
+static gboolean
+mail_config_ews_autodiscover_get_without_password (ESourceAuthenticator *authenticator)
+{
+	EMailConfigEwsAutodiscover *autodiscover;
+	EMailConfigServiceBackend *backend;
+	CamelSettings *settings;
+
+	autodiscover = E_MAIL_CONFIG_EWS_AUTODISCOVER (authenticator);
+	backend = e_mail_config_ews_autodiscover_get_backend (autodiscover);
+	settings = e_mail_config_service_backend_get_settings (backend);
+
+	return e_ews_connection_util_get_authentication_without_password (CAMEL_EWS_SETTINGS (settings));
+}
+
 static ESourceAuthenticationResult
 mail_config_ews_autodiscover_try_password_sync (ESourceAuthenticator *auth,
                                                 const GString *password,
@@ -321,8 +335,8 @@ e_mail_config_ews_autodiscover_class_init (EMailConfigEwsAutodiscoverClass *clas
 static void
 e_mail_config_ews_autodiscover_authenticator_init (ESourceAuthenticatorInterface *interface)
 {
-	interface->try_password_sync =
-		mail_config_ews_autodiscover_try_password_sync;
+	interface->get_without_password = mail_config_ews_autodiscover_get_without_password;
+	interface->try_password_sync = mail_config_ews_autodiscover_try_password_sync;
 }
 
 static void

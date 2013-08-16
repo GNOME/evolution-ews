@@ -1417,6 +1417,41 @@ ews_connection_finalize (GObject *object)
 	G_OBJECT_CLASS (e_ews_connection_parent_class)->finalize (object);
 }
 
+gboolean
+e_ews_connection_util_get_authentication_without_password (CamelEwsSettings *ews_settings)
+{
+	gboolean auth_without_password;
+	gchar *auth_mechanism;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (ews_settings), FALSE);
+
+	auth_mechanism = camel_network_settings_dup_auth_mechanism (
+		CAMEL_NETWORK_SETTINGS (ews_settings));
+
+	/* the other one is currently NTLM */
+	auth_without_password = g_strcmp0 (auth_mechanism, "PLAIN") != 0;
+
+	g_free (auth_mechanism);
+
+	return auth_without_password;
+}
+
+static gboolean
+ews_connection_get_without_password (ESourceAuthenticator *authenticator)
+{
+	CamelEwsSettings *ews_settings;
+	gboolean auth_without_password;
+
+	ews_settings = e_ews_connection_ref_settings (E_EWS_CONNECTION (authenticator));
+	g_return_val_if_fail (ews_settings != NULL, FALSE);
+
+	auth_without_password = e_ews_connection_util_get_authentication_without_password (ews_settings);
+
+	g_clear_object (&ews_settings);
+
+	return auth_without_password;
+}
+
 static ESourceAuthenticationResult
 ews_connection_try_password_sync (ESourceAuthenticator *authenticator,
                                   const GString *password,
@@ -1463,6 +1498,7 @@ ews_connection_try_password_sync (ESourceAuthenticator *authenticator,
 		}
 
 		e_ews_connection_set_password (connection, NULL);
+		ews_connection_schedule_abort (connection);
 	}
 
 	return result;
@@ -1508,6 +1544,7 @@ e_ews_connection_class_init (EEwsConnectionClass *class)
 static void
 e_ews_connection_authenticator_init (ESourceAuthenticatorInterface *interface)
 {
+	interface->get_without_password = ews_connection_get_without_password;
 	interface->try_password_sync = ews_connection_try_password_sync;
 }
 
@@ -1970,7 +2007,7 @@ e_ews_connection_set_password (EEwsConnection *cnc,
 		memset (cnc->priv->password, 0, strlen (cnc->priv->password));
 
 	g_free (cnc->priv->password);
-	cnc->priv->password = g_strdup (password);
+	cnc->priv->password = g_strdup ((password && *password) ? password : NULL);
 
 	g_mutex_unlock (&cnc->priv->password_lock);
 

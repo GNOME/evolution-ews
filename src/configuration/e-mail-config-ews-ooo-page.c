@@ -800,6 +800,18 @@ mail_config_ews_ooo_page_submit_finish (EMailConfigPage *page,
 	return !g_simple_async_result_propagate_error (simple, error);
 }
 
+static gboolean
+mail_config_ews_ooo_page_get_without_password (ESourceAuthenticator *authenticator)
+{
+	EMailConfigEwsOooPage *page;
+	CamelSettings *settings;
+
+	page = E_MAIL_CONFIG_EWS_OOO_PAGE (authenticator);
+	settings = mail_config_ews_ooo_page_get_settings (page);
+
+	return e_ews_connection_util_get_authentication_without_password (CAMEL_EWS_SETTINGS (settings));
+}
+
 static ESourceAuthenticationResult
 mail_config_ews_ooo_page_try_password_sync (ESourceAuthenticator *auth,
                                             const GString *password,
@@ -929,8 +941,8 @@ e_mail_config_ews_ooo_page_interface_init (EMailConfigPageInterface *interface)
 static void
 e_mail_config_ews_ooo_page_authenticator_init (ESourceAuthenticatorInterface *interface)
 {
-	interface->try_password_sync =
-		mail_config_ews_ooo_page_try_password_sync;
+	interface->get_without_password = mail_config_ews_ooo_page_get_without_password;
+	interface->try_password_sync = mail_config_ews_ooo_page_try_password_sync;
 }
 
 static void

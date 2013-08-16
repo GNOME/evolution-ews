@@ -4367,6 +4367,18 @@ e_cal_backend_ews_finalize (GObject *object)
 	G_OBJECT_CLASS (e_cal_backend_ews_parent_class)->finalize (object);
 }
 
+static gboolean
+cal_backend_ews_get_without_password (ESourceAuthenticator *authenticator)
+{
+	ECalBackendEws *ews_backend;
+	CamelEwsSettings *ews_settings;
+
+	ews_backend = E_CAL_BACKEND_EWS (authenticator);
+	ews_settings = cal_backend_ews_get_collection_settings (ews_backend);
+
+	return e_ews_connection_util_get_authentication_without_password (ews_settings);
+}
+
 static ESourceAuthenticationResult
 cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
                                    const GString *password,
@@ -4516,6 +4528,7 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 static void
 e_cal_backend_ews_authenticator_init (ESourceAuthenticatorInterface *interface)
 {
+	interface->get_without_password = cal_backend_ews_get_without_password;
 	interface->try_password_sync = cal_backend_ews_try_password_sync;
 }
 
