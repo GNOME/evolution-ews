@@ -1,3 +1,32 @@
+Evolution-EWS 3.9.90 2013-08-19
+-------------------------------
+
+Bug Fixes:
+	Bug 654528 - Cann't forward event as iCalendar (Milan Crha)
+	Bug 660748 - Cann't save attachment in event (Milan Crha)
+	Bug 675737 - Show user's folder sizes (Punit Jain)
+	Bug 681741 - Meeting cancellation doesn't remove event from calendar
+	             (Fabiano Fidêncio)
+	Bug 699558 - Use-after-free of a cancellable during GAL update
+	             (Milan Crha)
+	Bug 704772 - Fails to properly import calendar events (Milan Crha)
+	Bug 704914 - Crash under e_ews_dump_file_attachment_from_soap_parameter
+	             (Milan Crha)
+	Bug 704940 - Crash in sync_xxx_response_cb() (Fabiano Fidêncio)
+	Bug 705118 - Double-free in ews_oof_settings_get_response_cb()
+	             (Fabiano Fidêncio)
+	Bug 705337 - OOO message not shown (David Woodhouse)
+	Bug 705617 - Failed connection hides offline data in online mode
+	             (Milan Crha)
+	Bug 705658 - Fix errors found by CLANG - Avoid assign an undefined
+	             value (Fabiano Fidêncio)
+
+Translations:
+	Nilamdyuti Goswami (as)
+	Sweta Kothari (gu)
+	Shankar Prasad (kn)
+
+
 Evolution-EWS 3.9.5 2013-07-29
 ------------------------------
 
