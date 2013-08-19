@@ -302,6 +302,9 @@ e_ews_item_dispose (GObject *object)
 		g_free (priv->task_fields);
 	}
 
+	g_slist_free_full (priv->categories, g_free);
+	priv->categories = NULL;
+
 	if (parent_class->dispose)
 		(* parent_class->dispose) (object);
 }

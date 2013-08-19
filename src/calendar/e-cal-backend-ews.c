@@ -1144,6 +1144,53 @@ convert_sensitivity_calcomp_to_xml (ESoapMessage *msg,
 }
 
 static void
+convert_categories_calcomp_to_xml (ESoapMessage *msg,
+				   ECalComponent *comp,
+				   icalcomponent *icalcomp)
+{
+	GSList *categ_list, *citer;
+
+	g_return_if_fail (msg != NULL);
+	g_return_if_fail (icalcomp != NULL);
+
+	if (comp) {
+		g_object_ref (comp);
+	} else {
+		icalcomponent *clone = icalcomponent_new_clone (icalcomp);
+
+		comp = e_cal_component_new ();
+		if (!e_cal_component_set_icalcomponent (comp, clone)) {
+			icalcomponent_free (clone);
+			g_object_unref (comp);
+
+			return;
+		}
+	}
+
+	e_cal_component_get_categories_list (comp, &categ_list);
+
+	g_object_unref (comp);
+
+	if (!categ_list)
+		return;
+
+	e_soap_message_start_element (msg, "Categories", NULL, NULL);
+
+	for (citer = categ_list; citer;  citer = g_slist_next (citer)) {
+		const gchar *category = citer->data;
+
+		if (!category || !*category)
+			continue;
+
+		e_ews_message_write_string_parameter (msg, "String", NULL, category);
+	}
+
+	e_soap_message_end_element (msg); /* Categories */
+
+	e_cal_component_free_categories_list (categ_list);
+}
+
+static void
 convert_vevent_calcomp_to_xml (ESoapMessage *msg,
                                gpointer user_data)
 {
@@ -1174,6 +1221,8 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	value = icalcomponent_get_description (icalcomp);
 	if (value)
 		e_ews_message_write_string_parameter_with_attribute (msg, "Body", NULL, value, "BodyType", "Text");
+
+	convert_categories_calcomp_to_xml (msg, comp, icalcomp);
 
 	/* set alarms */
 	has_alarms = e_cal_component_has_alarms (comp);
@@ -1261,6 +1310,8 @@ convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
 
 	e_ews_message_write_string_parameter_with_attribute (msg, "Body", NULL, icalcomponent_get_description (icalcomp), "BodyType", "Text");
 
+	convert_categories_calcomp_to_xml (msg, NULL, icalcomp);
+
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_DUE_PROPERTY);
 	if (prop) {
 		dt = icalproperty_get_due (prop);
@@ -1316,6 +1367,8 @@ convert_vjournal_calcomp_to_xml (ESoapMessage *msg,
 	if (!text || !*text)
 		text = icalcomponent_get_summary (icalcomp);
 	e_ews_message_write_string_parameter_with_attribute (msg, "Body", NULL, text, "BodyType", "Text");
+
+	convert_categories_calcomp_to_xml (msg, NULL, icalcomp);
 
 	e_soap_message_end_element (msg); /* Message */
 }
@@ -1906,6 +1959,36 @@ exit:
 }
 
 static void
+convert_component_categories_to_updatexml (ECalComponent *comp,
+					   ESoapMessage *msg,
+					   const gchar *base_elem_name)
+{
+	GSList *categ_list = NULL, *citer;
+
+	g_return_if_fail (comp != NULL);
+	g_return_if_fail (msg != NULL);
+	g_return_if_fail (base_elem_name != NULL);
+
+	e_cal_component_get_categories_list (comp, &categ_list);
+	e_ews_message_start_set_item_field (msg, "Categories", "item", base_elem_name);
+	e_soap_message_start_element (msg, "Categories", NULL, NULL);
+
+	for (citer = categ_list; citer;  citer = g_slist_next (citer)) {
+		const gchar *category = citer->data;
+
+		if (!category || !*category)
+			continue;
+
+		e_ews_message_write_string_parameter (msg, "String", NULL, category);
+	}
+
+	e_soap_message_end_element (msg); /* Categories */
+	e_ews_message_end_set_item_field (msg);
+
+	e_cal_component_free_categories_list (categ_list);
+}
+
+static void
 convert_vevent_property_to_updatexml (ESoapMessage *msg,
                                       const gchar *name,
                                       const gchar *value,
@@ -1997,6 +2080,9 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 		}
 	}
 	else convert_vevent_property_to_updatexml (msg, "ReminderIsSet", "false", "item", NULL, NULL);
+
+	/* Categories */
+	convert_component_categories_to_updatexml (modify_data->comp, msg, "CalendarItem");
 
 	/*location*/
 	value = icalcomponent_get_location (icalcomp);
@@ -2205,6 +2291,9 @@ convert_vtodo_component_to_updatexml (ESoapMessage *msg,
 		}
 	}
 
+	/* Categories */
+	convert_component_categories_to_updatexml (modify_data->comp, msg, "Task");
+
 	e_ews_message_end_item_change (msg);
 }
 
@@ -2254,6 +2343,9 @@ convert_vjournal_component_to_updatexml (ESoapMessage *msg,
 		text = icalcomponent_get_summary (icalcomp);
 
 	convert_vjournal_property_to_updatexml (msg, "Body", text, "item", "BodyType", "Text");
+
+	/* Categories */
+	convert_component_categories_to_updatexml (modify_data->comp, msg, "Message");
 
 	e_ews_message_end_item_change (msg);
 }
@@ -3533,6 +3625,9 @@ add_item_to_cache (ECalBackendEws *cbews,
 		comp = e_cal_component_new ();
 		e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (icalcomp));
 
+		/* Categories */
+		e_cal_component_set_categories_list (comp, (GSList *) e_ews_item_get_categories (item));
+
 		/*
 		 * There is no API to set/get alarm description on the server side.
 		 * However, for some reason, the alarm description has been set to "REMINDER"
@@ -3651,7 +3746,16 @@ ews_cal_sync_get_items_sync (ECalBackendEws *cbews,
 			ews_cal_sync_get_items_sync (
 				cbews, modified_occurrences,
 				"IdOnly",
-				"item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:UID calendar:Resources calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees");
+				"item:Attachments"
+				" item:HasAttachments"
+				" item:MimeContent"
+				" item:Categories"
+				" calendar:TimeZone"
+				" calendar:UID"
+				" calendar:Resources"
+				" calendar:ModifiedOccurrences"
+				" calendar:RequiredAttendees"
+				" calendar:OptionalAttendees");
 		}
 	}
 
@@ -3723,7 +3827,16 @@ cal_backend_ews_process_folder_items (ECalBackendEws *cbews,
 			cbews,
 			cal_item_ids,
 			"IdOnly",
-			"item:Attachments item:HasAttachments item:MimeContent calendar:TimeZone calendar:UID calendar:Resources calendar:ModifiedOccurrences calendar:RequiredAttendees calendar:OptionalAttendees");
+			"item:Attachments"
+			" item:Categories"
+			" item:HasAttachments"
+			" item:MimeContent"
+			" calendar:TimeZone"
+			" calendar:UID"
+			" calendar:Resources"
+			" calendar:ModifiedOccurrences"
+			" calendar:RequiredAttendees"
+			" calendar:OptionalAttendees");
 	}
 
 	if (task_memo_item_ids) {
