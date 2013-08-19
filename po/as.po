@@ -4,8 +4,8 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2013-07-09 07:52+0000\n"
-"PO-Revision-Date: 2013-08-01 18:39+0530\n"
+"POT-Creation-Date: 2013-08-16 23:29+0000\n"
+"PO-Revision-Date: 2013-08-19 16:57+0530\n"
 "Last-Translator: Nilamdyuti Goswami <ngoswami@redhat.com>\n"
 "Language-Team: American English <kde-i18n-doc@kde.org>\n"
 "Language: as\n"
@@ -15,54 +15,54 @@ msgstr ""
 "X-Generator: Lokalize 1.5\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-#: ../src/addressbook/e-book-backend-ews.c:1413
+#: ../src/addressbook/e-book-backend-ews.c:1421
 msgid "The backend does not support bulk additions"
 msgstr "বেকএণ্ডে বৃহত সংযোজন সমৰ্থন নকৰে"
 
-#: ../src/addressbook/e-book-backend-ews.c:1452
-#: ../src/addressbook/e-book-backend-ews.c:1796
+#: ../src/addressbook/e-book-backend-ews.c:1460
+#: ../src/addressbook/e-book-backend-ews.c:1804
 msgid ""
 "Cannot save contact list, it's only supported on EWS Server 2010 or later"
 msgstr ""
 "পৰিচয় তালিকা সংৰক্ষণ কৰিব নোৱাৰি, ই কেৱল EWS চাৰ্ভাৰ 2010 অথবা তাৰ পিছত "
 "সমৰ্থিত"
 
-#: ../src/addressbook/e-book-backend-ews.c:1755
+#: ../src/addressbook/e-book-backend-ews.c:1763
 msgid "The backend does not support bulk modifications"
 msgstr "বেকএণ্ডে বৃহত পৰিৱৰ্তন সমৰ্থন নকৰে"
 
-#: ../src/addressbook/e-book-backend-ews.c:1955
+#: ../src/addressbook/e-book-backend-ews.c:1963
 msgid "Wait till syncing is done"
 msgstr "সংমিহলি সম্পূৰ্ণ হোৱালৈ অপেক্ষা কৰক"
 
-#: ../src/addressbook/e-book-backend-ews.c:2364
+#: ../src/addressbook/e-book-backend-ews.c:2372
 #, c-format
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr "%s %d%% ত পৰিচয়সমূহ ডাউনল'ড কৰা সম্পূৰ্ণ..."
 
-#: ../src/addressbook/e-book-backend-ews.c:3032
+#: ../src/addressbook/e-book-backend-ews.c:3050
 msgid "Syncing contacts..."
 msgstr "পৰিচয়সমূহ সংমিহলি কৰা হৈছে..."
 
 # translation auto-copied from project evolution-exchange, version el6, document evolution-exchange-2.32
-#: ../src/addressbook/e-book-backend-ews.c:3251
+#: ../src/addressbook/e-book-backend-ews.c:3281
 #: ../src/configuration/e-ews-search-user.c:365
 msgid "Searching..."
 msgstr "অনুসন্ধান কৰা হৈছে..."
 
-#: ../src/calendar/e-cal-backend-ews.c:1054
+#: ../src/calendar/e-cal-backend-ews.c:1069
 msgid "EWS does not support bulk removals"
 msgstr "EWS এ একাধিক অপসাৰণ সমৰ্থন নকৰে"
 
-#: ../src/calendar/e-cal-backend-ews.c:1504
+#: ../src/calendar/e-cal-backend-ews.c:1519
 msgid "Unknown error"
 msgstr "অজ্ঞাত ত্ৰুটি"
 
-#: ../src/calendar/e-cal-backend-ews.c:1705
+#: ../src/calendar/e-cal-backend-ews.c:1720
 msgid "EWS does not support bulk additions"
 msgstr "EWS এ একাধিক সংযোজন সমৰ্থন নকৰে"
 
-#: ../src/calendar/e-cal-backend-ews.c:2288
+#: ../src/calendar/e-cal-backend-ews.c:2303
 msgid "EWS does not support bulk modifications"
 msgstr "EWS এ একাধিক পৰিবৰ্তন সমৰ্থন নকৰে"
 
@@ -81,29 +81,29 @@ msgstr "মাইমসমলৰ পৰা বিশ্লেষক সৃজন
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "সভা অনুৰোধ মাইমসমল বিশ্লেষণ কৰিবলে অক্ষম!"
 
-#: ../src/camel/camel-ews-folder.c:346
+#: ../src/camel/camel-ews-folder.c:344
 #, c-format
 msgid "Unable to create cache file"
 msgstr "ক্যাশ ফাইল সৃষ্টি কৰিবলে অক্ষম"
 
 # translation auto-copied from project evolution-data-server, version el6, document evolution-data-server-2.32
-#: ../src/camel/camel-ews-folder.c:451 ../src/camel/camel-ews-folder.c:531
+#: ../src/camel/camel-ews-folder.c:445 ../src/camel/camel-ews-folder.c:527
 #, c-format
 msgid "Unable to create cache path"
 msgstr "ক্যাশ পথ সৃষ্টি কৰিবলে অক্ষম"
 
-#: ../src/camel/camel-ews-folder.c:541
+#: ../src/camel/camel-ews-folder.c:537
 #, c-format
 msgid "Failed to move message cache file"
 msgstr "বাৰ্তা ক্যাশ ফাইল স্থানান্তৰ কৰিবলে ব্যৰ্থ"
 
 # translation auto-copied from project evolution-exchange, version el6, document evolution-exchange-2.32
-#: ../src/camel/camel-ews-folder.c:1189
+#: ../src/camel/camel-ews-folder.c:1183
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "%s ৰ সংক্ষিপ্ত বিবৰণ ল'ড কৰিবলৈ ব্যৰ্থ"
 
-#: ../src/camel/camel-ews-folder.c:1625
+#: ../src/camel/camel-ews-folder.c:1619
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr "অফলাইন অৱস্থাত ফোল্ডাৰত কাৰ্য্যসমূহ পৰিৱেশন কৰিব নোৱাৰি"
@@ -173,8 +173,8 @@ msgid ""
 "with NTLM authentication."
 msgstr ""
 "এই বিকল্পয় এটা প্লেইনটেক্সট পাছৱাৰ্ড ব্যৱহাৰ কৰি NTLM প্ৰমাণীকৰণৰ সৈতে "
-"Exchange চাৰ্ভাৰলৈ সংযোগ "
-"কৰিব।"
+"Exchange "
+"চাৰ্ভাৰলৈ সংযোগ কৰিব।"
 
 #: ../src/camel/camel-ews-provider.c:102
 msgid "Basic"
@@ -186,8 +186,8 @@ msgid ""
 "with Basic authentication."
 msgstr ""
 "এই বিকল্পয় এটা প্লেইনটেক্সট পাছৱাৰ্ড ব্যৱহাৰ কৰি মৌলিক প্ৰমাণীকৰণৰ সৈতে "
-"Exchange চাৰ্ভাৰলৈ সংযোগ "
-"কৰিব।"
+"Exchange "
+"চাৰ্ভাৰলৈ সংযোগ কৰিব।"
 
 #: ../src/camel/camel-ews-store.c:292
 #, c-format
@@ -210,14 +210,9 @@ msgstr "%s_%d"
 msgid "Checking \"Out of Office\" settings"
 msgstr "\"অফিচৰ বাহিৰ\" সংহতি নিৰীক্ষণ কৰা হৈছে"
 
-#: ../src/camel/camel-ews-store.c:835
+#: ../src/camel/camel-ews-store.c:843
 msgid "Updating foreign folder structure"
 msgstr "বিদেশী ফোল্ডাৰৰ গঠন আপডেইট কৰা হৈছে"
-
-# translation auto-copied from project evolution-data-server, version el6, document evolution-data-server-2.32
-#: ../src/camel/camel-ews-store.c:1120
-msgid "Authentication password not available"
-msgstr "প্ৰমাণীকৰণ পাছৱাৰ্ড উপলব্ধ নহয়"
 
 #: ../src/camel/camel-ews-store.c:1285
 msgid "Query for authentication types is not supported"
@@ -237,117 +232,120 @@ msgstr "অফলাইন অৱস্থাত EWS ৰাজহুৱা ফ�
 msgid "Cannot find any EWS public folders"
 msgstr "কোনো EWS ৰাজহুৱা ফোল্ডাৰ পোৱা নাযায়"
 
-#: ../src/camel/camel-ews-store.c:1827
+#: ../src/camel/camel-ews-store.c:1831
 #, c-format
 msgid "Cannot create folder '%s', folder already exists"
 msgstr "ফোল্ডাৰ '%s' সৃষ্টি কৰিব নোৱাৰি, ফোল্ডাৰ ইতিমধ্যে অস্তিত্ববান"
 
-#: ../src/camel/camel-ews-store.c:1842
+#: ../src/camel/camel-ews-store.c:1846
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "উপধায়ক ফোল্ডাৰ %s অস্তিত্ববান নহয়"
 
-#: ../src/camel/camel-ews-store.c:1852
+#: ../src/camel/camel-ews-store.c:1856
 #, c-format
 msgid ""
 "Cannot create folder under '%s', it is used for folders of other users only"
 msgstr ""
 "'%s' অন্তৰ্গত ফোল্ডাৰ সৃষ্টি কৰিব নোৱাৰি, ইয়াক কেৱল অন্য ব্যৱহাৰকাৰীৰ "
-"ফোল্ডাৰসমূহৰ বাবে ব্যৱহাৰ কৰা হয়"
+"ফোল্ডাৰসমূহৰ "
+"বাবে ব্যৱহাৰ কৰা হয়"
 
-#: ../src/camel/camel-ews-store.c:1862
+#: ../src/camel/camel-ews-store.c:1866
 #, c-format
 msgid "Cannot create folder under '%s', it is used for public folders only"
 msgstr ""
 "'%s' ৰ অন্তৰ্গত ফোল্ডাৰ সৃষ্টি কৰিব নোৱাৰি, ইয়াক কেৱল ৰাজহুৱা ফোল্ডাৰসমূহৰ "
-"বাবে ব্যৱহাৰ কৰা হয়"
+"বাবে "
+"ব্যৱহাৰ কৰা হয়"
 
-#: ../src/camel/camel-ews-store.c:1931
+#: ../src/camel/camel-ews-store.c:1935
 #, c-format
 msgid "Folder does not exist"
 msgstr "ফোল্ডাৰ অস্তিত্ববান নহয়"
 
-#: ../src/camel/camel-ews-store.c:1940
+#: ../src/camel/camel-ews-store.c:1944
 #, c-format
 msgid "Cannot remove folder '%s', it is used for folders of other users only"
 msgstr ""
 "ফোল্ডাৰ '%s' আতৰাব নোৱাৰি, ইয়াক কেৱল অন্য ব্যৱহাৰকাৰীৰ ফোল্ডাৰসমূহৰ বাবে "
-"ব্যৱহাৰ কৰা হয়"
+"ব্যৱহাৰ "
+"কৰা হয়"
 
-#: ../src/camel/camel-ews-store.c:1950
+#: ../src/camel/camel-ews-store.c:1954
 #, c-format
 msgid "Cannot remove folder '%s', it is used for public folders only"
 msgstr ""
 "ফোল্ডাৰ '%s' আতৰাব নোৱাৰি, ইয়াক কেৱল ৰাজহুৱা ফোল্ডাৰসমূহৰ বাবে ব্যৱহাৰ কৰা হয়"
 
-#: ../src/camel/camel-ews-store.c:2058
+#: ../src/camel/camel-ews-store.c:2062
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "ফোল্ডাৰ %s অস্তিত্ববান নহয়"
 
-#: ../src/camel/camel-ews-store.c:2068
+#: ../src/camel/camel-ews-store.c:2072
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "ফোল্ডাৰ %s ৰ বাবে কোনো পৰিবৰ্তন কি' ৰেকৰ্ড নাই"
 
-#: ../src/camel/camel-ews-store.c:2110
+#: ../src/camel/camel-ews-store.c:2114
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "একে সময়তে এটা ফোল্ডাৰ পুনৰ নামকৰণ আৰু স্থানান্তৰ কৰিব নোৱাৰি"
 
-#: ../src/camel/camel-ews-store.c:2146
+#: ../src/camel/camel-ews-store.c:2150
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "উপধায়ক ফোল্ডাৰ %s ৰ বাবে ফোল্ডাৰ ID বিচাৰি পোৱা নাযায়"
 
 # translation auto-copied from project evolution-exchange, version el6, document evolution-exchange-2.32
-#: ../src/camel/camel-ews-store.c:2196 ../src/camel/camel-ews-transport.c:69
+#: ../src/camel/camel-ews-store.c:2200 ../src/camel/camel-ews-transport.c:69
 #, c-format
 msgid "Exchange server %s"
 msgstr "Exchange চাৰ্ভাৰ %s"
 
-#: ../src/camel/camel-ews-store.c:2199
+#: ../src/camel/camel-ews-store.c:2203
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "%s ত %s ৰ বাবে Exchange চাৰ্ভাৰ"
 
 # translation auto-copied from project evolution-exchange, version el6, document evolution-exchange-2.32
-#: ../src/camel/camel-ews-store.c:2243
+#: ../src/camel/camel-ews-store.c:2247
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "আবৰ্জনা ফোল্ডাৰ অৱস্থিত কৰিব নোৱাৰি"
 
 # translation auto-copied from project evolution-exchange, version el6, document evolution-exchange-2.32
-#: ../src/camel/camel-ews-store.c:2303
+#: ../src/camel/camel-ews-store.c:2307
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "আবৰ্জনা ফোল্ডাৰ অৱস্থিত কৰিব নোৱাৰি"
 
-#: ../src/camel/camel-ews-store.c:2493
+#: ../src/camel/camel-ews-store.c:2497
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "অফলাইন অৱস্থাত EWS ফোল্ডাৰসমূহ স্বাক্ষৰ কৰিব নোৱাৰি"
 
-#: ../src/camel/camel-ews-store.c:2516
+#: ../src/camel/camel-ews-store.c:2520
 #, c-format
 msgid "Cannot subscribe folder '%s', no public folder available"
 msgstr "ফোল্ডাৰ '%s' স্বাক্ষৰ কৰিব নোৱাৰি, কোনো ৰাজহুৱা ফোল্ডাৰ উপলব্ধ নহয়"
 
-#: ../src/camel/camel-ews-store.c:2526
+#: ../src/camel/camel-ews-store.c:2530
 #, c-format
 msgid "Cannot subscribe folder '%s', folder not found"
 msgstr "ফোল্ডাৰ '%s' স্বাক্ষৰ কৰিব নোৱাৰি, ফোল্ডাৰ পোৱা নগল"
 
-#: ../src/camel/camel-ews-store.c:2617
+#: ../src/camel/camel-ews-store.c:2621
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "অফলাইন অৱস্থাত EWS ফোল্ডাৰসমূহ অস্বাক্ষৰ কৰিব নোৱাৰি"
 
 # translation auto-copied from project evolution-data-server, version el6, document evolution-data-server-2.32
-#: ../src/camel/camel-ews-store.c:2734
+#: ../src/camel/camel-ews-store.c:2738
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "এই কৰ্ম সমাপ্ত কৰাৰ বাবে অন-লাইন অৱস্থাত থকা আবশ্যক"
 
-#: ../src/camel/camel-ews-store.c:2778
+#: ../src/camel/camel-ews-store.c:2782
 msgid "Unsetting the \"Out of Office\" status"
 msgstr "\"অফিচৰ বাহিৰ\" অৱস্থা অসংহিত কৰিব নোৱাৰি"
 
@@ -398,40 +396,74 @@ msgstr ""
 msgid "Data source '%s' does not represent an Exchange Web Services folder"
 msgstr "তথ্য উৎস '%s' এ এটাExchange ৱেব সেৱাসমূহ ফোল্ডাৰ প্ৰতিনিদ্ধিত্ব নকৰে"
 
-#: ../src/configuration/e-ews-config-utils.c:516
+#: ../src/configuration/e-ews-config-utils.c:474
+#| msgid "Folder ID:"
+msgid "Folder"
+msgstr "ফোল্ডাৰ"
+
+#: ../src/configuration/e-ews-config-utils.c:480
+msgid "Size"
+msgstr "আকাৰ"
+
+#: ../src/configuration/e-ews-config-utils.c:506
+#: ../src/configuration/e-ews-config-utils.c:511
+msgid "Unable to retrieve folder size information"
+msgstr "ফোল্ডাৰ আকাৰ তথ্য উদ্ধাৰ কৰিব নোৱাৰি"
+
+#: ../src/configuration/e-ews-config-utils.c:621
+#| msgctxt "Permissions"
+#| msgid "Folder visible"
+msgid "Folder Sizes"
+msgstr "ফোল্ডাৰৰ আকাৰবোৰ"
+
+#: ../src/configuration/e-ews-config-utils.c:624
+msgid "_Close"
+msgstr "বন্ধ কৰক (_C)"
+
+#: ../src/configuration/e-ews-config-utils.c:638
+msgid "Fetching folder list…"
+msgstr "ফোল্ডাৰৰ তালিকা প্ৰাপ্ত কৰা হৈছে…"
+
+#: ../src/configuration/e-ews-config-utils.c:791
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr "ফোল্ডাৰ '%s' ৰ অনুমতিসমূহ সম্পাদন কৰিব নোৱাৰি, অন্য ফোল্ডাৰ বাছক।"
 
-#: ../src/configuration/e-ews-config-utils.c:594
+#: ../src/configuration/e-ews-config-utils.c:868
+#| msgctxt "Permissions"
+#| msgid "Folder visible"
+msgid "Folder Sizes..."
+msgstr "ফোল্ডাৰৰ আকাৰবোৰ..."
+
+#: ../src/configuration/e-ews-config-utils.c:875
 msgid "Subscribe to folder of other user..."
 msgstr "অন্য ব্যৱহাৰকাৰীৰ ফোল্ডাৰলে স্বাক্ষৰ কৰক..."
 
-#: ../src/configuration/e-ews-config-utils.c:603
 #: ../src/configuration/e-ews-config-utils.c:884
-#: ../src/configuration/e-ews-config-utils.c:915
-#: ../src/configuration/e-ews-config-utils.c:946
-#: ../src/configuration/e-ews-config-utils.c:977
+#: ../src/configuration/e-ews-config-utils.c:1166
+#: ../src/configuration/e-ews-config-utils.c:1197
+#: ../src/configuration/e-ews-config-utils.c:1228
+#: ../src/configuration/e-ews-config-utils.c:1259
 msgid "Permissions..."
 msgstr "অনুমতিসমূহ..."
 
-#: ../src/configuration/e-ews-config-utils.c:605
+#: ../src/configuration/e-ews-config-utils.c:886
 msgid "Edit EWS folder permissions"
 msgstr "EWS ফোল্ডাৰৰ অনুমতিসমূহ সম্পাদন কৰক"
 
-#: ../src/configuration/e-ews-config-utils.c:886
+#: ../src/configuration/e-ews-config-utils.c:1168
 msgid "Edit EWS calendar permissions"
 msgstr "EWS কেলেন্ডাৰ অনুমতিসমূহ সম্পাদন কৰক"
 
-#: ../src/configuration/e-ews-config-utils.c:917
+#: ../src/configuration/e-ews-config-utils.c:1199
 msgid "Edit EWS tasks permissions"
 msgstr "EWS কাৰ্য্য অনুমতিসমূহ সম্পাদন কৰক"
 
-#: ../src/configuration/e-ews-config-utils.c:948
+#: ../src/configuration/e-ews-config-utils.c:1230
 msgid "Edit EWS memos permissions"
 msgstr "EWS মেমো অনুমতিসমূহ সম্পাদন কৰক"
 
-#: ../src/configuration/e-ews-config-utils.c:979
+#: ../src/configuration/e-ews-config-utils.c:1261
 msgid "Edit EWS contacts permissions"
 msgstr "EWS পৰিচয়সমূহৰ অনুমতিসমূহ সম্পাদন কৰক"
 
@@ -693,7 +725,7 @@ msgid "_Search:"
 msgstr "সন্ধান কৰক (_S):"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
-#: ../src/server/e-ews-folder.c:631
+#: ../src/server/e-ews-folder.c:657
 #, c-format
 msgid "Cannot add folder, folder already exists as '%s'"
 msgstr "ফোল্ডাৰ যোগ কৰিব নোৱাৰি, ফোল্ডাৰ ইতিমধ্যে '%s' ৰূপে অস্তিত্ববান"
@@ -729,7 +761,8 @@ msgid ""
 "permission to access it."
 msgstr ""
 "ফোল্ডাৰ '%s' পোৱা নগল। হয় ই অস্তিত্ববান নহয় অথবা আপোনাৰ ওচৰত ইয়াক অভিগম "
-"কৰিবলে অনুমতি নাই।"
+"কৰিবলে "
+"অনুমতি নাই।"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:373
 msgid "Cannot add folder, cannot determine folder's type"
@@ -777,7 +810,8 @@ msgstr "কাৰ্য্যসমূহ"
 msgid "Testing availability of folder '%s' of user '%s', please wait..."
 msgstr ""
 "ব্যৱহাৰকাৰী '%s' ৰ ফোল্ডাৰ '%s' ৰ উপলব্ধতা পৰিক্ষা কৰা হৈছে, অনুগ্ৰহ কৰি "
-"অপেক্ষা কৰক..."
+"অপেক্ষা "
+"কৰক..."
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:614
 msgid "Subscribe to folder of other EWS user..."
@@ -915,12 +949,12 @@ msgid ""
 "folder, click Permissions and change the options there."
 msgstr ""
 "প্ৰতিনিধিসকলে আপোনাৰ হৈ বস্তুবোৰ পঠাব পাৰিব, সভাৰ অনুৰোধ সৃষ্টি কৰা আৰু "
-"প্ৰতিক্ৰিয়া কৰা "
-"অন্তৰ্ভুক্ত কৰাকৈ। যদি আপুনি কাৰোবাৰ-হৈ অনুমতি নিদিয়াকৈ ফোল্ডাৰ অনুমতিসমূহ "
-"প্ৰদান কৰিব বিচাৰে, "
-"এই ডাইলগ বাকচ বন্ধ কৰক, ফোল্ডাৰত ৰাইট ক্লিক কৰক, অনুমতিসমূহত ক্লিক কৰক আৰু "
-"বিকল্পসমূহ তাত "
-"পৰিবৰ্তন কৰক।"
+"প্ৰতিক্ৰিয়া "
+"কৰা অন্তৰ্ভুক্ত কৰাকৈ। যদি আপুনি কাৰোবাৰ-হৈ অনুমতি নিদিয়াকৈ ফোল্ডাৰ "
+"অনুমতিসমূহ প্ৰদান "
+"কৰিব বিচাৰে, এই ডাইলগ বাকচ বন্ধ কৰক, ফোল্ডাৰত ৰাইট ক্লিক কৰক, অনুমতিসমূহত "
+"ক্লিক "
+"কৰক আৰু বিকল্পসমূহ তাত পৰিবৰ্তন কৰক।"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1181
 msgid ""
@@ -928,7 +962,8 @@ msgid ""
 "where I am the organizer to:"
 msgstr ""
 "মোলৈ পঠোৱা সভাৰ অনুৰোধসমূহ সভাৰ অনুৰোধসমূহ য'ত মৈ সংঘটক তাৰ প্ৰতিক্ৰিয়াবোৰ "
-"চিহ্নিত ব্যক্তিলৈ প্ৰেৰণ কৰক:"
+"চিহ্নিত "
+"ব্যক্তিলৈ প্ৰেৰণ কৰক:"
 
 #. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1190
@@ -937,7 +972,8 @@ msgid ""
 "and responses to me (recommended)"
 msgstr ""
 "কেৱল মোৰ প্ৰতিনিধিসকল, কিন্তু সভাৰ অনুৰোধসমূহ আৰু মোলৈ প্ৰতিক্ৰিয়াসমূহৰ এটা "
-"কপি পঠাওক (উপদেশিত) (_s)"
+"কপি পঠাওক "
+"(উপদেশিত) (_s)"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1197
 msgid "My d_elegates only"
@@ -950,6 +986,22 @@ msgstr "মোৰ প্ৰতিনিধিসকল আৰু মই (_n)"
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1713
 msgid "Retrieving \"Delegates\" settings"
 msgstr "\"প্ৰতিনিধিসকল\"  সংহতিসমূহ উদ্ধাৰ কৰা হৈছে"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:195
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:256
+#| msgid "GAL settings"
+msgid "EWS Settings"
+msgstr "EWS সংহতিসমূহ"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:201
+msgid "View the size of all Exchange folders"
+msgstr "সকলো Exchange ফোল্ডাৰৰ আকাৰ চাওক"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:205
+#| msgctxt "Permissions"
+#| msgid "Folder visible"
+msgid "Folder _Sizes"
+msgstr "ফোল্ডাৰৰ আকাৰবোৰ (_S)"
 
 #: ../src/configuration/e-mail-config-ews-gal.c:221
 msgid "Locating offline address books"
@@ -978,8 +1030,8 @@ msgid ""
 "external person who sends a mail to you."
 msgstr ""
 "তলৰ ধাৰ্য্যত বাৰ্তাসমূহ আপোনালৈ এটা মেইল পঠিওৱা প্ৰতিজন ভিতৰত আৰু বাহিৰ "
-"ব্যক্তিলৈ স্বচালিতভাৱে "
-"পঠোৱা হ'ব।"
+"ব্যক্তিলৈ "
+"স্বচালিতভাৱে পঠোৱা হ'ব।"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:468
 msgid "Do _not send Out of Office replies"
@@ -1072,68 +1124,72 @@ msgstr "প্ৰমাণীকৰণ ব্যৰ্থ"
 msgid "No response: %s"
 msgstr "কোনো প্ৰতিক্ৰিয়া নাই: %s"
 
-#: ../src/server/e-ews-connection.c:2090
+#: ../src/server/e-ews-connection.c:2126
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "স্বখোজ প্ৰতিক্ৰিয়া XML বিশ্লেষণ কৰিবলে ব্যৰ্থ"
 
-#: ../src/server/e-ews-connection.c:2097
+#: ../src/server/e-ews-connection.c:2133
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "<Autodiscover> উপাদান সন্ধান কৰিবলে ব্যৰ্থ"
 
-#: ../src/server/e-ews-connection.c:2108
+#: ../src/server/e-ews-connection.c:2144
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "<Response> উপাদান বিচাৰি পাবলে ব্যৰ্থ"
 
-#: ../src/server/e-ews-connection.c:2119
+#: ../src/server/e-ews-connection.c:2155
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "<Account> উপাদান সন্ধান কৰিবলে ব্যৰ্থ"
 
-#: ../src/server/e-ews-connection.c:2138
+#: ../src/server/e-ews-connection.c:2174
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr "স্বখোজ প্ৰতিক্ৰিয়াত <ASUrl> আৰু <OABUrl> সন্ধান কৰিবলে ব্যৰ্থ"
 
-#: ../src/server/e-ews-connection.c:2220
+#: ../src/server/e-ews-connection.c:2256
 msgid "URL cannot be NULL"
 msgstr "URL NULL হ'ব নোৱাৰিব"
 
-#: ../src/server/e-ews-connection.c:2228
+#: ../src/server/e-ews-connection.c:2264
 #, c-format
 msgid "URL '%s' is not valid"
 msgstr "URL '%s' বৈধ নহয়"
 
-#: ../src/server/e-ews-connection.c:2330
+#: ../src/server/e-ews-connection.c:2364
 msgid "Email address is missing a domain part"
 msgstr "ইমেইল ঠিকনাত এটা ডমেইন অংশ নাই"
 
-#: ../src/server/e-ews-connection.c:2657
+#: ../src/server/e-ews-connection.c:2686
 msgid "Failed to parse oab XML"
 msgstr "oab XML বিশ্লেষণ কৰিবলে ব্যৰ্থ"
 
-#: ../src/server/e-ews-connection.c:2665
+#: ../src/server/e-ews-connection.c:2694
 msgid "Failed to find <OAB> element\n"
 msgstr "<OAB> উপাদান সন্ধান কৰিবলে ব্যৰ্থ\n"
 
-#: ../src/server/e-ews-connection.c:3908
+#: ../src/server/e-ews-connection.c:3940
 msgid "No items found"
 msgstr "কোনো বস্তু পোৱা নগল"
 
-#: ../src/server/e-ews-folder.c:586
+#: ../src/server/e-ews-folder.c:612
 msgid "Cannot add folder, unsupported folder type"
 msgstr "ফোল্ডাৰ যোগ কৰিব পৰা নাযায়, অসমৰ্থিত ফোল্ডাৰ ধৰণ"
 
-#: ../src/server/e-ews-folder.c:591
+#: ../src/server/e-ews-folder.c:617
 msgid "Cannot add folder, master source not found"
 msgstr "ফোল্ডাৰ যোগ কৰিব নোৱাৰি, মাস্টাৰ উৎস পোৱা নগল"
 
-#: ../src/utils/ews-camel-common.c:187
+#: ../src/utils/ews-camel-common.c:308
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "নতুন বাৰ্তাৰ বাবে return ID ৰ কাৰণে CreateItem  কল ব্যৰ্থ হল"
+
+# translation auto-copied from project evolution-data-server, version el6, document evolution-data-server-2.32
+#~ msgid "Authentication password not available"
+#~ msgstr "প্ৰমাণীকৰণ পাছৱাৰ্ড উপলব্ধ নহয়"
 
 # translation auto-copied from project evolution, version el6, document evolution-2.32
 #~ msgid "Enter Password for %s"
@@ -1147,9 +1203,6 @@ msgstr "নতুন বাৰ্তাৰ বাবে return ID ৰ কাৰ�
 
 #~ msgid "Fetching..."
 #~ msgstr "প্ৰাপ্ত কৰা হৈছে..."
-
-#~ msgid "GAL settings"
-#~ msgstr "GAL সংহতিসমূহ"
 
 #~ msgid "Exchange Web Services Plugin"
 #~ msgstr "ৱেব সেৱাসমূহ অদল বদল প্লাগিন"
