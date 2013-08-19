@@ -1,7 +1,6 @@
 # Czech translation for evolution-ews.
 # Copyright (C) 2011 evolution-ews's COPYRIGHT HOLDER
 # This file is distributed under the same license as the evolution-ews package.
-#
 # Marek Černocký <marek@manet.cz>, 2011, 2012, 2013.
 #
 msgid ""
@@ -9,8 +8,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2013-05-19 20:09+0000\n"
-"PO-Revision-Date: 2013-05-23 19:08+0200\n"
+"POT-Creation-Date: 2013-08-16 23:29+0000\n"
+"PO-Revision-Date: 2013-08-19 14:10+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: Czech <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -20,53 +19,53 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Gtranslator 2.91.6\n"
 
-#: ../src/addressbook/e-book-backend-ews.c:1405
+#: ../src/addressbook/e-book-backend-ews.c:1421
 msgid "The backend does not support bulk additions"
 msgstr "Serverová část nepodporuje hromadné přidávání"
 
-#: ../src/addressbook/e-book-backend-ews.c:1444
-#: ../src/addressbook/e-book-backend-ews.c:1787
+#: ../src/addressbook/e-book-backend-ews.c:1460
+#: ../src/addressbook/e-book-backend-ews.c:1804
 msgid ""
 "Cannot save contact list, it's only supported on EWS Server 2010 or later"
 msgstr ""
 "Nelze uložit seznam kontaktů, je to podporováno jen na EWS Server 2010 nebo "
 "novějším"
 
-#: ../src/addressbook/e-book-backend-ews.c:1746
+#: ../src/addressbook/e-book-backend-ews.c:1763
 msgid "The backend does not support bulk modifications"
 msgstr "Serverová část nepodporuje hromadné změny"
 
-#: ../src/addressbook/e-book-backend-ews.c:1946
+#: ../src/addressbook/e-book-backend-ews.c:1963
 msgid "Wait till syncing is done"
 msgstr "Vyčkejte, než se dokončí synchronizace"
 
-#: ../src/addressbook/e-book-backend-ews.c:2293
+#: ../src/addressbook/e-book-backend-ews.c:2372
 #, c-format
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr "Stahování kontaktů v %s %d%% dokončeno…"
 
-#: ../src/addressbook/e-book-backend-ews.c:2945
+#: ../src/addressbook/e-book-backend-ews.c:3050
 msgid "Syncing contacts..."
 msgstr "Synchronizují se kontakty…"
 
-#: ../src/addressbook/e-book-backend-ews.c:3166
-#: ../src/configuration/e-ews-search-user.c:364
+#: ../src/addressbook/e-book-backend-ews.c:3281
+#: ../src/configuration/e-ews-search-user.c:365
 msgid "Searching..."
 msgstr "Vyhledává se…"
 
-#: ../src/calendar/e-cal-backend-ews.c:1054
+#: ../src/calendar/e-cal-backend-ews.c:1069
 msgid "EWS does not support bulk removals"
 msgstr "EWS nepodporuje hromadné odstraňování"
 
-#: ../src/calendar/e-cal-backend-ews.c:1504
+#: ../src/calendar/e-cal-backend-ews.c:1519
 msgid "Unknown error"
 msgstr "Neznámá chyba"
 
-#: ../src/calendar/e-cal-backend-ews.c:1705
+#: ../src/calendar/e-cal-backend-ews.c:1720
 msgid "EWS does not support bulk additions"
 msgstr "EWS nepodporuje hromadné přidávání"
 
-#: ../src/calendar/e-cal-backend-ews.c:2288
+#: ../src/calendar/e-cal-backend-ews.c:2303
 msgid "EWS does not support bulk modifications"
 msgstr "EWS nepodporuje hromadné změny"
 
@@ -85,83 +84,83 @@ msgstr "Nelze vygenerovat analyzátor z obsahu MIME!"
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Nelze analyzovat uvítací požadavek z obsahu MIME!"
 
-#: ../src/camel/camel-ews-folder.c:346
+#: ../src/camel/camel-ews-folder.c:344
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Nelze vytvořit soubor pro mezipaměť"
 
-#: ../src/camel/camel-ews-folder.c:451 ../src/camel/camel-ews-folder.c:531
+#: ../src/camel/camel-ews-folder.c:445 ../src/camel/camel-ews-folder.c:527
 #, c-format
 msgid "Unable to create cache path"
 msgstr "Nelze vytvořit cestu pro mezipaměť"
 
-#: ../src/camel/camel-ews-folder.c:541
+#: ../src/camel/camel-ews-folder.c:537
 #, c-format
 msgid "Failed to move message cache file"
 msgstr "Nelze přesunout soubor s mezipamětí zpráv"
 
-#: ../src/camel/camel-ews-folder.c:1189
+#: ../src/camel/camel-ews-folder.c:1183
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nelze získat přehled pro složku %s"
 
-#: ../src/camel/camel-ews-folder.c:1625
+#: ../src/camel/camel-ews-folder.c:1619
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr "Akci na složce nelze provádět v režimu off-line"
 
-#: ../src/camel/camel-ews-provider.c:48
+#: ../src/camel/camel-ews-provider.c:47
 msgid "Checking for new mail"
 msgstr "Kontrola nové pošty"
 
-#: ../src/camel/camel-ews-provider.c:50
+#: ../src/camel/camel-ews-provider.c:49
 msgid "C_heck for new messages in all folders"
 msgstr "Kontrolovat _nové zprávy ve všech složkách"
 
-#: ../src/camel/camel-ews-provider.c:53
+#: ../src/camel/camel-ews-provider.c:52
 msgid "Options"
 msgstr "Volby"
 
-#: ../src/camel/camel-ews-provider.c:55
+#: ../src/camel/camel-ews-provider.c:54
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "Pro nové zprávy na tomto serveru použív_at filtry"
 
-#: ../src/camel/camel-ews-provider.c:57
+#: ../src/camel/camel-ews-provider.c:56
 msgid "Check new messages for _Junk contents"
 msgstr "Kontrolovat nové zprávy, zda ne_jsou nevyžádané"
 
-#: ../src/camel/camel-ews-provider.c:59
+#: ../src/camel/camel-ews-provider.c:58
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "Nevyžádané zprávy kontrolovat pouze v doručené poště (IN_BOX)"
 
-#: ../src/camel/camel-ews-provider.c:61
+#: ../src/camel/camel-ews-provider.c:60
 msgid "Automatically synchroni_ze remote mail locally"
 msgstr "Automaticky synchronizovat vzdálenou poštu na místní počítač"
 
-#: ../src/camel/camel-ews-provider.c:64
+#: ../src/camel/camel-ews-provider.c:63
 msgid "Connection"
 msgstr "Připojení"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/camel/camel-ews-provider.c:68
+#: ../src/camel/camel-ews-provider.c:67
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "Časový limi_t připojení (v sekundách) pro %s"
 
-#: ../src/camel/camel-ews-provider.c:76
+#: ../src/camel/camel-ews-provider.c:75
 msgid "Exchange Web Services"
 msgstr "Webové služby Exchange"
 
-#: ../src/camel/camel-ews-provider.c:78
+#: ../src/camel/camel-ews-provider.c:77
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Pro přístup k serverům Exchange pomocí webových služeb"
 
-#: ../src/camel/camel-ews-provider.c:93
+#: ../src/camel/camel-ews-provider.c:92
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/camel/camel-ews-provider.c:95
+#: ../src/camel/camel-ews-provider.c:94
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -169,11 +168,11 @@ msgstr ""
 "Tato volba způsobí připojování k serveru Exchange pomocí hesla v textové "
 "podobě a autentizací NTLM"
 
-#: ../src/camel/camel-ews-provider.c:103
+#: ../src/camel/camel-ews-provider.c:102
 msgid "Basic"
 msgstr "Základní"
 
-#: ../src/camel/camel-ews-provider.c:105
+#: ../src/camel/camel-ews-provider.c:104
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -202,13 +201,9 @@ msgstr "%s_%d"
 msgid "Checking \"Out of Office\" settings"
 msgstr "Kontroluje se nastavení „Mimo kancelář“"
 
-#: ../src/camel/camel-ews-store.c:835
+#: ../src/camel/camel-ews-store.c:843
 msgid "Updating foreign folder structure"
 msgstr "Aktualizuje se struktura vzdálených složek"
-
-#: ../src/camel/camel-ews-store.c:1120
-msgid "Authentication password not available"
-msgstr "Autentizační heslo není k dispozici"
 
 #: ../src/camel/camel-ews-store.c:1285
 msgid "Query for authentication types is not supported"
@@ -227,17 +222,17 @@ msgstr "V režimu off-line nelze vypsat žádné veřejné složky EWS"
 msgid "Cannot find any EWS public folders"
 msgstr "Nelze najít žádné veřejné složky EWS"
 
-#: ../src/camel/camel-ews-store.c:1827
+#: ../src/camel/camel-ews-store.c:1831
 #, c-format
 msgid "Cannot create folder '%s', folder already exists"
 msgstr "Nelze vytvořit složku „%s“, složka již existuje"
 
-#: ../src/camel/camel-ews-store.c:1842
+#: ../src/camel/camel-ews-store.c:1846
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Rodičovská složka %s neexistuje"
 
-#: ../src/camel/camel-ews-store.c:1852
+#: ../src/camel/camel-ews-store.c:1856
 #, c-format
 msgid ""
 "Cannot create folder under '%s', it is used for folders of other users only"
@@ -245,95 +240,95 @@ msgstr ""
 "Nelze vytvořit složku pod složkou „%s“, která se používá pouze pro složky "
 "ostatních uživatelů"
 
-#: ../src/camel/camel-ews-store.c:1862
+#: ../src/camel/camel-ews-store.c:1866
 #, c-format
 msgid "Cannot create folder under '%s', it is used for public folders only"
 msgstr ""
 "Nelze vytvořit složku pod složkou „%s“, která se používá pouze pro veřejné "
 "složky"
 
-#: ../src/camel/camel-ews-store.c:1931
+#: ../src/camel/camel-ews-store.c:1935
 #, c-format
 msgid "Folder does not exist"
 msgstr "Složka neexistuje"
 
-#: ../src/camel/camel-ews-store.c:1940
+#: ../src/camel/camel-ews-store.c:1944
 #, c-format
 msgid "Cannot remove folder '%s', it is used for folders of other users only"
 msgstr ""
 "Nelze odstranit složku „%s“, která se používá pouze pro složky ostatních "
 "uživatelů"
 
-#: ../src/camel/camel-ews-store.c:1950
+#: ../src/camel/camel-ews-store.c:1954
 #, c-format
 msgid "Cannot remove folder '%s', it is used for public folders only"
 msgstr "Nelze odstranit složku „%s“, která se používá pouze pro veřejné složky"
 
-#: ../src/camel/camel-ews-store.c:2058
+#: ../src/camel/camel-ews-store.c:2062
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Složka %s neexistuje"
 
-#: ../src/camel/camel-ews-store.c:2068
+#: ../src/camel/camel-ews-store.c:2072
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Neexistuje záznam s klíčem o změně (ChangeKey) pro složku %s"
 
-#: ../src/camel/camel-ews-store.c:2110
+#: ../src/camel/camel-ews-store.c:2114
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Složku nelze naráz přejmenovat i přesunout"
 
-#: ../src/camel/camel-ews-store.c:2146
+#: ../src/camel/camel-ews-store.c:2150
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nelze najít ID složky pro rodičovskou složku %s"
 
-#: ../src/camel/camel-ews-store.c:2196 ../src/camel/camel-ews-transport.c:69
+#: ../src/camel/camel-ews-store.c:2200 ../src/camel/camel-ews-transport.c:69
 #, c-format
 msgid "Exchange server %s"
 msgstr "Server Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:2199
+#: ../src/camel/camel-ews-store.c:2203
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Služba Exchange pro uživatele %s na počítači %s"
 
-#: ../src/camel/camel-ews-store.c:2243
+#: ../src/camel/camel-ews-store.c:2247
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Nelze vyhledat složku Koš"
 
-#: ../src/camel/camel-ews-store.c:2303
+#: ../src/camel/camel-ews-store.c:2307
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Nelze vyhledat složku Nevyžádaná pošta"
 
-#: ../src/camel/camel-ews-store.c:2493
+#: ../src/camel/camel-ews-store.c:2497
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "K odběru složek EWS se nelze přihlásit v režimu off-line"
 
-#: ../src/camel/camel-ews-store.c:2516
+#: ../src/camel/camel-ews-store.c:2520
 #, c-format
 msgid "Cannot subscribe folder '%s', no public folder available"
 msgstr ""
 "Nelze se přihlásit k odběru složky  „%s“, není dostupná žádná veřejná složka"
 
-#: ../src/camel/camel-ews-store.c:2526
+#: ../src/camel/camel-ews-store.c:2530
 #, c-format
 msgid "Cannot subscribe folder '%s', folder not found"
 msgstr "Nelze se přihlásit k odběru složky „%s“, složka nebyla nalezena"
 
-#: ../src/camel/camel-ews-store.c:2617
+#: ../src/camel/camel-ews-store.c:2621
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Z odběru složek EWS se nelze odhlásit v režimu off-line"
 
-#: ../src/camel/camel-ews-store.c:2734
+#: ../src/camel/camel-ews-store.c:2738
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "K dokončení této operace je nutné, abyste pracovali on-line"
 
-#: ../src/camel/camel-ews-store.c:2778
+#: ../src/camel/camel-ews-store.c:2782
 msgid "Unsetting the \"Out of Office\" status"
 msgstr "Ruší se nastavení stavu „Mimo kancelář“"
 
@@ -383,40 +378,74 @@ msgstr "Nelze určit vhodnou třídu složky pro novou složku s názvem „%s�
 msgid "Data source '%s' does not represent an Exchange Web Services folder"
 msgstr "Zdroj dat „%s“ se nenachází ve složce Exchange Web Services"
 
-#: ../src/configuration/e-ews-config-utils.c:516
+#: ../src/configuration/e-ews-config-utils.c:474
+#| msgid "Folder ID:"
+msgid "Folder"
+msgstr "Složka"
+
+#: ../src/configuration/e-ews-config-utils.c:480
+msgid "Size"
+msgstr "Velikost"
+
+#: ../src/configuration/e-ews-config-utils.c:506
+#: ../src/configuration/e-ews-config-utils.c:511
+msgid "Unable to retrieve folder size information"
+msgstr "Nelze získat informace o velikosti složky"
+
+#: ../src/configuration/e-ews-config-utils.c:621
+#| msgctxt "Permissions"
+#| msgid "Folder visible"
+msgid "Folder Sizes"
+msgstr "Velikosti složek"
+
+#: ../src/configuration/e-ews-config-utils.c:624
+msgid "_Close"
+msgstr "_Zavřít"
+
+#: ../src/configuration/e-ews-config-utils.c:638
+msgid "Fetching folder list…"
+msgstr "Získává se seznam složek…"
+
+#: ../src/configuration/e-ews-config-utils.c:791
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr "Nelze upravit oprávnění složky „%s“, zvolte jinou složku."
 
-#: ../src/configuration/e-ews-config-utils.c:594
+#: ../src/configuration/e-ews-config-utils.c:868
+#| msgctxt "Permissions"
+#| msgid "Folder visible"
+msgid "Folder Sizes..."
+msgstr "Velikosti složek…"
+
+#: ../src/configuration/e-ews-config-utils.c:875
 msgid "Subscribe to folder of other user..."
 msgstr "Přihlásit odběr složky jiného uživatele…"
 
-#: ../src/configuration/e-ews-config-utils.c:603
 #: ../src/configuration/e-ews-config-utils.c:884
-#: ../src/configuration/e-ews-config-utils.c:915
-#: ../src/configuration/e-ews-config-utils.c:946
-#: ../src/configuration/e-ews-config-utils.c:977
+#: ../src/configuration/e-ews-config-utils.c:1166
+#: ../src/configuration/e-ews-config-utils.c:1197
+#: ../src/configuration/e-ews-config-utils.c:1228
+#: ../src/configuration/e-ews-config-utils.c:1259
 msgid "Permissions..."
 msgstr "Oprávnění…"
 
-#: ../src/configuration/e-ews-config-utils.c:605
+#: ../src/configuration/e-ews-config-utils.c:886
 msgid "Edit EWS folder permissions"
 msgstr "Upravit oprávnění složky EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:886
+#: ../src/configuration/e-ews-config-utils.c:1168
 msgid "Edit EWS calendar permissions"
 msgstr "Upravit oprávnění kalendáře EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:917
+#: ../src/configuration/e-ews-config-utils.c:1199
 msgid "Edit EWS tasks permissions"
 msgstr "Upravit oprávnění úkolů EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:948
+#: ../src/configuration/e-ews-config-utils.c:1230
 msgid "Edit EWS memos permissions"
 msgstr "Upravit oprávnění poznámek EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:979
+#: ../src/configuration/e-ews-config-utils.c:1261
 msgid "Edit EWS contacts permissions"
 msgstr "Upravit oprávnění kontaktů EWS"
 
@@ -486,151 +515,151 @@ msgstr "Vlastní"
 msgid "Writing folder permissions, please wait..."
 msgstr "Zapisují se oprávnění složky, čekejte prosím…"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:759
+#: ../src/configuration/e-ews-edit-folder-permissions.c:777
 msgctxt "User"
 msgid "Anonymous"
 msgstr "Anonymní"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:762
+#: ../src/configuration/e-ews-edit-folder-permissions.c:780
 msgctxt "User"
 msgid "Default"
 msgstr "Výchozí"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:768
+#: ../src/configuration/e-ews-edit-folder-permissions.c:786
 msgctxt "User"
 msgid "Unknown"
 msgstr "Neznámý"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:849
-#: ../src/configuration/e-ews-search-user.c:430
+#: ../src/configuration/e-ews-edit-folder-permissions.c:867
+#: ../src/configuration/e-ews-search-user.c:431
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1075
 msgid "Name"
 msgstr "Jméno"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:855
+#: ../src/configuration/e-ews-edit-folder-permissions.c:873
 msgid "Permission level"
 msgstr "Úroveň oprávnění"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:907
+#: ../src/configuration/e-ews-edit-folder-permissions.c:925
 msgid "Edit EWS folder permissions..."
 msgstr "Úprava oprávnění složky EWS…"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:932
+#: ../src/configuration/e-ews-edit-folder-permissions.c:950
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:635
 msgid "Account:"
 msgstr "Účet:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:960
+#: ../src/configuration/e-ews-edit-folder-permissions.c:978
 msgid "Folder name:"
 msgstr "Název složky:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:983
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1001
 msgid "Folder ID:"
 msgstr "ID složky:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1047
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1065
 msgid "Permissions"
 msgstr "Oprávnění"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1069
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1087
 msgid "Permi_ssion level:"
 msgstr "Úroveň op_rávnění:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1103
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1121
 msgctxt "Permissions"
 msgid "Read"
 msgstr "Čtení"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1115
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1182
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1133
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1200
 msgctxt "Permissions"
 msgid "None"
 msgstr "nic"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1121
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1139
 msgctxt "Permissions"
 msgid "Free/Busy time"
 msgstr "volný/obsazený čas"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1126
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1144
 msgctxt "Permissions"
 msgid "Free/Busy time, subject, location"
 msgstr "volný/obsazený čas, předmět, místo"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1132
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1150
 msgctxt "Permissions"
 msgid "Full Details"
 msgstr "úplné podrobnosti"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1138
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1156
 msgctxt "Permissions"
 msgid "Write"
 msgstr "Zápis"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1150
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1168
 msgctxt "Permissions"
 msgid "Create items"
 msgstr "vytvářet položky"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1154
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1172
 msgctxt "Permissions"
 msgid "Create subfolders"
 msgstr "vytvářet podsložky"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1158
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1176
 msgctxt "Permissions"
 msgid "Edit own"
 msgstr "upravovat vlastní"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1162
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1180
 msgctxt "Permissions"
 msgid "Edit all"
 msgstr "upravovat vše"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1170
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1188
 msgctxt "Permissions"
 msgid "Delete items"
 msgstr "Mazání položek"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1187
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1205
 msgctxt "Permissions"
 msgid "Own"
 msgstr "vlastní"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1192
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1210
 msgctxt "Permissions"
 msgid "All"
 msgstr "všechny"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1198
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1216
 msgctxt "Permissions"
 msgid "Other"
 msgstr "Ostatní"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1210
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1228
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "vlastník složky"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1214
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1232
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "kontakt složky"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1218
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1236
 msgctxt "Permissions"
 msgid "Folder visible"
 msgstr "viditelnost složky"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1291
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1309
 msgid "Reading folder permissions, please wait..."
 msgstr "Čtou se oprávnění složky, čekejte prosím…"
 
-#: ../src/configuration/e-ews-ooo-notificator.c:186
+#: ../src/configuration/e-ews-ooo-notificator.c:184
 msgid "Unset on Server"
 msgstr "Zrušit nastavení na serveru"
 
-#: ../src/configuration/e-ews-ooo-notificator.c:187
+#: ../src/configuration/e-ews-ooo-notificator.c:185
 msgid "Unset the \"Out of Office\" status"
 msgstr "Zrušit nastavení stavu „Mimo kancelář“"
 
@@ -662,25 +691,25 @@ msgstr[0] "Nalezeno více než 100 uživatelů, ale zobrazuje se pouze první %d
 msgstr[1] "Nalezeno více než 100 uživatelů, ale zobrazují se pouze první %d"
 msgstr[2] "Nalezeno více než 100 uživatelů, ale zobrazuje se pouze prvních %d"
 
-#: ../src/configuration/e-ews-search-user.c:356
-#: ../src/configuration/e-ews-search-user.c:539
+#: ../src/configuration/e-ews-search-user.c:357
+#: ../src/configuration/e-ews-search-user.c:540
 msgid "Search for a user"
 msgstr "Vyhledávání uživatele"
 
-#: ../src/configuration/e-ews-search-user.c:436
+#: ../src/configuration/e-ews-search-user.c:437
 msgid "E-mail"
 msgstr "E-mail"
 
-#: ../src/configuration/e-ews-search-user.c:473
+#: ../src/configuration/e-ews-search-user.c:474
 msgid "Choose EWS user..."
 msgstr "Výběr uživatele EWS…"
 
-#: ../src/configuration/e-ews-search-user.c:496
+#: ../src/configuration/e-ews-search-user.c:497
 msgid "_Search:"
 msgstr "Vy_hledat:"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
-#: ../src/server/e-ews-folder.c:631
+#: ../src/server/e-ews-folder.c:657
 #, c-format
 msgid "Cannot add folder, folder already exists as '%s'"
 msgstr "Nelze přidat složku, složka již existuje jako „%s“"
@@ -787,11 +816,11 @@ msgstr "Název _složky:"
 msgid "Include _subfolders"
 msgstr "Včetně pod_složek"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:129
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:140
 msgid "Querying Autodiscover service"
 msgstr "Dotazuje se služby automatického vyhledávání"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:212
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:231
 msgid "Fetch _URL"
 msgstr "Získat adresu _URL"
 
@@ -929,6 +958,21 @@ msgstr "Moji delegáti a já"
 msgid "Retrieving \"Delegates\" settings"
 msgstr "Získává se nastavení „delegátů“"
 
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:195
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:256
+msgid "EWS Settings"
+msgstr "Nastavení EWS"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:201
+msgid "View the size of all Exchange folders"
+msgstr "Zobrazit velikost u všech složek Exchange"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:205
+#| msgctxt "Permissions"
+#| msgid "Folder visible"
+msgid "Folder _Sizes"
+msgstr "Veliko_sti složek"
+
 #: ../src/configuration/e-mail-config-ews-gal.c:221
 msgid "Locating offline address books"
 msgstr "Hledá se off-line adresář"
@@ -1047,67 +1091,70 @@ msgstr "Autentizace selhala"
 msgid "No response: %s"
 msgstr "Bez odezvy: %s"
 
-#: ../src/server/e-ews-connection.c:2094
+#: ../src/server/e-ews-connection.c:2126
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Selhala analýza odpovědi XML na automatické nalezení"
 
-#: ../src/server/e-ews-connection.c:2101
+#: ../src/server/e-ews-connection.c:2133
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Selhalo vyhledání prvku <Autodiscover>"
 
-#: ../src/server/e-ews-connection.c:2112
+#: ../src/server/e-ews-connection.c:2144
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Selhalo vyhledání prvku <Response>"
 
-#: ../src/server/e-ews-connection.c:2123
+#: ../src/server/e-ews-connection.c:2155
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Selhalo vyhledání prvku <Account>"
 
-#: ../src/server/e-ews-connection.c:2142
+#: ../src/server/e-ews-connection.c:2174
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
 "Selhalo vyhledání <ASUrl> a <OABUrl> v odpovědi na automatické nalezení"
 
-#: ../src/server/e-ews-connection.c:2224
+#: ../src/server/e-ews-connection.c:2256
 msgid "URL cannot be NULL"
 msgstr "Adresa URL nesmí být prázdná"
 
-#: ../src/server/e-ews-connection.c:2232
+#: ../src/server/e-ews-connection.c:2264
 #, c-format
 msgid "URL '%s' is not valid"
 msgstr "Adresa URL „%s“ není platná"
 
-#: ../src/server/e-ews-connection.c:2334
+#: ../src/server/e-ews-connection.c:2364
 msgid "Email address is missing a domain part"
 msgstr "U e-mailové adresy schází doménová část"
 
-#: ../src/server/e-ews-connection.c:2661
+#: ../src/server/e-ews-connection.c:2686
 msgid "Failed to parse oab XML"
 msgstr "Selhala analýza XML OAB"
 
-#: ../src/server/e-ews-connection.c:2669
+#: ../src/server/e-ews-connection.c:2694
 msgid "Failed to find <OAB> element\n"
 msgstr "Selhalo vyhledání prvku <OAB>\n"
 
-#: ../src/server/e-ews-connection.c:3910
+#: ../src/server/e-ews-connection.c:3940
 msgid "No items found"
 msgstr "Nenalezeny žádné položky"
 
-#: ../src/server/e-ews-folder.c:586
+#: ../src/server/e-ews-folder.c:612
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Nelze přidat složku, nepodporovaný typ složky"
 
-#: ../src/server/e-ews-folder.c:591
+#: ../src/server/e-ews-folder.c:617
 msgid "Cannot add folder, master source not found"
 msgstr "Nelze přidat složku, nenalezen hlavní zdroj"
 
-#: ../src/utils/ews-camel-common.c:187
+#: ../src/utils/ews-camel-common.c:308
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr ""
 "Selhalo volání funkce CreateItem, provedené kvůli získání ID pro novou zprávu"
+
+#~ msgid "Authentication password not available"
+#~ msgstr "Autentizační heslo není k dispozici"
