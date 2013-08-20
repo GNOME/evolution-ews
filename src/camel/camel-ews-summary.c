@@ -274,17 +274,20 @@ ews_info_set_flags (CamelMessageInfo *info,
 void
 camel_ews_summary_add_message (CamelFolderSummary *summary,
                                const gchar *uid,
+			       CamelMessageInfo *info,
                                CamelMimeMessage *message)
 {
 	CamelEwsMessageInfo *mi;
-	CamelMessageInfo *info;
 	const CamelFlag *flag;
 	const CamelTag *tag;
 
-	info = camel_folder_summary_get (summary, uid);
+	g_return_if_fail (uid != NULL);
+	g_return_if_fail (info != NULL);
+	g_return_if_fail (message != NULL);
 
 	/* Create summary entry */
 	mi = (CamelEwsMessageInfo *) camel_folder_summary_info_new_from_message (summary, message, NULL);
+	g_return_if_fail (mi != NULL);
 
 	/* Copy flags 'n' tags */
 	mi->info.flags = camel_message_info_flags (info);
@@ -294,6 +297,7 @@ camel_ews_summary_add_message (CamelFolderSummary *summary,
 		camel_message_info_set_user_flag ((CamelMessageInfo *) mi, flag->name, TRUE);
 		flag = flag->next;
 	}
+
 	tag = camel_message_info_user_tags (info);
 	while (tag) {
 		camel_message_info_set_user_tag ((CamelMessageInfo *) mi, tag->name, tag->value);
@@ -304,7 +308,8 @@ camel_ews_summary_add_message (CamelFolderSummary *summary,
 	mi->info.uid = camel_pstring_strdup (uid);
 
 	camel_folder_summary_add (summary, (CamelMessageInfo *) mi);
-	camel_message_info_free (info);
+	camel_folder_summary_touch (summary);
+	camel_folder_summary_save_to_db (summary, NULL);
 }
 
 static gboolean

@@ -1636,8 +1636,8 @@ ews_append_message_sync (CamelFolder *folder,
 	e_ews_folder_id_free (fid);
 	g_free (folder_id);
 
-	/* FIXME: Do we have to add it to the summary info ourselves?
-	 * Hopefully, since we need to store the changekey with it... */
+	camel_ews_summary_add_message (folder->summary, itemid, info, message);
+
 	if (appended_uid)
 		*appended_uid = itemid;
 	else
@@ -1857,6 +1857,15 @@ static void
 ews_folder_dispose (GObject *object)
 {
 	CamelEwsFolder *ews_folder = CAMEL_EWS_FOLDER (object);
+	CamelFolderSummary *summary;
+
+	summary = CAMEL_FOLDER (ews_folder)->summary;
+	if (summary) {
+		g_signal_handlers_disconnect_by_func (CAMEL_FOLDER (ews_folder)->summary, G_CALLBACK (ews_folder_count_notify_cb), ews_folder);
+
+		/* save changes, if there are any unsaved */
+		camel_folder_summary_save_to_db (summary, NULL);
+	}
 
 	if (ews_folder->cache != NULL) {
 		g_object_unref (ews_folder->cache);
@@ -1867,9 +1876,6 @@ ews_folder_dispose (GObject *object)
 		g_object_unref (ews_folder->search);
 		ews_folder->search = NULL;
 	}
-
-	if (CAMEL_FOLDER (ews_folder)->summary)
-		g_signal_handlers_disconnect_by_func (CAMEL_FOLDER (ews_folder)->summary, G_CALLBACK (ews_folder_count_notify_cb), ews_folder);
 
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (camel_ews_folder_parent_class)->dispose (object);
