@@ -94,7 +94,7 @@ void		e_soap_message_write_base64	(ESoapMessage *msg,
 						 const gchar *string,
 						 gint len);
 void		e_soap_message_write_time	(ESoapMessage *msg,
-						 const time_t *timeval);
+						 time_t timeval);
 void		e_soap_message_write_string	(ESoapMessage *msg,
 						 const gchar *string);
 void		e_soap_message_write_buffer	(ESoapMessage *msg,

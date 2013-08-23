@@ -225,6 +225,37 @@ const GSList *	e_ews_item_get_modified_occurrences
 gchar *		e_ews_embed_attachment_id_in_uri (const gchar *olduri, const gchar *attach_id);
 GSList *	e_ews_item_get_attachments_ids
 						(EEwsItem *item);
+const gchar *	e_ews_item_get_extended_tag	(EEwsItem *item,
+						 guint32 prop_tag);
+const gchar *	e_ews_item_get_extended_distinguished_tag
+						(EEwsItem *item,
+						 const gchar *set_id,
+						 guint32 prop_id);
+gboolean	e_ews_item_get_extended_property_as_boolean
+						(EEwsItem *item,
+						 const gchar *set_id,
+						 guint32 prop_id_or_tag,
+						 gboolean *found);
+gint		e_ews_item_get_extended_property_as_int
+						(EEwsItem *item,
+						 const gchar *set_id,
+						 guint32 prop_id_or_tag,
+						 gboolean *found);
+gdouble		e_ews_item_get_extended_property_as_double
+						(EEwsItem *item,
+						 const gchar *set_id,
+						 guint32 prop_id_or_tag,
+						 gboolean *found);
+const gchar *	e_ews_item_get_extended_property_as_string
+						(EEwsItem *item,
+						 const gchar *set_id,
+						 guint32 prop_id_or_tag,
+						 gboolean *found);
+time_t		e_ews_item_get_extended_property_as_time
+						(EEwsItem *item,
+						 const gchar *set_id,
+						 guint32 prop_id_or_tag,
+						 gboolean *found);
 
 EEwsAttachmentInfo *
 e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gchar *cache, const gchar *comp_uid);

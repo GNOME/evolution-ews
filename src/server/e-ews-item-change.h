@@ -51,6 +51,128 @@ void e_ews_message_add_delete_item_field (ESoapMessage *msg, const gchar *name, 
 
 void e_ews_message_add_delete_item_field_indexed (ESoapMessage *msg, const gchar *name, const gchar *fielduri_prefix, const gchar *field_index);
 
+typedef enum {
+	E_EWS_MESSAGE_DATA_TYPE_BOOLEAN,
+	E_EWS_MESSAGE_DATA_TYPE_INT,
+	E_EWS_MESSAGE_DATA_TYPE_DOUBLE,
+	E_EWS_MESSAGE_DATA_TYPE_STRING,
+	E_EWS_MESSAGE_DATA_TYPE_TIME
+} EEwsMessageDataType;
+
+const gchar *
+	e_ews_message_data_type_get_xml_name			(EEwsMessageDataType data_type);
+
+void	e_ews_message_add_delete_item_field_extended_tag	(ESoapMessage *msg,
+								 guint32 prop_id,
+								 EEwsMessageDataType data_type);
+
+void	e_ews_message_add_delete_item_field_extended_distinguished_tag
+								(ESoapMessage *msg,
+								 const gchar *set_id,
+								 guint32 prop_id,
+								 EEwsMessageDataType data_type);
+
+void	e_ews_message_add_set_item_field_extended_tag_boolean	(ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 guint32 prop_id,
+								 gboolean value);
+void	e_ews_message_add_set_item_field_extended_tag_int	(ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 guint32 prop_id,
+								 gint value);
+void	e_ews_message_add_set_item_field_extended_tag_double	(ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 guint32 prop_id,
+								 gdouble value);
+void	e_ews_message_add_set_item_field_extended_tag_string	(ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 guint32 prop_id,
+								 const gchar *value);
+void	e_ews_message_add_set_item_field_extended_tag_time	(ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 guint32 prop_id,
+								 time_t value);
+void	e_ews_message_add_set_item_field_extended_distinguished_tag_boolean
+								(ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 const gchar *set_id,
+								 guint32 prop_id,
+								 gboolean value);
+void	e_ews_message_add_set_item_field_extended_distinguished_tag_int
+								(ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 const gchar *set_id,
+								 guint32 prop_id,
+								 gint value);
+void	e_ews_message_add_set_item_field_extended_distinguished_tag_double
+								(ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 const gchar *set_id,
+								 guint32 prop_id,
+								 gdouble value);
+void	e_ews_message_add_set_item_field_extended_distinguished_tag_string
+								(ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 const gchar *set_id,
+								 guint32 prop_id,
+								 const gchar *value);
+void	e_ews_message_add_set_item_field_extended_distinguished_tag_time
+								(ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 const gchar *set_id,
+								 guint32 prop_id,
+								 time_t value);
+void	e_ews_message_add_extended_property_tag_boolean		(ESoapMessage *msg,
+								 guint32 prop_id,
+								 gboolean value);
+void	e_ews_message_add_extended_property_tag_int		(ESoapMessage *msg,
+								 guint32 prop_id,
+								 gint value);
+void	e_ews_message_add_extended_property_tag_double		(ESoapMessage *msg,
+								 guint32 prop_id,
+								 gdouble value);
+void	e_ews_message_add_extended_property_tag_string		(ESoapMessage *msg,
+								 guint32 prop_id,
+								 const gchar *value);
+void	e_ews_message_add_extended_property_tag_time		(ESoapMessage *msg,
+								 guint32 prop_id,
+								 time_t value);
+void	e_ews_message_add_extended_property_distinguished_tag_boolean
+								(ESoapMessage *msg,
+								 const gchar *set_id,
+								 guint32 prop_id,
+								 gboolean value);
+void	e_ews_message_add_extended_property_distinguished_tag_int
+								(ESoapMessage *msg,
+								 const gchar *set_id,
+								 guint32 prop_id,
+								 gint value);
+void	e_ews_message_add_extended_property_distinguished_tag_double
+								(ESoapMessage *msg,
+								 const gchar *set_id,
+								 guint32 prop_id,
+								 gdouble value);
+void	e_ews_message_add_extended_property_distinguished_tag_string
+								(ESoapMessage *msg,
+								 const gchar *set_id,
+								 guint32 prop_id,
+								 const gchar *value);
+void	e_ews_message_add_extended_property_distinguished_tag_time
+								(ESoapMessage *msg,
+								 const gchar *set_id,
+								 guint32 prop_id,
+								 time_t value);
+
 G_END_DECLS
 
 #endif

@@ -195,3 +195,374 @@ e_ews_message_add_delete_item_field_indexed (ESoapMessage *msg,
 
 	g_free (fielduri);
 }
+
+const gchar *
+e_ews_message_data_type_get_xml_name (EEwsMessageDataType data_type)
+{
+	switch (data_type) {
+	case E_EWS_MESSAGE_DATA_TYPE_BOOLEAN:
+		return "Boolean";
+	case E_EWS_MESSAGE_DATA_TYPE_INT:
+		return "Integer";
+	case E_EWS_MESSAGE_DATA_TYPE_DOUBLE:
+		return "Double";
+	case E_EWS_MESSAGE_DATA_TYPE_STRING:
+		return "String";
+	case E_EWS_MESSAGE_DATA_TYPE_TIME:
+		return "SystemTime";
+	}
+
+	g_warn_if_reached ();
+
+	return NULL;
+}
+
+void
+e_ews_message_add_delete_item_field_extended_tag (ESoapMessage *msg,
+						  guint32 prop_id,
+						  EEwsMessageDataType data_type)
+{
+	const gchar *prop_type = e_ews_message_data_type_get_xml_name (data_type);
+
+	g_return_if_fail (prop_type != NULL);
+
+	e_soap_message_start_element (msg, "DeleteItemField", NULL, NULL);
+	e_ews_message_write_extended_tag (msg, prop_id, prop_type);
+	e_soap_message_end_element (msg); /* DeleteItemField */
+}
+
+void
+e_ews_message_add_delete_item_field_extended_distinguished_tag (ESoapMessage *msg,
+								const gchar *set_id,
+								guint32 prop_id,
+								EEwsMessageDataType data_type)
+{
+	const gchar *prop_type = e_ews_message_data_type_get_xml_name (data_type);
+
+	g_return_if_fail (prop_type != NULL);
+
+	e_soap_message_start_element (msg, "DeleteItemField", NULL, NULL);
+	e_ews_message_write_extended_distinguished_tag (msg, set_id, prop_id, prop_type);
+	e_soap_message_end_element (msg); /* DeleteItemField */
+}
+
+static void
+ews_message_write_data_value (ESoapMessage *msg,
+			      EEwsMessageDataType data_type,
+			      gconstpointer value)
+{
+	g_return_if_fail (value != NULL);
+
+	switch (data_type) {
+	case E_EWS_MESSAGE_DATA_TYPE_BOOLEAN:
+		e_ews_message_write_string_parameter (msg, "Value", NULL, (*((const gboolean *) value)) ? "true" : "false");
+		return;
+	case E_EWS_MESSAGE_DATA_TYPE_INT:
+		e_ews_message_write_int_parameter (msg, "Value", NULL, *((const gint *) value));
+		return;
+	case E_EWS_MESSAGE_DATA_TYPE_DOUBLE:
+		e_ews_message_write_double_parameter (msg, "Value", NULL, *((const gdouble *) value));
+		return;
+	case E_EWS_MESSAGE_DATA_TYPE_STRING:
+		e_ews_message_write_string_parameter (msg, "Value", NULL, (const gchar *) value);
+		return;
+	case E_EWS_MESSAGE_DATA_TYPE_TIME:
+		e_ews_message_write_time_parameter (msg, "Value", NULL, *((const time_t *) value));
+		return;
+	}
+
+	g_warn_if_reached ();
+}
+
+static void
+ews_message_add_extended_property_tag (ESoapMessage *msg,
+				       guint32 prop_id,
+				       EEwsMessageDataType data_type,
+				       gconstpointer value)
+{
+	const gchar *prop_type = e_ews_message_data_type_get_xml_name (data_type);
+
+	g_return_if_fail (prop_type != NULL);
+
+	e_soap_message_start_element (msg, "ExtendedProperty", NULL, NULL);
+
+	e_ews_message_write_extended_tag (msg, prop_id, prop_type);
+	ews_message_write_data_value (msg, data_type, value);
+
+	e_soap_message_end_element (msg); /* ExtendedProperty */
+}
+
+static void
+ews_message_add_extended_property_distinguished_tag (ESoapMessage *msg,
+						     const gchar *set_id,
+						     guint32 prop_id,
+						     EEwsMessageDataType data_type,
+						     gconstpointer value)
+{
+	const gchar *prop_type = e_ews_message_data_type_get_xml_name (data_type);
+
+	g_return_if_fail (prop_type != NULL);
+
+	e_soap_message_start_element (msg, "ExtendedProperty", NULL, NULL);
+
+	e_ews_message_write_extended_distinguished_tag (msg, set_id, prop_id, prop_type);
+	ews_message_write_data_value (msg, data_type, value);
+
+	e_soap_message_end_element (msg); /* ExtendedProperty */
+}
+
+static void
+ews_message_add_set_item_field_extended_tag (ESoapMessage *msg,
+					     const gchar *elem_prefix,
+					     const gchar *elem_name,
+					     guint32 prop_id,
+					     EEwsMessageDataType data_type,
+					     gconstpointer value)
+{
+	const gchar *prop_type = e_ews_message_data_type_get_xml_name (data_type);
+
+	g_return_if_fail (prop_type != NULL);
+
+	e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
+	e_ews_message_write_extended_tag (msg, prop_id, prop_type);
+
+	e_soap_message_start_element (msg, elem_name, elem_prefix, NULL);
+	ews_message_add_extended_property_tag (msg, prop_id, data_type, value);
+	e_soap_message_end_element (msg); /* elem_name */
+
+	e_soap_message_end_element (msg); /* SetItemField */
+}
+
+static void
+ews_message_add_set_item_field_extended_distinguished_tag (ESoapMessage *msg,
+							   const gchar *elem_prefix,
+							   const gchar *elem_name,
+							   const gchar *set_id,
+							   guint32 prop_id,
+							   EEwsMessageDataType data_type,
+							   gconstpointer value)
+{
+	const gchar *prop_type = e_ews_message_data_type_get_xml_name (data_type);
+
+	g_return_if_fail (prop_type != NULL);
+
+	e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
+
+	e_ews_message_write_extended_distinguished_tag (msg, set_id, prop_id, prop_type);
+
+	e_soap_message_start_element (msg, elem_name, elem_prefix, NULL);
+	ews_message_add_extended_property_distinguished_tag (msg, set_id, prop_id, data_type, value);
+	e_soap_message_end_element (msg); /* elem_name */
+
+	e_soap_message_end_element (msg); /* SetItemField */
+}
+
+void
+e_ews_message_add_set_item_field_extended_tag_boolean (ESoapMessage *msg,
+						       const gchar *elem_prefix,
+						       const gchar *elem_name,
+						       guint32 prop_id,
+						       gboolean value)
+{
+	ews_message_add_set_item_field_extended_tag (msg, elem_prefix, elem_name, prop_id,
+		E_EWS_MESSAGE_DATA_TYPE_BOOLEAN, &value);
+}
+
+void
+e_ews_message_add_set_item_field_extended_tag_int (ESoapMessage *msg,
+						   const gchar *elem_prefix,
+						   const gchar *elem_name,
+						   guint32 prop_id,
+						   gint value)
+{
+	ews_message_add_set_item_field_extended_tag (msg, elem_prefix, elem_name, prop_id,
+		E_EWS_MESSAGE_DATA_TYPE_INT, &value);
+}
+
+void
+e_ews_message_add_set_item_field_extended_tag_double (ESoapMessage *msg,
+						      const gchar *elem_prefix,
+						      const gchar *elem_name,
+						      guint32 prop_id,
+						      gdouble value)
+{
+	ews_message_add_set_item_field_extended_tag (msg, elem_prefix, elem_name, prop_id,
+		E_EWS_MESSAGE_DATA_TYPE_DOUBLE, &value);
+}
+
+void
+e_ews_message_add_set_item_field_extended_tag_string (ESoapMessage *msg,
+						      const gchar *elem_prefix,
+						      const gchar *elem_name,
+						      guint32 prop_id,
+						      const gchar *value)
+{
+	ews_message_add_set_item_field_extended_tag (msg, elem_prefix, elem_name, prop_id,
+		E_EWS_MESSAGE_DATA_TYPE_STRING, value);
+}
+
+void
+e_ews_message_add_set_item_field_extended_tag_time (ESoapMessage *msg,
+						    const gchar *elem_prefix,
+						    const gchar *elem_name,
+						    guint32 prop_id,
+						    time_t value)
+{
+	ews_message_add_set_item_field_extended_tag (msg, elem_prefix, elem_name, prop_id,
+		E_EWS_MESSAGE_DATA_TYPE_TIME, &value);
+}
+
+void
+e_ews_message_add_set_item_field_extended_distinguished_tag_boolean (ESoapMessage *msg,
+								     const gchar *elem_prefix,
+								     const gchar *elem_name,
+								     const gchar *set_id,
+								     guint32 prop_id,
+								     gboolean value)
+{
+	ews_message_add_set_item_field_extended_distinguished_tag (msg, elem_prefix, elem_name, set_id, prop_id,
+		E_EWS_MESSAGE_DATA_TYPE_BOOLEAN, &value);
+}
+
+void
+e_ews_message_add_set_item_field_extended_distinguished_tag_int (ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 const gchar *set_id,
+								 guint32 prop_id,
+								 gint value)
+{
+	ews_message_add_set_item_field_extended_distinguished_tag (msg, elem_prefix, elem_name, set_id, prop_id,
+		E_EWS_MESSAGE_DATA_TYPE_INT, &value);
+}
+
+void
+e_ews_message_add_set_item_field_extended_distinguished_tag_double (ESoapMessage *msg,
+								    const gchar *elem_prefix,
+								    const gchar *elem_name,
+								    const gchar *set_id,
+								    guint32 prop_id,
+								    gdouble value)
+{
+	ews_message_add_set_item_field_extended_distinguished_tag (msg, elem_prefix, elem_name, set_id, prop_id,
+		E_EWS_MESSAGE_DATA_TYPE_DOUBLE, &value);
+}
+
+void
+e_ews_message_add_set_item_field_extended_distinguished_tag_string (ESoapMessage *msg,
+								    const gchar *elem_prefix,
+								    const gchar *elem_name,
+								    const gchar *set_id,
+								    guint32 prop_id,
+								    const gchar *value)
+{
+	ews_message_add_set_item_field_extended_distinguished_tag (msg, elem_prefix, elem_name, set_id, prop_id,
+		E_EWS_MESSAGE_DATA_TYPE_STRING, value);
+}
+
+void
+e_ews_message_add_set_item_field_extended_distinguished_tag_time (ESoapMessage *msg,
+								  const gchar *elem_prefix,
+								  const gchar *elem_name,
+								  const gchar *set_id,
+								  guint32 prop_id,
+								  time_t value)
+{
+	ews_message_add_set_item_field_extended_distinguished_tag (msg, elem_prefix, elem_name, set_id, prop_id,
+		E_EWS_MESSAGE_DATA_TYPE_TIME, &value);
+}
+
+void
+e_ews_message_add_extended_property_tag_boolean (ESoapMessage *msg,
+					         guint32 prop_id,
+					         gboolean value)
+{
+	ews_message_add_extended_property_tag (msg, prop_id,
+		E_EWS_MESSAGE_DATA_TYPE_BOOLEAN, &value);
+}
+
+void
+e_ews_message_add_extended_property_tag_int (ESoapMessage *msg,
+					     guint32 prop_id,
+					     gint value)
+{
+	ews_message_add_extended_property_tag (msg, prop_id,
+		E_EWS_MESSAGE_DATA_TYPE_INT, &value);
+}
+
+void
+e_ews_message_add_extended_property_tag_double (ESoapMessage *msg,
+						guint32 prop_id,
+						gdouble value)
+{
+	ews_message_add_extended_property_tag (msg, prop_id,
+		E_EWS_MESSAGE_DATA_TYPE_DOUBLE, &value);
+}
+
+void
+e_ews_message_add_extended_property_tag_string (ESoapMessage *msg,
+						guint32 prop_id,
+						const gchar *value)
+{
+	ews_message_add_extended_property_tag (msg, prop_id,
+		E_EWS_MESSAGE_DATA_TYPE_STRING, value);
+}
+
+void
+e_ews_message_add_extended_property_tag_time (ESoapMessage *msg,
+					      guint32 prop_id,
+					      time_t value)
+{
+	ews_message_add_extended_property_tag (msg, prop_id,
+		E_EWS_MESSAGE_DATA_TYPE_TIME, &value);
+}
+
+void
+e_ews_message_add_extended_property_distinguished_tag_boolean (ESoapMessage *msg,
+							       const gchar *set_id,
+							       guint32 prop_id,
+							       gboolean value)
+{
+	ews_message_add_extended_property_distinguished_tag (msg, set_id, prop_id,
+		E_EWS_MESSAGE_DATA_TYPE_BOOLEAN, &value);
+}
+
+void
+e_ews_message_add_extended_property_distinguished_tag_int (ESoapMessage *msg,
+							   const gchar *set_id,
+							   guint32 prop_id,
+							   gint value)
+{
+	ews_message_add_extended_property_distinguished_tag (msg, set_id, prop_id,
+		E_EWS_MESSAGE_DATA_TYPE_INT, &value);
+}
+
+void
+e_ews_message_add_extended_property_distinguished_tag_double (ESoapMessage *msg,
+							      const gchar *set_id,
+							      guint32 prop_id,
+							      gdouble value)
+{
+	ews_message_add_extended_property_distinguished_tag (msg, set_id, prop_id,
+		E_EWS_MESSAGE_DATA_TYPE_DOUBLE, &value);
+}
+
+void
+e_ews_message_add_extended_property_distinguished_tag_string (ESoapMessage *msg,
+							      const gchar *set_id,
+							      guint32 prop_id,
+							      const gchar *value)
+{
+	ews_message_add_extended_property_distinguished_tag (msg, set_id, prop_id,
+		E_EWS_MESSAGE_DATA_TYPE_STRING, value);
+}
+
+void
+e_ews_message_add_extended_property_distinguished_tag_time (ESoapMessage *msg,
+							    const gchar *set_id,
+							    guint32 prop_id,
+							    time_t value)
+{
+	ews_message_add_extended_property_distinguished_tag (msg, set_id, prop_id,
+		E_EWS_MESSAGE_DATA_TYPE_TIME, &value);
+}

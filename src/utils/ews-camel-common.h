@@ -32,7 +32,7 @@ camel_ews_utils_create_mime_message (EEwsConnection *cnc,
 				     const gchar *disposition,
 				     const EwsFolderId *fid,
 				     CamelMimeMessage *message,
-				     gint32 message_camel_flags,
+				     CamelMessageInfo *info,
 				     CamelAddress *from,
 				     CamelAddress *recipients,
 				     gchar **itemid,
@@ -41,10 +41,6 @@ camel_ews_utils_create_mime_message (EEwsConnection *cnc,
 				     GError **error);
 
 G_END_DECLS
-
-#ifdef	__cplusplus
-}
-#endif
 
 #endif	/* EWS_CAMEL_COMMON_H */
 

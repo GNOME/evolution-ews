@@ -61,10 +61,17 @@ which needs to be better organized via functions */
 
 #define MAX_ATTACHMENT_SIZE 1*1024*1024   /*In bytes*/
 
-#define SUMMARY_ITEM_FLAGS "item:ResponseObjects item:Sensitivity item:Importance item:Categories"
+/* there are written more follow-up flags, but it's read only few of them */
+#define SUMMARY_FOLLOWUP_FLAGS	" mapi:int:0x1090" /* PidTagFlagStatus */ \
+				" mapi:time:0x1091" /* PidTagFlagCompleteTime */ \
+				" mapi:dist:string:Common:0x8530" /* PidLidFlagRequest */ \
+				" mapi:dist:time:Task:0x8105" /* PidLidTaskDueDate */
+
+#define SUMMARY_ITEM_FLAGS "item:ResponseObjects item:Sensitivity item:Importance item:Categories" SUMMARY_FOLLOWUP_FLAGS
 #define ITEM_PROPS "item:Subject item:DateTimeReceived item:DateTimeSent item:DateTimeCreated item:Size " \
 		   "item:HasAttachments item:InReplyTo"
 #define SUMMARY_ITEM_PROPS ITEM_PROPS " " SUMMARY_ITEM_FLAGS
+
 
 #define SUMMARY_MESSAGE_FLAGS SUMMARY_ITEM_FLAGS " message:IsRead mapi:int:0x0e07 mapi:int:0x0e17 mapi:int:0x1080 mapi:int:0x1081"
 #define SUMMARY_MESSAGE_PROPS ITEM_PROPS " message:From message:Sender message:ToRecipients message:CcRecipients " \
@@ -789,28 +796,9 @@ msg_update_flags (ESoapMessage *msg,
 			if (mi->info.flags & CAMEL_MESSAGE_FORWARDED)
 				icon = 0x106;
 
-			e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
-
-			e_soap_message_start_element (msg, "ExtendedFieldURI", NULL, NULL);
-			e_soap_message_add_attribute (msg, "PropertyTag", "0x1080", NULL, NULL);
-			e_soap_message_add_attribute (msg, "PropertyType", "Integer", NULL, NULL);
-			e_soap_message_end_element (msg);
-
-			e_soap_message_start_element (msg, "Message", NULL, NULL);
-			e_soap_message_start_element (msg, "ExtendedProperty", NULL, NULL);
-
-			/* And now we have to specify the field *again*. Yay for XML crap */
-			e_soap_message_start_element (msg, "ExtendedFieldURI", NULL, NULL);
-			e_soap_message_add_attribute (msg, "PropertyTag", "0x1080", NULL, NULL);
-			e_soap_message_add_attribute (msg, "PropertyType", "Integer", NULL, NULL);
-			e_soap_message_end_element (msg);
-
-			e_ews_message_write_int_parameter (msg, "Value", NULL, icon);
-
-			e_soap_message_end_element (msg); /* ExtendedProperty */
-			e_soap_message_end_element (msg); /* Message */
-			e_soap_message_end_element (msg); /* SetItemField */
+			e_ews_message_add_set_item_field_extended_tag_int (msg, NULL, "Message", 0x1080, icon);
 		}
+
 		/* now update the Categories */
 		e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
 
@@ -826,6 +814,8 @@ msg_update_flags (ESoapMessage *msg,
 		e_soap_message_end_element (msg); /* Categories */
 		e_soap_message_end_element (msg); /* Message */
 		e_soap_message_end_element (msg); /* SetItemField */
+
+		ews_utils_update_followup_flags (msg, (CamelMessageInfo *) mi);
 
 		e_ews_message_end_item_change (msg);
 
@@ -1623,8 +1613,7 @@ ews_append_message_sync (CamelFolder *folder,
 	fid = e_ews_folder_id_new (folder_id, NULL, FALSE);
 	if (!camel_ews_utils_create_mime_message (
 		cnc, "SaveOnly", fid, message,
-		camel_message_info_flags (info),
-		from, NULL, &itemid, &changekey,
+		info, from, NULL, &itemid, &changekey,
 		cancellable, &local_error)) {
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
 		g_propagate_error (error, local_error);

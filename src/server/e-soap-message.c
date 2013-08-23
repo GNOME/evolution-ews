@@ -844,21 +844,26 @@ e_soap_message_write_base64 (ESoapMessage *msg,
 /**
  * e_soap_message_write_time:
  * @msg: the #ESoapMessage.
- * @timeval: pointer to a time_t to encode
+ * @timeval: the time_t to encode
  *
- * Writes the stringified value of @timeval as the current element's
+ * Writes the iso8601 value of @timeval as the current element's
  * content.
  **/
 void
 e_soap_message_write_time (ESoapMessage *msg,
-                           const time_t *timeval)
+                           time_t timeval)
 {
-	gchar *string;
+	GTimeVal tv;
+	gchar *iso_time;
 
 	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
 
-	string = g_strchomp (ctime (timeval));
-	e_soap_message_write_string (msg, string);
+	tv.tv_usec = 0;
+	tv.tv_sec = timeval;
+
+	iso_time = g_time_val_to_iso8601 (&tv);
+	e_soap_message_write_string (msg, iso_time);
+	g_free (iso_time);
 }
 
 /**

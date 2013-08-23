@@ -28,10 +28,11 @@
 #include "ews-camel-common.h"
 
 #include "server/e-ews-message.h"
+#include "server/e-ews-item-change.h"
 
 struct _create_mime_msg_data {
 	CamelMimeMessage *message;
-	gint32 message_camel_flags;
+	CamelMessageInfo *info;
 	CamelAddress *from;
 	CamelAddress *recipients;
 };
@@ -117,7 +118,11 @@ create_mime_message_cb (ESoapMessage *msg,
 	GByteArray *bytes;
 	gchar *base64;
 	gint msgflag;
+	guint32 message_camel_flags = 0;
 
+	if (create_data->info)
+		message_camel_flags = camel_message_info_flags (create_data->info);
+		
 	e_soap_message_start_element (msg, "Message", NULL, NULL);
 	e_soap_message_start_element (msg, "MimeContent", NULL, NULL);
 
@@ -169,7 +174,7 @@ create_mime_message_cb (ESoapMessage *msg,
 			msg,
 			"Importance",
 			NULL,
-			(create_data->message_camel_flags & CAMEL_MESSAGE_FLAGGED) != 0 ? "High" : "Normal",
+			(message_camel_flags & CAMEL_MESSAGE_FLAGGED) != 0 ? "High" : "Normal",
 			NULL,
 			NULL);
 
@@ -179,34 +184,82 @@ create_mime_message_cb (ESoapMessage *msg,
 	 * sees this property that you're setting the value to 0
 	 * ... it never checks */
 	msgflag  = MAPI_MSGFLAG_READ; /* draft or sent is always read */
-	if ((create_data->message_camel_flags & CAMEL_MESSAGE_DRAFT) != 0)
+	if ((message_camel_flags & CAMEL_MESSAGE_DRAFT) != 0)
 		msgflag |= MAPI_MSGFLAG_UNSENT;
 
-	e_soap_message_start_element (msg, "ExtendedProperty", NULL, NULL);
-	e_soap_message_start_element (msg, "ExtendedFieldURI", NULL, NULL);
-	e_soap_message_add_attribute (msg, "PropertyTag", "0x0E07", NULL, NULL);
-	e_soap_message_add_attribute (msg, "PropertyType", "Integer", NULL, NULL);
-	e_soap_message_end_element (msg); /* ExtendedFieldURI */
+	e_ews_message_add_extended_property_tag_int (msg, 0x0e07, msgflag);
 
-	e_ews_message_write_int_parameter (msg, "Value", NULL, msgflag);
-
-	e_soap_message_end_element (msg); /* ExtendedProperty */
-
-	if ((create_data->message_camel_flags & (CAMEL_MESSAGE_FORWARDED | CAMEL_MESSAGE_ANSWERED)) != 0) {
+	if ((message_camel_flags & (CAMEL_MESSAGE_FORWARDED | CAMEL_MESSAGE_ANSWERED)) != 0) {
 		gint icon;
 
-		icon = (create_data->message_camel_flags & CAMEL_MESSAGE_ANSWERED) != 0 ? 0x105 : 0x106;
+		icon = (message_camel_flags & CAMEL_MESSAGE_ANSWERED) != 0 ? 0x105 : 0x106;
 
-		e_soap_message_start_element (msg, "ExtendedProperty", NULL, NULL);
+		e_ews_message_add_extended_property_tag_int (msg, 0x1080, icon);
+	}
 
-		e_soap_message_start_element (msg, "ExtendedFieldURI", NULL, NULL);
-		e_soap_message_add_attribute (msg, "PropertyTag", "0x1080", NULL, NULL);
-		e_soap_message_add_attribute (msg, "PropertyType", "Integer", NULL, NULL);
-		e_soap_message_end_element (msg); /* ExtendedFieldURI */
+	if (create_data->info) {
+		const gchar *followup, *completed, *dueby;
+		time_t completed_tt = (time_t) 0 , dueby_tt = (time_t) 0;
 
-		e_ews_message_write_int_parameter (msg, "Value", NULL, icon);
+		/* follow-up flags */
+		followup = camel_message_info_user_tag (create_data->info, "follow-up");
+		completed = camel_message_info_user_tag (create_data->info, "completed-on");
+		dueby = camel_message_info_user_tag (create_data->info, "due-by");
 
-		e_soap_message_end_element (msg); /* ExtendedProperty */
+		if (followup && !*followup)
+			followup = NULL;
+
+		if (completed && *completed)
+			completed_tt = camel_header_decode_date (completed, NULL);
+
+		if (dueby && *dueby)
+			dueby_tt = camel_header_decode_date (dueby, NULL);
+
+		/* PidTagFlagStatus */
+		e_ews_message_add_extended_property_tag_int (msg, 0x1090,
+			followup ? (completed_tt != (time_t) 0 ? 0x01 /* followupComplete */: 0x02 /* followupFlagged */) : 0x0);
+
+		if (followup) {
+			/* PidLidFlagRequest */
+			e_ews_message_add_extended_property_distinguished_tag_string (msg, "Common", 0x8530, followup);
+
+			/* PidTagToDoItemFlags */
+			e_ews_message_add_extended_property_tag_int (msg, 0x0e2b, 1);
+		}
+
+		if (followup && completed_tt != (time_t) 0) {
+			/* minute precision */
+			completed_tt = completed_tt - (completed_tt % 60);
+
+			/* PidTagFlagCompleteTime */
+			e_ews_message_add_extended_property_tag_time (msg, 0x1091, completed_tt);
+
+			/* PidLidTaskDateCompleted */
+			e_ews_message_add_extended_property_distinguished_tag_time (msg, "Task", 0x810f, completed_tt);
+
+			/* PidLidTaskStatus */
+			e_ews_message_add_extended_property_distinguished_tag_int (msg, "Task", 0x8101, 2);
+
+			/* PidLidPercentComplete */
+			e_ews_message_add_extended_property_distinguished_tag_double (msg, "Task", 0x8102, 1.0);
+
+			/* PidLidTaskComplete */
+			e_ews_message_add_extended_property_distinguished_tag_boolean (msg, "Task", 0x811c, TRUE);
+		}
+
+		if (followup && dueby_tt != (time_t) 0 && completed_tt == (time_t) 0) {
+			/* PidLidTaskStatus */
+			e_ews_message_add_extended_property_distinguished_tag_int (msg, "Task", 0x8101, 0);
+
+			/* PidLidPercentComplete */
+			e_ews_message_add_extended_property_distinguished_tag_double (msg, "Task", 0x8102, 0.0);
+
+			/* PidLidTaskDueDate */
+			e_ews_message_add_extended_property_distinguished_tag_time (msg, "Task", 0x8105, dueby_tt);
+
+			/* PidLidTaskComplete */
+			e_ews_message_add_extended_property_distinguished_tag_boolean (msg, "Task", 0x811c, FALSE);
+		}
 	}
 
 	if (create_data->recipients) {
@@ -231,7 +284,7 @@ create_mime_message_cb (ESoapMessage *msg,
 			msg,
 			"IsRead",
 			NULL,
-			(create_data->message_camel_flags & CAMEL_MESSAGE_SEEN) != 0 ? "true" : "false",
+			(message_camel_flags & CAMEL_MESSAGE_SEEN) != 0 ? "true" : "false",
 			NULL,
 			NULL);
 
@@ -245,7 +298,7 @@ camel_ews_utils_create_mime_message (EEwsConnection *cnc,
                                      const gchar *disposition,
                                      const EwsFolderId *fid,
                                      CamelMimeMessage *message,
-                                     gint32 message_camel_flags,
+                                     CamelMessageInfo *info,
                                      CamelAddress *from,
 				     CamelAddress *recipients,
                                      gchar **itemid,
@@ -263,7 +316,7 @@ camel_ews_utils_create_mime_message (EEwsConnection *cnc,
 	create_data = g_new0 (struct _create_mime_msg_data, 1);
 
 	create_data->message = message;
-	create_data->message_camel_flags = message_camel_flags;
+	create_data->info = info;
 	create_data->from = from;
 	create_data->recipients = recipients;
 

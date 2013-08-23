@@ -32,6 +32,8 @@
 
 #include "server/camel-ews-settings.h"
 #include "server/e-ews-message.h"
+#include "server/e-ews-item-change.h"
+#include "utils/ews-camel-common.h"
 
 #include "camel-ews-utils.h"
 
@@ -435,7 +437,8 @@ ews_utils_replace_server_user_flags (ESoapMessage *msg,
 		 * receipt-handled flag for message receipts, which we
 		 * don't want showing up in the categories, so
 		 * silently drop it here */
-		if (strcmp (n, "receipt-handled") == 0)
+		if (strcmp (n, "receipt-handled") == 0 ||
+		    strcmp (n, "$has-cal") == 0)
 			continue;
 		e_ews_message_write_string_parameter (msg, "String", NULL, n);
 	}
@@ -639,6 +642,70 @@ ews_set_threading_data (CamelEwsMessageInfo *mi,
 	camel_header_references_list_clear (&refs);
 }
 
+static gboolean
+camel_ews_utils_update_follow_up_flags (EEwsItem *item,
+					CamelMessageInfo *info)
+{
+	gboolean changed = FALSE, found;
+	time_t completed_tt, dueby_tt;
+	const gchar *followup_name;
+	gint flag_status;
+
+	/* PidTagFlagStatus */
+	found = FALSE;
+	flag_status = e_ews_item_get_extended_property_as_int (item, NULL, 0x1090, &found);
+	if (!found)
+		flag_status = 0;
+
+	/* PidTagFlagCompleteTime */
+	found = FALSE;
+	completed_tt = e_ews_item_get_extended_property_as_time (item, NULL, 0x1091, &found);
+	if (!found)
+		completed_tt = (time_t) 0;
+
+	/* PidLidFlagRequest */
+	found = FALSE;
+	followup_name = e_ews_item_get_extended_property_as_string (item, "Common", 0x8530, &found);
+	if (!found)
+		followup_name = NULL;
+
+	/* PidLidTaskDueDate */
+	found = FALSE;
+	dueby_tt = e_ews_item_get_extended_property_as_time (item, "Task", 0x8105, &found);
+	if (!found)
+		dueby_tt = (time_t) 0;
+
+	if (flag_status == 1) {
+		/* complete */
+		if (!camel_message_info_user_tag (info, "follow-up"))
+			changed = camel_message_info_set_user_tag (info, "follow-up", followup_name ? followup_name : "follow-up") || changed;
+		if (completed_tt != (time_t) 0) {
+			gchar *text = camel_header_format_date (completed_tt, 0);
+			changed = camel_message_info_set_user_tag (info, "completed-on", text) || changed;
+			g_free (text);
+		} else {
+			changed = camel_message_info_set_user_tag (info, "completed-on", NULL) || changed;
+		}
+	} else if (flag_status == 2) {
+		/* follow-up */
+		changed = camel_message_info_set_user_tag (info, "follow-up", followup_name ? followup_name : "follow-up") || changed;
+		changed = camel_message_info_set_user_tag (info, "completed-on", NULL) || changed;
+		if (dueby_tt != (time_t) 0) {
+			gchar *text = camel_header_format_date (dueby_tt, 0);
+			changed = camel_message_info_set_user_tag (info, "due-by", text) || changed;
+			g_free (text);
+		} else {
+			changed = camel_message_info_set_user_tag (info, "due-by", NULL) || changed;
+		}
+	} else {
+		changed = camel_message_info_set_user_tag (info, "follow-up", NULL) || changed;
+		changed = camel_message_info_set_user_tag (info, "completed-on", NULL) || changed;
+		changed = camel_message_info_set_user_tag (info, "due-by", NULL) || changed;
+	}
+
+	return changed;
+}
+
 void
 camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
                                     GSList *items_updated)
@@ -665,17 +732,26 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
 			camel_folder_summary_get (folder->summary, id->id);
 		if (mi) {
 			gint server_flags;
+			gboolean changed, was_changed;
 
+			was_changed = (mi->info.flags & CAMEL_MESSAGE_FOLDER_FLAGGED) != 0;
 			server_flags = ews_utils_get_server_flags (item);
 			ews_utils_merge_server_user_flags (item, mi);
-			if (camel_ews_update_message_info_flags (
+			changed = camel_ews_update_message_info_flags (
 				folder->summary, (CamelMessageInfo *) mi,
-				server_flags, NULL))
+				server_flags, NULL);
+			changed = camel_ews_utils_update_follow_up_flags (item, (CamelMessageInfo *) mi) || changed;
+
+			if (changed)
 				camel_folder_change_info_change_uid (ci, mi->info.uid);
 
 			g_free (mi->change_key);
 			mi->change_key = g_strdup (id->change_key);
 			mi->info.dirty = TRUE;
+			if (!was_changed) {
+				/* do not save to the server what was just read, when did not change locally before */
+				mi->info.flags = mi->info.flags & (~CAMEL_MESSAGE_FOLDER_FLAGGED);
+			}
 
 			camel_message_info_free (mi);
 			g_object_unref (item);
@@ -789,6 +865,8 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 		mi->info.flags |= server_flags;
 		mi->server_flags = server_flags;
 
+		camel_ews_utils_update_follow_up_flags (item, (CamelMessageInfo *) mi);
+
 		camel_folder_summary_add (
 			folder->summary, (CamelMessageInfo *) mi);
 
@@ -838,4 +916,140 @@ camel_ews_utils_get_host_name (CamelSettings *settings)
 	g_free (hosturl);
 
 	return host;
+}
+
+void
+ews_utils_update_followup_flags (ESoapMessage *msg,
+				 CamelMessageInfo *mi)
+{
+	const gchar *followup, *completed, *dueby;
+	time_t completed_tt = (time_t) 0 , dueby_tt = (time_t) 0;
+
+	g_return_if_fail (msg != NULL);
+	g_return_if_fail (mi != NULL);
+
+	followup = camel_message_info_user_tag (mi, "follow-up");
+	completed = camel_message_info_user_tag (mi, "completed-on");
+	dueby = camel_message_info_user_tag (mi, "due-by");
+
+	if (followup && !*followup)
+		followup = NULL;
+
+	if (completed && *completed)
+		completed_tt = camel_header_decode_date (completed, NULL);
+
+	if (dueby && *dueby)
+		dueby_tt = camel_header_decode_date (dueby, NULL);
+
+	/* PidTagFlagStatus */
+	e_ews_message_add_set_item_field_extended_tag_int (msg, NULL, "Message", 0x1090,
+		followup ? (completed_tt != (time_t) 0 ? 0x01 /* followupComplete */: 0x02 /* followupFlagged */) : 0x0);
+
+	if (followup) {
+		time_t now_tt = time (NULL);
+
+		/* PidLidFlagRequest */
+		e_ews_message_add_set_item_field_extended_distinguished_tag_string (msg, NULL, "Message", "Common", 0x8530, followup);
+
+		/* PidTagToDoItemFlags */
+		e_ews_message_add_set_item_field_extended_tag_int (msg, NULL, "Message", 0x0e2b, 1);
+
+		if (completed_tt == (time_t) 0 && dueby_tt == (time_t) 0) {
+			/* PidLidTaskStatus */
+			e_ews_message_add_set_item_field_extended_distinguished_tag_int (msg, NULL, "Message", "Task", 0x8101, 0);
+
+			/* PidLidPercentComplete */
+			e_ews_message_add_set_item_field_extended_distinguished_tag_double (msg, NULL, "Message", "Task", 0x8102, 0.0);
+
+			/* PidLidTaskStartDate */
+			e_ews_message_add_set_item_field_extended_distinguished_tag_time (msg, NULL, "Message", "Task", 0x8104, now_tt);
+
+			/* PidLidTaskDueDate */
+			e_ews_message_add_set_item_field_extended_distinguished_tag_time (msg, NULL, "Message", "Task", 0x8105, now_tt);
+
+			/* PidLidTaskComplete */
+			e_ews_message_add_set_item_field_extended_distinguished_tag_boolean (msg, NULL, "Message", "Task", 0x811c, FALSE);
+		}
+	} else {
+		/* PidTagFlagStatus */
+		e_ews_message_add_delete_item_field_extended_tag (msg, 0x1090, E_EWS_MESSAGE_DATA_TYPE_INT);
+
+		/* PidTagFlagCompleteTime */
+		e_ews_message_add_delete_item_field_extended_tag (msg, 0x1091, E_EWS_MESSAGE_DATA_TYPE_TIME);
+
+		/* PidTagToDoItemFlags */
+		e_ews_message_add_delete_item_field_extended_tag (msg, 0x0e2b, E_EWS_MESSAGE_DATA_TYPE_INT);
+
+		/* PidTagFollowupIcon */
+		e_ews_message_add_delete_item_field_extended_tag (msg, 0x1095, E_EWS_MESSAGE_DATA_TYPE_INT);
+
+		/* PidLidFlagRequest */
+		e_ews_message_add_delete_item_field_extended_distinguished_tag (msg, "Common", 0x8530, E_EWS_MESSAGE_DATA_TYPE_STRING);
+
+		/* PidLidFlagString */
+		e_ews_message_add_delete_item_field_extended_distinguished_tag (msg, "Common", 0x85c0, E_EWS_MESSAGE_DATA_TYPE_INT);
+
+		/* PidLidTaskStatus */
+		e_ews_message_add_delete_item_field_extended_distinguished_tag (msg, "Task", 0x8101, E_EWS_MESSAGE_DATA_TYPE_INT);
+
+		/* PidLidPercentComplete */
+		e_ews_message_add_delete_item_field_extended_distinguished_tag (msg, "Task", 0x8102, E_EWS_MESSAGE_DATA_TYPE_DOUBLE);
+
+		/* PidLidTaskStartDate */
+		e_ews_message_add_delete_item_field_extended_distinguished_tag (msg, "Task", 0x8104, E_EWS_MESSAGE_DATA_TYPE_TIME);
+
+		/* PidLidTaskDueDate */
+		e_ews_message_add_delete_item_field_extended_distinguished_tag (msg, "Task", 0x8105, E_EWS_MESSAGE_DATA_TYPE_TIME);
+
+		/* PidLidTaskDateCompleted */
+		e_ews_message_add_delete_item_field_extended_distinguished_tag (msg, "Task", 0x810f, E_EWS_MESSAGE_DATA_TYPE_TIME);
+
+		/* PidLidTaskComplete */
+		e_ews_message_add_delete_item_field_extended_distinguished_tag (msg, "Task", 0x811c, E_EWS_MESSAGE_DATA_TYPE_BOOLEAN);
+	}
+
+	if (followup && completed_tt != (time_t) 0) {
+		/* minute precision */
+		completed_tt = completed_tt - (completed_tt % 60);
+
+		/* PidTagFlagCompleteTime */
+		e_ews_message_add_set_item_field_extended_tag_time (msg, NULL, "Message", 0x1091, completed_tt);
+
+		/* PidTagFollowupIcon */
+		e_ews_message_add_delete_item_field_extended_tag (msg, 0x1095, E_EWS_MESSAGE_DATA_TYPE_INT);
+
+		/* PidLidTaskDateCompleted */
+		e_ews_message_add_set_item_field_extended_distinguished_tag_time (msg, NULL, "Message", "Task", 0x810f, completed_tt);
+
+		/* PidLidTaskStatus */
+		e_ews_message_add_set_item_field_extended_distinguished_tag_int (msg, NULL, "Message", "Task", 0x8101, 2);
+
+		/* PidLidPercentComplete */
+		e_ews_message_add_set_item_field_extended_distinguished_tag_double (msg, NULL, "Message", "Task", 0x8102, 1.0);
+
+		/* PidLidTaskComplete */
+		e_ews_message_add_set_item_field_extended_distinguished_tag_boolean (msg, NULL, "Message", "Task", 0x811c, TRUE);
+	}
+
+	if (followup && dueby_tt != (time_t) 0 && completed_tt == (time_t) 0) {
+		time_t now_tt = time (NULL);
+
+		if (now_tt > dueby_tt)
+			now_tt = dueby_tt - 1;
+
+		/* PidLidTaskStatus */
+		e_ews_message_add_set_item_field_extended_distinguished_tag_int (msg, NULL, "Message", "Task", 0x8101, 0);
+
+		/* PidLidPercentComplete */
+		e_ews_message_add_set_item_field_extended_distinguished_tag_double (msg, NULL, "Message", "Task", 0x8102, 0.0);
+
+		/* PidLidTaskStartDate */
+		e_ews_message_add_set_item_field_extended_distinguished_tag_time (msg, NULL, "Message", "Task", 0x8104, now_tt);
+
+		/* PidLidTaskDueDate */
+		e_ews_message_add_set_item_field_extended_distinguished_tag_time (msg, NULL, "Message", "Task", 0x8105, dueby_tt);
+
+		/* PidLidTaskComplete */
+		e_ews_message_add_set_item_field_extended_distinguished_tag_boolean (msg, NULL, "Message", "Task", 0x811c, FALSE);
+	}
 }

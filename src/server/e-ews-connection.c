@@ -3810,6 +3810,96 @@ e_ews_connection_satisfies_server_version (EEwsConnection *cnc,
 	return cnc->priv->version >= version;
 }
 
+static gboolean
+ews_decode_mapi_property_string_type (const gchar *type_string,
+				      EEwsMessageDataType *data_type)
+{
+	g_return_val_if_fail (type_string != NULL, FALSE);
+	g_return_val_if_fail (data_type != NULL, FALSE);
+
+	if (g_ascii_strcasecmp (type_string, "boolean") == 0) {
+		*data_type = E_EWS_MESSAGE_DATA_TYPE_BOOLEAN;
+		return TRUE;
+	}
+
+	if (g_ascii_strcasecmp (type_string, "int") == 0) {
+		*data_type = E_EWS_MESSAGE_DATA_TYPE_INT;
+		return TRUE;
+	}
+
+	if (g_ascii_strcasecmp (type_string, "double") == 0) {
+		*data_type = E_EWS_MESSAGE_DATA_TYPE_DOUBLE;
+		return TRUE;
+	}
+
+	if (g_ascii_strcasecmp (type_string, "string") == 0) {
+		*data_type = E_EWS_MESSAGE_DATA_TYPE_STRING;
+		return TRUE;
+	}
+
+	if (g_ascii_strcasecmp (type_string, "time") == 0) {
+		*data_type = E_EWS_MESSAGE_DATA_TYPE_TIME;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+static gboolean
+ews_decode_mapi_property_string_id (const gchar *hexa_id,
+				    guint32 *prop_id)
+{
+	gint64 value;
+
+	g_return_val_if_fail (hexa_id != NULL, FALSE);
+	g_return_val_if_fail (prop_id != NULL, FALSE);
+	g_return_val_if_fail (g_ascii_strncasecmp (hexa_id, "0x", 2) == 0, FALSE);
+
+	value = g_ascii_strtoll (hexa_id + 2, NULL, 16);
+	*prop_id = (guint32) value;
+
+	return value != 0;
+}
+
+/* expects either "mapi:Type:0xPropId" or "mapi:dist:Type:SetId:0xPropId"
+   where 'type' is one of boolean/int/double/string/time */
+static gboolean
+ews_decode_mapi_property_string (const gchar *prop_descr,
+				 EEwsMessageDataType *data_type,
+				 guint32 *prop_id,
+				 gchar **distinguished_set_id)
+{
+	gchar **split;
+	guint len;
+	gboolean res = FALSE;
+
+	g_return_val_if_fail (prop_descr != NULL, FALSE);
+	g_return_val_if_fail (data_type != NULL, FALSE);
+	g_return_val_if_fail (prop_id != NULL, FALSE);
+	g_return_val_if_fail (distinguished_set_id != NULL, FALSE);
+	g_return_val_if_fail (g_ascii_strncasecmp (prop_descr, "mapi:", 5) == 0, FALSE);
+
+	split = g_strsplit (prop_descr, ":", 0);
+	g_return_val_if_fail (split != NULL, FALSE);
+
+	len = g_strv_length (split);
+	if (len == 3
+	    && ews_decode_mapi_property_string_type (split[1], data_type)
+	    && ews_decode_mapi_property_string_id (split[2], prop_id)) {
+		res = TRUE;
+	} else if (len == 5
+		   && g_ascii_strcasecmp (split[1], "dist") == 0
+		   && ews_decode_mapi_property_string_type (split[2], data_type)
+		   && ews_decode_mapi_property_string_id (split[4], prop_id)) {
+		*distinguished_set_id = g_strdup (split[3]);
+		res = *distinguished_set_id && **distinguished_set_id;
+	}
+
+	g_strfreev (split);
+
+	return res;
+}
+
 void
 e_ews_connection_get_items (EEwsConnection *cnc,
                             gint pri,
@@ -3875,12 +3965,28 @@ e_ews_connection_get_items (EEwsConnection *cnc,
 
 		e_soap_message_start_element (msg, "AdditionalProperties", NULL, NULL);
 		while (prop[i]) {
-			/* XX FIXME: Come up with a better way of doing this */
-			if (!g_ascii_strncasecmp (prop[i], "mapi:int:0x", 11)) {
-				e_soap_message_start_element (msg, "ExtendedFieldURI", NULL, NULL);
-				e_soap_message_add_attribute (msg, "PropertyTag", prop[i] + 9, NULL, NULL);
-				e_soap_message_add_attribute (msg, "PropertyType", "Integer", NULL, NULL);
-				e_soap_message_end_element (msg);
+			if (g_ascii_strncasecmp (prop[i], "mapi:", 5) == 0) {
+				EEwsMessageDataType data_type;
+				guint32 prop_id = -1;
+				gchar *distinguished_set_id = NULL;
+
+				if (ews_decode_mapi_property_string (prop[i], &data_type, &prop_id, &distinguished_set_id)) {
+					const gchar *prop_type = e_ews_message_data_type_get_xml_name (data_type);
+
+					if (prop_type) {
+						if (distinguished_set_id) {
+							e_ews_message_write_extended_distinguished_tag (msg, distinguished_set_id, prop_id, prop_type);
+						} else {
+							e_ews_message_write_extended_tag (msg, prop_id, prop_type);
+						}
+					} else {
+						g_warning ("%s: Failed to decode mapi property type from '%s'", G_STRFUNC, prop[i]);
+					}
+				} else {
+					g_warning ("%s: Failed to decode mapi property from '%s'", G_STRFUNC, prop[i]);
+				}
+
+				g_free (distinguished_set_id);
 			} else {
 				e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", prop[i]);
 			}

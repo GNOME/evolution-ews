@@ -32,6 +32,7 @@
 #include <glib/gprintf.h>
 #include <libsoup/soup-misc.h>
 #include "e-ews-item.h"
+#include "e-ews-item-change.h"
 
 #ifdef G_OS_WIN32
 
@@ -158,6 +159,9 @@ struct _EEwsItemPrivate {
 	guint32 mapi_message_status;		/* http://msdn.microsoft.com/en-us/library/cc839915.aspx */
 	guint32 mapi_message_flags;		/* http://msdn.microsoft.com/en-us/library/cc839733.aspx */
 
+	GHashTable *mapi_extended_tags; /* simple tag->string_value */
+	GHashTable *mapi_extended_sets; /* setid-> [ tag->string_value ] */
+
 	/* properties */
 	EwsId *item_id;
 	gchar *subject;
@@ -219,6 +223,16 @@ e_ews_item_dispose (GObject *object)
 	priv = item->priv;
 
 	g_clear_error (&priv->error);
+
+	if (priv->mapi_extended_sets) {
+		g_hash_table_destroy (priv->mapi_extended_sets);
+		priv->mapi_extended_sets = NULL;
+	}
+
+	if (priv->mapi_extended_tags) {
+		g_hash_table_destroy (priv->mapi_extended_tags);
+		priv->mapi_extended_tags = NULL;
+	}
 
 	if (priv->item_id) {
 		g_free (priv->item_id->id);
@@ -348,6 +362,9 @@ e_ews_item_init (EEwsItem *item)
 	item->priv = priv;
 
 	priv->item_type = E_EWS_ITEM_TYPE_UNKNOWN;
+
+	priv->mapi_extended_tags = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_free);
+	priv->mapi_extended_sets = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_hash_table_destroy);
 }
 
 static void
@@ -452,9 +469,10 @@ static void
 parse_extended_property (EEwsItemPrivate *priv,
                          ESoapParameter *param)
 {
+	EEwsMessageDataType data_type;
 	ESoapParameter *subparam;
-	gchar *str;
-	guint32 tag, value;
+	gchar *str, *setid;
+	guint32 tag;
 
 	subparam = e_soap_parameter_get_first_child_by_name (param, "ExtendedFieldURI");
 	if (!subparam)
@@ -464,53 +482,84 @@ parse_extended_property (EEwsItemPrivate *priv,
 	if (!str)
 		return;
 
-	/* We only handle integer MAPI properties for now... */
-	if (g_ascii_strcasecmp (str, "Integer")) {
+	/* We only handle some MAPI properties for now... */
+	if (g_ascii_strcasecmp (str, "Boolean") == 0) {
+		data_type = E_EWS_MESSAGE_DATA_TYPE_BOOLEAN;
+	} else if (g_ascii_strcasecmp (str, "Integer") == 0) {
+		data_type = E_EWS_MESSAGE_DATA_TYPE_INT;
+	} else if (g_ascii_strcasecmp (str, "Double") == 0) {
+		data_type = E_EWS_MESSAGE_DATA_TYPE_DOUBLE;
+	} else if (g_ascii_strcasecmp (str, "String") == 0) {
+		data_type = E_EWS_MESSAGE_DATA_TYPE_STRING;
+	} else if (g_ascii_strcasecmp (str, "SystemTime") == 0) {
+		data_type = E_EWS_MESSAGE_DATA_TYPE_TIME;
+	} else {
 		g_free (str);
 		return;
 	}
 	g_free (str);
 
 	str = e_soap_parameter_get_property (subparam, "PropertyTag");
-	if (!str)
-		return;
+	if (!str) {
+		str = e_soap_parameter_get_property (subparam, "PropertyId");
+		if (!str)
+			return;
+	}
 
 	tag = strtol (str, NULL, 0);
 	g_free (str);
 
+	setid = e_soap_parameter_get_property (subparam, "DistinguishedPropertySetId");
+
 	subparam = e_soap_parameter_get_first_child_by_name (param, "Value");
-	if (!subparam)
+	if (!subparam) {
+		g_free (setid);
 		return;
+	}
 
 	str = e_soap_parameter_get_string_value (subparam);
-	if (!str)
+	if (!str) {
+		g_free (setid);
 		return;
-
-	value = strtol (str, NULL, 0);
-	g_free (str);
-
-	switch (tag) {
-	case 0x01080: /* PidTagIconIndex */
-		priv->mapi_icon_index = value;
-		break;
-
-	case 0x1081:
-		priv->mapi_last_verb_executed = value;
-		break;
-
-	case 0xe07:
-		priv->mapi_message_flags = value;
-		break;
-
-	case 0xe17:
-		priv->mapi_message_status = value;
-		break;
-
-	default:
-		g_print (
-			"Fetched unrecognised MAPI property 0x%x, value %d\n",
-			tag, value);
 	}
+
+	if (data_type == E_EWS_MESSAGE_DATA_TYPE_INT) {
+		guint32 value;
+
+		value = strtol (str, NULL, 0);
+
+		switch (tag) {
+		case 0x01080: /* PidTagIconIndex */
+			priv->mapi_icon_index = value;
+			break;
+
+		case 0x1081:
+			priv->mapi_last_verb_executed = value;
+			break;
+
+		case 0xe07:
+			priv->mapi_message_flags = value;
+			break;
+
+		case 0xe17:
+			priv->mapi_message_status = value;
+			break;
+		}
+	}
+
+	if (setid) {
+		GHashTable *set_hash = g_hash_table_lookup (priv->mapi_extended_sets, setid);
+		if (!set_hash) {
+			set_hash = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_free);
+			g_hash_table_insert (priv->mapi_extended_sets, setid, set_hash);
+		}
+
+		g_hash_table_insert (set_hash, GUINT_TO_POINTER (tag), g_strdup (str));
+	} else {
+		g_hash_table_insert (priv->mapi_extended_tags, GUINT_TO_POINTER (tag), g_strdup (str));
+	}
+
+	g_free (str);
 }
 
 static void
@@ -1498,6 +1547,131 @@ e_ews_item_get_attachments_ids (EEwsItem *item)
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
 	return item->priv->attachments_ids;
+}
+
+const gchar *
+e_ews_item_get_extended_tag (EEwsItem *item,
+			     guint32 prop_tag)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	if (!item->priv->mapi_extended_tags)
+		return NULL;
+
+	return g_hash_table_lookup (item->priv->mapi_extended_tags, GUINT_TO_POINTER (prop_tag));
+}
+
+const gchar *
+e_ews_item_get_extended_distinguished_tag (EEwsItem *item,
+					   const gchar *set_id,
+					   guint32 prop_id)
+{
+	GHashTable *set_tags;
+
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	if (!item->priv->mapi_extended_sets)
+		return NULL;
+
+	set_tags = g_hash_table_lookup (item->priv->mapi_extended_sets, set_id);
+	if (!set_tags)
+		return NULL;
+
+	return g_hash_table_lookup (set_tags, GUINT_TO_POINTER (prop_id));
+}
+
+gboolean
+e_ews_item_get_extended_property_as_boolean (EEwsItem *item,
+					     const gchar *set_id,
+					     guint32 prop_id_or_tag,
+					     gboolean *found)
+{
+	const gchar *value;
+
+	value = e_ews_item_get_extended_property_as_string (item, set_id, prop_id_or_tag, found);
+	if (!value)
+		return FALSE;
+
+	if (g_str_equal (value, "true"))
+		return TRUE;
+
+	if (g_str_equal (value, "true"))
+		return FALSE;
+
+	if (found)
+		*found = FALSE;
+	return FALSE;
+}
+
+gint
+e_ews_item_get_extended_property_as_int (EEwsItem *item,
+					 const gchar *set_id,
+					 guint32 prop_id_or_tag,
+					 gboolean *found)
+{
+	const gchar *value;
+
+	value = e_ews_item_get_extended_property_as_string (item, set_id, prop_id_or_tag, found);
+	if (!value)
+		return 0;
+
+	return strtol (value, NULL, 0);
+}
+
+gdouble
+e_ews_item_get_extended_property_as_double (EEwsItem *item,
+					    const gchar *set_id,
+					    guint32 prop_id_or_tag,
+					    gboolean *found)
+{
+	const gchar *value;
+
+	value = e_ews_item_get_extended_property_as_string (item, set_id, prop_id_or_tag, found);
+	if (!value)
+		return 0.0;
+
+	return g_ascii_strtod (value, NULL);
+}
+
+const gchar *
+e_ews_item_get_extended_property_as_string (EEwsItem *item,
+					    const gchar *set_id,
+					    guint32 prop_id_or_tag,
+					    gboolean *found)
+{
+	const gchar *value;
+
+	if (set_id)
+		value = e_ews_item_get_extended_distinguished_tag (item, set_id, prop_id_or_tag);
+	else
+		value = e_ews_item_get_extended_tag (item, prop_id_or_tag);
+
+	if (found)
+		*found = value != NULL;
+
+	return value;
+}
+
+time_t
+e_ews_item_get_extended_property_as_time (EEwsItem *item,
+					  const gchar *set_id,
+					  guint32 prop_id_or_tag,
+					  gboolean *found)
+{
+	const gchar *value;
+	GTimeVal tv;
+
+	value = e_ews_item_get_extended_property_as_string (item, set_id, prop_id_or_tag, found);
+	if (!value)
+		return (time_t) 0;
+
+	if (g_time_val_from_iso8601 (value, &tv))
+		return tv.tv_sec;
+
+	if (found)
+		*found = FALSE;
+
+	return (time_t) 0;
 }
 
 gchar *

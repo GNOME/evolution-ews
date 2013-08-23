@@ -68,7 +68,28 @@ void		e_ews_message_write_int_parameter
 						 const gchar *name,
 						 const gchar *prefix,
 						 glong value);
+void		e_ews_message_write_double_parameter
+						(ESoapMessage *msg,
+						 const gchar *name,
+						 const gchar *prefix,
+						 gdouble value);
+void		e_ews_message_write_time_parameter
+						(ESoapMessage *msg,
+						 const gchar *name,
+						 const gchar *prefix,
+						 time_t value);
 void		e_ews_message_write_footer	(ESoapMessage *msg);
+
+void		e_ews_message_write_extended_tag
+						(ESoapMessage *msg,
+						 guint32 prop_id,
+						 const gchar *prop_type);
+
+void		e_ews_message_write_extended_distinguished_tag
+						(ESoapMessage *msg,
+						 const gchar *set_id,
+						 guint32 prop_id,
+						 const gchar *prop_type);
 
 G_END_DECLS
 

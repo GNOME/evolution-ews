@@ -188,6 +188,28 @@ e_ews_message_write_int_parameter (ESoapMessage *msg,
 }
 
 void
+e_ews_message_write_double_parameter (ESoapMessage *msg,
+				      const gchar *name,
+				      const gchar *prefix,
+				      gdouble value)
+{
+	e_soap_message_start_element (msg, name, prefix, NULL);
+	e_soap_message_write_double (msg, value);
+	e_soap_message_end_element (msg);
+}
+
+void
+e_ews_message_write_time_parameter (ESoapMessage *msg,
+				    const gchar *name,
+				    const gchar *prefix,
+				    time_t value)
+{
+	e_soap_message_start_element (msg, name, prefix, NULL);
+	e_soap_message_write_time (msg, value);
+	e_soap_message_end_element (msg);
+}
+
+void
 e_ews_message_write_footer (ESoapMessage *msg)
 {
 	e_soap_message_end_element (msg);
@@ -195,4 +217,40 @@ e_ews_message_write_footer (ESoapMessage *msg)
 	e_soap_message_end_envelope (msg);
 
 	e_soap_message_persist (msg);
+}
+
+void
+e_ews_message_write_extended_tag (ESoapMessage *msg,
+				  guint32 prop_id,
+				  const gchar *prop_type)
+{
+	gchar *num;
+
+	num = g_strdup_printf ("%d", prop_id);
+
+	e_soap_message_start_element (msg, "ExtendedFieldURI", NULL, NULL);
+	e_soap_message_add_attribute (msg, "PropertyTag", num, NULL, NULL);
+	e_soap_message_add_attribute (msg, "PropertyType", prop_type, NULL, NULL);
+	e_soap_message_end_element (msg); /* ExtendedFieldURI */
+
+	g_free (num);
+}
+
+void
+e_ews_message_write_extended_distinguished_tag (ESoapMessage *msg,
+						const gchar *set_id,
+						guint32 prop_id,
+						const gchar *prop_type)
+{
+	gchar *num;
+
+	num = g_strdup_printf ("%d", prop_id);
+
+	e_soap_message_start_element (msg, "ExtendedFieldURI", NULL, NULL);
+	e_soap_message_add_attribute (msg, "DistinguishedPropertySetId", set_id, NULL, NULL);
+	e_soap_message_add_attribute (msg, "PropertyId", num, NULL, NULL);
+	e_soap_message_add_attribute (msg, "PropertyType", prop_type, NULL, NULL);
+	e_soap_message_end_element (msg); /* ExtendedFieldURI */
+
+	g_free (num);
 }
