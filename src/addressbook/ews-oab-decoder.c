@@ -754,7 +754,7 @@ ews_decode_oab_prop (EwsOabDecoder *eod,
 			break;
 		}
 		default:
-			g_assert_not_reached ();
+			g_error ("%s: Cannot decode property 0x%x", G_STRFUNC, prop_id);
 			break;
 	}
 
@@ -773,19 +773,19 @@ ews_destroy_oab_prop (guint32 prop_id, gpointer val)
 		case EWS_PTYP_BOOLEAN:
 			break;
 		case EWS_PTYP_BINARY:
-			g_bytes_unref(val);
+			g_bytes_unref (val);
 			break;
 		case EWS_PTYP_STRING8:
 		case EWS_PTYP_STRING:
 			g_free ((gchar *) val);
 			break;
 		case EWS_PTYP_MULTIPLEBINARY:
-			g_slist_foreach ((GSList *) val, (GFunc) g_bytes_unref, NULL);
-			g_slist_free ((GSList *) val);
+			g_slist_free_full ((GSList *) val, (GDestroyNotify) g_bytes_unref);
 			break;
 		case EWS_PTYP_MULTIPLESTRING8:
 		case EWS_PTYP_MULTIPLESTRING:
-			g_slist_foreach ((GSList *) val, (GFunc) g_free, NULL);
+			g_slist_free_full ((GSList *) val, g_free);
+			break;
 		case EWS_PTYP_MULTIPLEINTEGER32:
 			g_slist_free ((GSList *) val);
 			break;
@@ -916,6 +916,12 @@ ews_decode_addressbook_record (EwsOabDecoder *eod,
 
 		val = g_slist_nth_data (props, i);
 		prop_id = GPOINTER_TO_UINT (val);
+
+		/* these are not encoded in the OAB, according to
+		   http://msdn.microsoft.com/en-us/library/gg671985%28v=EXCHG.80%29.aspx
+		 */
+		if ((prop_id & 0xFFFF) == EWS_PTYP_OBJECT)
+			continue;
 
 		val = ews_decode_oab_prop (eod, prop_id, cancellable, error);
 

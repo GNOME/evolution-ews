@@ -25,6 +25,7 @@
 /* Ews oab data types */
 #define EWS_PTYP_INTEGER32		0x0003
 #define EWS_PTYP_BOOLEAN		0x000B
+#define	EWS_PTYP_OBJECT			0x000d
 #define EWS_PTYP_STRING8		0x001E
 #define EWS_PTYP_STRING			0x001F
 #define EWS_PTYP_BINARY			0x0102
