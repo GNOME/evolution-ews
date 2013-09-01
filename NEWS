@@ -1,3 +1,20 @@
+Evolution-EWS 3.9.91 2013-09-02
+-------------------------------
+
+Bug Fixes:
+	Bug 655325 - Support follow up flag (Milan Crha)
+	Bug 656008 - Handle Categories on calendar components (Milan Crha)
+	Bug 657807 - "Save as draft" saving duplicate drafts (Milan Crha)
+	Bug 675796 - Assertion abort in ews_decode_oab_prop() (Milan Crha)
+
+Translations:
+	Nilamdyuti Goswami (as)
+	Marek Černocký (cs)
+	Piotr Drąg (pl)
+	Rafael Ferreira (pt_BR)
+	Shantha kumar (ta)
+
+
 Evolution-EWS 3.9.90 2013-08-19
 -------------------------------
 
