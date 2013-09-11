@@ -51,6 +51,8 @@ libeews_1_2_la_SOURCES = \
 	$(KERBEROS_FILES) \
 	e-ews-connection.c \
 	e-ews-connection.h \
+	e-ews-debug.c \
+	e-ews-debug.h \
 	e-ews-enumtypes.c \
 	e-ews-folder.c \
 	e-ews-item.c \
@@ -81,6 +83,7 @@ libeewsincludedir = $(privincludedir)/ews
 libeewsinclude_HEADERS = \
 	ews-errors.h \
 	e-ews-connection.h \
+	e-ews-debug.h \
 	e-ews-enums.h \
 	e-ews-enumtypes.h \
 	e-ews-folder.h \

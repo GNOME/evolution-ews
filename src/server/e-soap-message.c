@@ -16,7 +16,9 @@
 #ifdef G_OS_WIN32
 #include <io.h>
 #endif
+
 #include "e-soap-message.h"
+#include "e-ews-debug.h"
 
 #define E_SOAP_MESSAGE_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE \
@@ -344,11 +346,18 @@ e_soap_message_new (const gchar *method,
 
 	soup_uri_free (uri);
 
-	/* Don't accumulate body data into a huge buffer.
-	 * Instead, parse it as it arrives. */
-	soup_message_body_set_accumulate (
-		SOUP_MESSAGE (msg)->response_body,
-		FALSE);
+	/*
+	 * Don't use streaming-based messages when we are loggin the traffic
+	 * to generate trace files for tests
+	 */
+	if (e_ews_debug_get_log_level () <= 2) {
+		/* Don't accumulate body data into a huge buffer.
+		 * Instead, parse it as it arrives. */
+		soup_message_body_set_accumulate (
+				SOUP_MESSAGE (msg)->response_body,
+				FALSE);
+	}
+
 	g_signal_connect (msg, "got-headers", G_CALLBACK (soap_got_headers), NULL);
 	g_signal_connect (msg, "got-chunk", G_CALLBACK (soap_got_chunk), NULL);
 	g_signal_connect (msg, "restarted", G_CALLBACK (soap_restarted), NULL);

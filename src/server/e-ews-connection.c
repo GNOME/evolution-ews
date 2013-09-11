@@ -44,6 +44,7 @@
 #include "e-ews-connection.h"
 #include "e-ews-message.h"
 #include "e-ews-item-change.h"
+#include "e-ews-debug.h"
 
 #define d(x) x
 
@@ -438,7 +439,7 @@ ews_next_request (gpointer _cnc)
 
 	node = (EwsNode *) l->data;
 
-	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) == 1)) {
+	if (e_ews_debug_get_log_level () == 1) {
 		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (node->msg)->request_body));
 		/* print request's body */
 		printf ("\n The request headers");
@@ -595,6 +596,7 @@ ews_response_cb (SoupSession *session,
 {
 	EwsNode *enode = (EwsNode *) data;
 	ESoapResponse *response;
+	gint log_level;
 
 	if (g_cancellable_is_cancelled (enode->cancellable))
 		goto exit;
@@ -621,7 +623,9 @@ ews_response_cb (SoupSession *session,
 
 	/* TODO: The stdout can be replaced with Evolution's
 	 * Logging framework also */
-	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1))
+
+	log_level = e_ews_debug_get_log_level ();
+	if (log_level >= 1 && log_level < 3)
 		e_soap_response_dump_response (response, stdout);
 
 	if (enode->cb != NULL)
@@ -1529,9 +1533,56 @@ e_ews_soup_thread (gpointer user_data)
 	return NULL;
 }
 
+/*
+ * e_ews_debug_handler:
+ *
+ * GLib debug message handler, which is passed all messages from g_debug() calls,
+ * and decides whether to print them.
+ */
+static void
+e_ews_debug_handler (const gchar *log_domain,
+		     GLogLevelFlags log_level,
+		     const gchar *message,
+		     gpointer user_data)
+{
+	if (e_ews_debug_get_log_level () >= 3)
+		g_log_default_handler (log_domain, log_level, message, NULL);
+}
+
+/*
+ * e_ews_soup_log_print:
+ *
+ * Log printer for the libsoup logging functionality, which just marshal all soup log
+ * output to the standard GLib logging framework (and thus to debug_handler(), above).
+ */
+static void
+e_ews_soup_log_printer (SoupLogger *logger,
+			SoupLoggerLogLevel level,
+			char direction,
+			const gchar *data,
+			gpointer user_data)
+{
+	const gchar *filtered_data = NULL;
+
+	if (e_ews_debug_get_log_level () >= 3) {
+		if (direction == '>' && g_ascii_strncasecmp (data, "Host:", 5) == 0)
+			filtered_data = "Host: <redacted>";
+		else if (direction == '>' && g_ascii_strncasecmp (data, "Authorization:", 14) == 0)
+			filtered_data = "Authorization: <redacted>";
+		else if (direction == '<' && g_ascii_strncasecmp (data, "Set-Cookie:", 11) == 0)
+			filtered_data = "Set-Cookie: <redacted>";
+		else
+			filtered_data = data;
+	}
+
+	g_debug ("%c %s", direction, filtered_data ? filtered_data : data);
+}
+
 static void
 e_ews_connection_init (EEwsConnection *cnc)
 {
+	gint log_level;
+
 	cnc->priv = E_EWS_CONNECTION_GET_PRIVATE (cnc);
 
 	cnc->priv->soup_context = g_main_context_new ();
@@ -1552,12 +1603,25 @@ e_ews_connection_init (EEwsConnection *cnc)
 	e_proxy_setup_proxy (cnc->priv->proxy);
 	g_signal_connect (cnc->priv->proxy, "changed", G_CALLBACK (proxy_settings_changed), cnc);
 
-	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 2)) {
+	log_level = e_ews_debug_get_log_level ();
+
+	if (log_level >= 2) {
 		SoupLogger *logger;
 		logger = soup_logger_new (SOUP_LOGGER_LOG_BODY, -1);
+
+		if (log_level >= 3) {
+			soup_logger_set_printer (logger, e_ews_soup_log_printer, NULL, NULL);
+			g_log_set_handler (
+				G_LOG_DOMAIN,
+				G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING |
+				G_LOG_LEVEL_MESSAGE | G_LOG_LEVEL_INFO,
+				e_ews_debug_handler, cnc);
+		}
+
 		soup_session_add_feature (
 			cnc->priv->soup_session,
 			SOUP_SESSION_FEATURE (logger));
+		g_object_unref (logger);
 	}
 
 	g_mutex_init (&cnc->priv->password_lock);
@@ -2070,7 +2134,10 @@ autodiscover_data_free (struct _autodiscover_data *ad)
 static void
 ews_dump_raw_soup_response (SoupMessage *msg)
 {
-	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1)) {
+	gint log_level;
+
+	log_level = e_ews_debug_get_log_level ();
+	if (log_level >= 1 && log_level < 3) {
 		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->response_body));
 		/* print response body */
 		printf ("\n The response headers");
@@ -2260,6 +2327,7 @@ e_ews_get_msg_for_url (const gchar *url,
                        GError **error)
 {
 	SoupMessage *msg;
+	gint log_level;
 
 	if (url == NULL) {
 		g_set_error_literal (
@@ -2295,7 +2363,8 @@ e_ews_get_msg_for_url (const gchar *url,
 			G_CALLBACK (post_restarted), buf);
 	}
 
-	if (g_getenv ("EWS_DEBUG") && (atoi (g_getenv ("EWS_DEBUG")) >= 1)) {
+	log_level = e_ews_debug_get_log_level ();
+	if (log_level >= 1 && log_level < 3) {
 		soup_buffer_free (
 			soup_message_body_flatten (
 			SOUP_MESSAGE (msg)->request_body));
@@ -3158,7 +3227,12 @@ e_ews_connection_download_oal_file (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, data, (GDestroyNotify) oal_req_data_free);
 
-	soup_message_body_set_accumulate (soup_message->response_body, FALSE);
+	/*
+	 * Don't use streaming-based messages when we are loggin the traffic
+	 * to generate trace files for tests
+	 */
+	if (e_ews_debug_get_log_level () <= 2)
+		soup_message_body_set_accumulate (soup_message->response_body, FALSE);
 
 	g_signal_connect (
 		soup_message, "got-headers",

@@ -349,6 +349,28 @@ e_ews_folder_id_free (EwsFolderId *fid)
 	}
 }
 
+gboolean
+e_ews_folder_id_is_equal (const EwsFolderId *a,
+			  const EwsFolderId *b)
+{
+	if (a == NULL && b == NULL)
+		return TRUE;
+
+	if (a == NULL || b == NULL)
+		return FALSE;
+
+	if ((a->is_distinguished_id ? 1 : 0) != (b->is_distinguished_id ? 1 : 0))
+		return FALSE;
+
+	if (g_strcmp0 (a->id, b->id) != 0)
+		return FALSE;
+
+	if (g_strcmp0 (a->change_key, b->change_key) != 0)
+		return FALSE;
+
+	return TRUE;
+}
+
 const gchar *
 e_ews_folder_get_name (EEwsFolder *folder)
 {
