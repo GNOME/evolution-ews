@@ -5,13 +5,24 @@
 #
 # inbox -> indbakke (taget fra evolution-filen)
 # junk -> spam (taget fra evolution-filen)
+# unset -> nulstil
+#          Jeg var også i tvivl, men nu hælder jeg mere til at det måske mere er 
+#          nulstil, der skal stå her.
+#          Hvis det er selve statusteksten som det drejer sig om, så vil nulstilling
+#          være oplagt. Er det derimod tilstanden for status, så vil slå fra eller 
+#          deaktivere nok være bedre. Hvis ikke på kontoret-status som standard er
+#          slået fra, så vil nulstille også give mening.
+#          slog lige op i evolution (hovedfilen) og der er også brugt nulstil (et sted 
+#          dog deaktiver).
+#          Jeg holder lidt til slå fra eller deaktivere, men kender ikke programmet godt
+#          nok til at give andet end mit bud. 
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-09-09 22:45+0200\n"
-"PO-Revision-Date: 2013-03-26 21:38+0000\n"
+"POT-Creation-Date: 2013-09-11 22:34+0200\n"
+"PO-Revision-Date: 2013-09-11 21:38+0000\n"
 "Last-Translator: Joe Hansen <joedalton2@yahoo.dk>\n"
 "Language-Team: Dansk-gruppen <dansk@dansk-gruppen.dk>\n"
 "Language: \n"
@@ -29,6 +40,8 @@ msgstr "Motoren understøtter ikke massetilføjelser"
 msgid ""
 "Cannot save contact list, it's only supported on EWS Server 2010 or later"
 msgstr ""
+"Kan ikke gemme kontaktliste, den er kun understøttet på EWS Server 2010 "
+"eller senere"
 
 # mon ikke bulk i denne her sammenhæng betyder at man fjerne mange (mails,
 # kalendere, begivenheder?) på en gang. Måske sådan noget som
@@ -61,9 +74,8 @@ msgid "EWS does not support bulk removals"
 msgstr "EWS understøtter ikke flere massefjernelser"
 
 #: ../src/calendar/e-cal-backend-ews.c:1572
-#, fuzzy
 msgid "Unknown error"
-msgstr "Ukendt"
+msgstr "Ukendt fejl"
 
 #: ../src/calendar/e-cal-backend-ews.c:1773
 msgid "EWS does not support bulk additions"
@@ -202,9 +214,8 @@ msgid "%s_%d"
 msgstr "%s_%d"
 
 #: ../src/camel/camel-ews-store.c:603
-#, fuzzy
 msgid "Checking \"Out of Office\" settings"
-msgstr "Henter indstillinger for \"Ikke på kontoret\""
+msgstr "Kontroller indstillinger for \"Ikke på kontoret\""
 
 #: ../src/camel/camel-ews-store.c:843
 msgid "Updating foreign folder structure"
@@ -332,9 +343,8 @@ msgid "You must be working online to complete this operation"
 msgstr "Du skal være på nettet for at fuldføre denne handling"
 
 #: ../src/camel/camel-ews-store.c:2782
-#, fuzzy
 msgid "Unsetting the \"Out of Office\" status"
-msgstr "Henter indstillinger for \"Ikke på kontoret\""
+msgstr "Nulstil status for \"Ikke på kontoret\""
 
 #: ../src/camel/camel-ews-transport.c:72
 #, c-format
@@ -384,31 +394,29 @@ msgid "Data source '%s' does not represent an Exchange Web Services folder"
 msgstr "Datakilde \"%s\" repræsenterer ikke en mappe for Exchange Web Services"
 
 #: ../src/configuration/e-ews-config-utils.c:474
-#, fuzzy
 msgid "Folder"
-msgstr "Mappe-id:"
+msgstr "Mappe"
 
 #: ../src/configuration/e-ews-config-utils.c:480
 msgid "Size"
-msgstr ""
+msgstr "Størrelse"
 
 #: ../src/configuration/e-ews-config-utils.c:506
 #: ../src/configuration/e-ews-config-utils.c:511
 msgid "Unable to retrieve folder size information"
-msgstr ""
+msgstr "Kan ikke hente information om mappestørrelse"
 
 #: ../src/configuration/e-ews-config-utils.c:621
-#, fuzzy
 msgid "Folder Sizes"
-msgstr "Mappe synlig"
+msgstr "Mappestørrrelser"
 
 #: ../src/configuration/e-ews-config-utils.c:624
 msgid "_Close"
-msgstr ""
+msgstr "_Luk"
 
 #: ../src/configuration/e-ews-config-utils.c:638
 msgid "Fetching folder list…"
-msgstr ""
+msgstr "Henter mappeliste …"
 
 #: ../src/configuration/e-ews-config-utils.c:791
 #, c-format
@@ -416,9 +424,8 @@ msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr "Kan ikke redigere rettigheder for mappe \"%s\", vælg en anden mappe."
 
 #: ../src/configuration/e-ews-config-utils.c:868
-#, fuzzy
 msgid "Folder Sizes..."
-msgstr "Mappe synlig"
+msgstr "Mappestørrelser ..."
 
 #: ../src/configuration/e-ews-config-utils.c:875
 msgid "Subscribe to folder of other user..."
@@ -664,12 +671,11 @@ msgstr "Læser mapperettigheder, vent venligst ..."
 
 #: ../src/configuration/e-ews-ooo-notificator.c:184
 msgid "Unset on Server"
-msgstr ""
+msgstr "Nulstil på server"
 
 #: ../src/configuration/e-ews-ooo-notificator.c:185
-#, fuzzy
 msgid "Unset the \"Out of Office\" status"
-msgstr "Henter indstillinger for \"Ikke på kontoret\""
+msgstr "Nulstil status for \"Ikke på kontoret\""
 
 #: ../src/configuration/e-ews-search-user.c:208
 #, c-format
@@ -971,16 +977,15 @@ msgstr "Modtager indstillinger for \"Delegerede\""
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:195
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:256
 msgid "EWS Settings"
-msgstr ""
+msgstr "EWS-indstillinger"
 
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:201
 msgid "View the size of all Exchange folders"
-msgstr ""
+msgstr "Vis størrelsen for alle Exchangemapper"
 
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:205
-#, fuzzy
 msgid "Folder _Sizes"
-msgstr "Mappe synlig"
+msgstr "Mappe_størrelser"
 
 #: ../src/configuration/e-mail-config-ews-gal.c:221
 msgid "Locating offline address books"
@@ -1085,7 +1090,7 @@ msgstr "Indstillinger for &quot;Delegerede&quot; kunne ikke hentes."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:6
 msgid "Your Exchange account \"{0}\" has the status set as \"Out of Office\"."
-msgstr ""
+msgstr "Din Exchangekonto \"{0}\" har statussen \"Ikke på kontoret\"."
 
 #: ../src/server/e-ews-connection.c:538
 msgid "Operation Cancelled"
