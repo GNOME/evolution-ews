@@ -605,7 +605,7 @@ ews_folder_maybe_update_mlist (CamelFolder *folder,
 		}
 	}
 
-	camel_message_info_free ((CamelMessageInfo *) mi);
+	camel_message_info_unref (mi);
 }
 
 /* Get the message from cache if available otherwise get it from server */
@@ -824,7 +824,7 @@ msg_update_flags (ESoapMessage *msg,
 
 		camel_folder_summary_touch (mi->info.summary);
 
-		camel_message_info_free (mi);
+		camel_message_info_unref (mi);
 	}
 	/* Don't think we need to free the list; we already freed every element */
 }
@@ -949,13 +949,13 @@ ews_move_to_junk_folder (CamelFolder *folder,
 			for (iter = junk_uids; iter; iter = g_slist_next (iter)) {
 				const gchar *uid = iter->data;
 
-				camel_folder_summary_lock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+				camel_folder_summary_lock (folder->summary);
 
 				camel_folder_change_info_remove_uid (changes, uid);
 				camel_folder_summary_remove_uid (folder->summary, uid);
 				ews_data_cache_remove (ews_folder->cache, "cur", uid, NULL);
 
-				camel_folder_summary_unlock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+				camel_folder_summary_unlock (folder->summary);
 			}
 
 			if (camel_folder_change_info_changed (changes)) {
@@ -1031,16 +1031,16 @@ ews_synchronize_sync (CamelFolder *folder,
 				junk_uids = g_slist_prepend (junk_uids, (gpointer) camel_pstring_strdup (uids->pdata[i]));
 		} else if (flags_set & CAMEL_MESSAGE_DELETED) {
 			deleted_uids = g_slist_prepend (deleted_uids, (gpointer) camel_pstring_strdup (uids->pdata[i]));
-			camel_message_info_free (mi);
+			camel_message_info_unref (mi);
 		} else if (flags_set & CAMEL_MESSAGE_JUNK) {
 			junk_uids = g_slist_prepend (junk_uids, (gpointer) camel_pstring_strdup (uids->pdata[i]));
-			camel_message_info_free (mi);
+			camel_message_info_unref (mi);
 		} else if ((flags_set & CAMEL_MESSAGE_FOLDER_FLAGGED) != 0) {
 			/* OK, the change must have been the labels */
 			mi_list = g_slist_append (mi_list, mi);
 			mi_list_len++;
 		} else {
-			camel_message_info_free (mi);
+			camel_message_info_unref (mi);
 		}
 
 		if (mi_list_len == EWS_MAX_FETCH_COUNT) {
@@ -1244,7 +1244,7 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 
 		/* Check if the item has really changed */
 		if (!strcmp (((CamelEwsMessageInfo *) mi)->change_key, id->change_key)) {
-			camel_message_info_free (mi);
+			camel_message_info_unref (mi);
 			g_object_unref (item);
 			continue;
 		}
@@ -1254,7 +1254,7 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 		else
 			msg_ids = g_slist_append (msg_ids, g_strdup (id->id));
 
-		camel_message_info_free (mi);
+		camel_message_info_unref (mi);
 		g_object_unref (item);
 	}
 	g_slist_free (updated_items);
@@ -1423,7 +1423,7 @@ ews_folder_forget_all_mails (CamelEwsFolder *ews_folder)
 
 	changes = camel_folder_change_info_new ();
 
-	camel_folder_summary_lock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+	camel_folder_summary_lock (folder->summary);
 	for (ii = 0; ii < known_uids->len; ii++) {
 		const gchar *uid = g_ptr_array_index (known_uids, ii);
 
@@ -1431,7 +1431,7 @@ ews_folder_forget_all_mails (CamelEwsFolder *ews_folder)
 		camel_folder_summary_remove_uid (folder->summary, uid);
 		ews_data_cache_remove (ews_folder->cache, "cur", uid, NULL);
 	}
-	camel_folder_summary_unlock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+	camel_folder_summary_unlock (folder->summary);
 
 	if (camel_folder_change_info_changed (changes)) {
 		camel_folder_summary_touch (folder->summary);
@@ -1758,11 +1758,11 @@ ews_delete_messages (CamelFolder *folder,
 		if (status) {
 			while (deleted_items) {
 				const gchar *uid = (gchar *) deleted_items->data;
-				camel_folder_summary_lock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+				camel_folder_summary_lock (folder->summary);
 				camel_folder_change_info_remove_uid (changes, uid);
 				camel_folder_summary_remove_uid (folder->summary, uid);
 				ews_data_cache_remove (ews_folder->cache, "cur", uid, NULL);
-				camel_folder_summary_unlock (folder->summary, CAMEL_FOLDER_SUMMARY_SUMMARY_LOCK);
+				camel_folder_summary_unlock (folder->summary);
 				deleted_items = g_slist_next (deleted_items);
 			}
 		}
@@ -1823,7 +1823,7 @@ ews_expunge_sync (CamelFolder *folder,
 		if (ews_info && (is_trash || (ews_info->info.flags & CAMEL_MESSAGE_DELETED) != 0))
 			deleted_items = g_slist_prepend (deleted_items, (gpointer) camel_pstring_strdup (uid));
 
-		camel_message_info_free (info);
+		camel_message_info_unref (info);
 	}
 
 	camel_folder_summary_free_array (known_uids);

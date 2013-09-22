@@ -753,7 +753,7 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
 				mi->info.flags = mi->info.flags & (~CAMEL_MESSAGE_FOLDER_FLAGGED);
 			}
 
-			camel_message_info_free (mi);
+			camel_message_info_unref (mi);
 			g_object_unref (item);
 			continue;
 		}
@@ -808,7 +808,7 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 		mi = (CamelEwsMessageInfo *)
 			camel_folder_summary_get (folder->summary, id->id);
 		if (mi) {
-			camel_message_info_free (mi);
+			camel_message_info_unref (mi);
 			g_object_unref (item);
 			continue;
 		}

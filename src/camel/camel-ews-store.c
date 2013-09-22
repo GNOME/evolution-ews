@@ -2923,7 +2923,6 @@ camel_ews_store_class_init (CamelEwsStoreClass *class)
 	store_class->delete_folder_sync = ews_delete_folder_sync;
 	store_class->rename_folder_sync = ews_rename_folder_sync;
 	store_class->get_folder_info_sync = ews_get_folder_info_sync;
-	store_class->free_folder_info = camel_store_free_folder_info_full;
 
 	store_class->get_trash_folder_sync = ews_get_trash_folder_sync;
 	store_class->get_junk_folder_sync = ews_get_junk_folder_sync;
