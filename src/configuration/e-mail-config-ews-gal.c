@@ -148,7 +148,7 @@ mail_config_ews_gal_active_id_to_oal_selected (GBinding *binding,
 	GObject *target_object;
 	GtkComboBoxText *combo_box;
 	const gchar *active_id;
-	const gchar *active_text;
+	gchar *active_text;
 	gchar *selected = NULL;
 
 	target_object = g_binding_get_target (binding);
@@ -162,6 +162,7 @@ mail_config_ews_gal_active_id_to_oal_selected (GBinding *binding,
 
 	g_value_set_string (target_value, selected);
 
+	g_free (active_text);
 	g_free (selected);
 
 	return TRUE;
