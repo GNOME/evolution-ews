@@ -2472,6 +2472,8 @@ ebews_start_gal_sync (gpointer data)
 	ews_settings = book_backend_ews_get_collection_settings (cbews);
 	priv = cbews->priv;
 
+	g_return_val_if_fail (priv->summary != NULL, FALSE);
+
 	cancellable = g_object_ref (priv->cancellable);
 
 	oab_cnc = e_ews_connection_new (priv->oab_url, ews_settings);
@@ -3142,11 +3144,11 @@ delta_thread (gpointer data)
 	g_mutex_unlock (&priv->dlock->mutex);
 
 	while (TRUE)	{
-		gboolean succeeded;
+		gboolean succeeded = TRUE;
 
 		if (!priv->is_gal)
 			succeeded = ebews_start_sync (ebews);
-		else
+		else if (priv->summary)
 			succeeded = ebews_start_gal_sync (ebews);
 
 		g_mutex_lock (&priv->dlock->mutex);
