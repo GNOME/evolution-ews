@@ -604,6 +604,29 @@ gboolean	e_ews_connection_delete_folder_sync
 						 GCancellable *cancellable,
 						 GError **error);
 
+void		e_ews_connection_empty_folder	(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *folder_id,
+						 gboolean is_distinguished_id,
+						 const gchar *delete_type,
+						 gboolean delete_subfolders,
+						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
+						 gpointer user_data);
+gboolean	e_ews_connection_empty_folder_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GError **error);
+gboolean	e_ews_connection_empty_folder_sync
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *folder_id,
+						 gboolean is_distinguished_id,
+						 const gchar *delete_type,
+						 gboolean delete_subfolders,
+						 GCancellable *cancellable,
+						 GError **error);
+
 void		e_ews_connection_update_folder	(EEwsConnection *cnc,
 						 gint pri,
 						 EEwsRequestCreationCallback create_cb,

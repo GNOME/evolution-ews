@@ -910,9 +910,15 @@ ews_backend_delete_resource_sync (ECollectionBackend *backend,
 
 		folder_id = e_source_ews_folder_dup_id (extension);
 
-		success = e_ews_connection_delete_folder_sync (
-			connection, EWS_PRIORITY_MEDIUM, folder_id,
-			FALSE, "HardDelete", cancellable, error);
+		if (e_ews_connection_satisfies_server_version (connection, E_EWS_EXCHANGE_2010)) {
+			success = e_ews_connection_empty_folder_sync (
+				connection, EWS_PRIORITY_MEDIUM, folder_id,
+				FALSE, "HardDelete", TRUE, cancellable, error);
+		} else {
+			success = e_ews_connection_delete_folder_sync (
+				connection, EWS_PRIORITY_MEDIUM, folder_id,
+				FALSE, "HardDelete", cancellable, error);
+		}
 
 		g_free (folder_id);
 	}

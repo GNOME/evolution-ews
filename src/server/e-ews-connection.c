@@ -6081,6 +6081,162 @@ e_ews_connection_delete_folder_sync (EEwsConnection *cnc,
 }
 
 static void
+empty_folder_response_cb (ESoapResponse *response,
+			  GSimpleAsyncResult *simple)
+{
+	ESoapParameter *param;
+	ESoapParameter *subparam;
+	GError *error = NULL;
+
+	param = e_soap_response_get_first_parameter_by_name (
+		response, "ResponseMessages", &error);
+
+	/* Sanity check */
+	g_return_if_fail (
+		(param != NULL && error == NULL) ||
+		(param == NULL && error != NULL));
+
+	if (error != NULL) {
+		g_simple_async_result_take_error (simple, error);
+		return;
+	}
+
+	subparam = e_soap_parameter_get_first_child (param);
+
+	while (subparam != NULL) {
+		if (!ews_get_response_status (subparam, &error)) {
+			g_simple_async_result_take_error (simple, error);
+			return;
+		}
+
+		subparam = e_soap_parameter_get_next_child (subparam);
+	}
+}
+
+void
+e_ews_connection_empty_folder (EEwsConnection *cnc,
+			       gint pri,
+			       const gchar *folder_id,
+			       gboolean is_distinguished_id,
+			       const gchar *delete_type,
+			       gboolean delete_subfolders,
+			       GCancellable *cancellable,
+			       GAsyncReadyCallback callback,
+			       gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_if_fail (cnc != NULL);
+
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"EmptyFolder",
+			"DeleteType",
+			delete_type,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2010,
+			FALSE);
+
+	e_soap_message_add_attribute (msg, "DeleteSubFolders", delete_subfolders ? "true" : "false", NULL, NULL);
+
+	e_soap_message_start_element (msg, "FolderIds", "messages", NULL);
+
+	e_soap_message_start_element (
+			msg,
+			is_distinguished_id ? "DistinguishedFolderId" : "FolderId",
+			NULL,
+			NULL);
+	e_soap_message_add_attribute (msg, "Id", folder_id, NULL, NULL);
+
+	/* This element is required for delegate access */
+	if (is_distinguished_id && cnc->priv->email) {
+		e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
+		e_ews_message_write_string_parameter(
+				msg, "EmailAddress", NULL, cnc->priv->email);
+		e_soap_message_end_element (msg);
+	}
+
+	e_soap_message_end_element (msg); /* </DistinguishedFolderId> || </FolderId> */
+
+	e_soap_message_end_element (msg); /* </FolderIds> */
+
+	e_ews_message_write_footer (msg);
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_empty_folder);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	e_ews_connection_queue_request (
+		cnc, msg, empty_folder_response_cb,
+		pri, cancellable, simple);
+
+	g_object_unref (simple);
+}
+
+gboolean
+e_ews_connection_empty_folder_finish (EEwsConnection *cnc,
+				      GAsyncResult *result,
+				      GError **error)
+{
+	GSimpleAsyncResult *simple;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_empty_folder),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	return TRUE;
+}
+
+gboolean
+e_ews_connection_empty_folder_sync (EEwsConnection *cnc,
+				    gint pri,
+				    const gchar *folder_id,
+				    gboolean is_distinguished_id,
+				    const gchar *delete_type,
+				    gboolean delete_subfolder,
+				    GCancellable *cancellable,
+				    GError **error)
+{
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+
+	closure = e_async_closure_new ();
+
+	e_ews_connection_empty_folder (
+		cnc, pri, folder_id,
+		is_distinguished_id,
+		delete_type,
+		delete_subfolder,
+		cancellable,
+		e_async_closure_callback, closure);
+
+	result = e_async_closure_wait (closure);
+
+	success = e_ews_connection_empty_folder_finish (cnc, result, error);
+
+	e_async_closure_free (closure);
+
+	return success;
+}
+
+static void
 ews_handle_create_attachments_param (ESoapParameter *param,
                                      EwsAsyncData *async_data)
 {
