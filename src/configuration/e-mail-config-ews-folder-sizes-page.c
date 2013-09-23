@@ -197,6 +197,7 @@ mail_config_ews_folder_sizes_page_constructed (GObject *object)
 	gtk_label_set_use_markup (GTK_LABEL (widget), TRUE);
 	gtk_misc_set_alignment (GTK_MISC (widget), 0.0, 0.5);
 	gtk_grid_attach (content_grid, widget, 0, 0, 2, 1);
+	g_free (markup);
 
 	widget = gtk_label_new (_("View the size of all Exchange folders"));
 	gtk_misc_set_alignment (GTK_MISC (widget), 0, 0.5);
