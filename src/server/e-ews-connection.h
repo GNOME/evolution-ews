@@ -214,6 +214,9 @@ void		e_ews_connection_utils_unref_in_thread
 GType		e_ews_connection_get_type	(void);
 EEwsConnection *e_ews_connection_new		(const gchar *uri,
 						 CamelEwsSettings *settings);
+EEwsConnection *e_ews_connection_new_full	(const gchar *uri,
+						 CamelEwsSettings *settings,
+						 gboolean allow_connection_reuse);
 const gchar *	e_ews_connection_get_uri	(EEwsConnection *cnc);
 const gchar *	e_ews_connection_get_password	(EEwsConnection *cnc);
 gchar *		e_ews_connection_dup_password	(EEwsConnection *cnc);
@@ -1020,6 +1023,23 @@ gboolean	e_ews_connection_find_folder_sync
 						 const EwsFolderId *fid,
 						 gboolean *includes_last_item,
 						 GSList **folders,
+						 GCancellable *cancellable,
+						 GError **error);
+void		e_ews_connection_query_auth_methods
+						(EEwsConnection *cnc,
+						 gint pri,
+						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
+						 gpointer user_data);
+gboolean	e_ews_connection_query_auth_methods_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GSList **auth_methods,
+						 GError **error);
+gboolean	e_ews_connection_query_auth_methods_sync
+						(EEwsConnection *cnc,
+						 gint pri,
+						 GSList **auth_methods,
 						 GCancellable *cancellable,
 						 GError **error);
 

@@ -1830,9 +1830,10 @@ e_ews_connection_find (const gchar *uri,
 }
 
 /**
- * e_ews_connection_new
+ * e_ews_connection_new_full
  * @uri: Exchange server uri
  * @settings: a #CamelEwsSettings
+ * @allow_connection_reuse: whether can return already created connection
  *
  * This does not authenticate to the server. It merely stores the username and password.
  * Authentication happens when a request is made to the server.
@@ -1840,8 +1841,9 @@ e_ews_connection_find (const gchar *uri,
  * Returns: EEwsConnection
  **/
 EEwsConnection *
-e_ews_connection_new (const gchar *uri,
-                      CamelEwsSettings *settings)
+e_ews_connection_new_full (const gchar *uri,
+			   CamelEwsSettings *settings,
+			   gboolean allow_connection_reuse)
 {
 	CamelNetworkSettings *network_settings;
 	EEwsConnection *cnc;
@@ -1859,7 +1861,7 @@ e_ews_connection_new (const gchar *uri,
 	g_mutex_lock (&connecting);
 
 	/* search the connection in our hash table */
-	if (loaded_connections_permissions != NULL) {
+	if (allow_connection_reuse && loaded_connections_permissions != NULL) {
 		cnc = g_hash_table_lookup (
 			loaded_connections_permissions, hash_key);
 
@@ -1905,14 +1907,16 @@ e_ews_connection_new (const gchar *uri,
 		cnc->priv->soup_session, "timeout",
 		G_BINDING_SYNC_CREATE);
 
-	/* add the connection to the loaded_connections_permissions hash table */
-	if (loaded_connections_permissions == NULL)
-		loaded_connections_permissions = g_hash_table_new_full (
-			g_str_hash, g_str_equal,
-			g_free, NULL);
-	g_hash_table_insert (
-		loaded_connections_permissions,
-		g_strdup (cnc->priv->hash_key), cnc);
+	if (allow_connection_reuse) {
+		/* add the connection to the loaded_connections_permissions hash table */
+		if (loaded_connections_permissions == NULL)
+			loaded_connections_permissions = g_hash_table_new_full (
+				g_str_hash, g_str_equal,
+				g_free, NULL);
+		g_hash_table_insert (
+			loaded_connections_permissions,
+			g_strdup (cnc->priv->hash_key), cnc);
+	}
 
 	/* update proxy with set 'uri' */
 	proxy_settings_changed (cnc->priv->proxy, cnc);
@@ -1921,6 +1925,13 @@ e_ews_connection_new (const gchar *uri,
 	g_mutex_unlock (&connecting);
 	return cnc;
 
+}
+
+EEwsConnection *
+e_ews_connection_new (const gchar *uri,
+		      CamelEwsSettings *settings)
+{
+	return e_ews_connection_new_full (uri, settings, TRUE);
 }
 
 const gchar *
@@ -8587,6 +8598,180 @@ e_ews_connection_find_folder_sync (EEwsConnection *cnc,
 
 	success = e_ews_connection_find_folder_finish (
 		cnc, result, includes_last_item, folders, error);
+
+	e_async_closure_free (closure);
+
+	return success;
+}
+
+#define EWS_OBJECT_KEY_AUTHS_GATHERED "ews-auths-gathered"
+
+static void
+query_auth_methods_response_cb (ESoapResponse *response,
+				GSimpleAsyncResult *simple)
+{
+	ESoapParameter *param;
+	GError *error = NULL;
+
+	param = e_soap_response_get_first_parameter_by_name (
+		response, "ResponseMessages", &error);
+
+	/* Sanity check */
+	g_return_if_fail (
+		(param != NULL && error == NULL) ||
+		(param == NULL && error != NULL));
+
+	if (error != NULL) {
+		g_simple_async_result_take_error (simple, error);
+		return;
+	}
+
+	/* nothing to read, it should not get this far anyway */
+}
+
+static void
+ews_connection_gather_auth_methods_cb (SoupMessage *message,
+				       GSimpleAsyncResult *simple)
+{
+	EwsAsyncData *async_data;
+	const gchar *auths_lst;
+	gchar **auths;
+	gint ii;
+
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	g_return_if_fail (async_data != NULL);
+
+	auths_lst = soup_message_headers_get_list (message->response_headers, "WWW-Authenticate");
+	if (!auths_lst)
+		return;
+
+	auths = g_strsplit (auths_lst, ",", -1);
+	for (ii = 0; auths && auths[ii]; ii++) {
+		gchar *auth, *space;
+
+		auth = g_strstrip (g_strdup (auths[ii]));
+		if (auth && *auth) {
+			space = strchr (auth, ' ');
+			if (space)
+				*space = '\0';
+
+			async_data->items = g_slist_prepend (async_data->items, auth);
+		} else {
+			g_free (auth);
+		}
+	}
+
+	g_strfreev (auths);
+
+	g_object_set_data (G_OBJECT (simple), EWS_OBJECT_KEY_AUTHS_GATHERED, GINT_TO_POINTER (1));
+
+	soup_message_set_status_full (message, SOUP_STATUS_CANCELLED, "EWS auths gathered");
+}
+
+/* Note: This only works if the connection is not connected yet */
+void
+e_ews_connection_query_auth_methods (EEwsConnection *cnc,
+				     gint pri,
+				     GCancellable *cancellable,
+				     GAsyncReadyCallback callback,
+				     gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_if_fail (cnc != NULL);
+
+	/* use some simple operation to get WWW-Authenticate headers from the server */
+	msg = e_ews_message_new_with_header (
+			cnc->priv->uri,
+			cnc->priv->impersonate_user,
+			"GetFolder",
+			NULL,
+			NULL,
+			cnc->priv->version,
+			E_EWS_EXCHANGE_2007_SP1,
+			TRUE);
+
+	e_soap_message_start_element (msg, "FolderShape", "messages", NULL);
+	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, "IdOnly");
+	e_soap_message_end_element (msg);
+
+	e_soap_message_start_element (msg, "FolderIds", "messages", NULL);
+	e_ews_message_write_string_parameter_with_attribute (msg, "DistinguishedFolderId", NULL, NULL, "Id", "inbox");
+	e_soap_message_end_element (msg);
+
+	e_ews_message_write_footer (msg);
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data,
+		e_ews_connection_query_auth_methods);
+
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (
+		simple, async_data, (GDestroyNotify) async_data_free);
+
+	soup_message_add_header_handler (SOUP_MESSAGE (msg), "got_body", "WWW-Authenticate",
+		G_CALLBACK (ews_connection_gather_auth_methods_cb), simple);
+
+	e_ews_connection_queue_request (
+		cnc, msg, query_auth_methods_response_cb,
+		pri, cancellable, simple);
+
+	g_object_unref (simple);
+}
+
+gboolean
+e_ews_connection_query_auth_methods_finish (EEwsConnection *cnc,
+					    GAsyncResult *result,
+					    GSList **auth_methods,
+					    GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (auth_methods != NULL, FALSE);
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (
+		result, G_OBJECT (cnc), e_ews_connection_query_auth_methods),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (GPOINTER_TO_INT (g_object_get_data (G_OBJECT (simple), EWS_OBJECT_KEY_AUTHS_GATHERED)) != 1 &&
+	    g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	*auth_methods = g_slist_reverse (async_data->items);
+
+	return TRUE;
+}
+
+/* Note: This only works if the connection is not connected yet */
+gboolean
+e_ews_connection_query_auth_methods_sync (EEwsConnection *cnc,
+					  gint pri,
+					  GSList **auth_methods,
+					  GCancellable *cancellable,
+					  GError **error)
+{
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+
+	closure = e_async_closure_new ();
+
+	e_ews_connection_query_auth_methods (cnc, pri, cancellable, e_async_closure_callback, closure);
+
+	result = e_async_closure_wait (closure);
+
+	success = e_ews_connection_query_auth_methods_finish (
+		cnc, result, auth_methods, error);
 
 	e_async_closure_free (closure);
 

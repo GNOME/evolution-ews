@@ -1277,14 +1277,70 @@ ews_authenticate_sync (CamelService *service,
 	return result;
 }
 
-static  GList *
+static GList *
 ews_store_query_auth_types_sync (CamelService *service,
                                  GCancellable *cancellable,
                                  GError **error)
 {
-	g_set_error_literal (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC, _("Query for authentication types is not supported"));
+	EEwsConnection *connection;
+	CamelSettings *settings;
+	CamelEwsSettings *ews_settings;
+	GList *auth_types = NULL;
+	GSList *auth_methods = NULL, *aiter;
+	gchar *hosturl;
 
-	return NULL;
+	g_return_val_if_fail (CAMEL_IS_EWS_STORE (service), NULL);
+
+	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (service))) {
+		g_set_error (
+			error, CAMEL_SERVICE_ERROR,
+			CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("You must be working online to complete this operation"));
+		return NULL;
+	}
+
+	settings = camel_service_ref_settings (service);
+	ews_settings = CAMEL_EWS_SETTINGS (settings);
+	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
+	connection = e_ews_connection_new_full (hosturl, ews_settings, FALSE);
+	g_free (hosturl);
+	g_object_unref (settings);
+
+	if (e_ews_connection_query_auth_methods_sync (connection, G_PRIORITY_DEFAULT, &auth_methods, cancellable, error)) {
+		CamelProvider *provider;
+		CamelServiceAuthType *authtype;
+
+		provider = camel_service_get_provider (service);
+		g_return_val_if_fail (provider != NULL, NULL);
+
+		for (aiter = auth_methods; aiter; aiter = aiter->next) {
+			GList *siter;
+			const gchar *auth = aiter->data;
+
+			if (!auth)
+				continue;
+
+			if (g_ascii_strcasecmp (auth, "NTLM") == 0)
+				auth = ""; 
+			else if (g_ascii_strcasecmp (auth, "Basic") == 0)
+				auth = "PLAIN";
+			else if (g_ascii_strcasecmp (auth, "Negotiate") == 0)
+				auth = "GSSAPI";
+
+			for (siter = provider->authtypes; siter; siter = siter->next) {
+				authtype = siter->data;
+
+				if (g_ascii_strcasecmp (authtype->authproto, auth) == 0)
+					auth_types = g_list_prepend (auth_types, authtype);
+			}
+		}
+
+		g_slist_free_full (auth_methods, g_free);
+	}
+
+	g_object_unref (connection);
+
+	return g_list_reverse (auth_types);
 }
 
 static CamelFolderInfo * ews_create_folder_sync (CamelStore *store, const gchar *parent_name,const gchar *folder_name, GCancellable *cancellable, GError **error);
