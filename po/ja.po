@@ -1,0 +1,1098 @@
+# Japanese translation for evolution-ews.
+# Copyright (C) 2013 evolution-ews's COPYRIGHT HOLDER
+# This file is distributed under the same license as the evolution-ews package.
+# noriko <noriko@redhat.com>, 2013.
+# Noriko Mizumoto <noriko@fedoraproject.org>, 2013.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: evolution-ews master\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-ews&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2013-09-23 20:10+0000\n"
+"PO-Revision-Date: 2013-09-19 13:59+0000\n"
+"Last-Translator: Noriko Mizumoto <noriko@fedoraproject.org>\n"
+"Language-Team: Japanese <gnome-translation@gnome.gr.jp>\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: ../src/addressbook/e-book-backend-ews.c:1421
+msgid "The backend does not support bulk additions"
+msgstr "バックエンドでは大量追加には対応していません"
+
+#: ../src/addressbook/e-book-backend-ews.c:1460
+#: ../src/addressbook/e-book-backend-ews.c:1804
+msgid "Cannot save contact list, it's only supported on EWS Server 2010 or later"
+msgstr "連絡先一覧を保存できません、EWS Server 2010 またはそれ以降のみの対応となります"
+
+#: ../src/addressbook/e-book-backend-ews.c:1763
+msgid "The backend does not support bulk modifications"
+msgstr "バックエンドでは大量変更には対応していません"
+
+#: ../src/addressbook/e-book-backend-ews.c:1963
+msgid "Wait till syncing is done"
+msgstr "同期が完了するまで待機する"
+
+#: ../src/addressbook/e-book-backend-ews.c:2372
+#, c-format
+msgid "Downloading contacts in %s %d%% completed... "
+msgstr "%s に連絡先をダウンロード中 %d%% 完了..."
+
+#: ../src/addressbook/e-book-backend-ews.c:3052
+msgid "Syncing contacts..."
+msgstr "連絡先を同期中..."
+
+#: ../src/addressbook/e-book-backend-ews.c:3283
+#: ../src/configuration/e-ews-search-user.c:365
+msgid "Searching..."
+msgstr "検索中..."
+
+#: ../src/calendar/e-cal-backend-ews.c:1069
+msgid "EWS does not support bulk removals"
+msgstr "EWS では大量削除には対応していません"
+
+#: ../src/calendar/e-cal-backend-ews.c:1572
+msgid "Unknown error"
+msgstr "不明なエラー"
+
+#: ../src/calendar/e-cal-backend-ews.c:1773
+msgid "EWS does not support bulk additions"
+msgstr "EWS では大量追加には対応していません"
+
+#: ../src/calendar/e-cal-backend-ews.c:2395
+msgid "EWS does not support bulk modifications"
+msgstr "EWS では大量変更には対応していません"
+
+#: ../src/camel/camel-ews-folder.c:275
+#, c-format
+msgid "Unable to open mimecontent temporary file!"
+msgstr "mimecontent の一時ファイルを開けません!"
+
+#: ../src/camel/camel-ews-folder.c:283
+#, c-format
+msgid "Unable to generate parser from mimecontent!"
+msgstr "mimecontent からパーサーを生成できません!"
+
+#: ../src/camel/camel-ews-folder.c:292
+#, c-format
+msgid "Unable to parse meeting request mimecontent!"
+msgstr "ミーティングリクエストの mimecontent を解析できません!"
+
+#: ../src/camel/camel-ews-folder.c:351
+#, c-format
+msgid "Unable to create cache file"
+msgstr "キャッシュファイルを作成できません"
+
+#: ../src/camel/camel-ews-folder.c:452 ../src/camel/camel-ews-folder.c:534
+#, c-format
+msgid "Unable to create cache path"
+msgstr "キャッシュパスを作成できません"
+
+#: ../src/camel/camel-ews-folder.c:544
+#, c-format
+msgid "Failed to move message cache file"
+msgstr "メッセージキャッシュファイルの移動に失敗しました"
+
+#: ../src/camel/camel-ews-folder.c:1173
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "%s の概要をロードできませんでした"
+
+#: ../src/camel/camel-ews-folder.c:1609
+#, c-format
+msgid "Cant perform actions on the folder while in offline mode"
+msgstr "オフラインモードではこのフォルダーで動作を行なうことができません"
+
+#: ../src/camel/camel-ews-provider.c:47
+msgid "Checking for new mail"
+msgstr "新しいメールをチェック中"
+
+#: ../src/camel/camel-ews-provider.c:49
+msgid "C_heck for new messages in all folders"
+msgstr "すべてのフォルダーで新しいメッセージがないかチェックする(_H)"
+
+#: ../src/camel/camel-ews-provider.c:52
+msgid "Options"
+msgstr "オプション"
+
+#: ../src/camel/camel-ews-provider.c:54
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr "このサーバー上の受信箱にある新しいメッセージにフィルターを適用する(_A)"
+
+#: ../src/camel/camel-ews-provider.c:56
+msgid "Check new messages for _Junk contents"
+msgstr "新しいメッセージにジャンクコンテンツがないかチェックする(_J)"
+
+#: ../src/camel/camel-ews-provider.c:58
+msgid "Only check for Junk messages in the IN_BOX folder"
+msgstr "受信箱フォルダーにあるジャンクメッセージだけをチェックする(_B)"
+
+#: ../src/camel/camel-ews-provider.c:60
+msgid "Automatically synchroni_ze remote mail locally"
+msgstr "ローカルにリモートメールを自動同期する(_Z)"
+
+#: ../src/camel/camel-ews-provider.c:63
+msgid "Connection"
+msgstr "接続"
+
+#. Translators: '%s' is preplaced with a widget, where "
+#. * user can select how long the timeout should be.
+#: ../src/camel/camel-ews-provider.c:67
+#, c-format
+msgid "Connection _timeout (in seconds) %s"
+msgstr "接続タイムアウト (秒単位) %s(_T)"
+
+#: ../src/camel/camel-ews-provider.c:75
+msgid "Exchange Web Services"
+msgstr "Exchange Web Services"
+
+#: ../src/camel/camel-ews-provider.c:77
+msgid "For accessing Exchange servers using Web Services"
+msgstr "Web サービスを使用して Exchange サーバーにアクセスする"
+
+#: ../src/camel/camel-ews-provider.c:92
+msgid "NTLM"
+msgstr "NTLM"
+
+#: ../src/camel/camel-ews-provider.c:94
+msgid "This option will connect to the Exchange server using a plaintext password with NTLM authentication."
+msgstr "プレーンテキストのパスワードを使った NTLM 認証で Exchange サーバーに接続します。"
+
+#: ../src/camel/camel-ews-provider.c:102
+msgid "Basic"
+msgstr "Basic"
+
+#: ../src/camel/camel-ews-provider.c:104
+msgid "This option will connect to the Exchange server using a plaintext password with Basic authentication."
+msgstr "プレーンテキストのパスワードを使った Basic 認証で Exchange サーバーに接続します。"
+
+#: ../src/camel/camel-ews-store.c:292
+#, c-format
+msgid "Session has no storage path"
+msgstr "セッションにストレージパスがありません"
+
+#: ../src/camel/camel-ews-store.c:329
+#, c-format
+msgctxt "PublicFolders"
+msgid "%s_%d"
+msgstr "%s_%d"
+
+#: ../src/camel/camel-ews-store.c:458
+#, c-format
+msgctxt "ForeignFolders"
+msgid "%s_%d"
+msgstr "%s_%d"
+
+#: ../src/camel/camel-ews-store.c:603
+msgid "Checking \"Out of Office\" settings"
+msgstr "\"不在\" 設定のチェック中"
+
+#: ../src/camel/camel-ews-store.c:843
+msgid "Updating foreign folder structure"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:1298 ../src/camel/camel-ews-store.c:2794
+#, c-format
+msgid "You must be working online to complete this operation"
+msgstr "この動作を完了するにはオンラインで作業する必要があります"
+
+#: ../src/camel/camel-ews-store.c:1393
+#, c-format
+msgid "No such folder: %s"
+msgstr "そのようなフォルダーはありません: %s"
+
+#: ../src/camel/camel-ews-store.c:1705
+msgid "Cannot list EWS public folders in offline mode"
+msgstr "オフラインモードでは EWS パブリックフォルダーは表示できません"
+
+#: ../src/camel/camel-ews-store.c:1778
+msgid "Cannot find any EWS public folders"
+msgstr "EWS パブリックフォルダーが見つかりません"
+
+#: ../src/camel/camel-ews-store.c:1887
+#, c-format
+msgid "Cannot create folder '%s', folder already exists"
+msgstr "フォルダー %s は作成できません、フォルダーはすでに存在しています"
+
+#: ../src/camel/camel-ews-store.c:1902
+#, c-format
+msgid "Parent folder %s does not exist"
+msgstr "親フォルダー %s は存在しません"
+
+#: ../src/camel/camel-ews-store.c:1912
+#, c-format
+msgid "Cannot create folder under '%s', it is used for folders of other users only"
+msgstr "'%s' の配下にフォルダーは作成できません、他のユーザーのフォルダー専用となります"
+
+#: ../src/camel/camel-ews-store.c:1922
+#, c-format
+msgid "Cannot create folder under '%s', it is used for public folders only"
+msgstr "'%s' の配下にフォルダーは作成できません、パブリックフォルダー専用となります"
+
+#: ../src/camel/camel-ews-store.c:1991
+#, c-format
+msgid "Folder does not exist"
+msgstr "フォルダーは存在しません"
+
+#: ../src/camel/camel-ews-store.c:2000
+#, c-format
+msgid "Cannot remove folder '%s', it is used for folders of other users only"
+msgstr "'%s' フォルダー削除できません、他のユーザーのフォルダー専用となります"
+
+#: ../src/camel/camel-ews-store.c:2010
+#, c-format
+msgid "Cannot remove folder '%s', it is used for public folders only"
+msgstr "'%s' フォルダーは削除できません、パブリックフォルダー専用となります"
+
+#: ../src/camel/camel-ews-store.c:2118
+#, c-format
+msgid "Folder %s does not exist"
+msgstr "フォルダー %s は存在しません"
+
+#: ../src/camel/camel-ews-store.c:2128
+#, c-format
+msgid "No change key record for folder %s"
+msgstr "フォルダー %s のキー変更記録はありません"
+
+#: ../src/camel/camel-ews-store.c:2170
+#, c-format
+msgid "Cannot both rename and move a folder at the same time"
+msgstr "フォルダー名の変更と移動は同時には行なえません"
+
+#: ../src/camel/camel-ews-store.c:2206
+#, c-format
+msgid "Cannot find folder ID for parent folder %s"
+msgstr "親フォルダー %s のフォルダー ID が見つかりません"
+
+#: ../src/camel/camel-ews-store.c:2256 ../src/camel/camel-ews-transport.c:69
+#, c-format
+msgid "Exchange server %s"
+msgstr "Exchange サーバー %s"
+
+#: ../src/camel/camel-ews-store.c:2259
+#, c-format
+msgid "Exchange service for %s on %s"
+msgstr "%s (%s 上) の Exchange サービス"
+
+#: ../src/camel/camel-ews-store.c:2303
+#, c-format
+msgid "Could not locate Trash folder"
+msgstr "ゴミ箱フォルダーが見つかりませんでした"
+
+#: ../src/camel/camel-ews-store.c:2363
+#, c-format
+msgid "Could not locate Junk folder"
+msgstr "ジャンクフォルダーが見つかりませんでした"
+
+#: ../src/camel/camel-ews-store.c:2553
+msgid "Cannot subscribe EWS folders in offline mode"
+msgstr "オフラインモードでは EWS フォルダーをサブスクライブできません"
+
+#: ../src/camel/camel-ews-store.c:2576
+#, c-format
+msgid "Cannot subscribe folder '%s', no public folder available"
+msgstr "'%s' フォルダーをサブスクライブできません、使用可能なパブリックフォルダーがありません"
+
+#: ../src/camel/camel-ews-store.c:2586
+#, c-format
+msgid "Cannot subscribe folder '%s', folder not found"
+msgstr "'%s' フォルダーをサブスクライブできません、フォルダーが見つかりません"
+
+#: ../src/camel/camel-ews-store.c:2677
+msgid "Cannot unsubscribe EWS folders in offline mode"
+msgstr "オフラインモードでは EWS フォルダーのサブスクライブを解除できません"
+
+#: ../src/camel/camel-ews-store.c:2838
+msgid "Unsetting the \"Out of Office\" status"
+msgstr "\"不在\" 状態をオフにしています"
+
+#: ../src/camel/camel-ews-transport.c:72
+#, c-format
+msgid "Exchange mail delivery via %s"
+msgstr "%s 経由の Exchange メール配信"
+
+#: ../src/camel/camel-ews-transport.c:119
+msgid "Cannot send message with no From address"
+msgstr "差出人のアドレスがないメッセージは送信できません"
+
+#: ../src/camel/camel-ews-transport.c:125
+msgid "Exchange server cannot send message with multiple From addresses"
+msgstr "Exchange サーバーでは差出人アドレスが複数のメッセージの送信はできません"
+
+#: ../src/camel/camel-ews-transport.c:136
+msgid "Failed to read From address"
+msgstr "差出人のアドレスの読み取りに失敗しました"
+
+#: ../src/camel/camel-ews-transport.c:148
+#, c-format
+msgid "Exchange server cannot send message as '%s', when the account was configured for address '%s'"
+msgstr "Exchange サーバーでは '%s' のメッセージは送信できません (アカウントが '%s' アドレスに設定された場合)"
+
+#: ../src/camel/camel-ews-transport.c:162
+#, c-format
+msgid "Service not connected"
+msgstr "サービスは接続されていません"
+
+#: ../src/collection/e-ews-backend.c:422
+#: ../src/configuration/e-mail-config-ews-gal.c:275
+msgid "Global Address List"
+msgstr "グローバルアドレス一覧"
+
+#: ../src/collection/e-ews-backend.c:807
+#, c-format
+msgid "Could not determine a suitable folder class for a new folder named '%s'"
+msgstr "'%s' と言う名前の新しいフォルダーに適したフォルダークラスを確定できませんでした"
+
+#: ../src/collection/e-ews-backend.c:896
+#, c-format
+msgid "Data source '%s' does not represent an Exchange Web Services folder"
+msgstr "データソース '%s' は Exchange Web Services フォルダーを表していません"
+
+#: ../src/configuration/e-ews-config-utils.c:474
+msgid "Folder"
+msgstr "フォルダー"
+
+#: ../src/configuration/e-ews-config-utils.c:480
+msgid "Size"
+msgstr "サイズ"
+
+#: ../src/configuration/e-ews-config-utils.c:506
+#: ../src/configuration/e-ews-config-utils.c:511
+msgid "Unable to retrieve folder size information"
+msgstr "フォルダーサイズに関する情報を取得できません"
+
+#: ../src/configuration/e-ews-config-utils.c:621
+msgid "Folder Sizes"
+msgstr "フォルダーサイズ"
+
+#: ../src/configuration/e-ews-config-utils.c:624
+msgid "_Close"
+msgstr "閉じる(_C)"
+
+#: ../src/configuration/e-ews-config-utils.c:638
+msgid "Fetching folder list…"
+msgstr "フォルダーの一覧をフェッチ中..."
+
+#: ../src/configuration/e-ews-config-utils.c:791
+#, c-format
+msgid "Cannot edit permissions of folder '%s', choose other folder."
+msgstr "フォルダー '%s' のパーミッションを編集できません、他のフォルダーを選択してください。"
+
+#: ../src/configuration/e-ews-config-utils.c:868
+msgid "Folder Sizes..."
+msgstr "フォルダーサイズ..."
+
+#: ../src/configuration/e-ews-config-utils.c:875
+msgid "Subscribe to folder of other user..."
+msgstr "他のユーザーのフォルダーをサブスクライブする..."
+
+#: ../src/configuration/e-ews-config-utils.c:884
+#: ../src/configuration/e-ews-config-utils.c:1166
+#: ../src/configuration/e-ews-config-utils.c:1197
+#: ../src/configuration/e-ews-config-utils.c:1228
+#: ../src/configuration/e-ews-config-utils.c:1259
+msgid "Permissions..."
+msgstr "パーミッション..."
+
+#: ../src/configuration/e-ews-config-utils.c:886
+msgid "Edit EWS folder permissions"
+msgstr "EWS フォルダーのパーミッションを編集"
+
+#: ../src/configuration/e-ews-config-utils.c:1168
+msgid "Edit EWS calendar permissions"
+msgstr "EWS カレンダーのパーミッションを編集"
+
+#: ../src/configuration/e-ews-config-utils.c:1199
+msgid "Edit EWS tasks permissions"
+msgstr "EWS タスクのパーミッションを編集"
+
+#: ../src/configuration/e-ews-config-utils.c:1230
+msgid "Edit EWS memos permissions"
+msgstr ""
+
+#: ../src/configuration/e-ews-config-utils.c:1261
+msgid "Edit EWS contacts permissions"
+msgstr "EWS 連絡先のパーミッションを編集"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:87
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:487
+msgctxt "PermissionsLevel"
+msgid "None"
+msgstr "なし"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:88
+msgctxt "PermissionsLevel"
+msgid "Owner"
+msgstr "所有者"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:98
+msgctxt "PermissionsLevel"
+msgid "Publishing Editor"
+msgstr "発行編集者"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:107
+msgctxt "PermissionsLevel"
+msgid "Editor"
+msgstr "編集者"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:115
+msgctxt "PermissionsLevel"
+msgid "Publishing Author"
+msgstr "発行作成者"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:122
+msgctxt "PermissionsLevel"
+msgid "Author"
+msgstr "作成者"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:128
+#, fuzzy
+msgctxt "PermissionsLevel"
+msgid "Nonediting Author"
+msgstr "編集権限のない作成者"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:133
+msgctxt "PermissionsLevel"
+msgid "Reviewer"
+msgstr "参照者"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:136
+msgctxt "PermissionsLevel"
+msgid "Contributor"
+msgstr "寄稿者"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:139
+msgctxt "PermissionsLevel"
+msgid "Free/Busy time"
+msgstr "空き時間情報"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:141
+msgctxt "PermissionsLevel"
+msgid "Free/Busy time, subject, location"
+msgstr "空き時間情報、件名、場所"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:143
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:508
+msgctxt "PermissionsLevel"
+msgid "Custom"
+msgstr "カスタム"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:267
+msgid "Writing folder permissions, please wait..."
+msgstr "フォルダーのパーミッションを書き込んでいます、お待ちください..."
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:777
+msgctxt "User"
+msgid "Anonymous"
+msgstr "匿名"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:780
+msgctxt "User"
+msgid "Default"
+msgstr "デフォルト"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:786
+msgctxt "User"
+msgid "Unknown"
+msgstr "不明"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:867
+#: ../src/configuration/e-ews-search-user.c:431
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1063
+msgid "Name"
+msgstr "名前"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:873
+msgid "Permission level"
+msgstr "パーミッションレベル"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:925
+msgid "Edit EWS folder permissions..."
+msgstr "EWS フォルダーのパーミッションを編集..."
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:950
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:635
+msgid "Account:"
+msgstr "アカウント:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:978
+msgid "Folder name:"
+msgstr "フォルダー名:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1001
+msgid "Folder ID:"
+msgstr "フォルダー ID:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1065
+msgid "Permissions"
+msgstr "パーミッション"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1087
+msgid "Permi_ssion level:"
+msgstr "パーミッションレベル(_S):"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1121
+msgctxt "Permissions"
+msgid "Read"
+msgstr "読み込み"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1133
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1200
+msgctxt "Permissions"
+msgid "None"
+msgstr "なし"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1139
+msgctxt "Permissions"
+msgid "Free/Busy time"
+msgstr "空き時間情報"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1144
+msgctxt "Permissions"
+msgid "Free/Busy time, subject, location"
+msgstr "空き時間情報、件名、場所"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1150
+msgctxt "Permissions"
+msgid "Full Details"
+msgstr "全詳細"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1156
+msgctxt "Permissions"
+msgid "Write"
+msgstr "書き込み"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1168
+msgctxt "Permissions"
+msgid "Create items"
+msgstr "アイテムの作成"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1172
+msgctxt "Permissions"
+msgid "Create subfolders"
+msgstr "サブフォルダーの作成"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1176
+msgctxt "Permissions"
+msgid "Edit own"
+msgstr ""
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1180
+msgctxt "Permissions"
+msgid "Edit all"
+msgstr "すべてを編集"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1188
+msgctxt "Permissions"
+msgid "Delete items"
+msgstr "アイテムの削除"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1205
+msgctxt "Permissions"
+msgid "Own"
+msgstr ""
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1210
+msgctxt "Permissions"
+msgid "All"
+msgstr "すべて"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1216
+msgctxt "Permissions"
+msgid "Other"
+msgstr "その他"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1228
+msgctxt "Permissions"
+msgid "Folder owner"
+msgstr "フォルダーの所有者"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1232
+msgctxt "Permissions"
+msgid "Folder contact"
+msgstr ""
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1236
+msgctxt "Permissions"
+msgid "Folder visible"
+msgstr ""
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1309
+msgid "Reading folder permissions, please wait..."
+msgstr "フォルダーのパーミッションを読み込んでいます、お待ちください..."
+
+#: ../src/configuration/e-ews-ooo-notificator.c:184
+msgid "Unset on Server"
+msgstr "サーバーでオフにする"
+
+#: ../src/configuration/e-ews-ooo-notificator.c:185
+msgid "Unset the \"Out of Office\" status"
+msgstr "\"不在\" 状態をオフにする"
+
+#: ../src/configuration/e-ews-search-user.c:208
+#, c-format
+msgid "No users found, only one contact"
+msgid_plural "No users found, only %d contacts"
+msgstr[0] "ユーザーが見つかりません、%d 件の連絡先のみ"
+
+#: ../src/configuration/e-ews-search-user.c:213
+msgid "No users found"
+msgstr "ユーザーが見つかりません"
+
+#: ../src/configuration/e-ews-search-user.c:217
+#, c-format
+msgid "Found one user"
+msgid_plural "Found %d users"
+msgstr[0] "%d ユーザーが見つかりました"
+
+#: ../src/configuration/e-ews-search-user.c:223
+#, c-format
+msgid "Found more than 100 users, but showing only first %d"
+msgid_plural "Found more than 100 users, but showing only first %d"
+msgstr[0] "ユーザーが 100 名以上見つかりましたが、最初の %d 名のみを表示しています"
+
+#: ../src/configuration/e-ews-search-user.c:357
+#: ../src/configuration/e-ews-search-user.c:540
+msgid "Search for a user"
+msgstr "ユーザーの検索"
+
+#: ../src/configuration/e-ews-search-user.c:437
+msgid "E-mail"
+msgstr "メール"
+
+#: ../src/configuration/e-ews-search-user.c:474
+msgid "Choose EWS user..."
+msgstr "EWS ユーザーの選択..."
+
+#: ../src/configuration/e-ews-search-user.c:497
+msgid "_Search:"
+msgstr "検索(_S):"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
+#: ../src/server/e-ews-folder.c:657
+#, c-format
+msgid "Cannot add folder, folder already exists as '%s'"
+msgstr "フォルダーを追加できません、フォルダーは '%s' としてすでに存在しています"
+
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. * Example result: "Mailbox - John Smith"
+#.
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:107
+#, c-format
+msgctxt "ForeignFolder"
+msgid "Mailbox - %s"
+msgstr "メールボックス - %s"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:272
+msgid "Cannot test foreign folder availability while in offline mode"
+msgstr ""
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:297
+#, c-format
+msgid "User '%s' was not found on the server"
+msgstr "ユーザー '%s' はサーバー上には見つかりませんでした"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:333
+#, c-format
+msgid "User name '%s' is ambiguous, specify it more precisely, please"
+msgstr "ユーザー名 '%s' では不明瞭です、具体的に指定してください"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:355
+#, c-format
+msgid "Folder '%s' not found. Either it does not exist or you do not have permission to access it."
+msgstr "フォルダー '%s' は見つかりませんでした。このフォルダーは存在していないか、このフォルダーにアクセスするパーミッションがありません。"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:373
+msgid "Cannot add folder, cannot determine folder's type"
+msgstr "フォルダーを追加できません、フォルダーのタイプを確定できません"
+
+#. Translators: This is used to name foreign folder.
+#. * The first '%s' is replaced with user name to whom the folder belongs,
+#. * the second '%s' is replaced with folder name.
+#. * Example result: "John Smith - Calendar"
+#.
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:418
+#, c-format
+msgctxt "ForeignFolder"
+msgid "%s - %s"
+msgstr "%s - %s"
+
+#. convert well-known names to their non-localized form
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:512
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:720
+msgid "Inbox"
+msgstr "受信箱"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:514
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
+msgid "Contacts"
+msgstr "連絡先"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:516
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:722
+msgid "Calendar"
+msgstr "カレンダー"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:518
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:723
+msgid "Memos"
+msgstr "メモ"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:520
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:724
+msgid "Tasks"
+msgstr "タスク"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:537
+#, c-format
+msgid "Testing availability of folder '%s' of user '%s', please wait..."
+msgstr "フォルダー '%s' (ユーザー '%s') の可用性をテスト中、お待ちください..."
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:614
+msgid "Subscribe to folder of other EWS user..."
+msgstr "他の EWS ユーザーのフォルダーをサブスクライブする..."
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:665
+msgid "User"
+msgstr "ユーザー"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:672
+msgid "_User:"
+msgstr "ユーザー(_U):"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:687
+msgid "C_hoose..."
+msgstr "選択(_H)..."
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:703
+msgid "_Folder name:"
+msgstr "フォルダー名(_F):"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:733
+msgid "Include _subfolders"
+msgstr "サブフォルダーを含む(_S)"
+
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:140
+msgid "Querying Autodiscover service"
+msgstr "Autodiscover サービスの問い合わせ中"
+
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:231
+msgid "Fetch _URL"
+msgstr "URL のフェッチ(_U)"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:140
+msgid "Configuration"
+msgstr "設定"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:158
+msgid "User_name:"
+msgstr "ユーザー名(_N):"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:172
+msgid "_Host URL:"
+msgstr "ホストの URL(_H):"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:191
+msgid "OAB U_RL:"
+msgstr "OAB の URL(_R):"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:205
+msgid "Open _Mailbox of other user"
+msgstr "他のユーザーのメールボックスを開く(_M)"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:239
+msgid "S_earch..."
+msgstr "検索(_E)..."
+
+#: ../src/configuration/e-mail-config-ews-backend.c:250
+msgid "Authentication"
+msgstr "認証"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:488
+msgctxt "PermissionsLevel"
+msgid "Reviewer (can read items)"
+msgstr "参照者 (アイテムの読み取りが可能)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:489
+msgctxt "PermissionsLevel"
+msgid "Author (can read and create items)"
+msgstr "作成者 (アイテムの読み取りと作成が可能)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:490
+msgctxt "PermissionsLevel"
+msgid "Editor (can read, create and modify items)"
+msgstr "編集者 (アイテムの読み取り、作成、変更が可能)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:593
+msgid "Delegate permissions"
+msgstr "代理人のパーミッション"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:611
+msgid "C_alendar"
+msgstr "カレンダー(_A)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:614
+msgid "_Delegate receives copies of meeting-related messages sent to me"
+msgstr "自分に送信されたミーティング関連のメッセージのコピーを代理人に送信する(_D)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:619
+msgid "_Tasks"
+msgstr "タスク(_T)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:622
+msgid "_Inbox"
+msgstr "受信箱(_I)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:625
+msgid "C_ontacts"
+msgstr "連絡先(_O)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:628
+msgid "_Notes"
+msgstr "メモ(_N)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:631
+msgid "_Journal"
+msgstr "ジャーナル(_J)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:634
+#, c-format
+msgid "Delegate '%s' has the following permissions"
+msgstr "代理人 '%s' は次のパーミッションを持ちます"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:652
+msgid "Delegate can see my _private items"
+msgstr "代理人は自分のプライベートアイテムを見ることができる(_P)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:975
+msgid "Retrieving current user permissions, please wait..."
+msgstr "現在のユーザーのパーミッションを取得しています、お待ちください..."
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1096
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1629
+msgid "Delegates"
+msgstr "代理人"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1120
+msgid "Delegates can send items on your behalf, including creating and responding to meeting requests. If you want to grant folder permissions without giving send-on-behalf-of permissions, close this dialog box, right-click the folder, click Permissions and change the options there."
+msgstr "ミーティングのリクエストに対して応答するなど、代理人はユーザーの代理としてアイテムを送信することができます。代理としてアイテムの送信を許可するパーミッションを与える代わりにフォルダーのパーミッションを付与したい場合には、このダイアログボックスを閉じてからフォルダーを右クリックし、パーミッションをクリックしてオプションを変更します。"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1169
+msgid "Deliver meeting requests addressed to me and responses to meeting requests where I am the organizer to:"
+msgstr "自分に宛てられたミーティングリクエスト、および自分がオーガナイザーであるミーティングリクエストに対する応答を次のユーザーに配信します。"
+
+#. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1178
+msgid ""
+"My delegates only, but _send a copy of meeting requests\n"
+"and responses to me (recommended)"
+msgstr ""
+"自分の代理人のみ、ただしミーティングリクエストおよび応答の\n"
+"コピーを自分にも送信する(推奨)(_S)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1185
+msgid "My d_elegates only"
+msgstr "自分の代理人のみ(_E)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1192
+msgid "My delegates a_nd me"
+msgstr "自分の代理人と自分(_N)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1710
+msgid "Retrieving \"Delegates\" settings"
+msgstr "\"代理人\" 設定を取得中"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:195
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:257
+msgid "EWS Settings"
+msgstr "EWS 設定"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:202
+msgid "View the size of all Exchange folders"
+msgstr "Exchange フォルダーのサイズを表示"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:206
+msgid "Folder _Sizes"
+msgstr "フォルダーサイズ(_S)"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:222
+msgid "Locating offline address books"
+msgstr "オフラインのアドレス帳を検索中"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:302
+msgid "Cache o_ffline address book"
+msgstr "オフラインアドレス帳をキャッシュ(_F)"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:328
+msgid "Select ad_dress list:"
+msgstr "アドレス一覧の選択(_D):"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:352
+msgid "Fetch List"
+msgstr "一覧のフェッチ"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:432
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:914
+msgid "Out of Office"
+msgstr "不在"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:448
+msgid "The messages specified below will be automatically sent to each internal and external person who sends a mail to you."
+msgstr "以下のメッセージは、ユーザーにメールを送信した内部および外部の送信者に自動的に送信されます。"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:456
+msgid "Do _not send Out of Office replies"
+msgstr "不在の返信を送信しない(_N)"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:464
+msgid "_Send Out of Office replies"
+msgstr "不在の返信を送信する(_S)"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:472
+msgid "Send Out of Office replies only _during this time period:"
+msgstr "次の期間だけ不在の返信を送信する(_D):"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:492
+msgid "_From:"
+msgstr "開始(_F):"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:517
+msgid "_To:"
+msgstr "終了(_T):"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:542
+msgid "I_nternal:"
+msgstr "内部(_N):"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:551
+msgid "Message to be sent within the organization"
+msgstr "組織内に送信するメッセージ"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:578
+msgid "E_xternal:"
+msgstr "外部(_X):"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:586
+msgid "Message to be sent outside the organization"
+msgstr "組織外に送信するメッセージ"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:596
+msgid "Do not reply to senders outside the organization"
+msgstr "組織外の送信者には返信しない"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:599
+msgid "Reply only to known senders outside the organization"
+msgstr "組織外からの送信の場合、知っている人にのみ返信する"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:602
+msgid "Reply to any sender outside the organization"
+msgstr "組織外からの送信の場合、すべての送信者に返信する"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:996
+msgid "Retrieving \"Out of Office\" settings"
+msgstr "\"不在\" 設定を取得中"
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:1
+msgid "Autodiscovery query failed."
+msgstr "Autodiscovery クエリーに失敗しました。"
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:2
+msgid "The reported error was &quot;{0}&quot;."
+msgstr "報告されたエラーは &quot;{0}&quot; でした。"
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:3
+msgid "Failed to locate offline address books."
+msgstr "オフラインアドレス帳の検索に失敗しました。"
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:4
+msgid "Failed to retrieve &quot;Out of Office&quot; settings."
+msgstr "&quot;不在&quot; 設定の取得に失敗しました。"
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:5
+msgid "Failed to retrieve &quot;Delegates&quot; settings."
+msgstr "&quot;代理人&quot; 設定の取得に失敗しました。"
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:6
+msgid "Your Exchange account \"{0}\" has the status set as \"Out of Office\"."
+msgstr "ユーザーの Exchange アカウント \"{0}\" には \"不在\" 状態が設定されています。"
+
+#: ../src/server/e-ews-connection.c:538
+msgid "Operation Cancelled"
+msgstr "動作は取り消されました"
+
+#: ../src/server/e-ews-connection.c:607
+msgid "Authentication failed"
+msgstr "認証に失敗しました"
+
+#: ../src/server/e-ews-connection.c:618
+#, c-format
+msgid "No response: %s"
+msgstr "応答なし: %s"
+
+#: ../src/server/e-ews-connection.c:2137
+#, c-format
+msgid "Failed to parse autodiscover response XML"
+msgstr "autodiscover 応答 XML の解析に失敗しました"
+
+#: ../src/server/e-ews-connection.c:2144
+#, c-format
+msgid "Failed to find <Autodiscover> element"
+msgstr "<Autodiscover> エレメントの検索に失敗しました"
+
+#: ../src/server/e-ews-connection.c:2155
+#, c-format
+msgid "Failed to find <Response> element"
+msgstr "<Response> エレメントの検索に失敗しました"
+
+#: ../src/server/e-ews-connection.c:2166
+#, c-format
+msgid "Failed to find <Account> element"
+msgstr "<Account> エレメントの検索に失敗しました"
+
+#: ../src/server/e-ews-connection.c:2185
+#, c-format
+msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
+msgstr "autodiscover 応答内の <ASUrl> と <OABUrl> の検索に失敗しました"
+
+#: ../src/server/e-ews-connection.c:2267
+msgid "URL cannot be NULL"
+msgstr "URL は NULL にはできません"
+
+#: ../src/server/e-ews-connection.c:2275
+#, c-format
+msgid "URL '%s' is not valid"
+msgstr "URL '%s' は無効です"
+
+#: ../src/server/e-ews-connection.c:2375
+msgid "Email address is missing a domain part"
+msgstr "メールアドレスにドメイン部分がありません"
+
+#: ../src/server/e-ews-connection.c:2697
+msgid "Failed to parse oab XML"
+msgstr "oab XML の解析に失敗しました"
+
+#: ../src/server/e-ews-connection.c:2705
+msgid "Failed to find <OAB> element\n"
+msgstr "<OAB> エレメントの検索に失敗しました\n"
+
+#: ../src/server/e-ews-connection.c:4057
+msgid "No items found"
+msgstr "アイテムが見つかりませんでした"
+
+#: ../src/server/e-ews-folder.c:612
+msgid "Cannot add folder, unsupported folder type"
+msgstr "フォルダーを追加できません、未対応のフォルダータイプです"
+
+#: ../src/server/e-ews-folder.c:617
+msgid "Cannot add folder, master source not found"
+msgstr "フォルダーを追加できません、マスターソースが見つかりません"
+
+#: ../src/utils/ews-camel-common.c:361
+#, c-format
+msgid "CreateItem call failed to return ID for new message"
+msgstr "CreateItem コールは新しいメッセージの ID を返すのに失敗しました"
+
+#~ msgid "Query for authentication types is not supported"
+#~ msgstr "認証タイプのクエリーには対応していません"
