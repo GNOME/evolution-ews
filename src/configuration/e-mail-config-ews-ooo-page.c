@@ -51,6 +51,8 @@ struct _EMailConfigEwsOooPagePrivate {
 	EEwsOofSettings *oof_settings;
 	GMutex oof_settings_lock;
 
+	GCancellable *refresh_cancellable;
+
 	/* to not save unchanged state */
 	gboolean changed;
 
@@ -373,30 +375,16 @@ mail_config_ews_ooo_page_dispose (GObject *object)
 
 	priv = E_MAIL_CONFIG_EWS_OOO_PAGE_GET_PRIVATE (object);
 
-	if (priv->registry != NULL) {
-		g_object_unref (priv->registry);
-		priv->registry = NULL;
+	if (priv->refresh_cancellable) {
+		g_cancellable_cancel (priv->refresh_cancellable);
+		g_clear_object (&priv->refresh_cancellable);
 	}
 
-	if (priv->account_source != NULL) {
-		g_object_unref (priv->account_source);
-		priv->account_source = NULL;
-	}
-
-	if (priv->collection_source != NULL) {
-		g_object_unref (priv->collection_source);
-		priv->collection_source = NULL;
-	}
-
-	if (priv->identity_source != NULL) {
-		g_object_unref (priv->identity_source);
-		priv->identity_source = NULL;
-	}
-
-	if (priv->oof_settings != NULL) {
-		g_object_unref (priv->oof_settings);
-		priv->oof_settings = NULL;
-	}
+	g_clear_object (&priv->registry);
+	g_clear_object (&priv->account_source);
+	g_clear_object (&priv->collection_source);
+	g_clear_object (&priv->identity_source);
+	g_clear_object (&priv->oof_settings);
 
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (e_mail_config_ews_ooo_page_parent_class)->
@@ -816,6 +804,9 @@ mail_config_ews_ooo_page_try_password_sync (ESourceAuthenticator *auth,
 	const gchar *mailbox;
 	GError *local_error = NULL;
 
+	if (g_cancellable_set_error_if_cancelled (cancellable, error))
+		return E_SOURCE_AUTHENTICATION_ERROR;
+
 	page = E_MAIL_CONFIG_EWS_OOO_PAGE (auth);
 	mailbox = mail_config_ews_ooo_page_get_mailbox (page);
 	settings = mail_config_ews_ooo_page_get_settings (page);
@@ -991,9 +982,15 @@ e_mail_config_ews_ooo_page_refresh (EMailConfigEwsOooPage *page)
 	source = e_mail_config_ews_ooo_page_get_collection_source (page);
 	authenticator = E_SOURCE_AUTHENTICATOR (page);
 
+	if (page->priv->refresh_cancellable) {
+		g_cancellable_cancel (page->priv->refresh_cancellable);
+		g_clear_object (&page->priv->refresh_cancellable);
+	}
+
 	activity = e_mail_config_activity_page_new_activity (
 		E_MAIL_CONFIG_ACTIVITY_PAGE (page));
 	cancellable = e_activity_get_cancellable (activity);
+	page->priv->refresh_cancellable = g_object_ref (cancellable);
 
 	e_activity_set_text (
 		activity, _("Retrieving \"Out of Office\" settings"));
