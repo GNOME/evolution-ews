@@ -2027,19 +2027,11 @@ ews_delete_folder_sync (CamelStore *store,
 
 		connection = camel_ews_store_ref_connection (ews_store);
 
-		if (e_ews_connection_satisfies_server_version (connection, E_EWS_EXCHANGE_2010)) {
-			success = e_ews_connection_empty_folder_sync (
-				connection,
-				EWS_PRIORITY_MEDIUM,
-				fid, FALSE, "HardDelete", TRUE,
-				cancellable, &local_error);
-		} else {
-			success = e_ews_connection_delete_folder_sync (
-				connection,
-				EWS_PRIORITY_MEDIUM,
-				fid, FALSE, "HardDelete",
-				cancellable, &local_error);
-		}
+		success = e_ews_connection_delete_folder_sync (
+			connection,
+			EWS_PRIORITY_MEDIUM,
+			fid, FALSE, "HardDelete",
+			cancellable, &local_error);
 
 		g_object_unref (connection);
 	}
