@@ -108,14 +108,25 @@ CamelServiceAuthType camel_ews_basic_authtype = {
 	TRUE
 };
 
+CamelServiceAuthType camel_ews_gssapi_authtype = {
+	N_("Kerberos"),
+
+	N_("This option will connect to the Exchange server using a "
+	   "Kerberos/GSSAPI authentication."),
+
+	"GSSAPI",
+	FALSE
+};
+
 void
 camel_provider_module_init (void)
 {
 	ews_provider.url_hash = ews_url_hash;
 	ews_provider.url_equal = ews_url_equal;
-	ews_provider.authtypes = g_list_prepend (
-		g_list_prepend (NULL, &camel_ews_basic_authtype),
-		&camel_ews_ntlm_authtype);
+	ews_provider.authtypes = g_list_append (g_list_append (g_list_append (NULL,
+		&camel_ews_ntlm_authtype),
+		&camel_ews_basic_authtype),
+		&camel_ews_gssapi_authtype);
 	ews_provider.translation_domain = GETTEXT_PACKAGE;
 
 	ews_provider.object_types[CAMEL_PROVIDER_STORE] =  CAMEL_TYPE_EWS_STORE;
