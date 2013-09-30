@@ -336,6 +336,12 @@ gboolean	e_ews_connection_find_folder_items_sync
 EEwsServerVersion
 		e_ews_connection_get_server_version
 						(EEwsConnection *cnc);
+void		e_ews_connection_set_server_version
+						(EEwsConnection *cnc,
+						 EEwsServerVersion version);
+void		e_ews_connection_set_server_version_from_string
+						(EEwsConnection *cnc,
+						 const gchar *version);
 gboolean	e_ews_connection_satisfies_server_version
 						(EEwsConnection *cnc,
 						 EEwsServerVersion versio);

@@ -21,6 +21,7 @@
 #endif
 
 #include "e-ews-debug.h"
+#include "e-ews-message.h"
 
 gint
 e_ews_debug_get_log_level (void)
@@ -39,4 +40,26 @@ e_ews_debug_get_log_level (void)
 	}
 
 	return level;
+}
+
+const gchar *
+e_ews_connection_get_server_version_string (EEwsConnection *cnc)
+{
+	switch (e_ews_connection_get_server_version(cnc)) {
+		case E_EWS_EXCHANGE_2007:
+			return "2007";
+		case E_EWS_EXCHANGE_2007_SP1:
+			return "2007_SP1";
+		case E_EWS_EXCHANGE_2010:
+			return "2010";
+		case E_EWS_EXCHANGE_2010_SP1:
+			return "2010_SP1";
+		case E_EWS_EXCHANGE_2010_SP2:
+		case E_EWS_EXCHANGE_FUTURE:
+			return "2010_SP2";
+		case E_EWS_EXCHANGE_UNKNOWN:
+			return "Unknown";
+		default:
+			return NULL;
+	}
 }

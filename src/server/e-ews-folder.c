@@ -351,7 +351,8 @@ e_ews_folder_id_free (EwsFolderId *fid)
 
 gboolean
 e_ews_folder_id_is_equal (const EwsFolderId *a,
-			  const EwsFolderId *b)
+			  const EwsFolderId *b,
+			  gboolean check_change_key)
 {
 	if (a == NULL && b == NULL)
 		return TRUE;
@@ -365,8 +366,9 @@ e_ews_folder_id_is_equal (const EwsFolderId *a,
 	if (g_strcmp0 (a->id, b->id) != 0)
 		return FALSE;
 
-	if (g_strcmp0 (a->change_key, b->change_key) != 0)
-		return FALSE;
+	if (check_change_key)
+		if (g_strcmp0 (a->change_key, b->change_key) != 0)
+			return FALSE;
 
 	return TRUE;
 }

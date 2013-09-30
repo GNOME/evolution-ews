@@ -84,7 +84,8 @@ EwsFolderId *	e_ews_folder_id_new (const gchar *id,
 				     gboolean is_distinguished_id);
 void		e_ews_folder_id_free (EwsFolderId *fid);
 gboolean	e_ews_folder_id_is_equal (const EwsFolderId *a,
-					  const EwsFolderId *b);
+					  const EwsFolderId *b,
+					  gboolean check_change_key);
 
 typedef enum {
 	E_EWS_ESOURCE_FLAG_NONE			= 0,

@@ -284,6 +284,32 @@ LIBS=$save_libs
 AC_MSG_RESULT([$ac_cv_have_smi])
 
 dnl ****************************
+dnl Check for uhttpmock
+dnl ****************************
+AC_ARG_ENABLE([tests],
+	[AS_HELP_STRING([--enable-tests],
+	[Enable low level tests for EwsConnection @<:@default=no@:>@])],
+	[enable_tests="$enableval"], [enable_tests=no])
+
+if test "x$enable_tests" = "xyes" ; then
+	PKG_CHECK_MODULES(UHTTPMOCK, [libuhttpmock-0.0], have_uhttpmock=yes,
+			  have_uhttpmock=no)
+	AC_SUBST(UHTTPMOCK_CFLAGS)
+	AC_SUBST(UHTTPMOCK_LIBS)
+
+	if test "x$have_uhttpmock" = "xyes" ; then
+		AC_DEFINE(ENABLE_TESTS, 1, [Define to add support for low level tests])
+	else
+		AC_ERROR([
+
+		libuhttpmock >= 0.0 not found.
+
+		])
+	fi
+fi
+AM_CONDITIONAL([ENABLE_TESTS], [test "x$have_uhttpmock" = "xyes"])
+
+dnl ****************************
 dnl Expose version information
 dnl ****************************
 API_VERSION=1.2
@@ -352,6 +378,7 @@ src/calendar/Makefile
 src/camel/Makefile
 src/collection/Makefile
 src/configuration/Makefile
+src/tests/Makefile
 po/Makefile.in
 ])
 AC_OUTPUT
@@ -360,5 +387,6 @@ AC_MSG_NOTICE([
 	Kerberos 5	: $msg_krb5
 	Strict building : $enable_strict
 	Use libmspack   : $have_mspack
+	Enable tests	: $enable_tests
 ])
 

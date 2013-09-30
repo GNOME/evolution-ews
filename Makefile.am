@@ -52,6 +52,7 @@ MAINTAINERCLEANFILES = \
 #     once libmspack >= 0.4 becomes more widespread.
 DISTCHECK_CONFIGURE_FLAGS = \
 	--with-internal-lzx \
+	--enable-tests \
 	$(NULL)
 
 -include $(top_srcdir)/git.mk

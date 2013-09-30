@@ -20,10 +20,14 @@
 #define E_EWS_DEBUG_H
 
 #include <glib.h>
+#include <server/e-ews-connection.h>
 
 G_BEGIN_DECLS
 
 gint		e_ews_debug_get_log_level		(void);
+const gchar *	e_ews_connection_get_server_version_string
+							(EEwsConnection *cnc);
+
 
 G_END_DECLS
 

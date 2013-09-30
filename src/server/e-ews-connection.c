@@ -563,18 +563,7 @@ ews_discover_server_version (EEwsConnection *cnc,
 
 	version = e_soap_parameter_get_property (param, "Version");
 
-	if (g_strcmp0 (version, "Exchange2007") == 0)
-		cnc->priv->version = E_EWS_EXCHANGE_2007;
-	else if (g_strcmp0 (version, "Exchange2007_SP1") == 0)
-		cnc->priv->version = E_EWS_EXCHANGE_2007_SP1;
-	else if (g_strcmp0 (version, "Exchange2010") == 0)
-		cnc->priv->version = E_EWS_EXCHANGE_2010;
-	else if (g_strcmp0 (version, "Exchange2010_SP1") == 0)
-		cnc->priv->version = E_EWS_EXCHANGE_2010_SP1;
-	else if (g_strcmp0 (version, "Exchange2010_SP2") == 0)
-		cnc->priv->version = E_EWS_EXCHANGE_2010_SP2;
-	else
-		cnc->priv->version = E_EWS_EXCHANGE_FUTURE;
+	e_ews_connection_set_server_version_from_string (cnc, version);
 
 	g_free (version);
 }
@@ -1760,7 +1749,6 @@ e_ews_connection_init (EEwsConnection *cnc)
 
 	cnc->priv->soup_thread = g_thread_new (NULL, e_ews_soup_thread, cnc);
 
-	/* create the SoupSession for this connection */
 	cnc->priv->soup_session = soup_session_async_new_with_options (
 		SOUP_SESSION_USE_NTLM, TRUE,
 		SOUP_SESSION_ASYNC_CONTEXT,
@@ -4047,6 +4035,35 @@ e_ews_connection_get_server_version (EEwsConnection *cnc)
 	g_return_val_if_fail (cnc->priv != NULL, E_EWS_EXCHANGE_UNKNOWN);
 
 	return cnc->priv->version;
+}
+
+void
+e_ews_connection_set_server_version (EEwsConnection *cnc,
+				     EEwsServerVersion version)
+{
+	g_return_if_fail (cnc != NULL);
+	g_return_if_fail (cnc->priv != NULL);
+
+	if (cnc->priv->version != version)
+		cnc->priv->version = version;
+}
+
+void
+e_ews_connection_set_server_version_from_string (EEwsConnection *cnc,
+						 const gchar *version)
+{
+	if (g_strcmp0 (version, "Exchange2007") == 0)
+		cnc->priv->version = E_EWS_EXCHANGE_2007;
+	else if (g_strcmp0 (version, "Exchange2007_SP1") == 0)
+		cnc->priv->version = E_EWS_EXCHANGE_2007_SP1;
+	else if (g_strcmp0 (version, "Exchange2010") == 0)
+		cnc->priv->version = E_EWS_EXCHANGE_2010;
+	else if (g_strcmp0 (version, "Exchange2010_SP1") == 0)
+		cnc->priv->version = E_EWS_EXCHANGE_2010_SP1;
+	else if (g_strcmp0 (version, "Exchange2010_SP2") == 0)
+		cnc->priv->version = E_EWS_EXCHANGE_2010_SP2;
+	else
+		cnc->priv->version = E_EWS_EXCHANGE_FUTURE;
 }
 
 gboolean
