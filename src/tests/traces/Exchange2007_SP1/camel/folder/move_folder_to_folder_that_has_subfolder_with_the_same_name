@@ -1,0 +1,48 @@
+> POST /EWS/Exchange.asmx HTTP/1.1
+> Soup-Debug-Timestamp: 1381373615
+> Soup-Debug: SoupSessionAsync 1 (0x25324b0), ESoapMessage 14 (0x25414a0), SoupSocket 1 (0x7fa350004d00)
+> Host: <redacted>
+> User-Agent: Evolution/3.11.1
+> Connection: Keep-Alive
+> Content-Type: text/xml; charset=utf-8
+> 
+> <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+> <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><SOAP-ENV:Header><types:RequestServerVersion xmlns:types="http://schemas.microsoft.com/exchange/services/2006/types" Version="Exchange2007_SP1"/></SOAP-ENV:Header><SOAP-ENV:Body xmlns:messages="http://schemas.microsoft.com/exchange/services/2006/messages"><messages:CreateFolder xmlns="http://schemas.microsoft.com/exchange/services/2006/types"><messages:ParentFolderId><FolderId Id="AAMkADIyMDQ2NDc3LWI5NWUtNGRjNi1iN2RiLWI1YWQ5ODQ1ZDA5OQAuAAAAAACivok1/cL1QIejMUXitFygAQAZqVFjEGG+Qo7TIVNxZT1qBJW+VRB4AAA="/></messages:ParentFolderId><messages:Folders><Folder><DisplayName>inbox</DisplayName></Folder></messages:Folders></messages:CreateFolder></SOAP-ENV:Body></SOAP-ENV:Envelope>
+  
+< HTTP/1.1 200 OK
+< Soup-Debug-Timestamp: 1381373615
+< Soup-Debug: ESoapMessage 14 (0x25414a0)
+< Date: Thu, 10 Oct 2013 02:53:35 GMT
+< Server: Microsoft-IIS/6.0
+< X-Powered-By: ASP.NET
+< X-AspNet-Version: 2.0.50727
+< Cache-Control: private, max-age=0
+< Content-Type: text/xml; charset=utf-8
+< Content-Length: 1062
+< 
+< <?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><soap:Header><t:ServerVersionInfo MajorVersion="8" MinorVersion="1" MajorBuildNumber="436" MinorBuildNumber="0" Version="Exchange2007_SP1" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" /></soap:Header><soap:Body><m:CreateFolderResponse xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"><m:ResponseMessages><m:CreateFolderResponseMessage ResponseClass="Success"><m:ResponseCode>NoError</m:ResponseCode><m:Folders><t:Folder><t:FolderId Id="AAMkADIyMDQ2NDc3LWI5NWUtNGRjNi1iN2RiLWI1YWQ5ODQ1ZDA5OQAuAAAAAACivok1/cL1QIejMUXitFygAQAZqVFjEGG+Qo7TIVNxZT1qBJW+VRB5AAA=" ChangeKey="AQAAABYAAAAZqVFjEGG+Qo7TIVNxZT1qBJW+VWsQ" /></t:Folder></m:Folders></m:CreateFolderResponseMessage></m:ResponseMessages></m:CreateFolderResponse></soap:Body></soap:Envelope>
+  
+> POST /EWS/Exchange.asmx HTTP/1.1
+> Soup-Debug-Timestamp: 1381373615
+> Soup-Debug: SoupSessionAsync 1 (0x25324b0), ESoapMessage 15 (0x25414a0), SoupSocket 1 (0x7fa350004d00)
+> Host: <redacted>
+> User-Agent: Evolution/3.11.1
+> Connection: Keep-Alive
+> Content-Type: text/xml; charset=utf-8
+> 
+> <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+> <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><SOAP-ENV:Header><types:RequestServerVersion xmlns:types="http://schemas.microsoft.com/exchange/services/2006/types" Version="Exchange2007_SP1"/></SOAP-ENV:Header><SOAP-ENV:Body xmlns:messages="http://schemas.microsoft.com/exchange/services/2006/messages"><messages:MoveFolder xmlns="http://schemas.microsoft.com/exchange/services/2006/types"><messages:ToFolderId><DistinguishedFolderId Id="msgfolderroot"/></messages:ToFolderId><messages:FolderIds><FolderId Id="AAMkADIyMDQ2NDc3LWI5NWUtNGRjNi1iN2RiLWI1YWQ5ODQ1ZDA5OQAuAAAAAACivok1/cL1QIejMUXitFygAQAZqVFjEGG+Qo7TIVNxZT1qBJW+VRB5AAA="/></messages:FolderIds></messages:MoveFolder></SOAP-ENV:Body></SOAP-ENV:Envelope>
+  
+< HTTP/1.1 200 OK
+< Soup-Debug-Timestamp: 1381373616
+< Soup-Debug: ESoapMessage 15 (0x25414a0)
+< Date: Thu, 10 Oct 2013 02:53:36 GMT
+< Server: Microsoft-IIS/6.0
+< X-Powered-By: ASP.NET
+< X-AspNet-Version: 2.0.50727
+< Cache-Control: private, max-age=0
+< Content-Type: text/xml; charset=utf-8
+< Content-Length: 951
+< 
+< <?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><soap:Header><t:ServerVersionInfo MajorVersion="8" MinorVersion="1" MajorBuildNumber="436" MinorBuildNumber="0" Version="Exchange2007_SP1" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" /></soap:Header><soap:Body><m:MoveFolderResponse xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"><m:ResponseMessages><m:MoveFolderResponseMessage ResponseClass="Error"><m:MessageText>The move or copy operation failed.</m:MessageText><m:ResponseCode>ErrorMoveCopyFailed</m:ResponseCode><m:DescriptiveLinkKey>0</m:DescriptiveLinkKey><m:Folders /></m:MoveFolderResponseMessage></m:ResponseMessages></m:MoveFolderResponse></soap:Body></soap:Envelope>
+  

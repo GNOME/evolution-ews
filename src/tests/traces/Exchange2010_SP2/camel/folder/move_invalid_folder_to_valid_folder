@@ -1,0 +1,25 @@
+> POST /EWS/Exchange.asmx HTTP/1.1
+> Soup-Debug-Timestamp: 1381373630
+> Soup-Debug: SoupSessionAsync 1 (0x24a78a0), ESoapMessage 10 (0x2548390), SoupSocket 1 (0x7fa34c002460)
+> Host: <redacted>
+> User-Agent: Evolution/3.11.1
+> Connection: Keep-Alive
+> Content-Type: text/xml; charset=utf-8
+> 
+> <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+> <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><SOAP-ENV:Header><types:RequestServerVersion xmlns:types="http://schemas.microsoft.com/exchange/services/2006/types" Version="Exchange2010_SP2"/></SOAP-ENV:Header><SOAP-ENV:Body xmlns:messages="http://schemas.microsoft.com/exchange/services/2006/messages"><messages:MoveFolder xmlns="http://schemas.microsoft.com/exchange/services/2006/types"><messages:ToFolderId><FolderId Id="AAMkADhhNjgxMWMwLWFjMjAtNGMxYi1iMmVkLTYxN2ZjZjg0NjYxMwAuAAAAAABrjnF0sj+sSounzj9c5qzwAQBPRrS+NgN2TLdvauFC2S+xAACqkvK4AAA="/></messages:ToFolderId><messages:FolderIds><FolderId Id="malformedparentid"/></messages:FolderIds></messages:MoveFolder></SOAP-ENV:Body></SOAP-ENV:Envelope>
+  
+< HTTP/1.1 200 OK
+< Soup-Debug-Timestamp: 1381373631
+< Soup-Debug: ESoapMessage 10 (0x2548390)
+< Cache-Control: private
+< Transfer-Encoding: chunked
+< Content-Type: text/xml; charset=utf-8
+< Server: Microsoft-IIS/7.5
+< Set-Cookie: <redacted>
+< X-AspNet-Version: 2.0.50727
+< X-Powered-By: ASP.NET
+< Date: Thu, 10 Oct 2013 02:52:35 GMT
+< 
+< <?xml version="1.0" encoding="utf-8"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Header><h:ServerVersionInfo MajorVersion="14" MinorVersion="2" MajorBuildNumber="328" MinorBuildNumber="9" Version="Exchange2010_SP2" xmlns:h="http://schemas.microsoft.com/exchange/services/2006/types" xmlns="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"/></s:Header><s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><m:MoveFolderResponse xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"><m:ResponseMessages><m:MoveFolderResponseMessage ResponseClass="Error"><m:MessageText>Id is malformed.</m:MessageText><m:ResponseCode>ErrorInvalidIdMalformed</m:ResponseCode><m:DescriptiveLinkKey>0</m:DescriptiveLinkKey><m:Folders/></m:MoveFolderResponseMessage></m:ResponseMessages></m:MoveFolderResponse></s:Body></s:Envelope>
+  

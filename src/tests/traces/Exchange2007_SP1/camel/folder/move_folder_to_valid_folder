@@ -1,0 +1,72 @@
+> POST /EWS/Exchange.asmx HTTP/1.1
+> Soup-Debug-Timestamp: 1381373616
+> Soup-Debug: SoupSessionAsync 1 (0x25324b0), ESoapMessage 16 (0x25414a0), SoupSocket 1 (0x7fa350004d00)
+> Host: <redacted>
+> User-Agent: Evolution/3.11.1
+> Connection: Keep-Alive
+> Content-Type: text/xml; charset=utf-8
+> 
+> <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+> <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><SOAP-ENV:Header><types:RequestServerVersion xmlns:types="http://schemas.microsoft.com/exchange/services/2006/types" Version="Exchange2007_SP1"/></SOAP-ENV:Header><SOAP-ENV:Body xmlns:messages="http://schemas.microsoft.com/exchange/services/2006/messages"><messages:MoveFolder xmlns="http://schemas.microsoft.com/exchange/services/2006/types"><messages:ToFolderId><FolderId Id="AAMkADIyMDQ2NDc3LWI5NWUtNGRjNi1iN2RiLWI1YWQ5ODQ1ZDA5OQAuAAAAAACivok1/cL1QIejMUXitFygAQAZqVFjEGG+Qo7TIVNxZT1qBJW+VRB3AAA="/></messages:ToFolderId><messages:FolderIds><FolderId Id="AAMkADIyMDQ2NDc3LWI5NWUtNGRjNi1iN2RiLWI1YWQ5ODQ1ZDA5OQAuAAAAAACivok1/cL1QIejMUXitFygAQAZqVFjEGG+Qo7TIVNxZT1qBJW+VRB4AAA="/></messages:FolderIds></messages:MoveFolder></SOAP-ENV:Body></SOAP-ENV:Envelope>
+  
+< HTTP/1.1 200 OK
+< Soup-Debug-Timestamp: 1381373616
+< Soup-Debug: ESoapMessage 16 (0x25414a0)
+< Date: Thu, 10 Oct 2013 02:53:36 GMT
+< Server: Microsoft-IIS/6.0
+< X-Powered-By: ASP.NET
+< X-AspNet-Version: 2.0.50727
+< Cache-Control: private, max-age=0
+< Content-Type: text/xml; charset=utf-8
+< Content-Length: 1054
+< 
+< <?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><soap:Header><t:ServerVersionInfo MajorVersion="8" MinorVersion="1" MajorBuildNumber="436" MinorBuildNumber="0" Version="Exchange2007_SP1" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" /></soap:Header><soap:Body><m:MoveFolderResponse xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"><m:ResponseMessages><m:MoveFolderResponseMessage ResponseClass="Success"><m:ResponseCode>NoError</m:ResponseCode><m:Folders><t:Folder><t:FolderId Id="AAMkADIyMDQ2NDc3LWI5NWUtNGRjNi1iN2RiLWI1YWQ5ODQ1ZDA5OQAuAAAAAACivok1/cL1QIejMUXitFygAQAZqVFjEGG+Qo7TIVNxZT1qBJW+VRB4AAA=" ChangeKey="AQAAABYAAAAZqVFjEGG+Qo7TIVNxZT1qBJW+VWsS" /></t:Folder></m:Folders></m:MoveFolderResponseMessage></m:ResponseMessages></m:MoveFolderResponse></soap:Body></soap:Envelope>
+  
+> POST /EWS/Exchange.asmx HTTP/1.1
+> Soup-Debug-Timestamp: 1381373616
+> Soup-Debug: SoupSessionAsync 1 (0x25324b0), ESoapMessage 17 (0x25414a0), SoupSocket 1 (0x7fa350004d00)
+> Host: <redacted>
+> User-Agent: Evolution/3.11.1
+> Connection: Keep-Alive
+> Content-Type: text/xml; charset=utf-8
+> 
+> <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+> <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><SOAP-ENV:Header><types:RequestServerVersion xmlns:types="http://schemas.microsoft.com/exchange/services/2006/types" Version="Exchange2007_SP1"/></SOAP-ENV:Header><SOAP-ENV:Body xmlns:messages="http://schemas.microsoft.com/exchange/services/2006/messages"><messages:GetFolder xmlns="http://schemas.microsoft.com/exchange/services/2006/types"><messages:FolderShape><BaseShape>AllProperties</BaseShape></messages:FolderShape><messages:FolderIds><FolderId Id="AAMkADIyMDQ2NDc3LWI5NWUtNGRjNi1iN2RiLWI1YWQ5ODQ1ZDA5OQAuAAAAAACivok1/cL1QIejMUXitFygAQAZqVFjEGG+Qo7TIVNxZT1qBJW+VRB4AAA=" ChangeKey="AQAAABYAAAAZqVFjEGG+Qo7TIVNxZT1qBJW+VWkJ"/></messages:FolderIds></messages:GetFolder></SOAP-ENV:Body></SOAP-ENV:Envelope>
+  
+< HTTP/1.1 200 OK
+< Soup-Debug-Timestamp: 1381373617
+< Soup-Debug: ESoapMessage 17 (0x25414a0)
+< Date: Thu, 10 Oct 2013 02:53:37 GMT
+< Server: Microsoft-IIS/6.0
+< X-Powered-By: ASP.NET
+< X-AspNet-Version: 2.0.50727
+< Cache-Control: private, max-age=0
+< Content-Type: text/xml; charset=utf-8
+< Content-Length: 2746
+< 
+< <?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><soap:Header><t:ServerVersionInfo MajorVersion="8" MinorVersion="1" MajorBuildNumber="436" MinorBuildNumber="0" Version="Exchange2007_SP1" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" /></soap:Header><soap:Body><m:GetFolderResponse xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"><m:ResponseMessages><m:GetFolderResponseMessage ResponseClass="Success"><m:ResponseCode>NoError</m:ResponseCode><m:Folders><t:Folder><t:FolderId Id="AAMkADIyMDQ2NDc3LWI5NWUtNGRjNi1iN2RiLWI1YWQ5ODQ1ZDA5OQAuAAAAAACivok1/cL1QIejMUXitFygAQAZqVFjEGG+Qo7TIVNxZT1qBJW+VRB4AAA=" ChangeKey="AQAAABYAAAAZqVFjEGG+Qo7TIVNxZT1qBJW+VWsS" /><t:ParentFolderId Id="AAMkADIyMDQ2NDc3LWI5NWUtNGRjNi1iN2RiLWI1YWQ5ODQ1ZDA5OQAuAAAAAACivok1/cL1QIejMUXitFygAQAZqVFjEGG+Qo7TIVNxZT1qBJW+VRB3AAA=" ChangeKey="AQAAAA==" /><t:DisplayName>non-distinguished-folder-subfolder</t:DisplayName><t:TotalCount>0</t:TotalCount><t:ChildFolderCount>1</t:ChildFolderCount><t:EffectiveRights><t:CreateAssociated>true</t:CreateAssociated><t:CreateContents>true</t:CreateContents><t:CreateHierarchy>true</t:CreateHierarchy><t:Delete>true</t:Delete><t:Modify>true</t:Modify><t:Read>true</t:Read></t:EffectiveRights><t:PermissionSet><t:Permissions><t:Permission><t:UserId><t:DistinguishedUser>Default</t:DistinguishedUser></t:UserId><t:CanCreateItems>false</t:CanCreateItems><t:CanCreateSubFolders>false</t:CanCreateSubFolders><t:IsFolderOwner>false</t:IsFolderOwner><t:IsFolderVisible>true</t:IsFolderVisible><t:IsFolderContact>false</t:IsFolderContact><t:EditItems>None</t:EditItems><t:DeleteItems>None</t:DeleteItems><t:ReadItems>None</t:ReadItems><t:PermissionLevel>None</t:PermissionLevel></t:Permission><t:Permission><t:UserId><t:SID>S-1-5-21-2911559388-2830705764-2912516678-1126</t:SID><t:PrimarySmtpAddress>mcrha@exchange2007.gsslab</t:PrimarySmtpAddress><t:DisplayName>Milan Crha</t:DisplayName></t:UserId><t:CanCreateItems>false</t:CanCreateItems><t:CanCreateSubFolders>false</t:CanCreateSubFolders><t:IsFolderOwner>false</t:IsFolderOwner><t:IsFolderVisible>true</t:IsFolderVisible><t:IsFolderContact>false</t:IsFolderContact><t:EditItems>None</t:EditItems><t:DeleteItems>None</t:DeleteItems><t:ReadItems>FullDetails</t:ReadItems><t:PermissionLevel>Reviewer</t:PermissionLevel></t:Permission></t:Permissions></t:PermissionSet><t:UnreadCount>0</t:UnreadCount></t:Folder></m:Folders></m:GetFolderResponseMessage></m:ResponseMessages></m:GetFolderResponse></soap:Body></soap:Envelope>
+  
+> POST /EWS/Exchange.asmx HTTP/1.1
+> Soup-Debug-Timestamp: 1381373617
+> Soup-Debug: SoupSessionAsync 1 (0x25324b0), ESoapMessage 18 (0x25414a0), SoupSocket 1 (0x7fa350004d00)
+> Host: <redacted>
+> User-Agent: Evolution/3.11.1
+> Connection: Keep-Alive
+> Content-Type: text/xml; charset=utf-8
+> 
+> <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+> <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><SOAP-ENV:Header><types:RequestServerVersion xmlns:types="http://schemas.microsoft.com/exchange/services/2006/types" Version="Exchange2007_SP1"/></SOAP-ENV:Header><SOAP-ENV:Body xmlns:messages="http://schemas.microsoft.com/exchange/services/2006/messages"><messages:GetFolder xmlns="http://schemas.microsoft.com/exchange/services/2006/types"><messages:FolderShape><BaseShape>IdOnly</BaseShape></messages:FolderShape><messages:FolderIds><FolderId Id="AAMkADIyMDQ2NDc3LWI5NWUtNGRjNi1iN2RiLWI1YWQ5ODQ1ZDA5OQAuAAAAAACivok1/cL1QIejMUXitFygAQAZqVFjEGG+Qo7TIVNxZT1qBJW+VRB3AAA=" ChangeKey="AQAAABYAAAAZqVFjEGG+Qo7TIVNxZT1qBJW+VWcF"/><FolderId Id="AAMkADIyMDQ2NDc3LWI5NWUtNGRjNi1iN2RiLWI1YWQ5ODQ1ZDA5OQAuAAAAAACivok1/cL1QIejMUXitFygAQAZqVFjEGG+Qo7TIVNxZT1qBJW+VRB4AAA=" ChangeKey="AQAAABYAAAAZqVFjEGG+Qo7TIVNxZT1qBJW+VWkJ"/></messages:FolderIds></messages:GetFolder></SOAP-ENV:Body></SOAP-ENV:Envelope>
+  
+< HTTP/1.1 200 OK
+< Soup-Debug-Timestamp: 1381373617
+< Soup-Debug: ESoapMessage 18 (0x25414a0)
+< Date: Thu, 10 Oct 2013 02:53:37 GMT
+< Server: Microsoft-IIS/6.0
+< X-Powered-By: ASP.NET
+< X-AspNet-Version: 2.0.50727
+< Cache-Control: private, max-age=0
+< Content-Type: text/xml; charset=utf-8
+< Content-Length: 1408
+< 
+< <?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><soap:Header><t:ServerVersionInfo MajorVersion="8" MinorVersion="1" MajorBuildNumber="436" MinorBuildNumber="0" Version="Exchange2007_SP1" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" /></soap:Header><soap:Body><m:GetFolderResponse xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"><m:ResponseMessages><m:GetFolderResponseMessage ResponseClass="Success"><m:ResponseCode>NoError</m:ResponseCode><m:Folders><t:Folder><t:FolderId Id="AAMkADIyMDQ2NDc3LWI5NWUtNGRjNi1iN2RiLWI1YWQ5ODQ1ZDA5OQAuAAAAAACivok1/cL1QIejMUXitFygAQAZqVFjEGG+Qo7TIVNxZT1qBJW+VRB3AAA=" ChangeKey="AQAAABYAAAAZqVFjEGG+Qo7TIVNxZT1qBJW+VWcF" /></t:Folder></m:Folders></m:GetFolderResponseMessage><m:GetFolderResponseMessage ResponseClass="Success"><m:ResponseCode>NoError</m:ResponseCode><m:Folders><t:Folder><t:FolderId Id="AAMkADIyMDQ2NDc3LWI5NWUtNGRjNi1iN2RiLWI1YWQ5ODQ1ZDA5OQAuAAAAAACivok1/cL1QIejMUXitFygAQAZqVFjEGG+Qo7TIVNxZT1qBJW+VRB4AAA=" ChangeKey="AQAAABYAAAAZqVFjEGG+Qo7TIVNxZT1qBJW+VWsS" /></t:Folder></m:Folders></m:GetFolderResponseMessage></m:ResponseMessages></m:GetFolderResponse></soap:Body></soap:Envelope>
+  

@@ -1,0 +1,79 @@
+> POST /EWS/Exchange.asmx HTTP/1.1
+> Soup-Debug-Timestamp: 1381373607
+> Soup-Debug: SoupSessionAsync 1 (0x25324b0), ESoapMessage 1 (0x2546440), SoupSocket 1 (0x7fa350004d00)
+> Host: <redacted>
+> User-Agent: Evolution/3.11.1
+> Connection: Keep-Alive
+> Content-Type: text/xml; charset=utf-8
+> Authorization: <redacted>
+> 
+> <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+> <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><SOAP-ENV:Header><types:RequestServerVersion xmlns:types="http://schemas.microsoft.com/exchange/services/2006/types" Version="Exchange2007_SP1"/></SOAP-ENV:Header><SOAP-ENV:Body xmlns:messages="http://schemas.microsoft.com/exchange/services/2006/messages"><messages:CreateFolder xmlns="http://schemas.microsoft.com/exchange/services/2006/types"><messages:ParentFolderId><DistinguishedFolderId Id="msgfolderroot"/></messages:ParentFolderId><messages:Folders><Folder><DisplayName>inbox</DisplayName></Folder></messages:Folders></messages:CreateFolder></SOAP-ENV:Body></SOAP-ENV:Envelope>
+  
+< HTTP/1.1 401 Unauthorized
+< Soup-Debug-Timestamp: 1381373607
+< Soup-Debug: ESoapMessage 1 (0x2546440)
+< Content-Length: 1539
+< Content-Type: text/html
+< Server: Microsoft-IIS/6.0
+< WWW-Authenticate: NTLM TlRMTVNTUAACAAAAGAAYADgAAAAFgoEC6JS04IcAkUIAAAAAAAAAANgA2ABQAAAABQLODgAAAA9FAFgAQwBIAEEATgBHAEUAMgAwADAANwACABgARQBYAEMASABBAE4ARwBFADIAMAAwADcAAQAaAFcASQBOAEQATwBXAFMAMgAwADAAMwBSADIABAAmAGUAeABjAGgAYQBuAGcAZQAyADAAMAA3AC4AZwBzAHMAbABhAGIAAwBCAHcAaQBuAGQAbwB3AHMAMgAwADAAMwByADIALgBlAHgAYwBoAGEAbgBnAGUAMgAwADAANwAuAGcAcwBzAGwAYQBiAAUAJgBlAHgAYwBoAGEAbgBnAGUAMgAwADAANwAuAGcAcwBzAGwAYQBiAAAAAAA=
+< X-Powered-By: ASP.NET
+< Date: Thu, 10 Oct 2013 02:53:27 GMT
+< 
+< <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+< <HTML><HEAD><TITLE>You are not authorized to view this page</TITLE>
+< <META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+< <STYLE type="text/css">
+<   BODY { font: 8pt/12pt verdana }
+<   H1 { font: 13pt/15pt verdana }
+<   H2 { font: 8pt/12pt verdana }
+<   A:link { color: red }
+<   A:visited { color: maroon }
+< </STYLE>
+< </HEAD><BODY><TABLE width=500 border=0 cellspacing=10><TR><TD>
+< 
+< <h1>You are not authorized to view this page</h1>
+< You do not have permission to view this directory or page using the credentials that you supplied.
+< <hr>
+< <p>Please try the following:</p>
+< <ul>
+< <li>Contact the Web site administrator if you believe you should be able to view this directory or page.</li>
+< <li>Click the <a href="javascript:location.reload()">Refresh</a> button to try again with different credentials.</li>
+< </ul>
+< <h2>HTTP Error 401.1 - Unauthorized: Access is denied due to invalid credentials.<br>Internet Information Services (IIS)</h2>
+< <hr>
+< <p>Technical Information (for support personnel)</p>
+< <ul>
+< <li>Go to <a href="http://go.microsoft.com/fwlink/?linkid=8180">Microsoft Product Support Services</a> and perform a title search for the words <b>HTTP</b> and <b>401</b>.</li>
+< <li>Open <b>IIS Help</b>, which is accessible in IIS Manager (inetmgr),
+<  and search for topics titled <b>Authentication</b>, <b>Access Control</b>, and <b>About Custom Error Messages</b>.</li>
+< </ul>
+< 
+< </TD></TR></TABLE></BODY></HTML>
+  
+> POST /EWS/Exchange.asmx HTTP/1.1
+> Soup-Debug-Timestamp: 1381373607
+> Soup-Debug: SoupSessionAsync 1 (0x25324b0), ESoapMessage 1 (0x2546440), SoupSocket 1 (0x7fa350004d00), restarted
+> Host: <redacted>
+> User-Agent: Evolution/3.11.1
+> Connection: Keep-Alive
+> Content-Type: text/xml; charset=utf-8
+> Content-Length: 877
+> Authorization: <redacted>
+> 
+> <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+> <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><SOAP-ENV:Header><types:RequestServerVersion xmlns:types="http://schemas.microsoft.com/exchange/services/2006/types" Version="Exchange2007_SP1"/></SOAP-ENV:Header><SOAP-ENV:Body xmlns:messages="http://schemas.microsoft.com/exchange/services/2006/messages"><messages:CreateFolder xmlns="http://schemas.microsoft.com/exchange/services/2006/types"><messages:ParentFolderId><DistinguishedFolderId Id="msgfolderroot"/></messages:ParentFolderId><messages:Folders><Folder><DisplayName>inbox</DisplayName></Folder></messages:Folders></messages:CreateFolder></SOAP-ENV:Body></SOAP-ENV:Envelope>
+  
+< HTTP/1.1 200 OK
+< Soup-Debug-Timestamp: 1381373608
+< Soup-Debug: ESoapMessage 1 (0x2546440)
+< Date: Thu, 10 Oct 2013 02:53:28 GMT
+< Server: Microsoft-IIS/6.0
+< X-Powered-By: ASP.NET
+< X-AspNet-Version: 2.0.50727
+< Cache-Control: private, max-age=0
+< Content-Type: text/xml; charset=utf-8
+< Content-Length: 971
+< 
+< <?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><soap:Header><t:ServerVersionInfo MajorVersion="8" MinorVersion="1" MajorBuildNumber="436" MinorBuildNumber="0" Version="Exchange2007_SP1" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" /></soap:Header><soap:Body><m:CreateFolderResponse xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"><m:ResponseMessages><m:CreateFolderResponseMessage ResponseClass="Error"><m:MessageText>A folder with the specified name already exists.</m:MessageText><m:ResponseCode>ErrorFolderExists</m:ResponseCode><m:DescriptiveLinkKey>0</m:DescriptiveLinkKey><m:Folders /></m:CreateFolderResponseMessage></m:ResponseMessages></m:CreateFolderResponse></soap:Body></soap:Envelope>
+  

@@ -1,0 +1,24 @@
+> POST /EWS/Exchange.asmx HTTP/1.1
+> Soup-Debug-Timestamp: 1381373608
+> Soup-Debug: SoupSessionAsync 1 (0x25324b0), ESoapMessage 3 (0x25414a0), SoupSocket 1 (0x7fa350004d00)
+> Host: <redacted>
+> User-Agent: Evolution/3.11.1
+> Connection: Keep-Alive
+> Content-Type: text/xml; charset=utf-8
+> 
+> <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+> <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><SOAP-ENV:Header><types:RequestServerVersion xmlns:types="http://schemas.microsoft.com/exchange/services/2006/types" Version="Exchange2007_SP1"/></SOAP-ENV:Header><SOAP-ENV:Body xmlns:messages="http://schemas.microsoft.com/exchange/services/2006/messages"><messages:CreateFolder xmlns="http://schemas.microsoft.com/exchange/services/2006/types"><messages:ParentFolderId><FolderId Id="AAMkADQyYzVlYmU0LWNhNTUtNDNkYy04ZGYxLTk5ZTk5ZGY4NmJlMwAuAAAAAAB9G7pDgpwKQKc31aq6C3GTAQAi6qqMgDmPQrslhHoZnZkhAABOpnTeSTE="/></messages:ParentFolderId><messages:Folders><Folder><DisplayName>folder</DisplayName></Folder></messages:Folders></messages:CreateFolder></SOAP-ENV:Body></SOAP-ENV:Envelope>
+  
+< HTTP/1.1 200 OK
+< Soup-Debug-Timestamp: 1381373609
+< Soup-Debug: ESoapMessage 3 (0x25414a0)
+< Date: Thu, 10 Oct 2013 02:53:29 GMT
+< Server: Microsoft-IIS/6.0
+< X-Powered-By: ASP.NET
+< X-AspNet-Version: 2.0.50727
+< Cache-Control: private, max-age=0
+< Content-Type: text/xml; charset=utf-8
+< Content-Length: 1058
+< 
+< <?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><soap:Header><t:ServerVersionInfo MajorVersion="8" MinorVersion="1" MajorBuildNumber="436" MinorBuildNumber="0" Version="Exchange2007_SP1" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" /></soap:Header><soap:Body><m:CreateFolderResponse xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"><m:ResponseMessages><m:CreateFolderResponseMessage ResponseClass="Error"><m:MessageText>No mailbox with such guid.</m:MessageText><m:ResponseCode>ErrorNonExistentMailbox</m:ResponseCode><m:DescriptiveLinkKey>0</m:DescriptiveLinkKey><m:MessageXml><t:Value Name="MailboxGuid">42c5ebe4-ca55-43dc-8df1-99e99df86be3</t:Value></m:MessageXml><m:Folders /></m:CreateFolderResponseMessage></m:ResponseMessages></m:CreateFolderResponse></soap:Body></soap:Envelope>
+  

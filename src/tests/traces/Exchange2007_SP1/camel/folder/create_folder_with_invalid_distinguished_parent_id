@@ -1,0 +1,25 @@
+> POST /EWS/Exchange.asmx HTTP/1.1
+> Soup-Debug-Timestamp: 1381373608
+> Soup-Debug: SoupSessionAsync 1 (0x25324b0), ESoapMessage 2 (0x2546440), SoupSocket 1 (0x7fa350004d00)
+> Host: <redacted>
+> User-Agent: Evolution/3.11.1
+> Connection: Keep-Alive
+> Content-Type: text/xml; charset=utf-8
+> 
+> <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+> <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><SOAP-ENV:Header><types:RequestServerVersion xmlns:types="http://schemas.microsoft.com/exchange/services/2006/types" Version="Exchange2007_SP1"/></SOAP-ENV:Header><SOAP-ENV:Body xmlns:messages="http://schemas.microsoft.com/exchange/services/2006/messages"><messages:CreateFolder xmlns="http://schemas.microsoft.com/exchange/services/2006/types"><messages:ParentFolderId><DistinguishedFolderId Id="invalidparentid"/></messages:ParentFolderId><messages:Folders><Folder><DisplayName>folder</DisplayName></Folder></messages:Folders></messages:CreateFolder></SOAP-ENV:Body></SOAP-ENV:Envelope>
+  
+< HTTP/1.1 500 Internal Server Error
+< Soup-Debug-Timestamp: 1381373608
+< Soup-Debug: ESoapMessage 2 (0x2546440)
+< Date: Thu, 10 Oct 2013 02:53:28 GMT
+< Server: Microsoft-IIS/6.0
+< X-Powered-By: ASP.NET
+< X-AspNet-Version: 2.0.50727
+< Content-Length: 1361
+< Cache-Control: private
+< Content-Type: text/xml; charset=utf-8
+< 
+< <?xml version="1.0"?>
+< <soap11:Envelope xmlns:soap11="http://schemas.xmlsoap.org/soap/envelope/"><soap11:Header><t:ServerVersionInfo MajorVersion="8" MinorVersion="1" MajorBuildNumber="436" MinorBuildNumber="0" Version="Exchange2007_SP1" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" /></soap11:Header><soap11:Body><soap11:Fault><faultcode>soap11:Client</faultcode><faultstring>The request failed schema validation: The 'Id' attribute is invalid - The value 'invalidparentid' is invalid according to its datatype 'http://schemas.microsoft.com/exchange/services/2006/types:DistinguishedFolderIdNameType' - The Enumeration constraint failed.</faultstring><detail><e:ResponseCode xmlns:e="http://schemas.microsoft.com/exchange/services/2006/errors">ErrorSchemaValidation</e:ResponseCode><e:Message xmlns:e="http://schemas.microsoft.com/exchange/services/2006/errors">The 'Id' attribute is invalid - The value 'invalidparentid' is invalid according to its datatype 'http://schemas.microsoft.com/exchange/services/2006/types:DistinguishedFolderIdNameType' - The Enumeration constraint failed.</e:Message><e:Line xmlns:e="http://schemas.microsoft.com/exchange/services/2006/errors">2</e:Line><e:Position xmlns:e="http://schemas.microsoft.com/exchange/services/2006/errors">630</e:Position></detail></soap11:Fault></soap11:Body></soap11:Envelope>
+  
