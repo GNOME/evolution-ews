@@ -1133,6 +1133,11 @@ ews_authenticate_sync (CamelService *service,
 
 	g_object_unref (settings);
 
+	g_object_bind_property (
+		service, "proxy-resolver",
+		connection, "proxy-resolver",
+		G_BINDING_SYNC_CREATE);
+
 	/* XXX We need to run some operation that requires authentication
 	 *     but does not change any server-side state, so we can check
 	 *     the error status and determine if our password is valid.
@@ -1305,6 +1310,11 @@ ews_store_query_auth_types_sync (CamelService *service,
 	connection = e_ews_connection_new_full (hosturl, ews_settings, FALSE);
 	g_free (hosturl);
 	g_object_unref (settings);
+
+	g_object_bind_property (
+		service, "proxy-resolver",
+		connection, "proxy-resolver",
+		G_BINDING_SYNC_CREATE);
 
 	if (e_ews_connection_query_auth_methods_sync (connection, G_PRIORITY_DEFAULT, &auth_methods, cancellable, error)) {
 		CamelProvider *provider;

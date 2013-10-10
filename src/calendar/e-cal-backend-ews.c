@@ -4511,6 +4511,11 @@ cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 
 	g_free (hosturl);
 
+	g_object_bind_property (
+		backend, "proxy-resolver",
+		connection, "proxy-resolver",
+		G_BINDING_SYNC_CREATE);
+
 	store = backend->priv->store;
 	old_sync_state = e_cal_backend_store_get_key_value (store, SYNC_KEY);
 

@@ -2193,6 +2193,11 @@ ews_download_gal_file (EBookBackendEws *cbews,
 
 	oab_cnc = e_ews_connection_new (full_url, ews_settings);
 
+	g_object_bind_property (
+		cbews, "proxy-resolver",
+		oab_cnc, "proxy-resolver",
+		G_BINDING_SYNC_CREATE);
+
 	password = e_ews_connection_dup_password (priv->cnc);
 	e_ews_connection_set_password (oab_cnc, password);
 	g_free (password);
@@ -2477,6 +2482,11 @@ ebews_start_gal_sync (gpointer data)
 	cancellable = g_object_ref (priv->cancellable);
 
 	oab_cnc = e_ews_connection_new (priv->oab_url, ews_settings);
+
+	g_object_bind_property (
+		cbews, "proxy-resolver",
+		oab_cnc, "proxy-resolver",
+		G_BINDING_SYNC_CREATE);
 
 	password = e_ews_connection_dup_password (priv->cnc);
 	e_ews_connection_set_password (oab_cnc, password);
@@ -3778,6 +3788,11 @@ book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
 
 	connection = e_ews_connection_new (hosturl, ews_settings);
+
+	g_object_bind_property (
+		backend, "proxy-resolver",
+		connection, "proxy-resolver",
+		G_BINDING_SYNC_CREATE);
 
 	result = e_source_authenticator_try_password_sync (
 		E_SOURCE_AUTHENTICATOR (connection),

@@ -1074,6 +1074,11 @@ e_ews_backend_ref_connection_sync (EEwsBackend *backend,
 	connection = e_ews_connection_new (hosturl, settings);
 	g_free (hosturl);
 
+	g_object_bind_property (
+		backend, "proxy-resolver",
+		connection, "proxy-resolver",
+		G_BINDING_SYNC_CREATE);
+
 	success = e_backend_authenticate_sync (
 		E_BACKEND (backend),
 		E_SOURCE_AUTHENTICATOR (connection),
