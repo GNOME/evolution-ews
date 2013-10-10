@@ -81,6 +81,7 @@ struct _EEwsConnectionPrivate {
 	GThread *soup_thread;
 	GMainLoop *soup_loop;
 	GMainContext *soup_context;
+	GProxyResolver *proxy_resolver;
 
 	CamelEwsSettings *settings;
 	GMutex property_lock;
@@ -103,6 +104,7 @@ struct _EEwsConnectionPrivate {
 enum {
 	PROP_0,
 	PROP_PASSWORD,
+	PROP_PROXY_RESOLVER,
 	PROP_SETTINGS
 };
 
@@ -1448,6 +1450,12 @@ ews_connection_set_property (GObject *object,
 				g_value_get_string (value));
 			return;
 
+		case PROP_PROXY_RESOLVER:
+			e_ews_connection_set_proxy_resolver (
+				E_EWS_CONNECTION (object),
+				g_value_get_object (value));
+			return;
+
 		case PROP_SETTINGS:
 			ews_connection_set_settings (
 				E_EWS_CONNECTION (object),
@@ -1469,6 +1477,13 @@ ews_connection_get_property (GObject *object,
 			g_value_take_string (
 				value,
 				e_ews_connection_dup_password (
+				E_EWS_CONNECTION (object)));
+			return;
+
+		case PROP_PROXY_RESOLVER:
+			g_value_take_object (
+				value,
+				e_ews_connection_ref_proxy_resolver (
 				E_EWS_CONNECTION (object)));
 			return;
 
@@ -1518,6 +1533,8 @@ ews_connection_dispose (GObject *object)
 		g_main_context_unref (priv->soup_context);
 		priv->soup_context = NULL;
 	}
+
+	g_clear_object (&priv->proxy_resolver);
 
 	if (priv->settings != NULL) {
 		g_object_unref (priv->settings);
@@ -1633,6 +1650,17 @@ e_ews_connection_class_init (EEwsConnectionClass *class)
 
 	g_object_class_install_property (
 		object_class,
+		PROP_PROXY_RESOLVER,
+		g_param_spec_object (
+			"proxy-resolver",
+			"Proxy Resolver",
+			"The proxy resolver for this backend",
+			G_TYPE_PROXY_RESOLVER,
+			G_PARAM_READWRITE |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
 		PROP_SETTINGS,
 		g_param_spec_object (
 			"settings",
@@ -1730,6 +1758,13 @@ e_ews_connection_init (EEwsConnection *cnc)
 		SOUP_SESSION_ASYNC_CONTEXT,
 		cnc->priv->soup_context,
 		NULL);
+
+	/* Do not use G_BINDING_SYNC_CREATE because the property_lock is
+	 * not initialized and we don't have a GProxyResolver yet anyway. */
+	g_object_bind_property (
+		cnc, "proxy-resolver",
+		cnc->priv->soup_session, "proxy-resolver",
+		G_BINDING_DEFAULT);
 
 	cnc->priv->version = E_EWS_EXCHANGE_UNKNOWN;
 
@@ -2185,6 +2220,53 @@ e_ews_connection_get_impersonate_user (EEwsConnection *cnc)
 	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
 
 	return cnc->priv->impersonate_user;
+}
+
+GProxyResolver *
+e_ews_connection_ref_proxy_resolver (EEwsConnection *cnc)
+{
+	GProxyResolver *proxy_resolver = NULL;
+
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
+
+	g_mutex_lock (&cnc->priv->property_lock);
+
+	if (cnc->priv->proxy_resolver != NULL)
+		proxy_resolver = g_object_ref (cnc->priv->proxy_resolver);
+
+	g_mutex_unlock (&cnc->priv->property_lock);
+
+	return proxy_resolver;
+}
+
+void
+e_ews_connection_set_proxy_resolver (EEwsConnection *cnc,
+                                     GProxyResolver *proxy_resolver)
+{
+	gboolean notify = FALSE;
+
+	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
+
+	g_mutex_lock (&cnc->priv->property_lock);
+
+	/* Emitting a "notify" signal unnecessarily might have
+	 * unwanted side effects like cancelling a SoupMessage.
+	 * Only emit if we now have a different GProxyResolver. */
+
+	if (proxy_resolver != cnc->priv->proxy_resolver) {
+		g_clear_object (&cnc->priv->proxy_resolver);
+		cnc->priv->proxy_resolver = proxy_resolver;
+
+		if (proxy_resolver != NULL)
+			g_object_ref (proxy_resolver);
+
+		notify = TRUE;
+	}
+
+	g_mutex_unlock (&cnc->priv->property_lock);
+
+	if (notify)
+		g_object_notify (G_OBJECT (cnc), "proxy-resolver");
 }
 
 CamelEwsSettings *

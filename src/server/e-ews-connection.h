@@ -224,6 +224,12 @@ void		e_ews_connection_set_password	(EEwsConnection *cnc,
 						 const gchar *password);
 const gchar *	e_ews_connection_get_impersonate_user
 						(EEwsConnection *cnc);
+GProxyResolver *
+		e_ews_connection_ref_proxy_resolver
+						(EEwsConnection *cnc);
+void		e_ews_connection_set_proxy_resolver
+						(EEwsConnection *cnc,
+						 GProxyResolver *proxy_resolver);
 CamelEwsSettings *
 		e_ews_connection_ref_settings	(EEwsConnection *cnc);
 SoupSession *	e_ews_connection_ref_soup_session
