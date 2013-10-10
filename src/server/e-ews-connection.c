@@ -84,7 +84,7 @@ struct _EEwsConnectionPrivate {
 	EProxy *proxy;
 
 	CamelEwsSettings *settings;
-	GMutex password_lock;
+	GMutex property_lock;
 
 	/* Hash key for the loaded_connections_permissions table. */
 	gchar *hash_key;
@@ -1573,7 +1573,7 @@ ews_connection_finalize (GObject *object)
 	g_free (priv->hash_key);
 	g_free (priv->impersonate_user);
 
-	g_mutex_clear (&priv->password_lock);
+	g_mutex_clear (&priv->property_lock);
 	g_rec_mutex_clear (&priv->queue_lock);
 
 	/* Chain up to parent's finalize() method. */
@@ -1782,7 +1782,7 @@ e_ews_connection_init (EEwsConnection *cnc)
 		g_object_unref (logger);
 	}
 
-	g_mutex_init (&cnc->priv->password_lock);
+	g_mutex_init (&cnc->priv->property_lock);
 	g_rec_mutex_init (&cnc->priv->queue_lock);
 
 	g_signal_connect (
@@ -2180,12 +2180,12 @@ e_ews_connection_dup_password (EEwsConnection *cnc)
 
 	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
 
-	g_mutex_lock (&cnc->priv->password_lock);
+	g_mutex_lock (&cnc->priv->property_lock);
 
 	protected = e_ews_connection_get_password (cnc);
 	duplicate = g_strdup (protected);
 
-	g_mutex_unlock (&cnc->priv->password_lock);
+	g_mutex_unlock (&cnc->priv->property_lock);
 
 	return duplicate;
 }
@@ -2196,7 +2196,7 @@ e_ews_connection_set_password (EEwsConnection *cnc,
 {
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
-	g_mutex_lock (&cnc->priv->password_lock);
+	g_mutex_lock (&cnc->priv->property_lock);
 
 	/* Zero-fill the old password before freeing it. */
 	if (cnc->priv->password != NULL && *cnc->priv->password != '\0')
@@ -2205,7 +2205,7 @@ e_ews_connection_set_password (EEwsConnection *cnc,
 	g_free (cnc->priv->password);
 	cnc->priv->password = g_strdup (password);
 
-	g_mutex_unlock (&cnc->priv->password_lock);
+	g_mutex_unlock (&cnc->priv->property_lock);
 
 	g_object_notify (G_OBJECT (cnc), "password");
 }
