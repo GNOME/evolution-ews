@@ -404,8 +404,16 @@ ewscal_add_availability_rrule (ESoapMessage *msg,
 {
 	struct icalrecurrencetype recur = icalproperty_get_rrule (prop);
 	gchar buffer[16];
+	gint dayorder;
 
-	snprintf (buffer, 16, "%d", icalrecurrencetype_day_position (recur.by_day[0]));
+	dayorder = icalrecurrencetype_day_position (recur.by_day[0]);
+	dayorder = dayorder % 5;
+	if (dayorder < 0)
+		dayorder += 5;
+	dayorder += 1;
+
+	/* expected value is 1..5, inclusive */
+	snprintf (buffer, 16, "%d", dayorder);
 	e_ews_message_write_string_parameter (msg, "DayOrder", NULL, buffer);
 
 	snprintf (buffer, 16, "%d", recur.by_month[0]);
