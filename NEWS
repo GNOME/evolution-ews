@@ -1,4 +1,23 @@
-Evolution-EWS 3.10.9 2013-09-23
+Evolution-EWS 3.10.1 2013-10-14
+-------------------------------
+
+Bug Fixes:
+	Bug 706151 - Crash under mail_config_ews_ooo_page_display_settings()
+	             (Milan Crha)
+	Bug 708309 - Crash accessing GAL not marked for offline (Milan Crha)
+	Bug 708348 - Memory leaks from account preferences (Milan Crha)
+
+Other Changes:
+	* Fetch Free/Busy fails due to incorrect value of DayOrder element
+	  (Milan Crha)
+
+Translations:
+	Daniel Mustieles (es)
+	Andika Triwidada (id)
+	Rūdolfs Mazurs (lv)
+
+
+Evolution-EWS 3.10.0 2013-09-23
 -------------------------------
 
 Translations:
