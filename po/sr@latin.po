@@ -1,1165 +1,3826 @@
-# Serbian translation of evolution-ews
-# Courtesy of Prevod.org team (http://prevod.org/) -- 2012.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the ewolution-ews package.
-# Miroslav Nikolić <miroslavnikolic@rocketmail.com>, 2012, 2013.
+# Serbian translation of ekiga
+# Courtesy of Prevod.org team (http://prevod.org/) -- 2003—2012.
+# This file is distributed under the same license as the ekiga package.
+# Maintainer: Dejan Matijević <dejan@ns.sympatico.ca>
+# Reviewed on 2005-08-13 by: Igor Nestorović <igor@prevod.org>
+# Translated on 2009-09-12 by: Branko Kokanović <branko.kokanovic@gmail.com>
+# Branko Kokanović <branko.kokanovic@gmail.com>, 2011.
+# Miroslav Nikolić <miroslavnikolic@rocketmail.com>, 2011, 2012, 2013.
 msgid ""
 msgstr ""
-"Project-Id-Version: evolution-ews\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product"
-"=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2013-09-01 13:23+0000\n"
-"PO-Revision-Date: 2013-09-08 07:51+0200\n"
+"Project-Id-Version: ekiga\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=ekiga&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2013-09-28 08:30+0000\n"
+"PO-Revision-Date: 2013-04-02 09:14+0200\n"
 "Last-Translator: Miroslav Nikolić <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: Serbian <gnom@prevod.org>\n"
 "Language: sr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=n==1? 3 : n%10==1 && n%100!=11 ? 0 : "
-"n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=4; plural=n==1? 3 : n%10==1 && n%100!=11 ? 0 : n"
+"%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Project-Style: gnome\n"
 
-#: ../src/addressbook/e-book-backend-ews.c:1421
-msgid "The backend does not support bulk additions"
-msgstr "Pozadinac ne podržava grupno dodavanje"
+#. Application name
+#: ../ekiga.desktop.in.in.h:1 ../src/gui/main.cpp:117 ../src/gui/main.cpp:119
+msgid "Ekiga Softphone"
+msgstr "Softverski telefon Ekiga"
 
-#: ../src/addressbook/e-book-backend-ews.c:1460
-#: ../src/addressbook/e-book-backend-ews.c:1804
+#: ../ekiga.desktop.in.in.h:2
+msgid "IP Telephony, VoIP and Video Conferencing"
+msgstr "Telefoniranje, prenos glasa i slike preko interneta"
+
+#: ../ekiga.desktop.in.in.h:3
+msgid "Talk to and see people over the Internet"
+msgstr "Razgovarajte sa prijateljima i gledajte ih preko Interneta"
+
+#: ../ekiga.schemas.in.in.h:1
+msgid "Audio output device"
+msgstr "Izlazni zvučni uređaji"
+
+#: ../ekiga.schemas.in.in.h:2
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:739
+msgid "Select the audio output device to use"
+msgstr "Izaberite uređaj koji će se koristiti za izlaz zvuka"
+
+#: ../ekiga.schemas.in.in.h:3
+msgid "Audio input device"
+msgstr "Ulazni zvučni uređaji"
+
+#: ../ekiga.schemas.in.in.h:4
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:746
+msgid "Select the audio input device to use"
+msgstr "Izaberite uređaj koji će se koristiti za ulaz zvuka"
+
+#: ../ekiga.schemas.in.in.h:5
+msgid "Video input device"
+msgstr "Ulazni video uređaj"
+
+#: ../ekiga.schemas.in.in.h:6
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:805
 msgid ""
-"Cannot save contact list, it's only supported on EWS Server 2010 or later"
+"Select the video input device to use. If an error occurs when using this "
+"device a test picture will be transmitted."
 msgstr ""
-"Ne mogu da sačuvam spisak kontakata, podržano je samo na VUR serverima 2010 "
-"ili kasnijim"
+"Izaberite video ulaz koji će se koristiti. Ukoliko se dogodi greška pri "
+"upotrebi ovog uređaja, preneće se probna slika."
 
-#: ../src/addressbook/e-book-backend-ews.c:1763
-msgid "The backend does not support bulk modifications"
-msgstr "Pozadinac ne podržava grupno uređivanje"
+#: ../ekiga.schemas.in.in.h:7
+msgid "Video size"
+msgstr "Veličina slike"
 
-#: ../src/addressbook/e-book-backend-ews.c:1963
-msgid "Wait till syncing is done"
-msgstr "Sačekaj dok se usklađivanje ne obavi"
-
-#: ../src/addressbook/e-book-backend-ews.c:2372
-#, c-format
-msgid "Downloading contacts in %s %d%% completed... "
-msgstr "Preuzimam kontakte u %s, obavljeno je %d%%... "
-
-#: ../src/addressbook/e-book-backend-ews.c:3050
-msgid "Syncing contacts..."
-msgstr "Usaglašavam kontakte..."
-
-#: ../src/addressbook/e-book-backend-ews.c:3281
-#: ../src/configuration/e-ews-search-user.c:365
-msgid "Searching..."
-msgstr "Pretražujem..."
-
-#: ../src/calendar/e-cal-backend-ews.c:1069
-msgid "EWS does not support bulk removals"
-msgstr "VUR ne podržava grupno uklanjanje"
-
-#: ../src/calendar/e-cal-backend-ews.c:1572
-#| msgctxt "User"
-#| msgid "Unknown"
-msgid "Unknown error"
-msgstr "Nepoznata greška"
-
-#: ../src/calendar/e-cal-backend-ews.c:1773
-msgid "EWS does not support bulk additions"
-msgstr "VUR ne podržava grupno dodavanje"
-
-#: ../src/calendar/e-cal-backend-ews.c:2395
-msgid "EWS does not support bulk modifications"
-msgstr "VUR ne podržava grupno uređivanje"
-
-#: ../src/camel/camel-ews-folder.c:275
-#, c-format
-msgid "Unable to open mimecontent temporary file!"
-msgstr "Ne mogu da otvorim privremenu datoteku mime sadržaja!"
-
-#: ../src/camel/camel-ews-folder.c:283
-#, c-format
-msgid "Unable to generate parser from mimecontent!"
-msgstr "Ne mogu da stvorim obrađivač iz mime sadržaja!"
-
-#: ../src/camel/camel-ews-folder.c:292
-#, c-format
-msgid "Unable to parse meeting request mimecontent!"
-msgstr "Ne mogu da obradim mime sadržaj zahteva za sastanak!"
-
-#: ../src/camel/camel-ews-folder.c:351
-#, c-format
-msgid "Unable to create cache file"
-msgstr "Ne mogu da napravim datoteku ostave"
-
-#: ../src/camel/camel-ews-folder.c:452 ../src/camel/camel-ews-folder.c:534
-#, c-format
-msgid "Unable to create cache path"
-msgstr "Ne mogu da napravim putanju privremenog čuvanja"
-
-#: ../src/camel/camel-ews-folder.c:544
-#, c-format
-msgid "Failed to move message cache file"
-msgstr "Nisam uspeo da premestim datoteku ostave poruke"
-
-#: ../src/camel/camel-ews-folder.c:1173
-#, c-format
-msgid "Could not load summary for %s"
-msgstr "Ne mogu da učitam pregled za „%s“"
-
-#: ../src/camel/camel-ews-folder.c:1609
-#, c-format
-msgid "Cant perform actions on the folder while in offline mode"
-msgstr "Ne mogu da izvršim radnje nad fasciklama u režimu van mreže"
-
-#: ../src/camel/camel-ews-provider.c:47
-msgid "Checking for new mail"
-msgstr "Proveravam novu poštu"
-
-#: ../src/camel/camel-ews-provider.c:49
-msgid "C_heck for new messages in all folders"
-msgstr "P_otraži nove poruke u svim fasciklama"
-
-#: ../src/camel/camel-ews-provider.c:52
-msgid "Options"
-msgstr "Opcije"
-
-#: ../src/camel/camel-ews-provider.c:54
-msgid "_Apply filters to new messages in Inbox on this server"
-msgstr "_Primeni propusnike na nove poruke u sandučetu ovog servera"
-
-#: ../src/camel/camel-ews-provider.c:56
-msgid "Check new messages for _Junk contents"
-msgstr "Proveri ima li _neželjenih među novim porukama"
-
-#: ../src/camel/camel-ews-provider.c:58
-msgid "Only check for Junk messages in the IN_BOX folder"
-msgstr "Proveri da nema đubreta samo u fascikli SAN_DUČE"
-
-#: ../src/camel/camel-ews-provider.c:60
-msgid "Automatically synchroni_ze remote mail locally"
-msgstr "Sam uskladi _udaljenu poštu sa lokalnom"
-
-#: ../src/camel/camel-ews-provider.c:63
-msgid "Connection"
-msgstr "Veza"
-
-#. Translators: '%s' is preplaced with a widget, where "
-#. * user can select how long the timeout should be.
-#: ../src/camel/camel-ews-provider.c:67
-#, c-format
-msgid "Connection _timeout (in seconds) %s"
-msgstr "Vremenski _istek veze (u sekundama) %s"
-
-#: ../src/camel/camel-ews-provider.c:75
-msgid "Exchange Web Services"
-msgstr "Veb usluge razmene"
-
-#: ../src/camel/camel-ews-provider.c:77
-msgid "For accessing Exchange servers using Web Services"
-msgstr "Za pristupanje serverima razmene upotreboom veb usluga"
-
-#: ../src/camel/camel-ews-provider.c:92
-msgid "NTLM"
-msgstr "NTLM"
-
-#: ../src/camel/camel-ews-provider.c:94
+#: ../ekiga.schemas.in.in.h:8
+#, fuzzy
+#| msgid ""
+#| "Select the transmitted video size: Small (QCIF 176x144) or Large (CIF "
+#| "352x288)"
 msgid ""
-"This option will connect to the Exchange server using a plaintext password "
-"with NTLM authentication."
+"Select the transmitted video size: 0: QCIF (176x144), 1: CIF (352x288), 2: "
+"4CIF (704x576), 3: SIF (320x240), 4: 4SIF (640x480)"
 msgstr ""
-"Ova opcija će vas povezati na server razmene koristeći lozinku običnog "
-"teksta sa NTLM potvrdom identiteta."
+"Izaberite veličinu prenesene slike: Mala (KuCIF 176x144) ili velika (CIF "
+"352x288)"
 
-#: ../src/camel/camel-ews-provider.c:102
-msgid "Basic"
-msgstr "Osnovno"
+#: ../ekiga.schemas.in.in.h:9
+msgid "Video channel"
+msgstr "Kanal za sliku"
 
-#: ../src/camel/camel-ews-provider.c:104
+#: ../ekiga.schemas.in.in.h:10
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:809
+msgid "The video channel number to use (to select camera, tv or other sources)"
+msgstr "Broj kanala za sliku (za izbor kamere, TV i ostalih izvora)"
+
+#: ../ekiga.schemas.in.in.h:11
+msgid "Video format"
+msgstr "Video format"
+
+#: ../ekiga.schemas.in.in.h:12
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:813
 msgid ""
-"This option will connect to the Exchange server using a plaintext password "
-"with Basic authentication."
+"Select the format for video cameras (does not apply to most USB cameras)"
 msgstr ""
-"Ova opcija će vas povezati na server razmene koristeći lozinku običnog "
-"teksta sa osnovnom potvrdom identiteta."
+"Izaberite format za video kamere (nije primenljivo na većinu USB kamera)"
 
-#: ../src/camel/camel-ews-store.c:292
-#, c-format
-msgid "Session has no storage path"
-msgstr "Sesija nema putanju skladišta"
+#: ../ekiga.schemas.in.in.h:13
+msgid "Video preview"
+msgstr "Pregled slike"
 
-#: ../src/camel/camel-ews-store.c:329
-#, c-format
-msgctxt "PublicFolders"
-msgid "%s_%d"
-msgstr "%s_%d"
+#: ../ekiga.schemas.in.in.h:14
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1075
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1218
+msgid "Display images from your camera device"
+msgstr "Prikaži slike sa kamere"
 
-#: ../src/camel/camel-ews-store.c:458
-#, c-format
-msgctxt "ForeignFolders"
-msgid "%s_%d"
-msgstr "%s_%d"
+#: ../ekiga.schemas.in.in.h:15
+msgid "Frame Rate"
+msgstr "Učestanost kadrova"
 
-#: ../src/camel/camel-ews-store.c:603
-msgid "Checking \"Out of Office\" settings"
-msgstr "Označavam podešavanja za „van kancelarije“"
-
-#: ../src/camel/camel-ews-store.c:843
-msgid "Updating foreign folder structure"
-msgstr "Osvežavam strukturu strane fascikle"
-
-#: ../src/camel/camel-ews-store.c:1285
-msgid "Query for authentication types is not supported"
-msgstr "Propitivanje za vrstama potvrde identiteta nije podržano"
-
-#: ../src/camel/camel-ews-store.c:1337
-#, c-format
-msgid "No such folder: %s"
-msgstr "Nema takve fascikle: %s"
-
-#: ../src/camel/camel-ews-store.c:1649
-msgid "Cannot list EWS public folders in offline mode"
-msgstr "Ne mogu da ispišem VUR javne fascikle u režimu van mreže"
-
-#: ../src/camel/camel-ews-store.c:1722
-msgid "Cannot find any EWS public folders"
-msgstr "Ne mogu da pronađem VUR javne fascikle"
-
-#: ../src/camel/camel-ews-store.c:1831
-#, c-format
-msgid "Cannot create folder '%s', folder already exists"
-msgstr "Ne mogu da napravim fasciklu „%s“, fascikla već postoji"
-
-#: ../src/camel/camel-ews-store.c:1846
-#, c-format
-msgid "Parent folder %s does not exist"
-msgstr "Ne postoji roditeljska fascikla „%s“"
-
-#: ../src/camel/camel-ews-store.c:1856
-#, c-format
+#: ../ekiga.schemas.in.in.h:16
 msgid ""
-"Cannot create folder under '%s', it is used for folders of other users only"
+"The maximum transmitted frame rate in frames/s. This rate may not be reached "
+"in case a minimum quality was configure via a TSTO value smaller than 31 and "
+"the bitrate selected is not sufficient to support this minimum quality"
 msgstr ""
-"Ne mogu da napravim fasciklu pod „%s“, koristi se samo za fascikle drugih "
-"korisnika"
+"Maksimalni protok broj kadrova u sekundi. Ovaj protok ne mora da se dostigne "
+"ukoliko je minimalni kvalitet podešen TSTO vrednošću manjom od 31 i bitski "
+"protok nije dovoljan da podrži minimalni kvalitet slike"
 
-#: ../src/camel/camel-ews-store.c:1866
-#, c-format
-msgid "Cannot create folder under '%s', it is used for public folders only"
+#: ../ekiga.schemas.in.in.h:17
+msgid "Full name"
+msgstr "Ime i prezime"
+
+#: ../ekiga.schemas.in.in.h:18
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:447
+msgid "Enter your full name"
+msgstr "Unesite puno ime"
+
+#: ../ekiga.schemas.in.in.h:19
+msgid "Contact short status"
+msgstr "Sažeto stanje kontakta"
+
+#: ../ekiga.schemas.in.in.h:20
+msgid "The short status information"
+msgstr "Sažeti podaci o stanju"
+
+#: ../ekiga.schemas.in.in.h:21
+msgid "Contact long status"
+msgstr "Opširno stanje kontakta"
+
+#: ../ekiga.schemas.in.in.h:22
+msgid "The long status information"
+msgstr "Prošireni podaci stanja"
+
+#: ../ekiga.schemas.in.in.h:23
+msgid "The Audio Codecs List"
+msgstr "Spisak audio kodeka"
+
+#: ../ekiga.schemas.in.in.h:24
+msgid "The audio codecs list"
+msgstr "Spisak audio kodeka"
+
+#: ../ekiga.schemas.in.in.h:25
+msgid "Enable silence detection"
+msgstr "Omogući pronalaženje tišine"
+
+#: ../ekiga.schemas.in.in.h:26
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:843
+msgid "If enabled, use silence detection with the codecs supporting it"
 msgstr ""
-"Ne mogu da napravim fasciklu pod „%s“, koristi se samo za javne fascikle"
+"Ako je uključeno, koristi otkrivanje tišine sa kodecima koji to podržavaju"
 
-#: ../src/camel/camel-ews-store.c:1935
-#, c-format
-msgid "Folder does not exist"
-msgstr "Fascikla ne postoji"
+#: ../ekiga.schemas.in.in.h:27
+msgid "Enable echo cancellation"
+msgstr "Uključi poništavanje odjeka"
 
-#: ../src/camel/camel-ews-store.c:1944
-#, c-format
-msgid "Cannot remove folder '%s', it is used for folders of other users only"
+#: ../ekiga.schemas.in.in.h:28
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:845
+msgid "If enabled, use echo cancellation"
+msgstr "Ako je uključeno, koristi poništavanje odjeka"
+
+#: ../ekiga.schemas.in.in.h:29
+msgid "Alternative audio output device"
+msgstr "Rezervni izlazni zvučni uređaj"
+
+#: ../ekiga.schemas.in.in.h:30
+msgid "Select an alternative audio output device to use for sound events."
 msgstr ""
-"Ne mogu da uklonim fasciklu „%s“, koristi se samo za fascikle drugih "
-"korisnika"
+"Izaberite jedan rezervni izlazni zvučni uređaj koji će se koristiti za "
+"zvučno oglašavanje događaja."
 
-#: ../src/camel/camel-ews-store.c:1954
-#, c-format
-msgid "Cannot remove folder '%s', it is used for public folders only"
-msgstr "Ne mogu da uklonim fasciklu „%s“, koristi se samo za javne fascikle"
+#: ../ekiga.schemas.in.in.h:31
+msgid "The incoming call sound"
+msgstr "Zvuk dolaznog poziva"
 
-#: ../src/camel/camel-ews-store.c:2062
-#, c-format
-msgid "Folder %s does not exist"
-msgstr "Ne postoji fascikla „%s“"
+#: ../ekiga.schemas.in.in.h:32
+msgid "The sound that will be played on incoming calls, if enabled"
+msgstr "Ako je uključeno, zvuk koji će biti pušten za dolazne pozive"
 
-#: ../src/camel/camel-ews-store.c:2072
-#, c-format
-msgid "No change key record for folder %s"
-msgstr "Nema zapisa izmene ključa za fasciklu „%s“"
+#: ../ekiga.schemas.in.in.h:33
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:352
+msgid "Play sound on incoming calls"
+msgstr "Pusti zvuk na dolazne pozive"
 
-#: ../src/camel/camel-ews-store.c:2114
-#, c-format
-msgid "Cannot both rename and move a folder at the same time"
-msgstr "Ne mogu u isto vreme da preimenujem i da premestim fasciklu"
+#: ../ekiga.schemas.in.in.h:34
+msgid "The chosen sound will be played on incoming calls, if enabled"
+msgstr "Ako je uključeno, izabrani zvuk će biti pušten na dolazeće pozive"
 
-#: ../src/camel/camel-ews-store.c:2150
-#, c-format
-msgid "Cannot find folder ID for parent folder %s"
-msgstr "Ne mogu da pronađem IB fascikle za roditeljsku fasciklu „%s“"
+#: ../ekiga.schemas.in.in.h:35
+msgid "The new instant message sound"
+msgstr "Zvuk za novu brzu poruku"
 
-#: ../src/camel/camel-ews-store.c:2200 ../src/camel/camel-ews-transport.c:69
-#, c-format
-msgid "Exchange server %s"
-msgstr "Server razmene %s"
-
-#: ../src/camel/camel-ews-store.c:2203
-#, c-format
-msgid "Exchange service for %s on %s"
-msgstr "Usluga razmene za „%s“ na „%s“"
-
-#: ../src/camel/camel-ews-store.c:2247
-#, c-format
-msgid "Could not locate Trash folder"
-msgstr "Ne mogu da pronađem fasciklu za smeće"
-
-#: ../src/camel/camel-ews-store.c:2307
-#, c-format
-msgid "Could not locate Junk folder"
-msgstr "Ne mogu da pronađem fasciklu za đubre"
-
-#: ../src/camel/camel-ews-store.c:2497
-msgid "Cannot subscribe EWS folders in offline mode"
-msgstr "Ne mogu da pretplatim VUR fascikle u režimu van mreže"
-
-#: ../src/camel/camel-ews-store.c:2520
-#, c-format
-msgid "Cannot subscribe folder '%s', no public folder available"
-msgstr "Ne mogu da pretplatim fasciklu „%s“, nema dostupne javne fascikle"
-
-#: ../src/camel/camel-ews-store.c:2530
-#, c-format
-msgid "Cannot subscribe folder '%s', folder not found"
-msgstr "Ne mogu da pretplatim fasciklu „%s“, nisam našao fasciklu"
-
-#: ../src/camel/camel-ews-store.c:2621
-msgid "Cannot unsubscribe EWS folders in offline mode"
-msgstr "Ne mogu da poništim pretplatu VUR fascikli u režimu van mreže"
-
-#: ../src/camel/camel-ews-store.c:2738
-#, c-format
-msgid "You must be working online to complete this operation"
-msgstr "Morate da budete na mreži da biste završili ovu operaciju"
-
-#: ../src/camel/camel-ews-store.c:2782
-msgid "Unsetting the \"Out of Office\" status"
-msgstr "Poništavam stanje za „van kancelarije“"
-
-#: ../src/camel/camel-ews-transport.c:72
-#, c-format
-msgid "Exchange mail delivery via %s"
-msgstr "Isporuka pošte razmene putem „%s“"
-
-#: ../src/camel/camel-ews-transport.c:119
-msgid "Cannot send message with no From address"
-msgstr "Ne mogu da pošaljem poruku bez adrese pošiljaoca"
-
-#: ../src/camel/camel-ews-transport.c:125
-msgid "Exchange server cannot send message with multiple From addresses"
-msgstr "Server razmene ne može da pošalje poruku sa nekoliko adresa pošiljaoca"
-
-#: ../src/camel/camel-ews-transport.c:136
-msgid "Failed to read From address"
-msgstr "Nisam uspeo da pročitam adresu pošiljaoca"
-
-#: ../src/camel/camel-ews-transport.c:148
-#, c-format
+#: ../ekiga.schemas.in.in.h:36
 msgid ""
-"Exchange server cannot send message as '%s', when the account was configured "
-"for address '%s'"
+"The sound that will be played when there is a new instant message, if enabled"
 msgstr ""
-"Server razmene ne može da pošalje poruku kao „%s“, kada je nalog podešen za "
-"adresu „%s“"
+"Ako je uključeno, zvuk koji će biti pušten kada pristigne nova brza poruka"
 
-#: ../src/camel/camel-ews-transport.c:162
-#, c-format
-msgid "Service not connected"
-msgstr "Usluga nije povezana"
+#: ../ekiga.schemas.in.in.h:37
+msgid "Play sound on new message"
+msgstr "Pusti zvuk kad pristigne nova poruka"
 
-#: ../src/collection/e-ews-backend.c:422
-#: ../src/configuration/e-mail-config-ews-gal.c:274
-msgid "Global Address List"
-msgstr "Spisak opštih adresa"
-
-#: ../src/collection/e-ews-backend.c:807
-#, c-format
-msgid "Could not determine a suitable folder class for a new folder named '%s'"
-msgstr ""
-"Ne mogu da odredim odgovarajući razred fascikle za novu fasciklu pod nazivom "
-"„%s“"
-
-#: ../src/collection/e-ews-backend.c:896
-#, c-format
-msgid "Data source '%s' does not represent an Exchange Web Services folder"
-msgstr "Izvor podataka „%s“ ne predstavlja fasciklu veb usluge razmene"
-
-#: ../src/configuration/e-ews-config-utils.c:474
-#| msgid "Folder ID:"
-msgid "Folder"
-msgstr "Fascikla"
-
-#: ../src/configuration/e-ews-config-utils.c:480
-msgid "Size"
-msgstr "Veličina"
-
-#: ../src/configuration/e-ews-config-utils.c:506
-#: ../src/configuration/e-ews-config-utils.c:511
-msgid "Unable to retrieve folder size information"
-msgstr "Ne mogu da pronađem podatke o veličini fascikle"
-
-#: ../src/configuration/e-ews-config-utils.c:621
-#| msgctxt "Permissions"
-#| msgid "Folder visible"
-msgid "Folder Sizes"
-msgstr "Veličine fascikle"
-
-#: ../src/configuration/e-ews-config-utils.c:624
-msgid "_Close"
-msgstr "_Zatvori"
-
-#: ../src/configuration/e-ews-config-utils.c:638
-msgid "Fetching folder list…"
-msgstr "Preuzimam spisak fascikli…"
-
-#: ../src/configuration/e-ews-config-utils.c:791
-#, c-format
-msgid "Cannot edit permissions of folder '%s', choose other folder."
-msgstr ""
-"Ne mogu da uredim ovlašćenja za fasciklu „%s“, izaberite drugu faljsciklu."
-
-#: ../src/configuration/e-ews-config-utils.c:868
-#| msgctxt "Permissions"
-#| msgid "Folder visible"
-msgid "Folder Sizes..."
-msgstr "Veličine fascikle..."
-
-#: ../src/configuration/e-ews-config-utils.c:875
-msgid "Subscribe to folder of other user..."
-msgstr "Prijavi se na fasciklu drugog korisnika..."
-
-#: ../src/configuration/e-ews-config-utils.c:884
-#: ../src/configuration/e-ews-config-utils.c:1166
-#: ../src/configuration/e-ews-config-utils.c:1197
-#: ../src/configuration/e-ews-config-utils.c:1228
-#: ../src/configuration/e-ews-config-utils.c:1259
-msgid "Permissions..."
-msgstr "Ovlašćenja..."
-
-#: ../src/configuration/e-ews-config-utils.c:886
-msgid "Edit EWS folder permissions"
-msgstr "Uredi ovlašćenja VUR fascikle"
-
-#: ../src/configuration/e-ews-config-utils.c:1168
-msgid "Edit EWS calendar permissions"
-msgstr "Uredi ovlašćenja VUR kalendara"
-
-#: ../src/configuration/e-ews-config-utils.c:1199
-msgid "Edit EWS tasks permissions"
-msgstr "Uredi ovlašćenja VUR zadataka"
-
-#: ../src/configuration/e-ews-config-utils.c:1230
-msgid "Edit EWS memos permissions"
-msgstr "Uredi ovlašćenja VUR beležaka"
-
-#: ../src/configuration/e-ews-config-utils.c:1261
-msgid "Edit EWS contacts permissions"
-msgstr "Uredi ovlašćenja VUR kontakata"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:87
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:499
-msgctxt "PermissionsLevel"
-msgid "None"
-msgstr "Ništa"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:88
-msgctxt "PermissionsLevel"
-msgid "Owner"
-msgstr "Vlasnik"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:98
-msgctxt "PermissionsLevel"
-msgid "Publishing Editor"
-msgstr "Uređivač objavljivanja"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:107
-msgctxt "PermissionsLevel"
-msgid "Editor"
-msgstr "Urednik"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:115
-msgctxt "PermissionsLevel"
-msgid "Publishing Author"
-msgstr "Autor objavljivanja"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:122
-msgctxt "PermissionsLevel"
-msgid "Author"
-msgstr "Autor"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:128
-msgctxt "PermissionsLevel"
-msgid "Nonediting Author"
-msgstr "Autor koji ne uređuje"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:133
-msgctxt "PermissionsLevel"
-msgid "Reviewer"
-msgstr "Pregledač"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:136
-msgctxt "PermissionsLevel"
-msgid "Contributor"
-msgstr "Saradnik"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:139
-msgctxt "PermissionsLevel"
-msgid "Free/Busy time"
-msgstr "Vreme „slobodno/zauzeto“"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:141
-msgctxt "PermissionsLevel"
-msgid "Free/Busy time, subject, location"
-msgstr "Vreme slobodno/zauzeto, subjekat, mesto"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:143
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:520
-msgctxt "PermissionsLevel"
-msgid "Custom"
-msgstr "Proizvoljno"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:267
-msgid "Writing folder permissions, please wait..."
-msgstr "Zapisujem ovlašćenja fascikle, molim sačekajte..."
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:777
-msgctxt "User"
-msgid "Anonymous"
-msgstr "Bezimeni"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:780
-msgctxt "User"
-msgid "Default"
-msgstr "Zadat"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:786
-msgctxt "User"
-msgid "Unknown"
-msgstr "Nepoznat"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:867
-#: ../src/configuration/e-ews-search-user.c:431
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1075
-msgid "Name"
-msgstr "Naziv"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:873
-msgid "Permission level"
-msgstr "Nivo ovlašćenja"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:925
-msgid "Edit EWS folder permissions..."
-msgstr "Uredi ovlašćenja VUR fascikle..."
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:950
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:635
-msgid "Account:"
-msgstr "Nalog:"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:978
-msgid "Folder name:"
-msgstr "Naziv fascikle:"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1001
-msgid "Folder ID:"
-msgstr "IB fascikle:"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1065
-msgid "Permissions"
-msgstr "Ovlašćenja"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1087
-msgid "Permi_ssion level:"
-msgstr "Nivo _ovlašćenja:"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1121
-msgctxt "Permissions"
-msgid "Read"
-msgstr "Čitanje"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1133
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1200
-msgctxt "Permissions"
-msgid "None"
-msgstr "Ništa"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1139
-msgctxt "Permissions"
-msgid "Free/Busy time"
-msgstr "Vreme „slobodno/zauzeto“"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1144
-msgctxt "Permissions"
-msgid "Free/Busy time, subject, location"
-msgstr "Vreme slobodno/zauzeto, subjekat, mesto"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1150
-msgctxt "Permissions"
-msgid "Full Details"
-msgstr "Potpuni detalji"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1156
-msgctxt "Permissions"
-msgid "Write"
-msgstr "Pisanje"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1168
-msgctxt "Permissions"
-msgid "Create items"
-msgstr "Pravi stavke"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1172
-msgctxt "Permissions"
-msgid "Create subfolders"
-msgstr "Pravi podfascikle"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1176
-msgctxt "Permissions"
-msgid "Edit own"
-msgstr "Uređuje svoje"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1180
-msgctxt "Permissions"
-msgid "Edit all"
-msgstr "Uređuje sve"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1188
-msgctxt "Permissions"
-msgid "Delete items"
-msgstr "Briše stavke"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1205
-msgctxt "Permissions"
-msgid "Own"
-msgstr "Svoje"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1210
-msgctxt "Permissions"
-msgid "All"
-msgstr "Sve"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1216
-msgctxt "Permissions"
-msgid "Other"
-msgstr "Drugo"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1228
-msgctxt "Permissions"
-msgid "Folder owner"
-msgstr "Vlasnik fascikle"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1232
-msgctxt "Permissions"
-msgid "Folder contact"
-msgstr "Sadržaj fascikle"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1236
-msgctxt "Permissions"
-msgid "Folder visible"
-msgstr "Fascikla je vidljiva"
-
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1309
-msgid "Reading folder permissions, please wait..."
-msgstr "Čitam ovlašćenja fascikle, molim sačekajte..."
-
-#: ../src/configuration/e-ews-ooo-notificator.c:184
-msgid "Unset on Server"
-msgstr "Poništi na serveru"
-
-#: ../src/configuration/e-ews-ooo-notificator.c:185
-msgid "Unset the \"Out of Office\" status"
-msgstr "Poništi stanje za „van kancelarije“"
-
-#: ../src/configuration/e-ews-search-user.c:208
-#, c-format
-msgid "No users found, only one contact"
-msgid_plural "No users found, only %d contacts"
-msgstr[0] "Nisam pronašao korisnike, samo %d kontakt"
-msgstr[1] "Nisam pronašao korisnike, samo %d kontakta"
-msgstr[2] "Nisam pronašao korisnike, samo %d kontakata"
-msgstr[3] "Nisam pronašao korisnike, samo jedan kontakt"
-
-#: ../src/configuration/e-ews-search-user.c:213
-msgid "No users found"
-msgstr "Nisam pronašao korisnike"
-
-#: ../src/configuration/e-ews-search-user.c:217
-#, c-format
-msgid "Found one user"
-msgid_plural "Found %d users"
-msgstr[0] "Pronađoh %d korisnika"
-msgstr[1] "Pronađoh %d korisnika"
-msgstr[2] "Pronađoh %d korisnika"
-msgstr[3] "Pronađoh jednog korisnika"
-
-#: ../src/configuration/e-ews-search-user.c:223
-#, c-format
-msgid "Found more than 100 users, but showing only first %d"
-msgid_plural "Found more than 100 users, but showing only first %d"
-msgstr[0] "Nađoh više od 100 korisnika, ali prikazujem samo prvih %d"
-msgstr[1] "Nađoh više od 100 korisnika, ali prikazujem samo prva %d"
-msgstr[2] "Nađoh više od 100 korisnika, ali prikazujem samo prvih %d"
-msgstr[3] "Nađoh više od 100 korisnika, ali prikazujem samo prvog"
-
-#: ../src/configuration/e-ews-search-user.c:357
-#: ../src/configuration/e-ews-search-user.c:540
-msgid "Search for a user"
-msgstr "Potražite korisnika"
-
-#: ../src/configuration/e-ews-search-user.c:437
-msgid "E-mail"
-msgstr "El. pošta"
-
-#: ../src/configuration/e-ews-search-user.c:474
-msgid "Choose EWS user..."
-msgstr "Izaberi VUR korisnika..."
-
-#: ../src/configuration/e-ews-search-user.c:497
-msgid "_Search:"
-msgstr "_Potraži:"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
-#: ../src/server/e-ews-folder.c:657
-#, c-format
-msgid "Cannot add folder, folder already exists as '%s'"
-msgstr "Ne mogu da dodam fasciklu, fascikla već postoji kao „%s“"
-
-#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
-#. * Example result: "Mailbox - John Smith"
-#.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:107
-#, c-format
-msgctxt "ForeignFolder"
-msgid "Mailbox - %s"
-msgstr "Poštansko sanduče — %s"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:272
-msgid "Cannot test foreign folder availability while in offline mode"
-msgstr ""
-"Ne mogu da isprobam dostupnost strane fascikle dok sam u režimu van mreže"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:297
-#, c-format
-msgid "User '%s' was not found on the server"
-msgstr "Nisam pronašao korisnika „%s“ na serveru"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:333
-#, c-format
-msgid "User name '%s' is ambiguous, specify it more precisely, please"
-msgstr "Korisničko ime „%s“ je nejasno, navedite ga malo tačnije, molim lepo"
-
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:355
-#, c-format
+#: ../ekiga.schemas.in.in.h:38
 msgid ""
-"Folder '%s' not found. Either it does not exist or you do not have "
-"permission to access it."
+"The chosen sound will be played when a new instant message is received, if "
+"enabled"
 msgstr ""
-"Nisam pronašao fasciklu „%s“. Ili ne postoji ili vi nemate ovlašćenja da joj "
-"pristupite."
+"Ako je omogućeno, biće pušten izabrani zvuk pri prijemu nove brze poruke"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:373
-msgid "Cannot add folder, cannot determine folder's type"
-msgstr "Ne mogu da dodam fasciklu, ne mogu da odredim vrstu datoteke"
+#: ../ekiga.schemas.in.in.h:39
+msgid "The new voice mail sound"
+msgstr "Zvuk dolazne govorne pošte"
 
-#. Translators: This is used to name foreign folder.
-#. * The first '%s' is replaced with user name to whom the folder belongs,
-#. * the second '%s' is replaced with folder name.
-#. * Example result: "John Smith - Calendar"
-#.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:418
-#, c-format
-msgctxt "ForeignFolder"
-msgid "%s - %s"
-msgstr "%s — %s"
+#: ../ekiga.schemas.in.in.h:40
+msgid ""
+"The sound that will be played when there is a new voice mail, if enabled"
+msgstr ""
+"Ako je uključeno, zvuk koji će biti pušten pri prijemu nove govorne pošte"
 
-#. convert well-known names to their non-localized form
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:512
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:720
-msgid "Inbox"
-msgstr "Prijemno sanduče"
+#: ../ekiga.schemas.in.in.h:41
+msgid "Play sound on new voice mail"
+msgstr "Pusti zvuk kada pristigne nova govorna pošta"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:514
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
+#: ../ekiga.schemas.in.in.h:42
+msgid ""
+"The chosen sound will be played when a new voice mail is received, if enabled"
+msgstr ""
+"Ako je uključeno, biće pušten izabrani zvuk pri prijemu nove govorne pošte"
+
+#: ../ekiga.schemas.in.in.h:43
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:362
+msgid "Play ring tone"
+msgstr "Pusti zvuk za zvono"
+
+#: ../ekiga.schemas.in.in.h:44
+msgid "The chosen sound will be played when calling somebody, if enabled"
+msgstr "Ako je uključeno, izabrani zvuk će biti pušten pri zvanju nekoga"
+
+#: ../ekiga.schemas.in.in.h:45
+msgid "The dial tone sound"
+msgstr "Zvuk za signal slobodnog biranja"
+
+#: ../ekiga.schemas.in.in.h:46
+msgid "The sound that will be played when calling somebody, if enabled"
+msgstr "Ako je uključeno, zvuk koji će biti pušten pri zvanju nekoga"
+
+#: ../ekiga.schemas.in.in.h:47
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:372
+msgid "Play busy tone"
+msgstr "Pusti zvuk zauzeća"
+
+#: ../ekiga.schemas.in.in.h:48
+msgid ""
+"The chosen sound will be played at the end of calls or calling somebody who "
+"is busy, if enabled"
+msgstr ""
+"Ako je uključeno, izabrani zvuk će biti pušten po završetku poziva ili pri "
+"zvanju nekoga ko je zauzet"
+
+#: ../ekiga.schemas.in.in.h:49
+msgid "The busy tone sound"
+msgstr "Zvuk zauzeća"
+
+#: ../ekiga.schemas.in.in.h:50
+msgid ""
+"The sound that will be played at the end of calls or when calling somebody "
+"who is busy, if enabled"
+msgstr ""
+"Ako je uključeno, zvuk koji će biti pušten po okončanju poziva ili pri zvanju "
+"nekoga ko je zauzet"
+
+#: ../ekiga.schemas.in.in.h:51
+msgid "The accounts list"
+msgstr "Spisak naloga"
+
+#: ../ekiga.schemas.in.in.h:52
+msgid "The list of accounts to which Ekiga should register"
+msgstr "Spisak naloga koje Ekiga treba da koristi kod registracije/prijave"
+
+#: ../ekiga.schemas.in.in.h:53
+msgid "Type of Service (TOS) byte on outgoing RTP IP packets"
+msgstr "Bajt vrste servisa (TOS) na odlaznim RTP IP paketima"
+
+#: ../ekiga.schemas.in.in.h:54
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:469
+msgid ""
+"The Type of Service (TOS) byte on outgoing RTP IP packets. This byte is used "
+"by the network to provide some level of Quality of Service (QoS). Default "
+"value 184 (0xB8) corresponds to Expedited Forwarding (EF) PHB as defined in "
+"RFC 3246."
+msgstr ""
+"Bajt vrste servisa (TOS) na odlaznim RTP IP paketima. Ovaj bajt koristi "
+"mreža da obezbedi određeni nivo kvaliteta servisa (QoS). Podrazumevana "
+"vrednost 184 (0xB8) odgovara brzom prosleđivanju (Expedited Forwarding, EF) "
+"PHB kao što je definisano u RFC 3246."
+
+#: ../ekiga.schemas.in.in.h:55
+msgid "Listen port"
+msgstr "Port osluškivanja"
+
+#: ../ekiga.schemas.in.in.h:56
+msgid ""
+"The port to listen to for incoming connections. Ekiga needs to be restarted "
+"for the new value to take effect"
+msgstr ""
+"Port osluškivanja za dolaznim pozivima. Ekiga treba da bude ponovo pokrenuta "
+"da nova vrednost stupi na snagu"
+
+#: ../ekiga.schemas.in.in.h:57
+msgid "Outbound Proxy"
+msgstr "Spoljno-vezujući posrednik"
+
+#: ../ekiga.schemas.in.in.h:58
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:701
+msgid "The SIP Outbound Proxy to use for outgoing calls"
+msgstr "SIP posrednik koji se koristi za odlazne pozive"
+
+#: ../ekiga.schemas.in.in.h:59
+msgid "Forward calls to host"
+msgstr "Preusmerava pozive na računar"
+
+#: ../ekiga.schemas.in.in.h:60
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:656
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:704
+msgid "The host where calls should be forwarded if call forwarding is enabled"
+msgstr ""
+"Računar prema kome treba da budu preusmereni pozivi ako je uključeno "
+"preusmeravanje"
+
+#: ../ekiga.schemas.in.in.h:61
+msgid "DTMF sending"
+msgstr "Slanje DTMF-a"
+
+#: ../ekiga.schemas.in.in.h:62
+msgid ""
+"Select the mode for sending DTMFs. The values can be 0 (for \"RFC2833\") and "
+"1 (for \"INFO\")"
+msgstr ""
+"Izaberite režim slanja DTMF signala. Vrednost može biti 0 (za „RFC2833“) i 1 "
+"(za „INFO“)"
+
+#: ../ekiga.schemas.in.in.h:63
+msgid ""
+"The port to listen to for incoming connections. Ekiga needs to be restarted "
+"for the new value to take effect."
+msgstr ""
+"Oslušavani port za dolazne pozive. Ekiga treba da bude ponovo pokrenuta da "
+"nova vrednost stupi na snagu."
+
+#: ../ekiga.schemas.in.in.h:64
+msgid "TCP port range"
+msgstr "Opseg TCP portova"
+
+#: ../ekiga.schemas.in.in.h:65
+msgid ""
+"The range of TCP ports that Ekiga will use for the H.323 H.245 channel. This "
+"port range has no effect if both participants to the conference are using "
+"H.245 Tunneling."
+msgstr ""
+"Opseg TCP portova koji Ekiga koristi za H.323 i H.245 kanal. Ovaj opseg nema "
+"uticaja ako oba učesnika konferencije koriste H.245 tunel."
+
+#: ../ekiga.schemas.in.in.h:66
+msgid "UDP port range"
+msgstr "Opseg UDP portova"
+
+#: ../ekiga.schemas.in.in.h:67
+msgid "The range of UDP ports that Ekiga will use."
+msgstr "Opseg UDP portova koje Ekiga koristi."
+
+#: ../ekiga.schemas.in.in.h:68
+msgid "Enable H.245 tunneling"
+msgstr "Omogućava H.245 tunel"
+
+#: ../ekiga.schemas.in.in.h:69
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:665
+msgid ""
+"This enables H.245 Tunneling mode. In H.245 Tunneling mode H.245 messages "
+"are encapsulated into the H.225 channel (port 1720). This saves one TCP "
+"connection during calls. H.245 Tunneling was introduced in H.323v2."
+msgstr ""
+"Ovo uključuje H.245 režim tunela. U H.245 režimu tunela H.245 poruke su "
+"uokvirene u H.225 kanal (port 1720). Ovo štedi jednu TCP vezu za vreme "
+"poziva. H.245 tunel je uveden u H.323v2."
+
+#: ../ekiga.schemas.in.in.h:70
+msgid "Enable early H.245"
+msgstr "Uključuje rani H.245"
+
+#: ../ekiga.schemas.in.in.h:71
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:667
+msgid "This enables H.245 early in the setup"
+msgstr "Ovo uključuje H.245 rano u podešavanju"
+
+#: ../ekiga.schemas.in.in.h:72
+msgid "Enable 'Fast Start'"
+msgstr "Omogući „Brzo pokretanje“"
+
+#: ../ekiga.schemas.in.in.h:73
+msgid ""
+"Connection will be established in Fast Start mode. Fast Start (Fast Connect) "
+"is a new way to start calls faster that was introduced in H.323v2."
+msgstr ""
+"Veza će biti uspostavljena u režimu brzog pokretanja. Brzo pokretanje (Brzo "
+"povezivanje) je novi put da započnete razgovor brže koji je uveden u H.323v2."
+
+#: ../ekiga.schemas.in.in.h:74
+msgid "Enable H.239"
+msgstr "Uključuje H.245"
+
+#: ../ekiga.schemas.in.in.h:75
+msgid "This enables H.239 capability for additional video roles"
+msgstr "Ovo uključuje H.239 mogućnost za dodatne funkcije snimka"
+
+#: ../ekiga.schemas.in.in.h:76
+msgid "Extended Video Roles"
+msgstr "Funkcije proširenog snimka"
+
+#: ../ekiga.schemas.in.in.h:77
+msgid ""
+"Select the H.239 Video Role. The values can be 0 (for \"disable extended "
+"video\"), 1 (for \"allow per content role mask\"), 2 (for \"force "
+"presentation\"), or 3 (for \"force live role\")"
+msgstr ""
+"Bira funkciju H.239 snimka. Vrednosti mogu biti 0 (za „isključi prošireni "
+"snimak“), 1 (za „dopusti masku funkcije po sadržaju“), 2 (za „prisili "
+"predstaljanje“), ili 3 (za „prisili funkciju uživo“)"
+
+#: ../ekiga.schemas.in.in.h:78
+msgid ""
+"Select the mode for sending DTMFs. The values can be 0 (for \"String\"), 1 "
+"(for \"Tone\"), 2 (for \"RFC2833\"), or 3 (for \"Q.931\") (default is "
+"\"String\"). Choosing other values than \"String\" disables the Text Chat."
+msgstr ""
+"Izaberite režim slanja DTMF signala. Vrednosti mogu biti 0 (za „Nisku "
+"znakova“), 1 („Tonsko“), 2 (za „RFC2833“) ili 3 (za „Ku.931“) (podrazumevano "
+"je „Niska znakova“). Izbor neke druge vrednosti od „Niske znakova“ isključuje "
+"tekstualni razgovor."
+
+#: ../ekiga.schemas.in.in.h:79
+msgid "Always forward calls to the given host"
+msgstr "Uvek prosleđuje pozive do datog računara"
+
+#: ../ekiga.schemas.in.in.h:80
+msgid ""
+"If enabled, all incoming calls will be forwarded to the host that is "
+"specified in the field below"
+msgstr ""
+"Ako je uključeno, svi dolazni pozivi će biti preusmereni na računar koji je "
+"naznačen u narednom polju"
+
+#: ../ekiga.schemas.in.in.h:81
+msgid "Forward calls to the given host if busy"
+msgstr "Preusmerava poziv na dati računar ako je zauzeto"
+
+#: ../ekiga.schemas.in.in.h:82
+msgid ""
+"If enabled, all incoming calls will be forwarded to the host that is "
+"specified in the field below if you already are in a call or if you are in "
+"busy mode"
+msgstr ""
+"Ako je uključeno, svi dolazni pozivi će biti preusmereni na računar koji je "
+"naznačen u narednom polju ako imate poziv ili ako ste u režimu zauzetosti"
+
+#: ../ekiga.schemas.in.in.h:83
+msgid "Forward calls to the given host if no answer"
+msgstr "Preusmerava poziv na dati računar ako se ne odgovara na poziv"
+
+#: ../ekiga.schemas.in.in.h:84
+msgid ""
+"If enabled, all incoming calls will be forwarded to the host that is "
+"specified in the field below if you do not answer the call"
+msgstr ""
+"Ako je uključeno, svi dolazni pozivi će biti preusmereni na računar koji je "
+"naznačen u narednom polju ako ne odgovorite na poziv"
+
+#: ../ekiga.schemas.in.in.h:85
+msgid "The STUN Server"
+msgstr "STUN server"
+
+# bug: s/technic/technology/
+#: ../ekiga.schemas.in.in.h:86
+msgid ""
+"The STUN server to use for STUN Support. STUN is a technology that permits "
+"passage through some types of NAT gateway"
+msgstr ""
+"STUN server za STUN podršku. STUN je tehnologija koja dopušta da se prođe "
+"kroz neke vrste maskiranja mreže."
+
+#: ../ekiga.schemas.in.in.h:87
+msgid "Enable STUN network detection"
+msgstr "Uključuje otkrivanje STUN mreže"
+
+#: ../ekiga.schemas.in.in.h:88
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:471
+msgid "Enable the automatic network setup resulting from the STUN test"
+msgstr "Uključuje samopodešavanje mreže dobijeno STUN testom"
+
+#: ../ekiga.schemas.in.in.h:89
+msgid "NAT Binding Timeout"
+msgstr "Vremenski rok vezivanja adresnog prevodioca"
+
+#: ../ekiga.schemas.in.in.h:90
+msgid ""
+"Enter the number of seconds after which Ekiga should try refreshing the NAT "
+"binding when STUN is being used"
+msgstr ""
+"Unesite broj sekundi nakon kojih bi program trebao da osveži vezivanje na "
+"adresnog mrežnog prevodioca kada se koristi STUN"
+
+#: ../ekiga.schemas.in.in.h:91
+msgid "Position on the screen of the call window"
+msgstr "Položaj prozora za pozive"
+
+#: ../ekiga.schemas.in.in.h:92
+msgid "Size of the call window"
+msgstr "Veličina prozora za pozive"
+
+#: ../ekiga.schemas.in.in.h:93
+msgid "Position on the screen of the main window"
+msgstr "Položaj glavnog prozora"
+
+#: ../ekiga.schemas.in.in.h:94
+msgid "Change the panel section of the main window"
+msgstr "Menja odeljak panela glavnog prozora"
+
+#: ../ekiga.schemas.in.in.h:95
+msgid ""
+"Change the panel section of the main window (0=Contacts, 1=Dialpad, 2=Call "
+"history)"
+msgstr ""
+"Menja odeljak panela glavnog prozora (0=Kontakti, 1=Brojčanik, 2=Istorijat "
+"poziva)"
+
+#: ../ekiga.schemas.in.in.h:96
+msgid "Size of the chat window"
+msgstr "Veličina prozora za tekstualne poruke"
+
+#: ../ekiga.schemas.in.in.h:97
+msgid "Position on the screen of the chat window"
+msgstr "Položaj prozora za tekstualne poruke"
+
+#: ../ekiga.schemas.in.in.h:98
+msgid "Size of the druid window"
+msgstr "Veličina prozora čarobnjaka"
+
+#: ../ekiga.schemas.in.in.h:99
+msgid "Position on the screen of the druid window"
+msgstr "Položaj prozora čarobnjaka-pomoćnika"
+
+#: ../ekiga.schemas.in.in.h:100
+msgid "Position on the screen of the address book window"
+msgstr "Položaj prozora imenika"
+
+#: ../ekiga.schemas.in.in.h:101
+msgid "Size of the address book window"
+msgstr "Veličina prozora imenika"
+
+#: ../ekiga.schemas.in.in.h:102
+msgid "Position on the screen of the audio settings window"
+msgstr "Položaj prozora za podešavanja zvuka"
+
+#: ../ekiga.schemas.in.in.h:103
+msgid "Size of the audio settings window"
+msgstr "Veličina prozora podešavanja zvuka"
+
+#: ../ekiga.schemas.in.in.h:104
+msgid "Position on the screen of the video settings window"
+msgstr "Položaj prozora za podešavanja snimka"
+
+#: ../ekiga.schemas.in.in.h:105
+msgid "Size of the video settings window"
+msgstr "Veličina prozora podešavanja snimka"
+
+#: ../ekiga.schemas.in.in.h:106
+msgid "Position on the screen of the preferences window"
+msgstr "Položaj prozora postavki"
+
+#: ../ekiga.schemas.in.in.h:107
+msgid "Size of the preferences window"
+msgstr "Veličina prozora postavki"
+
+#: ../ekiga.schemas.in.in.h:108
+msgid "Position on the screen of the accounts window"
+msgstr "Položaj prozora za naloge na ekranu"
+
+#: ../ekiga.schemas.in.in.h:109
+msgid "Size of the accounts window"
+msgstr "Veličina prozora za naloge"
+
+#: ../ekiga.schemas.in.in.h:110
+msgid "Disable video hardware acceleration"
+msgstr "Isključuje hardversko ubrzavanje za video"
+
+#: ../ekiga.schemas.in.in.h:111
+msgid ""
+"This key disables DirectX (on win32) and XVideo (on Linux) video hardware "
+"acceleration"
+msgstr ""
+"Ovaj ključ isključuje hardversko ubrzanje videa za DirektniIks (na vin32) i "
+"IksVideo (na Linuksu)"
+
+#: ../ekiga.schemas.in.in.h:112
+msgid "Allow picture-in-picture software scaling"
+msgstr "Dozvoljava programsko uvećanje slike-u-slici"
+
+#: ../ekiga.schemas.in.in.h:113
+msgid ""
+"Allow Ekiga to fall back to software scaling the picture-in-picture if "
+"hardware support is not available. If this is set to false, Ekiga will not "
+"try to open the PIP if hardware support is not available."
+msgstr ""
+"Dozvoljava Ekigi da koristi programsko povećavanje i smanjivanje slike-u-slici "
+"ukoliko ne postoji hardverska podrška. Ukoliko nije izabrano, Ekiga neće "
+"koristiti programsko povećanje čak i kad ne postoji hardverska podrška."
+
+#: ../ekiga.schemas.in.in.h:114
+msgid "Specify the software scaling algorithm"
+msgstr "Navodi algoritam programskog povećanja"
+
+#: ../ekiga.schemas.in.in.h:115
+msgid ""
+"Specify the software scaling algorithm: 0: nearest neighbor, 1: nearest "
+"neighbor with box filter, 2: bilinear filtering, 3: hyperbolic filtering. "
+"Does not apply on windows systems."
+msgstr ""
+"Navedite algoritam za programsko povećavanje ili smanjivanje slike: 0: najbliži "
+"sused, 1: najbliži sused sa filterom kutije, 2: bilinearno filtriranje, 3: "
+"hiperbolično filtriranje. Ne koristi se na sistemima prozora."
+
+#: ../ekiga.schemas.in.in.h:116
+msgid "The zoom value"
+msgstr "Vrednost uvećanja"
+
+#: ../ekiga.schemas.in.in.h:117
+msgid ""
+"The zoom value in percent to apply to images displayed in the main GUI (can "
+"be 50, 100, or 200)"
+msgstr ""
+"Vrednost uvećanja slika koje se prikazuju u glavnom prozoru (može biti 50, "
+"100 ili 200)"
+
+#: ../ekiga.schemas.in.in.h:118
+msgid ""
+"The zoom value in percent to apply to images displayed in the extended GUI "
+"(can be 50, 100, or 200)"
+msgstr ""
+"Vrednost uvećanja slika koje se prikazuju u proširenom prozoru (može biti 50, "
+"100 ili 200)"
+
+#: ../ekiga.schemas.in.in.h:119
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:463
+msgid "Place windows displaying video above other windows during calls"
+msgstr ""
+"Postavlja prozore koji prikazuju snimak iznad ostalih prozora u toku razgovora"
+
+#: ../ekiga.schemas.in.in.h:120
+msgid "The default video view"
+msgstr "Početni prikaz snimka"
+
+#: ../ekiga.schemas.in.in.h:121
+msgid ""
+"The default video view (0: Local, 1: Remote, 2: Both, 3: Both in a separate "
+"window)"
+msgstr ""
+"Podrazumevani prikaz snimka (0: lokalni, 1: udaljeni, 2: oba, 3: oba u "
+"posebnim prozorima)"
+
+#: ../ekiga.schemas.in.in.h:122
+msgid "The video view before having switched to fullscreen"
+msgstr "Širina snimka pre prebacivanja na ceo ekran"
+
+#: ../ekiga.schemas.in.in.h:123
+msgid ""
+"The video view before having switched to fullscreen (same values as "
+"video_view)"
+msgstr ""
+"Širina snimka pre prebacivanja na ceo ekran (ista vrednost kao „video_view“)"
+
+#: ../ekiga.schemas.in.in.h:124
+msgid "Remote video window size"
+msgstr "Veličina prozora udaljenog snimka"
+
+#: ../ekiga.schemas.in.in.h:125
+msgid "The size of the remote video window"
+msgstr "Veličina prozora udaljenog snimka"
+
+#: ../ekiga.schemas.in.in.h:126
+msgid "Remote video window position"
+msgstr "Položaj prozora udaljenog snimka"
+
+#: ../ekiga.schemas.in.in.h:127
+msgid "The position of the remote video window"
+msgstr "Položaj prozora udaljenog snimka"
+
+# bug(slobo): ne može ovako ostati
+#: ../ekiga.schemas.in.in.h:128
+msgid "Maximum jitter buffer"
+msgstr "Najveći bafer pulsa"
+
+#: ../ekiga.schemas.in.in.h:129
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:847
+msgid "The maximum jitter buffer size for audio reception (in ms)"
+msgstr "Najveća veličina bafera pulsa za audio prijem (u ms)"
+
+#: ../ekiga.schemas.in.in.h:130
+msgid "The video codecs list"
+msgstr "Spisak video kodeka"
+
+#: ../ekiga.schemas.in.in.h:131
+msgid "Maximum TX video bitrate"
+msgstr "Najveći video protok za slanje"
+
+#: ../ekiga.schemas.in.in.h:132
+msgid ""
+"The maximum TX video bitrate in kbit/s. The video quality and the number of "
+"transmitted frames per second (depends on selected codec) will be "
+"dynamically adjusted above their minimum during calls to try to minimize the "
+"bandwidth to the given value"
+msgstr ""
+"Najveći video protok za slanje u kbit/s. Kvalitet slike i broj prenesenih "
+"kadrova u sekundi (u zavisnosti od odabranog kodeka) biće dinamički "
+"prilagođeni iznad njihovog minimuma za vreme poziva pri pokušaju da se umanji "
+"protok na datu vrednost"
+
+#: ../ekiga.schemas.in.in.h:133
+msgid "Maximum RX video bitrate"
+msgstr "Najveći video protok za primanje"
+
+#: ../ekiga.schemas.in.in.h:134
+msgid ""
+"The maximum RX video bitrate in kbit/s. This value will be signaled to the "
+"peer endpoint that can adjust (if it supports it) its TX bitrate if it is "
+"above the signaled value"
+msgstr ""
+"Najveći video protok za primanje u kbit/s. Ova vrednost će biti poslata osobi "
+"sa kojom razgovarate (ako njen program to podržava) radi podešavanja video "
+"protoka za slanje ukoliko je iznad ove vrednosti."
+
+#: ../ekiga.schemas.in.in.h:135
+msgid "Temporal Spatial Trade Off"
+msgstr "Vremensko prostorni odnos"
+
+#: ../ekiga.schemas.in.in.h:136
+msgid ""
+"Whether to prefer to sustain the max. frame rate or lower it possibly in "
+"order to keep a minimum level of (spatial) quality for all frames. 0: "
+"Highest minimal quality, 31: lowest minimal quality"
+msgstr ""
+"Da li da se održava najveća brzina kadrova ili da se smanjuje zbog održavanja "
+"najmanjeg nivoa (prostornog) kvaliteta svih kadrova. 0: Najviši najmanji "
+"kvalitet, 31: najniži najmanji kvalitet"
+
+#: ../ekiga.schemas.in.in.h:137
+msgid "List of folded groups in the roster"
+msgstr "Spisak preklopljenih grupa u listi kontakata"
+
+#: ../ekiga.schemas.in.in.h:138
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1243
+msgid "Show offline contacts"
+msgstr "Prikazuje prijatelje van mreže"
+
+#: ../ekiga.schemas.in.in.h:139
+msgid "If enabled, offline contacts will be shown in the roster"
+msgstr ""
+"Ako je uključeno, kontakti koji nisu na mreži će biti prikazani u listi "
+"kontakata"
+
+#: ../ekiga.schemas.in.in.h:140
+msgid "LDAP servers"
+msgstr "LDAP serveri"
+
+#: ../ekiga.schemas.in.in.h:141
+msgid "List of configured LDAP servers"
+msgstr "Spisak podešenih LDAP servera"
+
+#: ../ekiga.schemas.in.in.h:142
+msgid "Calls history"
+msgstr "Istorijat poziva"
+
+#: ../ekiga.schemas.in.in.h:143
+msgid "The history of the 100 last calls"
+msgstr "Istorijat poslednjih 100 načinjenih poziva"
+
+# bug(slobo): msgstr "Nema roka za odgovor" ...sumnjam da je ovo
+#: ../ekiga.schemas.in.in.h:144
+msgid "No answer timeout"
+msgstr "Vremenski rok bez odgovora"
+
+#: ../ekiga.schemas.in.in.h:145
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:494
+msgid ""
+"Automatically reject or forward incoming calls if no answer is given after "
+"the specified amount of time (in seconds)"
+msgstr ""
+"Sam odbija ili prosleđuje dolazne pozive ukoliko nije odgovoreno određeno "
+"vreme (u sekundama)."
+
+#: ../ekiga.schemas.in.in.h:146
+msgid "Automatic answer"
+msgstr "Samojavljanje"
+
+#: ../ekiga.schemas.in.in.h:147
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:495
+msgid "If enabled, automatically answer incoming calls"
+msgstr "Ako je uključeno, program će se sam javiti na sve dolazne pozive"
+
+#: ../lib/engine/audioinput/audioinput-core.cpp:196
+#: ../lib/engine/audioinput/audioinput-core.cpp:201
+#: ../lib/engine/audiooutput/audiooutput-core.cpp:217
+#: ../lib/engine/audiooutput/audiooutput-core.cpp:222
+#: ../lib/engine/videoinput/videoinput-core.cpp:240
+#: ../lib/engine/videoinput/videoinput-core.cpp:245
+msgid "New device detected"
+msgstr "Otkriven je novi uređaj"
+
+#: ../lib/engine/audioinput/audioinput-core.cpp:201
+#: ../lib/engine/audiooutput/audiooutput-core.cpp:222
+#: ../lib/engine/videoinput/videoinput-core.cpp:245
+msgid "Use it"
+msgstr "Koristi ga"
+
+#: ../lib/engine/audioinput/audioinput-core.cpp:231
+#: ../lib/engine/audiooutput/audiooutput-core.cpp:251
+#: ../lib/engine/videoinput/videoinput-core.cpp:275
+msgid "Device removed"
+msgstr "Uređaj je uklonjen"
+
+#: ../lib/engine/components/call-history/history-book.cpp:144
+#: ../lib/engine/gui/gtk-frontend/call-history-view-gtk.cpp:186
+msgid "Clear List"
+msgstr "Očisti spisak"
+
+#: ../lib/engine/components/call-history/history-contact.cpp:167
+msgid "Received"
+msgstr "Primljeni"
+
+#: ../lib/engine/components/call-history/history-contact.cpp:170
+msgid "Placed"
+msgstr "Načinjeni"
+
+#: ../lib/engine/components/call-history/history-contact.cpp:173
+msgid "Missed"
+msgstr "Propušteni"
+
+#: ../lib/engine/components/local-roster/local-cluster.cpp:75
+#: ../lib/engine/components/local-roster/local-heap.cpp:117
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1169
+#: ../plugins/evolution/evolution-book.cpp:301
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:71
+msgid "A_dd Contact"
+msgstr "Dod_aj kontakt"
+
+#: ../lib/engine/components/local-roster/local-heap.cpp:93
+msgid "Services"
+msgstr "Usluge"
+
+#: ../lib/engine/components/local-roster/local-heap.cpp:94
+msgid "Echo test"
+msgstr "Test odjeka"
+
+#: ../lib/engine/components/local-roster/local-heap.cpp:95
+msgid "Conference room"
+msgstr "Soba za konferenciju"
+
+#: ../lib/engine/components/local-roster/local-heap.cpp:96
+msgid "Call back test"
+msgstr "Test povratnog poziva"
+
+#: ../lib/engine/components/local-roster/local-heap.cpp:110
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1305
 msgid "Contacts"
 msgstr "Kontakti"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:516
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:722
-msgid "Calendar"
-msgstr "Kalendar"
+#: ../lib/engine/components/local-roster/local-heap.cpp:127
+msgid "Rename"
+msgstr "Preimenuj"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:518
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:723
-msgid "Memos"
-msgstr "Beleške"
+#: ../lib/engine/components/local-roster/local-heap.cpp:196
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:485
+msgid "Family"
+msgstr "Porodica"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:520
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:724
-msgid "Tasks"
-msgstr "Zadaci"
+#: ../lib/engine/components/local-roster/local-heap.cpp:197
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:486
+msgid "Friend"
+msgstr "Prijatelj"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:537
+#. Translator: http://www.ietf.org/rfc/rfc4480.txt proposes several
+#. relationships between you and your contact; associate means
+#. someone who is at the same "level" than you.
+#.
+#: ../lib/engine/components/local-roster/local-heap.cpp:202
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:491
+msgid "Associate"
+msgstr "Saradnik"
+
+#. Translator: http://www.ietf.org/rfc/rfc4480.txt proposes several
+#. relationships between you and your contact; assistant means
+#. someone who is at a lower "level" than you.
+#.
+#: ../lib/engine/components/local-roster/local-heap.cpp:207
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:496
+msgid "Assistant"
+msgstr "Pomoćnik"
+
+#. Translator: http://www.ietf.org/rfc/rfc4480.txt proposes several
+#. relationships between you and your contact; supervisor means
+#. someone who is at a higher "level" than you.
+#.
+#: ../lib/engine/components/local-roster/local-heap.cpp:212
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:501
+msgid "Supervisor"
+msgstr "Supervizor"
+
+#. Translator: http://www.ietf.org/rfc/rfc4480.txt proposes several
+#. relationships between you and your contact; self means yourself.
+#.
+#: ../lib/engine/components/local-roster/local-heap.cpp:216
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:505
+msgid "Self"
+msgstr "Ja"
+
+#: ../lib/engine/components/local-roster/local-heap.cpp:235
+#: ../lib/engine/components/local-roster/local-roster-bridge.cpp:93
+msgid "Add to local roster"
+msgstr "Dodaj u lokalne kontakte"
+
+#: ../lib/engine/components/local-roster/local-heap.cpp:236
+msgid ""
+"Please fill in this form to add a new contact to ekiga's internal roster"
+msgstr ""
+"Popunite ovaj formular da dodate novi kontakt Ekiginom unutrašnjem spisku "
+"kontakata"
+
+#: ../lib/engine/components/local-roster/local-heap.cpp:238
+#: ../lib/engine/components/local-roster/local-heap.cpp:435
+#: ../lib/engine/components/local-roster/local-presentity.cpp:279
+#: ../lib/engine/components/opal/opal-account.cpp:497
+#: ../plugins/evolution/evolution-contact.cpp:324
+#: ../plugins/loudmouth/loudmouth-account.cpp:342
+#: ../plugins/loudmouth/loudmouth-bank.cpp:123
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:338
+#: ../plugins/loudmouth/loudmouth-presentity.cpp:289
+#: ../plugins/resource-list/rl-cluster.cpp:169
+#: ../plugins/resource-list/rl-heap.cpp:526
+#: ../plugins/resource-list/rl-presentity.cpp:233
+msgid "Name:"
+msgstr "Ime:"
+
+#: ../lib/engine/components/local-roster/local-heap.cpp:238
+#: ../lib/engine/components/local-roster/local-presentity.cpp:279
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:338
+msgid "Name of the contact, as shown in your roster"
+msgstr "Ime kontakta, kako će biti prikazan na spisku"
+
+#: ../lib/engine/components/local-roster/local-heap.cpp:247
+#: ../lib/engine/components/local-roster/local-heap.cpp:249
+#: ../lib/engine/components/local-roster/local-presentity.cpp:280
+#: ../plugins/resource-list/rl-cluster.cpp:170
+#: ../plugins/resource-list/rl-heap.cpp:527
+#: ../plugins/resource-list/rl-presentity.cpp:234
+msgid "Address:"
+msgstr "Adresa:"
+
+#: ../lib/engine/components/local-roster/local-heap.cpp:247
+#: ../lib/engine/components/local-roster/local-heap.cpp:249
+#: ../lib/engine/components/local-roster/local-presentity.cpp:280
+msgid ""
+"Address, e.g. sip:xyz@ekiga.net; if you do not specify the host part, e.g. "
+"sip:xyz, then you can choose it by right-clicking on the contact in roster"
+msgstr ""
+"Adresa, npr. „sip:xyz@ekiga.net“; ako ne navedete domaćina, npr. „sip:xyz“, "
+"onda ga možete izabrati desnim klikom na kontakt u rednom spisku"
+
+#: ../lib/engine/components/local-roster/local-heap.cpp:253
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:340
+msgid "Put contact in groups:"
+msgstr "Stavi kontakt u grupe:"
+
+#: ../lib/engine/components/local-roster/local-heap.cpp:420
+msgid "You supplied an unsupported address"
+msgstr "Naveli ste nepodržanu adresu"
+
+#: ../lib/engine/components/local-roster/local-heap.cpp:422
+msgid "You already have a contact with this address!"
+msgstr "Već imate kontakt sa ovom adresom!"
+
+#: ../lib/engine/components/local-roster/local-heap.cpp:433
+msgid "Rename group"
+msgstr "Preimenuj grupu"
+
+#: ../lib/engine/components/local-roster/local-heap.cpp:434
+msgid "Please edit this group name"
+msgstr "Izmenite naziv ove grupe"
+
+#: ../lib/engine/components/local-roster/local-presentity.cpp:140
+#: ../plugins/resource-list/rl-entry.cpp:141
+#: ../plugins/resource-list/rl-heap.cpp:102
+#: ../plugins/resource-list/rl-heap.cpp:144
+#: ../plugins/resource-list/rl-heap.cpp:176
+#: ../plugins/resource-list/rl-presentity.cpp:143
+msgid "Unnamed"
+msgstr "Neimenovano"
+
+#: ../lib/engine/components/local-roster/local-presentity.cpp:245
+#: ../lib/engine/components/opal/opal-account.cpp:399
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1193
+#: ../plugins/evolution/evolution-contact.cpp:228
+#: ../plugins/loudmouth/loudmouth-presentity.cpp:174
+#: ../plugins/resource-list/rl-presentity.cpp:212
+msgid "_Edit"
+msgstr "_Uređivanje"
+
+#: ../lib/engine/components/local-roster/local-presentity.cpp:247
+#: ../lib/engine/components/opal/opal-account.cpp:401
+#: ../lib/engine/gui/gtk-frontend/accounts-window.cpp:679
+#: ../plugins/evolution/evolution-contact.cpp:230
+#: ../plugins/loudmouth/loudmouth-account.cpp:445
+#: ../plugins/loudmouth/loudmouth-presentity.cpp:199
+#: ../plugins/resource-list/rl-presentity.cpp:214
+msgid "_Remove"
+msgstr "_Ukloni"
+
+#: ../lib/engine/components/local-roster/local-presentity.cpp:276
+#: ../plugins/loudmouth/loudmouth-presentity.cpp:286
+msgid "Edit roster element"
+msgstr "Izmeni elemente liste kontakata"
+
+#: ../lib/engine/components/local-roster/local-presentity.cpp:277
+msgid ""
+"Please fill in this form to change an existing element of ekiga's internal "
+"roster"
+msgstr ""
+"Popunite ovaj formular da izmenite postojeći element Ekiginog unutrašnjeg "
+"spiska"
+
+#: ../lib/engine/components/local-roster/local-presentity.cpp:281
+msgid "Is a preferred contact"
+msgstr "Je omiljeni kontakt"
+
+#: ../lib/engine/components/local-roster/local-presentity.cpp:283
+#: ../plugins/loudmouth/loudmouth-presentity.cpp:291
+#: ../plugins/resource-list/rl-heap.cpp:528
+#: ../plugins/resource-list/rl-presentity.cpp:236
+msgid "Choose groups:"
+msgstr "Odaberite grupe:"
+
+#: ../lib/engine/components/opal/h323-endpoint.cpp:124
+#: ../lib/engine/components/opal/opal-call.cpp:697
+#: ../lib/engine/components/opal/sip-endpoint.cpp:163
+msgid "Call"
+msgstr "Poziv"
+
+#: ../lib/engine/components/opal/h323-endpoint.cpp:127
+#: ../lib/engine/components/opal/sip-endpoint.cpp:166
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2163
+msgid "Transfer"
+msgstr "Prebaci"
+
+#. Translators : The alias we are registering already exists : failure
+#: ../lib/engine/components/opal/h323-endpoint.cpp:306
+msgid "Duplicate alias"
+msgstr "Već postoji ovaj nadimak"
+
+#: ../lib/engine/components/opal/h323-endpoint.cpp:309
+msgid "Bad username/password"
+msgstr "Pogrešno korisničko ime/lozinka"
+
+#: ../lib/engine/components/opal/h323-endpoint.cpp:312
+#: ../lib/engine/components/opal/sip-endpoint.cpp:483
+msgid "Transport error"
+msgstr "Greška prenosa"
+
+#: ../lib/engine/components/opal/h323-endpoint.cpp:323
+#: ../lib/engine/components/opal/h323-endpoint.cpp:328
+#: ../lib/engine/components/opal/sip-endpoint.cpp:696
+msgid "Failed"
+msgstr "Nije uspelo"
+
+#. Translators: this is a state, not an action, i.e. it should be read as
+#. "(you are) unregistered", and not as "(you have been) unregistered"
+#: ../lib/engine/components/opal/opal-account.cpp:71
+#: ../lib/engine/components/opal/opal-account.cpp:347
+#: ../lib/engine/components/opal/opal-account.cpp:711
+msgid "Unregistered"
+msgstr "Neregistrovan(a)"
+
+#. translators : the result will look like :
+#. * "registered (with 2 voice mail messages)"
+#.
+#: ../lib/engine/components/opal/opal-account.cpp:238
 #, c-format
-msgid "Testing availability of folder '%s' of user '%s', please wait..."
-msgstr "Isprobavam dostupnost fascikle „%s“ korisnika „%s“, molim sačekajte..."
+msgid "%s (with %d voice mail message)"
+msgid_plural "%s (with %d voice mail messages)"
+msgstr[0] "%s (sa %d porukom na govornoj pošti)"
+msgstr[1] "%s (sa %d poruke na govornoj pošti)"
+msgstr[2] "%s (sa %d poruka na govornoj pošti)"
+msgstr[3] "%s (sa jednom porukom na govornoj pošti)"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:614
-msgid "Subscribe to folder of other EWS user..."
-msgstr "Prijavi se na fasciklu drugog VUR korisnika..."
+#: ../lib/engine/components/opal/opal-account.cpp:316
+#: ../lib/engine/components/opal/opal-account.cpp:793
+msgid "Processing..."
+msgstr "Obrađujem..."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:665
-msgid "User"
-msgstr "Korisnik"
+#: ../lib/engine/components/opal/opal-account.cpp:391
+#: ../lib/engine/gui/gtk-frontend/accounts-window.cpp:673
+#: ../plugins/loudmouth/loudmouth-account.cpp:433
+msgid "_Disable"
+msgstr "_Isključi"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:672
+#: ../lib/engine/components/opal/opal-account.cpp:394
+#: ../lib/engine/gui/gtk-frontend/accounts-window.cpp:670
+#: ../plugins/loudmouth/loudmouth-account.cpp:437
+msgid "_Enable"
+msgstr "_Uključi"
+
+#: ../lib/engine/components/opal/opal-account.cpp:415
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:549
+msgid "Recharge the account"
+msgstr "Dopunite nalog"
+
+#: ../lib/engine/components/opal/opal-account.cpp:420
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:561
+msgid "Consult the balance history"
+msgstr "Pogledaj istorijat stanja"
+
+#: ../lib/engine/components/opal/opal-account.cpp:425
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:573
+msgid "Consult the call history"
+msgstr "Pogledaj istorijat poziva"
+
+#: ../lib/engine/components/opal/opal-account.cpp:493
+#: ../lib/engine/components/opal/opal-bank.cpp:163
+#: ../plugins/loudmouth/loudmouth-account.cpp:337
+#: ../plugins/loudmouth/loudmouth-bank.cpp:119
+msgid "Edit account"
+msgstr "Izmeni nalog"
+
+#: ../lib/engine/components/opal/opal-account.cpp:495
+#: ../lib/engine/components/opal/opal-bank.cpp:164
+#: ../plugins/evolution/evolution-book.cpp:345
+#: ../plugins/evolution/evolution-contact.cpp:322
+#: ../plugins/loudmouth/loudmouth-account.cpp:339
+msgid "Please update the following fields:"
+msgstr "Ažurirajte sledeća polja:"
+
+#: ../lib/engine/components/opal/opal-account.cpp:497
+#: ../lib/engine/components/opal/opal-bank.cpp:190
+#: ../lib/engine/components/opal/opal-bank.cpp:200
+#: ../plugins/loudmouth/loudmouth-account.cpp:342
+#: ../plugins/loudmouth/loudmouth-bank.cpp:123
+msgid "Account name, e.g. MyAccount"
+msgstr "Ime naloga, npr. MojNalog"
+
+#: ../lib/engine/components/opal/opal-account.cpp:499
+msgid "Registrar:"
+msgstr "Registar:"
+
+#: ../lib/engine/components/opal/opal-account.cpp:499
+#: ../lib/engine/components/opal/opal-bank.cpp:201
+msgid "The registrar, e.g. ekiga.net"
+msgstr "Registar, npr. „ekiga.net“"
+
+#: ../lib/engine/components/opal/opal-account.cpp:501
+msgid "Gatekeeper:"
+msgstr "Čuvar kapije:"
+
+#: ../lib/engine/components/opal/opal-account.cpp:501
+#: ../lib/engine/components/opal/opal-bank.cpp:191
+msgid "The gatekeeper, e.g. ekiga.net"
+msgstr "Čuvar kapije, npr. „ekiga.net“"
+
+#: ../lib/engine/components/opal/opal-account.cpp:502
+#: ../plugins/loudmouth/loudmouth-account.cpp:346
+#: ../plugins/loudmouth/loudmouth-bank.cpp:124
+#: ../plugins/resource-list/rl-cluster.cpp:174
+msgid "User:"
+msgstr "Korisnik:"
+
+#: ../lib/engine/components/opal/opal-account.cpp:502
+#: ../lib/engine/components/opal/opal-bank.cpp:172
+#: ../lib/engine/components/opal/opal-bank.cpp:183
+#: ../lib/engine/components/opal/opal-bank.cpp:192
+#: ../lib/engine/components/opal/opal-bank.cpp:202
+#: ../plugins/loudmouth/loudmouth-account.cpp:346
+#: ../plugins/loudmouth/loudmouth-bank.cpp:124
+msgid "The user name, e.g. jim"
+msgstr "Korisničko ime, npr. „pera“"
+
+#. Translators:
+#. * SIP knows two usernames: The name for the client ("User") and the name
+#. * for the authentication procedure ("Authentication user")
+#: ../lib/engine/components/opal/opal-account.cpp:507
+msgid "Authentication user:"
+msgstr "Korisničko ime za prijavu:"
+
+#: ../lib/engine/components/opal/opal-account.cpp:507
+#: ../lib/engine/components/opal/opal-bank.cpp:203
+msgid ""
+"The user name used during authentication, if different than the user name; "
+"leave empty if you do not have one"
+msgstr ""
+"Korisničko ime koje se koristi pri prijavljivanju, ako je različito od "
+"korisničkog imena; ostavite prazno ako ga nemate"
+
+#: ../lib/engine/components/opal/opal-account.cpp:508
+#: ../plugins/loudmouth/loudmouth-account.cpp:362
+#: ../plugins/loudmouth/loudmouth-bank.cpp:127
+#: ../plugins/resource-list/rl-cluster.cpp:173
+msgid "Password:"
+msgstr "Lozinka:"
+
+#: ../lib/engine/components/opal/opal-account.cpp:508
+#: ../lib/engine/components/opal/opal-bank.cpp:174
+#: ../lib/engine/components/opal/opal-bank.cpp:185
+#: ../lib/engine/components/opal/opal-bank.cpp:194
+#: ../lib/engine/components/opal/opal-bank.cpp:204
+#: ../plugins/loudmouth/loudmouth-account.cpp:362
+#: ../plugins/loudmouth/loudmouth-bank.cpp:127
+msgid "Password associated to the user"
+msgstr "Lozinka vezana za ovog korisnika"
+
+#: ../lib/engine/components/opal/opal-account.cpp:509
+msgid "Timeout:"
+msgstr "Vremenski rok:"
+
+#: ../lib/engine/components/opal/opal-account.cpp:509
+#: ../lib/engine/components/opal/opal-bank.cpp:195
+#: ../lib/engine/components/opal/opal-bank.cpp:205
+msgid ""
+"Time in seconds after which the account registration is automatically retried"
+msgstr "Vreme u sekundama nakon koga se ponovo pokušava registracija naloga"
+
+#: ../lib/engine/components/opal/opal-account.cpp:510
+#: ../lib/engine/components/opal/opal-bank.cpp:208
+#: ../plugins/loudmouth/loudmouth-account.cpp:376
+#: ../plugins/loudmouth/loudmouth-bank.cpp:128
+msgid "Enable account"
+msgstr "Omogući nalog"
+
+#: ../lib/engine/components/opal/opal-account.cpp:538
+#: ../lib/engine/components/opal/opal-bank.cpp:242
+msgid "You did not supply a name for that account."
+msgstr "Morate navesti ime ovog naloga."
+
+#: ../lib/engine/components/opal/opal-account.cpp:540
+#: ../lib/engine/components/opal/opal-bank.cpp:244
+msgid "You did not supply a host to register to."
+msgstr "Morate navesti računar koji koristite za posrednika ili izlaz."
+
+#: ../lib/engine/components/opal/opal-account.cpp:542
+#: ../lib/engine/components/opal/opal-bank.cpp:246
+msgid "You did not supply a user name for that account."
+msgstr "Morate navesti korisničko ime za ovaj nalog."
+
+#: ../lib/engine/components/opal/opal-account.cpp:544
+#: ../lib/engine/components/opal/opal-bank.cpp:248
+msgid "The timeout should be at least 10 seconds."
+msgstr "Vreme prekoračenja mora biti bar 10 sekundi."
+
+#. Translators: this is a state, not an action, i.e. it should be read as
+#. "(you are) registered", and not as "(you have been) registered"
+#: ../lib/engine/components/opal/opal-account.cpp:684
+msgid "Registered"
+msgstr "Registracija je obavljena"
+
+#: ../lib/engine/components/opal/opal-account.cpp:725
+msgid "Could not unregister"
+msgstr "Ne mogu da isključim nalog"
+
+#: ../lib/engine/components/opal/opal-account.cpp:737
+#: ../lib/engine/components/opal/opal-account.cpp:772
+msgid "Could not register to "
+msgstr "Ne mogu da se upišem na "
+
+#: ../lib/engine/components/opal/opal-account.cpp:738
+#: ../lib/engine/components/opal/opal-account.cpp:773
+#: ../plugins/loudmouth/loudmouth-account.cpp:443
+msgid "Edit"
+msgstr "Uređivanje"
+
+#: ../lib/engine/components/opal/opal-account.cpp:767
+msgid "Could not register"
+msgstr "Ne mogu da registrujem nalog"
+
+#: ../lib/engine/components/opal/opal-account.cpp:916
+msgid "Appointment"
+msgstr "Zakazivanje"
+
+#: ../lib/engine/components/opal/opal-account.cpp:921
+msgid "Breakfast"
+msgstr "Doručak"
+
+#: ../lib/engine/components/opal/opal-account.cpp:926
+msgid "Dinner"
+msgstr "Večera"
+
+#: ../lib/engine/components/opal/opal-account.cpp:932
+msgid "Holiday"
+msgstr "Praznik"
+
+#: ../lib/engine/components/opal/opal-account.cpp:937
+msgid "In transit"
+msgstr "U prolazu"
+
+#: ../lib/engine/components/opal/opal-account.cpp:942
+msgid "Looking for work"
+msgstr "Tražim posao"
+
+#: ../lib/engine/components/opal/opal-account.cpp:947
+msgid "Lunch"
+msgstr "Ručak"
+
+#: ../lib/engine/components/opal/opal-account.cpp:952
+msgid "Meal"
+msgstr "Obrok"
+
+#: ../lib/engine/components/opal/opal-account.cpp:957
+msgid "Meeting"
+msgstr "Sastanak"
+
+#: ../lib/engine/components/opal/opal-account.cpp:962
+msgid "On the phone"
+msgstr "Na telefonu"
+
+#: ../lib/engine/components/opal/opal-account.cpp:967
+msgid "Playing"
+msgstr "Igra"
+
+#: ../lib/engine/components/opal/opal-account.cpp:972
+msgid "Shopping"
+msgstr "Kupovina"
+
+#: ../lib/engine/components/opal/opal-account.cpp:977
+msgid "Sleeping"
+msgstr "Spavanje"
+
+#: ../lib/engine/components/opal/opal-account.cpp:982
+msgid "Working"
+msgstr "Rad"
+
+#: ../lib/engine/components/opal/opal-bank.cpp:102
+msgid "_Add an Ekiga.net Account"
+msgstr "Dod_aj „Ekiga.net“ nalog"
+
+#: ../lib/engine/components/opal/opal-bank.cpp:104
+msgid "_Add an Ekiga Call Out Account"
+msgstr "Dod_aj nalog Ekige za pozivanje"
+
+#: ../lib/engine/components/opal/opal-bank.cpp:106
+msgid "_Add a SIP Account"
+msgstr "Dod_aj SIP nalog"
+
+#: ../lib/engine/components/opal/opal-bank.cpp:109
+msgid "_Add an H.323 Account"
+msgstr "Dod_aj H.323 nalog"
+
+#: ../lib/engine/components/opal/opal-bank.cpp:169
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:433
+msgid "Get an Ekiga.net SIP account"
+msgstr "Zatražite SIP nalog ekigine mreže"
+
+#: ../lib/engine/components/opal/opal-bank.cpp:172
+#: ../lib/engine/components/opal/opal-bank.cpp:192
+#: ../lib/engine/components/opal/opal-bank.cpp:202
 msgid "_User:"
 msgstr "_Korisnik:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:687
-msgid "C_hoose..."
-msgstr "Iza_beri..."
+#: ../lib/engine/components/opal/opal-bank.cpp:174
+#: ../lib/engine/components/opal/opal-bank.cpp:194
+#: ../lib/engine/components/opal/opal-bank.cpp:204
+#: ../plugins/ldap/ldap-book.cpp:986
+msgid "_Password:"
+msgstr "_Lozinka:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:703
-msgid "_Folder name:"
-msgstr "Naziv _fascikle:"
+#: ../lib/engine/components/opal/opal-bank.cpp:179
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:537
+msgid "Get an Ekiga Call Out account"
+msgstr "Zatražite nalog Ekige za pozivanje"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:733
-msgid "Include _subfolders"
-msgstr "Uključi _podfascikle"
+#: ../lib/engine/components/opal/opal-bank.cpp:183
+msgid "_Account ID:"
+msgstr "IB n_aloga:"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:140
-msgid "Querying Autodiscover service"
-msgstr "Propitujem uslugu samootkrivanja"
+#: ../lib/engine/components/opal/opal-bank.cpp:185
+msgid "_PIN code:"
+msgstr "_PIN broj:"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:231
-msgid "Fetch _URL"
-msgstr "Dovuci _adresu"
+#: ../lib/engine/components/opal/opal-bank.cpp:190
+#: ../lib/engine/components/opal/opal-bank.cpp:200
+#: ../plugins/evolution/evolution-book.cpp:347
+msgid "_Name:"
+msgstr "_Ime:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:140
-msgid "Configuration"
-msgstr "Podešavanje"
+#: ../lib/engine/components/opal/opal-bank.cpp:191
+msgid "_Gatekeeper:"
+msgstr "Č_uvar kapije:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:158
-msgid "User_name:"
-msgstr "Korisničko _ime:"
+#: ../lib/engine/components/opal/opal-bank.cpp:195
+#: ../lib/engine/components/opal/opal-bank.cpp:205
+msgid "_Timeout:"
+msgstr "_Vremenski rok:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:172
-msgid "_Host URL:"
-msgstr "Adresa _domaćina:"
+#: ../lib/engine/components/opal/opal-bank.cpp:201
+msgid "_Registrar:"
+msgstr "_Registar:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:191
-msgid "OAB U_RL:"
-msgstr "OAB _adresa:"
+#: ../lib/engine/components/opal/opal-bank.cpp:203
+msgid "_Authentication user:"
+msgstr "Korisničko ime za prij_avu:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:205
-msgid "Open _Mailbox of other user"
-msgstr "Otvori _sanduče drugog korisnika"
+#: ../lib/engine/components/opal/opal-call.cpp:425
+msgid "Local user cleared the call"
+msgstr "Lokalni korisnik je uklonio poziv"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:239
-msgid "S_earch..."
-msgstr "_Potraži..."
+#: ../lib/engine/components/opal/opal-call.cpp:428
+#: ../lib/engine/components/opal/opal-call.cpp:431
+msgid "Local user rejected the call"
+msgstr "Lokalni korisnik je odbio poziv"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:250
-msgid "Authentication"
-msgstr "Potvrđivanje identiteta"
+#: ../lib/engine/components/opal/opal-call.cpp:434
+msgid "Remote user cleared the call"
+msgstr "Udaljeni korisnik je poništio poziv"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:500
-msgctxt "PermissionsLevel"
-msgid "Reviewer (can read items)"
-msgstr "Pregledač (može da čita stavke)"
+#: ../lib/engine/components/opal/opal-call.cpp:437
+msgid "Remote user rejected the call"
+msgstr "Udaljeni korisnik je odbio poziv"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:501
-msgctxt "PermissionsLevel"
-msgid "Author (can read and create items)"
-msgstr "Autor (može da čita i da stvara stavke)"
+#: ../lib/engine/components/opal/opal-call.cpp:440
+msgid "Remote user has stopped calling"
+msgstr "Udaljeni korisnik je zaustavio poziv"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:502
-msgctxt "PermissionsLevel"
-msgid "Editor (can read, create and modify items)"
-msgstr "Urednik (može da čita, stvara i menja stavke)"
+#: ../lib/engine/components/opal/opal-call.cpp:443
+msgid "Abnormal call termination"
+msgstr "Neuobičajen prekid poziva"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:605
-msgid "Delegate permissions"
-msgstr "Ovlašćenja izaslanika"
+#: ../lib/engine/components/opal/opal-call.cpp:446
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:423
+msgid "Could not connect to remote host"
+msgstr "Ne mogu da se povežem na udaljenog domaćina"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:623
-msgid "C_alendar"
-msgstr "_Kalendar"
+#: ../lib/engine/components/opal/opal-call.cpp:450
+msgid "The Gatekeeper cleared the call"
+msgstr "Čuvar kapije je poništio poziv"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:626
-msgid "_Delegate receives copies of meeting-related messages sent to me"
-msgstr "_Izaslanik prima primerke poruka sa sastanka poslatih meni"
+#: ../lib/engine/components/opal/opal-call.cpp:453
+msgid "User not found"
+msgstr "Korisnik nije pronađen"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:631
-msgid "_Tasks"
-msgstr "_Zadaci"
+#: ../lib/engine/components/opal/opal-call.cpp:456
+msgid "Insufficient bandwidth"
+msgstr "Nedovoljan propusni opseg"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:634
-msgid "_Inbox"
-msgstr "_Sanduče"
+#: ../lib/engine/components/opal/opal-call.cpp:459
+msgid "No common codec"
+msgstr "Nema poznatog kodeka"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:637
-msgid "C_ontacts"
-msgstr "_Kontakti"
+#: ../lib/engine/components/opal/opal-call.cpp:462
+msgid "Call forwarded"
+msgstr "Poziv je preusmeren"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:640
-msgid "_Notes"
-msgstr "_Beleške"
+#: ../lib/engine/components/opal/opal-call.cpp:465
+msgid "Security check failed"
+msgstr "Neuspešna sigurnosna provera"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:643
-msgid "_Journal"
-msgstr "_Dnevnik"
+#: ../lib/engine/components/opal/opal-call.cpp:468
+msgid "Local user is busy"
+msgstr "Lokalni korisnik je zauzet"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:646
-#, c-format
-msgid "Delegate '%s' has the following permissions"
-msgstr "Izaslanik „%s“ ima sledeća ovlašćenja"
+#: ../lib/engine/components/opal/opal-call.cpp:471
+#: ../lib/engine/components/opal/opal-call.cpp:477
+msgid "Congested link to remote party"
+msgstr "Prepuna veza do udaljene strane"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:664
-msgid "Delegate can see my _private items"
-msgstr "Izaslanik može da vidi moje _lične stavke"
+#: ../lib/engine/components/opal/opal-call.cpp:474
+msgid "Remote user is busy"
+msgstr "Udaljeni korisnik je zauzet"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:987
-msgid "Retrieving current user permissions, please wait..."
-msgstr "Dovlačim ovlašćenja tekućeg vlasnika, molim sačekajte..."
+#: ../lib/engine/components/opal/opal-call.cpp:480
+msgid "Remote host is offline"
+msgstr "Udaljeni računar nije na mreži"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1108
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1638
-msgid "Delegates"
-msgstr "Izaslanici"
+#: ../lib/engine/components/opal/opal-call.cpp:483
+msgid "User is offline"
+msgstr "Korisnik nije na mreži"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1132
+#: ../lib/engine/components/opal/opal-call.cpp:486
+msgid "Remote host not found"
+msgstr "Udaljeni računar nije nađen"
+
+#: ../lib/engine/components/opal/opal-call.cpp:490
+msgid "User is not available"
+msgstr "Korisnik nije dostupan"
+
+#: ../lib/engine/components/opal/opal-call.cpp:493
+#: ../lib/engine/components/opal/sip-endpoint.cpp:661
+msgid "Service unavailable"
+msgstr "Usluga nije dostupna"
+
+#: ../lib/engine/components/opal/opal-call.cpp:503
+msgid "Call completed"
+msgstr "Poziv je završen"
+
+#: ../lib/engine/components/opal/opal-call.cpp:694
+msgid "Missed call from"
+msgstr "Propušteni poziv od"
+
+#: ../lib/engine/components/opal/opal-call.cpp:696
+msgid "Missed call"
+msgstr "Propušten poziv"
+
+#: ../lib/engine/components/opal/opal-call-manager.cpp:875
 msgid ""
-"Delegates can send items on your behalf, including creating and responding "
-"to meeting requests. If you want to grant folder permissions without giving "
-"send-on-behalf-of permissions, close this dialog box, right-click the "
-"folder, click Permissions and change the options there."
+"Ekiga did not manage to configure your network settings automatically. You "
+"can still use it, but you need to configure your network settings manually.\n"
+"\n"
+"Please see http://wiki.ekiga.org/index.php/Enable_port_forwarding_manually "
+"for instructions"
 msgstr ""
-"Izaslanici mogu da šalju stavke u vaše ime, uključujući stvaranje i odgovaranje "
-"na pozive za sastanak. Ako želite da odobrite ovlašćenja fascikle a da ne "
-"date ovlašćenje za slanje-na-nečije-ime, zatvorite ovo prozorče, kliknite "
-"desnim tasterom miša na fasciklu, izaberite stavku Ovlašćenja i tu promenite "
-"opcije."
+"Ekiga nije uspela da sama podesi mrežna podešavanja. I dalje je možete "
+"koristiti, ali ćete mrežu morati ručno da podesite.\n"
+"\n"
+"Pogledajte http://wiki.ekiga.org/index.php/Enable_port_forwarding_manually "
+"za uputstva"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1181
+#: ../lib/engine/components/opal/sip-endpoint.cpp:168
+msgid "Message"
+msgstr "Poruka"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:479
+msgid "Illegal status code"
+msgstr "Nedozvoljena šifra stanja"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:487
+msgid "Invalid address"
+msgstr "Neispravna adresa"
+
+#. Translators: Host of the remote party is offline, this should
+#. * appear when the remote host does not reply in an acceptable time
+#: ../lib/engine/components/opal/sip-endpoint.cpp:493
+msgid "Remote party host is offline"
+msgstr "Udaljeni računar nije na mreži"
+
+#. Translators: the following strings are answers from the SIP server
+#. * when the packet it receives has an error, see
+#. * http://www.ietf.org/rfc/rfc3261.txt, chapter 21 for more information
+#: ../lib/engine/components/opal/sip-endpoint.cpp:509
+msgid "Multiple choices"
+msgstr "Višestruki izbor"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:513
+msgid "Moved permanently"
+msgstr "Trajno premešten"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:517
+msgid "Moved temporarily"
+msgstr "Privremeno premešten"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:521
+msgid "Use proxy"
+msgstr "Koristi posrednika"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:525
+msgid "Alternative service"
+msgstr "Rezervna usluga"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:529
+msgid "Bad request"
+msgstr "Loš zahtev"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:533
+msgid "Unauthorized"
+msgstr "Neovlašćen"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:537
+msgid "Payment required"
+msgstr "Nije besplatno"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:541
+msgid "Forbidden, please check that username and password are correct"
+msgstr "Nije dozvoljeno, proverite da li su korisničko ime i lozinka tačni"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:545
+msgid "Not found"
+msgstr "Nisam pronašao"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:549
+msgid "Method not allowed"
+msgstr "Način nije dozvoljen"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:553
+msgid "Not acceptable"
+msgstr "Neprihvatljivo"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:557
+msgid "Proxy authentication required"
+msgstr "Zahteva se prijavljivanje na posrednika"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:561
+msgid "Timeout"
+msgstr "Vremenski rok"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:565
+msgid "Conflict"
+msgstr "Sukob"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:569
+msgid "Length required"
+msgstr "Zahteva se dužina"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:573
+msgid "Request entity too big"
+msgstr "Zahtevani entitet je preveliki"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:577
+msgid "Request URI too long"
+msgstr "Adresa zahteva je predugačka"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:581
+msgid "Unsupported media type"
+msgstr "Nepodržana vrsta medija"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:585
+msgid "Unsupported URI scheme"
+msgstr "Nepodržana šema adrese"
+
+#. Translators:  The extension we are trying to register does not exist.
+#. * Here extension is a specific "phone number", see
+#. * http://en.wikipedia.org/wiki/Extension_(telephone)
+#. * for more information
+#: ../lib/engine/components/opal/sip-endpoint.cpp:593
+msgid "Bad extension"
+msgstr "Loše proširenje"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:597
+msgid "Extension required"
+msgstr "Zahteva se proširenje"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:601
+msgid "Interval too brief"
+msgstr "Interval je prekratak"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:605
+msgid "Temporarily unavailable"
+msgstr "Privremeno nedostupna"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:609
+msgid "Loop detected"
+msgstr "Detektovana petlja"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:613
+msgid "Too many hops"
+msgstr "Previše skokova"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:617
+msgid "Address incomplete"
+msgstr "Adresa nije dovršena"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:621
+msgid "Ambiguous"
+msgstr "Dvosmisleno"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:625
+msgid "Busy Here"
+msgstr "Ovde je zauzeto"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:629
+msgid "Request terminated"
+msgstr "Zahtev je prekinut"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:633
+msgid "Not acceptable here"
+msgstr "Ovde je neprihvatljivo"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:637
+msgid "Bad event"
+msgstr "Loš događaj"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:641
+msgid "Request pending"
+msgstr "Zahtev je na čekanju"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:645
+msgid "Undecipherable"
+msgstr "Dešifrovanje nije moguće"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:649
+msgid "Internal server error"
+msgstr "Interna greška na serveru"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:653
+msgid "Not implemented"
+msgstr "Nije primenjeno"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:657
+msgid "Bad gateway"
+msgstr "Loš mrežni prolaz"
+
+# bug(slobo): msgstr "Nema roka za odgovor" ...sumnjam da je ovo
+#: ../lib/engine/components/opal/sip-endpoint.cpp:665
+msgid "Server timeout"
+msgstr "Istekao je vremenski rok na serveru"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:669
+msgid "SIP version not supported"
+msgstr "Izdanje SIP-a nije podržano"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:673
+msgid "Message too large"
+msgstr "Poruka je predugačka"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:677
+msgid "Busy everywhere"
+msgstr "Svuda je zauzeto"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:681
+msgid "Decline"
+msgstr "Odbij"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:685
+msgid "Does not exist anymore"
+msgstr "Više ne postoji"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:689
+msgid "Globally not acceptable"
+msgstr "Globalno neprihvatljivo"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:808
+msgid "Could not send message: "
+msgstr "Ne mogu da pošaljem poruku: "
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:810
+msgid "user offline"
+msgstr "korisnik nije na mreži"
+
+#. Ignore
+#: ../lib/engine/components/opal/sip-endpoint.cpp:849
+#: ../plugins/libnotify/libnotify-main.cpp:272
+#, c-format
+msgid "Incoming call from %s"
+msgstr "Poziva vas „%s“"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:851
+#, c-format
+msgid "Incoming call"
+msgstr "Dolazni poziv"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:857
+#, c-format
+msgid "In a call with %s"
+msgstr "U razgovoru sa %s"
+
+#: ../lib/engine/components/opal/sip-endpoint.cpp:859
+#, c-format
+msgid "In a call"
+msgstr "Na vezi"
+
+#: ../lib/engine/gui/gtk-core/codecsbox.cpp:453
+msgid "Move selected codec priority upwards"
+msgstr "Pomeri prioritet označenog kodeka na više"
+
+#: ../lib/engine/gui/gtk-core/codecsbox.cpp:463
+msgid "Move selected codec priority downwards"
+msgstr "Pomeri prioritet označenog kodeka na niže"
+
+#: ../lib/engine/gui/gtk-core/form-dialog-gtk.cpp:661
+msgid "Advanced"
+msgstr "Napredno"
+
+#: ../lib/engine/gui/gtk-core/form-dialog-gtk.cpp:1278
+msgid "Add Group"
+msgstr "Dodaj grupu"
+
+#: ../lib/engine/gui/gtk-frontend/accounts-window.cpp:559
+msgid "Account Name"
+msgstr "Naziv naloga"
+
+#: ../lib/engine/gui/gtk-frontend/accounts-window.cpp:560
+msgid "Status"
+msgstr "Stanje"
+
+#: ../lib/engine/gui/gtk-frontend/accounts-window.cpp:571
+#: ../lib/engine/gui/gtk-frontend/accounts-window.cpp:609
+msgid "Accounts"
+msgstr "Nalozi"
+
+#: ../lib/engine/gui/gtk-frontend/accounts-window.cpp:580
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1203
+msgid "_Accounts"
+msgstr "_Nalozi"
+
+#: ../lib/engine/gui/gtk-frontend/accounts-window.cpp:584
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1249
+msgid "_Help"
+msgstr "Po_moć"
+
+#: ../lib/engine/gui/gtk-frontend/accounts-window.cpp:676
+msgid "Edi_t"
+msgstr "_Izmeni"
+
+#: ../lib/engine/gui/gtk-frontend/addressbook-window.cpp:621
+msgid "Address Book"
+msgstr "Imenik"
+
+#: ../lib/engine/gui/gtk-frontend/addressbook-window.cpp:637
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1174
+msgid "Address _Book"
+msgstr "Imeni_k"
+
+#. This will add static and dynamic actions
+#: ../lib/engine/gui/gtk-frontend/addressbook-window.cpp:646
+msgid "_Action"
+msgstr "_Radnja"
+
+#: ../lib/engine/gui/gtk-frontend/addressbook-window.cpp:692
+msgid "Category"
+msgstr "Kategorija"
+
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:131
 msgid ""
-"Deliver meeting requests addressed to me and responses to meeting requests "
-"where I am the organizer to:"
+"This is the Ekiga general configuration assistant. The following steps will "
+"set up Ekiga by asking a few simple questions.\n"
+"\n"
+"Once you have completed these steps, you can always change them later by "
+"selecting Preferences in the Edit menu."
 msgstr ""
-"Isporuči zahteve za sastanak upućene meni i odgovore na zahteve za sastanak "
-"gde sam ja organizator:"
+"Ovo je čarobnjak za podešavanje Ekige. Sledeći koraci će podesiti Ekigu "
+"postavljanjem par jednostavnih pitanja.\n"
+"\n"
+"Kada prođete ove korake, kasnije ih uvek možete izmeniti birajući „Postavke“ "
+"u izborniku „Uređivanje“."
 
-#. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1190
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:139
+msgid "Welcome to Ekiga"
+msgstr "Dobrodošli u Ekigu"
+
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:162
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:443
+msgid "Personal Information"
+msgstr "Lični podaci"
+
+#. The user fields
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:165
+msgid "Please enter your first name and your surname:"
+msgstr "Upišite vaše ime i prezime:"
+
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:174
 msgid ""
-"My delegates only, but _send a copy of meeting requests\n"
-"and responses to me (recommended)"
+"Your first name and surname will be used when connecting to other VoIP and "
+"videoconferencing software."
 msgstr ""
-"Samo moji izaslanici, ali meni _pošalji primerak zahteva\n"
-"za sastanak i odgovore (preporučeno)"
+"Vaše ime i prezime će se koristiti prilikom povezivanja sa drugim softverom "
+"za prenos glasa putem IP-a i video konferencije."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1197
-msgid "My d_elegates only"
-msgstr "Samo _moji izaslanici"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1204
-msgid "My delegates a_nd me"
-msgstr "Moji izaslanici i _ja"
-
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1713
-msgid "Retrieving \"Delegates\" settings"
-msgstr "Dovlačim podešavanja „Izaslanici“"
-
-#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:195
-#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:256
-msgid "EWS Settings"
-msgstr "Podešavanja VUR-a"
-
-#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:201
-msgid "View the size of all Exchange folders"
-msgstr "Pregledaj veličinu svih fascikli razmene"
-
-#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:205
-#| msgctxt "Permissions"
-#| msgid "Folder visible"
-msgid "Folder _Sizes"
-msgstr "Veličine _fascikle"
-
-#: ../src/configuration/e-mail-config-ews-gal.c:221
-msgid "Locating offline address books"
-msgstr "Ubaci u ostavu adresar van mreže"
-
-#: ../src/configuration/e-mail-config-ews-gal.c:301
-msgid "Cache o_ffline address book"
-msgstr "Ubaci u ostavu adresar van _mreže"
-
-#: ../src/configuration/e-mail-config-ews-gal.c:327
-msgid "Select ad_dress list:"
-msgstr "Izaberi spisak _adresa:"
-
-#: ../src/configuration/e-mail-config-ews-gal.c:351
-msgid "Fetch List"
-msgstr "Dovuci spisak"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:444
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:923
-msgid "Out of Office"
-msgstr "Van kancelarije"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:460
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:224
 msgid ""
-"The messages specified below will be automatically sent to each internal and "
-"external person who sends a mail to you."
+"If you do not have a SIP or H323 account, ekiga can only be used on your "
+"local internal network (inside your company, for example).  You will require "
+"an account if you want to be accessible to people on the Internet.  Many web "
+"sites allow you to create an account.  We suggest that you use a free ekiga."
+"net account, which allows you to be joined by any person with a SIP "
+"account.  If you want to call regular phone lines too, we suggest that you "
+"purchase an inexpensive call out account.\n"
+"\n"
+"The following two pages allow you to create such accounts."
 msgstr ""
-"Dole navedene poruke će biti samostalno poslate svakoj unutrašnjoj i spoljnoj "
-"osobi koja vam pošalje poruku."
+"Ako nemate SIP ili H323 nalog, ekiga može biti korišćena samo na vašoj "
+"lokalnoj unutrašnjoj mreži (unutar vašeg preduzeća, na primer).  Zatražićete "
+"nalog ako želite da budete dostupni ljudima na Internetu.  Mnogi veb sajtovi "
+"vam omogućavaju da napravite nalog.  Predlažemo vam da koristite besplatan "
+"nalog ekigine mreže, koji vam omogućava da budete pristupačni svim ljudima "
+"koji imaju SIP nalog.  Ako želite takođe da zovete redovne telefonske "
+"linije, predlažemo vam kupite jeftin nalog za pozive.\n"
+"\n"
+"Sledeće dve stranice vam omogućavaju da napravite takve naloge."
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:468
-msgid "Do _not send Out of Office replies"
-msgstr "Ne _šalji odgovore za van kancelarije"
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:239
+msgid "Introduction to Accounts"
+msgstr "Uvod u naloge"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:476
-msgid "_Send Out of Office replies"
-msgstr "_Pošalji odgovore za van kancelarije"
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:396
+msgid "Ekiga.net Account"
+msgstr "Nalog Ekigine mreže"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:484
-msgid "Send Out of Office replies only _during this time period:"
-msgstr "Pošalji odgovore za van kancelarije samo za ovo _vreme:"
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:398
+msgid "Please enter your username:"
+msgstr "Unesite vaše korisničko ime:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:504
-msgid "_From:"
-msgstr "_Šalje:"
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:406
+msgid "Please enter your password:"
+msgstr "Unesite vašu lozinku:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:529
-msgid "_To:"
-msgstr "_Prima:"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:554
-msgid "I_nternal:"
-msgstr "_Unutrašnja:"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:563
-msgid "Message to be sent within the organization"
-msgstr "Poruka koja će biti poslata unutar organizacije"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:590
-msgid "E_xternal:"
-msgstr "_Spoljna:"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:598
-msgid "Message to be sent outside the organization"
-msgstr "Poruka koja će biti poslata van organizacije"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:608
-msgid "Do not reply to senders outside the organization"
-msgstr "Ne odgovaraj pošiljaocima van organizacije"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:611
-msgid "Reply only to known senders outside the organization"
-msgstr "Odgovori samo poznatim pošiljaocima van organizacije"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:614
-msgid "Reply to any sender outside the organization"
-msgstr "Odgovori svim pošiljaocima van organizacije"
-
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:999
-msgid "Retrieving \"Out of Office\" settings"
-msgstr "Dovlačim podešavanja za „van kancelarije“"
-
-#: ../src/configuration/module-ews-configuration.error.xml.h:1
-msgid "Autodiscovery query failed."
-msgstr "Upit samootkrivanja nije uspeo."
-
-#: ../src/configuration/module-ews-configuration.error.xml.h:2
-msgid "The reported error was &quot;{0}&quot;."
-msgstr "Prijavljena greška beše „{0}“."
-
-#: ../src/configuration/module-ews-configuration.error.xml.h:3
-msgid "Failed to locate offline address books."
-msgstr "Nisam uspeo da pronađem adresare z avan mreže."
-
-#: ../src/configuration/module-ews-configuration.error.xml.h:4
-msgid "Failed to retrieve &quot;Out of Office&quot; settings."
-msgstr "Nisam uspeo da dovučem podešavanja „Van kancelarije“."
-
-#: ../src/configuration/module-ews-configuration.error.xml.h:5
-msgid "Failed to retrieve &quot;Delegates&quot; settings."
-msgstr "Nisam uspeo da dovučem podešavanja „Izaslanici“."
-
-#: ../src/configuration/module-ews-configuration.error.xml.h:6
-msgid "Your Exchange account \"{0}\" has the status set as \"Out of Office\"."
-msgstr "Vaš nalog razmene „{0}“ ima stanje podešeno na „van kancelarije“."
-
-#: ../src/server/e-ews-connection.c:538
-msgid "Operation Cancelled"
-msgstr "Radnja je otkazana"
-
-#: ../src/server/e-ews-connection.c:607
-msgid "Authentication failed"
-msgstr "Neuspešna prijava"
-
-#: ../src/server/e-ews-connection.c:618
-#, c-format
-msgid "No response: %s"
-msgstr "Nema odgovora: %s"
-
-#: ../src/server/e-ews-connection.c:2126
-#, c-format
-msgid "Failed to parse autodiscover response XML"
-msgstr "Nisam uspeo da obradim samootkrivajući odgovor IksML"
-
-#: ../src/server/e-ews-connection.c:2133
-#, c-format
-msgid "Failed to find <Autodiscover> element"
-msgstr "Nisam uspeo da pronađem element <Samootkrivanje>"
-
-#: ../src/server/e-ews-connection.c:2144
-#, c-format
-msgid "Failed to find <Response> element"
-msgstr "Nisam uspeo da pronađem element <Odgovor>"
-
-#: ../src/server/e-ews-connection.c:2155
-#, c-format
-msgid "Failed to find <Account> element"
-msgstr "Nisam uspeo da pronađem element <Nalog>"
-
-#: ../src/server/e-ews-connection.c:2174
-#, c-format
-msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:416
+msgid ""
+"The username and password are used to login to your existing account at the "
+"ekiga.net free SIP service. If you do not have an ekiga.net SIP address yet, "
+"you may first create an account below. This will provide a SIP address that "
+"allows people to call you.\n"
+"\n"
+"You may skip this step if you use an alternative SIP service, or if you "
+"would prefer to specify the login details later."
 msgstr ""
-"Nisam uspeo da pronađem <ASadresu> i <OABadresu> u odgovoru samootkrivanja"
+"Korisničko ime i lozinka se koriste za prijavljivanje na vaš postojeći nalog "
+"na besplatnoj SIP usluzi ekigine mreže. Ako još uvek nemate SIP adresu "
+"ekigine mreže, možete prvo ispod da napravite nalog. Ovo će obezbediti SIP "
+"adresu koja će omogućiti ljudima da vas zovu.\n"
+"\n"
+"Možete da preskočite ovaj korak ako koristite neku drugu SIP uslugu, ili ako "
+"želite kasnije da navedete pojedinosti za prijavljivanje."
 
-#: ../src/server/e-ews-connection.c:2256
-msgid "URL cannot be NULL"
-msgstr "Adresa ne može biti NIŠTAVNA"
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:442
+msgid "I do not want to sign up for the ekiga.net free service"
+msgstr "Ne želim da se prijavim na besplatnu uslugu ekigine mreže"
 
-#: ../src/server/e-ews-connection.c:2264
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:502
+msgid "Ekiga Call Out Account"
+msgstr "Nalog Ekige za pozivanje"
+
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:504
+msgid "Please enter your account ID:"
+msgstr "Unesite korisničko ime naloga:"
+
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:512
+msgid "Please enter your PIN code:"
+msgstr "Unesite vašu PIN lozinku:"
+
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:523
+msgid ""
+"You can make calls to regular phones and cell numbers worldwide using Ekiga. "
+"To enable this, you need to do two things:\n"
+"- First buy an account at the URL below.\n"
+"- Then enter your account ID and PIN code.\n"
+"The service will work only if your account is created using the URL in this "
+"dialog.\n"
+msgstr ""
+"Možete da pozivate obične telefonske i mobilne brojeve širom sveta koristeći "
+"Ekigu. Da biste to mogli, treba da uradite dve stvari:\n"
+"— Kupite nalog na donjoj adresi.\n"
+"— Unesete broj naloga i lozinku.\n"
+"Usluga će raditi samo ako ste nalog napravili koristeći adresu iz ovog "
+"prozorčeta.\n"
+
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:582
+msgid "I do not want to sign up for the Ekiga Call Out service"
+msgstr "Ne želim da se prijavim na uslugu ekiginih poziva"
+
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:692
+msgid "Configuration Complete"
+msgstr "Podešavanje završeno"
+
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:694
+msgid ""
+"You have now finished the Ekiga configuration. All the settings can be "
+"changed in the Ekiga preferences. Enjoy!"
+msgstr ""
+"Upravo ste završili podešavanje Ekige. Možete promeniti sva podešavanja iz "
+"Ekiginih „Postavki“. Uživajte!"
+
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:701
+msgid "Configuration summary:"
+msgstr "Pregled podešavanja:"
+
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:748
+#: ../lib/engine/gui/gtk-frontend/book-view-gtk.cpp:584
+msgid "Full Name"
+msgstr "Ime i prezime"
+
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:762
+msgid "SIP URI"
+msgstr "SIP adresa"
+
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:777
+msgid "Ekiga Call Out"
+msgstr "Pozivanje sa Ekige"
+
+#: ../lib/engine/gui/gtk-frontend/assistant-window.cpp:816
 #, c-format
-msgid "URL '%s' is not valid"
-msgstr "Adresa „%s“ nije ispravna"
+msgid "Ekiga Configuration Assistant (%d of %d)"
+msgstr "Čarobnjak za uvodno podešavanje (strana %d/%d)"
 
-#: ../src/server/e-ews-connection.c:2364
-msgid "Email address is missing a domain part"
-msgstr "El. pošti nedostaje deo domena"
+#: ../lib/engine/gui/gtk-frontend/book-view-gtk.cpp:527
+msgid "_Search Filter:"
+msgstr "_Filter pretrage:"
 
-#: ../src/server/e-ews-connection.c:2686
-msgid "Failed to parse oab XML"
-msgstr "Nisam uspeo da obradim oab IksML"
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:760
+msgid "Error while initializing video output"
+msgstr "Greška pri pokretanju video izlaza"
 
-#: ../src/server/e-ews-connection.c:2694
-msgid "Failed to find <OAB> element\n"
-msgstr "Nisam uspeo da pronađem element <OAB>\n"
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:761
+msgid "No video will be displayed on your machine during this call"
+msgstr "Nikakav video neće biti prikazan za vreme ovog poziva"
 
-#: ../src/server/e-ews-connection.c:4046
-msgid "No items found"
-msgstr "Nisam pronašao nijednu stavku"
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:771
+msgid ""
+"There was an error opening or initializing the video output. Please verify "
+"that no other application is using the accelerated video output."
+msgstr ""
+"Desila se greška prilikom otvaranja ili pokretanja video izlaza. Proverite da "
+"nijedan drugi program ne koristi ubrzani video izlaz."
 
-#: ../src/server/e-ews-folder.c:612
-msgid "Cannot add folder, unsupported folder type"
-msgstr "Ne mogu da dodam fasciklu, nepodržana vrsta fascikle"
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:773
+msgid ""
+"There was an error opening or initializing the video output. Please verify "
+"that you are using a color depth of 24 or 32 bits per pixel."
+msgstr ""
+"Desila se greška prilikom otvaranja ili pokretanja video izlaza. Proverite da "
+"li koristite dubinu boja od 24 ili 32 bita po pikselu."
 
-#: ../src/server/e-ews-folder.c:617
-msgid "Cannot add folder, master source not found"
-msgstr "Ne mogu da dodam fasciklu, nisam pronašao glavni izvor"
-
-#: ../src/utils/ews-camel-common.c:361
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:896
 #, c-format
-msgid "CreateItem call failed to return ID for new message"
-msgstr "Poziv „Napravi stavku“ nije uspeo da vrati IB za novu poruku"
+msgid "Error while accessing video device %s"
+msgstr "Greška prilikom pristupa video uređaju %s"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:899
+msgid "A moving logo will be transmitted during calls."
+msgstr "Biće prikazan pokretni logo za vreme poziva."
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:903
+msgid ""
+"There was an error while opening the device. In case it is a pluggable "
+"device it may be sufficient to reconnect it. If not, or if it still is not "
+"accessible, please check your permissions and make sure that the appropriate "
+"driver is loaded."
+msgstr ""
+"Dogodila se greška prilikom otvaranja uređaja. Ukoliko možete da ponovo "
+"utaknete uređaj, možda je to dovoljno se ponovo poveže. Ukoliko se uređaj ne "
+"utačinje ili ovo ne uspe, proverite ovlašćenja i uverite se da je odgovarajući "
+"upravljački program učitan."
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:907
+msgid "Your video driver doesn't support the requested video format."
+msgstr "Upravljački program za video ne podržava zahtevani video format."
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:911
+msgid "Could not open the chosen channel."
+msgstr "Ne mogu da otvorim izabrani kanal."
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:915
+msgid ""
+"Your driver doesn't seem to support any of the color formats supported by "
+"Ekiga.\n"
+" Please check your kernel driver documentation in order to determine which "
+"Palette is supported."
+msgstr ""
+"Upravljački program izgleda da ne podržava nijedan od formata boja koje Ekiga "
+"podržava.\n"
+" Proverite dokumentaciju vašeg upravljačkog programa u jezgru da odredite "
+"koja paleta je podržana."
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:919
+msgid "Error while setting the frame rate."
+msgstr "Greška prilikom podešavanja broja kadrova u sekundi."
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:923
+msgid "Error while setting the frame size."
+msgstr "Greška prilikom podešavanja veličine slike."
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:928
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:998
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1079
+msgid "Unknown error."
+msgstr "Nepoznata greška."
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:980
+#, c-format
+msgid "Error while opening audio input device %s"
+msgstr "Greška pri otvaranju ulaznog zvučnog uređaja %s"
+
+#. Translators: This happens when there is an error with audio input:
+#. * Nothing ("silence") will be transmitted
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:985
+msgid "Only silence will be transmitted."
+msgstr "Druga strana će čuti samo tišinu."
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:989
+msgid ""
+"Unable to open the selected audio device for recording. In case it is a "
+"pluggable device it may be sufficient to reconnect it. If not, or if it "
+"still is not accessible, please check your audio setup, the permissions and "
+"that the device is not busy."
+msgstr ""
+"Ne mogu da otvorim izabrani zvučni uređaj za snimanje. Ukoliko je uređaj "
+"utačinje, možda će biti dovoljno ponovo ga povezati. Ukoliko se uređaj ne "
+"utačinje ili ovo ne uspe, proverite podešavanje zvuka, ovlašćenja i da li je "
+"uređaj zauzet."
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:993
+msgid ""
+"The selected audio device was successfully opened but it is impossible to "
+"read data from this device. In case it is a pluggable device it may be "
+"sufficient to reconnect it. If not, or if it still is not accessible, please "
+"check your audio setup."
+msgstr ""
+"Izabran zvučni uređaj je uspešno otvoren ali je nemoguće čitati podatke sa "
+"ovog uređaja. Ukoliko možete da ponovo utaknete uređaj, možda je to dovoljno "
+"da se ponovo poveže. Ukoliko se uređaj ne utačinje ili ovo ne uspe, proverite "
+"zvučna podešavanja."
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1063
+#, c-format
+msgid "Error while opening audio output device %s"
+msgstr "Greška pri otvaranju izlaznog zvučnog uređaja %s"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1066
+msgid "No incoming sound will be played."
+msgstr "Dolazni zvuk neće biti puštan."
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1070
+msgid ""
+"Unable to open the selected audio device for playing. In case it is a "
+"pluggable device it may be sufficient to reconnect it. If not, or if it "
+"still is not accessible, please check your audio setup, the permissions and "
+"that the device is not busy."
+msgstr ""
+"Nije moguće otvoriti izabran zvučni uređaj za puštanje. Ukoliko je uređaj "
+"utačinje, možda će biti dovoljno ponovo ga povezati. Ukoliko se uređaj ne "
+"utačinje ili ovo ne uspe, proverite podešavanje zvuka, ovlašćenja i da li je "
+"uređaj zauzet."
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1074
+msgid ""
+"The selected audio device was successfully opened but it is impossible to "
+"write data to this device. In case it is a pluggable device it may be "
+"sufficient to reconnect it. If not, or if it still is not accessible, please "
+"check your audio setup."
+msgstr ""
+"Izabran zvučni uređaj je uspešno otvoren ali je nemoguće snimati podatke na "
+"ovaj uređaj. Ukoliko možete da ponovo utaknete uređaj, možda je to dovoljno "
+"da se ponovo poveže. Ukoliko se uređaj ne utačinje ili ovo ne uspe, proverite "
+"zvučna podešavanja."
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1115
+#, c-format
+msgid "Calling %s..."
+msgstr "Pozivam „%s“..."
+
+#. %s is the SIP/H.323 address of the remote user, this text is shown
+#. below video during a call
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1145
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:545
+#, c-format
+msgid "Connected with %s"
+msgstr "Povezan sa %s"
+
+#. Init
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1168
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1199
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2497
+msgid "Standby"
+msgstr "Pripravan"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1184
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1197
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2647
+msgid "Call Window"
+msgstr "Prozor za poziv"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1210
+msgid "Call on hold"
+msgstr "Poziv na čekanju"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1221
+msgid "Call retrieved"
+msgstr "Poziv povraćen"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1308
+#, c-format
+msgid ""
+"Connected with %s\n"
+"%s"
+msgstr ""
+"Povezani ste sa „%s“\n"
+"%s"
+
+#. Translators: TX is a common abbreviation for "transmit".  As it
+#. * is shown in a tooltip, there is no space constraint
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1516
+#, c-format
+msgid "TX: %dx%d"
+msgstr "Prenos: %dx%d"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1518
+msgid "TX: / "
+msgstr "Prenos: / "
+
+#. Translators: RX is a common abbreviation for "receive".  As it
+#. * is shown in a tooltip, there is no space constraint
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1523
+#, c-format
+msgid "RX: %dx%d"
+msgstr "Prijem: %dx%d"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1525
+msgid "RX: / "
+msgstr "Prijem: / "
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1534
+#, c-format
+msgid ""
+"Lost packets: %.1f %%\n"
+"Late packets: %.1f %%\n"
+"Out of order packets: %.1f %%\n"
+"Jitter buffer: %d ms\n"
+"Codecs: %s\n"
+"Resolution: %s %s"
+msgstr ""
+"Izgubljeni paketi: %.1f %%\n"
+"Zakasneli paketi: %.1f %%\n"
+"Paketi van reda: %.1f %%\n"
+"Bafer pulsa: %d ms\n"
+"Kodeci: %s\n"
+"Rezolucija: %s %s"
+
+#. Translators: A = Audio, V = Video, FPS = Frames per second
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1634
+#, c-format
+msgid "A:%.1f/%.1f V:%.1f/%.1f FPS:%d/%d"
+msgstr "A:%.1f/%.1f V:%.1f/%.1f K/S:%d/%d"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1658
+msgid "_Retrieve Call"
+msgstr "Pov_rati poziv"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1671
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1986
+msgid "H_old Call"
+msgstr "Zadrži p_oziv"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1702
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1998
+msgid "Suspend _Audio"
+msgstr "Zaustavi _zvuk"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1704
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2003
+msgid "Suspend _Video"
+msgstr "Zaustavi _sliku"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1706
+msgid "Resume _Audio"
+msgstr "Obnovi prijem _zvuka"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1708
+msgid "Resume _Video"
+msgstr "Obnovi prijem _slike"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1742
+msgid "Video Settings"
+msgstr "Podešavanja videa"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1768
+msgid "Adjust brightness"
+msgstr "Podesiti svetlinu"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1788
+msgid "Adjust whiteness"
+msgstr "Podesi belilo"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1808
+msgid "Adjust color"
+msgstr "Podesi boje"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1828
+msgid "Adjust contrast"
+msgstr "Podesiti kontrast"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1870
+msgid "Audio Settings"
+msgstr "Podešavanja zvuka"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1974
+msgid "_Call"
+msgstr "_Pozovi"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1976
+msgid "_Pick up"
+msgstr "_Izaberi"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1976
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2385
+msgid "Pick up the current call"
+msgstr "Izaberite trenutni poziv"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1980
+msgid "_Hang up"
+msgstr "_Prekini"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1980
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2401
+msgid "Hang up the current call"
+msgstr "Prekinite trenutni poziv"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1986
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2467
+msgid "Hold the current call"
+msgstr "Zadržite trenutni poziv"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1990
+msgid "_Transfer Call"
+msgstr "_Prebaci poziv"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1991
+msgid "Transfer the current call"
+msgstr "Prebacuje trenutni poziv"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:1999
+msgid "Suspend or resume the audio transmission"
+msgstr "Zaustavlja ili nastavlja zvučni prenos"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2004
+msgid "Suspend or resume the video transmission"
+msgstr "Zaustavlja ili nastavlja prenos slike"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2011
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1182
+msgid "Close the Ekiga window"
+msgstr "Zatvara prozor programa Ekiga"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2016
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1215
+msgid "_View"
+msgstr "P_regled"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2018
+msgid "_Local Video"
+msgstr "_Lokalni video"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2019
+msgid "Local video image"
+msgstr "Lokalna video slika"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2023
+msgid "_Remote Video"
+msgstr "_Udaljeni video"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2024
+msgid "Remote video image"
+msgstr "Udaljena slika"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2028
+msgid "_Picture-in-Picture"
+msgstr "_Slika u slici"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2029
+msgid "Both video images"
+msgstr "Oba video snimka"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2035
+msgid "Zoom in"
+msgstr "Uvećaj"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2039
+msgid "Zoom out"
+msgstr "Umanji"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2043
+msgid "Normal size"
+msgstr "Normalna veličina"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2047
+msgid "_Fullscreen"
+msgstr "Preko _celog ekrana"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2047
+msgid "Switch to fullscreen"
+msgstr "Prebaci na ceo ekran"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2162
+msgid "Transfer call to:"
+msgstr "Prebaci poziv:"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2428
+msgid "Change the volume of your soundcard"
+msgstr "Izmenite zvuk zvučne karte"
+
+#: ../lib/engine/gui/gtk-frontend/call-window.cpp:2448
+msgid "Change the color settings of your video device"
+msgstr "Izmenite podešavanja boje video uređaja"
+
+#: ../lib/engine/gui/gtk-frontend/chat-area.cpp:241
+msgid "says:"
+msgstr "kaže:"
+
+#: ../lib/engine/gui/gtk-frontend/chat-area.cpp:368
+msgid "Open link in browser"
+msgstr "Otvori vezu u Internet pregledniku"
+
+#: ../lib/engine/gui/gtk-frontend/chat-area.cpp:374
+msgid "Copy link"
+msgstr "Umnoži vezu"
+
+#: ../lib/engine/gui/gtk-frontend/chat-area.cpp:831
+msgid "_Smile..."
+msgstr "_Smešak..."
+
+#: ../lib/engine/gui/gtk-frontend/chat-window.cpp:136
+#, c-format
+msgid "You have %d unread text message"
+msgid_plural "You have %d unread text messages"
+msgstr[0] "Imate %d nepročitanu tekstualnu poruku"
+msgstr[1] "Imate %d nepročitane tekstualne poruke"
+msgstr[2] "Imate %d nepročitanih tekstualnih poruka"
+msgstr[3] "Imate jednu poruku"
+
+#: ../lib/engine/gui/gtk-frontend/chat-window.cpp:139
+msgid "Read"
+msgstr "Čitaj"
+
+#. we can't do much here since we get the Chat as reference...
+#: ../lib/engine/gui/gtk-frontend/chat-window.cpp:440
+msgid "Chat Window"
+msgstr "Prozor za tekstualne poruke"
+
+#: ../lib/engine/gui/gtk-frontend/device-lists.cpp:71
+#: ../lib/engine/gui/gtk-frontend/device-lists.cpp:90
+#: ../lib/engine/gui/gtk-frontend/device-lists.cpp:110
+msgid "No device found"
+msgstr "Nisam pronašao uređaj"
+
+#: ../lib/engine/gui/gtk-frontend/heap-view.cpp:239
+#: ../lib/engine/gui/gtk-frontend/heap-view.cpp:278
+#: ../lib/engine/gui/gtk-frontend/roster-view-gtk.cpp:1032
+#: ../lib/engine/gui/gtk-frontend/roster-view-gtk.cpp:1134
+msgid "Unsorted"
+msgstr "Nepoređano"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:346
+msgid "Presence"
+msgstr "Prisustvo"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:352
+msgid "Addressbook"
+msgstr "Imenik"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:606
+#, c-format
+msgid "Missed call from %s"
+msgstr "Propušteni poziv od %s"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:641
+msgid "Error"
+msgstr "Greška"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1043
+msgid ""
+"Enter a URI on the left, and click this button to place a call or to hang up"
+msgstr ""
+"Unesite adresu koju pozivate levo, i pritisnite ovo dugme da uputite poziv "
+"ili prekinete vezu"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1094
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1225
+msgid "View the contacts list"
+msgstr "Pogledaj spisak kontakata"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1105
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1230
+msgid "View the dialpad"
+msgstr "Prikaži brojčanik"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1116
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1235
+msgid "View the call history"
+msgstr "Pogledaj istorijat poziva"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1156
+msgid "_Chat"
+msgstr "Ća_skanje"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1158
+msgid "Co_ntact"
+msgstr "Ko_ntakt"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1159
+msgid "Act on selected contact"
+msgstr "Akcija nad izabranim kontaktom"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1163
+msgid "Ca_ll a Number"
+msgstr "Pozovi _broj"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1163
+msgid "Place a new call"
+msgstr "Uputite novi poziv"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1169
+msgid "Add a contact to the roster"
+msgstr "Dodaj kontakt na spisku"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1175
+msgid "Find contacts"
+msgstr "Pronađi kontakt"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1189
+#: ../lib/engine/gui/gtk-frontend/statusicon.cpp:373
+msgid "Quit"
+msgstr "Izađi"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1195
+msgid "_Configuration Assistant"
+msgstr "Čarobnja_k za prvo podešavanje"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1196
+msgid "Run the configuration assistant"
+msgstr "Pokreni čarobnjaka za prvo podešavanje"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1204
+msgid "Edit your accounts"
+msgstr "Uredite vaše naloge"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1210
+msgid "Change your preferences"
+msgstr "Izmenite vaše postavke"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1217
+msgid "_Video Preview"
+msgstr "Pregled _snimka"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1225
+msgid "Con_tacts"
+msgstr "Kon_takti"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1230
+msgid "_Dialpad"
+msgstr "_Brojčanik"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1235
+msgid "_Call History"
+msgstr "_Istorijat poziva"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1243
+msgid "Show Offline _Contacts"
+msgstr "Prikaži kontakte _van mreže"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1252
+#: ../lib/engine/gui/gtk-frontend/statusicon.cpp:361
+msgid "Get help by reading the Ekiga manual"
+msgstr "Potražite pomoć u uputstvu za Ekigu"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1257
+#: ../lib/engine/gui/gtk-frontend/statusicon.cpp:366
+msgid "View information about Ekiga"
+msgstr "Pogledaj podatke o Ekigi"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1334
+msgid "Dialpad"
+msgstr "Brojčanik"
+
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1352
+msgid "Call history"
+msgstr "Istorijat poziva"
+
+# bug(slobo): prevod za traversal
+#: ../lib/engine/gui/gtk-frontend/main_window.cpp:1364
+msgid "Ekiga"
+msgstr "Ekiga"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:382
+msgid "Play sound for new voice mails"
+msgstr "Pusti zvuk pri prijemu govorne pošte"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:392
+msgid "Play sound for new instant messages"
+msgstr "Pusti zvuk pri prijemu novih brzih poruka"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:445
+msgid "_Full name:"
+msgstr "_Puno ime:"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:461
+msgid "Video Display"
+msgstr "Prikaz slike"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:463
+msgid "Place windows displaying video _above other windows"
+msgstr "Postavi prozore koji prikazuju sliku _iznad ostalih prozora"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:467
+msgid "Network Settings"
+msgstr "Podešavanja mreže"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:469
+msgid "Type of Service (TOS):"
+msgstr "Vrsta usluge (TOS):"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:471
+msgid "Enable network _detection"
+msgstr "Omogući o_tkrivanje mreže"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:481
+msgid "Call Forwarding"
+msgstr "Preusmeravanje poziva"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:483
+msgid "_Always forward calls to the given host"
+msgstr "_Uvek prosledi pozive do datog domaćina"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:483
+msgid ""
+"If enabled, all incoming calls will be forwarded to the host that is "
+"specified in the protocol settings"
+msgstr ""
+"Ako je uključeno, svi dolazni pozivi će biti preusmereni na računar koji je "
+"naznačen u podešavanjima protokola"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:485
+msgid "Forward calls to the given host if _no answer"
+msgstr "Preusmeri poziv do datog računara ako _nema odgovora"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:485
+msgid ""
+"If enabled, all incoming calls will be forwarded to the host that is "
+"specified in the protocol settings if you do not answer the call"
+msgstr ""
+"Ako je uključeno, svi dolazni pozivi će biti preusmereni na računar koji je "
+"naznačen u podešavanjima protokola ako ne odgovorite na poziv"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:487
+msgid "Forward calls to the given host if _busy"
+msgstr "Preusmeri poziv do datog domaćina ako je _zauzeto"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:487
+msgid ""
+"If enabled, all incoming calls will be forwarded to the host that is "
+"specified in the protocol settings if you already are in a call or if you "
+"are in busy mode"
+msgstr ""
+"Ako je uključeno, svi dolazni pozivi će biti preusmereni na računar koji je "
+"naznačen u podešavanjima protokola ako imate poziv ili ako ste u režimu "
+"zauzetosti"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:491
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:1209
+msgid "Call Options"
+msgstr "Opcije poziva"
+
+#. Add all the fields
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:494
+msgid "Call forwarding delay (in seconds):"
+msgstr "Kašnjenje prosleđivanja poziva (u sekundama):"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:495
+msgid "_Automatically answer incoming calls"
+msgstr "_Automatsko javljanje na dolazne pozive"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:526
+msgid "Ekiga Sound Events"
+msgstr "Ekiga zvučni događaji"
+
+#  Translators: This is "A" as in "Audio"
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:560
+msgid "A"
+msgstr "Zvuk"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:572
+msgid "Event"
+msgstr "Događaj"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:584
+msgid "Choose a sound"
+msgstr "Izaberite neki zvučni zapis"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:589
+msgid "Wavefiles"
+msgstr "wav datoteke"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:598
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:617
+msgid "Play"
+msgstr "Pusti"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:638
+msgid "String"
+msgstr "Niska"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:639
+msgid "Tone"
+msgstr "Ton"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:640
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:692
+msgid "RFC2833"
+msgstr "RFC2833"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:641
+msgid "Q.931"
+msgstr "Ku.931"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:645
+msgid "Disable H.239 Extended Video"
+msgstr "Isključi H.239 prošireni snimak"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:646
+msgid "Allow H.239 per Content Role Mask"
+msgstr "Dopusti H.239 masku funkcije po sadržaju"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:647
+msgid "Force H.239 Presentation Role"
+msgstr "Prisili H.239 funkciju predstavljanja"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:648
+msgid "Force H.239 Live Role"
+msgstr "Prisili H.239 funkciju uživo"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:653
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:699
+msgid "Misc Settings"
+msgstr "Razna podešavanja"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:656
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:704
+msgid "Forward _URI:"
+msgstr "Adresa pre_usmeravanja:"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:662
+msgid "Advanced Settings"
+msgstr "Napredna podešavanja"
+
+#. The toggles
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:665
+msgid "Enable H.245 _tunneling"
+msgstr "Omogući H.245 _tunel"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:667
+msgid "Enable _early H.245"
+msgstr "Uključi _rani H.245"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:669
+msgid "Enable fast _start procedure"
+msgstr "Uključi proceduru brzi _start"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:669
+msgid ""
+"Connection will be established in Fast Start (Fast Connect) mode. Fast Start "
+"is a new way to start calls faster that was introduced in H.323v2."
+msgstr ""
+"Veza će biti uspostavljena u režimu brzog pokretanja (Brzo povezivanje). Brzo "
+"pokretanje je novi put da započnete razgovor brže koji je uveden u H.323v2."
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:671
+msgid "Enable H.239 control"
+msgstr "Uključi H.239 upravljanje"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:671
+msgid "This enables H.239 capability for additional video roles."
+msgstr "Ovo uključuje H.239 mogućnost za dodatne funkcije snimka."
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:673
+msgid "Select the H.239 Video Role"
+msgstr "Izaberi funkciju H.239 snimka"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:677
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:710
+msgid "DTMF Mode"
+msgstr "DTMF režim"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:679
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:712
+msgid "_Send DTMF as:"
+msgstr "_Pošalji DTMF kao:"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:679
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:712
+msgid "Select the mode for DTMFs sending"
+msgstr "Odaberite režim za DTMF slanje"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:693
+msgid "INFO"
+msgstr "INFO"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:701
+msgid "_Outbound proxy:"
+msgstr "Spoljni _vezani posrednik:"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:729
+msgid "Audio Devices"
+msgstr "Zvučni uređaji"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:737
+msgid "Ringing device:"
+msgstr "Uređaj za zvono:"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:737
+msgid "Select the ringing audio device to use"
+msgstr "Izaberite uređaj koji će se koristiti za zvonjenje"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:739
+msgid "Output device:"
+msgstr "Izlazni uređaj:"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:746
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:805
+msgid "Input device:"
+msgstr "Ulazni uređaj:"
+
+#. That button will refresh the device list
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:750
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:816
+msgid "_Detect devices"
+msgstr "Pro_nađi uređaje"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:750
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:816
+msgid "Click here to refresh the device list"
+msgstr "Kliknite ovde da osvežite spisak uređaja"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:784
+msgid "PAL (Europe)"
+msgstr "PAL (Evropa)"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:785
+msgid "NTSC (America)"
+msgstr "NTSC (Amerika)"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:786
+msgid "SECAM (France)"
+msgstr "SECAM (Francuska)"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:787
+msgid "Auto"
+msgstr "Samostalno"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:799
+msgid "Video Devices"
+msgstr "Uređaji za sliku"
+
+#. Video Channel
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:809
+msgid "Channel:"
+msgstr "Kanal:"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:811
+msgid "Size:"
+msgstr "Veličina:"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:811
+msgid "Select the transmitted video size"
+msgstr "Odaberite veličinu poslatog video zapisa"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:813
+msgid "Format:"
+msgstr "Format:"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:832
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:860
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:1236
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:1246
+msgid "Codecs"
+msgstr "Kodeci"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:839
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:867
+msgid "Settings"
+msgstr "Podešavanja"
+
+#. Translators: the full sentence is Automatically adjust jitter buffer
+#. between X and Y ms
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:843
+msgid "Enable silence _detection"
+msgstr "Uključi _otkrivanje tišine"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:845
+msgid "Enable echo can_celation"
+msgstr "Uključi poništavanje _odjeka"
+
+# bug(slobo): ne može ovako ostati
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:847
+msgid "Maximum _jitter buffer (in ms):"
+msgstr "Najveća međumemorija _pulsa (u ms):"
+
+#. Translators: the full sentence is Keep a minimum video quality of X %
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:870
+msgid "Picture quality"
+msgstr "Kvalitet slike"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:870
+msgid "Frame rate"
+msgstr "Učestalost kadrova"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:870
+msgid ""
+"Choose if you want to guarantee a minimum image quality (possibly leading to "
+"dropped frames in order not to surpass the bitrate limit) or if you prefer "
+"to keep the frame rate"
+msgstr ""
+"Odaberite ako želite da garantujete najmanji kvalitet slike (što može dovesti "
+"do odbačenih kadrova u prenosu da bi se obezbedio potreban protok) ili broj "
+"prenetih slika u sekundi."
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:872
+msgid "Maximum video _bitrate (in kbits/s):"
+msgstr "Najveći _video protok (u kbits/s):"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:872
+msgid ""
+"The maximum video bitrate in kbits/s. The video quality and the effective "
+"frame rate will be dynamically adjusted to keep the bitrate at the given "
+"value."
+msgstr ""
+"Najveći video protok u kbitima/s. Video kvalitet i broj prenesenih kadrova u "
+"sekundi će biti dinamički podešeni da bi se protok održao na zadatoj "
+"vrednosti."
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:1179
+msgid "Ekiga Preferences"
+msgstr "Postavke Ekige"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:1199
+msgid "General"
+msgstr "Opšte"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:1200
+msgid "Personal Data"
+msgstr "Lični podaci"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:1205
+msgid "General Settings"
+msgstr "Opšta podešavanja"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:1214
+msgid "Sound Events"
+msgstr "Zvučni događaji"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:1218
+msgid "Protocols"
+msgstr "Protokoli"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:1220
+msgid "SIP Settings"
+msgstr "SIP podešavanja"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:1225
+msgid "H.323 Settings"
+msgstr "H.323 podešavanja"
+
+#. The player
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:1231
+msgid "Audio"
+msgstr "Zvuk"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:1232
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:1242
+msgid "Devices"
+msgstr "Uređaji"
+
+#: ../lib/engine/gui/gtk-frontend/preferences-window.cpp:1241
+msgid "Video"
+msgstr "Video"
+
+#: ../lib/engine/gui/gtk-frontend/roster-view-gtk.cpp:1083
+#: ../lib/engine/gui/gtk-frontend/statusmenu.cpp:95
+msgid "Away"
+msgstr "Odsutan"
+
+#: ../lib/engine/gui/gtk-frontend/roster-view-gtk.cpp:1085
+#: ../lib/engine/gui/gtk-frontend/statusmenu.cpp:94
+msgid "Available"
+msgstr "Dostupan"
+
+#: ../lib/engine/gui/gtk-frontend/roster-view-gtk.cpp:1087
+msgid "Offline"
+msgstr "Nepovezan"
+
+#: ../lib/engine/gui/gtk-frontend/roster-view-gtk.cpp:1089
+#: ../lib/engine/gui/gtk-frontend/statusmenu.cpp:96
+msgid "Busy"
+msgstr "Zauzet"
+
+#: ../lib/engine/gui/gtk-frontend/statusicon.cpp:294
+#, c-format
+msgid "You have %d message"
+msgid_plural "You have %d messages"
+msgstr[0] "Imate %d poruku"
+msgstr[1] "Imate %d poruke"
+msgstr[2] "Imate %d poruka"
+msgstr[3] "Imate jednu poruku"
+
+#: ../lib/engine/gui/gtk-frontend/statusmenu.cpp:392
+msgid "Custom message..."
+msgstr "Proizvoljna poruka..."
+
+#: ../lib/engine/gui/gtk-frontend/statusmenu.cpp:437
+msgid "Clear"
+msgstr "Očisti"
+
+#. Build the dialog
+#: ../lib/engine/gui/gtk-frontend/statusmenu.cpp:525
+#: ../lib/engine/gui/gtk-frontend/statusmenu.cpp:673
+msgid "Custom Message"
+msgstr "Proizvoljna poruka"
+
+#: ../lib/engine/gui/gtk-frontend/statusmenu.cpp:541
+msgid "Delete custom messages:"
+msgstr "Izbriši proizvoljne poruke:"
+
+#: ../lib/engine/gui/gtk-frontend/statusmenu.cpp:690
+msgid "Define a custom message:"
+msgstr "Odredi proizvoljnu poruku:"
+
+#: ../lib/gui/dialpad.c:53
+msgid "abc"
+msgstr "abc"
+
+#: ../lib/gui/dialpad.c:54
+msgid "def"
+msgstr "def"
+
+#: ../lib/gui/dialpad.c:55
+msgid "ghi"
+msgstr "ghi"
+
+#: ../lib/gui/dialpad.c:56
+msgid "jkl"
+msgstr "jkl"
+
+#: ../lib/gui/dialpad.c:57
+msgid "mno"
+msgstr "mno"
+
+#: ../lib/gui/dialpad.c:58
+msgid "pqrs"
+msgstr "pqrs"
+
+#: ../lib/gui/dialpad.c:59
+msgid "tuv"
+msgstr "tuv"
+
+#: ../lib/gui/dialpad.c:60
+msgid "wxyz"
+msgstr "wxyz"
+
+#: ../lib/gui/gmcallbacks.c:66
+msgid "Contributors:"
+msgstr "Doprinosioci:"
+
+#: ../lib/gui/gmcallbacks.c:71
+msgid "Artwork:"
+msgstr "Umetnički rad:"
+
+#: ../lib/gui/gmcallbacks.c:78
+msgid "See AUTHORS file for full credits"
+msgstr "Pročitajte datoteku „AUTHORS“ sa spiskom svih učesnika"
+
+#: ../lib/gui/gmcallbacks.c:94
+msgid ""
+"This program is free software; you can redistribute it and/or modify it "
+"under the terms of the GNU General Public License as published by the Free "
+"Software Foundation; either version 2 of the License, or (at your option) "
+"any later version. "
+msgstr ""
+"Ekiga je slobodan softver; možete je raspodeljivati i/ili menjati pod uslovima "
+"Gnuove opšte javne licence kako je objavljuje Zadužbina Slobodnog Softvera; "
+"bilo verzije 2 te Licence, ili (po vašem nahođenju) bilo koje novije verzije. "
+
+#: ../lib/gui/gmcallbacks.c:98
+msgid ""
+"This program is distributed in the hope that it will be useful, but WITHOUT "
+"ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or "
+"FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for "
+"more details. You should have received a copy of the GNU General Public "
+"License along with this program; if not, write to the Free Software "
+"Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA."
+msgstr ""
+"Ekiga se raspodeljuje u nadi da će biti od koristi, ali BEZ IKAKVIH "
+"GARANCIJA; čak i bez podrazumevane garancije KORISNOSTI ili PRILAGOĐENOSTI "
+"ODREĐENOJ NAMENI. Vidite Gnuovu opštu javnu licencu za više detalja. Trebali "
+"ste da primite primerak Gnuove opšte javne licence uz Ekigu; ako niste, "
+"pišite Zadužbini Slobodnog Softvera na adresu: „Free Software Foundation, "
+"Inc.), 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA“."
+
+#: ../lib/gui/gmcallbacks.c:105
+msgid ""
+"Ekiga is licensed under the GPL license and as a special exception, you have "
+"permission to link or otherwise combine this program with the programs OPAL, "
+"OpenH323 and PWLIB, and distribute the combination, without applying the "
+"requirements of the GNU GPL to the OPAL, OpenH323 and PWLIB programs, as "
+"long as you do follow the requirements of the GNU GPL for all the rest of "
+"the software thus combined."
+msgstr ""
+"Ekiga je licencirana pod Gnuovom opštom javnom licencom, a kao specijalni "
+"izuzetak, imate ovlašćenje da povezujete ili na drugi način kombinujete ovaj "
+"program sa programima „OPAL“, „OpenH323“ and „PWLIB“ i raspodeljujete ovakvu "
+"kombinaciju bez primene Gnuove opšte javne licence na OPAL, OpenH323 i PVLIB "
+"programe, dok god pratite zahteve Gnuove opšte javne licence za ostale "
+"iskombinovane programe."
+
+#. Translators: Please write translator credits here, and
+#. * separate names with \n
+#: ../lib/gui/gmcallbacks.c:117
+msgid "translator-credits"
+msgstr ""
+"Dejan Matijević <dejan@ns.sympatico.ca>\n"
+"Danilo Šegan <danilo@prevod.org>\n"
+"Slobodan D. Sredojević <slobo@akrep.be>\n"
+"Branko Kokanović <branko.kokanovic@gmail.com>\n"
+"http://prevod.org — prevod na srpski jezik."
+
+#: ../lib/gui/gmcallbacks.c:122
+msgid ""
+"Ekiga is full-featured SIP and H.323 compatible VoIP, IP-Telephony and "
+"Videoconferencing application that allows you to make audio and video calls "
+"to remote users with SIP and H.323 hardware or software."
+msgstr ""
+"Ekiga je potpuno funkcionalan program za Glas preko IP-a, IP-telefoniju i "
+"Video konferencije saglasan sa SIP-om i H.323 koji vam omogućava da obavljate "
+"audio i video pozive udaljenim korisnicima sa SIP i H.323 komponentama ili "
+"softverom."
+
+#: ../lib/gui/gmcallbacks.c:195
+msgid "Unable to open help file."
+msgstr "Ne mogu da otvorim datoteku pomoći."
+
+#: ../lib/gui/gmdialog.c:323
+msgid "Do not show this dialog again"
+msgstr "Ne prikazuj više ovo prozorče"
+
+#: ../plugins/avahi/avahi-heap.cpp:131 ../plugins/avahi/avahi-heap.cpp:378
+msgid "Neighbours"
+msgstr "Susedi"
+
+#: ../plugins/evolution/evolution-book.cpp:75
+#: ../plugins/ldap/ldap-book.cpp:920
+#, c-format
+msgid "%d user found"
+msgid_plural "%d users found"
+msgstr[0] "%d korisnik je pronađen"
+msgstr[1] "%d korisnika su pronađena"
+msgstr[2] "%d korisnika je pronađeno"
+msgstr[3] "Jedan korisnik je pronađen"
+
+#: ../plugins/evolution/evolution-book.cpp:343
+msgid "Add Contact"
+msgstr "Dodaj kontakt"
+
+#: ../plugins/evolution/evolution-book.cpp:348
+#: ../plugins/evolution/evolution-contact.cpp:333
+msgid "VoIP _URI:"
+msgstr "_Adresa za glas preko IP-a:"
+
+#: ../plugins/evolution/evolution-book.cpp:349
+#: ../plugins/evolution/evolution-contact.cpp:334
+msgid "_Home phone:"
+msgstr "_Kućni telefon:"
+
+#: ../plugins/evolution/evolution-book.cpp:350
+#: ../plugins/evolution/evolution-contact.cpp:335
+msgid "_Office phone:"
+msgstr "_Službeni telefon:"
+
+#: ../plugins/evolution/evolution-book.cpp:351
+#: ../plugins/evolution/evolution-contact.cpp:336
+msgid "_Cell phone:"
+msgstr "_Mobilni telefon:"
+
+#: ../plugins/evolution/evolution-book.cpp:352
+#: ../plugins/evolution/evolution-contact.cpp:337
+msgid "_Pager:"
+msgstr "_Pejdžer:"
+
+#: ../plugins/evolution/evolution-contact.cpp:320
+msgid "Edit contact"
+msgstr "Izmeni kontakt"
+
+#: ../plugins/evolution/evolution-contact.cpp:374
+msgid "Remove contact"
+msgstr "Ukloni kontakt"
+
+#: ../plugins/evolution/evolution-contact.cpp:376
+#, c-format
+msgid "Are you sure you want to remove %s from the addressbook?"
+msgstr "Da li ste sigurni da želite da uklonite %s iz imenika?"
+
+#: ../plugins/gstreamer/gst-audioinput.cpp:196
+msgid "Audio test"
+msgstr "Zvučni test"
+
+#: ../plugins/gstreamer/gst-audiooutput.cpp:226
+msgid "Silent"
+msgstr "Tiho"
+
+#: ../plugins/gstreamer/gst-videoinput.cpp:190
+msgid "Video test"
+msgstr "Video test"
+
+#. Translators: "Screencast" means the video input device will be your screen -- the other end will see your desktop
+#: ../plugins/gstreamer/gst-videoinput.cpp:342
+#: ../plugins/gstreamer/gst-videoinput.cpp:347
+msgid "Crazy"
+msgstr "Ludo"
+
+#: ../plugins/gstreamer/gst-videoinput.cpp:347
+msgid "Screencast"
+msgstr "Zapis ekrana"
+
+#: ../plugins/ldap/ldap-book.cpp:427 ../plugins/resource-list/rl-entry.cpp:160
+#: ../plugins/resource-list/rl-entry-ref.cpp:138
+msgid "_Refresh"
+msgstr "_Osveži"
+
+#: ../plugins/ldap/ldap-book.cpp:430
+msgid "_Remove addressbook"
+msgstr "_Ukloni imenik"
+
+#: ../plugins/ldap/ldap-book.cpp:432
+msgid "Addressbook _properties"
+msgstr "Svojstva _imenika"
+
+#: ../plugins/ldap/ldap-book.cpp:563
+msgid "LDAP SASL Interaction"
+msgstr "LDAP SASL povezanost"
+
+#. Translators, Howard explained : "Challenge" is a generic term
+#. * in authentication. It's a prompt from the authentication mechanism
+#. * for some type of credential. Exactly what kind of challenge and
+#. * what kind of credential depends on the specific authentication
+#. * mechanism. Since SASL is a generic interface, and can dynamically
+#. * load arbitrary mechanisms, there's not much more specific you can
+#. * say about it. You might google for "challenge response
+#. * authentication" if you'd like more background context.
+#.
+#: ../plugins/ldap/ldap-book.cpp:605
+msgid "Challenge: "
+msgstr "Izazov: "
+
+#: ../plugins/ldap/ldap-book.cpp:613
+msgid "Interact"
+msgstr "Interakcija"
+
+#: ../plugins/ldap/ldap-book.cpp:680
+msgid "Refreshing"
+msgstr "Osvežavam"
+
+#: ../plugins/ldap/ldap-book.cpp:686
+msgid "Could not initialize server"
+msgstr "Nije uspelo pokretanje servera"
+
+#: ../plugins/ldap/ldap-book.cpp:700 ../plugins/ldap/ldap-book.cpp:745
+msgid "LDAP Error: "
+msgstr "LDAP greška: "
+
+#: ../plugins/ldap/ldap-book.cpp:754
+msgid "Contacted server"
+msgstr "Kontaktirani server"
+
+#. patience == 0
+#: ../plugins/ldap/ldap-book.cpp:793
+msgid "Could not connect to server"
+msgstr "Ne mogu da se povežem na server"
+
+#. patience == 0
+#: ../plugins/ldap/ldap-book.cpp:841 ../plugins/ldap/ldap-book.cpp:890
+msgid "Could not search"
+msgstr "Ne mogu da pretražim"
+
+#: ../plugins/ldap/ldap-book.cpp:849
+msgid "Waiting for search results"
+msgstr "Čekam na rezultate pretrage"
+
+#: ../plugins/ldap/ldap-book.cpp:942
+msgid "Please edit the following fields"
+msgstr "Izmenite sledeća polja"
+
+#: ../plugins/ldap/ldap-book.cpp:944
+msgid "Book _name:"
+msgstr "_Naziv knjige:"
+
+#: ../plugins/ldap/ldap-book.cpp:944
+msgid "Book name, as shown in your dialog box"
+msgstr "Ime knjige, kako je prikazano u vašem prozorčetu"
+
+#: ../plugins/ldap/ldap-book.cpp:945
+msgid "Server _URI:"
+msgstr "_Adresa servera:"
+
+#: ../plugins/ldap/ldap-book.cpp:945
+msgid "Name of LDAP server, prefixed by ldap://"
+msgstr "Naziv LDAP servera, sa prefiksom „ldap://“"
+
+#: ../plugins/ldap/ldap-book.cpp:946
+msgid "_Base DN:"
+msgstr "_Osnovni naziv domena:"
+
+#: ../plugins/ldap/ldap-book.cpp:952
+msgid "Subtree"
+msgstr "Podstablo"
+
+#: ../plugins/ldap/ldap-book.cpp:953
+msgid "Single level"
+msgstr "Jedan nivo"
+
+#: ../plugins/ldap/ldap-book.cpp:954
+msgid "_Search scope"
+msgstr "Op_seg pretrage"
+
+#. Translators: DisplayName Attribute is the name of the LDAP
+#. * attribute whose value will be used to name an addressbook entry.
+#. * On Microsoft systems the actual attribute is literally named
+#. * "DisplayName" (i.e., "the name that will be displayed") but on
+#. * most LDAP servers it's "CommonName".
+#.
+#: ../plugins/ldap/ldap-book.cpp:969
+msgid "_DisplayName attribute:"
+msgstr "Osobina vi_dljivo ime:"
+
+#: ../plugins/ldap/ldap-book.cpp:970
+msgid "Call _attributes:"
+msgstr "Osobine poziv_a:"
+
+#: ../plugins/ldap/ldap-book.cpp:970
+msgid "The field you are searching for"
+msgstr "Polje koje pretražujete"
+
+#: ../plugins/ldap/ldap-book.cpp:972 ../plugins/ldap/ldap-book.cpp:974
+msgid "_Filter template:"
+msgstr "Šablon _filtriranja:"
+
+#: ../plugins/ldap/ldap-book.cpp:972 ../plugins/ldap/ldap-book.cpp:974
+msgid "Here, a \"$\" is replaced by the search string"
+msgstr "Ovde se „$“ zamenjuje niskom znakova za pretragu"
+
+#. Translators: Bind ID - In LDAP, the operation that begins an LDAP
+#. * session and authenticates the user to the directory is called a
+#. * Bind operation.  There are two types of Binds supported in the
+#. * standard protocol - Simple Bind and SASL Bind.  Since both of
+#. * them are used for authentication, both of them require some type
+#. * of user ID as a parameter, and that is supplied here.  (Of
+#. * course, the Bind ID can be left blank, in which case the session
+#. * is anonymous / unauthenticated.)
+#.
+#: ../plugins/ldap/ldap-book.cpp:985
+msgid "Bind _ID:"
+msgstr "_IB povezivanja:"
+
+#: ../plugins/ldap/ldap-book.cpp:985
+msgid "User ID; leave blank for anonymous / nonauthenticated"
+msgstr "IB korisnika; ostavite prazno za anonimno / neprijavljeno"
+
+#: ../plugins/ldap/ldap-book.cpp:986
+msgid "The password for the user ID above, if any"
+msgstr "Lozinka za IB korisnika, ako postoji"
+
+#: ../plugins/ldap/ldap-book.cpp:987
+msgid "Use _TLS"
+msgstr "Koristi _TLS"
+
+#: ../plugins/ldap/ldap-book.cpp:988
+msgid "Use SAS_L"
+msgstr "Koristi _SASL"
+
+#: ../plugins/ldap/ldap-book.cpp:1002
+msgid "SASL _mechanism"
+msgstr "SASL _mehanizam"
+
+#: ../plugins/ldap/ldap-book.cpp:1012
+msgid "Edit LDAP directory"
+msgstr "Izmeni LDAP fasciklu"
+
+#: ../plugins/ldap/ldap-book.cpp:1034
+msgid "Please provide a Book Name for this directory\n"
+msgstr "Unesite ime knjige za ovu fasciklu\n"
+
+#: ../plugins/ldap/ldap-book.cpp:1037
+msgid "Please provide a Server URI\n"
+msgstr "Unesite adresu servera\n"
+
+#: ../plugins/ldap/ldap-book.cpp:1040
+msgid "Please provide a DisplayName attribute\n"
+msgstr "Unesite svojstvo vidljivog imena\n"
+
+#: ../plugins/ldap/ldap-book.cpp:1043
+msgid "Please provide a Call attribute\n"
+msgstr "Unesite osobinu poziva\n"
+
+#: ../plugins/ldap/ldap-book.cpp:1046 ../plugins/ldap/ldap-book.cpp:1082
+msgid "Invalid Server URI\n"
+msgstr "Pogrešna adresa servera\n"
+
+#: ../plugins/ldap/ldap-source.cpp:130
+msgid "Add an LDAP Address Book"
+msgstr "Dodaj LDAP adresar"
+
+#: ../plugins/ldap/ldap-source.cpp:134
+msgid "Add the Ekiga.net Directory"
+msgstr "Dodaj Ekiga.net fasciklu"
+
+#: ../plugins/ldap/ldap-source.cpp:155
+msgid "Create LDAP directory"
+msgstr "Napravi LDAP fasciklu"
+
+#: ../plugins/ldap/ldap-source.cpp:164
+msgid "Ekiga.net Directory"
+msgstr "Ekiga.net fascikla"
+
+#: ../plugins/libnotify/libnotify-main.cpp:273
+msgid "Remote URI:"
+msgstr "Udaljena adresa:"
+
+#: ../plugins/libnotify/libnotify-main.cpp:286
+msgid "Reject"
+msgstr "Odbaci"
+
+#: ../plugins/libnotify/libnotify-main.cpp:288
+msgid "Accept"
+msgstr "Prihvati"
+
+#: ../plugins/loudmouth/loudmouth-account.cpp:112
+#: ../plugins/loudmouth/loudmouth-account.cpp:159
+msgid "Inactive"
+msgstr "Neaktivan"
+
+#: ../plugins/loudmouth/loudmouth-account.cpp:238
+#, c-format
+msgid "Could not connect (%s)"
+msgstr "Ne mogu da se povežem (%s)"
+
+#  Connection type
+#: ../plugins/loudmouth/loudmouth-account.cpp:244
+msgid "Connecting..."
+msgstr "Povezujem se..."
+
+#: ../plugins/loudmouth/loudmouth-account.cpp:284
+msgid "Authenticating..."
+msgstr "Potvrđujem identitet..."
+
+#. FIXME: can't we report better?
+#: ../plugins/loudmouth/loudmouth-account.cpp:294
+msgid "Could not connect"
+msgstr "Ne mogu da se povežem"
+
+#: ../plugins/loudmouth/loudmouth-account.cpp:304
+msgid "Disconnected"
+msgstr "Veza je prekinuta"
+
+#: ../plugins/loudmouth/loudmouth-account.cpp:314
+msgid "Connected"
+msgstr "Povezani ste"
+
+#. FIXME: can't we report something better?
+#: ../plugins/loudmouth/loudmouth-account.cpp:320
+msgid "Could not authenticate"
+msgstr "Ne mogu da potvrdim identitet"
+
+#: ../plugins/loudmouth/loudmouth-account.cpp:350
+#: ../plugins/loudmouth/loudmouth-bank.cpp:125
+msgid "Server:"
+msgstr "Server:"
+
+#: ../plugins/loudmouth/loudmouth-account.cpp:350
+#: ../plugins/loudmouth/loudmouth-bank.cpp:125
+msgid "The server, e.g. jabber.org"
+msgstr "Server, npr. „jabber.org“"
+
+#: ../plugins/loudmouth/loudmouth-account.cpp:354
+msgid "Port:"
+msgstr "Port:"
+
+#: ../plugins/loudmouth/loudmouth-account.cpp:354
+msgid "The transport protocol port, if different than the default"
+msgstr "Port protokola prenosa, ako se razlikuje od osnovnog"
+
+#: ../plugins/loudmouth/loudmouth-account.cpp:358
+#: ../plugins/loudmouth/loudmouth-bank.cpp:126
+msgid "Resource:"
+msgstr "Resurs:"
+
+#: ../plugins/loudmouth/loudmouth-account.cpp:358
+#: ../plugins/loudmouth/loudmouth-bank.cpp:126
+msgid ""
+"The resource, such as home or work, allowing to distinguish among several "
+"terminals registered to the same account; leave empty if you do not know "
+"what it is"
+msgstr ""
+"Resurs, kao kućni ili na poslu, koji dopušta razlikovanje između nekoliko "
+"terminala upisanih na istom nalogu; ostavite prazno ako ne znate šta je to"
+
+#: ../plugins/loudmouth/loudmouth-bank.cpp:109
+msgid "_Add a Jabber/XMPP Account"
+msgstr "Dod_aj Džaber/IksMPP nalog"
+
+#: ../plugins/loudmouth/loudmouth-bank.cpp:121
+msgid "Please fill in the following fields:"
+msgstr "Popunite sledeća polja:"
+
+#. FIXME: this is here until the feature is ready
+#: ../plugins/loudmouth/loudmouth-dialect.cpp:121
+msgid "Join a discussion group"
+msgstr "Pridruži se grupi za ćaskanje"
+
+#: ../plugins/loudmouth/loudmouth-dialect.cpp:132
+msgid "Open a group chat room"
+msgstr "Otvorite sobu grupnog ćaskanja"
+
+#: ../plugins/loudmouth/loudmouth-dialect.cpp:134
+msgid "Please provide a room name"
+msgstr "Unesite naziv sobe"
+
+#: ../plugins/loudmouth/loudmouth-dialect.cpp:136
+msgid "Room name"
+msgstr "Naziv sobe"
+
+#: ../plugins/loudmouth/loudmouth-dialect.cpp:136
+msgid "The name of the room you want to enter"
+msgstr "Naziv sobe kojoj želite da pristupite"
+
+#: ../plugins/loudmouth/loudmouth-dialect.cpp:138
+msgid "Pseudonym"
+msgstr "Pseudonim"
+
+#: ../plugins/loudmouth/loudmouth-dialect.cpp:138
+msgid "The pseudonym you'll have in the room"
+msgstr "Pseudonim koji ćete imati u sobi"
+
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:172
+msgid "Authorization to see your presence"
+msgstr "Potvrda vašeg prisustva"
+
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:176
+#, c-format
+msgid "%s asks the permission to see your presence, saying: \"%s\"."
+msgstr "%s je zatražio dozvoli da vidi vaše prisustvo, rekavši „%s“."
+
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:180
+#, c-format
+msgid "%s asks the permission to see your presence."
+msgstr "%s je zatražio da vidi vaše prisustvo."
+
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:187
+msgid "grant him/her the permission to see your presence"
+msgstr "daj mu/joj dozvolu da vidi vaše prisustvo"
+
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:188
+msgid "refuse him/her the permission to see your presence"
+msgstr "odbij mu/joj zahtev da vidi vaše prisustvo"
+
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:189
+msgid "decide later (also close or cancel this dialog)"
+msgstr "odluči kasnije (možete i da zatvorite ili poništite ovo prozorče)"
+
+# bug(slobo): msgstr "Nema roka za odgovor" ...sumnjam da je ovo
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:190
+msgid "Your answer is: "
+msgstr "Vaš odgovor je: "
+
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:334
+msgid "Add a roster element"
+msgstr "Dodaj element liste kontakata"
+
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:335
+msgid "Please fill in this form to add a new element to the remote roster"
+msgstr ""
+"Popunite ovaj formular za dodavanje novog elementa u Ekiginoj udaljenoj listi "
+"kontakata"
+
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:337
+#: ../plugins/resource-list/rl-heap.cpp:470
+msgid "Identifier:"
+msgstr "Identifikator:"
+
+#: ../plugins/loudmouth/loudmouth-heap-roster.cpp:337
+msgid "identifier@server"
+msgstr "identifikator@server"
+
+#: ../plugins/loudmouth/loudmouth-presentity.cpp:167
+msgid "Start chat"
+msgstr "Počni ćaskanje"
+
+#: ../plugins/loudmouth/loudmouth-presentity.cpp:170
+msgid "Continue chat"
+msgstr "Nastavi ćaskanje"
+
+#: ../plugins/loudmouth/loudmouth-presentity.cpp:179
+#: ../plugins/loudmouth/loudmouth-presentity.cpp:185
+msgid "Ask him/her to see his/her status"
+msgstr "Pitaj ga/je da mu/joj vidite stanje"
+
+#: ../plugins/loudmouth/loudmouth-presentity.cpp:183
+#: ../plugins/loudmouth/loudmouth-presentity.cpp:195
+msgid "Forbid him/her to see my status"
+msgstr "Zabrani mu/joj da vidi vaše stanje"
+
+#: ../plugins/loudmouth/loudmouth-presentity.cpp:187
+msgid "Ask him/her to see his/her status (pending)"
+msgstr "Pitaj ga/je da mu/joj vidite stanje (na čekanju)"
+
+#: ../plugins/loudmouth/loudmouth-presentity.cpp:191
+#: ../plugins/loudmouth/loudmouth-presentity.cpp:196
+msgid "Stop getting his/her status"
+msgstr "Zaustavi preuzimanje njegovog/njenog stanja"
+
+#: ../plugins/loudmouth/loudmouth-presentity.cpp:287
+msgid ""
+"Please fill in this form to change an existing element of the remote roster"
+msgstr ""
+"Popunite ovaj formular da izmenite postojeći element Ekigine udaljene liste "
+"kontakata"
+
+#: ../plugins/resource-list/rl-cluster.cpp:102
+msgid "Add resource list"
+msgstr "Dodaj spisak izvorišta"
+
+#: ../plugins/resource-list/rl-cluster.cpp:166
+msgid "Add new resource-list"
+msgstr "Dodaj novi spisak resursa"
+
+#: ../plugins/resource-list/rl-cluster.cpp:167
+msgid ""
+"Please fill in this form to add a new contact list to ekiga's remote roster"
+msgstr ""
+"Popunite ovaj formular za dodavanje novog spiska kontakata u Ekiginoj "
+"udaljenoj listi kontakata"
+
+#: ../plugins/resource-list/rl-cluster.cpp:171
+#: ../plugins/resource-list/rl-heap.cpp:471
+msgid "Writable:"
+msgstr "Upisivo:"
+
+#: ../plugins/resource-list/rl-cluster.cpp:172
+msgid "Username:"
+msgstr "Korisničko ime:"
+
+#: ../plugins/resource-list/rl-entry.cpp:202
+msgid "Invalid server data"
+msgstr "Neispravni podaci o serveru"
+
+#: ../plugins/resource-list/rl-entry-ref.cpp:53
+msgid "Click to fetch"
+msgstr "Kliknite da dobavite"
+
+#: ../plugins/resource-list/rl-entry-ref.cpp:120
+msgid "Distant contact"
+msgstr "Udaljeni kontakt"
+
+#: ../plugins/resource-list/rl-heap.cpp:198
+msgid "_Add a new contact"
+msgstr "Dod_aj novi kontakt"
+
+#: ../plugins/resource-list/rl-heap.cpp:200
+msgid "_Refresh contact list"
+msgstr "_Osveži spisak kontakata"
+
+#: ../plugins/resource-list/rl-heap.cpp:202
+msgid "Contact list _properties"
+msgstr "Osobine _spiska kontakata"
+
+#: ../plugins/resource-list/rl-heap.cpp:462
+msgid "Edit contact list properties"
+msgstr "Izmeni osobine spiska kontakata"
+
+#: ../plugins/resource-list/rl-heap.cpp:464
+msgid "Please edit the following fields (no identifier means global)"
+msgstr "Izmenite sledeća polja (bez identifikatora podrazumeva globalnu izmenu)"
+
+#: ../plugins/resource-list/rl-heap.cpp:467
+msgid "Contact list's name:"
+msgstr "Ime spiska kontakata:"
+
+#. "Document" used as a name -- uri point to the root of a document tree
+#: ../plugins/resource-list/rl-heap.cpp:469
+msgid "Document root:"
+msgstr "Koren dokumenta:"
+
+#: ../plugins/resource-list/rl-heap.cpp:472
+msgid "Server username:"
+msgstr "Korisničko ime servera:"
+
+#: ../plugins/resource-list/rl-heap.cpp:473
+msgid "Server password:"
+msgstr "Lozinka servera:"
+
+#: ../plugins/resource-list/rl-heap.cpp:512
+msgid "Add a remote contact"
+msgstr "Dodaj udaljeni kontakt"
+
+#: ../plugins/resource-list/rl-heap.cpp:513
+msgid "Please fill in this form to create a new contact on a remote server"
+msgstr ""
+"Popunite ovaj formular da biste napravili novi kontakt na udaljenom serveru"
+
+#. Translators: #%d - ordinal number
+#: ../plugins/resource-list/rl-list.cpp:183
+#, c-format
+msgid "%s / List #%d"
+msgstr "%s / Spisak #%d"
+
+#. Translators: #%d - ordinal number
+#: ../plugins/resource-list/rl-list.cpp:188
+#, c-format
+msgid "List #%d"
+msgstr "Spisak #%d"
+
+#: ../plugins/resource-list/rl-presentity.cpp:230
+msgid "Edit remote contact"
+msgstr "Izmeni udaljeni kontakt"
+
+#: ../plugins/resource-list/rl-presentity.cpp:231
+msgid ""
+"Please fill in this form to change an existing contact on a remote server"
+msgstr ""
+"Popunite ovaj formular da izmenite postojeći kontakt na udaljenom serveru"
+
+#: ../src/gui/main.cpp:137
+msgid "Prints debug messages in the console (level between 1 and 8)"
+msgstr "Prikazuje poruke za rešavanje problema u konzoli (nivoi između 1 i 8)"
+
+#: ../src/gui/main.cpp:142
+msgid "Makes Ekiga call the given URI"
+msgstr "Pravi Ekiga poziv na datu adresu"
+
+#~ msgid "Kind of network selected in the assistant"
+#~ msgstr "Vrsta mreže odabrana u čarobnjaku"
+
+#~ msgid "0: 56kbps, 1: ISDN, 2: DSL128, 3: DSL512, 4: LAN, 5: Custom"
+#~ msgstr ""
+#~ "0: 56K modem, 1: dig. tel. linija sa int. uslugama, 2: digitalna "
+#~ "pretplatnička linija 128, 3: digitalna pretplatnička linija 512, 4: "
+#~ "lokalna mreža, 5: proizvoljno"
+
+#  Connection type
+#~ msgid "Connection Type"
+#~ msgstr "Vrsta veze"
+
+#~ msgid "Please choose your connection type:"
+#~ msgstr "Izaberite vrstu veze:"
+
+#~ msgid "56k Modem"
+#~ msgstr "Modem na običnoj telefonskoj liniji"
+
+#~ msgid "ISDN"
+#~ msgstr "ISDN"
+
+#~ msgid "DSL/Cable (128 kbit/s uplink)"
+#~ msgstr "DSL/Kablovska (128 kbit/s odlazno)"
+
+#~ msgid "DSL/Cable (512 kbit/s uplink)"
+#~ msgstr "DSL/Kablovska (512 kbit/s odlazno)"
+
+#~ msgid "LAN"
+#~ msgstr "Lokalna mreža"
+
+#~ msgid "Keep current settings"
+#~ msgstr "Zadrži tekuća podešavanja"
+
+#~ msgid ""
+#~ "The connection type will permit determining the best quality settings "
+#~ "that Ekiga will use during calls. You can later change the settings "
+#~ "individually in the preferences window."
+#~ msgstr ""
+#~ "Vrsta veze dozvoljava određivanje podešavanja sa najboljim kvalitetom koje će "
+#~ "Ekiga koristiti prilikom poziva. Naknadno možete izmeniti pojedinačna "
+#~ "podešavanja među postavkama."
+
+#~ msgid "Please choose the audio ringing device:"
+#~ msgstr "Izaberite zvučni uređaj za zvono:"
+
+#~ msgid ""
+#~ "The audio ringing device is the device that will be used to play the "
+#~ "ringing sound on incoming calls."
+#~ msgstr ""
+#~ "Zvučni uređaj za zvono je uređaj koji se koristi za puštanje zvuka zvona "
+#~ "pri dolaznim pozivima."
+
+#~ msgid "Please choose the audio output device:"
+#~ msgstr "Izaberite izlazni uređaj za zvuk:"
+
+#~ msgid ""
+#~ "The audio output device is the device that will be used to play audio "
+#~ "during calls."
+#~ msgstr ""
+#~ "Izlazni uređaj za zvuk je uređaj koji se koristi za puštanje zvuka za "
+#~ "vreme poziva."
+
+#~ msgid "Please choose the audio input device:"
+#~ msgstr "Izaberite ulazni uređaj za zvuk:"
+
+#~ msgid ""
+#~ "The audio input device is the device that will be used to record your "
+#~ "voice during calls."
+#~ msgstr ""
+#~ "Ulazni uređaj za zvuk je uređaj koji se koristi za snimanje glasa za vreme "
+#~ "poziva."
+
+#~ msgid "Video Input Device"
+#~ msgstr "Ulazni video uređaj"
+
+#~ msgid "Please choose your video input device:"
+#~ msgstr "Izaberite ulazni uređaj za video:"
+
+#~ msgid ""
+#~ "The video input device is the device that will be used to capture video "
+#~ "during calls."
+#~ msgstr ""
+#~ "Ulazni uređaj za video je uređaj koji se koristi za snimanje videa za "
+#~ "vreme poziva."
+
+#~ msgid "Audio Ringing Device"
+#~ msgstr "Zvučni uređaj za zvono"
+
+#~ msgid "Audio Output Device"
+#~ msgstr "Izlazni zvučni uređaj"
+
+#~ msgid "Audio Input Device"
+#~ msgstr "Ulazni zvučni uređaj"
+
+#~ msgid "Unknown"
+#~ msgstr "Nepoznato"
