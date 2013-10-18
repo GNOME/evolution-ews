@@ -2501,7 +2501,11 @@ ebews_start_gal_sync (gpointer data)
 	if (!e_ews_connection_get_oal_detail_sync (
 		oab_cnc, priv->folder_id, NULL, old_etag, &full_l, &etag,
 		cancellable, &error)) {
-		ret = FALSE;
+		if (g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_NOT_MODIFIED)) {
+			g_clear_error (&error);
+		} else {
+			ret = FALSE;
+		}
 		goto exit;
 	}
 
@@ -3229,7 +3233,8 @@ fetch_from_offline (EBookBackendEws *ews,
 
 	priv = ews->priv;
 
-	if (priv->is_gal && !g_strcmp0 (query, "(contains \"x-evolution-any-field\" \"\")")) {
+	/* GAL with folder_id means offline GAL */
+	if (priv->is_gal && !priv->folder_id && !g_strcmp0 (query, "(contains \"x-evolution-any-field\" \"\")")) {
 		e_data_book_view_notify_complete (book_view, error);
 		g_object_unref (book_view);
 		return;
@@ -3530,7 +3535,8 @@ e_book_backend_ews_get_backend_property (EBookBackend *backend,
 		ebews = E_BOOK_BACKEND_EWS (backend);
 		g_return_val_if_fail (ebews != NULL, NULL);
 
-		if (ebews->priv->is_gal) {
+		/* GAL with folder_id is an offline GAL */
+		if (ebews->priv->is_gal && !ebews->priv->folder_id) {
 			return g_strdup ("net,bulk-removes,contact-lists");
 		} else {
 			/* do-initialy-query is enabled for system address book also, so that we get the
