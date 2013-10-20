@@ -25,7 +25,6 @@ LIBS = \
 TEST_SRCS = \
 	ews-test-common.c \
 	ews-test-common.h \
-	e-ews-connection.h \
 	$(NULL)
 
 TEST_PROGS			+= ews-test-camel
