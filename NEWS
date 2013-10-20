@@ -1,4 +1,36 @@
-Evolution-EWS 3.10.9 2013-09-23
+Evolution-EWS 3.11.1 2013-10-21
+-------------------------------
+
+Bug Fixes:
+	Bug 704869 - Support Kerberos authentication (Milan Crha)
+	Bug 706151 - Crash under mail_config_ews_ooo_page_display_settings()
+	             (Milan Crha)
+	Bug 708121 - Add low level tests in EWS (for EwsConnection)
+	             (Fabiano Fidêncio)
+	Bug 708309 - Crash accessing GAL not marked for offline (Milan Crha)
+	Bug 708348 - Memory leaks from account preferences (Milan Crha)
+	Bug 708628 - Add support for EmptyFolder operation (Fabiano Fidêncio)
+
+Other Changes:
+	* Check for supported authentication methods by the server (Milan Crha)
+	* Fetch Free/Busy fails due to incorrect value of DayOrder element
+	  (Milan Crha)
+	* Make offline GAL browsable (Milan Crha)
+
+Translations:
+	Marek Černocký (cs)
+	Daniel Mustieles (es)
+	Gabor Kelemen (hu)
+	Andika Triwidada (id)
+	Noriko Mizumoto (ja)
+	Aurimas Černius (lt)
+	Rūdolfs Mazurs (lv)
+	Rafael Ferreira (pt_BR)
+	Matej Urbančič (sl)
+	Мирослав Николић (sr)
+
+
+Evolution-EWS 3.10.0 2013-09-23
 -------------------------------
 
 Translations:
