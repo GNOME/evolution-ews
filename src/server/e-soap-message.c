@@ -331,7 +331,8 @@ e_soap_message_new (const gchar *method,
                     gboolean standalone,
                     const gchar *xml_encoding,
                     const gchar *env_prefix,
-                    const gchar *env_uri)
+                    const gchar *env_uri,
+		    gboolean standard_handlers)
 {
 	ESoapMessage *msg;
 	SoupURI *uri;
@@ -358,9 +359,11 @@ e_soap_message_new (const gchar *method,
 				FALSE);
 	}
 
-	g_signal_connect (msg, "got-headers", G_CALLBACK (soap_got_headers), NULL);
-	g_signal_connect (msg, "got-chunk", G_CALLBACK (soap_got_chunk), NULL);
-	g_signal_connect (msg, "restarted", G_CALLBACK (soap_restarted), NULL);
+	if (standard_handlers) {
+		g_signal_connect (msg, "got-headers", G_CALLBACK (soap_got_headers), NULL);
+		g_signal_connect (msg, "got-chunk", G_CALLBACK (soap_got_chunk), NULL);
+		g_signal_connect (msg, "restarted", G_CALLBACK (soap_restarted), NULL);
+	}
 
 	return msg;
 }

@@ -51,6 +51,8 @@ libeews_1_2_la_SOURCES = \
 	$(KERBEROS_FILES) \
 	e-ews-connection.c \
 	e-ews-connection.h \
+	e-ews-connection-utils.c \
+	e-ews-connection-utils.g \
 	e-ews-debug.c \
 	e-ews-debug.h \
 	e-ews-enumtypes.c \
@@ -58,6 +60,8 @@ libeews_1_2_la_SOURCES = \
 	e-ews-item.c \
 	e-ews-item-change.c \
 	e-ews-message.c \
+	e-ews-notification.c \
+	e-ews-notification.h \
 	e-ews-oof-settings.c \
 	e-soap-message.c \
 	e-soap-message.h \
@@ -83,6 +87,7 @@ libeewsincludedir = $(privincludedir)/ews
 libeewsinclude_HEADERS = \
 	ews-errors.h \
 	e-ews-connection.h \
+	e-ews-connection-utils.h \
 	e-ews-debug.h \
 	e-ews-enums.h \
 	e-ews-enumtypes.h \
@@ -90,6 +95,7 @@ libeewsinclude_HEADERS = \
 	e-ews-item.h \
 	e-ews-item-change.h \
 	e-ews-message.h \
+	e-ews-notification.h \
 	e-ews-oof-settings.h \
 	$(NULL)
 

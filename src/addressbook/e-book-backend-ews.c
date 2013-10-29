@@ -90,6 +90,9 @@ struct _EBookBackendEwsPrivate {
 	SyncDelta *dlock;
 
 	GCancellable *cancellable;
+
+	gboolean listen_notifications;
+	gchar *subscription_id;
 };
 
 /* using this for backward compatibility with E_DATA_BOOK_MODE */
@@ -115,6 +118,8 @@ enum {
 /* Forward Declarations */
 static void	e_book_backend_ews_authenticator_init
 				(ESourceAuthenticatorInterface *interface);
+static gpointer ews_update_items_thread (gpointer data);
+
 
 G_DEFINE_TYPE_WITH_CODE (
 	EBookBackendEws,
@@ -2854,7 +2859,7 @@ exit:
 	return contact;
 }
 
-static void
+static gboolean
 ebews_store_distribution_list_items (EBookBackendEws *ebews,
                                      const EwsId *id,
                                      const gchar *d_name,
@@ -2863,23 +2868,26 @@ ebews_store_distribution_list_items (EBookBackendEws *ebews,
 {
 	EContact *contact;
 	EVCardAttribute *attr;
+	gboolean ret;
 
-	g_return_if_fail (ebews->priv->summary != NULL);
+	g_return_val_if_fail (ebews->priv->summary != NULL, FALSE);
 
 	contact = ebews_get_dl_info (ebews, id, d_name, members, error);
 	if (contact == NULL)
-		return;
+		return FALSE;
 
 	attr = e_vcard_attribute_new (NULL, "X-EWS-KIND");
 	e_vcard_add_attribute_with_value (E_VCARD (contact), attr, "DT_DISTLIST");
 
-	e_book_backend_sqlitedb_new_contact (ebews->priv->summary, ebews->priv->folder_id, contact, TRUE, error);
-	e_book_backend_notify_update (E_BOOK_BACKEND (ebews), contact);
+	ret = e_book_backend_sqlitedb_new_contact (ebews->priv->summary, ebews->priv->folder_id, contact, TRUE, error);
+	if (ret)
+		e_book_backend_notify_update (E_BOOK_BACKEND (ebews), contact);
 
 	g_object_unref (contact);
+	return ret;
 }
 
-static void
+static gboolean
 ebews_vcards_append_dl (EBookBackendEws *ebews,
 			const EwsId *id,
                         const gchar *d_name,
@@ -2893,7 +2901,7 @@ ebews_vcards_append_dl (EBookBackendEws *ebews,
 
 	contact = ebews_get_dl_info (ebews, id, d_name, members, error);
 	if (contact == NULL)
-		return;
+		return FALSE;
 
 	attr = e_vcard_attribute_new (NULL, "X-EWS-KIND");
 	e_vcard_add_attribute_with_value (E_VCARD (contact), attr, "DT_DISTLIST");
@@ -2903,6 +2911,8 @@ ebews_vcards_append_dl (EBookBackendEws *ebews,
 
 	g_free (vcard_string);
 	g_object_unref (contact);
+
+	return TRUE;
 }
 
 static gboolean
@@ -2918,9 +2928,10 @@ ebews_fetch_items (EBookBackendEws *ebews,
 	GSList *l;
 	GSList *contact_item_ids = NULL, *dl_ids = NULL;
 	GSList *new_items = NULL;
+	gboolean ret = FALSE;
 
 	if (!book_backend_ews_ensure_connected (ebews, cancellable, error)) {
-		return FALSE;
+		return ret;
 	}
 
 	priv = ebews->priv;
@@ -2944,14 +2955,12 @@ ebews_fetch_items (EBookBackendEws *ebews,
 
 	/* TODO fetch attachments */
 	if (contact_item_ids)
-		e_ews_connection_get_items_sync (
+		if (!e_ews_connection_get_items_sync (
 			cnc, EWS_PRIORITY_MEDIUM,
 			contact_item_ids, "Default", CONTACT_ITEM_PROPS,
 			FALSE, NULL, E_EWS_BODY_TYPE_TEXT, &new_items, NULL, NULL,
-			cancellable, error);
-
-	if (*error)
-		goto cleanup;
+			cancellable, error))
+			goto cleanup;
 
 	if (new_items) {
 		if (store_to_cache)
@@ -2963,13 +2972,12 @@ ebews_fetch_items (EBookBackendEws *ebews,
 
 	/* Get the display names of the distribution lists */
 	if (dl_ids)
-		e_ews_connection_get_items_sync (
+		if (!e_ews_connection_get_items_sync (
 			cnc, EWS_PRIORITY_MEDIUM,
 			dl_ids, "Default", NULL,
 			FALSE, NULL, E_EWS_BODY_TYPE_TEXT, &new_items, NULL, NULL,
-			cancellable, error);
-	if (*error)
-		goto cleanup;
+			cancellable, error))
+			goto cleanup;
 
 	for (l = new_items; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;
@@ -2986,26 +2994,21 @@ ebews_fetch_items (EBookBackendEws *ebews,
 		mb = g_new0 (EwsMailbox, 1);
 		mb->item_id = (EwsId *) id;
 
-		/* expand dl */
-		if (*error)
-			goto cleanup;
-
 		d_name = e_ews_item_get_subject (item);
-		e_ews_connection_expand_dl_sync (
+		if (!e_ews_connection_expand_dl_sync (
 			cnc, EWS_PRIORITY_MEDIUM, mb, &members,
-			&includes_last, cancellable, error);
-		if (*error)
+			&includes_last, cancellable, error))
 			goto cleanup;
 
 		if (store_to_cache)
-			ebews_store_distribution_list_items (ebews, id, d_name, members, error);
+			ret = ebews_store_distribution_list_items (ebews, id, d_name, members, error);
 		else
-			ebews_vcards_append_dl (ebews, id, d_name, members, vcards, error);
+			ret = ebews_vcards_append_dl (ebews, id, d_name, members, vcards, error);
 
 		g_free (mb);
 		g_slist_free_full (members, (GDestroyNotify) e_ews_mailbox_free);
 
-		if (*error)
+		if (!ret)
 			goto cleanup;
 	}
 
@@ -3047,8 +3050,7 @@ ebews_start_sync (gpointer data)
 	EBookBackendEws *ebews;
 	EBookBackendEwsPrivate *priv;
 	GList *list, *link;
-	gchar *sync_state, *status_message = NULL;
-	gboolean includes_last_item;
+	gchar *status_message = NULL;
 	GCancellable *cancellable;
 	GError *error = NULL;
 
@@ -3070,64 +3072,7 @@ ebews_start_sync (gpointer data)
 	g_list_free_full (list, g_object_unref);
 	g_free (status_message);
 
-	sync_state = e_book_backend_sqlitedb_get_sync_data (priv->summary, priv->folder_id, NULL);
-	do
-	{
-		GSList *items_created = NULL, *items_updated = NULL;
-		GSList *items_deleted = NULL;
-		gchar *old_sync_state = sync_state;
-
-		sync_state = NULL;
-
-		e_ews_connection_sync_folder_items_sync (
-			priv->cnc, EWS_PRIORITY_MEDIUM,
-			old_sync_state, priv->folder_id,
-			"IdOnly", NULL, EWS_MAX_FETCH_COUNT,
-			&sync_state,
-			&includes_last_item,
-			&items_created, &items_updated,
-			&items_deleted, cancellable, &error);
-
-		g_free (old_sync_state);
-
-		if (g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_INVALIDSYNCSTATEDATA)) {
-			g_clear_error (&error);
-			e_book_backend_sqlitedb_set_sync_data (priv->summary, priv->folder_id, NULL, &error);
-			ebews_forget_all_contacts (ebews);
-
-			e_ews_connection_sync_folder_items_sync (priv->cnc, EWS_PRIORITY_MEDIUM, NULL, priv->folder_id, "IdOnly", NULL, EWS_MAX_FETCH_COUNT,
-				&sync_state, &includes_last_item, &items_created, &items_updated, &items_deleted,
-				cancellable, &error);
-		}
-
-		if (error)
-			break;
-
-		if (items_deleted)
-			ebews_sync_deleted_items (ebews, items_deleted, &error);
-
-		if (items_created)
-			ebews_fetch_items (ebews, items_created, TRUE, NULL, cancellable, &error);
-
-		if (error) {
-			g_slist_free_full (items_updated, g_object_unref);
-
-			break;
-		}
-
-		if (items_updated)
-			ebews_fetch_items (ebews, items_updated, TRUE, NULL, cancellable, &error);
-
-		if (error)
-			break;
-
-		e_book_backend_sqlitedb_set_sync_data (priv->summary, priv->folder_id, sync_state, &error);
-	} while (!error && !includes_last_item);
-
-	if (!error)
-		e_book_backend_sqlitedb_set_is_populated (priv->summary, priv->folder_id, TRUE, &error);
-
-	g_free (sync_state);
+	ews_update_items_thread (g_object_ref (ebews));
 
 	/* hide progress message when done */
 	list = e_book_backend_list_views (E_BOOK_BACKEND (ebews));
@@ -3606,6 +3551,245 @@ e_book_backend_ews_get_backend_property (EBookBackend *backend,
 		get_backend_property (backend, prop_name);
 }
 
+static gpointer
+handle_notifications_thread (gpointer data)
+{
+	EBookBackendEws *ebews = data;
+
+	PRIV_LOCK (ebews->priv);
+
+	if (ebews->priv->cnc == NULL)
+		goto exit;
+
+	if (ebews->priv->listen_notifications) {
+		GSList *folders = NULL;
+
+		if (ebews->priv->subscription_id != NULL)
+			goto exit;
+
+		folders = g_slist_prepend (folders, ebews->priv->folder_id);
+		e_ews_connection_enable_notifications_sync (
+				ebews->priv->cnc,
+				folders,
+				NULL,
+				&ebews->priv->subscription_id,
+				NULL,
+				NULL);
+		g_slist_free (folders);
+	} else {
+		if (ebews->priv->subscription_id == NULL)
+			goto exit;
+
+		e_ews_connection_disable_notifications_sync (
+				ebews->priv->cnc,
+				ebews->priv->subscription_id,
+				NULL,
+				NULL);
+		g_free (ebews->priv->subscription_id);
+		ebews->priv->subscription_id = NULL;
+	}
+
+ exit:
+	PRIV_UNLOCK (ebews->priv);
+	g_object_unref (ebews);
+	return NULL;
+}
+
+static void
+ebews_listen_notifications_cb (EBookBackendEws *ebews,
+			       GParamSpec *spec,
+			       CamelEwsSettings *ews_settings)
+{
+	GThread *thread;
+
+	PRIV_LOCK (ebews->priv);
+	if (ebews->priv->cnc == NULL) {
+		PRIV_UNLOCK (ebews->priv);
+		return;
+	}
+
+	if (!e_ews_connection_satisfies_server_version (ebews->priv->cnc, E_EWS_EXCHANGE_2010_SP1)) {
+		PRIV_UNLOCK (ebews->priv);
+		return;
+	}
+
+	ebews->priv->listen_notifications = camel_ews_settings_get_listen_notifications (ews_settings);
+	PRIV_UNLOCK (ebews->priv);
+
+	thread = g_thread_new (NULL, handle_notifications_thread, g_object_ref (ebews));
+	g_thread_unref (thread);
+}
+
+static gpointer
+ews_update_items_thread (gpointer data)
+{
+	EBookBackendEws *ebews = data;
+	EBookBackendEwsPrivate *priv;
+	gchar *sync_state;
+	GError *error = NULL;
+	gboolean includes_last_item;
+
+	priv = ebews->priv;
+
+	sync_state = e_book_backend_sqlitedb_get_sync_data (priv->summary, priv->folder_id, NULL);
+	do {
+		GSList *items_created = NULL;
+		GSList *items_updated = NULL;
+		GSList *items_deleted = NULL;
+		gchar *old_sync_state = sync_state;
+
+		sync_state = NULL;
+		includes_last_item = TRUE;
+
+		e_ews_connection_sync_folder_items_sync (
+				priv->cnc,
+				EWS_PRIORITY_MEDIUM,
+				old_sync_state,
+				priv->folder_id,
+				"IdOnly",
+				NULL,
+				EWS_MAX_FETCH_COUNT,
+				&sync_state,
+				&includes_last_item,
+				&items_created,
+				&items_updated,
+				&items_deleted,
+				priv->cancellable,
+				&error);
+
+		g_free (old_sync_state);
+
+		if (error != NULL) {
+			if (g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_INVALIDSYNCSTATEDATA)) {
+				g_clear_error (&error);
+				e_book_backend_sqlitedb_set_sync_data (priv->summary, priv->folder_id, NULL, &error);
+				if (error != NULL)
+					break;
+
+				ebews_forget_all_contacts (ebews);
+
+				if (!e_ews_connection_sync_folder_items_sync (
+						priv->cnc,
+						EWS_PRIORITY_MEDIUM,
+						NULL,
+						priv->folder_id,
+						"IdOnly",
+						NULL,
+						EWS_MAX_FETCH_COUNT,
+						&sync_state,
+						&includes_last_item,
+						&items_created,
+						&items_updated,
+						&items_deleted,
+						priv->cancellable,
+						&error))
+					break;
+			} else {
+					break;
+			}
+		}
+
+		if (items_deleted) {
+			ebews_sync_deleted_items (
+					ebews,
+					items_deleted, /* freed inside the function */
+					&error);
+			if (error != NULL) {
+				g_slist_free_full (items_created, g_object_unref);
+				g_slist_free_full (items_updated, g_object_unref);
+				break;
+			}
+		}
+
+		if (items_created) {
+			ebews_fetch_items (
+					ebews,
+					items_created, /* freed insite the function */
+					TRUE,
+					NULL,
+					priv->cancellable,
+					&error);
+			if (error != NULL) {
+				g_slist_free_full (items_updated, g_object_unref);
+				break;
+			};
+		}
+
+		if (items_updated) {
+			ebews_fetch_items (
+					ebews,
+					items_updated, /* freed inside the function */
+					TRUE,
+					NULL,
+					priv->cancellable,
+					&error);
+			if (error != NULL)
+				break;
+		}
+
+		e_book_backend_sqlitedb_set_sync_data (priv->summary, priv->folder_id, sync_state, &error);
+		if (error != NULL)
+			break;
+	} while (!includes_last_item);
+
+	if (error == NULL)
+		e_book_backend_sqlitedb_set_is_populated (priv->summary, priv->folder_id, TRUE, &error);
+
+	if (error != NULL) {
+		g_warning ("%s: %s", G_STRFUNC, error->message);
+		g_clear_error (&error);
+	}
+
+	g_free (sync_state);
+	g_object_unref (ebews);
+
+	return NULL;
+}
+
+static void
+ebews_server_notification_cb (EBookBackendEws *ebews,
+			      GSList *events,
+			      EEwsConnection *cnc)
+{
+	GSList *l;
+	gboolean update_folder = FALSE;
+
+	g_return_if_fail (ebews != NULL);
+	g_return_if_fail (ebews->priv != NULL);
+
+	for (l = events; l != NULL; l = l->next) {
+		EEwsNotificationEvent *event = l->data;
+
+		switch (event->type) {
+			case E_EWS_NOTIFICATION_EVENT_CREATED:
+			case E_EWS_NOTIFICATION_EVENT_DELETED:
+			case E_EWS_NOTIFICATION_EVENT_MODIFIED:
+				PRIV_LOCK (ebews->priv);
+				if (g_strcmp0 (event->folder_id, ebews->priv->folder_id) == 0)
+					update_folder = TRUE;
+				PRIV_UNLOCK (ebews->priv);
+				break;
+			case E_EWS_NOTIFICATION_EVENT_MOVED:
+			case E_EWS_NOTIFICATION_EVENT_COPIED:
+				PRIV_LOCK (ebews->priv);
+				if (g_strcmp0 (event->folder_id, ebews->priv->folder_id) == 0 ||
+				    g_strcmp0 (event->old_folder_id, ebews->priv->folder_id) == 0)
+					update_folder = TRUE;
+				PRIV_UNLOCK (ebews->priv);
+				break;
+			default:
+				return;
+		}
+	}
+
+	if (update_folder) {
+		GThread *thread;
+
+		thread = g_thread_new (NULL, ews_update_items_thread, g_object_ref (ebews));
+		g_thread_unref (thread);
+	}
+}
+
 static void
 e_book_backend_ews_open (EBookBackend *backend,
                          EDataBook *book,
@@ -3613,32 +3797,58 @@ e_book_backend_ews_open (EBookBackend *backend,
                          GCancellable *cancellable,
                          gboolean only_if_exists)
 {
-	EBookBackendEws *cbews;
+	CamelEwsSettings *ews_settings;
+	EBookBackendEws *ebews;
+	EBookBackendEwsPrivate * priv;
 	ESource *source;
 	GError *error = NULL;
 
-	cbews = E_BOOK_BACKEND_EWS (backend);
+	if (e_book_backend_is_opened (backend))
+		return;
+
+	ebews = E_BOOK_BACKEND_EWS (backend);
+	priv = ebews->priv;
 
 	source = e_backend_get_source (E_BACKEND (backend));
 	e_book_backend_ews_load_source (backend, source, only_if_exists, &error);
+	ews_settings = book_backend_ews_get_collection_settings (ebews);
 
 	if (error == NULL) {
 		gboolean need_to_authenticate;
 
-		PRIV_LOCK (cbews->priv);
-		need_to_authenticate = cbews->priv->cnc == NULL && e_backend_get_online (E_BACKEND (backend));
-		PRIV_UNLOCK (cbews->priv);
+		PRIV_LOCK (priv);
+		need_to_authenticate = priv->cnc == NULL && e_backend_get_online (E_BACKEND (backend));
+		PRIV_UNLOCK (priv);
 
 		if (need_to_authenticate) {
 			e_backend_authenticate_sync (
-				E_BACKEND (backend),
-				E_SOURCE_AUTHENTICATOR (backend),
-				cancellable, &error);
+					E_BACKEND (backend),
+					E_SOURCE_AUTHENTICATOR (backend),
+					cancellable, &error);
 		}
+	}
+
+	if (error == NULL) {
+		priv->listen_notifications = camel_ews_settings_get_listen_notifications (ews_settings);
+
+		if (priv->listen_notifications)
+			ebews_listen_notifications_cb (ebews, NULL, ews_settings);
 	}
 
 	convert_error_to_edb_error (&error);
 	e_data_book_respond_open (book, opid, error);
+
+	g_signal_connect_swapped (
+			priv->cnc,
+			"server-notification",
+			G_CALLBACK (ebews_server_notification_cb),
+			ebews);
+
+	g_signal_connect_swapped (
+			ews_settings,
+			"notify::listen-notifications",
+			G_CALLBACK (ebews_listen_notifications_cb),
+			ebews);
 }
 
 /**
@@ -3712,9 +3922,13 @@ e_book_backend_ews_dispose (GObject *object)
 {
 	EBookBackendEws *bews;
 	EBookBackendEwsPrivate *priv;
+	CamelEwsSettings *ews_settings;
 
 	bews = E_BOOK_BACKEND_EWS (object);
 	priv = bews->priv;
+
+	ews_settings = book_backend_ews_get_collection_settings (bews);
+	g_signal_handlers_disconnect_by_func (ews_settings, ebews_listen_notifications_cb, bews);
 
 	if (priv->cancellable)
 		g_cancellable_cancel (priv->cancellable);
@@ -3740,9 +3954,21 @@ e_book_backend_ews_dispose (GObject *object)
 	}
 
 	if (priv->cnc) {
-		g_object_unref (priv->cnc);
-		priv->cnc = NULL;
+		g_signal_handlers_disconnect_by_func (priv->cnc, ebews_server_notification_cb, bews);
+
+		if (priv->listen_notifications && priv->subscription_id != NULL) {
+			e_ews_connection_disable_notifications_sync (
+					priv->cnc,
+					priv->subscription_id,
+					NULL,
+					NULL);
+		}
+
+		g_clear_object (&priv->cnc);
 	}
+
+	g_free (priv->subscription_id);
+	priv->subscription_id = NULL;
 
 	g_free (priv->folder_id);
 	priv->folder_id = NULL;

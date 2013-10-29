@@ -45,7 +45,8 @@ ESoapMessage *	e_ews_message_new_with_header	(const gchar *uri,
 						 const gchar *attribute_value,
 						 EEwsServerVersion server_version,
 						 EEwsServerVersion minimum_version,
-						 gboolean force_minimum_version);
+						 gboolean force_minimum_version,
+						 gboolean standard_handlers);
 void		e_ews_message_write_string_parameter
 						(ESoapMessage *msg,
 						 const gchar *name,

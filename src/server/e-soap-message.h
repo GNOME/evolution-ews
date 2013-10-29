@@ -51,7 +51,8 @@ ESoapMessage *	e_soap_message_new		(const gchar *method,
 						 gboolean standalone,
 						 const gchar *xml_encoding,
 						 const gchar *env_prefix,
-						 const gchar *env_uri);
+						 const gchar *env_uri,
+						 gboolean standard_handlers);
 ESoapMessage *	e_soap_message_new_from_uri	(const gchar *method,
 						 SoupURI *uri,
 						 gboolean standalone,

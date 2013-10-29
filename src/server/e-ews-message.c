@@ -37,14 +37,15 @@ e_ews_message_new_with_header (const gchar *uri,
                                const gchar *attribute_value,
 			       EEwsServerVersion server_version,
                                EEwsServerVersion minimum_version,
-			       gboolean force_minimum_version)
+			       gboolean force_minimum_version,
+			       gboolean standard_handlers)
 {
 	ESoapMessage *msg;
 	const gchar *server_ver = "Exchange2007";
 	EEwsServerVersion version;
 
 	msg = e_soap_message_new (
-		SOUP_METHOD_POST, uri, FALSE, NULL, NULL, NULL);
+		SOUP_METHOD_POST, uri, FALSE, NULL, NULL, NULL, standard_handlers);
 	if (msg == NULL) {
 		g_warning (G_STRLOC ": Could not build SOAP message");
 		return NULL;

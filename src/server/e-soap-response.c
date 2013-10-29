@@ -96,6 +96,7 @@ e_soap_response_new (void)
 /**
  * e_soap_response_new_from_string:
  * @xmlstr: the XML string to parse.
+ * @xmlstr_len: XML string's length or -1 for a null-terminated string
  *
  * Create a new #ESoapResponse object from the XML string contained
  * in @xmlstr.
@@ -104,14 +105,15 @@ e_soap_response_new (void)
  * error).
  */
 ESoapResponse *
-e_soap_response_new_from_string (const gchar *xmlstr)
+e_soap_response_new_from_string (const gchar *xmlstr,
+				 gint xmlstr_length)
 {
 	ESoapResponse *response;
 
 	g_return_val_if_fail (xmlstr != NULL, NULL);
 
 	response = g_object_new (E_TYPE_SOAP_RESPONSE, NULL);
-	if (!e_soap_response_from_string (response, xmlstr)) {
+	if (!e_soap_response_from_string (response, xmlstr, xmlstr_length)) {
 		g_object_unref (response);
 		return NULL;
 	}
@@ -169,6 +171,7 @@ parse_parameters (ESoapResponse *response,
  * e_soap_response_from_string:
  * @response: the #ESoapResponse object.
  * @xmlstr: XML string to parse.
+ * @xmlstr_len: XML string's length or -1 for a null-terminated string
  *
  * Parses the string contained in @xmlstr and sets all properties from
  * it in the @response object.
@@ -177,7 +180,8 @@ parse_parameters (ESoapResponse *response,
  */
 gboolean
 e_soap_response_from_string (ESoapResponse *response,
-                             const gchar *xmlstr)
+                             const gchar *xmlstr,
+			     gint xmlstr_length)
 {
 	xmlDocPtr xmldoc;
 
@@ -185,7 +189,7 @@ e_soap_response_from_string (ESoapResponse *response,
 	g_return_val_if_fail (xmlstr != NULL, FALSE);
 
 	/* parse the string */
-	xmldoc = xmlParseMemory (xmlstr, strlen (xmlstr));
+	xmldoc = xmlParseMemory (xmlstr, xmlstr_length == -1 ? strlen (xmlstr) : xmlstr_length);
 	if (!xmldoc)
 		return FALSE;
 

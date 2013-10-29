@@ -31,6 +31,7 @@
 struct _CamelEwsSettingsPrivate {
 	GMutex property_lock;
 	gboolean check_all;
+	gboolean listen_notifications;
 	gboolean filter_junk;
 	gboolean filter_junk_inbox;
 	gboolean oab_offline;
@@ -49,6 +50,7 @@ enum {
 	PROP_0,
 	PROP_AUTH_MECHANISM,
 	PROP_CHECK_ALL,
+	PROP_LISTEN_NOTIFICATIONS,
 	PROP_EMAIL,
 	PROP_FILTER_JUNK,
 	PROP_FILTER_JUNK_INBOX,
@@ -89,6 +91,12 @@ ews_settings_set_property (GObject *object,
 
 		case PROP_CHECK_ALL:
 			camel_ews_settings_set_check_all (
+				CAMEL_EWS_SETTINGS (object),
+				g_value_get_boolean (value));
+			return;
+
+		case PROP_LISTEN_NOTIFICATIONS:
+			camel_ews_settings_set_listen_notifications (
 				CAMEL_EWS_SETTINGS (object),
 				g_value_get_boolean (value));
 			return;
@@ -211,6 +219,13 @@ ews_settings_get_property (GObject *object,
 			g_value_set_boolean (
 				value,
 				camel_ews_settings_get_check_all (
+				CAMEL_EWS_SETTINGS (object)));
+			return;
+
+		case PROP_LISTEN_NOTIFICATIONS:
+			g_value_set_boolean (
+				value,
+				camel_ews_settings_get_listen_notifications (
 				CAMEL_EWS_SETTINGS (object)));
 			return;
 
@@ -375,6 +390,18 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 			"check-all",
 			"Check All",
 			"Check all folders for new messages",
+			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_LISTEN_NOTIFICATIONS,
+		g_param_spec_boolean (
+			"listen-notifications",
+			"Listen Notifications",
+			"Whether to listen for server notification",
 			FALSE,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
@@ -595,6 +622,47 @@ camel_ews_settings_set_check_all (CamelEwsSettings *settings,
 	settings->priv->check_all = check_all;
 
 	g_object_notify (G_OBJECT (settings), "check-all");
+}
+
+/**
+ * camel_ews_settings_get_listen_notifications:
+ * @settings: a #CamelEwsSettings
+ *
+ * Returns whether to listen for server notifications.
+ *
+ * Returns: whether to listen for server notifications
+ *
+ * Since: 3.12
+ **/
+gboolean
+camel_ews_settings_get_listen_notifications (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), FALSE);
+
+	return settings->priv->listen_notifications;
+}
+
+/**
+ * camel_ews_settings_set_listen_notifications:
+ * @settings: a #CamelEwsSettings
+ * @listen_notifications: whether to listen for server notifications
+ *
+ * Sets whether to listen for server notifications.
+ *
+ * Since: 3.12
+ **/
+void
+camel_ews_settings_set_listen_notifications (CamelEwsSettings *settings,
+					     gboolean listen_notifications)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	if ((settings->priv->listen_notifications ? 1 : 0) == (listen_notifications ? 1 : 0))
+		return;
+
+	settings->priv->listen_notifications = listen_notifications;
+
+	g_object_notify (G_OBJECT (settings), "listen-notifications");
 }
 
 /**

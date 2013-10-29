@@ -47,6 +47,8 @@ static CamelProviderConfEntry ews_conf_entries[] = {
 	  N_("Checking for new mail") },
 	{ CAMEL_PROVIDER_CONF_CHECKBOX, "check-all", NULL,
 	  N_("C_heck for new messages in all folders"), "1" },
+	{ CAMEL_PROVIDER_CONF_CHECKBOX, "listen-notifications", NULL,
+	  N_("_Listen for server change notifications"), "1" },
 	{ CAMEL_PROVIDER_CONF_SECTION_END },
 
 	{ CAMEL_PROVIDER_CONF_SECTION_START, "general", NULL, N_("Options") },

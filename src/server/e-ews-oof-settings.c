@@ -483,7 +483,8 @@ ews_oof_settings_initable_init_async (GAsyncInitable *initable,
 		NULL,
 		version,
 		E_EWS_EXCHANGE_2007_SP1,
-		FALSE);
+		FALSE,
+		TRUE);
 
 	e_soap_message_start_element (message, "Mailbox", NULL, NULL);
 	e_ews_message_write_string_parameter (
@@ -999,7 +1000,8 @@ e_ews_oof_settings_submit (EEwsOofSettings *settings,
 		NULL,
 		version,
 		E_EWS_EXCHANGE_2007_SP1,
-		FALSE);
+		FALSE,
+		TRUE);
 
 	/* <Mailbox> */
 

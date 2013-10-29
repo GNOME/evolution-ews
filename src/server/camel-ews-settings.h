@@ -61,6 +61,11 @@ gboolean	camel_ews_settings_get_check_all
 void		camel_ews_settings_set_check_all
 						(CamelEwsSettings *settings,
 						 gboolean check_all);
+gboolean	camel_ews_settings_get_listen_notifications
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_listen_notifications
+						(CamelEwsSettings *settings,
+						 gboolean listen_notifications);
 const gchar *	camel_ews_settings_get_email	(CamelEwsSettings *settings);
 gchar *		camel_ews_settings_dup_email	(CamelEwsSettings *settings);
 void		camel_ews_settings_set_email	(CamelEwsSettings *settings,

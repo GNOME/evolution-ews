@@ -65,6 +65,9 @@
 
 #define FINFO_REFRESH_INTERVAL 60
 
+#define UPDATE_LOCK(x) (g_rec_mutex_lock(&(x)->priv->update_lock))
+#define UPDATE_UNLOCK(x) (g_rec_mutex_unlock(&(x)->priv->update_lock))
+
 struct _CamelEwsStorePrivate {
 	time_t last_refresh_time;
 	GMutex get_finfo_lock;
@@ -72,6 +75,15 @@ struct _CamelEwsStorePrivate {
 	GMutex connection_lock;
 	gboolean has_ooo_set;
 	CamelEwsStoreOooAlertState ooo_alert_state;
+
+	gboolean listen_notifications;
+	guint update_folder_id;
+	guint update_folder_list_id;
+	gchar *subscription_id;
+	GCancellable *updates_cancellable;
+	GSList *update_folder_names;
+	GRecMutex update_lock;
+
 	GSList *public_folders; /* EEwsFolder * objects */
 };
 
@@ -578,12 +590,9 @@ ews_update_folder_hierarchy (CamelEwsStore *ews_store,
 	camel_ews_store_summary_store_string_val (ews_store->summary, "sync_state", sync_state);
 	camel_ews_store_summary_save (ews_store->summary, NULL);
 
-	g_slist_foreach (folders_created, (GFunc) g_object_unref, NULL);
-	g_slist_foreach (folders_updated, (GFunc) g_object_unref, NULL);
-	g_slist_foreach (folders_deleted, (GFunc) g_free, NULL);
-	g_slist_free (folders_created);
-	g_slist_free (folders_deleted);
-	g_slist_free (folders_updated);
+	g_slist_free_full (folders_created, g_object_unref);
+	g_slist_free_full (folders_updated, g_object_unref);
+	g_slist_free_full (folders_deleted, g_free);
 	g_free (sync_state);
 }
 
@@ -593,7 +602,6 @@ ews_update_has_ooo_set (CamelSession *session,
 			gpointer user_data,
 			GError **error)
 {
-
 	CamelEwsStore *ews_store = user_data;
 	EEwsOofSettings *oof_settings;
 	EEwsOofState oof_state;
@@ -624,6 +632,481 @@ ews_update_has_ooo_set (CamelSession *session,
 	camel_operation_pop_message (cancellable);
 }
 
+struct ScheduleUpdateData
+{
+	GCancellable *cancellable;
+	CamelEwsStore *ews_store;
+	guint expected_id;
+};
+
+static void
+free_schedule_update_data (gpointer ptr)
+{
+	struct ScheduleUpdateData *sud = ptr;
+
+	if (sud == NULL)
+		return;
+
+	g_clear_object (&sud->cancellable);
+	g_clear_object (&sud->ews_store);
+
+	g_free (sud);
+}
+
+static gpointer
+camel_ews_folder_list_update_thread (gpointer user_data)
+{
+	struct ScheduleUpdateData *sud = user_data;
+	CamelEwsStore *ews_store = sud->ews_store;
+	GSList *created = NULL;
+	GSList *updated = NULL;
+	GSList *deleted = NULL;
+	gchar *old_sync_state = NULL;
+	gchar *new_sync_state;
+	gboolean includes_last;
+
+	if (g_cancellable_is_cancelled (sud->cancellable))
+		goto exit;
+
+	old_sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
+	if (!e_ews_connection_sync_folder_hierarchy_sync (
+			ews_store->priv->connection,
+			EWS_PRIORITY_LOW,
+			old_sync_state,
+			&new_sync_state,
+			&includes_last,
+			&created,
+			&updated,
+			&deleted,
+			sud->cancellable,
+			NULL))
+		goto exit;
+
+	if (g_cancellable_is_cancelled (sud->cancellable)) {
+		g_slist_free_full (created, g_object_unref);
+		g_slist_free_full (updated, g_object_unref);
+		g_slist_free_full (deleted, g_free);
+		g_free (new_sync_state);
+
+		goto exit;
+	}
+
+	if (created != NULL || updated != NULL || deleted != NULL) {
+		ews_update_folder_hierarchy (
+				ews_store,
+				new_sync_state, /* freed in the function */
+				includes_last,
+				created, /* freed in the function */
+				deleted, /* freed in the function */
+				updated, /* freed in the function */
+				NULL);
+	} else {
+		g_slist_free_full (created, g_object_unref);
+		g_slist_free_full (updated, g_object_unref);
+		g_slist_free_full (deleted, g_free);
+		g_free (new_sync_state);
+	}
+
+exit:
+	g_free (old_sync_state);
+	free_schedule_update_data (sud);
+	return NULL;
+}
+
+static gpointer
+camel_ews_folder_update_thread (gpointer user_data)
+{
+	struct ScheduleUpdateData *sud = user_data;
+	CamelEwsStore *ews_store = sud->ews_store;
+	GSList *l;
+
+	g_return_val_if_fail (sud != NULL, NULL);
+
+	for (l = ews_store->priv->update_folder_names; l != NULL && !g_cancellable_is_cancelled (sud->cancellable); l = l->next) {
+		const gchar *folder_name = l->data;
+		CamelFolder *folder;
+		GError *error = NULL;
+
+		folder = camel_store_get_folder_sync (CAMEL_STORE (ews_store), folder_name, 0, sud->cancellable, NULL);
+		if (folder == NULL)
+			continue;
+
+		camel_folder_refresh_info_sync (folder, sud->cancellable, &error);
+		g_object_unref (folder);
+
+		if (error != NULL) {
+			g_warning ("%s: %s\n", G_STRFUNC, error->message);
+			g_clear_error (&error);
+			break;
+		}
+	}
+
+	g_slist_free_full (ews_store->priv->update_folder_names, g_free);
+	ews_store->priv->update_folder_names = NULL;
+	free_schedule_update_data (sud);
+	return NULL;
+}
+
+static void
+run_update_thread (CamelEwsStore *ews_store,
+		   gboolean folder_list,
+		   GCancellable *cancellable)
+{
+	GThread *thread;
+	struct ScheduleUpdateData *sud;
+
+	g_return_if_fail (ews_store != NULL);
+	g_return_if_fail (cancellable != NULL);
+
+	sud = g_new0 (struct ScheduleUpdateData, 1);
+	sud->ews_store = g_object_ref (ews_store);
+	sud->cancellable = g_object_ref (cancellable);
+
+	thread = g_thread_new (
+		NULL,
+		folder_list ? camel_ews_folder_list_update_thread : camel_ews_folder_update_thread,
+		sud);
+	g_thread_unref (thread);
+}
+
+static gboolean
+folder_update_cb (gpointer user_data)
+{
+	struct ScheduleUpdateData *sud = user_data;
+
+	g_return_val_if_fail (sud != NULL, FALSE);
+
+	if (g_cancellable_is_cancelled (sud->cancellable))
+		return FALSE;
+
+	g_return_val_if_fail (sud->ews_store != NULL, FALSE);
+	g_return_val_if_fail (sud->ews_store->priv != NULL, FALSE);
+
+	UPDATE_LOCK (sud->ews_store);
+	if (sud->expected_id != sud->ews_store->priv->update_folder_id)
+		goto exit;
+
+	sud->ews_store->priv->update_folder_id = 0;
+
+	if (!g_cancellable_is_cancelled (sud->cancellable))
+		run_update_thread (sud->ews_store, FALSE, sud->cancellable);
+
+exit:
+	UPDATE_UNLOCK (sud->ews_store);
+	return FALSE;
+}
+
+static void
+get_folder_names_to_update (gpointer key,
+			    gpointer value,
+			    gpointer user_data)
+{
+	CamelEwsStore *ews_store = user_data;
+	const gchar *folder_id = key;
+	gchar *folder_name;
+
+	folder_name = camel_ews_store_summary_get_folder_full_name (ews_store->summary, folder_id, NULL);
+	if (folder_name != NULL)
+		ews_store->priv->update_folder_names = g_slist_prepend (ews_store->priv->update_folder_names, folder_name);
+}
+
+static void
+schedule_folder_update (CamelEwsStore *ews_store,
+			GHashTable *folder_ids)
+{
+	struct ScheduleUpdateData *sud;
+	CamelSettings *settings;
+
+	g_return_if_fail (ews_store != NULL);
+	g_return_if_fail (ews_store->priv != NULL);
+
+	UPDATE_LOCK (ews_store);
+	g_hash_table_foreach (folder_ids, get_folder_names_to_update, ews_store);
+
+	if (ews_store->priv->update_folder_names == NULL)
+		goto exit;
+
+	sud = g_new0 (struct ScheduleUpdateData, 1);
+	sud->ews_store = g_object_ref (ews_store);
+	sud->cancellable = g_object_ref (ews_store->priv->updates_cancellable);
+
+	if (ews_store->priv->update_folder_id > 0)
+		g_source_remove (ews_store->priv->update_folder_id);
+
+	settings = camel_service_ref_settings (CAMEL_SERVICE (ews_store));
+
+	ews_store->priv->update_folder_id = g_timeout_add_seconds_full (
+								G_PRIORITY_LOW,
+								1,
+								folder_update_cb,
+								sud,
+								free_schedule_update_data);
+	sud->expected_id = ews_store->priv->update_folder_id;
+
+	g_object_unref (settings);
+
+exit:
+	UPDATE_UNLOCK (ews_store);
+}
+
+static gboolean
+folder_list_update_cb (gpointer user_data)
+{
+	struct ScheduleUpdateData *sud = user_data;
+
+	g_return_val_if_fail (sud != NULL, FALSE);
+
+	if (g_cancellable_is_cancelled (sud->cancellable))
+		return FALSE;
+
+	g_return_val_if_fail (sud->ews_store != NULL, FALSE);
+	g_return_val_if_fail (sud->ews_store->priv != NULL, FALSE);
+
+	if (sud->expected_id != sud->ews_store->priv->update_folder_list_id)
+		goto exit;
+
+	sud->ews_store->priv->update_folder_list_id = 0;
+
+	if (!g_cancellable_is_cancelled (sud->cancellable))
+		run_update_thread (sud->ews_store, TRUE, sud->cancellable);
+
+exit:
+	return FALSE;
+}
+
+static void
+schedule_folder_list_update (CamelEwsStore *ews_store)
+{
+	struct ScheduleUpdateData *sud;
+	CamelSettings *settings;
+
+	g_return_if_fail (ews_store != NULL);
+	g_return_if_fail (ews_store->priv != NULL);
+
+	UPDATE_LOCK (ews_store);
+	if (!ews_store->priv->updates_cancellable)
+		goto exit;
+
+	sud = g_new0 (struct ScheduleUpdateData, 1);
+	sud->ews_store = g_object_ref (ews_store);
+	sud->cancellable = g_object_ref (ews_store->priv->updates_cancellable);
+
+	if (ews_store->priv->update_folder_list_id > 0)
+		g_source_remove (ews_store->priv->update_folder_list_id);
+
+	settings = camel_service_ref_settings (CAMEL_SERVICE (ews_store));
+
+	ews_store->priv->update_folder_list_id = g_timeout_add_seconds_full (
+								G_PRIORITY_LOW,
+								1,
+								folder_list_update_cb,
+								sud,
+								free_schedule_update_data);
+	sud->expected_id = ews_store->priv->update_folder_list_id;
+
+	g_object_unref (settings);
+
+exit:
+	UPDATE_UNLOCK (ews_store);
+}
+
+static void
+camel_ews_store_server_notification_cb (CamelEwsStore *ews_store,
+					GSList *events,
+					EEwsConnection *cnc)
+{
+	GSList *l;
+	gboolean update_folder = FALSE;
+	gboolean update_folder_list = FALSE;
+	GHashTable *folder_ids;
+
+	g_return_if_fail (ews_store != NULL);
+	g_return_if_fail (ews_store->priv != NULL);
+
+	folder_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+
+	for (l = events; l != NULL; l = l->next) {
+		EEwsNotificationEvent *event = l->data;
+
+		switch (event->type) {
+			case E_EWS_NOTIFICATION_EVENT_CREATED:
+			case E_EWS_NOTIFICATION_EVENT_DELETED:
+			case E_EWS_NOTIFICATION_EVENT_MODIFIED:
+				UPDATE_LOCK (ews_store);
+				if (event->is_item) {
+					update_folder = TRUE;
+					if (!g_hash_table_lookup (folder_ids, event->folder_id))
+						g_hash_table_insert (
+							folder_ids, g_strdup (event->folder_id), GINT_TO_POINTER (1));
+				} else {
+					update_folder_list = TRUE;
+				}
+				UPDATE_UNLOCK (ews_store);
+				break;
+			case E_EWS_NOTIFICATION_EVENT_MOVED:
+			case E_EWS_NOTIFICATION_EVENT_COPIED:
+				UPDATE_LOCK (ews_store);
+				if (event->is_item) {
+					update_folder = TRUE;
+					if (!g_hash_table_lookup (folder_ids, event->old_folder_id))
+						g_hash_table_insert (
+							folder_ids, g_strdup (event->old_folder_id), GINT_TO_POINTER (1));
+
+					if (!g_hash_table_lookup (folder_ids, event->folder_id))
+						g_hash_table_insert (
+							folder_ids, g_strdup (event->folder_id), GINT_TO_POINTER (1));
+				} else {
+					update_folder_list = TRUE;
+				}
+				UPDATE_UNLOCK (ews_store);
+				break;
+			default:
+				break;
+		}
+	}
+
+	if (update_folder)
+		schedule_folder_update (ews_store, folder_ids);
+	if (update_folder_list)
+		schedule_folder_list_update (ews_store);
+
+	g_hash_table_destroy (folder_ids);
+}
+
+struct HandleNotificationsData {
+	CamelEwsStore *ews_store;
+	GSList *folders;
+};
+
+static void
+handle_notifications_data_free (struct HandleNotificationsData *hnd)
+{
+	if (hnd == NULL)
+		return;
+
+	if (hnd->ews_store)
+		g_object_unref (hnd->ews_store);
+
+	g_slist_free_full (hnd->folders, g_free);
+	g_free (hnd);
+}
+
+static gpointer
+start_notifications_thread (gpointer data)
+{
+	struct HandleNotificationsData *hnd = data;
+	CamelEwsStore *ews_store = hnd->ews_store;
+
+	if (ews_store->priv->connection == NULL)
+		goto exit;
+
+	if (ews_store->priv->listen_notifications) {
+		e_ews_connection_enable_notifications_sync (
+				ews_store->priv->connection,
+				hnd->folders,
+				NULL,
+				&ews_store->priv->subscription_id,
+				NULL,
+				NULL);
+	} else {
+		if (ews_store->priv->subscription_id == NULL)
+			goto exit;
+
+		e_ews_connection_disable_notifications_sync (
+				ews_store->priv->connection,
+				ews_store->priv->subscription_id,
+				NULL,
+				NULL);
+		g_free (ews_store->priv->subscription_id);
+		ews_store->priv->subscription_id = NULL;
+	}
+
+ exit:
+	handle_notifications_data_free (hnd);
+	return NULL;
+}
+
+static gpointer
+restart_notifications_thread (gpointer data)
+{
+	struct HandleNotificationsData *hnd = data;
+	CamelEwsStore *ews_store = hnd->ews_store;
+
+	if (ews_store->priv->connection == NULL)
+		goto exit;
+
+	if (!ews_store->priv->listen_notifications)
+		goto exit;
+
+	if (ews_store->priv->subscription_id != NULL) {
+		e_ews_connection_disable_notifications_sync (
+				ews_store->priv->connection,
+				ews_store->priv->subscription_id,
+				NULL,
+				NULL);
+		g_free (ews_store->priv->subscription_id);
+		ews_store->priv->subscription_id = NULL;
+	}
+
+	e_ews_connection_enable_notifications_sync (
+			ews_store->priv->connection,
+			hnd->folders,
+			NULL,
+			&ews_store->priv->subscription_id,
+			NULL,
+			NULL);
+
+ exit:
+	handle_notifications_data_free (hnd);
+	return NULL;
+}
+
+static void
+handle_notifications (CamelEwsStore *ews_store,
+		      CamelEwsSettings *ews_settings,
+		      gboolean restart)
+{
+	GThread *thread;
+	struct HandleNotificationsData *hnd;
+
+	if (ews_store->priv->connection == NULL)
+		return;
+
+	if (!e_ews_connection_satisfies_server_version (ews_store->priv->connection, E_EWS_EXCHANGE_2010_SP1))
+		return;
+
+	hnd = g_new0 (struct HandleNotificationsData, 1);
+	hnd->ews_store = g_object_ref (ews_store);
+
+	if (!camel_ews_settings_get_check_all (ews_settings)) {
+		gchar *inbox;
+
+		inbox = camel_ews_store_summary_get_folder_id_from_folder_type (
+			ews_store->summary, CAMEL_FOLDER_TYPE_INBOX);
+		hnd->folders = g_slist_prepend (hnd->folders, inbox);
+	}
+
+	ews_store->priv->listen_notifications = camel_ews_settings_get_listen_notifications (ews_settings);
+	thread = g_thread_new (NULL, restart ? restart_notifications_thread : start_notifications_thread, hnd);
+	g_thread_unref (thread);
+}
+
+static void
+camel_ews_store_listen_notifications_cb (CamelEwsStore *ews_store,
+					 GParamSpec *spec,
+					 CamelEwsSettings *ews_settings)
+{
+	handle_notifications (ews_store, ews_settings, FALSE);
+}
+
+static void
+camel_ews_store_check_all_cb (CamelEwsStore *ews_store,
+			      GParamSpec *spec,
+			      CamelEwsSettings *ews_settings)
+{
+	handle_notifications (ews_store, ews_settings, TRUE);
+}
+
 static gboolean
 ews_connect_sync (CamelService *service,
                   GCancellable *cancellable,
@@ -631,12 +1114,15 @@ ews_connect_sync (CamelService *service,
 {
 	EEwsConnection *connection;
 	CamelEwsStore *ews_store;
+	CamelEwsStorePrivate *priv;
+	CamelEwsSettings *ews_settings;
 	CamelSession *session;
 	CamelSettings *settings;
 	gchar *auth_mech;
 	gboolean success;
 
 	ews_store = CAMEL_EWS_STORE (service);
+	priv = ews_store->priv;
 
 	if (camel_service_get_connection_status (service) == CAMEL_SERVICE_DISCONNECTED)
 		return FALSE;
@@ -649,6 +1135,7 @@ ews_connect_sync (CamelService *service,
 
 	session = camel_service_ref_session (service);
 	settings = camel_service_ref_settings (service);
+	ews_settings = CAMEL_EWS_SETTINGS (settings);
 
 	/* Try running an operation that requires authentication
 	 * to make sure we have valid credentials available. */
@@ -658,7 +1145,6 @@ ews_connect_sync (CamelService *service,
 			   auth_mech ? auth_mech : "NTLM", cancellable, error);
 
 	g_free (auth_mech);
-	g_object_unref (settings);
 
 	if (success) {
 		CamelEwsStoreOooAlertState state;
@@ -671,13 +1157,62 @@ ews_connect_sync (CamelService *service,
 				g_object_ref (ews_store),
 				g_object_unref);
 
+		if (!priv->updates_cancellable)
+			priv->updates_cancellable = g_cancellable_new ();
+
+		priv->listen_notifications = camel_ews_settings_get_listen_notifications (ews_settings);
+		if (priv->listen_notifications)
+			camel_ews_store_listen_notifications_cb (ews_store, NULL, ews_settings);
+
 		camel_offline_store_set_online_sync (
 			CAMEL_OFFLINE_STORE (ews_store),
 			TRUE, cancellable, NULL);
+
+		g_signal_connect_swapped (
+			priv->connection,
+			"server-notification",
+			G_CALLBACK (camel_ews_store_server_notification_cb),
+			ews_store);
 	}
 
+	g_signal_connect_swapped (
+		ews_settings,
+		"notify::listen-notifications",
+		G_CALLBACK (camel_ews_store_listen_notifications_cb),
+		ews_store);
+
+	g_signal_connect_swapped (
+		ews_settings,
+		"notify::check-all",
+		G_CALLBACK (camel_ews_store_check_all_cb),
+		ews_store);
+
 	g_object_unref (session);
+	g_object_unref (settings);
+
 	return success;
+}
+
+static void
+stop_pending_updates (CamelEwsStore *ews_store)
+{
+	CamelEwsStorePrivate *priv;
+
+	g_return_if_fail (ews_store != NULL);
+	g_return_if_fail (ews_store->priv != NULL);
+
+	priv = ews_store->priv;
+
+	UPDATE_LOCK (ews_store);
+	if (priv->updates_cancellable) {
+		g_cancellable_cancel (priv->updates_cancellable);
+		g_object_unref (priv->updates_cancellable);
+		priv->updates_cancellable = NULL;
+	}
+
+	g_slist_free_full (priv->update_folder_names, g_free);
+	priv->update_folder_names = NULL;
+	UPDATE_UNLOCK (ews_store);
 }
 
 static gboolean
@@ -703,7 +1238,24 @@ ews_disconnect_sync (CamelService *service,
 		 *       the first place. */
 		settings = camel_service_ref_settings (service);
 		g_signal_handlers_disconnect_by_data (settings, service);
+		g_signal_handlers_disconnect_by_func (
+			ews_store->priv->connection, camel_ews_store_server_notification_cb, ews_store);
+
 		g_object_unref (settings);
+
+		if (ews_store->priv->listen_notifications) {
+			stop_pending_updates (ews_store);
+			if (ews_store->priv->subscription_id != NULL) {
+				e_ews_connection_disable_notifications_sync (
+						ews_store->priv->connection,
+						ews_store->priv->subscription_id,
+						cancellable,
+						error);
+
+				g_free (ews_store->priv->subscription_id);
+				ews_store->priv->subscription_id = NULL;
+			}
+		}
 
 		e_ews_connection_set_password (
 			ews_store->priv->connection, NULL);
@@ -2896,8 +3448,14 @@ static void
 ews_store_dispose (GObject *object)
 {
 	CamelEwsStore *ews_store;
+	CamelEwsSettings *ews_settings;
 
 	ews_store = CAMEL_EWS_STORE (object);
+
+	ews_settings = CAMEL_EWS_SETTINGS (camel_service_ref_settings (CAMEL_SERVICE (ews_store)));
+	g_signal_handlers_disconnect_by_func (ews_settings, camel_ews_store_listen_notifications_cb, ews_store);
+	g_signal_handlers_disconnect_by_func (ews_settings, camel_ews_store_check_all_cb, ews_store);
+	g_object_unref (ews_settings);
 
 	if (ews_store->summary != NULL) {
 		camel_ews_store_summary_save (ews_store->summary, NULL);
@@ -2906,8 +3464,29 @@ ews_store_dispose (GObject *object)
 	}
 
 	if (ews_store->priv->connection != NULL) {
-		g_object_unref (ews_store->priv->connection);
-		ews_store->priv->connection = NULL;
+		g_signal_handlers_disconnect_by_func (
+			ews_store->priv->connection, camel_ews_store_server_notification_cb, ews_store);
+
+		if (ews_store->priv->listen_notifications && ews_store->priv->subscription_id != NULL) {
+			stop_pending_updates (ews_store);
+			e_ews_connection_disable_notifications_sync (
+				ews_store->priv->connection,
+				ews_store->priv->subscription_id,
+				NULL,
+				NULL);
+		}
+
+		g_clear_object (&ews_store->priv->connection);
+	}
+
+	if (ews_store->priv->subscription_id) {
+		g_free (ews_store->priv->subscription_id);
+		ews_store->priv->subscription_id = NULL;
+	}
+
+	if (ews_store->priv->update_folder_names) {
+		g_slist_free_full (ews_store->priv->update_folder_names, g_free);
+		ews_store->priv->update_folder_names = NULL;
 	}
 
 	if (ews_store->priv->public_folders) {
@@ -2929,6 +3508,7 @@ ews_store_finalize (GObject *object)
 	g_free (ews_store->storage_path);
 	g_mutex_clear (&ews_store->priv->get_finfo_lock);
 	g_mutex_clear (&ews_store->priv->connection_lock);
+	g_rec_mutex_clear (&ews_store->priv->update_lock);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_ews_store_parent_class)->finalize (object);
@@ -3009,6 +3589,11 @@ camel_ews_store_init (CamelEwsStore *ews_store)
 		CAMEL_EWS_STORE_GET_PRIVATE (ews_store);
 
 	ews_store->priv->last_refresh_time = time (NULL) - (FINFO_REFRESH_INTERVAL + 10);
+	ews_store->priv->updates_cancellable = NULL;
+	ews_store->priv->update_folder_names = NULL;
+	ews_store->priv->update_folder_id = 0;
+	ews_store->priv->update_folder_list_id = 0;
 	g_mutex_init (&ews_store->priv->get_finfo_lock);
 	g_mutex_init (&ews_store->priv->connection_lock);
+	g_rec_mutex_init (&ews_store->priv->update_lock);
 }

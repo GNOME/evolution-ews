@@ -114,14 +114,16 @@ sync_deleted_folders (CamelEwsStore *store,
 		if (ftype == E_EWS_FOLDER_TYPE_MAILBOX) {
 			fi = camel_ews_utils_build_folder_info (store, fid);
 
-			camel_ews_store_summary_remove_folder (ews_summary, fid, &error);
-
-			if ((fi->flags & CAMEL_FOLDER_SUBSCRIBED) != 0) {
-				camel_subscribable_folder_unsubscribed (CAMEL_SUBSCRIBABLE (store), fi);
-				camel_store_folder_deleted (CAMEL_STORE (store), fi);
+			if (!camel_ews_store_summary_remove_folder (ews_summary, fid, &error)) {
+				if (error != NULL) {
+					g_warning ("%s: %s", G_STRFUNC, error->message);
+					g_clear_error (&error);
+				}
+				continue;
 			}
 
-			g_clear_error (&error);
+			camel_subscribable_folder_unsubscribed (CAMEL_SUBSCRIBABLE (store), fi);
+			camel_store_folder_deleted (CAMEL_STORE (store), fi);
 		}
 	}
 }
