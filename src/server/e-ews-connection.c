@@ -887,6 +887,16 @@ sync_hierarchy_response_cb (ESoapResponse *response,
 
 	async_data = g_simple_async_result_get_op_res_gpointer (simple);
 
+	/*
+	 * During the first connection, we are able to get the current version of the Exchange server.
+	 * For Addressbook/Calendar backends, we are ensuring it happens during the
+	 * ews_connection_try_password_sync(), that calls e_e_ews_connection_get_folder_sync() and then
+	 * we are able to get the current version of the server from this first response.
+	 *
+	 * For Camel, the first connection is done calling e_ews_connection_sync_folder_hierarchy_sync().
+	 */
+	ews_discover_server_version (async_data->cnc, response);
+
 	param = e_soap_response_get_first_parameter_by_name (
 		response, "ResponseMessages", &error);
 
@@ -992,9 +1002,11 @@ get_folder_response_cb (ESoapResponse *response,
 
 	/*
 	 * During the first connection, we are able to get the current version of the Exchange server.
-	 * We are ensuring it happens during the ews_connection_try_password_sync(), that calls
-	 * ews_connection_get_folder_sync() and then we are able to get the current version of the
-	 * server from this first response.
+	 * For Addressbook/Calendar backends, we are ensuring it happens during the
+	 * ews_connection_try_password_sync(), that calls e_e_ews_connection_get_folder_sync() and then
+	 * we are able to get the current version of the server from this first response.
+	 *
+	 * For Camel, the first connection is done calling e_ews_connection_sync_folder_hierarchy_sync().
 	 */
 	ews_discover_server_version (async_data->cnc, response);
 
@@ -3996,6 +4008,7 @@ e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc,
 		e_ews_connection_sync_folder_hierarchy);
 
 	async_data = g_new0 (EwsAsyncData, 1);
+	async_data->cnc = cnc;
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 

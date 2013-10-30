@@ -3781,8 +3781,6 @@ book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 	CamelEwsSettings *ews_settings;
 	gchar *hosturl;
 
-	/* This tests the password by fetching the contacts folder. */
-
 	backend = E_BOOK_BACKEND_EWS (authenticator);
 	ews_settings = book_backend_ews_get_collection_settings (backend);
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);

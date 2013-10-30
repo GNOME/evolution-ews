@@ -4487,104 +4487,42 @@ cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
                                    GError **error)
 {
 	ECalBackendEws *backend;
-	ECalBackendStore *store;
 	EEwsConnection *connection;
 	ESourceAuthenticationResult result;
 	CamelEwsSettings *ews_settings;
-	GSList *items_created = NULL;
-	GSList *items_updated = NULL;
-	GSList *items_deleted = NULL;
-	gboolean includes_last_item = FALSE;
-	const gchar *old_sync_state;
-	gchar *new_sync_state = NULL;
 	gchar *hosturl;
-	GError *local_error = NULL;
-
-	/* This tests the password by synchronizing the folder. */
 
 	backend = E_CAL_BACKEND_EWS (authenticator);
 	ews_settings = cal_backend_ews_get_collection_settings (backend);
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
 
 	connection = e_ews_connection_new (hosturl, ews_settings);
-	e_ews_connection_set_password (connection, password->str);
-
-	g_free (hosturl);
 
 	g_object_bind_property (
 		backend, "proxy-resolver",
 		connection, "proxy-resolver",
 		G_BINDING_SYNC_CREATE);
 
-	store = backend->priv->store;
-	old_sync_state = e_cal_backend_store_get_key_value (store, SYNC_KEY);
+	result = e_source_authenticator_try_password_sync (
+		E_SOURCE_AUTHENTICATOR (connection),
+		password, cancellable, error);
 
-	/* fetch only up to one item, it's to check whether connection works */
-	e_ews_connection_sync_folder_items_sync (
-		connection,
-		EWS_PRIORITY_MEDIUM,
-		old_sync_state,
-		backend->priv->folder_id,
-		"IdOnly", NULL, 1,
-		&new_sync_state,
-		&includes_last_item,
-		&items_created,
-		&items_updated,
-		&items_deleted,
-		cancellable, &local_error);
+	if (result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
 
-	if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_INVALIDSYNCSTATEDATA)) {
-		g_clear_error (&local_error);
-		e_cal_backend_store_put_key_value (store, SYNC_KEY, NULL);
-		cbews_forget_all_components (backend);
-
-		e_ews_connection_sync_folder_items_sync (connection, EWS_PRIORITY_MEDIUM, NULL, backend->priv->folder_id, "IdOnly", NULL, 1,
-			&new_sync_state, &includes_last_item, &items_created, &items_updated, &items_deleted,
-			cancellable, &local_error);
-	}
-
-	if (local_error == NULL) {
 		PRIV_LOCK (backend->priv);
-		if (backend->priv->user_email)
-			g_free (backend->priv->user_email);
-		backend->priv->user_email = camel_ews_settings_dup_email (ews_settings);
 
 		if (backend->priv->cnc != NULL)
 			g_object_unref (backend->priv->cnc);
 		backend->priv->cnc = g_object_ref (connection);
+
 		PRIV_UNLOCK (backend->priv);
 
-		g_slist_free_full (items_created, g_object_unref);
-		g_slist_free_full (items_updated, g_object_unref);
-		g_slist_free_full (items_deleted, g_free);
-
 		ews_start_sync (backend);
-
-		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
-
-	} else {
-		gboolean auth_failed;
-
-		/* Make sure we're not leaking anything. */
-		g_warn_if_fail (items_created == NULL);
-		g_warn_if_fail (items_updated == NULL);
-		g_warn_if_fail (items_deleted == NULL);
-
-		auth_failed = g_error_matches (
-			local_error, EWS_CONNECTION_ERROR,
-			EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED);
-
-		if (auth_failed) {
-			g_clear_error (&local_error);
-			result = E_SOURCE_AUTHENTICATION_REJECTED;
-		} else {
-			g_propagate_error (error, local_error);
-			result = E_SOURCE_AUTHENTICATION_ERROR;
-		}
 	}
 
-	g_free (new_sync_state);
 	g_object_unref (connection);
+
+	g_free (hosturl);
 
 	return result;
 }
