@@ -146,14 +146,19 @@ ews_data_cache_get (CamelDataCache *cdc,
                     GError **error)
 {
 	GChecksum *sha = g_checksum_new (G_CHECKSUM_SHA256);
-	CamelStream *ret;
+	CamelStream *stream = NULL;
+	GIOStream *base_stream;
 
 	g_checksum_update (sha, (guchar *) key, strlen (key));
-	ret = camel_data_cache_get (
+	base_stream = camel_data_cache_get (
 		cdc, path, g_checksum_get_string (sha), error);
+	if (base_stream != NULL) {
+		stream = camel_stream_new (base_stream);
+		g_object_unref (base_stream);
+	}
 	g_checksum_free (sha);
 
-	return ret;
+	return stream;
 }
 
 static gchar *
