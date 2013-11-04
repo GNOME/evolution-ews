@@ -28,6 +28,8 @@
 #include <libedataserver/libedataserver.h>
 
 #include <mail/em-folder-tree.h>
+#include <mail/em-folder-utils.h>
+#include <libemail-engine/e-mail-utils.h>
 #include <shell/e-shell.h>
 #include <shell/e-shell-sidebar.h>
 #include <shell/e-shell-view.h>
@@ -420,9 +422,11 @@ e_ews_config_utils_open_connection_for (ESourceRegistry *registry,
 }
 
 enum {
-	COL_FOLDERSIZE_NAME = 0,
-	COL_FOLDERSIZE_SIZE,
-	COL_FOLDERSIZE_MAX
+	COL_FOLDER_ICON = 0,	/* G_TYPE_STRING */
+	COL_FOLDER_NAME,	/* G_TYPE_STRING */
+	COL_FOLDER_SIZE,	/* G_TYPE_STRING */
+	COL_FOLDER_FLAGS,	/* G_TYPE_UINT */
+	N_COLUMNS
 };
 
 typedef struct
@@ -435,20 +439,107 @@ typedef struct
 	CamelEwsSettings *ews_settings;
 	CamelEwsStore *ews_store;
 
-	GSList *folder_list;
+	GHashTable *folder_sizes;
 	GCancellable *cancellable;
 	GError *error;
 } FolderSizeDialogData;
+
+static gint
+folder_tree_model_sort (GtkTreeModel *model,
+			GtkTreeIter *a,
+			GtkTreeIter *b,
+			gpointer unused)
+{
+	gchar *aname, *bname;
+	guint32 aflags, bflags;
+	gint ret = -2;
+
+	gtk_tree_model_get (
+		model, a,
+		COL_FOLDER_NAME, &aname,
+		COL_FOLDER_FLAGS, &aflags,
+		-1);
+
+	gtk_tree_model_get (
+		model, b,
+		COL_FOLDER_NAME, &bname,
+		COL_FOLDER_FLAGS, &bflags,
+		-1);
+
+	/* Inbox is always first. */
+	if ((aflags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_INBOX)
+		ret = -1;
+	else if ((bflags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_INBOX)
+		ret = 1;
+	else {
+		if (aname != NULL && bname != NULL)
+			ret = g_utf8_collate (aname, bname);
+		else if (aname == bname)
+			ret = 0;
+		else if (aname == NULL)
+			ret = -1;
+		else
+			ret = 1;
+	}
+
+	g_free (aname);
+	g_free (bname);
+
+	return ret;
+}
+
+static void
+folder_sizes_tree_populate (GtkTreeStore *store,
+			    CamelFolderInfo *folder_info,
+			    GtkTreeIter *parent,
+			    FolderSizeDialogData *fsd)
+{
+	while (folder_info != NULL) {
+		GtkTreeIter iter;
+		const gchar *icon_name;
+		const gchar *folder_size;
+
+		icon_name = em_folder_utils_get_icon_name (folder_info->flags);
+		if (g_strcmp0 (icon_name, "folder") == 0) {
+			CamelFolder *folder;
+
+			folder = camel_store_get_folder_sync (
+				CAMEL_STORE (fsd->ews_store), folder_info->full_name, 0, NULL, NULL);
+
+			if (folder != NULL) {
+				if (em_utils_folder_is_drafts (fsd->registry, folder))
+					icon_name = "accessories-text-editor";
+
+				g_object_unref (folder);
+			}
+		}
+
+		folder_size = g_hash_table_lookup (fsd->folder_sizes, folder_info->full_name);
+
+		gtk_tree_store_append (store, &iter, parent);
+		gtk_tree_store_set (store, &iter,
+				COL_FOLDER_ICON, icon_name,
+				COL_FOLDER_NAME, folder_info->display_name,
+				COL_FOLDER_SIZE, folder_size,
+				COL_FOLDER_FLAGS, folder_info->flags,
+				-1);
+
+		if (folder_info->child != NULL)
+			folder_sizes_tree_populate (store, folder_info->child, &iter, fsd);
+
+		folder_info = folder_info->next;
+	}
+}
 
 static gboolean
 ews_settings_get_folder_sizes_idle (gpointer user_data)
 {
 	GtkWidget *widget;
 	GtkCellRenderer *renderer;
-	GtkListStore *store;
-	GtkTreeIter iter;
+	GtkTreeStore *tree_store;
 	GtkBox *content_area;
 	FolderSizeDialogData *fsd = user_data;
+	CamelFolderInfo *root;
 
 	g_return_val_if_fail (fsd != NULL, FALSE);
 
@@ -458,9 +549,8 @@ ews_settings_get_folder_sizes_idle (gpointer user_data)
 	/* Hide progress bar. Set status */
 	gtk_widget_destroy (GTK_WIDGET (fsd->spinner_grid));
 
-	if (fsd->folder_list) {
+	if (fsd->folder_sizes != NULL) {
 		GtkWidget *scrolledwindow, *tree_view;
-		GSList *fiter;
 
 		scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
 		gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow),
@@ -469,37 +559,65 @@ ews_settings_get_folder_sizes_idle (gpointer user_data)
 
 		/* Tree View */
 		tree_view =  gtk_tree_view_new ();
-		renderer = gtk_cell_renderer_text_new ();
-		gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (tree_view),-1,
-				_("Folder"),
-				renderer, "text", COL_FOLDERSIZE_NAME,
-				NULL);
+		renderer = gtk_cell_renderer_pixbuf_new ();
+		gtk_tree_view_insert_column_with_attributes (
+			GTK_TREE_VIEW (tree_view),
+			-1,
+			NULL,
+			renderer,
+			"icon-name",
+			COL_FOLDER_ICON,
+			NULL);
 
 		renderer = gtk_cell_renderer_text_new ();
-		gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (tree_view),-1,
-				_("Size"), renderer,
-				"text", COL_FOLDERSIZE_SIZE,
-				NULL);
+		gtk_tree_view_insert_column_with_attributes (
+			GTK_TREE_VIEW (tree_view),
+			-1,
+			_("Folder"),
+			renderer,
+			"text",
+			COL_FOLDER_NAME,
+			NULL);
+
+		renderer = gtk_cell_renderer_text_new ();
+		gtk_tree_view_insert_column_with_attributes (
+			GTK_TREE_VIEW (tree_view),
+			-1,
+			_("Size"),
+			renderer,
+			"text",
+			COL_FOLDER_SIZE,
+			NULL);
+
 		/* Model for TreeView */
-		store = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
-		gtk_tree_view_set_model (GTK_TREE_VIEW (tree_view), GTK_TREE_MODEL (store));
+		tree_store = gtk_tree_store_new (
+			N_COLUMNS,
+			/* COL_FOLDER_ICON */ G_TYPE_STRING,
+			/* COL_FOLDER_NAME */ G_TYPE_STRING,
+			/* COL_FOLDER_SIZE */ G_TYPE_STRING,
+			/* COL_FOLDER_FLAGS */ G_TYPE_UINT);
 
-		/* Populate model with data */
-		for (fiter = fsd->folder_list; fiter;  fiter = fiter->next) {
-			EEwsFolder *folder = fiter->data;
-			gchar *folder_size = g_format_size (e_ews_folder_get_size (folder));
+		gtk_tree_sortable_set_default_sort_func (
+			GTK_TREE_SORTABLE (tree_store),
+			folder_tree_model_sort, NULL, NULL);
 
-			gtk_list_store_append (store, &iter);
-			gtk_list_store_set (store, &iter,
-					COL_FOLDERSIZE_NAME,
-					e_ews_folder_get_name (folder),
-					COL_FOLDERSIZE_SIZE,
-					folder_size,
-					-1);
+		gtk_tree_sortable_set_sort_column_id (
+			GTK_TREE_SORTABLE (tree_store),
+			GTK_TREE_SORTABLE_DEFAULT_SORT_COLUMN_ID,
+			GTK_SORT_ASCENDING);
 
-			g_free (folder_size);
-		}
+		gtk_tree_view_set_model (GTK_TREE_VIEW (tree_view), GTK_TREE_MODEL (tree_store));
 
+		root = camel_store_get_folder_info_sync (
+			CAMEL_STORE (fsd->ews_store), NULL,
+			CAMEL_STORE_FOLDER_INFO_RECURSIVE,
+			NULL, NULL);
+
+		folder_sizes_tree_populate (tree_store, root, NULL, fsd);
+
+		camel_folder_info_free (root);
+
+		gtk_tree_view_expand_all (GTK_TREE_VIEW (tree_view));
 		gtk_container_add (GTK_CONTAINER (scrolledwindow), tree_view);
 		widget = scrolledwindow;
 	} else if (fsd->error) {
@@ -518,7 +636,7 @@ ews_settings_get_folder_sizes_idle (gpointer user_data)
 	gtk_box_pack_start (content_area, widget, TRUE, TRUE, 6);
 
 cleanup:
-	g_slist_free_full (fsd->folder_list, g_object_unref);
+	g_hash_table_destroy (fsd->folder_sizes);
 	g_object_unref (fsd->registry);
 	g_object_unref (fsd->source);
 	g_object_unref (fsd->ews_settings);
@@ -538,7 +656,6 @@ ews_settings_get_folder_sizes_thread (gpointer user_data)
 
 	g_return_val_if_fail (fsd != NULL, NULL);
 
-	fsd->folder_list = NULL;
 	cnc = e_ews_config_utils_open_connection_for (
 			fsd->registry,
 			fsd->source,
@@ -549,9 +666,9 @@ ews_settings_get_folder_sizes_thread (gpointer user_data)
 	if (cnc) {
 		EwsAdditionalProps *add_props;
 		EwsExtendedFieldURI *ext_uri;
-		GSList *ids, *l, *folders_ids = NULL;
+		GSList *ids, *l, *folders_ids = NULL, *folders_list = NULL;
 
-		fsd->folder_list = NULL;
+		fsd->folder_sizes = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
 		/* Use MAPI property to retrieve folder size */
 		add_props = g_new0 (EwsAdditionalProps, 1);
@@ -570,10 +687,25 @@ ews_settings_get_folder_sizes_thread (gpointer user_data)
 
 		e_ews_connection_get_folder_sync (
 				cnc, EWS_PRIORITY_MEDIUM, "Default",
-				add_props, folders_ids, &fsd->folder_list,
+				add_props, folders_ids, &folders_list,
 				fsd->cancellable, &fsd->error);
 
+		for (l = folders_list; l != NULL; l = l->next) {
+			const EwsFolderId *folder_id;
+			gchar *folder_full_name;
+			gchar *folder_size;
+
+			folder_id = e_ews_folder_get_id (l->data);
+			folder_full_name = camel_ews_store_summary_get_folder_full_name (
+				fsd->ews_store->summary, folder_id->id, NULL);
+			folder_size = g_format_size (e_ews_folder_get_size (l->data));
+
+			g_hash_table_insert (fsd->folder_sizes, folder_full_name, folder_size);
+		}
+
+		g_slist_free_full (folders_list, g_object_unref);
 		g_slist_free_full (folders_ids, (GDestroyNotify) e_ews_folder_id_free);
+		g_slist_free_full (ids, g_free);
 		g_free (ext_uri->prop_type);
 		g_free (ext_uri->prop_tag);
 		g_free (ext_uri);
