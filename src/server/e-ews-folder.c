@@ -317,7 +317,7 @@ e_ews_folder_is_error (EEwsFolder *folder)
 }
 
 const GError *
-e_ews_folder_get_error (EEwsFolder *folder)
+e_ews_folder_get_error (const EEwsFolder *folder)
 {
 	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), NULL);
 
@@ -374,7 +374,7 @@ e_ews_folder_id_is_equal (const EwsFolderId *a,
 }
 
 const gchar *
-e_ews_folder_get_name (EEwsFolder *folder)
+e_ews_folder_get_name (const EEwsFolder *folder)
 {
 	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), NULL);
 
@@ -397,7 +397,7 @@ e_ews_folder_set_name (EEwsFolder *folder,
 }
 
 const EwsFolderId *
-e_ews_folder_get_id (EEwsFolder *folder)
+e_ews_folder_get_id (const EEwsFolder *folder)
 {
 	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), NULL);
 
@@ -405,7 +405,7 @@ e_ews_folder_get_id (EEwsFolder *folder)
 }
 
 const EwsFolderId *
-e_ews_folder_get_parent_id (EEwsFolder *folder)
+e_ews_folder_get_parent_id (const EEwsFolder *folder)
 {
 	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), NULL);
 
@@ -433,7 +433,7 @@ e_ews_folder_set_parent_id (EEwsFolder *folder,
 }
 
 EEwsFolderType
-e_ews_folder_get_folder_type (EEwsFolder *folder)
+e_ews_folder_get_folder_type (const EEwsFolder *folder)
 {
 	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), -1);
 
@@ -450,7 +450,7 @@ e_ews_folder_set_folder_type (EEwsFolder *folder,
 }
 
 guint32
-e_ews_folder_get_total_count (EEwsFolder *folder)
+e_ews_folder_get_total_count (const EEwsFolder *folder)
 {
 	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), -1);
 
@@ -458,7 +458,7 @@ e_ews_folder_get_total_count (EEwsFolder *folder)
 }
 
 guint32
-e_ews_folder_get_unread_count (EEwsFolder *folder)
+e_ews_folder_get_unread_count (const EEwsFolder *folder)
 {
 	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), -1);
 
@@ -466,7 +466,7 @@ e_ews_folder_get_unread_count (EEwsFolder *folder)
 }
 
 guint32
-e_ews_folder_get_child_count (EEwsFolder *folder)
+e_ews_folder_get_child_count (const EEwsFolder *folder)
 {
 	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), -1);
 
@@ -474,7 +474,7 @@ e_ews_folder_get_child_count (EEwsFolder *folder)
 }
 
 guint64
-e_ews_folder_get_size (EEwsFolder *folder)
+e_ews_folder_get_size (const EEwsFolder *folder)
 {
 	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), -1);
 
@@ -482,7 +482,7 @@ e_ews_folder_get_size (EEwsFolder *folder)
 }
 
 gboolean
-e_ews_folder_get_foreign (EEwsFolder *folder)
+e_ews_folder_get_foreign (const EEwsFolder *folder)
 {
 	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), FALSE);
 
