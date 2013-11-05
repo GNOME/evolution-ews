@@ -8,7 +8,7 @@ m4_define([ews_version],
 
 AC_PREREQ(2.58)
 AC_INIT([evolution-ews], [ews_version], [http://bugzilla.gnome.org/browse.cgi?product=evolution-ews])
-AM_INIT_AUTOMAKE([gnu 1.9 dist-xz no-dist-gzip -Wno-portability])
+AM_INIT_AUTOMAKE([gnu 1.9 dist-xz no-dist-gzip -Wno-portability tar-ustar])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR(README)
 AC_CONFIG_HEADERS(config.h)
