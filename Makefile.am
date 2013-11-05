@@ -1,9 +1,12 @@
+if ENABLE_TESTS
+TESTS_DIR = tests
+endif
+
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 
 NULL =
 
-SUBDIRS = src po
-DIST_SUBDIRS= src po
+SUBDIRS = src po $(TESTS_DIR)
 
 changelogs = \
 	ChangeLog \
@@ -52,7 +55,7 @@ MAINTAINERCLEANFILES = \
 #     once libmspack >= 0.4 becomes more widespread.
 DISTCHECK_CONFIGURE_FLAGS = \
 	--with-internal-lzx \
-	--disable-tests \
+	--enable-tests \
 	$(NULL)
 
 -include $(top_srcdir)/git.mk

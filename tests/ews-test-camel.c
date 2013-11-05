@@ -780,12 +780,12 @@ int main (int argc,
 		g_free (message);
 
 		message = g_strdup_printf (
-			"/%s/camel/folder/create_folder_invalid_distinguished_parent_id", etd->version);
+			"/%s/camel/folder/create_folder_with_invalid_distinguished_parent_id", etd->version);
 		g_test_add_data_func (message, etd, test_create_folder_with_invalid_distinguished_parent_id);
 		g_free (message);
 
 		message = g_strdup_printf (
-			"/%s/camel/folder/create_folder_invalid_non_distinguished_parent_id", etd->version);
+			"/%s/camel/folder/create_folder_with_invalid_non_distinguished_parent_id", etd->version);
 		g_test_add_data_func (message, etd, test_create_folder_with_invalid_non_distinguished_parent_id);
 		g_free (message);
 

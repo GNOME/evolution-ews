@@ -1,7 +1,3 @@
-if ENABLE_TESTS
-TESTS_DIR = tests
-endif
-
 SUBDIRS = \
 	server \
 	utils \
@@ -9,7 +5,6 @@ SUBDIRS = \
 	calendar \
 	addressbook \
 	collection \
-	configuration \
-	$(TESTS_DIR)
+	configuration
 
 -include $(top_srcdir)/git.mk

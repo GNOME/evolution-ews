@@ -378,8 +378,8 @@ src/calendar/Makefile
 src/camel/Makefile
 src/collection/Makefile
 src/configuration/Makefile
-src/tests/Makefile
 po/Makefile.in
+tests/Makefile
 ])
 AC_OUTPUT
 
