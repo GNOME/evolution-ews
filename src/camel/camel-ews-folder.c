@@ -150,8 +150,8 @@ ews_data_cache_get (CamelDataCache *cdc,
 	GIOStream *base_stream;
 
 	g_checksum_update (sha, (guchar *) key, strlen (key));
-	base_stream = G_IO_STREAM (camel_data_cache_get (
-		cdc, path, g_checksum_get_string (sha), error));
+	base_stream = camel_data_cache_get (
+		cdc, path, g_checksum_get_string (sha), error);
 	if (base_stream != NULL) {
 		stream = camel_stream_new (base_stream);
 		g_object_unref (base_stream);
