@@ -9,6 +9,7 @@ module_ews_configuration_la_CPPFLAGS = \
 	-I$(top_srcdir)/src \
 	$(EVOLUTION_MAIL_CFLAGS) \
 	$(EVOLUTION_SHELL_CFLAGS) \
+	$(LIBECAL_CFLAGS) \
 	$(NULL)
 
 module_ews_configuration_la_SOURCES = \
@@ -53,6 +54,7 @@ module_ews_configuration_la_LIBADD = \
 	$(top_builddir)/src/utils/libewsutils.la \
 	$(EVOLUTION_MAIL_LIBS) \
 	$(EVOLUTION_SHELL_LIBS) \
+	$(LIBECAL_LIBS) \
 	$(NULL)
 
 module_ews_configuration_la_LDFLAGS = \
