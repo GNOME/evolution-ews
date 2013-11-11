@@ -28,7 +28,7 @@
 #include <glib/gi18n-lib.h>
 #include <gtk/gtk.h>
 
-#include <libemail-engine/e-mail-session.h>
+#include <libemail-engine/libemail-engine.h>
 
 #include "camel/camel-ews-store.h"
 #include "camel/camel-ews-store-summary.h"
