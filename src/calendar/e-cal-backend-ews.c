@@ -4104,7 +4104,6 @@ typedef struct {
 	GSList *users;
 	time_t start;
 	time_t end;
-	icaltimezone *timezone;
 } EwsFreeBusyData;
 
 static void
@@ -4114,8 +4113,9 @@ prepare_free_busy_request (ESoapMessage *msg,
 	EwsFreeBusyData *free_busy_data = user_data;
 	GSList *addr;
 	icaltimetype t_start, t_end;
+	icaltimezone *utc_zone = icaltimezone_get_utc_timezone ();
 
-	ewscal_set_availability_timezone (msg, free_busy_data->timezone);
+	ewscal_set_availability_timezone (msg, utc_zone);
 
 	e_soap_message_start_element (msg, "MailboxDataArray", "messages", NULL);
 
@@ -4137,8 +4137,8 @@ prepare_free_busy_request (ESoapMessage *msg,
 	e_soap_message_start_element (msg, "FreeBusyViewOptions", NULL, NULL);
 
 	e_soap_message_start_element (msg, "TimeWindow", NULL, NULL);
-	t_start = icaltime_from_timet_with_zone (free_busy_data->start, 0, free_busy_data->timezone);
-	t_end = icaltime_from_timet_with_zone (free_busy_data->end, 0, free_busy_data->timezone);
+	t_start = icaltime_from_timet_with_zone (free_busy_data->start, 0, utc_zone);
+	t_end = icaltime_from_timet_with_zone (free_busy_data->end, 0, utc_zone);
 	ewscal_set_time (msg, "StartTime", &t_start, FALSE);
 	ewscal_set_time (msg, "EndTime", &t_end, FALSE);
 	e_soap_message_end_element (msg); /* "TimeWindow" */
@@ -4229,7 +4229,6 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend,
 	free_busy_data->users = users_copy;
 	free_busy_data->start = start;
 	free_busy_data->end = end;
-	free_busy_data->timezone = priv->default_zone;
 
 	e_ews_connection_get_free_busy (
 		priv->cnc,
