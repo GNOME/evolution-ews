@@ -29,7 +29,7 @@
 
 #include <mail/em-folder-tree.h>
 #include <mail/em-folder-utils.h>
-#include <libemail-engine/e-mail-utils.h>
+#include <libemail-engine/libemail-engine.h>
 #include <shell/e-shell.h>
 #include <shell/e-shell-sidebar.h>
 #include <shell/e-shell-view.h>
