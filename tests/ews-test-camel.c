@@ -112,8 +112,8 @@ static void
 test_create_existing_folder (gconstpointer user_data)
 {
 	UhmServer *local_server;
-	gboolean retval;
-	gboolean folder_exists;
+	gboolean retval = TRUE;
+	gboolean folder_exists = FALSE;
 	GError *error = NULL;
 	EwsFolderId *fid;
 	EwsTestData *etd = (gpointer) user_data;
@@ -154,8 +154,8 @@ static void
 test_create_folder_with_invalid_distinguished_parent_id (gconstpointer user_data)
 {
 	UhmServer *local_server;
-	gboolean retval;
-	gboolean parent_folder_not_found;
+	gboolean retval = TRUE;
+	gboolean parent_folder_not_found = FALSE;
 	GError *error = NULL;
 	EwsFolderId *fid;
 	EwsTestData *etd = (gpointer) user_data;
@@ -196,7 +196,7 @@ static void
 test_create_folder_with_invalid_non_distinguished_parent_id (gconstpointer user_data)
 {
 	UhmServer *local_server;
-	gboolean retval;
+	gboolean retval = TRUE;
 	gboolean parent_folder_not_found = FALSE;
 	GError *error = NULL;
 	EwsFolderId *fid;
@@ -243,8 +243,8 @@ static void
 test_create_folder_with_malformed_parent_id (gconstpointer user_data)
 {
 	UhmServer *local_server;
-	gboolean retval;
-	gboolean malformed_parent_id;
+	gboolean retval = TRUE;
+	gboolean malformed_parent_id = FALSE;
 	GError *error = NULL;
 	EwsFolderId *fid;
 	EwsTestData *etd = (gpointer) user_data;
