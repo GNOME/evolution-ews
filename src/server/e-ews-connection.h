@@ -221,6 +221,162 @@ typedef struct {
 	gchar *old_folder_id;
 } EEwsNotificationEvent;
 
+/*
+ * <To Kind=""/>
+ */
+typedef struct {
+	gchar *kind;
+	gchar *value;
+} EEwsCalendarTo;
+
+/*
+ * <AbsoluteDateTransition>
+ *     <To/>
+ *     <DateTime/>
+ * </AbsoluteDateTransition>
+ */
+typedef struct {
+	EEwsCalendarTo *to;
+	gchar *date_time;
+} EEwsCalendarAbsoluteDateTransition;
+
+/*
+ * <RecurringDayTransition>
+ *     <To/>
+ *     <TimeOffset/>
+ *     <Month/>
+ *     <DayOfWeek/>
+ *     <Ocurrence/>
+ * </RecurringDayTransition>
+ */
+typedef struct {
+	EEwsCalendarTo *to;
+	gchar *time_offset;
+	gchar *month;
+	gchar *day_of_week;
+	gchar *occurrence;
+} EEwsCalendarRecurringDayTransition;
+
+/*
+ * <RecurringDateTransition>
+ *     <To/>
+ *     <TimeOffset/>
+ *     <Month/>
+ *     <Day/>
+ * </RecurringDateTransition>
+ */
+typedef struct {
+	EEwsCalendarTo *to;
+	gchar *time_offset;
+	gchar *month;
+	gchar *day;
+} EEwsCalendarRecurringDateTransition;
+
+/*
+ * <Period Bias="" Name="" Id=""/>
+ */
+typedef struct {
+	gchar *bias;
+	gchar *name;
+	gchar *id;
+} EEwsCalendarPeriod;
+
+/*
+ * <TransitionsGroup Id="">
+ *     <Transition>
+ *         <To/>
+ *     <Transition>
+ *     <AbsoluteDateTransition/>
+ *     <RecurringDayTransition/>
+ *     <RecurringDateTransition/>
+ * </TransitionsGroup>
+ */
+typedef struct {
+	gchar *id;
+	EEwsCalendarTo *transition;
+	GSList *absolute_date_transitions; /* EEwsCalendarAbsoluteDateTransition */
+	GSList *recurring_day_transitions; /* EEwsCalendarRecurringDayTransition */
+	GSList *recurring_date_transitions; /* EEwsCalendarRecurringDateTransition */
+} EEwsCalendarTransitionsGroup;
+
+/*
+ * <Transitions Id="">
+ *     <Transition>
+ *         <To/>
+ *     <Transition>
+ *     <AbsoluteDateTransition/>
+ *     <RecurringDayTransition/>
+ *     <RecurringDateTransition/>
+ * </Transitions>
+ */
+typedef struct {
+	EEwsCalendarTo *transition;
+	GSList *absolute_date_transitions; /* EEwsCalendarAbsoluteDateTransition */
+	GSList *recurring_day_transitions; /* EEwsCalendarRecurringDayTransition */
+	GSList *recurring_date_transitions; /* EEwsCalendarRecurringDateTransition */
+} EEwsCalendarTransitions;
+
+/*
+ * <TimeZoneDefinition Id="" Name="">
+ *     <Periods>
+ *         <Period/>
+ *     </Periods>
+ *     <TransitionsGroups>
+ *         <TransitionsGroup/>
+ *     </TransitionsGroups>
+ *     <Transitions/>
+ * </TimeZoneDefinition>
+ */
+typedef struct {
+	gchar *name;
+	gchar *id;
+	GSList *periods; /* EEwsCalendarPeriod */
+	GSList *transitions_groups; /* EEwsCalendarTrasitionsGroup */
+	EEwsCalendarTransitions *transitions;
+} EEwsCalendarTimeZoneDefinition;
+
+EEwsCalendarTo *
+		e_ews_calendar_to_new		(void);
+void		e_ews_calendar_to_free		(EEwsCalendarTo *to);
+
+EEwsCalendarAbsoluteDateTransition *
+		e_ews_calendar_absolute_date_transition_new
+						(void);
+void		e_ews_calendar_absolute_date_transition_free
+						(EEwsCalendarAbsoluteDateTransition *adt);
+
+EEwsCalendarRecurringDayTransition *
+		e_ews_calendar_recurring_day_transition_new
+						(void);
+void		e_ews_calendar_recurring_day_transition_free
+						(EEwsCalendarRecurringDayTransition *rdayt);
+
+EEwsCalendarRecurringDateTransition *
+		e_ews_calendar_recurring_date_transition_new
+						(void);
+void		e_ews_calendar_recurring_date_transition_free
+						(EEwsCalendarRecurringDateTransition *rdatet);
+
+EEwsCalendarPeriod *
+		e_ews_calendar_period_new	(void);
+void		e_ews_calendar_period_free	(EEwsCalendarPeriod *period);
+
+EEwsCalendarTransitionsGroup *
+		e_ews_calendar_transitions_group_new
+						(void);
+void		e_ews_calendar_transitions_group_free
+						(EEwsCalendarTransitionsGroup *tg);
+
+EEwsCalendarTransitions *
+		e_ews_calendar_transitions_new	(void);
+void		e_ews_calendar_transitions_free	(EEwsCalendarTransitions *transitions);
+
+EEwsCalendarTimeZoneDefinition *
+		e_ews_calendar_time_zone_definition_new
+						(void);
+void		e_ews_calendar_time_zone_definition_free
+						(EEwsCalendarTimeZoneDefinition *tzd);
+
 EEwsNotificationEvent *
 		e_ews_notification_event_new	(void);
 void		e_ews_notification_event_free	(EEwsNotificationEvent *event);
@@ -1104,6 +1260,25 @@ void		e_ews_connection_enable_notifications_sync
 void		e_ews_connection_disable_notifications_sync
 						(EEwsConnection *cnc,
 						 guint subscription_key);
+void		e_ews_connection_get_server_time_zones
+						(EEwsConnection *cnc,
+						 gint pri,
+						 GSList *msdn_locations,
+						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
+						 gpointer user_data);
+gboolean	e_ews_connection_get_server_time_zones_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 GSList **tzds, /* EEwsCalendarTimeZoneDefinition */
+						 GError **error);
+gboolean	e_ews_connection_get_server_time_zones_sync
+						(EEwsConnection *cnc,
+						 gint pri,
+						 GSList *msdn_locations,
+						 GSList **tzds, /* EEwsCalendarTimeZoneDefinition */
+						 GCancellable *cancellable,
+						 GError **error);
 
 G_END_DECLS
 

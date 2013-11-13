@@ -1174,6 +1174,11 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 			priv->calendar_item_accept_id = g_new0 (EwsId, 1);
 			priv->calendar_item_accept_id->id = e_soap_parameter_get_property (subparam, "Id");
 			priv->calendar_item_accept_id->change_key = e_soap_parameter_get_property (subparam, "ChangeKey");
+		} else if (!g_ascii_strcasecmp (name, "StartTimeZone")) {
+			if (priv->timezone != NULL)
+				g_free (priv->timezone);
+
+			priv->timezone = e_soap_parameter_get_property (subparam, "Id");
 		}
 	}
 

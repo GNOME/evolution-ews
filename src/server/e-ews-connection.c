@@ -131,6 +131,7 @@ struct _EwsAsyncData {
 	GSList *items_created;
 	GSList *items_updated;
 	GSList *items_deleted;
+	GSList *tzds; /* EEwsCalendarTimeZoneDefinition */
 
 	gint total_items;
 	const gchar *directory;
@@ -201,6 +202,158 @@ e_ews_notification_event_free (EEwsNotificationEvent *event)
 		g_free (event->folder_id);
 		g_free (event->old_folder_id);
 		g_free (event);
+	}
+}
+
+EEwsCalendarTo *
+e_ews_calendar_to_new (void)
+{
+	return g_new0 (EEwsCalendarTo, 1);
+}
+
+void
+e_ews_calendar_to_free (EEwsCalendarTo *to) {
+	if (to != NULL) {
+		g_free (to->kind);
+		g_free (to->value);
+	}
+}
+
+EEwsCalendarAbsoluteDateTransition *
+e_ews_calendar_absolute_date_transition_new (void)
+{
+	return g_new0 (EEwsCalendarAbsoluteDateTransition, 1);
+}
+
+void
+e_ews_calendar_absolute_date_transition_free (EEwsCalendarAbsoluteDateTransition *adt)
+{
+	if (adt != NULL) {
+		e_ews_calendar_to_free (adt->to);
+		g_free (adt->date_time);
+		g_free (adt);
+	}
+}
+
+EEwsCalendarRecurringDayTransition *
+e_ews_calendar_recurring_day_transition_new (void)
+{
+	return g_new0 (EEwsCalendarRecurringDayTransition, 1);
+}
+
+void
+e_ews_calendar_recurring_day_transition_free (EEwsCalendarRecurringDayTransition *rdayt)
+{
+	if (rdayt != NULL) {
+		e_ews_calendar_to_free (rdayt->to);
+		g_free (rdayt->time_offset);
+		g_free (rdayt->month);
+		g_free (rdayt->day_of_week);
+		g_free (rdayt->occurrence);
+		g_free (rdayt);
+	}
+}
+
+EEwsCalendarRecurringDateTransition *
+e_ews_calendar_recurring_date_transition_new (void)
+{
+	return g_new0 (EEwsCalendarRecurringDateTransition, 1);
+}
+
+void
+e_ews_calendar_recurring_date_transition_free (EEwsCalendarRecurringDateTransition *rdatet)
+{
+	if (rdatet != NULL) {
+		e_ews_calendar_to_free (rdatet->to);
+		g_free (rdatet->time_offset);
+		g_free (rdatet->month);
+		g_free (rdatet->day);
+		g_free (rdatet);
+	}
+}
+
+EEwsCalendarPeriod *
+e_ews_calendar_period_new (void)
+{
+	return g_new0 (EEwsCalendarPeriod, 1);
+}
+
+void
+e_ews_calendar_period_free (EEwsCalendarPeriod *period)
+{
+	if (period != NULL) {
+		g_free (period->bias);
+		g_free (period->name);
+		g_free (period->id);
+		g_free (period);
+	}
+}
+
+EEwsCalendarTransitionsGroup *
+e_ews_calendar_transitions_group_new (void)
+{
+	return g_new0 (EEwsCalendarTransitionsGroup, 1);
+}
+
+void
+e_ews_calendar_transitions_group_free (EEwsCalendarTransitionsGroup *tg)
+{
+	if (tg != NULL) {
+		g_free (tg->id);
+		e_ews_calendar_to_free (tg->transition);
+		g_slist_free_full (
+			tg->absolute_date_transitions,
+			(GDestroyNotify) e_ews_calendar_absolute_date_transition_free);
+		g_slist_free_full (
+			tg->recurring_day_transitions,
+			(GDestroyNotify) e_ews_calendar_recurring_day_transition_free);
+		g_slist_free_full (
+			tg->recurring_date_transitions,
+			(GDestroyNotify) e_ews_calendar_recurring_date_transition_free);
+		g_free (tg);
+	}
+}
+
+EEwsCalendarTransitions *
+e_ews_calendar_transitions_new (void)
+{
+	return g_new0 (EEwsCalendarTransitions, 1);
+}
+
+void
+e_ews_calendar_transitions_free (EEwsCalendarTransitions *transitions)
+{
+	if (transitions != NULL) {
+		e_ews_calendar_to_free (transitions->transition);
+		g_slist_free_full (
+			transitions->absolute_date_transitions,
+			(GDestroyNotify) e_ews_calendar_absolute_date_transition_free);
+		g_slist_free_full (
+			transitions->recurring_day_transitions,
+			(GDestroyNotify) e_ews_calendar_recurring_day_transition_free);
+		g_slist_free_full (
+			transitions->recurring_date_transitions,
+			(GDestroyNotify) e_ews_calendar_recurring_date_transition_free);
+		g_free (transitions);
+	}
+}
+
+EEwsCalendarTimeZoneDefinition *
+e_ews_calendar_time_zone_definition_new (void)
+{
+	return g_new0 (EEwsCalendarTimeZoneDefinition, 1);
+}
+
+void
+e_ews_calendar_time_zone_definition_free (EEwsCalendarTimeZoneDefinition *tzd)
+{
+	if (tzd != NULL) {
+		g_free (tzd->name);
+		g_free (tzd->id);
+		g_slist_free_full (tzd->periods, (GDestroyNotify) e_ews_calendar_period_free);
+		g_slist_free_full (tzd->transitions_groups, (GDestroyNotify) e_ews_calendar_transitions_group_free);
+		e_ews_calendar_transitions_free (tzd->transitions);
+		g_free (tzd);
 	}
 }
 
@@ -9245,4 +9398,648 @@ e_ews_connection_disable_notifications_sync (EEwsConnection *cnc,
 
 exit:
 	NOTIFICATION_UNLOCK (cnc);
+}
+
+static EEwsCalendarTo *
+ews_get_to (ESoapParameter *node)
+{
+	EEwsCalendarTo *to = NULL;
+	ESoapParameter *param;
+	gchar *kind = NULL;
+	gchar *value = NULL;
+	gboolean success = FALSE;
+
+	param = e_soap_parameter_get_first_child_by_name (node, "To");
+	if (param == NULL)
+		goto exit;
+
+	kind = e_soap_parameter_get_property (param, "Kind");
+	if (kind == NULL)
+		goto exit;
+
+	value = e_soap_parameter_get_string_value (param);
+	if (value == NULL)
+		goto exit;
+
+	success = TRUE;
+
+exit:
+	if (success) {
+		to = e_ews_calendar_to_new ();
+		to->kind = kind;
+		to->value = value;
+	} else {
+		g_free (kind);
+		g_free (value);
+	}
+
+	return to;
+}
+
+static EEwsCalendarPeriod *
+ews_get_period (ESoapParameter *node)
+{
+	EEwsCalendarPeriod *period = NULL;
+	gchar *bias = NULL;
+	gchar *name = NULL;
+	gchar *id = NULL;
+
+	bias = e_soap_parameter_get_property (node, "Bias");
+	name = e_soap_parameter_get_property (node, "Name");
+	id = e_soap_parameter_get_property (node, "Id");
+
+	if (bias == NULL || name == NULL || id == NULL) {
+		g_free (bias);
+		g_free (name);
+		g_free (id);
+
+		return NULL;
+	}
+
+	period = e_ews_calendar_period_new ();
+	period->bias = bias;
+	period->name = name;
+	period->id = id;
+
+	return period;
+}
+
+static GSList *
+ews_get_periods_list (ESoapParameter *node)
+{
+	ESoapParameter *param;
+	GSList *periods = NULL;
+
+	for (param = e_soap_parameter_get_first_child_by_name (node, "Period");
+	     param != NULL;
+	     param = e_soap_parameter_get_next_child_by_name (param, "Period")) {
+		EEwsCalendarPeriod *period;
+
+		period = ews_get_period (param);
+		if (period != NULL) {
+			periods = g_slist_prepend (periods, period);
+		} else {
+			g_slist_free_full (periods, (GDestroyNotify) e_ews_calendar_period_free);
+			return NULL;
+		}
+	}
+
+	periods = g_slist_reverse (periods);
+	return periods;
+}
+
+static EEwsCalendarAbsoluteDateTransition *
+ews_get_absolute_date_transition (ESoapParameter *node)
+{
+	ESoapParameter *param;
+	EEwsCalendarAbsoluteDateTransition *absolute_date_transition = NULL;
+	EEwsCalendarTo *to = NULL;
+	gchar *date_time = NULL;
+	gboolean success = FALSE;
+
+	param = e_soap_parameter_get_first_child_by_name (node, "To");
+	if (param != NULL)
+		to = ews_get_to (param);
+
+	if (to == NULL)
+		goto exit;
+
+	param = e_soap_parameter_get_first_child_by_name (node, "DateTime");
+	if (param != NULL)
+		date_time = e_soap_parameter_get_string_value (param);
+
+	if (date_time == NULL)
+		goto exit;
+
+	success = TRUE;
+
+exit:
+	if (success) {
+		absolute_date_transition = e_ews_calendar_absolute_date_transition_new ();
+		absolute_date_transition->to = to;
+		absolute_date_transition->date_time = date_time;
+	} else {
+		e_ews_calendar_to_free (to);
+		g_free (date_time);
+	}
+
+	return absolute_date_transition;
+}
+
+static EEwsCalendarRecurringDateTransition *
+ews_get_recurring_date_transition (ESoapParameter *node)
+{
+	ESoapParameter *param;
+	EEwsCalendarRecurringDateTransition *recurring_date_transition = NULL;
+	EEwsCalendarTo *to = NULL;
+	gchar *time_offset = NULL;
+	gchar *month = NULL;
+	gchar *day = NULL;
+	gboolean success = FALSE;
+
+	to = ews_get_to (node);
+	if (to == NULL)
+		goto exit;
+
+	param = e_soap_parameter_get_first_child_by_name (node, "TimeOffset");
+	if (param != NULL)
+		time_offset = e_soap_parameter_get_string_value (param);
+
+	if (time_offset == NULL)
+		goto exit;
+
+	param = e_soap_parameter_get_first_child_by_name (node, "Month");
+	if (param != NULL)
+		month = e_soap_parameter_get_string_value (param);
+
+	if (month == NULL)
+		goto exit;
+
+	param = e_soap_parameter_get_first_child_by_name (node, "Day");
+	if (param != NULL)
+		day = e_soap_parameter_get_string_value (param);
+
+	if (day == NULL)
+		goto exit;
+
+	success = TRUE;
+
+exit:
+	if (success) {
+		recurring_date_transition = e_ews_calendar_recurring_date_transition_new ();
+		recurring_date_transition->to = to;
+		recurring_date_transition->time_offset = time_offset;
+		recurring_date_transition->month = month;
+		recurring_date_transition->day = day;
+	} else {
+		e_ews_calendar_to_free (to);
+		g_free (time_offset);
+		g_free (month);
+		g_free (day);
+	}
+
+	return recurring_date_transition;
+}
+
+static EEwsCalendarRecurringDayTransition *
+ews_get_recurring_day_transition (ESoapParameter *node)
+{
+	ESoapParameter *param;
+	EEwsCalendarRecurringDayTransition *recurring_day_transition = NULL;
+	EEwsCalendarTo *to = NULL;
+	gchar *time_offset = NULL;
+	gchar *month = NULL;
+	gchar *day_of_week = NULL;
+	gchar *occurrence = NULL;
+	gboolean success = FALSE;
+
+	to = ews_get_to (node);
+	if (to == NULL)
+		goto exit;
+
+	param = e_soap_parameter_get_first_child_by_name (node, "TimeOffset");
+	if (param != NULL)
+		time_offset = e_soap_parameter_get_string_value (param);
+
+	if (time_offset == NULL)
+		goto exit;
+
+	param = e_soap_parameter_get_first_child_by_name (node, "Month");
+	if (param != NULL)
+		month = e_soap_parameter_get_string_value (param);
+
+	if (month == NULL)
+		goto exit;
+
+	param = e_soap_parameter_get_first_child_by_name (node, "DayOfWeek");
+	if (param != NULL)
+		day_of_week = e_soap_parameter_get_string_value (param);
+
+	if (day_of_week == NULL)
+		goto exit;
+
+	param = e_soap_parameter_get_first_child_by_name (node, "Occurrence");
+	if (param != NULL)
+		occurrence = e_soap_parameter_get_string_value (param);
+
+	if (occurrence == NULL)
+		goto exit;
+
+	success = TRUE;
+
+exit:
+	if (success) {
+		recurring_day_transition = e_ews_calendar_recurring_day_transition_new ();
+		recurring_day_transition->to = to;
+		recurring_day_transition->time_offset = time_offset;
+		recurring_day_transition->month = month;
+		recurring_day_transition->day_of_week = day_of_week;
+		recurring_day_transition->occurrence = occurrence;
+	} else {
+		e_ews_calendar_to_free (to);
+		g_free (time_offset);
+		g_free (month);
+		g_free (day_of_week);
+		g_free (occurrence);
+	}
+
+	return recurring_day_transition;
+}
+
+static GSList *
+ews_get_absolute_date_transitions_list (ESoapParameter *node)
+{
+	ESoapParameter *param;
+	GSList *absolute_date_transitions = NULL;
+
+	for (param = e_soap_parameter_get_first_child_by_name (node, "AbsoluteDateTransition");
+	     param != NULL;
+	     param = e_soap_parameter_get_next_child_by_name (param, "AbsoluteDateTransition")) {
+		EEwsCalendarAbsoluteDateTransition *absolute_date_transition;
+
+		absolute_date_transition = ews_get_absolute_date_transition (param);
+		if (absolute_date_transition != NULL) {
+			absolute_date_transitions =
+				g_slist_prepend (absolute_date_transitions, absolute_date_transition);
+		} else {
+			g_slist_free_full (
+				absolute_date_transitions,
+				(GDestroyNotify) e_ews_calendar_absolute_date_transition_free);
+			return NULL;
+		}
+	}
+
+	absolute_date_transitions = g_slist_reverse (absolute_date_transitions);
+	return absolute_date_transitions;
+}
+
+static GSList *
+ews_get_recurring_day_transitions_list (ESoapParameter *node)
+{
+	ESoapParameter *param;
+	GSList *recurring_day_transitions = NULL;
+
+	for (param = e_soap_parameter_get_first_child_by_name (node, "RecurringDayTransition");
+	     param != NULL;
+	     param = e_soap_parameter_get_next_child_by_name (param, "RecurringDayTransition")) {
+		EEwsCalendarRecurringDayTransition *recurring_day_transition;
+
+		recurring_day_transition = ews_get_recurring_day_transition (param);
+		if (recurring_day_transition != NULL) {
+			recurring_day_transitions =
+				g_slist_prepend (recurring_day_transitions, recurring_day_transition);
+		} else {
+			g_slist_free_full (
+				recurring_day_transitions,
+				(GDestroyNotify) e_ews_calendar_recurring_day_transition_free);
+			return NULL;
+		}
+	}
+
+	recurring_day_transitions = g_slist_reverse (recurring_day_transitions);
+	return recurring_day_transitions;
+}
+
+static GSList *
+ews_get_recurring_date_transitions_list (ESoapParameter *node)
+{
+	ESoapParameter *param;
+	GSList *recurring_date_transitions = NULL;
+
+	for (param = e_soap_parameter_get_first_child_by_name (node, "RecurringDateTransition");
+	     param != NULL;
+	     param = e_soap_parameter_get_next_child_by_name (param, "RecurringDateTransition")) {
+		EEwsCalendarRecurringDateTransition *recurring_date_transition;
+
+		recurring_date_transition = ews_get_recurring_date_transition (param);
+		if (recurring_date_transition != NULL) {
+			recurring_date_transitions =
+				g_slist_prepend (recurring_date_transitions, recurring_date_transition);
+		} else {
+			g_slist_free_full (
+				recurring_date_transitions,
+				(GDestroyNotify) e_ews_calendar_recurring_date_transition_free);
+			return NULL;
+		}
+	}
+
+	recurring_date_transitions = g_slist_reverse (recurring_date_transitions);
+	return recurring_date_transitions;
+}
+
+static EEwsCalendarTransitionsGroup *
+ews_get_transitions_group (ESoapParameter *node)
+{
+	EEwsCalendarTransitionsGroup *tg = NULL;
+	EEwsCalendarTo *transition = NULL;
+	ESoapParameter *param = NULL;
+	gchar *id = NULL;
+	GSList *absolute_date_transitions = NULL;
+	GSList *recurring_date_transitions = NULL;
+	GSList *recurring_day_transitions = NULL;
+
+	id = e_soap_parameter_get_property (node, "Id");
+	if (id == NULL)
+		return NULL;
+
+	param = e_soap_parameter_get_first_child_by_name (node, "Transition");
+	if (param != NULL)
+		transition = ews_get_to (param);
+
+	absolute_date_transitions = ews_get_absolute_date_transitions_list (node);
+	recurring_date_transitions = ews_get_recurring_date_transitions_list (node);
+	recurring_day_transitions = ews_get_recurring_day_transitions_list (node);
+
+	tg = e_ews_calendar_transitions_group_new ();
+	tg->id = id;
+	tg->transition = transition;
+	tg->absolute_date_transitions = absolute_date_transitions;
+	tg->recurring_date_transitions = recurring_date_transitions;
+	tg->recurring_day_transitions = recurring_day_transitions;
+
+	return tg;
+}
+
+static GSList *
+ews_get_transitions_groups_list (ESoapParameter *node)
+{
+	ESoapParameter *param;
+	GSList *transitions_groups = NULL;
+
+	for (param = e_soap_parameter_get_first_child_by_name (node, "TransitionsGroup");
+	     param != NULL;
+	     param = e_soap_parameter_get_next_child_by_name (param, "TransitionsGroup")) {
+		EEwsCalendarTransitionsGroup *tg;
+
+		tg = ews_get_transitions_group (param);
+		if (tg != NULL) {
+			transitions_groups = g_slist_prepend (transitions_groups, tg);
+		} else {
+			g_slist_free_full (transitions_groups, (GDestroyNotify) e_ews_calendar_transitions_group_free);
+			return NULL;
+		}
+	}
+
+	transitions_groups = g_slist_reverse (transitions_groups);
+	return transitions_groups;
+}
+
+static EEwsCalendarTransitions *
+ews_get_transitions (ESoapParameter *node)
+{
+	ESoapParameter *param;
+	EEwsCalendarTransitions *transitions = NULL;
+	EEwsCalendarTo *transition = NULL;
+	GSList *absolute_date_transitions = NULL;
+	GSList *recurring_date_transitions = NULL;
+	GSList *recurring_day_transitions = NULL;
+
+	param = e_soap_parameter_get_first_child_by_name (node, "Transition");
+	if (param != NULL)
+		transition = ews_get_to (param);
+
+	if (transition == NULL)
+		return NULL;
+
+	absolute_date_transitions = ews_get_absolute_date_transitions_list (node);
+	recurring_day_transitions = ews_get_recurring_day_transitions_list (node);
+	recurring_date_transitions = ews_get_recurring_date_transitions_list (node);
+
+	transitions = e_ews_calendar_transitions_new ();
+	transitions->transition = transition;
+	transitions->absolute_date_transitions = absolute_date_transitions;
+	transitions->recurring_day_transitions = recurring_day_transitions;
+	transitions->recurring_date_transitions = recurring_date_transitions;
+
+	return transitions;
+}
+
+static EEwsCalendarTimeZoneDefinition *
+ews_get_time_zone_definition (ESoapParameter *node)
+{
+	ESoapParameter *param;
+	gchar *name = NULL;
+	gchar *id = NULL;
+	GSList *periods = NULL;
+	GSList *transitions_groups = NULL;
+	EEwsCalendarTransitions *transitions = NULL;
+	EEwsCalendarTimeZoneDefinition *tzd = NULL;
+	gboolean success = FALSE;
+
+	name = e_soap_parameter_get_property (node, "Name");
+	if (name == NULL)
+		goto exit;
+
+	id = e_soap_parameter_get_property (node, "Id");
+	if (id == NULL)
+		goto exit;
+
+	param = e_soap_parameter_get_first_child_by_name (node, "Periods");
+	if (param != NULL)
+		periods = ews_get_periods_list (param);
+	if (periods == NULL)
+		goto exit;
+
+	param = e_soap_parameter_get_first_child_by_name (node, "TransitionsGroups");
+	if (param != NULL)
+		transitions_groups = ews_get_transitions_groups_list (param);
+	if (transitions_groups == NULL)
+		goto exit;
+
+	param = e_soap_parameter_get_first_child_by_name (node, "Transitions");
+	if (param != NULL)
+		transitions = ews_get_transitions (param);
+	if (transitions == NULL)
+		goto exit;
+
+	success = TRUE;
+
+exit:
+	if (success) {
+		tzd = e_ews_calendar_time_zone_definition_new ();
+		tzd->name = name;
+		tzd->id = id;
+		tzd->periods = periods;
+		tzd->transitions_groups = transitions_groups;
+		tzd->transitions = transitions;
+	} else {
+		g_free (name);
+		g_free (id);
+		g_slist_free_full (periods, (GDestroyNotify) e_ews_calendar_period_free);
+		g_slist_free_full (transitions_groups, (GDestroyNotify) e_ews_calendar_transitions_group_free);
+		e_ews_calendar_transitions_free (transitions);
+	}
+
+	return tzd;
+}
+
+static void
+get_server_time_zones_response_cb (ESoapResponse *response,
+				   GSimpleAsyncResult *simple)
+{
+	EwsAsyncData *async_data;
+	ESoapParameter *param;
+	ESoapParameter *subparam;
+	GError *error = NULL;
+
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	param = e_soap_response_get_first_parameter_by_name (
+		response, "ResponseMessages", &error);
+
+	/* Sanity check */
+	g_return_if_fail (
+		(param != NULL && error == NULL) ||
+		(param == NULL && error != NULL));
+
+	if (error != NULL) {
+		g_simple_async_result_take_error (simple, error);
+		return;
+	}
+
+	subparam = e_soap_parameter_get_first_child (param);
+
+	while (subparam != NULL) {
+		const gchar *name = (const gchar *) subparam->name;
+
+		if (!ews_get_response_status (subparam, &error)) {
+			g_simple_async_result_take_error (simple, error);
+			return;
+		}
+
+		if (E_EWS_CONNECTION_UTILS_CHECK_ELEMENT (name, "GetServerTimeZonesResponseMessage")) {
+			ESoapParameter *node, *node2;
+
+			node = e_soap_parameter_get_first_child_by_name (subparam, "TimeZoneDefinitions");
+			if (node != NULL) {
+				node2 = e_soap_parameter_get_first_child_by_name (node, "TimeZoneDefinition");
+				if (node2 != NULL) {
+					EEwsCalendarTimeZoneDefinition *tzd;
+
+					tzd = ews_get_time_zone_definition (node2);
+					if (tzd != NULL)
+						async_data->tzds = g_slist_prepend (async_data->tzds, tzd);
+				}
+			}
+		}
+
+		subparam = e_soap_parameter_get_next_child (subparam);
+	}
+
+	async_data->tzds = g_slist_reverse (async_data->tzds);
+}
+
+void
+e_ews_connection_get_server_time_zones (EEwsConnection *cnc,
+					gint pri,
+					GSList *msdn_locations,
+					GCancellable *cancellable,
+					GAsyncReadyCallback callback,
+					gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+	GSList *l;
+
+	g_return_if_fail (cnc != NULL);
+	g_return_if_fail (cnc->priv != NULL);
+
+	simple = g_simple_async_result_new (
+		G_OBJECT (cnc), callback, user_data, e_ews_connection_get_server_time_zones);
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (simple, async_data, (GDestroyNotify) async_data_free);
+
+	/*
+	 * EWS server version earlier than 2010 doesn't have support to "GetServerTimeZones".
+	 * So, if the API is called with an older Exchange's version, let's just fail silently.
+	 */
+	if (!e_ews_connection_satisfies_server_version (cnc, E_EWS_EXCHANGE_2010_SP1)) {
+		g_simple_async_result_complete_in_idle (simple);
+		g_object_unref (simple);
+		return;
+	}
+
+	msg = e_ews_message_new_with_header (
+		cnc->priv->uri,
+		cnc->priv->impersonate_user,
+		"GetServerTimeZones",
+		"ReturnFullTimeZoneData",
+		"true",
+		cnc->priv->version,
+		E_EWS_EXCHANGE_2010,
+		FALSE,
+		TRUE);
+
+	e_soap_message_start_element (msg, "Ids", "messages", NULL);
+	for (l = msdn_locations; l != NULL; l = l->next)
+		e_ews_message_write_string_parameter_with_attribute (msg, "Id", NULL, l->data, NULL, NULL);
+	e_soap_message_end_element (msg); /* Ids */
+
+	e_ews_message_write_footer (msg); /* Complete the footer and print the request */
+
+	e_ews_connection_queue_request (cnc, msg, get_server_time_zones_response_cb, pri, cancellable, simple);
+
+	g_object_unref (simple);
+}
+
+gboolean
+e_ews_connection_get_server_time_zones_finish (EEwsConnection *cnc,
+					       GAsyncResult *result,
+					       GSList **tzds, /*EEwsCalendarTimeZoneDefinition */
+					       GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (result, G_OBJECT (cnc), e_ews_connection_get_server_time_zones),
+		FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	if (async_data->tzds == NULL)
+		return FALSE;
+
+	if (tzds != NULL)
+		*tzds = async_data->tzds;
+	else
+		g_slist_free_full (
+			async_data->tzds,
+			(GDestroyNotify) e_ews_calendar_time_zone_definition_free);
+
+	return TRUE;
+}
+
+gboolean
+e_ews_connection_get_server_time_zones_sync (EEwsConnection *cnc,
+					     gint pri,
+					     GSList *msdn_locations,
+					     GSList **tzds, /* EEwsCalendarTimeZoneDefinition */
+					     GCancellable *cancellable,
+					     GError **error)
+{
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+
+	closure = e_async_closure_new ();
+
+	e_ews_connection_get_server_time_zones (
+		cnc, pri, msdn_locations, cancellable, e_async_closure_callback, closure);
+
+	result = e_async_closure_wait (closure);
+
+	success = e_ews_connection_get_server_time_zones_finish (cnc, result, tzds, error);
+
+	e_async_closure_free (closure);
+
+	return success;
 }
