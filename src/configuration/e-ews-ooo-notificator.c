@@ -194,7 +194,7 @@ e_ews_ooo_notificator_show_notification (EEwsOooNotificator *extension,
 	e_alert_sink_submit_alert (E_ALERT_SINK (shell_content), alert);
 
 	/* If the user doesn't cancel the notify, it will be hide automatically in 5 minutes */
-	data->timeout_id = g_timeout_add_seconds_full (
+	data->timeout_id = e_named_timeout_add_seconds_full (
 			G_PRIORITY_DEFAULT, 300,
 			e_ews_ooo_notificator_hide_notification_by_timeout_cb,
 			data, e_ews_ooo_notificator_dispatcher_data_free);
@@ -252,14 +252,14 @@ e_ews_ooo_notificator_service_removed (gpointer user_data)
 /*
  * GTK+ UI calls cannot be done in a dedicated thread.
  * So, let's ensure that our functions (that do something in the UI) will run
- * in the main thread, calling them through g_timeout_add_full().
+ * in the main thread, calling them through e_named_timeout_add_full().
  */
 static void
 e_ews_ooo_notificator_dispatcher (EEwsOooNotificatorDispatcherData *data,
 				  EEwsOooNotificationDispatcherFunction function,
 				  GDestroyNotify destroy_data)
 {
-	g_timeout_add_full (G_PRIORITY_DEFAULT, 1, function, data, destroy_data);
+	e_named_timeout_add_full (G_PRIORITY_DEFAULT, 1, function, data, destroy_data);
 }
 
 static void

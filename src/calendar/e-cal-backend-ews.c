@@ -4187,7 +4187,7 @@ ews_cal_start_refreshing (ECalBackendEws *cbews)
 	    e_backend_get_online (E_BACKEND (cbews)) &&
 	    priv->cnc) {
 		ews_start_sync (cbews);
-		priv->refresh_timeout = g_timeout_add_seconds (
+		priv->refresh_timeout = e_named_timeout_add_seconds (
 			REFRESH_INTERVAL, (GSourceFunc) ews_start_sync, cbews);
 	}
 

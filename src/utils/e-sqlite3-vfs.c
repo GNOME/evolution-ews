@@ -245,7 +245,7 @@ e_sqlite3_file_xSync (sqlite3_file *pFile,
 		g_source_remove (cFile->timeout_id);
 
 	/* Wait SYNC_TIMEOUT_SECONDS before we actually sync. */
-	cFile->timeout_id = g_timeout_add_seconds (
+	cFile->timeout_id = e_named_timeout_add_seconds (
 		SYNC_TIMEOUT_SECONDS, (GSourceFunc)
 		sync_push_request_timeout, cFile);
 

@@ -835,7 +835,7 @@ schedule_folder_update (CamelEwsStore *ews_store,
 
 	settings = camel_service_ref_settings (CAMEL_SERVICE (ews_store));
 
-	ews_store->priv->update_folder_id = g_timeout_add_seconds_full (
+	ews_store->priv->update_folder_id = e_named_timeout_add_seconds_full (
 								G_PRIORITY_LOW,
 								1,
 								folder_update_cb,
@@ -896,7 +896,7 @@ schedule_folder_list_update (CamelEwsStore *ews_store)
 
 	settings = camel_service_ref_settings (CAMEL_SERVICE (ews_store));
 
-	ews_store->priv->update_folder_list_id = g_timeout_add_seconds_full (
+	ews_store->priv->update_folder_list_id = e_named_timeout_add_seconds_full (
 								G_PRIORITY_LOW,
 								1,
 								folder_list_update_cb,

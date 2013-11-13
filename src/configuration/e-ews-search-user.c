@@ -363,7 +363,7 @@ search_term_changed_cb (GtkEntry *entry,
 		sid->dialog = dialog;
 
 		gtk_label_set_text (GTK_LABEL (pgu->info_label), _("Searching..."));
-		pgu->schedule_search_id = g_timeout_add (333, schedule_search_cb, sid);
+		pgu->schedule_search_id = e_named_timeout_add (333, schedule_search_cb, sid);
 	}
 }
 
