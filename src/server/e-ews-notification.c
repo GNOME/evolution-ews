@@ -442,7 +442,7 @@ ews_notification_soup_got_chunk (SoupMessage *msg,
 		chunk_str = (gchar *) notification->priv->chunk->data;
 		chunk_len = notification->priv->chunk->len;
 
-		if (chunk_len > 0) {
+		if (chunk_len == 0) {
 			g_byte_array_free (notification->priv->chunk, TRUE);
 			notification->priv->chunk = NULL;
 			keep_parsing = FALSE;
