@@ -3417,11 +3417,8 @@ ews_store_unset_oof_settings_state (CamelSession *session,
 	e_ews_oof_settings_set_state (oof_settings, E_EWS_OOF_STATE_DISABLED);
 	e_ews_oof_settings_submit_sync (oof_settings, cancellable, error);
 	g_object_unref (oof_settings);
-	if (local_error != NULL)
-		g_propagate_error (error, local_error);
 
 	camel_operation_pop_message (cancellable);
-
 }
 
 void

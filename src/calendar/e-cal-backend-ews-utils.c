@@ -535,7 +535,6 @@ ewscal_set_reccurence (ESoapMessage *msg,
 {
 	gchar buffer[256];
 	gint i, len;
-	gboolean is_relative = FALSE;
 
 	/* MSDN reference: http://msdn.microsoft.com/en-us/library/aa580471%28v=EXCHG.80%29.aspx
 	 */
@@ -603,10 +602,13 @@ ewscal_set_reccurence (ESoapMessage *msg,
 			break;
 
 		case ICAL_YEARLY_RECURRENCE:
+			#if 0 /* FIXME */
 			if (is_relative) {
 				ewscal_add_rrule (msg, rrule);
 
-			} else {
+			} else
+			#endif
+			{
 				e_soap_message_start_element (msg, "AbsoluteYearlyRecurrence", NULL, NULL);
 
 				/* work according to RFC5545 §3.3.10
@@ -765,12 +767,12 @@ e_ews_collect_organizer (icalcomponent *comp)
 	org_prop = icalcomponent_get_first_property (comp, ICAL_ORGANIZER_PROPERTY);
 	org = icalproperty_get_organizer (org_prop);
 	if (!org)
-		org = "";
+		return NULL;
 
 	if (g_ascii_strncasecmp (org, "MAILTO:", 7) == 0)
-		org_email_address = (org) + 7;
-	else
-		org_email_address = org;
+		org = org + 7;
+
+	org_email_address = org;
 
 	if (org_email_address && !*org_email_address)
 		org_email_address = NULL;

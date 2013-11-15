@@ -983,6 +983,7 @@ handle_get_items_response_cb (EwsAsyncData *async_data, ESoapParameter *param)
 		const gchar *name = (const gchar *) subparam->name;
 
 		if (g_str_has_suffix (name, "ResponseMessage")) {
+			/* coverity[unchecked_value] */
 			ews_get_response_status (subparam, &error);
 			ews_handle_items_param (subparam, async_data, error);
 		} else {
@@ -7470,16 +7471,6 @@ get_delegate_response_cb (ESoapResponse *response,
 	/* it's OK to not have set any delegate */
 	if (!param)
 		return;
-
-	/* Sanity check */
-	g_return_if_fail (
-		(param != NULL && error == NULL) ||
-		(param == NULL && error != NULL));
-
-	if (error != NULL) {
-		g_simple_async_result_take_error (simple, error);
-		return;
-	}
 
 	subparam = e_soap_parameter_get_first_child (param);
 

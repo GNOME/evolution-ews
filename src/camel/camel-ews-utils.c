@@ -303,9 +303,6 @@ sync_created_folders (CamelEwsStore *ews_store,
 		 * let's worry about that in a later commit. */
 		add_folder_to_summary (ews_store, folder);
 
-		if (ftype != E_EWS_FOLDER_TYPE_MAILBOX)
-			continue;
-
 		if (created_folder_ids) {
 			*created_folder_ids = g_slist_append (*created_folder_ids, g_strdup (fid->id));
 		} else {

@@ -490,6 +490,8 @@ add_permission_level_combo_row (GtkGrid *grid,
 	gtk_combo_box_text_append_text (combo, C_("PermissionsLevel", "Editor (can read, create and modify items)"));
 
 	switch (preselect) {
+	/* to make compiler happy */
+	/* coverity[dead_error_begin] */
 	case EwsPermissionLevel_Unknown:
 		break;
 	case EwsPermissionLevel_None:
@@ -1191,7 +1193,6 @@ mail_config_ews_delegates_page_constructed (GObject *object)
 
 	widget = gtk_radio_button_new_with_mnemonic (radio_group, _("My delegates a_nd me"));
 	page->priv->deliver_delegates_and_me_radio = widget;
-	radio_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (widget));
 	gtk_grid_attach (grid, widget, 0, row, 2, 1);
 
 	g_signal_connect_swapped (

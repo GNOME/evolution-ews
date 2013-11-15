@@ -199,7 +199,10 @@ camel_ews_folder_get_message_from_cache (CamelEwsFolder *ews_folder,
 			gchar *new_fname = ews_data_cache_get_filename (
 				ews_folder->cache,
 				"cur", uid, error);
-			g_rename (old_fname, new_fname);
+			if (g_rename (old_fname, new_fname) == -1) {
+				g_warning ("%s: Failed to rename '%s' to '%s': %s", G_STRFUNC,
+					   old_fname, new_fname, g_strerror (errno));
+			}
 			g_free (new_fname);
 			stream = ews_data_cache_get (ews_folder->cache, "cur", uid, error);
 		}
@@ -365,7 +368,10 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
 			goto exit_save;
 		if (camel_stream_close (newstream, NULL, error) == -1)
 			goto exit_save;
-		g_remove (mime_fname);
+		if (g_remove (mime_fname) == -1) {
+			g_warning ("%s: Failed to remove file '%s': %s",
+				   G_STRFUNC, mime_fname, g_strerror (errno));
+		}
 		success = TRUE;
  exit_save:
 		if (fd != -1)
@@ -401,7 +407,6 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	CamelEwsStore *ews_store;
 	const gchar *mime_content;
 	CamelMimeMessage *message = NULL;
-	CamelStream *tmp_stream = NULL;
 	GSList *ids = NULL, *items = NULL;
 	gchar *mime_dir;
 	gchar *cache_file;
@@ -570,9 +575,6 @@ exit:
 		g_object_unref (items->data);
 		g_slist_free (items);
 	}
-
-	if (tmp_stream)
-		g_object_unref (tmp_stream);
 
 	if (mime_fname_new)
 		g_free (mime_fname_new);

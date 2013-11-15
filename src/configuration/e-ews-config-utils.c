@@ -289,15 +289,6 @@ ews_config_utils_authenticator_try_password_sync (ESourceAuthenticator *auth,
 	g_free (hosturl);
 	g_free (user);
 
-	if (local_error) {
-		g_warn_if_fail (!authenticator->conn);
-		authenticator->conn = NULL;
-
-		g_propagate_error (error, local_error);
-
-		return E_SOURCE_AUTHENTICATION_ERROR;
-	}
-
 	g_warn_if_fail (authenticator->conn);
 
 	/* test whether connection works with some simple operation */

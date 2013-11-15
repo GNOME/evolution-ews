@@ -377,7 +377,7 @@ ews_backend_add_gal_source (EEwsBackend *backend)
 	const gchar *display_name;
 	const gchar *extension_name;
 	const gchar *gal_uid;
-	const gchar *oal_id;
+	const gchar *oal_id = NULL;
 	const gchar *uid;
 	gchar *oal_selected;
 
@@ -426,12 +426,8 @@ ews_backend_add_gal_source (EEwsBackend *backend)
 	g_free (backend->priv->oal_selected);
 	backend->priv->oal_selected = oal_selected;  /* takes ownership */
 
-	if (oal_id != NULL)
-		source = e_collection_backend_new_child (
-			collection_backend, oal_id);
-	else
-		source = e_collection_backend_new_child (
-			collection_backend, "Global Address List");
+	source = e_collection_backend_new_child (
+		collection_backend, oal_id);
 
 	e_source_set_display_name (source, display_name);
 

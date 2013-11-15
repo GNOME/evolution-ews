@@ -300,6 +300,7 @@ camel_ews_summary_add_message (CamelFolderSummary *summary,
 
 	tag = camel_message_info_user_tags (info);
 	while (tag) {
+		/* coverity[unchecked_value] */
 		camel_message_info_set_user_tag ((CamelMessageInfo *) mi, tag->name, tag->value);
 		tag = tag->next;
 	}
