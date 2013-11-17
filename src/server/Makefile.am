@@ -52,7 +52,7 @@ libeews_1_2_la_SOURCES = \
 	e-ews-connection.c \
 	e-ews-connection.h \
 	e-ews-connection-utils.c \
-	e-ews-connection-utils.g \
+	e-ews-connection-utils.h \
 	e-ews-debug.c \
 	e-ews-debug.h \
 	e-ews-enumtypes.c \
