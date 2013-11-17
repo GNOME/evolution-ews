@@ -1,3 +1,24 @@
+Evolution-EWS 3.11.2 2013-11-18
+-------------------------------
+
+Bug Fixes:
+	Bug 699349 - Listen for server change notifications (Fabiano Fidêncio)
+	Bug 708353 - Enhance folder size dialog (Fabiano Fidêncio)
+	Bug 711148 - Ensure that ews_discover_server_version() will be called
+	             on the first connection for Calendar/Camel
+	             (Fabiano Fidêncio)
+	Bug 711470 - Move tests from src/tests to test and fix make distcheck
+	             (Fabiano Fidêncio)
+	Bug 712304 - Crash in the notification code (Fabiano Fidêncio)
+
+Other Changes:
+	* Update tar format to tar-ustar (Fabiano Fidêncio)
+	* Fix potential issues found by static analysis tools (Milan Crha)
+
+Translations:
+	Enrico Nicoletto (pt_BR)
+
+
 Evolution-EWS 3.11.1 2013-10-21
 -------------------------------
 
