@@ -55,13 +55,11 @@ GType		e_ews_notification_get_type	(void);
 EEwsNotification *
 		e_ews_notification_new		(EEwsConnection *connection);
 
-guint		e_ews_notification_get_events_sync
+void		e_ews_notification_start_listening_sync
 						(EEwsNotification *notification,
-						 gint pri,
-						 const gchar *subscription_id);
-void		e_ews_notification_cancel_get_events
+						 GSList *folders);
+void		e_ews_notification_stop_listening_sync
 						(EEwsNotification *notification);
-
 
 G_END_DECLS
 

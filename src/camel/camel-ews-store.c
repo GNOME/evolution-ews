@@ -77,9 +77,9 @@ struct _CamelEwsStorePrivate {
 	CamelEwsStoreOooAlertState ooo_alert_state;
 
 	gboolean listen_notifications;
+	guint subscription_key;
 	guint update_folder_id;
 	guint update_folder_list_id;
-	gchar *subscription_id;
 	GCancellable *updates_cancellable;
 	GSList *update_folder_names;
 	GRecMutex update_lock;
@@ -93,6 +93,12 @@ static gboolean	ews_store_construct	(CamelService *service, CamelSession *sessio
 static void camel_ews_store_initable_init (GInitableIface *interface);
 static void camel_ews_subscribable_init (CamelSubscribableInterface *interface);
 static GInitableIface *parent_initable_interface;
+
+static CamelFolderInfo *folder_info_from_store_summary (CamelEwsStore *store,
+							const gchar *top,
+							guint32 flags,
+							GCancellable *cancellable,
+							GError **error);
 
 enum {
 	PROP_0,
@@ -1001,70 +1007,51 @@ start_notifications_thread (gpointer data)
 		goto exit;
 
 	if (ews_store->priv->listen_notifications) {
+		if (ews_store->priv->subscription_key != 0)
+			goto exit;
+
 		e_ews_connection_enable_notifications_sync (
-				ews_store->priv->connection,
-				hnd->folders,
-				NULL,
-				&ews_store->priv->subscription_id,
-				NULL,
-				NULL);
+			ews_store->priv->connection,
+			hnd->folders,
+			&ews_store->priv->subscription_key);
 	} else {
-		if (ews_store->priv->subscription_id == NULL)
+		if (ews_store->priv->subscription_key == 0)
 			goto exit;
 
 		e_ews_connection_disable_notifications_sync (
-				ews_store->priv->connection,
-				ews_store->priv->subscription_id,
-				NULL,
-				NULL);
-		g_free (ews_store->priv->subscription_id);
-		ews_store->priv->subscription_id = NULL;
-	}
-
- exit:
-	handle_notifications_data_free (hnd);
-	return NULL;
-}
-
-static gpointer
-restart_notifications_thread (gpointer data)
-{
-	struct HandleNotificationsData *hnd = data;
-	CamelEwsStore *ews_store = hnd->ews_store;
-
-	if (ews_store->priv->connection == NULL)
-		goto exit;
-
-	if (!ews_store->priv->listen_notifications)
-		goto exit;
-
-	if (ews_store->priv->subscription_id != NULL) {
-		e_ews_connection_disable_notifications_sync (
-				ews_store->priv->connection,
-				ews_store->priv->subscription_id,
-				NULL,
-				NULL);
-		g_free (ews_store->priv->subscription_id);
-		ews_store->priv->subscription_id = NULL;
-	}
-
-	e_ews_connection_enable_notifications_sync (
 			ews_store->priv->connection,
-			hnd->folders,
-			NULL,
-			&ews_store->priv->subscription_id,
-			NULL,
-			NULL);
+			ews_store->priv->subscription_key);
 
- exit:
+		ews_store->priv->subscription_key = 0;
+	}
+
+exit:
 	handle_notifications_data_free (hnd);
 	return NULL;
 }
 
 static void
-handle_notifications (CamelEwsStore *ews_store,
-		      CamelEwsSettings *ews_settings,
-		      gboolean restart)
+folder_ids_populate (CamelFolderInfo *folder_info,
+		     gpointer data)
+{
+	struct HandleNotificationsData *hnd = data;
+
+	while (folder_info != NULL) {
+		gchar *id;
+
+		id = camel_ews_store_summary_get_folder_id_from_name (hnd->ews_store->summary, folder_info->full_name);
+		hnd->folders = g_slist_prepend (hnd->folders, id);
+
+		if (folder_info->child != NULL)
+			folder_ids_populate (folder_info->child, hnd);
+
+		folder_info = folder_info->next;
+	}
+}
+
+static void
+camel_ews_store_handle_notifications (CamelEwsStore *ews_store,
+				      CamelEwsSettings *ews_settings)
 {
 	GThread *thread;
 	struct HandleNotificationsData *hnd;
@@ -1084,10 +1071,22 @@ handle_notifications (CamelEwsStore *ews_store,
 		inbox = camel_ews_store_summary_get_folder_id_from_folder_type (
 			ews_store->summary, CAMEL_FOLDER_TYPE_INBOX);
 		hnd->folders = g_slist_prepend (hnd->folders, inbox);
+	} else {
+		CamelFolderInfo *fi;
+
+		fi = folder_info_from_store_summary (
+			ews_store,
+			NULL,
+			CAMEL_STORE_FOLDER_INFO_RECURSIVE,
+			NULL,
+			NULL);
+
+		folder_ids_populate (fi, hnd);
+
+		camel_folder_info_free (fi);
 	}
 
-	ews_store->priv->listen_notifications = camel_ews_settings_get_listen_notifications (ews_settings);
-	thread = g_thread_new (NULL, restart ? restart_notifications_thread : start_notifications_thread, hnd);
+	thread = g_thread_new (NULL, start_notifications_thread, hnd);
 	g_thread_unref (thread);
 }
 
@@ -1096,7 +1095,12 @@ camel_ews_store_listen_notifications_cb (CamelEwsStore *ews_store,
 					 GParamSpec *spec,
 					 CamelEwsSettings *ews_settings)
 {
-	handle_notifications (ews_store, ews_settings, FALSE);
+	if (ews_store->priv->listen_notifications == camel_ews_settings_get_listen_notifications (ews_settings))
+		return;
+
+	ews_store->priv->listen_notifications = !ews_store->priv->listen_notifications;
+
+	camel_ews_store_handle_notifications (ews_store, ews_settings);
 }
 
 static void
@@ -1104,7 +1108,10 @@ camel_ews_store_check_all_cb (CamelEwsStore *ews_store,
 			      GParamSpec *spec,
 			      CamelEwsSettings *ews_settings)
 {
-	handle_notifications (ews_store, ews_settings, TRUE);
+	if (!ews_store->priv->listen_notifications)
+		return;
+
+	camel_ews_store_handle_notifications (ews_store, ews_settings);
 }
 
 static gboolean
@@ -1146,6 +1153,8 @@ ews_connect_sync (CamelService *service,
 
 	g_free (auth_mech);
 
+	priv->listen_notifications = FALSE;
+
 	if (success) {
 		CamelEwsStoreOooAlertState state;
 
@@ -1160,8 +1169,7 @@ ews_connect_sync (CamelService *service,
 		if (!priv->updates_cancellable)
 			priv->updates_cancellable = g_cancellable_new ();
 
-		priv->listen_notifications = camel_ews_settings_get_listen_notifications (ews_settings);
-		if (priv->listen_notifications)
+		if (camel_ews_settings_get_listen_notifications (ews_settings))
 			camel_ews_store_listen_notifications_cb (ews_store, NULL, ews_settings);
 
 		camel_offline_store_set_online_sync (
@@ -1221,7 +1229,7 @@ ews_disconnect_sync (CamelService *service,
                      GCancellable *cancellable,
                      GError **error)
 {
-	CamelEwsStore *ews_store = (CamelEwsStore *) service;
+	CamelEwsStore *ews_store = CAMEL_EWS_STORE (service);
 	CamelServiceClass *service_class;
 
 	g_mutex_lock (&ews_store->priv->connection_lock);
@@ -1245,16 +1253,16 @@ ews_disconnect_sync (CamelService *service,
 
 		if (ews_store->priv->listen_notifications) {
 			stop_pending_updates (ews_store);
-			if (ews_store->priv->subscription_id != NULL) {
-				e_ews_connection_disable_notifications_sync (
-						ews_store->priv->connection,
-						ews_store->priv->subscription_id,
-						cancellable,
-						error);
 
-				g_free (ews_store->priv->subscription_id);
-				ews_store->priv->subscription_id = NULL;
+			if (ews_store->priv->subscription_key != 0) {
+				e_ews_connection_disable_notifications_sync (
+					ews_store->priv->connection,
+					ews_store->priv->subscription_key);
+
+				ews_store->priv->subscription_key = 0;
 			}
+
+			ews_store->priv->listen_notifications = FALSE;
 		}
 
 		e_ews_connection_set_password (
@@ -3464,32 +3472,28 @@ ews_store_dispose (GObject *object)
 		g_signal_handlers_disconnect_by_func (
 			ews_store->priv->connection, camel_ews_store_server_notification_cb, ews_store);
 
-		if (ews_store->priv->listen_notifications && ews_store->priv->subscription_id != NULL) {
+		if (ews_store->priv->listen_notifications) {
 			stop_pending_updates (ews_store);
-			e_ews_connection_disable_notifications_sync (
-				ews_store->priv->connection,
-				ews_store->priv->subscription_id,
-				NULL,
-				NULL);
+
+			if (ews_store->priv->subscription_key != 0) {
+				e_ews_connection_disable_notifications_sync (
+					ews_store->priv->connection,
+					ews_store->priv->subscription_key);
+
+				ews_store->priv->subscription_key = 0;
+			}
+
+			ews_store->priv->listen_notifications = FALSE;
 		}
 
 		g_clear_object (&ews_store->priv->connection);
 	}
 
-	if (ews_store->priv->subscription_id) {
-		g_free (ews_store->priv->subscription_id);
-		ews_store->priv->subscription_id = NULL;
-	}
+	g_slist_free_full (ews_store->priv->update_folder_names, g_free);
+	ews_store->priv->update_folder_names = NULL;
 
-	if (ews_store->priv->update_folder_names) {
-		g_slist_free_full (ews_store->priv->update_folder_names, g_free);
-		ews_store->priv->update_folder_names = NULL;
-	}
-
-	if (ews_store->priv->public_folders) {
-		g_slist_free_full (ews_store->priv->public_folders, g_object_unref);
-		ews_store->priv->public_folders = NULL;
-	}
+	g_slist_free_full (ews_store->priv->public_folders, g_object_unref);
+	ews_store->priv->public_folders = NULL;
 
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (camel_ews_store_parent_class)->dispose (object);
@@ -3588,6 +3592,7 @@ camel_ews_store_init (CamelEwsStore *ews_store)
 	ews_store->priv->last_refresh_time = time (NULL) - (FINFO_REFRESH_INTERVAL + 10);
 	ews_store->priv->updates_cancellable = NULL;
 	ews_store->priv->update_folder_names = NULL;
+	ews_store->priv->subscription_key = 0;
 	ews_store->priv->update_folder_id = 0;
 	ews_store->priv->update_folder_list_id = 0;
 	g_mutex_init (&ews_store->priv->get_finfo_lock);

@@ -35,8 +35,8 @@ G_DEFINE_TYPE (EEwsNotification, e_ews_notification, G_TYPE_OBJECT)
 struct _EEwsNotificationPrivate {
 	SoupSession *soup_session;
 	EEwsConnection *connection; /* not referred */
-	ESoapMessage *msg;
 	GByteArray *chunk;
+	GCancellable *cancellable;
 };
 
 enum {
@@ -51,7 +51,16 @@ static const gchar *default_events_names[] = {
 	"ModifiedEvent",
 	"MovedEvent",
 	"StatusEvent",
-	NULL};
+	NULL
+};
+
+typedef struct _EEwsNotificationThreadData EEwsNotificationThreadData;
+
+struct _EEwsNotificationThreadData {
+	EEwsNotification *notification;
+	GCancellable *cancellable;
+	GSList *folders;
+};
 
 static void
 ews_notification_authenticate (SoupSession *session,
@@ -129,6 +138,15 @@ e_ews_notification_set_connection (EEwsNotification *notification,
 		&notification->priv->connection);
 }
 
+static EEwsConnection *
+e_ews_notification_get_connection (const EEwsNotification *notification)
+{
+	g_return_val_if_fail (E_IS_EWS_NOTIFICATION (notification), NULL);
+	g_return_val_if_fail (notification->priv == NULL, NULL);
+
+	return notification->priv->connection;
+}
+
 static void
 ews_notification_set_property (GObject *object,
 			       guint property_id,
@@ -144,15 +162,6 @@ ews_notification_set_property (GObject *object,
 	}
 
 	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-}
-
-static EEwsConnection *
-e_ews_notification_get_connection (const EEwsNotification *notification)
-{
-	g_return_val_if_fail (E_IS_EWS_NOTIFICATION (notification), NULL);
-	g_return_val_if_fail (notification->priv == NULL, NULL);
-
-	return notification->priv->connection;
 }
 
 static void
@@ -180,19 +189,28 @@ ews_notification_dispose (GObject *object)
 
 	priv = E_EWS_NOTIFICATION_GET_PRIVATE (object);
 
-	if (priv->soup_session) {
+	if (priv->cancellable != NULL)
+		g_cancellable_cancel (priv->cancellable);
+
+	if (priv->soup_session != NULL) {
 		g_signal_handlers_disconnect_by_func (
 			priv->soup_session,
 			ews_notification_authenticate, object);
 	}
 
-	if (priv->connection) {
+	if (priv->cancellable != NULL)
+		g_clear_object (&priv->cancellable);
+
+	if (priv->connection != NULL) {
 		g_object_weak_unref (
 			G_OBJECT (priv->connection),
 			(GWeakNotify) g_nullify_pointer,
 			&priv->connection);
 		priv->connection = NULL;
 	}
+
+	/* Chain up to parent's dispose() method. */
+	G_OBJECT_CLASS (e_ews_notification_parent_class)->dispose (object);
 }
 
 static void
@@ -242,6 +260,203 @@ e_ews_notification_init (EEwsNotification *notification)
 
 	g_signal_connect (notification->priv->soup_session, "authenticate", G_CALLBACK (ews_notification_authenticate), notification);
 }
+
+static gboolean
+e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
+					  GSList *folders,
+					  gchar **subscription_id,
+					  GCancellable *cancellable)
+{
+	CamelEwsSettings *ews_settings;
+	ESoapMessage *msg;
+	ESoapResponse *response;
+	ESoapParameter *param, *subparam;
+	GError *error = NULL;
+	GSList *l;
+	gchar *auth_mech = NULL;
+	guint event_type;
+	xmlDoc *doc;
+
+	g_return_val_if_fail (notification != NULL, FALSE);
+	g_return_val_if_fail (notification->priv != NULL, FALSE);
+
+	msg = e_ews_message_new_with_header (
+		e_ews_connection_get_uri (notification->priv->connection),
+		e_ews_connection_get_impersonate_user (notification->priv->connection),
+		"Subscribe",
+		NULL,
+		NULL,
+		e_ews_connection_get_server_version (notification->priv->connection),
+		E_EWS_EXCHANGE_2010_SP1,
+		FALSE,
+		FALSE);
+
+	e_soap_message_start_element (msg, "StreamingSubscriptionRequest", "messages", NULL);
+
+	e_soap_message_start_element (msg, "FolderIds", NULL, NULL);
+	for (l = folders; l; l = l->next) {
+		e_ews_message_write_string_parameter_with_attribute (
+			msg,
+			"FolderId",
+			NULL,
+			NULL,
+			"Id",
+			l->data);
+	}
+	e_soap_message_end_element (msg); /* FolderIds */
+
+	e_soap_message_start_element (msg, "EventTypes", NULL, NULL);
+	for (event_type = 0; default_events_names[event_type] != NULL; event_type++) {
+		if (g_strcmp0 (default_events_names[event_type], "StatusEvent") == 0)
+			continue;
+
+		e_ews_message_write_string_parameter_with_attribute (
+			msg,
+			"EventType",
+			NULL,
+			default_events_names[event_type],
+			NULL,
+			NULL);
+	}
+	e_soap_message_end_element (msg); /* EventTypes */
+
+	e_soap_message_end_element (msg); /* StreamingSubscriptionRequest */
+	e_ews_message_write_footer (msg); /* Complete the footer and print the request */
+
+	soup_message_body_set_accumulate (SOUP_MESSAGE (msg)->response_body, TRUE);
+
+	ews_settings = e_ews_connection_ref_settings (notification->priv->connection);
+
+	g_object_get (G_OBJECT (ews_settings), "auth-mechanism", &auth_mech, NULL);
+	if (g_strcmp0 (auth_mech, "GSSAPI") == 0)
+		e_ews_connection_utils_setup_msg_gssapi_auth (
+			notification->priv->connection,
+			notification->priv->soup_session,
+			SOUP_MESSAGE (msg));
+
+	g_object_unref (ews_settings);
+	g_free (auth_mech);
+
+	if (g_cancellable_is_cancelled (cancellable)) {
+		g_object_unref (msg);
+		return FALSE;
+	}
+
+	if (!SOUP_STATUS_IS_SUCCESSFUL (
+		soup_session_send_message (notification->priv->soup_session, SOUP_MESSAGE (msg)))) {
+		g_object_unref (msg);
+		return FALSE;
+	}
+
+	doc = xmlReadMemory (
+		SOUP_MESSAGE (msg)->response_body->data,
+		SOUP_MESSAGE (msg)->response_body->length,
+		"response.xml", NULL, 0);
+
+	response = e_soap_response_new_from_xmldoc (doc);
+	g_object_unref (msg);
+
+	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages", &error);
+
+	/* Sanity check */
+	g_warn_if_fail ((param != NULL && error == NULL) || (param == NULL && error != NULL));
+
+	if (error != NULL) {
+		g_warning (G_STRLOC ": %s\n", error->message);
+		g_error_free (error);
+
+		g_object_unref (response);
+		return FALSE;
+	}
+
+	subparam = e_soap_parameter_get_first_child (param);
+
+	while (subparam != NULL) {
+		const gchar *name = (const gchar *) subparam->name;
+
+		if (!ews_get_response_status (subparam, &error)) {
+			g_warning (G_STRLOC ": %s\n", error->message);
+			g_error_free (error);
+
+			g_object_unref (response);
+			return FALSE;
+		}
+
+		if (E_EWS_CONNECTION_UTILS_CHECK_ELEMENT (name, "SubscribeResponseMessage")) {
+			ESoapParameter *node;
+
+			node = e_soap_parameter_get_first_child_by_name (subparam, "SubscriptionId");
+			*subscription_id = e_soap_parameter_get_string_value (node);
+		}
+
+		subparam = e_soap_parameter_get_next_child (subparam);
+	}
+
+	g_object_unref (response);
+	return TRUE;
+}
+
+static gboolean
+e_ews_notification_unsubscribe_folder_sync (EEwsNotification *notification,
+					    const gchar *subscription_id)
+{
+	ESoapMessage *msg;
+	ESoapResponse *response;
+	ESoapParameter *param;
+	GError *error = NULL;
+	xmlDoc *doc;
+
+	g_return_val_if_fail (notification != NULL, FALSE);
+	g_return_val_if_fail (notification->priv != NULL, FALSE);
+
+	msg = e_ews_message_new_with_header (
+		e_ews_connection_get_uri (notification->priv->connection),
+		e_ews_connection_get_impersonate_user (notification->priv->connection),
+		"Unsubscribe",
+		NULL,
+		NULL,
+		e_ews_connection_get_server_version (notification->priv->connection),
+		E_EWS_EXCHANGE_2010_SP1,
+		FALSE,
+		FALSE);
+
+	e_ews_message_write_string_parameter_with_attribute (
+		msg, "SubscriptionId", "messages", subscription_id, NULL, NULL);
+
+	e_ews_message_write_footer (msg); /* Complete the footer and print the request */
+
+	soup_message_body_set_accumulate (SOUP_MESSAGE (msg)->response_body, TRUE);
+
+	if (!SOUP_STATUS_IS_SUCCESSFUL (
+		soup_session_send_message (notification->priv->soup_session, SOUP_MESSAGE (msg)))) {
+		g_object_unref (msg);
+		return FALSE;
+	}
+
+	doc = xmlReadMemory (
+		SOUP_MESSAGE (msg)->response_body->data,
+		SOUP_MESSAGE (msg)->response_body->length,
+		"response.xml", NULL, 0);
+
+	response = e_soap_response_new_from_xmldoc (doc);
+	g_object_unref (msg);
+
+	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages", &error);
+
+	/* Sanity check */
+	g_warn_if_fail ((param != NULL && error == NULL) || (param == NULL && error != NULL));
+
+	g_object_unref (response);
+
+	if (error != NULL) {
+		g_warning (G_STRLOC ": %s\n", error->message);
+		g_error_free (error);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 
 static EEwsNotificationEvent *
 get_folder_event_info (ESoapParameter *param,
@@ -337,13 +552,10 @@ ews_notification_fire_events_from_response (EEwsNotification *notification,
 	GSList *events = NULL;
 	GError *error = NULL;
 
-	param = e_soap_response_get_first_parameter_by_name (
-		response, "ResponseMessages", &error);
+	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages", &error);
 
 	/* Sanity check */
-	g_return_if_fail (
-		(param != NULL && error == NULL) ||
-		(param == NULL && error != NULL));
+	g_warn_if_fail ((param != NULL && error == NULL) || (param == NULL && error != NULL));
 
 	if (error != NULL) {
 		g_warning (G_STRLOC ": %s\n", error->message);
@@ -442,7 +654,7 @@ ews_notification_soup_got_chunk (SoupMessage *msg,
 		chunk_str = (gchar *) notification->priv->chunk->data;
 		chunk_len = notification->priv->chunk->len;
 
-		if (chunk_len == 0) {
+		if (chunk_len == 0 || g_cancellable_is_cancelled (notification->priv->cancellable)) {
 			g_byte_array_free (notification->priv->chunk, TRUE);
 			notification->priv->chunk = NULL;
 			keep_parsing = FALSE;
@@ -450,82 +662,124 @@ ews_notification_soup_got_chunk (SoupMessage *msg,
 	} while (keep_parsing);
 }
 
-/*
- * e_ews_notification_get_events_sync
- *
- * @param notification:
- * @param pri
- * @param subscription_id
- * @param cancellable
- * @param user_data
- */
-guint
+static gboolean
 e_ews_notification_get_events_sync (EEwsNotification *notification,
-				    gint pri,
 				    const gchar *subscription_id)
 {
-	CamelEwsSettings *ews_settings;
 	ESoapMessage *msg;
-	gchar *auth_mech = NULL;
-	guint ret;
+	gboolean ret;
+	gulong handler_id;
 
 	g_return_val_if_fail (notification != NULL, SOUP_STATUS_CANCELLED);
 	g_return_val_if_fail (notification->priv != NULL, SOUP_STATUS_CANCELLED);
 	g_return_val_if_fail (notification->priv->connection != NULL, SOUP_STATUS_CANCELLED);
 
-	notification->priv->msg = e_ews_message_new_with_header (
+	msg = e_ews_message_new_with_header (
 		e_ews_connection_get_uri (notification->priv->connection),
 		e_ews_connection_get_impersonate_user (notification->priv->connection),
 		"GetStreamingEvents",
 		NULL,
 		NULL,
 		e_ews_connection_get_server_version (notification->priv->connection),
-		E_EWS_EXCHANGE_2010_SP2,
+		E_EWS_EXCHANGE_2010_SP1,
 		FALSE,
 		FALSE);
 
-	msg = notification->priv->msg;
-
 	e_soap_message_start_element (msg, "SubscriptionIds", "messages", NULL);
-	e_ews_message_write_string_parameter_with_attribute (
-		msg, "SubscriptionId", NULL, subscription_id, NULL, NULL);
+	e_ews_message_write_string_parameter_with_attribute (msg, "SubscriptionId", NULL, subscription_id, NULL, NULL);
 	e_soap_message_end_element (msg); /* SubscriptionIds */
 
-	e_ews_message_write_string_parameter_with_attribute (
-		msg, "ConnectionTimeout", "messages", "10", NULL, NULL);
+	e_ews_message_write_string_parameter_with_attribute (msg, "ConnectionTimeout", "messages", "10", NULL, NULL);
 
 	e_ews_message_write_footer (msg); /* Complete the footer and print the request */
 
 	if (e_ews_debug_get_log_level () <= 2)
 		soup_message_body_set_accumulate (SOUP_MESSAGE (msg)->response_body, FALSE);
 
-	ews_settings = e_ews_connection_ref_settings (notification->priv->connection);
-
-	g_object_get (G_OBJECT (ews_settings), "auth-mechanism", &auth_mech, NULL);
-	if (g_strcmp0 (auth_mech, "GSSAPI") == 0)
-		e_ews_connection_utils_setup_msg_gssapi_auth (
-			notification->priv->connection,
-			notification->priv->soup_session,
-			SOUP_MESSAGE (msg));
-
-	g_object_unref (ews_settings);
-	g_free (auth_mech);
-
-	g_signal_connect (
+	handler_id = g_signal_connect (
 		SOUP_MESSAGE (msg), "got-chunk",
 		G_CALLBACK (ews_notification_soup_got_chunk), notification);
 
-	ret = soup_session_send_message (notification->priv->soup_session, SOUP_MESSAGE (msg));
-	g_clear_object (&msg);
+	ret = SOUP_STATUS_IS_SUCCESSFUL (
+		soup_session_send_message (notification->priv->soup_session, SOUP_MESSAGE (msg)));
+
+	g_signal_handler_disconnect (msg, handler_id);
+	g_object_unref (msg);
 
 	return ret;
 }
 
-void
-e_ews_notification_cancel_get_events (EEwsNotification *notification)
+static gpointer
+e_ews_notification_get_events_thread (gpointer user_data)
 {
-	soup_session_cancel_message (
-		notification->priv->soup_session,
-		SOUP_MESSAGE (notification->priv->msg),
-		SOUP_STATUS_CANCELLED);
+	EEwsNotificationThreadData *td = user_data;
+	gchar *subscription_id = NULL;
+	gboolean ret;
+
+	g_return_val_if_fail (td != NULL, NULL);
+	g_return_val_if_fail (td->notification != NULL, NULL);
+	g_return_val_if_fail (td->folders != NULL, NULL);
+
+	if (!e_ews_notification_subscribe_folder_sync (td->notification, td->folders, &subscription_id, td->cancellable))
+		goto exit;
+
+	do {
+		if (g_cancellable_is_cancelled (td->cancellable))
+			goto exit;
+
+		ret = e_ews_notification_get_events_sync (
+				td->notification,
+				subscription_id);
+	} while (ret);
+
+
+exit:
+	if (subscription_id != NULL) {
+		e_ews_notification_unsubscribe_folder_sync (td->notification, subscription_id);
+		g_free (subscription_id);
+	}
+
+	g_slist_free_full (td->folders, g_free);
+	g_object_unref (td->cancellable);
+	g_object_unref (td->notification);
+	g_free (td);
+
+	return NULL;
+}
+
+void
+e_ews_notification_start_listening_sync (EEwsNotification *notification,
+					 GSList *folders)
+{
+	EEwsNotificationThreadData *td;
+	GSList *l;
+	GThread *thread;
+
+	g_return_if_fail (notification != NULL);
+	g_return_if_fail (notification->priv != NULL);
+	g_return_if_fail (folders != NULL);
+
+	if (notification->priv->cancellable != NULL)
+		e_ews_notification_stop_listening_sync (notification);
+
+	notification->priv->cancellable = g_cancellable_new ();
+
+	td = g_new0 (EEwsNotificationThreadData, 1);
+	td->notification = g_object_ref (notification);
+	td->cancellable = g_object_ref (notification->priv->cancellable);
+	for (l = folders; l != NULL; l = l->next)
+		td->folders = g_slist_prepend(td->folders, g_strdup (l->data));
+
+	thread = g_thread_new (NULL, e_ews_notification_get_events_thread, td);
+	g_thread_unref (thread);
+}
+
+void
+e_ews_notification_stop_listening_sync (EEwsNotification *notification)
+{
+	g_return_if_fail (notification != NULL);
+	g_return_if_fail (notification->priv != NULL);
+
+	g_cancellable_cancel (notification->priv->cancellable);
+	g_clear_object (&notification->priv->cancellable);
 }

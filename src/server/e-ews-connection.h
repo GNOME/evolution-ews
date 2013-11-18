@@ -211,7 +211,7 @@ typedef enum {
 	E_EWS_NOTIFICATION_EVENT_DELETED,
 	E_EWS_NOTIFICATION_EVENT_MODIFIED,
 	E_EWS_NOTIFICATION_EVENT_MOVED,
-	E_EWS_NOTIFICATION_EVENT_STATUS,
+	E_EWS_NOTIFICATION_EVENT_STATUS
 } EEwsNotificationEventType;
 
 typedef struct {
@@ -1097,56 +1097,13 @@ gboolean	e_ews_connection_query_auth_methods_sync
 						 GSList **auth_methods,
 						 GCancellable *cancellable,
 						 GError **error);
-void		e_ews_connection_subscribe_folder
-						(EEwsConnection *cnc,
-						 gint pri,
-						 GSList *folders,
-						 GSList *events,
-						 GCancellable *cancellable,
-						 GAsyncReadyCallback callback,
-						 gpointer user_data);
-gboolean	e_ews_connection_subscribe_folder_finish
-						(EEwsConnection *cnc,
-						 GAsyncResult *result,
-						 gchar **subscription_id,
-						 GError **error);
-gboolean	e_ews_connection_subscribe_folder_sync
-						(EEwsConnection *cnc,
-						 gint pri,
-						 GSList *folders,
-						 GSList *events,
-						 gchar **subscription_id,
-						 GCancellable *cancellable,
-						 GError **error);
-void		e_ews_connection_unsubscribe_folder
-						(EEwsConnection *cnc,
-						 gint pri,
-						 const gchar *subscription_id,
-						 GCancellable *cancellable,
-						 GAsyncReadyCallback callback,
-						 gpointer user_data);
-gboolean	e_ews_connection_unsubscribe_folder_finish
-						(EEwsConnection *cnc,
-						 GAsyncResult *result,
-						 GError **error);
-gboolean	e_ews_connection_unsubscribe_folder_sync
-						(EEwsConnection *cnc,
-						 gint pri,
-						 const gchar *subscription_id,
-						 GCancellable *cancellable,
-						 GError **error);
-gboolean	e_ews_connection_enable_notifications_sync
+void		e_ews_connection_enable_notifications_sync
 						(EEwsConnection *cnc,
 						 GSList *folders,
-						 GSList *events,
-						 gchar **subscription_id,
-						 GCancellable *cancellable,
-						 GError **error);
-gboolean	e_ews_connection_disable_notifications_sync
+						 guint *subscription_key);
+void		e_ews_connection_disable_notifications_sync
 						(EEwsConnection *cnc,
-						 const gchar *subscription_id,
-						 GCancellable *cancellable,
-						 GError **error);
+						 guint subscription_key);
 
 G_END_DECLS
 

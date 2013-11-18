@@ -84,8 +84,8 @@ struct _ECalBackendEwsPrivate {
 
 	GCancellable *cancellable;
 
+	guint subscription_key;
 	gboolean listen_notifications;
-	gchar *subscription_id;
 };
 
 #define PRIV_LOCK(p)   (g_rec_mutex_lock (&(p)->rec_mutex))
@@ -617,32 +617,29 @@ handle_notifications_thread (gpointer data)
 	if (cbews->priv->listen_notifications) {
 		GSList *folders = NULL;
 
-		if (cbews->priv->subscription_id != NULL)
+		if (cbews->priv->subscription_key != 0)
 			goto exit;
 
 		folders = g_slist_prepend (folders, cbews->priv->folder_id);
+
 		e_ews_connection_enable_notifications_sync (
 				cbews->priv->cnc,
 				folders,
-				NULL,
-				&cbews->priv->subscription_id,
-				NULL,
-				NULL);
+				&cbews->priv->subscription_key);
+
 		g_slist_free (folders);
 	} else {
-		if (cbews->priv->subscription_id == NULL)
+		if (cbews->priv->subscription_key == 0)
 			goto exit;
 
 		e_ews_connection_disable_notifications_sync (
 				cbews->priv->cnc,
-				cbews->priv->subscription_id,
-				NULL,
-				NULL);
-		g_free (cbews->priv->subscription_id);
-		cbews->priv->subscription_id = NULL;
+				cbews->priv->subscription_key);
+
+		cbews->priv->subscription_key = 0;
 	}
 
- exit:
+exit:
 	PRIV_UNLOCK (cbews->priv);
 	g_object_unref (cbews);
 	return NULL;
@@ -776,26 +773,31 @@ e_cal_backend_ews_open (ECalBackend *backend,
 
 	if (ret) {
 		e_cal_backend_set_writable (backend, TRUE);
-		priv->listen_notifications = camel_ews_settings_get_listen_notifications (ews_settings);
 
-		if (priv->listen_notifications)
-			cbews_listen_notifications_cb (cbews, NULL, ews_settings);
+		PRIV_LOCK (priv);
+		if (priv->cnc != NULL) {
+			priv->listen_notifications = camel_ews_settings_get_listen_notifications (ews_settings);
+
+			if (priv->listen_notifications)
+				cbews_listen_notifications_cb (cbews, NULL, ews_settings);
+
+			g_signal_connect_swapped (
+				priv->cnc,
+				"server-notification",
+				G_CALLBACK (cbews_server_notification_cb),
+				cbews);
+		}
+		PRIV_UNLOCK (priv);
 	}
 
 	convert_error_to_edc_error (&error);
 	e_data_cal_respond_open (cal, opid, error);
 
 	g_signal_connect_swapped (
-			priv->cnc,
-			"server-notification",
-			G_CALLBACK (cbews_server_notification_cb),
-			cbews);
-
-	g_signal_connect_swapped (
-			ews_settings,
-			"notify::listen-notifications",
-			G_CALLBACK (cbews_listen_notifications_cb),
-			cbews);
+		ews_settings,
+		"notify::listen-notifications",
+		G_CALLBACK (cbews_listen_notifications_cb),
+		cbews);
 }
 
 static void
@@ -4604,12 +4606,13 @@ e_cal_backend_ews_dispose (GObject *object)
 	if (priv->cnc) {
 		g_signal_handlers_disconnect_by_func (priv->cnc, cbews_server_notification_cb, object);
 
-		if (priv->listen_notifications && priv->subscription_id != NULL) {
-			e_ews_connection_disable_notifications_sync (
+		if (priv->listen_notifications) {
+			if (priv->subscription_key != 0) {
+				e_ews_connection_disable_notifications_sync (
 					priv->cnc,
-					priv->subscription_id,
-					NULL,
-					NULL);
+					priv->subscription_key);
+				priv->subscription_key = 0;
+			}
 
 			priv->listen_notifications = FALSE;
 		}
@@ -4617,9 +4620,6 @@ e_cal_backend_ews_dispose (GObject *object)
 		g_object_unref (priv->cnc);
 		priv->cnc = NULL;
 	}
-
-	g_free (priv->subscription_id);
-	priv->subscription_id = NULL;
 
 	G_OBJECT_CLASS (e_cal_backend_ews_parent_class)->dispose (object);
 }

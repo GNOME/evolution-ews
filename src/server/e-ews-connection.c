@@ -59,6 +59,9 @@
 #define QUEUE_LOCK(x) (g_rec_mutex_lock(&(x)->priv->queue_lock))
 #define QUEUE_UNLOCK(x) (g_rec_mutex_unlock(&(x)->priv->queue_lock))
 
+#define NOTIFICATION_LOCK(x) (g_mutex_lock(&(x)->priv->notification_lock))
+#define NOTIFICATION_UNLOCK(x) (g_mutex_unlock(&(x)->priv->notification_lock))
+
 struct _EwsNode;
 static GMutex connecting;
 static GHashTable *loaded_connections_permissions = NULL;
@@ -96,6 +99,10 @@ struct _EEwsConnectionPrivate {
 	GSList *jobs;
 	GSList *active_job_queue;
 	GRecMutex queue_lock;
+	GMutex notification_lock;
+
+	GHashTable *subscriptions;
+	GSList *subscribed_folders;
 
 	EEwsServerVersion version;
 };
@@ -114,19 +121,11 @@ enum {
 
 static guint signals[LAST_SIGNAL];
 
-static const gchar *default_events_names[] = {
-	"CopiedEvent",
-	"CreatedEvent",
-	"DeletedEvent",
-	"ModifiedEvent",
-	"MovedEvent",
-	"StatusEvent",
-	NULL};
+static guint notification_key = 1;
 
 typedef struct _EwsNode EwsNode;
 typedef struct _EwsAsyncData EwsAsyncData;
 typedef struct _EwsEventsAsyncData EwsEventsAsyncData;
-typedef struct _EwsNotificationThreadData EwsNotificationThreadData;
 
 struct _EwsAsyncData {
 	GSList *items_created;
@@ -144,10 +143,6 @@ struct _EwsAsyncData {
 	EEwsConnection *cnc;
 };
 
-struct _EwsEventsAsyncData {
-	gchar *subscription_id;
-};
-
 struct _EwsNode {
 	ESoapMessage *msg;
 	EEwsConnection *cnc;
@@ -158,11 +153,6 @@ struct _EwsNode {
 
 	GCancellable *cancellable;
 	gulong cancel_handler_id;
-};
-
-struct _EwsNotificationThreadData {
-	EEwsConnection *cnc;
-	gchar *subscription_id;
 };
 
 /* Forward Declarations */
@@ -194,12 +184,6 @@ ews_connection_error_quark (void)
 
 static void
 async_data_free (EwsAsyncData *async_data)
-{
-	g_free (async_data);
-}
-
-static void
-events_async_data_free (EwsEventsAsyncData *async_data)
 {
 	g_free (async_data);
 }
@@ -1393,6 +1377,14 @@ ews_connection_dispose (GObject *object)
 	g_slist_free (priv->active_job_queue);
 	priv->active_job_queue = NULL;
 
+	g_slist_free_full (priv->subscribed_folders, g_free);
+	priv->subscribed_folders = NULL;
+
+	if (priv->subscriptions != NULL) {
+		g_hash_table_destroy (priv->subscriptions);
+		priv->subscriptions = NULL;
+	}
+
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (e_ews_connection_parent_class)->dispose (object);
 }
@@ -1412,6 +1404,7 @@ ews_connection_finalize (GObject *object)
 
 	g_mutex_clear (&priv->property_lock);
 	g_rec_mutex_clear (&priv->queue_lock);
+	g_mutex_clear (&priv->notification_lock);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (e_ews_connection_parent_class)->finalize (object);
@@ -1522,6 +1515,12 @@ e_ews_connection_class_init (EEwsConnectionClass *class)
 		g_cclosure_marshal_VOID__POINTER,
 		G_TYPE_NONE, 1,
 		G_TYPE_POINTER);
+}
+
+static void
+e_ews_connection_folders_list_free (gpointer data)
+{
+	g_slist_free_full ((GSList *) data, g_free);
 }
 
 static void
@@ -1641,8 +1640,13 @@ e_ews_connection_init (EEwsConnection *cnc)
 		g_object_unref (logger);
 	}
 
+	cnc->priv->subscriptions = g_hash_table_new_full (
+			g_direct_hash, g_direct_equal,
+			NULL, e_ews_connection_folders_list_free);
+
 	g_mutex_init (&cnc->priv->property_lock);
 	g_rec_mutex_init (&cnc->priv->queue_lock);
+	g_mutex_init (&cnc->priv->notification_lock);
 
 	g_signal_connect (
 		cnc->priv->soup_session, "authenticate",
@@ -9122,412 +9126,123 @@ e_ews_connection_query_auth_methods_sync (EEwsConnection *cnc,
 }
 
 static void
-subscribe_folder_response_cb (ESoapResponse *response,
-			      GSimpleAsyncResult *simple)
+ews_connection_build_subscribed_folders_list (gpointer key,
+					      gpointer value,
+					      gpointer user_data)
 {
-	EwsEventsAsyncData *async_data;
-	ESoapParameter *param;
-	ESoapParameter *subparam;
-	GError *error = NULL;
+	GSList *folders = value, *l;
+	EEwsConnection *cnc = user_data;
 
-	async_data = g_simple_async_result_get_op_res_gpointer (simple);
-
-	param = e_soap_response_get_first_parameter_by_name (
-		response, "ResponseMessages", &error);
-
-	/* Sanity check */
-	g_return_if_fail (
-		(param != NULL && error == NULL) ||
-		(param == NULL && error != NULL));
-
-	if (error != NULL) {
-		g_simple_async_result_take_error (simple, error);
-		return;
-	}
-
-	subparam = e_soap_parameter_get_first_child (param);
-
-	while (subparam != NULL) {
-		const gchar *name = (const gchar *) subparam->name;
-
-		if (!ews_get_response_status (subparam, &error)) {
-			g_simple_async_result_take_error (simple, error);
-			return;
+	for (l = folders; l != NULL; l = l->next) {
+		if (g_slist_find_custom (cnc->priv->subscribed_folders, l->data, (GCompareFunc) g_strcmp0) == NULL) {
+			cnc->priv->subscribed_folders =
+				g_slist_prepend (cnc->priv->subscribed_folders, g_strdup (l->data));
 		}
-
-		if (E_EWS_CONNECTION_UTILS_CHECK_ELEMENT (name, "SubscribeResponseMessage")) {
-			ESoapParameter *node;
-
-			node = e_soap_parameter_get_first_child_by_name (subparam, "SubscriptionId");
-			async_data->subscription_id = e_soap_parameter_get_string_value (node);
-		}
-
-		subparam = e_soap_parameter_get_next_child (subparam);
 	}
 }
 
-void
-e_ews_connection_subscribe_folder (EEwsConnection *cnc,
-				   gint pri,
-				   GSList *folders,
-				   GSList *events,
-				   GCancellable *cancellable,
-				   GAsyncReadyCallback callback,
-				   gpointer user_data)
-{
-	ESoapMessage *msg;
-	GSimpleAsyncResult *simple;
-	EwsEventsAsyncData *async_data;
-	GSList *l;
-
-	g_return_if_fail (cnc != NULL);
-	g_return_if_fail (cnc->priv != NULL);
-
-	simple = g_simple_async_result_new (
-		G_OBJECT (cnc), callback, user_data, e_ews_connection_subscribe_folder);
-	async_data = g_new0 (EwsEventsAsyncData, 1);
-	g_simple_async_result_set_op_res_gpointer (simple, async_data, (GDestroyNotify) events_async_data_free);
-
-	/*
-	 * EWS server version earlier than 2010_SP1 doesn't have support to "StreamingSubcription".
-	 * So, if the API is called with an older version of the server to subscribe, let's just fail silently.
-	 */
-	if (!e_ews_connection_satisfies_server_version (cnc, E_EWS_EXCHANGE_2010_SP1)) {
-		g_simple_async_result_complete_in_idle (simple);
-		g_object_unref (simple);
-		return;
-	}
-
-	msg = e_ews_message_new_with_header (
-		cnc->priv->uri,
-		cnc->priv->impersonate_user,
-		"Subscribe",
-		NULL,
-		NULL,
-		cnc->priv->version,
-		E_EWS_EXCHANGE_2010_SP1,
-		FALSE,
-		TRUE);
-
-	e_soap_message_start_element (msg, "StreamingSubscriptionRequest", "messages", NULL);
-
-	if (folders == NULL) {
-		e_soap_message_add_attribute (msg, "SubscribeToAllFolders", "true", NULL, NULL);
-	} else {
-		e_soap_message_start_element (msg, "FolderIds", NULL, NULL);
-		for (l = folders; l; l = l->next) {
-			e_ews_message_write_string_parameter_with_attribute (
-				msg,
-				"FolderId",
-				NULL,
-				NULL,
-				"Id",
-				l->data);
-		}
-		e_soap_message_end_element (msg); /* FolderIds */
-	}
-
-	e_soap_message_start_element (msg, "EventTypes", NULL, NULL);
-	for (l = events; l; l = l->next)
-		e_ews_message_write_string_parameter_with_attribute (msg, "EventType", NULL, l->data, NULL, NULL);
-	e_soap_message_end_element (msg); /* EventTypes */
-
-	e_soap_message_end_element (msg); /* StreamingSubscriptionRequest */
-	e_ews_message_write_footer (msg); /* Complete the footer and print the request */
-
-	e_ews_connection_queue_request (cnc, msg, subscribe_folder_response_cb, pri, cancellable, simple);
-
-	g_object_unref (simple);
-}
-
-gboolean
-e_ews_connection_subscribe_folder_finish (EEwsConnection *cnc,
-					  GAsyncResult *result,
-					  gchar **subscription_id,
-					  GError **error)
-{
-	GSimpleAsyncResult *simple;
-	EwsEventsAsyncData *async_data;
-
-	g_return_val_if_fail (cnc != NULL, FALSE);
-	g_return_val_if_fail (
-		g_simple_async_result_is_valid (result, G_OBJECT (cnc), e_ews_connection_subscribe_folder), FALSE);
-
-	simple = G_SIMPLE_ASYNC_RESULT (result);
-	async_data = g_simple_async_result_get_op_res_gpointer (simple);
-
-	if (g_simple_async_result_propagate_error (simple, error))
-		return FALSE;
-
-	if (async_data->subscription_id == NULL)
-		return FALSE;
-
-	if (subscription_id)
-		*subscription_id = async_data->subscription_id;
-	else
-		g_free (async_data->subscription_id);
-
-	return TRUE;
-}
-
-gboolean
-e_ews_connection_subscribe_folder_sync (EEwsConnection *cnc,
-					gint pri,
-					GSList *folders,
-					GSList *events,
-					gchar **subscription_id,
-					GCancellable *cancellable,
-					GError **error)
-{
-	EAsyncClosure *closure;
-	GAsyncResult *result;
-	gboolean success;
-
-	g_return_val_if_fail (cnc != NULL, FALSE);
-	g_return_val_if_fail (*subscription_id == NULL, FALSE);
-
-	closure = e_async_closure_new ();
-
-	e_ews_connection_subscribe_folder (
-		cnc, pri, folders, events, cancellable, e_async_closure_callback, closure);
-
-	result = e_async_closure_wait (closure);
-
-	success = e_ews_connection_subscribe_folder_finish (cnc, result, subscription_id, error);
-
-	e_async_closure_free (closure);
-
-	return success;
-}
-
-static void
-unsubscribe_folder_response_cb (ESoapResponse *response,
-				GSimpleAsyncResult *simple)
-{
-	ESoapParameter *param;
-	GError *error = NULL;
-
-	param = e_soap_response_get_first_parameter_by_name (
-		response, "ResponseMessages", &error);
-
-	/* Sanity check */
-	g_return_if_fail (
-		(param != NULL && error == NULL) ||
-		(param == NULL && error != NULL));
-
-	if (error != NULL)
-		g_simple_async_result_take_error (simple, error);
-}
-
-void
-e_ews_connection_unsubscribe_folder (EEwsConnection *cnc,
-				     gint pri,
-				     const gchar *subscription_id,
-				     GCancellable *cancellable,
-				     GAsyncReadyCallback callback,
-				     gpointer user_data)
-{
-	ESoapMessage *msg;
-	GSimpleAsyncResult *simple;
-
-	g_return_if_fail (cnc != NULL);
-	g_return_if_fail (cnc->priv != NULL);
-	g_return_if_fail (subscription_id != NULL);
-
-	msg = e_ews_message_new_with_header (
-		cnc->priv->uri,
-		cnc->priv->impersonate_user,
-		"Unsubscribe",
-		NULL,
-		NULL,
-		cnc->priv->version,
-		E_EWS_EXCHANGE_2010_SP1,
-		FALSE,
-		TRUE);
-
-	e_ews_message_write_string_parameter_with_attribute (
-		msg, "SubscriptionId", "messages", subscription_id, NULL, NULL);
-
-	e_ews_message_write_footer (msg); /* Complete the footer and print the request */
-
-	simple = g_simple_async_result_new (
-		G_OBJECT (cnc), callback, user_data, e_ews_connection_unsubscribe_folder);
-
-	e_ews_connection_queue_request (cnc, msg, unsubscribe_folder_response_cb, pri, cancellable, simple);
-
-	g_object_unref (simple);
-}
-
-gboolean
-e_ews_connection_unsubscribe_folder_finish (EEwsConnection *cnc,
-					    GAsyncResult *result,
-					    GError **error)
-{
-	GSimpleAsyncResult *simple;
-
-	g_return_val_if_fail (cnc != NULL, FALSE);
-	g_return_val_if_fail (
-		g_simple_async_result_is_valid (result, G_OBJECT (cnc), e_ews_connection_unsubscribe_folder), FALSE);
-
-	simple = G_SIMPLE_ASYNC_RESULT (result);
-
-	if (g_simple_async_result_propagate_error (simple, error))
-		return FALSE;
-
-	return TRUE;
-}
-
-gboolean
-e_ews_connection_unsubscribe_folder_sync (EEwsConnection *cnc,
-					  gint pri,
-					  const gchar *subscription_id,
-					  GCancellable *cancellable,
-					  GError **error)
-{
-	EAsyncClosure *closure;
-	GAsyncResult *result;
-	gboolean success;
-
-	g_return_val_if_fail (cnc != NULL, FALSE);
-
-	closure = e_async_closure_new ();
-
-	e_ews_connection_unsubscribe_folder (
-		cnc, pri, subscription_id, cancellable, e_async_closure_callback, closure);
-
-	result = e_async_closure_wait (closure);
-
-	success = e_ews_connection_unsubscribe_folder_finish (cnc, result, error);
-
-	e_async_closure_free (closure);
-
-	return success;
-}
-
-static gpointer
-e_ews_connection_notification_thread (gpointer user_data)
-{
-	EwsNotificationThreadData *ent = user_data;
-	EEwsConnection *cnc = ent->cnc;
-	guint ret;
-
-	g_return_val_if_fail (cnc != NULL, NULL);
-	g_return_val_if_fail (cnc->priv != NULL, NULL);
-
-	do {
-		ret = e_ews_notification_get_events_sync (
-			cnc->priv->notification,
-			EWS_PRIORITY_MEDIUM,
-			ent->subscription_id);
-	} while (SOUP_STATUS_IS_SUCCESSFUL (ret));
-
-	g_free (ent->subscription_id);
-	g_free (ent);
-
-	return NULL;
-}
-
-/* Enables server notification on a folder, or on a whole store, if folders is NULL.
- * The events can be NULL to obtain the default notifications (Copied, Created,
- * Deleted and Moved).
- * Pair function for this is e_ews_connection_disable_notifications_sync().
+/*
+ * Enables server notification on a folder (or a set of folders).
+ * The events we are listen for notifications are: Copied, Created, Deleted, Modified and Moved.
+ *
+ * As we have only one subscription per connection, for every enable_notifications_sync() call,
+ * we do:
+ * - Check if we already are subscribed
+ * - If we are already subscribed:
+ *  - Stop to send events regards to the already subscribed folders' list
+ *  - Unsubscribe the already subscribed folders' list
+ * - Add the user folders' lst to the hash table if subscribed folders
+ * - Create a new list of the folders to subscribe for, based in the hash table of subscribed folders
+ * - Subscribed to listen notifications for the folders
+ * - Start to send events regards to the newly subscribed folders' list
+ *
+ * Pair function for this one is e_ews_connection_disable_notifications_sync() and we do
+ * something really similar for every disable_notifications_sync() call.
+ *
  * The notification is received to the caller with the "server-notification" signal.
  * Note that the signal is used for each notification, without distinction on the
  * enabled object.
  */
-gboolean
+void
 e_ews_connection_enable_notifications_sync (EEwsConnection *cnc,
 					    GSList *folders,
-					    GSList *events,
-					    gchar **subscription_id,
-					    GCancellable *cancellable,
-					    GError **error)
+					    guint *subscription_key)
 {
-	GSList *default_events = NULL;
-	GThread *thread;
-	gboolean ret = TRUE;
-	EwsNotificationThreadData *ent;
+	GSList *new_folders = NULL, *l;
+	gint subscriptions_size;
 
-	g_return_val_if_fail (cnc != NULL, FALSE);
-	g_return_val_if_fail (*subscription_id == NULL, FALSE);
-	g_return_val_if_fail (subscription_id != NULL, FALSE);
-	g_return_val_if_fail (cnc->priv->version >= E_EWS_EXCHANGE_2010_SP1, FALSE);
+	g_return_if_fail (cnc != NULL);
+	g_return_if_fail (cnc->priv != NULL);
+	g_return_if_fail (cnc->priv->version >= E_EWS_EXCHANGE_2010_SP1);
+	g_return_if_fail (folders != NULL);
 
-	if (events == NULL) {
-		guint event_type;
-		for (event_type = 0; default_events_names[event_type] != NULL; event_type++) {
-			if (g_strcmp0 (default_events_names[event_type], "StatusEvent") == 0)
-				continue;
-			default_events = g_slist_prepend (default_events, (gchar *) default_events_names[event_type]);
-		}
-	}
+	NOTIFICATION_LOCK (cnc);
+	subscriptions_size = g_hash_table_size (cnc->priv->subscriptions);
 
-	ret = e_ews_connection_subscribe_folder_sync (
-		cnc,
-		EWS_PRIORITY_MEDIUM,
-		folders,
-		events != NULL ? events : default_events,
-		subscription_id,
-		cancellable,
-		error);
-
-	if (!ret)
+	if (subscriptions_size == G_MAXUINT - 1)
 		goto exit;
 
-	ent = g_new0 (EwsNotificationThreadData, 1);
-	ent->cnc = cnc;
-	ent->subscription_id = g_strdup (*subscription_id);
+	if (subscriptions_size > 0) {
+		e_ews_notification_stop_listening_sync (cnc->priv->notification);
+
+		g_clear_object (&cnc->priv->notification);
+
+		g_slist_free_full (cnc->priv->subscribed_folders, g_free);
+		cnc->priv->subscribed_folders = NULL;
+	}
+
+	while (g_hash_table_contains (cnc->priv->subscriptions, GINT_TO_POINTER (notification_key))) {
+		notification_key++;
+		if (notification_key == 0)
+			notification_key++;
+	}
+
+	for (l = folders; l != NULL; l = l->next)
+		new_folders = g_slist_prepend (new_folders, g_strdup (l->data));
+
+	g_hash_table_insert (cnc->priv->subscriptions, GINT_TO_POINTER (notification_key), new_folders);
+	new_folders = NULL;
+
+	g_hash_table_foreach (cnc->priv->subscriptions, ews_connection_build_subscribed_folders_list, cnc);
 
 	cnc->priv->notification = e_ews_notification_new (cnc);
 
-	thread = g_thread_new (NULL, e_ews_connection_notification_thread, ent);
-	g_thread_unref (thread);
+	e_ews_notification_start_listening_sync (cnc->priv->notification, cnc->priv->subscribed_folders);
 
 exit:
-	g_slist_free (default_events);
-	return ret;
+	*subscription_key = notification_key;
+	notification_key++;
+	if (notification_key == 0)
+		notification_key++;
+
+	NOTIFICATION_UNLOCK (cnc);
 }
 
-gboolean
+void
 e_ews_connection_disable_notifications_sync (EEwsConnection *cnc,
-					     const gchar *subscription_id,
-					     GCancellable *cancellable,
-					     GError **error)
+					     guint subscription_key)
 {
-	gboolean ret = TRUE;
+	g_return_if_fail (cnc != NULL);
+	g_return_if_fail (cnc->priv != NULL);
 
-	g_return_val_if_fail (cnc != NULL, FALSE);
-	g_return_val_if_fail (cnc->priv != NULL, FALSE);
-	g_return_val_if_fail (subscription_id != NULL, FALSE);
-
+	NOTIFICATION_LOCK (cnc);
 	if (cnc->priv->notification == NULL)
 		goto exit;
 
-	e_ews_notification_cancel_get_events (cnc->priv->notification);
-
-	ret = e_ews_connection_unsubscribe_folder_sync (
-		cnc,
-		EWS_PRIORITY_MEDIUM,
-		subscription_id,
-		cancellable,
-		error);
-
-	if (!ret) {
-		EwsNotificationThreadData *ent;
-		GThread *thread;
-
-		ent = g_new0 (EwsNotificationThreadData, 1);
-		ent->cnc = cnc;
-		ent->subscription_id = g_strdup (subscription_id);
-
-		thread = g_thread_new (NULL, e_ews_connection_notification_thread, ent);
-		g_thread_unref (thread);
-
+	if (!g_hash_table_remove (cnc->priv->subscriptions, GINT_TO_POINTER (subscription_key)))
 		goto exit;
-	}
+
+	e_ews_notification_stop_listening_sync (cnc->priv->notification);
 
 	g_clear_object (&cnc->priv->notification);
 
+	g_slist_free_full (cnc->priv->subscribed_folders, g_free);
+	cnc->priv->subscribed_folders = NULL;
+
+	g_hash_table_foreach (cnc->priv->subscriptions, ews_connection_build_subscribed_folders_list, cnc);
+	if (cnc->priv->subscribed_folders != NULL)
+		e_ews_notification_start_listening_sync (cnc->priv->notification, cnc->priv->subscribed_folders);
+
 exit:
-	return ret;
+	NOTIFICATION_UNLOCK (cnc);
 }

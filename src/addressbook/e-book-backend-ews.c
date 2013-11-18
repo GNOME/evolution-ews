@@ -91,8 +91,8 @@ struct _EBookBackendEwsPrivate {
 
 	GCancellable *cancellable;
 
+	guint subscription_key;
 	gboolean listen_notifications;
-	gchar *subscription_id;
 };
 
 /* using this for backward compatibility with E_DATA_BOOK_MODE */
@@ -3557,39 +3557,35 @@ handle_notifications_thread (gpointer data)
 	EBookBackendEws *ebews = data;
 
 	PRIV_LOCK (ebews->priv);
-
 	if (ebews->priv->cnc == NULL)
 		goto exit;
 
 	if (ebews->priv->listen_notifications) {
 		GSList *folders = NULL;
 
-		if (ebews->priv->subscription_id != NULL)
+		if (ebews->priv->subscription_key != 0)
 			goto exit;
 
 		folders = g_slist_prepend (folders, ebews->priv->folder_id);
+
 		e_ews_connection_enable_notifications_sync (
 				ebews->priv->cnc,
 				folders,
-				NULL,
-				&ebews->priv->subscription_id,
-				NULL,
-				NULL);
+				&ebews->priv->subscription_key);
+
 		g_slist_free (folders);
 	} else {
-		if (ebews->priv->subscription_id == NULL)
+		if (ebews->priv->subscription_key == 0)
 			goto exit;
 
 		e_ews_connection_disable_notifications_sync (
 				ebews->priv->cnc,
-				ebews->priv->subscription_id,
-				NULL,
-				NULL);
-		g_free (ebews->priv->subscription_id);
-		ebews->priv->subscription_id = NULL;
+				ebews->priv->subscription_key);
+
+		ebews->priv->subscription_key = 0;
 	}
 
- exit:
+exit:
 	PRIV_UNLOCK (ebews->priv);
 	g_object_unref (ebews);
 	return NULL;
@@ -3829,26 +3825,28 @@ e_book_backend_ews_open (EBookBackend *backend,
 	}
 
 	if (error == NULL) {
+		PRIV_LOCK (priv);
 		priv->listen_notifications = camel_ews_settings_get_listen_notifications (ews_settings);
 
 		if (priv->listen_notifications)
 			ebews_listen_notifications_cb (ebews, NULL, ews_settings);
+
+		g_signal_connect_swapped (
+			priv->cnc,
+			"server-notification",
+			G_CALLBACK (ebews_server_notification_cb),
+			ebews);
+		PRIV_UNLOCK (priv);
 	}
 
 	convert_error_to_edb_error (&error);
 	e_data_book_respond_open (book, opid, error);
 
 	g_signal_connect_swapped (
-			priv->cnc,
-			"server-notification",
-			G_CALLBACK (ebews_server_notification_cb),
-			ebews);
-
-	g_signal_connect_swapped (
-			ews_settings,
-			"notify::listen-notifications",
-			G_CALLBACK (ebews_listen_notifications_cb),
-			ebews);
+		ews_settings,
+		"notify::listen-notifications",
+		G_CALLBACK (ebews_listen_notifications_cb),
+		ebews);
 }
 
 /**
@@ -3956,19 +3954,19 @@ e_book_backend_ews_dispose (GObject *object)
 	if (priv->cnc) {
 		g_signal_handlers_disconnect_by_func (priv->cnc, ebews_server_notification_cb, bews);
 
-		if (priv->listen_notifications && priv->subscription_id != NULL) {
-			e_ews_connection_disable_notifications_sync (
+		if (priv->listen_notifications) {
+			if (priv->subscription_key != 0) {
+				e_ews_connection_disable_notifications_sync (
 					priv->cnc,
-					priv->subscription_id,
-					NULL,
-					NULL);
+					priv->subscription_key);
+				priv->subscription_key = 0;
+			}
+
+			priv->listen_notifications = FALSE;
 		}
 
 		g_clear_object (&priv->cnc);
 	}
-
-	g_free (priv->subscription_id);
-	priv->subscription_id = NULL;
 
 	g_free (priv->folder_id);
 	priv->folder_id = NULL;
