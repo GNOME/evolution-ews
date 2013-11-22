@@ -3383,6 +3383,8 @@ add_item_to_cache (ECalBackendEws *cbews,
 		}
 
 		if (item_type == E_EWS_ITEM_TYPE_TASK) {
+			const gchar *percent_complete;
+
 			/*start date*/
 			has_this_date = FALSE;
 			e_ews_item_task_has_start_date (item, &has_this_date);
@@ -3409,7 +3411,8 @@ add_item_to_cache (ECalBackendEws *cbews,
 			}
 
 			/*precent complete*/
-			icalprop  = icalproperty_new_percentcomplete (atoi (e_ews_item_get_percent_complete (item)));
+			percent_complete = e_ews_item_get_percent_complete (item);
+			icalprop  = icalproperty_new_percentcomplete (atoi (percent_complete ? percent_complete : "0"));
 			icalcomponent_add_property (icalcomp, icalprop);
 
 			/*due date*/
