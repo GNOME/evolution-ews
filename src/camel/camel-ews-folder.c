@@ -65,7 +65,8 @@ which needs to be better organized via functions */
 #define SUMMARY_FOLLOWUP_FLAGS	" mapi:int:0x1090" /* PidTagFlagStatus */ \
 				" mapi:time:0x1091" /* PidTagFlagCompleteTime */ \
 				" mapi:dist:string:Common:0x8530" /* PidLidFlagRequest */ \
-				" mapi:dist:time:Task:0x8105" /* PidLidTaskDueDate */
+				" mapi:dist:time:Task:0x8105" /* PidLidTaskDueDate */ \
+				" mapi:string:0x007D" /* PidTagTransportMessageHeaders */
 
 #define SUMMARY_ITEM_FLAGS "item:ResponseObjects item:Sensitivity item:Importance item:Categories" SUMMARY_FOLLOWUP_FLAGS
 #define ITEM_PROPS "item:Subject item:DateTimeReceived item:DateTimeSent item:DateTimeCreated item:Size " \

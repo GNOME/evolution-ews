@@ -792,7 +792,8 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 		const EwsMailbox *from;
 		EEwsItemType item_type;
 		const GSList *to, *cc;
-		gboolean has_attachments;
+		const gchar *msg_headers;
+		gboolean has_attachments, found_property;
 		guint32 server_flags;
 
 		if (!item)
@@ -812,8 +813,33 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 			continue;
 		}
 
-		mi = (CamelEwsMessageInfo *)
-			camel_message_info_new (folder->summary);
+
+		/* PidTagTransportMessageHeaders */
+		found_property = FALSE;
+		msg_headers = e_ews_item_get_extended_property_as_string (item, NULL, 0x007D, &found_property);
+		if (!found_property)
+			msg_headers = NULL;
+
+		if (msg_headers && *msg_headers) {
+			CamelMimePart *part = camel_mime_part_new ();
+			CamelStream *stream;
+			CamelMimeParser *parser;
+
+			stream = camel_stream_mem_new_with_buffer (msg_headers, strlen (msg_headers));
+			parser = camel_mime_parser_new ();
+			camel_mime_parser_init_with_stream (parser, stream, NULL);
+			camel_mime_parser_scan_from (parser, FALSE);
+			g_object_unref (stream);
+
+			if (camel_mime_part_construct_from_parser_sync (part, parser, NULL, NULL))
+				mi = (CamelEwsMessageInfo *) camel_folder_summary_info_new_from_header (folder->summary, part->headers);
+
+			g_object_unref (parser);
+			g_object_unref (part);
+		}
+
+		if (!mi)
+			mi = (CamelEwsMessageInfo *) camel_message_info_new (folder->summary);
 
 		if (mi->info.content == NULL) {
 			mi->info.content =
