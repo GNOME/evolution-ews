@@ -573,6 +573,7 @@ mail_config_ews_ooo_page_constructed (GObject *object)
 	gtk_container_add (GTK_CONTAINER (container), widget);
 	text_buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (widget));
 	page->priv->internal_reply = text_buffer;  /* do not reference */
+	e_spell_text_view_attach (GTK_TEXT_VIEW (widget));
 	gtk_widget_show (widget);
 
 	widget = gtk_label_new_with_mnemonic (_("E_xternal:"));
@@ -624,6 +625,7 @@ mail_config_ews_ooo_page_constructed (GObject *object)
 	gtk_container_add (GTK_CONTAINER (container), widget);
 	text_buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (widget));
 	page->priv->external_reply = text_buffer;  /* do not reference */
+	e_spell_text_view_attach (GTK_TEXT_VIEW (widget));
 	gtk_widget_show (widget);
 
 	/* XXX Bit of a hack.  Since the enum value for "none" is zero,
