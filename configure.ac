@@ -155,8 +155,10 @@ if test "x$enable_strict" = xauto; then
 fi
 AC_MSG_RESULT([$enable_strict])
 
+dnl Need to migrate to EBookSqlite before
+dnl we can use EDS_DISABLE_DEPRECATED again.
 if test "x$enable_strict" = xyes; then
-	CFLAGS="$CFLAGS -DG_DISABLE_DEPRECATED -DEDS_DISABLE_DEPRECATED"
+	CFLAGS="$CFLAGS -DG_DISABLE_DEPRECATED"
 fi
 
 dnl Warn about API usage that violates our minimum requirements.
