@@ -1,3 +1,11 @@
+Evolution-EWS 3.10.3 2013-12-09
+-------------------------------
+
+Bug Fixes:
+	Bug 664174 - Crash in add_item_to_cache() (Milan Crha)
+	Bug 719376 - Filter by mailing list doesn't work (Milan Crha)
+
+
 Evolution-EWS 3.10.2 2013-11-11
 -------------------------------
 
