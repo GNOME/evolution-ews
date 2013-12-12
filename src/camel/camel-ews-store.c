@@ -103,13 +103,17 @@ static CamelFolderInfo *folder_info_from_store_summary (CamelEwsStore *store,
 enum {
 	PROP_0,
 	PROP_HAS_OOO_SET,
-	PROP_OOO_ALERT_STATE
+	PROP_OOO_ALERT_STATE,
+	PROP_CONNECTABLE,
+	PROP_HOST_REACHABLE
 };
 
 G_DEFINE_TYPE_WITH_CODE (
 	CamelEwsStore, camel_ews_store, CAMEL_TYPE_OFFLINE_STORE,
 	G_IMPLEMENT_INTERFACE (
 		G_TYPE_INITABLE, camel_ews_store_initable_init)
+	G_IMPLEMENT_INTERFACE (
+		CAMEL_TYPE_NETWORK_SERVICE, NULL)
 	G_IMPLEMENT_INTERFACE (
 		CAMEL_TYPE_SUBSCRIBABLE, camel_ews_subscribable_init))
 
@@ -129,6 +133,11 @@ ews_store_set_property (GObject *object,
 			camel_ews_store_set_ooo_alert_state (
 				CAMEL_EWS_STORE (object),
 				g_value_get_enum (value));
+			return;
+		case PROP_CONNECTABLE:
+			camel_network_service_set_connectable (
+				CAMEL_NETWORK_SERVICE (object),
+				g_value_get_object (value));
 			return;
 	}
 
@@ -153,6 +162,18 @@ ews_store_get_property (GObject *object,
 				value,
 				camel_ews_store_get_ooo_alert_state (
 				CAMEL_EWS_STORE (object)));
+			return;
+		case PROP_CONNECTABLE:
+			g_value_take_object (
+				value,
+				camel_network_service_ref_connectable (
+					CAMEL_NETWORK_SERVICE (object)));
+			return;
+		case PROP_HOST_REACHABLE:
+			g_value_set_boolean (
+				value,
+				camel_network_service_get_host_reachable (
+					CAMEL_NETWORK_SERVICE (object)));
 			return;
 	}
 
@@ -3554,6 +3575,18 @@ camel_ews_store_class_init (CamelEwsStoreClass *class)
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
+
+	/* Inherited from CamelNetworkService */
+	g_object_class_override_property (
+		object_class,
+		PROP_CONNECTABLE,
+		"connectable");
+
+	/* Inherited from CamelNetworkService */
+	g_object_class_override_property (
+		object_class,
+		PROP_HOST_REACHABLE,
+		"host-reachable");
 
 	service_class = CAMEL_SERVICE_CLASS (class);
 	service_class->settings_type = CAMEL_TYPE_EWS_SETTINGS;
