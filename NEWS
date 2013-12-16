@@ -1,3 +1,26 @@
+Evolution-EWS 3.11.3 2013-12-16
+-------------------------------
+
+Bug Fixes:
+	Bug 664174 - Crash in add_item_to_cache() (Milan Crha)
+	Bug 705338 - OOO message not spell-checked (Jan-Michael Brummer)
+	Bug 712255 - Name all the timeouts added with g_timeout_add()
+	             (Fabiano Fidêncio)
+	Bug 712304 - Crash in the notification code (Fabiano Fidêncio)
+	Bug 715165 - Show connection status icons (Fabiano Fidêncio)
+	Bug 719376 - Filter by mailing list doesn't work (Milan Crha)
+
+Other Changes:
+	* configure.ac: Do not define EDS_DISABLE_DEPRECATED. (Matthew Barnes)
+	* Setup the Authentication extension so Camel can determine host
+	  reachability (Matthew Barnes)
+
+Translations:
+	Marek Černocký (cs)
+	Facundo Dario Illanes (es)
+	Shantha kumar (ta)
+
+
 Evolution-EWS 3.11.2 2013-11-18
 -------------------------------
 
