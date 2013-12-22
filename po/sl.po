@@ -9,105 +9,104 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2013-10-01 17:21+0000\n"
-"PO-Revision-Date: 2013-10-01 23:58+0100\n"
+"POT-Creation-Date: 2013-12-18 17:50+0000\n"
+"PO-Revision-Date: 2013-12-22 19:12+0100\n"
 "Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n%100==1 ? 1 : n%100==2 ? 2 : n%100==3 || n"
-"%100==4 ? 3 : 0);\n"
+"Plural-Forms: nplurals=4; plural=(n%100==1 ? 1 : n%100==2 ? 2 : n%100==3 || n%100==4 ? 3 : 0);\n"
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Generator: Poedit 1.5.4\n"
 
-#: ../src/addressbook/e-book-backend-ews.c:1421
+#: ../src/addressbook/e-book-backend-ews.c:1426
 msgid "The backend does not support bulk additions"
 msgstr "Ozadnji program ne podpira množičnega dodajanja"
 
-#: ../src/addressbook/e-book-backend-ews.c:1460
-#: ../src/addressbook/e-book-backend-ews.c:1804
+#: ../src/addressbook/e-book-backend-ews.c:1465
+#: ../src/addressbook/e-book-backend-ews.c:1809
 msgid ""
 "Cannot save contact list, it's only supported on EWS Server 2010 or later"
 msgstr ""
 "Ni mogoče shraniti seznama stikov. Podprt je le v okolju strežnika EWS 2010 "
 "ali novejšega."
 
-#: ../src/addressbook/e-book-backend-ews.c:1763
+#: ../src/addressbook/e-book-backend-ews.c:1768
 msgid "The backend does not support bulk modifications"
 msgstr "Ozadnji program ne podpira množičnega spreminjanja"
 
-#: ../src/addressbook/e-book-backend-ews.c:1963
+#: ../src/addressbook/e-book-backend-ews.c:1968
 msgid "Wait till syncing is done"
 msgstr "Počakaj na konec usklajevanja"
 
-#: ../src/addressbook/e-book-backend-ews.c:2372
+#: ../src/addressbook/e-book-backend-ews.c:2382
 #, c-format
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr "Prejemanje stikov v %s: %d%% končano ..."
 
-#: ../src/addressbook/e-book-backend-ews.c:3052
+#: ../src/addressbook/e-book-backend-ews.c:3068
 msgid "Syncing contacts..."
 msgstr "Usklajevanje stikov ..."
 
-#: ../src/addressbook/e-book-backend-ews.c:3283
+#: ../src/addressbook/e-book-backend-ews.c:3243
 #: ../src/configuration/e-ews-search-user.c:365
 msgid "Searching..."
 msgstr "Iskanje ..."
 
-#: ../src/calendar/e-cal-backend-ews.c:1069
+#: ../src/calendar/e-cal-backend-ews.c:1213
 msgid "EWS does not support bulk removals"
 msgstr "Sistem EWS ne podpira množičnega odstranjevanja"
 
-#: ../src/calendar/e-cal-backend-ews.c:1572
+#: ../src/calendar/e-cal-backend-ews.c:1716
 msgid "Unknown error"
 msgstr "Neznana napaka"
 
-#: ../src/calendar/e-cal-backend-ews.c:1773
+#: ../src/calendar/e-cal-backend-ews.c:1917
 msgid "EWS does not support bulk additions"
 msgstr "Sistem EWS ne podpira množičnega dodajanja"
 
-#: ../src/calendar/e-cal-backend-ews.c:2395
+#: ../src/calendar/e-cal-backend-ews.c:2539
 msgid "EWS does not support bulk modifications"
 msgstr "Sistem EWS ne podpira množičnega spreminjanja"
 
-#: ../src/camel/camel-ews-folder.c:275
+#: ../src/camel/camel-ews-folder.c:284
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Ni mogoče odpreti začasne datoteke vsebine MIME."
 
-#: ../src/camel/camel-ews-folder.c:283
+#: ../src/camel/camel-ews-folder.c:292
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Ni mogoče ustvariti razčlenjevalnika iz vsebine MIME!"
 
-#: ../src/camel/camel-ews-folder.c:292
+#: ../src/camel/camel-ews-folder.c:301
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Ni mogoče razčleniti zahtev srečanj vsebine MIME!"
 
-#: ../src/camel/camel-ews-folder.c:351
+#: ../src/camel/camel-ews-folder.c:360
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Ni mogoče ustvariti datoteke predpomnilnika"
 
-#: ../src/camel/camel-ews-folder.c:452 ../src/camel/camel-ews-folder.c:534
+#: ../src/camel/camel-ews-folder.c:463 ../src/camel/camel-ews-folder.c:545
 #, c-format
 msgid "Unable to create cache path"
 msgstr "Ni mogoče ustvariti poti predpomnilnika"
 
-#: ../src/camel/camel-ews-folder.c:544
+#: ../src/camel/camel-ews-folder.c:555
 #, c-format
 msgid "Failed to move message cache file"
 msgstr "Ni mogoče premakniti predpomnilniške datoteke sporočil"
 
-#: ../src/camel/camel-ews-folder.c:1173
+#: ../src/camel/camel-ews-folder.c:1181
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Ni mogoče naložiti povzetka za %s"
 
-#: ../src/camel/camel-ews-folder.c:1609
+#: ../src/camel/camel-ews-folder.c:1617
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr "Ni mogoče izvesti dejanj v mapah v načinu brez povezave"
@@ -120,51 +119,55 @@ msgstr "Preverjanje za novo pošto"
 msgid "C_heck for new messages in all folders"
 msgstr "Preveri za _nova sporočila v vseh mapah"
 
-#: ../src/camel/camel-ews-provider.c:52
+#: ../src/camel/camel-ews-provider.c:51
+msgid "_Listen for server change notifications"
+msgstr "_Prisluhni opozorilom sprememb na strežniku"
+
+#: ../src/camel/camel-ews-provider.c:54
 msgid "Options"
 msgstr "Možnosti"
 
-#: ../src/camel/camel-ews-provider.c:54
+#: ../src/camel/camel-ews-provider.c:56
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr ""
 "Uvelj_avi filtre na novih sporočilih v mapi dohodne pošte na tem strežniku"
 
-#: ../src/camel/camel-ews-provider.c:56
+#: ../src/camel/camel-ews-provider.c:58
 msgid "Check new messages for _Junk contents"
 msgstr "Med novimi sporočili preveri za _vsiljeno pošto"
 
-#: ../src/camel/camel-ews-provider.c:58
+#: ../src/camel/camel-ews-provider.c:60
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "Vsiljeno pošto preveri le v mapi _dohodnih sporočil"
 
-#: ../src/camel/camel-ews-provider.c:60
+#: ../src/camel/camel-ews-provider.c:62
 msgid "Automatically synchroni_ze remote mail locally"
 msgstr "Samodejno _uskladi oddaljeno in krajevno pošto"
 
-#: ../src/camel/camel-ews-provider.c:63
+#: ../src/camel/camel-ews-provider.c:65
 msgid "Connection"
 msgstr "Povezava"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/camel/camel-ews-provider.c:67
+#: ../src/camel/camel-ews-provider.c:69
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "Časovna pre_koračitev povezave (v sekundah) %s"
 
-#: ../src/camel/camel-ews-provider.c:75
+#: ../src/camel/camel-ews-provider.c:77
 msgid "Exchange Web Services"
 msgstr "Spletna storitev Exchange"
 
-#: ../src/camel/camel-ews-provider.c:77
+#: ../src/camel/camel-ews-provider.c:79
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Za dostop do strežnikov Exchange preko spletnih storitev"
 
-#: ../src/camel/camel-ews-provider.c:92
+#: ../src/camel/camel-ews-provider.c:94
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/camel/camel-ews-provider.c:94
+#: ../src/camel/camel-ews-provider.c:96
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -172,11 +175,11 @@ msgstr ""
 "Možnost omogoča vzpostavitev povezave s strežnikom Exchange z besedilnim "
 "geslom z overjanjem NTLM."
 
-#: ../src/camel/camel-ews-provider.c:102
+#: ../src/camel/camel-ews-provider.c:104
 msgid "Basic"
 msgstr "Osnovno"
 
-#: ../src/camel/camel-ews-provider.c:104
+#: ../src/camel/camel-ews-provider.c:106
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -184,11 +187,11 @@ msgstr ""
 "Možnost omogoča vzpostavitev povezave s strežnikom Exchange z besedilnim "
 "geslom z osnovnim overjanjem."
 
-#: ../src/camel/camel-ews-provider.c:112
+#: ../src/camel/camel-ews-provider.c:114
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/camel/camel-ews-provider.c:114
+#: ../src/camel/camel-ews-provider.c:116
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -196,147 +199,147 @@ msgstr ""
 "Možnost omogoči vzpostavitev povezave s strežnikom Exchange ob uporabi "
 "Kerberos/GSSAPI."
 
-#: ../src/camel/camel-ews-store.c:292
+#: ../src/camel/camel-ews-store.c:330
 #, c-format
 msgid "Session has no storage path"
 msgstr "Seja nima določene poti shrambe"
 
-#: ../src/camel/camel-ews-store.c:329
+#: ../src/camel/camel-ews-store.c:367
 #, c-format
 msgctxt "PublicFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:458
+#: ../src/camel/camel-ews-store.c:496
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:603
+#: ../src/camel/camel-ews-store.c:637
 msgid "Checking \"Out of Office\" settings"
 msgstr "Preverjanje nastavitve stanja \"Izven pisarne\""
 
-#: ../src/camel/camel-ews-store.c:843
+#: ../src/camel/camel-ews-store.c:1423
 msgid "Updating foreign folder structure"
 msgstr "Posodabljanje tuje strukture map"
 
-#: ../src/camel/camel-ews-store.c:1298 ../src/camel/camel-ews-store.c:2794
+#: ../src/camel/camel-ews-store.c:1883 ../src/camel/camel-ews-store.c:3384
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Za dokončanje tega opravila je treba vzpostaviti povezavo v omrežje"
 
-#: ../src/camel/camel-ews-store.c:1393
+#: ../src/camel/camel-ews-store.c:1983
 #, c-format
 msgid "No such folder: %s"
 msgstr "Ni takšne mape: %s"
 
-#: ../src/camel/camel-ews-store.c:1705
+#: ../src/camel/camel-ews-store.c:2295
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "V načinu brez povezave ni mogoče izpisati javnih map EWS"
 
-#: ../src/camel/camel-ews-store.c:1778
+#: ../src/camel/camel-ews-store.c:2368
 msgid "Cannot find any EWS public folders"
 msgstr "Javnih map EWS ni mogoče najti."
 
-#: ../src/camel/camel-ews-store.c:1887
+#: ../src/camel/camel-ews-store.c:2477
 #, c-format
 msgid "Cannot create folder '%s', folder already exists"
 msgstr "Mape '%s' ni mogoče ustvarite, že obstaja"
 
-#: ../src/camel/camel-ews-store.c:1902
+#: ../src/camel/camel-ews-store.c:2492
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Nadrejena mapa %s ne obstaja"
 
-#: ../src/camel/camel-ews-store.c:1912
+#: ../src/camel/camel-ews-store.c:2502
 #, c-format
 msgid ""
 "Cannot create folder under '%s', it is used for folders of other users only"
 msgstr ""
 "Mape pod '%s' ni mogoče ustvariti, uporablja se le za mape drugih uporabnikov"
 
-#: ../src/camel/camel-ews-store.c:1922
+#: ../src/camel/camel-ews-store.c:2512
 #, c-format
 msgid "Cannot create folder under '%s', it is used for public folders only"
 msgstr "Mape pod '%s' ni mogoče ustvariti, saj se uporablja le za javne mape"
 
-#: ../src/camel/camel-ews-store.c:1991
+#: ../src/camel/camel-ews-store.c:2581
 #, c-format
 msgid "Folder does not exist"
 msgstr "Mapa ne obstaja"
 
-#: ../src/camel/camel-ews-store.c:2000
+#: ../src/camel/camel-ews-store.c:2590
 #, c-format
 msgid "Cannot remove folder '%s', it is used for folders of other users only"
 msgstr ""
 "Mape pod '%s' ni mogoče odstraniti, uporablja se le za mape drugih "
 "uporabnikov"
 
-#: ../src/camel/camel-ews-store.c:2010
+#: ../src/camel/camel-ews-store.c:2600
 #, c-format
 msgid "Cannot remove folder '%s', it is used for public folders only"
 msgstr "Mape pod '%s' ni mogoče odstraniti, saj se uporablja le za javne mape"
 
-#: ../src/camel/camel-ews-store.c:2118
+#: ../src/camel/camel-ews-store.c:2708
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Mapa %s ne obstaja."
 
-#: ../src/camel/camel-ews-store.c:2128
+#: ../src/camel/camel-ews-store.c:2718
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Ni zapisa ključa za mapo %s"
 
-#: ../src/camel/camel-ews-store.c:2170
+#: ../src/camel/camel-ews-store.c:2760
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Ni mogoče hkrati preimenovati in premakniti mape"
 
-#: ../src/camel/camel-ews-store.c:2206
+#: ../src/camel/camel-ews-store.c:2796
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Ni mogoče najti ID mape za nadrejeno mapo %s"
 
-#: ../src/camel/camel-ews-store.c:2256 ../src/camel/camel-ews-transport.c:69
+#: ../src/camel/camel-ews-store.c:2846 ../src/camel/camel-ews-transport.c:69
 #, c-format
 msgid "Exchange server %s"
 msgstr "Strežnik Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:2259
+#: ../src/camel/camel-ews-store.c:2849
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Storitev Exchange za %s na %s"
 
-#: ../src/camel/camel-ews-store.c:2303
+#: ../src/camel/camel-ews-store.c:2893
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Mape Smeti ni mogoče najti"
 
-#: ../src/camel/camel-ews-store.c:2363
+#: ../src/camel/camel-ews-store.c:2953
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Mape za vsiljeno pošto ni mogoče najti."
 
-#: ../src/camel/camel-ews-store.c:2553
+#: ../src/camel/camel-ews-store.c:3143
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "V načinu brez povezave se ni mogoče naročiti na mape EWS"
 
-#: ../src/camel/camel-ews-store.c:2576
+#: ../src/camel/camel-ews-store.c:3166
 #, c-format
 msgid "Cannot subscribe folder '%s', no public folder available"
 msgstr "Na mapo '%s' ni mogoče naročiti, ker ustrezne javne mape ni na voljo"
 
-#: ../src/camel/camel-ews-store.c:2586
+#: ../src/camel/camel-ews-store.c:3176
 #, c-format
 msgid "Cannot subscribe folder '%s', folder not found"
 msgstr "Na mapo '%s' ni mogoče naročiti, ker mape ni mogoče najti"
 
-#: ../src/camel/camel-ews-store.c:2677
+#: ../src/camel/camel-ews-store.c:3267
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "V načinu brez povezave ni mogoče preklicati naročil na mape EWS"
 
-#: ../src/camel/camel-ews-store.c:2838
+#: ../src/camel/camel-ews-store.c:3428
 msgid "Unsetting the \"Out of Office\" status"
 msgstr "Poteka preklic nastavitve stanja \"Izven pisarne\""
 
@@ -377,79 +380,79 @@ msgstr "Storitev ni povezana"
 msgid "Global Address List"
 msgstr "Splošni seznam naslovov"
 
-#: ../src/collection/e-ews-backend.c:807
+#: ../src/collection/e-ews-backend.c:821
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named '%s'"
 msgstr "Za novo mapo z imenom '%s' ni mogoče določiti ustreznega razreda mape"
 
-#: ../src/collection/e-ews-backend.c:896
+#: ../src/collection/e-ews-backend.c:910
 #, c-format
 msgid "Data source '%s' does not represent an Exchange Web Services folder"
 msgstr "Vir podatkov '%s' ne predstavlja mape spletnih storitev Exchange"
 
-#: ../src/configuration/e-ews-config-utils.c:474
+#: ../src/configuration/e-ews-config-utils.c:567
 msgid "Folder"
 msgstr "Mapa"
 
-#: ../src/configuration/e-ews-config-utils.c:480
+#: ../src/configuration/e-ews-config-utils.c:577
 msgid "Size"
 msgstr "Velikost"
 
-#: ../src/configuration/e-ews-config-utils.c:506
-#: ../src/configuration/e-ews-config-utils.c:511
+#: ../src/configuration/e-ews-config-utils.c:615
+#: ../src/configuration/e-ews-config-utils.c:620
 msgid "Unable to retrieve folder size information"
 msgstr "Ni mogoče pridobiti podrobnosti o velikosti mape"
 
-#: ../src/configuration/e-ews-config-utils.c:621
+#: ../src/configuration/e-ews-config-utils.c:744
 msgid "Folder Sizes"
 msgstr "Velikosti map"
 
-#: ../src/configuration/e-ews-config-utils.c:624
+#: ../src/configuration/e-ews-config-utils.c:747
 msgid "_Close"
 msgstr "_Zapri"
 
-#: ../src/configuration/e-ews-config-utils.c:638
+#: ../src/configuration/e-ews-config-utils.c:761
 msgid "Fetching folder list…"
 msgstr "Pridobivanje seznama map ..."
 
-#: ../src/configuration/e-ews-config-utils.c:791
+#: ../src/configuration/e-ews-config-utils.c:914
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr "Ni mogoče urediti dovoljenj mape '%s'; izberite drugo mapo."
 
-#: ../src/configuration/e-ews-config-utils.c:868
+#: ../src/configuration/e-ews-config-utils.c:991
 msgid "Folder Sizes..."
 msgstr "Velikosti map ..."
 
-#: ../src/configuration/e-ews-config-utils.c:875
+#: ../src/configuration/e-ews-config-utils.c:998
 msgid "Subscribe to folder of other user..."
 msgstr "Naročilo na mapo drugega uporabnika ..."
 
-#: ../src/configuration/e-ews-config-utils.c:884
-#: ../src/configuration/e-ews-config-utils.c:1166
-#: ../src/configuration/e-ews-config-utils.c:1197
-#: ../src/configuration/e-ews-config-utils.c:1228
-#: ../src/configuration/e-ews-config-utils.c:1259
+#: ../src/configuration/e-ews-config-utils.c:1007
+#: ../src/configuration/e-ews-config-utils.c:1289
+#: ../src/configuration/e-ews-config-utils.c:1320
+#: ../src/configuration/e-ews-config-utils.c:1351
+#: ../src/configuration/e-ews-config-utils.c:1382
 msgid "Permissions..."
 msgstr "Dovoljenja ..."
 
-#: ../src/configuration/e-ews-config-utils.c:886
+#: ../src/configuration/e-ews-config-utils.c:1009
 msgid "Edit EWS folder permissions"
 msgstr "Uredi dovoljenja map EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:1168
+#: ../src/configuration/e-ews-config-utils.c:1291
 msgid "Edit EWS calendar permissions"
 msgstr "Uredi dovoljenja koledarja EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:1199
+#: ../src/configuration/e-ews-config-utils.c:1322
 msgid "Edit EWS tasks permissions"
 msgstr "Uredi dovoljenja nalog EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:1230
+#: ../src/configuration/e-ews-config-utils.c:1353
 msgid "Edit EWS memos permissions"
 msgstr "Uredi dovoljenja opomnikov EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:1261
+#: ../src/configuration/e-ews-config-utils.c:1384
 msgid "Edit EWS contacts permissions"
 msgstr "Uredi dovoljenja stikov EWS"
 
@@ -510,7 +513,7 @@ msgid "Free/Busy time, subject, location"
 msgstr "Čas zasedenosti, zadeva, mesto"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:143
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:508
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:510
 msgctxt "PermissionsLevel"
 msgid "Custom"
 msgstr "Po meri"
@@ -536,7 +539,7 @@ msgstr "Neznano"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:867
 #: ../src/configuration/e-ews-search-user.c:431
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1063
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1065
 msgid "Name"
 msgstr "Ime"
 
@@ -716,7 +719,7 @@ msgid "_Search:"
 msgstr "_Poišči:"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
-#: ../src/server/e-ews-folder.c:679
+#: ../src/server/e-ews-folder.c:681
 #, c-format
 msgid "Cannot add folder, folder already exists as '%s'"
 msgstr "Mape ni mogoče dodati, ker že obstaja kot '%s'"
@@ -875,59 +878,59 @@ msgctxt "PermissionsLevel"
 msgid "Editor (can read, create and modify items)"
 msgstr "Urednik (lahko bere, ustvarja in spreminja vsebine)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:593
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:595
 msgid "Delegate permissions"
 msgstr "Dovoljenja pooblaščencev"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:611
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:613
 msgid "C_alendar"
 msgstr "Koled_ar"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:614
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:616
 msgid "_Delegate receives copies of meeting-related messages sent to me"
 msgstr ""
 "_Pooblaščenec prejme kopije meni poslanih sporočil, ki se nanašajo na "
 "sestanek"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:619
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:621
 msgid "_Tasks"
 msgstr "_Naloge"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:622
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:624
 msgid "_Inbox"
 msgstr "_Dohodni predal:"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:625
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:627
 msgid "C_ontacts"
 msgstr "S_tiki"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:628
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:630
 msgid "_Notes"
 msgstr "_Opombe"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:631
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:633
 msgid "_Journal"
 msgstr "_Dnevnik"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:634
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:636
 #, c-format
 msgid "Delegate '%s' has the following permissions"
 msgstr "Pooblaščenec '%s' ima naslednje pravice"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:652
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:654
 msgid "Delegate can see my _private items"
 msgstr "Pooblaščenec lahko vidi moje _zasebne vsebine"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:975
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:977
 msgid "Retrieving current user permissions, please wait..."
 msgstr "Pridobivanje pravic trenutnega uporabnika, počakajte trenutek ..."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1096
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1629
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1098
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1630
 msgid "Delegates"
 msgstr "Pooblaščenci"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1120
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1122
 msgid ""
 "Delegates can send items on your behalf, including creating and responding "
 "to meeting requests. If you want to grant folder permissions without giving "
@@ -939,7 +942,7 @@ msgstr ""
 "mapo brez pravic za pošiljanje-v-imenu, zaprite to pogovorno okno, desno "
 "kliknite mapo, kliknite Dovoljenja in spremenite možnosti."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1169
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1171
 msgid ""
 "Deliver meeting requests addressed to me and responses to meeting requests "
 "where I am the organizer to:"
@@ -948,7 +951,7 @@ msgstr ""
 "za sestanke, katerih organizator sem, na naslov:"
 
 #. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1178
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1180
 msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
@@ -956,15 +959,15 @@ msgstr ""
 "Le moji pooblaščenci, vendar _pošlji kopijo zahtevkov za sestanke\n"
 "in odgovore nanje meni (priporočeno)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1185
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1187
 msgid "My d_elegates only"
 msgstr "Le _moji pooblaščenci"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1192
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1194
 msgid "My delegates a_nd me"
 msgstr "Moji pooblaščenci i_n jaz"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1710
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1711
 msgid "Retrieving \"Delegates\" settings"
 msgstr "Pridobivanje nastavitev o \"Pooblaščencih\""
 
@@ -998,7 +1001,7 @@ msgid "Fetch List"
 msgstr "Pridobi seznam"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:432
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:914
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:916
 msgid "Out of Office"
 msgstr "Izven pisarne"
 
@@ -1038,27 +1041,27 @@ msgstr "_Notranji:"
 msgid "Message to be sent within the organization"
 msgstr "Sporočilo za prejemnike znotraj organizacije"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:578
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:579
 msgid "E_xternal:"
 msgstr "_Zunanji:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:586
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:587
 msgid "Message to be sent outside the organization"
 msgstr "Sporočilo za zunanje prejemnike"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:596
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:597
 msgid "Do not reply to senders outside the organization"
 msgstr "Ne odgovarjaj pošiljateljem zunaj organizacije"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:599
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:600
 msgid "Reply only to known senders outside the organization"
 msgstr "Odgovarjaj le znanim pošiljateljem zunaj organizacije"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:602
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:603
 msgid "Reply to any sender outside the organization"
 msgstr "Odgovori vsem pošiljateljem zunaj organizacije"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:996
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:998
 msgid "Retrieving \"Out of Office\" settings"
 msgstr "Pridobivanje nastavitev \"Odsoten iz pisarne\" ..."
 
@@ -1086,74 +1089,74 @@ msgstr "Pridobivanje nastavitev &quot;Pooblaščencev&quot; je spodletelo."
 msgid "Your Exchange account \"{0}\" has the status set as \"Out of Office\"."
 msgstr "Na računu Exchange \"{0}\" je določeno stanje \"Izven pisarne\"."
 
-#: ../src/server/e-ews-connection.c:709
+#: ../src/server/e-ews-connection.c:514
 msgid "Operation Cancelled"
 msgstr "Opravilo je preklicano"
 
-#: ../src/server/e-ews-connection.c:779
+#: ../src/server/e-ews-connection.c:584
 msgid "Authentication failed"
 msgstr "Overitev je spodletela"
 
-#: ../src/server/e-ews-connection.c:790
+#: ../src/server/e-ews-connection.c:595
 #, c-format
 msgid "No response: %s"
 msgstr "Brez odgovora: %s"
 
-#: ../src/server/e-ews-connection.c:2374
+#: ../src/server/e-ews-connection.c:2269
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Razčlenjevanje samodejnega odgovora XML je spodletelo"
 
-#: ../src/server/e-ews-connection.c:2381
+#: ../src/server/e-ews-connection.c:2276
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Iskanje predmeta <samodejnega zaznavanja> je spodletelo."
 
-#: ../src/server/e-ews-connection.c:2392
+#: ../src/server/e-ews-connection.c:2287
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Iskanje predmeta <odziva> je spodletelo."
 
-#: ../src/server/e-ews-connection.c:2403
+#: ../src/server/e-ews-connection.c:2298
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Iskanje predmeta <računa> je spodletelo."
 
-#: ../src/server/e-ews-connection.c:2422
+#: ../src/server/e-ews-connection.c:2317
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr "Samodejno iskanje predmetov odgovora <ASUrl> in <OABUrl> je spodletelo"
 
-#: ../src/server/e-ews-connection.c:2505
+#: ../src/server/e-ews-connection.c:2400
 msgid "URL cannot be NULL"
 msgstr "URL ne sme biti NULL"
 
-#: ../src/server/e-ews-connection.c:2513
+#: ../src/server/e-ews-connection.c:2408
 #, c-format
 msgid "URL '%s' is not valid"
 msgstr "URL '%s' ni veljaven"
 
-#: ../src/server/e-ews-connection.c:2614
+#: ../src/server/e-ews-connection.c:2509
 msgid "Email address is missing a domain part"
 msgstr "V elektronskem naslovu manjka del z domeno"
 
-#: ../src/server/e-ews-connection.c:2936
+#: ../src/server/e-ews-connection.c:2831
 msgid "Failed to parse oab XML"
 msgstr "Razčlenjevanje datoteke OAB XML je spodletelo."
 
-#: ../src/server/e-ews-connection.c:2944
+#: ../src/server/e-ews-connection.c:2839
 msgid "Failed to find <OAB> element\n"
 msgstr "Iskanje predmeta <OAB> je spodletelo.\n"
 
-#: ../src/server/e-ews-connection.c:4301
+#: ../src/server/e-ews-connection.c:4230
 msgid "No items found"
 msgstr "Ni zadetkov"
 
-#: ../src/server/e-ews-folder.c:634
+#: ../src/server/e-ews-folder.c:636
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Mape ni mogoče dodati, ker vrsta mape ni podprta"
 
-#: ../src/server/e-ews-folder.c:639
+#: ../src/server/e-ews-folder.c:641
 msgid "Cannot add folder, master source not found"
 msgstr "Mape ni mogoče dodati, ker izvornega vira ni mogoče najti"
 
