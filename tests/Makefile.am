@@ -6,6 +6,7 @@ AM_CPPFLAGS = \
 	-I$(top_builddir) \
 	-I$(top_builddir)/src \
 	-DTEST_FILE_DIR="\"$(top_srcdir)/tests/\"" \
+	-DCALENDAR_MODULE_DIR="\"$(top_srcdir)/src/calendar/\"" \
 	-DG_LOG_DOMAIN=\"libeews-tests\" \
 	$(UHTTPMOCK_CFLAGS) \
 	$(LIBEDATASERVER_CFLAGS) \
@@ -55,9 +56,13 @@ EXTRA_DIST += \
 	traces/Exchange2010_SP2/camel/folder/move_folder_to_valid_folder \
 	traces/Exchange2010_SP2/camel/folder/move_invalid_folder_to_valid_folder \
 	traces/Exchange2010_SP2/camel/folder/move_valid_folder_to_invalid_folder \
+	\
+	tests/traces/Exchange2010_SP2/calendar/timezones/get_server_time_zones_sync \
 	$(NULL)
 
-TEST_PROGS			+= ews-test-camel
+TEST_PROGS			+= ews-test-camel ews-test-timezones
+
 ews_test_camel_SOURCES		 = ews-test-camel.c $(TEST_SRCS)
+ews_test_timezones_SOURCES	 = ews-test-timezones.c $(TEST_SRCS)
 
 -include $(top_srcdir)/git.mk
