@@ -867,6 +867,34 @@ ews_sync_mi_flags (CamelFolder *folder,
 }
 
 static gboolean
+ews_save_flags (CamelFolder *folder,
+		GSList *mi_list,
+		GCancellable *cancellable,
+		GError **error)
+{
+	gboolean ret;
+	GError *local_error = NULL;
+
+	ret = ews_sync_mi_flags (folder, mi_list, cancellable, &local_error);
+
+	if (local_error != NULL) {
+		if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ACCESSDENIED)) {
+			/*
+			 * If cannot save flags, then it can be a public
+			 * or a foreign folder with no write access;
+			 * the flags will be saved locally, at least
+			 */
+			g_clear_error (&local_error);
+			ret = TRUE;
+		} else {
+			g_propagate_error (error, local_error);
+		}
+	}
+
+	return ret;
+}
+
+static gboolean
 ews_folder_is_of_type (CamelFolder *folder,
                        guint32 folder_type)
 {
@@ -1023,7 +1051,7 @@ ews_synchronize_sync (CamelFolder *folder,
 		 * for most flags — not even replied/forwarded. */
 		if ((flags_set & CAMEL_MESSAGE_FOLDER_FLAGGED) != 0 &&
 		    (flags_changed & (CAMEL_MESSAGE_SEEN | CAMEL_MESSAGE_ANSWERED | CAMEL_MESSAGE_FORWARDED | CAMEL_MESSAGE_FLAGGED)) != 0) {
-			mi_list = g_slist_append (mi_list, mi);
+			mi_list = g_slist_prepend (mi_list, mi);
 			mi_list_len++;
 
 			if (flags_set & CAMEL_MESSAGE_DELETED)
@@ -1038,29 +1066,21 @@ ews_synchronize_sync (CamelFolder *folder,
 			camel_message_info_free (mi);
 		} else if ((flags_set & CAMEL_MESSAGE_FOLDER_FLAGGED) != 0) {
 			/* OK, the change must have been the labels */
-			mi_list = g_slist_append (mi_list, mi);
+			mi_list = g_slist_prepend (mi_list, mi);
 			mi_list_len++;
 		} else {
 			camel_message_info_free (mi);
 		}
 
 		if (mi_list_len == EWS_MAX_FETCH_COUNT) {
-			success = ews_sync_mi_flags (folder, mi_list, cancellable, &local_error);
+			success = ews_save_flags (folder, mi_list, cancellable, &local_error);
 			mi_list = NULL;
 			mi_list_len = 0;
 		}
 	}
 
-	if (mi_list_len && success) {
-		success = ews_sync_mi_flags (folder, mi_list, cancellable, &local_error);
-		if (local_error && g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ACCESSDENIED)) {
-			/* if cannot save flags, then it can be a public or
-			   a foreign folder with no write access;
-			   the flags will be saved locally, at least */
-			g_clear_error (&local_error);
-			success = TRUE;
-		}			
-	}
+	if (mi_list != NULL && success)
+		success = ews_save_flags (folder, mi_list, cancellable, &local_error);
 
 	if (deleted_uids && success)
 		success = ews_delete_messages (folder, deleted_uids, ews_folder_is_of_type (folder, CAMEL_FOLDER_TYPE_TRASH), cancellable, &local_error);
@@ -1655,8 +1675,9 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 	const gchar *dst_full_name;
 	gchar *dst_id;
 	GError *local_error = NULL;
-	GSList *ids = NULL, *ret_items = NULL;
-	gint i = 0;
+	GSList *ids = NULL, *ret_items = NULL, *mi_list = NULL;
+	gint i = 0, mi_list_len = 0;
+	gboolean success = TRUE;
 
 	dst_full_name = camel_folder_get_full_name (destination);
 	dst_ews_store = (CamelEwsStore *) camel_folder_get_parent_store (destination);
@@ -1668,11 +1689,38 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 	dst_id = camel_ews_store_summary_get_folder_id_from_name (
 		dst_ews_store->summary, dst_full_name);
 
-	for (i = 0; i < uids->len; i++) {
-		ids = g_slist_append (ids, (gchar *) uids->pdata[i]);
+	for (i = 0; success && i < uids->len; i++) {
+		guint32 flags_set;
+		CamelEwsMessageInfo *mi;
+
+		ids = g_slist_prepend (ids, (gchar *) uids->pdata[i]);
+
+		mi = (gpointer) camel_folder_summary_get (source->summary, uids->pdata[i]);
+		if (!mi)
+			continue;
+
+		flags_set = camel_message_info_flags (mi);
+
+		/* Exchange doesn't seem to have a sane representation
+		 * for most flags — not even replied/forwarded. */
+		if ((flags_set & CAMEL_MESSAGE_FOLDER_FLAGGED) != 0) {
+			mi_list = g_slist_prepend (mi_list, mi);
+			mi_list_len++;
+		} else {
+			camel_message_info_unref (mi);
+		}
+
+		if (mi_list_len == EWS_MAX_FETCH_COUNT) {
+			success = ews_save_flags (source, mi_list, cancellable, &local_error);
+			mi_list = NULL;
+			mi_list_len = 0;
+		}
 	}
 
-	if (e_ews_connection_move_items_sync (
+	if (mi_list != NULL && success)
+		success = ews_save_flags (source, mi_list, cancellable, &local_error);
+
+	if (success && e_ews_connection_move_items_sync (
 		cnc, EWS_PRIORITY_MEDIUM,
 		dst_id, !delete_originals,
 		ids, &ret_items,
