@@ -27,7 +27,9 @@ G_BEGIN_DECLS
 gint		e_ews_debug_get_log_level		(void);
 const gchar *	e_ews_connection_get_server_version_string
 							(EEwsConnection *cnc);
-
+EEwsServerVersion
+		e_ews_debug_get_server_version_from_string
+							(const gchar *version);
 
 G_END_DECLS
 

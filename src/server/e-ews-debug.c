@@ -63,3 +63,19 @@ e_ews_connection_get_server_version_string (EEwsConnection *cnc)
 			return NULL;
 	}
 }
+
+EEwsServerVersion
+e_ews_debug_get_server_version_from_string (const gchar *version) {
+	if (g_strcmp0 (version, "Exchange2007") == 0)
+		return E_EWS_EXCHANGE_2007;
+	else if (g_strcmp0 (version, "Exchange2007_SP1") == 0)
+		return E_EWS_EXCHANGE_2007_SP1;
+	else if (g_strcmp0 (version, "Exchange2010") == 0)
+		return E_EWS_EXCHANGE_2010;
+	else if (g_strcmp0 (version, "Exchange2010_SP1") == 0)
+		return E_EWS_EXCHANGE_2010_SP1;
+	else if (g_strcmp0 (version, "Exchange2010_SP2") == 0)
+		return E_EWS_EXCHANGE_2010_SP2;
+	else
+		return E_EWS_EXCHANGE_FUTURE;
+}
