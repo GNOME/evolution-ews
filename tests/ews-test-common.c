@@ -286,11 +286,15 @@ ews_test_get_test_data_list (void)
 static void
 ews_test_data_free (EwsTestData *etd)
 {
-	g_free (etd->hostname);
-	g_free (etd->version);
-	g_free (etd->server_uri);
-	g_object_unref (etd->connection);
-	g_free (etd);
+	if (etd != NULL) {
+		if (etd->connection != NULL)
+			g_object_unref (etd->connection);
+
+		g_free (etd->hostname);
+		g_free (etd->version);
+		g_free (etd->server_uri);
+		g_free (etd);
+	}
 }
 
 void
