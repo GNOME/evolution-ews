@@ -229,7 +229,7 @@ ews_test_init (gint argc,
 	uhm_server_set_enable_online (mock_server, write_traces);
 
 	/* Set handler of debug information */
-	g_log_set_handler (G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, (GLogFunc) ews_test_debug_handler, mock_server);
+	g_log_set_handler ("libeews", G_LOG_LEVEL_DEBUG, ews_test_debug_handler, mock_server);
 
 	if (number == 0)
 		prepare_fake_data (&number, &fake_versions, &fake_hostnames, &fake_server_uris);
