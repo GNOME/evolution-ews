@@ -253,11 +253,6 @@ dnl ****************************
 PKG_CHECK_MODULES(LIBICAL, libical)
 
 dnl ****************************
-dnl Check for kerberos
-dnl ****************************
-EVO_KRB5_SUPPORT
-
-dnl ****************************
 dnl Check for libmspack with OAB support
 dnl ****************************
 AC_ARG_WITH([internal-lzx],
@@ -386,7 +381,6 @@ tests/Makefile
 AC_OUTPUT
 
 AC_MSG_NOTICE([
-	Kerberos 5	: $msg_krb5
 	Strict building : $enable_strict
 	Use libmspack   : $have_mspack
 	Enable tests	: $enable_tests

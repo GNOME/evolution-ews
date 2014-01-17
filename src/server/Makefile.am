@@ -20,14 +20,6 @@ ENUM_GENERATED = \
 	e-ews-enumtypes.c \
 	$(NULL)
 
-if ENABLE_KRB5
-KERBEROS_FILES = \
-	ews-kerberos.c \
-	ews-kerberos.h
-else
-KERBEROS_FILES =
-endif
-
 libeews_1_2_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-DG_LOG_DOMAIN=\"libeews\" \
@@ -39,7 +31,6 @@ libeews_1_2_la_CPPFLAGS = \
 	$(LIBECAL_CFLAGS) \
 	$(LIBICAL_CFLAGS) \
 	$(LIBEDATASERVER_CFLAGS) \
-	$(KRB5_CFLAGS)	\
 	$(DEBUG_CFLAGS) \
 	$(NULL)
 
@@ -48,7 +39,6 @@ libeews_1_2_la_SOURCES = \
 	camel-ews-settings.c \
 	ews-errors.h \
 	ews-errors.c \
-	$(KERBEROS_FILES) \
 	e-ews-connection.c \
 	e-ews-connection.h \
 	e-ews-connection-utils.c \
@@ -76,7 +66,6 @@ libeews_1_2_la_LIBADD = \
 	$(LIBECAL_LIBS) \
 	$(LIBICAL_LIBS) \
 	$(LIBEDATASERVER_LIBS) \
-	$(KRB5_LIBS) \
 	$(SOCKET_LIBS) \
 	$(NULL)
 
