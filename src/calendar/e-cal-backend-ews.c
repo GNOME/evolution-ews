@@ -3649,6 +3649,7 @@ e_cal_backend_ews_get_backend_property (ECalBackend *backend,
 			CAL_STATIC_CAPABILITY_NO_TASK_ASSIGNMENT,
 			CAL_STATIC_CAPABILITY_SAVE_SCHEDULES,
 			CAL_STATIC_CAPABILITY_NO_ALARM_AFTER_START,
+			CAL_STATIC_CAPABILITY_NO_MEMO_START_DATE,
 			NULL);
 	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_CAL_EMAIL_ADDRESS)) {
 		/* return email address of the person who opened the calendar */
