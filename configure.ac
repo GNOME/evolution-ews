@@ -63,8 +63,8 @@ m4_define([gdk_minimum_version], [3.0])
 m4_define([gdk_encoded_version], [GDK_VERSION_3_0])
 
 dnl Keep these two definitions in agreement.
-m4_define([soup_minimum_version], [2.38.1])
-m4_define([soup_encoded_version], [SOUP_VERSION_2_38])
+m4_define([soup_minimum_version], [2.42])
+m4_define([soup_encoded_version], [SOUP_VERSION_2_42])
 
 dnl ***********************************
 dnl Automake 1.11 - Silent Build Rules
