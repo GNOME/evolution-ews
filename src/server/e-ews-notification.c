@@ -634,6 +634,7 @@ ews_notification_soup_got_chunk (SoupMessage *msg,
 		ESoapResponse *response;
 		const gchar *end;
 		gsize len;
+		gboolean cancelled = FALSE;
 
 		end = g_strstr_len (chunk_str, chunk_len, "</Envelope>");
 
@@ -654,10 +655,16 @@ ews_notification_soup_got_chunk (SoupMessage *msg,
 		chunk_str = (gchar *) notification->priv->chunk->data;
 		chunk_len = notification->priv->chunk->len;
 
-		if (chunk_len == 0 || g_cancellable_is_cancelled (notification->priv->cancellable)) {
+		cancelled = g_cancellable_is_cancelled (notification->priv->cancellable);
+		if (chunk_len == 0 || cancelled) {
 			g_byte_array_free (notification->priv->chunk, TRUE);
 			notification->priv->chunk = NULL;
 			keep_parsing = FALSE;
+
+			if (cancelled) {
+				/* Abort any pending operations */
+				soup_session_abort (notification->priv->soup_session);
+			}
 		}
 	} while (keep_parsing);
 }
