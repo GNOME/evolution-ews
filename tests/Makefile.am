@@ -10,6 +10,7 @@ AM_CPPFLAGS = \
 	-DG_LOG_DOMAIN=\"libeews-tests\" \
 	$(UHTTPMOCK_CFLAGS) \
 	$(LIBEDATASERVER_CFLAGS) \
+	$(LIBECAL_CFLAGS) \
 	$(NULL)
 
 noinst_PROGRAMS = $(TEST_PROGS)
@@ -19,6 +20,7 @@ LIBS = \
 	$(top_builddir)/src/utils/libewsutils.la \
 	$(UHTTPMOCK_LIBS) \
 	$(LIBEDATASERVER_LIBS) \
+	$(LIBECAL_LIBS) \
 	$(NULL)
 
 TEST_SRCS = \
