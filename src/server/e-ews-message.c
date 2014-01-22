@@ -255,3 +255,27 @@ e_ews_message_write_extended_distinguished_tag (ESoapMessage *msg,
 
 	g_free (num);
 }
+
+void
+e_ews_message_write_extended_name (ESoapMessage *msg,
+				   const gchar *name,
+				   const gchar *prop_type)
+{
+	e_soap_message_start_element (msg, "ExtendedFieldURI", NULL, NULL);
+	e_soap_message_add_attribute (msg, "PropertyName", name, NULL, NULL);
+	e_soap_message_add_attribute (msg, "PropertyType", prop_type, NULL, NULL);
+	e_soap_message_end_element (msg); /* ExtendedFieldURI */
+}
+
+void
+e_ews_message_write_extended_distinguished_name (ESoapMessage *msg,
+						 const gchar *set_id,
+						 const gchar *name,
+						 const gchar *prop_type)
+{
+	e_soap_message_start_element (msg, "ExtendedFieldURI", NULL, NULL);
+	e_soap_message_add_attribute (msg, "DistinguishedPropertySetId", set_id, NULL, NULL);
+	e_soap_message_add_attribute (msg, "PropertyName", name, NULL, NULL);
+	e_soap_message_add_attribute (msg, "PropertyType", prop_type, NULL, NULL);
+	e_soap_message_end_element (msg); /* ExtendedFieldURI */
+}

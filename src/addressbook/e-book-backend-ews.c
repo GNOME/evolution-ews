@@ -381,6 +381,7 @@ get_photo (EBookBackendEws *ebews,
 	   GError **error)
 {
 	EContactPhoto *photo = NULL;
+	EEwsAdditionalProps *add_props = NULL;
 	EEwsAttachmentInfo *info;
 	GSList *contact_item_ids = NULL, *new_items = NULL;
 	GSList *attachments = NULL,  *attachments_ids = NULL;
@@ -389,6 +390,9 @@ get_photo (EBookBackendEws *ebews,
 	const EwsId *id;
 	gsize len;
 
+	add_props = e_ews_additional_props_new ();
+	add_props->field_uri = g_strdup ("item:Attachments");
+
 	id = e_ews_item_get_id (item);
 	contact_item_ids = g_slist_prepend (contact_item_ids, g_strdup (id->id));
 	if (!e_ews_connection_get_items_sync (
@@ -396,7 +400,7 @@ get_photo (EBookBackendEws *ebews,
 			EWS_PRIORITY_MEDIUM,
 			contact_item_ids,
 			"IdOnly",
-			"item:Attachments",
+			add_props,
 			FALSE,
 			NULL,
 			E_EWS_BODY_TYPE_TEXT,
@@ -434,6 +438,7 @@ get_photo (EBookBackendEws *ebews,
 	e_contact_photo_set_inlined (photo, content, len);
 
 exit:
+	e_ews_additional_props_free (add_props);
 	g_slist_free_full (contact_item_ids, g_free);
 	g_slist_free_full (new_items, g_object_unref);
 	g_slist_free_full (attachments_ids, g_free);
@@ -960,6 +965,7 @@ ebews_set_photo_changes (EBookBackendEws *ebews,
 			 GError **error)
 {
 	EContactPhoto *old_photo, *new_photo;
+	EEwsAdditionalProps *add_props = NULL;
 	GSList *contact_item_ids = NULL, *new_items = NULL, *attachments_ids = NULL;
 	gchar *id = e_contact_get (old, E_CONTACT_UID);
 	const gchar *contact_photo_id;
@@ -977,13 +983,16 @@ ebews_set_photo_changes (EBookBackendEws *ebews,
 	if (photos_equal (old_photo, new_photo))
 		goto exit;
 
+	add_props = e_ews_additional_props_new ();
+	add_props->field_uri = g_strdup ("item:Attachments");
+
 	contact_item_ids = g_slist_append (contact_item_ids, id);
 	if (!e_ews_connection_get_items_sync (
 			ebews->priv->cnc,
 			EWS_PRIORITY_MEDIUM,
 			contact_item_ids,
 			"IdOnly",
-			"item:Attachments",
+			add_props,
 			FALSE,
 			NULL,
 			E_EWS_BODY_TYPE_TEXT,
@@ -1011,6 +1020,7 @@ ebews_set_photo_changes (EBookBackendEws *ebews,
 		set_photo (ebews, new, new_photo, cancellable, error);
 
 exit:
+	e_ews_additional_props_free (add_props);
 	e_contact_photo_free (old_photo);
 	e_contact_photo_free (new_photo);
 	g_slist_free_full (contact_item_ids, g_free);
@@ -2954,13 +2964,22 @@ ebews_fetch_items (EBookBackendEws *ebews,
 	g_slist_free (items);
 
 	/* TODO fetch attachments */
-	if (contact_item_ids)
-		if (!e_ews_connection_get_items_sync (
+	if (contact_item_ids) {
+		EEwsAdditionalProps *add_props;
+		add_props = e_ews_additional_props_new ();
+		add_props->field_uri = g_strdup (CONTACT_ITEM_PROPS);
+
+		ret = e_ews_connection_get_items_sync (
 			cnc, EWS_PRIORITY_MEDIUM,
-			contact_item_ids, "Default", CONTACT_ITEM_PROPS,
+			contact_item_ids, "Default", add_props,
 			FALSE, NULL, E_EWS_BODY_TYPE_TEXT, &new_items, NULL, NULL,
-			cancellable, error))
+			cancellable, error);
+
+		e_ews_additional_props_free (add_props);
+
+		if (!ret)
 			goto cleanup;
+	}
 
 	if (new_items) {
 		if (store_to_cache)
@@ -3017,7 +3036,7 @@ cleanup:
 	g_slist_free_full (dl_ids, g_free);
 	g_slist_free_full (contact_item_ids, g_free);
 
-	return TRUE;
+	return ret;
 }
 
 static void

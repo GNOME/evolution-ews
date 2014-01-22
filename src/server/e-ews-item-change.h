@@ -173,6 +173,118 @@ void	e_ews_message_add_extended_property_distinguished_tag_time
 								 guint32 prop_id,
 								 time_t value);
 
+void	e_ews_message_add_delete_item_field_extended_name	(ESoapMessage *msg,
+								 const gchar *name,
+								 EEwsMessageDataType data_type);
+
+void	e_ews_message_add_delete_item_field_extended_distinguished_name
+								(ESoapMessage *msg,
+								 const gchar *set_id,
+								 const gchar *name,
+								 EEwsMessageDataType data_type);
+
+void	e_ews_message_add_set_item_field_extended_name_boolean	(ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 const gchar *name,
+								 gboolean value);
+void	e_ews_message_add_set_item_field_extended_name_int	(ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 const gchar *name,
+								 gint value);
+void	e_ews_message_add_set_item_field_extended_name_double	(ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 const gchar *name,
+								 gdouble value);
+void	e_ews_message_add_set_item_field_extended_name_string	(ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 const gchar *name,
+								 const gchar *value);
+void	e_ews_message_add_set_item_field_extended_name_time	(ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 const gchar *name,
+								 time_t value);
+void	e_ews_message_add_set_item_field_extended_distinguished_name_boolean
+								(ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 const gchar *set_id,
+								 const gchar *name,
+								 gboolean value);
+void	e_ews_message_add_set_item_field_extended_distinguished_name_int
+								(ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 const gchar *set_id,
+								 const gchar *name,
+								 gint value);
+void	e_ews_message_add_set_item_field_extended_distinguished_name_double
+								(ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 const gchar *set_id,
+								 const gchar *name,
+								 gdouble value);
+void	e_ews_message_add_set_item_field_extended_distinguished_name_string
+								(ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 const gchar *set_id,
+								 const gchar *name,
+								 const gchar *value);
+void	e_ews_message_add_set_item_field_extended_distinguished_name_time
+								(ESoapMessage *msg,
+								 const gchar *elem_prefix,
+								 const gchar *elem_name,
+								 const gchar *set_id,
+								 const gchar *name,
+								 time_t value);
+void	e_ews_message_add_extended_property_name_boolean	(ESoapMessage *msg,
+								 const gchar *name,
+								 gboolean value);
+void	e_ews_message_add_extended_property_name_int		(ESoapMessage *msg,
+								 const gchar *name,
+								 gint value);
+void	e_ews_message_add_extended_property_name_double		(ESoapMessage *msg,
+								 const gchar *name,
+								 gdouble value);
+void	e_ews_message_add_extended_property_name_string		(ESoapMessage *msg,
+								 const gchar *name,
+								 const gchar *value);
+void	e_ews_message_add_extended_property_name_time		(ESoapMessage *msg,
+								 const gchar *name,
+								 time_t value);
+void	e_ews_message_add_extended_property_distinguished_name_boolean
+								(ESoapMessage *msg,
+								 const gchar *set_id,
+								 const gchar *name,
+								 gboolean value);
+void	e_ews_message_add_extended_property_distinguished_name_int
+								(ESoapMessage *msg,
+								 const gchar *set_id,
+								 const gchar *name,
+								 gint value);
+void	e_ews_message_add_extended_property_distinguished_name_double
+								(ESoapMessage *msg,
+								 const gchar *set_id,
+								 const gchar *name,
+								 gdouble value);
+void	e_ews_message_add_extended_property_distinguished_name_string
+								(ESoapMessage *msg,
+								 const gchar *set_id,
+								 const gchar *name,
+								 const gchar *value);
+void	e_ews_message_add_extended_property_distinguished_name_time
+								(ESoapMessage *msg,
+								 const gchar *set_id,
+								 const gchar *name,
+								 time_t value);
+
+
 G_END_DECLS
 
 #endif

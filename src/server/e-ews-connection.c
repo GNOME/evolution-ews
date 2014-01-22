@@ -357,6 +357,59 @@ e_ews_calendar_time_zone_definition_free (EEwsCalendarTimeZoneDefinition *tzd)
 	}
 }
 
+EEwsExtendedFieldURI *
+e_ews_extended_field_uri_new (void)
+{
+	return g_new0 (EEwsExtendedFieldURI, 1);
+}
+
+void
+e_ews_extended_field_uri_free (EEwsExtendedFieldURI *ex_field_uri)
+{
+	if (ex_field_uri != NULL) {
+		g_free (ex_field_uri->distinguished_prop_set_id);
+		g_free (ex_field_uri->prop_set_id);
+		g_free (ex_field_uri->prop_tag);
+		g_free (ex_field_uri->prop_name);
+		g_free (ex_field_uri->prop_id);
+		g_free (ex_field_uri->prop_type);
+		g_free (ex_field_uri);
+	}
+}
+
+EEwsIndexedFieldURI *
+e_ews_indexed_field_uri_new (void)
+{
+	return g_new0 (EEwsIndexedFieldURI, 1);
+}
+
+void
+e_ews_indexed_field_uri_free (EEwsIndexedFieldURI *id_field_uri)
+{
+	if (id_field_uri != NULL) {
+		g_free (id_field_uri->field_uri);
+		g_free (id_field_uri->field_index);
+		g_free (id_field_uri);
+	}
+}
+
+EEwsAdditionalProps *
+e_ews_additional_props_new (void)
+{
+	return g_new0 (EEwsAdditionalProps, 1);
+}
+
+void
+e_ews_additional_props_free (EEwsAdditionalProps *add_props)
+{
+	if (add_props != NULL) {
+		g_free (add_props->field_uri);
+		g_slist_free_full (add_props->extended_furis, (GDestroyNotify) e_ews_extended_field_uri_free);
+		g_slist_free_full (add_props->indexed_furis, (GDestroyNotify) e_ews_indexed_field_uri_free);
+		g_free (add_props);
+	}
+}
+
 static EwsNode *
 ews_node_new ()
 {
@@ -3508,7 +3561,7 @@ e_ews_connection_set_mailbox (EEwsConnection *cnc,
 
 static void
 ews_append_additional_props_to_msg (ESoapMessage *msg,
-                                    EwsAdditionalProps *add_props)
+                                    const EEwsAdditionalProps *add_props)
 {
 	GSList *l;
 
@@ -3531,7 +3584,7 @@ ews_append_additional_props_to_msg (ESoapMessage *msg,
 
 	if (add_props->extended_furis) {
 		for (l = add_props->extended_furis; l != NULL; l = g_slist_next (l)) {
-			EwsExtendedFieldURI *ex_furi = (EwsExtendedFieldURI *) l->data;
+			EEwsExtendedFieldURI *ex_furi = l->data;
 
 			e_soap_message_start_element (msg, "ExtendedFieldURI", NULL, NULL);
 
@@ -3559,7 +3612,7 @@ ews_append_additional_props_to_msg (ESoapMessage *msg,
 
 	if (add_props->indexed_furis) {
 		for (l = add_props->indexed_furis; l != NULL; l = g_slist_next (l)) {
-			EwsIndexedFieldURI *in_furi = (EwsIndexedFieldURI *) l->data;
+			EEwsIndexedFieldURI *in_furi = l->data;
 
 			e_soap_message_start_element (msg, "IndexedFieldURI", NULL, NULL);
 
@@ -3587,14 +3640,14 @@ ews_write_sort_order_to_msg (ESoapMessage *msg,
 	if (sort_order->uri_type == NORMAL_FIELD_URI)
 		e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", (gchar *) sort_order->field_uri);
 	else if (sort_order->uri_type == INDEXED_FIELD_URI) {
-		EwsIndexedFieldURI *in_furi = (EwsIndexedFieldURI *) sort_order->field_uri;
+		EEwsIndexedFieldURI *in_furi = sort_order->field_uri;
 
 		e_soap_message_start_element (msg, "IndexedFieldURI", NULL, NULL);
 		e_soap_message_add_attribute (msg, "FieldURI", in_furi->field_uri, NULL, NULL);
 		e_soap_message_add_attribute (msg, "FieldIndex", in_furi->field_index, NULL, NULL);
 		e_soap_message_end_element (msg);
 	} else if (sort_order->uri_type == EXTENDED_FIELD_URI) {
-		EwsExtendedFieldURI *ex_furi = (EwsExtendedFieldURI *) sort_order->field_uri;
+		EEwsExtendedFieldURI *ex_furi = sort_order->field_uri;
 
 		e_soap_message_start_element (msg, "ExtendedFieldURI", NULL, NULL);
 
@@ -3635,7 +3688,7 @@ e_ews_connection_sync_folder_items (EEwsConnection *cnc,
                                     const gchar *last_sync_state,
                                     const gchar *fid,
                                     const gchar *default_props,
-                                    const gchar *additional_props,
+				    const EEwsAdditionalProps *add_props,
                                     guint max_entries,
                                     GCancellable *cancellable,
                                     GAsyncReadyCallback callback,
@@ -3660,18 +3713,7 @@ e_ews_connection_sync_folder_items (EEwsConnection *cnc,
 	e_soap_message_start_element (msg, "ItemShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, default_props);
 
-	if (additional_props && *additional_props) {
-		gchar **prop = g_strsplit (additional_props, " ", 0);
-		gint i = 0;
-
-		e_soap_message_start_element (msg, "AdditionalProperties", NULL, NULL);
-		while (prop[i]) {
-			e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", prop[i]);
-			i++;
-		}
-		g_strfreev (prop);
-		e_soap_message_end_element (msg);
-	}
+	ews_append_additional_props_to_msg (msg, add_props);
 
 	e_soap_message_end_element (msg);
 
@@ -3743,7 +3785,7 @@ e_ews_connection_sync_folder_items_sync (EEwsConnection *cnc,
                                          const gchar *old_sync_state,
                                          const gchar *fid,
                                          const gchar *default_props,
-                                         const gchar *additional_props,
+					 const EEwsAdditionalProps *add_props,
                                          guint max_entries,
                                          gchar **new_sync_state,
                                          gboolean *includes_last_item,
@@ -3763,7 +3805,7 @@ e_ews_connection_sync_folder_items_sync (EEwsConnection *cnc,
 
 	e_ews_connection_sync_folder_items (
 		cnc, pri, old_sync_state, fid, default_props,
-		additional_props, max_entries, cancellable,
+		add_props, max_entries, cancellable,
 		e_async_closure_callback, closure);
 
 	result = e_async_closure_wait (closure);
@@ -3837,7 +3879,7 @@ e_ews_connection_find_folder_items (EEwsConnection *cnc,
                                     gint pri,
                                     EwsFolderId *fid,
                                     const gchar *default_props,
-                                    EwsAdditionalProps *add_props,
+                                    const EEwsAdditionalProps *add_props,
                                     EwsSortOrder *sort_order,
                                     const gchar *query,
                                     EEwsFolderType type,
@@ -3936,7 +3978,7 @@ e_ews_connection_find_folder_items_sync (EEwsConnection *cnc,
                                          gint pri,
                                          EwsFolderId *fid,
                                          const gchar *default_props,
-                                         EwsAdditionalProps *add_props,
+                                         const EEwsAdditionalProps *add_props,
                                          EwsSortOrder *sort_order,
                                          const gchar *query,
                                          EEwsFolderType type,
@@ -4146,102 +4188,12 @@ e_ews_connection_satisfies_server_version (EEwsConnection *cnc,
 	return cnc->priv->version >= version;
 }
 
-static gboolean
-ews_decode_mapi_property_string_type (const gchar *type_string,
-				      EEwsMessageDataType *data_type)
-{
-	g_return_val_if_fail (type_string != NULL, FALSE);
-	g_return_val_if_fail (data_type != NULL, FALSE);
-
-	if (g_ascii_strcasecmp (type_string, "boolean") == 0) {
-		*data_type = E_EWS_MESSAGE_DATA_TYPE_BOOLEAN;
-		return TRUE;
-	}
-
-	if (g_ascii_strcasecmp (type_string, "int") == 0) {
-		*data_type = E_EWS_MESSAGE_DATA_TYPE_INT;
-		return TRUE;
-	}
-
-	if (g_ascii_strcasecmp (type_string, "double") == 0) {
-		*data_type = E_EWS_MESSAGE_DATA_TYPE_DOUBLE;
-		return TRUE;
-	}
-
-	if (g_ascii_strcasecmp (type_string, "string") == 0) {
-		*data_type = E_EWS_MESSAGE_DATA_TYPE_STRING;
-		return TRUE;
-	}
-
-	if (g_ascii_strcasecmp (type_string, "time") == 0) {
-		*data_type = E_EWS_MESSAGE_DATA_TYPE_TIME;
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
-static gboolean
-ews_decode_mapi_property_string_id (const gchar *hexa_id,
-				    guint32 *prop_id)
-{
-	gint64 value;
-
-	g_return_val_if_fail (hexa_id != NULL, FALSE);
-	g_return_val_if_fail (prop_id != NULL, FALSE);
-	g_return_val_if_fail (g_ascii_strncasecmp (hexa_id, "0x", 2) == 0, FALSE);
-
-	value = g_ascii_strtoll (hexa_id + 2, NULL, 16);
-	*prop_id = (guint32) value;
-
-	return value != 0;
-}
-
-/* expects either "mapi:Type:0xPropId" or "mapi:dist:Type:SetId:0xPropId"
-   where 'type' is one of boolean/int/double/string/time */
-static gboolean
-ews_decode_mapi_property_string (const gchar *prop_descr,
-				 EEwsMessageDataType *data_type,
-				 guint32 *prop_id,
-				 gchar **distinguished_set_id)
-{
-	gchar **split;
-	guint len;
-	gboolean res = FALSE;
-
-	g_return_val_if_fail (prop_descr != NULL, FALSE);
-	g_return_val_if_fail (data_type != NULL, FALSE);
-	g_return_val_if_fail (prop_id != NULL, FALSE);
-	g_return_val_if_fail (distinguished_set_id != NULL, FALSE);
-	g_return_val_if_fail (g_ascii_strncasecmp (prop_descr, "mapi:", 5) == 0, FALSE);
-
-	split = g_strsplit (prop_descr, ":", 0);
-	g_return_val_if_fail (split != NULL, FALSE);
-
-	len = g_strv_length (split);
-	if (len == 3
-	    && ews_decode_mapi_property_string_type (split[1], data_type)
-	    && ews_decode_mapi_property_string_id (split[2], prop_id)) {
-		res = TRUE;
-	} else if (len == 5
-		   && g_ascii_strcasecmp (split[1], "dist") == 0
-		   && ews_decode_mapi_property_string_type (split[2], data_type)
-		   && ews_decode_mapi_property_string_id (split[4], prop_id)) {
-		*distinguished_set_id = g_strdup (split[3]);
-		res = *distinguished_set_id && **distinguished_set_id;
-	}
-
-	g_strfreev (split);
-
-	return res;
-}
-
 void
 e_ews_connection_get_items (EEwsConnection *cnc,
                             gint pri,
                             const GSList *ids,
                             const gchar *default_props,
-                            const gchar *additional_props,
+			    const EEwsAdditionalProps *add_props,
                             gboolean include_mime,
                             const gchar *mime_directory,
 			    EEwsBodyType body_type,
@@ -4296,42 +4248,8 @@ e_ews_connection_get_items (EEwsConnection *cnc,
 		break;
 	}
 
-	if (additional_props && *additional_props) {
-		gchar **prop = g_strsplit (additional_props, " ", 0);
-		gint i = 0;
+	ews_append_additional_props_to_msg (msg, add_props);
 
-		e_soap_message_start_element (msg, "AdditionalProperties", NULL, NULL);
-		while (prop[i]) {
-			if (g_ascii_strncasecmp (prop[i], "mapi:", 5) == 0) {
-				EEwsMessageDataType data_type;
-				guint32 prop_id = -1;
-				gchar *distinguished_set_id = NULL;
-
-				if (ews_decode_mapi_property_string (prop[i], &data_type, &prop_id, &distinguished_set_id)) {
-					const gchar *prop_type = e_ews_message_data_type_get_xml_name (data_type);
-
-					if (prop_type) {
-						if (distinguished_set_id) {
-							e_ews_message_write_extended_distinguished_tag (msg, distinguished_set_id, prop_id, prop_type);
-						} else {
-							e_ews_message_write_extended_tag (msg, prop_id, prop_type);
-						}
-					} else {
-						g_warning ("%s: Failed to decode mapi property type from '%s'", G_STRFUNC, prop[i]);
-					}
-				} else {
-					g_warning ("%s: Failed to decode mapi property from '%s'", G_STRFUNC, prop[i]);
-				}
-
-				g_free (distinguished_set_id);
-			} else {
-				e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", prop[i]);
-			}
-			i++;
-		}
-		g_strfreev (prop);
-		e_soap_message_end_element (msg);
-	}
 	e_soap_message_end_element (msg);
 
 	e_soap_message_start_element (msg, "ItemIds", "messages", NULL);
@@ -4394,7 +4312,7 @@ e_ews_connection_get_items_sync (EEwsConnection *cnc,
                                  gint pri,
                                  const GSList *ids,
                                  const gchar *default_props,
-                                 const gchar *additional_props,
+				 const EEwsAdditionalProps *add_props,
                                  gboolean include_mime,
                                  const gchar *mime_directory,
 				 EEwsBodyType body_type,
@@ -4414,7 +4332,7 @@ e_ews_connection_get_items_sync (EEwsConnection *cnc,
 
 	e_ews_connection_get_items (
 		cnc, pri,ids, default_props,
-		additional_props, include_mime,
+		add_props, include_mime,
 		mime_directory, body_type, progress_fn,
 		progress_data, cancellable,
 		e_async_closure_callback, closure);
@@ -5831,7 +5749,7 @@ void
 e_ews_connection_get_folder (EEwsConnection *cnc,
                              gint pri,
                              const gchar *folder_shape,
-                             EwsAdditionalProps *add_props,
+                             const EEwsAdditionalProps *add_props,
                              GSList *folder_ids,
                              GCancellable *cancellable,
                              GAsyncReadyCallback callback,
@@ -5917,7 +5835,7 @@ gboolean
 e_ews_connection_get_folder_sync (EEwsConnection *cnc,
                                   gint pri,
                                   const gchar *folder_shape,
-                                  EwsAdditionalProps *add_props,
+                                  const EEwsAdditionalProps *add_props,
                                   GSList *folder_ids,
                                   GSList **folders,
                                   GCancellable *cancellable,

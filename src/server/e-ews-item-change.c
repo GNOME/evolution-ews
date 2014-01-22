@@ -566,3 +566,325 @@ e_ews_message_add_extended_property_distinguished_tag_time (ESoapMessage *msg,
 	ews_message_add_extended_property_distinguished_tag (msg, set_id, prop_id,
 		E_EWS_MESSAGE_DATA_TYPE_TIME, &value);
 }
+
+void
+e_ews_message_add_delete_item_field_extended_name (ESoapMessage *msg,
+						   const gchar *name,
+						   EEwsMessageDataType data_type)
+{
+	const gchar *prop_type = e_ews_message_data_type_get_xml_name (data_type);
+
+	g_return_if_fail (prop_type != NULL);
+
+	e_soap_message_start_element (msg, "DeleteItemField", NULL, NULL);
+	e_ews_message_write_extended_name (msg, name, prop_type);
+	e_soap_message_end_element (msg); /* DeleteItemField */
+}
+
+void
+e_ews_message_add_delete_item_field_extended_distinguished_name (ESoapMessage *msg,
+								 const gchar *set_id,
+								 const gchar *name,
+								 EEwsMessageDataType data_type)
+{
+	const gchar *prop_type = e_ews_message_data_type_get_xml_name (data_type);
+
+	g_return_if_fail (prop_type != NULL);
+
+	e_soap_message_start_element (msg, "DeleteItemField", NULL, NULL);
+	e_ews_message_write_extended_distinguished_name (msg, set_id, name, prop_type);
+	e_soap_message_end_element (msg); /* DeleteItemField */
+}
+
+static void
+ews_message_add_extended_property_name (ESoapMessage *msg,
+					const gchar *name,
+					EEwsMessageDataType data_type,
+					gconstpointer value)
+{
+	const gchar *prop_type = e_ews_message_data_type_get_xml_name (data_type);
+
+	g_return_if_fail (prop_type != NULL);
+
+	e_soap_message_start_element (msg, "ExtendedProperty", NULL, NULL);
+
+	e_ews_message_write_extended_name (msg, name, prop_type);
+	ews_message_write_data_value (msg, data_type, value);
+
+	e_soap_message_end_element (msg); /* ExtendedProperty */
+}
+
+static void
+ews_message_add_extended_property_distinguished_name (ESoapMessage *msg,
+						      const gchar *set_id,
+						      const gchar *name,
+						      EEwsMessageDataType data_type,
+						      gconstpointer value)
+{
+	const gchar *prop_type = e_ews_message_data_type_get_xml_name (data_type);
+
+	g_return_if_fail (prop_type != NULL);
+
+	e_soap_message_start_element (msg, "ExtendedProperty", NULL, NULL);
+
+	e_ews_message_write_extended_distinguished_name (msg, set_id, name, prop_type);
+	ews_message_write_data_value (msg, data_type, value);
+
+	e_soap_message_end_element (msg); /* ExtendedProperty */
+}
+
+static void
+ews_message_add_set_item_field_extended_name (ESoapMessage *msg,
+					      const gchar *elem_prefix,
+					      const gchar *elem_name,
+					      const gchar *name,
+					      EEwsMessageDataType data_type,
+					      gconstpointer value)
+{
+	const gchar *prop_type = e_ews_message_data_type_get_xml_name (data_type);
+
+	g_return_if_fail (prop_type != NULL);
+
+	e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
+	e_ews_message_write_extended_name (msg, name, prop_type);
+
+	e_soap_message_start_element (msg, elem_name, elem_prefix, NULL);
+	ews_message_add_extended_property_name (msg, name, data_type, value);
+	e_soap_message_end_element (msg); /* elem_name */
+
+	e_soap_message_end_element (msg); /* SetItemField */
+}
+
+static void
+ews_message_add_set_item_field_extended_distinguished_name (ESoapMessage *msg,
+							    const gchar *elem_prefix,
+							    const gchar *elem_name,
+							    const gchar *set_id,
+							    const gchar *name,
+							    EEwsMessageDataType data_type,
+							    gconstpointer value)
+{
+	const gchar *prop_type = e_ews_message_data_type_get_xml_name (data_type);
+
+	g_return_if_fail (prop_type != NULL);
+
+	e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
+
+	e_ews_message_write_extended_distinguished_name (msg, set_id, name, prop_type);
+
+	e_soap_message_start_element (msg, elem_name, elem_prefix, NULL);
+	ews_message_add_extended_property_distinguished_name (msg, set_id, name, data_type, value);
+	e_soap_message_end_element (msg); /* elem_name */
+
+	e_soap_message_end_element (msg); /* SetItemField */
+}
+
+void
+e_ews_message_add_set_item_field_extended_name_boolean (ESoapMessage *msg,
+							const gchar *elem_prefix,
+							const gchar *elem_name,
+							const gchar *name,
+							gboolean value)
+{
+	ews_message_add_set_item_field_extended_name (msg, elem_prefix, elem_name, name,
+		E_EWS_MESSAGE_DATA_TYPE_BOOLEAN, &value);
+}
+
+void
+e_ews_message_add_set_item_field_extended_name_int (ESoapMessage *msg,
+						    const gchar *elem_prefix,
+						    const gchar *elem_name,
+						    const gchar *name,
+						    gint value)
+{
+	ews_message_add_set_item_field_extended_name (msg, elem_prefix, elem_name, name,
+		E_EWS_MESSAGE_DATA_TYPE_INT, &value);
+}
+
+void
+e_ews_message_add_set_item_field_extended_name_double (ESoapMessage *msg,
+						       const gchar *elem_prefix,
+						       const gchar *elem_name,
+						       const gchar *name,
+						       gdouble value)
+{
+	ews_message_add_set_item_field_extended_name (msg, elem_prefix, elem_name, name,
+		E_EWS_MESSAGE_DATA_TYPE_DOUBLE, &value);
+}
+
+void
+e_ews_message_add_set_item_field_extended_name_string (ESoapMessage *msg,
+						       const gchar *elem_prefix,
+						       const gchar *elem_name,
+						       const gchar *name,
+						       const gchar *value)
+{
+	ews_message_add_set_item_field_extended_name (msg, elem_prefix, elem_name, name,
+		E_EWS_MESSAGE_DATA_TYPE_STRING, value);
+}
+
+void
+e_ews_message_add_set_item_field_extended_name_time (ESoapMessage *msg,
+						     const gchar *elem_prefix,
+						     const gchar *elem_name,
+						     const gchar *name,
+						     time_t value)
+{
+	ews_message_add_set_item_field_extended_name (msg, elem_prefix, elem_name, name,
+		E_EWS_MESSAGE_DATA_TYPE_TIME, &value);
+}
+
+void
+e_ews_message_add_set_item_field_extended_distinguished_name_boolean (ESoapMessage *msg,
+								      const gchar *elem_prefix,
+								      const gchar *elem_name,
+								      const gchar *set_id,
+								      const gchar *name,
+								      gboolean value)
+{
+	ews_message_add_set_item_field_extended_distinguished_name (msg, elem_prefix, elem_name, set_id, name,
+		E_EWS_MESSAGE_DATA_TYPE_BOOLEAN, &value);
+}
+
+void
+e_ews_message_add_set_item_field_extended_distinguished_name_int (ESoapMessage *msg,
+								  const gchar *elem_prefix,
+								  const gchar *elem_name,
+								  const gchar *set_id,
+								  const gchar *name,
+								  gint value)
+{
+	ews_message_add_set_item_field_extended_distinguished_name (msg, elem_prefix, elem_name, set_id, name,
+		E_EWS_MESSAGE_DATA_TYPE_INT, &value);
+}
+
+void
+e_ews_message_add_set_item_field_extended_distinguished_name_double (ESoapMessage *msg,
+								     const gchar *elem_prefix,
+								     const gchar *elem_name,
+								     const gchar *set_id,
+								     const gchar *name,
+								     gdouble value)
+{
+	ews_message_add_set_item_field_extended_distinguished_name (msg, elem_prefix, elem_name, set_id, name,
+		E_EWS_MESSAGE_DATA_TYPE_DOUBLE, &value);
+}
+
+void
+e_ews_message_add_set_item_field_extended_distinguished_name_string (ESoapMessage *msg,
+								     const gchar *elem_prefix,
+								     const gchar *elem_name,
+								     const gchar *set_id,
+								     const gchar *name,
+								     const gchar *value)
+{
+	ews_message_add_set_item_field_extended_distinguished_name (msg, elem_prefix, elem_name, set_id, name,
+		E_EWS_MESSAGE_DATA_TYPE_STRING, value);
+}
+
+void
+e_ews_message_add_set_item_field_extended_distinguished_name_time (ESoapMessage *msg,
+								   const gchar *elem_prefix,
+								   const gchar *elem_name,
+								   const gchar *set_id,
+								   const gchar *name,
+								   time_t value)
+{
+	ews_message_add_set_item_field_extended_distinguished_name (msg, elem_prefix, elem_name, set_id, name,
+		E_EWS_MESSAGE_DATA_TYPE_TIME, &value);
+}
+
+void
+e_ews_message_add_extended_property_name_boolean (ESoapMessage *msg,
+						  const gchar *name,
+						  gboolean value)
+{
+	ews_message_add_extended_property_name (msg, name,
+		E_EWS_MESSAGE_DATA_TYPE_BOOLEAN, &value);
+}
+
+void
+e_ews_message_add_extended_property_name_int (ESoapMessage *msg,
+					      const gchar *name,
+					      gint value)
+{
+	ews_message_add_extended_property_name (msg, name,
+		E_EWS_MESSAGE_DATA_TYPE_INT, &value);
+}
+
+void
+e_ews_message_add_extended_property_name_double (ESoapMessage *msg,
+						 const gchar *name,
+						 gdouble value)
+{
+	ews_message_add_extended_property_name (msg, name,
+		E_EWS_MESSAGE_DATA_TYPE_DOUBLE, &value);
+}
+
+void
+e_ews_message_add_extended_property_name_string (ESoapMessage *msg,
+						 const gchar *name,
+						 const gchar *value)
+{
+	ews_message_add_extended_property_name (msg, name,
+		E_EWS_MESSAGE_DATA_TYPE_STRING, value);
+}
+
+void
+e_ews_message_add_extended_property_name_time (ESoapMessage *msg,
+					       const gchar *name,
+					       time_t value)
+{
+	ews_message_add_extended_property_name (msg, name,
+		E_EWS_MESSAGE_DATA_TYPE_TIME, &value);
+}
+
+void
+e_ews_message_add_extended_property_distinguished_name_boolean (ESoapMessage *msg,
+							        const gchar *set_id,
+							        const gchar *name,
+							        gboolean value)
+{
+	ews_message_add_extended_property_distinguished_name (msg, set_id, name,
+		E_EWS_MESSAGE_DATA_TYPE_BOOLEAN, &value);
+}
+
+void
+e_ews_message_add_extended_property_distinguished_name_int (ESoapMessage *msg,
+							    const gchar *set_id,
+							    const gchar *name,
+							    gint value)
+{
+	ews_message_add_extended_property_distinguished_name (msg, set_id, name,
+		E_EWS_MESSAGE_DATA_TYPE_INT, &value);
+}
+
+void
+e_ews_message_add_extended_property_distinguished_name_double (ESoapMessage *msg,
+							       const gchar *set_id,
+							       const gchar *name,
+							       gdouble value)
+{
+	ews_message_add_extended_property_distinguished_name (msg, set_id, name,
+		E_EWS_MESSAGE_DATA_TYPE_DOUBLE, &value);
+}
+
+void
+e_ews_message_add_extended_property_distinguished_name_string (ESoapMessage *msg,
+							       const gchar *set_id,
+							       const gchar *name,
+							       const gchar *value)
+{
+	ews_message_add_extended_property_distinguished_name (msg, set_id, name,
+		E_EWS_MESSAGE_DATA_TYPE_STRING, value);
+}
+
+void
+e_ews_message_add_extended_property_distinguished_name_time (ESoapMessage *msg,
+							     const gchar *set_id,
+							     const gchar *name,
+							     time_t value)
+{
+	ews_message_add_extended_property_distinguished_name (msg, set_id, name,
+		E_EWS_MESSAGE_DATA_TYPE_TIME, &value);
+}

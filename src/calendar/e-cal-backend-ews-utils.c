@@ -1718,9 +1718,10 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	ECalComponent *comp = e_cal_component_new ();
 	GSList *required = NULL, *optional = NULL, *resource = NULL;
 	icaltimetype dtstart, dtend;
+	icaltimezone *tzid_start, *tzid_end;
 	icalproperty *prop;
-	gboolean has_alarms;
-	const gchar *value;
+	gboolean has_alarms, satisfies;
+	const gchar *ical_location_start, *ical_location_end, *value;
 
 	e_cal_component_set_icalcomponent (comp, icalcomp);
 
@@ -1752,7 +1753,28 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 
 	/* start time, end time and meeting time zone */
 	dtstart = icalcomponent_get_dtstart (icalcomp);
+	tzid_start = (icaltimezone *) (dtstart.zone ? dtstart.zone : convert_data->default_zone);
+	ical_location_start = icaltimezone_get_location (tzid_start);
+
 	dtend = icalcomponent_get_dtend (icalcomp);
+	tzid_end = (icaltimezone *) (dtend.zone ? dtend.zone : convert_data->default_zone);
+	ical_location_end = icaltimezone_get_location (tzid_end);
+
+	satisfies = e_ews_connection_satisfies_server_version (convert_data->connection, E_EWS_EXCHANGE_2010);
+	if (satisfies) {
+		/* set iana timezone info as an extended property */
+		e_ews_message_add_extended_property_distinguished_name_string (
+			msg,
+			"PublicStrings",
+			"EvolutionEWSStartTimeZone",
+			ical_location_start);
+
+		e_ews_message_add_extended_property_distinguished_name_string (
+			msg,
+			"PublicStrings",
+			"EvolutionEWSEndTimeZone",
+			ical_location_end);
+	}
 
 	ewscal_set_time (msg, "Start", &dtstart, FALSE);
 	ewscal_set_time (msg, "End", &dtend, FALSE);
@@ -1800,27 +1822,16 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	/* We have to cast these because libical puts a const pointer into the
 	 * icaltimetype, but its basic read-only icaltimezone_foo() functions
 	 * take a non-const pointer! */
-	if (e_ews_connection_satisfies_server_version (convert_data->connection, E_EWS_EXCHANGE_2010)) {
-		const gchar *ical_location;
+	if (satisfies) {
 		const gchar *msdn_location;
-		icaltimezone *tzid;
 		GSList *msdn_locations = NULL;
 		GSList *tzds = NULL;
 
-		tzid = (icaltimezone *) (dtstart.zone ? dtstart.zone : convert_data->default_zone);
-		ical_location = icaltimezone_get_location (tzid);
-		msdn_location = e_cal_backend_ews_tz_util_get_msdn_equivalent (ical_location);
+		msdn_location = e_cal_backend_ews_tz_util_get_msdn_equivalent (ical_location_start);
+		msdn_locations = g_slist_append (msdn_locations, (gchar *) msdn_location);
 
-		msdn_locations = g_slist_prepend (msdn_locations, (gchar *) msdn_location);
-
-		tzid = (icaltimezone *)
-			(dtend.zone ? dtend.zone : convert_data->default_zone);
-		ical_location = icaltimezone_get_location (tzid);
-		msdn_location = e_cal_backend_ews_tz_util_get_msdn_equivalent (ical_location);
-
-		msdn_locations = g_slist_prepend (msdn_locations, (gchar *) msdn_location);
-
-		msdn_locations = g_slist_reverse (msdn_locations);
+		msdn_location = e_cal_backend_ews_tz_util_get_msdn_equivalent (ical_location_end);
+		msdn_locations = g_slist_append (msdn_locations, (gchar *) msdn_location);
 
 		if (e_ews_connection_get_server_time_zones_sync (
 				convert_data->connection,
@@ -1836,9 +1847,7 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 		g_slist_free (msdn_locations);
 		g_slist_free_full (tzds, (GDestroyNotify) e_ews_calendar_time_zone_definition_free);
 	} else {
-		ewscal_set_meeting_timezone (
-			msg,
-			(icaltimezone *) (dtstart.zone ? dtstart.zone : convert_data->default_zone));
+		ewscal_set_meeting_timezone (msg, tzid_start);
 	}
 
 	e_soap_message_end_element (msg); /* "CalendarItem" */
@@ -2000,9 +2009,17 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 	icalcomponent *icalcomp_old = e_cal_component_get_icalcomponent (convert_data->old_comp);
 	GSList *required = NULL, *optional = NULL, *resource = NULL;
 	icaltimetype dtstart, dtend, dtstart_old, dtend_old;
+	icaltimezone *tzid_start = NULL, *tzid_end = NULL;
 	icalproperty *prop, *transp;
 	const gchar *org_email_address = NULL, *value = NULL, *old_value = NULL;
-	gboolean has_alarms, has_alarms_old, dt_changed = FALSE;
+	const gchar *ical_location_start = NULL, *ical_location_end = NULL;
+	const gchar *old_ical_location_start = NULL, *old_ical_location_end = NULL;
+	const gchar *old_msdn_location_start = NULL, *old_msdn_location_end = NULL;
+	const gchar *msdn_location_start = NULL, *msdn_location_end = NULL;
+	gboolean has_alarms, has_alarms_old;
+	gboolean dt_start_changed = FALSE, dt_end_changed = FALSE, dt_changed;
+	gboolean dt_start_changed_timezone_name = FALSE, dt_end_changed_timezone_name = FALSE;
+	gboolean satisfies;
 	gint alarm = 0, alarm_old = 0;
 	gchar *recid;
 	GError *error = NULL;
@@ -2110,22 +2127,80 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 	/* Update other properties allowed only for meeting organizers*/
 	/*meeting dates*/
 	dtstart = icalcomponent_get_dtstart (icalcomp);
-	dtend = icalcomponent_get_dtend (icalcomp);
 	dtstart_old = icalcomponent_get_dtstart (icalcomp_old);
+	dt_start_changed = icaltime_compare (dtstart, dtstart_old) != 0;
+	if (dtstart.zone != NULL) {
+		tzid_start = (icaltimezone *) dtstart.zone;
+		ical_location_start = icaltimezone_get_location (tzid_start);
+
+		old_ical_location_start = icaltimezone_get_location ((icaltimezone *)dtstart_old.zone);
+		if (g_strcmp0 (ical_location_start, old_ical_location_start) != 0)
+			dt_start_changed_timezone_name = TRUE;
+	}
+
+	dtend = icalcomponent_get_dtend (icalcomp);
 	dtend_old = icalcomponent_get_dtend (icalcomp_old);
-	if (icaltime_compare (dtstart, dtstart_old) != 0) {
+	dt_end_changed = icaltime_compare (dtend, dtend_old) != 0;
+	if (dtend.zone != NULL) {
+		tzid_end = (icaltimezone *) dtend.zone;
+		ical_location_end = icaltimezone_get_location (tzid_end);
+
+		old_ical_location_end = icaltimezone_get_location ((icaltimezone *)dtend_old.zone);
+		if (g_strcmp0 (ical_location_end, old_ical_location_end) != 0)
+			dt_end_changed_timezone_name = TRUE;
+	}
+
+	satisfies = e_ews_connection_satisfies_server_version (convert_data->connection, E_EWS_EXCHANGE_2010);
+
+	if (satisfies) {
+		if (old_ical_location_start != NULL) {
+			old_msdn_location_start = e_cal_backend_ews_tz_util_get_msdn_equivalent (old_ical_location_start);
+			msdn_location_start = e_cal_backend_ews_tz_util_get_msdn_equivalent (ical_location_start);
+
+			if (g_strcmp0 (old_msdn_location_start, msdn_location_start) != 0)
+				dt_start_changed = TRUE;
+		}
+
+		if (old_ical_location_end != NULL) {
+			old_msdn_location_end = e_cal_backend_ews_tz_util_get_msdn_equivalent (old_ical_location_end);
+			msdn_location_end = e_cal_backend_ews_tz_util_get_msdn_equivalent (ical_location_end);
+
+			if (g_strcmp0 (old_msdn_location_end, msdn_location_end) != 0)
+				dt_end_changed = TRUE;
+		}
+
+		if ((dt_start_changed || dt_start_changed_timezone_name) && ical_location_start != NULL)
+			e_ews_message_add_set_item_field_extended_distinguished_name_string (
+				msg,
+				NULL,
+				"CalendarItem",
+				"PublicStrings",
+				"EvolutionEWSStartTimeZone",
+				ical_location_start);
+
+		if ((dt_end_changed || dt_end_changed_timezone_name) && ical_location_end != NULL)
+			e_ews_message_add_set_item_field_extended_distinguished_name_string (
+				msg,
+				NULL,
+				"CalendarItem",
+				"PublicStrings",
+				"EvolutionEWSEndTimeZone",
+				ical_location_end);
+	}
+
+	if (dt_start_changed) {
 		e_ews_message_start_set_item_field (msg, "Start", "calendar","CalendarItem");
 		ewscal_set_time (msg, "Start", &dtstart, FALSE);
 		e_ews_message_end_set_item_field (msg);
-		dt_changed = TRUE;
 	}
 
-	if (icaltime_compare (dtend, dtend_old) != 0) {
+	if (dt_end_changed) {
 		e_ews_message_start_set_item_field (msg, "End", "calendar", "CalendarItem");
 		ewscal_set_time (msg, "End", &dtend, FALSE);
 		e_ews_message_end_set_item_field (msg);
-		dt_changed = TRUE;
 	}
+
+	dt_changed = dt_start_changed || dt_end_changed;
 
 	/*Check for All Day Event*/
 	if (dt_changed) {
@@ -2135,7 +2210,6 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 			convert_vevent_property_to_updatexml (msg, "IsAllDayEvent", "false", "calendar", NULL, NULL);
 	}
 
-	/*need to test it*/
 	e_ews_collect_attendees (icalcomp, &required, &optional, &resource);
 	if (required != NULL) {
 		e_ews_message_start_set_item_field (msg, "RequiredAttendees", "calendar", "CalendarItem");
@@ -2177,68 +2251,54 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 		e_ews_message_end_set_item_field (msg);
 	}
 
-	/* We have to cast these because libical puts a const pointer into the
-	 * icaltimetype, but its basic read-only icaltimezone_foo() functions
-	 * take a non-const pointer! */
-	if (e_ews_connection_satisfies_server_version (convert_data->connection, E_EWS_EXCHANGE_2010)) {
-		const gchar *ical_location;
-		const gchar *msdn_location;
-		icaltimezone *tzid;
-		GSList *msdn_locations = NULL;
-		GSList *tzds = NULL;
+	if (dt_changed) {
+		if (satisfies && (msdn_location_start != NULL || msdn_location_end != NULL)) {
+			GSList *msdn_locations = NULL;
+			GSList *tzds = NULL;
 
-		if (dtstart.zone != NULL) {
-			tzid = (icaltimezone *) dtstart.zone;
-			ical_location = icaltimezone_get_location (tzid);
-			msdn_location = e_cal_backend_ews_tz_util_get_msdn_equivalent (ical_location);
-			msdn_locations = g_slist_append (msdn_locations, (gchar *) msdn_location);
-		}
+			if (msdn_location_start != NULL)
+				msdn_locations = g_slist_append (msdn_locations, (gchar *) msdn_location_start);
 
-		if (dtend.zone != NULL) {
-			tzid = (icaltimezone *) dtend.zone;
-			ical_location = icaltimezone_get_location (tzid);
-			msdn_location = e_cal_backend_ews_tz_util_get_msdn_equivalent (ical_location);
-			msdn_locations = g_slist_append (msdn_locations, (gchar *) msdn_location);
-		}
+			if (msdn_location_end != NULL)
+				msdn_locations = g_slist_append (msdn_locations, (gchar *) msdn_location_end);
 
-		if (e_ews_connection_get_server_time_zones_sync (
-			convert_data->connection,
-			EWS_PRIORITY_MEDIUM,
-			msdn_locations,
-			&tzds,
-			NULL,
-			NULL)) {
-			GSList *tmp;
+			if (e_ews_connection_get_server_time_zones_sync (
+				convert_data->connection,
+				EWS_PRIORITY_MEDIUM,
+				msdn_locations,
+				&tzds,
+				NULL,
+				NULL)) {
+				GSList *tmp;
 
-			tmp = tzds;
-			if (dtstart.zone != NULL) {
-				e_ews_message_start_set_item_field (msg, "StartTimeZone", "calendar", "CalendarItem");
-				ewscal_set_timezone (msg, "StartTimeZone", tmp->data);
-				e_ews_message_end_set_item_field (msg);
+				tmp = tzds;
+				if (dtstart.zone != NULL) {
+					e_ews_message_start_set_item_field (msg, "StartTimeZone", "calendar", "CalendarItem");
+					ewscal_set_timezone (msg, "StartTimeZone", tmp->data);
+					e_ews_message_end_set_item_field (msg);
 
-				/*
-				 * Exchange server is smart enough to return the list of
-				 * ServerTimeZone without repeated elements
-				 */
-				if (tmp->next != NULL)
-					tmp = tmp->next;
+					/*
+					 * Exchange server is smart enough to return the list of
+					 * ServerTimeZone without repeated elements
+					 */
+					if (tmp->next != NULL)
+						tmp = tmp->next;
+				}
+
+				if (dtend.zone != NULL) {
+					e_ews_message_start_set_item_field (msg, "EndTimeZone", "calendar", "CalendarItem");
+					ewscal_set_timezone (msg, "EndTimeZone", tmp->data);
+					e_ews_message_end_set_item_field (msg);
+				}
 			}
 
-			if (dtend.zone != NULL) {
-				e_ews_message_start_set_item_field (msg, "EndTimeZone", "calendar", "CalendarItem");
-				ewscal_set_timezone (msg, "EndTimeZone", tmp->data);
-				e_ews_message_end_set_item_field (msg);
-			}
+			g_slist_free (msdn_locations);
+			g_slist_free_full (tzds, (GDestroyNotify) e_ews_calendar_time_zone_definition_free);
+		} else {
+			e_ews_message_start_set_item_field (msg, "MeetingTimeZone", "calendar", "CalendarItem");
+			ewscal_set_meeting_timezone (msg, tzid_start);
+			e_ews_message_end_set_item_field (msg);
 		}
-
-		g_slist_free (msdn_locations);
-		g_slist_free_full (tzds, (GDestroyNotify) e_ews_calendar_time_zone_definition_free);
-	} else {
-		e_ews_message_start_set_item_field (msg, "MeetingTimeZone", "calendar", "CalendarItem");
-		ewscal_set_meeting_timezone (
-			msg,
-			(icaltimezone *) (dtstart.zone ? dtstart.zone : convert_data->default_zone));
-		e_ews_message_end_set_item_field (msg);
 	}
 
 	e_ews_message_end_item_change (msg);

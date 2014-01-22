@@ -109,7 +109,8 @@ struct _ECalBackendEwsPrivate {
 
 #define GET_ITEMS_SYNC_PROPERTIES_2010 \
 	GET_ITEMS_SYNC_PROPERTIES \
-	" calendar:StartTimeZone"
+	" calendar:StartTimeZone" \
+	" calendar:EndTimeZone"
 
 
 #define e_data_cal_error_if_fail(expr, _code)					\
@@ -1399,6 +1400,10 @@ ews_create_object_cb (GObject *object,
 	g_slist_free (ids);
 
 	if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_EVENT) {
+		EEwsAdditionalProps *add_props;
+
+		add_props = e_ews_additional_props_new ();
+		add_props->field_uri = g_strdup ("calendar:UID");
 
 		items = g_slist_append (items, item_id->id);
 
@@ -1407,10 +1412,12 @@ ews_create_object_cb (GObject *object,
 			cnc, EWS_PRIORITY_MEDIUM,
 			items,
 			"IdOnly",
-			"calendar:UID",
+			add_props,
 			FALSE, NULL, E_EWS_BODY_TYPE_TEXT,
 			&items_req,
 			NULL, NULL, priv->cancellable, &error);
+
+		e_ews_additional_props_free (add_props);
 		if (!res && error != NULL) {
 			if (items_req)
 				g_slist_free_full (items_req, g_object_unref);
@@ -2692,6 +2699,35 @@ ews_get_attachments (ECalBackendEws *cbews,
 	PRIV_UNLOCK (cbews->priv);
 }
 
+static icaltimezone *
+get_timezone (ETimezoneCache *timezone_cache,
+	      const gchar *msdn_tzid,
+	      const gchar *tzid,
+	      const gchar *evo_ews_tzid)
+{
+	icaltimezone *zone = NULL;
+	const gchar *evo_ews_msdn_tzid;
+
+	zone = e_timezone_cache_get_timezone (timezone_cache, tzid);
+	if (zone == NULL)
+		zone = icaltimezone_get_builtin_timezone (tzid);
+
+	if (g_strcmp0 (tzid, evo_ews_tzid) == 0)
+		return zone;
+
+	if (evo_ews_tzid != NULL) {
+		evo_ews_msdn_tzid = e_cal_backend_ews_tz_util_get_msdn_equivalent (evo_ews_tzid);
+
+		if (g_strcmp0 (msdn_tzid, evo_ews_msdn_tzid) == 0) {
+			zone = e_timezone_cache_get_timezone (timezone_cache, evo_ews_tzid);
+			if (zone == NULL)
+				zone = icaltimezone_get_builtin_timezone (evo_ews_tzid);
+		}
+	}
+
+	return zone;
+}
+
 static void
 add_item_to_cache (ECalBackendEws *cbews,
                    EEwsItem *item)
@@ -2852,50 +2888,120 @@ add_item_to_cache (ECalBackendEws *cbews,
 		icalcomponent_add_component (vcomp,icalcomp);
 	} else {
 		struct icaltimetype dt;
-		icaltimezone *zone;
 		const gchar *tzid;
 
 		mime_content = e_ews_item_get_mime_content (item);
 		vcomp = icalparser_parse_string (mime_content);
 
-		/* Add the timezone */
-		vtimezone = icalcomponent_get_first_component (vcomp, ICAL_VTIMEZONE_COMPONENT);
-		if (vtimezone != NULL) {
-			zone = icaltimezone_new ();
-			vtimezone = icalcomponent_new_clone (vtimezone);
-			icaltimezone_set_component (zone, vtimezone);
-			e_timezone_cache_add_timezone (timezone_cache, zone);
-			icaltimezone_free (zone, TRUE);
-		}
-
-		zone = NULL;
 		tzid = e_ews_item_get_tzid (item);
+		if (tzid == NULL) {
+			/*
+			 * When we are working with Exchange server 2010 or newer, we have to handle a few
+			 * things more than we do working old servers. These things are:
+			 * - MSDN timezone names:
+			 *   Used setting StartTimeZone and EndTimeZone. MSDN timezone names are not
+			 *   the same used in libical, so we need to have a table of equivalence to
+			 *   convert from one to another and avoid show the MSDN timezone name to the
+			 *   user and save it in the ETimezoneCache.
+			 * - EvoEWSStartTimeZone/EvoEWSEndTimeZone
+			 *   Used to keep track if the timezone shown to the user is the same one set
+			 *   by him/her. As we have a table of equivalence, sometimes the user sets a
+			 *   timezone but without EvoEWSStartTiemZone property, another timezone name,
+			 *   in the same offset, can be shown. And we want to avoid this.
+			 * - DTEND property:
+			 *   As we have to work with DTEND setting an event when using EWS server 2010 or
+			 *   newer, we have to care about set it properly here, instead of use the same
+			 *   as is used in DTSTART.
+			 */
+			icaltimezone *start_zone, *end_zone;
+			const gchar *start_tzid, *end_tzid;
+			const gchar *ical_start_tzid, *ical_end_tzid;
+			const gchar *evo_ews_start_tzid, *evo_ews_end_tzid;
 
-		if (tzid != NULL) {
-			const gchar *ical_location;
+			start_tzid = e_ews_item_get_start_tzid (item);
+			end_tzid = e_ews_item_get_end_tzid (item);
 
-			ical_location = e_cal_backend_ews_tz_util_get_ical_equivalent (tzid);
+			ical_start_tzid = e_cal_backend_ews_tz_util_get_ical_equivalent (start_tzid);
+			ical_end_tzid = e_cal_backend_ews_tz_util_get_ical_equivalent (end_tzid);
 
-			zone = e_timezone_cache_get_timezone (
+			evo_ews_start_tzid = e_ews_item_get_iana_start_time_zone (item);
+			evo_ews_end_tzid = e_ews_item_get_iana_end_time_zone (item);
+
+			/*
+			 * We have a few timezones that don't have an equivalent MSDN timezone.
+			 * For those, we will get ical_start_tzid being NULL and then we need to use
+			 * start_tzid, which one has the libical's expected name.
+			 */
+			start_zone = get_timezone (
 				timezone_cache,
-				ical_location != NULL ? ical_location : tzid);
-		}
+				start_tzid,
+				ical_start_tzid != NULL ? ical_start_tzid : start_tzid,
+				evo_ews_start_tzid);
+			end_zone = get_timezone (
+				timezone_cache,
+				end_tzid,
+				ical_end_tzid != NULL ? ical_end_tzid : end_tzid,
+				evo_ews_end_tzid);
 
-		if (zone == NULL)
-			zone = icaltimezone_get_builtin_timezone (tzid);
+			if (start_zone != NULL) {
+				icalcomp = icalcomponent_get_first_component (vcomp, kind);
 
-		if (zone != NULL) {
-			icalcomp = icalcomponent_get_first_component (vcomp, kind);
+				icalcomponent_add_component (
+					vcomp,
+					icalcomponent_new_clone (icaltimezone_get_component (start_zone)));
 
-			icalcomponent_add_component (vcomp, icalcomponent_new_clone (icaltimezone_get_component (zone)));
+				dt = icalcomponent_get_dtstart (icalcomp);
+				dt = icaltime_convert_to_zone (dt, start_zone);
+				icalcomponent_set_dtstart (icalcomp, dt);
 
-			dt = icalcomponent_get_dtstart (icalcomp);
-			dt = icaltime_convert_to_zone (dt, zone);
-			icalcomponent_set_dtstart (icalcomp, dt);
+				e_timezone_cache_add_timezone (timezone_cache, start_zone);
 
-			dt = icalcomponent_get_dtend (icalcomp);
-			dt = icaltime_convert_to_zone (dt, zone);
-			icalcomponent_set_dtend (icalcomp, dt);
+				if (end_zone != NULL) {
+					dt = icalcomponent_get_dtend (icalcomp);
+					dt = icaltime_convert_to_zone (dt, end_zone);
+					icalcomponent_set_dtend (icalcomp, dt);
+
+					e_timezone_cache_add_timezone (timezone_cache, end_zone);
+				}
+			}
+		} else {
+			/*
+			 * When we are working with Exchange server older than 2010, we don't set different
+			 * DTSTART and DTEND properties in VTIMEZONE. The reason of that is we don't use
+			 * those properties settings/changing a meeting timezone.
+			 * So, for older servers, here, we only set the DTSTART and DTEND properties with
+			 * the same values.
+			 */
+			icaltimezone *zone;
+
+			/* Add the timezone */
+			vtimezone = icalcomponent_get_first_component (vcomp, ICAL_VTIMEZONE_COMPONENT);
+			if (vtimezone != NULL) {
+				zone = icaltimezone_new ();
+				vtimezone = icalcomponent_new_clone (vtimezone);
+				icaltimezone_set_component (zone, vtimezone);
+				e_timezone_cache_add_timezone (timezone_cache, zone);
+				icaltimezone_free (zone, TRUE);
+			}
+
+			zone = e_timezone_cache_get_timezone (timezone_cache, tzid);
+
+			if (zone == NULL)
+				zone = icaltimezone_get_builtin_timezone (tzid);
+
+			if (zone != NULL) {
+				icalcomp = icalcomponent_get_first_component (vcomp, kind);
+
+				icalcomponent_add_component (vcomp, icalcomponent_new_clone (icaltimezone_get_component (zone)));
+
+				dt = icalcomponent_get_dtstart (icalcomp);
+				dt = icaltime_convert_to_zone (dt, zone);
+				icalcomponent_set_dtstart (icalcomp, dt);
+
+				dt = icalcomponent_get_dtend (icalcomp);
+				dt = icaltime_convert_to_zone (dt, zone);
+				icalcomponent_set_dtend (icalcomp, dt);
+			}
 		}
 	}
 	/* Vevent or Vtodo */
@@ -3120,7 +3226,7 @@ static gboolean
 ews_cal_sync_get_items_sync (ECalBackendEws *cbews,
                              const GSList *item_ids,
                              const gchar *default_props,
-                             const gchar *additional_props)
+                             const EEwsAdditionalProps *add_props)
 {
 	ECalBackendEwsPrivate *priv;
 	gboolean ret = FALSE;
@@ -3134,7 +3240,7 @@ ews_cal_sync_get_items_sync (ECalBackendEws *cbews,
 		EWS_PRIORITY_MEDIUM,
 		item_ids,
 		default_props,
-		additional_props,
+		add_props,
 		FALSE,
 		NULL,
 		E_EWS_BODY_TYPE_TEXT,
@@ -3160,11 +3266,35 @@ ews_cal_sync_get_items_sync (ECalBackendEws *cbews,
 
 		modified_occurrences = e_ews_item_get_modified_occurrences (item);
 		if (modified_occurrences) {
+			EEwsAdditionalProps *modified_add_props;
+
+			modified_add_props = e_ews_additional_props_new ();
+			if (e_ews_connection_satisfies_server_version (priv->cnc, E_EWS_EXCHANGE_2010)) {
+				EEwsExtendedFieldURI *ext_uri;
+
+				modified_add_props->field_uri = g_strdup (GET_ITEMS_SYNC_PROPERTIES_2010);
+
+				ext_uri = e_ews_extended_field_uri_new ();
+				ext_uri->distinguished_prop_set_id = g_strdup ("PublicStrings");
+				ext_uri->prop_name = g_strdup ("EvolutionEWSStartTimeZone");
+				ext_uri->prop_type = g_strdup ("String");
+				modified_add_props->extended_furis = g_slist_append (modified_add_props->extended_furis, ext_uri);
+
+				ext_uri = e_ews_extended_field_uri_new ();
+				ext_uri->distinguished_prop_set_id = g_strdup ("PublicStrings");
+				ext_uri->prop_name = g_strdup ("EvolutionEWSEndTimeZone");
+				ext_uri->prop_type = g_strdup ("String");
+				modified_add_props->extended_furis = g_slist_append (modified_add_props->extended_furis, ext_uri);
+			} else {
+				modified_add_props->field_uri = g_strdup (GET_ITEMS_SYNC_PROPERTIES_2007);
+			}
+
 			ret = ews_cal_sync_get_items_sync (
 				cbews, modified_occurrences,
 				"IdOnly",
-				e_ews_connection_satisfies_server_version (priv->cnc, E_EWS_EXCHANGE_2010) ?
-					GET_ITEMS_SYNC_PROPERTIES_2010 : GET_ITEMS_SYNC_PROPERTIES_2007);
+				modified_add_props);
+
+			e_ews_additional_props_free (modified_add_props);
 
 			if (!ret)
 				goto exit;
@@ -3238,13 +3368,38 @@ cal_backend_ews_process_folder_items (ECalBackendEws *cbews,
 	}
 	e_cal_backend_store_thaw_changes (priv->store);
 
+
 	if (cal_item_ids) {
+		EEwsAdditionalProps *add_props;
+
+		add_props = e_ews_additional_props_new ();
+		if (e_ews_connection_satisfies_server_version (priv->cnc, E_EWS_EXCHANGE_2010)) {
+			EEwsExtendedFieldURI *ext_uri;
+
+			add_props->field_uri = g_strdup (GET_ITEMS_SYNC_PROPERTIES_2010);
+
+			ext_uri = e_ews_extended_field_uri_new ();
+			ext_uri->distinguished_prop_set_id = g_strdup ("PublicStrings");
+			ext_uri->prop_name = g_strdup ("EvolutionEWSStartTimeZone");
+			ext_uri->prop_type = g_strdup ("String");
+			add_props->extended_furis = g_slist_append (add_props->extended_furis, ext_uri);
+
+			ext_uri = e_ews_extended_field_uri_new ();
+			ext_uri->distinguished_prop_set_id = g_strdup ("PublicStrings");
+			ext_uri->prop_name = g_strdup ("EvolutionEWSEndTimeZone");
+			ext_uri->prop_type = g_strdup ("String");
+			add_props->extended_furis = g_slist_append (add_props->extended_furis, ext_uri);
+		} else {
+			add_props->field_uri = g_strdup (GET_ITEMS_SYNC_PROPERTIES_2007);
+		}
+
 		ews_cal_sync_get_items_sync (
 			cbews,
 			cal_item_ids,
 			"IdOnly",
-			e_ews_connection_satisfies_server_version (priv->cnc, E_EWS_EXCHANGE_2010) ?
-				GET_ITEMS_SYNC_PROPERTIES_2010 : GET_ITEMS_SYNC_PROPERTIES_2007);
+			add_props);
+
+		e_ews_additional_props_free (add_props);
 	}
 
 	if (task_memo_item_ids) {
@@ -3306,7 +3461,12 @@ ews_start_sync_thread (gpointer data)
 
 	old_sync_state = g_strdup (e_cal_backend_store_get_key_value (priv->store, SYNC_KEY));
 	do {
+		EEwsAdditionalProps *add_props;
+
 		includes_last_item = TRUE;
+
+		add_props = e_ews_additional_props_new ();
+		add_props->field_uri = g_strdup ("item:ItemClass");
 
 		ret = e_ews_connection_sync_folder_items_sync (
 			priv->cnc,
@@ -3314,7 +3474,7 @@ ews_start_sync_thread (gpointer data)
 			old_sync_state,
 			priv->folder_id,
 			"IdOnly",
-			"item:ItemClass",
+			add_props,
 			EWS_MAX_FETCH_COUNT,
 			&new_sync_state,
 			&includes_last_item,
@@ -3324,6 +3484,7 @@ ews_start_sync_thread (gpointer data)
 			priv->cancellable,
 			&error);
 
+		e_ews_additional_props_free (add_props);
 		g_free (old_sync_state);
 		old_sync_state = NULL;
 

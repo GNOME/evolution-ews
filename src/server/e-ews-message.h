@@ -92,6 +92,17 @@ void		e_ews_message_write_extended_distinguished_tag
 						 guint32 prop_id,
 						 const gchar *prop_type);
 
+void		e_ews_message_write_extended_name
+						(ESoapMessage *msg,
+						 const gchar *name,
+						 const gchar *prop_type);
+
+void		e_ews_message_write_extended_distinguished_name
+						(ESoapMessage *msg,
+						 const gchar *set_id,
+						 const gchar *name,
+						 const gchar *prop_type);
+
 G_END_DECLS
 
 #endif

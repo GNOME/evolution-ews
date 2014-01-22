@@ -181,7 +181,11 @@ struct _EEwsItemPrivate {
 
 	gchar *uid;
 	gchar *timezone;
+	gchar *start_timezone;
+	gchar *end_timezone;
 	gchar *contact_photo_id;
+	gchar *iana_start_time_zone;
+	gchar *iana_end_time_zone;
 
 	GSList *to_recipients;
 	GSList *cc_recipients;
@@ -268,8 +272,20 @@ e_ews_item_dispose (GObject *object)
 	g_free (priv->timezone);
 	priv->timezone = NULL;
 
+	g_free (priv->start_timezone);
+	priv->start_timezone = NULL;
+
+	g_free (priv->end_timezone);
+	priv->end_timezone = NULL;
+
 	g_free (priv->contact_photo_id);
 	priv->contact_photo_id = NULL;
+
+	g_free (priv->iana_start_time_zone);
+	priv->iana_start_time_zone = NULL;
+
+	g_free (priv->iana_end_time_zone);
+	priv->iana_end_time_zone = NULL;
 
 	g_slist_free_full (priv->to_recipients, (GDestroyNotify) e_ews_mailbox_free);
 	priv->to_recipients = NULL;
@@ -471,7 +487,7 @@ parse_extended_property (EEwsItemPrivate *priv,
 {
 	EEwsMessageDataType data_type;
 	ESoapParameter *subparam;
-	gchar *str, *setid;
+	gchar *str, *setid, *name, *value;
 	guint32 tag;
 
 	subparam = e_soap_parameter_get_first_child_by_name (param, "ExtendedFieldURI");
@@ -499,67 +515,80 @@ parse_extended_property (EEwsItemPrivate *priv,
 	}
 	g_free (str);
 
-	str = e_soap_parameter_get_property (subparam, "PropertyTag");
-	if (!str) {
-		str = e_soap_parameter_get_property (subparam, "PropertyId");
-		if (!str)
-			return;
-	}
+	name = e_soap_parameter_get_property (subparam, "PropertyName");
+	if (!name) {
+		str = e_soap_parameter_get_property (subparam, "PropertyTag");
+		if (!str) {
+			str = e_soap_parameter_get_property (subparam, "PropertyId");
+			if (!str)
+				return;
+		}
 
-	tag = strtol (str, NULL, 0);
-	g_free (str);
+		tag = strtol (str, NULL, 0);
+		g_free (str);
+	}
 
 	setid = e_soap_parameter_get_property (subparam, "DistinguishedPropertySetId");
 
 	subparam = e_soap_parameter_get_first_child_by_name (param, "Value");
 	if (!subparam) {
 		g_free (setid);
+		g_free (name);
 		return;
 	}
 
-	str = e_soap_parameter_get_string_value (subparam);
-	if (!str) {
+	value = e_soap_parameter_get_string_value (subparam);
+	if (!value) {
 		g_free (setid);
+		g_free (name);
 		return;
 	}
 
 	if (data_type == E_EWS_MESSAGE_DATA_TYPE_INT) {
-		guint32 value;
+		guint32 num_value;
 
-		value = strtol (str, NULL, 0);
+		num_value = strtol (value, NULL, 0);
 
 		switch (tag) {
 		case 0x01080: /* PidTagIconIndex */
-			priv->mapi_icon_index = value;
+			priv->mapi_icon_index = num_value;
 			break;
 
 		case 0x1081:
-			priv->mapi_last_verb_executed = value;
+			priv->mapi_last_verb_executed = num_value;
 			break;
 
 		case 0xe07:
-			priv->mapi_message_flags = value;
+			priv->mapi_message_flags = num_value;
 			break;
 
 		case 0xe17:
-			priv->mapi_message_status = value;
+			priv->mapi_message_status = num_value;
 			break;
 		}
 	}
 
 	if (setid) {
-		GHashTable *set_hash = g_hash_table_lookup (priv->mapi_extended_sets, setid);
-		if (!set_hash) {
-			set_hash = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_free);
-			g_hash_table_insert (priv->mapi_extended_sets, setid, set_hash);
-		}
+		if (g_strcmp0 (name, "EvolutionEWSStartTimeZone") == 0) {
+			priv->iana_start_time_zone = g_strdup (value);
+		} else if (g_strcmp0 (name, "EvolutionEWSEndTimeZone") == 0) {
+			priv->iana_end_time_zone = g_strdup (value);
+		} else {
+			GHashTable *set_hash = g_hash_table_lookup (priv->mapi_extended_sets, setid);
 
-		g_hash_table_insert (set_hash, GUINT_TO_POINTER (tag), g_strdup (str));
+			if (!set_hash) {
+				set_hash = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_free);
+				g_hash_table_insert (priv->mapi_extended_sets, setid, set_hash);
+			}
+
+			g_hash_table_insert (set_hash, GUINT_TO_POINTER (tag), g_strdup (value));
+		}
 	} else {
-		g_hash_table_insert (priv->mapi_extended_tags, GUINT_TO_POINTER (tag), g_strdup (str));
+		g_hash_table_insert (priv->mapi_extended_tags, GUINT_TO_POINTER (tag), g_strdup (value));
 	}
 
-	g_free (str);
+	g_free (value);
+	g_free (name);
 }
 
 static void
@@ -1175,11 +1204,11 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 			priv->calendar_item_accept_id->id = e_soap_parameter_get_property (subparam, "Id");
 			priv->calendar_item_accept_id->change_key = e_soap_parameter_get_property (subparam, "ChangeKey");
 		} else if (!g_ascii_strcasecmp (name, "StartTimeZone")) {
-			if (priv->timezone != NULL)
-				g_free (priv->timezone);
-
-			priv->timezone = e_soap_parameter_get_property (subparam, "Id");
+			priv->start_timezone = e_soap_parameter_get_property (subparam, "Id");
+		} else if (!g_ascii_strcasecmp (name, "EndTimeZone")) {
+			priv->end_timezone = e_soap_parameter_get_property (subparam, "Id");
 		}
+
 	}
 
 	return TRUE;
@@ -1476,6 +1505,22 @@ e_ews_item_get_importance (EEwsItem *item)
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), EWS_ITEM_LOW);
 
 	return item->priv->importance;
+}
+
+const gchar *
+e_ews_item_get_iana_start_time_zone (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	return item->priv->iana_start_time_zone;
+}
+
+const gchar *
+e_ews_item_get_iana_end_time_zone (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	return item->priv->iana_end_time_zone;
 }
 
 EwsMailbox *
@@ -2196,6 +2241,24 @@ e_ews_item_get_tzid (EEwsItem *item)
 
 	/* can be NULL */
 	return item->priv->timezone;
+}
+
+const gchar *
+e_ews_item_get_start_tzid (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	/* can be NULL */
+	return item->priv->start_timezone;
+}
+
+const gchar *
+e_ews_item_get_end_tzid (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	/* can be NULL */
+	return item->priv->end_timezone;
 }
 
 const gchar *

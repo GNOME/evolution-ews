@@ -347,8 +347,13 @@ gboolean	e_ews_item_task_has_complete_date
 						(EEwsItem * item,
 						 gboolean * has_date);
 const gchar *	e_ews_item_get_tzid		(EEwsItem *item);
+const gchar *	e_ews_item_get_start_tzid	(EEwsItem *item);
+const gchar *	e_ews_item_get_end_tzid		(EEwsItem *item);
 const gchar *	e_ews_item_get_contact_photo_id	(EEwsItem *item);
-
+const gchar *	e_ews_item_get_iana_start_time_zone
+						(EEwsItem *item);
+const gchar *	e_ews_item_get_iana_end_time_zone
+						(EEwsItem *item);
 
 /* Folder Permissions */
 EEwsPermission *e_ews_permission_new		(EEwsPermissionUserType user_type,

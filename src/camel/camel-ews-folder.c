@@ -62,19 +62,14 @@ which needs to be better organized via functions */
 #define MAX_ATTACHMENT_SIZE 1*1024*1024   /*In bytes*/
 
 /* there are written more follow-up flags, but it's read only few of them */
-#define SUMMARY_FOLLOWUP_FLAGS	" mapi:int:0x1090" /* PidTagFlagStatus */ \
-				" mapi:time:0x1091" /* PidTagFlagCompleteTime */ \
-				" mapi:dist:string:Common:0x8530" /* PidLidFlagRequest */ \
-				" mapi:dist:time:Task:0x8105" /* PidLidTaskDueDate */ \
-				" mapi:string:0x007D" /* PidTagTransportMessageHeaders */
+#define SUMMARY_ITEM_FLAGS "item:ResponseObjects item:Sensitivity item:Importance item:Categories"
 
-#define SUMMARY_ITEM_FLAGS "item:ResponseObjects item:Sensitivity item:Importance item:Categories" SUMMARY_FOLLOWUP_FLAGS
 #define ITEM_PROPS "item:Subject item:DateTimeReceived item:DateTimeSent item:DateTimeCreated item:Size " \
 		   "item:HasAttachments item:InReplyTo"
 #define SUMMARY_ITEM_PROPS ITEM_PROPS " " SUMMARY_ITEM_FLAGS
 
 
-#define SUMMARY_MESSAGE_FLAGS SUMMARY_ITEM_FLAGS " message:IsRead mapi:int:0x0e07 mapi:int:0x0e17 mapi:int:0x1080 mapi:int:0x1081"
+#define SUMMARY_MESSAGE_FLAGS SUMMARY_ITEM_FLAGS " message:IsRead"
 #define SUMMARY_MESSAGE_PROPS ITEM_PROPS " message:From message:Sender message:ToRecipients message:CcRecipients " \
 		   "message:BccRecipients message:IsRead message:References message:InternetMessageId " \
 		   SUMMARY_MESSAGE_FLAGS
@@ -105,6 +100,73 @@ static gboolean ews_refresh_info_sync (CamelFolder *folder, GCancellable *cancel
 #define d(x)
 
 G_DEFINE_TYPE (CamelEwsFolder, camel_ews_folder, CAMEL_TYPE_OFFLINE_FOLDER)
+
+static GSList *
+ews_folder_get_summary_followup_mapi_flags (void)
+{
+	GSList *list = NULL;
+	EEwsExtendedFieldURI *ext_uri;
+
+	ext_uri = e_ews_extended_field_uri_new ();
+	ext_uri->prop_tag = g_strdup_printf ("%d", 0x1090); /* PidTagFlagStatus */
+	ext_uri->prop_type = g_strdup ("Integer");
+	list = g_slist_append (list, ext_uri);
+
+	ext_uri = e_ews_extended_field_uri_new ();
+	ext_uri->prop_tag = g_strdup_printf ("%d", 0x1091); /* PidTagFlagCompleteTime */
+	ext_uri->prop_type = g_strdup ("SystemTime");
+	list = g_slist_append (list, ext_uri);
+
+	ext_uri = e_ews_extended_field_uri_new ();
+	ext_uri->prop_tag = g_strdup_printf ("%d", 0x007D); /*  PidTagTransportMessageHeaders */
+	ext_uri->prop_type = g_strdup ("String");
+	list = g_slist_append (list, ext_uri);
+
+	ext_uri = e_ews_extended_field_uri_new ();
+	ext_uri->distinguished_prop_set_id = g_strdup ("Common");
+	ext_uri->prop_id = g_strdup_printf ("%d", 0x8530); /* PidLidFlagRequest */
+	ext_uri->prop_type = g_strdup ("String");
+	list = g_slist_append (list, ext_uri);
+
+	ext_uri = e_ews_extended_field_uri_new ();
+	ext_uri->distinguished_prop_set_id = g_strdup ("Task");
+	ext_uri->prop_id = g_strdup_printf ("%d", 0x8105); /* PidLidTaskDueDate */
+	ext_uri->prop_type = g_strdup ("SystemTime");
+	list = g_slist_append (list, ext_uri);
+
+	return list;
+}
+
+static GSList *
+ews_folder_get_summary_message_mapi_flags (void)
+{
+	GSList *list;
+	EEwsExtendedFieldURI *ext_uri;
+
+	list = ews_folder_get_summary_followup_mapi_flags ();
+
+	ext_uri = e_ews_extended_field_uri_new ();
+	ext_uri->prop_tag = g_strdup_printf ("%d", 0x0e07);
+	ext_uri->prop_type = g_strdup ("Integer");
+	list = g_slist_append (list, ext_uri);
+
+	ext_uri = e_ews_extended_field_uri_new ();
+	ext_uri->prop_tag = g_strdup_printf ("%d", 0x0e17);
+	ext_uri->prop_type = g_strdup ("Integer");
+	list = g_slist_append (list, ext_uri);
+
+	ext_uri = e_ews_extended_field_uri_new ();
+	ext_uri->prop_tag = g_strdup_printf ("%d", 0x1080);
+	ext_uri->prop_type = g_strdup ("Integer");
+	list = g_slist_append (list, ext_uri);
+
+	ext_uri = e_ews_extended_field_uri_new ();
+	ext_uri->prop_tag = g_strdup_printf ("%d", 0x1081);
+	ext_uri->prop_type = g_strdup ("Integer");
+	list = g_slist_append (list, ext_uri);
+
+	return list;
+}
 
 static gchar *
 ews_get_filename (CamelFolder *folder,
@@ -405,6 +467,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	CamelEwsFolder *ews_folder;
 	CamelEwsFolderPrivate *priv;
 	EEwsConnection *cnc;
+	EEwsAdditionalProps *add_props = NULL;
 	CamelEwsStore *ews_store;
 	const gchar *mime_content;
 	CamelMimeMessage *message = NULL;
@@ -465,14 +528,18 @@ camel_ews_folder_get_message (CamelFolder *folder,
 		goto exit;
 	}
 
+	add_props = e_ews_additional_props_new ();
+	add_props->field_uri = g_strdup ("item:MimeContent");
+
 	res = e_ews_connection_get_items_sync (
-		cnc, pri, ids, "IdOnly", "item:MimeContent",
+		cnc, pri, ids, "IdOnly", add_props,
 		TRUE, mime_dir, E_EWS_BODY_TYPE_ANY,
 		&items,
 		(ESoapProgressFn) camel_operation_progress,
 		(gpointer) cancellable,
 		cancellable, &local_error);
 	g_free (mime_dir);
+	e_ews_additional_props_free (add_props);
 
 	if (!res || !items) {
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
@@ -496,15 +563,20 @@ camel_ews_folder_get_message (CamelFolder *folder,
 		const EwsId *calendar_item_accept_id = NULL;
 		gboolean is_calendar_UID = TRUE;
 
+		add_props = e_ews_additional_props_new ();
+		add_props->field_uri = g_strdup ("meeting:AssociatedCalendarItemId");
+
 		// Get AssociatedCalendarItemId with second get_items call
 		res = e_ews_connection_get_items_sync (
-			cnc, pri, ids, "IdOnly",
-			"meeting:AssociatedCalendarItemId",
+			cnc, pri, ids, "IdOnly", add_props,
 			FALSE, NULL, E_EWS_BODY_TYPE_ANY,
 			&items_req,
 			(ESoapProgressFn) camel_operation_progress,
 			(gpointer) cancellable,
 			cancellable, &local_error);
+
+		e_ews_additional_props_free (add_props);
+
 		if (!res || (items_req && e_ews_item_get_item_type (items_req->data) == E_EWS_ITEM_TYPE_ERROR)) {
 			if (items_req) {
 				g_object_unref (items_req->data);
@@ -1287,12 +1359,22 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 	}
 	g_slist_free (updated_items);
 
-	if (msg_ids)
+
+	if (msg_ids) {
+		EEwsAdditionalProps *add_props;
+
+		add_props = e_ews_additional_props_new ();
+		add_props->field_uri = g_strdup (SUMMARY_MESSAGE_FLAGS);
+		add_props->extended_furis = ews_folder_get_summary_message_mapi_flags ();
+
 		e_ews_connection_get_items_sync (
 			cnc, EWS_PRIORITY_MEDIUM,
-			msg_ids, "IdOnly", SUMMARY_MESSAGE_FLAGS,
+			msg_ids, "IdOnly", add_props,
 			FALSE, NULL, E_EWS_BODY_TYPE_ANY, &items, NULL, NULL,
 			cancellable, &local_error);
+
+		e_ews_additional_props_free (add_props);
+	}
 
 	camel_ews_utils_sync_updated_items (ews_folder, items);
 	items = NULL;
@@ -1302,12 +1384,21 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 		goto exit;
 	}
 
-	if (generic_item_ids)
+	if (generic_item_ids) {
+		EEwsAdditionalProps *add_props;
+
+		add_props = e_ews_additional_props_new ();
+		add_props->field_uri = g_strdup (SUMMARY_ITEM_FLAGS);
+		add_props->extended_furis = ews_folder_get_summary_followup_mapi_flags ();
+
 		e_ews_connection_get_items_sync (
 			cnc, EWS_PRIORITY_MEDIUM,
-			generic_item_ids, "IdOnly", SUMMARY_ITEM_FLAGS,
+			generic_item_ids, "IdOnly", add_props,
 			FALSE, NULL, E_EWS_BODY_TYPE_ANY, &items, NULL, NULL,
 			cancellable, &local_error);
+
+		e_ews_additional_props_free (add_props);
+	}
 	camel_ews_utils_sync_updated_items (ews_folder, items);
 
 	if (local_error) {
@@ -1370,12 +1461,22 @@ sync_created_items (CamelEwsFolder *ews_folder,
 	}
 	g_slist_free (created_items);
 
-	if (msg_ids)
+
+	if (msg_ids) {
+		EEwsAdditionalProps *add_props;
+
+		add_props = e_ews_additional_props_new ();
+		add_props->field_uri = g_strdup (SUMMARY_MESSAGE_PROPS);
+		add_props->extended_furis = ews_folder_get_summary_message_mapi_flags ();
+
 		e_ews_connection_get_items_sync (
 			cnc, EWS_PRIORITY_MEDIUM,
-			msg_ids, "IdOnly", SUMMARY_MESSAGE_PROPS,
+			msg_ids, "IdOnly", add_props,
 			FALSE, NULL, E_EWS_BODY_TYPE_ANY, &items, NULL, NULL,
 			cancellable, &local_error);
+
+		e_ews_additional_props_free (add_props);
+	}
 
 	if (local_error) {
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
@@ -1386,12 +1487,22 @@ sync_created_items (CamelEwsFolder *ews_folder,
 	camel_ews_utils_sync_created_items (ews_folder, cnc, items, cancellable);
 	items = NULL;
 
-	if (post_item_ids)
+
+	if (post_item_ids) {
+		EEwsAdditionalProps *add_props;
+
+		add_props = e_ews_additional_props_new ();
+		add_props->field_uri = g_strdup (SUMMARY_POSTITEM_PROPS);
+		add_props->extended_furis = ews_folder_get_summary_followup_mapi_flags ();
+
 		e_ews_connection_get_items_sync (
 			cnc, EWS_PRIORITY_MEDIUM,
-			post_item_ids, "IdOnly", SUMMARY_POSTITEM_PROPS,
+			post_item_ids, "IdOnly", add_props,
 			FALSE, NULL, E_EWS_BODY_TYPE_ANY, &items, NULL, NULL,
 			cancellable, &local_error);
+
+		e_ews_additional_props_free (add_props);
+	}
 
 	if (local_error) {
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
@@ -1402,12 +1513,21 @@ sync_created_items (CamelEwsFolder *ews_folder,
 	camel_ews_utils_sync_created_items (ews_folder, cnc, items, cancellable);
 	items = NULL;
 
-	if (generic_item_ids)
+	if (generic_item_ids) {
+		EEwsAdditionalProps *add_props;
+
+		add_props = e_ews_additional_props_new ();
+		add_props->field_uri = g_strdup (SUMMARY_ITEM_PROPS);
+		add_props->extended_furis = ews_folder_get_summary_followup_mapi_flags ();
+
 		e_ews_connection_get_items_sync (
 			cnc, EWS_PRIORITY_MEDIUM,
-			generic_item_ids, "IdOnly", SUMMARY_ITEM_PROPS,
+			generic_item_ids, "IdOnly", add_props,
 			FALSE, NULL, E_EWS_BODY_TYPE_ANY, &items, NULL, NULL,
 			cancellable, &local_error);
+
+		e_ews_additional_props_free (add_props);
+	}
 
 	camel_ews_utils_sync_created_items (ews_folder, cnc, items, cancellable);
 
@@ -1415,6 +1535,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
 		g_propagate_error (error, local_error);
 	}
+
 exit:
 	if (msg_ids) {
 		g_slist_foreach (msg_ids, (GFunc) g_free, NULL);

@@ -181,18 +181,18 @@ typedef struct {
 	gchar *prop_name;
 	gchar *prop_id;
 	gchar *prop_type;
-} EwsExtendedFieldURI;
+} EEwsExtendedFieldURI;
 
 typedef struct {
 	gchar *field_uri;
 	gchar *field_index;
-} EwsIndexedFieldURI;
+} EEwsIndexedFieldURI;
 
 typedef struct {
 	gchar *field_uri;
 	GSList *extended_furis;
 	GSList *indexed_furis;
-} EwsAdditionalProps;
+} EEwsAdditionalProps;
 
 typedef struct {
 	gchar *order;
@@ -377,6 +377,18 @@ EEwsCalendarTimeZoneDefinition *
 void		e_ews_calendar_time_zone_definition_free
 						(EEwsCalendarTimeZoneDefinition *tzd);
 
+EEwsExtendedFieldURI *
+		e_ews_extended_field_uri_new	(void);
+void		e_ews_extended_field_uri_free	(EEwsExtendedFieldURI *ex_field_uri);
+
+EEwsIndexedFieldURI *
+		e_ews_indexed_field_uri_new	(void);
+void		e_ews_indexed_field_uri_free	(EEwsIndexedFieldURI *id_field_uri);
+
+EEwsAdditionalProps *
+		e_ews_additional_props_new	(void);
+void		e_ews_additional_props_free	(EEwsAdditionalProps *add_props);
+
 EEwsNotificationEvent *
 		e_ews_notification_event_new	(void);
 void		e_ews_notification_event_free	(EEwsNotificationEvent *event);
@@ -447,7 +459,7 @@ void		e_ews_connection_sync_folder_items
 						 const gchar *old_sync_state,
 						 const gchar *fid,
 						 const gchar *default_props,
-						 const gchar *additional_props,
+						 const EEwsAdditionalProps *add_props,
 						 guint max_entries,
 						 GCancellable *cancellable,
 						 GAsyncReadyCallback callback,
@@ -467,7 +479,7 @@ gboolean	e_ews_connection_sync_folder_items_sync
 						 const gchar *old_sync_state,
 						 const gchar *fid,
 						 const gchar *default_props,
-						 const gchar *additional_props,
+						 const EEwsAdditionalProps *add_props,
 						 guint max_entries,
 						 gchar **new_sync_state,
 						 gboolean *includes_last_item,
@@ -486,7 +498,7 @@ void		e_ews_connection_find_folder_items
 						 gint pri,
 						 EwsFolderId *fid,
 						 const gchar *props,
-						 EwsAdditionalProps *add_props,
+						 const EEwsAdditionalProps *add_props,
 						 EwsSortOrder *sort_order,
 						 const gchar *query,
 						 EEwsFolderType type,
@@ -505,7 +517,7 @@ gboolean	e_ews_connection_find_folder_items_sync
 						 gint pri,
 						 EwsFolderId *fid,
 						 const gchar *default_props,
-						 EwsAdditionalProps *add_props,
+						 const EEwsAdditionalProps *add_props,
 						 EwsSortOrder *sort_order,
 						 const gchar *query,
 						 EEwsFolderType type,
@@ -532,7 +544,7 @@ void		e_ews_connection_get_items	(EEwsConnection *cnc,
 						 gint pri,
 						 const GSList *ids,
 						 const gchar *default_props,
-						 const gchar *additional_props,
+						 const EEwsAdditionalProps *add_props,
 						 gboolean include_mime,
 						 const gchar *mime_directory,
 						 EEwsBodyType body_type,
@@ -550,7 +562,7 @@ gboolean	e_ews_connection_get_items_sync	(EEwsConnection *cnc,
 						 gint pri,
 						 const GSList *ids,
 						 const gchar *default_props,
-						 const gchar *additional_props,
+						 const EEwsAdditionalProps *add_props,
 						 gboolean include_mime,
 						 const gchar *mime_directory,
 						 EEwsBodyType body_type,
@@ -856,7 +868,7 @@ gboolean	e_ews_connection_move_folder_sync
 void		e_ews_connection_get_folder	(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *folder_shape,
-						 EwsAdditionalProps *add_props,
+						 const EEwsAdditionalProps *add_props,
 						 GSList *folder_ids,
 						 GCancellable *cancellable,
 						 GAsyncReadyCallback callback,
@@ -870,7 +882,7 @@ gboolean	e_ews_connection_get_folder_sync
 						(EEwsConnection *cnc,
 						 gint pri,
 						 const gchar *folder_shape,
-						 EwsAdditionalProps *add_props,
+						 const EEwsAdditionalProps *add_props,
 						 GSList *folder_ids,
 						 GSList **folders,
 						 GCancellable *cancellable,

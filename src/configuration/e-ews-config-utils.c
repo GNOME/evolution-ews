@@ -655,16 +655,16 @@ ews_settings_get_folder_sizes_thread (gpointer user_data)
 			&fsd->error);
 
 	if (cnc) {
-		EwsAdditionalProps *add_props;
-		EwsExtendedFieldURI *ext_uri;
+		EEwsAdditionalProps *add_props;
+		EEwsExtendedFieldURI *ext_uri;
 		GSList *ids, *l, *folders_ids = NULL, *folders_list = NULL;
 
 		fsd->folder_sizes = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
 		/* Use MAPI property to retrieve folder size */
-		add_props = g_new0 (EwsAdditionalProps, 1);
-		ext_uri = g_new0 (EwsExtendedFieldURI, 1);
-		ext_uri->prop_tag = g_strdup ("0x0e08"); /* Folder size property tag */
+		add_props = e_ews_additional_props_new ();
+		ext_uri = e_ews_extended_field_uri_new ();
+		ext_uri->prop_tag = g_strdup_printf ("%d", 0x0e08); /* Folder size property tag */
 		ext_uri->prop_type = g_strdup ("Integer");
 		add_props->extended_furis = g_slist_prepend (add_props->extended_furis, ext_uri);
 
@@ -697,11 +697,7 @@ ews_settings_get_folder_sizes_thread (gpointer user_data)
 		g_slist_free_full (folders_list, g_object_unref);
 		g_slist_free_full (folders_ids, (GDestroyNotify) e_ews_folder_id_free);
 		g_slist_free_full (ids, g_free);
-		g_free (ext_uri->prop_type);
-		g_free (ext_uri->prop_tag);
-		g_free (ext_uri);
-		g_slist_free (add_props->extended_furis);
-		g_free (add_props);
+		e_ews_additional_props_free (add_props);
 		g_object_unref (cnc);
 	}
 
