@@ -357,6 +357,9 @@ AC_SUBST(eds_moduledir)
 evo_moduledir=`$PKG_CONFIG --variable=moduledir evolution-shell-3.0`
 AC_SUBST(evo_moduledir)
 
+ewsdatadir=`$PKG_CONFIG --variable=privdatadir evolution-data-server-1.2`/ews
+AC_SUBST(ewsdatadir)
+
 dnl *************
 dnl Gtk Doc stuff
 dnl *************

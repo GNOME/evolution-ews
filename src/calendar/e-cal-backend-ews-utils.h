@@ -74,10 +74,8 @@ void e_ews_clean_icalcomponent (icalcomponent *icalcomp);
 
 const gchar *e_cal_backend_ews_tz_util_get_msdn_equivalent (const gchar *ical_tz_location);
 const gchar *e_cal_backend_ews_tz_util_get_ical_equivalent (const gchar *msdn_tz_location);
-void e_cal_backend_ews_populate_tz_ical_to_msdn (void);
-void e_cal_backend_ews_populate_tz_msdn_to_ical (void);
-void e_cal_backend_ews_unref_tz_ical_to_msdn (void);
-void e_cal_backend_ews_unref_tz_msdn_to_ical (void);
+void e_cal_backend_ews_populate_windows_zones (void);
+void e_cal_backend_ews_unref_windows_zones (void);
 
 void e_cal_backend_ews_convert_calcomp_to_xml (ESoapMessage *msg, gpointer user_data);
 void e_cal_backend_ews_convert_component_to_updatexml (ESoapMessage *msg, gpointer user_data);

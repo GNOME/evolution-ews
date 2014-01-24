@@ -4037,8 +4037,7 @@ e_cal_backend_ews_finalize (GObject *object)
 	g_free (priv);
 	cbews->priv = NULL;
 
-	e_cal_backend_ews_unref_tz_ical_to_msdn ();
-	e_cal_backend_ews_unref_tz_msdn_to_ical ();
+	e_cal_backend_ews_unref_windows_zones ();
 
 	G_OBJECT_CLASS (e_cal_backend_ews_parent_class)->finalize (object);
 }
@@ -4158,7 +4157,6 @@ e_cal_backend_ews_init (ECalBackendEws *cbews)
 		cbews, "notify::online",
 		G_CALLBACK (e_cal_backend_ews_notify_online_cb), NULL);
 
-	e_cal_backend_ews_populate_tz_ical_to_msdn ();
-	e_cal_backend_ews_populate_tz_msdn_to_ical ();
+	e_cal_backend_ews_populate_windows_zones ();
 }
 

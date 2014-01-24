@@ -77,6 +77,9 @@ void		e_soap_message_start_fault_detail
 						(ESoapMessage *msg);
 void		e_soap_message_end_fault_detail	(ESoapMessage *msg);
 void		e_soap_message_start_header	(ESoapMessage *msg);
+void		e_soap_message_replace_header	(ESoapMessage *msg,
+						 const gchar *name,
+						 const gchar *value);
 void		e_soap_message_end_header	(ESoapMessage *msg);
 void		e_soap_message_start_header_element
 						(ESoapMessage *msg,

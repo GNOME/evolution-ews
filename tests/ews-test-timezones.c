@@ -24,7 +24,7 @@
 
 #include "ews-test-common.h"
 
-void (* populate_tz_ical_to_msdn) (void);
+void (* populate_windows_zones) (void);
 const gchar * (* ical_to_msdn_equivalent) (const gchar *);
 void (* convert_calcomp_to_xml) (ESoapMessage *, gpointer);
 
@@ -278,8 +278,8 @@ int main (int argc,
 
 	if (!g_module_symbol (
 		module,
-		"e_cal_backend_ews_populate_tz_ical_to_msdn",
-		(gpointer *) &populate_tz_ical_to_msdn)) {
+		"e_cal_backend_ews_populate_windows_zones",
+		(gpointer *) &populate_windows_zones)) {
 			g_printerr ("\n%s\n", g_module_error ());
 			goto exit;
 	}
@@ -305,7 +305,7 @@ int main (int argc,
 	etds = ews_test_get_test_data_list ();
 
 	/* Set handler of debug information */
-	populate_tz_ical_to_msdn ();
+	populate_windows_zones ();
 	builtin_timezones = icaltimezone_get_builtin_timezones ();
 
 	for (l = etds; l != NULL; l = l->next) {
@@ -320,7 +320,6 @@ int main (int argc,
 			message = g_strdup_printf ("/%s/calendar/timezones/ical_compatibility", etd->version);
 			g_test_add_data_func (message, etd, test_libical_timezones_compatibility);
 			g_free (message);
-
 
 			message = g_strdup_printf ("/%s/calendar/timezones/time_zones_sync", etd->version);
 			g_test_add_data_func (message, etd, test_time_zones_sync);

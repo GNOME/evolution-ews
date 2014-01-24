@@ -2,9 +2,12 @@ NULL =
 
 ecal_backend_LTLIBRARIES = libecalbackendews.la
 
+ewsdata_DATA = windowsZones.xml
+
 libecalbackendews_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-DEXCHANGE_EWS_LOCALEDIR=\"$(localedir)\" \
+	-DEXCHANGE_EWS_DATADIR=\""$(ewsdatadir)"\" \
 	-I$(top_srcdir) \
 	-I$(top_srcdir)/src \
 	-I$(top_builddir) \
@@ -41,3 +44,5 @@ libecalbackendews_la_LDFLAGS = \
 	-module -avoid-version $(NO_UNDEFINED)
 
 -include $(top_srcdir)/git.mk
+
+EXTRA_DIST = $(ewsdata_DATA)

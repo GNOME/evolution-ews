@@ -103,6 +103,9 @@ void		e_ews_message_write_extended_distinguished_name
 						 const gchar *name,
 						 const gchar *prop_type);
 
+void		e_ews_message_replace_server_version (ESoapMessage *msg,
+						      EEwsServerVersion version);
+
 G_END_DECLS
 
 #endif

@@ -27,7 +27,40 @@
 
 #include <string.h>
 #include <libsoup/soup-uri.h>
+#include <libxml/parser.h>
+#include <libxml/xpath.h>
+#include <libxml/xpathInternals.h>
+#include <libxml/tree.h>
 #include "e-ews-message.h"
+
+static const gchar *
+convert_server_version_to_string (EEwsServerVersion version)
+{
+	/* server info */
+	switch (version) {
+		/*
+		 * If we don't know the server version, let's use the safest possible
+		 */
+		case E_EWS_EXCHANGE_UNKNOWN:
+			return "Exchange2007_SP1";
+		case E_EWS_EXCHANGE_2007:
+			return "Exchange2007";
+		case E_EWS_EXCHANGE_2007_SP1:
+			return "Exchange2007_SP1";
+		case E_EWS_EXCHANGE_2010:
+			return "Exchange2010";
+		case E_EWS_EXCHANGE_2010_SP1:
+			return "Exchange2010_SP1";
+		/*
+		 * If we don't have support for the latest version, let's use the latest possible
+		 */
+		case E_EWS_EXCHANGE_2010_SP2:
+		case E_EWS_EXCHANGE_FUTURE:
+			return "Exchange2010_SP2";
+	}
+
+	return "Exchange2007";
+}
 
 ESoapMessage *
 e_ews_message_new_with_header (const gchar *uri,
@@ -41,7 +74,7 @@ e_ews_message_new_with_header (const gchar *uri,
 			       gboolean standard_handlers)
 {
 	ESoapMessage *msg;
-	const gchar *server_ver = "Exchange2007";
+	const gchar *server_ver;
 	EEwsServerVersion version;
 
 	msg = e_soap_message_new (
@@ -68,34 +101,7 @@ e_ews_message_new_with_header (const gchar *uri,
 	else
 		version = server_version >= minimum_version ? server_version : minimum_version;
 
-	/* server info */
-	switch (version) {
-		/*
-		 * If we don't know the server version, let's use the safest possible
-		 */
-		case E_EWS_EXCHANGE_UNKNOWN:
-			server_ver = "Exchange2007_SP1";
-			break;
-		case E_EWS_EXCHANGE_2007:
-			server_ver = "Exchange2007";
-			break;
-		case E_EWS_EXCHANGE_2007_SP1:
-			server_ver = "Exchange2007_SP1";
-			break;
-		case E_EWS_EXCHANGE_2010:
-			server_ver = "Exchange2010";
-			break;
-		case E_EWS_EXCHANGE_2010_SP1:
-			server_ver = "Exchange2010_SP1";
-			break;
-		/*
-		 * If we don't have support for the latest version, let's use the latest possible
-		 */
-		case E_EWS_EXCHANGE_2010_SP2:
-		case E_EWS_EXCHANGE_FUTURE:
-			server_ver = "Exchange2010_SP2";
-			break;
-	}
+	server_ver = convert_server_version_to_string (version);
 
 	e_soap_message_start_header (msg);
 
@@ -278,4 +284,71 @@ e_ews_message_write_extended_distinguished_name (ESoapMessage *msg,
 	e_soap_message_add_attribute (msg, "PropertyName", name, NULL, NULL);
 	e_soap_message_add_attribute (msg, "PropertyType", prop_type, NULL, NULL);
 	e_soap_message_end_element (msg); /* ExtendedFieldURI */
+}
+
+static xmlXPathObjectPtr
+xpath_eval (xmlXPathContextPtr ctx,
+	    const gchar *format,
+	    ...)
+{
+	xmlXPathObjectPtr result;
+	va_list args;
+	gchar *expr;
+
+	if (ctx == NULL)
+		return NULL;
+
+	va_start (args, format);
+	expr = g_strdup_vprintf (format, args);
+	va_end (args);
+
+	result = xmlXPathEvalExpression (BAD_CAST expr, ctx);
+	g_free (expr);
+
+	if (result == NULL)
+		return NULL;
+
+	if (result->type == XPATH_NODESET && xmlXPathNodeSetIsEmpty (result->nodesetval)) {
+		xmlXPathFreeObject (result);
+		return NULL;
+	}
+
+	return result;
+}
+
+void
+e_ews_message_replace_server_version (ESoapMessage *msg,
+				      EEwsServerVersion version)
+{
+	xmlDocPtr doc;
+	xmlXPathContextPtr xpctx;
+	xmlXPathObjectPtr result;
+	xmlNodeSetPtr nodeset;
+	xmlNodePtr node;
+	const gchar *server_ver;
+
+	doc = e_soap_message_get_xml_doc (msg);
+	xpctx = xmlXPathNewContext (doc);
+
+	xmlXPathRegisterNs (
+			xpctx,
+			BAD_CAST "s",
+			BAD_CAST "http://schemas.xmlsoap.org/soap/envelope/");
+
+	xmlXPathRegisterNs (
+			xpctx,
+			BAD_CAST "t",
+			BAD_CAST "http://schemas.microsoft.com/exchange/services/2006/types");
+
+	result = xpath_eval (xpctx, "/s:Envelope/s:Header/t:RequestServerVersion");
+	if (result != NULL) {
+		server_ver = convert_server_version_to_string (version);
+
+		nodeset = result->nodesetval;
+		node = nodeset->nodeTab[0];
+		xmlSetProp (node, BAD_CAST "Version", BAD_CAST server_ver);
+	}
+
+	xmlXPathFreeObject (result);
+	xmlXPathFreeContext (xpctx);
 }
