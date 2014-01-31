@@ -1707,7 +1707,7 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 			mi_list = g_slist_prepend (mi_list, mi);
 			mi_list_len++;
 		} else {
-			camel_message_info_unref (mi);
+			camel_message_info_free (mi);
 		}
 
 		if (mi_list_len == EWS_MAX_FETCH_COUNT) {
