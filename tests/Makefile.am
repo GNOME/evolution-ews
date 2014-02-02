@@ -59,7 +59,7 @@ EXTRA_DIST += \
 	traces/Exchange2010_SP2/camel/folder/move_invalid_folder_to_valid_folder \
 	traces/Exchange2010_SP2/camel/folder/move_valid_folder_to_invalid_folder \
 	\
-	tests/traces/Exchange2010_SP2/calendar/timezones/get_server_time_zones_sync \
+	traces/Exchange2010_SP2/calendar/timezones/get_server_time_zones_sync \
 	$(NULL)
 
 TEST_PROGS			+= ews-test-camel ews-test-timezones
