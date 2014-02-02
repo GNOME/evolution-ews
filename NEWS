@@ -1,3 +1,26 @@
+Evolution-EWS 3.11.5 2014-02-03
+-------------------------------
+
+Bug Fixes:
+	Bug 712179 - Cannot create calendar object: The property is
+	             deprecated for this version of Exchange (Fabiano Fidêncio)
+	Bug 721381 - Doesn't keep flags when moving messages (Fabiano Fidêncio)
+	Bug 722415 - Memo does not support Start Date property
+	             (Fabiano Fidêncio)
+
+Other Changes:
+	* Drop KRB5 dependency (Milan Crha)
+	* Bump minimum libsoup requirement to 2.42 (Fabiano Fidêncio)
+	* Unit test improvements. (Fabiano Fidêncio)
+	* Add e_ews_debug_get_server_version_from_string() (Fabiano Fidêncio)
+	* Abort any pending operations in case notification was cancelled
+	  (Fabiano Fidêncio)
+
+Translations:
+	Nilamdyuti Goswami (as)
+	Мирослав Николић (sr)
+
+
 Evolution-EWS 3.11.4 2014-01-13
 -------------------------------
 
