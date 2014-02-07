@@ -1264,7 +1264,7 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 		}
 
 		/* Check if the item has really changed */
-		if (!strcmp (((CamelEwsMessageInfo *) mi)->change_key, id->change_key)) {
+		if (!g_strcmp0 (((CamelEwsMessageInfo *) mi)->change_key, id->change_key)) {
 			camel_message_info_free (mi);
 			g_object_unref (item);
 			continue;
