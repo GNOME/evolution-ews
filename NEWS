@@ -1,3 +1,14 @@
+Evolution-EWS 3.10.4 2013-02-10
+-------------------------------
+
+Bug Fixes:
+	Bug 721381 - Doesn't keep flags when moving messages (Fabiano Fidêncio)
+	Bug 723520 - Crash while syncing updated items (Milan Crha)
+
+Translations:
+	Benjamin Steinwender (de)
+	Shankar Prasad (kn)
+
 Evolution-EWS 3.10.3 2013-12-09
 -------------------------------
 
