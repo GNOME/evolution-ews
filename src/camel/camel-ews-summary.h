@@ -91,6 +91,7 @@ gboolean
 					 CamelFlag *server_user_flags);
 void	camel_ews_summary_add_message	(CamelFolderSummary *summary,
 					 const gchar *uid,
+					 const gchar *change_key,
 					 CamelMessageInfo *info,
 					 CamelMimeMessage *message);
 void	ews_summary_clear		(CamelFolderSummary *summary,

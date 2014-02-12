@@ -274,6 +274,7 @@ ews_info_set_flags (CamelMessageInfo *info,
 void
 camel_ews_summary_add_message (CamelFolderSummary *summary,
                                const gchar *uid,
+			       const gchar *change_key,
 			       CamelMessageInfo *info,
                                CamelMimeMessage *message)
 {
@@ -288,6 +289,9 @@ camel_ews_summary_add_message (CamelFolderSummary *summary,
 	/* Create summary entry */
 	mi = (CamelEwsMessageInfo *) camel_folder_summary_info_new_from_message (summary, message, NULL);
 	g_return_if_fail (mi != NULL);
+
+	/* Set the change_key */
+	mi->change_key = g_strdup (change_key);
 
 	/* Copy flags 'n' tags */
 	mi->info.flags = camel_message_info_flags (info);

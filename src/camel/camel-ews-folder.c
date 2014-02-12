@@ -185,6 +185,29 @@ ews_get_filename (CamelFolder *folder,
 	return filename;
 }
 
+static CamelStream *
+ews_data_cache_add (CamelDataCache *cdc,
+		    const gchar *path,
+		    const gchar *key,
+		    GError **error)
+{
+	GIOStream *base_stream;
+	CamelStream *stream = NULL;
+	GChecksum *sha = g_checksum_new (G_CHECKSUM_SHA256);
+
+	g_checksum_update (sha, (guchar *) key, strlen (key));
+	base_stream = camel_data_cache_add (
+		cdc, path, g_checksum_get_string (sha), error);
+	g_checksum_free (sha);
+
+	if (base_stream != NULL)
+		stream = camel_stream_new (base_stream);
+
+	g_object_unref (base_stream);
+
+	return stream;
+}
+
 static gint
 ews_data_cache_remove (CamelDataCache *cdc,
                        const gchar *path,
@@ -1774,7 +1797,7 @@ ews_append_message_sync (CamelFolder *folder,
 	e_ews_folder_id_free (fid);
 	g_free (folder_id);
 
-	camel_ews_summary_add_message (folder->summary, itemid, info, message);
+	camel_ews_summary_add_message (folder->summary, itemid, changekey, info, message);
 
 	if (appended_uid)
 		*appended_uid = itemid;
@@ -1799,7 +1822,6 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 {
 	EEwsConnection *cnc;
 	CamelEwsStore *dst_ews_store;
-	CamelFolderChangeInfo *changes = NULL;
 	const gchar *dst_full_name;
 	gchar *dst_id;
 	GError *local_error = NULL;
@@ -1848,22 +1870,82 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 	if (mi_list != NULL && success)
 		success = ews_save_flags (source, mi_list, cancellable, &local_error);
 
+	ids = g_slist_reverse (ids);
+
 	if (success && e_ews_connection_move_items_sync (
 		cnc, EWS_PRIORITY_MEDIUM,
 		dst_id, !delete_originals,
 		ids, &ret_items,
 		cancellable, &local_error)) {
+		CamelFolderChangeInfo *changes;
+		GSList *l;
+
+		changes = camel_folder_change_info_new ();
+
+		for (l = ret_items, i = 0; l != NULL; l = l->next, i++) {
+			CamelMimeMessage *message;
+			CamelStream *stream;
+			CamelMessageInfo *info;
+			CamelMessageInfo *clone;
+			const EwsId *id;
+
+			if (e_ews_item_get_item_type (l->data) == E_EWS_ITEM_TYPE_ERROR)
+				continue;
+
+			id = e_ews_item_get_id (l->data);
+
+			message = ews_folder_get_message_cached (source, uids->pdata[i], cancellable);
+			if (message == NULL)
+				continue;
+
+			stream = ews_data_cache_add (
+				CAMEL_EWS_FOLDER (destination)->cache, "cur", id->id, NULL);
+			if (stream == NULL) {
+				g_object_unref (message);
+
+				continue;
+			}
+
+			camel_data_wrapper_write_to_stream_sync (
+				CAMEL_DATA_WRAPPER (message), stream, cancellable, NULL);
+
+			info = camel_folder_summary_get (source->summary, uids->pdata[i]);
+			if (info == NULL) {
+				g_object_unref (stream);
+				g_object_unref (message);
+
+				continue;
+			}
+
+			clone = camel_message_info_clone (info);
+
+			camel_ews_summary_add_message (destination->summary, id->id, id->change_key, clone, message);
+			camel_folder_change_info_add_uid (changes, id->id);
+
+			camel_message_info_unref (clone);
+			camel_message_info_unref (info);
+			g_object_unref (stream);
+			g_object_unref (message);
+		}
+
+		if (camel_folder_change_info_changed (changes))
+			camel_folder_changed (destination, changes);
+
+		camel_folder_change_info_free (changes);
 
 		if (delete_originals) {
 			changes = camel_folder_change_info_new ();
+
 			for (i = 0; i < uids->len; i++) {
 				camel_folder_summary_remove_uid (source->summary, uids->pdata[i]);
 				camel_folder_change_info_remove_uid (changes, uids->pdata[i]);
+				ews_data_cache_remove (CAMEL_EWS_FOLDER (source)->cache, "cur", uids->pdata[i], NULL);
 			}
 			if (camel_folder_change_info_changed (changes)) {
 				camel_folder_summary_touch (source->summary);
 				camel_folder_changed (source, changes);
 			}
+
 			camel_folder_change_info_free (changes);
 		}
 
