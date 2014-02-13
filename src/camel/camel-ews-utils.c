@@ -1078,3 +1078,39 @@ ews_utils_update_followup_flags (ESoapMessage *msg,
 		e_ews_message_add_set_item_field_extended_distinguished_tag_boolean (msg, NULL, "Message", "Task", 0x811c, FALSE);
 	}
 }
+gboolean
+camel_ews_utils_delete_folders_from_summary_recursive (CamelEwsStore *ews_store,
+						       CamelFolderInfo *folder_info,
+						       gboolean send_signals,
+						       GError **error)
+{
+	gboolean success = TRUE;
+
+	while (folder_info != NULL) {
+		gchar *fid;
+
+		if (folder_info->child != NULL) {
+			success = camel_ews_utils_delete_folders_from_summary_recursive (
+				ews_store, folder_info->child, send_signals, error);
+
+			if (!success)
+				break;
+		}
+
+		fid = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, folder_info->full_name);
+		success = camel_ews_store_summary_remove_folder (ews_store->summary, fid, error);
+		g_free (fid);
+
+		if (!success)
+			break;
+
+		if (send_signals) {
+			camel_subscribable_folder_unsubscribed (CAMEL_SUBSCRIBABLE (ews_store), folder_info);
+			camel_store_folder_deleted (CAMEL_STORE (ews_store), folder_info);
+		}
+
+		folder_info = folder_info->next;
+	}
+
+	return success;
+}

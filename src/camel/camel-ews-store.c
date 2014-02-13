@@ -2562,36 +2562,6 @@ ews_create_folder_sync (CamelStore *store,
 	return fi;
 }
 
-static gboolean
-ews_update_store_delete_recursive (CamelEwsStore *ews_store,
-				   CamelFolderInfo *folder_info,
-				   GError **error)
-{
-	gboolean success = TRUE;
-
-	while (folder_info != NULL) {
-		gchar *fid;
-
-		if (folder_info->child != NULL) {
-			success = ews_update_store_delete_recursive (ews_store, folder_info->child, error);
-
-			if (!success)
-				break;
-		}
-
-		fid = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, folder_info->full_name);
-		success = camel_ews_store_summary_remove_folder (ews_store->summary, fid, error);
-		g_free (fid);
-
-		if (!success)
-			break;
-
-		folder_info = folder_info->next;
-	}
-
-	return success;
-}
-
 static void
 ews_update_store_move_recursive (CamelEwsStore *ews_store,
 				 CamelFolderInfo *folder_info)
@@ -2727,7 +2697,7 @@ ews_delete_folder_sync (CamelStore *store,
 	}
 
 	if (is_under_trash_folder) {
-		success = ews_update_store_delete_recursive (ews_store, to_update, &local_error);
+		success = camel_ews_utils_delete_folders_from_summary_recursive (ews_store, to_update, FALSE, error);
 
 		if (!success) {
 			g_free (trash_fid);

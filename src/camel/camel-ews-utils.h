@@ -77,6 +77,11 @@ void		ews_utils_replace_server_user_flags
 void		ews_utils_update_followup_flags (ESoapMessage *msg,
 						 CamelMessageInfo *mi);
 gchar *		camel_ews_utils_get_host_name	(CamelSettings *settings);
+gboolean	camel_ews_utils_delete_folders_from_summary_recursive
+						(CamelEwsStore *ews_store,
+						 CamelFolderInfo *folder_info,
+						 gboolean send_signals,
+						 GError **error);
 
 G_END_DECLS
 
