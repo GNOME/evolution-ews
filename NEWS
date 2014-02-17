@@ -1,3 +1,18 @@
+Evolution-EWS 3.11.90 2014-02-17
+--------------------------------
+
+Bug Fixes:
+	Bug 655806 - Folder deletion is very slow (Fabiano Fidêncio)
+	Bug 722416 - Don't change the timezone name (Fabiano Fidêncio)
+	Bug 722419 - Inconsistent mapping between Olson and Windows format
+	             (Fabiano Fidêncio)
+	Bug 723520 - Crash while syncing updated items (Milan Crha)
+
+Translations:
+	Shankar Prasad (kn)
+	Aurimas Černius (lt)
+
+
 Evolution-EWS 3.11.5 2014-02-03
 -------------------------------
 
