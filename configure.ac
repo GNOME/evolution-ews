@@ -228,11 +228,6 @@ PKG_CHECK_MODULES(LIBEMAIL_ENGINE, libemail-engine >= eds_minimum_version)
 PKG_CHECK_MODULES(CAMEL, camel-1.2 >= eds_minimum_version)
 
 dnl ****************************
-dnl Check for evolution plugins 
-dnl ****************************
-PKG_CHECK_MODULES(EVOLUTION_PLUGIN, evolution-plugin-3.0 >= evo_minimum_version)
-
-dnl ****************************
 dnl Check for evolution shell 
 dnl ****************************
 PKG_CHECK_MODULES(EVOLUTION_SHELL, evolution-shell-3.0 >= evo_minimum_version)

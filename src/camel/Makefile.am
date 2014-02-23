@@ -29,8 +29,7 @@ libcamelews_la_CPPFLAGS = \
 	$(CAMEL_CFLAGS) \
 	$(LIBEDATASERVER_CFLAGS) \
 	$(LIBECAL_CFLAGS) \
-	$(EVOLUTION_PLUGIN_CFLAGS) \
-	$(LIBEMAIL_ENGINE_CFLAGS) \
+	$(EVOLUTION_SHELL_CFLAGS) \
 	$(GNOME_INCLUDEDIR) \
 	$(SOUP_CFLAGS) \
 	$(LIBEBACKEND_CFLAGS) \
@@ -67,8 +66,7 @@ libcamelews_la_LIBADD = \
 	$(top_builddir)/src/server/libeews-1.2.la  \
 	$(top_builddir)/src/utils/libewsutils.la  \
 	$(CAMEL_LIBS) \
-	$(EVOLUTION_PLUGIN_LIBS) \
-	$(LIBEMAIL_ENGINE_LIBS) \
+	$(EVOLUTION_SHELL_LIBS) \
 	$(LIBEDATASERVER_LIBS) \
 	$(LIBEBACKEND_LIBS) \
 	$(LIBECAL_LIBS) \
