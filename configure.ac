@@ -322,7 +322,7 @@ AC_SUBST_FILE(EVO_PLUGIN_RULE)
 dnl *******************
 dnl Special directories
 dnl *******************
-errordir=`$PKG_CONFIG --variable=errordir evolution-plugin-3.0`
+errordir=`$PKG_CONFIG --variable=errordir evolution-shell-3.0`
 AC_SUBST(errordir)
 
 plugindir=`$PKG_CONFIG --variable=plugindir evolution-plugin-3.0`
