@@ -36,9 +36,9 @@
 
 /* Forward Declarations */
 static void	e_ews_oof_settings_initable_init
-					(GInitableIface *interface);
+					(GInitableIface *iface);
 static void	e_ews_oof_settings_async_initable_init
-					(GAsyncInitableIface *interface);
+					(GAsyncInitableIface *iface);
 
 struct _EEwsOofSettingsPrivate {
 	GMutex property_lock;
@@ -634,16 +634,16 @@ e_ews_oof_settings_init (EEwsOofSettings *settings)
 }
 
 static void
-e_ews_oof_settings_initable_init (GInitableIface *interface)
+e_ews_oof_settings_initable_init (GInitableIface *iface)
 {
-	interface->init = ews_oof_settings_initable_init;
+	iface->init = ews_oof_settings_initable_init;
 }
 
 static void
-e_ews_oof_settings_async_initable_init (GAsyncInitableIface *interface)
+e_ews_oof_settings_async_initable_init (GAsyncInitableIface *iface)
 {
-	interface->init_async = ews_oof_settings_initable_init_async;
-	interface->init_finish = ews_oof_settings_initable_init_finish;
+	iface->init_async = ews_oof_settings_initable_init_async;
+	iface->init_finish = ews_oof_settings_initable_init_finish;
 }
 
 EEwsOofSettings *

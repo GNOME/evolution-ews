@@ -49,7 +49,7 @@ enum {
 	PROP_SOURCE_REGISTRY
 };
 
-static void e_mail_config_ews_folder_sizes_page_interface_init (EMailConfigPageInterface *interface);
+static void e_mail_config_ews_folder_sizes_page_interface_init (EMailConfigPageInterface *iface);
 
 G_DEFINE_DYNAMIC_TYPE_EXTENDED (EMailConfigEwsFolderSizesPage, e_mail_config_ews_folder_sizes_page, GTK_TYPE_BOX, 0,
 	G_IMPLEMENT_INTERFACE_DYNAMIC (E_TYPE_MAIL_CONFIG_PAGE, e_mail_config_ews_folder_sizes_page_interface_init))
@@ -252,10 +252,10 @@ e_mail_config_ews_folder_sizes_page_class_finalize (EMailConfigEwsFolderSizesPag
 }
 
 static void
-e_mail_config_ews_folder_sizes_page_interface_init (EMailConfigPageInterface *interface)
+e_mail_config_ews_folder_sizes_page_interface_init (EMailConfigPageInterface *iface)
 {
-	interface->title = _("EWS Settings");
-	interface->sort_order = E_MAIL_CONFIG_EWS_FOLDER_SIZES_PAGE_SORT_ORDER;
+	iface->title = _("EWS Settings");
+	iface->sort_order = E_MAIL_CONFIG_EWS_FOLDER_SIZES_PAGE_SORT_ORDER;
 }
 
 static void

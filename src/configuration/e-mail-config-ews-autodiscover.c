@@ -50,7 +50,7 @@ enum {
 
 /* Forward Declarations */
 static void	e_mail_config_ews_autodiscover_authenticator_init
-				(ESourceAuthenticatorInterface *interface);
+				(ESourceAuthenticatorInterface *iface);
 
 G_DEFINE_DYNAMIC_TYPE_EXTENDED (
 	EMailConfigEwsAutodiscover,
@@ -319,9 +319,9 @@ e_mail_config_ews_autodiscover_class_init (EMailConfigEwsAutodiscoverClass *clas
 }
 
 static void
-e_mail_config_ews_autodiscover_authenticator_init (ESourceAuthenticatorInterface *interface)
+e_mail_config_ews_autodiscover_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
-	interface->try_password_sync =
+	iface->try_password_sync =
 		mail_config_ews_autodiscover_try_password_sync;
 }
 

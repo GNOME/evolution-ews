@@ -133,7 +133,7 @@ static void ews_cal_component_get_item_id (ECalComponent *comp, gchar **itemid, 
 static gboolean ews_start_sync	(gpointer data);
 static gpointer ews_start_sync_thread (gpointer data);
 static void	e_cal_backend_ews_authenticator_init
-				(ESourceAuthenticatorInterface *interface);
+				(ESourceAuthenticatorInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE (
 	ECalBackendEws,
@@ -4132,9 +4132,9 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 }
 
 static void
-e_cal_backend_ews_authenticator_init (ESourceAuthenticatorInterface *interface)
+e_cal_backend_ews_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
-	interface->try_password_sync = cal_backend_ews_try_password_sync;
+	iface->try_password_sync = cal_backend_ews_try_password_sync;
 }
 
 static void

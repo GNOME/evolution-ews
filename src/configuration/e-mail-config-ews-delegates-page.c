@@ -84,9 +84,9 @@ enum {
 
 /* Forward Declarations */
 static void	e_mail_config_ews_delegates_page_interface_init
-					(EMailConfigPageInterface *interface);
+					(EMailConfigPageInterface *iface);
 static void	e_mail_config_ews_delegates_page_authenticator_init
-					(ESourceAuthenticatorInterface *interface);
+					(ESourceAuthenticatorInterface *iface);
 static void	add_to_tree_view	(EMailConfigEwsDelegatesPage *page,
 					 EwsDelegateInfo *di,
 					 gboolean select);
@@ -1625,18 +1625,18 @@ e_mail_config_ews_delegates_page_class_init (EMailConfigEwsDelegatesPageClass *c
 }
 
 static void
-e_mail_config_ews_delegates_page_interface_init (EMailConfigPageInterface *interface)
+e_mail_config_ews_delegates_page_interface_init (EMailConfigPageInterface *iface)
 {
-	interface->title = _("Delegates");
-	interface->sort_order = E_MAIL_CONFIG_EWS_DELEGATES_PAGE_SORT_ORDER;
-	interface->submit = mail_config_ews_delegates_page_submit;
-	interface->submit_finish = mail_config_ews_delegates_page_submit_finish;
+	iface->title = _("Delegates");
+	iface->sort_order = E_MAIL_CONFIG_EWS_DELEGATES_PAGE_SORT_ORDER;
+	iface->submit = mail_config_ews_delegates_page_submit;
+	iface->submit_finish = mail_config_ews_delegates_page_submit_finish;
 }
 
 static void
-e_mail_config_ews_delegates_page_authenticator_init (ESourceAuthenticatorInterface *interface)
+e_mail_config_ews_delegates_page_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
-	interface->try_password_sync = mail_config_ews_delegates_page_try_password_sync;
+	iface->try_password_sync = mail_config_ews_delegates_page_try_password_sync;
 }
 
 static void

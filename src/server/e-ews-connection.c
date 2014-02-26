@@ -158,7 +158,7 @@ struct _EwsNode {
 
 /* Forward Declarations */
 static void	e_ews_connection_authenticator_init
-				(ESourceAuthenticatorInterface *interface);
+				(ESourceAuthenticatorInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE (
 	EEwsConnection,
@@ -1730,9 +1730,9 @@ e_ews_connection_folders_list_free (gpointer data)
 }
 
 static void
-e_ews_connection_authenticator_init (ESourceAuthenticatorInterface *interface)
+e_ews_connection_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
-	interface->try_password_sync = ews_connection_try_password_sync;
+	iface->try_password_sync = ews_connection_try_password_sync;
 }
 
 static gpointer

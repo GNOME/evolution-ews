@@ -48,7 +48,7 @@ enum {
 
 /* Forward Declarations */
 static void	e_mail_config_ews_oal_combo_box_authenticator_init
-				(ESourceAuthenticatorInterface *interface);
+				(ESourceAuthenticatorInterface *iface);
 
 G_DEFINE_DYNAMIC_TYPE_EXTENDED (
 	EMailConfigEwsOalComboBox,
@@ -217,9 +217,9 @@ e_mail_config_ews_oal_combo_box_class_init (EMailConfigEwsOalComboBoxClass *clas
 }
 
 static void
-e_mail_config_ews_oal_combo_box_authenticator_init (ESourceAuthenticatorInterface *interface)
+e_mail_config_ews_oal_combo_box_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
-	interface->try_password_sync =
+	iface->try_password_sync =
 		mail_config_ews_oal_combo_box_try_password_sync;
 }
 

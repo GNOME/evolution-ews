@@ -117,7 +117,7 @@ enum {
 
 /* Forward Declarations */
 static void	e_book_backend_ews_authenticator_init
-				(ESourceAuthenticatorInterface *interface);
+				(ESourceAuthenticatorInterface *iface);
 static gpointer ews_update_items_thread (gpointer data);
 
 
@@ -4095,9 +4095,9 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 }
 
 static void
-e_book_backend_ews_authenticator_init (ESourceAuthenticatorInterface *interface)
+e_book_backend_ews_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
-	interface->try_password_sync = book_backend_ews_try_password_sync;
+	iface->try_password_sync = book_backend_ews_try_password_sync;
 }
 
 static void

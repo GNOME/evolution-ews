@@ -81,9 +81,9 @@ enum {
 
 /* Forward Declarations */
 static void	e_mail_config_ews_ooo_page_interface_init
-				(EMailConfigPageInterface *interface);
+				(EMailConfigPageInterface *iface);
 static void	e_mail_config_ews_ooo_page_authenticator_init
-				(ESourceAuthenticatorInterface *interface);
+				(ESourceAuthenticatorInterface *iface);
 
 G_DEFINE_DYNAMIC_TYPE_EXTENDED (
 	EMailConfigEwsOooPage,
@@ -911,18 +911,18 @@ e_mail_config_ews_ooo_page_class_init (EMailConfigEwsOooPageClass *class)
 }
 
 static void
-e_mail_config_ews_ooo_page_interface_init (EMailConfigPageInterface *interface)
+e_mail_config_ews_ooo_page_interface_init (EMailConfigPageInterface *iface)
 {
-	interface->title = _("Out of Office");
-	interface->sort_order = E_MAIL_CONFIG_EWS_OOO_PAGE_SORT_ORDER;
-	interface->submit = mail_config_ews_ooo_page_submit;
-	interface->submit_finish = mail_config_ews_ooo_page_submit_finish;
+	iface->title = _("Out of Office");
+	iface->sort_order = E_MAIL_CONFIG_EWS_OOO_PAGE_SORT_ORDER;
+	iface->submit = mail_config_ews_ooo_page_submit;
+	iface->submit_finish = mail_config_ews_ooo_page_submit_finish;
 }
 
 static void
-e_mail_config_ews_ooo_page_authenticator_init (ESourceAuthenticatorInterface *interface)
+e_mail_config_ews_ooo_page_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
-	interface->try_password_sync =
+	iface->try_password_sync =
 		mail_config_ews_ooo_page_try_password_sync;
 }
 

@@ -328,7 +328,7 @@ ews_config_utils_authenticator_try_password_sync (ESourceAuthenticator *auth,
 
 GType e_ews_config_utils_authenticator_get_type (void) G_GNUC_CONST;
 
-static void e_ews_config_utils_authenticator_authenticator_init (ESourceAuthenticatorInterface *interface);
+static void e_ews_config_utils_authenticator_authenticator_init (ESourceAuthenticatorInterface *iface);
 
 G_DEFINE_TYPE_EXTENDED (EEwsConfigUtilsAuthenticator, e_ews_config_utils_authenticator, G_TYPE_OBJECT, 0,
 	G_IMPLEMENT_INTERFACE (E_TYPE_SOURCE_AUTHENTICATOR, e_ews_config_utils_authenticator_authenticator_init))
@@ -356,9 +356,9 @@ e_ews_config_utils_authenticator_class_init (EEwsConfigUtilsAuthenticatorClass *
 }
 
 static void
-e_ews_config_utils_authenticator_authenticator_init (ESourceAuthenticatorInterface *interface)
+e_ews_config_utils_authenticator_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
-	interface->try_password_sync = ews_config_utils_authenticator_try_password_sync;
+	iface->try_password_sync = ews_config_utils_authenticator_try_password_sync;
 }
 
 static void

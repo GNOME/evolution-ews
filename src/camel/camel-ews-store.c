@@ -90,8 +90,8 @@ struct _CamelEwsStorePrivate {
 static gboolean	ews_store_construct	(CamelService *service, CamelSession *session,
 					 CamelProvider *provider, GError **error);
 
-static void camel_ews_store_initable_init (GInitableIface *interface);
-static void camel_ews_subscribable_init (CamelSubscribableInterface *interface);
+static void camel_ews_store_initable_init (GInitableIface *iface);
+static void camel_ews_subscribable_init (CamelSubscribableInterface *iface);
 static GInitableIface *parent_initable_interface;
 
 static CamelFolderInfo *folder_info_from_store_summary (CamelEwsStore *store,
@@ -300,11 +300,11 @@ ews_store_initable_init (GInitable *initable,
 }
 
 static void
-camel_ews_store_initable_init (GInitableIface *interface)
+camel_ews_store_initable_init (GInitableIface *iface)
 {
-	parent_initable_interface = g_type_interface_peek_parent (interface);
+	parent_initable_interface = g_type_interface_peek_parent (iface);
 
-	interface->init = ews_store_initable_init;
+	iface->init = ews_store_initable_init;
 }
 
 static gboolean
@@ -3696,11 +3696,11 @@ camel_ews_store_class_init (CamelEwsStoreClass *class)
 }
 
 static void
-camel_ews_subscribable_init (CamelSubscribableInterface *interface)
+camel_ews_subscribable_init (CamelSubscribableInterface *iface)
 {
-	interface->folder_is_subscribed = ews_store_folder_is_subscribed;
-	interface->subscribe_folder_sync = ews_store_subscribe_folder_sync;
-	interface->unsubscribe_folder_sync = ews_store_unsubscribe_folder_sync;
+	iface->folder_is_subscribed = ews_store_folder_is_subscribed;
+	iface->subscribe_folder_sync = ews_store_subscribe_folder_sync;
+	iface->unsubscribe_folder_sync = ews_store_unsubscribe_folder_sync;
 }
 
 static void
