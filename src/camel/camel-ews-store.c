@@ -1952,36 +1952,10 @@ ews_get_folder_sync (CamelStore *store,
 
 	fid = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, folder_name);
 
-	/* We don't support CAMEL_STORE_FOLDER_EXCL. Nobody ever uses it */
-	if (!fid && (flags & CAMEL_STORE_FOLDER_CREATE)) {
-		CamelFolderInfo *fi;
-		const gchar *parent, *top, *slash;
-		gchar *copy = NULL;
-
-		slash = strrchr (folder_name, '/');
-		if (slash) {
-			copy = g_strdup (folder_name);
-
-			/* Split into parent path, and new name */
-			copy[slash - folder_name] = 0;
-			parent = copy;
-			top = copy + (slash - folder_name) + 1;
-		} else {
-			parent = "";
-			top = folder_name;
-		}
-
-		fi = ews_create_folder_sync (store, parent, top, cancellable, error);
-		g_free (copy);
-
-		if (!fi)
-			return NULL;
-
-		camel_folder_info_free (fi);
-	} else if (!fid) {
+	if (!fid) {
 		g_set_error (
 			error, CAMEL_STORE_ERROR,
-			CAMEL_ERROR_GENERIC,
+			CAMEL_STORE_ERROR_NO_FOLDER,
 			_("No such folder: %s"), folder_name);
 		return NULL;
 	} else {
