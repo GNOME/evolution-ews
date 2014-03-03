@@ -1,3 +1,20 @@
+Evolution-EWS 3.11.91 2014-03-03
+--------------------------------
+
+Bug Fixes:
+	Bug #720260 - Moved messages need to be retrieved again
+	              (Fabiano Fidêncio)
+	Bug #724232 - Empty Trash doesn't delete Trash subfolders
+	              (Fabiano Fidêncio)
+
+Other Changes:
+	* configure.ac: Remove evolution-plugin dependency. (Matthew Barnes)
+
+Translations:
+	Balázs Úr (hu)
+	Manoj Kumar Giri (or)
+
+
 Evolution-EWS 3.11.90 2014-02-17
 --------------------------------
 
