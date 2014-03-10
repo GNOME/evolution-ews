@@ -1184,7 +1184,7 @@ e_cal_backend_ews_remove_object (ECalBackend *backend,
 		index = e_cal_backend_ews_rid_to_index (
 			e_cal_backend_ews_get_timezone_from_ical_component (
 				backend,
-				e_cal_component_get_icalcomponent (comp)),
+				e_cal_component_get_icalcomponent (parent)),
 			rid,
 			e_cal_component_get_icalcomponent (parent),
 			&error);
@@ -1769,6 +1769,11 @@ ews_cal_modify_object_cb (GObject *object,
 		convert_error_to_edc_error (&error);
 		if (modify_data->context)
 			e_data_cal_respond_modify_objects (modify_data->cal, modify_data->context, error, NULL, NULL);
+		else if (error != NULL) {
+			g_warning ("Modify object error :  %s\n", error->message);
+			g_clear_error (&error);
+		}
+
 		goto exit;
 	}
 
@@ -1801,17 +1806,13 @@ ews_cal_modify_object_cb (GObject *object,
 		old_components = g_slist_append (NULL, modify_data->extra_comp);
 		new_components = g_slist_append (NULL, modify_data->comp);
 
-		convert_error_to_edc_error (&error);
-		e_data_cal_respond_modify_objects (modify_data->cal, modify_data->context, error, old_components, new_components);
+		e_data_cal_respond_modify_objects (modify_data->cal, modify_data->context, NULL, old_components, new_components);
 
 		g_slist_free (old_components);
 		g_slist_free (new_components);
-	} else if (error != NULL) {
-		g_warning ("Modify object error :  %s\n", error->message);
-		g_clear_error (&error);
-	} else {
-		ews_start_sync (cbews);
 	}
+
+	ews_start_sync (cbews);
 
 	PRIV_LOCK (priv);
 	g_hash_table_replace (priv->item_id_hash, g_strdup (modify_data->item_id), g_object_ref (modify_data->comp));
@@ -1902,8 +1903,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 		goto exit;
 	}
 
-	if (!e_ews_connection_satisfies_server_version (cbews->priv->cnc, E_EWS_EXCHANGE_2010))
-		e_cal_backend_ews_pick_all_tzids_out (cbews, icalcomp);
+	e_cal_backend_ews_pick_all_tzids_out (cbews, icalcomp);
 
 	comp = e_cal_component_new ();
 	e_cal_component_set_icalcomponent (comp, icalcomp);
@@ -1927,8 +1927,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 	}
 	PRIV_UNLOCK (priv);
 
-	if (!e_ews_connection_satisfies_server_version (cbews->priv->cnc, E_EWS_EXCHANGE_2010))
-		e_cal_backend_ews_pick_all_tzids_out (cbews, e_cal_component_get_icalcomponent (oldcomp));
+	e_cal_backend_ews_pick_all_tzids_out (cbews, e_cal_component_get_icalcomponent (oldcomp));
 
 	/*In case we have updated attachments we have to run update attachments
 	 *before update items so attendees will receive mails with already updated attachments */
