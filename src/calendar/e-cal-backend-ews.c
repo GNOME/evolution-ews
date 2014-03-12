@@ -1186,8 +1186,7 @@ exit:
 
 	if (context)
 		e_data_cal_respond_remove_objects (cal, context, error, NULL, NULL, NULL);
-
-	if (error != NULL) {
+	else if (error != NULL) {
 		g_warning ("Remove object error :  %s\n", error->message);
 		g_clear_error (&error);
 	}
@@ -1503,6 +1502,7 @@ ews_create_object_cb (GObject *object,
 
 	convert_error_to_edc_error (&error);
 	e_data_cal_respond_create_objects (create_data->cal, create_data->context, error, new_uids, new_comps);
+	error = NULL;
 
 	g_slist_free (new_uids);
 	g_slist_free (new_comps);
