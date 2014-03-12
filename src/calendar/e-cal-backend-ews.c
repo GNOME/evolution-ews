@@ -317,6 +317,7 @@ typedef struct {
 	EDataCal *cal; /* Create, Remove, Modify, FreeBusy, Attachments, DiscardAlarm */
 	GSList *users; /* FreeBusy */
 	gchar *item_id; /* Accept, Remove, Modify, Attachments, DiscardAlarm */
+	gchar *uid; /* Remove */
 	gchar *rid; /* Remove */
 	EEwsAttachmentType cb_type; /* Attachments */
 	ECalObjModType mod; /* Remove */
@@ -338,6 +339,7 @@ e_cal_backend_ews_async_data_free (EwsCalendarAsyncData *async_data)
 
 		g_slist_free_full (async_data->users, g_free);
 		g_free (async_data->item_id);
+		g_free (async_data->uid);
 		g_free (async_data->rid);
 
 		g_free (async_data);
@@ -982,7 +984,6 @@ ews_cal_delete_comp (ECalBackendEws *cbews,
 	if (!ret)
 		goto exit;
 
-	/* TODO test with recurrence handling */
 	e_cal_backend_notify_component_removed (E_CAL_BACKEND (cbews), uid, comp, NULL);
 
 	PRIV_LOCK (priv);
@@ -1054,6 +1055,42 @@ ews_cal_remove_object_cb (GObject *object,
 	simple = G_SIMPLE_ASYNC_RESULT (res);
 
 	if (!g_simple_async_result_propagate_error (simple, &error) || error->code == EWS_CONNECTION_ERROR_ITEMNOTFOUND) {
+		/* remove detached instances first */
+		if (remove_data->mod == E_CAL_OBJ_MOD_ALL) {
+			ECalBackendEws *cbews = remove_data->cbews;
+			GSList *with_detached, *iter;
+
+			with_detached = e_cal_backend_store_get_components_by_uid (cbews->priv->store, remove_data->uid);
+			for (iter = with_detached; iter; iter = g_slist_next (iter)) {
+				ECalComponent *comp;
+				ECalComponentId *id;
+
+				comp = iter->data;
+				id = e_cal_component_get_id (comp);
+
+				/* notify separately only detached instances - the master object will be removed below */
+				if (id && id->rid && *id->rid &&
+				    e_cal_backend_store_remove_component (cbews->priv->store, id->uid, id->rid)) {
+					gchar *item_id = NULL;
+
+					e_cal_backend_notify_component_removed (E_CAL_BACKEND (cbews), id, comp, NULL);
+
+					ews_cal_component_get_item_id (comp, &item_id, NULL);
+					if (item_id) {
+						PRIV_LOCK (cbews->priv);
+						g_hash_table_remove (cbews->priv->item_id_hash, item_id);
+						PRIV_UNLOCK (cbews->priv);
+
+						g_free (item_id);
+					}
+				}
+
+				e_cal_component_free_id (id);
+			}
+
+			g_slist_free_full (with_detached, g_object_unref);
+		}
+
 		/* FIXME: This is horrid. Will bite us when we start to delete
 		 * more than one item at a time... */
 		if (remove_data->comp != NULL)
@@ -1117,7 +1154,7 @@ e_cal_backend_ews_remove_object (ECalBackend *backend,
 
 	if (rid) {
 		parent = e_cal_backend_store_get_component (priv->store, uid, NULL);
-		if (!parent) {
+		if (!parent && !comp) {
 			g_warning ("EEE Cant find master component with uid:%s\n", uid);
 			g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
 			PRIV_UNLOCK (priv);
@@ -1163,6 +1200,7 @@ e_cal_backend_ews_remove_object (ECalBackend *backend,
 	remove_data->cal = g_object_ref (cal);
 	remove_data->context = context;
 	remove_data->item_id = g_strdup (item_id.id);
+	remove_data->uid = g_strdup (uid);
 	remove_data->rid = (rid ? g_strdup (rid) : NULL);
 	remove_data->mod = mod;
 
