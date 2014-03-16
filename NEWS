@@ -1,3 +1,15 @@
+Evolution-EWS 3.11.92 2014-03-17
+--------------------------------
+
+Bug Fixes:
+	Bug 726078 - After change an instance of a recurring event, the rest
+	             of the instances cannot be changed (Fabiano Fidêncio)
+	Bug 726079 - Notify about removal of detached instances (Milan Crha)
+
+Other Changes:
+	* ECalBackendEws: Do not cause double-free of a GError (Milan Crha)
+
+
 Evolution-EWS 3.11.91 2014-03-03
 --------------------------------
 
