@@ -10,6 +10,7 @@ module_ews_backend_la_CPPFLAGS = \
 	$(LIBEDATASERVER_CFLAGS) \
 	$(LIBEBACKEND_CFLAGS) \
 	$(SOUP_CFLAGS) \
+	$(CODE_COVERAGE_CFLAGS) \
 	$(NULL)
 
 module_ews_backend_la_SOURCES = \
@@ -29,7 +30,7 @@ module_ews_backend_la_LIBADD = \
 	$(NULL)
 
 module_ews_backend_la_LDFLAGS = \
-	-module -avoid-version $(NO_UNDEFINED) \
+	-module -avoid-version $(NO_UNDEFINED) $(CODE_COVERAGE_LDFLAGS) \
 	$(NULL)
 
 -include $(top_srcdir)/git.mk

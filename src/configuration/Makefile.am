@@ -10,6 +10,7 @@ module_ews_configuration_la_CPPFLAGS = \
 	$(EVOLUTION_MAIL_CFLAGS) \
 	$(EVOLUTION_SHELL_CFLAGS) \
 	$(LIBECAL_CFLAGS) \
+	$(CODE_COVERAGE_CFLAGS) \
 	$(NULL)
 
 module_ews_configuration_la_SOURCES = \
@@ -58,7 +59,7 @@ module_ews_configuration_la_LIBADD = \
 	$(NULL)
 
 module_ews_configuration_la_LDFLAGS = \
-	-module -avoid-version $(NO_UNDEFINED)
+	-module -avoid-version $(NO_UNDEFINED) $(CODE_COVERAGE_LDFLAGS)
 
 error_DATA = module-ews-configuration.error
 

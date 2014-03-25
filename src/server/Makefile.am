@@ -32,6 +32,7 @@ libeews_1_2_la_CPPFLAGS = \
 	$(LIBICAL_CFLAGS) \
 	$(LIBEDATASERVER_CFLAGS) \
 	$(DEBUG_CFLAGS) \
+	$(CODE_COVERAGE_CFLAGS) \
 	$(NULL)
 
 libeews_1_2_la_SOURCES = \
@@ -69,7 +70,7 @@ libeews_1_2_la_LIBADD = \
 	$(SOCKET_LIBS) \
 	$(NULL)
 
-libeews_1_2_la_LDFLAGS = $(NO_UNDEFINED)
+libeews_1_2_la_LDFLAGS = $(NO_UNDEFINED) $(CODE_COVERAGE_LDFLAGS)
 
 libeewsincludedir = $(privincludedir)/ews
 

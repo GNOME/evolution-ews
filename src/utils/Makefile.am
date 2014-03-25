@@ -14,6 +14,7 @@ libewsutils_la_CPPFLAGS = \
 	$(DEBUG_CFLAGS) \
 	$(CAMEL_CFLAGS) \
 	$(LIBEDATACAL_CFLAGS) \
+	$(CODE_COVERAGE_CFLAGS) \
 	$(NULL)
 
 libewsutils_la_SOURCES = \
@@ -33,6 +34,6 @@ libewsutils_la_LIBADD = \
 	$(LIBEDATACAL_LIBS) \
 	$(NULL)
 
-libewsutils_la_LDFLAGS = $(NO_UNDEFINED)
+libewsutils_la_LDFLAGS = $(NO_UNDEFINED) $(CODE_COVERAGE_LDFLAGS)
 
 -include $(top_srcdir)/git.mk

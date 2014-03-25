@@ -19,6 +19,7 @@ libecalbackendews_la_CPPFLAGS = \
 	$(SOUP_CFLAGS) \
 	$(CAMEL_CFLAGS) \
 	$(DEBUG_CFLAGS) \
+	$(CODE_COVERAGE_CFLAGS) \
 	$(NULL)
 
 libecalbackendews_la_SOURCES = \
@@ -41,7 +42,7 @@ libecalbackendews_la_LIBADD = \
 	$(NULL)
 
 libecalbackendews_la_LDFLAGS = \
-	-module -avoid-version $(NO_UNDEFINED)
+	-module -avoid-version $(NO_UNDEFINED) $(CODE_COVERAGE_LDFLAGS)
 
 -include $(top_srcdir)/git.mk
 

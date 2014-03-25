@@ -196,6 +196,8 @@ AC_PROG_LIBTOOL
 
 PKG_PROG_PKG_CONFIG
 
+GNOME_CODE_COVERAGE
+
 dnl ********************************
 dnl Check for evolution-data-server
 dnl ********************************
@@ -376,8 +378,9 @@ tests/Makefile
 AC_OUTPUT
 
 AC_MSG_NOTICE([
-	Strict building : $enable_strict
-	Use libmspack   : $have_mspack
-	Enable tests	: $enable_tests
+	Strict building :	$enable_strict
+	Use libmspack :		$have_mspack
+	Enable tests :		$enable_tests
+	Code coverage (gcov) :	$enable_code_coverage
 ])
 

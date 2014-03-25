@@ -1,5 +1,7 @@
 include $(top_srcdir)/gtester.mk
 
+@GNOME_CODE_COVERAGE_RULES@
+
 AM_CPPFLAGS = \
 	-I$(top_srcdir) \
 	-I$(top_srcdir)/src \

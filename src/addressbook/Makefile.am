@@ -26,6 +26,7 @@ libebookbackendews_la_CPPFLAGS = \
 	$(EVOLUTION_ADDRESSBOOK_CFLAGS) \
 	$(SQLITE3_CFLAGS) \
 	$(SOUP_CFLAGS) \
+	$(CODE_COVERAGE_CFLAGS) \
 	$(NULL)
 
 libebookbackendews_la_SOURCES = \
@@ -55,7 +56,7 @@ libebookbackendews_la_LIBADD = \
 	$(NULL)
 
 libebookbackendews_la_LDFLAGS = \
-	-module -avoid-version $(NO_UNDEFINED)
+	-module -avoid-version $(NO_UNDEFINED) $(CODE_COVERAGE_LDFLAGS)
 
 noinst_PROGRAMS = gal-lzx-decompress-test oab-decode-test
 

@@ -26,6 +26,7 @@ libcamelews_la_CPPFLAGS = \
 	-I$(top_srcdir) \
 	-I$(top_srcdir)/src \
 	-DEXCHANGE_EWS_LOCALEDIR=\"$(localedir)\" \
+	-DG_LOG_DOMAIN=\"camel-ews-provider\" \
 	$(CAMEL_CFLAGS) \
 	$(LIBEDATASERVER_CFLAGS) \
 	$(LIBECAL_CFLAGS) \
@@ -34,7 +35,7 @@ libcamelews_la_CPPFLAGS = \
 	$(SOUP_CFLAGS) \
 	$(LIBEBACKEND_CFLAGS) \
 	$(E_DATA_SERVER_CFLAGS) \
-	-DG_LOG_DOMAIN=\"camel-ews-provider\" \
+	$(CODE_COVERAGE_CFLAGS) \
 	$(NULL)
 
 libcamelews_la_SOURCES = \
@@ -60,7 +61,7 @@ noinst_HEADERS = \
 	camel-ews-transport.h \
 	$(NULL)
 
-libcamelews_la_LDFLAGS = -avoid-version $(NO_UNDEFINED)
+libcamelews_la_LDFLAGS = -avoid-version $(NO_UNDEFINED) $(CODE_COVERAGE_LDFLAGS)
 
 libcamelews_la_LIBADD = \
 	$(top_builddir)/src/server/libeews-1.2.la  \
