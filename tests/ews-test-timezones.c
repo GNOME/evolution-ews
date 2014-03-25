@@ -45,7 +45,50 @@ const gchar *str_comp =
 	" RSVP=TRUE;CN=Someone;LANGUAGE=en:MAILTO:someone@provider.com\n"
 	"END:VEVENT";
 
+/*
+ * These timezones, present in tzdata, don't have a correspondent "Windows timezone".
+ * In runtime, we fallback and set the server version as 2007_SP1 in the request, which
+ * doesn't treat the transitions on the server side.
+ * For tests purposes, this list of known unknown timezones is enough.
+ */
+static const gchar *unknown_timezones[] = {
+	"Australia/Lord_Howe",
+	"Australia/Eucla",
+	"America/Atikokan",
+	"Pacific/Easter",
+	"Africa/Asmara",
+	"Pacific/Chuuk",
+	"Pacific/Pohnpei",
+	"Atlantic/Faroe",
+	"Pacific/Kiritimati",
+	"Pacific/Norfolk",
+	"Pacific/Chatham",
+	"Pacific/Marquesas",
+	"Pacific/Gambier",
+	"America/Miquelon",
+	"Pacific/Pitcairn",
+	"Asia/Gaza",
+	"Asia/Hebron",
+	"America/Adak",
+	"America/Metlakatla",
+	"Asia/Ho_Chi_Minh",
+	NULL
+};
+
 static icalarray *builtin_timezones = NULL;
+
+static gboolean
+is_a_known_unknown_timezone (const gchar *zone)
+{
+	gint i;
+
+	for (i = 0; unknown_timezones[i] != NULL; i++) {
+		if (g_strcmp0 (zone, unknown_timezones[i]) == 0)
+			return TRUE;
+	}
+
+	return FALSE;
+}
 
 static void
 server_notify_resolver_cb (GObject *object, GParamSpec *pspec, gpointer user_data)
@@ -84,8 +127,10 @@ test_libical_timezones_compatibility (gconstpointer user_data)
 		zone_location = icaltimezone_get_location (zone);
 
 		if (ical_to_msdn_equivalent (zone_location) == NULL) {
-			retval = FALSE;
-			g_printerr ("\nMissing ical_tz_location: %s\n", zone_location);
+			if (!is_a_known_unknown_timezone (zone_location)) {
+				retval = FALSE;
+				g_printerr ("\nMissing ical_tz_location: %s\n", zone_location);
+			}
 		}
 	}
 
@@ -189,6 +234,9 @@ test_time_zones_sync (gconstpointer user_data)
 
 		zone = icalarray_element_at (builtin_timezones, i);
 		zone_location = icaltimezone_get_location (zone);
+
+		if (is_a_known_unknown_timezone (zone_location))
+			continue;
 
 		str = g_strdup_printf ("%s%s%s%s%s", tokens[0], zone_location, tokens[1], zone_location, tokens[2]);
 		comp = e_cal_component_new_from_string (str);
