@@ -94,7 +94,7 @@ struct _CamelEwsFolderPrivate {
 
 extern gint camel_application_is_exiting;
 
-static gboolean ews_delete_messages (CamelFolder *folder, GSList *deleted_items, gboolean expunge, GCancellable *cancellable, GError **error);
+static gboolean ews_delete_messages (CamelFolder *folder, const GSList *deleted_items, gboolean expunge, GCancellable *cancellable, GError **error);
 static gboolean ews_refresh_info_sync (CamelFolder *folder, GCancellable *cancellable, GError **error);
 
 #define d(x)
@@ -838,13 +838,14 @@ static void
 msg_update_flags (ESoapMessage *msg,
                   gpointer user_data)
 {
-	GSList *mi_list = user_data;
+	/* the mi_list is owned by the caller */
+	const GSList *mi_list = user_data, *iter;
 	CamelEwsMessageInfo *mi;
 
-	while ((mi = g_slist_nth_data (mi_list, 0))) {
+	for (iter = mi_list; iter; iter = g_slist_next (iter)) {
 		guint32 flags_changed;
 
-		mi_list = g_slist_remove (mi_list, mi);
+		mi = iter->data;
 
 		flags_changed = mi->server_flags ^ mi->info.flags;
 
@@ -926,15 +927,12 @@ msg_update_flags (ESoapMessage *msg,
 		mi->info.dirty = TRUE;
 
 		camel_folder_summary_touch (mi->info.summary);
-
-		camel_message_info_unref (mi);
 	}
-	/* Don't think we need to free the list; we already freed every element */
 }
 
 static gboolean
 ews_sync_mi_flags (CamelFolder *folder,
-                   GSList *mi_list,
+                   const GSList *mi_list,
                    GCancellable *cancellable,
                    GError **error)
 {
@@ -955,7 +953,7 @@ ews_sync_mi_flags (CamelFolder *folder,
 		cnc, EWS_PRIORITY_LOW,
 		"AlwaysOverwrite", "SaveOnly",
 		NULL, NULL,
-		msg_update_flags, mi_list, NULL,
+		msg_update_flags, (gpointer) mi_list, NULL,
 		cancellable, &local_error);
 
 	if (local_error) {
@@ -970,7 +968,7 @@ ews_sync_mi_flags (CamelFolder *folder,
 
 static gboolean
 ews_save_flags (CamelFolder *folder,
-		GSList *mi_list,
+		const GSList *mi_list,
 		GCancellable *cancellable,
 		GError **error)
 {
@@ -1023,7 +1021,7 @@ ews_folder_is_of_type (CamelFolder *folder,
 
 static gboolean
 ews_move_to_junk_folder (CamelFolder *folder,
-                         GSList *junk_uids,
+                         const GSList *junk_uids,
                          GCancellable *cancellable,
                          GError **error)
 {
@@ -1035,7 +1033,6 @@ ews_move_to_junk_folder (CamelFolder *folder,
 
 	if (ews_folder_is_of_type (folder, CAMEL_FOLDER_TYPE_JUNK)) {
 		/* cannot move to itself, but treat it as success */
-		g_slist_free_full (junk_uids, (GDestroyNotify) camel_pstring_free);
 		return TRUE;
 	}
 
@@ -1073,7 +1070,7 @@ ews_move_to_junk_folder (CamelFolder *folder,
 
 		if (status) {
 			CamelFolderChangeInfo *changes;
-			GSList *iter;
+			const GSList *iter;
 
 			changes = camel_folder_change_info_new ();
 
@@ -1100,8 +1097,6 @@ ews_move_to_junk_folder (CamelFolder *folder,
 			camel_ews_store_maybe_disconnect (ews_store, local_error);
 			g_propagate_error (error, local_error);
 		}
-
-		g_slist_free_full (junk_uids, (GDestroyNotify) camel_pstring_free);
 	}
 
 	g_object_unref (cnc);
@@ -1176,6 +1171,7 @@ ews_synchronize_sync (CamelFolder *folder,
 
 		if (mi_list_len == EWS_MAX_FETCH_COUNT) {
 			success = ews_save_flags (folder, mi_list, cancellable, &local_error);
+			g_slist_free_full (mi_list, camel_message_info_unref);
 			mi_list = NULL;
 			mi_list_len = 0;
 		}
@@ -1183,16 +1179,15 @@ ews_synchronize_sync (CamelFolder *folder,
 
 	if (mi_list != NULL && success)
 		success = ews_save_flags (folder, mi_list, cancellable, &local_error);
+	g_slist_free_full (mi_list, camel_message_info_unref);
 
 	if (deleted_uids && success)
 		success = ews_delete_messages (folder, deleted_uids, ews_folder_is_of_type (folder, CAMEL_FOLDER_TYPE_TRASH), cancellable, &local_error);
-	else
-		g_slist_free_full (deleted_uids, (GDestroyNotify) camel_pstring_free);
+	g_slist_free_full (deleted_uids, (GDestroyNotify) camel_pstring_free);
 
 	if (junk_uids && success)
 		success = ews_move_to_junk_folder (folder, junk_uids, cancellable, &local_error);
-	else
-		g_slist_free_full (junk_uids, (GDestroyNotify) camel_pstring_free);
+	g_slist_free_full (junk_uids, (GDestroyNotify) camel_pstring_free);
 
 	camel_folder_summary_save_to_db (folder->summary, NULL);
 	camel_folder_summary_free_array (uids);
@@ -1862,6 +1857,7 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 
 		if (mi_list_len == EWS_MAX_FETCH_COUNT) {
 			success = ews_save_flags (source, mi_list, cancellable, &local_error);
+			g_slist_free_full (mi_list, camel_message_info_unref);
 			mi_list = NULL;
 			mi_list_len = 0;
 		}
@@ -1869,6 +1865,7 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 
 	if (mi_list != NULL && success)
 		success = ews_save_flags (source, mi_list, cancellable, &local_error);
+	g_slist_free_full (mi_list, camel_message_info_unref);
 
 	ids = g_slist_reverse (ids);
 
@@ -1971,7 +1968,7 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 
 static gboolean
 ews_delete_messages_from_server (CamelEwsStore *ews_store,
-				 GSList *deleted_items,
+				 const GSList *deleted_items,
 				 EwsDeleteType delete_type,
 				 GCancellable *cancellable,
 				 GError **error)
@@ -1992,15 +1989,15 @@ ews_delete_messages_from_server (CamelEwsStore *ews_store,
 
 static void
 ews_delete_messages_from_folder (CamelFolder *folder,
-				 GSList *deleted_items)
+				 const GSList *deleted_items)
 {
 	CamelFolderChangeInfo *changes;
-	GSList *l;
+	const GSList *iter;
 
 	changes = camel_folder_change_info_new ();
 
-	for (l = deleted_items; l != NULL; l = l->next) {
-		const gchar *uid = l->data;
+	for (iter = deleted_items; iter != NULL; iter = iter->next) {
+		const gchar *uid = iter->data;
 
 		camel_folder_summary_lock (folder->summary);
 		camel_folder_change_info_remove_uid (changes, uid);
@@ -2019,7 +2016,7 @@ ews_delete_messages_from_folder (CamelFolder *folder,
 
 static gboolean
 ews_delete_messages (CamelFolder *folder,
-                     GSList *deleted_items,
+                     const GSList *deleted_items,
                      gboolean expunge,
                      GCancellable *cancellable,
                      GError **error)
