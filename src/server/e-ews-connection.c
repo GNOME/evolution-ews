@@ -4423,7 +4423,7 @@ delete_item_response_cb (ESoapResponse *response,
 void
 e_ews_connection_delete_items (EEwsConnection *cnc,
                                gint pri,
-                               GSList *ids,
+                               const GSList *ids,
                                EwsDeleteType delete_type,
                                EwsSendMeetingCancellationsType send_cancels,
                                EwsAffectedTaskOccurrencesType affected_tasks,
@@ -4434,7 +4434,7 @@ e_ews_connection_delete_items (EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
-	GSList *l;
+	const GSList *iter;
 
 	g_return_if_fail (cnc != NULL);
 
@@ -4461,8 +4461,8 @@ e_ews_connection_delete_items (EEwsConnection *cnc,
 
 	e_soap_message_start_element (msg, "ItemIds", "messages", NULL);
 
-	for (l = ids; l != NULL; l = g_slist_next (l))
-		e_ews_message_write_string_parameter_with_attribute (msg, "ItemId", NULL, NULL, "Id", l->data);
+	for (iter = ids; iter != NULL; iter = g_slist_next (iter))
+		e_ews_message_write_string_parameter_with_attribute (msg, "ItemId", NULL, NULL, "Id", iter->data);
 
 	e_soap_message_end_element (msg);
 
@@ -4584,7 +4584,7 @@ e_ews_connection_delete_items_finish (EEwsConnection *cnc,
 gboolean
 e_ews_connection_delete_items_sync (EEwsConnection *cnc,
                                     gint pri,
-                                    GSList *ids,
+                                    const GSList *ids,
                                     EwsDeleteType delete_type,
                                     EwsSendMeetingCancellationsType send_cancels,
                                     EwsAffectedTaskOccurrencesType affected_tasks,
@@ -6028,7 +6028,7 @@ e_ews_connection_move_items (EEwsConnection *cnc,
                              gint pri,
                              const gchar *folder_id,
                              gboolean docopy,
-                             GSList *ids,
+                             const GSList *ids,
                              GCancellable *cancellable,
                              GAsyncReadyCallback callback,
                              gpointer user_data)
@@ -6036,7 +6036,7 @@ e_ews_connection_move_items (EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
-	GSList *l;
+	const GSList *iter;
 
 	g_return_if_fail (cnc != NULL);
 
@@ -6070,8 +6070,8 @@ e_ews_connection_move_items (EEwsConnection *cnc,
 	e_soap_message_end_element (msg); /* ToFolderId */
 
 	e_soap_message_start_element (msg, "ItemIds", "messages", NULL);
-	for (l = ids; l != NULL; l = g_slist_next (l))
-		e_ews_message_write_string_parameter_with_attribute (msg, "ItemId", NULL, NULL, "Id", l->data);
+	for (iter = ids; iter != NULL; iter = g_slist_next (iter))
+		e_ews_message_write_string_parameter_with_attribute (msg, "ItemId", NULL, NULL, "Id", iter->data);
 	e_soap_message_end_element (msg); /* ItemIds */
 
 	e_ews_message_write_footer (msg);
@@ -6137,7 +6137,7 @@ e_ews_connection_move_items_sync (EEwsConnection *cnc,
                                   gint pri,
                                   const gchar *folder_id,
                                   gboolean docopy,
-                                  GSList *ids,
+                                  const GSList *ids,
                                   GSList **items,
                                   GCancellable *cancellable,
                                   GError **error)
