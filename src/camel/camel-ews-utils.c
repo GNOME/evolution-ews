@@ -620,6 +620,8 @@ ews_set_threading_data (CamelEwsMessageInfo *mi,
 		return;
 
 	count = camel_header_references_list_size (&refs);
+	g_free (mi->info.references);
+	mi->info.references = NULL;
 	mi->info.references = g_malloc (
 		sizeof (*mi->info.references) + ((count - 1) *
 		sizeof (mi->info.references->references[0])));
