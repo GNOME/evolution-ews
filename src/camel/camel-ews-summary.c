@@ -255,9 +255,11 @@ content_info_to_db (CamelFolderSummary *s,
 {
 
 	if (info->type) {
+		g_free (mir->cinfo);
 		mir->cinfo = g_strdup ("1");
 		return CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->content_info_to_db (s, info, mir);
 	} else {
+		g_free (mir->cinfo);
 		mir->cinfo = g_strdup ("0");
 		return TRUE;
 	}
