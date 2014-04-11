@@ -226,7 +226,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_widget_show (widget);
 	priv->impersonate_user_entry = widget;  /* do not reference */
 
-	g_object_bind_property (
+	e_binding_bind_object_text_property (
 		settings, "impersonate-user",
 		widget, "text",
 		G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
@@ -263,19 +263,19 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	priv->auth_check = widget;  /* do not reference */
 	gtk_widget_show (widget);
 
-	g_object_bind_property (
+	e_binding_bind_object_text_property (
 		settings, "user",
 		priv->user_entry, "text",
 		G_BINDING_BIDIRECTIONAL |
 		G_BINDING_SYNC_CREATE);
 
-	g_object_bind_property (
+	e_binding_bind_object_text_property (
 		settings, "hosturl",
 		priv->host_entry, "text",
 		G_BINDING_BIDIRECTIONAL |
 		G_BINDING_SYNC_CREATE);
 
-	g_object_bind_property (
+	e_binding_bind_object_text_property (
 		settings, "oaburl",
 		priv->oab_entry, "text",
 		G_BINDING_BIDIRECTIONAL |
