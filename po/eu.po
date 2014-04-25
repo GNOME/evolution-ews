@@ -2,39 +2,31 @@
 # Copyright (C) 2014 evolution-ews's COPYRIGHT HOLDER
 # This file is distributed under the same license as the evolution-ews package.
 #
+# Irune Asumendi Mallea <iasurmendi@outlook.com>, 2014.
+# Arantzazu Azpillaga Landa <azpilla@gmail.com>, 2014.
+# Olatz Erdozia Ibañez <olatz8@yahoo.com>, 2014.
+# Ibon Idoiaga Basaras <bixerdo@openmailbox.org>, 2014.
+# Iñaki Iñurrieta Labaien <inaki.inurrieta@gmail.com>, 2014.
+# Patricia Jorge Kuartango <kuartango@gmail.com>, 2014.
+# Haritz Mendiguren Goienola <hamengoi@gmail.com>, 2014.
+# Jose Ramiro Urizar Jaio <jotaerre963@gmail.com>, 2014.
+# Elhuyar Hizkuntza Zerbitzuak <itzulpenak@elhuyar.com>, 2014.
 # Iñaki Larrañaga Murgoitio <dooteo@zundan.com>, 2014.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: evolution-ews gnome-3-10\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-04-25 15:26+0200\n"
-"PO-Revision-Date: 2014-04-25 15:28+0200\n"
+"Project-Id-Version: evolution-ews master\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-ews&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2014-04-16 17:13+0200\n"
+"PO-Revision-Date: 2014-04-16 17:08+0200\n"
 "Last-Translator: Iñaki Larrañaga Murgoitio <dooteo@zundan.com>\n"
 "Language-Team: Basque <librezale@librezale.org>\n"
 "Language: eu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"\n"
-"Irune Asumendi Mallea <iasurmendi@outlook.com>\\n"
-"\n"
-"Arantzazu Azpillaga Landa <azpilla@gmail.com>\\n"
-"\n"
-"Olatz Erdozia Ibañez <olatz8@yahoo.com>\\n"
-"\n"
-"Ibon Idoiaga Basaras <bixerdo@openmailbox.org>\\n"
-"\n"
-"I�aki I�urrieta Labaien <inaki.inurrieta@gmail.com>\\n"
-"\n"
-"Patricia Jorge Kuartango <kuartango@gmail.com>\\n"
-"\n"
-"Haritz Mendiguren Goienola <hamengoi@gmail.com>\\n"
-"\n"
-"Jose Ramiro Urizar Jaio <jotaerre963@gmail.com>\\n"
-"\n"
-"Elhuyar Hizkuntza Zerbitzuak <itzulpenak@elhuyar.com>\n"
-"\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Lokalize 1.4\n"
 
 #: ../src/addressbook/e-book-backend-ews.c:1436
