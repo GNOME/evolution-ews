@@ -1,3 +1,22 @@
+Evolution-EWS 3.13.1 2014-04-28
+-------------------------------
+
+Bug Fixes:
+	Bug 684425 - Do not pass NULL text to gtk_entry_set_text() (Milan Crha)
+
+Other Changes:
+	* Add an --enable-code-coverage configure option to enable gcov
+	  support (Milan Crha)
+	* tests: Create a list of known unknown zones (Fabiano Fidêncio)
+	* Fix two memory leaks from Camel code (Milan Crha)
+	* Simplify memory management around ews_sync_mi_flags() function
+	  (Milan Crha)
+
+Translations:
+	Inaki Larranaga Murgoitio (eu)
+	Andika Triwidada (id)
+
+
 Evoluiton-EWS 3.12.0 2014-03-24
 -------------------------------
 
