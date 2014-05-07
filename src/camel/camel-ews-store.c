@@ -747,11 +747,16 @@ camel_ews_folder_update_thread (gpointer user_data)
 {
 	struct ScheduleUpdateData *sud = user_data;
 	CamelEwsStore *ews_store = sud->ews_store;
-	GSList *l;
+	GSList *update_folder_names, *l;
 
 	g_return_val_if_fail (sud != NULL, NULL);
 
-	for (l = ews_store->priv->update_folder_names; l != NULL && !g_cancellable_is_cancelled (sud->cancellable); l = l->next) {
+	UPDATE_LOCK (ews_store);
+	update_folder_names = ews_store->priv->update_folder_names;
+	ews_store->priv->update_folder_names = NULL;
+	UPDATE_UNLOCK (ews_store);
+
+	for (l = update_folder_names; l != NULL && !g_cancellable_is_cancelled (sud->cancellable); l = l->next) {
 		const gchar *folder_name = l->data;
 		CamelFolder *folder;
 		GError *error = NULL;
@@ -770,9 +775,10 @@ camel_ews_folder_update_thread (gpointer user_data)
 		}
 	}
 
-	g_slist_free_full (ews_store->priv->update_folder_names, g_free);
-	ews_store->priv->update_folder_names = NULL;
+	g_slist_free_full (update_folder_names, g_free);
+	update_folder_names = NULL;
 	free_schedule_update_data (sud);
+
 	return NULL;
 }
 
@@ -891,6 +897,7 @@ folder_list_update_cb (gpointer user_data)
 	g_return_val_if_fail (sud->ews_store != NULL, FALSE);
 	g_return_val_if_fail (sud->ews_store->priv != NULL, FALSE);
 
+	UPDATE_LOCK (sud->ews_store);
 	if (sud->expected_id != sud->ews_store->priv->update_folder_list_id)
 		goto exit;
 
@@ -900,6 +907,8 @@ folder_list_update_cb (gpointer user_data)
 		run_update_thread (sud->ews_store, TRUE, sud->cancellable);
 
 exit:
+	UPDATE_UNLOCK (sud->ews_store);
+
 	return FALSE;
 }
 
