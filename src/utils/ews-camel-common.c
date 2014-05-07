@@ -183,7 +183,7 @@ create_mime_message_cb (ESoapMessage *msg,
 	 * property Further crap is that Exchange 2007 assumes when it
 	 * sees this property that you're setting the value to 0
 	 * ... it never checks */
-	msgflag  = MAPI_MSGFLAG_READ; /* draft or sent is always read */
+	msgflag = MAPI_MSGFLAG_READ; /* draft or sent is always read */
 	if ((message_camel_flags & CAMEL_MESSAGE_DRAFT) != 0)
 		msgflag |= MAPI_MSGFLAG_UNSENT;
 

@@ -145,24 +145,34 @@ ews_folder_get_summary_message_mapi_flags (void)
 
 	list = ews_folder_get_summary_followup_mapi_flags ();
 
+	/* PidTagMessageFlags */
 	ext_uri = e_ews_extended_field_uri_new ();
 	ext_uri->prop_tag = g_strdup_printf ("%d", 0x0e07);
 	ext_uri->prop_type = g_strdup ("Integer");
 	list = g_slist_append (list, ext_uri);
 
+	/* PidTagMessageStatus */
 	ext_uri = e_ews_extended_field_uri_new ();
 	ext_uri->prop_tag = g_strdup_printf ("%d", 0x0e17);
 	ext_uri->prop_type = g_strdup ("Integer");
 	list = g_slist_append (list, ext_uri);
 
+	/* PidTagIconIndex */
 	ext_uri = e_ews_extended_field_uri_new ();
 	ext_uri->prop_tag = g_strdup_printf ("%d", 0x1080);
 	ext_uri->prop_type = g_strdup ("Integer");
 	list = g_slist_append (list, ext_uri);
 
+	/* PidTagLastVerbExecuted */
 	ext_uri = e_ews_extended_field_uri_new ();
 	ext_uri->prop_tag = g_strdup_printf ("%d", 0x1081);
 	ext_uri->prop_type = g_strdup ("Integer");
+	list = g_slist_append (list, ext_uri);
+
+	/* PidTagReadReceiptRequested */
+	ext_uri = e_ews_extended_field_uri_new ();
+	ext_uri->prop_tag = g_strdup_printf ("%d", 0x0029);
+	ext_uri->prop_type = g_strdup ("Boolean");
 	list = g_slist_append (list, ext_uri);
 
 	return list;
@@ -930,6 +940,38 @@ msg_update_flags (ESoapMessage *msg,
 	}
 }
 
+static void
+ews_suppress_read_receipt (ESoapMessage *msg,
+			   gpointer user_data)
+{
+	/* the mi_list is owned by the caller */
+	const GSList *mi_list = user_data, *iter;
+	CamelEwsMessageInfo *mi;
+
+	for (iter = mi_list; iter; iter = g_slist_next (iter)) {
+		mi = iter->data;
+		if (!mi || (camel_message_info_flags (mi) & CAMEL_EWS_MESSAGE_MSGFLAG_RN_PENDING) == 0)
+			continue;
+
+		/* There was requested a read-receipt, but it is handled by evolution-ews,
+		   thus prevent an automatic send of it by the server */
+		e_soap_message_start_element (msg, "SuppressReadReceipt", NULL, NULL);
+		e_soap_message_start_element (msg, "ReferenceItemId", NULL, NULL);
+		e_soap_message_add_attribute (msg, "Id", mi->info.uid, NULL, NULL);
+		e_soap_message_add_attribute (msg, "ChangeKey", mi->change_key, NULL, NULL);
+		e_soap_message_end_element (msg); /* "ReferenceItemId" */
+		e_soap_message_end_element (msg); /* SuppressReadReceipt */
+
+		mi->info.flags = mi->info.flags & (~CAMEL_EWS_MESSAGE_MSGFLAG_RN_PENDING);
+		mi->info.dirty = TRUE;
+
+		if (!camel_message_info_user_flag ((CamelMessageInfo *) mi, "receipt-handled"))
+			camel_message_info_set_user_flag ((CamelMessageInfo *) mi, "receipt-handled", TRUE);
+
+		camel_folder_summary_touch (mi->info.summary);
+	}
+}
+
 static gboolean
 ews_sync_mi_flags (CamelFolder *folder,
                    const GSList *mi_list,
@@ -938,8 +980,9 @@ ews_sync_mi_flags (CamelFolder *folder,
 {
 	CamelEwsStore *ews_store;
 	EEwsConnection *cnc;
+	const GSList *iter;
 	GError *local_error = NULL;
-	gboolean res;
+	gboolean res = TRUE;
 
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
 
@@ -949,12 +992,42 @@ ews_sync_mi_flags (CamelFolder *folder,
 
 	cnc = camel_ews_store_ref_connection (ews_store);
 
-	res = e_ews_connection_update_items_sync (
-		cnc, EWS_PRIORITY_LOW,
-		"AlwaysOverwrite", "SaveOnly",
-		NULL, NULL,
-		msg_update_flags, (gpointer) mi_list, NULL,
-		cancellable, &local_error);
+	for (iter = mi_list; iter; iter = g_slist_next (iter)) {
+		CamelEwsMessageInfo *mi = iter->data;
+
+		if (mi && (camel_message_info_flags (mi) & CAMEL_EWS_MESSAGE_MSGFLAG_RN_PENDING) != 0)
+			break;
+	}
+
+	/* NULL means all had been checked and none has the flag set */
+	if (iter) {
+		GSList *ids = NULL;
+
+		res = e_ews_connection_create_items_sync (
+			cnc, EWS_PRIORITY_LOW,
+			"SaveOnly", NULL, NULL,
+			ews_suppress_read_receipt, (gpointer) mi_list,
+			&ids, cancellable, &local_error);
+
+		g_slist_free_full (ids, g_object_unref);
+
+		/* ignore this error, it's not a big problem */
+		if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_READRECEIPTNOTPENDING)) {
+			g_clear_error (&local_error);
+			res = TRUE;
+		}
+	}
+
+	if (res) {
+		res = e_ews_connection_update_items_sync (
+			cnc, EWS_PRIORITY_LOW,
+			"AlwaysOverwrite", "SaveOnly",
+			NULL, NULL,
+			msg_update_flags, (gpointer) mi_list, NULL,
+			cancellable, &local_error);
+	}
+
+	camel_folder_summary_save_to_db (folder->summary, NULL);
 
 	if (local_error) {
 		camel_ews_store_maybe_disconnect (ews_store, local_error);

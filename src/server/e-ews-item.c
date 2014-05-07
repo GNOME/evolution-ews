@@ -554,15 +554,15 @@ parse_extended_property (EEwsItemPrivate *priv,
 			priv->mapi_icon_index = num_value;
 			break;
 
-		case 0x1081:
+		case 0x1081: /* PidTagLastVerbExecuted */
 			priv->mapi_last_verb_executed = num_value;
 			break;
 
-		case 0xe07:
+		case 0x0e07: /* PidTagMessageFlags */
 			priv->mapi_message_flags = num_value;
 			break;
 
-		case 0xe17:
+		case 0x0e17: /* PidTagMessageStatus */
 			priv->mapi_message_status = num_value;
 			break;
 		}
@@ -1451,6 +1451,14 @@ e_ews_item_is_answered (EEwsItem *item,
 	return TRUE;
 }
 
+guint32
+e_ews_item_get_message_flags (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), 0);
+
+	return item->priv->mapi_message_flags;
+}
+
 const GSList *
 e_ews_item_get_to_recipients (EEwsItem *item)
 {
@@ -1645,11 +1653,12 @@ e_ews_item_get_extended_property_as_boolean (EEwsItem *item,
 	if (g_str_equal (value, "true"))
 		return TRUE;
 
-	if (g_str_equal (value, "true"))
+	if (g_str_equal (value, "false"))
 		return FALSE;
 
 	if (found)
 		*found = FALSE;
+
 	return FALSE;
 }
 
