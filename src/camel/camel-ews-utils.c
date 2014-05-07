@@ -40,6 +40,8 @@
 #define SUBFOLDER_DIR_NAME     "subfolders"
 #define SUBFOLDER_DIR_NAME_LEN 10
 
+#define EWS_MAPI_MSGFLAG_RN_PENDING 0x100
+
 CamelFolderInfo *
 camel_ews_utils_build_folder_info (CamelEwsStore *store,
                                    const gchar *fid)
@@ -418,6 +420,16 @@ ews_utils_rename_label (const gchar *cat,
 	return cat;
 }
 
+static gboolean
+ews_utils_is_system_user_flag (const gchar *name)
+{
+	if (!name)
+		return FALSE;
+
+	return g_str_equal (name, "receipt-handled") ||
+		g_str_equal (name, "$has-cal");
+}
+
 void
 ews_utils_replace_server_user_flags (ESoapMessage *msg,
                                      CamelEwsMessageInfo *mi)
@@ -431,14 +443,12 @@ ews_utils_replace_server_user_flags (ESoapMessage *msg,
 		const gchar *n = ews_utils_rename_label (flag->name, 0);
 		if (*n == '\0')
 			continue;
-		/* This is a mismatch between evolution flags and
-		 * exchange categories.  Evolution uses a
-		 * receipt-handled flag for message receipts, which we
-		 * don't want showing up in the categories, so
-		 * silently drop it here */
-		if (strcmp (n, "receipt-handled") == 0 ||
-		    strcmp (n, "$has-cal") == 0)
+
+		/* Skip evolution-defined flags which are not supposed to
+		   be categories on an Exchange server */
+		if (ews_utils_is_system_user_flag (n))
 			continue;
+
 		e_ews_message_write_string_parameter (msg, "String", NULL, n);
 	}
 }
@@ -453,14 +463,16 @@ ews_utils_merge_server_user_flags (EEwsItem *item,
 
 	/* transfer camel flags to a list */
 	for (flag = camel_message_info_user_flags (&mi->info); flag;
-	     flag = flag->next)
-		list = g_slist_append (list, (gchar *) flag->name);
-
-	/* we're transferring from server only, so just dump them */
-	for (p = list; p; p = p->next) {
-		camel_flag_set (&mi->info.user_flags, p->data, 0);
+	     flag = flag->next) {
+		if (!ews_utils_is_system_user_flag (flag->name))
+			list = g_slist_prepend (list, (gchar *) flag->name);
 	}
-	//g_slist_foreach (list, (GFunc) g_free, NULL);
+
+	for (p = list; p; p = p->next) {
+		/* remove custom user flags */
+		camel_flag_set (&mi->info.user_flags, p->data, FALSE);
+	}
+
 	g_slist_free (list);
 
 	/* now transfer over all the categories */
@@ -471,12 +483,12 @@ ews_utils_merge_server_user_flags (EEwsItem *item,
 	}
 }
 
-static gint
+static guint32
 ews_utils_get_server_flags (EEwsItem *item)
 {
 	gboolean flag;
 	EwsImportance importance;
-	gint server_flags = 0;
+	guint32 server_flags = 0, msg_flags;
 
 	e_ews_item_is_read (item, &flag);
 	if (flag)
@@ -499,6 +511,10 @@ ews_utils_get_server_flags (EEwsItem *item)
 	importance = e_ews_item_get_importance (item);
 	if (importance == EWS_ITEM_HIGH)
 		server_flags |= CAMEL_MESSAGE_FLAGGED;
+
+	msg_flags = e_ews_item_get_message_flags (item);
+	if ((msg_flags & EWS_MAPI_MSGFLAG_RN_PENDING) != 0)
+		server_flags |= CAMEL_EWS_MESSAGE_MSGFLAG_RN_PENDING;
 
 	/* TODO Update replied flags */
 
@@ -707,6 +723,23 @@ camel_ews_utils_update_follow_up_flags (EEwsItem *item,
 	return changed;
 }
 
+static gboolean
+camel_ews_utils_update_read_receipt_flags (EEwsItem *item,
+					   CamelMessageInfo *info,
+					   guint32 server_flags,
+					   gboolean requests_read_receipt)
+{
+	gboolean changed = FALSE;
+
+	/* PidTagReadReceiptRequested */
+	if ((requests_read_receipt || e_ews_item_get_extended_property_as_boolean (item, NULL, 0x0029, NULL)) &&
+	    (server_flags & CAMEL_EWS_MESSAGE_MSGFLAG_RN_PENDING) == 0) {
+		changed = camel_message_info_set_user_flag (info, "receipt-handled", TRUE) || changed;
+	}
+
+	return changed;
+}
+
 void
 camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
                                     GSList *items_updated)
@@ -732,16 +765,18 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
 		mi = (CamelEwsMessageInfo *)
 			camel_folder_summary_get (folder->summary, id->id);
 		if (mi) {
-			gint server_flags;
+			guint32 server_flags;
 			gboolean changed, was_changed;
 
 			was_changed = (mi->info.flags & CAMEL_MESSAGE_FOLDER_FLAGGED) != 0;
+
 			server_flags = ews_utils_get_server_flags (item);
 			ews_utils_merge_server_user_flags (item, mi);
 			changed = camel_ews_update_message_info_flags (
 				folder->summary, (CamelMessageInfo *) mi,
 				server_flags, NULL);
 			changed = camel_ews_utils_update_follow_up_flags (item, (CamelMessageInfo *) mi) || changed;
+			changed = camel_ews_utils_update_read_receipt_flags (item, (CamelMessageInfo *) mi, server_flags, FALSE) || changed;
 
 			if (changed)
 				camel_folder_change_info_change_uid (ci, mi->info.uid);
@@ -795,7 +830,7 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 		EEwsItemType item_type;
 		const GSList *to, *cc;
 		const gchar *msg_headers;
-		gboolean has_attachments, found_property;
+		gboolean has_attachments, found_property, message_requests_read_receipt = FALSE;
 		guint32 server_flags;
 
 		if (!item)
@@ -833,8 +868,11 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 			camel_mime_parser_scan_from (parser, FALSE);
 			g_object_unref (stream);
 
-			if (camel_mime_part_construct_from_parser_sync (part, parser, NULL, NULL))
+			if (camel_mime_part_construct_from_parser_sync (part, parser, NULL, NULL)) {
 				mi = (CamelEwsMessageInfo *) camel_folder_summary_info_new_from_header (folder->summary, part->headers);
+				if (camel_header_raw_find (&(part->headers), "Disposition-Notification-To", NULL))
+					message_requests_read_receipt = TRUE;
+			}
 
 			g_object_unref (parser);
 			g_object_unref (part);
@@ -893,9 +931,9 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 		mi->server_flags = server_flags;
 
 		camel_ews_utils_update_follow_up_flags (item, (CamelMessageInfo *) mi);
+		camel_ews_utils_update_read_receipt_flags (item, (CamelMessageInfo *) mi, server_flags, message_requests_read_receipt);
 
-		camel_folder_summary_add (
-			folder->summary, (CamelMessageInfo *) mi);
+		camel_folder_summary_add (folder->summary, (CamelMessageInfo *) mi);
 
 		/* camel_folder_summary_add() sets folder_flagged flag
 		 * on the message info, but this is a fresh item downloaded

@@ -52,8 +52,7 @@ typedef struct _CamelEwsMessageContentInfo CamelEwsMessageContentInfo;
 
 /* extra summary flags*/
 enum {
-	CAMEL_EWS_MESSAGE_JUNK = 1 << 17,
-	CAMEL_EWS_MESSAGE_NOJUNK = 1 << 18
+	CAMEL_EWS_MESSAGE_MSGFLAG_RN_PENDING = CAMEL_MESSAGE_FOLDER_FLAGGED << 1
 };
 
 struct _CamelEwsMessageInfo {

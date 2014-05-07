@@ -201,6 +201,7 @@ gboolean	e_ews_item_is_forwarded		(EEwsItem *item,
 						 gboolean *is_forwarded);
 gboolean	e_ews_item_is_answered		(EEwsItem *item,
 						 gboolean *is_answered);
+guint32		e_ews_item_get_message_flags	(EEwsItem *item);
 const GSList *	e_ews_item_get_to_recipients	(EEwsItem *item);
 const GSList *	e_ews_item_get_cc_recipients	(EEwsItem *item);
 const GSList *	e_ews_item_get_bcc_recipients	(EEwsItem *item);
