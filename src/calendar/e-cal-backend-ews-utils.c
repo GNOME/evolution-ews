@@ -1664,7 +1664,7 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 	}
 
 	org_email_address = e_ews_collect_organizer (icalcomp);
-	if (org_email_address && g_ascii_strcasecmp (org_email_address, convert_data->user_email)) {
+	if (org_email_address && convert_data->user_email && g_ascii_strcasecmp (org_email_address, convert_data->user_email)) {
 		e_ews_message_end_item_change (msg);
 		return;
 	}
