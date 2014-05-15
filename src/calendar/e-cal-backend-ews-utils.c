@@ -1303,7 +1303,7 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	ical_location_end = icaltimezone_get_location (tzid_end);
 
 	satisfies = e_ews_connection_satisfies_server_version (convert_data->connection, E_EWS_EXCHANGE_2010);
-	if (satisfies) {
+	if (satisfies && ical_location_start != NULL && ical_location_end != NULL) {
 		/* set iana timezone info as an extended property */
 		e_ews_message_add_extended_property_distinguished_name_string (
 			msg,
@@ -1842,7 +1842,7 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 			e_ews_message_replace_server_version (msg, E_EWS_EXCHANGE_2007_SP1);
 
 			e_ews_message_start_set_item_field (msg, "MeetingTimeZone", "calendar", "CalendarItem");
-			ewscal_set_meeting_timezone (msg, tzid_start);
+			ewscal_set_meeting_timezone (msg, tzid_start ? tzid_start : convert_data->default_zone);
 			e_ews_message_end_set_item_field (msg);
 		}
 	}
