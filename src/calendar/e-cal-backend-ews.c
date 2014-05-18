@@ -1124,7 +1124,7 @@ e_cal_backend_ews_remove_object (ECalBackend *backend,
 	EwsCalendarAsyncData *remove_data;
 	ECalBackendEws *cbews = (ECalBackendEws *) backend;
 	ECalBackendEwsPrivate *priv;
-	ECalComponent *comp, *parent = NULL;
+	ECalComponent *comp = NULL, *parent = NULL;
 	GError *error = NULL;
 	EwsId item_id;
 	guint index = 0;
@@ -1632,7 +1632,7 @@ e_cal_backend_ews_create_objects (ECalBackend *backend,
 	ECalBackendEwsPrivate *priv;
 	icalcomponent_kind kind;
 	icalcomponent *icalcomp;
-	ECalComponent *comp;
+	ECalComponent *comp = NULL;
 	struct icaltimetype current;
 	GError *error = NULL;
 	const gchar *send_meeting_invitations, *calobj;
@@ -1868,7 +1868,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
 	icalcomponent_kind kind;
-	ECalComponent *comp, *oldcomp;
+	ECalComponent *comp = NULL, *oldcomp;
 	icalcomponent *icalcomp;
 	gchar *itemid = NULL, *changekey = NULL;
 	struct icaltimetype current;
