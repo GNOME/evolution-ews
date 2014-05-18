@@ -488,7 +488,7 @@ parse_extended_property (EEwsItemPrivate *priv,
 	EEwsMessageDataType data_type;
 	ESoapParameter *subparam;
 	gchar *str, *setid, *name, *value;
-	guint32 tag;
+	guint32 tag = 0;
 
 	subparam = e_soap_parameter_get_first_child_by_name (param, "ExtendedFieldURI");
 	if (!subparam)
@@ -583,7 +583,7 @@ parse_extended_property (EEwsItemPrivate *priv,
 
 			g_hash_table_insert (set_hash, GUINT_TO_POINTER (tag), g_strdup (value));
 		}
-	} else {
+	} else if (tag != 0) {
 		g_hash_table_insert (priv->mapi_extended_tags, GUINT_TO_POINTER (tag), g_strdup (value));
 	}
 
