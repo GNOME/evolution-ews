@@ -2171,12 +2171,11 @@ ews_cal_do_method_request_publish_reply (ECalBackendEws *cbews,
 	gchar *change_key = NULL;
 	gchar *mail_id = NULL;
 	gint pass = 0;
+	GSList *ids = NULL;
 
 	ews_cal_component_get_calendar_item_accept_id (comp, &item_id, &change_key, &mail_id);
 
 	while (pass < 2) {
-		GSList *ids = NULL;
-
 		/*in case we do not have item id we will create item with mime content only*/
 		if (item_id == NULL) {
 			e_ews_receive_objects_no_exchange_mail (cbews, subcomp, &ids, cancellable, &local_error);
@@ -2206,7 +2205,7 @@ ews_cal_do_method_request_publish_reply (ECalBackendEws *cbews,
 			 * maybe the associated accept calendar item changed
 			 * on the server, thus retry with updated values
 			 */
-			GSList *ids = NULL, *my_ids = NULL;
+			GSList *my_ids = NULL;
 
 			g_clear_error (&local_error);
 
@@ -2249,16 +2248,18 @@ ews_cal_do_method_request_publish_reply (ECalBackendEws *cbews,
 			}
 
 			g_slist_free (my_ids);
-			g_slist_free_full (ids, g_object_unref);
 
 			if (pass == 0)
 				break;
 		} else {
 			break;
 		}
+
+		g_slist_free_full (ids, g_object_unref);
+		ids = NULL;
 	}
 
-	if (error == NULL) {
+	if (local_error == NULL) {
 		icalproperty *transp;
 
 		transp = icalcomponent_get_first_property (subcomp, ICAL_TRANSP_PROPERTY);
@@ -2266,7 +2267,7 @@ ews_cal_do_method_request_publish_reply (ECalBackendEws *cbews,
 		if (g_strcmp0 (icalproperty_get_value_as_string (transp), "TRANSPARENT") == 0 &&
 		    g_strcmp0 (response_type, "ACCEPTED") == 0) {
 			EwsCalendarConvertData convert_data;
-			GSList *l, *ids = NULL;
+			GSList *l;
 
 			/*
 			 * user can accept meeting but mark it as free in it's calendar
@@ -2293,18 +2294,19 @@ ews_cal_do_method_request_publish_reply (ECalBackendEws *cbews,
 				NULL,
 				e_cal_backend_ews_prepare_set_free_busy_status,
 				&convert_data,
-				&ids,
+				NULL,
 				cancellable,
 				&local_error);
 		}
 	}
 
-	if (error != NULL)
+	if (local_error != NULL)
 		g_propagate_error (error, local_error);
 
 	g_free (item_id);
 	g_free (change_key);
 	g_free (mail_id);
+	g_slist_free_full (ids, g_object_unref);
 
 	/*We have to run sync before any other operations */
 	ews_start_sync (cbews);
