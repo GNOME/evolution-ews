@@ -4847,14 +4847,9 @@ e_ews_connection_update_items_finish (EEwsConnection *cnc,
 
 	if (ids)
 		*ids = async_data->items;
-	else {
-		while (async_data->items) {
-			g_object_unref (async_data->items->data);
-			async_data->items = g_slist_remove (
-				async_data->items,
-				async_data->items->data);
-		}
-	}
+	else
+		g_slist_free_full (async_data->items, g_object_unref);
+
 	return TRUE;
 }
 
