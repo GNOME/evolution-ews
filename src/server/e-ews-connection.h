@@ -113,16 +113,6 @@ typedef enum {
 } EEwsBodyType;
 
 typedef struct {
-	gchar *as_url;
-	gchar *oab_url;
-
-	/* all the below variables are for future use */
-	gchar *oof_url;
-	gpointer future1;
-	gpointer future2;
-} EwsUrls;
-
-typedef struct {
 	gchar *id;
 	gchar *dn;
 	gchar *name;
