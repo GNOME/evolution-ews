@@ -126,6 +126,7 @@ static guint notification_key = 1;
 typedef struct _EwsNode EwsNode;
 typedef struct _EwsAsyncData EwsAsyncData;
 typedef struct _EwsEventsAsyncData EwsEventsAsyncData;
+typedef struct _EwsUrls EwsUrls;
 
 struct _EwsAsyncData {
 	GSList *items_created;
@@ -154,6 +155,16 @@ struct _EwsNode {
 
 	GCancellable *cancellable;
 	gulong cancel_handler_id;
+};
+
+struct _EwsUrls {
+	xmlChar *as_url;
+	xmlChar *oab_url;
+
+	/* all the below variables are for future use */
+	xmlChar *oof_url;
+	gpointer future1;
+	gpointer future2;
 };
 
 /* Forward Declarations */
@@ -426,11 +437,19 @@ autodiscover_parse_protocol (xmlNode *node,
 	for (node = node->children; node; node = node->next) {
 		if (node->type == XML_ELEMENT_NODE &&
 		    !strcmp ((gchar *) node->name, "ASUrl")) {
-			urls->as_url = (gchar *) xmlNodeGetContent (node);
-		} else if (node->type == XML_ELEMENT_NODE &&
-		    !strcmp ((gchar *) node->name, "OABUrl"))
-			urls->oab_url = (gchar *) xmlNodeGetContent (node);
+			if (urls->as_url != NULL)
+				xmlFree (urls->as_url);
 
+			urls->as_url = xmlNodeGetContent (node);
+		} else if (node->type == XML_ELEMENT_NODE &&
+		    !strcmp ((gchar *) node->name, "OABUrl")) {
+			if (urls->oab_url != NULL)
+				xmlFree (urls->oab_url);
+
+			urls->oab_url = xmlNodeGetContent (node);
+		}
+
+		/* Once we find both, we can stop looking for the URLs */
 		if (urls->as_url && urls->oab_url)
 			return TRUE;
 	}
@@ -2510,13 +2529,19 @@ autodiscover_response_cb (SoupSession *session,
 		if (node->type == XML_ELEMENT_NODE &&
 		    !strcmp ((gchar *) node->name, "Protocol")) {
 			success = autodiscover_parse_protocol (node, urls);
-			break;
+			/* Since the server may send back multiple <Protocol> nodes
+			 * don't break unless we found the both URLs.
+			 */
+			if (success)
+				break;
 		}
 	}
 
 	if (!success) {
-		g_free (urls->as_url);
-		g_free (urls->oab_url);
+		if (urls->as_url != NULL)
+			xmlFree (urls->as_url);
+		if (urls->oab_url != NULL)
+			xmlFree (urls->oab_url);
 		g_free (urls);
 		g_set_error (
 			&error, EWS_CONNECTION_ERROR, -1,
@@ -2533,11 +2558,15 @@ autodiscover_response_cb (SoupSession *session,
 		}
 	}
 
-	ad->as_url = urls->as_url;
-	urls->as_url = NULL;
+	if (urls->as_url != NULL) {
+		ad->as_url = g_strdup ((gchar *) urls->as_url);
+		xmlFree (urls->as_url);
+	}
 
-	ad->oab_url = urls->oab_url;
-	urls->oab_url = NULL;
+	if (urls->oab_url != NULL) {
+		ad->oab_url = g_strdup ((gchar *) urls->oab_url);
+		xmlFree (urls->oab_url);
+	}
 
 	g_free (urls);
 
