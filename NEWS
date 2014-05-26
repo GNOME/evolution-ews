@@ -1,3 +1,21 @@
+Evolution-EWS 3.13.2 2014-05-26
+-------------------------------
+
+Bug Fixes:
+	Bug #656805 - Read receipt handling doesn't work (Milan Crha)
+	Bug #728246 - Fail creating all day event (Fabiano Fidêncio)
+	Bug #730042 - Autodiscover XML can contain multiple Protocol elements (Nathan Caza)
+
+Miscellaneous:
+	Guard private update-related variables with an update lock (Milan Crha)
+	Fix g_ascii_strcasecmp: assertion 's2 != NULL' (Fabiano Fidêncio)
+	Fix 'Unintialized pointer read' (Fabiano Fidêncio)
+	Fix 'Uninitialized scalar variable' (Fabiano Fidêncio)
+	Fix 'Logically dead code' (Fabiano Fidêncio)
+
+Translations:
+	Christian Kirbach (de)
+
 Evolution-EWS 3.13.1 2014-04-28
 -------------------------------
 
