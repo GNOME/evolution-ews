@@ -54,9 +54,6 @@ typedef struct {
 	time_t end;
 } EwsCalendarConvertData;
 
-EwsCalendarConvertData *ews_calendar_convert_data_new (void);
-void ews_calendar_convert_data_free (EwsCalendarConvertData *convert_data);
-
 const gchar *e_ews_collect_organizer (icalcomponent *comp);
 void e_ews_collect_attendees (icalcomponent *comp, GSList **required, GSList **optional, GSList **resource);
 
