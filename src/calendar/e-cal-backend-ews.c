@@ -377,7 +377,7 @@ e_cal_backend_ews_discard_alarm (ECalBackend *backend,
 	ECalBackendEws *cbews = (ECalBackendEws *) backend;
 	ECalBackendEwsPrivate *priv;
 	EwsCalendarAsyncData *edad;
-	EwsCalendarConvertData convert_data;
+	EwsCalendarConvertData convert_data = { 0 };
 	ECalComponent *comp;
 	GError *local_error = NULL;
 
@@ -1342,7 +1342,7 @@ ews_create_attachments_cb (GObject *object,
 		const gchar *send_meeting_invitations;
 		const gchar *send_or_save;
 		EwsCalendarAsyncData *modify_data;
-		EwsCalendarConvertData convert_data;
+		EwsCalendarConvertData convert_data = { 0 };
 
 		modify_data = g_new0 (EwsCalendarAsyncData, 1);
 		modify_data->cbews = g_object_ref (create_data->cbews);
@@ -1626,7 +1626,7 @@ e_cal_backend_ews_create_objects (ECalBackend *backend,
                                   const GSList *calobjs)
 {
 	EwsCalendarAsyncData *create_data;
-	EwsCalendarConvertData convert_data;
+	EwsCalendarConvertData convert_data = { 0 };
 	EwsFolderId *fid;
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
@@ -1868,7 +1868,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 	ECalBackendEws *cbews;
 	ECalBackendEwsPrivate *priv;
 	icalcomponent_kind kind;
-	ECalComponent *comp = NULL, *oldcomp;
+	ECalComponent *comp = NULL, *oldcomp = NULL;
 	icalcomponent *icalcomp;
 	gchar *itemid = NULL, *changekey = NULL;
 	struct icaltimetype current;
@@ -1925,6 +1925,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 		PRIV_UNLOCK (priv);
 		goto exit;
 	}
+	g_object_ref (oldcomp);
 	PRIV_UNLOCK (priv);
 
 	e_cal_backend_ews_pick_all_tzids_out (cbews, e_cal_component_get_icalcomponent (oldcomp));
@@ -2036,7 +2037,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 		g_free (item_id);
 
 	} else {
-		EwsCalendarConvertData convert_data;
+		EwsCalendarConvertData convert_data = { 0 };
 		const gchar *send_meeting_invitations;
 		const gchar *send_or_save;
 
@@ -2077,11 +2078,14 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 			ews_cal_modify_object_cb,
 			modify_data);
 	}
+
+	g_clear_object (&oldcomp);
+
 	return;
 
 exit:
-	if (comp != NULL)
-		g_object_unref (comp);
+	g_clear_object (&oldcomp);
+	g_clear_object (&comp);
 
 	convert_error_to_edc_error (&error);
 	if (context)
@@ -2099,7 +2103,7 @@ e_ews_receive_objects_no_exchange_mail (ECalBackendEws *cbews,
                                         GCancellable *cancellable,
                                         GError **error)
 {
-	EwsCalendarConvertData convert_data;
+	EwsCalendarConvertData convert_data = { 0 };
 	EwsFolderId *fid;
 
 	convert_data.connection = cbews->priv->cnc;
@@ -2180,7 +2184,7 @@ ews_cal_do_method_request_publish_reply (ECalBackendEws *cbews,
 		if (item_id == NULL) {
 			e_ews_receive_objects_no_exchange_mail (cbews, subcomp, &ids, cancellable, &local_error);
 		} else {
-			EwsCalendarConvertData convert_data;
+			EwsCalendarConvertData convert_data = { 0 };
 
 			convert_data.response_type = (gchar *) response_type;
 			convert_data.item_id = item_id;
@@ -2266,7 +2270,7 @@ ews_cal_do_method_request_publish_reply (ECalBackendEws *cbews,
 
 		if (g_strcmp0 (icalproperty_get_value_as_string (transp), "TRANSPARENT") == 0 &&
 		    g_strcmp0 (response_type, "ACCEPTED") == 0) {
-			EwsCalendarConvertData convert_data;
+			EwsCalendarConvertData convert_data = { 0 };
 			GSList *l;
 
 			/*
@@ -2723,13 +2727,17 @@ ews_get_attachments (ECalBackendEws *cbews,
 		}
 
 		id = e_cal_component_get_id (comp);
-		cache_comp = e_cal_backend_store_get_component (cbews->priv->store, id->uid, id->rid);
-		e_cal_component_free_id (id);
+		if (!id) {
+			g_warn_if_reached ();
+		} else {
+			cache_comp = e_cal_backend_store_get_component (cbews->priv->store, id->uid, id->rid);
+			e_cal_component_free_id (id);
 
-		put_component_to_store (cbews, comp);
+			put_component_to_store (cbews, comp);
 
-		if (cache_comp)
-			e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbews), cache_comp, comp);
+			if (cache_comp)
+				e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbews), cache_comp, comp);
+		}
 
 		g_slist_free_full (uris, g_free);
 		g_slist_free_full (info_attachments, (GDestroyNotify) e_ews_attachment_info_free);
@@ -3398,11 +3406,17 @@ cal_backend_ews_process_folder_items (ECalBackendEws *cbews,
 
 		PRIV_LOCK (priv);
 		comp = g_hash_table_lookup (priv->item_id_hash, item_id);
+		if (comp)
+			g_object_ref (comp);
 		PRIV_UNLOCK (priv);
 
 		if (comp) {
-			if (!ews_cal_delete_comp (cbews, comp, item_id))
+			if (!ews_cal_delete_comp (cbews, comp, item_id)) {
+				g_object_unref (comp);
 				goto exit;
+			}
+
+			g_object_unref (comp);
 		}
 	}
 	e_cal_backend_store_thaw_changes (priv->store);
@@ -3778,7 +3792,7 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend,
 	ECalBackendEwsPrivate *priv = cbews->priv;
 	GError *error = NULL;
 	EwsCalendarAsyncData *free_busy_data;
-	EwsCalendarConvertData convert_data;
+	EwsCalendarConvertData convert_data = { 0 };
 	GSList *users_copy = NULL;
 
 	/* make sure we're not offline */

@@ -210,37 +210,6 @@ e_cal_backend_ews_tz_util_get_ical_equivalent (const gchar *msdn_tz_location)
 	return ical_tz_location;
 }
 
-EwsCalendarConvertData *
-ews_calendar_convert_data_new (void)
-{
-	return g_new0 (EwsCalendarConvertData, 1);
-}
-
-void
-ews_calendar_convert_data_free (EwsCalendarConvertData *convert_data)
-{
-	if (convert_data != NULL) {
-		if (convert_data->connection != NULL)
-			g_clear_object (&convert_data->connection);
-		if (convert_data->comp != NULL)
-			g_clear_object (&convert_data->comp);
-		if (convert_data->old_comp != NULL)
-			g_clear_object (&convert_data->old_comp);
-		if (convert_data->default_zone != NULL)
-			icaltimezone_free (convert_data->default_zone, TRUE);
-		if (convert_data->icalcomp != NULL)
-			icalcomponent_free (convert_data->icalcomp);
-
-		g_free (convert_data->item_id);
-		g_free (convert_data->change_key);
-		g_free (convert_data->user_email);
-		g_free (convert_data->response_type);
-		g_slist_free_full (convert_data->users, g_free);
-
-		g_free (convert_data);
-	}
-}
-
 /*
  * Iterate over the icalcomponent properties and collect attendees
  */
