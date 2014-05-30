@@ -60,7 +60,7 @@ noinst_HEADERS = \
 	camel-ews-transport.h \
 	$(NULL)
 
-libcamelews_la_LDFLAGS = -avoid-version $(NO_UNDEFINED)
+libcamelews_la_LDFLAGS = -module -avoid-version $(NO_UNDEFINED)
 
 libcamelews_la_LIBADD = \
 	$(top_builddir)/src/server/libeews-1.2.la  \
