@@ -1,3 +1,21 @@
+Evolution-EWS 3.12.3 2014-06-09
+-------------------------------
+
+Bug Fixes:
+	Bug 728246 - Fail creating all day event (Fabiano Fidêncio)
+	Bug 730042 - Autodiscover XML can contain multiple Protocol elements (Nathan Caza)
+	Bug 692780 - Crash under ews_get_attachments() (Milan Crha)
+	Bug 730878 - Build libcamelews as a module (Olav Vitters)
+
+Miscellaneous:
+	Fix g_ascii_strcasecmp: assertion 's2 != NULL' (Fabiano Fidêncio)
+	Fix 'Unintialized pointer read' (Fabiano Fidêncio)
+	Fix 'Uninitialized scalar variable' (Fabiano Fidêncio)
+	Fix 'Logically dead code' (Fabiano Fidêncio)
+
+Translations:
+	MarMav (el)
+
 Evolution-EWS 3.12.2 2014-05-12
 -------------------------------
 
