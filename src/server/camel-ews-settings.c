@@ -76,6 +76,35 @@ G_DEFINE_TYPE_WITH_CODE (
 	G_IMPLEMENT_INTERFACE (
 		CAMEL_TYPE_NETWORK_SETTINGS, NULL))
 
+static gboolean
+ews_settings_transform_host_url_to_host_cb (GBinding *binding,
+					    const GValue *host_url_value,
+					    GValue *host_value,
+					    gpointer user_data)
+{
+	const gchar *host_url;
+
+	host_url = g_value_get_string (host_url_value);
+	if (host_url && *host_url) {
+		SoupURI *uri;
+
+		uri = soup_uri_new (host_url);
+		if (uri) {
+			const gchar *host;
+
+			host = soup_uri_get_host (uri);
+			if (!host || !*host)
+				host = "";
+
+			g_value_set_string (host_value, host);
+
+			soup_uri_free (uri);
+		}
+	}
+
+	return TRUE;
+}
+
 static void
 ews_settings_set_property (GObject *object,
                             guint property_id,
@@ -581,6 +610,14 @@ camel_ews_settings_init (CamelEwsSettings *settings)
 {
 	settings->priv = CAMEL_EWS_SETTINGS_GET_PRIVATE (settings);
 	g_mutex_init (&settings->priv->property_lock);
+
+	g_object_bind_property_full (settings, "hosturl",
+				     settings, "host",
+				     G_BINDING_DEFAULT,
+				     ews_settings_transform_host_url_to_host_cb,
+				     NULL,
+				     NULL,
+				     NULL);
 }
 
 /**
