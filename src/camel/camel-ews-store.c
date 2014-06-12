@@ -3689,8 +3689,7 @@ camel_ews_subscribable_init (CamelSubscribableInterface *iface)
 static void
 camel_ews_store_init (CamelEwsStore *ews_store)
 {
-	ews_store->priv =
-		CAMEL_EWS_STORE_GET_PRIVATE (ews_store);
+	ews_store->priv = CAMEL_EWS_STORE_GET_PRIVATE (ews_store);
 
 	ews_store->priv->last_refresh_time = time (NULL) - (FINFO_REFRESH_INTERVAL + 10);
 	ews_store->priv->updates_cancellable = NULL;
