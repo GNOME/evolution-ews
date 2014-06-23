@@ -1,3 +1,14 @@
+Evolution-EWS 3.13.3 2014-06-23
+-------------------------------
+
+Bug Fixes:
+	Bug 692780 - Crash under ews_get_attachments() (Milan Crha)
+	Bug 730878 - Build libcamelews as a module (Olav Vitters)
+	Bug 731585 - evolution-ews Camel part pretends offline state (Milan Crha)
+
+Translations:
+	MarMav (el)
+
 Evolution-EWS 3.13.2 2014-05-26
 -------------------------------
 
