@@ -1,0 +1,357 @@
+# Hungarian translation for evolution-ews.
+# Copyright (C) 2014 evolution-ews's COPYRIGHT HOLDER
+# This file is distributed under the same license as the evolution-ews package.
+#
+# Balázs Úr <urbalazs@gmail.com>, 2014.
+msgid ""
+msgstr ""
+"Project-Id-Version: evolution-ews gnome-3-2\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-ews&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2014-06-30 16:39+0000\n"
+"PO-Revision-Date: 2014-06-30 22:06+0200\n"
+"Last-Translator: Balázs Úr <urbalazs@gmail.com>\n"
+"Language-Team: Hungarian <gnome-hu-list@gnome.org>\n"
+"Language: hu\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Lokalize 1.2\n"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:240
+msgid "Global Address list"
+msgstr "Globális címlista"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:110
+#, c-format
+msgid "Autodiscover failed: %s"
+msgstr "Az automatikus felismerés sikertelen: %s"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:145
+#, c-format
+msgid "Enter Password for %s"
+msgstr "Adja meg %s jelszavát"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:154
+msgid "Could not get password."
+msgstr "Nem kérhető le a jelszó."
+
+#. OAB url entry
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:275
+msgid "OAB U_RL:"
+msgstr "OAB U_RL:"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:287
+msgid "_Host URL:"
+msgstr "_Gép URL:"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:302
+msgid "Fetch _URL"
+msgstr "_URL lekérése"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:470
+msgid "Could not fetch oal list: "
+msgstr "Nem sikerült letölteni az oal listát:"
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:512
+msgid "Fetching..."
+msgstr "Letöltés…"
+
+#. Add cache check box
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:649
+msgid "Cache o_ffline address book"
+msgstr "_Kapcsolat nélküli címjegyzék gyorsítótárazása"
+
+#. Add label
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:655
+msgid "Select Ad_dress list: "
+msgstr "_Címlista kiválasztása: "
+
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:665
+msgid "Fetch _list"
+msgstr "Lista l_etöltése"
+
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:1
+#: ../src/camel/camel-ews-provider.c:69
+msgid "Exchange Web Services"
+msgstr "Exchange webszolgáltatások"
+
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:2
+msgid "GAL settings"
+msgstr "GAL-beállítások"
+
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:3
+msgid "Exchange Web Services Plugin"
+msgstr "Exchange webszolgáltatások bővítmény"
+
+#: ../src/addressbook/e-book-backend-ews.c:1475
+#, c-format
+msgid "Downloading contacts in %s %d%% completed... "
+msgstr "Kapcsolatok letöltése itt: %s %d%%-ban kész…"
+
+#: ../src/addressbook/e-book-backend-ews.c:1865
+msgid "Syncing contacts..."
+msgstr "Névjegyek szinkronizálása…"
+
+#: ../src/addressbook/e-book-backend-ews.c:2062
+msgid "Searching..."
+msgstr "Keresés…"
+
+#: ../src/addressbook/e-book-backend-sqlitedb.c:470
+#, c-format
+msgid "Insufficient memory"
+msgstr "Nincs elég memória"
+
+#: ../src/calendar/e-cal-backend-ews.c:3543
+#, c-format
+msgid "Unknown calendar property '%s'"
+msgstr "Ismeretlen naptártulajdonság: „%s”"
+
+#: ../src/camel/camel-ews-folder.c:255
+#, c-format
+msgid "Unable to open mimecontent temporary file!"
+msgstr "Nem nyitható meg a MIME-tartalom átmeneti fájlja!"
+
+#: ../src/camel/camel-ews-folder.c:262
+#, c-format
+msgid "Unable to generate parser from mimecontent!"
+msgstr "Nem hozható létre a MIME-tartalom feldolgozója!"
+
+#: ../src/camel/camel-ews-folder.c:271
+#, c-format
+msgid "Unable to parse meeting request mimecontent!"
+msgstr "Nem dolgozható fel a találkozókérés MIME-tartalma!"
+
+#: ../src/camel/camel-ews-folder.c:328
+#, c-format
+msgid "Unable to create cache file"
+msgstr "Nem hozató létre gyorsítótárfájl"
+
+#: ../src/camel/camel-ews-folder.c:425 ../src/camel/camel-ews-folder.c:494
+#, c-format
+msgid "Unable to create cache path"
+msgstr "Nem hozható létre a gyorsítótár útvonala"
+
+#: ../src/camel/camel-ews-folder.c:503
+#, c-format
+msgid "Failed to move message cache file"
+msgstr "Sikertelen az üzenetgyorsítótár-fájl áthelyezése"
+
+#: ../src/camel/camel-ews-folder.c:853
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "„%s” összefoglalása nem tölthető be"
+
+#: ../src/camel/camel-ews-folder.c:1180 ../src/camel/camel-ews-store.c:537
+#: ../src/camel/camel-ews-store.c:593 ../src/camel/camel-ews-store.c:661
+#, c-format
+msgid "Cant perform actions on the folder while in offline mode"
+msgstr "Kapcsolat nélküli módban nem lehet végrehajtani a műveleteket a mappán"
+
+#: ../src/camel/camel-ews-provider.c:48
+msgid "Checking for new mail"
+msgstr "Új levelek keresése"
+
+#: ../src/camel/camel-ews-provider.c:50
+msgid "C_heck for new messages in all folders"
+msgstr "_Új levelek keresése minden mappában"
+
+#: ../src/camel/camel-ews-provider.c:53
+msgid "Options"
+msgstr "Beállítások"
+
+#: ../src/camel/camel-ews-provider.c:55
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr "S_zűrők alkalmazása az új üzenetekre ezen kiszolgáló bejövő mappájában"
+
+#: ../src/camel/camel-ews-provider.c:57
+msgid "Check new messages for Jun_k contents"
+msgstr "_Levélszemét keresése az új levelek között"
+
+#: ../src/camel/camel-ews-provider.c:59
+msgid "Only check for Junk messages in the IN_BOX folder"
+msgstr "Csak a BEÉ_RKEZETT ÜZENETEK mappában keressen levélszemetet"
+
+#: ../src/camel/camel-ews-provider.c:61
+msgid "Automatically synchroni_ze remote mail locally"
+msgstr "A távoli levelek automatikus helyi s_zinkronizációja"
+
+#: ../src/camel/camel-ews-provider.c:71
+msgid "For accessing Exchange servers using Web Services"
+msgstr "Exchange kiszolgálók eléréséhez webszolgáltatások használatával"
+
+#: ../src/camel/camel-ews-provider.c:87
+msgid "Password"
+msgstr "Jelszó"
+
+#: ../src/camel/camel-ews-provider.c:89
+msgid ""
+"This option will connect to the Exchange server using a plaintext password."
+msgstr ""
+"Ez a beállítás egyszerű szöveges jelszó használatával létesít kapcsolatot az "
+"IMAP kiszolgálóval."
+
+#: ../src/camel/camel-ews-store.c:141
+#, c-format
+msgid "Session has no storage path"
+msgstr "A munkamenet nem rendelkezik tárolási útvonallal"
+
+#: ../src/camel/camel-ews-store.c:151
+#, c-format
+msgid "EWS service has no host URL"
+msgstr "Az EWS szolgáltatásnak nincs gép URL-e"
+
+#: ../src/camel/camel-ews-store.c:323
+#, c-format
+msgid "No such folder: %s"
+msgstr "Nincs %s nevű mappa"
+
+#: ../src/camel/camel-ews-store.c:530
+#, c-format
+msgid "Parent folder %s does not exist"
+msgstr "A szülő mappa (%s) nem létezik"
+
+#: ../src/camel/camel-ews-store.c:587
+#, c-format
+msgid "Folder does not exist"
+msgstr "A mappa nem létezik"
+
+#: ../src/camel/camel-ews-store.c:669
+#, c-format
+msgid "Folder %s does not exist"
+msgstr "A(z) %s mappa nem létezik"
+
+#: ../src/camel/camel-ews-store.c:678
+#, c-format
+msgid "No change key record for folder %s"
+msgstr "Nem változott a(z) %s mappa fő rekordja"
+
+#: ../src/camel/camel-ews-store.c:717
+#, c-format
+msgid "Cannot both rename and move a folder at the same time"
+msgstr "Nem lehet egyszerre átnevezni és mozgatni a mappát"
+
+#: ../src/camel/camel-ews-store.c:748
+#, c-format
+msgid "Cannot find folder ID for parent folder %s"
+msgstr "Nem található a(z) %s szülőmappa mappaazonosítója"
+
+#: ../src/camel/camel-ews-store.c:777 ../src/camel/camel-ews-transport.c:58
+#, c-format
+msgid "Exchange server %s"
+msgstr "%s Exchange kiszolgáló"
+
+#: ../src/camel/camel-ews-store.c:779
+#, c-format
+msgid "Exchange service for %s on %s"
+msgstr "Exchange szolgáltatás %s számára ezen: %s"
+
+#: ../src/camel/camel-ews-store.c:815
+#, c-format
+msgid "You must be working online to complete this operation"
+msgstr "A művelet befejezéséhez online kell dolgoznia"
+
+#: ../src/camel/camel-ews-transport.c:62
+#, c-format
+msgid "Exchange mail delivery via %s"
+msgstr "Exchange levélkézbesítés %s segítségével"
+
+#: ../src/camel/camel-ews-transport.c:92
+msgid "Cannot send message with no From address"
+msgstr "Nem küldhető el a levél a feladó címe nélkül"
+
+#: ../src/camel/camel-ews-transport.c:96
+msgid "Exchange server cannot send message with multiple From addresses"
+msgstr ""
+"Az Exchange kiszolgáló nem tud több Feladó címmel rendelkező üzenetet küldeni"
+
+#: ../src/camel/camel-ews-transport.c:104
+msgid "Failed to read From address"
+msgstr "Nem sikerült olvasni a feladó címét"
+
+#: ../src/camel/camel-ews-transport.c:110
+#, c-format
+msgid ""
+"Exchange server cannot send message as '%s', when the account was configured "
+"for address '%s'"
+msgstr ""
+"Az Exchange kiszolgáló nem tud „%s”-ként levelet küldeni, ha a fiók a "
+"következő címhez van beállítva: „%s”"
+
+#: ../src/camel/camel-ews-transport.c:121
+#, c-format
+msgid "Service not connected"
+msgstr "Nem kapcsolódott a szolgáltatáshoz"
+
+#: ../src/server/e-ews-connection.c:354
+msgid "Operation Cancelled"
+msgstr "Művelet megszakítva"
+
+#: ../src/server/e-ews-connection.c:408
+msgid "Authentication failed"
+msgstr "A hitelesítés sikertelen"
+
+#: ../src/server/e-ews-connection.c:416
+#, c-format
+msgid "No response: %s"
+msgstr "Nincs válasz: %s"
+
+#: ../src/server/e-ews-connection.c:1073 ../src/server/e-ews-connection.c:1418
+#: ../src/server/e-ews-connection.c:1655
+#, c-format
+msgid "Code: %d - Unexpected response from server"
+msgstr "Kód: %d - Váratlan válasz a kiszolgálótól"
+
+#: ../src/server/e-ews-connection.c:1085
+#, c-format
+msgid "Failed to parse autodiscover response XML"
+msgstr "Az automatikus felderítésre adott válasz XML feldolgozása sikertelen."
+
+#: ../src/server/e-ews-connection.c:1093
+#, c-format
+msgid "Failed to find <Autodiscover> element\n"
+msgstr "Nem sikerült megtalálni az <Autodiscover> elemet\n"
+
+#: ../src/server/e-ews-connection.c:1105
+#, c-format
+msgid "Failed to find <Response> element\n"
+msgstr "Nem sikerült megtalálni a <Response> elemet\n"
+
+#: ../src/server/e-ews-connection.c:1117
+#, c-format
+msgid "Failed to find <Account> element\n"
+msgstr "Nem sikerült megtalálni az <Account> elemet\n"
+
+#: ../src/server/e-ews-connection.c:1136
+#, c-format
+msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
+msgstr ""
+"Az <ASUrl> és <OABUrl> nem található az automatikus felderítésre adott "
+"válaszban"
+
+#: ../src/server/e-ews-connection.c:1234
+#, c-format
+msgid "Both email and password must be provided"
+msgstr "Az e-mailt és a jelszót is meg kell adni"
+
+#: ../src/server/e-ews-connection.c:1241
+#, c-format
+msgid "Wrong email id"
+msgstr "Rossz e-mail azonosító"
+
+#: ../src/server/e-ews-connection.c:1428
+#, c-format
+msgid "Failed to parse oab XML"
+msgstr "Nem sikerült feldolgozni az oab XML-t"
+
+#: ../src/server/e-ews-connection.c:1435
+#, c-format
+msgid "Failed to find <OAB> element\n"
+msgstr "Nem sikerült megtalálni az <OAB> elemet\n"
+
+#: ../src/utils/ews-camel-common.c:164
+#, c-format
+msgid "CreateItem call failed to return ID for new message"
+msgstr "A CreateItem hívás nem adott vissza új üzenetazonosítót"
+
