@@ -4,14 +4,16 @@
 #
 # Mézi Zoltán <mezi dot zoltan at gmail dot com>, 2011.
 # Gabor Kelemen <kelemeng at gnome dot hu>, 2011, 2012.
+# Balázs Úr <urbalazs@gmail.com>, 2014.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-03-18 14:15+0100\n"
-"PO-Revision-Date: 2012-03-18 14:15+0100\n"
-"Last-Translator: Gabor Kelemen <kelemeng at gnome dot hu>\n"
-"Language-Team: Magyar <gnome-hu-list at gnome dot org>\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-ews&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2014-06-30 16:39+0000\n"
+"PO-Revision-Date: 2014-06-30 22:03+0200\n"
+"Last-Translator: Balázs Úr <urbalazs@gmail.com>\n"
+"Language-Team: Hungarian <kde-l10n-hu@kde.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,7 +21,7 @@ msgstr ""
 "X-Poedit-Language: Hungarian\n"
 "X-Poedit-Country: HUNGARY\n"
 "Plural-Forms:  nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 1.0\n"
+"X-Generator: Lokalize 1.2\n"
 
 #: ../src/account-setup-eplugin/exchange-ews-account-listener.c:242
 msgid "Global Address list"
@@ -29,7 +31,7 @@ msgstr "Globális címlista"
 msgid "Select a valid time range"
 msgstr "Válasszon egy érvényes időtartamot"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:286
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:288
 #, c-format
 msgid ""
 "Unable to fetch out of office settings: \n"
@@ -38,7 +40,7 @@ msgstr ""
 "Nem kérhetők le a házon kívül állapot beállításai:\n"
 "%s"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:318
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:320
 msgid ""
 "The messages specified below will be automatically sent to \n"
 " each internal and external personal who sends a mail to you."
@@ -46,65 +48,65 @@ msgstr ""
 "Az alább megadott üzenetek automatikusan elküldésre kerülnek\n"
 "minden belső és külső feladónak, aki Önnek levelet küld."
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:323
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:325
 msgid "Status:"
 msgstr "Állapot:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:328
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:333
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:330
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:335
 msgid "I am _out of the office"
 msgstr "Házon _kívül vagyok"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:329
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:332
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:331
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:334
 msgid "I am _in the office"
 msgstr "Házon _belül vagyok"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:354
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:356
 msgid "_From:"
 msgstr "_Feladó:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:359
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:361
 msgid "_To:"
 msgstr "_Címzett:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:376
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:378
 msgid "I_nternal:"
 msgstr "B_első:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:378
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:380
 msgid "Message to be sent inside organization"
 msgstr "A szervezeten belülre küldendő üzenet"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:385
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:387
 msgid "None"
 msgstr "Nincs"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:386
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:388
 msgid "Known"
 msgstr "Ismert"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:387
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:389
 msgid "All"
 msgstr "Mind"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:389
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:391
 msgid "Send Message to"
 msgstr "Üzenet küldése:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:409
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:411
 msgid "E_xternal:"
 msgstr "_Külső:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:411
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:413
 msgid "Message to be sent outside organization"
 msgstr "A szervezeten kívülre küldendő üzenet"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:575
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:577
 msgid "Out of Office"
 msgstr "Nincs bent"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:581
+#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:583
 msgid "Fetching out of office settings..."
 msgstr "A házon kívül állapot beállításainak lekérése…"
 
@@ -123,80 +125,80 @@ msgid "Could not get password."
 msgstr "Nem kérhető le a jelszó."
 
 #. OAB url entry
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:286
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:293
 msgid "OAB U_RL:"
 msgstr "OAB U_RL:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:298
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:305
 msgid "_Host URL:"
 msgstr "_Gép URL:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:313
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:320
 msgid "Fetch _URL"
 msgstr "_URL lekérése"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:478
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:485
 msgid "Could not fetch oal list: "
 msgstr "Nem sikerült letölteni az oal listát:"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:524
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:532
 msgid "Fetching..."
 msgstr "Letöltés…"
 
 #. Add cache check box
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:661
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:670
 msgid "Cache o_ffline address book"
 msgstr "_Kapcsolat nélküli címjegyzék gyorsítótárazása"
 
 #. Add label
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:667
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:676
 msgid "Select Ad_dress list: "
 msgstr "_Címlista kiválasztása: "
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:677
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:686
 msgid "Fetch _list"
 msgstr "Lista l_etöltése"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:764
-#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:1
+#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:773
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:3
 msgid "EWS Settings"
 msgstr "EWS-beállítások"
 
-#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:2
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:1
 #: ../src/camel/camel-ews-provider.c:69
 msgid "Exchange Web Services"
 msgstr "Exchange webszolgáltatások"
 
-#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:3
-msgid "Exchange Web Services Plugin"
-msgstr "Exchange webszolgáltatások bővítmény"
-
-#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:4
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:2
 msgid "GAL settings"
 msgstr "GAL-beállítások"
 
-#: ../src/addressbook/e-book-backend-ews.c:913
+#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:4
+msgid "Exchange Web Services Plugin"
+msgstr "Exchange webszolgáltatások bővítmény"
+
+#: ../src/addressbook/e-book-backend-ews.c:951
 msgid "The backend does not support bulk additions"
 msgstr "A háttérprogram nem támogatja a tömeges feltöltéseket"
 
-#: ../src/addressbook/e-book-backend-ews.c:1184
+#: ../src/addressbook/e-book-backend-ews.c:1226
 msgid "The backend does not support bulk modifications"
 msgstr "A háttérprogram nem támogatja a tömeges módosításokat"
 
-#: ../src/addressbook/e-book-backend-ews.c:1358
+#: ../src/addressbook/e-book-backend-ews.c:1405
 msgid "Wait till syncing is done"
 msgstr "Várakozás a szinkronizálás befejeződésére"
 
-#: ../src/addressbook/e-book-backend-ews.c:1676
+#: ../src/addressbook/e-book-backend-ews.c:1741
 #, c-format
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr "Kapcsolatok letöltése itt: %s %d%%-ban kész…"
 
-#: ../src/addressbook/e-book-backend-ews.c:2165
+#: ../src/addressbook/e-book-backend-ews.c:2240
 msgid "Syncing contacts..."
 msgstr "Névjegyek szinkronizálása…"
 
-#: ../src/addressbook/e-book-backend-ews.c:2357
+#: ../src/addressbook/e-book-backend-ews.c:2437
 msgid "Searching..."
 msgstr "Keresés…"
 
@@ -225,23 +227,22 @@ msgstr "Nem dolgozható fel a találkozókérés MIME-tartalma!"
 msgid "Unable to create cache file"
 msgstr "Nem hozató létre gyorsítótárfájl"
 
-#: ../src/camel/camel-ews-folder.c:436 ../src/camel/camel-ews-folder.c:505
+#: ../src/camel/camel-ews-folder.c:437 ../src/camel/camel-ews-folder.c:513
 #, c-format
 msgid "Unable to create cache path"
 msgstr "Nem hozható létre a gyorsítótár útvonala"
 
-#: ../src/camel/camel-ews-folder.c:514
+#: ../src/camel/camel-ews-folder.c:522
 #, c-format
 msgid "Failed to move message cache file"
 msgstr "Sikertelen az üzenetgyorsítótár-fájl áthelyezése"
 
-#: ../src/camel/camel-ews-folder.c:917
+#: ../src/camel/camel-ews-folder.c:1084
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "„%s” összefoglalása nem tölthető be"
 
-#: ../src/camel/camel-ews-folder.c:1258 ../src/camel/camel-ews-store.c:757
-#: ../src/camel/camel-ews-store.c:813 ../src/camel/camel-ews-store.c:883
+#: ../src/camel/camel-ews-folder.c:1462
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr "Kapcsolat nélküli módban nem lehet végrehajtani a műveleteket a mappán"
@@ -278,68 +279,91 @@ msgstr "A távoli levelek automatikus helyi s_zinkronizációja"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Exchange kiszolgálók eléréséhez webszolgáltatások használatával"
 
-#: ../src/camel/camel-ews-provider.c:87
-msgid "Password"
-msgstr "Jelszó"
+#: ../src/camel/camel-ews-provider.c:86
+msgid "NTLM"
+msgstr "NTLM"
 
-#: ../src/camel/camel-ews-provider.c:89
+#: ../src/camel/camel-ews-provider.c:88
+#| msgid ""
+#| "This option will connect to the Exchange server using a plaintext "
+#| "password."
 msgid ""
-"This option will connect to the Exchange server using a plaintext password."
+"This option will connect to the Exchange server using a plaintext password "
+"with NTLM authentication."
 msgstr ""
 "Ezzel az opcióval az Exchange kiszolgálóhoz sima szöveges jelszóval fog "
-"kapcsolódni."
+"kapcsolódni NTLM hitelesítés használatával."
 
-#: ../src/camel/camel-ews-store.c:184
+#: ../src/camel/camel-ews-provider.c:96
+msgid "Basic"
+msgstr "Alap"
+
+#: ../src/camel/camel-ews-provider.c:98
+#| msgid ""
+#| "This option will connect to the Exchange server using a plaintext "
+#| "password."
+msgid ""
+"This option will connect to the Exchange server using a plaintext password "
+"with Basic authentication."
+msgstr ""
+"Ezzel az opcióval az Exchange kiszolgálóhoz sima szöveges jelszóval fog "
+"kapcsolódni alap hitelesítés használatával."
+
+#: ../src/camel/camel-ews-store.c:183
 #, c-format
 msgid "Session has no storage path"
 msgstr "A munkamenet nem rendelkezik tárolási útvonallal"
 
-#: ../src/camel/camel-ews-store.c:554
+#: ../src/camel/camel-ews-store.c:500
+msgid "Query for authentication types is not supported"
+msgstr "A hitelesítési típusok lekérése nem támogatott"
+
+#: ../src/camel/camel-ews-store.c:551
 #, c-format
 msgid "No such folder: %s"
 msgstr "Nincs %s nevű mappa"
 
-#: ../src/camel/camel-ews-store.c:750
+#: ../src/camel/camel-ews-store.c:754
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "A szülő mappa (%s) nem létezik"
 
-#: ../src/camel/camel-ews-store.c:807
+#: ../src/camel/camel-ews-store.c:812
 #, c-format
 msgid "Folder does not exist"
 msgstr "A mappa nem létezik"
 
-#: ../src/camel/camel-ews-store.c:891
+#: ../src/camel/camel-ews-store.c:895
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "A(z) %s mappa nem létezik"
 
-#: ../src/camel/camel-ews-store.c:900
+#: ../src/camel/camel-ews-store.c:904
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Nem változott a(z) %s mappa fő rekordja"
 
-#: ../src/camel/camel-ews-store.c:939
+#: ../src/camel/camel-ews-store.c:943
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Nem lehet egyszerre átnevezni és mozgatni a mappát"
 
-#: ../src/camel/camel-ews-store.c:970
+#: ../src/camel/camel-ews-store.c:974
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nem található a(z) %s szülőmappa mappaazonosítója"
 
-#: ../src/camel/camel-ews-store.c:1007 ../src/camel/camel-ews-transport.c:66
+#: ../src/camel/camel-ews-store.c:1016 ../src/camel/camel-ews-transport.c:66
 #, c-format
 msgid "Exchange server %s"
 msgstr "%s Exchange kiszolgáló"
 
-#: ../src/camel/camel-ews-store.c:1009
+#: ../src/camel/camel-ews-store.c:1018
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Exchange szolgáltatás %s számára ezen: %s"
 
-#: ../src/camel/camel-ews-store.c:1049
+#: ../src/camel/camel-ews-store.c:1094
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "A művelet befejezéséhez online kell dolgoznia"
@@ -376,76 +400,83 @@ msgstr ""
 msgid "Service not connected"
 msgstr "Nem kapcsolódott a szolgáltatáshoz"
 
-#: ../src/server/e-ews-connection.c:360
+#: ../src/server/e-ews-connection.c:476
 msgid "Operation Cancelled"
 msgstr "Művelet megszakítva"
 
-#: ../src/server/e-ews-connection.c:422
+#: ../src/server/e-ews-connection.c:538
 msgid "Authentication failed"
 msgstr "A hitelesítés sikertelen"
 
-#: ../src/server/e-ews-connection.c:430
+#: ../src/server/e-ews-connection.c:546
 #, c-format
 msgid "No response: %s"
 msgstr "Nincs válasz: %s"
 
-#: ../src/server/e-ews-connection.c:1284 ../src/server/e-ews-connection.c:1642
-#: ../src/server/e-ews-connection.c:1881
+#: ../src/server/e-ews-connection.c:1491 ../src/server/e-ews-connection.c:1851
+#: ../src/server/e-ews-connection.c:2093
 #, c-format
 msgid "Code: %d - Unexpected response from server"
 msgstr "Kód: %d - Váratlan válasz a kiszolgálótól"
 
-#: ../src/server/e-ews-connection.c:1296
+#: ../src/server/e-ews-connection.c:1503
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Az automatikus felderítésre adott válasz XML feldolgozása sikertelen."
 
-#: ../src/server/e-ews-connection.c:1304
+#: ../src/server/e-ews-connection.c:1511
 #, c-format
 msgid "Failed to find <Autodiscover> element\n"
 msgstr "Nem sikerült megtalálni az <Autodiscover> elemet\n"
 
-#: ../src/server/e-ews-connection.c:1316
+#: ../src/server/e-ews-connection.c:1523
 #, c-format
 msgid "Failed to find <Response> element\n"
 msgstr "Nem sikerült megtalálni a <Response> elemet\n"
 
-#: ../src/server/e-ews-connection.c:1328
+#: ../src/server/e-ews-connection.c:1535
 #, c-format
 msgid "Failed to find <Account> element\n"
 msgstr "Nem sikerült megtalálni az <Account> elemet\n"
 
-#: ../src/server/e-ews-connection.c:1347
+#: ../src/server/e-ews-connection.c:1554
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
 "Az <ASUrl> és <OABUrl> nem található az automatikus felderítésre adott "
 "válaszban"
 
-#: ../src/server/e-ews-connection.c:1449
+#: ../src/server/e-ews-connection.c:1662
 #, c-format
 msgid "Both email and password must be provided"
 msgstr "Az e-mailt és a jelszót is meg kell adni"
 
-#: ../src/server/e-ews-connection.c:1456
+#: ../src/server/e-ews-connection.c:1669
 #, c-format
 msgid "Wrong email id"
 msgstr "Rossz e-mail azonosító"
 
-#: ../src/server/e-ews-connection.c:1652
+#: ../src/server/e-ews-connection.c:1861
 #, c-format
 msgid "Failed to parse oab XML"
 msgstr "Nem sikerült feldolgozni az oab XML-t"
 
-#: ../src/server/e-ews-connection.c:1659
+#: ../src/server/e-ews-connection.c:1868
 #, c-format
 msgid "Failed to find <OAB> element\n"
 msgstr "Nem sikerült megtalálni az <OAB> elemet\n"
+
+#: ../src/server/e-ews-connection.c:2911
+msgid "No items found"
+msgstr "Nem találhatók elemek"
 
 #: ../src/utils/ews-camel-common.c:170
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "A CreateItem hívás nem adott vissza új üzenetazonosítót"
+
+#~ msgid "Password"
+#~ msgstr "Jelszó"
 
 #~ msgid "Unknown calendar property '%s'"
 #~ msgstr "Ismeretlen naptártulajdonság: „%s”"
