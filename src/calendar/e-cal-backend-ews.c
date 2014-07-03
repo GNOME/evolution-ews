@@ -40,6 +40,8 @@
 #include <libical/icalproperty.h>
 #include <libical/icalparameter.h>
 
+#include <calendar/gui/itip-utils.h>
+
 #include "server/e-source-ews-folder.h"
 
 #include "utils/ews-camel-common.h"
@@ -2127,13 +2129,86 @@ e_ews_receive_objects_no_exchange_mail (ECalBackendEws *cbews,
 	e_ews_folder_id_free (fid);
 }
 
+static icalproperty *
+find_attendee (icalcomponent *ical_comp,
+               const gchar *address)
+{
+	icalproperty *prop;
+
+	if (address == NULL)
+		return NULL;
+
+	for (prop = icalcomponent_get_first_property (ical_comp, ICAL_ATTENDEE_PROPERTY);
+	     prop != NULL;
+	     prop = icalcomponent_get_next_property (ical_comp, ICAL_ATTENDEE_PROPERTY)) {
+		gchar *attendee;
+		gchar *text;
+
+		attendee = icalproperty_get_value_as_string_r (prop);
+
+		 if (!attendee)
+			continue;
+
+		text = g_strdup (itip_strip_mailto (attendee));
+		text = g_strstrip (text);
+		if (text && !g_ascii_strcasecmp (address, text)) {
+			g_free (text);
+			g_free (attendee);
+			break;
+		}
+		g_free (text);
+		g_free (attendee);
+	}
+
+	return prop;
+}
+
+static icalproperty *
+find_attendee_if_sentby (icalcomponent *ical_comp,
+                         const gchar *address)
+{
+	icalproperty *prop;
+
+	if (address == NULL)
+		return NULL;
+
+	for (prop = icalcomponent_get_first_property (ical_comp, ICAL_ATTENDEE_PROPERTY);
+	     prop != NULL;
+	     prop = icalcomponent_get_next_property (ical_comp, ICAL_ATTENDEE_PROPERTY)) {
+		icalparameter *param;
+		const gchar *attendee_sentby;
+		gchar *text;
+
+		param = icalproperty_get_first_parameter (prop, ICAL_SENTBY_PARAMETER);
+		if (!param)
+			continue;
+
+		attendee_sentby = icalparameter_get_sentby (param);
+
+		if (!attendee_sentby)
+			continue;
+
+		text = g_strdup (itip_strip_mailto (attendee_sentby));
+		text = g_strstrip (text);
+		if (text && !g_ascii_strcasecmp (address, text)) {
+			g_free (text);
+			break;
+		}
+		g_free (text);
+	}
+
+	return prop;
+}
+
 static const gchar *
-e_ews_get_current_user_meeting_reponse (icalcomponent *icalcomp,
+e_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
+					icalcomponent *icalcomp,
                                         const gchar *current_user_mail)
 {
 	icalproperty *attendee;
 	const gchar *attendee_str = NULL, *attendee_mail = NULL;
 	gint attendees_count = 0;
+	const gchar *response = NULL;
 
 	for (attendee = icalcomponent_get_first_property (icalcomp, ICAL_ATTENDEE_PROPERTY);
 		attendee != NULL;
@@ -2157,9 +2232,31 @@ e_ews_get_current_user_meeting_reponse (icalcomponent *icalcomp,
 		g_return_val_if_fail (attendee != NULL, NULL);
 
 		return icalproperty_get_parameter_as_string (attendee, "PARTSTAT");
+	} else {
+		ESourceRegistry *registry;
+		ECalComponent *comp;
+
+		registry = e_cal_backend_get_registry (E_CAL_BACKEND (cbews));
+		comp = e_cal_component_new ();
+		if (e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (icalcomp))) {
+			gchar *my_address;
+
+			my_address = itip_get_comp_attendee (registry, comp, NULL);
+
+			attendee = find_attendee (icalcomp, my_address);
+			if (!attendee)
+				attendee = find_attendee_if_sentby (icalcomp, my_address);
+
+			if (attendee)
+				response = icalproperty_get_parameter_as_string (attendee, "PARTSTAT");
+
+			g_free (my_address);
+		}
+
+		g_object_unref (comp);
 	}
 
-	return NULL;
+	return response;
 }
 
 static void
@@ -2176,6 +2273,11 @@ ews_cal_do_method_request_publish_reply (ECalBackendEws *cbews,
 	gchar *mail_id = NULL;
 	gint pass = 0;
 	GSList *ids = NULL;
+
+	if (!response_type) {
+		g_propagate_error (error, EDC_ERROR (UnknownUser));
+		return;
+	}
 
 	ews_cal_component_get_calendar_item_accept_id (comp, &item_id, &change_key, &mail_id);
 
@@ -2370,7 +2472,7 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend,
 		e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (subcomp));
 
 		/*getting a data for meeting request response*/
-		response_type = e_ews_get_current_user_meeting_reponse (
+		response_type = e_ews_get_current_user_meeting_reponse (cbews,
 			e_cal_component_get_icalcomponent (comp),
 			priv->user_email);
 
@@ -3984,11 +4086,18 @@ e_cal_backend_ews_get_destination_address (EBackend *backend,
 static void
 e_cal_backend_ews_constructed (GObject *object)
 {
+	ECalBackendEws *cbews = E_CAL_BACKEND_EWS (object);
+	CamelEwsSettings *ews_settings;
+
 	G_OBJECT_CLASS (e_cal_backend_ews_parent_class)->constructed (object);
 
 	/* Reset the connectable, it steals data from Authentication extension,
 	   where is written incorrect address */
 	e_backend_set_connectable (E_BACKEND (object), NULL);
+
+	ews_settings = cal_backend_ews_get_collection_settings (cbews);
+	g_warn_if_fail (cbews->priv->user_email == NULL);
+	cbews->priv->user_email = camel_ews_settings_dup_email (ews_settings);
 }
 
 static void

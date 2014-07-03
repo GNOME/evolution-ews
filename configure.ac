@@ -238,6 +238,11 @@ dnl ****************************
 PKG_CHECK_MODULES(EVOLUTION_MAIL, evolution-mail-3.0 >= evo_minimum_version)
 
 dnl ****************************
+dnl Check for evolution calendar
+dnl ****************************
+PKG_CHECK_MODULES(EVOLUTION_CALENDAR, evolution-calendar-3.0 >= evo_minimum_version)
+
+dnl ****************************
 dnl Check for sqlite3 
 dnl ****************************
 PKG_CHECK_MODULES(SQLITE3, sqlite3)
