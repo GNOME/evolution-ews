@@ -29,6 +29,8 @@ typedef ECalBackendFactoryClass ECalBackendEwsJournalFactoryClass;
 typedef ECalBackendFactory ECalBackendEwsTodosFactory;
 typedef ECalBackendFactoryClass ECalBackendEwsTodosFactoryClass;
 
+static EModule *e_module;
+
 /* Module Entry Points */
 void e_module_load (GTypeModule *type_module);
 void e_module_unload (GTypeModule *type_module);
@@ -56,6 +58,12 @@ G_DEFINE_DYNAMIC_TYPE (
 static void
 e_cal_backend_ews_events_factory_class_init (ECalBackendFactoryClass *class)
 {
+	EBackendFactoryClass *backend_factory_class;
+
+	backend_factory_class = E_BACKEND_FACTORY_CLASS (class);
+	backend_factory_class->e_module = e_module;
+	backend_factory_class->share_subprocess = TRUE;
+
 	class->factory_name = FACTORY_NAME;
 	class->component_kind = ICAL_VEVENT_COMPONENT;
 	class->backend_type = E_TYPE_CAL_BACKEND_EWS;
@@ -74,6 +82,12 @@ e_cal_backend_ews_events_factory_init (ECalBackendFactory *factory)
 static void
 e_cal_backend_ews_journal_factory_class_init (ECalBackendFactoryClass *class)
 {
+	EBackendFactoryClass *backend_factory_class;
+
+	backend_factory_class = E_BACKEND_FACTORY_CLASS (class);
+	backend_factory_class->e_module = e_module;
+	backend_factory_class->share_subprocess = TRUE;
+
 	class->factory_name = FACTORY_NAME;
 	class->component_kind = ICAL_VJOURNAL_COMPONENT;
 	class->backend_type = E_TYPE_CAL_BACKEND_EWS;
@@ -92,6 +106,12 @@ e_cal_backend_ews_journal_factory_init (ECalBackendFactory *factory)
 static void
 e_cal_backend_ews_todos_factory_class_init (ECalBackendFactoryClass *class)
 {
+	EBackendFactoryClass *backend_factory_class;
+
+	backend_factory_class = E_BACKEND_FACTORY_CLASS (class);
+	backend_factory_class->e_module = e_module;
+	backend_factory_class->share_subprocess = TRUE;
+
 	class->factory_name = FACTORY_NAME;
 	class->component_kind = ICAL_VTODO_COMPONENT;
 	class->backend_type = E_TYPE_CAL_BACKEND_EWS;
@@ -113,6 +133,8 @@ e_module_load (GTypeModule *type_module)
 	bindtextdomain (GETTEXT_PACKAGE, EXCHANGE_EWS_LOCALEDIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 
+	e_module = E_MODULE (type_module);
+
 	e_source_ews_folder_type_register (type_module);
 
 	e_cal_backend_ews_events_factory_register_type (type_module);
@@ -123,4 +145,5 @@ e_module_load (GTypeModule *type_module)
 G_MODULE_EXPORT void
 e_module_unload (GTypeModule *type_module)
 {
+	e_module = NULL;
 }
