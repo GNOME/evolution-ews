@@ -3438,11 +3438,7 @@ ews_soup_got_chunk (SoupMessage *msg,
 				&data->error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_UNKNOWN,
 				"Failed to write streaming data to file : %d ", errno);
 		}
-#ifdef G_OS_WIN32
-		closesocket (fd);
-#else
 		close (fd);
-#endif
 	} else {
 		g_set_error (
 			&data->error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_UNKNOWN,
