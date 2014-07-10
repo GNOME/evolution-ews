@@ -242,11 +242,7 @@ soap_sax_endElementNs (gpointer _ctxt,
 	ESoapMessagePrivate *priv = ctxt->_private;
 
 	if (priv->steal_fd != -1) {
-#ifdef G_OS_WIN32
-		closesocket (priv->steal_fd);
-#else
 		close (priv->steal_fd);
-#endif
 		priv->steal_fd = -1;
 	}
 	xmlSAX2EndElementNs (ctxt, localname, prefix, uri);
