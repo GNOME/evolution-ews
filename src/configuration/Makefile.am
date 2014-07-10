@@ -49,7 +49,7 @@ module_ews_configuration_la_SOURCES = \
 	$(NULL)
 
 module_ews_configuration_la_LIBADD = \
-	$(top_builddir)/src/camel/libcamelews.la \
+	$(top_builddir)/src/camel/libcamelews-priv.la \
 	$(top_builddir)/src/server/libeews-1.2.la \
 	$(top_builddir)/src/utils/libewsutils.la \
 	$(EVOLUTION_MAIL_LIBS) \
