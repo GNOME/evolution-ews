@@ -1,3 +1,14 @@
+Evolution-EWS 3.12.4 2014-07-14
+-------------------------------
+
+Bug Fixes:
+	Bug 731585 - evolution-ews Camel part pretends offline state (Milan Crha)
+	Bug 728942 - Fails to pair user with attendee in invitation response (Milan Crha)
+	Bug 730878 - Split libcamelews into a static and a dynamic library (Milan Crha)
+
+Miscellaneous:
+	Make Evolution-EWS build under Win32 (Milan Crha)
+
 Evolution-EWS 3.12.3 2014-06-09
 -------------------------------
 
