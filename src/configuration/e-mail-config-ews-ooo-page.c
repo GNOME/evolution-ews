@@ -422,8 +422,7 @@ mail_config_ews_ooo_page_constructed (GObject *object)
 	page = E_MAIL_CONFIG_EWS_OOO_PAGE (object);
 
 	/* Chain up to parent's constructed() method. */
-	G_OBJECT_CLASS (e_mail_config_ews_ooo_page_parent_class)->
-		constructed (object);
+	G_OBJECT_CLASS (e_mail_config_ews_ooo_page_parent_class)->constructed (object);
 
 	size_group = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
 

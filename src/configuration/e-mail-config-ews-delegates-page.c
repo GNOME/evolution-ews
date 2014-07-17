@@ -1090,8 +1090,7 @@ mail_config_ews_delegates_page_constructed (GObject *object)
 	page = E_MAIL_CONFIG_EWS_DELEGATES_PAGE (object);
 
 	/* Chain up to parent's constructed() method. */
-	G_OBJECT_CLASS (e_mail_config_ews_delegates_page_parent_class)->
-		constructed (object);
+	G_OBJECT_CLASS (e_mail_config_ews_delegates_page_parent_class)->constructed (object);
 
 	gtk_box_set_spacing (GTK_BOX (page), 12);
 

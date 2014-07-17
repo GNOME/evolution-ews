@@ -61,8 +61,7 @@ mail_config_ews_notebook_constructed (GObject *object)
 	notebook = mail_config_ews_notebook_get_extensible (extension);
 
 	/* Chain up to parent's constructed() method. */
-	G_OBJECT_CLASS (e_mail_config_ews_notebook_parent_class)->
-		constructed (object);
+	G_OBJECT_CLASS (e_mail_config_ews_notebook_parent_class)->constructed (object);
 
 	session = e_mail_config_notebook_get_session (notebook);
 	registry = e_mail_session_get_registry (session);
