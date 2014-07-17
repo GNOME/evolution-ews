@@ -232,8 +232,7 @@ mail_config_ews_autodiscover_constructed (GObject *object)
 	gtk_button_set_use_underline (button, TRUE);
 
 	/* Chain up tp parent's constructed() method. */
-	G_OBJECT_CLASS (e_mail_config_ews_autodiscover_parent_class)->
-		constructed (object);
+	G_OBJECT_CLASS (e_mail_config_ews_autodiscover_parent_class)->constructed (object);
 }
 
 static void

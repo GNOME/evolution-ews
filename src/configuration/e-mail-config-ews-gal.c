@@ -257,8 +257,7 @@ mail_config_ews_gal_constructed (GObject *object)
 	extension = E_MAIL_CONFIG_EWS_GAL (object);
 
 	/* Chain up to parent's constructed() method. */
-	G_OBJECT_CLASS (e_mail_config_ews_gal_parent_class)->
-		constructed (object);
+	G_OBJECT_CLASS (e_mail_config_ews_gal_parent_class)->constructed (object);
 
 	page = mail_config_ews_gal_get_provider_page (extension);
 	backend = e_mail_config_provider_page_get_backend (page);
