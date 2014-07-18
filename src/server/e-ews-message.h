@@ -38,6 +38,8 @@ typedef enum {
 	E_EWS_EXCHANGE_FUTURE
 } EEwsServerVersion;
 
+void		e_ews_message_attach_chunk_allocator
+						(SoupMessage *message);
 ESoapMessage *	e_ews_message_new_with_header	(const gchar *uri,
 						 const gchar *impersonate_user,
 						 const gchar *method_name,
