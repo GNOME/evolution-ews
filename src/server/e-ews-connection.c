@@ -2644,6 +2644,8 @@ e_ews_get_msg_for_url (const gchar *url,
 		return NULL;
 	}
 
+	e_ews_message_attach_chunk_allocator (msg);
+
 	soup_message_headers_append (
 		msg->request_headers,
 		"User-Agent", "libews/0.1");

@@ -33,6 +33,27 @@
 #include <libxml/tree.h>
 #include "e-ews-message.h"
 
+static SoupBuffer *
+ews_soup_chunk_allocator (SoupMessage *message,
+			  gsize max_len,
+			  gpointer user_data)
+{
+	gsize len = 32768;
+	guchar *data;
+
+	data = g_new0 (guchar, len);
+
+	return soup_buffer_new_take (data, len);
+}
+
+void
+e_ews_message_attach_chunk_allocator (SoupMessage *message)
+{
+	g_return_if_fail (SOUP_IS_MESSAGE (message));
+
+	soup_message_set_chunk_allocator (message, ews_soup_chunk_allocator, NULL, NULL);
+}
+
 static const gchar *
 convert_server_version_to_string (EEwsServerVersion version)
 {
@@ -83,6 +104,8 @@ e_ews_message_new_with_header (const gchar *uri,
 		g_warning (G_STRLOC ": Could not build SOAP message");
 		return NULL;
 	}
+
+	e_ews_message_attach_chunk_allocator (SOUP_MESSAGE (msg));
 
 	soup_message_headers_append (
 		SOUP_MESSAGE (msg)->request_headers,
