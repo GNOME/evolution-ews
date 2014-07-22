@@ -27,6 +27,7 @@
 #include <mail/e-mail-config-service-page.h>
 
 #include "server/e-ews-connection.h"
+#include "server/e-ews-connection-utils.h"
 
 #define E_MAIL_CONFIG_EWS_AUTODISCOVER_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE \
@@ -245,6 +246,22 @@ mail_config_ews_autodiscover_clicked (GtkButton *button)
 	mail_config_ews_autodiscover_run (autodiscover);
 }
 
+static gboolean
+mail_config_ews_autodiscover_get_without_password (ESourceAuthenticator *auth)
+{
+	EMailConfigEwsAutodiscover *autodiscover;
+	EMailConfigServiceBackend *backend;
+	CamelSettings *settings;
+	CamelEwsSettings *ews_settings;
+
+	autodiscover = E_MAIL_CONFIG_EWS_AUTODISCOVER (auth);
+	backend = e_mail_config_ews_autodiscover_get_backend (autodiscover);
+	settings = e_mail_config_service_backend_get_settings (backend);
+	ews_settings = CAMEL_EWS_SETTINGS (settings);
+
+	return e_ews_connection_utils_get_without_password (ews_settings);
+}
+
 static ESourceAuthenticationResult
 mail_config_ews_autodiscover_try_password_sync (ESourceAuthenticator *auth,
                                                 const GString *password,
@@ -320,6 +337,8 @@ e_mail_config_ews_autodiscover_class_init (EMailConfigEwsAutodiscoverClass *clas
 static void
 e_mail_config_ews_autodiscover_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
+	iface->get_without_password =
+		mail_config_ews_autodiscover_get_without_password;
 	iface->try_password_sync =
 		mail_config_ews_autodiscover_try_password_sync;
 }

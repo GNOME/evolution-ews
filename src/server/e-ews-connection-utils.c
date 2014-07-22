@@ -241,4 +241,20 @@ e_ews_connection_utils_check_element (const gchar *function_name,
 	return TRUE;
 }
 
+/* Return TRUE if using GSSAPI.  */
+gboolean
+e_ews_connection_utils_get_without_password (CamelEwsSettings *ews_settings)
+{
+	gboolean result = FALSE;
+	gchar *auth_mech = NULL;
 
+	g_object_get (G_OBJECT (ews_settings), "auth-mechanism", &auth_mech,
+		      NULL);
+
+	if (g_strcmp0 (auth_mech, "GSSAPI") == 0)
+		result = TRUE;
+
+	g_free (auth_mech);
+
+	return result;
+}

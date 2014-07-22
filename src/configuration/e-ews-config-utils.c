@@ -37,6 +37,7 @@
 #include <shell/e-shell-window.h>
 
 #include "server/e-ews-connection.h"
+#include "server/e-ews-connection-utils.h"
 #include "server/e-source-ews-folder.h"
 
 #include "e-ews-edit-folder-permissions.h"
@@ -265,6 +266,13 @@ struct _EEwsConfigUtilsAuthenticatorClass {
 	GObjectClass parent_class;
 };
 
+static gboolean
+ews_config_utils_authenticator_get_without_password (ESourceAuthenticator *auth)
+{
+	EEwsConfigUtilsAuthenticator *authenticator = (EEwsConfigUtilsAuthenticator *) auth;
+	return e_ews_connection_utils_get_without_password (authenticator->ews_settings);
+}
+
 static ESourceAuthenticationResult
 ews_config_utils_authenticator_try_password_sync (ESourceAuthenticator *auth,
                                                   const GString *password,
@@ -359,7 +367,10 @@ e_ews_config_utils_authenticator_class_init (EEwsConfigUtilsAuthenticatorClass *
 static void
 e_ews_config_utils_authenticator_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
-	iface->try_password_sync = ews_config_utils_authenticator_try_password_sync;
+	iface->get_without_password =
+		ews_config_utils_authenticator_get_without_password;
+	iface->try_password_sync =
+		ews_config_utils_authenticator_try_password_sync;
 }
 
 static void

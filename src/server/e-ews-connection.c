@@ -488,6 +488,19 @@ typedef struct _EwsScheduleData
 	gpointer queue_user_data;
 } EwsScheduleData;
 
+static gboolean
+ews_connection_get_without_password (ESourceAuthenticator *authenticator)
+{
+	gboolean result;
+	EEwsConnection *cnc = E_EWS_CONNECTION (authenticator);
+	CamelEwsSettings *ews_settings = e_ews_connection_ref_settings (cnc);
+
+	result = e_ews_connection_utils_get_without_password (ews_settings);
+
+	g_object_unref (ews_settings);
+	return result;
+}
+
 /* this is run in priv->soup_thread */
 static gboolean
 ews_connection_scheduled_cb (gpointer user_data)
@@ -1751,6 +1764,7 @@ e_ews_connection_folders_list_free (gpointer data)
 static void
 e_ews_connection_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
+	iface->get_without_password = ews_connection_get_without_password;
 	iface->try_password_sync = ews_connection_try_password_sync;
 }
 

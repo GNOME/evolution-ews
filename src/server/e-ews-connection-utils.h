@@ -41,6 +41,9 @@ gboolean	e_ews_connection_utils_check_element	(const gchar *function_name,
 							 const gchar *element_name,
 							 const gchar *expected_name);
 
+gboolean	e_ews_connection_utils_get_without_password
+							(CamelEwsSettings *ews_settings);
+
 G_END_DECLS
 
 #endif /* E_EWS_CONNECTION_UTILS_H */
