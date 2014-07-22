@@ -43,6 +43,7 @@
 #include "server/e-ews-item-change.h"
 #include "server/e-ews-message.h"
 #include "server/e-ews-connection.h"
+#include "server/e-ews-connection-utils.h"
 #include "server/e-ews-item.h"
 #include "server/e-source-ews-folder.h"
 
@@ -4012,6 +4013,18 @@ e_book_backend_ews_dispose (GObject *object)
 	G_OBJECT_CLASS (e_book_backend_ews_parent_class)->dispose (object);
 }
 
+static gboolean
+book_backend_ews_get_without_password (ESourceAuthenticator *authenticator)
+{
+	EBookBackendEws *backend;
+	CamelEwsSettings *ews_settings;
+
+	backend = E_BOOK_BACKEND_EWS (authenticator);
+	ews_settings = book_backend_ews_get_collection_settings (backend);
+
+	return e_ews_connection_utils_get_without_password (ews_settings);
+}
+
 static ESourceAuthenticationResult
 book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
                                     const GString *password,
@@ -4097,6 +4110,7 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 static void
 e_book_backend_ews_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
+	iface->get_without_password = book_backend_ews_get_without_password;
 	iface->try_password_sync = book_backend_ews_try_password_sync;
 }
 

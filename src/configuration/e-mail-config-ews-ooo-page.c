@@ -32,6 +32,7 @@
 
 #include "server/camel-ews-settings.h"
 #include "server/e-ews-connection.h"
+#include "server/e-ews-connection-utils.h"
 #include "server/e-ews-oof-settings.h"
 
 #define E_MAIL_CONFIG_EWS_OOO_PAGE_GET_PRIVATE(obj) \
@@ -789,6 +790,20 @@ mail_config_ews_ooo_page_submit_finish (EMailConfigPage *page,
 	return !g_simple_async_result_propagate_error (simple, error);
 }
 
+static gboolean
+mail_config_ews_ooo_page_get_without_password (ESourceAuthenticator *auth)
+{
+	EMailConfigEwsOooPage *page;
+	CamelSettings *settings;
+	CamelEwsSettings *ews_settings;
+
+	page = E_MAIL_CONFIG_EWS_OOO_PAGE (auth);
+	settings = mail_config_ews_ooo_page_get_settings (page);
+	ews_settings = CAMEL_EWS_SETTINGS (settings);
+
+	return e_ews_connection_utils_get_without_password (ews_settings);
+}
+
 static ESourceAuthenticationResult
 mail_config_ews_ooo_page_try_password_sync (ESourceAuthenticator *auth,
                                             const GString *password,
@@ -921,6 +936,8 @@ e_mail_config_ews_ooo_page_interface_init (EMailConfigPageInterface *iface)
 static void
 e_mail_config_ews_ooo_page_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
+	iface->get_without_password =
+		mail_config_ews_ooo_page_get_without_password;
 	iface->try_password_sync =
 		mail_config_ews_ooo_page_try_password_sync;
 }

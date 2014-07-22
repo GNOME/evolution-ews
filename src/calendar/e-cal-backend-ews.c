@@ -43,6 +43,7 @@
 #include <calendar/gui/itip-utils.h>
 
 #include "server/e-source-ews-folder.h"
+#include "server/e-ews-connection-utils.h"
 
 #include "utils/ews-camel-common.h"
 
@@ -4204,6 +4205,18 @@ e_cal_backend_ews_finalize (GObject *object)
 	G_OBJECT_CLASS (e_cal_backend_ews_parent_class)->finalize (object);
 }
 
+static gboolean
+cal_backend_ews_get_without_password (ESourceAuthenticator *authenticator)
+{
+	ECalBackendEws *backend;
+	CamelEwsSettings *ews_settings;
+
+	backend = E_CAL_BACKEND_EWS (authenticator);
+	ews_settings = cal_backend_ews_get_collection_settings (backend);
+
+	return e_ews_connection_utils_get_without_password (ews_settings);
+}
+
 static ESourceAuthenticationResult
 cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
                                    const GString *password,
@@ -4296,6 +4309,7 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 static void
 e_cal_backend_ews_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
+	iface->get_without_password = cal_backend_ews_get_without_password;
 	iface->try_password_sync = cal_backend_ews_try_password_sync;
 }
 

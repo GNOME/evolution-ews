@@ -25,6 +25,7 @@
 #include <mail/e-mail-config-service-page.h>
 
 #include "server/e-ews-connection.h"
+#include "server/e-ews-connection-utils.h"
 
 #define E_MAIL_CONFIG_EWS_OAL_COMBO_BOX_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE \
@@ -135,6 +136,23 @@ mail_config_ews_oal_combo_box_finalize (GObject *object)
 		finalize (object);
 }
 
+static gboolean
+mail_config_ews_oal_combo_box_get_without_password (ESourceAuthenticator *auth)
+{
+	EMailConfigEwsOalComboBox *combo_box;
+	EMailConfigServiceBackend *backend;
+	CamelSettings *settings;
+	CamelEwsSettings *ews_settings;
+
+	combo_box = E_MAIL_CONFIG_EWS_OAL_COMBO_BOX (auth);
+	backend = e_mail_config_ews_oal_combo_box_get_backend (combo_box);
+	settings = e_mail_config_service_backend_get_settings (backend);
+
+	ews_settings = CAMEL_EWS_SETTINGS (settings);
+
+	return e_ews_connection_utils_get_without_password (ews_settings);
+}
+
 static ESourceAuthenticationResult
 mail_config_ews_oal_combo_box_try_password_sync (ESourceAuthenticator *auth,
                                                  const GString *password,
@@ -219,6 +237,8 @@ e_mail_config_ews_oal_combo_box_class_init (EMailConfigEwsOalComboBoxClass *clas
 static void
 e_mail_config_ews_oal_combo_box_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
+	iface->get_without_password =
+		mail_config_ews_oal_combo_box_get_without_password;
 	iface->try_password_sync =
 		mail_config_ews_oal_combo_box_try_password_sync;
 }
