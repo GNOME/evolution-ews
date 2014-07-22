@@ -2634,6 +2634,10 @@ static void post_restarted (SoupMessage *msg, gpointer data)
 {
 	xmlOutputBuffer *buf = data;
 
+	/* Not all restarts are due to a redirect; some are for auth */
+	if (msg->status_code == 401)
+		return;
+
 	/* In violation of RFC2616, libsoup will change a POST request to
 	 * a GET on receiving a 302 redirect. */
 	printf ("Working around libsoup bug with redirect\n");
