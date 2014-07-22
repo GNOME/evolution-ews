@@ -22,6 +22,9 @@
 
 #include <string.h>
 
+#include <glib.h>
+#include <glib/gstdio.h>
+
 #include "e-ews-connection-utils.h"
 
 #define EWS_GSSAPI_SOUP_SESSION "ews-gssapi-soup-session"
@@ -241,7 +244,92 @@ e_ews_connection_utils_check_element (const gchar *function_name,
 	return TRUE;
 }
 
-/* Return TRUE if using GSSAPI.  */
+static gboolean
+ews_connect_check_ntlm_available (void)
+{
+#ifndef G_OS_WIN32
+	const gchar *helper;
+	CamelStream *stream;
+	const gchar *cp;
+	const gchar *user;
+	gchar buf[1024];
+	gsize s;
+	gchar *command;
+	gint ret;
+
+	/* We are attempting to predict what libsoup will do. */
+	helper = g_getenv ("SOUP_NTLM_AUTH_DEBUG");
+	if (!helper)
+		helper = "/usr/bin/ntlm_auth";
+	else if (!helper[0])
+		return FALSE;
+
+	if (g_access (helper, X_OK))
+		return FALSE;
+
+	user = g_getenv ("NTLMUSER");
+	if (!user)
+		user = g_get_user_name();
+
+	cp = strpbrk (user, "\\/");
+	if (cp != NULL) {
+		command = g_strdup_printf (
+			"%s --helper-protocol ntlmssp-client-1 "
+			"--use-cached-creds --username '%s' "
+			"--domain '%.*s'", helper,
+			cp + 1, (gint)(cp - user), user);
+	} else {
+		command = g_strdup_printf (
+			"%s --helper-protocol ntlmssp-client-1 "
+			"--use-cached-creds --username '%s'",
+			helper, user);
+	}
+
+	stream = camel_stream_process_new ();
+
+	ret = camel_stream_process_connect (CAMEL_STREAM_PROCESS (stream),
+					    command, NULL, NULL);
+
+	g_free (command);
+
+	if (ret) {
+		g_object_unref (stream);
+		return FALSE;
+	}
+
+	if (camel_stream_write_string (stream, "YR\n", NULL, NULL) < 0) {
+		g_object_unref (stream);
+		return FALSE;
+	}
+
+	s = camel_stream_read (stream, buf, sizeof (buf), NULL, NULL);
+	if (s < 4) {
+		g_object_unref (stream);
+		return FALSE;
+	}
+
+	if (buf[0] != 'Y' || buf[1] != 'R' || buf[2] != ' ' || buf[s - 1] != '\n') {
+		g_object_unref (stream);
+		return FALSE;
+	}
+
+	g_object_unref (stream);
+
+	return TRUE;
+#else
+	/* Win32 should be able to use SSPI here. */
+	return FALSE;
+#endif
+}
+
+
+/* Should we bother to attempt a connection without a password? Remember,
+ * this is *purely* an optimisation to avoid that extra round-trip if we
+ * *KNOW* it's going to fail. So if unsure, return TRUE to avoid pestering
+ * the user for a password which might not even get used.
+ *
+ * We *have* to handle the case where the passwordless attempt  fails
+ * and we have to fall back to asking for a password anyway. */
 gboolean
 e_ews_connection_utils_get_without_password (CamelEwsSettings *ews_settings)
 {
@@ -253,6 +341,8 @@ e_ews_connection_utils_get_without_password (CamelEwsSettings *ews_settings)
 
 	if (g_strcmp0 (auth_mech, "GSSAPI") == 0)
 		result = TRUE;
+	else if (g_strcmp0 (auth_mech, "PLAIN") != 0)
+		result = ews_connect_check_ntlm_available ();
 
 	g_free (auth_mech);
 
