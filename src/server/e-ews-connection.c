@@ -1898,9 +1898,21 @@ ews_connection_authenticate (SoupSession *sess,
 	user = camel_network_settings_dup_user (network_settings);
 
 	password = e_ews_connection_dup_password (cnc);
-
-	if (password != NULL)
+	if (password != NULL) {
 		soup_auth_authenticate (auth, user, password);
+	} else {
+		/* The NTLM implementation in libsoup doesn't cope very well
+		 * with recovering from authentication failures (bug 703181).
+		 * So cancel the message now while it's in-flight, and we'll
+		 * get a shiny new connection for the next attempt. */
+		const char *scheme = soup_auth_get_scheme_name (auth);
+
+		if (!g_ascii_strcasecmp(scheme, "NTLM")) {
+			soup_session_cancel_message(cnc->priv->soup_session,
+						    msg,
+						    SOUP_STATUS_UNAUTHORIZED);
+		}
+	}
 
 	g_free (password);
 	g_free (user);
