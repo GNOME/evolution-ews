@@ -1887,14 +1887,6 @@ ews_store_query_auth_types_sync (CamelService *service,
 
 	g_return_val_if_fail (CAMEL_IS_EWS_STORE (service), NULL);
 
-	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (service))) {
-		g_set_error (
-			error, CAMEL_SERVICE_ERROR,
-			CAMEL_SERVICE_ERROR_UNAVAILABLE,
-			_("You must be working online to complete this operation"));
-		return NULL;
-	}
-
 	settings = camel_service_ref_settings (service);
 	ews_settings = CAMEL_EWS_SETTINGS (settings);
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
