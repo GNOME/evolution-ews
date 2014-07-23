@@ -262,6 +262,9 @@ e_ews_notification_init (EEwsNotification *notification)
 		SOUP_SESSION_USE_NTLM, TRUE,
 		NULL);
 
+	soup_session_add_feature_by_type (notification->priv->soup_session,
+					  SOUP_TYPE_COOKIE_JAR);
+
 	log_level = e_ews_debug_get_log_level ();
 	if (log_level >= 2) {
 		SoupLogger *logger;
