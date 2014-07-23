@@ -123,14 +123,6 @@ e_ews_notification_new (EEwsConnection *connection)
 
 	ews_settings = e_ews_connection_ref_settings (connection);
 
-	g_object_bind_property_full (
-		ews_settings, "auth-mechanism",
-		notification->priv->soup_session, "use-ntlm",
-		G_BINDING_SYNC_CREATE,
-		e_ews_connection_utils_auth_mech_to_use_ntlm,
-		NULL,
-		NULL, (GDestroyNotify) NULL);
-
 	g_object_unref (ews_settings);
 
 	return notification;
@@ -226,6 +218,35 @@ ews_notification_dispose (GObject *object)
 	G_OBJECT_CLASS (e_ews_notification_parent_class)->dispose (object);
 }
 
+static GObject *
+ews_notification_constructor (GType gtype, guint n_properties,
+			      GObjectConstructParam *properties)
+{
+	GObject *obj = G_OBJECT_CLASS (e_ews_notification_parent_class)->
+		constructor (gtype, n_properties, properties);
+	EEwsNotificationPrivate *priv;
+	CamelEwsSettings *ews_settings;
+	gchar *auth_mech = NULL;
+
+	priv = E_EWS_NOTIFICATION_GET_PRIVATE (obj);
+
+	ews_settings = e_ews_connection_ref_settings (priv->connection);
+
+	g_object_get (G_OBJECT (ews_settings), "auth-mechanism", &auth_mech,
+		      NULL);
+
+	if (g_strcmp0 (auth_mech, "BASIC") != 0)
+		soup_session_remove_feature_by_type (priv->soup_session,
+						     SOUP_TYPE_AUTH_BASIC);
+	if (!auth_mech) /* NTLM */
+		soup_session_add_feature_by_type (priv->soup_session,
+						  SOUP_TYPE_AUTH_NTLM);
+	g_free (auth_mech);
+	g_object_unref(ews_settings);
+
+	return obj;
+}
+
 static void
 e_ews_notification_class_init (EEwsNotificationClass *class)
 {
@@ -234,6 +255,7 @@ e_ews_notification_class_init (EEwsNotificationClass *class)
 	g_type_class_add_private (class, sizeof (EEwsNotificationPrivate));
 
 	object_class = G_OBJECT_CLASS (class);
+	object_class->constructor = ews_notification_constructor;
 	object_class->set_property = ews_notification_set_property;
 	object_class->get_property = ews_notification_get_property;
 	object_class->dispose = ews_notification_dispose;
@@ -258,9 +280,7 @@ e_ews_notification_init (EEwsNotification *notification)
 
 	notification->priv = E_EWS_NOTIFICATION_GET_PRIVATE (notification);
 
-	notification->priv->soup_session = soup_session_sync_new_with_options (
-		SOUP_SESSION_USE_NTLM, TRUE,
-		NULL);
+	notification->priv->soup_session = soup_session_sync_new ();
 
 	log_level = e_ews_debug_get_log_level ();
 	if (log_level >= 2) {

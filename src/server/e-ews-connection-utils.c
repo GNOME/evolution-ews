@@ -206,25 +206,7 @@ e_ews_connection_utils_unref_in_thread (gpointer object)
 	g_thread_unref (thread);
 }
 
-gboolean
-e_ews_connection_utils_auth_mech_to_use_ntlm (GBinding *binding,
-					      const GValue *source_value,
-					      GValue *target_value,
-					      gpointer user_data)
-{
-	const gchar *auth_mechanism;
-	gboolean use_ntlm;
-
-	/* Use NTLM unless the auth mechanism is "PLAIN" or "GSSAPI". */
-	auth_mechanism = g_value_get_string (source_value);
-	use_ntlm = g_strcmp0 (auth_mechanism, "PLAIN") != 0 &&
-		   g_strcmp0 (auth_mechanism, "GSSAPI") != 0;
-	g_value_set_boolean (target_value, use_ntlm);
-
-	return TRUE;
-}
-
-/* Do not call this directly, use E_EWS_CONNECTION_UTILS_CHECK_ELEMENT macro instead. */
+/* Do not call this directly; use E_EWS_CONNECTION_UTILS_CHECK_ELEMENT macro instead. */
 gboolean
 e_ews_connection_utils_check_element (const gchar *function_name,
 				      const gchar *element_name,

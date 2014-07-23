@@ -1648,6 +1648,31 @@ ews_connection_finalize (GObject *object)
 	G_OBJECT_CLASS (e_ews_connection_parent_class)->finalize (object);
 }
 
+static GObject *
+ews_connection_constructor (GType gtype, guint n_properties,
+			    GObjectConstructParam *properties)
+{
+	GObject *obj = G_OBJECT_CLASS (e_ews_connection_parent_class)->
+		constructor (gtype, n_properties, properties);
+	EEwsConnection *cnc = E_EWS_CONNECTION (obj);
+	CamelEwsSettings *ews_settings = e_ews_connection_ref_settings (cnc);
+	gchar *auth_mech = NULL;
+
+	g_object_get (G_OBJECT (ews_settings), "auth-mechanism", &auth_mech,
+		      NULL);
+
+	if (g_strcmp0 (auth_mech, "BASIC") != 0)
+		soup_session_remove_feature_by_type (cnc->priv->soup_session,
+						     SOUP_TYPE_AUTH_BASIC);
+	if (!auth_mech) /* NTLM */
+		soup_session_add_feature_by_type (cnc->priv->soup_session,
+						  SOUP_TYPE_AUTH_NTLM);
+	g_free (auth_mech);
+	g_object_unref(ews_settings);
+
+	return obj;
+}
+
 static ESourceAuthenticationResult
 ews_connection_try_password_sync (ESourceAuthenticator *authenticator,
                                   const GString *password,
@@ -1706,6 +1731,7 @@ e_ews_connection_class_init (EEwsConnectionClass *class)
 	g_type_class_add_private (class, sizeof (EEwsConnectionPrivate));
 
 	object_class = G_OBJECT_CLASS (class);
+	object_class->constructor = ews_connection_constructor;
 	object_class->set_property = ews_connection_set_property;
 	object_class->get_property = ews_connection_get_property;
 	object_class->dispose = ews_connection_dispose;
@@ -1844,9 +1870,7 @@ e_ews_connection_init (EEwsConnection *cnc)
 	cnc->priv->soup_thread = g_thread_new (NULL, e_ews_soup_thread, cnc);
 
 	cnc->priv->soup_session = soup_session_async_new_with_options (
-		SOUP_SESSION_USE_NTLM, TRUE,
-		SOUP_SESSION_ASYNC_CONTEXT,
-		cnc->priv->soup_context,
+		SOUP_SESSION_ASYNC_CONTEXT, cnc->priv->soup_context,
 		NULL);
 
 	/* Do not use G_BINDING_SYNC_CREATE because the property_lock is
@@ -2229,14 +2253,6 @@ e_ews_connection_new_full (const gchar *uri,
 	} else {
 		cnc->priv->impersonate_user = NULL;
 	}
-
-	g_object_bind_property_full (
-		settings, "auth-mechanism",
-		cnc->priv->soup_session, "use-ntlm",
-		G_BINDING_SYNC_CREATE,
-		e_ews_connection_utils_auth_mech_to_use_ntlm,
-		NULL,
-		NULL, (GDestroyNotify) NULL);
 
 	g_object_bind_property (
 		settings, "timeout",

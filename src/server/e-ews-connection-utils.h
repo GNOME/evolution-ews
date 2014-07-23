@@ -32,11 +32,6 @@ void		e_ews_connection_utils_setup_msg_gssapi_auth
 							 SoupSession *session,
 							 SoupMessage *message);
 void		e_ews_connection_utils_unref_in_thread	(gpointer object);
-gboolean	e_ews_connection_utils_auth_mech_to_use_ntlm
-							(GBinding *binding,
-							 const GValue *source_value,
-							 GValue *target_value,
-							 gpointer user_data);
 gboolean	e_ews_connection_utils_check_element	(const gchar *function_name,
 							 const gchar *element_name,
 							 const gchar *expected_name);
