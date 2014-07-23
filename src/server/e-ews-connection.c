@@ -74,6 +74,8 @@ static void	ews_connection_authenticate	(SoupSession *sess,
 						 SoupAuth *auth,
 						 gboolean retrying,
 						 gpointer data);
+static void ews_dump_raw_soup_request (SoupMessage *msg);
+static void ews_dump_raw_soup_response (SoupMessage *msg);
 
 /* Connection APIS */
 
@@ -511,6 +513,8 @@ ews_connection_scheduled_cb (gpointer user_data)
 
 	switch (sd->op) {
 	case EWS_SCHEDULE_OP_QUEUE_MESSAGE:
+		ews_dump_raw_soup_request (sd->message);
+
 		soup_session_queue_message (
 			sd->cnc->priv->soup_session, sd->message,
 			sd->queue_callback, sd->queue_user_data);
@@ -641,15 +645,6 @@ ews_next_request (gpointer _cnc)
 
 	node = (EwsNode *) l->data;
 
-	if (e_ews_debug_get_log_level () == 1) {
-		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (node->msg)->request_body));
-		/* print request's body */
-		printf ("\n The request headers");
-		fputc ('\n', stdout);
-		fputs (SOUP_MESSAGE (node->msg)->request_body->data, stdout);
-		fputc ('\n', stdout);
-	}
-
 	/* Remove the node from the priority queue */
 	cnc->priv->jobs = g_slist_remove (cnc->priv->jobs, (gconstpointer *) node);
 
@@ -667,6 +662,8 @@ ews_next_request (gpointer _cnc)
 
 		g_object_unref (ews_settings);
 		g_free (auth_mech);
+
+		ews_dump_raw_soup_request (msg);
 
 		soup_session_queue_message (cnc->priv->soup_session, msg, ews_response_cb, node);
 		QUEUE_UNLOCK (cnc);
@@ -838,8 +835,14 @@ ews_response_cb (SoupSession *session,
 	 * Logging framework also */
 
 	log_level = e_ews_debug_get_log_level ();
-	if (log_level >= 1 && log_level < 3)
+	if (log_level >= 1 && log_level < 3) {
+		/* This will dump only the headers, since we stole the body.
+		 * And only if EWS_DEBUG=1, since higher levels will have dumped
+		 * it directly from libsoup anyway. */
+		ews_dump_raw_soup_response(msg);
+		/* And this will dump the body... */
 		e_soap_response_dump_response (response, stdout);
+	}
 
 	if (enode->cb != NULL)
 		enode->cb (response, enode->simple);
@@ -2471,21 +2474,61 @@ autodiscover_data_free (struct _autodiscover_data *ad)
 }
 
 static void
+print_header (const gchar *name, const gchar *value, gpointer user_data)
+{
+	fprintf (user_data, "%s: %s\n", name, value);
+}
+
+static void
+ews_dump_raw_soup_message (FILE *out, SoupMessageHeaders *hdrs,
+			   SoupMessageBody *body)
+{
+	if (soup_message_body_get_accumulate (body)) {
+		SoupBuffer *buffer;
+
+		buffer = soup_message_body_flatten (body);
+		soup_buffer_free (buffer);
+	}
+
+	/* print body */
+	fprintf (out, " =====================\n");
+	soup_message_headers_foreach (hdrs, print_header, out);
+	fputc ('\n', out);
+	if (body->data) {
+		fputs (body->data, out);
+		fputc ('\n', out);
+	}
+	fflush (out);
+}
+
+static void
+ews_dump_raw_soup_request (SoupMessage *msg)
+{
+	gint log_level;
+
+	log_level = e_ews_debug_get_log_level ();
+	if (log_level == 1) {
+		/* print request body */
+		printf ("\n URI: %s\n", soup_uri_to_string (soup_message_get_uri (msg),
+							  TRUE));
+		printf (" The request headers for message %p\n", msg);
+		ews_dump_raw_soup_message (stdout, msg->request_headers,
+					   msg->request_body);
+	}
+}
+
+static void
 ews_dump_raw_soup_response (SoupMessage *msg)
 {
 	gint log_level;
 
 	log_level = e_ews_debug_get_log_level ();
-	if (log_level >= 1 && log_level < 3) {
-		soup_buffer_free (soup_message_body_flatten (SOUP_MESSAGE (msg)->response_body));
-		/* print response body */
-		printf ("\n The response headers");
-		printf ("\n =====================");
-		fputc ('\n', stdout);
-		fputs (SOUP_MESSAGE (msg)->response_body->data, stdout);
-		fputc ('\n', stdout);
+	if (log_level >= 1) {
+		printf ("\n The response code: %d\n", msg->status_code);
+		printf (" The response headers for message %p\n", msg);
+		ews_dump_raw_soup_message (stdout, msg->response_headers,
+					   msg->response_body);
 	}
-
 }
 
 static void
@@ -2680,7 +2723,6 @@ e_ews_get_msg_for_url (const gchar *url,
                        GError **error)
 {
 	SoupMessage *msg;
-	gint log_level;
 
 	if (url == NULL) {
 		g_set_error_literal (
@@ -2718,18 +2760,7 @@ e_ews_get_msg_for_url (const gchar *url,
 			G_CALLBACK (post_restarted), buf);
 	}
 
-	log_level = e_ews_debug_get_log_level ();
-	if (log_level >= 1 && log_level < 3) {
-		soup_buffer_free (
-			soup_message_body_flatten (
-			SOUP_MESSAGE (msg)->request_body));
-		/* print request's body */
-		printf ("\n The request headers");
-		printf ("\n ===================");
-		fputc ('\n', stdout);
-		fputs (SOUP_MESSAGE (msg)->request_body->data, stdout);
-		fputc ('\n', stdout);
-	}
+	ews_dump_raw_soup_request (msg);
 
 	return msg;
 }
@@ -3438,6 +3469,8 @@ oal_download_response_cb (SoupSession *soup_session,
 		data->error = NULL;
 		g_unlink (data->cache_filename);
 	}
+
+	ews_dump_raw_soup_response (soup_message);
 
 	g_simple_async_result_complete_in_idle (simple);
 	e_ews_connection_utils_unref_in_thread (simple);
