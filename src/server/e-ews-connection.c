@@ -46,6 +46,7 @@
 #include "e-ews-item-change.h"
 #include "e-ews-debug.h"
 #include "e-ews-notification.h"
+#include "e-soup-auth-negotiate.h"
 
 #define d(x) x
 
@@ -653,13 +654,6 @@ ews_next_request (gpointer _cnc)
 
 	if (cnc->priv->soup_session) {
 		SoupMessage *msg = SOUP_MESSAGE (node->msg);
-		CamelEwsSettings *ews_settings = e_ews_connection_ref_settings (cnc);
-
-		if (camel_ews_settings_get_auth_mechanism (ews_settings) ==
-		    EWS_AUTH_TYPE_GSSAPI)
-			e_ews_connection_utils_setup_msg_gssapi_auth (cnc, cnc->priv->soup_session, msg);
-
-		g_object_unref (ews_settings);
 
 		ews_dump_raw_soup_request (msg);
 
@@ -1660,14 +1654,16 @@ ews_connection_constructor (GType gtype, guint n_properties,
 
 	mech = camel_ews_settings_get_auth_mechanism (priv->settings);
 
-	/* We need to disable Basic auth to avoid it getting in the way of
+	/* We used to disable Basic auth to avoid it getting in the way of
 	 * our GSSAPI hacks. But leave it enabled in the case where NTLM is
 	 * enabled, which is the default configuration. It's a useful fallback
 	 * which people may be relying on. */
-	if (mech == EWS_AUTH_TYPE_GSSAPI)
+	if (mech == EWS_AUTH_TYPE_GSSAPI) {
+		soup_session_add_feature_by_type (priv->soup_session,
+						  E_SOUP_TYPE_AUTH_NEGOTIATE);
 		soup_session_remove_feature_by_type (priv->soup_session,
 						     SOUP_TYPE_AUTH_BASIC);
-	else if (mech == EWS_AUTH_TYPE_NTLM)
+	} else if (mech == EWS_AUTH_TYPE_NTLM)
 		soup_session_add_feature_by_type (priv->soup_session,
 						  SOUP_TYPE_AUTH_NTLM);
 

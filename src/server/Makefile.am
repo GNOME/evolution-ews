@@ -60,6 +60,8 @@ libeews_1_2_la_SOURCES = \
 	e-soap-response.h \
 	e-source-ews-folder.c \
 	e-source-ews-folder.h \
+	e-soup-auth-negotiate.c \
+	e-soup-auth-negotiate.h \
 	$(NULL)
 
 libeews_1_2_la_LIBADD = \

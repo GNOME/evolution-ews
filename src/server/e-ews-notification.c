@@ -25,6 +25,7 @@
 #include "e-ews-connection-utils.h"
 #include "e-ews-debug.h"
 #include "e-ews-notification.h"
+#include "e-soup-auth-negotiate.h"
 
 #define E_EWS_NOTIFICATION_GET_PRIVATE(obj)\
 	(G_TYPE_INSTANCE_GET_PRIVATE \
@@ -234,14 +235,16 @@ ews_notification_constructor (GType gtype, guint n_properties,
 
 	g_object_unref (ews_settings);
 
-	/* We need to disable Basic auth to avoid it getting in the way of
+	/* We used to disable Basic auth to avoid it getting in the way of
 	 * our GSSAPI hacks. But leave it enabled in the case where NTLM is
 	 * enabled, which is the default configuration. It's a useful fallback
 	 * which people may be relying on. */
-	if (mech == EWS_AUTH_TYPE_GSSAPI)
+	if (mech == EWS_AUTH_TYPE_GSSAPI) {
+		soup_session_add_feature_by_type (priv->soup_session,
+						  E_SOUP_TYPE_AUTH_NEGOTIATE);
 		soup_session_remove_feature_by_type (priv->soup_session,
 						     SOUP_TYPE_AUTH_BASIC);
-	else if (mech == EWS_AUTH_TYPE_NTLM)
+	} else if (mech == EWS_AUTH_TYPE_NTLM)
 		soup_session_add_feature_by_type (priv->soup_session,
 						  SOUP_TYPE_AUTH_NTLM);
 
@@ -304,7 +307,6 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 					  gchar **subscription_id,
 					  GCancellable *cancellable)
 {
-	CamelEwsSettings *ews_settings;
 	ESoapMessage *msg;
 	ESoapResponse *response;
 	ESoapParameter *param, *subparam;
@@ -360,17 +362,6 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 	e_ews_message_write_footer (msg); /* Complete the footer and print the request */
 
 	soup_message_body_set_accumulate (SOUP_MESSAGE (msg)->response_body, TRUE);
-
-	ews_settings = e_ews_connection_ref_settings (notification->priv->connection);
-
-	if (camel_ews_settings_get_auth_mechanism (ews_settings) ==
-	    EWS_AUTH_TYPE_GSSAPI)
-		e_ews_connection_utils_setup_msg_gssapi_auth (
-			notification->priv->connection,
-			notification->priv->soup_session,
-			SOUP_MESSAGE (msg));
-
-	g_object_unref (ews_settings);
 
 	if (g_cancellable_is_cancelled (cancellable)) {
 		g_object_unref (msg);

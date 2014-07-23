@@ -27,10 +27,6 @@ G_BEGIN_DECLS
 #define E_EWS_CONNECTION_UTILS_CHECK_ELEMENT(element_name, expected_name) \
 	(e_ews_connection_utils_check_element (G_STRFUNC, (element_name), (expected_name)))
 
-void		e_ews_connection_utils_setup_msg_gssapi_auth
-							(EEwsConnection *connection,
-							 SoupSession *session,
-							 SoupMessage *message);
 void		e_ews_connection_utils_unref_in_thread	(gpointer object);
 gboolean	e_ews_connection_utils_check_element	(const gchar *function_name,
 							 const gchar *element_name,
