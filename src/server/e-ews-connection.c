@@ -1903,6 +1903,9 @@ e_ews_connection_init (EEwsConnection *cnc)
 		g_object_unref (logger);
 	}
 
+	soup_session_add_feature_by_type (cnc->priv->soup_session,
+					  SOUP_TYPE_COOKIE_JAR);
+
 	cnc->priv->subscriptions = g_hash_table_new_full (
 			g_direct_hash, g_direct_equal,
 			NULL, e_ews_connection_folders_list_free);
