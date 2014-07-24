@@ -1661,10 +1661,14 @@ ews_connection_constructor (GType gtype, guint n_properties,
 	g_object_get (G_OBJECT (ews_settings), "auth-mechanism", &auth_mech,
 		      NULL);
 
-	if (g_strcmp0 (auth_mech, "Basic") != 0)
+	/* We need to disable Basic auth to avoid it getting in the way of
+	 * our GSSAPI hacks. But leave it enabled in the case where NTLM is
+	 * enabled, which is the default configuration. It's a useful fallback
+	 * which people may be relying on. */
+	if (g_strcmp0 (auth_mech, "GSSAPI") == 0)
 		soup_session_remove_feature_by_type (cnc->priv->soup_session,
 						     SOUP_TYPE_AUTH_BASIC);
-	if (!auth_mech) /* NTLM */
+	else if (g_strcmp0 (auth_mech, "PLAIN") != 0) /* NTLM */
 		soup_session_add_feature_by_type (cnc->priv->soup_session,
 						  SOUP_TYPE_AUTH_NTLM);
 	g_free (auth_mech);
