@@ -358,8 +358,8 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 		return FALSE;
 	}
 
-	if (!SOUP_STATUS_IS_SUCCESSFUL (
-		soup_session_send_message (notification->priv->soup_session, SOUP_MESSAGE (msg)))) {
+	soup_session_send_message (notification->priv->soup_session, SOUP_MESSAGE (msg));
+	if (!SOUP_STATUS_IS_SUCCESSFUL (SOUP_MESSAGE (msg)->status_code)) {
 		g_object_unref (msg);
 		return FALSE;
 	}
@@ -443,8 +443,8 @@ e_ews_notification_unsubscribe_folder_sync (EEwsNotification *notification,
 
 	soup_message_body_set_accumulate (SOUP_MESSAGE (msg)->response_body, TRUE);
 
-	if (!SOUP_STATUS_IS_SUCCESSFUL (
-		soup_session_send_message (notification->priv->soup_session, SOUP_MESSAGE (msg)))) {
+	soup_session_send_message (notification->priv->soup_session, SOUP_MESSAGE (msg));
+	if (!SOUP_STATUS_IS_SUCCESSFUL (SOUP_MESSAGE (msg)->status_code)) {
 		g_object_unref (msg);
 		return FALSE;
 	}
@@ -723,8 +723,8 @@ e_ews_notification_get_events_sync (EEwsNotification *notification,
 		SOUP_MESSAGE (msg), "got-chunk",
 		G_CALLBACK (ews_notification_soup_got_chunk), notification);
 
-	ret = SOUP_STATUS_IS_SUCCESSFUL (
-		soup_session_send_message (notification->priv->soup_session, SOUP_MESSAGE (msg)));
+	soup_session_send_message (notification->priv->soup_session, SOUP_MESSAGE (msg));
+	ret = SOUP_STATUS_IS_SUCCESSFUL (SOUP_MESSAGE (msg)->status_code);
 
 	g_signal_handler_disconnect (msg, handler_id);
 	g_object_unref (msg);
