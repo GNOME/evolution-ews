@@ -3844,6 +3844,12 @@ e_book_backend_ews_open (EBookBackend *backend,
 		}
 	}
 
+	convert_error_to_edb_error (&error);
+	e_data_book_respond_open (book, opid, error);
+
+	if (ebews->priv->is_gal)
+		return;
+
 	if (error == NULL) {
 		PRIV_LOCK (priv);
 		priv->listen_notifications = camel_ews_settings_get_listen_notifications (ews_settings);
@@ -3858,9 +3864,6 @@ e_book_backend_ews_open (EBookBackend *backend,
 			ebews);
 		PRIV_UNLOCK (priv);
 	}
-
-	convert_error_to_edb_error (&error);
-	e_data_book_respond_open (book, opid, error);
 
 	g_signal_connect_swapped (
 		ews_settings,
