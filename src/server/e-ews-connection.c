@@ -659,14 +659,12 @@ ews_next_request (gpointer _cnc)
 	if (cnc->priv->soup_session) {
 		SoupMessage *msg = SOUP_MESSAGE (node->msg);
 		CamelEwsSettings *ews_settings = e_ews_connection_ref_settings (cnc);
-		gchar *auth_mech = NULL;
 
-		g_object_get (G_OBJECT (ews_settings), "auth-mechanism", &auth_mech, NULL);
-		if (g_strcmp0 (auth_mech, "GSSAPI") == 0)
+		if (camel_ews_settings_get_auth_mechanism (ews_settings) ==
+		    EWS_AUTH_TYPE_GSSAPI)
 			e_ews_connection_utils_setup_msg_gssapi_auth (cnc, cnc->priv->soup_session, msg);
 
 		g_object_unref (ews_settings);
-		g_free (auth_mech);
 
 		soup_session_queue_message (cnc->priv->soup_session, msg, ews_response_cb, node);
 		QUEUE_UNLOCK (cnc);
@@ -1654,25 +1652,21 @@ ews_connection_constructor (GType gtype, guint n_properties,
 {
 	GObject *obj = G_OBJECT_CLASS (e_ews_connection_parent_class)->
 		constructor (gtype, n_properties, properties);
-	EEwsConnection *cnc = E_EWS_CONNECTION (obj);
-	CamelEwsSettings *ews_settings = e_ews_connection_ref_settings (cnc);
-	gchar *auth_mech = NULL;
+	EEwsConnectionPrivate *priv = E_EWS_CONNECTION_GET_PRIVATE (obj);
+	EwsAuthType mech;
 
-	g_object_get (G_OBJECT (ews_settings), "auth-mechanism", &auth_mech,
-		      NULL);
+	mech = camel_ews_settings_get_auth_mechanism (priv->settings);
 
 	/* We need to disable Basic auth to avoid it getting in the way of
 	 * our GSSAPI hacks. But leave it enabled in the case where NTLM is
 	 * enabled, which is the default configuration. It's a useful fallback
 	 * which people may be relying on. */
-	if (g_strcmp0 (auth_mech, "GSSAPI") == 0)
-		soup_session_remove_feature_by_type (cnc->priv->soup_session,
+	if (mech == EWS_AUTH_TYPE_GSSAPI)
+		soup_session_remove_feature_by_type (priv->soup_session,
 						     SOUP_TYPE_AUTH_BASIC);
-	else if (g_strcmp0 (auth_mech, "PLAIN") != 0) /* NTLM */
-		soup_session_add_feature_by_type (cnc->priv->soup_session,
+	else if (mech == EWS_AUTH_TYPE_NTLM)
+		soup_session_add_feature_by_type (priv->soup_session,
 						  SOUP_TYPE_AUTH_NTLM);
-	g_free (auth_mech);
-	g_object_unref(ews_settings);
 
 	return obj;
 }

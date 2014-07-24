@@ -26,6 +26,7 @@
 #include <glib/gstdio.h>
 
 #include "e-ews-connection-utils.h"
+#include "camel-ews-settings.h"
 
 #define EWS_GSSAPI_SOUP_SESSION "ews-gssapi-soup-session"
 #define EWS_GSSAPI_SASL		"ews-gssapi-sasl"
@@ -315,18 +316,20 @@ ews_connect_check_ntlm_available (void)
 gboolean
 e_ews_connection_utils_get_without_password (CamelEwsSettings *ews_settings)
 {
-	gboolean result = FALSE;
-	gchar *auth_mech = NULL;
+	switch (camel_ews_settings_get_auth_mechanism (ews_settings)) {
+	case EWS_AUTH_TYPE_GSSAPI:
+		return TRUE;
 
-	g_object_get (G_OBJECT (ews_settings), "auth-mechanism", &auth_mech,
-		      NULL);
+	case EWS_AUTH_TYPE_NTLM:
+		return ews_connect_check_ntlm_available ();
 
-	if (g_strcmp0 (auth_mech, "GSSAPI") == 0)
-		result = TRUE;
-	else if (g_strcmp0 (auth_mech, "PLAIN") != 0)
-		result = ews_connect_check_ntlm_available ();
+	case EWS_AUTH_TYPE_BASIC:
+		return FALSE;
 
-	g_free (auth_mech);
+	/* No default: case (which should never be used anyway). That
+	 * means the compiler will warn if we ever add a new mechanism
+	 * to the enum and don't handle it here. */
+	}
 
-	return result;
+	return FALSE;
 }

@@ -55,7 +55,16 @@ struct _CamelEwsSettingsClass {
 	CamelOfflineSettingsClass parent_class;
 };
 
+typedef enum {
+	EWS_AUTH_TYPE_NTLM,
+	EWS_AUTH_TYPE_BASIC,
+	EWS_AUTH_TYPE_GSSAPI
+} EwsAuthType;
+
+
 GType		camel_ews_settings_get_type	(void) G_GNUC_CONST;
+EwsAuthType	camel_ews_settings_get_auth_mechanism
+						(CamelEwsSettings *settings);
 gboolean	camel_ews_settings_get_check_all
 						(CamelEwsSettings *settings);
 void		camel_ews_settings_set_check_all
