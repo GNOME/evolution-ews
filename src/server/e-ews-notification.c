@@ -235,7 +235,7 @@ ews_notification_constructor (GType gtype, guint n_properties,
 	g_object_get (G_OBJECT (ews_settings), "auth-mechanism", &auth_mech,
 		      NULL);
 
-	if (g_strcmp0 (auth_mech, "BASIC") != 0)
+	if (g_strcmp0 (auth_mech, "Basic") != 0)
 		soup_session_remove_feature_by_type (priv->soup_session,
 						     SOUP_TYPE_AUTH_BASIC);
 	if (!auth_mech) /* NTLM */
