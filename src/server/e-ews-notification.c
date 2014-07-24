@@ -226,27 +226,24 @@ ews_notification_constructor (GType gtype, guint n_properties,
 		constructor (gtype, n_properties, properties);
 	EEwsNotificationPrivate *priv;
 	CamelEwsSettings *ews_settings;
-	gchar *auth_mech = NULL;
+	EwsAuthType mech;
 
 	priv = E_EWS_NOTIFICATION_GET_PRIVATE (obj);
-
 	ews_settings = e_ews_connection_ref_settings (priv->connection);
+	mech = camel_ews_settings_get_auth_mechanism (ews_settings);
 
-	g_object_get (G_OBJECT (ews_settings), "auth-mechanism", &auth_mech,
-		      NULL);
+	g_object_unref (ews_settings);
 
 	/* We need to disable Basic auth to avoid it getting in the way of
 	 * our GSSAPI hacks. But leave it enabled in the case where NTLM is
 	 * enabled, which is the default configuration. It's a useful fallback
 	 * which people may be relying on. */
-	if (g_strcmp0 (auth_mech, "GSSAPI") == 0)
+	if (mech == EWS_AUTH_TYPE_GSSAPI)
 		soup_session_remove_feature_by_type (priv->soup_session,
 						     SOUP_TYPE_AUTH_BASIC);
-	else if (g_strcmp0 (auth_mech, "PLAIN") != 0) /* NTLM */
+	else if (mech == EWS_AUTH_TYPE_NTLM)
 		soup_session_add_feature_by_type (priv->soup_session,
 						  SOUP_TYPE_AUTH_NTLM);
-	g_free (auth_mech);
-	g_object_unref(ews_settings);
 
 	return obj;
 }
@@ -313,7 +310,6 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 	ESoapParameter *param, *subparam;
 	GError *error = NULL;
 	GSList *l;
-	gchar *auth_mech = NULL;
 	guint event_type;
 	xmlDoc *doc;
 
@@ -367,15 +363,14 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 
 	ews_settings = e_ews_connection_ref_settings (notification->priv->connection);
 
-	g_object_get (G_OBJECT (ews_settings), "auth-mechanism", &auth_mech, NULL);
-	if (g_strcmp0 (auth_mech, "GSSAPI") == 0)
+	if (camel_ews_settings_get_auth_mechanism (ews_settings) ==
+	    EWS_AUTH_TYPE_GSSAPI)
 		e_ews_connection_utils_setup_msg_gssapi_auth (
 			notification->priv->connection,
 			notification->priv->soup_session,
 			SOUP_MESSAGE (msg));
 
 	g_object_unref (ews_settings);
-	g_free (auth_mech);
 
 	if (g_cancellable_is_cancelled (cancellable)) {
 		g_object_unref (msg);

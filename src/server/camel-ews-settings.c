@@ -621,6 +621,43 @@ camel_ews_settings_init (CamelEwsSettings *settings)
 }
 
 /**
+ * camel_ews_settings_get_auth_mechanism:
+ * @settings: a #CamelEwsSettings
+ *
+ * Returns a #EwsAuthType enum value indicating which authentication
+ * method to use.
+ *
+ * Returns: authentication method to use for this account
+ *
+ * Since: 3.14
+ **/
+EwsAuthType
+camel_ews_settings_get_auth_mechanism (CamelEwsSettings *settings)
+{
+	EwsAuthType result;
+	gchar *auth_mech = NULL;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), FALSE);
+
+	g_object_get (G_OBJECT (settings), "auth-mechanism", &auth_mech, NULL);
+
+	/* The value for "NTLM" is a special case. Sometimes it's NULL,
+	 * and sometimes it's "". But never "NTLM". No, that would be too
+	 * simple. (I think it's for backward-compatibility with old
+	 * profiles, so they default to NTLM). */
+	if (auth_mech && g_ascii_strcasecmp (auth_mech, "PLAIN") == 0)
+		result = EWS_AUTH_TYPE_BASIC;
+	else if (auth_mech && g_ascii_strcasecmp (auth_mech, "GSSAPI") == 0)
+		result = EWS_AUTH_TYPE_GSSAPI;
+	else
+		result = EWS_AUTH_TYPE_NTLM;
+
+	g_free (auth_mech);
+
+	return result;
+}
+
+/**
  * camel_ews_settings_get_check_all:
  * @settings: a #CamelEwsSettings
  *
