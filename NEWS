@@ -1,3 +1,37 @@
+Evolution-EWS 3.13.4 2014-07-28
+-------------------------------
+
+Bug Fixes:
+	Bug 728942 - Fails to pair user with attendee in invitation response (Milan Crha)
+	Bug 730878 - Split libcamelews into a static and a dynamic library (Milan Crha)
+	Bug 733274 - EWS is very slow to download large messages (Milan Crha)
+	Bug 703181 - Work around libsoup's failure to recover from NTLM auth failure (David Woodhouse)
+	Bug 732850 - GSSAPI authentication doesn't need a password (Daniel Sands)
+	Bug 703181 - NTLM authentication doesn't (always) need a password (David Woodhouse)
+	Bug 732850 - Remove reachability check from ews_store_query_auth_types_sync() (Daniel Sands)
+	Bug 732850 - Not all message restarts are due to a redirect (Daniel Sands)
+	Bug 733663 - Do not attempt to subscribe to GAL changes (David Woodhouse)
+
+Miscellaneous:
+	Replace GtkSpinner with Evolution's ESpinner (Milan Crha)
+	Make Evolution-EWS build under Win32 (Milan Crha)
+	Adapt evolution-ews to support backend-per-process (Fabiano Fidêncio)
+	Add missing chain-up to parent's constructed() method (Milan Crha)
+	Clean up enabling/disabling NTLM and Basic auth types (David Woodhouse)
+	Handle cookies (non-persistently) (Daniel Sands)
+	Fix string comparison for Basic auth (David Woodhouse)
+	Leave Basic auth enabled when NTLM is configured (David Woodhouse)
+	Add camel_ews_settings_get_auth_mechanism() helper function (David Woodhouse)
+	Clean up logging slightly and make it more consistent (Daniel Sands)
+	SOUP_STATUS_IS_SUCCESSFUL(soup_session_send_message()) sends message twice (David Woodhouse)
+	Clean up Negotiate auth implementation to be a SoupAuth subclass (Daniel Sands)
+
+Translations:
+	Daniel Mustieles (es)
+	Marek Černocký (cs)
+	Piotr Drąg (pl)
+	Rafael Ferreira (pt_BR)
+
 Evolution-EWS 3.13.3 2014-06-23
 -------------------------------
 
