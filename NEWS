@@ -1,3 +1,24 @@
+Evolution-EWS 3.12.5 2014-08-11
+-------------------------------
+
+Bug Fixes:
+	Bug 733274 - EWS is very slow to download large messages (Milan Crha)
+	Bug 703181 - Work around libsoup's failure to recover from NTLM auth failure (David Woodhouse)
+	Bug 732850 - GSSAPI authentication doesn't need a password (Daniel Sands)
+	Bug 703181 - NTLM authentication doesn't (always) need a password (David Woodhouse)
+	Bug 733663 - Do not attempt to subscribe to GAL changes (David Woodhouse)
+	Bug 732850 - Remove reachability check from ews_store_query_auth_types_sync() (Daniel Sands)
+	Bug 732850 - Not all message restarts are due to a redirect (Daniel Sands)
+
+Miscellaneous:
+	Add missing chain-up to parent's constructed() method (Milan Crha)
+	Handle cookies (non-persistently) (Daniel Sands)
+	SOUP_STATUS_IS_SUCCESSFUL(soup_session_send_message()) sends message twice (David Woodhouse)
+	Clean up enabling/disabling NTLM and Basic auth types (David Woodhouse)
+	Clean up logging slightly and make it more consistent (Daniel Sands)
+	Add camel_ews_settings_get_auth_mechanism() helper function (David Woodhouse)
+	Clean up Negotiate auth implementation to be a SoupAuth subclass (Daniel Sands)
+
 Evolution-EWS 3.12.4 2014-07-14
 -------------------------------
 
