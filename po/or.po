@@ -1,313 +1,365 @@
-# Manoj Kumar Giri <mgiri@redhat.com>, 2013.
+# Manoj Kumar Giri <mgiri@redhat.com>, 2013, 2014.
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-06 14:45+0530\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2013-10-30 03:52-0400\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-ews&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2014-07-24 13:51+0000\n"
+"PO-Revision-Date: 2014-08-27 17:46+0530\n"
 "Last-Translator: Manoj Kumar Giri <mgiri@redhat.com>\n"
 "Language-Team: Oriya <oriya-it@googlegroups.com>\n"
 "Language: or\n"
-"X-Generator: Zanata 3.2.3\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Lokalize 1.5\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-#: ../src/addressbook/e-book-backend-ews.c:1038
+#: ../src/addressbook/e-book-backend-ews.c:1437
 msgid "The backend does not support bulk additions"
 msgstr "ପୃଷ୍ଠଭୂମି ଏକାଧିକ ସମଷ୍ଟିକୁ ସହାୟତା କରିନଥାଏ"
 
-#: ../src/addressbook/e-book-backend-ews.c:1325
+#: ../src/addressbook/e-book-backend-ews.c:1476
+#: ../src/addressbook/e-book-backend-ews.c:1820
+msgid ""
+"Cannot save contact list, it's only supported on EWS Server 2010 or later"
+msgstr ""
+"ସମ୍ପର୍କ ତାଲିକାକୁ ସଂରକ୍ଷଣ କରି ପାରିବେ ନାହିଁ, ଏହା କେବଳ EWS ସର୍ଭର 2010 କିମ୍ବା "
+"ପରବର୍ତ୍ତୀରେ ସହାୟତା ପ୍ରାପ୍ତ"
+
+#: ../src/addressbook/e-book-backend-ews.c:1779
 msgid "The backend does not support bulk modifications"
 msgstr "ପୃଷ୍ଠଭୂମି ଏକାଧିକ ପରିବର୍ତ୍ତନକୁ ସହାୟତା କରିନଥାଏ"
 
-#: ../src/addressbook/e-book-backend-ews.c:1513
+#: ../src/addressbook/e-book-backend-ews.c:1979
 msgid "Wait till syncing is done"
 msgstr "ସନ୍ତୁଳନ ସରିବା ପର୍ଯ୍ୟନ୍ତ ଅପେକ୍ଷା କରନ୍ତୁ"
 
-#: ../src/addressbook/e-book-backend-ews.c:1922
+#: ../src/addressbook/e-book-backend-ews.c:2393
 #, c-format
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr "%s %d%% ରେ ସମ୍ପର୍କଗୁଡ଼ିକର ଆହରଣ ସମ୍ପୂର୍ଣ୍ଣ ହୋଇଛି... "
 
-#: ../src/addressbook/e-book-backend-ews.c:2535
+#: ../src/addressbook/e-book-backend-ews.c:3088
 msgid "Syncing contacts..."
 msgstr "ସମ୍ପର୍କଗୁଡ଼ିକୁ ସନ୍ତୁଳନ କରୁଅଛି..."
 
-#: ../src/addressbook/e-book-backend-ews.c:2757
+#: ../src/addressbook/e-book-backend-ews.c:3263
 #: ../src/configuration/e-ews-search-user.c:365
 msgid "Searching..."
 msgstr "ସନ୍ଧାନ କରୁଅଛି..."
 
-#: ../src/calendar/e-cal-backend-ews.c:1112
+#: ../src/calendar/e-cal-backend-ews.c:1257
 msgid "EWS does not support bulk removals"
 msgstr "EWS ଏକାଧିକ ବହିଷ୍କାରକୁ ସହାୟତା କରିନଥାଏ"
 
-#: ../src/calendar/e-cal-backend-ews.c:1755
+#: ../src/calendar/e-cal-backend-ews.c:1433
+#| msgctxt "User"
+#| msgid "Unknown"
+msgid "Unknown error"
+msgstr "ଅଜଣା ତୃଟି"
+
+#: ../src/calendar/e-cal-backend-ews.c:1648
 msgid "EWS does not support bulk additions"
 msgstr "EWS ଏକାଧିକ ସମଷ୍ଟିକୁ ସହାୟତା କରିନଥାଏ"
 
-#: ../src/calendar/e-cal-backend-ews.c:2338
+#: ../src/calendar/e-cal-backend-ews.c:1853
 msgid "EWS does not support bulk modifications"
 msgstr "EWS ଏକାଧିକ ପରିବର୍ତ୍ତନକୁ ସହାୟତା କରିନଥାଏ"
 
-#: ../src/camel/camel-ews-folder.c:268
+#: ../src/calendar/e-cal-backend-ews.c:2279
+#, c-format
+msgid "Cannot find user '%s' between attendees"
+msgstr "ଅଂଶଗ୍ରହଣକାରୀମାନଙ୍କ ମଧ୍ଯରେ ବ୍ୟବହାରକାରୀ '%s' କୁ ଖୋଜିପାରିବେ ନାହିଁ"
+
+#: ../src/camel/camel-ews-folder.c:379
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "mimecontent ଅସ୍ଥାୟୀ ଫାଇଲ ଖୋଲିବାରେ ଅସମର୍ଥ!"
 
-#: ../src/camel/camel-ews-folder.c:276
+#: ../src/camel/camel-ews-folder.c:387
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "ମାଇମ ବିଷୟବସ୍ତୁରୁ ବିଶ୍ଳେଷକ ସୃଷ୍ଟିକରିବାରେ ଅସମର୍ଥ!"
 
-#: ../src/camel/camel-ews-folder.c:285
+#: ../src/camel/camel-ews-folder.c:396
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "ସାକ୍ଷାତକାର ଅନୁରୋଧ ମାଇମ ବିଷୟବସ୍ତୁକୁ ବିଶ୍ଳେଷଣ କରିବାରେ ଅସମର୍ଥ!"
 
-#: ../src/camel/camel-ews-folder.c:346
+#: ../src/camel/camel-ews-folder.c:455
 #, c-format
 msgid "Unable to create cache file"
 msgstr "କ୍ୟାଶେ ଫାଇଲ ନିର୍ମାଣ କରିବାରେ ଅସମର୍ଥ"
 
-#: ../src/camel/camel-ews-folder.c:451 ../src/camel/camel-ews-folder.c:531
+#: ../src/camel/camel-ews-folder.c:559 ../src/camel/camel-ews-folder.c:650
 #, c-format
 msgid "Unable to create cache path"
 msgstr "କ୍ୟାଶେ ପଥ ନିର୍ମାଣ କରିବାରେ ଅସମର୍ଥ"
 
-#: ../src/camel/camel-ews-folder.c:541
+#: ../src/camel/camel-ews-folder.c:660
 #, c-format
 msgid "Failed to move message cache file"
 msgstr "ସନ୍ଦେଶ କ୍ୟାଶେ ଫାଇଲକୁ ଘୁଞ୍ଚାଇବାରେ ବିଫଳ"
 
-#: ../src/camel/camel-ews-folder.c:1189
+#: ../src/camel/camel-ews-folder.c:1364
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "%s ପାଇଁ ସାରାଂଶ ଧାରଣ କରିପାରିବେ ନାହିଁ"
 
-#: ../src/camel/camel-ews-folder.c:1625
+#: ../src/camel/camel-ews-folder.c:1849
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr "ଅଫଲାଇନ ଧାରାରେ ଥିବା ସମୟରେ ଫୋଲଡର ଉପରେ କୌଣସି କାର୍ଯ୍ୟ କରିପାରିବେ ନାହିଁ"
 
-#: ../src/camel/camel-ews-provider.c:48
+#: ../src/camel/camel-ews-provider.c:47
 msgid "Checking for new mail"
 msgstr "ନୂତନ ମେଲ ଯାଞ୍ଚ କରୁଅଛି"
 
-#: ../src/camel/camel-ews-provider.c:50
+#: ../src/camel/camel-ews-provider.c:49
 msgid "C_heck for new messages in all folders"
 msgstr "ସମସ୍ତ ଫୋଲଡରରେ ନୂତନ ସନ୍ଦେଶଗୁଡ଼ିକ ପାଇଁ ଯାଞ୍ଚକରନ୍ତୁ (_h)"
 
-#: ../src/camel/camel-ews-provider.c:53
+#: ../src/camel/camel-ews-provider.c:51
+msgid "_Listen for server change notifications"
+msgstr "ସର୍ଭର ପରିବର୍ତ୍ତନ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ପାଇଁ ଶୁଣନ୍ତୁ (_L)"
+
+#: ../src/camel/camel-ews-provider.c:54
 msgid "Options"
 msgstr "ବିକଳ୍ପଗୁଡିକ"
 
-#: ../src/camel/camel-ews-provider.c:55
+#: ../src/camel/camel-ews-provider.c:56
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "ଏହି ସର୍ଭରର ଇନବକ୍ସରେ ନୂତନ ସନ୍ଦେଶଗୁଡ଼ିକ ପାଇଁ ଛାଣକ ପ୍ରୟୋଗ କରନ୍ତୁ (_A)"
 
-#: ../src/camel/camel-ews-provider.c:57
+#: ../src/camel/camel-ews-provider.c:58
 msgid "Check new messages for _Junk contents"
 msgstr "ଜଙ୍କ ସୂଚୀ ପାଇଁ ନୂତନ ସନ୍ଦେଶଗୁଡ଼ିକୁ ଯାଞ୍ଚ କରନ୍ତୁ (_J)"
 
-#: ../src/camel/camel-ews-provider.c:59
+#: ../src/camel/camel-ews-provider.c:60
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "INBOX ଫୋଲଡରରେ କେବଳ Junk ସନ୍ଦେଶଗୁଡ଼ିକ ପାଇଁ ଯାଞ୍ଚ କରନ୍ତୁ"
 
-#: ../src/camel/camel-ews-provider.c:61
+#: ../src/camel/camel-ews-provider.c:62
 msgid "Automatically synchroni_ze remote mail locally"
 msgstr "ସ୍ୱୟଂଚାଳିତ ଭାବରେ ସୂଦୂର ମେଲକୁ ସ୍ଥାନୀୟ ଭାବରେ ସମକାଳିନ କରିଥାଏ (_z)"
 
-#: ../src/camel/camel-ews-provider.c:64
+#: ../src/camel/camel-ews-provider.c:65
 msgid "Connection"
 msgstr "ସଂଯୋଗ"
 
-#: ../src/camel/camel-ews-provider.c:68
+#. Translators: '%s' is preplaced with a widget, where "
+#. * user can select how long the timeout should be.
+#: ../src/camel/camel-ews-provider.c:69
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "ସଂଯୋଗ ସମୟ ସମାପ୍ତି (ସେକଣ୍ଡରେ) %s (_t)"
 
-#: ../src/camel/camel-ews-provider.c:76
+#: ../src/camel/camel-ews-provider.c:77
 msgid "Exchange Web Services"
 msgstr "ଏକ୍ସଚେଞ୍ଜ ୱେବ ସର୍ଭିସଗୁଡ଼ିକ"
 
-#: ../src/camel/camel-ews-provider.c:78
+#: ../src/camel/camel-ews-provider.c:79
 msgid "For accessing Exchange servers using Web Services"
 msgstr ""
 "ୱେବ ସର୍ଭିସଗୁଡ଼ିକୁ ବ୍ୟବହାର କରି ଏକ୍ସଚେଞ୍ଜ ସର୍ଭରଗୁଡ଼ିକୁ ଅଭିଗମ୍ୟ କରିବା ପାଇଁ"
 
-#: ../src/camel/camel-ews-provider.c:93
+#: ../src/camel/camel-ews-provider.c:94
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/camel/camel-ews-provider.c:95
+#: ../src/camel/camel-ews-provider.c:96
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
 msgstr ""
-"ସରଳ ପାଠ୍ୟ ପ୍ରବେଶ ସଂକେତକୁ ମୌଳିକ ବୈଧିକରଣ ସହିତ ବ୍ୟବହାର କରି ଏହି ବିକଳ୍ପଟି "
-"Exchange ସର୍ଭର ସହିତ ସଂଯୁକ୍ତ ହୋଇଥାଏ।"
+"ସରଳ ପାଠ୍ୟ ପ୍ରବେଶ ସଂକେତକୁ ମୌଳିକ ବୈଧିକରଣ ସହିତ ବ୍ୟବହାର କରି ଏହି ବିକଳ୍ପଟି Exchange "
+"ସର୍ଭର ସହିତ "
+"ସଂଯୁକ୍ତ ହୋଇଥାଏ।"
 
-#: ../src/camel/camel-ews-provider.c:103
+#: ../src/camel/camel-ews-provider.c:104
 msgid "Basic"
 msgstr "ମୌଳିକ"
 
-#: ../src/camel/camel-ews-provider.c:105
+#: ../src/camel/camel-ews-provider.c:106
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
 msgstr ""
-"ସରଳ ପାଠ୍ୟ ପ୍ରବେଶ ସଂକେତକୁ ମୌଳିକ ବୈଧିକରଣ ସହିତ ବ୍ୟବହାର କରି ଏହି ବିକଳ୍ପଟି "
-"Exchange ସର୍ଭର ସହିତ ସଂଯୁକ୍ତ ହୋଇଥାଏ।"
+"ସରଳ ପାଠ୍ୟ ପ୍ରବେଶ ସଂକେତକୁ ମୌଳିକ ବୈଧିକରଣ ସହିତ ବ୍ୟବହାର କରି ଏହି ବିକଳ୍ପଟି Exchange "
+"ସର୍ଭର ସହିତ "
+"ସଂଯୁକ୍ତ ହୋଇଥାଏ।"
 
-#: ../src/camel/camel-ews-store.c:192
+#: ../src/camel/camel-ews-provider.c:114
+msgid "Kerberos"
+msgstr "କେର୍ବେରୋଶ"
+
+#: ../src/camel/camel-ews-provider.c:116
+#| msgid ""
+#| "This option will connect to the Exchange server using a plaintext "
+#| "password with Basic authentication."
+msgid ""
+"This option will connect to the Exchange server using a Kerberos/GSSAPI "
+"authentication."
+msgstr ""
+"ସରଳ ପାଠ୍ୟ ପ୍ରବେଶ ସଂକେତକୁ ମୌଳିକ ବୈଧିକରଣ ସହିତ Kerberos/GSSAPI ବ୍ୟବହାର କରି ଏହି "
+"ବିକଳ୍ପଟି Exchange ସର୍ଭର ସହିତ "
+"ସଂଯୁକ୍ତ ହୋଇଥାଏ।"
+
+#: ../src/camel/camel-ews-store.c:332
 #, c-format
 msgid "Session has no storage path"
 msgstr "ଏହି ଅଧିବେଶନରେ କୌଣସି ସଂରକ୍ଷଣ ପଥ ନାହିଁ"
 
-#: ../src/camel/camel-ews-store.c:229
+#: ../src/camel/camel-ews-store.c:369
 #, c-format
 msgctxt "PublicFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:358
+#: ../src/camel/camel-ews-store.c:498
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:727
+#: ../src/camel/camel-ews-store.c:639
+#| msgid "Retrieving \"Out of Office\" settings"
+msgid "Checking \"Out of Office\" settings"
+msgstr "\"କାର୍ଯ୍ୟାଳୟ ବାହାରେ\" ସେଟିଙ୍ଗକୁ ଯାଞ୍ଚ କରୁଅଛି"
+
+#: ../src/camel/camel-ews-store.c:1434
 msgid "Updating foreign folder structure"
 msgstr "ବାହାର ଫୋଲଡର ସଂରଚନାକୁ ଅଦ୍ୟତନ କରୁଅଛି"
 
-#: ../src/camel/camel-ews-store.c:1169
-msgid "Query for authentication types is not supported"
-msgstr "ବୈଧିକରଣ ପ୍ରକାରଗୁଡ଼ିକ ପାଇଁ ପ୍ରଶ୍ନ ସହାୟତା ପ୍ରାପ୍ତ ନୁହଁ"
-
-#: ../src/camel/camel-ews-store.c:1221
+#: ../src/camel/camel-ews-store.c:1960
 #, c-format
 msgid "No such folder: %s"
 msgstr "ଏପରି କୌଣସି ଫୋଲଡର ନାହିଁ: %s"
 
-#: ../src/camel/camel-ews-store.c:1533
+#: ../src/camel/camel-ews-store.c:2272
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "EWS ସର୍ବସାଧାରଣ ଫୋଲଡରଗୁଡ଼ିକୁ ଅଫଲାଇନ ଧାରାରେ ତାଲିକାଭୁକ୍ତ କରିପାରିବେ ନାହିଁ"
 
-#: ../src/camel/camel-ews-store.c:1606
+#: ../src/camel/camel-ews-store.c:2345
 msgid "Cannot find any EWS public folders"
 msgstr "କୌଣସି EWS ସର୍ବସାଧାରଣ ଫୋଲଡରଗୁଡ଼ିକୁ ଖୋଜିପାରିବେ ନାହିଁ"
 
-#: ../src/camel/camel-ews-store.c:1711
+#: ../src/camel/camel-ews-store.c:2454
 #, c-format
 msgid "Cannot create folder '%s', folder already exists"
 msgstr "'%s' ଫୋଲଡର ସୃଷ୍ଚି କରିପାରିବେ ନାହିଁ, ଫୋଲଡର  ପୂର୍ବରୁ ଅବସ୍ଥିତ"
 
-#: ../src/camel/camel-ews-store.c:1726
+#: ../src/camel/camel-ews-store.c:2469
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "ମୂଖ୍ୟ ଫୋଲଡର %s  ଅବସ୍ଥିତ ନାହିଁ"
 
-#: ../src/camel/camel-ews-store.c:1736
+#: ../src/camel/camel-ews-store.c:2479
 #, c-format
 msgid ""
 "Cannot create folder under '%s', it is used for folders of other users only"
 msgstr ""
 "'%s' ଅନ୍ତର୍ଗତରେ ଫୋଲଡର ନିର୍ମାଣ କରିପାରିବେ ନାହିଁ, ଏହା କେବଳ ଅନ୍ୟ "
-"ବ୍ୟବହାରକାରୀମାନଙ୍କ ଫୋଲଡର ପାଇଁ ବ୍ୟବହାର କରାଯାଇଥାଏ"
+"ବ୍ୟବହାରକାରୀମାନଙ୍କ ଫୋଲଡର "
+"ପାଇଁ ବ୍ୟବହାର କରାଯାଇଥାଏ"
 
-#: ../src/camel/camel-ews-store.c:1746
+#: ../src/camel/camel-ews-store.c:2489
 #, c-format
 msgid "Cannot create folder under '%s', it is used for public folders only"
 msgstr ""
-"'%s' ଅନ୍ତର୍ଗତରେ ଫୋଲଡର ନିର୍ମାଣ କରିପାରିବେ ନାହିଁ, ଏହା କେବଳ ସର୍ବସାଧାରଣ ଫୋଲଡର "
-"ପାଇଁ ବ୍ୟବହାର କରାଯାଇଥାଏ"
+"'%s' ଅନ୍ତର୍ଗତରେ ଫୋଲଡର ନିର୍ମାଣ କରିପାରିବେ ନାହିଁ, ଏହା କେବଳ ସର୍ବସାଧାରଣ ଫୋଲଡର ପାଇଁ "
+"ବ୍ୟବହାର "
+"କରାଯାଇଥାଏ"
 
-#: ../src/camel/camel-ews-store.c:1815
+#: ../src/camel/camel-ews-store.c:2593
 #, c-format
 msgid "Folder does not exist"
 msgstr "ଫୋଲଡ଼ର ଅବସ୍ଥିତ ନାହିଁ"
 
-#: ../src/camel/camel-ews-store.c:1824
+#: ../src/camel/camel-ews-store.c:2603
 #, c-format
 msgid "Cannot remove folder '%s', it is used for folders of other users only"
 msgstr ""
 "'%s' ଫୋଲଡରକୁ ବାହାର କରିପାରିବେ ନାହିଁ, ଏହା କେବଳ ଅନ୍ୟ ବ୍ୟବହାରକାରୀମାନଙ୍କ ଫୋଲଡର "
-"ପାଇଁ ବ୍ୟବହାର କରାଯାଇଥାଏ"
+"ପାଇଁ ବ୍ୟବହାର "
+"କରାଯାଇଥାଏ"
 
-#: ../src/camel/camel-ews-store.c:1834
+#: ../src/camel/camel-ews-store.c:2614
 #, c-format
 msgid "Cannot remove folder '%s', it is used for public folders only"
 msgstr ""
 "'%s' ଫୋଲଡରକୁ ବାହାର କରିପାରିବେ ନାହିଁ, ଏହା କେବଳ ସର୍ବସାଧାରଣ ଫୋଲଡର ପାଇଁ ବ୍ୟବହାର "
 "କରାଯାଇଥାଏ"
 
-#: ../src/camel/camel-ews-store.c:1942
+#: ../src/camel/camel-ews-store.c:2770
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "ଫୋଲଡର %s ଅବସ୍ଥିତ ନାହିଁ"
 
-#: ../src/camel/camel-ews-store.c:1952
+#: ../src/camel/camel-ews-store.c:2780
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "ଫୋଲଡର %s ପାଇଁ କୌଣସି ପରିବର୍ତ୍ତନ କି ନାହିଁ"
 
-#: ../src/camel/camel-ews-store.c:1994
+#: ../src/camel/camel-ews-store.c:2822
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
-msgstr ""
-"ଏକାସଙ୍ଗେ ଫୋଲଡରର ନାମ ପରିବର୍ତ୍ତନ କରିପାରିବେ ନାହିଁ ଏବଂ ଘୁଞ୍ଚାଇପାରିବେ ନାହିଁ"
+msgstr "ଏକାସଙ୍ଗେ ଫୋଲଡରର ନାମ ପରିବର୍ତ୍ତନ କରିପାରିବେ ନାହିଁ ଏବଂ ଘୁଞ୍ଚାଇପାରିବେ ନାହିଁ"
 
-#: ../src/camel/camel-ews-store.c:2030
+#: ../src/camel/camel-ews-store.c:2858
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "ମୂଖ୍ୟ ଫୋଲଡର %s ପାଇଁ ଫୋଲଡର ID ଖୋଜିପାରିବେ ନାହିଁ"
 
-#: ../src/camel/camel-ews-store.c:2080 ../src/camel/camel-ews-transport.c:69
+#: ../src/camel/camel-ews-store.c:2908 ../src/camel/camel-ews-transport.c:69
 #, c-format
 msgid "Exchange server %s"
 msgstr "ଏକ୍ସଚେଞ୍ଜ ସର୍ଭର %s"
 
-#: ../src/camel/camel-ews-store.c:2083
+#: ../src/camel/camel-ews-store.c:2911
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "%s ପାଇଁ %s ଉପରେ ଏକ୍ସଚେଞ୍ଜ ସର୍ଭିସ"
 
-#: ../src/camel/camel-ews-store.c:2127
+#: ../src/camel/camel-ews-store.c:2955
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "ଟ୍ରାସ ଫୋଲଡରକୁ ଖୋଜି  ପାରିଲା ନାହିଁ"
 
-#: ../src/camel/camel-ews-store.c:2187
+#: ../src/camel/camel-ews-store.c:3015
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "ଜଙ୍କ ଫୋଲଡରକୁ ଖୋଜି  ପାରିଲା ନାହିଁ"
 
-#: ../src/camel/camel-ews-store.c:2377
+#: ../src/camel/camel-ews-store.c:3205
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "EWS ଫୋଲଡରକୁ ଅଫଲାଇନ ଧାରାରେ ଗ୍ରହଣ କରିପାରିଲା ନାହିଁ"
 
-#: ../src/camel/camel-ews-store.c:2400
+#: ../src/camel/camel-ews-store.c:3228
 #, c-format
 msgid "Cannot subscribe folder '%s', no public folder available"
 msgstr ""
 "ଫୋଲଡରକୁ '%s' କୁ ଗ୍ରହଣ କରିପାରିଲା ନାହିଁ, କୌଣସି ସର୍ବସାଧାରଣ ଫୋଲଡର ଉପଲବ୍ଧ ନାହିଁ"
 
-#: ../src/camel/camel-ews-store.c:2410
+#: ../src/camel/camel-ews-store.c:3238
 #, c-format
 msgid "Cannot subscribe folder '%s', folder not found"
 msgstr "ଫୋଲଡରକୁ '%s' କୁ ଗ୍ରହଣ କରିପାରିଲା ନାହିଁ, ଫୋଲଡର ମିଳିଲା ନାହିଁ"
 
-#: ../src/camel/camel-ews-store.c:2501
+#: ../src/camel/camel-ews-store.c:3329
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "EWS ଫୋଲଡରଗୁଡ଼ିକୁ ଅଫଲାଇନ ଧାରାରେ ସଦସ୍ୟତା ଖାରଜ କରିପାରିବେ ନାହିଁ"
 
-#: ../src/camel/camel-ews-store.c:2618
+#: ../src/camel/camel-ews-store.c:3446
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "ଏହି ପ୍ରୟୋଗକୁ ସମ୍ପୂର୍ଣ୍ଣ କରିବା ପାଇଁ ଆପଣଙ୍କୁ ଅନଲାଇନ କାର୍ଯ୍ୟ କରିବାକୁ ହେବ"
+
+#: ../src/camel/camel-ews-store.c:3490
+#| msgid "Retrieving \"Out of Office\" settings"
+msgid "Unsetting the \"Out of Office\" status"
+msgstr "\"କାର୍ଯ୍ୟାଳୟ ବାହାରେ\" ସ୍ଥିତିକୁ ଅବିନ୍ୟାସିତ କରୁଅଛି"
 
 #: ../src/camel/camel-ews-transport.c:72
 #, c-format
@@ -332,71 +384,105 @@ msgid ""
 "Exchange server cannot send message as '%s', when the account was configured "
 "for address '%s'"
 msgstr ""
-"ଏକ୍ସଚେଞ୍ଜ ସର୍ଭର ସନ୍ଦେଶକୁ '%s' ଭାବରେ ପଠାଇପାରିବେ ନାହିଁ, ଯେତେବେଳେ ଖାତାକୁ ଠିକଣା "
-"'%s' ପାଇଁ ବିନ୍ୟାସ କରାଯାଇଥାଏ"
+"ଏକ୍ସଚେଞ୍ଜ ସର୍ଭର ସନ୍ଦେଶକୁ '%s' ଭାବରେ ପଠାଇପାରିବେ ନାହିଁ, ଯେତେବେଳେ ଖାତାକୁ ଠିକଣା '%"
+"s' ପାଇଁ "
+"ବିନ୍ୟାସ କରାଯାଇଥାଏ"
 
 #: ../src/camel/camel-ews-transport.c:162
 #, c-format
 msgid "Service not connected"
 msgstr "ସର୍ଭିସ ସଂଯୁକ୍ତ ନୁହଁ"
 
-#: ../src/collection/e-ews-backend.c:428
+#: ../src/collection/e-ews-backend.c:422
 #: ../src/configuration/e-mail-config-ews-gal.c:274
 msgid "Global Address List"
 msgstr "ସର୍ବସାଧାରଣ ଠିକଣା ତାଲିକା"
 
-#: ../src/collection/e-ews-backend.c:813
+#: ../src/collection/e-ews-backend.c:821
 #, c-format
-msgid ""
-"Could not determine a suitable folder class for a new folder named '%s'"
+msgid "Could not determine a suitable folder class for a new folder named '%s'"
 msgstr ""
 "'%s' ନାମକ ନୂତନ ଫୋଲଡର ପାଇଁ ଉପଯୁକ୍ତ ଫୋଲଡର ଶ୍ରେଣୀ ନିର୍ଦ୍ଧାରଣ କରିପାରିବେ ନାହିଁ"
 
-#: ../src/collection/e-ews-backend.c:902
+#: ../src/collection/e-ews-backend.c:910
 #, c-format
 msgid "Data source '%s' does not represent an Exchange Web Services folder"
 msgstr "ତଥ୍ୟ ଉତ୍ସ '%s' କୌଣସି ଏକ୍ସଚେଞ୍ଜ ୱେବ ସର୍ଭିସ ଫୋଲଡରକୁ ଉପସ୍ଥାପନ କରିନଥାଏ"
 
-#: ../src/configuration/e-ews-config-utils.c:516
+#: ../src/configuration/e-ews-config-utils.c:579
+#| msgid "Folder ID:"
+msgid "Folder"
+msgstr "ଫୋଲଡର୍"
+
+#: ../src/configuration/e-ews-config-utils.c:589
+msgid "Size"
+msgstr "ଆକାର"
+
+#: ../src/configuration/e-ews-config-utils.c:627
+#: ../src/configuration/e-ews-config-utils.c:632
+msgid "Unable to retrieve folder size information"
+msgstr "ଫୋଲଡର୍‌ ଆକାର ସୂଚନାକୁ ପୁନରୁଦ୍ଧାର କରିବାରେ ଅସମର୍ଥ"
+
+#: ../src/configuration/e-ews-config-utils.c:752
+#| msgctxt "Permissions"
+#| msgid "Folder visible"
+msgid "Folder Sizes"
+msgstr "ଫୋଲଡରର ଆକାରଗୁଡ଼ିକ"
+
+#: ../src/configuration/e-ews-config-utils.c:755
+msgid "_Close"
+msgstr "ବନ୍ଦ କରନ୍ତୁ (_C)"
+
+#: ../src/configuration/e-ews-config-utils.c:769
+msgid "Fetching folder list…"
+msgstr "ଫୋଲଡର୍‌ ତାଲିକା ବାହାର କରୁଅଛି…"
+
+#: ../src/configuration/e-ews-config-utils.c:922
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr ""
 "ଫୋଲଡର '%s' ର ଅନୁମତିଗୁଡ଼ିକୁ ସମ୍ପାଦନ କରିପାରିବେ ନାହିଁ, ଅନ୍ୟ ଫୋଲଡରକୁ ବାଛନ୍ତୁ।"
 
-#: ../src/configuration/e-ews-config-utils.c:594
+#: ../src/configuration/e-ews-config-utils.c:999
+#| msgctxt "Permissions"
+#| msgid "Folder visible"
+msgid "Folder Sizes..."
+msgstr "ଫୋଲଡରର ଆକାର ..."
+
+#: ../src/configuration/e-ews-config-utils.c:1006
 msgid "Subscribe to folder of other user..."
 msgstr "ଅନ୍ୟ ବ୍ୟବହାରକାରୀର ଫୋଲଡରକୁ ଗ୍ରହଣ କରନ୍ତୁ ..."
 
-#: ../src/configuration/e-ews-config-utils.c:603
-#: ../src/configuration/e-ews-config-utils.c:884
-#: ../src/configuration/e-ews-config-utils.c:915
-#: ../src/configuration/e-ews-config-utils.c:946
-#: ../src/configuration/e-ews-config-utils.c:977
+#: ../src/configuration/e-ews-config-utils.c:1015
+#: ../src/configuration/e-ews-config-utils.c:1297
+#: ../src/configuration/e-ews-config-utils.c:1328
+#: ../src/configuration/e-ews-config-utils.c:1359
+#: ../src/configuration/e-ews-config-utils.c:1390
 msgid "Permissions..."
 msgstr "ଅନୁମତି ..."
 
-#: ../src/configuration/e-ews-config-utils.c:605
+#: ../src/configuration/e-ews-config-utils.c:1017
 msgid "Edit EWS folder permissions"
 msgstr "EWS ଫୋଲଡର ଅନୁମତିଗୁଡ଼ିକୁ ସମ୍ପାଦନ କରନ୍ତୁ"
 
-#: ../src/configuration/e-ews-config-utils.c:886
+#: ../src/configuration/e-ews-config-utils.c:1299
 msgid "Edit EWS calendar permissions"
 msgstr "EWS କ୍ୟାଲେଣ୍ଡର ଅନୁମତିଗୁଡ଼ିକୁ ସମ୍ପାଦନ କରନ୍ତୁ"
 
-#: ../src/configuration/e-ews-config-utils.c:917
+#: ../src/configuration/e-ews-config-utils.c:1330
 msgid "Edit EWS tasks permissions"
 msgstr "EWS କାର୍ଯ୍ୟ ଅନୁମତିଗୁଡ଼ିକୁ ସମ୍ପାଦନ କରନ୍ତୁ"
 
-#: ../src/configuration/e-ews-config-utils.c:948
+#: ../src/configuration/e-ews-config-utils.c:1361
 msgid "Edit EWS memos permissions"
 msgstr "EWS ମେମୋ ଅନୁମତିଗୁଡ଼ିକୁ ସମ୍ପାଦନ କରନ୍ତୁ"
 
-#: ../src/configuration/e-ews-config-utils.c:979
+#: ../src/configuration/e-ews-config-utils.c:1392
 msgid "Edit EWS contacts permissions"
 msgstr "EWS ସମ୍ପର୍କ ଅନୁମତିଗୁଡ଼ିକୁ ସମ୍ପାଦନ କରନ୍ତୁ"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:87
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:499
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:488
 msgctxt "PermissionsLevel"
 msgid "None"
 msgstr "କିଛି ନାହିଁ"
@@ -452,7 +538,7 @@ msgid "Free/Busy time, subject, location"
 msgstr "ମୁକ୍ତ/ବ୍ୟସ୍ତ ସମୟ,ବସ୍ତୁ, ଅବସ୍ଥାନ"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:143
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:520
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:511
 msgctxt "PermissionsLevel"
 msgid "Custom"
 msgstr "ଇଚ୍ଛାରୂପଣ"
@@ -478,7 +564,7 @@ msgstr "ଅଜଣା"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:867
 #: ../src/configuration/e-ews-search-user.c:431
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1075
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1066
 msgid "Name"
 msgstr "ନାମ"
 
@@ -601,6 +687,15 @@ msgstr "ଫୋଲଡର ଦୃଶ୍ଯମାନ"
 msgid "Reading folder permissions, please wait..."
 msgstr "ଫୋଲଡର ଅନୁମତିଗୁଡ଼ିକୁ ପଢ଼ୁଅଛି, ଦୟାକରି ଅପେକ୍ଷା କରନ୍ତୁ ..."
 
+#: ../src/configuration/e-ews-ooo-notificator.c:184
+msgid "Unset on Server"
+msgstr "ସର୍ଭରରେ ସେଟ ହୋଇନାହିଁ"
+
+#: ../src/configuration/e-ews-ooo-notificator.c:185
+#| msgid "Retrieving \"Out of Office\" settings"
+msgid "Unset the \"Out of Office\" status"
+msgstr "\"କାର୍ଯ୍ୟାଳୟ ବାହାରେ\" ସ୍ଥିତିକୁ ସେଟ କରନ୍ତୁ ନାହିଁ"
+
 #: ../src/configuration/e-ews-search-user.c:208
 #, c-format
 msgid "No users found, only one contact"
@@ -644,11 +739,14 @@ msgid "_Search:"
 msgstr "ସନ୍ଧାନ କରନ୍ତୁ (_S):"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
-#: ../src/server/e-ews-folder.c:632
+#: ../src/server/e-ews-folder.c:681
 #, c-format
 msgid "Cannot add folder, folder already exists as '%s'"
 msgstr "ଫୋଲଡରକୁ ଯୋଗ କରିପାରିବେ ନାହିଁ, ଫୋଲଡର ପୂର୍ବରୁ '%s' ଭାବରେ ଅବସ୍ଥିତ"
 
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. * Example result: "Mailbox - John Smith"
+#.
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:107
 #, c-format
 msgctxt "ForeignFolder"
@@ -678,18 +776,25 @@ msgid ""
 "permission to access it."
 msgstr ""
 "ଫୋଲଡର '%s' ମିଳିଲା ନାହିଁ। ହୁଏତଃ ଏହା ଅବସ୍ଥିତ ନାହିଁ ଅଥବା ଆପଣଙ୍କ ପାଖରେ ଏହାକୁ "
-"ଅଭିଗମ୍ୟ କରିବା ପାଇଁ ଅନୁମତି ନାହିଁ।"
+"ଅଭିଗମ୍ୟ କରିବା ପାଇଁ "
+"ଅନୁମତି ନାହିଁ।"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:373
 msgid "Cannot add folder, cannot determine folder's type"
 msgstr "ଫୋଲଡର ଯୋଗ କରିପାରିବେ ନାହିଁ, ଫୋଲଡରର ପ୍ରକାର ନିର୍ଦ୍ଧାରଣ କରିପାରିବେ ନାହିଁ"
 
+#. Translators: This is used to name foreign folder.
+#. * The first '%s' is replaced with user name to whom the folder belongs,
+#. * the second '%s' is replaced with folder name.
+#. * Example result: "John Smith - Calendar"
+#.
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:418
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s - %s"
 msgstr "%s - %s"
 
+#. convert well-known names to their non-localized form
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:512
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:720
 msgid "Inbox"
@@ -746,11 +851,11 @@ msgstr "ଫୋଲଡର ନାମ (_F):"
 msgid "Include _subfolders"
 msgstr "ଉପ ପୋଲଡରଗୁଡ଼ିକୁ ଅନ୍ତର୍ଭୁକ୍ତ କରନ୍ତୁ (_s)"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:140
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:141
 msgid "Querying Autodiscover service"
 msgstr "ସ୍ୱୟଂଆବିଷ୍କାର ସର୍ଭିସକୁ ଅନୁସନ୍ଧାନ କରୁଅଛି"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:231
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:232
 msgid "Fetch _URL"
 msgstr "URL ଖୋଜୁଅଛି (_U)"
 
@@ -782,77 +887,75 @@ msgstr "ସନ୍ଧାନ କରନ୍ତୁ (_e)..."
 msgid "Authentication"
 msgstr "ବୈଧିକରଣ"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:500
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:489
 msgctxt "PermissionsLevel"
 msgid "Reviewer (can read items)"
 msgstr "ସମୀକ୍ଷକ (ବସ୍ତୁଗୁଡ଼ିକୁ ପଢ଼ିପାରିବେ)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:501
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:490
 msgctxt "PermissionsLevel"
 msgid "Author (can read and create items)"
 msgstr "ଲେଖକ (ବସ୍ତୁଗୁଡ଼ିକୁ ପଢ଼ିପାରିବେ ଏବଂ ନିର୍ମାଣ କରିପାରିବେ)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:502
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:491
 msgctxt "PermissionsLevel"
 msgid "Editor (can read, create and modify items)"
 msgstr ""
-"ସମ୍ପାଦକ (ବସ୍ତୁଗୁଡ଼ିକୁ ପଢ଼ିପାରିବେ, ନିର୍ମାଣ କରିପାରିବେ ଏବଂ ପରିବର୍ତ୍ତନ "
-"କରିପାରିବେ)"
+"ସମ୍ପାଦକ (ବସ୍ତୁଗୁଡ଼ିକୁ ପଢ଼ିପାରିବେ, ନିର୍ମାଣ କରିପାରିବେ ଏବଂ ପରିବର୍ତ୍ତନ କରିପାରିବେ)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:605
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:596
 msgid "Delegate permissions"
 msgstr "ପ୍ରତିନିଧି ଅନୁମତିଗୁଡ଼ିକ"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:623
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:614
 msgid "C_alendar"
 msgstr "କାଲେଣ୍ଡର (_a)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:626
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:617
 msgid "_Delegate receives copies of meeting-related messages sent to me"
 msgstr ""
 "ମୋ ପାଖକୁ ପଠାଯାଇଥିବା ସାକ୍ଷାତକାର ସମ୍ପୃକ୍ତ ସନ୍ଦେଶଗୁଡ଼ିକର ପ୍ରତିଲିପିକୁ ପ୍ରତିନିଧି "
 "ଗ୍ରହଣ କରିଥାଏ (_D)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:631
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:622
 msgid "_Tasks"
 msgstr "କାର୍ଯ୍ଯ (_T)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:634
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:625
 msgid "_Inbox"
 msgstr "ଇନବକ୍ସ (_I)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:637
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:628
 msgid "C_ontacts"
 msgstr "ଯୋଗାଯୋଗ (_o)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:640
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:631
 msgid "_Notes"
 msgstr "ଟିପ୍ପଣୀ (_N)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:643
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:634
 msgid "_Journal"
 msgstr "ପତ୍ରିକା (_J)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:646
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:637
 #, c-format
 msgid "Delegate '%s' has the following permissions"
 msgstr "ପ୍ରତିନିଧି '%s' ପାଖରେ ନିମ୍ନଲିଖିତ ଅନୁମତିଗୁଡ଼ିକ ଅଛି"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:664
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:655
 msgid "Delegate can see my _private items"
 msgstr "ପ୍ରତିନିଧି ମୋର ବ୍ୟକ୍ତିଗତ ବସ୍ତୁଗୁଡ଼ିକୁ ଦେଖିପାରିବେ (_p)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:987
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:978
 msgid "Retrieving current user permissions, please wait..."
-msgstr ""
-"ପ୍ରଚଳିତ ବ୍ଯବହାରକାରୀଙ୍କ ଅନୁମତିକୁ ବାହାର କରୁଅଛି, ଦୟାକରି ଅପେକ୍ଷା କରନ୍ତୁ..."
+msgstr "ପ୍ରଚଳିତ ବ୍ଯବହାରକାରୀଙ୍କ ଅନୁମତିକୁ ବାହାର କରୁଅଛି, ଦୟାକରି ଅପେକ୍ଷା କରନ୍ତୁ..."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1108
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1638
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1098
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1644
 msgid "Delegates"
 msgstr "ପ୍ରତିନିଧିମାନେ"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1132
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1122
 msgid ""
 "Delegates can send items on your behalf, including creating and responding "
 "to meeting requests. If you want to grant folder permissions without giving "
@@ -860,20 +963,24 @@ msgid ""
 "folder, click Permissions and change the options there."
 msgstr ""
 "ପ୍ରତିନିଧି ଆପଣଙ୍କ ବଦଳରେ ବସ୍ତୁଗୁଡ଼ିକୁ ପଠାଇପାରିବେ, ସାକ୍ଷାତକାର ଅନୁରୋଧଗୁଡ଼ିକର "
-"ନିର୍ମାଣ କରିଥାଏ ଏବଂ ଉତ୍ତର ଦେଇଥାଏ। ଯଦି ଆପଣ ଫୋଲଡର ଅନୁମତିଗୁଡ଼ିକୁ ଏହା ବଦଳରେ "
-"ପଠାନ୍ତୁ ଅନୁମତି ବିନା  ଅନୁମତି ଦେବାକୁ ଚାହୁଁଛନ୍ତି, ତେବେ ଏହି ସଂଳାପ ବାକ୍ସକୁ ବନ୍ଦ "
-"କରନ୍ତୁ, ଫୋଲଡରରେ ଡ଼ାହାଣ କ୍ଲିକ କରନ୍ତୁ, ଅନୁମତିଗୁଡ଼ିକୁ କ୍ଲିକ କରନ୍ତୁ ଏବଂ ସେଠାରେ "
-"ବିକଳ୍ପଗୁଡ଼ିକୁ ପରିବର୍ତ୍ତନ କରନ୍ତୁ।"
+"ନିର୍ମାଣ କରିଥାଏ ଏବଂ ଉତ୍ତର "
+"ଦେଇଥାଏ। ଯଦି ଆପଣ ଫୋଲଡର ଅନୁମତିଗୁଡ଼ିକୁ ଏହା ବଦଳରେ ପଠାନ୍ତୁ ଅନୁମତି ବିନା  ଅନୁମତି "
+"ଦେବାକୁ ଚାହୁଁଛନ୍ତି, "
+"ତେବେ ଏହି ସଂଳାପ ବାକ୍ସକୁ ବନ୍ଦ କରନ୍ତୁ, ଫୋଲଡରରେ ଡ଼ାହାଣ କ୍ଲିକ କରନ୍ତୁ, "
+"ଅନୁମତିଗୁଡ଼ିକୁ କ୍ଲିକ କରନ୍ତୁ ଏବଂ "
+"ସେଠାରେ ବିକଳ୍ପଗୁଡ଼ିକୁ ପରିବର୍ତ୍ତନ କରନ୍ତୁ।"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1181
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1171
 msgid ""
 "Deliver meeting requests addressed to me and responses to meeting requests "
 "where I am the organizer to:"
 msgstr ""
 "ମୋ ପାଇଁ ଥିବା ସାକ୍ଷାତକାର ଅନୁରୋଧଗୁଡ଼ିକୁ ଏବଂ ସାକ୍ଷାତକାର ଅନୁରୋଧଗୁଡ଼ିକୁ ଉତ୍ତର "
-"ଦେଇଥାଏ ଯେଉଁଠି ମୁଁ ଆୟୋଜକ ଅଟେ:"
+"ଦେଇଥାଏ ଯେଉଁଠି ମୁଁ "
+"ଆୟୋଜକ ଅଟେ:"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1190
+#. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1180
 msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
@@ -881,19 +988,34 @@ msgstr ""
 "କେବଳ ମୋର ପ୍ରତିନିଧିମାନେ, କିନ୍ତୁ ସାକ୍ଷାତକାର ଅନୁରୋଧଗୁଡ଼ିକର ଗୋଟିଏ ପ୍ରତିଲିପି\n"
 "ଏବଂ ଉତ୍ତରଗୁଡ଼ିକୁ ମୋ ପାଖକୁ ପଠାନ୍ତୁ (ପରାମର୍ଶିତ)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1197
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1187
 msgid "My d_elegates only"
 msgstr "କେବଳ ମୋର ପ୍ରତିନିଧିମାନେ (_e)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1204
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1194
 msgid "My delegates a_nd me"
 msgstr "ମୋର ପ୍ରତିନିଧିମାନେ ଏବଂ ମୁଁ (_n)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1713
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1728
 msgid "Retrieving \"Delegates\" settings"
 msgstr "\"ପ୍ରତିନିଧିମାନଙ୍କ\" ସଂରଚନାକୁ ବାହାର କରୁଅଛି"
 
-#: ../src/configuration/e-mail-config-ews-gal.c:221
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:195
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:257
+msgid "EWS Settings"
+msgstr "EWS ସଂରଚନା"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:202
+msgid "View the size of all Exchange folders"
+msgstr "ସମସ୍ତ ବଦଳାଯାଇଥିବା ଫୋଲଡର୍‌ଗୁଡ଼ିକୁ ଦେଖନ୍ତୁ"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:206
+#| msgctxt "Permissions"
+#| msgid "Folder visible"
+msgid "Folder _Sizes"
+msgstr "ଫୋଲଡର୍ ଆକାରଗୁଡ଼ିକ (_S)"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:222
 msgid "Locating offline address books"
 msgstr "ଅଫଲାଇନ ଠିକଣା ପୁସ୍ତକଗୁଡ଼ିକୁ ଖୋଜୁଅଛି"
 
@@ -909,68 +1031,69 @@ msgstr "ବଚ୍ଛିତ ଠିକଣା ତାଲିକା  (_d):"
 msgid "Fetch List"
 msgstr "ତାଲିକା ଆଣନ୍ତୁ"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:444
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:923
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:432
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:930
 msgid "Out of Office"
 msgstr "କାର୍ଯ୍ଯାଳୟ ବାହାରେ"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:460
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:448
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
 msgstr ""
 "ତଳେ ଉଲ୍ଲେଖ କରାଯାଇଥିବା ସନ୍ଦେଶଗୁଡ଼ିକ ସ୍ୱୟଂଚାଳିତ ଭାବରେ ପ୍ରତ୍ୟେକ ଆଭ୍ୟନ୍ତରୀଣ ଏବଂ "
-"ବାହ୍ୟ ବ୍ୟକ୍ତିଙ୍କ ପାଖକୁ ପଠାନ୍ତୁ ଯିଏକି ଆପଣଙ୍କ ପାଖକୁ ମେଲ ପଠାଇଥାଏ।"
+"ବାହ୍ୟ ବ୍ୟକ୍ତିଙ୍କ "
+"ପାଖକୁ ପଠାନ୍ତୁ ଯିଏକି ଆପଣଙ୍କ ପାଖକୁ ମେଲ ପଠାଇଥାଏ।"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:468
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:456
 msgid "Do _not send Out of Office replies"
 msgstr "କାର୍ଯ୍ଯାଳୟ ବାହାରେ ଥିବା ଉତ୍ତରକୁ ପଠାନ୍ତୁ ନାହିଁ (_n)"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:476
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:464
 msgid "_Send Out of Office replies"
 msgstr "କାର୍ଯ୍ଯାଳୟ ବାହାରେ ଥିବା ଉତ୍ତରକୁ ପଠାନ୍ତୁ (_S)"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:484
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:472
 msgid "Send Out of Office replies only _during this time period:"
 msgstr "କେବଳ ଏହି ସମୟ ସୀମା ମଧ୍ଯରେ କାର୍ଯ୍ଯାଳୟ ବାହାରେ ଥିବା ଉତ୍ତରକୁ ପଠାନ୍ତୁ (_d):"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:504
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:492
 msgid "_From:"
 msgstr "ଏଠାରୁ (_F):"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:529
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:517
 msgid "_To:"
 msgstr "ଏଠାକୁ (_T):"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:554
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:542
 msgid "I_nternal:"
 msgstr "ଆଭ୍ୟନ୍ତରୀଣ (_n):"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:563
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:551
 msgid "Message to be sent within the organization"
 msgstr "ଅନୁଷ୍ଠାନ ମଧ୍ଯରେ ପଠାଇବାକୁ ଥିବା ସନ୍ଦେଶ"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:590
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:579
 msgid "E_xternal:"
 msgstr "ବାହ୍ଯ (_x):"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:598
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:587
 msgid "Message to be sent outside the organization"
 msgstr "ଅନୁଷ୍ଠାନ ବାହାରକୁ ପଠାଇବା ପାଇଁ ଥିବା ସନ୍ଦେଶ"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:608
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:597
 msgid "Do not reply to senders outside the organization"
 msgstr "ଅନୁଷ୍ଠାନ ବାହାରେ ଥିବା ପ୍ରେରକମାନଙ୍କୁ ଉତ୍ତର ଦିଅନ୍ତୁ ନାହିଁ"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:611
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:600
 msgid "Reply only to known senders outside the organization"
 msgstr "ଅନୁଷ୍ଠାନ ବାହାରେ କେବଳ ଜଣା ପ୍ରେରକମାନଙ୍କୁ ଉତ୍ତର ଦିଅନ୍ତୁ"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:614
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:603
 msgid "Reply to any sender outside the organization"
 msgstr "ଅନୁଷ୍ଠାନ ବାହାରେ ଯେକୌଣସି ପ୍ରେରକଙ୍କୁ ଉତ୍ତର ଦିଅନ୍ତୁ"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:999
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:1014
 msgid "Retrieving \"Out of Office\" settings"
 msgstr "\"କାର୍ଯ୍ୟାଳୟ ବାହାରେ\" ସେଟିଙ୍ଗକୁ କାଢ଼ୁଅଛି"
 
@@ -994,78 +1117,87 @@ msgstr "&quot;କାର୍ଯ୍ୟାଳୟ ବାହାରେ&quot; ସେଟ�
 msgid "Failed to retrieve &quot;Delegates&quot; settings."
 msgstr "&quot;ପ୍ରତିନିଧି&quot; ସେଟିଙ୍ଗକୁ କାଢ଼ିବାରେ ବିଫଳ।"
 
-#: ../src/server/e-ews-connection.c:494
+#: ../src/configuration/module-ews-configuration.error.xml.h:6
+msgid "Your Exchange account \"{0}\" has the status set as \"Out of Office\"."
+msgstr ""
+"ଆପଣଙ୍କର ବଦଳାଯାଇଥିବା ଖାତା \"{0}\" ର ସ୍ଥିତି \"କାର୍ଯ୍ୟାଳୟ ବାହାରେ\" ଭାବରେ ସେଟ "
+"କରାଯାଇଛି।"
+
+#: ../src/server/e-ews-connection.c:741
 msgid "Operation Cancelled"
 msgstr "ପ୍ରୟୋଗକୁ ବାତିଲ କରାଯାଇଛି"
 
-#: ../src/server/e-ews-connection.c:563
+#: ../src/server/e-ews-connection.c:811
 msgid "Authentication failed"
 msgstr "ବୈଧିକରଣ ବିଫଳ"
 
-#: ../src/server/e-ews-connection.c:574
+#: ../src/server/e-ews-connection.c:822
 #, c-format
 msgid "No response: %s"
 msgstr "କୌଣସି ଉତ୍ତର ନାହିଁ: %s"
 
-#: ../src/server/e-ews-connection.c:1912
+#: ../src/server/e-ews-connection.c:2576
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "ସ୍ୱୟଂଆବିଷ୍କାର ଉତ୍ତର XML କୁ ବିଶ୍ଳେଷଣ କରିବାରେ ବିଫଳ"
 
-#: ../src/server/e-ews-connection.c:1919
+#: ../src/server/e-ews-connection.c:2583
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "<Autodiscover> ଉପାଦାନକୁ ଖୋଜିବାରେ ବିଫଳ"
 
-#: ../src/server/e-ews-connection.c:1930
+#: ../src/server/e-ews-connection.c:2594
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "<Response> ଉପାଦାନକୁ ଖୋଜିବାରେ ବିଫଳ"
 
-#: ../src/server/e-ews-connection.c:1941
+#: ../src/server/e-ews-connection.c:2605
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "<Account> ଉପାଦାନକୁ ଖୋଜିବାରେ ବିଫଳ"
 
-#: ../src/server/e-ews-connection.c:1960
+#: ../src/server/e-ews-connection.c:2630
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr "ସ୍ୱୟଂଆବିଷ୍କାର ଉତ୍ତରରେ <ASUrl> ଏବଂ <OABUrl> କୁ ଖୋଜିବାରେ ବିଫଳ"
 
-#: ../src/server/e-ews-connection.c:2042
+#: ../src/server/e-ews-connection.c:2720
 msgid "URL cannot be NULL"
 msgstr "URL ଶୂନ୍ୟ ହୋଇପାରିବ ନାହିଁ"
 
-#: ../src/server/e-ews-connection.c:2050
+#: ../src/server/e-ews-connection.c:2728
 #, c-format
 msgid "URL '%s' is not valid"
 msgstr "URL '%s' ଟି ବୈଧ ନୁହଁ"
 
-#: ../src/server/e-ews-connection.c:2152
+#: ../src/server/e-ews-connection.c:2820
 msgid "Email address is missing a domain part"
 msgstr "ଇମେଲ ଠିକଣାରେ ଡମେନ ଅଂଶ ନାହିଁ"
 
-#: ../src/server/e-ews-connection.c:2479
+#: ../src/server/e-ews-connection.c:3142
 msgid "Failed to parse oab XML"
 msgstr "oab XML ବିଶ୍ଳେଷଣ କରିବାରେ ବିଫଳ"
 
-#: ../src/server/e-ews-connection.c:2487
+#: ../src/server/e-ews-connection.c:3150
 msgid "Failed to find <OAB> element\n"
 msgstr "<OAB> ଉପାଦାନକୁ ଖୋଜିବାରେ ବିଫଳ\n"
 
-#: ../src/server/e-ews-connection.c:3673
+#: ../src/server/e-ews-connection.c:4404
 msgid "No items found"
 msgstr "କୌଣସି ବସ୍ତୁ ମିଳିଲା ନାହିଁ"
 
-#: ../src/server/e-ews-folder.c:587
+#: ../src/server/e-ews-folder.c:636
 msgid "Cannot add folder, unsupported folder type"
 msgstr "ଫୋଲଡର ଯୋଗ କରିପାରିବେ ନାହିଁ, ଅସମର୍ଥିତ ଫୋଲଡର ପ୍ରକାର"
 
-#: ../src/server/e-ews-folder.c:592
+#: ../src/server/e-ews-folder.c:641
 msgid "Cannot add folder, master source not found"
 msgstr "ଫୋଲଡର ଯୋଗ କରିପାରିବେ ନାହିଁ, ମୂଖ୍ୟ ଉତ୍ସ ମିଳୁ ନାହିଁ"
 
-#: ../src/utils/ews-camel-common.c:221
+#: ../src/utils/ews-camel-common.c:361
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "CreateItem କଲ ନୂତନ ସନ୍ଦେଶ ପାଇଁ  ID ଫେରାଇବାରେ ବିଫଳ"
+
+#~ msgid "Query for authentication types is not supported"
+#~ msgstr "ବୈଧିକରଣ ପ୍ରକାରଗୁଡ଼ିକ ପାଇଁ ପ୍ରଶ୍ନ ସହାୟତା ପ୍ରାପ୍ତ ନୁହଁ"
