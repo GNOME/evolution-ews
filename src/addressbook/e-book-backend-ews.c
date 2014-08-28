@@ -75,7 +75,6 @@ struct _EBookBackendEwsPrivate {
 
 	EBookBackendSqliteDB *summary;
 
-	gboolean only_if_exists;
 	gboolean is_writable;
 	gboolean marked_for_offline;
 	gboolean cache_ready;
@@ -3400,10 +3399,9 @@ e_book_backend_ews_stop_view (EBookBackend *backend,
 	}
 }
 
-static void
+static gboolean
 e_book_backend_ews_load_source (EBookBackend *backend,
                                 ESource *source,
-                                gboolean only_if_exists,
                                 GError **perror)
 {
 	EBookBackendEws *cbews;
@@ -3440,7 +3438,7 @@ e_book_backend_ews_load_source (EBookBackend *backend,
 		display_name, TRUE, perror);
 
 	if (priv->summary == NULL)
-		return;
+		return FALSE;
 
 	priv->marked_for_offline = FALSE;
 	priv->is_writable = FALSE;
@@ -3466,6 +3464,8 @@ e_book_backend_ews_load_source (EBookBackend *backend,
 
 		priv->marked_for_offline = TRUE;
 	}
+
+	return TRUE;
 }
 
 static void
@@ -3806,70 +3806,65 @@ ebews_server_notification_cb (EBookBackendEws *ebews,
 	}
 }
 
-static void
-e_book_backend_ews_open (EBookBackend *backend,
-                         EDataBook *book,
-                         guint opid,
-                         GCancellable *cancellable,
-                         gboolean only_if_exists)
+static gboolean
+e_book_backend_ews_open_sync (EBookBackend *backend,
+			      GCancellable *cancellable,
+			      GError **error)
 {
 	CamelEwsSettings *ews_settings;
 	EBookBackendEws *ebews;
 	EBookBackendEwsPrivate * priv;
 	ESource *source;
-	GError *error = NULL;
+	gboolean need_to_authenticate;
 
 	if (e_book_backend_is_opened (backend))
-		return;
+		return TRUE;
 
 	ebews = E_BOOK_BACKEND_EWS (backend);
 	priv = ebews->priv;
 
 	source = e_backend_get_source (E_BACKEND (backend));
-	e_book_backend_ews_load_source (backend, source, only_if_exists, &error);
+	if (!e_book_backend_ews_load_source (backend, source, error)) {
+		convert_error_to_edb_error (error);
+		return FALSE;
+	}
 	ews_settings = book_backend_ews_get_collection_settings (ebews);
 
-	if (error == NULL) {
-		gboolean need_to_authenticate;
+	PRIV_LOCK (priv);
+	need_to_authenticate = priv->cnc == NULL && e_backend_get_online (E_BACKEND (backend));
+	PRIV_UNLOCK (priv);
 
-		PRIV_LOCK (priv);
-		need_to_authenticate = priv->cnc == NULL && e_backend_get_online (E_BACKEND (backend));
-		PRIV_UNLOCK (priv);
-
-		if (need_to_authenticate) {
-			e_backend_authenticate_sync (
-					E_BACKEND (backend),
-					E_SOURCE_AUTHENTICATOR (backend),
-					cancellable, &error);
-		}
+	if (need_to_authenticate &&
+	    !e_backend_authenticate_sync (E_BACKEND (backend),
+					  E_SOURCE_AUTHENTICATOR (backend),
+					  cancellable, error)) {
+		convert_error_to_edb_error (error);
+		return FALSE;
 	}
-
-	convert_error_to_edb_error (&error);
-	e_data_book_respond_open (book, opid, error);
 
 	if (ebews->priv->is_gal)
-		return;
+		return TRUE;
 
-	if (error == NULL) {
-		PRIV_LOCK (priv);
-		priv->listen_notifications = camel_ews_settings_get_listen_notifications (ews_settings);
+	PRIV_LOCK (priv);
+	priv->listen_notifications = camel_ews_settings_get_listen_notifications (ews_settings);
 
-		if (priv->listen_notifications)
-			ebews_listen_notifications_cb (ebews, NULL, ews_settings);
+	if (priv->listen_notifications)
+		ebews_listen_notifications_cb (ebews, NULL, ews_settings);
 
-		g_signal_connect_swapped (
-			priv->cnc,
-			"server-notification",
-			G_CALLBACK (ebews_server_notification_cb),
-			ebews);
-		PRIV_UNLOCK (priv);
-	}
+	g_signal_connect_swapped (
+		priv->cnc,
+		"server-notification",
+		G_CALLBACK (ebews_server_notification_cb),
+		ebews);
+	PRIV_UNLOCK (priv);
 
 	g_signal_connect_swapped (
 		ews_settings,
 		"notify::listen-notifications",
 		G_CALLBACK (ebews_listen_notifications_cb),
 		ebews);
+
+	return TRUE;
 }
 
 /**
@@ -4103,7 +4098,7 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 	parent_class = E_BOOK_BACKEND_CLASS (klass);
 
 	/* Set the virtual methods. */
-	parent_class->open		      = e_book_backend_ews_open;
+	parent_class->open_sync		      = e_book_backend_ews_open_sync;
 	parent_class->get_backend_property    = e_book_backend_ews_get_backend_property;
 
 	parent_class->create_contacts         = e_book_backend_ews_create_contacts;
