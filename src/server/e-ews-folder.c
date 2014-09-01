@@ -48,8 +48,6 @@ struct _EEwsFolderPrivate {
 	gboolean foreign;
 };
 
-static GObjectClass *parent_class = NULL;
-
 static void
 e_ews_folder_dispose (GObject *object)
 {
@@ -57,8 +55,7 @@ e_ews_folder_dispose (GObject *object)
 
 	g_return_if_fail (E_IS_EWS_FOLDER (folder));
 
-	if (parent_class->dispose)
-		(* parent_class->dispose) (object);
+	G_OBJECT_CLASS (e_ews_folder_parent_class)->dispose (object);
 }
 
 static void
@@ -92,11 +89,7 @@ e_ews_folder_finalize (GObject *object)
 		priv->parent_fid = NULL;
 	}
 
-	g_free (priv);
-	folder->priv = NULL;
-
-	if (parent_class->finalize)
-		(* parent_class->finalize) (object);
+	G_OBJECT_CLASS (e_ews_folder_parent_class)->finalize (object);
 }
 
 static void
@@ -104,7 +97,7 @@ e_ews_folder_class_init (EEwsFolderClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-	parent_class = g_type_class_peek_parent (klass);
+	g_type_class_add_private (klass, sizeof (EEwsFolderPrivate));
 
 	object_class->dispose = e_ews_folder_dispose;
 	object_class->finalize = e_ews_folder_finalize;
@@ -113,15 +106,10 @@ e_ews_folder_class_init (EEwsFolderClass *klass)
 static void
 e_ews_folder_init (EEwsFolder *folder)
 {
-	EEwsFolderPrivate *priv;
-
-	/* allocate internal structure */
-	priv = g_new0 (EEwsFolderPrivate, 1);
-	folder->priv = priv;
-
-	priv->error = NULL;
-	priv->folder_type = E_EWS_FOLDER_TYPE_UNKNOWN;
-	priv->foreign = FALSE;
+	folder->priv = G_TYPE_INSTANCE_GET_PRIVATE (folder, E_TYPE_EWS_FOLDER, EEwsFolderPrivate);
+	folder->priv->error = NULL;
+	folder->priv->folder_type = E_EWS_FOLDER_TYPE_UNKNOWN;
+	folder->priv->foreign = FALSE;
 }
 
 static gboolean

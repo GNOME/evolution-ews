@@ -148,7 +148,6 @@ struct _EEwsItemPrivate {
 	struct _EEwsTaskFields *task_fields;
 };
 
-static GObjectClass *parent_class = NULL;
 static void	ews_item_free_attendee (EwsAttendee *attendee);
 static void	ews_free_contact_fields (struct _EEwsContactFields *con_fields);
 
@@ -273,26 +272,7 @@ e_ews_item_dispose (GObject *object)
 	g_slist_free_full (priv->categories, g_free);
 	priv->categories = NULL;
 
-	if (parent_class->dispose)
-		(* parent_class->dispose) (object);
-}
-
-static void
-e_ews_item_finalize (GObject *object)
-{
-	EEwsItem *item = (EEwsItem *) object;
-	EEwsItemPrivate *priv;
-
-	g_return_if_fail (E_IS_EWS_ITEM (item));
-
-	priv = item->priv;
-
-	/* clean up */
-	g_free (priv);
-	item->priv = NULL;
-
-	if (parent_class->finalize)
-		(* parent_class->finalize) (object);
+	G_OBJECT_CLASS (e_ews_item_parent_class)->dispose (object);
 }
 
 static void
@@ -300,25 +280,20 @@ e_ews_item_class_init (EEwsItemClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-	parent_class = g_type_class_peek_parent (klass);
+	g_type_class_add_private (klass, sizeof (EEwsItemPrivate));
 
 	object_class->dispose = e_ews_item_dispose;
-	object_class->finalize = e_ews_item_finalize;
 }
 
 static void
 e_ews_item_init (EEwsItem *item)
 {
-	EEwsItemPrivate *priv;
+	item->priv = G_TYPE_INSTANCE_GET_PRIVATE (item, E_TYPE_EWS_ITEM, EEwsItemPrivate);
 
-	/* allocate internal structure */
-	priv = g_new0 (EEwsItemPrivate, 1);
-	item->priv = priv;
+	item->priv->item_type = E_EWS_ITEM_TYPE_UNKNOWN;
 
-	priv->item_type = E_EWS_ITEM_TYPE_UNKNOWN;
-
-	priv->mapi_extended_tags = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_free);
-	priv->mapi_extended_sets = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_hash_table_destroy);
+	item->priv->mapi_extended_tags = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_free);
+	item->priv->mapi_extended_sets = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_hash_table_destroy);
 }
 
 static void

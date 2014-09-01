@@ -4197,9 +4197,6 @@ e_cal_backend_ews_finalize (GObject *object)
 		priv->refreshing_done = NULL;
 	}
 
-	g_free (priv);
-	cbews->priv = NULL;
-
 	e_cal_backend_ews_unref_windows_zones ();
 
 	G_OBJECT_CLASS (e_cal_backend_ews_parent_class)->finalize (object);
@@ -4271,6 +4268,8 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	EBackendClass *backend_class;
 	ECalBackendClass *cal_backend_class;
 
+	g_type_class_add_private (class, sizeof (ECalBackendEwsPrivate));
+
 	object_class = G_OBJECT_CLASS (class);
 	backend_class = E_BACKEND_CLASS (class);
 	cal_backend_class = E_CAL_BACKEND_CLASS (class);
@@ -4316,18 +4315,14 @@ e_cal_backend_ews_authenticator_init (ESourceAuthenticatorInterface *iface)
 static void
 e_cal_backend_ews_init (ECalBackendEws *cbews)
 {
-	ECalBackendEwsPrivate *priv;
-
-	priv = g_new0 (ECalBackendEwsPrivate, 1);
+	cbews->priv = G_TYPE_INSTANCE_GET_PRIVATE (cbews, E_TYPE_CAL_BACKEND_EWS, ECalBackendEwsPrivate);
 
 	/* create the mutex for thread safety */
-	g_rec_mutex_init (&priv->rec_mutex);
-	priv->refreshing_done = e_flag_new ();
-	priv->item_id_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
-	priv->default_zone = icaltimezone_get_utc_timezone ();
-	priv->cancellable = g_cancellable_new ();
-
-	cbews->priv = priv;
+	g_rec_mutex_init (&cbews->priv->rec_mutex);
+	cbews->priv->refreshing_done = e_flag_new ();
+	cbews->priv->item_id_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
+	cbews->priv->default_zone = icaltimezone_get_utc_timezone ();
+	cbews->priv->cancellable = g_cancellable_new ();
 
 	g_signal_connect (
 		cbews, "notify::online",
@@ -4335,4 +4330,3 @@ e_cal_backend_ews_init (ECalBackendEws *cbews)
 
 	e_cal_backend_ews_populate_windows_zones ();
 }
-
