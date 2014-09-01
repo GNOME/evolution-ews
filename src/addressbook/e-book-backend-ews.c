@@ -118,6 +118,8 @@ enum {
 /* Forward Declarations */
 static void	e_book_backend_ews_authenticator_init
 				(ESourceAuthenticatorInterface *iface);
+static void	e_book_backend_ews_initable_init
+				(GInitableIface *iface);
 static gpointer ews_update_items_thread (gpointer data);
 
 
@@ -127,7 +129,10 @@ G_DEFINE_TYPE_WITH_CODE (
 	E_TYPE_BOOK_BACKEND,
 	G_IMPLEMENT_INTERFACE (
 		E_TYPE_SOURCE_AUTHENTICATOR,
-		e_book_backend_ews_authenticator_init))
+		e_book_backend_ews_authenticator_init)
+	G_IMPLEMENT_INTERFACE (
+		G_TYPE_INITABLE,
+		e_book_backend_ews_initable_init))
 
 static CamelEwsSettings *
 book_backend_ews_get_collection_settings (EBookBackendEws *backend)
@@ -3400,10 +3405,12 @@ e_book_backend_ews_stop_view (EBookBackend *backend,
 }
 
 static gboolean
-e_book_backend_ews_load_source (EBookBackend *backend,
-                                ESource *source,
-                                GError **perror)
+book_backend_ews_initable_init (GInitable *initable,
+				GCancellable *cancellable,
+				GError **error)
 {
+	EBookBackend *backend = E_BOOK_BACKEND (initable);
+	ESource *source = e_backend_get_source (E_BACKEND (backend));
 	EBookBackendEws *cbews;
 	EBookBackendEwsPrivate *priv;
 	CamelEwsSettings *settings;
@@ -3435,10 +3442,12 @@ e_book_backend_ews_load_source (EBookBackend *backend,
 
 	priv->summary = e_book_backend_sqlitedb_new (
 		cache_dir, email, priv->folder_id,
-		display_name, TRUE, perror);
+		display_name, TRUE, error);
 
-	if (priv->summary == NULL)
+	if (priv->summary == NULL) {
+		convert_error_to_edb_error (error);
 		return FALSE;
+	}
 
 	priv->marked_for_offline = FALSE;
 	priv->is_writable = FALSE;
@@ -3814,7 +3823,6 @@ e_book_backend_ews_open_sync (EBookBackend *backend,
 	CamelEwsSettings *ews_settings;
 	EBookBackendEws *ebews;
 	EBookBackendEwsPrivate * priv;
-	ESource *source;
 	gboolean need_to_authenticate;
 
 	if (e_book_backend_is_opened (backend))
@@ -3823,11 +3831,6 @@ e_book_backend_ews_open_sync (EBookBackend *backend,
 	ebews = E_BOOK_BACKEND_EWS (backend);
 	priv = ebews->priv;
 
-	source = e_backend_get_source (E_BACKEND (backend));
-	if (!e_book_backend_ews_load_source (backend, source, error)) {
-		convert_error_to_edb_error (error);
-		return FALSE;
-	}
 	ews_settings = book_backend_ews_get_collection_settings (ebews);
 
 	PRIV_LOCK (priv);
@@ -4121,6 +4124,12 @@ e_book_backend_ews_authenticator_init (ESourceAuthenticatorInterface *iface)
 {
 	iface->get_without_password = book_backend_ews_get_without_password;
 	iface->try_password_sync = book_backend_ews_try_password_sync;
+}
+
+static void
+e_book_backend_ews_initable_init (GInitableIface *iface)
+{
+	iface->init = book_backend_ews_initable_init;
 }
 
 static void
