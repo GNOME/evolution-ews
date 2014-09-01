@@ -3967,6 +3967,7 @@ e_book_backend_ews_dispose (GObject *object)
 		g_cond_clear (&priv->dlock->cond);
 		g_free (priv->dlock);
 		priv->dthread = NULL;
+		priv->dlock = NULL;
 	}
 
 	if (priv->cancellable) {
@@ -4008,12 +4009,19 @@ e_book_backend_ews_dispose (GObject *object)
 		priv->summary = NULL;
 	}
 
-	g_rec_mutex_clear (&priv->rec_mutex);
-
-	g_free (priv);
-	priv = NULL;
-
 	G_OBJECT_CLASS (e_book_backend_ews_parent_class)->dispose (object);
+}
+
+static void
+e_book_backend_ews_finalize (GObject *object)
+{
+	EBookBackendEws *bews;
+
+	bews = E_BOOK_BACKEND_EWS (object);
+
+	g_rec_mutex_clear (&bews->priv->rec_mutex);
+
+	G_OBJECT_CLASS (e_book_backend_ews_parent_class)->finalize (object);
 }
 
 static gboolean
@@ -4089,6 +4097,8 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 	EBackendClass *backend_class;
 	EBookBackendClass *parent_class;
 
+	g_type_class_add_private (klass, sizeof (EBookBackendEwsPrivate));
+
 	backend_class = E_BACKEND_CLASS (klass);
 	parent_class = E_BOOK_BACKEND_CLASS (klass);
 
@@ -4108,6 +4118,7 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 
 	object_class->constructed             = e_book_backend_ews_constructed;
 	object_class->dispose                 = e_book_backend_ews_dispose;
+	object_class->finalize                = e_book_backend_ews_finalize;
 }
 
 static void
@@ -4120,19 +4131,13 @@ e_book_backend_ews_authenticator_init (ESourceAuthenticatorInterface *iface)
 static void
 e_book_backend_ews_init (EBookBackendEws *backend)
 {
-	EBookBackendEws *bews;
-	EBookBackendEwsPrivate *priv;
+	backend->priv = G_TYPE_INSTANCE_GET_PRIVATE (backend, E_TYPE_BOOK_BACKEND_EWS, EBookBackendEwsPrivate);
+	backend->priv->ops = g_hash_table_new (NULL, NULL);
 
-	bews = E_BOOK_BACKEND_EWS (backend);
-
-	priv = g_new0 (EBookBackendEwsPrivate, 1);
-	priv->ops = g_hash_table_new (NULL, NULL);
-
-	bews->priv = priv;
-	g_rec_mutex_init (&priv->rec_mutex);
-	priv->cancellable = g_cancellable_new ();
+	g_rec_mutex_init (&backend->priv->rec_mutex);
+	backend->priv->cancellable = g_cancellable_new ();
 
 	g_signal_connect (
-		bews, "notify::online",
+		backend, "notify::online",
 		G_CALLBACK (e_book_backend_ews_notify_online_cb), NULL);
 }

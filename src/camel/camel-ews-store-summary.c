@@ -46,8 +46,6 @@ ews_store_summary_finalize (GObject *object)
 	if (priv->monitor_delete)
 		g_object_unref (priv->monitor_delete);
 
-	g_free (priv);
-
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_ews_store_summary_parent_class)->finalize (object);
 }
@@ -57,6 +55,8 @@ camel_ews_store_summary_class_init (CamelEwsStoreSummaryClass *class)
 {
 	GObjectClass *object_class;
 
+	g_type_class_add_private (class, sizeof (CamelEwsStoreSummaryPrivate));
+
 	object_class = G_OBJECT_CLASS (class);
 	object_class->finalize = ews_store_summary_finalize;
 }
@@ -64,16 +64,13 @@ camel_ews_store_summary_class_init (CamelEwsStoreSummaryClass *class)
 static void
 camel_ews_store_summary_init (CamelEwsStoreSummary *ews_summary)
 {
-	CamelEwsStoreSummaryPrivate *priv;
+	ews_summary->priv = G_TYPE_INSTANCE_GET_PRIVATE (ews_summary, CAMEL_TYPE_EWS_STORE_SUMMARY, CamelEwsStoreSummaryPrivate);
 
-	priv = g_new0 (CamelEwsStoreSummaryPrivate, 1);
-	ews_summary->priv = priv;
-
-	priv->key_file = g_key_file_new ();
-	priv->dirty = FALSE;
-	priv->fname_id_hash = g_hash_table_new (g_str_hash, g_str_equal);
-	priv->id_fname_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
-	g_rec_mutex_init (&priv->s_lock);
+	ews_summary->priv->key_file = g_key_file_new ();
+	ews_summary->priv->dirty = FALSE;
+	ews_summary->priv->fname_id_hash = g_hash_table_new (g_str_hash, g_str_equal);
+	ews_summary->priv->id_fname_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+	g_rec_mutex_init (&ews_summary->priv->s_lock);
 }
 
 static gchar *build_full_name (CamelEwsStoreSummary *ews_summary, const gchar *fid)
