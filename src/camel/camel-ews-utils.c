@@ -762,8 +762,14 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
 		}
 
 		id = e_ews_item_get_id (item);
-		mi = (CamelEwsMessageInfo *)
-			camel_folder_summary_get (folder->summary, id->id);
+		if (!id) {
+			g_warning ("%s: Missing ItemId for item type %d (subject:%s)", G_STRFUNC, e_ews_item_get_item_type (item),
+				e_ews_item_get_subject (item) ? e_ews_item_get_subject (item) : "???");
+			g_object_unref (item);
+			continue;
+		}
+
+		mi = (CamelEwsMessageInfo *) camel_folder_summary_get (folder->summary, id->id);
 		if (mi) {
 			guint32 server_flags;
 			gboolean changed, was_changed;
@@ -842,8 +848,14 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 		}
 
 		id = e_ews_item_get_id (item);
-		mi = (CamelEwsMessageInfo *)
-			camel_folder_summary_get (folder->summary, id->id);
+		if (!id) {
+			g_warning ("%s: Missing ItemId for item type %d (subject:%s)", G_STRFUNC, e_ews_item_get_item_type (item),
+				e_ews_item_get_subject (item) ? e_ews_item_get_subject (item) : "???");
+			g_object_unref (item);
+			continue;
+		}
+
+		mi = (CamelEwsMessageInfo *) camel_folder_summary_get (folder->summary, id->id);
 		if (mi) {
 			camel_message_info_unref (mi);
 			g_object_unref (item);

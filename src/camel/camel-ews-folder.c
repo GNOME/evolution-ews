@@ -1422,8 +1422,19 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 
 	for (l = updated_items; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;
-		const EwsId *id = e_ews_item_get_id (item);
+		const EwsId *id;
 		CamelMessageInfo *mi;
+
+		if (!item)
+			continue;
+
+		id = e_ews_item_get_id (item);
+		if (!id) {
+			g_warning ("%s: Missing ItemId for item type %d (subject:%s)", G_STRFUNC, e_ews_item_get_item_type (item),
+				e_ews_item_get_subject (item) ? e_ews_item_get_subject (item) : "???");
+			g_object_unref (item);
+			continue;
+		}
 
 		/* Compare the item_type from summary as the updated items seems to
 		 * arrive as generic types while its not the case */
@@ -1533,6 +1544,14 @@ sync_created_items (CamelEwsFolder *ews_folder,
 
 		id = e_ews_item_get_id (item);
 		item_type = e_ews_item_get_item_type (item);
+
+		if (!id) {
+			g_warning ("%s: Missing ItemId for item type %d (subject:%s)", G_STRFUNC, item_type,
+				e_ews_item_get_subject (item) ? e_ews_item_get_subject (item) : "???");
+			g_object_unref (item);
+			continue;
+		}
+
 		/* created_msg_ids are items other than generic item. We fetch them
 		 * separately since the property sets vary */
 		/* FIXME: Do we need to handle any other item types
