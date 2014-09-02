@@ -63,6 +63,9 @@ static gboolean
 ebews_fetch_items (EBookBackendEws *ebews,  GSList *items, GSList **contacts,
 		   GCancellable *cancellable, GError **error);
 
+static void cursors_contact_added (EBookBackendEws *bf, EContact *contact);
+static void cursors_contact_removed (EBookBackendEws *bf, EContact *contact);
+
 typedef struct {
 	GCond cond;
 	GMutex mutex;
@@ -98,6 +101,8 @@ struct _EBookBackendEwsPrivate {
 
 	guint rev_counter;
 	gchar *locale;
+
+	GList *cursors;
 };
 
 /* using this for backward compatibility with E_DATA_BOOK_MODE */
@@ -1389,6 +1394,7 @@ ews_create_contact_cb (GObject *object,
 			contacts = g_slist_append (NULL, create_contact->contact);
 			e_data_book_respond_create_contacts (create_contact->book, create_contact->opid, EDB_ERROR (SUCCESS), contacts);
 			g_slist_free (contacts);
+			cursors_contact_added (ebews, create_contact->contact);
 		}
 
 		/*
@@ -1532,6 +1538,7 @@ ews_book_remove_contact_cb (GObject *object,
 	EBookBackendEws *ebews = remove_contact->ebews;
 	EBookBackendEwsPrivate *priv = ebews->priv;
 	GSimpleAsyncResult *simple;
+	GSList *l, *contacts = NULL;
 	GError *error = NULL;
 
 	simple = G_SIMPLE_ASYNC_RESULT (res);
@@ -1540,6 +1547,13 @@ ews_book_remove_contact_cb (GObject *object,
 
 	if (!g_simple_async_result_propagate_error (simple, &error) &&
 	    e_book_sqlite_lock (priv->summary, EBSQL_LOCK_WRITE, remove_contact->cancellable, &error)) {
+		/* Wtf? Do we really have to fetch deleted contacts in full, just to tell the cursors? */
+		for (l = remove_contact->sl_ids; l != NULL; l = g_slist_next (l)) {
+			EContact *contact = NULL;
+			e_book_sqlite_get_contact (priv->summary, l->data, FALSE, &contact, NULL);
+			if (contact)
+				contacts = g_slist_prepend (contacts, contact);
+		}
 		if (e_book_sqlite_remove_contacts (priv->summary, remove_contact->sl_ids, remove_contact->cancellable, &error) &&
 		    ebews_bump_revision (ebews, &error))
 			e_book_sqlite_unlock (priv->summary, EBSQL_UNLOCK_COMMIT, &error);
@@ -1547,14 +1561,17 @@ ews_book_remove_contact_cb (GObject *object,
 			e_book_sqlite_unlock (priv->summary, EBSQL_UNLOCK_ROLLBACK, NULL);
 	}
 
-	if (error == NULL)
+	if (error == NULL) {
 		e_data_book_respond_remove_contacts (remove_contact->book, remove_contact->opid, EDB_ERROR (SUCCESS),  remove_contact->sl_ids);
-	else {
+		for (l = contacts; l != NULL; l = g_slist_next (l))
+			cursors_contact_removed (ebews, E_CONTACT (l->data));
+	} else {
 		e_data_book_respond_remove_contacts (remove_contact->book, remove_contact->opid, EDB_ERROR_EX (OTHER_ERROR, error->message), NULL);
 
 		g_warning ("\nError removing contact %s \n", error->message);
 	}
 
+	g_slist_free_full (contacts, g_object_unref);
 	g_slist_free_full (remove_contact->sl_ids, g_free);
 	g_object_unref (remove_contact->ebews);
 	g_object_unref (remove_contact->book);
@@ -1681,6 +1698,8 @@ ews_modify_contact_cb (GObject *object,
 			new_contacts = g_slist_append (NULL, modify_contact->new_contact);
 			e_data_book_respond_modify_contacts (modify_contact->book, modify_contact->opid, EDB_ERROR (SUCCESS), new_contacts);
 			g_slist_free (new_contacts);
+			cursors_contact_removed (ebews, modify_contact->old_contact);
+			cursors_contact_added (ebews, modify_contact->new_contact);
 		}
 
 		g_slist_free (items);
@@ -2462,8 +2481,10 @@ ews_gal_store_contact (EContact *contact,
 						    TRUE, data->cancellable, error) &&
 			    ebews_bump_revision (data->cbews, error)) {
 				if (e_book_sqlite_unlock (priv->summary, EBSQL_UNLOCK_COMMIT, error)) {
-					for (l = data->contact_collector; l != NULL; l = g_slist_next (l))
+					for (l = data->contact_collector; l != NULL; l = g_slist_next (l)) {
 						e_book_backend_notify_update (E_BOOK_BACKEND (data->cbews), E_CONTACT (l->data));
+						cursors_contact_added (data->cbews, E_CONTACT (l->data));
+					}
 				}
 			} else
 				e_book_sqlite_unlock (priv->summary, EBSQL_UNLOCK_ROLLBACK, NULL);
@@ -2575,9 +2596,18 @@ ews_replace_gal_in_db (EBookBackendEws *cbews,
 	d (g_print ("GAL removing %d contacts\n", g_slist_length (stale_uids)));
 
 	/* Remove attachments. This will be easier once we add cursor support. */
+	// XXX: Tell cursors
 	if (!e_book_sqlite_lock (priv->summary, EBSQL_LOCK_WRITE, cancellable, error))
 		ret = FALSE;
 	else {
+		GSList *contacts = NULL, *l;
+		/* Wtf? Do we really have to fetch deleted contacts in full, just to tell the cursors? */
+		for (l = stale_uids; l != NULL; l = g_slist_next (l)) {
+			EContact *contact = NULL;
+			e_book_sqlite_get_contact (priv->summary, l->data, FALSE, &contact, NULL);
+			if (contact)
+				contacts = g_slist_prepend (contacts, contact);
+		}
 		if ((stale_uids && !e_book_sqlite_remove_contacts (priv->summary, stale_uids, cancellable, error)) ||
 		    !ebews_bump_revision (cbews, error) ||
 		    !e_book_sqlite_set_key_value_int (priv->summary, E_BOOK_SQL_IS_POPULATED_KEY, TRUE, error)) {
@@ -2585,7 +2615,11 @@ ews_replace_gal_in_db (EBookBackendEws *cbews,
 			e_book_sqlite_unlock (priv->summary, EBSQL_UNLOCK_ROLLBACK, NULL);
 		} else {
 			ret = e_book_sqlite_unlock (priv->summary, EBSQL_UNLOCK_COMMIT, error);
+			if (ret)
+				for (l = contacts; l != NULL; l = g_slist_next (l))
+					cursors_contact_removed (cbews, E_CONTACT (l->data));
 		}
+		g_slist_free_full (contacts, g_object_unref);
 	}
 
 	t2 = g_get_monotonic_time ();
@@ -2794,14 +2828,17 @@ ebews_sync_deleted_items (EBookBackendEws *ebews,
 
 	for (l = *deleted_ids; l != NULL; l = g_slist_next (l)) {
 		gchar *id = (gchar *) l->data;
-		gboolean exists = FALSE;
+		EContact *contact = NULL;
 
-		if (e_book_sqlite_has_contact (priv->summary, id, &exists, NULL) && exists) {
-
-			if (e_book_sqlite_remove_contact (priv->summary, id, cancellable, error))
+		if (e_book_sqlite_get_contact (priv->summary, id, FALSE, &contact, NULL)) {
+			if (e_book_sqlite_remove_contact (priv->summary, id, cancellable, error)) {
+				cursors_contact_removed (ebews, contact);
+				g_object_unref (contact);
 				e_book_backend_notify_remove (E_BOOK_BACKEND (ebews), id);
-			else
+			} else {
+				g_object_unref (contact);
 				return FALSE;
+			}
 		}
 	}
 
@@ -4076,6 +4113,11 @@ e_book_backend_ews_dispose (GObject *object)
 		priv->summary = NULL;
 	}
 
+	if (priv->cursors) {
+		g_list_free_full (priv->cursors, g_object_unref);
+		priv->cursors = NULL;
+	}
+
 	g_free (priv->locale);
 	priv->locale = NULL;
 
@@ -4159,6 +4201,92 @@ book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 	return result;
 }
 
+
+static void
+cursors_contact_added (EBookBackendEws *ebews,
+                       EContact *contact)
+{
+	GList *l;
+
+	for (l = ebews->priv->cursors; l; l = l->next) {
+		EDataBookCursor *cursor = l->data;
+
+		e_data_book_cursor_contact_added (cursor, contact);
+	}
+}
+
+static void
+cursors_contact_removed (EBookBackendEws *ebews,
+                         EContact *contact)
+{
+	GList *l;
+
+	for (l = ebews->priv->cursors; l; l = l->next) {
+		EDataBookCursor *cursor = l->data;
+
+		e_data_book_cursor_contact_removed (cursor, contact);
+	}
+}
+
+static EDataBookCursor *
+e_book_backend_ews_create_cursor (EBookBackend *backend,
+				  EContactField *sort_fields,
+				  EBookCursorSortType *sort_types,
+				  guint n_fields,
+				  GError **error)
+{
+	EBookBackendEws *ebews = E_BOOK_BACKEND_EWS (backend);
+	EDataBookCursor *cursor;
+
+	PRIV_LOCK (ebews->priv);
+
+	cursor = e_data_book_cursor_sqlite_new (
+		backend,
+		ebews->priv->summary,
+		"revision",
+		sort_fields,
+		sort_types,
+		n_fields,
+		error);
+
+	if (cursor != NULL) {
+		ebews->priv->cursors =
+			g_list_prepend (ebews->priv->cursors, cursor);
+	}
+
+	PRIV_UNLOCK (ebews->priv);
+
+	return cursor;
+}
+
+static gboolean
+e_book_backend_ews_delete_cursor (EBookBackend *backend,
+				  EDataBookCursor *cursor,
+				  GError **error)
+{
+	EBookBackendEws *ebews = E_BOOK_BACKEND_EWS (backend);
+	GList *link;
+
+	PRIV_LOCK (ebews->priv);
+
+	link = g_list_find (ebews->priv->cursors, cursor);
+
+	if (link != NULL) {
+		ebews->priv->cursors = g_list_delete_link (ebews->priv->cursors, link);
+		g_object_unref (cursor);
+	} else {
+		g_set_error_literal (
+			error,
+			E_CLIENT_ERROR,
+			E_CLIENT_ERROR_INVALID_ARG,
+			_("Requested to delete an unrelated cursor"));
+	}
+
+	PRIV_UNLOCK (ebews->priv);
+
+	return link != NULL;
+}
+
 static gboolean
 e_book_backend_ews_set_locale (EBookBackend *backend,
 			       const gchar *locale,
@@ -4167,6 +4295,7 @@ e_book_backend_ews_set_locale (EBookBackend *backend,
 {
 	EBookBackendEws *ebews = E_BOOK_BACKEND_EWS (backend);
 	gboolean success = FALSE;
+	GList *l;
 
 	PRIV_LOCK (ebews->priv);
 
@@ -4182,6 +4311,15 @@ e_book_backend_ews_set_locale (EBookBackend *backend,
 	if (success) {
 		g_free (ebews->priv->locale);
 		ebews->priv->locale = g_strdup (locale);
+	}
+
+	/* This must be done outside the EBookSqlite lock,
+	 * as it may try to acquire the lock as well. */
+	for (l = ebews->priv->cursors; success && l; l = l->next) {
+		EDataBookCursor *cursor = l->data;
+
+		success = e_data_book_cursor_load_locale (
+			cursor, NULL, cancellable, error);
 	}
 
 	PRIV_LOCK (ebews->priv);
@@ -4227,6 +4365,8 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 	parent_class->get_contact_list        = e_book_backend_ews_get_contact_list;
 	parent_class->start_view              = e_book_backend_ews_start_view;
 	parent_class->stop_view               = e_book_backend_ews_stop_view;
+	parent_class->create_cursor           = e_book_backend_ews_create_cursor;
+	parent_class->delete_cursor           = e_book_backend_ews_delete_cursor;
 	parent_class->set_locale              = e_book_backend_ews_set_locale;
 	parent_class->dup_locale              = e_book_backend_ews_dup_locale;
 
