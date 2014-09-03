@@ -13,6 +13,7 @@ endif
 libebookbackendews_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-DG_LOG_DOMAIN=\"libebookbackend\" \
+	-DBACKENDDIR="\"$(ebook_backenddir)\"" \
 	-DEXCHANGE_EWS_LOCALEDIR=\"$(localedir)\" \
 	-I$(top_srcdir) \
 	-I$(top_srcdir)/src \

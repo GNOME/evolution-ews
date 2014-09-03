@@ -73,6 +73,7 @@ typedef struct {
 } SyncDelta;
 
 struct _EBookBackendEwsPrivate {
+	gchar *base_directory;
 	EEwsConnection *cnc;
 	gchar *folder_id;
 	gchar *oab_url;
@@ -3511,7 +3512,10 @@ book_backend_ews_initable_init (GInitable *initable,
 	cbews = E_BOOK_BACKEND_EWS (backend);
 	priv = cbews->priv;
 
-	cache_dir = e_book_backend_get_cache_dir (backend);
+	if (priv->base_directory)
+		cache_dir = priv->base_directory;
+	else
+		cache_dir = e_book_backend_get_cache_dir (backend);
 	db_filename = g_build_filename (cache_dir, "contacts.db", NULL);
 	settings = book_backend_ews_get_collection_settings (cbews);
 
@@ -3920,16 +3924,17 @@ e_book_backend_ews_open_sync (EBookBackend *backend,
 	gboolean need_to_authenticate;
 	gchar *revision = NULL;
 
-	if (e_book_backend_is_opened (backend))
-		return TRUE;
-
 	ebews = E_BOOK_BACKEND_EWS (backend);
 	priv = ebews->priv;
+
+	if (priv->base_directory || e_book_backend_is_opened (backend))
+		return TRUE;
 
 	ews_settings = book_backend_ews_get_collection_settings (ebews);
 
 	PRIV_LOCK (priv);
 	need_to_authenticate = priv->cnc == NULL && e_backend_get_online (E_BACKEND (backend));
+
 	PRIV_UNLOCK (priv);
 
 	if (need_to_authenticate &&
@@ -4120,6 +4125,9 @@ e_book_backend_ews_dispose (GObject *object)
 
 	g_free (priv->locale);
 	priv->locale = NULL;
+
+	g_free (priv->base_directory);
+	priv->base_directory = NULL;
 
 	G_OBJECT_CLASS (e_book_backend_ews_parent_class)->dispose (object);
 }
@@ -4341,6 +4349,40 @@ e_book_backend_ews_dup_locale (EBookBackend *backend)
 	return locale;
 }
 
+static EDataBookDirect *
+e_book_backend_ews_get_direct_book (EBookBackend *backend)
+{
+	EDataBookDirect *direct;
+	gchar *backend_path;
+	const gchar *dirname;
+	const gchar *modules_env = NULL;
+
+	modules_env = g_getenv (EDS_ADDRESS_BOOK_MODULES);
+
+	dirname = e_book_backend_get_cache_dir (backend);
+
+	/* Support in-tree testing / relocated modules */
+	if (modules_env)
+		backend_path = g_build_filename (modules_env, "libebookbackendews.so", NULL);
+	else
+		backend_path = g_build_filename (BACKENDDIR, "libebookbackendews.so", NULL);
+	direct = e_data_book_direct_new (backend_path, "EBookBackendEwsFactory", dirname);
+
+	g_free (backend_path);
+
+	return direct;
+}
+
+static void
+e_book_backend_ews_configure_direct (EBookBackend *backend,
+                                     const gchar  *config)
+{
+       EBookBackendEwsPrivate *priv;
+
+       priv = E_BOOK_BACKEND_EWS (backend)->priv;
+       priv->base_directory = g_strdup (config);
+}
+
 static void
 e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 {
@@ -4369,6 +4411,8 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 	parent_class->delete_cursor           = e_book_backend_ews_delete_cursor;
 	parent_class->set_locale              = e_book_backend_ews_set_locale;
 	parent_class->dup_locale              = e_book_backend_ews_dup_locale;
+	parent_class->get_direct_book         = e_book_backend_ews_get_direct_book;
+	parent_class->configure_direct        = e_book_backend_ews_configure_direct;
 
 	backend_class->get_destination_address = e_book_backend_ews_get_destination_address;
 
