@@ -876,7 +876,6 @@ ews_decode_addressbook_write_display_type (EContact **contact,
  * @eod: 
  * @contact: Pass a valid EContact for decoding the address-book record. NULL in case of header record.
  * @props:
- * @dset: used to collect multiple properties that needs to be combined and stored as one EContactField
  * @cancellable: 
  * @error: 
  * 
@@ -888,14 +887,14 @@ ews_decode_addressbook_write_display_type (EContact **contact,
 static gboolean
 ews_decode_addressbook_record (EwsOabDecoder *eod,
                                EContact *contact,
-                               EwsDeferredSet *dset,
                                GSList *props,
                                GCancellable *cancellable,
                                GError **error)
 {
 	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
+	EwsDeferredSet *dset = NULL;
 	guint bit_array_size, i, len;
-	gchar *bit_str;
+	gchar *bit_str, *uid;
 	gboolean ret = TRUE;
 
 	len = g_slist_length (props);
@@ -906,6 +905,9 @@ ews_decode_addressbook_record (EwsOabDecoder *eod,
 		ret = FALSE;
 		goto exit;
 	}
+
+	if (contact)
+		dset = g_new0 (EwsDeferredSet, 1);
 
 	for (i = 0; i < len; i++) {
 		gpointer val, index;
@@ -950,6 +952,23 @@ exit:
 	if (bit_str)
 		g_free (bit_str);
 
+	if (!contact)
+		return ret;
+
+	if (dset->addr) {
+		e_contact_set (contact, E_CONTACT_ADDRESS_WORK, dset->addr);
+		e_contact_address_free (dset->addr);
+	}
+	g_free (dset);
+
+	/* set the smtp address as contact's uid */
+	uid = (gchar *) e_contact_get (contact, E_CONTACT_EMAIL_1);
+	if (uid && *uid) {
+		e_contact_set (contact, E_CONTACT_UID, uid);
+		g_free (uid);
+	} else
+		ret = FALSE;
+
 	return ret;
 }
 
@@ -971,7 +990,7 @@ ews_decode_and_store_oab_records (EwsOabDecoder *eod,
 		cancellable, error);
 
 	ews_decode_addressbook_record (
-		eod, NULL, NULL, priv->hdr_props, cancellable, error);
+		eod, NULL, priv->hdr_props, cancellable, error);
 
 	if (*error) {
 		ret = FALSE;
@@ -980,12 +999,9 @@ ews_decode_and_store_oab_records (EwsOabDecoder *eod,
 
 	for (i = 0; i < priv->total_records; i++) {
 		EContact *contact;
-		EwsDeferredSet *dset;
-		gchar *uid = NULL;
 		goffset offset;
 
 		contact = e_contact_new ();
-		dset = g_new0 (EwsDeferredSet, 1);
 
 		/* eat the size */
 		ews_oab_read_uint32 (
@@ -995,35 +1011,14 @@ ews_decode_and_store_oab_records (EwsOabDecoder *eod,
 		/* fetch the offset */
 		offset = g_seekable_tell ((GSeekable *) priv->fis);
 
-		ews_decode_addressbook_record (
-			eod, contact, dset,
-			priv->oab_props, cancellable, error);
+		if (ews_decode_addressbook_record (eod, contact,
+						   priv->oab_props,
+						   cancellable, error))
+			cb (contact, offset,
+			    ((gfloat) (i + 1) / priv->total_records) * 100,
+			    user_data, error);
 
-		if (*error)
-			goto error;
-
-		if (dset->addr)
-			e_contact_set (
-				contact,
-				E_CONTACT_ADDRESS_WORK,
-				dset->addr);
-
-		/* set the smtp address as contact's uid */
-		uid = (gchar *) e_contact_get (contact, E_CONTACT_EMAIL_1);
-		if (uid && *uid) {
-			e_contact_set (contact, E_CONTACT_UID, uid);
-
-			cb (
-				contact, offset,
-				((gfloat) (i + 1) / priv->total_records) * 100,
-				user_data, error);
-		}
-
-error:
 		g_object_unref (contact);
-		e_contact_address_free (dset->addr);
-		g_free (dset);
-		g_free (uid);
 
 		if (*error) {
 			ret = FALSE;
@@ -1161,22 +1156,16 @@ ews_oab_decoder_get_contact_from_offset (EwsOabDecoder *eod,
                                          GError **error)
 {
 	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
-	EwsDeferredSet *dset;
 	EContact *contact = NULL;
 
 	if (!g_seekable_seek ((GSeekable *) priv->fis, offset, G_SEEK_SET, cancellable, error))
 		return NULL;
 
 	contact = e_contact_new ();
-	dset = g_new0 (EwsDeferredSet, 1);
-	ews_decode_addressbook_record (eod, contact, dset, oab_props, cancellable, error);
-	if (*error) {
+	if (!ews_decode_addressbook_record (eod, contact, oab_props, cancellable, error)) {
 		g_object_unref (contact);
 		contact = NULL;
 	}
-
-	e_contact_address_free (dset->addr);
-	g_free (dset);
 
 	return contact;
 }
