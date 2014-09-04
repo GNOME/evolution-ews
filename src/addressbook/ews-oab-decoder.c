@@ -63,6 +63,19 @@ typedef struct {
 } EwsDeferredSet;
 
 static void
+ews_populate_string_sha1 (EContact *contact,
+			  EContactField field,
+			  gpointer value,
+			  gpointer user_data)
+{
+	gchar *sum;
+
+	sum = g_compute_checksum_for_string (G_CHECKSUM_SHA1, (const gchar *) value, -1);
+	e_contact_set (contact, field, sum);
+	g_free (sum);
+}
+
+static void
 ews_populate_simple_string (EContact *contact,
                             EContactField field,
                             gpointer value,
@@ -207,6 +220,7 @@ static const struct prop_field_mapping {
 	void (*populate_function) (EContact *contact, EContactField field, gpointer value, gpointer user_data);
 	void (*defered_populate_function) (EwsDeferredSet *dset, guint32 prop_id, gpointer value);
 } prop_map[] = {
+	{EWS_PT_EMAIL_ADDRESS, E_CONTACT_UID, ews_populate_string_sha1},
 	{EWS_PT_SMTP_ADDRESS, E_CONTACT_EMAIL_1, ews_populate_simple_string},
 	{EWS_PT_DISPLAY_NAME, E_CONTACT_FULL_NAME, ews_populate_simple_string},
 	{EWS_PT_ACCOUNT, E_CONTACT_NICKNAME, ews_populate_simple_string},
@@ -894,7 +908,7 @@ ews_decode_addressbook_record (EwsOabDecoder *eod,
 	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	EwsDeferredSet *dset = NULL;
 	guint bit_array_size, i, len;
-	gchar *bit_str, *uid;
+	gchar *bit_str;
 	gboolean ret = TRUE;
 
 	len = g_slist_length (props);
@@ -962,12 +976,13 @@ exit:
 	g_free (dset);
 
 	/* set the smtp address as contact's uid */
-	uid = (gchar *) e_contact_get (contact, E_CONTACT_EMAIL_1);
-	if (uid && *uid) {
-		e_contact_set (contact, E_CONTACT_UID, uid);
-		g_free (uid);
-	} else
-		ret = FALSE;
+	if (!e_contact_get_const(contact, E_CONTACT_UID)) {
+		const gchar *uid = e_contact_get_const (contact, E_CONTACT_EMAIL_1);
+		if (uid && *uid)
+			e_contact_set (contact, E_CONTACT_UID, uid);
+		else
+			ret = FALSE;
+	}
 
 	return ret;
 }
