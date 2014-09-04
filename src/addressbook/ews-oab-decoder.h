@@ -58,6 +58,7 @@ struct _EwsOabDecoderClass {
 
 typedef void	(*EwsOabContactAddedCb)		(EContact *contact,
 						 goffset offset,
+						 const gchar *sha1,
 						 guint percent_complete,
 						 gpointer user_data,
 						 GError **error);

@@ -231,34 +231,6 @@ book_backend_ews_ensure_connected (EBookBackendEws *bbews,
 	return FALSE;
 }
 
-static gboolean
-ews_remove_attachments (const gchar *attachment_dir)
-{
-	GDir *dir;
-
-	dir = g_dir_open (attachment_dir, 0, NULL);
-	if (dir) {
-		const gchar *fname;
-		gchar *full_path;
-
-		while ((fname = g_dir_read_name (dir))) {
-			full_path = g_build_filename (attachment_dir, fname, NULL);
-			if (g_unlink (full_path) != 0) {
-				g_free (full_path);
-				g_dir_close (dir);
-
-				return FALSE;
-			}
-
-			g_free (full_path);
-		}
-
-		g_dir_close (dir);
-	}
-
-	return TRUE;
-}
-
 static const struct phone_field_mapping {
 	EContactField field;
 	const gchar *element;
@@ -2370,50 +2342,83 @@ ews_remove_old_gal_file (EBookBackendEws *cbews,
 }
 
 struct _db_data {
+	GHashTable *uids;
 	GSList *contact_collector;
+	GSList *sha1_collector;
 	guint collected_length;
 	EBookBackendEws *cbews;
 	GCancellable *cancellable;
+	gint unchanged;
+	gint changed;
+	gint added;
+	gint percent;
 };
 
 static void
 ews_gal_store_contact (EContact *contact,
                        goffset offset,
+		       const gchar *sha1,
                        guint percent,
                        gpointer user_data,
                        GError **error)
 {
 	struct _db_data *data = (struct _db_data *) user_data;
 	EBookBackendEwsPrivate *priv = data->cbews->priv;
+	const gchar *uid = e_contact_get_const (contact, E_CONTACT_UID);
+	gchar *db_sha1 = NULL;
 
 	g_return_if_fail (priv->summary != NULL);
 
+	/* Hm, can we not do these two at once? */
+	db_sha1 = g_hash_table_lookup (data->uids, uid);
+	if (g_hash_table_remove (data->uids, uid)) {
+		if (!g_strcmp0 (db_sha1, sha1)) {
+			data->unchanged++;
+			goto out;
+		}
+		data->changed++;
+	} else
+		data->added++;
+
 	data->contact_collector = g_slist_prepend (data->contact_collector, g_object_ref (contact));
+	data->sha1_collector = g_slist_prepend (data->sha1_collector, g_strdup (sha1));
 	data->collected_length += 1;
 
 	if (data->collected_length == 1000 || percent >= 100) {
 		GSList *l;
-		GList *list, *link;
-		gchar *status_message = NULL;
-
-		d (g_print ("GAL adding contacts, percent complete : %d \n", percent);)
-
-		status_message = g_strdup_printf (_("Downloading contacts in %s %d%% completed... "), priv->folder_name, percent);
-		list = e_book_backend_list_views (E_BOOK_BACKEND (data->cbews));
-		for (link = list; link != NULL; link = g_list_next (link))
-			e_data_book_view_notify_progress (E_DATA_BOOK_VIEW (link->data), -1, status_message);
-		g_list_free_full (list, g_object_unref);
-		g_free (status_message);
 
 		data->contact_collector = g_slist_reverse (data->contact_collector);
-		e_book_sqlite_add_contacts (priv->summary, data->contact_collector, NULL, TRUE, data->cancellable, error);
+		data->sha1_collector = g_slist_reverse (data->sha1_collector);
+		e_book_sqlite_add_contacts (priv->summary, data->contact_collector, data->sha1_collector,
+					    TRUE, data->cancellable, error);
 
 		for (l = data->contact_collector; l != NULL; l = g_slist_next (l))
 			e_book_backend_notify_update (E_BOOK_BACKEND (data->cbews), E_CONTACT (l->data));
 
 		g_slist_free_full (data->contact_collector, g_object_unref);
+		g_slist_free_full (data->sha1_collector, g_free);
 		data->contact_collector = NULL;
+		data->sha1_collector = NULL;
 		data->collected_length = 0;
+	}
+ out:
+	g_free (db_sha1);
+	if (data->percent != percent) {
+		gchar *status_message = NULL;
+		GList *list, *link;
+
+		data->percent = percent;
+
+		d (g_print ("GAL processing contacts, %d%% complete (%d added, %d changed, %d unchanged\n",
+			    percent, data->added, data->changed, data->unchanged);)
+
+		status_message = g_strdup_printf (_("Downloading contacts in %s %d%% completed... "),
+						  priv->folder_name, percent);
+		list = e_book_backend_list_views (E_BOOK_BACKEND (data->cbews));
+		for (link = list; link != NULL; link = g_list_next (link))
+			e_data_book_view_notify_progress (E_DATA_BOOK_VIEW (link->data), -1, status_message);
+		g_list_free_full (list, g_object_unref);
+		g_free (status_message);
 	}
 }
 
@@ -2422,6 +2427,14 @@ static gint det_sort_func (gconstpointer _a, gconstpointer _b)
 	const EwsOALDetails *a = _a, *b = _b;
 
 	return a->seq - b->seq;
+}
+
+static void append_to_list (gpointer key, gpointer val, gpointer user_data)
+{
+	GSList **list = user_data;
+
+	*list = g_slist_prepend (*list, key);
+	g_free (val);
 }
 
 static gboolean
@@ -2434,38 +2447,63 @@ ews_replace_gal_in_db (EBookBackendEws *cbews,
 	EwsOabDecoder *eod;
 	gboolean ret = TRUE;
 	gint populated = 0;
+	GSList *stale_uids = NULL;
 	struct _db_data data;
 
 	g_return_val_if_fail (priv->summary != NULL, FALSE);
 
+	data.unchanged = data.changed = data.added = 0;
+	data.percent = 0;
+	data.uids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+
 	/* remove the old address-book and create a new one in db */
 	e_book_sqlite_get_key_value_int (priv->summary, E_BOOK_SQL_IS_POPULATED_KEY, &populated, NULL);
 	if (populated) {
-		GSList *uids = NULL;
+		GSList *slist = NULL, *l;
 
-		e_book_sqlite_search_uids (priv->summary, NULL, &uids, cancellable, NULL);
-		if (uids) {
-			e_book_sqlite_remove_contacts (priv->summary, uids, cancellable, NULL);
-			g_slist_free_full (uids, g_free);
+		e_book_sqlite_search (priv->summary, NULL, TRUE, &slist, cancellable, NULL);
+
+		while (slist) {
+			EbSqlSearchData *search_data = slist->data;
+
+			l = slist;
+			slist = slist->next;
+			g_slist_free_1 (l);
+
+			g_hash_table_insert (data.uids, search_data->uid, search_data->extra);
+
+			/* We steal these */
+			search_data->extra = search_data->uid = NULL;
+			e_book_sqlite_search_data_free (search_data);
 		}
-
-		ews_remove_attachments (priv->attachment_dir);
 	}
-
-	if (!ret)
-		return FALSE;
 
 	eod = ews_oab_decoder_new (filename, priv->attachment_dir, error);
 	if (*error)
 		return FALSE;
 
 	data.contact_collector = NULL;
+	data.sha1_collector = NULL;
 	data.collected_length = 0;
 	data.cbews = cbews;
 	data.cancellable = cancellable;
 
 	ret = ews_oab_decoder_decode (eod, ews_gal_store_contact, &data, cancellable, error);
 
+	/* Remove any items which were not present in the new OAB */
+	g_hash_table_foreach (data.uids, append_to_list, &stale_uids);
+	d (g_print ("GAL removing %d contacts\n", g_slist_length (stale_uids)));
+
+	/* Remove attachments. This will be easier once we add cursor support. */
+	if (stale_uids && !e_book_sqlite_remove_contacts (priv->summary, stale_uids, cancellable, error))
+		ret = FALSE;
+
+	d (g_print("GAL update completed %ssuccessfully. Changed: %d, Unchanged: %d, Added %d, Removed: %d\n",
+		   ret ? "" : "un",
+		   data.changed, data.unchanged, data.added, g_slist_length(stale_uids)));
+
+	g_slist_free (stale_uids);
+	g_hash_table_destroy (data.uids);
 	/* always notify views as complete, to not left anything behind,
 	   if the decode was cancelled before full completion */
 	e_book_backend_notify_complete (E_BOOK_BACKEND (cbews));

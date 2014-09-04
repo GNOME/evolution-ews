@@ -13,6 +13,7 @@
 
 struct _db_data {
 	GSList *contact_collector;
+	GSList *sha1_collector;
 	guint collected_length;
 	EBookSqlite *summary;
 	const gchar *folderid;
@@ -21,6 +22,7 @@ struct _db_data {
 static void
 ews_test_store_contact (EContact *contact,
                         goffset offset,
+			const gchar *sha1,
                         guint percent,
                         gpointer user_data,
                         GError **error)
@@ -28,17 +30,20 @@ ews_test_store_contact (EContact *contact,
 	struct _db_data *data = (struct _db_data *) user_data;
 
 	data->contact_collector = g_slist_prepend (data->contact_collector, g_object_ref (contact));
+	data->sha1_collector = g_slist_prepend (data->sha1_collector, g_strdup (sha1));
 	data->collected_length += 1;
 
 	if (data->collected_length == 1000 || percent >= 100) {
 		data->contact_collector = g_slist_reverse (data->contact_collector);
-		e_book_sqlite_add_contacts (data->summary, data->contact_collector, NULL,
+		e_book_sqlite_add_contacts (data->summary, data->contact_collector,
+					    data->sha1_collector,
 					    FALSE, NULL, error);
 		g_print ("percent complete %d \n", percent);
 
-		g_slist_foreach (data->contact_collector, (GFunc) g_object_unref, NULL);
-		g_slist_free (data->contact_collector);
+		g_slist_free_full (data->contact_collector, g_object_unref);
+		g_slist_free_full (data->sha1_collector, g_free);
 		data->contact_collector = NULL;
+		data->sha1_collector = NULL;
 		data->collected_length = 0;
 	}
 }
@@ -71,7 +76,7 @@ main (gint argc,
 		exit(1);
 	}
 
-	data.contact_collector = NULL;
+	data.sha1_collector = data.contact_collector = NULL;
 	data.collected_length = 0;
 	data.summary = summary;
 	data.folderid = "de";

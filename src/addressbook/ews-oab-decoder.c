@@ -1041,7 +1041,7 @@ ews_decode_and_store_oab_records (EwsOabDecoder *eod,
 		if (ews_decode_addressbook_record (eod, memstream,
 						   contact, priv->oab_props,
 						   cancellable, error))
-			cb (contact, offset,
+			cb (contact, offset, sum_str,
 			    ((gfloat) (i + 1) / priv->total_records) * 100,
 			    user_data, error);
 
