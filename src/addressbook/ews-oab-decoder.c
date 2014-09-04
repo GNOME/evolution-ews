@@ -977,6 +977,7 @@ exit:
 /* Decodes the hdr and address-book records and stores the address-book records inside the db */
 static gboolean
 ews_decode_and_store_oab_records (EwsOabDecoder *eod,
+				  EwsOabContactFilterCb filter_cb,
                                   EwsOabContactAddedCb cb,
                                   gpointer user_data,
                                   GCancellable *cancellable,
@@ -1038,7 +1039,8 @@ ews_decode_and_store_oab_records (EwsOabDecoder *eod,
 
 		memstream = g_memory_input_stream_new_from_data (record_buf, rec_size, NULL);
 
-		if (ews_decode_addressbook_record (eod, memstream,
+		if ((!filter_cb || filter_cb (offset, sum_str, user_data, error)) &&
+		    ews_decode_addressbook_record (eod, memstream,
 						   contact, priv->oab_props,
 						   cancellable, error))
 			cb (contact, offset, sum_str,
@@ -1142,6 +1144,7 @@ ews_oab_decoder_set_oab_prop_string (EwsOabDecoder *eod,
  **/
 gboolean
 ews_oab_decoder_decode (EwsOabDecoder *eod,
+                        EwsOabContactFilterCb filter_cb,
                         EwsOabContactAddedCb cb,
                         gpointer user_data,
                         GCancellable *cancellable,
@@ -1166,7 +1169,7 @@ ews_oab_decoder_decode (EwsOabDecoder *eod,
 		goto exit;
 
 	ret = ews_decode_and_store_oab_records (
-		eod, cb, user_data, cancellable, &err);
+		eod, filter_cb, cb, user_data, cancellable, &err);
 exit:
 	if (o_hdr)
 		g_free (o_hdr);

@@ -83,7 +83,7 @@ main (gint argc,
 
 	timer = g_timer_new ();
 	g_timer_start (timer);
-	if (!ews_oab_decoder_decode (eod, ews_test_store_contact, &data, NULL, &err)) {
+	if (!ews_oab_decoder_decode (eod, NULL, ews_test_store_contact, &data, NULL, &err)) {
 		g_print ("Unable to decode %s \n", err->message);
 	}
 	g_timer_stop (timer);
