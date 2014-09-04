@@ -62,12 +62,17 @@ typedef void	(*EwsOabContactAddedCb)		(EContact *contact,
 						 guint percent_complete,
 						 gpointer user_data,
 						 GError **error);
+typedef gboolean (*EwsOabContactFilterCb)	(goffset offset,
+						 const gchar *sha1,
+						 gpointer user_data,
+						 GError **error);
 
 GType		ews_oab_decoder_get_type	(void);
 EwsOabDecoder *	ews_oab_decoder_new		(const gchar *oab_filename,
 						 const gchar *cache_dir,
 						 GError **error);
 gboolean	ews_oab_decoder_decode		(EwsOabDecoder *eod,
+						 EwsOabContactFilterCb filter_cb,
 						 EwsOabContactAddedCb cb,
 						 gpointer user_data,
 						 GCancellable *cancellable,

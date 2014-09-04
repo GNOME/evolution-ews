@@ -2343,6 +2343,7 @@ ews_remove_old_gal_file (EBookBackendEws *cbews,
 
 struct _db_data {
 	GHashTable *uids;
+	GHashTable *sha1s;
 	GSList *contact_collector;
 	GSList *sha1_collector;
 	guint collected_length;
@@ -2354,6 +2355,27 @@ struct _db_data {
 	gint percent;
 };
 
+static gboolean
+ews_gal_filter_contact (goffset offset, const gchar *sha1,
+                       gpointer user_data, GError **error)
+{
+	struct _db_data *data = (struct _db_data *) user_data;
+	gchar *uid;
+
+	/* Is there an existing identical record, with the same SHA1? */
+	uid = g_hash_table_lookup (data->sha1s, sha1);
+	if (!uid)
+		return TRUE;
+
+	/* Remove it from the hash tables so it doesn't get deleted at the end. */
+	g_hash_table_remove (data->sha1s, sha1);
+	g_hash_table_remove (data->uids, uid);
+	data->unchanged++;
+
+	/* Don't bother to parse and process this record. */
+	return FALSE;
+}
+
 static void
 ews_gal_store_contact (EContact *contact,
                        goffset offset,
@@ -2364,25 +2386,20 @@ ews_gal_store_contact (EContact *contact,
 {
 	struct _db_data *data = (struct _db_data *) user_data;
 	EBookBackendEwsPrivate *priv = data->cbews->priv;
-	const gchar *uid = e_contact_get_const (contact, E_CONTACT_UID);
-	gchar *db_sha1 = NULL;
 
 	g_return_if_fail (priv->summary != NULL);
 
-	/* Hm, can we not do these two at once? */
-	db_sha1 = g_hash_table_lookup (data->uids, uid);
-	if (g_hash_table_remove (data->uids, uid)) {
-		if (!g_strcmp0 (db_sha1, sha1)) {
-			data->unchanged++;
-			goto out;
-		}
-		data->changed++;
-	} else
-		data->added++;
+	if (contact) {
+		const gchar *uid = e_contact_get_const (contact, E_CONTACT_UID);
+		if (g_hash_table_remove (data->uids, uid))
+			data->changed++;
+		else
+			data->added++;
 
-	data->contact_collector = g_slist_prepend (data->contact_collector, g_object_ref (contact));
-	data->sha1_collector = g_slist_prepend (data->sha1_collector, g_strdup (sha1));
-	data->collected_length += 1;
+		data->contact_collector = g_slist_prepend (data->contact_collector, g_object_ref (contact));
+		data->sha1_collector = g_slist_prepend (data->sha1_collector, g_strdup (sha1));
+		data->collected_length += 1;
+	}
 
 	if (data->collected_length == 1000 || percent >= 100) {
 		GSList *l;
@@ -2401,8 +2418,7 @@ ews_gal_store_contact (EContact *contact,
 		data->sha1_collector = NULL;
 		data->collected_length = 0;
 	}
- out:
-	g_free (db_sha1);
+
 	if (data->percent != percent) {
 		gchar *status_message = NULL;
 		GList *list, *link;
@@ -2434,7 +2450,6 @@ static void append_to_list (gpointer key, gpointer val, gpointer user_data)
 	GSList **list = user_data;
 
 	*list = g_slist_prepend (*list, key);
-	g_free (val);
 }
 
 static gboolean
@@ -2449,13 +2464,16 @@ ews_replace_gal_in_db (EBookBackendEws *cbews,
 	gint populated = 0;
 	GSList *stale_uids = NULL;
 	struct _db_data data;
+	gint64 t1, t2;
 
 	g_return_val_if_fail (priv->summary != NULL, FALSE);
 
 	data.unchanged = data.changed = data.added = 0;
 	data.percent = 0;
 	data.uids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+	data.sha1s = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
+	t1 = g_get_monotonic_time ();
 	/* remove the old address-book and create a new one in db */
 	e_book_sqlite_get_key_value_int (priv->summary, E_BOOK_SQL_IS_POPULATED_KEY, &populated, NULL);
 	if (populated) {
@@ -2471,6 +2489,7 @@ ews_replace_gal_in_db (EBookBackendEws *cbews,
 			g_slist_free_1 (l);
 
 			g_hash_table_insert (data.uids, search_data->uid, search_data->extra);
+			g_hash_table_insert (data.sha1s, search_data->extra, search_data->uid);
 
 			/* We steal these */
 			search_data->extra = search_data->uid = NULL;
@@ -2488,7 +2507,9 @@ ews_replace_gal_in_db (EBookBackendEws *cbews,
 	data.cbews = cbews;
 	data.cancellable = cancellable;
 
-	ret = ews_oab_decoder_decode (eod, ews_gal_store_contact, &data, cancellable, error);
+	ret = ews_oab_decoder_decode (eod, ews_gal_filter_contact, ews_gal_store_contact, &data, cancellable, error);
+	/* Flush final entries */
+	ews_gal_store_contact (NULL, 0, NULL, 100, &data, error);
 
 	/* Remove any items which were not present in the new OAB */
 	g_hash_table_foreach (data.uids, append_to_list, &stale_uids);
@@ -2498,11 +2519,13 @@ ews_replace_gal_in_db (EBookBackendEws *cbews,
 	if (stale_uids && !e_book_sqlite_remove_contacts (priv->summary, stale_uids, cancellable, error))
 		ret = FALSE;
 
-	d (g_print("GAL update completed %ssuccessfully. Changed: %d, Unchanged: %d, Added %d, Removed: %d\n",
-		   ret ? "" : "un",
-		   data.changed, data.unchanged, data.added, g_slist_length(stale_uids)));
+	t2 = g_get_monotonic_time ();
+	d (g_print("GAL update completed %ssuccessfully in %ld µs. Added: %d, Changed: %d, Unchanged %d, Removed: %d\n",
+		   ret ? "" : "un", t2 - t1,
+		   data.added, data.changed, data.unchanged, g_slist_length(stale_uids)));
 
 	g_slist_free (stale_uids);
+	g_hash_table_destroy (data.sha1s);
 	g_hash_table_destroy (data.uids);
 	/* always notify views as complete, to not left anything behind,
 	   if the decode was cancelled before full completion */
