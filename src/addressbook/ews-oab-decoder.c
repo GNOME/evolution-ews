@@ -48,7 +48,7 @@ typedef struct _EwsOabDecoderPrivate EwsOabDecoderPrivate;
 
 struct _EwsOabDecoderPrivate {
 	gchar *cache_dir;
-	GFileInputStream *fis;
+	GInputStream *fis;
 
 	guint32 total_records;
 	GSList *hdr_props;
@@ -321,7 +321,7 @@ ews_oab_decoder_new (const gchar *oab_filename,
 	priv = GET_PRIVATE (eod);
 
 	gf = g_file_new_for_path (oab_filename);
-	priv->fis = g_file_read (gf, NULL, &err);
+	priv->fis = (GInputStream *)g_file_read (gf, NULL, &err);
 	if (err)
 		goto exit;
 
@@ -457,16 +457,15 @@ typedef struct {
 } EwsOabHdr;
 
 static EwsOabHdr *
-ews_read_oab_header (EwsOabDecoder *eod,
+ews_read_oab_header (EwsOabDecoder *eod, GInputStream *stream,
                      GCancellable *cancellable,
                      GError **error)
 {
 	EwsOabHdr *o_hdr;
-	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 
 	o_hdr = g_new0 (EwsOabHdr, 1);
 
-	o_hdr->version = ews_oab_read_uint32 (G_INPUT_STREAM (priv->fis), cancellable, error);
+	o_hdr->version = ews_oab_read_uint32 (stream, cancellable, error);
 	if (*error)
 		goto exit;
 
@@ -475,10 +474,10 @@ ews_read_oab_header (EwsOabDecoder *eod,
 		goto exit;
 	}
 
-	o_hdr->serial = ews_oab_read_uint32 (G_INPUT_STREAM (priv->fis), cancellable, error);
+	o_hdr->serial = ews_oab_read_uint32 (stream, cancellable, error);
 	if (*error)
 		goto exit;
-	o_hdr->total_recs = ews_oab_read_uint32 (G_INPUT_STREAM (priv->fis), cancellable, error);
+	o_hdr->total_recs = ews_oab_read_uint32 (stream, cancellable, error);
 
 exit:
 	if (*error) {
@@ -490,7 +489,7 @@ exit:
 }
 
 static gboolean
-ews_decode_hdr_props (EwsOabDecoder *eod,
+ews_decode_hdr_props (EwsOabDecoder *eod, GInputStream *stream,
                       gboolean oab_hdrs,
                       GCancellable *cancellable,
                       GError **error)
@@ -500,9 +499,7 @@ ews_decode_hdr_props (EwsOabDecoder *eod,
 	GSList **props;
 
 	/* number of properties */
-	num_props = ews_oab_read_uint32 (
-		G_INPUT_STREAM (priv->fis),
-		cancellable, error);
+	num_props = ews_oab_read_uint32 (stream, cancellable, error);
 
 	if (*error)
 		return FALSE;
@@ -520,9 +517,7 @@ ews_decode_hdr_props (EwsOabDecoder *eod,
 	for (i = 0; i < num_props; i++) {
 		guint32 prop_id;
 
-		prop_id = ews_oab_read_uint32 (
-			G_INPUT_STREAM (priv->fis),
-			cancellable, error);
+		prop_id = ews_oab_read_uint32 (stream, cancellable, error);
 
 		*props = g_slist_prepend (*props, GUINT_TO_POINTER (prop_id));
 
@@ -530,9 +525,7 @@ ews_decode_hdr_props (EwsOabDecoder *eod,
 			return FALSE;
 
 		/* eat the flags */
-		ews_oab_read_uint32 (
-			G_INPUT_STREAM (priv->fis),
-			cancellable, error);
+		ews_oab_read_uint32 (stream, cancellable, error);
 
 		if (*error)
 			return FALSE;
@@ -547,26 +540,23 @@ ews_decode_hdr_props (EwsOabDecoder *eod,
 }
 
 static gboolean
-ews_decode_metadata (EwsOabDecoder *eod,
+ews_decode_metadata (EwsOabDecoder *eod, GInputStream *stream,
                      GCancellable *cancellable,
                      GError **error)
 {
-	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	gboolean ret = TRUE;
 
 	/* eat the size */
-	ews_oab_read_uint32 (
-		G_INPUT_STREAM (priv->fis),
-		cancellable, error);
+	ews_oab_read_uint32 (stream, cancellable, error);
 
 	if (*error)
 		return FALSE;
 
-	ret = ews_decode_hdr_props (eod, FALSE, cancellable, error);
+	ret = ews_decode_hdr_props (eod, stream, FALSE, cancellable, error);
 	if (!ret)
 		return FALSE;
 
-	ret = ews_decode_hdr_props (eod, TRUE, cancellable, error);
+	ret = ews_decode_hdr_props (eod, stream, TRUE, cancellable, error);
 
 	return ret;
 }
@@ -587,15 +577,14 @@ ews_is_bit_set (const gchar *str,
 }
 
 static guint32
-ews_decode_uint32 (EwsOabDecoder *eod,
+ews_decode_uint32 (EwsOabDecoder *eod, GInputStream *stream,
                    GCancellable *cancellable,
                    GError **error)
 {
-	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	guint8 first;
 	guint32 ret = 0, num;
 
-	g_input_stream_read (G_INPUT_STREAM (priv->fis), &first, 1, cancellable, error);
+	g_input_stream_read (stream, &first, 1, cancellable, error);
 	if (*error)
 		return ret;
 
@@ -605,16 +594,16 @@ ews_decode_uint32 (EwsOabDecoder *eod,
 		return (guint32) first;
 
 	if (num == 1) {
-		g_input_stream_read (G_INPUT_STREAM (priv->fis), &first, 1, cancellable, error);
+		g_input_stream_read (stream, &first, 1, cancellable, error);
 		return (guint32) first;
 	}
 
 	if (num == 2)
-		ret = ews_oab_read_uint16 (G_INPUT_STREAM (priv->fis), cancellable, error);
+		ret = ews_oab_read_uint16 (stream, cancellable, error);
 	if (num == 3) {
 		gchar *tmp, *str = g_malloc0 (num + 1);
 
-		g_input_stream_read (G_INPUT_STREAM (priv->fis), str, num, cancellable, error);
+		g_input_stream_read (stream, str, num, cancellable, error);
 		/* not sure if its the right way to do, test it */
 		tmp = g_strconcat ("0", str, NULL);
 
@@ -624,26 +613,25 @@ ews_decode_uint32 (EwsOabDecoder *eod,
 		g_free (str);
 		g_free (tmp);
 	} else if (num == 4)
-		ret = ews_oab_read_uint32 (G_INPUT_STREAM (priv->fis), cancellable, error);
+		ret = ews_oab_read_uint32 (stream, cancellable, error);
 
 	return ret;
 }
 
 static GBytes *
-ews_decode_binary (EwsOabDecoder *eod,
+ews_decode_binary (EwsOabDecoder *eod, GInputStream *stream,
                    GCancellable *cancellable,
                    GError **error)
 {
-	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	guint32 len;
 	gchar *binary;
 	GBytes *val = NULL;
 
-	len = ews_decode_uint32 (eod, cancellable, error);
+	len = ews_decode_uint32 (eod, stream, cancellable, error);
 	if (*error)
 		return NULL;
 	binary = g_malloc (len);
-	g_input_stream_read (G_INPUT_STREAM (priv->fis), binary, len, cancellable, error);
+	g_input_stream_read (stream, binary, len, cancellable, error);
 	if (*error) {
 		g_free (binary);
 		goto exit;
@@ -657,12 +645,11 @@ exit:
 }
 
 static gpointer
-ews_decode_oab_prop (EwsOabDecoder *eod,
+ews_decode_oab_prop (EwsOabDecoder *eod, GInputStream *stream,
                      guint32 prop_id,
                      GCancellable *cancellable,
                      GError **error)
 {
-	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	guint32 prop_type;
 	gpointer ret_val = NULL;
 
@@ -673,7 +660,7 @@ ews_decode_oab_prop (EwsOabDecoder *eod,
 		{
 			guint32 val;
 
-			val = ews_decode_uint32 (eod, cancellable, error);
+			val = ews_decode_uint32 (eod, stream, cancellable, error);
 			ret_val = GUINT_TO_POINTER (val);
 
 			d (g_print ("prop id %X prop type: int32 value %d \n", prop_id, val);)
@@ -684,7 +671,7 @@ ews_decode_oab_prop (EwsOabDecoder *eod,
 		{
 			guchar val;
 
-			g_input_stream_read (G_INPUT_STREAM (priv->fis), &val, 1, cancellable, error);
+			g_input_stream_read (stream, &val, 1, cancellable, error);
 			ret_val = GUINT_TO_POINTER ((guint) val);
 			d (g_print ("prop id %X prop type: bool value %d \n", prop_id, val);)
 
@@ -695,7 +682,7 @@ ews_decode_oab_prop (EwsOabDecoder *eod,
 		{
 			gchar *val;
 
-			val = ews_oab_read_upto (G_INPUT_STREAM (priv->fis), '\0', cancellable, error);
+			val = ews_oab_read_upto (stream, '\0', cancellable, error);
 			ret_val = (gpointer) val;
 
 			d (g_print ("prop id %X prop type: string value %s \n", prop_id, val);)
@@ -703,7 +690,7 @@ ews_decode_oab_prop (EwsOabDecoder *eod,
 		}
 		case EWS_PTYP_BINARY:
 		{
-			ret_val = ews_decode_binary (eod, cancellable, error);
+			ret_val = ews_decode_binary (eod, stream, cancellable, error);
 			d (g_print ("prop id %X prop type: binary size %zd \n", prop_id, g_bytes_get_size ((GBytes *)ret_val)));
 			break;
 		}
@@ -715,7 +702,7 @@ ews_decode_oab_prop (EwsOabDecoder *eod,
 			guint32 num, i;
 			GSList *list = NULL;
 
-			num = ews_decode_uint32 (eod, cancellable, error);
+			num = ews_decode_uint32 (eod, stream, cancellable, error);
 			if (*error)
 				break;
 			d (g_print ("prop id %X prop type: multi-num %d \n", prop_id, num);)
@@ -726,7 +713,7 @@ ews_decode_oab_prop (EwsOabDecoder *eod,
 				if (prop_type == EWS_PTYP_MULTIPLEINTEGER32) {
 					guint32 v = 0;
 
-					v = ews_decode_uint32 (eod, cancellable, error);
+					v = ews_decode_uint32 (eod, stream, cancellable, error);
 					val = GUINT_TO_POINTER (v);
 					list = g_slist_prepend (list, val);
 
@@ -738,7 +725,7 @@ ews_decode_oab_prop (EwsOabDecoder *eod,
 				} else if (prop_type == EWS_PTYP_MULTIPLEBINARY) {
 					GBytes *val;
 
-					val = ews_decode_binary (eod, cancellable, error);
+					val = ews_decode_binary (eod, stream, cancellable, error);
 					if (!val) {
 						g_slist_foreach (list, (GFunc) g_bytes_unref, NULL);
 						g_slist_free (list);
@@ -751,7 +738,7 @@ ews_decode_oab_prop (EwsOabDecoder *eod,
 				} else {
 					gchar *val;
 
-					val = ews_oab_read_upto (G_INPUT_STREAM (priv->fis), '\0', cancellable, error);
+					val = ews_oab_read_upto (stream, '\0', cancellable, error);
 					if (!val) {
 						g_slist_foreach (list, (GFunc) g_free, NULL);
 						g_slist_free (list);
@@ -899,7 +886,7 @@ ews_decode_addressbook_write_display_type (EContact **contact,
  * Returns: 
  **/
 static gboolean
-ews_decode_addressbook_record (EwsOabDecoder *eod,
+ews_decode_addressbook_record (EwsOabDecoder *eod, GInputStream *stream,
                                EContact *contact,
                                GSList *props,
                                GCancellable *cancellable,
@@ -914,7 +901,7 @@ ews_decode_addressbook_record (EwsOabDecoder *eod,
 	len = g_slist_length (props);
 	bit_array_size = (guint) ceil (len / 8.0);
 	bit_str = g_malloc0 (bit_array_size);
-	g_input_stream_read (G_INPUT_STREAM (priv->fis), bit_str, bit_array_size, cancellable, error);
+	g_input_stream_read (stream, bit_str, bit_array_size, cancellable, error);
 	if (*error) {
 		ret = FALSE;
 		goto exit;
@@ -939,7 +926,7 @@ ews_decode_addressbook_record (EwsOabDecoder *eod,
 		if ((prop_id & 0xFFFF) == EWS_PTYP_OBJECT)
 			continue;
 
-		val = ews_decode_oab_prop (eod, prop_id, cancellable, error);
+		val = ews_decode_oab_prop (eod, stream, prop_id, cancellable, error);
 
 		if (prop_id == EWS_PT_DISPLAY_TYPE)
 			ews_decode_addressbook_write_display_type (&contact, GPOINTER_TO_UINT (val), FALSE);
@@ -1001,11 +988,11 @@ ews_decode_and_store_oab_records (EwsOabDecoder *eod,
 
 	/* eat the size */
 	ews_oab_read_uint32 (
-		G_INPUT_STREAM (priv->fis),
+		priv->fis,
 		cancellable, error);
 
-	ews_decode_addressbook_record (
-		eod, NULL, priv->hdr_props, cancellable, error);
+	ews_decode_addressbook_record (eod, priv->fis, NULL,
+				       priv->hdr_props, cancellable, error);
 
 	if (*error) {
 		ret = FALSE;
@@ -1020,14 +1007,14 @@ ews_decode_and_store_oab_records (EwsOabDecoder *eod,
 
 		/* eat the size */
 		ews_oab_read_uint32 (
-			G_INPUT_STREAM (priv->fis),
+			priv->fis,
 			cancellable, error);
 
 		/* fetch the offset */
 		offset = g_seekable_tell ((GSeekable *) priv->fis);
 
-		if (ews_decode_addressbook_record (eod, contact,
-						   priv->oab_props,
+		if (ews_decode_addressbook_record (eod, priv->fis,
+						   contact, priv->oab_props,
 						   cancellable, error))
 			cb (contact, offset,
 			    ((gfloat) (i + 1) / priv->total_records) * 100,
@@ -1138,7 +1125,7 @@ ews_oab_decoder_decode (EwsOabDecoder *eod,
 	EwsOabHdr *o_hdr;
 	gboolean ret = TRUE;
 
-	o_hdr = ews_read_oab_header (eod, cancellable, &err);
+	o_hdr = ews_read_oab_header (eod, priv->fis, cancellable, &err);
 	if (!o_hdr) {
 		ret = FALSE;
 		goto exit;
@@ -1147,7 +1134,7 @@ ews_oab_decoder_decode (EwsOabDecoder *eod,
 	priv->total_records = o_hdr->total_recs;
 	g_print ("Total records is %d \n", priv->total_records);
 
-	ret = ews_decode_metadata (eod, cancellable, &err);
+	ret = ews_decode_metadata (eod, priv->fis, cancellable, &err);
 	if (!ret)
 		goto exit;
 
@@ -1177,7 +1164,9 @@ ews_oab_decoder_get_contact_from_offset (EwsOabDecoder *eod,
 		return NULL;
 
 	contact = e_contact_new ();
-	if (!ews_decode_addressbook_record (eod, contact, oab_props, cancellable, error)) {
+	if (!ews_decode_addressbook_record (eod, priv->fis,
+					    contact, oab_props, cancellable,
+					    error)) {
 		g_object_unref (contact);
 		contact = NULL;
 	}
