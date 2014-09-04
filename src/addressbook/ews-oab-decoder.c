@@ -983,8 +983,14 @@ ews_decode_and_store_oab_records (EwsOabDecoder *eod,
                                   GError **error)
 {
 	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
-	gboolean ret = TRUE;
+	gboolean ret = FALSE;
 	guint32 i;
+	int buf_len = 200;
+	guchar *record_buf = g_malloc (buf_len);
+	GChecksum *sum = g_checksum_new (G_CHECKSUM_SHA1);
+
+	if (!record_buf || !sum)
+		goto exit;
 
 	/* eat the size */
 	ews_oab_read_uint32 (
@@ -994,41 +1000,62 @@ ews_decode_and_store_oab_records (EwsOabDecoder *eod,
 	ews_decode_addressbook_record (eod, priv->fis, NULL,
 				       priv->hdr_props, cancellable, error);
 
-	if (*error) {
-		ret = FALSE;
+	if (*error)
 		goto exit;
-	}
+
 
 	for (i = 0; i < priv->total_records; i++) {
 		EContact *contact;
 		goffset offset;
+		guint32 rec_size;
+		GInputStream *memstream;
+		const gchar *sum_str;
 
 		contact = e_contact_new ();
 
 		/* eat the size */
-		ews_oab_read_uint32 (
-			priv->fis,
-			cancellable, error);
+		rec_size = ews_oab_read_uint32 (priv->fis, cancellable, error);
+		if (rec_size < 4)
+			goto exit;
 
+		rec_size -= 4;
+
+		if (rec_size > buf_len) {
+			g_free (record_buf);
+			record_buf = g_malloc(rec_size);
+			buf_len = rec_size;
+			if (!record_buf)
+				goto exit;
+		}
 		/* fetch the offset */
 		offset = g_seekable_tell ((GSeekable *) priv->fis);
+		if (g_input_stream_read (priv->fis, record_buf, rec_size, cancellable, error) != rec_size)
+			goto exit;
 
-		if (ews_decode_addressbook_record (eod, priv->fis,
+		g_checksum_reset (sum);
+		g_checksum_update (sum, record_buf, rec_size);
+		sum_str = g_checksum_get_string (sum);
+
+		memstream = g_memory_input_stream_new_from_data (record_buf, rec_size, NULL);
+
+		if (ews_decode_addressbook_record (eod, memstream,
 						   contact, priv->oab_props,
 						   cancellable, error))
 			cb (contact, offset,
 			    ((gfloat) (i + 1) / priv->total_records) * 100,
 			    user_data, error);
 
+		g_object_unref (memstream);
 		g_object_unref (contact);
 
-		if (*error) {
-			ret = FALSE;
+		if (*error)
 			goto exit;
-		}
 	}
 
+	ret = TRUE;
 exit:
+	g_checksum_free (sum);
+	g_free (record_buf);
 	return ret;
 }
 
