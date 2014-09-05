@@ -59,8 +59,6 @@ libebookbackendews_la_LDFLAGS = \
 
 noinst_PROGRAMS = gal-lzx-decompress-test oab-decode-test
 
-oab-decode-test$(EXEEXT): libebookbackendews.la
-
 oab_decode_test_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	$(LIBEBOOK_CFLAGS) \
@@ -75,7 +73,7 @@ oab_decode_test_LDADD = \
 	$(GNOME_PLATFORM_LIBS) \
 	$(LIBEBOOK_LIBS) \
 	$(LIBEDATABOOK_LIBS)  \
-	$(top_builddir)/src/addressbook/libebookbackendews.la
+	libebookbackendews.la
 	$(NULL)
 
 gal_lzx_decompress_test_CPPFLAGS = \
