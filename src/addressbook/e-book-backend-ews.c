@@ -93,6 +93,8 @@ struct _EBookBackendEwsPrivate {
 
 	guint subscription_key;
 	gboolean listen_notifications;
+
+	guint rev_counter;
 };
 
 /* using this for backward compatibility with E_DATA_BOOK_MODE */
@@ -199,6 +201,28 @@ convert_error_to_edb_error (GError **perror)
 	g_error_free (*perror);
 	*perror = error;
 }
+
+static gboolean ebews_bump_revision (EBookBackendEws *ebews, GError **error)
+{
+	gboolean ret;
+	gchar *prop_value;
+	time_t t = time (NULL);
+
+	PRIV_LOCK (ebews->priv);
+	prop_value = g_strdup_printf ("%ld(%d)", (long) t, ++ebews->priv->rev_counter);
+	PRIV_UNLOCK (ebews->priv);
+
+	ret = e_book_sqlite_set_key_value (ebews->priv->summary, "revision",
+					   prop_value, error);
+	if (ret)
+		e_book_backend_notify_property_changed (E_BOOK_BACKEND (ebews),
+							BOOK_BACKEND_PROPERTY_REVISION,
+							prop_value);
+	g_free (prop_value);
+
+	return ret;
+}
+
 
 static gboolean
 book_backend_ews_ensure_connected (EBookBackendEws *bbews,
@@ -1348,7 +1372,7 @@ ews_create_contact_cb (GObject *object,
 		e_contact_set (create_contact->contact, E_CONTACT_UID, item_id->id);
 		e_contact_set (create_contact->contact, E_CONTACT_REV, item_id->change_key);
 		e_book_sqlite_add_contact (ebews->priv->summary, create_contact->contact, NULL, TRUE, create_contact->cancellable, &error);
-
+		ebews_bump_revision (ebews, &error);
 		if (error == NULL) {
 			GSList *contacts;
 
@@ -1505,8 +1529,10 @@ ews_book_remove_contact_cb (GObject *object,
 
 	g_return_if_fail (priv->summary != NULL);
 
-	if (!g_simple_async_result_propagate_error (simple, &error))
+	if (!g_simple_async_result_propagate_error (simple, &error)) {
 		deleted = e_book_sqlite_remove_contacts (priv->summary, remove_contact->sl_ids, remove_contact->cancellable, &error);
+		ebews_bump_revision (ebews, &error);
+	}
 
 	if (deleted)
 		e_data_book_respond_remove_contacts (remove_contact->book, remove_contact->opid, EDB_ERROR (SUCCESS),  remove_contact->sl_ids);
@@ -1632,6 +1658,7 @@ ews_modify_contact_cb (GObject *object,
 				modify_contact->new_contact, NULL,
 				TRUE, modify_contact->cancellable,
 				&error);
+		ebews_bump_revision (ebews, &error);
 
 		if (error == NULL) {
 			GSList *new_contacts;
@@ -2408,6 +2435,7 @@ ews_gal_store_contact (EContact *contact,
 		data->sha1_collector = g_slist_reverse (data->sha1_collector);
 		e_book_sqlite_add_contacts (priv->summary, data->contact_collector, data->sha1_collector,
 					    TRUE, data->cancellable, error);
+		ebews_bump_revision (data->cbews, error);
 
 		for (l = data->contact_collector; l != NULL; l = g_slist_next (l))
 			e_book_backend_notify_update (E_BOOK_BACKEND (data->cbews), E_CONTACT (l->data));
@@ -2518,6 +2546,8 @@ ews_replace_gal_in_db (EBookBackendEws *cbews,
 	/* Remove attachments. This will be easier once we add cursor support. */
 	if (stale_uids && !e_book_sqlite_remove_contacts (priv->summary, stale_uids, cancellable, error))
 		ret = FALSE;
+
+	ebews_bump_revision (cbews, error);
 
 	t2 = g_get_monotonic_time ();
 	d (g_print("GAL update completed %ssuccessfully in %ld µs. Added: %d, Changed: %d, Unchanged %d, Removed: %d\n",
@@ -3640,7 +3670,13 @@ e_book_backend_ews_get_backend_property (EBookBackend *backend,
 		g_string_free (buffer, TRUE);
 
 		return fields;
-	}
+	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_REVISION)) {
+		EBookBackendEws *ebews = E_BOOK_BACKEND_EWS (backend);
+		gchar *prop_value = NULL;
+
+		e_book_sqlite_get_key_value (ebews->priv->summary, "revision", &prop_value, NULL);
+		return prop_value;
+        }
 
 	/* Chain up to parent's get_backend_property() method. */
 	return E_BOOK_BACKEND_CLASS (e_book_backend_ews_parent_class)->
@@ -3757,6 +3793,7 @@ ews_update_items_thread (gpointer data)
 				e_book_sqlite_set_key_value (priv->summary, E_BOOK_SQL_SYNC_DATA_KEY, NULL, &error);
 				if (error != NULL)
 					break;
+				ebews_bump_revision (ebews, &error);
 
 				ebews_forget_all_contacts (ebews);
 
@@ -3823,6 +3860,7 @@ ews_update_items_thread (gpointer data)
 		e_book_sqlite_set_key_value (priv->summary, E_BOOK_SQL_SYNC_DATA_KEY, sync_state, &error);
 		if (error != NULL)
 			break;
+		ebews_bump_revision (ebews, &error);
 	} while (!includes_last_item);
 
 	if (error == NULL)
@@ -3892,6 +3930,7 @@ e_book_backend_ews_open_sync (EBookBackend *backend,
 	EBookBackendEws *ebews;
 	EBookBackendEwsPrivate * priv;
 	gboolean need_to_authenticate;
+	gchar *revision = NULL;
 
 	if (e_book_backend_is_opened (backend))
 		return TRUE;
@@ -3911,6 +3950,14 @@ e_book_backend_ews_open_sync (EBookBackend *backend,
 					  cancellable, error)) {
 		convert_error_to_edb_error (error);
 		return FALSE;
+	}
+
+	e_book_sqlite_get_key_value (priv->summary, "revision", &revision, NULL);
+	if (revision) {
+		e_book_backend_notify_property_changed (backend,
+							BOOK_BACKEND_PROPERTY_REVISION,
+							revision);
+		g_free (revision);
 	}
 
 	if (ebews->priv->is_gal)
