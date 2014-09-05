@@ -1,317 +1,367 @@
-# Shankar Prasad <svenkate@redhat.com>, 2013.
+# Shankar Prasad <svenkate@redhat.com>, 2013, 2014.
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-06 14:45+0530\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-ews&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2014-09-05 04:41+0000\n"
+"PO-Revision-Date: 2014-09-05 17:41+0530\n"
+"Last-Translator: \n"
+"Language-Team: Kannada <kde-i18n-doc@kde.org>\n"
+"Language: kn\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2013-10-31 05:53-0400\n"
-"Last-Translator: Shankar Prasad <svenkate@redhat.com>\n"
-"Language-Team: Kannada <kde-i18n-doc@kde.org>\n"
-"Language: kn\n"
-"X-Generator: Zanata 3.2.3\n"
+"X-Generator: Lokalize 1.5\n"
 "Plural-Forms: nplurals=2; plural=(n!=1)\n"
 
-#: ../src/addressbook/e-book-backend-ews.c:1038
+#: ../src/addressbook/e-book-backend-ews.c:1437
 msgid "The backend does not support bulk additions"
 msgstr "ಹಿನ್ನೆಲೆಯು ಒಟ್ಟು ಪ್ರಮಾಣದಲ್ಲಿ ಸೇರಿಸುವುದಕ್ಕೆ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"
 
-#: ../src/addressbook/e-book-backend-ews.c:1325
+#: ../src/addressbook/e-book-backend-ews.c:1476
+#: ../src/addressbook/e-book-backend-ews.c:1820
+msgid ""
+"Cannot save contact list, it's only supported on EWS Server 2010 or later"
+msgstr ""
+"ಸಂಪರ್ಕದ ಪಟ್ಟಿಯನ್ನು ಉಳಿಸಲಾಗಿಲ್ಲ, ಇದು ಕೇವಲ EWS Server 2010 ಅಥವ ಮುಂದಿನದರಲ್ಲಿ "
+"ಮಾತ್ರ ಬೆಂಬಲಿತವಾಗಿದೆ"
+
+#: ../src/addressbook/e-book-backend-ews.c:1779
 msgid "The backend does not support bulk modifications"
 msgstr "ಹಿನ್ನೆಲೆಯು ಒಟ್ಟು ಪ್ರಮಾಣದಲ್ಲಿ  ಮಾರ್ಪಡಿಸುವುದಕ್ಕೆ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"
 
-#: ../src/addressbook/e-book-backend-ews.c:1513
+#: ../src/addressbook/e-book-backend-ews.c:1979
 msgid "Wait till syncing is done"
 msgstr "ಸಿಂಕ್ ಮಾಡುವಿಕೆಯು ಪೂರ್ಣಗೊಳ್ಳುವವರೆಗೆ ಕಾಯಿ"
 
-#: ../src/addressbook/e-book-backend-ews.c:1922
+#: ../src/addressbook/e-book-backend-ews.c:2393
 #, c-format
 msgid "Downloading contacts in %s %d%% completed... "
 msgstr "ಸಂಪರ್ಕಗಳನ್ನು %s %d%% ಗೆ ಇಳಿಸಿಕೊಳ್ಳುವುದು ಪೂರ್ಣಗೊಂಡಿದೆ... "
 
-#: ../src/addressbook/e-book-backend-ews.c:2535
+#: ../src/addressbook/e-book-backend-ews.c:3088
 msgid "Syncing contacts..."
 msgstr "ಸಂಪರ್ಕವಿಳಾಸಗಳನ್ನು ಹೊಂದಾಣಿಕೆ ಮಾಡಲಾಗುತ್ತಿದೆ..."
 
-#: ../src/addressbook/e-book-backend-ews.c:2757
+#: ../src/addressbook/e-book-backend-ews.c:3263
 #: ../src/configuration/e-ews-search-user.c:365
 msgid "Searching..."
 msgstr "ಹುಡುಕಲಾಗುತ್ತಿದೆ..."
 
-#: ../src/calendar/e-cal-backend-ews.c:1112
+#: ../src/calendar/e-cal-backend-ews.c:1257
 msgid "EWS does not support bulk removals"
 msgstr "EWS ಒಟ್ಟು ಪ್ರಮಾಣದಲ್ಲಿ ತೆಗೆದುಹಾಕುವುದಕ್ಕೆ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"
 
-#: ../src/calendar/e-cal-backend-ews.c:1755
+#: ../src/calendar/e-cal-backend-ews.c:1433
+#| msgctxt "User"
+#| msgid "Unknown"
+msgid "Unknown error"
+msgstr "ಗೊತ್ತಿರದ ದೋಷ"
+
+#: ../src/calendar/e-cal-backend-ews.c:1648
 msgid "EWS does not support bulk additions"
 msgstr "EWS ಒಟ್ಟು ಪ್ರಮಾಣದಲ್ಲಿ ಸೇರಿಸುವುದಕ್ಕೆ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"
 
-#: ../src/calendar/e-cal-backend-ews.c:2338
+#: ../src/calendar/e-cal-backend-ews.c:1853
 msgid "EWS does not support bulk modifications"
 msgstr "EWS ಒಟ್ಟು ಪ್ರಮಾಣದಲ್ಲಿ ಮಾರ್ಪಡಿಸುವುದಕ್ಕೆ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"
 
-#: ../src/camel/camel-ews-folder.c:268
+#: ../src/calendar/e-cal-backend-ews.c:2279
+#, c-format
+msgid "Cannot find user '%s' between attendees"
+msgstr "ಪಾಲ್ಗೊಳ್ಳುವವರ ನಡುವೆ ಬಳಕೆದಾರ '%s' ಕಂಡುಬಂದಿಲ್ಲ"
+
+#: ../src/camel/camel-ews-folder.c:379
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "mimecontent ತಾತ್ಕಾಲಿಕ ಕಡತವನ್ನು ತೆರೆಯಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ!"
 
-#: ../src/camel/camel-ews-folder.c:276
+#: ../src/camel/camel-ews-folder.c:387
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "mimecontent ಇಂದ ಪಾರ್ಸರ್ ಅನ್ನು ಉತ್ಪಾದಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ!"
 
-#: ../src/camel/camel-ews-folder.c:285
+#: ../src/camel/camel-ews-folder.c:396
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "mimecontent ಮೀಟಿಂಗ್ ಮನವಿಯನ್ನು ಪಾರ್ಸ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ!"
 
-#: ../src/camel/camel-ews-folder.c:346
+#: ../src/camel/camel-ews-folder.c:455
 #, c-format
 msgid "Unable to create cache file"
 msgstr "ಕ್ಯಾಶ್ ಕಡತವನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
 
-#: ../src/camel/camel-ews-folder.c:451 ../src/camel/camel-ews-folder.c:531
+#: ../src/camel/camel-ews-folder.c:559 ../src/camel/camel-ews-folder.c:650
 #, c-format
 msgid "Unable to create cache path"
 msgstr "ಕ್ಯಾಶೆ ಮಾರ್ಗವನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
 
-#: ../src/camel/camel-ews-folder.c:541
+#: ../src/camel/camel-ews-folder.c:660
 #, c-format
 msgid "Failed to move message cache file"
 msgstr "ಸಂದೇಶ ಕ್ಯಾಶ್ ಕಡತವನ್ನು ಸ್ಥಳಾಂತರಿಸಲು ವಿಫಲಗೊಂಡಿದೆ"
 
-#: ../src/camel/camel-ews-folder.c:1189
+#: ../src/camel/camel-ews-folder.c:1364
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "%s ಗಾಗಿ ಸಾರಾಂಶವನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
 
-#: ../src/camel/camel-ews-folder.c:1625
+#: ../src/camel/camel-ews-folder.c:1868
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr ""
 "ಆಫ್‌ಲೈನ್ ಸ್ಥಿತಿಯಲ್ಲಿದ್ದಾಗ ಪತ್ರಕೋಶದ ಮೇಲೆ ಯಾವುದೆ ಕ್ರಿಯೆಗಳನ್ನು ನಡೆಸಲಾಗಿಲ್ಲ"
 
-#: ../src/camel/camel-ews-provider.c:48
+#: ../src/camel/camel-ews-provider.c:47
 msgid "Checking for new mail"
 msgstr "ಹೊಸ ಅಂಚೆ‍ಗಾಗಿ ಕಾಯಲಾಗುತ್ತಿದೆ"
 
-#: ../src/camel/camel-ews-provider.c:50
+#: ../src/camel/camel-ews-provider.c:49
 msgid "C_heck for new messages in all folders"
 msgstr "ಹೊಸ ಸಂದೇಶಕ್ಕಾಗಿ ಎಲ್ಲಾ ಪತ್ರಕೋಶದಲ್ಲೂ ಹುಡುಕು (_h)"
 
-#: ../src/camel/camel-ews-provider.c:53
+#: ../src/camel/camel-ews-provider.c:51
+msgid "_Listen for server change notifications"
+msgstr "ಪೂರೈಕೆಗಣಕ ಬದಲಾವಣೆಯ ಸೂಚನೆಗಳಿಗಾಗಿ ಆಲಿಸು (_L)"
+
+#: ../src/camel/camel-ews-provider.c:54
 msgid "Options"
 msgstr "ಆಯ್ಕೆಗಳು"
 
-#: ../src/camel/camel-ews-provider.c:55
+#: ../src/camel/camel-ews-provider.c:56
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr ""
-"ಈ ಪರಿಚಾರಕದಲ್ಲಿನ INBOX ನಲ್ಲಿನ ಹೊಸ ಸಂದೇಶಗಳಿಗೆ ಫಿಲ್ಟರುಗಳನ್ನು ಅನ್ವಯಿಸು(_A)"
+"ಈ ಪೂರೈಕೆಗಣಕದಲ್ಲಿನ INBOX ನಲ್ಲಿನ ಹೊಸ ಸಂದೇಶಗಳಿಗೆ ಫಿಲ್ಟರುಗಳನ್ನು ಅನ್ವಯಿಸು (_A)"
 
-#: ../src/camel/camel-ews-provider.c:57
+#: ../src/camel/camel-ews-provider.c:58
 msgid "Check new messages for _Junk contents"
-msgstr "ರದ್ದಿ ವಿಷಯಗಳನ್ನು ಹೊಂದಿರುವ ಹೊಸ ಸಂದೇಶಗಳನ್ನು ಪರಿಶೀಲಿಸು(_J)"
+msgstr "ರದ್ದಿ ವಿಷಯಗಳನ್ನು ಹೊಂದಿರುವ ಹೊಸ ಸಂದೇಶಗಳನ್ನು ಪರಿಶೀಲಿಸು (_J)"
 
-#: ../src/camel/camel-ews-provider.c:59
+#: ../src/camel/camel-ews-provider.c:60
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "ಕೇವಲ IN_BOX ಪತ್ರಕೋಶದಲ್ಲಿನ ರದ್ದಿ ಸಂದೇಶಗಳನ್ನು ಮಾತ್ರ ಪರಿಶೀಲಿಸು"
 
-#: ../src/camel/camel-ews-provider.c:61
+#: ../src/camel/camel-ews-provider.c:62
 msgid "Automatically synchroni_ze remote mail locally"
 msgstr "ಸ್ವಯಂಚಾಲಿತವಾಗಿ ದೂರಸ್ಥ ಅಂಚೆಗಳನ್ನು ಸ್ಥಳೀಯವಾಗು ಹೊಂದಿಸು (_z)"
 
-#: ../src/camel/camel-ews-provider.c:64
+#: ../src/camel/camel-ews-provider.c:65
 msgid "Connection"
 msgstr "ಸಂಪರ್ಕ"
 
-#: ../src/camel/camel-ews-provider.c:68
+#. Translators: '%s' is preplaced with a widget, where "
+#. * user can select how long the timeout should be.
+#: ../src/camel/camel-ews-provider.c:69
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "ಸಂಪರ್ಕದ ಕಾಲಾವಧಿ ತೀರಿದೆ (ಸೆಕೆಂಡುಗಳಲ್ಲಿ) %s (_t)"
 
-#: ../src/camel/camel-ews-provider.c:76
+#: ../src/camel/camel-ews-provider.c:77
 msgid "Exchange Web Services"
 msgstr "ಎಕ್ಸ್‌ಚೇಂಜ್ ವೆಬ್ ಸರ್ವಿಸಸ್"
 
-#: ../src/camel/camel-ews-provider.c:78
+#: ../src/camel/camel-ews-provider.c:79
 msgid "For accessing Exchange servers using Web Services"
 msgstr "ವೆಬ್‌ ಸರ್ವಿಸಸ್ ಬಳಸಿಕೊಂಡು ಎಕ್ಸ್‌ಚೇಂಜ್ ಪೂರೈಕೆಗಣಕಗಳನ್ನು ನಿಲುಕಿಸಿಕೊಳ್ಳಲು"
 
-#: ../src/camel/camel-ews-provider.c:93
+#: ../src/camel/camel-ews-provider.c:94
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/camel/camel-ews-provider.c:95
+#: ../src/camel/camel-ews-provider.c:96
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
 msgstr ""
 "ಈ ಆಯ್ಕೆಯು NTLM ದೃಢೀಕರಣದೊಂದಿಗೆ ಸಾಮಾನ್ಯವಾದ ಸರಳಪಠ್ಯ ಗುಪ್ತಪದವನ್ನು ಬಳಸಿಕೊಂಡು "
-"ಎಕ್ಸ್‍ಚೇಂಜ್ ಪರಿಚಾರಕದೊಂದಿಗೆ ಸಂಪರ್ಕಕಲ್ಪಿಸುತ್ತದೆ."
+"ಎಕ್ಸ್‍ಚೇಂಜ್ "
+"ಪೂರೈಕೆಗಣಕದೊಂದಿಗೆ ಸಂಪರ್ಕಕಲ್ಪಿಸುತ್ತದೆ."
 
-#: ../src/camel/camel-ews-provider.c:103
+#: ../src/camel/camel-ews-provider.c:104
 msgid "Basic"
 msgstr "ಮೂಲಭೂತ"
 
-#: ../src/camel/camel-ews-provider.c:105
+#: ../src/camel/camel-ews-provider.c:106
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
 msgstr ""
 "ಈ ಆಯ್ಕೆಯು ಮೂಲಭೂತ ದೃಢೀಕರಣದೊಂದಿಗೆ ಸಾಮಾನ್ಯವಾದ ಸರಳಪಠ್ಯ ಗುಪ್ತಪದವನ್ನು ಬಳಸಿಕೊಂಡು "
-"ಎಕ್ಸ್‍ಚೇಂಜ್ ಪರಿಚಾರಕದೊಂದಿಗೆ ಸಂಪರ್ಕಕಲ್ಪಿಸುತ್ತದೆ."
+"ಎಕ್ಸ್‍ಚೇಂಜ್ "
+"ಪೂರೈಕೆಗಣಕದೊಂದಿಗೆ ಸಂಪರ್ಕಕಲ್ಪಿಸುತ್ತದೆ."
 
-#: ../src/camel/camel-ews-store.c:192
+#: ../src/camel/camel-ews-provider.c:114
+msgid "Kerberos"
+msgstr "Kerberos"
+
+#: ../src/camel/camel-ews-provider.c:116
+#| msgid ""
+#| "This option will connect to the Exchange server using a plaintext "
+#| "password with Basic authentication."
+msgid ""
+"This option will connect to the Exchange server using a Kerberos/GSSAPI "
+"authentication."
+msgstr ""
+"ಈ ಆಯ್ಕೆಯು Kerberos/GSSAPI ದೃಢೀಕರಣದೊಂದಿಗೆ ಎಕ್ಸ್‌ಚೇಂಜ್ ಪೂರೈಕೆಗಣಕದೊಂದಿಗೆ "
+"ಸಂಪರ್ಕಕಲ್ಪಿಸುತ್ತದೆ."
+
+#: ../src/camel/camel-ews-store.c:332
 #, c-format
 msgid "Session has no storage path"
 msgstr "ಅಧಿವೇಶನವು ಯಾವುದೆ ಶೇಖರಣಾ ಮಾರ್ಗವನ್ನು ಹೊಂದಿಲ್ಲ"
 
-#: ../src/camel/camel-ews-store.c:229
+#: ../src/camel/camel-ews-store.c:369
 #, c-format
 msgctxt "PublicFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:358
+#: ../src/camel/camel-ews-store.c:498
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:727
+#: ../src/camel/camel-ews-store.c:639
+#| msgid "Retrieving \"Out of Office\" settings"
+msgid "Checking \"Out of Office\" settings"
+msgstr "\"ಕಛೇರಿಯಿಂದ ಹೊರಕ್ಕೆ\" ಸಿದ್ಧತೆಗಳನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ"
+
+#: ../src/camel/camel-ews-store.c:1434
 msgid "Updating foreign folder structure"
 msgstr "ಹೊರಗಿನ ಪತ್ರಕೋಶ ರಚನೆಯನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ"
 
-#: ../src/camel/camel-ews-store.c:1169
-msgid "Query for authentication types is not supported"
-msgstr "ದೃಢೀಕರಣದ ಬಗೆಗಾಗಿ ಮನವಿಗೆ ಬೆಂಬಲವಿಲ್ಲ"
-
-#: ../src/camel/camel-ews-store.c:1221
+#: ../src/camel/camel-ews-store.c:1960
 #, c-format
 msgid "No such folder: %s"
 msgstr "ಅಂತಹ ಪತ್ರಕೋಶಗಳಿಲ್ಲ: %s"
 
-#: ../src/camel/camel-ews-store.c:1533
+#: ../src/camel/camel-ews-store.c:2272
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "ಆಫ್‌ಲೈನಿನ ಸ್ಥಿತಿಯಲ್ಲಿ EWS ಸಾರ್ವಜನಿಕ ಪತ್ರಕೋಶಗಳನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
 
-#: ../src/camel/camel-ews-store.c:1606
+#: ../src/camel/camel-ews-store.c:2345
 msgid "Cannot find any EWS public folders"
 msgstr "ಯಾವುದೆ EWS ಸಾರ್ವಜನಿಕ ಪತ್ರಕೋಶಗಳು ಕಂಡುಬಂದಿಲ್ಲ"
 
-#: ../src/camel/camel-ews-store.c:1711
+#: ../src/camel/camel-ews-store.c:2454
 #, c-format
 msgid "Cannot create folder '%s', folder already exists"
 msgstr "ಪತ್ರಕೋಶವನ್ನು ನಿರ್ಮಿಸಲಾಗಿಲ್ಲ: '%s: ಪತ್ರಕೋಶವು ಈಗಾಗಲೆ ಇದೆ"
 
-#: ../src/camel/camel-ews-store.c:1726
+#: ../src/camel/camel-ews-store.c:2469
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "ಮೂಲ %s ಪತ್ರಕೋಶ ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ"
 
-#: ../src/camel/camel-ews-store.c:1736
+#: ../src/camel/camel-ews-store.c:2479
 #, c-format
 msgid ""
 "Cannot create folder under '%s', it is used for folders of other users only"
 msgstr ""
 "'%s' ಅಡಿಯಲ್ಲಿ ಪತ್ರಕೋಶವನ್ನು ರಚಿಸಲಾಗಿಲ್ಲ, ಇದನ್ನು ಬೇರೆ ಬಳಕೆದಾರರ ಪತ್ರಕೋಶಗಳಿಗಾಗಿ "
-"ಮಾತ್ರ ಬಳಸಲಾಗುತ್ತದೆ"
+"ಮಾತ್ರ "
+"ಬಳಸಲಾಗುತ್ತದೆ"
 
-#: ../src/camel/camel-ews-store.c:1746
+#: ../src/camel/camel-ews-store.c:2489
 #, c-format
 msgid "Cannot create folder under '%s', it is used for public folders only"
 msgstr ""
-"'%s' ಅಡಿಯಲ್ಲಿ ಪತ್ರಕೋಶವನ್ನು ರಚಿಸಲಾಗಿಲ್ಲ, ಇದನ್ನು ಸಾರ್ವಜನಿಕ ಪತ್ರಕೋಶಗಳಿಗಾಗಿ "
-"ಮಾತ್ರ ಬಳಸಲಾಗುತ್ತದೆ"
+"'%s' ಅಡಿಯಲ್ಲಿ ಪತ್ರಕೋಶವನ್ನು ರಚಿಸಲಾಗಿಲ್ಲ, ಇದನ್ನು ಸಾರ್ವಜನಿಕ ಪತ್ರಕೋಶಗಳಿಗಾಗಿ ಮಾತ್ರ "
+"ಬಳಸಲಾಗುತ್ತದೆ"
 
-#: ../src/camel/camel-ews-store.c:1815
+#: ../src/camel/camel-ews-store.c:2593
 #, c-format
 msgid "Folder does not exist"
 msgstr "ಪತ್ರಕೋಶ ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ"
 
-#: ../src/camel/camel-ews-store.c:1824
+#: ../src/camel/camel-ews-store.c:2603
 #, c-format
 msgid "Cannot remove folder '%s', it is used for folders of other users only"
 msgstr ""
 "'%s' ಪತ್ರಕೋಶವನ್ನು ತೆಗೆಯಲಾಗಿಲ್ಲ, ಇದನ್ನು ಬೇರೆ ಬಳಕೆದಾರರ ಪತ್ರಕೋಶಗಳಿಗಾಗಿ ಮಾತ್ರ "
 "ಬಳಸಲಾಗುತ್ತದೆ"
 
-#: ../src/camel/camel-ews-store.c:1834
+#: ../src/camel/camel-ews-store.c:2614
 #, c-format
 msgid "Cannot remove folder '%s', it is used for public folders only"
 msgstr ""
 "'%s' ಪತ್ರಕೋಶವನ್ನು ತೆಗೆಯಲಾಗಿಲ್ಲ, ಇದನ್ನು ಸಾರ್ವಜನಿಕ ಪತ್ರಕೋಶಗಳಿಗಾಗಿ ಮಾತ್ರ "
 "ಬಳಸಲಾಗುತ್ತದೆ"
 
-#: ../src/camel/camel-ews-store.c:1942
+#: ../src/camel/camel-ews-store.c:2770
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "'%s' ಪತ್ರಕೋಶ ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ"
 
-#: ../src/camel/camel-ews-store.c:1952
+#: ../src/camel/camel-ews-store.c:2780
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "%s ಪತ್ರಕೋಶಕ್ಕಾಗಿ ಯಾವುದೆ ಕೀಲಿ ಬದಲಾವಣೆ ದಾಖಲೆ ಇಲ್ಲ"
 
-#: ../src/camel/camel-ews-store.c:1994
+#: ../src/camel/camel-ews-store.c:2822
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr ""
 "ಪತ್ರಕೋಶದ ಸ್ಥಳಾಂತರಿಸುವಿಕೆ ಮತ್ತು ಹೆಸರು ಬದಲಾಯಿಸುವಿಕೆಯನ್ನು ಒಟ್ಟಿಗೆ ನಡೆಸಲು "
 "ಸಾಧ್ಯವಿಲ್ಲ"
 
-#: ../src/camel/camel-ews-store.c:2030
+#: ../src/camel/camel-ews-store.c:2858
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "ಮೂಲ ಪತ್ರಕೋಶ %s ಕ್ಕಾಗಿ ಪತ್ರಕೋಶದ ID ಕಂಡುಬಂದಿಲ್ಲ"
 
-#: ../src/camel/camel-ews-store.c:2080 ../src/camel/camel-ews-transport.c:69
+#: ../src/camel/camel-ews-store.c:2908 ../src/camel/camel-ews-transport.c:69
 #, c-format
 msgid "Exchange server %s"
-msgstr "ಎಕ್ಸ್‌ಚೇಂಜ್ ಪರಿಚಾರಕ %s"
+msgstr "ಎಕ್ಸ್‌ಚೇಂಜ್ ಪೂರೈಕೆಗಣಕ %s"
 
-#: ../src/camel/camel-ews-store.c:2083
+#: ../src/camel/camel-ews-store.c:2911
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "%s %s ನಲ್ಲಿನ Exchange ಸೇವೆ"
 
-#: ../src/camel/camel-ews-store.c:2127
+#: ../src/camel/camel-ews-store.c:2955
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "ಕಸ (ಟ್ರಾಶ್) ಪತ್ರಕೋಶವು ಕಂಡುಬಂದಿಲ್ಲ"
 
-#: ../src/camel/camel-ews-store.c:2187
+#: ../src/camel/camel-ews-store.c:3015
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "ರದ್ದಿ (ಜಂಕ್) ಪತ್ರಕೋಶವು ಕಂಡುಬಂದಿಲ್ಲ"
 
-#: ../src/camel/camel-ews-store.c:2377
+#: ../src/camel/camel-ews-store.c:3205
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "ಆಫ್‌ಲೈನ್‌ ಸ್ಥಿತಿಯಲ್ಲಿ EWS ಪತ್ರಕೋಶಗಳಿಗೆ ಚಂದಾದಾರನಾಗಲು ಸಾಧ್ಯವಿಲ್ಲ"
 
-#: ../src/camel/camel-ews-store.c:2400
+#: ../src/camel/camel-ews-store.c:3228
 #, c-format
 msgid "Cannot subscribe folder '%s', no public folder available"
 msgstr ""
 "'%s' ಪತ್ರಕೋಶಕ್ಕೆ ಚಂದಾದಾರನಾಗಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ: ಯಾವುದೆ ಸಾರ್ವಜನಿಕ ಪತ್ರಕೋಶವು "
 "ಲಭ್ಯವಿಲ್ಲ"
 
-#: ../src/camel/camel-ews-store.c:2410
+#: ../src/camel/camel-ews-store.c:3238
 #, c-format
 msgid "Cannot subscribe folder '%s', folder not found"
 msgstr "'%s' ಪತ್ರಕೋಶಕ್ಕೆ ಚಂದಾದಾರನಾಗಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ: ಪತ್ರಕೋಶವು ಕಂಡುಬಂದಿಲ್ಲ"
 
-#: ../src/camel/camel-ews-store.c:2501
+#: ../src/camel/camel-ews-store.c:3329
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr ""
 "ಆಫ್‌ಲೈನ್‌ ಸ್ಥಿತಿಯಲ್ಲಿ EWS ಪತ್ರಕೋಶದ ಚಂದಾದಾರಿಕೆಯನ್ನು ರದ್ದುಗೊಳಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
 
-#: ../src/camel/camel-ews-store.c:2618
+#: ../src/camel/camel-ews-store.c:3446
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "ಈ ಕಾರ್ಯವನ್ನು ಪೂರ್ಣಗೊಳಿಸಲು ನೀವು ಆನ್‌ಲೈನ್‌ನಲ್ಲಿ ಕೆಲಸ ಮಾಡುತ್ತಿರಬೇಕು"
+
+#: ../src/camel/camel-ews-store.c:3490
+#| msgid "Retrieving \"Out of Office\" settings"
+msgid "Unsetting the \"Out of Office\" status"
+msgstr "\"ಕಛೇರಿಯಿಂದ ಹೊರಕ್ಕೆ\" ಸ್ಥಿತಿಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗುತ್ತದೆ"
 
 #: ../src/camel/camel-ews-transport.c:72
 #, c-format
@@ -346,66 +396,99 @@ msgstr ""
 msgid "Service not connected"
 msgstr "ಸೇವೆಯೊಂದಿಗೆ ಸಂಪರ್ಕ ಸಾಧಿಸಲಾಗಿಲ್ಲ"
 
-#: ../src/collection/e-ews-backend.c:428
+#: ../src/collection/e-ews-backend.c:422
 #: ../src/configuration/e-mail-config-ews-gal.c:274
 msgid "Global Address List"
 msgstr "ಜಾಗತಿಕ ವಿಳಾಸ ಪಟ್ಟಿ"
 
-#: ../src/collection/e-ews-backend.c:813
+#: ../src/collection/e-ews-backend.c:821
 #, c-format
-msgid ""
-"Could not determine a suitable folder class for a new folder named '%s'"
+msgid "Could not determine a suitable folder class for a new folder named '%s'"
 msgstr ""
 "'%s' ಎಂಬ ಹೆಸರಿನ ಪತ್ರಕೋಶಕ್ಕಾಗಿ ಒಂದು ಸೂಕ್ತವಾದ ಪತ್ರಕೋಶ ವರ್ಗವನ್ನು ಸೂಚಿಸಲು "
 "ಸಾಧ್ಯವಾಗಿಲ್ಲ."
 
-#: ../src/collection/e-ews-backend.c:902
+#: ../src/collection/e-ews-backend.c:910
 #, c-format
 msgid "Data source '%s' does not represent an Exchange Web Services folder"
 msgstr ""
 "ದತ್ತಾಂಶ ಆಕರ '%s' ಒಂದು ಎಕ್ಸ್‌ಚೇಂಜ್ ವೆಬ್ ಸರ್ವಿಸಸ್ ಪತ್ರಕೋಶವನ್ನು "
 "ಪ್ರತಿನಿಧಿಸುವುದಿಲ್ಲ"
 
-#: ../src/configuration/e-ews-config-utils.c:516
+#: ../src/configuration/e-ews-config-utils.c:579
+#| msgid "Folder ID:"
+msgid "Folder"
+msgstr "ಪತ್ರಕೋಶ"
+
+#: ../src/configuration/e-ews-config-utils.c:589
+msgid "Size"
+msgstr "ಗಾತ್ರ"
+
+#: ../src/configuration/e-ews-config-utils.c:627
+#: ../src/configuration/e-ews-config-utils.c:632
+msgid "Unable to retrieve folder size information"
+msgstr "ಪತ್ರಕೋಶದ ಗಾತ್ರದ ಮಾಹಿತಿಯನ್ನು ಹಿಂಪಡೆಯಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
+
+#: ../src/configuration/e-ews-config-utils.c:752
+#| msgctxt "Permissions"
+#| msgid "Folder visible"
+msgid "Folder Sizes"
+msgstr "ಪತ್ರಕೋಶದ ಗಾತ್ರಗಳು"
+
+#: ../src/configuration/e-ews-config-utils.c:755
+msgid "_Close"
+msgstr "ಮುಚ್ಚು (_C)"
+
+#: ../src/configuration/e-ews-config-utils.c:769
+msgid "Fetching folder list…"
+msgstr "ಪತ್ರಕೋಶದ ಪಟ್ಟಿಯನ್ನು ಪಡೆಯಲಾಗುತ್ತಿದೆ..."
+
+#: ../src/configuration/e-ews-config-utils.c:922
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr ""
 "'%s' ಪತ್ರಕೋಶ ಅನುಮತಿಗಳನ್ನು ಸಂಪಾದಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ, ಇತರೆ ಪತ್ರಕೋಶವನ್ನು ಆರಿಸಿ."
 
-#: ../src/configuration/e-ews-config-utils.c:594
+#: ../src/configuration/e-ews-config-utils.c:999
+#| msgctxt "Permissions"
+#| msgid "Folder visible"
+msgid "Folder Sizes..."
+msgstr "ಪತ್ರಕೋಶದ ಗಾತ್ರಗಳು..."
+
+#: ../src/configuration/e-ews-config-utils.c:1006
 msgid "Subscribe to folder of other user..."
 msgstr "ಇತರೆ ಬಳಕೆದಾರರ ಪತ್ರಕೋಶಕ್ಕೆ ಚಂದಾದಾರರಾಗಿ..."
 
-#: ../src/configuration/e-ews-config-utils.c:603
-#: ../src/configuration/e-ews-config-utils.c:884
-#: ../src/configuration/e-ews-config-utils.c:915
-#: ../src/configuration/e-ews-config-utils.c:946
-#: ../src/configuration/e-ews-config-utils.c:977
+#: ../src/configuration/e-ews-config-utils.c:1015
+#: ../src/configuration/e-ews-config-utils.c:1297
+#: ../src/configuration/e-ews-config-utils.c:1328
+#: ../src/configuration/e-ews-config-utils.c:1359
+#: ../src/configuration/e-ews-config-utils.c:1390
 msgid "Permissions..."
 msgstr "ಅನುಮತಿಗಳು..."
 
-#: ../src/configuration/e-ews-config-utils.c:605
+#: ../src/configuration/e-ews-config-utils.c:1017
 msgid "Edit EWS folder permissions"
 msgstr "EWS ಪತ್ರಕೋಶ ಅನುಮತಿಗಳನ್ನು ಸಂಪಾದಿಸಿ"
 
-#: ../src/configuration/e-ews-config-utils.c:886
+#: ../src/configuration/e-ews-config-utils.c:1299
 msgid "Edit EWS calendar permissions"
 msgstr "EWS ಕ್ಯಾಲೆಂಡರ್ ಅನುಮತಿಗಳನ್ನು ಸಂಪಾದಿಸಿ"
 
-#: ../src/configuration/e-ews-config-utils.c:917
+#: ../src/configuration/e-ews-config-utils.c:1330
 msgid "Edit EWS tasks permissions"
 msgstr "EWS ಕಾರ್ಯಗಳ ಅನುಮತಿಗಳನ್ನು ಸಂಪಾದಿಸಿ"
 
-#: ../src/configuration/e-ews-config-utils.c:948
+#: ../src/configuration/e-ews-config-utils.c:1361
 msgid "Edit EWS memos permissions"
 msgstr "EWS ಮೆಮೊಗಳ ಅನುಮತಿಗಳನ್ನು ಸಂಪಾದಿಸಿ"
 
-#: ../src/configuration/e-ews-config-utils.c:979
+#: ../src/configuration/e-ews-config-utils.c:1392
 msgid "Edit EWS contacts permissions"
 msgstr "EWS ಸಂಪರ್ಕಗಳ ಅನುಮತಿಗಳನ್ನು ಸಂಪಾದಿಸಿ"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:87
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:499
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:488
 msgctxt "PermissionsLevel"
 msgid "None"
 msgstr "ಯಾವುದೂ ಇಲ್ಲ"
@@ -461,7 +544,7 @@ msgid "Free/Busy time, subject, location"
 msgstr "ಬಿಡುವು/ಕಾರ್ಯನಿರತ ಸಮಯ, ವಿಷಯ, ಸ್ಥಳ"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:143
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:520
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:511
 msgctxt "PermissionsLevel"
 msgid "Custom"
 msgstr "ಅಗತ್ಯಾನುಗುಣ"
@@ -487,7 +570,7 @@ msgstr "ಗೊತ್ತಿರದ"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:867
 #: ../src/configuration/e-ews-search-user.c:431
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1075
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1066
 msgid "Name"
 msgstr "ಹೆಸರು"
 
@@ -610,6 +693,15 @@ msgstr "ಪತ್ರಕೋಶ ಗೋಚರಿಸುತ್ತಿದೆ"
 msgid "Reading folder permissions, please wait..."
 msgstr "ಪತ್ರಕೋಶದ ಅನುಮತಿಗಳನ್ನು ಓದಲಾಗುತ್ತಿದೆ, ದಯವಿಟ್ಟು ಕಾಯಿರಿ..."
 
+#: ../src/configuration/e-ews-ooo-notificator.c:184
+msgid "Unset on Server"
+msgstr "ಪೂರೈಕೆಗಣಕದಲ್ಲಿ ರದ್ದುಗೊಳಿಸು"
+
+#: ../src/configuration/e-ews-ooo-notificator.c:185
+#| msgid "Retrieving \"Out of Office\" settings"
+msgid "Unset the \"Out of Office\" status"
+msgstr "\"ಕಛೇರಿಯಿಂದ ಹೊರಕ್ಕೆ\" ಸ್ಥಿತಿಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗುತ್ತದೆ"
+
 #: ../src/configuration/e-ews-search-user.c:208
 #, c-format
 msgid "No users found, only one contact"
@@ -657,11 +749,14 @@ msgid "_Search:"
 msgstr "ಹುಡುಕು (_S):"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
-#: ../src/server/e-ews-folder.c:632
+#: ../src/server/e-ews-folder.c:669
 #, c-format
 msgid "Cannot add folder, folder already exists as '%s'"
 msgstr "ಪತ್ರಕೋಶವನ್ನು ಸೇರಿಸಲಾಗಿಲ್ಲ: '%s' ಪತ್ರಕೋಶವು ಈಗಾಗಲೆ ಇದೆ"
 
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. * Example result: "Mailbox - John Smith"
+#.
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:107
 #, c-format
 msgctxt "ForeignFolder"
@@ -690,19 +785,26 @@ msgid ""
 "permission to access it."
 msgstr ""
 "'%s' ಪತ್ರಕೋಶವು ಕಂಡುಬಂದಿಲ್ಲ. ಒಂದೋ ಇದು ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ ಅಥವ ಅದನ್ನು "
-"ನಿಲುಕಿಸಿಕೊಳ್ಳಲು ನಿಮಗೆ ಅನುಮತಿ ಇಲ್ಲ."
+"ನಿಲುಕಿಸಿಕೊಳ್ಳಲು "
+"ನಿಮಗೆ ಅನುಮತಿ ಇಲ್ಲ."
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:373
 msgid "Cannot add folder, cannot determine folder's type"
 msgstr ""
 "ಪತ್ರಕೋಶವನ್ನು ಸೇರಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ, ಪತ್ರಕೋಶದ ಬಗೆಯನ್ನು ನಿರ್ಧರಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
 
+#. Translators: This is used to name foreign folder.
+#. * The first '%s' is replaced with user name to whom the folder belongs,
+#. * the second '%s' is replaced with folder name.
+#. * Example result: "John Smith - Calendar"
+#.
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:418
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s - %s"
 msgstr "%s - %s"
 
+#. convert well-known names to their non-localized form
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:512
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:720
 msgid "Inbox"
@@ -733,7 +835,8 @@ msgstr "ಕಾರ್ಯಗಳು"
 msgid "Testing availability of folder '%s' of user '%s', please wait..."
 msgstr ""
 "'%s' ಪತ್ರಕೋಶವು '%s' ಬಳಕೆದಾರರಿಗೆ ಪರೀಕ್ಷಿಸಲು ಲಭ್ಯವಿರುವ ಕುರಿತು "
-"ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ, ನಿರೀಕ್ಷಿಸಿ..."
+"ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ, "
+"ನಿರೀಕ್ಷಿಸಿ..."
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:614
 msgid "Subscribe to folder of other EWS user..."
@@ -759,11 +862,11 @@ msgstr "ಪತ್ರಕೋಶದ ಹೆಸರು (_F):"
 msgid "Include _subfolders"
 msgstr "ಉಪಪತ್ರಕೋಶದಲ್ಲಿ ಸೇರಿಸು (_s)"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:140
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:141
 msgid "Querying Autodiscover service"
 msgstr "ಸ್ವಯಂಪತ್ತೆಯು ಸೇವೆಯನ್ನು ಮನವಿ ಮಾಡಲಾಗುತ್ತಿದೆ"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:231
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:232
 msgid "Fetch _URL"
 msgstr "_URL ಅನ್ನು ಪಡೆದುಕೊ"
 
@@ -795,95 +898,100 @@ msgstr "ಹುಡುಕು (_e)..."
 msgid "Authentication"
 msgstr "ದೃಢೀಕರಣ"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:500
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:489
 msgctxt "PermissionsLevel"
 msgid "Reviewer (can read items)"
 msgstr "ಅವಲೋಕಿಸುವವ (ಅಂಶಗಳನ್ನು ಓದಬಹುದು)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:501
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:490
 msgctxt "PermissionsLevel"
 msgid "Author (can read and create items)"
 msgstr "ಕತೃ (ಅಂಶಗಳನ್ನು ಓದಲು ಮತ್ತು ರಚಿಸಲು ಸಾಧ್ಯ)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:502
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:491
 msgctxt "PermissionsLevel"
 msgid "Editor (can read, create and modify items)"
 msgstr "ಸಂಪಾದಕ (ಅಂಶಗಳನ್ನು ಓದಲು, ರಚಿಸಲು ಮತ್ತು ಸಂಪಾದಿಸಲು ಸಾಧ್ಯ)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:605
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:596
 msgid "Delegate permissions"
 msgstr "ಅನುಮತಿಗಳನ್ನು ಡೆಲಿಗೇಟ್‌ ಮಾಡು"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:623
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:614
 msgid "C_alendar"
 msgstr "ಕ್ಯಾಲೆಂಡರ್ (_a):"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:626
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:617
 msgid "_Delegate receives copies of meeting-related messages sent to me"
 msgstr ""
 "ನನಗೆ ಕಳುಹಿಸಿದ ಮೀಟಿಂಗಿಗೆ ಸಂಬಂಧಿಸಿದ ಸಂದೇಶಗಳ ಪ್ರತಿಗಳು ಡೆಲಿಗೇಟ್‌ಗೆ "
-"ಸ್ವೀಕರಿಸುತ್ತಾರೆ (_D)"
+"ಸ್ವೀಕರಿಸುತ್ತಾರೆ "
+"(_D)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:631
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:622
 msgid "_Tasks"
 msgstr "ಕಾರ್ಯಗಳು (_T)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:634
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:625
 msgid "_Inbox"
 msgstr "ಒಳಪೆಟ್ಟಿಗೆ (_I):"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:637
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:628
 msgid "C_ontacts"
 msgstr "ಸಂಪರ್ಕವಿಳಾಸಗಳು (_o)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:640
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:631
 msgid "_Notes"
 msgstr "ಟಿಪ್ಪಣಿಗಳು (_N)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:643
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:634
 msgid "_Journal"
 msgstr "ಜರ್ನಲ್ (_J)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:646
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:637
 #, c-format
 msgid "Delegate '%s' has the following permissions"
 msgstr "'%s' ಡೆಲಿಗೇಟ್ ಈ ಕೆಳಗಿನ ಅನುಮತಿಗಳನ್ನು ಹೊಂದಿದ್ದಾರೆ"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:664
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:655
 msgid "Delegate can see my _private items"
 msgstr "ಡೆಲಿಗೇಟ್ ನನ್ನ ಖಾಸಗಿ ಅಂಶಗಳನ್ನು ನೋಡಬಹುದು (_p)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:987
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:978
 msgid "Retrieving current user permissions, please wait..."
 msgstr "ಪ್ರಸಕ್ತ ಬಳಕೆದಾರರ ಅನುಮತಿಗಳನ್ನು ಪಡೆಯಲಾಗುತ್ತಿದೆ, ದಯವಿಟ್ಟು ಕಾಯಿರಿ..."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1108
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1638
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1098
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1644
 msgid "Delegates"
 msgstr "ಡೆಲಿಗೇಟ್‌ಗಳು"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1132
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1122
 msgid ""
 "Delegates can send items on your behalf, including creating and responding "
 "to meeting requests. If you want to grant folder permissions without giving "
 "send-on-behalf-of permissions, close this dialog box, right-click the "
 "folder, click Permissions and change the options there."
 msgstr ""
-"ಡೆಲಿಗೇಟ್‌ಗಳು ಮೀಟಿಂಗ್ ಮನವಿಗಳನ್ನು ಸಿದ್ಧಪಡಿಸುವುದು ಮತ್ತು ಪ್ರತಿಕ್ರಿಯಿಸುವುದರ "
-"ಜೊತೆಗೆ ನಿಮ್ಮ ಪರವಾಗಿ ಅಂಶಗಳನ್ನು ಕಳುಹಿಸಲು ಸಾಧ್ಯವಿರುತ್ತದೆ. ನಿಮ್ಮ-ಪರವಾಗಿ-ಕಳುಹಿಸುವ "
-"ಅನುಮತಿಗಳನ್ನು ನೀಡದೆ ನೀವು ಕೇವಲ ಪತ್ರಕೋಶದ ಅನುಮತಿಗಳನ್ನು ಮಾತ್ರ ನೀಡಲು ಬಯಸಿದಲ್ಲಿ, ಈ "
-"ಸಂವಾದಚೌಕವನ್ನು ಮುಚ್ಚಿ, ಪತ್ರಕೋಶದ ಮೇಲೆ ಬಲಕ್ಲಿಕ್ ಮಾಡಿ, ಅನುಮತಿಗಳ ಮೇಲೆ ಕ್ಲಿಕ್ ಮಾಡಿ "
-"ಅಲ್ಲಿ ಆಯ್ಕೆಗಳನ್ನು ಬದಲಾಯಿಸಿ."
+"ಡೆಲಿಗೇಟ್‌ಗಳು ಮೀಟಿಂಗ್ ಮನವಿಗಳನ್ನು ಸಿದ್ಧಪಡಿಸುವುದು ಮತ್ತು ಪ್ರತಿಕ್ರಿಯಿಸುವುದರ ಜೊತೆಗೆ "
+"ನಿಮ್ಮ "
+"ಪರವಾಗಿ ಅಂಶಗಳನ್ನು ಕಳುಹಿಸಲು ಸಾಧ್ಯವಿರುತ್ತದೆ. ನಿಮ್ಮ-ಪರವಾಗಿ-ಕಳುಹಿಸುವ ಅನುಮತಿಗಳನ್ನು "
+"ನೀಡದೆ ನೀವು ಕೇವಲ ಪತ್ರಕೋಶದ ಅನುಮತಿಗಳನ್ನು ಮಾತ್ರ ನೀಡಲು ಬಯಸಿದಲ್ಲಿ, ಈ ಸಂವಾದಚೌಕವನ್ನು "
+"ಮುಚ್ಚಿ, ಪತ್ರಕೋಶದ ಮೇಲೆ ಬಲಕ್ಲಿಕ್ ಮಾಡಿ, ಅನುಮತಿಗಳ ಮೇಲೆ ಕ್ಲಿಕ್ ಮಾಡಿ ಅಲ್ಲಿ "
+"ಆಯ್ಕೆಗಳನ್ನು "
+"ಬದಲಾಯಿಸಿ."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1181
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1171
 msgid ""
 "Deliver meeting requests addressed to me and responses to meeting requests "
 "where I am the organizer to:"
 msgstr ""
 "ನನ್ನನ್ನು ಉದ್ಧೇಶಿಸಿ ಬಂದ ಮೀಟಿಂಗ್ ಮನವಿಗಳನ್ನು ಮತ್ತು ನಾನು ಸಂಘಟಕನಾದ ಮೀಟಿಂಗ್‌ನ "
-"ಮನವಿಗಳ ಪ್ರತಿಕ್ರಿಯೆಗಳನ್ನು ನನಗೆ ಕಳುಹಿಸು:"
+"ಮನವಿಗಳ "
+"ಪ್ರತಿಕ್ರಿಯೆಗಳನ್ನು ನನಗೆ ಕಳುಹಿಸು:"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1190
+#. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1180
 msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
@@ -891,19 +999,34 @@ msgstr ""
 "ನನ್ನ ಡೆಲಿಗೇಟ್‌ಗಳಿಗೆ ಮಾತ್ರ, ಆದರೆ ಮೀಟಿಂಗ್ ಮನವಿಗಳ ಒಂದು ಪ್ರತಿಯನ್ನು ಮತ್ತು \n"
 "ಪ್ರತಿಕ್ರಿಯೆಗಳನ್ನು ನನಗೆ ಕಳುಹಿಸು (ಸಲಹೆ ಮಾಡಲಾಗುತ್ತದೆ)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1197
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1187
 msgid "My d_elegates only"
 msgstr "ನನ್ನ ಡೆಲಿಗೇಟ್‌ಗಳಿಗೆ ಮಾತ್ರ (_e)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1204
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1194
 msgid "My delegates a_nd me"
 msgstr "ನನ್ನ ಡೆಲಿಗೇಟ್‌ಗಳು ಮತ್ತು ನಾನು (_n)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1713
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1728
 msgid "Retrieving \"Delegates\" settings"
 msgstr "\"ಡೆಲಿಗೇಟ್‌ಗಳ\" ಸಿದ್ಧತೆಗಳನ್ನು ಮರಳಿ ಪಡೆಯಲಾಗುತ್ತಿದೆ"
 
-#: ../src/configuration/e-mail-config-ews-gal.c:221
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:195
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:257
+msgid "EWS Settings"
+msgstr "EWS ಸಿದ್ಧತೆಗಳು"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:202
+msgid "View the size of all Exchange folders"
+msgstr "ಎಕ್ಸ್‌ಚೇಂಜ್ ಪತ್ರಕೋಶಗಳ ಗಾತ್ರವನ್ನು ನೋಡು"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:206
+#| msgctxt "Permissions"
+#| msgid "Folder visible"
+msgid "Folder _Sizes"
+msgstr "ಪತ್ರಕೋಶದ ಗಾತ್ರಗಳು (_S)"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:222
 msgid "Locating offline address books"
 msgstr "ಆಫ್‌ಲೈನ್ ವಿಳಾಸ ಪುಸ್ತಕಗಳನ್ನು ಪತ್ತೆ ಮಾಡಲಾಗುತ್ತಿದೆ"
 
@@ -919,12 +1042,12 @@ msgstr "ವಿಳಾಸ ಪಟ್ಟಿಯನ್ನು ಆರಿಸು (_d): "
 msgid "Fetch List"
 msgstr "ಪಟ್ಟಿ ಪಡೆದುಕೊ"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:444
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:923
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:432
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:930
 msgid "Out of Office"
 msgstr "ಕಛೇರಿಯಿಂದ ಹೊರಕ್ಕೆ"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:460
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:448
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
@@ -932,56 +1055,56 @@ msgstr ""
 "ನಿಮಗೆ ಮೈಲ್ ಕಳುಹಿಸುವ ಪ್ರತಿಯೊಬ್ಬ ಒಳಗಿನ ಮತ್ತು ಹೊರಗಿನ ವ್ಯಕ್ತಿಗೂ ಕೆಳಗೆ ಸೂಚಿಸಲಾದ "
 "ಸಂದೇಶವನ್ನು ತಾನಾಗಿಯೆ ಕಳುಹಿಸಲಾಗುತ್ತದೆ."
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:468
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:456
 msgid "Do _not send Out of Office replies"
 msgstr "ಕಛೇರಿಯಿಂದ ಹೊರಕ್ಕೆ ಸಂದೇಶವನ್ನು ಕಳುಹಿಸಬೇಡ (_n)"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:476
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:464
 msgid "_Send Out of Office replies"
 msgstr "ಕಛೇರಿಯಿಂದ ಹೊರಕ್ಕೆ ಸಂದೇಶವನ್ನು ಕಳುಹಿಸು (_S)"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:484
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:472
 msgid "Send Out of Office replies only _during this time period:"
 msgstr ""
 "ಕೇವಲ ಈ ಅವಧಿಯಲ್ಲಿ ಮಾತ್ರ ಕಛೇರಿಯಿಂದ ಹೊರಕ್ಕೆ ಎನ್ನುವ ಉತ್ತರವನ್ನು ಕಳುಹಿಸು (_d):"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:504
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:492
 msgid "_From:"
 msgstr "ಇಂದ (_F):"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:529
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:517
 msgid "_To:"
 msgstr "ಗೆ (_T):"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:554
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:542
 msgid "I_nternal:"
 msgstr "ಆಂತರಿಕ (_n):"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:563
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:551
 msgid "Message to be sent within the organization"
 msgstr "ಸಂಸ್ಥೆಯ ಒಳಗೆಯೆ ಕಳುಹಿಸಲಾಗುವ ಸಂದೇಶ"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:590
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:579
 msgid "E_xternal:"
 msgstr "ಹೊರಗಿನ (_x):"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:598
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:587
 msgid "Message to be sent outside the organization"
 msgstr "ಸಂಸ್ಥೆಯ ಹೊರಗೆ ಕಳುಹಿಸಲಾಗುವ ಸಂದೇಶ"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:608
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:597
 msgid "Do not reply to senders outside the organization"
 msgstr "ಸಂಸ್ಥೆಯ ಹೊರಗಿನ ಗೊತ್ತಿರದ ಕಳುಹಿಸುವವರಿಗೆ ಉತ್ತರಿಸಬೇಡ"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:611
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:600
 msgid "Reply only to known senders outside the organization"
 msgstr "ಸಂಸ್ಥೆಯ ಹೊರಗಿನ ಗೊತ್ತಿರದ ಕಳುಹಿಸುವವರಿಗೆ ಮಾತ್ರ ಉತ್ತರಿಸು"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:614
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:603
 msgid "Reply to any sender outside the organization"
 msgstr "ಸಂಸ್ಥೆಯ ಹೊರಗಿನ ಯಾವುದೆ ಕಳುಹಿಸುವವರಿಗೆ ಉತ್ತರಿಸು"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:999
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:1014
 msgid "Retrieving \"Out of Office\" settings"
 msgstr "\"ಕಛೇರಿಯಿಂದ ಹೊರಕ್ಕೆ\" ಸಿದ್ಧತೆಗಳನ್ನು ಮರಳಿ ಪಡೆಯಲಾಗುತ್ತಿದೆ"
 
@@ -1005,80 +1128,89 @@ msgstr "&quot;ಕಛೇರಿಯ ಹೊರಕ್ಕೆ&quot; ಸಿದ್ಧತ�
 msgid "Failed to retrieve &quot;Delegates&quot; settings."
 msgstr "&quot;ಡೆಲಿಗೇಟ್‌ಗಳ&quot; ಸಿದ್ಧತೆಗಳನ್ನು ಮರಳಿ ಪಡೆಯುವಲ್ಲಿ ವಿಫಲಗೊಂಡಿದೆ."
 
-#: ../src/server/e-ews-connection.c:494
+#: ../src/configuration/module-ews-configuration.error.xml.h:6
+msgid "Your Exchange account \"{0}\" has the status set as \"Out of Office\"."
+msgstr ""
+"ನಿಮ್ಮ ಎಕ್ಸ್‌ಚೇಂಜ್ ಖಾತೆ \"{0}\" ಯು ಸ್ಥಿತಿಯನ್ನು \"ಕಛೇರಿಯಿಂದ ಹೊರಕ್ಕೆ\" ಎಂದು "
+"ಹೊಂದಿಸಿದೆ."
+
+#: ../src/server/e-ews-connection.c:741
 msgid "Operation Cancelled"
 msgstr "ಕಾರ್ಯವು ರದ್ದು ಮಾಡಲ್ಪಟ್ಟಿದೆ"
 
-#: ../src/server/e-ews-connection.c:563
+#: ../src/server/e-ews-connection.c:811
 msgid "Authentication failed"
 msgstr "ದೃಢೀಕರಣವು ವಿಫಲಗೊಂಡಿದೆ"
 
-#: ../src/server/e-ews-connection.c:574
+#: ../src/server/e-ews-connection.c:822
 #, c-format
 msgid "No response: %s"
 msgstr "ಯಾವುದೆ ಪ್ರತಿಕ್ರಿಯೆ ಇಲ್ಲ: %s"
 
-#: ../src/server/e-ews-connection.c:1912
+#: ../src/server/e-ews-connection.c:2576
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "ಸ್ವಯಂಪತ್ತೆ ಪ್ರತಿಕ್ರಿಯೆ XML ಅನ್ನು ಪಾರ್ಸ್ ಮಾಡುವಲ್ಲಿ ವಿಫಲಗೊಂಡಿದೆ"
 
-#: ../src/server/e-ews-connection.c:1919
+#: ../src/server/e-ews-connection.c:2583
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "<Autodiscover> ಪತ್ತೆ ಮಾಡುವಲ್ಲಿ ವಿಫಲಗೊಂಡಿದೆ"
 
-#: ../src/server/e-ews-connection.c:1930
+#: ../src/server/e-ews-connection.c:2594
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "<Response> ಪತ್ತೆ ಮಾಡುವಲ್ಲಿ ವಿಫಲಗೊಂಡಿದೆ"
 
-#: ../src/server/e-ews-connection.c:1941
+#: ../src/server/e-ews-connection.c:2605
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "<Account> ಪತ್ತೆ ಮಾಡುವಲ್ಲಿ ವಿಫಲಗೊಂಡಿದೆ"
 
-#: ../src/server/e-ews-connection.c:1960
+#: ../src/server/e-ews-connection.c:2630
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
 "<ASUrl> ಮತ್ತು <OABUrl> ಅನ್ನು ಸ್ವಯಂಪತ್ತೆ ಪ್ರತಿಕ್ರಿಯೆಯಲ್ಲಿ ಪತ್ತೆಮಾಡಲು "
 "ವಿಫಲಗೊಂಡಿದೆ"
 
-#: ../src/server/e-ews-connection.c:2042
+#: ../src/server/e-ews-connection.c:2720
 msgid "URL cannot be NULL"
 msgstr "URL, NULL ಆಗಿರುವಂತಿಲ್ಲ"
 
-#: ../src/server/e-ews-connection.c:2050
+#: ../src/server/e-ews-connection.c:2728
 #, c-format
 msgid "URL '%s' is not valid"
 msgstr "URL '%s' ಮಾನ್ಯವಾದುದಾಗಿಲ್ಲ"
 
-#: ../src/server/e-ews-connection.c:2152
+#: ../src/server/e-ews-connection.c:2820
 msgid "Email address is missing a domain part"
 msgstr "ವಿಅಂಚೆ ವಿಳಾಸದಲ್ಲಿ ಡೊಮೇನ್ ಭಾಗವು ಕಾಣಿಸುತ್ತಿಲ್ಲ"
 
-#: ../src/server/e-ews-connection.c:2479
+#: ../src/server/e-ews-connection.c:3142
 msgid "Failed to parse oab XML"
 msgstr "oab XML ಅನ್ನು ಪಾರ್ಸ್ ಮಾಡುವಲ್ಲಿ ವಿಫಲಗೊಂಡಿದೆ"
 
-#: ../src/server/e-ews-connection.c:2487
+#: ../src/server/e-ews-connection.c:3150
 msgid "Failed to find <OAB> element\n"
 msgstr "<OAB> ಘಟಕವನ್ನು ಪತ್ತೆ ಮಾಡುವಲ್ಲಿ ವಿಫಲಗೊಂಡಿದೆ\n"
 
-#: ../src/server/e-ews-connection.c:3673
+#: ../src/server/e-ews-connection.c:4404
 msgid "No items found"
 msgstr "ಯಾವುದೇ ಅಂಶ ಪತ್ತೆಯಾಗಿಲ್ಲ"
 
-#: ../src/server/e-ews-folder.c:587
+#: ../src/server/e-ews-folder.c:624
 msgid "Cannot add folder, unsupported folder type"
 msgstr "ಪತ್ರಕೋಶವನ್ನು ಸೇರಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ, ಪತ್ರಕೋಶದ ಬಗೆಗೆ ಬೆಂಬಲವಿಲ್ಲ"
 
-#: ../src/server/e-ews-folder.c:592
+#: ../src/server/e-ews-folder.c:629
 msgid "Cannot add folder, master source not found"
 msgstr "ಪತ್ರಕೋಶವನ್ನು ಸೇರಿಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ: ಮಾಸ್ಟರ್ ಆಕರವು ಕಂಡುಬಂದಿಲ್ಲ"
 
-#: ../src/utils/ews-camel-common.c:221
+#: ../src/utils/ews-camel-common.c:361
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "CreateItem ಕರೆಯು ಹೊಸ ಸಂದೇಶಕ್ಕಾಗಿ ID ಯನ್ನು ಮರಳಿಸಲು ವಿಫಲಗೊಂಡಿದೆ"
+
+#~ msgid "Query for authentication types is not supported"
+#~ msgstr "ದೃಢೀಕರಣದ ಬಗೆಗಾಗಿ ಮನವಿಗೆ ಬೆಂಬಲವಿಲ್ಲ"
