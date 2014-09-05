@@ -95,6 +95,7 @@ struct _EBookBackendEwsPrivate {
 	gboolean listen_notifications;
 
 	guint rev_counter;
+	gchar *locale;
 };
 
 /* using this for backward compatibility with E_DATA_BOOK_MODE */
@@ -3547,6 +3548,13 @@ book_backend_ews_initable_init (GInitable *initable,
 		return FALSE;
 	}
 
+	if (!e_book_sqlite_get_locale (priv->summary, &priv->locale, error)) {
+		convert_error_to_edb_error (error);
+                g_object_unref (priv->summary);
+                priv->summary = NULL;
+		return FALSE;
+	}
+
 	priv->marked_for_offline = FALSE;
 	priv->is_writable = FALSE;
 
@@ -4126,6 +4134,9 @@ e_book_backend_ews_dispose (GObject *object)
 		priv->summary = NULL;
 	}
 
+	g_free (priv->locale);
+	priv->locale = NULL;
+
 	G_OBJECT_CLASS (e_book_backend_ews_parent_class)->dispose (object);
 }
 
@@ -4206,6 +4217,45 @@ book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 	return result;
 }
 
+static gboolean
+e_book_backend_ews_set_locale (EBookBackend *backend,
+			       const gchar *locale,
+			       GCancellable *cancellable,
+			       GError **error)
+{
+	EBookBackendEws *ebews = E_BOOK_BACKEND_EWS (backend);
+	gboolean success;
+
+	PRIV_LOCK (ebews->priv);
+
+	success = e_book_sqlite_set_locale (ebews->priv->summary, locale,
+					    cancellable, error);
+	if (success) {
+		g_free (ebews->priv->locale);
+		ebews->priv->locale = g_strdup (locale);
+	}
+
+	PRIV_UNLOCK (ebews->priv);
+
+	ebews_bump_revision (ebews, error);
+
+	return success;
+}
+
+static gchar *
+e_book_backend_ews_dup_locale (EBookBackend *backend)
+{
+	EBookBackendEws *ebews = E_BOOK_BACKEND_EWS (backend);
+	EBookBackendEwsPrivate *priv = ebews->priv;
+	gchar *locale;
+
+	PRIV_LOCK (ebews->priv);
+	locale = g_strdup (priv->locale);
+	PRIV_UNLOCK (ebews->priv);
+
+	return locale;
+}
+
 static void
 e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 {
@@ -4230,6 +4280,8 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 	parent_class->get_contact_list        = e_book_backend_ews_get_contact_list;
 	parent_class->start_view              = e_book_backend_ews_start_view;
 	parent_class->stop_view               = e_book_backend_ews_stop_view;
+	parent_class->set_locale              = e_book_backend_ews_set_locale;
+	parent_class->dup_locale              = e_book_backend_ews_dup_locale;
 
 	backend_class->get_destination_address = e_book_backend_ews_get_destination_address;
 
