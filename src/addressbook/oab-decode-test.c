@@ -14,7 +14,7 @@
 struct _db_data {
 	GSList *contact_collector;
 	guint collected_length;
-	EBookBackendSqliteDB *summary;
+	EBookSqlite *summary;
 	const gchar *folderid;
 };
 
@@ -32,7 +32,8 @@ ews_test_store_contact (EContact *contact,
 
 	if (data->collected_length == 1000 || percent >= 100) {
 		data->contact_collector = g_slist_reverse (data->contact_collector);
-		e_book_backend_sqlitedb_add_contacts (data->summary, data->folderid, data->contact_collector, FALSE, error);
+		e_book_sqlite_add_contacts (data->summary, data->contact_collector, NULL,
+					    FALSE, NULL, error);
 		g_print ("percent complete %d \n", percent);
 
 		g_slist_foreach (data->contact_collector, (GFunc) g_object_unref, NULL);
@@ -46,7 +47,7 @@ gint
 main (gint argc,
       gchar *argv[])
 {
-	EBookBackendSqliteDB *summary;
+	EBookSqlite *summary;
 	EwsOabDecoder *eod;
 	GError *err = NULL;
 	GTimer *timer;
@@ -59,8 +60,16 @@ main (gint argc,
 		return -1;
 	}
 
-	summary = e_book_backend_sqlitedb_new (argv[2], "dum", "de", "dum", TRUE, NULL);
+	summary = e_book_sqlite_new (argv[2], NULL, NULL, &err);
+	if (err) {
+		printf("err: %s\n", err->message);
+		exit(1);
+	}
 	eod = ews_oab_decoder_new (argv[1], argv[2], &err);
+	if (err) {
+		printf("err: %s\n", err->message);
+		exit(1);
+	}
 
 	data.contact_collector = NULL;
 	data.collected_length = 0;
