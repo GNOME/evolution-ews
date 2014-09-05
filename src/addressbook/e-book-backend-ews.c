@@ -1742,7 +1742,7 @@ e_book_backend_ews_modify_contacts (EBookBackend *backend,
                                     GCancellable *cancellable,
                                     const GSList *vcards)
 {
-	EContact *contact = NULL, *old_contact;
+	EContact *contact = NULL, *old_contact = NULL;
 	EwsModifyContact *modify_contact;
 	EBookBackendEws *ebews;
 	EwsId *id;
