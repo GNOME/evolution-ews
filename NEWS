@@ -1,3 +1,10 @@
+Evolution-EWS 3.12.6 2014-09-08
+-------------------------------
+
+Bug Fixes:
+	Bug 735799 - Workaround crash for messages with no item ID (Milan Crha)
+	Bug 735801 - Use-after-free in e_book_backend_ews_dispose() after resume (Milan Crha)
+
 Evolution-EWS 3.12.5 2014-08-11
 -------------------------------
 
