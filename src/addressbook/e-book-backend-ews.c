@@ -3275,10 +3275,10 @@ ebews_start_refreshing (EBookBackendEws *ebews)
 
 static void
 fetch_from_offline (EBookBackendEws *ews,
-                    EDataBookView *book_view,
-                    const gchar *query,
+		    EDataBookView *book_view,
+		    const gchar *query,
 		    GCancellable *cancellable,
-                    GError *error)
+		    GError **error)
 {
 	GSList *contacts = NULL, *l;
 	EBookBackendEwsPrivate *priv;
@@ -3286,15 +3286,12 @@ fetch_from_offline (EBookBackendEws *ews,
 	priv = ews->priv;
 
 	/* GAL with folder_id means offline GAL */
-	if (priv->is_gal && !priv->folder_id && !g_strcmp0 (query, "(contains \"x-evolution-any-field\" \"\")")) {
-		e_data_book_view_notify_complete (book_view, error);
-		g_object_unref (book_view);
+	if (priv->is_gal && !priv->folder_id && !g_strcmp0 (query, "(contains \"x-evolution-any-field\" \"\")"))
 		return;
-	}
 
 	g_return_if_fail (priv->summary != NULL);
 
-	e_book_sqlite_search (priv->summary, query, FALSE, &contacts, cancellable, &error);
+	e_book_sqlite_search (priv->summary, query, FALSE, &contacts, cancellable, error);
 	for (l = contacts; l != NULL; l = g_slist_next (l)) {
 		EbSqlSearchData *s_data = (EbSqlSearchData *) l->data;
 
@@ -3305,8 +3302,6 @@ fetch_from_offline (EBookBackendEws *ews,
 
 	if (contacts)
 		g_slist_free (contacts);
-	e_data_book_view_notify_complete (book_view, error);
-	g_object_unref (book_view);
 }
 
 static void
@@ -3340,34 +3335,30 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 	g_object_ref (book_view);
 	e_data_book_view_notify_progress (book_view, -1, _("Searching..."));
 
+	PRIV_LOCK (priv);
+	cancellable = g_cancellable_new ();
+	g_hash_table_insert (priv->ops, book_view, cancellable);
+	PRIV_UNLOCK (priv);
+
 	if (!e_backend_get_online (E_BACKEND (backend))) {
 		if (priv->summary)
 			e_book_sqlite_get_key_value_int (priv->summary, E_BOOK_SQL_IS_POPULATED_KEY, &is_populated, NULL);
 		if (is_populated) {
-			fetch_from_offline (ebews, book_view, query, /*XXX*/NULL, error);
-			return;
+			fetch_from_offline (ebews, book_view, query, cancellable, &error);
+			goto out;
 		}
 
 		error = EDB_ERROR (OFFLINE_UNAVAILABLE);
-		e_data_book_view_notify_complete (book_view, error);
-		g_object_unref (book_view);
-		g_error_free (error);
-		return;
+		goto out;
 	}
 
 	if (priv->cnc == NULL) {
-		/* XXX Why doesn't start_view()
-		 *     get passed a GCancellable? */
 		e_backend_authenticate_sync (
 			E_BACKEND (backend),
 			E_SOURCE_AUTHENTICATOR (backend),
-			NULL, &error);
-		if (error != NULL) {
-			e_data_book_view_notify_complete (book_view, error);
-			g_object_unref (book_view);
-			g_error_free (error);
-			return;
-		}
+			cancellable, &error);
+		if (error != NULL)
+			goto out;
 	}
 
 	g_return_if_fail (priv->cnc != NULL);
@@ -3377,22 +3368,18 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 	if (priv->summary)
 		e_book_sqlite_get_key_value_int (priv->summary, E_BOOK_SQL_IS_POPULATED_KEY, &is_populated, NULL);
 	if (is_populated) {
-		fetch_from_offline (ebews, book_view, query, /*XXX*/NULL, error);
-		return;
+		fetch_from_offline (ebews, book_view, query, cancellable, &error);
+		goto out;
 	}
 
 	e_book_backend_ews_build_restriction (query, &is_autocompletion, &auto_comp_str);
 	if (!is_autocompletion || !auto_comp_str) {
 		g_free (auto_comp_str);
-		e_data_book_view_notify_complete (book_view, error);
-		g_object_unref (book_view);
-		return;
+		goto out;
 	}
 
 	extension_name = E_SOURCE_EXTENSION_EWS_FOLDER;
 	extension = e_source_get_extension (source, extension_name);
-
-	cancellable = g_cancellable_new ();
 
 	/* FIXME Need to convert the Ids from EwsLegacyId format to EwsId format using
 	 * convert_id operation before using it as the schema has changed between Exchange
@@ -3404,13 +3391,11 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 	/* We do not scan until we reach the last_item as it might be good enough to show first 100
 	 * items during auto-completion. Change it if needed. TODO, Personal Address-book should start using
 	 * find_items rather than resolve_names to support all queries */
-	g_hash_table_insert (priv->ops, book_view, cancellable);
 	e_ews_connection_resolve_names_sync (
 		priv->cnc, EWS_PRIORITY_MEDIUM, auto_comp_str,
 		EWS_SEARCH_AD, NULL, TRUE, &mailboxes, &contacts,
 		&includes_last_item, cancellable, &error);
 	g_free (auto_comp_str);
-	g_hash_table_remove (priv->ops, book_view);
 	e_ews_folder_id_free (fid);
 	if (error != NULL) {
 		e_data_book_view_notify_complete (book_view, error);
@@ -3462,7 +3447,13 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 
 	g_slist_free (mailboxes);
 	g_slist_free (contacts);
+ out:
 	e_data_book_view_notify_complete (book_view, error);
+	g_clear_error (&error);
+	PRIV_LOCK (priv);
+	g_hash_table_remove (priv->ops, book_view);
+	PRIV_UNLOCK (priv);
+	g_object_unref (cancellable);
 	g_object_unref (book_view);
 }
 
@@ -3474,11 +3465,11 @@ e_book_backend_ews_stop_view (EBookBackend *backend,
 	EBookBackendEwsPrivate *priv = bews->priv;
 	GCancellable *cancellable;
 
+	PRIV_LOCK (priv);
 	cancellable = g_hash_table_lookup (priv->ops, book_view);
-	if (cancellable) {
+	if (cancellable)
 		g_cancellable_cancel (cancellable);
-		g_hash_table_remove (priv->ops, book_view);
-	}
+	PRIV_UNLOCK (priv);
 }
 
 static gboolean
@@ -4066,6 +4057,9 @@ e_book_backend_ews_dispose (GObject *object)
 
 		g_clear_object (&priv->cnc);
 	}
+
+	if (priv->ops)
+		g_hash_table_destroy (priv->ops);
 
 	g_free (priv->folder_id);
 	priv->folder_id = NULL;
