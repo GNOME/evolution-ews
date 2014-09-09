@@ -2764,9 +2764,9 @@ exit:
  * @deleted_items: 
  * @error: cannot be NULL 
  **/
-static void
+static gboolean
 ebews_sync_deleted_items (EBookBackendEws *ebews,
-                          GSList *deleted_ids,
+                          GSList **deleted_ids,
 			  GCancellable *cancellable,
                           GError **error)
 {
@@ -2775,18 +2775,47 @@ ebews_sync_deleted_items (EBookBackendEws *ebews,
 
 	priv = ebews->priv;
 
-	g_return_if_fail (priv->summary != NULL);
-
-	for (l = deleted_ids; l != NULL; l = g_slist_next (l)) {
+	for (l = *deleted_ids; l != NULL; l = g_slist_next (l)) {
 		gchar *id = (gchar *) l->data;
 		gboolean exists = FALSE;
 
-		if (e_book_sqlite_has_contact (priv->summary, id, &exists, NULL) && exists)
-			e_book_sqlite_remove_contact (priv->summary, id, cancellable, error);
-		e_book_backend_notify_remove (E_BOOK_BACKEND (ebews), id);
+		if (e_book_sqlite_has_contact (priv->summary, id, &exists, NULL) && exists) {
+
+			if (e_book_sqlite_remove_contact (priv->summary, id, cancellable, error))
+				e_book_backend_notify_remove (E_BOOK_BACKEND (ebews), id);
+			else
+				return FALSE;
+		}
 	}
 
-	g_slist_free_full (deleted_ids, g_free);
+	g_slist_free_full (*deleted_ids, g_free);
+	*deleted_ids = NULL;
+
+	return TRUE;
+}
+
+static gboolean
+ebews_sync_modified_items (EBookBackendEws *ebews, GSList **contacts,
+			   GCancellable *cancellable, GError **error)
+{
+	GSList *l;
+	EBookBackendEwsPrivate *priv;
+
+	priv = ebews->priv;
+
+	for (l = *contacts; l != NULL; l = g_slist_next (l)) {
+		EContact *contact = E_CONTACT (l->data);
+
+		if (e_book_sqlite_add_contact (priv->summary, contact, NULL, TRUE, cancellable, error))
+			e_book_backend_notify_update (E_BOOK_BACKEND (ebews), contact);
+		else
+			return FALSE;
+	}
+
+	g_slist_free_full (*contacts, g_object_unref);
+	*contacts = NULL;
+
+	return TRUE;
 }
 
 static EContact *
@@ -3051,6 +3080,7 @@ ebews_fetch_items (EBookBackendEws *ebews,
 	gboolean ret = FALSE;
 
 	if (!book_backend_ews_ensure_connected (ebews, cancellable, error)) {
+		g_slist_free_full (items, g_object_unref);
 		return ret;
 	}
 
@@ -3766,14 +3796,16 @@ ews_update_items_thread (gpointer data)
 	gchar *sync_state = NULL;
 	GError *error = NULL;
 	gboolean includes_last_item;
+	GSList *items_created = NULL;
+	GSList *items_updated = NULL;
+	GSList *items_deleted = NULL;
+	GSList *contacts_created = NULL;
+	GSList *contacts_updated = NULL;
 
 	priv = ebews->priv;
 
 	e_book_sqlite_get_key_value (priv->summary, E_BOOK_SQL_SYNC_DATA_KEY, &sync_state, NULL);
 	do {
-		GSList *items_created = NULL;
-		GSList *items_updated = NULL;
-		GSList *items_deleted = NULL;
 		gchar *old_sync_state = sync_state;
 
 		sync_state = NULL;
@@ -3828,53 +3860,62 @@ ews_update_items_thread (gpointer data)
 			}
 		}
 
-		if (items_deleted) {
-			ebews_sync_deleted_items (
-					ebews,
-					items_deleted, /* freed inside the function */
-					priv->cancellable,
-					&error);
-			if (error != NULL) {
-				g_slist_free_full (items_created, g_object_unref);
-				g_slist_free_full (items_updated, g_object_unref);
-				break;
-			}
-		}
-
 		if (items_created) {
 			ebews_fetch_items (
 					ebews,
-					items_created, /* freed insite the function */
-					TRUE,
-					NULL,
+					items_created, /* freed inside the function */
+					FALSE,
+					&contacts_created,
 					priv->cancellable,
 					&error);
-			if (error != NULL) {
-				g_slist_free_full (items_updated, g_object_unref);
+			items_created = NULL;
+			if (error != NULL)
 				break;
-			};
 		}
 
 		if (items_updated) {
 			ebews_fetch_items (
 					ebews,
 					items_updated, /* freed inside the function */
-					TRUE,
-					NULL,
+					FALSE,
+					&contacts_updated,
 					priv->cancellable,
 					&error);
+			items_updated = NULL;
 			if (error != NULL)
 				break;
 		}
 
-		e_book_sqlite_set_key_value (priv->summary, E_BOOK_SQL_SYNC_DATA_KEY, sync_state, &error);
-		if (error != NULL)
+		/* Network traffic is done, and database access starts here */
+		if (items_deleted &&
+		    !ebews_sync_deleted_items (ebews, &items_deleted, priv->cancellable, &error))
 			break;
-		ebews_bump_revision (ebews, &error);
+
+		if (contacts_created &&
+		    !ebews_sync_modified_items (ebews, &contacts_created, priv->cancellable, &error))
+			break;
+
+		if (contacts_updated &&
+		    !ebews_sync_modified_items (ebews, &contacts_updated, priv->cancellable, &error))
+			break;
+
+		if (!e_book_sqlite_set_key_value (priv->summary, E_BOOK_SQL_SYNC_DATA_KEY, sync_state, &error))
+			break;
+
+		if (includes_last_item &&
+		    !e_book_sqlite_set_key_value_int (priv->summary, E_BOOK_SQL_IS_POPULATED_KEY, TRUE, &error))
+			break;
+
+		if (!ebews_bump_revision (ebews, &error))
+			break;
+
 	} while (!includes_last_item);
 
-	if (error == NULL)
-		e_book_sqlite_set_key_value_int (priv->summary, E_BOOK_SQL_IS_POPULATED_KEY, TRUE, &error);
+	g_slist_free_full (items_created, g_object_unref);
+	g_slist_free_full (items_updated, g_object_unref);
+	g_slist_free_full (items_deleted, g_object_unref);
+	g_slist_free_full (contacts_created, g_object_unref);
+	g_slist_free_full (contacts_updated, g_object_unref);
 
 	if (error != NULL) {
 		g_warning ("%s: %s", G_STRFUNC, error->message);
