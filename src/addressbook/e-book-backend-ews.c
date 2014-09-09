@@ -3103,30 +3103,6 @@ cleanup:
 	return ret;
 }
 
-static void
-ebews_forget_all_contacts (EBookBackendEws *ebews)
-{
-	EBookBackend *backend;
-	GSList *ids = NULL;
-
-	g_return_if_fail (E_IS_BOOK_BACKEND_EWS (ebews));
-
-	backend = E_BOOK_BACKEND (ebews);
-	g_return_if_fail (backend != NULL);
-
-	e_book_sqlite_search_uids (ebews->priv->summary, NULL, &ids, ebews->priv->cancellable, NULL);
-	if (ids) {
-		GSList *id;
-
-		e_book_sqlite_remove_contacts (ebews->priv->summary, ids, ebews->priv->cancellable, NULL);
-		for (id = ids; id; id = id->next) {
-			e_book_backend_notify_remove (backend, id->data);
-		}
-
-		g_slist_free_full (ids, g_free);
-	}
-}
-
 static gboolean
 ebews_start_sync (gpointer data)
 {
@@ -3723,6 +3699,7 @@ ews_update_items_thread (gpointer data)
 	GSList *items_created = NULL;
 	GSList *items_updated = NULL;
 	GSList *items_deleted = NULL;
+	GSList *items_deleted_resync = NULL;
 	GSList *contacts_created = NULL;
 	GSList *contacts_updated = NULL;
 
@@ -3756,32 +3733,20 @@ ews_update_items_thread (gpointer data)
 		if (error != NULL) {
 			if (g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_INVALIDSYNCSTATEDATA)) {
 				g_clear_error (&error);
-				e_book_sqlite_set_key_value (priv->summary, E_BOOK_SQL_SYNC_DATA_KEY, NULL, &error);
-				if (error != NULL)
-					break;
-				ebews_bump_revision (ebews, &error);
 
-				ebews_forget_all_contacts (ebews);
+				if (!e_book_sqlite_search_uids (priv->summary, NULL, &items_deleted_resync,
+								priv->cancellable, &error))
+					break;
 
-				if (!e_ews_connection_sync_folder_items_sync (
-						priv->cnc,
-						EWS_PRIORITY_MEDIUM,
-						NULL,
-						priv->folder_id,
-						"IdOnly",
-						NULL,
-						EWS_MAX_FETCH_COUNT,
-						&sync_state,
-						&includes_last_item,
-						&items_created,
-						&items_updated,
-						&items_deleted,
-						priv->cancellable,
-						&error))
-					break;
-			} else {
-					break;
+				/* This should be the case anyway, but make sure */
+				sync_state = NULL;
+
+				/* Ensure we go round the loop again */
+				includes_last_item = FALSE;
+				continue;
 			}
+			/* Other error */
+			break;
 		}
 
 		if (items_created) {
@@ -3809,6 +3774,10 @@ ews_update_items_thread (gpointer data)
 		}
 
 		/* Network traffic is done, and database access starts here */
+		if (items_deleted_resync &&
+		    !ebews_sync_deleted_items (ebews, &items_deleted_resync, priv->cancellable, &error))
+			break;
+
 		if (items_deleted &&
 		    !ebews_sync_deleted_items (ebews, &items_deleted, priv->cancellable, &error))
 			break;
@@ -3836,6 +3805,7 @@ ews_update_items_thread (gpointer data)
 	g_slist_free_full (items_created, g_object_unref);
 	g_slist_free_full (items_updated, g_object_unref);
 	g_slist_free_full (items_deleted, g_object_unref);
+	g_slist_free_full (items_deleted_resync, g_object_unref);
 	g_slist_free_full (contacts_created, g_object_unref);
 	g_slist_free_full (contacts_updated, g_object_unref);
 
