@@ -1899,7 +1899,7 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
                                      const gchar *query)
 {
 	GSList *vcard_list = NULL;
-	GSList *list, *l;
+	GSList *list = NULL, *l;
 	GError *error = NULL;
 	EBookBackendEws *ebews;
 	EBookBackendEwsPrivate *priv;
@@ -1977,7 +1977,22 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 			cancellable, &error);
 
 		/*we have got Id for items lets fetch them using getitem operation*/
-		ebews_fetch_items (ebews, items, FALSE, &vcard_list, cancellable, &error);
+		ebews_fetch_items (ebews, items, FALSE, &list, cancellable, &error);
+
+		while (list) {
+			gchar *vcard_string;
+
+			l = list;
+			list = list->next;
+
+			vcard_string = e_vcard_to_string (E_VCARD (l->data), EVC_FORMAT_VCARD_30);
+
+			g_object_unref (l->data);
+			g_slist_free_1 (l);
+
+			vcard_list = g_slist_append (vcard_list, vcard_string);
+		}
+
 		convert_error_to_edb_error (&error);
 		e_data_book_respond_get_contact_list (book, opid, error, vcard_list);
 
@@ -2841,18 +2856,15 @@ ebews_store_contact_items (EBookBackendEws *ebews,
 }
 
 static void
-ebews_get_vcards_list (EBookBackendEws *ebews,
-		       GSList *new_items,
-                       GSList **vcards,
-		       GCancellable *cancellable,
-		       GError **error)
+ebews_get_contacts_list (EBookBackendEws *ebews, GSList *new_items,
+			 GSList **contacts, GCancellable *cancellable,
+			 GError **error)
 {
 	GSList *l;
 
 	for (l = new_items; l != NULL; l = g_slist_next (l)) {
 		EContact *contact;
 		EEwsItem *item = l->data;
-		gchar *vcard_string = NULL;
 		EVCardAttribute *attr;
 
 		if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR) {
@@ -2865,11 +2877,9 @@ ebews_get_vcards_list (EBookBackendEws *ebews,
 		attr = e_vcard_attribute_new (NULL, "X-EWS-KIND");
 		e_vcard_add_attribute_with_value (E_VCARD (contact), attr, "DT_MAILUSER");
 
-		vcard_string = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
-		*vcards = g_slist_append (*vcards, g_strdup(vcard_string));
-		g_free (vcard_string);
+		*contacts = g_slist_prepend (*contacts, contact);
+
 		g_object_unref (item);
-		g_object_unref (contact);
 	}
 	g_slist_free (new_items);
 }
@@ -3006,16 +3016,12 @@ ebews_store_distribution_list_items (EBookBackendEws *ebews,
 }
 
 static gboolean
-ebews_vcards_append_dl (EBookBackendEws *ebews,
-			const EwsId *id,
-                        const gchar *d_name,
-                        GSList *members,
-                        GSList **vcards,
-			GError **error)
+ebews_contacts_append_dl (EBookBackendEws *ebews, const EwsId *id,
+			  const gchar *d_name,GSList *members,
+			  GSList **contacts, GError **error)
 {
 	EContact *contact;
 	EVCardAttribute *attr;
-	gchar *vcard_string = NULL;
 
 	contact = ebews_get_dl_info (ebews, id, d_name, members, error);
 	if (contact == NULL)
@@ -3024,11 +3030,7 @@ ebews_vcards_append_dl (EBookBackendEws *ebews,
 	attr = e_vcard_attribute_new (NULL, "X-EWS-KIND");
 	e_vcard_add_attribute_with_value (E_VCARD (contact), attr, "DT_DISTLIST");
 
-	vcard_string = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
-	*vcards = g_slist_append (*vcards, g_strdup(vcard_string));
-
-	g_free (vcard_string);
-	g_object_unref (contact);
+	*contacts = g_slist_prepend (*contacts, contact);
 
 	return TRUE;
 }
@@ -3037,7 +3039,7 @@ static gboolean
 ebews_fetch_items (EBookBackendEws *ebews,
                    GSList *items,
                    gboolean store_to_cache,
-                   GSList **vcards,
+                   GSList **contacts,
                    GCancellable *cancellable,
                    GError **error)
 {
@@ -3093,7 +3095,7 @@ ebews_fetch_items (EBookBackendEws *ebews,
 		if (store_to_cache)
 			ebews_store_contact_items (ebews, new_items, cancellable, error);
 		else
-			ebews_get_vcards_list (ebews, new_items, vcards, cancellable, error);
+			ebews_get_contacts_list (ebews, new_items, contacts, cancellable, error);
 	}
 	new_items = NULL;
 
@@ -3130,7 +3132,7 @@ ebews_fetch_items (EBookBackendEws *ebews,
 		if (store_to_cache)
 			ret = ebews_store_distribution_list_items (ebews, id, d_name, members, cancellable, error);
 		else
-			ret = ebews_vcards_append_dl (ebews, id, d_name, members, vcards, error);
+			ret = ebews_contacts_append_dl (ebews, id, d_name, members, contacts, error);
 
 		g_free (mb);
 		g_slist_free_full (members, (GDestroyNotify) e_ews_mailbox_free);
