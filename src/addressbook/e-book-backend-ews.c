@@ -117,6 +117,7 @@ enum {
  * some additional properties that are not return with Default view */
 #define CONTACT_ITEM_PROPS "item:Attachments item:HasAttachments item:Body contacts:Manager contacts:Department contacts:SpouseName contacts:AssistantName contacts:BusinessHomePage contacts:Birthday"
 
+/* NB: This is locked *outside* the EBookSqlite lock. Never lock it under e_book_sqlite_lock() */
 #define PRIV_LOCK(p)   (g_rec_mutex_lock (&(p)->rec_mutex))
 #define PRIV_UNLOCK(p) (g_rec_mutex_unlock (&(p)->rec_mutex))
 
@@ -211,9 +212,9 @@ static gboolean ebews_bump_revision (EBookBackendEws *ebews, GError **error)
 	gchar *prop_value;
 	time_t t = time (NULL);
 
-	PRIV_LOCK (ebews->priv);
+	/* rev_counter is protected by the EBookSqlite lock. We only ever
+	 * call ebews_bump_revision() under e_book_sqlite_lock() */
 	prop_value = g_strdup_printf ("%ld(%d)", (long) t, ++ebews->priv->rev_counter);
-	PRIV_UNLOCK (ebews->priv);
 
 	ret = e_book_sqlite_set_key_value (ebews->priv->summary, "revision",
 					   prop_value, error);
@@ -1374,8 +1375,14 @@ ews_create_contact_cb (GObject *object,
 
 		e_contact_set (create_contact->contact, E_CONTACT_UID, item_id->id);
 		e_contact_set (create_contact->contact, E_CONTACT_REV, item_id->change_key);
-		e_book_sqlite_add_contact (ebews->priv->summary, create_contact->contact, NULL, TRUE, create_contact->cancellable, &error);
-		ebews_bump_revision (ebews, &error);
+		if (e_book_sqlite_lock (ebews->priv->summary, EBSQL_LOCK_WRITE, create_contact->cancellable, &error)) {
+			if (e_book_sqlite_add_contact (ebews->priv->summary, create_contact->contact, NULL,
+						       TRUE, create_contact->cancellable, &error) &&
+			    ebews_bump_revision (ebews, &error))
+				e_book_sqlite_unlock (ebews->priv->summary, EBSQL_UNLOCK_COMMIT, &error);
+			else
+				e_book_sqlite_unlock (ebews->priv->summary, EBSQL_UNLOCK_ROLLBACK, &error);
+		}
 		if (error == NULL) {
 			GSList *contacts;
 
@@ -1526,18 +1533,21 @@ ews_book_remove_contact_cb (GObject *object,
 	EBookBackendEwsPrivate *priv = ebews->priv;
 	GSimpleAsyncResult *simple;
 	GError *error = NULL;
-	gboolean deleted = FALSE;
 
 	simple = G_SIMPLE_ASYNC_RESULT (res);
 
 	g_return_if_fail (priv->summary != NULL);
 
-	if (!g_simple_async_result_propagate_error (simple, &error)) {
-		deleted = e_book_sqlite_remove_contacts (priv->summary, remove_contact->sl_ids, remove_contact->cancellable, &error);
-		ebews_bump_revision (ebews, &error);
+	if (!g_simple_async_result_propagate_error (simple, &error) &&
+	    e_book_sqlite_lock (priv->summary, EBSQL_LOCK_WRITE, remove_contact->cancellable, &error)) {
+		if (e_book_sqlite_remove_contacts (priv->summary, remove_contact->sl_ids, remove_contact->cancellable, &error) &&
+		    ebews_bump_revision (ebews, &error))
+			e_book_sqlite_unlock (priv->summary, EBSQL_UNLOCK_COMMIT, &error);
+		else
+			e_book_sqlite_unlock (priv->summary, EBSQL_UNLOCK_ROLLBACK, NULL);
 	}
 
-	if (deleted)
+	if (error == NULL)
 		e_data_book_respond_remove_contacts (remove_contact->book, remove_contact->opid, EDB_ERROR (SUCCESS),  remove_contact->sl_ids);
 	else {
 		e_data_book_respond_remove_contacts (remove_contact->book, remove_contact->opid, EDB_ERROR_EX (OTHER_ERROR, error->message), NULL);
@@ -1655,13 +1665,15 @@ ews_modify_contact_cb (GObject *object,
 
 		id = e_contact_get (modify_contact->old_contact, E_CONTACT_UID);
 
-		e_book_sqlite_remove_contact (ebews->priv->summary, id, modify_contact->cancellable, &error);
-		e_book_sqlite_add_contact (
-				ebews->priv->summary,
-				modify_contact->new_contact, NULL,
-				TRUE, modify_contact->cancellable,
-				&error);
-		ebews_bump_revision (ebews, &error);
+		if (e_book_sqlite_lock (ebews->priv->summary, EBSQL_LOCK_WRITE, modify_contact->cancellable, &error)) {
+			if (e_book_sqlite_remove_contact (ebews->priv->summary, id, modify_contact->cancellable, &error) &&
+			    e_book_sqlite_add_contact (ebews->priv->summary, modify_contact->new_contact, NULL,
+						       TRUE, modify_contact->cancellable, &error) &&
+			    ebews_bump_revision (ebews, &error))
+				e_book_sqlite_unlock (ebews->priv->summary, EBSQL_UNLOCK_COMMIT, &error);
+			else
+				e_book_sqlite_unlock (ebews->priv->summary, EBSQL_UNLOCK_ROLLBACK, NULL);
+		}
 
 		if (error == NULL) {
 			GSList *new_contacts;
@@ -1838,8 +1850,14 @@ e_book_backend_ews_modify_contacts (EBookBackend *backend,
 	id->id = e_contact_get (contact, E_CONTACT_UID);
 	id->change_key = e_contact_get (contact, E_CONTACT_REV);
 
-	if (!e_book_sqlite_get_contact (priv->summary, id->id, TRUE, &old_contact, &error)) {
+	if (e_book_sqlite_lock (priv->summary, EBSQL_LOCK_READ, cancellable, &error)) {
+		e_book_sqlite_get_contact (priv->summary, id->id, TRUE, &old_contact, &error);
+		e_book_sqlite_unlock (priv->summary, EBSQL_UNLOCK_NONE, error ? NULL : &error);
+	}
+
+	if (!old_contact) {
 		g_object_unref (contact);
+		g_clear_error (&error); // Shouldn't we be using this? NOT_SUPPORTED seems wrong
 		e_data_book_respond_modify_contacts (book, opid, EDB_ERROR (NOT_SUPPORTED), NULL);
 		return;
 	}
@@ -1915,7 +1933,10 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 
 	if (!e_backend_get_online (E_BACKEND (backend))) {
 		if (populated) {
-			if (e_book_sqlite_search (priv->summary, query, FALSE, &list, cancellable, &error)) {
+		search_db:
+			if (e_book_sqlite_lock (priv->summary, EBSQL_LOCK_READ, cancellable, &error)) {
+				e_book_sqlite_search (priv->summary, query, FALSE, &list, cancellable, &error);
+
 				l = list;
 				while (l) {
 					EbSqlSearchData *s_data = (EbSqlSearchData *) l->data;
@@ -1924,6 +1945,7 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 					e_book_sqlite_search_data_free (s_data);
 					l = l->next;
 				}
+				e_book_sqlite_unlock (priv->summary, EBSQL_UNLOCK_NONE, NULL);
 			}
 			convert_error_to_edb_error (&error);
 			e_data_book_respond_get_contact_list (book, opid, error, vcard_list);
@@ -1943,23 +1965,7 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 	}
 
 	if (populated) {
-		if (e_book_sqlite_search (priv->summary, query, FALSE, &list, cancellable, &error)) {
-			l = list;
-			while (l) {
-				EbSqlSearchData *s_data = (EbSqlSearchData *) l->data;
-
-				vcard_list = g_slist_append (vcard_list, g_strdup (s_data->vcard));
-				e_book_sqlite_search_data_free (s_data);
-				l = l->next;
-			}
-		}
-
-		convert_error_to_edb_error (&error);
-		e_data_book_respond_get_contact_list (book, opid, error, vcard_list);
-
-		g_slist_free (list);
-		g_slist_free_full (vcard_list, g_free);
-		return;
+		goto search_db;
 
 	} else if (!priv->marked_for_offline) {
 		GSList *items = NULL;
@@ -2451,12 +2457,17 @@ ews_gal_store_contact (EContact *contact,
 
 		data->contact_collector = g_slist_reverse (data->contact_collector);
 		data->sha1_collector = g_slist_reverse (data->sha1_collector);
-		e_book_sqlite_add_contacts (priv->summary, data->contact_collector, data->sha1_collector,
-					    TRUE, data->cancellable, error);
-		ebews_bump_revision (data->cbews, error);
-
-		for (l = data->contact_collector; l != NULL; l = g_slist_next (l))
-			e_book_backend_notify_update (E_BOOK_BACKEND (data->cbews), E_CONTACT (l->data));
+		if (e_book_sqlite_lock (priv->summary, EBSQL_LOCK_WRITE, data->cancellable, error)) {
+			if (e_book_sqlite_add_contacts (priv->summary, data->contact_collector, data->sha1_collector,
+						    TRUE, data->cancellable, error) &&
+			    ebews_bump_revision (data->cbews, error)) {
+				if (e_book_sqlite_unlock (priv->summary, EBSQL_UNLOCK_COMMIT, error)) {
+					for (l = data->contact_collector; l != NULL; l = g_slist_next (l))
+						e_book_backend_notify_update (E_BOOK_BACKEND (data->cbews), E_CONTACT (l->data));
+				}
+			} else
+				e_book_sqlite_unlock (priv->summary, EBSQL_UNLOCK_ROLLBACK, NULL);
+		}
 
 		g_slist_free_full (data->contact_collector, g_object_unref);
 		g_slist_free_full (data->sha1_collector, g_free);
@@ -2520,12 +2531,14 @@ ews_replace_gal_in_db (EBookBackendEws *cbews,
 	data.sha1s = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
 	t1 = g_get_monotonic_time ();
-	/* remove the old address-book and create a new one in db */
+
 	e_book_sqlite_get_key_value_int (priv->summary, E_BOOK_SQL_IS_POPULATED_KEY, &populated, NULL);
 	if (populated) {
 		GSList *slist = NULL, *l;
-
-		e_book_sqlite_search (priv->summary, NULL, TRUE, &slist, cancellable, NULL);
+		if (e_book_sqlite_lock (priv->summary, EBSQL_LOCK_READ, cancellable, NULL)) {
+			e_book_sqlite_search (priv->summary, NULL, TRUE, &slist, cancellable, NULL);
+			e_book_sqlite_unlock (priv->summary, EBSQL_UNLOCK_NONE, NULL);
+		}
 
 		while (slist) {
 			EbSqlSearchData *search_data = slist->data;
@@ -2563,10 +2576,18 @@ ews_replace_gal_in_db (EBookBackendEws *cbews,
 	d (g_print ("GAL removing %d contacts\n", g_slist_length (stale_uids)));
 
 	/* Remove attachments. This will be easier once we add cursor support. */
-	if (stale_uids && !e_book_sqlite_remove_contacts (priv->summary, stale_uids, cancellable, error))
+	if (!e_book_sqlite_lock (priv->summary, EBSQL_LOCK_WRITE, cancellable, error))
 		ret = FALSE;
-
-	ebews_bump_revision (cbews, error);
+	else {
+		if ((stale_uids && !e_book_sqlite_remove_contacts (priv->summary, stale_uids, cancellable, error)) ||
+		    !ebews_bump_revision (cbews, error) ||
+		    !e_book_sqlite_set_key_value_int (priv->summary, E_BOOK_SQL_IS_POPULATED_KEY, TRUE, error)) {
+			ret = FALSE;
+			e_book_sqlite_unlock (priv->summary, EBSQL_UNLOCK_ROLLBACK, NULL);
+		} else {
+			ret = e_book_sqlite_unlock (priv->summary, EBSQL_UNLOCK_COMMIT, error);
+		}
+	}
 
 	t2 = g_get_monotonic_time ();
 	d (g_print("GAL update completed %ssuccessfully in %ld µs. Added: %d, Changed: %d, Unchanged %d, Removed: %d\n",
@@ -2579,12 +2600,6 @@ ews_replace_gal_in_db (EBookBackendEws *cbews,
 	/* always notify views as complete, to not left anything behind,
 	   if the decode was cancelled before full completion */
 	e_book_backend_notify_complete (E_BOOK_BACKEND (cbews));
-
-	if (!ret)
-	       return ret;
-
-	/* mark the db as populated */
-	ret = e_book_sqlite_set_key_value_int (priv->summary, E_BOOK_SQL_IS_POPULATED_KEY, TRUE, error);
 
 	return ret;
 }
@@ -3236,7 +3251,7 @@ ebews_start_refreshing (EBookBackendEws *ebews)
 	PRIV_UNLOCK (priv);
 }
 
-static void
+static gboolean
 fetch_from_offline (EBookBackendEws *ews,
 		    EDataBookView *book_view,
 		    const gchar *query,
@@ -3250,11 +3265,13 @@ fetch_from_offline (EBookBackendEws *ews,
 
 	/* GAL with folder_id means offline GAL */
 	if (priv->is_gal && !priv->folder_id && !g_strcmp0 (query, "(contains \"x-evolution-any-field\" \"\")"))
-		return;
+		return TRUE;
 
-	g_return_if_fail (priv->summary != NULL);
+	if (!e_book_sqlite_lock (priv->summary, EBSQL_LOCK_READ, cancellable, error))
+		return FALSE;
 
 	e_book_sqlite_search (priv->summary, query, FALSE, &contacts, cancellable, error);
+	e_book_sqlite_unlock (priv->summary, EBSQL_UNLOCK_NONE, NULL);
 	for (l = contacts; l != NULL; l = g_slist_next (l)) {
 		EbSqlSearchData *s_data = (EbSqlSearchData *) l->data;
 
@@ -3265,6 +3282,8 @@ fetch_from_offline (EBookBackendEws *ews,
 
 	if (contacts)
 		g_slist_free (contacts);
+
+	return TRUE;
 }
 
 static void
@@ -3774,30 +3793,20 @@ ews_update_items_thread (gpointer data)
 		}
 
 		/* Network traffic is done, and database access starts here */
-		if (items_deleted_resync &&
-		    !ebews_sync_deleted_items (ebews, &items_deleted_resync, priv->cancellable, &error))
+		if (!e_book_sqlite_lock (priv->summary, EBSQL_LOCK_WRITE, priv->cancellable, &error))
 			break;
 
-		if (items_deleted &&
-		    !ebews_sync_deleted_items (ebews, &items_deleted, priv->cancellable, &error))
+		if ((items_deleted_resync && !ebews_sync_deleted_items (ebews, &items_deleted_resync, priv->cancellable, &error)) ||
+		    (items_deleted && !ebews_sync_deleted_items (ebews, &items_deleted, priv->cancellable, &error)) ||
+		    (contacts_created && !ebews_sync_modified_items (ebews, &contacts_created, priv->cancellable, &error)) ||
+		    (contacts_updated && !ebews_sync_modified_items (ebews, &contacts_updated, priv->cancellable, &error)) ||
+		    !e_book_sqlite_set_key_value (priv->summary, E_BOOK_SQL_SYNC_DATA_KEY, sync_state, &error) ||
+		    (includes_last_item && !e_book_sqlite_set_key_value_int (priv->summary, E_BOOK_SQL_IS_POPULATED_KEY, TRUE, &error)) ||
+		    !ebews_bump_revision (ebews, &error)) {
+			e_book_sqlite_unlock (priv->summary, EBSQL_UNLOCK_ROLLBACK, NULL);
 			break;
-
-		if (contacts_created &&
-		    !ebews_sync_modified_items (ebews, &contacts_created, priv->cancellable, &error))
-			break;
-
-		if (contacts_updated &&
-		    !ebews_sync_modified_items (ebews, &contacts_updated, priv->cancellable, &error))
-			break;
-
-		if (!e_book_sqlite_set_key_value (priv->summary, E_BOOK_SQL_SYNC_DATA_KEY, sync_state, &error))
-			break;
-
-		if (includes_last_item &&
-		    !e_book_sqlite_set_key_value_int (priv->summary, E_BOOK_SQL_IS_POPULATED_KEY, TRUE, &error))
-			break;
-
-		if (!ebews_bump_revision (ebews, &error))
+		}
+		if (!e_book_sqlite_unlock (priv->summary, EBSQL_UNLOCK_COMMIT, &error))
 			break;
 
 	} while (!includes_last_item);
@@ -4158,20 +4167,25 @@ e_book_backend_ews_set_locale (EBookBackend *backend,
 			       GError **error)
 {
 	EBookBackendEws *ebews = E_BOOK_BACKEND_EWS (backend);
-	gboolean success;
+	gboolean success = FALSE;
 
 	PRIV_LOCK (ebews->priv);
 
-	success = e_book_sqlite_set_locale (ebews->priv->summary, locale,
-					    cancellable, error);
+	if (!e_book_sqlite_lock (ebews->priv->summary, EBSQL_LOCK_WRITE, cancellable, error))
+		return FALSE;
+
+	if (e_book_sqlite_set_locale (ebews->priv->summary, locale, cancellable, error) &&
+	    ebews_bump_revision (ebews, error))
+		success = e_book_sqlite_unlock (ebews->priv->summary, EBSQL_UNLOCK_COMMIT, error);
+	else
+		e_book_sqlite_unlock (ebews->priv->summary, EBSQL_UNLOCK_ROLLBACK, NULL);
+
 	if (success) {
 		g_free (ebews->priv->locale);
 		ebews->priv->locale = g_strdup (locale);
 	}
 
-	PRIV_UNLOCK (ebews->priv);
-
-	ebews_bump_revision (ebews, error);
+	PRIV_LOCK (ebews->priv);
 
 	return success;
 }
