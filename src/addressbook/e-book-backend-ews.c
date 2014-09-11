@@ -103,7 +103,7 @@ enum {
 };
 
 #define EWS_MAX_FETCH_COUNT 500
-#define REFRESH_INTERVAL 600000
+#define REFRESH_INTERVAL 21600
 
 #define ELEMENT_TYPE_SIMPLE 0x01 /* simple string fields */
 #define ELEMENT_TYPE_COMPLEX 0x02 /* complex fields while require different get/set functions */
