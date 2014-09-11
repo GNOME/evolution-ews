@@ -44,7 +44,7 @@ enum {
 	PROP_PUBLIC
 };
 
-G_DEFINE_DYNAMIC_TYPE (
+G_DEFINE_TYPE (
 	ESourceEwsFolder,
 	e_source_ews_folder,
 	E_TYPE_SOURCE_EXTENSION)
@@ -236,11 +236,6 @@ e_source_ews_folder_class_init (ESourceEwsFolderClass *class)
 }
 
 static void
-e_source_ews_folder_class_finalize (ESourceEwsFolderClass *class)
-{
-}
-
-static void
 e_source_ews_folder_init (ESourceEwsFolder *extension)
 {
 	extension->priv = E_SOURCE_EWS_FOLDER_GET_PRIVATE (extension);
@@ -250,10 +245,9 @@ e_source_ews_folder_init (ESourceEwsFolder *extension)
 void
 e_source_ews_folder_type_register (GTypeModule *type_module)
 {
-	/* XXX G_DEFINE_DYNAMIC_TYPE declares a static type registration
-	 *     function, so we have to wrap it with a public function in
-	 *     order to register types from a separate compilation unit. */
-	e_source_ews_folder_register_type (type_module);
+	/* We need to ensure this is registered, because it's looked up
+	 * by name in e_source_get_extension(). */
+	g_type_ensure (E_TYPE_SOURCE_EWS_FOLDER);
 }
 
 const gchar *
