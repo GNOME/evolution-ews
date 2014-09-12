@@ -4,9 +4,9 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-09-05 04:41+0000\n"
-"PO-Revision-Date: 2014-09-05 17:41+0530\n"
-"Last-Translator: \n"
+"POT-Creation-Date: 2014-09-12 04:40+0000\n"
+"PO-Revision-Date: 2014-09-12 18:25+0530\n"
+"Last-Translator: Shankar Prasad <svenkate AT redhat Dot com>\n"
 "Language-Team: Kannada <kde-i18n-doc@kde.org>\n"
 "Language: kn\n"
 "MIME-Version: 1.0\n"
@@ -15,47 +15,51 @@ msgstr ""
 "X-Generator: Lokalize 1.5\n"
 "Plural-Forms: nplurals=2; plural=(n!=1)\n"
 
-#: ../src/addressbook/e-book-backend-ews.c:1437
+#: ../src/addressbook/e-book-backend-ews.c:1455
 msgid "The backend does not support bulk additions"
 msgstr "ಹಿನ್ನೆಲೆಯು ಒಟ್ಟು ಪ್ರಮಾಣದಲ್ಲಿ ಸೇರಿಸುವುದಕ್ಕೆ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"
 
-#: ../src/addressbook/e-book-backend-ews.c:1476
-#: ../src/addressbook/e-book-backend-ews.c:1820
+#: ../src/addressbook/e-book-backend-ews.c:1494
+#: ../src/addressbook/e-book-backend-ews.c:1861
 msgid ""
 "Cannot save contact list, it's only supported on EWS Server 2010 or later"
 msgstr ""
 "ಸಂಪರ್ಕದ ಪಟ್ಟಿಯನ್ನು ಉಳಿಸಲಾಗಿಲ್ಲ, ಇದು ಕೇವಲ EWS Server 2010 ಅಥವ ಮುಂದಿನದರಲ್ಲಿ "
-"ಮಾತ್ರ ಬೆಂಬಲಿತವಾಗಿದೆ"
+"ಮಾತ್ರ "
+"ಬೆಂಬಲಿತವಾಗಿದೆ"
 
-#: ../src/addressbook/e-book-backend-ews.c:1779
+#: ../src/addressbook/e-book-backend-ews.c:1820
 msgid "The backend does not support bulk modifications"
 msgstr "ಹಿನ್ನೆಲೆಯು ಒಟ್ಟು ಪ್ರಮಾಣದಲ್ಲಿ  ಮಾರ್ಪಡಿಸುವುದಕ್ಕೆ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"
 
-#: ../src/addressbook/e-book-backend-ews.c:1979
+#: ../src/addressbook/e-book-backend-ews.c:2032
 msgid "Wait till syncing is done"
 msgstr "ಸಿಂಕ್ ಮಾಡುವಿಕೆಯು ಪೂರ್ಣಗೊಳ್ಳುವವರೆಗೆ ಕಾಯಿ"
 
-#: ../src/addressbook/e-book-backend-ews.c:2393
+#: ../src/addressbook/e-book-backend-ews.c:2511
 #, c-format
-msgid "Downloading contacts in %s %d%% completed... "
-msgstr "ಸಂಪರ್ಕಗಳನ್ನು %s %d%% ಗೆ ಇಳಿಸಿಕೊಳ್ಳುವುದು ಪೂರ್ಣಗೊಂಡಿದೆ... "
+#| msgid "Downloading contacts in %s %d%% completed... "
+msgid "Processing contacts in %s %d%% completed... "
+msgstr "%s %d%% ನಲ್ಲಿ ಸಂಪರ್ಕಗಳನ್ನು ಸಂಸ್ಕರಿಸುವುದು ಪೂರ್ಣಗೊಂಡಿದೆ..."
 
-#: ../src/addressbook/e-book-backend-ews.c:3088
+#: ../src/addressbook/e-book-backend-ews.c:3118
 msgid "Syncing contacts..."
 msgstr "ಸಂಪರ್ಕವಿಳಾಸಗಳನ್ನು ಹೊಂದಾಣಿಕೆ ಮಾಡಲಾಗುತ್ತಿದೆ..."
 
-#: ../src/addressbook/e-book-backend-ews.c:3263
+#: ../src/addressbook/e-book-backend-ews.c:3294
 #: ../src/configuration/e-ews-search-user.c:365
 msgid "Searching..."
 msgstr "ಹುಡುಕಲಾಗುತ್ತಿದೆ..."
+
+#: ../src/addressbook/e-book-backend-ews.c:4269
+msgid "Requested to delete an unrelated cursor"
+msgstr "ಸಂಬಂಧಿಸದೆ ಇರುವ ತೆರೆಸೂಚಕವನ್ನು ಅಳಿಸಲು ಮನವಿ ಮಾಡಲಾಗಿದೆ"
 
 #: ../src/calendar/e-cal-backend-ews.c:1257
 msgid "EWS does not support bulk removals"
 msgstr "EWS ಒಟ್ಟು ಪ್ರಮಾಣದಲ್ಲಿ ತೆಗೆದುಹಾಕುವುದಕ್ಕೆ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"
 
 #: ../src/calendar/e-cal-backend-ews.c:1433
-#| msgctxt "User"
-#| msgid "Unknown"
 msgid "Unknown error"
 msgstr "ಗೊತ್ತಿರದ ದೋಷ"
 
@@ -196,9 +200,6 @@ msgid "Kerberos"
 msgstr "Kerberos"
 
 #: ../src/camel/camel-ews-provider.c:116
-#| msgid ""
-#| "This option will connect to the Exchange server using a plaintext "
-#| "password with Basic authentication."
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -224,7 +225,6 @@ msgid "%s_%d"
 msgstr "%s_%d"
 
 #: ../src/camel/camel-ews-store.c:639
-#| msgid "Retrieving \"Out of Office\" settings"
 msgid "Checking \"Out of Office\" settings"
 msgstr "\"ಕಛೇರಿಯಿಂದ ಹೊರಕ್ಕೆ\" ಸಿದ್ಧತೆಗಳನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ"
 
@@ -359,7 +359,6 @@ msgid "You must be working online to complete this operation"
 msgstr "ಈ ಕಾರ್ಯವನ್ನು ಪೂರ್ಣಗೊಳಿಸಲು ನೀವು ಆನ್‌ಲೈನ್‌ನಲ್ಲಿ ಕೆಲಸ ಮಾಡುತ್ತಿರಬೇಕು"
 
 #: ../src/camel/camel-ews-store.c:3490
-#| msgid "Retrieving \"Out of Office\" settings"
 msgid "Unsetting the \"Out of Office\" status"
 msgstr "\"ಕಛೇರಿಯಿಂದ ಹೊರಕ್ಕೆ\" ಸ್ಥಿತಿಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗುತ್ತದೆ"
 
@@ -416,7 +415,6 @@ msgstr ""
 "ಪ್ರತಿನಿಧಿಸುವುದಿಲ್ಲ"
 
 #: ../src/configuration/e-ews-config-utils.c:579
-#| msgid "Folder ID:"
 msgid "Folder"
 msgstr "ಪತ್ರಕೋಶ"
 
@@ -430,8 +428,6 @@ msgid "Unable to retrieve folder size information"
 msgstr "ಪತ್ರಕೋಶದ ಗಾತ್ರದ ಮಾಹಿತಿಯನ್ನು ಹಿಂಪಡೆಯಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ"
 
 #: ../src/configuration/e-ews-config-utils.c:752
-#| msgctxt "Permissions"
-#| msgid "Folder visible"
 msgid "Folder Sizes"
 msgstr "ಪತ್ರಕೋಶದ ಗಾತ್ರಗಳು"
 
@@ -450,8 +446,6 @@ msgstr ""
 "'%s' ಪತ್ರಕೋಶ ಅನುಮತಿಗಳನ್ನು ಸಂಪಾದಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ, ಇತರೆ ಪತ್ರಕೋಶವನ್ನು ಆರಿಸಿ."
 
 #: ../src/configuration/e-ews-config-utils.c:999
-#| msgctxt "Permissions"
-#| msgid "Folder visible"
 msgid "Folder Sizes..."
 msgstr "ಪತ್ರಕೋಶದ ಗಾತ್ರಗಳು..."
 
@@ -698,7 +692,6 @@ msgid "Unset on Server"
 msgstr "ಪೂರೈಕೆಗಣಕದಲ್ಲಿ ರದ್ದುಗೊಳಿಸು"
 
 #: ../src/configuration/e-ews-ooo-notificator.c:185
-#| msgid "Retrieving \"Out of Office\" settings"
 msgid "Unset the \"Out of Office\" status"
 msgstr "\"ಕಛೇರಿಯಿಂದ ಹೊರಕ್ಕೆ\" ಸ್ಥಿತಿಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗುತ್ತದೆ"
 
@@ -1021,8 +1014,6 @@ msgid "View the size of all Exchange folders"
 msgstr "ಎಕ್ಸ್‌ಚೇಂಜ್ ಪತ್ರಕೋಶಗಳ ಗಾತ್ರವನ್ನು ನೋಡು"
 
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:206
-#| msgctxt "Permissions"
-#| msgid "Folder visible"
 msgid "Folder _Sizes"
 msgstr "ಪತ್ರಕೋಶದ ಗಾತ್ರಗಳು (_S)"
 
