@@ -2489,7 +2489,8 @@ ews_replace_gal_in_db (EBookBackendEws *cbews,
 			g_slist_free_1 (l);
 
 			g_hash_table_insert (data.uids, search_data->uid, search_data->extra);
-			g_hash_table_insert (data.sha1s, search_data->extra, search_data->uid);
+			if (search_data->extra)
+				g_hash_table_insert (data.sha1s, search_data->extra, search_data->uid);
 
 			/* We steal these */
 			search_data->extra = search_data->uid = NULL;
