@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-07 02:12+0200\n"
-"PO-Revision-Date: 2014-09-07 02:14+0200\n"
+"POT-Creation-Date: 2014-09-14 22:30+0200\n"
+"PO-Revision-Date: 2014-09-14 22:31+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -23,39 +23,43 @@ msgstr ""
 "X-Poedit-Language: Polish\n"
 "X-Poedit-Country: Poland\n"
 
-#: ../src/addressbook/e-book-backend-ews.c:1413
+#: ../src/addressbook/e-book-backend-ews.c:1455
 msgid "The backend does not support bulk additions"
 msgstr "Mechanizm nie obsługuje dodawania całości"
 
-#: ../src/addressbook/e-book-backend-ews.c:1452
-#: ../src/addressbook/e-book-backend-ews.c:1798
+#: ../src/addressbook/e-book-backend-ews.c:1494
+#: ../src/addressbook/e-book-backend-ews.c:1861
 msgid ""
 "Cannot save contact list, it's only supported on EWS Server 2010 or later"
 msgstr ""
 "Nie można zapisać listy kontaktów, jest to obsługiwane tylko w EWS Server "
 "2010 lub późniejszym"
 
-#: ../src/addressbook/e-book-backend-ews.c:1757
+#: ../src/addressbook/e-book-backend-ews.c:1820
 msgid "The backend does not support bulk modifications"
 msgstr "Mechanizm nie obsługuje modyfikacji całości"
 
-#: ../src/addressbook/e-book-backend-ews.c:1960
+#: ../src/addressbook/e-book-backend-ews.c:2032
 msgid "Wait till syncing is done"
 msgstr "Oczekiwanie na ukończenie synchronizacji"
 
-#: ../src/addressbook/e-book-backend-ews.c:2431
+#: ../src/addressbook/e-book-backend-ews.c:2511
 #, c-format
 msgid "Processing contacts in %s %d%% completed... "
 msgstr "Przetwarzanie kontaktów w %s %d%% ukończono... "
 
-#: ../src/addressbook/e-book-backend-ews.c:3164
+#: ../src/addressbook/e-book-backend-ews.c:3118
 msgid "Syncing contacts..."
 msgstr "Synchronizowanie kontaktów..."
 
-#: ../src/addressbook/e-book-backend-ews.c:3341
+#: ../src/addressbook/e-book-backend-ews.c:3294
 #: ../src/configuration/e-ews-search-user.c:365
 msgid "Searching..."
 msgstr "Wyszukiwanie..."
+
+#: ../src/addressbook/e-book-backend-ews.c:4269
+msgid "Requested to delete an unrelated cursor"
+msgstr "Zażądano usunięcia niepowiązanego kursora"
 
 #: ../src/calendar/e-cal-backend-ews.c:1257
 msgid "EWS does not support bulk removals"
