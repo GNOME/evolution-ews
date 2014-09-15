@@ -3,16 +3,16 @@
 # This file is distributed under the same license as the evolution-ews package.
 #
 # Shantha <shantha.thamizh@gmail.com>, 2013.
-# Shantha kumar <shkumar@redhat.com>, 2013.
+# Shantha kumar <shkumar@redhat.com>, 2013, 2014.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2013-11-12 11:07+0000\n"
-"PO-Revision-Date: 2013-11-20 16:04+0630\n"
+"POT-Creation-Date: 2014-09-15 04:39+0000\n"
+"PO-Revision-Date: 2014-09-15 16:54+0630\n"
 "Last-Translator: Shantha kumar <shkumar@redhat.com>\n"
-"Language-Team: Tamil <ta@li.org>\n"
+"Language-Team: Tamil <kde-i18n-doc@kde.org>\n"
 "Language: ta\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -20,12 +20,12 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.5\n"
 
-#: ../src/addressbook/e-book-backend-ews.c:1426
+#: ../src/addressbook/e-book-backend-ews.c:1455
 msgid "The backend does not support bulk additions"
 msgstr "பின்புல முறைமையானது மொத்த சேர்க்கைகளை ஆதரிக்காது"
 
-#: ../src/addressbook/e-book-backend-ews.c:1465
-#: ../src/addressbook/e-book-backend-ews.c:1809
+#: ../src/addressbook/e-book-backend-ews.c:1494
+#: ../src/addressbook/e-book-backend-ews.c:1861
 msgid ""
 "Cannot save contact list, it's only supported on EWS Server 2010 or later"
 msgstr ""
@@ -33,80 +33,90 @@ msgstr ""
 "பதிப்புகளில் "
 "மட்டுமே இவ்வசதிக்கு ஆதரவுண்டு"
 
-#: ../src/addressbook/e-book-backend-ews.c:1768
+#: ../src/addressbook/e-book-backend-ews.c:1820
 msgid "The backend does not support bulk modifications"
 msgstr "மொத்தமாக மாற்றம் செய்தலை பின்புல அமைப்பு ஆதரிக்காது"
 
-#: ../src/addressbook/e-book-backend-ews.c:1968
+#: ../src/addressbook/e-book-backend-ews.c:2032
 msgid "Wait till syncing is done"
 msgstr "ஒத்திசைவு முடியும் வரை காத்திருக்கவும்"
 
-#: ../src/addressbook/e-book-backend-ews.c:2382
+#: ../src/addressbook/e-book-backend-ews.c:2511
 #, c-format
-msgid "Downloading contacts in %s %d%% completed... "
-msgstr "%s %d%% இல் இருந்து தொடர்புகளை இறக்குமதி செய்தல் முடிவடைந்தது... "
+#| msgid "Downloading contacts in %s %d%% completed... "
+msgid "Processing contacts in %s %d%% completed... "
+msgstr "%s %d%% இல் தொடர்புகளை செயலாக்கம் செய்தல் முடிவடைந்தது..."
 
-#: ../src/addressbook/e-book-backend-ews.c:3068
+#: ../src/addressbook/e-book-backend-ews.c:3119
 msgid "Syncing contacts..."
 msgstr "தொடர்புகளை ஒத்திசைக்கிறது..."
 
-#: ../src/addressbook/e-book-backend-ews.c:3243
+#: ../src/addressbook/e-book-backend-ews.c:3295
 #: ../src/configuration/e-ews-search-user.c:365
 msgid "Searching..."
 msgstr "தேடுகிறது..."
 
-#: ../src/calendar/e-cal-backend-ews.c:1211
+#: ../src/addressbook/e-book-backend-ews.c:4270
+msgid "Requested to delete an unrelated cursor"
+msgstr "தொடர்பில்லாத ஒரு சுட்டியை அழிக்கக் கோரப்பட்டது"
+
+#: ../src/calendar/e-cal-backend-ews.c:1257
 msgid "EWS does not support bulk removals"
 msgstr "மொத்தமாக நீக்குதலை EWS ஆதரிக்காது"
 
-#: ../src/calendar/e-cal-backend-ews.c:1714
+#: ../src/calendar/e-cal-backend-ews.c:1433
 msgid "Unknown error"
 msgstr "தெரியாத பிழை"
 
-#: ../src/calendar/e-cal-backend-ews.c:1915
+#: ../src/calendar/e-cal-backend-ews.c:1648
 msgid "EWS does not support bulk additions"
 msgstr "மொத்தமாக சேர்த்தலை EWS ஆதரிக்காது"
 
-#: ../src/calendar/e-cal-backend-ews.c:2537
+#: ../src/calendar/e-cal-backend-ews.c:1853
 msgid "EWS does not support bulk modifications"
 msgstr "மொத்தமாக மாற்றம் செய்தலை EWS ஆதரிக்காது"
 
-#: ../src/camel/camel-ews-folder.c:280
+#: ../src/calendar/e-cal-backend-ews.c:2279
+#, c-format
+msgid "Cannot find user '%s' between attendees"
+msgstr "பங்கேற்பாளர்களில் '%s' என்ற பயனரைக் கண்டுபிடிக்க முடியவில்லை"
+
+#: ../src/camel/camel-ews-folder.c:379
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "mimecontent தற்காலிகக் கோப்பைத் திறக்க முடியவில்லை!"
 
-#: ../src/camel/camel-ews-folder.c:288
+#: ../src/camel/camel-ews-folder.c:387
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "mimecontent இலிருந்து பாகுபடுத்தியை உருவாக்க முடியவில்லை!"
 
-#: ../src/camel/camel-ews-folder.c:297
+#: ../src/camel/camel-ews-folder.c:396
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "கூட்டக் கோரிக்கை mimecontent ஐ பாகுபடுத்த முடியவில்லை!"
 
-#: ../src/camel/camel-ews-folder.c:356
+#: ../src/camel/camel-ews-folder.c:455
 #, c-format
 msgid "Unable to create cache file"
 msgstr "தேக்ககக் கோப்பினை உருவாக்க முடியவில்லை"
 
-#: ../src/camel/camel-ews-folder.c:457 ../src/camel/camel-ews-folder.c:539
+#: ../src/camel/camel-ews-folder.c:559 ../src/camel/camel-ews-folder.c:650
 #, c-format
 msgid "Unable to create cache path"
 msgstr "தேக்ககப் பாதையை உருவாக்க முடியவில்லை"
 
-#: ../src/camel/camel-ews-folder.c:549
+#: ../src/camel/camel-ews-folder.c:660
 #, c-format
 msgid "Failed to move message cache file"
 msgstr "செய்திகள் தேக்ககக் கோப்பை நகர்த்துவதில் தோல்வியடைந்தது"
 
-#: ../src/camel/camel-ews-folder.c:1178
+#: ../src/camel/camel-ews-folder.c:1364
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "%s க்கான சுருக்கத்தை ஏற்ற முடியவில்லை"
 
-#: ../src/camel/camel-ews-folder.c:1614
+#: ../src/camel/camel-ews-folder.c:1868
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr ""
@@ -196,70 +206,63 @@ msgid "Kerberos"
 msgstr "Kerberos"
 
 #: ../src/camel/camel-ews-provider.c:116
-#| msgid ""
-#| "This option will connect to the Exchange server using a plaintext "
-#| "password with Basic authentication."
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
 msgstr ""
 "இந்த விருப்பம் Kerberos/GSSAPI அங்கீகரிப்பைப் பயன்படுத்தி Exchange "
-"சேவையகத்துடன் இணைக்கும்."
+"சேவையகத்துடன் "
+"இணைக்கும்."
 
-#: ../src/camel/camel-ews-store.c:303
+#: ../src/camel/camel-ews-store.c:332
 #, c-format
 msgid "Session has no storage path"
 msgstr "அமர்வில் சேமிப்பகப் பாதை இல்லை"
 
-#: ../src/camel/camel-ews-store.c:340
+#: ../src/camel/camel-ews-store.c:369
 #, c-format
 msgctxt "PublicFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:469
+#: ../src/camel/camel-ews-store.c:498
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:610
+#: ../src/camel/camel-ews-store.c:639
 msgid "Checking \"Out of Office\" settings"
 msgstr "\"அலுவலகத்தில் இல்லை\" அமைவுகளை சோதிக்கிறது"
 
-#: ../src/camel/camel-ews-store.c:1394
+#: ../src/camel/camel-ews-store.c:1434
 msgid "Updating foreign folder structure"
 msgstr "வெளிப்புறக் கோப்புறைக் கட்டமைப்பைப் புதுப்பிக்கிறது"
 
-#: ../src/camel/camel-ews-store.c:1854 ../src/camel/camel-ews-store.c:3355
-#, c-format
-msgid "You must be working online to complete this operation"
-msgstr "இந்த செயலை முடிக்க நீங்கள் இணையதொடர்பில் செயல்பட வேண்டும்"
-
-#: ../src/camel/camel-ews-store.c:1954
+#: ../src/camel/camel-ews-store.c:1960
 #, c-format
 msgid "No such folder: %s"
 msgstr "இப்படி ஒரு கோப்புறை இல்லை : %s"
 
-#: ../src/camel/camel-ews-store.c:2266
+#: ../src/camel/camel-ews-store.c:2272
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "ஆஃப்லைன் பயன்முறையில் EWS பொதுக் கோப்புறைகளைப் பட்டியலிட முடியாது"
 
-#: ../src/camel/camel-ews-store.c:2339
+#: ../src/camel/camel-ews-store.c:2345
 msgid "Cannot find any EWS public folders"
 msgstr "EWS பொதுக் கோப்புறைகள் எதையும் கண்டறிய முடியவில்லை"
 
-#: ../src/camel/camel-ews-store.c:2448
+#: ../src/camel/camel-ews-store.c:2454
 #, c-format
 msgid "Cannot create folder '%s', folder already exists"
 msgstr "கோப்புறை '%s' ஐ உருவாக்க முடியாது, கோப்புறை ஏற்கனவே உள்ளது"
 
-#: ../src/camel/camel-ews-store.c:2463
+#: ../src/camel/camel-ews-store.c:2469
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "தாய் கோப்புறை '%s' இல்லை"
 
-#: ../src/camel/camel-ews-store.c:2473
+#: ../src/camel/camel-ews-store.c:2479
 #, c-format
 msgid ""
 "Cannot create folder under '%s', it is used for folders of other users only"
@@ -268,91 +271,96 @@ msgstr ""
 "கோப்புறைகளுக்காக "
 "மட்டுமே பயன்படுத்தப்படுகிறது"
 
-#: ../src/camel/camel-ews-store.c:2483
+#: ../src/camel/camel-ews-store.c:2489
 #, c-format
 msgid "Cannot create folder under '%s', it is used for public folders only"
 msgstr ""
 "'%s' இன் கீழ் கோப்புறையை உருவாக்க முடியாது, அது பொது கோப்புறைகளுக்காக மட்டுமே "
 "பயன்படுத்தப்படுகிறது"
 
-#: ../src/camel/camel-ews-store.c:2552
+#: ../src/camel/camel-ews-store.c:2593
 #, c-format
 msgid "Folder does not exist"
 msgstr "கோப்புறை இல்லை"
 
-#: ../src/camel/camel-ews-store.c:2561
+#: ../src/camel/camel-ews-store.c:2603
 #, c-format
 msgid "Cannot remove folder '%s', it is used for folders of other users only"
 msgstr ""
 "கோப்புறை '%s' ஐ அகற்ற முடியாது, அது மற்ற பயனர்களின் கோப்புறைகளுக்காக மட்டுமே "
 "பயன்படுத்தப்படுகிறது"
 
-#: ../src/camel/camel-ews-store.c:2571
+#: ../src/camel/camel-ews-store.c:2614
 #, c-format
 msgid "Cannot remove folder '%s', it is used for public folders only"
 msgstr ""
 "கோப்புறை '%s' ஐ அகற்ற முடியாது, அது பொது கோப்புறைகளுக்காக மட்டுமே "
 "பயன்படுத்தப்படுகிறது"
 
-#: ../src/camel/camel-ews-store.c:2679
+#: ../src/camel/camel-ews-store.c:2770
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "கோப்புறை %s இல்லை"
 
-#: ../src/camel/camel-ews-store.c:2689
+#: ../src/camel/camel-ews-store.c:2780
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "கோப்புறை %s க்கு மாற்ற விசைப் பதிவு இல்லை"
 
-#: ../src/camel/camel-ews-store.c:2731
+#: ../src/camel/camel-ews-store.c:2822
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "கோப்புறையை ஒரே சமயத்தில் மறுபெயரிடவும் நகர்த்தவும் முடியாது"
 
-#: ../src/camel/camel-ews-store.c:2767
+#: ../src/camel/camel-ews-store.c:2858
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "தாய் கோப்புறை %s க்கான கோப்புறை ID ஐக் கண்டறிய முடியவில்லை"
 
-#: ../src/camel/camel-ews-store.c:2817 ../src/camel/camel-ews-transport.c:69
+#: ../src/camel/camel-ews-store.c:2908 ../src/camel/camel-ews-transport.c:69
 #, c-format
 msgid "Exchange server %s"
 msgstr "Exchange சேவையகம் %s"
 
-#: ../src/camel/camel-ews-store.c:2820
+#: ../src/camel/camel-ews-store.c:2911
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "%s இல் %s க்கான Exchange சேவை"
 
-#: ../src/camel/camel-ews-store.c:2864
+#: ../src/camel/camel-ews-store.c:2955
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "குப்பை கோப்புறையைக் கண்டறிய முடியவில்லை"
 
-#: ../src/camel/camel-ews-store.c:2924
+#: ../src/camel/camel-ews-store.c:3015
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "தேவையற்றவை கோப்புறையைக் கண்டறிய முடியவில்லை"
 
-#: ../src/camel/camel-ews-store.c:3114
+#: ../src/camel/camel-ews-store.c:3205
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "ஆஃப்லைன் பயன்முறையில் EWS கோப்புறைகளுக்கு குழு சேர முடியாது"
 
-#: ../src/camel/camel-ews-store.c:3137
+#: ../src/camel/camel-ews-store.c:3228
 #, c-format
 msgid "Cannot subscribe folder '%s', no public folder available"
 msgstr "கோப்புறை '%s' க்கு குழு சேர முடியாது, பொது கோப்புறை கிடைக்கவில்லை"
 
-#: ../src/camel/camel-ews-store.c:3147
+#: ../src/camel/camel-ews-store.c:3238
 #, c-format
 msgid "Cannot subscribe folder '%s', folder not found"
 msgstr "கோப்புறை '%s' க்கு குழு சேர முடியாது, கோப்புறை காணப்படவில்லை"
 
-#: ../src/camel/camel-ews-store.c:3238
+#: ../src/camel/camel-ews-store.c:3329
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "ஆஃப்லைன் பயன்முறையில் EWS கோப்புறைகளிலிருந்து குழுவிலக முடியாது"
 
-#: ../src/camel/camel-ews-store.c:3399
+#: ../src/camel/camel-ews-store.c:3446
+#, c-format
+msgid "You must be working online to complete this operation"
+msgstr "இந்த செயலை முடிக்க நீங்கள் இணையதொடர்பில் செயல்பட வேண்டும்"
+
+#: ../src/camel/camel-ews-store.c:3490
 msgid "Unsetting the \"Out of Office\" status"
 msgstr "\" அலுவலகத்தில் இல்லை\" நிலையை அகற்றுகிறது"
 
@@ -389,93 +397,93 @@ msgid "Service not connected"
 msgstr "சேவை இணைப்பில் இல்லை"
 
 #: ../src/collection/e-ews-backend.c:422
-#: ../src/configuration/e-mail-config-ews-gal.c:275
+#: ../src/configuration/e-mail-config-ews-gal.c:274
 msgid "Global Address List"
 msgstr "பொதுவான முகவரி பட்டியல்"
 
-#: ../src/collection/e-ews-backend.c:807
+#: ../src/collection/e-ews-backend.c:821
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named '%s'"
 msgstr ""
 "'%s' எனப் பெயரிடப்பட்ட ஒரு புதிய கோப்புறைக்கு பொருத்தமான ஒரு கோப்புறை வகையைத் "
 "தீர்மானிக்க முடியவில்லை"
 
-#: ../src/collection/e-ews-backend.c:896
+#: ../src/collection/e-ews-backend.c:910
 #, c-format
 msgid "Data source '%s' does not represent an Exchange Web Services folder"
 msgstr ""
 "தரவு மூலம் '%s' ஆனது ஒரு Exchange வலை சேவைகள் கோப்புறையைக் குறிப்பிடவில்லை"
 
-#: ../src/configuration/e-ews-config-utils.c:576
+#: ../src/configuration/e-ews-config-utils.c:579
 msgid "Folder"
 msgstr "கோப்புறை"
 
-#: ../src/configuration/e-ews-config-utils.c:586
+#: ../src/configuration/e-ews-config-utils.c:589
 msgid "Size"
 msgstr "அளவு"
 
-#: ../src/configuration/e-ews-config-utils.c:624
-#: ../src/configuration/e-ews-config-utils.c:629
+#: ../src/configuration/e-ews-config-utils.c:627
+#: ../src/configuration/e-ews-config-utils.c:632
 msgid "Unable to retrieve folder size information"
 msgstr "கோப்புறை அளவு தகவலைப் பெற முடியவில்லை"
 
-#: ../src/configuration/e-ews-config-utils.c:753
+#: ../src/configuration/e-ews-config-utils.c:752
 msgid "Folder Sizes"
 msgstr "கோப்புறை அளவுகள்"
 
-#: ../src/configuration/e-ews-config-utils.c:756
+#: ../src/configuration/e-ews-config-utils.c:755
 msgid "_Close"
 msgstr "மூடு (_C)"
 
-#: ../src/configuration/e-ews-config-utils.c:770
+#: ../src/configuration/e-ews-config-utils.c:769
 msgid "Fetching folder list…"
 msgstr "கோப்புறைப் பட்டியலைப் பெறுகிறது..."
 
-#: ../src/configuration/e-ews-config-utils.c:923
+#: ../src/configuration/e-ews-config-utils.c:922
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr ""
 "கோப்புறை '%s' இன் அனுமதிகளைத் திருத்த முடியாது, வேறு கோப்புறையைத் தேர்வு "
 "செய்யவும்."
 
-#: ../src/configuration/e-ews-config-utils.c:1000
+#: ../src/configuration/e-ews-config-utils.c:999
 msgid "Folder Sizes..."
 msgstr "கோப்புறை அளவுகள்..."
 
-#: ../src/configuration/e-ews-config-utils.c:1007
+#: ../src/configuration/e-ews-config-utils.c:1006
 msgid "Subscribe to folder of other user..."
 msgstr "மற்ற பயனரின் கோப்புறைக்கு குழுசேரவும்..."
 
-#: ../src/configuration/e-ews-config-utils.c:1016
-#: ../src/configuration/e-ews-config-utils.c:1298
-#: ../src/configuration/e-ews-config-utils.c:1329
-#: ../src/configuration/e-ews-config-utils.c:1360
-#: ../src/configuration/e-ews-config-utils.c:1391
+#: ../src/configuration/e-ews-config-utils.c:1015
+#: ../src/configuration/e-ews-config-utils.c:1297
+#: ../src/configuration/e-ews-config-utils.c:1328
+#: ../src/configuration/e-ews-config-utils.c:1359
+#: ../src/configuration/e-ews-config-utils.c:1390
 msgid "Permissions..."
 msgstr "அனுமதிகள்..."
 
-#: ../src/configuration/e-ews-config-utils.c:1018
+#: ../src/configuration/e-ews-config-utils.c:1017
 msgid "Edit EWS folder permissions"
 msgstr "EWS கோப்புறை அனுமதிகளைத் திருத்து"
 
-#: ../src/configuration/e-ews-config-utils.c:1300
+#: ../src/configuration/e-ews-config-utils.c:1299
 msgid "Edit EWS calendar permissions"
 msgstr "EWS நாள்காட்டி அனுமதிகளைத் திருத்து"
 
-#: ../src/configuration/e-ews-config-utils.c:1331
+#: ../src/configuration/e-ews-config-utils.c:1330
 msgid "Edit EWS tasks permissions"
 msgstr "EWS பணிகள் அனுமதிகளைத் திருத்து"
 
-#: ../src/configuration/e-ews-config-utils.c:1362
+#: ../src/configuration/e-ews-config-utils.c:1361
 msgid "Edit EWS memos permissions"
 msgstr "EWS குறிப்புகள் அனுமதிகளைத் திருத்து"
 
-#: ../src/configuration/e-ews-config-utils.c:1393
+#: ../src/configuration/e-ews-config-utils.c:1392
 msgid "Edit EWS contacts permissions"
 msgstr "EWS தொடர்புகள் அனுமதிகளைத் திருத்து"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:87
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:487
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:488
 msgctxt "PermissionsLevel"
 msgid "None"
 msgstr "எதுவுமில்லை"
@@ -531,7 +539,7 @@ msgid "Free/Busy time, subject, location"
 msgstr "ஒய்வு/பணிமிகுதி நேரம், பொருள், இடம்"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:143
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:508
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:511
 msgctxt "PermissionsLevel"
 msgid "Custom"
 msgstr "தனிப்பயன்"
@@ -557,7 +565,7 @@ msgstr "தெரியாதது"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:867
 #: ../src/configuration/e-ews-search-user.c:431
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1063
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1066
 msgid "Name"
 msgstr "பெயர்"
 
@@ -735,7 +743,7 @@ msgid "_Search:"
 msgstr "தேடு (_S):"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
-#: ../src/server/e-ews-folder.c:681
+#: ../src/server/e-ews-folder.c:669
 #, c-format
 msgid "Cannot add folder, folder already exists as '%s'"
 msgstr "கோப்புறையைச் சேர்க்க முடியாது, '%s' என கோப்புறை ஏற்கனவே உள்ளது"
@@ -849,11 +857,11 @@ msgstr "கோப்புறைப் பெயர் (_F):"
 msgid "Include _subfolders"
 msgstr "துணைக் கோப்புறைகளையும் சேர் (_s)"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:140
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:141
 msgid "Querying Autodiscover service"
 msgstr "தானியங்கு கண்டறிதல் சேவையை வினவுகிறது"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:231
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:232
 msgid "Fetch _URL"
 msgstr "URL ஐப் பெறு (_U)"
 
@@ -885,74 +893,74 @@ msgstr "தேடு... (_e)"
 msgid "Authentication"
 msgstr "அங்கீகரிப்பு"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:488
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:489
 msgctxt "PermissionsLevel"
 msgid "Reviewer (can read items)"
 msgstr "மதிப்பீட்டாளர் (உருப்படிகளை வாசிக்க முடியும்)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:489
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:490
 msgctxt "PermissionsLevel"
 msgid "Author (can read and create items)"
 msgstr "உருவாக்கியவர் (உருப்படிகளை வாசிக்கவும் உருவாக்கவும் முடியும்)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:490
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:491
 msgctxt "PermissionsLevel"
 msgid "Editor (can read, create and modify items)"
 msgstr "திருத்துபவர் (உருப்படிகளை வாசிக்க, உருவாக்க மாற்றம் செய்ய முடியும்)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:593
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:596
 msgid "Delegate permissions"
 msgstr "பிரதிநிதி அனுமதிகள்"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:611
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:614
 msgid "C_alendar"
 msgstr "நாள்காட்டி (_a)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:614
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:617
 msgid "_Delegate receives copies of meeting-related messages sent to me"
 msgstr ""
 "எனக்கு அனுப்பப்படும் கூட்டம் தொடர்பான செய்திகளின் நகல்கள் பிரதிநிதி பெறுவார் "
 "(_D)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:619
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:622
 msgid "_Tasks"
 msgstr "பணிகள் (_T)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:622
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:625
 msgid "_Inbox"
 msgstr "இன்பாக்ஸ் (_i)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:625
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:628
 msgid "C_ontacts"
 msgstr "தொடர்புகள் (_o)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:628
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:631
 msgid "_Notes"
 msgstr "குறிப்புகள் (_N)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:631
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:634
 msgid "_Journal"
 msgstr "இதழ் (_j)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:634
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:637
 #, c-format
 msgid "Delegate '%s' has the following permissions"
 msgstr "பிரதிநிதி '%s' க்கு பின்வரும் அனுமதிகள் உள்ளன"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:652
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:655
 msgid "Delegate can see my _private items"
 msgstr "பிரதிநிதி என் தனிப்பட்ட உருப்படிகளைக் காணலாம் (_p)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:975
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:978
 msgid "Retrieving current user permissions, please wait..."
 msgstr "நடப்பு பயனர் அனுமதிகளை மீட்டெடுக்கிறது, காத்திருக்கவும்..."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1096
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1629
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1098
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1644
 msgid "Delegates"
 msgstr "பிரதிநிதிகள்"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1120
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1122
 msgid ""
 "Delegates can send items on your behalf, including creating and responding "
 "to meeting requests. If you want to grant folder permissions without giving "
@@ -969,7 +977,7 @@ msgstr ""
 "என்பதைச் "
 "சொடுக்கி, அங்குள்ள விருப்பங்களை மாற்றவும்."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1169
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1171
 msgid ""
 "Deliver meeting requests addressed to me and responses to meeting requests "
 "where I am the organizer to:"
@@ -979,7 +987,7 @@ msgstr ""
 "கூட்டக் கோரிக்கைகளின் பதிலளிப்புகளை எனக்கு அனுப்பவும்:"
 
 #. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1178
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1180
 msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
@@ -988,15 +996,15 @@ msgstr ""
 "மற்றும் பதிலளிப்புகளின் ஒரு நகலை எனக்கும் அனுப்பு (பரிந்துரைக்கப்படுகிறது) "
 "(_s)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1185
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1187
 msgid "My d_elegates only"
 msgstr "எனது பிரதிநிதிகள் மட்டும் (_e)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1192
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1194
 msgid "My delegates a_nd me"
 msgstr "எனது பிரதிநிதிகளும் நானும் (_n)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1710
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1728
 msgid "Retrieving \"Delegates\" settings"
 msgstr "\"பிரதிநிதிகள்\" அமைவுகளை மீட்டெடுக்கிறது"
 
@@ -1017,20 +1025,20 @@ msgstr "கோப்புறை அளவுகள் (_S)"
 msgid "Locating offline address books"
 msgstr " ஆஃப் லைன் முகவரிப் புத்தகங்களைக் கண்டறிகிறது"
 
-#: ../src/configuration/e-mail-config-ews-gal.c:302
+#: ../src/configuration/e-mail-config-ews-gal.c:301
 msgid "Cache o_ffline address book"
 msgstr "ஆஃப்லைன் முகவரிப்புத்தகத்தை தேக்ககப்படுத்து (_f)"
 
-#: ../src/configuration/e-mail-config-ews-gal.c:328
+#: ../src/configuration/e-mail-config-ews-gal.c:327
 msgid "Select ad_dress list:"
 msgstr "முகவரிப் பட்டியலைத் தேர்ந்தெடுக்கவும் (_d)"
 
-#: ../src/configuration/e-mail-config-ews-gal.c:352
+#: ../src/configuration/e-mail-config-ews-gal.c:351
 msgid "Fetch List"
 msgstr "பட்டியலைப் பெறு"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:432
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:914
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:930
 msgid "Out of Office"
 msgstr "அலுவலகத்தில் இல்லை"
 
@@ -1072,30 +1080,30 @@ msgstr "அகத்தமைந்த (_n):"
 msgid "Message to be sent within the organization"
 msgstr "நிறுவனத்துக்கு உள்ளே அனுப்ப வேண்டிய செய்தி"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:578
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:579
 msgid "E_xternal:"
 msgstr "வெளிப்புற: (_x)"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:586
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:587
 msgid "Message to be sent outside the organization"
 msgstr "நிறுவனத்துக்கு வெளியே அனுப்ப வேண்டிய செய்தி"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:596
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:597
 msgid "Do not reply to senders outside the organization"
 msgstr "நிறுவனத்திற்கு வெளியே உள்ள அனுப்புநர்களுக்கு பதிலளிக்க வேண்டாம்"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:599
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:600
 msgid "Reply only to known senders outside the organization"
 msgstr ""
 "நிறுவனத்திற்கு வெளியிலிருப்பவர்களில் தெரிந்த அனுப்புநர்களுக்கு மட்டும் "
 "பதிலளிக்கவும்"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:602
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:603
 msgid "Reply to any sender outside the organization"
 msgstr ""
 "நிறுவனத்திற்கு வெளியிலிருக்கும் அனைத்து அனுப்புநர்களுக்கும் பதிலளிக்கவும்"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:996
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:1014
 msgid "Retrieving \"Out of Office\" settings"
 msgstr "\"அலுவலகத்தில் இல்லை\" அமைவுகளை மீட்டெடுக்கிறது"
 
@@ -1126,40 +1134,40 @@ msgstr ""
 "உங்கள் Exchange கணக்கு \"{0}\" இன் நிலை \"அலுவலகத்தில் இல்லை\" என "
 "அமைக்கப்பட்டுள்ளது."
 
-#: ../src/server/e-ews-connection.c:530
+#: ../src/server/e-ews-connection.c:741
 msgid "Operation Cancelled"
 msgstr "செயல்பாடு ரத்து செய்யப்பட்டது"
 
-#: ../src/server/e-ews-connection.c:600
+#: ../src/server/e-ews-connection.c:811
 msgid "Authentication failed"
 msgstr "அங்கீகரிப்பு தோல்வியடைந்தது"
 
-#: ../src/server/e-ews-connection.c:611
+#: ../src/server/e-ews-connection.c:822
 #, c-format
 msgid "No response: %s"
 msgstr "பதில் இல்லை: %s"
 
-#: ../src/server/e-ews-connection.c:2264
+#: ../src/server/e-ews-connection.c:2576
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "தானியக்கக் கண்டறிதல் பதிலளிப்பு XML ஐ பாகுபடுத்துவதில் தோல்வியடைந்தது"
 
-#: ../src/server/e-ews-connection.c:2271
+#: ../src/server/e-ews-connection.c:2583
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "<Autodiscover> கூறைக் கண்டறிவதில் தோல்வியடைந்தது"
 
-#: ../src/server/e-ews-connection.c:2282
+#: ../src/server/e-ews-connection.c:2594
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "<Response> கூறைக் கண்டறிவதில் தோல்வியடைந்தது"
 
-#: ../src/server/e-ews-connection.c:2293
+#: ../src/server/e-ews-connection.c:2605
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr " <Account> கூறைக் கண்டறிவதில் தோல்வியடைந்தது"
 
-#: ../src/server/e-ews-connection.c:2312
+#: ../src/server/e-ews-connection.c:2630
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
@@ -1167,36 +1175,36 @@ msgstr ""
 "கண்டறிவதில் "
 "தோல்வியடைந்தது"
 
-#: ../src/server/e-ews-connection.c:2395
+#: ../src/server/e-ews-connection.c:2720
 msgid "URL cannot be NULL"
 msgstr "URL காலியாக இருக்கக்கூடாது"
 
-#: ../src/server/e-ews-connection.c:2403
+#: ../src/server/e-ews-connection.c:2728
 #, c-format
 msgid "URL '%s' is not valid"
 msgstr "URL '%s' செல்லுபடியானது"
 
-#: ../src/server/e-ews-connection.c:2504
+#: ../src/server/e-ews-connection.c:2820
 msgid "Email address is missing a domain part"
 msgstr "மின்னஞ்சல் முகவரியில் ஒரு டொமைன் பகுதி விடுபட்டுள்ளது"
 
-#: ../src/server/e-ews-connection.c:2826
+#: ../src/server/e-ews-connection.c:3142
 msgid "Failed to parse oab XML"
 msgstr "oab XML ஐ பாகுபடுத்துவதில் தோல்வியடைந்தது"
 
-#: ../src/server/e-ews-connection.c:2834
+#: ../src/server/e-ews-connection.c:3150
 msgid "Failed to find <OAB> element\n"
 msgstr "<OAB> கூறைக் கண்டறிவதில் தோல்வியடைந்தது\n"
 
-#: ../src/server/e-ews-connection.c:4225
+#: ../src/server/e-ews-connection.c:4404
 msgid "No items found"
 msgstr "உருப்படிகள் எதுவும் இல்லை"
 
-#: ../src/server/e-ews-folder.c:636
+#: ../src/server/e-ews-folder.c:624
 msgid "Cannot add folder, unsupported folder type"
 msgstr "கோப்புறையைச் சேர்க்க முடியாது, ஆதரிக்கப்படாத கோப்புறை வகை"
 
-#: ../src/server/e-ews-folder.c:641
+#: ../src/server/e-ews-folder.c:629
 msgid "Cannot add folder, master source not found"
 msgstr "கோப்புறையைச் சேர்க்க முடியாது, பிரதான மூலம் காணப்படவில்லை"
 
