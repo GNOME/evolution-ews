@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-09-05 04:41+0000\n"
-"PO-Revision-Date: 2014-09-05 20:07+0700\n"
+"POT-Creation-Date: 2014-09-16 04:41+0000\n"
+"PO-Revision-Date: 2014-09-16 18:11+0700\n"
 "Last-Translator: Andika Triwidada <andika@gmail.com>\n"
 "Language-Team: Indonesian <gnome@i15n.org>\n"
 "Language: id\n"
@@ -19,39 +19,43 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 1.6.9\n"
 
-#: ../src/addressbook/e-book-backend-ews.c:1437
+#: ../src/addressbook/e-book-backend-ews.c:1455
 msgid "The backend does not support bulk additions"
 msgstr "Backend tak mendukung penambahan masal"
 
-#: ../src/addressbook/e-book-backend-ews.c:1476
-#: ../src/addressbook/e-book-backend-ews.c:1820
+#: ../src/addressbook/e-book-backend-ews.c:1494
+#: ../src/addressbook/e-book-backend-ews.c:1861
 msgid ""
 "Cannot save contact list, it's only supported on EWS Server 2010 or later"
 msgstr ""
 "Tak bisa menyimpan daftar kontak, itu hanya didukung pada EWS Server 2010 "
 "atau setelahnya"
 
-#: ../src/addressbook/e-book-backend-ews.c:1779
+#: ../src/addressbook/e-book-backend-ews.c:1820
 msgid "The backend does not support bulk modifications"
 msgstr "Backend tak mendukung pengubahan masal"
 
-#: ../src/addressbook/e-book-backend-ews.c:1979
+#: ../src/addressbook/e-book-backend-ews.c:2032
 msgid "Wait till syncing is done"
 msgstr "Menunggu sampai penyelarasan selesai"
 
-#: ../src/addressbook/e-book-backend-ews.c:2393
+#: ../src/addressbook/e-book-backend-ews.c:2511
 #, c-format
-msgid "Downloading contacts in %s %d%% completed... "
-msgstr "Mengunduh kontak dalam %s %d%% komplit..."
+msgid "Processing contacts in %s %d%% completed... "
+msgstr "Memroses kontak dalam %s %d%% komplit..."
 
-#: ../src/addressbook/e-book-backend-ews.c:3088
+#: ../src/addressbook/e-book-backend-ews.c:3119
 msgid "Syncing contacts..."
 msgstr "Menyelaraskan kontak…"
 
-#: ../src/addressbook/e-book-backend-ews.c:3263
+#: ../src/addressbook/e-book-backend-ews.c:3295
 #: ../src/configuration/e-ews-search-user.c:365
 msgid "Searching..."
 msgstr "Mencari…"
+
+#: ../src/addressbook/e-book-backend-ews.c:4270
+msgid "Requested to delete an unrelated cursor"
+msgstr "Diminta menghapus sebuah kursor yang tak berhubungan"
 
 #: ../src/calendar/e-cal-backend-ews.c:1257
 msgid "EWS does not support bulk removals"
