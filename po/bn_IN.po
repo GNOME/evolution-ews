@@ -1,0 +1,1162 @@
+# sray <sray@redhat.com>, 2013. #zanata
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-08-06 14:45+0530\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2013-11-26 05:48-0500\n"
+"Last-Translator: sray <sray@redhat.com>\n"
+"Language-Team: Bengali (India)\n"
+"Language: bn-IN\n"
+"X-Generator: Zanata 3.1.2\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+# auto translated by TM merge from project: evolution-data-server, version: 3.8.4, DocId: evolution-data-server-3.8
+#: ../src/addressbook/e-book-backend-ews.c:1038
+msgid "The backend does not support bulk additions"
+msgstr "ব্যাক-এন্ডে একযোগে একাধিক সংযোজন সমর্থিত হবে না"
+
+# auto translated by TM merge from project: evolution-data-server, version: 3.8.4, DocId: evolution-data-server-3.8
+#: ../src/addressbook/e-book-backend-ews.c:1325
+msgid "The backend does not support bulk modifications"
+msgstr "ব্যাক-এন্ডে একযোগে একাধিক সংযোজন সমর্থিত হবে না"
+
+#: ../src/addressbook/e-book-backend-ews.c:1513
+msgid "Wait till syncing is done"
+msgstr "সলময় না হওয়া পর্যন্ত অপেক্ষা করুন"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/addressbook/e-book-backend-ews.c:1922
+#, c-format
+msgid "Downloading contacts in %s %d%% completed... "
+msgstr "%s - এ পরিচিতিগুলি ডাউনলোড করা হচ্ছে %d%% সম্পন্ন হয়েছে... "
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/addressbook/e-book-backend-ews.c:2535
+msgid "Syncing contacts..."
+msgstr "পরিচিতিগুলি সমলয় হচ্ছে..."
+
+# auto translated by TM merge from project: system-config-printer, version: 1.1.16-23, DocId: system-config-printer
+#: ../src/addressbook/e-book-backend-ews.c:2757
+#: ../src/configuration/e-ews-search-user.c:365
+msgid "Searching..."
+msgstr "অনুসন্ধান করা হচ্ছে..."
+
+#: ../src/calendar/e-cal-backend-ews.c:1112
+msgid "EWS does not support bulk removals"
+msgstr "EWS প্রচুর অপসারণ সমর্থন করে না"
+
+#: ../src/calendar/e-cal-backend-ews.c:1755
+msgid "EWS does not support bulk additions"
+msgstr "EWS প্রচুর সংযোজন সমর্থন করে না"
+
+#: ../src/calendar/e-cal-backend-ews.c:2338
+msgid "EWS does not support bulk modifications"
+msgstr "EWS প্রচুর সংশোধন সমর্থন করে না"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/camel/camel-ews-folder.c:268
+#, c-format
+msgid "Unable to open mimecontent temporary file!"
+msgstr "মাইম-কনটেন্ট অস্থায়ী ফাইল খোলা গেল না!"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/camel/camel-ews-folder.c:276
+#, c-format
+msgid "Unable to generate parser from mimecontent!"
+msgstr "মাইম-কনটেন্ট থেকে পার্জার প্রস্তুত করা গেল না!"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/camel/camel-ews-folder.c:285
+#, c-format
+msgid "Unable to parse meeting request mimecontent!"
+msgstr "সাক্ষাৎকারের অনুরোধের মাইম-কনটেন্ট পার্জ করা গেল না!"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/camel/camel-ews-folder.c:346
+#, c-format
+msgid "Unable to create cache file"
+msgstr "ক্যাশে ফাইল তৈরি করা গেল না"
+
+# auto translated by TM merge from project: evolution-data-server, version: el6, DocId: evolution-data-server-2.32
+#: ../src/camel/camel-ews-folder.c:451 ../src/camel/camel-ews-folder.c:531
+#, c-format
+msgid "Unable to create cache path"
+msgstr "ক্যাশে পাথ নির্মাণ করতে ব্যর্থ"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/camel/camel-ews-folder.c:541
+#, c-format
+msgid "Failed to move message cache file"
+msgstr "বার্তা ক্যাশে ফাইল সরানো গেল না"
+
+# auto translated by TM merge from project: evolution-mapi, version: el6, DocId: evolution-mapi
+#: ../src/camel/camel-ews-folder.c:1189
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "%s সম্বন্ধীয় সংক্ষিপ্ত তথ্য লোড করতে ব্যর্থ"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/camel/camel-ews-folder.c:1625
+#, c-format
+msgid "Cant perform actions on the folder while in offline mode"
+msgstr "অফলাইন অবস্থায় থাকলে ফোল্ডারে কাজগুলি করা যায় না"
+
+# auto translated by TM merge from project: evolution-mapi, version: el6, DocId: evolution-mapi
+#: ../src/camel/camel-ews-provider.c:48
+msgid "Checking for new mail"
+msgstr "নতুন বার্তার উপস্থিতি পরীক্ষা করা হচ্ছে"
+
+# auto translated by TM merge from project: evolution-mapi, version: el6, DocId: evolution-mapi
+#: ../src/camel/camel-ews-provider.c:50
+msgid "C_heck for new messages in all folders"
+msgstr "সকল ফোল্ডারের মধ্যে নতুন বার্তার উপস্থিতি পরীক্ষা করা হচ্ছে (_h)"
+
+# auto translated by TM merge from project: RHEL Deployment Guide, version: 6.2, DocId: Product_Subscriptions_and_Entitlements
+#: ../src/camel/camel-ews-provider.c:53
+msgid "Options"
+msgstr "বিকল্প"
+
+# auto translated by TM merge from project: evolution-mapi, version: el6, DocId: evolution-mapi
+#: ../src/camel/camel-ews-provider.c:55
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr ""
+"চিহ্নিত সার্ভারের মধ্যপ উপস্থিত Inbox ফোল্ডারের মধ্যে উপস্থিত নতুন বার্তার "
+"ক্ষেত্রে ফিল্টার প্রয়োগ করা হবে (_A)"
+
+# auto translated by TM merge from project: evolution-mapi, version: el6, DocId: evolution-mapi
+#: ../src/camel/camel-ews-provider.c:57
+msgid "Check new messages for _Junk contents"
+msgstr ""
+"অবাঞ্ছিত সামগ্রী চিহ্নিত করার উদ্দেশ্যে নতুন বার্তা পরীক্ষা করা হবে (_J)"
+
+# auto translated by TM merge from project: evolution-data-server, version: el6, DocId: evolution-data-server-2.32
+#: ../src/camel/camel-ews-provider.c:59
+msgid "Only check for Junk messages in the IN_BOX folder"
+msgstr ""
+"INBOX (ইনবক্স) ফোল্ডারে শুধুমাত্র অবাঞ্ছিত বার্তা (Junk) পরীক্ষা করা হবে(_B)"
+
+# auto translated by TM merge from project: evolution-data-server, version: el6, DocId: evolution-data-server-2.32
+#: ../src/camel/camel-ews-provider.c:61
+msgid "Automatically synchroni_ze remote mail locally"
+msgstr "স্বয়ংক্রিয়ভাবে দূরবর্তী বার্তা স্থানীয়রূপে সুসংগত করা হবে (_z)"
+
+# auto translated by TM merge from project: system-config-printer, version: 1.1.16-23, DocId: system-config-printer
+#: ../src/camel/camel-ews-provider.c:64
+msgid "Connection"
+msgstr "সংযোগ"
+
+#: ../src/camel/camel-ews-provider.c:68
+#, c-format
+msgid "Connection _timeout (in seconds) %s"
+msgstr "সংযোগের সময় সমাপ্ত (সেকেন্ডে) %s (_t)"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/camel/camel-ews-provider.c:76
+msgid "Exchange Web Services"
+msgstr "Exchange ওয়েব পরিষেবাদি"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/camel/camel-ews-provider.c:78
+msgid "For accessing Exchange servers using Web Services"
+msgstr "ওয়েব পরিষেবাদির সাহায্যে Exchange সার্ভার অ্যাক্সেস করার ক্ষেত্রে"
+
+#: ../src/camel/camel-ews-provider.c:93
+msgid "NTLM"
+msgstr "NTLM"
+
+#: ../src/camel/camel-ews-provider.c:95
+msgid ""
+"This option will connect to the Exchange server using a plaintext password "
+"with NTLM authentication."
+msgstr ""
+"এই বিকল্পের দরুণ Exchange সার্ভারের সাথে প্লেইন-টেক্সট পাসওয়ার্ড বিশিষ্ট "
+"NTLM অনুমোদন প্রক্রিয়ার দ্বারা সংযোগ করা হবে।"
+
+# auto translated by TM merge from project: nautilus, version: 3.8.2, DocId: nautilus
+#: ../src/camel/camel-ews-provider.c:103
+msgid "Basic"
+msgstr "প্রাথমিক"
+
+#: ../src/camel/camel-ews-provider.c:105
+msgid ""
+"This option will connect to the Exchange server using a plaintext password "
+"with Basic authentication."
+msgstr ""
+"এই বিকল্পের দরুণ Exchange সার্ভারের সাথে প্লেইন-টেক্সট পাসওয়ার্ড বিশিষ্ট "
+"প্রাথমিক অনুমোদন প্রক্রিয়ার দ্বারা সংযোগ করা হবে।"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/camel/camel-ews-store.c:192
+#, c-format
+msgid "Session has no storage path"
+msgstr "সেশনে কোনে সংগ্রহস্থলের পাথ নেই"
+
+#: ../src/camel/camel-ews-store.c:229
+#, c-format
+msgctxt "PublicFolders"
+msgid "%s_%d"
+msgstr "%s_%d"
+
+#: ../src/camel/camel-ews-store.c:358
+#, c-format
+msgctxt "ForeignFolders"
+msgid "%s_%d"
+msgstr "%s_%d"
+
+#: ../src/camel/camel-ews-store.c:727
+msgid "Updating foreign folder structure"
+msgstr "অজানা ফোল্ডার গঠন অাপডেট করা হচ্ছে"
+
+#: ../src/camel/camel-ews-store.c:1169
+msgid "Query for authentication types is not supported"
+msgstr "পরিচয় প্রমাণের ধরনের জন্য কোয়্যারি সমর্থিত নয়"
+
+# auto translated by TM merge from project: evolution-data-server, version: el6, DocId: evolution-data-server-2.32
+#: ../src/camel/camel-ews-store.c:1221
+#, c-format
+msgid "No such folder: %s"
+msgstr "এই ধরনের ফোল্ডার উপস্থিত নেই: %s"
+
+#: ../src/camel/camel-ews-store.c:1533
+msgid "Cannot list EWS public folders in offline mode"
+msgstr "অফ-লাইন অবস্থায় EWS সর্বজনীন ফোল্ডারগুলি তালিকাভুক্ত করা যাচ্ছে না"
+
+#: ../src/camel/camel-ews-store.c:1606
+msgid "Cannot find any EWS public folders"
+msgstr "কোনো EWS সর্বজনীন ফোল্ডার খঁজে পাওয়া যায়নি"
+
+#: ../src/camel/camel-ews-store.c:1711
+#, c-format
+msgid "Cannot create folder '%s', folder already exists"
+msgstr "'%s' ফোল্ডার নির্মাণ করতে ব্যর্থ, ফোল্ডার ইতিমধ্যেই উপস্থিত"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/camel/camel-ews-store.c:1726
+#, c-format
+msgid "Parent folder %s does not exist"
+msgstr "প্রধান ফোল্ডার %s অনুপস্থিত"
+
+#: ../src/camel/camel-ews-store.c:1736
+#, c-format
+msgid ""
+"Cannot create folder under '%s', it is used for folders of other users only"
+msgstr ""
+"'%s' এর মধ্যে ফোল্ডার তৈরি করা যায় না, অন্যান্য ব্যবহারকারীদের ফোল্ডারগুলির "
+"জন্য ব্যবহৃত হয়"
+
+#: ../src/camel/camel-ews-store.c:1746
+#, c-format
+msgid "Cannot create folder under '%s', it is used for public folders only"
+msgstr ""
+"'%s' এর মধ্যে ফোল্ডার তৈরি করা যায় না, এটি শুধুমাত্র সর্বজনীন ফাইলগুলির "
+"জন্য  ব্যবহৃত হয়"
+
+# auto translated by TM merge from project: evolution-exchange, version: el6, DocId: evolution-exchange-2.32
+#: ../src/camel/camel-ews-store.c:1815
+#, c-format
+msgid "Folder does not exist"
+msgstr "ফোল্ডার অনুপস্থিত"
+
+#: ../src/camel/camel-ews-store.c:1824
+#, c-format
+msgid "Cannot remove folder '%s', it is used for folders of other users only"
+msgstr ""
+"'%s' ফোল্ডার সরানো যায় না, এটি শুধুমাত্র অন্যান্য ব্যবহারকারীদের "
+"ফোল্ডারগুলির জন্য ব্যবহার করা হয়"
+
+#: ../src/camel/camel-ews-store.c:1834
+#, c-format
+msgid "Cannot remove folder '%s', it is used for public folders only"
+msgstr ""
+"'%s' ফোল্ডার সরানো যায় না, এটি শুধুমাত্র সার্বজনীন ফোল্ডারগুলির জন্য "
+"ব্যবহার করা হয়"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/camel/camel-ews-store.c:1942
+#, c-format
+msgid "Folder %s does not exist"
+msgstr "%s ফোল্ডার অনুপস্থিত"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/camel/camel-ews-store.c:1952
+#, c-format
+msgid "No change key record for folder %s"
+msgstr "%s -এর প্রধান রেকর্ড পরিবর্তন করা যায় না"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/camel/camel-ews-store.c:1994
+#, c-format
+msgid "Cannot both rename and move a folder at the same time"
+msgstr "কোনো ফোল্ডারকে একই সাথে পুনঃনামকরণ করতে এবং সরাতে পারবেন না"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/camel/camel-ews-store.c:2030
+#, c-format
+msgid "Cannot find folder ID for parent folder %s"
+msgstr "প্রধান ফোল্ডার %s -এর ফোল্ডার অাইডি খুঁজে পাওয়া যাচ্ছে না"
+
+# auto translated by TM merge from project: evolution-exchange, version: el6, DocId: evolution-exchange-2.32
+#: ../src/camel/camel-ews-store.c:2080 ../src/camel/camel-ews-transport.c:69
+#, c-format
+msgid "Exchange server %s"
+msgstr "এক্সচেঞ্জ সার্ভার %s"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/camel/camel-ews-store.c:2083
+#, c-format
+msgid "Exchange service for %s on %s"
+msgstr "%s - এ %s -এর Exchange পরিষেবা"
+
+#: ../src/camel/camel-ews-store.c:2127
+#, c-format
+msgid "Could not locate Trash folder"
+msgstr "ট্র্যাশ ফোল্ডারের অবস্থান নির্দিষ্ট করা যায়নি"
+
+#: ../src/camel/camel-ews-store.c:2187
+#, c-format
+msgid "Could not locate Junk folder"
+msgstr "জাঙ্ক ফোল্ডারের অবস্থান নির্দিষ্ট করা যায় না"
+
+#: ../src/camel/camel-ews-store.c:2377
+msgid "Cannot subscribe EWS folders in offline mode"
+msgstr "অফলাইন মোডে EWS ফোল্ডারগুলি সাবস্ক্রাইব করা যায় না"
+
+#: ../src/camel/camel-ews-store.c:2400
+#, c-format
+msgid "Cannot subscribe folder '%s', no public folder available"
+msgstr ""
+"'%s' ফোল্ডার সাবস্ক্রাইব করা যায় না, কোনো সার্বজনীন ফোল্ডার উপলব্ধ নেই"
+
+#: ../src/camel/camel-ews-store.c:2410
+#, c-format
+msgid "Cannot subscribe folder '%s', folder not found"
+msgstr "'%s' ফোল্ডার সাবস্ক্রাইব করা যায় না, ফোল্ডার খঁজে পাওয়া যায় না"
+
+#: ../src/camel/camel-ews-store.c:2501
+msgid "Cannot unsubscribe EWS folders in offline mode"
+msgstr "অফলাইন মোডে EWS ফোল্ডারগুলি অান-সাবস্ক্রাইব করা যায় না"
+
+# auto translated by TM merge from project: evolution-data-server, version: el6, DocId: evolution-data-server-2.32
+#: ../src/camel/camel-ews-store.c:2618
+#, c-format
+msgid "You must be working online to complete this operation"
+msgstr "এই কর্ম সমাপ্ত করার জন্য অন-লাইন অবস্থায় থাকা আবশ্যক"
+
+#: ../src/camel/camel-ews-transport.c:72
+#, c-format
+msgid "Exchange mail delivery via %s"
+msgstr "%s'র মাধ্যমে Exchange মেল পৌঁছে দেওয়া"
+
+#: ../src/camel/camel-ews-transport.c:119
+msgid "Cannot send message with no From address"
+msgstr "কোনো 'থেকে' ঠিকানা ছাড়া বার্তা পাঠানো যায় না"
+
+#: ../src/camel/camel-ews-transport.c:125
+msgid "Exchange server cannot send message with multiple From addresses"
+msgstr "এক্সচেঞ্জ সার্ভার একাধিক 'থেকে' ঠিকানা সমেত বার্তা পাঠাতে পারে না"
+
+#: ../src/camel/camel-ews-transport.c:136
+msgid "Failed to read From address"
+msgstr "'থেকে' ঠিকানা পড়া যায়নি"
+
+#: ../src/camel/camel-ews-transport.c:148
+#, c-format
+msgid ""
+"Exchange server cannot send message as '%s', when the account was configured "
+"for address '%s'"
+msgstr ""
+"এক্সচেঞ্জ সার্ভার '%s' হিসাবে বার্তা পাঠাতে পারে না, যেখানে অ্যাকাউন্ট '%s' "
+"এর জন্য কনফিগার করা হয়েছে"
+
+#: ../src/camel/camel-ews-transport.c:162
+#, c-format
+msgid "Service not connected"
+msgstr "পরিষেবা সংযুক্ত নয়"
+
+#: ../src/collection/e-ews-backend.c:428
+#: ../src/configuration/e-mail-config-ews-gal.c:274
+msgid "Global Address List"
+msgstr "সার্বজনীন ঠিকানার তালিকা"
+
+#: ../src/collection/e-ews-backend.c:813
+#, c-format
+msgid ""
+"Could not determine a suitable folder class for a new folder named '%s'"
+msgstr ""
+"'%s' নামের একটি নতুন ফোল্ডারের জন্য একটি উপযুক্ত ফোল্ডার শ্রেণি নির্ধারণ করা "
+"যায়নি"
+
+#: ../src/collection/e-ews-backend.c:902
+#, c-format
+msgid "Data source '%s' does not represent an Exchange Web Services folder"
+msgstr ""
+"ডেটা সোর্স '%s' একটি এক্সচেঞ্জ ওয়েব পরিষেবাদি ফোল্ডারকে উপস্থাপিত করে না"
+
+#: ../src/configuration/e-ews-config-utils.c:516
+#, c-format
+msgid "Cannot edit permissions of folder '%s', choose other folder."
+msgstr ""
+"'%s' ফোল্ডারের অনুমতিগুলি সম্পাদন করা যায় না, অপর একটি ফোল্ডার চয়ন করুন।"
+
+#: ../src/configuration/e-ews-config-utils.c:594
+msgid "Subscribe to folder of other user..."
+msgstr "অন্য ব্যবহারকারীর ফোল্ডারে সাবস্ক্রাইব করুন..."
+
+#: ../src/configuration/e-ews-config-utils.c:603
+#: ../src/configuration/e-ews-config-utils.c:884
+#: ../src/configuration/e-ews-config-utils.c:915
+#: ../src/configuration/e-ews-config-utils.c:946
+#: ../src/configuration/e-ews-config-utils.c:977
+msgid "Permissions..."
+msgstr "অনুমতিগুলি..."
+
+#: ../src/configuration/e-ews-config-utils.c:605
+msgid "Edit EWS folder permissions"
+msgstr "EWS ফোল্ডার অনুমতিগুলি সম্পাদন করুন"
+
+#: ../src/configuration/e-ews-config-utils.c:886
+msgid "Edit EWS calendar permissions"
+msgstr "EWS বর্ষপঞ্জির অনুমতিগুলি সম্পাদন করুন"
+
+#: ../src/configuration/e-ews-config-utils.c:917
+msgid "Edit EWS tasks permissions"
+msgstr "EWS কাজের অনুমতিগুলিকে সম্পাদন করুন"
+
+#: ../src/configuration/e-ews-config-utils.c:948
+msgid "Edit EWS memos permissions"
+msgstr "EWS মেমো অনুমতিগুলিকে সম্পাদন করুন"
+
+#: ../src/configuration/e-ews-config-utils.c:979
+msgid "Edit EWS contacts permissions"
+msgstr "EWS পরিচিতির অনুমতিগুলিকে সম্পাদন করুন"
+
+# auto translated by TM merge from project: rhsm-web, version: 0.0, DocId: management
+#: ../src/configuration/e-ews-edit-folder-permissions.c:87
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:499
+msgctxt "PermissionsLevel"
+msgid "None"
+msgstr "একটিও নয়"
+
+# auto translated by TM merge from project: evolution-exchange, version: el6, DocId: evolution-exchange-2.32
+#: ../src/configuration/e-ews-edit-folder-permissions.c:88
+msgctxt "PermissionsLevel"
+msgid "Owner"
+msgstr "মালিক"
+
+# auto translated by TM merge from project: evolution-exchange, version: el6, DocId: evolution-exchange-2.32
+#: ../src/configuration/e-ews-edit-folder-permissions.c:98
+msgctxt "PermissionsLevel"
+msgid "Publishing Editor"
+msgstr "প্রকাশনা সম্পাদক"
+
+# auto translated by TM merge from project: evolution-exchange, version: el6, DocId: evolution-exchange-2.32
+#: ../src/configuration/e-ews-edit-folder-permissions.c:107
+msgctxt "PermissionsLevel"
+msgid "Editor"
+msgstr "সম্পাদক"
+
+# auto translated by TM merge from project: evolution-exchange, version: el6, DocId: evolution-exchange-2.32
+#: ../src/configuration/e-ews-edit-folder-permissions.c:115
+msgctxt "PermissionsLevel"
+msgid "Publishing Author"
+msgstr "প্রকাশনা লেখক"
+
+# auto translated by TM merge from project: evolution-exchange, version: el6, DocId: evolution-exchange-2.32
+#: ../src/configuration/e-ews-edit-folder-permissions.c:122
+msgctxt "PermissionsLevel"
+msgid "Author"
+msgstr "লেখক"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:128
+msgctxt "PermissionsLevel"
+msgid "Nonediting Author"
+msgstr "নন-এডিটিং লেখক"
+
+# auto translated by TM merge from project: evolution-exchange, version: el6, DocId: evolution-exchange-2.32
+#: ../src/configuration/e-ews-edit-folder-permissions.c:133
+msgctxt "PermissionsLevel"
+msgid "Reviewer"
+msgstr "পর্যালোচক"
+
+# auto translated by TM merge from project: evolution-exchange, version: el6, DocId: evolution-exchange-2.32
+#: ../src/configuration/e-ews-edit-folder-permissions.c:136
+msgctxt "PermissionsLevel"
+msgid "Contributor"
+msgstr "অবদানকারী"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:139
+msgctxt "PermissionsLevel"
+msgid "Free/Busy time"
+msgstr "ব্যস্ত নয়/ব্যস্ত সময়"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:141
+msgctxt "PermissionsLevel"
+msgid "Free/Busy time, subject, location"
+msgstr "ব্যস্ত নয়/ব্যস্ত সময়, বস্তু, অবস্থান"
+
+# auto translated by TM merge from project: system-config-printer, version: 1.1.16-23, DocId: system-config-printer
+#: ../src/configuration/e-ews-edit-folder-permissions.c:143
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:520
+msgctxt "PermissionsLevel"
+msgid "Custom"
+msgstr "স্বনির্ধারিত"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:267
+msgid "Writing folder permissions, please wait..."
+msgstr "ফোল্ডারের অনুমতিগুলি লেখা হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন..."
+
+# auto translated by TM merge from project: evolution-data-server, version: el6, DocId: evolution-data-server-2.32
+#: ../src/configuration/e-ews-edit-folder-permissions.c:777
+msgctxt "User"
+msgid "Anonymous"
+msgstr "নামবিহীন"
+
+# auto translated by TM merge from project: Skynet topics, version: 1, DocId: 4732-84010
+#: ../src/configuration/e-ews-edit-folder-permissions.c:780
+msgctxt "User"
+msgid "Default"
+msgstr "ডিফল্ট"
+
+# auto translated by TM merge from project: rhsm-web, version: 0.0, DocId: management
+#: ../src/configuration/e-ews-edit-folder-permissions.c:786
+msgctxt "User"
+msgid "Unknown"
+msgstr "অজানা"
+
+# auto translated by TM merge from project: rhsm-web, version: 0.0, DocId: management
+#: ../src/configuration/e-ews-edit-folder-permissions.c:867
+#: ../src/configuration/e-ews-search-user.c:431
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1075
+msgid "Name"
+msgstr "নাম"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:873
+msgid "Permission level"
+msgstr "অনুমতির স্তর"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:925
+msgid "Edit EWS folder permissions..."
+msgstr "EWS ফোল্ডারের অনুমতিগুলি সম্পাদন করুন..."
+
+# auto translated by TM merge from project: empathy, version: 3.8.3, DocId: empathy
+#: ../src/configuration/e-ews-edit-folder-permissions.c:950
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:635
+msgid "Account:"
+msgstr "অ্যাকাউন্ট:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:978
+msgid "Folder name:"
+msgstr "ফোল্ডারের নাম:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1001
+msgid "Folder ID:"
+msgstr "ফোল্ডারের অাইডি:"
+
+# auto translated by TM merge from project: evolution-exchange, version: el6, DocId: evolution-exchange-2.32
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1065
+msgid "Permissions"
+msgstr "অনুমতিগুলি"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1087
+msgid "Permi_ssion level:"
+msgstr "অনুমতির স্তর (_s):"
+
+# auto translated by TM merge from project: evolution, version: el6, DocId: evolution-2.32
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1121
+msgctxt "Permissions"
+msgid "Read"
+msgstr "পড়া"
+
+# auto translated by TM merge from project: rhsm-web, version: 0.0, DocId: management
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1133
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1200
+msgctxt "Permissions"
+msgid "None"
+msgstr "কোনো অনুমতি নেই"
+
+# auto translated by TM merge from project: evolution-ews, version: 3.8.4, DocId: evolution-ews
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1139
+msgctxt "Permissions"
+msgid "Free/Busy time"
+msgstr "ব্যস্ত নয়/ব্যস্ত সময়"
+
+# auto translated by TM merge from project: evolution-ews, version: 3.8.4, DocId: evolution-ews
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1144
+msgctxt "Permissions"
+msgid "Free/Busy time, subject, location"
+msgstr "ব্যস্ত নয়/ব্যস্ত সময়, বস্তু, অবস্থান"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1150
+msgctxt "Permissions"
+msgid "Full Details"
+msgstr "সম্পূর্ণ বিস্তারিত"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1156
+msgctxt "Permissions"
+msgid "Write"
+msgstr "লেখা"
+
+# auto translated by TM merge from project: evolution-exchange, version: el6, DocId: evolution-exchange-2.32
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1168
+msgctxt "Permissions"
+msgid "Create items"
+msgstr "বস্তু তৈরি করুন"
+
+# auto translated by TM merge from project: evolution-exchange, version: el6, DocId: evolution-exchange-2.32
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1172
+msgctxt "Permissions"
+msgid "Create subfolders"
+msgstr "সাব-ফোল্ডার নির্মাণ করুন"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1176
+msgctxt "Permissions"
+msgid "Edit own"
+msgstr "নিজে সম্পাদন"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1180
+msgctxt "Permissions"
+msgid "Edit all"
+msgstr "সকলে সম্পাদন"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1188
+msgctxt "Permissions"
+msgid "Delete items"
+msgstr "অাইটেমগুলি মুছুন"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1205
+msgctxt "Permissions"
+msgid "Own"
+msgstr "মালিক"
+
+# auto translated by TM merge from project: rhsm-web, version: 0.0, DocId: management
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1210
+msgctxt "Permissions"
+msgid "All"
+msgstr "সকল"
+
+# auto translated by TM merge from project: rhsm-web, version: 0.0, DocId: management
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1216
+msgctxt "Permissions"
+msgid "Other"
+msgstr "অন্যান্য"
+
+# auto translated by TM merge from project: evolution-exchange, version: el6, DocId: evolution-exchange-2.32
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1228
+msgctxt "Permissions"
+msgid "Folder owner"
+msgstr "ফোল্ডারের মালিক"
+
+# auto translated by TM merge from project: evolution-exchange, version: el6, DocId: evolution-exchange-2.32
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1232
+msgctxt "Permissions"
+msgid "Folder contact"
+msgstr "ফোল্ডারের পরিচিতি"
+
+# auto translated by TM merge from project: evolution-exchange, version: el6, DocId: evolution-exchange-2.32
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1236
+msgctxt "Permissions"
+msgid "Folder visible"
+msgstr "ফোল্ডার দৃশ্যমান"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1309
+msgid "Reading folder permissions, please wait..."
+msgstr "ফোল্ডারের অনুমতিগুলি পড়া হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন..."
+
+#: ../src/configuration/e-ews-search-user.c:208
+#, c-format
+msgid "No users found, only one contact"
+msgid_plural "No users found, only %d contacts"
+msgstr[0] "কোনো ব্যবহারকারী পাওয়া যায়নি, শুধুমাত্র একটি পরিচিতি"
+msgstr[1] "কোনো ব্যবহারকারী পাওয়া যায়নি, শুধুমাত্র %d পরিচিতি"
+
+#: ../src/configuration/e-ews-search-user.c:213
+msgid "No users found"
+msgstr "কোনো ব্যবহারকারী পাওয়া যায়নি"
+
+#: ../src/configuration/e-ews-search-user.c:217
+#, c-format
+msgid "Found one user"
+msgid_plural "Found %d users"
+msgstr[0] "একজন ব্যবহারকারী পাওয়া গেছে"
+msgstr[1] "%d জন ব্যবহারকারী পাওয়া গেছে"
+
+#: ../src/configuration/e-ews-search-user.c:223
+#, c-format
+msgid "Found more than 100 users, but showing only first %d"
+msgid_plural "Found more than 100 users, but showing only first %d"
+msgstr[0] ""
+"100 এরও বেশি ব্যবহারকারী খঁজে পাওয়া গেছে, কিন্তু শুধুমাত্র প্রথম %d দেখানো "
+"হচ্ছে"
+msgstr[1] ""
+"100 এরও বেশি ব্যবহারকারী খঁজে পাওয়া গেছে, কিন্তু শুধুমাত্র প্রথম %d দেখানো "
+"হচ্ছে"
+
+#: ../src/configuration/e-ews-search-user.c:357
+#: ../src/configuration/e-ews-search-user.c:540
+msgid "Search for a user"
+msgstr "ব্যবহারকারী অনুসন্ধান করুন"
+
+#: ../src/configuration/e-ews-search-user.c:437
+msgid "E-mail"
+msgstr "ইমেল"
+
+#: ../src/configuration/e-ews-search-user.c:474
+msgid "Choose EWS user..."
+msgstr "EWS ব্যবহারকারী বাছুন..."
+
+# auto translated by TM merge from project: evolution-data-server, version: el6, DocId: evolution-data-server-2.32
+#: ../src/configuration/e-ews-search-user.c:497
+msgid "_Search:"
+msgstr "অনুসন্ধান: (_S)"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
+#: ../src/server/e-ews-folder.c:632
+#, c-format
+msgid "Cannot add folder, folder already exists as '%s'"
+msgstr "ফোল্ডার যোগ করা যায় না, ফোল্ডার ইতিমধ্যেই '%s' হিসাবে উপস্থিত"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:107
+#, c-format
+msgctxt "ForeignFolder"
+msgid "Mailbox - %s"
+msgstr "মেলবক্স - %s"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:272
+msgid "Cannot test foreign folder availability while in offline mode"
+msgstr "অফলাইনে থাকার সময়ে অজানা ফোল্ডারের উপলব্ধতা যাচাই করা যায় না"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:297
+#, c-format
+msgid "User '%s' was not found on the server"
+msgstr "সার্ভারে '%s' ব্যবহারকারী খঁজে পাওয়া যায়নি"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:333
+#, c-format
+msgid "User name '%s' is ambiguous, specify it more precisely, please"
+msgstr ""
+"ব্যবহারকারী নাম '%s' অস্পষ্ট, অনুগ্রহ করে অারো সুস্পষ্ট করে উল্লেখ করুন"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:355
+#, c-format
+msgid ""
+"Folder '%s' not found. Either it does not exist or you do not have "
+"permission to access it."
+msgstr ""
+"ফোল্ডার '%s' খঁজে পাওয়া যায়নি। হয় এটির অস্তিত্ব নেই অথবা এটিকে অ্যাক্সেস "
+"করার অনুমতি অাপনার কাছে নেই।"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:373
+msgid "Cannot add folder, cannot determine folder's type"
+msgstr "ফোল্ডারের ধরণ নির্ধারণ করতে না পারার কারণে ফোল্ডার যোগ করা যায়নি"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:418
+#, c-format
+msgctxt "ForeignFolder"
+msgid "%s - %s"
+msgstr "%s - %s"
+
+# auto translated by TM merge from project: evolution, version: el6, DocId: evolution-2.32
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:512
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:720
+msgid "Inbox"
+msgstr "ইনবক্স"
+
+# auto translated by TM merge from project: evolution, version: el6, DocId: evolution-2.32
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:514
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
+msgid "Contacts"
+msgstr "পরিচিতি"
+
+# auto translated by TM merge from project: evolution, version: el6, DocId: evolution-2.32
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:516
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:722
+msgid "Calendar"
+msgstr "বর্ষপঞ্জি"
+
+# auto translated by TM merge from project: evolution, version: el6, DocId: evolution-2.32
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:518
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:723
+msgid "Memos"
+msgstr "কর্মসূচী"
+
+# auto translated by TM merge from project: evolution, version: el6, DocId: evolution-2.32
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:520
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:724
+msgid "Tasks"
+msgstr "কর্ম"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:537
+#, c-format
+msgid "Testing availability of folder '%s' of user '%s', please wait..."
+msgstr ""
+"'%s' ফোল্ডারের উপলব্ধতা, '%s' ব্যবহারকারীর, যাচাই করা হচ্ছে, অনুগ্রহ করে "
+"অপেক্ষা করুন..."
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:614
+msgid "Subscribe to folder of other EWS user..."
+msgstr "অন্য EWS ব্যবহারকারীর ফোল্ডারে সাবস্ক্রাইব করুন..."
+
+# auto translated by TM merge from project: RHEL Deployment Guide, version: 6.2, DocId: Managing_Users_and_Groups
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:665
+msgid "User"
+msgstr "ব্যবহারকারী"
+
+# auto translated by TM merge from project: evolution-exchange, version: el6, DocId: evolution-exchange-2.32
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:672
+msgid "_User:"
+msgstr "ব্যবহারকারী (_U):"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:687
+msgid "C_hoose..."
+msgstr "বাছুন (_h)..."
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:703
+msgid "_Folder name:"
+msgstr "ফোল্ডারের নাম (_F):"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:733
+msgid "Include _subfolders"
+msgstr "উপফোল্ডারগুলি অন্তর্ভুক্ত করুন (_s)"
+
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:140
+msgid "Querying Autodiscover service"
+msgstr "Autodiscover পরিষেবার খোঁজ করা হচ্ছে"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:231
+msgid "Fetch _URL"
+msgstr "সংগ্রহ URL (_U)"
+
+# auto translated by TM merge from project: evolution, version: el6, DocId: evolution-2.32
+#: ../src/configuration/e-mail-config-ews-backend.c:140
+msgid "Configuration"
+msgstr "কনফিগারেশন"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:158
+msgid "User_name:"
+msgstr "ব্যবহারকারীর নাম (_n):"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:172
+msgid "_Host URL:"
+msgstr "হোস্ট URL (_H):"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:191
+msgid "OAB U_RL:"
+msgstr "OAB U_RL:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:205
+msgid "Open _Mailbox of other user"
+msgstr "অন্য ব্যবহারকারীর মেলবক্স খুলুন (_M)"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:239
+msgid "S_earch..."
+msgstr "অনুসন্ধান (_e)..."
+
+# auto translated by TM merge from project: RHEV Installation Guide, version: 3.1, DocId: topics/Configuring_Hyperisor_for_Red_Hat_Network
+#: ../src/configuration/e-mail-config-ews-backend.c:250
+msgid "Authentication"
+msgstr "অনুমোদন"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:500
+msgctxt "PermissionsLevel"
+msgid "Reviewer (can read items)"
+msgstr "পরিদর্শক (অাইটেম পড়তে পারবেন)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:501
+msgctxt "PermissionsLevel"
+msgid "Author (can read and create items)"
+msgstr "মালিক (অাইটেম পড়তে এবং তৈরি করতে পারবেন)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:502
+msgctxt "PermissionsLevel"
+msgid "Editor (can read, create and modify items)"
+msgstr "সম্পাদক (অাইটেম পড়তে, তৈরি করতে এবং সংশোধন করতে পারবেন)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:605
+msgid "Delegate permissions"
+msgstr "প্রতিনিধিদের অনুমতি"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:623
+msgid "C_alendar"
+msgstr "বর্ষপঞ্জি:(_a)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:626
+msgid "_Delegate receives copies of meeting-related messages sent to me"
+msgstr ""
+"অামাকে পাঠানো মিটিং সংক্রান্ত বার্তার অনুলিপি প্রতিনিধি প্রাপ্ত করেন (_D)"
+
+# auto translated by TM merge from project: evolution, version: el6, DocId: evolution-2.32
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:631
+msgid "_Tasks"
+msgstr "কর্ম (_T)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:634
+msgid "_Inbox"
+msgstr "ইনবক্স (_I)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:637
+msgid "C_ontacts"
+msgstr "পরিচিতি (_o)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:640
+msgid "_Notes"
+msgstr "নোট (_N)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:643
+msgid "_Journal"
+msgstr "পত্রিকা (_J)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:646
+#, c-format
+msgid "Delegate '%s' has the following permissions"
+msgstr "'%s' প্রতিনিধির নিম্নলিখিত অনুমতি রয়েছে"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:664
+msgid "Delegate can see my _private items"
+msgstr "প্রতিনিধি অামার ব্যক্তিগত অাইটেম দেখতে পাবেন (_p)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:987
+msgid "Retrieving current user permissions, please wait..."
+msgstr ""
+"বর্তমান ব্যবহারকারী অনুমতিগুলি পুনরুদ্ধার করা হচ্ছে, অনুগ্রহ করে অপেক্ষা "
+"করুন..."
+
+# auto translated by TM merge from project: evolution-exchange, version: el6, DocId: evolution-exchange-2.32
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1108
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1638
+msgid "Delegates"
+msgstr "প্রতিনিধি"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1132
+msgid ""
+"Delegates can send items on your behalf, including creating and responding "
+"to meeting requests. If you want to grant folder permissions without giving "
+"send-on-behalf-of permissions, close this dialog box, right-click the "
+"folder, click Permissions and change the options there."
+msgstr ""
+"প্রতিনিধিরা মিটিং অনুরোধ তৈরি করা এবং তাতে জবাব দেওয়া সমেত অাপনার হয়ে "
+"অাইটেম পাঠাতে পারবেন। 'এর তরফ থেকে পাঠান' অনুমতিগুলি না দিয়ে অাপনি ফোল্ডার "
+"অনুমতিগুলির অনুমোদন দিতে চাইলে, এই ডায়ালগ বক্স বন্ধ করুন, ফোল্ডারটিতে ডান "
+"ক্লিক করুন, অনুমতি ক্লিক করুন এবং এখান থেকে বিকল্প পরিবর্তন করুন।"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1181
+msgid ""
+"Deliver meeting requests addressed to me and responses to meeting requests "
+"where I am the organizer to:"
+msgstr ""
+"অামাকে পাঠানো মিটিং অনুরোধ এবং অামি সংগঠক এমন মিটিং অনুরোধগুলিতে পাঠানো জবাব "
+"এখানে পাঠান:"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1190
+msgid ""
+"My delegates only, but _send a copy of meeting requests\n"
+"and responses to me (recommended)"
+msgstr ""
+"শুধুমাত্র অামার প্রতিনিধিদের, কিন্তু মিটিং অনুরোধ এবং জবাবের\n"
+"একটি অনুলিপি অামাকে পাঠান (প্রস্তাবিত) (_s)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1197
+msgid "My d_elegates only"
+msgstr "শুধুমাত্র অামার প্রতিনিধি ( _e)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1204
+msgid "My delegates a_nd me"
+msgstr "অামার প্রতিনিধি এবং অামি (_n)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1713
+msgid "Retrieving \"Delegates\" settings"
+msgstr "\"প্রতিনিধি\" সেটিং পুনরুদ্ধার করা হচ্ছে"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:221
+msgid "Locating offline address books"
+msgstr "অফলাইন ঠিকানা বই এর অবস্থান নির্দিষ্ট করা হচ্ছে"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/configuration/e-mail-config-ews-gal.c:301
+msgid "Cache o_ffline address book"
+msgstr "অফলাইন ঠিকানা বই ক্যাশে করুন (_f)"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:327
+msgid "Select ad_dress list:"
+msgstr "ঠিকানা তালিকা নির্বাচন করুন (_d):"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:351
+msgid "Fetch List"
+msgstr "তালিকা সংগ্রহ"
+
+# auto translated by TM merge from project: evolution, version: el6, DocId: evolution-2.32
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:444
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:923
+msgid "Out of Office"
+msgstr "অফিসে উপস্থিত নেই"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:460
+msgid ""
+"The messages specified below will be automatically sent to each internal and "
+"external person who sends a mail to you."
+msgstr ""
+"নীচে উল্লেখ করা বার্তাগুলি অাপনাকে অাভ্যন্তরীণ বা বাহ্যিক যিনিই বার্তা "
+"পাঠাবেন তাকেই স্বয়ংক্রিয় ভাবে পাঠানো হবে।"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:468
+msgid "Do _not send Out of Office replies"
+msgstr "অফিসে অনুপস্থিতির ক্ষেত্রে প্রত্যুত্তর পাঠাবেন না (_n)"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:476
+msgid "_Send Out of Office replies"
+msgstr "অফিসে অনুপস্থিতির ক্ষেত্রে প্রত্যুত্তর পাঠান (_S)"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:484
+msgid "Send Out of Office replies only _during this time period:"
+msgstr ""
+"শুধুমাত্র এই সময়কালের ভিতরে অফিসে অনুপস্থিতির ক্ষেত্রে প্রত্যুত্তর পাঠান "
+"(_d):"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:504
+msgid "_From:"
+msgstr "থেকে (_F):"
+
+# auto translated by TM merge from project: evolution, version: el6, DocId: evolution-2.32
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:529
+msgid "_To:"
+msgstr "প্রাপক(_T):"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:554
+msgid "I_nternal:"
+msgstr "অভ্যন্তরীণ (_n):"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:563
+msgid "Message to be sent within the organization"
+msgstr "বার্তা প্রতিষ্ঠানের ভিতরে পাঠানো হবে"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:590
+msgid "E_xternal:"
+msgstr "বাহ্যিক (_x):"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:598
+msgid "Message to be sent outside the organization"
+msgstr "বার্তা প্রতিষ্ঠানের বাইরে পাঠানো হবে"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:608
+msgid "Do not reply to senders outside the organization"
+msgstr "প্রতিষ্ঠানের বাইরের প্রেরকদের প্রত্যুত্তর জানাবেন না"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:611
+msgid "Reply only to known senders outside the organization"
+msgstr "প্রতিষ্ঠানের বাইরে শুধুমাত্র জানা প্রেরকদের প্রত্যুত্তর জানান"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:614
+msgid "Reply to any sender outside the organization"
+msgstr "প্রতিষ্ঠানের বাইরের যেকোনো প্রেরককে প্রত্যুত্তর জানান"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:999
+msgid "Retrieving \"Out of Office\" settings"
+msgstr "\"অফিসে অনুপস্থিত\" সেটিং পুনরুদ্ধার করা হচ্ছে"
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:1
+msgid "Autodiscovery query failed."
+msgstr "Autodiscovery কোয়্যারি ব্যর্থ হয়েছে।"
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:2
+msgid "The reported error was &quot;{0}&quot;."
+msgstr "জানানো ত্রুটি হল &quot;{0}&quot;।"
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:3
+msgid "Failed to locate offline address books."
+msgstr "অফলাইন ঠিকানা বই এর অবস্থান নির্ধারণ করা যায়নি।"
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:4
+msgid "Failed to retrieve &quot;Out of Office&quot; settings."
+msgstr "&quot;অফিসে অনুপস্থিত&quot; সেটিং পুনরুদ্ধার করা যায়নি।"
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:5
+msgid "Failed to retrieve &quot;Delegates&quot; settings."
+msgstr "&quot;প্রতিনিধি&quot; সেটিং পুনরুদ্ধার করা যায়নি।"
+
+#: ../src/server/e-ews-connection.c:494
+msgid "Operation Cancelled"
+msgstr "কাজটি বাতিল করা হয়েছে"
+
+# auto translated by TM merge from project: evolution-mapi, version: el6, DocId: evolution-mapi
+#: ../src/server/e-ews-connection.c:563
+msgid "Authentication failed"
+msgstr "পরিচয় প্রমাণ করতে বিফল"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/server/e-ews-connection.c:574
+#, c-format
+msgid "No response: %s"
+msgstr "কোনো প্রত্যুত্তর পাওয়া যায়নি: %s"
+
+# auto translated by TM merge from project: evolution-data-server, version: 3.8.4, DocId: evolution-data-server-3.8
+#: ../src/server/e-ews-connection.c:1912
+#, c-format
+msgid "Failed to parse autodiscover response XML"
+msgstr "autodiscover প্রতিক্রিয়ার XML পার্স করতে ব্যর্থ"
+
+#: ../src/server/e-ews-connection.c:1919
+#, c-format
+msgid "Failed to find <Autodiscover> element"
+msgstr "<Autodiscover> বিষয়টি খুঁজে পাওয়া গেল না"
+
+#: ../src/server/e-ews-connection.c:1930
+#, c-format
+msgid "Failed to find <Response> element"
+msgstr "<Response> বিষয়টি খুঁজে পাওয়া গেল না"
+
+#: ../src/server/e-ews-connection.c:1941
+#, c-format
+msgid "Failed to find <Account> element"
+msgstr "<Account> বিষয়টি খুঁজে পাওয়া গেল না"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/server/e-ews-connection.c:1960
+#, c-format
+msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
+msgstr "স্বতঃসন্ধান প্রত্যুত্তরে <ASUrl> এবং <OABUrl> খুঁজে পাওয়া গেল না"
+
+#: ../src/server/e-ews-connection.c:2042
+msgid "URL cannot be NULL"
+msgstr "URL NULL হতে পারে না"
+
+#: ../src/server/e-ews-connection.c:2050
+#, c-format
+msgid "URL '%s' is not valid"
+msgstr "URL '%s' বৈধ নয়"
+
+#: ../src/server/e-ews-connection.c:2152
+msgid "Email address is missing a domain part"
+msgstr "একটি ডোমেন অংশে ইমেল ঠিকানা অনুপস্থিত"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/server/e-ews-connection.c:2479
+msgid "Failed to parse oab XML"
+msgstr "oab XML পার্জ করা গেল না"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/server/e-ews-connection.c:2487
+msgid "Failed to find <OAB> element\n"
+msgstr "<OAB> বিষয়টি খুঁজে পাওয়া গেল না\n"
+
+# auto translated by TM merge from project: gtk3, version: 3.8.2, DocId: gtk30
+#: ../src/server/e-ews-connection.c:3673
+msgid "No items found"
+msgstr "কোনো বস্তু পাওয়া যায়নি"
+
+#: ../src/server/e-ews-folder.c:587
+msgid "Cannot add folder, unsupported folder type"
+msgstr "ফোল্ডারের ধরণ অসমর্থিত হওয়ার কারণে ফোল্ডার যোগ করা যায়নি"
+
+#: ../src/server/e-ews-folder.c:592
+msgid "Cannot add folder, master source not found"
+msgstr "মাস্টার সোর্স না পাওয়ার কারণে ফোল্ডার যোগ করা যায়নি"
+
+# auto translated by TM merge from project: evolution-ews, version: el6, DocId: evolution-ews
+#: ../src/utils/ews-camel-common.c:221
+#, c-format
+msgid "CreateItem call failed to return ID for new message"
+msgstr "ক্রিয়েট-অাইটেম কল নতুন বার্তার অাইডি ফেরত অানতে পারল না"
