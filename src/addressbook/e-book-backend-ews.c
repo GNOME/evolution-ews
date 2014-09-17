@@ -2591,8 +2591,9 @@ ews_replace_gal_in_db (EBookBackendEws *cbews,
 	data.cancellable = cancellable;
 
 	ret = ews_oab_decoder_decode (eod, ews_gal_filter_contact, ews_gal_store_contact, &data, cancellable, error);
-	/* Flush final entries */
-	ews_gal_store_contact (NULL, 0, NULL, 100, &data, error);
+	/* Flush final entries if there are any */
+	if (data.contact_collector)
+		ews_gal_store_contact (NULL, 0, NULL, 100, &data, error);
 
 	/* Remove any items which were not present in the new OAB */
 	g_hash_table_foreach (data.uids, append_to_list, &stale_uids);
