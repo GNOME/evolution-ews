@@ -2398,7 +2398,7 @@ ews_remove_old_gal_file (EBookBackendEws *cbews,
                          GError **error)
 {
 	EBookBackendEwsPrivate *priv = cbews->priv;
-	gchar *filename;
+	gchar *filename = NULL;
 
 	if (!priv->summary)
 		return FALSE;
