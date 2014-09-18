@@ -4,8 +4,8 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-07-24 13:51+0000\n"
-"PO-Revision-Date: 2014-08-27 17:46+0530\n"
+"POT-Creation-Date: 2014-09-18 04:41+0000\n"
+"PO-Revision-Date: 2014-09-18 17:41+0530\n"
 "Last-Translator: Manoj Kumar Giri <mgiri@redhat.com>\n"
 "Language-Team: Oriya <oriya-it@googlegroups.com>\n"
 "Language: or\n"
@@ -15,47 +15,51 @@ msgstr ""
 "X-Generator: Lokalize 1.5\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-#: ../src/addressbook/e-book-backend-ews.c:1437
+#: ../src/addressbook/e-book-backend-ews.c:1455
 msgid "The backend does not support bulk additions"
 msgstr "ପୃଷ୍ଠଭୂମି ଏକାଧିକ ସମଷ୍ଟିକୁ ସହାୟତା କରିନଥାଏ"
 
-#: ../src/addressbook/e-book-backend-ews.c:1476
-#: ../src/addressbook/e-book-backend-ews.c:1820
+#: ../src/addressbook/e-book-backend-ews.c:1494
+#: ../src/addressbook/e-book-backend-ews.c:1861
 msgid ""
 "Cannot save contact list, it's only supported on EWS Server 2010 or later"
 msgstr ""
 "ସମ୍ପର୍କ ତାଲିକାକୁ ସଂରକ୍ଷଣ କରି ପାରିବେ ନାହିଁ, ଏହା କେବଳ EWS ସର୍ଭର 2010 କିମ୍ବା "
-"ପରବର୍ତ୍ତୀରେ ସହାୟତା ପ୍ରାପ୍ତ"
+"ପରବର୍ତ୍ତୀରେ "
+"ସହାୟତା ପ୍ରାପ୍ତ"
 
-#: ../src/addressbook/e-book-backend-ews.c:1779
+#: ../src/addressbook/e-book-backend-ews.c:1820
 msgid "The backend does not support bulk modifications"
 msgstr "ପୃଷ୍ଠଭୂମି ଏକାଧିକ ପରିବର୍ତ୍ତନକୁ ସହାୟତା କରିନଥାଏ"
 
-#: ../src/addressbook/e-book-backend-ews.c:1979
+#: ../src/addressbook/e-book-backend-ews.c:2032
 msgid "Wait till syncing is done"
 msgstr "ସନ୍ତୁଳନ ସରିବା ପର୍ଯ୍ୟନ୍ତ ଅପେକ୍ଷା କରନ୍ତୁ"
 
-#: ../src/addressbook/e-book-backend-ews.c:2393
+#: ../src/addressbook/e-book-backend-ews.c:2511
 #, c-format
-msgid "Downloading contacts in %s %d%% completed... "
-msgstr "%s %d%% ରେ ସମ୍ପର୍କଗୁଡ଼ିକର ଆହରଣ ସମ୍ପୂର୍ଣ୍ଣ ହୋଇଛି... "
+#| msgid "Downloading contacts in %s %d%% completed... "
+msgid "Processing contacts in %s %d%% completed... "
+msgstr "%s %d%% ରେ ସମ୍ପର୍କଗୁଡ଼ିକର ପ୍ରକ୍ରିୟା ସମ୍ପୂର୍ଣ୍ଣ ହୋଇଛି..."
 
-#: ../src/addressbook/e-book-backend-ews.c:3088
+#: ../src/addressbook/e-book-backend-ews.c:3120
 msgid "Syncing contacts..."
 msgstr "ସମ୍ପର୍କଗୁଡ଼ିକୁ ସନ୍ତୁଳନ କରୁଅଛି..."
 
-#: ../src/addressbook/e-book-backend-ews.c:3263
+#: ../src/addressbook/e-book-backend-ews.c:3296
 #: ../src/configuration/e-ews-search-user.c:365
 msgid "Searching..."
 msgstr "ସନ୍ଧାନ କରୁଅଛି..."
+
+#: ../src/addressbook/e-book-backend-ews.c:4271
+msgid "Requested to delete an unrelated cursor"
+msgstr "ଏକ ଅସମ୍ପୃକ୍ତ ସୂଚକକୁ ଅପସାରଣ କରିବା ପାଇଁ ଅନୁରୋଧ କରାଯାଇଛି"
 
 #: ../src/calendar/e-cal-backend-ews.c:1257
 msgid "EWS does not support bulk removals"
 msgstr "EWS ଏକାଧିକ ବହିଷ୍କାରକୁ ସହାୟତା କରିନଥାଏ"
 
 #: ../src/calendar/e-cal-backend-ews.c:1433
-#| msgctxt "User"
-#| msgid "Unknown"
 msgid "Unknown error"
 msgstr "ଅଜଣା ତୃଟି"
 
@@ -107,7 +111,7 @@ msgstr "ସନ୍ଦେଶ କ୍ୟାଶେ ଫାଇଲକୁ ଘୁଞ୍ଚ
 msgid "Could not load summary for %s"
 msgstr "%s ପାଇଁ ସାରାଂଶ ଧାରଣ କରିପାରିବେ ନାହିଁ"
 
-#: ../src/camel/camel-ews-folder.c:1849
+#: ../src/camel/camel-ews-folder.c:1868
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr "ଅଫଲାଇନ ଧାରାରେ ଥିବା ସମୟରେ ଫୋଲଡର ଉପରେ କୌଣସି କାର୍ଯ୍ୟ କରିପାରିବେ ନାହିଁ"
@@ -195,16 +199,13 @@ msgid "Kerberos"
 msgstr "କେର୍ବେରୋଶ"
 
 #: ../src/camel/camel-ews-provider.c:116
-#| msgid ""
-#| "This option will connect to the Exchange server using a plaintext "
-#| "password with Basic authentication."
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
 msgstr ""
 "ସରଳ ପାଠ୍ୟ ପ୍ରବେଶ ସଂକେତକୁ ମୌଳିକ ବୈଧିକରଣ ସହିତ Kerberos/GSSAPI ବ୍ୟବହାର କରି ଏହି "
-"ବିକଳ୍ପଟି Exchange ସର୍ଭର ସହିତ "
-"ସଂଯୁକ୍ତ ହୋଇଥାଏ।"
+"ବିକଳ୍ପଟି "
+"Exchange ସର୍ଭର ସହିତ ସଂଯୁକ୍ତ ହୋଇଥାଏ।"
 
 #: ../src/camel/camel-ews-store.c:332
 #, c-format
@@ -224,7 +225,6 @@ msgid "%s_%d"
 msgstr "%s_%d"
 
 #: ../src/camel/camel-ews-store.c:639
-#| msgid "Retrieving \"Out of Office\" settings"
 msgid "Checking \"Out of Office\" settings"
 msgstr "\"କାର୍ଯ୍ୟାଳୟ ବାହାରେ\" ସେଟିଙ୍ଗକୁ ଯାଞ୍ଚ କରୁଅଛି"
 
@@ -357,7 +357,6 @@ msgid "You must be working online to complete this operation"
 msgstr "ଏହି ପ୍ରୟୋଗକୁ ସମ୍ପୂର୍ଣ୍ଣ କରିବା ପାଇଁ ଆପଣଙ୍କୁ ଅନଲାଇନ କାର୍ଯ୍ୟ କରିବାକୁ ହେବ"
 
 #: ../src/camel/camel-ews-store.c:3490
-#| msgid "Retrieving \"Out of Office\" settings"
 msgid "Unsetting the \"Out of Office\" status"
 msgstr "\"କାର୍ଯ୍ୟାଳୟ ବାହାରେ\" ସ୍ଥିତିକୁ ଅବିନ୍ୟାସିତ କରୁଅଛି"
 
@@ -410,7 +409,6 @@ msgid "Data source '%s' does not represent an Exchange Web Services folder"
 msgstr "ତଥ୍ୟ ଉତ୍ସ '%s' କୌଣସି ଏକ୍ସଚେଞ୍ଜ ୱେବ ସର୍ଭିସ ଫୋଲଡରକୁ ଉପସ୍ଥାପନ କରିନଥାଏ"
 
 #: ../src/configuration/e-ews-config-utils.c:579
-#| msgid "Folder ID:"
 msgid "Folder"
 msgstr "ଫୋଲଡର୍"
 
@@ -424,8 +422,6 @@ msgid "Unable to retrieve folder size information"
 msgstr "ଫୋଲଡର୍‌ ଆକାର ସୂଚନାକୁ ପୁନରୁଦ୍ଧାର କରିବାରେ ଅସମର୍ଥ"
 
 #: ../src/configuration/e-ews-config-utils.c:752
-#| msgctxt "Permissions"
-#| msgid "Folder visible"
 msgid "Folder Sizes"
 msgstr "ଫୋଲଡରର ଆକାରଗୁଡ଼ିକ"
 
@@ -444,8 +440,6 @@ msgstr ""
 "ଫୋଲଡର '%s' ର ଅନୁମତିଗୁଡ଼ିକୁ ସମ୍ପାଦନ କରିପାରିବେ ନାହିଁ, ଅନ୍ୟ ଫୋଲଡରକୁ ବାଛନ୍ତୁ।"
 
 #: ../src/configuration/e-ews-config-utils.c:999
-#| msgctxt "Permissions"
-#| msgid "Folder visible"
 msgid "Folder Sizes..."
 msgstr "ଫୋଲଡରର ଆକାର ..."
 
@@ -692,7 +686,6 @@ msgid "Unset on Server"
 msgstr "ସର୍ଭରରେ ସେଟ ହୋଇନାହିଁ"
 
 #: ../src/configuration/e-ews-ooo-notificator.c:185
-#| msgid "Retrieving \"Out of Office\" settings"
 msgid "Unset the \"Out of Office\" status"
 msgstr "\"କାର୍ଯ୍ୟାଳୟ ବାହାରେ\" ସ୍ଥିତିକୁ ସେଟ କରନ୍ତୁ ନାହିଁ"
 
@@ -739,7 +732,7 @@ msgid "_Search:"
 msgstr "ସନ୍ଧାନ କରନ୍ତୁ (_S):"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
-#: ../src/server/e-ews-folder.c:681
+#: ../src/server/e-ews-folder.c:669
 #, c-format
 msgid "Cannot add folder, folder already exists as '%s'"
 msgstr "ଫୋଲଡରକୁ ଯୋଗ କରିପାରିବେ ନାହିଁ, ଫୋଲଡର ପୂର୍ବରୁ '%s' ଭାବରେ ଅବସ୍ଥିତ"
@@ -1010,8 +1003,6 @@ msgid "View the size of all Exchange folders"
 msgstr "ସମସ୍ତ ବଦଳାଯାଇଥିବା ଫୋଲଡର୍‌ଗୁଡ଼ିକୁ ଦେଖନ୍ତୁ"
 
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:206
-#| msgctxt "Permissions"
-#| msgid "Folder visible"
 msgid "Folder _Sizes"
 msgstr "ଫୋଲଡର୍ ଆକାରଗୁଡ଼ିକ (_S)"
 
@@ -1186,11 +1177,11 @@ msgstr "<OAB> ଉପାଦାନକୁ ଖୋଜିବାରେ ବିଫଳ\n"
 msgid "No items found"
 msgstr "କୌଣସି ବସ୍ତୁ ମିଳିଲା ନାହିଁ"
 
-#: ../src/server/e-ews-folder.c:636
+#: ../src/server/e-ews-folder.c:624
 msgid "Cannot add folder, unsupported folder type"
 msgstr "ଫୋଲଡର ଯୋଗ କରିପାରିବେ ନାହିଁ, ଅସମର୍ଥିତ ଫୋଲଡର ପ୍ରକାର"
 
-#: ../src/server/e-ews-folder.c:641
+#: ../src/server/e-ews-folder.c:629
 msgid "Cannot add folder, master source not found"
 msgstr "ଫୋଲଡର ଯୋଗ କରିପାରିବେ ନାହିଁ, ମୂଖ୍ୟ ଉତ୍ସ ମିଳୁ ନାହିଁ"
 
