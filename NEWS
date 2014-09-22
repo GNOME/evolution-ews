@@ -1,3 +1,54 @@
+Evolution-EWS 3.13.6 2014-09-22
+-------------------------------
+
+Bug Fixes:
+	Bug 735799 - Workaround crash for messages with no item ID (Milan Crha)
+	Bug 735801 - Use-after-free in e_book_backend_ews_dispose() after resume (Milan Crha)
+	Bug 736257 - Fix cancellation of addressbook lookups (David Woodhouse)
+
+Miscellaneous:
+	Update addressbook to use ->open_sync() (David Woodhouse)
+	Use GInitable to initialise addressbook (David Woodhouse)
+	Port addressbook to EBookSqlite (David Woodhouse)
+	Fix build for oab-decode-test, port it to EBookSqlite (David Woodhouse)
+	Move dset handling inside ews_decode_addressbook_record() (David Woodhouse)
+	Use (hashed) PidTagEmailAddress for OAB item UID (David Woodhouse)
+	Pass GInputStream to decoder functions instead of assuming priv->fis (David Woodhouse)
+	Use GMemoryInputStream for processing records, calculate SHA1 on each (David Woodhouse)
+	Optimise EWS GAL update not to rewrite unchanged records (David Woodhouse)
+	Avoid processing OAB records which already exist (David Woodhouse)
+	Fix modify_contacts for EBookSqlite (David Woodhouse)
+	Add revision support for addressbook (David Woodhouse)
+	Add locale support for addressbook (David Woodhouse)
+	Make ebews_fetch_items() return a list of EContacts not EVCards (David Woodhouse)
+	Refactor ews_update_items_thread() to do all database access together (David Woodhouse)
+	Kill store_to_cache option for ebews_fetch_items() (David Woodhouse)
+	Clean up resync code path in ews_update_items_thread() (David Woodhouse)
+	Use EBookSqlite locking (David Woodhouse)
+	Add cursor support to addressbook (David Woodhouse)
+	Add DRA support to addressbook (David Woodhouse)
+	Fix notification for non-GAL updates to only happen on commit (David Woodhouse)
+	Avoid using dynamic types for ESourceEwsFolder (David Woodhouse)
+	Reduce addressbook refresh interval to 6 hours (David Woodhouse)
+	Fix addressbook upgrade from pre-SHA1 versions (David Woodhouse)
+	Don't flush the final GAL updates if there are none (David Woodhouse)
+	Initialise filename to NULL in ews_remove_old_gal_file() (David Woodhouse)
+
+Translations:
+	Manoj Kumar Giri (or)
+	Nilamdyuti Goswami (as)
+	Shankar Prasad (kn)
+	Andika Triwidada (id)
+	Piotr Drąg (pl)
+	Marek Černocký (cs)
+	Balázs Úr (hu)
+	Shantha kumar (ta)
+	Saibal Ray (bn_IN)
+	Matej Urbančič (sl)
+	Sweta Kothari (gu)
+	Manoj Kumar Giri (or)
+	Sandeep Sheshrao Shedmake (mr)
+
 Evolution-EWS 3.13.5 2014-08-25
 -------------------------------
 
