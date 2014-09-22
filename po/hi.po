@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2014-09-22 06:32+0000\n"
-"PO-Revision-Date: 2014-09-22 13:36+0630\n"
+"PO-Revision-Date: 2014-09-22 13:58+0630\n"
 "Last-Translator: rajesh <rajesh>\n"
 "Language-Team: Hindi <kde-i18n-doc@kde.org>\n"
 "Language: hi\n"
@@ -28,6 +28,8 @@ msgstr "बैकेंड थोक परिवर्धन का समर�
 msgid ""
 "Cannot save contact list, it's only supported on EWS Server 2010 or later"
 msgstr ""
+"संपर्क सूची सहेज नहीं सकता है, यह केवल EWS सर्वर पर समर्थित है 2010 या "
+"पश्चातवर्ती"
 
 #: ../src/addressbook/e-book-backend-ews.c:1820
 msgid "The backend does not support bulk modifications"
@@ -40,7 +42,7 @@ msgstr "तुल्यकान संपन्न होने तक प्�
 #: ../src/addressbook/e-book-backend-ews.c:2511
 #, c-format
 msgid "Processing contacts in %s %d%% completed... "
-msgstr ""
+msgstr "%s %d%% में संपर्क की प्रक्रिया पूर्ण... "
 
 #: ../src/addressbook/e-book-backend-ews.c:3120
 msgid "Syncing contacts..."
@@ -53,7 +55,7 @@ msgstr "खोज रहा है..."
 
 #: ../src/addressbook/e-book-backend-ews.c:4271
 msgid "Requested to delete an unrelated cursor"
-msgstr ""
+msgstr "असंबंधित कर्सर मिटाने का निवेदन"
 
 #: ../src/calendar/e-cal-backend-ews.c:1257
 msgid "EWS does not support bulk removals"
@@ -74,7 +76,7 @@ msgstr "EWS बल्क योग का समर्थन नहीं कर
 #: ../src/calendar/e-cal-backend-ews.c:2279
 #, c-format
 msgid "Cannot find user '%s' between attendees"
-msgstr ""
+msgstr "उपयोक्ता '%s' को श्रोता के बीच ढूँढ़ नहीं सकता है"
 
 #: ../src/camel/camel-ews-folder.c:379
 #, c-format
@@ -197,7 +199,7 @@ msgstr "करबरोस"
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
-msgstr ""
+msgstr "करबरोस/GSSAPI सत्यापन के उपयोग से यह विकल्प एक्सचेंज सर्वर से जोड़ेगा."
 
 #: ../src/camel/camel-ews-store.c:332
 #, c-format
@@ -218,7 +220,7 @@ msgstr "%s_%d"
 
 #: ../src/camel/camel-ews-store.c:639
 msgid "Checking \"Out of Office\" settings"
-msgstr ""
+msgstr "\"Out of Office\" सेटिंग जाँच रहा है"
 
 #: ../src/camel/camel-ews-store.c:1434
 msgid "Updating foreign folder structure"
@@ -348,7 +350,7 @@ msgstr ""
 
 #: ../src/camel/camel-ews-store.c:3490
 msgid "Unsetting the \"Out of Office\" status"
-msgstr ""
+msgstr "\"Out of Office\" स्थिति की अनसेटिंग"
 
 #: ../src/camel/camel-ews-transport.c:72
 #, c-format
@@ -671,11 +673,11 @@ msgstr "फोल्डर अनुमति पढ़ रहा है, कृ
 
 #: ../src/configuration/e-ews-ooo-notificator.c:184
 msgid "Unset on Server"
-msgstr ""
+msgstr "सर्वर पर अनसेट"
 
 #: ../src/configuration/e-ews-ooo-notificator.c:185
 msgid "Unset the \"Out of Office\" status"
-msgstr ""
+msgstr "\"Out of Office\" स्थिति पर अनसेट"
 
 #: ../src/configuration/e-ews-search-user.c:208
 #, c-format
@@ -974,7 +976,7 @@ msgstr "\"डेलिगेट\" सेटिंग पुनर्प्रा
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:195
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:257
 msgid "EWS Settings"
-msgstr ""
+msgstr "EWS सेटिंग"
 
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:202
 msgid "View the size of all Exchange folders"
@@ -982,7 +984,7 @@ msgstr "सभी लेनदेन फ़ोल्डरों का आक�
 
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:206
 msgid "Folder _Sizes"
-msgstr ""
+msgstr "फ़ोल्डर आकार (_S)"
 
 #: ../src/configuration/e-mail-config-ews-gal.c:222
 msgid "Locating offline address books"
@@ -1088,6 +1090,7 @@ msgstr "&quot;डेलिगेट&quot; सेटिंग पाने मे
 #: ../src/configuration/module-ews-configuration.error.xml.h:6
 msgid "Your Exchange account \"{0}\" has the status set as \"Out of Office\"."
 msgstr ""
+"आपका एक्सचेंज खाता \"{0}\" के पास \"Out of Office\" की प्रस्थिति सेट है."
 
 #: ../src/server/e-ews-connection.c:741
 msgid "Operation Cancelled"
@@ -1134,7 +1137,7 @@ msgstr "URL रिक्त नहीं हो सकता है"
 #: ../src/server/e-ews-connection.c:2728
 #, c-format
 msgid "URL '%s' is not valid"
-msgstr ""
+msgstr "URL '%s' वैध नहीं है"
 
 #: ../src/server/e-ews-connection.c:2820
 msgid "Email address is missing a domain part"
