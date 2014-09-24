@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-09-21 04:36+0000\n"
-"PO-Revision-Date: 2014-09-21 16:47+0530\n"
+"POT-Creation-Date: 2014-09-24 04:40+0000\n"
+"PO-Revision-Date: 2014-09-24 12:11+0530\n"
 "Last-Translator: Sandeep Shedmake <sshedmak@redhat.com>\n"
 "Language-Team: Marathi <maajhe-sanganak@freelists.org>\n"
 "Language: mr\n"
@@ -19,38 +19,43 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.5\n"
 
-#: ../src/addressbook/e-book-backend-ews.c:1447
+#: ../src/addressbook/e-book-backend-ews.c:1455
 msgid "The backend does not support bulk additions"
 msgstr "बॅकएंड बल्क समाविष्टांकरीता समर्थन पुरवत नाही"
 
-#: ../src/addressbook/e-book-backend-ews.c:1486
-#: ../src/addressbook/e-book-backend-ews.c:1840
+#: ../src/addressbook/e-book-backend-ews.c:1494
+#: ../src/addressbook/e-book-backend-ews.c:1861
 msgid ""
 "Cannot save contact list, it's only supported on EWS Server 2010 or later"
 msgstr ""
 "संपर्क सूची साठवणे अशक्य, ते फक्त EWS Server 2010 किंवा पुढीलवर समर्थीत आहे"
 
-#: ../src/addressbook/e-book-backend-ews.c:1799
+#: ../src/addressbook/e-book-backend-ews.c:1820
 msgid "The backend does not support bulk modifications"
 msgstr "बॅकएंड बल्क संपादनकरीता समर्थन पुरवत नाही"
 
-#: ../src/addressbook/e-book-backend-ews.c:2011
+#: ../src/addressbook/e-book-backend-ews.c:2032
 msgid "Wait till syncing is done"
 msgstr "सिंकिंग पूर्ण होईपर्यंत थांबा"
 
-#: ../src/addressbook/e-book-backend-ews.c:2488
+#: ../src/addressbook/e-book-backend-ews.c:2511
 #, c-format
-msgid "Downloading contacts in %s %d%% completed... "
-msgstr "%s %d%% मध्ये संपर्क डाउनोलड करणे पूर्ण झाले... "
+#| msgid "Downloading contacts in %s %d%% completed... "
+msgid "Processing contacts in %s %d%% completed... "
+msgstr "%s %d%% मधील संपर्कांचे विश्लेषण पूर्ण झाले... "
 
-#: ../src/addressbook/e-book-backend-ews.c:3083
+#: ../src/addressbook/e-book-backend-ews.c:3120
 msgid "Syncing contacts..."
 msgstr "संपर्क सिंग करत आहे..."
 
-#: ../src/addressbook/e-book-backend-ews.c:3259
+#: ../src/addressbook/e-book-backend-ews.c:3296
 #: ../src/configuration/e-ews-search-user.c:365
 msgid "Searching..."
 msgstr "शोधत आहे..."
+
+#: ../src/addressbook/e-book-backend-ews.c:4271
+msgid "Requested to delete an unrelated cursor"
+msgstr "असंबंधीत कर्सर नष्ट करण्यासाठी विनंती केली"
 
 #: ../src/calendar/e-cal-backend-ews.c:1257
 msgid "EWS does not support bulk removals"
@@ -67,6 +72,11 @@ msgstr "EWS बल्क समावेषनकरीता समर्थन
 #: ../src/calendar/e-cal-backend-ews.c:1853
 msgid "EWS does not support bulk modifications"
 msgstr "EWS बल्क् संपादनकरीता समर्थन पुरवत नाही"
+
+#: ../src/calendar/e-cal-backend-ews.c:2279
+#, c-format
+msgid "Cannot find user '%s' between attendees"
+msgstr "वापरकर्ता '%s' अंतर्गत अटेंडिज शोधणे अशक्य"
 
 #: ../src/camel/camel-ews-folder.c:379
 #, c-format
@@ -117,7 +127,6 @@ msgid "C_heck for new messages in all folders"
 msgstr "सर्व फोल्डर्स् मध्ये नवीन संदेशकरीता तपासणी करा (_h)"
 
 #: ../src/camel/camel-ews-provider.c:51
-#| msgid "Lis_ten for server notifications"
 msgid "_Listen for server change notifications"
 msgstr "सर्व्हर बदल सूचनांकरीता ऐका (_L)"
 
@@ -190,9 +199,6 @@ msgid "Kerberos"
 msgstr "केर्बेरोस्"
 
 #: ../src/camel/camel-ews-provider.c:116
-#| msgid ""
-#| "This option will connect to the Exchange server using a plaintext "
-#| "password with Basic authentication."
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -395,71 +401,69 @@ msgstr "'%s' नावाच्या नवीन फोल्डरकरी�
 msgid "Data source '%s' does not represent an Exchange Web Services folder"
 msgstr "डाटा सोअर्स् '%s' एक्सचेंज वेब सर्व्हिसेस् फोल्डर प्रस्तुत करत नाही"
 
-#: ../src/configuration/e-ews-config-utils.c:578
+#: ../src/configuration/e-ews-config-utils.c:579
 msgid "Folder"
 msgstr "फोल्डर"
 
-#: ../src/configuration/e-ews-config-utils.c:588
+#: ../src/configuration/e-ews-config-utils.c:589
 msgid "Size"
 msgstr "आकार"
 
-#: ../src/configuration/e-ews-config-utils.c:626
-#: ../src/configuration/e-ews-config-utils.c:631
+#: ../src/configuration/e-ews-config-utils.c:627
+#: ../src/configuration/e-ews-config-utils.c:632
 msgid "Unable to retrieve folder size information"
 msgstr "फोल्डर आकार विषयी माहिती प्राप्त करण्यास अशक्य"
 
-#: ../src/configuration/e-ews-config-utils.c:751
-#| msgid "Folder Size"
+#: ../src/configuration/e-ews-config-utils.c:752
 msgid "Folder Sizes"
 msgstr "फोल्डर आकार"
 
-#: ../src/configuration/e-ews-config-utils.c:754
+#: ../src/configuration/e-ews-config-utils.c:755
 msgid "_Close"
 msgstr "बंद करा (_C)"
 
-#: ../src/configuration/e-ews-config-utils.c:768
+#: ../src/configuration/e-ews-config-utils.c:769
 msgid "Fetching folder list…"
 msgstr "फोल्डर सूची प्राप्त करत आहे..."
 
-#: ../src/configuration/e-ews-config-utils.c:921
+#: ../src/configuration/e-ews-config-utils.c:922
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr "फोल्डर '%s' ची परवानगी संपादित करणे अशक्य, इतर फोल्डर नीवडा."
 
-#: ../src/configuration/e-ews-config-utils.c:998
-#| msgid "Folder size..."
+#: ../src/configuration/e-ews-config-utils.c:999
 msgid "Folder Sizes..."
 msgstr "फोल्डर आकार..."
 
-#: ../src/configuration/e-ews-config-utils.c:1005
+#: ../src/configuration/e-ews-config-utils.c:1006
 msgid "Subscribe to folder of other user..."
 msgstr "इतर वापरकर्त्याच्या फोल्डरकरीता सबस्क्राइब व्हा..."
 
-#: ../src/configuration/e-ews-config-utils.c:1014
-#: ../src/configuration/e-ews-config-utils.c:1296
-#: ../src/configuration/e-ews-config-utils.c:1327
-#: ../src/configuration/e-ews-config-utils.c:1358
-#: ../src/configuration/e-ews-config-utils.c:1389
+#: ../src/configuration/e-ews-config-utils.c:1015
+#: ../src/configuration/e-ews-config-utils.c:1297
+#: ../src/configuration/e-ews-config-utils.c:1328
+#: ../src/configuration/e-ews-config-utils.c:1359
+#: ../src/configuration/e-ews-config-utils.c:1390
 msgid "Permissions..."
 msgstr "परवानगी..."
 
-#: ../src/configuration/e-ews-config-utils.c:1016
+#: ../src/configuration/e-ews-config-utils.c:1017
 msgid "Edit EWS folder permissions"
 msgstr "EWS फोल्डर परवानगी संपादित करा"
 
-#: ../src/configuration/e-ews-config-utils.c:1298
+#: ../src/configuration/e-ews-config-utils.c:1299
 msgid "Edit EWS calendar permissions"
 msgstr "EWS दिनदर्शिका परवानगी संपादित करा"
 
-#: ../src/configuration/e-ews-config-utils.c:1329
+#: ../src/configuration/e-ews-config-utils.c:1330
 msgid "Edit EWS tasks permissions"
 msgstr "EWS कार्ये परवानगी संपादित करा"
 
-#: ../src/configuration/e-ews-config-utils.c:1360
+#: ../src/configuration/e-ews-config-utils.c:1361
 msgid "Edit EWS memos permissions"
 msgstr "EWS मेमोज परवानगी संपादित करा"
 
-#: ../src/configuration/e-ews-config-utils.c:1391
+#: ../src/configuration/e-ews-config-utils.c:1392
 msgid "Edit EWS contacts permissions"
 msgstr "EWS संपर्क परवानगी संपादित करा"
 
@@ -841,31 +845,31 @@ msgstr "स्वयंडिस्कवर सर्व्हिसची च�
 msgid "Fetch _URL"
 msgstr "फेच् URL (_U)"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:194
+#: ../src/configuration/e-mail-config-ews-backend.c:140
 msgid "Configuration"
 msgstr "संरचना"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:212
+#: ../src/configuration/e-mail-config-ews-backend.c:158
 msgid "User_name:"
 msgstr "वापरकर्तानाव (_n):"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:226
+#: ../src/configuration/e-mail-config-ews-backend.c:172
 msgid "_Host URL:"
 msgstr "यमजान URL (_H):"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:245
+#: ../src/configuration/e-mail-config-ews-backend.c:191
 msgid "OAB U_RL:"
 msgstr "OAB URL (_R):"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:259
+#: ../src/configuration/e-mail-config-ews-backend.c:205
 msgid "Open _Mailbox of other user"
 msgstr "इतर वापरकर्त्याचा मेलबॉक्स उघडा (_M)"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:293
+#: ../src/configuration/e-mail-config-ews-backend.c:239
 msgid "S_earch..."
 msgstr "शोधा (_e)..."
 
-#: ../src/configuration/e-mail-config-ews-backend.c:304
+#: ../src/configuration/e-mail-config-ews-backend.c:250
 msgid "Authentication"
 msgstr "ओळखपटवा"
 
@@ -978,7 +982,6 @@ msgstr "\"डेलिगेट्स्\" सेटिंग्स् प्र
 
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:195
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:257
-#| msgid "MAPI Settings"
 msgid "EWS Settings"
 msgstr "EWS सेटिंग्ज"
 
@@ -987,7 +990,6 @@ msgid "View the size of all Exchange folders"
 msgstr "सर्व एक्सचेंज फोल्डर्सच्या आकाराचे दृष्य"
 
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:206
-#| msgid "Folder _Size"
 msgid "Folder _Sizes"
 msgstr "फोल्डर आकार (_S)"
 
