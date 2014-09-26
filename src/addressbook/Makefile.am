@@ -59,7 +59,9 @@ libebookbackendews_la_LIBADD = \
 libebookbackendews_la_LDFLAGS = \
 	-module -avoid-version $(NO_UNDEFINED) $(CODE_COVERAGE_LDFLAGS)
 
+if HAVE_MSPACK
 noinst_PROGRAMS = gal-lzx-decompress-test oab-decode-test
+endif
 
 oab_decode_test_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
