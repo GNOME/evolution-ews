@@ -113,15 +113,22 @@ AC_SUBST(LIBM)
 dnl ***********************
 dnl Compiler Warning Flags
 dnl ***********************
+proposed_warning_flags=
+
+if test "x$enable_maintainer_mode" = "xyes" ; then
+	proposed_warning_flags="-Wall -Wextra -Wdeprecated-declarations"
+else
+	proposed_warning_flags="-Wno-deprecated-declarations"
+fi
+
 AS_COMPILER_FLAGS(WARNING_FLAGS,
-	"-Wall -Wextra
-	-Wdeprecated-declarations
+	"$proposed_warning_flags
 	-Wno-missing-field-initializers
 	-Wno-sign-compare
 	-Wno-unused-parameter
 	-Wdeclaration-after-statement
 	-Werror-implicit-function-declaration
-	-Wformat-nonliteral -Wformat-security -Winit-self
+	-Wformat -Wformat-nonliteral -Wformat-security -Winit-self
 	-Wmissing-declarations -Wmissing-include-dirs
 	-Wmissing-noreturn -Wnested-externs -Wpointer-arith
 	-Wundef -Wwrite-strings")
