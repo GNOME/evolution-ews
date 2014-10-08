@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2014 Evolution Team <evolution-hackers@gnome.org> -->
+<component type="addon">
+	<id>evolution-ews</id>
+	<extends>evolution.desktop</extends>
+	<_name>Exchange Web Services</_name>
+	<_summary>For accessing Exchange servers using Web Services</_summary>
+	<url type="homepage">https://live.gnome.org/Apps/Evolution</url>
+	<metadata_license>CC0-1.0</metadata_license>
+	<project_license>LGPL</project_license>
+	<updatecontact>evolution-hackers_at_gnome.org</updatecontact>
+</component>
