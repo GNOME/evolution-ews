@@ -1,6 +1,7 @@
 # List of source files containing translatable strings.
 # Please keep this list in alphabetic order.
 [encoding: UTF-8]
+evolution-ews.metainfo.xml.in
 src/addressbook/e-book-backend-ews.c
 src/calendar/e-cal-backend-ews.c
 src/camel/camel-ews-folder.c

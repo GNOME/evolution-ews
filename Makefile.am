@@ -12,8 +12,15 @@ changelogs = \
 	ChangeLog \
 	$(NULL)
 
+@INTLTOOL_XML_NOMERGE_RULE@
+metainfodir = $(datadir)/appdata
+metainfo_in_files = evolution-ews.metainfo.xml.in
+metainfo_files = $(metainfo_in_files:.xml.in=.xml)
+dist_metainfo_DATA = $(metainfo_files)
+
 EXTRA_DIST =  \
 	$(changelog) \
+	$(metainfo_in_files) \
 	enumtypes.c.template \
 	enumtypes.h.template \
 	intltool-merge.in \
@@ -26,6 +33,8 @@ CLEANFILES = \
 	intltool-update \
 	intltool-extract \
 	$(NULL)
+
+DISTCLEANFILES = $(metainfo_files)
 
 MAINTAINERCLEANFILES = \
 	$(srcdir)/INSTALL \
