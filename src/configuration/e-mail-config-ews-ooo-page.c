@@ -744,6 +744,9 @@ mail_config_ews_ooo_page_submit (EMailConfigPage *page,
 	e_ews_oof_settings_set_internal_reply (priv->oof_settings, text);
 	g_free (text);
 
+	e_ews_oof_settings_set_external_audience (priv->oof_settings,
+		gtk_combo_box_get_active (GTK_COMBO_BOX (priv->external_audience)));
+
 	text_buffer = priv->external_reply;
 	gtk_text_buffer_get_bounds (text_buffer, &start, &end);
 	text = gtk_text_buffer_get_text (text_buffer, &start, &end, FALSE);
