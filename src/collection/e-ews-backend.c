@@ -47,6 +47,8 @@ struct _EEwsBackendPrivate {
 	GMutex connection_lock;
 
 	gboolean need_update_folders;
+
+	gulong notify_online_id;
 };
 
 struct _SyncFoldersClosure {
@@ -536,7 +538,13 @@ add_remote_sources (EEwsBackend *backend)
 				E_SERVER_SIDE_SOURCE (source), TRUE);
 			e_source_registry_server_add_source (registry, source);
 		} else {
-			e_source_registry_server_add_source (registry, source);
+			GError *error = NULL;
+
+			if (!e_source_remove_sync (source, NULL, &error))
+				g_warning ("%s: Failed to remove old EWS source '%s': %s", G_STRFUNC, e_source_get_uid (source),
+					error ? error->message : "Unknown error");
+
+			g_clear_error (&error);
 		}
 	}
 
@@ -656,6 +664,11 @@ ews_backend_populate (ECollectionBackend *backend)
 	/* do not do anything, if account is disabled */
 	if (!e_source_get_enabled (source))
 		return;
+
+	if (!ews_backend->priv->notify_online_id)
+		ews_backend->priv->notify_online_id = g_signal_connect (
+			backend, "notify::online",
+			G_CALLBACK (ews_backend_populate), NULL);
 
 	/* For now at least, we don't need to know the
 	 * results, so no callback function is needed. */
@@ -1022,10 +1035,6 @@ e_ews_backend_init (EEwsBackend *backend)
 	g_mutex_init (&backend->priv->folders_lock);
 	g_mutex_init (&backend->priv->sync_state_lock);
 	g_mutex_init (&backend->priv->connection_lock);
-
-	g_signal_connect (
-		backend, "notify::online",
-		G_CALLBACK (ews_backend_populate), NULL);
 }
 
 void
