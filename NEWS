@@ -1,3 +1,44 @@
+Evolution-EWS 3.12.7 2014-10-13
+-------------------------------
+
+Bug Fixes:
+	Bug 736257 - Fix cancellation of addressbook lookups (David Woodhouse)
+	Bug 733578 - Out of Office settings - external audience value is not saved (Milan Crha)
+	Bug 737773 - Duplicate GAL in new accounts (Milan Crha)
+
+Miscellaneous:
+	Update addressbook to use ->open_sync() (David Woodhouse)
+	Use GInitable to initialise addressbook (David Woodhouse)
+	Port addressbook to EBookSqlite (David Woodhouse)
+	Fix build for oab-decode-test, port it to EBookSqlite (David Woodhouse)
+	Move dset handling inside ews_decode_addressbook_record() (David Woodhouse)
+	Use (hashed) PidTagEmailAddress for OAB item UID (David Woodhouse)
+	Pass GInputStream to decoder functions instead of assuming priv->fis (David Woodhouse)
+	Use GMemoryInputStream for processing records, calculate SHA1 on each (David Woodhouse)
+	Optimise EWS GAL update not to rewrite unchanged records (David Woodhouse)
+	Avoid processing OAB records which already exist (David Woodhouse)
+	Fix modify_contacts for EBookSqlite (David Woodhouse)
+	Fix addressbook upgrade from pre-SHA1 versions (David Woodhouse)
+	Reduce addressbook refresh interval to 6 hours (David Woodhouse)
+	Avoid using dynamic types for ESourceEwsFolder (David Woodhouse)
+	Add revision support for addressbook (David Woodhouse)
+	Add locale support for addressbook (David Woodhouse)
+	Make ebews_fetch_items() return a list of EContacts not EVCards (David Woodhouse)
+	Refactor ews_update_items_thread() to do all database access together (David Woodhouse)
+	Kill store_to_cache option for ebews_fetch_items() (David Woodhouse)
+	Clean up resync code path in ews_update_items_thread() (David Woodhouse)
+	Use EBookSqlite locking (David Woodhouse)
+	Fix notification for non-GAL updates to only happen on commit (David Woodhouse)
+	Don't flush the final GAL updates if there are none (David Woodhouse)
+	Initialise filename to NULL in ews_remove_old_gal_file() (David Woodhouse)
+	Add evolution-ews.metainfo.xml file (Milan Crha)
+	Use INTLTOOL_XML_RULE for appdata files (Milan Crha)
+
+Translations:
+	Shankar Prasad (kn)
+	Sandeep Sheshrao Shedmake (mr)
+	Krasimir Chonov (bg)
+
 Evolution-EWS 3.12.6 2014-09-08
 -------------------------------
 
