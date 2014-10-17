@@ -85,18 +85,24 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 
 dnl ******************************
+dnl Initialize libtool
+dnl ******************************
+LT_PREREQ(2.2)
+LT_INIT(disable-static win32-dll)
+
+dnl ******************************
 dnl Check for Win32
 dnl ******************************
 
 AC_MSG_CHECKING([for Win32])
 case "$host" in
 *-mingw*)
-	os_win32=yes
+	os_win32='yes'
 	NO_UNDEFINED='-no-undefined'
 	SOCKET_LIBS='-lws2_32'
 	;;
 *)
-	os_win32=no
+	os_win32='no'
 	NO_UNDEFINED='-no-undefined'
 	SOCKET_LIBS=''
 	;;
@@ -346,7 +352,14 @@ AC_SUBST(camel_providerdir)
 privincludedir=`$PKG_CONFIG --variable=privincludedir libedataserver-1.2`
 AC_SUBST(privincludedir)
 
-privlibdir=`$PKG_CONFIG --variable=privlibdir evolution-data-server-1.2`
+if test "$os_win32" = yes; then
+	dnl On Win32 there is no "rpath" mechanism. We install the private
+	dnl shared libraries in $libdir, meaning the DLLs will actually be in
+	dnl $bindir. This means just having $bindir in PATH will be enough.
+	privlibdir=$libdir
+else
+	privlibdir=`$PKG_CONFIG --variable=privlibdir evolution-data-server-1.2`
+fi
 AC_SUBST(privlibdir)
 
 edataserver_privincludedir=`$PKG_CONFIG --variable=privincludedir libedataserver-1.2`

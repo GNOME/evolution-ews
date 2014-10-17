@@ -1,6 +1,10 @@
 NULL =
 
+if OS_WIN32
+lib_LTLIBRARIES = libcamelews-priv.la
+else
 noinst_LTLIBRARIES = libcamelews-priv.la
+endif
 
 ENUM_TYPES = camel-ews-enums.h
 
