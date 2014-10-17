@@ -117,6 +117,7 @@ proposed_warning_flags=
 
 if test "x$enable_maintainer_mode" = "xyes" ; then
 	proposed_warning_flags="-Wall -Wextra -Wdeprecated-declarations"
+	CFLAGS="$CFLAGS -DEDS_DISABLE_DEPRECATED"
 else
 	proposed_warning_flags="-Wno-deprecated-declarations"
 fi
