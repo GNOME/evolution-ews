@@ -1,3 +1,26 @@
+Evolution-EWS 3.13.7 2014-10-27
+-------------------------------
+
+Bug Fixes:
+	Bug 653157 - Enable extra compiler warnings in maintainer mode only (Milan Crha)
+	Bug 733578 - Out of Office settings - external audience value is not saved (Milan Crha)
+	Bug 737773 - Duplicate GAL in new accounts (Milan Crha)
+
+Miscellaneous:
+	Build addressbook test binaries only with mspack library (Milan Crha)
+	Add evolution-ews.metainfo.xml file (Milan Crha)
+	Use INTLTOOL_XML_RULE for appdata files (Milan Crha)
+	Make sure deprecated EDS symbols will not be used (Milan Crha)
+	Miscellaneous Win32 related build fixes (Milan Crha)
+
+Translations:
+	Rajesh Ranjan (hi)
+	Saibal Ray (bn_IN)
+	Krishnababu Krothapalli (te)
+	Sandeep Sheshrao Shedmake (mr)
+	Мирослав Николић (sr)
+	Мирослав Николић (sr@latin)
+
 Evolution-EWS 3.13.6 2014-09-22
 -------------------------------
 
