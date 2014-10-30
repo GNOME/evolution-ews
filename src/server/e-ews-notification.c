@@ -202,6 +202,7 @@ ews_notification_dispose (GObject *object)
 		g_signal_handlers_disconnect_by_func (
 			priv->soup_session,
 			ews_notification_authenticate, object);
+		g_clear_object (&priv->soup_session);
 	}
 
 	if (priv->cancellable != NULL)
@@ -317,6 +318,10 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 
 	g_return_val_if_fail (notification != NULL, FALSE);
 	g_return_val_if_fail (notification->priv != NULL, FALSE);
+
+	/* Can happen during process shutdown */
+	if (!notification->priv->connection)
+		return FALSE;
 
 	msg = e_ews_message_new_with_header (
 		e_ews_connection_get_uri (notification->priv->connection),
@@ -434,6 +439,10 @@ e_ews_notification_unsubscribe_folder_sync (EEwsNotification *notification,
 
 	g_return_val_if_fail (notification != NULL, FALSE);
 	g_return_val_if_fail (notification->priv != NULL, FALSE);
+
+	/* Can happen during process shutdown */
+	if (!notification->priv->connection)
+		return FALSE;
 
 	msg = e_ews_message_new_with_header (
 		e_ews_connection_get_uri (notification->priv->connection),
@@ -616,7 +625,8 @@ ews_notification_fire_events_from_response (EEwsNotification *notification,
 	}
 
 	if (events != NULL) {
-		g_signal_emit_by_name (notification->priv->connection, "server-notification", events);
+		if (notification->priv->connection)
+			g_signal_emit_by_name (notification->priv->connection, "server-notification", events);
 		g_slist_free_full (events, (GDestroyNotify) e_ews_notification_event_free);
 	}
 }
