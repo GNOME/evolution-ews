@@ -9403,14 +9403,15 @@ e_ews_connection_disable_notifications_sync (EEwsConnection *cnc,
 
 	e_ews_notification_stop_listening_sync (cnc->priv->notification);
 
-	g_clear_object (&cnc->priv->notification);
-
 	g_slist_free_full (cnc->priv->subscribed_folders, g_free);
 	cnc->priv->subscribed_folders = NULL;
 
 	g_hash_table_foreach (cnc->priv->subscriptions, ews_connection_build_subscribed_folders_list, cnc);
-	if (cnc->priv->subscribed_folders != NULL)
+	if (cnc->priv->subscribed_folders != NULL) {
 		e_ews_notification_start_listening_sync (cnc->priv->notification, cnc->priv->subscribed_folders);
+	} else {
+		g_clear_object (&cnc->priv->notification);
+	}
 
 exit:
 	NOTIFICATION_UNLOCK (cnc);
