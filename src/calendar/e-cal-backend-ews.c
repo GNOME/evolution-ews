@@ -190,8 +190,6 @@ convert_error_to_edc_error (GError **perror)
 		case EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED:
 			error = EDC_ERROR_EX (AuthenticationFailed, (*perror)->message);
 			break;
-		case EWS_CONNECTION_ERROR_CANCELLED:
-			break;
 		case EWS_CONNECTION_ERROR_FOLDERNOTFOUND:
 		case EWS_CONNECTION_ERROR_MANAGEDFOLDERNOTFOUND:
 		case EWS_CONNECTION_ERROR_PARENTFOLDERNOTFOUND:
