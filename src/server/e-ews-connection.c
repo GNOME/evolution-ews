@@ -736,8 +736,8 @@ ews_cancel_request (GCancellable *cancellable,
 
 	g_simple_async_result_set_error (
 		simple,
-		EWS_CONNECTION_ERROR,
-		EWS_CONNECTION_ERROR_CANCELLED,
+		G_IO_ERROR,
+		G_IO_ERROR_CANCELLED,
 		_("Operation Cancelled"));
 	if (found) {
 		ews_connection_schedule_cancel_message (cnc, SOUP_MESSAGE (msg));
