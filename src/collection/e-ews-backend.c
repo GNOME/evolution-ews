@@ -394,6 +394,7 @@ ews_backend_add_gal_source (EEwsBackend *backend)
 		g_object_unref (server);
 
 		if (source != NULL) {
+			e_source_set_enabled (source, TRUE);
 			g_object_unref (source);
 			return;
 		}
@@ -430,6 +431,7 @@ ews_backend_add_gal_source (EEwsBackend *backend)
 
 	source = e_collection_backend_new_child (
 		collection_backend, oal_id);
+	e_source_set_enabled (source, TRUE);
 
 	e_source_set_display_name (source, display_name);
 
@@ -463,48 +465,21 @@ ews_backend_add_gal_source (EEwsBackend *backend)
 	g_object_unref (source);
 }
 
+static void ews_backend_populate (ECollectionBackend *backend);
+
 static void
 ews_backend_source_changed_cb (ESource *source,
                                EEwsBackend *backend)
 {
-	CamelEwsSettings *settings;
-	const gchar *oal_selected;
-	const gchar *gal_uid;
-
 	if (!e_source_get_enabled (source)) {
 		backend->priv->need_update_folders = TRUE;
 		return;
 	}
 
-	if (!e_backend_get_online (E_BACKEND (backend)) ||
-	    !backend->priv->need_update_folders)
+	if (!backend->priv->need_update_folders)
 		return;
 
-	settings = ews_backend_get_settings (backend);
-	gal_uid = camel_ews_settings_get_gal_uid (settings);
-	oal_selected = camel_ews_settings_get_oal_selected (settings);
-
-	if (g_strcmp0 (oal_selected, backend->priv->oal_selected) == 0)
-		return;
-
-	/* Remove the old Global Address List source if present. */
-	if (gal_uid != NULL) {
-		ECollectionBackend *collection_backend;
-		ESourceRegistryServer *server;
-
-		collection_backend = E_COLLECTION_BACKEND (backend);
-		server = e_collection_backend_ref_server (collection_backend);
-		source = e_source_registry_server_ref_source (server, gal_uid);
-
-		if (source != NULL) {
-			e_source_registry_server_remove_source (server, source);
-			g_object_unref (source);
-		}
-
-		camel_ews_settings_set_gal_uid (settings, NULL);
-	}
-
-	ews_backend_add_gal_source (backend);
+	ews_backend_populate (E_COLLECTION_BACKEND (backend));
 }
 
 static void
@@ -652,6 +627,43 @@ ews_backend_constructed (GObject *object)
 }
 
 static void
+ews_backend_claim_old_resources (ECollectionBackend *backend)
+{
+	ESourceRegistryServer *registry;
+	GList *old_resources, *iter;
+
+	g_return_if_fail (E_IS_COLLECTION_BACKEND (backend));
+
+	registry = e_collection_backend_ref_server (backend);
+	old_resources = e_collection_backend_claim_all_resources (backend);
+
+	for (iter = old_resources; iter; iter = g_list_next (iter)) {
+		ESource *source = iter->data;
+
+		e_source_set_enabled (source, TRUE);
+		e_source_registry_server_add_source (registry, source);
+	}
+
+	g_list_free_full (old_resources, g_object_unref);
+	g_clear_object (&registry);
+}
+
+static void
+ews_backend_folders_synced_cb (GObject *source,
+			       GAsyncResult *result,
+			       gpointer user_data)
+{
+	EEwsBackend *ews_backend;
+
+	g_return_if_fail (E_IS_EWS_BACKEND (source));
+
+	ews_backend = E_EWS_BACKEND (source);
+
+	if (!e_ews_backend_sync_folders_finish (ews_backend, result, NULL))
+		ews_backend_claim_old_resources (E_COLLECTION_BACKEND (ews_backend));
+}
+
+static void
 ews_backend_populate (ECollectionBackend *backend)
 {
 	ESource *source;
@@ -661,20 +673,21 @@ ews_backend_populate (ECollectionBackend *backend)
 
 	ews_backend->priv->need_update_folders = TRUE;
 
-	/* do not do anything, if account is disabled */
-	if (!e_source_get_enabled (source))
-		return;
-
 	if (!ews_backend->priv->notify_online_id)
 		ews_backend->priv->notify_online_id = g_signal_connect (
 			backend, "notify::online",
 			G_CALLBACK (ews_backend_populate), NULL);
 
-	/* For now at least, we don't need to know the
-	 * results, so no callback function is needed. */
-	e_ews_backend_sync_folders (ews_backend, NULL, NULL, NULL);
+	/* do not do anything, if account is disabled */
+	if (!e_source_get_enabled (source))
+		return;
 
 	ews_backend_add_gal_source (ews_backend);
+
+	if (e_backend_get_online (E_BACKEND (backend)))
+		e_ews_backend_sync_folders (ews_backend, NULL, ews_backend_folders_synced_cb, NULL);
+	else
+		ews_backend_claim_old_resources (backend);
 }
 
 static gchar *

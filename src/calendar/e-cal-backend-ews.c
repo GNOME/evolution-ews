@@ -780,7 +780,7 @@ e_cal_backend_ews_open (ECalBackend *backend,
 
 	need_to_authenticate =
 		(priv->cnc == NULL) &&
-		(e_backend_get_online (E_BACKEND (backend)));
+		(e_backend_is_destination_reachable (E_BACKEND (backend), cancellable, NULL));
 
 	PRIV_UNLOCK (priv);
 
@@ -799,12 +799,6 @@ e_cal_backend_ews_open (ECalBackend *backend,
 
 			if (priv->listen_notifications)
 				cbews_listen_notifications_cb (cbews, NULL, ews_settings);
-
-			g_signal_connect_swapped (
-				priv->cnc,
-				"server-notification",
-				G_CALLBACK (cbews_server_notification_cb),
-				cbews);
 		}
 		PRIV_UNLOCK (priv);
 	}
@@ -4246,6 +4240,12 @@ cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 		if (backend->priv->cnc != NULL)
 			g_object_unref (backend->priv->cnc);
 		backend->priv->cnc = g_object_ref (connection);
+
+		g_signal_connect_swapped (
+			backend->priv->cnc,
+			"server-notification",
+			G_CALLBACK (cbews_server_notification_cb),
+			backend);
 
 		PRIV_UNLOCK (backend->priv);
 

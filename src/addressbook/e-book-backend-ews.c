@@ -3315,6 +3315,17 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 			E_BACKEND (backend),
 			E_SOURCE_AUTHENTICATOR (backend),
 			cancellable, &error);
+		if (g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NORESPONSE)) {
+			/* possibly server unreachable, try offline */
+			if (priv->summary)
+				e_book_sqlite_get_key_value_int (priv->summary, E_BOOK_SQL_IS_POPULATED_KEY, &is_populated, NULL);
+			if (is_populated) {
+				g_clear_error (&error);
+				fetch_from_offline (ebews, book_view, query, cancellable, &error);
+				goto out;
+			}
+		}
+
 		if (error != NULL)
 			goto out;
 	}
@@ -3900,7 +3911,7 @@ e_book_backend_ews_open_sync (EBookBackend *backend,
 	ews_settings = book_backend_ews_get_collection_settings (ebews);
 
 	PRIV_LOCK (priv);
-	need_to_authenticate = priv->cnc == NULL && e_backend_get_online (E_BACKEND (backend));
+	need_to_authenticate = priv->cnc == NULL && e_backend_is_destination_reachable (E_BACKEND (backend), cancellable, NULL);
 
 	PRIV_UNLOCK (priv);
 
@@ -3929,11 +3940,6 @@ e_book_backend_ews_open_sync (EBookBackend *backend,
 	if (priv->listen_notifications)
 		ebews_listen_notifications_cb (ebews, NULL, ews_settings);
 
-	g_signal_connect_swapped (
-		priv->cnc,
-		"server-notification",
-		G_CALLBACK (ebews_server_notification_cb),
-		ebews);
 	PRIV_UNLOCK (priv);
 
 	g_signal_connect_swapped (
@@ -4158,6 +4164,12 @@ book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 			g_object_unref (backend->priv->cnc);
 		backend->priv->cnc = g_object_ref (connection);
 		backend->priv->is_writable = !backend->priv->is_gal;
+
+		g_signal_connect_swapped (
+			backend->priv->cnc,
+			"server-notification",
+			G_CALLBACK (ebews_server_notification_cb),
+			backend);
 
 		PRIV_UNLOCK (backend->priv);
 
