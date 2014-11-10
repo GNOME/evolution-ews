@@ -1,3 +1,13 @@
+Evolution-EWS 3.12.8 2014-11-10
+-------------------------------
+
+Bug Fixes:
+	Bug 738987 - Crash under e_ews_notification_unsubscribe_folder_sync() (Milan Crha)
+	Bug 691293 - Claim old resources in offline mode (Milan Crha)
+
+Miscellaneous:
+	Use G_IO_ERROR_CANCELLED instead of EWS_CONNECTION_ERROR_CANCELLED (Milan Crha)
+
 Evolution-EWS 3.12.7 2014-10-13
 -------------------------------
 
