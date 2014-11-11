@@ -1884,7 +1884,18 @@ ews_append_message_sync (CamelFolder *folder,
 	e_ews_folder_id_free (fid);
 	g_free (folder_id);
 
-	camel_ews_summary_add_message (folder->summary, itemid, changekey, info, message);
+	if (camel_ews_summary_add_message (folder->summary, itemid, changekey, info, message)) {
+		CamelFolderChangeInfo *changes;
+
+		changes = camel_folder_change_info_new ();
+
+		camel_folder_change_info_add_uid (changes, itemid);
+
+		if (camel_folder_change_info_changed (changes))
+			camel_folder_changed (folder, changes);
+
+		camel_folder_change_info_free (changes);
+	}
 
 	if (appended_uid)
 		*appended_uid = itemid;
@@ -2008,8 +2019,8 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 
 			clone = camel_message_info_clone (info);
 
-			camel_ews_summary_add_message (destination->summary, id->id, id->change_key, clone, message);
-			camel_folder_change_info_add_uid (changes, id->id);
+			if (camel_ews_summary_add_message (destination->summary, id->id, id->change_key, clone, message))
+				camel_folder_change_info_add_uid (changes, id->id);
 
 			camel_message_info_unref (clone);
 			camel_message_info_unref (info);

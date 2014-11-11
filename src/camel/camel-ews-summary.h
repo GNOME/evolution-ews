@@ -88,7 +88,8 @@ gboolean
 					 CamelMessageInfo *info,
 					 guint32 server_flags,
 					 CamelFlag *server_user_flags);
-void	camel_ews_summary_add_message	(CamelFolderSummary *summary,
+gboolean
+	camel_ews_summary_add_message	(CamelFolderSummary *summary,
 					 const gchar *uid,
 					 const gchar *change_key,
 					 CamelMessageInfo *info,
