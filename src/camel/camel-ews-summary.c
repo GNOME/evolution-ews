@@ -273,7 +273,7 @@ ews_info_set_flags (CamelMessageInfo *info,
 	return CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->info_set_flags (info, flags, set);
 }
 
-void
+gboolean
 camel_ews_summary_add_message (CamelFolderSummary *summary,
                                const gchar *uid,
 			       const gchar *change_key,
@@ -284,13 +284,13 @@ camel_ews_summary_add_message (CamelFolderSummary *summary,
 	const CamelFlag *flag;
 	const CamelTag *tag;
 
-	g_return_if_fail (uid != NULL);
-	g_return_if_fail (info != NULL);
-	g_return_if_fail (message != NULL);
+	g_return_val_if_fail (uid != NULL, FALSE);
+	g_return_val_if_fail (info != NULL, FALSE);
+	g_return_val_if_fail (message != NULL, FALSE);
 
 	/* Create summary entry */
 	mi = (CamelEwsMessageInfo *) camel_folder_summary_info_new_from_message (summary, message, NULL);
-	g_return_if_fail (mi != NULL);
+	g_return_val_if_fail (mi != NULL, FALSE);
 
 	/* Set the change_key */
 	mi->change_key = g_strdup (change_key);
@@ -317,6 +317,8 @@ camel_ews_summary_add_message (CamelFolderSummary *summary,
 	camel_folder_summary_add (summary, (CamelMessageInfo *) mi);
 	camel_folder_summary_touch (summary);
 	camel_folder_summary_save_to_db (summary, NULL);
+
+	return TRUE;
 }
 
 static gboolean
