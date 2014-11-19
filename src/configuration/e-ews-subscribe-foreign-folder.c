@@ -124,8 +124,11 @@ add_foreign_folder_to_camel (CamelEwsStore *ews_store,
 			CAMEL_FOLDER_SUBSCRIBED, e_ews_folder_get_total_count (folder), TRUE, FALSE);
 	} else {
 		const gchar *displayname;
+		gchar *escaped_name;
 
-		fullname = g_strdup_printf ("%s/%s/%s", EWS_FOREIGN_FOLDER_ROOT_DISPLAY_NAME, mailbox, display_foldername);
+		escaped_name = e_ews_folder_utils_escape_name (display_foldername);
+		fullname = g_strdup_printf ("%s/%s/%s", EWS_FOREIGN_FOLDER_ROOT_DISPLAY_NAME, mailbox, escaped_name);
+		g_free (escaped_name);
 
 		/* make sure the path is unique */
 		camel_ews_store_ensure_unique_path (ews_store, &fullname);

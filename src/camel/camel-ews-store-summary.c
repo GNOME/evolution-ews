@@ -14,7 +14,7 @@
 #define S_UNLOCK(x) (g_rec_mutex_unlock(&(x)->priv->s_lock))
 
 #define STORE_GROUP_NAME "##storepriv"
-#define CURRENT_SUMMARY_VERSION 1
+#define CURRENT_SUMMARY_VERSION 2
 
 struct _CamelEwsStoreSummaryPrivate {
 	GKeyFile *key_file;
