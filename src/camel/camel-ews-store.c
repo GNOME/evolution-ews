@@ -1982,7 +1982,7 @@ get_public_folder_full_name (EEwsFolder *folder,
 	g_return_val_if_fail (folder != NULL, NULL);
 	g_return_val_if_fail (folders_by_id != NULL, NULL);
 
-	full_name = g_string_new (e_ews_folder_get_name (folder));
+	full_name = g_string_new (e_ews_folder_get_escaped_name (folder));
 	while (folder) {
 		parent_fid = e_ews_folder_get_parent_id (folder);
 		if (!parent_fid || !parent_fid->id)
@@ -1991,7 +1991,7 @@ get_public_folder_full_name (EEwsFolder *folder,
 		folder = g_hash_table_lookup (folders_by_id, parent_fid->id);
 		if (folder) {
 			g_string_prepend (full_name, "/");
-			g_string_prepend (full_name, e_ews_folder_get_name (folder));
+			g_string_prepend (full_name, e_ews_folder_get_escaped_name (folder));
 		}
 	}
 
@@ -3248,10 +3248,10 @@ ews_store_subscribe_folder_sync (CamelSubscribable *subscribable,
 
 		g_return_val_if_fail (parent_name != NULL, FALSE);
 
-		tmp = g_strconcat (parent_name, "/", e_ews_folder_get_name (folder), NULL);
+		tmp = g_strconcat (parent_name, "/", e_ews_folder_get_escaped_name (folder), NULL);
 		g_free (parent_name);
 	} else {
-		tmp = g_strconcat (EWS_PUBLIC_FOLDER_ROOT_DISPLAY_NAME, "/", e_ews_folder_get_name (folder), NULL);
+		tmp = g_strconcat (EWS_PUBLIC_FOLDER_ROOT_DISPLAY_NAME, "/", e_ews_folder_get_escaped_name (folder), NULL);
 	}
 
 	if (e_ews_folder_get_folder_type (folder) != E_EWS_FOLDER_TYPE_MAILBOX) {

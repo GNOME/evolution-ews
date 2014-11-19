@@ -63,6 +63,7 @@ gboolean	e_ews_folder_is_error (EEwsFolder *folder);
 const GError *	e_ews_folder_get_error (const EEwsFolder *folder);
 const gchar *	e_ews_folder_get_name (const EEwsFolder *folder);
 void		e_ews_folder_set_name (EEwsFolder *folder, const gchar *new_name);
+const gchar *	e_ews_folder_get_escaped_name (const EEwsFolder *folder);
 void		e_ews_folder_set_parent_id (EEwsFolder *folder, EwsFolderId *fid);
 const EwsFolderId *
 		e_ews_folder_get_parent_id (const EEwsFolder *folder);
@@ -86,6 +87,9 @@ void		e_ews_folder_id_free (EwsFolderId *fid);
 gboolean	e_ews_folder_id_is_equal (const EwsFolderId *a,
 					  const EwsFolderId *b,
 					  gboolean check_change_key);
+
+gchar *		e_ews_folder_utils_escape_name			(const gchar *folder_name);
+gchar *		e_ews_folder_utils_unescape_name		(const gchar *escaped_folder_name);
 
 typedef enum {
 	E_EWS_ESOURCE_FLAG_NONE			= 0,

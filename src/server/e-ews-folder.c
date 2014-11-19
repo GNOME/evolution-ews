@@ -38,6 +38,7 @@ G_DEFINE_TYPE (EEwsFolder, e_ews_folder, G_TYPE_OBJECT)
 struct _EEwsFolderPrivate {
 	GError *error;
 	gchar *name;
+	gchar *escaped_name;
 	EwsFolderId *fid;
 	EwsFolderId *parent_fid;
 	EEwsFolderType folder_type;
@@ -74,6 +75,9 @@ e_ews_folder_finalize (GObject *object)
 		g_free (priv->name);
 		priv->name = NULL;
 	}
+
+	g_free (priv->escaped_name);
+	priv->escaped_name = NULL;
 
 	if (priv->fid) {
 		g_free (priv->fid->id);
@@ -184,8 +188,10 @@ e_ews_folder_set_from_soap_parameter (EEwsFolder *folder,
 	}
 
 	subparam = e_soap_parameter_get_first_child_by_name (node, "DisplayName");
-	if (subparam)
+	if (subparam) {
 		priv->name = e_soap_parameter_get_string_value (subparam);
+		priv->escaped_name = e_ews_folder_utils_escape_name (priv->name);
+	}
 
 	subparam = e_soap_parameter_get_first_child_by_name (node, "UnreadCount");
 	if (subparam)
@@ -381,7 +387,18 @@ e_ews_folder_set_name (EEwsFolder *folder,
 	priv = folder->priv;
 
 	g_free (priv->name);
+	g_free (priv->escaped_name);
+
 	priv->name = g_strdup (new_name);
+	priv->escaped_name = e_ews_folder_utils_escape_name (priv->name);
+}
+
+const gchar *
+e_ews_folder_get_escaped_name (const EEwsFolder *folder)
+{
+	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), NULL);
+
+	return folder->priv->escaped_name;
 }
 
 const EwsFolderId *
@@ -484,6 +501,70 @@ e_ews_folder_set_foreign (EEwsFolder *folder,
 	g_return_if_fail (E_IS_EWS_FOLDER (folder));
 
 	folder->priv->foreign = is_foreign;
+}
+
+/* escapes backslashes with \5C and forward slashes with \2F */
+gchar *
+e_ews_folder_utils_escape_name (const gchar *folder_name)
+{
+	gint ii, jj, count = 0;
+	gchar *res;
+
+	if (!folder_name)
+		return NULL;
+
+	for (ii = 0; folder_name[ii]; ii++) {
+		if (folder_name[ii] == '\\' || folder_name[ii] == '/')
+			count++;
+	}
+
+	if (!count)
+		return g_strdup (folder_name);
+
+	res = g_malloc0 (sizeof (gchar *) * (1 + ii + (2 * count)));
+	for (ii = 0, jj = 0; folder_name[ii]; ii++, jj++) {
+		if (folder_name[ii] == '\\') {
+			res[jj] = '\\';
+			res[jj + 1] = '5';
+			res[jj + 2] = 'C';
+			jj += 2;
+		} else if (folder_name[ii] == '/') {
+			res[jj] = '\\';
+			res[jj + 1] = '2';
+			res[jj + 2] = 'F';
+			jj += 2;
+		} else {
+			res[jj] = folder_name[ii];
+		}
+	}
+
+	res[jj] = '\0';
+
+	return res;
+}
+
+/* reverses e_ews_folder_utils_escape_name() processing */
+gchar *
+e_ews_folder_utils_unescape_name (const gchar *escaped_folder_name)
+{
+	gchar *res = g_strdup (escaped_folder_name);
+	gint ii, jj;
+
+	if (!res)
+		return res;
+
+	for (ii = 0, jj = 0; res[ii]; ii++, jj++) {
+		if (res[ii] == '\\' && g_ascii_isxdigit (res[ii + 1]) && g_ascii_isxdigit (res[ii + 2])) {
+			res[jj] = ((g_ascii_xdigit_value (res[ii + 1]) & 0xF) << 4) | (g_ascii_xdigit_value (res[ii + 2]) & 0xF);
+			ii += 2;
+		} else if (ii != jj) {
+			res[jj] = res[ii];
+		}
+	}
+
+	res[jj] = '\0';
+
+	return res;
 }
 
 gchar *

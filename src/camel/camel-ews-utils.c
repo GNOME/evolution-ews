@@ -48,6 +48,7 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store,
 {
 	CamelEwsStoreSummary *ews_summary = store->summary;
 	CamelFolderInfo *fi;
+	gchar *folder_name;
 
 	fi = camel_folder_info_new ();
 	fi->full_name = camel_ews_store_summary_get_folder_full_name (
@@ -60,14 +61,14 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store,
 		return NULL;
 	}
 
-	fi->display_name = camel_ews_store_summary_get_folder_name (
-		ews_summary, fid, NULL);
-	fi->flags = camel_ews_store_summary_get_folder_flags (
-		ews_summary, fid, NULL);
-	fi->unread = camel_ews_store_summary_get_folder_unread (
-		ews_summary, fid, NULL);
-	fi->total = camel_ews_store_summary_get_folder_total (
-		ews_summary, fid, NULL);
+	folder_name = camel_ews_store_summary_get_folder_name (ews_summary, fid, NULL);
+
+	fi->display_name = e_ews_folder_utils_unescape_name (folder_name);
+	fi->flags = camel_ews_store_summary_get_folder_flags (ews_summary, fid, NULL);
+	fi->unread = camel_ews_store_summary_get_folder_unread (ews_summary, fid, NULL);
+	fi->total = camel_ews_store_summary_get_folder_total (ews_summary, fid, NULL);
+
+	g_free (folder_name);
 
 	if (!(fi->flags & CAMEL_FOLDER_TYPE_MASK)) {
 		switch (camel_ews_store_summary_get_folder_type (ews_summary, fid, NULL)) {
