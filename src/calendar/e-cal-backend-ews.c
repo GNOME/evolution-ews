@@ -443,6 +443,41 @@ e_cal_backend_ews_discard_alarm (ECalBackend *backend,
 		edad);
 }
 
+static gchar *
+cal_backend_ews_get_builtin_zone_object (const gchar *tzid)
+{
+	icalcomponent *icalcomp = NULL, *free_comp = NULL;
+	icaltimezone *zone;
+	gchar *object = NULL;
+
+	zone = icaltimezone_get_builtin_timezone (tzid);
+	if (!zone) {
+		icalcomp = free_comp = icaltzutil_fetch_timezone (tzid);
+	}
+
+	if (zone)
+		icalcomp = icaltimezone_get_component (zone);
+
+	if (icalcomp) {
+		icalcomponent *clone = icalcomponent_new_clone (icalcomp);
+		icalproperty *prop;
+
+		prop = icalcomponent_get_first_property (clone, ICAL_TZID_PROPERTY);
+		if (prop) {
+			/* change tzid to our, because the component has the buildin tzid */
+			icalproperty_set_tzid (prop, tzid);
+
+			object = icalcomponent_as_ical_string_r (clone);
+		}
+		icalcomponent_free (clone);
+	}
+
+	if (free_comp)
+		icalcomponent_free (free_comp);
+
+	return object;
+}
+
 static void
 e_cal_backend_ews_get_timezone (ECalBackend *backend,
                                 EDataCal *cal,
@@ -476,36 +511,20 @@ e_cal_backend_ews_get_timezone (ECalBackend *backend,
 				slashes++;
 		}
 
-		if (slashes == 1) {
-			icalcomponent *icalcomp = NULL, *free_comp = NULL;
+		if (slashes == 1)
+			object = cal_backend_ews_get_builtin_zone_object (tzid);
 
-			icaltimezone *zone = icaltimezone_get_builtin_timezone (tzid);
-			if (!zone) {
-				icalcomp = free_comp = icaltzutil_fetch_timezone (tzid);
+		if (!object) {
+			/* The timezone can be sometimes the Windows zone, try to convert it to libical */
+			const gchar *ical_location = e_cal_backend_ews_tz_util_get_ical_equivalent (tzid);
+			if (ical_location) {
+				object = cal_backend_ews_get_builtin_zone_object (ical_location);
 			}
-
-			if (zone)
-				icalcomp = icaltimezone_get_component (zone);
-
-			if (icalcomp) {
-				icalcomponent *clone = icalcomponent_new_clone (icalcomp);
-				icalproperty *prop;
-
-				prop = icalcomponent_get_first_property (clone, ICAL_TZID_PROPERTY);
-				if (prop) {
-					/* change tzid to our, because the component has the buildin tzid */
-					icalproperty_set_tzid (prop, tzid);
-
-					object = icalcomponent_as_ical_string_r (clone);
-					g_clear_error (&error);
-				}
-				icalcomponent_free (clone);
-			}
-
-			if (free_comp)
-				icalcomponent_free (free_comp);
 		}
 	}
+
+	if (!object && !error)
+		g_propagate_error (&error, e_data_cal_create_error (ObjectNotFound, NULL));
 
 	convert_error_to_edc_error (&error);
 	e_data_cal_respond_get_timezone (cal, context, error, object);

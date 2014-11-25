@@ -471,7 +471,7 @@ For terms of use, see http://www.unicode.org/copyright.html
 			<mapZone other="Pakistan Standard Time" territory="PK" type="Asia/Karachi"/>
 
 			<!-- (UTC+05:30) Chennai, Kolkata, Mumbai, New Delhi -->
-			<mapZone other="India Standard Time" territory="001" type="Asia/Calcutta"/>
+			<mapZone other="India Standard Time" territory="001" type="Asia/Kolkata"/>
 			<mapZone other="India Standard Time" territory="IN" type="Asia/Calcutta"/>
 
 			<!-- (UTC+05:30) Sri Jayawardenepura -->
@@ -648,13 +648,6 @@ For terms of use, see http://www.unicode.org/copyright.html
 			<!-- (UTC+13:00) Samoa -->
 			<mapZone other="Samoa Standard Time" territory="001" type="Pacific/Apia"/>
 			<mapZone other="Samoa Standard Time" territory="WS" type="Pacific/Apia"/>
-
-			<!-- Internal fixes -->
-			<mapZone other="Argentina Standard Time" territory="AR" type="America/Argentina/Buenos_Aires America/Argentina/Cordoba America/Argentina/Jujuy America/Argentina/Catamarca America/Argentina/Mendoza"/>
-			<mapZone other="India Standard Time" territory="IN" type="Asia/Kolkata"/>
-			<mapZone other="Nepal Standard Time" territory="NP" type="Asia/Kathmandu"/>
-			<mapZone other="Eastern Standard Time" territory="US" type="America/Kentucky/Louisville"/>
-			<mapZone other="US Eastern Standard Time" territory="US" type="America/Indiana/Indianapolis"/>
 		</mapTimezones>
 	</windowsZones>
 </supplementalData>
