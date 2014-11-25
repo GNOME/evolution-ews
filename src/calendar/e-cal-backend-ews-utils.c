@@ -123,13 +123,19 @@ e_cal_backend_ews_populate_windows_zones (void)
 		tokens = g_strsplit ((gchar *) ical, " ", 0);
 		tokens_len = g_strv_length (tokens);
 		if (tokens_len == 1) {
-			g_hash_table_insert (msdn_to_ical, g_strdup ((gchar *) msdn), g_strdup ((gchar *) ical));
-			g_hash_table_insert (ical_to_msdn, g_strdup ((gchar *) ical), g_strdup ((gchar *) msdn));
+			if (!g_hash_table_lookup (msdn_to_ical, msdn))
+				g_hash_table_insert (msdn_to_ical, g_strdup ((gchar *) msdn), g_strdup ((gchar *) ical));
+
+			if (!g_hash_table_lookup (ical_to_msdn, ical))
+				g_hash_table_insert (ical_to_msdn, g_strdup ((gchar *) ical), g_strdup ((gchar *) msdn));
 		} else {
 			gint j;
 			for (j = 0; j < tokens_len; j++) {
-				g_hash_table_insert (msdn_to_ical, g_strdup ((gchar *) msdn), g_strdup (tokens[j]));
-				g_hash_table_insert (ical_to_msdn, g_strdup (tokens[j]), g_strdup ((gchar *) msdn));
+				if (!g_hash_table_lookup (msdn_to_ical, msdn))
+					g_hash_table_insert (msdn_to_ical, g_strdup ((gchar *) msdn), g_strdup (tokens[j]));
+
+				if (!g_hash_table_lookup (ical_to_msdn, tokens[j]))
+					g_hash_table_insert (ical_to_msdn, g_strdup (tokens[j]), g_strdup ((gchar *) msdn));
 			}
 		}
 
