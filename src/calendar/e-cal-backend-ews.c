@@ -1319,6 +1319,8 @@ ews_create_attachments_cb (GObject *object,
 		if (error != NULL)
 			g_clear_error (&error);
 
+		e_cal_backend_ews_async_data_free (create_data);
+
 		return;
 	}
 
@@ -1364,7 +1366,7 @@ ews_create_attachments_cb (GObject *object,
 		modify_data->extra_comp = g_object_ref (create_data->extra_comp);
 		modify_data->cal = g_object_ref (create_data->cal);
 		modify_data->context = create_data->context;
-		modify_data->item_id = create_data->item_id;
+		modify_data->item_id = g_strdup (create_data->item_id);
 
 		convert_data.connection = create_data->cbews->priv->cnc;
 		convert_data.user_email = create_data->cbews->priv->user_email;
