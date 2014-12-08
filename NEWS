@@ -1,3 +1,15 @@
+Evolution-EWS 3.12.9 2014-12-08
+-------------------------------
+
+Bug Fixes:
+	Bug 738945 - Missing folder changed notify after message append (Milan Crha)
+	Bug 738093 - Show folder names with slash properly (Milan Crha)
+	Bug 734747 - Fails to provide "Eastern Standard Time" timezone (Milan Crha)
+	Bug 740772 - Use-after-free when adding attachments to events (Milan Crha)
+
+Miscellaneous:
+	Set max-width-chars to wrapped GtkLabel-s (Milan Crha)
+
 Evolution-EWS 3.12.8 2014-11-10
 -------------------------------
 
