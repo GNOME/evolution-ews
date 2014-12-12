@@ -1603,12 +1603,19 @@ static void
 ews_store_maybe_update_sent_and_drafts (CamelEwsStore *ews_store,
 					/* const */ GSList *ews_folders)
 {
+	CamelSession *session;
 	ESourceRegistry *registry;
 	ESource *sibling, *source = NULL;
 
 	g_return_if_fail (CAMEL_IS_EWS_STORE (ews_store));
 
-	registry = e_source_registry_new_sync (NULL, NULL);
+	session = camel_service_ref_session (CAMEL_SERVICE (ews_store));
+	if (session && E_IS_MAIL_SESSION (session))
+		registry = g_object_ref (e_mail_session_get_registry (E_MAIL_SESSION (session)));
+	else
+		registry = e_source_registry_new_sync (NULL, NULL);
+	g_clear_object (&session);
+
 	g_return_if_fail (registry != NULL);
 
 	sibling = e_source_registry_ref_source (registry, camel_service_get_uid (CAMEL_SERVICE (ews_store)));
