@@ -4258,6 +4258,9 @@ cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 
 		PRIV_LOCK (backend->priv);
 
+		g_free (backend->priv->user_email);
+		backend->priv->user_email = camel_ews_settings_dup_email (ews_settings);
+
 		if (backend->priv->cnc != NULL)
 			g_object_unref (backend->priv->cnc);
 		backend->priv->cnc = g_object_ref (connection);
