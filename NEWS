@@ -1,3 +1,10 @@
+Evolution-EWS 3.12.10 2015-01-12
+--------------------------------
+
+Bug Fixes:
+	Bug 695754 - Reuse existing ESourceRegistry from EMailSession, if possible (Milan Crha)
+	Bug 729286 - [Calendar] Update stored user email after successful connect (William Shuman)
+
 Evolution-EWS 3.12.9 2014-12-08
 -------------------------------
 
