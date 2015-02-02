@@ -26,6 +26,7 @@
 
 #include <gtk/gtk.h>
 #include <libedataserver/libedataserver.h>
+#include <libedataserverui/libedataserverui.h>
 
 #include <e-util/e-util.h>
 #include <mail/em-folder-tree.h>
@@ -57,6 +58,7 @@ struct RunWithFeedbackData
 	GObject *with_object;
 	EEwsSetupFunc thread_func;
 	EEwsSetupFunc idle_func;
+	EEwsSetupFunc finish_idle_func;
 	gpointer user_data;
 	GDestroyNotify free_user_data;
 	GError *error;
@@ -106,6 +108,9 @@ run_with_feedback_idle (gpointer user_data)
 	} else {
 		was_cancelled = TRUE;
 	}
+
+	if (rfd->finish_idle_func)
+		rfd->finish_idle_func (rfd->with_object, rfd->user_data, rfd->cancellable, &rfd->error);
 
 	if (!was_cancelled) {
 		if (rfd->error) {
@@ -197,6 +202,7 @@ e_ews_config_utils_run_in_thread_with_feedback_general (GtkWindow *parent,
 	rfd->with_object = g_object_ref (with_object);
 	rfd->thread_func = thread_func;
 	rfd->idle_func = idle_func;
+	rfd->finish_idle_func = NULL;
 	rfd->user_data = user_data;
 	rfd->free_user_data = free_user_data;
 	rfd->error = NULL;
@@ -251,137 +257,90 @@ e_ews_config_utils_run_in_thread_with_feedback_modal (GtkWindow *parent,
 	e_ews_config_utils_run_in_thread_with_feedback_general (parent, with_object, description, thread_func, idle_func, user_data, free_user_data, TRUE);
 }
 
-typedef struct _EEwsConfigUtilsAuthenticator EEwsConfigUtilsAuthenticator;
-typedef struct _EEwsConfigUtilsAuthenticatorClass EEwsConfigUtilsAuthenticatorClass;
+void
+e_ews_config_utils_run_in_thread (GObject *with_object,
+				  EEwsSetupFunc thread_func,
+				  EEwsSetupFunc idle_func,
+				  gpointer user_data,
+				  GDestroyNotify free_user_data,
+				  GCancellable *cancellable)
+{
+	struct RunWithFeedbackData *rfd;
+	GThread *thread;
 
-struct _EEwsConfigUtilsAuthenticator {
-	GObject parent;
+	g_return_if_fail (with_object != NULL);
+	g_return_if_fail (thread_func != NULL);
 
-	ESourceRegistry *registry;
+	rfd = g_new0 (struct RunWithFeedbackData, 1);
+	rfd->parent = NULL;
+	rfd->dialog = NULL;
+	rfd->cancellable = cancellable ? g_object_ref (cancellable) : g_cancellable_new ();
+	rfd->with_object = g_object_ref (with_object);
+	rfd->thread_func = thread_func;
+	rfd->idle_func = NULL;
+	rfd->finish_idle_func = idle_func;
+	rfd->user_data = user_data;
+	rfd->free_user_data = free_user_data;
+	rfd->error = NULL;
+	rfd->run_modal = FALSE;
+
+	thread = g_thread_new (NULL, run_with_feedback_thread, rfd);
+	g_thread_unref (thread);
+}
+
+typedef struct _TryCredentialsData {
 	CamelEwsSettings *ews_settings;
+	const gchar *connect_url;
+	EEwsConfigUtilTryCredentialsFunc try_credentials_func;
+	gpointer user_data;
 	EEwsConnection *conn;
-};
-
-struct _EEwsConfigUtilsAuthenticatorClass {
-	GObjectClass parent_class;
-};
+} TryCredentialsData;
 
 static gboolean
-ews_config_utils_authenticator_get_without_password (ESourceAuthenticator *auth)
+ews_config_utils_try_credentials_sync (ECredentialsPrompter *prompter,
+				       ESource *source,
+				       const ENamedParameters *credentials,
+				       gboolean *out_authenticated,
+				       gpointer user_data,
+				       GCancellable *cancellable,
+				       GError **error)
 {
-	EEwsConfigUtilsAuthenticator *authenticator = (EEwsConfigUtilsAuthenticator *) auth;
-	return e_ews_connection_utils_get_without_password (authenticator->ews_settings);
-}
+	TryCredentialsData *data = user_data;
+	ESourceAuthenticationResult auth_result;
+	gchar *hosturl;
+	gboolean res = TRUE;
 
-static ESourceAuthenticationResult
-ews_config_utils_authenticator_try_password_sync (ESourceAuthenticator *auth,
-                                                  const GString *password,
-                                                  GCancellable *cancellable,
-                                                  GError **error)
-{
-	EEwsConfigUtilsAuthenticator *authenticator = (EEwsConfigUtilsAuthenticator *) auth;
-	CamelNetworkSettings *network_settings;
-	gchar *hosturl, *user;
-	EwsFolderId *fid;
-	GSList *ids = NULL, *folders = NULL;
-	GError *local_error = NULL;
-
-	network_settings = CAMEL_NETWORK_SETTINGS (authenticator->ews_settings);
-
-	hosturl = camel_ews_settings_dup_hosturl (authenticator->ews_settings);
-	user = camel_network_settings_dup_user (network_settings);
-
-	authenticator->conn = e_ews_connection_new (
-		hosturl, authenticator->ews_settings);
-	e_ews_connection_set_password (authenticator->conn, password->str);
-
+	hosturl = camel_ews_settings_dup_hosturl (data->ews_settings);
+	data->conn = e_ews_connection_new (data->connect_url ? data->connect_url : hosturl, data->ews_settings);
 	g_free (hosturl);
-	g_free (user);
 
-	g_warn_if_fail (authenticator->conn);
+	e_ews_connection_update_credentials (data->conn, credentials);
 
-	/* test whether connection works with some simple operation */
-	fid = g_new0 (EwsFolderId, 1);
-	fid->id = g_strdup ("inbox");
-	fid->is_distinguished_id = TRUE;
-	ids = g_slist_append (ids, fid);
+	if (data->try_credentials_func)
+		auth_result = data->try_credentials_func (data->conn, credentials, data->user_data, cancellable, error);
+	else
+		auth_result = e_ews_connection_try_credentials_sync (data->conn, credentials, cancellable, error);
 
-	e_ews_connection_get_folder_sync (
-		authenticator->conn, EWS_PRIORITY_MEDIUM, "Default",
-		NULL, ids, &folders, cancellable, &local_error);
-
-	e_ews_folder_id_free (fid);
-	g_slist_free (ids);
-	g_slist_free_full (folders, g_object_unref);
-
-	if (local_error) {
-		g_object_unref (authenticator->conn);
-		authenticator->conn = NULL;
-
-		if (g_error_matches (
-		    local_error, EWS_CONNECTION_ERROR,
-		    EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED)) {
-			g_clear_error (&local_error);
-			return E_SOURCE_AUTHENTICATION_REJECTED;
-		}
-
-		g_propagate_error (error, local_error);
-
-		return E_SOURCE_AUTHENTICATION_ERROR;
+	if (auth_result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
+		*out_authenticated = TRUE;
+	} else if (auth_result == E_SOURCE_AUTHENTICATION_REJECTED) {
+		*out_authenticated = FALSE;
+		g_clear_object (&data->conn);
+		g_clear_error (error);
+	} else {
+		res = FALSE;
+		g_clear_object (&data->conn);
 	}
 
-	return E_SOURCE_AUTHENTICATION_ACCEPTED;
-}
-
-#define E_TYPE_EWS_CONFIG_UTILS_AUTHENTICATOR (e_ews_config_utils_authenticator_get_type ())
-
-GType e_ews_config_utils_authenticator_get_type (void) G_GNUC_CONST;
-
-static void e_ews_config_utils_authenticator_authenticator_init (ESourceAuthenticatorInterface *iface);
-
-G_DEFINE_TYPE_EXTENDED (EEwsConfigUtilsAuthenticator, e_ews_config_utils_authenticator, G_TYPE_OBJECT, 0,
-	G_IMPLEMENT_INTERFACE (E_TYPE_SOURCE_AUTHENTICATOR, e_ews_config_utils_authenticator_authenticator_init))
-
-static void
-ews_config_utils_authenticator_finalize (GObject *object)
-{
-	EEwsConfigUtilsAuthenticator *authenticator = (EEwsConfigUtilsAuthenticator *) object;
-
-	g_object_unref (authenticator->registry);
-	g_object_unref (authenticator->ews_settings);
-	if (authenticator->conn)
-		g_object_unref (authenticator->conn);
-
-	G_OBJECT_CLASS (e_ews_config_utils_authenticator_parent_class)->finalize (object);
-}
-
-static void
-e_ews_config_utils_authenticator_class_init (EEwsConfigUtilsAuthenticatorClass *class)
-{
-	GObjectClass *object_class;
-
-	object_class = G_OBJECT_CLASS (class);
-	object_class->finalize = ews_config_utils_authenticator_finalize;
-}
-
-static void
-e_ews_config_utils_authenticator_authenticator_init (ESourceAuthenticatorInterface *iface)
-{
-	iface->get_without_password =
-		ews_config_utils_authenticator_get_without_password;
-	iface->try_password_sync =
-		ews_config_utils_authenticator_try_password_sync;
-}
-
-static void
-e_ews_config_utils_authenticator_init (EEwsConfigUtilsAuthenticator *authenticator)
-{
+	return res;
 }
 
 EEwsConnection	*
-e_ews_config_utils_open_connection_for (ESourceRegistry *registry,
-                                        ESource *source,
+e_ews_config_utils_open_connection_for (ESource *source,
                                         CamelEwsSettings *ews_settings,
+					const gchar *connect_url,
+					EEwsConfigUtilTryCredentialsFunc try_credentials_func,
+					gpointer user_data,
                                         GCancellable *cancellable,
                                         GError **perror)
 {
@@ -389,7 +348,6 @@ e_ews_config_utils_open_connection_for (ESourceRegistry *registry,
 	CamelNetworkSettings *network_settings;
 	GError *local_error = NULL;
 
-	g_return_val_if_fail (registry != NULL, NULL);
 	g_return_val_if_fail (source != NULL, NULL);
 	g_return_val_if_fail (ews_settings != NULL, NULL);
 
@@ -397,25 +355,58 @@ e_ews_config_utils_open_connection_for (ESourceRegistry *registry,
 
 	/* use the one from mailer, if there, otherwise open new */
 	conn = e_ews_connection_find (
-		camel_ews_settings_get_hosturl (ews_settings),
+		connect_url && *connect_url ? connect_url : camel_ews_settings_get_hosturl (ews_settings),
 		camel_network_settings_get_user (network_settings));
-	if (conn)
+	if (conn) {
+		if (try_credentials_func &&
+		    try_credentials_func (conn, NULL, user_data, cancellable, perror) != E_SOURCE_AUTHENTICATION_ACCEPTED) {
+			g_clear_object (&conn);
+		}
 		return conn;
+	}
 
 	while (!conn && !g_cancellable_is_cancelled (cancellable) && !local_error) {
-		EEwsConfigUtilsAuthenticator *authenticator = g_object_new (E_TYPE_EWS_CONFIG_UTILS_AUTHENTICATOR, NULL);
+		if (e_ews_connection_utils_get_without_password (ews_settings)) {
+			ESourceAuthenticationResult result;
+			gchar *hosturl;
 
-		authenticator->ews_settings = g_object_ref (ews_settings);
-		authenticator->registry = g_object_ref (registry);
+			hosturl = camel_ews_settings_dup_hosturl (ews_settings);
+			conn = e_ews_connection_new (connect_url && *connect_url ? connect_url : hosturl, ews_settings);
+			g_free (hosturl);
 
-		e_source_registry_authenticate_sync (
-			registry, source, E_SOURCE_AUTHENTICATOR (authenticator),
-			cancellable, &local_error);
+			e_ews_connection_update_credentials (conn, NULL);
 
-		if (authenticator->conn)
-			conn = g_object_ref (authenticator->conn);
+			if (try_credentials_func)
+				result = try_credentials_func (conn, NULL, user_data, cancellable, &local_error);
+			else
+				result = e_ews_connection_try_credentials_sync (conn, NULL, cancellable, &local_error);
 
-		g_object_unref (authenticator);
+			if (result != E_SOURCE_AUTHENTICATION_ACCEPTED) {
+				g_clear_object (&conn);
+				break;
+			}
+		} else {
+			EShell *shell;
+			TryCredentialsData data;
+
+			shell = e_shell_get_default ();
+
+			data.ews_settings = g_object_ref (ews_settings);
+			data.connect_url = connect_url && *connect_url ? connect_url : NULL;
+			data.try_credentials_func = try_credentials_func;
+			data.user_data = user_data;
+			data.conn = NULL;
+
+			e_credentials_prompter_loop_prompt_sync (e_shell_get_credentials_prompter (shell),
+				source, E_CREDENTIALS_PROMPTER_PROMPT_FLAG_ALLOW_SOURCE_SAVE,
+				ews_config_utils_try_credentials_sync, &data, cancellable, &local_error);
+
+			if (data.conn)
+				conn = g_object_ref (data.conn);
+
+			g_clear_object (&data.ews_settings);
+			g_clear_object (&data.conn);
+		}
 	}
 
 	if (local_error)
@@ -660,9 +651,9 @@ ews_settings_get_folder_sizes_thread (gpointer user_data)
 	g_return_val_if_fail (fsd != NULL, NULL);
 
 	cnc = e_ews_config_utils_open_connection_for (
-			fsd->registry,
 			fsd->source,
 			fsd->ews_settings,
+			NULL, NULL, NULL,
 			fsd->cancellable,
 			&fsd->error);
 

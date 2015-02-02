@@ -24,6 +24,8 @@
 
 #include <glib/gi18n-lib.h>
 
+#include <libedataserverui/libedataserverui.h>
+#include <shell/e-shell.h>
 #include <mail/e-mail-config-service-page.h>
 
 #include "server/e-ews-connection.h"
@@ -42,6 +44,9 @@ struct _EMailConfigEwsAutodiscoverPrivate {
 struct _AsyncContext {
 	EMailConfigEwsAutodiscover *autodiscover;
 	EActivity *activity;
+	ESource *source;
+	CamelEwsSettings *ews_settings;
+	gchar *email_address;
 };
 
 enum {
@@ -49,29 +54,38 @@ enum {
 	PROP_BACKEND
 };
 
-/* Forward Declarations */
-static void	e_mail_config_ews_autodiscover_authenticator_init
-				(ESourceAuthenticatorInterface *iface);
-
-G_DEFINE_DYNAMIC_TYPE_EXTENDED (
-	EMailConfigEwsAutodiscover,
-	e_mail_config_ews_autodiscover,
-	GTK_TYPE_BUTTON,
-	0,
-	G_IMPLEMENT_INTERFACE_DYNAMIC (
-		E_TYPE_SOURCE_AUTHENTICATOR,
-		e_mail_config_ews_autodiscover_authenticator_init))
+G_DEFINE_DYNAMIC_TYPE (EMailConfigEwsAutodiscover, e_mail_config_ews_autodiscover, GTK_TYPE_BUTTON)
 
 static void
-async_context_free (AsyncContext *async_context)
+async_context_free (gpointer ptr)
 {
-	if (async_context->autodiscover != NULL)
-		g_object_unref (async_context->autodiscover);
+	AsyncContext *async_context = ptr;
 
-	if (async_context->activity != NULL)
-		g_object_unref (async_context->activity);
+	if (!async_context)
+		return;
+
+	g_clear_object (&async_context->autodiscover);
+	g_clear_object (&async_context->activity);
+	g_clear_object (&async_context->source);
+	g_clear_object (&async_context->ews_settings);
+	g_free (async_context->email_address);
 
 	g_slice_free (AsyncContext, async_context);
+}
+
+static gboolean
+mail_config_ews_autodiscover_finish (EMailConfigEwsAutodiscover *autodiscover,
+				     GAsyncResult *result,
+				     GError **error)
+{
+	g_return_val_if_fail (E_IS_MAIL_CONFIG_EWS_AUTODISCOVER (autodiscover), FALSE);
+	g_return_val_if_fail (g_task_is_valid (result, autodiscover), FALSE);
+
+	g_return_val_if_fail (
+		g_async_result_is_tagged (
+		result, mail_config_ews_autodiscover_finish), FALSE);
+
+	return g_task_propagate_boolean (G_TASK (result), error);
 }
 
 static void
@@ -89,8 +103,7 @@ mail_config_ews_autodiscover_run_cb (GObject *source_object,
 	autodiscover = async_context->autodiscover;
 	alert_sink = e_activity_get_alert_sink (async_context->activity);
 
-	e_source_registry_authenticate_finish (
-		E_SOURCE_REGISTRY (source_object), result, &error);
+	mail_config_ews_autodiscover_finish (E_MAIL_CONFIG_EWS_AUTODISCOVER (source_object), result, &error);
 
 	backend = e_mail_config_ews_autodiscover_get_backend (autodiscover);
 	settings = e_mail_config_service_backend_get_settings (backend);
@@ -111,8 +124,71 @@ mail_config_ews_autodiscover_run_cb (GObject *source_object,
 	}
 
 	gtk_widget_set_sensitive (GTK_WIDGET (autodiscover), TRUE);
+}
 
-	async_context_free (async_context);
+static gboolean
+mail_config_ews_autodiscover_sync (ECredentialsPrompter *prompter,
+				   ESource *source,
+				   const ENamedParameters *credentials,
+				   gboolean *out_authenticated,
+				   gpointer user_data,
+				   GCancellable *cancellable,
+				   GError **error)
+{
+	AsyncContext *async_context = user_data;
+	GError *local_error = NULL;
+	gboolean res = TRUE;
+
+	e_ews_autodiscover_ws_url_sync (
+		async_context->ews_settings, async_context->email_address,
+		credentials && e_named_parameters_get (credentials, E_SOURCE_CREDENTIAL_PASSWORD) ?
+		e_named_parameters_get (credentials, E_SOURCE_CREDENTIAL_PASSWORD) : "",
+		cancellable, &local_error);
+
+	if (local_error == NULL) {
+		*out_authenticated = TRUE;
+	} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
+		*out_authenticated = FALSE;
+		g_error_free (local_error);
+	} else {
+		res = FALSE;
+		g_propagate_error (error, local_error);
+	}
+
+	return res;
+}
+
+static void
+mail_config_ews_autodiscover_run_thread (GTask *task,
+					 gpointer source_object,
+					 gpointer task_data,
+					 GCancellable *cancellable)
+{
+	AsyncContext *async_context = task_data;
+	GError *local_error = NULL;
+	gboolean success = FALSE;
+
+	if (!g_cancellable_set_error_if_cancelled (cancellable, &local_error) && !local_error) {
+		if (e_ews_connection_utils_get_without_password (async_context->ews_settings)) {
+			success = e_ews_autodiscover_ws_url_sync (
+				async_context->ews_settings, async_context->email_address, "",
+				cancellable, &local_error);
+		} else {
+			EShell *shell;
+
+			shell = e_shell_get_default ();
+
+			success = e_credentials_prompter_loop_prompt_sync (e_shell_get_credentials_prompter (shell),
+				async_context->source, E_CREDENTIALS_PROMPTER_PROMPT_FLAG_ALLOW_SOURCE_SAVE,
+				mail_config_ews_autodiscover_sync, async_context, cancellable, &local_error);
+		}
+	}
+
+	if (local_error != NULL) {
+		g_task_return_error (task, local_error);
+	} else {
+		g_task_return_boolean (task, success);
+	}
 }
 
 static void
@@ -122,20 +198,17 @@ mail_config_ews_autodiscover_run (EMailConfigEwsAutodiscover *autodiscover)
 	EMailConfigServicePage *page;
 	EMailConfigServiceBackend *backend;
 	CamelSettings *settings;
-	ESourceRegistry *registry;
 	ESource *source;
 	GCancellable *cancellable;
 	AsyncContext *async_context;
+	GTask *task;
 
 	backend = e_mail_config_ews_autodiscover_get_backend (autodiscover);
 	page = e_mail_config_service_backend_get_page (backend);
 	source = e_mail_config_service_backend_get_source (backend);
 	settings = e_mail_config_service_backend_get_settings (backend);
 
-	registry = e_mail_config_service_page_get_registry (page);
-
-	activity = e_mail_config_activity_page_new_activity (
-		E_MAIL_CONFIG_ACTIVITY_PAGE (page));
+	activity = e_mail_config_activity_page_new_activity (E_MAIL_CONFIG_ACTIVITY_PAGE (page));
 	cancellable = e_activity_get_cancellable (activity);
 
 	e_activity_set_text (activity, _("Querying Autodiscover service"));
@@ -145,20 +218,26 @@ mail_config_ews_autodiscover_run (EMailConfigEwsAutodiscover *autodiscover)
 	async_context = g_slice_new0 (AsyncContext);
 	async_context->autodiscover = g_object_ref (autodiscover);
 	async_context->activity = activity;  /* takes ownership */
+	async_context->source = g_object_ref (source);
+	async_context->ews_settings = g_object_ref (settings);
+	async_context->email_address = g_strdup (e_mail_config_service_page_get_email_address (page));
 
 	/*
-	 * e_source_registry_authenticate() will be run in a new a thread, which
-	 * one will invoke camel_ews_settings_set_{oaburl,hosturl}(), emiting
-	 * signals that are bound to GTK+ UI signals, causing GTK+ calls in this
+	 * The GTask will be run in a new thread, which will invoke
+	 * camel_ews_settings_set_{oaburl,hosturl}(), emiting signals that
+	 * are bound to GTK+ UI signals, causing GTK+ calls in this
 	 * secondary thread and consequently a crash. To avoid this, let's stop
 	 * the property changes notifications while we are not in the main thread.
 	 */
 	g_object_freeze_notify (G_OBJECT (settings));
-	e_source_registry_authenticate (
-		registry, source,
-		E_SOURCE_AUTHENTICATOR (autodiscover),
-		cancellable, mail_config_ews_autodiscover_run_cb,
-		async_context);
+
+	task = g_task_new (autodiscover, cancellable, mail_config_ews_autodiscover_run_cb, async_context);
+	g_task_set_source_tag (task, mail_config_ews_autodiscover_finish);
+	g_task_set_task_data (task, async_context, async_context_free);
+
+	g_task_run_in_thread (task, mail_config_ews_autodiscover_run_thread);
+
+	g_object_unref (task);
 }
 
 static void
@@ -246,64 +325,6 @@ mail_config_ews_autodiscover_clicked (GtkButton *button)
 	mail_config_ews_autodiscover_run (autodiscover);
 }
 
-static gboolean
-mail_config_ews_autodiscover_get_without_password (ESourceAuthenticator *auth)
-{
-	EMailConfigEwsAutodiscover *autodiscover;
-	EMailConfigServiceBackend *backend;
-	CamelSettings *settings;
-	CamelEwsSettings *ews_settings;
-
-	autodiscover = E_MAIL_CONFIG_EWS_AUTODISCOVER (auth);
-	backend = e_mail_config_ews_autodiscover_get_backend (autodiscover);
-	settings = e_mail_config_service_backend_get_settings (backend);
-	ews_settings = CAMEL_EWS_SETTINGS (settings);
-
-	return e_ews_connection_utils_get_without_password (ews_settings);
-}
-
-static ESourceAuthenticationResult
-mail_config_ews_autodiscover_try_password_sync (ESourceAuthenticator *auth,
-                                                const GString *password,
-                                                GCancellable *cancellable,
-                                                GError **error)
-{
-	EMailConfigEwsAutodiscover *autodiscover;
-	EMailConfigServiceBackend *backend;
-	EMailConfigServicePage *page;
-	CamelSettings *settings;
-	CamelEwsSettings *ews_settings;
-	ESourceAuthenticationResult result;
-	const gchar *email_address;
-	GError *local_error = NULL;
-
-	autodiscover = E_MAIL_CONFIG_EWS_AUTODISCOVER (auth);
-	backend = e_mail_config_ews_autodiscover_get_backend (autodiscover);
-	page = e_mail_config_service_backend_get_page (backend);
-	settings = e_mail_config_service_backend_get_settings (backend);
-
-	email_address = e_mail_config_service_page_get_email_address (page);
-
-	ews_settings = CAMEL_EWS_SETTINGS (settings);
-
-	e_ews_autodiscover_ws_url_sync (
-		ews_settings, email_address, password->str,
-		cancellable, &local_error);
-
-	if (local_error == NULL) {
-		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
-	} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
-		result = E_SOURCE_AUTHENTICATION_REJECTED;
-		g_error_free (local_error);
-
-	} else {
-		result = E_SOURCE_AUTHENTICATION_ERROR;
-		g_propagate_error (error, local_error);
-	}
-
-	return result;
-}
-
 static void
 e_mail_config_ews_autodiscover_class_init (EMailConfigEwsAutodiscoverClass *class)
 {
@@ -332,15 +353,6 @@ e_mail_config_ews_autodiscover_class_init (EMailConfigEwsAutodiscoverClass *clas
 			E_TYPE_MAIL_CONFIG_SERVICE_BACKEND,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT_ONLY));
-}
-
-static void
-e_mail_config_ews_autodiscover_authenticator_init (ESourceAuthenticatorInterface *iface)
-{
-	iface->get_without_password =
-		mail_config_ews_autodiscover_get_without_password;
-	iface->try_password_sync =
-		mail_config_ews_autodiscover_try_password_sync;
 }
 
 static void

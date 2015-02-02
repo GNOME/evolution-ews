@@ -170,17 +170,7 @@ struct _EwsUrls {
 	gpointer future2;
 };
 
-/* Forward Declarations */
-static void	e_ews_connection_authenticator_init
-				(ESourceAuthenticatorInterface *iface);
-
-G_DEFINE_TYPE_WITH_CODE (
-	EEwsConnection,
-	e_ews_connection,
-	G_TYPE_OBJECT,
-	G_IMPLEMENT_INTERFACE (
-		E_TYPE_SOURCE_AUTHENTICATOR,
-		e_ews_connection_authenticator_init))
+G_DEFINE_TYPE (EEwsConnection, e_ews_connection, G_TYPE_OBJECT)
 
 /* Static Functions */
 
@@ -490,19 +480,6 @@ typedef struct _EwsScheduleData
 	SoupSessionCallback queue_callback;
 	gpointer queue_user_data;
 } EwsScheduleData;
-
-static gboolean
-ews_connection_get_without_password (ESourceAuthenticator *authenticator)
-{
-	gboolean result;
-	EEwsConnection *cnc = E_EWS_CONNECTION (authenticator);
-	CamelEwsSettings *ews_settings = e_ews_connection_ref_settings (cnc);
-
-	result = e_ews_connection_utils_get_without_password (ews_settings);
-
-	g_object_unref (ews_settings);
-	return result;
-}
 
 /* this is run in priv->soup_thread */
 static gboolean
@@ -938,7 +915,7 @@ sync_hierarchy_response_cb (ESoapResponse *response,
 	/*
 	 * During the first connection, we are able to get the current version of the Exchange server.
 	 * For Addressbook/Calendar backends, we are ensuring it happens during the
-	 * ews_connection_try_password_sync(), that calls e_e_ews_connection_get_folder_sync() and then
+	 * e_ews_connection_try_credentials_sync(), that calls e_e_ews_connection_get_folder_sync() and then
 	 * we are able to get the current version of the server from this first response.
 	 *
 	 * For Camel, the first connection is done calling e_ews_connection_sync_folder_hierarchy_sync().
@@ -1051,7 +1028,7 @@ get_folder_response_cb (ESoapResponse *response,
 	/*
 	 * During the first connection, we are able to get the current version of the Exchange server.
 	 * For Addressbook/Calendar backends, we are ensuring it happens during the
-	 * ews_connection_try_password_sync(), that calls e_e_ews_connection_get_folder_sync() and then
+	 * e_ews_connection_try_credentials_sync(), that calls e_e_ews_connection_get_folder_sync() and then
 	 * we are able to get the current version of the server from this first response.
 	 *
 	 * For Camel, the first connection is done calling e_ews_connection_sync_folder_hierarchy_sync().
@@ -1670,56 +1647,6 @@ ews_connection_constructor (GType gtype, guint n_properties,
 	return obj;
 }
 
-static ESourceAuthenticationResult
-ews_connection_try_password_sync (ESourceAuthenticator *authenticator,
-                                  const GString *password,
-                                  GCancellable *cancellable,
-                                  GError **error)
-{
-	EEwsConnection *connection;
-	ESourceAuthenticationResult result;
-	EwsFolderId *fid = NULL;
-	GSList *ids = NULL;
-	GError *local_error = NULL;
-
-	connection = E_EWS_CONNECTION (authenticator);
-
-	e_ews_connection_set_password (connection, password->str);
-
-	fid = g_new0 (EwsFolderId, 1);
-	fid->id = g_strdup ("inbox");
-	fid->is_distinguished_id = TRUE;
-	ids = g_slist_append (ids, fid);
-
-	e_ews_connection_get_folder_sync (
-		connection, EWS_PRIORITY_MEDIUM, "Default",
-		NULL, ids, NULL, cancellable, &local_error);
-
-	g_slist_free_full (ids, (GDestroyNotify) e_ews_folder_id_free);
-
-	if (local_error == NULL) {
-		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
-	} else {
-		gboolean auth_failed;
-
-		auth_failed = g_error_matches (
-			local_error, EWS_CONNECTION_ERROR,
-			EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED);
-
-		if (auth_failed) {
-			g_clear_error (&local_error);
-			result = E_SOURCE_AUTHENTICATION_REJECTED;
-		} else {
-			g_propagate_error (error, local_error);
-			result = E_SOURCE_AUTHENTICATION_ERROR;
-		}
-
-		e_ews_connection_set_password (connection, NULL);
-	}
-
-	return result;
-}
-
 static void
 e_ews_connection_class_init (EEwsConnectionClass *class)
 {
@@ -1782,13 +1709,6 @@ static void
 e_ews_connection_folders_list_free (gpointer data)
 {
 	g_slist_free_full ((GSList *) data, g_free);
-}
-
-static void
-e_ews_connection_authenticator_init (ESourceAuthenticatorInterface *iface)
-{
-	iface->get_without_password = ews_connection_get_without_password;
-	iface->try_password_sync = ews_connection_try_password_sync;
 }
 
 static gpointer
@@ -2281,6 +2201,75 @@ e_ews_connection_new (const gchar *uri,
 		      CamelEwsSettings *settings)
 {
 	return e_ews_connection_new_full (uri, settings, TRUE);
+}
+
+void
+e_ews_connection_update_credentials (EEwsConnection *cnc,
+				     const ENamedParameters *credentials)
+{
+	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
+
+	if (credentials) {
+		e_ews_connection_set_password (cnc, e_named_parameters_get (credentials, E_SOURCE_CREDENTIAL_PASSWORD));
+
+		if (e_named_parameters_get (credentials, E_SOURCE_CREDENTIAL_USERNAME)) {
+			CamelNetworkSettings *network_settings;
+
+			network_settings = CAMEL_NETWORK_SETTINGS (cnc->priv->settings);
+			camel_network_settings_set_user (network_settings, e_named_parameters_get (credentials, E_SOURCE_CREDENTIAL_USERNAME));
+		}
+	} else {
+		e_ews_connection_set_password (cnc, NULL);
+	}
+}
+
+ESourceAuthenticationResult
+e_ews_connection_try_credentials_sync (EEwsConnection *cnc,
+				       const ENamedParameters *credentials,
+				       GCancellable *cancellable,
+				       GError **error)
+{
+	ESourceAuthenticationResult result;
+	EwsFolderId *fid = NULL;
+	GSList *ids = NULL;
+	GError *local_error = NULL;
+
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), E_SOURCE_AUTHENTICATION_ERROR);
+
+	e_ews_connection_update_credentials (cnc, credentials);
+
+	fid = g_new0 (EwsFolderId, 1);
+	fid->id = g_strdup ("inbox");
+	fid->is_distinguished_id = TRUE;
+	ids = g_slist_append (ids, fid);
+
+	e_ews_connection_get_folder_sync (
+		cnc, EWS_PRIORITY_MEDIUM, "Default",
+		NULL, ids, NULL, cancellable, &local_error);
+
+	g_slist_free_full (ids, (GDestroyNotify) e_ews_folder_id_free);
+
+	if (local_error == NULL) {
+		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
+	} else {
+		gboolean auth_failed;
+
+		auth_failed = g_error_matches (
+			local_error, EWS_CONNECTION_ERROR,
+			EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED);
+
+		if (auth_failed) {
+			g_clear_error (&local_error);
+			result = E_SOURCE_AUTHENTICATION_REJECTED;
+		} else {
+			g_propagate_error (error, local_error);
+			result = E_SOURCE_AUTHENTICATION_ERROR;
+		}
+
+		e_ews_connection_set_password (cnc, NULL);
+	}
+
+	return result;
 }
 
 const gchar *

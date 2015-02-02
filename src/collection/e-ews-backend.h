@@ -62,6 +62,7 @@ void		e_ews_backend_type_register	(GTypeModule *type_module);
 EEwsConnection *
 		e_ews_backend_ref_connection_sync
 						(EEwsBackend *backend,
+						 ESourceAuthenticationResult *result,
 						 GCancellable *cancellable,
 						 GError **error);
 void		e_ews_backend_ref_connection	(EEwsBackend *backend,

@@ -73,6 +73,8 @@ struct _EMailConfigEwsDelegatesPagePrivate {
 struct _AsyncContext {
 	EMailConfigEwsDelegatesPage *page;
 	EActivity *activity;
+	ESource *source;
+	GObject *settings;
 };
 
 enum {
@@ -86,8 +88,6 @@ enum {
 /* Forward Declarations */
 static void	e_mail_config_ews_delegates_page_interface_init
 					(EMailConfigPageInterface *iface);
-static void	e_mail_config_ews_delegates_page_authenticator_init
-					(ESourceAuthenticatorInterface *iface);
 static void	add_to_tree_view	(EMailConfigEwsDelegatesPage *page,
 					 EwsDelegateInfo *di,
 					 gboolean select);
@@ -102,19 +102,23 @@ G_DEFINE_DYNAMIC_TYPE_EXTENDED (
 	0,
 	G_IMPLEMENT_INTERFACE_DYNAMIC (
 		E_TYPE_MAIL_CONFIG_PAGE,
-		e_mail_config_ews_delegates_page_interface_init)
-	G_IMPLEMENT_INTERFACE_DYNAMIC (
-		E_TYPE_SOURCE_AUTHENTICATOR,
-		e_mail_config_ews_delegates_page_authenticator_init))
+		e_mail_config_ews_delegates_page_interface_init))
 
 static void
-async_context_free (AsyncContext *async_context)
+async_context_free (gpointer ptr)
 {
-	if (async_context->page != NULL)
-		g_object_unref (async_context->page);
+	AsyncContext *async_context = ptr;
 
-	if (async_context->activity != NULL)
-		g_object_unref (async_context->activity);
+	if (!async_context)
+		return;
+
+	if (async_context->settings)
+		g_object_thaw_notify (async_context->settings);
+
+	g_clear_object (&async_context->page);
+	g_clear_object (&async_context->activity);
+	g_clear_object (&async_context->source);
+	g_clear_object (&async_context->settings);
 
 	g_slice_free (AsyncContext, async_context);
 }
@@ -226,80 +230,6 @@ copy_delegate_info (const EwsDelegateInfo *src)
 	di->view_priv_items = src->view_priv_items;
 
 	return di;
-}
-
-static void
-mail_config_ews_delegates_page_refresh_cb (GObject *source_object,
-                                           GAsyncResult *result,
-                                           gpointer user_data)
-{
-	ESourceRegistry *registry;
-	AsyncContext *async_context;
-	EAlertSink *alert_sink;
-	GError *error = NULL;
-
-	registry = E_SOURCE_REGISTRY (source_object);
-	async_context = (AsyncContext *) user_data;
-
-	alert_sink = e_activity_get_alert_sink (async_context->activity);
-
-	e_source_registry_authenticate_finish (registry, result, &error);
-
-	if (e_activity_handle_cancellation (async_context->activity, error)) {
-		g_error_free (error);
-
-	} else if (error != NULL) {
-		e_alert_submit (
-			alert_sink,
-			"ews:query-delegates-error",
-			error->message, NULL);
-		g_error_free (error);
-
-	} else {
-		EMailConfigEwsDelegatesPage *page = async_context->page;
-		GtkWidget *radio = page->priv->deliver_copy_me_radio;
-		GtkTreeModel *model;
-		const GSList *iter;
-
-		g_mutex_lock (&page->priv->delegates_lock);
-
-		switch (page->priv->deliver_to) {
-		case EwsDelegateDeliver_DelegatesOnly:
-			radio = page->priv->deliver_delegates_only_radio;
-			break;
-		case EwsDelegateDeliver_DelegatesAndMe:
-			radio = page->priv->deliver_delegates_and_me_radio;
-			break;
-		case EwsDelegateDeliver_DelegatesAndSendInformationToMe:
-			radio = page->priv->deliver_copy_me_radio;
-			break;
-		}
-
-		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio), TRUE);
-
-		model = gtk_tree_view_get_model (GTK_TREE_VIEW (page->priv->users_tree_view));
-		gtk_list_store_clear (GTK_LIST_STORE (model));
-
-		for (iter = page->priv->orig_delegates; iter; iter = iter->next) {
-			const EwsDelegateInfo *orig_di = iter->data;
-			EwsDelegateInfo *di;
-
-			if (!orig_di) {
-				g_warn_if_reached ();
-				continue;
-			}
-
-			di = copy_delegate_info (orig_di);
-
-			add_to_tree_view (page, di, FALSE);
-		}
-
-		g_mutex_unlock (&page->priv->delegates_lock);
-
-		enable_delegates_page_widgets (page, page->priv->connection != NULL);
-	}
-
-	async_context_free (async_context);
 }
 
 static void
@@ -830,10 +760,9 @@ retrieve_user_permissions_thread_cb (GObject *ppage,
 		conn = g_object_ref (page->priv->connection);
 	else
 		conn = e_ews_config_utils_open_connection_for (
-			e_mail_config_ews_delegates_page_get_registry (page),
 			e_mail_config_ews_delegates_page_get_collection_source (page),
 			CAMEL_EWS_SETTINGS (mail_config_ews_delegates_page_get_settings (page)),
-			cancellable, perror);
+			NULL, NULL, NULL, cancellable, perror);
 
 	g_object_unref (service);
 
@@ -1501,53 +1430,29 @@ sort_by_display_name_cb (gconstpointer a,
 	return g_utf8_collate (aname, bname);
 }
 
-static gboolean
-mail_config_ews_delegates_page_get_without_password (ESourceAuthenticator *auth)
-{
-	EMailConfigEwsDelegatesPage *page;
-	CamelSettings *settings;
-	CamelEwsSettings *ews_settings;
-
-	page = E_MAIL_CONFIG_EWS_DELEGATES_PAGE (auth);
-	settings = mail_config_ews_delegates_page_get_settings (page);
-	ews_settings = CAMEL_EWS_SETTINGS (settings);
-
-	return e_ews_connection_utils_get_without_password (ews_settings);
-}
-
 static ESourceAuthenticationResult
-mail_config_ews_delegates_page_try_password_sync (ESourceAuthenticator *auth,
-                                                  const GString *password,
-                                                  GCancellable *cancellable,
-                                                  GError **error)
+mail_config_ews_delegates_page_try_credentials_sync (EEwsConnection *connection,
+						     const ENamedParameters *credentials,
+						     gpointer user_data,
+						     GCancellable *cancellable,
+						     GError **error)
 {
-	EMailConfigEwsDelegatesPage *page;
-	CamelSettings *settings;
-	CamelEwsSettings *ews_settings;
+	AsyncContext *async_context = user_data;
 	ESourceAuthenticationResult result;
 	EwsDelegateDeliver deliver_to;
 	GSList *delegates;
-	const gchar *hosturl;
 	const gchar *mailbox;
 	GError *local_error = NULL;
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, error))
 		return E_SOURCE_AUTHENTICATION_ERROR;
 
-	page = E_MAIL_CONFIG_EWS_DELEGATES_PAGE (auth);
-	mailbox = mail_config_ews_delegates_page_get_mailbox (page);
-	settings = mail_config_ews_delegates_page_get_settings (page);
+	mailbox = mail_config_ews_delegates_page_get_mailbox (async_context->page);
 
-	ews_settings = CAMEL_EWS_SETTINGS (settings);
-	hosturl = camel_ews_settings_get_hosturl (ews_settings);
+	g_clear_object (&async_context->page->priv->connection);
+	e_ews_connection_set_mailbox (connection, mailbox);
 
-	if (page->priv->connection)
-		g_object_unref (page->priv->connection);
-	page->priv->connection = e_ews_connection_new (hosturl, ews_settings);
-	e_ews_connection_set_password (page->priv->connection, password->str);
-	e_ews_connection_set_mailbox (page->priv->connection, mailbox);
-
-	if (e_ews_connection_get_delegate_sync (page->priv->connection, G_PRIORITY_DEFAULT, NULL, TRUE,
+	if (e_ews_connection_get_delegate_sync (connection, G_PRIORITY_DEFAULT, NULL, TRUE,
 		&deliver_to, &delegates, cancellable, &local_error) ||
 	    g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ITEMNOTFOUND)) {
 		if (local_error) {
@@ -1558,26 +1463,122 @@ mail_config_ews_delegates_page_try_password_sync (ESourceAuthenticator *auth,
 
 		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
 
-		/* The page takes ownership of the settings. */
-		g_mutex_lock (&page->priv->delegates_lock);
-		g_slist_free_full (page->priv->orig_delegates, (GDestroyNotify) ews_delegate_info_free);
+		async_context->page->priv->connection = g_object_ref (connection);
 
-		page->priv->deliver_to = deliver_to;
-		page->priv->orig_delegates = g_slist_sort (delegates, sort_by_display_name_cb);
-		g_mutex_unlock (&page->priv->delegates_lock);
+		/* The page takes ownership of the settings. */
+		g_mutex_lock (&async_context->page->priv->delegates_lock);
+		g_slist_free_full (async_context->page->priv->orig_delegates, (GDestroyNotify) ews_delegate_info_free);
+
+		async_context->page->priv->deliver_to = deliver_to;
+		async_context->page->priv->orig_delegates = g_slist_sort (delegates, sort_by_display_name_cb);
+		g_mutex_unlock (&async_context->page->priv->delegates_lock);
 
 	} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
 		result = E_SOURCE_AUTHENTICATION_REJECTED;
-		g_clear_object (&page->priv->connection);
+		g_clear_object (&async_context->page->priv->connection);
 		g_error_free (local_error);
 
 	} else {
 		result = E_SOURCE_AUTHENTICATION_ERROR;
-		g_clear_object (&page->priv->connection);
+		g_clear_object (&async_context->page->priv->connection);
 		g_propagate_error (error, local_error);
 	}
 
 	return result;
+}
+
+static void
+mail_config_ews_delegates_page_refresh_thread_cb (GObject *with_object,
+						  gpointer user_data,
+						  GCancellable *cancellable,
+						  GError **perror)
+{
+	AsyncContext *async_context = user_data;
+	CamelEwsSettings *ews_settings;
+	EEwsConnection *connection;
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror))
+		return;
+
+	ews_settings = CAMEL_EWS_SETTINGS (async_context->settings);
+	connection = e_ews_config_utils_open_connection_for (async_context->source, ews_settings, NULL,
+		mail_config_ews_delegates_page_try_credentials_sync, async_context, cancellable, perror);
+
+	g_clear_object (&connection);
+}
+
+static void
+mail_config_ews_delegates_page_refresh_idle_cb (GObject *with_object,
+						gpointer user_data,
+						GCancellable *cancellable,
+						GError **perror)
+{
+	AsyncContext *async_context;
+	EAlertSink *alert_sink;
+	GError *error = NULL;
+
+	async_context = (AsyncContext *) user_data;
+
+	if (perror) {
+		error = *perror;
+		*perror = NULL;
+	}
+
+	alert_sink = e_activity_get_alert_sink (async_context->activity);
+
+	if (e_activity_handle_cancellation (async_context->activity, error)) {
+		g_error_free (error);
+
+	} else if (error != NULL) {
+		e_alert_submit (
+			alert_sink,
+			"ews:query-delegates-error",
+			error->message, NULL);
+		g_error_free (error);
+
+	} else {
+		EMailConfigEwsDelegatesPage *page = async_context->page;
+		GtkWidget *radio = page->priv->deliver_copy_me_radio;
+		GtkTreeModel *model;
+		const GSList *iter;
+
+		g_mutex_lock (&page->priv->delegates_lock);
+
+		switch (page->priv->deliver_to) {
+		case EwsDelegateDeliver_DelegatesOnly:
+			radio = page->priv->deliver_delegates_only_radio;
+			break;
+		case EwsDelegateDeliver_DelegatesAndMe:
+			radio = page->priv->deliver_delegates_and_me_radio;
+			break;
+		case EwsDelegateDeliver_DelegatesAndSendInformationToMe:
+			radio = page->priv->deliver_copy_me_radio;
+			break;
+		}
+
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio), TRUE);
+
+		model = gtk_tree_view_get_model (GTK_TREE_VIEW (page->priv->users_tree_view));
+		gtk_list_store_clear (GTK_LIST_STORE (model));
+
+		for (iter = page->priv->orig_delegates; iter; iter = iter->next) {
+			const EwsDelegateInfo *orig_di = iter->data;
+			EwsDelegateInfo *di;
+
+			if (!orig_di) {
+				g_warn_if_reached ();
+				continue;
+			}
+
+			di = copy_delegate_info (orig_di);
+
+			add_to_tree_view (page, di, FALSE);
+		}
+
+		g_mutex_unlock (&page->priv->delegates_lock);
+
+		enable_delegates_page_widgets (page, page->priv->connection != NULL);
+	}
 }
 
 static void
@@ -1650,15 +1651,6 @@ e_mail_config_ews_delegates_page_interface_init (EMailConfigPageInterface *iface
 }
 
 static void
-e_mail_config_ews_delegates_page_authenticator_init (ESourceAuthenticatorInterface *iface)
-{
-	iface->get_without_password =
-		mail_config_ews_delegates_page_get_without_password;
-	iface->try_password_sync =
-		mail_config_ews_delegates_page_try_password_sync;
-}
-
-static void
 e_mail_config_ews_delegates_page_class_finalize (EMailConfigEwsDelegatesPageClass *class)
 {
 }
@@ -1703,18 +1695,15 @@ e_mail_config_ews_delegates_page_new (ESourceRegistry *registry,
 void
 e_mail_config_ews_delegates_page_refresh (EMailConfigEwsDelegatesPage *page)
 {
-	ESourceAuthenticator *authenticator;
-	ESourceRegistry *registry;
 	ESource *source;
 	EActivity *activity;
 	GCancellable *cancellable;
+	CamelSettings *settings;
 	AsyncContext *async_context;
 
 	g_return_if_fail (E_IS_MAIL_CONFIG_EWS_DELEGATES_PAGE (page));
 
-	registry = e_mail_config_ews_delegates_page_get_registry (page);
 	source = e_mail_config_ews_delegates_page_get_collection_source (page);
-	authenticator = E_SOURCE_AUTHENTICATOR (page);
 
 	if (page->priv->refresh_cancellable) {
 		g_cancellable_cancel (page->priv->refresh_cancellable);
@@ -1729,13 +1718,22 @@ e_mail_config_ews_delegates_page_refresh (EMailConfigEwsDelegatesPage *page)
 	e_activity_set_text (
 		activity, _("Retrieving \"Delegates\" settings"));
 
+	settings = mail_config_ews_delegates_page_get_settings (page);
+
 	async_context = g_slice_new0 (AsyncContext);
 	async_context->page = g_object_ref (page);
 	async_context->activity = activity;  /* takes ownership */
+	async_context->source = g_object_ref (source);
+	async_context->settings = g_object_ref (settings);
 
-	e_source_registry_authenticate (
-		registry, source, authenticator, cancellable,
-		mail_config_ews_delegates_page_refresh_cb, async_context);
+	/* Property changes can cause update of the UI, but this runs in a thread,
+	   thus freeze the notify till be back in UI thread */
+	g_object_freeze_notify (async_context->settings);
+
+	e_ews_config_utils_run_in_thread (G_OBJECT (page),
+		mail_config_ews_delegates_page_refresh_thread_cb,
+		mail_config_ews_delegates_page_refresh_idle_cb,
+		async_context, async_context_free, cancellable);
 }
 
 ESourceRegistry *

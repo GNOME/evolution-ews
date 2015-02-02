@@ -47,9 +47,25 @@ void			e_ews_config_utils_run_in_thread_with_feedback_modal	(GtkWindow *parent,
 										 gpointer user_data,
 										 GDestroyNotify free_user_data);
 
-EEwsConnection	*	e_ews_config_utils_open_connection_for			(ESourceRegistry *registry,
-										 ESource *source,
+void			e_ews_config_utils_run_in_thread			(GObject *with_object,
+										 EEwsSetupFunc thread_func,
+										 EEwsSetupFunc idle_func,
+										 gpointer user_data,
+										 GDestroyNotify free_user_data,
+										 GCancellable *cancellable);
+
+typedef ESourceAuthenticationResult
+			(* EEwsConfigUtilTryCredentialsFunc)			(EEwsConnection *cnc,
+										 const ENamedParameters *credentials,
+										 gpointer user_data,
+										 GCancellable *cancellable,
+										 GError **error);
+
+EEwsConnection	*	e_ews_config_utils_open_connection_for			(ESource *source,
 										 CamelEwsSettings *ews_settings,
+										 const gchar *connect_url,
+										 EEwsConfigUtilTryCredentialsFunc try_credentials_func,
+										 gpointer user_data,
 										 GCancellable *cancellable,
 										 GError **perror);
 

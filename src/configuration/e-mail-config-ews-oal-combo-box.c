@@ -20,12 +20,13 @@
 #include <config.h>
 #endif
 
-#include "e-mail-config-ews-oal-combo-box.h"
-
 #include <mail/e-mail-config-service-page.h>
 
 #include "server/e-ews-connection.h"
 #include "server/e-ews-connection-utils.h"
+
+#include "e-ews-config-utils.h"
+#include "e-mail-config-ews-oal-combo-box.h"
 
 #define E_MAIL_CONFIG_EWS_OAL_COMBO_BOX_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE \
@@ -47,18 +48,33 @@ enum {
 	PROP_BACKEND
 };
 
-/* Forward Declarations */
-static void	e_mail_config_ews_oal_combo_box_authenticator_init
-				(ESourceAuthenticatorInterface *iface);
+G_DEFINE_DYNAMIC_TYPE (EMailConfigEwsOalComboBox, e_mail_config_ews_oal_combo_box, GTK_TYPE_COMBO_BOX_TEXT)
 
-G_DEFINE_DYNAMIC_TYPE_EXTENDED (
-	EMailConfigEwsOalComboBox,
-	e_mail_config_ews_oal_combo_box,
-	GTK_TYPE_COMBO_BOX_TEXT,
-	0,
-	G_IMPLEMENT_INTERFACE_DYNAMIC (
-		E_TYPE_SOURCE_AUTHENTICATOR,
-		e_mail_config_ews_oal_combo_box_authenticator_init))
+typedef struct _AsyncContext {
+	EMailConfigEwsOalComboBox *combo_box;
+	GSimpleAsyncResult *simple;
+	ESource *source;
+	GObject *settings;
+} AsyncContext;
+
+static void
+async_context_free (gpointer ptr)
+{
+	AsyncContext *async_context = ptr;
+
+	if (!async_context)
+		return;
+
+	if (async_context->settings)
+		g_object_thaw_notify (async_context->settings);
+
+	g_clear_object (&async_context->combo_box);
+	g_clear_object (&async_context->simple);
+	g_clear_object (&async_context->source);
+	g_clear_object (&async_context->settings);
+
+	g_slice_free (AsyncContext, async_context);
+}
 
 static void
 mail_config_ews_oal_combo_box_set_backend (EMailConfigEwsOalComboBox *combo_box,
@@ -136,78 +152,6 @@ mail_config_ews_oal_combo_box_finalize (GObject *object)
 		finalize (object);
 }
 
-static gboolean
-mail_config_ews_oal_combo_box_get_without_password (ESourceAuthenticator *auth)
-{
-	EMailConfigEwsOalComboBox *combo_box;
-	EMailConfigServiceBackend *backend;
-	CamelSettings *settings;
-	CamelEwsSettings *ews_settings;
-
-	combo_box = E_MAIL_CONFIG_EWS_OAL_COMBO_BOX (auth);
-	backend = e_mail_config_ews_oal_combo_box_get_backend (combo_box);
-	settings = e_mail_config_service_backend_get_settings (backend);
-
-	ews_settings = CAMEL_EWS_SETTINGS (settings);
-
-	return e_ews_connection_utils_get_without_password (ews_settings);
-}
-
-static ESourceAuthenticationResult
-mail_config_ews_oal_combo_box_try_password_sync (ESourceAuthenticator *auth,
-                                                 const GString *password,
-                                                 GCancellable *cancellable,
-                                                 GError **error)
-{
-	EMailConfigEwsOalComboBox *combo_box;
-	EMailConfigServiceBackend *backend;
-	CamelSettings *settings;
-	CamelEwsSettings *ews_settings;
-	ESourceAuthenticationResult result;
-	EEwsConnection *cnc;
-	GSList *oal_items = NULL;
-	const gchar *oab_url;
-	GError *local_error = NULL;
-
-	combo_box = E_MAIL_CONFIG_EWS_OAL_COMBO_BOX (auth);
-	backend = e_mail_config_ews_oal_combo_box_get_backend (combo_box);
-	settings = e_mail_config_service_backend_get_settings (backend);
-
-	ews_settings = CAMEL_EWS_SETTINGS (settings);
-	oab_url = camel_ews_settings_get_oaburl (ews_settings);
-
-	cnc = e_ews_connection_new (oab_url, ews_settings);
-	e_ews_connection_set_password (cnc, password->str);
-
-	e_ews_connection_get_oal_list_sync (
-		cnc, &oal_items, cancellable, &local_error);
-
-	g_object_unref (cnc);
-
-	if (local_error == NULL) {
-		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
-
-		/* Deposit results in the private struct for
-		 * the update_finish() function to pick up. */
-		g_mutex_lock (&combo_box->priv->oal_items_lock);
-		g_slist_free_full (
-			combo_box->priv->oal_items,
-			(GDestroyNotify) ews_oal_free);
-		combo_box->priv->oal_items = oal_items;
-		g_mutex_unlock (&combo_box->priv->oal_items_lock);
-
-	} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
-		result = E_SOURCE_AUTHENTICATION_REJECTED;
-		g_error_free (local_error);
-
-	} else {
-		result = E_SOURCE_AUTHENTICATION_ERROR;
-		g_propagate_error (error, local_error);
-	}
-
-	return result;
-}
-
 static void
 e_mail_config_ews_oal_combo_box_class_init (EMailConfigEwsOalComboBoxClass *class)
 {
@@ -232,15 +176,6 @@ e_mail_config_ews_oal_combo_box_class_init (EMailConfigEwsOalComboBoxClass *clas
 			E_TYPE_MAIL_CONFIG_SERVICE_BACKEND,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT_ONLY));
-}
-
-static void
-e_mail_config_ews_oal_combo_box_authenticator_init (ESourceAuthenticatorInterface *iface)
-{
-	iface->get_without_password =
-		mail_config_ews_oal_combo_box_get_without_password;
-	iface->try_password_sync =
-		mail_config_ews_oal_combo_box_try_password_sync;
 }
 
 static void
@@ -285,26 +220,90 @@ e_mail_config_ews_oal_combo_box_get_backend (EMailConfigEwsOalComboBox *combo_bo
 	return combo_box->priv->backend;
 }
 
-/* Helper for e_mail_config_ews_oal_combo_box_update() */
-static void
-mail_config_ews_oal_combo_box_update_cb (GObject *source_object,
-                                         GAsyncResult *result,
-                                         gpointer user_data)
+static ESourceAuthenticationResult
+mail_config_ews_aol_combo_box_update_try_credentials_sync (EEwsConnection *connection,
+							   const ENamedParameters *credentials,
+							   gpointer user_data,
+							   GCancellable *cancellable,
+							   GError **error)
 {
-	GSimpleAsyncResult *simple;
+	AsyncContext *async_context = user_data;
+	EMailConfigEwsOalComboBox *combo_box;
+	ESourceAuthenticationResult result;
+	GSList *oal_items = NULL;
+	GError *local_error = NULL;
+
+	combo_box = E_MAIL_CONFIG_EWS_OAL_COMBO_BOX (async_context->combo_box);
+
+	e_ews_connection_get_oal_list_sync (connection, &oal_items, cancellable, &local_error);
+
+	if (local_error == NULL) {
+		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
+
+		/* Deposit results in the private struct for
+		 * the update_finish() function to pick up. */
+		g_mutex_lock (&combo_box->priv->oal_items_lock);
+		g_slist_free_full (
+			combo_box->priv->oal_items,
+			(GDestroyNotify) ews_oal_free);
+		combo_box->priv->oal_items = oal_items;
+		g_mutex_unlock (&combo_box->priv->oal_items_lock);
+
+	} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
+		result = E_SOURCE_AUTHENTICATION_REJECTED;
+		g_error_free (local_error);
+
+	} else {
+		result = E_SOURCE_AUTHENTICATION_ERROR;
+		g_propagate_error (error, local_error);
+	}
+
+	return result;
+}
+
+static void
+mail_config_ews_aol_combo_box_update_thread_cb (GObject *with_object,
+						gpointer user_data,
+						GCancellable *cancellable,
+						GError **perror)
+{
+	AsyncContext *async_context = user_data;
+	CamelEwsSettings *ews_settings;
+	const gchar *oab_url;
+	EEwsConnection *connection;
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, perror))
+		return;
+
+	ews_settings = CAMEL_EWS_SETTINGS (async_context->settings);
+	oab_url = camel_ews_settings_get_oaburl (ews_settings);
+
+	connection = e_ews_config_utils_open_connection_for (async_context->source, ews_settings, oab_url,
+		mail_config_ews_aol_combo_box_update_try_credentials_sync, async_context, cancellable, perror);
+
+	g_clear_object (&connection);
+}
+
+static void
+mail_config_ews_aol_combo_box_update_idle_cb (GObject *with_object,
+					      gpointer user_data,
+					      GCancellable *cancellable,
+					      GError **perror)
+{
+	AsyncContext *async_context;
 	GError *error = NULL;
 
-	simple = G_SIMPLE_ASYNC_RESULT (user_data);
+	async_context = (AsyncContext *) user_data;
 
-	e_source_registry_authenticate_finish (
-		E_SOURCE_REGISTRY (source_object), result, &error);
+	if (perror) {
+		error = *perror;
+		*perror = NULL;
+	}
 
 	if (error != NULL)
-		g_simple_async_result_take_error (simple, error);
+		g_simple_async_result_take_error (async_context->simple, error);
 
-	g_simple_async_result_complete (simple);
-
-	g_object_unref (simple);
+	g_simple_async_result_complete (async_context->simple);
 }
 
 void
@@ -314,28 +313,35 @@ e_mail_config_ews_oal_combo_box_update (EMailConfigEwsOalComboBox *combo_box,
                                         gpointer user_data)
 {
 	GSimpleAsyncResult *simple;
-	EMailConfigServicePage *page;
 	EMailConfigServiceBackend *backend;
-	ESourceAuthenticator *authenticator;
-	ESourceRegistry *registry;
+	AsyncContext *async_context;
+	CamelSettings *settings;
 	ESource *source;
 
 	g_return_if_fail (E_IS_MAIL_CONFIG_EWS_OAL_COMBO_BOX (combo_box));
 
 	backend = e_mail_config_ews_oal_combo_box_get_backend (combo_box);
-	page = e_mail_config_service_backend_get_page (backend);
+	settings = e_mail_config_service_backend_get_settings (backend);
 	source = e_mail_config_service_backend_get_source (backend);
-	registry = e_mail_config_service_page_get_registry (page);
-
-	authenticator = E_SOURCE_AUTHENTICATOR (combo_box);
 
 	simple = g_simple_async_result_new (
 		G_OBJECT (combo_box), callback, user_data,
 		e_mail_config_ews_oal_combo_box_update);
 
-	e_source_registry_authenticate (
-		registry, source, authenticator, cancellable,
-		mail_config_ews_oal_combo_box_update_cb, simple);
+	async_context = g_slice_new0 (AsyncContext);
+	async_context->combo_box = g_object_ref (combo_box);
+	async_context->simple = simple;  /* takes ownership */
+	async_context->source = g_object_ref (source);
+	async_context->settings = g_object_ref (settings);
+
+	/* Property changes can cause update of the UI, but this runs in a thread,
+	   thus freeze the notify till be back in UI thread */
+	g_object_freeze_notify (async_context->settings);
+
+	e_ews_config_utils_run_in_thread (G_OBJECT (combo_box),
+		mail_config_ews_aol_combo_box_update_thread_cb,
+		mail_config_ews_aol_combo_box_update_idle_cb,
+		async_context, async_context_free, cancellable);
 }
 
 gboolean

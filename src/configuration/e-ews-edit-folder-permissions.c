@@ -689,9 +689,9 @@ read_folder_permissions_thread (GObject *dialog,
 	g_return_if_fail (widgets->folder_id != NULL);
 
 	widgets->conn = e_ews_config_utils_open_connection_for (
-		widgets->registry,
 		widgets->source,
 		widgets->ews_settings,
+		NULL, NULL, NULL,
 		cancellable,
 		perror);
 

@@ -135,16 +135,8 @@ struct _ECalBackendEwsPrivate {
 static void ews_cal_component_get_item_id (ECalComponent *comp, gchar **itemid, gchar **changekey);
 static gboolean ews_start_sync	(gpointer data);
 static gpointer ews_start_sync_thread (gpointer data);
-static void	e_cal_backend_ews_authenticator_init
-				(ESourceAuthenticatorInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE (
-	ECalBackendEws,
-	e_cal_backend_ews,
-	E_TYPE_CAL_BACKEND,
-	G_IMPLEMENT_INTERFACE (
-		E_TYPE_SOURCE_AUTHENTICATOR,
-		e_cal_backend_ews_authenticator_init))
+G_DEFINE_TYPE (ECalBackendEws, e_cal_backend_ews, E_TYPE_CAL_BACKEND)
 
 static CamelEwsSettings *
 cal_backend_ews_get_collection_settings (ECalBackendEws *backend)
@@ -240,6 +232,7 @@ cal_backend_ews_ensure_connected (ECalBackendEws *cbews,
 				  GCancellable *cancellable,
 				  GError **perror)
 {
+	CamelEwsSettings *ews_settings;
 	GError *local_error = NULL;
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (cbews), FALSE);
@@ -253,10 +246,15 @@ cal_backend_ews_ensure_connected (ECalBackendEws *cbews,
 
 	PRIV_UNLOCK (cbews->priv);
 
-	e_backend_authenticate_sync (
-		E_BACKEND (cbews),
-		E_SOURCE_AUTHENTICATOR (cbews),
-		cancellable, &local_error);
+	ews_settings = cal_backend_ews_get_collection_settings (cbews);
+
+	if (e_ews_connection_utils_get_without_password (ews_settings)) {
+		e_backend_schedule_authenticate (E_BACKEND (cbews), NULL);
+	} else {
+		e_backend_credentials_required_sync (E_BACKEND (cbews),
+			E_SOURCE_CREDENTIALS_REASON_REQUIRED, NULL, 0, NULL,
+			cancellable, &local_error);
+	}
 
 	if (!local_error)
 		return TRUE;
@@ -396,6 +394,11 @@ e_cal_backend_ews_discard_alarm (ECalBackend *backend,
 	}
 
 	PRIV_UNLOCK (priv);
+
+	if (!cbews->priv->cnc) {
+		e_data_cal_respond_discard_alarm (cal, context, EDC_ERROR (RepositoryOffline));
+		return;
+	}
 
 	if (!cal_backend_ews_ensure_connected (cbews, cancellable, &local_error)) {
 		convert_error_to_edc_error (&local_error);
@@ -774,6 +777,8 @@ e_cal_backend_ews_open (ECalBackend *backend,
 	source = e_backend_get_source (E_BACKEND (cbews));
 	ews_settings = cal_backend_ews_get_collection_settings (cbews);
 
+	e_source_set_connection_status (source, E_SOURCE_CONNECTION_STATUS_CONNECTING);
+
 	PRIV_LOCK (priv);
 
 	if (!priv->store) {
@@ -803,11 +808,13 @@ e_cal_backend_ews_open (ECalBackend *backend,
 
 	PRIV_UNLOCK (priv);
 
+	if (cbews->priv->cnc)
+		e_source_set_connection_status (source, E_SOURCE_CONNECTION_STATUS_CONNECTED);
+	else
+		e_source_set_connection_status (source, E_SOURCE_CONNECTION_STATUS_DISCONNECTED);
+
 	if (need_to_authenticate)
-		ret = e_backend_authenticate_sync (
-				E_BACKEND (backend),
-				E_SOURCE_AUTHENTICATOR (backend),
-				cancellable, &error);
+		ret = cal_backend_ews_ensure_connected (cbews, cancellable, &error);
 
 	if (ret) {
 		e_cal_backend_set_writable (backend, TRUE);
@@ -1150,6 +1157,11 @@ e_cal_backend_ews_remove_object (ECalBackend *backend,
 	 *        This is actually an update event where an exception date will have to be appended to the master. 
 	 */
 	e_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
+
+	if (!cbews->priv->cnc) {
+		e_data_cal_respond_discard_alarm (cal, context, EDC_ERROR (RepositoryOffline));
+		return;
+	}
 
 	if (!cal_backend_ews_ensure_connected (cbews, cancellable, &error)) {
 		convert_error_to_edc_error (&error);
@@ -1671,7 +1683,7 @@ e_cal_backend_ews_create_objects (ECalBackend *backend,
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
 
 	/* make sure we're not offline */
-	if (!e_backend_get_online (E_BACKEND (backend))) {
+	if (!e_backend_get_online (E_BACKEND (backend)) || !cbews->priv->cnc) {
 		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
 		goto exit;
 	}
@@ -1899,7 +1911,7 @@ e_cal_backend_ews_modify_object (ECalBackend *backend,
 	priv = cbews->priv;
 	kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
 
-	if (!e_backend_get_online (E_BACKEND (backend))) {
+	if (!e_backend_get_online (E_BACKEND (backend)) || !cbews->priv->cnc) {
 		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
 		goto exit;
 	}
@@ -2450,7 +2462,7 @@ e_cal_backend_ews_receive_objects (ECalBackend *backend,
 	priv = cbews->priv;
 
 	/* make sure we're not offline */
-	if (!e_backend_get_online (E_BACKEND (backend))) {
+	if (!e_backend_get_online (E_BACKEND (backend)) || !cbews->priv->cnc) {
 		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
 		goto exit;
 	}
@@ -2664,7 +2676,7 @@ e_cal_backend_ews_send_objects (ECalBackend *backend,
 	priv = cbews->priv;
 
 	/* make sure we're not offline */
-	if (!e_backend_get_online (E_BACKEND (backend))) {
+	if (!e_backend_get_online (E_BACKEND (backend)) || !cbews->priv->cnc) {
 		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
 		goto exit;
 	}
@@ -3912,7 +3924,7 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend,
 	GSList *users_copy = NULL;
 
 	/* make sure we're not offline */
-	if (!e_backend_get_online (E_BACKEND (backend))) {
+	if (!e_backend_get_online (E_BACKEND (backend)) || !cbews->priv->cnc) {
 		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
 		goto exit;
 	}
@@ -4215,32 +4227,22 @@ e_cal_backend_ews_finalize (GObject *object)
 	G_OBJECT_CLASS (e_cal_backend_ews_parent_class)->finalize (object);
 }
 
-static gboolean
-cal_backend_ews_get_without_password (ESourceAuthenticator *authenticator)
-{
-	ECalBackendEws *backend;
-	CamelEwsSettings *ews_settings;
-
-	backend = E_CAL_BACKEND_EWS (authenticator);
-	ews_settings = cal_backend_ews_get_collection_settings (backend);
-
-	return e_ews_connection_utils_get_without_password (ews_settings);
-}
-
 static ESourceAuthenticationResult
-cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
-                                   const GString *password,
-                                   GCancellable *cancellable,
-                                   GError **error)
+e_cal_backend_ews_authenticate_sync (EBackend *backend,
+				     const ENamedParameters *credentials,
+				     gchar **out_certificate_pem,
+				     GTlsCertificateFlags *out_certificate_errors,
+				     GCancellable *cancellable,
+				     GError **error)
 {
-	ECalBackendEws *backend;
+	ECalBackendEws *cal_backend;
 	EEwsConnection *connection;
 	ESourceAuthenticationResult result;
 	CamelEwsSettings *ews_settings;
 	gchar *hosturl;
 
-	backend = E_CAL_BACKEND_EWS (authenticator);
-	ews_settings = cal_backend_ews_get_collection_settings (backend);
+	cal_backend = E_CAL_BACKEND_EWS (backend);
+	ews_settings = cal_backend_ews_get_collection_settings (cal_backend);
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
 
 	connection = e_ews_connection_new (hosturl, ews_settings);
@@ -4250,30 +4252,28 @@ cal_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
 		connection, "proxy-resolver",
 		G_BINDING_SYNC_CREATE);
 
-	result = e_source_authenticator_try_password_sync (
-		E_SOURCE_AUTHENTICATOR (connection),
-		password, cancellable, error);
+	result = e_ews_connection_try_credentials_sync (connection, credentials, cancellable, error);
 
 	if (result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
 
-		PRIV_LOCK (backend->priv);
+		PRIV_LOCK (cal_backend->priv);
 
-		g_free (backend->priv->user_email);
-		backend->priv->user_email = camel_ews_settings_dup_email (ews_settings);
+		g_free (cal_backend->priv->user_email);
+		cal_backend->priv->user_email = camel_ews_settings_dup_email (ews_settings);
 
-		if (backend->priv->cnc != NULL)
-			g_object_unref (backend->priv->cnc);
-		backend->priv->cnc = g_object_ref (connection);
+		if (cal_backend->priv->cnc != NULL)
+			g_object_unref (cal_backend->priv->cnc);
+		cal_backend->priv->cnc = g_object_ref (connection);
 
 		g_signal_connect_swapped (
-			backend->priv->cnc,
+			cal_backend->priv->cnc,
 			"server-notification",
 			G_CALLBACK (cbews_server_notification_cb),
 			backend);
 
-		PRIV_UNLOCK (backend->priv);
+		PRIV_UNLOCK (cal_backend->priv);
 
-		ews_start_sync (backend);
+		ews_start_sync (cal_backend);
 	}
 
 	g_object_unref (connection);
@@ -4301,6 +4301,7 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	object_class->finalize = e_cal_backend_ews_finalize;
 
 	backend_class->get_destination_address = e_cal_backend_ews_get_destination_address;
+	backend_class->authenticate_sync = e_cal_backend_ews_authenticate_sync;
 
 	/* Property accessors */
 	cal_backend_class->get_backend_property = e_cal_backend_ews_get_backend_property;
@@ -4325,13 +4326,6 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
 	cal_backend_class->receive_objects = e_cal_backend_ews_receive_objects;
 	cal_backend_class->send_objects = e_cal_backend_ews_send_objects;
 	cal_backend_class->get_free_busy = e_cal_backend_ews_get_free_busy;
-}
-
-static void
-e_cal_backend_ews_authenticator_init (ESourceAuthenticatorInterface *iface)
-{
-	iface->get_without_password = cal_backend_ews_get_without_password;
-	iface->try_password_sync = cal_backend_ews_try_password_sync;
 }
 
 static void

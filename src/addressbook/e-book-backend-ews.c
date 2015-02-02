@@ -129,8 +129,6 @@ enum {
 #define PRIV_UNLOCK(p) (g_rec_mutex_unlock (&(p)->rec_mutex))
 
 /* Forward Declarations */
-static void	e_book_backend_ews_authenticator_init
-				(ESourceAuthenticatorInterface *iface);
 static void	e_book_backend_ews_initable_init
 				(GInitableIface *iface);
 static gpointer ews_update_items_thread (gpointer data);
@@ -140,9 +138,6 @@ G_DEFINE_TYPE_WITH_CODE (
 	EBookBackendEws,
 	e_book_backend_ews,
 	E_TYPE_BOOK_BACKEND,
-	G_IMPLEMENT_INTERFACE (
-		E_TYPE_SOURCE_AUTHENTICATOR,
-		e_book_backend_ews_authenticator_init)
 	G_IMPLEMENT_INTERFACE (
 		G_TYPE_INITABLE,
 		e_book_backend_ews_initable_init))
@@ -238,6 +233,7 @@ book_backend_ews_ensure_connected (EBookBackendEws *bbews,
 				   GCancellable *cancellable,
 				   GError **perror)
 {
+	CamelEwsSettings *ews_settings;
 	GError *local_error = NULL;
 
 	g_return_val_if_fail (E_IS_BOOK_BACKEND_EWS (bbews), FALSE);
@@ -251,10 +247,15 @@ book_backend_ews_ensure_connected (EBookBackendEws *bbews,
 
 	PRIV_UNLOCK (bbews->priv);
 
-	e_backend_authenticate_sync (
-		E_BACKEND (bbews),
-		E_SOURCE_AUTHENTICATOR (bbews),
-		cancellable, &local_error);
+	ews_settings = book_backend_ews_get_collection_settings (bbews);
+
+	if (e_ews_connection_utils_get_without_password (ews_settings)) {
+		e_backend_schedule_authenticate (E_BACKEND (bbews), NULL);
+	} else {
+		e_backend_credentials_required_sync (E_BACKEND (bbews),
+			E_SOURCE_CREDENTIALS_REASON_REQUIRED, NULL, 0, NULL,
+			cancellable, &local_error);
+	}
 
 	if (!local_error)
 		return TRUE;
@@ -1458,7 +1459,7 @@ e_book_backend_ews_create_contacts (EBookBackend *backend,
 	ebews = E_BOOK_BACKEND_EWS (backend);
 	priv = ebews->priv;
 
-	if (!e_backend_get_online (E_BACKEND (backend))) {
+	if (!e_backend_get_online (E_BACKEND (backend)) || !ebews->priv->cnc) {
 		if (!priv->is_writable) {
 			e_data_book_respond_create_contacts (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
 			return;
@@ -1597,7 +1598,7 @@ e_book_backend_ews_remove_contacts (EBookBackend *backend,
 
 	priv = ebews->priv;
 
-	if (!e_backend_get_online (E_BACKEND (backend))) {
+	if (!e_backend_get_online (E_BACKEND (backend)) || !ebews->priv->cnc) {
 		if (!priv->is_writable) {
 			e_data_book_respond_remove_contacts (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
 			return;
@@ -1823,7 +1824,7 @@ e_book_backend_ews_modify_contacts (EBookBackend *backend,
 	ebews = E_BOOK_BACKEND_EWS (backend);
 	priv = ebews->priv;
 
-	if (!e_backend_get_online (E_BACKEND (backend))) {
+	if (!e_backend_get_online (E_BACKEND (backend)) || !ebews->priv->cnc) {
 		if (!priv->is_writable) {
 			e_data_book_respond_modify_contacts (book, opid, EDB_ERROR (PERMISSION_DENIED), NULL);
 			return;
@@ -1916,7 +1917,7 @@ e_book_backend_ews_get_contact (EBookBackend *backend,
 
 	ebews =  E_BOOK_BACKEND_EWS (backend);
 
-	if (!e_backend_get_online (E_BACKEND (backend))) {
+	if (!e_backend_get_online (E_BACKEND (backend)) || !ebews->priv->cnc) {
 		e_data_book_respond_get_contact (book, opid, EDB_ERROR (REPOSITORY_OFFLINE), NULL);
 		return;
 	}
@@ -1950,7 +1951,7 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 	if (priv->summary)
 		e_book_sqlite_get_key_value_int (priv->summary, E_BOOK_SQL_IS_POPULATED_KEY, &populated, NULL);
 
-	if (!e_backend_get_online (E_BACKEND (backend))) {
+	if (!e_backend_get_online (E_BACKEND (backend)) || !ebews->priv->cnc) {
 		if (populated) {
 		search_db:
 			if (e_book_sqlite_lock (priv->summary, EBSQL_LOCK_READ, cancellable, &error)) {
@@ -3001,7 +3002,7 @@ ebews_fetch_items (EBookBackendEws *ebews, GSList *items, GSList **contacts,
 	GSList *new_items = NULL;
 	gboolean ret = FALSE;
 
-	if (!book_backend_ews_ensure_connected (ebews, cancellable, error)) {
+	if (!book_backend_ews_ensure_connected (ebews, cancellable, error) || !ebews->priv->cnc) {
 		g_slist_free_full (items, g_object_unref);
 		return ret;
 	}
@@ -3186,14 +3187,22 @@ delta_thread (gpointer data)
 }
 
 static gboolean
-fetch_deltas (EBookBackendEws *ebews)
+fetch_deltas (EBookBackendEws *ebews,
+	      gboolean force_update)
 {
 	EBookBackendEwsPrivate *priv = ebews->priv;
 	GError *error = NULL;
 
 	/* If the thread is already running just return back */
-	if (priv->dthread)
+	if (priv->dthread) {
+		if (force_update && priv->dlock) {
+			g_mutex_lock (&priv->dlock->mutex);
+			g_cond_signal (&priv->dlock->cond);
+			g_mutex_unlock (&priv->dlock->mutex);
+		}
+
 		return FALSE;
+	}
 
 	if (!priv->dlock) {
 		priv->dlock = g_new0 (SyncDelta, 1);
@@ -3212,7 +3221,8 @@ fetch_deltas (EBookBackendEws *ebews)
 }
 
 static void
-ebews_start_refreshing (EBookBackendEws *ebews)
+ebews_start_refreshing (EBookBackendEws *ebews,
+			gboolean force_update)
 {
 	EBookBackendEwsPrivate *priv;
 
@@ -3222,7 +3232,7 @@ ebews_start_refreshing (EBookBackendEws *ebews)
 
 	if (e_backend_get_online (E_BACKEND (ebews)) &&
 	    priv->cnc != NULL && priv->marked_for_offline)
-		fetch_deltas (ebews);
+		fetch_deltas (ebews, force_update);
 
 	PRIV_UNLOCK (priv);
 }
@@ -3298,7 +3308,7 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 	g_hash_table_insert (priv->ops, book_view, cancellable);
 	PRIV_UNLOCK (priv);
 
-	if (!e_backend_get_online (E_BACKEND (backend))) {
+	if (!e_backend_get_online (E_BACKEND (backend)) || !priv->cnc) {
 		if (priv->summary)
 			e_book_sqlite_get_key_value_int (priv->summary, E_BOOK_SQL_IS_POPULATED_KEY, &is_populated, NULL);
 		if (is_populated) {
@@ -3306,33 +3316,12 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 			goto out;
 		}
 
-		error = EDB_ERROR (OFFLINE_UNAVAILABLE);
 		goto out;
-	}
-
-	if (priv->cnc == NULL) {
-		e_backend_authenticate_sync (
-			E_BACKEND (backend),
-			E_SOURCE_AUTHENTICATOR (backend),
-			cancellable, &error);
-		if (g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NORESPONSE)) {
-			/* possibly server unreachable, try offline */
-			if (priv->summary)
-				e_book_sqlite_get_key_value_int (priv->summary, E_BOOK_SQL_IS_POPULATED_KEY, &is_populated, NULL);
-			if (is_populated) {
-				g_clear_error (&error);
-				fetch_from_offline (ebews, book_view, query, cancellable, &error);
-				goto out;
-			}
-		}
-
-		if (error != NULL)
-			goto out;
 	}
 
 	g_return_if_fail (priv->cnc != NULL);
 
-	ebews_start_refreshing (ebews);
+	ebews_start_refreshing (ebews, FALSE);
 
 	if (priv->summary)
 		e_book_sqlite_get_key_value_int (priv->summary, E_BOOK_SQL_IS_POPULATED_KEY, &is_populated, NULL);
@@ -3549,6 +3538,10 @@ e_book_backend_ews_notify_online_cb (EBookBackend *backend,
 			ebews->priv->is_writable = !ebews->priv->is_gal;
 
 			e_book_backend_set_writable (backend, ebews->priv->is_writable);
+
+			e_backend_schedule_credentials_required (E_BACKEND (backend),
+				E_SOURCE_CREDENTIALS_REASON_REQUIRED, NULL, 0, NULL,
+				ebews->priv->cancellable, G_STRFUNC);
 		}
 	}
 }
@@ -3899,6 +3892,7 @@ e_book_backend_ews_open_sync (EBookBackend *backend,
 	CamelEwsSettings *ews_settings;
 	EBookBackendEws *ebews;
 	EBookBackendEwsPrivate * priv;
+	ESource *source;
 	gboolean need_to_authenticate;
 	gchar *revision = NULL;
 
@@ -3909,19 +3903,14 @@ e_book_backend_ews_open_sync (EBookBackend *backend,
 		return TRUE;
 
 	ews_settings = book_backend_ews_get_collection_settings (ebews);
+	source = e_backend_get_source (E_BACKEND (ebews));
+
+	e_source_set_connection_status (source, E_SOURCE_CONNECTION_STATUS_CONNECTING);
 
 	PRIV_LOCK (priv);
 	need_to_authenticate = priv->cnc == NULL && e_backend_is_destination_reachable (E_BACKEND (backend), cancellable, NULL);
 
 	PRIV_UNLOCK (priv);
-
-	if (need_to_authenticate &&
-	    !e_backend_authenticate_sync (E_BACKEND (backend),
-					  E_SOURCE_AUTHENTICATOR (backend),
-					  cancellable, error)) {
-		convert_error_to_edb_error (error);
-		return FALSE;
-	}
 
 	e_book_sqlite_get_key_value (priv->summary, "revision", &revision, NULL);
 	if (revision) {
@@ -3931,22 +3920,32 @@ e_book_backend_ews_open_sync (EBookBackend *backend,
 		g_free (revision);
 	}
 
-	if (ebews->priv->is_gal)
-		return TRUE;
+	if (!ebews->priv->is_gal) {
+		PRIV_LOCK (priv);
+		priv->listen_notifications = camel_ews_settings_get_listen_notifications (ews_settings);
 
-	PRIV_LOCK (priv);
-	priv->listen_notifications = camel_ews_settings_get_listen_notifications (ews_settings);
+		if (priv->listen_notifications)
+			ebews_listen_notifications_cb (ebews, NULL, ews_settings);
 
-	if (priv->listen_notifications)
-		ebews_listen_notifications_cb (ebews, NULL, ews_settings);
+		PRIV_UNLOCK (priv);
 
-	PRIV_UNLOCK (priv);
+		g_signal_connect_swapped (
+			ews_settings,
+			"notify::listen-notifications",
+			G_CALLBACK (ebews_listen_notifications_cb),
+			ebews);
+	}
 
-	g_signal_connect_swapped (
-		ews_settings,
-		"notify::listen-notifications",
-		G_CALLBACK (ebews_listen_notifications_cb),
-		ebews);
+	if (ebews->priv->cnc)
+		e_source_set_connection_status (source, E_SOURCE_CONNECTION_STATUS_CONNECTED);
+	else
+		e_source_set_connection_status (source, E_SOURCE_CONNECTION_STATUS_DISCONNECTED);
+
+	if (need_to_authenticate &&
+	    !book_backend_ews_ensure_connected (ebews, cancellable, error)) {
+		convert_error_to_edb_error (error);
+		return FALSE;
+	}
 
 	return TRUE;
 }
@@ -4117,69 +4116,58 @@ e_book_backend_ews_finalize (GObject *object)
 	G_OBJECT_CLASS (e_book_backend_ews_parent_class)->finalize (object);
 }
 
-static gboolean
-book_backend_ews_get_without_password (ESourceAuthenticator *authenticator)
-{
-	EBookBackendEws *backend;
-	CamelEwsSettings *ews_settings;
-
-	backend = E_BOOK_BACKEND_EWS (authenticator);
-	ews_settings = book_backend_ews_get_collection_settings (backend);
-
-	return e_ews_connection_utils_get_without_password (ews_settings);
-}
-
 static ESourceAuthenticationResult
-book_backend_ews_try_password_sync (ESourceAuthenticator *authenticator,
-                                    const GString *password,
-                                    GCancellable *cancellable,
-                                    GError **error)
+e_book_backend_ews_authenticate_sync (EBackend *backend,
+				      const ENamedParameters *credentials,
+				      gchar **out_certificate_pem,
+				      GTlsCertificateFlags *out_certificate_errors,
+				      GCancellable *cancellable,
+				      GError **error)
 {
-	EBookBackendEws *backend;
+	EBookBackendEws *ews_backend;
 	EEwsConnection *connection;
 	ESourceAuthenticationResult result;
 	CamelEwsSettings *ews_settings;
 	gchar *hosturl;
 
-	backend = E_BOOK_BACKEND_EWS (authenticator);
-	ews_settings = book_backend_ews_get_collection_settings (backend);
+	ews_backend = E_BOOK_BACKEND_EWS (backend);
+	ews_settings = book_backend_ews_get_collection_settings (ews_backend);
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
 
 	connection = e_ews_connection_new (hosturl, ews_settings);
 
 	g_object_bind_property (
-		backend, "proxy-resolver",
+		ews_backend, "proxy-resolver",
 		connection, "proxy-resolver",
 		G_BINDING_SYNC_CREATE);
 
-	result = e_source_authenticator_try_password_sync (
-		E_SOURCE_AUTHENTICATOR (connection),
-		password, cancellable, error);
+	result = e_ews_connection_try_credentials_sync (connection, credentials, cancellable, error);
 
 	if (result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
 
-		PRIV_LOCK (backend->priv);
+		PRIV_LOCK (ews_backend->priv);
 
-		if (backend->priv->cnc != NULL)
-			g_object_unref (backend->priv->cnc);
-		backend->priv->cnc = g_object_ref (connection);
-		backend->priv->is_writable = !backend->priv->is_gal;
+		if (ews_backend->priv->cnc != NULL)
+			g_object_unref (ews_backend->priv->cnc);
+		ews_backend->priv->cnc = g_object_ref (connection);
+		ews_backend->priv->is_writable = !ews_backend->priv->is_gal;
 
 		g_signal_connect_swapped (
-			backend->priv->cnc,
+			ews_backend->priv->cnc,
 			"server-notification",
 			G_CALLBACK (ebews_server_notification_cb),
 			backend);
 
-		PRIV_UNLOCK (backend->priv);
+		PRIV_UNLOCK (ews_backend->priv);
 
-		e_backend_set_online (E_BACKEND (backend), TRUE);
+		e_backend_set_online (backend, TRUE);
+		ebews_start_refreshing (ews_backend, TRUE);
 	} else {
-		backend->priv->is_writable = FALSE;
-		e_backend_set_online (E_BACKEND (backend), FALSE);
+		ews_backend->priv->is_writable = FALSE;
+		e_backend_set_online (backend, FALSE);
 	}
 
-	e_book_backend_set_writable (E_BOOK_BACKEND (backend), backend->priv->is_writable);
+	e_book_backend_set_writable (E_BOOK_BACKEND (backend), ews_backend->priv->is_writable);
 
 	g_object_unref (connection);
 
@@ -4406,17 +4394,11 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 	parent_class->configure_direct        = e_book_backend_ews_configure_direct;
 
 	backend_class->get_destination_address = e_book_backend_ews_get_destination_address;
+	backend_class->authenticate_sync = e_book_backend_ews_authenticate_sync;
 
 	object_class->constructed             = e_book_backend_ews_constructed;
 	object_class->dispose                 = e_book_backend_ews_dispose;
 	object_class->finalize                = e_book_backend_ews_finalize;
-}
-
-static void
-e_book_backend_ews_authenticator_init (ESourceAuthenticatorInterface *iface)
-{
-	iface->get_without_password = book_backend_ews_get_without_password;
-	iface->try_password_sync = book_backend_ews_try_password_sync;
 }
 
 static void

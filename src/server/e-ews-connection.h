@@ -395,6 +395,15 @@ EEwsConnection *e_ews_connection_new		(const gchar *uri,
 EEwsConnection *e_ews_connection_new_full	(const gchar *uri,
 						 CamelEwsSettings *settings,
 						 gboolean allow_connection_reuse);
+void		e_ews_connection_update_credentials
+						(EEwsConnection *cnc,
+						 const ENamedParameters *credentials);
+ESourceAuthenticationResult
+		e_ews_connection_try_credentials_sync
+						(EEwsConnection *cnc,
+						 const ENamedParameters *credentials,
+						 GCancellable *cancellable,
+						 GError **error);
 const gchar *	e_ews_connection_get_uri	(EEwsConnection *cnc);
 const gchar *	e_ews_connection_get_password	(EEwsConnection *cnc);
 gchar *		e_ews_connection_dup_password	(EEwsConnection *cnc);
