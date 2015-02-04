@@ -993,7 +993,7 @@ msgstr "Hledá se off-line adresář"
 
 #: ../src/configuration/e-mail-config-ews-gal.c:301
 msgid "Cache o_ffline address book"
-msgstr "Uložit off-line adresář do mezipaměti"
+msgstr "Ukládat adresář do mezipaměti pro použití při o_dpojení"
 
 #: ../src/configuration/e-mail-config-ews-gal.c:327
 msgid "Select ad_dress list:"
