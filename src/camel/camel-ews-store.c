@@ -1193,7 +1193,7 @@ ews_connect_sync (CamelService *service,
 		state = camel_ews_store_get_ooo_alert_state (ews_store);
 		if (state == CAMEL_EWS_STORE_OOO_ALERT_STATE_UNKNOWN)
 			camel_session_submit_job (
-				session,
+				session, _("Checking \"Out of Office\" settings"),
 				ews_update_has_ooo_set,
 				g_object_ref (ews_store),
 				g_object_unref);
@@ -1567,7 +1567,7 @@ camel_ews_store_update_foreign_subfolders (CamelEwsStore *ews_store,
 	euf->folder_id = g_strdup (fid);
 
 	camel_session_submit_job (
-		session, ews_store_update_foreign_subfolders,
+		session, _("Updating foreign folders"), ews_store_update_foreign_subfolders,
 		euf, ews_update_foreign_subfolders_data_free);
 
 	g_object_unref (session);
@@ -3531,7 +3531,7 @@ camel_ews_store_unset_oof_settings_state (CamelEwsStore *ews_store)
 	session = camel_service_ref_session (service);
 
 	camel_session_submit_job (
-		session,
+		session, _("Unsetting the \"Out of Office\" status"),
 		ews_store_unset_oof_settings_state,
 		g_object_ref (ews_store),
 		g_object_unref);
