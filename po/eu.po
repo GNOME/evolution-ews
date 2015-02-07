@@ -12,13 +12,15 @@
 # Jose Ramiro Urizar Jaio <jotaerre963@gmail.com>, 2014.
 # Elhuyar Hizkuntza Zerbitzuak <itzulpenak@elhuyar.com>, 2014.
 # Iñaki Larrañaga Murgoitio <dooteo@zundan.com>, 2014.
+# Edurne Labaka <elabaka@uzei.com>, 2015.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews evolution-ews-3-12\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-04-25 15:33+0200\n"
-"PO-Revision-Date: 2014-04-16 17:08+0200\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-ews&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2015-02-07 11:54+0100\n"
+"PO-Revision-Date: 2014-11-10 16:19+0100\n"
 "Last-Translator: Iñaki Larrañaga Murgoitio <dooteo@zundan.com>\n"
 "Language-Team: Basque <librezale@librezale.org>\n"
 "Language: eu\n"
@@ -26,7 +28,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Lokalize 1.4\n"
+"X-Generator: Poedit 1.6.10\n"
 
 #: ../src/addressbook/e-book-backend-ews.c:1436
 msgid "The backend does not support bulk additions"
