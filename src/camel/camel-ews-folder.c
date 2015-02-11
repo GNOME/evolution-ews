@@ -92,8 +92,6 @@ struct _CamelEwsFolderPrivate {
 	GHashTable *uid_eflags;
 };
 
-extern gint camel_application_is_exiting;
-
 static gboolean ews_delete_messages (CamelFolder *folder, const GSList *deleted_items, gboolean expunge, GCancellable *cancellable, GError **error);
 static gboolean ews_refresh_info_sync (CamelFolder *folder, GCancellable *cancellable, GError **error);
 
