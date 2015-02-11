@@ -1133,6 +1133,43 @@ ews_cal_remove_object_cb (GObject *object,
 	e_cal_backend_ews_async_data_free (remove_data);
 }
 
+static gboolean
+e_cal_backend_ews_is_organizer (ECalBackendEws *cbews,
+				ECalComponent *instance_comp,
+				ECalComponent *parent_comp)
+{
+	ECalComponent *comp;
+	gboolean is_organizer = FALSE;
+
+	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (cbews), FALSE);
+
+	comp = instance_comp ? instance_comp : parent_comp;
+	if (!comp)
+		return FALSE;
+
+	PRIV_LOCK (cbews->priv);
+
+	if (e_cal_component_has_organizer (comp)) {
+		ECalComponentOrganizer organizer;
+
+		organizer.value = NULL;
+
+		e_cal_component_get_organizer (comp, &organizer);
+		if (organizer.value) {
+			const gchar *email = organizer.value;
+
+			if (!g_ascii_strncasecmp (email, "mailto:", 7))
+				email += 7;
+
+			is_organizer = cbews->priv->user_email && g_ascii_strcasecmp (email, cbews->priv->user_email) == 0;
+		}
+	}
+
+	PRIV_UNLOCK (cbews->priv);
+
+	return is_organizer;
+}
+
 static void
 e_cal_backend_ews_remove_object (ECalBackend *backend,
                                  EDataCal *cal,
@@ -1231,9 +1268,9 @@ e_cal_backend_ews_remove_object (ECalBackend *backend,
 	remove_data->mod = mod;
 
 	e_ews_connection_delete_item (
-		priv->cnc, EWS_PRIORITY_MEDIUM, &item_id, index,
-		EWS_HARD_DELETE, EWS_SEND_TO_NONE, EWS_ALL_OCCURRENCES,
-		priv->cancellable,
+		priv->cnc, EWS_PRIORITY_MEDIUM, &item_id, index, EWS_HARD_DELETE,
+		e_cal_backend_ews_is_organizer (cbews, comp, parent) ? EWS_SEND_TO_ALL_AND_SAVE_COPY : EWS_SEND_TO_NONE,
+		EWS_ALL_OCCURRENCES, priv->cancellable,
 		ews_cal_remove_object_cb,
 		remove_data);
 
