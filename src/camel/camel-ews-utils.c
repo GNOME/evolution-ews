@@ -344,17 +344,15 @@ ews_utils_sync_folders (CamelEwsStore *ews_store,
 
 void
 camel_ews_utils_sync_deleted_items (CamelEwsFolder *ews_folder,
-                                    GSList *items_deleted)
+                                    GSList *items_deleted,
+				    CamelFolderChangeInfo *change_info)
 {
 	CamelStore *store;
 	CamelFolder *folder;
 	const gchar *full_name;
-	CamelFolderChangeInfo *ci;
 	CamelEwsStore *ews_store;
 	GSList *l;
 	GList *items_deleted_list = NULL;
-
-	ci = camel_folder_change_info_new ();
 
 	folder = CAMEL_FOLDER (ews_folder);
 	full_name = camel_folder_get_full_name (folder);
@@ -369,7 +367,7 @@ camel_ews_utils_sync_deleted_items (CamelEwsFolder *ews_folder,
 			items_deleted_list, (gpointer) id);
 
 		camel_folder_summary_remove_uid (folder->summary, id);
-		camel_folder_change_info_remove_uid (ci, id);
+		camel_folder_change_info_remove_uid (change_info, id);
 	}
 
 	items_deleted_list = g_list_reverse (items_deleted_list);
@@ -377,13 +375,6 @@ camel_ews_utils_sync_deleted_items (CamelEwsFolder *ews_folder,
 		CAMEL_STORE (ews_store)->cdb_w,
 		full_name, items_deleted_list, NULL);
 	g_list_free (items_deleted_list);
-
-	if (camel_folder_change_info_changed (ci)) {
-		camel_folder_summary_touch (folder->summary);
-		camel_folder_summary_save_to_db (folder->summary, NULL);
-		camel_folder_changed (folder, ci);
-	}
-	camel_folder_change_info_free (ci);
 
 	g_slist_foreach (items_deleted, (GFunc) g_free, NULL);
 	g_slist_free (items_deleted);
@@ -743,13 +734,12 @@ camel_ews_utils_update_read_receipt_flags (EEwsItem *item,
 
 void
 camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
-                                    GSList *items_updated)
+                                    GSList *items_updated,
+				    CamelFolderChangeInfo *change_info)
 {
 	CamelFolder *folder;
-	CamelFolderChangeInfo *ci;
 	GSList *l;
 
-	ci = camel_folder_change_info_new ();
 	folder = CAMEL_FOLDER (ews_folder);
 
 	for (l = items_updated; l != NULL; l = g_slist_next (l)) {
@@ -786,7 +776,7 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
 			changed = camel_ews_utils_update_read_receipt_flags (item, (CamelMessageInfo *) mi, server_flags, FALSE) || changed;
 
 			if (changed)
-				camel_folder_change_info_change_uid (ci, mi->info.uid);
+				camel_folder_change_info_change_uid (change_info, mi->info.uid);
 
 			g_free (mi->change_key);
 			mi->change_key = g_strdup (id->change_key);
@@ -804,12 +794,6 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
 		g_object_unref (item);
 	}
 
-	if (camel_folder_change_info_changed (ci)) {
-		camel_folder_summary_touch (folder->summary);
-		camel_folder_summary_save_to_db (folder->summary, NULL);
-		camel_folder_changed (CAMEL_FOLDER (ews_folder), ci);
-	}
-	camel_folder_change_info_free (ci);
 	g_slist_free (items_updated);
 }
 
@@ -817,16 +801,15 @@ void
 camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
                                     EEwsConnection *cnc,
                                     GSList *items_created,
+				    CamelFolderChangeInfo *change_info,
                                     GCancellable *cancellable)
 {
 	CamelFolder *folder;
-	CamelFolderChangeInfo *ci;
 	GSList *l;
 
 	if (!items_created)
 		return;
 
-	ci = camel_folder_change_info_new ();
 	folder = CAMEL_FOLDER (ews_folder);
 
 	for (l = items_created; l != NULL; l = g_slist_next (l)) {
@@ -955,18 +938,12 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 		*/
 		mi->info.flags &= ~CAMEL_MESSAGE_FOLDER_FLAGGED;
 
-		camel_folder_change_info_add_uid (ci, id->id);
-		camel_folder_change_info_recent_uid (ci, id->id);
+		camel_folder_change_info_add_uid (change_info, id->id);
+		camel_folder_change_info_recent_uid (change_info, id->id);
 
 		g_object_unref (item);
 	}
 
-	if (camel_folder_change_info_changed (ci)) {
-		camel_folder_summary_touch (folder->summary);
-		camel_folder_summary_save_to_db (folder->summary, NULL);
-		camel_folder_changed (CAMEL_FOLDER (ews_folder), ci);
-	}
-	camel_folder_change_info_free (ci);
 	g_slist_free (items_created);
 }
 

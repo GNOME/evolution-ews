@@ -1407,6 +1407,7 @@ static void
 sync_updated_items (CamelEwsFolder *ews_folder,
                     EEwsConnection *cnc,
                     GSList *updated_items,
+		    CamelFolderChangeInfo *change_info,
                     GCancellable *cancellable,
                     GError **error)
 {
@@ -1476,7 +1477,7 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 		e_ews_additional_props_free (add_props);
 	}
 
-	camel_ews_utils_sync_updated_items (ews_folder, items);
+	camel_ews_utils_sync_updated_items (ews_folder, items, change_info);
 	items = NULL;
 	if (local_error) {
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
@@ -1499,7 +1500,7 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 
 		e_ews_additional_props_free (add_props);
 	}
-	camel_ews_utils_sync_updated_items (ews_folder, items);
+	camel_ews_utils_sync_updated_items (ews_folder, items, change_info);
 
 	if (local_error) {
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
@@ -1522,6 +1523,7 @@ static void
 sync_created_items (CamelEwsFolder *ews_folder,
                     EEwsConnection *cnc,
                     GSList *created_items,
+		    CamelFolderChangeInfo *change_info,
                     GCancellable *cancellable,
                     GError **error)
 {
@@ -1592,7 +1594,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 		goto exit;
 	}
 
-	camel_ews_utils_sync_created_items (ews_folder, cnc, items, cancellable);
+	camel_ews_utils_sync_created_items (ews_folder, cnc, items, change_info, cancellable);
 	items = NULL;
 
 
@@ -1618,7 +1620,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 		goto exit;
 	}
 
-	camel_ews_utils_sync_created_items (ews_folder, cnc, items, cancellable);
+	camel_ews_utils_sync_created_items (ews_folder, cnc, items, change_info, cancellable);
 	items = NULL;
 
 	if (generic_item_ids) {
@@ -1637,7 +1639,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 		e_ews_additional_props_free (add_props);
 	}
 
-	camel_ews_utils_sync_created_items (ews_folder, cnc, items, cancellable);
+	camel_ews_utils_sync_created_items (ews_folder, cnc, items, change_info, cancellable);
 
 	if (local_error) {
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
@@ -1705,6 +1707,7 @@ ews_refresh_info_sync (CamelFolder *folder,
                        GCancellable *cancellable,
                        GError **error)
 {
+	CamelFolderChangeInfo *change_info;
 	CamelEwsFolder *ews_folder;
 	CamelEwsFolderPrivate *priv;
 	EEwsConnection *cnc;
@@ -1713,6 +1716,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 	gchar *id;
 	gchar *sync_state;
 	gboolean includes_last_item = FALSE;
+	gint64 last_folder_update_time;
 	GError *local_error = NULL;
 
 	full_name = camel_folder_get_full_name (folder);
@@ -1739,6 +1743,8 @@ ews_refresh_info_sync (CamelFolder *folder,
 
 	camel_folder_summary_prepare_fetch_all (folder->summary, NULL);
 
+	change_info = camel_folder_change_info_new ();
+	last_folder_update_time = g_get_monotonic_time ();
 	id = camel_ews_store_summary_get_folder_id_from_name (
 		ews_store->summary, full_name);
 
@@ -1776,10 +1782,10 @@ ews_refresh_info_sync (CamelFolder *folder,
 		}
 
 		if (items_deleted)
-			camel_ews_utils_sync_deleted_items (ews_folder, items_deleted);
+			camel_ews_utils_sync_deleted_items (ews_folder, items_deleted, change_info);
 
 		if (items_created)
-			sync_created_items (ews_folder, cnc, items_created, cancellable, &local_error);
+			sync_created_items (ews_folder, cnc, items_created, change_info, cancellable, &local_error);
 
 		if (local_error) {
 			if (items_updated) {
@@ -1791,7 +1797,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 		}
 
 		if (items_updated)
-			sync_updated_items (ews_folder, cnc, items_updated, cancellable, &local_error);
+			sync_updated_items (ews_folder, cnc, items_updated, change_info, cancellable, &local_error);
 
 		if (local_error)
 			break;
@@ -1807,9 +1813,27 @@ ews_refresh_info_sync (CamelFolder *folder,
 		((CamelEwsSummary *) folder->summary)->sync_state = sync_state;
 
 		camel_folder_summary_touch (folder->summary);
+
+		if (camel_folder_change_info_changed (change_info)) {
+			camel_folder_summary_save_to_db (folder->summary, NULL);
+			/* Notify any listeners only once per 10 seconds, as such notify can cause UI update */
+			if (g_get_monotonic_time () - last_folder_update_time >= 10 * G_USEC_PER_SEC) {
+				last_folder_update_time = g_get_monotonic_time ();
+				camel_folder_changed (folder, change_info);
+				camel_folder_change_info_clear (change_info);
+			}
+		}
 	} while (!local_error && !includes_last_item && !g_cancellable_is_cancelled (cancellable));
 
-	camel_folder_summary_save_to_db (folder->summary, NULL);
+	if (camel_folder_change_info_changed (change_info)) {
+		camel_folder_summary_touch (folder->summary);
+		camel_folder_summary_save_to_db (folder->summary, NULL);
+		camel_folder_changed (folder, change_info);
+	} else {
+		camel_folder_summary_save_to_db (folder->summary, NULL);
+	}
+
+	camel_folder_change_info_free (change_info);
 
 	if (local_error)
 		g_propagate_error (error, local_error);
