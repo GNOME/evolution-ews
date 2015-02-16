@@ -1,3 +1,22 @@
+Evolution-EWS 3.13.90 2015-02-16
+--------------------------------
+
+Bug Fixes:
+	Bug 743705 - No cancellation sent for deleted meeting (Milan Crha)
+	Bug 741855 - Too often folder change notifications on folder refresh (Milan Crha)
+
+Miscellaneous:
+	Move authentication of backends back to the client (Milan Crha)
+	Use automake subdir-objects option (Milan Crha)
+	Adapt to camel_session_submit_job() API change (Milan Crha)
+	Remove unused declaration of camel_application_is_exiting variable (Milan Crha)
+
+Translations:
+	Marek Černocký (cs)
+	Inaki Larranaga Murgoitio (eu)
+	Piotr Drąg (pl)
+	Balázs Úr (hu)
+
 Evolution-EWS 3.13.10 2015-01-26
 --------------------------------
 
