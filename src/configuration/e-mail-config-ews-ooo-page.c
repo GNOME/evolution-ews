@@ -446,7 +446,7 @@ mail_config_ews_ooo_page_constructed (GObject *object)
 	gtk_box_pack_start (GTK_BOX (page), widget, TRUE, TRUE, 0);
 	gtk_widget_show (widget);
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		page->priv->disabled_radio_button, "active",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE |
@@ -461,7 +461,7 @@ mail_config_ews_ooo_page_constructed (GObject *object)
 	gtk_size_group_add_widget (size_group, widget);
 	gtk_widget_show (widget);
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		page->priv->scheduled_radio_button, "active",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
@@ -474,7 +474,7 @@ mail_config_ews_ooo_page_constructed (GObject *object)
 	page->priv->start_time = widget;  /* do not reference */
 	gtk_widget_show (widget);
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		page->priv->scheduled_radio_button, "active",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
@@ -486,7 +486,7 @@ mail_config_ews_ooo_page_constructed (GObject *object)
 	gtk_size_group_add_widget (size_group, widget);
 	gtk_widget_show (widget);
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		page->priv->scheduled_radio_button, "active",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
@@ -499,7 +499,7 @@ mail_config_ews_ooo_page_constructed (GObject *object)
 	page->priv->end_time = widget;  /* do not reference */
 	gtk_widget_show (widget);
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		page->priv->scheduled_radio_button, "active",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
@@ -596,7 +596,7 @@ mail_config_ews_ooo_page_constructed (GObject *object)
 	/* XXX Bit of a hack.  Since the enum value for "none" is zero,
 	 *     sensitize the text view if the combo box has a non-zero
 	 *     "active" value (in other words, anything but "none"). */
-	g_object_bind_property (
+	e_binding_bind_property (
 		page->priv->external_audience, "active",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);

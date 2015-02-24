@@ -611,7 +611,7 @@ camel_ews_settings_init (CamelEwsSettings *settings)
 	settings->priv = CAMEL_EWS_SETTINGS_GET_PRIVATE (settings);
 	g_mutex_init (&settings->priv->property_lock);
 
-	g_object_bind_property_full (settings, "hosturl",
+	e_binding_bind_property_full (settings, "hosturl",
 				     settings, "host",
 				     G_BINDING_DEFAULT,
 				     ews_settings_transform_host_url_to_host_cb,

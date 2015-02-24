@@ -1792,7 +1792,7 @@ e_ews_connection_init (EEwsConnection *cnc)
 
 	/* Do not use G_BINDING_SYNC_CREATE because the property_lock is
 	 * not initialized and we don't have a GProxyResolver yet anyway. */
-	g_object_bind_property (
+	e_binding_bind_property (
 		cnc, "proxy-resolver",
 		cnc->priv->soup_session, "proxy-resolver",
 		G_BINDING_DEFAULT);
@@ -2174,7 +2174,7 @@ e_ews_connection_new_full (const gchar *uri,
 		cnc->priv->impersonate_user = NULL;
 	}
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		settings, "timeout",
 		cnc->priv->soup_session, "timeout",
 		G_BINDING_SYNC_CREATE);

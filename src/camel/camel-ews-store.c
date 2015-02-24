@@ -1731,7 +1731,7 @@ ews_authenticate_sync (CamelService *service,
 
 	g_object_unref (settings);
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		service, "proxy-resolver",
 		connection, "proxy-resolver",
 		G_BINDING_SYNC_CREATE);
@@ -1901,7 +1901,7 @@ ews_store_query_auth_types_sync (CamelService *service,
 	g_free (hosturl);
 	g_object_unref (settings);
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		service, "proxy-resolver",
 		connection, "proxy-resolver",
 		G_BINDING_SYNC_CREATE);

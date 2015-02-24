@@ -290,7 +290,7 @@ mail_config_ews_gal_constructed (GObject *object)
 	gtk_box_pack_start (GTK_BOX (page), widget, FALSE, FALSE, 0);
 	gtk_widget_show (widget);
 
-	g_object_bind_property_full (
+	e_binding_bind_property_full (
 		settings, "oaburl",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE,
@@ -306,7 +306,7 @@ mail_config_ews_gal_constructed (GObject *object)
 	extension->priv->toggle_button = widget;  /* do not reference */
 	gtk_widget_show (widget);
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		settings, "oab-offline",
 		widget, "active",
 		G_BINDING_BIDIRECTIONAL |
@@ -319,7 +319,7 @@ mail_config_ews_gal_constructed (GObject *object)
 	gtk_grid_attach (GTK_GRID (container), widget, 0, 1, 1, 1);
 	gtk_widget_show (widget);
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		settings, "oab-offline",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
@@ -341,7 +341,7 @@ mail_config_ews_gal_constructed (GObject *object)
 	extension->priv->combo_box = widget;  /* do not reference */
 	gtk_widget_show (widget);
 
-	g_object_bind_property_full (
+	e_binding_bind_property_full (
 		settings, "oal-selected",
 		widget, "active-id",
 		G_BINDING_BIDIRECTIONAL |

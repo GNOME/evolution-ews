@@ -215,7 +215,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		}
 	}
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		settings, "use-impersonation",
 		widget, "active",
 		G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
@@ -231,7 +231,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		widget, "text",
 		G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		settings, "use-impersonation",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
@@ -240,7 +240,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_grid_attach (GTK_GRID (container), widget, 2, 4, 1, 1);
 	gtk_widget_show (widget);
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		priv->impersonate_user_entry, "sensitive",
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
@@ -284,7 +284,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	/* Don't use G_BINDING_SYNC_CREATE here since the widget
 	 * chooses its initial mechanism more intelligently than
 	 * a simple property binding would. */
-	g_object_bind_property (
+	e_binding_bind_property (
 		settings, "auth-mechanism",
 		priv->auth_check, "active-mechanism",
 		G_BINDING_BIDIRECTIONAL);
@@ -294,7 +294,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	extension = e_source_get_extension (source, extension_name);
 
 	/* The collection identity is the user name. */
-	g_object_bind_property (
+	e_binding_bind_property (
 		settings, "user",
 		extension, "identity",
 		G_BINDING_BIDIRECTIONAL |

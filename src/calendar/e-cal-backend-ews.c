@@ -4284,7 +4284,7 @@ e_cal_backend_ews_authenticate_sync (EBackend *backend,
 
 	connection = e_ews_connection_new (hosturl, ews_settings);
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		backend, "proxy-resolver",
 		connection, "proxy-resolver",
 		G_BINDING_SYNC_CREATE);

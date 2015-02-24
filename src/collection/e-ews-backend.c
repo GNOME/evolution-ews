@@ -751,7 +751,7 @@ ews_backend_child_added (ECollectionBackend *backend,
 		auth_child_extension = e_source_get_extension (
 			child_source, extension_name);
 
-		g_object_bind_property (
+		e_binding_bind_property (
 			collection_extension, "identity",
 			auth_child_extension, "user",
 			G_BINDING_SYNC_CREATE);
@@ -1163,7 +1163,7 @@ e_ews_backend_ref_connection_sync (EEwsBackend *backend,
 	connection = e_ews_connection_new (hosturl, settings);
 	g_free (hosturl);
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		backend, "proxy-resolver",
 		connection, "proxy-resolver",
 		G_BINDING_SYNC_CREATE);

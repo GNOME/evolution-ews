@@ -2261,7 +2261,7 @@ ews_download_gal_file (EBookBackendEws *cbews,
 
 	oab_cnc = e_ews_connection_new (full_url, ews_settings);
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		cbews, "proxy-resolver",
 		oab_cnc, "proxy-resolver",
 		G_BINDING_SYNC_CREATE);
@@ -2671,7 +2671,7 @@ ebews_start_gal_sync (gpointer data)
 
 	oab_cnc = e_ews_connection_new (priv->oab_url, ews_settings);
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		cbews, "proxy-resolver",
 		oab_cnc, "proxy-resolver",
 		G_BINDING_SYNC_CREATE);
@@ -4136,7 +4136,7 @@ e_book_backend_ews_authenticate_sync (EBackend *backend,
 
 	connection = e_ews_connection_new (hosturl, ews_settings);
 
-	g_object_bind_property (
+	e_binding_bind_property (
 		ews_backend, "proxy-resolver",
 		connection, "proxy-resolver",
 		G_BINDING_SYNC_CREATE);
