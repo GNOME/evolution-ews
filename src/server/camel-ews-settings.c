@@ -629,7 +629,7 @@ camel_ews_settings_init (CamelEwsSettings *settings)
  *
  * Returns: authentication method to use for this account
  *
- * Since: 3.14
+ * Since: 3.16
  **/
 EwsAuthType
 camel_ews_settings_get_auth_mechanism (CamelEwsSettings *settings)
