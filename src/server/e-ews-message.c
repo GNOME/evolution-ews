@@ -101,7 +101,7 @@ e_ews_message_new_with_header (const gchar *uri,
 	msg = e_soap_message_new (
 		SOUP_METHOD_POST, uri, FALSE, NULL, NULL, NULL, standard_handlers);
 	if (msg == NULL) {
-		g_warning (G_STRLOC ": Could not build SOAP message");
+		g_warning ("%s: Could not build SOAP message for uri '%s'", G_STRFUNC, uri);
 		return NULL;
 	}
 

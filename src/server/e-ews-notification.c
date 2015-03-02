@@ -334,6 +334,11 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 		FALSE,
 		FALSE);
 
+	if (!msg) {
+		g_warning ("%s: Failed to create Soup message for URI '%s'", G_STRFUNC, e_ews_connection_get_uri (notification->priv->connection));
+		return FALSE;
+	}
+
 	e_soap_message_start_element (msg, "StreamingSubscriptionRequest", "messages", NULL);
 
 	e_soap_message_start_element (msg, "FolderIds", NULL, NULL);
@@ -454,6 +459,11 @@ e_ews_notification_unsubscribe_folder_sync (EEwsNotification *notification,
 		E_EWS_EXCHANGE_2010_SP1,
 		FALSE,
 		FALSE);
+
+	if (!msg) {
+		g_warning ("%s: Failed to create Soup message for URI '%s'", G_STRFUNC, e_ews_connection_get_uri (notification->priv->connection));
+		return FALSE;
+	}
 
 	e_ews_message_write_string_parameter_with_attribute (
 		msg, "SubscriptionId", "messages", subscription_id, NULL, NULL);
@@ -713,9 +723,9 @@ e_ews_notification_get_events_sync (EEwsNotification *notification,
 	gboolean ret;
 	gulong handler_id;
 
-	g_return_val_if_fail (notification != NULL, SOUP_STATUS_CANCELLED);
-	g_return_val_if_fail (notification->priv != NULL, SOUP_STATUS_CANCELLED);
-	g_return_val_if_fail (notification->priv->connection != NULL, SOUP_STATUS_CANCELLED);
+	g_return_val_if_fail (notification != NULL, FALSE);
+	g_return_val_if_fail (notification->priv != NULL, FALSE);
+	g_return_val_if_fail (notification->priv->connection != NULL, FALSE);
 
 	msg = e_ews_message_new_with_header (
 		e_ews_connection_get_uri (notification->priv->connection),
@@ -727,6 +737,11 @@ e_ews_notification_get_events_sync (EEwsNotification *notification,
 		E_EWS_EXCHANGE_2010_SP1,
 		FALSE,
 		FALSE);
+
+	if (!msg) {
+		g_warning ("%s: Failed to create Soup message for URI '%s'", G_STRFUNC, e_ews_connection_get_uri (notification->priv->connection));
+		return FALSE;
+	}
 
 	e_soap_message_start_element (msg, "SubscriptionIds", "messages", NULL);
 	e_ews_message_write_string_parameter_with_attribute (msg, "SubscriptionId", NULL, subscription_id, NULL, NULL);
