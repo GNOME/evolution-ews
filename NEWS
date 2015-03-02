@@ -1,3 +1,14 @@
+Evolution-EWS 3.15.91 2015-03-02
+--------------------------------
+
+Miscellaneous:
+	Use thread safe variants of g_object_bind_property*() functions from evolution-data-server (Milan Crha)
+	Update devel-doc Since from 3.14 to 3.16 (Milan Crha)
+	Sync version with GNOME 3.15 series (Milan Crha)
+
+Translations:
+	Matej Urbančič (sl)
+
 Evolution-EWS 3.13.90 2015-02-16
 --------------------------------
 
