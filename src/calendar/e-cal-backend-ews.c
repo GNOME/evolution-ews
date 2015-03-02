@@ -4311,6 +4311,7 @@ e_cal_backend_ews_authenticate_sync (EBackend *backend,
 		PRIV_UNLOCK (cal_backend->priv);
 
 		ews_start_sync (cal_backend);
+		cbews_listen_notifications_cb (cal_backend, NULL, ews_settings);
 	}
 
 	g_object_unref (connection);

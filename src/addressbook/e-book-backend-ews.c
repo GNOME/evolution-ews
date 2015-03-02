@@ -4162,6 +4162,9 @@ e_book_backend_ews_authenticate_sync (EBackend *backend,
 
 		e_backend_set_online (backend, TRUE);
 		ebews_start_refreshing (ews_backend, TRUE);
+
+		if (!ews_backend->priv->is_gal)
+			ebews_listen_notifications_cb (ews_backend, NULL, ews_settings);
 	} else {
 		ews_backend->priv->is_writable = FALSE;
 		e_backend_set_online (backend, FALSE);
