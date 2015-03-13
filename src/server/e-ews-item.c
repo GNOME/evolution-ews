@@ -1718,6 +1718,8 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param,
 	}
 
 	if (cache && content && g_file_test ((const gchar *) content, G_FILE_TEST_IS_REGULAR | G_FILE_TEST_EXISTS)) {
+		gchar *uri;
+
 		info = e_ews_attachment_info_new (E_EWS_ATTACHMENT_INFO_TYPE_URI);
 
 		tmpfilename = (gchar *) content;
@@ -1740,8 +1742,10 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param,
 		g_free (content);
 
 		/* Return URI to saved file */
-		e_ews_attachment_info_set_uri (info, g_filename_to_uri (filename, NULL, NULL));
+		uri = g_filename_to_uri (filename, NULL, NULL);
+		e_ews_attachment_info_set_uri (info, uri);
 		g_free (filename);
+		g_free (uri);
 	} else {
 		info = e_ews_attachment_info_new (E_EWS_ATTACHMENT_INFO_TYPE_INLINED);
 		e_ews_attachment_info_set_inlined_data (info, content, data_len);
