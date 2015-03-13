@@ -1559,8 +1559,37 @@ ews_create_object_cb (GObject *object,
 		e_cal_component_get_attachment_list (create_data->comp, &attachments);
 
 		for (i = attachments; i; i = i->next) {
-			EEwsAttachmentInfo *info = e_ews_attachment_info_new (E_EWS_ATTACHMENT_INFO_TYPE_URI);
-			e_ews_attachment_info_set_uri (info, i->data);
+			const gchar *uri = i->data;
+			gchar *uri_filename;
+			EEwsAttachmentInfo *info;
+
+			if (!uri || !*uri)
+				continue;
+
+			info = e_ews_attachment_info_new (E_EWS_ATTACHMENT_INFO_TYPE_URI);
+
+			e_ews_attachment_info_set_uri (info, uri);
+
+			uri_filename = g_filename_from_uri (uri, NULL, NULL);
+			if (uri_filename && *uri_filename) {
+				gchar *basename;
+
+				basename = g_path_get_basename (uri_filename);
+				if (basename && *basename && basename[0] != '.' && basename[0] != G_DIR_SEPARATOR) {
+					const gchar *uid;
+
+					e_cal_component_get_uid (create_data->comp, &uid);
+
+					if (uid && g_str_has_prefix (basename, uid) && basename[strlen (uid)] == '-') {
+						e_ews_attachment_info_set_prefer_filename (info, basename + strlen (uid) + 1);
+					}
+				}
+
+				g_free (basename);
+			}
+
+			g_free (uri_filename);
+
 			info_attachments = g_slist_append (info_attachments, info);
 		}
 
