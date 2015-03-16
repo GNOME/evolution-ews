@@ -1,3 +1,23 @@
+Evolution-EWS 3.15.92 2015-03-16
+--------------------------------
+
+Bug Fixes:
+	Bug 745457 - Crash under e_ews_notification_subscribe_folder_sync() (Milan Crha)
+	Bug 695911 - Creates long and cryptic calendar attachment names (Milan Crha)
+
+Miscellaneous:
+	Correct 'Listen for server change notification' for books and calendars (Milan Crha)
+	DOAP: Add programming language (Andre Klapper)
+	DOAP: Fix category error (Andre Klapper)
+	DOAP: Add description property (Andre Klapper)
+	Memory leak in e_ews_dump_file_attachment_from_soap_parameter() (Milan Crha)
+
+Translations:
+	Rafael Ferreira (pt_BR)
+	Dušan Kazik (sk)
+	Samir Ribic (bs)
+	Aurimas Černius (lt)
+
 Evolution-EWS 3.15.91 2015-03-02
 --------------------------------
 
