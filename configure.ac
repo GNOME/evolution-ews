@@ -1,7 +1,7 @@
 dnl Evolution-EWS version
 m4_define([ews_major_version], [3])
-m4_define([ews_minor_version], [16])
-m4_define([ews_micro_version], [0])
+m4_define([ews_minor_version], [17])
+m4_define([ews_micro_version], [1])
 
 m4_define([ews_version],
 	[ews_major_version.ews_minor_version.ews_micro_version])
