@@ -589,7 +589,7 @@ ews_notification_handle_events_param (ESoapParameter *node,
 	*events = g_slist_reverse (*events);
 }
 
-static void
+static gboolean
 ews_notification_fire_events_from_response (EEwsNotification *notification,
 					    ESoapResponse *response)
 {
@@ -605,7 +605,7 @@ ews_notification_fire_events_from_response (EEwsNotification *notification,
 	if (error != NULL) {
 		g_warning (G_STRLOC ": %s\n", error->message);
 		g_error_free (error);
-		return;
+		return FALSE;
 	}
 
 	subparam = e_soap_parameter_get_first_child (param);
@@ -617,7 +617,7 @@ ews_notification_fire_events_from_response (EEwsNotification *notification,
 			g_warning (G_STRLOC ": %s\n", error->message);
 			g_error_free (error);
 			g_slist_free_full (events, (GDestroyNotify) e_ews_notification_event_free);
-			return;
+			return FALSE;
 		}
 
 		if (E_EWS_CONNECTION_UTILS_CHECK_ELEMENT (name, "GetStreamingEventsResponseMessage")) {
@@ -639,6 +639,8 @@ ews_notification_fire_events_from_response (EEwsNotification *notification,
 			g_signal_emit_by_name (notification->priv->connection, "server-notification", events);
 		g_slist_free_full (events, (GDestroyNotify) e_ews_notification_event_free);
 	}
+
+	return TRUE;
 }
 
 static void
@@ -693,7 +695,12 @@ ews_notification_soup_got_chunk (SoupMessage *msg,
 		if (response == NULL)
 			break;
 
-		ews_notification_fire_events_from_response (notification, response);
+		if (!ews_notification_fire_events_from_response (notification, response)) {
+			soup_session_abort (notification->priv->soup_session);
+
+			g_object_unref (response);
+			break;
+		}
 		g_object_unref (response);
 
 		notification->priv->chunk = g_byte_array_remove_range (notification->priv->chunk, 0, len);
