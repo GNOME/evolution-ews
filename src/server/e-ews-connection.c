@@ -9217,7 +9217,7 @@ e_ews_connection_query_auth_methods (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	soup_message_add_header_handler (SOUP_MESSAGE (msg), "got_body", "WWW-Authenticate",
+	soup_message_add_header_handler (SOUP_MESSAGE (msg), "got-headers", "WWW-Authenticate",
 		G_CALLBACK (ews_connection_gather_auth_methods_cb), simple);
 
 	e_ews_connection_queue_request (
