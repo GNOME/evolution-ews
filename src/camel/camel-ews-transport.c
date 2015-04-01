@@ -30,6 +30,8 @@
 
 #include <glib/gi18n-lib.h>
 
+#include <libemail-engine/libemail-engine.h>
+
 #include "server/camel-ews-settings.h"
 
 #include "utils/ews-camel-common.h"
@@ -41,6 +43,91 @@
 #define REPLY_VIEW "default message attachments threading"
 
 G_DEFINE_TYPE (CamelEwsTransport, camel_ews_transport, CAMEL_TYPE_TRANSPORT)
+
+static gboolean
+ews_transport_sent_folder_is_server_side (CamelService *service,
+					  EwsFolderId **folder_id,
+					  GCancellable *cancellable)
+{
+	CamelSession *session;
+	ESourceRegistry *registry;
+	ESource *sibling, *source = NULL;
+	gboolean is_server_side = FALSE;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_TRANSPORT (service), FALSE);
+	g_return_val_if_fail (folder_id != NULL, FALSE);
+
+	session = camel_service_ref_session (service);
+	if (session && E_IS_MAIL_SESSION (session))
+		registry = g_object_ref (e_mail_session_get_registry (E_MAIL_SESSION (session)));
+	else
+		registry = e_source_registry_new_sync (cancellable, NULL);
+
+	if (!registry) {
+		g_clear_object (&session);
+		return FALSE;
+	}
+
+	sibling = e_source_registry_ref_source (registry, camel_service_get_uid (service));
+	if (sibling) {
+		GList *sources, *siter;
+
+		sources = e_source_registry_list_sources (registry, E_SOURCE_EXTENSION_MAIL_SUBMISSION);
+		for (siter = sources; siter; siter = siter->next) {
+			source = siter->data;
+
+			if (!source || g_strcmp0 (e_source_get_parent (source), e_source_get_parent (sibling)) != 0 ||
+			    !e_source_has_extension (source, E_SOURCE_EXTENSION_MAIL_SUBMISSION) ||
+			    !e_source_has_extension (source, E_SOURCE_EXTENSION_MAIL_COMPOSITION))
+				source = NULL;
+			else
+				break;
+		}
+
+		if (source &&
+		    e_source_has_extension (source, E_SOURCE_EXTENSION_MAIL_SUBMISSION) &&
+		    e_source_has_extension (source, E_SOURCE_EXTENSION_MAIL_COMPOSITION)) {
+			ESourceMailSubmission *subm_extension;
+			CamelStore *store = NULL;
+			gchar *folder_name = NULL;
+
+			subm_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_MAIL_SUBMISSION);
+
+			if (e_source_mail_submission_get_sent_folder (subm_extension) &&
+			    e_mail_folder_uri_parse (session,
+				e_source_mail_submission_get_sent_folder (subm_extension),
+				&store, &folder_name, NULL) & CAMEL_IS_EWS_STORE (store)) {
+				CamelEwsStore *ews_store = CAMEL_EWS_STORE (store);
+				gchar *folder_id_str;
+
+				folder_id_str = camel_ews_store_summary_get_folder_id_from_name (
+					ews_store->summary, folder_name);
+				if (folder_id_str) {
+					gchar *change_key;
+
+					change_key = camel_ews_store_summary_get_change_key (ews_store->summary, folder_name, NULL);
+					*folder_id = e_ews_folder_id_new (folder_id_str, change_key, FALSE);
+					g_free (change_key);
+
+					is_server_side = *folder_id != NULL;
+				}
+
+				g_free (folder_id_str);
+			}
+
+			g_clear_object (&store);
+			g_free (folder_name);
+		}
+
+		g_list_free_full (sources, g_object_unref);
+		g_object_unref (sibling);
+	}
+
+	g_object_unref (registry);
+	g_clear_object (&session);
+
+	return is_server_side;
+}
 
 static gboolean
 ews_transport_connect_sync (CamelService *service,
@@ -81,6 +168,7 @@ ews_send_to_sync (CamelTransport *transport,
                   CamelMimeMessage *message,
                   CamelAddress *from,
                   CamelAddress *recipients,
+		  gboolean *out_sent_message_saved,
                   GCancellable *cancellable,
                   GError **error)
 {
@@ -90,6 +178,7 @@ ews_send_to_sync (CamelTransport *transport,
 	CamelSettings *settings;
 	CamelService *service;
 	EEwsConnection *cnc;
+	EwsFolderId *folder_id = NULL;
 	gchar *ews_email;
 	gchar *host_url;
 	gchar *user;
@@ -163,11 +252,17 @@ ews_send_to_sync (CamelTransport *transport,
 		goto exit;
 	}
 
+	if (ews_transport_sent_folder_is_server_side (service, &folder_id, cancellable)) {
+		if (out_sent_message_saved)
+			*out_sent_message_saved = TRUE;
+	}
+
 	success = camel_ews_utils_create_mime_message (
-		cnc, "SendOnly", NULL, message, NULL,
+		cnc, folder_id ? "SendAndSaveCopy" : "SendOnly", folder_id, message, NULL,
 		from, recipients, NULL, NULL, cancellable, error);
 
 	g_object_unref (cnc);
+	e_ews_folder_id_free (folder_id);
 
 exit:
 	g_free (ews_email);
