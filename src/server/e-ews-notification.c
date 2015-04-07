@@ -795,8 +795,21 @@ e_ews_notification_get_events_thread (gpointer user_data)
 		ret = e_ews_notification_get_events_sync (
 				td->notification,
 				subscription_id);
-	} while (ret);
 
+		if (!ret) {
+			g_debug ("%s: Failed to get notification events (SubscriptionId: '%s')", G_STRFUNC, subscription_id);
+
+			e_ews_notification_unsubscribe_folder_sync (td->notification, subscription_id);
+			g_free (subscription_id);
+
+			ret = e_ews_notification_subscribe_folder_sync (td->notification, td->folders, &subscription_id, td->cancellable);
+			if (ret) {
+				g_debug ("%s: Re-subscribed to get notifications events (SubscriptionId: '%s')", G_STRFUNC, subscription_id);
+			} else {
+				g_debug ("%s: Failed to re-subscribed to get notifications events", G_STRFUNC);
+			}
+		}
+	} while (ret);
 
 exit:
 	if (subscription_id != NULL) {
