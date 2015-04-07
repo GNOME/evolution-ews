@@ -315,6 +315,7 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 	GSList *l;
 	guint event_type;
 	xmlDoc *doc;
+	gint log_level = e_ews_debug_get_log_level ();
 
 	g_return_val_if_fail (notification != NULL, FALSE);
 	g_return_val_if_fail (notification->priv != NULL, FALSE);
@@ -378,6 +379,10 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 		return FALSE;
 	}
 
+	if (log_level >= 1 && log_level < 3) {
+		e_ews_debug_dump_raw_soup_request (SOUP_MESSAGE (msg));
+	}
+
 	soup_session_send_message (notification->priv->soup_session, SOUP_MESSAGE (msg));
 	if (!SOUP_STATUS_IS_SUCCESSFUL (SOUP_MESSAGE (msg)->status_code)) {
 		g_object_unref (msg);
@@ -391,6 +396,10 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 
 	response = e_soap_response_new_from_xmldoc (doc);
 	g_object_unref (msg);
+
+	if (log_level >= 1 && log_level < 3) {
+		e_ews_debug_dump_raw_soup_response (SOUP_MESSAGE (msg));
+	}
 
 	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages", &error);
 
@@ -652,6 +661,7 @@ ews_notification_soup_got_chunk (SoupMessage *msg,
 	const gchar *chunk_str;
 	gsize chunk_len;
 	gboolean keep_parsing = TRUE;
+	gint log_level = e_ews_debug_get_log_level ();
 
 	/*
 	 * Here we receive, in chunks, "well-formed" messages that contain:
@@ -694,6 +704,11 @@ ews_notification_soup_got_chunk (SoupMessage *msg,
 		response = e_soap_response_new_from_string (chunk_str, len);
 		if (response == NULL)
 			break;
+
+		if (log_level >= 1 && log_level < 3) {
+			e_ews_debug_dump_raw_soup_response (msg);
+			e_soap_response_dump_response (response, stdout);
+		}
 
 		if (!ews_notification_fire_events_from_response (notification, response)) {
 			soup_session_abort (notification->priv->soup_session);
