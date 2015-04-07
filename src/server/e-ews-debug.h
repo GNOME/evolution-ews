@@ -30,7 +30,10 @@ const gchar *	e_ews_connection_get_server_version_string
 EEwsServerVersion
 		e_ews_debug_get_server_version_from_string
 							(const gchar *version);
-
+void		e_ews_debug_dump_raw_soup_request
+							(SoupMessage *msg);
+void		e_ews_debug_dump_raw_soup_response
+							(SoupMessage *msg);
 G_END_DECLS
 
 #endif /* E_EWS_DEBUG_H */

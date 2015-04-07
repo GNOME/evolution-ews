@@ -75,8 +75,6 @@ static void	ews_connection_authenticate	(SoupSession *sess,
 						 SoupAuth *auth,
 						 gboolean retrying,
 						 gpointer data);
-static void ews_dump_raw_soup_request (SoupMessage *msg);
-static void ews_dump_raw_soup_response (SoupMessage *msg);
 
 /* Connection APIS */
 
@@ -491,7 +489,7 @@ ews_connection_scheduled_cb (gpointer user_data)
 
 	switch (sd->op) {
 	case EWS_SCHEDULE_OP_QUEUE_MESSAGE:
-		ews_dump_raw_soup_request (sd->message);
+		e_ews_debug_dump_raw_soup_request (sd->message);
 
 		soup_session_queue_message (
 			sd->cnc->priv->soup_session, sd->message,
@@ -632,7 +630,7 @@ ews_next_request (gpointer _cnc)
 	if (cnc->priv->soup_session) {
 		SoupMessage *msg = SOUP_MESSAGE (node->msg);
 
-		ews_dump_raw_soup_request (msg);
+		e_ews_debug_dump_raw_soup_request (msg);
 
 		soup_session_queue_message (cnc->priv->soup_session, msg, ews_response_cb, node);
 		QUEUE_UNLOCK (cnc);
@@ -808,7 +806,7 @@ ews_response_cb (SoupSession *session,
 		/* This will dump only the headers, since we stole the body.
 		 * And only if EWS_DEBUG=1, since higher levels will have dumped
 		 * it directly from libsoup anyway. */
-		ews_dump_raw_soup_response(msg);
+		e_ews_debug_dump_raw_soup_response (msg);
 		/* And this will dump the body... */
 		e_soap_response_dump_response (response, stdout);
 	}
@@ -2453,64 +2451,6 @@ autodiscover_data_free (struct _autodiscover_data *ad)
 }
 
 static void
-print_header (const gchar *name, const gchar *value, gpointer user_data)
-{
-	fprintf (user_data, "%s: %s\n", name, value);
-}
-
-static void
-ews_dump_raw_soup_message (FILE *out, SoupMessageHeaders *hdrs,
-			   SoupMessageBody *body)
-{
-	if (soup_message_body_get_accumulate (body)) {
-		SoupBuffer *buffer;
-
-		buffer = soup_message_body_flatten (body);
-		soup_buffer_free (buffer);
-	}
-
-	/* print body */
-	fprintf (out, " =====================\n");
-	soup_message_headers_foreach (hdrs, print_header, out);
-	fputc ('\n', out);
-	if (body->data) {
-		fputs (body->data, out);
-		fputc ('\n', out);
-	}
-	fflush (out);
-}
-
-static void
-ews_dump_raw_soup_request (SoupMessage *msg)
-{
-	gint log_level;
-
-	log_level = e_ews_debug_get_log_level ();
-	if (log_level == 1) {
-		/* print request body */
-		printf ("\n URI: %s\n", soup_uri_to_string (soup_message_get_uri (msg),
-							  TRUE));
-		printf (" The request headers for message %p\n", msg);
-		ews_dump_raw_soup_message (stdout, msg->request_headers,
-					   msg->request_body);
-	}
-}
-
-static void
-ews_dump_raw_soup_response (SoupMessage *msg)
-{
-	gint log_level;
-
-	log_level = e_ews_debug_get_log_level ();
-	if (log_level >= 1) {
-		printf ("\n The response code: %d\n", msg->status_code);
-		printf (" The response headers for message %p\n", msg);
-		ews_dump_raw_soup_message (stdout, msg->response_headers,
-					   msg->response_body);
-	}
-}
-
-static void
 autodiscover_cancelled_cb (GCancellable *cancellable,
                            EEwsConnection *cnc)
 {
@@ -2554,7 +2494,7 @@ autodiscover_response_cb (SoupSession *session,
 		goto failed;
 	}
 
-	ews_dump_raw_soup_response (msg);
+	e_ews_debug_dump_raw_soup_response (msg);
 	doc = xmlReadMemory (
 		msg->response_body->data,
 		msg->response_body->length,
@@ -2739,7 +2679,7 @@ e_ews_get_msg_for_url (const gchar *url,
 			G_CALLBACK (post_restarted), buf);
 	}
 
-	ews_dump_raw_soup_request (msg);
+	e_ews_debug_dump_raw_soup_request (msg);
 
 	return msg;
 }
@@ -3119,7 +3059,7 @@ oal_response_cb (SoupSession *soup_session,
 	if (etag)
 		data->etag = g_strdup(etag);
 
-	ews_dump_raw_soup_response (soup_message);
+	e_ews_debug_dump_raw_soup_response (soup_message);
 
 	doc = xmlReadMemory (
 		soup_message->response_body->data,
@@ -3449,7 +3389,7 @@ oal_download_response_cb (SoupSession *soup_session,
 		g_unlink (data->cache_filename);
 	}
 
-	ews_dump_raw_soup_response (soup_message);
+	e_ews_debug_dump_raw_soup_response (soup_message);
 
 	g_simple_async_result_complete_in_idle (simple);
 	e_ews_connection_utils_unref_in_thread (simple);
