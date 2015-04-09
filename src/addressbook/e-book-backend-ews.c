@@ -3158,7 +3158,7 @@ delta_thread (gpointer data)
 
 		if (!priv->is_gal)
 			succeeded = ebews_start_sync (ebews);
-		else if (priv->summary)
+		else if (priv->summary && priv->marked_for_offline)
 			succeeded = ebews_start_gal_sync (ebews);
 
 		g_mutex_lock (&priv->dlock->mutex);
@@ -3487,17 +3487,12 @@ book_backend_ews_initable_init (GInitable *initable,
 	priv->marked_for_offline = FALSE;
 	priv->is_writable = FALSE;
 
-	if (!priv->is_gal) {
-		extension_name = E_SOURCE_EXTENSION_OFFLINE;
-		extension = e_source_get_extension (source, extension_name);
+	extension_name = E_SOURCE_EXTENSION_OFFLINE;
+	extension = e_source_get_extension (source, extension_name);
 
-		priv->marked_for_offline =
-			e_source_offline_get_stay_synchronized (
-			E_SOURCE_OFFLINE (extension));
+	priv->marked_for_offline = e_source_offline_get_stay_synchronized (E_SOURCE_OFFLINE (extension));
 
-	/* If folder_id is present it means the GAL is marked for
-	 * offline usage, we do not check for offline_sync property */
-	} else if (priv->folder_id != NULL) {
+	if (priv->is_gal) {
 		priv->folder_name = g_strdup (display_name);
 		priv->oab_url = camel_ews_settings_dup_oaburl (settings);
 
@@ -3506,7 +3501,7 @@ book_backend_ews_initable_init (GInitable *initable,
 			cache_dir, "attachments", NULL);
 		g_mkdir_with_parents (priv->attachment_dir, 0777);
 
-		priv->marked_for_offline = TRUE;
+		priv->marked_for_offline = camel_ews_settings_get_oab_offline (settings);
 	}
 
 	return TRUE;
