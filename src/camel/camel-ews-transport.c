@@ -134,6 +134,10 @@ ews_transport_connect_sync (CamelService *service,
                             GCancellable *cancellable,
                             GError **error)
 {
+	/* Chain up to parent's method. */
+	if (!CAMEL_SERVICE_CLASS (camel_ews_transport_parent_class)->connect_sync (service, cancellable, error))
+		return FALSE;
+
 	return TRUE;
 }
 

@@ -1160,6 +1160,10 @@ ews_connect_sync (CamelService *service,
 	gchar *auth_mech;
 	gboolean success;
 
+	/* Chain up to parent's method. */
+	if (!CAMEL_SERVICE_CLASS (camel_ews_store_parent_class)->connect_sync (service, cancellable, error))
+		return FALSE;
+
 	ews_store = CAMEL_EWS_STORE (service);
 	priv = ews_store->priv;
 
