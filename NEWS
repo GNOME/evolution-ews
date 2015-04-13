@@ -1,3 +1,15 @@
+Evolution-EWS 3.16.1 2015-04-13
+-------------------------------
+
+Bug Fixes:
+	Bug 746513 - Constant stream of invalid requests for subscription events (Fabiano Fidêncio)
+	Bug 709924 - Cannot turn off offline GAL once selected (Milan Crha)
+	Bug 747500 - Mail account connection settings change requires restart (Milan Crha)
+
+Miscellaneous:
+	Query auth methods right from the got-headers signal (Milan Crha)
+	notification: Try to re-subscribe in case of failure (Fabiano Fidêncio)
+
 Evolution-EWS 3.16.0 2015-03-23
 -------------------------------
 
