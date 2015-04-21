@@ -816,6 +816,7 @@ e_ews_notification_get_events_thread (gpointer user_data)
 
 			e_ews_notification_unsubscribe_folder_sync (td->notification, subscription_id);
 			g_free (subscription_id);
+			subscription_id = NULL;
 
 			ret = e_ews_notification_subscribe_folder_sync (td->notification, td->folders, &subscription_id, td->cancellable);
 			if (ret) {
