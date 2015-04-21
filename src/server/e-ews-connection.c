@@ -535,6 +535,7 @@ ews_connection_schedule_queue_message (EEwsConnection *cnc,
 	g_source_set_priority (source, G_PRIORITY_DEFAULT);
 	g_source_set_callback (source, ews_connection_scheduled_cb, sd, NULL);
 	g_source_attach (source, cnc->priv->soup_context);
+	g_source_unref (source);
 }
 
 static void
@@ -556,6 +557,7 @@ ews_connection_schedule_cancel_message (EEwsConnection *cnc,
 	g_source_set_priority (source, G_PRIORITY_DEFAULT);
 	g_source_set_callback (source, ews_connection_scheduled_cb, sd, NULL);
 	g_source_attach (source, cnc->priv->soup_context);
+	g_source_unref (source);
 }
 
 static void
@@ -574,6 +576,7 @@ ews_connection_schedule_abort (EEwsConnection *cnc)
 	g_source_set_priority (source, G_PRIORITY_DEFAULT);
 	g_source_set_callback (source, ews_connection_scheduled_cb, sd, NULL);
 	g_source_attach (source, cnc->priv->soup_context);
+	g_source_unref (source);
 }
 
 static void ews_cancel_request (GCancellable *cancellable, gpointer user_data);
@@ -655,6 +658,7 @@ ews_trigger_next_request (EEwsConnection *cnc)
 		g_source_set_priority (source, G_PRIORITY_DEFAULT);
 		g_source_set_callback (source, ews_next_request, cnc, NULL);
 		g_source_attach (source, cnc->priv->soup_context);
+		g_source_unref (source);
 	} else {
 		ews_next_request (cnc);
 	}
@@ -6978,6 +6982,7 @@ ews_handle_attachments_param (ESoapParameter *param,
 		if (!g_ascii_strcasecmp (name, "ItemAttachment")) {
 			item = e_ews_item_new_from_soap_parameter (subparam);
 			info = e_ews_item_dump_mime_content (item, async_data->directory);
+			g_clear_object (&item);
 
 		} else if (!g_ascii_strcasecmp (name, "FileAttachment")) {
 			info = e_ews_dump_file_attachment_from_soap_parameter (
