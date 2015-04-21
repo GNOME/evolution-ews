@@ -1091,7 +1091,9 @@ e_soap_message_persist (ESoapMessage *msg)
 	soup_message_set_request (
 		SOUP_MESSAGE (msg),
 		"text/xml; charset=utf-8",
-		SOUP_MEMORY_TAKE, (gchar *) body, len);
+		SOUP_MEMORY_COPY, (gchar *) body, len);
+
+	xmlFree (body);
 }
 
 /**

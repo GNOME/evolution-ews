@@ -492,6 +492,7 @@ parse_extended_property (EEwsItemPrivate *priv,
 			if (!set_hash) {
 				set_hash = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_free);
 				g_hash_table_insert (priv->mapi_extended_sets, setid, set_hash);
+				setid = NULL;
 			}
 
 			g_hash_table_insert (set_hash, GUINT_TO_POINTER (tag), g_strdup (value));
@@ -500,6 +501,7 @@ parse_extended_property (EEwsItemPrivate *priv,
 		g_hash_table_insert (priv->mapi_extended_tags, GUINT_TO_POINTER (tag), g_strdup (value));
 	}
 
+	g_free (setid);
 	g_free (value);
 	g_free (name);
 }
