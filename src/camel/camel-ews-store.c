@@ -659,6 +659,7 @@ ews_update_has_ooo_set (CamelSession *session,
 	}
 
 	camel_operation_pop_message (cancellable);
+	g_clear_object (&oof_settings);
 }
 
 struct ScheduleUpdateData
