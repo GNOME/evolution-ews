@@ -2036,7 +2036,6 @@ typedef struct {
 	/* For future use */
 	gpointer restriction;
 
-	gboolean is_query_handled;
 	gboolean is_autocompletion;
 	gchar *auto_comp_str;
 } EBookBackendEwsSExpData;
@@ -2082,7 +2081,6 @@ func_is (struct _ESExp *f,
          gpointer data)
 {
 	ESExpResult *r;
-	EBookBackendEwsSExpData *sdata = data;
 
 	if (argc != 2
 	    && argv[0]->type != ESEXP_RES_STRING
@@ -2094,7 +2092,6 @@ func_is (struct _ESExp *f,
 	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
 	r->value.boolean = FALSE;
 
-	sdata->is_query_handled = FALSE;
 	return r;
 }
 
@@ -2106,7 +2103,6 @@ func_endswith (struct _ESExp *f,
                gpointer data)
 {
 	ESExpResult *r;
-	EBookBackendEwsSExpData *sdata = data;
 
 	if (argc != 2
 	    && argv[0]->type != ESEXP_RES_STRING
@@ -2118,7 +2114,6 @@ func_endswith (struct _ESExp *f,
 	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
 	r->value.boolean = FALSE;
 
-	sdata->is_query_handled = FALSE;
 	return r;
 
 }
@@ -2132,6 +2127,7 @@ func_contains (struct _ESExp *f,
 {
 	ESExpResult *r;
 	EBookBackendEwsSExpData *sdata = data;
+	const gchar *propname, *str;
 
 	if (argc != 2
 	    && argv[0]->type != ESEXP_RES_STRING
@@ -2140,10 +2136,19 @@ func_contains (struct _ESExp *f,
 		return NULL;
 	}
 
+	propname = argv[0]->value.string;
+	str = argv[1]->value.string;
+
+	if (!strcmp (propname, "full_name") || !strcmp (propname, "email")) {
+		if (!sdata->auto_comp_str) {
+			sdata->auto_comp_str = g_strdup (str);
+			sdata->is_autocompletion = TRUE;
+		}
+	}
+
 	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
 	r->value.boolean = FALSE;
 
-	sdata->is_query_handled = FALSE;
 	return r;
 
 }
@@ -2157,7 +2162,7 @@ func_beginswith (struct _ESExp *f,
                  gpointer data)
 {
 	ESExpResult *r;
-	gchar *propname, *str;
+	const gchar *propname, *str;
 	EBookBackendEwsSExpData *sdata = data;
 
 	if (argc != 2 ||
@@ -2209,8 +2214,7 @@ e_book_backend_ews_build_restriction (const gchar *query,
 
 	sexp = e_sexp_new ();
 	sdata = g_new0 (EBookBackendEwsSExpData, 1);
-
-	sdata->is_query_handled = TRUE;
+	sdata->is_autocompletion = FALSE;
 
 	for (i = 0; i < G_N_ELEMENTS (symbols); i++) {
 		e_sexp_add_function (
