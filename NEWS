@@ -1,3 +1,13 @@
+Evolution-EWS 3.16.2 2015-05-11
+-------------------------------
+
+Bug Fixes:
+	Bug 748242 - Abort with invalid free() (Fabiano Fidêncio)
+	Bug 729989 - Reuses obsolete connection after network change (Milan Crha)
+
+Miscellaneous:
+	Fix various memory leaks (Milan Crha)
+
 Evolution-EWS 3.16.1 2015-04-13
 -------------------------------
 
