@@ -4284,8 +4284,10 @@ e_book_backend_ews_set_locale (EBookBackend *backend,
 
 	PRIV_LOCK (ebews->priv);
 
-	if (!e_book_sqlite_lock (ebews->priv->summary, EBSQL_LOCK_WRITE, cancellable, error))
+	if (!e_book_sqlite_lock (ebews->priv->summary, EBSQL_LOCK_WRITE, cancellable, error)) {
+		PRIV_UNLOCK (ebews->priv);
 		return FALSE;
+	}
 
 	if (e_book_sqlite_set_locale (ebews->priv->summary, locale, cancellable, error) &&
 	    ebews_bump_revision (ebews, error))
@@ -4307,7 +4309,7 @@ e_book_backend_ews_set_locale (EBookBackend *backend,
 			cursor, NULL, cancellable, error);
 	}
 
-	PRIV_LOCK (ebews->priv);
+	PRIV_UNLOCK (ebews->priv);
 
 	return success;
 }
