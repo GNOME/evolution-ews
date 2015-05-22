@@ -2761,7 +2761,10 @@ ebews_start_gal_sync (gpointer data)
 	if (!ret)
 		goto exit;
 
-	e_book_sqlite_set_key_value (priv->summary, "etag", etag ? etag : "", NULL);
+	ret = e_book_sqlite_set_key_value (priv->summary, "etag", etag ? etag : "", NULL);
+	if (!ret)
+		goto exit;
+
 	if (e_book_sqlite_set_key_value (priv->summary, "oab-filename",
 					 uncompressed_filename, NULL)) {
 		/* Don't let it get deleted */

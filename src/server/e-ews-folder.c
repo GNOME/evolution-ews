@@ -521,7 +521,7 @@ e_ews_folder_utils_escape_name (const gchar *folder_name)
 	if (!count)
 		return g_strdup (folder_name);
 
-	res = g_malloc0 (sizeof (gchar *) * (1 + ii + (2 * count)));
+	res = g_malloc0 (sizeof (gchar) * (1 + ii + (2 * count)));
 	for (ii = 0, jj = 0; folder_name[ii]; ii++, jj++) {
 		if (folder_name[ii] == '\\') {
 			res[jj] = '\\';

@@ -148,7 +148,7 @@ static EEwsConnection *
 e_ews_notification_get_connection (const EEwsNotification *notification)
 {
 	g_return_val_if_fail (E_IS_EWS_NOTIFICATION (notification), NULL);
-	g_return_val_if_fail (notification->priv == NULL, NULL);
+	g_return_val_if_fail (notification->priv != NULL, NULL);
 
 	return notification->priv->connection;
 }

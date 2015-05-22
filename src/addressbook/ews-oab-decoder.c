@@ -956,7 +956,7 @@ exit:
 	if (!contact)
 		return ret;
 
-	if (dset->addr) {
+	if (dset && dset->addr) {
 		e_contact_set (contact, E_CONTACT_ADDRESS_WORK, dset->addr);
 		e_contact_address_free (dset->addr);
 	}
