@@ -1,3 +1,14 @@
+Evolution-EWS 3.17.2 2015-05-25
+-------------------------------
+
+Bug Fixes:
+	Bug 729989 - Reuses obsolete connection after network change (Milan Crha)
+	Bug 671546 - Search with 'contains' in composer auto-completion (Milan Crha)
+
+Miscellaneous:
+	Correct locking in e_book_backend_ews_set_locale() (Milan Crha)
+	Address some of the Coverity Scan issues (Milan Crha)
+
 Evolution-EWS 3.17.1 2015-04-27
 -------------------------------
 
