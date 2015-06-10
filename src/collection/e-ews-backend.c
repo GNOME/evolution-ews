@@ -1029,7 +1029,6 @@ ews_backend_authenticate_sync (EBackend *backend,
 	EEwsConnection *connection;
 	CamelEwsSettings *ews_settings;
 	ESourceAuthenticationResult result = E_SOURCE_AUTHENTICATION_ERROR;
-	gchar *hosturl;
 
 	g_return_val_if_fail (E_IS_EWS_BACKEND (backend), E_SOURCE_AUTHENTICATION_ERROR);
 
