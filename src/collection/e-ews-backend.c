@@ -339,12 +339,7 @@ static void
 ews_backend_sync_deleted_folders (EEwsBackend *backend,
                                   GSList *list)
 {
-	ECollectionBackend *collection_backend;
-	ESourceRegistryServer *server;
 	GSList *link;
-
-	collection_backend = E_COLLECTION_BACKEND (backend);
-	server = e_collection_backend_ref_server (collection_backend);
 
 	for (link = list; link != NULL; link = g_slist_next (link)) {
 		const gchar *folder_id = link->data;
@@ -359,12 +354,10 @@ ews_backend_sync_deleted_folders (EEwsBackend *backend,
 
 		/* This will trigger a "child-removed" signal and
 		 * our handler will remove the hash table entry. */
-		e_source_registry_server_remove_source (server, source);
+		e_source_remove_sync (source, NULL, NULL);
 
 		g_object_unref (source);
 	}
-
-	g_object_unref (server);
 }
 
 static void
