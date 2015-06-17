@@ -5145,7 +5145,7 @@ get_search_scope_str (EwsContactsSearchScope scope)
 		case EWS_SEARCH_CONTACTS_AD:
 			return "ContactsActiveDirectory";
 		default:
-			g_assert_not_reached ();
+			g_warn_if_reached ();
 			return NULL;
 
 	}
