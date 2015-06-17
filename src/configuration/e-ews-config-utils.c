@@ -1165,6 +1165,7 @@ update_ews_source_entries_cb (EShellView *shell_view,
 	GtkActionGroup *action_group;
 	EShell *shell;
 	EShellWindow *shell_window;
+	ESource *source = NULL;
 	const gchar *group;
 	gboolean is_ews_source, is_online;
 
@@ -1182,7 +1183,28 @@ update_ews_source_entries_cb (EShellView *shell_view,
 	else
 		g_return_if_reached ();
 
-	is_ews_source = get_selected_ews_source (shell_view, NULL, NULL);
+	is_ews_source = get_selected_ews_source (shell_view, &source, NULL);
+
+	if (is_ews_source) {
+		if (!source || !e_source_has_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER))
+		    is_ews_source = FALSE;
+
+		if (is_ews_source) {
+			ESourceEwsFolder *ews_folder = e_source_get_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER);
+
+			/* Require both ChangeKey and folder's Id, but GAL can have a ':' in the Id,
+			   which should be ignored, because it's not a valid folder Id. */
+			if (!e_source_ews_folder_get_id (ews_folder) ||
+			    g_strcmp0 (e_source_ews_folder_get_id (ews_folder), "") == 0 ||
+			    !e_source_ews_folder_get_change_key (ews_folder) ||
+			    g_strcmp0 (e_source_ews_folder_get_change_key (ews_folder), "") == 0 ||
+			    strchr (e_source_ews_folder_get_id (ews_folder), ':') != NULL)
+				is_ews_source = FALSE;
+		}
+	}
+
+	g_clear_object (&source);
+
 	shell_window = e_shell_view_get_shell_window (shell_view);
 	shell = e_shell_window_get_shell (shell_window);
 
