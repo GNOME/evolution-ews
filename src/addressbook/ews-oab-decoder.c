@@ -791,7 +791,7 @@ ews_destroy_oab_prop (guint32 prop_id, gpointer val)
 			g_slist_free ((GSList *) val);
 			break;
 		default:
-			g_assert_not_reached ();
+			g_warn_if_reached ();
 			break;
 	}
 }
