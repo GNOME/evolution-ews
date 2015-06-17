@@ -188,6 +188,7 @@ ews_backend_new_child (EEwsBackend *backend,
 
 	display_name = e_ews_folder_get_name (folder);
 	e_source_set_display_name (source, display_name);
+	e_source_set_enabled (source, TRUE);
 
 	switch (e_ews_folder_get_folder_type (folder)) {
 		case E_EWS_FOLDER_TYPE_CALENDAR:
