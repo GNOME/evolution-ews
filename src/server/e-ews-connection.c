@@ -789,6 +789,16 @@ ews_response_cb (SoupSession *session,
 			EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED,
 			_("Authentication failed"));
 		goto exit;
+	} else if (msg->status_code == SOUP_STATUS_CANT_RESOLVE ||
+		   msg->status_code == SOUP_STATUS_CANT_RESOLVE_PROXY ||
+		   msg->status_code == SOUP_STATUS_CANT_CONNECT ||
+		   msg->status_code == SOUP_STATUS_CANT_CONNECT_PROXY) {
+		g_simple_async_result_set_error (
+			enode->simple,
+			EWS_CONNECTION_ERROR,
+			EWS_CONNECTION_ERROR_UNAVAILABLE,
+			"%s", msg->reason_phrase);
+		goto exit;
 	}
 
 	response = e_soap_message_parse_response ((ESoapMessage *) msg);

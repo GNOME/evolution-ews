@@ -1759,6 +1759,11 @@ ews_authenticate_sync (CamelService *service,
 	g_free (old_sync_state);
 	old_sync_state = NULL;
 
+	if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_UNAVAILABLE)) {
+		local_error->domain = CAMEL_SERVICE_ERROR;
+		local_error->code = CAMEL_SERVICE_ERROR_UNAVAILABLE;
+	}
+
 	if (!initial_setup && g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_INVALIDSYNCSTATEDATA)) {
 		g_clear_error (&local_error);
 		ews_store_forget_all_folders (ews_store);
