@@ -113,20 +113,11 @@ ews_notification_authenticate (SoupSession *session,
 EEwsNotification *
 e_ews_notification_new (EEwsConnection *connection)
 {
-	EEwsNotification *notification;
-	CamelEwsSettings *ews_settings;
-
 	g_return_val_if_fail (E_IS_EWS_CONNECTION (connection), NULL);
 
-	notification = g_object_new (
+	return g_object_new (
 		E_TYPE_EWS_NOTIFICATION,
 		"connection", connection, NULL);
-
-	ews_settings = e_ews_connection_ref_settings (connection);
-
-	g_object_unref (ews_settings);
-
-	return notification;
 }
 
 static void
@@ -774,6 +765,13 @@ e_ews_notification_get_events_sync (EEwsNotification *notification,
 	return ret;
 }
 
+static void
+ews_notification_cancelled_cb (GCancellable *cancellable,
+			       SoupSession *session)
+{
+	soup_session_abort (session);
+}
+
 static gpointer
 e_ews_notification_get_events_thread (gpointer user_data)
 {
@@ -789,14 +787,22 @@ e_ews_notification_get_events_thread (gpointer user_data)
 		goto exit;
 
 	do {
+		gulong handler_id;
+
 		if (g_cancellable_is_cancelled (td->cancellable))
 			goto exit;
+
+		handler_id = g_cancellable_connect (td->cancellable, G_CALLBACK (ews_notification_cancelled_cb),
+			g_object_ref (td->notification->priv->soup_session), g_object_unref);
 
 		ret = e_ews_notification_get_events_sync (
 				td->notification,
 				subscription_id);
 
-		if (!ret) {
+		if (handler_id > 0)
+			g_cancellable_disconnect (td->cancellable, handler_id);
+
+		if (!ret && !g_cancellable_is_cancelled (td->cancellable)) {
 			g_debug ("%s: Failed to get notification events (SubscriptionId: '%s')", G_STRFUNC, subscription_id);
 
 			e_ews_notification_unsubscribe_folder_sync (td->notification, subscription_id);
