@@ -507,6 +507,7 @@ add_remote_sources (EEwsBackend *backend)
 				E_SERVER_SIDE_SOURCE (source), TRUE);
 			e_server_side_source_set_remote_deletable (
 				E_SERVER_SIDE_SOURCE (source), TRUE);
+			e_source_set_enabled (source, TRUE);
 			e_source_registry_server_add_source (registry, source);
 		} else {
 			GError *error = NULL;
