@@ -634,11 +634,19 @@ ews_update_has_ooo_set (CamelSession *session,
 	CamelEwsStore *ews_store = user_data;
 	EEwsOofSettings *oof_settings;
 	EEwsOofState oof_state;
+	EEwsConnection *cnc;
 	GError *local_error = NULL;
+
+	cnc = camel_ews_store_ref_connection (ews_store);
+	if (!cnc)
+		return;
 
 	camel_operation_push_message (cancellable, _("Checking \"Out of Office\" settings"));
 
-	oof_settings = e_ews_oof_settings_new_sync (ews_store->priv->connection, cancellable, &local_error);
+	oof_settings = e_ews_oof_settings_new_sync (cnc, cancellable, &local_error);
+
+	g_clear_object (&cnc);
+
 	if (local_error != NULL) {
 		g_propagate_error (error, local_error);
 		camel_operation_pop_message (cancellable);
@@ -688,6 +696,7 @@ camel_ews_folder_list_update_thread (gpointer user_data)
 {
 	struct ScheduleUpdateData *sud = user_data;
 	CamelEwsStore *ews_store = sud->ews_store;
+	EEwsConnection *cnc = NULL;
 	GSList *created = NULL;
 	GSList *updated = NULL;
 	GSList *deleted = NULL;
@@ -698,9 +707,13 @@ camel_ews_folder_list_update_thread (gpointer user_data)
 	if (g_cancellable_is_cancelled (sud->cancellable))
 		goto exit;
 
+	cnc = camel_ews_store_ref_connection (ews_store);
+	if (!cnc)
+		goto exit;
+
 	old_sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
 	if (!e_ews_connection_sync_folder_hierarchy_sync (
-			ews_store->priv->connection,
+			cnc,
 			EWS_PRIORITY_LOW,
 			old_sync_state,
 			&new_sync_state,
@@ -739,6 +752,7 @@ camel_ews_folder_list_update_thread (gpointer user_data)
 
 exit:
 	g_free (old_sync_state);
+	g_clear_object (&cnc);
 	free_schedule_update_data (sud);
 	return NULL;
 }
@@ -1035,8 +1049,10 @@ start_notifications_thread (gpointer data)
 {
 	struct HandleNotificationsData *hnd = data;
 	CamelEwsStore *ews_store = hnd->ews_store;
+	EEwsConnection *cnc;
 
-	if (ews_store->priv->connection == NULL)
+	cnc = camel_ews_store_ref_connection (ews_store);
+	if (!cnc)
 		goto exit;
 
 	if (ews_store->priv->listen_notifications) {
@@ -1044,7 +1060,7 @@ start_notifications_thread (gpointer data)
 			goto exit;
 
 		e_ews_connection_enable_notifications_sync (
-			ews_store->priv->connection,
+			cnc,
 			hnd->folders,
 			&ews_store->priv->subscription_key);
 	} else {
@@ -1052,7 +1068,7 @@ start_notifications_thread (gpointer data)
 			goto exit;
 
 		e_ews_connection_disable_notifications_sync (
-			ews_store->priv->connection,
+			cnc,
 			ews_store->priv->subscription_key);
 
 		ews_store->priv->subscription_key = 0;
@@ -1060,6 +1076,8 @@ start_notifications_thread (gpointer data)
 
 exit:
 	handle_notifications_data_free (hnd);
+	g_clear_object (&cnc);
+
 	return NULL;
 }
 
@@ -1087,13 +1105,18 @@ camel_ews_store_handle_notifications (CamelEwsStore *ews_store,
 				      CamelEwsSettings *ews_settings)
 {
 	GThread *thread;
+	EEwsConnection *cnc;
 	struct HandleNotificationsData *hnd;
 
-	if (ews_store->priv->connection == NULL)
+	cnc = camel_ews_store_ref_connection (ews_store);
+
+	if (!cnc)
 		return;
 
-	if (!e_ews_connection_satisfies_server_version (ews_store->priv->connection, E_EWS_EXCHANGE_2010_SP1))
+	if (!e_ews_connection_satisfies_server_version (cnc, E_EWS_EXCHANGE_2010_SP1)) {
+		g_clear_object (&cnc);
 		return;
+	}
 
 	hnd = g_new0 (struct HandleNotificationsData, 1);
 	hnd->ews_store = g_object_ref (ews_store);
@@ -1118,6 +1141,8 @@ camel_ews_store_handle_notifications (CamelEwsStore *ews_store,
 
 		camel_folder_info_free (fi);
 	}
+
+	g_clear_object (&cnc);
 
 	thread = g_thread_new (NULL, start_notifications_thread, hnd);
 	g_thread_unref (thread);
@@ -1213,11 +1238,15 @@ ews_connect_sync (CamelService *service,
 			CAMEL_OFFLINE_STORE (ews_store),
 			TRUE, cancellable, NULL);
 
-		g_signal_connect_swapped (
-			priv->connection,
-			"server-notification",
-			G_CALLBACK (camel_ews_store_server_notification_cb),
-			ews_store);
+		connection = camel_ews_store_ref_connection (ews_store);
+		if (connection) {
+			g_signal_connect_swapped (
+				connection,
+				"server-notification",
+				G_CALLBACK (camel_ews_store_server_notification_cb),
+				ews_store);
+			g_clear_object (&connection);
+		}
 	}
 
 	g_signal_connect_swapped (
@@ -1260,16 +1289,10 @@ stop_pending_updates (CamelEwsStore *ews_store)
 	UPDATE_UNLOCK (ews_store);
 }
 
-static gboolean
-ews_disconnect_sync (CamelService *service,
-                     gboolean clean,
-                     GCancellable *cancellable,
-                     GError **error)
+static void
+ews_store_unset_connection_locked (CamelEwsStore *ews_store)
 {
-	CamelEwsStore *ews_store = CAMEL_EWS_STORE (service);
-	CamelServiceClass *service_class;
-
-	g_mutex_lock (&ews_store->priv->connection_lock);
+	g_return_if_fail (CAMEL_IS_EWS_STORE (ews_store));
 
 	/* TODO cancel all operations in the connection */
 	if (ews_store->priv->connection != NULL) {
@@ -1281,8 +1304,8 @@ ews_disconnect_sync (CamelService *service,
 		 *       our own reference to that CamelSettings instance, or
 		 *       better yet avoid connecting signal handlers to it in
 		 *       the first place. */
-		settings = camel_service_ref_settings (service);
-		g_signal_handlers_disconnect_by_data (settings, service);
+		settings = camel_service_ref_settings (CAMEL_SERVICE (ews_store));
+		g_signal_handlers_disconnect_by_data (settings, ews_store);
 		g_signal_handlers_disconnect_by_func (
 			ews_store->priv->connection, camel_ews_store_server_notification_cb, ews_store);
 
@@ -1307,7 +1330,19 @@ ews_disconnect_sync (CamelService *service,
 		g_object_unref (ews_store->priv->connection);
 		ews_store->priv->connection = NULL;
 	}
+}
 
+static gboolean
+ews_disconnect_sync (CamelService *service,
+                     gboolean clean,
+                     GCancellable *cancellable,
+                     GError **error)
+{
+	CamelEwsStore *ews_store = CAMEL_EWS_STORE (service);
+	CamelServiceClass *service_class;
+
+	g_mutex_lock (&ews_store->priv->connection_lock);
+	ews_store_unset_connection_locked (ews_store);
 	g_mutex_unlock (&ews_store->priv->connection_lock);
 
 	service_class = CAMEL_SERVICE_CLASS (camel_ews_store_parent_class);
@@ -1781,8 +1816,7 @@ ews_authenticate_sync (CamelService *service,
 		GSList *foreign_fids, *ff;
 
 		g_mutex_lock (&ews_store->priv->connection_lock);
-		if (ews_store->priv->connection != NULL)
-			g_object_unref (ews_store->priv->connection);
+		ews_store_unset_connection_locked (ews_store);
 		ews_store->priv->connection = g_object_ref (connection);
 		g_mutex_unlock (&ews_store->priv->connection_lock);
 
@@ -1805,10 +1839,7 @@ ews_authenticate_sync (CamelService *service,
 		g_slist_free_full (foreign_fids, g_free);
 	} else {
 		g_mutex_lock (&ews_store->priv->connection_lock);
-		if (ews_store->priv->connection != NULL) {
-			g_object_unref (ews_store->priv->connection);
-			ews_store->priv->connection = NULL;
-		}
+		ews_store_unset_connection_locked (ews_store);
 		g_mutex_unlock (&ews_store->priv->connection_lock);
 
 		g_free (new_sync_state);
@@ -3568,26 +3599,9 @@ ews_store_dispose (GObject *object)
 		ews_store->summary = NULL;
 	}
 
-	if (ews_store->priv->connection != NULL) {
-		g_signal_handlers_disconnect_by_func (
-			ews_store->priv->connection, camel_ews_store_server_notification_cb, ews_store);
-
-		if (ews_store->priv->listen_notifications) {
-			stop_pending_updates (ews_store);
-
-			if (ews_store->priv->subscription_key != 0) {
-				e_ews_connection_disable_notifications_sync (
-					ews_store->priv->connection,
-					ews_store->priv->subscription_key);
-
-				ews_store->priv->subscription_key = 0;
-			}
-
-			ews_store->priv->listen_notifications = FALSE;
-		}
-
-		g_clear_object (&ews_store->priv->connection);
-	}
+	g_mutex_lock (&ews_store->priv->connection_lock);
+	ews_store_unset_connection_locked (ews_store);
+	g_mutex_unlock (&ews_store->priv->connection_lock);
 
 	g_slist_free_full (ews_store->priv->update_folder_names, g_free);
 	ews_store->priv->update_folder_names = NULL;
