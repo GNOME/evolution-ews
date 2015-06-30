@@ -2476,7 +2476,7 @@ static void
 ews_dump_raw_soup_message (FILE *out, SoupMessageHeaders *hdrs,
 			   SoupMessageBody *body)
 {
-	if (soup_message_body_get_accumulate (body)) {
+	if (body && soup_message_body_get_accumulate (body)) {
 		SoupBuffer *buffer;
 
 		buffer = soup_message_body_flatten (body);
@@ -2485,9 +2485,12 @@ ews_dump_raw_soup_message (FILE *out, SoupMessageHeaders *hdrs,
 
 	/* print body */
 	fprintf (out, " =====================\n");
-	soup_message_headers_foreach (hdrs, print_header, out);
+	if (hdrs)
+		soup_message_headers_foreach (hdrs, print_header, out);
+	else
+		fprintf (out, " null headers\n");
 	fputc ('\n', out);
-	if (body->data) {
+	if (body && body->data) {
 		fputs (body->data, out);
 		fputc ('\n', out);
 	}
