@@ -3967,7 +3967,7 @@ done:
 	if (free_busy)
 		e_data_cal_report_free_busy_data (free_busy_data->cal, free_busy);
 	convert_error_to_edc_error (&error);
-	e_data_cal_respond_get_free_busy (free_busy_data->cal, free_busy_data->context, error);
+	e_data_cal_respond_get_free_busy (free_busy_data->cal, free_busy_data->context, error, free_busy);
 
 	g_slist_free_full (free_busy, g_free);
 	e_cal_backend_ews_async_data_free (free_busy_data);
@@ -4033,7 +4033,7 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend,
 
 exit:
 	convert_error_to_edc_error (&error);
-	e_data_cal_respond_get_free_busy (cal, context, error);
+	e_data_cal_respond_get_free_busy (cal, context, error, NULL);
 
 }
 
