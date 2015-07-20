@@ -1,3 +1,15 @@
+Evolution-EWS 3.17.4 2015-07-20
+-------------------------------
+
+Bug Fixes:
+	Bug 751547 - Foreign calendars hidden after account enable (Milan Crha)
+	Bug 751725 - Enhance thread safety around CamelEwsStore::connection (Milan Crha)
+	Bug 692361 - e_cal_client_get_free_busy() broken (Milan Crha)
+
+Miscellaneous:
+	Differentiate between Unavailable and No response errors (Milan Crha)
+	e_ews_debug_dump_raw_soup_message: Check for non-NULL hdrs and body arguments (Milan Crha)
+
 Evolution-EWS 3.17.3 2015-06-22
 -------------------------------
 
