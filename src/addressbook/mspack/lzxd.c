@@ -13,6 +13,7 @@
 /* LZX decompression implementation */
 
 #include "lzx.h"
+#include <glib.h>
 
 /* Microsoft's LZX document (in cab-sdk.exe) and their implementation
  * of the com.ms.util.cab Java package do not concur.
@@ -804,7 +805,7 @@ int ews_lzxd_decompress(struct lzxd_stream *lzx, off_t out_bytes) {
 
     /* check that we've used all of the previous frame first */
     if (lzx->o_ptr != lzx->o_end) {
-      D(("%ld avail bytes, new %d frame", lzx->o_end-lzx->o_ptr, frame_size))
+      D(("%" G_GINT64_FORMAT " avail bytes, new %d frame", (gint64) (lzx->o_end - lzx->o_ptr), frame_size))
       return lzx->error = LZX_ERR_DECRUNCH;
     }
 

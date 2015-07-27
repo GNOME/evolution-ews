@@ -801,7 +801,7 @@ e_soap_message_write_int (ESoapMessage *msg,
 
 	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
 
-	string = g_strdup_printf ("%ld", i);
+	string = g_strdup_printf ("%" G_GINT64_FORMAT, (gint64) i);
 	e_soap_message_write_string (msg, string);
 	g_free (string);
 }

@@ -214,7 +214,7 @@ static gboolean ebews_bump_revision (EBookBackendEws *ebews, GError **error)
 
 	/* rev_counter is protected by the EBookSqlite lock. We only ever
 	 * call ebews_bump_revision() under e_book_sqlite_lock() */
-	prop_value = g_strdup_printf ("%ld(%d)", (long) t, ++ebews->priv->rev_counter);
+	prop_value = g_strdup_printf ("%" G_GINT64_FORMAT "(%d)", (gint64) t, ++ebews->priv->rev_counter);
 
 	ret = e_book_sqlite_set_key_value (ebews->priv->summary, "revision",
 					   prop_value, error);
@@ -2626,8 +2626,8 @@ ews_replace_gal_in_db (EBookBackendEws *cbews,
 	}
 
 	t2 = g_get_monotonic_time ();
-	d (g_print("GAL update completed %ssuccessfully in %ld µs. Added: %d, Changed: %d, Unchanged %d, Removed: %d\n",
-		   ret ? "" : "un", t2 - t1,
+	d (g_print("GAL update completed %ssuccessfully in %" G_GINT64_FORMAT " µs. Added: %d, Changed: %d, Unchanged %d, Removed: %d\n",
+		   ret ? "" : "un", (gint64) (t2 - t1),
 		   data.added, data.changed, data.unchanged, g_slist_length(stale_uids)));
 
 	g_slist_free (stale_uids);
