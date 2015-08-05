@@ -2049,6 +2049,32 @@ get_public_folder_full_name (EEwsFolder *folder,
 	return g_string_free (full_name, FALSE);
 }
 
+static gboolean
+ews_store_has_as_parent_id (CamelEwsStoreSummary *ews_summary,
+			    const gchar *fid,
+			    const gchar *mailroot_fid)
+{
+	gchar *parent = NULL;
+	gboolean found = FALSE;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_STORE_SUMMARY (ews_summary), FALSE);
+	g_return_val_if_fail (fid != NULL, FALSE);
+	g_return_val_if_fail (mailroot_fid != NULL, FALSE);
+
+	while (found = g_strcmp0 (fid, mailroot_fid) == 0, fid && !found) {
+		gchar *tmp = parent;
+
+		parent = camel_ews_store_summary_get_parent_folder_id (ews_summary, fid, NULL);
+		fid = parent;
+
+		g_free (tmp);
+	}
+
+	g_free (parent);
+
+	return found;
+}
+
 static CamelFolderInfo *
 folder_info_from_store_summary (CamelEwsStore *store,
                                 const gchar *top,
@@ -2180,11 +2206,19 @@ folder_info_from_store_summary (CamelEwsStore *store,
 	/* search in regular/subscribed folders */
 	} else {
 		GSList *folders, *fiter;
+		gchar *mailroot_fid = NULL, *inbox_fid;
 
 		ews_summary = store->summary;
 		folders = camel_ews_store_summary_get_folders (ews_summary, top);
 		if (!folders)
 			return NULL;
+
+		inbox_fid = camel_ews_store_summary_get_folder_id_from_folder_type (ews_summary, CAMEL_FOLDER_TYPE_INBOX);
+		if (inbox_fid) {
+			mailroot_fid = camel_ews_store_summary_get_parent_folder_id (ews_summary, inbox_fid, NULL);
+		}
+		g_free (inbox_fid);
+		inbox_fid = NULL;
 
 		folder_infos = g_ptr_array_new ();
 
@@ -2202,6 +2236,10 @@ folder_info_from_store_summary (CamelEwsStore *store,
 				fflags = camel_ews_store_summary_get_folder_flags (ews_summary, fid, NULL);
 				if (!(fflags & CAMEL_FOLDER_SUBSCRIBED))
 					continue;
+			} else if (!camel_ews_store_summary_get_foreign (ews_summary, fid, NULL) &&
+				mailroot_fid && !ews_store_has_as_parent_id (ews_summary, fid, mailroot_fid)) {
+				/* Skip mail folders out of the msgfolderroot hierarchy */
+				continue;
 			}
 
 			fi = camel_ews_utils_build_folder_info (store, fid);
@@ -2209,6 +2247,7 @@ folder_info_from_store_summary (CamelEwsStore *store,
 		}
 
 		g_slist_free_full (folders, g_free);
+		g_free (mailroot_fid);
 	}
 
 	root_fi = camel_folder_info_build (folder_infos, top, '/', TRUE);
