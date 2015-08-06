@@ -1091,7 +1091,14 @@ folder_ids_populate (CamelFolderInfo *folder_info,
 		gchar *id;
 
 		id = camel_ews_store_summary_get_folder_id_from_name (hnd->ews_store->summary, folder_info->full_name);
-		hnd->folders = g_slist_prepend (hnd->folders, id);
+		if (id && !g_str_has_prefix (id, "ForeignMailbox::") &&
+		    !g_str_equal (id, EWS_PUBLIC_FOLDER_ROOT_ID) &&
+		    !g_str_equal (id, EWS_FOREIGN_FOLDER_ROOT_ID) &&
+		    !camel_ews_store_summary_get_foreign (hnd->ews_store->summary, id, NULL) &&
+		    !camel_ews_store_summary_get_public (hnd->ews_store->summary, id, NULL))
+			hnd->folders = g_slist_prepend (hnd->folders, id);
+		else
+			g_free (id);
 
 		if (folder_info->child != NULL)
 			folder_ids_populate (folder_info->child, hnd);
