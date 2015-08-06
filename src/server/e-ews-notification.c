@@ -386,11 +386,11 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 		"response.xml", NULL, 0);
 
 	response = e_soap_response_new_from_xmldoc (doc);
-	g_object_unref (msg);
 
 	if (log_level >= 1 && log_level < 3) {
 		e_ews_debug_dump_raw_soup_response (SOUP_MESSAGE (msg));
 	}
+	g_object_unref (msg);
 
 	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages", &error);
 
