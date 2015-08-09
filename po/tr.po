@@ -1,0 +1,1175 @@
+# Turkish translation for evolution-ews.
+# Copyright (C) 2015 evolution-ews's COPYRIGHT HOLDER
+# This file is distributed under the same license as the evolution-ews package.
+# Kaan Özdinçer <kaanozdincer@gmail.com>, 2015.
+# Muhammet Kara <muhammetk@gmail.com>, 2015.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: evolution ews master\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-ews&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2015-08-06 15:25+0000\n"
+"PO-Revision-Date: 2015-08-09 18:59+0300\n"
+"Last-Translator: Muhammet Kara <muhammetk@gmail.com>\n"
+"Language-Team: Türkçe <gnome-turk@gnome.org>\n"
+"Language: tr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Gtranslator 2.91.7\n"
+"X-POOTLE-MTIME: 1434380104.000000\n"
+
+#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:77
+msgid "Exchange Web Services"
+msgstr "Exchange Web Servisleri"
+
+#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:79
+msgid "For accessing Exchange servers using Web Services"
+msgstr "Web Servisleri kullanarak Exchange sunucularına ulaşmak için"
+
+#: ../src/addressbook/e-book-backend-ews.c:1454
+msgid "The backend does not support bulk additions"
+msgstr "Arka yüz, toplu eklemeleri desteklemiyor"
+
+#: ../src/addressbook/e-book-backend-ews.c:1493
+#: ../src/addressbook/e-book-backend-ews.c:1860
+msgid ""
+"Cannot save contact list, it's only supported on EWS Server 2010 or later"
+msgstr ""
+"Kişi listesi kaydedilemiyor, bu sadece EWS Sunucusu 2010 veya sonrası "
+"tarafından desktekleniyor"
+
+#: ../src/addressbook/e-book-backend-ews.c:1819
+msgid "The backend does not support bulk modifications"
+msgstr "Ark yüz, toplu değiştirmeleri desteklemiyor"
+
+#: ../src/addressbook/e-book-backend-ews.c:2031
+msgid "Wait till syncing is done"
+msgstr "Eşzamanlama bitene kadar bekle"
+
+#: ../src/addressbook/e-book-backend-ews.c:2514
+#, c-format
+msgid "Processing contacts in %s %d%% completed... "
+msgstr "Kişilerin işlenmesi %s %d%% tamamlandı... "
+
+#: ../src/addressbook/e-book-backend-ews.c:3126
+msgid "Syncing contacts..."
+msgstr "Kişiler eşzamanlanıyor..."
+
+#: ../src/addressbook/e-book-backend-ews.c:3311
+#: ../src/configuration/e-ews-search-user.c:365
+msgid "Searching..."
+msgstr "Aranıyor..."
+
+#: ../src/addressbook/e-book-backend-ews.c:4274
+msgid "Requested to delete an unrelated cursor"
+msgstr "İlişkisiz bir imlecin silinmesi istenmiş"
+
+#: ../src/calendar/e-cal-backend-ews.c:1317
+msgid "EWS does not support bulk removals"
+msgstr "EWS, toplu silmeleri desteklemiyor"
+
+#: ../src/calendar/e-cal-backend-ews.c:1495
+msgid "Unknown error"
+msgstr "Bilinmeyen hata"
+
+#: ../src/calendar/e-cal-backend-ews.c:1739
+msgid "EWS does not support bulk additions"
+msgstr "EWS, toplu eklemeleri desteklemiyor"
+
+#: ../src/calendar/e-cal-backend-ews.c:1944
+msgid "EWS does not support bulk modifications"
+msgstr "EWS, toplu değiştirmeleri desteklemiyor"
+
+#: ../src/calendar/e-cal-backend-ews.c:2370
+#, c-format
+msgid "Cannot find user '%s' between attendees"
+msgstr "'%s' kullanıcısı, katılımcılar arasında bulunamıyor"
+
+#: ../src/camel/camel-ews-folder.c:377
+#, c-format
+msgid "Unable to open mimecontent temporary file!"
+msgstr "Mime içerikli geçici dosya açılamadı!"
+
+#: ../src/camel/camel-ews-folder.c:385
+#, c-format
+msgid "Unable to generate parser from mimecontent!"
+msgstr "Mime içeriğinden bir ayrıştırıcı oluşturulamadı!"
+
+#: ../src/camel/camel-ews-folder.c:394
+#, c-format
+msgid "Unable to parse meeting request mimecontent!"
+msgstr "Mime içerikli konuşma isteği ayrıştırılamadı!"
+
+#: ../src/camel/camel-ews-folder.c:453
+#, c-format
+msgid "Unable to create cache file"
+msgstr "Ön bellek fosyası oluşturulamadı"
+
+#: ../src/camel/camel-ews-folder.c:557 ../src/camel/camel-ews-folder.c:648
+#, c-format
+msgid "Unable to create cache path"
+msgstr "Ön bellek dizini oluşturulamadı"
+
+#: ../src/camel/camel-ews-folder.c:658
+#, c-format
+msgid "Failed to move message cache file"
+msgstr "İleti ön belleği dosyası taşınamadı"
+
+#: ../src/camel/camel-ews-folder.c:1362
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "%s için özet yüklenemedi"
+
+#: ../src/camel/camel-ews-folder.c:1890
+#, c-format
+msgid "Cant perform actions on the folder while in offline mode"
+msgstr "Çevrim dışı kipteyken, klasörde eylemleri yapılamaz"
+
+#: ../src/camel/camel-ews-provider.c:47
+msgid "Checking for new mail"
+msgstr "Yeni posta kontrol ediliyor"
+
+#: ../src/camel/camel-ews-provider.c:49
+msgid "C_heck for new messages in all folders"
+msgstr "Tüm klasörlerde yeni iletileri _kontrol et"
+
+#: ../src/camel/camel-ews-provider.c:51
+msgid "_Listen for server change notifications"
+msgstr "Sunucu değişikliği bildirimlerini _dinle"
+
+#: ../src/camel/camel-ews-provider.c:54
+msgid "Options"
+msgstr "Seçenekler"
+
+#: ../src/camel/camel-ews-provider.c:56
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr "Bu sunucudaki Gelen Kutusu içindeki iletilere filtreleri _uygula"
+
+#: ../src/camel/camel-ews-provider.c:58
+msgid "Check new messages for _Junk contents"
+msgstr "_Gereksiz içerikleri için yeni iletileri kontrol et"
+
+#: ../src/camel/camel-ews-provider.c:60
+msgid "Only check for Junk messages in the IN_BOX folder"
+msgstr "Önemsiz içerikleri sadece IN_BOX klasöründeki iletiler için kontrol et"
+
+#: ../src/camel/camel-ews-provider.c:62
+msgid "Automatically synchroni_ze remote mail locally"
+msgstr "Uzaktaki postaları yerel ile kendiliğinden eş _zamanla"
+
+#: ../src/camel/camel-ews-provider.c:65
+msgid "Connection"
+msgstr "Bağlantı"
+
+#. Translators: '%s' is preplaced with a widget, where "
+#. * user can select how long the timeout should be.
+#: ../src/camel/camel-ews-provider.c:69
+#, c-format
+msgid "Connection _timeout (in seconds) %s"
+msgstr "Bağlantı _zaman aşımı (saniyede cinsinden) %s"
+
+#: ../src/camel/camel-ews-provider.c:94
+msgid "NTLM"
+msgstr "NTLM"
+
+#: ../src/camel/camel-ews-provider.c:96
+msgid ""
+"This option will connect to the Exchange server using a plaintext password "
+"with NTLM authentication."
+msgstr ""
+"Bu seçenek ile, Exchange sunucusuna NTLM kimlik doğrulaması ile düz metin "
+"parola kullanılarak bağlanılacak."
+
+#: ../src/camel/camel-ews-provider.c:104
+msgid "Basic"
+msgstr "Basic"
+
+#: ../src/camel/camel-ews-provider.c:106
+msgid ""
+"This option will connect to the Exchange server using a plaintext password "
+"with Basic authentication."
+msgstr ""
+"Bu seçenek ile, Exchange sunucusuna Basic kimlik doğrulaması ile düz metin "
+"parola kullanılarak bağlanılacak."
+
+#: ../src/camel/camel-ews-provider.c:114
+msgid "Kerberos"
+msgstr "Kerberos"
+
+#: ../src/camel/camel-ews-provider.c:116
+msgid ""
+"This option will connect to the Exchange server using a Kerberos/GSSAPI "
+"authentication."
+msgstr ""
+"Bu seçenek ile, Exchange sunucusuna Kerberos/GSSAPI kimlik doğrulaması "
+"kullanılarak bağlanılacak."
+
+#: ../src/camel/camel-ews-store.c:332
+#, c-format
+msgid "Session has no storage path"
+msgstr "Oturumun depolama dizini yok"
+
+#: ../src/camel/camel-ews-store.c:369
+#, c-format
+msgctxt "PublicFolders"
+msgid "%s_%d"
+msgstr "%s_%d"
+
+#: ../src/camel/camel-ews-store.c:498
+#, c-format
+msgctxt "ForeignFolders"
+msgid "%s_%d"
+msgstr "%s_%d"
+
+#: ../src/camel/camel-ews-store.c:644 ../src/camel/camel-ews-store.c:1233
+msgid "Checking \"Out of Office\" settings"
+msgstr "\"Ofis Dışı\" ayarlarını kontrol et"
+
+#: ../src/camel/camel-ews-store.c:1481
+msgid "Updating foreign folder structure"
+msgstr "Yapancı klasör yapısını güncelle"
+
+#: ../src/camel/camel-ews-store.c:1617
+msgid "Updating foreign folders"
+msgstr "Yapancı klasörleri güncelleme"
+
+#: ../src/camel/camel-ews-store.c:2015
+#, c-format
+msgid "No such folder: %s"
+msgstr "Böyle bir klasör yok: %s"
+
+#: ../src/camel/camel-ews-store.c:2366
+msgid "Cannot list EWS public folders in offline mode"
+msgstr "Çevrim dışı kipte, EWS açık klasörleri listelenemez"
+
+#: ../src/camel/camel-ews-store.c:2439
+msgid "Cannot find any EWS public folders"
+msgstr "Herhangi bir EWS açık klasörü bulunamıyor"
+
+#: ../src/camel/camel-ews-store.c:2548
+#, c-format
+msgid "Cannot create folder '%s', folder already exists"
+msgstr "'%s' klasörü oluşturulamadı, klasör zaten mevcut"
+
+#: ../src/camel/camel-ews-store.c:2563
+#, c-format
+msgid "Parent folder %s does not exist"
+msgstr "Üst klasörü %s mevcut değil"
+
+#: ../src/camel/camel-ews-store.c:2573
+#, c-format
+msgid ""
+"Cannot create folder under '%s', it is used for folders of other users only"
+msgstr ""
+"'%s' altına bir klasör oluşturulamıyor, sadece diğer kullanıcıların "
+"klasörleri için kullanılıyor"
+
+#: ../src/camel/camel-ews-store.c:2583
+#, c-format
+msgid "Cannot create folder under '%s', it is used for public folders only"
+msgstr ""
+"'%s' altına bir klasör oluşturulamıyor, sadece açık klasörler için "
+"kullanılıyor"
+
+#: ../src/camel/camel-ews-store.c:2687
+#, c-format
+msgid "Folder does not exist"
+msgstr "Klasör mevcut değil"
+
+#: ../src/camel/camel-ews-store.c:2697
+#, c-format
+msgid "Cannot remove folder '%s', it is used for folders of other users only"
+msgstr ""
+"'%s' klasörü silinemiyor, sadece diğer kullanıcıların klasörleri için "
+"kullanılıyor"
+
+#: ../src/camel/camel-ews-store.c:2708
+#, c-format
+msgid "Cannot remove folder '%s', it is used for public folders only"
+msgstr "'%s' klasörü silinemiyor, sadece açık klasörler için kullanılıyor"
+
+#: ../src/camel/camel-ews-store.c:2864
+#, c-format
+msgid "Folder %s does not exist"
+msgstr "%s Klasörü mevcut değil"
+
+#: ../src/camel/camel-ews-store.c:2874
+#, c-format
+msgid "No change key record for folder %s"
+msgstr "%s klasörü için değişim anahtarı kaydı yok"
+
+#: ../src/camel/camel-ews-store.c:2916
+#, c-format
+msgid "Cannot both rename and move a folder at the same time"
+msgstr "Bir klasörü aynı anda hem yeniden adlandırıp hem de taşıyamassınız"
+
+#: ../src/camel/camel-ews-store.c:2952
+#, c-format
+msgid "Cannot find folder ID for parent folder %s"
+msgstr "%s üst klasörü için klasörü kimliği bulunamıyor"
+
+#: ../src/camel/camel-ews-store.c:3002 ../src/camel/camel-ews-transport.c:160
+#, c-format
+msgid "Exchange server %s"
+msgstr "Exchange sunucu %s"
+
+#: ../src/camel/camel-ews-store.c:3005
+#, c-format
+msgid "Exchange service for %s on %s"
+msgstr "%s için %s üzerindeki Exchange servisi"
+
+#: ../src/camel/camel-ews-store.c:3049
+#, c-format
+msgid "Could not locate Trash folder"
+msgstr "Çöp klasörü bulunamadı"
+
+#: ../src/camel/camel-ews-store.c:3109
+#, c-format
+msgid "Could not locate Junk folder"
+msgstr "Önemsiz klasörü bulunamadı"
+
+#: ../src/camel/camel-ews-store.c:3299
+msgid "Cannot subscribe EWS folders in offline mode"
+msgstr "Çevrim dışı kipte EWS klasörlerine abone olunamıyor"
+
+#: ../src/camel/camel-ews-store.c:3322
+#, c-format
+msgid "Cannot subscribe folder '%s', no public folder available"
+msgstr "'%s' klasörüne abone olunamıyor, kullanılabilir bir açık klasör yok"
+
+#: ../src/camel/camel-ews-store.c:3332
+#, c-format
+msgid "Cannot subscribe folder '%s', folder not found"
+msgstr "'%s' klasörüne abone olunamıyor, klasör bulunamadı"
+
+#: ../src/camel/camel-ews-store.c:3423
+msgid "Cannot unsubscribe EWS folders in offline mode"
+msgstr "Çevrip dışı kipte EWS klasörlerinden abonelik kaldırılamıyor"
+
+#: ../src/camel/camel-ews-store.c:3540
+#, c-format
+msgid "You must be working online to complete this operation"
+msgstr "Bu işlemi tamamlayabilmek için çevirim içi çalışmanız gerekiyor"
+
+#: ../src/camel/camel-ews-store.c:3584 ../src/camel/camel-ews-store.c:3621
+msgid "Unsetting the \"Out of Office\" status"
+msgstr "\"Ofis Dışı\" durumunu sil"
+
+#: ../src/camel/camel-ews-transport.c:163
+#, c-format
+msgid "Exchange mail delivery via %s"
+msgstr "%s üzerinden Exchange posta teslimatı"
+
+#: ../src/camel/camel-ews-transport.c:212
+msgid "Cannot send message with no From address"
+msgstr "Gönderen adresi olmadan ileti gönderilemez"
+
+#: ../src/camel/camel-ews-transport.c:218
+msgid "Exchange server cannot send message with multiple From addresses"
+msgstr ""
+"Exchange sunucusu, birden çok Gönderen adresi olan iletiyi gönderemiyor"
+
+#: ../src/camel/camel-ews-transport.c:229
+msgid "Failed to read From address"
+msgstr "Gönderen adresini okuma başarısız"
+
+#: ../src/camel/camel-ews-transport.c:241
+#, c-format
+msgid ""
+"Exchange server cannot send message as '%s', when the account was configured "
+"for address '%s'"
+msgstr ""
+"Exchange sunucusu, '%s' olarak iletiyi gönderemiyor, '%s' adresi için "
+"yapılandırılmış"
+
+#: ../src/camel/camel-ews-transport.c:255
+#, c-format
+msgid "Service not connected"
+msgstr "Service bağlı değil"
+
+#: ../src/collection/e-ews-backend.c:421
+#: ../src/configuration/e-mail-config-ews-gal.c:276
+msgid "Global Address List"
+msgstr "Evrensel Adres Listesi"
+
+#: ../src/collection/e-ews-backend.c:856
+#, c-format
+msgid "Could not determine a suitable folder class for a new folder named '%s'"
+msgstr ""
+"'%s' isimli yeni klasör için uygun bir klasör sınıfına karar verilemedi"
+
+#: ../src/collection/e-ews-backend.c:944
+#, c-format
+msgid "Data source '%s' does not represent an Exchange Web Services folder"
+msgstr ""
+"'%s' veri kaynağı, bir Exchange Web Servisleri klasörünü temsil etmiyor"
+
+#: ../src/configuration/e-ews-config-utils.c:570
+msgid "Folder"
+msgstr "Klasör"
+
+#: ../src/configuration/e-ews-config-utils.c:580
+msgid "Size"
+msgstr "Boyut"
+
+#: ../src/configuration/e-ews-config-utils.c:618
+#: ../src/configuration/e-ews-config-utils.c:623
+msgid "Unable to retrieve folder size information"
+msgstr "Klasör boyutu bilgisi alınamadı"
+
+#: ../src/configuration/e-ews-config-utils.c:743
+msgid "Folder Sizes"
+msgstr "Klasör Boyutları"
+
+#: ../src/configuration/e-ews-config-utils.c:746
+msgid "_Close"
+msgstr "_Kapat"
+
+#: ../src/configuration/e-ews-config-utils.c:760
+msgid "Fetching folder list…"
+msgstr "Klasör listesi çekiliyor…"
+
+#: ../src/configuration/e-ews-config-utils.c:913
+#, c-format
+msgid "Cannot edit permissions of folder '%s', choose other folder."
+msgstr "'%s' klasörünün izinleri düzenlenemiyor, başka bir klasör seçin."
+
+#: ../src/configuration/e-ews-config-utils.c:990
+msgid "Folder Sizes..."
+msgstr "Klasör Boyutları..."
+
+#: ../src/configuration/e-ews-config-utils.c:997
+msgid "Subscribe to folder of other user..."
+msgstr "Diğer bir kullanıcının klasörüne abone ol..."
+
+#: ../src/configuration/e-ews-config-utils.c:1006
+#: ../src/configuration/e-ews-config-utils.c:1310
+#: ../src/configuration/e-ews-config-utils.c:1341
+#: ../src/configuration/e-ews-config-utils.c:1372
+#: ../src/configuration/e-ews-config-utils.c:1403
+msgid "Permissions..."
+msgstr "İzinler..."
+
+#: ../src/configuration/e-ews-config-utils.c:1008
+msgid "Edit EWS folder permissions"
+msgstr "EWS klasör izinlerini düzenle"
+
+#: ../src/configuration/e-ews-config-utils.c:1312
+msgid "Edit EWS calendar permissions"
+msgstr "EWS takvim izinlerini düzenle"
+
+#: ../src/configuration/e-ews-config-utils.c:1343
+msgid "Edit EWS tasks permissions"
+msgstr "EWS görevlerinin izinlerini düzenle"
+
+#: ../src/configuration/e-ews-config-utils.c:1374
+msgid "Edit EWS memos permissions"
+msgstr "EWS notlarının izinlerini düzenle"
+
+#: ../src/configuration/e-ews-config-utils.c:1405
+msgid "Edit EWS contacts permissions"
+msgstr "EWS kişilerinin izinlerini düzenle"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:87
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:418
+msgctxt "PermissionsLevel"
+msgid "None"
+msgstr "Yok"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:88
+msgctxt "PermissionsLevel"
+msgid "Owner"
+msgstr "Sahibi"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:98
+msgctxt "PermissionsLevel"
+msgid "Publishing Editor"
+msgstr "Yayıncı Editör"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:107
+msgctxt "PermissionsLevel"
+msgid "Editor"
+msgstr "Editör"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:115
+msgctxt "PermissionsLevel"
+msgid "Publishing Author"
+msgstr "Yayıncı Yazar"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:122
+msgctxt "PermissionsLevel"
+msgid "Author"
+msgstr "Yazar"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:128
+msgctxt "PermissionsLevel"
+msgid "Nonediting Author"
+msgstr "Düzenlemeyen Yazar"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:133
+msgctxt "PermissionsLevel"
+msgid "Reviewer"
+msgstr "Gözden Geçiren"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:136
+msgctxt "PermissionsLevel"
+msgid "Contributor"
+msgstr "Katkıda Bulunan"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:139
+msgctxt "PermissionsLevel"
+msgid "Free/Busy time"
+msgstr "Müsait/Meşgul süresi"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:141
+msgctxt "PermissionsLevel"
+msgid "Free/Busy time, subject, location"
+msgstr "Müsait/Meşgul süresi, başlık, konum"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:143
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:441
+msgctxt "PermissionsLevel"
+msgid "Custom"
+msgstr "Özel"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:267
+msgid "Writing folder permissions, please wait..."
+msgstr "Klasör izinleri yazılıyor, lütfen bekleyiniz..."
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:777
+msgctxt "User"
+msgid "Anonymous"
+msgstr "Anonim"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:780
+msgctxt "User"
+msgid "Default"
+msgstr "Öntanımlı"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:786
+msgctxt "User"
+msgid "Unknown"
+msgstr "Bilinmeyen"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:867
+#: ../src/configuration/e-ews-search-user.c:431
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:995
+msgid "Name"
+msgstr "Ad"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:873
+msgid "Permission level"
+msgstr "İzin seviyesi"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:925
+msgid "Edit EWS folder permissions..."
+msgstr "EWS klasör izinlerini düzenle..."
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:950
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:638
+msgid "Account:"
+msgstr "Hesap:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:978
+msgid "Folder name:"
+msgstr "Klasör adı:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1001
+msgid "Folder ID:"
+msgstr "Klasör Kimliği:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1065
+msgid "Permissions"
+msgstr "İzinler"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1087
+msgid "Permi_ssion level:"
+msgstr "İz_in seviyesi:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1121
+msgctxt "Permissions"
+msgid "Read"
+msgstr "Okuma"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1133
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1200
+msgctxt "Permissions"
+msgid "None"
+msgstr "Yok"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1139
+msgctxt "Permissions"
+msgid "Free/Busy time"
+msgstr "Müsait/Meşgul zamanı"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1144
+msgctxt "Permissions"
+msgid "Free/Busy time, subject, location"
+msgstr "Müsait/Meşgul zamanı, başlık, konum"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1150
+msgctxt "Permissions"
+msgid "Full Details"
+msgstr "Tüm Ayrıntılar"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1156
+msgctxt "Permissions"
+msgid "Write"
+msgstr "Yazma"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1168
+msgctxt "Permissions"
+msgid "Create items"
+msgstr "Öğeleri oluştur"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1172
+msgctxt "Permissions"
+msgid "Create subfolders"
+msgstr "Alt klasörleri oluştur"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1176
+msgctxt "Permissions"
+msgid "Edit own"
+msgstr "Sahibini düzenle"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1180
+msgctxt "Permissions"
+msgid "Edit all"
+msgstr "Tümünü düzenle"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1188
+msgctxt "Permissions"
+msgid "Delete items"
+msgstr "Öğeleri sil"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1205
+msgctxt "Permissions"
+msgid "Own"
+msgstr "Sahibi"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1210
+msgctxt "Permissions"
+msgid "All"
+msgstr "Tümü"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1216
+msgctxt "Permissions"
+msgid "Other"
+msgstr "Diğer"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1228
+msgctxt "Permissions"
+msgid "Folder owner"
+msgstr "Klasör sahibi"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1232
+msgctxt "Permissions"
+msgid "Folder contact"
+msgstr "Klasör bağlantısı"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1236
+msgctxt "Permissions"
+msgid "Folder visible"
+msgstr "Klasör görünürlüğü"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1309
+msgid "Reading folder permissions, please wait..."
+msgstr "Klasör izinleri okunuyor, lütfen bekleyiniz..."
+
+#: ../src/configuration/e-ews-ooo-notificator.c:184
+msgid "Unset on Server"
+msgstr "Sunucuda Ayarı Kaldı"
+
+#: ../src/configuration/e-ews-ooo-notificator.c:185
+msgid "Unset the \"Out of Office\" status"
+msgstr "\"Ofis Dışı\" durumu ayarını kaldır"
+
+#: ../src/configuration/e-ews-search-user.c:208
+#, c-format
+msgid "No users found, only one contact"
+msgid_plural "No users found, only %d contacts"
+msgstr[0] "Hiç kullanıcı bulunamadı, sadece %d kişi"
+
+#: ../src/configuration/e-ews-search-user.c:213
+msgid "No users found"
+msgstr "Hiç kullanıcı bulunamadı"
+
+#: ../src/configuration/e-ews-search-user.c:217
+#, c-format
+msgid "Found one user"
+msgid_plural "Found %d users"
+msgstr[0] "%d kullanıcı bulundu"
+
+#: ../src/configuration/e-ews-search-user.c:223
+#, c-format
+msgid "Found more than 100 users, but showing only first %d"
+msgid_plural "Found more than 100 users, but showing only first %d"
+msgstr[0] ""
+"100 kullanıcıdan fazla bulundu, ancak sadece ilk %d tanesi gösteriliyor"
+
+#: ../src/configuration/e-ews-search-user.c:357
+#: ../src/configuration/e-ews-search-user.c:540
+msgid "Search for a user"
+msgstr "Bir kullanıcı ara"
+
+#: ../src/configuration/e-ews-search-user.c:437
+msgid "E-mail"
+msgstr "E-posta"
+
+#: ../src/configuration/e-ews-search-user.c:474
+msgid "Choose EWS user..."
+msgstr "EWS kullanıcısı seçin..."
+
+#: ../src/configuration/e-ews-search-user.c:497
+msgid "_Search:"
+msgstr "_Ara:"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
+#: ../src/server/e-ews-folder.c:750
+#, c-format
+msgid "Cannot add folder, folder already exists as '%s'"
+msgstr "Klasör eklenemiyor, klasör zaten '%s' olarak mevcut"
+
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. * Example result: "Mailbox - John Smith"
+#.
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:107
+#, c-format
+msgctxt "ForeignFolder"
+msgid "Mailbox - %s"
+msgstr "Posta Kutusu - %s"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:275
+msgid "Cannot test foreign folder availability while in offline mode"
+msgstr ""
+"Çevrim dışı kipteyken, yabancı klasör kullanılabilirliği test edilemiyor"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:300
+#, c-format
+msgid "User '%s' was not found on the server"
+msgstr "'%s' kullanıcısı sunucuda bulunamadı"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:336
+#, c-format
+msgid "User name '%s' is ambiguous, specify it more precisely, please"
+msgstr "'%s' kullanıcı adı belirsiz, lütfen daha doğrusunu belirtin"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:358
+#, c-format
+msgid ""
+"Folder '%s' not found. Either it does not exist or you do not have "
+"permission to access it."
+msgstr ""
+"'%s' klasörü bulunamadı. Ya mevcut değil ya da erişebilmeniz için gerekli "
+"olan izine sahip değilsiniz."
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:376
+msgid "Cannot add folder, cannot determine folder's type"
+msgstr "Klasör eklenemiyor, klasör türüne karar verilemedi"
+
+#. Translators: This is used to name foreign folder.
+#. * The first '%s' is replaced with user name to whom the folder belongs,
+#. * the second '%s' is replaced with folder name.
+#. * Example result: "John Smith - Calendar"
+#.
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:421
+#, c-format
+msgctxt "ForeignFolder"
+msgid "%s - %s"
+msgstr "%s - %s"
+
+#. convert well-known names to their non-localized form
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:515
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:723
+msgid "Inbox"
+msgstr "Gelen Kutusu"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:517
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:724
+msgid "Contacts"
+msgstr "Kişiler"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:519
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:725
+msgid "Calendar"
+msgstr "Takvim"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:521
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:726
+msgid "Memos"
+msgstr "Notlar"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:523
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:727
+msgid "Tasks"
+msgstr "Görevler"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:540
+#, c-format
+msgid "Testing availability of folder '%s' of user '%s', please wait..."
+msgstr ""
+"'%s' klasörü '%s' kişisinin ve kullanılabilirliği kontrol ediliyor, lütfen "
+"bekleyiniz..."
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:617
+msgid "Subscribe to folder of other EWS user..."
+msgstr "Diğer EWS kullanıcısının klasörüne abone ol..."
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:668
+msgid "User"
+msgstr "Kullanıcı"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:675
+msgid "_User:"
+msgstr "_Kullanıcı:"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:690
+msgid "C_hoose..."
+msgstr "Se_çin..."
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:706
+msgid "_Folder name:"
+msgstr "_Klasör adı:"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:736
+msgid "Include _subfolders"
+msgstr "Alt _dizinler dahil et"
+
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:214
+msgid "Querying Autodiscover service"
+msgstr "Otomatik keşif servisini sorgulama"
+
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:311
+msgid "Fetch _URL"
+msgstr "_URL Getir"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:140
+msgid "Configuration"
+msgstr "Yapılandırma"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:158
+msgid "User_name:"
+msgstr "Kullanıcı _adı:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:172
+msgid "_Host URL:"
+msgstr "_Makine Adresi:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:191
+msgid "OAB U_RL:"
+msgstr "OAB _Adresi:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:205
+msgid "Open _Mailbox of other user"
+msgstr "Diğer kullanıcının _Posta Kutusunu aç"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:239
+msgid "S_earch..."
+msgstr "A_rama..."
+
+#: ../src/configuration/e-mail-config-ews-backend.c:250
+msgid "Authentication"
+msgstr "Kimlik Doğrulama"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:419
+msgctxt "PermissionsLevel"
+msgid "Reviewer (can read items)"
+msgstr "Denetçi (öğeleri okuyabilir)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:420
+msgctxt "PermissionsLevel"
+msgid "Author (can read and create items)"
+msgstr "Yazar (öğeleri okuyabilir ve oluşturabilir)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:421
+msgctxt "PermissionsLevel"
+msgid "Editor (can read, create and modify items)"
+msgstr "Editör (okuyabilir, oluşturabilir ve değişiklik yapabilir)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:526
+msgid "Delegate permissions"
+msgstr "Temsilci İzinleri"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:544
+msgid "C_alendar"
+msgstr "T_akvim"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:547
+msgid "_Delegate receives copies of meeting-related messages sent to me"
+msgstr "Bana gönderilen konuşma iletilerinin kopyasını almayı _temsil et"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:552
+msgid "_Tasks"
+msgstr "_Görevler"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:555
+msgid "_Inbox"
+msgstr "_Gelen Kutusu"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:558
+msgid "C_ontacts"
+msgstr "K_işiler"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:561
+msgid "_Notes"
+msgstr "_Notlar"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:564
+msgid "_Journal"
+msgstr "_Günlük"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:567
+#, c-format
+msgid "Delegate '%s' has the following permissions"
+msgstr "'%s' temsilcisi şu izinlere sahip"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:585
+msgid "Delegate can see my _private items"
+msgstr "Temsilci _özel öğelerimi görebilir"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:907
+msgid "Retrieving current user permissions, please wait..."
+msgstr "Mevcut kullanıcının izinleri getiriliyor, lütfen bekleyiniz..."
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1027
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1647
+msgid "Delegates"
+msgstr "Temsilciler"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1051
+msgid ""
+"Delegates can send items on your behalf, including creating and responding "
+"to meeting requests. If you want to grant folder permissions without giving "
+"send-on-behalf-of permissions, close this dialog box, right-click the "
+"folder, click Permissions and change the options there."
+msgstr ""
+"Temsilciler, öğeleri kendilerine gönderebilir, konuşma istekleri için "
+"oluşturma ve cevap vermeyi sağlayabilirler. send-on-behalg-of izinleri hariç "
+"tüm klasör izinlerine sahip olmak için, pencereyi kapatın, klasöre sağ "
+"tıklayın, İzinler 'e tıklayın ve oradaki seçeneği değiştirin."
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1101
+msgid ""
+"Deliver meeting requests addressed to me and responses to meeting requests "
+"where I am the organizer to:"
+msgstr ""
+"Konuşma istekleri adresime teslim et ve konuşma isteklerine düzenleyici "
+"olduğum yere cevap ver:"
+
+#. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1111
+msgid ""
+"My delegates only, but _send a copy of meeting requests\n"
+"and responses to me (recommended)"
+msgstr ""
+"Sadece temsilcilerim, ancak konuşma isteklerinin bir kopyasını _göder\n"
+"ve bana yanıtla (tavsiye edilen)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1118
+msgid "My d_elegates only"
+msgstr "Sadece benim t_emsilcilerim"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1125
+msgid "My delegates a_nd me"
+msgstr "Benim temsilcilerim _ve ben"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1719
+msgid "Retrieving \"Delegates\" settings"
+msgstr "\"Temsilciler\" ayarları alınıyor"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:195
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:257
+msgid "EWS Settings"
+msgstr "EWS Ayarları"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:202
+msgid "View the size of all Exchange folders"
+msgstr "Tüm Exchange klasörlerinin boyutunu göster"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:206
+msgid "Folder _Sizes"
+msgstr "Klasör _Boyutları"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:224
+msgid "Locating offline address books"
+msgstr "Çevrim dışı adres defteri bulma"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:303
+msgid "Cache o_ffline address book"
+msgstr "_Çevrim dışı adres defterini ön belleğe al"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:329
+msgid "Select ad_dress list:"
+msgstr "A_dres listesi seç:"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:353
+msgid "Fetch List"
+msgstr "Listeyi Getir"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:396
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:931
+msgid "Out of Office"
+msgstr "Ofis Dışı"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:412
+msgid ""
+"The messages specified below will be automatically sent to each internal and "
+"external person who sends a mail to you."
+msgstr ""
+"Aşağıda belirtilmiş iletiler, otomatik olarak size bir posta göndermiş olan "
+"iç ve dış her bir kişiye gönderilecektir."
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:421
+msgid "Do _not send Out of Office replies"
+msgstr "Ofis Dışı cevaplarını gö_nderme"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:429
+msgid "_Send Out of Office replies"
+msgstr "Ofis Dışı cevaplarına _gönder"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:437
+msgid "Send Out of Office replies only _during this time period:"
+msgstr "Ofis Dışı cevaplarına sadece _şu zaman aralığında gönder:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:457
+msgid "_From:"
+msgstr "_Kimden:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:482
+msgid "_To:"
+msgstr "_Kime:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:507
+msgid "I_nternal:"
+msgstr "İ_ç:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:516
+msgid "Message to be sent within the organization"
+msgstr "Kurum içine gönderilecek ileti"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:544
+msgid "E_xternal:"
+msgstr "D_ış:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:552
+msgid "Message to be sent outside the organization"
+msgstr "Kurum dışına gönderilecek ileti"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:562
+msgid "Do not reply to senders outside the organization"
+msgstr "Kurum dışı gönderenlere cevap verme"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:565
+msgid "Reply only to known senders outside the organization"
+msgstr "Kurum dışı gönderenler arasında sadece tanıdık olanlara cevap ver"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:568
+msgid "Reply to any sender outside the organization"
+msgstr "Kurum dışı olan tüm gönderenlere cevap ver"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:1003
+msgid "Retrieving \"Out of Office\" settings"
+msgstr "\"Ofis Dışı\" ayarları alınıyor"
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:1
+msgid "Autodiscovery query failed."
+msgstr "Otomatik keşif sorgusu başarısız oldu."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:2
+msgid "The reported error was &quot;{0}&quot;."
+msgstr "Bildirilen hata, &quot;{0}&quot;."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:3
+msgid "Failed to locate offline address books."
+msgstr "Çevrim dışı adres defteri bulunamadı."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:4
+msgid "Failed to retrieve &quot;Out of Office&quot; settings."
+msgstr "&quot;Ofis Dışı&quot; ayarları alınamadı."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:5
+msgid "Failed to retrieve &quot;Delegates&quot; settings."
+msgstr "&quot;Temsilciler&quot; ayarları alınamadı."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:6
+msgid "Your Exchange account \"{0}\" has the status set as \"Out of Office\"."
+msgstr "Exchange hesabınız \"{0}\", \"Ofis Dışı\" olarak ayarlanmış."
+
+#: ../src/server/e-ews-connection.c:720
+msgid "Operation Cancelled"
+msgstr "İşlem İptal Edildi"
+
+#: ../src/server/e-ews-connection.c:790
+msgid "Authentication failed"
+msgstr "Kimlik doğrulama başarısız"
+
+#: ../src/server/e-ews-connection.c:811
+#, c-format
+msgid "No response: %s"
+msgstr "Cevap yok: %s"
+
+#: ../src/server/e-ews-connection.c:2519
+#, c-format
+msgid "Failed to parse autodiscover response XML"
+msgstr "Otomatik keşifin XML yanıtı ayrıştırılamadı"
+
+#: ../src/server/e-ews-connection.c:2526
+#, c-format
+msgid "Failed to find <Autodiscover> element"
+msgstr "<Autodiscover> öğesi bulunamadı"
+
+#: ../src/server/e-ews-connection.c:2537
+#, c-format
+msgid "Failed to find <Response> element"
+msgstr "<Response> öğesi bulunamadı"
+
+#: ../src/server/e-ews-connection.c:2548
+#, c-format
+msgid "Failed to find <Account> element"
+msgstr "<Account> öğesi bulunamadı"
+
+#: ../src/server/e-ews-connection.c:2573
+#, c-format
+msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
+msgstr "<ASUrl> ve <OABUrl> öğesi otomatik keşif yanıtında bulunamadı"
+
+#: ../src/server/e-ews-connection.c:2663
+msgid "URL cannot be NULL"
+msgstr "Adres NULL olamaz"
+
+#: ../src/server/e-ews-connection.c:2671
+#, c-format
+msgid "URL '%s' is not valid"
+msgstr "'%s' adresi geçerli değil"
+
+#: ../src/server/e-ews-connection.c:2763
+msgid "Email address is missing a domain part"
+msgstr "Eposta adresinde alan adı kısmı eksik"
+
+#: ../src/server/e-ews-connection.c:3085
+msgid "Failed to parse oab XML"
+msgstr "OAB XML ayrıştırılamadı"
+
+#: ../src/server/e-ews-connection.c:3093
+msgid "Failed to find <OAB> element\n"
+msgstr "<OAB> öğesi bulunamadı\n"
+
+#: ../src/server/e-ews-connection.c:4347
+msgid "No items found"
+msgstr "Hiç bir öğe bulunamadı"
+
+#: ../src/server/e-ews-folder.c:705
+msgid "Cannot add folder, unsupported folder type"
+msgstr "Klasör eklenemiyor, desteklenmeye klasör türü"
+
+#: ../src/server/e-ews-folder.c:710
+msgid "Cannot add folder, master source not found"
+msgstr "Klasör eklenemiyor, ana kaynak bulunamadı"
+
+#: ../src/utils/ews-camel-common.c:361
+#, c-format
+msgid "CreateItem call failed to return ID for new message"
+msgstr "CreateItem çağrısı, yeni ileti için kimlik döndürmesi başarısız"
