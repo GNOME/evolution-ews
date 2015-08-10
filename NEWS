@@ -1,3 +1,13 @@
+Evolution-EWS 3.16.5 2015-08-10
+-------------------------------
+
+Bug Fixes:
+	Bug 751703 - Skip mail folders out of mail hierarchy (Milan Crha)
+
+Miscellaneous:
+	Avoid %ld in printf formats (Milan Crha)
+	Use only personal mail folders for change notification listener (Milan Crha)
+
 Evolution-EWS 3.16.4 2015-07-13
 -------------------------------
 
