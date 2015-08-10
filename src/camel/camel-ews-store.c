@@ -2128,8 +2128,8 @@ folder_info_from_store_summary (CamelEwsStore *store,
 		fi->full_name = g_strdup (EWS_PUBLIC_FOLDER_ROOT_DISPLAY_NAME);
 		fi->display_name = g_strdup (fi->full_name);
 		fi->flags = CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_NOSELECT;
-		fi->unread = 0;
-		fi->total = 0;
+		fi->unread = -1;
+		fi->total = -1;
 
 		g_ptr_array_add (folder_infos, fi);
 
@@ -2148,8 +2148,8 @@ folder_info_from_store_summary (CamelEwsStore *store,
 			fi->full_name = get_public_folder_full_name (folder, folders_by_id);
 			fi->display_name = g_strdup (e_ews_folder_get_name (folder));
 			fi->flags = 0;
-			fi->unread = 0;
-			fi->total = 0;
+			fi->unread = e_ews_folder_get_unread_count (folder);
+			fi->total = e_ews_folder_get_total_count (folder);
 
 			switch (e_ews_folder_get_folder_type (folder)) {
 			case E_EWS_FOLDER_TYPE_CALENDAR:
