@@ -1225,6 +1225,24 @@ convert_categories_calcomp_to_xml (ESoapMessage *msg,
 	e_cal_component_free_categories_list (categ_list);
 }
 
+static gboolean
+check_is_all_day_event (const struct icaltimetype dtstart,
+			icaltimezone *zone_start,
+			const struct icaltimetype dtend,
+			icaltimezone *zone_end)
+{
+	gint64 secs_start, secs_end;
+
+	if (icaltime_is_date (dtstart) && icaltime_is_date (dtend))
+		return TRUE;
+
+	secs_start = (gint64) (zone_start ? icaltime_as_timet_with_zone (dtstart, zone_start) : icaltime_as_timet (dtstart));
+	secs_end = (gint64) (zone_end ? icaltime_as_timet_with_zone (dtend, zone_end) : icaltime_as_timet (dtend));
+
+	/* takes whole day(s) and starts on midnight in the zone_start */
+	return ((secs_end - secs_start) % (24 * 60 * 60)) == 0 && (secs_start % 24 * 60 * 60) == 0;
+}
+
 static void
 convert_vevent_calcomp_to_xml (ESoapMessage *msg,
                                gpointer user_data)
@@ -1298,7 +1316,7 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	/* We have to do the time zone(s) later, or the server rejects the request */
 
 	/* All day event ? */
-	if (icaltime_is_date (dtstart))
+	if (check_is_all_day_event (dtstart, tzid_start, dtend, tzid_end))
 		e_ews_message_write_string_parameter (msg, "IsAllDayEvent", NULL, "true");
 
 	/*freebusy*/
@@ -1723,7 +1741,7 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 
 	/*Check for All Day Event*/
 	if (dt_changed) {
-		if (icaltime_is_date (dtstart))
+		if (check_is_all_day_event (dtstart, tzid_start, dtend, tzid_end))
 			convert_vevent_property_to_updatexml (msg, "IsAllDayEvent", "true", "calendar", NULL, NULL);
 		else
 			convert_vevent_property_to_updatexml (msg, "IsAllDayEvent", "false", "calendar", NULL, NULL);
@@ -1770,8 +1788,8 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 		e_ews_message_end_set_item_field (msg);
 	}
 
-	if (dt_changed) {
-		if (satisfies && (msdn_location_start != NULL || msdn_location_end != NULL)) {
+	if (dt_changed && satisfies) {
+		if (msdn_location_start != NULL || msdn_location_end != NULL) {
 			GSList *msdn_locations = NULL;
 			GSList *tzds = NULL;
 
@@ -1813,13 +1831,13 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 
 			g_slist_free (msdn_locations);
 			g_slist_free_full (tzds, (GDestroyNotify) e_ews_calendar_time_zone_definition_free);
-		} else {
-			e_ews_message_replace_server_version (msg, E_EWS_EXCHANGE_2007_SP1);
-
-			e_ews_message_start_set_item_field (msg, "MeetingTimeZone", "calendar", "CalendarItem");
-			ewscal_set_meeting_timezone (msg, tzid_start ? tzid_start : convert_data->default_zone);
-			e_ews_message_end_set_item_field (msg);
 		}
+	} else if (dt_changed) {
+		e_ews_message_replace_server_version (msg, E_EWS_EXCHANGE_2007_SP1);
+
+		e_ews_message_start_set_item_field (msg, "MeetingTimeZone", "calendar", "CalendarItem");
+		ewscal_set_meeting_timezone (msg, tzid_start ? tzid_start : convert_data->default_zone);
+		e_ews_message_end_set_item_field (msg);
 	}
 
 	e_ews_message_end_item_change (msg);
