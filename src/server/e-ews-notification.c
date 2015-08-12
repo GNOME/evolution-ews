@@ -730,11 +730,17 @@ ews_notification_soup_got_chunk (SoupMessage *msg,
 
 static gboolean
 e_ews_notification_get_events_sync (EEwsNotification *notification,
-				    const gchar *subscription_id)
+				    const gchar *subscription_id,
+				    gboolean *out_fatal_error)
 {
 	ESoapMessage *msg;
 	gboolean ret;
 	gulong handler_id;
+	guint status_code;
+
+	g_return_val_if_fail (out_fatal_error != NULL, FALSE);
+
+	*out_fatal_error = TRUE;
 
 	g_return_val_if_fail (notification != NULL, FALSE);
 	g_return_val_if_fail (notification->priv != NULL, FALSE);
@@ -771,8 +777,10 @@ e_ews_notification_get_events_sync (EEwsNotification *notification,
 		SOUP_MESSAGE (msg), "got-chunk",
 		G_CALLBACK (ews_notification_soup_got_chunk), notification);
 
-	soup_session_send_message (notification->priv->soup_session, SOUP_MESSAGE (msg));
-	ret = SOUP_STATUS_IS_SUCCESSFUL (SOUP_MESSAGE (msg)->status_code);
+	status_code = soup_session_send_message (notification->priv->soup_session, SOUP_MESSAGE (msg));
+
+	ret = SOUP_STATUS_IS_SUCCESSFUL (status_code);
+	*out_fatal_error = SOUP_STATUS_IS_CLIENT_ERROR (status_code) || SOUP_STATUS_IS_SERVER_ERROR (status_code);
 
 	g_signal_handler_disconnect (msg, handler_id);
 	g_object_unref (msg);
@@ -792,7 +800,7 @@ e_ews_notification_get_events_thread (gpointer user_data)
 {
 	EEwsNotificationThreadData *td = user_data;
 	gchar *subscription_id = NULL;
-	gboolean ret;
+	gboolean ret, fatal_error = FALSE;
 
 	g_return_val_if_fail (td != NULL, NULL);
 	g_return_val_if_fail (td->notification != NULL, NULL);
@@ -810,9 +818,7 @@ e_ews_notification_get_events_thread (gpointer user_data)
 		handler_id = g_cancellable_connect (td->cancellable, G_CALLBACK (ews_notification_cancelled_cb),
 			g_object_ref (td->notification->priv->soup_session), g_object_unref);
 
-		ret = e_ews_notification_get_events_sync (
-				td->notification,
-				subscription_id);
+		ret = e_ews_notification_get_events_sync (td->notification, subscription_id, &fatal_error);
 
 		if (handler_id > 0)
 			g_cancellable_disconnect (td->cancellable, handler_id);
@@ -824,11 +830,13 @@ e_ews_notification_get_events_thread (gpointer user_data)
 			g_free (subscription_id);
 			subscription_id = NULL;
 
-			ret = e_ews_notification_subscribe_folder_sync (td->notification, td->folders, &subscription_id, td->cancellable);
-			if (ret) {
-				g_debug ("%s: Re-subscribed to get notifications events (SubscriptionId: '%s')", G_STRFUNC, subscription_id);
-			} else {
-				g_debug ("%s: Failed to re-subscribed to get notifications events", G_STRFUNC);
+			if (!fatal_error) {
+				ret = e_ews_notification_subscribe_folder_sync (td->notification, td->folders, &subscription_id, td->cancellable);
+				if (ret) {
+					g_debug ("%s: Re-subscribed to get notifications events (SubscriptionId: '%s')", G_STRFUNC, subscription_id);
+				} else {
+					g_debug ("%s: Failed to re-subscribed to get notifications events", G_STRFUNC);
+				}
 			}
 		}
 	} while (ret);
