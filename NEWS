@@ -1,3 +1,20 @@
+Evolution-EWS 3.17.90 2015-08-17
+--------------------------------
+
+Bug Fixes:
+	Bug 751703 - Skip mail folders out of mail hierarchy (Milan Crha)
+	Bug 233140 - Show message counts in subscribe folders dialog (Milan Crha)
+	Bug 753543 - All-day events should have set date and time (Milan Crha)
+
+Miscellaneous:
+	Avoid %ld in printf formats (Milan Crha)
+	Correct use-after-free in notification code when EWS debugging is on (Milan Crha)
+	Use only personal mail folders for change notification listener (Milan Crha)
+	Do not loop in the notification code on fatal client/server errors (Milan Crha)
+
+Translations:
+	Necdet Yücel (tr)
+
 Evolution-EWS 3.17.4 2015-07-20
 -------------------------------
 
