@@ -323,7 +323,7 @@ ews_ss_hash_replace (CamelEwsStoreSummary *ews_summary,
 	if (ofname) {
 		gchar *ofid = g_hash_table_lookup (
 			ews_summary->priv->fname_id_hash, ofname);
-		if (!strcmp (folder_id, ofid)) {
+		if (ofid && !strcmp (folder_id, ofid)) {
 			g_hash_table_remove (
 				ews_summary->priv->fname_id_hash, ofname);
 			if (recurse)
