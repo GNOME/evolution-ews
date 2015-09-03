@@ -604,10 +604,6 @@ ews_backend_constructed (GObject *object)
 	e_server_side_source_set_remote_creatable (
 		E_SERVER_SIDE_SOURCE (source), TRUE);
 
-	g_signal_connect (
-		source, "changed",
-		G_CALLBACK (ews_backend_source_changed_cb), object);
-
 	/* Setup the Authentication extension so
 	 * Camel can determine host reachability. */
 	extension_name = E_SOURCE_EXTENSION_AUTHENTICATION;
@@ -672,10 +668,15 @@ ews_backend_populate (ECollectionBackend *backend)
 
 	ews_backend->priv->need_update_folders = TRUE;
 
-	if (!ews_backend->priv->notify_online_id)
+	if (!ews_backend->priv->notify_online_id) {
 		ews_backend->priv->notify_online_id = g_signal_connect (
 			backend, "notify::online",
 			G_CALLBACK (ews_backend_populate), NULL);
+
+		g_signal_connect (
+			source, "changed",
+			G_CALLBACK (ews_backend_source_changed_cb), ews_backend);
+	}
 
 	/* do not do anything, if account is disabled */
 	if (!e_source_get_enabled (source))
@@ -1154,7 +1155,7 @@ e_ews_backend_ref_connection_sync (EEwsBackend *backend,
 
 	settings = ews_backend_get_settings (backend);
 	hosturl = camel_ews_settings_dup_hosturl (settings);
-	connection = e_ews_connection_new (hosturl, settings);
+	connection = e_ews_connection_new_full (hosturl, settings, FALSE);
 	g_free (hosturl);
 
 	e_binding_bind_property (
