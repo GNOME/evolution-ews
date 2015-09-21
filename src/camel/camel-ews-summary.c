@@ -327,16 +327,20 @@ ews_update_user_flags (CamelMessageInfo *info,
 {
 	gboolean changed = FALSE;
 	CamelMessageInfoBase *binfo = (CamelMessageInfoBase *) info;
-	gboolean set_cal = FALSE;
+	gboolean set_cal = FALSE, set_note = FALSE;
 
 	if (camel_flag_get (&binfo->user_flags, "$has_cal"))
 		set_cal = TRUE;
+	if (camel_flag_get (&binfo->user_flags, "$has_note"))
+		set_note = TRUE;
 
 	changed = camel_flag_list_copy (&binfo->user_flags, &server_user_flags);
 
-	/* reset the calendar flag if it was set in messageinfo before */
+	/* reset the flags as they were set in messageinfo before */
 	if (set_cal)
 		camel_flag_set (&binfo->user_flags, "$has_cal", TRUE);
+	if (set_note)
+		camel_flag_set (&binfo->user_flags, "$has_note", TRUE);
 
 	return changed;
 }
