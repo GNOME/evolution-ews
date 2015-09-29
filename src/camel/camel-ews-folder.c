@@ -1422,14 +1422,17 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 	for (l = updated_items; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;
 		const EwsId *id;
+		EEwsItemType item_type;
 		CamelMessageInfo *mi;
 
 		if (!item)
 			continue;
 
 		id = e_ews_item_get_id (item);
+		item_type = e_ews_item_get_item_type (item);
+
 		if (!id) {
-			g_warning ("%s: Missing ItemId for item type %d (subject:%s)", G_STRFUNC, e_ews_item_get_item_type (item),
+			g_warning ("%s: Missing ItemId for item type %d (subject:%s)", G_STRFUNC, item_type,
 				e_ews_item_get_subject (item) ? e_ews_item_get_subject (item) : "???");
 			g_object_unref (item);
 			continue;
@@ -1450,9 +1453,14 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 			continue;
 		}
 
-		if (((CamelEwsMessageInfo *) mi)->item_type == E_EWS_ITEM_TYPE_GENERIC_ITEM)
+		if (item_type == E_EWS_ITEM_TYPE_GENERIC_ITEM)
 			generic_item_ids = g_slist_append (generic_item_ids, g_strdup (id->id));
-		else
+		else if (item_type == E_EWS_ITEM_TYPE_MESSAGE ||
+			item_type == E_EWS_ITEM_TYPE_MEETING_REQUEST ||
+			item_type == E_EWS_ITEM_TYPE_MEETING_MESSAGE ||
+			item_type == E_EWS_ITEM_TYPE_MEETING_RESPONSE ||
+			item_type == E_EWS_ITEM_TYPE_MEETING_CANCELLATION ||
+			item_type == E_EWS_ITEM_TYPE_POST_ITEM)
 			msg_ids = g_slist_append (msg_ids, g_strdup (id->id));
 
 		camel_message_info_unref (mi);
@@ -1564,7 +1572,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 			msg_ids = g_slist_append (msg_ids, g_strdup (id->id));
 		else if (item_type == E_EWS_ITEM_TYPE_POST_ITEM)
 			post_item_ids = g_slist_append (post_item_ids, g_strdup (id->id));
-		else
+		else if (item_type == E_EWS_ITEM_TYPE_GENERIC_ITEM)
 			generic_item_ids = g_slist_append (generic_item_ids, g_strdup (id->id));
 
 		g_object_unref (item);
