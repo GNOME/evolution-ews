@@ -554,7 +554,8 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	    g_mkdir_with_parents (mime_dir, 0700) == -1) {
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			_("Unable to create cache path"));
+			_("Unable to create cache path '%s': %s"),
+			mime_dir, g_strerror (errno));
 		g_free (mime_dir);
 		goto exit;
 	}
@@ -645,7 +646,8 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	if (g_mkdir_with_parents (dir, 0700) == -1) {
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			_("Unable to create cache path"));
+			_("Unable to create cache path '%s': %s"),
+			dir, g_strerror (errno));
 		g_free (dir);
 		g_free (cache_file);
 		goto exit;
@@ -655,7 +657,11 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	if (g_rename (mime_content, cache_file) != 0) {
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			_("Failed to move message cache file"));
+			/* Translators: The first %s consists of the source file name,
+			   the second %s of the destination file name and
+			   the third %s of the error message. */
+			_("Failed to move message cache file from '%s' to '%s': %s"),
+			mime_content, cache_file, g_strerror (errno));
 		g_free (cache_file);
 		goto exit;
 	}
