@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-31 01:59+0200\n"
-"PO-Revision-Date: 2015-08-31 02:00+0200\n"
+"POT-Creation-Date: 2015-10-25 19:48+0100\n"
+"PO-Revision-Date: 2015-10-25 19:49+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -110,22 +110,26 @@ msgstr "Nie można przetworzyć treści MIME żądania spotkania."
 msgid "Unable to create cache file"
 msgstr "Nie można utworzyć pliku bufora"
 
-#: ../src/camel/camel-ews-folder.c:557 ../src/camel/camel-ews-folder.c:648
+#: ../src/camel/camel-ews-folder.c:557 ../src/camel/camel-ews-folder.c:649
 #, c-format
-msgid "Unable to create cache path"
-msgstr "Nie można utworzyć ścieżki bufora"
+msgid "Unable to create cache path '%s': %s"
+msgstr "Nie można utworzyć ścieżki bufora „%s”: %s"
 
-#: ../src/camel/camel-ews-folder.c:658
+#. Translators: The first %s consists of the source file name,
+#. the second %s of the destination file name and
+#. the third %s of the error message.
+#: ../src/camel/camel-ews-folder.c:663
 #, c-format
-msgid "Failed to move message cache file"
-msgstr "Przeniesienie pliku bufora wiadomości się nie powiodło"
+msgid "Failed to move message cache file from '%s' to '%s': %s"
+msgstr ""
+"Przeniesienie pliku bufora wiadomości z „%s” do „%s” się nie powiodło: %s"
 
-#: ../src/camel/camel-ews-folder.c:1362
+#: ../src/camel/camel-ews-folder.c:1368
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nie można wczytać zestawienia dla %s"
 
-#: ../src/camel/camel-ews-folder.c:1890
+#: ../src/camel/camel-ews-folder.c:1904
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr "Nie można wykonać działań na katalogu w trybie offline"
@@ -401,14 +405,14 @@ msgstr "Usługa nie jest połączona"
 msgid "Global Address List"
 msgstr "Ogólna lista adresowa"
 
-#: ../src/collection/e-ews-backend.c:856
+#: ../src/collection/e-ews-backend.c:857
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named '%s'"
 msgstr ""
 "Nie można ustalić odpowiedniej klasy katalogów dla nowego katalogu o nazwie "
 "„%s”"
 
-#: ../src/collection/e-ews-backend.c:944
+#: ../src/collection/e-ews-backend.c:945
 #, c-format
 msgid "Data source '%s' does not represent an Exchange Web Services folder"
 msgstr "Źródło danych „%s” nie przedstawia katalog Exchange Web Services"
