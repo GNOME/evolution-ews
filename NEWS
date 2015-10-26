@@ -1,3 +1,17 @@
+Evolution-EWS 3.19.1 2015-10-26
+-------------------------------
+
+Bug Fixes:
+	Bug 255032 - Be able to write a note on a mail (Milan Crha)
+
+Miscellaneous:
+	Show only mail messages in mail folders (Milan Crha)
+	Extend error messages in camel_ews_folder_get_message() (Milan Crha)
+
+Translations:
+	Marek Černocký (cs)
+	Piotr Drąg (pl)
+
 Evolution-EWS 3.18.0 2015-09-21
 -------------------------------
 
