@@ -1733,6 +1733,14 @@ ews_store_maybe_update_sent_and_drafts (CamelEwsStore *ews_store,
 		}
 
 		g_list_free_full (sources, g_object_unref);
+
+		/* To store also the "folders-initialized" flag change */
+		source = e_source_registry_ref_source (registry, e_source_get_parent (sibling));
+		if (source) {
+			e_source_write_sync (source, NULL, NULL);
+			g_clear_object (&source);
+		}
+
 		g_object_unref (sibling);
 	}
 
@@ -1887,10 +1895,9 @@ ews_authenticate_sync (CamelService *service,
 		} else
 			d (printf ("folders for respective distinguished ids don't exist"));
 
-		if (!camel_ews_settings_get_folders_initialized (ews_settings)) {
+		if (!camel_ews_settings_get_folders_initialized (ews_settings) && !folder_err) {
+			camel_ews_settings_set_folders_initialized (ews_settings, TRUE);
 			ews_store_maybe_update_sent_and_drafts (ews_store, folders);
-			if (!folder_err)
-				camel_ews_settings_set_folders_initialized (ews_settings, TRUE);
 		}
 
 		g_slist_foreach (folders, (GFunc) g_object_unref, NULL);
