@@ -1466,7 +1466,10 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 			item_type == E_EWS_ITEM_TYPE_MEETING_MESSAGE ||
 			item_type == E_EWS_ITEM_TYPE_MEETING_RESPONSE ||
 			item_type == E_EWS_ITEM_TYPE_MEETING_CANCELLATION ||
-			item_type == E_EWS_ITEM_TYPE_POST_ITEM)
+			item_type == E_EWS_ITEM_TYPE_POST_ITEM ||
+			/* Unknown for items received through the server notifications;
+		           it's part of the summary, thus it is a message anyway */
+			item_type == E_EWS_ITEM_TYPE_UNKNOWN)
 			msg_ids = g_slist_append (msg_ids, g_strdup (id->id));
 
 		camel_message_info_unref (mi);
