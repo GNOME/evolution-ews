@@ -703,6 +703,7 @@ camel_ews_folder_list_update_thread (gpointer user_data)
 	gchar *old_sync_state = NULL;
 	gchar *new_sync_state;
 	gboolean includes_last;
+	GError *local_error = NULL;
 
 	if (g_cancellable_is_cancelled (sud->cancellable))
 		goto exit;
@@ -722,7 +723,7 @@ camel_ews_folder_list_update_thread (gpointer user_data)
 			&updated,
 			&deleted,
 			sud->cancellable,
-			NULL))
+			&local_error))
 		goto exit;
 
 	if (g_cancellable_is_cancelled (sud->cancellable)) {
@@ -750,7 +751,20 @@ camel_ews_folder_list_update_thread (gpointer user_data)
 		g_free (new_sync_state);
 	}
 
-exit:
+ exit:
+	if (local_error) {
+		camel_ews_store_maybe_disconnect (ews_store, local_error);
+		g_clear_error (&local_error);
+
+		g_mutex_lock (&ews_store->priv->get_finfo_lock);
+		ews_store->priv->last_refresh_time -= FINFO_REFRESH_INTERVAL;
+		g_mutex_unlock (&ews_store->priv->get_finfo_lock);
+	} else {
+		g_mutex_lock (&ews_store->priv->get_finfo_lock);
+		ews_store->priv->last_refresh_time = time (NULL);
+		g_mutex_unlock (&ews_store->priv->get_finfo_lock);
+	}
+
 	g_free (old_sync_state);
 	g_clear_object (&cnc);
 	free_schedule_update_data (sud);
@@ -2270,72 +2284,16 @@ folder_info_from_store_summary (CamelEwsStore *store,
 	return root_fi;
 }
 
-static void
-ews_folder_hierarchy_ready_cb (GObject *obj,
-                               GAsyncResult *res,
-                               gpointer user_data)
-{
-	GSList *folders_created = NULL, *folders_updated = NULL;
-	GSList *folders_deleted = NULL;
-	CamelEwsStore *ews_store = (CamelEwsStore *) user_data;
-	CamelEwsStorePrivate *priv = ews_store->priv;
-	EEwsConnection *cnc = (EEwsConnection *) obj;
-	gchar *sync_state = NULL;
-	gboolean includes_last_folder;
-	GError *error = NULL;
-
-	e_ews_connection_sync_folder_hierarchy_finish (
-		cnc, res, &sync_state, &includes_last_folder,
-		&folders_created, &folders_updated,
-		&folders_deleted, &error);
-
-	if (error != NULL) {
-		g_warning ("Unable to fetch the folder hierarchy: %s :%d \n", error->message, error->code);
-
-		camel_ews_store_maybe_disconnect (ews_store, error);
-
-		g_mutex_lock (&priv->get_finfo_lock);
-		ews_store->priv->last_refresh_time -= FINFO_REFRESH_INTERVAL;
-		g_mutex_unlock (&priv->get_finfo_lock);
-		goto exit;
-	}
-	g_mutex_lock (&priv->get_finfo_lock);
-	ews_update_folder_hierarchy (
-		ews_store, sync_state, includes_last_folder,
-		folders_created, folders_deleted, folders_updated, NULL);
-
-	ews_store->priv->last_refresh_time = time (NULL);
-	g_mutex_unlock (&priv->get_finfo_lock);
-
-exit:
-	g_object_unref (ews_store);
-	g_clear_error (&error);
-}
-
 static gboolean
 ews_refresh_finfo (CamelEwsStore *ews_store)
 {
-	EEwsConnection *connection;
-	gchar *sync_state;
-
 	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (ews_store)))
 		return FALSE;
 
-	if (!camel_service_connect_sync ((CamelService *) ews_store, NULL, NULL))
-		return FALSE;
+	if (!ews_store->priv->updates_cancellable)
+		ews_store->priv->updates_cancellable = g_cancellable_new ();
 
-	sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
-
-	connection = camel_ews_store_ref_connection (ews_store);
-
-	e_ews_connection_sync_folder_hierarchy (
-		connection, EWS_PRIORITY_MEDIUM,
-		sync_state, NULL, ews_folder_hierarchy_ready_cb,
-		g_object_ref (ews_store));
-
-	g_object_unref (connection);
-
-	g_free (sync_state);
+	run_update_thread (ews_store, TRUE, ews_store->priv->updates_cancellable);
 
 	return TRUE;
 }
