@@ -1,3 +1,14 @@
+Evolution-EWS 3.18.2 2015-11-09
+-------------------------------
+
+Bug Fixes:
+	Bug 757458 - Server-side mail message flag change ignored (Milan Crha)
+	Bug 757477 - Sent/Drafts folders always reset from default to remote (Milan Crha)
+	Bug 757525 - Hang on network connection change (Milan Crha)
+
+Translations:
+	Andika Triwidada (id)
+
 Evolution-EWS 3.18.1 2015-10-12
 -------------------------------
 
