@@ -561,7 +561,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	}
 
 	add_props = e_ews_additional_props_new ();
-	add_props->field_uri = g_strdup ("item:MimeContent");
+	add_props->field_uri = g_strdup ("item:MimeContent message:From message:Sender");
 
 	res = e_ews_connection_get_items_sync (
 		cnc, pri, ids, "IdOnly", add_props,
@@ -668,6 +668,42 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	g_free (cache_file);
 
 	message = camel_ews_folder_get_message_from_cache (ews_folder, uid, cancellable, error);
+	if (message) {
+		CamelInternetAddress *from;
+		const gchar *email = NULL;
+
+		from = camel_mime_message_get_from (message);
+
+		if (!from || !camel_internet_address_get (from, 0, NULL, &email) || !email || !*email) {
+			const EwsMailbox *mailbox;
+
+			mailbox = e_ews_item_get_from (items->data);
+			if (!mailbox)
+				mailbox = e_ews_item_get_sender (items->data);
+			if (mailbox) {
+				CamelStream *cache_stream;
+
+				email = NULL;
+
+				if (g_strcmp0 (mailbox->routing_type, "EX") == 0)
+					email = e_ews_item_util_strip_ex_address (mailbox->email);
+
+				from = camel_internet_address_new ();
+				camel_internet_address_add (from, mailbox->name, email ? email : mailbox->email);
+				camel_mime_message_set_from (message, from);
+				g_object_unref (from);
+
+				g_rec_mutex_lock (&priv->cache_lock);
+				/* Ignore errors here, it's nothing fatal in this case */
+				cache_stream = ews_data_cache_get (ews_folder->cache, "cur", uid, NULL);
+				if (cache_stream) {
+					camel_data_wrapper_write_to_stream_sync (CAMEL_DATA_WRAPPER (message), cache_stream, cancellable, NULL);
+					g_object_unref (cache_stream);
+				}
+				g_rec_mutex_unlock (&priv->cache_lock);
+			}
+		}
+	}
 
 exit:
 	g_mutex_lock (&priv->state_lock);
