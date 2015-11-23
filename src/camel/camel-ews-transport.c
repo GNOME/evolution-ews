@@ -45,9 +45,9 @@
 G_DEFINE_TYPE (CamelEwsTransport, camel_ews_transport, CAMEL_TYPE_TRANSPORT)
 
 static gboolean
-ews_transport_sent_folder_is_server_side (CamelService *service,
-					  EwsFolderId **folder_id,
-					  GCancellable *cancellable)
+ews_transport_can_server_side_sent_folder (CamelService *service,
+					   EwsFolderId **folder_id,
+					   GCancellable *cancellable)
 {
 	CamelSession *session;
 	ESourceRegistry *registry;
@@ -93,7 +93,11 @@ ews_transport_sent_folder_is_server_side (CamelService *service,
 
 			subm_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_MAIL_SUBMISSION);
 
-			if (e_source_mail_submission_get_sent_folder (subm_extension) &&
+			/* Copy messages on the server side only if the replies
+			   might not be saved to the original folder, which is handled
+			   by the evolution itself. */
+			if (!e_source_mail_submission_get_replies_to_origin_folder (subm_extension) &&
+			    e_source_mail_submission_get_sent_folder (subm_extension) &&
 			    e_mail_folder_uri_parse (session,
 				e_source_mail_submission_get_sent_folder (subm_extension),
 				&store, &folder_name, NULL) & CAMEL_IS_EWS_STORE (store)) {
@@ -256,7 +260,7 @@ ews_send_to_sync (CamelTransport *transport,
 		goto exit;
 	}
 
-	if (ews_transport_sent_folder_is_server_side (service, &folder_id, cancellable)) {
+	if (ews_transport_can_server_side_sent_folder (service, &folder_id, cancellable)) {
 		if (out_sent_message_saved)
 			*out_sent_message_saved = TRUE;
 	}
