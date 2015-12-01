@@ -355,12 +355,15 @@ static gboolean
 mail_config_ews_backend_check_complete (EMailConfigServiceBackend *backend)
 {
 	EMailConfigServicePage *page;
+	EMailConfigEwsBackendPrivate *priv;
 	CamelSettings *settings;
 	CamelEwsSettings *ews_settings;
 	CamelNetworkSettings *network_settings;
 	const gchar *hosturl;
 	const gchar *user;
+	gboolean correct, complete = TRUE;
 
+	priv = E_MAIL_CONFIG_EWS_BACKEND_GET_PRIVATE (backend);
 	page = e_mail_config_service_backend_get_page (backend);
 
 	/* This backend serves double duty.  One instance holds the
@@ -381,13 +384,17 @@ mail_config_ews_backend_check_complete (EMailConfigServiceBackend *backend)
 	network_settings = CAMEL_NETWORK_SETTINGS (settings);
 	user = camel_network_settings_get_user (network_settings);
 
-	if (hosturl == NULL || *hosturl == '\0')
-		return FALSE;
+	correct = hosturl != NULL && *hosturl != '\0';
+	complete = complete && correct;
 
-	if (user == NULL || *user == '\0')
-		return FALSE;
+	e_util_set_entry_issue_hint (priv->host_entry, correct ? NULL : _("Host URL cannot be empty"));
 
-	return TRUE;
+	correct = user != NULL && *user != '\0';
+	complete = complete && correct;
+
+	e_util_set_entry_issue_hint (priv->user_entry, correct ? NULL : _("User name cannot be empty"));
+
+	return complete;
 }
 
 static void
