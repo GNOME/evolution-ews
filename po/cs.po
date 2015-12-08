@@ -1,7 +1,6 @@
 # Czech translation for evolution-ews.
 # Copyright (C) 2011 evolution-ews's COPYRIGHT HOLDER
 # This file is distributed under the same license as the evolution-ews package.
-#
 # Marek Černocký <marek@manet.cz>, 2011, 2012, 2013, 2014, 2015.
 #
 msgid ""
@@ -9,16 +8,16 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2015-10-24 05:11+0000\n"
-"PO-Revision-Date: 2015-10-24 13:53+0200\n"
+"POT-Creation-Date: 2015-12-08 18:14+0000\n"
+"PO-Revision-Date: 2015-12-08 21:25+0100\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
-"Language-Team: čeština <gnome-cs-list@gnome.org>\n"
+"Language-Team: Czech <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Gtranslator 2.91.6\n"
+"X-Generator: Gtranslator 2.91.7\n"
 
 #: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:77
 msgid "Exchange Web Services"
@@ -120,12 +119,12 @@ msgstr "Nelze vytvořit cestu „%s“ pro mezipaměť: %s"
 msgid "Failed to move message cache file from '%s' to '%s': %s"
 msgstr "Nelze přesunout soubor s mezipamětí zpráv z „%s“ do „%s“: %s"
 
-#: ../src/camel/camel-ews-folder.c:1368
+#: ../src/camel/camel-ews-folder.c:1404
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nelze získat přehled pro složku %s"
 
-#: ../src/camel/camel-ews-folder.c:1904
+#: ../src/camel/camel-ews-folder.c:1943
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr "Akci na složce nelze provádět v režimu off-line"
@@ -226,42 +225,42 @@ msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:644 ../src/camel/camel-ews-store.c:1233
+#: ../src/camel/camel-ews-store.c:644 ../src/camel/camel-ews-store.c:1247
 msgid "Checking \"Out of Office\" settings"
 msgstr "Kontroluje se nastavení „Mimo kancelář“"
 
-#: ../src/camel/camel-ews-store.c:1481
+#: ../src/camel/camel-ews-store.c:1495
 msgid "Updating foreign folder structure"
 msgstr "Aktualizuje se struktura vzdálených složek"
 
-#: ../src/camel/camel-ews-store.c:1617
+#: ../src/camel/camel-ews-store.c:1631
 msgid "Updating foreign folders"
 msgstr "Aktualizují se vzdálené složky"
 
-#: ../src/camel/camel-ews-store.c:2015
+#: ../src/camel/camel-ews-store.c:2036
 #, c-format
 msgid "No such folder: %s"
 msgstr "Taková složka neexistuje: %s"
 
-#: ../src/camel/camel-ews-store.c:2366
+#: ../src/camel/camel-ews-store.c:2331
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "V režimu off-line nelze vypsat žádné veřejné složky EWS"
 
-#: ../src/camel/camel-ews-store.c:2439
+#: ../src/camel/camel-ews-store.c:2404
 msgid "Cannot find any EWS public folders"
 msgstr "Nelze najít žádné veřejné složky EWS"
 
-#: ../src/camel/camel-ews-store.c:2548
+#: ../src/camel/camel-ews-store.c:2513
 #, c-format
 msgid "Cannot create folder '%s', folder already exists"
 msgstr "Nelze vytvořit složku „%s“, složka již existuje"
 
-#: ../src/camel/camel-ews-store.c:2563
+#: ../src/camel/camel-ews-store.c:2528
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Rodičovská složka %s neexistuje"
 
-#: ../src/camel/camel-ews-store.c:2573
+#: ../src/camel/camel-ews-store.c:2538
 #, c-format
 msgid ""
 "Cannot create folder under '%s', it is used for folders of other users only"
@@ -269,116 +268,116 @@ msgstr ""
 "Nelze vytvořit složku pod složkou „%s“, která se používá pouze pro složky "
 "ostatních uživatelů"
 
-#: ../src/camel/camel-ews-store.c:2583
+#: ../src/camel/camel-ews-store.c:2548
 #, c-format
 msgid "Cannot create folder under '%s', it is used for public folders only"
 msgstr ""
 "Nelze vytvořit složku pod složkou „%s“, která se používá pouze pro veřejné "
 "složky"
 
-#: ../src/camel/camel-ews-store.c:2687
+#: ../src/camel/camel-ews-store.c:2652
 #, c-format
 msgid "Folder does not exist"
 msgstr "Složka neexistuje"
 
-#: ../src/camel/camel-ews-store.c:2697
+#: ../src/camel/camel-ews-store.c:2662
 #, c-format
 msgid "Cannot remove folder '%s', it is used for folders of other users only"
 msgstr ""
 "Nelze odstranit složku „%s“, která se používá pouze pro složky ostatních "
 "uživatelů"
 
-#: ../src/camel/camel-ews-store.c:2708
+#: ../src/camel/camel-ews-store.c:2673
 #, c-format
 msgid "Cannot remove folder '%s', it is used for public folders only"
 msgstr "Nelze odstranit složku „%s“, která se používá pouze pro veřejné složky"
 
-#: ../src/camel/camel-ews-store.c:2864
+#: ../src/camel/camel-ews-store.c:2829
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Složka %s neexistuje"
 
-#: ../src/camel/camel-ews-store.c:2874
+#: ../src/camel/camel-ews-store.c:2839
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Neexistuje záznam s klíčem o změně (ChangeKey) pro složku %s"
 
-#: ../src/camel/camel-ews-store.c:2916
+#: ../src/camel/camel-ews-store.c:2881
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Složku nelze naráz přejmenovat i přesunout"
 
-#: ../src/camel/camel-ews-store.c:2952
+#: ../src/camel/camel-ews-store.c:2917
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nelze najít ID složky pro rodičovskou složku %s"
 
-#: ../src/camel/camel-ews-store.c:3002 ../src/camel/camel-ews-transport.c:160
+#: ../src/camel/camel-ews-store.c:2967 ../src/camel/camel-ews-transport.c:164
 #, c-format
 msgid "Exchange server %s"
 msgstr "Server Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:3005
+#: ../src/camel/camel-ews-store.c:2970
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Služba Exchange pro uživatele %s na počítači %s"
 
-#: ../src/camel/camel-ews-store.c:3049
+#: ../src/camel/camel-ews-store.c:3014
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Nelze vyhledat složku Koš"
 
-#: ../src/camel/camel-ews-store.c:3109
+#: ../src/camel/camel-ews-store.c:3074
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Nelze vyhledat složku Nevyžádaná pošta"
 
-#: ../src/camel/camel-ews-store.c:3299
+#: ../src/camel/camel-ews-store.c:3264
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "K odběru složek EWS se nelze přihlásit v režimu off-line"
 
-#: ../src/camel/camel-ews-store.c:3322
+#: ../src/camel/camel-ews-store.c:3287
 #, c-format
 msgid "Cannot subscribe folder '%s', no public folder available"
 msgstr ""
 "Nelze se přihlásit k odběru složky  „%s“, není dostupná žádná veřejná složka"
 
-#: ../src/camel/camel-ews-store.c:3332
+#: ../src/camel/camel-ews-store.c:3297
 #, c-format
 msgid "Cannot subscribe folder '%s', folder not found"
 msgstr "Nelze se přihlásit k odběru složky „%s“, složka nebyla nalezena"
 
-#: ../src/camel/camel-ews-store.c:3423
+#: ../src/camel/camel-ews-store.c:3388
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Z odběru složek EWS se nelze odhlásit v režimu off-line"
 
-#: ../src/camel/camel-ews-store.c:3540
+#: ../src/camel/camel-ews-store.c:3505
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "K dokončení této operace je nutné, abyste pracovali on-line"
 
-#: ../src/camel/camel-ews-store.c:3584 ../src/camel/camel-ews-store.c:3621
+#: ../src/camel/camel-ews-store.c:3549 ../src/camel/camel-ews-store.c:3586
 msgid "Unsetting the \"Out of Office\" status"
 msgstr "Ruší se nastavení stavu „Mimo kancelář“"
 
-#: ../src/camel/camel-ews-transport.c:163
+#: ../src/camel/camel-ews-transport.c:167
 #, c-format
 msgid "Exchange mail delivery via %s"
 msgstr "Doručování pošty Exchange přes server %s"
 
-#: ../src/camel/camel-ews-transport.c:212
+#: ../src/camel/camel-ews-transport.c:216
 msgid "Cannot send message with no From address"
 msgstr "Nelze odeslat zprávu, která nemá uvedenu adresu „Od“"
 
-#: ../src/camel/camel-ews-transport.c:218
+#: ../src/camel/camel-ews-transport.c:222
 msgid "Exchange server cannot send message with multiple From addresses"
 msgstr "Server Exchange nemůže odeslat zprávu s více adresami „Od“"
 
-#: ../src/camel/camel-ews-transport.c:229
+#: ../src/camel/camel-ews-transport.c:233
 msgid "Failed to read From address"
 msgstr "Selhalo čtení adresy „Od“"
 
-#: ../src/camel/camel-ews-transport.c:241
+#: ../src/camel/camel-ews-transport.c:245
 #, c-format
 msgid ""
 "Exchange server cannot send message as '%s', when the account was configured "
@@ -387,7 +386,7 @@ msgstr ""
 "Server Exchange nemůže odeslat zprávu jako „%s“, když je účet nastaven pro "
 "adresu „%s“"
 
-#: ../src/camel/camel-ews-transport.c:255
+#: ../src/camel/camel-ews-transport.c:259
 #, c-format
 msgid "Service not connected"
 msgstr "Služba není připojena"
@@ -875,6 +874,14 @@ msgstr "Hl_edat…"
 #: ../src/configuration/e-mail-config-ews-backend.c:250
 msgid "Authentication"
 msgstr "Autentizace"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:390
+msgid "Host URL cannot be empty"
+msgstr "Adresa URL hostitele nesmí být prázdná"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:395
+msgid "User name cannot be empty"
+msgstr "Uživatelské jméno nesmí být prázdné"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:419
 msgctxt "PermissionsLevel"
