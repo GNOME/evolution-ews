@@ -14,8 +14,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2015-12-01 06:15+0000\n"
-"PO-Revision-Date: 2015-12-01 13:26+0100\n"
+"POT-Creation-Date: 2015-12-07 06:15+0000\n"
+"PO-Revision-Date: 2015-12-07 12:41+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español; Castellano <gnome-es-list@gnome.org>\n"
 "Language: \n"
@@ -114,7 +114,6 @@ msgstr "No se pudo crear el archivo de la caché"
 
 #: ../src/camel/camel-ews-folder.c:557 ../src/camel/camel-ews-folder.c:649
 #, c-format
-#| msgid "Unable to create cache path"
 msgid "Unable to create cache path '%s': %s"
 msgstr "No se pudo crear la ruta de la caché «%s»: %s"
 
@@ -123,7 +122,6 @@ msgstr "No se pudo crear la ruta de la caché «%s»: %s"
 #. the third %s of the error message.
 #: ../src/camel/camel-ews-folder.c:663
 #, c-format
-#| msgid "Failed to move message cache file"
 msgid "Failed to move message cache file from '%s' to '%s': %s"
 msgstr "Falló al mover el archivo de la caché de mensajes de «%s» a «%s»: %s"
 
@@ -898,6 +896,15 @@ msgstr "_Buscar…"
 #: ../src/configuration/e-mail-config-ews-backend.c:250
 msgid "Authentication"
 msgstr "Autenticación"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:390
+#| msgid "URL cannot be NULL"
+msgid "Host URL cannot be empty"
+msgstr "El URL del equipo no puede estar vacío"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:395
+msgid "User name cannot be empty"
+msgstr "El nombre de usuario no puede estar vacío"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:419
 msgctxt "PermissionsLevel"
