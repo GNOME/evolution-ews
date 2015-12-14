@@ -1,3 +1,13 @@
+Evolution-EWS 3.18.3 2015-12-14
+-------------------------------
+
+Bug Fixes:
+	Bug 758375 - Avoid server side copy when Save replies to original folder is set (Milan Crha)
+
+Miscellaneous:
+	[Camel] Fill message From header if missing in received MIME content (Milan Crha)
+	Add <kudos/> into a metainfo file (Milan Crha)
+
 Evolution-EWS 3.18.2 2015-11-09
 -------------------------------
 
