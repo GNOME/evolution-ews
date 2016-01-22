@@ -279,7 +279,7 @@ ews_store_initable_init (GInitable *initable,
 	store = CAMEL_STORE (initable);
 	service = CAMEL_SERVICE (initable);
 
-	store->flags |= CAMEL_STORE_USE_CACHE_DIR;
+	store->flags |= CAMEL_STORE_USE_CACHE_DIR | CAMEL_STORE_SUPPORTS_INITIAL_SETUP;
 	ews_migrate_to_user_cache_dir (service);
 
 	store->flags |= CAMEL_STORE_CAN_DELETE_FOLDERS_AT_ONCE;
@@ -1634,131 +1634,128 @@ camel_ews_store_update_foreign_subfolders (CamelEwsStore *ews_store,
 	g_object_unref (session);
 }
 
-static void
-ews_store_update_source_extension_folder (CamelEwsStore *ews_store,
-					  const gchar *folder_id,
-					  gpointer extension,
-					  const gchar *extension_property)
+static gboolean
+ews_initial_setup_with_connection_sync (CamelStore *store,
+					GHashTable *save_setup,
+					EEwsConnection *connection,
+					GCancellable *cancellable,
+					GError **error)
 {
-	gchar *fullname;
+	CamelEwsStore *ews_store;
+	GSList *folders = NULL, *folder_ids = NULL;
+	gint nn;
+	GError *local_error = NULL;
 
-	g_return_if_fail (CAMEL_IS_EWS_STORE (ews_store));
-	g_return_if_fail (extension != NULL);
-	g_return_if_fail (extension_property != NULL);
+	g_return_val_if_fail (CAMEL_IS_EWS_STORE (store), FALSE);
 
-	if (!folder_id)
-		return;
+	if (g_cancellable_set_error_if_cancelled (cancellable, error))
+		return FALSE;
 
-	fullname = camel_ews_store_summary_get_folder_full_name (ews_store->summary, folder_id, NULL);
-	if (fullname) {
-		gchar *folder_uri;
+	ews_store = CAMEL_EWS_STORE (store);
+	if (connection) {
+		g_object_ref (connection);
+	} else {
+		if (!camel_ews_store_connected (ews_store, cancellable, error))
+			return FALSE;
 
-		folder_uri = e_mail_folder_uri_build (CAMEL_STORE (ews_store), fullname);
-		g_object_set (extension, extension_property, folder_uri, NULL);
-		g_free (folder_uri);
-		g_free (fullname);
+		connection = camel_ews_store_ref_connection (ews_store);
+		g_return_val_if_fail (connection != NULL, FALSE);
 	}
+
+	for (nn = 0; nn < G_N_ELEMENTS (system_folder); nn++) {
+		EwsFolderId *fid = NULL;
+
+		fid = g_new0 (EwsFolderId, 1);
+		fid->id = g_strdup (system_folder[nn].dist_folder_id);
+		fid->is_distinguished_id = TRUE;
+
+		folder_ids = g_slist_append (folder_ids, fid);
+	}
+
+	/* fetch system folders first using getfolder operation */
+	if (!e_ews_connection_get_folder_sync (
+		connection, EWS_PRIORITY_MEDIUM, "IdOnly",
+		NULL, folder_ids, &folders,
+		cancellable, &local_error)) {
+		g_clear_object (&connection);
+		g_propagate_error (error, local_error);
+		return FALSE;
+	}
+
+	if (folders && (g_slist_length (folders) != G_N_ELEMENTS (system_folder)))
+		d (printf ("Error : not all folders are returned by getfolder operation"));
+	else if (!local_error && folders)
+		ews_store_set_flags (ews_store, folders);
+	else if (local_error) {
+		/* report error and make sure we are not leaking anything */
+		g_warn_if_fail (folders == NULL);
+	} else
+		d (printf ("folders for respective distinguished ids don't exist"));
+
+	if (save_setup) {
+		gchar *folder_id;
+
+		folder_id = camel_ews_store_summary_get_folder_id_from_folder_type (ews_store->summary, CAMEL_FOLDER_TYPE_SENT);
+		if (folder_id) {
+			gchar *fullname;
+
+			fullname = camel_ews_store_summary_get_folder_full_name (ews_store->summary, folder_id, NULL);
+			if (fullname && *fullname) {
+				g_hash_table_insert (save_setup,
+					g_strdup (CAMEL_STORE_SETUP_SENT_FOLDER),
+					g_strdup (fullname));
+			}
+
+			g_free (fullname);
+			g_free (folder_id);
+		}
+
+		if (g_slist_length (folders) == G_N_ELEMENTS (system_folder)) {
+			gint ii;
+
+			for (ii = 0; ii < G_N_ELEMENTS (system_folder); ii++) {
+				if (g_str_equal ("drafts", system_folder[ii].dist_folder_id)) {
+					break;
+				}
+			}
+
+			if (ii < G_N_ELEMENTS (system_folder)) {
+				EEwsFolder *drafts = g_slist_nth (folders, ii)->data;
+				if (drafts && !e_ews_folder_is_error (drafts)) {
+					const EwsFolderId *fid = e_ews_folder_get_id (drafts);
+
+					if (fid && fid->id) {
+						gchar *fullname;
+
+						fullname = camel_ews_store_summary_get_folder_full_name (ews_store->summary, fid->id, NULL);
+						if (fullname && *fullname) {
+							g_hash_table_insert (save_setup,
+								g_strdup (CAMEL_STORE_SETUP_DRAFTS_FOLDER),
+								g_strdup (fullname));
+						}
+
+						g_free (fullname);
+					}
+				}
+			}
+		}
+	}
+
+	g_slist_free_full (folders, g_object_unref);
+	g_slist_free_full (folder_ids, (GDestroyNotify) e_ews_folder_id_free);
+	g_clear_object (&connection);
+	g_clear_error (&local_error);
+
+	return TRUE;
 }
 
-static void
-ews_store_maybe_update_sent_and_drafts (CamelEwsStore *ews_store,
-					/* const */ GSList *ews_folders)
+static gboolean
+ews_initial_setup_sync (CamelStore *store,
+			GHashTable *save_setup,
+			GCancellable *cancellable,
+			GError **error)
 {
-	CamelSession *session;
-	ESourceRegistry *registry;
-	ESource *sibling, *source = NULL;
-
-	g_return_if_fail (CAMEL_IS_EWS_STORE (ews_store));
-
-	session = camel_service_ref_session (CAMEL_SERVICE (ews_store));
-	if (session && E_IS_MAIL_SESSION (session))
-		registry = g_object_ref (e_mail_session_get_registry (E_MAIL_SESSION (session)));
-	else
-		registry = e_source_registry_new_sync (NULL, NULL);
-	g_clear_object (&session);
-
-	g_return_if_fail (registry != NULL);
-
-	sibling = e_source_registry_ref_source (registry, camel_service_get_uid (CAMEL_SERVICE (ews_store)));
-	if (sibling) {
-		GList *sources, *siter;
-
-		sources = e_source_registry_list_sources (registry, E_SOURCE_EXTENSION_MAIL_SUBMISSION);
-		for (siter = sources; siter; siter = siter->next) {
-			source = siter->data;
-
-			if (!source || g_strcmp0 (e_source_get_parent (source), e_source_get_parent (sibling)) != 0 ||
-			    !e_source_has_extension (source, E_SOURCE_EXTENSION_MAIL_SUBMISSION) ||
-			    !e_source_has_extension (source, E_SOURCE_EXTENSION_MAIL_COMPOSITION))
-				source = NULL;
-			else
-				break;
-		}
-
-		if (source &&
-		    e_source_has_extension (source, E_SOURCE_EXTENSION_MAIL_SUBMISSION) &&
-		    e_source_has_extension (source, E_SOURCE_EXTENSION_MAIL_COMPOSITION)) {
-			ESourceMailSubmission *subm_extension;
-			ESourceMailComposition *coms_extension;
-			gboolean changed = FALSE;
-
-			subm_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_MAIL_SUBMISSION);
-			coms_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_MAIL_COMPOSITION);
-
-			if (e_source_mail_submission_get_sent_folder (subm_extension) &&
-			    g_ascii_strcasecmp (e_source_mail_submission_get_sent_folder (subm_extension), "folder://local/Sent") == 0) {
-				gchar *folder_id;
-
-				folder_id = camel_ews_store_summary_get_folder_id_from_folder_type (ews_store->summary, CAMEL_FOLDER_TYPE_SENT);
-				if (folder_id) {
-					changed = TRUE;
-					ews_store_update_source_extension_folder (ews_store, folder_id, subm_extension, "sent-folder");
-					g_free (folder_id);
-				}
-			}
-
-			if (e_source_mail_composition_get_drafts_folder (coms_extension) &&
-			    g_ascii_strcasecmp (e_source_mail_composition_get_drafts_folder (coms_extension), "folder://local/Drafts") == 0) {
-				if (g_slist_length (ews_folders) == G_N_ELEMENTS (system_folder)) {
-					gint ii;
-					for (ii = 0; ii < G_N_ELEMENTS (system_folder); ii++) {
-						if (g_str_equal ("drafts", system_folder[ii].dist_folder_id)) {
-							break;
-						}
-					}
-
-					if (ii < G_N_ELEMENTS (system_folder)) {
-						EEwsFolder *drafts = g_slist_nth (ews_folders, ii)->data;
-						if (drafts && !e_ews_folder_is_error (drafts)) {
-							const EwsFolderId *fid = e_ews_folder_get_id (drafts);
-
-							if (fid && fid->id) {
-								changed = TRUE;
-								ews_store_update_source_extension_folder (ews_store, fid->id, coms_extension, "drafts-folder");
-							}
-						}
-					}
-				}
-			}
-
-			if (changed) {
-				e_source_write_sync (source, NULL, NULL);
-			}
-		}
-
-		g_list_free_full (sources, g_object_unref);
-
-		/* To store also the "folders-initialized" flag change */
-		source = e_source_registry_ref_source (registry, e_source_get_parent (sibling));
-		if (source) {
-			e_source_write_sync (source, NULL, NULL);
-			g_clear_object (&source);
-		}
-
-		g_object_unref (sibling);
-	}
-
-	g_object_unref (registry);
+	return ews_initial_setup_with_connection_sync (store, save_setup, NULL, cancellable, error);
 }
 
 static CamelAuthenticationResult
@@ -1775,14 +1772,14 @@ ews_authenticate_sync (CamelService *service,
 	GSList *folders_created = NULL;
 	GSList *folders_updated = NULL;
 	GSList *folders_deleted = NULL;
-	GSList *folder_ids = NULL, *folders = NULL;
+	GSList *folder_ids = NULL;
 	GSList *created_folder_ids = NULL;
 	gboolean includes_last_folder = FALSE;
 	gboolean initial_setup = FALSE;
 	const gchar *password;
 	gchar *hosturl;
 	gchar *old_sync_state = NULL, *new_sync_state = NULL;
-	GError *local_error = NULL, *folder_err = NULL;
+	GError *local_error = NULL;
 
 	ews_store = CAMEL_EWS_STORE (service);
 
@@ -1813,8 +1810,17 @@ ews_authenticate_sync (CamelService *service,
 
 	/*use old sync_state from summary*/
 	old_sync_state = camel_ews_store_summary_get_string_val (ews_store->summary, "sync_state", NULL);
-	if (!old_sync_state)
+	if (!old_sync_state) {
 		initial_setup = TRUE;
+	} else {
+		gchar *inbox_folder_id;
+
+		inbox_folder_id = camel_ews_store_summary_get_folder_id_from_folder_type (ews_store->summary, CAMEL_FOLDER_TYPE_INBOX);
+		if (!inbox_folder_id || !*inbox_folder_id)
+			initial_setup = TRUE;
+
+		g_free (inbox_folder_id);
+	}
 
 	e_ews_connection_sync_folder_hierarchy_sync (connection, EWS_PRIORITY_MEDIUM, old_sync_state,
 		&new_sync_state, &includes_last_folder, &folders_created, &folders_updated, &folders_deleted,
@@ -1880,45 +1886,8 @@ ews_authenticate_sync (CamelService *service,
 	}
 
 	/*get folders using distinguished id by GetFolder operation and set system flags to folders, only for first time*/
-	if (!local_error && (initial_setup || !camel_ews_settings_get_folders_initialized (ews_settings))) {
-		gint n = 0;
-
-		while (n < G_N_ELEMENTS (system_folder)) {
-			EwsFolderId *fid = NULL;
-
-			fid = g_new0 (EwsFolderId, 1);
-			fid->id = g_strdup (system_folder[n].dist_folder_id);
-			fid->is_distinguished_id = TRUE;
-			folder_ids = g_slist_append (folder_ids, fid);
-			n++;
-		}
-
-		/* fetch system folders first using getfolder operation*/
-		e_ews_connection_get_folder_sync (
-			connection, EWS_PRIORITY_MEDIUM, "IdOnly",
-			NULL, folder_ids, &folders,
-			cancellable, &folder_err);
-
-		if (folders && (g_slist_length (folders) != G_N_ELEMENTS (system_folder)))
-			d (printf ("Error : not all folders are returned by getfolder operation"));
-		else if (folder_err == NULL && folders != NULL)
-			ews_store_set_flags (ews_store, folders);
-		else if (folder_err) {
-			/*report error and make sure we are not leaking anything*/
-			g_warn_if_fail (folders == NULL);
-		} else
-			d (printf ("folders for respective distinguished ids don't exist"));
-
-		if (!camel_ews_settings_get_folders_initialized (ews_settings) && !folder_err) {
-			camel_ews_settings_set_folders_initialized (ews_settings, TRUE);
-			ews_store_maybe_update_sent_and_drafts (ews_store, folders);
-		}
-
-		g_slist_foreach (folders, (GFunc) g_object_unref, NULL);
-		g_slist_foreach (folder_ids, (GFunc) e_ews_folder_id_free, NULL);
-		g_slist_free (folders);
-		g_slist_free (folder_ids);
-		g_clear_error (&folder_err);
+	if (!local_error && initial_setup && connection) {
+		ews_initial_setup_with_connection_sync (CAMEL_STORE (ews_store), NULL, connection, cancellable, NULL);
 	}
 
 	/* postpone notification of new folders to time when also folder flags are known,
@@ -3706,6 +3675,7 @@ camel_ews_store_class_init (CamelEwsStoreClass *class)
 	store_class->delete_folder_sync = ews_delete_folder_sync;
 	store_class->rename_folder_sync = ews_rename_folder_sync;
 	store_class->get_folder_info_sync = ews_get_folder_info_sync;
+	store_class->initial_setup_sync = ews_initial_setup_sync;
 
 	store_class->get_trash_folder_sync = ews_get_trash_folder_sync;
 	store_class->get_junk_folder_sync = ews_get_junk_folder_sync;

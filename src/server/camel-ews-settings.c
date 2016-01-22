@@ -36,7 +36,6 @@ struct _CamelEwsSettingsPrivate {
 	gboolean filter_junk_inbox;
 	gboolean oab_offline;
 	gboolean use_impersonation;
-	gboolean folders_initialized;
 	gchar *email;
 	gchar *gal_uid;
 	gchar *hosturl;
@@ -54,7 +53,6 @@ enum {
 	PROP_EMAIL,
 	PROP_FILTER_JUNK,
 	PROP_FILTER_JUNK_INBOX,
-	PROP_FOLDERS_INITIALIZED,
 	PROP_GAL_UID,
 	PROP_HOST,
 	PROP_HOSTURL,
@@ -144,12 +142,6 @@ ews_settings_set_property (GObject *object,
 
 		case PROP_FILTER_JUNK_INBOX:
 			camel_ews_settings_set_filter_junk_inbox (
-				CAMEL_EWS_SETTINGS (object),
-				g_value_get_boolean (value));
-			return;
-
-		case PROP_FOLDERS_INITIALIZED:
-			camel_ews_settings_set_folders_initialized (
 				CAMEL_EWS_SETTINGS (object),
 				g_value_get_boolean (value));
 			return;
@@ -276,13 +268,6 @@ ews_settings_get_property (GObject *object,
 			g_value_set_boolean (
 				value,
 				camel_ews_settings_get_filter_junk_inbox (
-				CAMEL_EWS_SETTINGS (object)));
-			return;
-
-		case PROP_FOLDERS_INITIALIZED:
-			g_value_set_boolean (
-				value,
-				camel_ews_settings_get_folders_initialized (
 				CAMEL_EWS_SETTINGS (object)));
 			return;
 
@@ -467,18 +452,6 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 			"filter-junk-inbox",
 			"Filter Junk Inbox",
 			"Whether to filter junk from Inbox only",
-			FALSE,
-			G_PARAM_READWRITE |
-			G_PARAM_CONSTRUCT |
-			G_PARAM_STATIC_STRINGS));
-
-	g_object_class_install_property (
-		object_class,
-		PROP_FOLDERS_INITIALIZED,
-		g_param_spec_boolean (
-			"folders-initialized",
-			"Folders Initialized",
-			"Whether Sent Items and Drafts folders are initialized",
 			FALSE,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
@@ -737,50 +710,6 @@ camel_ews_settings_set_listen_notifications (CamelEwsSettings *settings,
 	settings->priv->listen_notifications = listen_notifications;
 
 	g_object_notify (G_OBJECT (settings), "listen-notifications");
-}
-
-/**
- * camel_ews_settings_get_folders_initialized:
- * @settings: a #CamelEwsSettings
- *
- * Returns whether folders had been initialized.
- * This is used to know whether it's required to setup Drafts
- * and Sent Items folders as folders for that purpose in Evolution.
- *
- * Returns: whether folders had been initialized
- *
- * Since: 3.6
- **/
-gboolean
-camel_ews_settings_get_folders_initialized (CamelEwsSettings *settings)
-{
-	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), FALSE);
-
-	return settings->priv->folders_initialized;
-}
-
-/**
- * camel_ews_settings_set_folders_initialized:
- * @settings: a #CamelEwsSettings
- * @folders_initialized: whether folders had been initialized
- *
- * Sets whether to folders had been initialized. This is for Drafts
- * and Sent Items folders only.
- *
- * Since: 3.6
- **/
-void
-camel_ews_settings_set_folders_initialized (CamelEwsSettings *settings,
-					    gboolean folders_initialized)
-{
-	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
-
-	if ((settings->priv->folders_initialized ? 1 : 0) == (folders_initialized ? 1 : 0))
-		return;
-
-	settings->priv->folders_initialized = folders_initialized;
-
-	g_object_notify (G_OBJECT (settings), "folders-initialized");
 }
 
 const gchar *

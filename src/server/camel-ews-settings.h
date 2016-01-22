@@ -128,11 +128,6 @@ gchar *		camel_ews_settings_dup_impersonate_user
 void		camel_ews_settings_set_impersonate_user
 						(CamelEwsSettings *settings,
 						 const gchar *impersonate_user);
-gboolean	camel_ews_settings_get_folders_initialized
-						(CamelEwsSettings *settings);
-void		camel_ews_settings_set_folders_initialized
-						(CamelEwsSettings *settings,
-						 gboolean folders_initialized);
 
 G_END_DECLS
 
