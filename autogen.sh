@@ -4,22 +4,40 @@
 srcdir=`dirname $0`
 test -z "$srcdir" && srcdir=.
 
-PKG_NAME="evolution-ews"
-REQUIRED_AUTOCONF_VERSION=2.58
-REQUIRED_AUTOMAKE_VERSION=1.9
-REQUIRED_LIBTOOL_VERSION=2.2
-REQUIRED_INTLTOOL_VERSION=0.35.5
-
 (test -f $srcdir/configure.ac \
   && test -f $srcdir/ChangeLog \
   && test -d $srcdir/src/camel) || {
     echo -n "**Error**: Directory "\`$srcdir\'" does not look like the" >&2
-    echo " top-level $PKG_NAME directory" >&2
+    echo " top-level evolution-ews directory" >&2
     exit 1
 }
 
-which gnome-autogen.sh || {
-    echo "You need to install gnome-common from the GNOME git" >&2
-    exit 1
+olddir=`pwd`
+cd $srcdir
+
+check_exists() {
+	variable=`which $1`
+
+	if test -z $variable; then
+		echo "*** No $1 found, please intall it ***" >&2
+		exit 1
+	fi
 }
-USE_GNOME2_MACROS=1 . gnome-autogen.sh
+
+check_exists aclocal
+check_exists autoreconf
+check_exists gtkdocize
+check_exists intltoolize
+
+m4dir=`autoconf --trace 'AC_CONFIG_MACRO_DIR:$1'`
+if [ -n "$m4dir" ]; then
+	mkdir -p $m4dir
+fi
+
+aclocal -I m4 || exit $?
+gtkdocize --copy || exit $?
+intltoolize --force --copy --automake || exit $?
+autoreconf --verbose --force --install -Wno-portability || exit $?
+
+cd $olddir
+test -n "$NOCONFIGURE" || "$srcdir/configure" --enable-maintainer-mode "$@"
