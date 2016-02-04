@@ -1972,10 +1972,11 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 
 			g_slist_free (list);
 			g_slist_free_full (vcard_list, g_free);
-			return;
-		} else
+		} else {
 			e_data_book_respond_get_contact_list (book, opid, EDB_ERROR (OFFLINE_UNAVAILABLE), vcard_list);
-			return;
+		}
+
+		return;
 	}
 
 	if (!book_backend_ews_ensure_connected (ebews, cancellable, &error)) {
@@ -2026,10 +2027,9 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 
 		e_ews_folder_id_free (fid);
 		g_slist_free_full (vcard_list, g_free);
-		return;
-	} else
+	} else {
 		e_data_book_respond_get_contact_list (book, opid, EDB_ERROR_EX (OTHER_ERROR, _("Wait till syncing is done")), vcard_list);
-		return;
+	}
 }
 
 typedef struct {
