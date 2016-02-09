@@ -597,7 +597,7 @@ ews_set_threading_data (CamelEwsMessageInfo *mi,
 	const gchar *references, *inreplyto;
 	gint count = 0;
 	const gchar *message_id;
-	struct _camel_header_references *refs, *irt, *scan;
+	GSList *refs, *irt, *scan;
 	guint8 *digest;
 	gchar *msgid;
 
@@ -619,15 +619,14 @@ ews_set_threading_data (CamelEwsMessageInfo *mi,
 
 	/* Prepend In-Reply-To: contents to References: for summary info */
 	inreplyto = e_ews_item_get_in_replyto (item);
-	irt = camel_header_references_inreplyto_decode (inreplyto);
+	irt = camel_header_references_decode (inreplyto);
 	if (irt) {
-		irt->next = refs;
-		refs = irt;
+		refs = g_slist_concat (irt, refs);
 	}
 	if (!refs)
 		return;
 
-	count = camel_header_references_list_size (&refs);
+	count = g_slist_length (refs);
 	g_free (mi->info.references);
 	mi->info.references = NULL;
 	mi->info.references = g_malloc (
@@ -637,18 +636,18 @@ ews_set_threading_data (CamelEwsMessageInfo *mi,
 	count = 0;
 
 	while (scan) {
-		digest = get_md5_digest ((const guchar *) scan->id);
+		digest = get_md5_digest ((const guchar *) scan->data);
 		memcpy (
 			mi->info.references->references[count].id.hash,
 			digest, sizeof (mi->info.message_id.id.hash));
 		g_free (digest);
 
 		count++;
-		scan = scan->next;
+		scan = g_slist_next (scan);
 	}
 
 	mi->info.references->size = count;
-	camel_header_references_list_clear (&refs);
+	g_slist_free_full (refs, g_free);
 }
 
 static gboolean
