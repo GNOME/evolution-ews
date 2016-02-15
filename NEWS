@@ -1,3 +1,18 @@
+Evolution-EWS 3.19.90 2016-02-15
+--------------------------------
+
+Bug Fixes:
+	Bug 725320 - [Camel] Let the store preconfigure settings the first time (Milan Crha)
+	Bug 761346 - More Camel introspection fixes (Milan Crha)
+
+Miscellaneous:
+	Contact photos from offline GAL not shown (Milan Crha)
+	Do not require gnome-common to run autogen.sh (Milan Crha)
+	Correct indentation in e_book_backend_ews_get_contact_list() (Milan Crha)
+
+Translations:
+	Aurimas Černius (lt)
+
 Evolution-EWS 3.19.4 2016-01-18
 -------------------------------
 
