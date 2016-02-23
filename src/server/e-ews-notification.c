@@ -643,6 +643,26 @@ ews_notification_fire_events_from_response (EEwsNotification *notification,
 	return TRUE;
 }
 
+static gboolean
+ews_abort_session_idle_cb (gpointer user_data)
+{
+	SoupSession *session = user_data;
+
+	g_return_val_if_fail (SOUP_IS_SESSION (session), FALSE);
+
+	soup_session_abort (session);
+
+	return FALSE;
+}
+
+static void
+ews_notification_schedule_abort (SoupSession *session)
+{
+	g_return_if_fail (SOUP_IS_SESSION (session));
+
+	g_idle_add_full (G_PRIORITY_HIGH_IDLE, ews_abort_session_idle_cb, g_object_ref (session), g_object_unref);
+}
+
 static void
 ews_notification_soup_got_chunk (SoupMessage *msg,
 				 SoupBuffer *chunk,
@@ -702,7 +722,7 @@ ews_notification_soup_got_chunk (SoupMessage *msg,
 		}
 
 		if (!ews_notification_fire_events_from_response (notification, response)) {
-			soup_session_abort (notification->priv->soup_session);
+			ews_notification_schedule_abort (notification->priv->soup_session);
 
 			g_object_unref (response);
 			break;
@@ -721,8 +741,8 @@ ews_notification_soup_got_chunk (SoupMessage *msg,
 			keep_parsing = FALSE;
 
 			if (cancelled) {
-				/* Abort any pending operations */
-				soup_session_abort (notification->priv->soup_session);
+				/* Abort any pending operations, but not here, rather in another thread */
+				ews_notification_schedule_abort (notification->priv->soup_session);
 			}
 		}
 	} while (keep_parsing);
@@ -792,7 +812,7 @@ static void
 ews_notification_cancelled_cb (GCancellable *cancellable,
 			       SoupSession *session)
 {
-	soup_session_abort (session);
+	ews_notification_schedule_abort (session);
 }
 
 static gpointer
