@@ -1,3 +1,12 @@
+Evolution-EWS 3.19.91 2016-02-29
+--------------------------------
+
+Bug Fixes:
+	Bug 760319 - [EEwsNotification] Abort session on idle, to avoid deadlock (Milan Crha)
+
+Translations:
+	Rafael Fontenelle (pt_BR)
+
 Evolution-EWS 3.19.90 2016-02-15
 --------------------------------
 
