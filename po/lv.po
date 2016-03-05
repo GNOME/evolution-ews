@@ -1,14 +1,14 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 #
-# Rūdolfs Mazurs <rudolfs.mazurs@gmail.com>, 2012, 2013.
+# Rūdolfs Mazurs <rudolfs.mazurs@gmail.com>, 2012, 2013, 2016.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2013-09-30 11:28+0000\n"
-"PO-Revision-Date: 2013-10-03 15:08+0300\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=evolutio"
+"n-ews&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2016-03-05 06:16+0000\n"
+"PO-Revision-Date: 2016-03-05 17:09+0200\n"
 "Last-Translator: Rūdolfs Mazurs <rudolfs.mazurs@gmail.com>\n"
 "Language-Team: Latvian <lata-l10n@googlegroups.com>\n"
 "Language: lv\n"
@@ -17,94 +17,117 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : "
 "2);\n"
-"X-Generator: Lokalize 1.5\n"
+"X-Generator: Lokalize 2.0\n"
 
-#: ../src/addressbook/e-book-backend-ews.c:1421
+#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:77
+msgid "Exchange Web Services"
+msgstr "Exchange Web Services"
+
+#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:79
+msgid "For accessing Exchange servers using Web Services"
+msgstr "Lai piekļūtu Exchange serveriem, izmantojot Web Services"
+
+#: ../src/addressbook/e-book-backend-ews.c:1454
 msgid "The backend does not support bulk additions"
 msgstr "Aizmugure neatbalsta masveida pievienošanu"
 
-#: ../src/addressbook/e-book-backend-ews.c:1460
-#: ../src/addressbook/e-book-backend-ews.c:1804
+#: ../src/addressbook/e-book-backend-ews.c:1493
+#: ../src/addressbook/e-book-backend-ews.c:1860
 msgid ""
 "Cannot save contact list, it's only supported on EWS Server 2010 or later"
 msgstr ""
 "Nevar saglabāt kontaktu sarakstu, to atbalsta tikai EWS serveris 2010 vai "
 "jaunāks"
 
-#: ../src/addressbook/e-book-backend-ews.c:1763
+#: ../src/addressbook/e-book-backend-ews.c:1819
 msgid "The backend does not support bulk modifications"
 msgstr "Aizmugure neatbalsta masveida izmaiņas"
 
-#: ../src/addressbook/e-book-backend-ews.c:1963
+#: ../src/addressbook/e-book-backend-ews.c:2031
 msgid "Wait till syncing is done"
 msgstr "Uzgaidiet līdz sinhronizēšana ir pabeigta"
 
-#: ../src/addressbook/e-book-backend-ews.c:2372
+#: ../src/addressbook/e-book-backend-ews.c:2514
 #, c-format
-msgid "Downloading contacts in %s %d%% completed... "
-msgstr "Lejupielādē kontaktus no %s, %d%% ir pabeigti..."
+#| msgid "Downloading contacts in %s %d%% completed... "
+msgid "Processing contacts in %s %d%% completed... "
+msgstr "Apstrādā kontaktus no %s, %d%% ir pabeigti..."
 
-#: ../src/addressbook/e-book-backend-ews.c:3052
+#: ../src/addressbook/e-book-backend-ews.c:3126
 msgid "Syncing contacts..."
 msgstr "Sinhronizē kontaktus..."
 
-#: ../src/addressbook/e-book-backend-ews.c:3283
+#: ../src/addressbook/e-book-backend-ews.c:3311
 #: ../src/configuration/e-ews-search-user.c:365
 msgid "Searching..."
 msgstr "Meklē..."
 
-#: ../src/calendar/e-cal-backend-ews.c:1069
+#: ../src/addressbook/e-book-backend-ews.c:4274
+msgid "Requested to delete an unrelated cursor"
+msgstr "Pieprasīja dzēst nesaistītu kursoru"
+
+#: ../src/calendar/e-cal-backend-ews.c:1317
 msgid "EWS does not support bulk removals"
 msgstr "EWS neatbalsta masveida izņemšanu"
 
-#: ../src/calendar/e-cal-backend-ews.c:1572
+#: ../src/calendar/e-cal-backend-ews.c:1495
 msgid "Unknown error"
 msgstr "Nezināma kļūda"
 
-#: ../src/calendar/e-cal-backend-ews.c:1773
+#: ../src/calendar/e-cal-backend-ews.c:1739
 msgid "EWS does not support bulk additions"
 msgstr "EWS neatbalsta masveida pievienošanu"
 
-#: ../src/calendar/e-cal-backend-ews.c:2395
+#: ../src/calendar/e-cal-backend-ews.c:1944
 msgid "EWS does not support bulk modifications"
 msgstr "EWS neatbalsta masveida izmaiņas"
 
-#: ../src/camel/camel-ews-folder.c:275
+#: ../src/calendar/e-cal-backend-ews.c:2370
+#, c-format
+msgid "Cannot find user '%s' between attendees"
+msgstr "Starp dalībniekiem nevar atrast lietotāju “%s”"
+
+#: ../src/camel/camel-ews-folder.c:377
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Neizdevās atvērt mimecontent pagaidu datni!"
 
-#: ../src/camel/camel-ews-folder.c:283
+#: ../src/camel/camel-ews-folder.c:385
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Neizdevās izveidot parseri no mimecontent!"
 
-#: ../src/camel/camel-ews-folder.c:292
+#: ../src/camel/camel-ews-folder.c:394
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Neizdevās saprast tikšanās pieprasījuma mimecontent!"
 
-#: ../src/camel/camel-ews-folder.c:351
+#: ../src/camel/camel-ews-folder.c:453
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Nevarē izveidot kešatmiņas datni"
 
-#: ../src/camel/camel-ews-folder.c:452 ../src/camel/camel-ews-folder.c:534
+#: ../src/camel/camel-ews-folder.c:557 ../src/camel/camel-ews-folder.c:649
 #, c-format
-msgid "Unable to create cache path"
-msgstr "Nevar izveidot kešatmiņas ceļu"
+#| msgid "Unable to create cache path"
+msgid "Unable to create cache path '%s': %s"
+msgstr "Nevar izveidot kešatmiņas ceļu “%s” — %s"
 
-#: ../src/camel/camel-ews-folder.c:544
+#. Translators: The first %s consists of the source file name,
+#. the second %s of the destination file name and
+#. the third %s of the error message.
+#: ../src/camel/camel-ews-folder.c:663
 #, c-format
-msgid "Failed to move message cache file"
-msgstr "Neizdevās pārvietot vēstuļu kešatmiņas datni"
+#| msgid "Failed to move message cache file"
+msgid "Failed to move message cache file from '%s' to '%s': %s"
+msgstr "Neizdevās pārvietot vēstuļu kešatmiņas datni no “%s” uz “%s” — %s"
 
-#: ../src/camel/camel-ews-folder.c:1173
+#: ../src/camel/camel-ews-folder.c:1404
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nevar ielādēt %s kopsavilkumu"
 
-#: ../src/camel/camel-ews-folder.c:1609
+#: ../src/camel/camel-ews-folder.c:1943
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
 msgstr "Nevar veikt darbības ar mapi, kamēr atrodas nesaistes režīmā"
@@ -117,54 +140,46 @@ msgstr "Pārbauda jauno pastu"
 msgid "C_heck for new messages in all folders"
 msgstr "_Pārbaudīt visās mapēs, vai nav jaunu vēstuļu"
 
-#: ../src/camel/camel-ews-provider.c:52
+#: ../src/camel/camel-ews-provider.c:51
+msgid "_Listen for server change notifications"
+msgstr "K_lausīties servera izmaiņu paziņojumus"
+
+#: ../src/camel/camel-ews-provider.c:54
 msgid "Options"
 msgstr "Opcijas"
 
-#: ../src/camel/camel-ews-provider.c:54
+#: ../src/camel/camel-ews-provider.c:56
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Attiecināt filtrus uz jaunajām vēstulēm iesūtnē šajā serverī"
 
-#: ../src/camel/camel-ews-provider.c:56
+#: ../src/camel/camel-ews-provider.c:58
 msgid "Check new messages for _Junk contents"
 msgstr "Pārbaudīt, vai jaunās vēstules nav _mēstules"
 
-#: ../src/camel/camel-ews-provider.c:58
+#: ../src/camel/camel-ews-provider.c:60
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "Pārbaudīt uz mēstulēm tikai iesūtnes mapē"
 
-#: ../src/camel/camel-ews-provider.c:60
+#: ../src/camel/camel-ews-provider.c:62
 msgid "Automatically synchroni_ze remote mail locally"
 msgstr "Automātiski sinhroni_zēt attālināto pastu lokāli"
 
-#: ../src/camel/camel-ews-provider.c:63
-#| msgid "Configuration"
+#: ../src/camel/camel-ews-provider.c:65
 msgid "Connection"
 msgstr "Savienojums"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/camel/camel-ews-provider.c:67
+#: ../src/camel/camel-ews-provider.c:69
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "Savienojuma _noildze (sekundēs) %s"
 
-#: ../src/camel/camel-ews-provider.c:75
-msgid "Exchange Web Services"
-msgstr "Exchange Web Services"
-
-#: ../src/camel/camel-ews-provider.c:77
-msgid "For accessing Exchange servers using Web Services"
-msgstr "Lai piekļūtu Exchange serveriem, izmantojot Web Services"
-
-#: ../src/camel/camel-ews-provider.c:92
+#: ../src/camel/camel-ews-provider.c:94
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/camel/camel-ews-provider.c:94
-#| msgid ""
-#| "This option will connect to the Exchange server using a plaintext "
-#| "password."
+#: ../src/camel/camel-ews-provider.c:96
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -172,14 +187,11 @@ msgstr ""
 "Šī opcija savienos ar Exchange serveri, lietojot parasta teksta paroli ar "
 "NTLM autentifikācija."
 
-#: ../src/camel/camel-ews-provider.c:102
+#: ../src/camel/camel-ews-provider.c:104
 msgid "Basic"
 msgstr "Pamata"
 
-#: ../src/camel/camel-ews-provider.c:104
-#| msgid ""
-#| "This option will connect to the Exchange server using a plaintext "
-#| "password."
+#: ../src/camel/camel-ews-provider.c:106
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -187,14 +199,11 @@ msgstr ""
 "Šī opcija savienos ar Exchange serveri, lietojot parasta teksta paroli ar "
 "pamata autentifikāciju."
 
-#: ../src/camel/camel-ews-provider.c:112
+#: ../src/camel/camel-ews-provider.c:114
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/camel/camel-ews-provider.c:114
-#| msgid ""
-#| "This option will connect to the Exchange server using a plaintext "
-#| "password."
+#: ../src/camel/camel-ews-provider.c:116
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -202,176 +211,171 @@ msgstr ""
 "Šī opcija savienosies ar Exchange serveri, lietojot Kerberos/GSSAPI "
 "autentifikāciju."
 
-#: ../src/camel/camel-ews-store.c:292
+#: ../src/camel/camel-ews-store.c:332
 #, c-format
 msgid "Session has no storage path"
 msgstr "Sesijai nav glabātuves ceļa"
 
-#: ../src/camel/camel-ews-store.c:329
+#: ../src/camel/camel-ews-store.c:369
 #, c-format
 msgctxt "PublicFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:458
+#: ../src/camel/camel-ews-store.c:498
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:603
-#| msgid "Fetching out of office settings..."
+#: ../src/camel/camel-ews-store.c:644 ../src/camel/camel-ews-store.c:1247
 msgid "Checking \"Out of Office\" settings"
 msgstr "Pārbauda “ārpus biroja” iestatījumus"
 
-#: ../src/camel/camel-ews-store.c:843
+#: ../src/camel/camel-ews-store.c:1495
 msgid "Updating foreign folder structure"
 msgstr "Atjaunina ārējo mapju struktūru"
 
-#: ../src/camel/camel-ews-store.c:1298 ../src/camel/camel-ews-store.c:2794
-#, c-format
-msgid "You must be working online to complete this operation"
-msgstr "Jums ir jāstrādā tiešsaistē, lai izpildītu šo darbību"
+#: ../src/camel/camel-ews-store.c:1631
+#| msgid "Updating foreign folder structure"
+msgid "Updating foreign folders"
+msgstr "Atjaunina ārējās mapes"
 
-#: ../src/camel/camel-ews-store.c:1393
+#: ../src/camel/camel-ews-store.c:2005
 #, c-format
 msgid "No such folder: %s"
 msgstr "Nav tādas mapes: %s"
 
-#: ../src/camel/camel-ews-store.c:1705
-#| msgid "Cant perform actions on the folder while in offline mode"
+#: ../src/camel/camel-ews-store.c:2300
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Nevar uzskaitīt EWS publiskās mapes nesaistes režīmā"
 
-#: ../src/camel/camel-ews-store.c:1778
-#| msgid "Cannot find folder ID for parent folder %s"
+#: ../src/camel/camel-ews-store.c:2373
 msgid "Cannot find any EWS public folders"
 msgstr "Nevar atrast EWS publiskās mapes"
 
-#: ../src/camel/camel-ews-store.c:1887
+#: ../src/camel/camel-ews-store.c:2482
 #, c-format
-#| msgid "Parent folder %s does not exist"
 msgid "Cannot create folder '%s', folder already exists"
 msgstr "Nevar izveidot mapi “%s” — mape jau eksistē"
 
-#: ../src/camel/camel-ews-store.c:1902
+#: ../src/camel/camel-ews-store.c:2497
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Vecāka mape %s neeksistē"
 
-#: ../src/camel/camel-ews-store.c:1912
+#: ../src/camel/camel-ews-store.c:2507
 #, c-format
 msgid ""
 "Cannot create folder under '%s', it is used for folders of other users only"
 msgstr ""
 "Nevar izveidot mapi zem “%s”, to izmanto mapēm tikai citiem lietotājiem"
 
-#: ../src/camel/camel-ews-store.c:1922
+#: ../src/camel/camel-ews-store.c:2517
 #, c-format
 msgid "Cannot create folder under '%s', it is used for public folders only"
 msgstr "Nevar izveidot mapi zem “%s”, to izmanto tikai publiskām mapēm"
 
-#: ../src/camel/camel-ews-store.c:1991
+#: ../src/camel/camel-ews-store.c:2621
 #, c-format
 msgid "Folder does not exist"
 msgstr "Mape neeksistē"
 
-#: ../src/camel/camel-ews-store.c:2000
+#: ../src/camel/camel-ews-store.c:2631
 #, c-format
 msgid "Cannot remove folder '%s', it is used for folders of other users only"
 msgstr "Nevar izņemt mapi “%s”, to izmanto tikai mapēm citiem lietotājiem"
 
-#: ../src/camel/camel-ews-store.c:2010
+#: ../src/camel/camel-ews-store.c:2642
 #, c-format
 msgid "Cannot remove folder '%s', it is used for public folders only"
 msgstr "Nevar izņemt mapi “%s”, to izmanto tikai publiskām mapēm"
 
-#: ../src/camel/camel-ews-store.c:2118
+#: ../src/camel/camel-ews-store.c:2798
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Mape %s neeksistē"
 
-#: ../src/camel/camel-ews-store.c:2128
+#: ../src/camel/camel-ews-store.c:2808
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Mapei %s nav maiņas atslēgas ieraksta"
 
-#: ../src/camel/camel-ews-store.c:2170
+#: ../src/camel/camel-ews-store.c:2850
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Nevar vienlaicīgi pārsaukt un pārvietot mapi"
 
-#: ../src/camel/camel-ews-store.c:2206
+#: ../src/camel/camel-ews-store.c:2886
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nevar atrast mapes ID vecāka mapei %s"
 
-#: ../src/camel/camel-ews-store.c:2256 ../src/camel/camel-ews-transport.c:69
+#: ../src/camel/camel-ews-store.c:2936 ../src/camel/camel-ews-transport.c:164
 #, c-format
 msgid "Exchange server %s"
 msgstr "Exchange serveris %s"
 
-#: ../src/camel/camel-ews-store.c:2259
+#: ../src/camel/camel-ews-store.c:2939
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "%s Exchange serviss %s"
 
-#: ../src/camel/camel-ews-store.c:2303
+#: ../src/camel/camel-ews-store.c:2983
 #, c-format
-#| msgid "Could not load summary for %s"
 msgid "Could not locate Trash folder"
 msgstr "Nevarēja atrast miskastes mapi"
 
-#: ../src/camel/camel-ews-store.c:2363
+#: ../src/camel/camel-ews-store.c:3043
 #, c-format
-#| msgid "Could not load summary for %s"
 msgid "Could not locate Junk folder"
 msgstr "Nevarēja atrast mēstuļu mapi"
 
-#: ../src/camel/camel-ews-store.c:2553
-#| msgid "Cant perform actions on the folder while in offline mode"
+#: ../src/camel/camel-ews-store.c:3233
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Nevar abonēt EWS mapes nesaistes režīmā"
 
-#: ../src/camel/camel-ews-store.c:2576
+#: ../src/camel/camel-ews-store.c:3256
 #, c-format
 msgid "Cannot subscribe folder '%s', no public folder available"
 msgstr "Nevar abonēt mapi “%s”, nav pieejamas publiskās mapes"
 
-#: ../src/camel/camel-ews-store.c:2586
+#: ../src/camel/camel-ews-store.c:3266
 #, c-format
-#| msgid "Cannot find folder ID for parent folder %s"
 msgid "Cannot subscribe folder '%s', folder not found"
 msgstr "Nevar abonēt mapi “%s”, mape nav atrasta"
 
-#: ../src/camel/camel-ews-store.c:2677
-#| msgid "Cant perform actions on the folder while in offline mode"
+#: ../src/camel/camel-ews-store.c:3357
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Nevar pārtraukt EWS mapes abonēšanu nesaistes režīmā"
 
-#: ../src/camel/camel-ews-store.c:2838
-#| msgid "Fetching out of office settings..."
+#: ../src/camel/camel-ews-store.c:3474
+#, c-format
+msgid "You must be working online to complete this operation"
+msgstr "Jums ir jāstrādā tiešsaistē, lai izpildītu šo darbību"
+
+#: ../src/camel/camel-ews-store.c:3518 ../src/camel/camel-ews-store.c:3555
 msgid "Unsetting the \"Out of Office\" status"
 msgstr "Atstata “ārpus biroja” iestatījumus"
 
-#: ../src/camel/camel-ews-transport.c:72
+#: ../src/camel/camel-ews-transport.c:167
 #, c-format
 msgid "Exchange mail delivery via %s"
 msgstr "Exchange pasta nosūtīšana caur  %s"
 
-#: ../src/camel/camel-ews-transport.c:119
+#: ../src/camel/camel-ews-transport.c:216
 msgid "Cannot send message with no From address"
 msgstr "Nevar nosūtīt vēstuli bez “No” adreses"
 
-#: ../src/camel/camel-ews-transport.c:125
+#: ../src/camel/camel-ews-transport.c:222
 msgid "Exchange server cannot send message with multiple From addresses"
 msgstr "Exchange serveris nevar nosūtīt vēstules ar vairākām “No” adresēm"
 
-#: ../src/camel/camel-ews-transport.c:136
+#: ../src/camel/camel-ews-transport.c:233
 msgid "Failed to read From address"
 msgstr "Neizdevās nolasīt “No” adreses"
 
-#: ../src/camel/camel-ews-transport.c:148
+#: ../src/camel/camel-ews-transport.c:245
 #, c-format
 msgid ""
 "Exchange server cannot send message as '%s', when the account was configured "
@@ -380,95 +384,94 @@ msgstr ""
 "Exchange serveris nevar nosūtīt vēstules kā “%s”, kad konts ir konfigurēts "
 "adresei “%s”"
 
-#: ../src/camel/camel-ews-transport.c:162
+#: ../src/camel/camel-ews-transport.c:259
 #, c-format
 msgid "Service not connected"
 msgstr "Serviss nav savienojies"
 
-#: ../src/collection/e-ews-backend.c:422
-#: ../src/configuration/e-mail-config-ews-gal.c:275
+#: ../src/collection/e-ews-backend.c:421
+#: ../src/configuration/e-mail-config-ews-gal.c:276
 msgid "Global Address List"
 msgstr "Globāls adrešu saraksts"
 
-#: ../src/collection/e-ews-backend.c:807
+#: ../src/collection/e-ews-backend.c:857
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named '%s'"
 msgstr "Neizdevās noteikt atbilstošu mapes klasi jaunajai mape “%s”"
 
-#: ../src/collection/e-ews-backend.c:896
+#: ../src/collection/e-ews-backend.c:945
 #, c-format
 msgid "Data source '%s' does not represent an Exchange Web Services folder"
 msgstr "Datu avots “%s” neatspoguļo Exchange Web Services mapi"
 
-#: ../src/configuration/e-ews-config-utils.c:474
+#: ../src/configuration/e-ews-config-utils.c:570
 msgid "Folder"
 msgstr "Mape"
 
-#: ../src/configuration/e-ews-config-utils.c:480
+#: ../src/configuration/e-ews-config-utils.c:580
 msgid "Size"
 msgstr "Izmērs"
 
-#: ../src/configuration/e-ews-config-utils.c:506
-#: ../src/configuration/e-ews-config-utils.c:511
+#: ../src/configuration/e-ews-config-utils.c:618
+#: ../src/configuration/e-ews-config-utils.c:623
 msgid "Unable to retrieve folder size information"
 msgstr "Neizdevās iegūt informāciju par mapes izmēru"
 
-#: ../src/configuration/e-ews-config-utils.c:621
+#: ../src/configuration/e-ews-config-utils.c:743
 msgid "Folder Sizes"
 msgstr "Mapju izmēri"
 
-#: ../src/configuration/e-ews-config-utils.c:624
+#: ../src/configuration/e-ews-config-utils.c:746
 msgid "_Close"
 msgstr "Ai_zvērt"
 
-#: ../src/configuration/e-ews-config-utils.c:638
+#: ../src/configuration/e-ews-config-utils.c:760
 msgid "Fetching folder list…"
 msgstr "Iegūst mapju sarakstu..."
 
-#: ../src/configuration/e-ews-config-utils.c:791
+#: ../src/configuration/e-ews-config-utils.c:913
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr "Nevar rediģēt atļaujas mapei “%s”. Izvēlieties citu mapi."
 
-#: ../src/configuration/e-ews-config-utils.c:868
+#: ../src/configuration/e-ews-config-utils.c:990
 msgid "Folder Sizes..."
 msgstr "Mapju izmēri..."
 
-#: ../src/configuration/e-ews-config-utils.c:875
+#: ../src/configuration/e-ews-config-utils.c:997
 msgid "Subscribe to folder of other user..."
 msgstr "Abonēt cita lietotāja mapi..."
 
-#: ../src/configuration/e-ews-config-utils.c:884
-#: ../src/configuration/e-ews-config-utils.c:1166
-#: ../src/configuration/e-ews-config-utils.c:1197
-#: ../src/configuration/e-ews-config-utils.c:1228
-#: ../src/configuration/e-ews-config-utils.c:1259
+#: ../src/configuration/e-ews-config-utils.c:1006
+#: ../src/configuration/e-ews-config-utils.c:1310
+#: ../src/configuration/e-ews-config-utils.c:1341
+#: ../src/configuration/e-ews-config-utils.c:1372
+#: ../src/configuration/e-ews-config-utils.c:1403
 msgid "Permissions..."
 msgstr "Atļaujas..."
 
-#: ../src/configuration/e-ews-config-utils.c:886
+#: ../src/configuration/e-ews-config-utils.c:1008
 msgid "Edit EWS folder permissions"
 msgstr "Rediģēt EWS mapju atļaujas"
 
-#: ../src/configuration/e-ews-config-utils.c:1168
+#: ../src/configuration/e-ews-config-utils.c:1312
 msgid "Edit EWS calendar permissions"
 msgstr "Rediģēt EWS kalendāru atļaujas"
 
-#: ../src/configuration/e-ews-config-utils.c:1199
+#: ../src/configuration/e-ews-config-utils.c:1343
 msgid "Edit EWS tasks permissions"
 msgstr "Rediģēt EWS uzdevumu atļaujas"
 
-#: ../src/configuration/e-ews-config-utils.c:1230
+#: ../src/configuration/e-ews-config-utils.c:1374
 msgid "Edit EWS memos permissions"
 msgstr "Rediģēt EWS memo atļaujas"
 
-#: ../src/configuration/e-ews-config-utils.c:1261
+#: ../src/configuration/e-ews-config-utils.c:1405
 msgid "Edit EWS contacts permissions"
 msgstr "Rediģēt EWS kontaktu atļaujas"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:87
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:487
-#| msgid "None"
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:418
 msgctxt "PermissionsLevel"
 msgid "None"
 msgstr "Nekāds"
@@ -524,7 +527,7 @@ msgid "Free/Busy time, subject, location"
 msgstr "Brīvs/aizņemts laiks, temats, vieta"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:143
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:508
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:441
 msgctxt "PermissionsLevel"
 msgid "Custom"
 msgstr "Pielāgotas"
@@ -544,14 +547,13 @@ msgid "Default"
 msgstr "Noklusējuma"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:786
-#| msgid "Known"
 msgctxt "User"
 msgid "Unknown"
 msgstr "Nezināms"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:867
 #: ../src/configuration/e-ews-search-user.c:431
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1063
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:995
 msgid "Name"
 msgstr "Vārds"
 
@@ -564,12 +566,11 @@ msgid "Edit EWS folder permissions..."
 msgstr "Rediģēt EWS mapju atļaujas..."
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:950
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:635
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:638
 msgid "Account:"
 msgstr "Konts:"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:978
-#| msgid "User_name:"
 msgid "Folder name:"
 msgstr "Mapes nosaukums:"
 
@@ -592,7 +593,6 @@ msgstr "Lasīt"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1133
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1200
-#| msgid "None"
 msgctxt "Permissions"
 msgid "None"
 msgstr "Nekādas"
@@ -648,7 +648,6 @@ msgid "Own"
 msgstr "Paša"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1210
-#| msgid "All"
 msgctxt "Permissions"
 msgid "All"
 msgstr "Visu"
@@ -659,13 +658,11 @@ msgid "Other"
 msgstr "Citu"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1228
-#| msgid "Folder does not exist"
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "Mapes īpašnieks"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1232
-#| msgid "Folder does not exist"
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "Mapes kontakts"
@@ -684,9 +681,6 @@ msgid "Unset on Server"
 msgstr "Unset serverī"
 
 #: ../src/configuration/e-ews-ooo-notificator.c:185
-#| msgid ""
-#| "Unable to fetch out of office settings: \n"
-#| "%s"
 msgid "Unset the \"Out of Office\" status"
 msgstr "Atstatīt “ārpus biroja” iestatījumus"
 
@@ -732,14 +726,12 @@ msgid "Choose EWS user..."
 msgstr "Izvēlieties EWS lietotāju..."
 
 #: ../src/configuration/e-ews-search-user.c:497
-#| msgid "Searching..."
 msgid "_Search:"
 msgstr "_Meklēt:"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
-#: ../src/server/e-ews-folder.c:679
+#: ../src/server/e-ews-folder.c:750
 #, c-format
-#| msgid "Cannot find folder ID for parent folder %s"
 msgid "Cannot add folder, folder already exists as '%s'"
 msgstr "Nevar pievienot mapi, jau ir mape ar nosaukumu “%s”"
 
@@ -752,22 +744,21 @@ msgctxt "ForeignFolder"
 msgid "Mailbox - %s"
 msgstr "Pastkaste — %s"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:272
-#| msgid "Cant perform actions on the folder while in offline mode"
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:275
 msgid "Cannot test foreign folder availability while in offline mode"
 msgstr "Nevar pārbaudīt ārējo mapi, kamēr atrodas nesaistes režīmā"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:297
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:300
 #, c-format
 msgid "User '%s' was not found on the server"
 msgstr "Lietotājs “%s” netika atrasts uz servera"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:333
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:336
 #, c-format
 msgid "User name '%s' is ambiguous, specify it more precisely, please"
 msgstr "Lietotājvārds “%s“ ir neviennozīmīgs, lūdzu, norādiet to precīzāk"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:355
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:358
 #, c-format
 msgid ""
 "Folder '%s' not found. Either it does not exist or you do not have "
@@ -776,8 +767,7 @@ msgstr ""
 "Mape “%s” nav atrasta. Tā vai nu neeksistē, vai arī jums nav tiesību tai "
 "piekļūt."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:373
-#| msgid "Cannot find folder ID for parent folder %s"
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:376
 msgid "Cannot add folder, cannot determine folder's type"
 msgstr "Nevar pievienot mapi, nevar noteikt mapes veidu"
 
@@ -786,74 +776,72 @@ msgstr "Nevar pievienot mapi, nevar noteikt mapes veidu"
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith - Calendar"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:418
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:421
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s - %s"
 msgstr "%s — %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:512
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:720
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:515
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:723
 msgid "Inbox"
 msgstr "Iesūtne"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:514
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:517
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:724
 msgid "Contacts"
 msgstr "Kontakti"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:516
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:722
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:519
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:725
 msgid "Calendar"
 msgstr "Kalendārs"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:518
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:723
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:521
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:726
 msgid "Memos"
 msgstr "Memo"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:520
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:724
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:523
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:727
 msgid "Tasks"
 msgstr "Uzdevumi"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:537
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:540
 #, c-format
 msgid "Testing availability of folder '%s' of user '%s', please wait..."
 msgstr "Pārbauda mapes “%s” no lietotāja “%s” pieejamību. Lūdzu, uzgaidiet..."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:614
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:617
 msgid "Subscribe to folder of other EWS user..."
 msgstr "Abonēt cita EWS lietotāja mapi..."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:665
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:668
 msgid "User"
 msgstr "Lietotājs"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:672
-#| msgid "User_name:"
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:675
 msgid "_User:"
 msgstr "_Lietotājs:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:687
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:690
 msgid "C_hoose..."
 msgstr "I_zvēlēties..."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:703
-#| msgid "User_name:"
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:706
 msgid "_Folder name:"
 msgstr "_Mapes nosaukums:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:733
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:736
 msgid "Include _subfolders"
 msgstr "Iekļaut _apakšmapes"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:140
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:214
 msgid "Querying Autodiscover service"
 msgstr "Apvaicā automātiskās atklāšanas servisu"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:231
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:311
 msgid "Fetch _URL"
 msgstr "Saņemt _URL"
 
@@ -878,7 +866,6 @@ msgid "Open _Mailbox of other user"
 msgstr "Atvērt cita lietotāja _pastkasti"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:239
-#| msgid "Searching..."
 msgid "S_earch..."
 msgstr "M_eklēt..."
 
@@ -886,73 +873,82 @@ msgstr "M_eklēt..."
 msgid "Authentication"
 msgstr "Autentifikācija"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:488
+#: ../src/configuration/e-mail-config-ews-backend.c:390
+#| msgid "URL cannot be NULL"
+msgid "Host URL cannot be empty"
+msgstr "Resursdatora URL nevar būt tukšs"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:395
+msgid "User name cannot be empty"
+msgstr "Lietotājvārds nevar būt tukšs"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:419
 msgctxt "PermissionsLevel"
 msgid "Reviewer (can read items)"
 msgstr "Recenzents (var lasīt vienumus)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:489
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:420
 msgctxt "PermissionsLevel"
 msgid "Author (can read and create items)"
 msgstr "Autors (var lasīt un izveidot vienumus)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:490
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:421
 msgctxt "PermissionsLevel"
 msgid "Editor (can read, create and modify items)"
 msgstr "Redaktors (var lasīt, izveidot un mainīt vienumus)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:593
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:526
 msgid "Delegate permissions"
 msgstr "Deleģēt atļaujas"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:611
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:544
 msgid "C_alendar"
 msgstr "K_alendārs"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:614
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:547
 msgid "_Delegate receives copies of meeting-related messages sent to me"
 msgstr ""
 "Delegāts saņem ar sanāksmēs saistīto vēstuļu kopijas, kas ir man nosūtītas"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:619
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:552
 msgid "_Tasks"
 msgstr "_Uzdevumi"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:622
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:555
 msgid "_Inbox"
 msgstr "_Iesūtne"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:625
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:558
 msgid "C_ontacts"
 msgstr "K_ontakti"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:628
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:561
 msgid "_Notes"
 msgstr "_Piezīmes"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:631
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:564
 msgid "_Journal"
 msgstr "Žu_rnāls"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:634
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:567
 #, c-format
 msgid "Delegate '%s' has the following permissions"
 msgstr "Delegātam “%s” ir sekojošās atļaujas"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:652
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:585
 msgid "Delegate can see my _private items"
 msgstr "Delegāts var redzēt manus _privātos vienumus"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:975
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:907
 msgid "Retrieving current user permissions, please wait..."
 msgstr "Saņem pašreizējā lietotāja atļaujas, lūdzu, uzgaidiet..."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1096
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1629
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1027
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1647
 msgid "Delegates"
 msgstr "Delegāti"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1120
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1051
 msgid ""
 "Delegates can send items on your behalf, including creating and responding "
 "to meeting requests. If you want to grant folder permissions without giving "
@@ -961,10 +957,10 @@ msgid ""
 msgstr ""
 "Delegāti var sūtīt vienumus jūsu vārdā, tai skaitā veidot un atbildēt uz "
 "sanāksmju pieprasījumiem. Jūs varat piešķirt tiesības uz mapēm, nedodot "
-"atļauju sūtīt kāda vārdā, aizveriet šo dialoglodziņu, veiciet labo klikšķi uz "
-"mapes, spiediet “Atļaujas” un tur mainīt opcijas."
+"atļauju sūtīt kāda vārdā, aizveriet šo dialoglodziņu, veiciet labo klikšķi "
+"uz mapes, spiediet “Atļaujas” un tur mainīt opcijas."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1169
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1101
 msgid ""
 "Deliver meeting requests addressed to me and responses to meeting requests "
 "where I am the organizer to:"
@@ -973,7 +969,7 @@ msgstr ""
 "pieprasījumiem, kurus es vadu, uz:"
 
 #. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1178
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1111
 msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
@@ -981,15 +977,15 @@ msgstr ""
 "Tikai mani delegāti, bet _sūtīt man kopiju par sanāksmju\n"
 "pieprasījumiem un atbildēm (ieteicams)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1185
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1118
 msgid "My d_elegates only"
 msgstr "Tikai mani d_elegāti"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1192
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1125
 msgid "My delegates a_nd me"
 msgstr "Ma_ni delegāti un es"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1710
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1719
 msgid "Retrieving \"Delegates\" settings"
 msgstr "Saņem “delegāti” iestatījumus"
 
@@ -1006,31 +1002,28 @@ msgstr "Rādīt visu Exchange mapju izmērus"
 msgid "Folder _Sizes"
 msgstr "Mapju _izmēri"
 
-#: ../src/configuration/e-mail-config-ews-gal.c:222
+#: ../src/configuration/e-mail-config-ews-gal.c:224
 msgid "Locating offline address books"
 msgstr "Meklē nesaistes adrešu grāmatas"
 
-#: ../src/configuration/e-mail-config-ews-gal.c:302
+#: ../src/configuration/e-mail-config-ews-gal.c:303
 msgid "Cache o_ffline address book"
 msgstr "Pieglabāt _nesaistes adrešu grāmatas"
 
-#: ../src/configuration/e-mail-config-ews-gal.c:328
+#: ../src/configuration/e-mail-config-ews-gal.c:329
 msgid "Select ad_dress list:"
 msgstr "Izvēlieties a_drešu sarakstu: "
 
-#: ../src/configuration/e-mail-config-ews-gal.c:352
+#: ../src/configuration/e-mail-config-ews-gal.c:353
 msgid "Fetch List"
 msgstr "Saņemt sarakstu"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:432
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:914
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:396
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:931
 msgid "Out of Office"
 msgstr "Ārpus biroja"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:448
-#| msgid ""
-#| "The messages specified below will be automatically sent to each internal "
-#| "and external personal who sends a mail to you."
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:412
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
@@ -1038,68 +1031,59 @@ msgstr ""
 "Zemāk uzrakstītais ziņojums tiks automātiski nosūtīts katrai iekšējai un "
 "ārējai personai, kas nosūtīs jums vēstuli."
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:456
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:421
 msgid "Do _not send Out of Office replies"
 msgstr "_Nesūtīt “Ārpus biroja” atbildes"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:464
-#| msgid "Out of Office"
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:429
 msgid "_Send Out of Office replies"
 msgstr "_Sūtīt “Ārpus biroja” atbildes"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:472
-#| msgid "_Send only during this time period"
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:437
 msgid "Send Out of Office replies only _during this time period:"
 msgstr "Sūtīt “Ārpus biroja” atbil_des tikai šajā laika periodā:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:492
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:457
 msgid "_From:"
 msgstr "_No:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:517
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:482
 msgid "_To:"
 msgstr "_Kam:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:542
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:507
 msgid "I_nternal:"
 msgstr "Ie_kšējs:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:551
-#| msgid "Message to be sent inside organization"
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:516
 msgid "Message to be sent within the organization"
 msgstr "Ziņojums, ko sūtīt organizācijas iekšienē"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:578
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:544
 msgid "E_xternal:"
 msgstr "Ā_rējs:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:586
-#| msgid "Message to be sent outside organization"
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:552
 msgid "Message to be sent outside the organization"
 msgstr "Ziņojums, ko sūtīt ārpus organizācijas"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:596
-#| msgid "Message to be sent outside organization"
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:562
 msgid "Do not reply to senders outside the organization"
 msgstr "Neatbildēt sūtītājiem ārpus organizācijas"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:599
-#| msgid "Message to be sent outside organization"
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:565
 msgid "Reply only to known senders outside the organization"
 msgstr "Atbildēt tikai zināmiem sūtītājiem ārpus organizācijas"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:602
-#| msgid "Message to be sent outside organization"
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:568
 msgid "Reply to any sender outside the organization"
 msgstr "Atbildēt jebkuram sūtītājam ārpus organizācijas"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:996
-#| msgid "Fetching out of office settings..."
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:1003
 msgid "Retrieving \"Out of Office\" settings"
 msgstr "Saņem “ārpus biroja” iestatījumus"
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:1
-#| msgid "Autodiscover failed: %s"
 msgid "Autodiscovery query failed."
 msgstr "Neveiksmīgs automātiskās atklāšanas vaicājums."
 
@@ -1108,14 +1092,10 @@ msgid "The reported error was &quot;{0}&quot;."
 msgstr "Ziņotā kļūda bija “{0}”."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:3
-#| msgid "Locating offline address books"
 msgid "Failed to locate offline address books."
 msgstr "Neizdevās atrast nesaistes adrešu grāmatas."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:4
-#| msgid ""
-#| "Unable to fetch out of office settings: \n"
-#| "%s"
 msgid "Failed to retrieve &quot;Out of Office&quot; settings."
 msgstr "Neizdevās saņemt “ārpus biroja” iestatījumus."
 
@@ -1127,76 +1107,74 @@ msgstr "Neizdevās saņemt “Delegātu” iestatījumus."
 msgid "Your Exchange account \"{0}\" has the status set as \"Out of Office\"."
 msgstr "Jūsu Exchange kontam “{0}” ir iestatīts status “Ārpus biroja”"
 
-#: ../src/server/e-ews-connection.c:709
+#: ../src/server/e-ews-connection.c:720
 msgid "Operation Cancelled"
 msgstr "Darbība atcelta"
 
-#: ../src/server/e-ews-connection.c:779
+#: ../src/server/e-ews-connection.c:790
 msgid "Authentication failed"
 msgstr "Autentifikācija neizdevās"
 
-#: ../src/server/e-ews-connection.c:790
+#: ../src/server/e-ews-connection.c:811
 #, c-format
 msgid "No response: %s"
 msgstr "Nav atbildes — %s"
 
-#: ../src/server/e-ews-connection.c:2374
+#: ../src/server/e-ews-connection.c:2519
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Neizdevās saprast automātiskās atklāšanas atbildes XML"
 
-#: ../src/server/e-ews-connection.c:2381
+#: ../src/server/e-ews-connection.c:2526
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Neizdevās atrast <Autodiscover> elementu"
 
-#: ../src/server/e-ews-connection.c:2392
+#: ../src/server/e-ews-connection.c:2537
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Neizdevās atrast <Response> elementu"
 
-#: ../src/server/e-ews-connection.c:2403
+#: ../src/server/e-ews-connection.c:2548
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Neizdevās atrast <Account> elementu"
 
-#: ../src/server/e-ews-connection.c:2422
+#: ../src/server/e-ews-connection.c:2573
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr "Neizdevās atrast <ASUrl> un <OABUrl> automātiskās atklāšanas atbildē"
 
-#: ../src/server/e-ews-connection.c:2505
+#: ../src/server/e-ews-connection.c:2663
 msgid "URL cannot be NULL"
 msgstr "URL nevar būt NULL"
 
-#: ../src/server/e-ews-connection.c:2513
+#: ../src/server/e-ews-connection.c:2671
 #, c-format
 msgid "URL '%s' is not valid"
 msgstr "URL “%s” nav derīgs"
 
-#: ../src/server/e-ews-connection.c:2614
+#: ../src/server/e-ews-connection.c:2763
 msgid "Email address is missing a domain part"
 msgstr "E-pasta adresei trūkst domēna daļas"
 
-#: ../src/server/e-ews-connection.c:2936
+#: ../src/server/e-ews-connection.c:3085
 msgid "Failed to parse oab XML"
 msgstr "Neizdevās saprast oab XML"
 
-#: ../src/server/e-ews-connection.c:2944
+#: ../src/server/e-ews-connection.c:3093
 msgid "Failed to find <OAB> element\n"
 msgstr "Neizdevās atrast <OAB> elementu\n"
 
-#: ../src/server/e-ews-connection.c:4301
+#: ../src/server/e-ews-connection.c:4347
 msgid "No items found"
 msgstr "Nekas nav atrasts"
 
-#: ../src/server/e-ews-folder.c:634
-#| msgid "Cannot find folder ID for parent folder %s"
+#: ../src/server/e-ews-folder.c:705
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Nevar pievienot mapi, neatbalstīts mapes veids"
 
-#: ../src/server/e-ews-folder.c:639
-#| msgid "Cannot find folder ID for parent folder %s"
+#: ../src/server/e-ews-folder.c:710
 msgid "Cannot add folder, master source not found"
 msgstr "Nevar pievienot mapi, nav atrasts galvenais avots"
 
@@ -1204,70 +1182,3 @@ msgstr "Nevar pievienot mapi, nav atrasts galvenais avots"
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "CreateItem izsaukumam neizdevās atgriezt jaunās vēstules ID"
-
-#~ msgid "Global Address list"
-#~ msgstr "Globāls adrešu saraksts"
-
-#~ msgid "Cannot set Date-Time in Past"
-#~ msgstr "Nevar iestatīt datumu un laiku pagātnē"
-
-#~ msgid "Select a valid time range"
-#~ msgstr "Izvēlieties derīgu laika apgabalu"
-
-#~ msgid ""
-#~ "The messages specified below will be automatically sent to \n"
-#~ " each internal and external personal who sends a mail to you."
-#~ msgstr ""
-#~ "Zemāk uzrakstītais ziņojums tiks automātiski nosūtīts katrai \n"
-#~ "iekšējai vai ārējai personai, kas nosūtīs jums vēstuli."
-
-#~ msgid "Status:"
-#~ msgstr "Statuss:"
-
-#~ msgid "I am _out of the office"
-#~ msgstr "Esmu ārpus biroja"
-
-#~ msgid "I am _in the office"
-#~ msgstr "Esmu birojā"
-
-#~ msgid "Send Message to"
-#~ msgstr "Sūtīt vēstuli"
-
-#~ msgid "Enter Password for %s"
-#~ msgstr "Ievadiet %s paroli"
-
-#~ msgid "Could not get password."
-#~ msgstr "Neizdevās saņemt paroli."
-
-#~ msgid "Could not fetch oal list: "
-#~ msgstr "Neizdevās saņemt oal sarakstu: "
-
-#~ msgid "Fetching..."
-#~ msgstr "Saņem..."
-
-#~ msgid "Select Ad_dress list: "
-#~ msgstr "Izvēlieties a_drešu sarakstu: "
-
-#~ msgid "Fetch _list"
-#~ msgstr "Saņemt _sarakstu:"
-
-#~ msgid "GAL settings"
-#~ msgstr "GAL iestatījumi"
-
-#~ msgid "Exchange Web Services Plugin"
-#~ msgstr "Exchange Web Services spraudnis"
-
-#~ msgid "Insufficient memory"
-#~ msgstr "Nepietiek atmiņas"
-
-#~ msgid "Password"
-#~ msgstr "Parole"
-
-#~ msgid "Code: %d - Unexpected response from server"
-#~ msgstr "Kods: %d — negaidīta atbilde no servera"
-
-#~ msgid "Both email and password must be provided"
-#~ msgstr "Jānorāda gan e-pasts gan parole"
-
-#~ msgid "Wrong email id"
-#~ msgstr "Nepareizs e-pasta id"
