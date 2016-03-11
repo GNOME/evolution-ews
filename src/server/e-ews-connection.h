@@ -85,7 +85,6 @@ typedef enum {
 	EWS_SEARCH_AD_CONTACTS,
 	EWS_SEARCH_CONTACTS,
 	EWS_SEARCH_CONTACTS_AD
-
 } EwsContactsSearchScope;
 
 typedef enum {

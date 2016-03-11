@@ -401,10 +401,13 @@ get_photo (EBookBackendEws *ebews,
 	const EwsId *id;
 	gsize len;
 
+	id = e_ews_item_get_id (item);
+	if (!id)
+		return NULL;
+
 	add_props = e_ews_additional_props_new ();
 	add_props->field_uri = g_strdup ("item:Attachments");
 
-	id = e_ews_item_get_id (item);
 	contact_item_ids = g_slist_prepend (contact_item_ids, g_strdup (id->id));
 	if (!e_ews_connection_get_items_sync (
 			ebews->priv->cnc,
@@ -588,6 +591,9 @@ set_email_address (EContact *contact,
 	const gchar *ea;
 
 	ea = e_ews_item_get_email_address (item, item_field);
+	if (ea && g_str_has_prefix (ea, "SMTP:"))
+		ea = ea + 5;
+
 	if (ea && *ea)
 		e_contact_set (contact, field, ea);
 }
@@ -3371,47 +3377,34 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 
 	for (l = mailboxes, c = contacts; l != NULL; l = g_slist_next (l), c = c ? g_slist_next (c) : NULL) {
 		EwsMailbox *mb = l->data;
-		EwsResolveContact *rc = c ? c->data : NULL;
-		EContact *contact;
+		EEwsItem *contact_item = c ? c->data : NULL;
+		EContact *contact = NULL;
+		const gchar *str;
 
-		contact = e_contact_new ();
+		if (contact_item && e_ews_item_get_item_type (contact_item) == E_EWS_ITEM_TYPE_CONTACT)
+			contact = ebews_get_contact_info (ebews, contact_item, cancellable, NULL);
+
+		if (!contact)
+			contact = e_contact_new ();
 
 		/* We do not get an id from the server, so just using email_id as uid for now */
 		e_contact_set (contact, E_CONTACT_UID, mb->email);
 
-		if (rc && rc->display_name && *rc->display_name)
-			e_contact_set (contact, E_CONTACT_FULL_NAME, rc->display_name);
-		else
+		str = e_contact_get_const (contact, E_CONTACT_FULL_NAME);
+		if (!str || !*str)
 			e_contact_set (contact, E_CONTACT_FULL_NAME, mb->name);
 
-		if (rc && g_hash_table_size (rc->email_addresses) > 0) {
-			GList *emails = g_hash_table_get_values (rc->email_addresses), *iter;
-			GList *use_emails = NULL;
-
-			for (iter = emails; iter; iter = iter->next) {
-				if (iter->data && g_str_has_prefix (iter->data, "SMTP:"))
-					use_emails = g_list_prepend (use_emails, ((gchar *) iter->data) + 5);
-			}
-
-			if (!use_emails)
-				use_emails = g_list_prepend (use_emails, mb->email);
-
-			e_contact_set (contact, E_CONTACT_EMAIL, use_emails);
-
-			g_list_free (use_emails);
-			g_list_free (emails);
-		} else
+		str = e_contact_get_const (contact, E_CONTACT_EMAIL_1);
+		if (!str || !*str)
 			e_contact_set (contact, E_CONTACT_EMAIL_1, mb->email);
 
 		e_data_book_view_notify_update (book_view, contact);
 
-		e_ews_mailbox_free (mb);
-		e_ews_free_resolve_contact (rc);
 		g_object_unref (contact);
 	}
 
-	g_slist_free (mailboxes);
-	g_slist_free (contacts);
+	g_slist_free_full (mailboxes, (GDestroyNotify) e_ews_mailbox_free);
+	g_slist_free_full (contacts, g_object_unref);
  out:
 	e_data_book_view_notify_complete (book_view, error);
 	g_clear_error (&error);

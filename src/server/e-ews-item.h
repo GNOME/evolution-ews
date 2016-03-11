@@ -84,11 +84,6 @@ typedef struct {
 } EwsMailbox;
 
 typedef struct {
-	gchar *display_name;
-	GHashTable *email_addresses;
-} EwsResolveContact;
-
-typedef struct {
 	EwsMailbox *mailbox;
 	gchar *attendeetype;
 	gchar *responsetype;
@@ -217,9 +212,6 @@ EwsMailbox *
 		e_ews_item_mailbox_from_soap_param
 						(ESoapParameter *param);
 void		e_ews_mailbox_free		(EwsMailbox *mailbox);
-EwsResolveContact *
-		e_ews_item_resolve_contact_from_soap_param (ESoapParameter *param);
-void		e_ews_free_resolve_contact	(/*EwsResolveContact * */ gpointer rc);
 
 const GSList *	e_ews_item_get_modified_occurrences
 						(EEwsItem *item);
@@ -307,6 +299,8 @@ void		e_ews_attachment_info_set_uri	(EEwsAttachmentInfo *info,
 const gchar *	e_ews_item_get_fileas		(EEwsItem *item);
 const EwsCompleteName *
 		e_ews_item_get_complete_name	(EEwsItem *item);
+const gchar *	e_ews_item_get_display_name	(EEwsItem *item);
+GHashTable *	e_ews_item_get_email_addresses	(EEwsItem *item);
 const gchar *	e_ews_item_get_email_address	(EEwsItem *item, const gchar *type);
 const EwsAddress *
 		e_ews_item_get_physical_address	(EEwsItem *item, const gchar *type);

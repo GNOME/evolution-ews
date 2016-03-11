@@ -38,6 +38,7 @@ G_DEFINE_TYPE (EEwsItem, e_ews_item, G_TYPE_OBJECT)
 
 struct _EEwsContactFields {
 	gchar *fileas;
+	gchar *display_name;
 	EwsCompleteName *complete_name;
 
 	GHashTable *email_addresses;
@@ -327,6 +328,7 @@ ews_free_contact_fields (struct _EEwsContactFields *con_fields)
 		if (con_fields->im_addresses)
 			g_hash_table_destroy (con_fields->im_addresses);
 
+		g_free (con_fields->display_name);
 		g_free (con_fields->fileas);
 		g_free (con_fields->company_name);
 		g_free (con_fields->department);
@@ -749,6 +751,8 @@ parse_contact_field (EEwsItem *item,
 
 	if (!g_ascii_strcasecmp (name, "Culture")) {
 		priv->contact_fields->culture = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "DisplayName")) {
+		priv->contact_fields->display_name = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "FileAs")) {
 		priv->contact_fields->fileas = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "CompleteName")) {
@@ -1843,6 +1847,24 @@ e_ews_item_get_complete_name (EEwsItem *item)
 	return (const EwsCompleteName *) item->priv->contact_fields->complete_name;
 }
 
+const gchar *
+e_ews_item_get_display_name (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+
+	return item->priv->contact_fields->display_name;
+}
+
+GHashTable *
+e_ews_item_get_email_addresses (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+
+	return item->priv->contact_fields->email_addresses;
+}
+
 /**
  * e_ews_item_get_email_address 
  * @item: 
@@ -2195,42 +2217,6 @@ e_ews_item_get_contact_photo_id (EEwsItem *item)
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
 	return item->priv->contact_photo_id;
-}
-
-EwsResolveContact *
-e_ews_item_resolve_contact_from_soap_param (ESoapParameter *param)
-{
-	ESoapParameter *subparam;
-	EwsResolveContact *rc;
-
-	if (!param)
-		return NULL;
-
-	rc = g_new0 (EwsResolveContact, 1);
-	rc->email_addresses = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
-
-	subparam = e_soap_parameter_get_first_child_by_name (param, "DisplayName");
-	if (subparam)
-		rc->display_name = e_soap_parameter_get_string_value (subparam);
-
-	subparam = e_soap_parameter_get_first_child_by_name (param, "EmailAddresses");
-	if (subparam)
-		parse_entries (rc->email_addresses, subparam, (EwsGetValFunc) e_soap_parameter_get_string_value);
-
-	return rc;
-}
-
-void
-e_ews_free_resolve_contact (gpointer rc)
-{
-	EwsResolveContact *resc = rc;
-
-	if (!resc)
-		return;
-
-	g_free (resc->display_name);
-	g_hash_table_unref (resc->email_addresses);
-	g_free (resc);
 }
 
 /* free returned pointer with e_ews_permission_free() */

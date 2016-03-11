@@ -1259,15 +1259,15 @@ ews_handle_resolution_set_param (ESoapParameter *subparam,
 		node = e_soap_parameter_get_first_child_by_name (subparam, "Mailbox");
 		mb = e_ews_item_mailbox_from_soap_param (node);
 		if (mb) {
-			EwsResolveContact *rc;
+			EEwsItem *contact_item;
 
 			mailboxes = g_slist_prepend (mailboxes, mb);
 
 			/* 'mailboxes' and 'contact_items' match 1:1, but if the contact information
 			 * wasn't found, then NULL is stored in the corresponding position */
 			node = e_soap_parameter_get_first_child_by_name (subparam, "Contact");
-			rc = e_ews_item_resolve_contact_from_soap_param (node);
-			contact_items = g_slist_prepend (contact_items, rc);
+			contact_item = e_ews_item_new_from_soap_parameter (node);
+			contact_items = g_slist_prepend (contact_items, contact_item);
 		}
 	}
 
@@ -5189,7 +5189,7 @@ e_ews_connection_resolve_names_finish (EEwsConnection *cnc,
 	if (contact_items)
 		*contact_items = async_data->items_created;
 	else
-		g_slist_free_full (async_data->items_created, e_ews_free_resolve_contact);
+		g_slist_free_full (async_data->items_created, g_object_unref);
 	*mailboxes = async_data->items;
 
 	return TRUE;
@@ -5273,17 +5273,24 @@ ews_connection_resolve_by_name (EEwsConnection *cnc,
 		    (is_user_name && g_str_equal (usename, mailbox->name)))) {
 			*smtp_address = g_strdup (mailbox->email);
 			break;
-		} else if (contacts && !contacts->next && contacts->data) {
-			const EwsResolveContact *resolved = contacts->data;
-			GList *emails = g_hash_table_get_values (resolved->email_addresses), *iter;
+		} else if (contacts && !contacts->next && contacts->data &&
+			   e_ews_item_get_item_type (contacts->data) == E_EWS_ITEM_TYPE_CONTACT) {
+			EEwsItem *contact_item = contacts->data;
+			GHashTable *addresses_hash = e_ews_item_get_email_addresses (contact_item);
+			GList *emails = addresses_hash ? g_hash_table_get_values (addresses_hash) : NULL, *iter;
+			const gchar *display_name;
 			gboolean found = FALSE;
+
+			display_name = e_ews_item_get_display_name (contact_item);
+			if (!display_name || !*display_name)
+				display_name = e_ews_item_get_fileas (contact_item);
 
 			for (iter = emails; iter && !found; iter = iter->next) {
 				const gchar *it_email = iter->data;
 
 				if (it_email && g_str_has_prefix (it_email, "SMTP:")
 				    && ((!is_user_name && g_str_has_prefix (it_email, usename) && it_email[len] == '@') ||
-				    (is_user_name && g_str_equal (usename, resolved->display_name)))) {
+				    (is_user_name && display_name && g_str_equal (usename, display_name)))) {
 					found = TRUE;
 					break;
 				}
@@ -5294,11 +5301,11 @@ ews_connection_resolve_by_name (EEwsConnection *cnc,
 			if (found) {
 				gint ii;
 
-				for (ii = 0; ii < g_hash_table_size (resolved->email_addresses); ii++) {
+				for (ii = 0; ii < g_hash_table_size (addresses_hash); ii++) {
 					gchar *key, *value;
 
 					key = g_strdup_printf ("EmailAddress%d", ii + 1);
-					value = g_hash_table_lookup (resolved->email_addresses, key);
+					value = g_hash_table_lookup (addresses_hash, key);
 					g_free (key);
 
 					if (value && g_str_has_prefix (value, "SMTP:")) {
@@ -5313,7 +5320,7 @@ ews_connection_resolve_by_name (EEwsConnection *cnc,
 	}
 
 	g_slist_free_full (mailboxes, (GDestroyNotify) e_ews_mailbox_free);
-	g_slist_free_full (contacts, (GDestroyNotify) e_ews_free_resolve_contact);
+	g_slist_free_full (contacts, g_object_unref);
 }
 
 gboolean
@@ -5345,15 +5352,17 @@ e_ews_connection_ex_to_smtp_sync (EEwsConnection *cnc,
 		const EwsMailbox *mailbox = mailboxes->data;
 		if (mailbox->email && *mailbox->email && g_strcmp0 (mailbox->routing_type, "EX") != 0) {
 			*smtp_address = g_strdup (mailbox->email);
-		} else if (contacts && !contacts->next && contacts->data) {
-			const EwsResolveContact *resolved = contacts->data;
+		} else if (contacts && !contacts->next && contacts->data &&
+			   e_ews_item_get_item_type (contacts->data) == E_EWS_ITEM_TYPE_CONTACT) {
+			EEwsItem *contact_item = contacts->data;
+			GHashTable *addresses = e_ews_item_get_email_addresses (contact_item);
 			gint ii;
 
-			for (ii = 0; ii < g_hash_table_size (resolved->email_addresses); ii++) {
+			for (ii = 0; ii < (addresses ? g_hash_table_size (addresses) : 0); ii++) {
 				gchar *key, *value;
 
 				key = g_strdup_printf ("EmailAddress%d", ii + 1);
-				value = g_hash_table_lookup (resolved->email_addresses, key);
+				value = g_hash_table_lookup (addresses, key);
 				g_free (key);
 
 				if (value && g_str_has_prefix (value, "SMTP:")) {
@@ -5366,7 +5375,7 @@ e_ews_connection_ex_to_smtp_sync (EEwsConnection *cnc,
 	}
 
 	g_slist_free_full (mailboxes, (GDestroyNotify) e_ews_mailbox_free);
-	g_slist_free_full (contacts, (GDestroyNotify) e_ews_free_resolve_contact);
+	g_slist_free_full (contacts, g_object_unref);
 
 	if (!*smtp_address) {
 		const gchar *usename;
