@@ -1,0 +1,1277 @@
+# Occitan translatiion for evolution-ews.
+# Copyright (C) 2012 evolution-ews's COPYRIGHT HOLDER
+# This file is distributed under the same license as the evolution-ews package.
+# Cédric Valmary (totenoc.eu) <cvalmary@yahoo.fr>, 2016.
+msgid ""
+msgstr ""
+"Project-Id-Version: evolution-ews master\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-ews&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2016-03-05 18:16+0000\n"
+"PO-Revision-Date: 2016-03-13 14:07+0100\n"
+"Last-Translator: Cédric Valmary (totenoc.eu) <cvalmary@yahoo.fr>\n"
+"Language-Team: Tot En Òc\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Poedit 1.8.4\n"
+"X-Project-Style: gnome\n"
+
+#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:77
+msgid "Exchange Web Services"
+msgstr "Exchange Web Services"
+
+#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:79
+msgid "For accessing Exchange servers using Web Services"
+msgstr "Per accedir als servidors Exchange en utilizant Web Services"
+
+#: ../src/addressbook/e-book-backend-ews.c:1454
+msgid "The backend does not support bulk additions"
+msgstr "Lo motor pren pas en carga los apondons per lòt"
+
+#: ../src/addressbook/e-book-backend-ews.c:1493
+#: ../src/addressbook/e-book-backend-ews.c:1860
+msgid "Cannot save contact list, it's only supported on EWS Server 2010 or later"
+msgstr ""
+
+#: ../src/addressbook/e-book-backend-ews.c:1819
+msgid "The backend does not support bulk modifications"
+msgstr "Lo motor pren pas en carga las modificacions per lòt"
+
+#: ../src/addressbook/e-book-backend-ews.c:2031
+msgid "Wait till syncing is done"
+msgstr "Esperar la fin de la sincronizacion"
+
+#: ../src/addressbook/e-book-backend-ews.c:2514
+#, c-format
+#| msgid "Downloading contacts in %s %d%% completed... "
+msgid "Processing contacts in %s %d%% completed... "
+msgstr "Telecargament dels contactes dins %s en cors, %d%% acabat... "
+
+#: ../src/addressbook/e-book-backend-ews.c:3126
+msgid "Syncing contacts..."
+msgstr "Sincronizacion dels contactes..."
+
+#: ../src/addressbook/e-book-backend-ews.c:3311
+#: ../src/configuracion/e-ews-search-user.c:365
+msgid "Searching..."
+msgstr "Recèrca..."
+
+#: ../src/addressbook/e-book-backend-ews.c:4274
+msgid "Requested to delete an unrelated cursor"
+msgstr ""
+
+#: ../src/calendar/e-cal-backend-ews.c:1317
+msgid "EWS does not support bulk removals"
+msgstr "EWS pren pas en carga les supressions per lòt"
+
+#: ../src/calendar/e-cal-backend-ews.c:1495
+msgid "Unknown error"
+msgstr ""
+
+#: ../src/calendar/e-cal-backend-ews.c:1739
+msgid "EWS does not support bulk additions"
+msgstr "EWS pren pas en carga los apondons per lòt"
+
+#: ../src/calendar/e-cal-backend-ews.c:1944
+msgid "EWS does not support bulk modifications"
+msgstr "EWS pren pas en carga las modificacions per lòt"
+
+#: ../src/calendar/e-cal-backend-ews.c:2370
+#, c-format
+msgid "Cannot find user '%s' between attendees"
+msgstr ""
+
+#: ../src/camel/camel-ews-folder.c:377
+#, c-format
+msgid "Unable to open mimecontent temporary file!"
+msgstr "Impossible de dobrir lo fichièr temporari mimecontent"
+
+#: ../src/camel/camel-ews-folder.c:385
+#, c-format
+msgid "Unable to generate parser from mimecontent!"
+msgstr "Impossible de generar l'analisador a partir de mimecontent"
+
+#: ../src/camel/camel-ews-folder.c:394
+#, c-format
+msgid "Unable to parse meeting request mimecontent!"
+msgstr "Impossible d'analisar la requèsta de réunion mimecontent"
+
+#: ../src/camel/camel-ews-folder.c:453
+#, c-format
+msgid "Unable to create cache file"
+msgstr "Impossible de crear lo fichièr cache"
+
+#: ../src/camel/camel-ews-folder.c:557 ../src/camel/camel-ews-folder.c:649
+#, c-format
+#| msgid "Unable to create cache path"
+msgid "Unable to create cache path '%s': %s"
+msgstr "Impossible de crear lo camin del cache '%s': %s"
+
+#. Translators: The first %s consists of the source file name,
+#. the second %s of the destination file name and
+#. the third %s of the error message.
+#: ../src/camel/camel-ews-folder.c:663
+#, c-format
+#| msgid "Failed to move message cache file"
+msgid "Failed to move message cache file from '%s' to '%s': %s"
+msgstr ""
+
+#: ../src/camel/camel-ews-folder.c:1404
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "Impossible de cargar lo resumit per %s"
+
+#: ../src/camel/camel-ews-folder.c:1943
+#, c-format
+msgid "Cant perform actions on the folder while in offline mode"
+msgstr "Impossible de realizar las accions sul dorsièr en mòde fòra linha"
+
+#: ../src/camel/camel-ews-provider.c:47
+msgid "Checking for new mail"
+msgstr "Verificacion dels messatges novèls"
+
+#: ../src/camel/camel-ews-provider.c:49
+msgid "C_heck for new messages in all folders"
+msgstr "_Verificar la preséncia de messatges novèls dins totes los dorsièrs"
+
+#: ../src/camel/camel-ews-provider.c:51
+msgid "_Listen for server change notifications"
+msgstr ""
+
+#: ../src/camel/camel-ews-provider.c:54
+msgid "Options"
+msgstr "Opcions"
+
+#: ../src/camel/camel-ews-provider.c:56
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr ""
+"_Aplicar los filtres suls messatges novèls dins la Bóstia de recepcion sur ce "
+"servidor"
+
+#: ../src/camel/camel-ews-provider.c:58
+msgid "Check new messages for _Junk contents"
+msgstr "Detectar los _Porrièrs electronics dins los messatges novèls"
+
+#: ../src/camel/camel-ews-provider.c:60
+msgid "Only check for Junk messages in the IN_BOX folder"
+msgstr "Detectar los Porrièrs electronics _solament dins la Bóstia de recepcion"
+
+#: ../src/camel/camel-ews-provider.c:62
+msgid "Automatically synchroni_ze remote mail locally"
+msgstr "_Sincronizar automaticament lo corrièr electronic a distància localement"
+
+#: ../src/camel/camel-ews-provider.c:65
+#| msgid "Configuracion"
+msgid "Connection"
+msgstr "Connexion"
+
+#. Translators: '%s' is preplaced with a widget, where "
+#. * user can select how long the timeout should be.
+#: ../src/camel/camel-ews-provider.c:69
+#, c-format
+msgid "Connection _timeout (in seconds) %s"
+msgstr ""
+
+#: ../src/camel/camel-ews-provider.c:94
+msgid "NTLM"
+msgstr "NTLM"
+
+#: ../src/camel/camel-ews-provider.c:96
+#| msgid ""
+#| "This option will connect to the Exchange server using a plaintext password."
+msgid ""
+"This option will connect to the Exchange server using a plaintext password "
+"with NTLM authentication."
+msgstr ""
+"Aquesta opcion implica una connexion al servidor Exchange en utilizant un "
+"senhal en NTLM."
+
+#: ../src/camel/camel-ews-provider.c:104
+msgid "Basic"
+msgstr "Basic"
+
+#: ../src/camel/camel-ews-provider.c:106
+#| msgid ""
+#| "This option will connect to the Exchange server using a plaintext password."
+msgid ""
+"This option will connect to the Exchange server using a plaintext password "
+"with Basic authentication."
+msgstr ""
+"Aquesta opcion implique una connexion al servidor Exchange en utilizant un "
+"senhal en Basic."
+
+#: ../src/camel/camel-ews-provider.c:114
+msgid "Kerberos"
+msgstr "Kerberos"
+
+#: ../src/camel/camel-ews-provider.c:116
+#| msgid ""
+#| "This option will connect to the Exchange server using a plaintext password."
+msgid ""
+"This option will connect to the Exchange server using a Kerberos/GSSAPI "
+"authentication."
+msgstr ""
+"Aquesta opcion implique una connexion al servidor Exchange en utilizant un "
+"senhal Kerberos."
+
+#: ../src/camel/camel-ews-store.c:332
+#, c-format
+msgid "Session has no storage path"
+msgstr "La session a pas de camin d'emmagazinatge"
+
+#: ../src/camel/camel-ews-store.c:369
+#, c-format
+msgctxt "PublicFolders"
+msgid "%s_%d"
+msgstr "%s_%d"
+
+#: ../src/camel/camel-ews-store.c:498
+#, c-format
+msgctxt "ForeignFolders"
+msgid "%s_%d"
+msgstr "%s_%d"
+
+#: ../src/camel/camel-ews-store.c:644 ../src/camel/camel-ews-store.c:1247
+#| msgid "Fetching out of office settings..."
+msgid "Checking \"Out of Office\" settings"
+msgstr "Recuperacion dels paramètres d'abséncia del burèu"
+
+#: ../src/camel/camel-ews-store.c:1495
+msgid "Updating foreign folder structure"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:1631
+msgid "Updating foreign folders"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:2005
+#, c-format
+msgid "No such folder: %s"
+msgstr "Pas cap de dorsièr d'aqueste tipe : %s"
+
+#: ../src/camel/camel-ews-store.c:2300
+#| msgid "Cant perform actions on the folder while in offline mode"
+msgid "Cannot list EWS public folders in offline mode"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:2373
+#| msgid "Cannot find folder ID for parent folder %s"
+msgid "Cannot find any EWS public folders"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:2482
+#, c-format
+#| msgid "Parent folder %s does not exist"
+msgid "Cannot create folder '%s', folder already exists"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:2497
+#, c-format
+msgid "Parent folder %s does not exist"
+msgstr "Lo dorsièr parent %s existís pas"
+
+#: ../src/camel/camel-ews-store.c:2507
+#, c-format
+msgid ""
+"Cannot create folder under '%s', it is used for folders of other users only"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:2517
+#, c-format
+msgid "Cannot create folder under '%s', it is used for public folders only"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:2621
+#, c-format
+msgid "Folder does not exist"
+msgstr "Lo dorsièr existís pas"
+
+#: ../src/camel/camel-ews-store.c:2631
+#, c-format
+msgid "Cannot remove folder '%s', it is used for folders of other users only"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:2642
+#, c-format
+msgid "Cannot remove folder '%s', it is used for public folders only"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:2798
+#, c-format
+msgid "Folder %s does not exist"
+msgstr "Lo dorsièr %s existís pas"
+
+#: ../src/camel/camel-ews-store.c:2808
+#, c-format
+msgid "No change key record for folder %s"
+msgstr "Aucun enregistrament de modificacion de clau pel dorsièr %s"
+
+#: ../src/camel/camel-ews-store.c:2850
+#, c-format
+msgid "Cannot both rename and move a folder at the same time"
+msgstr "Impossible de renomenar e desplaçar un dorsièr simultanèument"
+
+#: ../src/camel/camel-ews-store.c:2886
+#, c-format
+msgid "Cannot find folder ID for parent folder %s"
+msgstr "Impossible de trobar l'identificacion de dorsièr pel dorsièr parent %s"
+
+#: ../src/camel/camel-ews-store.c:2936 ../src/camel/camel-ews-transport.c:164
+#, c-format
+msgid "Exchange server %s"
+msgstr "Servidor Exchange %s"
+
+#: ../src/camel/camel-ews-store.c:2939
+#, c-format
+msgid "Exchange service for %s on %s"
+msgstr "Servici Exchange per %s sus %s"
+
+#: ../src/camel/camel-ews-store.c:2983
+#, c-format
+#| msgid "Could not load summary for %s"
+msgid "Could not locate Trash folder"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:3043
+#, c-format
+#| msgid "Could not load summary for %s"
+msgid "Could not locate Junk folder"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:3233
+#| msgid "Cant perform actions on the folder while in offline mode"
+msgid "Cannot subscribe EWS folders in offline mode"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:3256
+#, c-format
+msgid "Cannot subscribe folder '%s', no public folder available"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:3266
+#, c-format
+#| msgid "Cannot find folder ID for parent folder %s"
+msgid "Cannot subscribe folder '%s', folder not found"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:3357
+#| msgid "Cant perform actions on the folder while in offline mode"
+msgid "Cannot unsubscribe EWS folders in offline mode"
+msgstr ""
+
+#: ../src/camel/camel-ews-store.c:3474
+#, c-format
+msgid "You must be working online to complete this operation"
+msgstr "Vos cal trabalhar en-linha per acabar aquesta operacion"
+
+#: ../src/camel/camel-ews-store.c:3518 ../src/camel/camel-ews-store.c:3555
+#| msgid "Fetching out of office settings..."
+msgid "Unsetting the \"Out of Office\" status"
+msgstr ""
+
+#: ../src/camel/camel-ews-transport.c:167
+#, c-format
+msgid "Exchange mail delivery via %s"
+msgstr "Liurason de corrièr electronic Exchange per %s"
+
+#: ../src/camel/camel-ews-transport.c:216
+msgid "Cannot send message with no From address"
+msgstr "Impossible de mandar un messatge sens adreça Expeditor"
+
+#: ../src/camel/camel-ews-transport.c:222
+msgid "Exchange server cannot send message with multiple From addresses"
+msgstr ""
+"Lo servidor Exchange pòt pas mandar des messatge amb mantuna adreça Expeditor"
+
+#: ../src/camel/camel-ews-transport.c:233
+msgid "Failed to read From address"
+msgstr "Impossible de legir l'adreça Expeditor"
+
+#: ../src/camel/camel-ews-transport.c:245
+#, c-format
+msgid ""
+"Exchange server cannot send message as '%s', when the account was configured "
+"for address '%s'"
+msgstr ""
+"Lo servidor Exchange pòt pas mandar lo messatge jol nom « %s » mentre que lo "
+"compte es estat configurat amb l'adreça « %s »"
+
+#: ../src/camel/camel-ews-transport.c:259
+#, c-format
+msgid "Service not connected"
+msgstr "Servici non connectat"
+
+#: ../src/collection/e-ews-backend.c:421
+#: ../src/configuracion/e-mail-config-ews-gal.c:276
+msgid "Global Address List"
+msgstr "Lista d'adreças globala"
+
+#: ../src/collection/e-ews-backend.c:857
+#, c-format
+msgid "Could not determine a suitable folder class for a new folder named '%s'"
+msgstr ""
+
+#: ../src/collection/e-ews-backend.c:945
+#, c-format
+msgid "Data source '%s' does not represent an Exchange Web Services folder"
+msgstr ""
+
+#: ../src/configuracion/e-ews-config-utils.c:570
+msgid "Folder"
+msgstr "Dorsièr"
+
+#: ../src/configuracion/e-ews-config-utils.c:580
+msgid "Size"
+msgstr "Talha"
+
+#: ../src/configuracion/e-ews-config-utils.c:618
+#: ../src/configuracion/e-ews-config-utils.c:623
+msgid "Unable to retrieve folder size information"
+msgstr ""
+
+#: ../src/configuracion/e-ews-config-utils.c:743
+msgid "Folder Sizes"
+msgstr ""
+
+#: ../src/configuracion/e-ews-config-utils.c:746
+msgid "_Close"
+msgstr "_Tampar"
+
+#: ../src/configuracion/e-ews-config-utils.c:760
+msgid "Fetching folder list…"
+msgstr ""
+
+#: ../src/configuracion/e-ews-config-utils.c:913
+#, c-format
+msgid "Cannot edit permissions of folder '%s', choose other folder."
+msgstr ""
+
+#: ../src/configuracion/e-ews-config-utils.c:990
+msgid "Folder Sizes..."
+msgstr ""
+
+#: ../src/configuracion/e-ews-config-utils.c:997
+msgid "Subscribe to folder of other user..."
+msgstr ""
+
+#: ../src/configuracion/e-ews-config-utils.c:1006
+#: ../src/configuracion/e-ews-config-utils.c:1310
+#: ../src/configuracion/e-ews-config-utils.c:1341
+#: ../src/configuracion/e-ews-config-utils.c:1372
+#: ../src/configuracion/e-ews-config-utils.c:1403
+msgid "Permissions..."
+msgstr "Permissions..."
+
+#: ../src/configuracion/e-ews-config-utils.c:1008
+msgid "Edit EWS folder permissions"
+msgstr ""
+
+#: ../src/configuracion/e-ews-config-utils.c:1312
+msgid "Edit EWS calendar permissions"
+msgstr ""
+
+#: ../src/configuracion/e-ews-config-utils.c:1343
+msgid "Edit EWS tasks permissions"
+msgstr ""
+
+#: ../src/configuracion/e-ews-config-utils.c:1374
+msgid "Edit EWS memos permissions"
+msgstr ""
+
+#: ../src/configuracion/e-ews-config-utils.c:1405
+msgid "Edit EWS contacts permissions"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:87
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:418
+#| msgid "None"
+msgctxt "PermissionsLevel"
+msgid "None"
+msgstr "Pas cap"
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:88
+msgctxt "PermissionsLevel"
+msgid "Owner"
+msgstr "Proprietari"
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:98
+msgctxt "PermissionsLevel"
+msgid "Publishing Editor"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:107
+msgctxt "PermissionsLevel"
+msgid "Editor"
+msgstr "Editor"
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:115
+msgctxt "PermissionsLevel"
+msgid "Publishing Author"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:122
+msgctxt "PermissionsLevel"
+msgid "Author"
+msgstr "Autor"
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:128
+msgctxt "PermissionsLevel"
+msgid "Nonediting Author"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:133
+msgctxt "PermissionsLevel"
+msgid "Reviewer"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:136
+msgctxt "PermissionsLevel"
+msgid "Contributor"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:139
+msgctxt "PermissionsLevel"
+msgid "Free/Busy time"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:141
+msgctxt "PermissionsLevel"
+msgid "Free/Busy time, subject, location"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:143
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:441
+msgctxt "PermissionsLevel"
+msgid "Custom"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:267
+msgid "Writing folder permissions, please wait..."
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:777
+msgctxt "User"
+msgid "Anonymous"
+msgstr "Anonim"
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:780
+msgctxt "User"
+msgid "Default"
+msgstr "Per defaut"
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:786
+#| msgid "Known"
+msgctxt "User"
+msgid "Unknown"
+msgstr "Desconegut"
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:867
+#: ../src/configuracion/e-ews-search-user.c:431
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:995
+msgid "Name"
+msgstr "Nom"
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:873
+msgid "Permission level"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:925
+msgid "Edit EWS folder permissions..."
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:950
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:638
+msgid "Account:"
+msgstr "Compte :"
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:978
+#| msgid "User_name:"
+msgid "Folder name:"
+msgstr "Dorsièr de l'utilizaire"
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1001
+msgid "Folder ID:"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1065
+msgid "Permissions"
+msgstr "Permissions"
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1087
+msgid "Permi_ssion level:"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1121
+msgctxt "Permissions"
+msgid "Read"
+msgstr "Legir"
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1133
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1200
+#| msgid "None"
+msgctxt "Permissions"
+msgid "None"
+msgstr "Pas cap"
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1139
+msgctxt "Permissions"
+msgid "Free/Busy time"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1144
+msgctxt "Permissions"
+msgid "Free/Busy time, subject, location"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1150
+msgctxt "Permissions"
+msgid "Full Details"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1156
+msgctxt "Permissions"
+msgid "Write"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1168
+msgctxt "Permissions"
+msgid "Create items"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1172
+msgctxt "Permissions"
+msgid "Create subfolders"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1176
+msgctxt "Permissions"
+msgid "Edit own"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1180
+msgctxt "Permissions"
+msgid "Edit all"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1188
+msgctxt "Permissions"
+msgid "Delete items"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1205
+msgctxt "Permissions"
+msgid "Own"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1210
+#| msgid "All"
+msgctxt "Permissions"
+msgid "All"
+msgstr "Totes"
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1216
+msgctxt "Permissions"
+msgid "Other"
+msgstr "Autre"
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1228
+#| msgid "Folder does not exist"
+msgctxt "Permissions"
+msgid "Folder owner"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1232
+#| msgid "Folder does not exist"
+msgctxt "Permissions"
+msgid "Folder contact"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1236
+msgctxt "Permissions"
+msgid "Folder visible"
+msgstr ""
+
+#: ../src/configuracion/e-ews-edit-folder-permissions.c:1309
+msgid "Reading folder permissions, please wait..."
+msgstr ""
+
+#: ../src/configuracion/e-ews-ooo-notificator.c:184
+msgid "Unset on Server"
+msgstr ""
+
+#: ../src/configuracion/e-ews-ooo-notificator.c:185
+#| msgid ""
+#| "Unable to fetch out of office settings: \n"
+#| "%s"
+msgid "Unset the \"Out of Office\" status"
+msgstr ""
+
+#: ../src/configuracion/e-ews-search-user.c:208
+#, c-format
+msgid "No users found, only one contact"
+msgid_plural "No users found, only %d contacts"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ../src/configuracion/e-ews-search-user.c:213
+msgid "No users found"
+msgstr ""
+
+#: ../src/configuracion/e-ews-search-user.c:217
+#, c-format
+msgid "Found one user"
+msgid_plural "Found %d users"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ../src/configuracion/e-ews-search-user.c:223
+#, c-format
+msgid "Found more than 100 users, but showing only first %d"
+msgid_plural "Found more than 100 users, but showing only first %d"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ../src/configuracion/e-ews-search-user.c:357
+#: ../src/configuracion/e-ews-search-user.c:540
+msgid "Search for a user"
+msgstr "Recercar un utilizaire"
+
+#: ../src/configuracion/e-ews-search-user.c:437
+msgid "E-mail"
+msgstr "E-mail"
+
+#: ../src/configuracion/e-ews-search-user.c:474
+msgid "Choose EWS user..."
+msgstr "Causir un utilizaire EWS..."
+
+#: ../src/configuracion/e-ews-search-user.c:497
+#| msgid "Searching..."
+msgid "_Search:"
+msgstr "_Recercar :"
+
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:97
+#: ../src/server/e-ews-folder.c:750
+#, c-format
+#| msgid "Cannot find folder ID for parent folder %s"
+msgid "Cannot add folder, folder already exists as '%s'"
+msgstr "Impossible de trobar l'identificacion de dorsièr, lodorsièr existís %s"
+
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. * Example result: "Mailbox - John Smith"
+#.
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:107
+#, c-format
+msgctxt "ForeignFolder"
+msgid "Mailbox - %s"
+msgstr ""
+
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:275
+#| msgid "Cant perform actions on the folder while in offline mode"
+msgid "Cannot test foreign folder availability while in offline mode"
+msgstr "Impossible de realizar las accions sul dorsièr en mòde fòra linha"
+
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:300
+#, c-format
+msgid "User '%s' was not found on the server"
+msgstr ""
+
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:336
+#, c-format
+msgid "User name '%s' is ambiguous, specify it more precisely, please"
+msgstr ""
+
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:358
+#, c-format
+msgid ""
+"Folder '%s' not found. Either it does not exist or you do not have permission "
+"to access it."
+msgstr ""
+
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:376
+#| msgid "Cannot find folder ID for parent folder %s"
+msgid "Cannot add folder, cannot determine folder's type"
+msgstr ""
+
+#. Translators: This is used to name foreign folder.
+#. * The first '%s' is replaced with user name to whom the folder belongs,
+#. * the second '%s' is replaced with folder name.
+#. * Example result: "John Smith - Calendar"
+#.
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:421
+#, c-format
+msgctxt "ForeignFolder"
+msgid "%s - %s"
+msgstr "%s - %s"
+
+#. convert well-known names to their non-localized form
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:515
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:723
+msgid "Inbox"
+msgstr "Recepcion"
+
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:517
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:724
+msgid "Contacts"
+msgstr "Contactes"
+
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:519
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:725
+msgid "Calendar"
+msgstr "Calendièr"
+
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:521
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:726
+msgid "Memos"
+msgstr "Memos"
+
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:523
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:727
+msgid "Tasks"
+msgstr "Prètzfaches"
+
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:540
+#, c-format
+msgid "Testing availability of folder '%s' of user '%s', please wait..."
+msgstr ""
+
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:617
+msgid "Subscribe to folder of other EWS user..."
+msgstr ""
+
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:668
+msgid "User"
+msgstr "Utilizaire"
+
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:675
+#| msgid "User_name:"
+msgid "_User:"
+msgstr "_Utilizaire :"
+
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:690
+msgid "C_hoose..."
+msgstr "_Causir..."
+
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:706
+#| msgid "User_name:"
+msgid "_Folder name:"
+msgstr "_Nom del dorsièr :"
+
+#: ../src/configuracion/e-ews-subscribe-foreign-folder.c:736
+msgid "Include _subfolders"
+msgstr "Inclure los _sosdorsièrs"
+
+#: ../src/configuracion/e-mail-config-ews-autodiscover.c:214
+msgid "Querying Autodiscover service"
+msgstr "Interrogacion del servici Autodesdobèrta"
+
+#: ../src/configuracion/e-mail-config-ews-autodiscover.c:311
+msgid "Fetch _URL"
+msgstr "Recuperar l'_URL"
+
+#: ../src/configuracion/e-mail-config-ews-backend.c:140
+msgid "Configuracion"
+msgstr "Configuracion"
+
+#: ../src/configuracion/e-mail-config-ews-backend.c:158
+msgid "User_name:"
+msgstr "_Nom d'utilizaire :"
+
+#: ../src/configuracion/e-mail-config-ews-backend.c:172
+msgid "_Host URL:"
+msgstr "URL _òste :"
+
+#: ../src/configuracion/e-mail-config-ews-backend.c:191
+msgid "OAB U_RL:"
+msgstr "U_RL OAB :"
+
+#: ../src/configuracion/e-mail-config-ews-backend.c:205
+msgid "Open _Mailbox of other user"
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-backend.c:239
+#| msgid "Searching..."
+msgid "S_earch..."
+msgstr "Re_cercar..."
+
+#: ../src/configuracion/e-mail-config-ews-backend.c:250
+msgid "Authentication"
+msgstr "Autentificacion"
+
+#: ../src/configuracion/e-mail-config-ews-backend.c:390
+msgid "Host URL cannot be empty"
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-backend.c:395
+msgid "User name cannot be empty"
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:419
+msgctxt "PermissionsLevel"
+msgid "Reviewer (can read items)"
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:420
+msgctxt "PermissionsLevel"
+msgid "Author (can read and create items)"
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:421
+msgctxt "PermissionsLevel"
+msgid "Editor (can read, create and modify items)"
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:526
+msgid "Delegate permissions"
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:544
+msgid "C_alendar"
+msgstr "C_alendièr"
+
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:547
+msgid "_Delegate receives copies of meeting-related messages sent to me"
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:552
+msgid "_Tasks"
+msgstr "Prè_tzfaches"
+
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:555
+msgid "_Inbox"
+msgstr "Recepc_ion"
+
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:558
+msgid "C_ontacts"
+msgstr "C_ontactes"
+
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:561
+msgid "_Notes"
+msgstr "_Nòtas"
+
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:564
+msgid "_Jornal"
+msgstr "_Jornal"
+
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:567
+#, c-format
+msgid "Delegate '%s' has the following permissions"
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:585
+msgid "Delegate can see my _private items"
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:907
+msgid "Retrieving current user permissions, please wait..."
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:1027
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:1647
+msgid "Delegates"
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:1051
+msgid ""
+"Delegates can send items on your behalf, including creating and responding to "
+"meeting requests. If you want to grant folder permissions without giving send-"
+"on-behalf-of permissions, close this dialog box, right-click the folder, click "
+"Permissions and change the options there."
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:1101
+msgid ""
+"Deliver meeting requests addressed to me and responses to meeting requests "
+"where I am the organizer to:"
+msgstr ""
+
+#. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:1111
+msgid ""
+"My delegates only, but _send a copy of meeting requests\n"
+"and responses to me (recommended)"
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:1118
+msgid "My d_elegates only"
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:1125
+msgid "My delegates a_nd me"
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-delegates-page.c:1719
+msgid "Retrieving \"Delegates\" settings"
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-folder-sizes-page.c:195
+#: ../src/configuracion/e-mail-config-ews-folder-sizes-page.c:257
+msgid "EWS Settings"
+msgstr "Paramètres EWS"
+
+#: ../src/configuracion/e-mail-config-ews-folder-sizes-page.c:202
+msgid "View the size of all Exchange folders"
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-folder-sizes-page.c:206
+msgid "Folder _Sizes"
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-gal.c:224
+msgid "Locating offline address books"
+msgstr "Localizacion des quasernets d'adreças fòra linha"
+
+#: ../src/configuracion/e-mail-config-ews-gal.c:303
+msgid "Cache o_ffline address book"
+msgstr "Metre lo quasernet d'adreças fòra-li_gne en cache"
+
+#: ../src/configuracion/e-mail-config-ews-gal.c:329
+msgid "Select ad_dress list:"
+msgstr "Seleccionar la lista d'a_dresses :"
+
+#: ../src/configuracion/e-mail-config-ews-gal.c:353
+msgid "Fetch List"
+msgstr "Recuperar la lista"
+
+#: ../src/configuracion/e-mail-config-ews-ooo-page.c:396
+#: ../src/configuracion/e-mail-config-ews-ooo-page.c:931
+msgid "Out of Office"
+msgstr "Absent del burèu"
+
+#: ../src/configuracion/e-mail-config-ews-ooo-page.c:412
+#| msgid ""
+#| "The messages specified below will be automatically sent to each internal "
+#| "and external personal who sends a mail to you."
+msgid ""
+"The messages specified below will be automatically sent to each internal and "
+"external person who sends a mail to you."
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-ooo-page.c:421
+msgid "Do _not send Out of Office replies"
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-ooo-page.c:429
+#| msgid "Out of Office"
+msgid "_Send Out of Office replies"
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-ooo-page.c:437
+#| msgid "_Send only during this time period"
+msgid "Send Out of Office replies only _during this time period:"
+msgstr ""
+
+#: ../src/configuracion/e-mail-config-ews-ooo-page.c:457
+msgid "_From:"
+msgstr "_De :"
+
+#: ../src/configuracion/e-mail-config-ews-ooo-page.c:482
+msgid "_To:"
+msgstr "_A :"
+
+#: ../src/configuracion/e-mail-config-ews-ooo-page.c:507
+msgid "I_nternal:"
+msgstr "I_ntèrne :"
+
+#: ../src/configuracion/e-mail-config-ews-ooo-page.c:516
+#| msgid "Message to be sent inside organization"
+msgid "Message to be sent within the organization"
+msgstr "Messatge de mandar a l'interior de la societat"
+
+#: ../src/configuracion/e-mail-config-ews-ooo-page.c:544
+msgid "E_xternal:"
+msgstr "E_xtèrne :"
+
+#: ../src/configuracion/e-mail-config-ews-ooo-page.c:552
+#| msgid "Message to be sent outside organization"
+msgid "Message to be sent outside the organization"
+msgstr "Messatge de mandar a l'exterior de la societat"
+
+#: ../src/configuracion/e-mail-config-ews-ooo-page.c:562
+#| msgid "Message to be sent outside organization"
+msgid "Do not reply to senders outside the organization"
+msgstr "Messatge de mandar a l'exterior de la societat"
+
+#: ../src/configuracion/e-mail-config-ews-ooo-page.c:565
+#| msgid "Message to be sent outside organization"
+msgid "Reply only to known senders outside the organization"
+msgstr "Messatge de mandar a l'exterior de la societat"
+
+#: ../src/configuracion/e-mail-config-ews-ooo-page.c:568
+#| msgid "Message to be sent outside organization"
+msgid "Reply to any sender outside the organization"
+msgstr "Messatge de mandar a l'exterior de la societat"
+
+#: ../src/configuracion/e-mail-config-ews-ooo-page.c:1003
+#| msgid "Fetching out of office settings..."
+msgid "Retrieving \"Out of Office\" settings"
+msgstr "Recuperacion dels paramètres d'abséncia del burèu"
+
+#: ../src/configuracion/module-ews-configuracion.error.xml.h:1
+#| msgid "Querying Autodiscover service"
+msgid "Autodiscovery query failed."
+msgstr "Interrogacion del servici Autodesdobèrta."
+
+#: ../src/configuracion/module-ews-configuracion.error.xml.h:2
+msgid "The reported error was &quot;{0}&quot;."
+msgstr ""
+
+#: ../src/configuracion/module-ews-configuracion.error.xml.h:3
+#| msgid "Locating offline address books"
+msgid "Failed to locate offline address books."
+msgstr "Localizacion des quasernets d'adreças fòra linha."
+
+#: ../src/configuracion/module-ews-configuracion.error.xml.h:4
+#| msgid ""
+#| "Unable to fetch out of office settings: \n"
+#| "%s"
+msgid "Failed to retrieve &quot;Out of Office&quot; settings."
+msgstr "Impossible de recuperar los paramètres d'abséncia del burèu."
+
+#: ../src/configuracion/module-ews-configuracion.error.xml.h:5
+msgid "Failed to retrieve &quot;Delegates&quot; settings."
+msgstr ""
+
+#: ../src/configuracion/module-ews-configuracion.error.xml.h:6
+msgid "Your Exchange account \"{0}\" has the status set as \"Out of Office\"."
+msgstr ""
+
+#: ../src/server/e-ews-connection.c:720
+msgid "Operation Cancelled"
+msgstr "Operacion anullada"
+
+#: ../src/server/e-ews-connection.c:790
+msgid "Authentication failed"
+msgstr "Fracàs d'autentificacion"
+
+#: ../src/server/e-ews-connection.c:811
+#, c-format
+msgid "No response: %s"
+msgstr "Aucune responsa : %s"
+
+#: ../src/server/e-ews-connection.c:2519
+#, c-format
+msgid "Failed to parse autodiscover response XML"
+msgstr "Fracàs d'analisi de la responsa d'autodesdobèrta XML"
+
+#: ../src/server/e-ews-connection.c:2526
+#, c-format
+msgid "Failed to find <Autodiscover> element"
+msgstr "Fracàs de l'obtencion de l'element <Autodiscover>"
+
+#: ../src/server/e-ews-connection.c:2537
+#, c-format
+msgid "Failed to find <Response> element"
+msgstr "Fracàs de l'obtencion de l'element <Response>"
+
+#: ../src/server/e-ews-connection.c:2548
+#, c-format
+msgid "Failed to find <Account> element"
+msgstr "Fracàs de l'obtencion de l'element <Account>"
+
+#: ../src/server/e-ews-connection.c:2573
+#, c-format
+msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
+msgstr ""
+"Fracàs de l'obtencion de <ASUrl> e <OABUrl> dins la responsa d'autodesdobèrta"
+
+#: ../src/server/e-ews-connection.c:2663
+msgid "URL cannot be NULL"
+msgstr ""
+
+#: ../src/server/e-ews-connection.c:2671
+#, c-format
+msgid "URL '%s' is not valid"
+msgstr ""
+
+#: ../src/server/e-ews-connection.c:2763
+msgid "Email address is missing a domain part"
+msgstr "Manca una partida domeni a l'adreça electronica"
+
+#: ../src/server/e-ews-connection.c:3085
+msgid "Failed to parse oab XML"
+msgstr "Fracàs d'analisi oab XML"
+
+#: ../src/server/e-ews-connection.c:3093
+msgid "Failed to find <OAB> element\n"
+msgstr "Fracàs de l'obtencion de l'element <OAB>\n"
+
+#: ../src/server/e-ews-connection.c:4347
+msgid "No items found"
+msgstr ""
+
+#: ../src/server/e-ews-folder.c:705
+#| msgid "Cannot find folder ID for parent folder %s"
+msgid "Cannot add folder, unsupported folder type"
+msgstr ""
+
+#: ../src/server/e-ews-folder.c:710
+#| msgid "Cannot find folder ID for parent folder %s"
+msgid "Cannot add folder, master source not found"
+msgstr ""
+
+#: ../src/utils/ews-camel-common.c:361
+#, c-format
+msgid "CreateItem call failed to return ID for new message"
+msgstr ""
+"L'apèl CreateItem a pas capitat de renviar un identificant pel novèl messatge"
+
+#~ msgid "Global Address list"
+#~ msgstr "Lista d'adreças globala"
+
+#~ msgid "Cannot set Date-Time in Past"
+#~ msgstr "Impossible de definir Date-Ora dins lo passat"
+
+#~ msgid "Select a valid time range"
+#~ msgstr "Seleccionar un periòde temporal valide"
+
+#~ msgid ""
+#~ "The messages specified below will be automatically sent to \n"
+#~ " each internal and external personal who sends a mail to you."
+#~ msgstr ""
+#~ "Les messages especificats ci-dessous seràn automaticament mandats a \n"
+#~ " cada personal interne e externe qui vous manda un corrièr electronic."
+
+#~ msgid "Status:"
+#~ msgstr "Estatut :"
+
+#~ msgid "I am _out of the office"
+#~ msgstr "Soi _absent del burèu"
+
+#~ msgid "I am _in the office"
+#~ msgstr "Soi al _burèu"
+
+#~ msgid "Send Message to"
+#~ msgstr "Mandar lo messatge a"
+
+#~ msgid "Enter Password for %s"
+#~ msgstr "Sasissètz lo senhal per %s"
+
+#~ msgid "Could not get password."
+#~ msgstr "Impossible d'obténer lo senhal."
+
+#~ msgid "Could not fetch oal list: "
+#~ msgstr "Impossible de recuperar la lista oal : "
+
+#~ msgid "Fetching..."
+#~ msgstr "Recuperacion..."
+
+#~ msgid "Select Ad_dress list: "
+#~ msgstr "Seleccionar la lista d'a_dresses : "
+
+#~ msgid "Fetch _list"
+#~ msgstr "Recuperar la _liste"
+
+#~ msgid "GAL settings"
+#~ msgstr "Paramètres GAL"
+
+#~ msgid "Exchange Web Services Plugin"
+#~ msgstr "Empeuton Exchange Web Services"
+
+#~ msgid "Insufficient memory"
+#~ msgstr "Memòria insuffisante"
+
+#~ msgid "Password"
+#~ msgstr "Senhal"
