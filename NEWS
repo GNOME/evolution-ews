@@ -1,3 +1,15 @@
+Evolution-EWS 3.19.92 2016-03-14
+--------------------------------
+
+Bug Fixes:
+	Bug 763430 - Show additional GAL Attributes in Contacts (Milan Crha)
+
+Translations:
+	Balázs Úr (hu)
+	Rūdolfs Mazurs (lv)
+	Matej Urbančič (sl)
+	Cédric Valmary (oc)
+
 Evolution-EWS 3.19.91 2016-02-29
 --------------------------------
 
