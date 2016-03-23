@@ -25,6 +25,7 @@
 #define E_EWS_MESSAGE_H
 
 #include "e-soap-message.h"
+#include "camel-ews-settings.h"
 
 G_BEGIN_DECLS
 
@@ -40,7 +41,11 @@ typedef enum {
 
 void		e_ews_message_attach_chunk_allocator
 						(SoupMessage *message);
-ESoapMessage *	e_ews_message_new_with_header	(const gchar *uri,
+void		e_ews_message_set_user_agent_header
+						(SoupMessage *message,
+						 CamelEwsSettings *settings);
+ESoapMessage *	e_ews_message_new_with_header	(CamelEwsSettings *settings,
+						 const gchar *uri,
 						 const gchar *impersonate_user,
 						 const gchar *method_name,
 						 const gchar *attribute_name,

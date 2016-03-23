@@ -128,6 +128,18 @@ gchar *		camel_ews_settings_dup_impersonate_user
 void		camel_ews_settings_set_impersonate_user
 						(CamelEwsSettings *settings,
 						 const gchar *impersonate_user);
+gboolean	camel_ews_settings_get_override_user_agent
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_override_user_agent
+						(CamelEwsSettings *settings,
+						 gboolean override_user_agent);
+const gchar *	camel_ews_settings_get_user_agent
+						(CamelEwsSettings *settings);
+gchar *		camel_ews_settings_dup_user_agent
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_user_agent
+						(CamelEwsSettings *settings,
+						 const gchar *user_agent);
 
 G_END_DECLS
 

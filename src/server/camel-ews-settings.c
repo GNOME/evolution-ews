@@ -43,6 +43,8 @@ struct _CamelEwsSettingsPrivate {
 	gchar *oal_selected;
 	guint timeout;
 	gchar *impersonate_user;
+	gboolean override_user_agent;
+	gchar *user_agent;
 };
 
 enum {
@@ -64,7 +66,9 @@ enum {
 	PROP_TIMEOUT,
 	PROP_USER,
 	PROP_USE_IMPERSONATION,
-	PROP_IMPERSONATE_USER
+	PROP_IMPERSONATE_USER,
+	PROP_OVERRIDE_USER_AGENT,
+	PROP_USER_AGENT
 };
 
 G_DEFINE_TYPE_WITH_CODE (
@@ -217,6 +221,18 @@ ews_settings_set_property (GObject *object,
 				CAMEL_EWS_SETTINGS (object),
 				g_value_get_string (value));
 			return;
+
+		case PROP_OVERRIDE_USER_AGENT:
+			camel_ews_settings_set_override_user_agent (
+				CAMEL_EWS_SETTINGS (object),
+				g_value_get_boolean (value));
+			return;
+
+		case PROP_USER_AGENT:
+			camel_ews_settings_set_user_agent (
+				CAMEL_EWS_SETTINGS (object),
+				g_value_get_string (value));
+			return;
 	}
 
 	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -352,6 +368,20 @@ ews_settings_get_property (GObject *object,
 			g_value_take_string (
 				value,
 				camel_ews_settings_dup_impersonate_user (
+				CAMEL_EWS_SETTINGS (object)));
+			return;
+
+		case PROP_OVERRIDE_USER_AGENT:
+			g_value_set_boolean (
+				value,
+				camel_ews_settings_get_override_user_agent (
+				CAMEL_EWS_SETTINGS (object)));
+			return;
+
+		case PROP_USER_AGENT:
+			g_value_take_string (
+				value,
+				camel_ews_settings_dup_user_agent (
 				CAMEL_EWS_SETTINGS (object)));
 			return;
 	}
@@ -573,6 +603,30 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 			"Impersonate User",
 			"Impersonate User",
 			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_OVERRIDE_USER_AGENT,
+		g_param_spec_boolean (
+			"override-user-agent",
+			"Override User Agent",
+			"Whether to override User-Agent header",
+			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_USER_AGENT,
+		g_param_spec_string (
+			"user-agent",
+			"User Agent",
+			"User-Agent header value to use, if override-user-agent is set to TRUE",
+			"Microsoft Office/14.0 (Windows NT ,5.1; Microsoft Outlook 14.0.4734; Pro)",
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
@@ -1144,4 +1198,73 @@ camel_ews_settings_set_impersonate_user (CamelEwsSettings *settings,
 	g_mutex_unlock (&settings->priv->property_lock);
 
 	g_object_notify (G_OBJECT (settings), "impersonate-user");
+}
+
+gboolean
+camel_ews_settings_get_override_user_agent (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), FALSE);
+
+	return settings->priv->override_user_agent;
+}
+
+void
+camel_ews_settings_set_override_user_agent (CamelEwsSettings *settings,
+					    gboolean override_user_agent)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	if ((settings->priv->override_user_agent ? 1 : 0) == (override_user_agent ? 1 : 0))
+		return;
+
+	settings->priv->override_user_agent = override_user_agent;
+
+	g_object_notify (G_OBJECT (settings), "override-user-agent");
+}
+
+const gchar *
+camel_ews_settings_get_user_agent (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
+
+	return settings->priv->user_agent;
+}
+
+gchar *
+camel_ews_settings_dup_user_agent (CamelEwsSettings *settings)
+{
+	const gchar *protected;
+	gchar *duplicate;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
+
+	g_mutex_lock (&settings->priv->property_lock);
+
+	protected = camel_ews_settings_get_user_agent (settings);
+	duplicate = g_strdup (protected);
+
+	g_mutex_unlock (&settings->priv->property_lock);
+
+	return duplicate;
+}
+
+void
+camel_ews_settings_set_user_agent (CamelEwsSettings *settings,
+				   const gchar *user_agent)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	g_mutex_lock (&settings->priv->property_lock);
+
+	if (g_strcmp0 (settings->priv->user_agent, user_agent) == 0) {
+		g_mutex_unlock (&settings->priv->property_lock);
+		return;
+	}
+
+	g_free (settings->priv->user_agent);
+	settings->priv->user_agent = e_util_strdup_strip (user_agent);
+
+	g_mutex_unlock (&settings->priv->property_lock);
+
+	g_object_notify (G_OBJECT (settings), "user-agent");
 }

@@ -67,6 +67,9 @@ static CamelProviderConfEntry ews_conf_entries[] = {
 	  /* Translators: '%s' is preplaced with a widget, where "
 	   * user can select how long the timeout should be. */
 	  N_("Connection _timeout (in seconds) %s"), "0:1:0:32768" },
+	{ CAMEL_PROVIDER_CONF_CHECKBOX, "override-user-agent", NULL,
+	  N_("Override _User-Agent header value"), "0" },
+	{ CAMEL_PROVIDER_CONF_ENTRY, "user-agent", "override-user-agent", "" },
 	{ CAMEL_PROVIDER_CONF_SECTION_END },
 
 	{ CAMEL_PROVIDER_CONF_END }

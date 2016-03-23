@@ -83,8 +83,31 @@ convert_server_version_to_string (EEwsServerVersion version)
 	return "Exchange2007";
 }
 
+void
+e_ews_message_set_user_agent_header (SoupMessage *message,
+				     CamelEwsSettings *settings)
+{
+	g_return_if_fail (SOUP_IS_MESSAGE (message));
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	if (camel_ews_settings_get_override_user_agent (settings)) {
+		gchar *user_agent;
+
+		user_agent = camel_ews_settings_dup_user_agent (settings);
+
+		if (user_agent && *user_agent) {
+			soup_message_headers_append (message->request_headers, "User-Agent", user_agent);
+		}
+
+		g_free (user_agent);
+	} else {
+		soup_message_headers_append (message->request_headers, "User-Agent", "Evolution/" VERSION);
+	}
+}
+
 ESoapMessage *
-e_ews_message_new_with_header (const gchar *uri,
+e_ews_message_new_with_header (CamelEwsSettings *settings,
+			       const gchar *uri,
                                const gchar *impersonate_user,
                                const gchar *method_name,
                                const gchar *attribute_name,
@@ -110,9 +133,7 @@ e_ews_message_new_with_header (const gchar *uri,
 	soup_message_headers_append (
 		SOUP_MESSAGE (msg)->request_headers,
 		"Content-Type", "text/xml; charset=utf-8");
-	soup_message_headers_append (
-		SOUP_MESSAGE (msg)->request_headers,
-		"User-Agent", "Evolution/" VERSION);
+	e_ews_message_set_user_agent_header (SOUP_MESSAGE (msg), settings);
 	soup_message_headers_append (
 		SOUP_MESSAGE (msg)->request_headers,
 		"Connection", "Keep-Alive");

@@ -2651,7 +2651,8 @@ static void post_restarted (SoupMessage *msg, gpointer data)
 }
 
 static SoupMessage *
-e_ews_get_msg_for_url (const gchar *url,
+e_ews_get_msg_for_url (CamelEwsSettings *settings,
+		       const gchar *url,
                        xmlOutputBuffer *buf,
                        GError **error)
 {
@@ -2674,9 +2675,7 @@ e_ews_get_msg_for_url (const gchar *url,
 
 	e_ews_message_attach_chunk_allocator (msg);
 
-	soup_message_headers_append (
-		msg->request_headers,
-		"User-Agent", "libews/0.1");
+	e_ews_message_set_user_agent_header (msg, settings);
 
 	if (buf != NULL) {
 		soup_message_set_request (
@@ -2824,10 +2823,10 @@ e_ews_autodiscover_ws_url (CamelEwsSettings *settings,
 		simple, ad, (GDestroyNotify) autodiscover_data_free);
 
 	/* Passing a NULL URL string returns NULL. */
-	ad->msgs[0] = e_ews_get_msg_for_url (url1, buf, &error);
-	ad->msgs[1] = e_ews_get_msg_for_url (url2, buf, NULL);
-	ad->msgs[2] = e_ews_get_msg_for_url (url3, buf, NULL);
-	ad->msgs[3] = e_ews_get_msg_for_url (url4, buf, NULL);
+	ad->msgs[0] = e_ews_get_msg_for_url (settings, url1, buf, &error);
+	ad->msgs[1] = e_ews_get_msg_for_url (settings, url2, buf, NULL);
+	ad->msgs[2] = e_ews_get_msg_for_url (settings, url3, buf, NULL);
+	ad->msgs[3] = e_ews_get_msg_for_url (settings, url4, buf, NULL);
 
 	/* These have to be submitted only after they're both set in ad->msgs[]
 	 * or there will be races with fast completion */
@@ -3180,7 +3179,7 @@ e_ews_connection_get_oal_list (EEwsConnection *cnc,
 
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
-	soup_message = e_ews_get_msg_for_url (cnc->priv->uri, NULL, &error);
+	soup_message = e_ews_get_msg_for_url (cnc->priv->settings, cnc->priv->uri, NULL, &error);
 
 	simple = g_simple_async_result_new (
 		G_OBJECT (cnc), callback, user_data,
@@ -3301,7 +3300,7 @@ e_ews_connection_get_oal_detail (EEwsConnection *cnc,
 
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
-	soup_message = e_ews_get_msg_for_url (cnc->priv->uri, NULL, &error);
+	soup_message = e_ews_get_msg_for_url (cnc->priv->settings, cnc->priv->uri, NULL, &error);
 
 	simple = g_simple_async_result_new (
 		G_OBJECT (cnc), callback, user_data,
@@ -3514,7 +3513,7 @@ e_ews_connection_download_oal_file (EEwsConnection *cnc,
 
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
-	soup_message = e_ews_get_msg_for_url (cnc->priv->uri, NULL, &error);
+	soup_message = e_ews_get_msg_for_url (cnc->priv->settings, cnc->priv->uri, NULL, &error);
 
 	simple = g_simple_async_result_new (
 		G_OBJECT (cnc), callback, user_data,
@@ -3747,6 +3746,7 @@ e_ews_connection_sync_folder_items (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"SyncFolderItems",
@@ -3941,6 +3941,7 @@ e_ews_connection_find_folder_items (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"FindItem",
@@ -4073,6 +4074,7 @@ e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"SyncFolderHierarchy",
@@ -4257,6 +4259,7 @@ e_ews_connection_get_items (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"GetItem",
@@ -4485,6 +4488,7 @@ e_ews_connection_delete_items (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"DeleteItem",
@@ -4549,6 +4553,7 @@ e_ews_connection_delete_item (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"DeleteItem",
@@ -4792,6 +4797,7 @@ e_ews_connection_update_items (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"UpdateItem",
@@ -4956,6 +4962,7 @@ e_ews_connection_create_items (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"CreateItem",
@@ -5119,6 +5126,7 @@ e_ews_connection_resolve_names (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"ResolveNames",
@@ -5415,6 +5423,7 @@ e_ews_connection_expand_dl (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"ExpandDL",
@@ -5568,6 +5577,7 @@ e_ews_connection_update_folder (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"UpdateFolder",
@@ -5700,6 +5710,7 @@ e_ews_connection_move_folder (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"MoveFolder",
@@ -5812,6 +5823,7 @@ e_ews_connection_get_folder (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"GetFolder",
@@ -5933,6 +5945,7 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"CreateFolder",
@@ -6092,6 +6105,7 @@ e_ews_connection_move_items (EEwsConnection *cnc,
 
 	if (docopy)
 		msg = e_ews_message_new_with_header (
+				cnc->priv->settings,
 				cnc->priv->uri,
 				cnc->priv->impersonate_user,
 				"CopyItem",
@@ -6103,6 +6117,7 @@ e_ews_connection_move_items (EEwsConnection *cnc,
 				TRUE);
 	else
 		msg = e_ews_message_new_with_header (
+				cnc->priv->settings,
 				cnc->priv->uri,
 				cnc->priv->impersonate_user,
 				"MoveItem",
@@ -6275,6 +6290,7 @@ e_ews_connection_delete_folder (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"DeleteFolder",
@@ -6438,6 +6454,7 @@ e_ews_connection_empty_folder (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"EmptyFolder",
@@ -6705,6 +6722,7 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
 		simple, async_data, (GDestroyNotify) async_data_free);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"CreateAttachment",
@@ -6889,6 +6907,7 @@ e_ews_connection_delete_attachments (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"DeleteAttachment",
@@ -7079,6 +7098,7 @@ e_ews_connection_get_attachments (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"GetAttachment",
@@ -7355,6 +7375,7 @@ e_ews_connection_get_free_busy (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"GetUserAvailabilityRequest",
@@ -7631,6 +7652,7 @@ e_ews_connection_get_delegate (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"GetDelegate",
@@ -7809,6 +7831,7 @@ e_ews_connection_add_delegate (EEwsConnection *cnc,
 	g_return_if_fail (delegates != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"AddDelegate",
@@ -7940,6 +7963,7 @@ e_ews_connection_remove_delegate (EEwsConnection *cnc,
 	g_return_if_fail (delegate_ids != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"RemoveDelegate",
@@ -8051,6 +8075,7 @@ e_ews_connection_update_delegate (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"UpdateDelegate",
@@ -8245,6 +8270,7 @@ e_ews_connection_get_folder_permissions (EEwsConnection *cnc,
 	g_return_if_fail (folder_id != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"GetFolder",
@@ -8364,6 +8390,7 @@ e_ews_connection_set_folder_permissions (EEwsConnection *cnc,
 	g_return_if_fail (permissions != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"UpdateFolder",
@@ -8612,6 +8639,7 @@ e_ews_connection_get_password_expiration (EEwsConnection *cnc,
 	EwsAsyncData *async_data;
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"GetPasswordExpirationDate",
@@ -8776,6 +8804,7 @@ e_ews_connection_get_folder_info (EEwsConnection *cnc,
 	g_return_if_fail (folder_id != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"GetFolder",
@@ -8971,6 +9000,7 @@ e_ews_connection_find_folder (EEwsConnection *cnc,
 	g_return_if_fail (cnc != NULL);
 
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"FindFolder",
@@ -9153,6 +9183,7 @@ e_ews_connection_query_auth_methods (EEwsConnection *cnc,
 
 	/* use some simple operation to get WWW-Authenticate headers from the server */
 	msg = e_ews_message_new_with_header (
+			cnc->priv->settings,
 			cnc->priv->uri,
 			cnc->priv->impersonate_user,
 			"GetFolder",
@@ -9931,6 +9962,7 @@ e_ews_connection_get_server_time_zones (EEwsConnection *cnc,
 	}
 
 	msg = e_ews_message_new_with_header (
+		cnc->priv->settings,
 		cnc->priv->uri,
 		cnc->priv->impersonate_user,
 		"GetServerTimeZones",

@@ -302,6 +302,7 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 	ESoapMessage *msg;
 	ESoapResponse *response;
 	ESoapParameter *param, *subparam;
+	CamelEwsSettings *settings;
 	GError *error = NULL;
 	GSList *l;
 	guint event_type;
@@ -315,7 +316,10 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 	if (!notification->priv->connection)
 		return FALSE;
 
+	settings = e_ews_connection_ref_settings (notification->priv->connection);
+
 	msg = e_ews_message_new_with_header (
+		settings,
 		e_ews_connection_get_uri (notification->priv->connection),
 		e_ews_connection_get_impersonate_user (notification->priv->connection),
 		"Subscribe",
@@ -325,6 +329,8 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 		E_EWS_EXCHANGE_2010_SP1,
 		FALSE,
 		FALSE);
+
+	g_clear_object (&settings);
 
 	if (!msg) {
 		g_warning ("%s: Failed to create Soup message for URI '%s'", G_STRFUNC, e_ews_connection_get_uri (notification->priv->connection));
@@ -439,6 +445,7 @@ e_ews_notification_unsubscribe_folder_sync (EEwsNotification *notification,
 	ESoapMessage *msg;
 	ESoapResponse *response;
 	ESoapParameter *param;
+	CamelEwsSettings *settings;
 	GError *error = NULL;
 	xmlDoc *doc;
 
@@ -449,7 +456,10 @@ e_ews_notification_unsubscribe_folder_sync (EEwsNotification *notification,
 	if (!notification->priv->connection)
 		return FALSE;
 
+	settings = e_ews_connection_ref_settings (notification->priv->connection);
+
 	msg = e_ews_message_new_with_header (
+		settings,
 		e_ews_connection_get_uri (notification->priv->connection),
 		e_ews_connection_get_impersonate_user (notification->priv->connection),
 		"Unsubscribe",
@@ -459,6 +469,8 @@ e_ews_notification_unsubscribe_folder_sync (EEwsNotification *notification,
 		E_EWS_EXCHANGE_2010_SP1,
 		FALSE,
 		FALSE);
+
+	g_clear_object (&settings);
 
 	if (!msg) {
 		g_warning ("%s: Failed to create Soup message for URI '%s'", G_STRFUNC, e_ews_connection_get_uri (notification->priv->connection));
@@ -754,6 +766,7 @@ e_ews_notification_get_events_sync (EEwsNotification *notification,
 				    gboolean *out_fatal_error)
 {
 	ESoapMessage *msg;
+	CamelEwsSettings *settings;
 	gboolean ret;
 	gulong handler_id;
 	guint status_code;
@@ -766,7 +779,10 @@ e_ews_notification_get_events_sync (EEwsNotification *notification,
 	g_return_val_if_fail (notification->priv != NULL, FALSE);
 	g_return_val_if_fail (notification->priv->connection != NULL, FALSE);
 
+	settings = e_ews_connection_ref_settings (notification->priv->connection);
+
 	msg = e_ews_message_new_with_header (
+		settings,
 		e_ews_connection_get_uri (notification->priv->connection),
 		e_ews_connection_get_impersonate_user (notification->priv->connection),
 		"GetStreamingEvents",
@@ -776,6 +792,8 @@ e_ews_notification_get_events_sync (EEwsNotification *notification,
 		E_EWS_EXCHANGE_2010_SP1,
 		FALSE,
 		FALSE);
+
+	g_clear_object (&settings);
 
 	if (!msg) {
 		g_warning ("%s: Failed to create Soup message for URI '%s'", G_STRFUNC, e_ews_connection_get_uri (notification->priv->connection));
