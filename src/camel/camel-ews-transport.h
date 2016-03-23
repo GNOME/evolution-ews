@@ -49,10 +49,12 @@ G_BEGIN_DECLS
 
 typedef struct _CamelEwsTransport CamelEwsTransport;
 typedef struct _CamelEwsTransportClass CamelEwsTransportClass;
+typedef struct _CamelEwsTransportPrivate CamelEwsTransportPrivate;
 
 struct _CamelEwsTransport {
 	CamelTransport parent;
-	gboolean connected;
+
+	CamelEwsTransportPrivate *priv;
 };
 
 struct _CamelEwsTransportClass {
