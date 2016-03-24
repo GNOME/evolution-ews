@@ -1,435 +1,1208 @@
 # Swedish translation for evolution-ews.
-# Copyright (C) 2012 Free Software Foundation, Inc.
+# Copyright © 2012-2016 Free Software Foundation, Inc.
 # This file is distributed under the same license as the evolution-ews package.
 # Daniel Nylander <po@danielnylander.se>, 2012.
+# Sebastian Rasmussen <sebras@gmail.com>, 2016.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-02-28 08:48+0100\n"
-"PO-Revision-Date: 2012-02-28 08:51+0100\n"
-"Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-ews&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2016-03-24 18:28+0000\n"
+"PO-Revision-Date: 2016-03-24 20:24+0100\n"
+"Last-Translator: Sebastian Rasmussen <sebras@gmail.com>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
-"Language: \n"
+"Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.8.7.1\n"
 
-#: ../src/account-setup-eplugin/exchange-ews-account-listener.c:241
-msgid "Global Address list"
-msgstr "Global adresslista"
-
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:177
-msgid "Select a valid time range"
-msgstr ""
-
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:286
-#, c-format
-msgid ""
-"Unable to fetch out of office settings: \n"
-"%s"
-msgstr ""
-
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:318
-msgid ""
-"The messages specified below will be automatically sent to \n"
-" each internal and external personal who sends a mail to you."
-msgstr ""
-
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:323
-msgid "Status:"
-msgstr "Status:"
-
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:328
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:333
-msgid "I am _out of the office"
-msgstr "Jag är _inte på kontoret"
-
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:329
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:332
-msgid "I am _in the office"
-msgstr "Jag är _på kontoret"
-
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:354
-msgid "_From:"
-msgstr "_Från:"
-
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:359
-msgid "_To:"
-msgstr "_Till:"
-
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:376
-msgid "I_nternal:"
-msgstr "I_ntern:"
-
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:378
-msgid "Message to be sent inside organization"
-msgstr ""
-
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:385
-msgid "None"
-msgstr "Ingen"
-
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:386
-msgid "Known"
-msgstr "Kända"
-
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:387
-msgid "All"
-msgstr "Alla"
-
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:389
-msgid "Send Message to"
-msgstr "Skicka meddelande till"
-
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:409
-msgid "E_xternal:"
-msgstr "E_xtern:"
-
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:411
-msgid "Message to be sent outside organization"
-msgstr ""
-
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:575
-msgid "Out of Office"
-msgstr "Inte på kontoret"
-
-#: ../src/account-setup-eplugin/exchange-ews-account-out-of-office.c:581
-msgid "Fetching out of office settings..."
-msgstr ""
-
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:111
-#, c-format
-msgid "Autodiscover failed: %s"
-msgstr ""
-
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:154
-#, c-format
-msgid "Enter Password for %s"
-msgstr "Ange lösenord för %s"
-
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:163
-msgid "Could not get password."
-msgstr ""
-
-#. OAB url entry
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:286
-msgid "OAB U_RL:"
-msgstr ""
-
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:298
-msgid "_Host URL:"
-msgstr ""
-
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:313
-msgid "Fetch _URL"
-msgstr ""
-
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:478
-msgid "Could not fetch oal list: "
-msgstr ""
-
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:524
-msgid "Fetching..."
-msgstr "Hämtar..."
-
-#. Add cache check box
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:661
-msgid "Cache o_ffline address book"
-msgstr ""
-
-#. Add label
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:667
-msgid "Select Ad_dress list: "
-msgstr ""
-
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:677
-msgid "Fetch _list"
-msgstr ""
-
-#: ../src/account-setup-eplugin/exchange-ews-account-setup.c:764
-#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:3
-msgid "EWS Settings"
-msgstr ""
-
-#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:1
-#: ../src/camel/camel-ews-provider.c:69
+#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:80
 msgid "Exchange Web Services"
-msgstr ""
+msgstr "Exchange Web Services"
 
-#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:2
-msgid "GAL settings"
-msgstr ""
+#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:82
+msgid "For accessing Exchange servers using Web Services"
+msgstr "För att nå Exchange-servrar som använder Web Services"
 
-#: ../src/account-setup-eplugin/org-gnome-exchange-ews.eplug.xml.h:4
-msgid "Exchange Web Services Plugin"
-msgstr ""
-
-#: ../src/addressbook/e-book-backend-ews.c:901
+#: ../src/addressbook/e-book-backend-ews.c:1460
 msgid "The backend does not support bulk additions"
-msgstr ""
+msgstr "Bakänden saknar stöd för satsvisa tillägg"
 
-#: ../src/addressbook/e-book-backend-ews.c:1172
+#: ../src/addressbook/e-book-backend-ews.c:1499
+#: ../src/addressbook/e-book-backend-ews.c:1866
+msgid ""
+"Cannot save contact list, it's only supported on EWS Server 2010 or later"
+msgstr ""
+"Kan inte spara kontaktlista, det stöds bara i EWS Server 2010 eller senare"
+
+#: ../src/addressbook/e-book-backend-ews.c:1825
 msgid "The backend does not support bulk modifications"
-msgstr ""
+msgstr "Bakänden saknar stöd för satsvisa ändringar"
 
-#: ../src/addressbook/e-book-backend-ews.c:1346
+#: ../src/addressbook/e-book-backend-ews.c:2037
 msgid "Wait till syncing is done"
-msgstr ""
+msgstr "Vänta tills synkning är klar"
 
-#: ../src/addressbook/e-book-backend-ews.c:1665
+#: ../src/addressbook/e-book-backend-ews.c:2520
 #, c-format
-msgid "Downloading contacts in %s %d%% completed... "
-msgstr ""
+msgid "Processing contacts in %s %d%% completed... "
+msgstr "Behandlar kontakter i %s %d%% klart… "
 
-#: ../src/addressbook/e-book-backend-ews.c:2159
+#: ../src/addressbook/e-book-backend-ews.c:3132
 msgid "Syncing contacts..."
-msgstr "Synkroniserar kontakter..."
+msgstr "Synkroniserar kontakter…"
 
-#: ../src/addressbook/e-book-backend-ews.c:2358
+#: ../src/addressbook/e-book-backend-ews.c:3317
+#: ../src/configuration/e-ews-search-user.c:365
 msgid "Searching..."
-msgstr "Söker..."
+msgstr "Söker…"
 
-#: ../src/addressbook/e-book-backend-sqlitedb.c:474
+#: ../src/addressbook/e-book-backend-ews.c:4267
+msgid "Requested to delete an unrelated cursor"
+msgstr "Begärde att ta bort en orelaterad markör"
+
+#: ../src/calendar/e-cal-backend-ews.c:1317
+msgid "EWS does not support bulk removals"
+msgstr "EWS saknar stöd för satsvisa borttagningar"
+
+#: ../src/calendar/e-cal-backend-ews.c:1495
+msgid "Unknown error"
+msgstr "Okänt fel"
+
+#: ../src/calendar/e-cal-backend-ews.c:1739
+msgid "EWS does not support bulk additions"
+msgstr "EWS saknar stöd för satsvisa tillägg"
+
+#: ../src/calendar/e-cal-backend-ews.c:1944
+msgid "EWS does not support bulk modifications"
+msgstr "EWS saknar stöd för satsvisa ändringar"
+
+#: ../src/calendar/e-cal-backend-ews.c:2370
 #, c-format
-msgid "Insufficient memory"
-msgstr ""
+msgid "Cannot find user '%s' between attendees"
+msgstr "Kan inte hitta deltagare ”%s” i listan över deltagare"
 
-#: ../src/camel/camel-ews-folder.c:262
+#: ../src/camel/camel-ews-folder.c:377
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
-msgstr ""
+msgstr "Kunde inte öppna temporärfil för mime-innehåll!"
 
-#: ../src/camel/camel-ews-folder.c:269
+#: ../src/camel/camel-ews-folder.c:385
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
-msgstr ""
+msgstr "Kunde inte generera tolk från mime-innehåll!"
 
-#: ../src/camel/camel-ews-folder.c:278
+#: ../src/camel/camel-ews-folder.c:394
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
-msgstr ""
+msgstr "Kunde inte tolka mime-innehåll i sammanträdesbegäran!"
 
-#: ../src/camel/camel-ews-folder.c:335
+#: ../src/camel/camel-ews-folder.c:453
 #, c-format
 msgid "Unable to create cache file"
-msgstr ""
+msgstr "Kunde inte skapa cachefil"
 
-#: ../src/camel/camel-ews-folder.c:436
-#: ../src/camel/camel-ews-folder.c:505
+#: ../src/camel/camel-ews-folder.c:557 ../src/camel/camel-ews-folder.c:649
 #, c-format
-msgid "Unable to create cache path"
-msgstr ""
+msgid "Unable to create cache path '%s': %s"
+msgstr "Kunde inte skapa cachesökväg ”%s”: %s"
 
-#: ../src/camel/camel-ews-folder.c:514
+#. Translators: The first %s consists of the source file name,
+#. the second %s of the destination file name and
+#. the third %s of the error message.
+#: ../src/camel/camel-ews-folder.c:663
 #, c-format
-msgid "Failed to move message cache file"
-msgstr ""
+msgid "Failed to move message cache file from '%s' to '%s': %s"
+msgstr "Misslyckades att flytta meddelandecachefil från ”%s” till ”%s”: %s"
 
-#: ../src/camel/camel-ews-folder.c:917
+#: ../src/camel/camel-ews-folder.c:1404
 #, c-format
 msgid "Could not load summary for %s"
-msgstr ""
+msgstr "Kunde inte läsa in sammanfattning för %s"
 
-#: ../src/camel/camel-ews-folder.c:1258
-#: ../src/camel/camel-ews-store.c:757
-#: ../src/camel/camel-ews-store.c:813
-#: ../src/camel/camel-ews-store.c:883
+# sebras: https://bugzilla.gnome.org/show_bug.cgi?id=764110
+#: ../src/camel/camel-ews-folder.c:1943
 #, c-format
 msgid "Cant perform actions on the folder while in offline mode"
-msgstr ""
+msgstr "Kan inte utföra åtgärder på mappen i frånkopplat läge"
 
-#: ../src/camel/camel-ews-provider.c:48
+#: ../src/camel/camel-ews-provider.c:47
 msgid "Checking for new mail"
-msgstr ""
+msgstr "Kontrollerar ny e-post"
 
-#: ../src/camel/camel-ews-provider.c:50
+#: ../src/camel/camel-ews-provider.c:49
 msgid "C_heck for new messages in all folders"
-msgstr ""
+msgstr "Le_ta efter nya meddelanden i alla mappar"
 
-#: ../src/camel/camel-ews-provider.c:53
+#: ../src/camel/camel-ews-provider.c:51
+msgid "_Listen for server change notifications"
+msgstr "_Lyssna efter ändringsaviseringar från server"
+
+#: ../src/camel/camel-ews-provider.c:54
 msgid "Options"
 msgstr "Alternativ"
 
-#: ../src/camel/camel-ews-provider.c:55
+#: ../src/camel/camel-ews-provider.c:56
 msgid "_Apply filters to new messages in Inbox on this server"
-msgstr ""
+msgstr "_Tillämpa filter för nya meddelanden i Inkorg på denna server"
 
-#: ../src/camel/camel-ews-provider.c:57
+#: ../src/camel/camel-ews-provider.c:58
 msgid "Check new messages for _Junk contents"
-msgstr ""
+msgstr "Kontrollera om nya meddelanden är s_kräppost"
 
-#: ../src/camel/camel-ews-provider.c:59
+#: ../src/camel/camel-ews-provider.c:60
 msgid "Only check for Junk messages in the IN_BOX folder"
-msgstr ""
+msgstr "Kontrollera endast I_nkorgsmappen efter skräppost"
 
-#: ../src/camel/camel-ews-provider.c:61
+#: ../src/camel/camel-ews-provider.c:62
 msgid "Automatically synchroni_ze remote mail locally"
-msgstr ""
+msgstr "Synkroni_sera automatiskt fjärrpost lokalt"
+
+#: ../src/camel/camel-ews-provider.c:65
+msgid "Connection"
+msgstr "Anslutning"
+
+#. Translators: '%s' is preplaced with a widget, where "
+#. * user can select how long the timeout should be.
+#: ../src/camel/camel-ews-provider.c:69
+#, c-format
+msgid "Connection _timeout (in seconds) %s"
+msgstr "_Tidsgräns för anslutning (i sekunder) %s"
 
 #: ../src/camel/camel-ews-provider.c:71
-msgid "For accessing Exchange servers using Web Services"
+msgid "Override _User-Agent header value"
+msgstr "Åsidosätt rubrikvärde för _User-Agent"
+
+#: ../src/camel/camel-ews-provider.c:97
+msgid "NTLM"
+msgstr "NTLM"
+
+#: ../src/camel/camel-ews-provider.c:99
+msgid ""
+"This option will connect to the Exchange server using a plaintext password "
+"with NTLM authentication."
 msgstr ""
+"Detta alternativ kommer att ansluta till Exchange-servern med ett lösenord i "
+"klartext med NTLM-autentisering."
 
-#: ../src/camel/camel-ews-provider.c:87
-msgid "Password"
-msgstr "Lösenord"
+#: ../src/camel/camel-ews-provider.c:107
+msgid "Basic"
+msgstr "Grundläggande"
 
-#: ../src/camel/camel-ews-provider.c:89
-msgid "This option will connect to the Exchange server using a plaintext password."
+#: ../src/camel/camel-ews-provider.c:109
+msgid ""
+"This option will connect to the Exchange server using a plaintext password "
+"with Basic authentication."
 msgstr ""
+"Detta alternativ kommer att ansluta till Exchange-servern med ett lösenord i "
+"klartext med Basic-autentisering."
 
-#: ../src/camel/camel-ews-store.c:184
+#: ../src/camel/camel-ews-provider.c:117
+msgid "Kerberos"
+msgstr "Kerberos"
+
+#: ../src/camel/camel-ews-provider.c:119
+msgid ""
+"This option will connect to the Exchange server using a Kerberos/GSSAPI "
+"authentication."
+msgstr ""
+"Detta alternativ kommer att ansluta till Exchange-servern med Kerberos/"
+"GSSAPI-autentisering."
+
+#: ../src/camel/camel-ews-store.c:332
 #, c-format
 msgid "Session has no storage path"
-msgstr ""
+msgstr "Sessionen har inte lagringssökväg"
 
-#: ../src/camel/camel-ews-store.c:554
+#: ../src/camel/camel-ews-store.c:369
+#, c-format
+msgctxt "PublicFolders"
+msgid "%s_%d"
+msgstr "%s_%d"
+
+#: ../src/camel/camel-ews-store.c:498
+#, c-format
+msgctxt "ForeignFolders"
+msgid "%s_%d"
+msgstr "%s_%d"
+
+#: ../src/camel/camel-ews-store.c:644 ../src/camel/camel-ews-store.c:1247
+msgid "Checking \"Out of Office\" settings"
+msgstr "Kontrollerar inställningar för ”Inte på kontoret”"
+
+#: ../src/camel/camel-ews-store.c:1495
+msgid "Updating foreign folder structure"
+msgstr "Uppdaterar struktur för främmande mappar"
+
+#: ../src/camel/camel-ews-store.c:1631
+msgid "Updating foreign folders"
+msgstr "Uppdaterar främmande mappar"
+
+#: ../src/camel/camel-ews-store.c:2005
 #, c-format
 msgid "No such folder: %s"
-msgstr ""
+msgstr "Det finns ingen sådan mapp: %s"
 
-#: ../src/camel/camel-ews-store.c:750
+#: ../src/camel/camel-ews-store.c:2300
+msgid "Cannot list EWS public folders in offline mode"
+msgstr "Kan inte lista EWS-publika mappar i frånkopplat läge"
+
+#: ../src/camel/camel-ews-store.c:2373
+msgid "Cannot find any EWS public folders"
+msgstr "Kan inte hitta några EWS-publika mappar"
+
+#: ../src/camel/camel-ews-store.c:2482
+#, c-format
+msgid "Cannot create folder '%s', folder already exists"
+msgstr "Kan inte skapa mappen ”%s”, mappen finns redan"
+
+#: ../src/camel/camel-ews-store.c:2497
 #, c-format
 msgid "Parent folder %s does not exist"
-msgstr ""
+msgstr "Föräldramappen %s existerar inte"
 
-#: ../src/camel/camel-ews-store.c:807
+#: ../src/camel/camel-ews-store.c:2507
+#, c-format
+msgid ""
+"Cannot create folder under '%s', it is used for folders of other users only"
+msgstr ""
+"Kan inte skapa mapp under ”%s”, den används endast för andra användares "
+"mappar"
+
+#: ../src/camel/camel-ews-store.c:2517
+#, c-format
+msgid "Cannot create folder under '%s', it is used for public folders only"
+msgstr "Kan inte skapa mapp under ”%s”, den används endast för publika mappar"
+
+#: ../src/camel/camel-ews-store.c:2621
 #, c-format
 msgid "Folder does not exist"
-msgstr ""
+msgstr "Mappen finns inte"
 
-#: ../src/camel/camel-ews-store.c:891
+#: ../src/camel/camel-ews-store.c:2631
+#, c-format
+msgid "Cannot remove folder '%s', it is used for folders of other users only"
+msgstr ""
+"Kan inte ta bort mapp ”%s”, den används endast för andra användares mappar"
+
+#: ../src/camel/camel-ews-store.c:2642
+#, c-format
+msgid "Cannot remove folder '%s', it is used for public folders only"
+msgstr "Kan inte ta bort mapp ”%s”, den används endast för publika mappar"
+
+#: ../src/camel/camel-ews-store.c:2798
 #, c-format
 msgid "Folder %s does not exist"
-msgstr ""
+msgstr "Mappen %s finns inte"
 
-#: ../src/camel/camel-ews-store.c:900
+#: ../src/camel/camel-ews-store.c:2808
 #, c-format
 msgid "No change key record for folder %s"
-msgstr ""
+msgstr "Ingen ändringsnyckelpost för mapp %s"
 
-#: ../src/camel/camel-ews-store.c:939
+#: ../src/camel/camel-ews-store.c:2850
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
-msgstr ""
+msgstr "Kan inte både byta namn på och flytta en mapp samtidigt"
 
-#: ../src/camel/camel-ews-store.c:970
+#: ../src/camel/camel-ews-store.c:2886
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
-msgstr ""
+msgstr "Kan inte hitta mapp-ID för föräldramapp %s"
 
-#: ../src/camel/camel-ews-store.c:1007
-#: ../src/camel/camel-ews-transport.c:66
+#: ../src/camel/camel-ews-store.c:2936 ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange server %s"
-msgstr ""
+msgstr "Exchange server %s"
 
-#: ../src/camel/camel-ews-store.c:1009
+#: ../src/camel/camel-ews-store.c:2939
 #, c-format
 msgid "Exchange service for %s on %s"
-msgstr ""
+msgstr "Exchange-tjänst för %s på %s"
 
-#: ../src/camel/camel-ews-store.c:1049
+#: ../src/camel/camel-ews-store.c:2983
+#, c-format
+msgid "Could not locate Trash folder"
+msgstr "Kunde inte hitta mappen Papperskorg"
+
+#: ../src/camel/camel-ews-store.c:3043
+#, c-format
+msgid "Could not locate Junk folder"
+msgstr "Kunde inte hitta mappen Skräppost"
+
+#: ../src/camel/camel-ews-store.c:3233
+msgid "Cannot subscribe EWS folders in offline mode"
+msgstr "Kan inte prenumerera på EWS-mappar i frånkopplat läge"
+
+#: ../src/camel/camel-ews-store.c:3256
+#, c-format
+msgid "Cannot subscribe folder '%s', no public folder available"
+msgstr "Kan inte prenumerera på mappen ”%s”, ingen publik mapp tillgänglig"
+
+#: ../src/camel/camel-ews-store.c:3266
+#, c-format
+msgid "Cannot subscribe folder '%s', folder not found"
+msgstr "Kan inte prenumerera på mappen ”%s”, mappen hittades inte"
+
+#: ../src/camel/camel-ews-store.c:3357
+msgid "Cannot unsubscribe EWS folders in offline mode"
+msgstr "Kan inte avsluta prenumeration på EWS-mappar i frånkopplat läge"
+
+#: ../src/camel/camel-ews-store.c:3474
 #, c-format
 msgid "You must be working online to complete this operation"
-msgstr ""
+msgstr "Du måste vara ansluten för att slutföra denna åtgärd"
 
-#: ../src/camel/camel-ews-transport.c:69
+#: ../src/camel/camel-ews-store.c:3518 ../src/camel/camel-ews-store.c:3555
+msgid "Unsetting the \"Out of Office\" status"
+msgstr "Stänger av status för ”Inte på kontoret”"
+
+#: ../src/camel/camel-ews-transport.c:321
 #, c-format
 msgid "Exchange mail delivery via %s"
-msgstr ""
+msgstr "Exchange e-postleverans via %s"
 
-#: ../src/camel/camel-ews-transport.c:106
+#: ../src/camel/camel-ews-transport.c:370
 msgid "Cannot send message with no From address"
-msgstr ""
+msgstr "Kan inte skicka meddelande utan avsändaradressen"
 
-#: ../src/camel/camel-ews-transport.c:110
+#: ../src/camel/camel-ews-transport.c:376
 msgid "Exchange server cannot send message with multiple From addresses"
 msgstr ""
+"Exchange-servern kan inte skicka meddelande med multipla avsändaradresser"
 
-#: ../src/camel/camel-ews-transport.c:118
+#: ../src/camel/camel-ews-transport.c:387
 msgid "Failed to read From address"
-msgstr ""
+msgstr "Misslyckades med att läsa avsändaradress"
 
-#: ../src/camel/camel-ews-transport.c:124
+#: ../src/camel/camel-ews-transport.c:399
 #, c-format
-msgid "Exchange server cannot send message as '%s', when the account was configured for address '%s'"
+msgid ""
+"Exchange server cannot send message as '%s', when the account was configured "
+"for address '%s'"
 msgstr ""
+"Exchange-server kan inte skicka meddelande som ”%s” när kontot konfigurerats "
+"för adressen ”%s”"
 
-#: ../src/camel/camel-ews-transport.c:135
+#: ../src/camel/camel-ews-transport.c:413
 #, c-format
 msgid "Service not connected"
-msgstr ""
+msgstr "Tjänst inte ansluten"
 
-#: ../src/server/e-ews-connection.c:360
+#: ../src/collection/e-ews-backend.c:421
+#: ../src/configuration/e-mail-config-ews-gal.c:276
+msgid "Global Address List"
+msgstr "Global adresslista"
+
+#: ../src/collection/e-ews-backend.c:857
+#, c-format
+msgid "Could not determine a suitable folder class for a new folder named '%s'"
+msgstr "Kunde inte bestämma en lämplig mappklass för en ny mapp vid namn ”%s”"
+
+#: ../src/collection/e-ews-backend.c:945
+#, c-format
+msgid "Data source '%s' does not represent an Exchange Web Services folder"
+msgstr "Datakälla ”%s” representerar inte en Exchange Web Services-mapp"
+
+#: ../src/configuration/e-ews-config-utils.c:570
+msgid "Folder"
+msgstr "Mapp"
+
+#: ../src/configuration/e-ews-config-utils.c:580
+msgid "Size"
+msgstr "Storlek"
+
+#: ../src/configuration/e-ews-config-utils.c:618
+#: ../src/configuration/e-ews-config-utils.c:623
+msgid "Unable to retrieve folder size information"
+msgstr "Kunde inte hämta information om mappstorlek"
+
+#: ../src/configuration/e-ews-config-utils.c:743
+msgid "Folder Sizes"
+msgstr "Mappstorlekar"
+
+#: ../src/configuration/e-ews-config-utils.c:746
+msgid "_Close"
+msgstr "_Stäng"
+
+#: ../src/configuration/e-ews-config-utils.c:760
+msgid "Fetching folder list…"
+msgstr "Hämtar mapplista…"
+
+#: ../src/configuration/e-ews-config-utils.c:913
+#, c-format
+msgid "Cannot edit permissions of folder '%s', choose other folder."
+msgstr "Kan inte redigera rättigheter för mapp ”%s”, välj en annan mapp."
+
+#: ../src/configuration/e-ews-config-utils.c:990
+msgid "Folder Sizes..."
+msgstr "Mappstorlekar…"
+
+#: ../src/configuration/e-ews-config-utils.c:997
+msgid "Subscribe to folder of other user..."
+msgstr "Prenumerera på mapp för en annan användare…"
+
+#: ../src/configuration/e-ews-config-utils.c:1006
+#: ../src/configuration/e-ews-config-utils.c:1310
+#: ../src/configuration/e-ews-config-utils.c:1341
+#: ../src/configuration/e-ews-config-utils.c:1372
+#: ../src/configuration/e-ews-config-utils.c:1403
+msgid "Permissions..."
+msgstr "Rättigheter…"
+
+#: ../src/configuration/e-ews-config-utils.c:1008
+msgid "Edit EWS folder permissions"
+msgstr "Redigera rättigheter för EWS-mapp"
+
+#: ../src/configuration/e-ews-config-utils.c:1312
+msgid "Edit EWS calendar permissions"
+msgstr "Redigera rättigheter för EWS-kalender"
+
+#: ../src/configuration/e-ews-config-utils.c:1343
+msgid "Edit EWS tasks permissions"
+msgstr "Redigera rättigheter för EWS-uppgifter"
+
+#: ../src/configuration/e-ews-config-utils.c:1374
+msgid "Edit EWS memos permissions"
+msgstr "Redigera rättigheter för EWS-memon"
+
+#: ../src/configuration/e-ews-config-utils.c:1405
+msgid "Edit EWS contacts permissions"
+msgstr "Redigera rättigheter för EWS-kontakter"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:87
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:418
+msgctxt "PermissionsLevel"
+msgid "None"
+msgstr "Ingen"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:88
+msgctxt "PermissionsLevel"
+msgid "Owner"
+msgstr "Ägare"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:98
+msgctxt "PermissionsLevel"
+msgid "Publishing Editor"
+msgstr "Publicerande redaktör"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:107
+msgctxt "PermissionsLevel"
+msgid "Editor"
+msgstr "Redaktör"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:115
+msgctxt "PermissionsLevel"
+msgid "Publishing Author"
+msgstr "Publicerande författare"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:122
+msgctxt "PermissionsLevel"
+msgid "Author"
+msgstr "Författare"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:128
+msgctxt "PermissionsLevel"
+msgid "Nonediting Author"
+msgstr "Författare som inte är redaktör"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:133
+msgctxt "PermissionsLevel"
+msgid "Reviewer"
+msgstr "Granskare"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:136
+msgctxt "PermissionsLevel"
+msgid "Contributor"
+msgstr "Bidragsgivare"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:139
+msgctxt "PermissionsLevel"
+msgid "Free/Busy time"
+msgstr "Ledig/Upptagen-tid"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:141
+msgctxt "PermissionsLevel"
+msgid "Free/Busy time, subject, location"
+msgstr "Ledig/Upptagen-tid, ämne, plats"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:143
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:441
+msgctxt "PermissionsLevel"
+msgid "Custom"
+msgstr "Anpassad"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:267
+msgid "Writing folder permissions, please wait..."
+msgstr "Skriver mapprättigheter, vänta…"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:777
+msgctxt "User"
+msgid "Anonymous"
+msgstr "Anonym"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:780
+msgctxt "User"
+msgid "Default"
+msgstr "Standard"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:786
+msgctxt "User"
+msgid "Unknown"
+msgstr "Okänd"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:867
+#: ../src/configuration/e-ews-search-user.c:431
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:995
+msgid "Name"
+msgstr "Namn"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:873
+msgid "Permission level"
+msgstr "Rättighetsnivå"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:925
+msgid "Edit EWS folder permissions..."
+msgstr "Redigera rättigheter för EWS-mappar…"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:950
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:638
+msgid "Account:"
+msgstr "Konto:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:978
+msgid "Folder name:"
+msgstr "Mappnamn:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1001
+msgid "Folder ID:"
+msgstr "Mapp-ID:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1065
+msgid "Permissions"
+msgstr "Rättigheter"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1087
+msgid "Permi_ssion level:"
+msgstr "Rättig_hetsnivå:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1121
+msgctxt "Permissions"
+msgid "Read"
+msgstr "Läs"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1133
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1200
+msgctxt "Permissions"
+msgid "None"
+msgstr "Inga"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1139
+msgctxt "Permissions"
+msgid "Free/Busy time"
+msgstr "Ledig/Upptagen-tid"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1144
+msgctxt "Permissions"
+msgid "Free/Busy time, subject, location"
+msgstr "Ledig/Upptagen-tid, ämne, plats"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1150
+msgctxt "Permissions"
+msgid "Full Details"
+msgstr "Fullständiga detaljer"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1156
+msgctxt "Permissions"
+msgid "Write"
+msgstr "Skriv"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1168
+msgctxt "Permissions"
+msgid "Create items"
+msgstr "Skapa objekt"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1172
+msgctxt "Permissions"
+msgid "Create subfolders"
+msgstr "Skapa undermappar"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1176
+msgctxt "Permissions"
+msgid "Edit own"
+msgstr "Redigera egna"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1180
+msgctxt "Permissions"
+msgid "Edit all"
+msgstr "Redigera alla"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1188
+msgctxt "Permissions"
+msgid "Delete items"
+msgstr "Ta bort objekt"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1205
+msgctxt "Permissions"
+msgid "Own"
+msgstr "Egna"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1210
+msgctxt "Permissions"
+msgid "All"
+msgstr "Alla"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1216
+msgctxt "Permissions"
+msgid "Other"
+msgstr "Andra"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1228
+msgctxt "Permissions"
+msgid "Folder owner"
+msgstr "Mappägare"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1232
+msgctxt "Permissions"
+msgid "Folder contact"
+msgstr "Mappkontakt"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1236
+msgctxt "Permissions"
+msgid "Folder visible"
+msgstr "Mappsynlighet"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1309
+msgid "Reading folder permissions, please wait..."
+msgstr "Läser mapprättigheter, vänta…"
+
+#: ../src/configuration/e-ews-ooo-notificator.c:184
+msgid "Unset on Server"
+msgstr "Stäng av på servern"
+
+#: ../src/configuration/e-ews-ooo-notificator.c:185
+msgid "Unset the \"Out of Office\" status"
+msgstr "Stäng av status ”Inte på kontoret”"
+
+#: ../src/configuration/e-ews-search-user.c:208
+#, c-format
+msgid "No users found, only one contact"
+msgid_plural "No users found, only %d contacts"
+msgstr[0] "Hittade inga användare, bara en kontakt"
+msgstr[1] "Hittade inga användare, bara %d kontakter"
+
+#: ../src/configuration/e-ews-search-user.c:213
+msgid "No users found"
+msgstr "Inga användare hittades"
+
+#: ../src/configuration/e-ews-search-user.c:217
+#, c-format
+msgid "Found one user"
+msgid_plural "Found %d users"
+msgstr[0] "Hittade en användare"
+msgstr[1] "Hittade %d användare"
+
+#: ../src/configuration/e-ews-search-user.c:223
+#, c-format
+msgid "Found more than 100 users, but showing only first %d"
+msgid_plural "Found more than 100 users, but showing only first %d"
+msgstr[0] "Hittade mer än 100 användare, men visar bara den första"
+msgstr[1] "Hittade mer än 100 användare, men visar bara de första %d"
+
+#: ../src/configuration/e-ews-search-user.c:357
+#: ../src/configuration/e-ews-search-user.c:540
+msgid "Search for a user"
+msgstr "Sök efter en användare"
+
+#: ../src/configuration/e-ews-search-user.c:437
+msgid "E-mail"
+msgstr "E-post"
+
+#: ../src/configuration/e-ews-search-user.c:474
+msgid "Choose EWS user..."
+msgstr "Välj EWS-användare…"
+
+#: ../src/configuration/e-ews-search-user.c:497
+msgid "_Search:"
+msgstr "_Sök:"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
+#: ../src/server/e-ews-folder.c:750
+#, c-format
+msgid "Cannot add folder, folder already exists as '%s'"
+msgstr "Kan inte lägga till mapp, mappen finns redan som ”%s”"
+
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. * Example result: "Mailbox - John Smith"
+#.
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:107
+#, c-format
+msgctxt "ForeignFolder"
+msgid "Mailbox - %s"
+msgstr "Brevlåda - %s"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:275
+msgid "Cannot test foreign folder availability while in offline mode"
+msgstr ""
+"Kan inte kontrollera tillgänglighet för främmande mappar i frånkopplat läge"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:300
+#, c-format
+msgid "User '%s' was not found on the server"
+msgstr "Användaren ”%s” hittade inte på servern"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:336
+#, c-format
+msgid "User name '%s' is ambiguous, specify it more precisely, please"
+msgstr "Användarnamnet ”%s” är tvetydigt, ange det mer precist"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:358
+#, c-format
+msgid ""
+"Folder '%s' not found. Either it does not exist or you do not have "
+"permission to access it."
+msgstr ""
+"Mappen ”%s” hittade inte. Antingen så finns den inte eller så har du inte "
+"åtkomsträttigheter till den."
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:376
+msgid "Cannot add folder, cannot determine folder's type"
+msgstr "Kan inte lägga till mapp, kan inte bestämma mappens typ"
+
+#. Translators: This is used to name foreign folder.
+#. * The first '%s' is replaced with user name to whom the folder belongs,
+#. * the second '%s' is replaced with folder name.
+#. * Example result: "John Smith - Calendar"
+#.
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:421
+#, c-format
+msgctxt "ForeignFolder"
+msgid "%s - %s"
+msgstr "%s - %s"
+
+#. convert well-known names to their non-localized form
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:515
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:723
+msgid "Inbox"
+msgstr "Inkorg"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:517
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:724
+msgid "Contacts"
+msgstr "Kontakter"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:519
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:725
+msgid "Calendar"
+msgstr "Kalender"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:521
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:726
+msgid "Memos"
+msgstr "Memon"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:523
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:727
+msgid "Tasks"
+msgstr "Uppgifter"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:540
+#, c-format
+msgid "Testing availability of folder '%s' of user '%s', please wait..."
+msgstr "Kontrollerar tillgänglighet för mapp ”%s” för användare ”%s”, vänta…"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:617
+msgid "Subscribe to folder of other EWS user..."
+msgstr "Prenumerera på mapp för annan EWS-användare…"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:668
+msgid "User"
+msgstr "Användare"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:675
+msgid "_User:"
+msgstr "_Användare:"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:690
+msgid "C_hoose..."
+msgstr "_Välj…"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:706
+msgid "_Folder name:"
+msgstr "_Mappnamn:"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:736
+msgid "Include _subfolders"
+msgstr "Inkludera _undermappar"
+
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:214
+msgid "Querying Autodiscover service"
+msgstr "Frågar autodetekteringstjänst"
+
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:311
+msgid "Fetch _URL"
+msgstr "Hämtnings-_URL"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:140
+msgid "Configuration"
+msgstr "Konfiguration"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:158
+msgid "User_name:"
+msgstr "Användar_namn:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:172
+msgid "_Host URL:"
+msgstr "_Värd-URL:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:191
+msgid "OAB U_RL:"
+msgstr "OAB-U_RL:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:205
+msgid "Open _Mailbox of other user"
+msgstr "Öppna _brevlåda för en annan användare"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:239
+msgid "S_earch..."
+msgstr "_Sök…"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:250
+msgid "Authentication"
+msgstr "Autentisering"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:390
+msgid "Host URL cannot be empty"
+msgstr "Värd-URL kan inte vara tom"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:395
+msgid "User name cannot be empty"
+msgstr "Användarnamn kan inte vara tomt"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:419
+msgctxt "PermissionsLevel"
+msgid "Reviewer (can read items)"
+msgstr "Granskare (kan läsa objekt)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:420
+msgctxt "PermissionsLevel"
+msgid "Author (can read and create items)"
+msgstr "Författare (kan läsa och skapa objekt)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:421
+msgctxt "PermissionsLevel"
+msgid "Editor (can read, create and modify items)"
+msgstr "Redaktör (kan läsa, skapa och modifiera objekt)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:526
+msgid "Delegate permissions"
+msgstr "Delegaträttigheter"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:544
+msgid "C_alendar"
+msgstr "K_alender"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:547
+msgid "_Delegate receives copies of meeting-related messages sent to me"
+msgstr ""
+"_Delegat får kopior av sammanträdesrelaterade meddelanden som skickas till "
+"mig"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:552
+msgid "_Tasks"
+msgstr "_Uppgifter"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:555
+msgid "_Inbox"
+msgstr "_Inkorg"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:558
+msgid "C_ontacts"
+msgstr "K_ontakter"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:561
+msgid "_Notes"
+msgstr "_Noteringar"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:564
+msgid "_Journal"
+msgstr "_Dagbok"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:567
+#, c-format
+msgid "Delegate '%s' has the following permissions"
+msgstr "Delegat ”%s” har följande rättigheter"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:585
+msgid "Delegate can see my _private items"
+msgstr "Delegat kan se mina _privata objekt"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:907
+msgid "Retrieving current user permissions, please wait..."
+msgstr "Hämtar aktuella användarrättigheter, vänta…"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1027
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1647
+msgid "Delegates"
+msgstr "Delegater"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1051
+msgid ""
+"Delegates can send items on your behalf, including creating and responding "
+"to meeting requests. If you want to grant folder permissions without giving "
+"send-on-behalf-of permissions, close this dialog box, right-click the "
+"folder, click Permissions and change the options there."
+msgstr ""
+"Delegater kan skicka objekt å dina vägnar, inklusive skapa och svara på "
+"sammanträdesbegäran. Om du vill ge mapprättigheter utan att ge rättigheter "
+"att skicka å dina vägnar, stäng denna dialogruta, högerklicka på mappen, "
+"klicka på Rättigheter och ändra alternativen där."
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1101
+msgid ""
+"Deliver meeting requests addressed to me and responses to meeting requests "
+"where I am the organizer to:"
+msgstr ""
+"Leverera sammanträdesbegäran adresserade till mig och svar till mötesbegäran "
+"där jag är organisatör till:"
+
+#. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1111
+msgid ""
+"My delegates only, but _send a copy of meeting requests\n"
+"and responses to me (recommended)"
+msgstr ""
+"Endast mina delegater, men _skicka en kopia av sammanträdesbegäran\n"
+"och svar till mig (rekommenderas)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1118
+msgid "My d_elegates only"
+msgstr "Endast mina d_elegater"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1125
+msgid "My delegates a_nd me"
+msgstr "Mina delegater _och mig"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1719
+msgid "Retrieving \"Delegates\" settings"
+msgstr "Hämtar inställningar för ”Delegater”"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:195
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:257
+msgid "EWS Settings"
+msgstr "EWS-inställningar"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:202
+msgid "View the size of all Exchange folders"
+msgstr "Visa storleken för alla Exchange-mappar"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:206
+msgid "Folder _Sizes"
+msgstr "Mapp_storlekar"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:224
+msgid "Locating offline address books"
+msgstr "Letar upp frånkopplade adressböcker"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:303
+msgid "Cache o_ffline address book"
+msgstr "Cacha _frånkopplad adressbok"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:329
+msgid "Select ad_dress list:"
+msgstr "Välj a_dresslista:"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:353
+msgid "Fetch List"
+msgstr "Hämta lista"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:396
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:931
+msgid "Out of Office"
+msgstr "Inte på kontoret"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:412
+msgid ""
+"The messages specified below will be automatically sent to each internal and "
+"external person who sends a mail to you."
+msgstr ""
+"Meddelandena som anges nedan kommer automatiskt att skickas till varje "
+"intern och extern person som skickar e-post till dig."
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:421
+msgid "Do _not send Out of Office replies"
+msgstr "Skicka _inte ”Inte på kontoret”-svar"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:429
+msgid "_Send Out of Office replies"
+msgstr "_Skicka ”Inte på kontoret”-svar"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:437
+msgid "Send Out of Office replies only _during this time period:"
+msgstr "Skicka endast ”Inte på kontoret”-svar _under denna tidsperiod:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:457
+msgid "_From:"
+msgstr "_Från:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:482
+msgid "_To:"
+msgstr "_Till:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:507
+msgid "I_nternal:"
+msgstr "I_ntern:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:516
+msgid "Message to be sent within the organization"
+msgstr "Meddelande ska skickas inom organisationen"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:544
+msgid "E_xternal:"
+msgstr "E_xtern:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:552
+msgid "Message to be sent outside the organization"
+msgstr "Meddelandet ska skickas utanför organisationen"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:562
+msgid "Do not reply to senders outside the organization"
+msgstr "Svara inte till avsändare utanför organisationen"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:565
+msgid "Reply only to known senders outside the organization"
+msgstr "Svara bara till kända avsändare utanför organisationen"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:568
+msgid "Reply to any sender outside the organization"
+msgstr "Svara till vilken avsändare utanför organisationen som helst"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:1003
+msgid "Retrieving \"Out of Office\" settings"
+msgstr "Hämtar inställningar för ”Inte på kontoret”"
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:1
+msgid "Autodiscovery query failed."
+msgstr "Autodetekteringsfråga misslyckades."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:2
+msgid "The reported error was &quot;{0}&quot;."
+msgstr "Det rapporterade felet var &quot;{0}&quot;."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:3
+msgid "Failed to locate offline address books."
+msgstr "Misslyckades med att hitta frånkopplade adressböcker."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:4
+msgid "Failed to retrieve &quot;Out of Office&quot; settings."
+msgstr "Misslyckades att hämta inställningar för &quot;Inte på kontoret&quot;."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:5
+msgid "Failed to retrieve &quot;Delegates&quot; settings."
+msgstr "Misslyckades att hämta inställningar för &quot;Delegater&quot;."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:6
+msgid "Your Exchange account \"{0}\" has the status set as \"Out of Office\"."
+msgstr "Ditt Exchange-konto ”{0}” har status inställt på ”Inte på kontoret”."
+
+#: ../src/server/e-ews-connection.c:720
 msgid "Operation Cancelled"
-msgstr ""
+msgstr "Operationen avbruten"
 
-#: ../src/server/e-ews-connection.c:422
+#: ../src/server/e-ews-connection.c:790
 msgid "Authentication failed"
-msgstr ""
+msgstr "Autentisering misslyckades"
 
-#: ../src/server/e-ews-connection.c:430
+#: ../src/server/e-ews-connection.c:811
 #, c-format
 msgid "No response: %s"
 msgstr "Inget svar: %s"
 
-#: ../src/server/e-ews-connection.c:1276
-#: ../src/server/e-ews-connection.c:1634
-#: ../src/server/e-ews-connection.c:1873
-#, c-format
-msgid "Code: %d - Unexpected response from server"
-msgstr ""
-
-#: ../src/server/e-ews-connection.c:1288
+#: ../src/server/e-ews-connection.c:2519
 #, c-format
 msgid "Failed to parse autodiscover response XML"
-msgstr ""
+msgstr "Misslyckades att tolka XML-svar från autodetektering"
 
-#: ../src/server/e-ews-connection.c:1296
+#: ../src/server/e-ews-connection.c:2526
 #, c-format
-msgid "Failed to find <Autodiscover> element\n"
-msgstr ""
+msgid "Failed to find <Autodiscover> element"
+msgstr "Misslyckades med att hitta <Autodiscover>-element"
 
-#: ../src/server/e-ews-connection.c:1308
+#: ../src/server/e-ews-connection.c:2537
 #, c-format
-msgid "Failed to find <Response> element\n"
-msgstr ""
+msgid "Failed to find <Response> element"
+msgstr "Misslyckades med att hitta <Response>-element"
 
-#: ../src/server/e-ews-connection.c:1320
+#: ../src/server/e-ews-connection.c:2548
 #, c-format
-msgid "Failed to find <Account> element\n"
-msgstr ""
+msgid "Failed to find <Account> element"
+msgstr "Misslyckades med att hitta <Account>-element"
 
-#: ../src/server/e-ews-connection.c:1339
+#: ../src/server/e-ews-connection.c:2573
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
-msgstr ""
+msgstr "Kunde inte hitta <ASUrl> och <OABUrl> i svar för autodetektering"
 
-#: ../src/server/e-ews-connection.c:1441
-#, c-format
-msgid "Both email and password must be provided"
-msgstr ""
+#: ../src/server/e-ews-connection.c:2664
+msgid "URL cannot be NULL"
+msgstr "URL kan inte vara NULL"
 
-#: ../src/server/e-ews-connection.c:1448
+#: ../src/server/e-ews-connection.c:2672
 #, c-format
-msgid "Wrong email id"
-msgstr ""
+msgid "URL '%s' is not valid"
+msgstr "URL ”%s” är inte giltig"
 
-#: ../src/server/e-ews-connection.c:1644
-#, c-format
+#: ../src/server/e-ews-connection.c:2762
+msgid "Email address is missing a domain part"
+msgstr "E-postadress saknar en domändel"
+
+#: ../src/server/e-ews-connection.c:3084
 msgid "Failed to parse oab XML"
-msgstr ""
+msgstr "Misslyckades med att tolka oab-XML"
 
-#: ../src/server/e-ews-connection.c:1651
-#, c-format
+#: ../src/server/e-ews-connection.c:3092
 msgid "Failed to find <OAB> element\n"
-msgstr ""
+msgstr "Misslyckades att hitta <OAB>-element\n"
 
-#: ../src/utils/ews-camel-common.c:170
+#: ../src/server/e-ews-connection.c:4350
+msgid "No items found"
+msgstr "Inga objekt hittades"
+
+#: ../src/server/e-ews-folder.c:705
+msgid "Cannot add folder, unsupported folder type"
+msgstr "Kan inte lägga till mapp, mapptyp stöds ej"
+
+#: ../src/server/e-ews-folder.c:710
+msgid "Cannot add folder, master source not found"
+msgstr "Kan inte lägga till mapp, huvudkälla inte funnen"
+
+#: ../src/utils/ews-camel-common.c:361
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr ""
+"Anrop till CreateItem misslyckades med att returnera ID för nytt meddelande"
 
+#~ msgid "Status:"
+#~ msgstr "Status:"
+
+#~ msgid "I am _out of the office"
+#~ msgstr "Jag är _inte på kontoret"
+
+#~ msgid "I am _in the office"
+#~ msgstr "Jag är _på kontoret"
+
+#~ msgid "Send Message to"
+#~ msgstr "Skicka meddelande till"
+
+#~ msgid "Enter Password for %s"
+#~ msgstr "Ange lösenord för %s"
+
+#~ msgid "Fetching..."
+#~ msgstr "Hämtar..."
+
+#~ msgid "Password"
+#~ msgstr "Lösenord"
