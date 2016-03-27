@@ -4,14 +4,14 @@
 # pomóc w jego rozwijaniu i pielęgnowaniu, napisz do nas:
 # gnomepl@aviary.pl
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-# Piotr Drąg <piotrdrag@gmail.com>, 2010-2015.
-# Aviary.pl <gnomepl@aviary.pl>, 2010-2015.
+# Piotr Drąg <piotrdrag@gmail.com>, 2010-2016.
+# Aviary.pl <gnomepl@aviary.pl>, 2010-2016.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-06 18:58+0100\n"
-"PO-Revision-Date: 2015-12-06 18:59+0100\n"
+"POT-Creation-Date: 2016-03-27 16:13+0200\n"
+"PO-Revision-Date: 2016-03-27 16:14+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -23,49 +23,49 @@ msgstr ""
 "X-Poedit-Language: Polish\n"
 "X-Poedit-Country: Poland\n"
 
-#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:77
+#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:80
 msgid "Exchange Web Services"
 msgstr "Exchange Web Services"
 
-#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:79
+#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:82
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Dostęp do serwerów Exchange używając Web Services"
 
-#: ../src/addressbook/e-book-backend-ews.c:1454
+#: ../src/addressbook/e-book-backend-ews.c:1460
 msgid "The backend does not support bulk additions"
 msgstr "Mechanizm nie obsługuje dodawania całości"
 
-#: ../src/addressbook/e-book-backend-ews.c:1493
-#: ../src/addressbook/e-book-backend-ews.c:1860
+#: ../src/addressbook/e-book-backend-ews.c:1499
+#: ../src/addressbook/e-book-backend-ews.c:1866
 msgid ""
 "Cannot save contact list, it's only supported on EWS Server 2010 or later"
 msgstr ""
 "Nie można zapisać listy kontaktów, jest to obsługiwane tylko w EWS Server "
 "2010 lub późniejszym"
 
-#: ../src/addressbook/e-book-backend-ews.c:1819
+#: ../src/addressbook/e-book-backend-ews.c:1825
 msgid "The backend does not support bulk modifications"
 msgstr "Mechanizm nie obsługuje modyfikacji całości"
 
-#: ../src/addressbook/e-book-backend-ews.c:2031
+#: ../src/addressbook/e-book-backend-ews.c:2037
 msgid "Wait till syncing is done"
 msgstr "Oczekiwanie na ukończenie synchronizacji"
 
-#: ../src/addressbook/e-book-backend-ews.c:2514
+#: ../src/addressbook/e-book-backend-ews.c:2520
 #, c-format
 msgid "Processing contacts in %s %d%% completed... "
 msgstr "Przetwarzanie kontaktów w %s %d%% ukończono… "
 
-#: ../src/addressbook/e-book-backend-ews.c:3126
+#: ../src/addressbook/e-book-backend-ews.c:3132
 msgid "Syncing contacts..."
 msgstr "Synchronizowanie kontaktów…"
 
-#: ../src/addressbook/e-book-backend-ews.c:3311
+#: ../src/addressbook/e-book-backend-ews.c:3317
 #: ../src/configuration/e-ews-search-user.c:365
 msgid "Searching..."
 msgstr "Wyszukiwanie…"
 
-#: ../src/addressbook/e-book-backend-ews.c:4274
+#: ../src/addressbook/e-book-backend-ews.c:4267
 msgid "Requested to delete an unrelated cursor"
 msgstr "Zażądano usunięcia niepowiązanego kursora"
 
@@ -178,11 +178,15 @@ msgstr "Połączenie"
 msgid "Connection _timeout (in seconds) %s"
 msgstr "_Czas oczekiwania na połączenie (w sekundach) %s"
 
-#: ../src/camel/camel-ews-provider.c:94
+#: ../src/camel/camel-ews-provider.c:71
+msgid "Override _User-Agent header value"
+msgstr "Zastępowanie wartości nagłówka agenta _użytkownika"
+
+#: ../src/camel/camel-ews-provider.c:97
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/camel/camel-ews-provider.c:96
+#: ../src/camel/camel-ews-provider.c:99
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -190,11 +194,11 @@ msgstr ""
 "Ta opcja spowoduje połączenie z serwerem Exchange używając hasła tekstowego "
 "za pomocą uwierzytelniania NTLM."
 
-#: ../src/camel/camel-ews-provider.c:104
+#: ../src/camel/camel-ews-provider.c:107
 msgid "Basic"
 msgstr "Podstawowe"
 
-#: ../src/camel/camel-ews-provider.c:106
+#: ../src/camel/camel-ews-provider.c:109
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -202,11 +206,11 @@ msgstr ""
 "Ta opcja spowoduje połączenie z serwerem Exchange używając hasła tekstowego "
 "za pomocą uwierzytelniania podstawowego."
 
-#: ../src/camel/camel-ews-provider.c:114
+#: ../src/camel/camel-ews-provider.c:117
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/camel/camel-ews-provider.c:116
+#: ../src/camel/camel-ews-provider.c:119
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -243,30 +247,30 @@ msgstr "Aktualizowanie obcej struktury katalogów"
 msgid "Updating foreign folders"
 msgstr "Aktualizowanie obcych katalogów"
 
-#: ../src/camel/camel-ews-store.c:2036
+#: ../src/camel/camel-ews-store.c:2005
 #, c-format
 msgid "No such folder: %s"
 msgstr "Nie ma takiego katalogu: %s"
 
-#: ../src/camel/camel-ews-store.c:2331
+#: ../src/camel/camel-ews-store.c:2300
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Nie można wyświetlić listy katalogów publicznych EWS w trybie offline"
 
-#: ../src/camel/camel-ews-store.c:2404
+#: ../src/camel/camel-ews-store.c:2373
 msgid "Cannot find any EWS public folders"
 msgstr "Nie można odnaleźć żadnych katalogów publicznych EWS"
 
-#: ../src/camel/camel-ews-store.c:2513
+#: ../src/camel/camel-ews-store.c:2482
 #, c-format
 msgid "Cannot create folder '%s', folder already exists"
 msgstr "Nie można utworzyć katalogu „%s”. Katalog już istnieje"
 
-#: ../src/camel/camel-ews-store.c:2528
+#: ../src/camel/camel-ews-store.c:2497
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Katalog nadrzędny %s nie istnieje"
 
-#: ../src/camel/camel-ews-store.c:2538
+#: ../src/camel/camel-ews-store.c:2507
 #, c-format
 msgid ""
 "Cannot create folder under '%s', it is used for folders of other users only"
@@ -274,119 +278,119 @@ msgstr ""
 "Nie można utworzyć katalogu w „%s”, jest on używany tylko dla katalogów "
 "innych użytkowników"
 
-#: ../src/camel/camel-ews-store.c:2548
+#: ../src/camel/camel-ews-store.c:2517
 #, c-format
 msgid "Cannot create folder under '%s', it is used for public folders only"
 msgstr ""
 "Nie można utworzyć katalogu w „%s”, jest on używany tylko dla katalogów "
 "publicznych"
 
-#: ../src/camel/camel-ews-store.c:2652
+#: ../src/camel/camel-ews-store.c:2621
 #, c-format
 msgid "Folder does not exist"
 msgstr "Katalog nie istnieje"
 
-#: ../src/camel/camel-ews-store.c:2662
+#: ../src/camel/camel-ews-store.c:2631
 #, c-format
 msgid "Cannot remove folder '%s', it is used for folders of other users only"
 msgstr ""
 "Nie można usunąć katalogu „%s”, jest on używany tylko dla katalogów innych "
 "użytkowników"
 
-#: ../src/camel/camel-ews-store.c:2673
+#: ../src/camel/camel-ews-store.c:2642
 #, c-format
 msgid "Cannot remove folder '%s', it is used for public folders only"
 msgstr ""
 "Nie można usunąć katalogu „%s”, jest on używany tylko dla katalogów "
 "publicznych"
 
-#: ../src/camel/camel-ews-store.c:2829
+#: ../src/camel/camel-ews-store.c:2798
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Katalog %s nie istnieje"
 
-#: ../src/camel/camel-ews-store.c:2839
+#: ../src/camel/camel-ews-store.c:2808
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Brak wpisu klucza zmiany dla katalogu %s"
 
-#: ../src/camel/camel-ews-store.c:2881
+#: ../src/camel/camel-ews-store.c:2850
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Nie można zmienić nazwy i przenieść katalogu w tym samym czasie"
 
-#: ../src/camel/camel-ews-store.c:2917
+#: ../src/camel/camel-ews-store.c:2886
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nie można odnaleźć identyfikatora katalogu dla katalogu nadrzędnego %s"
 
-#: ../src/camel/camel-ews-store.c:2967 ../src/camel/camel-ews-transport.c:164
+#: ../src/camel/camel-ews-store.c:2936 ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange server %s"
 msgstr "Serwer Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:2970
+#: ../src/camel/camel-ews-store.c:2939
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Usługa Exchange dla %s na %s"
 
-#: ../src/camel/camel-ews-store.c:3014
+#: ../src/camel/camel-ews-store.c:2983
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Nie można ustalić położenia katalogu Kosz"
 
-#: ../src/camel/camel-ews-store.c:3074
+#: ../src/camel/camel-ews-store.c:3043
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Nie można ustalić położenia katalogu Niechciane"
 
-#: ../src/camel/camel-ews-store.c:3264
+#: ../src/camel/camel-ews-store.c:3233
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Nie można subskrybować katalogów EWS w trybie offline"
 
-#: ../src/camel/camel-ews-store.c:3287
+#: ../src/camel/camel-ews-store.c:3256
 #, c-format
 msgid "Cannot subscribe folder '%s', no public folder available"
 msgstr ""
 "Nie można subskrybować katalogu „%s”, żaden katalog publiczny nie jest "
 "dostępny"
 
-#: ../src/camel/camel-ews-store.c:3297
+#: ../src/camel/camel-ews-store.c:3266
 #, c-format
 msgid "Cannot subscribe folder '%s', folder not found"
 msgstr "Nie można subskrybować katalogu „%s”, nie odnaleziono katalogu"
 
-#: ../src/camel/camel-ews-store.c:3388
+#: ../src/camel/camel-ews-store.c:3357
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Nie można usuwać subskrypcji katalogów EWS w trybie offline"
 
-#: ../src/camel/camel-ews-store.c:3505
+#: ../src/camel/camel-ews-store.c:3474
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Należy pracować w trybie online, aby ukończyć to działanie"
 
-#: ../src/camel/camel-ews-store.c:3549 ../src/camel/camel-ews-store.c:3586
+#: ../src/camel/camel-ews-store.c:3518 ../src/camel/camel-ews-store.c:3555
 msgid "Unsetting the \"Out of Office\" status"
 msgstr "Usuwanie ustawienia stanu obecności poza biurem"
 
-#: ../src/camel/camel-ews-transport.c:167
+#: ../src/camel/camel-ews-transport.c:321
 #, c-format
 msgid "Exchange mail delivery via %s"
 msgstr "Dostarczanie poczty Exchange przez %s"
 
-#: ../src/camel/camel-ews-transport.c:216
+#: ../src/camel/camel-ews-transport.c:370
 msgid "Cannot send message with no From address"
 msgstr "Nie można wysłać wiadomości bez adresata"
 
-#: ../src/camel/camel-ews-transport.c:222
+#: ../src/camel/camel-ews-transport.c:376
 msgid "Exchange server cannot send message with multiple From addresses"
 msgstr "Serwer Exchange nie może wysłać wiadomości z wieloma adresatami"
 
-#: ../src/camel/camel-ews-transport.c:233
+#: ../src/camel/camel-ews-transport.c:387
 msgid "Failed to read From address"
 msgstr "Odczytanie adresata się nie powiodło"
 
-#: ../src/camel/camel-ews-transport.c:245
+#: ../src/camel/camel-ews-transport.c:399
 #, c-format
 msgid ""
 "Exchange server cannot send message as '%s', when the account was configured "
@@ -395,7 +399,7 @@ msgstr ""
 "Serwer Exchange nie może wysłać wiadomości jako „%s”, podczas gdy konto "
 "zostało skonfigurowane dla adresu „%s”"
 
-#: ../src/camel/camel-ews-transport.c:259
+#: ../src/camel/camel-ews-transport.c:413
 #, c-format
 msgid "Service not connected"
 msgstr "Usługa nie jest połączona"
@@ -1170,28 +1174,28 @@ msgstr ""
 "Odnalezienie elementów <ASUrl> i <OABUrl> w odpowiedzi automatycznego "
 "wykrywania się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:2663
+#: ../src/server/e-ews-connection.c:2664
 msgid "URL cannot be NULL"
 msgstr "Adres URL nie może wynosić NULL"
 
-#: ../src/server/e-ews-connection.c:2671
+#: ../src/server/e-ews-connection.c:2672
 #, c-format
 msgid "URL '%s' is not valid"
 msgstr "Adres URL „%s” nie jest prawidłowy"
 
-#: ../src/server/e-ews-connection.c:2763
+#: ../src/server/e-ews-connection.c:2762
 msgid "Email address is missing a domain part"
 msgstr "W adresie e-mail brakuje części domeny"
 
-#: ../src/server/e-ews-connection.c:3085
+#: ../src/server/e-ews-connection.c:3084
 msgid "Failed to parse oab XML"
 msgstr "Przetworzenie XML „oab” się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:3093
+#: ../src/server/e-ews-connection.c:3092
 msgid "Failed to find <OAB> element\n"
 msgstr "Odnalezienie elementu <OAB> się nie powiodło\n"
 
-#: ../src/server/e-ews-connection.c:4347
+#: ../src/server/e-ews-connection.c:4350
 msgid "No items found"
 msgstr "Nie odnaleziono elementów"
 
