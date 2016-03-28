@@ -2,69 +2,68 @@
 # Copyright (C) 2016 evolution-ews's COPYRIGHT HOLDER
 # This file is distributed under the same license as the evolution-ews package.
 # Gabriel Speckhahn <gabspeck@gmail.com>, 2012.
-# Rafael Fontenelle <rffontenelle@gmail.com>, 2012, 2013, 2016.
 # Enrico Nicoletto <liverig@gmail.com>, 2013.
-#
+# Rafael Fontenelle <rafaelff@gnome.org>, 2012, 2013, 2016.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2016-02-29 06:15+0000\n"
-"PO-Revision-Date: 2016-02-29 06:38-0300\n"
-"Last-Translator: Rafael Fontenelle <rffontenelle@gmail.com>\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product"
+"=evolution-ews&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2016-03-28 05:26+0000\n"
+"PO-Revision-Date: 2016-03-28 10:05-0200\n"
+"Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 1.8.7\n"
+"X-Generator: Virtaal 0.7.1\n"
 "X-Project-Style: gnome\n"
 
-#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:77
+#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:80
 msgid "Exchange Web Services"
 msgstr "Web services do Exchange"
 
-#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:79
+#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:82
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Para acessar servidores Exchange usando Web services"
 
-#: ../src/addressbook/e-book-backend-ews.c:1454
+#: ../src/addressbook/e-book-backend-ews.c:1460
 msgid "The backend does not support bulk additions"
 msgstr "O mecanismo não tem suporte a inclusões em lote"
 
-#: ../src/addressbook/e-book-backend-ews.c:1493
-#: ../src/addressbook/e-book-backend-ews.c:1860
+#: ../src/addressbook/e-book-backend-ews.c:1499
+#: ../src/addressbook/e-book-backend-ews.c:1866
 msgid ""
 "Cannot save contact list, it's only supported on EWS Server 2010 or later"
 msgstr ""
 "Não foi possível salvar a lista de contatos, pois ela tem suporte apenas em "
 "servidor EWS 2010 ou posterior"
 
-#: ../src/addressbook/e-book-backend-ews.c:1819
+#: ../src/addressbook/e-book-backend-ews.c:1825
 msgid "The backend does not support bulk modifications"
 msgstr "O mecanismo não tem suporte a modificações em lote"
 
-#: ../src/addressbook/e-book-backend-ews.c:2031
+#: ../src/addressbook/e-book-backend-ews.c:2037
 msgid "Wait till syncing is done"
 msgstr "Aguarde até a conclusão da sincronização"
 
-#: ../src/addressbook/e-book-backend-ews.c:2514
+#: ../src/addressbook/e-book-backend-ews.c:2520
 #, c-format
 msgid "Processing contacts in %s %d%% completed... "
 msgstr "Processando contatos em %s %d%% concluídos... "
 
-#: ../src/addressbook/e-book-backend-ews.c:3126
+#: ../src/addressbook/e-book-backend-ews.c:3132
 msgid "Syncing contacts..."
 msgstr "Sincronizando contatos..."
 
-#: ../src/addressbook/e-book-backend-ews.c:3311
+#: ../src/addressbook/e-book-backend-ews.c:3317
 #: ../src/configuration/e-ews-search-user.c:365
 msgid "Searching..."
 msgstr "Pesquisando..."
 
-#: ../src/addressbook/e-book-backend-ews.c:4274
+#: ../src/addressbook/e-book-backend-ews.c:4267
 msgid "Requested to delete an unrelated cursor"
 msgstr "Requisitada a exclusão de cursor não-relacionado"
 
@@ -176,11 +175,15 @@ msgstr "Conexão"
 msgid "Connection _timeout (in seconds) %s"
 msgstr "Limite de _tempo de espera por conexão (em segundos) %s"
 
-#: ../src/camel/camel-ews-provider.c:94
+#: ../src/camel/camel-ews-provider.c:71
+msgid "Override _User-Agent header value"
+msgstr "Sobrescrever valor do cabeçalho _User-Agent"
+
+#: ../src/camel/camel-ews-provider.c:97
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/camel/camel-ews-provider.c:96
+#: ../src/camel/camel-ews-provider.c:99
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -188,11 +191,11 @@ msgstr ""
 "Essa opção conectará ao servidor Exchange usando uma senha em texto simples "
 "com autenticação NTLM."
 
-#: ../src/camel/camel-ews-provider.c:104
+#: ../src/camel/camel-ews-provider.c:107
 msgid "Basic"
 msgstr "Básico"
 
-#: ../src/camel/camel-ews-provider.c:106
+#: ../src/camel/camel-ews-provider.c:109
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -200,11 +203,11 @@ msgstr ""
 "Essa opção conectará ao servidor Exchange usando uma senha em texto simples "
 "com autenticação Básica."
 
-#: ../src/camel/camel-ews-provider.c:114
+#: ../src/camel/camel-ews-provider.c:117
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/camel/camel-ews-provider.c:116
+#: ../src/camel/camel-ews-provider.c:119
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -318,7 +321,7 @@ msgstr "Não é possível renomear e mover uma pasta ao mesmo tempo"
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Não foi possível encontrar o ID de pasta para a pasta pai %s"
 
-#: ../src/camel/camel-ews-store.c:2936 ../src/camel/camel-ews-transport.c:164
+#: ../src/camel/camel-ews-store.c:2936 ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange server %s"
 msgstr "Servidor Exchange %s"
@@ -372,26 +375,26 @@ msgstr "Você precisa estar trabalhando online para completar essa operação"
 msgid "Unsetting the \"Out of Office\" status"
 msgstr "Desmarcando o estado de \"Fora do escritório\""
 
-#: ../src/camel/camel-ews-transport.c:167
+#: ../src/camel/camel-ews-transport.c:321
 #, c-format
 msgid "Exchange mail delivery via %s"
 msgstr "Entrega de correio Exchange via %s"
 
-#: ../src/camel/camel-ews-transport.c:216
+#: ../src/camel/camel-ews-transport.c:370
 msgid "Cannot send message with no From address"
 msgstr "Não é possível enviar uma mensagem sem um endereço de remetente"
 
-#: ../src/camel/camel-ews-transport.c:222
+#: ../src/camel/camel-ews-transport.c:376
 msgid "Exchange server cannot send message with multiple From addresses"
 msgstr ""
 "O servidor Exchange não pode enviar uma mensagem com múltiplos endereços de "
 "remetente"
 
-#: ../src/camel/camel-ews-transport.c:233
+#: ../src/camel/camel-ews-transport.c:387
 msgid "Failed to read From address"
 msgstr "Não foi possível ler o endereço do remetente"
 
-#: ../src/camel/camel-ews-transport.c:245
+#: ../src/camel/camel-ews-transport.c:399
 #, c-format
 msgid ""
 "Exchange server cannot send message as '%s', when the account was configured "
@@ -400,7 +403,7 @@ msgstr ""
 "O servidor Exchange não pode mandar a mensagem como \"%s\", pois a conta foi "
 "configurada para o endereço \"%s\""
 
-#: ../src/camel/camel-ews-transport.c:259
+#: ../src/camel/camel-ews-transport.c:413
 #, c-format
 msgid "Service not connected"
 msgstr "Serviço não conectado"
@@ -778,7 +781,7 @@ msgstr "O usuário \"%s\" não foi encontrado no servidor"
 msgid "User name '%s' is ambiguous, specify it more precisely, please"
 msgstr ""
 "O nome do usuário \"%s\" é ambíguo. Por favor, especifique-o de forma mais "
-"precisa."
+"precisa"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:358
 #, c-format
@@ -1173,30 +1176,30 @@ msgstr "Falha ao localizar o elemento <Account>"
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
-"<ASUrl> e <OABUrl> não foram encontrados na resposta da descoberta automática"
+"Falha ao localizar <ASUrl> e <OABUrl> na resposta da descoberta automática"
 
-#: ../src/server/e-ews-connection.c:2663
+#: ../src/server/e-ews-connection.c:2664
 msgid "URL cannot be NULL"
 msgstr "A URL não pode ser NULL"
 
-#: ../src/server/e-ews-connection.c:2671
+#: ../src/server/e-ews-connection.c:2672
 #, c-format
 msgid "URL '%s' is not valid"
 msgstr "A URL \"%s\" não é válida"
 
-#: ../src/server/e-ews-connection.c:2763
+#: ../src/server/e-ews-connection.c:2762
 msgid "Email address is missing a domain part"
 msgstr "O endereço de e-mail está sem a parte de domínio"
 
-#: ../src/server/e-ews-connection.c:3085
+#: ../src/server/e-ews-connection.c:3084
 msgid "Failed to parse oab XML"
 msgstr "Falha ao analisar o XML oab"
 
-#: ../src/server/e-ews-connection.c:3093
+#: ../src/server/e-ews-connection.c:3092
 msgid "Failed to find <OAB> element\n"
 msgstr "O elemento <OAB> não foi encontrado\n"
 
-#: ../src/server/e-ews-connection.c:4347
+#: ../src/server/e-ews-connection.c:4350
 msgid "No items found"
 msgstr "Nenhum item encontrado"
 
