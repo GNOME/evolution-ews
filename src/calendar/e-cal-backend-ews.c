@@ -82,6 +82,7 @@ struct _ECalBackendEwsPrivate {
 	EFlag *refreshing_done;
 	GHashTable *item_id_hash;
 
+	GMutex cancellable_lock;
 	GCancellable *cancellable;
 
 	guint subscription_key;
@@ -202,6 +203,40 @@ convert_error_to_edc_error (GError **perror)
 	*perror = error;
 }
 
+static GCancellable *
+cal_backend_ews_ref_cancellable (ECalBackendEws *cbews)
+{
+	GCancellable *cancellable = NULL;
+
+	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (cbews), NULL);
+
+	g_mutex_lock (&cbews->priv->cancellable_lock);
+	if (cbews->priv->cancellable)
+		cancellable = g_object_ref (cbews->priv->cancellable);
+	g_mutex_unlock (&cbews->priv->cancellable_lock);
+
+	return cancellable;
+}
+
+static void
+cal_backend_ews_set_cancellable (ECalBackendEws *cbews,
+				 GCancellable *cancellable)
+{
+	GCancellable *old_cancellable;
+
+	g_return_if_fail (E_IS_CAL_BACKEND_EWS (cbews));
+
+	g_mutex_lock (&cbews->priv->cancellable_lock);
+	old_cancellable = cbews->priv->cancellable;
+	cbews->priv->cancellable = cancellable;
+	g_mutex_unlock (&cbews->priv->cancellable_lock);
+
+	if (old_cancellable) {
+		g_cancellable_cancel (old_cancellable);
+		g_object_unref (old_cancellable);
+	}
+}
+
 static void
 switch_offline (ECalBackendEws *cbews)
 {
@@ -215,11 +250,7 @@ switch_offline (ECalBackendEws *cbews)
 		priv->refresh_timeout = 0;
 	}
 
-	if (priv->cancellable) {
-		g_cancellable_cancel (priv->cancellable);
-		g_object_unref (priv->cancellable);
-		priv->cancellable = NULL;
-	}
+	cal_backend_ews_set_cancellable (cbews, NULL);
 
 	if (priv->cnc) {
 		g_object_unref (priv->cnc);
@@ -311,6 +342,7 @@ typedef enum {
 
 typedef struct {
 	ECalBackendEws *cbews; /* Create, Remove, Modify, FreeBusy, Attachments, DiscardAlarm */
+	GCancellable *cancellable;
 	ECalComponent *comp; /* Create, Remove, Modify, FreeBusy, Attachments */
 	ECalComponent *extra_comp; /* Modify, Attachments: used as old_comp. Remove: used as parent_comp */
 	EDataCal *cal; /* Create, Remove, Modify, FreeBusy, Attachments, DiscardAlarm */
@@ -327,14 +359,11 @@ static void
 e_cal_backend_ews_async_data_free (EwsCalendarAsyncData *async_data)
 {
 	if (async_data != NULL) {
-		if (async_data->cbews != NULL)
-			g_clear_object (&async_data->cbews);
-		if (async_data->comp != NULL)
-			g_clear_object (&async_data->comp);
-		if (async_data->extra_comp != NULL)
-			g_clear_object (&async_data->extra_comp);
-		if (async_data->cal != NULL)
-			g_clear_object (&async_data->cal);
+		g_clear_object (&async_data->cbews);
+		g_clear_object (&async_data->cancellable);
+		g_clear_object (&async_data->comp);
+		g_clear_object (&async_data->extra_comp);
+		g_clear_object (&async_data->cal);
 
 		g_slist_free_full (async_data->users, g_free);
 		g_free (async_data->item_id);
@@ -410,6 +439,7 @@ e_cal_backend_ews_discard_alarm (ECalBackend *backend,
 	 * Exchange not support that? */
 	edad = g_new0 (EwsCalendarAsyncData, 1);
 	edad->cbews = g_object_ref (cbews);
+	edad->cancellable = cal_backend_ews_ref_cancellable (cbews);
 	edad->cal = g_object_ref (cal);
 	edad->context = context;
 
@@ -441,7 +471,7 @@ e_cal_backend_ews_discard_alarm (ECalBackend *backend,
 		"SendToNone", NULL,
 		e_cal_backend_ews_clear_reminder_is_set,
 		&convert_data,
-		priv->cancellable,
+		edad->cancellable,
 		ews_cal_discard_alarm_cb,
 		edad);
 }
@@ -1258,6 +1288,7 @@ e_cal_backend_ews_remove_object (ECalBackend *backend,
 
 	remove_data = g_new0 (EwsCalendarAsyncData, 1);
 	remove_data->cbews = g_object_ref (cbews);
+	remove_data->cancellable = cal_backend_ews_ref_cancellable (cbews);
 	remove_data->comp = comp != NULL ? g_object_ref (comp) : NULL;
 	remove_data->extra_comp = parent != NULL ? g_object_ref (parent) : NULL;
 	remove_data->cal = g_object_ref (cal);
@@ -1270,7 +1301,7 @@ e_cal_backend_ews_remove_object (ECalBackend *backend,
 	e_ews_connection_delete_item (
 		priv->cnc, EWS_PRIORITY_MEDIUM, &item_id, index, EWS_HARD_DELETE,
 		e_cal_backend_ews_is_organizer (cbews, comp, parent) ? EWS_SEND_TO_ALL_AND_SAVE_COPY : EWS_SEND_TO_NONE,
-		EWS_ALL_OCCURRENCES, priv->cancellable,
+		EWS_ALL_OCCURRENCES, remove_data->cancellable,
 		ews_cal_remove_object_cb,
 		remove_data);
 
@@ -1411,6 +1442,7 @@ ews_create_attachments_cb (GObject *object,
 
 		modify_data = g_new0 (EwsCalendarAsyncData, 1);
 		modify_data->cbews = g_object_ref (create_data->cbews);
+		modify_data->cancellable = cal_backend_ews_ref_cancellable (create_data->cbews);
 		modify_data->comp = g_object_ref (create_data->comp);
 		modify_data->extra_comp = g_object_ref (create_data->extra_comp);
 		modify_data->cal = g_object_ref (create_data->cal);
@@ -1442,7 +1474,7 @@ ews_create_attachments_cb (GObject *object,
 			priv->folder_id,
 			e_cal_backend_ews_convert_component_to_updatexml,
 			&convert_data,
-			priv->cancellable,
+			modify_data->cancellable,
 			ews_cal_modify_object_cb,
 			modify_data);
 	} else {
@@ -1503,10 +1535,12 @@ ews_create_object_cb (GObject *object,
 
 	if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_EVENT) {
 		EEwsAdditionalProps *add_props;
+		GCancellable *cancellable;
 
 		add_props = e_ews_additional_props_new ();
 		add_props->field_uri = g_strdup ("calendar:UID");
 
+		cancellable = cal_backend_ews_ref_cancellable (cbews);
 		items = g_slist_append (items, item_id->id);
 
 		/* get calender uid from server*/
@@ -1517,9 +1551,11 @@ ews_create_object_cb (GObject *object,
 			add_props,
 			FALSE, NULL, E_EWS_BODY_TYPE_TEXT,
 			&items_req,
-			NULL, NULL, priv->cancellable, &error);
+			NULL, NULL, cancellable, &error);
 
 		e_ews_additional_props_free (add_props);
+		g_clear_object (&cancellable);
+
 		if (!res && error != NULL) {
 			if (items_req)
 				g_slist_free_full (items_req, g_object_unref);
@@ -1551,6 +1587,7 @@ ews_create_object_cb (GObject *object,
 		EwsCalendarAsyncData *attach_data = g_new0 (EwsCalendarAsyncData, 1);
 
 		attach_data->cbews = g_object_ref (create_data->cbews);
+		attach_data->cancellable = cal_backend_ews_ref_cancellable (create_data->cbews);
 		attach_data->comp = g_object_ref (create_data->comp);
 		attach_data->cal = g_object_ref (create_data->cal);
 		attach_data->context = create_data->context;
@@ -1596,7 +1633,7 @@ ews_create_object_cb (GObject *object,
 		e_ews_connection_create_attachments (
 			cnc, EWS_PRIORITY_MEDIUM,
 			item_id, info_attachments,
-			FALSE, priv->cancellable,
+			FALSE, attach_data->cancellable,
 			ews_create_attachments_cb,
 			attach_data);
 
@@ -2862,6 +2899,7 @@ ews_get_attachments (ECalBackendEws *cbews,
 	ECalComponent *comp;
 	const gchar *uid;
 	GSList *uris = NULL, *info_attachments = NULL;
+	GCancellable *cancellable;
 
 	e_ews_item_has_attachments (item, &has_attachment);
 	if (!has_attachment)
@@ -2870,10 +2908,13 @@ ews_get_attachments (ECalBackendEws *cbews,
 	item_id = e_ews_item_get_id (item);
 	g_return_if_fail (item_id != NULL);
 
+	cancellable = cal_backend_ews_ref_cancellable (cbews);
+
 	PRIV_LOCK (cbews->priv);
 	comp = g_hash_table_lookup (cbews->priv->item_id_hash, item_id->id);
 	if (!comp) {
 		PRIV_UNLOCK (cbews->priv);
+		g_clear_object (&cancellable);
 		g_warning ("%s: Failed to get component from item_id_hash", G_STRFUNC);
 		return;
 	}
@@ -2890,7 +2931,7 @@ ews_get_attachments (ECalBackendEws *cbews,
 		TRUE,
 		&info_attachments,
 		NULL, NULL,
-		cbews->priv->cancellable,
+		cancellable,
 		NULL)) {
 		icalcomponent *icalcomp;
 		icalproperty *icalprop;
@@ -2938,6 +2979,8 @@ ews_get_attachments (ECalBackendEws *cbews,
 	}
 
 	PRIV_UNLOCK (cbews->priv);
+
+	g_clear_object (&cancellable);
 }
 
 static icaltimezone *
@@ -3027,6 +3070,7 @@ add_item_to_cache (ECalBackendEws *cbews,
 		if (e_ews_item_get_delegator (item) != NULL) {
 			const gchar *task_owner = e_ews_item_get_delegator (item);
 			GSList *mailboxes = NULL, *l;
+			GCancellable *cancellable;
 			GError *error = NULL;
 			gboolean includes_last_item;
 			gchar *mailtoname;
@@ -3043,11 +3087,13 @@ add_item_to_cache (ECalBackendEws *cbews,
 			icalproperty_add_parameter (icalprop, param);
 			icalcomponent_add_property (icalcomp, icalprop);
 
+			cancellable = cal_backend_ews_ref_cancellable (cbews);
+
 			/* get delegator mail box*/
 			e_ews_connection_resolve_names_sync (
 				priv->cnc, EWS_PRIORITY_MEDIUM, task_owner,
 				EWS_SEARCH_AD, NULL, FALSE, &mailboxes, NULL,
-				&includes_last_item, priv->cancellable, &error);
+				&includes_last_item, cancellable, &error);
 
 			for (l = mailboxes; l != NULL; l = g_slist_next (l)) {
 				EwsMailbox *mb = l->data;
@@ -3062,6 +3108,7 @@ add_item_to_cache (ECalBackendEws *cbews,
 				e_ews_mailbox_free (mb);
 			}
 			g_slist_free (mailboxes);
+			g_clear_object (&cancellable);
 		}
 
 		if (item_type == E_EWS_ITEM_TYPE_TASK) {
@@ -3472,9 +3519,12 @@ ews_cal_sync_get_items_sync (ECalBackendEws *cbews,
 	ECalBackendEwsPrivate *priv;
 	gboolean ret = FALSE;
 	GSList *items = NULL, *l;
+	GCancellable *cancellable;
 	GError *error = NULL;
 
 	priv = cbews->priv;
+
+	cancellable = cal_backend_ews_ref_cancellable (cbews);
 
 	e_ews_connection_get_items_sync (
 		priv->cnc,
@@ -3487,8 +3537,10 @@ ews_cal_sync_get_items_sync (ECalBackendEws *cbews,
 		E_EWS_BODY_TYPE_TEXT,
 		&items,
 		NULL, NULL,
-		priv->cancellable,
+		cancellable,
 		&error);
+
+	g_clear_object (&cancellable);
 
 	if (error != NULL) {
 		g_debug ("%s: Unable to get items: %s", G_STRFUNC, error->message);
@@ -3701,19 +3753,25 @@ ews_start_sync_thread (gpointer data)
 	gboolean ret;
 	gchar *old_sync_state = NULL;
 	gchar *new_sync_state = NULL;
+	GCancellable *cancellable;
 	GError *error = NULL;
 
 	cbews = (ECalBackendEws *) data;
 	priv = cbews->priv;
 
+	cancellable = cal_backend_ews_ref_cancellable (cbews);
+
 	old_sync_state = g_strdup (e_cal_backend_store_get_key_value (priv->store, SYNC_KEY));
 	do {
 		EEwsAdditionalProps *add_props;
+		GCancellable *cancellable;
 
 		includes_last_item = TRUE;
 
 		add_props = e_ews_additional_props_new ();
 		add_props->field_uri = g_strdup ("item:ItemClass");
+
+		cancellable = cal_backend_ews_ref_cancellable (cbews);
 
 		ret = e_ews_connection_sync_folder_items_sync (
 			priv->cnc,
@@ -3728,10 +3786,11 @@ ews_start_sync_thread (gpointer data)
 			&items_created,
 			&items_updated,
 			&items_deleted,
-			priv->cancellable,
+			cancellable,
 			&error);
 
 		e_ews_additional_props_free (add_props);
+		g_clear_object (&cancellable);
 		g_free (old_sync_state);
 		old_sync_state = NULL;
 
@@ -3754,7 +3813,7 @@ ews_start_sync_thread (gpointer data)
 							&items_created,
 							&items_updated,
 							&items_deleted,
-							priv->cancellable,
+							cancellable,
 							&error)) {
 					if (!g_error_matches (
 							error,
@@ -3793,6 +3852,8 @@ ews_start_sync_thread (gpointer data)
 	} while (!includes_last_item);
 
 	ews_refreshing_dec (cbews);
+
+	g_clear_object (&cancellable);
 
 	g_slist_free_full (items_created, g_object_unref);
 	g_slist_free_full (items_updated, g_object_unref);
@@ -4115,13 +4176,7 @@ e_cal_backend_ews_notify_online_cb (EBackend *backend,
 	PRIV_LOCK (priv);
 
 	if (e_backend_get_online (backend)) {
-		if (priv->cancellable) {
-			g_cancellable_cancel (priv->cancellable);
-			g_object_unref (priv->cancellable);
-			priv->cancellable = NULL;
-		}
-		priv->cancellable = g_cancellable_new ();
-
+		cal_backend_ews_set_cancellable (cbews, g_cancellable_new ());
 		priv->read_only = FALSE;
 	} else {
 		switch_offline (cbews);
@@ -4213,11 +4268,7 @@ e_cal_backend_ews_dispose (GObject *object)
 		priv->refresh_timeout = 0;
 	}
 
-	if (priv->cancellable) {
-		g_cancellable_cancel (priv->cancellable);
-		g_object_unref (priv->cancellable);
-		priv->cancellable = NULL;
-	}
+	cal_backend_ews_set_cancellable (cbews, NULL);
 
 	if (priv->cnc) {
 		g_signal_handlers_disconnect_by_func (priv->cnc, cbews_server_notification_cb, object);
@@ -4255,6 +4306,7 @@ e_cal_backend_ews_finalize (GObject *object)
 
 	/* Clean up */
 	g_rec_mutex_clear (&priv->rec_mutex);
+	g_mutex_clear (&priv->cancellable_lock);
 
 	if (priv->store) {
 		g_object_unref (priv->store);
@@ -4402,6 +4454,7 @@ e_cal_backend_ews_init (ECalBackendEws *cbews)
 
 	/* create the mutex for thread safety */
 	g_rec_mutex_init (&cbews->priv->rec_mutex);
+	g_mutex_init (&cbews->priv->cancellable_lock);
 	cbews->priv->refreshing_done = e_flag_new ();
 	cbews->priv->item_id_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
 	cbews->priv->default_zone = icaltimezone_get_utc_timezone ();
