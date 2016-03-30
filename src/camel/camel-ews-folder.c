@@ -1940,7 +1940,7 @@ ews_append_message_sync (CamelFolder *folder,
 		g_free (folder_id);
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			_("Cant perform actions on the folder while in offline mode"));
+			_("Cannot perform actions on the folder while in offline mode"));
 		return FALSE;
 	}
 
