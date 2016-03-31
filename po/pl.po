@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-03-27 16:13+0200\n"
-"PO-Revision-Date: 2016-03-27 16:14+0200\n"
+"POT-Creation-Date: 2016-03-31 19:03+0200\n"
+"PO-Revision-Date: 2016-03-31 19:04+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -69,23 +69,23 @@ msgstr "Wyszukiwanie…"
 msgid "Requested to delete an unrelated cursor"
 msgstr "Zażądano usunięcia niepowiązanego kursora"
 
-#: ../src/calendar/e-cal-backend-ews.c:1317
+#: ../src/calendar/e-cal-backend-ews.c:1349
 msgid "EWS does not support bulk removals"
 msgstr "EWS nie obsługuje usuwania całości"
 
-#: ../src/calendar/e-cal-backend-ews.c:1495
+#: ../src/calendar/e-cal-backend-ews.c:1528
 msgid "Unknown error"
 msgstr "Nieznany błąd"
 
-#: ../src/calendar/e-cal-backend-ews.c:1739
+#: ../src/calendar/e-cal-backend-ews.c:1777
 msgid "EWS does not support bulk additions"
 msgstr "EWS nie obsługuje dodawania całości"
 
-#: ../src/calendar/e-cal-backend-ews.c:1944
+#: ../src/calendar/e-cal-backend-ews.c:1982
 msgid "EWS does not support bulk modifications"
 msgstr "EWS nie obsługuje modyfikacji całości"
 
-#: ../src/calendar/e-cal-backend-ews.c:2370
+#: ../src/calendar/e-cal-backend-ews.c:2408
 #, c-format
 msgid "Cannot find user '%s' between attendees"
 msgstr "Nie można odnaleźć użytkownika „%s” na liście uczestników"
@@ -131,7 +131,7 @@ msgstr "Nie można wczytać zestawienia dla %s"
 
 #: ../src/camel/camel-ews-folder.c:1943
 #, c-format
-msgid "Cant perform actions on the folder while in offline mode"
+msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Nie można wykonać działań na katalogu w trybie offline"
 
 #: ../src/camel/camel-ews-provider.c:47
