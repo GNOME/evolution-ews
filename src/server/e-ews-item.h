@@ -259,6 +259,7 @@ e_ews_item_ical_dump (EEwsItem *item);
 EEwsAttachmentInfo *
 e_ews_item_dump_mime_content (EEwsItem *item, const gchar *cache);
 
+const gchar *	e_ews_item_get_my_response_type	(EEwsItem *item);
 const GSList *	e_ews_item_get_attendees	(EEwsItem *item);
 
 const EwsId *	e_ews_item_get_calendar_item_accept_id

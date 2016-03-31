@@ -135,6 +135,7 @@ struct _EEwsItemPrivate {
 
 	GSList *modified_occurrences;
 	GSList *attachments_ids;
+	gchar *my_response_type;
 	GSList *attendees;
 
 	EwsId *calendar_item_accept_id;
@@ -239,6 +240,9 @@ e_ews_item_dispose (GObject *object)
 
 	g_slist_free_full (priv->attachments_ids, g_free);
 	priv->attachments_ids = NULL;
+
+	g_free (priv->my_response_type);
+	priv->my_response_type = NULL;
 
 	g_slist_free_full (priv->attendees, (GDestroyNotify) ews_item_free_attendee);
 	priv->attendees = NULL;
@@ -1112,6 +1116,9 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 			parse_extended_property (priv, subparam);
 		} else if (!g_ascii_strcasecmp (name, "ModifiedOccurrences")) {
 			process_modified_occurrences (priv, subparam);
+		} else if (!g_ascii_strcasecmp (name, "MyResponseType")) {
+			g_free (priv->my_response_type);
+			priv->my_response_type = e_soap_parameter_get_string_value (subparam);
 		} else if (!g_ascii_strcasecmp (name, "RequiredAttendees")) {
 			process_attendees (priv, subparam, "Required");
 		} else if (!g_ascii_strcasecmp (name, "OptionalAttendees")) {
@@ -1811,6 +1818,14 @@ e_ews_item_dump_mime_content (EEwsItem *item,
 
 	/* Return URI to saved file */
 	return info;
+}
+
+const gchar *
+e_ews_item_get_my_response_type (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	return item->priv->my_response_type;
 }
 
 const GSList *

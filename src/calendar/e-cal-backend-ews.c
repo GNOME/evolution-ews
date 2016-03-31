@@ -104,6 +104,7 @@ struct _ECalBackendEwsPrivate {
 	" calendar:UID" \
 	" calendar:Resources" \
 	" calendar:ModifiedOccurrences" \
+	" calendar:MyResponseType" \
 	" calendar:RequiredAttendees" \
 	" calendar:OptionalAttendees"
 
@@ -3012,6 +3013,32 @@ get_timezone (ETimezoneCache *timezone_cache,
 	return zone;
 }
 
+static icalparameter *
+cal_backend_ews_responsetype_to_partstat (const gchar *responsetype)
+{
+	icalparameter *param = NULL;
+
+	g_return_val_if_fail (responsetype != NULL, NULL);
+
+	if (g_ascii_strcasecmp (responsetype, "Organizer") == 0)
+		param = icalparameter_new_partstat (ICAL_PARTSTAT_ACCEPTED);
+	else if (g_ascii_strcasecmp (responsetype, "Tentative") == 0)
+		param = icalparameter_new_partstat (ICAL_PARTSTAT_TENTATIVE);
+	else if (g_ascii_strcasecmp (responsetype, "Accept") == 0)
+		param = icalparameter_new_partstat (ICAL_PARTSTAT_ACCEPTED);
+	else if (g_ascii_strcasecmp (responsetype, "Decline") == 0)
+		param = icalparameter_new_partstat (ICAL_PARTSTAT_DECLINED);
+	else if (g_ascii_strcasecmp (responsetype, "NoResponseReceived") == 0)
+		param = icalparameter_new_partstat (ICAL_PARTSTAT_NEEDSACTION);
+	else if (g_ascii_strcasecmp (responsetype, "Unknown") == 0)
+		param = icalparameter_new_partstat (ICAL_PARTSTAT_NONE);
+
+	if (!param)
+		param = icalparameter_new_partstat (ICAL_PARTSTAT_NONE);
+
+	return param;
+}
+
 static void
 add_item_to_cache (ECalBackendEws *cbews,
                    EEwsItem *item)
@@ -3339,18 +3366,12 @@ add_item_to_cache (ECalBackendEws *cbews,
 			icalproperty_add_parameter (icalprop, cu_type);
 			icalproperty_add_parameter (icalprop, param);
 
-			if (g_ascii_strcasecmp (attendee->responsetype, "Organizer") == 0)
-				param = icalparameter_new_partstat (ICAL_PARTSTAT_ACCEPTED);
-			else if (g_ascii_strcasecmp (attendee->responsetype, "Tentative") == 0)
-				param = icalparameter_new_partstat (ICAL_PARTSTAT_TENTATIVE);
-			else if (g_ascii_strcasecmp (attendee->responsetype, "Accept") == 0)
-				param = icalparameter_new_partstat (ICAL_PARTSTAT_ACCEPTED);
-			else if (g_ascii_strcasecmp (attendee->responsetype, "Decline") == 0)
-				param = icalparameter_new_partstat (ICAL_PARTSTAT_DECLINED);
-			else if (g_ascii_strcasecmp (attendee->responsetype, "NoResponseReceived") == 0)
-				param = icalparameter_new_partstat (ICAL_PARTSTAT_NEEDSACTION);
-			else if (g_ascii_strcasecmp (attendee->responsetype, "Unknown") == 0)
-				param = icalparameter_new_partstat (ICAL_PARTSTAT_NONE);
+			if (cbews->priv->user_email && (email || attendee->mailbox->email) && e_ews_item_get_my_response_type (item) &&
+			    g_ascii_strcasecmp (email ? email : attendee->mailbox->email, cbews->priv->user_email) == 0) {
+				param = cal_backend_ews_responsetype_to_partstat (e_ews_item_get_my_response_type (item));
+			} else {
+				param = cal_backend_ews_responsetype_to_partstat (attendee->responsetype);
+			}
 			icalproperty_add_parameter (icalprop, param);
 
 			icalcomponent_add_property (icalcomp, icalprop);
