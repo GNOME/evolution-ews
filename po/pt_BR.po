@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product"
 "=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2016-03-28 05:26+0000\n"
-"PO-Revision-Date: 2016-03-28 10:05-0200\n"
+"POT-Creation-Date: 2016-03-31 17:28+0000\n"
+"PO-Revision-Date: 2016-03-31 14:54-0200\n"
 "Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
 "Language: pt_BR\n"
@@ -67,23 +67,23 @@ msgstr "Pesquisando..."
 msgid "Requested to delete an unrelated cursor"
 msgstr "Requisitada a exclusão de cursor não-relacionado"
 
-#: ../src/calendar/e-cal-backend-ews.c:1317
+#: ../src/calendar/e-cal-backend-ews.c:1349
 msgid "EWS does not support bulk removals"
 msgstr "O EWS não tem suporte a remoções em lote"
 
-#: ../src/calendar/e-cal-backend-ews.c:1495
+#: ../src/calendar/e-cal-backend-ews.c:1528
 msgid "Unknown error"
 msgstr "Erro desconhecido"
 
-#: ../src/calendar/e-cal-backend-ews.c:1739
+#: ../src/calendar/e-cal-backend-ews.c:1777
 msgid "EWS does not support bulk additions"
 msgstr "O EWS não tem suporte a inclusões em lote"
 
-#: ../src/calendar/e-cal-backend-ews.c:1944
+#: ../src/calendar/e-cal-backend-ews.c:1982
 msgid "EWS does not support bulk modifications"
 msgstr "O EWS não tem suporte a modificações em lote"
 
-#: ../src/calendar/e-cal-backend-ews.c:2370
+#: ../src/calendar/e-cal-backend-ews.c:2408
 #, c-format
 msgid "Cannot find user '%s' between attendees"
 msgstr "Não foi possível localizar o usuário \"%s\" entre os participantes"
@@ -129,7 +129,8 @@ msgstr "Não foi possível carregar o resumo para %s"
 
 #: ../src/camel/camel-ews-folder.c:1943
 #, c-format
-msgid "Cant perform actions on the folder while in offline mode"
+#| msgid "Cant perform actions on the folder while in offline mode"
+msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Não é possível executar ações na pasta no modo desconectado"
 
 #: ../src/camel/camel-ews-provider.c:47
