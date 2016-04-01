@@ -2890,18 +2890,24 @@ ebews_traverse_dl (EBookBackendEws *ebews,
 		   EwsMailbox *mb,
 		   GError **error)
 {
-	if (g_strcmp0 (mb->mailbox_type, "PrivateDL") == 0) {
+	if (g_strcmp0 (mb->mailbox_type, "PrivateDL") == 0 ||
+	    g_strcmp0 (mb->mailbox_type, "PublicDL") == 0) {
 		GSList *members = NULL, *l;
 		gboolean includes_last;
 		gboolean ret = FALSE;
+		const gchar *ident;
 
-		if (!mb->item_id || !mb->item_id->id)
+		if (mb->item_id && mb->item_id->id)
+			ident = mb->item_id->id;
+		else if (mb->email)
+			ident = mb->email;
+		else
 			return FALSE;
 
-		if (g_hash_table_lookup (items, mb->item_id->id) != NULL)
+		if (g_hash_table_lookup (items, ident) != NULL)
 			return TRUE;
 
-		g_hash_table_insert (items, g_strdup (mb->item_id->id), GINT_TO_POINTER (1));
+		g_hash_table_insert (items, g_strdup (ident), GINT_TO_POINTER (1));
 
 		if (!e_ews_connection_expand_dl_sync (
 			ebews->priv->cnc,
@@ -2937,7 +2943,7 @@ ebews_traverse_dl (EBookBackendEws *ebews,
 
 		if (value && g_hash_table_lookup (values, value) == NULL) {
 			e_vcard_attribute_add_value (attr, value);
-			e_vcard_add_attribute (E_VCARD (*contact), attr);
+			e_vcard_append_attribute (E_VCARD (*contact), attr);
 
 			g_hash_table_insert (values, g_strdup (value), GINT_TO_POINTER (1));
 		}
@@ -2982,6 +2988,31 @@ exit:
 	g_hash_table_destroy (items);
 	g_hash_table_destroy (values);
 	return contact;
+}
+
+static gboolean
+ebews_get_dl_info_gal (EBookBackendEws *ebews,
+		       EContact *contact,
+		       EwsMailbox *mb,
+		       GError **error)
+{
+	GHashTable *items, *values;
+	gboolean success;
+
+	items = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+	values = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+
+	success = ebews_traverse_dl (ebews, &contact, items, values, mb, error);
+
+	if (success) {
+		e_contact_set (contact, E_CONTACT_IS_LIST, GINT_TO_POINTER (TRUE));
+		e_contact_set (contact, E_CONTACT_LIST_SHOW_ADDRESSES, GINT_TO_POINTER (TRUE));
+	}
+
+	g_hash_table_destroy (items);
+	g_hash_table_destroy (values);
+
+	return success;
 }
 
 static gboolean
@@ -3381,7 +3412,15 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 		EContact *contact = NULL;
 		const gchar *str;
 
-		if (contact_item && e_ews_item_get_item_type (contact_item) == E_EWS_ITEM_TYPE_CONTACT)
+		if (g_strcmp0 (mb->mailbox_type, "PublicDL") == 0) {
+			contact = e_contact_new ();
+
+			if (!ebews_get_dl_info_gal (ebews, contact, mb, NULL)) {
+				g_clear_object (&contact);
+			}
+		}
+
+		if (!contact && contact_item && e_ews_item_get_item_type (contact_item) == E_EWS_ITEM_TYPE_CONTACT)
 			contact = ebews_get_contact_info (ebews, contact_item, cancellable, NULL);
 
 		if (!contact)
