@@ -1,3 +1,18 @@
+Evolution-EWS 3.20.1 2016-04-11
+-------------------------------
+
+Bug Fixes:
+	Bug 763719 - Reconnect or use its own connection for message send (Milan Crha)
+	Bug 743654 - Show user's meeting response in the Calendar view (Milan Crha)
+	Bug 764442 - Expand Distribution Lists from online GAL (not OAB) (Milan Crha)
+
+Miscellaneous:
+	Add thread safety around ECalBackendEws::priv::cancellable (Milan Crha)
+
+Translations:
+	Tom Tryfonidis (el)
+	Anders Jonsson (sv)
+
 Evolution-EWS 3.20.0 2016-03-21
 -------------------------------
 
