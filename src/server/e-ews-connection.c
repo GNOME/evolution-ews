@@ -57,6 +57,9 @@
 /* For the number of connections */
 #define EWS_CONNECTION_MAX_REQUESTS 1
 
+/* A chunk size limit when moving items in chunks. */
+#define EWS_MOVE_ITEMS_CHUNK_SIZE 500
+
 #define QUEUE_LOCK(x) (g_rec_mutex_lock(&(x)->priv->queue_lock))
 #define QUEUE_UNLOCK(x) (g_rec_mutex_unlock(&(x)->priv->queue_lock))
 
@@ -6225,6 +6228,75 @@ e_ews_connection_move_items_sync (EEwsConnection *cnc,
 		cnc, result, items, error);
 
 	e_async_closure_free (closure);
+
+	return success;
+}
+
+gboolean
+e_ews_connection_move_items_in_chunks_sync (EEwsConnection *cnc,
+					    gint pri,
+					    const gchar *folder_id,
+					    gboolean docopy,
+					    const GSList *ids,
+					    GSList **items,
+					    GCancellable *cancellable,
+					    GError **error)
+{
+	const GSList *iter;
+	guint total_ids = 0, done_ids = 0;
+	gboolean success = TRUE;
+
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (items != NULL, FALSE);
+
+	g_object_ref (cnc);
+
+	*items = NULL;
+	iter = ids;
+
+	while (success && iter) {
+		guint n_ids;
+		const GSList *tmp_iter;
+		GSList *processed_items = NULL;
+
+		for (tmp_iter = iter, n_ids = 0; tmp_iter && n_ids < EWS_MOVE_ITEMS_CHUNK_SIZE; tmp_iter = g_slist_next (tmp_iter), n_ids++) {
+			/* Only check bounds first, to avoid unnecessary allocations */
+		}
+
+		if (tmp_iter) {
+			GSList *shorter = NULL;
+
+			if (total_ids == 0)
+				total_ids = g_slist_length ((GSList *) ids);
+
+			for (n_ids = 0; iter && n_ids < EWS_MOVE_ITEMS_CHUNK_SIZE; iter = g_slist_next (iter), n_ids++) {
+				shorter = g_slist_prepend (shorter, iter->data);
+			}
+
+			shorter = g_slist_reverse (shorter);
+
+			success = e_ews_connection_move_items_sync (cnc, pri, folder_id, docopy,
+				shorter, &processed_items, cancellable, error);
+
+			g_slist_free (shorter);
+
+			done_ids += n_ids;
+		} else {
+			success = e_ews_connection_move_items_sync (cnc, pri, folder_id, docopy,
+				iter, &processed_items, cancellable, error);
+
+			iter = NULL;
+			done_ids = total_ids;
+		}
+
+		if (processed_items)
+			*items = g_slist_concat (*items, processed_items);
+
+		if (total_ids > 0)
+			camel_operation_progress (cancellable, 100 * (gdouble) done_ids / (gdouble) total_ids);
+	}
+
+	g_object_unref (cnc);
 
 	return success;
 }
