@@ -908,6 +908,15 @@ gboolean	e_ews_connection_move_items_sync
 						 GSList **items_ret,
 						 GCancellable *cancellable,
 						 GError **error);
+gboolean	e_ews_connection_move_items_in_chunks_sync
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *folder_id,
+						 gboolean docopy,
+						 const GSList *ids,
+						 GSList **items,
+						 GCancellable *cancellable,
+						 GError **error);
 
 void		e_ews_connection_create_attachments
 						(EEwsConnection *cnc,

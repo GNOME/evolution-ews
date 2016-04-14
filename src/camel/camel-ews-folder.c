@@ -1166,7 +1166,7 @@ ews_move_to_junk_folder (CamelFolder *folder,
 		folder_id = camel_ews_store_summary_get_folder_id_from_folder_type (
 			ews_store->summary, CAMEL_FOLDER_TYPE_JUNK);
 
-		status = e_ews_connection_move_items_sync (
+		status = e_ews_connection_move_items_in_chunks_sync (
 			cnc, EWS_PRIORITY_MEDIUM, folder_id, FALSE,
 			junk_uids, &moved_items, cancellable, &local_error);
 
@@ -1178,17 +1178,20 @@ ews_move_to_junk_folder (CamelFolder *folder,
 			status = ews_refresh_info_sync (folder, cancellable, &local_error);
 		}
 
-		g_slist_free_full (moved_items, g_object_unref);
-		g_free (folder_id);
-
-		if (status) {
+		/* Messages could be moved partially only, like when
+		   the user cancels the operation in the middle */
+		if (status || moved_items) {
 			CamelFolderChangeInfo *changes;
-			const GSList *iter;
+			const GSList *iter, *items_iter;
 
 			changes = camel_folder_change_info_new ();
 
-			for (iter = junk_uids; iter; iter = g_slist_next (iter)) {
+			for (iter = junk_uids, items_iter = moved_items; iter && items_iter; iter = g_slist_next (iter), items_iter = g_slist_next (items_iter)) {
 				const gchar *uid = iter->data;
+				EEwsItem *item = items_iter->data;
+
+				if (!item || e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR)
+					continue;
 
 				camel_folder_summary_lock (folder->summary);
 
@@ -1205,6 +1208,9 @@ ews_move_to_junk_folder (CamelFolder *folder,
 			}
 			camel_folder_change_info_free (changes);
 		}
+
+		g_slist_free_full (moved_items, g_object_unref);
+		g_free (folder_id);
 
 		if (local_error) {
 			camel_ews_store_maybe_disconnect (ews_store, local_error);
@@ -2047,13 +2053,17 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 
 	ids = g_slist_reverse (ids);
 
-	if (success && e_ews_connection_move_items_sync (
+	success = success && e_ews_connection_move_items_in_chunks_sync (
 		cnc, EWS_PRIORITY_MEDIUM,
 		dst_id, !delete_originals,
 		ids, &ret_items,
-		cancellable, &local_error)) {
+		cancellable, &local_error);
+
+	/* Messages could be copied/moved partially only, like when
+	   the user cancels the operation in the middle */
+	if (success || ret_items) {
 		CamelFolderChangeInfo *changes;
-		GSList *l;
+		GSList *l, *processed_items = NULL;
 
 		changes = camel_folder_change_info_new ();
 
@@ -2064,10 +2074,14 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 			CamelMessageInfo *clone;
 			const EwsId *id;
 
-			if (e_ews_item_get_item_type (l->data) == E_EWS_ITEM_TYPE_ERROR)
+			if (e_ews_item_get_item_type (l->data) == E_EWS_ITEM_TYPE_ERROR) {
+				if (!local_error)
+					local_error = g_error_copy (e_ews_item_get_error (l->data));
 				continue;
+			}
 
 			id = e_ews_item_get_id (l->data);
+			processed_items = g_slist_prepend (processed_items, uids->pdata[i]);
 
 			message = ews_folder_get_message_cached (source, uids->pdata[i], cancellable);
 			if (message == NULL)
@@ -2111,10 +2125,12 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 		if (delete_originals) {
 			changes = camel_folder_change_info_new ();
 
-			for (i = 0; i < uids->len; i++) {
-				camel_folder_summary_remove_uid (source->summary, uids->pdata[i]);
-				camel_folder_change_info_remove_uid (changes, uids->pdata[i]);
-				ews_data_cache_remove (CAMEL_EWS_FOLDER (source)->cache, "cur", uids->pdata[i], NULL);
+			for (l = processed_items; l; l = g_slist_next (l)) {
+				const gchar *uid = l->data;
+
+				camel_folder_summary_remove_uid (source->summary, uid);
+				camel_folder_change_info_remove_uid (changes, uid);
+				ews_data_cache_remove (CAMEL_EWS_FOLDER (source)->cache, "cur", uid, NULL);
 			}
 			if (camel_folder_change_info_changed (changes)) {
 				camel_folder_summary_touch (source->summary);
@@ -2127,8 +2143,13 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 		/* update destination folder only if not frozen, to not update
 		   for each single message transfer during filtering
 		 */
-		if (!camel_folder_is_frozen (destination))
+		if (!camel_folder_is_frozen (destination)) {
+			camel_operation_progress (cancellable, -1);
+
 			ews_refresh_info_sync (destination, cancellable, NULL);
+		}
+
+		g_slist_free (processed_items);
 	}
 	g_free (dst_id);
 
