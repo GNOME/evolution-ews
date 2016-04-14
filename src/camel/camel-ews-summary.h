@@ -47,6 +47,7 @@ G_BEGIN_DECLS
 
 typedef struct _CamelEwsSummary CamelEwsSummary;
 typedef struct _CamelEwsSummaryClass CamelEwsSummaryClass;
+typedef struct _CamelEwsSummaryPrivate CamelEwsSummaryPrivate;
 typedef struct _CamelEwsMessageInfo CamelEwsMessageInfo;
 typedef struct _CamelEwsMessageContentInfo CamelEwsMessageContentInfo;
 
@@ -69,9 +70,7 @@ struct _CamelEwsMessageContentInfo {
 
 struct _CamelEwsSummary {
 	CamelFolderSummary parent;
-
-	gchar *sync_state;
-	gint32 version;
+	CamelEwsSummaryPrivate *priv;
 } ;
 
 struct _CamelEwsSummaryClass {
@@ -96,6 +95,9 @@ gboolean
 					 CamelMimeMessage *message);
 void	ews_summary_clear		(CamelFolderSummary *summary,
 					 gboolean uncache);
+void	camel_ews_summary_set_sync_state(CamelEwsSummary *ews_summary,
+					 const gchar *sync_state);
+gchar *	camel_ews_summary_dup_sync_state(CamelEwsSummary *ews_summary);
 
 G_END_DECLS
 

@@ -55,6 +55,12 @@ static CamelMessageContentInfo * content_info_from_db (CamelFolderSummary *s, Ca
 
 /*End of Prototypes*/
 
+struct _CamelEwsSummaryPrivate {
+	GMutex property_lock;
+	gchar *sync_state;
+	gint32 version;
+};
+
 G_DEFINE_TYPE (CamelEwsSummary, camel_ews_summary, CAMEL_TYPE_FOLDER_SUMMARY)
 
 static CamelMessageInfo *
@@ -88,12 +94,13 @@ ews_message_info_free (CamelFolderSummary *s,
 static void
 ews_summary_finalize (GObject *object)
 {
-       CamelEwsSummary *ews_summary = CAMEL_EWS_SUMMARY (object);
+	CamelEwsSummary *ews_summary = CAMEL_EWS_SUMMARY (object);
 
-       g_free (ews_summary->sync_state);
+	g_free (ews_summary->priv->sync_state);
+	g_mutex_clear (&ews_summary->priv->property_lock);
 
-       /* Chain up to parent's finalize() method. */
-       G_OBJECT_CLASS (camel_ews_summary_parent_class)->finalize (object);
+	/* Chain up to parent's finalize() method. */
+	G_OBJECT_CLASS (camel_ews_summary_parent_class)->finalize (object);
 }
 
 static void
@@ -101,6 +108,8 @@ camel_ews_summary_class_init (CamelEwsSummaryClass *class)
 {
 	CamelFolderSummaryClass *folder_summary_class;
 	GObjectClass *object_class;
+
+	g_type_class_add_private (class, sizeof (CamelEwsSummaryPrivate));
 
 	object_class = G_OBJECT_CLASS (class);
 	object_class->finalize = ews_summary_finalize;
@@ -122,6 +131,9 @@ camel_ews_summary_class_init (CamelEwsSummaryClass *class)
 static void
 camel_ews_summary_init (CamelEwsSummary *ews_summary)
 {
+	ews_summary->priv = G_TYPE_INSTANCE_GET_PRIVATE (ews_summary, CAMEL_TYPE_EWS_SUMMARY, CamelEwsSummaryPrivate);
+
+	g_mutex_init (&ews_summary->priv->property_lock);
 }
 
 /**
@@ -149,7 +161,7 @@ static gboolean
 summary_header_from_db (CamelFolderSummary *s,
                         CamelFIRecord *mir)
 {
-	CamelEwsSummary *gms = CAMEL_EWS_SUMMARY (s);
+	CamelEwsSummary *ews_summary = CAMEL_EWS_SUMMARY (s);
 	gchar *part;
 
 	if (!CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_from_db (s, mir))
@@ -158,10 +170,10 @@ summary_header_from_db (CamelFolderSummary *s,
 	part = mir->bdata;
 
 	if (part)
-		EXTRACT_FIRST_DIGIT (gms->version);
+		EXTRACT_FIRST_DIGIT (ews_summary->priv->version);
 
 	if (part && part++ && strcmp (part, "(null)")) {
-		gms->sync_state = g_strdup (part);
+		camel_ews_summary_set_sync_state (ews_summary, part);
 	}
 
 	return TRUE;
@@ -171,14 +183,19 @@ static CamelFIRecord *
 summary_header_to_db (CamelFolderSummary *s,
                       GError **error)
 {
-	CamelEwsSummary *ims = CAMEL_EWS_SUMMARY (s);
+	CamelEwsSummary *ews_summary = CAMEL_EWS_SUMMARY (s);
 	struct _CamelFIRecord *fir;
+	gchar *sync_state;
 
 	fir = CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_to_db (s, error);
 	if (!fir)
 		return NULL;
 
-	fir->bdata = g_strdup_printf ("%d %s", CAMEL_EWS_SUMMARY_VERSION, ims->sync_state);
+	sync_state = camel_ews_summary_dup_sync_state (ews_summary);
+
+	fir->bdata = g_strdup_printf ("%d %s", CAMEL_EWS_SUMMARY_VERSION, sync_state);
+
+	g_free (sync_state);
 
 	return fir;
 
@@ -403,3 +420,34 @@ ews_summary_clear (CamelFolderSummary *summary,
 	camel_folder_summary_free_array (known_uids);
 }
 
+void
+camel_ews_summary_set_sync_state (CamelEwsSummary *ews_summary,
+				  const gchar *sync_state)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SUMMARY (ews_summary));
+
+	g_mutex_lock (&ews_summary->priv->property_lock);
+
+	if (g_strcmp0 (ews_summary->priv->sync_state, sync_state) != 0) {
+		g_free (ews_summary->priv->sync_state);
+		ews_summary->priv->sync_state = g_strdup (sync_state);
+	}
+
+	g_mutex_unlock (&ews_summary->priv->property_lock);
+}
+
+gchar *
+camel_ews_summary_dup_sync_state (CamelEwsSummary *ews_summary)
+{
+	gchar *sync_state;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_SUMMARY (ews_summary), NULL);
+
+	g_mutex_lock (&ews_summary->priv->property_lock);
+
+	sync_state = g_strdup (ews_summary->priv->sync_state);
+
+	g_mutex_unlock (&ews_summary->priv->property_lock);
+
+	return sync_state;
+}

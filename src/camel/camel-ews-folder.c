@@ -1807,7 +1807,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 	 * Due to these reasons we just get the item ids and its type in
 	 * SyncFolderItem request and fetch the item using the
 	 * GetItem request. */
-	sync_state = ((CamelEwsSummary *) folder->summary)->sync_state;
+	sync_state = camel_ews_summary_dup_sync_state ((CamelEwsSummary *) folder->summary);
 	do {
 		GSList *items_created = NULL, *items_updated = NULL;
 		GSList *items_deleted = NULL;
@@ -1819,8 +1819,8 @@ ews_refresh_info_sync (CamelFolder *folder,
 
 		if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_INVALIDSYNCSTATEDATA)) {
 			g_clear_error (&local_error);
-			g_free (((CamelEwsSummary *) folder->summary)->sync_state);
-			((CamelEwsSummary *) folder->summary)->sync_state = NULL;
+			camel_ews_summary_set_sync_state ((CamelEwsSummary *) folder->summary, NULL);
+			g_free (sync_state);
 			sync_state = NULL;
 			ews_folder_forget_all_mails (ews_folder);
 
@@ -1862,8 +1862,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 		camel_ews_store_summary_set_folder_unread (ews_store->summary, id, unread);
 		camel_ews_store_summary_save (ews_store->summary, NULL);
 
-		g_free (((CamelEwsSummary *) folder->summary)->sync_state);
-		((CamelEwsSummary *) folder->summary)->sync_state = sync_state;
+		camel_ews_summary_set_sync_state ((CamelEwsSummary *) folder->summary, sync_state);
 
 		camel_folder_summary_touch (folder->summary);
 
@@ -1894,9 +1893,9 @@ ews_refresh_info_sync (CamelFolder *folder,
 	g_mutex_lock (&priv->state_lock);
 	priv->refreshing = FALSE;
 	g_mutex_unlock (&priv->state_lock);
-	if (sync_state != ((CamelEwsSummary *) folder->summary)->sync_state)
-		g_free (sync_state);
+
 	g_object_unref (cnc);
+	g_free (sync_state);
 	g_free (id);
 
 	return !local_error;
@@ -2142,6 +2141,14 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 	g_slist_free_full (ret_items, g_object_unref);
 
 	return !local_error;
+}
+
+static void
+ews_prepare_content_refresh (CamelFolder *folder)
+{
+	g_return_if_fail (CAMEL_IS_EWS_FOLDER (folder));
+
+	camel_ews_summary_set_sync_state (CAMEL_EWS_SUMMARY (folder->summary), NULL);
 }
 
 static gboolean
@@ -2529,6 +2536,7 @@ camel_ews_folder_class_init (CamelEwsFolderClass *class)
 	folder_class->synchronize_sync = ews_synchronize_sync;
 	folder_class->expunge_sync = ews_expunge_sync;
 	folder_class->transfer_messages_to_sync = ews_transfer_messages_to_sync;
+	folder_class->prepare_content_refresh = ews_prepare_content_refresh;
 	folder_class->get_filename = ews_get_filename;
 }
 

@@ -2014,6 +2014,9 @@ ews_get_folder_sync (CamelStore *store,
 
 	g_free (folder_dir);
 
+	if ((flags & CAMEL_STORE_FOLDER_INFO_REFRESH) != 0)
+		camel_folder_prepare_content_refresh (folder);
+
 	return folder;
 }
 
