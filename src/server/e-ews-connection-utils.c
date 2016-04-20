@@ -67,6 +67,8 @@ e_ews_connection_utils_check_element (const gchar *function_name,
 	return TRUE;
 }
 
+static gboolean force_off_ntlm_auth_check = FALSE;
+
 static gboolean
 ews_connect_check_ntlm_available (void)
 {
@@ -79,6 +81,9 @@ ews_connect_check_ntlm_available (void)
 	gsize s;
 	gchar *command;
 	gint ret;
+
+	if (force_off_ntlm_auth_check)
+		return FALSE;
 
 	/* We are attempting to predict what libsoup will do. */
 	helper = g_getenv ("SOUP_NTLM_AUTH_DEBUG");
@@ -145,6 +150,11 @@ ews_connect_check_ntlm_available (void)
 #endif
 }
 
+void
+e_ews_connection_utils_force_off_ntlm_auth_check (void)
+{
+	force_off_ntlm_auth_check = TRUE;
+}
 
 /* Should we bother to attempt a connection without a password? Remember,
  * this is *purely* an optimisation to avoid that extra round-trip if we

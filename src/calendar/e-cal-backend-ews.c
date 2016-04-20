@@ -4414,6 +4414,11 @@ e_cal_backend_ews_authenticate_sync (EBackend *backend,
 
 		ews_start_sync (cal_backend);
 		cbews_listen_notifications_cb (cal_backend, NULL, ews_settings);
+	} else if (e_ews_connection_utils_get_without_password (ews_settings) &&
+		   result == E_SOURCE_AUTHENTICATION_REJECTED &&
+		   !e_named_parameters_exists (credentials, E_SOURCE_CREDENTIAL_PASSWORD)) {
+		e_ews_connection_utils_force_off_ntlm_auth_check ();
+		result = E_SOURCE_AUTHENTICATION_REQUIRED;
 	}
 
 	g_object_unref (connection);

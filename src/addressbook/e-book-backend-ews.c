@@ -4202,6 +4202,13 @@ e_book_backend_ews_authenticate_sync (EBackend *backend,
 	} else {
 		ews_backend->priv->is_writable = FALSE;
 		e_backend_set_online (backend, FALSE);
+
+		if (e_ews_connection_utils_get_without_password (ews_settings) &&
+			   result == E_SOURCE_AUTHENTICATION_REJECTED &&
+			   !e_named_parameters_exists (credentials, E_SOURCE_CREDENTIAL_PASSWORD)) {
+			e_ews_connection_utils_force_off_ntlm_auth_check ();
+			result = E_SOURCE_AUTHENTICATION_REQUIRED;
+		}
 	}
 
 	e_book_backend_set_writable (E_BOOK_BACKEND (backend), ews_backend->priv->is_writable);
