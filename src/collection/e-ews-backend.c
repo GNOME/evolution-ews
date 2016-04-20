@@ -1045,6 +1045,11 @@ ews_backend_authenticate_sync (EBackend *backend,
 		e_collection_backend_authenticate_children (E_COLLECTION_BACKEND (backend), credentials);
 
 		e_ews_backend_sync_folders (ews_backend, NULL, ews_backend_folders_synced_cb, NULL);
+	} else if (e_ews_connection_utils_get_without_password (ews_settings) &&
+		   result == E_SOURCE_AUTHENTICATION_REJECTED &&
+		   !e_named_parameters_exists (credentials, E_SOURCE_CREDENTIAL_PASSWORD)) {
+		e_ews_connection_utils_force_off_ntlm_auth_check ();
+		result = E_SOURCE_AUTHENTICATION_REQUIRED;
 	}
 
 	return result;

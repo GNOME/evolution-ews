@@ -169,12 +169,20 @@ mail_config_ews_autodiscover_run_thread (GTask *task,
 	gboolean success = FALSE;
 
 	if (!g_cancellable_set_error_if_cancelled (cancellable, &local_error) && !local_error) {
-		if (e_ews_connection_utils_get_without_password (async_context->ews_settings)) {
+		gboolean without_password;
+
+		without_password = e_ews_connection_utils_get_without_password (async_context->ews_settings);
+		if (without_password) {
 			success = e_ews_autodiscover_ws_url_sync (
 				async_context->ews_settings, async_context->email_address, "",
 				cancellable, &local_error);
-		} else {
+		}
+
+		if (!without_password || g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
 			EShell *shell;
+
+			e_ews_connection_utils_force_off_ntlm_auth_check ();
+			g_clear_error (&local_error);
 
 			shell = e_shell_get_default ();
 

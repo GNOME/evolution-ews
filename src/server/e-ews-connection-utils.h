@@ -32,6 +32,8 @@ gboolean	e_ews_connection_utils_check_element	(const gchar *function_name,
 							 const gchar *element_name,
 							 const gchar *expected_name);
 
+void		e_ews_connection_utils_force_off_ntlm_auth_check
+							(void);
 gboolean	e_ews_connection_utils_get_without_password
 							(CamelEwsSettings *ews_settings);
 

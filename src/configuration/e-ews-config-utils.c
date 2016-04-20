@@ -383,11 +383,17 @@ e_ews_config_utils_open_connection_for (ESource *source,
 
 			if (result != E_SOURCE_AUTHENTICATION_ACCEPTED) {
 				g_clear_object (&conn);
-				break;
+				if (result != E_SOURCE_AUTHENTICATION_REJECTED || local_error)
+					break;
 			}
-		} else {
+		}
+
+		if (!conn) {
 			EShell *shell;
 			TryCredentialsData data;
+
+			e_ews_connection_utils_force_off_ntlm_auth_check ();
+			g_clear_error (&local_error);
 
 			shell = e_shell_get_default ();
 
