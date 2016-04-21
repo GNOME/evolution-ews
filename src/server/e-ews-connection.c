@@ -4207,15 +4207,19 @@ void
 e_ews_connection_set_server_version_from_string (EEwsConnection *cnc,
 						 const gchar *version)
 {
-	if (g_strcmp0 (version, "Exchange2007") == 0)
+	if (!version)
+		cnc->priv->version = E_EWS_EXCHANGE_UNKNOWN;
+	else if (g_strcmp0 (version, "Exchange2007") == 0)
 		cnc->priv->version = E_EWS_EXCHANGE_2007;
-	else if (g_strcmp0 (version, "Exchange2007_SP1") == 0)
+	else if (g_strcmp0 (version, "Exchange2007_SP1") == 0 ||
+		 g_str_has_prefix (version, "Exchange2007"))
 		cnc->priv->version = E_EWS_EXCHANGE_2007_SP1;
 	else if (g_strcmp0 (version, "Exchange2010") == 0)
 		cnc->priv->version = E_EWS_EXCHANGE_2010;
 	else if (g_strcmp0 (version, "Exchange2010_SP1") == 0)
 		cnc->priv->version = E_EWS_EXCHANGE_2010_SP1;
-	else if (g_strcmp0 (version, "Exchange2010_SP2") == 0)
+	else if (g_strcmp0 (version, "Exchange2010_SP2") == 0 ||
+		 g_str_has_prefix (version, "Exchange2010"))
 		cnc->priv->version = E_EWS_EXCHANGE_2010_SP2;
 	else
 		cnc->priv->version = E_EWS_EXCHANGE_FUTURE;
