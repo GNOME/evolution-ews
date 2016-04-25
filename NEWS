@@ -1,3 +1,33 @@
+Evolution-EWS 3.21.1 2016-04-25
+-------------------------------
+
+Bug Fixes:
+	Bug 763991 - Add User-Agent setting in mail Properties (Milan Crha)
+	Bug 763719 - Reconnect or use its own connection for message send (Milan Crha)
+	Bug 764110 - Typo in error message (Sebastian Rasmussen)
+	Bug 743654 - Show user's meeting response in the Calendar view (Milan Crha)
+	Bug 764442 - Expand Distribution Lists from online GAL (not OAB) (Milan Crha)
+	Bug 764977 - Manual folder Refresh should fully resync with the server (Milan Crha)
+	Bug 764976 - Failed message move processed as successful (Milan Crha)
+	Bug 765209 - Correct server version set from string (Milan Crha)
+
+Miscellaneous:
+	Add thread safety around ECalBackendEws::priv::cancellable (Milan Crha)
+	Ask for password after NTLM/SSO authentication failure (Milan Crha)
+
+Translations:
+	Tom Tryfonidis (el)
+	Sebastian Rasmussen (sv)
+	Мирослав Николић (sr)
+	Мирослав Николић (sr@latin)
+	Balázs Úr (hu)
+	Piotr Drąg (pl)
+	Mario Blättermann (de)
+	Rafael Fontenelle (pt_BR)
+	Marek Černocký (cs)
+	Balázs Meskó (hu)
+	Daniel Mustieles (es)
+
 Evolution-EWS 3.20.0 2016-03-21
 -------------------------------
 
