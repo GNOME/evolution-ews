@@ -62,6 +62,8 @@ struct _EEwsContactFields {
 	gchar *spouse_name;
 	gchar *culture;
 	gchar *surname;
+	gchar *givenname;
+	gchar *middlename;
 	gchar *notes;
 };
 
@@ -345,6 +347,8 @@ ews_free_contact_fields (struct _EEwsContactFields *con_fields)
 		g_free (con_fields->spouse_name);
 		g_free (con_fields->culture);
 		g_free (con_fields->surname);
+		g_free (con_fields->givenname);
+		g_free (con_fields->middlename);
 		g_free (con_fields->notes);
 		g_free (con_fields);
 	}
@@ -797,6 +801,10 @@ parse_contact_field (EEwsItem *item,
 		priv->contact_fields->spouse_name = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "Surname")) {
 		priv->contact_fields->surname = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "GivenName")) {
+		priv->contact_fields->givenname = e_soap_parameter_get_string_value (subparam);
+	} else if (!g_ascii_strcasecmp (name, "MiddleName")) {
+		priv->contact_fields->middlename = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "WeddingAnniversary")) {
 		value = e_soap_parameter_get_string_value (subparam);
 		priv->contact_fields->wedding_anniversary = ews_item_parse_date (value);
@@ -1859,6 +1867,21 @@ e_ews_item_get_complete_name (EEwsItem *item)
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
 
+	if (!item->priv->contact_fields->complete_name && (
+	    item->priv->contact_fields->surname ||
+	    item->priv->contact_fields->middlename ||
+	    item->priv->contact_fields->givenname)) {
+		EwsCompleteName *cn;
+
+		cn = g_new0 (EwsCompleteName, 1);
+
+		cn->first_name = g_strdup (item->priv->contact_fields->givenname);
+		cn->middle_name = g_strdup (item->priv->contact_fields->middlename);
+		cn->last_name = g_strdup (item->priv->contact_fields->surname);
+
+		item->priv->contact_fields->complete_name = cn;
+	}
+
 	return (const EwsCompleteName *) item->priv->contact_fields->complete_name;
 }
 
@@ -2054,6 +2077,24 @@ e_ews_item_get_surname (EEwsItem *item)
 	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
 
 	return (const gchar *) item->priv->contact_fields->surname;
+}
+
+const gchar *
+e_ews_item_get_givenname (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+
+	return item->priv->contact_fields->givenname;
+}
+
+const gchar *
+e_ews_item_get_middlename (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+	g_return_val_if_fail (item->priv->contact_fields != NULL, NULL);
+
+	return item->priv->contact_fields->middlename;
 }
 
 const gchar *
