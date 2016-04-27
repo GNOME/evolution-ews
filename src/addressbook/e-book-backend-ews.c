@@ -591,8 +591,10 @@ set_email_address (EContact *contact,
 	const gchar *ea;
 
 	ea = e_ews_item_get_email_address (item, item_field);
-	if (ea && g_str_has_prefix (ea, "SMTP:"))
+	if (ea && g_ascii_strncasecmp (ea, "SMTP:", 5) == 0)
 		ea = ea + 5;
+	else
+		ea = NULL;
 
 	if (ea && *ea)
 		e_contact_set (contact, field, ea);
@@ -1252,6 +1254,7 @@ static const struct field_element_mapping {
 	{ E_CONTACT_SPOUSE, ELEMENT_TYPE_SIMPLE, "Profession", e_ews_item_get_profession},
 	{ E_CONTACT_SPOUSE, ELEMENT_TYPE_SIMPLE, "SpouseName", e_ews_item_get_spouse_name},
 	{ E_CONTACT_FAMILY_NAME, ELEMENT_TYPE_SIMPLE, "Surname", e_ews_item_get_surname},
+	{ E_CONTACT_GIVEN_NAME, ELEMENT_TYPE_SIMPLE, "GivenName", e_ews_item_get_givenname},
 	{ E_CONTACT_BIRTH_DATE, ELEMENT_TYPE_COMPLEX, "WeddingAnniversary", NULL,  ebews_populate_anniversary, ebews_set_anniversary, ebews_set_anniversary_changes },
 	{ E_CONTACT_PHOTO, ELEMENT_TYPE_COMPLEX, "Photo", NULL,  ebews_populate_photo, ebews_set_photo, ebews_set_photo_changes },
 
@@ -3432,6 +3435,10 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 		str = e_contact_get_const (contact, E_CONTACT_FULL_NAME);
 		if (!str || !*str)
 			e_contact_set (contact, E_CONTACT_FULL_NAME, mb->name);
+
+		str = e_contact_get_const (contact, E_CONTACT_EMAIL_1);
+		if ((!str || !*str) && contact_item && e_ews_item_get_item_type (contact_item) == E_EWS_ITEM_TYPE_CONTACT)
+			ebews_populate_emails (ebews, contact, contact_item, NULL, NULL);
 
 		str = e_contact_get_const (contact, E_CONTACT_EMAIL_1);
 		if (!str || !*str)
