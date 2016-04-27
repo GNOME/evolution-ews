@@ -586,18 +586,30 @@ static void
 set_email_address (EContact *contact,
                    EContactField field,
                    EEwsItem *item,
-                   const gchar *item_field)
+                   const gchar *item_field,
+		   gboolean require_smtp_prefix)
 {
 	const gchar *ea;
 
 	ea = e_ews_item_get_email_address (item, item_field);
 	if (ea && g_ascii_strncasecmp (ea, "SMTP:", 5) == 0)
 		ea = ea + 5;
-	else
+	else if (require_smtp_prefix)
 		ea = NULL;
 
 	if (ea && *ea)
 		e_contact_set (contact, field, ea);
+}
+
+static void
+ebews_populate_emails_ex (EBookBackendEws *ebews,
+			  EContact *contact,
+			  EEwsItem *item,
+			  gboolean require_smtp_prefix)
+{
+	set_email_address (contact, E_CONTACT_EMAIL_1, item, "EmailAddress1", require_smtp_prefix);
+	set_email_address (contact, E_CONTACT_EMAIL_2, item, "EmailAddress2", require_smtp_prefix);
+	set_email_address (contact, E_CONTACT_EMAIL_3, item, "EmailAddress3", require_smtp_prefix);
 }
 
 static void
@@ -607,9 +619,7 @@ ebews_populate_emails (EBookBackendEws *ebews,
 		       GCancellable *cancellable,
 		       GError **errror)
 {
-	set_email_address (contact, E_CONTACT_EMAIL_1, item, "EmailAddress1");
-	set_email_address (contact, E_CONTACT_EMAIL_2, item, "EmailAddress2");
-	set_email_address (contact, E_CONTACT_EMAIL_3, item, "EmailAddress3");
+	ebews_populate_emails_ex (ebews, contact, item, FALSE);
 }
 
 static void
@@ -3438,7 +3448,7 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 
 		str = e_contact_get_const (contact, E_CONTACT_EMAIL_1);
 		if ((!str || !*str) && contact_item && e_ews_item_get_item_type (contact_item) == E_EWS_ITEM_TYPE_CONTACT)
-			ebews_populate_emails (ebews, contact, contact_item, NULL, NULL);
+			ebews_populate_emails_ex (ebews, contact, contact_item, TRUE);
 
 		str = e_contact_get_const (contact, E_CONTACT_EMAIL_1);
 		if (!str || !*str)
