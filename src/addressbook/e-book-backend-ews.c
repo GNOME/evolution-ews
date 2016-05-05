@@ -3447,12 +3447,47 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 			e_contact_set (contact, E_CONTACT_FULL_NAME, mb->name);
 
 		str = e_contact_get_const (contact, E_CONTACT_EMAIL_1);
-		if ((!str || !*str) && contact_item && e_ews_item_get_item_type (contact_item) == E_EWS_ITEM_TYPE_CONTACT)
+		if (!str || !*str || (contact_item && e_ews_item_get_item_type (contact_item) == E_EWS_ITEM_TYPE_CONTACT)) {
+			/* Cleanup first, then re-add only SMTP addresses */
+			e_contact_set (contact, E_CONTACT_EMAIL_1, NULL);
+			e_contact_set (contact, E_CONTACT_EMAIL_2, NULL);
+			e_contact_set (contact, E_CONTACT_EMAIL_3, NULL);
+			e_contact_set (contact, E_CONTACT_EMAIL_4, NULL);
+			e_contact_set (contact, E_CONTACT_EMAIL, NULL);
+
 			ebews_populate_emails_ex (ebews, contact, contact_item, TRUE);
+		}
 
 		str = e_contact_get_const (contact, E_CONTACT_EMAIL_1);
-		if (!str || !*str)
+		if (!str || !*str) {
 			e_contact_set (contact, E_CONTACT_EMAIL_1, mb->email);
+		} else if (mb->email && (!mb->routing_type || g_ascii_strcasecmp (mb->routing_type, "SMTP") == 0)) {
+			EContactField fields[3] = { E_CONTACT_EMAIL_2, E_CONTACT_EMAIL_3, E_CONTACT_EMAIL_4 };
+			gchar *emails[3];
+			gint ii, ff = 0;
+
+			emails[0] = e_contact_get (contact, E_CONTACT_EMAIL_1);
+			emails[1] = e_contact_get (contact, E_CONTACT_EMAIL_2);
+			emails[2] = e_contact_get (contact, E_CONTACT_EMAIL_3);
+
+			/* Make the mailbox email the primary email and skip duplicates */
+			e_contact_set (contact, E_CONTACT_EMAIL_1, NULL);
+			e_contact_set (contact, E_CONTACT_EMAIL_2, NULL);
+			e_contact_set (contact, E_CONTACT_EMAIL_3, NULL);
+			e_contact_set (contact, E_CONTACT_EMAIL_4, NULL);
+			e_contact_set (contact, E_CONTACT_EMAIL, NULL);
+
+			e_contact_set (contact, E_CONTACT_EMAIL_1, mb->email);
+
+			for (ii = 0; ii < 3; ii++) {
+				if (emails[ii] && g_ascii_strcasecmp (emails[ii], mb->email) != 0) {
+					e_contact_set (contact, fields[ff], emails[ii]);
+					ff++;
+				}
+
+				g_free (emails[ii]);
+			}
+		}
 
 		e_data_book_view_notify_update (book_view, contact);
 
