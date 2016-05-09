@@ -89,7 +89,7 @@ struct _CamelEwsFolderPrivate {
 	gboolean fetch_pending;
 	GMutex state_lock;
 	GCond fetch_cond;
-	GHashTable *uid_eflags;
+	GHashTable *fetching_uids;
 };
 
 static gboolean ews_delete_messages (CamelFolder *folder, const GSList *deleted_items, gboolean expunge, GCancellable *cancellable, GError **error);
@@ -488,6 +488,15 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
 	return mime_fname_new;
 }
 
+static void
+ews_fetch_cancellable_cancelled_cb (GCancellable *cancellable,
+				    GCond *fetch_cond)
+{
+	g_return_if_fail (fetch_cond != NULL);
+
+	g_cond_broadcast (fetch_cond);
+}
+
 static CamelMimeMessage *
 camel_ews_folder_get_message (CamelFolder *folder,
                               const gchar *uid,
@@ -510,38 +519,59 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	gchar *mime_fname_new = NULL;
 	GError *local_error = NULL;
 
+	g_return_val_if_fail (CAMEL_IS_EWS_FOLDER (folder), NULL);
+
 	ews_store = (CamelEwsStore *) camel_folder_get_parent_store (folder);
 	ews_folder = (CamelEwsFolder *) folder;
 	priv = ews_folder->priv;
 
-	if (!camel_ews_store_connected (ews_store, cancellable, error))
-		return NULL;
-
 	g_mutex_lock (&priv->state_lock);
 
-	/* If another thread is already fetching this message, wait for it */
-
-	/* FIXME: We might end up refetching a message anyway, if another
-	 * thread has already finished fetching it by the time we get to
-	 * this point in the code — ews_folder_get_message_sync() doesn't
-	 * hold any locks when it calls get_message_from_cache() and then
-	 * falls back to this function. */
-	if (g_hash_table_lookup (priv->uid_eflags, uid)) {
-		do {
-			g_cond_wait (&priv->fetch_cond, &priv->state_lock);
-		} while (g_hash_table_lookup (priv->uid_eflags, uid));
-
+	message = camel_ews_folder_get_message_from_cache (ews_folder, uid, cancellable, NULL);
+	if (message) {
 		g_mutex_unlock (&priv->state_lock);
 
-		message = camel_ews_folder_get_message_from_cache (ews_folder, uid, cancellable, error);
 		return message;
+	}
+
+	/* If another thread is already fetching this message, wait for it */
+	if (g_hash_table_lookup (priv->fetching_uids, uid)) {
+		gulong cancelled_handler_id = 0;
+
+		if (G_IS_CANCELLABLE (cancellable)) {
+			cancelled_handler_id = g_cancellable_connect (cancellable,
+				G_CALLBACK (ews_fetch_cancellable_cancelled_cb),
+				&priv->fetch_cond, NULL);
+		}
+
+		do {
+			g_cond_wait (&priv->fetch_cond, &priv->state_lock);
+		} while (g_hash_table_lookup (priv->fetching_uids, uid) &&
+			 !g_cancellable_is_cancelled (cancellable));
+
+		if (cancelled_handler_id && G_IS_CANCELLABLE (cancellable))
+			g_cancellable_disconnect (cancellable, cancelled_handler_id);
+
+		if (g_cancellable_set_error_if_cancelled (cancellable, error)) {
+			g_mutex_unlock (&priv->state_lock);
+			return NULL;
+		}
+
+		message = camel_ews_folder_get_message_from_cache (ews_folder, uid, cancellable, NULL);
+		if (message || g_cancellable_set_error_if_cancelled (cancellable, error)) {
+			g_mutex_unlock (&priv->state_lock);
+			return message;
+		}
 	}
 
 	/* Because we're using this as a form of mutex, we *know* that
 	 * we won't be inserting where an entry already exists. So it's
 	 * OK to insert uid itself, not g_strdup (uid) */
-	g_hash_table_insert (priv->uid_eflags, (gchar *) uid, (gchar *) uid);
+	g_hash_table_insert (priv->fetching_uids, (gchar *) uid, (gchar *) uid);
 	g_mutex_unlock (&priv->state_lock);
+
+	if (!camel_ews_store_connected (ews_store, cancellable, error))
+		goto exit;
 
 	cnc = camel_ews_store_ref_connection (ews_store);
 	ids = g_slist_append (ids, (gchar *) uid);
@@ -707,11 +737,11 @@ camel_ews_folder_get_message (CamelFolder *folder,
 
 exit:
 	g_mutex_lock (&priv->state_lock);
-	g_hash_table_remove (priv->uid_eflags, uid);
-	g_mutex_unlock (&priv->state_lock);
+	g_hash_table_remove (priv->fetching_uids, uid);
 	g_cond_broadcast (&priv->fetch_cond);
+	g_mutex_unlock (&priv->state_lock);
 
-	if (!message && !error)
+	if (!message && error && !*error)
 		g_set_error (
 			error, CAMEL_ERROR, 1,
 			"Could not retrieve the message");
@@ -770,12 +800,11 @@ ews_folder_get_message_sync (CamelFolder *folder,
 {
 	CamelMimeMessage *message;
 
-	message = camel_ews_folder_get_message_from_cache ((CamelEwsFolder *) folder, uid, cancellable, NULL);
-	if (!message) {
-		message = camel_ews_folder_get_message (folder, uid, EWS_ITEM_HIGH, cancellable, error);
-		if (message)
-			ews_folder_maybe_update_mlist (folder, uid, message);
-	}
+	g_return_val_if_fail (CAMEL_IS_EWS_FOLDER (folder), NULL);
+
+	message = camel_ews_folder_get_message (folder, uid, EWS_ITEM_HIGH, cancellable, error);
+	if (message)
+		ews_folder_maybe_update_mlist (folder, uid, message);
 
 	return message;
 }
@@ -2478,7 +2507,7 @@ ews_folder_finalize (GObject *object)
 	g_mutex_clear (&ews_folder->priv->search_lock);
 	g_mutex_clear (&ews_folder->priv->state_lock);
 	g_rec_mutex_clear (&ews_folder->priv->cache_lock);
-	g_hash_table_destroy (ews_folder->priv->uid_eflags);
+	g_hash_table_destroy (ews_folder->priv->fetching_uids);
 	g_cond_clear (&ews_folder->priv->fetch_cond);
 
 	/* Chain up to parent's finalize() method. */
@@ -2573,7 +2602,7 @@ camel_ews_folder_init (CamelEwsFolder *ews_folder)
 	ews_folder->priv->refreshing = FALSE;
 
 	g_cond_init (&ews_folder->priv->fetch_cond);
-	ews_folder->priv->uid_eflags = g_hash_table_new (g_str_hash, g_str_equal);
+	ews_folder->priv->fetching_uids = g_hash_table_new (g_str_hash, g_str_equal);
 	camel_folder_set_lock_async (folder, TRUE);
 }
 
