@@ -2801,11 +2801,11 @@ ews_rename_folder_sync (CamelStore *store,
 
 	changekey = camel_ews_store_summary_get_change_key (ews_summary, fid, error);
 	if (!changekey) {
-		g_free (fid);
 		g_set_error (
 			error, CAMEL_STORE_ERROR,
 			CAMEL_STORE_ERROR_NO_FOLDER,
 			_("No change key record for folder %s"), fid);
+		g_free (fid);
 		return FALSE;
 	}
 
@@ -2848,7 +2848,6 @@ ews_rename_folder_sync (CamelStore *store,
 				error, CAMEL_STORE_ERROR,
 				CAMEL_STORE_ERROR_INVALID,
 				_("Cannot both rename and move a folder at the same time"));
-			g_free (changekey);
 			goto out;
 		}
 
@@ -2878,15 +2877,16 @@ ews_rename_folder_sync (CamelStore *store,
 			parent_name = g_strndup (new_name, new_slash - new_name - 1);
 			pfid = camel_ews_store_summary_get_folder_id_from_name (
 				ews_summary, parent_name);
-			g_free (parent_name);
 			if (!pfid) {
 				g_set_error (
 					error, CAMEL_STORE_ERROR,
 					CAMEL_STORE_ERROR_NO_FOLDER,
 					_("Cannot find folder ID for parent folder %s"),
 					parent_name);
+				g_free (parent_name);
 				goto out;
 			}
+			g_free (parent_name);
 		}
 
 		res = e_ews_connection_move_folder_sync (

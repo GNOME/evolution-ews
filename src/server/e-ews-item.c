@@ -823,7 +823,7 @@ static gchar *
 strip_html_tags (const gchar *html_text)
 {
 	gssize haystack_len = strlen (html_text);
-	gchar *plain_text = g_malloc (haystack_len);
+	gchar *plain_text = g_malloc (haystack_len + 1);
 	gchar *start = g_strstr_len (html_text, haystack_len, "<body"),
 		*end = g_strstr_len (html_text, haystack_len, "</body"),
 		*i, *j;
