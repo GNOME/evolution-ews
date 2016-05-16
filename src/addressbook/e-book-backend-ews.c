@@ -3419,7 +3419,7 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 		return;
 	}
 
-	for (l = mailboxes, c = contacts; l != NULL; l = g_slist_next (l), c = c ? g_slist_next (c) : NULL) {
+	for (l = mailboxes, c = contacts; l != NULL; l = g_slist_next (l), c = g_slist_next (c)) {
 		EwsMailbox *mb = l->data;
 		EEwsItem *contact_item = c ? c->data : NULL;
 		EContact *contact = NULL;
