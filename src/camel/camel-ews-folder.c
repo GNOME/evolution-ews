@@ -506,7 +506,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 {
 	CamelEwsFolder *ews_folder;
 	CamelEwsFolderPrivate *priv;
-	EEwsConnection *cnc;
+	EEwsConnection *cnc = NULL;
 	EEwsAdditionalProps *add_props = NULL;
 	CamelEwsStore *ews_store;
 	const gchar *mime_content;
