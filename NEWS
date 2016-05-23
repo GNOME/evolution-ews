@@ -1,3 +1,17 @@
+Evolution-EWS 3.21.2 2016-05-23
+-------------------------------
+
+Bug Fixes:
+	Bug 765398 - Online GAL contacts can have incorrect email address (Milan Crha)
+	Bug 766021 - Messages are downloaded for offline multiple times (Milan Crha)
+
+Miscellaneous:
+	Fix some issues found by Coverity Scan (Milan Crha)
+
+Translations:
+	Daniel Mustieles (es)
+	Balázs Meskó (hu)
+
 Evolution-EWS 3.21.1 2016-04-25
 -------------------------------
 
