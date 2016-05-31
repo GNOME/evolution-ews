@@ -1382,12 +1382,13 @@ convert_contact_to_xml (ESoapMessage *msg,
 		element_type = mappings[i].element_type;
 
 		if (element_type == ELEMENT_TYPE_SIMPLE) {
-			gchar *val = e_contact_get (contact, mappings[i].field_id);
+			gchar *val;
 
 			/* skip uid while creating contacts */
 			if (mappings[i].field_id == E_CONTACT_UID)
 				continue;
 
+			val = e_contact_get (contact, mappings[i].field_id);
 			if (val && *val)
 				e_ews_message_write_string_parameter (msg, mappings[i].element_name, NULL, val);
 			g_free (val);
