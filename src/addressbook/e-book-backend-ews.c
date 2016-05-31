@@ -1229,6 +1229,38 @@ ebews_set_email_changes (EBookBackendEws *ebews,
 	g_free (old_value);
 }
 
+static void
+ebews_populate_givenname (EBookBackendEws *ebews,
+			  EContact *contact,
+			  EEwsItem *item,
+			  GCancellable *cancellable,
+			  GError **error)
+{
+	const gchar *givenname;
+
+	givenname = e_ews_item_get_givenname (item);
+	if (givenname && *givenname)
+		e_contact_set (contact, E_CONTACT_GIVEN_NAME, givenname);
+}
+
+static void
+ebews_set_givenname (ESoapMessage *message,
+		     EContact *contact)
+{
+	/* Does nothing, the "GivenName" is filled by the "FullName" code */
+}
+
+static void
+ebews_set_givenname_changes (EBookBackendEws *ebews,
+			     ESoapMessage *message,
+			     EContact *new,
+			     EContact *old,
+			     GCancellable *cancellable,
+			     GError **error)
+{
+	/* Does nothing, the "GivenName" is filled by the "FullName" code */
+}
+
 static const struct field_element_mapping {
 	EContactField field_id;
 	gint element_type;
@@ -1264,7 +1296,7 @@ static const struct field_element_mapping {
 	{ E_CONTACT_SPOUSE, ELEMENT_TYPE_SIMPLE, "Profession", e_ews_item_get_profession},
 	{ E_CONTACT_SPOUSE, ELEMENT_TYPE_SIMPLE, "SpouseName", e_ews_item_get_spouse_name},
 	{ E_CONTACT_FAMILY_NAME, ELEMENT_TYPE_SIMPLE, "Surname", e_ews_item_get_surname},
-	{ E_CONTACT_GIVEN_NAME, ELEMENT_TYPE_SIMPLE, "GivenName", e_ews_item_get_givenname},
+	{ E_CONTACT_GIVEN_NAME, ELEMENT_TYPE_COMPLEX, "GivenName", NULL, ebews_populate_givenname, ebews_set_givenname, ebews_set_givenname_changes},
 	{ E_CONTACT_BIRTH_DATE, ELEMENT_TYPE_COMPLEX, "WeddingAnniversary", NULL,  ebews_populate_anniversary, ebews_set_anniversary, ebews_set_anniversary_changes },
 	{ E_CONTACT_PHOTO, ELEMENT_TYPE_COMPLEX, "Photo", NULL,  ebews_populate_photo, ebews_set_photo, ebews_set_photo_changes },
 
