@@ -2,86 +2,87 @@
 # Copyright © 2006, 2007, 2008, 2009, 2010, 2011 tomboy
 # This file is distributed under the same license as the tomboy package.
 # Pedro Albuquerque <palbuquerque73@gmail.com>, 2015.
+# Tiago Santos <tiagofsantos81@sapo.pt>, 2014 - 2016.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2015-12-05 06:14+0000\n"
-"PO-Revision-Date: 2015-12-05 08:09+0000\n"
-"Last-Translator: Pedro Albuquerque <palbuquerque73@gmail.com>\n"
-"Language-Team: Português <palbuquerque73@gmail.com>\n"
+"POT-Creation-Date: 2016-05-19 05:26+0000\n"
+"PO-Revision-Date: 2016-05-22 13:10+0100\n"
+"Last-Translator: Tiago Santos <tiagofsantos81@sapo.pt>\n"
+"Language-Team: Português\n"
 "Language: pt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\\n\n"
-"X-Generator: Gtranslator 2.91.6\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\\n;\n"
+"X-Generator: Poedit 1.5.4\n"
 
-#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:77
+#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:80
 msgid "Exchange Web Services"
 msgstr "Serviços web do Exchange"
 
-#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:79
+#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:82
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Para aceder a servidores Exchange usando serviços web"
 
-#: ../src/addressbook/e-book-backend-ews.c:1454
+#: ../src/addressbook/e-book-backend-ews.c:1473
 msgid "The backend does not support bulk additions"
 msgstr "O motor não tem suporte de adições em massa"
 
-#: ../src/addressbook/e-book-backend-ews.c:1493
-#: ../src/addressbook/e-book-backend-ews.c:1860
+#: ../src/addressbook/e-book-backend-ews.c:1512
+#: ../src/addressbook/e-book-backend-ews.c:1879
 msgid ""
 "Cannot save contact list, it's only supported on EWS Server 2010 or later"
 msgstr ""
 "Impossível gravar a lista de contactos, só é suportado em servidor EWS 2010 "
 "ou posterior"
 
-#: ../src/addressbook/e-book-backend-ews.c:1819
+#: ../src/addressbook/e-book-backend-ews.c:1838
 msgid "The backend does not support bulk modifications"
 msgstr "O motor não tem suporte a modificações em massa"
 
-#: ../src/addressbook/e-book-backend-ews.c:2031
+#: ../src/addressbook/e-book-backend-ews.c:2050
 msgid "Wait till syncing is done"
 msgstr "Aguarde até à conclusão da sincronização"
 
-#: ../src/addressbook/e-book-backend-ews.c:2514
+#: ../src/addressbook/e-book-backend-ews.c:2533
 #, c-format
 msgid "Processing contacts in %s %d%% completed... "
 msgstr "A processar contactos em %s, %d%% concluído... "
 
-#: ../src/addressbook/e-book-backend-ews.c:3126
+#: ../src/addressbook/e-book-backend-ews.c:3176
 msgid "Syncing contacts..."
 msgstr "A sincronizar contactos..."
 
-#: ../src/addressbook/e-book-backend-ews.c:3311
+#: ../src/addressbook/e-book-backend-ews.c:3361
 #: ../src/configuration/e-ews-search-user.c:365
 msgid "Searching..."
 msgstr "A procurar..."
 
-#: ../src/addressbook/e-book-backend-ews.c:4274
+#: ../src/addressbook/e-book-backend-ews.c:4365
 msgid "Requested to delete an unrelated cursor"
 msgstr "Pedido para eliminar um cursor não relacionado"
 
-#: ../src/calendar/e-cal-backend-ews.c:1317
+#: ../src/calendar/e-cal-backend-ews.c:1349
 msgid "EWS does not support bulk removals"
 msgstr "O EWS não tem suporte a remoções em massa"
 
-#: ../src/calendar/e-cal-backend-ews.c:1495
+#: ../src/calendar/e-cal-backend-ews.c:1528
 msgid "Unknown error"
 msgstr "Erro desconhecido"
 
-#: ../src/calendar/e-cal-backend-ews.c:1739
+#: ../src/calendar/e-cal-backend-ews.c:1777
 msgid "EWS does not support bulk additions"
 msgstr "O EWS não tem suporte a inclusões em massa"
 
-#: ../src/calendar/e-cal-backend-ews.c:1944
+#: ../src/calendar/e-cal-backend-ews.c:1982
 msgid "EWS does not support bulk modifications"
 msgstr "O EWS não tem suporte a modificações em massa"
 
-#: ../src/calendar/e-cal-backend-ews.c:2370
+#: ../src/calendar/e-cal-backend-ews.c:2408
 #, c-format
 msgid "Cannot find user '%s' between attendees"
 msgstr "Impossível localizar o utilizador %s entre os participantes"
@@ -106,7 +107,7 @@ msgstr "Impossível processar o mimecontent do pedido de reunião!"
 msgid "Unable to create cache file"
 msgstr "Impossível criar o ficheiro de cache"
 
-#: ../src/camel/camel-ews-folder.c:557 ../src/camel/camel-ews-folder.c:649
+#: ../src/camel/camel-ews-folder.c:587 ../src/camel/camel-ews-folder.c:679
 #, c-format
 msgid "Unable to create cache path '%s': %s"
 msgstr "Impossível criar o caminho de cache \"%s\": %s"
@@ -114,21 +115,28 @@ msgstr "Impossível criar o caminho de cache \"%s\": %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/camel/camel-ews-folder.c:663
+#: ../src/camel/camel-ews-folder.c:693
 #, c-format
 msgid "Failed to move message cache file from '%s' to '%s': %s"
 msgstr ""
 "Impossível mover o ficheiro de cache de mensagens de \"%s\" para \"%s\": %s"
 
-#: ../src/camel/camel-ews-folder.c:1404
+#: ../src/camel/camel-ews-folder.c:1439
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Impossível carregar o resumo para %s"
 
-#: ../src/camel/camel-ews-folder.c:1943
+#: ../src/camel/camel-ews-folder.c:1839
 #, c-format
-msgid "Cant perform actions on the folder while in offline mode"
-msgstr "Impossível executar ações na pasta no modo Offline"
+#| msgid "Fetching folder list…"
+msgid "Refreshing folder '%s'"
+msgstr "A atualizar a pasta /\"%s/\""
+
+#: ../src/camel/camel-ews-folder.c:1981
+#, c-format
+#| msgid "Cant perform actions on the folder while in offline mode"
+msgid "Cannot perform actions on the folder while in offline mode"
+msgstr "Impossível executar ações na pasta enquanto em modo Offline"
 
 #: ../src/camel/camel-ews-provider.c:47
 msgid "Checking for new mail"
@@ -173,11 +181,15 @@ msgstr "Ligação"
 msgid "Connection _timeout (in seconds) %s"
 msgstr "_Tempo de exipração da ligação (em segundos) %s"
 
-#: ../src/camel/camel-ews-provider.c:94
+#: ../src/camel/camel-ews-provider.c:71
+msgid "Override _User-Agent header value"
+msgstr "Sobrescrever o valor do cabeçalho do Agente de _Utilizador"
+
+#: ../src/camel/camel-ews-provider.c:97
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/camel/camel-ews-provider.c:96
+#: ../src/camel/camel-ews-provider.c:99
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -185,11 +197,11 @@ msgstr ""
 "Esta opção ligará ao servidor Exchange usando uma senha em texto simples com "
 "autenticação NTLM."
 
-#: ../src/camel/camel-ews-provider.c:104
+#: ../src/camel/camel-ews-provider.c:107
 msgid "Basic"
 msgstr "Básico"
 
-#: ../src/camel/camel-ews-provider.c:106
+#: ../src/camel/camel-ews-provider.c:109
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -197,11 +209,11 @@ msgstr ""
 "Esta opção ligará ao servidor Exchange usando uma senha em texto simples com "
 "autenticação básica."
 
-#: ../src/camel/camel-ews-provider.c:114
+#: ../src/camel/camel-ews-provider.c:117
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/camel/camel-ews-provider.c:116
+#: ../src/camel/camel-ews-provider.c:119
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -238,30 +250,30 @@ msgstr "A atualizar estrutura de pasta externa"
 msgid "Updating foreign folders"
 msgstr "A atualizar pastas externas"
 
-#: ../src/camel/camel-ews-store.c:2036
+#: ../src/camel/camel-ews-store.c:2005
 #, c-format
 msgid "No such folder: %s"
 msgstr "Pasta inexistente: %s"
 
-#: ../src/camel/camel-ews-store.c:2331
+#: ../src/camel/camel-ews-store.c:2303
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Impossível listar as pastas EWS públicas no modo Offline"
 
-#: ../src/camel/camel-ews-store.c:2404
+#: ../src/camel/camel-ews-store.c:2376
 msgid "Cannot find any EWS public folders"
 msgstr "Impossível encontrar uma pasta EWS pública"
 
-#: ../src/camel/camel-ews-store.c:2513
+#: ../src/camel/camel-ews-store.c:2485
 #, c-format
 msgid "Cannot create folder '%s', folder already exists"
 msgstr "Impossível criar a pasta \"%s\", a pasta já existe"
 
-#: ../src/camel/camel-ews-store.c:2528
+#: ../src/camel/camel-ews-store.c:2500
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "A pasta-mãe %s não existe"
 
-#: ../src/camel/camel-ews-store.c:2538
+#: ../src/camel/camel-ews-store.c:2510
 #, c-format
 msgid ""
 "Cannot create folder under '%s', it is used for folders of other users only"
@@ -269,116 +281,116 @@ msgstr ""
 "Impossível criar a pasta sob \"%s\", ela é usada só para pastas de outros "
 "utilizadores"
 
-#: ../src/camel/camel-ews-store.c:2548
+#: ../src/camel/camel-ews-store.c:2520
 #, c-format
 msgid "Cannot create folder under '%s', it is used for public folders only"
 msgstr ""
 "Impossível criar a pasta sob \"%s\", ela é usada só para pastas públicas"
 
-#: ../src/camel/camel-ews-store.c:2652
+#: ../src/camel/camel-ews-store.c:2624
 #, c-format
 msgid "Folder does not exist"
 msgstr "A pasta não existe"
 
-#: ../src/camel/camel-ews-store.c:2662
+#: ../src/camel/camel-ews-store.c:2634
 #, c-format
 msgid "Cannot remove folder '%s', it is used for folders of other users only"
 msgstr ""
 "Impossível remover a pasta \"%s\", ela é usada só para pastas de outros "
 "utilizadores"
 
-#: ../src/camel/camel-ews-store.c:2673
+#: ../src/camel/camel-ews-store.c:2645
 #, c-format
 msgid "Cannot remove folder '%s', it is used for public folders only"
 msgstr "Impossível remover a pasta \"%s\", ela é usada só para pastas públicas"
 
-#: ../src/camel/camel-ews-store.c:2829
+#: ../src/camel/camel-ews-store.c:2801
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "A pasta %s não existe"
 
-#: ../src/camel/camel-ews-store.c:2839
+#: ../src/camel/camel-ews-store.c:2810
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Nenhum registo de chave de mudança para a pasta %s"
 
-#: ../src/camel/camel-ews-store.c:2881
+#: ../src/camel/camel-ews-store.c:2853
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Impossível renomear e mover uma pasta ao mesmo tempo"
 
-#: ../src/camel/camel-ews-store.c:2917
+#: ../src/camel/camel-ews-store.c:2887
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Impossível encontrar o ID de pasta para a pasta-mãe %s"
 
-#: ../src/camel/camel-ews-store.c:2967 ../src/camel/camel-ews-transport.c:164
+#: ../src/camel/camel-ews-store.c:2939 ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange server %s"
 msgstr "Servidor Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:2970
+#: ../src/camel/camel-ews-store.c:2942
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Serviço Exchange para %s em %s"
 
-#: ../src/camel/camel-ews-store.c:3014
+#: ../src/camel/camel-ews-store.c:2986
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Impossível localizar a pasta Lixo"
 
-#: ../src/camel/camel-ews-store.c:3074
+#: ../src/camel/camel-ews-store.c:3046
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Impossível localizar a pasta Não solicitado"
 
-#: ../src/camel/camel-ews-store.c:3264
+#: ../src/camel/camel-ews-store.c:3236
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Impossível subscrever pastas EWS no modo Offline"
 
-#: ../src/camel/camel-ews-store.c:3287
+#: ../src/camel/camel-ews-store.c:3259
 #, c-format
 msgid "Cannot subscribe folder '%s', no public folder available"
 msgstr "Impossível subscrever a pasta \"%s\", não há pasta pública disponível"
 
-#: ../src/camel/camel-ews-store.c:3297
+#: ../src/camel/camel-ews-store.c:3269
 #, c-format
 msgid "Cannot subscribe folder '%s', folder not found"
 msgstr "Impossível subscrever a pasta \"%s\", pasta não encontrada"
 
-#: ../src/camel/camel-ews-store.c:3388
+#: ../src/camel/camel-ews-store.c:3360
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Impossível cancelar a subscrição nas pastas EWS no modo Offline"
 
-#: ../src/camel/camel-ews-store.c:3505
+#: ../src/camel/camel-ews-store.c:3477
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Tem de trabalhar online para completar esta operação"
 
-#: ../src/camel/camel-ews-store.c:3549 ../src/camel/camel-ews-store.c:3586
+#: ../src/camel/camel-ews-store.c:3521 ../src/camel/camel-ews-store.c:3558
 msgid "Unsetting the \"Out of Office\" status"
 msgstr "A desmarcar o estado \"Fora do escritório\""
 
-#: ../src/camel/camel-ews-transport.c:167
+#: ../src/camel/camel-ews-transport.c:321
 #, c-format
 msgid "Exchange mail delivery via %s"
 msgstr "Entrega de correio Exchange via %s"
 
-#: ../src/camel/camel-ews-transport.c:216
+#: ../src/camel/camel-ews-transport.c:370
 msgid "Cannot send message with no From address"
 msgstr "Impossível enviar uma mensagem sem um endereço de remetente"
 
-#: ../src/camel/camel-ews-transport.c:222
+#: ../src/camel/camel-ews-transport.c:376
 msgid "Exchange server cannot send message with multiple From addresses"
 msgstr ""
 "O servidor Exchange não pode enviar uma mensagem com múltiplos endereços de "
 "remetente"
 
-#: ../src/camel/camel-ews-transport.c:233
+#: ../src/camel/camel-ews-transport.c:387
 msgid "Failed to read From address"
 msgstr "Impossível ler o endereço do remetente"
 
-#: ../src/camel/camel-ews-transport.c:245
+#: ../src/camel/camel-ews-transport.c:399
 #, c-format
 msgid ""
 "Exchange server cannot send message as '%s', when the account was configured "
@@ -387,7 +399,7 @@ msgstr ""
 "O servidor Exchange não pode mandar a mensagem como \"%s\", a conta foi "
 "configurada para o endereço \"%s\""
 
-#: ../src/camel/camel-ews-transport.c:259
+#: ../src/camel/camel-ews-transport.c:413
 #, c-format
 msgid "Service not connected"
 msgstr "Serviço não ligado"
@@ -410,69 +422,69 @@ msgid "Data source '%s' does not represent an Exchange Web Services folder"
 msgstr ""
 "Origem de dados \"%s\" não representa uma pasta de serviços web do Exchange"
 
-#: ../src/configuration/e-ews-config-utils.c:570
+#: ../src/configuration/e-ews-config-utils.c:576
 msgid "Folder"
 msgstr "Pasta"
 
-#: ../src/configuration/e-ews-config-utils.c:580
+#: ../src/configuration/e-ews-config-utils.c:586
 msgid "Size"
 msgstr "Tamanho"
 
-#: ../src/configuration/e-ews-config-utils.c:618
-#: ../src/configuration/e-ews-config-utils.c:623
+#: ../src/configuration/e-ews-config-utils.c:624
+#: ../src/configuration/e-ews-config-utils.c:629
 msgid "Unable to retrieve folder size information"
 msgstr "Impossível obter informação de tamanho da pasta"
 
-#: ../src/configuration/e-ews-config-utils.c:743
+#: ../src/configuration/e-ews-config-utils.c:749
 msgid "Folder Sizes"
 msgstr "Tamanhos de pastas"
 
-#: ../src/configuration/e-ews-config-utils.c:746
+#: ../src/configuration/e-ews-config-utils.c:752
 msgid "_Close"
 msgstr "_Fechar"
 
-#: ../src/configuration/e-ews-config-utils.c:760
+#: ../src/configuration/e-ews-config-utils.c:766
 msgid "Fetching folder list…"
 msgstr "A obter lista de pastas…"
 
-#: ../src/configuration/e-ews-config-utils.c:913
+#: ../src/configuration/e-ews-config-utils.c:919
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr "Impossível editar permissões da pasta \"%s\", escolha outra."
 
-#: ../src/configuration/e-ews-config-utils.c:990
+#: ../src/configuration/e-ews-config-utils.c:996
 msgid "Folder Sizes..."
 msgstr "Tamanhos de pastas..."
 
-#: ../src/configuration/e-ews-config-utils.c:997
+#: ../src/configuration/e-ews-config-utils.c:1003
 msgid "Subscribe to folder of other user..."
 msgstr "Subscrever a pasta de outro utilizador..."
 
-#: ../src/configuration/e-ews-config-utils.c:1006
-#: ../src/configuration/e-ews-config-utils.c:1310
-#: ../src/configuration/e-ews-config-utils.c:1341
-#: ../src/configuration/e-ews-config-utils.c:1372
-#: ../src/configuration/e-ews-config-utils.c:1403
+#: ../src/configuration/e-ews-config-utils.c:1012
+#: ../src/configuration/e-ews-config-utils.c:1316
+#: ../src/configuration/e-ews-config-utils.c:1347
+#: ../src/configuration/e-ews-config-utils.c:1378
+#: ../src/configuration/e-ews-config-utils.c:1409
 msgid "Permissions..."
 msgstr "Permissões..."
 
-#: ../src/configuration/e-ews-config-utils.c:1008
+#: ../src/configuration/e-ews-config-utils.c:1014
 msgid "Edit EWS folder permissions"
 msgstr "Editar permissões da pasta EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:1312
+#: ../src/configuration/e-ews-config-utils.c:1318
 msgid "Edit EWS calendar permissions"
 msgstr "Editar permissões do calendário EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:1343
+#: ../src/configuration/e-ews-config-utils.c:1349
 msgid "Edit EWS tasks permissions"
 msgstr "Editar permissões das tarefas EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:1374
+#: ../src/configuration/e-ews-config-utils.c:1380
 msgid "Edit EWS memos permissions"
 msgstr "Editar permissões dos memorandos EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:1405
+#: ../src/configuration/e-ews-config-utils.c:1411
 msgid "Edit EWS contacts permissions"
 msgstr "Editar permissões dos contactos EWS"
 
@@ -847,11 +859,11 @@ msgstr "_Nome da pasta:"
 msgid "Include _subfolders"
 msgstr "_Incluir subpastas"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:214
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:222
 msgid "Querying Autodiscover service"
 msgstr "A consultar serviço de Descoberta automática"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:311
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:319
 msgid "Fetch _URL"
 msgstr "_Obter URL"
 
@@ -884,7 +896,6 @@ msgid "Authentication"
 msgstr "Autenticação"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:390
-#| msgid "URL cannot be NULL"
 msgid "Host URL cannot be empty"
 msgstr "O URL anfitrião não pode estar vazio"
 
@@ -1119,67 +1130,67 @@ msgstr ""
 "A sua conta Exchange \"{0}\" tem o estado definido como \"Fora do escritório"
 "\"."
 
-#: ../src/server/e-ews-connection.c:720
+#: ../src/server/e-ews-connection.c:723
 msgid "Operation Cancelled"
 msgstr "Operação cancelada"
 
-#: ../src/server/e-ews-connection.c:790
+#: ../src/server/e-ews-connection.c:793
 msgid "Authentication failed"
 msgstr "Falha na autenticação"
 
-#: ../src/server/e-ews-connection.c:811
+#: ../src/server/e-ews-connection.c:814
 #, c-format
 msgid "No response: %s"
 msgstr "Sem reposta: %s"
 
-#: ../src/server/e-ews-connection.c:2519
+#: ../src/server/e-ews-connection.c:2522
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Falha ao processar XML de resposta da descoberta automática"
 
-#: ../src/server/e-ews-connection.c:2526
+#: ../src/server/e-ews-connection.c:2529
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Falha ao localizar o elemento <Autodiscover>"
 
-#: ../src/server/e-ews-connection.c:2537
+#: ../src/server/e-ews-connection.c:2540
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Falha ao localizar o elemento <Response>"
 
-#: ../src/server/e-ews-connection.c:2548
+#: ../src/server/e-ews-connection.c:2551
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Falha ao localizar o elemento <Account>"
 
-#: ../src/server/e-ews-connection.c:2573
+#: ../src/server/e-ews-connection.c:2576
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
 "Falha ao localizar <ASUrl> e <OABUrl> na resposta da descoberta automática"
 
-#: ../src/server/e-ews-connection.c:2663
+#: ../src/server/e-ews-connection.c:2667
 msgid "URL cannot be NULL"
 msgstr "O URL não pode ser NULL"
 
-#: ../src/server/e-ews-connection.c:2671
+#: ../src/server/e-ews-connection.c:2675
 #, c-format
 msgid "URL '%s' is not valid"
 msgstr "O URL \"%s\" não é válido"
 
-#: ../src/server/e-ews-connection.c:2763
+#: ../src/server/e-ews-connection.c:2765
 msgid "Email address is missing a domain part"
 msgstr "O endereço de email tem a parte de domínio em falta"
 
-#: ../src/server/e-ews-connection.c:3085
+#: ../src/server/e-ews-connection.c:3087
 msgid "Failed to parse oab XML"
 msgstr "Falha ao processar o XML oab"
 
-#: ../src/server/e-ews-connection.c:3093
+#: ../src/server/e-ews-connection.c:3095
 msgid "Failed to find <OAB> element\n"
 msgstr "Falha ao localizar o elemento <OAB>\n"
 
-#: ../src/server/e-ews-connection.c:4347
+#: ../src/server/e-ews-connection.c:4357
 msgid "No items found"
 msgstr "Nenhum item encontrado"
 
