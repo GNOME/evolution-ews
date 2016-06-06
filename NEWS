@@ -1,3 +1,15 @@
+Evolution-EWS 3.20.3 2016-06-06
+-------------------------------
+
+Bug Fixes:
+	Bug 766021 - Messages are downloaded for offline multiple times (Milan Crha)
+	Bug 767030 - GivenName element written twice when creating contact (Milan Crha)
+
+Miscellaneous:
+	Fix some issues found by Coverity Scan (Milan Crha)
+	Initialize connection variable to NULL in camel_ews_folder_get_message() (Milan Crha)
+	Fix a memory leak when creating a contact (Milan Crha)
+
 Evolution-EWS 3.20.2 2016-05-09
 -------------------------------
 
