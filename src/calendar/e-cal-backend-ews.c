@@ -3153,7 +3153,7 @@ add_item_to_cache (ECalBackendEws *cbews,
 
 			/*status*/
 			ews_task_status = e_ews_item_get_status (item);
-			if (!g_strcmp0 (ews_task_status, "NotStarted") == 0) {
+			if (g_strcmp0 (ews_task_status, "NotStarted") != 0) {
 				if (g_strcmp0 (ews_task_status, "Completed") == 0)
 					status = ICAL_STATUS_COMPLETED;
 				else if (g_strcmp0 (ews_task_status, "InProgress") == 0)
