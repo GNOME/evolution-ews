@@ -714,6 +714,7 @@ ews_cancel_request (GCancellable *cancellable,
 
 	QUEUE_LOCK (cnc);
 	found = g_slist_find (cnc->priv->active_job_queue, node);
+	cnc->priv->jobs = g_slist_remove (cnc->priv->jobs, node);
 	QUEUE_UNLOCK (cnc);
 
 	g_simple_async_result_set_error (
@@ -724,10 +725,6 @@ ews_cancel_request (GCancellable *cancellable,
 	if (found) {
 		ews_connection_schedule_cancel_message (cnc, SOUP_MESSAGE (msg));
 	} else {
-		QUEUE_LOCK (cnc);
-		cnc->priv->jobs = g_slist_remove (cnc->priv->jobs, (gconstpointer) node);
-		QUEUE_UNLOCK (cnc);
-
 		ews_response_cb (cnc->priv->soup_session, SOUP_MESSAGE (msg), node);
 	}
 }
