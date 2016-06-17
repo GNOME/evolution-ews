@@ -3261,10 +3261,6 @@ add_item_to_cache (ECalBackendEws *cbews,
 			if (start_zone != NULL) {
 				icalcomp = icalcomponent_get_first_component (vcomp, kind);
 
-				icalcomponent_add_component (
-					vcomp,
-					icalcomponent_new_clone (icaltimezone_get_component (start_zone)));
-
 				dt = icalcomponent_get_dtstart (icalcomp);
 				dt = icaltime_convert_to_zone (dt, start_zone);
 				icalcomponent_set_dtstart (icalcomp, dt);
@@ -3306,8 +3302,6 @@ add_item_to_cache (ECalBackendEws *cbews,
 
 			if (zone != NULL) {
 				icalcomp = icalcomponent_get_first_component (vcomp, kind);
-
-				icalcomponent_add_component (vcomp, icalcomponent_new_clone (icaltimezone_get_component (zone)));
 
 				dt = icalcomponent_get_dtstart (icalcomp);
 				dt = icaltime_convert_to_zone (dt, zone);
