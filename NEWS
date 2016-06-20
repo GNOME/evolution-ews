@@ -1,3 +1,22 @@
+Evolution-EWS 3.21.3 2016-06-20
+-------------------------------
+
+Bug Fixes:
+	Bug 767030 - GivenName element written twice when creating contact (Milan Crha)
+	Bug 722193 - Possible use-after-free in ews_response_cb() after cancel (Milan Crha)
+	Bug 767335 - Attachment names are not URL-decoded (Milan Crha)
+	Bug 634294 - Calendar factory crash under e-cal-recur (Milan Crha)
+
+Miscellaneous:
+	Initialize connection variable to NULL in camel_ews_folder_get_message() (Milan Crha)
+	Fix a memory leak when creating a contact (Milan Crha)
+	Address some of the clang compiler warnings (Milan Crha)
+
+Translations:
+	Tiago Santos (pt)
+	Marek Černocký (cs)
+	Andika Triwidada (id)
+
 Evolution-EWS 3.21.2 2016-05-23
 -------------------------------
 
