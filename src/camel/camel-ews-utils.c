@@ -430,7 +430,7 @@ ews_utils_replace_server_user_flags (ESoapMessage *msg,
 
 	/* transfer camel flags to become the categories as an XML
 	 * array of strings */
-	for (flag = camel_message_info_user_flags (&mi->info); flag;
+	for (flag = camel_message_info_get_user_flags (&mi->info); flag;
 	     flag = flag->next) {
 		const gchar *n = ews_utils_rename_label (flag->name, 0);
 		if (*n == '\0')
@@ -454,7 +454,7 @@ ews_utils_merge_server_user_flags (EEwsItem *item,
 	const CamelFlag *flag;
 
 	/* transfer camel flags to a list */
-	for (flag = camel_message_info_user_flags (&mi->info); flag;
+	for (flag = camel_message_info_get_user_flags (&mi->info); flag;
 	     flag = flag->next) {
 		if (!ews_utils_is_system_user_flag (flag->name))
 			list = g_slist_prepend (list, (gchar *) flag->name);
@@ -685,7 +685,7 @@ camel_ews_utils_update_follow_up_flags (EEwsItem *item,
 
 	if (flag_status == 1) {
 		/* complete */
-		if (!camel_message_info_user_tag (info, "follow-up"))
+		if (!camel_message_info_get_user_tag (info, "follow-up"))
 			changed = camel_message_info_set_user_tag (info, "follow-up", followup_name ? followup_name : "follow-up") || changed;
 		if (completed_tt != (time_t) 0) {
 			gchar *text = camel_header_format_date (completed_tt, 0);
@@ -982,9 +982,9 @@ ews_utils_update_followup_flags (ESoapMessage *msg,
 	g_return_if_fail (msg != NULL);
 	g_return_if_fail (mi != NULL);
 
-	followup = camel_message_info_user_tag (mi, "follow-up");
-	completed = camel_message_info_user_tag (mi, "completed-on");
-	dueby = camel_message_info_user_tag (mi, "due-by");
+	followup = camel_message_info_get_user_tag (mi, "follow-up");
+	completed = camel_message_info_get_user_tag (mi, "completed-on");
+	dueby = camel_message_info_get_user_tag (mi, "due-by");
 
 	if (followup && !*followup)
 		followup = NULL;

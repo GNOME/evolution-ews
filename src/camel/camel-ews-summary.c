@@ -313,22 +313,22 @@ camel_ews_summary_add_message (CamelFolderSummary *summary,
 	mi->change_key = g_strdup (change_key);
 
 	/* Copy flags 'n' tags */
-	mi->info.flags = camel_message_info_flags (info);
+	mi->info.flags = camel_message_info_get_flags (info);
 
-	flag = camel_message_info_user_flags (info);
+	flag = camel_message_info_get_user_flags (info);
 	while (flag) {
 		camel_message_info_set_user_flag ((CamelMessageInfo *) mi, flag->name, TRUE);
 		flag = flag->next;
 	}
 
-	tag = camel_message_info_user_tags (info);
+	tag = camel_message_info_get_user_tags (info);
 	while (tag) {
 		/* coverity[unchecked_value] */
 		camel_message_info_set_user_tag ((CamelMessageInfo *) mi, tag->name, tag->value);
 		tag = tag->next;
 	}
 
-	mi->info.size = camel_message_info_size (info);
+	mi->info.size = camel_message_info_get_size (info);
 	mi->info.uid = camel_pstring_strdup (uid);
 
 	camel_folder_summary_add (summary, (CamelMessageInfo *) mi);

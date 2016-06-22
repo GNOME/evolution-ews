@@ -121,7 +121,7 @@ create_mime_message_cb (ESoapMessage *msg,
 	guint32 message_camel_flags = 0;
 
 	if (create_data->info)
-		message_camel_flags = camel_message_info_flags (create_data->info);
+		message_camel_flags = camel_message_info_get_flags (create_data->info);
 		
 	e_soap_message_start_element (msg, "Message", NULL, NULL);
 	e_soap_message_start_element (msg, "MimeContent", NULL, NULL);
@@ -202,9 +202,9 @@ create_mime_message_cb (ESoapMessage *msg,
 		time_t completed_tt = (time_t) 0 , dueby_tt = (time_t) 0;
 
 		/* follow-up flags */
-		followup = camel_message_info_user_tag (create_data->info, "follow-up");
-		completed = camel_message_info_user_tag (create_data->info, "completed-on");
-		dueby = camel_message_info_user_tag (create_data->info, "due-by");
+		followup = camel_message_info_get_user_tag (create_data->info, "follow-up");
+		completed = camel_message_info_get_user_tag (create_data->info, "completed-on");
+		dueby = camel_message_info_get_user_tag (create_data->info, "due-by");
 
 		if (followup && !*followup)
 			followup = NULL;

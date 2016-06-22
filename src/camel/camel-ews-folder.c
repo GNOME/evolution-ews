@@ -1019,7 +1019,7 @@ ews_suppress_read_receipt (ESoapMessage *msg,
 
 	for (iter = mi_list; iter; iter = g_slist_next (iter)) {
 		mi = iter->data;
-		if (!mi || (camel_message_info_flags (mi) & CAMEL_EWS_MESSAGE_MSGFLAG_RN_PENDING) == 0)
+		if (!mi || (camel_message_info_get_flags (mi) & CAMEL_EWS_MESSAGE_MSGFLAG_RN_PENDING) == 0)
 			continue;
 
 		/* There was requested a read-receipt, but it is handled by evolution-ews,
@@ -1034,7 +1034,7 @@ ews_suppress_read_receipt (ESoapMessage *msg,
 		mi->info.flags = mi->info.flags & (~CAMEL_EWS_MESSAGE_MSGFLAG_RN_PENDING);
 		mi->info.dirty = TRUE;
 
-		if (!camel_message_info_user_flag ((CamelMessageInfo *) mi, "receipt-handled"))
+		if (!camel_message_info_get_user_flag ((CamelMessageInfo *) mi, "receipt-handled"))
 			camel_message_info_set_user_flag ((CamelMessageInfo *) mi, "receipt-handled", TRUE);
 
 		camel_folder_summary_touch (mi->info.summary);
@@ -1064,7 +1064,7 @@ ews_sync_mi_flags (CamelFolder *folder,
 	for (iter = mi_list; iter; iter = g_slist_next (iter)) {
 		CamelEwsMessageInfo *mi = iter->data;
 
-		if (mi && (camel_message_info_flags (mi) & CAMEL_EWS_MESSAGE_MSGFLAG_RN_PENDING) != 0)
+		if (mi && (camel_message_info_get_flags (mi) & CAMEL_EWS_MESSAGE_MSGFLAG_RN_PENDING) != 0)
 			break;
 	}
 
@@ -1289,7 +1289,7 @@ ews_synchronize_sync (CamelFolder *folder,
 		if (!mi)
 			continue;
 
-		flags_set = camel_message_info_flags (mi);
+		flags_set = camel_message_info_get_flags (mi);
 		flags_changed = mi->server_flags ^ flags_set;
 
 		/* Exchange doesn't seem to have a sane representation
@@ -2060,7 +2060,7 @@ ews_transfer_messages_to_sync (CamelFolder *source,
 		if (!mi)
 			continue;
 
-		flags_set = camel_message_info_flags (mi);
+		flags_set = camel_message_info_get_flags (mi);
 
 		/* Exchange doesn't seem to have a sane representation
 		 * for most flags — not even replied/forwarded. */
