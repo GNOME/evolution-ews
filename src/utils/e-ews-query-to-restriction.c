@@ -1178,7 +1178,7 @@ e_ews_convert_sexp_to_restriction (ESoapMessage *msg,
 		return;
 
 	e_sexp_result_free (sexp, r);
-	e_sexp_unref (sexp);
+	g_object_unref (sexp);
 }
 
 static gboolean
