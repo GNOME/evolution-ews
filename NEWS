@@ -1,3 +1,14 @@
+Evolution-EWS 3.20.4 2016-07-11
+-------------------------------
+
+Bug Fixes:
+	Bug 722193 - Possible use-after-free in ews_response_cb() after cancel (Milan Crha)
+	Bug 767335 - Attachment names are not URL-decoded (Milan Crha)
+	Bug 634294 - Calendar factory crash under e-cal-recur (Milan Crha)
+
+Translations:
+	Andika Triwidada (id)
+
 Evolution-EWS 3.20.3 2016-06-06
 -------------------------------
 
