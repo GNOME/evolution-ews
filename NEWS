@@ -1,3 +1,16 @@
+Evolution-EWS 3.21.4 2016-07-18
+-------------------------------
+
+Bug Fixes:
+	Bug 764065 - [Camel] Use get methods for CamelMessageInfo fields (Corentin Noël)
+
+Miscellaneous:
+	Always build ESExp structure as a GObject descendant (Milan Crha)
+	Add Language headers to po files (Piotr Drąg)
+
+Translations:
+	Andika Triwidada (id)
+
 Evolution-EWS 3.21.3 2016-06-20
 -------------------------------
 
