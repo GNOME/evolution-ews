@@ -3047,7 +3047,7 @@ add_item_to_cache (ECalBackendEws *cbews,
 	ETimezoneCache *timezone_cache;
 	icalcomponent_kind kind;
 	EEwsItemType item_type;
-	icalcomponent *vtimezone, *icalcomp, *vcomp;
+	icalcomponent *icalcomp, *vcomp;
 	const gchar *mime_content;
 
 	timezone_cache = E_TIMEZONE_CACHE (cbews);
@@ -3204,6 +3204,7 @@ add_item_to_cache (ECalBackendEws *cbews,
 	} else {
 		struct icaltimetype dt;
 		const gchar *tzid;
+		gboolean timezone_set = FALSE;
 
 		mime_content = e_ews_item_get_mime_content (item);
 		vcomp = icalparser_parse_string (mime_content);
@@ -3265,6 +3266,7 @@ add_item_to_cache (ECalBackendEws *cbews,
 				dt = icaltime_convert_to_zone (dt, start_zone);
 				icalcomponent_set_dtstart (icalcomp, dt);
 
+				timezone_set = TRUE;
 				e_timezone_cache_add_timezone (timezone_cache, start_zone);
 
 				if (end_zone != NULL) {
@@ -3275,7 +3277,12 @@ add_item_to_cache (ECalBackendEws *cbews,
 					e_timezone_cache_add_timezone (timezone_cache, end_zone);
 				}
 			}
-		} else {
+
+			if (!timezone_set)
+				tzid = start_tzid;
+		}
+
+		if (!timezone_set && tzid) {
 			/*
 			 * When we are working with Exchange server older than 2010, we don't set different
 			 * DTSTART and DTEND properties in VTIMEZONE. The reason of that is we don't use
@@ -3284,25 +3291,53 @@ add_item_to_cache (ECalBackendEws *cbews,
 			 * the same values.
 			 */
 			icaltimezone *zone;
+			gchar *new_tzid = NULL;
 
-			/* Add the timezone */
-			vtimezone = icalcomponent_get_first_component (vcomp, ICAL_VTIMEZONE_COMPONENT);
-			if (vtimezone != NULL) {
-				zone = icaltimezone_new ();
-				vtimezone = icalcomponent_new_clone (vtimezone);
-				icaltimezone_set_component (zone, vtimezone);
-				e_timezone_cache_add_timezone (timezone_cache, zone);
-				icaltimezone_free (zone, TRUE);
+			icalcomp = icalcomponent_get_first_component (vcomp, kind);
+
+			if (!icaltimezone_get_builtin_timezone (tzid) &&
+			    icalcomponent_get_uid (icalcomp)) {
+				icalcomponent *vtimezone;
+
+				/* Add the timezone */
+				vtimezone = icalcomponent_get_first_component (vcomp, ICAL_VTIMEZONE_COMPONENT);
+				if (vtimezone != NULL) {
+					icalproperty *prop;
+
+					new_tzid = g_strconcat ("/evolution/ews/tzid/", icalcomponent_get_uid (icalcomp), NULL);
+
+					zone = icaltimezone_new ();
+					vtimezone = icalcomponent_new_clone (vtimezone);
+					prop = icalcomponent_get_first_property (vtimezone, ICAL_TZID_PROPERTY);
+					if (prop) {
+						icalproperty_set_tzid (prop, new_tzid);
+
+						prop = icalcomponent_get_first_property (vtimezone, ICAL_LOCATION_PROPERTY);
+						if (!prop) {
+							/* Use the original tzid as the timezone Location, to not expose
+							   evolution-ews TZID. */
+							prop = icalproperty_new_location (tzid);
+							icalcomponent_add_property (vtimezone, prop);
+						}
+					} else {
+						g_free (new_tzid);
+						new_tzid = NULL;
+					}
+					icaltimezone_set_component (zone, vtimezone);
+					e_timezone_cache_add_timezone (timezone_cache, zone);
+					icaltimezone_free (zone, TRUE);
+				}
 			}
 
-			zone = e_timezone_cache_get_timezone (timezone_cache, tzid);
+			zone = e_timezone_cache_get_timezone (timezone_cache, new_tzid ? new_tzid : tzid);
+
+			if (!zone && new_tzid)
+				zone = e_timezone_cache_get_timezone (timezone_cache, tzid);
 
 			if (zone == NULL)
 				zone = icaltimezone_get_builtin_timezone (tzid);
 
 			if (zone != NULL) {
-				icalcomp = icalcomponent_get_first_component (vcomp, kind);
-
 				dt = icalcomponent_get_dtstart (icalcomp);
 				dt = icaltime_convert_to_zone (dt, zone);
 				icalcomponent_set_dtstart (icalcomp, dt);
@@ -3311,8 +3346,11 @@ add_item_to_cache (ECalBackendEws *cbews,
 				dt = icaltime_convert_to_zone (dt, zone);
 				icalcomponent_set_dtend (icalcomp, dt);
 			}
+
+			g_free (new_tzid);
 		}
 	}
+
 	/* Vevent or Vtodo */
 	icalcomp = icalcomponent_get_first_component (vcomp, kind);
 	if (icalcomp) {
