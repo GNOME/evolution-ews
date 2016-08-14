@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2016-01-22 16:14+0000\n"
-"PO-Revision-Date: 2016-01-22 22:05+0200\n"
+"POT-Creation-Date: 2016-05-19 05:26+0000\n"
+"PO-Revision-Date: 2016-08-14 21:41+0300\n"
 "Last-Translator: Aurimas Černius <aurisc4@gmail.com>\n"
 "Language-Team: Lietuvių <gnome-lt@lists.akl.lt>\n"
 "Language: lt\n"
@@ -20,69 +20,69 @@ msgstr ""
 "%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Generator: Gtranslator 2.91.7\n"
 
-#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:77
+#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:80
 msgid "Exchange Web Services"
 msgstr "Exchange Web Services"
 
-#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:79
+#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:82
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Exchange serverių pasiekimui naudojant internetines tarnybas"
 
-#: ../src/addressbook/e-book-backend-ews.c:1454
+#: ../src/addressbook/e-book-backend-ews.c:1473
 msgid "The backend does not support bulk additions"
 msgstr "Realizacija nepalaiko masinių pridėjimų"
 
-#: ../src/addressbook/e-book-backend-ews.c:1493
-#: ../src/addressbook/e-book-backend-ews.c:1860
+#: ../src/addressbook/e-book-backend-ews.c:1512
+#: ../src/addressbook/e-book-backend-ews.c:1879
 msgid ""
 "Cannot save contact list, it's only supported on EWS Server 2010 or later"
 msgstr ""
 "Negalima įrašyti kontaktų sąrašo, jis palaikomas tik EWS Server 2010 ir "
 "naujesniame"
 
-#: ../src/addressbook/e-book-backend-ews.c:1819
+#: ../src/addressbook/e-book-backend-ews.c:1838
 msgid "The backend does not support bulk modifications"
 msgstr "Ši realizacija nepalaiko masinio keitimo"
 
-#: ../src/addressbook/e-book-backend-ews.c:2031
+#: ../src/addressbook/e-book-backend-ews.c:2050
 msgid "Wait till syncing is done"
 msgstr "Palaukite, kol bus baigta sinchronizacija"
 
-#: ../src/addressbook/e-book-backend-ews.c:2514
+#: ../src/addressbook/e-book-backend-ews.c:2533
 #, c-format
 msgid "Processing contacts in %s %d%% completed... "
 msgstr "Parsiunčiami %s kontaktai, %d%% baigta..."
 
-#: ../src/addressbook/e-book-backend-ews.c:3126
+#: ../src/addressbook/e-book-backend-ews.c:3176
 msgid "Syncing contacts..."
 msgstr "Sinchronizuojami kontaktai..."
 
-#: ../src/addressbook/e-book-backend-ews.c:3311
+#: ../src/addressbook/e-book-backend-ews.c:3361
 #: ../src/configuration/e-ews-search-user.c:365
 msgid "Searching..."
 msgstr "Ieškoma..."
 
-#: ../src/addressbook/e-book-backend-ews.c:4274
+#: ../src/addressbook/e-book-backend-ews.c:4365
 msgid "Requested to delete an unrelated cursor"
 msgstr "Paprašyta ištrinti nesusijusį žymiklį"
 
-#: ../src/calendar/e-cal-backend-ews.c:1317
+#: ../src/calendar/e-cal-backend-ews.c:1349
 msgid "EWS does not support bulk removals"
 msgstr "EWS nepalaiko masinio trynimo"
 
-#: ../src/calendar/e-cal-backend-ews.c:1495
+#: ../src/calendar/e-cal-backend-ews.c:1528
 msgid "Unknown error"
 msgstr "Nežinoma klaida"
 
-#: ../src/calendar/e-cal-backend-ews.c:1739
+#: ../src/calendar/e-cal-backend-ews.c:1777
 msgid "EWS does not support bulk additions"
 msgstr "EWS nepalaiko masinių pridėjimų"
 
-#: ../src/calendar/e-cal-backend-ews.c:1944
+#: ../src/calendar/e-cal-backend-ews.c:1982
 msgid "EWS does not support bulk modifications"
 msgstr "EWS nepalaiko masinio keitimo"
 
-#: ../src/calendar/e-cal-backend-ews.c:2370
+#: ../src/calendar/e-cal-backend-ews.c:2408
 #, c-format
 msgid "Cannot find user '%s' between attendees"
 msgstr "Nepavyko rasti tarp dalyvių naudotojo „%s“"
@@ -107,7 +107,7 @@ msgstr "Nepavyksta perskaityti susitikimo užklausos mimecontent!"
 msgid "Unable to create cache file"
 msgstr "Nepavyksta sukurti podėlio failo"
 
-#: ../src/camel/camel-ews-folder.c:557 ../src/camel/camel-ews-folder.c:649
+#: ../src/camel/camel-ews-folder.c:587 ../src/camel/camel-ews-folder.c:679
 #, c-format
 msgid "Unable to create cache path '%s': %s"
 msgstr "Nepavyksta sukurti podėlio kelio „%s“: %s"
@@ -115,19 +115,26 @@ msgstr "Nepavyksta sukurti podėlio kelio „%s“: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/camel/camel-ews-folder.c:663
+#: ../src/camel/camel-ews-folder.c:693
 #, c-format
 msgid "Failed to move message cache file from '%s' to '%s': %s"
 msgstr "Nepavyko perkelti laiškų podėlio failo iš „%s“ į „%s“: %s"
 
-#: ../src/camel/camel-ews-folder.c:1404
+#: ../src/camel/camel-ews-folder.c:1439
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nepavyksta įkelti %s santraukos"
 
-#: ../src/camel/camel-ews-folder.c:1943
+#: ../src/camel/camel-ews-folder.c:1839
 #, c-format
-msgid "Cant perform actions on the folder while in offline mode"
+#| msgid "Fetching folder list…"
+msgid "Refreshing folder '%s'"
+msgstr "Atnaujinamas aplankas „%s“"
+
+#: ../src/camel/camel-ews-folder.c:1981
+#, c-format
+#| msgid "Cant perform actions on the folder while in offline mode"
+msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Negalima atlikti veiksmų aplanke esant atsijungus"
 
 #: ../src/camel/camel-ews-provider.c:47
@@ -174,11 +181,15 @@ msgstr "Ryšys"
 msgid "Connection _timeout (in seconds) %s"
 msgstr "Jungimosi laiko pabaiga (sekundėmis) %s"
 
-#: ../src/camel/camel-ews-provider.c:94
+#: ../src/camel/camel-ews-provider.c:71
+msgid "Override _User-Agent header value"
+msgstr "Pakeisti _User-Agent antraštės reikšmę"
+
+#: ../src/camel/camel-ews-provider.c:97
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/camel/camel-ews-provider.c:96
+#: ../src/camel/camel-ews-provider.c:99
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -186,11 +197,11 @@ msgstr ""
 "Šis parametras jungsis prie Exchange serverio naudojant grynojo teksto "
 "slaptažodį su NTLM tapatybės patvirtinimu."
 
-#: ../src/camel/camel-ews-provider.c:104
+#: ../src/camel/camel-ews-provider.c:107
 msgid "Basic"
 msgstr "Bazinis"
 
-#: ../src/camel/camel-ews-provider.c:106
+#: ../src/camel/camel-ews-provider.c:109
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -198,11 +209,11 @@ msgstr ""
 "Šis parametras jungsis prie Exchange serverio naudojant grynojo teksto "
 "slaptažodį su Basic tapatybės patvirtinimu."
 
-#: ../src/camel/camel-ews-provider.c:114
+#: ../src/camel/camel-ews-provider.c:117
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/camel/camel-ews-provider.c:116
+#: ../src/camel/camel-ews-provider.c:119
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -244,25 +255,25 @@ msgstr "Atnaujinami išoriniai aplankai"
 msgid "No such folder: %s"
 msgstr "Nėra tokio aplanko: %s"
 
-#: ../src/camel/camel-ews-store.c:2300
+#: ../src/camel/camel-ews-store.c:2303
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Negalima išvardinti EWS viešų aplankų atsijungus"
 
-#: ../src/camel/camel-ews-store.c:2373
+#: ../src/camel/camel-ews-store.c:2376
 msgid "Cannot find any EWS public folders"
 msgstr "Nevyksta rasti jokių EWS viešų aplankų"
 
-#: ../src/camel/camel-ews-store.c:2482
+#: ../src/camel/camel-ews-store.c:2485
 #, c-format
 msgid "Cannot create folder '%s', folder already exists"
 msgstr "Negalima sukurti aplanko „%s“, toks aplankas jau yra"
 
-#: ../src/camel/camel-ews-store.c:2497
+#: ../src/camel/camel-ews-store.c:2500
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Nėra tėvinio aplanko %s"
 
-#: ../src/camel/camel-ews-store.c:2507
+#: ../src/camel/camel-ews-store.c:2510
 #, c-format
 msgid ""
 "Cannot create folder under '%s', it is used for folders of other users only"
@@ -270,116 +281,116 @@ msgstr ""
 "Negalima sukurti aplanko „%s“ viduje, jis naudojamas tik kitų naudotojų "
 "aplankams"
 
-#: ../src/camel/camel-ews-store.c:2517
+#: ../src/camel/camel-ews-store.c:2520
 #, c-format
 msgid "Cannot create folder under '%s', it is used for public folders only"
 msgstr ""
 "Negalima sukurti aplanko „%s“ viduje, jis naudojamas tik viešiesiems "
 "aplankams"
 
-#: ../src/camel/camel-ews-store.c:2621
+#: ../src/camel/camel-ews-store.c:2624
 #, c-format
 msgid "Folder does not exist"
 msgstr "Tokio aplanko nėra"
 
-#: ../src/camel/camel-ews-store.c:2631
+#: ../src/camel/camel-ews-store.c:2634
 #, c-format
 msgid "Cannot remove folder '%s', it is used for folders of other users only"
 msgstr ""
 "Negalima pašalinti „%s“ aplanko, jis naudojamas tik kitų naudotojų aplankams"
 
-#: ../src/camel/camel-ews-store.c:2642
+#: ../src/camel/camel-ews-store.c:2645
 #, c-format
 msgid "Cannot remove folder '%s', it is used for public folders only"
 msgstr ""
 "Negalima pašalinti aplanko „%s“, jis naudojamas tik viešiesiems aplankams"
 
-#: ../src/camel/camel-ews-store.c:2798
+#: ../src/camel/camel-ews-store.c:2801
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Aplanko %s nėra"
 
-#: ../src/camel/camel-ews-store.c:2808
+#: ../src/camel/camel-ews-store.c:2810
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Nėra pakeitimo raktinio įrašo aplankui %s"
 
-#: ../src/camel/camel-ews-store.c:2850
+#: ../src/camel/camel-ews-store.c:2853
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Negalima pervadinti ir perkelti aplanko tuo pat metu"
 
-#: ../src/camel/camel-ews-store.c:2886
+#: ../src/camel/camel-ews-store.c:2887
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nepavyksta rasti aplanko ID tėviniam aplankui %s"
 
-#: ../src/camel/camel-ews-store.c:2936 ../src/camel/camel-ews-transport.c:164
+#: ../src/camel/camel-ews-store.c:2939 ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange server %s"
 msgstr "Exchange serveris %s"
 
-#: ../src/camel/camel-ews-store.c:2939
+#: ../src/camel/camel-ews-store.c:2942
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Exchange tarnyba %s %s"
 
-#: ../src/camel/camel-ews-store.c:2983
+#: ../src/camel/camel-ews-store.c:2986
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Nepavyko rasti šiukšlinės aplanko"
 
-#: ../src/camel/camel-ews-store.c:3043
+#: ../src/camel/camel-ews-store.c:3046
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Nepavyko rasti šlamšto aplanko"
 
-#: ../src/camel/camel-ews-store.c:3233
+#: ../src/camel/camel-ews-store.c:3236
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Negalima prisiregistruoti prie EWS aplankų atsijungimo veiksenoje"
 
-#: ../src/camel/camel-ews-store.c:3256
+#: ../src/camel/camel-ews-store.c:3259
 #, c-format
 msgid "Cannot subscribe folder '%s', no public folder available"
 msgstr ""
 "Nepavyksta prisiregistruoti prie aplanko „%s“, nėra prieinamo viešo aplanko"
 
-#: ../src/camel/camel-ews-store.c:3266
+#: ../src/camel/camel-ews-store.c:3269
 #, c-format
 msgid "Cannot subscribe folder '%s', folder not found"
 msgstr "Nepavyksta prisiregistruoti prie aplanko „%s“, nerastas aplankas"
 
-#: ../src/camel/camel-ews-store.c:3357
+#: ../src/camel/camel-ews-store.c:3360
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Negalima išsiregistruoti iš EWS aplankų atsijungimo veiksenoje"
 
-#: ../src/camel/camel-ews-store.c:3474
+#: ../src/camel/camel-ews-store.c:3477
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Šiam veiksmui užbaigti, reikia būti prisijungus"
 
-#: ../src/camel/camel-ews-store.c:3518 ../src/camel/camel-ews-store.c:3555
+#: ../src/camel/camel-ews-store.c:3521 ../src/camel/camel-ews-store.c:3558
 msgid "Unsetting the \"Out of Office\" status"
 msgstr "Nuimama būsena „ne ofise“"
 
-#: ../src/camel/camel-ews-transport.c:167
+#: ../src/camel/camel-ews-transport.c:321
 #, c-format
 msgid "Exchange mail delivery via %s"
 msgstr "Exchange pašto pristatymas per %s"
 
-#: ../src/camel/camel-ews-transport.c:216
+#: ../src/camel/camel-ews-transport.c:370
 msgid "Cannot send message with no From address"
 msgstr "Negalima siųsti laiško be siuntėjo adreso"
 
-#: ../src/camel/camel-ews-transport.c:222
+#: ../src/camel/camel-ews-transport.c:376
 msgid "Exchange server cannot send message with multiple From addresses"
 msgstr "Exchange serveris negali siųsti laiško su keliais siuntėjo adresais"
 
-#: ../src/camel/camel-ews-transport.c:233
+#: ../src/camel/camel-ews-transport.c:387
 msgid "Failed to read From address"
 msgstr "Nepavyko perskaityti siuntėjo adreso"
 
-#: ../src/camel/camel-ews-transport.c:245
+#: ../src/camel/camel-ews-transport.c:399
 #, c-format
 msgid ""
 "Exchange server cannot send message as '%s', when the account was configured "
@@ -388,7 +399,7 @@ msgstr ""
 "Exchange serveris negali siųsti laiško kaip „%s“, kai paskyra buvo "
 "sukonfigūruota adresui „%s“"
 
-#: ../src/camel/camel-ews-transport.c:259
+#: ../src/camel/camel-ews-transport.c:413
 #, c-format
 msgid "Service not connected"
 msgstr "Tarnyba neprisijungusi"
@@ -408,69 +419,69 @@ msgstr "Nepavyko nustatyti tinkamos aplanko klasės aplankui pavadinimu „%s“
 msgid "Data source '%s' does not represent an Exchange Web Services folder"
 msgstr "Duomenų šaltinis „%s“ nereprezentuoja Exchange Web Services aplanko"
 
-#: ../src/configuration/e-ews-config-utils.c:570
+#: ../src/configuration/e-ews-config-utils.c:576
 msgid "Folder"
 msgstr "Aplankas"
 
-#: ../src/configuration/e-ews-config-utils.c:580
+#: ../src/configuration/e-ews-config-utils.c:586
 msgid "Size"
 msgstr "Dydis"
 
-#: ../src/configuration/e-ews-config-utils.c:618
-#: ../src/configuration/e-ews-config-utils.c:623
+#: ../src/configuration/e-ews-config-utils.c:624
+#: ../src/configuration/e-ews-config-utils.c:629
 msgid "Unable to retrieve folder size information"
 msgstr "Nepavyksta gauti aplanko dydžio informacijos"
 
-#: ../src/configuration/e-ews-config-utils.c:743
+#: ../src/configuration/e-ews-config-utils.c:749
 msgid "Folder Sizes"
 msgstr "Aplankų dydžiai"
 
-#: ../src/configuration/e-ews-config-utils.c:746
+#: ../src/configuration/e-ews-config-utils.c:752
 msgid "_Close"
 msgstr "_Užverti"
 
-#: ../src/configuration/e-ews-config-utils.c:760
+#: ../src/configuration/e-ews-config-utils.c:766
 msgid "Fetching folder list…"
 msgstr "Gaunamas aplankų sąrašas…"
 
-#: ../src/configuration/e-ews-config-utils.c:913
+#: ../src/configuration/e-ews-config-utils.c:919
 #, c-format
 msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgstr "Negalima keisti aplanko „%s“ leidimų, pasirinkite kitą aplanką."
 
-#: ../src/configuration/e-ews-config-utils.c:990
+#: ../src/configuration/e-ews-config-utils.c:996
 msgid "Folder Sizes..."
 msgstr "Aplankų dydžiai..."
 
-#: ../src/configuration/e-ews-config-utils.c:997
+#: ../src/configuration/e-ews-config-utils.c:1003
 msgid "Subscribe to folder of other user..."
 msgstr "Prisiregistruoti prie kito naudotojo aplanko..."
 
-#: ../src/configuration/e-ews-config-utils.c:1006
-#: ../src/configuration/e-ews-config-utils.c:1310
-#: ../src/configuration/e-ews-config-utils.c:1341
-#: ../src/configuration/e-ews-config-utils.c:1372
-#: ../src/configuration/e-ews-config-utils.c:1403
+#: ../src/configuration/e-ews-config-utils.c:1012
+#: ../src/configuration/e-ews-config-utils.c:1316
+#: ../src/configuration/e-ews-config-utils.c:1347
+#: ../src/configuration/e-ews-config-utils.c:1378
+#: ../src/configuration/e-ews-config-utils.c:1409
 msgid "Permissions..."
 msgstr "Leidimai..."
 
-#: ../src/configuration/e-ews-config-utils.c:1008
+#: ../src/configuration/e-ews-config-utils.c:1014
 msgid "Edit EWS folder permissions"
 msgstr "Keisti EWS aplanko leidimus"
 
-#: ../src/configuration/e-ews-config-utils.c:1312
+#: ../src/configuration/e-ews-config-utils.c:1318
 msgid "Edit EWS calendar permissions"
 msgstr "Keisti EWS kalendoriaus leidimus"
 
-#: ../src/configuration/e-ews-config-utils.c:1343
+#: ../src/configuration/e-ews-config-utils.c:1349
 msgid "Edit EWS tasks permissions"
 msgstr "Keisti EWS užduočių leidimus"
 
-#: ../src/configuration/e-ews-config-utils.c:1374
+#: ../src/configuration/e-ews-config-utils.c:1380
 msgid "Edit EWS memos permissions"
 msgstr "Keisti EWS raštelių leidimus"
 
-#: ../src/configuration/e-ews-config-utils.c:1405
+#: ../src/configuration/e-ews-config-utils.c:1411
 msgid "Edit EWS contacts permissions"
 msgstr "Keisti EWS kontaktų leidimus"
 
@@ -839,11 +850,11 @@ msgstr "_Aplanko pavadinimas:"
 msgid "Include _subfolders"
 msgstr "Įtraukti _poaplankius"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:214
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:222
 msgid "Querying Autodiscover service"
 msgstr "Užklausiama automatinio aptikimo tarnybos"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:311
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:319
 msgid "Fetch _URL"
 msgstr "Parsiųsti _URL"
 
@@ -1107,66 +1118,66 @@ msgstr "Nepavyko gauti &quot;įgaliotinių&quot; nustatymų."
 msgid "Your Exchange account \"{0}\" has the status set as \"Out of Office\"."
 msgstr "Jūsų Exchange paskyra „{0}“ turi nustatytą būseną „ne ofise“."
 
-#: ../src/server/e-ews-connection.c:720
+#: ../src/server/e-ews-connection.c:723
 msgid "Operation Cancelled"
 msgstr "Veiksmas atšauktas"
 
-#: ../src/server/e-ews-connection.c:790
+#: ../src/server/e-ews-connection.c:793
 msgid "Authentication failed"
 msgstr "Nepavyko patvirtinti tapatybės"
 
-#: ../src/server/e-ews-connection.c:811
+#: ../src/server/e-ews-connection.c:814
 #, c-format
 msgid "No response: %s"
 msgstr "Nėra atsakymo: %s"
 
-#: ../src/server/e-ews-connection.c:2519
+#: ../src/server/e-ews-connection.c:2522
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Nepavyko perskaityti automatinio aptikimo XML"
 
-#: ../src/server/e-ews-connection.c:2526
+#: ../src/server/e-ews-connection.c:2529
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Nepavyko rasti <Autodiscover> elemento"
 
-#: ../src/server/e-ews-connection.c:2537
+#: ../src/server/e-ews-connection.c:2540
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Nepavyko rasti <Response> elemento"
 
-#: ../src/server/e-ews-connection.c:2548
+#: ../src/server/e-ews-connection.c:2551
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Nepavyko rasti <Account> elemento"
 
-#: ../src/server/e-ews-connection.c:2573
+#: ../src/server/e-ews-connection.c:2576
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr "Automatinio aptikimo atsakyme nepavyko rasti <ASUrl> ir <OABUrl>"
 
-#: ../src/server/e-ews-connection.c:2663
+#: ../src/server/e-ews-connection.c:2667
 msgid "URL cannot be NULL"
 msgstr "URL negali būti NULL"
 
-#: ../src/server/e-ews-connection.c:2671
+#: ../src/server/e-ews-connection.c:2675
 #, c-format
 msgid "URL '%s' is not valid"
 msgstr "URL „%s“ yra netinkamas"
 
-#: ../src/server/e-ews-connection.c:2763
+#: ../src/server/e-ews-connection.c:2765
 msgid "Email address is missing a domain part"
 msgstr "El. pašto adresui trūksta domeno dalies"
 
-#: ../src/server/e-ews-connection.c:3085
+#: ../src/server/e-ews-connection.c:3087
 msgid "Failed to parse oab XML"
 msgstr "Nepavyko perskaityti oab XML"
 
-#: ../src/server/e-ews-connection.c:3093
+#: ../src/server/e-ews-connection.c:3095
 msgid "Failed to find <OAB> element\n"
 msgstr "Nepavyko rasti <OAB> elemento\n"
 
-#: ../src/server/e-ews-connection.c:4347
+#: ../src/server/e-ews-connection.c:4357
 msgid "No items found"
 msgstr "Nerasta elementų"
 
