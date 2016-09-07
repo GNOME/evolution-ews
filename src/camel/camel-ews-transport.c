@@ -359,10 +359,10 @@ ews_send_to_sync (CamelTransport *transport,
 
 	g_object_unref (settings);
 
-	used_from = camel_mime_message_get_from (message);
-
-	if (!used_from && CAMEL_IS_INTERNET_ADDRESS (from))
+	if (CAMEL_IS_INTERNET_ADDRESS (from))
 		used_from = CAMEL_INTERNET_ADDRESS (from);
+	else
+		used_from = camel_mime_message_get_from (message);
 
 	if (!used_from || camel_address_length (CAMEL_ADDRESS (used_from)) == 0) {
 		g_set_error_literal (
@@ -379,28 +379,11 @@ ews_send_to_sync (CamelTransport *transport,
 
 	} else {
 		const gchar *used_email = NULL;
-		gboolean addresses_match;
 
 		if (!camel_internet_address_get (used_from, 0, NULL, &used_email)) {
 			g_set_error_literal (
 				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
 				_("Failed to read From address"));
-			goto exit;
-		}
-
-		addresses_match =
-			(ews_email != NULL) &&
-			(used_email != NULL) &&
-			(g_ascii_strcasecmp (ews_email, used_email) == 0);
-
-		if (!addresses_match) {
-			g_set_error (
-				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-				_("Exchange server cannot send message as "
-				"'%s', when the account was configured for "
-				"address '%s'"),
-				used_email ? used_email : "NULL",
-				ews_email ? ews_email : "NULL");
 			goto exit;
 		}
 	}

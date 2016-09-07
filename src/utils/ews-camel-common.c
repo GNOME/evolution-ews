@@ -31,10 +31,12 @@
 #include "server/e-ews-item-change.h"
 
 struct _create_mime_msg_data {
+	EEwsConnection *cnc;
 	CamelMimeMessage *message;
 	CamelMessageInfo *info;
 	CamelAddress *from;
 	CamelAddress *recipients;
+	gboolean is_send;
 };
 
 static void
@@ -262,6 +264,22 @@ create_mime_message_cb (ESoapMessage *msg,
 		}
 	}
 
+	if (create_data->cnc && create_data->is_send) {
+		CamelEwsSettings *settings;
+
+		settings = e_ews_connection_ref_settings (create_data->cnc);
+		if (settings) {
+			e_soap_message_start_element (msg, "Sender", NULL, NULL);
+
+			e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
+			e_ews_message_write_string_parameter_with_attribute (msg, "EmailAddress", NULL, camel_ews_settings_get_email (settings), NULL, NULL);
+			e_soap_message_end_element (msg); /* Mailbox */
+
+			e_soap_message_end_element (msg); /* Sender */
+		}
+		g_clear_object (&settings);
+	}
+
 	if (create_data->recipients) {
 		GHashTable *recip_to, *recip_cc, *recip_bcc;
 
@@ -278,6 +296,22 @@ create_mime_message_cb (ESoapMessage *msg,
 		g_hash_table_destroy (recip_to);
 		g_hash_table_destroy (recip_cc);
 		g_hash_table_destroy (recip_bcc);
+	}
+
+	if (create_data->is_send && create_data->from && CAMEL_IS_INTERNET_ADDRESS (create_data->from)) {
+		const gchar *from_name = NULL, *from_email = NULL;
+
+		if (camel_internet_address_get (CAMEL_INTERNET_ADDRESS (create_data->from), 0, &from_name, &from_email) && from_email) {
+			e_soap_message_start_element (msg, "From", NULL, NULL);
+
+			e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
+			if (from_name && *from_name)
+				e_ews_message_write_string_parameter_with_attribute (msg, "Name", NULL, from_name, NULL, NULL);
+			e_ews_message_write_string_parameter_with_attribute (msg, "EmailAddress", NULL, from_email, NULL, NULL);
+			e_soap_message_end_element (msg); /* Mailbox */
+
+			e_soap_message_end_element (msg); /* From */
+		}
 	}
 
 	e_ews_message_write_string_parameter_with_attribute (
@@ -310,27 +344,22 @@ camel_ews_utils_create_mime_message (EEwsConnection *cnc,
 	GSList *ids;
 	EEwsItem *item;
 	const EwsId *ewsid;
-	gchar *restore_from = NULL;
 	gboolean res;
 
 	create_data = g_new0 (struct _create_mime_msg_data, 1);
 
+	create_data->cnc = cnc;
 	create_data->message = message;
 	create_data->info = info;
 	create_data->from = from;
 	create_data->recipients = recipients;
+	create_data->is_send = g_strcmp0 (disposition, "SendOnly") == 0 || g_strcmp0 (disposition, "SendAndSaveCopy") == 0;
 
-	if (g_strcmp0 (disposition, "SendOnly") == 0 ||
-	    g_strcmp0 (disposition, "SendAndSaveCopy") == 0) {
-		struct _camel_header_raw *header;
+	if (create_data->is_send && !create_data->from) {
+		CamelInternetAddress *address = camel_mime_message_get_from (message);
 
-		for (header = CAMEL_MIME_PART (message)->headers; header; header = header->next) {
-			if (header->name && g_ascii_strcasecmp (header->name, "From") == 0) {
-				restore_from = header->value;
-				header->value = g_strdup ("");
-				break;
-			}
-		}
+		if (address)
+			create_data->from = CAMEL_ADDRESS (address);
 	}
 
 	res = e_ews_connection_create_items_sync (
@@ -338,18 +367,6 @@ camel_ews_utils_create_mime_message (EEwsConnection *cnc,
 		disposition, NULL, fid,
 		create_mime_message_cb, create_data,
 		&ids, cancellable, error);
-
-	if (restore_from) {
-		struct _camel_header_raw *header;
-
-		for (header = CAMEL_MIME_PART (message)->headers; header; header = header->next) {
-			if (header->name && g_ascii_strcasecmp (header->name, "From") == 0) {
-				g_free (header->value);
-				header->value = restore_from;
-				break;
-			}
-		}
-	}
 
 	if (!res || (!itemid && !changekey))
 		return res;
