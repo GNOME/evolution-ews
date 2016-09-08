@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-15 13:40+0200\n"
-"PO-Revision-Date: 2016-08-15 13:42+0200\n"
+"POT-Creation-Date: 2016-09-08 02:59+0200\n"
+"PO-Revision-Date: 2016-09-08 03:00+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -25,7 +25,7 @@ msgstr "Exchange Web Services"
 
 #: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:82
 msgid "For accessing Exchange servers using Web Services"
-msgstr "Dostęp do serwerów Exchange używając Web Services"
+msgstr "Dostęp do serwerów Exchange za pomocą Web Services"
 
 #: ../src/addressbook/e-book-backend-ews.c:1506
 msgid "The backend does not support bulk additions"
@@ -177,7 +177,7 @@ msgstr "Połączenie"
 #: ../src/camel/camel-ews-provider.c:69
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
-msgstr "_Czas oczekiwania na połączenie (w sekundach) %s"
+msgstr "_Czas oczekiwania na połączenie (w sekundach) %s"
 
 #: ../src/camel/camel-ews-provider.c:71
 msgid "Override _User-Agent header value"
@@ -216,7 +216,7 @@ msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
 msgstr ""
-"Ta opcja spowoduje połączenie z serwerem Exchange używając uwierzytelniania "
+"Ta opcja spowoduje połączenie z serwerem Exchange za pomocą uwierzytelniania "
 "Kerberos/GSSAPI."
 
 #: ../src/camel/camel-ews-store.c:332
@@ -387,20 +387,11 @@ msgstr "Nie można wysłać wiadomości bez adresata"
 msgid "Exchange server cannot send message with multiple From addresses"
 msgstr "Serwer Exchange nie może wysłać wiadomości z wieloma adresatami"
 
-#: ../src/camel/camel-ews-transport.c:387
+#: ../src/camel/camel-ews-transport.c:386
 msgid "Failed to read From address"
 msgstr "Odczytanie adresata się nie powiodło"
 
-#: ../src/camel/camel-ews-transport.c:399
-#, c-format
-msgid ""
-"Exchange server cannot send message as '%s', when the account was configured "
-"for address '%s'"
-msgstr ""
-"Serwer Exchange nie może wysłać wiadomości jako „%s”, podczas gdy konto "
-"zostało skonfigurowane dla adresu „%s”"
-
-#: ../src/camel/camel-ews-transport.c:413
+#: ../src/camel/camel-ews-transport.c:396
 #, c-format
 msgid "Service not connected"
 msgstr "Usługa nie jest połączona"
@@ -956,7 +947,7 @@ msgstr "_Dziennik"
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:567
 #, c-format
 msgid "Delegate '%s' has the following permissions"
-msgstr "Delegat „%s” posiada poniższe uprawnienia"
+msgstr "Delegat „%s” ma poniższe uprawnienia"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:585
 msgid "Delegate can see my _private items"
@@ -1132,7 +1123,7 @@ msgstr "Pobranie ustawień delegatów się nie powiodło."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:6
 msgid "Your Exchange account \"{0}\" has the status set as \"Out of Office\"."
-msgstr "Konto Exchange „{0}” posiada ustawiony stan obecności poza biurem."
+msgstr "Konto Exchange „{0}” ma ustawiony stan obecności poza biurem."
 
 #: ../src/server/e-ews-connection.c:724
 msgid "Operation Cancelled"
@@ -1208,7 +1199,7 @@ msgstr "Nie można dodać katalogu. Nieobsługiwany typ katalogu"
 msgid "Cannot add folder, master source not found"
 msgstr "Nie można dodać katalogu. Nie odnaleziono głównego źródła"
 
-#: ../src/utils/ews-camel-common.c:361
+#: ../src/utils/ews-camel-common.c:378
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr ""
