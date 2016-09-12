@@ -1,3 +1,12 @@
+Evolution-EWS 3.21.92 2016-09-12
+--------------------------------
+
+Bug Fixes:
+	Bug 758374 - Do not restrict/remove From address on message send (Milan Crha)
+
+Translations:
+	Piotr Drąg (pl)
+
 Evolution-EWS 3.21.91 2016-08-29
 --------------------------------
 
