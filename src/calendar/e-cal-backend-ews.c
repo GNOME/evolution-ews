@@ -3209,6 +3209,38 @@ add_item_to_cache (ECalBackendEws *cbews,
 		mime_content = e_ews_item_get_mime_content (item);
 		vcomp = icalparser_parse_string (mime_content);
 
+		if (!vcomp && mime_content) {
+			const gchar *begin_vcalendar, *end_vcalendar;
+
+			/* Workaround Exchange 2016 error, which returns invalid iCalendar object (without 'END:VCALENDAR'),
+			   when the event has at least one detached instance. */
+			begin_vcalendar = camel_strstrcase (mime_content, "BEGIN:VCALENDAR");
+			end_vcalendar = camel_strstrcase (mime_content, "END:VCALENDAR");
+
+			/* If it exists, then it should be alone on a separate line */
+			if (!(begin_vcalendar && (begin_vcalendar == mime_content || begin_vcalendar[-1] == '\n') &&
+			    (begin_vcalendar[15 /* strlen ("BEGIN:VCALENDAR") */] == '\r' || begin_vcalendar[15] == '\n')))
+				begin_vcalendar = NULL;
+
+			/* If it exists, then it should be alone on a separate line and not at the very beginning of the mime_content */
+			if (!(end_vcalendar && end_vcalendar > mime_content && end_vcalendar[-1] == '\n' &&
+			    (end_vcalendar[13 /* strlen ("END:VCALENDAR") */] == '\r' || end_vcalendar[13] == '\n' || end_vcalendar[13] == '\0')))
+				end_vcalendar = NULL;
+
+			if (begin_vcalendar && !end_vcalendar) {
+				gchar *str;
+
+				str = g_strconcat (mime_content, "\r\n", "END:VCALENDAR", "\r\n", NULL);
+				vcomp = icalparser_parse_string (str);
+				g_free (str);
+			}
+		}
+
+		if (!vcomp) {
+			g_warn_if_reached ();
+			return;
+		}
+
 		tzid = e_ews_item_get_tzid (item);
 		if (tzid == NULL) {
 			/*
