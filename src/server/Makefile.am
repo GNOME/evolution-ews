@@ -27,6 +27,7 @@ libeews_1_2_la_CPPFLAGS = \
 	-I$(top_srcdir)/src \
 	-I$(top_builddir) \
 	-I$(top_builddir)/src \
+	$(CAMEL_CFLAGS) \
 	$(SOUP_CFLAGS) \
 	$(LIBECAL_CFLAGS) \
 	$(LIBICAL_CFLAGS) \
@@ -65,6 +66,7 @@ libeews_1_2_la_SOURCES = \
 	$(NULL)
 
 libeews_1_2_la_LIBADD = \
+	$(CAMEL_LIBS) \
 	$(SOUP_LIBS) \
 	$(LIBECAL_LIBS) \
 	$(LIBICAL_LIBS) \
