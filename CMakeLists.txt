@@ -101,26 +101,26 @@ endif(${ENABLE_MAINTAINER_MODE})
 
 set(MATH_LDFLAGS -lm)
 
-pkg_check_modules(CAMEL camel-1.2>=${eds_minimum_version})
-pkg_check_modules(EVOLUTION_DATA_SERVER evolution-data-server-1.2>=${eds_minimum_version})
-pkg_check_modules(LIBEBACKEND libebackend-1.2>=${eds_minimum_version})
-pkg_check_modules(LIBEBOOK libebook-1.2>=${eds_minimum_version})
-pkg_check_modules(LIBECAL libecal-1.2>=${eds_minimum_version})
-pkg_check_modules(LIBEDATABOOK libedata-book-1.2>=${eds_minimum_version})
-pkg_check_modules(LIBEDATACAL libedata-cal-1.2>=${eds_minimum_version})
-pkg_check_modules(LIBEDATASERVER libedataserver-1.2>=${eds_minimum_version})
+pkg_check_modules(CAMEL REQUIRED camel-1.2>=${eds_minimum_version})
+pkg_check_modules(EVOLUTION_DATA_SERVER REQUIRED evolution-data-server-1.2>=${eds_minimum_version})
+pkg_check_modules(LIBEBACKEND REQUIRED libebackend-1.2>=${eds_minimum_version})
+pkg_check_modules(LIBEBOOK REQUIRED libebook-1.2>=${eds_minimum_version})
+pkg_check_modules(LIBECAL REQUIRED libecal-1.2>=${eds_minimum_version})
+pkg_check_modules(LIBEDATABOOK REQUIRED libedata-book-1.2>=${eds_minimum_version})
+pkg_check_modules(LIBEDATACAL REQUIRED libedata-cal-1.2>=${eds_minimum_version})
+pkg_check_modules(LIBEDATASERVER REQUIRED libedataserver-1.2>=${eds_minimum_version})
 
-pkg_check_modules(EVOLUTION_SHELL evolution-shell-3.0>=${evo_minimum_version})
-pkg_check_modules(EVOLUTION_MAIL evolution-mail-3.0>=${evo_minimum_version})
-pkg_check_modules(EVOLUTION_CALENDAR evolution-calendar-3.0>=${evo_minimum_version})
+pkg_check_modules(EVOLUTION_SHELL REQUIRED evolution-shell-3.0>=${evo_minimum_version})
+pkg_check_modules(EVOLUTION_MAIL REQUIRED evolution-mail-3.0>=${evo_minimum_version})
+pkg_check_modules(EVOLUTION_CALENDAR REQUIRED evolution-calendar-3.0>=${evo_minimum_version})
 
-pkg_check_modules(GNOME_PLATFORM
+pkg_check_modules(GNOME_PLATFORM REQUIRED
 	glib-2.0>=${glib_minimum_version}
 	gtk+-3.0>=${gdk_minimum_version}
 )
 
-pkg_check_modules(LIBICAL libical)
-pkg_check_modules(SOUP libsoup-2.4>=${soup_minimum_version})
+pkg_check_modules(LIBICAL REQUIRED libical)
+pkg_check_modules(SOUP REQUIRED libsoup-2.4>=${soup_minimum_version})
 
 # ******************************
 # libmspack with OAB support
