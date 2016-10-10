@@ -1,3 +1,10 @@
+Evolution-EWS 3.22.1 2016-10-10
+-------------------------------
+
+Bug Fixes:
+	Bug 771370 - Exchange 2016 returns broken MIME content for events with detached instances (Milan Crha)
+	Bug 771931 - Add missing Camel cflags/libs to src/server/ (Milan Crha)
+
 Evolution-EWS 3.22.0 2016-09-19
 -------------------------------
 
