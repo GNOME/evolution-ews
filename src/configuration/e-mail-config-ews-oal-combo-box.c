@@ -16,9 +16,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "evolution-ews-config.h"
 
 #include <mail/e-mail-config-service-page.h>
 

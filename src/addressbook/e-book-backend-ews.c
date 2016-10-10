@@ -20,9 +20,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "evolution-ews-config.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,9 +43,8 @@
 #include "server/e-ews-connection.h"
 #include "server/e-ews-connection-utils.h"
 #include "server/e-ews-item.h"
+#include "server/e-ews-query-to-restriction.h"
 #include "server/e-source-ews-folder.h"
-
-#include "utils/e-ews-query-to-restriction.h"
 
 #include "e-book-backend-ews.h"
 #include "ews-oab-decoder.h"
@@ -2382,7 +2379,7 @@ static gchar *
 ews_download_gal (EBookBackendEws *cbews, EwsOALDetails *full, GSList *deltas, guint32 seq,
 		  GCancellable *cancellable, GError **error)
 {
-#ifdef USE_MSPACK
+#ifdef WITH_MSPACK
 	EBookBackendEwsPrivate *priv = cbews->priv;
 	GSList *p;
 	gchar *thisoab = NULL;
@@ -2443,7 +2440,7 @@ ews_download_gal (EBookBackendEws *cbews, EwsOALDetails *full, GSList *deltas, g
 		g_free (thisoab);
 	}
  full:
-#endif
+#endif /* WITH_MSPACK */
 	d (printf ("Ewsgal: Downloading full gal \n"));
 	return ews_download_full_gal (cbews, full, cancellable, error);
 }

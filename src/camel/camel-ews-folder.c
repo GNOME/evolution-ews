@@ -28,9 +28,7 @@ This needs to be rewritten with a lot of functions cleaned up.
 There are a lot of places where code is unneccesarily duplicated,
 which needs to be better organized via functions */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "evolution-ews-config.h"
 
 #include <errno.h>
 #include <string.h>
@@ -45,11 +43,10 @@ which needs to be better organized via functions */
 #include <libical/icalparser.h>
 
 #include "server/camel-ews-settings.h"
+#include "server/e-ews-camel-common.h"
 #include "server/e-ews-connection.h"
 #include "server/e-ews-item-change.h"
 #include "server/e-ews-message.h"
-
-#include "utils/ews-camel-common.h"
 
 #include "camel-ews-folder.h"
 #include "camel-ews-private.h"

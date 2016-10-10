@@ -1,0 +1,69 @@
+add_error_files(configuration module-ews-configuration.error)
+
+set(extra_deps
+	camelews-priv
+)
+set(sources
+	module-ews-configuration.c
+	e-cal-config-ews.c
+	e-cal-config-ews.h
+	e-book-config-ews.c
+	e-book-config-ews.h
+	e-mail-config-ews-autodiscover.c
+	e-mail-config-ews-autodiscover.h
+	e-mail-config-ews-backend.c
+	e-mail-config-ews-backend.h
+	e-mail-config-ews-gal.c
+	e-mail-config-ews-gal.h
+	e-mail-config-ews-notebook.c
+	e-mail-config-ews-notebook.h
+	e-mail-config-ews-oal-combo-box.c
+	e-mail-config-ews-oal-combo-box.h
+	e-mail-config-ews-delegates-page.c
+	e-mail-config-ews-delegates-page.h
+	e-mail-config-ews-folder-sizes-page.c
+	e-mail-config-ews-folder-sizes-page.h
+	e-mail-config-ews-ooo-page.c
+	e-mail-config-ews-ooo-page.h
+	e-ews-config-ui-extension.c
+	e-ews-config-ui-extension.h
+	e-ews-config-utils.c
+	e-ews-config-utils.h
+	e-ews-edit-folder-permissions.c
+	e-ews-edit-folder-permissions.h
+	e-ews-search-user.c
+	e-ews-search-user.h
+	e-ews-subscribe-foreign-folder.c
+	e-ews-subscribe-foreign-folder.h
+	e-ews-ooo-notificator.c
+	e-ews-ooo-notificator.h
+)
+set(extra_defines)
+set(extra_cflags
+	${EVOLUTION_MAIL_CFLAGS}
+	${EVOLUTION_SHELL_CFLAGS}
+	${LIBECAL_CFLAGS}
+	${LIBEBOOK_CFLAGS}
+)
+set(extra_incdirs
+	${EVOLUTION_MAIL_INCLUDE_DIRS}
+	${EVOLUTION_SHELL_INCLUDE_DIRS}
+	${LIBECAL_INCLUDE_DIRS}
+	${LIBEBOOK_INCLUDE_DIRS}
+)
+set(extra_ldflags
+	${EVOLUTION_MAIL_LDFLAGS}
+	${EVOLUTION_SHELL_LDFLAGS}
+	${LIBECAL_LDFLAGS}
+	${LIBEBOOK_LDFLAGS}
+)
+
+add_simple_module(module-ews-configuration
+	sources
+	extra_deps
+	extra_defines
+	extra_cflags
+	extra_incdirs
+	extra_ldflags
+	"${evo_moduledir}"
+)

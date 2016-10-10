@@ -19,9 +19,7 @@
  * USA
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "evolution-ews-config.h"
 
 #include <string.h>
 #include <glib/gi18n-lib.h>
@@ -29,9 +27,9 @@
 #include <camel/camel.h>
 #include <libedata-cal/libedata-cal.h>
 
-#include "e-ews-query-to-restriction.h"
-
 #include "server/e-ews-message.h"
+
+#include "e-ews-query-to-restriction.h"
 
 #define d(x) x
 

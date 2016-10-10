@@ -18,17 +18,15 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "evolution-ews-config.h"
 
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 
-#include "ews-camel-common.h"
-
 #include "server/e-ews-message.h"
 #include "server/e-ews-item-change.h"
+
+#include "e-ews-camel-common.h"
 
 struct _create_mime_msg_data {
 	EEwsConnection *cnc;
@@ -124,7 +122,7 @@ create_mime_message_cb (ESoapMessage *msg,
 
 	if (create_data->info)
 		message_camel_flags = camel_message_info_get_flags (create_data->info);
-		
+
 	e_soap_message_start_element (msg, "Message", NULL, NULL);
 	e_soap_message_start_element (msg, "MimeContent", NULL, NULL);
 
@@ -286,7 +284,7 @@ create_mime_message_cb (ESoapMessage *msg,
 		recip_to = g_hash_table_new (camel_strcase_hash, camel_strcase_equal);
 		recip_cc = g_hash_table_new (camel_strcase_hash, camel_strcase_equal);
 		recip_bcc = g_hash_table_new (camel_strcase_hash, camel_strcase_equal);
-	
+
 		filter_recipients (create_data->message, create_data->recipients, recip_to, recip_cc, recip_bcc);
 
 		write_recipients (msg, "ToRecipients", recip_to);

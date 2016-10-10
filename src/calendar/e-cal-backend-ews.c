@@ -18,9 +18,7 @@
  * USA
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "evolution-ews-config.h"
 
 #include <string.h>
 #include <sys/types.h>
@@ -44,8 +42,7 @@
 
 #include "server/e-source-ews-folder.h"
 #include "server/e-ews-connection-utils.h"
-
-#include "utils/ews-camel-common.h"
+#include "server/e-ews-camel-common.h"
 
 #include "e-cal-backend-ews.h"
 #include "e-cal-backend-ews-utils.h"

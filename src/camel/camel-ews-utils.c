@@ -18,9 +18,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "evolution-ews-config.h"
 
 #include <string.h>
 #include <unistd.h>
@@ -31,9 +29,9 @@
 #include <glib/gstdio.h>
 
 #include "server/camel-ews-settings.h"
-#include "server/e-ews-message.h"
+#include "server/e-ews-camel-common.h"
 #include "server/e-ews-item-change.h"
-#include "utils/ews-camel-common.h"
+#include "server/e-ews-message.h"
 
 #include "camel-ews-utils.h"
 

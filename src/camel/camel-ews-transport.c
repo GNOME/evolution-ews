@@ -22,9 +22,7 @@
  * USA
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "evolution-ews-config.h"
 
 #include <string.h>
 
@@ -33,8 +31,7 @@
 #include <libemail-engine/libemail-engine.h>
 
 #include "server/camel-ews-settings.h"
-
-#include "utils/ews-camel-common.h"
+#include "server/e-ews-camel-common.h"
 
 #include "camel-ews-store.h"
 #include "camel-ews-transport.h"

@@ -43,4 +43,3 @@ camel_ews_utils_create_mime_message (EEwsConnection *cnc,
 G_END_DECLS
 
 #endif	/* EWS_CAMEL_COMMON_H */
-

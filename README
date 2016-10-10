@@ -2,9 +2,18 @@
 
 1. BUILD
 
-   $ ./autogen.sh
-   $ make
-   $ make install
+   $ cd .../sources/evolution-ews
+   $ mkdir build
+   $ cd build
+   $ cmake -G "Unix Makefiles" \
+           -DCMAKE_INSTALL_PREFIX=/opt/evolution \
+           -DCMAKE_BUILD_TYPE=Release \
+           ..
+   $ make -j
+   $ make -j install
+
+Run `cmake --help` to get list of available generators (the -G argument)
+on your platform.
 
 ========================
 

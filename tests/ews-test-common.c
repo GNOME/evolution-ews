@@ -19,9 +19,7 @@
  *    Vadim Rutkovsky <vrutkovs@redhat.com>
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "evolution-ews-config.h"
 
 #include <string.h>
 

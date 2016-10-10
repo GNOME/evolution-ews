@@ -1,0 +1,22 @@
+set(extra_deps)
+set(sources
+	module-ews-backend.c
+	e-ews-backend.c
+	e-ews-backend.h
+	e-ews-backend-factory.c
+	e-ews-backend-factory.h
+)
+set(extra_defines)
+set(extra_cflags)
+set(extra_incdirs)
+set(extra_ldflags)
+
+add_simple_module(module-ews-backend
+	sources
+	extra_deps
+	extra_defines
+	extra_cflags
+	extra_incdirs
+	extra_ldflags
+	"${eds_moduledir}"
+)
