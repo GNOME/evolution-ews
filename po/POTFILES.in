@@ -23,6 +23,6 @@ src/configuration/e-mail-config-ews-folder-sizes-page.c
 src/configuration/e-mail-config-ews-gal.c
 src/configuration/e-mail-config-ews-ooo-page.c
 src/configuration/module-ews-configuration.error.xml
+src/server/e-ews-camel-common.c
 src/server/e-ews-connection.c
 src/server/e-ews-folder.c
-src/utils/ews-camel-common.c
