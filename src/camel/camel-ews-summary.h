@@ -24,6 +24,8 @@
 
 #include <camel/camel.h>
 
+#include "camel-ews-message-info.h"
+
 /* Standard GObject macros */
 #define CAMEL_TYPE_EWS_SUMMARY \
 	(camel_ews_summary_get_type ())
@@ -48,25 +50,6 @@ G_BEGIN_DECLS
 typedef struct _CamelEwsSummary CamelEwsSummary;
 typedef struct _CamelEwsSummaryClass CamelEwsSummaryClass;
 typedef struct _CamelEwsSummaryPrivate CamelEwsSummaryPrivate;
-typedef struct _CamelEwsMessageInfo CamelEwsMessageInfo;
-typedef struct _CamelEwsMessageContentInfo CamelEwsMessageContentInfo;
-
-/* extra summary flags*/
-enum {
-	CAMEL_EWS_MESSAGE_MSGFLAG_RN_PENDING = CAMEL_MESSAGE_FOLDER_FLAGGED << 1
-};
-
-struct _CamelEwsMessageInfo {
-	CamelMessageInfoBase info;
-
-	guint32 server_flags;
-	gint32 item_type;
-	gchar *change_key;
-} ;
-
-struct _CamelEwsMessageContentInfo {
-	CamelMessageContentInfo info;
-} ;
 
 struct _CamelEwsSummary {
 	CamelFolderSummary parent;
@@ -86,7 +69,7 @@ gboolean
 					(CamelFolderSummary *summary,
 					 CamelMessageInfo *info,
 					 guint32 server_flags,
-					 CamelFlag *server_user_flags);
+					 const CamelNamedFlags *server_user_flags);
 gboolean
 	camel_ews_summary_add_message	(CamelFolderSummary *summary,
 					 const gchar *uid,
