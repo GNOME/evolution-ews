@@ -349,7 +349,7 @@ ews_test_server_set_trace_directory (UhmServer *server,
 	gchar *path;
 	GFile *trace_directory;
 
-	path = g_strdup_printf (TEST_FILE_DIR "traces/%s/%s", version, tests);
+	path = g_strdup_printf (TEST_FILE_DIR "/traces/%s/%s", version, tests);
 	trace_directory = g_file_new_for_path (path);
 	g_free (path);
 	uhm_server_set_trace_directory (server, trace_directory);
