@@ -1209,18 +1209,28 @@ convert_categories_calcomp_to_xml (ESoapMessage *msg,
 	if (!categ_list)
 		return;
 
-	e_soap_message_start_element (msg, "Categories", NULL, NULL);
-
-	for (citer = categ_list; citer;  citer = g_slist_next (citer)) {
+	/* Categories cannot be empty, thus first verify they are not */
+	for (citer = categ_list; citer; citer = g_slist_next (citer)) {
 		const gchar *category = citer->data;
 
-		if (!category || !*category)
-			continue;
-
-		e_ews_message_write_string_parameter (msg, "String", NULL, category);
+		if (category && *category)
+			break;
 	}
 
-	e_soap_message_end_element (msg); /* Categories */
+	if (citer) {
+		e_soap_message_start_element (msg, "Categories", NULL, NULL);
+
+		for (citer = categ_list; citer; citer = g_slist_next (citer)) {
+			const gchar *category = citer->data;
+
+			if (!category || !*category)
+				continue;
+
+			e_ews_message_write_string_parameter (msg, "String", NULL, category);
+		}
+
+		e_soap_message_end_element (msg); /* Categories */
+	}
 
 	e_cal_component_free_categories_list (categ_list);
 }
@@ -1506,20 +1516,34 @@ convert_component_categories_to_updatexml (ECalComponent *comp,
 	g_return_if_fail (base_elem_name != NULL);
 
 	e_cal_component_get_categories_list (comp, &categ_list);
-	e_ews_message_start_set_item_field (msg, "Categories", "item", base_elem_name);
-	e_soap_message_start_element (msg, "Categories", NULL, NULL);
 
-	for (citer = categ_list; citer;  citer = g_slist_next (citer)) {
+	/* Categories cannot be empty, thus first verify they are not */
+
+	for (citer = categ_list; citer; citer = g_slist_next (citer)) {
 		const gchar *category = citer->data;
 
-		if (!category || !*category)
-			continue;
-
-		e_ews_message_write_string_parameter (msg, "String", NULL, category);
+		if (category && *category)
+			break;
 	}
 
-	e_soap_message_end_element (msg); /* Categories */
-	e_ews_message_end_set_item_field (msg);
+	if (citer) {
+		e_ews_message_start_set_item_field (msg, "Categories", "item", base_elem_name);
+		e_soap_message_start_element (msg, "Categories", NULL, NULL);
+
+		for (citer = categ_list; citer; citer = g_slist_next (citer)) {
+			const gchar *category = citer->data;
+
+			if (!category || !*category)
+				continue;
+
+			e_ews_message_write_string_parameter (msg, "String", NULL, category);
+		}
+
+		e_soap_message_end_element (msg); /* Categories */
+		e_ews_message_end_set_item_field (msg);
+	} else {
+		e_ews_message_add_delete_item_field (msg, "Categories", "item");
+	}
 
 	e_cal_component_free_categories_list (categ_list);
 }
