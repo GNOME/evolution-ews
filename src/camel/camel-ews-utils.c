@@ -420,10 +420,13 @@ ews_utils_is_system_user_flag (const gchar *name)
 		g_str_equal (name, "$has-cal");
 }
 
-void
-ews_utils_replace_server_user_flags (ESoapMessage *msg,
-                                     CamelEwsMessageInfo *mi)
+/* free with g_slist_free_full (flags, g_free);
+   the lists' members are values for the String xml element. */
+GSList *
+ews_utils_gather_server_user_flags (ESoapMessage *msg,
+				    CamelEwsMessageInfo *mi)
 {
+	GSList *user_flags = NULL;
 	const CamelFlag *flag;
 
 	/* transfer camel flags to become the categories as an XML
@@ -439,8 +442,10 @@ ews_utils_replace_server_user_flags (ESoapMessage *msg,
 		if (ews_utils_is_system_user_flag (n))
 			continue;
 
-		e_ews_message_write_string_parameter (msg, "String", NULL, n);
+		user_flags = g_slist_prepend (user_flags, g_strdup (n));
 	}
+
+	return g_slist_reverse (user_flags);
 }
 
 static void
@@ -993,12 +998,12 @@ ews_utils_update_followup_flags (ESoapMessage *msg,
 	if (dueby && *dueby)
 		dueby_tt = camel_header_decode_date (dueby, NULL);
 
-	/* PidTagFlagStatus */
-	e_ews_message_add_set_item_field_extended_tag_int (msg, NULL, "Message", 0x1090,
-		followup ? (completed_tt != (time_t) 0 ? 0x01 /* followupComplete */: 0x02 /* followupFlagged */) : 0x0);
-
 	if (followup) {
 		time_t now_tt = time (NULL);
+
+		/* PidTagFlagStatus */
+		e_ews_message_add_set_item_field_extended_tag_int (msg, NULL, "Message", 0x1090,
+			completed_tt != (time_t) 0 ? 0x01 /* followupComplete */: 0x02 /* followupFlagged */);
 
 		/* PidLidFlagRequest */
 		e_ews_message_add_set_item_field_extended_distinguished_tag_string (msg, NULL, "Message", "Common", 0x8530, followup);

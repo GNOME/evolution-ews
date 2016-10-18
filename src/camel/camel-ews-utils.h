@@ -74,7 +74,7 @@ void		camel_ews_utils_sync_updated_items
 						(CamelEwsFolder *ews_folder,
 						 GSList *items_updated,
 						 CamelFolderChangeInfo *change_info);
-void		ews_utils_replace_server_user_flags
+GSList *	ews_utils_gather_server_user_flags
 						(ESoapMessage *msg,
 						 CamelEwsMessageInfo *mi);
 void		ews_utils_update_followup_flags (ESoapMessage *msg,

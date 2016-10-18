@@ -920,6 +920,7 @@ msg_update_flags (ESoapMessage *msg,
 
 	for (iter = mi_list; iter; iter = g_slist_next (iter)) {
 		guint32 flags_changed;
+		GSList *user_flags;
 
 		mi = iter->data;
 
@@ -980,20 +981,33 @@ msg_update_flags (ESoapMessage *msg,
 		}
 
 		/* now update the Categories */
-		e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
+		user_flags = ews_utils_gather_server_user_flags (msg, mi);
+		if (user_flags) {
+			GSList *link;
 
-		e_soap_message_start_element (msg, "FieldURI", NULL, NULL);
-		e_soap_message_add_attribute (msg, "FieldURI", "item:Categories", NULL, NULL);
-		e_soap_message_end_element (msg);
+			e_soap_message_start_element (msg, "SetItemField", NULL, NULL);
 
-		e_soap_message_start_element (msg, "Message", NULL, NULL);
-		e_soap_message_start_element (msg, "Categories", NULL, NULL);
+			e_soap_message_start_element (msg, "FieldURI", NULL, NULL);
+			e_soap_message_add_attribute (msg, "FieldURI", "item:Categories", NULL, NULL);
+			e_soap_message_end_element (msg);
 
-		ews_utils_replace_server_user_flags (msg, mi);
+			e_soap_message_start_element (msg, "Message", NULL, NULL);
+			e_soap_message_start_element (msg, "Categories", NULL, NULL);
 
-		e_soap_message_end_element (msg); /* Categories */
-		e_soap_message_end_element (msg); /* Message */
-		e_soap_message_end_element (msg); /* SetItemField */
+			for (link = user_flags; link; link = g_slist_next (link)) {
+				const gchar *user_flag = link->data;
+
+				e_ews_message_write_string_parameter (msg, "String", NULL, user_flag);
+			}
+
+			e_soap_message_end_element (msg); /* Categories */
+			e_soap_message_end_element (msg); /* Message */
+			e_soap_message_end_element (msg); /* SetItemField */
+		} else {
+			e_ews_message_add_delete_item_field (msg, "Categories", "item");
+		}
+
+		g_slist_free_full (user_flags, g_free);
 
 		ews_utils_update_followup_flags (msg, (CamelMessageInfo *) mi);
 
