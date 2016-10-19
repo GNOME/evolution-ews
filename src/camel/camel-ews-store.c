@@ -1562,7 +1562,7 @@ ews_store_update_foreign_subfolders (CamelSession *session,
 					camel_ews_store_summary_new_folder (
 						ews_store->summary,
 						folder_id->id, parent_fid ? parent_fid->id : euf->folder_id, folder_id->change_key,
-						e_ews_folder_get_name (folder), E_EWS_FOLDER_TYPE_MAILBOX,
+						e_ews_folder_get_escaped_name (folder), E_EWS_FOLDER_TYPE_MAILBOX,
 						CAMEL_FOLDER_SUBSCRIBED, e_ews_folder_get_total_count (folder), TRUE, FALSE);
 
 					fi = camel_ews_utils_build_folder_info (ews_store, folder_id->id);
@@ -3148,7 +3148,8 @@ ews_store_find_public_folder (CamelEwsStore *ews_store,
 				break;
 			}
 
-			if (g_strcmp0 (e_ews_folder_get_name (subf), fname) == 0) {
+			if (g_strcmp0 (e_ews_folder_get_name (subf), fname) == 0 ||
+			    g_strcmp0 (e_ews_folder_get_escaped_name (subf), fname) == 0) {
 				parent_id = e_ews_folder_get_parent_id (subf);
 				if (!folder && (!parent_id || g_strcmp0 (parent_id->id, EWS_PUBLIC_FOLDER_ROOT_ID) == 0)) {
 					folder = subf;
