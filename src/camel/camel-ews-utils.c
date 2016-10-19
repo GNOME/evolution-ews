@@ -188,7 +188,7 @@ sync_updated_folders (CamelEwsStore *store,
 		}
 
 		pfid = e_ews_folder_get_parent_id (ews_folder);
-		display_name = g_strdup (e_ews_folder_get_name (ews_folder));
+		display_name = g_strdup (e_ews_folder_get_escaped_name (ews_folder));
 
 		/* If the folder is moved or renamed (which are separate
 		 * operations in Exchange, unfortunately, then the name
@@ -263,7 +263,7 @@ add_folder_to_summary (CamelEwsStore *store,
 
 	fid = e_ews_folder_get_id (folder);
 	pfid = e_ews_folder_get_parent_id (folder);
-	dname = e_ews_folder_get_name (folder);
+	dname = e_ews_folder_get_escaped_name (folder);
 	total = e_ews_folder_get_total_count (folder);
 	unread = e_ews_folder_get_unread_count (folder);
 	ftype = e_ews_folder_get_folder_type (folder);
