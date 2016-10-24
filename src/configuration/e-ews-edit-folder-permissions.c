@@ -580,7 +580,7 @@ add_button_clicked_cb (GObject *dialog)
 					COL_E_EWS_PERMISSION_USER_TYPE, &ut,
 					-1);
 
-				if (ut == E_EWS_PERMISSION_USER_TYPE_REGULAR && perm && g_strcmp0 (perm->primary_smtp, primary_smtp)) {
+				if (ut == E_EWS_PERMISSION_USER_TYPE_REGULAR && perm && g_strcmp0 (perm->primary_smtp, primary_smtp) == 0) {
 					gtk_tree_selection_select_iter (selection, &iter);
 					found = TRUE;
 					break;
