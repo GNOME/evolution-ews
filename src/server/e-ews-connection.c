@@ -1266,8 +1266,12 @@ ews_handle_resolution_set_param (ESoapParameter *subparam,
 			/* 'mailboxes' and 'contact_items' match 1:1, but if the contact information
 			 * wasn't found, then NULL is stored in the corresponding position */
 			node = e_soap_parameter_get_first_child_by_name (subparam, "Contact");
-			contact_item = e_ews_item_new_from_soap_parameter (node);
-			contact_items = g_slist_prepend (contact_items, contact_item);
+			if (node) {
+				contact_item = e_ews_item_new_from_soap_parameter (node);
+				contact_items = g_slist_prepend (contact_items, contact_item);
+			} else {
+				contact_items = g_slist_prepend (contact_items, NULL);
+			}
 		}
 	}
 
@@ -5201,7 +5205,7 @@ e_ews_connection_resolve_names_finish (EEwsConnection *cnc,
 	if (contact_items)
 		*contact_items = async_data->items_created;
 	else
-		g_slist_free_full (async_data->items_created, g_object_unref);
+		e_util_free_nullable_object_slist (async_data->items_created);
 	*mailboxes = async_data->items;
 
 	return TRUE;
@@ -5332,7 +5336,7 @@ ews_connection_resolve_by_name (EEwsConnection *cnc,
 	}
 
 	g_slist_free_full (mailboxes, (GDestroyNotify) e_ews_mailbox_free);
-	g_slist_free_full (contacts, g_object_unref);
+	e_util_free_nullable_object_slist (contacts);
 }
 
 gboolean
@@ -5387,7 +5391,7 @@ e_ews_connection_ex_to_smtp_sync (EEwsConnection *cnc,
 	}
 
 	g_slist_free_full (mailboxes, (GDestroyNotify) e_ews_mailbox_free);
-	g_slist_free_full (contacts, g_object_unref);
+	e_util_free_nullable_object_slist (contacts);
 
 	if (!*smtp_address) {
 		const gchar *usename;
