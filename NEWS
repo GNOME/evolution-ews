@@ -1,3 +1,24 @@
+Evolution-EWS 3.23.1 2016-10-24
+-------------------------------
+
+* Evolution-EWS uses CMake instead of autotools now. At the end of
+  the configure phase are printed all the available options and their
+  values. These can be used for the cmake command to tweak the build.
+
+Bug Fixes:
+	Bug 771370 - Exchange 2016 returns broken MIME content for events with detached instances (Milan Crha)
+	Bug 771931 - Add missing Camel cflags/libs to src/server/ (Milan Crha)
+	Bug 770936 - BAD REQUEST due to empty Categories element (Milan Crha)
+	Bug 738093 - Show folder names with slash properly ][ (Milan Crha)
+
+Miscellaneous:
+	Convert from autotools to CMake (Milan Crha)
+	Require as hard dependency some dependencies (Milan Crha)
+	Add a helper script for a 'dist' target (Milan Crha)
+	Rename SHARE_INSTALL_DIR to SHARE_INSTALL_PREFIX (Milan Crha)
+	Use tests/ as `make check` tests, if enabled with ENABLE_TESTS (Milan Crha)
+	Hard-break `make dist` when there are uncommitted changes (Milan Crha)
+
 Evolution-EWS 3.22.0 2016-09-19
 -------------------------------
 
