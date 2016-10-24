@@ -3525,7 +3525,7 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 	}
 
 	g_slist_free_full (mailboxes, (GDestroyNotify) e_ews_mailbox_free);
-	g_slist_free_full (contacts, g_object_unref);
+	e_util_free_nullable_object_slist (contacts);
  out:
 	e_data_book_view_notify_complete (book_view, error);
 	g_clear_error (&error);
