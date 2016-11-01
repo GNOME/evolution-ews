@@ -370,7 +370,7 @@ camel_ews_utils_sync_deleted_items (CamelEwsFolder *ews_folder,
 
 	items_deleted_list = g_list_reverse (items_deleted_list);
 	camel_db_delete_uids (
-		CAMEL_STORE (ews_store)->cdb_w,
+		camel_store_get_db (CAMEL_STORE (ews_store)),
 		full_name, items_deleted_list, NULL);
 	g_list_free (items_deleted_list);
 
