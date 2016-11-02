@@ -364,7 +364,7 @@ camel_ews_utils_sync_deleted_items (CamelEwsFolder *ews_folder,
 		items_deleted_list = g_list_prepend (
 			items_deleted_list, (gpointer) id);
 
-		camel_folder_summary_remove_uid (folder->summary, id);
+		camel_folder_summary_remove_uid (camel_folder_get_folder_summary (folder), id);
 		camel_folder_change_info_remove_uid (change_info, id);
 	}
 
@@ -741,9 +741,11 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
 				    CamelFolderChangeInfo *change_info)
 {
 	CamelFolder *folder;
+	CamelFolderSummary *folder_summary;
 	GSList *l;
 
 	folder = CAMEL_FOLDER (ews_folder);
+	folder_summary = camel_folder_get_folder_summary (folder);
 
 	for (l = items_updated; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;
@@ -763,7 +765,7 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
 			continue;
 		}
 
-		mi = camel_folder_summary_get (folder->summary, id->id);
+		mi = camel_folder_summary_get (folder_summary, id->id);
 		if (mi) {
 			guint32 server_flags;
 			gboolean changed, was_changed;
@@ -773,7 +775,7 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
 
 			server_flags = ews_utils_get_server_flags (item);
 			ews_utils_merge_server_user_flags (item, mi);
-			changed = camel_ews_update_message_info_flags (folder->summary, mi, server_flags, NULL);
+			changed = camel_ews_update_message_info_flags (folder_summary, mi, server_flags, NULL);
 			changed = camel_ews_utils_update_follow_up_flags (item, mi) || changed;
 			changed = camel_ews_utils_update_read_receipt_flags (item, mi, server_flags, FALSE) || changed;
 
@@ -806,12 +808,14 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
                                     GCancellable *cancellable)
 {
 	CamelFolder *folder;
+	CamelFolderSummary *folder_summary;
 	GSList *l;
 
 	if (!items_created)
 		return;
 
 	folder = CAMEL_FOLDER (ews_folder);
+	folder_summary = camel_folder_get_folder_summary (folder);
 
 	for (l = items_created; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;
@@ -840,7 +844,7 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 			continue;
 		}
 
-		mi = camel_folder_summary_get (folder->summary, id->id);
+		mi = camel_folder_summary_get (folder_summary, id->id);
 		if (mi) {
 			g_clear_object (&mi);
 			g_object_unref (item);
@@ -866,7 +870,7 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 			g_object_unref (stream);
 
 			if (camel_mime_part_construct_from_parser_sync (part, parser, NULL, NULL)) {
-				mi = camel_folder_summary_info_new_from_header (folder->summary, part->headers);
+				mi = camel_folder_summary_info_new_from_header (folder_summary, part->headers);
 				if (camel_header_raw_find (&(part->headers), "Disposition-Notification-To", NULL))
 					message_requests_read_receipt = TRUE;
 			}
@@ -876,7 +880,7 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 		}
 
 		if (!mi)
-			mi = camel_message_info_new (folder->summary);
+			mi = camel_message_info_new (folder_summary);
 
 		camel_message_info_set_abort_notifications (mi, TRUE);
 
@@ -928,7 +932,7 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 
 		camel_message_info_set_abort_notifications (mi, FALSE);
 
-		camel_folder_summary_add (folder->summary, mi, FALSE);
+		camel_folder_summary_add (folder_summary, mi, FALSE);
 
 		/* camel_folder_summary_add() sets folder_flagged flag
 		 * on the message info, but this is a fresh item downloaded
