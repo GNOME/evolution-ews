@@ -1115,7 +1115,7 @@ ews_sync_mi_flags (CamelFolder *folder,
 			cancellable, &local_error);
 	}
 
-	camel_folder_summary_save_to_db (camel_folder_get_folder_summary (folder), NULL);
+	camel_folder_summary_save (camel_folder_get_folder_summary (folder), NULL);
 
 	if (local_error) {
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
@@ -1359,7 +1359,7 @@ ews_synchronize_sync (CamelFolder *folder,
 		success = ews_move_to_junk_folder (folder, junk_uids, cancellable, &local_error);
 	g_slist_free_full (junk_uids, (GDestroyNotify) camel_pstring_free);
 
-	camel_folder_summary_save_to_db (folder_summary, NULL);
+	camel_folder_summary_save (folder_summary, NULL);
 	camel_folder_summary_free_array (uids);
 
 	if (local_error)
@@ -1809,7 +1809,7 @@ ews_folder_forget_all_mails (CamelEwsFolder *ews_folder)
 
 	if (camel_folder_change_info_changed (changes)) {
 		camel_folder_summary_touch (folder_summary);
-		camel_folder_summary_save_to_db (folder_summary, NULL);
+		camel_folder_summary_save (folder_summary, NULL);
 		camel_folder_changed (folder, changes);
 	}
 
@@ -1933,7 +1933,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 		camel_folder_summary_touch (folder_summary);
 
 		if (camel_folder_change_info_changed (change_info)) {
-			camel_folder_summary_save_to_db (folder_summary, NULL);
+			camel_folder_summary_save (folder_summary, NULL);
 			/* Notify any listeners only once per 10 seconds, as such notify can cause UI update */
 			if (g_get_monotonic_time () - last_folder_update_time >= 10 * G_USEC_PER_SEC) {
 				last_folder_update_time = g_get_monotonic_time ();
@@ -1947,10 +1947,10 @@ ews_refresh_info_sync (CamelFolder *folder,
 
 	if (camel_folder_change_info_changed (change_info)) {
 		camel_folder_summary_touch (folder_summary);
-		camel_folder_summary_save_to_db (folder_summary, NULL);
+		camel_folder_summary_save (folder_summary, NULL);
 		camel_folder_changed (folder, change_info);
 	} else {
-		camel_folder_summary_save_to_db (folder_summary, NULL);
+		camel_folder_summary_save (folder_summary, NULL);
 	}
 
 	camel_folder_change_info_free (change_info);
@@ -2520,7 +2520,7 @@ ews_folder_dispose (GObject *object)
 		g_signal_handlers_disconnect_by_func (summary, G_CALLBACK (ews_folder_count_notify_cb), ews_folder);
 
 		/* save changes, if there are any unsaved */
-		camel_folder_summary_save_to_db (summary, NULL);
+		camel_folder_summary_save (summary, NULL);
 	}
 
 	if (ews_folder->cache != NULL) {

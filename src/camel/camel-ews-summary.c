@@ -42,8 +42,8 @@
 #define d(x)
 
 /*Prototypes*/
-static gboolean summary_header_from_db (CamelFolderSummary *s, CamelFIRecord *mir);
-static CamelFIRecord * summary_header_to_db (CamelFolderSummary *s, GError **error);
+static gboolean summary_header_load (CamelFolderSummary *s, CamelFIRecord *mir);
+static CamelFIRecord * summary_header_save (CamelFolderSummary *s, GError **error);
 
 /*End of Prototypes*/
 
@@ -80,8 +80,8 @@ camel_ews_summary_class_init (CamelEwsSummaryClass *class)
 
 	folder_summary_class = CAMEL_FOLDER_SUMMARY_CLASS (class);
 	folder_summary_class->message_info_type = CAMEL_TYPE_EWS_MESSAGE_INFO;
-	folder_summary_class->summary_header_to_db = summary_header_to_db;
-	folder_summary_class->summary_header_from_db = summary_header_from_db;
+	folder_summary_class->summary_header_save = summary_header_save;
+	folder_summary_class->summary_header_load = summary_header_load;
 }
 
 static void
@@ -107,19 +107,19 @@ camel_ews_summary_new (struct _CamelFolder *folder)
 
 	summary = g_object_new (CAMEL_TYPE_EWS_SUMMARY, "folder", folder, NULL);
 
-	camel_folder_summary_load_from_db (summary, NULL);
+	camel_folder_summary_load (summary, NULL);
 
 	return summary;
 }
 
 static gboolean
-summary_header_from_db (CamelFolderSummary *s,
-                        CamelFIRecord *mir)
+summary_header_load (CamelFolderSummary *s,
+		     CamelFIRecord *mir)
 {
 	CamelEwsSummary *ews_summary = CAMEL_EWS_SUMMARY (s);
 	gchar *part;
 
-	if (!CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_from_db (s, mir))
+	if (!CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_load (s, mir))
 		return FALSE;
 
 	part = mir->bdata;
@@ -135,14 +135,14 @@ summary_header_from_db (CamelFolderSummary *s,
 }
 
 static CamelFIRecord *
-summary_header_to_db (CamelFolderSummary *s,
-                      GError **error)
+summary_header_save (CamelFolderSummary *s,
+		     GError **error)
 {
 	CamelEwsSummary *ews_summary = CAMEL_EWS_SUMMARY (s);
 	struct _CamelFIRecord *fir;
 	gchar *sync_state;
 
-	fir = CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_to_db (s, error);
+	fir = CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_save (s, error);
 	if (!fir)
 		return NULL;
 
@@ -186,7 +186,7 @@ camel_ews_summary_add_message (CamelFolderSummary *summary,
 
 	camel_folder_summary_add (summary, mi, FALSE);
 	camel_folder_summary_touch (summary);
-	camel_folder_summary_save_to_db (summary, NULL);
+	camel_folder_summary_save (summary, NULL);
 
 	g_object_unref (mi);
 
