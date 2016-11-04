@@ -870,8 +870,8 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 			g_object_unref (stream);
 
 			if (camel_mime_part_construct_from_parser_sync (part, parser, NULL, NULL)) {
-				mi = camel_folder_summary_info_new_from_header (folder_summary, part->headers);
-				if (camel_header_raw_find (&(part->headers), "Disposition-Notification-To", NULL))
+				mi = camel_folder_summary_info_new_from_headers (folder_summary, camel_medium_get_headers (CAMEL_MEDIUM (part)));
+				if (camel_medium_get_header (CAMEL_MEDIUM (part), "Disposition-Notification-To"))
 					message_requests_read_receipt = TRUE;
 			}
 

@@ -777,7 +777,7 @@ ews_folder_maybe_update_mlist (CamelFolder *folder,
 
 	if (!set_mlist || !*set_mlist) {
 		/* update mailing list information, if necessary */
-		gchar *mlist = camel_header_raw_check_mailing_list (&(CAMEL_MIME_PART (message)->headers));
+		gchar *mlist = camel_headers_dup_mailing_list (camel_medium_get_headers (CAMEL_MEDIUM (message)));
 
 		if (mlist) {
 			camel_message_info_set_mlist (mi, mlist);
