@@ -1,3 +1,14 @@
+Evolution-EWS 3.22.2 2016-11-07
+-------------------------------
+
+Bug Fixes:
+	Bug 770936 - BAD REQUEST due to empty Categories element (Milan Crha)
+	Bug 738093 - Show folder names with slash properly ][ (Milan Crha)
+	Bug 773379 - Cannot add more than one user into folder permissions (Milan Crha)
+
+Miscellaneous:
+	Runtime warnings when calling ResolveNames (Milan Crha)
+
 Evolution-EWS 3.22.1 2016-10-10
 -------------------------------
 
