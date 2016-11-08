@@ -2697,6 +2697,7 @@ ewscal_send_cancellation_email (ECalBackend *backend,
                                 const gchar *calobj)
 {
 	CamelMimeMessage *message;
+	CamelContentType *mime_type;
 	GError *error = NULL;
 	CamelMultipart *multi;
 	CamelMimePart *text_part, *vcal_part;
@@ -2726,8 +2727,9 @@ ewscal_send_cancellation_email (ECalBackend *backend,
 	camel_mime_part_set_content (text_part, body, strlen (body), "text/plain");
 
 	vcal_part = camel_mime_part_new ();
-	camel_content_type_set_param (CAMEL_DATA_WRAPPER (vcal_part)->mime_type, "charset", "utf-8");
-	camel_content_type_set_param (CAMEL_DATA_WRAPPER (vcal_part)->mime_type, "method", "CANCEL");
+	mime_type = camel_data_wrapper_get_mime_type_field (CAMEL_DATA_WRAPPER (vcal_part));
+	camel_content_type_set_param (mime_type, "charset", "utf-8");
+	camel_content_type_set_param (mime_type, "method", "CANCEL");
 	ical_str = icalcomponent_as_ical_string_r ((icalcomponent *) vcal);
 	camel_mime_part_set_content (vcal_part, ical_str, strlen (ical_str), "text/calendar; method=CANCEL");
 	free (ical_str);

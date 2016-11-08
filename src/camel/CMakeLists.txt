@@ -16,6 +16,8 @@ set(SOURCES
 	camel-ews-enums.h
 	camel-ews-folder.c
 	camel-ews-folder.h
+	camel-ews-message-info.c
+	camel-ews-message-info.h
 	camel-ews-private.h
 	camel-ews-store-summary.c
 	camel-ews-store-summary.h

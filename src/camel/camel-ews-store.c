@@ -277,10 +277,10 @@ ews_store_initable_init (GInitable *initable,
 	store = CAMEL_STORE (initable);
 	service = CAMEL_SERVICE (initable);
 
-	store->flags |= CAMEL_STORE_USE_CACHE_DIR | CAMEL_STORE_SUPPORTS_INITIAL_SETUP;
+	camel_store_set_flags (store, camel_store_get_flags (store) | CAMEL_STORE_USE_CACHE_DIR | CAMEL_STORE_SUPPORTS_INITIAL_SETUP);
 	ews_migrate_to_user_cache_dir (service);
 
-	store->flags |= CAMEL_STORE_CAN_DELETE_FOLDERS_AT_ONCE;
+	camel_store_set_flags (store, camel_store_get_flags (store) | CAMEL_STORE_CAN_DELETE_FOLDERS_AT_ONCE);
 
 	/* Chain up to parent interface's init() method. */
 	if (!parent_initable_interface->init (initable, cancellable, error))
@@ -313,13 +313,17 @@ ews_store_construct (CamelService *service,
 {
 	CamelEwsStore *ews_store;
 	gchar *summary_file, *session_storage_path;
+	guint32 store_flags;
 
 	ews_store = (CamelEwsStore *) service;
 
+	store_flags = camel_store_get_flags (CAMEL_STORE (ews_store));
+
 	/* Disable virtual trash and junk folders. Exchange has real
 	 * folders for that */
-	((CamelStore *) ews_store)->flags &= ~(CAMEL_STORE_VTRASH | CAMEL_STORE_VJUNK);
-	((CamelStore *) ews_store)->flags |= CAMEL_STORE_REAL_JUNK_FOLDER;
+	store_flags &= ~(CAMEL_STORE_VTRASH | CAMEL_STORE_VJUNK);
+	store_flags |= CAMEL_STORE_REAL_JUNK_FOLDER;
+	camel_store_set_flags (CAMEL_STORE (ews_store), store_flags);
 
 	/*storage path*/
 	session_storage_path = g_strdup (camel_service_get_user_cache_dir (service));
@@ -3003,12 +3007,12 @@ ews_get_trash_folder_sync (CamelStore *store,
 		   are moved to the Deleted Items folder first, thus in case of the trash
 		   folder instance being used to expunge messages will contain all of them.
 		*/
-		folders = camel_object_bag_list (store->folders);
+		folders = camel_store_dup_opened_folders (store);
 		for (ii = 0; ii < folders->len; ii++) {
 			CamelFolder *secfolder = folders->pdata[ii];
 
 			if (secfolder != folder && can)
-			    can = camel_folder_synchronize_sync (secfolder, FALSE, cancellable, NULL);
+				can = camel_folder_synchronize_sync (secfolder, FALSE, cancellable, NULL);
 
 			g_object_unref (secfolder);
 		}
