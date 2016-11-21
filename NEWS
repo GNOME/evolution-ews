@@ -1,3 +1,17 @@
+Evolution-EWS 3.23.2 2016-11-21
+-------------------------------
+
+Bug Fixes:
+	Bug 773379 - Cannot add more than one user into folder permissions (Milan Crha)
+	Bug 769573 - Allow also time part set for Tasks, not only date part (Milan Crha)
+	Bug 764065 - [Camel] Port more classes to GObject (Milan Crha)
+	Bug 774523 - Translator comments are missing in the .pot/.po files (Piotr Drąg)
+
+Miscellaneous:
+	Runtime warnings when calling ResolveNames (Milan Crha)
+	Do not require C++ compiler, when not used (Milan Crha)
+	Ensure CMAKE_SKIP_RPATH is OFF, the RPATH is used here (Milan Crha)
+
 Evolution-EWS 3.23.1 2016-10-24
 -------------------------------
 
