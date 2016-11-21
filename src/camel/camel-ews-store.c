@@ -363,11 +363,11 @@ ews_store_get_public_folders_name (CamelEwsStore *ews_store)
 		g_free (tmp_fid);
 		g_free (use_name);
 
-		/* Translators: This composes a "Public Folders" folder name for case when
-		 * user has such in his store already. The %s is replaced with "Public Folders",
-		 * the %d with counter, thus it composes name like "Public Folders_1"
-		*/
 		use_name = g_strdup_printf (
+			/* Translators: This composes a "Public Folders" folder name for case when
+			 * user has such in his store already. The %s is replaced with "Public Folders",
+			 * the %d with counter, thus it composes name like "Public Folders_1"
+			 */
 			C_("PublicFolders", "%s_%d"),
 			EWS_PUBLIC_FOLDER_ROOT_DISPLAY_NAME, counter);
 
@@ -492,11 +492,11 @@ camel_ews_store_ensure_virtual_folders (CamelEwsStore *ews_store)
 			g_free (tmp_fid);
 			g_free (use_name);
 
-			/* Translators: This composes a "Foreign Folders" folder name for case when
-			 * user has such in his store already. The %s is replaced with "Foreign Folders",
-			 * the %d with counter, thus it composes name like "Foreign Folders_1"
-			*/
 			use_name = g_strdup_printf (
+				/* Translators: This composes a "Foreign Folders" folder name for case when
+				 * user has such in his store already. The %s is replaced with "Foreign Folders",
+				 * the %d with counter, thus it composes name like "Foreign Folders_1"
+				 */
 				C_("ForeignFolders", "%s_%d"),
 				EWS_FOREIGN_FOLDER_ROOT_DISPLAY_NAME, counter);
 
