@@ -2671,7 +2671,7 @@ e_ews_get_msg_for_url (CamelEwsSettings *settings,
 	if (!msg) {
 		g_set_error (
 			error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
-			_("URL '%s' is not valid"), url);
+			_("URL “%s” is not valid"), url);
 		return NULL;
 	}
 

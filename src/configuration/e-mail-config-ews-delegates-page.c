@@ -562,7 +562,7 @@ show_delegate_properties_modal (EMailConfigEwsDelegatesPage *page,
 	lev_journal = add_permission_level_combo_row (grid, row, NULL, _("_Journal"), di->journal);
 	row++;
 
-	text = g_strdup_printf (_("Delegate '%s' has the following permissions"), name);
+	text = g_strdup_printf (_("Delegate “%s” has the following permissions"), name);
 	widget = gtk_frame_new (text);
 	gtk_container_add (GTK_CONTAINER (widget), GTK_WIDGET (grid));
 	g_free (text);
@@ -1714,7 +1714,7 @@ e_mail_config_ews_delegates_page_refresh (EMailConfigEwsDelegatesPage *page)
 	page->priv->refresh_cancellable = g_object_ref (cancellable);
 
 	e_activity_set_text (
-		activity, _("Retrieving \"Delegates\" settings"));
+		activity, _("Retrieving “Delegates” settings"));
 
 	settings = mail_config_ews_delegates_page_get_settings (page);
 

@@ -998,7 +998,7 @@ e_mail_config_ews_ooo_page_refresh (EMailConfigEwsOooPage *page)
 	page->priv->refresh_cancellable = g_object_ref (cancellable);
 
 	e_activity_set_text (
-		activity, _("Retrieving \"Out of Office\" settings"));
+		activity, _("Retrieving “Out of Office” settings"));
 
 	settings = mail_config_ews_ooo_page_get_settings (page);
 

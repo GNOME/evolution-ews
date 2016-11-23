@@ -2402,7 +2402,7 @@ ews_cal_do_method_request_publish_reply (ECalBackendEws *cbews,
 	GSList *ids = NULL;
 
 	if (!response_type) {
-		g_set_error (error, E_DATA_CAL_ERROR, UnknownUser, _("Cannot find user '%s' between attendees"), cbews->priv->user_email ? cbews->priv->user_email : "NULL");
+		g_set_error (error, E_DATA_CAL_ERROR, UnknownUser, _("Cannot find user “%s” between attendees"), cbews->priv->user_email ? cbews->priv->user_email : "NULL");
 		return;
 	}
 

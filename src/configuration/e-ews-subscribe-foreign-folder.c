@@ -92,7 +92,7 @@ add_foreign_folder_to_camel (CamelEwsStore *ews_store,
 		g_propagate_error (
 			perror,
 			g_error_new (EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_FOLDEREXISTS,
-			_("Cannot add folder, folder already exists as '%s'"), full_name));
+			_("Cannot add folder, folder already exists as “%s”"), full_name));
 
 		g_free (full_name);
 
@@ -100,9 +100,9 @@ add_foreign_folder_to_camel (CamelEwsStore *ews_store,
 	}
 
 	/* Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
-	 * Example result: "Mailbox - John Smith"
+	 * Example result: "Mailbox — John Smith"
 	*/
-	mailbox = g_strdup_printf (C_("ForeignFolder", "Mailbox - %s"), display_username);
+	mailbox = g_strdup_printf (C_("ForeignFolder", "Mailbox — %s"), display_username);
 
 	foreign_mailbox_id = g_strdup_printf ("ForeignMailbox::%s", foreign_email);
 	if (!camel_ews_store_summary_has_folder (ews_store->summary, foreign_mailbox_id)) {
@@ -295,7 +295,7 @@ check_foreign_folder_thread (GObject *with_object,
 		if (!mailboxes) {
 			g_set_error (
 				perror, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_MAILRECIPIENTNOTFOUND,
-				_("User '%s' was not found on the server"), cffd->email);
+				_("User “%s” was not found on the server"), cffd->email);
 			g_object_unref (conn);
 			return;
 		}
@@ -331,7 +331,7 @@ check_foreign_folder_thread (GObject *with_object,
 		if (!mailbox) {
 			g_set_error (
 				perror, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ITEMNOTFOUND,
-				_("User name '%s' is ambiguous, specify it more precisely, please"), cffd->email);
+				_("User name “%s” is ambiguous, specify it more precisely, please"), cffd->email);
 			g_object_unref (conn);
 			return;
 		}
@@ -353,7 +353,7 @@ check_foreign_folder_thread (GObject *with_object,
 			g_clear_error (&local_error);
 			local_error = g_error_new (
 				EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_FOLDERNOTFOUND,
-				_("Folder '%s' not found. Either it does not exist or you do not have permission to access it."),
+				_("Folder “%s” not found. Either it does not exist or you do not have permission to access it."),
 				cffd->orig_foldername);
 		}
 
@@ -371,7 +371,7 @@ check_foreign_folder_thread (GObject *with_object,
 	if (e_ews_folder_get_folder_type (folder) == E_EWS_FOLDER_TYPE_UNKNOWN) {
 		g_propagate_error (
 			perror, g_error_new_literal (EWS_CONNECTION_ERROR,
-			EWS_CONNECTION_ERROR_FOLDERNOTFOUND, _("Cannot add folder, cannot determine folder's type")));
+			EWS_CONNECTION_ERROR_FOLDERNOTFOUND, _("Cannot add folder, cannot determine folder’s type")));
 		g_object_unref (folder);
 		g_object_unref (conn);
 		return;
@@ -414,9 +414,9 @@ check_foreign_folder_idle (GObject *with_object,
 	/* Translators: This is used to name foreign folder.
 	 * The first '%s' is replaced with user name to whom the folder belongs,
 	 * the second '%s' is replaced with folder name.
-	 * Example result: "John Smith - Calendar"
+	 * Example result: "John Smith — Calendar"
 	*/
-	folder_name = g_strdup_printf (C_("ForeignFolder", "%s - %s"), base_username, base_foldername);
+	folder_name = g_strdup_printf (C_("ForeignFolder", "%s — %s"), base_username, base_foldername);
 	if (folder_type != E_EWS_FOLDER_TYPE_MAILBOX)
 		e_ews_folder_set_name (cffd->folder, folder_name);
 
@@ -535,7 +535,7 @@ subscribe_foreign_response_cb (GObject *dialog,
 	cffd->folder = NULL;
 
 	description = g_strdup_printf (
-		_("Testing availability of folder '%s' of user '%s', please wait..."),
+		_("Testing availability of folder “%s” of user “%s”, please wait..."),
 		show_foldername ? show_foldername : cffd->orig_foldername, cffd->email);
 
 	e_ews_config_utils_run_in_thread_with_feedback (

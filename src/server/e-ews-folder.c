@@ -745,7 +745,7 @@ e_ews_folder_utils_add_as_esource (ESourceRegistry *pregistry,
 		g_propagate_error (
 			perror,
 			g_error_new (EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_FOLDEREXISTS,
-			_("Cannot add folder, folder already exists as '%s'"), e_source_get_display_name (old_source)));
+			_("Cannot add folder, folder already exists as “%s”"), e_source_get_display_name (old_source)));
 	} else if (e_ews_folder_utils_populate_esource (
 		source,
 		sources,

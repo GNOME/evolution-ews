@@ -3,26 +3,26 @@
 
   <error type="warning" id="autodiscovery-error">
     <_primary>Autodiscovery query failed.</_primary>
-    <_secondary>The reported error was &quot;{0}&quot;.</_secondary>
+    <_secondary>The reported error was “{0}”.</_secondary>
   </error>
 
   <error type="warning" id="query-oal-error">
     <_primary>Failed to locate offline address books.</_primary>
-    <_secondary>The reported error was &quot;{0}&quot;.</_secondary>
+    <_secondary>The reported error was “{0}”.</_secondary>
   </error>
 
   <error type="warning" id="query-ooo-error">
-    <_primary>Failed to retrieve &quot;Out of Office&quot; settings.</_primary>
-    <_secondary>The reported error was &quot;{0}&quot;.</_secondary>
+    <_primary>Failed to retrieve “Out of Office” settings.</_primary>
+    <_secondary>The reported error was “{0}”.</_secondary>
   </error>
 
   <error type="warning" id="query-delegates-error">
-    <_primary>Failed to retrieve &quot;Delegates&quot; settings.</_primary>
-    <_secondary>The reported error was &quot;{0}&quot;.</_secondary>
+    <_primary>Failed to retrieve “Delegates” settings.</_primary>
+    <_secondary>The reported error was “{0}”.</_secondary>
   </error>
 
   <error type="info" id="has-ooo-set">
-    <_primary>Your Exchange account "{0}" has the status set as "Out of Office".</_primary>
+    <_primary>Your Exchange account “{0}” has the status set as “Out of Office”.</_primary>
   </error>
 
 </error-list>

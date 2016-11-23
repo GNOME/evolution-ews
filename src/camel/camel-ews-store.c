@@ -643,7 +643,7 @@ ews_update_has_ooo_set (CamelSession *session,
 	if (!cnc)
 		return;
 
-	camel_operation_push_message (cancellable, _("Checking \"Out of Office\" settings"));
+	camel_operation_push_message (cancellable, _("Checking “Out of Office” settings"));
 
 	oof_settings = e_ews_oof_settings_new_sync (cnc, cancellable, &local_error);
 
@@ -1246,7 +1246,7 @@ ews_connect_sync (CamelService *service,
 		state = camel_ews_store_get_ooo_alert_state (ews_store);
 		if (state == CAMEL_EWS_STORE_OOO_ALERT_STATE_UNKNOWN)
 			camel_session_submit_job (
-				session, _("Checking \"Out of Office\" settings"),
+				session, _("Checking “Out of Office” settings"),
 				ews_update_has_ooo_set,
 				g_object_ref (ews_store),
 				g_object_unref);
@@ -2484,7 +2484,7 @@ ews_create_folder_sync (CamelStore *store,
 		g_free (fid);
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			_("Cannot create folder '%s', folder already exists"),
+			_("Cannot create folder “%s”, folder already exists"),
 			full_name);
 		g_free (full_name);
 		return NULL;
@@ -2509,7 +2509,7 @@ ews_create_folder_sync (CamelStore *store,
 
 			g_set_error (
 				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-				_("Cannot create folder under '%s', it is used for folders of other users only"),
+				_("Cannot create folder under “%s”, it is used for folders of other users only"),
 				parent_name);
 			return NULL;
 		}
@@ -2519,7 +2519,7 @@ ews_create_folder_sync (CamelStore *store,
 
 			g_set_error (
 				error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-				_("Cannot create folder under '%s', it is used for public folders only"),
+				_("Cannot create folder under “%s”, it is used for public folders only"),
 				parent_name);
 			return NULL;
 		}
@@ -2633,7 +2633,7 @@ ews_delete_folder_sync (CamelStore *store,
 
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			_("Cannot remove folder '%s', it is used for folders of other users only"),
+			_("Cannot remove folder “%s”, it is used for folders of other users only"),
 			folder_name);
 		return FALSE;
 	}
@@ -2644,7 +2644,7 @@ ews_delete_folder_sync (CamelStore *store,
 
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			_("Cannot remove folder '%s', it is used for public folders only"),
+			_("Cannot remove folder “%s”, it is used for public folders only"),
 			folder_name);
 		return FALSE;
 	}
@@ -3259,7 +3259,7 @@ ews_store_subscribe_folder_sync (CamelSubscribable *subscribable,
 
 		g_set_error (
 			error, CAMEL_STORE_ERROR, CAMEL_STORE_ERROR_NO_FOLDER,
-			_("Cannot subscribe folder '%s', no public folder available"), folder_name);
+			_("Cannot subscribe folder “%s”, no public folder available"), folder_name);
 		return FALSE;
 	}
 
@@ -3269,7 +3269,7 @@ ews_store_subscribe_folder_sync (CamelSubscribable *subscribable,
 
 		g_set_error (
 			error, CAMEL_STORE_ERROR, CAMEL_STORE_ERROR_NO_FOLDER,
-			_("Cannot subscribe folder '%s', folder not found"), folder_name);
+			_("Cannot subscribe folder “%s”, folder not found"), folder_name);
 		return FALSE;
 	}
 
@@ -3521,7 +3521,7 @@ ews_store_unset_oof_settings_state (CamelSession *session,
 	EEwsOofState state;
 	GError *local_error = NULL;
 
-	camel_operation_push_message (cancellable, _("Unsetting the \"Out of Office\" status"));
+	camel_operation_push_message (cancellable, _("Unsetting the “Out of Office” status"));
 
 	connection = camel_ews_store_ref_connection (ews_store);
 	oof_settings = e_ews_oof_settings_new_sync (connection, cancellable, &local_error);
@@ -3558,7 +3558,7 @@ camel_ews_store_unset_oof_settings_state (CamelEwsStore *ews_store)
 	session = camel_service_ref_session (service);
 
 	camel_session_submit_job (
-		session, _("Unsetting the \"Out of Office\" status"),
+		session, _("Unsetting the “Out of Office” status"),
 		ews_store_unset_oof_settings_state,
 		g_object_ref (ews_store),
 		g_object_unref);

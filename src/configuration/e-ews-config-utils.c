@@ -914,7 +914,7 @@ action_folder_permissions_mail_cb (GtkAction *action,
 
 	str_folder_id = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, folder_path);
 	if (!str_folder_id) {
-		e_notice (parent, GTK_MESSAGE_ERROR, _("Cannot edit permissions of folder '%s', choose other folder."), folder_path);
+		e_notice (parent, GTK_MESSAGE_ERROR, _("Cannot edit permissions of folder “%s”, choose other folder."), folder_path);
 	} else {
 		EShell *shell;
 		ESource *source;

@@ -853,7 +853,7 @@ ews_backend_create_resource_sync (ECollectionBackend *backend,
 				error, G_IO_ERROR,
 				G_IO_ERROR_INVALID_ARGUMENT,
 				_("Could not determine a suitable folder "
-				"class for a new folder named '%s'"),
+				"class for a new folder named “%s”"),
 				e_source_get_display_name (source));
 			goto exit;
 		}
@@ -940,7 +940,7 @@ ews_backend_delete_resource_sync (ECollectionBackend *backend,
 		g_set_error (
 			error, G_IO_ERROR,
 			G_IO_ERROR_INVALID_ARGUMENT,
-			_("Data source '%s' does not represent "
+			_("Data source “%s” does not represent "
 			"an Exchange Web Services folder"),
 			e_source_get_display_name (source));
 		goto exit;

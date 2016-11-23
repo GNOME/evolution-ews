@@ -1539,7 +1539,7 @@ e_book_backend_ews_create_contacts (EBookBackend *backend,
 				opid,
 				EDB_ERROR_EX (
 					NOT_SUPPORTED,
-					_("Cannot save contact list, it's only supported on EWS Server 2010 or later")),
+					_("Cannot save contact list, it’s only supported on EWS Server 2010 or later")),
 				NULL);
 			return;
 		}
@@ -1906,7 +1906,7 @@ e_book_backend_ews_modify_contacts (EBookBackend *backend,
 				opid,
 				EDB_ERROR_EX (
 					NOT_SUPPORTED,
-					_("Cannot save contact list, it's only supported on EWS Server 2010 or later")),
+					_("Cannot save contact list, it’s only supported on EWS Server 2010 or later")),
 				NULL);
 			return;
 		}
