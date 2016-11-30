@@ -2454,13 +2454,20 @@ struct _autodiscover_data {
 static void
 autodiscover_data_free (struct _autodiscover_data *ad)
 {
-	g_object_unref (ad->cnc);
 	xmlOutputBufferClose (ad->buf);
 
 	if (ad->cancellable != NULL) {
 		g_cancellable_disconnect (ad->cancellable, ad->cancel_id);
 		g_object_unref (ad->cancellable);
 	}
+
+	/* Unref the connection after the cancellable is disconnected,
+	   to avoid race condition when the connection is freed inside
+	   the g_cancellable_disconnect() function, which holds the
+	   cancellable lock and blocks all other threads, while at
+	   the same time the connection can wait for the finish of
+	   its worker thread. */
+	g_object_unref (ad->cnc);
 
 	g_free (ad->as_url);
 	g_free (ad->oab_url);
