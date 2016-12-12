@@ -28,6 +28,7 @@
 #include "e-mail-config-ews-notebook.h"
 #include "e-mail-config-ews-oal-combo-box.h"
 #include "e-mail-config-ews-delegates-page.h"
+#include "e-mail-config-ews-offline-options.h"
 #include "e-mail-config-ews-ooo-page.h"
 #include "e-mail-config-ews-folder-sizes-page.h"
 #include "e-ews-ooo-notificator.h"
@@ -49,6 +50,7 @@ e_module_load (GTypeModule *type_module)
 	e_book_config_ews_type_register (type_module);
 	e_mail_config_ews_autodiscover_type_register (type_module);
 	e_mail_config_ews_backend_type_register (type_module);
+	e_mail_config_ews_offline_options_type_register (type_module);
 	e_mail_config_ews_gal_type_register (type_module);
 	e_mail_config_ews_notebook_type_register (type_module);
 	e_mail_config_ews_oal_combo_box_type_register (type_module);

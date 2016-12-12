@@ -23,6 +23,8 @@ set(sources
 	e-mail-config-ews-delegates-page.h
 	e-mail-config-ews-folder-sizes-page.c
 	e-mail-config-ews-folder-sizes-page.h
+	e-mail-config-ews-offline-options.c
+	e-mail-config-ews-offline-options.h
 	e-mail-config-ews-ooo-page.c
 	e-mail-config-ews-ooo-page.h
 	e-ews-config-ui-extension.c
