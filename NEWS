@@ -1,3 +1,22 @@
+Evolution-EWS 3.23.3 2016-12-12
+-------------------------------
+
+Bug Fixes:
+	Bug 774364 - Use Unicode in translatable strings (Piotr Drąg)
+	Bug 775363 - Bump minimum CMake version to 3.1 (Milan Crha)
+	Bug 775395 - Allow to override some (most) of the RPATH related settings (Dominique Leuenberger)
+
+Miscellaneous:
+	Autodiscover can cause deadlock in GCancellable code (Milan Crha)
+	Make glib_mkenums() files depend on the source enum file (Milan Crha)
+
+Translations:
+	Piotr Drąg (pl)
+	Anders Jonsson (sv)
+	Muhammet Kara (tr)
+	Christian Kirbach (de)
+	Balázs Meskó (hu)
+
 Evolution-EWS 3.23.2 2016-11-21
 -------------------------------
 
