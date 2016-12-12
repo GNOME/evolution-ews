@@ -146,7 +146,7 @@ test_time_zones_sync (gconstpointer user_data)
 	UhmServer *local_server;
 	EwsTestData *etd = (gpointer) user_data;
 	EwsCalendarConvertData convert_data;
-	EwsFolderId *calendar_fid;
+	EwsFolderId *calendar_fid = NULL;
 	gboolean includes_last_folder = FALSE;
 	gchar *old_sync_state = NULL;
 	gchar **tokens;
@@ -217,6 +217,11 @@ test_time_zones_sync (gconstpointer user_data)
 			g_free (new_sync_state);
 			break;
 		}
+	}
+
+	if (!calendar_fid) {
+		g_printerr ("No calendar folder found\n");
+		goto exit;
 	}
 
 	convert_data.connection = etd->connection;
