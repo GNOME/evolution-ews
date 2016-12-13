@@ -528,9 +528,13 @@ update_permission_dialog_by_level_combo (GObject *dialog)
 	    (!widgets->read_fb_time_radio && ii >= G_N_ELEMENTS (predefined_levels) - 3))
 		return;
 
-	rights = folder_permissions_dialog_to_rights (dialog);
-	rights = predefined_levels[ii].rights | (rights & (E_EWS_PERMISSION_BIT_FREE_BUSY_DETAILED |
-		E_EWS_PERMISSION_BIT_FREE_BUSY_SIMPLE));
+	if (!predefined_levels[ii].rights) {
+		rights = predefined_levels[ii].rights;
+	} else {
+		rights = folder_permissions_dialog_to_rights (dialog);
+		rights = predefined_levels[ii].rights | (rights & (E_EWS_PERMISSION_BIT_FREE_BUSY_DETAILED |
+			E_EWS_PERMISSION_BIT_FREE_BUSY_SIMPLE));
+	}
 
 	widgets->updating++;
 	update_folder_permissions_by_rights (dialog, rights);
