@@ -1491,6 +1491,40 @@ camel_ews_folder_new (CamelStore *store,
 		return NULL;
 	}
 
+	if (camel_offline_folder_can_downsync (CAMEL_OFFLINE_FOLDER (folder))) {
+		CamelSettings *settings;
+		gboolean offline_limit_by_age = FALSE;
+		CamelTimeUnit offline_limit_unit;
+		gint offline_limit_value;
+		time_t when = (time_t) 0;
+
+		settings = camel_service_ref_settings (CAMEL_SERVICE (store));
+
+		g_object_get (
+			settings,
+			"limit-by-age", &offline_limit_by_age,
+			"limit-unit", &offline_limit_unit,
+			"limit-value", &offline_limit_value,
+			NULL);
+
+		g_clear_object (&settings);
+
+		if (offline_limit_by_age)
+			when = camel_time_value_apply (when, offline_limit_unit, offline_limit_value);
+
+		if (when <= (time_t) 0)
+			when = (time_t) -1;
+
+		/* Ensure cache will expire when set up, otherwise
+		 * it causes redownload of messages too soon. */
+		camel_data_cache_set_expire_age (ews_folder->cache, when);
+		camel_data_cache_set_expire_access (ews_folder->cache, when);
+	} else {
+		/* Set cache expiration for one week. */
+		camel_data_cache_set_expire_age (ews_folder->cache, 60 * 60 * 24 * 7);
+		camel_data_cache_set_expire_access (ews_folder->cache, 60 * 60 * 24 * 7);
+	}
+
 	if (!g_ascii_strcasecmp (folder_name, "Inbox") ||
 	    folder_has_inbox_type (CAMEL_EWS_STORE (store), folder_name)) {
 		CamelSettings *settings;
