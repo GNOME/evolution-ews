@@ -906,7 +906,7 @@ ewscal_set_reccurence (ESoapMessage *msg,
 				snprintf (buffer, 256, "%d", recur.interval);
 				e_ews_message_write_string_parameter (msg, "Interval", NULL, buffer);
 
-				snprintf (buffer, 256, "%d", recur.by_month_day[0]);
+				snprintf (buffer, 256, "%d", recur.by_month_day[0] == -1 ? 31 : recur.by_month_day[0]);
 				e_ews_message_write_string_parameter (msg, "DayOfMonth", NULL, buffer);
 
 				e_soap_message_end_element (msg); /* "AbsoluteMonthlyRecurrence" */
@@ -928,7 +928,7 @@ ewscal_set_reccurence (ESoapMessage *msg,
 				 * dtstart is the default, give preference to by_month & by_month_day if they are set
 				 */
 				if (recur.by_month_day[0] != ICAL_RECURRENCE_ARRAY_MAX) {
-					snprintf (buffer, 256, "%d", recur.by_month_day[0]);
+					snprintf (buffer, 256, "%d", recur.by_month_day[0] == -1 ? 31 : recur.by_month_day[0]);
 				} else {
 					snprintf (buffer, 256, "%d", dtstart->day);
 				}
