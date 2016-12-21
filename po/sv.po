@@ -9,22 +9,22 @@ msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=Miscellaneous / EWS Core\n"
-"POT-Creation-Date: 2016-11-23 17:25+0000\n"
-"PO-Revision-Date: 2016-11-28 21:54+0100\n"
-"Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
+"POT-Creation-Date: 2016-12-19 14:54+0000\n"
+"PO-Revision-Date: 2016-12-21 23:16+0100\n"
+"Last-Translator: Josef Andersson <josef.andersson@fripost.org>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.8.11\n"
+"X-Generator: Poedit 1.8.9\n"
 
-#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:78
+#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:79
 msgid "Exchange Web Services"
 msgstr "Exchange Web Services"
 
-#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:80
+#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:81
 msgid "For accessing Exchange servers using Web Services"
 msgstr "För att nå Exchange-servrar som använder Web Services"
 
@@ -124,12 +124,12 @@ msgstr "Misslyckades att flytta meddelandecachefil från ”%s” till ”%s”:
 msgid "Could not load summary for %s"
 msgstr "Kunde inte läsa in sammanfattning för %s"
 
-#: ../src/camel/camel-ews-folder.c:1882
+#: ../src/camel/camel-ews-folder.c:1916
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Uppdaterar mappen ”%s”"
 
-#: ../src/camel/camel-ews-folder.c:2024
+#: ../src/camel/camel-ews-folder.c:2058
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Kan inte utföra åtgärder på mappen i frånkopplat läge"
@@ -163,29 +163,29 @@ msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "Kontrollera endast I_nkorgsmappen efter skräppost"
 
 #: ../src/camel/camel-ews-provider.c:60
-msgid "Automatically synchroni_ze remote mail locally"
-msgstr "Synkroni_sera automatiskt fjärrpost lokalt"
+msgid "Synchroni_ze remote mail locally in all folders"
+msgstr "Synkroni_sera fjärrpost lokalt i alla mappar"
 
-#: ../src/camel/camel-ews-provider.c:63
+#: ../src/camel/camel-ews-provider.c:64
 msgid "Connection"
 msgstr "Anslutning"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/camel/camel-ews-provider.c:67
+#: ../src/camel/camel-ews-provider.c:68
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "_Tidsgräns för anslutning (i sekunder) %s"
 
-#: ../src/camel/camel-ews-provider.c:69
+#: ../src/camel/camel-ews-provider.c:70
 msgid "Override _User-Agent header value"
 msgstr "Åsidosätt rubrikvärde för _User-Agent"
 
-#: ../src/camel/camel-ews-provider.c:95
+#: ../src/camel/camel-ews-provider.c:96
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/camel/camel-ews-provider.c:97
+#: ../src/camel/camel-ews-provider.c:98
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -193,11 +193,11 @@ msgstr ""
 "Detta alternativ kommer att ansluta till Exchange-servern med ett lösenord i "
 "klartext med NTLM-autentisering."
 
-#: ../src/camel/camel-ews-provider.c:105
+#: ../src/camel/camel-ews-provider.c:106
 msgid "Basic"
 msgstr "Grundläggande"
 
-#: ../src/camel/camel-ews-provider.c:107
+#: ../src/camel/camel-ews-provider.c:108
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -205,11 +205,11 @@ msgstr ""
 "Detta alternativ kommer att ansluta till Exchange-servern med ett lösenord i "
 "klartext med Basic-autentisering."
 
-#: ../src/camel/camel-ews-provider.c:115
+#: ../src/camel/camel-ews-provider.c:116
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/camel/camel-ews-provider.c:117
+#: ../src/camel/camel-ews-provider.c:118
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -543,143 +543,143 @@ msgstr "Anpassad"
 msgid "Writing folder permissions, please wait..."
 msgstr "Skriver mapprättigheter, vänta…"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:775
+#: ../src/configuration/e-ews-edit-folder-permissions.c:779
 msgctxt "User"
 msgid "Anonymous"
 msgstr "Anonym"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:778
+#: ../src/configuration/e-ews-edit-folder-permissions.c:782
 msgctxt "User"
 msgid "Default"
 msgstr "Standard"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:784
+#: ../src/configuration/e-ews-edit-folder-permissions.c:788
 msgctxt "User"
 msgid "Unknown"
 msgstr "Okänd"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:865
+#: ../src/configuration/e-ews-edit-folder-permissions.c:869
 #: ../src/configuration/e-ews-search-user.c:429
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:993
 msgid "Name"
 msgstr "Namn"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:871
+#: ../src/configuration/e-ews-edit-folder-permissions.c:875
 msgid "Permission level"
 msgstr "Rättighetsnivå"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:923
+#: ../src/configuration/e-ews-edit-folder-permissions.c:927
 msgid "Edit EWS folder permissions..."
 msgstr "Redigera rättigheter för EWS-mappar…"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:948
+#: ../src/configuration/e-ews-edit-folder-permissions.c:952
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:636
 msgid "Account:"
 msgstr "Konto:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:976
+#: ../src/configuration/e-ews-edit-folder-permissions.c:980
 msgid "Folder name:"
 msgstr "Mappnamn:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:999
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1003
 msgid "Folder ID:"
 msgstr "Mapp-ID:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1063
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1067
 msgid "Permissions"
 msgstr "Rättigheter"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1085
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1089
 msgid "Permi_ssion level:"
 msgstr "Rättig_hetsnivå:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1119
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1123
 msgctxt "Permissions"
 msgid "Read"
 msgstr "Läs"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1131
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1198
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1135
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1202
 msgctxt "Permissions"
 msgid "None"
 msgstr "Inga"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1137
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1141
 msgctxt "Permissions"
 msgid "Free/Busy time"
 msgstr "Ledig/Upptagen-tid"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1142
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1146
 msgctxt "Permissions"
 msgid "Free/Busy time, subject, location"
 msgstr "Ledig/Upptagen-tid, ämne, plats"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1148
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1152
 msgctxt "Permissions"
 msgid "Full Details"
 msgstr "Fullständiga detaljer"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1154
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1158
 msgctxt "Permissions"
 msgid "Write"
 msgstr "Skriv"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1166
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1170
 msgctxt "Permissions"
 msgid "Create items"
 msgstr "Skapa objekt"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1170
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1174
 msgctxt "Permissions"
 msgid "Create subfolders"
 msgstr "Skapa undermappar"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1174
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1178
 msgctxt "Permissions"
 msgid "Edit own"
 msgstr "Redigera egna"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1178
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1182
 msgctxt "Permissions"
 msgid "Edit all"
 msgstr "Redigera alla"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1186
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1190
 msgctxt "Permissions"
 msgid "Delete items"
 msgstr "Ta bort objekt"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1203
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1207
 msgctxt "Permissions"
 msgid "Own"
 msgstr "Egna"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1208
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1212
 msgctxt "Permissions"
 msgid "All"
 msgstr "Alla"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1214
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1218
 msgctxt "Permissions"
 msgid "Other"
 msgstr "Andra"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1226
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1230
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "Mappägare"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1230
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1234
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "Mappkontakt"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1234
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1238
 msgctxt "Permissions"
 msgid "Folder visible"
 msgstr "Mappsynlighet"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1307
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1311
 msgid "Reading folder permissions, please wait..."
 msgstr "Läser mapprättigheter, vänta…"
 
@@ -1131,53 +1131,53 @@ msgstr "Autentisering misslyckades"
 msgid "No response: %s"
 msgstr "Inget svar: %s"
 
-#: ../src/server/e-ews-connection.c:2521
+#: ../src/server/e-ews-connection.c:2528
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Misslyckades att tolka XML-svar från autodetektering"
 
-#: ../src/server/e-ews-connection.c:2528
+#: ../src/server/e-ews-connection.c:2535
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Misslyckades med att hitta <Autodiscover>-element"
 
-#: ../src/server/e-ews-connection.c:2539
+#: ../src/server/e-ews-connection.c:2546
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Misslyckades med att hitta <Response>-element"
 
-#: ../src/server/e-ews-connection.c:2550
+#: ../src/server/e-ews-connection.c:2557
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Misslyckades med att hitta <Account>-element"
 
-#: ../src/server/e-ews-connection.c:2575
+#: ../src/server/e-ews-connection.c:2582
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr "Kunde inte hitta <ASUrl> och <OABUrl> i svar för autodetektering"
 
-#: ../src/server/e-ews-connection.c:2666
+#: ../src/server/e-ews-connection.c:2673
 msgid "URL cannot be NULL"
 msgstr "URL kan inte vara NULL"
 
-#: ../src/server/e-ews-connection.c:2674
+#: ../src/server/e-ews-connection.c:2681
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "URL ”%s” är inte giltig"
 
-#: ../src/server/e-ews-connection.c:2764
+#: ../src/server/e-ews-connection.c:2771
 msgid "Email address is missing a domain part"
 msgstr "E-postadress saknar en domändel"
 
-#: ../src/server/e-ews-connection.c:3086
+#: ../src/server/e-ews-connection.c:3093
 msgid "Failed to parse oab XML"
 msgstr "Misslyckades med att tolka oab-XML"
 
-#: ../src/server/e-ews-connection.c:3094
+#: ../src/server/e-ews-connection.c:3101
 msgid "Failed to find <OAB> element\n"
 msgstr "Misslyckades att hitta <OAB>-element\n"
 
-#: ../src/server/e-ews-connection.c:4356
+#: ../src/server/e-ews-connection.c:4363
 msgid "No items found"
 msgstr "Inga objekt hittades"
 
