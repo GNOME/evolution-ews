@@ -1925,11 +1925,15 @@ ews_refresh_info_sync (CamelFolder *folder,
 	do {
 		GSList *items_created = NULL, *items_updated = NULL;
 		GSList *items_deleted = NULL;
+		gchar *new_sync_state = NULL;
 		guint32 total, unread;
 
 		e_ews_connection_sync_folder_items_sync (cnc, EWS_PRIORITY_MEDIUM, sync_state, id, "IdOnly", NULL, EWS_MAX_FETCH_COUNT,
-			&sync_state, &includes_last_item, &items_created, &items_updated, &items_deleted,
+			&new_sync_state, &includes_last_item, &items_created, &items_updated, &items_deleted,
 			cancellable, &local_error);
+
+		g_free (sync_state);
+		sync_state = new_sync_state;
 
 		if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_INVALIDSYNCSTATEDATA)) {
 			g_clear_error (&local_error);

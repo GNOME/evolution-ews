@@ -402,6 +402,7 @@ ews_settings_finalize (GObject *object)
 	g_free (priv->oaburl);
 	g_free (priv->oal_selected);
 	g_free (priv->impersonate_user);
+	g_free (priv->user_agent);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_ews_settings_parent_class)->finalize (object);
