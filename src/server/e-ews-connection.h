@@ -496,6 +496,7 @@ void		e_ews_connection_find_folder_items
 						 const EEwsAdditionalProps *add_props,
 						 EwsSortOrder *sort_order,
 						 const gchar *query,
+						 GPtrArray *only_ids, /* element-type utf8 */
 						 EEwsFolderType type,
 						 EwsConvertQueryCallback convert_query_cb,
 						 GCancellable *cancellable,
@@ -515,6 +516,7 @@ gboolean	e_ews_connection_find_folder_items_sync
 						 const EEwsAdditionalProps *add_props,
 						 EwsSortOrder *sort_order,
 						 const gchar *query,
+						 GPtrArray *only_ids, /* element-type utf8 */
 						 EEwsFolderType type,
 						 gboolean *includes_last_item,
 						 GSList **items,

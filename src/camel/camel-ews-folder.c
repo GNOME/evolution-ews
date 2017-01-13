@@ -50,6 +50,7 @@ which needs to be better organized via functions */
 
 #include "camel-ews-folder.h"
 #include "camel-ews-private.h"
+#include "camel-ews-search.h"
 #include "camel-ews-store.h"
 #include "camel-ews-summary.h"
 #include "camel-ews-utils.h"
@@ -835,6 +836,7 @@ ews_folder_search_by_expression (CamelFolder *folder,
                                  GError **error)
 {
 	CamelEwsFolder *ews_folder;
+	CamelEwsSearch *ews_search;
 	CamelEwsFolderPrivate *priv;
 	GPtrArray *matches;
 
@@ -843,8 +845,14 @@ ews_folder_search_by_expression (CamelFolder *folder,
 
 	g_mutex_lock (&priv->search_lock);
 
+	ews_search = CAMEL_EWS_SEARCH (ews_folder->search);
+
 	camel_folder_search_set_folder (ews_folder->search, folder);
+	camel_ews_search_set_cancellable_and_error (ews_search, cancellable, error);
+
 	matches = camel_folder_search_search (ews_folder->search, expression, NULL, cancellable, error);
+
+	camel_ews_search_set_cancellable_and_error (ews_search, NULL, NULL);
 
 	g_mutex_unlock (&priv->search_lock);
 
@@ -858,6 +866,7 @@ ews_folder_count_by_expression (CamelFolder *folder,
                                 GError **error)
 {
 	CamelEwsFolder *ews_folder;
+	CamelEwsSearch *ews_search;
 	CamelEwsFolderPrivate *priv;
 	guint32 matches;
 
@@ -866,8 +875,14 @@ ews_folder_count_by_expression (CamelFolder *folder,
 
 	g_mutex_lock (&priv->search_lock);
 
+	ews_search = CAMEL_EWS_SEARCH (ews_folder->search);
+
 	camel_folder_search_set_folder (ews_folder->search, folder);
+	camel_ews_search_set_cancellable_and_error (ews_search, cancellable, error);
+
 	matches = camel_folder_search_count (ews_folder->search, expression, cancellable, error);
+
+	camel_ews_search_set_cancellable_and_error (ews_search, NULL, NULL);
 
 	g_mutex_unlock (&priv->search_lock);
 
@@ -882,6 +897,7 @@ ews_folder_search_by_uids (CamelFolder *folder,
                            GError **error)
 {
 	CamelEwsFolder *ews_folder;
+	CamelEwsSearch *ews_search;
 	CamelEwsFolderPrivate *priv;
 	GPtrArray *matches;
 
@@ -893,8 +909,14 @@ ews_folder_search_by_uids (CamelFolder *folder,
 
 	g_mutex_lock (&priv->search_lock);
 
+	ews_search = CAMEL_EWS_SEARCH (ews_folder->search);
+
 	camel_folder_search_set_folder (ews_folder->search, folder);
+	camel_ews_search_set_cancellable_and_error (ews_search, cancellable, error);
+
 	matches = camel_folder_search_search (ews_folder->search, expression, uids, cancellable, error);
+
+	camel_ews_search_set_cancellable_and_error (ews_search, NULL, NULL);
 
 	g_mutex_unlock (&priv->search_lock);
 
@@ -1541,7 +1563,7 @@ camel_ews_folder_new (CamelStore *store,
 		g_object_unref (settings);
 	}
 
-	ews_folder->search = camel_folder_search_new ();
+	ews_folder->search = camel_ews_search_new (CAMEL_EWS_STORE (store));
 	if (!ews_folder->search) {
 		g_object_unref (folder);
 		return NULL;

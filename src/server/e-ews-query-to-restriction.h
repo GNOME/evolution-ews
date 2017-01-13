@@ -20,7 +20,17 @@
  * USA
  */
 
+#ifndef E_EWS_QUERY_TO_RESTRICTION_H
+#define E_EWS_QUERY_TO_RESTRICTION_H
+
 #include "server/e-soap-message.h"
 #include "server/e-ews-folder.h"
 
-void		e_ews_query_to_restriction (ESoapMessage *msg, const gchar *query, EEwsFolderType type);
+gboolean	e_ews_query_check_applicable	(const gchar *query,
+						 EEwsFolderType type);
+
+void		e_ews_query_to_restriction	(ESoapMessage *msg,
+						 const gchar *query,
+						 EEwsFolderType type);
+
+#endif /* E_EWS_QUERY_TO_RESTRICTION_H */

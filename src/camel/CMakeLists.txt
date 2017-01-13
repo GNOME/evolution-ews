@@ -19,6 +19,8 @@ set(SOURCES
 	camel-ews-message-info.c
 	camel-ews-message-info.h
 	camel-ews-private.h
+	camel-ews-search.c
+	camel-ews-search.h
 	camel-ews-store-summary.c
 	camel-ews-store-summary.h
 	camel-ews-store.c

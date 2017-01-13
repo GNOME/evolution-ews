@@ -2041,17 +2041,20 @@ e_book_backend_ews_get_contact_list (EBookBackend *backend,
 		GSList *items = NULL;
 		EwsFolderId *fid = NULL;
 		gboolean includes_last_item;
+		gboolean any_applicable;
 
 		fid = g_new0 (EwsFolderId, 1);
 		fid->id = g_strdup (priv->folder_id);
 		fid->is_distinguished_id = FALSE;
 
+		any_applicable = e_ews_query_check_applicable (query, E_EWS_FOLDER_TYPE_CONTACTS);
+
 		e_ews_connection_find_folder_items_sync (
 			priv->cnc, EWS_PRIORITY_MEDIUM,
-			fid, "IdOnly", NULL, NULL, query,
+			fid, "IdOnly", NULL, NULL, query, NULL,
 			E_EWS_FOLDER_TYPE_CONTACTS,
 			&includes_last_item,
-			&items, (EwsConvertQueryCallback) (e_ews_query_to_restriction),
+			&items, any_applicable ? e_ews_query_to_restriction : NULL,
 			cancellable, &error);
 
 		/*we have got Id for items lets fetch them using getitem operation*/

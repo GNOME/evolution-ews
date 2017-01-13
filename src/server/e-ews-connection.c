@@ -3914,6 +3914,27 @@ ews_append_folder_ids_to_msg (ESoapMessage *msg,
 	}
 }
 
+static void
+ews_connection_write_only_ids_restriction (ESoapMessage *msg,
+					   GPtrArray *only_ids)
+{
+	guint ii;
+
+	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
+	g_return_if_fail (only_ids && only_ids->len);
+
+	for (ii = 0; ii < only_ids->len; ii++) {
+		const gchar *itemid = g_ptr_array_index (only_ids, ii);
+
+		e_soap_message_start_element (msg, "IsEqualTo", NULL, NULL);
+		e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", "item:ItemId");
+		e_soap_message_start_element (msg, "FieldURIOrConstant", NULL, NULL);
+		e_ews_message_write_string_parameter_with_attribute (msg, "Constant", NULL, NULL, "Value", itemid);
+		e_soap_message_end_element (msg); /* FieldURIOrConstant */
+		e_soap_message_end_element (msg); /* IsEqualTo */
+	}
+}
+
 /**
  * e_ews_connection_find_folder_items:
  * @cnc: The EWS Connection
@@ -3923,6 +3944,7 @@ ews_append_folder_ids_to_msg (ESoapMessage *msg,
  * @add_props: Specify any additional properties to be fetched
  * @sort_order: Specific sorting order for items
  * @query: evo query based on which items will be fetched
+ * @only_ids: (element-type utf8) (nullable): a gchar * with item IDs, to check with only; can be %NULL
  * @type: type of folder
  * @convert_query_cb: a callback method to convert query to ews restiction
  * @cancellable: a GCancellable to monitor cancelled operations
@@ -3937,6 +3959,7 @@ e_ews_connection_find_folder_items (EEwsConnection *cnc,
                                     const EEwsAdditionalProps *add_props,
                                     EwsSortOrder *sort_order,
                                     const gchar *query,
+				    GPtrArray *only_ids, /* element-type utf8 */
                                     EEwsFolderType type,
                                     EwsConvertQueryCallback convert_query_cb,
                                     GCancellable *cancellable,
@@ -3968,8 +3991,27 @@ e_ews_connection_find_folder_items (EEwsConnection *cnc,
 	e_soap_message_end_element (msg);
 
 	/*write restriction message based on query*/
-	if (convert_query_cb)
+	if (convert_query_cb) {
+		e_soap_message_start_element (msg, "Restriction", "messages", NULL);
+
+		if (only_ids && only_ids->len) {
+			e_soap_message_start_element (msg, "And", "messages", NULL);
+			e_soap_message_start_element (msg, "Or", "messages", NULL);
+			ews_connection_write_only_ids_restriction (msg, only_ids);
+			e_soap_message_end_element (msg); /* Or */
+		}
+
 		convert_query_cb (msg, query, type);
+
+		if (only_ids && only_ids->len)
+			e_soap_message_end_element (msg); /* And */
+
+		e_soap_message_end_element (msg); /* Restriction */
+	} else if (only_ids && only_ids->len) {
+		e_soap_message_start_element (msg, "Restriction", "messages", NULL);
+		ews_connection_write_only_ids_restriction (msg, only_ids);
+		e_soap_message_end_element (msg);
+	}
 
 	if (sort_order)
 		ews_write_sort_order_to_msg (msg, sort_order);
@@ -4037,6 +4079,7 @@ e_ews_connection_find_folder_items_sync (EEwsConnection *cnc,
                                          const EEwsAdditionalProps *add_props,
                                          EwsSortOrder *sort_order,
                                          const gchar *query,
+					 GPtrArray *only_ids, /* element-type utf8 */
                                          EEwsFolderType type,
                                          gboolean *includes_last_item,
                                          GSList **items,
@@ -4055,7 +4098,7 @@ e_ews_connection_find_folder_items_sync (EEwsConnection *cnc,
 	e_ews_connection_find_folder_items (
 		cnc, pri, fid, default_props,
 		add_props, sort_order, query,
-		type, convert_query_cb, NULL,
+		only_ids, type, convert_query_cb, NULL,
 		e_async_closure_callback, closure);
 
 	result = e_async_closure_wait (closure);
