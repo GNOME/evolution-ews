@@ -634,7 +634,6 @@ calendar_func_occur_in_time_range (ESExp *f,
 {
 	ESExpResult *r;
 	EvalContext *ctx = data;
-	gchar *start, *end;
 
 	if (argv[0]->type != ESEXP_RES_TIME) {
 		e_sexp_fatal_error (
@@ -653,6 +652,8 @@ calendar_func_occur_in_time_range (ESExp *f,
 	if (!ctx->msg) {
 		ctx->any_applicable = TRUE;
 	} else {
+		gchar *start, *end;
+
 		start = e_ews_make_timestamp (argv[0]->value.time);
 		end = e_ews_make_timestamp (argv[1]->value.time);
 
@@ -660,12 +661,12 @@ calendar_func_occur_in_time_range (ESExp *f,
 		ews_restriction_write_greater_than_or_equal_to_message (ctx, "calendar:Start", start);
 		ews_restriction_write_less_than_or_equal_to_message (ctx, "calendar:End", end);
 		e_soap_message_end_element (ctx->msg);
+
+		g_free (start);
+		g_free (end);
 	}
 
 	r = e_sexp_result_new (f, ESEXP_RES_UNDEFINED);
-
-	g_free (start);
-	g_free (end);
 
 	return r;
 }
