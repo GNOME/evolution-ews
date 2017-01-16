@@ -1,3 +1,24 @@
+Evolution-EWS 3.23.4 2017-01-16
+-------------------------------
+
+Bug Fixes:
+	Bug 773419 - Age limit for offline message download (Milan Crha)
+	Bug 775951 - Folder permission level change doesn't change read permission (Milan Crha)
+	Bug 775649 - Monthly recurrence on the last day refused by the server (Milan Crha)
+	Bug 777021 - Use server-side search for 'body-contains' when online (Milan Crha)
+
+Miscellaneous:
+	Fix possible uninitialized variable usage in ews-test-timezones.c (Milan Crha)
+	Fix few memory leaks (Milan Crha)
+	Fix "variable may be used uninitialized" warning in query-to-restriction conversion (Milan Crha)
+
+Translations:
+	Piotr Drąg (pl)
+	Marek Černocký (cs)
+	Josef Andersson (sv)
+	Daniel Mustieles (es)
+	Rafael Fontenelle (pt_BR)
+
 Evolution-EWS 3.23.3 2016-12-12
 -------------------------------
 
