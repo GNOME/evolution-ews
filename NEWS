@@ -1,3 +1,13 @@
+Evolution-EWS 3.22.4 2017-01-16
+-------------------------------
+
+Bug Fixes:
+	Bug 775951 - Folder permission level change doesn't change read permission (Milan Crha)
+	Bug 775649 - Monthly recurrence on the last day refused by the server (Milan Crha)
+
+Miscellaneous:
+	Fix few memory leaks (Milan Crha)
+
 Evolution-EWS 3.22.3 2016-12-12
 -------------------------------
 
