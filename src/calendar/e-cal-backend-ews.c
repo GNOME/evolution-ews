@@ -2336,6 +2336,23 @@ e_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
 	const gchar *attendee_str = NULL, *attendee_mail = NULL;
 	gint attendees_count = 0;
 	const gchar *response = NULL;
+	gboolean found = FALSE;
+
+	attendee = icalcomponent_get_first_property (icalcomp, ICAL_ORGANIZER_PROPERTY);
+	if (attendee) {
+		attendee_str = icalproperty_get_organizer (attendee);
+
+		if (attendee_str) {
+			if (!strncasecmp (attendee_str, "MAILTO:", 7))
+				attendee_mail = attendee_str + 7;
+			else
+				attendee_mail = attendee_str;
+			if (attendee_mail && current_user_mail && g_ascii_strcasecmp (attendee_mail, current_user_mail) == 0) {
+				/* Empty string means it's an organizer, NULL is when not found */
+				return "";
+			}
+		}
+	}
 
 	for (attendee = icalcomponent_get_first_property (icalcomp, ICAL_ATTENDEE_PROPERTY);
 		attendee != NULL;
@@ -2347,19 +2364,22 @@ e_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
 				attendee_mail = attendee_str + 7;
 			else
 				attendee_mail = attendee_str;
-			if (attendee_mail && current_user_mail && g_ascii_strcasecmp (attendee_mail, current_user_mail) == 0)
-				return icalproperty_get_parameter_as_string (attendee, "PARTSTAT");
+			if (attendee_mail && current_user_mail && g_ascii_strcasecmp (attendee_mail, current_user_mail) == 0) {
+				response = icalproperty_get_parameter_as_string (attendee, "PARTSTAT");
+				found = TRUE;
+			}
 		}
 	}
 
 	/* this should not happen, but if the user's configured email does not match the one
 	   used in the invitation, like when the invitation comes to a mailing list... */
-	if (attendees_count == 1) {
+	if (!found && attendees_count == 1) {
 		attendee = icalcomponent_get_first_property (icalcomp, ICAL_ATTENDEE_PROPERTY);
 		g_return_val_if_fail (attendee != NULL, NULL);
 
-		return icalproperty_get_parameter_as_string (attendee, "PARTSTAT");
-	} else {
+		response = icalproperty_get_parameter_as_string (attendee, "PARTSTAT");
+		found = TRUE;
+	} else if (!found) {
 		ESourceRegistry *registry;
 		ECalComponent *comp;
 
@@ -2374,13 +2394,19 @@ e_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
 			if (!attendee)
 				attendee = find_attendee_if_sentby (icalcomp, my_address);
 
-			if (attendee)
+			if (attendee) {
 				response = icalproperty_get_parameter_as_string (attendee, "PARTSTAT");
+				found = TRUE;
+			}
 
 			g_free (my_address);
 		}
 
 		g_object_unref (comp);
+	}
+
+	if (found && !response) {
+		response = "NEEDS-ACTION";
 	}
 
 	return response;
@@ -2401,16 +2427,21 @@ ews_cal_do_method_request_publish_reply (ECalBackendEws *cbews,
 	gint pass = 0;
 	GSList *ids = NULL;
 
-	if (!response_type) {
+	if (!response_type &&
+	    e_cal_util_component_has_organizer (subcomp) &&
+	    e_cal_util_component_has_attendee (subcomp)) {
 		g_set_error (error, E_DATA_CAL_ERROR, UnknownUser, _("Cannot find user “%s” between attendees"), cbews->priv->user_email ? cbews->priv->user_email : "NULL");
 		return;
 	}
 
-	ews_cal_component_get_calendar_item_accept_id (comp, &item_id, &change_key, &mail_id);
+	if (response_type && *response_type)
+		ews_cal_component_get_calendar_item_accept_id (comp, &item_id, &change_key, &mail_id);
+	else
+		response_type = NULL;
 
 	while (pass < 2) {
 		/*in case we do not have item id we will create item with mime content only*/
-		if (item_id == NULL) {
+		if (!item_id || (response_type && g_ascii_strcasecmp (response_type, "NEEDS-ACTION") == 0)) {
 			e_ews_receive_objects_no_exchange_mail (cbews, subcomp, &ids, cancellable, &local_error);
 		} else {
 			EwsCalendarConvertData convert_data = { 0 };
