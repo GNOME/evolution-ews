@@ -1547,6 +1547,10 @@ camel_ews_folder_new (CamelStore *store,
 		camel_data_cache_set_expire_access (ews_folder->cache, 60 * 60 * 24 * 7);
 	}
 
+	camel_binding_bind_property (store, "online",
+		ews_folder->cache, "expire-enabled",
+		G_BINDING_SYNC_CREATE);
+
 	if (!g_ascii_strcasecmp (folder_name, "Inbox") ||
 	    folder_has_inbox_type (CAMEL_EWS_STORE (store), folder_name)) {
 		CamelSettings *settings;
