@@ -381,9 +381,16 @@ e_ews_extended_field_uri_free (EEwsExtendedFieldURI *ex_field_uri)
 }
 
 EEwsIndexedFieldURI *
-e_ews_indexed_field_uri_new (void)
+e_ews_indexed_field_uri_new (const gchar *uri,
+			     const gchar *index)
 {
-	return g_new0 (EEwsIndexedFieldURI, 1);
+	EEwsIndexedFieldURI *furi;
+
+	furi = g_new0 (EEwsIndexedFieldURI, 1);
+	furi->field_uri = g_strdup (uri);
+	furi->field_index = g_strdup (index);
+
+	return furi;
 }
 
 void

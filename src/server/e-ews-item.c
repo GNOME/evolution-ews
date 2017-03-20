@@ -106,6 +106,7 @@ struct _EEwsItemPrivate {
 	gchar *subject;
 	gchar *mime_content;
 
+	gchar *date_header;
 	time_t date_received;
 	time_t date_sent;
 	time_t date_created;
@@ -207,6 +208,9 @@ e_ews_item_dispose (GObject *object)
 
 	g_free (priv->references);
 	priv->references = NULL;
+
+	g_free (priv->date_header);
+	priv->date_header = NULL;
 
 	g_free (priv->timezone);
 	priv->timezone = NULL;
@@ -1041,6 +1045,20 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 			priv->item_id->change_key = e_soap_parameter_get_property (subparam, "ChangeKey");
 		} else if (!g_ascii_strcasecmp (name, "Subject")) {
 			priv->subject = e_soap_parameter_get_string_value (subparam);
+		} else if (!g_ascii_strcasecmp (name, "InternetMessageHeaders")) {
+			for (subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "InternetMessageHeader");
+			     subparam1;
+			     subparam1 = e_soap_parameter_get_next_child (subparam1)) {
+				gchar *str = e_soap_parameter_get_property (subparam1, "HeaderName");
+
+				if (g_strcmp0 (str, "Date") == 0) {
+					priv->date_header = e_soap_parameter_get_string_value (subparam1);
+					g_free (str);
+					break;
+				}
+
+				g_free (str);
+			}
 		} else if (!g_ascii_strcasecmp (name, "DateTimeReceived")) {
 			value = e_soap_parameter_get_string_value (subparam);
 			priv->date_received = ews_item_parse_date (value);
@@ -1307,12 +1325,21 @@ e_ews_item_get_in_replyto (EEwsItem *item)
 
 	return (const gchar *) item->priv->in_replyto;
 }
+
 const gchar *
 e_ews_item_get_references (EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 
 	return (const gchar *) item->priv->references;
+}
+
+const gchar *
+e_ews_item_get_date_header (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	return item->priv->date_header;
 }
 
 time_t

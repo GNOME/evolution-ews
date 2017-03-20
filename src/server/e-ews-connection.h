@@ -371,7 +371,8 @@ EEwsExtendedFieldURI *
 void		e_ews_extended_field_uri_free	(EEwsExtendedFieldURI *ex_field_uri);
 
 EEwsIndexedFieldURI *
-		e_ews_indexed_field_uri_new	(void);
+		e_ews_indexed_field_uri_new	(const gchar *uri,
+						 const gchar *index);
 void		e_ews_indexed_field_uri_free	(EEwsIndexedFieldURI *id_field_uri);
 
 EEwsAdditionalProps *
