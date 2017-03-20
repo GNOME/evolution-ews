@@ -590,6 +590,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 
 	add_props = e_ews_additional_props_new ();
 	add_props->field_uri = g_strdup ("item:MimeContent message:From message:Sender");
+	add_props->indexed_furis = g_slist_prepend (NULL, e_ews_indexed_field_uri_new ("item:InternetMessageHeader", "Date"));
 
 	res = e_ews_connection_get_items_sync (
 		cnc, pri, ids, "IdOnly", add_props,
@@ -698,7 +699,8 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	message = camel_ews_folder_get_message_from_cache (ews_folder, uid, cancellable, error);
 	if (message) {
 		CamelInternetAddress *from;
-		const gchar *email = NULL;
+		const gchar *email = NULL, *date_header;
+		gboolean resave = FALSE;
 
 		from = camel_mime_message_get_from (message);
 
@@ -709,8 +711,6 @@ camel_ews_folder_get_message (CamelFolder *folder,
 			if (!mailbox)
 				mailbox = e_ews_item_get_sender (items->data);
 			if (mailbox) {
-				CamelStream *cache_stream;
-
 				email = NULL;
 
 				if (g_strcmp0 (mailbox->routing_type, "EX") == 0)
@@ -721,15 +721,33 @@ camel_ews_folder_get_message (CamelFolder *folder,
 				camel_mime_message_set_from (message, from);
 				g_object_unref (from);
 
-				g_rec_mutex_lock (&priv->cache_lock);
-				/* Ignore errors here, it's nothing fatal in this case */
-				cache_stream = ews_data_cache_get (ews_folder->cache, "cur", uid, NULL);
-				if (cache_stream) {
-					camel_data_wrapper_write_to_stream_sync (CAMEL_DATA_WRAPPER (message), cache_stream, cancellable, NULL);
-					g_object_unref (cache_stream);
-				}
-				g_rec_mutex_unlock (&priv->cache_lock);
+				resave = TRUE;
 			}
+		}
+
+		date_header = e_ews_item_get_date_header (items->data);
+		if (date_header && *date_header) {
+			time_t tt;
+			gint tz_offset;
+
+			tt = camel_header_decode_date (date_header, &tz_offset);
+			if (tt > 0) {
+				camel_mime_message_set_date (message, tt, tz_offset);
+				resave = TRUE;
+			}
+		}
+
+		if (resave) {
+			CamelStream *cache_stream;
+
+			g_rec_mutex_lock (&priv->cache_lock);
+			/* Ignore errors here, it's nothing fatal in this case */
+			cache_stream = ews_data_cache_get (ews_folder->cache, "cur", uid, NULL);
+			if (cache_stream) {
+				camel_data_wrapper_write_to_stream_sync (CAMEL_DATA_WRAPPER (message), cache_stream, cancellable, NULL);
+				g_object_unref (cache_stream);
+			}
+			g_rec_mutex_unlock (&priv->cache_lock);
 		}
 	}
 

@@ -185,6 +185,7 @@ const gchar *	e_ews_item_get_msg_id		(EEwsItem *item);
 const gchar *	e_ews_item_get_uid		(EEwsItem *item);
 const gchar *	e_ews_item_get_in_replyto	(EEwsItem *item);
 const gchar *	e_ews_item_get_references	(EEwsItem *item);
+const gchar *	e_ews_item_get_date_header	(EEwsItem *item);
 time_t		e_ews_item_get_date_received	(EEwsItem *item);
 time_t		e_ews_item_get_date_sent	(EEwsItem *item);
 time_t		e_ews_item_get_date_created	(EEwsItem *item);
