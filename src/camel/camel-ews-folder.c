@@ -744,6 +744,26 @@ camel_ews_folder_get_message (CamelFolder *folder,
 			/* Ignore errors here, it's nothing fatal in this case */
 			cache_stream = ews_data_cache_get (ews_folder->cache, "cur", uid, NULL);
 			if (cache_stream) {
+				GIOStream *iostream;
+
+				/* Truncate the stream first, in case the message will be shorter
+				   than the one received from the server */
+				iostream = camel_stream_ref_base_stream (cache_stream);
+				if (iostream) {
+					GOutputStream *output_stream;
+
+					output_stream = g_io_stream_get_output_stream (iostream);
+					if (G_IS_SEEKABLE (output_stream)) {
+						GSeekable *seekable = G_SEEKABLE (output_stream);
+
+						if (g_seekable_can_truncate (seekable)) {
+							g_seekable_truncate (seekable, 0, NULL, NULL);
+						}
+					}
+
+					g_object_unref (iostream);
+				}
+
 				camel_data_wrapper_write_to_stream_sync (CAMEL_DATA_WRAPPER (message), cache_stream, cancellable, NULL);
 				g_object_unref (cache_stream);
 			}
