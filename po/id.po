@@ -6,40 +6,40 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=evolution-ews&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2016-06-13 09:38+0000\n"
-"PO-Revision-Date: 2016-07-08 19:21+0700\n"
-"Last-Translator: Andika Triwidada <atriwidada@gnome.org>\n"
+"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
+"product=evolution-ews&keywords=I18N+L10N&component=Miscellaneous / EWS Core\n"
+"POT-Creation-Date: 2017-02-26 06:45+0000\n"
+"PO-Revision-Date: 2017-03-21 15:51+0700\n"
+"Last-Translator: Kukuh Syafaat <syafaatkukuh@gmail.com>\n"
 "Language-Team: Indonesian <gnome@i15n.org>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 1.8.8\n"
+"X-Generator: Poedit 1.8.11\n"
 
-#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:80
+#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:79
 msgid "Exchange Web Services"
 msgstr "Layanan Web Exchange"
 
-#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:82
+#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:81
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Untuk mengakses server Exchange memakai Layanan Web"
 
-#: ../src/addressbook/e-book-backend-ews.c:1506
+#: ../src/addressbook/e-book-backend-ews.c:1503
 msgid "The backend does not support bulk additions"
 msgstr "Backend tak mendukung penambahan masal"
 
-#: ../src/addressbook/e-book-backend-ews.c:1545
-#: ../src/addressbook/e-book-backend-ews.c:1912
+#: ../src/addressbook/e-book-backend-ews.c:1542
+#: ../src/addressbook/e-book-backend-ews.c:1909
 msgid ""
-"Cannot save contact list, it's only supported on EWS Server 2010 or later"
+"Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Tak bisa menyimpan daftar kontak, itu hanya didukung pada EWS Server 2010 "
 "atau setelahnya"
 
-#: ../src/addressbook/e-book-backend-ews.c:1871
+#: ../src/addressbook/e-book-backend-ews.c:1868
 msgid "The backend does not support bulk modifications"
 msgstr "Backend tak mendukung pengubahan masal"
 
@@ -57,7 +57,7 @@ msgid "Syncing contacts..."
 msgstr "Menyelaraskan kontak…"
 
 #: ../src/addressbook/e-book-backend-ews.c:3394
-#: ../src/configuration/e-ews-search-user.c:365
+#: ../src/configuration/e-ews-search-user.c:363
 msgid "Searching..."
 msgstr "Mencari…"
 
@@ -65,127 +65,127 @@ msgstr "Mencari…"
 msgid "Requested to delete an unrelated cursor"
 msgstr "Diminta menghapus sebuah kursor yang tak berhubungan"
 
-#: ../src/calendar/e-cal-backend-ews.c:1349
+#: ../src/calendar/e-cal-backend-ews.c:1346
 msgid "EWS does not support bulk removals"
 msgstr "EWS tak mendukung penghapusan masa"
 
-#: ../src/calendar/e-cal-backend-ews.c:1528
+#: ../src/calendar/e-cal-backend-ews.c:1525
 msgid "Unknown error"
 msgstr "Galat tak dikenal"
 
-#: ../src/calendar/e-cal-backend-ews.c:1777
+#: ../src/calendar/e-cal-backend-ews.c:1774
 msgid "EWS does not support bulk additions"
 msgstr "EWS tak mendukung penambahan masal"
 
-#: ../src/calendar/e-cal-backend-ews.c:1982
+#: ../src/calendar/e-cal-backend-ews.c:1979
 msgid "EWS does not support bulk modifications"
 msgstr "EWS tak mendukung pengubahan masal"
 
-#: ../src/calendar/e-cal-backend-ews.c:2408
+#: ../src/calendar/e-cal-backend-ews.c:2433
 #, c-format
-msgid "Cannot find user '%s' between attendees"
-msgstr "Tak bisa temukan pengguna '%s' diantara yang hadir"
+msgid "Cannot find user “%s” between attendees"
+msgstr "Tak bisa temukan pengguna “%s” diantara yang hadir"
 
-#: ../src/camel/camel-ews-folder.c:377
+#: ../src/camel/camel-ews-folder.c:375
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Tak bisa membuka berkas temporer mimecontent!"
 
-#: ../src/camel/camel-ews-folder.c:385
+#: ../src/camel/camel-ews-folder.c:383
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Tak bisa menghasilkan pengurai dari mimecontent!"
 
-#: ../src/camel/camel-ews-folder.c:394
+#: ../src/camel/camel-ews-folder.c:392
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Tak bisa mengura mimecontent permintaan rapat!"
 
-#: ../src/camel/camel-ews-folder.c:453
+#: ../src/camel/camel-ews-folder.c:451
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Tak bisa membuat berkas singgahan"
 
-#: ../src/camel/camel-ews-folder.c:587 ../src/camel/camel-ews-folder.c:679
+#: ../src/camel/camel-ews-folder.c:585 ../src/camel/camel-ews-folder.c:677
 #, c-format
-msgid "Unable to create cache path '%s': %s"
-msgstr "Tak bisa membuat path singgahan '%s': %s"
+msgid "Unable to create cache path “%s”: %s"
+msgstr "Tak bisa membuat path singgahan “%s”: %s"
 
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/camel/camel-ews-folder.c:693
+#: ../src/camel/camel-ews-folder.c:691
 #, c-format
-msgid "Failed to move message cache file from '%s' to '%s': %s"
-msgstr "Gagal memindah berkas singgahan pesan dari '%s' ke '%s': %s"
+msgid "Failed to move message cache file from “%s” to “%s”: %s"
+msgstr "Gagal memindah berkas singgahan pesan dari “%s” to “%s”: %s"
 
-#: ../src/camel/camel-ews-folder.c:1439
+#: ../src/camel/camel-ews-folder.c:1498
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Tak bisa memuat ringkasan untuk %s"
 
-#: ../src/camel/camel-ews-folder.c:1839
+#: ../src/camel/camel-ews-folder.c:1942
 #, c-format
-msgid "Refreshing folder '%s'"
-msgstr "Menyegarkan folder '%s'"
+msgid "Refreshing folder “%s”"
+msgstr "Menyegarkan folder “%s”"
 
-#: ../src/camel/camel-ews-folder.c:1981
+#: ../src/camel/camel-ews-folder.c:2088
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Tak bisa melakukan aksi pada folder ketika dalam mode luring"
 
-#: ../src/camel/camel-ews-provider.c:47
+#: ../src/camel/camel-ews-provider.c:45
 msgid "Checking for new mail"
 msgstr "Sedang memeriksa surat baru"
 
-#: ../src/camel/camel-ews-provider.c:49
+#: ../src/camel/camel-ews-provider.c:47
 msgid "C_heck for new messages in all folders"
 msgstr "C_ek pesan baru dalam semua folder"
 
-#: ../src/camel/camel-ews-provider.c:51
+#: ../src/camel/camel-ews-provider.c:49
 msgid "_Listen for server change notifications"
 msgstr "_Dengarkan notifikasi perubahan server"
 
-#: ../src/camel/camel-ews-provider.c:54
+#: ../src/camel/camel-ews-provider.c:52
 msgid "Options"
 msgstr "Opsi"
 
-#: ../src/camel/camel-ews-provider.c:56
+#: ../src/camel/camel-ews-provider.c:54
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "Ter_apkan penyaring pada pesan baru dalam Kotak Masuk pada server ini"
 
-#: ../src/camel/camel-ews-provider.c:58
+#: ../src/camel/camel-ews-provider.c:56
 msgid "Check new messages for _Junk contents"
 msgstr "Periksa pesan baru untuk isi _Spam"
 
-#: ../src/camel/camel-ews-provider.c:60
+#: ../src/camel/camel-ews-provider.c:58
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "Ha_nya periksa pesan SPAM pada folder IN_BOX"
 
-#: ../src/camel/camel-ews-provider.c:62
-msgid "Automatically synchroni_ze remote mail locally"
-msgstr "Otomatis men_sinkronkan surat jauh ke lokal"
+#: ../src/camel/camel-ews-provider.c:60
+msgid "Synchroni_ze remote mail locally in all folders"
+msgstr "_Sinkronkan surat jauh ke lokal di semua folder"
 
-#: ../src/camel/camel-ews-provider.c:65
+#: ../src/camel/camel-ews-provider.c:64
 msgid "Connection"
 msgstr "Koneksi"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/camel/camel-ews-provider.c:69
+#: ../src/camel/camel-ews-provider.c:68
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "Tenggang wak_tu koneksi (dalam detik) %s"
 
-#: ../src/camel/camel-ews-provider.c:71
+#: ../src/camel/camel-ews-provider.c:70
 msgid "Override _User-Agent header value"
 msgstr "Timpa nilai header _User-Agent"
 
-#: ../src/camel/camel-ews-provider.c:97
+#: ../src/camel/camel-ews-provider.c:96
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/camel/camel-ews-provider.c:99
+#: ../src/camel/camel-ews-provider.c:98
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -193,11 +193,11 @@ msgstr ""
 "Opsi ini akan menyambung ke server Exchange menggunakan sandi teks polos "
 "dengan otentikasi NTLM."
 
-#: ../src/camel/camel-ews-provider.c:107
+#: ../src/camel/camel-ews-provider.c:106
 msgid "Basic"
 msgstr "Dasar"
 
-#: ../src/camel/camel-ews-provider.c:109
+#: ../src/camel/camel-ews-provider.c:108
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -205,11 +205,11 @@ msgstr ""
 "Opsi ini akan menyambung ke server Exchange menggunakan sandi teks polos "
 "dengan otentikasi Dasar."
 
-#: ../src/camel/camel-ews-provider.c:117
+#: ../src/camel/camel-ews-provider.c:116
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/camel/camel-ews-provider.c:119
+#: ../src/camel/camel-ews-provider.c:118
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -217,742 +217,741 @@ msgstr ""
 "Opsi ini akan menyambung ke server Exchange menggunakan otentikasi Kerberos/"
 "GSSAPI."
 
-#: ../src/camel/camel-ews-store.c:332
+#: ../src/camel/camel-ews-store.c:334
 #, c-format
 msgid "Session has no storage path"
 msgstr "Sesi tak memiliki path penyimpanan"
 
-#: ../src/camel/camel-ews-store.c:369
+#. Translators: This composes a "Public Folders" folder name for case when
+#. * user has such in his store already. The %s is replaced with "Public Folders",
+#. * the %d with counter, thus it composes name like "Public Folders_1"
+#.
+#: ../src/camel/camel-ews-store.c:371
 #, c-format
 msgctxt "PublicFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:498
+#. Translators: This composes a "Foreign Folders" folder name for case when
+#. * user has such in his store already. The %s is replaced with "Foreign Folders",
+#. * the %d with counter, thus it composes name like "Foreign Folders_1"
+#.
+#: ../src/camel/camel-ews-store.c:500
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:644 ../src/camel/camel-ews-store.c:1247
-msgid "Checking \"Out of Office\" settings"
+#: ../src/camel/camel-ews-store.c:646 ../src/camel/camel-ews-store.c:1249
+msgid "Checking “Out of Office” settings"
 msgstr "Memeriksa pengaturan \"Di Luar Kantor\""
 
-#: ../src/camel/camel-ews-store.c:1495
+#: ../src/camel/camel-ews-store.c:1497
 msgid "Updating foreign folder structure"
 msgstr "Memutakhirkan struktur folder asing"
 
-#: ../src/camel/camel-ews-store.c:1631
+#: ../src/camel/camel-ews-store.c:1633
 msgid "Updating foreign folders"
 msgstr "Memutakhirkan folder asing"
 
-#: ../src/camel/camel-ews-store.c:2005
+#: ../src/camel/camel-ews-store.c:2007
 #, c-format
 msgid "No such folder: %s"
 msgstr "Tak ada folder begitu: %s"
 
-#: ../src/camel/camel-ews-store.c:2303
+#: ../src/camel/camel-ews-store.c:2305
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Tak bisa membaca daftar folder publik EWS dalam mode luring"
 
-#: ../src/camel/camel-ews-store.c:2376
+#: ../src/camel/camel-ews-store.c:2378
 msgid "Cannot find any EWS public folders"
 msgstr "Tak bisa temukan folder publik EWS manapun"
 
-#: ../src/camel/camel-ews-store.c:2485
+#: ../src/camel/camel-ews-store.c:2487
 #, c-format
-msgid "Cannot create folder '%s', folder already exists"
-msgstr "Tak bisa membuat folder '%s', folder telah ada"
+msgid "Cannot create folder “%s”, folder already exists"
+msgstr "Tak bisa membuat folder “%s”, folder telah ada"
 
-#: ../src/camel/camel-ews-store.c:2500
+#: ../src/camel/camel-ews-store.c:2502
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Folder induk %s tidak ada"
 
-#: ../src/camel/camel-ews-store.c:2510
+#: ../src/camel/camel-ews-store.c:2512
 #, c-format
 msgid ""
-"Cannot create folder under '%s', it is used for folders of other users only"
+"Cannot create folder under “%s”, it is used for folders of other users only"
 msgstr ""
-"Tak bisa membuat folder di bawah '%s', itu hanya dipakai bagi folder "
+"Tak bisa membuat folder di bawah “%s”, itu hanya dipakai bagi folder "
 "pengguna lain"
 
-#: ../src/camel/camel-ews-store.c:2520
+#: ../src/camel/camel-ews-store.c:2522
 #, c-format
-msgid "Cannot create folder under '%s', it is used for public folders only"
+msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
-"Tak bisa membuat folder di bawah '%s', itu hanya dipakai bagi folder publik"
+"Tak bisa membuat folder di bawah “%s”, itu hanya dipakai bagi folder publik"
 
-#: ../src/camel/camel-ews-store.c:2624
+#: ../src/camel/camel-ews-store.c:2626
 #, c-format
 msgid "Folder does not exist"
 msgstr "Folder tidak ada"
 
-#: ../src/camel/camel-ews-store.c:2634
+#: ../src/camel/camel-ews-store.c:2636
 #, c-format
-msgid "Cannot remove folder '%s', it is used for folders of other users only"
+msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
-"Tak bisa menghapus folder '%s', itu hanya dipakai bagi folder pengguna lain"
+"Tak bisa menghapus folder “%s”, itu hanya dipakai bagi folder pengguna lain"
 
-#: ../src/camel/camel-ews-store.c:2645
+#: ../src/camel/camel-ews-store.c:2647
 #, c-format
-msgid "Cannot remove folder '%s', it is used for public folders only"
-msgstr "Tak bisa menghapus folder '%s', itu hanya dipakai bagi folder publik"
+msgid "Cannot remove folder “%s”, it is used for public folders only"
+msgstr "Tak bisa menghapus folder “%s”, itu hanya dipakai bagi folder publik"
 
-#: ../src/camel/camel-ews-store.c:2801
+#: ../src/camel/camel-ews-store.c:2803
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Folder %s tidak ada"
 
-#: ../src/camel/camel-ews-store.c:2810
+#: ../src/camel/camel-ews-store.c:2812
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Tidak ada catatan kunci perubahan bagi folder %s"
 
-#: ../src/camel/camel-ews-store.c:2853
+#: ../src/camel/camel-ews-store.c:2855
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Tak bisa sekaligus mengubah nama dan memindah folder di saat yang sama"
 
-#: ../src/camel/camel-ews-store.c:2887
+#: ../src/camel/camel-ews-store.c:2889
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Tak bisa temukan ID folder bagi folder induk %s"
 
-#: ../src/camel/camel-ews-store.c:2939 ../src/camel/camel-ews-transport.c:318
+#: ../src/camel/camel-ews-store.c:2941 ../src/camel/camel-ews-transport.c:315
 #, c-format
 msgid "Exchange server %s"
 msgstr "Server Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:2942
+#: ../src/camel/camel-ews-store.c:2944
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Layanan Exchange untuk %s pada %s"
 
-#: ../src/camel/camel-ews-store.c:2986
+#: ../src/camel/camel-ews-store.c:2988
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Tak bisa temukan folder Tong Sampah"
 
-#: ../src/camel/camel-ews-store.c:3046
+#: ../src/camel/camel-ews-store.c:3048
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Tak bisa temukan folder Sampah"
 
-#: ../src/camel/camel-ews-store.c:3236
+#: ../src/camel/camel-ews-store.c:3239
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Tak bisa berlangganan folder EWS dalam mode luring"
 
-#: ../src/camel/camel-ews-store.c:3259
+#: ../src/camel/camel-ews-store.c:3262
 #, c-format
-msgid "Cannot subscribe folder '%s', no public folder available"
-msgstr "Tak bisa berlangganan folder '%s', tak ada folder publik yang tersedia"
+msgid "Cannot subscribe folder “%s”, no public folder available"
+msgstr "Tak bisa berlangganan folder “%s”, tak ada folder publik yang tersedia"
 
-#: ../src/camel/camel-ews-store.c:3269
+#: ../src/camel/camel-ews-store.c:3272
 #, c-format
-msgid "Cannot subscribe folder '%s', folder not found"
-msgstr "Tak bisa berlangganan folder '%s', folder tak ditemukan"
+msgid "Cannot subscribe folder “%s”, folder not found"
+msgstr "Tak bisa berlangganan folder “%s”, folder tak ditemukan"
 
-#: ../src/camel/camel-ews-store.c:3360
+#: ../src/camel/camel-ews-store.c:3363
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Tak bisa berhenti berlangganan folder EWS dalam mode luring"
 
-#: ../src/camel/camel-ews-store.c:3477
+#: ../src/camel/camel-ews-store.c:3480
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Anda mesti daring untuk menuntaskan operasi ini"
 
-#: ../src/camel/camel-ews-store.c:3521 ../src/camel/camel-ews-store.c:3558
-msgid "Unsetting the \"Out of Office\" status"
+#: ../src/camel/camel-ews-store.c:3524 ../src/camel/camel-ews-store.c:3561
+msgid "Unsetting the “Out of Office” status"
 msgstr "Sedang menghapus status \"Di Luar Kantor\""
 
-#: ../src/camel/camel-ews-transport.c:321
+#: ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange mail delivery via %s"
 msgstr "Pengantaran surel Exchange melalui %s"
 
-#: ../src/camel/camel-ews-transport.c:370
+#: ../src/camel/camel-ews-transport.c:367
 msgid "Cannot send message with no From address"
 msgstr "Tak bisa mengirim pesan tanpa alamat Dari"
 
-#: ../src/camel/camel-ews-transport.c:376
+#: ../src/camel/camel-ews-transport.c:373
 msgid "Exchange server cannot send message with multiple From addresses"
 msgstr "Server Exchange tak bisa mengirim pesan dengan alamat Dari berganda"
 
-#: ../src/camel/camel-ews-transport.c:387
+#: ../src/camel/camel-ews-transport.c:383
 msgid "Failed to read From address"
 msgstr "Gagal membaca alamat Dari"
 
-#: ../src/camel/camel-ews-transport.c:399
-#, c-format
-msgid ""
-"Exchange server cannot send message as '%s', when the account was configured "
-"for address '%s'"
-msgstr ""
-"Server Exchange tak bisa mengirim pesan sebagai '%s', ketika akun ditata "
-"bagi alamat '%s'"
-
-#: ../src/camel/camel-ews-transport.c:413
+#: ../src/camel/camel-ews-transport.c:393
 #, c-format
 msgid "Service not connected"
 msgstr "Layanan tidak tersambung"
 
-#: ../src/collection/e-ews-backend.c:421
-#: ../src/configuration/e-mail-config-ews-gal.c:276
+#: ../src/collection/e-ews-backend.c:419
+#: ../src/configuration/e-mail-config-ews-gal.c:274
 msgid "Global Address List"
 msgstr "Daftar Alamat Global"
 
-#: ../src/collection/e-ews-backend.c:857
+#: ../src/collection/e-ews-backend.c:855
 #, c-format
-msgid "Could not determine a suitable folder class for a new folder named '%s'"
+msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
-"Tak bisa menentukan kelas folder yang cocok bagi folder baru bernama '%s'"
+"Tak bisa menentukan kelas folder yang cocok bagi folder baru bernama “%s”"
 
-#: ../src/collection/e-ews-backend.c:945
+#: ../src/collection/e-ews-backend.c:943
 #, c-format
-msgid "Data source '%s' does not represent an Exchange Web Services folder"
+msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr ""
-"Sumber data '%s' tak merepresentasikan suatu folder Layanan Web Exchange"
+"Sumber data “%s” tak merepresentasikan suatu folder Layanan Web Exchange"
 
-#: ../src/configuration/e-ews-config-utils.c:576
+#: ../src/configuration/e-ews-config-utils.c:574
 msgid "Folder"
 msgstr "Folder"
 
-#: ../src/configuration/e-ews-config-utils.c:586
+#: ../src/configuration/e-ews-config-utils.c:584
 msgid "Size"
 msgstr "Ukuran"
 
-#: ../src/configuration/e-ews-config-utils.c:624
-#: ../src/configuration/e-ews-config-utils.c:629
+#: ../src/configuration/e-ews-config-utils.c:622
+#: ../src/configuration/e-ews-config-utils.c:627
 msgid "Unable to retrieve folder size information"
 msgstr "Tak bisa mengambil informasi ukuran folder"
 
-#: ../src/configuration/e-ews-config-utils.c:749
+#: ../src/configuration/e-ews-config-utils.c:747
 msgid "Folder Sizes"
 msgstr "Ukuran Folder"
 
-#: ../src/configuration/e-ews-config-utils.c:752
+#: ../src/configuration/e-ews-config-utils.c:750
 msgid "_Close"
 msgstr "_Tutup"
 
-#: ../src/configuration/e-ews-config-utils.c:766
+#: ../src/configuration/e-ews-config-utils.c:764
 msgid "Fetching folder list…"
 msgstr "Mengambil daftar folder..."
 
-#: ../src/configuration/e-ews-config-utils.c:919
+#: ../src/configuration/e-ews-config-utils.c:917
 #, c-format
-msgid "Cannot edit permissions of folder '%s', choose other folder."
-msgstr "Tak bisa menyunting hak akses folder '%s', pilih folder lain."
+msgid "Cannot edit permissions of folder “%s”, choose other folder."
+msgstr "Tak bisa menyunting hak akses folder “%s”, pilih folder lain."
 
-#: ../src/configuration/e-ews-config-utils.c:996
+#: ../src/configuration/e-ews-config-utils.c:994
 msgid "Folder Sizes..."
 msgstr "Ukuran Folder..."
 
-#: ../src/configuration/e-ews-config-utils.c:1003
+#: ../src/configuration/e-ews-config-utils.c:1001
 msgid "Subscribe to folder of other user..."
 msgstr "Berlangganan ke folder milik pengguna lain…"
 
-#: ../src/configuration/e-ews-config-utils.c:1012
-#: ../src/configuration/e-ews-config-utils.c:1316
-#: ../src/configuration/e-ews-config-utils.c:1347
-#: ../src/configuration/e-ews-config-utils.c:1378
-#: ../src/configuration/e-ews-config-utils.c:1409
+#: ../src/configuration/e-ews-config-utils.c:1010
+#: ../src/configuration/e-ews-config-utils.c:1314
+#: ../src/configuration/e-ews-config-utils.c:1345
+#: ../src/configuration/e-ews-config-utils.c:1376
+#: ../src/configuration/e-ews-config-utils.c:1407
 msgid "Permissions..."
 msgstr "Izin…"
 
-#: ../src/configuration/e-ews-config-utils.c:1014
+#: ../src/configuration/e-ews-config-utils.c:1012
 msgid "Edit EWS folder permissions"
 msgstr "Sunting hak akses folder EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:1318
+#: ../src/configuration/e-ews-config-utils.c:1316
 msgid "Edit EWS calendar permissions"
 msgstr "Sunting hak akses kalender EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:1349
+#: ../src/configuration/e-ews-config-utils.c:1347
 msgid "Edit EWS tasks permissions"
 msgstr "Sunting hak akses tugas EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:1380
+#: ../src/configuration/e-ews-config-utils.c:1378
 msgid "Edit EWS memos permissions"
 msgstr "Sunting hak akses memo EWS"
 
-#: ../src/configuration/e-ews-config-utils.c:1411
+#: ../src/configuration/e-ews-config-utils.c:1409
 msgid "Edit EWS contacts permissions"
 msgstr "Sunting hak akses kontak EWS"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:87
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:418
+#: ../src/configuration/e-ews-edit-folder-permissions.c:85
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:416
 msgctxt "PermissionsLevel"
 msgid "None"
 msgstr "Nihil"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:88
+#: ../src/configuration/e-ews-edit-folder-permissions.c:86
 msgctxt "PermissionsLevel"
 msgid "Owner"
 msgstr "Pemilik"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:98
+#: ../src/configuration/e-ews-edit-folder-permissions.c:96
 msgctxt "PermissionsLevel"
 msgid "Publishing Editor"
 msgstr "Penyunting Penerbit"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:107
+#: ../src/configuration/e-ews-edit-folder-permissions.c:105
 msgctxt "PermissionsLevel"
 msgid "Editor"
 msgstr "Penyunting"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:115
+#: ../src/configuration/e-ews-edit-folder-permissions.c:113
 msgctxt "PermissionsLevel"
 msgid "Publishing Author"
 msgstr "Penulis Penerbit"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:122
+#: ../src/configuration/e-ews-edit-folder-permissions.c:120
 msgctxt "PermissionsLevel"
 msgid "Author"
 msgstr "Penulis"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:128
+#: ../src/configuration/e-ews-edit-folder-permissions.c:126
 msgctxt "PermissionsLevel"
 msgid "Nonediting Author"
 msgstr "Penulis Nonpenyuntingan"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:133
+#: ../src/configuration/e-ews-edit-folder-permissions.c:131
 msgctxt "PermissionsLevel"
 msgid "Reviewer"
 msgstr "Pemeriksa"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:136
+#: ../src/configuration/e-ews-edit-folder-permissions.c:134
 msgctxt "PermissionsLevel"
 msgid "Contributor"
 msgstr "Penyumbang"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:139
+#: ../src/configuration/e-ews-edit-folder-permissions.c:137
 msgctxt "PermissionsLevel"
 msgid "Free/Busy time"
 msgstr "Waktu luang/sibuk"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:141
+#: ../src/configuration/e-ews-edit-folder-permissions.c:139
 msgctxt "PermissionsLevel"
 msgid "Free/Busy time, subject, location"
 msgstr "Waktu luang/sibuk, subjek, lokasi"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:143
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:441
+#: ../src/configuration/e-ews-edit-folder-permissions.c:141
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:439
 msgctxt "PermissionsLevel"
 msgid "Custom"
 msgstr "Gubahan"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:267
+#: ../src/configuration/e-ews-edit-folder-permissions.c:265
 msgid "Writing folder permissions, please wait..."
 msgstr "Sedang menulis hak akses folder, silakan tunggu…"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:777
+#: ../src/configuration/e-ews-edit-folder-permissions.c:779
 msgctxt "User"
 msgid "Anonymous"
 msgstr "Anonim"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:780
+#: ../src/configuration/e-ews-edit-folder-permissions.c:782
 msgctxt "User"
 msgid "Default"
 msgstr "Baku"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:786
+#: ../src/configuration/e-ews-edit-folder-permissions.c:788
 msgctxt "User"
 msgid "Unknown"
 msgstr "Tak dikenal"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:867
-#: ../src/configuration/e-ews-search-user.c:431
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:995
+#: ../src/configuration/e-ews-edit-folder-permissions.c:869
+#: ../src/configuration/e-ews-search-user.c:429
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:993
 msgid "Name"
 msgstr "Nama"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:873
+#: ../src/configuration/e-ews-edit-folder-permissions.c:875
 msgid "Permission level"
 msgstr "Aras hak akses"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:925
+#: ../src/configuration/e-ews-edit-folder-permissions.c:927
 msgid "Edit EWS folder permissions..."
 msgstr "Sunting hak akses folder EWS…"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:950
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:638
+#: ../src/configuration/e-ews-edit-folder-permissions.c:952
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:636
 msgid "Account:"
 msgstr "Akun:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:978
+#: ../src/configuration/e-ews-edit-folder-permissions.c:980
 msgid "Folder name:"
 msgstr "Nama folder:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1001
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1003
 msgid "Folder ID:"
 msgstr "ID folder:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1065
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1067
 msgid "Permissions"
 msgstr "Izin"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1087
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1089
 msgid "Permi_ssion level:"
 msgstr "Ara_s hak akses:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1121
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1123
 msgctxt "Permissions"
 msgid "Read"
 msgstr "Baca"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1133
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1200
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1135
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1202
 msgctxt "Permissions"
 msgid "None"
 msgstr "Nihil"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1139
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1141
 msgctxt "Permissions"
 msgid "Free/Busy time"
 msgstr "Waktu luang/sibuk"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1144
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1146
 msgctxt "Permissions"
 msgid "Free/Busy time, subject, location"
 msgstr "Waktu luang/sibuk, subjek, lokasi"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1150
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1152
 msgctxt "Permissions"
 msgid "Full Details"
 msgstr "Rincian Lengkap"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1156
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1158
 msgctxt "Permissions"
 msgid "Write"
 msgstr "Tulis"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1168
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1170
 msgctxt "Permissions"
 msgid "Create items"
 msgstr "Buat butir"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1172
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1174
 msgctxt "Permissions"
 msgid "Create subfolders"
 msgstr "Buat subfolder"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1176
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1178
 msgctxt "Permissions"
 msgid "Edit own"
 msgstr "Sunting milik sendiri"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1180
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1182
 msgctxt "Permissions"
 msgid "Edit all"
 msgstr "Sunting semua"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1188
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1190
 msgctxt "Permissions"
 msgid "Delete items"
 msgstr "Hapus butir"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1205
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1207
 msgctxt "Permissions"
 msgid "Own"
 msgstr "Milik sendiri"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1210
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1212
 msgctxt "Permissions"
 msgid "All"
 msgstr "Semua"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1216
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1218
 msgctxt "Permissions"
 msgid "Other"
 msgstr "Lainnya"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1228
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1230
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "Folder pemilik"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1232
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1234
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "Folder kontak"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1236
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1238
 msgctxt "Permissions"
 msgid "Folder visible"
 msgstr "Folder nampak"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1309
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1311
 msgid "Reading folder permissions, please wait..."
 msgstr "Sedang membaca hak akses folder, silakan tunggu…"
 
-#: ../src/configuration/e-ews-ooo-notificator.c:184
+#: ../src/configuration/e-ews-ooo-notificator.c:182
 msgid "Unset on Server"
 msgstr "Hapus Tatanan pada Server"
 
-#: ../src/configuration/e-ews-ooo-notificator.c:185
-msgid "Unset the \"Out of Office\" status"
+#: ../src/configuration/e-ews-ooo-notificator.c:183
+msgid "Unset the “Out of Office” status"
 msgstr "Menghapus status \"Di Luar Kantor\""
 
-#: ../src/configuration/e-ews-search-user.c:208
+#: ../src/configuration/e-ews-search-user.c:206
 #, c-format
 msgid "No users found, only one contact"
 msgid_plural "No users found, only %d contacts"
 msgstr[0] "Tak ditemukan pengguna, hanya %d kontak"
 
-#: ../src/configuration/e-ews-search-user.c:213
+#: ../src/configuration/e-ews-search-user.c:211
 msgid "No users found"
 msgstr "Tak ditemukan pengguna"
 
-#: ../src/configuration/e-ews-search-user.c:217
+#: ../src/configuration/e-ews-search-user.c:215
 #, c-format
 msgid "Found one user"
 msgid_plural "Found %d users"
 msgstr[0] "Ditemukan %d pengguna"
 
-#: ../src/configuration/e-ews-search-user.c:223
+#: ../src/configuration/e-ews-search-user.c:221
 #, c-format
 msgid "Found more than 100 users, but showing only first %d"
 msgid_plural "Found more than 100 users, but showing only first %d"
 msgstr[0] ""
 "Ditemukan lebih dari 100 pengguna, tapi hanya menampilkan %d pertama"
 
-#: ../src/configuration/e-ews-search-user.c:357
-#: ../src/configuration/e-ews-search-user.c:540
+#: ../src/configuration/e-ews-search-user.c:355
+#: ../src/configuration/e-ews-search-user.c:538
 msgid "Search for a user"
 msgstr "Cari seorang pengguna"
 
-#: ../src/configuration/e-ews-search-user.c:437
+#: ../src/configuration/e-ews-search-user.c:435
 msgid "E-mail"
 msgstr "Surel"
 
-#: ../src/configuration/e-ews-search-user.c:474
+#: ../src/configuration/e-ews-search-user.c:472
 msgid "Choose EWS user..."
 msgstr "Pilih pengguna EWS…"
 
-#: ../src/configuration/e-ews-search-user.c:497
+#: ../src/configuration/e-ews-search-user.c:495
 msgid "_Search:"
 msgstr "_Cari:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
-#: ../src/server/e-ews-folder.c:750
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:95
+#: ../src/server/e-ews-folder.c:748
 #, c-format
-msgid "Cannot add folder, folder already exists as '%s'"
-msgstr "Tak bisa menambah folder, folder telah ada sebagai '%s'"
+msgid "Cannot add folder, folder already exists as “%s”"
+msgstr "Tak bisa menambah folder, folder telah ada sebagai “%s”"
 
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
-#. * Example result: "Mailbox - John Smith"
+#. * Example result: "Mailbox — John Smith"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:107
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:105
 #, c-format
 msgctxt "ForeignFolder"
-msgid "Mailbox - %s"
-msgstr "Kotak surat - %s"
+msgid "Mailbox — %s"
+msgstr "Kotak surat — %s"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:275
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:273
 msgid "Cannot test foreign folder availability while in offline mode"
 msgstr "Tak bisa menguji ketersediaan folder asing ketika dalam mode luring"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:300
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:298
 #, c-format
-msgid "User '%s' was not found on the server"
-msgstr "Pengguna '%s' tak ditemukan pada server"
+msgid "User “%s” was not found on the server"
+msgstr "Pengguna “%s” tak ditemukan pada server"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:336
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:334
 #, c-format
-msgid "User name '%s' is ambiguous, specify it more precisely, please"
-msgstr "Nama pengguna '%s' ambigu, harap nyatakan secara lebih presisi"
+msgid "User name “%s” is ambiguous, specify it more precisely, please"
+msgstr "Nama pengguna “%s” ambigu, harap nyatakan secara lebih presisi"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:358
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:356
 #, c-format
 msgid ""
-"Folder '%s' not found. Either it does not exist or you do not have "
+"Folder “%s” not found. Either it does not exist or you do not have "
 "permission to access it."
 msgstr ""
-"Folder '%s' tak ditemukan. Entah itu tak ada atau Anda tak punya hak untuk "
+"Folder “%s” tak ditemukan. Entah itu tak ada atau Anda tak punya hak untuk "
 "mengaksesnya."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:376
-msgid "Cannot add folder, cannot determine folder's type"
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:374
+msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Tak bisa menambah folder, tak bisa menentukan tipe folder"
 
 #. Translators: This is used to name foreign folder.
 #. * The first '%s' is replaced with user name to whom the folder belongs,
 #. * the second '%s' is replaced with folder name.
-#. * Example result: "John Smith - Calendar"
+#. * Example result: "John Smith — Calendar"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:421
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:419
 #, c-format
 msgctxt "ForeignFolder"
-msgid "%s - %s"
-msgstr "%s - %s"
+msgid "%s — %s"
+msgstr "%s — %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:515
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:723
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:513
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
 msgid "Inbox"
 msgstr "Inbox"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:517
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:724
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:515
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:722
 msgid "Contacts"
 msgstr "Kontak"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:519
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:725
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:517
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:723
 msgid "Calendar"
 msgstr "Kalender"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:521
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:726
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:519
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:724
 msgid "Memos"
 msgstr "Memo"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:523
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:727
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:521
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:725
 msgid "Tasks"
 msgstr "Tugas"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:540
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:538
 #, c-format
-msgid "Testing availability of folder '%s' of user '%s', please wait..."
-msgstr "Menguji ketersediaan folder '%s' dari pengguna '%s', silakan tunggu…"
+msgid "Testing availability of folder “%s” of user “%s”, please wait..."
+msgstr "Menguji ketersediaan folder “%s” dari pengguna “%s”, silakan tunggu..."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:617
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:615
 msgid "Subscribe to folder of other EWS user..."
 msgstr "Berlangganan ke folder pengguna EWS lain…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:668
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:666
 msgid "User"
 msgstr "Pengguna"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:675
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:673
 msgid "_User:"
 msgstr "Pengg_una:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:690
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:688
 msgid "C_hoose..."
 msgstr "_Pilih…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:706
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:704
 msgid "_Folder name:"
 msgstr "Nama _folder:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:736
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:734
 msgid "Include _subfolders"
 msgstr "Sertakan _subfolder"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:222
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:220
 msgid "Querying Autodiscover service"
 msgstr "Mengquery layanan Autodiscover"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:319
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:317
 msgid "Fetch _URL"
 msgstr "_URL Ambil"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:140
+#: ../src/configuration/e-mail-config-ews-backend.c:138
 msgid "Configuration"
 msgstr "Konfigurasi"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:158
+#: ../src/configuration/e-mail-config-ews-backend.c:156
 msgid "User_name:"
 msgstr "_Nama pengguna:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:172
+#: ../src/configuration/e-mail-config-ews-backend.c:170
 msgid "_Host URL:"
 msgstr "URL _Host:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:191
+#: ../src/configuration/e-mail-config-ews-backend.c:189
 msgid "OAB U_RL:"
 msgstr "U_RL OAB:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:205
+#: ../src/configuration/e-mail-config-ews-backend.c:203
 msgid "Open _Mailbox of other user"
 msgstr "Buka _Kotak surat pengguna lain"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:239
+#: ../src/configuration/e-mail-config-ews-backend.c:237
 msgid "S_earch..."
 msgstr "_Cari…"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:250
+#: ../src/configuration/e-mail-config-ews-backend.c:248
 msgid "Authentication"
 msgstr "Otentikasi"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:390
+#: ../src/configuration/e-mail-config-ews-backend.c:388
 msgid "Host URL cannot be empty"
 msgstr "URL host tak boleh kosong"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:395
+#: ../src/configuration/e-mail-config-ews-backend.c:393
 msgid "User name cannot be empty"
 msgstr "Nama pengguna tak boleh kosong"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:419
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:417
 msgctxt "PermissionsLevel"
 msgid "Reviewer (can read items)"
 msgstr "Pemeriksa (dapat membaca butir)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:420
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:418
 msgctxt "PermissionsLevel"
 msgid "Author (can read and create items)"
 msgstr "Penulis (bisa membaca dan membuat butir-butir)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:421
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:419
 msgctxt "PermissionsLevel"
 msgid "Editor (can read, create and modify items)"
 msgstr "Penyunting (dapat membaca, membuat, dan mengubah butir)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:526
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:524
 msgid "Delegate permissions"
 msgstr "Delegasikan hak"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:544
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:542
 msgid "C_alendar"
 msgstr "K_alender"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:547
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:545
 msgid "_Delegate receives copies of meeting-related messages sent to me"
 msgstr ""
 "Men_delegasikan penerimaan salinan pesan terkait rapat yang dikirim ke saya"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:552
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:550
 msgid "_Tasks"
 msgstr "_Tugas"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:555
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:553
 msgid "_Inbox"
 msgstr "_Inbox"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:558
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:556
 msgid "C_ontacts"
 msgstr "K_ontak"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:561
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:559
 msgid "_Notes"
 msgstr "Catata_n"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:564
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:562
 msgid "_Journal"
 msgstr "_Jurnal"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:567
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:565
 #, c-format
-msgid "Delegate '%s' has the following permissions"
-msgstr "Delegasi '%s' memiliki hak berikut"
+msgid "Delegate “%s” has the following permissions"
+msgstr "Delegasi “%s” memiliki hak berikut"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:585
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:583
 msgid "Delegate can see my _private items"
 msgstr "Delegasi dapat melihat butir-butir _pribadi saya"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:907
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:905
 msgid "Retrieving current user permissions, please wait..."
 msgstr "Mengambil info hak pengguna kini, harap tunggu..."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1027
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1647
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1025
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1645
 msgid "Delegates"
 msgstr "Delegasi"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1051
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1049
 msgid ""
 "Delegates can send items on your behalf, including creating and responding "
 "to meeting requests. If you want to grant folder permissions without giving "
@@ -964,7 +963,7 @@ msgstr ""
 "hak kirim-atas-nama, tutup kotak dialog ini, klik kanan pada folder, klik "
 "Hak, dan ubah opsi di sana."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1101
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1099
 msgid ""
 "Deliver meeting requests addressed to me and responses to meeting requests "
 "where I am the organizer to:"
@@ -973,7 +972,7 @@ msgstr ""
 "rapat dimana saya adalah pengelolanya ke:"
 
 #. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1111
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1109
 msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
@@ -981,53 +980,53 @@ msgstr ""
 "Hanya delegasi saya, tapi kirim _salinan permintaan rapat\n"
 "dan respon ke saya (disarankan)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1118
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1116
 msgid "My d_elegates only"
 msgstr "Hanya d_elegasi saya"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1125
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1123
 msgid "My delegates a_nd me"
 msgstr "Delegasi saya da_n saya"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1719
-msgid "Retrieving \"Delegates\" settings"
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1717
+msgid "Retrieving “Delegates” settings"
 msgstr "Mengambil pengaturan \"Delegasi\""
 
-#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:195
-#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:257
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:193
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:255
 msgid "EWS Settings"
 msgstr "Pengaturan EWS"
 
-#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:202
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:200
 msgid "View the size of all Exchange folders"
 msgstr "Lihat ukuran semua map Exchange"
 
-#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:206
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:204
 msgid "Folder _Sizes"
 msgstr "_Ukuran Folder"
 
-#: ../src/configuration/e-mail-config-ews-gal.c:224
+#: ../src/configuration/e-mail-config-ews-gal.c:222
 msgid "Locating offline address books"
 msgstr "Mencari buku alamat luring"
 
-#: ../src/configuration/e-mail-config-ews-gal.c:303
+#: ../src/configuration/e-mail-config-ews-gal.c:301
 msgid "Cache o_ffline address book"
 msgstr "_Singgahkan buku alamat luring"
 
-#: ../src/configuration/e-mail-config-ews-gal.c:329
+#: ../src/configuration/e-mail-config-ews-gal.c:327
 msgid "Select ad_dress list:"
 msgstr "Pilih _daftar alamat:"
 
-#: ../src/configuration/e-mail-config-ews-gal.c:353
+#: ../src/configuration/e-mail-config-ews-gal.c:351
 msgid "Fetch List"
 msgstr "Ambil Daftar"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:396
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:931
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:394
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:929
 msgid "Out of Office"
 msgstr "Keluar Kantor"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:412
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:410
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
@@ -1035,56 +1034,56 @@ msgstr ""
 "Pesan yang dinyatakan di bawah akan secara otomatis dikirim ke setiap orang "
 "internal dan eksternal yang mengirim surel ke Anda."
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:421
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:419
 msgid "Do _not send Out of Office replies"
 msgstr "Janga_n kirim jawaban Di Luar Kantor"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:429
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:427
 msgid "_Send Out of Office replies"
 msgstr "_Kirim jawaban Di Luar Kantor"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:437
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:435
 msgid "Send Out of Office replies only _during this time period:"
 msgstr "Kirim jawaban Di Luar Kantor hanya selama perio_da ini:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:457
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:455
 msgid "_From:"
 msgstr "_Dari:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:482
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:480
 msgid "_To:"
 msgstr "_Kepada:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:507
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:505
 msgid "I_nternal:"
 msgstr "I_nternal:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:516
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:514
 msgid "Message to be sent within the organization"
 msgstr "Pesan akan dikim di dalam organisasi"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:544
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:542
 msgid "E_xternal:"
 msgstr "E_ksternal:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:552
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:550
 msgid "Message to be sent outside the organization"
 msgstr "Pesan akan dikim di luar organisasi"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:562
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:560
 msgid "Do not reply to senders outside the organization"
 msgstr "Jangan kirim jawaban ke pengirim di luar organisasi"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:565
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:563
 msgid "Reply only to known senders outside the organization"
 msgstr "Jawab hanya ke pengirim yang dikenal di luar organisasi"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:568
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:566
 msgid "Reply to any sender outside the organization"
 msgstr "Balas ke pengirim manapun di luar organisasi"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:1003
-msgid "Retrieving \"Out of Office\" settings"
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:1001
+msgid "Retrieving “Out of Office” settings"
 msgstr "Mengambail pengaturan \"Di Luar Kantor\""
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:1
@@ -1092,97 +1091,108 @@ msgid "Autodiscovery query failed."
 msgstr "Query penemuan otomatis gagal."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:2
-msgid "The reported error was &quot;{0}&quot;."
-msgstr "Galat yang dilaporkan adalah &quot;{0}&quot;."
+msgid "The reported error was “{0}”."
+msgstr "Galat yang dilaporkan adalah “{0}”."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:3
 msgid "Failed to locate offline address books."
 msgstr "Gagal temukan buku alamat luring."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:4
-msgid "Failed to retrieve &quot;Out of Office&quot; settings."
-msgstr "Gagal mengambil pengatura &quot;Di Luar Kantor&quot;."
+msgid "Failed to retrieve “Out of Office” settings."
+msgstr "Gagal mengambil pengaturan \"Di Luar Kantor\""
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:5
-msgid "Failed to retrieve &quot;Delegates&quot; settings."
-msgstr "Gagal mengambil pengaturan &quot;Delegasi&quot;."
+msgid "Failed to retrieve “Delegates” settings."
+msgstr "Gagal mengambil pengaturan \"Delegasi\""
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:6
-msgid "Your Exchange account \"{0}\" has the status set as \"Out of Office\"."
+msgid "Your Exchange account “{0}” has the status set as “Out of Office”."
 msgstr "Akun Exchange \"{0}\" memiliki status \"Di Luar Kantor\"."
 
-#: ../src/server/e-ews-connection.c:723
+#: ../src/server/e-ews-camel-common.c:376
+#, c-format
+msgid "CreateItem call failed to return ID for new message"
+msgstr "Pemanggilan CreateItem gagal mengembalikan ID bagi pesan baru"
+
+#: ../src/server/e-ews-connection.c:722
 msgid "Operation Cancelled"
 msgstr "Operasi Dibatalkan"
 
-#: ../src/server/e-ews-connection.c:793
+#: ../src/server/e-ews-connection.c:788
 msgid "Authentication failed"
 msgstr "Otentikasi gagal"
 
-#: ../src/server/e-ews-connection.c:814
+#: ../src/server/e-ews-connection.c:809
 #, c-format
 msgid "No response: %s"
 msgstr "Tak ada respon: %s"
 
-#: ../src/server/e-ews-connection.c:2522
+#: ../src/server/e-ews-connection.c:2528
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Gagal mengurai XML respon autodiscover"
 
-#: ../src/server/e-ews-connection.c:2529
+#: ../src/server/e-ews-connection.c:2535
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Gagal menemukan elemen <Autodiscover>"
 
-#: ../src/server/e-ews-connection.c:2540
+#: ../src/server/e-ews-connection.c:2546
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Gagal menemukan elemen <Response>"
 
-#: ../src/server/e-ews-connection.c:2551
+#: ../src/server/e-ews-connection.c:2557
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Gagal menemukan elemen <Account>"
 
-#: ../src/server/e-ews-connection.c:2576
+#: ../src/server/e-ews-connection.c:2582
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr "Gagal menemukan <ASUrl> dan <OABUrl> dalam respon autodiscover"
 
-#: ../src/server/e-ews-connection.c:2667
+#: ../src/server/e-ews-connection.c:2673
 msgid "URL cannot be NULL"
 msgstr "URL tak boleh NULL"
 
-#: ../src/server/e-ews-connection.c:2675
+#: ../src/server/e-ews-connection.c:2681
 #, c-format
-msgid "URL '%s' is not valid"
-msgstr "URL '%s' tak valid"
+msgid "URL “%s” is not valid"
+msgstr "URL “%s” tak valid"
 
-#: ../src/server/e-ews-connection.c:2765
+#: ../src/server/e-ews-connection.c:2771
 msgid "Email address is missing a domain part"
 msgstr "Alamat surel kurang bagian domain"
 
-#: ../src/server/e-ews-connection.c:3087
+#: ../src/server/e-ews-connection.c:3093
 msgid "Failed to parse oab XML"
 msgstr "Gagal mengurai XML oab"
 
-#: ../src/server/e-ews-connection.c:3095
+#: ../src/server/e-ews-connection.c:3101
 msgid "Failed to find <OAB> element\n"
 msgstr "Gagal menemukan elemen <OAB>\n"
 
-#: ../src/server/e-ews-connection.c:4357
+#: ../src/server/e-ews-connection.c:4406
 msgid "No items found"
 msgstr "Tak temukan butir"
 
-#: ../src/server/e-ews-folder.c:705
+#: ../src/server/e-ews-folder.c:703
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Tak bisa menambah folder, tipe folder tak didukung"
 
-#: ../src/server/e-ews-folder.c:710
+#: ../src/server/e-ews-folder.c:708
 msgid "Cannot add folder, master source not found"
 msgstr "Tak bisa menambah folder, sumber induk tak ditemukan"
 
-#: ../src/utils/ews-camel-common.c:361
-#, c-format
-msgid "CreateItem call failed to return ID for new message"
-msgstr "Pemanggilan CreateItem gagal mengembalikan ID bagi pesan baru"
+#~ msgid ""
+#~ "Exchange server cannot send message as '%s', when the account was "
+#~ "configured for address '%s'"
+#~ msgstr ""
+#~ "Server Exchange tak bisa mengirim pesan sebagai '%s', ketika akun ditata "
+#~ "bagi alamat '%s'"
+
+#~ msgctxt "ForeignFolder"
+#~ msgid "%s - %s"
+#~ msgstr "%s - %s"
