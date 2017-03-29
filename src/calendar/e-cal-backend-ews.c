@@ -1224,7 +1224,7 @@ e_cal_backend_ews_remove_object (ECalBackend *backend,
 	e_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
 
 	if (!cbews->priv->cnc) {
-		e_data_cal_respond_discard_alarm (cal, context, EDC_ERROR (RepositoryOffline));
+		e_data_cal_respond_remove_objects (cal, context, EDC_ERROR (RepositoryOffline), NULL, NULL, NULL);
 		return;
 	}
 
