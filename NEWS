@@ -1,3 +1,12 @@
+Evolution-EWS 3.24.2 2017-05-08
+-------------------------------
+
+Bug Fixes:
+	Bug 781833 - Do not set '-Wl,--no-undefined' on BSD (Antoine Jacoutot)
+
+Translations:
+	Inaki Larranaga Murgoitio (eu)
+
 Evolution-EWS 3.24.1 2017-04-10
 -------------------------------
 
