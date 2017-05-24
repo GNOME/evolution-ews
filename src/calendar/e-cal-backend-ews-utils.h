@@ -57,10 +57,8 @@ typedef struct {
 const gchar *e_ews_collect_organizer (icalcomponent *comp);
 void e_ews_collect_attendees (icalcomponent *comp, GSList **required, GSList **optional, GSList **resource);
 
-void ewscal_set_time (ESoapMessage *msg, const gchar *name, icaltimetype *t, gboolean with_timezone);
 void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, EEwsCalendarTimeZoneDefinition *tzd);
 void ewscal_set_meeting_timezone (ESoapMessage *msg, icaltimezone *icaltz);
-void ewscal_set_availability_timezone (ESoapMessage *msg, icaltimezone *icaltz);
 void ewscal_set_reccurence (ESoapMessage *msg, icalproperty *rrule, icaltimetype *dtstart);
 void ewscal_set_reccurence_exceptions (ESoapMessage *msg, icalcomponent *comp);
 void ewscal_get_attach_differences (const GSList *original, const GSList *modified, GSList **removed, GSList **added);
@@ -77,7 +75,6 @@ void e_cal_backend_ews_unref_windows_zones (void);
 void e_cal_backend_ews_convert_calcomp_to_xml (ESoapMessage *msg, gpointer user_data);
 void e_cal_backend_ews_convert_component_to_updatexml (ESoapMessage *msg, gpointer user_data);
 void e_cal_backend_ews_clear_reminder_is_set (ESoapMessage *msg, gpointer user_data);
-void e_cal_backend_ews_prepare_free_busy_request (ESoapMessage *msg, gpointer user_data);
 void e_cal_backend_ews_prepare_set_free_busy_status (ESoapMessage *msg,gpointer user_data);
 void e_cal_backend_ews_prepare_accept_item_request (ESoapMessage *msg, gpointer user_data);
 

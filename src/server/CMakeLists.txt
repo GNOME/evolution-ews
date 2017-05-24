@@ -3,6 +3,8 @@ glib_mkenums(e-ews-enumtypes e-ews-enums.h E_EWS_ENUMTYPES_H)
 set(SOURCES
 	camel-ews-settings.c
 	camel-ews-settings.h
+	e-ews-calendar-utils.c
+	e-ews-calendar-utils.h
 	e-ews-camel-common.c
 	e-ews-camel-common.h
 	e-ews-connection.c

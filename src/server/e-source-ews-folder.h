@@ -84,6 +84,23 @@ gboolean	e_source_ews_folder_get_foreign_subfolders
 void		e_source_ews_folder_set_foreign_subfolders
 						(ESourceEwsFolder *extension,
 						 gboolean foreign_subfolders);
+const gchar *	e_source_ews_folder_get_foreign_mail
+						(ESourceEwsFolder *extension);
+gchar *		e_source_ews_folder_dup_foreign_mail
+						(ESourceEwsFolder *extension);
+void		e_source_ews_folder_set_foreign_mail
+						(ESourceEwsFolder *extension,
+						 const gchar *foreign_mail);
+guint		e_source_ews_folder_get_freebusy_weeks_before
+						(ESourceEwsFolder *extension);
+void		e_source_ews_folder_set_freebusy_weeks_before
+						(ESourceEwsFolder *extension,
+						 guint freebusy_weeks_before);
+guint		e_source_ews_folder_get_freebusy_weeks_after
+						(ESourceEwsFolder *extension);
+void		e_source_ews_folder_set_freebusy_weeks_after
+						(ESourceEwsFolder *extension,
+						 guint freebusy_weeks_after);
 gboolean	e_source_ews_folder_get_public	(ESourceEwsFolder *extension);
 void		e_source_ews_folder_set_public	(ESourceEwsFolder *extension,
 						 gboolean is_public);

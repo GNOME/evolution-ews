@@ -7357,13 +7357,15 @@ ews_handle_free_busy_view (ESoapParameter *param,
 	ESoapParameter *viewparam, *eventarray, *event_param, *subparam;
 	GTimeVal t_val;
 	const gchar *name;
-	gchar *value, *new_val = NULL, *summary = NULL, *location = NULL;
+	gchar *value, *new_val = NULL, *summary = NULL, *location = NULL, *id = NULL;
 
 	viewparam = e_soap_parameter_get_first_child_by_name (param, "FreeBusyView");
 	if (!viewparam) return;
 	vfb = icalcomponent_new_vfreebusy ();
 	eventarray = e_soap_parameter_get_first_child_by_name (viewparam, "CalendarEventArray");
-	for (event_param = e_soap_parameter_get_first_child (eventarray); event_param != NULL; event_param = e_soap_parameter_get_next_child (event_param), icalprop = NULL) {
+	for (event_param = eventarray ? e_soap_parameter_get_first_child (eventarray) : NULL;
+	     event_param != NULL;
+	     event_param = e_soap_parameter_get_next_child (event_param), icalprop = NULL) {
 		for (subparam = e_soap_parameter_get_first_child (event_param); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
 			name = e_soap_parameter_get_name (subparam);
 
@@ -7420,6 +7422,10 @@ ews_handle_free_busy_view (ESoapParameter *param,
 			} else if (!g_ascii_strcasecmp (name, "CalendarEventDetails")) {
 				ESoapParameter *dparam;
 
+				dparam = e_soap_parameter_get_first_child_by_name (subparam, "ID");
+				if (dparam)
+					id = e_soap_parameter_get_string_value (dparam);
+
 				dparam = e_soap_parameter_get_first_child_by_name (subparam, "Subject");
 				if (dparam)
 					summary = e_soap_parameter_get_string_value (dparam);
@@ -7430,6 +7436,8 @@ ews_handle_free_busy_view (ESoapParameter *param,
 			}
 		}
 		if (icalprop != NULL) {
+			if (id)
+				icalproperty_set_parameter_from_string (icalprop, "X-EWS-ID", id);
 			if (summary)
 				icalproperty_set_parameter_from_string (icalprop, "X-SUMMARY", summary);
 			if (location)
@@ -7437,10 +7445,9 @@ ews_handle_free_busy_view (ESoapParameter *param,
 			icalcomponent_add_property (vfb, icalprop);
 		}
 
-		g_free (summary);
-		g_free (location);
-		summary = NULL;
-		location = NULL;
+		g_clear_pointer (&summary, g_free);
+		g_clear_pointer (&location, g_free);
+		g_clear_pointer (&id, g_free);
 	}
 
 	async_data->items = g_slist_append (async_data->items, vfb);

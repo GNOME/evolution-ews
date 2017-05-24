@@ -41,6 +41,7 @@
 #include <calendar/gui/itip-utils.h>
 
 #include "server/e-source-ews-folder.h"
+#include "server/e-ews-calendar-utils.h"
 #include "server/e-ews-connection-utils.h"
 #include "server/e-ews-camel-common.h"
 
@@ -84,6 +85,7 @@ struct _ECalBackendEwsPrivate {
 
 	guint subscription_key;
 	gboolean listen_notifications;
+	gboolean is_freebusy_calendar;
 };
 
 #define PRIV_LOCK(p)   (g_rec_mutex_lock (&(p)->rec_mutex))
@@ -732,7 +734,7 @@ cbews_listen_notifications_cb (ECalBackendEws *cbews,
 		return;
 	}
 
-	cbews->priv->listen_notifications = camel_ews_settings_get_listen_notifications (ews_settings);
+	cbews->priv->listen_notifications = !cbews->priv->is_freebusy_calendar && camel_ews_settings_get_listen_notifications (ews_settings);
 	PRIV_UNLOCK (cbews->priv);
 
 	thread = g_thread_new (NULL, handle_notifications_thread, g_object_ref (cbews));
@@ -816,6 +818,7 @@ e_cal_backend_ews_open (ECalBackend *backend,
 		extension_name = E_SOURCE_EXTENSION_EWS_FOLDER;
 		extension = e_source_get_extension (source, extension_name);
 		priv->folder_id = e_source_ews_folder_dup_id (extension);
+		priv->is_freebusy_calendar = g_strcmp0 (priv->folder_id, "freebusy-calendar") == 0;
 
 		priv->storage_path = g_build_filename (cache_dir, priv->folder_id, NULL);
 
@@ -845,11 +848,11 @@ e_cal_backend_ews_open (ECalBackend *backend,
 		ret = cal_backend_ews_ensure_connected (cbews, cancellable, &error);
 
 	if (ret) {
-		e_cal_backend_set_writable (backend, TRUE);
+		e_cal_backend_set_writable (backend, !priv->is_freebusy_calendar);
 
 		PRIV_LOCK (priv);
 		if (priv->cnc != NULL) {
-			priv->listen_notifications = camel_ews_settings_get_listen_notifications (ews_settings);
+			priv->listen_notifications = !priv->is_freebusy_calendar && camel_ews_settings_get_listen_notifications (ews_settings);
 
 			if (priv->listen_notifications)
 				cbews_listen_notifications_cb (cbews, NULL, ews_settings);
@@ -3856,6 +3859,34 @@ cbews_forget_all_components (ECalBackendEws *cbews)
 	g_slist_free_full (ids, (GDestroyNotify) e_cal_component_free_id);
 }
 
+static gboolean
+ews_freebusy_ecomp_changed (ECalComponent *ecomp,
+			    icalcomponent *vevent)
+{
+	icalcomponent *icomp;
+	gboolean changed = FALSE;
+
+	g_return_val_if_fail (vevent != NULL, FALSE);
+
+	if (!ecomp)
+		return TRUE;
+
+	icomp = e_cal_component_get_icalcomponent (ecomp);
+	if (!icomp)
+		return TRUE;
+
+	if (!changed)
+		changed = g_strcmp0 (icalcomponent_get_summary (icomp), icalcomponent_get_summary (vevent)) != 0;
+	if (!changed)
+		changed = g_strcmp0 (icalcomponent_get_location (icomp), icalcomponent_get_location (vevent)) != 0;
+	if (!changed)
+		changed = icaltime_compare (icalcomponent_get_dtstart (icomp), icalcomponent_get_dtstart (vevent)) != 0;
+	if (!changed)
+		changed = icaltime_compare (icalcomponent_get_dtend (icomp), icalcomponent_get_dtend (vevent)) != 0;
+
+	return changed;
+}
+
 static gpointer
 ews_start_sync_thread (gpointer data)
 {
@@ -3876,95 +3907,288 @@ ews_start_sync_thread (gpointer data)
 
 	cancellable = cal_backend_ews_ref_cancellable (cbews);
 
-	old_sync_state = g_strdup (e_cal_backend_store_get_key_value (priv->store, SYNC_KEY));
-	do {
-		EEwsAdditionalProps *add_props;
-		GCancellable *cancellable;
+	if (priv->is_freebusy_calendar) {
+		ESourceEwsFolder *ews_folder;
+		EEWSFreeBusyData fbdata;
+		GSList *free_busy = NULL, *link;
+		gboolean success;
+		time_t today;
 
-		includes_last_item = TRUE;
+		ews_folder = e_source_get_extension (e_backend_get_source (E_BACKEND (cbews)), E_SOURCE_EXTENSION_EWS_FOLDER);
 
-		add_props = e_ews_additional_props_new ();
-		add_props->field_uri = g_strdup ("item:ItemClass");
+		today = time_day_begin (time (NULL));
 
-		cancellable = cal_backend_ews_ref_cancellable (cbews);
+		fbdata.period_start = time_add_week (today, -e_source_ews_folder_get_freebusy_weeks_before (ews_folder));
+		fbdata.period_end = time_day_end (time_add_week (today, e_source_ews_folder_get_freebusy_weeks_after (ews_folder)));
+		fbdata.user_mails = g_slist_prepend (NULL, e_source_ews_folder_dup_foreign_mail (ews_folder));
 
-		ret = e_ews_connection_sync_folder_items_sync (
-			priv->cnc,
-			EWS_PRIORITY_MEDIUM,
-			old_sync_state,
-			priv->folder_id,
-			"IdOnly",
-			add_props,
-			EWS_MAX_FETCH_COUNT,
-			&new_sync_state,
-			&includes_last_item,
-			&items_created,
-			&items_updated,
-			&items_deleted,
-			cancellable,
-			&error);
+		success = e_ews_connection_get_free_busy_sync (priv->cnc, G_PRIORITY_DEFAULT,
+			e_ews_cal_utils_prepare_free_busy_request, &fbdata,
+			&free_busy, cancellable, &error);
 
-		e_ews_additional_props_free (add_props);
-		g_clear_object (&cancellable);
-		g_free (old_sync_state);
-		old_sync_state = NULL;
+		if (success) {
+			icaltimezone *utc_zone = icaltimezone_get_utc_timezone ();
+			GSList *ids;
+			GHashTable *known;
+			GHashTableIter iter;
+			gpointer key;
 
-		if (!ret) {
-			if (g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_INVALIDSYNCSTATEDATA)) {
-				g_clear_error (&error);
-				e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, NULL);
-				cbews_forget_all_components (cbews);
+			known = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
-				if (!e_ews_connection_sync_folder_items_sync (
-							priv->cnc,
-							EWS_PRIORITY_MEDIUM,
-							NULL,
-							priv->folder_id,
-							"IdOnly",
-							NULL,
-							EWS_MAX_FETCH_COUNT,
-							&new_sync_state,
-							&includes_last_item,
-							&items_created,
-							&items_updated,
-							&items_deleted,
-							cancellable,
-							&error)) {
-					if (!g_error_matches (
-							error,
-							EWS_CONNECTION_ERROR,
-							EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED)) {
-						e_cal_backend_set_writable (E_CAL_BACKEND (cbews), TRUE);
-						break;
+			ids = e_cal_backend_store_get_component_ids (priv->store);
+			for (link = ids; link; link = g_slist_next (link)) {
+				ECalComponentId *id = link->data;
+
+				if (id && id->uid && *id->uid)
+					g_hash_table_insert (known, g_strdup (id->uid), NULL);
+			}
+			g_slist_free_full (ids, (GDestroyNotify) e_cal_component_free_id);
+
+			for (link = free_busy; link; link = g_slist_next (link)) {
+				icalcomponent *fbcomp = link->data;
+				icalproperty *fbprop;
+				icalparameter *param;
+				struct icalperiodtype fb;
+				icalparameter_fbtype fbtype;
+
+				if (!fbcomp || icalcomponent_isa (fbcomp) != ICAL_VFREEBUSY_COMPONENT)
+					continue;
+
+				for (fbprop = icalcomponent_get_first_property (fbcomp, ICAL_FREEBUSY_PROPERTY);
+				     fbprop;
+				     fbprop = icalcomponent_get_next_property (fbcomp, ICAL_FREEBUSY_PROPERTY)) {
+					icalcomponent *vevent;
+					const gchar *id, *summary, *location;
+
+					param = icalproperty_get_first_parameter (fbprop, ICAL_FBTYPE_PARAMETER);
+					if (!param)
+						continue;
+
+					fbtype = icalparameter_get_fbtype (param);
+
+					if (fbtype != ICAL_FBTYPE_FREE &&
+					    fbtype != ICAL_FBTYPE_BUSY &&
+					    fbtype != ICAL_FBTYPE_BUSYUNAVAILABLE &&
+					    fbtype != ICAL_FBTYPE_BUSYTENTATIVE)
+						continue;
+
+					fb = icalproperty_get_freebusy (fbprop);
+					id = icalproperty_get_parameter_as_string (fbprop, "X-EWS-ID");
+					summary = icalproperty_get_parameter_as_string (fbprop, "X-SUMMARY");
+					location = icalproperty_get_parameter_as_string (fbprop, "X-LOCATION");
+
+					vevent = icalcomponent_new_vevent ();
+
+					if (id && *id) {
+						icalcomponent_set_uid (vevent, id);
+					} else {
+						gchar *uid;
+
+						uid = g_strdup_printf ("%s-%s-%d",
+							icaltime_as_ical_string (fb.start),
+							icaltime_as_ical_string (fb.end),
+							(gint) fbtype);
+
+						icalcomponent_set_uid (vevent, uid);
+
+						g_free (uid);
+					}
+
+					fb.start.zone = utc_zone;
+					fb.start.is_utc = 1;
+					fb.end.zone = utc_zone;
+					fb.end.is_utc = 1;
+
+					icalcomponent_set_dtstart (vevent, fb.start);
+					icalcomponent_set_dtend (vevent, fb.end);
+
+					icalcomponent_add_property (vevent, icalproperty_new_created (icaltime_current_time_with_zone (utc_zone)));
+
+					if (fbtype == ICAL_FBTYPE_FREE) {
+						icalcomponent_set_summary (vevent, C_("FreeBusyType", "Free"));
+						icalcomponent_add_property (vevent, icalproperty_new_transp (ICAL_TRANSP_TRANSPARENT));
+					} else if (fbtype == ICAL_FBTYPE_BUSY) {
+						icalcomponent_set_summary (vevent, C_("FreeBusyType", "Busy"));
+					} else if (fbtype == ICAL_FBTYPE_BUSYUNAVAILABLE) {
+						icalcomponent_set_summary (vevent, C_("FreeBusyType", "Out of Office"));
+					} else if (fbtype == ICAL_FBTYPE_BUSYTENTATIVE) {
+						icalcomponent_set_summary (vevent, C_("FreeBusyType", "Tentative"));
+					}
+
+					if (summary && *summary)
+						icalcomponent_set_summary (vevent, summary);
+
+					if (location && *location)
+						icalcomponent_set_location (vevent, location);
+
+					PRIV_LOCK (priv);
+					if (g_hash_table_remove (known, icalcomponent_get_uid (vevent))) {
+						ECalComponent *ecomp = g_hash_table_lookup (priv->item_id_hash, icalcomponent_get_uid (vevent));
+
+						g_object_ref (ecomp);
+
+						PRIV_UNLOCK (priv);
+
+						if (ews_freebusy_ecomp_changed (ecomp, vevent)) {
+							ECalComponent *new_ecomp;
+							gchar *uid = g_strdup (icalcomponent_get_uid (vevent));
+
+							new_ecomp = e_cal_component_new_from_icalcomponent (vevent);
+							if (new_ecomp) {
+								PRIV_LOCK (priv);
+								g_hash_table_insert (priv->item_id_hash, uid, g_object_ref (new_ecomp));
+								PRIV_UNLOCK (priv);
+
+								put_component_to_store (cbews, new_ecomp);
+								e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbews), ecomp, new_ecomp);
+
+								g_object_unref (new_ecomp);
+							} else {
+								g_free (uid);
+							}
+						} else {
+							icalcomponent_free (vevent);
+						}
+
+						g_clear_object (&ecomp);
+					} else {
+						ECalComponent *ecomp;
+						gchar *uid = g_strdup (icalcomponent_get_uid (vevent));
+
+						ecomp = e_cal_component_new_from_icalcomponent (vevent);
+						if (ecomp)
+							g_hash_table_insert (priv->item_id_hash, uid, g_object_ref (ecomp));
+						else
+							g_free (uid);
+
+						PRIV_UNLOCK (priv);
+
+						if (ecomp) {
+							put_component_to_store (cbews, ecomp);
+							e_cal_backend_notify_component_created (E_CAL_BACKEND (cbews), ecomp);
+						}
+
+						g_clear_object (&ecomp);
 					}
 				}
-			} else {
-				break;
 			}
+
+			g_hash_table_iter_init (&iter, known);
+			while (g_hash_table_iter_next (&iter, &key, NULL)) {
+				ECalComponentId id = { 0 };
+
+				id.uid = key;
+				id.rid = NULL;
+
+				if (e_cal_backend_store_remove_component (priv->store, id.uid, id.rid)) {
+					e_cal_backend_notify_component_removed (E_CAL_BACKEND (cbews), &id, NULL, NULL);
+
+					PRIV_LOCK (priv);
+					g_hash_table_remove (priv->item_id_hash, id.uid);
+					PRIV_UNLOCK (priv);
+				}
+			}
+
+			g_hash_table_destroy (known);
+		} else if (g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NOFREEBUSYACCESS)) {
+			cbews_forget_all_components (cbews);
+			e_cal_backend_notify_error (E_CAL_BACKEND (cbews), error->message);
+			g_clear_error (&error);
 		}
 
-		ret = cal_backend_ews_process_folder_items (
-				cbews,
-				new_sync_state,
-				items_created,
-				items_updated,
-				items_deleted);
+		g_slist_free_full (free_busy, (GDestroyNotify) icalcomponent_free);
+		g_slist_free_full (fbdata.user_mails, g_free);
+	} else {
+		old_sync_state = g_strdup (e_cal_backend_store_get_key_value (priv->store, SYNC_KEY));
+		do {
+			EEwsAdditionalProps *add_props;
+			GCancellable *cancellable;
 
-		if (!ret)
-			break;
+			includes_last_item = TRUE;
 
-		g_slist_free_full (items_created, g_object_unref);
-		g_slist_free_full (items_updated, g_object_unref);
-		g_slist_free_full (items_deleted, g_free);
-		items_created = NULL;
-		items_updated = NULL;
-		items_deleted = NULL;
+			add_props = e_ews_additional_props_new ();
+			add_props->field_uri = g_strdup ("item:ItemClass");
 
-		e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, new_sync_state);
+			cancellable = cal_backend_ews_ref_cancellable (cbews);
 
-		old_sync_state = new_sync_state;
-		new_sync_state = NULL;
-	} while (!includes_last_item);
+			ret = e_ews_connection_sync_folder_items_sync (
+				priv->cnc,
+				EWS_PRIORITY_MEDIUM,
+				old_sync_state,
+				priv->folder_id,
+				"IdOnly",
+				add_props,
+				EWS_MAX_FETCH_COUNT,
+				&new_sync_state,
+				&includes_last_item,
+				&items_created,
+				&items_updated,
+				&items_deleted,
+				cancellable,
+				&error);
+
+			e_ews_additional_props_free (add_props);
+			g_clear_object (&cancellable);
+			g_free (old_sync_state);
+			old_sync_state = NULL;
+
+			if (!ret) {
+				if (g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_INVALIDSYNCSTATEDATA)) {
+					g_clear_error (&error);
+					e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, NULL);
+					cbews_forget_all_components (cbews);
+
+					if (!e_ews_connection_sync_folder_items_sync (
+								priv->cnc,
+								EWS_PRIORITY_MEDIUM,
+								NULL,
+								priv->folder_id,
+								"IdOnly",
+								NULL,
+								EWS_MAX_FETCH_COUNT,
+								&new_sync_state,
+								&includes_last_item,
+								&items_created,
+								&items_updated,
+								&items_deleted,
+								cancellable,
+								&error)) {
+						if (!g_error_matches (
+								error,
+								EWS_CONNECTION_ERROR,
+								EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED)) {
+							e_cal_backend_set_writable (E_CAL_BACKEND (cbews), TRUE);
+							break;
+						}
+					}
+				} else {
+					break;
+				}
+			}
+
+			ret = cal_backend_ews_process_folder_items (
+					cbews,
+					new_sync_state,
+					items_created,
+					items_updated,
+					items_deleted);
+
+			if (!ret)
+				break;
+
+			g_slist_free_full (items_created, g_object_unref);
+			g_slist_free_full (items_updated, g_object_unref);
+			g_slist_free_full (items_deleted, g_free);
+			items_created = NULL;
+			items_updated = NULL;
+			items_deleted = NULL;
+
+			e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, new_sync_state);
+
+			old_sync_state = new_sync_state;
+			new_sync_state = NULL;
+		} while (!includes_last_item);
+	}
 
 	ews_refreshing_dec (cbews);
 
@@ -4162,7 +4386,7 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend,
 	ECalBackendEwsPrivate *priv = cbews->priv;
 	GError *error = NULL;
 	EwsCalendarAsyncData *free_busy_data;
-	EwsCalendarConvertData convert_data = { 0 };
+	EEWSFreeBusyData fbdata = { 0 };
 	GSList *users_copy = NULL;
 
 	/* make sure we're not offline */
@@ -4192,15 +4416,15 @@ e_cal_backend_ews_get_free_busy (ECalBackend *backend,
 	free_busy_data->context = context;
 	free_busy_data->users = users_copy;
 
-	convert_data.users = users_copy;
-	convert_data.start = start;
-	convert_data.end = end;
+	fbdata.period_start = start;
+	fbdata.period_end = end;
+	fbdata.user_mails = users_copy;
 
 	e_ews_connection_get_free_busy (
 		priv->cnc,
 		EWS_PRIORITY_MEDIUM,
-		e_cal_backend_ews_prepare_free_busy_request,
-		&convert_data,
+		e_ews_cal_utils_prepare_free_busy_request,
+		&fbdata,
 		cancellable,
 		ews_cal_get_free_busy_cb,
 		free_busy_data);

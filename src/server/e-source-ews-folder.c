@@ -29,7 +29,10 @@ struct _ESourceEwsFolderPrivate {
 	gchar *id;
 	gboolean foreign;
 	gboolean foreign_subfolders;
+	gchar *foreign_mail;
 	gboolean is_public;
+	guint freebusy_weeks_before;
+	guint freebusy_weeks_after;
 };
 
 enum {
@@ -38,6 +41,9 @@ enum {
 	PROP_ID,
 	PROP_FOREIGN,
 	PROP_FOREIGN_SUBFOLDERS,
+	PROP_FOREIGN_MAIL,
+	PROP_FREEBUSY_WEEKS_BEFORE,
+	PROP_FREEBUSY_WEEKS_AFTER,
 	PROP_PUBLIC
 };
 
@@ -75,6 +81,24 @@ source_ews_folder_set_property (GObject *object,
 			e_source_ews_folder_set_foreign_subfolders (
 				E_SOURCE_EWS_FOLDER (object),
 				g_value_get_boolean (value));
+			return;
+
+		case PROP_FOREIGN_MAIL:
+			e_source_ews_folder_set_foreign_mail (
+				E_SOURCE_EWS_FOLDER (object),
+				g_value_get_string (value));
+			return;
+
+		case PROP_FREEBUSY_WEEKS_BEFORE:
+			e_source_ews_folder_set_freebusy_weeks_before (
+				E_SOURCE_EWS_FOLDER (object),
+				g_value_get_uint (value));
+			return;
+
+		case PROP_FREEBUSY_WEEKS_AFTER:
+			e_source_ews_folder_set_freebusy_weeks_after (
+				E_SOURCE_EWS_FOLDER (object),
+				g_value_get_uint (value));
 			return;
 
 		case PROP_PUBLIC:
@@ -122,6 +146,27 @@ source_ews_folder_get_property (GObject *object,
 				E_SOURCE_EWS_FOLDER (object)));
 			return;
 
+		case PROP_FOREIGN_MAIL:
+			g_value_take_string (
+				value,
+				e_source_ews_folder_dup_foreign_mail (
+				E_SOURCE_EWS_FOLDER (object)));
+			return;
+
+		case PROP_FREEBUSY_WEEKS_BEFORE:
+			g_value_set_uint (
+				value,
+				e_source_ews_folder_get_freebusy_weeks_before (
+				E_SOURCE_EWS_FOLDER (object)));
+			return;
+
+		case PROP_FREEBUSY_WEEKS_AFTER:
+			g_value_set_uint (
+				value,
+				e_source_ews_folder_get_freebusy_weeks_after (
+				E_SOURCE_EWS_FOLDER (object)));
+			return;
+
 		case PROP_PUBLIC:
 			g_value_set_boolean (
 				value,
@@ -142,6 +187,7 @@ source_ews_folder_finalize (GObject *object)
 
 	g_free (priv->change_key);
 	g_free (priv->id);
+	g_free (priv->foreign_mail);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (e_source_ews_folder_parent_class)->finalize (object);
@@ -211,6 +257,45 @@ e_source_ews_folder_class_init (ESourceEwsFolderClass *class)
 			"ForeignSubfolders",
 			"Whether to search for subfolders of (this) foreign folder",
 			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS |
+			E_SOURCE_PARAM_SETTING));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_FOREIGN_MAIL,
+		g_param_spec_string (
+			"foreign-mail",
+			"ForeignMail",
+			"Other user's mail address",
+			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS |
+			E_SOURCE_PARAM_SETTING));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_FREEBUSY_WEEKS_BEFORE,
+		g_param_spec_uint (
+			"freebusy-weeks-before",
+			"FreeBusyWeeksBefore",
+			"How many weeks to read Free/Busy before today",
+			0, 5, 1,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS |
+			E_SOURCE_PARAM_SETTING));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_FREEBUSY_WEEKS_AFTER,
+		g_param_spec_uint (
+			"freebusy-weeks-after",
+			"FreeBusyWeeksAfter",
+			"How many weeks to read Free/Busy after today",
+			1, 54, 5,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS |
@@ -398,6 +483,97 @@ e_source_ews_folder_set_foreign_subfolders (ESourceEwsFolder *extension,
 	extension->priv->foreign_subfolders = foreign_subfolders;
 
 	g_object_notify (G_OBJECT (extension), "foreign-subfolders");
+}
+
+const gchar *
+e_source_ews_folder_get_foreign_mail (ESourceEwsFolder *extension)
+{
+	g_return_val_if_fail (E_IS_SOURCE_EWS_FOLDER (extension), NULL);
+
+	return extension->priv->foreign_mail;
+}
+
+gchar *
+e_source_ews_folder_dup_foreign_mail (ESourceEwsFolder *extension)
+{
+	const gchar *protected;
+	gchar *duplicate;
+
+	g_return_val_if_fail (E_IS_SOURCE_EWS_FOLDER (extension), NULL);
+
+	e_source_extension_property_lock (E_SOURCE_EXTENSION (extension));
+
+	protected = e_source_ews_folder_get_foreign_mail (extension);
+	duplicate = g_strdup (protected);
+
+	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
+
+	return duplicate;
+}
+
+void
+e_source_ews_folder_set_foreign_mail (ESourceEwsFolder *extension,
+				      const gchar *foreign_mail)
+{
+	g_return_if_fail (E_IS_SOURCE_EWS_FOLDER (extension));
+
+	e_source_extension_property_lock (E_SOURCE_EXTENSION (extension));
+
+	if (g_strcmp0 (extension->priv->foreign_mail, foreign_mail) == 0) {
+		e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
+		return;
+	}
+
+	g_free (extension->priv->foreign_mail);
+	extension->priv->foreign_mail = g_strdup (foreign_mail);
+
+	e_source_extension_property_unlock (E_SOURCE_EXTENSION (extension));
+
+	g_object_notify (G_OBJECT (extension), "foreign-mail");
+}
+
+guint
+e_source_ews_folder_get_freebusy_weeks_before (ESourceEwsFolder *extension)
+{
+	g_return_val_if_fail (E_IS_SOURCE_EWS_FOLDER (extension), 0);
+
+	return extension->priv->freebusy_weeks_before;
+}
+
+void
+e_source_ews_folder_set_freebusy_weeks_before (ESourceEwsFolder *extension,
+					       guint freebusy_weeks_before)
+{
+	g_return_if_fail (E_IS_SOURCE_EWS_FOLDER (extension));
+
+	if (extension->priv->freebusy_weeks_before == freebusy_weeks_before)
+		return;
+
+	extension->priv->freebusy_weeks_before = freebusy_weeks_before;
+
+	g_object_notify (G_OBJECT (extension), "freebusy-weeks-before");
+}
+
+guint
+e_source_ews_folder_get_freebusy_weeks_after (ESourceEwsFolder *extension)
+{
+	g_return_val_if_fail (E_IS_SOURCE_EWS_FOLDER (extension), 0);
+
+	return extension->priv->freebusy_weeks_after;
+}
+
+void
+e_source_ews_folder_set_freebusy_weeks_after (ESourceEwsFolder *extension,
+					      guint freebusy_weeks_after)
+{
+	g_return_if_fail (E_IS_SOURCE_EWS_FOLDER (extension));
+
+	if (extension->priv->freebusy_weeks_after == freebusy_weeks_after)
+		return;
+
+	extension->priv->freebusy_weeks_after = freebusy_weeks_after;
+
+	g_object_notify (G_OBJECT (extension), "freebusy-weeks-after");
 }
 
 gboolean

@@ -45,6 +45,7 @@ struct _EEwsFolderPrivate {
 	guint32 child_count;
 	guint64 size;
 	gboolean foreign;
+	gchar *foreign_mail;
 };
 
 static void
@@ -68,14 +69,9 @@ e_ews_folder_finalize (GObject *object)
 	priv = folder->priv;
 
 	g_clear_error (&priv->error);
-
-	if (priv->name) {
-		g_free (priv->name);
-		priv->name = NULL;
-	}
-
-	g_free (priv->escaped_name);
-	priv->escaped_name = NULL;
+	g_clear_pointer (&priv->name, g_free);
+	g_clear_pointer (&priv->escaped_name, g_free);
+	g_clear_pointer (&priv->foreign_mail, g_free);
 
 	if (priv->fid) {
 		g_free (priv->fid->id);
@@ -407,6 +403,16 @@ e_ews_folder_get_id (const EEwsFolder *folder)
 	return (const EwsFolderId *) folder->priv->fid;
 }
 
+void
+e_ews_folder_set_id (EEwsFolder *folder,
+		     EwsFolderId *fid)
+{
+	g_return_if_fail (E_IS_EWS_FOLDER (folder));
+
+	e_ews_folder_id_free (folder->priv->fid);
+	folder->priv->fid = fid;
+}
+
 const EwsFolderId *
 e_ews_folder_get_parent_id (const EEwsFolder *folder)
 {
@@ -499,6 +505,24 @@ e_ews_folder_set_foreign (EEwsFolder *folder,
 	g_return_if_fail (E_IS_EWS_FOLDER (folder));
 
 	folder->priv->foreign = is_foreign;
+}
+
+const gchar *
+e_ews_folder_get_foreign_mail (const EEwsFolder *folder)
+{
+	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), NULL);
+
+	return folder->priv->foreign_mail;
+}
+
+void
+e_ews_folder_set_foreign_mail (EEwsFolder *folder,
+			       const gchar *foreign_mail)
+{
+	g_return_if_fail (E_IS_EWS_FOLDER (folder));
+
+	g_free (folder->priv->foreign_mail);
+	folder->priv->foreign_mail = g_strdup (foreign_mail);
 }
 
 /* escapes backslashes with \5C and forward slashes with \2F */
@@ -676,6 +700,7 @@ e_ews_folder_utils_populate_esource (ESource *source,
 			e_source_ews_folder_set_change_key (folder_ext, NULL);
 			e_source_ews_folder_set_foreign (folder_ext, e_ews_folder_get_foreign (folder));
 			e_source_ews_folder_set_foreign_subfolders (folder_ext, (flags & E_EWS_ESOURCE_FLAG_INCLUDE_SUBFOLDERS) != 0);
+			e_source_ews_folder_set_foreign_mail (folder_ext, e_ews_folder_get_foreign_mail (folder));
 			e_source_ews_folder_set_public (folder_ext, (flags & E_EWS_ESOURCE_FLAG_PUBLIC_FOLDER) != 0);
 
 			offline_ext = e_source_get_extension (source, E_SOURCE_EXTENSION_OFFLINE);

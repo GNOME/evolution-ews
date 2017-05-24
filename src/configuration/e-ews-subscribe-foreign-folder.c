@@ -32,6 +32,8 @@
 #include "camel/camel-ews-store-summary.h"
 #include "camel/camel-ews-utils.h"
 
+#include "server/e-ews-calendar-utils.h"
+
 #include "e-ews-config-utils.h"
 #include "e-ews-search-user.h"
 #include "e-ews-subscribe-foreign-folder.h"
@@ -342,24 +344,53 @@ check_foreign_folder_thread (GObject *with_object,
 		return;
 	}
 
-	fid.id = (gchar *) (cffd->use_foldername ? cffd->use_foldername : cffd->orig_foldername);
-	fid.change_key = NULL;
-	fid.is_distinguished_id = cffd->use_foldername != NULL;
+	if (g_strcmp0 (cffd->use_foldername, "freebusy-calendar") == 0) {
+		EEWSFreeBusyData fbdata;
+		GSList *free_busy = NULL;
+		gboolean success;
 
-	if (!e_ews_connection_get_folder_info_sync (conn, G_PRIORITY_DEFAULT,
-		cffd->email, &fid, &folder, cancellable, &local_error)) {
-		if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ITEMNOTFOUND) ||
-		    g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_FOLDERNOTFOUND)) {
-			g_clear_error (&local_error);
-			local_error = g_error_new (
-				EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_FOLDERNOTFOUND,
-				_("Folder “%s” not found. Either it does not exist or you do not have permission to access it."),
-				cffd->orig_foldername);
+		fbdata.period_start = time (NULL);
+		fbdata.period_end = fbdata.period_start + (60 * 60);
+		fbdata.user_mails = g_slist_prepend (NULL, cffd->email);
+
+		success = e_ews_connection_get_free_busy_sync (conn, G_PRIORITY_DEFAULT,
+			e_ews_cal_utils_prepare_free_busy_request, &fbdata,
+			&free_busy, cancellable, perror);
+
+		g_slist_free_full (free_busy, (GDestroyNotify) icalcomponent_free);
+		g_slist_free (fbdata.user_mails);
+
+		if (!success) {
+			g_object_unref (conn);
+			return;
 		}
 
-		g_propagate_error (perror, local_error);
-		g_object_unref (conn);
-		return;
+		folder = g_object_new (E_TYPE_EWS_FOLDER, NULL);
+		e_ews_folder_set_id (folder, e_ews_folder_id_new (cffd->use_foldername, NULL, FALSE));
+		/* Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI */
+		e_ews_folder_set_name (folder, _("Availability"));
+		e_ews_folder_set_folder_type (folder, E_EWS_FOLDER_TYPE_CALENDAR);
+		e_ews_folder_set_foreign_mail (folder, cffd->email);
+	} else {
+		fid.id = (gchar *) (cffd->use_foldername ? cffd->use_foldername : cffd->orig_foldername);
+		fid.change_key = NULL;
+		fid.is_distinguished_id = cffd->use_foldername != NULL;
+
+		if (!e_ews_connection_get_folder_info_sync (conn, G_PRIORITY_DEFAULT,
+			cffd->email, &fid, &folder, cancellable, &local_error)) {
+			if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ITEMNOTFOUND) ||
+			    g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_FOLDERNOTFOUND)) {
+				g_clear_error (&local_error);
+				local_error = g_error_new (
+					EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_FOLDERNOTFOUND,
+					_("Folder “%s” not found. Either it does not exist or you do not have permission to access it."),
+					cffd->orig_foldername);
+			}
+
+			g_propagate_error (perror, local_error);
+			g_object_unref (conn);
+			return;
+		}
 	}
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, perror)) {
@@ -516,6 +547,8 @@ subscribe_foreign_response_cb (GObject *dialog,
 		use_foldername = g_strdup ("contacts");
 	} else if (g_strcmp0 (orig_foldername, _("Calendar")) == 0) {
 		use_foldername = g_strdup ("calendar");
+	} else if (g_strcmp0 (orig_foldername, _("Free/Busy as Calendar")) == 0) {
+		use_foldername = g_strdup ("freebusy-calendar");
 	} else if (g_strcmp0 (orig_foldername, _("Memos")) == 0) {
 		use_foldername = g_strdup ("notes");
 	} else if (g_strcmp0 (orig_foldername, _("Tasks")) == 0) {
@@ -721,6 +754,7 @@ e_ews_subscribe_foreign_folder (GtkWindow *parent,
 	gtk_combo_box_text_append_text (combo_text, _("Inbox"));
 	gtk_combo_box_text_append_text (combo_text, _("Contacts"));
 	gtk_combo_box_text_append_text (combo_text, _("Calendar"));
+	gtk_combo_box_text_append_text (combo_text, _("Free/Busy as Calendar"));
 	gtk_combo_box_text_append_text (combo_text, _("Memos"));
 	gtk_combo_box_text_append_text (combo_text, _("Tasks"));
 	gtk_combo_box_set_active (GTK_COMBO_BOX (combo_text), 0);

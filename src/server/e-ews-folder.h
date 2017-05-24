@@ -69,6 +69,7 @@ const EwsFolderId *
 		e_ews_folder_get_parent_id (const EEwsFolder *folder);
 const EwsFolderId *
 		e_ews_folder_get_id (const EEwsFolder *folder);
+void		e_ews_folder_set_id (EEwsFolder *folder, EwsFolderId *fid);
 guint32		e_ews_folder_get_total_count (const EEwsFolder *folder);
 guint32		e_ews_folder_get_unread_count (const EEwsFolder *folder);
 guint32		e_ews_folder_get_child_count (const EEwsFolder *folder);
@@ -79,6 +80,8 @@ EEwsFolderType	e_ews_folder_get_folder_type (const EEwsFolder *folder);
 void		e_ews_folder_set_folder_type (EEwsFolder *folder, EEwsFolderType folder_type);
 gboolean	e_ews_folder_get_foreign (const EEwsFolder *folder);
 void		e_ews_folder_set_foreign (EEwsFolder *folder, gboolean is_foreign);
+const gchar *	e_ews_folder_get_foreign_mail (const EEwsFolder *folder);
+void		e_ews_folder_set_foreign_mail (EEwsFolder *folder, const gchar *foreign_mail);
 
 EwsFolderId *	e_ews_folder_id_new (const gchar *id,
 				     const gchar *change_key,
