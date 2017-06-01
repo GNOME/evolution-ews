@@ -2281,7 +2281,13 @@ e_ews_connection_try_credentials_sync (EEwsConnection *cnc,
 
 		if (auth_failed) {
 			g_clear_error (&local_error);
-			result = E_SOURCE_AUTHENTICATION_REJECTED;
+
+			if (camel_ews_settings_get_auth_mechanism (cnc->priv->settings) != EWS_AUTH_TYPE_GSSAPI && (!credentials ||
+			    !e_named_parameters_exists (credentials, E_SOURCE_CREDENTIAL_PASSWORD))) {
+				result = E_SOURCE_AUTHENTICATION_REQUIRED;
+			} else {
+				result = E_SOURCE_AUTHENTICATION_REJECTED;
+			}
 		} else {
 			g_propagate_error (error, local_error);
 			result = E_SOURCE_AUTHENTICATION_ERROR;
