@@ -1973,6 +1973,7 @@ e_ews_attachment_info_free (EEwsAttachmentInfo *info)
 	}
 
 	g_free (info->prefer_filename);
+	g_free (info->id);
 	g_free (info);
 }
 
@@ -2067,7 +2068,6 @@ e_ews_attachment_info_set_filename (EEwsAttachmentInfo *info,
 	info->data.inlined.filename = g_strdup (filename);
 }
 
-
 const gchar *
 e_ews_attachment_info_get_uri (EEwsAttachmentInfo *info)
 {
@@ -2086,6 +2086,26 @@ e_ews_attachment_info_set_uri (EEwsAttachmentInfo *info,
 
 	g_free (info->data.uri);
 	info->data.uri = g_strdup (uri);
+}
+
+const gchar *
+e_ews_attachment_info_get_id (EEwsAttachmentInfo *info)
+{
+	g_return_val_if_fail (info != NULL, NULL);
+
+	return info->id;
+}
+
+void
+e_ews_attachment_info_set_id (EEwsAttachmentInfo *info,
+			      const gchar *id)
+{
+	g_return_if_fail (info != NULL);
+
+	if (info->id != id) {
+		g_free (info->id);
+		info->id = g_strdup (id);
+	}
 }
 
 /* Connection APIS */
@@ -3478,13 +3498,13 @@ ews_soup_got_chunk (SoupMessage *msg,
 		if (write (fd, (const gchar *) chunk->data, chunk->length) != chunk->length) {
 			g_set_error (
 				&data->error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_UNKNOWN,
-				"Failed to write streaming data to file : %d ", errno);
+				"Failed to write streaming data to file '%s': %s", data->cache_filename, g_strerror (errno));
 		}
 		close (fd);
 	} else {
 		g_set_error (
 			&data->error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_UNKNOWN,
-			"Failed to open the cache file : %d ", errno);
+			"Failed to open the cache file '%s': %s", data->cache_filename, g_strerror (errno));
 	}
 }
 
@@ -6983,9 +7003,7 @@ ews_handle_root_item_id_param (ESoapParameter *subparam,
 	if (attspara == NULL)
 		return;
 
-	async_data->items = g_slist_append (
-		async_data->items,
-		e_soap_parameter_get_property (attspara, "RootItemChangeKey"));
+	async_data->sync_state = e_soap_parameter_get_property (attspara, "RootItemChangeKey");
 }
 
 static void
@@ -7085,7 +7103,7 @@ e_ews_connection_delete_attachments (EEwsConnection *cnc,
 gboolean
 e_ews_connection_delete_attachments_finish (EEwsConnection *cnc,
                                             GAsyncResult *result,
-					    GSList **parents_ids,
+					    gchar **new_change_key,
                                             GError **error)
 {
 	GSimpleAsyncResult *simple;
@@ -7103,10 +7121,10 @@ e_ews_connection_delete_attachments_finish (EEwsConnection *cnc,
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
 
-	if (parents_ids)
-		*parents_ids = async_data->items;
+	if (new_change_key)
+		*new_change_key = async_data->sync_state;
 	else
-		g_slist_free_full (async_data->items, g_free);
+		g_free (async_data->sync_state);
 
 	return TRUE;
 }
@@ -7115,7 +7133,7 @@ gboolean
 e_ews_connection_delete_attachments_sync (EEwsConnection *cnc,
                                           gint pri,
                                           const GSList *attachments_ids,
-					  GSList **parents_ids,
+					  gchar **new_change_key,
                                           GCancellable *cancellable,
                                           GError **error)
 {
@@ -7134,7 +7152,7 @@ e_ews_connection_delete_attachments_sync (EEwsConnection *cnc,
 	result = e_async_closure_wait (closure);
 
 	ret = e_ews_connection_delete_attachments_finish (
-		cnc, result, parents_ids, error);
+		cnc, result, new_change_key, error);
 
 	e_async_closure_free (closure);
 

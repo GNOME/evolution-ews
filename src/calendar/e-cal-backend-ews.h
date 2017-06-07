@@ -35,31 +35,19 @@ G_BEGIN_DECLS
 
 typedef struct _ECalBackendEws        ECalBackendEws;
 typedef struct _ECalBackendEwsClass   ECalBackendEwsClass;
-
 typedef struct _ECalBackendEwsPrivate ECalBackendEwsPrivate;
 
 struct _ECalBackendEws {
-	ECalBackend backend;
-
-	/* Private data */
+	ECalMetaBackend parent_object;
 	ECalBackendEwsPrivate *priv;
 };
 
 struct _ECalBackendEwsClass {
-	ECalBackendClass parent_class;
+	ECalMetaBackendClass parent_class;
 };
 
 GType   e_cal_backend_ews_get_type (void);
 
-const EEwsConnection *
-	e_cal_backend_ews_get_connection		(ECalBackendEws *cbews);
-
-const icaltimezone *
-	e_cal_backend_ews_get_default_zone		(ECalBackendEws *cbews);
-
-const gchar *
-	e_cal_backend_ews_get_user_email		(ECalBackendEws *cbews);
-
 G_END_DECLS
 
-#endif
+#endif /* E_CAL_BACKEND_EWS_H */

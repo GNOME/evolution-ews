@@ -129,6 +129,7 @@ typedef struct {
 		gchar *uri;
 	} data;
 	gchar *prefer_filename;
+	gchar *id;
 } EEwsAttachmentInfo;
 
 typedef enum {
@@ -296,6 +297,10 @@ void		e_ews_attachment_info_set_filename
 const gchar *	e_ews_attachment_info_get_uri	(EEwsAttachmentInfo *info);
 void		e_ews_attachment_info_set_uri	(EEwsAttachmentInfo *info,
 						 const gchar *uri);
+const gchar *	e_ews_attachment_info_get_id	(EEwsAttachmentInfo *info);
+void		e_ews_attachment_info_set_id	(EEwsAttachmentInfo *info,
+						 const gchar *id);
+
 
 /* Contact fields */
 const gchar *	e_ews_item_get_fileas		(EEwsItem *item);

@@ -865,36 +865,6 @@ ewscal_set_reccurence_exceptions (ESoapMessage *msg,
 	e_soap_message_end_element (msg); /* "DeletedOccurrences" */
 }
 
-void
-ewscal_get_attach_differences (const GSList *original,
-                               const GSList *modified,
-                               GSList **removed,
-                               GSList **added)
-{
-	gboolean flag;
-	GSList *i, *i_next, *j, *j_next, *original_copy, *modified_copy;
-	original_copy = g_slist_copy ((GSList *) original);
-	modified_copy = g_slist_copy ((GSList *) modified);
-
-	for (j = modified_copy; j; j = j_next) {
-		j_next = j->next;
-
-		for (i = original_copy, flag = FALSE; !flag && i; i = i_next) {
-			i_next = i->next;
-
-			if (g_strcmp0 (j->data, i->data) == 0) {
-				/* Remove from the lists attachments that are on both */
-				original_copy = g_slist_delete_link (original_copy, i);
-				modified_copy = g_slist_delete_link (modified_copy, j);
-				flag = TRUE;
-			}
-		}
-	}
-
-	*removed = original_copy;
-	*added = modified_copy;
-}
-
 /*
  * get meeting organizer e-mail address
  */
@@ -1094,7 +1064,7 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	const gchar *ical_location_start, *ical_location_end, *value;
 	const gchar *msdn_location_start, *msdn_location_end;
 
-	e_cal_component_set_icalcomponent (comp, icalcomp);
+	e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (icalcomp));
 
 	/* FORMAT OF A SAMPLE SOAP MESSAGE: http://msdn.microsoft.com/en-us/library/aa564690.aspx */
 
@@ -1224,6 +1194,8 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	}
 
 	e_soap_message_end_element (msg); /* "CalendarItem" */
+
+	g_object_unref (comp);
 }
 
 static void
@@ -1898,6 +1870,7 @@ e_cal_backend_ews_rid_to_index (icaltimezone *timezone,
 		g_propagate_error (
 			error, EDC_ERROR_EX (OtherError,
 			"Invalid occurrence ID"));
+		index = 0;
 	}
 
 	return index;

@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
- *
  * Copyright (C) 1999-2008 Novell, Inc. (www.novell.com)
+ * Copyright (C) 2017 Red Hat, Inc. (www.redhat.com)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2 of the GNU Lesser General Public
@@ -63,37 +63,17 @@
 
 /* Private part of the CalBackendEws structure */
 struct _ECalBackendEwsPrivate {
-	/* Fields required for online server requests */
+	GRecMutex cnc_lock;
 	EEwsConnection *cnc;
 	gchar *folder_id;
-	gchar *user_email;
-	gchar *storage_path;
-
-	ECalBackendStore *store;
-	gboolean read_only;
-
-	/* A mutex to control access to the private structure for the following */
-	GRecMutex rec_mutex;
-	icaltimezone *default_zone;
-	guint refresh_timeout;
-	guint refreshing;
-	EFlag *refreshing_done;
-	GHashTable *item_id_hash;
-
-	GMutex cancellable_lock;
-	GCancellable *cancellable;
 
 	guint subscription_key;
-	gboolean listen_notifications;
 	gboolean is_freebusy_calendar;
+
+	gchar *attachments_dir;
 };
 
-#define PRIV_LOCK(p)   (g_rec_mutex_lock (&(p)->rec_mutex))
-#define PRIV_UNLOCK(p) (g_rec_mutex_unlock (&(p)->rec_mutex))
-
-#define SYNC_KEY "sync-state"
 #define EWS_MAX_FETCH_COUNT 100
-#define REFRESH_INTERVAL 600
 
 #define GET_ITEMS_SYNC_PROPERTIES \
 	"item:Attachments" \
@@ -116,7 +96,6 @@ struct _ECalBackendEwsPrivate {
 	" calendar:StartTimeZone" \
 	" calendar:EndTimeZone"
 
-
 #define e_data_cal_error_if_fail(expr, _code)					\
 	G_STMT_START {								\
 		if (G_LIKELY (expr)) {						\
@@ -132,15 +111,10 @@ struct _ECalBackendEwsPrivate {
 		}								\
 	} G_STMT_END
 
-/* Forward Declarations */
-static void ews_cal_component_get_item_id (ECalComponent *comp, gchar **itemid, gchar **changekey);
-static gboolean ews_start_sync	(gpointer data);
-static gpointer ews_start_sync_thread (gpointer data);
-
-G_DEFINE_TYPE (ECalBackendEws, e_cal_backend_ews, E_TYPE_CAL_BACKEND)
+G_DEFINE_TYPE (ECalBackendEws, e_cal_backend_ews, E_TYPE_CAL_META_BACKEND)
 
 static CamelEwsSettings *
-cal_backend_ews_get_collection_settings (ECalBackendEws *backend)
+ecb_ews_get_collection_settings (ECalBackendEws *cbews)
 {
 	ESource *source;
 	ESource *collection;
@@ -149,8 +123,8 @@ cal_backend_ews_get_collection_settings (ECalBackendEws *backend)
 	CamelSettings *settings;
 	const gchar *extension_name;
 
-	source = e_backend_get_source (E_BACKEND (backend));
-	registry = e_cal_backend_get_registry (E_CAL_BACKEND (backend));
+	source = e_backend_get_source (E_BACKEND (cbews));
+	registry = e_cal_backend_get_registry (E_CAL_BACKEND (cbews));
 
 	extension_name = e_source_camel_get_extension_name ("ews");
 	e_source_camel_generate_subtype ("ews", CAMEL_TYPE_EWS_SETTINGS);
@@ -169,13 +143,11 @@ cal_backend_ews_get_collection_settings (ECalBackendEws *backend)
 }
 
 static void
-convert_error_to_edc_error (GError **perror)
+ecb_ews_convert_error_to_edc_error (GError **perror)
 {
 	GError *error = NULL;
 
-	g_return_if_fail (perror != NULL);
-
-	if (!*perror || (*perror)->domain == E_DATA_CAL_ERROR)
+	if (!perror || !*perror || (*perror)->domain == E_DATA_CAL_ERROR)
 		return;
 
 	if ((*perror)->domain == EWS_CONNECTION_ERROR) {
@@ -194,254 +166,2523 @@ convert_error_to_edc_error (GError **perror)
 			error = EDC_ERROR_EX (ObjectNotFound, (*perror)->message);
 			break;
 		}
+
+		if (!error)
+			error = EDC_ERROR_EX (OtherError, (*perror)->message);
 	}
 
-	if (!error)
-		error = EDC_ERROR_EX (OtherError, (*perror)->message);
-
-	g_error_free (*perror);
-	*perror = error;
-}
-
-static GCancellable *
-cal_backend_ews_ref_cancellable (ECalBackendEws *cbews)
-{
-	GCancellable *cancellable = NULL;
-
-	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (cbews), NULL);
-
-	g_mutex_lock (&cbews->priv->cancellable_lock);
-	if (cbews->priv->cancellable)
-		cancellable = g_object_ref (cbews->priv->cancellable);
-	g_mutex_unlock (&cbews->priv->cancellable_lock);
-
-	return cancellable;
+	if (error) {
+		g_error_free (*perror);
+		*perror = error;
+	}
 }
 
 static void
-cal_backend_ews_set_cancellable (ECalBackendEws *cbews,
-				 GCancellable *cancellable)
+ecb_ews_server_notification_cb (ECalBackendEws *cbews,
+				GSList *events,
+				EEwsConnection *cnc)
 {
-	GCancellable *old_cancellable;
+	GSList *link;
+	gboolean update_folder = FALSE;
 
+	g_return_if_fail (cbews != NULL);
+	g_return_if_fail (cbews->priv != NULL);
+
+	for (link = events; link && !update_folder; link = g_slist_next (link)) {
+		EEwsNotificationEvent *event = link->data;
+
+		switch (event->type) {
+			case E_EWS_NOTIFICATION_EVENT_CREATED:
+			case E_EWS_NOTIFICATION_EVENT_DELETED:
+			case E_EWS_NOTIFICATION_EVENT_MODIFIED:
+				g_rec_mutex_lock (&cbews->priv->cnc_lock);
+				if (g_strcmp0 (event->folder_id, cbews->priv->folder_id) == 0)
+					update_folder = TRUE;
+				g_rec_mutex_unlock (&cbews->priv->cnc_lock);
+				break;
+			case E_EWS_NOTIFICATION_EVENT_MOVED:
+			case E_EWS_NOTIFICATION_EVENT_COPIED:
+				g_rec_mutex_lock (&cbews->priv->cnc_lock);
+				if (g_strcmp0 (event->folder_id, cbews->priv->folder_id) == 0 ||
+				    g_strcmp0 (event->old_folder_id, cbews->priv->folder_id) == 0)
+					update_folder = TRUE;
+				g_rec_mutex_unlock (&cbews->priv->cnc_lock);
+				break;
+			default:
+				return;
+		}
+	}
+
+	if (update_folder)
+		e_cal_meta_backend_schedule_refresh (E_CAL_META_BACKEND (cbews));
+}
+
+static void
+ecb_ews_unset_connection (ECalBackendEws *cbews)
+{
 	g_return_if_fail (E_IS_CAL_BACKEND_EWS (cbews));
 
-	g_mutex_lock (&cbews->priv->cancellable_lock);
-	old_cancellable = cbews->priv->cancellable;
-	cbews->priv->cancellable = cancellable;
-	g_mutex_unlock (&cbews->priv->cancellable_lock);
+	g_rec_mutex_lock (&cbews->priv->cnc_lock);
 
-	if (old_cancellable) {
-		g_cancellable_cancel (old_cancellable);
-		g_object_unref (old_cancellable);
+	if (cbews->priv->cnc) {
+		g_signal_handlers_disconnect_by_func (cbews->priv->cnc, ecb_ews_server_notification_cb, cbews);
+
+		if (cbews->priv->subscription_key != 0) {
+			e_ews_connection_disable_notifications_sync (
+				cbews->priv->cnc,
+				cbews->priv->subscription_key);
+			cbews->priv->subscription_key = 0;
+		}
 	}
+
+	g_rec_mutex_unlock (&cbews->priv->cnc_lock);
 }
 
-static void
-switch_offline (ECalBackendEws *cbews)
+static icaltimezone *
+ecb_ews_get_timezone (ETimezoneCache *timezone_cache,
+		      const gchar *msdn_tzid,
+		      const gchar *tzid,
+		      const gchar *evo_ews_tzid)
 {
-	ECalBackendEwsPrivate *priv;
+	icaltimezone *zone = NULL;
+	const gchar *evo_ews_msdn_tzid;
 
-	priv= cbews->priv;
-	priv->read_only = TRUE;
+	zone = e_timezone_cache_get_timezone (timezone_cache, tzid);
+	if (zone == NULL)
+		zone = icaltimezone_get_builtin_timezone (tzid);
 
-	if (priv->refresh_timeout) {
-		g_source_remove (priv->refresh_timeout);
-		priv->refresh_timeout = 0;
+	if (g_strcmp0 (tzid, evo_ews_tzid) == 0)
+		return zone;
+
+	if (evo_ews_tzid != NULL) {
+		evo_ews_msdn_tzid = e_cal_backend_ews_tz_util_get_msdn_equivalent (evo_ews_tzid);
+
+		if (g_strcmp0 (msdn_tzid, evo_ews_msdn_tzid) == 0) {
+			zone = e_timezone_cache_get_timezone (timezone_cache, evo_ews_tzid);
+			if (zone == NULL)
+				zone = icaltimezone_get_builtin_timezone (evo_ews_tzid);
+		}
 	}
 
-	cal_backend_ews_set_cancellable (cbews, NULL);
+	return zone;
+}
 
-	if (priv->cnc) {
-		g_object_unref (priv->cnc);
-		priv->cnc = NULL;
+static icalparameter *
+ecb_ews_responsetype_to_partstat (const gchar *responsetype)
+{
+	icalparameter *param = NULL;
+
+	g_return_val_if_fail (responsetype != NULL, NULL);
+
+	if (g_ascii_strcasecmp (responsetype, "Organizer") == 0)
+		param = icalparameter_new_partstat (ICAL_PARTSTAT_ACCEPTED);
+	else if (g_ascii_strcasecmp (responsetype, "Tentative") == 0)
+		param = icalparameter_new_partstat (ICAL_PARTSTAT_TENTATIVE);
+	else if (g_ascii_strcasecmp (responsetype, "Accept") == 0)
+		param = icalparameter_new_partstat (ICAL_PARTSTAT_ACCEPTED);
+	else if (g_ascii_strcasecmp (responsetype, "Decline") == 0)
+		param = icalparameter_new_partstat (ICAL_PARTSTAT_DECLINED);
+	else if (g_ascii_strcasecmp (responsetype, "NoResponseReceived") == 0)
+		param = icalparameter_new_partstat (ICAL_PARTSTAT_NEEDSACTION);
+	else if (g_ascii_strcasecmp (responsetype, "Unknown") == 0)
+		param = icalparameter_new_partstat (ICAL_PARTSTAT_NONE);
+
+	if (!param)
+		param = icalparameter_new_partstat (ICAL_PARTSTAT_NONE);
+
+	return param;
+}
+
+static ECalComponent *
+ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
+				EEwsItem *item,
+				GCancellable *cancellable,
+				GError **error)
+{
+	ECalComponent *res_component = NULL;
+	ETimezoneCache *timezone_cache;
+	icalcomponent_kind kind;
+	EEwsItemType item_type;
+	icalcomponent *icalcomp, *vcomp;
+	icaltimezone *utc_zone = icaltimezone_get_utc_timezone ();
+	CamelEwsSettings *ews_settings;
+	const gchar *mime_content;
+
+	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (cbews), NULL);
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
+
+	timezone_cache = E_TIMEZONE_CACHE (cbews);
+
+	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbews));
+	ews_settings = ecb_ews_get_collection_settings (cbews);
+
+	item_type = e_ews_item_get_item_type (item);
+	if (item_type == E_EWS_ITEM_TYPE_TASK || item_type == E_EWS_ITEM_TYPE_MEMO) {
+		icalproperty *icalprop;
+		icaltimetype due_date, start_date, complete_date, created;
+		icalproperty_status status  = ICAL_STATUS_NONE;
+		icalproperty_class class = ICAL_CLASS_NONE;
+		const gchar *ews_task_status, *sensitivity;
+		EwsImportance item_importance;
+		gint priority = 5;
+		gboolean has_this_date = FALSE;
+
+		vcomp = icalcomponent_new (ICAL_VCALENDAR_COMPONENT);
+		/*subject*/
+		icalcomp = icalcomponent_new (item_type == E_EWS_ITEM_TYPE_TASK ? ICAL_VTODO_COMPONENT : ICAL_VJOURNAL_COMPONENT);
+		icalprop = icalproperty_new_summary (e_ews_item_get_subject (item));
+		icalcomponent_add_property (icalcomp, icalprop);
+
+		/*date time created*/
+		created = icaltime_from_timet_with_zone (e_ews_item_get_date_created (item), 0, utc_zone);
+		icalprop = icalproperty_new_created (created);
+		icalcomponent_add_property (icalcomp, icalprop);
+
+		/*sensitivity*/
+		sensitivity = e_ews_item_get_sensitivity (item);
+		if (g_strcmp0 (sensitivity, "Normal") == 0)
+			class = ICAL_CLASS_PUBLIC;
+		else if (g_strcmp0 (sensitivity, "Private") == 0)
+			class = ICAL_CLASS_PRIVATE;
+		else if ((g_strcmp0 (sensitivity, "Confidential") == 0) ||
+			 (g_strcmp0 (sensitivity, "Personal") == 0))
+			class = ICAL_CLASS_CONFIDENTIAL;
+		icalprop = icalproperty_new_class (class);
+		icalcomponent_add_property (icalcomp, icalprop);
+
+		/*description*/
+		icalprop = icalproperty_new_description (e_ews_item_get_body (item));
+		icalcomponent_add_property (icalcomp, icalprop);
+
+		/*task assaingments*/
+		if (e_ews_item_get_delegator (item) != NULL) {
+			const gchar *task_owner = e_ews_item_get_delegator (item);
+			GSList *mailboxes = NULL, *l;
+			gboolean includes_last_item;
+			gchar *mailtoname, *user_email;
+			icalparameter *param;
+
+			/*The task owner according to Exchange is current user, even that the task was assigned by
+			 *someone else. I'm making the current user attendee and task delegator will be a task organizer */
+
+			user_email = camel_ews_settings_dup_email (ews_settings);
+			mailtoname = g_strdup_printf ("mailto:%s", user_email);
+			icalprop = icalproperty_new_attendee (mailtoname);
+			g_free (mailtoname);
+			g_free (user_email);
+
+			param = icalparameter_new_cn (e_ews_item_get_owner (item));
+			icalproperty_add_parameter (icalprop, param);
+			icalcomponent_add_property (icalcomp, icalprop);
+
+			/* get delegator mail box*/
+			e_ews_connection_resolve_names_sync (
+				cbews->priv->cnc, EWS_PRIORITY_MEDIUM, task_owner,
+				EWS_SEARCH_AD, NULL, FALSE, &mailboxes, NULL,
+				&includes_last_item, cancellable, error);
+
+			for (l = mailboxes; l != NULL; l = g_slist_next (l)) {
+				EwsMailbox *mb = l->data;
+
+				mailtoname = g_strdup_printf ("mailto:%s", mb->email);
+				icalprop = icalproperty_new_organizer (mailtoname);
+				param = icalparameter_new_cn (mb->name);
+				icalproperty_add_parameter (icalprop, param);
+				icalcomponent_add_property (icalcomp, icalprop);
+
+				g_free (mailtoname);
+				e_ews_mailbox_free (mb);
+			}
+			g_slist_free (mailboxes);
+		}
+
+		if (item_type == E_EWS_ITEM_TYPE_TASK) {
+			const gchar *percent_complete;
+
+			/*start date*/
+			has_this_date = FALSE;
+			e_ews_item_task_has_start_date (item, &has_this_date);
+			if (has_this_date) {
+				start_date = icaltime_from_timet_with_zone (e_ews_item_get_start_date (item), 0, utc_zone);
+				start_date.is_date = 1;
+				icalprop = icalproperty_new_dtstart (start_date);
+				icalcomponent_add_property (icalcomp, icalprop);
+			}
+
+			/*status*/
+			ews_task_status = e_ews_item_get_status (item);
+			if (g_strcmp0 (ews_task_status, "NotStarted") != 0) {
+				if (g_strcmp0 (ews_task_status, "Completed") == 0)
+					status = ICAL_STATUS_COMPLETED;
+				else if (g_strcmp0 (ews_task_status, "InProgress") == 0)
+					status = ICAL_STATUS_INPROCESS;
+				else if (g_strcmp0 (ews_task_status, "WaitingOnOthers") == 0)
+					status = ICAL_STATUS_NEEDSACTION;
+				else if (g_strcmp0 (ews_task_status, "Deferred") == 0)
+					status = ICAL_STATUS_CANCELLED;
+				icalprop = icalproperty_new_status (status);
+				icalcomponent_add_property (icalcomp, icalprop);
+			}
+
+			/*precent complete*/
+			percent_complete = e_ews_item_get_percent_complete (item);
+			icalprop  = icalproperty_new_percentcomplete (atoi (percent_complete ? percent_complete : "0"));
+			icalcomponent_add_property (icalcomp, icalprop);
+
+			/*due date*/
+			e_ews_item_task_has_due_date (item, &has_this_date);
+			if (has_this_date) {
+				due_date = icaltime_from_timet_with_zone (e_ews_item_get_due_date (item), 0, utc_zone);
+				due_date.is_date = 1;
+				icalprop = icalproperty_new_due (due_date);
+				icalcomponent_add_property (icalcomp, icalprop);
+			}
+
+			/*complete date*/
+			has_this_date = FALSE;
+			e_ews_item_task_has_complete_date (item, &has_this_date);
+			if (has_this_date) {
+				complete_date = icaltime_from_timet_with_zone (e_ews_item_get_complete_date (item), 0, utc_zone);
+				complete_date.is_date = 1;
+				icalprop = icalproperty_new_completed (complete_date);
+				icalcomponent_add_property (icalcomp, icalprop);
+			}
+
+			/*priority*/
+			item_importance = e_ews_item_get_importance (item);
+			if (item_importance == EWS_ITEM_HIGH)
+				priority = 3;
+			else if (item_importance == EWS_ITEM_LOW)
+				priority = 7;
+			icalprop = icalproperty_new_priority (priority);
+			icalcomponent_add_property (icalcomp, icalprop);
+		}
+
+		icalcomponent_add_component (vcomp, icalcomp);
+	} else {
+		struct icaltimetype dt;
+		const gchar *tzid;
+		gboolean timezone_set = FALSE;
+
+		mime_content = e_ews_item_get_mime_content (item);
+		vcomp = icalparser_parse_string (mime_content);
+
+		if (!vcomp && mime_content) {
+			const gchar *begin_vcalendar, *end_vcalendar;
+
+			/* Workaround Exchange 2016 error, which returns invalid iCalendar object (without 'END:VCALENDAR'),
+			   when the event has at least one detached instance. */
+			begin_vcalendar = camel_strstrcase (mime_content, "BEGIN:VCALENDAR");
+			end_vcalendar = camel_strstrcase (mime_content, "END:VCALENDAR");
+
+			/* If it exists, then it should be alone on a separate line */
+			if (!(begin_vcalendar && (begin_vcalendar == mime_content || begin_vcalendar[-1] == '\n') &&
+			    (begin_vcalendar[15 /* strlen ("BEGIN:VCALENDAR") */] == '\r' || begin_vcalendar[15] == '\n')))
+				begin_vcalendar = NULL;
+
+			/* If it exists, then it should be alone on a separate line and not at the very beginning of the mime_content */
+			if (!(end_vcalendar && end_vcalendar > mime_content && end_vcalendar[-1] == '\n' &&
+			    (end_vcalendar[13 /* strlen ("END:VCALENDAR") */] == '\r' || end_vcalendar[13] == '\n' || end_vcalendar[13] == '\0')))
+				end_vcalendar = NULL;
+
+			if (begin_vcalendar && !end_vcalendar) {
+				gchar *str;
+
+				str = g_strconcat (mime_content, "\r\n", "END:VCALENDAR", "\r\n", NULL);
+				vcomp = icalparser_parse_string (str);
+				g_free (str);
+			}
+		}
+
+		if (!vcomp) {
+			g_warn_if_reached ();
+			return NULL;
+		}
+
+		tzid = e_ews_item_get_tzid (item);
+		if (tzid == NULL) {
+			/*
+			 * When we are working with Exchange server 2010 or newer, we have to handle a few
+			 * things more than we do working old servers. These things are:
+			 * - MSDN timezone names:
+			 *   Used setting StartTimeZone and EndTimeZone. MSDN timezone names are not
+			 *   the same used in libical, so we need to have a table of equivalence to
+			 *   convert from one to another and avoid show the MSDN timezone name to the
+			 *   user and save it in the ETimezoneCache.
+			 * - EvoEWSStartTimeZone/EvoEWSEndTimeZone
+			 *   Used to keep track if the timezone shown to the user is the same one set
+			 *   by him/her. As we have a table of equivalence, sometimes the user sets a
+			 *   timezone but without EvoEWSStartTiemZone property, another timezone name,
+			 *   in the same offset, can be shown. And we want to avoid this.
+			 * - DTEND property:
+			 *   As we have to work with DTEND setting an event when using EWS server 2010 or
+			 *   newer, we have to care about set it properly here, instead of use the same
+			 *   as is used in DTSTART.
+			 */
+			icaltimezone *start_zone, *end_zone;
+			const gchar *start_tzid, *end_tzid;
+			const gchar *ical_start_tzid, *ical_end_tzid;
+			const gchar *evo_ews_start_tzid, *evo_ews_end_tzid;
+
+			start_tzid = e_ews_item_get_start_tzid (item);
+			end_tzid = e_ews_item_get_end_tzid (item);
+
+			ical_start_tzid = e_cal_backend_ews_tz_util_get_ical_equivalent (start_tzid);
+			ical_end_tzid = e_cal_backend_ews_tz_util_get_ical_equivalent (end_tzid);
+
+			evo_ews_start_tzid = e_ews_item_get_iana_start_time_zone (item);
+			evo_ews_end_tzid = e_ews_item_get_iana_end_time_zone (item);
+
+			/*
+			 * We have a few timezones that don't have an equivalent MSDN timezone.
+			 * For those, we will get ical_start_tzid being NULL and then we need to use
+			 * start_tzid, which one has the libical's expected name.
+			 */
+			start_zone = ecb_ews_get_timezone (
+				timezone_cache,
+				start_tzid,
+				ical_start_tzid != NULL ? ical_start_tzid : start_tzid,
+				evo_ews_start_tzid);
+			end_zone = ecb_ews_get_timezone (
+				timezone_cache,
+				end_tzid,
+				ical_end_tzid != NULL ? ical_end_tzid : end_tzid,
+				evo_ews_end_tzid);
+
+			if (start_zone != NULL) {
+				icalcomp = icalcomponent_get_first_component (vcomp, kind);
+
+				dt = icalcomponent_get_dtstart (icalcomp);
+				dt = icaltime_convert_to_zone (dt, start_zone);
+				icalcomponent_set_dtstart (icalcomp, dt);
+
+				timezone_set = TRUE;
+				e_timezone_cache_add_timezone (timezone_cache, start_zone);
+
+				if (end_zone != NULL) {
+					dt = icalcomponent_get_dtend (icalcomp);
+					dt = icaltime_convert_to_zone (dt, end_zone);
+					icalcomponent_set_dtend (icalcomp, dt);
+
+					e_timezone_cache_add_timezone (timezone_cache, end_zone);
+				}
+			}
+
+			if (!timezone_set)
+				tzid = start_tzid;
+		}
+
+		if (!timezone_set && tzid) {
+			/*
+			 * When we are working with Exchange server older than 2010, we don't set different
+			 * DTSTART and DTEND properties in VTIMEZONE. The reason of that is we don't use
+			 * those properties settings/changing a meeting timezone.
+			 * So, for older servers, here, we only set the DTSTART and DTEND properties with
+			 * the same values.
+			 */
+			icaltimezone *zone;
+			gchar *new_tzid = NULL;
+
+			icalcomp = icalcomponent_get_first_component (vcomp, kind);
+
+			if (!icaltimezone_get_builtin_timezone (tzid) &&
+			    icalcomponent_get_uid (icalcomp)) {
+				icalcomponent *vtimezone;
+
+				/* Add the timezone */
+				vtimezone = icalcomponent_get_first_component (vcomp, ICAL_VTIMEZONE_COMPONENT);
+				if (vtimezone != NULL) {
+					icalproperty *prop;
+
+					new_tzid = g_strconcat ("/evolution/ews/tzid/", icalcomponent_get_uid (icalcomp), NULL);
+
+					zone = icaltimezone_new ();
+					vtimezone = icalcomponent_new_clone (vtimezone);
+					prop = icalcomponent_get_first_property (vtimezone, ICAL_TZID_PROPERTY);
+					if (prop) {
+						icalproperty_set_tzid (prop, new_tzid);
+
+						prop = icalcomponent_get_first_property (vtimezone, ICAL_LOCATION_PROPERTY);
+						if (!prop) {
+							/* Use the original tzid as the timezone Location, to not expose
+							   evolution-ews TZID. */
+							prop = icalproperty_new_location (tzid);
+							icalcomponent_add_property (vtimezone, prop);
+						}
+					} else {
+						g_free (new_tzid);
+						new_tzid = NULL;
+					}
+					icaltimezone_set_component (zone, vtimezone);
+					e_timezone_cache_add_timezone (timezone_cache, zone);
+					icaltimezone_free (zone, TRUE);
+				}
+			}
+
+			zone = e_timezone_cache_get_timezone (timezone_cache, new_tzid ? new_tzid : tzid);
+
+			if (!zone && new_tzid)
+				zone = e_timezone_cache_get_timezone (timezone_cache, tzid);
+
+			if (zone == NULL)
+				zone = icaltimezone_get_builtin_timezone (tzid);
+
+			if (zone != NULL) {
+				dt = icalcomponent_get_dtstart (icalcomp);
+				dt = icaltime_convert_to_zone (dt, zone);
+				icalcomponent_set_dtstart (icalcomp, dt);
+
+				dt = icalcomponent_get_dtend (icalcomp);
+				dt = icaltime_convert_to_zone (dt, zone);
+				icalcomponent_set_dtend (icalcomp, dt);
+			}
+
+			g_free (new_tzid);
+		}
 	}
+
+	/* Vevent or Vtodo */
+	icalcomp = icalcomponent_get_first_component (vcomp, kind);
+	if (icalcomp) {
+		icalproperty *icalprop, *freebusy;
+		const EwsId *item_id;
+		const GSList *l = NULL;
+		const gchar *uid = e_ews_item_get_uid (item);
+		gchar *user_email;
+
+		item_id = e_ews_item_get_id (item);
+		user_email = camel_ews_settings_dup_email (ews_settings);
+
+		/* Attendees */
+		for (l = e_ews_item_get_attendees (item); l != NULL; l = g_slist_next (l)) {
+			icalparameter *param, *cu_type;
+			gchar *mailtoname;
+			const gchar *email = NULL;
+			EwsAttendee *attendee = (EwsAttendee *) l->data;
+
+			if (!attendee->mailbox)
+				continue;
+
+			if (g_strcmp0 (attendee->mailbox->routing_type, "EX") == 0)
+				email = e_ews_item_util_strip_ex_address (attendee->mailbox->email);
+
+			mailtoname = g_strdup_printf ("mailto:%s", email ? email : attendee->mailbox->email);
+			icalprop = icalproperty_new_attendee (mailtoname);
+			g_free (mailtoname);
+
+			param = icalparameter_new_cn (attendee->mailbox->name);
+			icalproperty_add_parameter (icalprop, param);
+
+			if (g_ascii_strcasecmp (attendee->attendeetype, "Required") == 0) {
+				param = icalparameter_new_role (ICAL_ROLE_REQPARTICIPANT);
+				cu_type = icalparameter_new_cutype (ICAL_CUTYPE_INDIVIDUAL);
+			}
+			else if (g_ascii_strcasecmp (attendee->attendeetype, "Resource") == 0) {
+				param = icalparameter_new_role (ICAL_ROLE_NONPARTICIPANT);
+				cu_type = icalparameter_new_cutype (ICAL_CUTYPE_RESOURCE);
+			}
+			else {
+				param = icalparameter_new_role ( ICAL_ROLE_OPTPARTICIPANT);
+				cu_type = icalparameter_new_cutype (ICAL_CUTYPE_INDIVIDUAL);
+			}
+			icalproperty_add_parameter (icalprop, cu_type);
+			icalproperty_add_parameter (icalprop, param);
+
+			if (user_email && (email || attendee->mailbox->email) && e_ews_item_get_my_response_type (item) &&
+			    g_ascii_strcasecmp (email ? email : attendee->mailbox->email, user_email) == 0) {
+				param = ecb_ews_responsetype_to_partstat (e_ews_item_get_my_response_type (item));
+			} else {
+				param = ecb_ews_responsetype_to_partstat (attendee->responsetype);
+			}
+			icalproperty_add_parameter (icalprop, param);
+
+			icalcomponent_add_property (icalcomp, icalprop);
+		}
+
+		g_free (user_email);
+
+		/* Free/Busy */
+		freebusy = icalcomponent_get_first_property (icalcomp, ICAL_TRANSP_PROPERTY);
+		if (!freebusy && (e_ews_item_get_item_type (item) != E_EWS_ITEM_TYPE_TASK)) {
+			/* Busy by default */
+			freebusy = icalproperty_new_transp (ICAL_TRANSP_OPAQUE);
+			icalcomponent_add_property (icalcomp, freebusy);
+		}
+		for (icalprop = icalcomponent_get_first_property (icalcomp, ICAL_X_PROPERTY);
+		     icalprop != NULL;
+		     icalprop = icalcomponent_get_next_property (icalcomp, ICAL_X_PROPERTY)) {
+			if (g_strcmp0 (icalproperty_get_x_name (icalprop), "X-MICROSOFT-CDO-BUSYSTATUS") == 0) {
+				if (g_strcmp0 (icalproperty_get_value_as_string (icalprop), "BUSY") == 0) {
+					icalproperty_set_transp (freebusy, ICAL_TRANSP_OPAQUE);
+				} else {
+					icalproperty_set_transp (freebusy, ICAL_TRANSP_TRANSPARENT);
+				}
+
+				break;
+			}
+		}
+
+		/* AllDayEvent */
+		for (icalprop = icalcomponent_get_first_property (icalcomp, ICAL_X_PROPERTY);
+		     icalprop != NULL;
+		     icalprop = icalcomponent_get_next_property (icalcomp, ICAL_X_PROPERTY)) {
+			if (g_strcmp0 (icalproperty_get_x_name (icalprop), "X-MICROSOFT-CDO-ALLDAYEVENT") == 0) {
+				if (g_strcmp0 (icalproperty_get_value_as_string (icalprop), "TRUE") == 0) {
+					struct icaltimetype dtend, dtstart;
+					dtstart = icalcomponent_get_dtstart (icalcomp);
+					dtstart.is_date = 1;
+					icalcomponent_set_dtstart (icalcomp, dtstart);
+
+					dtend = icalcomponent_get_dtend (icalcomp);
+					dtend.is_date = 1;
+					icalcomponent_set_dtend (icalcomp, dtend);
+				}
+				break;
+			}
+		}
+
+		if (icalcomponent_get_first_property (icalcomp, ICAL_RECURRENCEID_PROPERTY)) {
+			/* Exchange sets RRULE even on the children, which is broken */
+			icalprop = icalcomponent_get_first_property (icalcomp, ICAL_RRULE_PROPERTY);
+			if (icalprop) {
+				icalcomponent_remove_property (icalcomp, icalprop);
+				icalproperty_free (icalprop);
+			}
+		}
+
+		/* Exchange sets an ORGANIZER on all events. RFC2445 says:
+		 *
+		 *   This property MUST NOT be specified in an iCalendar
+		 *   object that specifies only a time zone definition or
+		 *   that defines calendar entities that are not group
+		 *   scheduled entities, but are entities only on a single
+		 *   user's calendar.
+		 */
+		if (!icalcomponent_get_first_property (icalcomp, ICAL_ATTENDEE_PROPERTY)) {
+			if ((icalprop = icalcomponent_get_first_property (icalcomp, ICAL_ORGANIZER_PROPERTY))) {
+				icalcomponent_remove_property (icalcomp, icalprop);
+				icalproperty_free (icalprop);
+			}
+		}
+
+		icalcomponent_set_uid (icalcomp, uid ? uid : item_id->id);
+
+		e_cal_util_set_x_property (icalcomp, "X-EVOLUTION-ITEMID", item_id->id);
+		e_cal_util_set_x_property (icalcomp, "X-EVOLUTION-CHANGEKEY", item_id->change_key);
+
+		res_component = e_cal_component_new_from_icalcomponent (icalcomponent_new_clone (icalcomp));
+
+		/* Categories */
+		e_cal_component_set_categories_list (res_component, (GSList *) e_ews_item_get_categories (item));
+
+		/*
+		 * There is no API to set/get alarm description on the server side.
+		 * However, for some reason, the alarm description has been set to "REMINDER"
+		 * automatically (and with no i18n). Instead of show it to the user, let's
+		 * set the summary as the alarm description.
+		 */
+		if (e_cal_component_has_alarms (res_component)) {
+			GList *alarm_uids, *l;
+
+			alarm_uids = e_cal_component_get_alarm_uids (res_component);
+			for (l = alarm_uids; l != NULL; l = l->next) {
+				ECalComponentAlarm *alarm;
+				ECalComponentText text;
+
+				alarm = e_cal_component_get_alarm (res_component, l->data);
+				e_cal_component_get_summary (res_component, &text);
+				e_cal_component_alarm_set_description (alarm, &text);
+
+				e_cal_component_alarm_free (alarm);
+			}
+			cal_obj_uid_list_free (alarm_uids);
+		}
+	}
+
+	icalcomponent_free (vcomp);
+
+	if (res_component) {
+		const GSList *attachment_ids, *aid, *l;
+		const gchar *uid = NULL;
+		GSList *info_attachments = NULL, *uris = NULL;
+		gboolean has_attachment = FALSE;
+
+		e_ews_item_has_attachments (item, &has_attachment);
+		if (!has_attachment)
+			return res_component;
+
+		e_cal_component_get_uid (res_component, &uid);
+
+		attachment_ids = e_ews_item_get_attachments_ids (item);
+
+		if (e_ews_connection_get_attachments_sync (
+			cbews->priv->cnc,
+			EWS_PRIORITY_MEDIUM,
+			uid,
+			attachment_ids,
+			cbews->priv->attachments_dir,
+			TRUE,
+			&info_attachments,
+			NULL, NULL,
+			cancellable,
+			NULL)) {
+			icalcomponent *icalcomp;
+			icalproperty *icalprop;
+			icalparameter *icalparam;
+
+			for (l = info_attachments; l; l = l->next) {
+				EEwsAttachmentInfo *info = l->data;
+
+				/* ignore non-uri attachments, because it's an exception */
+				if (e_ews_attachment_info_get_type (info) == E_EWS_ATTACHMENT_INFO_TYPE_URI) {
+					const gchar *uri = e_ews_attachment_info_get_uri (info);
+
+					if (uri)
+						uris = g_slist_append (uris, g_strdup (uri));
+				}
+			}
+
+			e_cal_component_set_attachment_list (res_component, uris);
+
+			icalcomp = e_cal_component_get_icalcomponent (res_component);
+			icalprop = icalcomponent_get_first_property (icalcomp, ICAL_ATTACH_PROPERTY);
+			for (aid = attachment_ids; aid && icalprop; aid = aid->next, icalprop = icalcomponent_get_next_property (icalcomp, ICAL_ATTACH_PROPERTY)) {
+				icalparam = icalparameter_new_x (aid->data);
+				icalparameter_set_xname (icalparam, "X-EWS-ATTACHMENTID");
+				icalproperty_add_parameter (icalprop, icalparam);
+			}
+
+			g_slist_free_full (uris, g_free);
+			g_slist_free_full (info_attachments, (GDestroyNotify) e_ews_attachment_info_free);
+		}
+	}
+
+	return res_component;
 }
 
 static gboolean
-cal_backend_ews_ensure_connected (ECalBackendEws *cbews,
-				  GCancellable *cancellable,
-				  GError **perror)
+ecb_ews_get_items_sync (ECalBackendEws *cbews,
+			const GSList *item_ids, /* gchar * */
+			const gchar *default_props,
+			const EEwsAdditionalProps *add_props,
+			GSList **out_components, /* ECalComponent * */
+			GCancellable *cancellable,
+			GError **error)
 {
-	CamelEwsSettings *ews_settings;
-	GError *local_error = NULL;
+	GSList *items = NULL, *link;
+	gboolean success;
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (cbews), FALSE);
+	g_return_val_if_fail (out_components != NULL, FALSE);
 
-	PRIV_LOCK (cbews->priv);
+	success = e_ews_connection_get_items_sync (
+		cbews->priv->cnc,
+		EWS_PRIORITY_MEDIUM,
+		item_ids,
+		default_props,
+		add_props,
+		FALSE,
+		NULL,
+		E_EWS_BODY_TYPE_TEXT,
+		&items,
+		NULL, NULL,
+		cancellable,
+		error);
+
+	if (!success)
+		return FALSE;
+
+	/* fetch modified occurrences */
+	for (link = items; link; link = g_slist_next (link)) {
+		EEwsItem *item = link->data;
+		const GSList *modified_occurrences;
+
+		if (!item || e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR)
+			continue;
+
+		modified_occurrences = e_ews_item_get_modified_occurrences (item);
+		if (modified_occurrences) {
+			EEwsAdditionalProps *modified_add_props;
+
+			modified_add_props = e_ews_additional_props_new ();
+			if (e_ews_connection_satisfies_server_version (cbews->priv->cnc, E_EWS_EXCHANGE_2010)) {
+				EEwsExtendedFieldURI *ext_uri;
+
+				modified_add_props->field_uri = g_strdup (GET_ITEMS_SYNC_PROPERTIES_2010);
+
+				ext_uri = e_ews_extended_field_uri_new ();
+				ext_uri->distinguished_prop_set_id = g_strdup ("PublicStrings");
+				ext_uri->prop_name = g_strdup ("EvolutionEWSStartTimeZone");
+				ext_uri->prop_type = g_strdup ("String");
+				modified_add_props->extended_furis = g_slist_append (modified_add_props->extended_furis, ext_uri);
+
+				ext_uri = e_ews_extended_field_uri_new ();
+				ext_uri->distinguished_prop_set_id = g_strdup ("PublicStrings");
+				ext_uri->prop_name = g_strdup ("EvolutionEWSEndTimeZone");
+				ext_uri->prop_type = g_strdup ("String");
+				modified_add_props->extended_furis = g_slist_append (modified_add_props->extended_furis, ext_uri);
+			} else {
+				modified_add_props->field_uri = g_strdup (GET_ITEMS_SYNC_PROPERTIES_2007);
+			}
+
+			success = ecb_ews_get_items_sync (cbews, modified_occurrences, "IdOnly", modified_add_props, out_components, cancellable, error);
+
+			e_ews_additional_props_free (modified_add_props);
+
+			if (!success)
+				goto exit;
+		}
+	}
+
+	for (link = items; link; link = g_slist_next (link)) {
+		EEwsItem *item = link->data;
+
+		if (!item)
+			continue;
+
+		if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR) {
+			g_propagate_error (error, g_error_copy (e_ews_item_get_error (item)));
+			success = FALSE;
+			break;
+		} else {
+			ECalComponent *comp;
+
+			comp = ecb_ews_item_to_component_sync (cbews, item, cancellable, error);
+			if (!comp) {
+				success = FALSE;
+				break;
+			}
+
+			*out_components = g_slist_prepend (*out_components, comp);
+		}
+	}
+
+ exit:
+	g_slist_free_full (items, g_object_unref);
+
+	return success;
+}
+
+static gboolean
+ecb_ews_fetch_items_sync (ECalBackendEws *cbews,
+			  const GSList *items, /* EEwsItem * */
+			  GSList **out_components, /* ECalComponent * */
+			  GCancellable *cancellable,
+			  GError **error)
+{
+	GSList *event_ids = NULL, *task_memo_ids = NULL, *link;
+	gboolean success = TRUE;
+
+	for (link = (GSList *) items; link; link = g_slist_next (link)) {
+		EEwsItem *item = link->data;
+		const EwsId *id = e_ews_item_get_id (item);
+		EEwsItemType type = e_ews_item_get_item_type (item);
+
+		if (type == E_EWS_ITEM_TYPE_EVENT)
+			event_ids = g_slist_prepend (event_ids, g_strdup (id->id));
+		else if (type == E_EWS_ITEM_TYPE_TASK || type == E_EWS_ITEM_TYPE_MEMO) {
+			task_memo_ids = g_slist_prepend (task_memo_ids, g_strdup (id->id));
+		}
+	}
+
+	if (event_ids) {
+		EEwsAdditionalProps *add_props;
+
+		add_props = e_ews_additional_props_new ();
+		if (e_ews_connection_satisfies_server_version (cbews->priv->cnc, E_EWS_EXCHANGE_2010)) {
+			EEwsExtendedFieldURI *ext_uri;
+
+			add_props->field_uri = g_strdup (GET_ITEMS_SYNC_PROPERTIES_2010);
+
+			ext_uri = e_ews_extended_field_uri_new ();
+			ext_uri->distinguished_prop_set_id = g_strdup ("PublicStrings");
+			ext_uri->prop_name = g_strdup ("EvolutionEWSStartTimeZone");
+			ext_uri->prop_type = g_strdup ("String");
+			add_props->extended_furis = g_slist_append (add_props->extended_furis, ext_uri);
+
+			ext_uri = e_ews_extended_field_uri_new ();
+			ext_uri->distinguished_prop_set_id = g_strdup ("PublicStrings");
+			ext_uri->prop_name = g_strdup ("EvolutionEWSEndTimeZone");
+			ext_uri->prop_type = g_strdup ("String");
+			add_props->extended_furis = g_slist_append (add_props->extended_furis, ext_uri);
+		} else {
+			add_props->field_uri = g_strdup (GET_ITEMS_SYNC_PROPERTIES_2007);
+		}
+
+		success = ecb_ews_get_items_sync (cbews, event_ids, "IdOnly", add_props, out_components, cancellable, error);
+
+		e_ews_additional_props_free (add_props);
+	}
+
+	if (task_memo_ids && success)
+		success = ecb_ews_get_items_sync (cbews, task_memo_ids, "AllProperties", NULL, out_components, cancellable, error);
+
+	g_slist_free_full (event_ids, g_free);
+	g_slist_free_full (task_memo_ids, g_free);
+
+	return success;
+}
+
+static gboolean
+ecb_ews_freebusy_ecomp_changed (ECalComponent *ecomp,
+				icalcomponent *vevent)
+{
+	icalcomponent *icomp;
+	gboolean changed = FALSE;
+
+	g_return_val_if_fail (vevent != NULL, FALSE);
+
+	if (!ecomp)
+		return TRUE;
+
+	icomp = e_cal_component_get_icalcomponent (ecomp);
+	if (!icomp)
+		return TRUE;
+
+	if (!changed)
+		changed = g_strcmp0 (icalcomponent_get_summary (icomp), icalcomponent_get_summary (vevent)) != 0;
+	if (!changed)
+		changed = g_strcmp0 (icalcomponent_get_location (icomp), icalcomponent_get_location (vevent)) != 0;
+	if (!changed)
+		changed = icaltime_compare (icalcomponent_get_dtstart (icomp), icalcomponent_get_dtstart (vevent)) != 0;
+	if (!changed)
+		changed = icaltime_compare (icalcomponent_get_dtend (icomp), icalcomponent_get_dtend (vevent)) != 0;
+
+	return changed;
+}
+
+static GSList * /* the possibly modified 'in_items' */
+ecb_ews_verify_changes (ECalCache *cal_cache,
+			icalcomponent_kind kind,
+			GSList *in_items, /* EEwsItem * */
+			GCancellable *cancellable)
+{
+	GSList *items = NULL, *link;
+
+	g_return_val_if_fail (E_IS_CAL_CACHE (cal_cache), in_items);
+
+	for (link = in_items; link; link = g_slist_next (link)) {
+		EEwsItem *item = link->data;
+		const EwsId *id = e_ews_item_get_id (item);
+		EEwsItemType type = e_ews_item_get_item_type (item);
+
+		if (!g_cancellable_is_cancelled (cancellable) && (
+		    (type == E_EWS_ITEM_TYPE_EVENT && kind == ICAL_VEVENT_COMPONENT) ||
+		    (type == E_EWS_ITEM_TYPE_MEMO && kind == ICAL_VJOURNAL_COMPONENT) ||
+		    (type == E_EWS_ITEM_TYPE_TASK && kind == ICAL_VTODO_COMPONENT) )) {
+			ECalComponent *existing = NULL;
+
+			if (e_cal_cache_get_component (cal_cache, id->id, NULL, &existing, cancellable, NULL) &&
+			    existing && g_strcmp0 (e_cal_util_get_x_property (e_cal_component_get_icalcomponent (existing),
+			    "X-EVOLUTION-CHANGEKEY"), id->change_key) == 0) {
+				g_object_unref (item);
+			} else {
+				items = g_slist_prepend (items, item);
+			}
+
+			g_clear_object (&existing);
+		} else if (type == E_EWS_ITEM_TYPE_EVENT ||
+			   type == E_EWS_ITEM_TYPE_MEMO ||
+			   type == E_EWS_ITEM_TYPE_TASK) {
+			g_object_unref (item);
+		} else {
+			items = g_slist_prepend (items, item);
+		}
+	}
+
+	g_slist_free (in_items);
+
+	return items;
+}
+
+static GSList * /* ECalMetaBackendInfo */
+ecb_ews_components_to_infos (ECalMetaBackend *meta_backend,
+			     const GSList *components, /* ECalComponent * */
+			     icalcomponent_kind kind)
+{
+	GSList *nfos = NULL, *link;
+	GHashTable *sorted_by_uids; /* gchar * ~> GSList { ECalComponent * } */
+	GHashTableIter iter;
+	gpointer key, value;
+
+	sorted_by_uids = g_hash_table_new (g_str_hash, g_str_equal);
+
+	for (link = (GSList *) components; link; link = g_slist_next (link)) {
+		ECalComponent *comp = link->data;
+		icalcomponent *icomp;
+		const gchar *uid;
+		GSList *instances;
+
+		if (!comp)
+			continue;
+
+		icomp = e_cal_component_get_icalcomponent (comp);
+		uid = icalcomponent_get_uid (icomp);
+
+		if (!uid)
+			continue;
+
+		instances = g_hash_table_lookup (sorted_by_uids, uid);
+		g_hash_table_insert (sorted_by_uids, (gpointer) uid, g_slist_prepend (instances, comp));
+	}
+
+	g_hash_table_iter_init (&iter, sorted_by_uids);
+	while (g_hash_table_iter_next (&iter, &key, &value)) {
+		const gchar *uid = key;
+		GSList *instances = value, *link;
+		icalcomponent *icomp, *merged;
+		ECalComponent *comp;
+		ECalMetaBackendInfo *nfo;
+		const gchar *revision, *itemid;
+
+		if (!uid || !instances) {
+			g_slist_free (instances);
+			continue;
+		}
+
+		/* Try to find master object, to have seves marter's itemid in ECalMetaBackendInfo::extra,
+		   thus the re-load of the event is done for the whole series and not for a detached instance */
+		comp = NULL;
+		for (link = instances; link && !comp; link = g_slist_next (link)) {
+			comp = link->data;
+
+			if (!comp)
+				continue;
+
+			if (e_cal_component_is_instance (comp))
+				comp = NULL;
+		}
+
+		if (!comp)
+			comp = instances->data;
+
+		if (!comp) {
+			g_slist_free (instances);
+			continue;
+		}
+
+		icomp = e_cal_component_get_icalcomponent (comp);
+		itemid = e_cal_util_get_x_property (icomp, "X-EVOLUTION-ITEMID");
+		revision = e_cal_util_get_x_property (icomp, "X-EVOLUTION-CHANGEKEY");
+		merged = e_cal_meta_backend_merge_instances (meta_backend, instances, FALSE);
+
+		if (!merged) {
+			g_warn_if_fail (merged != NULL);
+			g_slist_free (instances);
+			continue;
+		}
+
+		nfo = e_cal_meta_backend_info_new (uid, revision, NULL, itemid);
+		nfo->object = icalcomponent_as_ical_string_r (merged);
+
+		nfos = g_slist_prepend (nfos, nfo);
+
+		icalcomponent_free (merged);
+		g_slist_free (instances);
+	}
+
+	g_hash_table_destroy (sorted_by_uids);
+
+	return nfos;
+}
+
+static void
+ecb_ews_extract_item_id (ECalComponent *comp,
+			 gchar **out_id,
+			 gchar **out_change_key)
+{
+	icalcomponent *icalcomp;
+
+	g_return_if_fail (E_IS_CAL_COMPONENT (comp));
+
+	icalcomp = e_cal_component_get_icalcomponent (comp);
+	g_return_if_fail (icalcomp != NULL);
+
+	if (out_id)
+		*out_id = e_cal_util_dup_x_property (icalcomp, "X-EVOLUTION-ITEMID");
+	if (out_change_key)
+		*out_change_key = e_cal_util_dup_x_property (icalcomp, "X-EVOLUTION-CHANGEKEY");
+}
+
+static gboolean
+ecb_ews_is_organizer (ECalBackendEws *cbews,
+		      ECalComponent *comp)
+{
+	ECalComponentOrganizer organizer;
+	gboolean is_organizer = FALSE;
+
+	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (cbews), FALSE);
+	g_return_val_if_fail (E_IS_CAL_COMPONENT (comp), FALSE);
+
+	if (!e_cal_component_has_organizer (comp))
+		return FALSE;
+
+	organizer.value = NULL;
+
+	e_cal_component_get_organizer (comp, &organizer);
+	if (organizer.value) {
+		CamelEwsSettings *ews_settings;
+		const gchar *email = organizer.value;
+		gchar *user_email;
+
+		ews_settings = ecb_ews_get_collection_settings (cbews);
+
+		user_email = camel_ews_settings_dup_email (ews_settings);
+
+		if (!g_ascii_strncasecmp (email, "mailto:", 7))
+			email += 7;
+
+		is_organizer = user_email && g_ascii_strcasecmp (email, user_email) == 0;
+
+		g_free (user_email);
+	}
+
+	return is_organizer;
+}
+
+static gboolean
+ecb_ews_connect_sync (ECalMetaBackend *meta_backend,
+		      const ENamedParameters *credentials,
+		      ESourceAuthenticationResult *out_auth_result,
+		      gchar **out_certificate_pem,
+		      GTlsCertificateFlags *out_certificate_errors,
+		      GCancellable *cancellable,
+		      GError **error)
+{
+	ECalBackendEws *cbews;
+	CamelEwsSettings *ews_settings;
+	gchar *hosturl;
+	gboolean success = FALSE;
+
+	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (meta_backend), FALSE);
+	g_return_val_if_fail (out_auth_result != NULL, FALSE);
+
+	cbews = E_CAL_BACKEND_EWS (meta_backend);
+
+	g_rec_mutex_lock (&cbews->priv->cnc_lock);
 
 	if (cbews->priv->cnc) {
-		PRIV_UNLOCK (cbews->priv);
+		g_rec_mutex_unlock (&cbews->priv->cnc_lock);
+
+		*out_auth_result = E_SOURCE_AUTHENTICATION_ACCEPTED;
+
 		return TRUE;
 	}
 
-	PRIV_UNLOCK (cbews->priv);
+	ews_settings = ecb_ews_get_collection_settings (cbews);
+	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
 
-	ews_settings = cal_backend_ews_get_collection_settings (cbews);
+	cbews->priv->cnc = e_ews_connection_new (hosturl, ews_settings);
 
-	if (e_ews_connection_utils_get_without_password (ews_settings)) {
-		e_backend_schedule_authenticate (E_BACKEND (cbews), NULL);
+	e_binding_bind_property (
+		cbews, "proxy-resolver",
+		cbews->priv->cnc, "proxy-resolver",
+		G_BINDING_SYNC_CREATE);
+
+	*out_auth_result = e_ews_connection_try_credentials_sync (cbews->priv->cnc, credentials, cancellable, error);
+
+	if (*out_auth_result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
+		ESource *source = e_backend_get_source (E_BACKEND (cbews));
+		ESourceEwsFolder *ews_folder;
+
+		ews_folder = e_source_get_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER);
+
+		g_free (cbews->priv->folder_id);
+		cbews->priv->folder_id = e_source_ews_folder_dup_id (ews_folder);
+		cbews->priv->is_freebusy_calendar = g_strcmp0 (cbews->priv->folder_id, "freebusy-calendar") == 0;
+
+		g_signal_connect_swapped (cbews->priv->cnc, "server-notification",
+			G_CALLBACK (ecb_ews_server_notification_cb), cbews);
+
+		if (!cbews->priv->is_freebusy_calendar &&
+		    camel_ews_settings_get_listen_notifications (ews_settings) &&
+		    e_ews_connection_satisfies_server_version (cbews->priv->cnc, E_EWS_EXCHANGE_2010_SP1)) {
+			GSList *folders = NULL;
+
+			folders = g_slist_prepend (folders, cbews->priv->folder_id);
+
+			e_ews_connection_enable_notifications_sync (cbews->priv->cnc,
+				folders, &cbews->priv->subscription_key);
+
+			g_slist_free (folders);
+		}
+
+		e_cal_backend_set_writable (E_CAL_BACKEND (cbews), !cbews->priv->is_freebusy_calendar);
+		success = TRUE;
 	} else {
-		e_backend_credentials_required_sync (E_BACKEND (cbews),
-			E_SOURCE_CREDENTIALS_REASON_REQUIRED, NULL, 0, NULL,
-			cancellable, &local_error);
+		ecb_ews_convert_error_to_edc_error (error);
+		g_clear_object (&cbews->priv->cnc);
 	}
 
-	if (!local_error)
-		return TRUE;
+	g_rec_mutex_unlock (&cbews->priv->cnc_lock);
 
-	g_propagate_error (perror, local_error);
+	g_free (hosturl);
 
-	return FALSE;
+	return success;
 }
 
-static void
-e_cal_backend_ews_add_timezone (ECalBackend *backend,
-                                EDataCal *cal,
-                                guint32 context,
-                                GCancellable *cancellable,
-                                const gchar *tzobj)
+static gboolean
+ecb_ews_disconnect_sync (ECalMetaBackend *meta_backend,
+			 GCancellable *cancellable,
+			 GError **error)
 {
-	ETimezoneCache *timezone_cache;
-	icalcomponent *tz_comp;
 	ECalBackendEws *cbews;
-	GError *error = NULL;
 
-	cbews = (ECalBackendEws *) backend;
-	timezone_cache = E_TIMEZONE_CACHE (backend);
+	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (meta_backend), FALSE);
 
-	e_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
-	e_data_cal_error_if_fail (tzobj != NULL, InvalidArg);
+	cbews = E_CAL_BACKEND_EWS (meta_backend);
 
-	tz_comp = icalparser_parse_string (tzobj);
-	if (!tz_comp) {
-		g_propagate_error (&error, EDC_ERROR (InvalidObject));
-		goto exit;
-	}
+	ecb_ews_unset_connection (cbews);
 
-	if (icalcomponent_isa (tz_comp) == ICAL_VTIMEZONE_COMPONENT) {
-		icaltimezone *zone;
-
-		zone = icaltimezone_new ();
-		icaltimezone_set_component (zone, tz_comp);
-		e_timezone_cache_add_timezone (timezone_cache, zone);
-		icaltimezone_free (zone, 1);
-	}
-
-exit:
-	/*FIXME pass tzid here */
-	convert_error_to_edc_error (&error);
-	e_data_cal_respond_add_timezone (cal, context, error);
+	return TRUE;
 }
 
-typedef enum {
-	E_EWS_ATTACHMENT_TYPE_NOTHING = 0,
-	E_EWS_ATTACHMENT_TYPE_CREATE,
-	E_EWS_ATTACHMENT_TYPE_UPDATE
-} EEwsAttachmentType;
-
-typedef struct {
-	ECalBackendEws *cbews; /* Create, Remove, Modify, FreeBusy, Attachments, DiscardAlarm */
-	GCancellable *cancellable;
-	ECalComponent *comp; /* Create, Remove, Modify, FreeBusy, Attachments */
-	ECalComponent *extra_comp; /* Modify, Attachments: used as old_comp. Remove: used as parent_comp */
-	EDataCal *cal; /* Create, Remove, Modify, FreeBusy, Attachments, DiscardAlarm */
-	GSList *users; /* FreeBusy */
-	gchar *item_id; /* Accept, Remove, Modify, Attachments, DiscardAlarm */
-	gchar *uid; /* Remove */
-	gchar *rid; /* Remove */
-	EEwsAttachmentType cb_type; /* Attachments */
-	ECalObjModType mod; /* Remove */
-	guint32 context; /* Create, Remove, Modify, FreeBusy, Attachments, DiscardAlarm */
-} EwsCalendarAsyncData;
-
-static void
-e_cal_backend_ews_async_data_free (EwsCalendarAsyncData *async_data)
+static gboolean
+ecb_ews_get_changes_sync (ECalMetaBackend *meta_backend,
+			  const gchar *last_sync_tag,
+			  gboolean is_repeat,
+			  gchar **out_new_sync_tag,
+			  gboolean *out_repeat,
+			  GSList **out_created_objects,
+			  GSList **out_modified_objects,
+			  GSList **out_removed_objects,
+			  GCancellable *cancellable,
+			  GError **error)
 {
-	if (async_data != NULL) {
-		g_clear_object (&async_data->cbews);
-		g_clear_object (&async_data->cancellable);
-		g_clear_object (&async_data->comp);
-		g_clear_object (&async_data->extra_comp);
-		g_clear_object (&async_data->cal);
-
-		g_slist_free_full (async_data->users, g_free);
-		g_free (async_data->item_id);
-		g_free (async_data->uid);
-		g_free (async_data->rid);
-
-		g_free (async_data);
-	}
-}
-
-static void
-ews_cal_discard_alarm_cb (GObject *object,
-                          GAsyncResult *res,
-                          gpointer user_data)
-{
-	EEwsConnection *cnc = E_EWS_CONNECTION (object);
-	EwsCalendarAsyncData *edad = user_data;
-	GError *error = NULL;
-
-	if (!e_ews_connection_update_items_finish (cnc, res, NULL, &error)) {
-		convert_error_to_edc_error (&error);
-	}
-
-	convert_error_to_edc_error (&error);
-	e_data_cal_respond_discard_alarm (edad->cal, edad->context, error);
-
-	e_cal_backend_ews_async_data_free (edad);
-}
-
-static void
-e_cal_backend_ews_discard_alarm (ECalBackend *backend,
-                                 EDataCal *cal,
-                                 guint32 context,
-                                 GCancellable *cancellable,
-                                 const gchar *uid,
-                                 const gchar *rid,
-                                 const gchar *auid)
-{
-	ECalBackendEws *cbews = (ECalBackendEws *) backend;
-	ECalBackendEwsPrivate *priv;
-	EwsCalendarAsyncData *edad;
-	EwsCalendarConvertData convert_data = { 0 };
-	ECalComponent *comp;
+	ECalBackendEws *cbews;
+	ECalCache *cal_cache;
+	gboolean success = TRUE;
 	GError *local_error = NULL;
 
-	priv = cbews->priv;
+	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (meta_backend), FALSE);
+	g_return_val_if_fail (out_new_sync_tag != NULL, FALSE);
+	g_return_val_if_fail (out_repeat != NULL, FALSE);
+	g_return_val_if_fail (out_created_objects != NULL, FALSE);
+	g_return_val_if_fail (out_modified_objects != NULL, FALSE);
+	g_return_val_if_fail (out_removed_objects != NULL, FALSE);
 
-	PRIV_LOCK (priv);
+	*out_created_objects = NULL;
+	*out_modified_objects = NULL;
+	*out_removed_objects = NULL;
 
-	comp = e_cal_backend_store_get_component (priv->store, uid, NULL);
+	cbews = E_CAL_BACKEND_EWS (meta_backend);
+
+	cal_cache = e_cal_meta_backend_ref_cache (meta_backend);
+	g_return_val_if_fail (E_IS_CAL_CACHE (cal_cache), FALSE);
+
+	g_rec_mutex_lock (&cbews->priv->cnc_lock);
+
+	if (cbews->priv->is_freebusy_calendar) {
+		ESourceEwsFolder *ews_folder;
+		EEWSFreeBusyData fbdata;
+		GSList *free_busy = NULL, *link;
+		gboolean success;
+		time_t today;
+
+		ews_folder = e_source_get_extension (e_backend_get_source (E_BACKEND (cbews)), E_SOURCE_EXTENSION_EWS_FOLDER);
+
+		today = time_day_begin (time (NULL));
+
+		fbdata.period_start = time_add_week (today, -e_source_ews_folder_get_freebusy_weeks_before (ews_folder));
+		fbdata.period_end = time_day_end (time_add_week (today, e_source_ews_folder_get_freebusy_weeks_after (ews_folder)));
+		fbdata.user_mails = g_slist_prepend (NULL, e_source_ews_folder_dup_foreign_mail (ews_folder));
+
+		success = e_ews_connection_get_free_busy_sync (cbews->priv->cnc, G_PRIORITY_DEFAULT,
+			e_ews_cal_utils_prepare_free_busy_request, &fbdata,
+			&free_busy, cancellable, &local_error);
+
+		if (success) {
+			icaltimezone *utc_zone = icaltimezone_get_utc_timezone ();
+			GSList *comps = NULL;
+			GHashTable *known;
+			GHashTableIter iter;
+			gpointer key;
+
+			known = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
+
+			if (e_cal_cache_search_components (cal_cache, NULL, &comps, cancellable, NULL)) {
+				for (link = comps; link; link = g_slist_next (link)) {
+					ECalComponent *comp = link->data;
+					icalcomponent *icomp;
+					const gchar *uid;
+
+					if (!comp)
+						continue;
+
+					icomp = e_cal_component_get_icalcomponent (comp);
+					if (!icomp)
+						continue;
+
+					uid = icalcomponent_get_uid (icomp);
+
+					if (uid && *uid)
+						g_hash_table_insert (known, g_strdup (uid), g_object_ref (comp));
+				}
+
+				g_slist_free_full (comps, g_object_unref);
+			}
+
+			for (link = free_busy; link; link = g_slist_next (link)) {
+				icalcomponent *fbcomp = link->data;
+				icalproperty *fbprop;
+				icalparameter *param;
+				struct icalperiodtype fb;
+				icalparameter_fbtype fbtype;
+
+				if (!fbcomp || icalcomponent_isa (fbcomp) != ICAL_VFREEBUSY_COMPONENT)
+					continue;
+
+				for (fbprop = icalcomponent_get_first_property (fbcomp, ICAL_FREEBUSY_PROPERTY);
+				     fbprop;
+				     fbprop = icalcomponent_get_next_property (fbcomp, ICAL_FREEBUSY_PROPERTY)) {
+					ECalComponent *ecomp;
+					icalcomponent *vevent;
+					const gchar *id, *summary, *location;
+
+					param = icalproperty_get_first_parameter (fbprop, ICAL_FBTYPE_PARAMETER);
+					if (!param)
+						continue;
+
+					fbtype = icalparameter_get_fbtype (param);
+
+					if (fbtype != ICAL_FBTYPE_FREE &&
+					    fbtype != ICAL_FBTYPE_BUSY &&
+					    fbtype != ICAL_FBTYPE_BUSYUNAVAILABLE &&
+					    fbtype != ICAL_FBTYPE_BUSYTENTATIVE)
+						continue;
+
+					fb = icalproperty_get_freebusy (fbprop);
+					id = icalproperty_get_parameter_as_string (fbprop, "X-EWS-ID");
+					summary = icalproperty_get_parameter_as_string (fbprop, "X-SUMMARY");
+					location = icalproperty_get_parameter_as_string (fbprop, "X-LOCATION");
+
+					vevent = icalcomponent_new_vevent ();
+
+					if (id && *id) {
+						icalcomponent_set_uid (vevent, id);
+					} else {
+						gchar *uid;
+
+						uid = g_strdup_printf ("%s-%s-%d",
+							icaltime_as_ical_string (fb.start),
+							icaltime_as_ical_string (fb.end),
+							(gint) fbtype);
+
+						icalcomponent_set_uid (vevent, uid);
+
+						g_free (uid);
+					}
+
+					fb.start.zone = utc_zone;
+					fb.start.is_utc = 1;
+					fb.end.zone = utc_zone;
+					fb.end.is_utc = 1;
+
+					icalcomponent_set_dtstart (vevent, fb.start);
+					icalcomponent_set_dtend (vevent, fb.end);
+
+					icalcomponent_add_property (vevent, icalproperty_new_created (icaltime_current_time_with_zone (utc_zone)));
+
+					if (fbtype == ICAL_FBTYPE_FREE) {
+						icalcomponent_set_summary (vevent, C_("FreeBusyType", "Free"));
+						icalcomponent_add_property (vevent, icalproperty_new_transp (ICAL_TRANSP_TRANSPARENT));
+					} else if (fbtype == ICAL_FBTYPE_BUSY) {
+						icalcomponent_set_summary (vevent, C_("FreeBusyType", "Busy"));
+					} else if (fbtype == ICAL_FBTYPE_BUSYUNAVAILABLE) {
+						icalcomponent_set_summary (vevent, C_("FreeBusyType", "Out of Office"));
+					} else if (fbtype == ICAL_FBTYPE_BUSYTENTATIVE) {
+						icalcomponent_set_summary (vevent, C_("FreeBusyType", "Tentative"));
+					}
+
+					if (summary && *summary)
+						icalcomponent_set_summary (vevent, summary);
+
+					if (location && *location)
+						icalcomponent_set_location (vevent, location);
+
+					ecomp = g_hash_table_lookup (known, icalcomponent_get_uid (vevent));
+					if (ecomp) {
+						g_object_ref (ecomp);
+
+						/* This dereferences the ecomp, thus the ref() call above to keep it alive */
+						g_hash_table_remove (known, icalcomponent_get_uid (vevent));
+
+						if (ecb_ews_freebusy_ecomp_changed (ecomp, vevent)) {
+							ECalMetaBackendInfo *nfo;
+							gchar *revision = e_util_generate_uid ();
+
+							e_cal_util_set_x_property (vevent, "X-EVOLUTION-CHANGEKEY", revision);
+
+							nfo = e_cal_meta_backend_info_new (icalcomponent_get_uid (vevent), NULL, NULL, NULL);
+							nfo->revision = revision;
+							nfo->object = icalcomponent_as_ical_string_r (vevent);
+
+							*out_created_objects = g_slist_prepend (*out_created_objects, nfo);
+						} else {
+							icalcomponent_free (vevent);
+						}
+
+						g_clear_object (&ecomp);
+					} else {
+						ECalMetaBackendInfo *nfo;
+						gchar *revision = e_util_generate_uid ();
+
+						e_cal_util_set_x_property (vevent, "X-EVOLUTION-CHANGEKEY", revision);
+
+						nfo = e_cal_meta_backend_info_new (icalcomponent_get_uid (vevent), NULL, NULL, NULL);
+						nfo->revision = revision;
+						nfo->object = icalcomponent_as_ical_string_r (vevent);
+
+						*out_modified_objects = g_slist_prepend (*out_modified_objects, nfo);
+					}
+				}
+			}
+
+			g_hash_table_iter_init (&iter, known);
+			while (g_hash_table_iter_next (&iter, &key, NULL)) {
+				const gchar *uid = key;
+
+				*out_removed_objects = g_slist_prepend (*out_removed_objects,
+					e_cal_meta_backend_info_new (uid, NULL, NULL, NULL));
+			}
+
+			g_hash_table_destroy (known);
+		} else if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NOFREEBUSYACCESS)) {
+			e_cal_meta_backend_empty_cache_sync (meta_backend, cancellable, NULL);
+
+			e_cal_backend_notify_error (E_CAL_BACKEND (cbews), local_error->message);
+			g_clear_error (&local_error);
+		} else {
+			g_propagate_error (error, local_error);
+		}
+
+		g_slist_free_full (free_busy, (GDestroyNotify) icalcomponent_free);
+		g_slist_free_full (fbdata.user_mails, g_free);
+	} else {
+		GSList *items_created = NULL, *items_modified = NULL, *items_deleted = NULL, *link;
+		EEwsAdditionalProps *add_props;
+		gboolean includes_last_item = TRUE;
+
+		add_props = e_ews_additional_props_new ();
+		add_props->field_uri = g_strdup ("item:ItemClass");
+
+		success = e_ews_connection_sync_folder_items_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM,
+			last_sync_tag, cbews->priv->folder_id, "IdOnly", add_props, EWS_MAX_FETCH_COUNT,
+			out_new_sync_tag, &includes_last_item, &items_created, &items_modified, &items_deleted,
+			cancellable, &local_error);
+
+		if (!success &&
+		    g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_INVALIDSYNCSTATEDATA)) {
+			g_clear_error (&local_error);
+
+			e_cal_meta_backend_empty_cache_sync (meta_backend, cancellable, NULL);
+
+			success = e_ews_connection_sync_folder_items_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM,
+				NULL, cbews->priv->folder_id, "IdOnly", add_props, EWS_MAX_FETCH_COUNT,
+				out_new_sync_tag, &includes_last_item, &items_created, &items_modified, &items_deleted,
+				cancellable, &local_error);
+		}
+
+		e_ews_additional_props_free (add_props);
+
+		if (success) {
+			GSList *components_created = NULL, *components_modified = NULL;
+			icalcomponent_kind kind;
+
+			kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbews));
+
+			/* The sync state doesn't cover changes made by save_component_sync(),
+			   thus verify the changes, instead of re-donwloading the component again */
+			items_created = ecb_ews_verify_changes (cal_cache, kind, items_created, cancellable);
+			items_modified = ecb_ews_verify_changes (cal_cache, kind, items_modified, cancellable);
+
+			if (items_created) {
+				success = ecb_ews_fetch_items_sync (cbews, items_created, &components_created, cancellable, error);
+				if (success)
+					*out_created_objects = ecb_ews_components_to_infos (meta_backend, components_created, kind);
+			}
+
+			if (items_modified) {
+				success = ecb_ews_fetch_items_sync (cbews, items_modified, &components_modified, cancellable, error);
+				if (success)
+					*out_modified_objects = ecb_ews_components_to_infos (meta_backend, components_modified, kind);
+			}
+
+			for (link = items_deleted; link; link = g_slist_next (link)) {
+				const gchar *item_id = link->data;
+				GSList *ids = NULL, *ilink;
+
+				if (!e_cal_cache_get_ids_with_extra (cal_cache, item_id, &ids, cancellable, NULL))
+					continue;
+
+				for (ilink = ids; ilink; ilink = g_slist_next (ilink)) {
+					ECalComponentId *id = ilink->data;
+
+					/* Use the master object */
+					if (id && id->uid && *id->uid && (!id->rid || !*id->rid)) {
+						*out_removed_objects = g_slist_prepend (*out_removed_objects,
+							e_cal_meta_backend_info_new (id->uid, NULL, NULL, NULL));
+						break;
+					}
+				}
+
+				g_slist_free_full (ids, (GDestroyNotify) e_cal_component_free_id);
+			}
+
+			g_slist_free_full (components_created, g_object_unref);
+			g_slist_free_full (components_modified, g_object_unref);
+
+			*out_repeat = !includes_last_item;
+		} else if (local_error) {
+			g_propagate_error (error, local_error);
+		}
+
+		g_slist_free_full (items_created, g_object_unref);
+		g_slist_free_full (items_modified, g_object_unref);
+		g_slist_free_full (items_deleted, g_free);
+	}
+
+	g_rec_mutex_unlock (&cbews->priv->cnc_lock);
+
+	ecb_ews_convert_error_to_edc_error (error);
+	g_clear_object (&cal_cache);
+
+	return success;
+}
+
+static gboolean
+ecb_ews_load_component_sync (ECalMetaBackend *meta_backend,
+			     const gchar *uid,
+			     const gchar *extra,
+			     icalcomponent **out_component,
+			     gchar **out_extra,
+			     GCancellable *cancellable,
+			     GError **error)
+{
+	ECalBackendEws *cbews;
+	GSList *ids, *items = NULL, *components = NULL;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (meta_backend), FALSE);
+	g_return_val_if_fail (uid != NULL, FALSE);
+	g_return_val_if_fail (out_component != NULL, FALSE);
+	g_return_val_if_fail (out_extra != NULL, FALSE);
+
+	cbews = E_CAL_BACKEND_EWS (meta_backend);
+
+	g_rec_mutex_lock (&cbews->priv->cnc_lock);
+
+	ids = g_slist_prepend (NULL, (gpointer) (extra && *extra ? extra : uid));
+
+	success = e_ews_connection_get_items_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM, ids, "IdOnly",
+		NULL, FALSE, NULL, E_EWS_BODY_TYPE_TEXT, &items, NULL, NULL, cancellable, error);
+
+	g_slist_free (ids);
+
+	if (success && items) {
+		success = ecb_ews_fetch_items_sync (cbews, items, &components, cancellable, error);
+
+		if (components) {
+			const EwsId *ews_id = e_ews_item_get_id (items->data);
+
+			if (ews_id)
+				*out_extra = g_strdup (ews_id->id);
+
+			if (components->next) {
+				GSList *link;
+
+				*out_component = icalcomponent_new_vcalendar ();
+
+				for (link = components; link; link = g_slist_next (link)) {
+					ECalComponent *comp = link->data;
+
+					if (!comp)
+						continue;
+
+					icalcomponent_add_component (*out_component,
+						icalcomponent_new_clone (e_cal_component_get_icalcomponent (comp)));
+				}
+			} else {
+				*out_component = icalcomponent_new_clone (e_cal_component_get_icalcomponent (components->data));
+			}
+		} else {
+			success = FALSE;
+		}
+	}
+
+	if (!components && e_cal_meta_backend_refresh_sync (meta_backend, cancellable, NULL)) {
+		ECalCache *cal_cache;
+
+		cal_cache = e_cal_meta_backend_ref_cache (meta_backend);
+		if (cal_cache) {
+			success = e_cal_cache_get_components_by_uid (cal_cache, uid, &components, cancellable, NULL);
+			if (success) {
+				*out_component = e_cal_meta_backend_merge_instances (meta_backend, components, FALSE);
+
+				if (!e_cal_cache_get_component_extra (cal_cache, uid, NULL, out_extra, cancellable, NULL))
+					*out_extra = NULL;
+
+				g_clear_error (error);
+			}
+			g_object_unref (cal_cache);
+		}
+	}
+
+	g_rec_mutex_unlock (&cbews->priv->cnc_lock);
+
+	ecb_ews_convert_error_to_edc_error (error);
+	g_slist_free_full (components, g_object_unref);
+	g_slist_free_full (items, g_object_unref);
+
+	return success;
+}
+
+/* Very simple and naive component comparator, to avoid
+   unnecessary uploads and changes on the server. */
+static gboolean
+ecb_ews_components_equal (ECalComponent *comp1,
+			  ECalComponent *comp2)
+{
+	icalcomponent *icomp1, *icomp2;
+	icalproperty *prop1;
+	GHashTable *processed_props;
+	gboolean equal = TRUE;
+
+	if (!comp1 && !comp2)
+		return TRUE;
+	else if (!comp1 || !comp2)
+		return FALSE;
+
+	icomp1 = e_cal_component_get_icalcomponent (comp1);
+	icomp2 = e_cal_component_get_icalcomponent (comp2);
+
+	if (!icomp1 || !icomp2)
+		return FALSE;
+
+	if (g_strcmp0 (icalcomponent_get_uid (icomp1), icalcomponent_get_uid (icomp2)) != 0)
+		return FALSE;
+
+	if (icalcomponent_count_properties (icomp1, ICAL_ANY_PROPERTY) !=
+	    icalcomponent_count_properties (icomp2, ICAL_ANY_PROPERTY))
+		return FALSE;
+
+	processed_props = g_hash_table_new (g_direct_hash, g_direct_equal);
+
+	for (prop1 = icalcomponent_get_first_property (icomp1, ICAL_ANY_PROPERTY);
+	     prop1 && equal;
+	     prop1 = icalcomponent_get_next_property (icomp1, ICAL_ANY_PROPERTY)) {
+		icalproperty_kind kind = icalproperty_isa (prop1);
+		icalproperty *prop2;
+
+		for (prop2 = icalcomponent_get_first_property (icomp2, kind);
+		     prop2;
+		     prop2 = icalcomponent_get_next_property (icomp2, kind)) {
+			gchar *str1, *str2;
+			gboolean same;
+
+			if (g_hash_table_contains (processed_props, prop2))
+				continue;
+
+			if (icalproperty_count_parameters (prop1) != icalproperty_count_parameters (prop2))
+				continue;
+
+			str1 = icalproperty_as_ical_string_r (prop1);
+			str2 = icalproperty_as_ical_string_r (prop2);
+
+			same = g_strcmp0 (str1, str2) == 0;
+
+			g_free (str1);
+			g_free (str2);
+
+			if (same) {
+				g_hash_table_insert (processed_props, prop2, NULL);
+				break;
+			}
+		}
+
+		if (!prop2)
+			equal = FALSE;
+	}
+
+	g_hash_table_destroy (processed_props);
+
+	return equal;
+}
+
+typedef struct _ChangeData {
+	ECalComponent *old_component;
+	ECalComponent *new_component;
+} ChangeData;
+
+static void
+change_data_free (gpointer ptr)
+{
+	ChangeData *cd = ptr;
+
+	if (cd) {
+		g_clear_object (&cd->old_component);
+		g_clear_object (&cd->new_component);
+		g_free (cd);
+	}
+}
+
+static void
+ecb_ews_filter_out_unchanged_instances (const GSList *to_save_instances,
+					const GSList *existing_instances,
+					GSList **out_changed_instances, /* ChangeData * */
+					GSList **out_removed_instances) /* ECalComponent * */
+{
+	GSList *link = NULL;
+	GHashTable *existing_hash;
+	GHashTableIter iter;
+	gpointer value;
+
+	g_return_if_fail (to_save_instances != NULL);
+	g_return_if_fail (existing_instances != NULL);
+	g_return_if_fail (out_changed_instances != NULL);
+	g_return_if_fail (out_removed_instances != NULL);
+
+	*out_changed_instances = NULL;
+	*out_removed_instances = NULL;
+
+	existing_hash = g_hash_table_new_full ((GHashFunc)e_cal_component_id_hash, (GEqualFunc) e_cal_component_id_equal,
+		(GDestroyNotify) e_cal_component_free_id, NULL);
+
+	for (link = (GSList *) existing_instances; link; link = g_slist_next (link)) {
+		ECalComponent *comp = link->data;
+		ECalComponentId *id = NULL;
+
+		id = e_cal_component_get_id (comp);
+		if (id)
+			g_hash_table_insert (existing_hash, id, comp);
+	}
+
+	for (link = (GSList *) to_save_instances; link; link = g_slist_next (link)) {
+		ECalComponent *comp = link->data;
+		ECalComponentId *id = NULL;
+
+		id = e_cal_component_get_id (comp);
+		if (id) {
+			ECalComponent *old_comp;
+
+			old_comp = g_hash_table_lookup (existing_hash, id);
+
+			if (!ecb_ews_components_equal (comp, old_comp)) {
+				ChangeData *cd;
+
+				cd = g_new0 (ChangeData, 1);
+				cd->old_component = old_comp ? g_object_ref (old_comp) : NULL;
+				cd->new_component = g_object_ref (comp);
+
+				*out_changed_instances = g_slist_prepend (*out_changed_instances, cd);
+			}
+
+			g_hash_table_remove (existing_hash, id);
+			e_cal_component_free_id (id);
+		}
+	}
+
+	g_hash_table_iter_init (&iter, existing_hash);
+	while (g_hash_table_iter_next (&iter, NULL, &value)) {
+		*out_removed_instances = g_slist_prepend (*out_removed_instances, g_object_ref (value));
+	}
+
+	g_hash_table_destroy (existing_hash);
+}
+
+static gboolean
+ecb_ews_extract_attachments (icalcomponent *icalcomp,
+			     GSList **out_attachments) /* EEwsAttachmentInfo * */
+{
+	icalproperty *prop;
+	GSList *props = NULL, *link;
+
+	g_return_val_if_fail (icalcomp != NULL, FALSE);
+	g_return_val_if_fail (out_attachments != NULL, FALSE);
+
+	*out_attachments = NULL;
+
+	for (prop = icalcomponent_get_first_property (icalcomp, ICAL_ATTACH_PROPERTY);
+	     prop;
+	     prop = icalcomponent_get_next_property (icalcomp, ICAL_ATTACH_PROPERTY)) {
+		props = g_slist_prepend (props, prop);
+	}
+
+	for (link = props; link; link = g_slist_next (link)) {
+		EEwsAttachmentInfo *info;
+		icalattach *attach;
+		icalparameter *param;
+		const gchar *stored_filename;
+
+		prop = link->data;
+		param = icalproperty_get_first_parameter (prop, ICAL_FILENAME_PARAMETER);
+		stored_filename = param ? icalparameter_get_filename (param) : NULL;
+
+		attach = icalproperty_get_attach (prop);
+		if (icalattach_get_is_url (attach)) {
+			const gchar *uri;
+
+			uri = icalattach_get_url (attach);
+
+			if (!uri || !*uri)
+				continue;
+
+			info = e_ews_attachment_info_new (E_EWS_ATTACHMENT_INFO_TYPE_URI);
+
+			e_ews_attachment_info_set_uri (info, uri);
+			if (stored_filename && *stored_filename) {
+				e_ews_attachment_info_set_prefer_filename (info, stored_filename);
+			} else {
+				gchar *uri_filename;
+
+				uri_filename = g_filename_from_uri (uri, NULL, NULL);
+				if (uri_filename && *uri_filename) {
+					gchar *basename;
+
+					basename = g_path_get_basename (uri_filename);
+					if (basename && *basename && basename[0] != '.' && basename[0] != G_DIR_SEPARATOR) {
+						const gchar *uid;
+
+						uid = icalcomponent_get_uid (icalcomp);
+
+						if (uid && g_str_has_prefix (basename, uid) && basename[strlen (uid)] == '-') {
+							e_ews_attachment_info_set_prefer_filename (info, basename + strlen (uid) + 1);
+						}
+					}
+
+					g_free (basename);
+				}
+
+				g_free (uri_filename);
+			}
+		} else {
+			gsize len = -1;
+			guchar *decoded = NULL;
+			const gchar *content;
+
+			content = (const gchar *) icalattach_get_data (attach);
+			decoded = g_base64_decode (content, &len);
+
+			info = e_ews_attachment_info_new (E_EWS_ATTACHMENT_INFO_TYPE_INLINED);
+			e_ews_attachment_info_set_inlined_data (info, decoded, len);
+
+			if (stored_filename && *stored_filename)
+				e_ews_attachment_info_set_prefer_filename (info, stored_filename);
+
+			g_free (decoded);
+		}
+
+		e_ews_attachment_info_set_id (info, icalproperty_get_parameter_as_string (prop, "X-EWS-ATTACHMENTID"));
+		*out_attachments = g_slist_prepend (*out_attachments, info);
+	}
+
+	g_slist_free (props);
+
+	return *out_attachments != NULL;
+}
+
+static icaltimezone *
+ecb_ews_get_timezone_from_ical_component (ECalBackendEws *cbews,
+					  icalcomponent *icalcomp)
+{
+	ETimezoneCache *timezone_cache;
+	icalproperty *prop = NULL;
+	const gchar *tzid = NULL;
+
+	timezone_cache = E_TIMEZONE_CACHE (cbews);
+
+	prop = icalcomponent_get_first_property (icalcomp, ICAL_DTSTART_PROPERTY);
+	if (prop != NULL) {
+		icalparameter *param = NULL;
+
+		param = icalproperty_get_first_parameter (prop, ICAL_TZID_PARAMETER);
+		if (param) {
+			tzid = icalparameter_get_tzid (param);
+		} else {
+			struct icaltimetype dtstart;
+
+			dtstart = icalproperty_get_dtstart (prop);
+			if (dtstart.is_utc)
+				tzid = "UTC";
+		}
+	}
+
+	if (tzid)
+		return e_timezone_cache_get_timezone (timezone_cache, tzid);
+
+	return NULL;
+}
+
+static gboolean
+ecb_ews_remove_item_sync (ECalBackendEws *cbews,
+			  ECalCache *cal_cache,
+			  const gchar *uid,
+			  const gchar *rid,
+			  GCancellable *cancellable,
+			  GError **error)
+{
+	ECalComponent *comp = NULL, *parent = NULL;
+	EwsId item_id = { 0 };
+	gint index = 0;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (cbews), FALSE);
+	g_return_val_if_fail (E_IS_CAL_CACHE (cal_cache), FALSE);
+	g_return_val_if_fail (uid != NULL, FALSE);
+
+	if (rid && !*rid)
+		rid = NULL;
+
+	if (!e_cal_cache_get_component (cal_cache, uid, rid, &comp, cancellable, error) ||
+	    (rid && !e_cal_cache_get_component (cal_cache, uid, NULL, &parent, cancellable, error))) {
+		if (!parent && !comp) {
+			g_propagate_error (error, EDC_ERROR (ObjectNotFound));
+			return FALSE;
+		}
+	}
+
+	ecb_ews_extract_item_id (comp ? comp : parent, &item_id.id, &item_id.change_key);
+
+	if (!item_id.id) {
+		g_propagate_error (error, EDC_ERROR_EX (OtherError, "Cannot determine EWS ItemId"));
+		success = FALSE;
+	} else {
+		if (parent && !comp) {
+			index = e_cal_backend_ews_rid_to_index (
+				ecb_ews_get_timezone_from_ical_component (cbews,
+					e_cal_component_get_icalcomponent (parent)),
+				rid,
+				e_cal_component_get_icalcomponent (parent),
+				error);
+			if (index == 0)
+				success = FALSE;
+		}
+
+		success = success && e_ews_connection_delete_item_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM, &item_id, index, EWS_HARD_DELETE,
+			ecb_ews_is_organizer (cbews, comp) ? EWS_SEND_TO_ALL_AND_SAVE_COPY : EWS_SEND_TO_NONE,
+			EWS_ALL_OCCURRENCES, cancellable, error);
+	}
+
+	g_free (item_id.id);
+	g_free (item_id.change_key);
+
+	g_clear_object (&comp);
+	g_clear_object (&parent);
+
+	return success;
+}
+
+static void
+ecb_ews_get_attach_differences (ECalComponent *oldcomp,
+				ECalComponent *newcomp,
+				GSList **out_removed_attachment_ids, /* gchar * */
+				GSList **out_added_attachments) /* EEwsAttachmentInfo * */
+{
+	GSList *old_attachments = NULL, *new_attachments = NULL, *link;
+
+	g_return_if_fail (out_removed_attachment_ids != NULL);
+	g_return_if_fail (out_added_attachments != NULL);
+
+	*out_removed_attachment_ids = NULL;
+	*out_added_attachments = NULL;
+
+	if (!ecb_ews_extract_attachments (e_cal_component_get_icalcomponent (oldcomp), &old_attachments))
+		old_attachments = NULL;
+
+	if (!ecb_ews_extract_attachments (e_cal_component_get_icalcomponent (newcomp), &new_attachments))
+		new_attachments = NULL;
+
+	for (link = old_attachments; link; link = g_slist_next (link)) {
+		EEwsAttachmentInfo *old_nfo = link->data;
+		GSList *nlink;
+
+		if (!old_nfo)
+			continue;
+
+		for (nlink = new_attachments; nlink; nlink = g_slist_next (nlink)) {
+			EEwsAttachmentInfo *new_nfo = nlink->data;
+			gboolean same = FALSE;
+
+			if (!new_nfo ||
+			    e_ews_attachment_info_get_type (old_nfo) != e_ews_attachment_info_get_type (new_nfo))
+				continue;
+
+			if (e_ews_attachment_info_get_type (old_nfo) == E_EWS_ATTACHMENT_INFO_TYPE_INLINED) {
+				const gchar *old_data, *new_data;
+				gsize old_len = -1, new_len = -1;
+
+				old_data = e_ews_attachment_info_get_inlined_data (old_nfo, &old_len);
+				new_data = e_ews_attachment_info_get_inlined_data (new_nfo, &new_len);
+
+				same = old_len == new_len && (old_len == 0 ||
+					(old_len > 0 && old_data && new_data && memcmp (old_data, new_data, old_len) == 0));
+			} else if (e_ews_attachment_info_get_type (old_nfo) == E_EWS_ATTACHMENT_INFO_TYPE_URI) {
+				same = g_strcmp0 (e_ews_attachment_info_get_uri (old_nfo), e_ews_attachment_info_get_uri (new_nfo)) == 0;
+			}
+
+			if (same) {
+				new_attachments = g_slist_remove (new_attachments, new_nfo);
+				e_ews_attachment_info_free (new_nfo);
+				break;
+			}
+		}
+
+		if (!nlink) {
+			/* Did not find in the new_attachments, thus it's removed */
+			g_warn_if_fail (e_ews_attachment_info_get_id (old_nfo) != NULL);
+			*out_removed_attachment_ids = g_slist_prepend (*out_removed_attachment_ids,
+				g_strdup (e_ews_attachment_info_get_id (old_nfo)));
+		}
+	}
+
+	*out_added_attachments = new_attachments;
+
+	g_slist_free_full (old_attachments, (GDestroyNotify) e_ews_attachment_info_free);
+}
+
+struct TzidCbData {
+	icalcomponent *comp;
+	ECalBackendEws *cbews;
+};
+
+static void
+tzid_cb (icalparameter *param,
+	 gpointer data)
+{
+	struct TzidCbData *cbd = data;
+	const gchar *tzid;
+	icaltimezone *zone;
+	icalcomponent *new_comp;
+
+	tzid = icalparameter_get_tzid (param);
+	if (!tzid)
+		return;
+
+	zone = e_timezone_cache_get_timezone (E_TIMEZONE_CACHE (cbd->cbews), tzid);
+	if (!zone)
+		return;
+
+	new_comp = icaltimezone_get_component (zone);
+	if (!new_comp)
+		return;
+
+	icalcomponent_add_component (cbd->comp, icalcomponent_new_clone (new_comp));
+}
+
+static void
+ecb_ews_pick_all_tzids_out (ECalBackendEws *cbews,
+			    icalcomponent *icalcomp)
+{
+
+	/* pick all the tzids out of the component and resolve
+	 * them using the vtimezones in the current calendar */
+	struct TzidCbData cbd;
+
+	cbd.cbews = cbews;
+	cbd.comp = icalcomp;
+
+	icalcomponent_foreach_tzid (icalcomp, tzid_cb, &cbd);
+}
+
+static gboolean
+ecb_ews_modify_item_sync (ECalBackendEws *cbews,
+			  icalcomponent *old_icalcomp,
+			  icalcomponent *new_icalcomp,
+			  GCancellable *cancellable,
+			  GError **error)
+{
+	ECalComponent *comp = NULL, *oldcomp = NULL;
+	icalcomponent *icalcomp;
+	gchar *itemid = NULL, *changekey = NULL;
+	GSList *added_attachments = NULL, *removed_attachment_ids = NULL;
+	gboolean success = TRUE;
+
+	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (cbews), FALSE);
+	g_return_val_if_fail (new_icalcomp != NULL, FALSE);
+
+	icalcomp = icalcomponent_new_clone (new_icalcomp);
+
+	ecb_ews_pick_all_tzids_out (cbews, icalcomp);
+
+	comp = e_cal_component_new_from_icalcomponent (icalcomp);
 	if (!comp) {
-		e_data_cal_respond_discard_alarm (
-			cal, context,
-			EDC_ERROR (ObjectNotFound));
-		PRIV_UNLOCK (priv);
+		g_propagate_error (error, EDC_ERROR (InvalidObject));
+		return FALSE;
+	}
+
+	ecb_ews_extract_item_id (comp, &itemid, &changekey);
+	if (!itemid) {
+		g_propagate_error (error, EDC_ERROR_EX (OtherError, "Cannot determine EWS ItemId"));
+		g_object_unref (comp);
+		return FALSE;
+	}
+
+	if (old_icalcomp) {
+		oldcomp = e_cal_component_new_from_icalcomponent (icalcomponent_new_clone (old_icalcomp));
+	} else {
+		oldcomp = e_cal_component_new_from_icalcomponent (icalcomponent_new_clone (new_icalcomp));
+	}
+
+	ecb_ews_pick_all_tzids_out (cbews, e_cal_component_get_icalcomponent (oldcomp));
+
+	/* In case we have updated attachments we have to run update attachments
+	 * before update items so attendees will receive mails with already updated attachments */
+
+	ecb_ews_get_attach_differences (oldcomp, comp, &removed_attachment_ids, &added_attachments);
+
+	/* preform sync delete attachemnt operation*/
+	if (removed_attachment_ids) {
+		g_free (changekey);
+		changekey = NULL;
+
+		success = e_ews_connection_delete_attachments_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM,
+			removed_attachment_ids, &changekey, cancellable, error);
+
+		g_slist_free_full (removed_attachment_ids, g_free);
+	}
+
+	/* in case we have a new attachments add them before update */
+	if (added_attachments && success) {
+		EwsId item_id;
+
+		item_id.id = itemid;
+		item_id.change_key = changekey;
+
+		changekey = NULL;
+
+		success = e_ews_connection_create_attachments_sync (
+			cbews->priv->cnc, EWS_PRIORITY_MEDIUM,
+			&item_id, added_attachments,
+			FALSE, &changekey, NULL, cancellable, error);
+
+		g_free (item_id.change_key);
+	}
+
+	if (success && old_icalcomp &&
+	    icalcomponent_get_first_property (new_icalcomp, ICAL_RRULE_PROPERTY) &&
+	    !icalcomponent_get_first_property (new_icalcomp, ICAL_RECURRENCEID_PROPERTY)) {
+		icalproperty *prop, *old_prop;
+		GSList *exceptions = NULL, *link;
+		EwsId item_id;
+
+		item_id.id = itemid;
+		item_id.change_key = changekey;
+
+		/* Excluded occurrences */
+		for (prop = icalcomponent_get_first_property (new_icalcomp, ICAL_EXDATE_PROPERTY);
+		     prop;
+		     prop = icalcomponent_get_next_property (new_icalcomp, ICAL_EXDATE_PROPERTY)) {
+			const gchar *new_rid;
+
+			new_rid = icalproperty_get_value_as_string (prop);
+
+			for (old_prop = icalcomponent_get_first_property (old_icalcomp, ICAL_EXDATE_PROPERTY);
+			     old_prop;
+			     old_prop = icalcomponent_get_next_property (old_icalcomp, ICAL_EXDATE_PROPERTY)) {
+				if (g_strcmp0 (new_rid, icalproperty_get_value_as_string (old_prop)) == 0)
+					break;
+			}
+
+			if (!old_prop)
+				exceptions = g_slist_prepend (exceptions, prop);
+		}
+
+		exceptions = g_slist_reverse (exceptions);
+
+		for (link = exceptions; link && success; link = g_slist_next (link)) {
+			guint index;
+
+			prop = link->data;
+
+			index = e_cal_backend_ews_rid_to_index (
+				ecb_ews_get_timezone_from_ical_component (cbews, new_icalcomp),
+				icalproperty_get_value_as_string (prop),
+				new_icalcomp,
+				error);
+
+			if (index == 0) {
+				success = FALSE;
+			} else {
+				success = e_ews_connection_delete_item_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM, &item_id, index,
+					EWS_HARD_DELETE, EWS_SEND_TO_NONE, EWS_ALL_OCCURRENCES, cancellable, error);
+			}
+		}
+
+		g_slist_free (exceptions);
+	}
+
+	if (success) {
+		EwsCalendarConvertData convert_data = { 0 };
+		CamelEwsSettings *ews_settings;
+		const gchar *send_meeting_invitations;
+		const gchar *send_or_save;
+
+		ews_settings = ecb_ews_get_collection_settings (cbews);
+
+		convert_data.connection = cbews->priv->cnc;
+		convert_data.user_email = camel_ews_settings_dup_email (ews_settings);
+		convert_data.comp = comp;
+		convert_data.old_comp = oldcomp;
+		convert_data.item_id = itemid;
+		convert_data.change_key = changekey;
+		convert_data.default_zone = icaltimezone_get_utc_timezone ();
+
+		if (e_cal_component_has_attendees (comp)) {
+			send_meeting_invitations = "SendToAllAndSaveCopy";
+			send_or_save = "SendAndSaveCopy";
+		} else {
+			/*In case of appointment we have to set SendMeetingInvites to SendToNone */
+			send_meeting_invitations = "SendToNone";
+			send_or_save = "SaveOnly";
+		}
+
+		success = e_ews_connection_update_items_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM,
+			"AlwaysOverwrite", send_or_save, send_meeting_invitations, cbews->priv->folder_id,
+			e_cal_backend_ews_convert_component_to_updatexml, &convert_data,
+			NULL, cancellable, error);
+
+		g_free (convert_data.user_email);
+	}
+
+	g_slist_free_full (added_attachments, (GDestroyNotify) e_ews_attachment_info_free);
+	g_clear_object (&oldcomp);
+	g_clear_object (&comp);
+	g_free (changekey);
+	g_free (itemid);
+
+	return success;
+}
+
+static gboolean
+ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
+			     gboolean overwrite_existing,
+			     EConflictResolution conflict_resolution,
+			     const GSList *instances,
+			     const gchar *extra,
+			     gchar **out_new_uid,
+			     gchar **out_new_extra,
+			     GCancellable *cancellable,
+			     GError **error)
+{
+	ECalBackendEws *cbews;
+	ECalCache *cal_cache;
+	ECalComponent *master = NULL;
+	EwsFolderId *fid;
+	GSList *link;
+	const gchar *uid = NULL;
+	gboolean success = TRUE;
+
+	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (meta_backend), FALSE);
+
+	cbews = E_CAL_BACKEND_EWS (meta_backend);
+
+	for (link = (GSList *) instances; link && !master; link = g_slist_next (link)) {
+		master = link->data;
+
+		if (!master)
+			continue;
+
+		if (e_cal_component_is_instance (master))
+			master = NULL;
+	}
+
+	if (!master) {
+		g_propagate_error (error, EDC_ERROR (InvalidObject));
+		return FALSE;
+	}
+
+	cal_cache = e_cal_meta_backend_ref_cache (meta_backend);
+	g_return_val_if_fail (cal_cache != NULL, FALSE);
+
+	g_rec_mutex_lock (&cbews->priv->cnc_lock);
+
+	e_cal_component_get_uid (master, &uid);
+	fid = e_ews_folder_id_new (cbews->priv->folder_id, NULL, FALSE);
+
+	if (overwrite_existing) {
+		GSList *existing = NULL, *changed_instances = NULL, *removed_instances = NULL;
+
+		success = uid && e_cal_cache_get_components_by_uid (cal_cache, uid, &existing, cancellable, error) && existing;
+
+		if (success)
+			ecb_ews_filter_out_unchanged_instances (instances, existing, &changed_instances, &removed_instances);
+
+		if (success) {
+			for (link = changed_instances; link && success; link = g_slist_next (link)) {
+				ChangeData *cd = link->data;
+
+				if (!cd)
+					continue;
+
+				success = ecb_ews_modify_item_sync (cbews,
+					e_cal_component_get_icalcomponent (cd->old_component ? cd->old_component : master),
+					e_cal_component_get_icalcomponent (cd->new_component),
+					cancellable, error);
+			}
+
+			for (link = removed_instances; link && success; link = g_slist_next (link)) {
+				ECalComponent *comp = link->data;
+				ECalComponentId *id = NULL;
+
+				if (!comp)
+					continue;
+
+				id = e_cal_component_get_id (comp);
+
+				if (id) {
+					success = ecb_ews_remove_item_sync (cbews, cal_cache, id->uid, id->rid, cancellable, error);
+					e_cal_component_free_id (id);
+				}
+			}
+		}
+
+		if (success)
+			ecb_ews_extract_item_id (master, out_new_uid, NULL);
+
+		g_slist_free_full (existing, g_object_unref);
+		g_slist_free_full (changed_instances, change_data_free);
+		g_slist_free_full (removed_instances, g_object_unref);
+	} else {
+		EwsCalendarConvertData convert_data = { 0 };
+		EEwsItem *item = NULL;
+		const EwsId *ews_id = NULL;
+		const gchar *send_meeting_invitations;
+		icalcomponent *icalcomp;
+		icalproperty *prop;
+		GSList *items = NULL;
+
+		icalcomp = icalcomponent_new_clone (e_cal_component_get_icalcomponent (master));
+
+		e_ews_clean_icalcomponent (icalcomp);
+
+		if (!e_ews_connection_satisfies_server_version (cbews->priv->cnc, E_EWS_EXCHANGE_2010))
+			ecb_ews_pick_all_tzids_out (cbews, icalcomp);
+
+		/*
+		 * In case we are creating a meeting with attendees and attachments.
+		 * We have to preform 3 steps in order to allow attendees to receive attachments in their invite mails.
+		 * 1. create meeting and do not send invites
+		 * 2. create attachments
+		 * 3. dummy update meeting and send invites to all
+		 */
+		if (e_cal_component_has_attendees (master)) {
+			if (e_cal_component_has_attachments (master))
+				send_meeting_invitations = "SendToNone";
+			else
+				send_meeting_invitations = "SendToAllAndSaveCopy";
+		} else {
+			/* In case of appointment we have to set SendMeetingInvites to SendToNone */
+			send_meeting_invitations = "SendToNone";
+		}
+
+		convert_data.connection = cbews->priv->cnc;
+		convert_data.icalcomp = icalcomp;
+		convert_data.default_zone = icaltimezone_get_utc_timezone ();
+
+		success = e_ews_connection_create_items_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM, "SaveOnly", send_meeting_invitations,
+			fid, e_cal_backend_ews_convert_calcomp_to_xml, &convert_data,
+			&items, cancellable, error);
+
+		if (success && items) {
+			item = items->data;
+			if (item) {
+				g_object_ref (item);
+
+				ews_id = e_ews_item_get_id (item);
+			}
+		}
+
+		if (success && item && e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_EVENT) {
+			EEwsAdditionalProps *add_props;
+			GSList *items, *items_req = NULL;
+
+			add_props = e_ews_additional_props_new ();
+			add_props->field_uri = g_strdup ("calendar:UID");
+
+			items = g_slist_append (NULL, ews_id->id);
+
+			/* get calender uid from server*/
+			success = e_ews_connection_get_items_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM,
+				items, "IdOnly", add_props, FALSE, NULL, E_EWS_BODY_TYPE_TEXT,
+				&items_req, NULL, NULL, cancellable, error) && items_req != NULL;
+
+			e_ews_additional_props_free (add_props);
+
+			if (success) {
+				g_clear_object (&item);
+
+				item = items_req->data;
+				ews_id = NULL;
+
+				if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR) {
+					g_propagate_error (error, g_error_copy (e_ews_item_get_error (item)));
+					item = NULL;
+					success = FALSE;
+				} else {
+					item = g_object_ref (item);
+					ews_id = e_ews_item_get_id (item);
+				}
+			}
+
+			g_slist_free_full (items_req, g_object_unref);
+			g_slist_free (items);
+		}
+
+		/* attachments */
+		if (success && e_cal_component_has_attachments (master) > 0) {
+			GSList *info_attachments = NULL;
+
+			if (ecb_ews_extract_attachments (icalcomp, &info_attachments)) {
+				GSList *ids = NULL;
+
+				success = e_ews_connection_create_attachments_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM,
+					ews_id, info_attachments, FALSE, NULL, &ids, cancellable, error);
+
+				g_slist_free_full (info_attachments, (GDestroyNotify) e_ews_attachment_info_free);
+				g_slist_free_full (ids, g_free);
+			}
+		}
+
+		if (success && icalcomponent_get_first_property (icalcomp, ICAL_RRULE_PROPERTY)) {
+			GSList *exceptions = NULL;
+
+			/* Excluded occurrences */
+			for (prop = icalcomponent_get_first_property (icalcomp, ICAL_EXDATE_PROPERTY);
+			     prop;
+			     prop = icalcomponent_get_next_property (icalcomp, ICAL_EXDATE_PROPERTY)) {
+				exceptions = g_slist_prepend (exceptions, g_strdup (icalproperty_get_value_as_string (prop)));
+			}
+
+			for (link = exceptions; link && success; link = g_slist_next (link)) {
+				success = ecb_ews_remove_item_sync (cbews, cal_cache, uid, link->data, cancellable, error);
+			}
+
+			g_slist_free_full (exceptions, g_free);
+		}
+
+		if (success && e_cal_component_has_attendees (master) && e_cal_component_has_attachments (master)) {
+			if (ews_id) {
+				e_cal_util_set_x_property (icalcomp, "X-EVOLUTION-ITEMID", ews_id->id);
+				e_cal_util_set_x_property (icalcomp, "X-EVOLUTION-CHANGEKEY", ews_id->change_key);
+			}
+
+			/* In case we have attendees and atachemnts we have to fake update items,
+			 * this is the only way to pass attachments in meeting invite mail */
+			success = ecb_ews_modify_item_sync (cbews, NULL, icalcomp, cancellable, error);
+		}
+
+		icalcomponent_free (icalcomp);
+		g_clear_object (&item);
+
+		for (link = (GSList *) instances; link && success; link = g_slist_next (link)) {
+			ECalComponent *comp = link->data;
+
+			if (comp == master)
+				continue;
+
+			icalcomp = e_cal_component_get_icalcomponent (comp);
+
+			success = ecb_ews_modify_item_sync (cbews, NULL, icalcomp, cancellable, error);
+		}
+
+		if (success && items) {
+			EEwsItem *item = items->data;
+			const EwsId *item_id;
+
+			item_id = e_ews_item_get_id (item);
+			*out_new_uid = g_strdup (item_id->id);
+		}
+
+		g_slist_free_full (items, g_object_unref);
+	}
+
+	g_rec_mutex_unlock (&cbews->priv->cnc_lock);
+
+	g_clear_object (&cal_cache);
+	e_ews_folder_id_free (fid);
+
+	ecb_ews_convert_error_to_edc_error (error);
+
+	return success;
+}
+
+static gboolean
+ecb_ews_remove_component_sync (ECalMetaBackend *meta_backend,
+			       EConflictResolution conflict_resolution,
+			       const gchar *uid,
+			       const gchar *extra,
+			       const gchar *object,
+			       GCancellable *cancellable,
+			       GError **error)
+{
+	ECalBackendEws *cbews;
+	ECalComponent *comp;
+	EwsId item_id;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (meta_backend), FALSE);
+	g_return_val_if_fail (object != NULL, FALSE);
+
+	cbews = E_CAL_BACKEND_EWS (meta_backend);
+
+	comp = e_cal_component_new_from_string (object);
+	if (!comp) {
+		g_propagate_error (error, EDC_ERROR (InvalidObject));
+		return FALSE;
+	}
+
+	g_rec_mutex_lock (&cbews->priv->cnc_lock);
+
+	ecb_ews_extract_item_id (comp, &item_id.id, &item_id.change_key);
+
+	success = e_ews_connection_delete_item_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM, &item_id, 0, EWS_HARD_DELETE,
+		ecb_ews_is_organizer (cbews, comp) ? EWS_SEND_TO_ALL_AND_SAVE_COPY : EWS_SEND_TO_NONE,
+		EWS_ALL_OCCURRENCES, cancellable, error);
+
+	g_free (item_id.id);
+	g_free (item_id.change_key);
+
+	g_rec_mutex_unlock (&cbews->priv->cnc_lock);
+
+	ecb_ews_convert_error_to_edc_error (error);
+	g_object_unref (comp);
+
+	return success;
+}
+
+static void
+ecb_ews_discard_alarm_sync (ECalBackendSync *cal_backend_sync,
+			    EDataCal *cal,
+			    GCancellable *cancellable,
+			    const gchar *uid,
+			    const gchar *rid,
+			    const gchar *auid,
+			    GError **error)
+{
+	ECalBackendEws *cbews;
+	ECalCache *cal_cache;
+	ECalComponent *comp = NULL;
+	EwsCalendarConvertData convert_data = { 0 };
+
+	g_return_if_fail (E_IS_CAL_BACKEND_EWS (cal_backend_sync));
+
+	cbews = E_CAL_BACKEND_EWS (cal_backend_sync);
+
+	cal_cache = e_cal_meta_backend_ref_cache (E_CAL_META_BACKEND (cbews));
+	g_return_if_fail (cal_cache != NULL);
+
+	if (!e_cal_cache_get_component (cal_cache, uid, NULL, &comp, cancellable, NULL) || !comp) {
+		g_object_unref (cal_cache);
+		g_propagate_error (error, EDC_ERROR (ObjectNotFound));
 		return;
 	}
 
-	PRIV_UNLOCK (priv);
+	g_object_unref (cal_cache);
 
-	if (!cbews->priv->cnc) {
-		e_data_cal_respond_discard_alarm (cal, context, EDC_ERROR (RepositoryOffline));
+	if (!e_cal_meta_backend_ensure_connected_sync (E_CAL_META_BACKEND (cbews), cancellable, error)) {
+		g_clear_object (&comp);
 		return;
 	}
-
-	if (!cal_backend_ews_ensure_connected (cbews, cancellable, &local_error)) {
-		convert_error_to_edc_error (&local_error);
-		e_data_cal_respond_discard_alarm (cal, context, local_error);
-		return;
-	}
-
-	/* FIXME: Can't there be multiple alarms for each event? Or does
-	 * Exchange not support that? */
-	edad = g_new0 (EwsCalendarAsyncData, 1);
-	edad->cbews = g_object_ref (cbews);
-	edad->cancellable = cal_backend_ews_ref_cancellable (cbews);
-	edad->cal = g_object_ref (cal);
-	edad->context = context;
 
 	if (e_cal_component_has_recurrences (comp)) {
 		gint *index;
@@ -463,1784 +2704,122 @@ e_cal_backend_ews_discard_alarm (ECalBackend *backend,
 		convert_data.index = -1;
 	}
 
-	ews_cal_component_get_item_id (comp, &convert_data.item_id, &convert_data.change_key);
+	ecb_ews_extract_item_id (comp, &convert_data.item_id, &convert_data.change_key);
 
-	e_ews_connection_update_items (
-		priv->cnc, EWS_PRIORITY_MEDIUM,
+	if (e_ews_connection_update_items_sync (
+		cbews->priv->cnc, EWS_PRIORITY_MEDIUM,
 		"AlwaysOverwrite", NULL,
 		"SendToNone", NULL,
 		e_cal_backend_ews_clear_reminder_is_set,
 		&convert_data,
-		edad->cancellable,
-		ews_cal_discard_alarm_cb,
-		edad);
-}
-
-static gchar *
-cal_backend_ews_get_builtin_zone_object (const gchar *tzid)
-{
-	icalcomponent *icalcomp = NULL, *free_comp = NULL;
-	icaltimezone *zone;
-	gchar *object = NULL;
-
-	zone = icaltimezone_get_builtin_timezone (tzid);
-	if (!zone) {
-		icalcomp = free_comp = icaltzutil_fetch_timezone (tzid);
-	}
-
-	if (zone)
-		icalcomp = icaltimezone_get_component (zone);
-
-	if (icalcomp) {
-		icalcomponent *clone = icalcomponent_new_clone (icalcomp);
-		icalproperty *prop;
-
-		prop = icalcomponent_get_first_property (clone, ICAL_TZID_PROPERTY);
-		if (prop) {
-			/* change tzid to our, because the component has the buildin tzid */
-			icalproperty_set_tzid (prop, tzid);
-
-			object = icalcomponent_as_ical_string_r (clone);
-		}
-		icalcomponent_free (clone);
-	}
-
-	if (free_comp)
-		icalcomponent_free (free_comp);
-
-	return object;
-}
-
-static void
-e_cal_backend_ews_get_timezone (ECalBackend *backend,
-                                EDataCal *cal,
-                                guint32 context,
-                                GCancellable *cancellable,
-                                const gchar *tzid)
-{
-	ETimezoneCache *timezone_cache;
-	icalcomponent *icalcomp;
-	icaltimezone *zone;
-	gchar *object = NULL;
-	GError *error = NULL;
-
-	timezone_cache = E_TIMEZONE_CACHE (backend);
-
-	zone = e_timezone_cache_get_timezone (timezone_cache, tzid);
-	if (zone) {
-		icalcomp = icaltimezone_get_component (zone);
-
-		if (!icalcomp)
-			g_propagate_error (&error, e_data_cal_create_error (InvalidObject, NULL));
-		else
-			object = icalcomponent_as_ical_string_r (icalcomp);
-	} else {
-		/* TODO Implement in ECalBackend base class */
-		/* fallback if tzid contains only the location of timezone */
-		gint i, slashes = 0;
-
-		for (i = 0; tzid[i]; i++) {
-			if (tzid[i] == '/')
-				slashes++;
-		}
-
-		if (slashes == 1)
-			object = cal_backend_ews_get_builtin_zone_object (tzid);
-
-		if (!object) {
-			/* The timezone can be sometimes the Windows zone, try to convert it to libical */
-			const gchar *ical_location = e_cal_backend_ews_tz_util_get_ical_equivalent (tzid);
-			if (ical_location) {
-				object = cal_backend_ews_get_builtin_zone_object (ical_location);
-			}
-		}
-	}
-
-	if (!object && !error)
-		g_propagate_error (&error, e_data_cal_create_error (ObjectNotFound, NULL));
-
-	convert_error_to_edc_error (&error);
-	e_data_cal_respond_get_timezone (cal, context, error, object);
-	g_free (object);
-
-}
-
-/* changekey can be NULL if you don't want it. itemid cannot. */
-static void
-ews_cal_component_get_item_id (ECalComponent *comp,
-                               gchar **itemid,
-                               gchar **changekey)
-{
-	icalproperty *prop;
-	gchar *ck = NULL;
-	gchar *id = NULL;
-
-	prop = icalcomponent_get_first_property (
-		e_cal_component_get_icalcomponent (comp),
-		ICAL_X_PROPERTY);
-	while (prop) {
-		const gchar *x_name, *x_val;
-
-		x_name = icalproperty_get_x_name (prop);
-		x_val = icalproperty_get_x (prop);
-		if (!id && !g_ascii_strcasecmp (x_name, "X-EVOLUTION-ITEMID"))
-			id = g_strdup (x_val);
-		 else if (changekey && !ck && !g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY"))
-			ck = g_strdup (x_val);
-
-		prop = icalcomponent_get_next_property (
-			e_cal_component_get_icalcomponent (comp),
-			ICAL_X_PROPERTY);
-	}
-
-	*itemid = id;
-	if (changekey)
-		*changekey = ck;
-}
-
-/* changekey can be NULL if you don't want it. itemid cannot. */
-static void
-ews_cal_component_get_calendar_item_accept_id (ECalComponent *comp,
-                                               gchar **itemid,
-                                               gchar **changekey,
-					       gchar **mail_id)
-{
-	icalproperty *prop;
-	gchar *id_item = NULL;
-	gchar *id_accept = NULL;
-	gchar *ck = NULL;
-
-	prop = icalcomponent_get_first_property (
-		e_cal_component_get_icalcomponent (comp),
-		ICAL_X_PROPERTY);
-	while (prop) {
-		const gchar *x_name, *x_val;
-
-		x_name = icalproperty_get_x_name (prop);
-		x_val = icalproperty_get_x (prop);
-		if (!id_item && g_ascii_strcasecmp (x_name, "X-EVOLUTION-ITEMID") == 0)
-			id_item = g_strdup (x_val);
-		else if (!id_accept && g_ascii_strcasecmp (x_name, "X-EVOLUTION-ACCEPT-ID") == 0)
-			id_accept = g_strdup (x_val);
-		else if (changekey && !ck && !g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY"))
-			ck = g_strdup (x_val);
-
-		prop = icalcomponent_get_next_property (
-			e_cal_component_get_icalcomponent (comp),
-			ICAL_X_PROPERTY);
-	}
-
-	if (!id_item)
-		id_item = g_strdup (id_accept);
-
-	*itemid = id_item;
-	*mail_id = id_accept;
-	if (changekey)
-		*changekey = ck;
-}
-
-static void
-add_comps_to_item_id_hash (ECalBackendEws *cbews)
-{
-	ECalBackendEwsPrivate *priv;
-	GSList *comps, *l;
-
-	priv = cbews->priv;
-
-	PRIV_LOCK (priv);
-
-	comps = e_cal_backend_store_get_components (priv->store);
-	for (l = comps; l != NULL; l = g_slist_next (l)) {
-		ECalComponent *comp = (ECalComponent *)	l->data;
-		gchar *item_id = NULL;
-
-		ews_cal_component_get_item_id (comp, &item_id, NULL);
-		if (!item_id) {
-			const gchar *uid;
-
-			/* This should never happen, but sometimes when our
-			 * use of X- fields has changed it has triggered. Make
-			 * it cope, and not crash */
-			e_cal_component_get_uid (comp, &uid);
-			g_warning (
-				"EWS calendar item %s had no EWS ItemID!",
-				uid);
-			continue;
-		}
-		g_hash_table_insert (priv->item_id_hash, item_id, comp);
-	}
-
-	PRIV_UNLOCK (priv);
-
-	g_slist_free (comps);
-}
-
-static gpointer
-handle_notifications_thread (gpointer data)
-{
-	ECalBackendEws *cbews = data;
-
-	PRIV_LOCK (cbews->priv);
-
-	if (cbews->priv->cnc == NULL)
-		goto exit;
-
-	if (cbews->priv->listen_notifications) {
-		GSList *folders = NULL;
-
-		if (cbews->priv->subscription_key != 0)
-			goto exit;
-
-		folders = g_slist_prepend (folders, cbews->priv->folder_id);
-
-		e_ews_connection_enable_notifications_sync (
-				cbews->priv->cnc,
-				folders,
-				&cbews->priv->subscription_key);
-
-		g_slist_free (folders);
-	} else {
-		if (cbews->priv->subscription_key == 0)
-			goto exit;
-
-		e_ews_connection_disable_notifications_sync (
-				cbews->priv->cnc,
-				cbews->priv->subscription_key);
-
-		cbews->priv->subscription_key = 0;
-	}
-
-exit:
-	PRIV_UNLOCK (cbews->priv);
-	g_object_unref (cbews);
-	return NULL;
-}
-
-static void
-cbews_listen_notifications_cb (ECalBackendEws *cbews,
-			       GParamSpec *spec,
-			       CamelEwsSettings *ews_settings)
-{
-	GThread *thread;
-
-	PRIV_LOCK (cbews->priv);
-	if (cbews->priv->cnc == NULL) {
-		PRIV_UNLOCK (cbews->priv);
-		return;
-	}
-
-	if (!e_ews_connection_satisfies_server_version (cbews->priv->cnc, E_EWS_EXCHANGE_2010_SP1)) {
-		PRIV_UNLOCK (cbews->priv);
-		return;
-	}
-
-	cbews->priv->listen_notifications = !cbews->priv->is_freebusy_calendar && camel_ews_settings_get_listen_notifications (ews_settings);
-	PRIV_UNLOCK (cbews->priv);
-
-	thread = g_thread_new (NULL, handle_notifications_thread, g_object_ref (cbews));
-	g_thread_unref (thread);
-}
-
-static void
-cbews_server_notification_cb (ECalBackendEws *cbews,
-			      GSList *events,
-			      EEwsConnection *cnc)
-{
-	GSList *l;
-	gboolean update_folder = FALSE;
-
-	g_return_if_fail (cbews != NULL);
-	g_return_if_fail (cbews->priv != NULL);
-
-	for (l = events; l != NULL; l = l->next) {
-		EEwsNotificationEvent *event = l->data;
-
-		switch (event->type) {
-			case E_EWS_NOTIFICATION_EVENT_CREATED:
-			case E_EWS_NOTIFICATION_EVENT_DELETED:
-			case E_EWS_NOTIFICATION_EVENT_MODIFIED:
-				PRIV_LOCK (cbews->priv);
-				if (g_strcmp0 (event->folder_id, cbews->priv->folder_id) == 0)
-					update_folder = TRUE;
-				PRIV_UNLOCK (cbews->priv);
-				break;
-			case E_EWS_NOTIFICATION_EVENT_MOVED:
-			case E_EWS_NOTIFICATION_EVENT_COPIED:
-				PRIV_LOCK (cbews->priv);
-				if (g_strcmp0 (event->folder_id, cbews->priv->folder_id) == 0 ||
-				    g_strcmp0 (event->old_folder_id, cbews->priv->folder_id) == 0)
-					update_folder = TRUE;
-				PRIV_UNLOCK (cbews->priv);
-				break;
-			default:
-				return;
-		}
-	}
-
-	if (update_folder)
-		ews_start_sync (cbews);
-}
-
-static void
-e_cal_backend_ews_open (ECalBackend *backend,
-                        EDataCal *cal,
-                        guint32 opid,
-                        GCancellable *cancellable,
-                        gboolean only_if_exists)
-{
-	CamelEwsSettings *ews_settings;
-	ECalBackendEws *cbews;
-	ECalBackendEwsPrivate *priv;
-	ESource *source;
-	const gchar *cache_dir;
-	gboolean need_to_authenticate;
-	gboolean ret = TRUE;
-	GError *error = NULL;
-
-	if (e_cal_backend_is_opened (backend))
-		return;
-
-	cbews = (ECalBackendEws *) backend;
-	priv = cbews->priv;
-
-	cache_dir = e_cal_backend_get_cache_dir (backend);
-	source = e_backend_get_source (E_BACKEND (cbews));
-	ews_settings = cal_backend_ews_get_collection_settings (cbews);
-
-	e_source_set_connection_status (source, E_SOURCE_CONNECTION_STATUS_CONNECTING);
-
-	PRIV_LOCK (priv);
-
-	if (!priv->store) {
-		ESourceEwsFolder *extension;
-		const gchar *extension_name;
-
-		extension_name = E_SOURCE_EXTENSION_EWS_FOLDER;
-		extension = e_source_get_extension (source, extension_name);
-		priv->folder_id = e_source_ews_folder_dup_id (extension);
-		priv->is_freebusy_calendar = g_strcmp0 (priv->folder_id, "freebusy-calendar") == 0;
-
-		priv->storage_path = g_build_filename (cache_dir, priv->folder_id, NULL);
-
-		priv->store = e_cal_backend_store_new (
-			priv->storage_path,
-			E_TIMEZONE_CACHE (backend));
-		e_cal_backend_store_load (priv->store);
-		add_comps_to_item_id_hash (cbews);
-
-		if (priv->default_zone)
-			e_cal_backend_store_set_default_timezone (
-				priv->store, priv->default_zone);
-	}
-
-	need_to_authenticate =
-		(priv->cnc == NULL) &&
-		(e_backend_is_destination_reachable (E_BACKEND (backend), cancellable, NULL));
-
-	PRIV_UNLOCK (priv);
-
-	if (cbews->priv->cnc)
-		e_source_set_connection_status (source, E_SOURCE_CONNECTION_STATUS_CONNECTED);
-	else
-		e_source_set_connection_status (source, E_SOURCE_CONNECTION_STATUS_DISCONNECTED);
-
-	if (need_to_authenticate)
-		ret = cal_backend_ews_ensure_connected (cbews, cancellable, &error);
-
-	if (ret) {
-		e_cal_backend_set_writable (backend, !priv->is_freebusy_calendar);
-
-		PRIV_LOCK (priv);
-		if (priv->cnc != NULL) {
-			priv->listen_notifications = !priv->is_freebusy_calendar && camel_ews_settings_get_listen_notifications (ews_settings);
-
-			if (priv->listen_notifications)
-				cbews_listen_notifications_cb (cbews, NULL, ews_settings);
-		}
-		PRIV_UNLOCK (priv);
-	}
-
-	convert_error_to_edc_error (&error);
-	e_data_cal_respond_open (cal, opid, error);
-
-	g_signal_connect_swapped (
-		ews_settings,
-		"notify::listen-notifications",
-		G_CALLBACK (cbews_listen_notifications_cb),
-		cbews);
-}
-
-static void
-e_cal_backend_ews_get_object (ECalBackend *backend,
-                              EDataCal *cal,
-                              guint32 context,
-                              GCancellable *cancellable,
-                              const gchar *uid,
-                              const gchar *rid)
-{
-	ECalBackendEwsPrivate *priv;
-	ECalBackendEws *cbews = (ECalBackendEws *) backend;
-	gchar *object = NULL;
-	GError *error = NULL;
-
-	e_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
-
-	priv = cbews->priv;
-
-	PRIV_LOCK (priv);
-
-	if (e_backend_get_online (E_BACKEND (backend))) {
-		/* make sure any pending refreshing is done */
-		while (priv->refreshing) {
-			PRIV_UNLOCK (priv);
-			e_flag_wait (priv->refreshing_done);
-			PRIV_LOCK (priv);
-		}
-	}
-
-	/* search the object in the cache */
-	if (rid && *rid) {
-		ECalComponent *comp;
-
-		comp = e_cal_backend_store_get_component (priv->store, uid, rid);
-		if (!comp && e_backend_get_online (E_BACKEND (backend))) {
-			/* maybe a meeting invitation, for which the calendar item is not downloaded yet,
-			 * thus synchronize local cache first */
-			ews_start_sync (cbews);
-
-			PRIV_UNLOCK (priv);
-			e_flag_wait (priv->refreshing_done);
-			PRIV_LOCK (priv);
-
-			comp = e_cal_backend_store_get_component (priv->store, uid, rid);
-		}
-
-		if (comp) {
-			object = e_cal_component_get_as_string (comp);
-
-			g_object_unref (comp);
-
-			if (!object)
-				g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
-		} else {
-			g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
-		}
-	} else {
-		object = e_cal_backend_store_get_components_by_uid_as_ical_string (priv->store, uid);
-		if (!object && e_backend_get_online (E_BACKEND (backend))) {
-			/* maybe a meeting invitation, for which the calendar item is not downloaded yet,
-			 * thus synchronize local cache first */
-			ews_start_sync (cbews);
-
-			PRIV_UNLOCK (priv);
-			e_flag_wait (priv->refreshing_done);
-			PRIV_LOCK (priv);
-
-			object = e_cal_backend_store_get_components_by_uid_as_ical_string (priv->store, uid);
-		}
-
-		if (!object)
-			g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
-	}
-
-	PRIV_UNLOCK (priv);
-
- exit:
-	convert_error_to_edc_error (&error);
-	e_data_cal_respond_get_object (cal, context, error, object);
-	g_free (object);
-}
-
-static void
-cal_backend_ews_get_object_list (ECalBackend *backend,
-                                 const gchar *sexp,
-                                 GSList **objects,
-                                 GError **error)
-{
-	ECalBackendEws *cbews;
-	ECalBackendEwsPrivate *priv;
-	GSList *components, *l;
-	ECalBackendSExp *cbsexp;
-	gboolean search_needed = TRUE;
-	time_t occur_start = -1, occur_end = -1;
-	gboolean prunning_by_time;
-
-	cbews = E_CAL_BACKEND_EWS (backend);
-	priv = cbews->priv;
-
-	if (!strcmp (sexp, "#t"))
-		search_needed = FALSE;
-
-	cbsexp = e_cal_backend_sexp_new (sexp);
-	if (!cbsexp) {
-		g_propagate_error (error, EDC_ERROR (InvalidQuery));
-		return;
-	}
-
-	*objects = NULL;
-
-	prunning_by_time = e_cal_backend_sexp_evaluate_occur_times (
-		cbsexp, &occur_start, &occur_end);
-	components = prunning_by_time ?
-		e_cal_backend_store_get_components_occuring_in_range (priv->store, occur_start, occur_end)
-		: e_cal_backend_store_get_components (priv->store);
-
-	for (l = components; l != NULL; l = l->next) {
-		ECalComponent *comp = E_CAL_COMPONENT (l->data);
-
-		if (e_cal_backend_get_kind (backend) ==
-		    icalcomponent_isa (e_cal_component_get_icalcomponent (comp))) {
-			if ((!search_needed) ||
-			    (e_cal_backend_sexp_match_comp (cbsexp, comp, E_TIMEZONE_CACHE (backend)))) {
-				*objects = g_slist_append (*objects, e_cal_component_get_as_string (comp));
-			}
-		}
-	}
-
-	g_object_unref (cbsexp);
-	g_slist_free_full (components, g_object_unref);
-}
-
-static void
-e_cal_backend_ews_get_object_list (ECalBackend *backend,
-                                   EDataCal *cal,
-                                   guint32 context,
-                                   GCancellable *cancellable,
-                                   const gchar *sexp)
-{
-	GSList *objects = NULL, *l;
-	GError *error = NULL;
-
-	cal_backend_ews_get_object_list (backend, sexp, &objects, &error);
-
-	convert_error_to_edc_error (&error);
-	e_data_cal_respond_get_object_list (cal, context, error, objects);
-	if (objects) {
-		for (l = objects; l != NULL; l = g_slist_next (l))
-			g_free (l->data);
-		g_slist_free (objects);
-	}
-}
-
-static gboolean
-ews_cal_delete_comp (ECalBackendEws *cbews,
-                     ECalComponent *comp,
-                     const gchar *item_id)
-{
-	ECalBackendEwsPrivate *priv = cbews->priv;
-	ECalComponentId *uid;
-	gboolean ret;
-
-	uid = e_cal_component_get_id (comp);
-	ret = e_cal_backend_store_remove_component (priv->store, uid->uid, uid->rid);
-	if (!ret)
-		goto exit;
-
-	e_cal_backend_notify_component_removed (E_CAL_BACKEND (cbews), uid, comp, NULL);
-
-	PRIV_LOCK (priv);
-	g_hash_table_remove (priv->item_id_hash, item_id);
-	PRIV_UNLOCK (priv);
-
-exit:
-	e_cal_component_free_id (uid);
-	return ret;
-}
-
-static void
-ews_cal_append_exdate (ECalBackendEws *cbews,
-                       ECalComponent *comp,
-                       const gchar *rid,
-                       ECalObjModType mod)
-{
-	ECalComponent *old_comp;
-
-	old_comp = e_cal_component_clone (comp);
-	e_cal_util_remove_instances (e_cal_component_get_icalcomponent (comp), icaltime_from_string (rid), mod);
-
-	e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbews), old_comp, comp);
-
-	g_object_unref (old_comp);
-}
-
-static icaltimezone *
-e_cal_backend_ews_get_timezone_from_ical_component (ECalBackend *backend,
-						    icalcomponent *comp)
-{
-	ETimezoneCache *timezone_cache;
-	icalproperty *prop = NULL;
-	const gchar *tzid = NULL;
-
-	timezone_cache = E_TIMEZONE_CACHE (backend);
-
-	prop = icalcomponent_get_first_property (comp, ICAL_DTSTART_PROPERTY);
-	if (prop != NULL) {
-		icalparameter *param = NULL;
-
-		param = icalproperty_get_first_parameter (prop, ICAL_TZID_PARAMETER);
-		if (param != NULL) {
-			tzid = icalparameter_get_tzid (param);
-		} else {
-			struct icaltimetype dtstart;
-
-			dtstart = icalproperty_get_dtstart (prop);
-			if (dtstart.is_utc)
-				tzid = "UTC";
-		}
-	}
-
-	if (tzid != NULL)
-		return e_timezone_cache_get_timezone (timezone_cache, tzid);
-
-	return NULL;
-}
-
-static void
-ews_cal_remove_object_cb (GObject *object,
-                          GAsyncResult *res,
-                          gpointer user_data)
-{
-	EwsCalendarAsyncData *remove_data = user_data;
-	GSimpleAsyncResult *simple;
-	GError *error = NULL;
-
-	simple = G_SIMPLE_ASYNC_RESULT (res);
-
-	if (!g_simple_async_result_propagate_error (simple, &error) || error->code == EWS_CONNECTION_ERROR_ITEMNOTFOUND) {
-		/* remove detached instances first */
-		if (remove_data->mod == E_CAL_OBJ_MOD_ALL) {
-			ECalBackendEws *cbews = remove_data->cbews;
-			GSList *with_detached, *iter;
-
-			with_detached = e_cal_backend_store_get_components_by_uid (cbews->priv->store, remove_data->uid);
-			for (iter = with_detached; iter; iter = g_slist_next (iter)) {
-				ECalComponent *comp;
-				ECalComponentId *id;
-
-				comp = iter->data;
-				id = e_cal_component_get_id (comp);
-
-				/* notify separately only detached instances - the master object will be removed below */
-				if (id && id->rid && *id->rid &&
-				    e_cal_backend_store_remove_component (cbews->priv->store, id->uid, id->rid)) {
-					gchar *item_id = NULL;
-
-					e_cal_backend_notify_component_removed (E_CAL_BACKEND (cbews), id, comp, NULL);
-
-					ews_cal_component_get_item_id (comp, &item_id, NULL);
-					if (item_id) {
-						PRIV_LOCK (cbews->priv);
-						g_hash_table_remove (cbews->priv->item_id_hash, item_id);
-						PRIV_UNLOCK (cbews->priv);
-
-						g_free (item_id);
-					}
-				}
-
-				e_cal_component_free_id (id);
-			}
-
-			g_slist_free_full (with_detached, g_object_unref);
-		}
-
-		/* FIXME: This is horrid. Will bite us when we start to delete
-		 * more than one item at a time... */
-		if (remove_data->comp != NULL)
-			ews_cal_delete_comp (remove_data->cbews, remove_data->comp, remove_data->item_id);
-		if (remove_data->extra_comp != NULL)
-			ews_cal_append_exdate (
-				remove_data->cbews, remove_data->extra_comp, remove_data->rid, remove_data->mod);
-	}
-
-	convert_error_to_edc_error (&error);
-
-	if (remove_data->context)
-		e_data_cal_respond_remove_objects (remove_data->cal, remove_data->context, error, NULL, NULL, NULL);
-	else if (error) {
-		g_warning ("Remove object error :  %s\n", error->message);
-		g_clear_error (&error);
-	}
-
-	e_cal_backend_ews_async_data_free (remove_data);
-}
-
-static gboolean
-e_cal_backend_ews_is_organizer (ECalBackendEws *cbews,
-				ECalComponent *instance_comp,
-				ECalComponent *parent_comp)
-{
-	ECalComponent *comp;
-	gboolean is_organizer = FALSE;
-
-	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (cbews), FALSE);
-
-	comp = instance_comp ? instance_comp : parent_comp;
-	if (!comp)
-		return FALSE;
-
-	PRIV_LOCK (cbews->priv);
-
-	if (e_cal_component_has_organizer (comp)) {
-		ECalComponentOrganizer organizer;
-
-		organizer.value = NULL;
-
-		e_cal_component_get_organizer (comp, &organizer);
-		if (organizer.value) {
-			const gchar *email = organizer.value;
-
-			if (!g_ascii_strncasecmp (email, "mailto:", 7))
-				email += 7;
-
-			is_organizer = cbews->priv->user_email && g_ascii_strcasecmp (email, cbews->priv->user_email) == 0;
-		}
-	}
-
-	PRIV_UNLOCK (cbews->priv);
-
-	return is_organizer;
-}
-
-static void
-e_cal_backend_ews_remove_object (ECalBackend *backend,
-                                 EDataCal *cal,
-                                 guint32 context,
-                                 GCancellable *cancellable,
-                                 const gchar *uid,
-                                 const gchar *rid,
-                                 ECalObjModType mod)
-{
-	EwsCalendarAsyncData *remove_data;
-	ECalBackendEws *cbews = (ECalBackendEws *) backend;
-	ECalBackendEwsPrivate *priv;
-	ECalComponent *comp = NULL, *parent = NULL;
-	GError *error = NULL;
-	EwsId item_id;
-	guint index = 0;
-
-	/* There are 3 scenarios where this function is called:
-	 * 1. An item with no recurrence - rid is NULL. Nothing special here.
-	 * 2. A modified occurrence of a recurring event - rid isnt NULL. The store will contain the object which will have to be removed from it.
-	 * 3. A non modified occurrence of a recurring event - rid isnt NULL. The store will only have a reference to the master event.
-	 *        This is actually an update event where an exception date will have to be appended to the master. 
-	 */
-	e_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (cbews), InvalidArg);
-
-	if (!cbews->priv->cnc) {
-		e_data_cal_respond_remove_objects (cal, context, EDC_ERROR (RepositoryOffline), NULL, NULL, NULL);
-		return;
-	}
-
-	if (!cal_backend_ews_ensure_connected (cbews, cancellable, &error)) {
-		convert_error_to_edc_error (&error);
-		e_data_cal_respond_remove_objects (cal, context, error, NULL, NULL, NULL);
-		return;
-	}
-
-	priv = cbews->priv;
-
-	PRIV_LOCK (priv);
-
-	comp = e_cal_backend_store_get_component (priv->store, uid, rid);
-
-	if (!rid || !*rid)
-		rid = NULL;
-
-	if (rid) {
-		parent = e_cal_backend_store_get_component (priv->store, uid, NULL);
-		if (!parent && !comp) {
-			g_warning ("EEE Cant find master component with uid:%s\n", uid);
-			g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
-			PRIV_UNLOCK (priv);
-			goto exit;
-		}
-	}
-
-	if (!comp && !parent) {
-		g_warning ("EEE Cant find component with uid:%s & rid:%s\n", uid, rid);
-		g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
-		PRIV_UNLOCK (priv);
-		goto exit;
-	}
-
-	ews_cal_component_get_item_id ((comp ? comp : parent), &item_id.id, &item_id.change_key);
-
-	PRIV_UNLOCK (priv);
-
-	if (!item_id.id) {
-		g_propagate_error (
-			&error, EDC_ERROR_EX (OtherError,
-			"Cannot determine EWS ItemId"));
-		goto exit;
-	}
-
-	if (parent && !comp) {
-		index = e_cal_backend_ews_rid_to_index (
-			e_cal_backend_ews_get_timezone_from_ical_component (
-				backend,
-				e_cal_component_get_icalcomponent (parent)),
-			rid,
-			e_cal_component_get_icalcomponent (parent),
-			&error);
-
-		if (error != NULL)
-			goto exit;
-	}
-
-	remove_data = g_new0 (EwsCalendarAsyncData, 1);
-	remove_data->cbews = g_object_ref (cbews);
-	remove_data->cancellable = cal_backend_ews_ref_cancellable (cbews);
-	remove_data->comp = comp != NULL ? g_object_ref (comp) : NULL;
-	remove_data->extra_comp = parent != NULL ? g_object_ref (parent) : NULL;
-	remove_data->cal = g_object_ref (cal);
-	remove_data->context = context;
-	remove_data->item_id = g_strdup (item_id.id);
-	remove_data->uid = g_strdup (uid);
-	remove_data->rid = (rid ? g_strdup (rid) : NULL);
-	remove_data->mod = mod;
-
-	e_ews_connection_delete_item (
-		priv->cnc, EWS_PRIORITY_MEDIUM, &item_id, index, EWS_HARD_DELETE,
-		e_cal_backend_ews_is_organizer (cbews, comp, parent) ? EWS_SEND_TO_ALL_AND_SAVE_COPY : EWS_SEND_TO_NONE,
-		EWS_ALL_OCCURRENCES, remove_data->cancellable,
-		ews_cal_remove_object_cb,
-		remove_data);
-
-	return;
-
-exit:
-	if (comp != NULL)
-		g_object_unref (comp);
-
-	if (parent != NULL)
-		g_object_unref (parent);
-
-	convert_error_to_edc_error (&error);
-
-	if (context)
-		e_data_cal_respond_remove_objects (cal, context, error, NULL, NULL, NULL);
-	else if (error != NULL) {
-		g_warning ("Remove object error :  %s\n", error->message);
-		g_clear_error (&error);
-	}
-}
-
-static void
-e_cal_backend_ews_remove_objects (ECalBackend *backend,
-                                  EDataCal *cal,
-                                  guint32 context,
-                                  GCancellable *cancellable,
-                                  const GSList *ids,
-                                  ECalObjModType mod)
-{
-	GError *error = NULL;
-	const ECalComponentId *id;
-
-	if (!ids) {
-		if (context) {
-			g_propagate_error (&error, EDC_ERROR (InvalidArg));
-			e_data_cal_respond_remove_objects (cal, context, error, NULL, NULL, NULL);
-		}
-		return;
-	}
-
-	if (ids->next) {
-		if (context) {
-			g_propagate_error (&error, EDC_ERROR_EX (UnsupportedMethod, _("EWS does not support bulk removals")));
-			e_data_cal_respond_remove_objects (cal, context, error, NULL, NULL, NULL);
-		}
-		return;
-	}
-
-	id = ids->data;
-	if (!id) {
-		if (context) {
-			g_propagate_error (&error, EDC_ERROR (InvalidArg));
-			e_data_cal_respond_remove_objects (cal, context, error, NULL, NULL, NULL);
-		}
-		return;
-	}
-
-	e_cal_backend_ews_remove_object (backend, cal, context, cancellable, id->uid, id->rid, mod);
-}
-
-static icaltimezone * resolve_tzid (const gchar *tzid, gpointer user_data);
-static void put_component_to_store (ECalBackendEws *cbews,ECalComponent *comp);
-
-static void
-e_cal_backend_ews_modify_object (ECalBackend *backend,
-                                 EDataCal *cal,
-                                 guint32 context,
-                                 GCancellable *cancellable,
-                                 const gchar *calobj,
-                                 ECalObjModType mod);
-
-static void ews_cal_modify_object_cb (GObject *object,
-                                 GAsyncResult *res,
-                                 gpointer user_data);
-
-static void
-ews_create_attachments_cb (GObject *object,
-                                 GAsyncResult *res,
-                                 gpointer user_data)
-{
-	EEwsConnection *cnc = E_EWS_CONNECTION (object);
-	EwsCalendarAsyncData *create_data = user_data;
-	ECalBackendEwsPrivate *priv = create_data->cbews->priv;
-	gchar *change_key;
-	GSList *ids, *i;
-	GError *error = NULL;
-	icalproperty *icalprop;
-	icalcomponent *icalcomp;
-	icalparameter *icalparam;
-	const gchar *comp_uid;
-
-	if (!e_ews_connection_create_attachments_finish (cnc, &change_key, &ids, res, &error)) {
-		g_warning ("Error while creating attachments: %s\n", error ? error->message : "Unknown error");
-		if (error != NULL)
-			g_clear_error (&error);
-
-		e_cal_backend_ews_async_data_free (create_data);
-
-		return;
-	}
-
-	/* get exclusive access to the store */
-	e_cal_backend_store_freeze_changes (priv->store);
-
-	/* Update change key. id remains the same, but change key changed.*/
-	icalcomp = e_cal_component_get_icalcomponent (create_data->comp);
-	icalprop = icalcomponent_get_first_property (icalcomp, ICAL_X_PROPERTY);
-	while (icalprop) {
-		const gchar *x_name;
-		x_name = icalproperty_get_x_name (icalprop);
-		if (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY")) {
-			icalproperty_set_value_from_string (icalprop, change_key, "NO");
-			break;
-		}
-		icalprop = icalcomponent_get_next_property (icalcomp, ICAL_X_PROPERTY);
-	}
-
-	icalprop = icalcomponent_get_first_property (icalcomp, ICAL_ATTACH_PROPERTY);
-	i = ids;
-	for (; i && icalprop; i = i->next, icalprop = icalcomponent_get_next_property (icalcomp, ICAL_ATTACH_PROPERTY)) {
-		icalparam = icalparameter_new_x (i->data);
-		icalparameter_set_xname (icalparam, "X-EWS-ATTACHMENTID");
-		icalproperty_add_parameter (icalprop, icalparam);
-		g_free (i->data);
-	}
-
-	e_cal_component_commit_sequence (create_data->comp);
-	/* update changes and release access to the store */
-	e_cal_backend_store_thaw_changes (priv->store);
-
-	e_cal_component_get_uid (create_data->comp, &comp_uid);
-	if (create_data->cb_type == E_EWS_ATTACHMENT_TYPE_UPDATE) {
-		const gchar *send_meeting_invitations;
-		const gchar *send_or_save;
-		EwsCalendarAsyncData *modify_data;
-		EwsCalendarConvertData convert_data = { 0 };
-
-		modify_data = g_new0 (EwsCalendarAsyncData, 1);
-		modify_data->cbews = g_object_ref (create_data->cbews);
-		modify_data->cancellable = cal_backend_ews_ref_cancellable (create_data->cbews);
-		modify_data->comp = g_object_ref (create_data->comp);
-		modify_data->extra_comp = g_object_ref (create_data->extra_comp);
-		modify_data->cal = g_object_ref (create_data->cal);
-		modify_data->context = create_data->context;
-		modify_data->item_id = g_strdup (create_data->item_id);
-
-		convert_data.connection = create_data->cbews->priv->cnc;
-		convert_data.user_email = create_data->cbews->priv->user_email;
-		convert_data.comp = create_data->comp;
-		convert_data.old_comp = create_data->extra_comp;
-		convert_data.item_id = create_data->item_id;
-		convert_data.change_key = change_key;
-		convert_data.default_zone = create_data->cbews->priv->default_zone;
-
-		if (e_cal_component_has_attendees (create_data->comp)) {
-			send_meeting_invitations = "SendToAllAndSaveCopy";
-			send_or_save = "SendAndSaveCopy";
-		} else {
-			/*In case of appointment we have to set SendMeetingInvites to SendToNone */
-			send_meeting_invitations = "SendToNone";
-			send_or_save = "SaveOnly";
-		}
-
-		e_ews_connection_update_items (
-			priv->cnc, EWS_PRIORITY_MEDIUM,
-			"AlwaysOverwrite",
-			send_or_save,
-			send_meeting_invitations,
-			priv->folder_id,
-			e_cal_backend_ews_convert_component_to_updatexml,
-			&convert_data,
-			modify_data->cancellable,
-			ews_cal_modify_object_cb,
-			modify_data);
-	} else {
-		if (create_data->cb_type == E_EWS_ATTACHMENT_TYPE_CREATE) {
-			/*In case we have attendees we have to fake update items,
-			* this is the only way to pass attachments in meeting invite mail*/
-			if (e_cal_component_has_attendees (create_data->comp)) {
-				icalcomponent *icalcomp = e_cal_component_get_icalcomponent (create_data->comp);
-				e_cal_backend_ews_modify_object (
-					E_CAL_BACKEND (create_data->cbews),
-					create_data->cal,
-					0,
-					NULL,
-					icalcomponent_as_ical_string (icalcomp),
-					E_CAL_OBJ_MOD_ALL);
-			}
-		}
-	}
-
-	e_cal_backend_ews_async_data_free (create_data);
-	g_slist_free (ids);
-}
-
-static void
-ews_create_object_cb (GObject *object,
-                      GAsyncResult *res,
-                      gpointer user_data)
-{
-	EEwsConnection *cnc = E_EWS_CONNECTION (object);
-	EwsCalendarAsyncData *create_data = user_data;
-	ECalBackendEws *cbews = create_data->cbews;
-	ECalBackendEwsPrivate *priv = cbews->priv;
-	GError *error = NULL;
-	GSList *ids = NULL, *attachments = NULL, *i, *exceptions = NULL, *items_req = NULL, *items = NULL;
-	GSList *new_uids, *new_comps;
-	const gchar *comp_uid;
-	const EwsId *item_id;
-	icalproperty *icalprop;
-	icalcomponent *icalcomp;
-	guint n_attach;
-	EEwsItem *item;
-
-	/* get a list of ids from server (single item) */
-	if (!e_ews_connection_create_items_finish (cnc, res, &ids, &error)) {
-		if (error != NULL) {
-			convert_error_to_edc_error (&error);
-			e_data_cal_respond_create_objects (create_data->cal, create_data->context, error, NULL, NULL);
-		} else {
-			e_data_cal_respond_create_objects (
-					create_data->cal, create_data->context, EDC_ERROR_EX (OtherError, _("Unknown error")), NULL, NULL);
-		}
-		return;
-	}
-
-	item = (EEwsItem *) ids->data;
-	item_id = e_ews_item_get_id (item);
-	g_slist_free (ids);
-
-	if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_EVENT) {
-		EEwsAdditionalProps *add_props;
-		GCancellable *cancellable;
-
-		add_props = e_ews_additional_props_new ();
-		add_props->field_uri = g_strdup ("calendar:UID");
-
-		cancellable = cal_backend_ews_ref_cancellable (cbews);
-		items = g_slist_append (items, item_id->id);
-
-		/* get calender uid from server*/
-		e_ews_connection_get_items_sync (
-			cnc, EWS_PRIORITY_MEDIUM,
-			items,
-			"IdOnly",
-			add_props,
-			FALSE, NULL, E_EWS_BODY_TYPE_TEXT,
-			&items_req,
-			NULL, NULL, cancellable, &error);
-
-		e_ews_additional_props_free (add_props);
-		g_clear_object (&cancellable);
-
-		if (!res && error != NULL) {
-			if (items_req)
-				g_slist_free_full (items_req, g_object_unref);
-			convert_error_to_edc_error (&error);
-			e_data_cal_respond_create_objects (create_data->cal, create_data->context, error, NULL, NULL);
-			return;
-		}
-
-		item = (EEwsItem *) items_req->data;
-		if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR) {
-			error = g_error_copy (e_ews_item_get_error (item));
-			g_slist_free_full (items_req, g_object_unref);
-
-			convert_error_to_edc_error (&error);
-			e_data_cal_respond_create_objects (create_data->cal, create_data->context, error, NULL, NULL);
-			return;
-		}
-
-		item_id = e_ews_item_get_id (item);
-
-		g_slist_free (items);
-		g_slist_free (items_req);
-	}
-
-	/* attachments */
-	n_attach = e_cal_component_get_num_attachments (create_data->comp);
-	if (n_attach > 0) {
-		GSList *info_attachments = NULL;
-		EwsCalendarAsyncData *attach_data = g_new0 (EwsCalendarAsyncData, 1);
-
-		attach_data->cbews = g_object_ref (create_data->cbews);
-		attach_data->cancellable = cal_backend_ews_ref_cancellable (create_data->cbews);
-		attach_data->comp = g_object_ref (create_data->comp);
-		attach_data->cal = g_object_ref (create_data->cal);
-		attach_data->context = create_data->context;
-		attach_data->cb_type = 1;
-
-		e_cal_component_get_attachment_list (create_data->comp, &attachments);
-
-		for (i = attachments; i; i = i->next) {
-			const gchar *uri = i->data;
-			gchar *uri_filename;
-			EEwsAttachmentInfo *info;
-
-			if (!uri || !*uri)
-				continue;
-
-			info = e_ews_attachment_info_new (E_EWS_ATTACHMENT_INFO_TYPE_URI);
-
-			e_ews_attachment_info_set_uri (info, uri);
-
-			uri_filename = g_filename_from_uri (uri, NULL, NULL);
-			if (uri_filename && *uri_filename) {
-				gchar *basename;
-
-				basename = g_path_get_basename (uri_filename);
-				if (basename && *basename && basename[0] != '.' && basename[0] != G_DIR_SEPARATOR) {
-					const gchar *uid;
-
-					e_cal_component_get_uid (create_data->comp, &uid);
-
-					if (uid && g_str_has_prefix (basename, uid) && basename[strlen (uid)] == '-') {
-						e_ews_attachment_info_set_prefer_filename (info, basename + strlen (uid) + 1);
-					}
-				}
-
-				g_free (basename);
-			}
-
-			g_free (uri_filename);
-
-			info_attachments = g_slist_append (info_attachments, info);
-		}
-
-		e_ews_connection_create_attachments (
-			cnc, EWS_PRIORITY_MEDIUM,
-			item_id, info_attachments,
-			FALSE, attach_data->cancellable,
-			ews_create_attachments_cb,
-			attach_data);
-
-		g_slist_free_full (info_attachments, (GDestroyNotify) e_ews_attachment_info_free);
-		g_slist_free_full (attachments, g_free);
-	}
-
-	/* get exclusive access to the store */
-	e_cal_backend_store_freeze_changes (priv->store);
-
-	/* set a new ical property containing the change key we got from the exchange server for future use */
-	if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_EVENT)
-		e_cal_component_set_uid (create_data->comp, e_ews_item_get_uid (item));
-	else
-		e_cal_component_set_uid (create_data->comp, item_id->id);
-
-	icalprop = icalproperty_new_x (item_id->id);
-	icalproperty_set_x_name (icalprop, "X-EVOLUTION-ITEMID");
-	icalcomp = e_cal_component_get_icalcomponent (create_data->comp);
-	icalcomponent_add_property (icalcomp, icalprop);
-
-	icalprop = icalproperty_new_x (item_id->change_key);
-	icalproperty_set_x_name (icalprop, "X-EVOLUTION-CHANGEKEY");
-	icalcomp = e_cal_component_get_icalcomponent (create_data->comp);
-	icalcomponent_add_property (icalcomp, icalprop);
-
-	/* update component internal data */
-	e_cal_component_commit_sequence (create_data->comp);
-	put_component_to_store (create_data->cbews, create_data->comp);
-
-	e_cal_component_get_uid (create_data->comp, &comp_uid);
-
-	new_uids = g_slist_append (NULL, (gpointer) comp_uid);
-	new_comps = g_slist_append (NULL, create_data->comp);
-
-	convert_error_to_edc_error (&error);
-	e_data_cal_respond_create_objects (create_data->cal, create_data->context, error, new_uids, new_comps);
-	error = NULL;
-
-	g_slist_free (new_uids);
-	g_slist_free (new_comps);
-
-	/* notify the backend and the application that a new object was created */
-	e_cal_backend_notify_component_created (E_CAL_BACKEND (create_data->cbews), create_data->comp);
-
-	/* place new component in our cache */
-	PRIV_LOCK (priv);
-	g_hash_table_insert (priv->item_id_hash, g_strdup (item_id->id), g_object_ref (create_data->comp));
-	PRIV_UNLOCK (priv);
-
-	/* update changes and release access to the store */
-	e_cal_backend_store_thaw_changes (priv->store);
-
-	/* Excluded occurrences */
-	g_clear_error (&error);
-	icalprop = icalcomponent_get_first_property (icalcomp, ICAL_RRULE_PROPERTY);
-	if (icalprop != NULL) {
-		icalprop = icalcomponent_get_first_property (icalcomp, ICAL_EXDATE_PROPERTY);
-		for (; icalprop; icalprop = icalcomponent_get_next_property (icalcomp, ICAL_EXDATE_PROPERTY)) {
-			exceptions = g_slist_prepend (exceptions, g_strdup (icalproperty_get_value_as_string (icalprop)));
-		}
-
-		for (i = exceptions; i; i = i->next) {
-			e_cal_backend_ews_remove_object (
-				E_CAL_BACKEND (create_data->cbews), create_data->cal, 0, NULL,
-				comp_uid, i->data, E_CAL_OBJ_MOD_THIS);
-		}
-
-		g_slist_free_full (exceptions, g_free);
-	}
-
-	e_cal_backend_ews_async_data_free (create_data);
-}
-
-struct TzidCbData {
-	icalcomponent *comp;
-	ECalBackendEws *cbews;
-};
-
-static void tzid_cb (icalparameter *param, gpointer data)
-{
-	struct TzidCbData *cbd = data;
-	const gchar *tzid;
-	icaltimezone *zone;
-	icalcomponent *new_comp;
-
-	tzid = icalparameter_get_tzid (param);
-	if (!tzid)
-		return;
-
-	zone = resolve_tzid (tzid, cbd->cbews);
-	if (!zone)
-		return;
-
-	new_comp = icaltimezone_get_component (zone);
-	if (!new_comp)
-		return;
-
-	icalcomponent_add_component (cbd->comp, icalcomponent_new_clone (new_comp));
-}
-
-static void
-e_cal_backend_ews_pick_all_tzids_out (ECalBackendEws *cbews,
-				      icalcomponent *icalcomp)
-{
-
-	/* pick all the tzids out of the component and resolve
-	 * them using the vtimezones in the current calendar */
-	struct TzidCbData cbd;
-
-	cbd.cbews = cbews;
-	cbd.comp = icalcomp;
-	icalcomponent_foreach_tzid (icalcomp, tzid_cb, &cbd);
-}
-
-static void
-e_cal_backend_ews_create_objects (ECalBackend *backend,
-                                  EDataCal *cal,
-                                  guint32 context,
-                                  GCancellable *cancellable,
-                                  const GSList *calobjs)
-{
-	EwsCalendarAsyncData *create_data;
-	EwsCalendarConvertData convert_data = { 0 };
-	EwsFolderId *fid;
-	ECalBackendEws *cbews;
-	ECalBackendEwsPrivate *priv;
-	icalcomponent_kind kind;
-	icalcomponent *icalcomp;
-	ECalComponent *comp = NULL;
-	struct icaltimetype current;
-	GError *error = NULL;
-	const gchar *send_meeting_invitations, *calobj;
-
-	/* sanity check */
-	e_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (backend), InvalidArg);
-	e_data_cal_error_if_fail (calobjs != NULL, InvalidArg);
-
-	if (calobjs->next) {
-		g_propagate_error (&error, EDC_ERROR_EX (UnsupportedMethod, _("EWS does not support bulk additions")));
-		goto exit;
-	}
-
-	calobj = calobjs->data;
-	e_data_cal_error_if_fail (calobj != NULL && *calobj != '\0', InvalidArg);
-
-	cbews = E_CAL_BACKEND_EWS (backend);
-	priv = cbews->priv;
-
-	kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
-
-	/* make sure we're not offline */
-	if (!e_backend_get_online (E_BACKEND (backend)) || !cbews->priv->cnc) {
-		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
-		goto exit;
-	}
-
-	if (!cal_backend_ews_ensure_connected (cbews, cancellable, &error)) {
-		goto exit;
-	}
-
-	/* parse ical data */
-	comp = e_cal_component_new_from_string (calobj);
-	if (comp == NULL) {
-		g_propagate_error (&error, EDC_ERROR (InvalidObject));
-		goto exit;
-	}
-	icalcomp = e_cal_component_get_icalcomponent (comp);
-
-	/* make sure data was parsed properly */
-	if (!icalcomp) {
-		g_propagate_error (&error, EDC_ERROR (InvalidObject));
-		goto exit;
-	}
-
-	/* make sure ical data we parse is actually an ical component */
-	if (kind != icalcomponent_isa (icalcomp)) {
-		icalcomponent_free (icalcomp);
-		g_propagate_error (&error, EDC_ERROR (InvalidObject));
-		goto exit;
-	}
-
-	e_ews_clean_icalcomponent (icalcomp);
-
-	if (!e_ews_connection_satisfies_server_version (cbews->priv->cnc, E_EWS_EXCHANGE_2010))
-		e_cal_backend_ews_pick_all_tzids_out (cbews, icalcomp);
-
-	/* prepare new calender component */
-	current = icaltime_current_time_with_zone (icaltimezone_get_utc_timezone ());
-	e_cal_component_set_created (comp, &current);
-	e_cal_component_set_last_modified (comp, &current);
-
-	create_data = g_new0 (EwsCalendarAsyncData, 1);
-	create_data->cbews = g_object_ref (cbews);
-	create_data->comp = g_object_ref (comp);
-	create_data->cal = g_object_ref (cal);
-	create_data->context = context;
-
-	convert_data.connection = cbews->priv->cnc;
-	convert_data.icalcomp = icalcomp;
-	convert_data.default_zone = cbews->priv->default_zone;
-
-	/*
-	 * In case we are creating a meeting with attendees and attachments.
-	 * We have to preform 3 steps in order to allow attendees to receive attachments in their invite mails.
-	 * 1. create meeting and do not send invites
-	 * 2. create attachments
-	 * 3. dummy update meeting and send invites to all
-	 */
-	if (e_cal_component_has_attendees (comp)) {
-		if (e_cal_component_has_attachments (comp))
-			send_meeting_invitations = "SendToNone";
-		else
-			send_meeting_invitations = "SendToAllAndSaveCopy";
-	} else {
-		/*In case of appointment we have to set SendMeetingInvites to SendToNone */
-		send_meeting_invitations = "SendToNone";
-	}
-
-	fid = e_ews_folder_id_new (priv->folder_id, NULL, FALSE);
-
-	e_ews_connection_create_items (
-		priv->cnc,
-		EWS_PRIORITY_MEDIUM,
-		"SaveOnly",
-		send_meeting_invitations,
-		fid,
-		e_cal_backend_ews_convert_calcomp_to_xml,
-		&convert_data,
+		NULL,
 		cancellable,
-		ews_create_object_cb,
-		create_data);
+		error)) {
+		icalcomponent *icomp = e_cal_component_get_icalcomponent (comp);
+		GSList *modified_objects;
 
-	e_ews_folder_id_free (fid);
+		modified_objects = g_slist_prepend (NULL,
+			e_cal_meta_backend_info_new (icalcomponent_get_uid (icomp), NULL, NULL,
+				e_cal_util_get_x_property (icomp, "X-EVOLUTION-ITEMID")));
 
-	return;
+		/* Refresh the local cache, to have up-to-date ChangeKey */
+		e_cal_meta_backend_process_changes_sync (E_CAL_META_BACKEND (cbews), NULL, modified_objects, NULL, cancellable, error);
 
-exit:
-	if (comp != NULL)
-		g_object_unref (comp);
+		g_slist_free_full (modified_objects, e_cal_meta_backend_info_free);
+	}
 
-	convert_error_to_edc_error (&error);
-	e_data_cal_respond_create_objects (cal, context, error, NULL, NULL);
+	g_object_unref (comp);
+	g_free (convert_data.item_id);
+	g_free (convert_data.change_key);
+
+	ecb_ews_convert_error_to_edc_error (error);
 }
 
-static void
-ews_cal_modify_object_cb (GObject *object,
-                          GAsyncResult *res,
-                          gpointer user_data)
+static gboolean
+ecb_ews_send_cancellation_email_sync (ECalBackendEws *cbews,
+				      CamelAddress *from,
+				      CamelInternetAddress *recipient,
+				      const gchar *subject,
+				      const gchar *body,
+				      const gchar *calobj,
+				      GCancellable *cancellable,
+				      GError **error)
 {
-	EEwsConnection *cnc = E_EWS_CONNECTION (object);
-	EwsCalendarAsyncData *modify_data = user_data;
-	ECalBackendEws *cbews = modify_data->cbews;
-	ECalBackendEwsPrivate *priv = cbews->priv;
-	GError *error = NULL;
-	GSList *ids = NULL;
-	const EwsId *item_id;
-	icalproperty *icalprop = NULL;
-	icalcomponent *icalcomp;
-	ECalComponentId *id = NULL;
-	const gchar *x_name;
+	CamelMimeMessage *message;
+	CamelContentType *mime_type;
+	CamelMultipart *multi;
+	CamelMimePart *text_part, *vcal_part;
+	gchar *ical_str;
+	icalcomponent *vcal, *vevent, *vtz;
+	icalproperty *prop;
+	icaltimezone *icaltz;
+	struct icaltimetype dt;
+	gboolean success;
 
-	if (!e_ews_connection_update_items_finish (cnc, res, &ids, &error)) {
-		convert_error_to_edc_error (&error);
-		if (modify_data->context)
-			e_data_cal_respond_modify_objects (modify_data->cal, modify_data->context, error, NULL, NULL);
-		else if (error != NULL) {
-			g_warning ("Modify object error :  %s\n", error->message);
-			g_clear_error (&error);
-		}
+	vcal = icalcomponent_new (ICAL_VCALENDAR_COMPONENT);
+	icalcomponent_add_property (vcal, icalproperty_new_version ("2.0"));
+	icalcomponent_add_property (vcal, icalproperty_new_prodid ("-//Evolution EWS backend//EN"));
+	icalcomponent_add_property (vcal, icalproperty_new_method (ICAL_METHOD_CANCEL));
+	vevent = icalcomponent_new_from_string (calobj);
+	prop = icalcomponent_get_first_property (vevent, ICAL_STATUS_PROPERTY);
+	if (prop != NULL) icalcomponent_remove_property (vevent, prop);
+	icalcomponent_add_property (vevent, icalproperty_new_status (ICAL_STATUS_CANCELLED));
+	prop = icalcomponent_get_first_property (vevent, ICAL_METHOD_PROPERTY);
+	if (prop != NULL) icalcomponent_remove_property (vevent, prop);
+	dt = icalcomponent_get_dtstart (vevent);
+	icaltz = (icaltimezone *)
+		(dt.zone ? dt.zone : ecb_ews_get_timezone_from_ical_component (cbews, vevent));
+	vtz = icaltimezone_get_component (icaltz);
+	icalcomponent_add_component (vcal, icalcomponent_new_clone (vtz));
+	icalcomponent_add_component (vcal, vevent);
+	text_part = camel_mime_part_new ();
+	camel_mime_part_set_content (text_part, body, strlen (body), "text/plain");
 
-		goto exit;
-	}
+	vcal_part = camel_mime_part_new ();
+	mime_type = camel_data_wrapper_get_mime_type_field (CAMEL_DATA_WRAPPER (vcal_part));
+	camel_content_type_set_param (mime_type, "charset", "utf-8");
+	camel_content_type_set_param (mime_type, "method", "CANCEL");
+	ical_str = icalcomponent_as_ical_string_r ((icalcomponent *) vcal);
+	camel_mime_part_set_content (vcal_part, ical_str, strlen (ical_str), "text/calendar; method=CANCEL");
+	free (ical_str);
 
-	e_cal_backend_store_freeze_changes (priv->store);
+	multi = camel_multipart_new ();
+	camel_data_wrapper_set_mime_type (CAMEL_DATA_WRAPPER (multi), "multipart/alternative");
+	camel_multipart_add_part (multi, text_part);
+	camel_multipart_set_boundary (multi, NULL);
+	camel_multipart_add_part (multi, vcal_part);
+	g_object_unref (text_part);
+	g_object_unref (vcal_part);
 
-	item_id = e_ews_item_get_id ((EEwsItem *) ids->data);
+	message = camel_mime_message_new ();
+	camel_mime_message_set_subject (message, subject);
+	camel_mime_message_set_from (message, CAMEL_INTERNET_ADDRESS (from));
+	camel_mime_message_set_recipients (message, CAMEL_RECIPIENT_TYPE_TO, recipient);
 
-	/* Update change key. id remains the same, but change key changed.*/
-	icalcomp = e_cal_component_get_icalcomponent (modify_data->comp);
-	icalprop = icalcomponent_get_first_property (icalcomp, ICAL_X_PROPERTY);
-	while (icalprop) {
-		x_name = icalproperty_get_x_name (icalprop);
-		if (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY")) {
-			icalproperty_set_value_from_string (icalprop, item_id->change_key, "NO");
-			break;
-		}
-		icalprop = icalcomponent_get_next_property (icalcomp, ICAL_X_PROPERTY);
-	}
+	camel_medium_set_content ((CamelMedium *) message, (CamelDataWrapper *) multi);
+	g_object_unref (multi);
 
-	e_cal_component_commit_sequence (modify_data->comp);
-	id = e_cal_component_get_id (modify_data->comp);
-	e_cal_backend_store_remove_component (cbews->priv->store, id->uid, id->rid);
-	put_component_to_store (cbews, modify_data->comp);
+	success = camel_ews_utils_create_mime_message (cbews->priv->cnc, "SendOnly", NULL, message, NULL, from, NULL, NULL, NULL, cancellable, error);
 
-	if (modify_data->context) {
-		GSList *old_components, *new_components;
+	g_object_unref (message);
+	icalcomponent_free (vcal);
 
-		e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbews), modify_data->extra_comp, modify_data->comp);
-
-		old_components = g_slist_append (NULL, modify_data->extra_comp);
-		new_components = g_slist_append (NULL, modify_data->comp);
-
-		e_data_cal_respond_modify_objects (modify_data->cal, modify_data->context, NULL, old_components, new_components);
-
-		g_slist_free (old_components);
-		g_slist_free (new_components);
-	}
-
-	ews_start_sync (cbews);
-
-	PRIV_LOCK (priv);
-	g_hash_table_replace (priv->item_id_hash, g_strdup (modify_data->item_id), g_object_ref (modify_data->comp));
-	PRIV_UNLOCK (priv);
-
-	e_cal_backend_store_thaw_changes (priv->store);
-
-	icalproperty_free (icalprop);
-	e_cal_component_free_id (id);
-
-exit:
-	e_cal_backend_ews_async_data_free (modify_data);
+	return success;
 }
 
 static void
-e_cal_backend_ews_modify_objects (ECalBackend *backend,
-                                  EDataCal *cal,
-                                  guint32 context,
-                                  GCancellable *cancellable,
-                                  const GSList *calobjs,
-                                  ECalObjModType mod)
-{
-	GError *error = NULL;
-
-	if (!calobjs) {
-		if (context) {
-			g_propagate_error (&error, EDC_ERROR (InvalidArg));
-			e_data_cal_respond_modify_objects (cal, context, error, NULL, NULL);
-		}
-		return;
-	}
-
-	if (calobjs->next) {
-		if (context) {
-			g_propagate_error (&error, EDC_ERROR_EX (UnsupportedMethod, _("EWS does not support bulk modifications")));
-			e_data_cal_respond_modify_objects (cal, context, error, NULL, NULL);
-		}
-		return;
-	}
-
-	e_cal_backend_ews_modify_object (backend, cal, context, cancellable, calobjs->data, mod);
-}
-
-static void
-e_cal_backend_ews_modify_object (ECalBackend *backend,
-                                 EDataCal *cal,
-                                 guint32 context,
-                                 GCancellable *cancellable,
-                                 const gchar *calobj,
-                                 ECalObjModType mod)
-{
-	EwsCalendarAsyncData *modify_data;
-	ECalBackendEws *cbews;
-	ECalBackendEwsPrivate *priv;
-	icalcomponent_kind kind;
-	ECalComponent *comp = NULL, *oldcomp = NULL;
-	icalcomponent *icalcomp;
-	gchar *itemid = NULL, *changekey = NULL;
-	struct icaltimetype current;
-	GError *error = NULL;
-	GSList *original_attachments = NULL, *modified_attachments = NULL, *added_attachments = NULL, *removed_attachments = NULL, *removed_attachments_ids = NULL, *i;
-	EwsCalendarAsyncData *attach_data;
-
-	e_data_cal_error_if_fail (E_IS_CAL_BACKEND_EWS (backend), InvalidArg);
-	e_data_cal_error_if_fail (calobj != NULL && *calobj != '\0', InvalidArg);
-
-	cbews = E_CAL_BACKEND_EWS (backend);
-	priv = cbews->priv;
-	kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
-
-	if (!e_backend_get_online (E_BACKEND (backend)) || !cbews->priv->cnc) {
-		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
-		goto exit;
-	}
-
-	if (!cal_backend_ews_ensure_connected (cbews, cancellable, &error)) {
-		goto exit;
-	}
-
-	icalcomp = icalparser_parse_string (calobj);
-	if (!icalcomp) {
-		g_propagate_error (&error, EDC_ERROR (InvalidObject));
-		goto exit;
-	}
-	if (kind != icalcomponent_isa (icalcomp)) {
-		icalcomponent_free (icalcomp);
-		g_propagate_error (&error, EDC_ERROR (InvalidObject));
-		goto exit;
-	}
-
-	e_cal_backend_ews_pick_all_tzids_out (cbews, icalcomp);
-
-	comp = e_cal_component_new ();
-	e_cal_component_set_icalcomponent (comp, icalcomp);
-	current = icaltime_current_time_with_zone (icaltimezone_get_utc_timezone ());
-	e_cal_component_set_last_modified (comp, &current);
-
-	ews_cal_component_get_item_id (comp, &itemid, &changekey);
-	if (!itemid) {
-		g_propagate_error (
-			&error, EDC_ERROR_EX (OtherError,
-			"Cannot determine EWS ItemId"));
-		goto exit;
-	}
-
-	PRIV_LOCK (priv);
-	oldcomp = g_hash_table_lookup (priv->item_id_hash, itemid);
-	if (!oldcomp) {
-		g_propagate_error (&error, EDC_ERROR (ObjectNotFound));
-		PRIV_UNLOCK (priv);
-		goto exit;
-	}
-	g_object_ref (oldcomp);
-	PRIV_UNLOCK (priv);
-
-	e_cal_backend_ews_pick_all_tzids_out (cbews, e_cal_component_get_icalcomponent (oldcomp));
-
-	/*In case we have updated attachments we have to run update attachments
-	 *before update items so attendees will receive mails with already updated attachments */
-
-	e_cal_component_get_attachment_list (oldcomp, &original_attachments);
-	e_cal_component_get_attachment_list (comp, &modified_attachments);
-
-	ewscal_get_attach_differences (original_attachments, modified_attachments, &removed_attachments, &added_attachments);
-	g_slist_free (original_attachments);
-	g_slist_free (modified_attachments);
-
-	/* preform sync delete attachemnt operation*/
-	if (removed_attachments) {
-		icalproperty *icalprop;
-		GSList *items;
-
-		/* convert attachment uri to attachment id, should have used a hash table somehow */
-		icalcomp = e_cal_component_get_icalcomponent (oldcomp);
-		icalprop = icalcomponent_get_first_property (icalcomp, ICAL_ATTACH_PROPERTY);
-		while (icalprop) {
-			const gchar *attachment_url = icalproperty_get_value_as_string (icalprop);
-
-			for (items = removed_attachments; items; items = items->next) {
-				if (g_strcmp0 (attachment_url, items->data) == 0) {
-					break;
-				}
-			}
-
-			/* not NULL means the attachment was found in removed attachments */
-			if (items != NULL)
-				removed_attachments_ids = g_slist_append (removed_attachments_ids, icalproperty_get_parameter_as_string_r (icalprop, "X-EWS-ATTACHMENTID"));
-
-			icalprop = icalcomponent_get_next_property (icalcomp, ICAL_ATTACH_PROPERTY);
-		}
-
-		items = NULL;
-
-		if (removed_attachments_ids) {
-			if (e_ews_connection_delete_attachments_sync (
-				priv->cnc, EWS_PRIORITY_MEDIUM,
-				removed_attachments_ids, &items, cancellable, &error) && items)
-				changekey = items->data;
-		}
-
-		g_slist_free_full (removed_attachments_ids, g_free);
-		g_slist_free (removed_attachments);
-	}
-
-	/*in case we have a new attachmetns the update item will be preformed in ews_create_attachments_cb*/
-	if (added_attachments) {
-		const gchar *old_uid = NULL;
-		gint old_uid_len = 0;
-		GSList *info_attachments = NULL;
-		EwsId *item_id = g_new0 (EwsId, 1);
-		item_id->id = itemid;
-		item_id->change_key = changekey;
-		attach_data = g_new0 (EwsCalendarAsyncData, 1);
-
-		attach_data->cbews = g_object_ref (cbews);
-		attach_data->comp = g_object_ref (comp);
-		attach_data->cb_type = E_EWS_ATTACHMENT_TYPE_UPDATE;
-		attach_data->extra_comp = g_object_ref (oldcomp);
-		attach_data->cal = g_object_ref (cal);
-		attach_data->context = 0;
-		attach_data->item_id = itemid;
-
-		e_cal_component_get_uid (oldcomp, &old_uid);
-		if (old_uid)
-			old_uid_len = strlen (old_uid);
-
-		for (i = added_attachments; i; i = i->next) {
-			EEwsAttachmentInfo *info = e_ews_attachment_info_new (E_EWS_ATTACHMENT_INFO_TYPE_URI);
-
-			e_ews_attachment_info_set_uri (info, i->data);
-
-			if (old_uid) {
-				gchar *filename = g_filename_from_uri (i->data, NULL, NULL);
-				if (filename) {
-					const gchar *slash = strrchr (filename, G_DIR_SEPARATOR);
-					if (slash && g_str_has_prefix (slash + 1, old_uid) &&
-					    slash[1 + old_uid_len] == '-') {
-						e_ews_attachment_info_set_prefer_filename (info, slash + 1 + old_uid_len + 1);
-					}
-
-					g_free (filename);
-				}
-			}
-
-			info_attachments = g_slist_append (info_attachments, info);
-		}
-
-		if (context) {
-			convert_error_to_edc_error (&error);
-			e_data_cal_respond_modify_objects (cal, context, error, NULL, NULL);
-		}
-
-		e_ews_connection_create_attachments (
-			priv->cnc, EWS_PRIORITY_MEDIUM,
-			item_id, info_attachments,
-			FALSE, cancellable,
-			ews_create_attachments_cb,
-			attach_data);
-
-		g_slist_free_full (info_attachments, (GDestroyNotify) e_ews_attachment_info_free);
-		g_slist_free (added_attachments);
-		g_free (item_id);
-
-	} else {
-		EwsCalendarConvertData convert_data = { 0 };
-		const gchar *send_meeting_invitations;
-		const gchar *send_or_save;
-
-		modify_data = g_new0 (EwsCalendarAsyncData, 1);
-		modify_data->cbews = g_object_ref (cbews);
-		modify_data->comp = g_object_ref (comp);
-		modify_data->extra_comp = g_object_ref (oldcomp);
-		modify_data->cal = g_object_ref (cal);
-		modify_data->context = context;
-		modify_data->item_id = itemid;
-
-		convert_data.connection = cbews->priv->cnc;
-		convert_data.user_email = cbews->priv->user_email;
-		convert_data.comp = comp;
-		convert_data.old_comp = oldcomp;
-		convert_data.item_id = itemid;
-		convert_data.change_key = changekey;
-		convert_data.default_zone = cbews->priv->default_zone;
-
-		if (e_cal_component_has_attendees (comp)) {
-			send_meeting_invitations = "SendToAllAndSaveCopy";
-			send_or_save = "SendAndSaveCopy";
-		} else {
-			/*In case of appointment we have to set SendMeetingInvites to SendToNone */
-			send_meeting_invitations = "SendToNone";
-			send_or_save = "SaveOnly";
-		}
-
-		e_ews_connection_update_items (
-			priv->cnc, EWS_PRIORITY_MEDIUM,
-			"AlwaysOverwrite",
-			send_or_save,
-			send_meeting_invitations,
-			priv->folder_id,
-			e_cal_backend_ews_convert_component_to_updatexml,
-			&convert_data,
-			cancellable,
-			ews_cal_modify_object_cb,
-			modify_data);
-	}
-
-	g_clear_object (&oldcomp);
-
-	return;
-
-exit:
-	g_clear_object (&oldcomp);
-	g_clear_object (&comp);
-
-	convert_error_to_edc_error (&error);
-	if (context)
-		e_data_cal_respond_modify_objects (cal, context, error, NULL, NULL);
-	else if (error) {
-		g_warning ("Modify object error :  %s\n", error->message);
-		g_clear_error (&error);
-	}
-}
-
-static void
-e_ews_receive_objects_no_exchange_mail (ECalBackendEws *cbews,
-                                        icalcomponent *subcomp,
-                                        GSList **ids,
-                                        GCancellable *cancellable,
-                                        GError **error)
+ecb_ews_receive_objects_no_exchange_mail (ECalBackendEws *cbews,
+					  icalcomponent *subcomp,
+					  GSList **ids,
+					  GCancellable *cancellable,
+					  GError **error)
 {
 	EwsCalendarConvertData convert_data = { 0 };
 	EwsFolderId *fid;
 
 	convert_data.connection = cbews->priv->cnc;
 	convert_data.icalcomp = subcomp;
-	convert_data.default_zone = cbews->priv->default_zone;
+	convert_data.default_zone = icaltimezone_get_utc_timezone ();
 
 	fid = e_ews_folder_id_new (cbews->priv->folder_id, NULL, FALSE);
 
@@ -2331,9 +2910,9 @@ find_attendee_if_sentby (icalcomponent *ical_comp,
 }
 
 static const gchar *
-e_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
-					icalcomponent *icalcomp,
-                                        const gchar *current_user_mail)
+ecb_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
+					  icalcomponent *icalcomp,
+					  const gchar *current_user_mail)
 {
 	icalproperty *attendee;
 	const gchar *attendee_str = NULL, *attendee_mail = NULL;
@@ -2415,11 +2994,53 @@ e_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
 	return response;
 }
 
+/* changekey can be NULL if you don't want it. itemid cannot. */
 static void
-ews_cal_do_method_request_publish_reply (ECalBackendEws *cbews,
+ecb_ews_get_item_accept_id (ECalComponent *comp,
+			    gchar **itemid,
+			    gchar **changekey,
+			    gchar **mail_id)
+{
+	icalproperty *prop;
+	gchar *id_item = NULL;
+	gchar *id_accept = NULL;
+	gchar *ck = NULL;
+
+	prop = icalcomponent_get_first_property (
+		e_cal_component_get_icalcomponent (comp),
+		ICAL_X_PROPERTY);
+	while (prop) {
+		const gchar *x_name, *x_val;
+
+		x_name = icalproperty_get_x_name (prop);
+		x_val = icalproperty_get_x (prop);
+		if (!id_item && g_ascii_strcasecmp (x_name, "X-EVOLUTION-ITEMID") == 0)
+			id_item = g_strdup (x_val);
+		else if (!id_accept && g_ascii_strcasecmp (x_name, "X-EVOLUTION-ACCEPT-ID") == 0)
+			id_accept = g_strdup (x_val);
+		else if (changekey && !ck && !g_ascii_strcasecmp (x_name, "X-EVOLUTION-CHANGEKEY"))
+			ck = g_strdup (x_val);
+
+		prop = icalcomponent_get_next_property (
+			e_cal_component_get_icalcomponent (comp),
+			ICAL_X_PROPERTY);
+	}
+
+	if (!id_item)
+		id_item = g_strdup (id_accept);
+
+	*itemid = id_item;
+	*mail_id = id_accept;
+	if (changekey)
+		*changekey = ck;
+}
+
+static gboolean
+ecb_ews_do_method_request_publish_reply (ECalBackendEws *cbews,
 					 ECalComponent *comp,
 					 icalcomponent *subcomp,
 					 const gchar *response_type,
+					 const gchar *user_email,
 					 GCancellable *cancellable,
 					 GError **error)
 {
@@ -2433,19 +3054,19 @@ ews_cal_do_method_request_publish_reply (ECalBackendEws *cbews,
 	if (!response_type &&
 	    e_cal_util_component_has_organizer (subcomp) &&
 	    e_cal_util_component_has_attendee (subcomp)) {
-		g_set_error (error, E_DATA_CAL_ERROR, UnknownUser, _("Cannot find user “%s” between attendees"), cbews->priv->user_email ? cbews->priv->user_email : "NULL");
-		return;
+		g_set_error (error, E_DATA_CAL_ERROR, UnknownUser, _("Cannot find user “%s” between attendees"), user_email ? user_email : "NULL");
+		return FALSE;
 	}
 
 	if (response_type && *response_type)
-		ews_cal_component_get_calendar_item_accept_id (comp, &item_id, &change_key, &mail_id);
+		ecb_ews_get_item_accept_id (comp, &item_id, &change_key, &mail_id);
 	else
 		response_type = NULL;
 
 	while (pass < 2) {
 		/*in case we do not have item id we will create item with mime content only*/
 		if (!item_id || (response_type && g_ascii_strcasecmp (response_type, "NEEDS-ACTION") == 0)) {
-			e_ews_receive_objects_no_exchange_mail (cbews, subcomp, &ids, cancellable, &local_error);
+			ecb_ews_receive_objects_no_exchange_mail (cbews, subcomp, &ids, cancellable, &local_error);
 		} else {
 			EwsCalendarConvertData convert_data = { 0 };
 
@@ -2575,301 +3196,182 @@ ews_cal_do_method_request_publish_reply (ECalBackendEws *cbews,
 	g_free (mail_id);
 	g_slist_free_full (ids, g_object_unref);
 
-	/*We have to run sync before any other operations */
-	ews_start_sync (cbews);
+	return !local_error;
 }
 
 static void
-e_cal_backend_ews_receive_objects (ECalBackend *backend,
-                                   EDataCal *cal,
-                                   guint32 context,
-                                   GCancellable *cancellable,
-                                   const gchar *calobj)
+ecb_ews_receive_objects_sync (ECalBackendSync *sync_backend,
+			      EDataCal *cal,
+			      GCancellable *cancellable,
+			      const gchar *calobj,
+			      GError **error)
 {
 	ECalBackendEws *cbews;
-	ECalBackendEwsPrivate *priv;
-	icalcomponent_kind kind;
+	ECalBackend *cal_backend;
+	CamelEwsSettings *ews_settings;
 	icalcomponent *icalcomp, *subcomp;
-	GError *error = NULL;
-	icalproperty_method method;
+	icalcomponent_kind kind;
+	gchar *user_email;
+	gboolean success = TRUE, do_refresh = FALSE;
 
-	cbews = E_CAL_BACKEND_EWS (backend);
-	priv = cbews->priv;
+	g_return_if_fail (E_IS_CAL_BACKEND_EWS (sync_backend));
 
-	/* make sure we're not offline */
-	if (!e_backend_get_online (E_BACKEND (backend)) || !cbews->priv->cnc) {
-		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
-		goto exit;
-	}
+	cbews = E_CAL_BACKEND_EWS (sync_backend);
 
-	if (!cal_backend_ews_ensure_connected (cbews, cancellable, &error)) {
-		goto exit;
-	}
+	if (!e_cal_meta_backend_ensure_connected_sync (E_CAL_META_BACKEND (cbews), cancellable, error))
+		return;
 
-	icalcomp = icalparser_parse_string (calobj);
+	icalcomp = calobj ? icalparser_parse_string (calobj) : NULL;
 
-	/* make sure data was parsed properly */
 	if (!icalcomp) {
-		g_propagate_error (&error, EDC_ERROR (InvalidObject));
-		goto exit;
+		g_propagate_error (error, EDC_ERROR (InvalidObject));
+		return;
 	}
 
-	/* make sure ical data we parse is actually an vcal component */
+	/* make sure ical data we parse is actually a vCalendar component */
 	if (icalcomponent_isa (icalcomp) != ICAL_VCALENDAR_COMPONENT) {
 		icalcomponent_free (icalcomp);
-		g_propagate_error (&error, EDC_ERROR (InvalidObject));
-		goto exit;
+		g_propagate_error (error, EDC_ERROR (InvalidObject));
+		return;
 	}
 
-	kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
-	method = icalcomponent_get_method (icalcomp);
-	subcomp = icalcomponent_get_first_component (icalcomp, kind);
+	cal_backend = E_CAL_BACKEND (cbews);
+	kind = e_cal_backend_get_kind (cal_backend);
 
-	while (subcomp) {
-		ECalComponent *comp = e_cal_component_new ();
-		const gchar *response_type;
+	ews_settings = ecb_ews_get_collection_settings (cbews);
+	user_email = camel_ews_settings_dup_email (ews_settings);
 
-		/* duplicate the ical component */
-		e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (subcomp));
+	switch (icalcomponent_get_method (icalcomp)) {
+	case ICAL_METHOD_REQUEST:
+	case ICAL_METHOD_PUBLISH:
+	case ICAL_METHOD_REPLY:
+		for (subcomp = icalcomponent_get_first_component (icalcomp, kind);
+		     subcomp && success;
+		     subcomp = icalcomponent_get_next_component (icalcomp, kind)) {
+			ECalComponent *comp;
+			const gchar *response_type;
 
-		/*getting a data for meeting request response*/
-		response_type = e_ews_get_current_user_meeting_reponse (cbews,
-			e_cal_component_get_icalcomponent (comp),
-			priv->user_email);
+			/* getting a data for meeting request response */
+			response_type = ecb_ews_get_current_user_meeting_reponse (cbews, subcomp, user_email);
 
-		switch (method) {
-			case ICAL_METHOD_REQUEST:
-			case ICAL_METHOD_PUBLISH:
-			case ICAL_METHOD_REPLY:
-				ews_cal_do_method_request_publish_reply (
-					cbews,
-					comp,
-					subcomp,
-					response_type,
-					cancellable,
-					&error);
-				break;
-			case ICAL_METHOD_CANCEL: {
-				const gchar *uid = NULL;
-				gchar *rid = NULL;
-				ECalObjModType mod;
+			comp = e_cal_component_new_from_icalcomponent (icalcomponent_new_clone (subcomp));
 
-				e_cal_component_get_uid (comp, &uid);
-				rid = e_cal_component_get_recurid_as_string (comp);
-				mod = e_cal_component_is_instance (comp) ? E_CAL_OBJ_MOD_THIS : E_CAL_OBJ_MOD_ALL;
+			success = ecb_ews_do_method_request_publish_reply (cbews, comp, subcomp, response_type, user_email, cancellable, error);
 
-				e_cal_backend_ews_remove_object (backend, cal, 0, cancellable, uid, rid, mod);
-				g_free (rid);
-				break;
-			}
-			case ICAL_METHOD_COUNTER:
-				/*
-				 * this is a new time proposal mail from one of the attendees
-				 * if we decline the proposal, nothing have to be done
-				 * if we accept it we will call to modify_object
-				 */
-				if (g_strcmp0 (response_type, "ACCEPTED") == 0) {
-					gchar **split_subject;
-					icalproperty *summary;
+			do_refresh = TRUE;
 
-					/*
-					 * we have to edit the meeting subject to remove exchange header
-					 */
-					summary = icalcomponent_get_first_property (subcomp, ICAL_SUMMARY_PROPERTY);
-					split_subject =
-						g_strsplit (icalproperty_get_value_as_string (summary), ":", -1);
-					icalproperty_set_value_from_string (summary, split_subject[1] , "NO");
-					g_strfreev (split_subject);
-
-					e_cal_backend_ews_modify_object (backend, cal, 0, cancellable, icalcomponent_as_ical_string (subcomp), E_CAL_OBJ_MOD_ALL);
-				}
-				break;
-			default:
-				break;
+			g_object_unref (comp);
 		}
+		break;
+	case ICAL_METHOD_COUNTER:
+		/*
+		 * this is a new time proposal mail from one of the attendees
+		 * if we decline the proposal, nothing have to be done
+		 * if we accept it we will call to modify_object
+		 */
+		for (subcomp = icalcomponent_get_first_component (icalcomp, kind);
+		     subcomp && success;
+		     subcomp = icalcomponent_get_next_component (icalcomp, kind)) {
+			const gchar *response_type;
 
-		g_object_unref (comp);
-		subcomp = icalcomponent_get_next_component (icalcomp, kind);
+			/* getting a data for meeting request response */
+			response_type = ecb_ews_get_current_user_meeting_reponse (cbews, subcomp, user_email);
+
+			if (g_strcmp0 (response_type, "ACCEPTED") == 0) {
+				gchar **split_subject;
+				icalproperty *summary;
+
+				/* we have to edit the meeting subject to remove exchange header */
+				summary = icalcomponent_get_first_property (subcomp, ICAL_SUMMARY_PROPERTY);
+				split_subject =
+					g_strsplit (icalproperty_get_value_as_string (summary), ":", -1);
+				icalproperty_set_value_from_string (summary, split_subject[1] , "NO");
+				g_strfreev (split_subject);
+
+				success = ecb_ews_modify_item_sync (cbews, NULL, subcomp, cancellable, error);
+
+				do_refresh = TRUE;
+			}
+		}
+		break;
+	default:
+		break;
 	}
 
 	icalcomponent_free (icalcomp);
+	g_free (user_email);
 
-exit:
-	convert_error_to_edc_error (&error);
-	e_data_cal_respond_receive_objects (cal, context, error);
-}
-
-static const gchar *
-e_cal_get_meeting_cancellation_comment (ECalComponent *comp)
-{
-	icalproperty *prop;
-	prop = icalcomponent_get_first_property (
-		e_cal_component_get_icalcomponent (comp),
-		ICAL_X_PROPERTY);
-	while (prop) {
-		const gchar *x_name, *x_val;
-		x_name = icalproperty_get_x_name (prop);
-		x_val = icalproperty_get_x (prop);
-		if (!g_ascii_strcasecmp (x_name, "X-EVOLUTION-RETRACT-COMMENT"))
-			return x_val;
-
-		prop = icalcomponent_get_next_property (
-			e_cal_component_get_icalcomponent (comp),
-			ICAL_X_PROPERTY);
-	}
-
-	return NULL;
+	if (success && do_refresh)
+		e_cal_meta_backend_schedule_refresh (E_CAL_META_BACKEND (cbews));
 }
 
 static void
-ewscal_send_cancellation_email (ECalBackend *backend,
-                                EEwsConnection *cnc,
-                                CamelAddress *from,
-                                CamelInternetAddress *recipient,
-                                const gchar *subject,
-                                const gchar *body,
-                                const gchar *calobj)
-{
-	CamelMimeMessage *message;
-	CamelContentType *mime_type;
-	GError *error = NULL;
-	CamelMultipart *multi;
-	CamelMimePart *text_part, *vcal_part;
-	gchar *ical_str;
-	icalcomponent *vcal, *vevent, *vtz;
-	icalproperty *prop;
-	icaltimezone *icaltz;
-	struct icaltimetype dt;
-
-	vcal = icalcomponent_new (ICAL_VCALENDAR_COMPONENT);
-	icalcomponent_add_property (vcal, icalproperty_new_version ("2.0"));
-	icalcomponent_add_property (vcal, icalproperty_new_prodid ("-//Evolution EWS backend//EN"));
-	icalcomponent_add_property (vcal, icalproperty_new_method (ICAL_METHOD_CANCEL));
-	vevent = icalcomponent_new_from_string (calobj);
-	prop = icalcomponent_get_first_property (vevent, ICAL_STATUS_PROPERTY);
-	if (prop != NULL) icalcomponent_remove_property (vevent, prop);
-	icalcomponent_add_property (vevent, icalproperty_new_status (ICAL_STATUS_CANCELLED));
-	prop = icalcomponent_get_first_property (vevent, ICAL_METHOD_PROPERTY);
-	if (prop != NULL) icalcomponent_remove_property (vevent, prop);
-	dt = icalcomponent_get_dtstart (vevent);
-	icaltz = (icaltimezone *)
-		(dt.zone ? dt.zone : e_cal_backend_ews_get_timezone_from_ical_component (backend, vevent));
-	vtz = icaltimezone_get_component (icaltz);
-	icalcomponent_add_component (vcal, icalcomponent_new_clone (vtz));
-	icalcomponent_add_component (vcal, vevent);
-	text_part = camel_mime_part_new ();
-	camel_mime_part_set_content (text_part, body, strlen (body), "text/plain");
-
-	vcal_part = camel_mime_part_new ();
-	mime_type = camel_data_wrapper_get_mime_type_field (CAMEL_DATA_WRAPPER (vcal_part));
-	camel_content_type_set_param (mime_type, "charset", "utf-8");
-	camel_content_type_set_param (mime_type, "method", "CANCEL");
-	ical_str = icalcomponent_as_ical_string_r ((icalcomponent *) vcal);
-	camel_mime_part_set_content (vcal_part, ical_str, strlen (ical_str), "text/calendar; method=CANCEL");
-	free (ical_str);
-
-	multi = camel_multipart_new ();
-	camel_data_wrapper_set_mime_type (CAMEL_DATA_WRAPPER (multi), "multipart/alternative");
-	camel_multipart_add_part (multi, text_part);
-	camel_multipart_set_boundary (multi, NULL);
-	camel_multipart_add_part (multi, vcal_part);
-	g_object_unref (text_part);
-	g_object_unref (vcal_part);
-
-	message = camel_mime_message_new ();
-	camel_mime_message_set_subject (message, subject);
-	camel_mime_message_set_from (message, CAMEL_INTERNET_ADDRESS (from));
-	camel_mime_message_set_recipients (message, CAMEL_RECIPIENT_TYPE_TO, recipient);
-
-	camel_medium_set_content ((CamelMedium *) message, (CamelDataWrapper *) multi);
-	g_object_unref (multi);
-
-	camel_ews_utils_create_mime_message (cnc, "SendOnly", NULL, message, NULL, from, NULL, NULL, NULL, NULL, &error);
-
-	if (error) {
-		g_warning ("Failed to send cancellation email: %s", error->message);
-		g_clear_error (&error);
-	}
-
-	g_object_unref (message);
-	icalcomponent_free (vcal);
-}
-
-static void
-e_cal_backend_ews_send_objects (ECalBackend *backend,
-                                EDataCal *cal,
-                                guint32 context,
-                                GCancellable *cancellable,
-                                const gchar *calobj)
+ecb_ews_send_objects_sync (ECalBackendSync *sync_backend,
+			   EDataCal *cal,
+			   GCancellable *cancellable,
+			   const gchar *calobj,
+			   GSList **users,
+			   gchar **modified_calobj,
+			   GError **error)
 {
 	ECalBackendEws *cbews;
-	ECalBackendEwsPrivate *priv;
 	icalcomponent_kind kind;
 	icalcomponent *icalcomp, *subcomp = NULL;
-	GError *error = NULL;
 	gchar *subcalobj;
+	gboolean success = TRUE;
 
-	cbews = E_CAL_BACKEND_EWS (backend);
-	priv = cbews->priv;
+	g_return_if_fail (E_IS_CAL_BACKEND_EWS (sync_backend));
 
-	/* make sure we're not offline */
-	if (!e_backend_get_online (E_BACKEND (backend)) || !cbews->priv->cnc) {
-		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
-		goto exit;
-	}
+	cbews = E_CAL_BACKEND_EWS (sync_backend);
 
-	if (!cal_backend_ews_ensure_connected (cbews, cancellable, &error)) {
-		goto exit;
-	}
+	if (!e_cal_meta_backend_ensure_connected_sync (E_CAL_META_BACKEND (cbews), cancellable, error))
+		return;
 
-	icalcomp = icalparser_parse_string (calobj);
+	icalcomp = calobj ? icalparser_parse_string (calobj) : NULL;
 
 	/* make sure data was parsed properly */
 	if (!icalcomp) {
-		g_propagate_error (&error, EDC_ERROR (InvalidObject));
-		goto exit;
+		g_propagate_error (error, EDC_ERROR (InvalidObject));
+		return;
 	}
+
 	/* make sure ical data we parse is actually an vcal component */
 	if ((icalcomponent_isa (icalcomp) != ICAL_VCALENDAR_COMPONENT) && (icalcomponent_isa (icalcomp) != ICAL_VEVENT_COMPONENT)) {
 		icalcomponent_free (icalcomp);
-		g_propagate_error (&error, EDC_ERROR (InvalidObject));
-		goto exit;
+		g_propagate_error (error, EDC_ERROR (InvalidObject));
+		return;
 	}
 
-	kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
+	kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbews));
 
 	if (icalcomponent_isa (icalcomp) == ICAL_VCALENDAR_COMPONENT) {
-		kind = e_cal_backend_get_kind (E_CAL_BACKEND (backend));
+		kind = e_cal_backend_get_kind (E_CAL_BACKEND (cbews));
 		subcomp = icalcomponent_get_first_component (icalcomp, kind);
 	}
 	if (icalcomponent_isa (icalcomp) == ICAL_VEVENT_COMPONENT)
 		subcomp = icalcomp;
-	while (subcomp) {
-		ECalComponent *comp = e_cal_component_new ();
+	while (subcomp && success) {
 		const gchar *new_body_content = NULL, *subject = NULL, *org_email = NULL;
 		const gchar *org = NULL, *attendee = NULL;
 		icalproperty *prop, *org_prop = NULL;
 		CamelInternetAddress *org_addr = camel_internet_address_new ();
 
-		e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (subcomp));
-
-		new_body_content = e_cal_get_meeting_cancellation_comment (comp);
+		new_body_content = e_cal_util_get_x_property (subcomp, "X-EVOLUTION-RETRACT-COMMENT");
 		subject = icalproperty_get_value_as_string (icalcomponent_get_first_property (subcomp, ICAL_SUMMARY_PROPERTY));
 
 		org_prop = icalcomponent_get_first_property (subcomp, ICAL_ORGANIZER_PROPERTY);
 		org = icalproperty_get_organizer (org_prop);
 		if (!g_ascii_strncasecmp (org, "MAILTO:", 7))
 			org_email = (org) + 7;
-			else
-				org_email = org;
+		else
+			org_email = org;
 
 		camel_internet_address_add (org_addr, icalproperty_get_parameter_as_string (org_prop, "CN"), org_email);
 
 		/* iterate over every attendee property */
 		for (prop = icalcomponent_get_first_property (subcomp, ICAL_ATTENDEE_PROPERTY);
-			prop != NULL;
-			prop = icalcomponent_get_next_property (subcomp, ICAL_ATTENDEE_PROPERTY)) {
-
+		     prop && success;
+		     prop = icalcomponent_get_next_property (subcomp, ICAL_ATTENDEE_PROPERTY)) {
 			CamelInternetAddress *attendee_addr = camel_internet_address_new ();
 			attendee = icalproperty_get_attendee (prop);
 			if (g_ascii_strcasecmp (org_email, attendee) == 0) continue;
@@ -2877,1571 +3379,96 @@ e_cal_backend_ews_send_objects (ECalBackend *backend,
 
 			subcalobj = icalcomponent_as_ical_string_r (subcomp);
 			camel_internet_address_add (attendee_addr, icalproperty_get_parameter_as_string (prop, "CN"), attendee);
-			ewscal_send_cancellation_email (backend, priv->cnc, CAMEL_ADDRESS (org_addr), attendee_addr, subject, new_body_content, subcalobj);
+			success = ecb_ews_send_cancellation_email_sync (cbews, CAMEL_ADDRESS (org_addr), attendee_addr,
+				subject, new_body_content, subcalobj, cancellable, error);
 			g_object_unref (attendee_addr);
 			free (subcalobj);
 		}
 
 		g_object_unref (org_addr);
-		g_object_unref (comp);
 		subcomp = icalcomponent_get_next_component (icalcomp, kind);
 	}
 
 	icalcomponent_free (icalcomp);
 
-exit:
-	convert_error_to_edc_error (&error);
-	e_data_cal_respond_send_objects (cal, context, error,  NULL, calobj);
-}
-
-/* TODO Do not replicate this in every backend */
-static icaltimezone *
-resolve_tzid (const gchar *tzid,
-              gpointer user_data)
-{
-	ETimezoneCache *timezone_cache;
-
-	timezone_cache = E_TIMEZONE_CACHE (user_data);
-
-	return e_timezone_cache_get_timezone (timezone_cache, tzid);
+	ecb_ews_convert_error_to_edc_error (error);
 }
 
 static void
-put_component_to_store (ECalBackendEws *cbews,
-                        ECalComponent *comp)
-{
-	time_t time_start, time_end;
-	ECalBackendEwsPrivate *priv;
-
-	priv = cbews->priv;
-
-	e_cal_util_get_component_occur_times (
-		comp, &time_start, &time_end,
-		resolve_tzid, cbews, priv->default_zone,
-		e_cal_backend_get_kind (E_CAL_BACKEND (cbews)));
-
-	e_cal_backend_store_put_component_with_time_range (priv->store, comp, time_start, time_end);
-}
-
-static void
-ews_get_attachments (ECalBackendEws *cbews,
-                     EEwsItem *item)
-{
-	gboolean has_attachment = FALSE;
-	const GSList *attachment_ids, *aid, *l;
-	const EwsId *item_id;
-	ECalComponent *comp;
-	const gchar *uid;
-	GSList *uris = NULL, *info_attachments = NULL;
-	GCancellable *cancellable;
-
-	e_ews_item_has_attachments (item, &has_attachment);
-	if (!has_attachment)
-		return;
-
-	item_id = e_ews_item_get_id (item);
-	g_return_if_fail (item_id != NULL);
-
-	cancellable = cal_backend_ews_ref_cancellable (cbews);
-
-	PRIV_LOCK (cbews->priv);
-	comp = g_hash_table_lookup (cbews->priv->item_id_hash, item_id->id);
-	if (!comp) {
-		PRIV_UNLOCK (cbews->priv);
-		g_clear_object (&cancellable);
-		g_warning ("%s: Failed to get component from item_id_hash", G_STRFUNC);
-		return;
-	}
-
-	e_cal_component_get_uid (comp, &uid);
-
-	attachment_ids = e_ews_item_get_attachments_ids (item);
-	if (e_ews_connection_get_attachments_sync (
-		cbews->priv->cnc,
-		EWS_PRIORITY_MEDIUM,
-		uid,
-		attachment_ids,
-		cbews->priv->storage_path,
-		TRUE,
-		&info_attachments,
-		NULL, NULL,
-		cancellable,
-		NULL)) {
-		icalcomponent *icalcomp;
-		icalproperty *icalprop;
-		icalparameter *icalparam;
-		ECalComponentId *id;
-		ECalComponent *cache_comp;
-
-		for (l = info_attachments; l; l = l->next) {
-			EEwsAttachmentInfo *info = l->data;
-
-			/* ignore non-uri attachments, because it's an exception */
-			if (e_ews_attachment_info_get_type (info) == E_EWS_ATTACHMENT_INFO_TYPE_URI) {
-				const gchar *uri = e_ews_attachment_info_get_uri (info);
-
-				if (uri)
-					uris = g_slist_append (uris, g_strdup (uri));
-			}
-		}
-
-		e_cal_component_set_attachment_list (comp, uris);
-
-		icalcomp = e_cal_component_get_icalcomponent (comp);
-		icalprop = icalcomponent_get_first_property (icalcomp, ICAL_ATTACH_PROPERTY);
-		for (aid = attachment_ids; aid && icalprop; aid = aid->next, icalprop = icalcomponent_get_next_property (icalcomp, ICAL_ATTACH_PROPERTY)) {
-			icalparam = icalparameter_new_x (aid->data);
-			icalparameter_set_xname (icalparam, "X-EWS-ATTACHMENTID");
-			icalproperty_add_parameter (icalprop, icalparam);
-		}
-
-		id = e_cal_component_get_id (comp);
-		if (!id) {
-			g_warn_if_reached ();
-		} else {
-			cache_comp = e_cal_backend_store_get_component (cbews->priv->store, id->uid, id->rid);
-			e_cal_component_free_id (id);
-
-			put_component_to_store (cbews, comp);
-
-			if (cache_comp)
-				e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbews), cache_comp, comp);
-		}
-
-		g_slist_free_full (uris, g_free);
-		g_slist_free_full (info_attachments, (GDestroyNotify) e_ews_attachment_info_free);
-	}
-
-	PRIV_UNLOCK (cbews->priv);
-
-	g_clear_object (&cancellable);
-}
-
-static icaltimezone *
-get_timezone (ETimezoneCache *timezone_cache,
-	      const gchar *msdn_tzid,
-	      const gchar *tzid,
-	      const gchar *evo_ews_tzid)
-{
-	icaltimezone *zone = NULL;
-	const gchar *evo_ews_msdn_tzid;
-
-	zone = e_timezone_cache_get_timezone (timezone_cache, tzid);
-	if (zone == NULL)
-		zone = icaltimezone_get_builtin_timezone (tzid);
-
-	if (g_strcmp0 (tzid, evo_ews_tzid) == 0)
-		return zone;
-
-	if (evo_ews_tzid != NULL) {
-		evo_ews_msdn_tzid = e_cal_backend_ews_tz_util_get_msdn_equivalent (evo_ews_tzid);
-
-		if (g_strcmp0 (msdn_tzid, evo_ews_msdn_tzid) == 0) {
-			zone = e_timezone_cache_get_timezone (timezone_cache, evo_ews_tzid);
-			if (zone == NULL)
-				zone = icaltimezone_get_builtin_timezone (evo_ews_tzid);
-		}
-	}
-
-	return zone;
-}
-
-static icalparameter *
-cal_backend_ews_responsetype_to_partstat (const gchar *responsetype)
-{
-	icalparameter *param = NULL;
-
-	g_return_val_if_fail (responsetype != NULL, NULL);
-
-	if (g_ascii_strcasecmp (responsetype, "Organizer") == 0)
-		param = icalparameter_new_partstat (ICAL_PARTSTAT_ACCEPTED);
-	else if (g_ascii_strcasecmp (responsetype, "Tentative") == 0)
-		param = icalparameter_new_partstat (ICAL_PARTSTAT_TENTATIVE);
-	else if (g_ascii_strcasecmp (responsetype, "Accept") == 0)
-		param = icalparameter_new_partstat (ICAL_PARTSTAT_ACCEPTED);
-	else if (g_ascii_strcasecmp (responsetype, "Decline") == 0)
-		param = icalparameter_new_partstat (ICAL_PARTSTAT_DECLINED);
-	else if (g_ascii_strcasecmp (responsetype, "NoResponseReceived") == 0)
-		param = icalparameter_new_partstat (ICAL_PARTSTAT_NEEDSACTION);
-	else if (g_ascii_strcasecmp (responsetype, "Unknown") == 0)
-		param = icalparameter_new_partstat (ICAL_PARTSTAT_NONE);
-
-	if (!param)
-		param = icalparameter_new_partstat (ICAL_PARTSTAT_NONE);
-
-	return param;
-}
-
-static void
-add_item_to_cache (ECalBackendEws *cbews,
-                   EEwsItem *item)
-{
-	ECalBackendEwsPrivate *priv;
-	ETimezoneCache *timezone_cache;
-	icalcomponent_kind kind;
-	EEwsItemType item_type;
-	icalcomponent *icalcomp, *vcomp;
-	const gchar *mime_content;
-
-	timezone_cache = E_TIMEZONE_CACHE (cbews);
-
-	kind = e_cal_backend_get_kind ((ECalBackend *) cbews);
-	priv = cbews->priv;
-
-	item_type = e_ews_item_get_item_type (item);
-	if (item_type == E_EWS_ITEM_TYPE_TASK || item_type == E_EWS_ITEM_TYPE_MEMO) {
-		icalproperty *icalprop;
-		icaltimetype due_date, start_date, complete_date, created;
-		icalproperty_status status  = ICAL_STATUS_NONE;
-		icalproperty_class class = ICAL_CLASS_NONE;
-		const gchar *ews_task_status, *sensitivity;
-		EwsImportance item_importance;
-		gint priority = 5;
-		gboolean has_this_date = FALSE;
-
-		vcomp = icalcomponent_new (ICAL_VCALENDAR_COMPONENT);
-		/*subject*/
-		icalcomp = icalcomponent_new (item_type == E_EWS_ITEM_TYPE_TASK ? ICAL_VTODO_COMPONENT : ICAL_VJOURNAL_COMPONENT);
-		icalprop = icalproperty_new_summary (e_ews_item_get_subject (item));
-		icalcomponent_add_property (icalcomp, icalprop);
-
-		/*date time created*/
-		created = icaltime_from_timet_with_zone (e_ews_item_get_date_created (item), 0, priv->default_zone);
-		icalprop = icalproperty_new_created (created);
-		icalcomponent_add_property (icalcomp, icalprop);
-
-		/*sensitivity*/
-		sensitivity = e_ews_item_get_sensitivity (item);
-		if (g_strcmp0 (sensitivity, "Normal") == 0)
-			class = ICAL_CLASS_PUBLIC;
-		else if (g_strcmp0 (sensitivity, "Private") == 0)
-			class = ICAL_CLASS_PRIVATE;
-		else if ((g_strcmp0 (sensitivity, "Confidential") == 0) ||
-			 (g_strcmp0 (sensitivity, "Personal") == 0))
-			class = ICAL_CLASS_CONFIDENTIAL;
-		icalprop = icalproperty_new_class (class);
-		icalcomponent_add_property (icalcomp, icalprop);
-
-		/*description*/
-		icalprop = icalproperty_new_description (e_ews_item_get_body (item));
-		icalcomponent_add_property (icalcomp, icalprop);
-
-		/*task assaingments*/
-		if (e_ews_item_get_delegator (item) != NULL) {
-			const gchar *task_owner = e_ews_item_get_delegator (item);
-			GSList *mailboxes = NULL, *l;
-			GCancellable *cancellable;
-			GError *error = NULL;
-			gboolean includes_last_item;
-			gchar *mailtoname;
-			icalparameter *param;
-
-			/*The task owner according to Exchange is current user, even that the task was assigned by
-			 *someone else. I'm making the current user attendee and task delegator will be a task organizer */
-
-			mailtoname = g_strdup_printf ("mailto:%s", priv->user_email);
-			icalprop = icalproperty_new_attendee (mailtoname);
-			g_free (mailtoname);
-
-			param = icalparameter_new_cn (e_ews_item_get_owner (item));
-			icalproperty_add_parameter (icalprop, param);
-			icalcomponent_add_property (icalcomp, icalprop);
-
-			cancellable = cal_backend_ews_ref_cancellable (cbews);
-
-			/* get delegator mail box*/
-			e_ews_connection_resolve_names_sync (
-				priv->cnc, EWS_PRIORITY_MEDIUM, task_owner,
-				EWS_SEARCH_AD, NULL, FALSE, &mailboxes, NULL,
-				&includes_last_item, cancellable, &error);
-
-			for (l = mailboxes; l != NULL; l = g_slist_next (l)) {
-				EwsMailbox *mb = l->data;
-
-				mailtoname = g_strdup_printf ("mailto:%s", mb->email);
-				icalprop = icalproperty_new_organizer (mailtoname);
-				param = icalparameter_new_cn (mb->name);
-				icalproperty_add_parameter (icalprop, param);
-				icalcomponent_add_property (icalcomp, icalprop);
-
-				g_free (mailtoname);
-				e_ews_mailbox_free (mb);
-			}
-			g_slist_free (mailboxes);
-			g_clear_object (&cancellable);
-		}
-
-		if (item_type == E_EWS_ITEM_TYPE_TASK) {
-			const gchar *percent_complete;
-
-			/*start date*/
-			has_this_date = FALSE;
-			e_ews_item_task_has_start_date (item, &has_this_date);
-			if (has_this_date) {
-				start_date = icaltime_from_timet_with_zone (e_ews_item_get_start_date (item), 0, priv->default_zone);
-				start_date.is_date = 1;
-				icalprop = icalproperty_new_dtstart (start_date);
-				icalcomponent_add_property (icalcomp, icalprop);
-			}
-
-			/*status*/
-			ews_task_status = e_ews_item_get_status (item);
-			if (g_strcmp0 (ews_task_status, "NotStarted") != 0) {
-				if (g_strcmp0 (ews_task_status, "Completed") == 0)
-					status = ICAL_STATUS_COMPLETED;
-				else if (g_strcmp0 (ews_task_status, "InProgress") == 0)
-					status = ICAL_STATUS_INPROCESS;
-				else if (g_strcmp0 (ews_task_status, "WaitingOnOthers") == 0)
-					status = ICAL_STATUS_NEEDSACTION;
-				else if (g_strcmp0 (ews_task_status, "Deferred") == 0)
-					status = ICAL_STATUS_CANCELLED;
-				icalprop = icalproperty_new_status (status);
-				icalcomponent_add_property (icalcomp, icalprop);
-			}
-
-			/*precent complete*/
-			percent_complete = e_ews_item_get_percent_complete (item);
-			icalprop  = icalproperty_new_percentcomplete (atoi (percent_complete ? percent_complete : "0"));
-			icalcomponent_add_property (icalcomp, icalprop);
-
-			/*due date*/
-			e_ews_item_task_has_due_date (item, &has_this_date);
-			if (has_this_date) {
-				due_date = icaltime_from_timet_with_zone (e_ews_item_get_due_date (item), 0, priv->default_zone);
-				due_date.is_date = 1;
-				icalprop = icalproperty_new_due (due_date);
-				icalcomponent_add_property (icalcomp, icalprop);
-			}
-
-			/*complete date*/
-			has_this_date = FALSE;
-			e_ews_item_task_has_complete_date (item, &has_this_date);
-			if (has_this_date) {
-				complete_date = icaltime_from_timet_with_zone (e_ews_item_get_complete_date (item), 0, priv->default_zone);
-				complete_date.is_date = 1;
-				icalprop = icalproperty_new_completed (complete_date);
-				icalcomponent_add_property (icalcomp, icalprop);
-			}
-
-			/*priority*/
-			item_importance = e_ews_item_get_importance (item);
-			if (item_importance == EWS_ITEM_HIGH)
-				priority = 3;
-			else if (item_importance == EWS_ITEM_LOW)
-				priority = 7;
-			icalprop = icalproperty_new_priority (priority);
-			icalcomponent_add_property (icalcomp, icalprop);
-		}
-
-		icalcomponent_add_component (vcomp,icalcomp);
-	} else {
-		struct icaltimetype dt;
-		const gchar *tzid;
-		gboolean timezone_set = FALSE;
-
-		mime_content = e_ews_item_get_mime_content (item);
-		vcomp = icalparser_parse_string (mime_content);
-
-		if (!vcomp && mime_content) {
-			const gchar *begin_vcalendar, *end_vcalendar;
-
-			/* Workaround Exchange 2016 error, which returns invalid iCalendar object (without 'END:VCALENDAR'),
-			   when the event has at least one detached instance. */
-			begin_vcalendar = camel_strstrcase (mime_content, "BEGIN:VCALENDAR");
-			end_vcalendar = camel_strstrcase (mime_content, "END:VCALENDAR");
-
-			/* If it exists, then it should be alone on a separate line */
-			if (!(begin_vcalendar && (begin_vcalendar == mime_content || begin_vcalendar[-1] == '\n') &&
-			    (begin_vcalendar[15 /* strlen ("BEGIN:VCALENDAR") */] == '\r' || begin_vcalendar[15] == '\n')))
-				begin_vcalendar = NULL;
-
-			/* If it exists, then it should be alone on a separate line and not at the very beginning of the mime_content */
-			if (!(end_vcalendar && end_vcalendar > mime_content && end_vcalendar[-1] == '\n' &&
-			    (end_vcalendar[13 /* strlen ("END:VCALENDAR") */] == '\r' || end_vcalendar[13] == '\n' || end_vcalendar[13] == '\0')))
-				end_vcalendar = NULL;
-
-			if (begin_vcalendar && !end_vcalendar) {
-				gchar *str;
-
-				str = g_strconcat (mime_content, "\r\n", "END:VCALENDAR", "\r\n", NULL);
-				vcomp = icalparser_parse_string (str);
-				g_free (str);
-			}
-		}
-
-		if (!vcomp) {
-			g_warn_if_reached ();
-			return;
-		}
-
-		tzid = e_ews_item_get_tzid (item);
-		if (tzid == NULL) {
-			/*
-			 * When we are working with Exchange server 2010 or newer, we have to handle a few
-			 * things more than we do working old servers. These things are:
-			 * - MSDN timezone names:
-			 *   Used setting StartTimeZone and EndTimeZone. MSDN timezone names are not
-			 *   the same used in libical, so we need to have a table of equivalence to
-			 *   convert from one to another and avoid show the MSDN timezone name to the
-			 *   user and save it in the ETimezoneCache.
-			 * - EvoEWSStartTimeZone/EvoEWSEndTimeZone
-			 *   Used to keep track if the timezone shown to the user is the same one set
-			 *   by him/her. As we have a table of equivalence, sometimes the user sets a
-			 *   timezone but without EvoEWSStartTiemZone property, another timezone name,
-			 *   in the same offset, can be shown. And we want to avoid this.
-			 * - DTEND property:
-			 *   As we have to work with DTEND setting an event when using EWS server 2010 or
-			 *   newer, we have to care about set it properly here, instead of use the same
-			 *   as is used in DTSTART.
-			 */
-			icaltimezone *start_zone, *end_zone;
-			const gchar *start_tzid, *end_tzid;
-			const gchar *ical_start_tzid, *ical_end_tzid;
-			const gchar *evo_ews_start_tzid, *evo_ews_end_tzid;
-
-			start_tzid = e_ews_item_get_start_tzid (item);
-			end_tzid = e_ews_item_get_end_tzid (item);
-
-			ical_start_tzid = e_cal_backend_ews_tz_util_get_ical_equivalent (start_tzid);
-			ical_end_tzid = e_cal_backend_ews_tz_util_get_ical_equivalent (end_tzid);
-
-			evo_ews_start_tzid = e_ews_item_get_iana_start_time_zone (item);
-			evo_ews_end_tzid = e_ews_item_get_iana_end_time_zone (item);
-
-			/*
-			 * We have a few timezones that don't have an equivalent MSDN timezone.
-			 * For those, we will get ical_start_tzid being NULL and then we need to use
-			 * start_tzid, which one has the libical's expected name.
-			 */
-			start_zone = get_timezone (
-				timezone_cache,
-				start_tzid,
-				ical_start_tzid != NULL ? ical_start_tzid : start_tzid,
-				evo_ews_start_tzid);
-			end_zone = get_timezone (
-				timezone_cache,
-				end_tzid,
-				ical_end_tzid != NULL ? ical_end_tzid : end_tzid,
-				evo_ews_end_tzid);
-
-			if (start_zone != NULL) {
-				icalcomp = icalcomponent_get_first_component (vcomp, kind);
-
-				dt = icalcomponent_get_dtstart (icalcomp);
-				dt = icaltime_convert_to_zone (dt, start_zone);
-				icalcomponent_set_dtstart (icalcomp, dt);
-
-				timezone_set = TRUE;
-				e_timezone_cache_add_timezone (timezone_cache, start_zone);
-
-				if (end_zone != NULL) {
-					dt = icalcomponent_get_dtend (icalcomp);
-					dt = icaltime_convert_to_zone (dt, end_zone);
-					icalcomponent_set_dtend (icalcomp, dt);
-
-					e_timezone_cache_add_timezone (timezone_cache, end_zone);
-				}
-			}
-
-			if (!timezone_set)
-				tzid = start_tzid;
-		}
-
-		if (!timezone_set && tzid) {
-			/*
-			 * When we are working with Exchange server older than 2010, we don't set different
-			 * DTSTART and DTEND properties in VTIMEZONE. The reason of that is we don't use
-			 * those properties settings/changing a meeting timezone.
-			 * So, for older servers, here, we only set the DTSTART and DTEND properties with
-			 * the same values.
-			 */
-			icaltimezone *zone;
-			gchar *new_tzid = NULL;
-
-			icalcomp = icalcomponent_get_first_component (vcomp, kind);
-
-			if (!icaltimezone_get_builtin_timezone (tzid) &&
-			    icalcomponent_get_uid (icalcomp)) {
-				icalcomponent *vtimezone;
-
-				/* Add the timezone */
-				vtimezone = icalcomponent_get_first_component (vcomp, ICAL_VTIMEZONE_COMPONENT);
-				if (vtimezone != NULL) {
-					icalproperty *prop;
-
-					new_tzid = g_strconcat ("/evolution/ews/tzid/", icalcomponent_get_uid (icalcomp), NULL);
-
-					zone = icaltimezone_new ();
-					vtimezone = icalcomponent_new_clone (vtimezone);
-					prop = icalcomponent_get_first_property (vtimezone, ICAL_TZID_PROPERTY);
-					if (prop) {
-						icalproperty_set_tzid (prop, new_tzid);
-
-						prop = icalcomponent_get_first_property (vtimezone, ICAL_LOCATION_PROPERTY);
-						if (!prop) {
-							/* Use the original tzid as the timezone Location, to not expose
-							   evolution-ews TZID. */
-							prop = icalproperty_new_location (tzid);
-							icalcomponent_add_property (vtimezone, prop);
-						}
-					} else {
-						g_free (new_tzid);
-						new_tzid = NULL;
-					}
-					icaltimezone_set_component (zone, vtimezone);
-					e_timezone_cache_add_timezone (timezone_cache, zone);
-					icaltimezone_free (zone, TRUE);
-				}
-			}
-
-			zone = e_timezone_cache_get_timezone (timezone_cache, new_tzid ? new_tzid : tzid);
-
-			if (!zone && new_tzid)
-				zone = e_timezone_cache_get_timezone (timezone_cache, tzid);
-
-			if (zone == NULL)
-				zone = icaltimezone_get_builtin_timezone (tzid);
-
-			if (zone != NULL) {
-				dt = icalcomponent_get_dtstart (icalcomp);
-				dt = icaltime_convert_to_zone (dt, zone);
-				icalcomponent_set_dtstart (icalcomp, dt);
-
-				dt = icalcomponent_get_dtend (icalcomp);
-				dt = icaltime_convert_to_zone (dt, zone);
-				icalcomponent_set_dtend (icalcomp, dt);
-			}
-
-			g_free (new_tzid);
-		}
-	}
-
-	/* Vevent or Vtodo */
-	icalcomp = icalcomponent_get_first_component (vcomp, kind);
-	if (icalcomp) {
-		ECalComponent *comp, *cache_comp = NULL;
-		icalproperty *icalprop, *freebusy;
-		const EwsId *item_id;
-		ECalComponentId *id;
-		const GSList *l = NULL;
-		const gchar *uid = e_ews_item_get_uid (item);
-
-		item_id = e_ews_item_get_id (item);
-
-		/* Attendees */
-		for (l = e_ews_item_get_attendees (item); l != NULL; l = g_slist_next (l)) {
-			icalparameter *param, *cu_type;
-			gchar *mailtoname;
-			const gchar *email = NULL;
-			EwsAttendee *attendee = (EwsAttendee *) l->data;
-
-			if (!attendee->mailbox)
-				continue;
-
-			if (g_strcmp0 (attendee->mailbox->routing_type, "EX") == 0)
-				email = e_ews_item_util_strip_ex_address (attendee->mailbox->email);
-
-			mailtoname = g_strdup_printf ("mailto:%s", email ? email : attendee->mailbox->email);
-			icalprop = icalproperty_new_attendee (mailtoname);
-			g_free (mailtoname);
-
-			param = icalparameter_new_cn (attendee->mailbox->name);
-			icalproperty_add_parameter (icalprop, param);
-
-			if (g_ascii_strcasecmp (attendee->attendeetype, "Required") == 0) {
-				param = icalparameter_new_role (ICAL_ROLE_REQPARTICIPANT);
-				cu_type = icalparameter_new_cutype (ICAL_CUTYPE_INDIVIDUAL);
-			}
-			else if (g_ascii_strcasecmp (attendee->attendeetype, "Resource") == 0) {
-				param = icalparameter_new_role (ICAL_ROLE_NONPARTICIPANT);
-				cu_type = icalparameter_new_cutype (ICAL_CUTYPE_RESOURCE);
-			}
-			else {
-				param = icalparameter_new_role ( ICAL_ROLE_OPTPARTICIPANT);
-				cu_type = icalparameter_new_cutype (ICAL_CUTYPE_INDIVIDUAL);
-			}
-			icalproperty_add_parameter (icalprop, cu_type);
-			icalproperty_add_parameter (icalprop, param);
-
-			if (cbews->priv->user_email && (email || attendee->mailbox->email) && e_ews_item_get_my_response_type (item) &&
-			    g_ascii_strcasecmp (email ? email : attendee->mailbox->email, cbews->priv->user_email) == 0) {
-				param = cal_backend_ews_responsetype_to_partstat (e_ews_item_get_my_response_type (item));
-			} else {
-				param = cal_backend_ews_responsetype_to_partstat (attendee->responsetype);
-			}
-			icalproperty_add_parameter (icalprop, param);
-
-			icalcomponent_add_property (icalcomp, icalprop);
-		}
-
-		/* Free/Busy */
-		freebusy = icalcomponent_get_first_property (icalcomp, ICAL_TRANSP_PROPERTY);
-		if (!freebusy && (e_ews_item_get_item_type (item) != E_EWS_ITEM_TYPE_TASK)) {
-			/* Busy by default */
-			freebusy = icalproperty_new_transp (ICAL_TRANSP_OPAQUE);
-			icalcomponent_add_property (icalcomp, freebusy);
-		}
-		for (icalprop = icalcomponent_get_first_property (icalcomp, ICAL_X_PROPERTY);
-			icalprop != NULL;
-			icalprop = icalcomponent_get_next_property (icalcomp, ICAL_X_PROPERTY)) {
-
-			if (g_strcmp0 (icalproperty_get_x_name (icalprop), "X-MICROSOFT-CDO-BUSYSTATUS") == 0) {
-				if (g_strcmp0 (icalproperty_get_value_as_string (icalprop), "BUSY") == 0) {
-					icalproperty_set_transp (freebusy, ICAL_TRANSP_OPAQUE);
-				} else {
-					icalproperty_set_transp (freebusy, ICAL_TRANSP_TRANSPARENT);
-				}
-
-				break;
-			}
-		}
-
-		/*AllDayEvent*/
-		for (icalprop = icalcomponent_get_first_property (icalcomp, ICAL_X_PROPERTY);
-			icalprop != NULL;
-			icalprop = icalcomponent_get_next_property (icalcomp, ICAL_X_PROPERTY)) {
-
-			if (g_strcmp0 (icalproperty_get_x_name (icalprop), "X-MICROSOFT-CDO-ALLDAYEVENT") == 0) {
-				if (g_strcmp0 (icalproperty_get_value_as_string (icalprop), "TRUE") == 0) {
-					struct icaltimetype dtend, dtstart;
-					dtstart = icalcomponent_get_dtstart (icalcomp);
-					dtstart.is_date = 1;
-					icalcomponent_set_dtstart (icalcomp, dtstart);
-
-					dtend = icalcomponent_get_dtend (icalcomp);
-					dtend.is_date = 1;
-					icalcomponent_set_dtend (icalcomp, dtend);
-				}
-				break;
-			}
-		}
-
-		if (icalcomponent_get_first_property (icalcomp, ICAL_RECURRENCEID_PROPERTY)) {
-			/* Exchange sets RRULE even on the children, which is broken */
-			icalprop = icalcomponent_get_first_property (icalcomp, ICAL_RRULE_PROPERTY);
-			if (icalprop) {
-				icalcomponent_remove_property (icalcomp, icalprop);
-				icalproperty_free (icalprop);
-			}
-		}
-
-		/* Exchange sets an ORGANIZER on all events. RFC2445 says:
-		 *
-		 *   This property MUST NOT be specified in an iCalendar
-		 *   object that specifies only a time zone definition or
-		 *   that defines calendar entities that are not group
-		 *   scheduled entities, but are entities only on a single
-		 *   user's calendar.
-		 */
-		if (!icalcomponent_get_first_property (icalcomp, ICAL_ATTENDEE_PROPERTY)) {
-			if ((icalprop = icalcomponent_get_first_property (icalcomp, ICAL_ORGANIZER_PROPERTY))) {
-				icalcomponent_remove_property (icalcomp, icalprop);
-				icalproperty_free (icalprop);
-			}
-		}
-
-		icalcomponent_set_uid (icalcomp,uid ? uid : item_id->id);
-
-		icalprop = icalproperty_new_x (item_id->id);
-		icalproperty_set_x_name (icalprop, "X-EVOLUTION-ITEMID");
-		icalcomponent_add_property (icalcomp, icalprop);
-
-		icalprop = icalproperty_new_x (item_id->change_key);
-		icalproperty_set_x_name (icalprop, "X-EVOLUTION-CHANGEKEY");
-		icalcomponent_add_property (icalcomp, icalprop);
-
-		comp = e_cal_component_new ();
-		e_cal_component_set_icalcomponent (comp, icalcomponent_new_clone (icalcomp));
-
-		/* Categories */
-		e_cal_component_set_categories_list (comp, (GSList *) e_ews_item_get_categories (item));
-
-		/*
-		 * There is no API to set/get alarm description on the server side.
-		 * However, for some reason, the alarm description has been set to "REMINDER"
-		 * automatically (and with no i18n). Instead of show it to the user, let's
-		 * set the summary as the alarm description.
-		 */
-		if (e_cal_component_has_alarms (comp)) {
-			GList *alarm_uids, *l;
-
-			alarm_uids = e_cal_component_get_alarm_uids (comp);
-			for (l = alarm_uids; l != NULL; l = l->next) {
-				ECalComponentAlarm *alarm;
-				ECalComponentText text;
-
-				alarm = e_cal_component_get_alarm (comp, l->data);
-				e_cal_component_get_summary (comp, &text);
-				e_cal_component_alarm_set_description (alarm, &text);
-
-				e_cal_component_alarm_free (alarm);
-			}
-			cal_obj_uid_list_free (alarm_uids);
-		}
-
-		id = e_cal_component_get_id (comp);
-		cache_comp = e_cal_backend_store_get_component (priv->store, id->uid, id->rid);
-		e_cal_component_free_id (id);
-
-		put_component_to_store (cbews, comp);
-
-		if (!cache_comp) {
-			e_cal_backend_notify_component_created (E_CAL_BACKEND (cbews), comp);
-		} else {
-			e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbews), cache_comp, comp);
-		}
-
-		PRIV_LOCK (priv);
-		g_hash_table_insert (priv->item_id_hash, g_strdup (item_id->id), g_object_ref (comp));
-		PRIV_UNLOCK (priv);
-
-		g_object_unref (comp);
-	}
-	icalcomponent_free (vcomp);
-}
-
-static void
-ews_refreshing_inc (ECalBackendEws *cbews)
-{
-	PRIV_LOCK (cbews->priv);
-	if (!cbews->priv->refreshing)
-		e_flag_clear (cbews->priv->refreshing_done);
-	cbews->priv->refreshing++;
-	PRIV_UNLOCK (cbews->priv);
-}
-
-static void
-ews_refreshing_dec (ECalBackendEws *cbews)
-{
-	PRIV_LOCK (cbews->priv);
-	if (!cbews->priv->refreshing) {
-		e_flag_set (cbews->priv->refreshing_done);
-		PRIV_UNLOCK (cbews->priv);
-
-		g_warning ("%s: Invalid call, currently not refreshing", G_STRFUNC);
-		return;
-	}
-	cbews->priv->refreshing--;
-	if (!cbews->priv->refreshing) {
-		e_flag_set (cbews->priv->refreshing_done);
-	}
-	PRIV_UNLOCK (cbews->priv);
-}
-
-static gboolean
-ews_cal_sync_get_items_sync (ECalBackendEws *cbews,
-                             const GSList *item_ids,
-                             const gchar *default_props,
-                             const EEwsAdditionalProps *add_props)
-{
-	ECalBackendEwsPrivate *priv;
-	gboolean ret = FALSE;
-	GSList *items = NULL, *l;
-	GCancellable *cancellable;
-	GError *error = NULL;
-
-	priv = cbews->priv;
-
-	cancellable = cal_backend_ews_ref_cancellable (cbews);
-
-	e_ews_connection_get_items_sync (
-		priv->cnc,
-		EWS_PRIORITY_MEDIUM,
-		item_ids,
-		default_props,
-		add_props,
-		FALSE,
-		NULL,
-		E_EWS_BODY_TYPE_TEXT,
-		&items,
-		NULL, NULL,
-		cancellable,
-		&error);
-
-	g_clear_object (&cancellable);
-
-	if (error != NULL) {
-		g_debug ("%s: Unable to get items: %s", G_STRFUNC, error->message);
-		g_clear_error (&error);
-
-		goto exit;
-	}
-
-	/* fetch modified occurrences */
-	for (l = items; l != NULL; l = g_slist_next (l)) {
-		EEwsItem *item = l->data;
-		const GSList *modified_occurrences;
-
-		if (!item || e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR)
-			continue;
-
-		modified_occurrences = e_ews_item_get_modified_occurrences (item);
-		if (modified_occurrences) {
-			EEwsAdditionalProps *modified_add_props;
-
-			modified_add_props = e_ews_additional_props_new ();
-			if (e_ews_connection_satisfies_server_version (priv->cnc, E_EWS_EXCHANGE_2010)) {
-				EEwsExtendedFieldURI *ext_uri;
-
-				modified_add_props->field_uri = g_strdup (GET_ITEMS_SYNC_PROPERTIES_2010);
-
-				ext_uri = e_ews_extended_field_uri_new ();
-				ext_uri->distinguished_prop_set_id = g_strdup ("PublicStrings");
-				ext_uri->prop_name = g_strdup ("EvolutionEWSStartTimeZone");
-				ext_uri->prop_type = g_strdup ("String");
-				modified_add_props->extended_furis = g_slist_append (modified_add_props->extended_furis, ext_uri);
-
-				ext_uri = e_ews_extended_field_uri_new ();
-				ext_uri->distinguished_prop_set_id = g_strdup ("PublicStrings");
-				ext_uri->prop_name = g_strdup ("EvolutionEWSEndTimeZone");
-				ext_uri->prop_type = g_strdup ("String");
-				modified_add_props->extended_furis = g_slist_append (modified_add_props->extended_furis, ext_uri);
-			} else {
-				modified_add_props->field_uri = g_strdup (GET_ITEMS_SYNC_PROPERTIES_2007);
-			}
-
-			ret = ews_cal_sync_get_items_sync (
-				cbews, modified_occurrences,
-				"IdOnly",
-				modified_add_props);
-
-			e_ews_additional_props_free (modified_add_props);
-
-			if (!ret)
-				goto exit;
-		}
-	}
-
-	e_cal_backend_store_freeze_changes (priv->store);
-	for (l = items; l != NULL; l = g_slist_next (l)) {
-		EEwsItem *item = (EEwsItem *) l->data;
-
-		if (!item)
-			continue;
-
-		if (e_ews_item_get_item_type (item) != E_EWS_ITEM_TYPE_ERROR) {
-			add_item_to_cache (cbews, item);
-			ews_get_attachments (cbews, item);
-		}
-	}
-	e_cal_backend_store_thaw_changes (priv->store);
-	ret = TRUE;
-
-exit:
-	g_slist_free_full (items, g_object_unref);
-	return ret;
-}
-
-static gboolean
-cal_backend_ews_process_folder_items (ECalBackendEws *cbews,
-                                      const gchar *sync_state,
-                                      GSList *items_created,
-                                      GSList *items_updated,
-                                      GSList *items_deleted)
-{
-	ECalBackendEwsPrivate *priv;
-	GSList *l[2], *m, *cal_item_ids = NULL, *task_memo_item_ids = NULL;
-	gint i;
-	gboolean ret = FALSE;
-
-	priv = cbews->priv;
-
-	l[0] = items_created;
-	l[1] = items_updated;
-
-	for (i = 0; i < 2; i++) {
-		for (; l[i] != NULL; l[i] = g_slist_next (l[i])) {
-			EEwsItem *item = (EEwsItem *) l[i]->data;
-			EEwsItemType type = e_ews_item_get_item_type (item);
-			const EwsId *id;
-
-			id = e_ews_item_get_id (item);
-			if (type == E_EWS_ITEM_TYPE_EVENT)
-				cal_item_ids = g_slist_prepend (cal_item_ids, id->id);
-			else if (type == E_EWS_ITEM_TYPE_TASK || type == E_EWS_ITEM_TYPE_MEMO)
-				task_memo_item_ids = g_slist_prepend (task_memo_item_ids, id->id);
-		}
-	}
-
-	e_cal_backend_store_freeze_changes (priv->store);
-	for (m = items_deleted; m != NULL; m = g_slist_next (m)) {
-		gchar *item_id = (gchar *) m->data;
-		ECalComponent *comp;
-
-		PRIV_LOCK (priv);
-		comp = g_hash_table_lookup (priv->item_id_hash, item_id);
-		if (comp)
-			g_object_ref (comp);
-		PRIV_UNLOCK (priv);
-
-		if (comp) {
-			if (!ews_cal_delete_comp (cbews, comp, item_id)) {
-				g_object_unref (comp);
-				goto exit;
-			}
-
-			g_object_unref (comp);
-		}
-	}
-	e_cal_backend_store_thaw_changes (priv->store);
-
-
-	if (cal_item_ids) {
-		EEwsAdditionalProps *add_props;
-
-		add_props = e_ews_additional_props_new ();
-		if (e_ews_connection_satisfies_server_version (priv->cnc, E_EWS_EXCHANGE_2010)) {
-			EEwsExtendedFieldURI *ext_uri;
-
-			add_props->field_uri = g_strdup (GET_ITEMS_SYNC_PROPERTIES_2010);
-
-			ext_uri = e_ews_extended_field_uri_new ();
-			ext_uri->distinguished_prop_set_id = g_strdup ("PublicStrings");
-			ext_uri->prop_name = g_strdup ("EvolutionEWSStartTimeZone");
-			ext_uri->prop_type = g_strdup ("String");
-			add_props->extended_furis = g_slist_append (add_props->extended_furis, ext_uri);
-
-			ext_uri = e_ews_extended_field_uri_new ();
-			ext_uri->distinguished_prop_set_id = g_strdup ("PublicStrings");
-			ext_uri->prop_name = g_strdup ("EvolutionEWSEndTimeZone");
-			ext_uri->prop_type = g_strdup ("String");
-			add_props->extended_furis = g_slist_append (add_props->extended_furis, ext_uri);
-		} else {
-			add_props->field_uri = g_strdup (GET_ITEMS_SYNC_PROPERTIES_2007);
-		}
-
-		ews_cal_sync_get_items_sync (
-			cbews,
-			cal_item_ids,
-			"IdOnly",
-			add_props);
-
-		e_ews_additional_props_free (add_props);
-	}
-
-	if (task_memo_item_ids) {
-		ews_cal_sync_get_items_sync (
-			cbews,
-			task_memo_item_ids,
-			"AllProperties",
-			NULL);
-	}
-	ret = TRUE;
-
-exit:
-	g_slist_free (cal_item_ids);
-	g_slist_free (task_memo_item_ids);
-	return ret;
-}
-
-static void
-cbews_forget_all_components (ECalBackendEws *cbews)
-{
-	ECalBackend *backend;
-	GSList *ids, *ii;
-
-	g_return_if_fail (E_IS_CAL_BACKEND_EWS (cbews));
-
-	backend = E_CAL_BACKEND (cbews);
-	g_return_if_fail (backend != NULL);
-
-	ids = e_cal_backend_store_get_component_ids (cbews->priv->store);
-	for (ii = ids; ii; ii = ii->next) {
-		ECalComponentId *id = ii->data;
-
-		if (!id)
-			continue;
-
-		e_cal_backend_store_remove_component (cbews->priv->store, id->uid, id->rid);
-		e_cal_backend_notify_component_removed (backend, id, NULL, NULL);
-	}
-
-	g_slist_free_full (ids, (GDestroyNotify) e_cal_component_free_id);
-}
-
-static gboolean
-ews_freebusy_ecomp_changed (ECalComponent *ecomp,
-			    icalcomponent *vevent)
-{
-	icalcomponent *icomp;
-	gboolean changed = FALSE;
-
-	g_return_val_if_fail (vevent != NULL, FALSE);
-
-	if (!ecomp)
-		return TRUE;
-
-	icomp = e_cal_component_get_icalcomponent (ecomp);
-	if (!icomp)
-		return TRUE;
-
-	if (!changed)
-		changed = g_strcmp0 (icalcomponent_get_summary (icomp), icalcomponent_get_summary (vevent)) != 0;
-	if (!changed)
-		changed = g_strcmp0 (icalcomponent_get_location (icomp), icalcomponent_get_location (vevent)) != 0;
-	if (!changed)
-		changed = icaltime_compare (icalcomponent_get_dtstart (icomp), icalcomponent_get_dtstart (vevent)) != 0;
-	if (!changed)
-		changed = icaltime_compare (icalcomponent_get_dtend (icomp), icalcomponent_get_dtend (vevent)) != 0;
-
-	return changed;
-}
-
-static gpointer
-ews_start_sync_thread (gpointer data)
+ecb_ews_get_free_busy_sync (ECalBackendSync *sync_backend,
+			    EDataCal *cal,
+			    GCancellable *cancellable,
+			    const GSList *users,
+			    time_t start,
+			    time_t end,
+			    GSList **freebusyobjs,
+			    GError **error)
 {
 	ECalBackendEws *cbews;
-	ECalBackendEwsPrivate *priv;
-	GSList *items_created = NULL;
-	GSList *items_updated = NULL;
-	GSList *items_deleted = NULL;
-	gboolean includes_last_item;
-	gboolean ret;
-	gchar *old_sync_state = NULL;
-	gchar *new_sync_state = NULL;
-	GCancellable *cancellable;
-	GError *error = NULL;
-
-	cbews = (ECalBackendEws *) data;
-	priv = cbews->priv;
-
-	cancellable = cal_backend_ews_ref_cancellable (cbews);
-
-	if (priv->is_freebusy_calendar) {
-		ESourceEwsFolder *ews_folder;
-		EEWSFreeBusyData fbdata;
-		GSList *free_busy = NULL, *link;
-		gboolean success;
-		time_t today;
-
-		ews_folder = e_source_get_extension (e_backend_get_source (E_BACKEND (cbews)), E_SOURCE_EXTENSION_EWS_FOLDER);
-
-		today = time_day_begin (time (NULL));
-
-		fbdata.period_start = time_add_week (today, -e_source_ews_folder_get_freebusy_weeks_before (ews_folder));
-		fbdata.period_end = time_day_end (time_add_week (today, e_source_ews_folder_get_freebusy_weeks_after (ews_folder)));
-		fbdata.user_mails = g_slist_prepend (NULL, e_source_ews_folder_dup_foreign_mail (ews_folder));
-
-		success = e_ews_connection_get_free_busy_sync (priv->cnc, G_PRIORITY_DEFAULT,
-			e_ews_cal_utils_prepare_free_busy_request, &fbdata,
-			&free_busy, cancellable, &error);
-
-		if (success) {
-			icaltimezone *utc_zone = icaltimezone_get_utc_timezone ();
-			GSList *ids;
-			GHashTable *known;
-			GHashTableIter iter;
-			gpointer key;
-
-			known = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-
-			ids = e_cal_backend_store_get_component_ids (priv->store);
-			for (link = ids; link; link = g_slist_next (link)) {
-				ECalComponentId *id = link->data;
-
-				if (id && id->uid && *id->uid)
-					g_hash_table_insert (known, g_strdup (id->uid), NULL);
-			}
-			g_slist_free_full (ids, (GDestroyNotify) e_cal_component_free_id);
-
-			for (link = free_busy; link; link = g_slist_next (link)) {
-				icalcomponent *fbcomp = link->data;
-				icalproperty *fbprop;
-				icalparameter *param;
-				struct icalperiodtype fb;
-				icalparameter_fbtype fbtype;
-
-				if (!fbcomp || icalcomponent_isa (fbcomp) != ICAL_VFREEBUSY_COMPONENT)
-					continue;
-
-				for (fbprop = icalcomponent_get_first_property (fbcomp, ICAL_FREEBUSY_PROPERTY);
-				     fbprop;
-				     fbprop = icalcomponent_get_next_property (fbcomp, ICAL_FREEBUSY_PROPERTY)) {
-					icalcomponent *vevent;
-					const gchar *id, *summary, *location;
-
-					param = icalproperty_get_first_parameter (fbprop, ICAL_FBTYPE_PARAMETER);
-					if (!param)
-						continue;
-
-					fbtype = icalparameter_get_fbtype (param);
-
-					if (fbtype != ICAL_FBTYPE_FREE &&
-					    fbtype != ICAL_FBTYPE_BUSY &&
-					    fbtype != ICAL_FBTYPE_BUSYUNAVAILABLE &&
-					    fbtype != ICAL_FBTYPE_BUSYTENTATIVE)
-						continue;
-
-					fb = icalproperty_get_freebusy (fbprop);
-					id = icalproperty_get_parameter_as_string (fbprop, "X-EWS-ID");
-					summary = icalproperty_get_parameter_as_string (fbprop, "X-SUMMARY");
-					location = icalproperty_get_parameter_as_string (fbprop, "X-LOCATION");
-
-					vevent = icalcomponent_new_vevent ();
-
-					if (id && *id) {
-						icalcomponent_set_uid (vevent, id);
-					} else {
-						gchar *uid;
-
-						uid = g_strdup_printf ("%s-%s-%d",
-							icaltime_as_ical_string (fb.start),
-							icaltime_as_ical_string (fb.end),
-							(gint) fbtype);
-
-						icalcomponent_set_uid (vevent, uid);
-
-						g_free (uid);
-					}
-
-					fb.start.zone = utc_zone;
-					fb.start.is_utc = 1;
-					fb.end.zone = utc_zone;
-					fb.end.is_utc = 1;
-
-					icalcomponent_set_dtstart (vevent, fb.start);
-					icalcomponent_set_dtend (vevent, fb.end);
-
-					icalcomponent_add_property (vevent, icalproperty_new_created (icaltime_current_time_with_zone (utc_zone)));
-
-					if (fbtype == ICAL_FBTYPE_FREE) {
-						icalcomponent_set_summary (vevent, C_("FreeBusyType", "Free"));
-						icalcomponent_add_property (vevent, icalproperty_new_transp (ICAL_TRANSP_TRANSPARENT));
-					} else if (fbtype == ICAL_FBTYPE_BUSY) {
-						icalcomponent_set_summary (vevent, C_("FreeBusyType", "Busy"));
-					} else if (fbtype == ICAL_FBTYPE_BUSYUNAVAILABLE) {
-						icalcomponent_set_summary (vevent, C_("FreeBusyType", "Out of Office"));
-					} else if (fbtype == ICAL_FBTYPE_BUSYTENTATIVE) {
-						icalcomponent_set_summary (vevent, C_("FreeBusyType", "Tentative"));
-					}
-
-					if (summary && *summary)
-						icalcomponent_set_summary (vevent, summary);
-
-					if (location && *location)
-						icalcomponent_set_location (vevent, location);
-
-					PRIV_LOCK (priv);
-					if (g_hash_table_remove (known, icalcomponent_get_uid (vevent))) {
-						ECalComponent *ecomp = g_hash_table_lookup (priv->item_id_hash, icalcomponent_get_uid (vevent));
-
-						g_object_ref (ecomp);
-
-						PRIV_UNLOCK (priv);
-
-						if (ews_freebusy_ecomp_changed (ecomp, vevent)) {
-							ECalComponent *new_ecomp;
-							gchar *uid = g_strdup (icalcomponent_get_uid (vevent));
-
-							new_ecomp = e_cal_component_new_from_icalcomponent (vevent);
-							if (new_ecomp) {
-								PRIV_LOCK (priv);
-								g_hash_table_insert (priv->item_id_hash, uid, g_object_ref (new_ecomp));
-								PRIV_UNLOCK (priv);
-
-								put_component_to_store (cbews, new_ecomp);
-								e_cal_backend_notify_component_modified (E_CAL_BACKEND (cbews), ecomp, new_ecomp);
-
-								g_object_unref (new_ecomp);
-							} else {
-								g_free (uid);
-							}
-						} else {
-							icalcomponent_free (vevent);
-						}
-
-						g_clear_object (&ecomp);
-					} else {
-						ECalComponent *ecomp;
-						gchar *uid = g_strdup (icalcomponent_get_uid (vevent));
-
-						ecomp = e_cal_component_new_from_icalcomponent (vevent);
-						if (ecomp)
-							g_hash_table_insert (priv->item_id_hash, uid, g_object_ref (ecomp));
-						else
-							g_free (uid);
-
-						PRIV_UNLOCK (priv);
-
-						if (ecomp) {
-							put_component_to_store (cbews, ecomp);
-							e_cal_backend_notify_component_created (E_CAL_BACKEND (cbews), ecomp);
-						}
-
-						g_clear_object (&ecomp);
-					}
-				}
-			}
-
-			g_hash_table_iter_init (&iter, known);
-			while (g_hash_table_iter_next (&iter, &key, NULL)) {
-				ECalComponentId id = { 0 };
-
-				id.uid = key;
-				id.rid = NULL;
-
-				if (e_cal_backend_store_remove_component (priv->store, id.uid, id.rid)) {
-					e_cal_backend_notify_component_removed (E_CAL_BACKEND (cbews), &id, NULL, NULL);
-
-					PRIV_LOCK (priv);
-					g_hash_table_remove (priv->item_id_hash, id.uid);
-					PRIV_UNLOCK (priv);
-				}
-			}
-
-			g_hash_table_destroy (known);
-		} else if (g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NOFREEBUSYACCESS)) {
-			cbews_forget_all_components (cbews);
-			e_cal_backend_notify_error (E_CAL_BACKEND (cbews), error->message);
-			g_clear_error (&error);
-		}
-
-		g_slist_free_full (free_busy, (GDestroyNotify) icalcomponent_free);
-		g_slist_free_full (fbdata.user_mails, g_free);
-	} else {
-		old_sync_state = g_strdup (e_cal_backend_store_get_key_value (priv->store, SYNC_KEY));
-		do {
-			EEwsAdditionalProps *add_props;
-			GCancellable *cancellable;
-
-			includes_last_item = TRUE;
-
-			add_props = e_ews_additional_props_new ();
-			add_props->field_uri = g_strdup ("item:ItemClass");
-
-			cancellable = cal_backend_ews_ref_cancellable (cbews);
-
-			ret = e_ews_connection_sync_folder_items_sync (
-				priv->cnc,
-				EWS_PRIORITY_MEDIUM,
-				old_sync_state,
-				priv->folder_id,
-				"IdOnly",
-				add_props,
-				EWS_MAX_FETCH_COUNT,
-				&new_sync_state,
-				&includes_last_item,
-				&items_created,
-				&items_updated,
-				&items_deleted,
-				cancellable,
-				&error);
-
-			e_ews_additional_props_free (add_props);
-			g_clear_object (&cancellable);
-			g_free (old_sync_state);
-			old_sync_state = NULL;
-
-			if (!ret) {
-				if (g_error_matches (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_INVALIDSYNCSTATEDATA)) {
-					g_clear_error (&error);
-					e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, NULL);
-					cbews_forget_all_components (cbews);
-
-					if (!e_ews_connection_sync_folder_items_sync (
-								priv->cnc,
-								EWS_PRIORITY_MEDIUM,
-								NULL,
-								priv->folder_id,
-								"IdOnly",
-								NULL,
-								EWS_MAX_FETCH_COUNT,
-								&new_sync_state,
-								&includes_last_item,
-								&items_created,
-								&items_updated,
-								&items_deleted,
-								cancellable,
-								&error)) {
-						if (!g_error_matches (
-								error,
-								EWS_CONNECTION_ERROR,
-								EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED)) {
-							e_cal_backend_set_writable (E_CAL_BACKEND (cbews), TRUE);
-							break;
-						}
-					}
-				} else {
-					break;
-				}
-			}
-
-			ret = cal_backend_ews_process_folder_items (
-					cbews,
-					new_sync_state,
-					items_created,
-					items_updated,
-					items_deleted);
-
-			if (!ret)
-				break;
-
-			g_slist_free_full (items_created, g_object_unref);
-			g_slist_free_full (items_updated, g_object_unref);
-			g_slist_free_full (items_deleted, g_free);
-			items_created = NULL;
-			items_updated = NULL;
-			items_deleted = NULL;
-
-			e_cal_backend_store_put_key_value (priv->store, SYNC_KEY, new_sync_state);
-
-			old_sync_state = new_sync_state;
-			new_sync_state = NULL;
-		} while (!includes_last_item);
-	}
-
-	ews_refreshing_dec (cbews);
-
-	g_clear_object (&cancellable);
-
-	g_slist_free_full (items_created, g_object_unref);
-	g_slist_free_full (items_updated, g_object_unref);
-	g_slist_free_full (items_deleted, g_free);
-
-	if (error != NULL) {
-		g_warning ("%s: %s", G_STRFUNC, error->message);
-		g_clear_error (&error);
-	}
-
-	g_free (new_sync_state);
-	g_free (old_sync_state);
-
-	g_object_unref (cbews);
-
-	return NULL;
-}
-
-static gboolean
-ews_start_sync (gpointer data)
-{
-	ECalBackendEws *cbews = data;
-	GThread *thread;
-
-	PRIV_LOCK (cbews->priv);
-	if (cbews->priv->refreshing) {
-		PRIV_UNLOCK (cbews->priv);
-		return TRUE;
-	}
-
-	ews_refreshing_inc (cbews);
-
-	if (!cbews->priv->cnc) {
-		ews_refreshing_dec (cbews);
-		PRIV_UNLOCK (cbews->priv);
-		return FALSE;
-	}
-	PRIV_UNLOCK (cbews->priv);
-
-	/* run the actual operation in thread,
-	 * to not block main thread of the factory */
-	thread = g_thread_new (NULL, ews_start_sync_thread, g_object_ref (cbews));
-	g_thread_unref (thread);
-
-	return TRUE;
-}
-
-static void
-ews_cal_start_refreshing (ECalBackendEws *cbews)
-{
-	ECalBackendEwsPrivate *priv;
-
-	priv = cbews->priv;
-
-	PRIV_LOCK (priv);
-
-	if (!priv->refresh_timeout &&
-	    e_backend_get_online (E_BACKEND (cbews)) &&
-	    priv->cnc) {
-		ews_start_sync (cbews);
-		priv->refresh_timeout = e_named_timeout_add_seconds (
-			REFRESH_INTERVAL, (GSourceFunc) ews_start_sync, cbews);
-	}
-
-	PRIV_UNLOCK (priv);
-}
-
-static void
-e_cal_backend_ews_start_query (ECalBackend *backend,
-                               EDataCalView *query)
-{
-	ECalBackendEws *cbews;
-	ECalBackendEwsPrivate *priv;
-	GSList *components, *l;
-	ECalBackendSExp *cbsexp;
-	const gchar *sexp;
-	gboolean search_needed = TRUE;
-	time_t occur_start = -1, occur_end = -1;
-	gboolean prunning_by_time;
-	GError *err = NULL;
-
-	cbews = E_CAL_BACKEND_EWS (backend);
-	priv = cbews->priv;
-
-	ews_cal_start_refreshing (cbews);
-	cbsexp = e_data_cal_view_get_sexp (query);
-	if (!cbsexp) {
-		err = EDC_ERROR (InvalidQuery);
-		e_data_cal_view_notify_complete (query, err);
-		g_error_free (err);
-		return;
-	}
-
-	sexp = e_cal_backend_sexp_text (cbsexp);
-	if (!sexp || !strcmp (sexp, "#t"))
-		search_needed = FALSE;
-
-	prunning_by_time = e_cal_backend_sexp_evaluate_occur_times (
-		cbsexp, &occur_start, &occur_end);
-	components = prunning_by_time ?
-		e_cal_backend_store_get_components_occuring_in_range (priv->store, occur_start, occur_end)
-		: e_cal_backend_store_get_components (priv->store);
-
-	for (l = components; l != NULL; l = l->next) {
-		ECalComponent *comp = E_CAL_COMPONENT (l->data);
-
-		if (e_cal_backend_get_kind (backend) ==
-		    icalcomponent_isa (e_cal_component_get_icalcomponent (comp))) {
-			if ((!search_needed) ||
-			    (e_cal_backend_sexp_match_comp (cbsexp, comp, E_TIMEZONE_CACHE (backend)))) {
-				e_data_cal_view_notify_components_added_1 (query, comp);
-			}
-		}
-	}
-
-	g_slist_free_full (components, g_object_unref);
-	e_data_cal_view_notify_complete (query, NULL);
-}
-
-static void
-e_cal_backend_ews_refresh (ECalBackend *backend,
-                           EDataCal *cal,
-                           guint32 context,
-                           GCancellable *cancellable)
-{
-	ECalBackendEws *cbews;
-	ECalBackendEwsPrivate *priv;
-	GError *error = NULL;
-
-	cbews = E_CAL_BACKEND_EWS (backend);
-	priv = cbews->priv;
-
-	/* make sure we're not offline */
-	if (!e_backend_get_online (E_BACKEND (backend))) {
-		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
-		goto exit;
-	}
-
-	PRIV_LOCK (priv);
-	ews_start_sync (cbews);
-	PRIV_UNLOCK (priv);
-
-exit:
-	convert_error_to_edc_error (&error);
-	e_data_cal_respond_refresh (cal, context, error);
-}
-
-static void
-ews_cal_get_free_busy_cb (GObject *obj,
-                          GAsyncResult *res,
-                          gpointer user_data)
-{
-	EEwsConnection *cnc = (EEwsConnection *) obj;
-	EwsCalendarAsyncData *free_busy_data = user_data;
-	GSList *free_busy_sl = NULL, *i;
-	GSList *free_busy = NULL, *j;
-	GError *error = NULL;
-
-	if (!e_ews_connection_get_free_busy_finish (cnc, res, &free_busy_sl, &error)) {
-		goto done;
-	}
-
-	for (i = free_busy_sl, j = free_busy_data->users; i && j; i = i->next, j = j->next) {
-		/* add attendee property */
-		icalcomponent_add_property ((icalcomponent *) i->data, icalproperty_new_attendee (j->data));
-
-		free_busy = g_slist_append (free_busy, icalcomponent_as_ical_string_r (i->data));
-	}
-	g_slist_free (free_busy_sl);
-
-done:
-	if (free_busy)
-		e_data_cal_report_free_busy_data (free_busy_data->cal, free_busy);
-	convert_error_to_edc_error (&error);
-	e_data_cal_respond_get_free_busy (free_busy_data->cal, free_busy_data->context, error, free_busy);
-
-	g_slist_free_full (free_busy, g_free);
-	e_cal_backend_ews_async_data_free (free_busy_data);
-}
-
-static void
-e_cal_backend_ews_get_free_busy (ECalBackend *backend,
-                                 EDataCal *cal,
-                                 guint32 context,
-                                 GCancellable *cancellable,
-                                 const GSList *users,
-                                 time_t start,
-                                 time_t end)
-{
-	ECalBackendEws *cbews = E_CAL_BACKEND_EWS (backend);
-	ECalBackendEwsPrivate *priv = cbews->priv;
-	GError *error = NULL;
-	EwsCalendarAsyncData *free_busy_data;
 	EEWSFreeBusyData fbdata = { 0 };
-	GSList *users_copy = NULL;
+	GSList *freebusy = NULL;
+	gboolean success;
 
-	/* make sure we're not offline */
-	if (!e_backend_get_online (E_BACKEND (backend)) || !cbews->priv->cnc) {
-		g_propagate_error (&error, EDC_ERROR (RepositoryOffline));
-		goto exit;
-	}
+	g_return_if_fail (E_IS_CAL_BACKEND_EWS (sync_backend));
+	g_return_if_fail (freebusyobjs != NULL);
 
-	if (!cal_backend_ews_ensure_connected (cbews, cancellable, &error)) {
-		goto exit;
-	}
+	cbews = E_CAL_BACKEND_EWS (sync_backend);
+
+	*freebusyobjs = NULL;
+
+	if (!e_cal_meta_backend_ensure_connected_sync (E_CAL_META_BACKEND (cbews), cancellable, error))
+		return;
 
 	/* EWS can support only 100 identities, which is the maximum number of identities that the Web service method can request
 	 see http://msdn.microsoft.com / en - us / library / aa564001 % 28v = EXCHG.140 % 29.aspx */
-	if (g_slist_length ((GSList *) users) > 100)
-	{
-		g_propagate_error (&error, EDC_ERROR (SearchSizeLimitExceeded));
-		goto exit;
+	if (g_slist_length ((GSList *) users) > 100) {
+		g_propagate_error (error, EDC_ERROR (SearchSizeLimitExceeded));
+		return;
 	}
-
-	for (; users; users = users->next)
-	    users_copy = g_slist_append (users_copy, g_strdup (users->data));
-
-	free_busy_data = g_new0 (EwsCalendarAsyncData, 1);
-	free_busy_data->cbews = g_object_ref (cbews);
-	free_busy_data->cal = g_object_ref (cal);
-	free_busy_data->context = context;
-	free_busy_data->users = users_copy;
 
 	fbdata.period_start = start;
 	fbdata.period_end = end;
-	fbdata.user_mails = users_copy;
+	fbdata.user_mails = (GSList *) users;
 
-	e_ews_connection_get_free_busy (
-		priv->cnc,
-		EWS_PRIORITY_MEDIUM,
-		e_ews_cal_utils_prepare_free_busy_request,
-		&fbdata,
-		cancellable,
-		ews_cal_get_free_busy_cb,
-		free_busy_data);
+	success = e_ews_connection_get_free_busy_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM,
+		e_ews_cal_utils_prepare_free_busy_request, &fbdata,
+		&freebusy, cancellable, error);
 
-	return;
+	if (success) {
+		GSList *fblink, *ulink;
 
-exit:
-	convert_error_to_edc_error (&error);
-	e_data_cal_respond_get_free_busy (cal, context, error, NULL);
+		for (fblink = freebusy, ulink = (GSList *) users;
+		     fblink && ulink;
+		     fblink = g_slist_next (fblink), ulink = g_slist_next (ulink)) {
+			icalcomponent *icalcomp = fblink->data;
+			gchar *mailto;
 
+			/* add attendee property */
+			mailto = g_strconcat ("mailto:", ulink->data, NULL);
+			icalcomponent_add_property (icalcomp, icalproperty_new_attendee (mailto));
+			g_free (mailto);
+
+			*freebusyobjs = g_slist_prepend (*freebusyobjs, icalcomponent_as_ical_string_r (icalcomp));
+		}
+
+		*freebusyobjs = g_slist_reverse (*freebusyobjs);
+	}
+
+	g_slist_free_full (freebusy, (GDestroyNotify) icalcomponent_free);
+
+	ecb_ews_convert_error_to_edc_error (error);
 }
 
 static gchar *
-e_cal_backend_ews_get_backend_property (ECalBackend *backend,
-                                        const gchar *prop_name)
+ecb_ews_get_backend_property (ECalBackend *cal_backend,
+			      const gchar *prop_name)
 {
+	ECalBackendEws *cbews;
+
+	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (cal_backend), NULL);
 	g_return_val_if_fail (prop_name != NULL, NULL);
+
+	cbews = E_CAL_BACKEND_EWS (cal_backend);
 
 	if (g_str_equal (prop_name, CLIENT_BACKEND_PROPERTY_CAPABILITIES)) {
 		return g_strjoin (
@@ -4449,7 +3476,6 @@ e_cal_backend_ews_get_backend_property (ECalBackend *backend,
 			CAL_STATIC_CAPABILITY_NO_EMAIL_ALARMS,
 			CAL_STATIC_CAPABILITY_ONE_ALARM_ONLY,
 			CAL_STATIC_CAPABILITY_REMOVE_ALARMS,
-			CAL_STATIC_CAPABILITY_REFRESH_SUPPORTED,
 			CAL_STATIC_CAPABILITY_NO_THISANDPRIOR,
 			CAL_STATIC_CAPABILITY_NO_THISANDFUTURE,
 			CAL_STATIC_CAPABILITY_NO_CONV_TO_ASSIGN_TASK,
@@ -4459,78 +3485,60 @@ e_cal_backend_ews_get_backend_property (ECalBackend *backend,
 			CAL_STATIC_CAPABILITY_NO_MEMO_START_DATE,
 			CAL_STATIC_CAPABILITY_ALL_DAY_EVENT_AS_TIME,
 			CAL_STATIC_CAPABILITY_TASK_DATE_ONLY,
+			e_cal_meta_backend_get_capabilities (E_CAL_META_BACKEND (cbews)),
 			NULL);
 	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_CAL_EMAIL_ADDRESS)) {
 		/* return email address of the person who opened the calendar */
-		ECalBackendEws *cbews;
+		CamelEwsSettings *ews_settings;
 
-		cbews = E_CAL_BACKEND_EWS (backend);
+		ews_settings = ecb_ews_get_collection_settings (cbews);
 
-		return g_strdup (cbews->priv->user_email);
+		return camel_ews_settings_dup_email (ews_settings);
 	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_ALARM_EMAIL_ADDRESS)) {
 		/* ews does not support email based alarms */
 		return NULL;
-	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_DEFAULT_OBJECT)) {
-		ECalComponent *comp;
-		gchar *prop_value;
-
-		comp = e_cal_component_new ();
-
-		switch (e_cal_backend_get_kind (E_CAL_BACKEND (backend))) {
-		case ICAL_VEVENT_COMPONENT:
-			e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_EVENT);
-			break;
-		case ICAL_VTODO_COMPONENT:
-			e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_TODO);
-			break;
-		case ICAL_VJOURNAL_COMPONENT:
-			e_cal_component_set_new_vtype (comp, E_CAL_COMPONENT_JOURNAL);
-			break;
-		default:
-			g_object_unref (comp);
-			return NULL;
-		}
-
-		prop_value = e_cal_component_get_as_string (comp);
-
-		g_object_unref (comp);
-
-		return prop_value;
 	}
 
-	/* Chain up to parent's get_backend_property() method. */
-	return E_CAL_BACKEND_CLASS (e_cal_backend_ews_parent_class)->
-		get_backend_property (backend, prop_name);
+	/* Chain up to parent's method. */
+	return E_CAL_BACKEND_CLASS (e_cal_backend_ews_parent_class)->get_backend_property (cal_backend, prop_name);
 }
 
 static void
-e_cal_backend_ews_notify_online_cb (EBackend *backend,
-                                    GParamSpec *spec)
+ecb_ews_get_timezone_sync (ECalBackendSync *sync_backend,
+			   EDataCal *cal,
+			   GCancellable *cancellable,
+			   const gchar *tzid,
+			   gchar **tzobject,
+			   GError **error)
 {
-	ECalBackendEws *cbews;
-	ECalBackendEwsPrivate *priv;
+	GError *local_error = NULL;
 
-	cbews = E_CAL_BACKEND_EWS (backend);
-	priv = cbews->priv;
+	g_return_if_fail (E_IS_CAL_BACKEND_EWS (sync_backend));
+	g_return_if_fail (tzid != NULL);
+	g_return_if_fail (tzobject != NULL);
 
-	PRIV_LOCK (priv);
+	*tzobject = NULL;
 
-	if (e_backend_get_online (backend)) {
-		cal_backend_ews_set_cancellable (cbews, g_cancellable_new ());
-		priv->read_only = FALSE;
-	} else {
-		switch_offline (cbews);
+	E_CAL_BACKEND_SYNC_CLASS (e_cal_backend_ews_parent_class)->get_timezone_sync (sync_backend, cal, cancellable, tzid, tzobject, &local_error);
+
+	if (!*tzobject) {
+		/* The timezone can be sometimes the Windows zone, try to convert it to libical */
+		const gchar *ical_location = e_cal_backend_ews_tz_util_get_ical_equivalent (tzid);
+
+		if (ical_location)
+			E_CAL_BACKEND_SYNC_CLASS (e_cal_backend_ews_parent_class)->get_timezone_sync (sync_backend, cal, cancellable, ical_location, tzobject, NULL);
 	}
 
-	e_cal_backend_set_writable (E_CAL_BACKEND (backend), !priv->read_only);
-
-	PRIV_UNLOCK (priv);
+	if (*tzobject)
+		g_clear_error (&local_error);
+	else if (local_error)
+		g_propagate_error (error, local_error);
 }
 
 static gboolean
-e_cal_backend_ews_get_destination_address (EBackend *backend,
-					   gchar **host,
-					   guint16 *port)
+ecb_ews_get_destination_address (EBackend *backend,
+				 gchar **host,
+				 guint16 *port)
 {
 	CamelEwsSettings *ews_settings;
 	SoupURI *soup_uri;
@@ -4545,7 +3553,7 @@ e_cal_backend_ews_get_destination_address (EBackend *backend,
 	    !e_backend_get_source (backend))
 		return FALSE;
 
-	ews_settings = cal_backend_ews_get_collection_settings (E_CAL_BACKEND_EWS (backend));
+	ews_settings = ecb_ews_get_collection_settings (E_CAL_BACKEND_EWS (backend));
 	g_return_val_if_fail (ews_settings != NULL, FALSE);
 
 	host_url = camel_ews_settings_dup_hosturl (ews_settings);
@@ -4570,226 +3578,73 @@ e_cal_backend_ews_get_destination_address (EBackend *backend,
 	return result;
 }
 
+static gchar *
+ecb_ews_dup_component_revision (ECalCache *cal_cache,
+				icalcomponent *icalcomp,
+				gpointer user_data)
+{
+	g_return_val_if_fail (icalcomp != NULL, NULL);
+
+	return e_cal_util_dup_x_property (icalcomp, "X-EVOLUTION-CHANGEKEY");
+}
+
 static void
-e_cal_backend_ews_constructed (GObject *object)
+ecb_ews_constructed (GObject *object)
 {
 	ECalBackendEws *cbews = E_CAL_BACKEND_EWS (object);
-	CamelEwsSettings *ews_settings;
+	ECalCache *cal_cache;
+	gchar *cache_dirname;
 
+	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (e_cal_backend_ews_parent_class)->constructed (object);
 
 	/* Reset the connectable, it steals data from Authentication extension,
 	   where is written incorrect address */
 	e_backend_set_connectable (E_BACKEND (object), NULL);
 
-	ews_settings = cal_backend_ews_get_collection_settings (cbews);
-	g_warn_if_fail (cbews->priv->user_email == NULL);
-	cbews->priv->user_email = camel_ews_settings_dup_email (ews_settings);
+	cal_cache = e_cal_meta_backend_ref_cache (E_CAL_META_BACKEND (cbews));
+	g_return_if_fail (cal_cache != NULL);
+
+	cache_dirname = g_path_get_dirname (e_cache_get_filename (E_CACHE (cal_cache)));
+	g_signal_connect (cal_cache, "dup-component-revision", G_CALLBACK (ecb_ews_dup_component_revision), NULL);
+
+	g_clear_object (&cal_cache);
+
+	cbews->priv->attachments_dir = g_build_filename (cache_dirname, "attachments", NULL);
+	g_mkdir_with_parents (cbews->priv->attachments_dir, 0777);
+
+	g_free (cache_dirname);
 }
 
 static void
-e_cal_backend_ews_dispose (GObject *object)
+ecb_ews_dispose (GObject *object)
 {
-	ECalBackendEws *cbews;
-	ECalBackendEwsPrivate *priv;
-	CamelEwsSettings *ews_settings;
+	ECalBackendEws *cbews = E_CAL_BACKEND_EWS (object);
 
-	g_return_if_fail (object != NULL);
-	g_return_if_fail (E_IS_CAL_BACKEND_EWS (object));
+	g_rec_mutex_lock (&cbews->priv->cnc_lock);
 
-	cbews = E_CAL_BACKEND_EWS (object);
-	priv = cbews->priv;
+	g_clear_object (&cbews->priv->cnc);
 
-	ews_settings = cal_backend_ews_get_collection_settings (cbews);
-	g_signal_handlers_disconnect_by_func (ews_settings, cbews_listen_notifications_cb, cbews);
+	g_rec_mutex_unlock (&cbews->priv->cnc_lock);
 
-	if (priv->refresh_timeout) {
-		g_source_remove (priv->refresh_timeout);
-		priv->refresh_timeout = 0;
-	}
-
-	cal_backend_ews_set_cancellable (cbews, NULL);
-
-	if (priv->cnc) {
-		g_signal_handlers_disconnect_by_func (priv->cnc, cbews_server_notification_cb, object);
-
-		if (priv->listen_notifications) {
-			if (priv->subscription_key != 0) {
-				e_ews_connection_disable_notifications_sync (
-					priv->cnc,
-					priv->subscription_key);
-				priv->subscription_key = 0;
-			}
-
-			priv->listen_notifications = FALSE;
-		}
-
-		g_object_unref (priv->cnc);
-		priv->cnc = NULL;
-	}
-
+	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (e_cal_backend_ews_parent_class)->dispose (object);
 }
 
-/* Finalize handler for the file backend */
 static void
-e_cal_backend_ews_finalize (GObject *object)
+ecb_ews_finalize (GObject *object)
 {
-	ECalBackendEws *cbews;
-	ECalBackendEwsPrivate *priv;
+	ECalBackendEws *cbews = E_CAL_BACKEND_EWS (object);
 
-	g_return_if_fail (object != NULL);
-	g_return_if_fail (E_IS_CAL_BACKEND_EWS (object));
+	g_free (cbews->priv->folder_id);
+	g_free (cbews->priv->attachments_dir);
 
-	cbews = E_CAL_BACKEND_EWS (object);
-	priv = cbews->priv;
-
-	/* Clean up */
-	g_rec_mutex_clear (&priv->rec_mutex);
-	g_mutex_clear (&priv->cancellable_lock);
-
-	if (priv->store) {
-		g_object_unref (priv->store);
-		priv->store = NULL;
-	}
-
-	if (priv->folder_id) {
-		g_free (priv->folder_id);
-		priv->folder_id = NULL;
-	}
-
-	if (priv->user_email) {
-		g_free (priv->user_email);
-		priv->user_email = NULL;
-	}
-
-	if (priv->storage_path) {
-		g_free (priv->storage_path);
-		priv->storage_path = NULL;
-	}
-
-	if (priv->default_zone && priv->default_zone != icaltimezone_get_utc_timezone ()) {
-		icaltimezone_free (priv->default_zone, 1);
-		priv->default_zone = NULL;
-	}
-
-	g_hash_table_destroy (priv->item_id_hash);
-
-	if (priv->refreshing_done) {
-		e_flag_free (priv->refreshing_done);
-		priv->refreshing_done = NULL;
-	}
+	g_rec_mutex_clear (&cbews->priv->cnc_lock);
 
 	e_cal_backend_ews_unref_windows_zones ();
 
+	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (e_cal_backend_ews_parent_class)->finalize (object);
-}
-
-static ESourceAuthenticationResult
-e_cal_backend_ews_authenticate_sync (EBackend *backend,
-				     const ENamedParameters *credentials,
-				     gchar **out_certificate_pem,
-				     GTlsCertificateFlags *out_certificate_errors,
-				     GCancellable *cancellable,
-				     GError **error)
-{
-	ECalBackendEws *cal_backend;
-	EEwsConnection *connection;
-	ESourceAuthenticationResult result;
-	CamelEwsSettings *ews_settings;
-	gchar *hosturl;
-
-	cal_backend = E_CAL_BACKEND_EWS (backend);
-	ews_settings = cal_backend_ews_get_collection_settings (cal_backend);
-	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
-
-	connection = e_ews_connection_new (hosturl, ews_settings);
-
-	e_binding_bind_property (
-		backend, "proxy-resolver",
-		connection, "proxy-resolver",
-		G_BINDING_SYNC_CREATE);
-
-	result = e_ews_connection_try_credentials_sync (connection, credentials, cancellable, error);
-
-	if (result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
-
-		PRIV_LOCK (cal_backend->priv);
-
-		g_free (cal_backend->priv->user_email);
-		cal_backend->priv->user_email = camel_ews_settings_dup_email (ews_settings);
-
-		if (cal_backend->priv->cnc != NULL)
-			g_object_unref (cal_backend->priv->cnc);
-		cal_backend->priv->cnc = g_object_ref (connection);
-
-		g_signal_connect_swapped (
-			cal_backend->priv->cnc,
-			"server-notification",
-			G_CALLBACK (cbews_server_notification_cb),
-			backend);
-
-		PRIV_UNLOCK (cal_backend->priv);
-
-		ews_start_sync (cal_backend);
-		cbews_listen_notifications_cb (cal_backend, NULL, ews_settings);
-	} else if (e_ews_connection_utils_get_without_password (ews_settings) &&
-		   result == E_SOURCE_AUTHENTICATION_REJECTED &&
-		   !e_named_parameters_exists (credentials, E_SOURCE_CREDENTIAL_PASSWORD)) {
-		e_ews_connection_utils_force_off_ntlm_auth_check ();
-		result = E_SOURCE_AUTHENTICATION_REQUIRED;
-	}
-
-	g_object_unref (connection);
-
-	g_free (hosturl);
-
-	return result;
-}
-
-static void
-e_cal_backend_ews_class_init (ECalBackendEwsClass *class)
-{
-	GObjectClass *object_class;
-	EBackendClass *backend_class;
-	ECalBackendClass *cal_backend_class;
-
-	g_type_class_add_private (class, sizeof (ECalBackendEwsPrivate));
-
-	object_class = G_OBJECT_CLASS (class);
-	backend_class = E_BACKEND_CLASS (class);
-	cal_backend_class = E_CAL_BACKEND_CLASS (class);
-
-	object_class->constructed = e_cal_backend_ews_constructed;
-	object_class->dispose = e_cal_backend_ews_dispose;
-	object_class->finalize = e_cal_backend_ews_finalize;
-
-	backend_class->get_destination_address = e_cal_backend_ews_get_destination_address;
-	backend_class->authenticate_sync = e_cal_backend_ews_authenticate_sync;
-
-	/* Property accessors */
-	cal_backend_class->get_backend_property = e_cal_backend_ews_get_backend_property;
-
-	cal_backend_class->start_view = e_cal_backend_ews_start_query;
-
-	/* Many of these can be moved to Base class */
-	cal_backend_class->add_timezone = e_cal_backend_ews_add_timezone;
-	cal_backend_class->get_timezone = e_cal_backend_ews_get_timezone;
-
-	cal_backend_class->open = e_cal_backend_ews_open;
-	cal_backend_class->refresh = e_cal_backend_ews_refresh;
-	cal_backend_class->get_object = e_cal_backend_ews_get_object;
-	cal_backend_class->get_object_list = e_cal_backend_ews_get_object_list;
-
-	cal_backend_class->discard_alarm = e_cal_backend_ews_discard_alarm;
-
-	cal_backend_class->create_objects = e_cal_backend_ews_create_objects;
-	cal_backend_class->modify_objects = e_cal_backend_ews_modify_objects;
-	cal_backend_class->remove_objects = e_cal_backend_ews_remove_objects;
-
-	cal_backend_class->receive_objects = e_cal_backend_ews_receive_objects;
-	cal_backend_class->send_objects = e_cal_backend_ews_send_objects;
-	cal_backend_class->get_free_busy = e_cal_backend_ews_get_free_busy;
 }
 
 static void
@@ -4797,17 +3652,45 @@ e_cal_backend_ews_init (ECalBackendEws *cbews)
 {
 	cbews->priv = G_TYPE_INSTANCE_GET_PRIVATE (cbews, E_TYPE_CAL_BACKEND_EWS, ECalBackendEwsPrivate);
 
-	/* create the mutex for thread safety */
-	g_rec_mutex_init (&cbews->priv->rec_mutex);
-	g_mutex_init (&cbews->priv->cancellable_lock);
-	cbews->priv->refreshing_done = e_flag_new ();
-	cbews->priv->item_id_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
-	cbews->priv->default_zone = icaltimezone_get_utc_timezone ();
-	cbews->priv->cancellable = g_cancellable_new ();
-
-	g_signal_connect (
-		cbews, "notify::online",
-		G_CALLBACK (e_cal_backend_ews_notify_online_cb), NULL);
+	g_rec_mutex_init (&cbews->priv->cnc_lock);
 
 	e_cal_backend_ews_populate_windows_zones ();
+}
+
+static void
+e_cal_backend_ews_class_init (ECalBackendEwsClass *klass)
+{
+	GObjectClass *object_class;
+	EBackendClass *backend_class;
+	ECalBackendClass *cal_backend_class;
+	ECalBackendSyncClass *cal_backend_sync_class;
+	ECalMetaBackendClass *cal_meta_backend_class;
+
+	g_type_class_add_private (klass, sizeof (ECalBackendEwsPrivate));
+
+	cal_meta_backend_class = E_CAL_META_BACKEND_CLASS (klass);
+	cal_meta_backend_class->connect_sync = ecb_ews_connect_sync;
+	cal_meta_backend_class->disconnect_sync = ecb_ews_disconnect_sync;
+	cal_meta_backend_class->get_changes_sync = ecb_ews_get_changes_sync;
+	cal_meta_backend_class->load_component_sync = ecb_ews_load_component_sync;
+	cal_meta_backend_class->save_component_sync = ecb_ews_save_component_sync;
+	cal_meta_backend_class->remove_component_sync = ecb_ews_remove_component_sync;
+
+	cal_backend_sync_class = E_CAL_BACKEND_SYNC_CLASS (klass);
+	cal_backend_sync_class->discard_alarm_sync = ecb_ews_discard_alarm_sync;
+	cal_backend_sync_class->receive_objects_sync = ecb_ews_receive_objects_sync;
+	cal_backend_sync_class->send_objects_sync = ecb_ews_send_objects_sync;
+	cal_backend_sync_class->get_free_busy_sync = ecb_ews_get_free_busy_sync;
+	cal_backend_sync_class->get_timezone_sync = ecb_ews_get_timezone_sync;
+
+	cal_backend_class = E_CAL_BACKEND_CLASS (klass);
+	cal_backend_class->get_backend_property = ecb_ews_get_backend_property;
+
+	backend_class = E_BACKEND_CLASS (klass);
+	backend_class->get_destination_address = ecb_ews_get_destination_address;
+
+	object_class = G_OBJECT_CLASS (klass);
+	object_class->constructed = ecb_ews_constructed;
+	object_class->dispose = ecb_ews_dispose;
+	object_class->finalize = ecb_ews_finalize;
 }

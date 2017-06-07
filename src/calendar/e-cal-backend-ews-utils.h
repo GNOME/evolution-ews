@@ -61,7 +61,6 @@ void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, EEwsCalendarTime
 void ewscal_set_meeting_timezone (ESoapMessage *msg, icaltimezone *icaltz);
 void ewscal_set_reccurence (ESoapMessage *msg, icalproperty *rrule, icaltimetype *dtstart);
 void ewscal_set_reccurence_exceptions (ESoapMessage *msg, icalcomponent *comp);
-void ewscal_get_attach_differences (const GSList *original, const GSList *modified, GSList **removed, GSList **added);
 gchar *e_ews_extract_attachment_id_from_uri (const gchar *uri);
 void ews_set_alarm (ESoapMessage *msg, ECalComponent *comp);
 gint ews_get_alarm (ECalComponent *comp);

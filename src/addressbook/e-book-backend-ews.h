@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef __E_BOOK_BACKEND_EWS_H__
-#define __E_BOOK_BACKEND_EWS_H__
+#ifndef E_BOOK_BACKEND_EWS_H
+#define E_BOOK_BACKEND_EWS_H
 
 #include <libedata-book/libedata-book.h>
 
@@ -31,19 +31,18 @@
 #define E_IS_BOOK_BACKEND_EWS(o)       (G_TYPE_CHECK_INSTANCE_TYPE ((o), E_TYPE_BOOK_BACKEND_EWS))
 #define E_IS_BOOK_BACKEND_EWS_CLASS(k) (G_TYPE_CHECK_CLASS_TYPE ((k), E_TYPE_BOOK_BACKEND_EWS))
 #define E_BOOK_BACKEND_EWS_GET_CLASS(k) (G_TYPE_INSTANCE_GET_CLASS ((obj), E_TYPE_BOOK_BACKEND_EWS, EBookBackenEwsClass))
+
 typedef struct _EBookBackendEwsPrivate EBookBackendEwsPrivate;
 
 typedef struct {
-	EBookBackend         parent_object;
+	EBookMetaBackend parent_object;
 	EBookBackendEwsPrivate *priv;
 } EBookBackendEws;
 
 typedef struct {
-	EBookBackendClass parent_class;
+	EBookMetaBackendClass parent_class;
 } EBookBackendEwsClass;
 
-EBookBackend *e_book_backend_ews_new      (void);
 GType       e_book_backend_ews_get_type (void);
 
-#endif /* __E_BOOK_BACKEND_EWS_H__ */
-
+#endif /* E_BOOK_BACKEND_EWS_H */

@@ -954,13 +954,13 @@ void		e_ews_connection_delete_attachments
 gboolean	e_ews_connection_delete_attachments_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
-						 GSList **parents_ids,
+						 gchar **new_change_key,
 						 GError **error);
 gboolean	e_ews_connection_delete_attachments_sync
 						(EEwsConnection *cnc,
 						 gint pri,
 						 const GSList *attachments_ids,
-						 GSList **parents_ids,
+						 gchar **new_change_key,
 						 GCancellable *cancellable,
 						 GError **error);
 
