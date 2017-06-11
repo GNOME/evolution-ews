@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-28 17:12+0200\n"
-"PO-Revision-Date: 2017-05-28 17:13+0200\n"
+"POT-Creation-Date: 2017-06-11 15:17+0200\n"
+"PO-Revision-Date: 2017-06-11 15:18+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -27,84 +27,45 @@ msgstr "Exchange Web Services"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Dostęp do serwerów Exchange za pomocą Web Services"
 
-#: ../src/addressbook/e-book-backend-ews.c:1503
-msgid "The backend does not support bulk additions"
-msgstr "Mechanizm nie obsługuje dodawania całości"
+#: ../src/addressbook/e-book-backend-ews.c:2888
+msgid "Failed to update GAL:"
+msgstr "Zaktualizowanie GAL się nie powiodło:"
 
-#: ../src/addressbook/e-book-backend-ews.c:1542
-#: ../src/addressbook/e-book-backend-ews.c:1909
+#: ../src/addressbook/e-book-backend-ews.c:3044
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Nie można zapisać listy kontaktów, jest to obsługiwane tylko w EWS Server "
 "2010 lub późniejszym"
 
-#: ../src/addressbook/e-book-backend-ews.c:1868
-msgid "The backend does not support bulk modifications"
-msgstr "Mechanizm nie obsługuje modyfikacji całości"
+#: ../src/addressbook/e-book-backend-ews.c:3118
+msgid "Failed to set contact photo:"
+msgstr "Ustawienie zdjęcia kontaktu się nie powiodło:"
 
-#: ../src/addressbook/e-book-backend-ews.c:2083
-msgid "Wait till syncing is done"
-msgstr "Oczekiwanie na ukończenie synchronizacji"
-
-#: ../src/addressbook/e-book-backend-ews.c:2566
-#, c-format
-msgid "Processing contacts in %s %d%% completed... "
-msgstr "Przetwarzanie kontaktów w %s %d%% ukończono… "
-
-#: ../src/addressbook/e-book-backend-ews.c:3209
-msgid "Syncing contacts..."
-msgstr "Synchronizowanie kontaktów…"
-
-#: ../src/addressbook/e-book-backend-ews.c:3394
-#: ../src/configuration/e-ews-search-user.c:363
-msgid "Searching..."
-msgstr "Wyszukiwanie…"
-
-#: ../src/addressbook/e-book-backend-ews.c:4398
-msgid "Requested to delete an unrelated cursor"
-msgstr "Zażądano usunięcia niepowiązanego kursora"
-
-#: ../src/calendar/e-cal-backend-ews.c:1349
-msgid "EWS does not support bulk removals"
-msgstr "EWS nie obsługuje usuwania całości"
-
-#: ../src/calendar/e-cal-backend-ews.c:1528
-msgid "Unknown error"
-msgstr "Nieznany błąd"
-
-#: ../src/calendar/e-cal-backend-ews.c:1777
-msgid "EWS does not support bulk additions"
-msgstr "EWS nie obsługuje dodawania całości"
-
-#: ../src/calendar/e-cal-backend-ews.c:1982
-msgid "EWS does not support bulk modifications"
-msgstr "EWS nie obsługuje modyfikacji całości"
-
-#: ../src/calendar/e-cal-backend-ews.c:2436
-#, c-format
-msgid "Cannot find user “%s” between attendees"
-msgstr "Nie można odnaleźć użytkownika „%s” na liście uczestników"
-
-#: ../src/calendar/e-cal-backend-ews.c:4008
+#: ../src/calendar/e-cal-backend-ews.c:1487
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Wolny"
 
-#: ../src/calendar/e-cal-backend-ews.c:4011
+#: ../src/calendar/e-cal-backend-ews.c:1490
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Zajęty"
 
-#: ../src/calendar/e-cal-backend-ews.c:4013
+#: ../src/calendar/e-cal-backend-ews.c:1492
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Poza biurem"
 
-#: ../src/calendar/e-cal-backend-ews.c:4015
+#: ../src/calendar/e-cal-backend-ews.c:1494
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Wstępnie"
+
+#: ../src/calendar/e-cal-backend-ews.c:3057
+#, c-format
+msgid "Cannot find user “%s” between attendees"
+msgstr "Nie można odnaleźć użytkownika „%s” na liście uczestników"
 
 #: ../src/camel/camel-ews-folder.c:375
 #, c-format
@@ -758,6 +719,10 @@ msgstr[2] ""
 msgid "Search for a user"
 msgstr "Wyszukiwanie użytkownika"
 
+#: ../src/configuration/e-ews-search-user.c:363
+msgid "Searching..."
+msgstr "Wyszukiwanie…"
+
 #: ../src/configuration/e-ews-search-user.c:435
 msgid "E-mail"
 msgstr "E-mail"
@@ -1183,56 +1148,56 @@ msgstr "Uwierzytelnienie się nie powiodło"
 msgid "No response: %s"
 msgstr "Brak odpowiedzi: %s"
 
-#: ../src/server/e-ews-connection.c:2535
+#: ../src/server/e-ews-connection.c:2561
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr ""
 "Przetworzenie XML odpowiedzi automatycznego wykrywania się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:2542
+#: ../src/server/e-ews-connection.c:2568
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Odnalezienie elementu <Autodiscover> się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:2553
+#: ../src/server/e-ews-connection.c:2579
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Odnalezienie elementu <Response> się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:2564
+#: ../src/server/e-ews-connection.c:2590
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Odnalezienie elementu <Account> się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:2589
+#: ../src/server/e-ews-connection.c:2615
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
 "Odnalezienie elementów <ASUrl> i <OABUrl> w odpowiedzi automatycznego "
 "wykrywania się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:2680
+#: ../src/server/e-ews-connection.c:2706
 msgid "URL cannot be NULL"
 msgstr "Adres URL nie może wynosić NULL"
 
-#: ../src/server/e-ews-connection.c:2688
+#: ../src/server/e-ews-connection.c:2714
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "Adres URL „%s” nie jest prawidłowy"
 
-#: ../src/server/e-ews-connection.c:2778
+#: ../src/server/e-ews-connection.c:2804
 msgid "Email address is missing a domain part"
 msgstr "W adresie e-mail brakuje części domeny"
 
-#: ../src/server/e-ews-connection.c:3100
+#: ../src/server/e-ews-connection.c:3126
 msgid "Failed to parse oab XML"
 msgstr "Przetworzenie XML „oab” się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:3108
+#: ../src/server/e-ews-connection.c:3134
 msgid "Failed to find <OAB> element\n"
 msgstr "Odnalezienie elementu <OAB> się nie powiodło\n"
 
-#: ../src/server/e-ews-connection.c:4413
+#: ../src/server/e-ews-connection.c:4439
 msgid "No items found"
 msgstr "Nie odnaleziono elementów"
 
