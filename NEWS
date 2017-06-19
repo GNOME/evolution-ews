@@ -1,3 +1,10 @@
+Evolution-EWS 3.24.3 2017-06-19
+-------------------------------
+
+Miscellaneous:
+	e_ews_connection_try_credentials_sync() asks for password when not needed (Milan Crha)
+	Allow overwrite of CMAKE_SKIP_RPATH variable (Milan Crha)
+
 Evolution-EWS 3.24.2 2017-05-08
 -------------------------------
 
