@@ -1,3 +1,17 @@
+Evolution-EWS 3.25.3 2017-06-19
+-------------------------------
+
+Bug Fixes:
+	Bug 782826 - Allow adding Free/Busy as a foreign Calendar (Milan Crha)
+
+Miscellaneous:
+	e_ews_connection_try_credentials_sync() asks for password when not needed (Milan Crha)
+	Derive from EBookMetaBackend and ECalMetaBackend (Milan Crha)
+	Allow overwrite of CMAKE_SKIP_RPATH variable (Milan Crha)
+
+Translations:
+	Piotr Drąg (pl)
+
 Evolution-EWS 3.25.2 2017-05-22
 -------------------------------
 
