@@ -73,6 +73,8 @@ struct _ECalBackendEwsPrivate {
 	gchar *attachments_dir;
 };
 
+#define X_EWS_ORIGINAL_COMP "X-EWS-ORIGINAL-COMP"
+
 #define EWS_MAX_FETCH_COUNT 100
 
 #define GET_ITEMS_SYNC_PROPERTIES \
@@ -165,6 +167,9 @@ ecb_ews_convert_error_to_edc_error (GError **perror)
 		case EWS_CONNECTION_ERROR_ITEMNOTFOUND:
 			error = EDC_ERROR_EX (ObjectNotFound, (*perror)->message);
 			break;
+		case EWS_CONNECTION_ERROR_UNAVAILABLE:
+			g_set_error_literal (&error, G_IO_ERROR, G_IO_ERROR_HOST_NOT_FOUND, (*perror)->message);
+			break;
 		}
 
 		if (!error)
@@ -234,6 +239,8 @@ ecb_ews_unset_connection (ECalBackendEws *cbews)
 			cbews->priv->subscription_key = 0;
 		}
 	}
+
+	g_clear_object (&cbews->priv->cnc);
 
 	g_rec_mutex_unlock (&cbews->priv->cnc_lock);
 }
@@ -860,6 +867,65 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 	return res_component;
 }
 
+static void
+ecb_ews_store_original_comp (ECalComponent *comp)
+{
+	gchar *comp_str;
+	gchar *base64;
+
+	g_return_if_fail (E_IS_CAL_COMPONENT (comp));
+
+	comp_str = e_cal_component_get_as_string (comp);
+	g_return_if_fail (comp_str != NULL);
+
+	/* Include NUL-terminator */
+	base64 = g_base64_encode ((const guchar *) comp_str, strlen (comp_str) + 1);
+
+	e_cal_util_set_x_property (e_cal_component_get_icalcomponent (comp),
+		X_EWS_ORIGINAL_COMP, base64);
+
+	g_free (base64);
+	g_free (comp_str);
+}
+
+static ECalComponent * /* free with g_object_unref(), if not NULL */
+ecb_ews_restore_original_comp (ECalComponent *from_comp)
+{
+	ECalComponent *comp = NULL;
+	const gchar *original_base64;
+	guchar *decoded;
+	gsize len = -1;
+
+	g_return_val_if_fail (E_IS_CAL_COMPONENT (from_comp), NULL);
+
+	original_base64 = e_cal_util_get_x_property (e_cal_component_get_icalcomponent (from_comp), X_EWS_ORIGINAL_COMP);
+
+	if (!original_base64 || !*original_base64)
+		return NULL;
+
+	decoded = g_base64_decode (original_base64, &len);
+	if (!decoded || !*decoded || len <= 0) {
+		g_free (decoded);
+		return NULL;
+	}
+
+	if (decoded[len - 1] != '\0') {
+		gchar *tmp;
+
+		tmp = g_strndup ((const gchar *) decoded, len);
+
+		g_free (decoded);
+		decoded = (guchar *) tmp;
+	}
+
+	if (decoded && *decoded)
+		comp = e_cal_component_new_from_string ((const gchar *) decoded);
+
+	g_free (decoded);
+
+	return comp;
+}
+
 static gboolean
 ecb_ews_get_items_sync (ECalBackendEws *cbews,
 			const GSList *item_ids, /* gchar * */
@@ -952,6 +1018,8 @@ ecb_ews_get_items_sync (ECalBackendEws *cbews,
 				success = FALSE;
 				break;
 			}
+
+			ecb_ews_store_original_comp (comp);
 
 			*out_components = g_slist_prepend (*out_components, comp);
 		}
@@ -1121,6 +1189,8 @@ ecb_ews_components_to_infos (ECalMetaBackend *meta_backend,
 
 		if (!uid)
 			continue;
+
+		ecb_ews_store_original_comp (comp);
 
 		instances = g_hash_table_lookup (sorted_by_uids, uid);
 		g_hash_table_insert (sorted_by_uids, (gpointer) uid, g_slist_prepend (instances, comp));
@@ -1850,7 +1920,7 @@ ecb_ews_filter_out_unchanged_instances (const GSList *to_save_instances,
 
 	for (link = (GSList *) existing_instances; link; link = g_slist_next (link)) {
 		ECalComponent *comp = link->data;
-		ECalComponentId *id = NULL;
+		ECalComponentId *id;
 
 		id = e_cal_component_get_id (comp);
 		if (id)
@@ -2403,6 +2473,24 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 		GSList *existing = NULL, *changed_instances = NULL, *removed_instances = NULL;
 
 		success = uid && e_cal_cache_get_components_by_uid (cal_cache, uid, &existing, cancellable, error) && existing;
+
+		if (success) {
+			GSList *link;
+
+			/* This is for offline changes, where the component in the cache
+			   is already modified, while the original, the one on the server,
+			   is different. Using the cached component in this case generates
+			   empty UpdateItem request and nothing is saved. */
+			for (link = existing; link; link = g_slist_next (link)) {
+				ECalComponent *comp = link->data;
+
+				comp = ecb_ews_restore_original_comp (comp);
+				if (comp) {
+					g_object_unref (link->data);
+					link->data = comp;
+				}
+			}
+		}
 
 		if (success)
 			ecb_ews_filter_out_unchanged_instances (instances, existing, &changed_instances, &removed_instances);

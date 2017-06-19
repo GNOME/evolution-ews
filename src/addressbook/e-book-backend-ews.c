@@ -56,6 +56,8 @@
 #define EDB_ERROR(_code) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, NULL)
 #define EDB_ERROR_EX(_code,_msg) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, _msg)
 
+#define X_EWS_ORIGINAL_VCARD "X-EWS-ORIGINAL-VCARD"
+
 #define EWS_MAX_FETCH_COUNT 500
 
 #define ELEMENT_TYPE_SIMPLE 0x01 /* simple string fields */
@@ -131,6 +133,9 @@ ebb_ews_convert_error_to_edb_error (GError **perror)
 		case EWS_CONNECTION_ERROR_EVENTNOTFOUND:
 		case EWS_CONNECTION_ERROR_ITEMNOTFOUND:
 			error = EDB_ERROR_EX (CONTACT_NOT_FOUND, (*perror)->message);
+			break;
+		case EWS_CONNECTION_ERROR_UNAVAILABLE:
+			g_set_error_literal (&error, G_IO_ERROR, G_IO_ERROR_HOST_NOT_FOUND, (*perror)->message);
 			break;
 		}
 
@@ -1839,6 +1844,8 @@ ebb_ews_unset_connection (EBookBackendEws *bbews)
 		}
 	}
 
+	g_clear_object (&bbews->priv->cnc);
+
 	g_rec_mutex_unlock (&bbews->priv->cnc_lock);
 }
 
@@ -2202,6 +2209,61 @@ ebb_ews_check_gal_changes (EBookBackendEws *bbews,
 	return success;
 }
 
+static void
+ebb_ews_remove_original_vcard (EContact *contact)
+{
+	g_return_if_fail (E_IS_CONTACT (contact));
+
+	e_vcard_remove_attributes (E_VCARD (contact), NULL, X_EWS_ORIGINAL_VCARD);
+}
+
+static void
+ebb_ews_store_original_vcard (EContact *contact)
+{
+	EVCard *vcard;
+	EVCardAttribute *attr;
+	gchar *vcard_str;
+
+	g_return_if_fail (E_IS_CONTACT (contact));
+
+	ebb_ews_remove_original_vcard (contact);
+
+	vcard = E_VCARD (contact);
+
+	vcard_str = e_vcard_to_string (vcard, EVC_FORMAT_VCARD_30);
+
+	attr = e_vcard_attribute_new ("", X_EWS_ORIGINAL_VCARD);
+	e_vcard_attribute_add_value (attr, vcard_str);
+	e_vcard_add_attribute (vcard, attr);
+
+	g_free (vcard_str);
+}
+
+static const gchar *
+ebb_ews_get_original_vcard (EContact *contact)
+{
+	EVCardAttribute *attr;
+	GList *values = NULL;
+	const gchar *vcard;
+
+	g_return_val_if_fail (E_IS_CONTACT (contact), NULL);
+
+	attr = e_vcard_get_attribute (E_VCARD (contact), X_EWS_ORIGINAL_VCARD);
+	if (!attr)
+		return NULL;
+
+	values = e_vcard_attribute_get_values (attr);
+	if (!values)
+		return NULL;
+
+	vcard = values->data;
+
+	if (vcard && *vcard)
+		return vcard;
+
+	return NULL;
+}
+
 typedef struct {
 	/* For future use */
 	gpointer restriction;
@@ -2533,6 +2595,8 @@ ebb_ews_update_cache_for_expression (EBookBackendEws *bbews,
 					}
 				}
 
+				ebb_ews_store_original_vcard (contact);
+
 				nfo = e_book_meta_backend_info_new (e_contact_get_const (contact, E_CONTACT_UID),
 					e_contact_get_const (contact, E_CONTACT_REV), NULL, NULL);
 				nfo->object = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
@@ -2618,6 +2682,8 @@ ebb_ews_contacts_to_infos (const GSList *contacts) /* EContact * */
 
 		if (!E_IS_CONTACT (contact))
 			continue;
+
+		ebb_ews_store_original_vcard (contact);
 
 		nfo = e_book_meta_backend_info_new (
 			e_contact_get_const (contact, E_CONTACT_UID),
@@ -2996,8 +3062,11 @@ ebb_ews_load_contact_sync (EBookMetaBackend *meta_backend,
 		GSList *contacts = NULL;
 
 		success = ebb_ews_fetch_items_sync (bbews, items, &contacts, cancellable, error);
-		if (success && contacts)
+		if (success && contacts) {
 			*out_contact = g_object_ref (contacts->data);
+
+			ebb_ews_store_original_vcard (*out_contact);
+		}
 
 		g_slist_free_full (contacts, g_object_unref);
 	}
@@ -3056,6 +3125,25 @@ ebb_ews_save_contact_sync (EBookMetaBackend *meta_backend,
 		book_cache = e_book_meta_backend_ref_cache (meta_backend);
 
 		success = e_book_cache_get_contact (book_cache, e_contact_get_const (contact, E_CONTACT_UID), FALSE, &old_contact, cancellable, error);
+		if (success) {
+			const gchar *original_vcard;
+
+			/* This is for offline changes, where the EContact in the cache
+			   is already modified, while the original, the one on the server,
+			   is different. Using the cached EContact in this case generates
+			   empty UpdateItem request and nothing is saved. */
+			original_vcard = ebb_ews_get_original_vcard (old_contact);
+			if (original_vcard) {
+				EContact *tmp;
+
+				tmp = e_contact_new_from_vcard (original_vcard);
+				if (tmp) {
+					g_object_unref (old_contact);
+					old_contact = tmp;
+				}
+			}
+		}
+
 		if (success) {
 			ConvertData cd;
 			const gchar *conflict_res = "AlwaysOverwrite";
@@ -3271,6 +3359,49 @@ ebb_ews_get_backend_property (EBookBackend *book_backend,
 	return E_BOOK_BACKEND_CLASS (e_book_backend_ews_parent_class)->get_backend_property (book_backend, prop_name);
 }
 
+static gboolean
+ebb_ews_get_destination_address (EBackend *backend,
+				 gchar **host,
+				 guint16 *port)
+{
+	CamelEwsSettings *ews_settings;
+	SoupURI *soup_uri;
+	gchar *host_url;
+	gboolean result = FALSE;
+
+	g_return_val_if_fail (port != NULL, FALSE);
+	g_return_val_if_fail (host != NULL, FALSE);
+
+	/* Sanity checking */
+	if (!e_book_backend_get_registry (E_BOOK_BACKEND (backend)) ||
+	    !e_backend_get_source (backend))
+		return FALSE;
+
+	ews_settings = ebb_ews_get_collection_settings (E_BOOK_BACKEND_EWS (backend));
+	g_return_val_if_fail (ews_settings != NULL, FALSE);
+
+	host_url = camel_ews_settings_dup_hosturl (ews_settings);
+	g_return_val_if_fail (host_url != NULL, FALSE);
+
+	soup_uri = soup_uri_new (host_url);
+	if (soup_uri) {
+		*host = g_strdup (soup_uri_get_host (soup_uri));
+		*port = soup_uri_get_port (soup_uri);
+
+		result = *host && **host;
+		if (!result) {
+			g_free (*host);
+			*host = NULL;
+		}
+
+		soup_uri_free (soup_uri);
+	}
+
+	g_free (host_url);
+
+	return result;
+}
+
 static void
 e_book_backend_ews_constructed (GObject *object)
 {
@@ -3334,6 +3465,7 @@ static void
 e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 {
 	GObjectClass *object_class;
+	EBackendClass *backend_class;
 	EBookBackendClass *book_backend_class;
 	EBookMetaBackendClass *book_meta_backend_class;
 
@@ -3353,6 +3485,9 @@ e_book_backend_ews_class_init (EBookBackendEwsClass *klass)
 
 	book_backend_class = E_BOOK_BACKEND_CLASS (klass);
 	book_backend_class->get_backend_property = ebb_ews_get_backend_property;
+
+	backend_class = E_BACKEND_CLASS (klass);
+	backend_class->get_destination_address = ebb_ews_get_destination_address;
 
 	object_class = G_OBJECT_CLASS (klass);
 	object_class->constructed = e_book_backend_ews_constructed;

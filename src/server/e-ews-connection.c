@@ -797,7 +797,8 @@ ews_response_cb (SoupSession *session,
 	} else if (msg->status_code == SOUP_STATUS_CANT_RESOLVE ||
 		   msg->status_code == SOUP_STATUS_CANT_RESOLVE_PROXY ||
 		   msg->status_code == SOUP_STATUS_CANT_CONNECT ||
-		   msg->status_code == SOUP_STATUS_CANT_CONNECT_PROXY) {
+		   msg->status_code == SOUP_STATUS_CANT_CONNECT_PROXY ||
+		   msg->status_code == SOUP_STATUS_IO_ERROR) {
 		g_simple_async_result_set_error (
 			enode->simple,
 			EWS_CONNECTION_ERROR,
