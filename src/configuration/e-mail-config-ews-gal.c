@@ -269,7 +269,7 @@ mail_config_ews_gal_constructed (GObject *object)
 	if (!CAMEL_IS_EWS_SETTINGS (settings))
 		return;
 
-	container = GTK_WIDGET (page);
+	container = e_mail_config_activity_page_get_internal_box (E_MAIL_CONFIG_ACTIVITY_PAGE (page));
 
 	text = _("Global Address List");
 	markup = g_markup_printf_escaped ("<b>%s</b>", text);
@@ -285,7 +285,7 @@ mail_config_ews_gal_constructed (GObject *object)
 	gtk_widget_set_margin_left (widget, 12);
 	gtk_grid_set_row_spacing (GTK_GRID (widget), 6);
 	gtk_grid_set_column_spacing (GTK_GRID (widget), 6);
-	gtk_box_pack_start (GTK_BOX (page), widget, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (container), widget, FALSE, FALSE, 0);
 	gtk_widget_show (widget);
 
 	e_binding_bind_property_full (

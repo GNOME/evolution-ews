@@ -49,7 +49,7 @@ enum {
 
 static void e_mail_config_ews_folder_sizes_page_interface_init (EMailConfigPageInterface *iface);
 
-G_DEFINE_DYNAMIC_TYPE_EXTENDED (EMailConfigEwsFolderSizesPage, e_mail_config_ews_folder_sizes_page, GTK_TYPE_BOX, 0,
+G_DEFINE_DYNAMIC_TYPE_EXTENDED (EMailConfigEwsFolderSizesPage, e_mail_config_ews_folder_sizes_page, GTK_TYPE_SCROLLED_WINDOW, 0,
 	G_IMPLEMENT_INTERFACE_DYNAMIC (E_TYPE_MAIL_CONFIG_PAGE, e_mail_config_ews_folder_sizes_page_interface_init))
 
 static void
@@ -176,19 +176,19 @@ mail_config_ews_folder_sizes_page_constructed (GObject *object)
 {
 	EMailConfigEwsFolderSizesPage *page = E_MAIL_CONFIG_EWS_FOLDER_SIZES_PAGE (object);
 	GtkWidget *widget;
+	GtkWidget *main_box;
 	GtkGrid *content_grid;
 	gchar *markup;
 
 	/* Chain up to parent's constructed() method. */
 	G_OBJECT_CLASS (e_mail_config_ews_folder_sizes_page_parent_class)->constructed (object);
 
-	gtk_orientable_set_orientation (GTK_ORIENTABLE (page), GTK_ORIENTATION_VERTICAL);
-	gtk_box_set_spacing (GTK_BOX (page), 12);
+	main_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
 
 	content_grid = GTK_GRID (gtk_grid_new ());
 	gtk_grid_set_row_spacing (content_grid, 6);
 	gtk_grid_set_column_spacing (content_grid, 6);
-	gtk_box_pack_start (GTK_BOX (page), GTK_WIDGET (content_grid), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (main_box), GTK_WIDGET (content_grid), FALSE, FALSE, 0);
 
 	markup = g_markup_printf_escaped ("<b>%s</b>", _("EWS Settings"));
 	widget = gtk_label_new (markup);
@@ -205,7 +205,9 @@ mail_config_ews_folder_sizes_page_constructed (GObject *object)
 	g_signal_connect (widget, "clicked", G_CALLBACK (folder_sizes_clicked_cb), page);
 	gtk_grid_attach (content_grid, widget, 1, 1, 1, 1);
 
-	gtk_widget_show_all (GTK_WIDGET (page));
+	gtk_widget_show_all (GTK_WIDGET (main_box));
+
+	e_mail_config_page_set_content (E_MAIL_CONFIG_PAGE (page), main_box);
 }
 
 static void

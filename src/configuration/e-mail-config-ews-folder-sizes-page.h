@@ -50,12 +50,12 @@ typedef struct _EMailConfigEwsFolderSizesPageClass EMailConfigEwsFolderSizesPage
 typedef struct _EMailConfigEwsFolderSizesPagePrivate EMailConfigEwsFolderSizesPagePrivate;
 
 struct _EMailConfigEwsFolderSizesPage {
-	GtkBox parent;
+	GtkScrolledWindow parent;
 	EMailConfigEwsFolderSizesPagePrivate *priv;
 };
 
 struct _EMailConfigEwsFolderSizesPageClass {
-	GtkBoxClass parent_class;
+	GtkScrolledWindowClass parent_class;
 };
 
 GType			e_mail_config_ews_folder_sizes_page_get_type		(void) G_GNUC_CONST;

@@ -376,6 +376,7 @@ mail_config_ews_ooo_page_constructed (GObject *object)
 	GtkWidget *grid;
 	GtkWidget *widget;
 	GtkWidget *container;
+	GtkWidget *main_box;
 	GtkSizeGroup *size_group;
 	GtkTextBuffer *text_buffer;
 	GSList *group = NULL;
@@ -387,22 +388,23 @@ mail_config_ews_ooo_page_constructed (GObject *object)
 	/* Chain up to parent's constructed() method. */
 	G_OBJECT_CLASS (e_mail_config_ews_ooo_page_parent_class)->constructed (object);
 
-	size_group = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
+	main_box = e_mail_config_activity_page_get_internal_box (E_MAIL_CONFIG_ACTIVITY_PAGE (page));
+	gtk_box_set_spacing (GTK_BOX (main_box), 12);
 
-	gtk_box_set_spacing (GTK_BOX (page), 12);
+	size_group = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
 
 	text = _("Out of Office");
 	markup = g_markup_printf_escaped ("<b>%s</b>", text);
 	widget = gtk_label_new (markup);
 	gtk_label_set_use_markup (GTK_LABEL (widget), TRUE);
 	gtk_misc_set_alignment (GTK_MISC (widget), 0.0, 0.5);
-	gtk_box_pack_start (GTK_BOX (page), widget, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (main_box), widget, FALSE, FALSE, 0);
 	gtk_widget_show (widget);
 	g_free (markup);
 
 	widget = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
 	gtk_widget_set_margin_left (widget, 12);
-	gtk_box_pack_start (GTK_BOX (page), widget, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (main_box), widget, FALSE, FALSE, 0);
 	gtk_widget_show (widget);
 
 	container = widget;
@@ -441,7 +443,7 @@ mail_config_ews_ooo_page_constructed (GObject *object)
 	widget = gtk_grid_new ();
 	gtk_grid_set_row_spacing (GTK_GRID (widget), 6);
 	gtk_grid_set_column_spacing (GTK_GRID (widget), 6);
-	gtk_box_pack_start (GTK_BOX (page), widget, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (main_box), widget, TRUE, TRUE, 0);
 	gtk_widget_show (widget);
 
 	e_binding_bind_property (
@@ -600,6 +602,8 @@ mail_config_ews_ooo_page_constructed (GObject *object)
 		G_BINDING_SYNC_CREATE);
 
 	g_object_unref (size_group);
+
+	e_mail_config_page_set_content (E_MAIL_CONFIG_PAGE (page), main_box);
 
 	e_mail_config_ews_ooo_page_refresh (page);
 }

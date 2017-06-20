@@ -1010,7 +1010,7 @@ mail_config_ews_delegates_page_constructed (GObject *object)
 {
 	EMailConfigEwsDelegatesPage *page;
 	GtkGrid *grid;
-	GtkWidget *widget, *button, *hvgrid;
+	GtkWidget *widget, *button, *hvgrid, *main_box;
 	GSList *radio_group;
 	gchar *markup;
 	gint row = 0;
@@ -1020,13 +1020,14 @@ mail_config_ews_delegates_page_constructed (GObject *object)
 	/* Chain up to parent's constructed() method. */
 	G_OBJECT_CLASS (e_mail_config_ews_delegates_page_parent_class)->constructed (object);
 
-	gtk_box_set_spacing (GTK_BOX (page), 12);
+	main_box = e_mail_config_activity_page_get_internal_box (E_MAIL_CONFIG_ACTIVITY_PAGE (page));
+	gtk_box_set_spacing (GTK_BOX (main_box), 12);
 
 	markup = g_markup_printf_escaped ("<b>%s</b>", _("Delegates"));
 	widget = gtk_label_new (markup);
 	gtk_label_set_use_markup (GTK_LABEL (widget), TRUE);
 	gtk_misc_set_alignment (GTK_MISC (widget), 0.0, 0.5);
-	gtk_box_pack_start (GTK_BOX (page), widget, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (main_box), widget, FALSE, FALSE, 0);
 	gtk_widget_show (widget);
 	g_free (markup);
 
@@ -1041,7 +1042,7 @@ mail_config_ews_delegates_page_constructed (GObject *object)
 		"vexpand", FALSE,
 		"valign", GTK_ALIGN_START,
 		NULL);
-	gtk_box_pack_start (GTK_BOX (page), widget, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (main_box), widget, FALSE, FALSE, 0);
 
 	grid = GTK_GRID (widget);
 
@@ -1137,6 +1138,8 @@ mail_config_ews_delegates_page_constructed (GObject *object)
 	enable_delegates_page_widgets (page, FALSE);
 
 	gtk_widget_show_all (GTK_WIDGET (grid));
+
+	e_mail_config_page_set_content (E_MAIL_CONFIG_PAGE (page), main_box);
 
 	e_mail_config_ews_delegates_page_refresh (page);
 }
