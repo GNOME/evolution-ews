@@ -3418,6 +3418,7 @@ add_item_to_cache (ECalBackendEws *cbews,
 	if (icalcomp) {
 		ECalComponent *comp, *cache_comp = NULL;
 		icalproperty *icalprop, *freebusy;
+		struct icaltimetype itt;
 		const EwsId *item_id;
 		ECalComponentId *id;
 		const GSList *l = NULL;
@@ -3519,6 +3520,22 @@ add_item_to_cache (ECalBackendEws *cbews,
 			if (icalprop) {
 				icalcomponent_remove_property (icalcomp, icalprop);
 				icalproperty_free (icalprop);
+			}
+		}
+
+		/* The EXDATE sent by the server can be date-time format with timezone, while
+		   the event start time can be date-only. This breaks the rules, thus correct
+		   it and make also EXDATE date-only. */
+		itt = icalcomponent_get_dtstart (icalcomp);
+		if (icaltime_is_valid_time (itt) && itt.is_date) {
+			for (icalprop = icalcomponent_get_first_property (icalcomp, ICAL_EXDATE_PROPERTY);
+			     icalprop;
+			     icalprop = icalcomponent_get_next_property (icalcomp, ICAL_EXDATE_PROPERTY)) {
+				itt = icalproperty_get_exdate (icalprop);
+				itt.is_date = 1;
+				icalproperty_set_exdate (icalprop, itt);
+
+				icalproperty_remove_parameter_by_kind (icalprop, ICAL_TZID_PARAMETER);
 			}
 		}
 
