@@ -2877,7 +2877,7 @@ ebb_ews_get_changes_sync (EBookMetaBackend *meta_backend,
 				guint32 delta_size = 0;
 
 				for (link = full_l; link; link = g_slist_next (link)) {
-					EwsOALDetails *det = full_l->data;
+					EwsOALDetails *det = link->data;
 
 					/* Throw away anything older than we already have */
 					if (det->seq <= sequence) {
