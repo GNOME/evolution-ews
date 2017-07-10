@@ -700,10 +700,13 @@ ews_active_job_done (EEwsConnection *cnc,
 	if (ews_node->cancellable)
 		g_object_unref (ews_node->cancellable);
 
-	/* the 'simple' holds reference on 'cnc' and this function
-	 * is called in a dedicated thread, which 'cnc' joins on dispose,
-	 * thus to avoid race condition, unref the object in its own thread */
-	e_ews_connection_utils_unref_in_thread (ews_node->simple);
+	if (ews_node->simple) {
+		/* the 'simple' holds reference on 'cnc' and this function
+		 * is called in a dedicated thread, which 'cnc' joins on dispose,
+		 * thus to avoid race condition, unref the object in its own thread */
+		e_ews_connection_utils_unref_in_thread (ews_node->simple);
+	}
+
 	g_free (ews_node);
 }
 
@@ -782,7 +785,9 @@ ews_response_cb (SoupSession *session,
 {
 	EwsNode *enode = (EwsNode *) data;
 	ESoapResponse *response;
+	ESoapParameter *param;
 	gint log_level;
+	gint wait_ms = 0;
 
 	if (g_cancellable_is_cancelled (enode->cancellable))
 		goto exit;
@@ -831,13 +836,119 @@ ews_response_cb (SoupSession *session,
 		e_soap_response_dump_response (response, stdout);
 	}
 
+	param = e_soap_response_get_first_parameter_by_name (response, "detail", NULL);
+	if (param)
+		param = e_soap_parameter_get_first_child_by_name (param, "ResponseCode");
+	if (param) {
+		gchar *value;
+
+		value = e_soap_parameter_get_string_value (param);
+		if (value && ews_get_error_code (value) == EWS_CONNECTION_ERROR_SERVERBUSY) {
+			param = e_soap_response_get_first_parameter_by_name (response, "detail", NULL);
+			if (param)
+				param = e_soap_parameter_get_first_child_by_name (param, "MessageXml");
+			if (param) {
+				param = e_soap_parameter_get_first_child_by_name (param, "Value");
+				if (param) {
+					g_free (value);
+
+					value = e_soap_parameter_get_property (param, "Name");
+					if (g_strcmp0 (value, "BackOffMilliseconds") == 0) {
+						wait_ms = e_soap_parameter_get_int_value (param);
+					}
+				}
+			}
+		}
+
+		g_free (value);
+	}
+
+	if (wait_ms > 0) {
+		GCancellable *cancellable = enode->cancellable;
+		EFlag *flag;
+
+		if (cancellable)
+			g_object_ref (cancellable);
+		g_object_ref (msg);
+
+		flag = e_flag_new ();
+		while (wait_ms > 0 && !g_cancellable_is_cancelled (cancellable) && msg->status_code != SOUP_STATUS_CANCELLED) {
+			gint64 now = g_get_monotonic_time ();
+			gint left_minutes, left_seconds;
+
+			left_minutes = wait_ms / 60000;
+			left_seconds = (wait_ms / 1000) % 60;
+
+			if (left_minutes > 0) {
+				camel_operation_push_message (cancellable,
+					g_dngettext (GETTEXT_PACKAGE,
+						"Exchange server is busy, waiting to retry (%d:%02d minute)",
+						"Exchange server is busy, waiting to retry (%d:%02d minutes)", left_minutes),
+					left_minutes, left_seconds);
+			} else {
+				camel_operation_push_message (cancellable,
+					g_dngettext (GETTEXT_PACKAGE,
+						"Exchange server is busy, waiting to retry (%d second)",
+						"Exchange server is busy, waiting to retry (%d seconds)", left_seconds),
+					left_seconds);
+			}
+
+			e_flag_wait_until (flag, now + (G_TIME_SPAN_MILLISECOND * (wait_ms > 1000 ? 1000 : wait_ms)));
+
+			now = g_get_monotonic_time () - now;
+			now = now / G_TIME_SPAN_MILLISECOND;
+
+			if (now >= wait_ms)
+				wait_ms = 0;
+			wait_ms -= now;
+
+			camel_operation_pop_message (cancellable);
+		}
+
+		e_flag_free (flag);
+
+		g_object_unref (response);
+
+		if (g_cancellable_is_cancelled (cancellable) ||
+		    msg->status_code == SOUP_STATUS_CANCELLED) {
+			g_clear_object (&cancellable);
+			g_object_unref (msg);
+		} else {
+			EwsNode *new_node;
+
+			new_node = ews_node_new ();
+			new_node->msg = E_SOAP_MESSAGE (msg); /* takes ownership */
+			new_node->pri = enode->pri;
+			new_node->cb = enode->cb;
+			new_node->cnc = enode->cnc;
+			new_node->simple = enode->simple;
+
+			enode->simple = NULL;
+
+			QUEUE_LOCK (enode->cnc);
+			enode->cnc->priv->jobs = g_slist_prepend (enode->cnc->priv->jobs, new_node);
+			QUEUE_UNLOCK (enode->cnc);
+
+			if (cancellable) {
+				new_node->cancellable = g_object_ref (cancellable);
+				new_node->cancel_handler_id = g_cancellable_connect (
+					cancellable, G_CALLBACK (ews_cancel_request), new_node, NULL);
+			}
+
+			g_clear_object (&cancellable);
+		}
+
+		goto exit;
+	}
+
 	if (enode->cb != NULL)
 		enode->cb (response, enode->simple);
 
 	g_object_unref (response);
 
 exit:
-	g_simple_async_result_complete_in_idle (enode->simple);
+	if (enode->simple)
+		g_simple_async_result_complete_in_idle (enode->simple);
 
 	ews_active_job_done (enode->cnc, enode);
 }
