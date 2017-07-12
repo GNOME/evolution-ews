@@ -3457,12 +3457,15 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 		EEwsItem *contact_item = c ? c->data : NULL;
 		EContact *contact = NULL;
 		const gchar *str;
+		gboolean is_public_dl = FALSE;
 
 		if (g_strcmp0 (mb->mailbox_type, "PublicDL") == 0) {
 			contact = e_contact_new ();
 
 			if (!ebews_get_dl_info_gal (ebews, contact, mb, NULL)) {
 				g_clear_object (&contact);
+			} else {
+				is_public_dl = TRUE;
 			}
 		}
 
@@ -3480,7 +3483,7 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 			e_contact_set (contact, E_CONTACT_FULL_NAME, mb->name);
 
 		str = e_contact_get_const (contact, E_CONTACT_EMAIL_1);
-		if (!str || !*str || (contact_item && e_ews_item_get_item_type (contact_item) == E_EWS_ITEM_TYPE_CONTACT)) {
+		if (!str || !*str || (!is_public_dl && contact_item && e_ews_item_get_item_type (contact_item) == E_EWS_ITEM_TYPE_CONTACT)) {
 			/* Cleanup first, then re-add only SMTP addresses */
 			e_contact_set (contact, E_CONTACT_EMAIL_1, NULL);
 			e_contact_set (contact, E_CONTACT_EMAIL_2, NULL);
@@ -3494,7 +3497,7 @@ e_book_backend_ews_start_view (EBookBackend *backend,
 		str = e_contact_get_const (contact, E_CONTACT_EMAIL_1);
 		if (!str || !*str) {
 			e_contact_set (contact, E_CONTACT_EMAIL_1, mb->email);
-		} else if (mb->email && (!mb->routing_type || g_ascii_strcasecmp (mb->routing_type, "SMTP") == 0)) {
+		} else if (!is_public_dl && mb->email && (!mb->routing_type || g_ascii_strcasecmp (mb->routing_type, "SMTP") == 0)) {
 			EContactField fields[3] = { E_CONTACT_EMAIL_2, E_CONTACT_EMAIL_3, E_CONTACT_EMAIL_4 };
 			gchar *emails[3];
 			gint ii, ff = 0;
