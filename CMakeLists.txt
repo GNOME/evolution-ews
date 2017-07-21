@@ -190,7 +190,7 @@ pkg_check_variable(ewsdatadir evolution-data-server-1.2 privdatadir)
 
 set(ewsdatadir "${ewsdatadir}/ews")
 
-SET(CMAKE_INSTALL_RPATH "${LIB_INSTALL_DIR}:${privlibdir}:${evo_privlibdir}")
+SET(CMAKE_INSTALL_RPATH "${privlibdir}:${evo_privlibdir}")
 
 if(WIN32)
 	# On Win32 there is no "rpath" mechanism. We install the private
