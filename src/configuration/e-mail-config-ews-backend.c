@@ -350,6 +350,17 @@ mail_config_ews_backend_setup_defaults (EMailConfigServiceBackend *backend)
 }
 
 static gboolean
+mail_config_ews_backend_auto_configure (EMailConfigServiceBackend *backend,
+					EConfigLookup *config_lookup,
+					gint *out_priority)
+{
+	return e_mail_config_service_backend_auto_configure_for_kind (backend, config_lookup,
+		E_CONFIG_LOOKUP_RESULT_COLLECTION, NULL,
+		e_mail_config_service_backend_get_collection (backend),
+		out_priority);
+}
+
+static gboolean
 mail_config_ews_backend_check_complete (EMailConfigServiceBackend *backend)
 {
 	EMailConfigServicePage *page;
@@ -437,6 +448,7 @@ e_mail_config_ews_backend_class_init (EMailConfigEwsBackendClass *class)
 	backend_class->new_collection = mail_config_ews_backend_new_collection;
 	backend_class->insert_widgets = mail_config_ews_backend_insert_widgets;
 	backend_class->setup_defaults = mail_config_ews_backend_setup_defaults;
+	backend_class->auto_configure = mail_config_ews_backend_auto_configure;
 	backend_class->check_complete = mail_config_ews_backend_check_complete;
 	backend_class->commit_changes = mail_config_ews_backend_commit_changes;
 }

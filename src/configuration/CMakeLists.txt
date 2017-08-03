@@ -27,6 +27,8 @@ set(sources
 	e-mail-config-ews-offline-options.h
 	e-mail-config-ews-ooo-page.c
 	e-mail-config-ews-ooo-page.h
+	e-ews-config-lookup.c
+	e-ews-config-lookup.h
 	e-ews-config-ui-extension.c
 	e-ews-config-ui-extension.h
 	e-ews-config-utils.c
