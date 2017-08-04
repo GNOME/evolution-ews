@@ -352,12 +352,13 @@ mail_config_ews_backend_setup_defaults (EMailConfigServiceBackend *backend)
 static gboolean
 mail_config_ews_backend_auto_configure (EMailConfigServiceBackend *backend,
 					EConfigLookup *config_lookup,
-					gint *out_priority)
+					gint *out_priority,
+					gboolean *out_is_complete)
 {
 	return e_mail_config_service_backend_auto_configure_for_kind (backend, config_lookup,
 		E_CONFIG_LOOKUP_RESULT_COLLECTION, NULL,
 		e_mail_config_service_backend_get_collection (backend),
-		out_priority);
+		out_priority, out_is_complete);
 }
 
 static gboolean

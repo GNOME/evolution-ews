@@ -141,6 +141,7 @@ ews_config_lookup_thread (EConfigLookup *config_lookup,
 
 			lookup_result = e_config_lookup_result_simple_new (E_CONFIG_LOOKUP_RESULT_COLLECTION,
 				E_CONFIG_LOOKUP_RESULT_PRIORITY_IMAP - 100, /* This is better than IMAP */
+				TRUE,
 				"ews",
 				_("Exchange Web Services"),
 				description->str);
