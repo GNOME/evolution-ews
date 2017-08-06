@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-10 16:24+0200\n"
-"PO-Revision-Date: 2017-07-10 16:25+0200\n"
+"POT-Creation-Date: 2017-08-06 21:07+0200\n"
+"PO-Revision-Date: 2017-08-06 21:08+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -20,6 +20,7 @@ msgstr ""
 "|| n%100>=20) ? 1 : 2);\n"
 
 #: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:79
+#: ../src/configuration/e-ews-config-lookup.c:146
 msgid "Exchange Web Services"
 msgstr "Exchange Web Services"
 
@@ -27,18 +28,18 @@ msgstr "Exchange Web Services"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Dostęp do serwerów Exchange za pomocą Web Services"
 
-#: ../src/addressbook/e-book-backend-ews.c:2954
+#: ../src/addressbook/e-book-backend-ews.c:2957
 msgid "Failed to update GAL:"
 msgstr "Zaktualizowanie GAL się nie powiodło:"
 
-#: ../src/addressbook/e-book-backend-ews.c:3113
+#: ../src/addressbook/e-book-backend-ews.c:3116
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Nie można zapisać listy kontaktów, jest to obsługiwane tylko w EWS Server "
-"2010 lub późniejszym"
+"2010 lub nowszym"
 
-#: ../src/addressbook/e-book-backend-ews.c:3206
+#: ../src/addressbook/e-book-backend-ews.c:3209
 msgid "Failed to set contact photo:"
 msgstr "Ustawienie zdjęcia kontaktu się nie powiodło:"
 
@@ -401,6 +402,21 @@ msgstr ""
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Źródło danych „%s” nie przedstawia katalog Exchange Web Services"
+
+#: ../src/configuration/e-ews-config-lookup.c:129
+#, c-format
+msgid "User: %s"
+msgstr "Użytkownik: %s"
+
+#: ../src/configuration/e-ews-config-lookup.c:134
+#, c-format
+msgid "Host URL: %s"
+msgstr "Adres URL komputera: %s"
+
+#: ../src/configuration/e-ews-config-lookup.c:139
+#, c-format
+msgid "OAB URL: %s"
+msgstr "Adres URL OAB: %s"
 
 #: ../src/configuration/e-ews-config-utils.c:574
 msgid "Folder"
@@ -890,11 +906,11 @@ msgstr "Wysz_ukiwanie…"
 msgid "Authentication"
 msgstr "Uwierzytelnianie"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:388
+#: ../src/configuration/e-mail-config-ews-backend.c:400
 msgid "Host URL cannot be empty"
 msgstr "Adres URL komputera nie może być pusty"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:393
+#: ../src/configuration/e-mail-config-ews-backend.c:405
 msgid "User name cannot be empty"
 msgstr "Nazwa użytkownika nie może być pusta"
 
