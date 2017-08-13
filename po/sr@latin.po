@@ -1,17 +1,17 @@
 # Serbian translation of evolution-ews
 # Courtesy of Prevod.org team (http://prevod.org/) -- 2012—2017.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# Copyright © YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the ewolution-ews package.
 # Miroslav Nikolić <miroslavnikolic@rocketmail.com>, 2012—2017.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product"
+"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?product"
 "=evolution-ews&keywords=I18N+L10N&component=Miscellaneous / EWS Core\n"
-"POT-Creation-Date: 2016-12-19 14:54+0000\n"
-"PO-Revision-Date: 2017-02-13 05:48+0200\n"
+"POT-Creation-Date: 2017-08-03 10:44+0000\n"
+"PO-Revision-Date: 2017-08-13 15:01+0200\n"
 "Last-Translator: Miroslav Nikolić <miroslavnikolic@rocketmail.com>\n"
-"Language-Team: Serbian <(nothing)>\n"
+"Language-Team: srpski <gnome-sr@googlegroups.org>\n"
 "Language: sr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -21,6 +21,7 @@ msgstr ""
 "X-Project-Style: gnome\n"
 
 #: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:79
+#: ../src/configuration/e-ews-config-lookup.c:145
 msgid "Exchange Web Services"
 msgstr "Veb usluge razmene"
 
@@ -28,115 +29,93 @@ msgstr "Veb usluge razmene"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Za pristup serverima razmene pomoću veb usluga"
 
-#: ../src/addressbook/e-book-backend-ews.c:1503
-msgid "The backend does not support bulk additions"
-msgstr "Pozadinac ne podržava grupno dodavanje"
+#: ../src/addressbook/e-book-backend-ews.c:2957
+#| msgid "Failed to parse oab XML"
+msgid "Failed to update GAL:"
+msgstr "Nisam uspeo da osvežim GAL:"
 
-#: ../src/addressbook/e-book-backend-ews.c:1542
-#: ../src/addressbook/e-book-backend-ews.c:1909
-#| msgid ""
-#| "Cannot save contact list, it's only supported on EWS Server 2010 or later"
+#: ../src/addressbook/e-book-backend-ews.c:3116
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Ne mogu da sačuvam spisak kontakta, podržano je samo na VUR serverima 2010 "
 "ili novijim"
 
-#: ../src/addressbook/e-book-backend-ews.c:1868
-msgid "The backend does not support bulk modifications"
-msgstr "Pozadinac ne podržava grupno uređivanje"
+#: ../src/addressbook/e-book-backend-ews.c:3209
+#| msgid "Failed to parse oab XML"
+msgid "Failed to set contact photo:"
+msgstr "Nisam uspeo da podesim fotografiju kontakta:"
 
-#: ../src/addressbook/e-book-backend-ews.c:2080
-msgid "Wait till syncing is done"
-msgstr "Sačekaj dok se ne obavi usklađivanje"
+#: ../src/calendar/e-cal-backend-ews.c:1574
+msgctxt "FreeBusyType"
+msgid "Free"
+msgstr "Slobodan"
 
-#: ../src/addressbook/e-book-backend-ews.c:2563
+#: ../src/calendar/e-cal-backend-ews.c:1577
+msgctxt "FreeBusyType"
+msgid "Busy"
+msgstr "Zauzet"
+
+#: ../src/calendar/e-cal-backend-ews.c:1579
+#| msgid "Out of Office"
+msgctxt "FreeBusyType"
+msgid "Out of Office"
+msgstr "Van kancelarije"
+
+#: ../src/calendar/e-cal-backend-ews.c:1581
+msgctxt "FreeBusyType"
+msgid "Tentative"
+msgstr "Privremeno"
+
+#: ../src/calendar/e-cal-backend-ews.c:3162
 #, c-format
-msgid "Processing contacts in %s %d%% completed... "
-msgstr "Obrađujem kontakte u „%s“, obavljeno je %d%%... "
-
-#: ../src/addressbook/e-book-backend-ews.c:3206
-msgid "Syncing contacts..."
-msgstr "Usaglašavam kontakte..."
-
-#: ../src/addressbook/e-book-backend-ews.c:3391
-#: ../src/configuration/e-ews-search-user.c:363
-msgid "Searching..."
-msgstr "Pretražujem..."
-
-#: ../src/addressbook/e-book-backend-ews.c:4395
-msgid "Requested to delete an unrelated cursor"
-msgstr "Zatraženo je da obrišem neodnosni kurzor"
-
-#: ../src/calendar/e-cal-backend-ews.c:1346
-msgid "EWS does not support bulk removals"
-msgstr "VUR ne podržava grupno uklanjanje"
-
-#: ../src/calendar/e-cal-backend-ews.c:1525
-msgid "Unknown error"
-msgstr "Nepoznata greška"
-
-#: ../src/calendar/e-cal-backend-ews.c:1774
-msgid "EWS does not support bulk additions"
-msgstr "VUR ne podržava grupno dodavanje"
-
-#: ../src/calendar/e-cal-backend-ews.c:1979
-msgid "EWS does not support bulk modifications"
-msgstr "VUR ne podržava grupno uređivanje"
-
-#: ../src/calendar/e-cal-backend-ews.c:2405
-#, c-format
-#| msgid "Cannot find user '%s' between attendees"
 msgid "Cannot find user “%s” between attendees"
 msgstr "Ne mogu da nađem korisnika „%s“ među učesnicima"
 
-#: ../src/camel/camel-ews-folder.c:374
+#: ../src/camel/camel-ews-folder.c:375
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Ne mogu da otvorim privremenu datoteku mime sadržaja!"
 
-#: ../src/camel/camel-ews-folder.c:382
+#: ../src/camel/camel-ews-folder.c:383
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Ne mogu da stvorim obrađivača iz mime sadržaja!"
 
-#: ../src/camel/camel-ews-folder.c:391
+#: ../src/camel/camel-ews-folder.c:392
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Ne mogu da obradim mime sadržaj zahteva za sastanak!"
 
-#: ../src/camel/camel-ews-folder.c:450
+#: ../src/camel/camel-ews-folder.c:451
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Ne mogu da napravim datoteku ostave"
 
-#: ../src/camel/camel-ews-folder.c:584 ../src/camel/camel-ews-folder.c:676
+#: ../src/camel/camel-ews-folder.c:585 ../src/camel/camel-ews-folder.c:678
 #, c-format
-#| msgid "Unable to create cache path '%s': %s"
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Ne mogu da napravim putanju privremenog čuvanja „%s“: %s"
 
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/camel/camel-ews-folder.c:690
+#: ../src/camel/camel-ews-folder.c:692
 #, c-format
-#| msgid "Failed to move message cache file from '%s' to '%s': %s"
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Nisam uspeo da premestim datoteku ostave poruke iz „%s“ u „%s“: %s"
 
-#: ../src/camel/camel-ews-folder.c:1476
+#: ../src/camel/camel-ews-folder.c:1536
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Ne mogu da učitam sažetak za „%s“"
 
-#: ../src/camel/camel-ews-folder.c:1916
+#: ../src/camel/camel-ews-folder.c:1980
 #, c-format
-#| msgid "Refreshing folder '%s'"
 msgid "Refreshing folder “%s”"
 msgstr "Osvežavam fasciklu „%s“"
 
-#: ../src/camel/camel-ews-folder.c:2058
+#: ../src/camel/camel-ews-folder.c:2126
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Ne mogu da izvršim radnje nad fasciklom u režimu van mreže"
@@ -170,7 +149,6 @@ msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "Proveri da nema đubreta samo u fascikli SAN_DUČE"
 
 #: ../src/camel/camel-ews-provider.c:60
-#| msgid "Automatically synchroni_ze remote mail locally"
 msgid "Synchroni_ze remote mail locally in all folders"
 msgstr "Uskladi _udaljenu poštu sa lokalnom u svim fasciklama"
 
@@ -251,7 +229,6 @@ msgid "%s_%d"
 msgstr "%s_%d"
 
 #: ../src/camel/camel-ews-store.c:646 ../src/camel/camel-ews-store.c:1249
-#| msgid "Checking \"Out of Office\" settings"
 msgid "Checking “Out of Office” settings"
 msgstr "Označavam podešavanja za „van kancelarije“"
 
@@ -278,7 +255,6 @@ msgstr "Ne mogu da pronađem VUR javne fascikle"
 
 #: ../src/camel/camel-ews-store.c:2487
 #, c-format
-#| msgid "Cannot create folder '%s', folder already exists"
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Ne mogu da napravim fasciklu „%s“, fascikla već postoji"
 
@@ -289,9 +265,6 @@ msgstr "Ne postoji roditeljska fascikla „%s“"
 
 #: ../src/camel/camel-ews-store.c:2512
 #, c-format
-#| msgid ""
-#| "Cannot create folder under '%s', it is used for folders of other users "
-#| "only"
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
 msgstr ""
@@ -300,7 +273,6 @@ msgstr ""
 
 #: ../src/camel/camel-ews-store.c:2522
 #, c-format
-#| msgid "Cannot create folder under '%s', it is used for public folders only"
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "Ne mogu da napravim fasciklu pod „%s“, koristi se samo za javne fascikle"
@@ -312,8 +284,6 @@ msgstr "Fascikla ne postoji"
 
 #: ../src/camel/camel-ews-store.c:2636
 #, c-format
-#| msgid ""
-#| "Cannot remove folder '%s', it is used for folders of other users only"
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Ne mogu da uklonim fasciklu „%s“, koristi se samo za fascikle drugih "
@@ -321,7 +291,6 @@ msgstr ""
 
 #: ../src/camel/camel-ews-store.c:2647
 #, c-format
-#| msgid "Cannot remove folder '%s', it is used for public folders only"
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "Ne mogu da uklonim fasciklu „%s“, koristi se samo za javne fascikle"
 
@@ -371,13 +340,11 @@ msgstr "Ne mogu da pretplatim VUR fascikle u režimu van mreže"
 
 #: ../src/camel/camel-ews-store.c:3262
 #, c-format
-#| msgid "Cannot subscribe folder '%s', no public folder available"
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Ne mogu da pretplatim fasciklu „%s“, nema dostupne javne fascikle"
 
 #: ../src/camel/camel-ews-store.c:3272
 #, c-format
-#| msgid "Cannot subscribe folder '%s', folder not found"
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Ne mogu da pretplatim fasciklu „%s“, nisam našao fasciklu"
 
@@ -391,7 +358,6 @@ msgid "You must be working online to complete this operation"
 msgstr "Morate da budete na mreži da biste završili ovu radnju"
 
 #: ../src/camel/camel-ews-store.c:3524 ../src/camel/camel-ews-store.c:3561
-#| msgid "Unsetting the \"Out of Office\" status"
 msgid "Unsetting the “Out of Office” status"
 msgstr "Poništavam stanje za „van kancelarije“"
 
@@ -417,25 +383,40 @@ msgstr "Nisam uspeo da pročitam adresu pošiljaoca"
 msgid "Service not connected"
 msgstr "Usluga nije povezana"
 
-#: ../src/collection/e-ews-backend.c:419
+#: ../src/collection/e-ews-backend.c:464
 #: ../src/configuration/e-mail-config-ews-gal.c:274
 msgid "Global Address List"
 msgstr "Spisak opštih adresa"
 
-#: ../src/collection/e-ews-backend.c:855
+#: ../src/collection/e-ews-backend.c:900
 #, c-format
-#| msgid ""
-#| "Could not determine a suitable folder class for a new folder named '%s'"
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
 "Ne mogu da odredim odgovarajući razred fascikle za novu fasciklu pod nazivom "
 "„%s“"
 
-#: ../src/collection/e-ews-backend.c:943
+#: ../src/collection/e-ews-backend.c:988
 #, c-format
-#| msgid "Data source '%s' does not represent an Exchange Web Services folder"
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Izvor podataka „%s“ ne predstavlja fasciklu veb usluge razmene"
+
+#: ../src/configuration/e-ews-config-lookup.c:129
+#, c-format
+#| msgid "_User:"
+msgid "User: %s"
+msgstr "Korisnik: %s"
+
+#: ../src/configuration/e-ews-config-lookup.c:134
+#, c-format
+#| msgid "_Host URL:"
+msgid "Host URL: %s"
+msgstr "Adresa domaćina: %s"
+
+#: ../src/configuration/e-ews-config-lookup.c:139
+#, c-format
+#| msgid "OAB U_RL:"
+msgid "OAB URL: %s"
+msgstr "OAB adresa: %s"
 
 #: ../src/configuration/e-ews-config-utils.c:574
 msgid "Folder"
@@ -464,9 +445,9 @@ msgstr "Preuzimam spisak fascikli…"
 
 #: ../src/configuration/e-ews-config-utils.c:917
 #, c-format
-#| msgid "Cannot edit permissions of folder '%s', choose other folder."
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
-msgstr "Ne mogu da uredim ovlašćenja za fasciklu „%s“, izaberite drugu fasciklu."
+msgstr ""
+"Ne mogu da uredim ovlašćenja za fasciklu „%s“, izaberite drugu fasciklu."
 
 #: ../src/configuration/e-ews-config-utils.c:994
 msgid "Folder Sizes..."
@@ -600,7 +581,7 @@ msgid "Edit EWS folder permissions..."
 msgstr "Uredi ovlašćenja VUR fascikle..."
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:952
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:636
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:669
 msgid "Account:"
 msgstr "Nalog:"
 
@@ -715,7 +696,6 @@ msgid "Unset on Server"
 msgstr "Poništi na serveru"
 
 #: ../src/configuration/e-ews-ooo-notificator.c:183
-#| msgid "Unset the \"Out of Office\" status"
 msgid "Unset the “Out of Office” status"
 msgstr "Poništi stanje za „van kancelarije“"
 
@@ -755,6 +735,10 @@ msgstr[3] "Nađoh više od 100 korisnika, ali prikazujem samo prvog"
 msgid "Search for a user"
 msgstr "Potražite korisnika"
 
+#: ../src/configuration/e-ews-search-user.c:363
+msgid "Searching..."
+msgstr "Pretražujem..."
+
 #: ../src/configuration/e-ews-search-user.c:435
 msgid "E-mail"
 msgstr "E-pošta"
@@ -767,46 +751,43 @@ msgstr "Izaberi VUR korisnika..."
 msgid "_Search:"
 msgstr "_Potraži:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:95
-#: ../src/server/e-ews-folder.c:748
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
+#: ../src/server/e-ews-folder.c:773
 #, c-format
-#| msgid "Cannot add folder, folder already exists as '%s'"
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Ne mogu da dodam fasciklu, fascikla već postoji kao „%s“"
 
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
 #. * Example result: "Mailbox — John Smith"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:105
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:107
 #, c-format
-#| msgctxt "ForeignFolder"
-#| msgid "Mailbox - %s"
 msgctxt "ForeignFolder"
 msgid "Mailbox — %s"
 msgstr "Sanduče — %s"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:273
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:275
 msgid "Cannot test foreign folder availability while in offline mode"
 msgstr ""
 "Ne mogu da isprobam dostupnost strane fascikle dok sam u režimu van mreže"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:298
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:300
 #, c-format
-#| msgid "User '%s' was not found on the server"
 msgid "User “%s” was not found on the server"
 msgstr "Nisam pronašao korisnika „%s“ na serveru"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:334
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:336
 #, c-format
-#| msgid "User name '%s' is ambiguous, specify it more precisely, please"
 msgid "User name “%s” is ambiguous, specify it more precisely, please"
 msgstr "Korisničko ime „%s“ je nejasno, navedite ga malo tačnije, molim lepo"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:356
+#. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:371
+msgid "Availability"
+msgstr "Dostupnost"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:386
 #, c-format
-#| msgid ""
-#| "Folder '%s' not found. Either it does not exist or you do not have "
-#| "permission to access it."
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
 "permission to access it."
@@ -814,8 +795,7 @@ msgstr ""
 "Nisam pronašao fasciklu „%s“. Ili ne postoji ili vi nemate ovlašćenja da joj "
 "pristupite."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:374
-#| msgid "Cannot add folder, cannot determine folder's type"
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:405
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Ne mogu da dodam fasciklu, ne mogu da odredim vrstu datoteke"
 
@@ -824,65 +804,71 @@ msgstr "Ne mogu da dodam fasciklu, ne mogu da odredim vrstu datoteke"
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:419
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:450
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:513
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:544
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:754
 msgid "Inbox"
 msgstr "Prijemno sanduče"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:515
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:722
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:546
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:755
 msgid "Contacts"
 msgstr "Kontakti"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:517
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:723
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:548
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:756
 msgid "Calendar"
 msgstr "Kalendar"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:519
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:724
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:550
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:757
+#| msgctxt "PermissionsLevel"
+#| msgid "Free/Busy time"
+msgid "Free/Busy as Calendar"
+msgstr "Slobodan/Zauzet kao kalendar"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:552
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:758
 msgid "Memos"
 msgstr "Beleške"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:521
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:725
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:554
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:759
 msgid "Tasks"
 msgstr "Zadaci"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:538
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:571
 #, c-format
-#| msgid "Testing availability of folder '%s' of user '%s', please wait..."
 msgid "Testing availability of folder “%s” of user “%s”, please wait..."
 msgstr "Isprobavam dostupnost fascikle „%s“ korisnika „%s“, sačekajte..."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:615
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:648
 msgid "Subscribe to folder of other EWS user..."
 msgstr "Prijavi se na fasciklu drugog VUR korisnika..."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:666
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:699
 msgid "User"
 msgstr "Korisnik"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:673
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:706
 msgid "_User:"
 msgstr "_Korisnik:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:688
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
 msgid "C_hoose..."
 msgstr "Iza_beri..."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:704
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:737
 msgid "_Folder name:"
 msgstr "Naziv _fascikle:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:734
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:768
 msgid "Include _subfolders"
 msgstr "Uključi _podfascikle"
 
@@ -922,11 +908,11 @@ msgstr "_Potraži..."
 msgid "Authentication"
 msgstr "Potvrđivanje identiteta"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:388
+#: ../src/configuration/e-mail-config-ews-backend.c:399
 msgid "Host URL cannot be empty"
 msgstr "Adresa domaćina ne može biti prazna"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:393
+#: ../src/configuration/e-mail-config-ews-backend.c:404
 msgid "User name cannot be empty"
 msgstr "Korisničko ime ne može biti prazno"
 
@@ -979,7 +965,6 @@ msgstr "_Dnevnik"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:565
 #, c-format
-#| msgid "Delegate '%s' has the following permissions"
 msgid "Delegate “%s” has the following permissions"
 msgstr "Izaslanik „%s“ ima sledeća ovlašćenja"
 
@@ -991,12 +976,12 @@ msgstr "Izaslanik može da vidi moje _lične stavke"
 msgid "Retrieving current user permissions, please wait..."
 msgstr "Dovlačim ovlašćenja tekućeg vlasnika, sačekajte..."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1025
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1645
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1026
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1648
 msgid "Delegates"
 msgstr "Izaslanici"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1049
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1050
 msgid ""
 "Delegates can send items on your behalf, including creating and responding "
 "to meeting requests. If you want to grant folder permissions without giving "
@@ -1009,7 +994,7 @@ msgstr ""
 "desnim tasterom miša na fasciklu, izaberite stavku Ovlašćenja i tu promenite "
 "opcije."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1099
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1100
 msgid ""
 "Deliver meeting requests addressed to me and responses to meeting requests "
 "where I am the organizer to:"
@@ -1018,7 +1003,7 @@ msgstr ""
 "gde sam ja organizator:"
 
 #. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1109
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1110
 msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
@@ -1026,21 +1011,20 @@ msgstr ""
 "Samo moji izaslanici, ali meni _pošalji primerak zahteva\n"
 "za sastanak i odgovore (preporučeno)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1116
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1117
 msgid "My d_elegates only"
 msgstr "Samo _moji izaslanici"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1123
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1124
 msgid "My delegates a_nd me"
 msgstr "Moji izaslanici i _ja"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1717
-#| msgid "Retrieving \"Delegates\" settings"
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1720
 msgid "Retrieving “Delegates” settings"
 msgstr "Dovlačim podešavanja „Izaslanici“"
 
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:193
-#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:255
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:257
 msgid "EWS Settings"
 msgstr "Podešavanja VUR-a"
 
@@ -1068,12 +1052,12 @@ msgstr "Izaberi spisak _adresa:"
 msgid "Fetch List"
 msgstr "Dovuci spisak"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:394
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:929
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:396
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:933
 msgid "Out of Office"
 msgstr "Van kancelarije"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:410
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:412
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
@@ -1081,56 +1065,55 @@ msgstr ""
 "Dole navedene poruke biće automatski poslate svakoj unutrašnjoj i spoljnoj "
 "osobi koja vam pošalje poruku."
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:419
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:421
 msgid "Do _not send Out of Office replies"
 msgstr "Ne _šalji odgovore za van kancelarije"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:427
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:429
 msgid "_Send Out of Office replies"
 msgstr "_Pošalji odgovore za van kancelarije"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:435
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:437
 msgid "Send Out of Office replies only _during this time period:"
 msgstr "Pošalji odgovore za van kancelarije samo za ovo _vreme:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:455
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:457
 msgid "_From:"
 msgstr "_Šalje:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:480
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:482
 msgid "_To:"
 msgstr "_Prima:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:505
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:507
 msgid "I_nternal:"
 msgstr "_Unutrašnja:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:514
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:516
 msgid "Message to be sent within the organization"
 msgstr "Poruka koja će biti poslata unutar organizacije"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:542
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:544
 msgid "E_xternal:"
 msgstr "_Spoljna:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:550
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:552
 msgid "Message to be sent outside the organization"
 msgstr "Poruka koja će biti poslata van organizacije"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:560
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:562
 msgid "Do not reply to senders outside the organization"
 msgstr "Ne odgovaraj pošiljaocima van organizacije"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:563
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:565
 msgid "Reply only to known senders outside the organization"
 msgstr "Odgovori samo poznatim pošiljaocima van organizacije"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:566
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:568
 msgid "Reply to any sender outside the organization"
 msgstr "Odgovori svim pošiljaocima van organizacije"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:1001
-#| msgid "Retrieving \"Out of Office\" settings"
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:1005
 msgid "Retrieving “Out of Office” settings"
 msgstr "Dovlačim podešavanja za „van kancelarije“"
 
@@ -1139,7 +1122,6 @@ msgid "Autodiscovery query failed."
 msgstr "Upit samootkrivanja nije uspeo."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:2
-#| msgid "The reported error was &quot;{0}&quot;."
 msgid "The reported error was “{0}”."
 msgstr "Prijavljena greška beše „{0}“."
 
@@ -1148,18 +1130,14 @@ msgid "Failed to locate offline address books."
 msgstr "Nisam uspeo da pronađem vanmrežne adresare."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:4
-#| msgid "Failed to retrieve &quot;Out of Office&quot; settings."
 msgid "Failed to retrieve “Out of Office” settings."
 msgstr "Nisam uspeo da dovučem podešavanja „Van kancelarije“."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:5
-#| msgid "Failed to retrieve &quot;Delegates&quot; settings."
 msgid "Failed to retrieve “Delegates” settings."
 msgstr "Nisam uspeo da dovučem podešavanja „Izaslanici“."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:6
-#| msgid ""
-#| "Your Exchange account \"{0}\" has the status set as \"Out of Office\"."
 msgid "Your Exchange account “{0}” has the status set as “Out of Office”."
 msgstr "Vaš nalog razmene „{0}“ ima stanje podešeno na „van kancelarije“."
 
@@ -1168,78 +1146,125 @@ msgstr "Vaš nalog razmene „{0}“ ima stanje podešeno na „van kancelarije�
 msgid "CreateItem call failed to return ID for new message"
 msgstr "Poziv „Napravi stavku“ nije uspeo da vrati IB za novu poruku"
 
-#: ../src/server/e-ews-connection.c:722
+#: ../src/server/e-ews-connection.c:732
 msgid "Operation Cancelled"
 msgstr "Radnja je otkazana"
 
-#: ../src/server/e-ews-connection.c:788
+#: ../src/server/e-ews-connection.c:800
 msgid "Authentication failed"
 msgstr "Neuspešna prijava"
 
-#: ../src/server/e-ews-connection.c:809
+#: ../src/server/e-ews-connection.c:822
 #, c-format
 msgid "No response: %s"
 msgstr "Nema odgovora: %s"
 
-#: ../src/server/e-ews-connection.c:2528
+#: ../src/server/e-ews-connection.c:885
+#, c-format
+msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
+msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
+msgstr[0] "Server razmene je zauzet, čekam da pokušam ponovo (%d:%02d minut)"
+msgstr[1] "Server razmene je zauzet, čekam da pokušam ponovo (%d:%02d minuta)"
+msgstr[2] "Server razmene je zauzet, čekam da pokušam ponovo (%d:%02d minuta)"
+msgstr[3] "Server razmene je zauzet, čekam da pokušam ponovo (jedan minut)"
+
+#: ../src/server/e-ews-connection.c:891
+#, c-format
+msgid "Exchange server is busy, waiting to retry (%d second)"
+msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
+msgstr[0] "Server razmene je zauzet, čekam da pokušam ponovo (%d:%02d sekunda)"
+msgstr[1] "Server razmene je zauzet, čekam da pokušam ponovo (%d:%02d sekunde)"
+msgstr[2] "Server razmene je zauzet, čekam da pokušam ponovo (%d:%02d sekundi)"
+msgstr[3] "Server razmene je zauzet, čekam da pokušam ponovo (jedna sekunda)"
+
+#: ../src/server/e-ews-connection.c:2673
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Nisam uspeo da obradim samootkrivajući odgovor IksML"
 
-#: ../src/server/e-ews-connection.c:2535
+#: ../src/server/e-ews-connection.c:2680
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Nisam uspeo da pronađem element <Samootkrivanje>"
 
-#: ../src/server/e-ews-connection.c:2546
+#: ../src/server/e-ews-connection.c:2691
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Nisam uspeo da pronađem element <Odgovor>"
 
-#: ../src/server/e-ews-connection.c:2557
+#: ../src/server/e-ews-connection.c:2702
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Nisam uspeo da pronađem element <Nalog>"
 
-#: ../src/server/e-ews-connection.c:2582
+#: ../src/server/e-ews-connection.c:2727
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
 "Nisam uspeo da pronađem <ASadresu> i <OABadresu> u odgovoru samootkrivanja"
 
-#: ../src/server/e-ews-connection.c:2673
+#: ../src/server/e-ews-connection.c:2818
 msgid "URL cannot be NULL"
 msgstr "Adresa ne može biti NIŠTAVNA"
 
-#: ../src/server/e-ews-connection.c:2681
+#: ../src/server/e-ews-connection.c:2826
 #, c-format
-#| msgid "URL '%s' is not valid"
 msgid "URL “%s” is not valid"
 msgstr "Adresa „%s“ nije ispravna"
 
-#: ../src/server/e-ews-connection.c:2771
+#: ../src/server/e-ews-connection.c:2916
 msgid "Email address is missing a domain part"
 msgstr "E-pošti nedostaje deo domena"
 
-#: ../src/server/e-ews-connection.c:3093
+#: ../src/server/e-ews-connection.c:3238
 msgid "Failed to parse oab XML"
 msgstr "Nisam uspeo da obradim oab IksML"
 
-#: ../src/server/e-ews-connection.c:3101
+#: ../src/server/e-ews-connection.c:3246
 msgid "Failed to find <OAB> element\n"
 msgstr "Nisam uspeo da pronađem element <OAB>\n"
 
-#: ../src/server/e-ews-connection.c:4363
+#: ../src/server/e-ews-connection.c:4551
 msgid "No items found"
 msgstr "Nisam pronašao nijednu stavku"
 
-#: ../src/server/e-ews-folder.c:703
+#: ../src/server/e-ews-folder.c:728
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Ne mogu da dodam fasciklu, nepodržana vrsta fascikle"
 
-#: ../src/server/e-ews-folder.c:708
+#: ../src/server/e-ews-folder.c:733
 msgid "Cannot add folder, master source not found"
 msgstr "Ne mogu da dodam fasciklu, nisam pronašao glavni izvor"
+
+#~ msgid "The backend does not support bulk additions"
+#~ msgstr "Pozadinac ne podržava grupno dodavanje"
+
+#~ msgid "The backend does not support bulk modifications"
+#~ msgstr "Pozadinac ne podržava grupno uređivanje"
+
+#~ msgid "Wait till syncing is done"
+#~ msgstr "Sačekaj dok se ne obavi usklađivanje"
+
+#~ msgid "Processing contacts in %s %d%% completed... "
+#~ msgstr "Obrađujem kontakte u „%s“, obavljeno je %d%%... "
+
+#~ msgid "Syncing contacts..."
+#~ msgstr "Usaglašavam kontakte..."
+
+#~ msgid "Requested to delete an unrelated cursor"
+#~ msgstr "Zatraženo je da obrišem neodnosni kurzor"
+
+#~ msgid "EWS does not support bulk removals"
+#~ msgstr "VUR ne podržava grupno uklanjanje"
+
+#~ msgid "Unknown error"
+#~ msgstr "Nepoznata greška"
+
+#~ msgid "EWS does not support bulk additions"
+#~ msgstr "VUR ne podržava grupno dodavanje"
+
+#~ msgid "EWS does not support bulk modifications"
+#~ msgstr "VUR ne podržava grupno uređivanje"
 
 #~ msgid ""
 #~ "Exchange server cannot send message as '%s', when the account was "
