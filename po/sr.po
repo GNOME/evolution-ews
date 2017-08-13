@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?product"
 "=evolution-ews&keywords=I18N+L10N&component=Miscellaneous / EWS Core\n"
 "POT-Creation-Date: 2017-08-03 10:44+0000\n"
-"PO-Revision-Date: 2017-08-13 15:01+0200\n"
+"PO-Revision-Date: 2017-08-13 15:35+0200\n"
 "Last-Translator: Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: српски <gnome-sr@googlegroups.org>\n"
 "Language: sr\n"
@@ -831,7 +831,7 @@ msgstr "Календар"
 #| msgctxt "PermissionsLevel"
 #| msgid "Free/Busy time"
 msgid "Free/Busy as Calendar"
-msgstr "Слободан/Заузет као календар"
+msgstr "Слободно/заузето као календар"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:552
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:758
@@ -1172,9 +1172,9 @@ msgstr[3] "Сервер размене је заузет, чекам да пок
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
-msgstr[0] "Сервер размене је заузет, чекам да покушам поново (%d:%02d секунда)"
-msgstr[1] "Сервер размене је заузет, чекам да покушам поново (%d:%02d секунде)"
-msgstr[2] "Сервер размене је заузет, чекам да покушам поново (%d:%02d секунди)"
+msgstr[0] "Сервер размене је заузет, чекам да покушам поново (%d секунда)"
+msgstr[1] "Сервер размене је заузет, чекам да покушам поново (%d секунде)"
+msgstr[2] "Сервер размене је заузет, чекам да покушам поново (%d секунди)"
 msgstr[3] "Сервер размене је заузет, чекам да покушам поново (једна секунда)"
 
 #: ../src/server/e-ews-connection.c:2673

@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?product"
 "=evolution-ews&keywords=I18N+L10N&component=Miscellaneous / EWS Core\n"
 "POT-Creation-Date: 2017-08-03 10:44+0000\n"
-"PO-Revision-Date: 2017-08-13 15:01+0200\n"
+"PO-Revision-Date: 2017-08-13 15:35+0200\n"
 "Last-Translator: Miroslav Nikolić <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: srpski <gnome-sr@googlegroups.org>\n"
 "Language: sr\n"
@@ -831,7 +831,7 @@ msgstr "Kalendar"
 #| msgctxt "PermissionsLevel"
 #| msgid "Free/Busy time"
 msgid "Free/Busy as Calendar"
-msgstr "Slobodan/Zauzet kao kalendar"
+msgstr "Slobodno/zauzeto kao kalendar"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:552
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:758
@@ -1172,9 +1172,9 @@ msgstr[3] "Server razmene je zauzet, čekam da pokušam ponovo (jedan minut)"
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
-msgstr[0] "Server razmene je zauzet, čekam da pokušam ponovo (%d:%02d sekunda)"
-msgstr[1] "Server razmene je zauzet, čekam da pokušam ponovo (%d:%02d sekunde)"
-msgstr[2] "Server razmene je zauzet, čekam da pokušam ponovo (%d:%02d sekundi)"
+msgstr[0] "Server razmene je zauzet, čekam da pokušam ponovo (%d sekunda)"
+msgstr[1] "Server razmene je zauzet, čekam da pokušam ponovo (%d sekunde)"
+msgstr[2] "Server razmene je zauzet, čekam da pokušam ponovo (%d sekundi)"
 msgstr[3] "Server razmene je zauzet, čekam da pokušam ponovo (jedna sekunda)"
 
 #: ../src/server/e-ews-connection.c:2673
