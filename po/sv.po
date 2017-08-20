@@ -7,18 +7,18 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=Miscellaneous / EWS Core\n"
-"POT-Creation-Date: 2016-12-19 14:54+0000\n"
-"PO-Revision-Date: 2016-12-21 23:16+0100\n"
-"Last-Translator: Josef Andersson <josef.andersson@fripost.org>\n"
+"POT-Creation-Date: 2017-08-07 10:46+0000\n"
+"PO-Revision-Date: 2017-08-20 23:11+0200\n"
+"Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.8.9\n"
+"X-Generator: Poedit 2.0.3\n"
 
 #: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:79
 msgid "Exchange Web Services"
@@ -43,25 +43,25 @@ msgstr ""
 msgid "The backend does not support bulk modifications"
 msgstr "Bakänden saknar stöd för satsvisa ändringar"
 
-#: ../src/addressbook/e-book-backend-ews.c:2080
+#: ../src/addressbook/e-book-backend-ews.c:2083
 msgid "Wait till syncing is done"
 msgstr "Vänta tills synkning är klar"
 
-#: ../src/addressbook/e-book-backend-ews.c:2563
+#: ../src/addressbook/e-book-backend-ews.c:2566
 #, c-format
 msgid "Processing contacts in %s %d%% completed... "
 msgstr "Behandlar kontakter i %s %d%% klart… "
 
-#: ../src/addressbook/e-book-backend-ews.c:3206
+#: ../src/addressbook/e-book-backend-ews.c:3209
 msgid "Syncing contacts..."
 msgstr "Synkroniserar kontakter…"
 
-#: ../src/addressbook/e-book-backend-ews.c:3391
+#: ../src/addressbook/e-book-backend-ews.c:3394
 #: ../src/configuration/e-ews-search-user.c:363
 msgid "Searching..."
 msgstr "Söker…"
 
-#: ../src/addressbook/e-book-backend-ews.c:4395
+#: ../src/addressbook/e-book-backend-ews.c:4401
 msgid "Requested to delete an unrelated cursor"
 msgstr "Begärde att ta bort en orelaterad markör"
 
@@ -81,32 +81,32 @@ msgstr "EWS saknar stöd för satsvisa tillägg"
 msgid "EWS does not support bulk modifications"
 msgstr "EWS saknar stöd för satsvisa ändringar"
 
-#: ../src/calendar/e-cal-backend-ews.c:2405
+#: ../src/calendar/e-cal-backend-ews.c:2433
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Kan inte hitta deltagare ”%s” i listan över deltagare"
 
-#: ../src/camel/camel-ews-folder.c:374
+#: ../src/camel/camel-ews-folder.c:375
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Kunde inte öppna temporärfil för mime-innehåll!"
 
-#: ../src/camel/camel-ews-folder.c:382
+#: ../src/camel/camel-ews-folder.c:383
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Kunde inte generera tolk från mime-innehåll!"
 
-#: ../src/camel/camel-ews-folder.c:391
+#: ../src/camel/camel-ews-folder.c:392
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Kunde inte tolka mime-innehåll i sammanträdesbegäran!"
 
-#: ../src/camel/camel-ews-folder.c:450
+#: ../src/camel/camel-ews-folder.c:451
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Kunde inte skapa cachefil"
 
-#: ../src/camel/camel-ews-folder.c:584 ../src/camel/camel-ews-folder.c:676
+#: ../src/camel/camel-ews-folder.c:585 ../src/camel/camel-ews-folder.c:678
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Kunde inte skapa cachesökväg ”%s”: %s"
@@ -114,22 +114,22 @@ msgstr "Kunde inte skapa cachesökväg ”%s”: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/camel/camel-ews-folder.c:690
+#: ../src/camel/camel-ews-folder.c:692
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Misslyckades att flytta meddelandecachefil från ”%s” till ”%s”: %s"
 
-#: ../src/camel/camel-ews-folder.c:1476
+#: ../src/camel/camel-ews-folder.c:1536
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Kunde inte läsa in sammanfattning för %s"
 
-#: ../src/camel/camel-ews-folder.c:1916
+#: ../src/camel/camel-ews-folder.c:1980
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Uppdaterar mappen ”%s”"
 
-#: ../src/camel/camel-ews-folder.c:2058
+#: ../src/camel/camel-ews-folder.c:2126
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Kan inte utföra åtgärder på mappen i frånkopplat läge"
@@ -396,17 +396,17 @@ msgstr "Misslyckades med att läsa avsändaradress"
 msgid "Service not connected"
 msgstr "Tjänst inte ansluten"
 
-#: ../src/collection/e-ews-backend.c:419
+#: ../src/collection/e-ews-backend.c:464
 #: ../src/configuration/e-mail-config-ews-gal.c:274
 msgid "Global Address List"
 msgstr "Global adresslista"
 
-#: ../src/collection/e-ews-backend.c:855
+#: ../src/collection/e-ews-backend.c:900
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr "Kunde inte bestämma en lämplig mappklass för en ny mapp vid namn ”%s”"
 
-#: ../src/collection/e-ews-backend.c:943
+#: ../src/collection/e-ews-backend.c:988
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Datakälla ”%s” representerar inte en Exchange Web Services-mapp"
@@ -1118,66 +1118,84 @@ msgid "CreateItem call failed to return ID for new message"
 msgstr ""
 "Anrop till CreateItem misslyckades med att returnera ID för nytt meddelande"
 
-#: ../src/server/e-ews-connection.c:722
+#: ../src/server/e-ews-connection.c:732
 msgid "Operation Cancelled"
 msgstr "Operationen avbruten"
 
-#: ../src/server/e-ews-connection.c:788
+#: ../src/server/e-ews-connection.c:800
 msgid "Authentication failed"
 msgstr "Autentisering misslyckades"
 
-#: ../src/server/e-ews-connection.c:809
+#: ../src/server/e-ews-connection.c:821
 #, c-format
 msgid "No response: %s"
 msgstr "Inget svar: %s"
 
-#: ../src/server/e-ews-connection.c:2528
+#: ../src/server/e-ews-connection.c:884
+#, c-format
+msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
+msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
+msgstr[0] ""
+"Exchange-servern är upptagen, väntar med att försöka igen (%d:%02d minut)"
+msgstr[1] ""
+"Exchange-servern är upptagen, väntar med att försöka igen (%d:%02d minuter)"
+
+#: ../src/server/e-ews-connection.c:890
+#, c-format
+msgid "Exchange server is busy, waiting to retry (%d second)"
+msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
+msgstr[0] ""
+"Exchange-servern är upptagen, väntar med att försöka igen (%d sekund)"
+msgstr[1] ""
+"Exchange-servern är upptagen, väntar med att försöka igen (%d sekunder)"
+
+#: ../src/server/e-ews-connection.c:2652
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Misslyckades att tolka XML-svar från autodetektering"
 
-#: ../src/server/e-ews-connection.c:2535
+#: ../src/server/e-ews-connection.c:2659
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Misslyckades med att hitta <Autodiscover>-element"
 
-#: ../src/server/e-ews-connection.c:2546
+#: ../src/server/e-ews-connection.c:2670
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Misslyckades med att hitta <Response>-element"
 
-#: ../src/server/e-ews-connection.c:2557
+#: ../src/server/e-ews-connection.c:2681
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Misslyckades med att hitta <Account>-element"
 
-#: ../src/server/e-ews-connection.c:2582
+#: ../src/server/e-ews-connection.c:2706
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr "Kunde inte hitta <ASUrl> och <OABUrl> i svar för autodetektering"
 
-#: ../src/server/e-ews-connection.c:2673
+#: ../src/server/e-ews-connection.c:2797
 msgid "URL cannot be NULL"
 msgstr "URL kan inte vara NULL"
 
-#: ../src/server/e-ews-connection.c:2681
+#: ../src/server/e-ews-connection.c:2805
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "URL ”%s” är inte giltig"
 
-#: ../src/server/e-ews-connection.c:2771
+#: ../src/server/e-ews-connection.c:2895
 msgid "Email address is missing a domain part"
 msgstr "E-postadress saknar en domändel"
 
-#: ../src/server/e-ews-connection.c:3093
+#: ../src/server/e-ews-connection.c:3217
 msgid "Failed to parse oab XML"
 msgstr "Misslyckades med att tolka oab-XML"
 
-#: ../src/server/e-ews-connection.c:3101
+#: ../src/server/e-ews-connection.c:3225
 msgid "Failed to find <OAB> element\n"
 msgstr "Misslyckades att hitta <OAB>-element\n"
 
-#: ../src/server/e-ews-connection.c:4363
+#: ../src/server/e-ews-connection.c:4530
 msgid "No items found"
 msgstr "Inga objekt hittades"
 
