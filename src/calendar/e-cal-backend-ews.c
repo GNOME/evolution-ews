@@ -1376,7 +1376,7 @@ ecb_ews_connect_sync (ECalMetaBackend *meta_backend,
 
 		g_free (cbews->priv->folder_id);
 		cbews->priv->folder_id = e_source_ews_folder_dup_id (ews_folder);
-		cbews->priv->is_freebusy_calendar = g_strcmp0 (cbews->priv->folder_id, "freebusy-calendar") == 0;
+		cbews->priv->is_freebusy_calendar = cbews->priv->folder_id && g_str_has_prefix (cbews->priv->folder_id, "freebusy-calendar::");
 
 		g_signal_connect_swapped (cbews->priv->cnc, "server-notification",
 			G_CALLBACK (ecb_ews_server_notification_cb), cbews);

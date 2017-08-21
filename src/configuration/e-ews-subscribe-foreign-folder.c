@@ -347,6 +347,7 @@ check_foreign_folder_thread (GObject *with_object,
 	if (g_strcmp0 (cffd->use_foldername, "freebusy-calendar") == 0) {
 		EEWSFreeBusyData fbdata;
 		GSList *free_busy = NULL;
+		gchar *tmp;
 		gboolean success;
 
 		fbdata.period_start = time (NULL);
@@ -365,12 +366,16 @@ check_foreign_folder_thread (GObject *with_object,
 			return;
 		}
 
+		tmp = g_strconcat (cffd->use_foldername, "::", cffd->email, NULL);
+
 		folder = g_object_new (E_TYPE_EWS_FOLDER, NULL);
-		e_ews_folder_set_id (folder, e_ews_folder_id_new (cffd->use_foldername, NULL, FALSE));
+		e_ews_folder_set_id (folder, e_ews_folder_id_new (tmp, NULL, FALSE));
 		/* Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI */
 		e_ews_folder_set_name (folder, _("Availability"));
 		e_ews_folder_set_folder_type (folder, E_EWS_FOLDER_TYPE_CALENDAR);
 		e_ews_folder_set_foreign_mail (folder, cffd->email);
+
+		g_free (tmp);
 	} else {
 		fid.id = (gchar *) (cffd->use_foldername ? cffd->use_foldername : cffd->orig_foldername);
 		fid.change_key = NULL;
