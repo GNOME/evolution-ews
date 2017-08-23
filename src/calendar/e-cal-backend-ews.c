@@ -3014,16 +3014,39 @@ find_attendee_if_sentby (icalcomponent *ical_comp,
 	return prop;
 }
 
+static void
+ecb_ews_get_rsvp (icalproperty *attendee,
+		  gboolean *out_rsvp_requested)
+{
+	if (out_rsvp_requested)
+		*out_rsvp_requested = FALSE;
+	else
+		return;
+
+	if (attendee) {
+		icalparameter *rsvp;
+
+		rsvp = icalproperty_get_first_parameter (attendee, ICAL_RSVP_PARAMETER);
+		if (rsvp) {
+			*out_rsvp_requested = icalparameter_get_rsvp (rsvp) == ICAL_RSVP_TRUE;
+		}
+	}
+}
+
 static const gchar *
 ecb_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
 					  icalcomponent *icalcomp,
-					  const gchar *current_user_mail)
+					  const gchar *current_user_mail,
+					  gboolean *out_rsvp_requested)
 {
 	icalproperty *attendee;
 	const gchar *attendee_str = NULL, *attendee_mail = NULL;
 	gint attendees_count = 0;
 	const gchar *response = NULL;
 	gboolean found = FALSE;
+
+	if (out_rsvp_requested)
+		*out_rsvp_requested = FALSE;
 
 	attendee = icalcomponent_get_first_property (icalcomp, ICAL_ORGANIZER_PROPERTY);
 	if (attendee) {
@@ -3053,6 +3076,7 @@ ecb_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
 				attendee_mail = attendee_str;
 			if (attendee_mail && current_user_mail && g_ascii_strcasecmp (attendee_mail, current_user_mail) == 0) {
 				response = icalproperty_get_parameter_as_string (attendee, "PARTSTAT");
+				ecb_ews_get_rsvp (attendee, out_rsvp_requested);
 				found = TRUE;
 			}
 		}
@@ -3065,6 +3089,7 @@ ecb_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
 		g_return_val_if_fail (attendee != NULL, NULL);
 
 		response = icalproperty_get_parameter_as_string (attendee, "PARTSTAT");
+		ecb_ews_get_rsvp (attendee, out_rsvp_requested);
 		found = TRUE;
 	} else if (!found) {
 		ESourceRegistry *registry;
@@ -3083,6 +3108,7 @@ ecb_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
 
 			if (attendee) {
 				response = icalproperty_get_parameter_as_string (attendee, "PARTSTAT");
+				ecb_ews_get_rsvp (attendee, out_rsvp_requested);
 				found = TRUE;
 			}
 
@@ -3146,6 +3172,7 @@ ecb_ews_do_method_request_publish_reply (ECalBackendEws *cbews,
 					 icalcomponent *subcomp,
 					 const gchar *response_type,
 					 const gchar *user_email,
+					 gboolean rsvp_requested,
 					 GCancellable *cancellable,
 					 GError **error)
 {
@@ -3182,8 +3209,8 @@ ecb_ews_do_method_request_publish_reply (ECalBackendEws *cbews,
 			e_ews_connection_create_items_sync (
 				cbews->priv->cnc,
 				EWS_PRIORITY_MEDIUM,
-				"SendAndSaveCopy",
-				NULL,
+				rsvp_requested ? "SendAndSaveCopy" : "SaveOnly",
+				rsvp_requested ? NULL : "SendToNone",
 				NULL,
 				e_cal_backend_ews_prepare_accept_item_request,
 				&convert_data,
@@ -3355,13 +3382,14 @@ ecb_ews_receive_objects_sync (ECalBackendSync *sync_backend,
 		     subcomp = icalcomponent_get_next_component (icalcomp, kind)) {
 			ECalComponent *comp;
 			const gchar *response_type;
+			gboolean rsvp_requested = FALSE;
 
 			/* getting a data for meeting request response */
-			response_type = ecb_ews_get_current_user_meeting_reponse (cbews, subcomp, user_email);
+			response_type = ecb_ews_get_current_user_meeting_reponse (cbews, subcomp, user_email, &rsvp_requested);
 
 			comp = e_cal_component_new_from_icalcomponent (icalcomponent_new_clone (subcomp));
 
-			success = ecb_ews_do_method_request_publish_reply (cbews, comp, subcomp, response_type, user_email, cancellable, error);
+			success = ecb_ews_do_method_request_publish_reply (cbews, comp, subcomp, response_type, user_email, rsvp_requested, cancellable, error);
 
 			do_refresh = TRUE;
 
@@ -3380,7 +3408,7 @@ ecb_ews_receive_objects_sync (ECalBackendSync *sync_backend,
 			const gchar *response_type;
 
 			/* getting a data for meeting request response */
-			response_type = ecb_ews_get_current_user_meeting_reponse (cbews, subcomp, user_email);
+			response_type = ecb_ews_get_current_user_meeting_reponse (cbews, subcomp, user_email, NULL);
 
 			if (g_strcmp0 (response_type, "ACCEPTED") == 0) {
 				gchar **split_subject;
