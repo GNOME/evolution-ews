@@ -1,15 +1,15 @@
 # Czech translation for evolution-ews.
 # Copyright (C) 2011 evolution-ews's COPYRIGHT HOLDER
 # This file is distributed under the same license as the evolution-ews package.
-# Marek Černocký <marek@manet.cz>, 2011, 2012, 2013, 2014, 2015, 2016.
+# Marek Černocký <marek@manet.cz>, 2011, 2012, 2013, 2014, 2015, 2016, 2017.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=Miscellaneous / EWS Core\n"
-"POT-Creation-Date: 2016-12-12 21:26+0000\n"
-"PO-Revision-Date: 2016-12-19 10:20+0100\n"
+"POT-Creation-Date: 2017-08-03 10:44+0000\n"
+"PO-Revision-Date: 2017-08-29 12:27+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -20,6 +20,7 @@ msgstr ""
 "X-Generator: Gtranslator 2.91.7\n"
 
 #: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:79
+#: ../src/configuration/e-ews-config-lookup.c:145
 msgid "Exchange Web Services"
 msgstr "Webové služby Exchange"
 
@@ -27,86 +28,67 @@ msgstr "Webové služby Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Pro přístup k serverům Exchange pomocí webových služeb"
 
-#: ../src/addressbook/e-book-backend-ews.c:1503
-msgid "The backend does not support bulk additions"
-msgstr "Serverová část nepodporuje hromadné přidávání"
+#: ../src/addressbook/e-book-backend-ews.c:2957
+msgid "Failed to update GAL:"
+msgstr "Selhala aktualizace globálního seznamu adres:"
 
-#: ../src/addressbook/e-book-backend-ews.c:1542
-#: ../src/addressbook/e-book-backend-ews.c:1909
+#: ../src/addressbook/e-book-backend-ews.c:3116
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Nelze uložit seznam kontaktů, je to podporováno jen na EWS Server 2010 nebo "
 "novějším"
 
-#: ../src/addressbook/e-book-backend-ews.c:1868
-msgid "The backend does not support bulk modifications"
-msgstr "Serverová část nepodporuje hromadné změny"
+#: ../src/addressbook/e-book-backend-ews.c:3209
+msgid "Failed to set contact photo:"
+msgstr "Selhalo nastavení fotografie kontaktu:"
 
-#: ../src/addressbook/e-book-backend-ews.c:2080
-msgid "Wait till syncing is done"
-msgstr "Vyčkejte, než se dokončí synchronizace"
+#: ../src/calendar/e-cal-backend-ews.c:1574
+msgctxt "FreeBusyType"
+msgid "Free"
+msgstr "Volný"
 
-#: ../src/addressbook/e-book-backend-ews.c:2563
-#, c-format
-msgid "Processing contacts in %s %d%% completed... "
-msgstr "Zpracování kontaktů v %s %d%% dokončeno…"
+#: ../src/calendar/e-cal-backend-ews.c:1577
+msgctxt "FreeBusyType"
+msgid "Busy"
+msgstr "Obsazený"
 
-#: ../src/addressbook/e-book-backend-ews.c:3206
-msgid "Syncing contacts..."
-msgstr "Synchronizují se kontakty…"
+#: ../src/calendar/e-cal-backend-ews.c:1579
+msgctxt "FreeBusyType"
+msgid "Out of Office"
+msgstr "Mimo kancelář"
 
-#: ../src/addressbook/e-book-backend-ews.c:3391
-#: ../src/configuration/e-ews-search-user.c:363
-msgid "Searching..."
-msgstr "Vyhledává se…"
+#: ../src/calendar/e-cal-backend-ews.c:1581
+msgctxt "FreeBusyType"
+msgid "Tentative"
+msgstr "Předběžné"
 
-#: ../src/addressbook/e-book-backend-ews.c:4395
-msgid "Requested to delete an unrelated cursor"
-msgstr "Požadováno smazání nesouvisejícího kurzoru"
-
-#: ../src/calendar/e-cal-backend-ews.c:1346
-msgid "EWS does not support bulk removals"
-msgstr "EWS nepodporuje hromadné odstraňování"
-
-#: ../src/calendar/e-cal-backend-ews.c:1525
-msgid "Unknown error"
-msgstr "Neznámá chyba"
-
-#: ../src/calendar/e-cal-backend-ews.c:1774
-msgid "EWS does not support bulk additions"
-msgstr "EWS nepodporuje hromadné přidávání"
-
-#: ../src/calendar/e-cal-backend-ews.c:1979
-msgid "EWS does not support bulk modifications"
-msgstr "EWS nepodporuje hromadné změny"
-
-#: ../src/calendar/e-cal-backend-ews.c:2405
+#: ../src/calendar/e-cal-backend-ews.c:3162
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Uživatele „%s“ nelze nalézt mezi účastníky"
 
-#: ../src/camel/camel-ews-folder.c:374
+#: ../src/camel/camel-ews-folder.c:375
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Nelze otevřít dočasný soubor s obsahem MIME!"
 
-#: ../src/camel/camel-ews-folder.c:382
+#: ../src/camel/camel-ews-folder.c:383
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Nelze vygenerovat analyzátor z obsahu MIME!"
 
-#: ../src/camel/camel-ews-folder.c:391
+#: ../src/camel/camel-ews-folder.c:392
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Nelze analyzovat uvítací požadavek z obsahu MIME!"
 
-#: ../src/camel/camel-ews-folder.c:450
+#: ../src/camel/camel-ews-folder.c:451
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Nelze vytvořit soubor pro mezipaměť"
 
-#: ../src/camel/camel-ews-folder.c:584 ../src/camel/camel-ews-folder.c:676
+#: ../src/camel/camel-ews-folder.c:585 ../src/camel/camel-ews-folder.c:678
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Nelze vytvořit cestu „%s“ pro mezipaměť: %s"
@@ -114,22 +96,22 @@ msgstr "Nelze vytvořit cestu „%s“ pro mezipaměť: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/camel/camel-ews-folder.c:690
+#: ../src/camel/camel-ews-folder.c:692
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Selhal přesun souboru s mezipamětí zpráv z „%s“ do „%s“: %s"
 
-#: ../src/camel/camel-ews-folder.c:1476
+#: ../src/camel/camel-ews-folder.c:1536
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nelze získat přehled pro složku %s"
 
-#: ../src/camel/camel-ews-folder.c:1882
+#: ../src/camel/camel-ews-folder.c:1980
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Aktualizuje se složka „%s“"
 
-#: ../src/camel/camel-ews-folder.c:2024
+#: ../src/camel/camel-ews-folder.c:2126
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Akci na složce nelze provádět v režimu odpojení"
@@ -399,20 +381,35 @@ msgstr "Selhalo čtení adresy „Od“"
 msgid "Service not connected"
 msgstr "Služba není připojena"
 
-#: ../src/collection/e-ews-backend.c:419
+#: ../src/collection/e-ews-backend.c:464
 #: ../src/configuration/e-mail-config-ews-gal.c:274
 msgid "Global Address List"
 msgstr "Globální seznam adres"
 
-#: ../src/collection/e-ews-backend.c:855
+#: ../src/collection/e-ews-backend.c:900
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr "Nelze určit vhodnou třídu složky pro novou složku s názvem „%s“"
 
-#: ../src/collection/e-ews-backend.c:943
+#: ../src/collection/e-ews-backend.c:988
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Zdroj dat „%s“ se nenachází ve složce Exchange Web Services"
+
+#: ../src/configuration/e-ews-config-lookup.c:129
+#, c-format
+msgid "User: %s"
+msgstr "Uživatel: %s"
+
+#: ../src/configuration/e-ews-config-lookup.c:134
+#, c-format
+msgid "Host URL: %s"
+msgstr "Adresa URL na hostitele: %s"
+
+#: ../src/configuration/e-ews-config-lookup.c:139
+#, c-format
+msgid "OAB URL: %s"
+msgstr "Adresa URL na OAB: %s"
 
 #: ../src/configuration/e-ews-config-utils.c:574
 msgid "Folder"
@@ -529,12 +526,12 @@ msgstr "Přispěvatel"
 #: ../src/configuration/e-ews-edit-folder-permissions.c:137
 msgctxt "PermissionsLevel"
 msgid "Free/Busy time"
-msgstr "Volný/obsazený čas"
+msgstr "Volný/obsazený termín"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:139
 msgctxt "PermissionsLevel"
 msgid "Free/Busy time, subject, location"
-msgstr "Volný/obsazený čas, předmět, místo"
+msgstr "Volný/obsazený termín, předmět, místo"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:141
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:439
@@ -546,143 +543,143 @@ msgstr "Vlastní"
 msgid "Writing folder permissions, please wait..."
 msgstr "Zapisují se oprávnění složky, čekejte prosím…"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:775
+#: ../src/configuration/e-ews-edit-folder-permissions.c:779
 msgctxt "User"
 msgid "Anonymous"
 msgstr "Anonymní"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:778
+#: ../src/configuration/e-ews-edit-folder-permissions.c:782
 msgctxt "User"
 msgid "Default"
 msgstr "Výchozí"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:784
+#: ../src/configuration/e-ews-edit-folder-permissions.c:788
 msgctxt "User"
 msgid "Unknown"
 msgstr "Neznámý"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:865
+#: ../src/configuration/e-ews-edit-folder-permissions.c:869
 #: ../src/configuration/e-ews-search-user.c:429
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:993
 msgid "Name"
 msgstr "Jméno"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:871
+#: ../src/configuration/e-ews-edit-folder-permissions.c:875
 msgid "Permission level"
 msgstr "Úroveň oprávnění"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:923
+#: ../src/configuration/e-ews-edit-folder-permissions.c:927
 msgid "Edit EWS folder permissions..."
 msgstr "Úprava oprávnění složky EWS…"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:948
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:636
+#: ../src/configuration/e-ews-edit-folder-permissions.c:952
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:669
 msgid "Account:"
 msgstr "Účet:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:976
+#: ../src/configuration/e-ews-edit-folder-permissions.c:980
 msgid "Folder name:"
 msgstr "Název složky:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:999
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1003
 msgid "Folder ID:"
 msgstr "ID složky:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1063
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1067
 msgid "Permissions"
 msgstr "Oprávnění"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1085
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1089
 msgid "Permi_ssion level:"
 msgstr "Úroveň op_rávnění:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1119
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1123
 msgctxt "Permissions"
 msgid "Read"
 msgstr "Čtení"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1131
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1198
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1135
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1202
 msgctxt "Permissions"
 msgid "None"
 msgstr "nic"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1137
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1141
 msgctxt "Permissions"
 msgid "Free/Busy time"
-msgstr "volný/obsazený čas"
+msgstr "volný/obsazený termín"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1142
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1146
 msgctxt "Permissions"
 msgid "Free/Busy time, subject, location"
 msgstr "volný/obsazený čas, předmět, místo"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1148
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1152
 msgctxt "Permissions"
 msgid "Full Details"
 msgstr "úplné podrobnosti"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1154
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1158
 msgctxt "Permissions"
 msgid "Write"
 msgstr "Zápis"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1166
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1170
 msgctxt "Permissions"
 msgid "Create items"
 msgstr "vytvářet položky"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1170
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1174
 msgctxt "Permissions"
 msgid "Create subfolders"
 msgstr "vytvářet podsložky"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1174
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1178
 msgctxt "Permissions"
 msgid "Edit own"
 msgstr "upravovat vlastní"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1178
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1182
 msgctxt "Permissions"
 msgid "Edit all"
 msgstr "upravovat vše"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1186
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1190
 msgctxt "Permissions"
 msgid "Delete items"
 msgstr "Mazání položek"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1203
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1207
 msgctxt "Permissions"
 msgid "Own"
 msgstr "vlastní"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1208
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1212
 msgctxt "Permissions"
 msgid "All"
 msgstr "všechny"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1214
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1218
 msgctxt "Permissions"
 msgid "Other"
 msgstr "Ostatní"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1226
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1230
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "vlastník složky"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1230
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1234
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "kontakt složky"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1234
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1238
 msgctxt "Permissions"
 msgid "Folder visible"
 msgstr "viditelnost složky"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1307
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1311
 msgid "Reading folder permissions, please wait..."
 msgstr "Čtou se oprávnění složky, čekejte prosím…"
 
@@ -727,6 +724,10 @@ msgstr[2] "Nalezeno více než 100 uživatelů, ale zobrazuje se pouze prvních 
 msgid "Search for a user"
 msgstr "Vyhledávání uživatele"
 
+#: ../src/configuration/e-ews-search-user.c:363
+msgid "Searching..."
+msgstr "Vyhledává se…"
+
 #: ../src/configuration/e-ews-search-user.c:435
 msgid "E-mail"
 msgstr "E-mail"
@@ -739,8 +740,8 @@ msgstr "Výběr uživatele EWS…"
 msgid "_Search:"
 msgstr "Vy_hledat:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:95
-#: ../src/server/e-ews-folder.c:748
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
+#: ../src/server/e-ews-folder.c:773
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Nelze přidat složku, složka již existuje jako „%s“"
@@ -748,27 +749,32 @@ msgstr "Nelze přidat složku, složka již existuje jako „%s“"
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
 #. * Example result: "Mailbox — John Smith"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:105
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:107
 #, c-format
 msgctxt "ForeignFolder"
 msgid "Mailbox — %s"
 msgstr "Schránka – %s"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:273
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:275
 msgid "Cannot test foreign folder availability while in offline mode"
 msgstr "Test dostupnosti vzdálené složky nelze provést v režimu off-line"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:298
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:300
 #, c-format
 msgid "User “%s” was not found on the server"
 msgstr "Uživatel „%s“ nebyl na serveru nalezen"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:334
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:336
 #, c-format
 msgid "User name “%s” is ambiguous, specify it more precisely, please"
 msgstr "Jméno uživatele „%s“ je nejednoznačné, zadejte jej prosím přesněji"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:356
+#. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:371
+msgid "Availability"
+msgstr "Dostupnost"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:386
 #, c-format
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
@@ -777,7 +783,7 @@ msgstr ""
 "Složka „%s“ nebyla nalezena. Buď neexistuje nebo k ní nemáte oprávnění "
 "přístupu."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:374
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:405
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Nelze přidat složku, nelze určit typ složky"
 
@@ -786,64 +792,69 @@ msgstr "Nelze přidat složku, nelze určit typ složky"
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:419
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:450
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:513
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:544
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:754
 msgid "Inbox"
 msgstr "Přijatá"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:515
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:722
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:546
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:755
 msgid "Contacts"
 msgstr "Kontakty"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:517
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:723
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:548
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:756
 msgid "Calendar"
 msgstr "Kalendář"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:519
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:724
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:550
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:757
+msgid "Free/Busy as Calendar"
+msgstr "Volný/obsazený jako v kalendáři"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:552
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:758
 msgid "Memos"
 msgstr "Poznámky"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:521
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:725
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:554
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:759
 msgid "Tasks"
 msgstr "Úkoly"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:538
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:571
 #, c-format
 msgid "Testing availability of folder “%s” of user “%s”, please wait..."
 msgstr "Testuje se dostupnost složky „%s“ uživatele „%s“, čekejte prosím…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:615
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:648
 msgid "Subscribe to folder of other EWS user..."
 msgstr "Přihlásit odběr složky jiného uživatele EWS…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:666
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:699
 msgid "User"
 msgstr "Uživatel"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:673
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:706
 msgid "_User:"
 msgstr "_Uživatel:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:688
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
 msgid "C_hoose..."
 msgstr "Vy_brat…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:704
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:737
 msgid "_Folder name:"
 msgstr "Název _složky:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:734
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:768
 msgid "Include _subfolders"
 msgstr "Včetně pod_složek"
 
@@ -883,11 +894,11 @@ msgstr "Hl_edat…"
 msgid "Authentication"
 msgstr "Autentizace"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:388
+#: ../src/configuration/e-mail-config-ews-backend.c:399
 msgid "Host URL cannot be empty"
 msgstr "Adresa URL hostitele nesmí být prázdná"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:393
+#: ../src/configuration/e-mail-config-ews-backend.c:404
 msgid "User name cannot be empty"
 msgstr "Uživatelské jméno nesmí být prázdné"
 
@@ -951,12 +962,12 @@ msgstr "Delegát může vidět mé soukromé _položky"
 msgid "Retrieving current user permissions, please wait..."
 msgstr "Získávají se aktuální oprávnění uživatele, čekejte prosím…"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1025
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1645
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1026
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1648
 msgid "Delegates"
 msgstr "Delegáti"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1049
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1050
 msgid ""
 "Delegates can send items on your behalf, including creating and responding "
 "to meeting requests. If you want to grant folder permissions without giving "
@@ -968,7 +979,7 @@ msgstr ""
 "oprávnění k odesílání vaším jménem, zavřete toto dialogové okno, klikněte "
 "pravým tlačítkem na složku, klikněte na „Oprávnění“ a volby změňte."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1099
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1100
 msgid ""
 "Deliver meeting requests addressed to me and responses to meeting requests "
 "where I am the organizer to:"
@@ -977,7 +988,7 @@ msgstr ""
 "schuzky, u kterých jsem pořadatel, na:"
 
 #. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1109
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1110
 msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
@@ -985,20 +996,20 @@ msgstr ""
 "Jen moji delegáti, ale po_sílat mi kopie žádostí o schůzky\n"
 "a odpovědi na ně (doporučeno)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1116
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1117
 msgid "My d_elegates only"
 msgstr "Jen moji delegáti"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1123
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1124
 msgid "My delegates a_nd me"
 msgstr "Moji delegáti a já"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1717
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1720
 msgid "Retrieving “Delegates” settings"
 msgstr "Získává se nastavení „delegátů“"
 
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:193
-#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:255
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:257
 msgid "EWS Settings"
 msgstr "Nastavení EWS"
 
@@ -1026,12 +1037,12 @@ msgstr "Vyberte seznam a_dres: "
 msgid "Fetch List"
 msgstr "Získat seznam"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:394
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:929
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:396
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:933
 msgid "Out of Office"
 msgstr "Mimo kancelář"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:410
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:412
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
@@ -1039,55 +1050,55 @@ msgstr ""
 "Zprávy zadané níže budou automaticky rozeslány každé\n"
 " z interních a externích osob, která vám zasílá e-maily."
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:419
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:421
 msgid "Do _not send Out of Office replies"
 msgstr "_Neposílat odpovědi „Mimo kancelář“"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:427
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:429
 msgid "_Send Out of Office replies"
 msgstr "Po_sílat odpovědi „Mimo kancelář“"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:435
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:437
 msgid "Send Out of Office replies only _during this time period:"
 msgstr "Posílat odpovědi „Mimo kancelář“ jen v tomto časovém rozmezí:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:455
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:457
 msgid "_From:"
 msgstr "_Od:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:480
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:482
 msgid "_To:"
 msgstr "_Do:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:505
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:507
 msgid "I_nternal:"
 msgstr "I_nterní:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:514
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:516
 msgid "Message to be sent within the organization"
 msgstr "Zpráva, která se má rozesílat v rámci organizace"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:542
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:544
 msgid "E_xternal:"
 msgstr "E_xterní:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:550
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:552
 msgid "Message to be sent outside the organization"
 msgstr "Zpráva, která se má rozesílat mimo organizaci"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:560
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:562
 msgid "Do not reply to senders outside the organization"
 msgstr "Neodpovídat odesilatelům mimo organizaci"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:563
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:565
 msgid "Reply only to known senders outside the organization"
 msgstr "Odpovídat pouze známým odesilatelům mimo organizaci"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:566
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:568
 msgid "Reply to any sender outside the organization"
 msgstr "Odpovídat libovolným odesilatelům mimo organizaci"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:1001
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:1005
 msgid "Retrieving “Out of Office” settings"
 msgstr "Získává se nastavení „Mimo kancelář“"
 
@@ -1121,75 +1132,93 @@ msgid "CreateItem call failed to return ID for new message"
 msgstr ""
 "Selhalo volání funkce CreateItem, provedené kvůli získání ID pro novou zprávu"
 
-#: ../src/server/e-ews-connection.c:722
+#: ../src/server/e-ews-connection.c:732
 msgid "Operation Cancelled"
 msgstr "Operace zrušena"
 
-#: ../src/server/e-ews-connection.c:788
+#: ../src/server/e-ews-connection.c:800
 msgid "Authentication failed"
 msgstr "Autentizace selhala"
 
-#: ../src/server/e-ews-connection.c:809
+#: ../src/server/e-ews-connection.c:822
 #, c-format
 msgid "No response: %s"
 msgstr "Bez odezvy: %s"
 
-#: ../src/server/e-ews-connection.c:2528
+#: ../src/server/e-ews-connection.c:885
+#, c-format
+msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
+msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
+msgstr[0] ""
+"Server Exchange je zaneprázdněný, čeká se na opakování (%d:%02d minutu)"
+msgstr[1] ""
+"Server Exchange je zaneprázdněný, čeká se na opakování (%d:%02d minuty)"
+msgstr[2] ""
+"Server Exchange je zaneprázdněný, čeká se na opakování (%d:%02d minut)"
+
+#: ../src/server/e-ews-connection.c:891
+#, c-format
+msgid "Exchange server is busy, waiting to retry (%d second)"
+msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
+msgstr[0] "Server Exchange je zaneprázdněný, čeká se na opakování (%d sekundu)"
+msgstr[1] "Server Exchange je zaneprázdněný, čeká se na opakování (%d sekundy)"
+msgstr[2] "Server Exchange je zaneprázdněný, čeká se na opakování (%d sekund)"
+
+#: ../src/server/e-ews-connection.c:2673
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Selhala analýza odpovědi XML na automatické nalezení"
 
-#: ../src/server/e-ews-connection.c:2535
+#: ../src/server/e-ews-connection.c:2680
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Selhalo vyhledání prvku <Autodiscover>"
 
-#: ../src/server/e-ews-connection.c:2546
+#: ../src/server/e-ews-connection.c:2691
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Selhalo vyhledání prvku <Response>"
 
-#: ../src/server/e-ews-connection.c:2557
+#: ../src/server/e-ews-connection.c:2702
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Selhalo vyhledání prvku <Account>"
 
-#: ../src/server/e-ews-connection.c:2582
+#: ../src/server/e-ews-connection.c:2727
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
 "Selhalo vyhledání <ASUrl> a <OABUrl> v odpovědi na automatické nalezení"
 
-#: ../src/server/e-ews-connection.c:2673
+#: ../src/server/e-ews-connection.c:2818
 msgid "URL cannot be NULL"
 msgstr "Adresa URL nesmí být prázdná"
 
-#: ../src/server/e-ews-connection.c:2681
+#: ../src/server/e-ews-connection.c:2826
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "Adresa URL „%s“ není platná"
 
-#: ../src/server/e-ews-connection.c:2771
+#: ../src/server/e-ews-connection.c:2916
 msgid "Email address is missing a domain part"
 msgstr "U e-mailové adresy schází doménová část"
 
-#: ../src/server/e-ews-connection.c:3093
+#: ../src/server/e-ews-connection.c:3238
 msgid "Failed to parse oab XML"
 msgstr "Selhala analýza XML OAB"
 
-#: ../src/server/e-ews-connection.c:3101
+#: ../src/server/e-ews-connection.c:3246
 msgid "Failed to find <OAB> element\n"
 msgstr "Selhalo vyhledání prvku <OAB>\n"
 
-#: ../src/server/e-ews-connection.c:4363
+#: ../src/server/e-ews-connection.c:4551
 msgid "No items found"
 msgstr "Nenalezeny žádné položky"
 
-#: ../src/server/e-ews-folder.c:703
+#: ../src/server/e-ews-folder.c:728
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Nelze přidat složku, nepodporovaný typ složky"
 
-#: ../src/server/e-ews-folder.c:708
+#: ../src/server/e-ews-folder.c:733
 msgid "Cannot add folder, master source not found"
 msgstr "Nelze přidat složku, nenalezen hlavní zdroj"
-
