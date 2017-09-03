@@ -1,5 +1,5 @@
 # Hungarian translation of evolution-ews
-# Copyright (C) 2011-2016 Free Software Foundation, Inc.
+# Copyright (C) 2011-2017 Free Software Foundation, Inc.
 # This file is distributed under the same license as the evolution-ews package.
 #
 # Mézi Zoltán <mezi dot zoltan at gmail dot com>, 2011.
@@ -10,18 +10,19 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=Miscellaneous / EWS Core\n"
-"POT-Creation-Date: 2017-07-10 12:33+0000\n"
-"PO-Revision-Date: 2017-07-30 20:45+0200\n"
-"Last-Translator: Meskó Balázs <meskobalazs@fedoraproject.org>\n"
+"POT-Creation-Date: 2017-08-03 10:44+0000\n"
+"PO-Revision-Date: 2017-09-03 17:40+0200\n"
+"Last-Translator: Balázs Úr <urbalazs@gmail.com>\n"
 "Language-Team: Hungarian <openscope at googlegroups dot com>\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.0.2\n"
+"X-Generator: Lokalize 1.2\n"
 
 #: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:79
+#: ../src/configuration/e-ews-config-lookup.c:145
 msgid "Exchange Web Services"
 msgstr "Exchange webszolgáltatások"
 
@@ -29,60 +30,44 @@ msgstr "Exchange webszolgáltatások"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Exchange kiszolgálók eléréséhez webszolgáltatások használatával"
 
-#: ../src/addressbook/e-book-backend-ews.c:1503
-msgid "The backend does not support bulk additions"
-msgstr "A háttérprogram nem támogatja a tömeges hozzáadásokat"
+#: ../src/addressbook/e-book-backend-ews.c:2957
+#| msgid "Failed to parse oab XML"
+msgid "Failed to update GAL:"
+msgstr "Nem sikerült a GAL frissítése:"
 
-#: ../src/addressbook/e-book-backend-ews.c:1542
-#: ../src/addressbook/e-book-backend-ews.c:1909
+#: ../src/addressbook/e-book-backend-ews.c:3116
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Nem menthető a névjegylista, csak az EWS Server 2010 vagy újabb támogatja"
 
-#: ../src/addressbook/e-book-backend-ews.c:1868
-msgid "The backend does not support bulk modifications"
-msgstr "A háttérprogram nem támogatja a tömeges módosításokat"
-
-#: ../src/addressbook/e-book-backend-ews.c:2083
-msgid "Wait till syncing is done"
-msgstr "Várakozás a szinkronizálás befejeződésére"
-
-#: ../src/addressbook/e-book-backend-ews.c:2566
-#, c-format
-msgid "Processing contacts in %s %d%% completed... "
-msgstr "Kapcsolatok feldolgozása itt: %s %d%%-ban kész… "
-
 #: ../src/addressbook/e-book-backend-ews.c:3209
-msgid "Syncing contacts..."
-msgstr "Névjegyek szinkronizálása…"
+#| msgid "Failed to parse oab XML"
+msgid "Failed to set contact photo:"
+msgstr "Nem sikerült a kapcsolati fénykép beállítása:"
 
-#: ../src/addressbook/e-book-backend-ews.c:3394
-#: ../src/configuration/e-ews-search-user.c:363
-msgid "Searching..."
-msgstr "Keresés…"
+#: ../src/calendar/e-cal-backend-ews.c:1574
+msgctxt "FreeBusyType"
+msgid "Free"
+msgstr "Szabad"
 
-#: ../src/addressbook/e-book-backend-ews.c:4398
-msgid "Requested to delete an unrelated cursor"
-msgstr "Egy kapcsolattal nem rendelkező kurzor törlése lett kérve"
+#: ../src/calendar/e-cal-backend-ews.c:1577
+msgctxt "FreeBusyType"
+msgid "Busy"
+msgstr "Elfoglalt"
 
-#: ../src/calendar/e-cal-backend-ews.c:1346
-msgid "EWS does not support bulk removals"
-msgstr "Az EWS nem támogatja a tömeges módosításokat"
+#: ../src/calendar/e-cal-backend-ews.c:1579
+#| msgid "Out of Office"
+msgctxt "FreeBusyType"
+msgid "Out of Office"
+msgstr "Házon kívül"
 
-#: ../src/calendar/e-cal-backend-ews.c:1525
-msgid "Unknown error"
-msgstr "Ismeretlen hiba"
+#: ../src/calendar/e-cal-backend-ews.c:1581
+msgctxt "FreeBusyType"
+msgid "Tentative"
+msgstr "Feltételes"
 
-#: ../src/calendar/e-cal-backend-ews.c:1774
-msgid "EWS does not support bulk additions"
-msgstr "Az EWS nem támogatja a tömeges hozzáadásokat"
-
-#: ../src/calendar/e-cal-backend-ews.c:1979
-msgid "EWS does not support bulk modifications"
-msgstr "Az EWS nem támogatja a tömeges módosításokat"
-
-#: ../src/calendar/e-cal-backend-ews.c:2433
+#: ../src/calendar/e-cal-backend-ews.c:3162
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Nem található a(z) „%s” felhasználó a jelenlévők között"
@@ -421,6 +406,24 @@ msgstr ""
 "A(z) „%s” adatforrás nem az Exchange webszolgáltatások egyik mappáját "
 "képviseli"
 
+#: ../src/configuration/e-ews-config-lookup.c:129
+#, c-format
+#| msgid "_User:"
+msgid "User: %s"
+msgstr "Felhasználó: %s"
+
+#: ../src/configuration/e-ews-config-lookup.c:134
+#, c-format
+#| msgid "_Host URL:"
+msgid "Host URL: %s"
+msgstr "Gép URL: %s"
+
+#: ../src/configuration/e-ews-config-lookup.c:139
+#, c-format
+#| msgid "OAB U_RL:"
+msgid "OAB URL: %s"
+msgstr "OAB URL: %s"
+
 #: ../src/configuration/e-ews-config-utils.c:574
 msgid "Folder"
 msgstr "Mappa"
@@ -584,7 +587,7 @@ msgid "Edit EWS folder permissions..."
 msgstr "EWS mappajogosultságok szerkesztése…"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:952
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:636
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:669
 msgid "Account:"
 msgstr "Fiók:"
 
@@ -732,6 +735,10 @@ msgstr[1] "100-nál több felhasználó található, de csak az első %d jelenik
 msgid "Search for a user"
 msgstr "Felhasználó keresése"
 
+#: ../src/configuration/e-ews-search-user.c:363
+msgid "Searching..."
+msgstr "Keresés…"
+
 #: ../src/configuration/e-ews-search-user.c:435
 msgid "E-mail"
 msgstr "E-mail"
@@ -744,8 +751,8 @@ msgstr "Válasszon EWS felhasználót…"
 msgid "_Search:"
 msgstr "_Keresés:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:95
-#: ../src/server/e-ews-folder.c:748
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
+#: ../src/server/e-ews-folder.c:773
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "A mappa nem vehető fel, mert már létezik „%s” néven"
@@ -753,28 +760,33 @@ msgstr "A mappa nem vehető fel, mert már létezik „%s” néven"
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
 #. * Example result: "Mailbox — John Smith"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:105
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:107
 #, c-format
 msgctxt "ForeignFolder"
 msgid "Mailbox — %s"
 msgstr "%s postafiókja"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:273
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:275
 msgid "Cannot test foreign folder availability while in offline mode"
 msgstr ""
 "Kapcsolat nélküli módban nem lehet tesztelni a távoli mappa elérhetőségét"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:298
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:300
 #, c-format
 msgid "User “%s” was not found on the server"
 msgstr "„%s” felhasználó nem található a kiszolgálón"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:334
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:336
 #, c-format
 msgid "User name “%s” is ambiguous, specify it more precisely, please"
 msgstr "A(z) „%s” felhasználónév nem egyértelmű, adja meg pontosabban"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:356
+#. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:371
+msgid "Availability"
+msgstr "Elérhetőség"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:386
 #, c-format
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
@@ -783,7 +795,7 @@ msgstr ""
 "A(z) „%s” mappa nem található. Vagy nem létezik, vagy nincs jogosultsága "
 "elérni."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:374
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:405
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Nem vehető fel a mappa, nem határozható meg a mappa típusa"
 
@@ -792,66 +804,73 @@ msgstr "Nem vehető fel a mappa, nem határozható meg a mappa típusa"
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:419
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:450
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s – %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:513
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:544
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:754
 msgid "Inbox"
 msgstr "Beérkezett üzenetek"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:515
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:722
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:546
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:755
 msgid "Contacts"
 msgstr "Névjegyek"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:517
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:723
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:548
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:756
 msgid "Calendar"
 msgstr "Naptár"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:519
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:724
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:550
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:757
+#| msgctxt "PermissionsLevel"
+#| msgid "Free/Busy time"
+msgid "Free/Busy as Calendar"
+msgstr "Időbeosztás naptárként"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:552
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:758
 msgid "Memos"
 msgstr "Feljegyzések"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:521
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:725
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:554
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:759
 msgid "Tasks"
 msgstr "Feladatok"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:538
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:571
 #, c-format
 msgid "Testing availability of folder “%s” of user “%s”, please wait..."
 msgstr ""
 "„%2$s” felhasználó „%1$s” mappájának elérhetőségének tesztelése, kis "
 "türelmet…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:615
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:648
 msgid "Subscribe to folder of other EWS user..."
 msgstr "Feliratkozás más EWS felhasználó mappájára…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:666
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:699
 msgid "User"
 msgstr "Felhasználó"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:673
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:706
 msgid "_User:"
 msgstr "_Felhasználó:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:688
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
 msgid "C_hoose..."
 msgstr "_Válasszon…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:704
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:737
 msgid "_Folder name:"
 msgstr "_Mappa neve:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:734
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:768
 msgid "Include _subfolders"
 msgstr "_Almappákat beleértve"
 
@@ -891,11 +910,11 @@ msgstr "_Keresés…"
 msgid "Authentication"
 msgstr "Hitelesítés"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:388
+#: ../src/configuration/e-mail-config-ews-backend.c:399
 msgid "Host URL cannot be empty"
 msgstr "A gép URL nem lehet üres"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:393
+#: ../src/configuration/e-mail-config-ews-backend.c:404
 msgid "User name cannot be empty"
 msgstr "A felhasználónév nem lehet üres"
 
@@ -961,12 +980,12 @@ msgstr "A megbízott láthatja s_zemélyes elemeimet"
 msgid "Retrieving current user permissions, please wait..."
 msgstr "Aktuális felhasználó jogosultságainak lekérése, kis türelmet…"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1025
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1645
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1026
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1648
 msgid "Delegates"
 msgstr "Meghatalmazottak"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1049
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1050
 msgid ""
 "Delegates can send items on your behalf, including creating and responding "
 "to meeting requests. If you want to grant folder permissions without giving "
@@ -979,7 +998,7 @@ msgstr ""
 "zárja be ezt az ablakot, kattintson a jobb egérgombbal a mappán, válassza a "
 "Jogosultságok elemet, és módosítsa az ottani beállításokat."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1099
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1100
 msgid ""
 "Deliver meeting requests addressed to me and responses to meeting requests "
 "where I am the organizer to:"
@@ -988,7 +1007,7 @@ msgstr ""
 "adott válaszok kézbesítése:"
 
 #. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1109
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1110
 msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
@@ -996,20 +1015,20 @@ msgstr ""
 "Csak megbízottaimnak, de _küldjön másolatot a\n"
 "találkozókérésekről és válaszokról (javasolt)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1116
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1117
 msgid "My d_elegates only"
 msgstr "_Csak megbízottaimnak"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1123
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1124
 msgid "My delegates a_nd me"
 msgstr "Megbízottaimnak és _nekem"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1717
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1720
 msgid "Retrieving “Delegates” settings"
 msgstr "„Megbízottak” beállításainak lekérése"
 
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:193
-#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:255
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:257
 msgid "EWS Settings"
 msgstr "EWS-beállítások"
 
@@ -1037,12 +1056,12 @@ msgstr "Válasszon _címlistát:"
 msgid "Fetch List"
 msgstr "Lista letöltése"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:394
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:929
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:396
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:933
 msgid "Out of Office"
 msgstr "Házon kívül"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:410
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:412
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
@@ -1050,55 +1069,55 @@ msgstr ""
 "Az alább megadott üzenetek automatikusan elküldésre kerülnek minden belső és "
 "külső feladónak, aki Önnek levelet küld."
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:419
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:421
 msgid "Do _not send Out of Office replies"
 msgstr "_Ne küldjön házon kívül válaszokat"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:427
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:429
 msgid "_Send Out of Office replies"
 msgstr "_Házon kívül válaszok küldése"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:435
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:437
 msgid "Send Out of Office replies only _during this time period:"
 msgstr "Házon _kívül válaszok küldése csak ebben az időszakban:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:455
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:457
 msgid "_From:"
 msgstr "_Feladó:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:480
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:482
 msgid "_To:"
 msgstr "_Címzett:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:505
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:507
 msgid "I_nternal:"
 msgstr "B_első:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:514
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:516
 msgid "Message to be sent within the organization"
 msgstr "A szervezeten belülre küldendő üzenet"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:542
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:544
 msgid "E_xternal:"
 msgstr "_Külső:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:550
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:552
 msgid "Message to be sent outside the organization"
 msgstr "A szervezeten kívülre küldendő üzenet"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:560
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:562
 msgid "Do not reply to senders outside the organization"
 msgstr "Ne válaszoljon a szervezeten kívüli feladóknak"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:563
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:565
 msgid "Reply only to known senders outside the organization"
 msgstr "Válasz csak a szervezeten kívüli ismert feladóknak"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:566
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:568
 msgid "Reply to any sender outside the organization"
 msgstr "Válasz a szervezeten kívüli összes feladónak"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:1001
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:1005
 msgid "Retrieving “Out of Office” settings"
 msgstr "„Házon kívül” állapot beállításainak lekérése"
 
@@ -1139,12 +1158,12 @@ msgstr "Művelet megszakítva"
 msgid "Authentication failed"
 msgstr "A hitelesítés sikertelen"
 
-#: ../src/server/e-ews-connection.c:821
+#: ../src/server/e-ews-connection.c:822
 #, c-format
 msgid "No response: %s"
 msgstr "Nincs válasz: %s"
 
-#: ../src/server/e-ews-connection.c:884
+#: ../src/server/e-ews-connection.c:885
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -1155,7 +1174,7 @@ msgstr[1] ""
 "Az Exchange kiszolgáló elfoglalt, várakozás az újrapróbálkozásra (%d:%02d "
 "perc)"
 
-#: ../src/server/e-ews-connection.c:890
+#: ../src/server/e-ews-connection.c:891
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -1166,62 +1185,63 @@ msgstr[1] ""
 "Az Exchange kiszolgáló elfoglalt, várakozás az újrapróbálkozásra (%d "
 "másodperc)"
 
-#: ../src/server/e-ews-connection.c:2652
+#: ../src/server/e-ews-connection.c:2673
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Az automatikus felderítésre adott válasz XML feldolgozása sikertelen"
 
-#: ../src/server/e-ews-connection.c:2659
+#: ../src/server/e-ews-connection.c:2680
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Nem sikerült megtalálni az <Autodiscover> elemet"
 
-#: ../src/server/e-ews-connection.c:2670
+#: ../src/server/e-ews-connection.c:2691
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Nem sikerült megtalálni a <Response> elemet"
 
-#: ../src/server/e-ews-connection.c:2681
+#: ../src/server/e-ews-connection.c:2702
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Nem sikerült megtalálni az <Account> elemet"
 
-#: ../src/server/e-ews-connection.c:2706
+#: ../src/server/e-ews-connection.c:2727
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
 "Az <ASUrl> és <OABUrl> nem található az automatikus felderítésre adott "
 "válaszban"
 
-#: ../src/server/e-ews-connection.c:2797
+#: ../src/server/e-ews-connection.c:2818
 msgid "URL cannot be NULL"
 msgstr "Az URL nem lehet NULL"
 
-#: ../src/server/e-ews-connection.c:2805
+#: ../src/server/e-ews-connection.c:2826
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "A(z) „%s” URL nem érvényes"
 
-#: ../src/server/e-ews-connection.c:2895
+#: ../src/server/e-ews-connection.c:2916
 msgid "Email address is missing a domain part"
 msgstr "Az e-mail címből hiányzik a tartomány rész"
 
-#: ../src/server/e-ews-connection.c:3217
+#: ../src/server/e-ews-connection.c:3238
 msgid "Failed to parse oab XML"
 msgstr "Nem sikerült feldolgozni az oab XML-t"
 
-#: ../src/server/e-ews-connection.c:3225
+#: ../src/server/e-ews-connection.c:3246
 msgid "Failed to find <OAB> element\n"
 msgstr "Nem sikerült megtalálni az <OAB> elemet\n"
 
-#: ../src/server/e-ews-connection.c:4530
+#: ../src/server/e-ews-connection.c:4551
 msgid "No items found"
 msgstr "Nem találhatók elemek"
 
-#: ../src/server/e-ews-folder.c:703
+#: ../src/server/e-ews-folder.c:728
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Nem vehető fel a mappa, nem támogatott a mappa típusa"
 
-#: ../src/server/e-ews-folder.c:708
+#: ../src/server/e-ews-folder.c:733
 msgid "Cannot add folder, master source not found"
 msgstr "Nem vehető fel a mappa, nem található az elsődleges forrás"
+
