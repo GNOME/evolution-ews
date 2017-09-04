@@ -1,3 +1,17 @@
+Evolution-EWS 3.25.92 2017-09-04
+--------------------------------
+
+Bug Fixes:
+	Bug 782826 - Allow adding Free/Busy as a foreign Calendar ][ (Milan Crha)
+	Bug 786095 - Replies to meeting requests with RSVP=false (Milan Crha)
+
+Miscellaneous:
+	Adapt to rename of evolution.desktop to org.gnome.Evolution.desktop (Milan Crha)
+
+Translations:
+	Marek Cernocky (cs)
+	Balázs Úr (hu)
+
 Evolution-EWS 3.25.91 2017-08-21
 --------------------------------
 
