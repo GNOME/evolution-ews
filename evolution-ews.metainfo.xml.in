@@ -2,7 +2,7 @@
 <!-- Copyright 2014 Evolution Team <evolution-hackers@gnome.org> -->
 <component type="addon">
 	<id>evolution-ews</id>
-	<extends>org.gnome.Evolution.desktop</extends>
+	<extends>evolution.desktop</extends>
 	<_name>Exchange Web Services</_name>
 	<_summary>For accessing Exchange servers using Web Services</_summary>
 	<url type="homepage">https://live.gnome.org/Apps/Evolution</url>
