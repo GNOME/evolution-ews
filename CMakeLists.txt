@@ -42,8 +42,8 @@ add_definitions(-DGLIB_VERSION_MIN_REQUIRED=${glib_encoded_version})
 add_definitions(-DGDK_VERSION_MIN_REQUIRED=${gdk_encoded_version})
 add_definitions(-DSOUP_VERSION_MIN_REQUIRED=${soup_encoded_version})
 
-set(eds_minimum_version ${PROJECT_VERSION})
-set(evo_minimum_version ${PROJECT_VERSION})
+set(eds_minimum_version ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
+set(evo_minimum_version ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 set(mspack_minimum_version 0.4)
 
 # Load modules from the source tree
