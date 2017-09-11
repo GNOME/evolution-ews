@@ -1255,10 +1255,11 @@ ews_folder_is_of_type (CamelFolder *folder,
 }
 
 static gboolean
-ews_move_to_junk_folder (CamelFolder *folder,
-                         const GSList *junk_uids,
-                         GCancellable *cancellable,
-                         GError **error)
+ews_move_to_special_folder (CamelFolder *folder,
+			    const GSList *uids,
+			    guint32 folder_type,
+			    GCancellable *cancellable,
+			    GError **error)
 {
 	CamelEwsFolder *ews_folder;
 	CamelStore *parent_store;
@@ -1266,7 +1267,7 @@ ews_move_to_junk_folder (CamelFolder *folder,
 	EEwsConnection *cnc;
 	gboolean status = TRUE;
 
-	if (ews_folder_is_of_type (folder, CAMEL_FOLDER_TYPE_JUNK)) {
+	if (ews_folder_is_of_type (folder, folder_type)) {
 		/* cannot move to itself, but treat it as success */
 		return TRUE;
 	}
@@ -1280,17 +1281,16 @@ ews_move_to_junk_folder (CamelFolder *folder,
 
 	cnc = camel_ews_store_ref_connection (ews_store);
 
-	if (junk_uids) {
+	if (uids) {
 		GSList *moved_items = NULL;
 		GError *local_error = NULL;
 		gchar *folder_id;
 
-		folder_id = camel_ews_store_summary_get_folder_id_from_folder_type (
-			ews_store->summary, CAMEL_FOLDER_TYPE_JUNK);
+		folder_id = camel_ews_store_summary_get_folder_id_from_folder_type (ews_store->summary, folder_type);
 
 		status = e_ews_connection_move_items_in_chunks_sync (
 			cnc, EWS_PRIORITY_MEDIUM, folder_id, FALSE,
-			junk_uids, &moved_items, cancellable, &local_error);
+			uids, &moved_items, cancellable, &local_error);
 
 		if (!status && local_error && local_error->code == EWS_CONNECTION_ERROR_ITEMNOTFOUND) {
 			/* If move failed due to the item not found, ignore the error,
@@ -1308,7 +1308,7 @@ ews_move_to_junk_folder (CamelFolder *folder,
 
 			changes = camel_folder_change_info_new ();
 
-			for (iter = junk_uids, items_iter = moved_items; iter && items_iter; iter = g_slist_next (iter), items_iter = g_slist_next (items_iter)) {
+			for (iter = uids, items_iter = moved_items; iter && items_iter; iter = g_slist_next (iter), items_iter = g_slist_next (items_iter)) {
 				const gchar *uid = iter->data;
 				EEwsItem *item = items_iter->data;
 
@@ -1354,8 +1354,9 @@ ews_synchronize_sync (CamelFolder *folder,
 	CamelEwsStore *ews_store;
 	CamelFolderSummary *folder_summary;
 	GPtrArray *uids;
-	GSList *mi_list = NULL, *deleted_uids = NULL, *junk_uids = NULL;
+	GSList *mi_list = NULL, *deleted_uids = NULL, *junk_uids = NULL, *inbox_uids = NULL;
 	gint mi_list_len = 0;
+	gboolean is_junk_folder;
 	gboolean success = TRUE;
 	gint i;
 	GError *local_error = NULL;
@@ -1378,6 +1379,8 @@ ews_synchronize_sync (CamelFolder *folder,
 		return TRUE;
 	}
 
+	is_junk_folder = ews_folder_is_of_type (folder, CAMEL_FOLDER_TYPE_JUNK);
+
 	for (i = 0; success && i < uids->len; i++) {
 		guint32 flags_changed, flags_set;
 		CamelMessageInfo *mi = camel_folder_summary_get (folder_summary, uids->pdata[i]);
@@ -1399,11 +1402,16 @@ ews_synchronize_sync (CamelFolder *folder,
 				deleted_uids = g_slist_prepend (deleted_uids, (gpointer) camel_pstring_strdup (uids->pdata[i]));
 			else if (flags_set & CAMEL_MESSAGE_JUNK)
 				junk_uids = g_slist_prepend (junk_uids, (gpointer) camel_pstring_strdup (uids->pdata[i]));
+			else if (is_junk_folder && (flags_set & CAMEL_MESSAGE_NOTJUNK) != 0)
+				inbox_uids = g_slist_prepend (inbox_uids, (gpointer) camel_pstring_strdup (uids->pdata[i]));
 		} else if (flags_set & CAMEL_MESSAGE_DELETED) {
 			deleted_uids = g_slist_prepend (deleted_uids, (gpointer) camel_pstring_strdup (uids->pdata[i]));
 			g_clear_object (&mi);
 		} else if (flags_set & CAMEL_MESSAGE_JUNK) {
 			junk_uids = g_slist_prepend (junk_uids, (gpointer) camel_pstring_strdup (uids->pdata[i]));
+			g_clear_object (&mi);
+		} else if (is_junk_folder && (flags_set & CAMEL_MESSAGE_NOTJUNK) != 0) {
+			inbox_uids = g_slist_prepend (inbox_uids, (gpointer) camel_pstring_strdup (uids->pdata[i]));
 			g_clear_object (&mi);
 		} else if ((flags_set & CAMEL_MESSAGE_FOLDER_FLAGGED) != 0) {
 			/* OK, the change must have been the labels */
@@ -1430,8 +1438,12 @@ ews_synchronize_sync (CamelFolder *folder,
 	g_slist_free_full (deleted_uids, (GDestroyNotify) camel_pstring_free);
 
 	if (junk_uids && success)
-		success = ews_move_to_junk_folder (folder, junk_uids, cancellable, &local_error);
+		success = ews_move_to_special_folder (folder, junk_uids, CAMEL_FOLDER_TYPE_JUNK, cancellable, &local_error);
 	g_slist_free_full (junk_uids, (GDestroyNotify) camel_pstring_free);
+
+	if (inbox_uids && success)
+		success = ews_move_to_special_folder (folder, inbox_uids, CAMEL_FOLDER_TYPE_INBOX, cancellable, &local_error);
+	g_slist_free_full (inbox_uids, (GDestroyNotify) camel_pstring_free);
 
 	camel_folder_summary_save (folder_summary, NULL);
 	camel_folder_summary_free_array (uids);
