@@ -447,7 +447,26 @@ ews_utils_gather_server_user_flags (ESoapMessage *msg,
 		if (ews_utils_is_system_user_flag (n))
 			continue;
 
-		out_user_flags = g_slist_prepend (out_user_flags, g_strdup (n));
+		if (strchr (n, '_')) {
+			GString *str = g_string_sized_new (strlen (n));
+
+			while (*n) {
+				if (*n == '_') {
+					if (n[1] == '_')
+						g_string_append_c (str, '_');
+					else
+						g_string_append_c (str, ' ');
+				} else {
+					g_string_append_c (str, *n);
+				}
+
+				n++;
+			}
+
+			out_user_flags = g_slist_prepend (out_user_flags, g_string_free (str, FALSE));
+		} else {
+			out_user_flags = g_slist_prepend (out_user_flags, g_strdup (n));
+		}
 	}
 
 	camel_message_info_property_unlock (mi);
@@ -487,7 +506,33 @@ ews_utils_merge_server_user_flags (EEwsItem *item,
 
 	/* now transfer over all the categories */
 	for (p = e_ews_item_get_categories (item); p; p = p->next) {
-		camel_message_info_set_user_flag (mi, ews_utils_rename_label (p->data, TRUE), TRUE);
+		const gchar *flag = ews_utils_rename_label (p->data, 1);
+		gchar *underscored = NULL;
+
+		if (!flag || !*flag)
+			continue;
+
+		if (strchr (flag, ' ')) {
+			GString *str;
+
+			str = g_string_sized_new (strlen (flag) + 16);
+
+			while (*flag) {
+				if (*flag == '_')
+					g_string_append_c (str, '_');
+
+				g_string_append_c (str, *flag == ' ' ? '_' : *flag);
+
+				flag++;
+			}
+
+			underscored = g_string_free (str, FALSE);
+			flag = underscored;
+		}
+
+		camel_message_info_set_user_flag (mi, flag, TRUE);
+
+		g_free (underscored);
 	}
 
 	camel_message_info_thaw_notifications (mi);
