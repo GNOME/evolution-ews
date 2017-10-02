@@ -1,3 +1,12 @@
+Evolution-EWS 3.26.1 2017-10-02
+-------------------------------
+
+Bug Fixes:
+	Bug 786208 - Already opened message box doesn’t show new emails (Milan Crha)
+
+Miscellaneous:
+	Escape spaces in server Categories for message Labels (Milan Crha)
+
 Evolution-EWS 3.26.0 2017-09-11
 -------------------------------
 
