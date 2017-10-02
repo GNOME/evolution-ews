@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.1)
 cmake_policy(VERSION 3.1)
 
 project(evolution-ews
-	VERSION 3.24.6
+	VERSION 3.24.7
 	LANGUAGES C)
 set(PROJECT_BUGREPORT "http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-ews")
 
@@ -42,7 +42,7 @@ add_definitions(-DGLIB_VERSION_MIN_REQUIRED=${glib_encoded_version})
 add_definitions(-DGDK_VERSION_MIN_REQUIRED=${gdk_encoded_version})
 add_definitions(-DSOUP_VERSION_MIN_REQUIRED=${soup_encoded_version})
 
-set(eds_minimum_version 3.24.7)
+set(eds_minimum_version ${PROJECT_VERSION})
 set(evo_minimum_version ${PROJECT_VERSION})
 set(mspack_minimum_version 0.4)
 
