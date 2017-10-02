@@ -26,6 +26,8 @@
 
 #include "camel-ews-message-info.h"
 
+#define CAMEL_EWS_SUMMARY_VERSION (2)
+
 /* Standard GObject macros */
 #define CAMEL_TYPE_EWS_SUMMARY \
 	(camel_ews_summary_get_type ())
@@ -78,6 +80,7 @@ gboolean
 					 CamelMimeMessage *message);
 void	ews_summary_clear		(CamelFolderSummary *summary,
 					 gboolean uncache);
+gint32	camel_ews_summary_get_version	(CamelEwsSummary *ews_summary);
 void	camel_ews_summary_set_sync_state(CamelEwsSummary *ews_summary,
 					 const gchar *sync_state);
 gchar *	camel_ews_summary_dup_sync_state(CamelEwsSummary *ews_summary);

@@ -1748,6 +1748,7 @@ static void
 sync_created_items (CamelEwsFolder *ews_folder,
                     EEwsConnection *cnc,
                     GSList *created_items,
+		    GHashTable *updating_summary_uids,
 		    CamelFolderChangeInfo *change_info,
                     GCancellable *cancellable,
                     GError **error)
@@ -1775,6 +1776,20 @@ sync_created_items (CamelEwsFolder *ews_folder,
 				e_ews_item_get_subject (item) ? e_ews_item_get_subject (item) : "???");
 			g_object_unref (item);
 			continue;
+		}
+
+		if (updating_summary_uids) {
+			const gchar *pooled_uid = camel_pstring_strdup (id->id);
+			gboolean known;
+
+			known = g_hash_table_remove (updating_summary_uids, pooled_uid);
+
+			camel_pstring_free (pooled_uid);
+
+			if (known) {
+				g_object_unref (item);
+				continue;
+			}
 		}
 
 		/* created_msg_ids are items other than generic item. We fetch them
@@ -1938,6 +1953,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 	CamelFolderSummary *folder_summary;
 	CamelEwsFolder *ews_folder;
 	CamelEwsFolderPrivate *priv;
+	GHashTable *updating_summary_uids = NULL;
 	EEwsConnection *cnc;
 	CamelEwsStore *ews_store;
 	const gchar *full_name;
@@ -1979,6 +1995,10 @@ ews_refresh_info_sync (CamelFolder *folder,
 
 	camel_operation_push_message (cancellable, _("Refreshing folder “%s”"), camel_folder_get_display_name (folder));
 
+	if (camel_ews_summary_get_version (CAMEL_EWS_SUMMARY (folder_summary)) < CAMEL_EWS_SUMMARY_VERSION) {
+		updating_summary_uids = camel_folder_summary_get_hash (folder_summary);
+	}
+
 	/* Sync folder items does not return the fields ToRecipients,
 	 * CCRecipients. With the item_type unknown, its not possible
 	 * to fetch the right properties which are valid for an item type.
@@ -2005,6 +2025,10 @@ ews_refresh_info_sync (CamelFolder *folder,
 			g_free (sync_state);
 			sync_state = NULL;
 			ews_folder_forget_all_mails (ews_folder);
+			if (updating_summary_uids) {
+				g_hash_table_destroy (updating_summary_uids);
+				updating_summary_uids = NULL;
+			}
 
 			e_ews_connection_sync_folder_items_sync (cnc, EWS_PRIORITY_MEDIUM, NULL, id, "IdOnly", NULL, EWS_MAX_FETCH_COUNT,
 				&sync_state, &includes_last_item, &items_created, &items_updated, &items_deleted,
@@ -2020,7 +2044,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 			camel_ews_utils_sync_deleted_items (ews_folder, items_deleted, change_info);
 
 		if (items_created)
-			sync_created_items (ews_folder, cnc, items_created, change_info, cancellable, &local_error);
+			sync_created_items (ews_folder, cnc, items_created, updating_summary_uids, change_info, cancellable, &local_error);
 
 		if (local_error) {
 			if (items_updated) {
@@ -2058,6 +2082,32 @@ ews_refresh_info_sync (CamelFolder *folder,
 			}
 		}
 	} while (!local_error && !includes_last_item && !g_cancellable_is_cancelled (cancellable));
+
+	if (updating_summary_uids) {
+		if (!local_error && !g_cancellable_is_cancelled (cancellable) &&
+		    g_hash_table_size (updating_summary_uids) > 0) {
+			GHashTableIter iter;
+			gpointer key;
+			GList *removed_uids = NULL;
+
+			g_hash_table_iter_init (&iter, updating_summary_uids);
+			while (g_hash_table_iter_next (&iter, &key, NULL)) {
+				const gchar *uid = key;
+
+				camel_folder_change_info_remove_uid (change_info, uid);
+				ews_data_cache_remove (ews_folder->cache, "cur", uid, NULL);
+
+				removed_uids = g_list_prepend (removed_uids, (gpointer) uid);
+			}
+
+			camel_folder_summary_remove_uids (folder_summary, removed_uids);
+
+			g_list_free (removed_uids);
+		}
+
+		g_hash_table_destroy (updating_summary_uids);
+		updating_summary_uids = NULL;
+	}
 
 	camel_operation_pop_message (cancellable);
 
