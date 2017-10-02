@@ -34,8 +34,6 @@
 #include "camel-ews-folder.h"
 #include "camel-ews-summary.h"
 
-#define CAMEL_EWS_SUMMARY_VERSION (1)
-
 #define EXTRACT_FIRST_DIGIT(val) part ? val=strtoul (part, &part, 10) : 0;
 #define EXTRACT_DIGIT(val) part++; part ? val=strtoul (part, &part, 10) : 0;
 
@@ -122,13 +120,18 @@ summary_header_load (CamelFolderSummary *s,
 	if (!CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_load (s, mir))
 		return FALSE;
 
+	ews_summary->priv->version = 0;
+
 	part = mir->bdata;
 
 	if (part)
 		EXTRACT_FIRST_DIGIT (ews_summary->priv->version);
 
-	if (part && part++ && strcmp (part, "(null)")) {
+	if (part && part++ && strcmp (part, "(null)") &&
+	    ews_summary->priv->version >= CAMEL_EWS_SUMMARY_VERSION) {
 		camel_ews_summary_set_sync_state (ews_summary, part);
+	} else {
+		camel_ews_summary_set_sync_state (ews_summary, NULL);
 	}
 
 	return TRUE;
@@ -151,6 +154,8 @@ summary_header_save (CamelFolderSummary *s,
 	fir->bdata = g_strdup_printf ("%d %s", CAMEL_EWS_SUMMARY_VERSION, sync_state);
 
 	g_free (sync_state);
+
+	ews_summary->priv->version = CAMEL_EWS_SUMMARY_VERSION;
 
 	return fir;
 
@@ -275,6 +280,14 @@ ews_summary_clear (CamelFolderSummary *summary,
 		camel_folder_changed (camel_folder_summary_get_folder (summary), changes);
 	camel_folder_change_info_free (changes);
 	camel_folder_summary_free_array (known_uids);
+}
+
+gint32
+camel_ews_summary_get_version (CamelEwsSummary *ews_summary)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SUMMARY (ews_summary), -1);
+
+	return ews_summary->priv->version;
 }
 
 void
