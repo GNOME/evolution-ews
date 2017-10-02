@@ -1,3 +1,17 @@
+Evolution-EWS 3.24.6 2017-10-02
+-------------------------------
+
+Bug Fixes:
+	Bug 786208 - Already opened message box doesn’t show new emails (Milan Crha)
+
+Miscellaneous:
+	Bump dependency requirement on evolution-data-server (Milan Crha)
+
+Translations:
+	Rafael Fontenelle (pt_BR)
+	Anders Jonsson (sv)
+	Marek Cernocky (cs)
+
 Evolution-EWS 3.24.5 2017-08-07
 -------------------------------
 
