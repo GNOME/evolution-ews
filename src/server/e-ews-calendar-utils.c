@@ -224,7 +224,7 @@ e_ews_cal_utils_set_time (ESoapMessage *msg,
 	g_return_if_fail (tt != NULL);
 
 	if (with_timezone) {
-		if (tt->is_utc || !tt->zone || tt->zone == icaltimezone_get_utc_timezone ()) {
+		if (icaltime_is_utc (*tt) || !tt->zone || tt->zone == icaltimezone_get_utc_timezone ()) {
 			tz_ident = g_strdup ("Z");
 		} else {
 			gint offset, is_daylight, hrs, mins;

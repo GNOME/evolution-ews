@@ -1561,9 +1561,7 @@ ecb_ews_get_changes_sync (ECalMetaBackend *meta_backend,
 					}
 
 					fb.start.zone = utc_zone;
-					fb.start.is_utc = 1;
 					fb.end.zone = utc_zone;
-					fb.end.is_utc = 1;
 
 					icalcomponent_set_dtstart (vevent, fb.start);
 					icalcomponent_set_dtend (vevent, fb.end);
@@ -2089,7 +2087,7 @@ ecb_ews_get_timezone_from_ical_component (ECalBackendEws *cbews,
 			struct icaltimetype dtstart;
 
 			dtstart = icalproperty_get_dtstart (prop);
-			if (dtstart.is_utc)
+			if (icaltime_is_utc (dtstart))
 				tzid = "UTC";
 		}
 	}
