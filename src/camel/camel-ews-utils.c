@@ -478,11 +478,15 @@ static void
 ews_utils_merge_server_user_flags (EEwsItem *item,
                                    CamelMessageInfo *mi)
 {
+	CamelFolderSummary *summary;
 	GSList *list = NULL;
 	const GSList *p;
 	const CamelNamedFlags *user_flags;
 	guint ii, len;
 
+	summary = camel_message_info_ref_summary (mi);
+	if (summary)
+		camel_folder_summary_lock (summary);
 	camel_message_info_property_lock (mi);
 	camel_message_info_freeze_notifications (mi);
 
@@ -537,6 +541,9 @@ ews_utils_merge_server_user_flags (EEwsItem *item,
 
 	camel_message_info_thaw_notifications (mi);
 	camel_message_info_property_unlock (mi);
+	if (summary)
+		camel_folder_summary_unlock (summary);
+	g_clear_object (&summary);
 }
 
 static guint32
