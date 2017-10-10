@@ -800,6 +800,7 @@ ews_folder_maybe_update_mlist (CamelFolder *folder,
 			       const gchar *uid,
 			       CamelMimeMessage *message)
 {
+	CamelFolderSummary *summary;
 	CamelMessageInfo *mi;
 	const gchar *set_mlist;
 
@@ -811,6 +812,9 @@ ews_folder_maybe_update_mlist (CamelFolder *folder,
 	if (!mi)
 		return;
 
+	summary = camel_message_info_ref_summary (mi);
+	if (summary)
+		camel_folder_summary_lock (summary);
 	camel_message_info_property_lock (mi);
 	set_mlist = camel_message_info_get_mlist (mi);
 
@@ -825,7 +829,10 @@ ews_folder_maybe_update_mlist (CamelFolder *folder,
 	}
 
 	camel_message_info_property_unlock (mi);
+	if (summary)
+		camel_folder_summary_unlock (summary);
 
+	g_clear_object (&summary);
 	g_clear_object (&mi);
 }
 
@@ -994,6 +1001,7 @@ msg_update_flags (ESoapMessage *msg,
 	CamelEwsMessageInfo *emi;
 
 	for (iter = mi_list; iter; iter = g_slist_next (iter)) {
+		CamelFolderSummary *summary;
 		guint32 flags_changed, mi_flags;
 		GSList *user_flags;
 
@@ -1003,6 +1011,9 @@ msg_update_flags (ESoapMessage *msg,
 		if (!mi || !emi)
 			continue;
 
+		summary = camel_message_info_ref_summary (mi);
+		if (summary)
+			camel_folder_summary_lock (summary);
 		camel_message_info_property_lock (mi);
 
 		mi_flags = camel_message_info_get_flags (mi);
@@ -1096,6 +1107,9 @@ msg_update_flags (ESoapMessage *msg,
 		camel_message_info_set_folder_flagged (mi, FALSE);
 
 		camel_message_info_property_unlock (mi);
+		if (summary)
+			camel_folder_summary_unlock (summary);
+		g_clear_object (&summary);
 	}
 }
 
@@ -1108,10 +1122,15 @@ ews_suppress_read_receipt (ESoapMessage *msg,
 	CamelMessageInfo *mi;
 
 	for (iter = mi_list; iter; iter = g_slist_next (iter)) {
+		CamelFolderSummary *summary;
+
 		mi = iter->data;
 		if (!mi || (camel_message_info_get_flags (mi) & CAMEL_EWS_MESSAGE_MSGFLAG_RN_PENDING) == 0)
 			continue;
 
+		summary = camel_message_info_ref_summary (mi);
+		if (summary)
+			camel_folder_summary_lock (summary);
 		camel_message_info_property_lock (mi);
 		camel_message_info_freeze_notifications (mi);
 
@@ -1131,6 +1150,9 @@ ews_suppress_read_receipt (ESoapMessage *msg,
 
 		camel_message_info_thaw_notifications (mi);
 		camel_message_info_property_unlock (mi);
+		if (summary)
+			camel_folder_summary_unlock (summary);
+		g_clear_object (&summary);
 	}
 }
 
