@@ -990,7 +990,8 @@ sync_xxx_response_cb (ESoapParameter *subparam,
 			EEwsFolder *folder;
 
 			folder = parser (subparam1);
-			items_created = g_slist_append (items_created, folder);
+			if (folder)
+				items_created = g_slist_append (items_created, folder);
 		}
 
 		for (subparam1 = e_soap_parameter_get_first_child_by_name (node, "Update");
@@ -999,7 +1000,8 @@ sync_xxx_response_cb (ESoapParameter *subparam,
 			EEwsFolder *folder;
 
 			folder = parser (subparam1);
-			items_updated = g_slist_append (items_updated, folder);
+			if (folder)
+				items_updated = g_slist_append (items_updated, folder);
 		}
 		  /* Exchange 2007SP1 introduced <ReadFlagChange> which is basically identical
 		   * to <Update>; no idea why they thought it was a good idea. */
@@ -1009,7 +1011,8 @@ sync_xxx_response_cb (ESoapParameter *subparam,
 			EEwsFolder *folder;
 
 			folder = parser (subparam1);
-			items_updated = g_slist_append (items_updated, folder);
+			if (folder)
+				items_updated = g_slist_append (items_updated, folder);
 		}
 
 		for (subparam1 = e_soap_parameter_get_first_child_by_name (node, "Delete");

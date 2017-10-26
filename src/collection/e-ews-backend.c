@@ -213,6 +213,8 @@ ews_backend_new_child (EEwsBackend *backend,
 
 	fid = e_ews_folder_get_id (folder);
 
+	g_return_val_if_fail (fid != NULL, NULL);
+
 	collection_backend = E_COLLECTION_BACKEND (backend);
 	source = e_collection_backend_new_child (collection_backend, fid->id);
 
@@ -331,7 +333,7 @@ ews_backend_sync_created_folders (EEwsBackend *backend,
 
 		/* If we already know about this folder, skip it. */
 		fid = e_ews_folder_get_id (folder);
-		if (fid->id == NULL)
+		if (!fid || !fid->id)
 			continue;  /* not a valid ID anyway */
 		if (ews_backend_folders_contains (backend, fid->id))
 			continue;
