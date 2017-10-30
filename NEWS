@@ -1,3 +1,17 @@
+Evolution-EWS 3.26.2 2017-10-30
+-------------------------------
+
+Bug Fixes:
+	Bug 781645 - Skip GSettings schema compile when DESTDIR is set (Milan Crha)
+	Bug 788782 - Deadlock when trying to save changes after vFolder's thaw (Milan Crha)
+
+Miscellaneous:
+	Use icaltime_is_utc() instead of icaltimetype::is_utc (Milan Crha)
+	Prevent crash under ews_backend_sync_created_folders() (Milan Crha)
+
+Translations:
+	Daniel Mustieles (es)
+
 Evolution-EWS 3.26.1 2017-10-02
 -------------------------------
 
