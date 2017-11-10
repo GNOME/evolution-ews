@@ -265,6 +265,10 @@ ews_config_lookup_worker_result_from_settings (EConfigLookupWorker *lookup_worke
 
 		if (user && *user) {
 			e_config_lookup_result_simple_add_string (lookup_result,
+				E_SOURCE_EXTENSION_COLLECTION,
+				"identity", user);
+
+			e_config_lookup_result_simple_add_string (lookup_result,
 				E_SOURCE_EXTENSION_AUTHENTICATION,
 				"user", user);
 		}
@@ -273,6 +277,12 @@ ews_config_lookup_worker_result_from_settings (EConfigLookupWorker *lookup_worke
 			e_config_lookup_result_simple_add_string (lookup_result,
 				E_SOURCE_EXTENSION_AUTHENTICATION,
 				"host", suri->host);
+		}
+
+		if (suri && suri->port) {
+			e_config_lookup_result_simple_add_uint (lookup_result,
+				E_SOURCE_EXTENSION_AUTHENTICATION,
+				"port", suri->port);
 		}
 
 		e_config_lookup_add_result (config_lookup, lookup_result);

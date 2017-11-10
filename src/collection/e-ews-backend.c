@@ -200,6 +200,28 @@ ews_backend_update_enabled (ESource *data_source,
 	e_source_set_enabled (data_source, part_enabled);
 }
 
+static void
+ews_backend_sync_authentication (EEwsBackend *ews_backend,
+				 ESource *child_source)
+{
+	ESourceAuthentication *coll_authentication_extension, *child_authentication_extension;
+	ESource *collection_source;
+
+	g_return_if_fail (E_IS_EWS_BACKEND (ews_backend));
+	g_return_if_fail (E_IS_SOURCE (child_source));
+
+	collection_source = e_backend_get_source (E_BACKEND (ews_backend));
+
+	coll_authentication_extension = e_source_get_extension (collection_source, E_SOURCE_EXTENSION_AUTHENTICATION);
+	child_authentication_extension = e_source_get_extension (child_source, E_SOURCE_EXTENSION_AUTHENTICATION);
+
+	e_source_authentication_set_host (child_authentication_extension,
+		e_source_authentication_get_host (coll_authentication_extension));
+
+	e_source_authentication_set_user (child_authentication_extension,
+		e_source_authentication_get_user (coll_authentication_extension));
+}
+
 static ESource *
 ews_backend_new_child (EEwsBackend *backend,
                        EEwsFolder *folder)
@@ -241,6 +263,7 @@ ews_backend_new_child (EEwsBackend *backend,
 	extension = e_source_get_extension (source, extension_name);
 	e_source_backend_set_backend_name (
 		E_SOURCE_BACKEND (extension), "ews");
+	ews_backend_sync_authentication (backend, source);
 	ews_backend_update_enabled (source, e_backend_get_source (E_BACKEND (backend)));
 
 	if (e_ews_folder_get_folder_type (folder) != E_EWS_FOLDER_TYPE_CONTACTS &&
@@ -473,6 +496,7 @@ ews_backend_add_gal_source (EEwsBackend *backend)
 	source = e_collection_backend_new_child (
 		collection_backend, oal_id);
 	e_source_set_enabled (source, can_enable);
+	ews_backend_sync_authentication (backend, source);
 
 	e_source_set_display_name (source, display_name);
 
