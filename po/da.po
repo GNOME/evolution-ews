@@ -22,7 +22,7 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=Miscellaneous / EWS Core\n"
-"POT-Creation-Date: 2017-08-03 10:44+0000\n"
+"POT-Creation-Date: 2017-10-22 13:03+0000\n"
 "PO-Revision-Date: 2017-10-18 15:05+0200\n"
 "Last-Translator: Alan Mortensen <alanmortensen.am@gmail.com>\n"
 "Language-Team: Dansk-gruppen <dansk@dansk-gruppen.dk>\n"
@@ -33,12 +33,14 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 1.8.7.1\n"
 
-#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:79
-#: ../src/configuration/e-ews-config-lookup.c:145
+#: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
+#: ../src/camel/camel-ews-provider.c:79
+#: ../src/configuration/e-ews-config-lookup.c:146
 msgid "Exchange Web Services"
 msgstr "Exchange Web-tjenester"
 
-#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:81
+#: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
+#: ../src/camel/camel-ews-provider.c:81
 msgid "For accessing Exchange servers using Web Services"
 msgstr "For adgang til Exchangeservere der bruger internettjenester"
 
@@ -57,30 +59,30 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Kunne ikke sætte kontaktfoto:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1574
+#: ../src/calendar/e-cal-backend-ews.c:1572
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Ledig"
 
-#: ../src/calendar/e-cal-backend-ews.c:1577
+#: ../src/calendar/e-cal-backend-ews.c:1575
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Optaget"
 
-#: ../src/calendar/e-cal-backend-ews.c:1579
+#: ../src/calendar/e-cal-backend-ews.c:1577
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Ikke på kontoret"
 
-#: ../src/calendar/e-cal-backend-ews.c:1581
+#: ../src/calendar/e-cal-backend-ews.c:1579
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Foreløbig"
 
-#: ../src/calendar/e-cal-backend-ews.c:3162
+#: ../src/calendar/e-cal-backend-ews.c:3187
 #, c-format
 msgid "Cannot find user “%s” between attendees"
-msgstr "Kan ikke finde brugeren \"%s\" mellem deltagerne"
+msgstr "Kan ikke finde brugeren “%s” mellem deltagerne"
 
 #: ../src/camel/camel-ews-folder.c:375
 #, c-format
@@ -105,7 +107,7 @@ msgstr "Kan ikke oprette cachefil"
 #: ../src/camel/camel-ews-folder.c:585 ../src/camel/camel-ews-folder.c:678
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
-msgstr "Kan ikke oprette cachestien \"%s\": %s"
+msgstr "Kan ikke oprette cachestien “%s”: %s"
 
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
@@ -113,19 +115,19 @@ msgstr "Kan ikke oprette cachestien \"%s\": %s"
 #: ../src/camel/camel-ews-folder.c:692
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
-msgstr "Kunne ikke flytte beskedcachefilen fra \"%s\" til \"%s\": %s"
+msgstr "Kunne ikke flytte beskedcachefilen fra “%s” til “%s”: %s"
 
-#: ../src/camel/camel-ews-folder.c:1536
+#: ../src/camel/camel-ews-folder.c:1570
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Kunne ikke indlæse referat for %s"
 
-#: ../src/camel/camel-ews-folder.c:1980
+#: ../src/camel/camel-ews-folder.c:2030
 #, c-format
 msgid "Refreshing folder “%s”"
-msgstr "Opdaterer mappen \"%s\""
+msgstr "Opdaterer mappen “%s”"
 
-#: ../src/camel/camel-ews-folder.c:2126
+#: ../src/camel/camel-ews-folder.c:2210
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Kan ikke udføre handlinger på mappen i frakoblet tilstand"
@@ -240,7 +242,7 @@ msgstr "%s_%d"
 
 #: ../src/camel/camel-ews-store.c:646 ../src/camel/camel-ews-store.c:1249
 msgid "Checking “Out of Office” settings"
-msgstr "Kontrollerer indstillinger for \"Ikke på kontoret\""
+msgstr "Kontrollerer indstillinger for “Ikke på kontoret”"
 
 #: ../src/camel/camel-ews-store.c:1497
 msgid "Updating foreign folder structure"
@@ -266,7 +268,7 @@ msgstr "Kan ikke finde offentlige EWS-mapper"
 #: ../src/camel/camel-ews-store.c:2487
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
-msgstr "Kan ikke oprette mappen \"%s\". Mappen findes allerede"
+msgstr "Kan ikke oprette mappen “%s”. Mappen findes allerede"
 
 #: ../src/camel/camel-ews-store.c:2502
 #, c-format
@@ -278,14 +280,14 @@ msgstr "Overmappe %s findes ikke"
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
 msgstr ""
-"Kan ikke oprette mappen under \"%s\". Den bruges kun for mapper til andre "
+"Kan ikke oprette mappen under “%s”. Den bruges kun for mapper til andre "
 "brugere"
 
 #: ../src/camel/camel-ews-store.c:2522
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
-"Kan ikke oprette mappen under \"%s\". Den bruges kun for offentlige mapper"
+"Kan ikke oprette mappen under “%s”. Den bruges kun for offentlige mapper"
 
 #: ../src/camel/camel-ews-store.c:2626
 #, c-format
@@ -296,12 +298,12 @@ msgstr "Mappe findes ikke"
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
-"Kan ikke fjerne mappen \"%s\". Den bruges kun for mapper til andre brugere"
+"Kan ikke fjerne mappen “%s”. Den bruges kun for mapper til andre brugere"
 
 #: ../src/camel/camel-ews-store.c:2647
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
-msgstr "Kan ikke fjerne mappen \"%s\". Den bruges kun for offentlige mapper"
+msgstr "Kan ikke fjerne mappen “%s”. Den bruges kun for offentlige mapper"
 
 #: ../src/camel/camel-ews-store.c:2803
 #, c-format
@@ -351,12 +353,12 @@ msgstr "Kan ikke abonnere på EWS-mapper i frakoblet tilstand"
 #: ../src/camel/camel-ews-store.c:3262
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
-msgstr "Kan ikke abonnere på mappen \"%s\", ingen offentlig mappe tilgængelig"
+msgstr "Kan ikke abonnere på mappen “%s”, ingen offentlig mappe tilgængelig"
 
 #: ../src/camel/camel-ews-store.c:3272
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
-msgstr "Kan ikke abonnere på mappen \"%s\", mappen blev ikke fundet"
+msgstr "Kan ikke abonnere på mappen “%s”, mappen blev ikke fundet"
 
 #: ../src/camel/camel-ews-store.c:3363
 msgid "Cannot unsubscribe EWS folders in offline mode"
@@ -369,7 +371,7 @@ msgstr "Du skal være på nettet for at fuldføre denne handling"
 
 #: ../src/camel/camel-ews-store.c:3524 ../src/camel/camel-ews-store.c:3561
 msgid "Unsetting the “Out of Office” status"
-msgstr "Nulstil status for \"Ikke på kontoret\""
+msgstr "Nulstil status for “Ikke på kontoret”"
 
 #: ../src/camel/camel-ews-transport.c:318
 #, c-format
@@ -402,13 +404,12 @@ msgstr "Global adresseliste"
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
-"Kunne ikke bestemme en egnet mappeklasse for en ny mappe navngivet \"%s\""
+"Kunne ikke bestemme en egnet mappeklasse for en ny mappe navngivet “%s”"
 
 #: ../src/collection/e-ews-backend.c:988
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
-msgstr ""
-"Datakilden \"%s\" repræsenterer ikke en mappe for Exchange Web Services"
+msgstr "Datakilden “%s” repræsenterer ikke en mappe for Exchange Web Services"
 
 #: ../src/configuration/e-ews-config-lookup.c:129
 #, c-format
@@ -453,15 +454,15 @@ msgstr "Henter mappeliste …"
 #: ../src/configuration/e-ews-config-utils.c:917
 #, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
-msgstr "Kan ikke redigere rettigheder for mappen \"%s\". Vælg en anden mappe."
+msgstr "Kan ikke redigere rettigheder for mappen “%s”. Vælg en anden mappe."
 
 #: ../src/configuration/e-ews-config-utils.c:994
 msgid "Folder Sizes..."
-msgstr "Mappestørrelser ..."
+msgstr "Mappestørrelser …"
 
 #: ../src/configuration/e-ews-config-utils.c:1001
 msgid "Subscribe to folder of other user..."
-msgstr "Abonner på mappe for anden bruger ..."
+msgstr "Abonner på mappe for anden bruger …"
 
 #: ../src/configuration/e-ews-config-utils.c:1010
 #: ../src/configuration/e-ews-config-utils.c:1314
@@ -469,7 +470,7 @@ msgstr "Abonner på mappe for anden bruger ..."
 #: ../src/configuration/e-ews-config-utils.c:1376
 #: ../src/configuration/e-ews-config-utils.c:1407
 msgid "Permissions..."
-msgstr "Rettigheder ..."
+msgstr "Rettigheder …"
 
 #: ../src/configuration/e-ews-config-utils.c:1012
 msgid "Edit EWS folder permissions"
@@ -557,7 +558,7 @@ msgstr "Tilpassede"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:265
 msgid "Writing folder permissions, please wait..."
-msgstr "Skriver mapperettigheder, vent venligst ..."
+msgstr "Skriver mapperettigheder, vent venligst …"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:779
 msgctxt "User"
@@ -586,10 +587,10 @@ msgstr "Rettighedsniveau"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:927
 msgid "Edit EWS folder permissions..."
-msgstr "Rediger EWS-mapperettigheder ..."
+msgstr "Rediger EWS-mapperettigheder …"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:952
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:669
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:674
 msgid "Account:"
 msgstr "Konto:"
 
@@ -699,7 +700,7 @@ msgstr "Mappe synlig"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1311
 msgid "Reading folder permissions, please wait..."
-msgstr "Læser mapperettigheder, vent venligst ..."
+msgstr "Læser mapperettigheder, vent venligst …"
 
 #: ../src/configuration/e-ews-ooo-notificator.c:182
 msgid "Unset on Server"
@@ -707,7 +708,7 @@ msgstr "Nulstil på server"
 
 #: ../src/configuration/e-ews-ooo-notificator.c:183
 msgid "Unset the “Out of Office” status"
-msgstr "Nulstil status for \"Ikke på kontoret\""
+msgstr "Nulstil status for “Ikke på kontoret”"
 
 #: ../src/configuration/e-ews-search-user.c:206
 #, c-format
@@ -741,7 +742,7 @@ msgstr "Søg efter en bruger"
 
 #: ../src/configuration/e-ews-search-user.c:363
 msgid "Searching..."
-msgstr "Søger ..."
+msgstr "Søger …"
 
 #: ../src/configuration/e-ews-search-user.c:435
 msgid "E-mail"
@@ -749,7 +750,7 @@ msgstr "E-post"
 
 #: ../src/configuration/e-ews-search-user.c:472
 msgid "Choose EWS user..."
-msgstr "Vælg EWS-bruger ..."
+msgstr "Vælg EWS-bruger …"
 
 #: ../src/configuration/e-ews-search-user.c:495
 msgid "_Search:"
@@ -759,7 +760,7 @@ msgstr "_Søg:"
 #: ../src/server/e-ews-folder.c:773
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
-msgstr "Kan ikke tilføje mappe. Mappe findes allerede som \"%s\""
+msgstr "Kan ikke tilføje mappe. Mappe findes allerede som “%s”"
 
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
 #. * Example result: "Mailbox — John Smith"
@@ -777,28 +778,28 @@ msgstr "Kan ikke teste tilgængelighed for fremmed mappe i frakoblet tilstand"
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:300
 #, c-format
 msgid "User “%s” was not found on the server"
-msgstr "Brugeren \"%s\" blev ikke fundet på serveren"
+msgstr "Brugeren “%s” blev ikke fundet på serveren"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:336
 #, c-format
 msgid "User name “%s” is ambiguous, specify it more precisely, please"
-msgstr "Brugernavnet \"%s\" er tvetydigt. Angiv det mere præcist"
+msgstr "Brugernavnet “%s” er tvetydigt. Angiv det mere præcist"
 
 #. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:371
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:374
 msgid "Availability"
 msgstr "Tilgængelighed"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:386
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:391
 #, c-format
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
 "permission to access it."
 msgstr ""
-"Mappen \"%s\" blev ikke fundet. Enten findes den ikke, eller du har ikke "
+"Mappen “%s” blev ikke fundet. Enten findes den ikke, eller du har ikke "
 "rettigheder til at tilgå den."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:405
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:410
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Kan ikke tilføje mappe, kan ikke bestemme mappens type"
 
@@ -807,71 +808,70 @@ msgstr "Kan ikke tilføje mappe, kan ikke bestemme mappens type"
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:450
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:455
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:544
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:754
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:549
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:759
 msgid "Inbox"
 msgstr "Indbakke"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:546
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:755
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:551
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:760
 msgid "Contacts"
 msgstr "Kontakter"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:548
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:756
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:553
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:761
 msgid "Calendar"
 msgstr "Kalender"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:550
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:757
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:555
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:762
 msgid "Free/Busy as Calendar"
 msgstr "Ledig/optaget som kalender"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:552
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:758
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:557
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:763
 msgid "Memos"
 msgstr "Memoer"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:554
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:759
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:559
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:764
 msgid "Tasks"
 msgstr "Opgaver"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:571
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:576
 #, c-format
 msgid "Testing availability of folder “%s” of user “%s”, please wait..."
 msgstr ""
-"Tester tilgængelighed for mappen \"%s\" for brugeren \"%s\", vent "
-"venligst ..."
+"Tester tilgængelighed for mappen “%s” for brugeren “%s”, vent venligst …"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:648
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:653
 msgid "Subscribe to folder of other EWS user..."
-msgstr "Abonner på mappe for anden EWS-bruger ..."
+msgstr "Abonner på mappe for anden EWS-bruger …"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:699
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:704
 msgid "User"
 msgstr "Bruger"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:706
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:711
 msgid "_User:"
 msgstr "_Bruger:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:726
 msgid "C_hoose..."
-msgstr "_Vælg ..."
+msgstr "_Vælg …"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:737
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:742
 msgid "_Folder name:"
 msgstr "_Mappenavn:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:768
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:773
 msgid "Include _subfolders"
 msgstr "Inkluder _undermapper"
 
@@ -905,17 +905,17 @@ msgstr "Åbn _postkasse for anden bruger"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:237
 msgid "S_earch..."
-msgstr "_Søger ..."
+msgstr "_Søger …"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:248
 msgid "Authentication"
 msgstr "Godkendelse"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:399
+#: ../src/configuration/e-mail-config-ews-backend.c:400
 msgid "Host URL cannot be empty"
 msgstr "Værtsadressen kan ikke være tom"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:404
+#: ../src/configuration/e-mail-config-ews-backend.c:405
 msgid "User name cannot be empty"
 msgstr "Brugernavn kan ikke være tomt"
 
@@ -969,7 +969,7 @@ msgstr "_Journal"
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:565
 #, c-format
 msgid "Delegate “%s” has the following permissions"
-msgstr "Delegeret \"%s\" har følgende rettigheder"
+msgstr "Delegeret “%s” har følgende rettigheder"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:583
 msgid "Delegate can see my _private items"
@@ -977,7 +977,7 @@ msgstr "Delegeret kan se mine _private punkter"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:905
 msgid "Retrieving current user permissions, please wait..."
-msgstr "Modtager nuværende brugerrettigheder, vent venligst ..."
+msgstr "Modtager nuværende brugerrettigheder, vent venligst …"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1026
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1648
@@ -1027,7 +1027,7 @@ msgstr "Mine delegerede og _mig"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1720
 msgid "Retrieving “Delegates” settings"
-msgstr "Modtager indstillinger for \"Delegerede\""
+msgstr "Modtager indstillinger for “Delegerede”"
 
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:193
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:257
@@ -1121,7 +1121,7 @@ msgstr "Svar alle afsendere uden for organisationen"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:1005
 msgid "Retrieving “Out of Office” settings"
-msgstr "Henter indstillinger for \"Ikke på kontoret\""
+msgstr "Henter indstillinger for “Ikke på kontoret”"
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:1
 msgid "Autodiscovery query failed."
@@ -1129,7 +1129,7 @@ msgstr "Autoopdag-forespørgsel mislykkedes."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:2
 msgid "The reported error was “{0}”."
-msgstr "Den rapporterede fejl var \"{0}\"."
+msgstr "Den rapporterede fejl var “{0}”."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:3
 msgid "Failed to locate offline address books."
@@ -1137,15 +1137,15 @@ msgstr "Kunne ikke finde frakoblede adressebøger."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:4
 msgid "Failed to retrieve “Out of Office” settings."
-msgstr "Indstillinger for \"Ikke på kontoret\" kunne ikke hentes."
+msgstr "Indstillinger for “Ikke på kontoret” kunne ikke hentes."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:5
 msgid "Failed to retrieve “Delegates” settings."
-msgstr "Indstillinger for \"Delegerede\" kunne ikke hentes."
+msgstr "Indstillinger for “Delegerede” kunne ikke hentes."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:6
 msgid "Your Exchange account “{0}” has the status set as “Out of Office”."
-msgstr "Din Exchangekonto \"{0}\" har statussen \"Ikke på kontoret\"."
+msgstr "Din Exchangekonto “{0}” har statussen “Ikke på kontoret”."
 
 #: ../src/server/e-ews-camel-common.c:376
 #, c-format
@@ -1214,7 +1214,7 @@ msgstr "Adresse kan ikke være NULL"
 #: ../src/server/e-ews-connection.c:2826
 #, c-format
 msgid "URL “%s” is not valid"
-msgstr "Adressen \"%s\" er ikke gyldig"
+msgstr "Adressen “%s” er ikke gyldig"
 
 #: ../src/server/e-ews-connection.c:2916
 msgid "Email address is missing a domain part"
@@ -1255,10 +1255,10 @@ msgstr "Kan ikke tilføje mappe. Hovedkilde blev ikke fundet"
 #~ msgstr "Vent til synkroniseringen er færdig"
 
 #~ msgid "Processing contacts in %s %d%% completed... "
-#~ msgstr "Behandling af kontakter i %s %d%% er færdig ... "
+#~ msgstr "Behandling af kontakter i %s %d%% er færdig … "
 
 #~ msgid "Syncing contacts..."
-#~ msgstr "Synkroniserer kontakter ..."
+#~ msgstr "Synkroniserer kontakter …"
 
 #~ msgid "Requested to delete an unrelated cursor"
 #~ msgstr "Anmodede om at slette en urelateret markør"
