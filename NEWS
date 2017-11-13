@@ -1,3 +1,19 @@
+Evolution-EWS 3.27.2 2017-11-13
+-------------------------------
+
+Bug Fixes:
+	Bug 760329 - Try to poke autodiscovery when creating new account (Milan Crha)
+
+Miscellaneous:
+	Prevent crash under ews_backend_sync_created_folders() (Milan Crha)
+	Synchronize authentication extensions before creating an ESource (Milan Crha)
+
+Translations:
+	Daniel Mustieles (es)
+	Alan Mortensen (da)
+	Ask Hjorth Larsen (da)
+	Piotr Drąg (pl)
+
 Evolution-EWS 3.27.1 2017-10-16
 -------------------------------
 
