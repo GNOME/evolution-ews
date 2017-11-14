@@ -313,7 +313,6 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 	icalcomponent *icalcomp, *vcomp;
 	icaltimezone *utc_zone = icaltimezone_get_utc_timezone ();
 	CamelEwsSettings *ews_settings;
-	const gchar *mime_content;
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (cbews), NULL);
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
@@ -468,13 +467,14 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 		icalcomponent_add_component (vcomp, icalcomp);
 	} else {
 		struct icaltimetype dt;
+		const gchar *mime_content;
 		const gchar *tzid;
 		gboolean timezone_set = FALSE;
 
 		mime_content = e_ews_item_get_mime_content (item);
-		vcomp = icalparser_parse_string (mime_content);
+		vcomp = mime_content && *mime_content ? icalparser_parse_string (mime_content) : NULL;
 
-		if (!vcomp && mime_content) {
+		if (!vcomp && mime_content && *mime_content) {
 			const gchar *begin_vcalendar, *end_vcalendar;
 
 			/* Workaround Exchange 2016 error, which returns invalid iCalendar object (without 'END:VCALENDAR'),
@@ -502,7 +502,8 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 		}
 
 		if (!vcomp) {
-			g_warn_if_reached ();
+			if (mime_content)
+				g_warn_if_reached ();
 			return NULL;
 		}
 
