@@ -1317,14 +1317,14 @@ camel_ews_store_password_will_expire_cb (EEwsConnection *connection,
 			if (service_url) {
 				msg = g_strdup_printf (g_dngettext (GETTEXT_PACKAGE,
 					/* Translators: The "%s" is a service URL, provided by the server */
-					_("Password will expire in %d day. Open “%s” to change it."),
-					_("Password will expire in %d days. Open “%s” to change it."),
+					"Password will expire in %d day. Open “%s” to change it.",
+					"Password will expire in %d days. Open “%s” to change it.",
 					in_days),
 					in_days, service_url);
 			} else {
 				msg = g_strdup_printf (g_dngettext (GETTEXT_PACKAGE,
-					_("Password will expire in one day."),
-					_("Password will expire in %d days."),
+					"Password will expire in one day.",
+					"Password will expire in %d days.",
 					in_days),
 					in_days);
 			}
