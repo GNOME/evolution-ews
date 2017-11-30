@@ -118,6 +118,7 @@ enum {
 
 enum {
 	SERVER_NOTIFICATION,
+	PASSWORD_WILL_EXPIRE,
 	LAST_SIGNAL,
 };
 
@@ -776,6 +777,94 @@ e_ews_connection_queue_request (EEwsConnection *cnc,
 	ews_trigger_next_request (cnc);
 }
 
+static void
+ews_connection_expired_password_to_error (const gchar *service_url,
+					  GError **error)
+{
+	if (!error)
+		return;
+
+	if (service_url) {
+		g_set_error (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_PASSWORDEXPIRED,
+			_("Password expired. Change password at “%s”."), service_url);
+	} else {
+		g_set_error_literal (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_PASSWORDEXPIRED,
+			_("Password expired."));
+	}
+}
+
+static gboolean
+ews_connection_check_x_ms_credential_headers (SoupMessage *message,
+					      gint *out_expire_in_days,
+					      gboolean *out_expired,
+					      gchar **out_service_url)
+{
+	gboolean any_found = FALSE;
+	const gchar *header;
+
+	if (!message || !message->response_headers)
+		return FALSE;
+
+	header = soup_message_headers_get_list (message->response_headers, "X-MS-Credential-Service-CredExpired");
+	if (header && g_ascii_strcasecmp (header, "true") == 0) {
+		any_found = TRUE;
+
+		if (out_expired)
+			*out_expired = TRUE;
+	}
+
+	header = soup_message_headers_get_list (message->response_headers, "X-MS-Credentials-Expire");
+	if (header) {
+		gint in_days;
+
+		in_days = g_ascii_strtoll (header, NULL, 10);
+		if (in_days <= 30 && in_days >= 0) {
+			any_found = TRUE;
+
+			if (out_expire_in_days)
+				*out_expire_in_days = in_days;
+		}
+	}
+
+	if (any_found && out_service_url) {
+		header = soup_message_headers_get_list (message->response_headers, "X-MS-Credential-Service-Url");
+
+		*out_service_url = g_strdup (header);
+	}
+
+	return any_found;
+}
+
+static gboolean
+ews_connection_credentials_failed (EEwsConnection *connection,
+				   SoupMessage *message,
+				   GSimpleAsyncResult *simple)
+{
+	gint expire_in_days = 0;
+	gboolean expired = FALSE;
+	gchar *service_url = NULL;
+
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (connection), FALSE);
+	g_return_val_if_fail (SOUP_IS_MESSAGE (message), FALSE);
+	g_return_val_if_fail (G_IS_SIMPLE_ASYNC_RESULT (simple), FALSE);
+
+	if (!ews_connection_check_x_ms_credential_headers (message, &expire_in_days, &expired, &service_url))
+		return FALSE;
+
+	if (expired) {
+		GError *error = NULL;
+
+		ews_connection_expired_password_to_error (service_url, &error);
+		g_simple_async_result_take_error (simple, error);
+	} else if (expire_in_days > 0) {
+		g_signal_emit (connection, signals[PASSWORD_WILL_EXPIRE], 0, expire_in_days, service_url);
+	}
+
+	g_free (service_url);
+
+	return expired;
+}
+
 /* Response callbacks */
 
 static void
@@ -792,7 +881,9 @@ ews_response_cb (SoupSession *session,
 	if (g_cancellable_is_cancelled (enode->cancellable))
 		goto exit;
 
-	if (msg->status_code == SOUP_STATUS_UNAUTHORIZED) {
+	if (ews_connection_credentials_failed (enode->cnc, msg, enode->simple)) {
+		goto exit;
+	} else if (msg->status_code == SOUP_STATUS_UNAUTHORIZED) {
 		g_simple_async_result_set_error (
 			enode->simple,
 			EWS_CONNECTION_ERROR,
@@ -1839,6 +1930,16 @@ e_ews_connection_class_init (EEwsConnectionClass *class)
 		g_cclosure_marshal_VOID__POINTER,
 		G_TYPE_NONE, 1,
 		G_TYPE_POINTER);
+
+	signals[PASSWORD_WILL_EXPIRE] = g_signal_new (
+		"password-will-expire",
+		G_OBJECT_CLASS_TYPE (object_class),
+		G_SIGNAL_RUN_FIRST | G_SIGNAL_DETAILED | G_SIGNAL_ACTION,
+		G_STRUCT_OFFSET (EEwsConnectionClass, password_will_expire),
+		NULL, NULL, NULL,
+		G_TYPE_NONE, 2,
+		G_TYPE_INT,
+		G_TYPE_STRING);
 }
 
 static void
@@ -1981,12 +2082,29 @@ ews_connection_authenticate (SoupSession *sess,
 {
 	EEwsConnection *cnc = data;
 	CamelNetworkSettings *network_settings;
-	gchar *user, *password;
+	gchar *user, *password, *service_url = NULL;
+	gboolean expired = FALSE;
 
 	g_return_if_fail (cnc != NULL);
 
 	if (retrying)
 		e_ews_connection_set_password (cnc, NULL);
+
+	if (ews_connection_check_x_ms_credential_headers (msg, NULL, &expired, &service_url) && expired) {
+		GError *error = NULL;
+
+		ews_connection_expired_password_to_error (service_url, &error);
+
+		if (error)
+			soup_message_set_status_full (msg, SOUP_STATUS_IO_ERROR, error->message);
+
+		g_clear_error (&error);
+		g_free (service_url);
+
+		return;
+	}
+
+	g_free (service_url);
 
 	network_settings = CAMEL_NETWORK_SETTINGS (cnc->priv->settings);
 	user = camel_network_settings_dup_user (network_settings);
@@ -2659,9 +2777,19 @@ autodiscover_response_cb (SoupSession *session,
 	ad->msgs[idx] = NULL;
 
 	if (status != 200) {
-		g_set_error (
-			&error, SOUP_HTTP_ERROR, status,
-			"%d %s", status, msg->reason_phrase);
+		gboolean expired = FALSE;
+		gchar *service_url = NULL;
+
+		if (ews_connection_check_x_ms_credential_headers (msg, NULL, &expired, &service_url) && expired) {
+			ews_connection_expired_password_to_error (service_url, &error);
+		} else {
+			g_set_error (
+				&error, SOUP_HTTP_ERROR, status,
+				"%d %s", status, msg->reason_phrase);
+		}
+
+		g_free (service_url);
+
 		goto failed;
 	}
 
@@ -3214,7 +3342,9 @@ oal_response_cb (SoupSession *soup_session,
 	simple = G_SIMPLE_ASYNC_RESULT (user_data);
 	data = g_simple_async_result_get_op_res_gpointer (simple);
 
-	if (soup_message->status_code != 200) {
+	if (ews_connection_credentials_failed (data->cnc, soup_message, simple)) {
+		goto exit;
+	} else if (soup_message->status_code != 200) {
 		g_simple_async_result_set_error (
 			simple, SOUP_HTTP_ERROR,
 			soup_message->status_code,
@@ -3544,7 +3674,9 @@ oal_download_response_cb (SoupSession *soup_session,
 	simple = G_SIMPLE_ASYNC_RESULT (user_data);
 	data = g_simple_async_result_get_op_res_gpointer (simple);
 
-	if (soup_message->status_code != 200) {
+	if (ews_connection_credentials_failed (data->cnc, soup_message, simple)) {
+		g_unlink (data->cache_filename);
+	} else if (soup_message->status_code != 200) {
 		g_simple_async_result_set_error (
 			simple, SOUP_HTTP_ERROR,
 			soup_message->status_code,

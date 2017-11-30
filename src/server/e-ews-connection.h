@@ -65,6 +65,10 @@ struct _EEwsConnection {
 
 struct _EEwsConnectionClass {
 	GObjectClass parent_class;
+
+	void	(* password_will_expire)	(EEwsConnection *connection,
+						 gint in_days,
+						 const gchar *service_url);
 };
 
 enum {

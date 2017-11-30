@@ -73,6 +73,7 @@ struct _CamelEwsStorePrivate {
 	GMutex connection_lock;
 	gboolean has_ooo_set;
 	CamelEwsStoreOooAlertState ooo_alert_state;
+	gint password_expires_in_days;
 
 	gboolean listen_notifications;
 	guint subscription_key;
@@ -1291,6 +1292,52 @@ ews_connect_sync (CamelService *service,
 }
 
 static void
+camel_ews_store_password_will_expire_cb (EEwsConnection *connection,
+					 gint in_days,
+					 const gchar *service_url,
+					 gpointer user_data)
+{
+	CamelEwsStore *ews_store = user_data;
+
+	g_return_if_fail (CAMEL_IS_EWS_STORE (ews_store));
+
+	if (ews_store->priv->password_expires_in_days < 0 ||
+	    ews_store->priv->password_expires_in_days > in_days) {
+		CamelService *service;
+		CamelSession *session;
+
+		ews_store->priv->password_expires_in_days = in_days;
+
+		service = CAMEL_SERVICE (ews_store);
+		session = camel_service_ref_session (service);
+
+		if (session) {
+			gchar *msg;
+
+			if (service_url) {
+				msg = g_strdup_printf (g_dngettext (GETTEXT_PACKAGE,
+					/* Translators: The "%s" is a service URL, provided by the server */
+					_("Password will expire in %d day. Open “%s” to change it."),
+					_("Password will expire in %d days. Open “%s” to change it."),
+					in_days),
+					in_days, service_url);
+			} else {
+				msg = g_strdup_printf (g_dngettext (GETTEXT_PACKAGE,
+					_("Password will expire in one day."),
+					_("Password will expire in %d days."),
+					in_days),
+					in_days);
+			}
+
+			camel_session_user_alert (session, service, CAMEL_SESSION_ALERT_WARNING, msg);
+
+			g_object_unref (session);
+			g_free (msg);
+		}
+	}
+}
+
+static void
 stop_pending_updates (CamelEwsStore *ews_store)
 {
 	CamelEwsStorePrivate *priv;
@@ -1348,8 +1395,9 @@ ews_store_unset_connection_locked (CamelEwsStore *ews_store)
 			ews_store->priv->listen_notifications = FALSE;
 		}
 
-		e_ews_connection_set_password (
-			ews_store->priv->connection, NULL);
+		e_ews_connection_set_password (ews_store->priv->connection, NULL);
+		g_signal_handlers_disconnect_by_func (ews_store->priv->connection,
+			G_CALLBACK (camel_ews_store_password_will_expire_cb), ews_store);
 		g_object_unref (ews_store->priv->connection);
 		ews_store->priv->connection = NULL;
 	}
@@ -1855,6 +1903,8 @@ ews_authenticate_sync (CamelService *service,
 		g_mutex_lock (&ews_store->priv->connection_lock);
 		ews_store_unset_connection_locked (ews_store);
 		ews_store->priv->connection = g_object_ref (connection);
+		g_signal_connect (ews_store->priv->connection, "password-will-expire",
+			G_CALLBACK (camel_ews_store_password_will_expire_cb), ews_store);
 		g_mutex_unlock (&ews_store->priv->connection_lock);
 
 		/* This consumes all allocated result data. */
@@ -3707,6 +3757,7 @@ camel_ews_store_init (CamelEwsStore *ews_store)
 	ews_store->priv->subscription_key = 0;
 	ews_store->priv->update_folder_id = 0;
 	ews_store->priv->update_folder_list_id = 0;
+	ews_store->priv->password_expires_in_days = -1;
 	g_mutex_init (&ews_store->priv->get_finfo_lock);
 	g_mutex_init (&ews_store->priv->connection_lock);
 	g_rec_mutex_init (&ews_store->priv->update_lock);
