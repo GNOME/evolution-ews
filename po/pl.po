@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-11-12 19:19+0100\n"
-"PO-Revision-Date: 2017-11-12 19:20+0100\n"
+"POT-Creation-Date: 2017-12-03 18:27+0100\n"
+"PO-Revision-Date: 2017-12-03 18:28+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -45,27 +45,27 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Ustawienie zdjęcia kontaktu się nie powiodło:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1572
+#: ../src/calendar/e-cal-backend-ews.c:1573
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Wolny"
 
-#: ../src/calendar/e-cal-backend-ews.c:1575
+#: ../src/calendar/e-cal-backend-ews.c:1576
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Zajęty"
 
-#: ../src/calendar/e-cal-backend-ews.c:1577
+#: ../src/calendar/e-cal-backend-ews.c:1578
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Poza biurem"
 
-#: ../src/calendar/e-cal-backend-ews.c:1579
+#: ../src/calendar/e-cal-backend-ews.c:1580
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Wstępnie"
 
-#: ../src/calendar/e-cal-backend-ews.c:3187
+#: ../src/calendar/e-cal-backend-ews.c:3188
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Nie można odnaleźć użytkownika „%s” na liście uczestników"
@@ -203,7 +203,7 @@ msgstr ""
 "Ta opcja spowoduje połączenie z serwerem Exchange za pomocą uwierzytelniania "
 "Kerberos/GSSAPI."
 
-#: ../src/camel/camel-ews-store.c:334
+#: ../src/camel/camel-ews-store.c:335
 #, c-format
 msgid "Session has no storage path"
 msgstr "Sesja nie powiada ścieżki do pamięci masowej"
@@ -212,7 +212,7 @@ msgstr "Sesja nie powiada ścieżki do pamięci masowej"
 #. * user has such in his store already. The %s is replaced with "Public Folders",
 #. * the %d with counter, thus it composes name like "Public Folders_1"
 #.
-#: ../src/camel/camel-ews-store.c:371
+#: ../src/camel/camel-ews-store.c:372
 #, c-format
 msgctxt "PublicFolders"
 msgid "%s_%d"
@@ -222,48 +222,65 @@ msgstr "%s_%d"
 #. * user has such in his store already. The %s is replaced with "Foreign Folders",
 #. * the %d with counter, thus it composes name like "Foreign Folders_1"
 #.
-#: ../src/camel/camel-ews-store.c:500
+#: ../src/camel/camel-ews-store.c:501
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:646 ../src/camel/camel-ews-store.c:1249
+#: ../src/camel/camel-ews-store.c:647 ../src/camel/camel-ews-store.c:1250
 msgid "Checking “Out of Office” settings"
 msgstr "Sprawdzanie ustawień obecności poza biurem"
 
-#: ../src/camel/camel-ews-store.c:1497
+#. Translators: The "%s" is a service URL, provided by the server
+#: ../src/camel/camel-ews-store.c:1320
+#, c-format
+msgid "Password will expire in %d day. Open “%s” to change it."
+msgid_plural "Password will expire in %d days. Open “%s” to change it."
+msgstr[0] "Hasło wygaśnie za %d dzień. Proszę je zmienić pod adresem %s."
+msgstr[1] "Hasło wygaśnie za %d dni. Proszę je zmienić pod adresem %s."
+msgstr[2] "Hasło wygaśnie za %d dni. Proszę je zmienić pod adresem %s."
+
+#: ../src/camel/camel-ews-store.c:1326
+#, c-format
+msgid "Password will expire in one day."
+msgid_plural "Password will expire in %d days."
+msgstr[0] "Hasło wygaśnie za jeden dzień."
+msgstr[1] "Hasło wygaśnie za %d dni."
+msgstr[2] "Hasło wygaśnie za %d dni."
+
+#: ../src/camel/camel-ews-store.c:1545
 msgid "Updating foreign folder structure"
 msgstr "Aktualizowanie obcej struktury katalogów"
 
-#: ../src/camel/camel-ews-store.c:1633
+#: ../src/camel/camel-ews-store.c:1681
 msgid "Updating foreign folders"
 msgstr "Aktualizowanie obcych katalogów"
 
-#: ../src/camel/camel-ews-store.c:2007
+#: ../src/camel/camel-ews-store.c:2057
 #, c-format
 msgid "No such folder: %s"
 msgstr "Nie ma takiego katalogu: %s"
 
-#: ../src/camel/camel-ews-store.c:2305
+#: ../src/camel/camel-ews-store.c:2355
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Nie można wyświetlić listy katalogów publicznych EWS w trybie offline"
 
-#: ../src/camel/camel-ews-store.c:2378
+#: ../src/camel/camel-ews-store.c:2428
 msgid "Cannot find any EWS public folders"
 msgstr "Nie można odnaleźć żadnych katalogów publicznych EWS"
 
-#: ../src/camel/camel-ews-store.c:2487
+#: ../src/camel/camel-ews-store.c:2537
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Nie można utworzyć katalogu „%s”. Katalog już istnieje"
 
-#: ../src/camel/camel-ews-store.c:2502
+#: ../src/camel/camel-ews-store.c:2552
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Katalog nadrzędny %s nie istnieje"
 
-#: ../src/camel/camel-ews-store.c:2512
+#: ../src/camel/camel-ews-store.c:2562
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -271,98 +288,98 @@ msgstr ""
 "Nie można utworzyć katalogu w „%s”, jest on używany tylko dla katalogów "
 "innych użytkowników"
 
-#: ../src/camel/camel-ews-store.c:2522
+#: ../src/camel/camel-ews-store.c:2572
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "Nie można utworzyć katalogu w „%s”, jest on używany tylko dla katalogów "
 "publicznych"
 
-#: ../src/camel/camel-ews-store.c:2626
+#: ../src/camel/camel-ews-store.c:2676
 #, c-format
 msgid "Folder does not exist"
 msgstr "Katalog nie istnieje"
 
-#: ../src/camel/camel-ews-store.c:2636
+#: ../src/camel/camel-ews-store.c:2686
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Nie można usunąć katalogu „%s”, jest on używany tylko dla katalogów innych "
 "użytkowników"
 
-#: ../src/camel/camel-ews-store.c:2647
+#: ../src/camel/camel-ews-store.c:2697
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr ""
 "Nie można usunąć katalogu „%s”, jest on używany tylko dla katalogów "
 "publicznych"
 
-#: ../src/camel/camel-ews-store.c:2803
+#: ../src/camel/camel-ews-store.c:2853
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Katalog %s nie istnieje"
 
-#: ../src/camel/camel-ews-store.c:2812
+#: ../src/camel/camel-ews-store.c:2862
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Brak wpisu klucza zmiany dla katalogu %s"
 
-#: ../src/camel/camel-ews-store.c:2855
+#: ../src/camel/camel-ews-store.c:2905
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Nie można zmienić nazwy i przenieść katalogu w tym samym czasie"
 
-#: ../src/camel/camel-ews-store.c:2889
+#: ../src/camel/camel-ews-store.c:2939
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nie można odnaleźć identyfikatora katalogu dla katalogu nadrzędnego %s"
 
-#: ../src/camel/camel-ews-store.c:2941 ../src/camel/camel-ews-transport.c:315
+#: ../src/camel/camel-ews-store.c:2991 ../src/camel/camel-ews-transport.c:315
 #, c-format
 msgid "Exchange server %s"
 msgstr "Serwer Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:2944
+#: ../src/camel/camel-ews-store.c:2994
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Usługa Exchange dla %s na %s"
 
-#: ../src/camel/camel-ews-store.c:2988
+#: ../src/camel/camel-ews-store.c:3038
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Nie można ustalić położenia katalogu Kosz"
 
-#: ../src/camel/camel-ews-store.c:3048
+#: ../src/camel/camel-ews-store.c:3098
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Nie można ustalić położenia katalogu Niechciane"
 
-#: ../src/camel/camel-ews-store.c:3239
+#: ../src/camel/camel-ews-store.c:3289
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Nie można subskrybować katalogów EWS w trybie offline"
 
-#: ../src/camel/camel-ews-store.c:3262
+#: ../src/camel/camel-ews-store.c:3312
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 "Nie można subskrybować katalogu „%s”, żaden katalog publiczny nie jest "
 "dostępny"
 
-#: ../src/camel/camel-ews-store.c:3272
+#: ../src/camel/camel-ews-store.c:3322
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Nie można subskrybować katalogu „%s”, nie odnaleziono katalogu"
 
-#: ../src/camel/camel-ews-store.c:3363
+#: ../src/camel/camel-ews-store.c:3413
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Nie można usuwać subskrypcji katalogów EWS w trybie offline"
 
-#: ../src/camel/camel-ews-store.c:3480
+#: ../src/camel/camel-ews-store.c:3530
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Należy pracować w trybie online, aby ukończyć to działanie"
 
-#: ../src/camel/camel-ews-store.c:3524 ../src/camel/camel-ews-store.c:3561
+#: ../src/camel/camel-ews-store.c:3574 ../src/camel/camel-ews-store.c:3611
 msgid "Unsetting the “Out of Office” status"
 msgstr "Usuwanie ustawienia stanu obecności poza biurem"
 
@@ -1162,20 +1179,29 @@ msgstr ""
 "Zwrócenie identyfikatora dla nowej wiadomości przez wywołanie CreateItem się "
 "nie powiodło"
 
-#: ../src/server/e-ews-connection.c:732
+#: ../src/server/e-ews-connection.c:733
 msgid "Operation Cancelled"
 msgstr "Anulowano działanie"
 
-#: ../src/server/e-ews-connection.c:800
+#: ../src/server/e-ews-connection.c:789
+#, c-format
+msgid "Password expired. Change password at “%s”."
+msgstr "Hasło wygasło. Proszę je zmienić pod adresem %s."
+
+#: ../src/server/e-ews-connection.c:792
+msgid "Password expired."
+msgstr "Hasło wygasło."
+
+#: ../src/server/e-ews-connection.c:891
 msgid "Authentication failed"
 msgstr "Uwierzytelnienie się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:822
+#: ../src/server/e-ews-connection.c:913
 #, c-format
 msgid "No response: %s"
 msgstr "Brak odpowiedzi: %s"
 
-#: ../src/server/e-ews-connection.c:885
+#: ../src/server/e-ews-connection.c:976
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -1186,7 +1212,7 @@ msgstr[1] ""
 msgstr[2] ""
 "Serwer Exchange jest zajęty, oczekiwanie na ponowienie (%d∶%02d minut)"
 
-#: ../src/server/e-ews-connection.c:891
+#: ../src/server/e-ews-connection.c:982
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -1194,56 +1220,56 @@ msgstr[0] "Serwer Exchange jest zajęty, oczekiwanie na ponowienie (%d sekunda)"
 msgstr[1] "Serwer Exchange jest zajęty, oczekiwanie na ponowienie (%d sekundy)"
 msgstr[2] "Serwer Exchange jest zajęty, oczekiwanie na ponowienie (%d sekund)"
 
-#: ../src/server/e-ews-connection.c:2676
+#: ../src/server/e-ews-connection.c:2804
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr ""
 "Przetworzenie XML odpowiedzi automatycznego wykrywania się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:2683
+#: ../src/server/e-ews-connection.c:2811
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Odnalezienie elementu <Autodiscover> się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:2694
+#: ../src/server/e-ews-connection.c:2822
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Odnalezienie elementu <Response> się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:2705
+#: ../src/server/e-ews-connection.c:2833
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Odnalezienie elementu <Account> się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:2730
+#: ../src/server/e-ews-connection.c:2858
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
 "Odnalezienie elementów <ASUrl> i <OABUrl> w odpowiedzi automatycznego "
 "wykrywania się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:2821
+#: ../src/server/e-ews-connection.c:2949
 msgid "URL cannot be NULL"
 msgstr "Adres URL nie może wynosić NULL"
 
-#: ../src/server/e-ews-connection.c:2829
+#: ../src/server/e-ews-connection.c:2957
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "Adres URL „%s” nie jest prawidłowy"
 
-#: ../src/server/e-ews-connection.c:2919
+#: ../src/server/e-ews-connection.c:3047
 msgid "Email address is missing a domain part"
 msgstr "W adresie e-mail brakuje części domeny"
 
-#: ../src/server/e-ews-connection.c:3241
+#: ../src/server/e-ews-connection.c:3371
 msgid "Failed to parse oab XML"
 msgstr "Przetworzenie XML „oab” się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:3249
+#: ../src/server/e-ews-connection.c:3379
 msgid "Failed to find <OAB> element\n"
 msgstr "Odnalezienie elementu <OAB> się nie powiodło\n"
 
-#: ../src/server/e-ews-connection.c:4554
+#: ../src/server/e-ews-connection.c:4686
 msgid "No items found"
 msgstr "Nie odnaleziono elementów"
 
