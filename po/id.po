@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=Miscellaneous / EWS Core\n"
-"POT-Creation-Date: 2017-08-03 10:44+0000\n"
-"PO-Revision-Date: 2017-08-06 21:10+0700\n"
+"POT-Creation-Date: 2017-11-30 17:15+0000\n"
+"PO-Revision-Date: 2017-12-05 14:42+0700\n"
 "Last-Translator: Kukuh Syafaat <syafaatkukuh@gmail.com>\n"
 "Language-Team: Indonesian <gnome@i15n.org>\n"
 "Language: id\n"
@@ -17,14 +17,16 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 2.0.3\n"
+"X-Generator: Poedit 2.0.4\n"
 
-#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:79
-#: ../src/configuration/e-ews-config-lookup.c:145
+#: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
+#: ../src/camel/camel-ews-provider.c:79
+#: ../src/configuration/e-ews-config-lookup.c:251
 msgid "Exchange Web Services"
 msgstr "Layanan Web Exchange"
 
-#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:81
+#: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
+#: ../src/camel/camel-ews-provider.c:81
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Untuk mengakses server Exchange memakai Layanan Web"
 
@@ -43,27 +45,27 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Gagal mengatur foto kontak:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1574
+#: ../src/calendar/e-cal-backend-ews.c:1573
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Luang"
 
-#: ../src/calendar/e-cal-backend-ews.c:1577
+#: ../src/calendar/e-cal-backend-ews.c:1576
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Sibuk"
 
-#: ../src/calendar/e-cal-backend-ews.c:1579
+#: ../src/calendar/e-cal-backend-ews.c:1578
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Keluar Kantor"
 
-#: ../src/calendar/e-cal-backend-ews.c:1581
+#: ../src/calendar/e-cal-backend-ews.c:1580
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Sementara"
 
-#: ../src/calendar/e-cal-backend-ews.c:3162
+#: ../src/calendar/e-cal-backend-ews.c:3188
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Tak bisa temukan pengguna “%s” diantara yang hadir"
@@ -101,17 +103,17 @@ msgstr "Tak bisa membuat path singgahan “%s”: %s"
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Gagal memindah berkas singgahan pesan dari “%s” to “%s”: %s"
 
-#: ../src/camel/camel-ews-folder.c:1536
+#: ../src/camel/camel-ews-folder.c:1570
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Tak bisa memuat ringkasan untuk %s"
 
-#: ../src/camel/camel-ews-folder.c:1980
+#: ../src/camel/camel-ews-folder.c:2030
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Menyegarkan folder “%s”"
 
-#: ../src/camel/camel-ews-folder.c:2126
+#: ../src/camel/camel-ews-folder.c:2210
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Tak bisa melakukan aksi pada folder ketika dalam mode luring"
@@ -199,7 +201,7 @@ msgstr ""
 "Opsi ini akan menyambung ke server Exchange menggunakan otentikasi Kerberos/"
 "GSSAPI."
 
-#: ../src/camel/camel-ews-store.c:334
+#: ../src/camel/camel-ews-store.c:335
 #, c-format
 msgid "Session has no storage path"
 msgstr "Sesi tak memiliki path penyimpanan"
@@ -208,7 +210,7 @@ msgstr "Sesi tak memiliki path penyimpanan"
 #. * user has such in his store already. The %s is replaced with "Public Folders",
 #. * the %d with counter, thus it composes name like "Public Folders_1"
 #.
-#: ../src/camel/camel-ews-store.c:371
+#: ../src/camel/camel-ews-store.c:372
 #, c-format
 msgctxt "PublicFolders"
 msgid "%s_%d"
@@ -218,48 +220,62 @@ msgstr "%s_%d"
 #. * user has such in his store already. The %s is replaced with "Foreign Folders",
 #. * the %d with counter, thus it composes name like "Foreign Folders_1"
 #.
-#: ../src/camel/camel-ews-store.c:500
+#: ../src/camel/camel-ews-store.c:501
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:646 ../src/camel/camel-ews-store.c:1249
+#: ../src/camel/camel-ews-store.c:647 ../src/camel/camel-ews-store.c:1250
 msgid "Checking “Out of Office” settings"
 msgstr "Memeriksa pengaturan \"Di Luar Kantor\""
 
-#: ../src/camel/camel-ews-store.c:1497
+#. Translators: The "%s" is a service URL, provided by the server
+#: ../src/camel/camel-ews-store.c:1320
+#, c-format
+msgid "Password will expire in %d day. Open “%s” to change it."
+msgid_plural "Password will expire in %d days. Open “%s” to change it."
+msgstr[0] ""
+"Kata sandi akan kedaluwarsa dalam %d hari. Buka \"%s\" untuk menggantinya."
+
+#: ../src/camel/camel-ews-store.c:1326
+#, c-format
+msgid "Password will expire in one day."
+msgid_plural "Password will expire in %d days."
+msgstr[0] "Kata sandi akan kedaluwarsa dalam %d hari."
+
+#: ../src/camel/camel-ews-store.c:1545
 msgid "Updating foreign folder structure"
 msgstr "Memutakhirkan struktur folder asing"
 
-#: ../src/camel/camel-ews-store.c:1633
+#: ../src/camel/camel-ews-store.c:1681
 msgid "Updating foreign folders"
 msgstr "Memutakhirkan folder asing"
 
-#: ../src/camel/camel-ews-store.c:2007
+#: ../src/camel/camel-ews-store.c:2057
 #, c-format
 msgid "No such folder: %s"
 msgstr "Tak ada folder begitu: %s"
 
-#: ../src/camel/camel-ews-store.c:2305
+#: ../src/camel/camel-ews-store.c:2355
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Tak bisa membaca daftar folder publik EWS dalam mode luring"
 
-#: ../src/camel/camel-ews-store.c:2378
+#: ../src/camel/camel-ews-store.c:2428
 msgid "Cannot find any EWS public folders"
 msgstr "Tak bisa temukan folder publik EWS manapun"
 
-#: ../src/camel/camel-ews-store.c:2487
+#: ../src/camel/camel-ews-store.c:2537
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Tak bisa membuat folder “%s”, folder telah ada"
 
-#: ../src/camel/camel-ews-store.c:2502
+#: ../src/camel/camel-ews-store.c:2552
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Folder induk %s tidak ada"
 
-#: ../src/camel/camel-ews-store.c:2512
+#: ../src/camel/camel-ews-store.c:2562
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -267,92 +283,92 @@ msgstr ""
 "Tak bisa membuat folder di bawah “%s”, itu hanya dipakai bagi folder "
 "pengguna lain"
 
-#: ../src/camel/camel-ews-store.c:2522
+#: ../src/camel/camel-ews-store.c:2572
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "Tak bisa membuat folder di bawah “%s”, itu hanya dipakai bagi folder publik"
 
-#: ../src/camel/camel-ews-store.c:2626
+#: ../src/camel/camel-ews-store.c:2676
 #, c-format
 msgid "Folder does not exist"
 msgstr "Folder tidak ada"
 
-#: ../src/camel/camel-ews-store.c:2636
+#: ../src/camel/camel-ews-store.c:2686
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Tak bisa menghapus folder “%s”, itu hanya dipakai bagi folder pengguna lain"
 
-#: ../src/camel/camel-ews-store.c:2647
+#: ../src/camel/camel-ews-store.c:2697
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "Tak bisa menghapus folder “%s”, itu hanya dipakai bagi folder publik"
 
-#: ../src/camel/camel-ews-store.c:2803
+#: ../src/camel/camel-ews-store.c:2853
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Folder %s tidak ada"
 
-#: ../src/camel/camel-ews-store.c:2812
+#: ../src/camel/camel-ews-store.c:2862
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Tidak ada catatan kunci perubahan bagi folder %s"
 
-#: ../src/camel/camel-ews-store.c:2855
+#: ../src/camel/camel-ews-store.c:2905
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Tak bisa sekaligus mengubah nama dan memindah folder di saat yang sama"
 
-#: ../src/camel/camel-ews-store.c:2889
+#: ../src/camel/camel-ews-store.c:2939
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Tak bisa temukan ID folder bagi folder induk %s"
 
-#: ../src/camel/camel-ews-store.c:2941 ../src/camel/camel-ews-transport.c:315
+#: ../src/camel/camel-ews-store.c:2991 ../src/camel/camel-ews-transport.c:315
 #, c-format
 msgid "Exchange server %s"
 msgstr "Server Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:2944
+#: ../src/camel/camel-ews-store.c:2994
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Layanan Exchange untuk %s pada %s"
 
-#: ../src/camel/camel-ews-store.c:2988
+#: ../src/camel/camel-ews-store.c:3038
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Tak bisa temukan folder Tong Sampah"
 
-#: ../src/camel/camel-ews-store.c:3048
+#: ../src/camel/camel-ews-store.c:3098
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Tak bisa temukan folder Sampah"
 
-#: ../src/camel/camel-ews-store.c:3239
+#: ../src/camel/camel-ews-store.c:3289
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Tak bisa berlangganan folder EWS dalam mode luring"
 
-#: ../src/camel/camel-ews-store.c:3262
+#: ../src/camel/camel-ews-store.c:3312
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Tak bisa berlangganan folder “%s”, tak ada folder publik yang tersedia"
 
-#: ../src/camel/camel-ews-store.c:3272
+#: ../src/camel/camel-ews-store.c:3322
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Tak bisa berlangganan folder “%s”, folder tak ditemukan"
 
-#: ../src/camel/camel-ews-store.c:3363
+#: ../src/camel/camel-ews-store.c:3413
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Tak bisa berhenti berlangganan folder EWS dalam mode luring"
 
-#: ../src/camel/camel-ews-store.c:3480
+#: ../src/camel/camel-ews-store.c:3530
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Anda mesti daring untuk menuntaskan operasi ini"
 
-#: ../src/camel/camel-ews-store.c:3524 ../src/camel/camel-ews-store.c:3561
+#: ../src/camel/camel-ews-store.c:3574 ../src/camel/camel-ews-store.c:3611
 msgid "Unsetting the “Out of Office” status"
 msgstr "Sedang menghapus status \"Di Luar Kantor\""
 
@@ -378,37 +394,46 @@ msgstr "Gagal membaca alamat Dari"
 msgid "Service not connected"
 msgstr "Layanan tidak tersambung"
 
-#: ../src/collection/e-ews-backend.c:464
+#: ../src/collection/e-ews-backend.c:489
 #: ../src/configuration/e-mail-config-ews-gal.c:274
 msgid "Global Address List"
 msgstr "Daftar Alamat Global"
 
-#: ../src/collection/e-ews-backend.c:900
+#: ../src/collection/e-ews-backend.c:926
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
 "Tak bisa menentukan kelas folder yang cocok bagi folder baru bernama “%s”"
 
-#: ../src/collection/e-ews-backend.c:988
+#: ../src/collection/e-ews-backend.c:1014
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr ""
 "Sumber data “%s” tak merepresentasikan suatu folder Layanan Web Exchange"
 
-#: ../src/configuration/e-ews-config-lookup.c:129
+#: ../src/configuration/e-ews-config-lookup.c:192
+msgid "Exchange Web Services autodiscovery"
+msgstr "Penemuan otomatis Layanan Web Exchange"
+
+#: ../src/configuration/e-ews-config-lookup.c:235
 #, c-format
 msgid "User: %s"
 msgstr "Pengguna: %s"
 
-#: ../src/configuration/e-ews-config-lookup.c:134
+#: ../src/configuration/e-ews-config-lookup.c:240
 #, c-format
 msgid "Host URL: %s"
 msgstr "URL Host: %s"
 
-#: ../src/configuration/e-ews-config-lookup.c:139
+#: ../src/configuration/e-ews-config-lookup.c:245
 #, c-format
 msgid "OAB URL: %s"
 msgstr "URL OAB: %s"
+
+#: ../src/configuration/e-ews-config-lookup.c:322
+#, c-format
+msgid "Requires user password to continue"
+msgstr "Memerlukan kata sandi untuk melanjutkan"
 
 #: ../src/configuration/e-ews-config-utils.c:574
 msgid "Folder"
@@ -572,7 +597,7 @@ msgid "Edit EWS folder permissions..."
 msgstr "Sunting hak akses folder EWS…"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:952
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:669
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:674
 msgid "Account:"
 msgstr "Akun:"
 
@@ -764,11 +789,11 @@ msgid "User name “%s” is ambiguous, specify it more precisely, please"
 msgstr "Nama pengguna “%s” ambigu, harap nyatakan secara lebih presisi"
 
 #. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:371
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:374
 msgid "Availability"
 msgstr "Ketersediaan"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:386
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:391
 #, c-format
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
@@ -777,7 +802,7 @@ msgstr ""
 "Folder “%s” tak ditemukan. Entah itu tak ada atau Anda tak punya hak untuk "
 "mengaksesnya."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:405
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:410
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Tak bisa menambah folder, tak bisa menentukan tipe folder"
 
@@ -786,69 +811,69 @@ msgstr "Tak bisa menambah folder, tak bisa menentukan tipe folder"
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:450
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:455
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:544
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:754
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:549
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:759
 msgid "Inbox"
 msgstr "Inbox"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:546
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:755
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:551
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:760
 msgid "Contacts"
 msgstr "Kontak"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:548
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:756
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:553
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:761
 msgid "Calendar"
 msgstr "Kalender"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:550
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:757
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:555
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:762
 msgid "Free/Busy as Calendar"
 msgstr "Waktu luang/sibuk sebagai Kalendar"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:552
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:758
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:557
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:763
 msgid "Memos"
 msgstr "Memo"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:554
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:759
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:559
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:764
 msgid "Tasks"
 msgstr "Tugas"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:571
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:576
 #, c-format
 msgid "Testing availability of folder “%s” of user “%s”, please wait..."
 msgstr "Menguji ketersediaan folder “%s” dari pengguna “%s”, silakan tunggu..."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:648
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:653
 msgid "Subscribe to folder of other EWS user..."
 msgstr "Berlangganan ke folder pengguna EWS lain…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:699
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:704
 msgid "User"
 msgstr "Pengguna"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:706
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:711
 msgid "_User:"
 msgstr "Pengg_una:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:726
 msgid "C_hoose..."
 msgstr "_Pilih…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:737
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:742
 msgid "_Folder name:"
 msgstr "Nama _folder:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:768
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:773
 msgid "Include _subfolders"
 msgstr "Sertakan _subfolder"
 
@@ -888,11 +913,11 @@ msgstr "_Cari…"
 msgid "Authentication"
 msgstr "Otentikasi"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:399
+#: ../src/configuration/e-mail-config-ews-backend.c:400
 msgid "Host URL cannot be empty"
 msgstr "URL host tak boleh kosong"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:404
+#: ../src/configuration/e-mail-config-ews-backend.c:405
 msgid "User name cannot be empty"
 msgstr "Nama pengguna tak boleh kosong"
 
@@ -1126,80 +1151,89 @@ msgstr "Akun Exchange \"{0}\" memiliki status \"Di Luar Kantor\"."
 msgid "CreateItem call failed to return ID for new message"
 msgstr "Pemanggilan CreateItem gagal mengembalikan ID bagi pesan baru"
 
-#: ../src/server/e-ews-connection.c:732
+#: ../src/server/e-ews-connection.c:733
 msgid "Operation Cancelled"
 msgstr "Operasi Dibatalkan"
 
-#: ../src/server/e-ews-connection.c:800
+#: ../src/server/e-ews-connection.c:789
+#, c-format
+msgid "Password expired. Change password at “%s”."
+msgstr "Kata sandi kedaluwarsa. Ganti kata sandi di \"%s\""
+
+#: ../src/server/e-ews-connection.c:792
+msgid "Password expired."
+msgstr "Kata sandi kedaluwarsa."
+
+#: ../src/server/e-ews-connection.c:891
 msgid "Authentication failed"
 msgstr "Otentikasi gagal"
 
-#: ../src/server/e-ews-connection.c:822
+#: ../src/server/e-ews-connection.c:913
 #, c-format
 msgid "No response: %s"
 msgstr "Tak ada respon: %s"
 
-#: ../src/server/e-ews-connection.c:885
+#: ../src/server/e-ews-connection.c:976
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] ""
 "Server Exchange sedang sibuk, menunggu untuk mencoba lagi (%d:%02d menit)"
 
-#: ../src/server/e-ews-connection.c:891
+#: ../src/server/e-ews-connection.c:982
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
 msgstr[0] ""
 "Server Exchange sedang sibuk, menunggu untuk mencoba lagi (%d detik)"
 
-#: ../src/server/e-ews-connection.c:2673
+#: ../src/server/e-ews-connection.c:2804
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Gagal mengurai XML respon autodiscover"
 
-#: ../src/server/e-ews-connection.c:2680
+#: ../src/server/e-ews-connection.c:2811
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Gagal menemukan elemen <Autodiscover>"
 
-#: ../src/server/e-ews-connection.c:2691
+#: ../src/server/e-ews-connection.c:2822
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Gagal menemukan elemen <Response>"
 
-#: ../src/server/e-ews-connection.c:2702
+#: ../src/server/e-ews-connection.c:2833
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Gagal menemukan elemen <Account>"
 
-#: ../src/server/e-ews-connection.c:2727
+#: ../src/server/e-ews-connection.c:2858
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr "Gagal menemukan <ASUrl> dan <OABUrl> dalam respon autodiscover"
 
-#: ../src/server/e-ews-connection.c:2818
+#: ../src/server/e-ews-connection.c:2949
 msgid "URL cannot be NULL"
 msgstr "URL tak boleh NULL"
 
-#: ../src/server/e-ews-connection.c:2826
+#: ../src/server/e-ews-connection.c:2957
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "URL “%s” tak valid"
 
-#: ../src/server/e-ews-connection.c:2916
+#: ../src/server/e-ews-connection.c:3047
 msgid "Email address is missing a domain part"
 msgstr "Alamat surel kurang bagian domain"
 
-#: ../src/server/e-ews-connection.c:3238
+#: ../src/server/e-ews-connection.c:3371
 msgid "Failed to parse oab XML"
 msgstr "Gagal mengurai XML oab"
 
-#: ../src/server/e-ews-connection.c:3246
+#: ../src/server/e-ews-connection.c:3379
 msgid "Failed to find <OAB> element\n"
 msgstr "Gagal menemukan elemen <OAB>\n"
 
-#: ../src/server/e-ews-connection.c:4551
+#: ../src/server/e-ews-connection.c:4686
 msgid "No items found"
 msgstr "Tak temukan butir"
 
