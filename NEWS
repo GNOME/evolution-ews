@@ -1,3 +1,12 @@
+Evolution-EWS 3.26.3 2017-12-11
+-------------------------------
+
+Miscellaneous:
+	[ECalBackendEws] Prevent crash when item has no MIME content set (Milan Crha)
+
+Translations:
+	Ask Hjorth Larsen (da)
+
 Evolution-EWS 3.26.2 2017-10-30
 -------------------------------
 
