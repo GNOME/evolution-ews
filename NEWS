@@ -1,3 +1,19 @@
+Evolution-EWS 3.27.3 2017-12-11
+-------------------------------
+
+Bug Fixes:
+	Bug 790450 - Check response headers for credential expiration hints (Milan Crha)
+
+Miscellaneous:
+	[ECalBackendEws] Prevent crash when item has no MIME content set (Milan Crha)
+	Correct arguments of g_dngettext() added in the previous commit (Milan Crha)
+
+Translations:
+	Mario Blättermann (de)
+	Marek Cernocky (cs)
+	Piotr Drąg (pl)
+	Kukuh Syafaat (id)
+
 Evolution-EWS 3.27.2 2017-11-13
 -------------------------------
 
