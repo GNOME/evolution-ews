@@ -14,8 +14,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=Miscellaneous / EWS Core\n"
-"POT-Creation-Date: 2017-10-02 17:33+0000\n"
-"PO-Revision-Date: 2017-10-20 09:52+0200\n"
+"POT-Creation-Date: 2017-11-30 17:15+0000\n"
+"PO-Revision-Date: 2017-12-14 13:11+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: es <gnome-es-list@gnome.org>\n"
 "Language: es\n"
@@ -25,12 +25,14 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Gtranslator 2.91.6\n"
 
-#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:79
-#: ../src/configuration/e-ews-config-lookup.c:146
+#: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
+#: ../src/camel/camel-ews-provider.c:79
+#: ../src/configuration/e-ews-config-lookup.c:251
 msgid "Exchange Web Services"
 msgstr "Servicios web Exchange"
 
-#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:81
+#: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
+#: ../src/camel/camel-ews-provider.c:81
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Para acceder a servidores Exchange usando servicios web"
 
@@ -49,27 +51,27 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Falló al establecer la foto del contacto:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1574
+#: ../src/calendar/e-cal-backend-ews.c:1573
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Libre"
 
-#: ../src/calendar/e-cal-backend-ews.c:1577
+#: ../src/calendar/e-cal-backend-ews.c:1576
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Ocupado"
 
-#: ../src/calendar/e-cal-backend-ews.c:1579
+#: ../src/calendar/e-cal-backend-ews.c:1578
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Fuera de la oficina"
 
-#: ../src/calendar/e-cal-backend-ews.c:1581
+#: ../src/calendar/e-cal-backend-ews.c:1580
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Provisional"
 
-#: ../src/calendar/e-cal-backend-ews.c:3189
+#: ../src/calendar/e-cal-backend-ews.c:3188
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "No se puede encontrar al usuario «%s» entre los asistentes"
@@ -107,17 +109,17 @@ msgstr "No se pudo crear la ruta de la caché «%s»: %s"
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Falló al mover el archivo de la caché de mensajes de «%s» a «%s»: %s"
 
-#: ../src/camel/camel-ews-folder.c:1536
+#: ../src/camel/camel-ews-folder.c:1570
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "No se pudo cargar el resumen para %s"
 
-#: ../src/camel/camel-ews-folder.c:1996
+#: ../src/camel/camel-ews-folder.c:2030
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Actualizando carpeta «%s»"
 
-#: ../src/camel/camel-ews-folder.c:2176
+#: ../src/camel/camel-ews-folder.c:2210
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr ""
@@ -209,7 +211,7 @@ msgstr ""
 "Esta opción conectará al servidor de Exchange usando autenticación Kerberos/"
 "GSSAPI."
 
-#: ../src/camel/camel-ews-store.c:334
+#: ../src/camel/camel-ews-store.c:335
 #, c-format
 msgid "Session has no storage path"
 msgstr "La sesión no tiene ruta de almacenamiento"
@@ -218,7 +220,7 @@ msgstr "La sesión no tiene ruta de almacenamiento"
 #. * user has such in his store already. The %s is replaced with "Public Folders",
 #. * the %d with counter, thus it composes name like "Public Folders_1"
 #.
-#: ../src/camel/camel-ews-store.c:371
+#: ../src/camel/camel-ews-store.c:372
 #, c-format
 msgctxt "PublicFolders"
 msgid "%s_%d"
@@ -228,48 +230,63 @@ msgstr "%s_%d"
 #. * user has such in his store already. The %s is replaced with "Foreign Folders",
 #. * the %d with counter, thus it composes name like "Foreign Folders_1"
 #.
-#: ../src/camel/camel-ews-store.c:500
+#: ../src/camel/camel-ews-store.c:501
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:646 ../src/camel/camel-ews-store.c:1249
+#: ../src/camel/camel-ews-store.c:647 ../src/camel/camel-ews-store.c:1250
 msgid "Checking “Out of Office” settings"
 msgstr "Comprobando la configuración de «Estoy fuera de la oficina»"
 
-#: ../src/camel/camel-ews-store.c:1497
+#. Translators: The "%s" is a service URL, provided by the server
+#: ../src/camel/camel-ews-store.c:1320
+#, c-format
+msgid "Password will expire in %d day. Open “%s” to change it."
+msgid_plural "Password will expire in %d days. Open “%s” to change it."
+msgstr[0] "La contraseña caducará en %d día. Abra «%s para cambiarla»."
+msgstr[1] "La contraseña caducará en %d días. Abra «%s para cambiarla»."
+
+#: ../src/camel/camel-ews-store.c:1326
+#, c-format
+msgid "Password will expire in one day."
+msgid_plural "Password will expire in %d days."
+msgstr[0] "La contraseña caducará en un día."
+msgstr[1] "La contraseña caducará en %d días."
+
+#: ../src/camel/camel-ews-store.c:1545
 msgid "Updating foreign folder structure"
 msgstr "Actualizando la estructura de carpetas externas"
 
-#: ../src/camel/camel-ews-store.c:1633
+#: ../src/camel/camel-ews-store.c:1681
 msgid "Updating foreign folders"
 msgstr "Actualizando carpetas externas"
 
-#: ../src/camel/camel-ews-store.c:2007
+#: ../src/camel/camel-ews-store.c:2057
 #, c-format
 msgid "No such folder: %s"
 msgstr "No existe la carpeta: %s"
 
-#: ../src/camel/camel-ews-store.c:2305
+#: ../src/camel/camel-ews-store.c:2355
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "No se pueden listar las carpetas EWS en modo desconectado"
 
-#: ../src/camel/camel-ews-store.c:2378
+#: ../src/camel/camel-ews-store.c:2428
 msgid "Cannot find any EWS public folders"
 msgstr "No se puede encontrar ninguna carpeta EWS pública"
 
-#: ../src/camel/camel-ews-store.c:2487
+#: ../src/camel/camel-ews-store.c:2537
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "No se puede crear la carpeta «%s», la carpeta ya existe"
 
-#: ../src/camel/camel-ews-store.c:2502
+#: ../src/camel/camel-ews-store.c:2552
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "La carpeta padre %s no existe"
 
-#: ../src/camel/camel-ews-store.c:2512
+#: ../src/camel/camel-ews-store.c:2562
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -277,95 +294,95 @@ msgstr ""
 "No se puede crear la carpeta bajo «%s», sólo la usan carpetas de otros "
 "usuarios"
 
-#: ../src/camel/camel-ews-store.c:2522
+#: ../src/camel/camel-ews-store.c:2572
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "No se puede crear la carpeta bajo «%s», se usa sólo para carpetas públicas"
 
-#: ../src/camel/camel-ews-store.c:2626
+#: ../src/camel/camel-ews-store.c:2676
 #, c-format
 msgid "Folder does not exist"
 msgstr "La carpeta no existe"
 
-#: ../src/camel/camel-ews-store.c:2636
+#: ../src/camel/camel-ews-store.c:2686
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "No se puede eliminar la carpeta «%s», sólo la usan carpetas de otros usuarios"
 
-#: ../src/camel/camel-ews-store.c:2647
+#: ../src/camel/camel-ews-store.c:2697
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "No se puede quitar la carpeta «%s», se usa sólo para carpetas públicas"
 
-#: ../src/camel/camel-ews-store.c:2803
+#: ../src/camel/camel-ews-store.c:2853
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "La carpeta %s no existe"
 
-#: ../src/camel/camel-ews-store.c:2812
+#: ../src/camel/camel-ews-store.c:2862
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "No hay cambios en registros clave de la carpeta %s"
 
-#: ../src/camel/camel-ews-store.c:2855
+#: ../src/camel/camel-ews-store.c:2905
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "No se puede renombrar y mover una carpeta al mismo tiempo"
 
-#: ../src/camel/camel-ews-store.c:2889
+#: ../src/camel/camel-ews-store.c:2939
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "No se puede encontrar el ID de carpeta para la carpeta padre %s"
 
-#: ../src/camel/camel-ews-store.c:2941 ../src/camel/camel-ews-transport.c:315
+#: ../src/camel/camel-ews-store.c:2991 ../src/camel/camel-ews-transport.c:315
 #, c-format
 msgid "Exchange server %s"
 msgstr "Servidor Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:2944
+#: ../src/camel/camel-ews-store.c:2994
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Servicio Exchange para %s en %s"
 
-#: ../src/camel/camel-ews-store.c:2988
+#: ../src/camel/camel-ews-store.c:3038
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "No se pudo localizar la carpeta de la Papelera"
 
-#: ../src/camel/camel-ews-store.c:3048
+#: ../src/camel/camel-ews-store.c:3098
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "No se puedo encontrar la carpeta de Correo no deseado"
 
-#: ../src/camel/camel-ews-store.c:3239
+#: ../src/camel/camel-ews-store.c:3289
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "No se puede suscribir a las carpetas EWS en modo desconectado"
 
-#: ../src/camel/camel-ews-store.c:3262
+#: ../src/camel/camel-ews-store.c:3312
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 "No se puede suscribir a la carpeta «%s», no hay ninguna carpeta pública "
 "disponible"
 
-#: ../src/camel/camel-ews-store.c:3272
+#: ../src/camel/camel-ews-store.c:3322
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr ""
 "No se puede suscribir a la carpeta «%s», no se ha encontrado la carpeta"
 
-#: ../src/camel/camel-ews-store.c:3363
+#: ../src/camel/camel-ews-store.c:3413
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "No se puede desuscribir de las carpetas EWS en modo desconectado"
 
-#: ../src/camel/camel-ews-store.c:3480
+#: ../src/camel/camel-ews-store.c:3530
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Debe estar conectado para completar esta operación"
 
-#: ../src/camel/camel-ews-store.c:3524 ../src/camel/camel-ews-store.c:3561
+#: ../src/camel/camel-ews-store.c:3574 ../src/camel/camel-ews-store.c:3611
 msgid "Unsetting the “Out of Office” status"
 msgstr "Quitando el estado de «Estoy fuera de la oficina»."
 
@@ -392,42 +409,49 @@ msgstr "Falló al la dirección «Para»"
 msgid "Service not connected"
 msgstr "Servicio no conectado"
 
-#: ../src/collection/e-ews-backend.c:464
+#: ../src/collection/e-ews-backend.c:489
 #: ../src/configuration/e-mail-config-ews-gal.c:274
 msgid "Global Address List"
 msgstr "Lista global de direcciones"
 
-#: ../src/collection/e-ews-backend.c:900
+#: ../src/collection/e-ews-backend.c:926
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
 "No se pudo determinar una clase de carpeta apropiada para una nueva carpeta "
 "llamada «%s»"
 
-#: ../src/collection/e-ews-backend.c:988
+#: ../src/collection/e-ews-backend.c:1014
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr ""
 "El origen de los datos «%s» no representa una carpeta de servicios web de "
 "Exchange"
 
-#: ../src/configuration/e-ews-config-lookup.c:129
+#: ../src/configuration/e-ews-config-lookup.c:192
+#| msgid "Exchange Web Services Plugin"
+msgid "Exchange Web Services autodiscovery"
+msgstr "Descubrimiento automático de servicios web de Exchange"
+
+#: ../src/configuration/e-ews-config-lookup.c:235
 #, c-format
-#| msgid "_User:"
 msgid "User: %s"
 msgstr "Usuario: %s"
 
-#: ../src/configuration/e-ews-config-lookup.c:134
+#: ../src/configuration/e-ews-config-lookup.c:240
 #, c-format
-#| msgid "_Host URL:"
 msgid "Host URL: %s"
 msgstr "URL del equipo: %s"
 
-#: ../src/configuration/e-ews-config-lookup.c:139
+#: ../src/configuration/e-ews-config-lookup.c:245
 #, c-format
-#| msgid "OAB U_RL:"
 msgid "OAB URL: %s"
 msgstr "URL OAB: %s"
+
+#: ../src/configuration/e-ews-config-lookup.c:322
+#, c-format
+msgid "Requires user password to continue"
+msgstr "Debe cambiar la contraseña para continuar"
 
 #: ../src/configuration/e-ews-config-utils.c:574
 msgid "Folder"
@@ -1163,20 +1187,30 @@ msgstr ""
 msgid "CreateItem call failed to return ID for new message"
 msgstr "CreateItem falló al devolver el ID para el mensaje nuevo"
 
-#: ../src/server/e-ews-connection.c:732
+#: ../src/server/e-ews-connection.c:733
 msgid "Operation Cancelled"
 msgstr "Operación cancelada"
 
-#: ../src/server/e-ews-connection.c:800
+#: ../src/server/e-ews-connection.c:789
+#, c-format
+msgid "Password expired. Change password at “%s”."
+msgstr "La contraseña ha caducado. Cámbiela en «%s»."
+
+#: ../src/server/e-ews-connection.c:792
+#| msgid "Password"
+msgid "Password expired."
+msgstr "La contraseña ha caducado."
+
+#: ../src/server/e-ews-connection.c:891
 msgid "Authentication failed"
 msgstr "Falló la autenticación"
 
-#: ../src/server/e-ews-connection.c:822
+#: ../src/server/e-ews-connection.c:913
 #, c-format
 msgid "No response: %s"
 msgstr "Sin respuesta: %s"
 
-#: ../src/server/e-ews-connection.c:885
+#: ../src/server/e-ews-connection.c:976
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -1187,7 +1221,7 @@ msgstr[1] ""
 "El servidor de Exchange está ocupado, esperando para reintentar (%d:%02d "
 "minutos)"
 
-#: ../src/server/e-ews-connection.c:891
+#: ../src/server/e-ews-connection.c:982
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -1196,53 +1230,53 @@ msgstr[0] ""
 msgstr[1] ""
 "El servidor de Exchange está ocupado, esperando para reintentar (%d segundos)"
 
-#: ../src/server/e-ews-connection.c:2673
+#: ../src/server/e-ews-connection.c:2804
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Falló al analizar la respuesta XML de la autodetección"
 
-#: ../src/server/e-ews-connection.c:2680
+#: ../src/server/e-ews-connection.c:2811
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Falló al buscar el elemento <Autodiscover>"
 
-#: ../src/server/e-ews-connection.c:2691
+#: ../src/server/e-ews-connection.c:2822
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Falló al buscar el elemento<Response>"
 
-#: ../src/server/e-ews-connection.c:2702
+#: ../src/server/e-ews-connection.c:2833
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Falló al buscar el elemento <Account>"
 
-#: ../src/server/e-ews-connection.c:2727
+#: ../src/server/e-ews-connection.c:2858
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr "Falló al buscar <ASUrl> y <OABUrl> en la respuesta de la autodetección"
 
-#: ../src/server/e-ews-connection.c:2818
+#: ../src/server/e-ews-connection.c:2949
 msgid "URL cannot be NULL"
 msgstr "El URL no puede ser NULL"
 
-#: ../src/server/e-ews-connection.c:2826
+#: ../src/server/e-ews-connection.c:2957
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "El URL «%s» no es válido"
 
-#: ../src/server/e-ews-connection.c:2916
+#: ../src/server/e-ews-connection.c:3047
 msgid "Email address is missing a domain part"
 msgstr "Falta el dominio en la dirección de correo-e"
 
-#: ../src/server/e-ews-connection.c:3238
+#: ../src/server/e-ews-connection.c:3371
 msgid "Failed to parse oab XML"
 msgstr "Falló al analizar el XML oab"
 
-#: ../src/server/e-ews-connection.c:3246
+#: ../src/server/e-ews-connection.c:3379
 msgid "Failed to find <OAB> element\n"
 msgstr "Falló al buscar el elemento <OAB>\n"
 
-#: ../src/server/e-ews-connection.c:4551
+#: ../src/server/e-ews-connection.c:4686
 msgid "No items found"
 msgstr "No se encontraron elementos"
 
@@ -1374,12 +1408,6 @@ msgstr "No se puede añadir la carpeta, fuente principal no encontrada"
 
 #~ msgid "GAL settings"
 #~ msgstr "Configuración de GAL"
-
-#~ msgid "Exchange Web Services Plugin"
-#~ msgstr "Complemento de servicios web Exchange"
-
-#~ msgid "Password"
-#~ msgstr "Contraseña"
 
 #~ msgid "Code: %d - Unexpected response from server"
 #~ msgstr "Código: %d: respuesta inesperada del servidor"
