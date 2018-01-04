@@ -2366,7 +2366,12 @@ e_ews_connection_update_credentials (EEwsConnection *cnc,
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
 	if (credentials) {
-		e_ews_connection_set_password (cnc, e_named_parameters_get (credentials, E_SOURCE_CREDENTIAL_PASSWORD));
+		const gchar *password;
+
+		/* Update password only if it's provided, otherwise keep the previously set, if any */
+		password = e_named_parameters_get (credentials, E_SOURCE_CREDENTIAL_PASSWORD);
+		if (password && *password)
+			e_ews_connection_set_password (cnc, password);
 
 		if (e_named_parameters_get (credentials, E_SOURCE_CREDENTIAL_USERNAME)) {
 			CamelNetworkSettings *network_settings;
