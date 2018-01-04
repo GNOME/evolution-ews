@@ -222,6 +222,32 @@ ews_backend_sync_authentication (EEwsBackend *ews_backend,
 		e_source_authentication_get_user (coll_authentication_extension));
 }
 
+static gboolean
+ews_backend_is_uuid_like_name (const gchar *name)
+{
+	const gchar *uuid_mask = "{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}";
+	const gchar *ptr, *msk_ptr;
+	gint len;
+
+	if (!name || *name != '{')
+		return FALSE;
+
+	len = strlen (name);
+	if (name[len - 1] != '}' || len != strlen (uuid_mask))
+		return FALSE;
+
+	for (ptr = name, msk_ptr = uuid_mask; *ptr && *msk_ptr; ptr++, msk_ptr++) {
+		if (*msk_ptr == 'X') {
+			if (!g_ascii_isxdigit (*ptr))
+				break;
+		} else if (*msk_ptr != *ptr) {
+			break;
+		}
+	}
+
+	return *msk_ptr == *ptr && !*msk_ptr;
+}
+
 static ESource *
 ews_backend_new_child (EEwsBackend *backend,
                        EEwsFolder *folder)
@@ -237,10 +263,17 @@ ews_backend_new_child (EEwsBackend *backend,
 
 	g_return_val_if_fail (fid != NULL, NULL);
 
+	display_name = e_ews_folder_get_name (folder);
+
+	if (e_ews_folder_get_folder_type (folder) == E_EWS_FOLDER_TYPE_CONTACTS &&
+	    ews_backend_is_uuid_like_name (display_name)) {
+		/* Ignore address books with UUID-like name */
+		return NULL;
+	}
+
 	collection_backend = E_COLLECTION_BACKEND (backend);
 	source = e_collection_backend_new_child (collection_backend, fid->id);
 
-	display_name = e_ews_folder_get_name (folder);
 	e_source_set_display_name (source, display_name);
 
 	switch (e_ews_folder_get_folder_type (folder)) {
