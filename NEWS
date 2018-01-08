@@ -1,3 +1,9 @@
+Evolution-EWS 3.26.4 2018-01-08
+-------------------------------
+
+Bug Fixes:
+	Bug 792190 - Fails to update offline GAL (Milan Crha)
+
 Evolution-EWS 3.26.3 2017-12-11
 -------------------------------
 
