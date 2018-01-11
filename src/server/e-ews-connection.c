@@ -146,6 +146,7 @@ struct _EwsAsyncData {
 	EwsDelegateDeliver deliver_to;
 	EEwsFolderType folder_type;
 	EEwsConnection *cnc;
+	gchar *user_photo; /* base64-encoded, as GetUserPhoto result */
 };
 
 struct _EwsNode {
@@ -190,6 +191,7 @@ ews_connection_error_quark (void)
 static void
 async_data_free (EwsAsyncData *async_data)
 {
+	g_free (async_data->user_photo);
 	g_free (async_data);
 }
 
@@ -2381,6 +2383,38 @@ e_ews_connection_find (const gchar *uri,
 	g_mutex_unlock (&connecting);
 
 	return NULL;
+}
+
+/**
+ * e_ews_connection_list_existing:
+ *
+ * Returns: (transfer full) (element-type EEwsConnection): a new #GSList of all currently
+ *    opened connections to all servers. Free the returned #GSList with
+ *    g_slist_free_full (connections, g_object_unref);
+ *    when no longer needed.
+ **/
+GSList * /* EEwsConnection * */
+e_ews_connection_list_existing (void)
+{
+	GSList *connections = NULL;
+
+	g_mutex_lock (&connecting);
+
+	/* search the connection in our hash table */
+	if (loaded_connections_permissions != NULL) {
+		GHashTableIter iter;
+		gpointer value;
+
+		g_hash_table_iter_init (&iter, loaded_connections_permissions);
+		while (g_hash_table_iter_next (&iter, NULL, &value)) {
+			if (value)
+				connections = g_slist_prepend (connections, g_object_ref (value));
+		}
+	}
+
+	g_mutex_unlock (&connecting);
+
+	return connections;
 }
 
 /**
@@ -10455,6 +10489,155 @@ e_ews_connection_get_server_time_zones_sync (EEwsConnection *cnc,
 	result = e_async_closure_wait (closure);
 
 	success = e_ews_connection_get_server_time_zones_finish (cnc, result, tzds, error);
+
+	e_async_closure_free (closure);
+
+	return success;
+}
+
+static void
+get_user_photo_response_cb (ESoapResponse *response,
+			    GSimpleAsyncResult *simple)
+{
+	EwsAsyncData *async_data;
+	ESoapParameter *param;
+	GError *error = NULL;
+
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	param = e_soap_response_get_first_parameter_by_name (
+		response, "PictureData", &error);
+
+	/* Sanity check */
+	g_return_if_fail (
+		(param != NULL && error == NULL) ||
+		(param == NULL && error != NULL));
+
+	if (error != NULL) {
+		g_simple_async_result_take_error (simple, error);
+		return;
+	}
+
+	async_data->user_photo = e_soap_parameter_get_string_value (param);
+	if (async_data->user_photo && !*async_data->user_photo) {
+		g_free (async_data->user_photo);
+		async_data->user_photo = NULL;
+	}
+}
+
+void
+e_ews_connection_get_user_photo (EEwsConnection *cnc,
+				 gint pri,
+				 const gchar *email,
+				 EEwsSizeRequested size_requested,
+				 GCancellable *cancellable,
+				 GAsyncReadyCallback callback,
+				 gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+	gchar *tmp;
+
+	g_return_if_fail (cnc != NULL);
+	g_return_if_fail (cnc->priv != NULL);
+	g_return_if_fail (email != NULL);
+
+	simple = g_simple_async_result_new (G_OBJECT (cnc), callback, user_data, e_ews_connection_get_user_photo);
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (simple, async_data, (GDestroyNotify) async_data_free);
+
+	/*
+	 * EWS server version earlier than 2013 doesn't have support to "GetUserPhoto".
+	 */
+	if (!e_ews_connection_satisfies_server_version (cnc, E_EWS_EXCHANGE_2013)) {
+		g_simple_async_result_complete_in_idle (simple);
+		g_object_unref (simple);
+		return;
+	}
+
+	msg = e_ews_message_new_with_header (
+		cnc->priv->settings,
+		cnc->priv->uri,
+		cnc->priv->impersonate_user,
+		"GetUserPhoto",
+		NULL,
+		NULL,
+		cnc->priv->version,
+		E_EWS_EXCHANGE_2013,
+		FALSE,
+		TRUE);
+
+	e_soap_message_start_element (msg, "Email", "messages", NULL);
+	e_soap_message_write_string (msg, email);
+	e_soap_message_end_element (msg); /* Email */
+
+	e_soap_message_start_element (msg, "SizeRequested", "messages", NULL);
+	tmp = g_strdup_printf ("HR%dx%d", (gint) size_requested, size_requested);
+	e_soap_message_write_string (msg, tmp);
+	g_free (tmp);
+	e_soap_message_end_element (msg); /* SizeRequested */
+
+	e_ews_message_write_footer (msg); /* Complete the footer and print the request */
+
+	e_ews_connection_queue_request (cnc, msg, get_user_photo_response_cb, pri, cancellable, simple);
+
+	g_object_unref (simple);
+}
+
+gboolean
+e_ews_connection_get_user_photo_finish (EEwsConnection *cnc,
+					GAsyncResult *result,
+					gchar **out_picture_data, /* base64-encoded */
+					GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (result, G_OBJECT (cnc), e_ews_connection_get_user_photo),
+		FALSE);
+	g_return_val_if_fail (out_picture_data != NULL, FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	if (!async_data->user_photo)
+		return FALSE;
+
+	*out_picture_data = async_data->user_photo;
+	async_data->user_photo = NULL;
+
+	return TRUE;
+}
+
+gboolean
+e_ews_connection_get_user_photo_sync (EEwsConnection *cnc,
+				      gint pri,
+				      const gchar *email,
+				      EEwsSizeRequested size_requested,
+				      gchar **out_picture_data, /* base64-encoded */
+				      GCancellable *cancellable,
+				      GError **error)
+{
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+
+	closure = e_async_closure_new ();
+
+	e_ews_connection_get_user_photo (
+		cnc, pri, email, size_requested, cancellable, e_async_closure_callback, closure);
+
+	result = e_async_closure_wait (closure);
+
+	success = e_ews_connection_get_user_photo_finish (cnc, result, out_picture_data, error);
 
 	e_async_closure_free (closure);
 

@@ -115,6 +115,19 @@ typedef enum {
 	E_EWS_BODY_TYPE_TEXT
 } EEwsBodyType;
 
+typedef enum {
+	E_EWS_SIZE_REQUESTED_UNKNOWN = 0,
+	E_EWS_SIZE_REQUESTED_48X48 = 48,
+	E_EWS_SIZE_REQUESTED_64X64 = 64,
+	E_EWS_SIZE_REQUESTED_96X96 = 96,
+	E_EWS_SIZE_REQUESTED_120X120 = 120,
+	E_EWS_SIZE_REQUESTED_240X240 = 240,
+	E_EWS_SIZE_REQUESTED_360X360 = 360,
+	E_EWS_SIZE_REQUESTED_432X432 = 432,
+	E_EWS_SIZE_REQUESTED_504X504 = 504,
+	E_EWS_SIZE_REQUESTED_648X648 = 648
+} EEwsSizeRequested;
+
 typedef struct {
 	gchar *id;
 	gchar *dn;
@@ -424,6 +437,7 @@ SoupSession *	e_ews_connection_ref_soup_session
 						(EEwsConnection *cnc);
 EEwsConnection *e_ews_connection_find		(const gchar *uri,
 						 const gchar *username);
+GSList *	e_ews_connection_list_existing	(void); /* EEwsConnection * */
 void		e_ews_connection_queue_request	(EEwsConnection *cnc,
 						 ESoapMessage *msg,
 						 EEwsResponseCallback cb,
@@ -1300,6 +1314,26 @@ gboolean	e_ews_connection_get_server_time_zones_sync
 						 gint pri,
 						 GSList *msdn_locations,
 						 GSList **tzds, /* EEwsCalendarTimeZoneDefinition */
+						 GCancellable *cancellable,
+						 GError **error);
+void		e_ews_connection_get_user_photo	(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *email,
+						 EEwsSizeRequested size_requested,
+						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
+						 gpointer user_data);
+gboolean	e_ews_connection_get_user_photo_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 gchar **out_picture_data, /* base64-encoded */
+						 GError **error);
+gboolean	e_ews_connection_get_user_photo_sync
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const gchar *email,
+						 EEwsSizeRequested size_requested,
+						 gchar **out_picture_data, /* base64-encoded */
 						 GCancellable *cancellable,
 						 GError **error);
 

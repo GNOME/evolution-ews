@@ -53,8 +53,10 @@ e_ews_connection_get_server_version_string (EEwsConnection *cnc)
 		case E_EWS_EXCHANGE_2010_SP1:
 			return "2010_SP1";
 		case E_EWS_EXCHANGE_2010_SP2:
-		case E_EWS_EXCHANGE_FUTURE:
 			return "2010_SP2";
+		case E_EWS_EXCHANGE_2013:
+		case E_EWS_EXCHANGE_FUTURE:
+			return "2013";
 		case E_EWS_EXCHANGE_UNKNOWN:
 			return "Unknown";
 		default:
@@ -67,14 +69,19 @@ e_ews_debug_get_server_version_from_string (const gchar *version)
 {
 	if (g_strcmp0 (version, "Exchange2007") == 0)
 		return E_EWS_EXCHANGE_2007;
-	else if (g_strcmp0 (version, "Exchange2007_SP1") == 0)
+	else if (g_strcmp0 (version, "Exchange2007_SP1") == 0 ||
+		 (version && g_str_has_prefix (version, "Exchange2007")))
 		return E_EWS_EXCHANGE_2007_SP1;
 	else if (g_strcmp0 (version, "Exchange2010") == 0)
 		return E_EWS_EXCHANGE_2010;
 	else if (g_strcmp0 (version, "Exchange2010_SP1") == 0)
 		return E_EWS_EXCHANGE_2010_SP1;
-	else if (g_strcmp0 (version, "Exchange2010_SP2") == 0)
+	else if (g_strcmp0 (version, "Exchange2010_SP2") == 0 ||
+		 (version && g_str_has_prefix (version, "Exchange2010")))
 		return E_EWS_EXCHANGE_2010_SP2;
+	else if (g_strcmp0 (version, "Exchange2013") == 0 ||
+		 (version && g_str_has_prefix (version, "Exchange2013")))
+		return E_EWS_EXCHANGE_2013;
 	else
 		return E_EWS_EXCHANGE_FUTURE;
 }

@@ -33,6 +33,7 @@
 #include "e-mail-config-ews-folder-sizes-page.h"
 #include "e-ews-ooo-notificator.h"
 #include "e-ews-config-lookup.h"
+#include "e-ews-photo-source.h"
 
 #include "e-ews-config-ui-extension.h"
 #include "server/e-source-ews-folder.h"
@@ -61,6 +62,7 @@ e_module_load (GTypeModule *type_module)
 	e_ews_config_lookup_type_register (type_module);
 	e_ews_config_ui_extension_type_register (type_module);
 	e_ews_ooo_notificator_type_register (type_module);
+	e_ews_photo_source_type_register (type_module);
 
 	e_source_ews_folder_type_register (type_module);
 }

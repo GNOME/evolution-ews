@@ -41,6 +41,8 @@ set(sources
 	e-ews-subscribe-foreign-folder.h
 	e-ews-ooo-notificator.c
 	e-ews-ooo-notificator.h
+	e-ews-photo-source.c
+	e-ews-photo-source.h
 )
 set(extra_defines)
 set(extra_cflags

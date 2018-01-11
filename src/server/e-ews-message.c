@@ -70,12 +70,14 @@ convert_server_version_to_string (EEwsServerVersion version)
 			return "Exchange2010";
 		case E_EWS_EXCHANGE_2010_SP1:
 			return "Exchange2010_SP1";
+		case E_EWS_EXCHANGE_2010_SP2:
+			return "Exchange2010_SP2";
 		/*
 		 * If we don't have support for the latest version, let's use the latest possible
 		 */
-		case E_EWS_EXCHANGE_2010_SP2:
 		case E_EWS_EXCHANGE_FUTURE:
-			return "Exchange2010_SP2";
+		case E_EWS_EXCHANGE_2013:
+			return "Exchange2013";
 	}
 
 	return "Exchange2007";
