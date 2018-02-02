@@ -85,6 +85,7 @@ struct _ECalBackendEwsPrivate {
 	" calendar:UID" \
 	" calendar:Resources" \
 	" calendar:ModifiedOccurrences" \
+	" calendar:IsMeeting" \
 	" calendar:MyResponseType" \
 	" calendar:RequiredAttendees" \
 	" calendar:OptionalAttendees"
@@ -657,58 +658,62 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 		const EwsId *item_id;
 		const GSList *l = NULL;
 		const gchar *uid = e_ews_item_get_uid (item);
-		gchar *user_email;
 
 		item_id = e_ews_item_get_id (item);
-		user_email = camel_ews_settings_dup_email (ews_settings);
 
-		/* Attendees */
-		for (l = e_ews_item_get_attendees (item); l != NULL; l = g_slist_next (l)) {
-			icalparameter *param, *cu_type;
-			gchar *mailtoname;
-			const gchar *email = NULL;
-			EwsAttendee *attendee = (EwsAttendee *) l->data;
+		if (e_ews_item_get_is_meeting (item)) {
+			gchar *user_email;
 
-			if (!attendee->mailbox)
-				continue;
+			user_email = camel_ews_settings_dup_email (ews_settings);
 
-			if (g_strcmp0 (attendee->mailbox->routing_type, "EX") == 0)
-				email = e_ews_item_util_strip_ex_address (attendee->mailbox->email);
+			/* Attendees */
+			for (l = e_ews_item_get_attendees (item); l != NULL; l = g_slist_next (l)) {
+				icalparameter *param, *cu_type;
+				gchar *mailtoname;
+				const gchar *email = NULL;
+				EwsAttendee *attendee = (EwsAttendee *) l->data;
 
-			mailtoname = g_strdup_printf ("mailto:%s", email ? email : attendee->mailbox->email);
-			icalprop = icalproperty_new_attendee (mailtoname);
-			g_free (mailtoname);
+				if (!attendee->mailbox)
+					continue;
 
-			param = icalparameter_new_cn (attendee->mailbox->name);
-			icalproperty_add_parameter (icalprop, param);
+				if (g_strcmp0 (attendee->mailbox->routing_type, "EX") == 0)
+					email = e_ews_item_util_strip_ex_address (attendee->mailbox->email);
 
-			if (g_ascii_strcasecmp (attendee->attendeetype, "Required") == 0) {
-				param = icalparameter_new_role (ICAL_ROLE_REQPARTICIPANT);
-				cu_type = icalparameter_new_cutype (ICAL_CUTYPE_INDIVIDUAL);
+				mailtoname = g_strdup_printf ("mailto:%s", email ? email : attendee->mailbox->email);
+				icalprop = icalproperty_new_attendee (mailtoname);
+				g_free (mailtoname);
+
+				param = icalparameter_new_cn (attendee->mailbox->name);
+				icalproperty_add_parameter (icalprop, param);
+
+				if (g_ascii_strcasecmp (attendee->attendeetype, "Required") == 0) {
+					param = icalparameter_new_role (ICAL_ROLE_REQPARTICIPANT);
+					cu_type = icalparameter_new_cutype (ICAL_CUTYPE_INDIVIDUAL);
+				}
+				else if (g_ascii_strcasecmp (attendee->attendeetype, "Resource") == 0) {
+					param = icalparameter_new_role (ICAL_ROLE_NONPARTICIPANT);
+					cu_type = icalparameter_new_cutype (ICAL_CUTYPE_RESOURCE);
+				}
+				else {
+					param = icalparameter_new_role ( ICAL_ROLE_OPTPARTICIPANT);
+					cu_type = icalparameter_new_cutype (ICAL_CUTYPE_INDIVIDUAL);
+				}
+				icalproperty_add_parameter (icalprop, cu_type);
+				icalproperty_add_parameter (icalprop, param);
+
+				if (user_email && (email || attendee->mailbox->email) && e_ews_item_get_my_response_type (item) &&
+				    g_ascii_strcasecmp (email ? email : attendee->mailbox->email, user_email) == 0) {
+					param = ecb_ews_responsetype_to_partstat (e_ews_item_get_my_response_type (item));
+				} else {
+					param = ecb_ews_responsetype_to_partstat (attendee->responsetype);
+				}
+				icalproperty_add_parameter (icalprop, param);
+
+				icalcomponent_add_property (icalcomp, icalprop);
 			}
-			else if (g_ascii_strcasecmp (attendee->attendeetype, "Resource") == 0) {
-				param = icalparameter_new_role (ICAL_ROLE_NONPARTICIPANT);
-				cu_type = icalparameter_new_cutype (ICAL_CUTYPE_RESOURCE);
-			}
-			else {
-				param = icalparameter_new_role ( ICAL_ROLE_OPTPARTICIPANT);
-				cu_type = icalparameter_new_cutype (ICAL_CUTYPE_INDIVIDUAL);
-			}
-			icalproperty_add_parameter (icalprop, cu_type);
-			icalproperty_add_parameter (icalprop, param);
 
-			if (user_email && (email || attendee->mailbox->email) && e_ews_item_get_my_response_type (item) &&
-			    g_ascii_strcasecmp (email ? email : attendee->mailbox->email, user_email) == 0) {
-				param = ecb_ews_responsetype_to_partstat (e_ews_item_get_my_response_type (item));
-			} else {
-				param = ecb_ews_responsetype_to_partstat (attendee->responsetype);
-			}
-			icalproperty_add_parameter (icalprop, param);
-
-			icalcomponent_add_property (icalcomp, icalprop);
+			g_free (user_email);
 		}
-
-		g_free (user_email);
 
 		/* Free/Busy */
 		freebusy = icalcomponent_get_first_property (icalcomp, ICAL_TRANSP_PROPERTY);
