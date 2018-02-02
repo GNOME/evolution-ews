@@ -134,6 +134,7 @@ struct _EEwsItemPrivate {
 	EwsMailbox *from;
 	EwsMailbox *sender;
 
+	gboolean is_meeting;
 	GSList *modified_occurrences;
 	GSList *attachments_ids;
 	gchar *my_response_type;
@@ -300,6 +301,7 @@ e_ews_item_init (EEwsItem *item)
 	item->priv = G_TYPE_INSTANCE_GET_PRIVATE (item, E_TYPE_EWS_ITEM, EEwsItemPrivate);
 
 	item->priv->item_type = E_EWS_ITEM_TYPE_UNKNOWN;
+	item->priv->is_meeting = FALSE;
 
 	item->priv->mapi_extended_tags = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_free);
 	item->priv->mapi_extended_sets = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_hash_table_destroy);
@@ -1140,6 +1142,10 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 			parse_extended_property (priv, subparam);
 		} else if (!g_ascii_strcasecmp (name, "ModifiedOccurrences")) {
 			process_modified_occurrences (priv, subparam);
+		} else if (!g_ascii_strcasecmp (name, "IsMeeting")) {
+			value = e_soap_parameter_get_string_value (subparam);
+			priv->is_meeting = (!g_ascii_strcasecmp (value, "true"));
+			g_free (value);
 		} else if (!g_ascii_strcasecmp (name, "MyResponseType")) {
 			g_free (priv->my_response_type);
 			priv->my_response_type = e_soap_parameter_get_string_value (subparam);
@@ -1386,6 +1392,14 @@ e_ews_item_is_read (EEwsItem *item,
 	*read = item->priv->is_read;
 
 	return TRUE;
+}
+
+gboolean
+e_ews_item_get_is_meeting (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), FALSE);
+
+	return item->priv->is_meeting;
 }
 
 gboolean
