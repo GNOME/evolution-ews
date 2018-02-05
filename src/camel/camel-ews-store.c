@@ -1819,6 +1819,7 @@ ews_authenticate_sync (CamelService *service,
 	CamelSettings *settings;
 	CamelEwsSettings *ews_settings;
 	EEwsConnection *connection;
+	ESource *source;
 	GSList *folders_created = NULL;
 	GSList *folders_updated = NULL;
 	GSList *folders_deleted = NULL;
@@ -1839,10 +1840,12 @@ ews_authenticate_sync (CamelService *service,
 
 	ews_settings = CAMEL_EWS_SETTINGS (settings);
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
+	source = camel_ews_utils_ref_corresponding_source (service, cancellable);
 
-	connection = e_ews_connection_new (hosturl, ews_settings);
+	connection = e_ews_connection_new (source, hosturl, ews_settings);
 	e_ews_connection_set_password (connection, password);
 
+	g_clear_object (&source);
 	g_free (hosturl);
 
 	g_object_unref (settings);
@@ -1976,6 +1979,7 @@ ews_store_query_auth_types_sync (CamelService *service,
                                  GError **error)
 {
 	EEwsConnection *connection;
+	ESource *source;
 	CamelSettings *settings;
 	CamelEwsSettings *ews_settings;
 	GList *auth_types = NULL;
@@ -1987,7 +1991,11 @@ ews_store_query_auth_types_sync (CamelService *service,
 	settings = camel_service_ref_settings (service);
 	ews_settings = CAMEL_EWS_SETTINGS (settings);
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
-	connection = e_ews_connection_new_full (hosturl, ews_settings, FALSE);
+	source = camel_ews_utils_ref_corresponding_source (service, cancellable);
+
+	connection = e_ews_connection_new_full (source, hosturl, ews_settings, FALSE);
+
+	g_clear_object (&source);
 	g_free (hosturl);
 	g_object_unref (settings);
 
@@ -2016,6 +2024,16 @@ ews_store_query_auth_types_sync (CamelService *service,
 				auth = "PLAIN";
 			else if (g_ascii_strcasecmp (auth, "Negotiate") == 0)
 				auth = "GSSAPI";
+			else if (e_oauth2_services_is_supported () &&
+				 g_ascii_strcasecmp (auth, "Bearer") == 0) {
+				/* Use Camel name for OAuth2. It's up to the caller to decide whether
+				   it can be used or not. */
+				authtype = camel_sasl_authtype ("XOAUTH2");
+				if (authtype)
+					auth_types = g_list_prepend (auth_types, authtype);
+
+				continue;
+			}
 
 			for (siter = provider->authtypes; siter; siter = siter->next) {
 				authtype = siter->data;

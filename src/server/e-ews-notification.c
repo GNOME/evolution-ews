@@ -69,43 +69,11 @@ ews_notification_authenticate (SoupSession *session,
 			       gpointer data)
 {
 	EEwsNotification *notification = data;
-	EEwsConnection *connection;
-	CamelNetworkSettings *network_settings;
-	gchar *user, *password;
 
 	g_return_if_fail (notification != NULL);
 	g_return_if_fail (notification->priv->connection != NULL);
 
-	connection = notification->priv->connection;
-
-	if (retrying)
-		e_ews_connection_set_password (connection, NULL);
-
-	network_settings = CAMEL_NETWORK_SETTINGS (e_ews_connection_ref_settings (connection));
-	user = camel_network_settings_dup_user (network_settings);
-
-	password = e_ews_connection_dup_password (connection);
-
-	if (password != NULL) {
-		soup_auth_authenticate (auth, user, password);
-	} else {
-		/* The NTLM implementation in libsoup doesn't cope very well
-		 * with recovering from authentication failures (bug 703181).
-		 * So cancel the message now while it's in-flight, and we'll
-		 * get a shiny new connection for the next attempt. */
-		const char *scheme = soup_auth_get_scheme_name (auth);
-
-		if (!g_ascii_strcasecmp(scheme, "NTLM")) {
-			soup_session_cancel_message(notification->priv->soup_session,
-						    message,
-						    SOUP_STATUS_UNAUTHORIZED);
-		}
-	}
-
-	g_free (password);
-	g_free (user);
-	g_object_unref (network_settings);
-
+	e_ews_connection_utils_authenticate (notification->priv->connection, session, message, auth, retrying);
 }
 
 EEwsNotification *
@@ -178,6 +146,24 @@ ews_notification_get_property (GObject *object,
 }
 
 static void
+ews_notification_constructed (GObject *object)
+{
+	EEwsNotification *notif;
+	CamelEwsSettings *ews_settings;
+
+	/* Chain up to parent's method. */
+	G_OBJECT_CLASS (e_ews_notification_parent_class)->constructed (object);
+
+	notif = E_EWS_NOTIFICATION (object);
+	ews_settings = e_ews_connection_ref_settings (notif->priv->connection);
+
+	e_ews_connection_utils_prepare_auth_method (notif->priv->soup_session,
+		camel_ews_settings_get_auth_mechanism (ews_settings));
+
+	g_object_unref (ews_settings);
+}
+
+static void
 ews_notification_dispose (GObject *object)
 {
 	EEwsNotificationPrivate *priv;
@@ -209,38 +195,6 @@ ews_notification_dispose (GObject *object)
 	G_OBJECT_CLASS (e_ews_notification_parent_class)->dispose (object);
 }
 
-static GObject *
-ews_notification_constructor (GType gtype, guint n_properties,
-			      GObjectConstructParam *properties)
-{
-	GObject *obj = G_OBJECT_CLASS (e_ews_notification_parent_class)->
-		constructor (gtype, n_properties, properties);
-	EEwsNotificationPrivate *priv;
-	CamelEwsSettings *ews_settings;
-	EwsAuthType mech;
-
-	priv = E_EWS_NOTIFICATION_GET_PRIVATE (obj);
-	ews_settings = e_ews_connection_ref_settings (priv->connection);
-	mech = camel_ews_settings_get_auth_mechanism (ews_settings);
-
-	g_object_unref (ews_settings);
-
-	/* We used to disable Basic auth to avoid it getting in the way of
-	 * our GSSAPI hacks. But leave it enabled in the case where NTLM is
-	 * enabled, which is the default configuration. It's a useful fallback
-	 * which people may be relying on. */
-	if (mech == EWS_AUTH_TYPE_GSSAPI) {
-		soup_session_add_feature_by_type (priv->soup_session,
-						  E_SOUP_TYPE_AUTH_NEGOTIATE);
-		soup_session_remove_feature_by_type (priv->soup_session,
-						     SOUP_TYPE_AUTH_BASIC);
-	} else if (mech == EWS_AUTH_TYPE_NTLM)
-		soup_session_add_feature_by_type (priv->soup_session,
-						  SOUP_TYPE_AUTH_NTLM);
-
-	return obj;
-}
-
 static void
 e_ews_notification_class_init (EEwsNotificationClass *class)
 {
@@ -249,9 +203,9 @@ e_ews_notification_class_init (EEwsNotificationClass *class)
 	g_type_class_add_private (class, sizeof (EEwsNotificationPrivate));
 
 	object_class = G_OBJECT_CLASS (class);
-	object_class->constructor = ews_notification_constructor;
 	object_class->set_property = ews_notification_set_property;
 	object_class->get_property = ews_notification_get_property;
+	object_class->constructed = ews_notification_constructed;
 	object_class->dispose = ews_notification_dispose;
 
 	g_object_class_install_property (

@@ -174,6 +174,28 @@ if(ENABLE_TESTS)
 endif(ENABLE_TESTS)
 
 # ******************************
+# Office365 OAuth2 support
+# ******************************
+
+add_printable_variable(WITH_OFFICE365_TENANT "Office365.com OAuth 2.0 tenant" "")
+
+if(WITH_OFFICE365_TENANT STREQUAL "")
+	set(WITH_OFFICE365_TENANT "")
+endif(WITH_OFFICE365_TENANT STREQUAL "")
+
+add_printable_variable(WITH_OFFICE365_CLIENT_ID "Office365.com OAuth 2.0 client ID" "")
+
+if(WITH_OFFICE365_CLIENT_ID STREQUAL "")
+	set(WITH_OFFICE365_CLIENT_ID "")
+endif(WITH_OFFICE365_CLIENT_ID STREQUAL "")
+
+add_printable_variable(WITH_OFFICE365_REDIRECT_URI "Office365.com OAuth 2.0 redirect URI" "")
+
+if(WITH_OFFICE365_REDIRECT_URI STREQUAL "")
+	set(WITH_OFFICE365_REDIRECT_URI "https://login.microsoftonline.com/common/oauth2/v2.0/nativeclient")
+endif(WITH_OFFICE365_REDIRECT_URI STREQUAL "")
+
+# ******************************
 # Special directories
 # ******************************
 

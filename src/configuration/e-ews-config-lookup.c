@@ -345,7 +345,7 @@ ews_config_lookup_worker_run (EConfigLookupWorker *lookup_worker,
 	if (password) {
 		const gchar *servers;
 
-		if (e_ews_autodiscover_ws_url_sync (ews_settings, email_address, password, cancellable, NULL)) {
+		if (e_ews_autodiscover_ws_url_sync (source, ews_settings, email_address, password, cancellable, NULL)) {
 			ews_config_lookup_worker_result_from_settings (lookup_worker, config_lookup, email_address, ews_settings, params);
 		}
 
@@ -368,7 +368,7 @@ ews_config_lookup_worker_run (EConfigLookupWorker *lookup_worker,
 
 				camel_ews_settings_set_hosturl (ews_settings, server);
 
-				if (e_ews_autodiscover_ws_url_sync (ews_settings, email_address, password, cancellable, NULL)) {
+				if (e_ews_autodiscover_ws_url_sync (source, ews_settings, email_address, password, cancellable, NULL)) {
 					ews_config_lookup_worker_result_from_settings (lookup_worker, config_lookup, email_address, ews_settings, params);
 				}
 

@@ -1365,7 +1365,7 @@ ecb_ews_connect_sync (ECalMetaBackend *meta_backend,
 	ews_settings = ecb_ews_get_collection_settings (cbews);
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
 
-	cbews->priv->cnc = e_ews_connection_new (hosturl, ews_settings);
+	cbews->priv->cnc = e_ews_connection_new (e_backend_get_source (E_BACKEND (cbews)), hosturl, ews_settings);
 
 	e_binding_bind_property (
 		cbews, "proxy-resolver",

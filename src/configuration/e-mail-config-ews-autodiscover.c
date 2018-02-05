@@ -137,7 +137,7 @@ mail_config_ews_autodiscover_sync (ECredentialsPrompter *prompter,
 	GError *local_error = NULL;
 	gboolean res = TRUE;
 
-	e_ews_autodiscover_ws_url_sync (
+	e_ews_autodiscover_ws_url_sync (source,
 		async_context->ews_settings, async_context->email_address,
 		credentials && e_named_parameters_get (credentials, E_SOURCE_CREDENTIAL_PASSWORD) ?
 		e_named_parameters_get (credentials, E_SOURCE_CREDENTIAL_PASSWORD) : "",
@@ -171,7 +171,7 @@ mail_config_ews_autodiscover_run_thread (GTask *task,
 
 		without_password = e_ews_connection_utils_get_without_password (async_context->ews_settings);
 		if (without_password) {
-			success = e_ews_autodiscover_ws_url_sync (
+			success = e_ews_autodiscover_ws_url_sync (async_context->source,
 				async_context->ews_settings, async_context->email_address, "",
 				cancellable, &local_error);
 		}

@@ -27,6 +27,8 @@
 #include <glib-object.h>
 #include <gio/gio.h>
 #include <libsoup/soup.h>
+#include <libedataserver/libedataserver.h>
+
 #include "e-soap-message.h"
 #include "ews-errors.h"
 #include "e-ews-folder.h"
@@ -404,9 +406,11 @@ void		ews_oal_free			(EwsOAL *oal);
 void		ews_oal_details_free		(EwsOALDetails *details);
 
 GType		e_ews_connection_get_type	(void);
-EEwsConnection *e_ews_connection_new		(const gchar *uri,
+EEwsConnection *e_ews_connection_new		(ESource *source,
+						 const gchar *uri,
 						 CamelEwsSettings *settings);
-EEwsConnection *e_ews_connection_new_full	(const gchar *uri,
+EEwsConnection *e_ews_connection_new_full	(ESource *source,
+						 const gchar *uri,
 						 CamelEwsSettings *settings,
 						 gboolean allow_connection_reuse);
 void		e_ews_connection_update_credentials
@@ -418,7 +422,12 @@ ESourceAuthenticationResult
 						 const ENamedParameters *credentials,
 						 GCancellable *cancellable,
 						 GError **error);
+ESource *	e_ews_connection_get_source	(EEwsConnection *cnc);
 const gchar *	e_ews_connection_get_uri	(EEwsConnection *cnc);
+ESoupAuthBearer *
+		e_ews_connection_ref_bearer_auth(EEwsConnection *cnc);
+void		e_ews_connection_set_bearer_auth(EEwsConnection *cnc,
+						 ESoupAuthBearer *bearer_auth);
 const gchar *	e_ews_connection_get_password	(EEwsConnection *cnc);
 gchar *		e_ews_connection_dup_password	(EEwsConnection *cnc);
 void		e_ews_connection_set_password	(EEwsConnection *cnc,
@@ -445,12 +454,14 @@ void		e_ews_connection_queue_request	(EEwsConnection *cnc,
 						 GCancellable *cancellable,
 						 GSimpleAsyncResult *simple);
 
-gboolean	e_ews_autodiscover_ws_url_sync	(CamelEwsSettings *settings,
+gboolean	e_ews_autodiscover_ws_url_sync	(ESource *source,
+						 CamelEwsSettings *settings,
 						 const gchar *email_address,
 						 const gchar *password,
 						 GCancellable *cancellable,
 						 GError **error);
-void		e_ews_autodiscover_ws_url	(CamelEwsSettings *settings,
+void		e_ews_autodiscover_ws_url	(ESource *source,
+						 CamelEwsSettings *settings,
 						 const gchar *email_address,
 						 const gchar *password,
 						 GCancellable *cancellable,

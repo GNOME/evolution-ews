@@ -309,7 +309,7 @@ ews_config_utils_try_credentials_sync (ECredentialsPrompter *prompter,
 	gboolean res = TRUE;
 
 	hosturl = camel_ews_settings_dup_hosturl (data->ews_settings);
-	data->conn = e_ews_connection_new (data->connect_url ? data->connect_url : hosturl, data->ews_settings);
+	data->conn = e_ews_connection_new (source, data->connect_url ? data->connect_url : hosturl, data->ews_settings);
 	g_free (hosturl);
 
 	e_ews_connection_update_credentials (data->conn, credentials);
@@ -369,7 +369,7 @@ e_ews_config_utils_open_connection_for (ESource *source,
 			gchar *hosturl;
 
 			hosturl = camel_ews_settings_dup_hosturl (ews_settings);
-			conn = e_ews_connection_new (connect_url && *connect_url ? connect_url : hosturl, ews_settings);
+			conn = e_ews_connection_new (source, connect_url && *connect_url ? connect_url : hosturl, ews_settings);
 			g_free (hosturl);
 
 			e_ews_connection_update_credentials (conn, NULL);

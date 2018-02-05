@@ -58,7 +58,8 @@ struct _CamelEwsSettingsClass {
 typedef enum {
 	EWS_AUTH_TYPE_NTLM,
 	EWS_AUTH_TYPE_BASIC,
-	EWS_AUTH_TYPE_GSSAPI
+	EWS_AUTH_TYPE_GSSAPI,
+	EWS_AUTH_TYPE_OAUTH2
 } EwsAuthType;
 
 
@@ -140,6 +141,32 @@ gchar *		camel_ews_settings_dup_user_agent
 void		camel_ews_settings_set_user_agent
 						(CamelEwsSettings *settings,
 						 const gchar *user_agent);
+gboolean	camel_ews_settings_get_override_oauth2
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_override_oauth2
+						(CamelEwsSettings *settings,
+						 gboolean override_oauth2);
+const gchar *	camel_ews_settings_get_oauth2_tenant
+						(CamelEwsSettings *settings);
+gchar *		camel_ews_settings_dup_oauth2_tenant
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_oauth2_tenant
+						(CamelEwsSettings *settings,
+						 const gchar *tenant);
+const gchar *	camel_ews_settings_get_oauth2_client_id
+						(CamelEwsSettings *settings);
+gchar *		camel_ews_settings_dup_oauth2_client_id
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_oauth2_client_id
+						(CamelEwsSettings *settings,
+						 const gchar *client_id);
+const gchar *	camel_ews_settings_get_oauth2_redirect_uri
+						(CamelEwsSettings *settings);
+gchar *		camel_ews_settings_dup_oauth2_redirect_uri
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_oauth2_redirect_uri
+						(CamelEwsSettings *settings,
+						 const gchar *redirect_uri);
 
 G_END_DECLS
 

@@ -1262,7 +1262,7 @@ e_ews_backend_ref_connection_sync (EEwsBackend *backend,
 
 	settings = ews_backend_get_settings (backend);
 	hosturl = camel_ews_settings_dup_hosturl (settings);
-	connection = e_ews_connection_new_full (hosturl, settings, FALSE);
+	connection = e_ews_connection_new_full (e_backend_get_source (E_BACKEND (backend)), hosturl, settings, FALSE);
 	g_free (hosturl);
 
 	e_binding_bind_property (

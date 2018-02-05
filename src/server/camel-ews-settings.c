@@ -43,6 +43,10 @@ struct _CamelEwsSettingsPrivate {
 	gchar *impersonate_user;
 	gboolean override_user_agent;
 	gchar *user_agent;
+	gboolean override_oauth2;
+	gchar *oauth2_tenant;
+	gchar *oauth2_client_id;
+	gchar *oauth2_redirect_uri;
 };
 
 enum {
@@ -66,7 +70,11 @@ enum {
 	PROP_USE_IMPERSONATION,
 	PROP_IMPERSONATE_USER,
 	PROP_OVERRIDE_USER_AGENT,
-	PROP_USER_AGENT
+	PROP_USER_AGENT,
+	PROP_OVERRIDE_OAUTH2,
+	PROP_OAUTH2_TENANT,
+	PROP_OAUTH2_CLIENT_ID,
+	PROP_OAUTH2_REDIRECT_URI
 };
 
 G_DEFINE_TYPE_WITH_CODE (
@@ -231,6 +239,30 @@ ews_settings_set_property (GObject *object,
 				CAMEL_EWS_SETTINGS (object),
 				g_value_get_string (value));
 			return;
+
+		case PROP_OVERRIDE_OAUTH2:
+			camel_ews_settings_set_override_oauth2 (
+				CAMEL_EWS_SETTINGS (object),
+				g_value_get_boolean (value));
+			return;
+
+		case PROP_OAUTH2_TENANT:
+			camel_ews_settings_set_oauth2_tenant (
+				CAMEL_EWS_SETTINGS (object),
+				g_value_get_string (value));
+			return;
+
+		case PROP_OAUTH2_CLIENT_ID:
+			camel_ews_settings_set_oauth2_client_id (
+				CAMEL_EWS_SETTINGS (object),
+				g_value_get_string (value));
+			return;
+
+		case PROP_OAUTH2_REDIRECT_URI:
+			camel_ews_settings_set_oauth2_redirect_uri (
+				CAMEL_EWS_SETTINGS (object),
+				g_value_get_string (value));
+			return;
 	}
 
 	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -382,6 +414,34 @@ ews_settings_get_property (GObject *object,
 				camel_ews_settings_dup_user_agent (
 				CAMEL_EWS_SETTINGS (object)));
 			return;
+
+		case PROP_OVERRIDE_OAUTH2:
+			g_value_set_boolean (
+				value,
+				camel_ews_settings_get_override_oauth2 (
+				CAMEL_EWS_SETTINGS (object)));
+			return;
+
+		case PROP_OAUTH2_TENANT:
+			g_value_take_string (
+				value,
+				camel_ews_settings_dup_oauth2_tenant (
+				CAMEL_EWS_SETTINGS (object)));
+			return;
+
+		case PROP_OAUTH2_CLIENT_ID:
+			g_value_take_string (
+				value,
+				camel_ews_settings_dup_oauth2_client_id (
+				CAMEL_EWS_SETTINGS (object)));
+			return;
+
+		case PROP_OAUTH2_REDIRECT_URI:
+			g_value_take_string (
+				value,
+				camel_ews_settings_dup_oauth2_redirect_uri (
+				CAMEL_EWS_SETTINGS (object)));
+			return;
 	}
 
 	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -403,6 +463,9 @@ ews_settings_finalize (GObject *object)
 	g_free (priv->oal_selected);
 	g_free (priv->impersonate_user);
 	g_free (priv->user_agent);
+	g_free (priv->oauth2_tenant);
+	g_free (priv->oauth2_client_id);
+	g_free (priv->oauth2_redirect_uri);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_ews_settings_parent_class)->finalize (object);
@@ -629,6 +692,54 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_OVERRIDE_OAUTH2,
+		g_param_spec_boolean (
+			"override-oauth2",
+			"Override OAuth2",
+			"Whether to override OAuth2 values",
+			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_OAUTH2_TENANT,
+		g_param_spec_string (
+			"oauth2-tenant",
+			"OAuth2 Tenant",
+			"OAuth2 Tenant to use, only if override-oauth2 is TRUE, otherwise the compile-time value is used",
+			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_OAUTH2_CLIENT_ID,
+		g_param_spec_string (
+			"oauth2-client-id",
+			"OAuth2 Client ID",
+			"OAuth2 Client-ID to use, only if override-oauth2 is TRUE, otherwise the compile-time value is used",
+			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_OAUTH2_REDIRECT_URI,
+		g_param_spec_string (
+			"oauth2-redirect-uri",
+			"OAuth2 Redirect URI",
+			"OAuth2 Redirect URI to use, only if override-oauth2 is TRUE, otherwise the compile-time value is used",
+			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
 }
 
 static void
@@ -675,6 +786,8 @@ camel_ews_settings_get_auth_mechanism (CamelEwsSettings *settings)
 		result = EWS_AUTH_TYPE_BASIC;
 	else if (auth_mech && g_ascii_strcasecmp (auth_mech, "GSSAPI") == 0)
 		result = EWS_AUTH_TYPE_GSSAPI;
+	else if (auth_mech && g_ascii_strcasecmp (auth_mech, "Office365") == 0)
+		result = EWS_AUTH_TYPE_OAUTH2;
 	else
 		result = EWS_AUTH_TYPE_NTLM;
 
@@ -1266,4 +1379,167 @@ camel_ews_settings_set_user_agent (CamelEwsSettings *settings,
 	g_mutex_unlock (&settings->priv->property_lock);
 
 	g_object_notify (G_OBJECT (settings), "user-agent");
+}
+
+gboolean
+camel_ews_settings_get_override_oauth2 (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), FALSE);
+
+	return settings->priv->override_oauth2;
+}
+
+void
+camel_ews_settings_set_override_oauth2 (CamelEwsSettings *settings,
+					gboolean override_oauth2)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	if ((settings->priv->override_oauth2 ? 1 : 0) == (override_oauth2 ? 1 : 0))
+		return;
+
+	settings->priv->override_oauth2 = override_oauth2;
+
+	g_object_notify (G_OBJECT (settings), "override-oauth2");
+}
+
+const gchar *
+camel_ews_settings_get_oauth2_tenant (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
+
+	return settings->priv->oauth2_tenant;
+}
+
+gchar *
+camel_ews_settings_dup_oauth2_tenant (CamelEwsSettings *settings)
+{
+	const gchar *protected;
+	gchar *duplicate;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
+
+	g_mutex_lock (&settings->priv->property_lock);
+
+	protected = camel_ews_settings_get_oauth2_tenant (settings);
+	duplicate = g_strdup (protected);
+
+	g_mutex_unlock (&settings->priv->property_lock);
+
+	return duplicate;
+}
+
+void
+camel_ews_settings_set_oauth2_tenant (CamelEwsSettings *settings,
+				      const gchar *tenant)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	g_mutex_lock (&settings->priv->property_lock);
+
+	if (g_strcmp0 (settings->priv->oauth2_tenant, tenant) == 0) {
+		g_mutex_unlock (&settings->priv->property_lock);
+		return;
+	}
+
+	g_free (settings->priv->oauth2_tenant);
+	settings->priv->oauth2_tenant = e_util_strdup_strip (tenant);
+
+	g_mutex_unlock (&settings->priv->property_lock);
+
+	g_object_notify (G_OBJECT (settings), "oauth2-tenant");
+}
+
+const gchar *
+camel_ews_settings_get_oauth2_client_id (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
+
+	return settings->priv->oauth2_client_id;
+}
+
+gchar *
+camel_ews_settings_dup_oauth2_client_id (CamelEwsSettings *settings)
+{
+	const gchar *protected;
+	gchar *duplicate;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
+
+	g_mutex_lock (&settings->priv->property_lock);
+
+	protected = camel_ews_settings_get_oauth2_client_id (settings);
+	duplicate = g_strdup (protected);
+
+	g_mutex_unlock (&settings->priv->property_lock);
+
+	return duplicate;
+}
+
+void
+camel_ews_settings_set_oauth2_client_id (CamelEwsSettings *settings,
+					 const gchar *client_id)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	g_mutex_lock (&settings->priv->property_lock);
+
+	if (g_strcmp0 (settings->priv->oauth2_client_id, client_id) == 0) {
+		g_mutex_unlock (&settings->priv->property_lock);
+		return;
+	}
+
+	g_free (settings->priv->oauth2_client_id);
+	settings->priv->oauth2_client_id = e_util_strdup_strip (client_id);
+
+	g_mutex_unlock (&settings->priv->property_lock);
+
+	g_object_notify (G_OBJECT (settings), "oauth2-client-id");
+}
+
+const gchar *
+camel_ews_settings_get_oauth2_redirect_uri (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
+
+	return settings->priv->oauth2_redirect_uri;
+}
+
+gchar *
+camel_ews_settings_dup_oauth2_redirect_uri (CamelEwsSettings *settings)
+{
+	const gchar *protected;
+	gchar *duplicate;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), NULL);
+
+	g_mutex_lock (&settings->priv->property_lock);
+
+	protected = camel_ews_settings_get_oauth2_redirect_uri (settings);
+	duplicate = g_strdup (protected);
+
+	g_mutex_unlock (&settings->priv->property_lock);
+
+	return duplicate;
+}
+
+void
+camel_ews_settings_set_oauth2_redirect_uri (CamelEwsSettings *settings,
+					    const gchar *redirect_uri)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	g_mutex_lock (&settings->priv->property_lock);
+
+	if (g_strcmp0 (settings->priv->oauth2_redirect_uri, redirect_uri) == 0) {
+		g_mutex_unlock (&settings->priv->property_lock);
+		return;
+	}
+
+	g_free (settings->priv->oauth2_redirect_uri);
+	settings->priv->oauth2_redirect_uri = e_util_strdup_strip (redirect_uri);
+
+	g_mutex_unlock (&settings->priv->property_lock);
+
+	g_object_notify (G_OBJECT (settings), "oauth2-redirect-uri");
 }

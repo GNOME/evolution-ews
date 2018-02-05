@@ -28,6 +28,8 @@
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 
+#include <libemail-engine/libemail-engine.h>
+
 #include "server/camel-ews-settings.h"
 #include "server/e-ews-camel-common.h"
 #include "server/e-ews-item-change.h"
@@ -1204,4 +1206,48 @@ camel_ews_utils_delete_folders_from_summary_recursive (CamelEwsStore *ews_store,
 	}
 
 	return success;
+}
+
+/* Unref with g_object_unref() when done with it */
+ESource *
+camel_ews_utils_ref_corresponding_source (CamelService *service,
+					  GCancellable *cancellable)
+{
+	ESourceRegistry *registry = NULL;
+	CamelSession *session;
+	ESource *source = NULL;
+
+	g_return_val_if_fail (CAMEL_IS_SERVICE (service), NULL);
+
+	session = camel_service_ref_session (service);
+	if (E_IS_MAIL_SESSION (session)) {
+		registry = e_mail_session_get_registry (E_MAIL_SESSION (session));
+		if (registry)
+			g_object_ref (registry);
+	}
+
+	g_clear_object (&session);
+
+	if (!registry)
+		registry = e_source_registry_new_sync (cancellable, NULL);
+
+	if (registry) {
+		source = e_source_registry_ref_source (registry, camel_service_get_uid (service));
+
+		while (source && e_source_get_parent (source) &&
+		       !e_source_has_extension (source, E_SOURCE_EXTENSION_COLLECTION)) {
+			ESource *parent;
+
+			parent = e_source_registry_ref_source (registry, e_source_get_parent (source));
+			if (!parent)
+				break;
+
+			g_clear_object (&source);
+			source = parent;
+		}
+	}
+
+	g_clear_object (&registry);
+
+	return source;
 }

@@ -85,6 +85,9 @@ gboolean	camel_ews_utils_delete_folders_from_summary_recursive
 						 CamelFolderInfo *folder_info,
 						 gboolean send_signals,
 						 GError **error);
+ESource *	camel_ews_utils_ref_corresponding_source
+						(CamelService *service,
+						 GCancellable *cancellable);
 
 G_END_DECLS
 
