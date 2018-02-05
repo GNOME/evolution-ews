@@ -1,3 +1,14 @@
+Evolution-EWS 3.27.90 2018-02-05
+--------------------------------
+
+Bug Fixes:
+	Bug 792411 - Use GetUserPhoto to lookup sender's photo (Milan Crha)
+	Bug 793037 - Some appointments displayed as meetings (Milan Crha)
+	Bug 775690 - Support OAuth2 for outlook.office365.com (initial changes) (Milan Crha)
+
+Translations:
+	Marek Cernocky (cs)
+
 Evolution-EWS 3.27.4 2018-01-08
 -------------------------------
 
