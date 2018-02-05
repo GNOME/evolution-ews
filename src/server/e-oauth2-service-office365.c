@@ -31,8 +31,8 @@
 #define OFFICE365_SCOPE "offline_access " \
 	"https://outlook.office.com/Mail.ReadWrite " \
 	"https://outlook.office.com/Mail.Send " \
-	"https://outlook.office.com/ReadWrite " \
-	"https://outlook.office.com/ReadWrite " \
+	"https://outlook.office.com/Calendars.ReadWrite " \
+	"https://outlook.office.com/Contacts.ReadWrite " \
 	"https://outlook.office.com/Tasks.ReadWrite"
 
 	/*"https://outlook.office.com/Mail.ReadWrite.Shared " \
