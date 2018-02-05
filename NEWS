@@ -1,3 +1,9 @@
+Evolution-EWS 3.26.5 2018-02-05
+-------------------------------
+
+Bug Fixes:
+	Bug 793037 - Some appointments displayed as meetings (Milan Crha)
+
 Evolution-EWS 3.26.4 2018-01-08
 -------------------------------
 
