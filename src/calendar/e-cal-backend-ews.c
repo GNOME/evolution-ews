@@ -450,7 +450,6 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 			e_ews_item_task_has_complete_date (item, &has_this_date);
 			if (has_this_date) {
 				complete_date = icaltime_from_timet_with_zone (e_ews_item_get_complete_date (item), 0, utc_zone);
-				complete_date.is_date = 1;
 				icalprop = icalproperty_new_completed (complete_date);
 				icalcomponent_add_property (icalcomp, icalprop);
 			}
