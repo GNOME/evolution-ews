@@ -2459,6 +2459,48 @@ e_ews_connection_new (ESource *source,
 	return e_ews_connection_new_full (source, uri, settings, TRUE);
 }
 
+EEwsConnection *
+e_ews_connection_new_for_backend (EBackend *backend,
+				  ESourceRegistry *registry,
+				  const gchar *uri,
+				  CamelEwsSettings *settings)
+{
+	ESource *source;
+	EEwsConnection *cnc;
+
+	g_return_val_if_fail (E_IS_BACKEND (backend), NULL);
+	g_return_val_if_fail (E_IS_SOURCE_REGISTRY (registry), NULL);
+
+	source = e_backend_get_source (backend);
+	if (!source)
+		return e_ews_connection_new (source, uri, settings);
+
+	g_object_ref (source);
+
+	while (source && !e_source_has_extension (source, E_SOURCE_EXTENSION_COLLECTION) &&
+	       e_source_get_parent (source)) {
+		ESource *parent;
+
+		parent = e_source_registry_ref_source (registry, e_source_get_parent (source));
+		if (!parent) {
+			g_clear_object (&source);
+			break;
+		}
+
+		g_object_unref (source);
+		source = parent;
+	}
+
+	if (source)
+		cnc = e_ews_connection_new (source, uri, settings);
+	else
+		cnc = e_ews_connection_new (e_backend_get_source (backend), uri, settings);
+
+	g_clear_object (&source);
+
+	return cnc;
+}
+
 void
 e_ews_connection_update_credentials (EEwsConnection *cnc,
 				     const ENamedParameters *credentials)

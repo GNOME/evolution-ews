@@ -54,6 +54,7 @@ target_compile_definitions(evolution-ews PRIVATE
 
 target_compile_options(evolution-ews PUBLIC
 	${CAMEL_CFLAGS}
+	${LIBEBACKEND_CFLAGS}
 	${LIBECAL_CFLAGS}
 	${LIBEDATACAL_CFLAGS}
 	${LIBEDATASERVER_CFLAGS}
@@ -68,6 +69,7 @@ target_include_directories(evolution-ews PUBLIC
 	${CMAKE_SOURCE_DIR}/src
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CAMEL_INCLUDE_DIRS}
+	${LIBEBACKEND_INCLUDE_DIRS}
 	${LIBECAL_INCLUDE_DIRS}
 	${LIBEDATACAL_INCLUDE_DIRS}
 	${LIBEDATASERVER_INCLUDE_DIRS}
@@ -77,6 +79,7 @@ target_include_directories(evolution-ews PUBLIC
 
 target_link_libraries(evolution-ews
 	${CAMEL_LDFLAGS}
+	${LIBEBACKEND_LDFLAGS}
 	${LIBECAL_LDFLAGS}
 	${LIBEDATACAL_LDFLAGS}
 	${LIBEDATASERVER_LDFLAGS}

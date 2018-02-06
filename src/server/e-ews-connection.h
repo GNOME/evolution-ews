@@ -28,6 +28,7 @@
 #include <gio/gio.h>
 #include <libsoup/soup.h>
 #include <libedataserver/libedataserver.h>
+#include <libebackend/libebackend.h>
 
 #include "e-soap-message.h"
 #include "ews-errors.h"
@@ -413,6 +414,10 @@ EEwsConnection *e_ews_connection_new_full	(ESource *source,
 						 const gchar *uri,
 						 CamelEwsSettings *settings,
 						 gboolean allow_connection_reuse);
+EEwsConnection *e_ews_connection_new_for_backend(EBackend *backend,
+						 ESourceRegistry *registry,
+						 const gchar *uri,
+						 CamelEwsSettings *settings);
 void		e_ews_connection_update_credentials
 						(EEwsConnection *cnc,
 						 const ENamedParameters *credentials);

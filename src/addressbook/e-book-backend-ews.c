@@ -1887,7 +1887,7 @@ ebb_ews_download_gal_file (EBookBackendEws *bbews,
 	cache_dir = e_book_backend_get_cache_dir (E_BOOK_BACKEND (bbews));
 	download_path = g_build_filename (cache_dir, full->filename, NULL);
 
-	oab_cnc = e_ews_connection_new (e_backend_get_source (E_BACKEND (bbews)), full_url, ews_settings);
+	oab_cnc = e_ews_connection_new_for_backend (E_BACKEND (bbews), e_book_backend_get_registry (E_BOOK_BACKEND (bbews)), full_url, ews_settings);
 
 	e_binding_bind_property (
 		bbews, "proxy-resolver",
@@ -2732,7 +2732,7 @@ ebb_ews_connect_sync (EBookMetaBackend *meta_backend,
 	ews_settings = ebb_ews_get_collection_settings (bbews);
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
 
-	bbews->priv->cnc = e_ews_connection_new (e_backend_get_source (E_BACKEND (bbews)), hosturl, ews_settings);
+	bbews->priv->cnc = e_ews_connection_new_for_backend (E_BACKEND (bbews), e_book_backend_get_registry (E_BOOK_BACKEND (bbews)), hosturl, ews_settings);
 
 	e_binding_bind_property (
 		bbews, "proxy-resolver",
@@ -2856,7 +2856,7 @@ ebb_ews_get_changes_sync (EBookMetaBackend *meta_backend,
 			if (sequence == -1)
 				sequence = 0;
 
-			oab_cnc = e_ews_connection_new (e_backend_get_source (E_BACKEND (bbews)), oab_url, ews_settings);
+			oab_cnc = e_ews_connection_new_for_backend (E_BACKEND (bbews), e_book_backend_get_registry (E_BOOK_BACKEND (bbews)), oab_url, ews_settings);
 
 			e_binding_bind_property (
 				bbews, "proxy-resolver",

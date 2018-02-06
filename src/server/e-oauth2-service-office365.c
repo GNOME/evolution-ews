@@ -28,18 +28,20 @@
    https://tsmatz.wordpress.com/2016/10/07/application-permission-with-v2-endpoint-and-microsoft-graph/
 */
 
-#define OFFICE365_SCOPE "offline_access " \
-	"https://outlook.office.com/Mail.ReadWrite " \
-	"https://outlook.office.com/Mail.Send " \
-	"https://outlook.office.com/Calendars.ReadWrite " \
-	"https://outlook.office.com/Contacts.ReadWrite " \
-	"https://outlook.office.com/Tasks.ReadWrite"
+#define OFFICE365_RESOURCE "https://outlook.office.com"
 
-	/*"https://outlook.office.com/Mail.ReadWrite.Shared " \
-	"https://outlook.office.com/Mail.Send.Shared " \
-	"https://outlook.office.com/Calendars.ReadWrite.Shared " \
-	"https://outlook.office.com/Contacts.ReadWrite.Shared " \
-	"https://outlook.office.com/Tasks.ReadWrite.Shared"*/
+#define OFFICE365_SCOPE "offline_access " \
+	"Mail.ReadWrite " \
+	"Mail.Send " \
+	"Calendars.ReadWrite " \
+	"Contacts.ReadWrite " \
+	"Tasks.ReadWrite"
+
+	/*"Mail.ReadWrite.Shared " \
+	"Mail.Send.Shared " \
+	"Calendars.ReadWrite.Shared " \
+	"Contacts.ReadWrite.Shared " \
+	"Tasks.ReadWrite.Shared"*/
 
 struct _EOAuth2ServiceOffice365Private
 {
@@ -169,7 +171,7 @@ eos_office365_get_authentication_uri (EOAuth2Service *service,
 		}
 
 		res = eos_office365_cache_string (oauth2_office365,
-			g_strdup_printf ("https://login.microsoftonline.com/%s/oauth2/v2.0/authorize",
+			g_strdup_printf ("https://login.microsoftonline.com/%s/oauth2/authorize",
 				tenant ? tenant : OFFICE365_TENANT));
 
 		g_free (tenant);
@@ -177,7 +179,7 @@ eos_office365_get_authentication_uri (EOAuth2Service *service,
 		return res;
 	}
 
-	return "https://login.microsoftonline.com/" OFFICE365_TENANT "/oauth2/v2.0/authorize";
+	return "https://login.microsoftonline.com/" OFFICE365_TENANT "/oauth2/authorize";
 }
 
 static const gchar *
@@ -199,7 +201,7 @@ eos_office365_get_refresh_uri (EOAuth2Service *service,
 		}
 
 		res = eos_office365_cache_string (oauth2_office365,
-			g_strdup_printf ("https://login.microsoftonline.com/%s/oauth2/v2.0/token",
+			g_strdup_printf ("https://login.microsoftonline.com/%s/oauth2/token",
 				tenant ? tenant : OFFICE365_TENANT));
 
 		g_free (tenant);
@@ -207,7 +209,7 @@ eos_office365_get_refresh_uri (EOAuth2Service *service,
 		return res;
 	}
 
-	return "https://login.microsoftonline.com/" OFFICE365_TENANT "/oauth2/v2.0/token";
+	return "https://login.microsoftonline.com/" OFFICE365_TENANT "/oauth2/token";
 }
 
 static const gchar *
@@ -237,7 +239,7 @@ eos_office365_get_redirect_uri (EOAuth2Service *service,
 	if (res && *res)
 		return res;
 
-	return "https://login.microsoftonline.com/common/oauth2/v2.0/nativeclient";
+	return "https://login.microsoftonline.com/common/oauth2/nativeclient";
 }
 
 static void
@@ -248,7 +250,9 @@ eos_office365_prepare_authentication_uri_query (EOAuth2Service *service,
 	g_return_if_fail (uri_query != NULL);
 
 	e_oauth2_service_util_set_to_form (uri_query, "response_mode", "query");
+	e_oauth2_service_util_set_to_form (uri_query, "prompt", "admin_consent");
 	e_oauth2_service_util_set_to_form (uri_query, "scope", OFFICE365_SCOPE);
+	e_oauth2_service_util_set_to_form (uri_query, "resource", OFFICE365_RESOURCE);
 }
 
 static gboolean
@@ -316,6 +320,7 @@ eos_office365_prepare_refresh_token_form (EOAuth2Service *service,
 	g_return_if_fail (form != NULL);
 
 	e_oauth2_service_util_set_to_form (form, "scope", OFFICE365_SCOPE);
+	e_oauth2_service_util_set_to_form (form, "resource", OFFICE365_RESOURCE);
 	e_oauth2_service_util_set_to_form (form, "redirect_uri", e_oauth2_service_get_redirect_uri (service, source));
 }
 

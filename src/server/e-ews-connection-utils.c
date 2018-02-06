@@ -365,7 +365,9 @@ ews_connection_utils_maybe_prepare_bearer_auth (EEwsConnection *cnc,
 		return TRUE;
 	}
 
-	if (g_strcmp0 (auth_method, "OAuth2") != 0 && !e_oauth2_services_is_oauth2_alias_static (auth_method)) {
+	if (g_strcmp0 (auth_method, "OAuth2") != 0 &&
+	    g_strcmp0 (auth_method, "Office365") != 0 &&
+	    !e_oauth2_services_is_oauth2_alias_static (auth_method)) {
 		g_free (auth_method);
 		return TRUE;
 	}

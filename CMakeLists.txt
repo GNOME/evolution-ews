@@ -192,7 +192,7 @@ endif(WITH_OFFICE365_CLIENT_ID STREQUAL "")
 add_printable_variable(WITH_OFFICE365_REDIRECT_URI "Office365.com OAuth 2.0 redirect URI" "")
 
 if(WITH_OFFICE365_REDIRECT_URI STREQUAL "")
-	set(WITH_OFFICE365_REDIRECT_URI "https://login.microsoftonline.com/common/oauth2/v2.0/nativeclient")
+	set(WITH_OFFICE365_REDIRECT_URI "https://login.microsoftonline.com/common/oauth2/nativeclient")
 endif(WITH_OFFICE365_REDIRECT_URI STREQUAL "")
 
 # ******************************

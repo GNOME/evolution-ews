@@ -397,7 +397,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
 
-	markup = g_strdup_printf (_("Default redirect URI is “%s”"), "https://login.microsoftonline.com/common/oauth2/v2.0/nativeclient");
+	markup = g_strdup_printf (_("Default redirect URI is “%s”"), "https://login.microsoftonline.com/common/oauth2/nativeclient");
 	mail_config_ews_backend_set_oauth2_tooltip (widget, OFFICE365_REDIRECT_URI,
 		markup,
 		g_strdup_printf (_("Default redirect URI is “%s”"), OFFICE365_REDIRECT_URI));
