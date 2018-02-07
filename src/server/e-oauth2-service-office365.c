@@ -104,7 +104,7 @@ eos_office365_guess_can_process (EOAuth2Service *service,
 				 const gchar *protocol,
 				 const gchar *hostname)
 {
-	return e_oauth2_services_is_supported () && g_getenv ("EWS_WITH_OAUTH2") &&
+	return e_oauth2_services_is_supported () &&
 		protocol && g_ascii_strcasecmp (protocol, "ews") == 0 &&
 		hostname && e_util_utf8_strstrcase (hostname, "outlook.office365.com");
 }

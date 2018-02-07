@@ -579,6 +579,28 @@ mail_config_ews_backend_check_complete (EMailConfigServiceBackend *backend)
 
 	e_util_set_entry_issue_hint (priv->user_entry, correct ? NULL : _("User name cannot be empty"));
 
+	if (correct && camel_ews_settings_get_auth_mechanism (ews_settings) == EWS_AUTH_TYPE_OAUTH2) {
+		const gchar *tenant, *client_id;
+
+		if (camel_ews_settings_get_override_oauth2 (ews_settings)) {
+			tenant = camel_ews_settings_get_oauth2_tenant (ews_settings);
+			client_id = camel_ews_settings_get_oauth2_client_id (ews_settings);
+		} else {
+			tenant = OFFICE365_TENANT;
+			client_id = OFFICE365_CLIENT_ID;
+		}
+
+		correct = tenant && *tenant;
+		complete = complete && correct;
+
+		e_util_set_entry_issue_hint (priv->oauth2_tenant_entry, correct ? NULL : _("Tenant cannot be empty"));
+
+		correct = client_id && *client_id;
+		complete = complete && correct;
+
+		e_util_set_entry_issue_hint (priv->oauth2_client_id_entry, correct ? NULL : _("Application ID cannot be empty"));
+	}
+
 	return complete;
 }
 
