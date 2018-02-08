@@ -323,6 +323,8 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_box_pack_start (GTK_BOX (container), widget, FALSE, FALSE, 0);
 	g_free (markup);
 
+	/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+	   You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/ */
 	widget = gtk_label_new_with_mnemonic (_("_Tenant:"));
 	gtk_widget_set_margin_left (widget, 12);
 	gtk_misc_set_alignment (GTK_MISC (widget), 1.0, 0.5);
@@ -346,7 +348,11 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		G_BINDING_SYNC_CREATE);
 
 	mail_config_ews_backend_set_oauth2_tooltip (widget, OFFICE365_TENANT,
+		/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+		   You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/ */
 		_("There is not set any default tenant"),
+		/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+		   You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/ */
 		g_strdup_printf (_("Default tenant is “%s”"), OFFICE365_TENANT));
 
 	widget = gtk_label_new_with_mnemonic (_("Application I_D:"));
@@ -593,6 +599,8 @@ mail_config_ews_backend_check_complete (EMailConfigServiceBackend *backend)
 		correct = tenant && *tenant;
 		complete = complete && correct;
 
+		/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+		   You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/ */
 		e_util_set_entry_issue_hint (priv->oauth2_tenant_entry, correct ? NULL : _("Tenant cannot be empty"));
 
 		correct = client_id && *client_id;
