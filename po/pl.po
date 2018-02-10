@@ -1,15 +1,15 @@
 # Polish translation for evolution-ews.
-# Copyright © 2010-2017 the evolution-ews authors.
+# Copyright © 2010-2018 the evolution-ews authors.
 # This file is distributed under the same license as the evolution-ews package.
-# Piotr Drąg <piotrdrag@gmail.com>, 2010-2017.
-# Aviary.pl <community-poland@mozilla.org>, 2010-2017.
+# Piotr Drąg <piotrdrag@gmail.com>, 2010-2018.
+# Aviary.pl <community-poland@mozilla.org>, 2010-2018.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-03 18:27+0100\n"
-"PO-Revision-Date: 2017-12-03 18:28+0100\n"
+"POT-Creation-Date: 2018-02-10 23:14+0100\n"
+"PO-Revision-Date: 2018-02-10 23:15+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -20,13 +20,13 @@ msgstr ""
 "|| n%100>=20) ? 1 : 2);\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
-#: ../src/camel/camel-ews-provider.c:79
+#: ../src/camel/camel-ews-provider.c:81
 #: ../src/configuration/e-ews-config-lookup.c:251
 msgid "Exchange Web Services"
 msgstr "Exchange Web Services"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
-#: ../src/camel/camel-ews-provider.c:81
+#: ../src/camel/camel-ews-provider.c:83
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Dostęp do serwerów Exchange za pomocą Web Services"
 
@@ -45,27 +45,27 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Ustawienie zdjęcia kontaktu się nie powiodło:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1573
+#: ../src/calendar/e-cal-backend-ews.c:1577
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Wolny"
 
-#: ../src/calendar/e-cal-backend-ews.c:1576
+#: ../src/calendar/e-cal-backend-ews.c:1580
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Zajęty"
 
-#: ../src/calendar/e-cal-backend-ews.c:1578
+#: ../src/calendar/e-cal-backend-ews.c:1582
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Poza biurem"
 
-#: ../src/calendar/e-cal-backend-ews.c:1580
+#: ../src/calendar/e-cal-backend-ews.c:1584
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Wstępnie"
 
-#: ../src/calendar/e-cal-backend-ews.c:3188
+#: ../src/calendar/e-cal-backend-ews.c:3192
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Nie można odnaleźć użytkownika „%s” na liście uczestników"
@@ -119,59 +119,59 @@ msgstr "Odświeżanie katalogu „%s”"
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Nie można wykonać działań na katalogu w trybie offline"
 
-#: ../src/camel/camel-ews-provider.c:45
+#: ../src/camel/camel-ews-provider.c:47
 msgid "Checking for new mail"
 msgstr "Sprawdzanie nowej poczty"
 
-#: ../src/camel/camel-ews-provider.c:47
+#: ../src/camel/camel-ews-provider.c:49
 msgid "C_heck for new messages in all folders"
 msgstr "P_obierz nowe wiadomości ze wszystkich katalogów"
 
-#: ../src/camel/camel-ews-provider.c:49
+#: ../src/camel/camel-ews-provider.c:51
 msgid "_Listen for server change notifications"
 msgstr "_Nasłuchiwanie powiadomień o zmianach na serwerze"
 
-#: ../src/camel/camel-ews-provider.c:52
+#: ../src/camel/camel-ews-provider.c:54
 msgid "Options"
 msgstr "Opcje"
 
-#: ../src/camel/camel-ews-provider.c:54
+#: ../src/camel/camel-ews-provider.c:56
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr ""
 "_Zastosowanie filtrów na nowych wiadomościach w Nadchodzących na tym serwerze"
 
-#: ../src/camel/camel-ews-provider.c:56
+#: ../src/camel/camel-ews-provider.c:58
 msgid "Check new messages for _Junk contents"
 msgstr "Sp_rawdzanie nowych wiadomości pod kątem niechcianych wiadomości"
 
-#: ../src/camel/camel-ews-provider.c:58
+#: ../src/camel/camel-ews-provider.c:60
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "Sprawdzanie niechcianych wiadomości tylko w katalogu _Odebrane"
 
-#: ../src/camel/camel-ews-provider.c:60
+#: ../src/camel/camel-ews-provider.c:62
 msgid "Synchroni_ze remote mail locally in all folders"
 msgstr "_Synchronizacja zdalnej poczty lokalnie we wszystkich katalogach"
 
-#: ../src/camel/camel-ews-provider.c:64
+#: ../src/camel/camel-ews-provider.c:66
 msgid "Connection"
 msgstr "Połączenie"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/camel/camel-ews-provider.c:68
+#: ../src/camel/camel-ews-provider.c:70
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "_Czas oczekiwania na połączenie (w sekundach) %s"
 
-#: ../src/camel/camel-ews-provider.c:70
+#: ../src/camel/camel-ews-provider.c:72
 msgid "Override _User-Agent header value"
 msgstr "Zastępowanie wartości nagłówka agenta _użytkownika"
 
-#: ../src/camel/camel-ews-provider.c:96
+#: ../src/camel/camel-ews-provider.c:98
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/camel/camel-ews-provider.c:98
+#: ../src/camel/camel-ews-provider.c:100
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -179,11 +179,11 @@ msgstr ""
 "Ta opcja spowoduje połączenie z serwerem Exchange używając hasła tekstowego "
 "za pomocą uwierzytelniania NTLM."
 
-#: ../src/camel/camel-ews-provider.c:106
+#: ../src/camel/camel-ews-provider.c:108
 msgid "Basic"
 msgstr "Podstawowe"
 
-#: ../src/camel/camel-ews-provider.c:108
+#: ../src/camel/camel-ews-provider.c:110
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -191,11 +191,11 @@ msgstr ""
 "Ta opcja spowoduje połączenie z serwerem Exchange używając hasła tekstowego "
 "za pomocą uwierzytelniania podstawowego."
 
-#: ../src/camel/camel-ews-provider.c:116
+#: ../src/camel/camel-ews-provider.c:118
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/camel/camel-ews-provider.c:118
+#: ../src/camel/camel-ews-provider.c:120
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -257,30 +257,30 @@ msgstr "Aktualizowanie obcej struktury katalogów"
 msgid "Updating foreign folders"
 msgstr "Aktualizowanie obcych katalogów"
 
-#: ../src/camel/camel-ews-store.c:2057
+#: ../src/camel/camel-ews-store.c:2075
 #, c-format
 msgid "No such folder: %s"
 msgstr "Nie ma takiego katalogu: %s"
 
-#: ../src/camel/camel-ews-store.c:2355
+#: ../src/camel/camel-ews-store.c:2373
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Nie można wyświetlić listy katalogów publicznych EWS w trybie offline"
 
-#: ../src/camel/camel-ews-store.c:2428
+#: ../src/camel/camel-ews-store.c:2446
 msgid "Cannot find any EWS public folders"
 msgstr "Nie można odnaleźć żadnych katalogów publicznych EWS"
 
-#: ../src/camel/camel-ews-store.c:2537
+#: ../src/camel/camel-ews-store.c:2555
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Nie można utworzyć katalogu „%s”. Katalog już istnieje"
 
-#: ../src/camel/camel-ews-store.c:2552
+#: ../src/camel/camel-ews-store.c:2570
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Katalog nadrzędny %s nie istnieje"
 
-#: ../src/camel/camel-ews-store.c:2562
+#: ../src/camel/camel-ews-store.c:2580
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -288,136 +288,136 @@ msgstr ""
 "Nie można utworzyć katalogu w „%s”, jest on używany tylko dla katalogów "
 "innych użytkowników"
 
-#: ../src/camel/camel-ews-store.c:2572
+#: ../src/camel/camel-ews-store.c:2590
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "Nie można utworzyć katalogu w „%s”, jest on używany tylko dla katalogów "
 "publicznych"
 
-#: ../src/camel/camel-ews-store.c:2676
+#: ../src/camel/camel-ews-store.c:2694
 #, c-format
 msgid "Folder does not exist"
 msgstr "Katalog nie istnieje"
 
-#: ../src/camel/camel-ews-store.c:2686
+#: ../src/camel/camel-ews-store.c:2704
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Nie można usunąć katalogu „%s”, jest on używany tylko dla katalogów innych "
 "użytkowników"
 
-#: ../src/camel/camel-ews-store.c:2697
+#: ../src/camel/camel-ews-store.c:2715
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr ""
 "Nie można usunąć katalogu „%s”, jest on używany tylko dla katalogów "
 "publicznych"
 
-#: ../src/camel/camel-ews-store.c:2853
+#: ../src/camel/camel-ews-store.c:2871
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Katalog %s nie istnieje"
 
-#: ../src/camel/camel-ews-store.c:2862
+#: ../src/camel/camel-ews-store.c:2880
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Brak wpisu klucza zmiany dla katalogu %s"
 
-#: ../src/camel/camel-ews-store.c:2905
+#: ../src/camel/camel-ews-store.c:2923
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Nie można zmienić nazwy i przenieść katalogu w tym samym czasie"
 
-#: ../src/camel/camel-ews-store.c:2939
+#: ../src/camel/camel-ews-store.c:2957
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nie można odnaleźć identyfikatora katalogu dla katalogu nadrzędnego %s"
 
-#: ../src/camel/camel-ews-store.c:2991 ../src/camel/camel-ews-transport.c:315
+#: ../src/camel/camel-ews-store.c:3009 ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange server %s"
 msgstr "Serwer Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:2994
+#: ../src/camel/camel-ews-store.c:3012
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Usługa Exchange dla %s na %s"
 
-#: ../src/camel/camel-ews-store.c:3038
+#: ../src/camel/camel-ews-store.c:3056
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Nie można ustalić położenia katalogu Kosz"
 
-#: ../src/camel/camel-ews-store.c:3098
+#: ../src/camel/camel-ews-store.c:3116
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Nie można ustalić położenia katalogu Niechciane"
 
-#: ../src/camel/camel-ews-store.c:3289
+#: ../src/camel/camel-ews-store.c:3307
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Nie można subskrybować katalogów EWS w trybie offline"
 
-#: ../src/camel/camel-ews-store.c:3312
+#: ../src/camel/camel-ews-store.c:3330
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 "Nie można subskrybować katalogu „%s”, żaden katalog publiczny nie jest "
 "dostępny"
 
-#: ../src/camel/camel-ews-store.c:3322
+#: ../src/camel/camel-ews-store.c:3340
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Nie można subskrybować katalogu „%s”, nie odnaleziono katalogu"
 
-#: ../src/camel/camel-ews-store.c:3413
+#: ../src/camel/camel-ews-store.c:3431
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Nie można usuwać subskrypcji katalogów EWS w trybie offline"
 
-#: ../src/camel/camel-ews-store.c:3530
+#: ../src/camel/camel-ews-store.c:3548
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Należy pracować w trybie online, aby ukończyć to działanie"
 
-#: ../src/camel/camel-ews-store.c:3574 ../src/camel/camel-ews-store.c:3611
+#: ../src/camel/camel-ews-store.c:3592 ../src/camel/camel-ews-store.c:3629
 msgid "Unsetting the “Out of Office” status"
 msgstr "Usuwanie ustawienia stanu obecności poza biurem"
 
-#: ../src/camel/camel-ews-transport.c:318
+#: ../src/camel/camel-ews-transport.c:321
 #, c-format
 msgid "Exchange mail delivery via %s"
 msgstr "Dostarczanie poczty Exchange przez %s"
 
-#: ../src/camel/camel-ews-transport.c:367
+#: ../src/camel/camel-ews-transport.c:370
 msgid "Cannot send message with no From address"
 msgstr "Nie można wysłać wiadomości bez adresata"
 
-#: ../src/camel/camel-ews-transport.c:373
+#: ../src/camel/camel-ews-transport.c:376
 msgid "Exchange server cannot send message with multiple From addresses"
 msgstr "Serwer Exchange nie może wysłać wiadomości z wieloma adresatami"
 
-#: ../src/camel/camel-ews-transport.c:383
+#: ../src/camel/camel-ews-transport.c:386
 msgid "Failed to read From address"
 msgstr "Odczytanie adresata się nie powiodło"
 
-#: ../src/camel/camel-ews-transport.c:393
+#: ../src/camel/camel-ews-transport.c:396
 #, c-format
 msgid "Service not connected"
 msgstr "Usługa nie jest połączona"
 
-#: ../src/collection/e-ews-backend.c:489
+#: ../src/collection/e-ews-backend.c:522
 #: ../src/configuration/e-mail-config-ews-gal.c:274
 msgid "Global Address List"
 msgstr "Ogólna lista adresowa"
 
-#: ../src/collection/e-ews-backend.c:926
+#: ../src/collection/e-ews-backend.c:959
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
 "Nie można ustalić odpowiedniej klasy katalogów dla nowego katalogu o nazwie "
 "„%s”"
 
-#: ../src/collection/e-ews-backend.c:1014
+#: ../src/collection/e-ews-backend.c:1047
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Źródło danych „%s” nie przedstawia katalog Exchange Web Services"
@@ -906,41 +906,101 @@ msgstr "Odpytywanie usługi automatycznego wykrywania"
 msgid "Fetch _URL"
 msgstr "Pobierz adres _URL"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:138
+#: ../src/configuration/e-mail-config-ews-backend.c:178
 msgid "Configuration"
 msgstr "Konfiguracja"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:156
+#: ../src/configuration/e-mail-config-ews-backend.c:196
 msgid "User_name:"
 msgstr "_Nazwa użytkownika:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:170
+#: ../src/configuration/e-mail-config-ews-backend.c:210
 msgid "_Host URL:"
 msgstr "Adres URL _komputera:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:189
+#: ../src/configuration/e-mail-config-ews-backend.c:229
 msgid "OAB U_RL:"
 msgstr "Adres U_RL OAB:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:203
+#: ../src/configuration/e-mail-config-ews-backend.c:243
 msgid "Open _Mailbox of other user"
 msgstr "Otwórz _skrzynkę pocztową innego użytkownika"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:237
+#: ../src/configuration/e-mail-config-ews-backend.c:277
 msgid "S_earch..."
 msgstr "Wysz_ukiwanie…"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:248
+#: ../src/configuration/e-mail-config-ews-backend.c:288
 msgid "Authentication"
 msgstr "Uwierzytelnianie"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:400
+#: ../src/configuration/e-mail-config-ews-backend.c:315
+msgid "_Override Office365 OAuth2 settings"
+msgstr "_Zastępowanie ustawień OAuth2 usługi Office 365"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:319
+msgid "Help…"
+msgstr "Pomoc…"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/configuration/e-mail-config-ews-backend.c:328
+msgid "_Tenant:"
+msgstr "_Dzierżawca:"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/configuration/e-mail-config-ews-backend.c:353
+msgid "There is not set any default tenant"
+msgstr "Nie ustawiono żadnego domyślnego dzierżawcy"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/configuration/e-mail-config-ews-backend.c:356
+#, c-format
+msgid "Default tenant is “%s”"
+msgstr "Domyślny dzierżawca to „%s”"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:358
+msgid "Application I_D:"
+msgstr "_Identyfikator programu:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:381
+msgid "There is not set any default application ID"
+msgstr "Nie ustawiono żadnego domyślnego identyfikatora programu"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:382
+#, c-format
+msgid "Default application ID is “%s”"
+msgstr "Domyślny identyfikator programu to „%s”"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:384
+msgid "_Redirect URI:"
+msgstr "_Adres URI przekierowania:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:406
+#: ../src/configuration/e-mail-config-ews-backend.c:409
+#, c-format
+msgid "Default redirect URI is “%s”"
+msgstr "Domyślny adres URI przekierowania to „%s”"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:581
 msgid "Host URL cannot be empty"
 msgstr "Adres URL komputera nie może być pusty"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:405
+#: ../src/configuration/e-mail-config-ews-backend.c:586
 msgid "User name cannot be empty"
 msgstr "Nazwa użytkownika nie może być pusta"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/configuration/e-mail-config-ews-backend.c:604
+msgid "Tenant cannot be empty"
+msgstr "Dzierżawca nie może być pusty"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:609
+msgid "Application ID cannot be empty"
+msgstr "Identyfikator programu nie może być pusty"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:417
 msgctxt "PermissionsLevel"
@@ -1172,6 +1232,18 @@ msgstr "Pobranie ustawień delegatów się nie powiodło."
 msgid "Your Exchange account “{0}” has the status set as “Out of Office”."
 msgstr "Konto Exchange „{0}” ma ustawiony stan obecności poza biurem."
 
+#: ../src/server/camel-sasl-xoauth2-office365.c:23
+msgid "OAuth2 (Office365)"
+msgstr "OAuth2 (Office 365)"
+
+#: ../src/server/camel-sasl-xoauth2-office365.c:24
+msgid ""
+"This option will use an OAuth 2.0 access token to connect to the Office365."
+"com server"
+msgstr ""
+"Ta opcja spowoduje użycie tokenu dostępu OAuth 2.0 do łączenia się z usługą "
+"Office 365."
+
 #: ../src/server/e-ews-camel-common.c:376
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
@@ -1179,29 +1251,20 @@ msgstr ""
 "Zwrócenie identyfikatora dla nowej wiadomości przez wywołanie CreateItem się "
 "nie powiodło"
 
-#: ../src/server/e-ews-connection.c:733
+#: ../src/server/e-ews-connection.c:759
 msgid "Operation Cancelled"
 msgstr "Anulowano działanie"
 
-#: ../src/server/e-ews-connection.c:789
-#, c-format
-msgid "Password expired. Change password at “%s”."
-msgstr "Hasło wygasło. Proszę je zmienić pod adresem %s."
-
-#: ../src/server/e-ews-connection.c:792
-msgid "Password expired."
-msgstr "Hasło wygasło."
-
-#: ../src/server/e-ews-connection.c:891
+#: ../src/server/e-ews-connection.c:859
 msgid "Authentication failed"
 msgstr "Uwierzytelnienie się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:913
+#: ../src/server/e-ews-connection.c:881
 #, c-format
 msgid "No response: %s"
 msgstr "Brak odpowiedzi: %s"
 
-#: ../src/server/e-ews-connection.c:976
+#: ../src/server/e-ews-connection.c:944
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -1212,7 +1275,7 @@ msgstr[1] ""
 msgstr[2] ""
 "Serwer Exchange jest zajęty, oczekiwanie na ponowienie (%d∶%02d minut)"
 
-#: ../src/server/e-ews-connection.c:982
+#: ../src/server/e-ews-connection.c:950
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -1220,58 +1283,71 @@ msgstr[0] "Serwer Exchange jest zajęty, oczekiwanie na ponowienie (%d sekunda)"
 msgstr[1] "Serwer Exchange jest zajęty, oczekiwanie na ponowienie (%d sekundy)"
 msgstr[2] "Serwer Exchange jest zajęty, oczekiwanie na ponowienie (%d sekund)"
 
-#: ../src/server/e-ews-connection.c:2804
+#: ../src/server/e-ews-connection.c:2879
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr ""
 "Przetworzenie XML odpowiedzi automatycznego wykrywania się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:2811
+#: ../src/server/e-ews-connection.c:2886
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Odnalezienie elementu <Autodiscover> się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:2822
+#: ../src/server/e-ews-connection.c:2897
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Odnalezienie elementu <Response> się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:2833
+#: ../src/server/e-ews-connection.c:2908
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Odnalezienie elementu <Account> się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:2858
+#: ../src/server/e-ews-connection.c:2933
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
 "Odnalezienie elementów <ASUrl> i <OABUrl> w odpowiedzi automatycznego "
 "wykrywania się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:2949
+#: ../src/server/e-ews-connection.c:3024
 msgid "URL cannot be NULL"
 msgstr "Adres URL nie może wynosić NULL"
 
-#: ../src/server/e-ews-connection.c:2957
+#: ../src/server/e-ews-connection.c:3032
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "Adres URL „%s” nie jest prawidłowy"
 
-#: ../src/server/e-ews-connection.c:3047
+#: ../src/server/e-ews-connection.c:3123
 msgid "Email address is missing a domain part"
 msgstr "W adresie e-mail brakuje części domeny"
 
-#: ../src/server/e-ews-connection.c:3371
+#: ../src/server/e-ews-connection.c:3447
 msgid "Failed to parse oab XML"
 msgstr "Przetworzenie XML „oab” się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:3379
+#: ../src/server/e-ews-connection.c:3455
 msgid "Failed to find <OAB> element\n"
 msgstr "Odnalezienie elementu <OAB> się nie powiodło\n"
 
-#: ../src/server/e-ews-connection.c:4686
+#: ../src/server/e-ews-connection.c:4762
 msgid "No items found"
 msgstr "Nie odnaleziono elementów"
+
+#: ../src/server/e-ews-connection-utils.c:197
+#, c-format
+msgid "Password expired. Change password at “%s”."
+msgstr "Hasło wygasło. Proszę je zmienić pod adresem %s."
+
+#: ../src/server/e-ews-connection-utils.c:200
+msgid "Password expired."
+msgstr "Hasło wygasło."
+
+#: ../src/server/e-ews-connection-utils.c:416
+msgid "Unknown error"
+msgstr "Nieznany błąd"
 
 #: ../src/server/e-ews-folder.c:728
 msgid "Cannot add folder, unsupported folder type"
@@ -1280,3 +1356,9 @@ msgstr "Nie można dodać katalogu. Nieobsługiwany typ katalogu"
 #: ../src/server/e-ews-folder.c:733
 msgid "Cannot add folder, master source not found"
 msgstr "Nie można dodać katalogu. Nie odnaleziono głównego źródła"
+
+#. Translators: This is a user-visible string, display name of an OAuth2 service.
+#: ../src/server/e-oauth2-service-office365.c:122
+msgctxt "OAuth2Service"
+msgid "Office365"
+msgstr "Office 365"
