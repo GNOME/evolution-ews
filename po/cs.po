@@ -932,16 +932,16 @@ msgstr "Nápo_věda"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:326
 msgid "_Tenant:"
-msgstr "Nájem_ce:"
+msgstr "_Klient:"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:349
 msgid "There is not set any default tenant"
-msgstr "Není nastavený žádný výchozí nájemce"
+msgstr "Není nastavený žádný výchozí klient"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:350
 #, c-format
 msgid "Default tenant is “%s”"
-msgstr "Výchozí nájemce je „%s“"
+msgstr "Výchozí klient je „%s“"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:352
 msgid "Application I_D:"
