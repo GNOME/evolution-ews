@@ -297,7 +297,7 @@ e_ews_folder_new_from_error (const GError *error)
 }
 
 gboolean
-e_ews_folder_is_error (EEwsFolder *folder)
+e_ews_folder_is_error (const EEwsFolder *folder)
 {
 	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), TRUE);
 

@@ -689,14 +689,21 @@ ews_settings_get_folder_sizes_thread (gpointer user_data)
 				fsd->cancellable, &fsd->error);
 
 		for (l = folders_list; l != NULL; l = l->next) {
+			const EEwsFolder *folder = l->data;
 			const EwsFolderId *folder_id;
 			gchar *folder_full_name;
 			gchar *folder_size;
 
-			folder_id = e_ews_folder_get_id (l->data);
+			if (!folder || e_ews_folder_is_error (folder))
+				continue;
+
+			folder_id = e_ews_folder_get_id (folder);
+			if (!folder_id)
+				continue;
+
 			folder_full_name = camel_ews_store_summary_get_folder_full_name (
 				fsd->ews_store->summary, folder_id->id, NULL);
-			folder_size = g_format_size (e_ews_folder_get_size (l->data));
+			folder_size = g_format_size (e_ews_folder_get_size (folder));
 
 			g_hash_table_insert (fsd->folder_sizes, folder_full_name, folder_size);
 		}
