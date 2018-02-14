@@ -214,6 +214,15 @@ mail_config_ews_autodiscover_run (EMailConfigEwsAutodiscover *autodiscover)
 	source = e_mail_config_service_backend_get_source (backend);
 	settings = e_mail_config_service_backend_get_settings (backend);
 
+	if (!e_source_has_extension (source, E_SOURCE_EXTENSION_AUTHENTICATION)) {
+		ESource *collection;
+
+		collection = e_mail_config_service_backend_get_collection (backend);
+		if (collection && e_source_has_extension (collection, E_SOURCE_EXTENSION_AUTHENTICATION)) {
+			source = collection;
+		}
+	}
+
 	activity = e_mail_config_activity_page_new_activity (E_MAIL_CONFIG_ACTIVITY_PAGE (page));
 	cancellable = e_activity_get_cancellable (activity);
 

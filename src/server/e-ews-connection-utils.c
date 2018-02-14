@@ -362,7 +362,18 @@ ews_connection_utils_maybe_prepare_bearer_auth (EEwsConnection *cnc,
 		extension = e_source_get_extension (source, E_SOURCE_EXTENSION_AUTHENTICATION);
 		auth_method = e_source_authentication_dup_method (extension);
 	} else {
-		return TRUE;
+		CamelEwsSettings *ews_settings;
+
+		ews_settings = e_ews_connection_ref_settings (cnc);
+		if (ews_settings) {
+			if (camel_ews_settings_get_auth_mechanism (ews_settings) == EWS_AUTH_TYPE_OAUTH2)
+				auth_method = g_strdup ("OAuth2");
+
+			g_object_unref (ews_settings);
+		}
+
+		if (!auth_method)
+			return TRUE;
 	}
 
 	if (g_strcmp0 (auth_method, "OAuth2") != 0 &&

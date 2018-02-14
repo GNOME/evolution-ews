@@ -30,18 +30,20 @@
 
 #define OFFICE365_RESOURCE "https://outlook.office.com"
 
-#define OFFICE365_SCOPE "offline_access " \
+#define OFFICE365_SCOPE "openid offline_access profile " \
 	"Mail.ReadWrite " \
+	"Mail.ReadWrite.Shared " \
 	"Mail.Send " \
-	"Calendars.ReadWrite " \
-	"Contacts.ReadWrite " \
-	"Tasks.ReadWrite"
-
-	/*"Mail.ReadWrite.Shared " \
 	"Mail.Send.Shared " \
+	"Calendars.ReadWrite " \
 	"Calendars.ReadWrite.Shared " \
+	"Contacts.ReadWrite " \
 	"Contacts.ReadWrite.Shared " \
-	"Tasks.ReadWrite.Shared"*/
+	"Tasks.ReadWrite " \
+	"Tasks.ReadWrite.Shared " \
+	"MailboxSettings.ReadWrite " \
+	"People.Read " \
+	"User.ReadBasic.All"
 
 struct _EOAuth2ServiceOffice365Private
 {

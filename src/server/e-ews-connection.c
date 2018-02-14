@@ -852,6 +852,27 @@ ews_response_cb (SoupSession *session,
 	if (ews_connection_credentials_failed (enode->cnc, msg, enode->simple)) {
 		goto exit;
 	} else if (msg->status_code == SOUP_STATUS_UNAUTHORIZED) {
+		if (msg->response_headers) {
+			const gchar *diagnostics;
+
+			diagnostics = soup_message_headers_get_list (msg->response_headers, "X-MS-DIAGNOSTICS");
+			if (diagnostics && strstr (diagnostics, "invalid_grant")) {
+				g_simple_async_result_set_error (
+					enode->simple,
+					EWS_CONNECTION_ERROR,
+					EWS_CONNECTION_ERROR_ACCESSDENIED,
+					"%s", diagnostics);
+				goto exit;
+			} else if (diagnostics && *diagnostics) {
+				g_simple_async_result_set_error (
+					enode->simple,
+					EWS_CONNECTION_ERROR,
+					EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED,
+					"%s", diagnostics);
+				goto exit;
+			}
+		}
+
 		g_simple_async_result_set_error (
 			enode->simple,
 			EWS_CONNECTION_ERROR,
@@ -2780,7 +2801,7 @@ e_ews_autodiscover_ws_xml (const gchar *email_address)
 struct _autodiscover_data {
 	EEwsConnection *cnc;
 	xmlOutputBuffer *buf;
-	SoupMessage *msgs[4];
+	SoupMessage *msgs[5];
 
 	GCancellable *cancellable;
 	gulong cancel_id;
@@ -2840,11 +2861,11 @@ autodiscover_response_cb (SoupSession *session,
 
 	ad = g_simple_async_result_get_op_res_gpointer (simple);
 
-	for (idx = 0; idx < 4; idx++) {
+	for (idx = 0; idx < 5; idx++) {
 		if (ad->msgs[idx] == msg)
 			break;
 	}
-	if (idx == 4) {
+	if (idx == 5) {
 		/* We already got removed (cancelled). Do nothing */
 		goto unref;
 	}
@@ -2935,7 +2956,7 @@ autodiscover_response_cb (SoupSession *session,
 	}
 
 	/* We have a good response; cancel all the others */
-	for (idx = 0; idx < 4; idx++) {
+	for (idx = 0; idx < 5; idx++) {
 		if (ad->msgs[idx]) {
 			SoupMessage *m = ad->msgs[idx];
 			ad->msgs[idx] = NULL;
@@ -2958,7 +2979,7 @@ autodiscover_response_cb (SoupSession *session,
 	goto exit;
 
  failed:
-	for (idx = 0; idx < 4; idx++) {
+	for (idx = 0; idx < 5; idx++) {
 		if (ad->msgs[idx]) {
 			/* There's another request outstanding.
 			 * Hope that it has better luck. */
@@ -3099,7 +3120,7 @@ e_ews_autodiscover_ws_url (ESource *source,
 	GSimpleAsyncResult *simple;
 	struct _autodiscover_data *ad;
 	xmlOutputBuffer *buf;
-	gchar *url1, *url2, *url3, *url4;
+	gchar *url1, *url2, *url3, *url4, *url5;
 	gchar *domain;
 	xmlDoc *doc;
 	EEwsConnection *cnc;
@@ -3136,6 +3157,7 @@ e_ews_autodiscover_ws_url (ESource *source,
 	url2 = NULL;
 	url3 = NULL;
 	url4 = NULL;
+	url5 = NULL;
 
 	host_url = camel_ews_settings_get_hosturl (settings);
 	if (host_url != NULL)
@@ -3149,6 +3171,12 @@ e_ews_autodiscover_ws_url (ESource *source,
 
 		url1 = g_strdup_printf ("http%s://%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", host);
 		url2 = g_strdup_printf ("http%s://autodiscover.%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", host);
+
+		/* outlook.office365.com has its autodiscovery at outlook.com */
+		if (host && g_ascii_strcasecmp (host, "outlook.office365.com") == 0 &&
+		   domain && g_ascii_strcasecmp (host, "outlook.com") != 0) {
+			url5 = g_strdup_printf ("https://outlook.com/autodiscover/autodiscover.xml");
+		}
 
 		soup_uri_free (soup_uri);
 	}
@@ -3188,6 +3216,7 @@ e_ews_autodiscover_ws_url (ESource *source,
 	ad->msgs[1] = e_ews_get_msg_for_url (settings, url2, buf, NULL);
 	ad->msgs[2] = e_ews_get_msg_for_url (settings, url3, buf, NULL);
 	ad->msgs[3] = e_ews_get_msg_for_url (settings, url4, buf, NULL);
+	ad->msgs[4] = e_ews_get_msg_for_url (settings, url5, buf, NULL);
 
 	/* These have to be submitted only after they're both set in ad->msgs[]
 	 * or there will be races with fast completion */
@@ -3199,6 +3228,8 @@ e_ews_autodiscover_ws_url (ESource *source,
 		ews_connection_schedule_queue_message (cnc, ad->msgs[2], autodiscover_response_cb, g_object_ref (simple));
 	if (ad->msgs[3] != NULL)
 		ews_connection_schedule_queue_message (cnc, ad->msgs[3], autodiscover_response_cb, g_object_ref (simple));
+	if (ad->msgs[4] != NULL)
+		ews_connection_schedule_queue_message (cnc, ad->msgs[4], autodiscover_response_cb, g_object_ref (simple));
 
 	xmlFreeDoc (doc);
 	g_free (url1);
@@ -3206,7 +3237,7 @@ e_ews_autodiscover_ws_url (ESource *source,
 	g_free (url3);
 	g_free (url4);
 
-	if (error && !ad->msgs[0] && !ad->msgs[1] && !ad->msgs[2] && !ad->msgs[3]) {
+	if (error && !ad->msgs[0] && !ad->msgs[1] && !ad->msgs[2] && !ad->msgs[3] && !ad->msgs[4]) {
 		g_simple_async_result_take_error (simple, error);
 		g_simple_async_result_complete_in_idle (simple);
 	} else {
@@ -3421,6 +3452,27 @@ oal_response_cb (SoupSession *soup_session,
 	if (ews_connection_credentials_failed (data->cnc, soup_message, simple)) {
 		goto exit;
 	} else if (soup_message->status_code != 200) {
+		if (soup_message->status_code == SOUP_STATUS_UNAUTHORIZED &&
+		    soup_message->response_headers) {
+			const gchar *diagnostics;
+
+			diagnostics = soup_message_headers_get_list (soup_message->response_headers, "X-MS-DIAGNOSTICS");
+			if (diagnostics && strstr (diagnostics, "invalid_grant")) {
+				g_simple_async_result_set_error (
+					simple,
+					EWS_CONNECTION_ERROR,
+					EWS_CONNECTION_ERROR_ACCESSDENIED,
+					"%s", diagnostics);
+				goto exit;
+			} else if (diagnostics && *diagnostics) {
+				g_simple_async_result_set_error (
+					simple,
+					EWS_CONNECTION_ERROR,
+					EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED,
+					"%s", diagnostics);
+				goto exit;
+			}
+		}
 		g_simple_async_result_set_error (
 			simple, SOUP_HTTP_ERROR,
 			soup_message->status_code,
