@@ -1118,7 +1118,14 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	}
 
 	e_ews_cal_utils_set_time (msg, "Start", &dtstart, FALSE);
-	e_ews_cal_utils_set_time (msg, "End", &dtend, FALSE);
+
+	/* Cover components without DTEND */
+	if (icaltime_is_valid_time (dtend) &&
+	    !icaltime_is_null_time (dtend))
+		e_ews_cal_utils_set_time (msg, "End", &dtend, FALSE);
+	else
+		e_ews_cal_utils_set_time (msg, "End", &dtstart, FALSE);
+
 	/* We have to do the time zone(s) later, or the server rejects the request */
 
 	/* All day event ? */
