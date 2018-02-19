@@ -1,3 +1,22 @@
+Evolution-EWS 3.27.91 2018-02-19
+--------------------------------
+
+Bug Fixes:
+	Bug 793104 - COMPLETED in libical 3.0+ is DATE-TIME only (Milan Crha)
+	Bug 775690 - Support OAuth2 for outlook.office365.com (Milan Crha)
+	Bug 793368 - Install AppStream metadata to /usr/share/metainfo/ (Jeremy Bicha)
+
+Miscellaneous:
+	Correct possible scope for Office365 OAuth2 (Milan Crha)
+	Add translator comments around 'Tenant' word (Milan Crha)
+	Check validity of returned values in 'Folder Sizes' function (Milan Crha)
+	Various changes related to outlook.office365.com server (Milan Crha)
+	Office365.com OAuth2 - Relax the 'prompt' user interaction type (Milan Crha)
+
+Translations:
+	Marek Cernocky (cs)
+	Piotr Drąg (pl)
+
 Evolution-EWS 3.27.90 2018-02-05
 --------------------------------
 
