@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=Miscellaneous / EWS Core\n"
-"POT-Creation-Date: 2018-02-05 20:35+0000\n"
-"PO-Revision-Date: 2018-02-07 17:01+0100\n"
+"POT-Creation-Date: 2018-02-10 22:16+0000\n"
+"PO-Revision-Date: 2018-02-21 09:26+0100\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -45,27 +45,27 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Selhalo nastavení fotografie kontaktu:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1578
+#: ../src/calendar/e-cal-backend-ews.c:1577
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Volný"
 
-#: ../src/calendar/e-cal-backend-ews.c:1581
+#: ../src/calendar/e-cal-backend-ews.c:1580
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Obsazený"
 
-#: ../src/calendar/e-cal-backend-ews.c:1583
+#: ../src/calendar/e-cal-backend-ews.c:1582
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Mimo kancelář"
 
-#: ../src/calendar/e-cal-backend-ews.c:1585
+#: ../src/calendar/e-cal-backend-ews.c:1584
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Předběžné"
 
-#: ../src/calendar/e-cal-backend-ews.c:3193
+#: ../src/calendar/e-cal-backend-ews.c:3192
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Uživatele „%s“ nelze nalézt mezi účastníky"
@@ -930,49 +930,65 @@ msgstr "Přepsat nastavení _Office365 OAuth2"
 msgid "Help…"
 msgstr "Nápo_věda"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:326
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/configuration/e-mail-config-ews-backend.c:328
 msgid "_Tenant:"
 msgstr "_Klient:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:349
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/configuration/e-mail-config-ews-backend.c:353
 msgid "There is not set any default tenant"
 msgstr "Není nastavený žádný výchozí klient"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:350
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/configuration/e-mail-config-ews-backend.c:356
 #, c-format
 msgid "Default tenant is “%s”"
 msgstr "Výchozí klient je „%s“"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:352
+#: ../src/configuration/e-mail-config-ews-backend.c:358
 msgid "Application I_D:"
 msgstr "I_D aplikace:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:375
+#: ../src/configuration/e-mail-config-ews-backend.c:381
 msgid "There is not set any default application ID"
 msgstr "Není nastavené žádné výchozí ID aplikace"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:376
+#: ../src/configuration/e-mail-config-ews-backend.c:382
 #, c-format
 msgid "Default application ID is “%s”"
 msgstr "Výchozí ID aplikace je „%s“"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:378
+#: ../src/configuration/e-mail-config-ews-backend.c:384
 msgid "_Redirect URI:"
 msgstr "Přesmě_rovat na URI:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:400
-#: ../src/configuration/e-mail-config-ews-backend.c:403
+#: ../src/configuration/e-mail-config-ews-backend.c:406
+#: ../src/configuration/e-mail-config-ews-backend.c:409
 #, c-format
 msgid "Default redirect URI is “%s”"
 msgstr "Výchozí URI pro přesměrování je „%s“"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:575
+#: ../src/configuration/e-mail-config-ews-backend.c:581
 msgid "Host URL cannot be empty"
 msgstr "Adresa URL hostitele nesmí být prázdná"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:580
+#: ../src/configuration/e-mail-config-ews-backend.c:586
 msgid "User name cannot be empty"
 msgstr "Uživatelské jméno nesmí být prázdné"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/configuration/e-mail-config-ews-backend.c:604
+msgid "Tenant cannot be empty"
+msgstr "Označení klienta nesmí být prázdné"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:609
+msgid "Application ID cannot be empty"
+msgstr "ID aplikace nesmí být prázdné"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:417
 msgctxt "PermissionsLevel"
@@ -1248,54 +1264,54 @@ msgstr[0] "Server Exchange je zaneprázdněný, čeká se na opakování (%d sek
 msgstr[1] "Server Exchange je zaneprázdněný, čeká se na opakování (%d sekundy)"
 msgstr[2] "Server Exchange je zaneprázdněný, čeká se na opakování (%d sekund)"
 
-#: ../src/server/e-ews-connection.c:2837
+#: ../src/server/e-ews-connection.c:2879
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Selhala analýza odpovědi XML na automatické nalezení"
 
-#: ../src/server/e-ews-connection.c:2844
+#: ../src/server/e-ews-connection.c:2886
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Selhalo vyhledání prvku <Autodiscover>"
 
-#: ../src/server/e-ews-connection.c:2855
+#: ../src/server/e-ews-connection.c:2897
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Selhalo vyhledání prvku <Response>"
 
-#: ../src/server/e-ews-connection.c:2866
+#: ../src/server/e-ews-connection.c:2908
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Selhalo vyhledání prvku <Account>"
 
-#: ../src/server/e-ews-connection.c:2891
+#: ../src/server/e-ews-connection.c:2933
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
 "Selhalo vyhledání <ASUrl> a <OABUrl> v odpovědi na automatické nalezení"
 
-#: ../src/server/e-ews-connection.c:2982
+#: ../src/server/e-ews-connection.c:3024
 msgid "URL cannot be NULL"
 msgstr "Adresa URL nesmí být prázdná"
 
-#: ../src/server/e-ews-connection.c:2990
+#: ../src/server/e-ews-connection.c:3032
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "Adresa URL „%s“ není platná"
 
-#: ../src/server/e-ews-connection.c:3081
+#: ../src/server/e-ews-connection.c:3123
 msgid "Email address is missing a domain part"
 msgstr "U e-mailové adresy schází doménová část"
 
-#: ../src/server/e-ews-connection.c:3405
+#: ../src/server/e-ews-connection.c:3447
 msgid "Failed to parse oab XML"
 msgstr "Selhala analýza XML OAB"
 
-#: ../src/server/e-ews-connection.c:3413
+#: ../src/server/e-ews-connection.c:3455
 msgid "Failed to find <OAB> element\n"
 msgstr "Selhalo vyhledání prvku <OAB>\n"
 
-#: ../src/server/e-ews-connection.c:4720
+#: ../src/server/e-ews-connection.c:4762
 msgid "No items found"
 msgstr "Nenalezeny žádné položky"
 
@@ -1308,7 +1324,7 @@ msgstr "Vypršela platnost hesla. Změňte jej na „%s“."
 msgid "Password expired."
 msgstr "Vypršela platnost hesla."
 
-#: ../src/server/e-ews-connection-utils.c:414
+#: ../src/server/e-ews-connection-utils.c:416
 msgid "Unknown error"
 msgstr "Neznámá chyba"
 
@@ -1321,7 +1337,7 @@ msgid "Cannot add folder, master source not found"
 msgstr "Nelze přidat složku, nenalezen hlavní zdroj"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/server/e-oauth2-service-office365.c:120
+#: ../src/server/e-oauth2-service-office365.c:122
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office365"
