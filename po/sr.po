@@ -1,15 +1,15 @@
 # Serbian translation of evolution-ews
-# Courtesy of Prevod.org team (http://prevod.org/) -- 2012—2017.
+# Courtesy of Prevod.org team (http://prevod.org/) -- 2012—2018.
 # Copyright © YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the ewolution-ews package.
-# Мирослав Николић <miroslavnikolic@rocketmail.com>, 2012—2017.
+# Мирослав Николић <miroslavnikolic@rocketmail.com>, 2012—2018.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?product"
 "=evolution-ews&keywords=I18N+L10N&component=Miscellaneous / EWS Core\n"
-"POT-Creation-Date: 2017-08-03 10:44+0000\n"
-"PO-Revision-Date: 2017-08-13 15:35+0200\n"
+"POT-Creation-Date: 2018-02-07 18:06+0000\n"
+"PO-Revision-Date: 2018-02-24 18:51+0200\n"
 "Last-Translator: Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: српски <gnome-sr@googlegroups.org>\n"
 "Language: sr\n"
@@ -20,17 +20,18 @@ msgstr ""
 "n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Project-Style: gnome\n"
 
-#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:79
-#: ../src/configuration/e-ews-config-lookup.c:145
+#: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
+#: ../src/camel/camel-ews-provider.c:81
+#: ../src/configuration/e-ews-config-lookup.c:251
 msgid "Exchange Web Services"
 msgstr "Веб услуге размене"
 
-#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:81
+#: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
+#: ../src/camel/camel-ews-provider.c:83
 msgid "For accessing Exchange servers using Web Services"
 msgstr "За приступ серверима размене помоћу веб услуга"
 
 #: ../src/addressbook/e-book-backend-ews.c:2957
-#| msgid "Failed to parse oab XML"
 msgid "Failed to update GAL:"
 msgstr "Нисам успео да освежим ГАЛ:"
 
@@ -42,32 +43,30 @@ msgstr ""
 "или новијим"
 
 #: ../src/addressbook/e-book-backend-ews.c:3209
-#| msgid "Failed to parse oab XML"
 msgid "Failed to set contact photo:"
 msgstr "Нисам успео да подесим фотографију контакта:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1574
+#: ../src/calendar/e-cal-backend-ews.c:1577
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Слободан"
 
-#: ../src/calendar/e-cal-backend-ews.c:1577
+#: ../src/calendar/e-cal-backend-ews.c:1580
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Заузет"
 
-#: ../src/calendar/e-cal-backend-ews.c:1579
-#| msgid "Out of Office"
+#: ../src/calendar/e-cal-backend-ews.c:1582
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Ван канцеларије"
 
-#: ../src/calendar/e-cal-backend-ews.c:1581
+#: ../src/calendar/e-cal-backend-ews.c:1584
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Привремено"
 
-#: ../src/calendar/e-cal-backend-ews.c:3162
+#: ../src/calendar/e-cal-backend-ews.c:3192
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Не могу да нађем корисника „%s“ међу учесницима"
@@ -105,73 +104,73 @@ msgstr "Не могу да направим путању привременог 
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Нисам успео да преместим датотеку оставе поруке из „%s“ у „%s“: %s"
 
-#: ../src/camel/camel-ews-folder.c:1536
+#: ../src/camel/camel-ews-folder.c:1570
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Не могу да учитам сажетак за „%s“"
 
-#: ../src/camel/camel-ews-folder.c:1980
+#: ../src/camel/camel-ews-folder.c:2030
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Освежавам фасциклу „%s“"
 
-#: ../src/camel/camel-ews-folder.c:2126
+#: ../src/camel/camel-ews-folder.c:2210
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Не могу да извршим радње над фасциклом у режиму ван мреже"
 
-#: ../src/camel/camel-ews-provider.c:45
+#: ../src/camel/camel-ews-provider.c:47
 msgid "Checking for new mail"
 msgstr "Проверавам нову пошту"
 
-#: ../src/camel/camel-ews-provider.c:47
+#: ../src/camel/camel-ews-provider.c:49
 msgid "C_heck for new messages in all folders"
 msgstr "_Потражи нове поруке у свим фасциклама"
 
-#: ../src/camel/camel-ews-provider.c:49
+#: ../src/camel/camel-ews-provider.c:51
 msgid "_Listen for server change notifications"
 msgstr "_Ослушкуј за обавештењима о изменама сервера"
 
-#: ../src/camel/camel-ews-provider.c:52
+#: ../src/camel/camel-ews-provider.c:54
 msgid "Options"
 msgstr "Опције"
 
-#: ../src/camel/camel-ews-provider.c:54
+#: ../src/camel/camel-ews-provider.c:56
 msgid "_Apply filters to new messages in Inbox on this server"
 msgstr "_Примени филтере на новим порукама у сандучету овог сервера"
 
-#: ../src/camel/camel-ews-provider.c:56
+#: ../src/camel/camel-ews-provider.c:58
 msgid "Check new messages for _Junk contents"
 msgstr "Провери има ли _нежељених међу новим порукама"
 
-#: ../src/camel/camel-ews-provider.c:58
+#: ../src/camel/camel-ews-provider.c:60
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "Провери да нема ђубрета само у фасцикли САН_ДУЧЕ"
 
-#: ../src/camel/camel-ews-provider.c:60
+#: ../src/camel/camel-ews-provider.c:62
 msgid "Synchroni_ze remote mail locally in all folders"
 msgstr "Усклади _удаљену пошту са локалном у свим фасциклама"
 
-#: ../src/camel/camel-ews-provider.c:64
+#: ../src/camel/camel-ews-provider.c:66
 msgid "Connection"
 msgstr "Веза"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/camel/camel-ews-provider.c:68
+#: ../src/camel/camel-ews-provider.c:70
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "Време за _истек везе (у секундама) %s"
 
-#: ../src/camel/camel-ews-provider.c:70
+#: ../src/camel/camel-ews-provider.c:72
 msgid "Override _User-Agent header value"
 msgstr "Препиши вредност заглавља _агента корисника"
 
-#: ../src/camel/camel-ews-provider.c:96
+#: ../src/camel/camel-ews-provider.c:98
 msgid "NTLM"
 msgstr "НТЛМ"
 
-#: ../src/camel/camel-ews-provider.c:98
+#: ../src/camel/camel-ews-provider.c:100
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -179,11 +178,11 @@ msgstr ""
 "Ова опција ће вас повезати на сервер размене користећи лозинку у виду "
 "обичног текста са НТЛМ потврдом идентитета."
 
-#: ../src/camel/camel-ews-provider.c:106
+#: ../src/camel/camel-ews-provider.c:108
 msgid "Basic"
 msgstr "Основнo"
 
-#: ../src/camel/camel-ews-provider.c:108
+#: ../src/camel/camel-ews-provider.c:110
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -191,11 +190,11 @@ msgstr ""
 "Ова опција ће вас повезати на сервер размене користећи лозинку у виду "
 "обичног текста са основном потврдом идентитета."
 
-#: ../src/camel/camel-ews-provider.c:116
+#: ../src/camel/camel-ews-provider.c:118
 msgid "Kerberos"
 msgstr "Керберос"
 
-#: ../src/camel/camel-ews-provider.c:118
+#: ../src/camel/camel-ews-provider.c:120
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -203,7 +202,7 @@ msgstr ""
 "Ова опција ће вас повезати на сервер размене користећи потврђивање "
 "идентитета Кербероса/ГССАПИ-ја."
 
-#: ../src/camel/camel-ews-store.c:334
+#: ../src/camel/camel-ews-store.c:335
 #, c-format
 msgid "Session has no storage path"
 msgstr "Сесија нема путању складишта"
@@ -212,7 +211,7 @@ msgstr "Сесија нема путању складишта"
 #. * user has such in his store already. The %s is replaced with "Public Folders",
 #. * the %d with counter, thus it composes name like "Public Folders_1"
 #.
-#: ../src/camel/camel-ews-store.c:371
+#: ../src/camel/camel-ews-store.c:372
 #, c-format
 msgctxt "PublicFolders"
 msgid "%s_%d"
@@ -222,48 +221,67 @@ msgstr "%s_%d"
 #. * user has such in his store already. The %s is replaced with "Foreign Folders",
 #. * the %d with counter, thus it composes name like "Foreign Folders_1"
 #.
-#: ../src/camel/camel-ews-store.c:500
+#: ../src/camel/camel-ews-store.c:501
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:646 ../src/camel/camel-ews-store.c:1249
+#: ../src/camel/camel-ews-store.c:647 ../src/camel/camel-ews-store.c:1250
 msgid "Checking “Out of Office” settings"
 msgstr "Означавам подешавања за „ван канцеларије“"
 
-#: ../src/camel/camel-ews-store.c:1497
+#. Translators: The "%s" is a service URL, provided by the server
+#: ../src/camel/camel-ews-store.c:1320
+#, c-format
+msgid "Password will expire in %d day. Open “%s” to change it."
+msgid_plural "Password will expire in %d days. Open “%s” to change it."
+msgstr[0] "Лозинка ће истећи за %d дан. Отворите „%s“ да је измените."
+msgstr[1] "Лозинка ће истећи за %d дана. Отворите „%s“ да је измените."
+msgstr[2] "Лозинка ће истећи за %d дана. Отворите „%s“ да је измените."
+msgstr[3] "Лозинка ће истећи за један дан. Отворите „%s“ да је измените."
+
+#: ../src/camel/camel-ews-store.c:1326
+#, c-format
+msgid "Password will expire in one day."
+msgid_plural "Password will expire in %d days."
+msgstr[0] "Лозинка ће истећи за %d дан."
+msgstr[1] "Лозинка ће истећи за %d дана."
+msgstr[2] "Лозинка ће истећи за %d дана."
+msgstr[3] "Лозинка ће истећи за један дан."
+
+#: ../src/camel/camel-ews-store.c:1545
 msgid "Updating foreign folder structure"
 msgstr "Освежавам структуру стране фасцикле"
 
-#: ../src/camel/camel-ews-store.c:1633
+#: ../src/camel/camel-ews-store.c:1681
 msgid "Updating foreign folders"
 msgstr "Освежавам стране фасцикле"
 
-#: ../src/camel/camel-ews-store.c:2007
+#: ../src/camel/camel-ews-store.c:2075
 #, c-format
 msgid "No such folder: %s"
 msgstr "Нема такве фасцикле: %s"
 
-#: ../src/camel/camel-ews-store.c:2305
+#: ../src/camel/camel-ews-store.c:2373
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Не могу да испишем ВУР јавне фасцикле у режиму ван мреже"
 
-#: ../src/camel/camel-ews-store.c:2378
+#: ../src/camel/camel-ews-store.c:2446
 msgid "Cannot find any EWS public folders"
 msgstr "Не могу да пронађем ВУР јавне фасцикле"
 
-#: ../src/camel/camel-ews-store.c:2487
+#: ../src/camel/camel-ews-store.c:2555
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Не могу да направим фасциклу „%s“, фасцикла већ постоји"
 
-#: ../src/camel/camel-ews-store.c:2502
+#: ../src/camel/camel-ews-store.c:2570
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Не постоји родитељска фасцикла „%s“"
 
-#: ../src/camel/camel-ews-store.c:2512
+#: ../src/camel/camel-ews-store.c:2580
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -271,152 +289,159 @@ msgstr ""
 "Не могу да направим фасциклу под „%s“, користи се само за фасцикле других "
 "корисника"
 
-#: ../src/camel/camel-ews-store.c:2522
+#: ../src/camel/camel-ews-store.c:2590
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "Не могу да направим фасциклу под „%s“, користи се само за јавне фасцикле"
 
-#: ../src/camel/camel-ews-store.c:2626
+#: ../src/camel/camel-ews-store.c:2694
 #, c-format
 msgid "Folder does not exist"
 msgstr "Фасцикла не постоји"
 
-#: ../src/camel/camel-ews-store.c:2636
+#: ../src/camel/camel-ews-store.c:2704
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Не могу да уклоним фасциклу „%s“, користи се само за фасцикле других "
 "корисника"
 
-#: ../src/camel/camel-ews-store.c:2647
+#: ../src/camel/camel-ews-store.c:2715
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "Не могу да уклоним фасциклу „%s“, користи се само за јавне фасцикле"
 
-#: ../src/camel/camel-ews-store.c:2803
+#: ../src/camel/camel-ews-store.c:2871
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Не постоји фасцикла „%s“"
 
-#: ../src/camel/camel-ews-store.c:2812
+#: ../src/camel/camel-ews-store.c:2880
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Нема записа измене кључа за фасциклу „%s“"
 
-#: ../src/camel/camel-ews-store.c:2855
+#: ../src/camel/camel-ews-store.c:2923
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Не могу у исто време да преименујем и да преместим фасциклу"
 
-#: ../src/camel/camel-ews-store.c:2889
+#: ../src/camel/camel-ews-store.c:2957
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Не могу да пронађем ИБ фасцикле за родитељску фасциклу „%s“"
 
-#: ../src/camel/camel-ews-store.c:2941 ../src/camel/camel-ews-transport.c:315
+#: ../src/camel/camel-ews-store.c:3009 ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange server %s"
 msgstr "Сервер размене %s"
 
-#: ../src/camel/camel-ews-store.c:2944
+#: ../src/camel/camel-ews-store.c:3012
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Услуга размене за „%s“ на „%s“"
 
-#: ../src/camel/camel-ews-store.c:2988
+#: ../src/camel/camel-ews-store.c:3056
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Не могу да пронађем фасциклу за смеће"
 
-#: ../src/camel/camel-ews-store.c:3048
+#: ../src/camel/camel-ews-store.c:3116
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Не могу да пронађем фасциклу за ђубре"
 
-#: ../src/camel/camel-ews-store.c:3239
+#: ../src/camel/camel-ews-store.c:3307
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Не могу да претплатим ВУР фасцикле у режиму ван мреже"
 
-#: ../src/camel/camel-ews-store.c:3262
+#: ../src/camel/camel-ews-store.c:3330
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Не могу да претплатим фасциклу „%s“, нема доступне јавне фасцикле"
 
-#: ../src/camel/camel-ews-store.c:3272
+#: ../src/camel/camel-ews-store.c:3340
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Не могу да претплатим фасциклу „%s“, нисам нашао фасциклу"
 
-#: ../src/camel/camel-ews-store.c:3363
+#: ../src/camel/camel-ews-store.c:3431
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Не могу да поништим претплату ВУР фасцикли у режиму ван мреже"
 
-#: ../src/camel/camel-ews-store.c:3480
+#: ../src/camel/camel-ews-store.c:3548
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Морате да будете на мрежи да бисте завршили ову радњу"
 
-#: ../src/camel/camel-ews-store.c:3524 ../src/camel/camel-ews-store.c:3561
+#: ../src/camel/camel-ews-store.c:3592 ../src/camel/camel-ews-store.c:3629
 msgid "Unsetting the “Out of Office” status"
 msgstr "Поништавам стање за „ван канцеларије“"
 
-#: ../src/camel/camel-ews-transport.c:318
+#: ../src/camel/camel-ews-transport.c:321
 #, c-format
 msgid "Exchange mail delivery via %s"
 msgstr "Испорука поште размене путем „%s“"
 
-#: ../src/camel/camel-ews-transport.c:367
+#: ../src/camel/camel-ews-transport.c:370
 msgid "Cannot send message with no From address"
 msgstr "Не могу да пошаљем поруку без адресе пошиљаоца"
 
-#: ../src/camel/camel-ews-transport.c:373
+#: ../src/camel/camel-ews-transport.c:376
 msgid "Exchange server cannot send message with multiple From addresses"
 msgstr "Сервер размене не може да пошаље поруку са неколико адреса пошиљаоца"
 
-#: ../src/camel/camel-ews-transport.c:383
+#: ../src/camel/camel-ews-transport.c:386
 msgid "Failed to read From address"
 msgstr "Нисам успео да прочитам адресу пошиљаоца"
 
-#: ../src/camel/camel-ews-transport.c:393
+#: ../src/camel/camel-ews-transport.c:396
 #, c-format
 msgid "Service not connected"
 msgstr "Услуга није повезана"
 
-#: ../src/collection/e-ews-backend.c:464
+#: ../src/collection/e-ews-backend.c:522
 #: ../src/configuration/e-mail-config-ews-gal.c:274
 msgid "Global Address List"
 msgstr "Списак општих адреса"
 
-#: ../src/collection/e-ews-backend.c:900
+#: ../src/collection/e-ews-backend.c:959
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
 "Не могу да одредим одговарајући разред фасцикле за нову фасциклу под називом "
 "„%s“"
 
-#: ../src/collection/e-ews-backend.c:988
+#: ../src/collection/e-ews-backend.c:1047
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Извор података „%s“ не представља фасциклу веб услуге размене"
 
-#: ../src/configuration/e-ews-config-lookup.c:129
+#: ../src/configuration/e-ews-config-lookup.c:192
+#| msgid "Exchange Web Services"
+msgid "Exchange Web Services autodiscovery"
+msgstr "Самооткривање веб услуга размене"
+
+#: ../src/configuration/e-ews-config-lookup.c:235
 #, c-format
-#| msgid "_User:"
 msgid "User: %s"
 msgstr "Корисник: %s"
 
-#: ../src/configuration/e-ews-config-lookup.c:134
+#: ../src/configuration/e-ews-config-lookup.c:240
 #, c-format
-#| msgid "_Host URL:"
 msgid "Host URL: %s"
 msgstr "Адреса домаћина: %s"
 
-#: ../src/configuration/e-ews-config-lookup.c:139
+#: ../src/configuration/e-ews-config-lookup.c:245
 #, c-format
-#| msgid "OAB U_RL:"
 msgid "OAB URL: %s"
 msgstr "ОАБ адреса: %s"
+
+#: ../src/configuration/e-ews-config-lookup.c:322
+#, c-format
+msgid "Requires user password to continue"
+msgstr "Захтева лозинку корисника за наставак"
 
 #: ../src/configuration/e-ews-config-utils.c:574
 msgid "Folder"
@@ -581,7 +606,7 @@ msgid "Edit EWS folder permissions..."
 msgstr "Уреди овлашћења ВУР фасцикле..."
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:952
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:669
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:674
 msgid "Account:"
 msgstr "Налог:"
 
@@ -782,11 +807,11 @@ msgid "User name “%s” is ambiguous, specify it more precisely, please"
 msgstr "Корисничко име „%s“ је нејасно, наведите га мало тачније, молим лепо"
 
 #. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:371
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:374
 msgid "Availability"
 msgstr "Доступност"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:386
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:391
 #, c-format
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
@@ -795,7 +820,7 @@ msgstr ""
 "Нисам пронашао фасциклу „%s“. Или не постоји или ви немате овлашћења да јој "
 "приступите."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:405
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:410
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Не могу да додам фасциклу, не могу да одредим врсту датотеке"
 
@@ -804,71 +829,69 @@ msgstr "Не могу да додам фасциклу, не могу да од�
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:450
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:455
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:544
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:754
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:549
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:759
 msgid "Inbox"
 msgstr "Пријемно сандуче"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:546
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:755
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:551
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:760
 msgid "Contacts"
 msgstr "Контакти"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:548
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:756
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:553
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:761
 msgid "Calendar"
 msgstr "Календар"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:550
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:757
-#| msgctxt "PermissionsLevel"
-#| msgid "Free/Busy time"
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:555
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:762
 msgid "Free/Busy as Calendar"
 msgstr "Слободно/заузето као календар"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:552
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:758
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:557
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:763
 msgid "Memos"
 msgstr "Белешке"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:554
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:759
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:559
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:764
 msgid "Tasks"
 msgstr "Задаци"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:571
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:576
 #, c-format
 msgid "Testing availability of folder “%s” of user “%s”, please wait..."
 msgstr "Испробавам доступност фасцикле „%s“ корисника „%s“, сачекајте..."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:648
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:653
 msgid "Subscribe to folder of other EWS user..."
 msgstr "Пријави се на фасциклу другог ВУР корисника..."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:699
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:704
 msgid "User"
 msgstr "Корисник"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:706
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:711
 msgid "_User:"
 msgstr "_Корисник:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:726
 msgid "C_hoose..."
 msgstr "Иза_бери..."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:737
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:742
 msgid "_Folder name:"
 msgstr "Назив _фасцикле:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:768
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:773
 msgid "Include _subfolders"
 msgstr "Укључи _подфасцикле"
 
@@ -880,41 +903,95 @@ msgstr "Пропитујем услугу самооткривања"
 msgid "Fetch _URL"
 msgstr "Довуци _адресу"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:138
+#: ../src/configuration/e-mail-config-ews-backend.c:178
 msgid "Configuration"
 msgstr "Подешавање"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:156
+#: ../src/configuration/e-mail-config-ews-backend.c:196
 msgid "User_name:"
 msgstr "_Корисник:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:170
+#: ../src/configuration/e-mail-config-ews-backend.c:210
 msgid "_Host URL:"
 msgstr "Адреса _домаћина:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:189
+#: ../src/configuration/e-mail-config-ews-backend.c:229
 msgid "OAB U_RL:"
 msgstr "ОАБ _адреса:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:203
+#: ../src/configuration/e-mail-config-ews-backend.c:243
 msgid "Open _Mailbox of other user"
 msgstr "Отвори _сандуче другог корисника"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:237
+#: ../src/configuration/e-mail-config-ews-backend.c:277
 msgid "S_earch..."
 msgstr "_Потражи..."
 
-#: ../src/configuration/e-mail-config-ews-backend.c:248
+#: ../src/configuration/e-mail-config-ews-backend.c:288
 msgid "Authentication"
 msgstr "Потврђивање идентитета"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:399
+#: ../src/configuration/e-mail-config-ews-backend.c:315
+msgid "_Override Office365 OAuth2 settings"
+msgstr "_Препиши подешавања Офиса365 ОАут2"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:319
+msgid "Help…"
+msgstr "Помоћ…"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:326
+msgid "_Tenant:"
+msgstr "_Поручник:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:349
+msgid "There is not set any default tenant"
+msgstr "Није постављен ниједан основни поручник"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:350
+#, c-format
+msgid "Default tenant is “%s”"
+msgstr "Основни поручник је „%s“"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:352
+msgid "Application I_D:"
+msgstr "И_Б програма:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:375
+msgid "There is not set any default application ID"
+msgstr "Није постављен ниједан основни ИБ програма"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:376
+#, c-format
+msgid "Default application ID is “%s”"
+msgstr "Основни ИБ програма је „%s“"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:378
+msgid "_Redirect URI:"
+msgstr "_Адреса преусмерења:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:400
+#: ../src/configuration/e-mail-config-ews-backend.c:403
+#, c-format
+msgid "Default redirect URI is “%s”"
+msgstr "Основна адреса преусмерења је „%s“"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:575
 msgid "Host URL cannot be empty"
 msgstr "Адреса домаћина не може бити празна"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:404
+#: ../src/configuration/e-mail-config-ews-backend.c:580
 msgid "User name cannot be empty"
 msgstr "Корисничко име не може бити празно"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:596
+#| msgid "User name cannot be empty"
+msgid "Tenant cannot be empty"
+msgstr "Поручник не може бити празан"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:601
+#| msgid "Host URL cannot be empty"
+msgid "Application ID cannot be empty"
+msgstr "ИБ програма не може бити празан"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:417
 msgctxt "PermissionsLevel"
@@ -1141,25 +1218,38 @@ msgstr "Нисам успео да довучем подешавања „Иза
 msgid "Your Exchange account “{0}” has the status set as “Out of Office”."
 msgstr "Ваш налог размене „{0}“ има стање подешено на „ван канцеларије“."
 
+#: ../src/server/camel-sasl-xoauth2-office365.c:23
+#| msgid "Out of Office"
+msgid "OAuth2 (Office365)"
+msgstr "ОАут2 (Офис365)"
+
+#: ../src/server/camel-sasl-xoauth2-office365.c:24
+msgid ""
+"This option will use an OAuth 2.0 access token to connect to the Office365."
+"com server"
+msgstr ""
+"Ова опција ће користити ОАут 2.0 приступни прстен за повезивање са "
+"„Office365.com“ сервером"
+
 #: ../src/server/e-ews-camel-common.c:376
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "Позив „Направи ставку“ није успео да врати ИБ за нову поруку"
 
-#: ../src/server/e-ews-connection.c:732
+#: ../src/server/e-ews-connection.c:759
 msgid "Operation Cancelled"
 msgstr "Радња је отказана"
 
-#: ../src/server/e-ews-connection.c:800
+#: ../src/server/e-ews-connection.c:859
 msgid "Authentication failed"
 msgstr "Неуспешна пријава"
 
-#: ../src/server/e-ews-connection.c:822
+#: ../src/server/e-ews-connection.c:881
 #, c-format
 msgid "No response: %s"
 msgstr "Нема одговора: %s"
 
-#: ../src/server/e-ews-connection.c:885
+#: ../src/server/e-ews-connection.c:944
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -1168,7 +1258,7 @@ msgstr[1] "Сервер размене је заузет, чекам да пок
 msgstr[2] "Сервер размене је заузет, чекам да покушам поново (%d:%02d минута)"
 msgstr[3] "Сервер размене је заузет, чекам да покушам поново (један минут)"
 
-#: ../src/server/e-ews-connection.c:891
+#: ../src/server/e-ews-connection.c:950
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -1177,56 +1267,69 @@ msgstr[1] "Сервер размене је заузет, чекам да пок
 msgstr[2] "Сервер размене је заузет, чекам да покушам поново (%d секунди)"
 msgstr[3] "Сервер размене је заузет, чекам да покушам поново (једна секунда)"
 
-#: ../src/server/e-ews-connection.c:2673
+#: ../src/server/e-ews-connection.c:2879
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Нисам успео да обрадим самооткривајући одговор ИксМЛ"
 
-#: ../src/server/e-ews-connection.c:2680
+#: ../src/server/e-ews-connection.c:2886
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Нисам успео да пронађем елемент <Самооткривање>"
 
-#: ../src/server/e-ews-connection.c:2691
+#: ../src/server/e-ews-connection.c:2897
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Нисам успео да пронађем елемент <Одговор>"
 
-#: ../src/server/e-ews-connection.c:2702
+#: ../src/server/e-ews-connection.c:2908
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Нисам успео да пронађем елемент <Налог>"
 
-#: ../src/server/e-ews-connection.c:2727
+#: ../src/server/e-ews-connection.c:2933
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
 "Нисам успео да пронађем <АСадресу> и <ОАБадресу> у одговору самооткривања"
 
-#: ../src/server/e-ews-connection.c:2818
+#: ../src/server/e-ews-connection.c:3024
 msgid "URL cannot be NULL"
 msgstr "Адреса не може бити НИШТАВНА"
 
-#: ../src/server/e-ews-connection.c:2826
+#: ../src/server/e-ews-connection.c:3032
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "Адреса „%s“ није исправна"
 
-#: ../src/server/e-ews-connection.c:2916
+#: ../src/server/e-ews-connection.c:3123
 msgid "Email address is missing a domain part"
 msgstr "Е-пошти недостаје део домена"
 
-#: ../src/server/e-ews-connection.c:3238
+#: ../src/server/e-ews-connection.c:3447
 msgid "Failed to parse oab XML"
 msgstr "Нисам успео да обрадим оаб ИксМЛ"
 
-#: ../src/server/e-ews-connection.c:3246
+#: ../src/server/e-ews-connection.c:3455
 msgid "Failed to find <OAB> element\n"
 msgstr "Нисам успео да пронађем елемент <ОАБ>\n"
 
-#: ../src/server/e-ews-connection.c:4551
+#: ../src/server/e-ews-connection.c:4762
 msgid "No items found"
 msgstr "Нисам пронашао ниједну ставку"
+
+#: ../src/server/e-ews-connection-utils.c:197
+#, c-format
+msgid "Password expired. Change password at “%s”."
+msgstr "Лозинка је истекла. Промените лозинку на „%s“."
+
+#: ../src/server/e-ews-connection-utils.c:200
+msgid "Password expired."
+msgstr "Лозинка је истекла."
+
+#: ../src/server/e-ews-connection-utils.c:416
+msgid "Unknown error"
+msgstr "Непозната грешка"
 
 #: ../src/server/e-ews-folder.c:728
 msgid "Cannot add folder, unsupported folder type"
@@ -1235,6 +1338,12 @@ msgstr "Не могу да додам фасциклу, неподржана в�
 #: ../src/server/e-ews-folder.c:733
 msgid "Cannot add folder, master source not found"
 msgstr "Не могу да додам фасциклу, нисам пронашао главни извор"
+
+#. Translators: This is a user-visible string, display name of an OAuth2 service.
+#: ../src/server/e-oauth2-service-office365.c:122
+msgctxt "OAuth2Service"
+msgid "Office365"
+msgstr "Офис365"
 
 #~ msgid "The backend does not support bulk additions"
 #~ msgstr "Позадинац не подржава групно додавање"
@@ -1256,9 +1365,6 @@ msgstr "Не могу да додам фасциклу, нисам пронаш�
 
 #~ msgid "EWS does not support bulk removals"
 #~ msgstr "ВУР не подржава групно уклањање"
-
-#~ msgid "Unknown error"
-#~ msgstr "Непозната грешка"
 
 #~ msgid "EWS does not support bulk additions"
 #~ msgstr "ВУР не подржава групно додавање"
