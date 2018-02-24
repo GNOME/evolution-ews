@@ -239,7 +239,7 @@ msgid_plural "Password will expire in %d days. Open “%s” to change it."
 msgstr[0] "Lozinka će isteći za %d dan. Otvorite „%s“ da je izmenite."
 msgstr[1] "Lozinka će isteći za %d dana. Otvorite „%s“ da je izmenite."
 msgstr[2] "Lozinka će isteći za %d dana. Otvorite „%s“ da je izmenite."
-msgstr[3] "Lozinka će isteći za jedan dan. Otvorite „%s“ da je izmenite."
+msgstr[3] "Lozinka će isteći za %d dan. Otvorite „%s“ da je izmenite."
 
 #: ../src/camel/camel-ews-store.c:1326
 #, c-format
