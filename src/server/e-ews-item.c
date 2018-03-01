@@ -631,7 +631,7 @@ process_attendees (EEwsItemPrivate *priv,
 		attendee->mailbox = mailbox;
 
 		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "ResponseType");
-		attendee->responsetype = e_soap_parameter_get_string_value (subparam1);
+		attendee->responsetype = subparam1 ? e_soap_parameter_get_string_value (subparam1) : NULL;
 
 		attendee->attendeetype = (gchar *) type;
 

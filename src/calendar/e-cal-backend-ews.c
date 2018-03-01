@@ -293,7 +293,8 @@ ecb_ews_responsetype_to_partstat (const gchar *responsetype)
 {
 	icalparameter *param = NULL;
 
-	g_return_val_if_fail (responsetype != NULL, NULL);
+	if (!responsetype)
+		return icalparameter_new_partstat (ICAL_PARTSTAT_NONE);
 
 	if (g_ascii_strcasecmp (responsetype, "Organizer") == 0)
 		param = icalparameter_new_partstat (ICAL_PARTSTAT_ACCEPTED);
