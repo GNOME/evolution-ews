@@ -184,6 +184,19 @@ ecb_ews_convert_error_to_edc_error (GError **perror)
 }
 
 static void
+ecb_ews_maybe_disconnect_sync (ECalBackendEws *cbews,
+			       GError **in_perror,
+			       GCancellable *cancellable)
+{
+	g_return_if_fail (E_IS_CAL_BACKEND_EWS (cbews));
+
+	if (in_perror && g_error_matches (*in_perror, E_DATA_CAL_ERROR, AuthenticationFailed)) {
+		e_cal_meta_backend_disconnect_sync (E_CAL_META_BACKEND (cbews), cancellable, NULL);
+		e_backend_schedule_credentials_required (E_BACKEND (cbews), E_SOURCE_CREDENTIALS_REASON_REJECTED, NULL, 0, NULL, NULL, G_STRFUNC);
+	}
+}
+
+static void
 ecb_ews_server_notification_cb (ECalBackendEws *cbews,
 				GSList *events,
 				EEwsConnection *cnc)
@@ -1735,6 +1748,7 @@ ecb_ews_get_changes_sync (ECalMetaBackend *meta_backend,
 	g_rec_mutex_unlock (&cbews->priv->cnc_lock);
 
 	ecb_ews_convert_error_to_edc_error (error);
+	ecb_ews_maybe_disconnect_sync (cbews, error, cancellable);
 	g_clear_object (&cal_cache);
 
 	return success;
@@ -1821,6 +1835,7 @@ ecb_ews_load_component_sync (ECalMetaBackend *meta_backend,
 	g_rec_mutex_unlock (&cbews->priv->cnc_lock);
 
 	ecb_ews_convert_error_to_edc_error (error);
+	ecb_ews_maybe_disconnect_sync (cbews, error, cancellable);
 	g_slist_free_full (components, g_object_unref);
 	g_slist_free_full (items, g_object_unref);
 
@@ -2710,6 +2725,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 	e_ews_folder_id_free (fid);
 
 	ecb_ews_convert_error_to_edc_error (error);
+	ecb_ews_maybe_disconnect_sync (cbews, error, cancellable);
 
 	return success;
 }
@@ -2753,6 +2769,7 @@ ecb_ews_remove_component_sync (ECalMetaBackend *meta_backend,
 	g_rec_mutex_unlock (&cbews->priv->cnc_lock);
 
 	ecb_ews_convert_error_to_edc_error (error);
+	ecb_ews_maybe_disconnect_sync (cbews, error, cancellable);
 	g_object_unref (comp);
 
 	return success;
@@ -2841,6 +2858,7 @@ ecb_ews_discard_alarm_sync (ECalBackendSync *cal_backend_sync,
 	g_free (convert_data.change_key);
 
 	ecb_ews_convert_error_to_edc_error (error);
+	ecb_ews_maybe_disconnect_sync (cbews, error, cancellable);
 }
 
 static gboolean
@@ -3439,6 +3457,9 @@ ecb_ews_receive_objects_sync (ECalBackendSync *sync_backend,
 
 	if (success && do_refresh)
 		e_cal_meta_backend_schedule_refresh (E_CAL_META_BACKEND (cbews));
+
+	ecb_ews_convert_error_to_edc_error (error);
+	ecb_ews_maybe_disconnect_sync (cbews, error, cancellable);
 }
 
 static void
@@ -3528,6 +3549,7 @@ ecb_ews_send_objects_sync (ECalBackendSync *sync_backend,
 	icalcomponent_free (icalcomp);
 
 	ecb_ews_convert_error_to_edc_error (error);
+	ecb_ews_maybe_disconnect_sync (cbews, error, cancellable);
 }
 
 static void
@@ -3593,6 +3615,7 @@ ecb_ews_get_free_busy_sync (ECalBackendSync *sync_backend,
 	g_slist_free_full (freebusy, (GDestroyNotify) icalcomponent_free);
 
 	ecb_ews_convert_error_to_edc_error (error);
+	ecb_ews_maybe_disconnect_sync (cbews, error, cancellable);
 }
 
 static gchar *

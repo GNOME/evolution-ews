@@ -149,6 +149,19 @@ ebb_ews_convert_error_to_edb_error (GError **perror)
 	}
 }
 
+static void
+ebb_ews_maybe_disconnect_sync (EBookBackendEws *bbews,
+			       GError **in_perror,
+			       GCancellable *cancellable)
+{
+	g_return_if_fail (E_IS_BOOK_BACKEND_EWS (bbews));
+
+	if (in_perror && g_error_matches (*in_perror, E_DATA_BOOK_ERROR, E_DATA_BOOK_STATUS_AUTHENTICATION_FAILED)) {
+		e_book_meta_backend_disconnect_sync (E_BOOK_META_BACKEND (bbews), cancellable, NULL);
+		e_backend_schedule_credentials_required (E_BACKEND (bbews), E_SOURCE_CREDENTIALS_REASON_REJECTED, NULL, 0, NULL, NULL, G_STRFUNC);
+	}
+}
+
 static const struct phone_field_mapping {
 	EContactField field;
 	const gchar *element;
@@ -2633,6 +2646,7 @@ ebb_ews_update_cache_for_expression (EBookBackendEws *bbews,
 	g_rec_mutex_unlock (&bbews->priv->cnc_lock);
 
 	ebb_ews_convert_error_to_edb_error (error);
+	ebb_ews_maybe_disconnect_sync (bbews, error, cancellable);
 
 	return success;
 }
@@ -3024,6 +3038,7 @@ ebb_ews_get_changes_sync (EBookMetaBackend *meta_backend,
 	g_rec_mutex_unlock (&bbews->priv->cnc_lock);
 
 	ebb_ews_convert_error_to_edb_error (error);
+	ebb_ews_maybe_disconnect_sync (bbews, error, cancellable);
 
 	g_clear_object (&book_cache);
 
@@ -3079,6 +3094,7 @@ ebb_ews_load_contact_sync (EBookMetaBackend *meta_backend,
 	g_slist_free_full (items, g_object_unref);
 
 	ebb_ews_convert_error_to_edb_error (error);
+	ebb_ews_maybe_disconnect_sync (bbews, error, cancellable);
 
 	return success;
 }
@@ -3219,6 +3235,7 @@ ebb_ews_save_contact_sync (EBookMetaBackend *meta_backend,
 	g_rec_mutex_unlock (&bbews->priv->cnc_lock);
 
 	ebb_ews_convert_error_to_edb_error (error);
+	ebb_ews_maybe_disconnect_sync (bbews, error, cancellable);
 
 	return success;
 }
@@ -3251,6 +3268,7 @@ ebb_ews_remove_contact_sync (EBookMetaBackend *meta_backend,
 	g_rec_mutex_unlock (&bbews->priv->cnc_lock);
 
 	ebb_ews_convert_error_to_edb_error (error);
+	ebb_ews_maybe_disconnect_sync (bbews, error, cancellable);
 
 	return success;
 }
