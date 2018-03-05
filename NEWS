@@ -1,3 +1,22 @@
+Evolution-EWS 3.27.92 2018-03-05
+--------------------------------
+
+Bug Fixes:
+	Bug 793606 - Fails to import events without DTEND (Milan Crha)
+	Bug 763455 - Server-side password change doesn't reconnect book/calendar (Milan Crha)
+
+Miscellaneous:
+	Fix runtime warning when attendee has no ResponseType (Milan Crha)
+
+Translations:
+	Marek Cernocky (cs)
+	Daniel Mustieles (es)
+	Мирослав Николић (sr)
+	Мирослав Николић (sr@latin)
+	Mario Blättermann (de)
+	Rafael Fontenelle (pt_BR)
+	Gábor Kelemen (hu)
+
 Evolution-EWS 3.27.91 2018-02-19
 --------------------------------
 
