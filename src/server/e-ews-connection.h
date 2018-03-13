@@ -107,7 +107,8 @@ typedef enum {
 } EwsSendMeetingCancellationsType;
 
 typedef enum {
-	EWS_ALL_OCCURRENCES = 1,
+	EWS_NONE_OCCURRENCES = 0,
+	EWS_ALL_OCCURRENCES,
 	EWS_SPECIFIED_OCCURRENCE_ONLY
 } EwsAffectedTaskOccurrencesType;
 
@@ -626,7 +627,15 @@ gboolean	e_ews_connection_delete_items_sync
 						 EwsAffectedTaskOccurrencesType affected_tasks,
 						 GCancellable *cancellable,
 						 GError **error);
-
+gboolean	e_ews_connection_delete_items_in_chunks_sync
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const GSList *ids,
+						 EwsDeleteType delete_type,
+						 EwsSendMeetingCancellationsType send_cancels,
+						 EwsAffectedTaskOccurrencesType affected_tasks,
+						 GCancellable *cancellable,
+						 GError **error);
 void		e_ews_connection_delete_item	(EEwsConnection *cnc,
 						 gint pri,
 						 EwsId *id,

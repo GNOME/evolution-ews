@@ -2446,9 +2446,9 @@ ews_delete_messages_from_server (CamelEwsStore *ews_store,
 
 	cnc = camel_ews_store_ref_connection (ews_store);
 
-	ret = e_ews_connection_delete_items_sync (
+	ret = e_ews_connection_delete_items_in_chunks_sync (
 		cnc, EWS_PRIORITY_MEDIUM, deleted_items, delete_type,
-		EWS_SEND_TO_NONE, FALSE, cancellable, error);
+		EWS_SEND_TO_NONE, EWS_NONE_OCCURRENCES, cancellable, error);
 
 	g_object_unref (cnc);
 
