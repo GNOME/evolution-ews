@@ -4892,6 +4892,8 @@ static const gchar *
 ews_affected_tasks_to_str (EwsAffectedTaskOccurrencesType affected_tasks)
 {
 	switch (affected_tasks) {
+		case EWS_NONE_OCCURRENCES:
+			return NULL;
 		case EWS_ALL_OCCURRENCES:
 			return "AllOccurrences";
 		case EWS_SPECIFIED_OCCURRENCE_ONLY:
@@ -5033,7 +5035,7 @@ e_ews_connection_delete_item (EEwsConnection *cnc,
 			msg, "SendMeetingCancellations",
 			ews_send_cancels_to_str (send_cancels), NULL, NULL);
 
-	if (affected_tasks)
+	if (affected_tasks != EWS_NONE_OCCURRENCES)
 		e_soap_message_add_attribute (
 			msg, "AffectedTaskOccurrences",
 			ews_affected_tasks_to_str (affected_tasks), NULL, NULL);
@@ -5157,6 +5159,69 @@ e_ews_connection_delete_item_sync (EEwsConnection *cnc,
 	success = e_ews_connection_delete_items_finish (cnc, result, error);
 
 	e_async_closure_free (closure);
+
+	return success;
+}
+
+gboolean
+e_ews_connection_delete_items_in_chunks_sync (EEwsConnection *cnc,
+					      gint pri,
+					      const GSList *ids,
+					      EwsDeleteType delete_type,
+					      EwsSendMeetingCancellationsType send_cancels,
+					      EwsAffectedTaskOccurrencesType affected_tasks,
+					      GCancellable *cancellable,
+					      GError **error)
+{
+	const GSList *iter;
+	guint total_ids = 0, done_ids = 0;
+	gboolean success = TRUE;
+
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
+
+	g_object_ref (cnc);
+
+	iter = ids;
+
+	while (success && iter) {
+		guint n_ids;
+		const GSList *tmp_iter;
+
+		for (tmp_iter = iter, n_ids = 0; tmp_iter && n_ids < EWS_MOVE_ITEMS_CHUNK_SIZE; tmp_iter = g_slist_next (tmp_iter), n_ids++) {
+			/* Only check bounds first, to avoid unnecessary allocations */
+		}
+
+		if (tmp_iter) {
+			GSList *shorter = NULL;
+
+			if (total_ids == 0)
+				total_ids = g_slist_length ((GSList *) ids);
+
+			for (n_ids = 0; iter && n_ids < EWS_MOVE_ITEMS_CHUNK_SIZE; iter = g_slist_next (iter), n_ids++) {
+				shorter = g_slist_prepend (shorter, iter->data);
+			}
+
+			shorter = g_slist_reverse (shorter);
+
+			success = e_ews_connection_delete_items_sync (cnc, pri, shorter, delete_type, send_cancels,
+				affected_tasks, cancellable, error);
+
+			g_slist_free (shorter);
+
+			done_ids += n_ids;
+		} else {
+			success = e_ews_connection_delete_items_sync (cnc, pri, iter, delete_type, send_cancels,
+				affected_tasks, cancellable, error);
+
+			iter = NULL;
+			done_ids = total_ids;
+		}
+
+		if (total_ids > 0)
+			camel_operation_progress (cancellable, 100 * (gdouble) done_ids / (gdouble) total_ids);
+	}
+
+	g_object_unref (cnc);
 
 	return success;
 }
