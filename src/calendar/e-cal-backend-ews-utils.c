@@ -308,7 +308,8 @@ ews_get_alarm (ECalComponent *comp)
 
 void
 ews_set_alarm (ESoapMessage *msg,
-               ECalComponent *comp)
+               ECalComponent *comp,
+	       gboolean with_due_by)
 {
 	/* We know there would be only a single alarm in EWS calendar item */
 	GList *alarm_uids = e_cal_component_get_alarm_uids (comp);
@@ -319,14 +320,23 @@ ews_set_alarm (ESoapMessage *msg,
 	e_cal_component_alarm_get_action (alarm, &action);
 	if (action == E_CAL_COMPONENT_ALARM_DISPLAY) {
 		ECalComponentAlarmTrigger trigger;
-		gchar buf[20];
 		gint dur_int = 0;
+
 		e_cal_component_alarm_get_trigger (alarm, &trigger);
 		switch (trigger.type) {
 		case E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_START:
 			dur_int = ((icaldurationtype_as_int (trigger.u.rel_duration)) / SECS_IN_MINUTE) * -1;
-			snprintf (buf, 20, "%d", dur_int);
-			e_ews_message_write_string_parameter (msg, "ReminderMinutesBeforeStart", NULL, buf);
+			e_ews_message_write_int_parameter (msg, "ReminderMinutesBeforeStart", NULL, dur_int);
+			if (with_due_by) {
+				struct icaltimetype dtstart;
+
+				dtstart = icalcomponent_get_dtstart (e_cal_component_get_icalcomponent (comp));
+
+				if (!icaltime_is_null_time (dtstart)) {
+					e_ews_message_write_time_parameter (msg, "ReminderDueBy", NULL,
+						icaltime_as_timet_with_zone (dtstart, icaltimezone_get_utc_timezone ()));
+				}
+			}
 			break;
 		default:
 			break;
@@ -1088,7 +1098,7 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	/* set alarms */
 	has_alarms = e_cal_component_has_alarms (comp);
 	if (has_alarms)
-		ews_set_alarm (msg, comp);
+		ews_set_alarm (msg, comp, FALSE);
 	else
 		e_ews_message_write_string_parameter (msg, "ReminderIsSet", NULL, "false");
 
@@ -1215,6 +1225,7 @@ convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
 	icaltimetype dt;
 	gint value;
 	gchar buffer[16];
+	/* gboolean has_alarms; */
 
 	e_soap_message_start_element (msg, "Task", NULL, NULL);
 
@@ -1258,6 +1269,22 @@ convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
 			break;
 		}
 	}
+
+	/* has_alarms = icalcomponent_get_first_component (icalcomp, ICAL_VALARM_COMPONENT) != NULL;
+	if (has_alarms) {
+		ECalComponent *comp = e_cal_component_new_from_icalcomponent (icalcomponent_new_clone (icalcomp));
+
+		if (comp && e_cal_component_has_alarms (comp)) {
+			ews_set_alarm (msg, comp, TRUE);
+		} else {
+			has_alarms = FALSE;
+		}
+
+		g_clear_object (&comp);
+	}
+
+	if (!has_alarms)
+		e_ews_message_write_string_parameter (msg, "ReminderIsSet", NULL, "false");*/
 
 	e_soap_message_end_element (msg); /* "Task" */
 }

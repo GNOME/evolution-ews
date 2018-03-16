@@ -476,6 +476,62 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 				priority = 7;
 			icalprop = icalproperty_new_priority (priority);
 			icalcomponent_add_property (icalcomp, icalprop);
+
+			/* reminders */
+			/* The Exchange server stores start of the Task reminder and Start of the Task
+			   itself in separate properties, which doesn't work for evolution at the moment. */
+			/* if (e_ews_item_get_reminder_is_set (item)) {
+				time_t reminder_due_by = e_ews_item_get_reminder_due_by (item);
+				gint minutes_before_start = e_ews_item_get_reminder_minutes_before_start (item);
+
+				if (minutes_before_start >= 0 && reminder_due_by > (time_t) 0) {
+					ECalComponentAlarmTrigger trigger;
+					ECalComponentAlarmRepeat repeat;
+					ECalComponentAlarm *alarm;
+					icalcomponent *alarm_icalcomp;
+					struct icaltimetype dtstart, due_by;
+
+					dtstart = icalcomponent_get_dtstart (icalcomp);
+					due_by = icaltime_from_timet_with_zone (reminder_due_by, 0, utc_zone);
+
+					if (icaltime_is_null_time (dtstart)) {
+						dtstart = due_by;
+						dtstart.is_date = 1;
+
+						icalcomponent_set_dtstart (icalcomp, dtstart);
+					}
+
+					dtstart.is_date = 0;
+					dtstart.hour = 0;
+					dtstart.minute = 0;
+					dtstart.second = 0;
+					dtstart.zone = utc_zone;
+
+					minutes_before_start = minutes_before_start + (
+						(icaltime_as_timet_with_zone (dtstart, utc_zone) -
+						 icaltime_as_timet_with_zone (due_by, utc_zone)) / 60);
+
+					alarm = e_cal_component_alarm_new ();
+					memset (&trigger, 0, sizeof (ECalComponentAlarmTrigger));
+
+					trigger.type = E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_START;
+					trigger.u.rel_duration.is_neg = minutes_before_start < 0 ? 0 : 1; / * negative 'before start' means 'after start' * /
+					trigger.u.rel_duration.minutes = minutes_before_start < 0 ? -minutes_before_start : minutes_before_start;
+
+					memset (&repeat, 0, sizeof (repeat));
+					repeat.repetitions = 0;
+
+					e_cal_component_alarm_set_trigger (alarm, trigger);
+					e_cal_component_alarm_set_action (alarm, E_CAL_COMPONENT_ALARM_DISPLAY);
+					e_cal_component_alarm_set_repeat (alarm, repeat);
+
+					alarm_icalcomp = e_cal_component_alarm_get_icalcomponent (alarm);
+					if (alarm_icalcomp)
+						icalcomponent_add_component (icalcomp, alarm_icalcomp);
+
+					e_cal_component_alarm_free (alarm);
+				}
+			} */
 		}
 
 		icalcomponent_add_component (vcomp, icalcomp);
@@ -3645,6 +3701,7 @@ ecb_ews_get_backend_property (ECalBackend *cal_backend,
 			CAL_STATIC_CAPABILITY_NO_MEMO_START_DATE,
 			CAL_STATIC_CAPABILITY_ALL_DAY_EVENT_AS_TIME,
 			CAL_STATIC_CAPABILITY_TASK_DATE_ONLY,
+			CAL_STATIC_CAPABILITY_TASK_NO_ALARM,
 			e_cal_meta_backend_get_capabilities (E_CAL_META_BACKEND (cbews)),
 			NULL);
 	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_CAL_EMAIL_ADDRESS)) {

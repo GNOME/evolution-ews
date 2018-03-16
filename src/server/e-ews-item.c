@@ -148,6 +148,10 @@ struct _EEwsItemPrivate {
 	 * <Categories> which is a string array valued XML element */
 	GSList *categories;
 
+	gboolean reminder_is_set;
+	time_t reminder_due_by;
+	gint reminder_minutes_before_start;
+
 	struct _EEwsContactFields *contact_fields;
 	struct _EEwsTaskFields *task_fields;
 };
@@ -305,6 +309,9 @@ e_ews_item_init (EEwsItem *item)
 
 	item->priv->mapi_extended_tags = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_free);
 	item->priv->mapi_extended_sets = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_hash_table_destroy);
+
+	item->priv->reminder_is_set = FALSE;
+	item->priv->reminder_minutes_before_start = -1;
 }
 
 static void
@@ -1133,6 +1140,16 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 			g_free (value);
 		} else if (!g_ascii_strcasecmp (name, "TimeZone")) {
 			priv->timezone = e_soap_parameter_get_string_value (subparam);
+		} else if (!g_ascii_strcasecmp (name, "ReminderIsSet")) {
+			value = e_soap_parameter_get_string_value (subparam);
+			priv->reminder_is_set = (!g_ascii_strcasecmp (value, "true"));
+			g_free (value);
+		} else if (!g_ascii_strcasecmp (name, "ReminderDueBy")) {
+			value = e_soap_parameter_get_string_value (subparam);
+			priv->reminder_due_by = ews_item_parse_date (value);
+			g_free (value);
+		} else if (!g_ascii_strcasecmp (name, "ReminderMinutesBeforeStart")) {
+			priv->reminder_minutes_before_start = e_soap_parameter_get_int_value (subparam);
 		} else if (priv->item_type == E_EWS_ITEM_TYPE_TASK || priv->item_type == E_EWS_ITEM_TYPE_MEMO) {
 			parse_task_field (item, name, subparam);
 			/* fields below are not relevant for task, so skip them */
@@ -1889,6 +1906,32 @@ e_ews_item_get_calendar_item_accept_id (EEwsItem *item)
 	return (const EwsId *) item->priv->calendar_item_accept_id;
 }
 
+gboolean
+e_ews_item_get_reminder_is_set (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), FALSE);
+
+	return item->priv->reminder_is_set;
+}
+
+time_t
+e_ews_item_get_reminder_due_by (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
+
+	return item->priv->reminder_due_by;
+}
+
+/* -1 when not set, but should really check also
+   e_ews_item_get_reminder_is_set() before using the value */
+gint
+e_ews_item_get_reminder_minutes_before_start (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
+
+	return item->priv->reminder_minutes_before_start;
+}
+
 const gchar *
 e_ews_item_get_fileas (EEwsItem *item)
 {
@@ -2170,7 +2213,8 @@ e_ews_item_get_status (EEwsItem *item)
 	return item->priv->task_fields->status;
 }
 
-const gchar *	e_ews_item_get_percent_complete (EEwsItem *item)
+const gchar *
+e_ews_item_get_percent_complete (EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
 	g_return_val_if_fail (item->priv->task_fields != NULL, NULL);

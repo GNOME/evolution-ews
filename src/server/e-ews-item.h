@@ -210,6 +210,10 @@ EwsImportance
 		e_ews_item_get_importance	(EEwsItem *item);
 const GSList *
 		e_ews_item_get_categories	(EEwsItem *item);
+gboolean	e_ews_item_get_reminder_is_set	(EEwsItem *item);
+time_t		e_ews_item_get_reminder_due_by	(EEwsItem *item);
+gint		e_ews_item_get_reminder_minutes_before_start
+						(EEwsItem *item);
 EwsMailbox *
 		e_ews_item_mailbox_from_soap_param
 						(ESoapParameter *param);
