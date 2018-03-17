@@ -7,6 +7,7 @@ src/calendar/e-cal-backend-ews.c
 src/camel/camel-ews-folder.c
 src/camel/camel-ews-provider.c
 src/camel/camel-ews-store.c
+src/camel/camel-ews-store.h
 src/camel/camel-ews-transport.c
 src/camel/camel-ews-utils.c
 src/collection/e-ews-backend.c
