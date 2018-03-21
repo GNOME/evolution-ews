@@ -26,6 +26,7 @@ src/configuration/e-mail-config-ews-gal.c
 src/configuration/e-mail-config-ews-ooo-page.c
 src/configuration/module-ews-configuration.error.xml
 src/server/camel-sasl-xoauth2-office365.c
+src/server/e-ews-calendar-utils.c
 src/server/e-ews-camel-common.c
 src/server/e-ews-connection.c
 src/server/e-ews-connection-utils.c

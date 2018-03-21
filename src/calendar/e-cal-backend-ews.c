@@ -477,6 +477,9 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 			icalprop = icalproperty_new_priority (priority);
 			icalcomponent_add_property (icalcomp, icalprop);
 
+			/* recurrence */
+			e_ews_cal_utils_recurrence_to_rrule (item, icalcomp);
+
 			/* reminders */
 			/* The Exchange server stores start of the Task reminder and Start of the Task
 			   itself in separate properties, which doesn't work for evolution at the moment. */
@@ -3702,6 +3705,7 @@ ecb_ews_get_backend_property (ECalBackend *cal_backend,
 			CAL_STATIC_CAPABILITY_ALL_DAY_EVENT_AS_TIME,
 			CAL_STATIC_CAPABILITY_TASK_DATE_ONLY,
 			CAL_STATIC_CAPABILITY_TASK_NO_ALARM,
+			CAL_STATIC_CAPABILITY_TASK_CAN_RECUR,
 			e_cal_meta_backend_get_capabilities (E_CAL_META_BACKEND (cbews)),
 			NULL);
 	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_CAL_EMAIL_ADDRESS)) {

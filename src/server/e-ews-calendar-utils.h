@@ -24,8 +24,13 @@
 #include <libical/ical.h>
 
 #include "server/e-soap-message.h"
+#include "server/e-ews-item.h"
 
 G_BEGIN_DECLS
+
+/* Custom property, because evolution cannot cope with it,
+   but it shouldn't lost it as well */
+#define X_EWS_TASK_REGENERATION "X-EWS-TASK-REGENERATION"
 
 typedef struct _EEWSFreeBusyData {
 	time_t period_start;
@@ -33,13 +38,21 @@ typedef struct _EEWSFreeBusyData {
 	GSList *user_mails; /* gchar * */
 } EEWSFreeBusyData;
 
-void		e_ews_cal_utils_prepare_free_busy_request
+gboolean	e_ews_cal_utils_prepare_free_busy_request
 						(ESoapMessage *msg,
-						 gpointer user_data); /* EEWSFreeBusyData * */
+						 gpointer user_data, /* EEWSFreeBusyData * */
+						 GError **error);
 void		e_ews_cal_utils_set_time	(ESoapMessage *msg,
 						 const gchar *name,
 						 icaltimetype *tt,
 						 gboolean with_timezone);
+gboolean	e_ews_cal_utils_set_recurrence	(ESoapMessage *msg,
+						 icalcomponent *comp,
+						 gboolean server_satisfies_2013,
+						 GError **error);
+void		e_ews_cal_utils_recurrence_to_rrule
+						(EEwsItem *item,
+						 icalcomponent *comp);
 
 G_END_DECLS
 

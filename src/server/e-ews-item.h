@@ -162,6 +162,93 @@ typedef struct {
 	guint32 rights;				/* EEwsPermissionBits for the user */
 } EEwsPermission;
 
+typedef enum {
+	E_EWS_RECURRENCE_UNKNOWN = 0,
+	E_EWS_RECURRENCE_RELATIVE_YEARLY,
+	E_EWS_RECURRENCE_ABSOLUTE_YEARLY,
+	E_EWS_RECURRENCE_RELATIVE_MONTHLY,
+	E_EWS_RECURRENCE_ABSOLUTE_MONTHLY,
+	E_EWS_RECURRENCE_WEEKLY,
+	E_EWS_RECURRENCE_DAILY,
+	E_EWS_RECURRENCE_DAILY_REGENERATION,
+	E_EWS_RECURRENCE_WEEKLY_REGENERATION,
+	E_EWS_RECURRENCE_MONTHLY_REGENERATION,
+	E_EWS_RECURRENCE_YEARLY_REGENERATION
+} EEwsRecurrenceType;
+
+typedef enum {
+	E_EWS_RECURRENCE_DAYS_OF_WEEK_UNKNOWN		= 0,
+	E_EWS_RECURRENCE_DAYS_OF_WEEK_SUNDAY		= 1 << 0,
+	E_EWS_RECURRENCE_DAYS_OF_WEEK_MONDAY		= 1 << 1,
+	E_EWS_RECURRENCE_DAYS_OF_WEEK_TUESDAY		= 1 << 2,
+	E_EWS_RECURRENCE_DAYS_OF_WEEK_WEDNESDAY		= 1 << 3,
+	E_EWS_RECURRENCE_DAYS_OF_WEEK_THURSDAY		= 1 << 4,
+	E_EWS_RECURRENCE_DAYS_OF_WEEK_FRIDAY		= 1 << 5,
+	E_EWS_RECURRENCE_DAYS_OF_WEEK_SATURDAY		= 1 << 6,
+	E_EWS_RECURRENCE_DAYS_OF_WEEK_DAY		= 1 << 7,
+	E_EWS_RECURRENCE_DAYS_OF_WEEK_WEEKDAY		= 1 << 8,
+	E_EWS_RECURRENCE_DAYS_OF_WEEK_WEEKENDDAY	= 1 << 9
+} EEwsRecurrenceDaysOfWeek;
+
+typedef enum {
+	E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_UNKNOWN = 0,
+	E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_FIRST,
+	E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_SECOND,
+	E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_THIRD,
+	E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_FOURTH,
+	E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_LAST
+} EEwsRecurrenceDayOfWeekIndex;
+
+typedef enum {
+	E_EWS_RECURRENCE_END_UNKNOWN = 0,
+	E_EWS_RECURRENCE_END_NO_END,
+	E_EWS_RECURRENCE_END_DATE,
+	E_EWS_RECURRENCE_END_NUMBERED
+} EEwsRecurrenceEndType;
+
+typedef struct {
+	EEwsRecurrenceType type;
+	union _recur {
+		struct _relative_yearly {
+			guint32 days_of_week; /* bit-or of EEwsRecurrenceDaysOfWeek */
+			EEwsRecurrenceDayOfWeekIndex day_of_week_index;
+			GDateMonth month; /* 1..12 */
+		} relative_yearly;
+
+		struct _absolute_yearly {
+			gint day_of_month; /* 1..31 */
+			GDateMonth month; /* 1..12 */
+		} absolute_yearly;
+
+		struct _relative_monthly {
+			gint interval; /* 1..99 */
+			guint32 days_of_week; /* bit-or of EEwsRecurrenceDaysOfWeek */
+			EEwsRecurrenceDayOfWeekIndex day_of_week_index;
+		} relative_monthly;
+
+		struct _absolute_monthly {
+			gint interval; /* 1..99 */
+			gint day_of_month; /* 1..31 */
+		} absolute_monthly;
+
+		struct _weekly {
+			gint interval; /* 1..99 */
+			guint32 days_of_week; /* bit-or of EEwsRecurrenceDaysOfWeek */
+			GDateWeekday first_day_of_week; /* Exchange 2013 server and above */
+		} weekly;
+
+		/* Used for daily, daily_regeneration, weekly_regeneration, monthly_regeneration and yearly_regeneration */
+		gint interval; /* 1..999 */
+	} recur;
+
+	EEwsRecurrenceEndType end_type;
+	time_t utc_start_date;
+	union _end {
+		time_t utc_end_date;
+		gint number_of_occurrences;
+	} end;
+} EEwsRecurrence;
+
 GType		e_ews_item_get_type (void);
 EEwsItem *	e_ews_item_new_from_soap_parameter
 						(ESoapParameter *param);
@@ -214,6 +301,8 @@ gboolean	e_ews_item_get_reminder_is_set	(EEwsItem *item);
 time_t		e_ews_item_get_reminder_due_by	(EEwsItem *item);
 gint		e_ews_item_get_reminder_minutes_before_start
 						(EEwsItem *item);
+gboolean	e_ews_item_get_recurrence	(EEwsItem *item,
+						 EEwsRecurrence *out_recurrence);
 EwsMailbox *
 		e_ews_item_mailbox_from_soap_param
 						(ESoapParameter *param);

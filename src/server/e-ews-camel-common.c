@@ -107,9 +107,10 @@ write_recipients (ESoapMessage *msg,
 #define MAPI_MSGFLAG_READ	0x01
 #define MAPI_MSGFLAG_UNSENT	0x08
 
-static void
+static gboolean
 create_mime_message_cb (ESoapMessage *msg,
-                        gpointer user_data)
+                        gpointer user_data,
+			GError **error)
 {
 	struct _create_mime_msg_data *create_data = user_data;
 	CamelStream *mem, *filtered;
@@ -323,6 +324,8 @@ create_mime_message_cb (ESoapMessage *msg,
 	e_soap_message_end_element (msg); /* Message */
 
 	g_free (create_data);
+
+	return TRUE;
 }
 
 gboolean

@@ -29,6 +29,7 @@
 #include <glib/gstdio.h>
 #include <glib/gprintf.h>
 #include <libsoup/soup-misc.h>
+#include <libical/ical.h>
 #include "e-ews-item.h"
 #include "e-ews-item-change.h"
 
@@ -151,6 +152,7 @@ struct _EEwsItemPrivate {
 	gboolean reminder_is_set;
 	time_t reminder_due_by;
 	gint reminder_minutes_before_start;
+	EEwsRecurrence recurrence;
 
 	struct _EEwsContactFields *contact_fields;
 	struct _EEwsTaskFields *task_fields;
@@ -312,6 +314,8 @@ e_ews_item_init (EEwsItem *item)
 
 	item->priv->reminder_is_set = FALSE;
 	item->priv->reminder_minutes_before_start = -1;
+	item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+	item->priv->recurrence.end_type = E_EWS_RECURRENCE_END_UNKNOWN;
 }
 
 static void
@@ -376,24 +380,35 @@ ews_item_free_attendee (EwsAttendee *attendee)
 }
 
 static time_t
-ews_item_parse_date (const gchar *dtstring)
+ews_item_parse_date (ESoapParameter *param)
 {
 	time_t t = 0;
 	GTimeVal t_val;
+	gchar *dtstring;
+	gint len;
+
+	dtstring = e_soap_parameter_get_string_value (param);
 
 	g_return_val_if_fail (dtstring != NULL, 0);
 
+	len = strlen (dtstring);
 	if (g_time_val_from_iso8601 (dtstring, &t_val)) {
 		t = (time_t) t_val.tv_sec;
-	} else if (strlen (dtstring) == 8) {
+	} else if (len == 8 || (len == 11 && dtstring[4] == '-' && dtstring[7] == '-' && dtstring[10] == 'Z')) {
 		/* It might be a date value */
-		GDate date;
-		struct tm tt;
 		guint16 year;
 		guint month;
 		guint8 day;
 
-		g_date_clear (&date, 1);
+		if (len == 11) {
+			dtstring[4] = dtstring[5];
+			dtstring[5] = dtstring[6];
+			dtstring[6] = dtstring[8];
+			dtstring[7] = dtstring[9];
+			dtstring[8] = dtstring[10];
+			dtstring[9] = '\0';
+		}
+
 #define digit_at(x,y) (x[y] - '0')
 		year = digit_at (dtstring, 0) * 1000
 			+ digit_at (dtstring, 1) * 100
@@ -402,15 +417,33 @@ ews_item_parse_date (const gchar *dtstring)
 		month = digit_at (dtstring, 4) * 10 + digit_at (dtstring, 5);
 		day = digit_at (dtstring, 6) * 10 + digit_at (dtstring, 7);
 
-		g_date_set_year (&date, year);
-		g_date_set_month (&date, month);
-		g_date_set_day (&date, day);
+		if (len == 11) {
+			struct icaltimetype itt;
 
-		g_date_to_struct_tm (&date, &tt);
-		t = mktime (&tt);
+			itt = icaltime_null_time ();
+			itt.year = year;
+			itt.month = month;
+			itt.day = day;
+			itt.is_date = 1;
+			itt.zone = icaltimezone_get_utc_timezone ();
 
+			t = icaltime_as_timet_with_zone (itt, icaltimezone_get_utc_timezone ());
+		} else {
+			GDate date;
+			struct tm tt;
+
+			g_date_clear (&date, 1);
+			g_date_set_year (&date, year);
+			g_date_set_month (&date, month);
+			g_date_set_day (&date, day);
+
+			g_date_to_struct_tm (&date, &tt);
+			t = mktime (&tt);
+		}
 	} else
-		g_warning ("Could not parse the string \n");
+		g_warning ("%s: Could not parse the string '%s'", G_STRFUNC, dtstring ? dtstring : "[null]");
+
+	g_free (dtstring);
 
 	return t;
 }
@@ -766,7 +799,6 @@ parse_contact_field (EEwsItem *item,
                      ESoapParameter *subparam)
 {
 	EEwsItemPrivate *priv = item->priv;
-	gchar *value = NULL;
 
 	if (!g_ascii_strcasecmp (name, "Culture")) {
 		priv->contact_fields->culture = e_soap_parameter_get_string_value (subparam);
@@ -790,9 +822,7 @@ parse_contact_field (EEwsItem *item,
 	} else if (!g_ascii_strcasecmp (name, "AssistantName")) {
 		priv->contact_fields->assistant_name = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "Birthday")) {
-		value = e_soap_parameter_get_string_value (subparam);
-		priv->contact_fields->birthday = ews_item_parse_date (value);
-		g_free (value);
+		priv->contact_fields->birthday = ews_item_parse_date (subparam);
 	} else if (!g_ascii_strcasecmp (name, "BusinessHomePage")) {
 		priv->contact_fields->business_homepage = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "Department")) {
@@ -817,9 +847,7 @@ parse_contact_field (EEwsItem *item,
 	} else if (!g_ascii_strcasecmp (name, "MiddleName")) {
 		priv->contact_fields->middlename = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "WeddingAnniversary")) {
-		value = e_soap_parameter_get_string_value (subparam);
-		priv->contact_fields->wedding_anniversary = ews_item_parse_date (value);
-		g_free (value);
+		priv->contact_fields->wedding_anniversary = ews_item_parse_date (subparam);
 	} else if (!g_ascii_strcasecmp (name, "Body")) {
 		/*
 		 * For Exchange versions >= 2010_SP2 Notes property can be get
@@ -828,6 +856,460 @@ parse_contact_field (EEwsItem *item,
 		 */
 		priv->contact_fields->notes = e_soap_parameter_get_string_value (subparam);
 	}
+}
+
+static guint32 /* bit-or of EEwsRecurrenceDaysOfWeek */
+parse_recur_days_of_week (ESoapParameter *param)
+{
+	struct _keys {
+		const gchar *str_value;
+		EEwsRecurrenceDaysOfWeek bit_value;
+	} keys[] = {
+		/* Do not localize, these are values used in XML */
+		{ "Sunday", E_EWS_RECURRENCE_DAYS_OF_WEEK_SUNDAY },
+		{ "Monday", E_EWS_RECURRENCE_DAYS_OF_WEEK_MONDAY },
+		{ "Tuesday", E_EWS_RECURRENCE_DAYS_OF_WEEK_TUESDAY },
+		{ "Wednesday", E_EWS_RECURRENCE_DAYS_OF_WEEK_WEDNESDAY },
+		{ "Thursday", E_EWS_RECURRENCE_DAYS_OF_WEEK_THURSDAY },
+		{ "Friday", E_EWS_RECURRENCE_DAYS_OF_WEEK_FRIDAY },
+		{ "Saturday", E_EWS_RECURRENCE_DAYS_OF_WEEK_SATURDAY },
+		{ "Day", E_EWS_RECURRENCE_DAYS_OF_WEEK_DAY },
+		{ "Weekday", E_EWS_RECURRENCE_DAYS_OF_WEEK_WEEKDAY },
+		{ "WeekendDay", E_EWS_RECURRENCE_DAYS_OF_WEEK_WEEKENDDAY }
+	};
+	gchar *value, **split_value;
+	guint32 days_of_week = 0;
+	gint ii, jj;
+
+	g_return_val_if_fail (param != NULL, E_EWS_RECURRENCE_DAYS_OF_WEEK_UNKNOWN);
+
+	value = e_soap_parameter_get_string_value (param);
+	if (!value || !*value) {
+		g_free (value);
+		return E_EWS_RECURRENCE_DAYS_OF_WEEK_UNKNOWN;
+	}
+
+	split_value = g_strsplit (value, " ", -1);
+
+	for (ii = 0; split_value && split_value[ii]; ii++) {
+		const gchar *str = split_value[ii];
+
+		if (!str || !*str)
+			continue;
+
+		for (jj = 0; jj < G_N_ELEMENTS (keys); jj++) {
+			if (g_strcmp0 (str, keys[jj].str_value) == 0) {
+				days_of_week |= keys[jj].bit_value;
+				break;
+			}
+		}
+	}
+
+	g_strfreev (split_value);
+	g_free (value);
+
+	return days_of_week;
+}
+
+static EEwsRecurrenceDayOfWeekIndex
+parse_recur_day_of_week_index (ESoapParameter *param)
+{
+	EEwsRecurrenceDayOfWeekIndex day_of_week_index = E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_UNKNOWN;
+	gchar *value;
+
+	g_return_val_if_fail (param != NULL, E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_UNKNOWN);
+
+	value = e_soap_parameter_get_string_value (param);
+	if (!value || !*value) {
+		g_free (value);
+		return E_EWS_RECURRENCE_DAYS_OF_WEEK_UNKNOWN;
+	}
+
+	/* Do not localize, these are values used in XML */
+	if (g_strcmp0 (value, "First") == 0)
+		day_of_week_index = E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_FIRST;
+	else if (g_strcmp0 (value, "Second") == 0)
+		day_of_week_index = E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_SECOND;
+	else if (g_strcmp0 (value, "Third") == 0)
+		day_of_week_index = E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_THIRD;
+	else if (g_strcmp0 (value, "Fourth") == 0)
+		day_of_week_index = E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_FOURTH;
+	else if (g_strcmp0 (value, "Last") == 0)
+		day_of_week_index = E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_LAST;
+
+	g_free (value);
+
+	return day_of_week_index;
+}
+
+static GDateMonth
+parse_recur_month (ESoapParameter *param)
+{
+	GDateMonth month = G_DATE_BAD_MONTH;
+	gchar *value;
+
+	g_return_val_if_fail (param != NULL, G_DATE_BAD_MONTH);
+
+	value = e_soap_parameter_get_string_value (param);
+	if (!value || !*value) {
+		g_free (value);
+		return G_DATE_BAD_MONTH;
+	}
+
+	/* Do not localize, these are values used in XML */
+	if (g_strcmp0 (value, "January") == 0)
+		month = G_DATE_JANUARY;
+	else if (g_strcmp0 (value, "February") == 0)
+		month = G_DATE_FEBRUARY;
+	else if (g_strcmp0 (value, "March") == 0)
+		month = G_DATE_MARCH;
+	else if (g_strcmp0 (value, "April") == 0)
+		month = G_DATE_APRIL;
+	else if (g_strcmp0 (value, "May") == 0)
+		month = G_DATE_MAY;
+	else if (g_strcmp0 (value, "June") == 0)
+		month = G_DATE_JUNE;
+	else if (g_strcmp0 (value, "July") == 0)
+		month = G_DATE_JULY;
+	else if (g_strcmp0 (value, "August") == 0)
+		month = G_DATE_AUGUST;
+	else if (g_strcmp0 (value, "September") == 0)
+		month = G_DATE_SEPTEMBER;
+	else if (g_strcmp0 (value, "October") == 0)
+		month = G_DATE_OCTOBER;
+	else if (g_strcmp0 (value, "November") == 0)
+		month = G_DATE_NOVEMBER;
+	else if (g_strcmp0 (value, "December") == 0)
+		month = G_DATE_DECEMBER;
+
+	g_free (value);
+
+	return month;
+}
+
+static GDateWeekday
+parse_recur_first_day_of_week (ESoapParameter *param)
+{
+	GDateWeekday first_day_of_week = G_DATE_BAD_WEEKDAY;
+	gchar *value;
+
+	g_return_val_if_fail (param != NULL, G_DATE_BAD_WEEKDAY);
+
+	value = e_soap_parameter_get_string_value (param);
+	if (!value || !*value) {
+		g_free (value);
+		return G_DATE_BAD_WEEKDAY;
+	}
+
+	/* Do not localize, these are values used in XML */
+	if (g_strcmp0 (value, "Sunday") == 0)
+		first_day_of_week = G_DATE_SUNDAY;
+	else if (g_strcmp0 (value, "Monday") == 0)
+		first_day_of_week = G_DATE_MONDAY;
+	else if (g_strcmp0 (value, "Tuesday") == 0)
+		first_day_of_week = G_DATE_TUESDAY;
+	else if (g_strcmp0 (value, "Wednesday") == 0)
+		first_day_of_week = G_DATE_WEDNESDAY;
+	else if (g_strcmp0 (value, "Thursday") == 0)
+		first_day_of_week = G_DATE_THURSDAY;
+	else if (g_strcmp0 (value, "Friday") == 0)
+		first_day_of_week = G_DATE_FRIDAY;
+	else if (g_strcmp0 (value, "Saturday") == 0)
+		first_day_of_week = G_DATE_SATURDAY;
+
+	g_free (value);
+
+	return first_day_of_week;
+}
+
+static void
+parse_recurrence_field (EEwsItem *item,
+			ESoapParameter *param)
+{
+	ESoapParameter *subparam, *subparam1;
+
+	g_return_if_fail (item != NULL);
+	g_return_if_fail (param != NULL);
+
+	item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+	item->priv->recurrence.end_type = E_EWS_RECURRENCE_END_UNKNOWN;
+
+	if ((subparam = e_soap_parameter_get_first_child_by_name (param, "RelativeYearlyRecurrence")) != NULL) {
+		item->priv->recurrence.type = E_EWS_RECURRENCE_RELATIVE_YEARLY;
+		item->priv->recurrence.recur.relative_yearly.days_of_week = E_EWS_RECURRENCE_DAYS_OF_WEEK_UNKNOWN;
+		item->priv->recurrence.recur.relative_yearly.day_of_week_index = E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_UNKNOWN;
+		item->priv->recurrence.recur.relative_yearly.month = G_DATE_BAD_MONTH;
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "DaysOfWeek");
+		if (subparam1) {
+			item->priv->recurrence.recur.relative_yearly.days_of_week = parse_recur_days_of_week (subparam1);
+
+			if (item->priv->recurrence.recur.relative_yearly.days_of_week == E_EWS_RECURRENCE_DAYS_OF_WEEK_UNKNOWN)
+				item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		}
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "DayOfWeekIndex");
+		if (subparam1) {
+			item->priv->recurrence.recur.relative_yearly.day_of_week_index = parse_recur_day_of_week_index (subparam1);
+
+			if (item->priv->recurrence.recur.relative_yearly.day_of_week_index == E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_UNKNOWN)
+				item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		}
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Month");
+		if (subparam1) {
+			item->priv->recurrence.recur.relative_yearly.month = parse_recur_month (subparam1);
+
+			if (item->priv->recurrence.recur.relative_yearly.month == G_DATE_BAD_MONTH)
+				item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		}
+	} else if ((subparam = e_soap_parameter_get_first_child_by_name (param, "AbsoluteYearlyRecurrence")) != NULL) {
+		item->priv->recurrence.type = E_EWS_RECURRENCE_ABSOLUTE_YEARLY;
+		item->priv->recurrence.recur.absolute_yearly.day_of_month = 0;
+		item->priv->recurrence.recur.absolute_yearly.month = G_DATE_BAD_MONTH;
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "DayOfMonth");
+		if (subparam1) {
+			item->priv->recurrence.recur.absolute_yearly.day_of_month = e_soap_parameter_get_int_value (subparam1);
+
+			if (item->priv->recurrence.recur.absolute_yearly.day_of_month < 1 ||
+			    item->priv->recurrence.recur.absolute_yearly.day_of_month > 31)
+				item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		} else {
+			item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		}
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Month");
+		if (subparam1) {
+			item->priv->recurrence.recur.absolute_yearly.month = parse_recur_month (subparam1);
+
+			if (item->priv->recurrence.recur.absolute_yearly.month == G_DATE_BAD_MONTH)
+				item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		} else {
+			item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		}
+	} else if ((subparam = e_soap_parameter_get_first_child_by_name (param, "RelativeMonthlyRecurrence")) != NULL) {
+		item->priv->recurrence.type = E_EWS_RECURRENCE_RELATIVE_MONTHLY;
+		item->priv->recurrence.recur.relative_monthly.interval = 0;
+		item->priv->recurrence.recur.relative_monthly.days_of_week = E_EWS_RECURRENCE_DAYS_OF_WEEK_UNKNOWN;
+		item->priv->recurrence.recur.relative_monthly.day_of_week_index = E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_UNKNOWN;
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Interval");
+		if (subparam1) {
+			item->priv->recurrence.recur.relative_monthly.interval = e_soap_parameter_get_int_value (subparam1);
+
+			if (item->priv->recurrence.recur.relative_monthly.interval < 1)
+				item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		} else {
+			item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		}
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "DaysOfWeek");
+		if (subparam1) {
+			item->priv->recurrence.recur.relative_monthly.days_of_week = parse_recur_days_of_week (subparam1);
+
+			if (item->priv->recurrence.recur.relative_monthly.days_of_week == E_EWS_RECURRENCE_DAYS_OF_WEEK_UNKNOWN)
+				item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		} else {
+			item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		}
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "DayOfWeekIndex");
+		if (subparam1) {
+			item->priv->recurrence.recur.relative_monthly.day_of_week_index = parse_recur_day_of_week_index (subparam1);
+
+			if (item->priv->recurrence.recur.relative_monthly.day_of_week_index == E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_UNKNOWN)
+				item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		} else {
+			item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		}
+	} else if ((subparam = e_soap_parameter_get_first_child_by_name (param, "AbsoluteMonthlyRecurrence")) != NULL) {
+		item->priv->recurrence.type = E_EWS_RECURRENCE_ABSOLUTE_MONTHLY;
+		item->priv->recurrence.recur.absolute_monthly.interval = 0;
+		item->priv->recurrence.recur.absolute_monthly.day_of_month = 0;
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Interval");
+		if (subparam1) {
+			item->priv->recurrence.recur.absolute_monthly.interval = e_soap_parameter_get_int_value (subparam1);
+
+			if (item->priv->recurrence.recur.absolute_monthly.interval < 1)
+				item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		} else {
+			item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		}
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "DayOfMonth");
+		if (subparam1) {
+			item->priv->recurrence.recur.absolute_monthly.day_of_month = e_soap_parameter_get_int_value (subparam1);
+
+			if (item->priv->recurrence.recur.absolute_monthly.day_of_month < 1 ||
+			    item->priv->recurrence.recur.absolute_monthly.day_of_month > 31)
+				item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		} else {
+			item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		}
+	} else if ((subparam = e_soap_parameter_get_first_child_by_name (param, "WeeklyRecurrence")) != NULL) {
+		item->priv->recurrence.type = E_EWS_RECURRENCE_WEEKLY;
+		item->priv->recurrence.recur.weekly.interval = 0;
+		item->priv->recurrence.recur.weekly.days_of_week = E_EWS_RECURRENCE_DAYS_OF_WEEK_UNKNOWN;
+		item->priv->recurrence.recur.weekly.first_day_of_week = G_DATE_BAD_WEEKDAY;
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Interval");
+		if (subparam1) {
+			item->priv->recurrence.recur.weekly.interval = e_soap_parameter_get_int_value (subparam1);
+
+			if (item->priv->recurrence.recur.weekly.interval < 1)
+				item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		} else {
+			item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		}
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "DaysOfWeek");
+		if (subparam1) {
+			item->priv->recurrence.recur.weekly.days_of_week = parse_recur_days_of_week (subparam1);
+
+			if (item->priv->recurrence.recur.weekly.days_of_week == E_EWS_RECURRENCE_DAYS_OF_WEEK_UNKNOWN)
+				item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		} else {
+			item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		}
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "FirstDayOfWeek");
+		if (subparam1) {
+			item->priv->recurrence.recur.weekly.first_day_of_week = parse_recur_first_day_of_week (subparam1);
+
+			if (item->priv->recurrence.recur.weekly.first_day_of_week == G_DATE_BAD_WEEKDAY)
+				item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		} else {
+			/* It's okay, because 2007 doesn't support it */
+		}
+	} else if ((subparam = e_soap_parameter_get_first_child_by_name (param, "DailyRecurrence")) != NULL) {
+		item->priv->recurrence.type = E_EWS_RECURRENCE_DAILY;
+		item->priv->recurrence.recur.interval = 0;
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Interval");
+		if (subparam1) {
+			item->priv->recurrence.recur.interval = e_soap_parameter_get_int_value (subparam1);
+
+			if (item->priv->recurrence.recur.interval < 1)
+				item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		} else {
+			item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		}
+	} else if ((subparam = e_soap_parameter_get_first_child_by_name (param, "DailyRegeneration")) != NULL) {
+		item->priv->recurrence.type = E_EWS_RECURRENCE_DAILY_REGENERATION;
+		item->priv->recurrence.recur.interval = 0;
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Interval");
+		if (subparam1) {
+			item->priv->recurrence.recur.interval = e_soap_parameter_get_int_value (subparam1);
+
+			if (item->priv->recurrence.recur.interval < 1)
+				item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		} else {
+			item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		}
+	} else if ((subparam = e_soap_parameter_get_first_child_by_name (param, "WeeklyRegeneration")) != NULL) {
+		item->priv->recurrence.type = E_EWS_RECURRENCE_WEEKLY_REGENERATION;
+		item->priv->recurrence.recur.interval = 0;
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Interval");
+		if (subparam1) {
+			item->priv->recurrence.recur.interval = e_soap_parameter_get_int_value (subparam1);
+
+			if (item->priv->recurrence.recur.interval < 1)
+				item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		} else {
+			item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		}
+	} else if ((subparam = e_soap_parameter_get_first_child_by_name (param, "MonthlyRegeneration")) != NULL) {
+		item->priv->recurrence.type = E_EWS_RECURRENCE_MONTHLY_REGENERATION;
+		item->priv->recurrence.recur.interval = 0;
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Interval");
+		if (subparam1) {
+			item->priv->recurrence.recur.interval = e_soap_parameter_get_int_value (subparam1);
+
+			if (item->priv->recurrence.recur.interval < 1)
+				item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		} else {
+			item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		}
+	} else if ((subparam = e_soap_parameter_get_first_child_by_name (param, "YearlyRegeneration")) != NULL) {
+		item->priv->recurrence.type = E_EWS_RECURRENCE_YEARLY_REGENERATION;
+		item->priv->recurrence.recur.interval = 0;
+
+		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Interval");
+		if (subparam1) {
+			item->priv->recurrence.recur.interval = e_soap_parameter_get_int_value (subparam1);
+
+			if (item->priv->recurrence.recur.interval < 1)
+				item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		} else {
+			item->priv->recurrence.type = E_EWS_RECURRENCE_UNKNOWN;
+		}
+	}
+
+	if (item->priv->recurrence.type != E_EWS_RECURRENCE_UNKNOWN) {
+		if ((subparam = e_soap_parameter_get_first_child_by_name (param, "NoEndRecurrence")) != NULL) {
+			subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "StartDate");
+			if (subparam1) {
+				item->priv->recurrence.end_type = E_EWS_RECURRENCE_END_NO_END;
+				item->priv->recurrence.utc_start_date = ews_item_parse_date (subparam1);
+
+				if (item->priv->recurrence.utc_start_date == (time_t) -1)
+					item->priv->recurrence.end_type = E_EWS_RECURRENCE_END_UNKNOWN;
+			}
+		} else if ((subparam = e_soap_parameter_get_first_child_by_name (param, "EndDateRecurrence")) != NULL) {
+			item->priv->recurrence.end_type = E_EWS_RECURRENCE_END_DATE;
+
+			subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "StartDate");
+			if (subparam1) {
+				item->priv->recurrence.utc_start_date = ews_item_parse_date (subparam1);
+
+				if (item->priv->recurrence.utc_start_date == (time_t) -1)
+					item->priv->recurrence.end_type = E_EWS_RECURRENCE_END_UNKNOWN;
+			} else {
+				item->priv->recurrence.end_type = E_EWS_RECURRENCE_END_UNKNOWN;
+			}
+
+			subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "EndDate");
+			if (subparam1) {
+				item->priv->recurrence.end.utc_end_date = ews_item_parse_date (subparam1);
+
+				if (item->priv->recurrence.end.utc_end_date == (time_t) -1)
+					item->priv->recurrence.end_type = E_EWS_RECURRENCE_END_UNKNOWN;
+			} else {
+				item->priv->recurrence.end_type = E_EWS_RECURRENCE_END_UNKNOWN;
+			}
+		} else if ((subparam = e_soap_parameter_get_first_child_by_name (param, "NumberedRecurrence")) != NULL) {
+			item->priv->recurrence.end_type = E_EWS_RECURRENCE_END_NUMBERED;
+
+			subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "StartDate");
+			if (subparam1) {
+				item->priv->recurrence.utc_start_date = ews_item_parse_date (subparam1);
+
+				if (item->priv->recurrence.utc_start_date == (time_t) -1)
+					item->priv->recurrence.end_type = E_EWS_RECURRENCE_END_UNKNOWN;
+			} else {
+				item->priv->recurrence.end_type = E_EWS_RECURRENCE_END_UNKNOWN;
+			}
+
+			subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "NumberOfOccurrences");
+			if (subparam1) {
+				item->priv->recurrence.end.number_of_occurrences = e_soap_parameter_get_int_value (subparam1);
+
+				if (item->priv->recurrence.end.number_of_occurrences < 1)
+					item->priv->recurrence.end_type = E_EWS_RECURRENCE_END_UNKNOWN;
+			} else {
+				item->priv->recurrence.end_type = E_EWS_RECURRENCE_END_UNKNOWN;
+			}
+		}
+	}
+
+	g_warn_if_fail (
+		(item->priv->recurrence.type == E_EWS_RECURRENCE_UNKNOWN &&  item->priv->recurrence.end_type == E_EWS_RECURRENCE_END_UNKNOWN) ||
+		(item->priv->recurrence.type != E_EWS_RECURRENCE_UNKNOWN &&  item->priv->recurrence.end_type != E_EWS_RECURRENCE_END_UNKNOWN));
 }
 
 static gchar *
@@ -895,20 +1377,13 @@ parse_task_field (EEwsItem *item,
 	} else if (!g_ascii_strcasecmp (name, "PercentComplete")) {
 		priv->task_fields->percent_complete = e_soap_parameter_get_string_value (subparam);
 	} else if (!g_ascii_strcasecmp (name, "DueDate")) {
-		value = e_soap_parameter_get_string_value (subparam);
-		priv->task_fields->due_date = ews_item_parse_date (value);
-		g_free (value);
+		priv->task_fields->due_date = ews_item_parse_date (subparam);
 		priv->task_fields->has_due_date = TRUE;
 	} else if (!g_ascii_strcasecmp (name, "StartDate")) {
-		value = e_soap_parameter_get_string_value (subparam);
-		priv->task_fields->start_date = ews_item_parse_date (value);
-		g_free (value);
+		priv->task_fields->start_date = ews_item_parse_date (subparam);
 		priv->task_fields->has_start_date = TRUE;
-	}
-	else if (!g_ascii_strcasecmp (name, "CompleteDate")) {
-		value = e_soap_parameter_get_string_value (subparam);
-		priv->task_fields->complete_date = ews_item_parse_date (value);
-		g_free (value);
+	} else if (!g_ascii_strcasecmp (name, "CompleteDate")) {
+		priv->task_fields->complete_date = ews_item_parse_date (subparam);
 		priv->task_fields->has_complete_date = TRUE;
 	} else if (!g_ascii_strcasecmp (name, "Sensitivity")) {
 		priv->task_fields->sensitivity = e_soap_parameter_get_string_value (subparam);
@@ -927,6 +1402,8 @@ parse_task_field (EEwsItem *item,
 			g_free (priv->task_fields->delegator);
 			priv->task_fields->delegator = NULL;
 		}
+	} else if (!g_ascii_strcasecmp (name, "Recurrence")) {
+		parse_recurrence_field (item, subparam);
 	}
 }
 
@@ -1069,9 +1546,7 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 				g_free (str);
 			}
 		} else if (!g_ascii_strcasecmp (name, "DateTimeReceived")) {
-			value = e_soap_parameter_get_string_value (subparam);
-			priv->date_received = ews_item_parse_date (value);
-			g_free (value);
+			priv->date_received = ews_item_parse_date (subparam);
 		} else if (!g_ascii_strcasecmp (name, "Size")) {
 			priv->size = e_soap_parameter_get_int_value (subparam);
 		} else if (!g_ascii_strcasecmp (name, "Categories")) {
@@ -1081,13 +1556,9 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 		} else if (!g_ascii_strcasecmp (name, "InReplyTo")) {
 			priv->in_replyto = e_soap_parameter_get_string_value (subparam);
 		} else if (!g_ascii_strcasecmp (name, "DateTimeSent")) {
-			value = e_soap_parameter_get_string_value (subparam);
-			priv->date_sent = ews_item_parse_date (value);
-			g_free (value);
+			priv->date_sent = ews_item_parse_date (subparam);
 		} else if (!g_ascii_strcasecmp (name, "DateTimeCreated")) {
-			value = e_soap_parameter_get_string_value (subparam);
-			priv->date_created = ews_item_parse_date (value);
-			g_free (value);
+			priv->date_created = ews_item_parse_date (subparam);
 		} else if (!g_ascii_strcasecmp (name, "HasAttachments")) {
 			value = e_soap_parameter_get_string_value (subparam);
 			priv->has_attachments = (!g_ascii_strcasecmp (value, "true"));
@@ -1145,9 +1616,7 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 			priv->reminder_is_set = (!g_ascii_strcasecmp (value, "true"));
 			g_free (value);
 		} else if (!g_ascii_strcasecmp (name, "ReminderDueBy")) {
-			value = e_soap_parameter_get_string_value (subparam);
-			priv->reminder_due_by = ews_item_parse_date (value);
-			g_free (value);
+			priv->reminder_due_by = ews_item_parse_date (subparam);
 		} else if (!g_ascii_strcasecmp (name, "ReminderMinutesBeforeStart")) {
 			priv->reminder_minutes_before_start = e_soap_parameter_get_int_value (subparam);
 		} else if (priv->item_type == E_EWS_ITEM_TYPE_TASK || priv->item_type == E_EWS_ITEM_TYPE_MEMO) {
@@ -1930,6 +2399,23 @@ e_ews_item_get_reminder_minutes_before_start (EEwsItem *item)
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
 
 	return item->priv->reminder_minutes_before_start;
+}
+
+/* the out_recurrence is filled only if the function returns TRUE */
+gboolean
+e_ews_item_get_recurrence (EEwsItem *item,
+			   EEwsRecurrence *out_recurrence)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), FALSE);
+	g_return_val_if_fail (out_recurrence != NULL, -1);
+
+	if (item->priv->recurrence.type == E_EWS_RECURRENCE_UNKNOWN ||
+	    item->priv->recurrence.end_type == E_EWS_RECURRENCE_END_UNKNOWN)
+		return FALSE;
+
+	*out_recurrence = item->priv->recurrence;
+
+	return TRUE;
 }
 
 const gchar *

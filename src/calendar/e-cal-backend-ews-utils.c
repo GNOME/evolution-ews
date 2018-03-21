@@ -1059,9 +1059,10 @@ check_is_all_day_event (const struct icaltimetype dtstart,
 	return ((secs_end - secs_start) % (24 * 60 * 60)) == 0 && (secs_start % 24 * 60 * 60) == 0;
 }
 
-static void
+static gboolean
 convert_vevent_calcomp_to_xml (ESoapMessage *msg,
-                               gpointer user_data)
+                               gpointer user_data,
+			       GError **error)
 {
 	EwsCalendarConvertData *convert_data = user_data;
 	icalcomponent *icalcomp = convert_data->icalcomp;
@@ -1213,11 +1214,14 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	e_soap_message_end_element (msg); /* "CalendarItem" */
 
 	g_object_unref (comp);
+
+	return TRUE;
 }
 
-static void
+static gboolean
 convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
-                              gpointer user_data)
+                              gpointer user_data,
+			      GError **error)
 {
 	EwsCalendarConvertData *convert_data = user_data;
 	icalcomponent *icalcomp = convert_data->icalcomp;
@@ -1225,6 +1229,7 @@ convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
 	icaltimetype dt;
 	gint value;
 	gchar buffer[16];
+	gboolean success;
 	/* gboolean has_alarms; */
 
 	e_soap_message_start_element (msg, "Task", NULL, NULL);
@@ -1249,6 +1254,8 @@ convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
 		snprintf (buffer, 16, "%d", value);
 		e_ews_message_write_string_parameter (msg, "PercentComplete", NULL, buffer);
 	}
+
+	success = e_ews_cal_utils_set_recurrence (msg, icalcomp, FALSE, error);
 
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_DTSTART_PROPERTY);
 	if (prop) {
@@ -1287,11 +1294,14 @@ convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
 		e_ews_message_write_string_parameter (msg, "ReminderIsSet", NULL, "false");*/
 
 	e_soap_message_end_element (msg); /* "Task" */
+
+	return success;
 }
 
-static void
+static gboolean
 convert_vjournal_calcomp_to_xml (ESoapMessage *msg,
-				 gpointer user_data)
+				 gpointer user_data,
+				 GError **error)
 {
 	EwsCalendarConvertData *convert_data = user_data;
 	icalcomponent *icalcomp = convert_data->icalcomp;
@@ -1312,28 +1322,34 @@ convert_vjournal_calcomp_to_xml (ESoapMessage *msg,
 	convert_categories_calcomp_to_xml (msg, NULL, icalcomp);
 
 	e_soap_message_end_element (msg); /* Message */
+
+	return TRUE;
 }
 
-void
+gboolean
 e_cal_backend_ews_convert_calcomp_to_xml (ESoapMessage *msg,
-					  gpointer user_data)
+					  gpointer user_data,
+					  GError **error)
 {
 	EwsCalendarConvertData *convert_data = user_data;
+	gboolean success = FALSE;
 
 	switch (icalcomponent_isa (convert_data->icalcomp)) {
 	case ICAL_VEVENT_COMPONENT:
-		convert_vevent_calcomp_to_xml (msg, convert_data);
+		success = convert_vevent_calcomp_to_xml (msg, convert_data, error);
 		break;
 	case ICAL_VTODO_COMPONENT:
-		convert_vtodo_calcomp_to_xml (msg, convert_data);
+		success = convert_vtodo_calcomp_to_xml (msg, convert_data, error);
 		break;
 	case ICAL_VJOURNAL_COMPONENT:
-		convert_vjournal_calcomp_to_xml (msg, convert_data);
+		success = convert_vjournal_calcomp_to_xml (msg, convert_data, error);
 		break;
 	default:
 		g_warn_if_reached ();
 		break;
 	}
+
+	return success;
 }
 
 static void
@@ -1393,9 +1409,10 @@ convert_vevent_property_to_updatexml (ESoapMessage *msg,
 	e_ews_message_end_set_item_field (msg);
 }
 
-static void
+static gboolean
 convert_vevent_component_to_updatexml (ESoapMessage *msg,
-                                       gpointer user_data)
+                                       gpointer user_data,
+				       GError **error)
 {
 	EwsCalendarConvertData *convert_data = user_data;
 	icalcomponent *icalcomp = e_cal_component_get_icalcomponent (convert_data->comp);
@@ -1415,7 +1432,6 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 	gboolean satisfies;
 	gint alarm = 0, alarm_old = 0;
 	gchar *recid;
-	GError *error = NULL;
 
 	/* Modifying a recurring meeting ? */
 	if (icalcomponent_get_first_property (icalcomp_old, ICAL_RRULE_PROPERTY) != NULL) {
@@ -1432,7 +1448,7 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 					convert_data->default_zone,
 					recid,
 					icalcomp_old,
-					&error));
+					NULL));
 			g_free (recid);
 		} else {
 			e_ews_message_start_item_change (
@@ -1515,8 +1531,9 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 	org_email_address = e_ews_collect_organizer (icalcomp);
 	if (org_email_address && convert_data->user_email && g_ascii_strcasecmp (org_email_address, convert_data->user_email)) {
 		e_ews_message_end_item_change (msg);
-		return;
+		return TRUE;
 	}
+
 	/* Update other properties allowed only for meeting organizers*/
 	/*meeting dates*/
 	dtstart = icalcomponent_get_dtstart (icalcomp);
@@ -1697,6 +1714,8 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 	}
 
 	e_ews_message_end_item_change (msg);
+
+	return TRUE;
 }
 
 static void
@@ -1712,9 +1731,10 @@ convert_vtodo_property_to_updatexml (ESoapMessage *msg,
 	e_ews_message_end_set_item_field (msg);
 }
 
-static void
+static gboolean
 convert_vtodo_component_to_updatexml (ESoapMessage *msg,
-                                      gpointer user_data)
+                                      gpointer user_data,
+				      GError **error)
 {
 	EwsCalendarConvertData *convert_data = user_data;
 	icalcomponent *icalcomp = e_cal_component_get_icalcomponent (convert_data->comp);
@@ -1722,6 +1742,7 @@ convert_vtodo_component_to_updatexml (ESoapMessage *msg,
 	icaltimetype dt;
 	gint value;
 	gchar buffer[16];
+	gboolean success = TRUE;
 
 	e_ews_message_start_item_change (
 		msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
@@ -1762,6 +1783,17 @@ convert_vtodo_component_to_updatexml (ESoapMessage *msg,
 		e_ews_message_end_set_item_field (msg);
 	}
 
+	/* Recurrence */
+	value = icalcomponent_count_properties (e_cal_component_get_icalcomponent (convert_data->old_comp), ICAL_RRULE_PROPERTY);
+	if (icalcomponent_count_properties (icalcomp, ICAL_RRULE_PROPERTY) > 0 ||
+	    (e_cal_util_find_x_property (icalcomp, X_EWS_TASK_REGENERATION) && value <= 0)) {
+		e_ews_message_start_set_item_field (msg, "Recurrence", "task", "Task");
+		success = success && e_ews_cal_utils_set_recurrence (msg, icalcomp, FALSE, error);
+		e_ews_message_end_set_item_field (msg); /* Recurrence */
+	} else if (value > 0) {
+		e_ews_message_add_delete_item_field (msg, "Recurrence", "task");
+	}
+
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_DTSTART_PROPERTY);
 	if (prop) {
 		dt = icalproperty_get_dtstart (prop);
@@ -1794,6 +1826,8 @@ convert_vtodo_component_to_updatexml (ESoapMessage *msg,
 	convert_component_categories_to_updatexml (convert_data->comp, msg, "Task");
 
 	e_ews_message_end_item_change (msg);
+
+	return success;
 }
 
 static void
@@ -1809,9 +1843,10 @@ convert_vjournal_property_to_updatexml (ESoapMessage *msg,
 	e_ews_message_end_set_item_field (msg);
 }
 
-static void
+static gboolean
 convert_vjournal_component_to_updatexml (ESoapMessage *msg,
-					 gpointer user_data)
+					 gpointer user_data,
+					 GError **error)
 {
 	EwsCalendarConvertData *convert_data = user_data;
 	icalcomponent *icalcomp = e_cal_component_get_icalcomponent (convert_data->comp);
@@ -1847,28 +1882,34 @@ convert_vjournal_component_to_updatexml (ESoapMessage *msg,
 	convert_component_categories_to_updatexml (convert_data->comp, msg, "Message");
 
 	e_ews_message_end_item_change (msg);
+
+	return TRUE;
 }
 
-void
+gboolean
 e_cal_backend_ews_convert_component_to_updatexml (ESoapMessage *msg,
-						  gpointer user_data)
+						  gpointer user_data,
+						  GError **error)
 {
 	EwsCalendarConvertData *convert_data = user_data;
 	icalcomponent *icalcomp = e_cal_component_get_icalcomponent (convert_data->comp);
+	gboolean success = FALSE;
 
 	switch (icalcomponent_isa (icalcomp)) {
 	case ICAL_VEVENT_COMPONENT:
-		convert_vevent_component_to_updatexml (msg, user_data);
+		success = convert_vevent_component_to_updatexml (msg, user_data, error);
 		break;
 	case ICAL_VTODO_COMPONENT:
-		convert_vtodo_component_to_updatexml (msg, user_data);
+		success = convert_vtodo_component_to_updatexml (msg, user_data, error);
 		break;
 	case ICAL_VJOURNAL_COMPONENT:
-		convert_vjournal_component_to_updatexml (msg, user_data);
+		success = convert_vjournal_component_to_updatexml (msg, user_data, error);
 		break;
 	default:
 		break;
 	}
+
+	return success;
 }
 
 guint
@@ -1910,9 +1951,10 @@ e_cal_backend_ews_rid_to_index (icaltimezone *timezone,
 	return index;
 }
 
-void
+gboolean
 e_cal_backend_ews_clear_reminder_is_set (ESoapMessage *msg,
-					 gpointer user_data)
+					 gpointer user_data,
+					 GError **error)
 {
 	EwsCalendarConvertData *convert_data = user_data;
 
@@ -1930,11 +1972,14 @@ e_cal_backend_ews_clear_reminder_is_set (ESoapMessage *msg,
 	e_ews_message_end_set_item_field (msg);
 
 	e_ews_message_end_item_change (msg);
+
+	return TRUE;
 }
 
-void
+gboolean
 e_cal_backend_ews_prepare_set_free_busy_status (ESoapMessage *msg,
-						gpointer user_data)
+						gpointer user_data,
+						GError **error)
 {
 	EwsCalendarConvertData *data = user_data;
 
@@ -1947,11 +1992,14 @@ e_cal_backend_ews_prepare_set_free_busy_status (ESoapMessage *msg,
 	e_ews_message_end_set_item_field (msg);
 
 	e_ews_message_end_item_change (msg);
+
+	return TRUE;
 }
 
-void
+gboolean
 e_cal_backend_ews_prepare_accept_item_request (ESoapMessage *msg,
-					       gpointer user_data)
+					       gpointer user_data,
+					       GError **error)
 {
 	EwsCalendarConvertData *data = user_data;
 	const gchar *response_type = data->response_type;
@@ -1976,4 +2024,6 @@ e_cal_backend_ews_prepare_accept_item_request (ESoapMessage *msg,
 
 	/* end of "AcceptItem" */
 	e_soap_message_end_element (msg);
+
+	return TRUE;
 }

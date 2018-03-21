@@ -2817,9 +2817,10 @@ struct _rename_cb_data {
 	const gchar *folder_id;
 };
 
-static void
+static gboolean
 rename_folder_cb (ESoapMessage *msg,
-                  gpointer user_data)
+                  gpointer user_data,
+		  GError **error)
 {
 	struct _rename_cb_data *rename_data = user_data;
 
@@ -2838,6 +2839,8 @@ rename_folder_cb (ESoapMessage *msg,
 	e_soap_message_end_element (msg); /* SetFolderField */
 
 	e_ews_message_end_item_change (msg);
+
+	return TRUE;
 }
 
 static gboolean

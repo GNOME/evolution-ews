@@ -5322,6 +5322,8 @@ e_ews_connection_update_items (EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
+	gboolean success;
+	GError *local_error = NULL;
 
 	g_return_if_fail (cnc != NULL);
 
@@ -5360,7 +5362,7 @@ e_ews_connection_update_items (EEwsConnection *cnc,
 
 	e_soap_message_start_element (msg, "ItemChanges", "messages", NULL);
 
-	create_cb (msg, create_user_data);
+	success = create_cb (msg, create_user_data, &local_error);
 
 	e_soap_message_end_element (msg); /* ItemChanges */
 
@@ -5374,18 +5376,26 @@ e_ews_connection_update_items (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
+	if (!success) {
+		if (local_error)
+			g_simple_async_result_take_error (simple, local_error);
+		g_simple_async_result_complete_in_idle (simple);
+		g_clear_object (&msg);
+
 	/*
 	 * We need to check for both namespaces, because, the message is being wrote without use the types
 	 * namespace. Maybe it is wrong, but the server doesn't complain about that. But this is the reason
 	 * for the first check. The second one, is related to "how it should be" accord with EWS specifications.
 	 */
-	if (!element_has_child (msg, "/s:Envelope/s:Body/m:UpdateItem/m:ItemChanges/ItemChange/Updates") &&
-		!element_has_child (msg, "/s:Envelope/s:Body/m:UpdateItem/m:ItemChanges/t:ItemChange/t:Updates"))
+	} else if (!element_has_child (msg, "/s:Envelope/s:Body/m:UpdateItem/m:ItemChanges/ItemChange/Updates") &&
+		!element_has_child (msg, "/s:Envelope/s:Body/m:UpdateItem/m:ItemChanges/t:ItemChange/t:Updates")) {
 		g_simple_async_result_complete_in_idle (simple);
-	else
+		g_clear_object (&msg);
+	} else {
 		e_ews_connection_queue_request (
 			cnc, msg, get_items_response_cb,
 			pri, cancellable, simple);
+	}
 
 	g_object_unref (simple);
 }
@@ -5487,6 +5497,8 @@ e_ews_connection_create_items (EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
+	gboolean success;
+	GError *local_error = NULL;
 
 	g_return_if_fail (cnc != NULL);
 
@@ -5519,7 +5531,7 @@ e_ews_connection_create_items (EEwsConnection *cnc,
 
 	e_soap_message_start_element (msg, "Items", "messages", NULL);
 
-	create_cb (msg, create_user_data);
+	success = create_cb (msg, create_user_data, &local_error);
 
 	e_soap_message_end_element (msg); /* Items */
 
@@ -5533,9 +5545,16 @@ e_ews_connection_create_items (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	e_ews_connection_queue_request (
-		cnc, msg, get_items_response_cb,
-		pri, cancellable, simple);
+	if (success) {
+		e_ews_connection_queue_request (
+			cnc, msg, get_items_response_cb,
+			pri, cancellable, simple);
+	} else {
+		if (local_error)
+			g_simple_async_result_take_error (simple, local_error);
+		g_simple_async_result_complete_in_idle (simple);
+		g_clear_object (&msg);
+	}
 
 	g_object_unref (simple);
 }
@@ -6102,6 +6121,8 @@ e_ews_connection_update_folder (EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
+	gboolean success;
+	GError *local_error = NULL;
 
 	g_return_if_fail (cnc != NULL);
 
@@ -6119,7 +6140,7 @@ e_ews_connection_update_folder (EEwsConnection *cnc,
 
 	e_soap_message_start_element (msg, "FolderChanges", "messages", NULL);
 
-	create_cb (msg, create_user_data);
+	success = create_cb (msg, create_user_data, &local_error);
 
 	e_soap_message_end_element (msg); /* FolderChanges */
 
@@ -6133,9 +6154,16 @@ e_ews_connection_update_folder (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	e_ews_connection_queue_request (
-		cnc, msg, update_folder_response_cb,
-		pri, cancellable, simple);
+	if (success) {
+		e_ews_connection_queue_request (
+			cnc, msg, update_folder_response_cb,
+			pri, cancellable, simple);
+	} else {
+		if (local_error)
+			g_simple_async_result_take_error (simple, local_error);
+		g_simple_async_result_complete_in_idle (simple);
+		g_clear_object (&msg);
+	}
 
 	g_object_unref (simple);
 }
@@ -7974,6 +8002,8 @@ e_ews_connection_get_free_busy (EEwsConnection *cnc,
 	ESoapMessage *msg;
 	GSimpleAsyncResult *simple;
 	EwsAsyncData *async_data;
+	gboolean success;
+	GError *local_error = NULL;
 
 	g_return_if_fail (cnc != NULL);
 
@@ -7989,7 +8019,7 @@ e_ews_connection_get_free_busy (EEwsConnection *cnc,
 			FALSE,
 			TRUE);
 
-	free_busy_cb (msg, free_busy_user_data);
+	success = free_busy_cb (msg, free_busy_user_data, &local_error);
 
 	e_ews_message_write_footer (msg); /*GetUserAvailabilityRequest  */
 
@@ -8001,9 +8031,16 @@ e_ews_connection_get_free_busy (EEwsConnection *cnc,
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
-	e_ews_connection_queue_request (
-		cnc, msg, get_free_busy_response_cb,
-		pri, cancellable, simple);
+	if (success) {
+		e_ews_connection_queue_request (
+			cnc, msg, get_free_busy_response_cb,
+			pri, cancellable, simple);
+	} else {
+		if (local_error)
+			g_simple_async_result_take_error (simple, local_error);
+		g_simple_async_result_complete_in_idle (simple);
+		g_clear_object (&msg);
+	}
 
 	g_object_unref (simple);
 }

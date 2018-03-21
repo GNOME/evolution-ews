@@ -80,8 +80,9 @@ enum {
 	EWS_PRIORITY_HIGH
 };
 
-typedef void	(*EEwsRequestCreationCallback)	(ESoapMessage *msg,
-						 gpointer user_data);
+typedef gboolean(*EEwsRequestCreationCallback)	(ESoapMessage *msg,
+						 gpointer user_data,
+						 GError **error);
 typedef void	(*EwsProgressFn)		(gpointer object,
 						 gint percent);
 typedef void	(*EEwsResponseCallback)		(ESoapResponse *response,

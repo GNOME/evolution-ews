@@ -26,7 +26,7 @@
 
 void (* populate_windows_zones) (void);
 const gchar * (* ical_to_msdn_equivalent) (const gchar *);
-void (* convert_calcomp_to_xml) (ESoapMessage *, gpointer);
+gboolean (* convert_calcomp_to_xml) (ESoapMessage *, gpointer, GError **);
 
 const gchar *str_comp =
 	"BEGIN:VEVENT\n"

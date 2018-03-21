@@ -71,11 +71,11 @@ const gchar *e_cal_backend_ews_tz_util_get_ical_equivalent (const gchar *msdn_tz
 void e_cal_backend_ews_populate_windows_zones (void);
 void e_cal_backend_ews_unref_windows_zones (void);
 
-void e_cal_backend_ews_convert_calcomp_to_xml (ESoapMessage *msg, gpointer user_data);
-void e_cal_backend_ews_convert_component_to_updatexml (ESoapMessage *msg, gpointer user_data);
-void e_cal_backend_ews_clear_reminder_is_set (ESoapMessage *msg, gpointer user_data);
-void e_cal_backend_ews_prepare_set_free_busy_status (ESoapMessage *msg,gpointer user_data);
-void e_cal_backend_ews_prepare_accept_item_request (ESoapMessage *msg, gpointer user_data);
+gboolean e_cal_backend_ews_convert_calcomp_to_xml (ESoapMessage *msg, gpointer user_data, GError **error);
+gboolean e_cal_backend_ews_convert_component_to_updatexml (ESoapMessage *msg, gpointer user_data, GError **error);
+gboolean e_cal_backend_ews_clear_reminder_is_set (ESoapMessage *msg, gpointer user_data, GError **error);
+gboolean e_cal_backend_ews_prepare_set_free_busy_status (ESoapMessage *msg,gpointer user_data, GError **error);
+gboolean e_cal_backend_ews_prepare_accept_item_request (ESoapMessage *msg, gpointer user_data, GError **error);
 
 guint e_cal_backend_ews_rid_to_index (icaltimezone *timezone, const gchar *rid, icalcomponent *comp, GError **error);
 

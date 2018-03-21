@@ -1343,9 +1343,10 @@ ebb_ews_write_dl_members (ESoapMessage *msg,
 	e_soap_message_end_element (msg); /* Members */
 }
 
-static void
+static gboolean
 ebb_ews_convert_dl_to_xml_cb (ESoapMessage *msg,
-			      gpointer user_data)
+			      gpointer user_data,
+			      GError **error)
 {
 	EContact *contact = user_data;
 	EVCardAttribute *attribute;
@@ -1361,11 +1362,14 @@ ebb_ews_convert_dl_to_xml_cb (ESoapMessage *msg,
 	ebb_ews_write_dl_members (msg, contact);
 
 	e_soap_message_end_element (msg); /* DistributionList */
+
+	return TRUE;
 }
 
-static void
+static gboolean
 ebb_ews_convert_contact_to_xml_cb (ESoapMessage *msg,
-				   gpointer user_data)
+				   gpointer user_data,
+				   GError **error)
 {
 	EContact *contact = user_data;
 	gint i, element_type;
@@ -1393,6 +1397,8 @@ ebb_ews_convert_contact_to_xml_cb (ESoapMessage *msg,
 
 	/* end of "Contact" */
 	e_soap_message_end_element (msg);
+
+	return TRUE;
 }
 
 typedef struct _ConvertData {
@@ -1405,9 +1411,10 @@ typedef struct _ConvertData {
 	gchar *change_key;
 } ConvertData;
 
-static void
+static gboolean
 ebb_ews_convert_dl_to_updatexml_cb (ESoapMessage *msg,
-				    gpointer user_data)
+				    gpointer user_data,
+				    GError **error)
 {
 	ConvertData *cd = user_data;
 	EContact *old_contact = cd->old_contact;
@@ -1421,11 +1428,14 @@ ebb_ews_convert_dl_to_updatexml_cb (ESoapMessage *msg,
 	ebb_ews_write_dl_members (msg, new_contact);
 	e_ews_message_end_set_item_field (msg);
 	e_ews_message_end_item_change (msg);
+
+	return TRUE;
 }
 
-static void
+static gboolean
 ebb_ews_convert_contact_to_updatexml_cb (ESoapMessage *msg,
-					 gpointer user_data)
+					 gpointer user_data,
+					 GError **error)
 {
 	ConvertData *cd = user_data;
 	EContact *old_contact = cd->old_contact;
@@ -1486,6 +1496,8 @@ ebb_ews_convert_contact_to_updatexml_cb (ESoapMessage *msg,
 	}
 
 	e_ews_message_end_item_change (msg);
+
+	return TRUE;
 }
 
 static EContact *

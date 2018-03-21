@@ -991,9 +991,10 @@ ews_folder_search_free (CamelFolder *folder,
 
 /********************* folder functions*************************/
 
-static void
+static gboolean
 msg_update_flags (ESoapMessage *msg,
-                  gpointer user_data)
+                  gpointer user_data,
+		  GError **error)
 {
 	/* the mi_list is owned by the caller */
 	const GSList *mi_list = user_data, *iter;
@@ -1111,11 +1112,14 @@ msg_update_flags (ESoapMessage *msg,
 			camel_folder_summary_unlock (summary);
 		g_clear_object (&summary);
 	}
+
+	return TRUE;
 }
 
-static void
+static gboolean
 ews_suppress_read_receipt (ESoapMessage *msg,
-			   gpointer user_data)
+			   gpointer user_data,
+			   GError **error)
 {
 	/* the mi_list is owned by the caller */
 	const GSList *mi_list = user_data, *iter;
@@ -1154,6 +1158,8 @@ ews_suppress_read_receipt (ESoapMessage *msg,
 			camel_folder_summary_unlock (summary);
 		g_clear_object (&summary);
 	}
+
+	return TRUE;
 }
 
 static gboolean
