@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-18 01:28+0100\n"
-"PO-Revision-Date: 2018-03-18 01:29+0100\n"
+"POT-Creation-Date: 2018-03-25 21:11+0200\n"
+"PO-Revision-Date: 2018-03-25 21:12+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -30,42 +30,42 @@ msgstr "Exchange Web Services"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Dostęp do serwerów Exchange za pomocą Web Services"
 
-#: ../src/addressbook/e-book-backend-ews.c:2971
+#: ../src/addressbook/e-book-backend-ews.c:2983
 msgid "Failed to update GAL:"
 msgstr "Zaktualizowanie GAL się nie powiodło:"
 
-#: ../src/addressbook/e-book-backend-ews.c:3132
+#: ../src/addressbook/e-book-backend-ews.c:3144
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Nie można zapisać listy kontaktów, jest to obsługiwane tylko w EWS Server "
 "2010 lub nowszym"
 
-#: ../src/addressbook/e-book-backend-ews.c:3225
+#: ../src/addressbook/e-book-backend-ews.c:3237
 msgid "Failed to set contact photo:"
 msgstr "Ustawienie zdjęcia kontaktu się nie powiodło:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1647
+#: ../src/calendar/e-cal-backend-ews.c:1650
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Wolny"
 
-#: ../src/calendar/e-cal-backend-ews.c:1650
+#: ../src/calendar/e-cal-backend-ews.c:1653
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Zajęty"
 
-#: ../src/calendar/e-cal-backend-ews.c:1652
+#: ../src/calendar/e-cal-backend-ews.c:1655
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Poza biurem"
 
-#: ../src/calendar/e-cal-backend-ews.c:1654
+#: ../src/calendar/e-cal-backend-ews.c:1657
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Wstępnie"
 
-#: ../src/calendar/e-cal-backend-ews.c:3267
+#: ../src/calendar/e-cal-backend-ews.c:3270
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Nie można odnaleźć użytkownika „%s” na liście uczestników"
@@ -104,17 +104,17 @@ msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr ""
 "Przeniesienie pliku bufora wiadomości z „%s” do „%s” się nie powiodło: %s"
 
-#: ../src/camel/camel-ews-folder.c:1570
+#: ../src/camel/camel-ews-folder.c:1576
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nie można wczytać zestawienia dla %s"
 
-#: ../src/camel/camel-ews-folder.c:2030
+#: ../src/camel/camel-ews-folder.c:2036
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Odświeżanie katalogu „%s”"
 
-#: ../src/camel/camel-ews-folder.c:2210
+#: ../src/camel/camel-ews-folder.c:2216
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Nie można wykonać działań na katalogu w trybie offline"
@@ -314,72 +314,72 @@ msgstr ""
 "Nie można usunąć katalogu „%s”, jest on używany tylko dla katalogów "
 "publicznych"
 
-#: ../src/camel/camel-ews-store.c:2871
+#: ../src/camel/camel-ews-store.c:2874
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Katalog %s nie istnieje"
 
-#: ../src/camel/camel-ews-store.c:2880
+#: ../src/camel/camel-ews-store.c:2883
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Brak wpisu klucza zmiany dla katalogu %s"
 
-#: ../src/camel/camel-ews-store.c:2923
+#: ../src/camel/camel-ews-store.c:2926
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Nie można zmienić nazwy i przenieść katalogu w tym samym czasie"
 
-#: ../src/camel/camel-ews-store.c:2957
+#: ../src/camel/camel-ews-store.c:2960
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nie można odnaleźć identyfikatora katalogu dla katalogu nadrzędnego %s"
 
-#: ../src/camel/camel-ews-store.c:3009 ../src/camel/camel-ews-transport.c:318
+#: ../src/camel/camel-ews-store.c:3012 ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange server %s"
 msgstr "Serwer Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:3012
+#: ../src/camel/camel-ews-store.c:3015
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Usługa Exchange dla %s na %s"
 
-#: ../src/camel/camel-ews-store.c:3056
+#: ../src/camel/camel-ews-store.c:3059
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Nie można ustalić położenia katalogu Kosz"
 
-#: ../src/camel/camel-ews-store.c:3116
+#: ../src/camel/camel-ews-store.c:3119
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Nie można ustalić położenia katalogu Niechciane"
 
-#: ../src/camel/camel-ews-store.c:3307
+#: ../src/camel/camel-ews-store.c:3310
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Nie można subskrybować katalogów EWS w trybie offline"
 
-#: ../src/camel/camel-ews-store.c:3330
+#: ../src/camel/camel-ews-store.c:3333
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 "Nie można subskrybować katalogu „%s”, żaden katalog publiczny nie jest "
 "dostępny"
 
-#: ../src/camel/camel-ews-store.c:3340
+#: ../src/camel/camel-ews-store.c:3343
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Nie można subskrybować katalogu „%s”, nie odnaleziono katalogu"
 
-#: ../src/camel/camel-ews-store.c:3431
+#: ../src/camel/camel-ews-store.c:3434
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Nie można usuwać subskrypcji katalogów EWS w trybie offline"
 
-#: ../src/camel/camel-ews-store.c:3548
+#: ../src/camel/camel-ews-store.c:3551
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Należy pracować w trybie online, aby ukończyć to działanie"
 
-#: ../src/camel/camel-ews-store.c:3592 ../src/camel/camel-ews-store.c:3629
+#: ../src/camel/camel-ews-store.c:3595 ../src/camel/camel-ews-store.c:3632
 msgid "Unsetting the “Out of Office” status"
 msgstr "Usuwanie ustawienia stanu obecności poza biurem"
 
@@ -1252,7 +1252,17 @@ msgstr ""
 "Ta opcja spowoduje użycie tokenu dostępu OAuth 2.0 do łączenia się z usługą "
 "Office 365."
 
-#: ../src/server/e-ews-camel-common.c:376
+#: ../src/server/e-ews-calendar-utils.c:1151
+#, c-format
+msgid ""
+"Cannot store this recurrence. Change it to simple single daily, weekly, "
+"monthly or yearly recurrence without exceptions and with start date."
+msgstr ""
+"Nie można przechować tego powtórzenia. Należy zmienić je na proste, "
+"pojedyncze dzienne, tygodniowe, miesięczne lub roczne powtórzenie bez "
+"wyjątków i z datą rozpoczęcia."
+
+#: ../src/server/e-ews-camel-common.c:379
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr ""
