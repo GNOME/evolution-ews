@@ -21,6 +21,7 @@
 
 #include <glib/gi18n-lib.h>
 #include <libecal/libecal.h>
+#include <calendar/gui/calendar-config.h>
 
 #include "e-ews-message.h"
 #include "ews-errors.h"
@@ -395,6 +396,7 @@ e_ews_cal_utils_set_time (ESoapMessage *msg,
 			  icaltimetype *tt,
 			  gboolean with_timezone)
 {
+	struct icaltimetype local_tt;
 	gchar *str;
 	gchar *tz_ident = NULL;
 
@@ -420,6 +422,13 @@ e_ews_cal_utils_set_time (ESoapMessage *msg,
 
 			tz_ident = g_strdup_printf ("%s%02d:%02d", offset > 0 ? "+" : "-", hrs, mins);
 		}
+	}
+
+	if (tt->is_date) {
+		local_tt = *tt;
+		local_tt.zone = calendar_config_get_icaltimezone ();
+		local_tt = icaltime_from_timet_with_zone (icaltime_as_timet_with_zone (local_tt, local_tt.zone), FALSE, icaltimezone_get_utc_timezone ());
+		tt = &local_tt;
 	}
 
 	str = g_strdup_printf (

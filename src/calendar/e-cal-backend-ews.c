@@ -38,6 +38,7 @@
 #include <libical/icalproperty.h>
 #include <libical/icalparameter.h>
 
+#include <calendar/gui/calendar-config.h>
 #include <calendar/gui/itip-utils.h>
 
 #include "server/e-source-ews-folder.h"
@@ -418,13 +419,14 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 		}
 
 		if (item_type == E_EWS_ITEM_TYPE_TASK) {
+			icaltimezone *user_timezone = calendar_config_get_icaltimezone ();
 			const gchar *percent_complete;
 
 			/*start date*/
 			has_this_date = FALSE;
 			e_ews_item_task_has_start_date (item, &has_this_date);
 			if (has_this_date) {
-				start_date = icaltime_from_timet_with_zone (e_ews_item_get_start_date (item), 0, utc_zone);
+				start_date = icaltime_from_timet_with_zone (e_ews_item_get_start_date (item), 0, user_timezone);
 				start_date.is_date = 1;
 				icalprop = icalproperty_new_dtstart (start_date);
 				icalcomponent_add_property (icalcomp, icalprop);
@@ -453,7 +455,7 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 			/*due date*/
 			e_ews_item_task_has_due_date (item, &has_this_date);
 			if (has_this_date) {
-				due_date = icaltime_from_timet_with_zone (e_ews_item_get_due_date (item), 0, utc_zone);
+				due_date = icaltime_from_timet_with_zone (e_ews_item_get_due_date (item), 0, user_timezone);
 				due_date.is_date = 1;
 				icalprop = icalproperty_new_due (due_date);
 				icalcomponent_add_property (icalcomp, icalprop);
@@ -463,7 +465,7 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 			has_this_date = FALSE;
 			e_ews_item_task_has_complete_date (item, &has_this_date);
 			if (has_this_date) {
-				complete_date = icaltime_from_timet_with_zone (e_ews_item_get_complete_date (item), 0, utc_zone);
+				complete_date = icaltime_from_timet_with_zone (e_ews_item_get_complete_date (item), 0, user_timezone);
 				icalprop = icalproperty_new_completed (complete_date);
 				icalcomponent_add_property (icalcomp, icalprop);
 			}
