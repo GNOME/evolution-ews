@@ -1541,6 +1541,39 @@ ebb_ews_items_to_contacts (EBookBackendEws *bbews,
 	}
 }
 
+static void
+ebb_ews_mailbox_to_contact (EBookBackendEws *bbews,
+			    EContact **contact,
+			    GHashTable *values,
+			    const EwsMailbox *mb)
+{
+	CamelInternetAddress *addr;
+	gchar *value;
+
+	if (!mb->name && !mb->email)
+		return;
+
+	addr = camel_internet_address_new ();
+
+	camel_internet_address_add (addr, mb->name, mb->email ? mb->email : "");
+	value = camel_address_encode (CAMEL_ADDRESS (addr));
+
+	if (value && (!values || g_hash_table_lookup (values, value) == NULL)) {
+		EVCardAttribute *attr;
+
+		attr = e_vcard_attribute_new (NULL, EVC_EMAIL);
+		e_vcard_attribute_add_value (attr, value);
+		e_vcard_append_attribute (E_VCARD (*contact), attr);
+
+		if (values)
+			g_hash_table_insert (values, g_strdup (value), GINT_TO_POINTER (1));
+	} else {
+		g_free (value);
+	}
+
+	g_object_unref (addr);
+}
+
 static gboolean
 ebb_ews_traverse_dl (EBookBackendEws *bbews,
 		     EContact **contact,
@@ -1556,6 +1589,7 @@ ebb_ews_traverse_dl (EBookBackendEws *bbews,
 		gboolean includes_last;
 		gboolean ret = FALSE;
 		const gchar *ident;
+		GError *local_error = NULL;
 
 		if (mb->item_id && mb->item_id->id)
 			ident = mb->item_id->id;
@@ -1569,15 +1603,30 @@ ebb_ews_traverse_dl (EBookBackendEws *bbews,
 
 		g_hash_table_insert (items, g_strdup (ident), GINT_TO_POINTER (1));
 
-		if (!e_ews_connection_expand_dl_sync (
+		ret = e_ews_connection_expand_dl_sync (
 			bbews->priv->cnc,
 			EWS_PRIORITY_MEDIUM,
 			mb,
 			&members,
 			&includes_last,
 			cancellable,
-			error))
-			return FALSE;
+			&local_error);
+
+		if (!ret) {
+			if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NAMERESOLUTIONNORESULTS)) {
+				g_clear_error (&local_error);
+				if (mb->email && *mb->email)
+					ebb_ews_mailbox_to_contact (bbews, contact, values, mb);
+
+				ret = TRUE;
+				members = NULL;
+			} else {
+				if (local_error)
+					g_propagate_error (error, local_error);
+
+				return FALSE;
+			}
+		}
 
 		for (l = members; l; l = l->next) {
 			ret = ebb_ews_traverse_dl (bbews, contact, items, values, l->data, cancellable, error);
@@ -1588,27 +1637,7 @@ ebb_ews_traverse_dl (EBookBackendEws *bbews,
 		g_slist_free_full (members, (GDestroyNotify) e_ews_mailbox_free);
 		return ret;
 	} else {
-		EVCardAttribute *attr;
-		CamelInternetAddress *addr;
-		gchar *value = NULL;
-
-		if (mb->name == NULL && mb->email == NULL)
-			return TRUE;
-
-		addr = camel_internet_address_new ();
-		attr = e_vcard_attribute_new (NULL, EVC_EMAIL);
-
-		camel_internet_address_add (addr, mb->name, mb->email ? mb->email : "");
-		value = camel_address_encode (CAMEL_ADDRESS (addr));
-
-		if (value && g_hash_table_lookup (values, value) == NULL) {
-			e_vcard_attribute_add_value (attr, value);
-			e_vcard_append_attribute (E_VCARD (*contact), attr);
-
-			g_hash_table_insert (values, g_strdup (value), GINT_TO_POINTER (1));
-		}
-
-		g_object_unref (addr);
+		ebb_ews_mailbox_to_contact (bbews, contact, values, mb);
 
 		return TRUE;
 	}
@@ -1765,6 +1794,7 @@ ebb_ews_fetch_items_sync (EBookBackendEws *bbews,
 		EwsMailbox *mb;
 		GSList *members = NULL;
 		gboolean includes_last;
+		GError *local_error = NULL;
 
 		if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR)
 			continue;
@@ -1774,15 +1804,21 @@ ebb_ews_fetch_items_sync (EBookBackendEws *bbews,
 		mb->item_id = (EwsId *) id;
 
 		d_name = e_ews_item_get_subject (item);
-		if (!e_ews_connection_expand_dl_sync (
+		if (e_ews_connection_expand_dl_sync (
 			bbews->priv->cnc, EWS_PRIORITY_MEDIUM, mb, &members,
-			&includes_last, cancellable, error))
-			goto cleanup;
-
-		ret = ebb_ews_contacts_append_dl (bbews, id, d_name, members, contacts, cancellable, error);
+			&includes_last, cancellable, &local_error)) {
+			ret = ebb_ews_contacts_append_dl (bbews, id, d_name, members, contacts, cancellable, error);
+			g_slist_free_full (members, (GDestroyNotify) e_ews_mailbox_free);
+		} else {
+			ret = g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NAMERESOLUTIONNORESULTS);
+			if (ret) {
+				g_clear_error (&local_error);
+			} else if (local_error) {
+				g_propagate_error (error, local_error);
+			}
+		}
 
 		g_free (mb);
-		g_slist_free_full (members, (GDestroyNotify) e_ews_mailbox_free);
 
 		if (!ret)
 			goto cleanup;
