@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=Miscellaneous / EWS Core\n"
-"POT-Creation-Date: 2018-03-17 23:57+0000\n"
-"PO-Revision-Date: 2018-03-19 23:16+0200\n"
+"POT-Creation-Date: 2018-04-04 14:27+0000\n"
+"PO-Revision-Date: 2018-04-08 17:43+0300\n"
 "Last-Translator: Aurimas Černius <aurisc4@gmail.com>\n"
 "Language-Team: Lietuvių <gnome-lt@lists.akl.lt>\n"
 "Language: lt\n"
@@ -31,42 +31,42 @@ msgstr "Exchange Web Services"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Exchange serverių pasiekimui naudojant internetines tarnybas"
 
-#: ../src/addressbook/e-book-backend-ews.c:2971
+#: ../src/addressbook/e-book-backend-ews.c:3019
 msgid "Failed to update GAL:"
 msgstr "Nepavyko atnaujinti GAL:"
 
-#: ../src/addressbook/e-book-backend-ews.c:3132
+#: ../src/addressbook/e-book-backend-ews.c:3180
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Negalima įrašyti kontaktų sąrašo, jis palaikomas tik EWS Server 2010 ir "
 "naujesniame"
 
-#: ../src/addressbook/e-book-backend-ews.c:3225
+#: ../src/addressbook/e-book-backend-ews.c:3273
 msgid "Failed to set contact photo:"
 msgstr "Nepavyko nustatyti kontakto nuotraukos:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1647
+#: ../src/calendar/e-cal-backend-ews.c:1652
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Laisvas"
 
-#: ../src/calendar/e-cal-backend-ews.c:1650
+#: ../src/calendar/e-cal-backend-ews.c:1655
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Užsiėmęs"
 
-#: ../src/calendar/e-cal-backend-ews.c:1652
+#: ../src/calendar/e-cal-backend-ews.c:1657
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Ne biure"
 
-#: ../src/calendar/e-cal-backend-ews.c:1654
+#: ../src/calendar/e-cal-backend-ews.c:1659
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Bandomasis"
 
-#: ../src/calendar/e-cal-backend-ews.c:3267
+#: ../src/calendar/e-cal-backend-ews.c:3272
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Nepavyko rasti tarp dalyvių naudotojo „%s“"
@@ -104,17 +104,17 @@ msgstr "Nepavyksta sukurti podėlio kelio „%s“: %s"
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Nepavyko perkelti laiškų podėlio failo iš „%s“ į „%s“: %s"
 
-#: ../src/camel/camel-ews-folder.c:1570
+#: ../src/camel/camel-ews-folder.c:1576
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nepavyksta įkelti %s santraukos"
 
-#: ../src/camel/camel-ews-folder.c:2030
+#: ../src/camel/camel-ews-folder.c:2036
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Atnaujinamas aplankas „%s“"
 
-#: ../src/camel/camel-ews-folder.c:2210
+#: ../src/camel/camel-ews-folder.c:2216
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Negalima atlikti veiksmų aplanke esant atsijungus"
@@ -315,81 +315,79 @@ msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr ""
 "Negalima pašalinti aplanko „%s“, jis naudojamas tik viešiesiems aplankams"
 
-#: ../src/camel/camel-ews-store.c:2871
+#: ../src/camel/camel-ews-store.c:2874
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Aplanko %s nėra"
 
-#: ../src/camel/camel-ews-store.c:2880
+#: ../src/camel/camel-ews-store.c:2883
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Nėra pakeitimo raktinio įrašo aplankui %s"
 
-#: ../src/camel/camel-ews-store.c:2923
+#: ../src/camel/camel-ews-store.c:2926
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Negalima pervadinti ir perkelti aplanko tuo pat metu"
 
-#: ../src/camel/camel-ews-store.c:2957
+#: ../src/camel/camel-ews-store.c:2960
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nepavyksta rasti aplanko ID tėviniam aplankui %s"
 
-#: ../src/camel/camel-ews-store.c:3009 ../src/camel/camel-ews-transport.c:318
+#: ../src/camel/camel-ews-store.c:3012 ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange server %s"
 msgstr "Exchange serveris %s"
 
-#: ../src/camel/camel-ews-store.c:3012
+#: ../src/camel/camel-ews-store.c:3015
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Exchange tarnyba %s %s"
 
-#: ../src/camel/camel-ews-store.c:3056
+#: ../src/camel/camel-ews-store.c:3059
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Nepavyko rasti šiukšlinės aplanko"
 
-#: ../src/camel/camel-ews-store.c:3116
+#: ../src/camel/camel-ews-store.c:3119
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Nepavyko rasti šlamšto aplanko"
 
-#: ../src/camel/camel-ews-store.c:3307
+#: ../src/camel/camel-ews-store.c:3310
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Negalima prisiregistruoti prie EWS aplankų atsijungimo veiksenoje"
 
-#: ../src/camel/camel-ews-store.c:3330
+#: ../src/camel/camel-ews-store.c:3333
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 "Nepavyksta prisiregistruoti prie aplanko „%s“, nėra prieinamo viešo aplanko"
 
-#: ../src/camel/camel-ews-store.c:3340
+#: ../src/camel/camel-ews-store.c:3343
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Nepavyksta prisiregistruoti prie aplanko „%s“, nerastas aplankas"
 
-#: ../src/camel/camel-ews-store.c:3431
+#: ../src/camel/camel-ews-store.c:3434
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Negalima išsiregistruoti iš EWS aplankų atsijungimo veiksenoje"
 
-#: ../src/camel/camel-ews-store.c:3548
+#: ../src/camel/camel-ews-store.c:3551
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Šiam veiksmui užbaigti, reikia būti prisijungus"
 
-#: ../src/camel/camel-ews-store.c:3592 ../src/camel/camel-ews-store.c:3629
+#: ../src/camel/camel-ews-store.c:3595 ../src/camel/camel-ews-store.c:3632
 msgid "Unsetting the “Out of Office” status"
 msgstr "Nuimama būsena „ne ofise“"
 
 #: ../src/camel/camel-ews-store.h:56
-#| msgid "Updating foreign folders"
 msgid "Foreign Folders"
 msgstr "Išoriniai aplankai"
 
 #: ../src/camel/camel-ews-store.h:58
-#| msgid "Folder"
 msgid "Public Folders"
 msgstr "Vieši aplankai"
 
@@ -431,7 +429,6 @@ msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Duomenų šaltinis „%s“ nereprezentuoja Exchange Web Services aplanko"
 
 #: ../src/configuration/e-ews-config-lookup.c:192
-#| msgid "Exchange Web Services"
 msgid "Exchange Web Services autodiscovery"
 msgstr "Exchange Web Services automatinis aptikimas"
 
@@ -997,12 +994,10 @@ msgstr "Naudotojo vardas negali būti tuščias"
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/configuration/e-mail-config-ews-backend.c:604
-#| msgid "User name cannot be empty"
 msgid "Tenant cannot be empty"
 msgstr "Įmonės laukas negali būti tuščias"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:609
-#| msgid "Host URL cannot be empty"
 msgid "Application ID cannot be empty"
 msgstr "Programos ID negali būti tuščias"
 
@@ -1231,7 +1226,6 @@ msgid "Your Exchange account “{0}” has the status set as “Out of Office”
 msgstr "Jūsų Exchange paskyra „{0}“ turi nustatytą būseną „ne ofise“."
 
 #: ../src/server/camel-sasl-xoauth2-office365.c:23
-#| msgid "Out of Office"
 msgid "OAuth2 (Office365)"
 msgstr "OAuth2 (Office365)"
 
@@ -1243,7 +1237,16 @@ msgstr ""
 "Ši parinktis naudos OAuth 2.0 prieigos leksemą prisijungimui prie Office365."
 "com serverio"
 
-#: ../src/server/e-ews-camel-common.c:376
+#: ../src/server/e-ews-calendar-utils.c:1160
+#, c-format
+msgid ""
+"Cannot store this recurrence. Change it to simple single daily, weekly, "
+"monthly or yearly recurrence without exceptions and with start date."
+msgstr ""
+"Negalima įrašyti šio pasikartojimo. Pakeiskite į paprasčiausią kasdienį, "
+"savaitinį, mėnesinį ar metinį pasikartojimą be išimčių ir su pradžios data."
+
+#: ../src/server/e-ews-camel-common.c:379
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "CreateItem iškvietimas negrąžino naujo laiško ID"
