@@ -578,7 +578,7 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 
 		if (!vcomp) {
 			if (mime_content)
-				g_warn_if_reached ();
+				g_warning ("%s: Failed to parse mime content:---%s---", G_STRFUNC, mime_content);
 			return NULL;
 		}
 
@@ -1109,9 +1109,14 @@ ecb_ews_get_items_sync (ECalBackendEws *cbews,
 			break;
 		} else {
 			ECalComponent *comp;
+			GError *local_error = NULL;
 
-			comp = ecb_ews_item_to_component_sync (cbews, item, cancellable, error);
+			comp = ecb_ews_item_to_component_sync (cbews, item, cancellable, &local_error);
 			if (!comp) {
+				if (!local_error)
+					continue;
+
+				g_propagate_error (error, local_error);
 				success = FALSE;
 				break;
 			}

@@ -30,6 +30,8 @@
 #include <glib/gprintf.h>
 #include <libsoup/soup-misc.h>
 #include <libical/ical.h>
+#include <libedataserver/libedataserver.h>
+
 #include "e-ews-item.h"
 #include "e-ews-item-change.h"
 
@@ -1512,6 +1514,7 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 
 		/* The order is maintained according to the order in soap response */
 		if (!g_ascii_strcasecmp (name, "MimeContent")) {
+			gchar *charset;
 			guchar *data;
 			gsize data_len = 0;
 
@@ -1522,6 +1525,20 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 				g_free (data);
 				return FALSE;
 			}
+
+			charset = e_soap_parameter_get_property (subparam, "CharacterSet");
+			if (g_strcmp0 (charset, "UTF-8") == 0 &&
+			    !g_utf8_validate ((const gchar *) data, data_len, NULL)) {
+				gchar *tmp;
+
+				tmp = e_util_utf8_data_make_valid ((const gchar *) data, data_len);
+				if (tmp) {
+					g_free (data);
+					data = (guchar *) tmp;
+				}
+			}
+			g_free (charset);
+
 			priv->mime_content = (gchar *) data;
 
 			g_free (value);
