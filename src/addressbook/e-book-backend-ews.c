@@ -1265,6 +1265,18 @@ ebews_set_givenname_changes (EBookBackendEws *bbews,
 	/* Does nothing, the "GivenName" is filled by the "FullName" code */
 }
 
+static const gchar *
+ebews_get_fileas_or_display_name (EEwsItem *item)
+{
+	const gchar *value;
+
+	value = e_ews_item_get_fileas (item);
+	if (!value || !*value)
+		value = e_ews_item_get_display_name (item);
+
+	return value;
+}
+
 static const struct field_element_mapping {
 	EContactField field_id;
 	gint element_type;
@@ -1278,7 +1290,7 @@ static const struct field_element_mapping {
 } mappings[] = {
 	/* The order should be maintained for create contacts to work */
 	{ E_CONTACT_NOTE, ELEMENT_TYPE_COMPLEX, "Notes", NULL, ebews_populate_notes, ebews_set_notes, ebews_set_notes_changes },
-	{ E_CONTACT_FILE_AS, ELEMENT_TYPE_SIMPLE, "FileAs", e_ews_item_get_fileas},
+	{ E_CONTACT_FILE_AS, ELEMENT_TYPE_SIMPLE, "FileAs", ebews_get_fileas_or_display_name },
 	{ E_CONTACT_FULL_NAME, ELEMENT_TYPE_COMPLEX, "CompleteName", NULL, ebews_populate_full_name, ebews_set_full_name, ebews_set_full_name_changes},
 	{ E_CONTACT_NICKNAME, ELEMENT_TYPE_SIMPLE, "Nickname", NULL, ebews_populate_nick_name},
 	{ E_CONTACT_ORG, ELEMENT_TYPE_SIMPLE, "CompanyName", e_ews_item_get_company_name},
