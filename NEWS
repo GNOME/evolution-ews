@@ -1,3 +1,28 @@
+Evolution-EWS 3.29.1 2018-04-16
+-------------------------------
+
+Bug Fixes:
+	Bug 794116 - Delete messages in chunks to not exceed maximum limit (Milan Crha)
+	Bug 654459 - Support recurrence task (Milan Crha)
+	Bug 788202 - Convert Task dates to time zone set in Evolution (Milan Crha)
+	Bug 794924 - Reading EWS contact list aborts after error (Milan Crha)
+	Bug 794815 - Forgive errors when fetching events (Milan Crha)
+	Bug 795076 - [Contacts] Use Display Name as File As when File As is missing (Milan Crha)
+
+Miscellaneous:
+	Make it possible to disable Reminders for Tasks (Milan Crha)
+	Update POTFILES.in (Piotr Drąg)
+
+Translations:
+	Andika Triwidada (id)
+	Piotr Drąg (pl)
+	Aurimas Černius (lt)
+	Rafael Fontenelle (pt_BR)
+	Marek Černocký (cs)
+	Mario Blättermann (de)
+	Anders Jonsson (sv)
+	Rūdolfs Mazurs (lv)
+
 Evolution-EWS 3.28.0 2018-03-12
 -------------------------------
 
