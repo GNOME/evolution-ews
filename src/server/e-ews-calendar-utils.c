@@ -916,8 +916,8 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 
 	case ICAL_YEARLY_RECURRENCE: {
 		gint month_index = 1;
-		enum month_day_options month_day;
-		enum month_num_options month_num;
+		enum month_day_options month_day = MONTH_DAY_NTH;
+		enum month_num_options month_num = MONTH_NUM_DAY;
 
 		if (n_by_year_day != 0 ||
 		    n_by_week_no != 0 ||
