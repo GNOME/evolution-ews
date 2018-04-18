@@ -398,9 +398,8 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
 		CamelDataWrapper *dw;
 		CamelStream *tmpstream = NULL, *newstream = NULL;
 		GByteArray *ba;
-		icalcomponent *icalcomp, *subcomp;
-		icalproperty *icalprop;
-		gchar *calstring_new, *dir;
+		icalcomponent *icalcomp = NULL;
+		gchar *dir;
 		gint fd;
 		gboolean success = FALSE;
 
@@ -412,33 +411,43 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
 			goto exit_msg;
 		}
 		ba = camel_stream_mem_get_byte_array (CAMEL_STREAM_MEM (tmpstream));
-		g_byte_array_append (ba, (guint8 *) "\0", 1);
-		icalcomp = icalparser_parse_string ((gchar *) ba->data);
-		subcomp = icalcomponent_get_first_component (icalcomp, ICAL_VEVENT_COMPONENT);
-		icalprop = icalproperty_new_x (calendar_item_id->change_key);
-		icalproperty_set_x_name (icalprop, "X-EVOLUTION-CHANGEKEY");
-
-		/* In order to accept items we have to store AssociatedCalendarItemId (X-EVOLUTION-ITEMID)
-		 * or mail id (X-EVOLUTION-ACCEPT-ID) when we do not have AssociatedCalendarItemId */
-		icalcomponent_add_property (subcomp, icalprop);
-		if (is_calendar_UID) {
-			icalprop = icalproperty_new_x (calendar_item_id->id);
-			icalproperty_set_x_name (icalprop, "X-EVOLUTION-ITEMID");
-			icalcomponent_add_property (subcomp, icalprop);
+		if (ba && ba->len) {
+			g_byte_array_append (ba, (guint8 *) "\0", 1);
+			icalcomp = icalparser_parse_string ((gchar *) ba->data);
 		}
+		if (icalcomp) {
+			icalcomponent *subcomp;
+			icalproperty *icalprop;
+			gchar *calstring_new;
 
-		icalprop = icalproperty_new_x (mail_item_id->id);
-		icalproperty_set_x_name (icalprop, "X-EVOLUTION-ACCEPT-ID");
-		icalcomponent_add_property (subcomp, icalprop);
+			subcomp = icalcomponent_get_first_component (icalcomp, ICAL_VEVENT_COMPONENT);
+			icalprop = icalproperty_new_x (calendar_item_id->change_key);
+			icalproperty_set_x_name (icalprop, "X-EVOLUTION-CHANGEKEY");
 
-		calstring_new = icalcomponent_as_ical_string_r (icalcomp);
-		camel_mime_part_set_content (
-			mimepart,
-			(const gchar *) calstring_new,
-			strlen (calstring_new),
-			"text/calendar");
-		g_free (calstring_new);
-		icalcomponent_free (icalcomp);
+			/* In order to accept items we have to store AssociatedCalendarItemId (X-EVOLUTION-ITEMID)
+			 * or mail id (X-EVOLUTION-ACCEPT-ID) when we do not have AssociatedCalendarItemId */
+			icalcomponent_add_property (subcomp, icalprop);
+			if (is_calendar_UID) {
+				icalprop = icalproperty_new_x (calendar_item_id->id);
+				icalproperty_set_x_name (icalprop, "X-EVOLUTION-ITEMID");
+				icalcomponent_add_property (subcomp, icalprop);
+			}
+
+			icalprop = icalproperty_new_x (mail_item_id->id);
+			icalproperty_set_x_name (icalprop, "X-EVOLUTION-ACCEPT-ID");
+			icalcomponent_add_property (subcomp, icalprop);
+
+			calstring_new = icalcomponent_as_ical_string_r (icalcomp);
+			if (calstring_new) {
+				camel_mime_part_set_content (
+					mimepart,
+					(const gchar *) calstring_new,
+					strlen (calstring_new),
+					"text/calendar");
+				g_free (calstring_new);
+			}
+			icalcomponent_free (icalcomp);
+		}
 		g_object_unref (tmpstream);
 
 		/* Create a new file to store updated mimecontent */
