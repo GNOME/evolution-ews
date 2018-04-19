@@ -104,6 +104,11 @@ void		e_source_ews_folder_set_freebusy_weeks_after
 gboolean	e_source_ews_folder_get_public	(ESourceEwsFolder *extension);
 void		e_source_ews_folder_set_public	(ESourceEwsFolder *extension,
 						 gboolean is_public);
+gboolean	e_source_ews_folder_get_use_primary_address
+						(ESourceEwsFolder *extension);
+void		e_source_ews_folder_set_use_primary_address
+						(ESourceEwsFolder *extension,
+						 gboolean use_primary_address);
 
 G_END_DECLS
 

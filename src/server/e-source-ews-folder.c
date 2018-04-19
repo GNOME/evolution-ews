@@ -33,6 +33,7 @@ struct _ESourceEwsFolderPrivate {
 	gboolean is_public;
 	guint freebusy_weeks_before;
 	guint freebusy_weeks_after;
+	gboolean use_primary_address;
 };
 
 enum {
@@ -44,7 +45,8 @@ enum {
 	PROP_FOREIGN_MAIL,
 	PROP_FREEBUSY_WEEKS_BEFORE,
 	PROP_FREEBUSY_WEEKS_AFTER,
-	PROP_PUBLIC
+	PROP_PUBLIC,
+	PROP_USE_PRIMARY_ADDRESS
 };
 
 G_DEFINE_TYPE (
@@ -103,6 +105,12 @@ source_ews_folder_set_property (GObject *object,
 
 		case PROP_PUBLIC:
 			e_source_ews_folder_set_public (
+				E_SOURCE_EWS_FOLDER (object),
+				g_value_get_boolean (value));
+			return;
+
+		case PROP_USE_PRIMARY_ADDRESS:
+			e_source_ews_folder_set_use_primary_address (
 				E_SOURCE_EWS_FOLDER (object),
 				g_value_get_boolean (value));
 			return;
@@ -171,6 +179,13 @@ source_ews_folder_get_property (GObject *object,
 			g_value_set_boolean (
 				value,
 				e_source_ews_folder_get_public (
+				E_SOURCE_EWS_FOLDER (object)));
+			return;
+
+		case PROP_USE_PRIMARY_ADDRESS:
+			g_value_set_boolean (
+				value,
+				e_source_ews_folder_get_use_primary_address (
 				E_SOURCE_EWS_FOLDER (object)));
 			return;
 	}
@@ -308,6 +323,19 @@ e_source_ews_folder_class_init (ESourceEwsFolderClass *class)
 			"public",
 			"Public",
 			"The folder is a public folder, part of Public Folders",
+			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS |
+			E_SOURCE_PARAM_SETTING));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_USE_PRIMARY_ADDRESS,
+		g_param_spec_boolean (
+			"use-primary-address",
+			"Use Primary Address",
+			"Whether online GAL should use only the primary contact address",
 			FALSE,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
@@ -596,4 +624,26 @@ e_source_ews_folder_set_public (ESourceEwsFolder *extension,
 	extension->priv->is_public = is_public;
 
 	g_object_notify (G_OBJECT (extension), "public");
+}
+
+gboolean
+e_source_ews_folder_get_use_primary_address (ESourceEwsFolder *extension)
+{
+	g_return_val_if_fail (E_IS_SOURCE_EWS_FOLDER (extension), FALSE);
+
+	return extension->priv->use_primary_address;
+}
+
+void
+e_source_ews_folder_set_use_primary_address (ESourceEwsFolder *extension,
+					     gboolean use_primary_address)
+{
+	g_return_if_fail (E_IS_SOURCE_EWS_FOLDER (extension));
+
+	if ((extension->priv->use_primary_address ? 1 : 0) == (use_primary_address ? 1 : 0))
+		return;
+
+	extension->priv->use_primary_address = use_primary_address;
+
+	g_object_notify (G_OBJECT (extension), "use-primary-address");
 }

@@ -479,7 +479,7 @@ ebews_populate_notes (EBookBackendEws *bbews,
 	e_contact_set (contact, E_CONTACT_NOTE, notes);
 }
 
-static void
+static gboolean
 set_email_address (EContact *contact,
                    EContactField field,
                    EEwsItem *item,
@@ -494,19 +494,29 @@ set_email_address (EContact *contact,
 	else if (require_smtp_prefix)
 		ea = NULL;
 
-	if (ea && *ea)
+	if (ea && *ea) {
 		e_contact_set (contact, field, ea);
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 static void
 ebews_populate_emails_ex (EBookBackendEws *bbews,
 			  EContact *contact,
 			  EEwsItem *item,
-			  gboolean require_smtp_prefix)
+			  gboolean require_smtp_prefix,
+			  gboolean use_primary_address)
 {
-	set_email_address (contact, E_CONTACT_EMAIL_1, item, "EmailAddress1", require_smtp_prefix);
-	set_email_address (contact, E_CONTACT_EMAIL_2, item, "EmailAddress2", require_smtp_prefix);
-	set_email_address (contact, E_CONTACT_EMAIL_3, item, "EmailAddress3", require_smtp_prefix);
+	if (set_email_address (contact, E_CONTACT_EMAIL_1, item, "EmailAddress1", require_smtp_prefix) && use_primary_address)
+		return;
+
+	if (set_email_address (contact, E_CONTACT_EMAIL_2, item, "EmailAddress2", require_smtp_prefix) && use_primary_address)
+		return;
+
+	if (set_email_address (contact, E_CONTACT_EMAIL_3, item, "EmailAddress3", require_smtp_prefix) && use_primary_address)
+		return;
 }
 
 static void
@@ -516,7 +526,7 @@ ebews_populate_emails (EBookBackendEws *bbews,
 		       GCancellable *cancellable,
 		       GError **errror)
 {
-	ebews_populate_emails_ex (bbews, contact, item, FALSE);
+	ebews_populate_emails_ex (bbews, contact, item, FALSE, FALSE);
 }
 
 static void
@@ -1515,6 +1525,7 @@ ebb_ews_convert_contact_to_updatexml_cb (ESoapMessage *msg,
 static EContact *
 ebb_ews_item_to_contact (EBookBackendEws *bbews,
 			 EEwsItem *item,
+			 gboolean use_primary_address,
 			 GCancellable *cancellable,
 			 GError **error)
 {
@@ -1525,6 +1536,10 @@ ebb_ews_item_to_contact (EBookBackendEws *bbews,
 
 	for (ii = 0; ii < G_N_ELEMENTS (mappings); ii++) {
 		element_type = mappings[ii].element_type;
+
+		/* Skip email, when the primary is supposed to be used only */
+		if (use_primary_address && mappings[ii].field_id == E_CONTACT_EMAIL_1)
+			continue;
 
 		if (element_type == ELEMENT_TYPE_SIMPLE && !mappings[ii].populate_contact_func) {
 			const gchar *val = mappings[ii].get_simple_prop_func (item);
@@ -1556,7 +1571,7 @@ ebb_ews_items_to_contacts (EBookBackendEws *bbews,
 		if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR)
 			continue;
 
-		contact = ebb_ews_item_to_contact (bbews, item, cancellable, error);
+		contact = ebb_ews_item_to_contact (bbews, item, FALSE, cancellable, error);
 
 		attr = e_vcard_attribute_new (NULL, "X-EWS-KIND");
 		e_vcard_add_attribute_with_value (E_VCARD (contact), attr, "DT_MAILUSER");
@@ -2586,14 +2601,19 @@ ebb_ews_update_cache_for_expression (EBookBackendEws *bbews,
 				EWS_SEARCH_AD, NULL, TRUE, &mailboxes, &contacts, &includes_last_item, cancellable, error);
 
 		if (success) {
+			ESourceEwsFolder *ews_folder;
+			gboolean use_primary_address;
 			GSList *mlink, *clink;
+
+			ews_folder = e_source_get_extension (e_backend_get_source (E_BACKEND (bbews)), E_SOURCE_EXTENSION_EWS_FOLDER);
+			use_primary_address = e_source_ews_folder_get_use_primary_address (ews_folder);
 
 			for (mlink = mailboxes, clink = contacts; mlink; mlink = g_slist_next (mlink), clink = g_slist_next (clink)) {
 				EwsMailbox *mb = mlink->data;
 				EEwsItem *contact_item = clink ? clink->data : NULL;
 				EBookMetaBackendInfo *nfo;
 				EContact *contact = NULL;
-				gboolean is_public_dl = FALSE;
+				gboolean is_public_dl = FALSE, mailbox_address_set = FALSE;
 				const gchar *str;
 				gchar *fake_rev;
 
@@ -2608,7 +2628,7 @@ ebb_ews_update_cache_for_expression (EBookBackendEws *bbews,
 				}
 
 				if (!contact && contact_item && e_ews_item_get_item_type (contact_item) == E_EWS_ITEM_TYPE_CONTACT)
-					contact = ebb_ews_item_to_contact (bbews, contact_item, cancellable, NULL);
+					contact = ebb_ews_item_to_contact (bbews, contact_item, use_primary_address && !is_public_dl, cancellable, NULL);
 
 				if (!contact)
 					contact = e_contact_new ();
@@ -2624,12 +2644,19 @@ ebb_ews_update_cache_for_expression (EBookBackendEws *bbews,
 
 				g_free (fake_rev);
 
+				if (use_primary_address && !is_public_dl && mb->email &&
+				    (!mb->routing_type || g_ascii_strcasecmp (mb->routing_type, "SMTP") == 0)) {
+					e_contact_set (contact, E_CONTACT_EMAIL_1, mb->email);
+					mailbox_address_set = TRUE;
+				}
+
 				str = e_contact_get_const (contact, E_CONTACT_FULL_NAME);
 				if (!str || !*str)
 					e_contact_set (contact, E_CONTACT_FULL_NAME, mb->name);
 
 				str = e_contact_get_const (contact, E_CONTACT_EMAIL_1);
-				if (!str || !*str || (!is_public_dl && contact_item && e_ews_item_get_item_type (contact_item) == E_EWS_ITEM_TYPE_CONTACT)) {
+				if (!str || !*str || (!is_public_dl && contact_item && !mailbox_address_set &&
+				    e_ews_item_get_item_type (contact_item) == E_EWS_ITEM_TYPE_CONTACT)) {
 					/* Cleanup first, then re-add only SMTP addresses */
 					e_contact_set (contact, E_CONTACT_EMAIL_1, NULL);
 					e_contact_set (contact, E_CONTACT_EMAIL_2, NULL);
@@ -2637,13 +2664,14 @@ ebb_ews_update_cache_for_expression (EBookBackendEws *bbews,
 					e_contact_set (contact, E_CONTACT_EMAIL_4, NULL);
 					e_contact_set (contact, E_CONTACT_EMAIL, NULL);
 
-					ebews_populate_emails_ex (bbews, contact, contact_item, TRUE);
+					ebews_populate_emails_ex (bbews, contact, contact_item, TRUE, use_primary_address && !is_public_dl);
 				}
 
 				str = e_contact_get_const (contact, E_CONTACT_EMAIL_1);
 				if (!str || !*str) {
 					e_contact_set (contact, E_CONTACT_EMAIL_1, mb->email);
-				} else if (!is_public_dl && mb->email && (!mb->routing_type || g_ascii_strcasecmp (mb->routing_type, "SMTP") == 0)) {
+				} else if (!is_public_dl && !mailbox_address_set && mb->email &&
+					   (!mb->routing_type || g_ascii_strcasecmp (mb->routing_type, "SMTP") == 0)) {
 					EContactField fields[3] = { E_CONTACT_EMAIL_2, E_CONTACT_EMAIL_3, E_CONTACT_EMAIL_4 };
 					gchar *emails[3];
 					gint ii, ff = 0;

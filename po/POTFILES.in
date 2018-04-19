@@ -12,6 +12,7 @@ src/camel/camel-ews-transport.c
 src/camel/camel-ews-utils.c
 src/collection/e-ews-backend.c
 src/collection/module-ews-backend.c
+src/configuration/e-book-config-ews.c
 src/configuration/e-ews-config-lookup.c
 src/configuration/e-ews-config-utils.c
 src/configuration/e-ews-edit-folder-permissions.c
