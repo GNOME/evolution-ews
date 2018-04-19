@@ -504,6 +504,199 @@ ews_fetch_cancellable_cancelled_cb (GCancellable *cancellable,
 	g_cond_broadcast (fetch_cond);
 }
 
+static gboolean
+ews_message_from_properties_sync (CamelEwsFolder *ews_folder,
+				  EEwsConnection *cnc,
+				  gint pri,
+				  GSList *ids,
+				  const gchar *mime_dir,
+				  GSList **out_items, /* EEwsItem * */
+				  GCancellable *cancellable,
+				  GError **error)
+{
+	EEwsAdditionalProps *add_props;
+	const CamelNameValueArray *headers;
+	CamelMessageInfo *mi;
+	CamelMimeMessage *msg;
+	CamelStream *new_stream;
+	EEwsItem *item;
+	gboolean bval = FALSE;
+	gchar *mime_fname_new;
+	gint fd;
+	GSList *items = NULL;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_FOLDER (ews_folder), FALSE);
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (ids != NULL, FALSE);
+	g_return_val_if_fail (mime_dir != NULL, FALSE);
+	g_return_val_if_fail (out_items != NULL, FALSE);
+
+	add_props = e_ews_additional_props_new ();
+	add_props->field_uri = g_strdup (SUMMARY_MESSAGE_PROPS " item:Body item:Attachments");
+	add_props->extended_furis = ews_folder_get_summary_message_mapi_flags ();
+
+	if (!e_ews_connection_get_items_sync (cnc, pri, ids, "IdOnly", add_props,
+		FALSE, NULL, E_EWS_BODY_TYPE_TEXT, &items, NULL, NULL, cancellable, error) || !items) {
+		e_ews_additional_props_free (add_props);
+		return FALSE;
+	}
+
+	e_ews_additional_props_free (add_props);
+
+	mi = camel_ews_utils_item_to_message_info (ews_folder, cnc, items->data, cancellable);
+	if (!mi) {
+		g_slist_free_full (items, g_object_unref);
+		return FALSE;
+	}
+
+	item = items->data;
+	msg = camel_mime_message_new ();
+
+	headers = camel_message_info_get_headers (mi);
+	if (headers) {
+		CamelMedium *medium = CAMEL_MEDIUM (msg);
+		guint ii, len;
+
+		len = camel_name_value_array_get_length (headers);
+
+		for (ii = 0; ii < len; ii++) {
+			const gchar *name = NULL, *value = NULL;
+
+			/* Skip any content-describing headers */
+			if (camel_name_value_array_get (headers, ii, &name, &value) &&
+			    name && g_ascii_strncasecmp (name, "Content-", 8) != 0) {
+				camel_medium_add_header (medium, name, value);
+			}
+		}
+	} else {
+		CamelMedium *medium = CAMEL_MEDIUM (msg);
+
+		camel_mime_message_set_date (msg, e_ews_item_get_date_sent (item), 0);
+		camel_mime_message_set_message_id (msg, e_ews_item_get_msg_id (item));
+		if (e_ews_item_get_in_replyto (item))
+			camel_medium_set_header (medium, "In-Reply-To", e_ews_item_get_in_replyto (item));
+		if (e_ews_item_get_references (item))
+			camel_medium_set_header (medium, "References", e_ews_item_get_references (item));
+		camel_medium_set_header (medium, "From", camel_message_info_get_from (mi));
+		camel_medium_set_header (medium, "To", camel_message_info_get_to (mi));
+		camel_medium_set_header (medium, "Cc", camel_message_info_get_from (mi));
+		camel_mime_message_set_subject (msg, camel_message_info_get_subject (mi));
+	}
+
+	if (e_ews_item_has_attachments (item, &bval) && bval &&
+	    e_ews_item_get_attachments_ids (item)) {
+		CamelMimePart *part;
+		CamelMultipart *m_mixed;
+		const gchar *body = e_ews_item_get_body (item);
+		GSList *attach_ids, *attachments = NULL, *link;
+
+		m_mixed = camel_multipart_new ();
+		camel_data_wrapper_set_mime_type (CAMEL_DATA_WRAPPER (m_mixed), "multipart/mixed");
+		camel_multipart_set_boundary (m_mixed, NULL);
+
+		if (!body || !*body)
+			body = " ";
+
+		part = camel_mime_part_new ();
+		camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_8BIT);
+		camel_mime_part_set_content (part, body, strlen (body), "text/plain");
+		camel_multipart_add_part (m_mixed, part);
+		g_object_unref (part);
+
+		attach_ids = e_ews_item_get_attachments_ids (item);
+		if (e_ews_connection_get_attachments_sync (cnc, EWS_PRIORITY_MEDIUM, NULL, attach_ids, NULL, FALSE, &attachments,
+		    NULL, NULL, cancellable, error)) {
+			for (link = attachments; link; link = g_slist_next (link)) {
+				EEwsAttachmentInfo *ainfo = link->data;
+
+				if (ainfo && e_ews_attachment_info_get_type (ainfo) == E_EWS_ATTACHMENT_INFO_TYPE_INLINED) {
+					const gchar *mime_type;
+					const gchar *filename;
+					const gchar *content;
+					gsize content_len = 0;
+
+					mime_type = e_ews_attachment_info_get_mime_type (ainfo);
+					if (!mime_type)
+						mime_type = "application/octet-stream";
+
+					filename = e_ews_attachment_info_get_prefer_filename (ainfo);
+					if (!filename)
+						filename = e_ews_attachment_info_get_filename (ainfo);
+
+					content = e_ews_attachment_info_get_inlined_data (ainfo, &content_len);
+					if (!content) {
+						content = " ";
+						content_len = 1;
+					}
+
+					part = camel_mime_part_new ();
+					camel_mime_part_set_disposition (part, "attachment");
+					camel_mime_part_set_encoding (part, CAMEL_TRANSFER_ENCODING_BASE64);
+					camel_mime_part_set_content (part, content, content_len, mime_type);
+
+					if (filename)
+						camel_mime_part_set_filename (part, filename);
+
+					camel_multipart_add_part (m_mixed, part);
+					g_object_unref (part);
+				}
+			}
+
+			g_slist_free_full (attachments, (GDestroyNotify) e_ews_attachment_info_free);
+		}
+
+		camel_medium_set_content (CAMEL_MEDIUM (msg), CAMEL_DATA_WRAPPER (m_mixed));
+
+		g_object_unref (m_mixed);
+	} else {
+		const gchar *body = e_ews_item_get_body (item);
+
+		if (!body || !*body)
+			body = " ";
+
+		camel_mime_part_set_encoding (CAMEL_MIME_PART (msg), CAMEL_TRANSFER_ENCODING_8BIT);
+		camel_mime_part_set_content (CAMEL_MIME_PART (msg), body, strlen (body), "text/plain");
+	}
+
+	mime_fname_new = g_build_filename (mime_dir, "XXXXXX", NULL);
+	fd = g_mkstemp (mime_fname_new);
+	if (fd != -1)
+		e_ews_item_set_mime_content (item, mime_fname_new);
+	g_free (mime_fname_new);
+
+	if (fd == -1) {
+		g_set_error (
+			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			_("Unable to create cache file"));
+
+		g_slist_free_full (items, g_object_unref);
+		g_clear_object (&msg);
+		g_clear_object (&mi);
+
+		return FALSE;
+	}
+
+	new_stream = camel_stream_fs_new_with_fd (fd);
+	if (camel_data_wrapper_write_to_stream_sync (CAMEL_DATA_WRAPPER (msg), new_stream, cancellable, error) == -1 ||
+	   camel_stream_flush (new_stream, cancellable, error) == -1 ||
+	   camel_stream_close (new_stream, cancellable, error) == -1) {
+		g_slist_free_full (items, g_object_unref);
+		g_clear_object (&new_stream);
+		g_clear_object (&msg);
+		g_clear_object (&mi);
+
+		return FALSE;
+	}
+
+	g_clear_object (&new_stream);
+	g_clear_object (&msg);
+	g_clear_object (&mi);
+
+	*out_items = items;
+
+	return TRUE;
+}
+
 static CamelMimeMessage *
 camel_ews_folder_get_message (CamelFolder *folder,
                               const gchar *uid,
@@ -608,18 +801,46 @@ camel_ews_folder_get_message (CamelFolder *folder,
 		(ESoapProgressFn) camel_operation_progress,
 		(gpointer) cancellable,
 		cancellable, &local_error);
-	g_free (mime_dir);
 	e_ews_additional_props_free (add_props);
 
 	if (!res || !items) {
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
 		g_propagate_error (error, local_error);
+		g_free (mime_dir);
 		goto exit;
 	}
+
+	if (e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_ERROR) {
+		if (g_error_matches (e_ews_item_get_error (items->data), EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_MIMECONTENTCONVERSIONFAILED)) {
+			g_slist_free_full (items, g_object_unref);
+			items = NULL;
+			/* The server failed to convert message into the MimeContent;
+			   construct it from the properties. */
+			if (!ews_message_from_properties_sync (ews_folder, cnc, pri, ids, mime_dir, &items, cancellable, &local_error) || !items) {
+				camel_ews_store_maybe_disconnect (ews_store, local_error);
+				g_propagate_error (error, local_error);
+				g_free (mime_dir);
+				goto exit;
+			}
+		}
+
+		if (e_ews_item_get_item_type (items->data) == E_EWS_ITEM_TYPE_ERROR) {
+			local_error = g_error_copy (e_ews_item_get_error (items->data));
+			camel_ews_store_maybe_disconnect (ews_store, local_error);
+			if (local_error)
+				g_propagate_error (error, local_error);
+			g_free (mime_dir);
+			goto exit;
+		}
+	}
+
+	g_free (mime_dir);
 
 	/* The mime_content actually contains the *filename*, due to the
 	 * streaming hack in ESoapMessage */
 	mime_content = e_ews_item_get_mime_content (items->data);
+	if (!mime_content)
+		goto exit;
 
 	/* Exchange returns random UID for associated calendar item, which has no way
 	 * to match with calendar components saved in calendar cache. So manually get

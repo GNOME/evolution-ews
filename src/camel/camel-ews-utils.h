@@ -88,6 +88,12 @@ gboolean	camel_ews_utils_delete_folders_from_summary_recursive
 ESource *	camel_ews_utils_ref_corresponding_source
 						(CamelService *service,
 						 GCancellable *cancellable);
+CamelMessageInfo * /* (transfer full) */
+		camel_ews_utils_item_to_message_info
+						(CamelEwsFolder *ews_folder,
+						 EEwsConnection *cnc,
+						 EEwsItem *item,
+						 GCancellable *cancellable);
 
 G_END_DECLS
 

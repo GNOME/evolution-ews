@@ -108,6 +108,7 @@ struct _EEwsItemPrivate {
 	EwsId *item_id;
 	gchar *subject;
 	gchar *mime_content;
+	gchar *body;
 
 	gchar *date_header;
 	time_t date_received;
@@ -201,43 +202,20 @@ e_ews_item_dispose (GObject *object)
 		priv->attachment_id = NULL;
 	}
 
-	g_free (priv->mime_content);
-
-	g_free (priv->subject);
-	priv->subject = NULL;
-
-	g_free (priv->msg_id);
-	priv->msg_id = NULL;
-
-	g_free (priv->uid);
-	priv->uid = NULL;
-
-	g_free (priv->in_replyto);
-	priv->in_replyto = NULL;
-
-	g_free (priv->references);
-	priv->references = NULL;
-
-	g_free (priv->date_header);
-	priv->date_header = NULL;
-
-	g_free (priv->timezone);
-	priv->timezone = NULL;
-
-	g_free (priv->start_timezone);
-	priv->start_timezone = NULL;
-
-	g_free (priv->end_timezone);
-	priv->end_timezone = NULL;
-
-	g_free (priv->contact_photo_id);
-	priv->contact_photo_id = NULL;
-
-	g_free (priv->iana_start_time_zone);
-	priv->iana_start_time_zone = NULL;
-
-	g_free (priv->iana_end_time_zone);
-	priv->iana_end_time_zone = NULL;
+	g_clear_pointer (&priv->mime_content, g_free);
+	g_clear_pointer (&priv->body, g_free);
+	g_clear_pointer (&priv->subject, g_free);
+	g_clear_pointer (&priv->msg_id, g_free);
+	g_clear_pointer (&priv->uid, g_free);
+	g_clear_pointer (&priv->in_replyto, g_free);
+	g_clear_pointer (&priv->references, g_free);
+	g_clear_pointer (&priv->date_header, g_free);
+	g_clear_pointer (&priv->timezone, g_free);
+	g_clear_pointer (&priv->start_timezone, g_free);
+	g_clear_pointer (&priv->end_timezone, g_free);
+	g_clear_pointer (&priv->contact_photo_id, g_free);
+	g_clear_pointer (&priv->iana_start_time_zone, g_free);
+	g_clear_pointer (&priv->iana_end_time_zone, g_free);
 
 	g_slist_free_full (priv->to_recipients, (GDestroyNotify) e_ews_mailbox_free);
 	priv->to_recipients = NULL;
@@ -254,8 +232,7 @@ e_ews_item_dispose (GObject *object)
 	g_slist_free_full (priv->attachments_ids, g_free);
 	priv->attachments_ids = NULL;
 
-	g_free (priv->my_response_type);
-	priv->my_response_type = NULL;
+	g_clear_pointer (&priv->my_response_type, g_free);
 
 	g_slist_free_full (priv->attendees, (GDestroyNotify) ews_item_free_attendee);
 	priv->attendees = NULL;
@@ -1666,8 +1643,9 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 			priv->start_timezone = e_soap_parameter_get_property (subparam, "Id");
 		} else if (!g_ascii_strcasecmp (name, "EndTimeZone")) {
 			priv->end_timezone = e_soap_parameter_get_property (subparam, "Id");
+		} else if (!g_ascii_strcasecmp (name, "Body")) {
+			priv->body = e_soap_parameter_get_string_value (subparam);
 		}
-
 	}
 
 	return TRUE;
@@ -2310,6 +2288,7 @@ e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param,
 	} else {
 		info = e_ews_attachment_info_new (E_EWS_ATTACHMENT_INFO_TYPE_INLINED);
 		e_ews_attachment_info_set_inlined_data (info, content, data_len);
+		e_ews_attachment_info_set_prefer_filename (info, name);
 	}
 	return info;
 }
@@ -2765,9 +2744,11 @@ const gchar *
 e_ews_item_get_body (EEwsItem *item)
 {
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), NULL);
-	g_return_val_if_fail (item->priv->task_fields != NULL, NULL);
 
-	return item->priv->task_fields->body;
+	if (item->priv->body)
+		return item->priv->body;
+
+	return item->priv->task_fields ? item->priv->task_fields->body : NULL;
 }
 
 const gchar *
