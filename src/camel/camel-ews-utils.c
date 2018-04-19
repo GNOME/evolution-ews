@@ -859,6 +859,116 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
 	g_slist_free (items_updated);
 }
 
+CamelMessageInfo * /* (transfer full) */
+camel_ews_utils_item_to_message_info (CamelEwsFolder *ews_folder,
+				      EEwsConnection *cnc,
+				      EEwsItem *item,
+				      GCancellable *cancellable)
+{
+	CamelFolderSummary *folder_summary;
+	CamelMessageInfo *mi = NULL;
+	const EwsId *id;
+	const EwsMailbox *from;
+	gchar *tmp;
+	EEwsItemType item_type;
+	const gchar *msg_headers;
+	gboolean has_attachments, found_property, message_requests_read_receipt = FALSE;
+	guint32 server_flags;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_FOLDER (ews_folder), NULL);
+
+	if (!item || e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR)
+		return NULL;
+
+	id = e_ews_item_get_id (item);
+	if (!id)
+		return NULL;
+
+	folder_summary = camel_folder_get_folder_summary (CAMEL_FOLDER (ews_folder));
+
+	/* PidTagTransportMessageHeaders */
+	found_property = FALSE;
+	msg_headers = e_ews_item_get_extended_property_as_string (item, NULL, 0x007D, &found_property);
+	if (!found_property)
+		msg_headers = NULL;
+
+	if (msg_headers && *msg_headers) {
+		CamelMimePart *part = camel_mime_part_new ();
+		CamelStream *stream;
+		CamelMimeParser *parser;
+
+		stream = camel_stream_mem_new_with_buffer (msg_headers, strlen (msg_headers));
+		parser = camel_mime_parser_new ();
+		camel_mime_parser_init_with_stream (parser, stream, NULL);
+		camel_mime_parser_scan_from (parser, FALSE);
+		g_object_unref (stream);
+
+		if (camel_mime_part_construct_from_parser_sync (part, parser, NULL, NULL)) {
+			mi = camel_folder_summary_info_new_from_headers (folder_summary, camel_medium_get_headers (CAMEL_MEDIUM (part)));
+			if (camel_medium_get_header (CAMEL_MEDIUM (part), "Disposition-Notification-To"))
+				message_requests_read_receipt = TRUE;
+		}
+
+		g_object_unref (parser);
+		g_object_unref (part);
+	}
+
+	if (!mi)
+		mi = camel_message_info_new (folder_summary);
+
+	camel_message_info_set_abort_notifications (mi, TRUE);
+
+	item_type = e_ews_item_get_item_type (item);
+	if (item_type == E_EWS_ITEM_TYPE_EVENT ||
+	    item_type == E_EWS_ITEM_TYPE_MEETING_MESSAGE ||
+	    item_type == E_EWS_ITEM_TYPE_MEETING_REQUEST ||
+	    item_type == E_EWS_ITEM_TYPE_MEETING_RESPONSE ||
+	    item_type == E_EWS_ITEM_TYPE_MEETING_RESPONSE)
+		camel_message_info_set_user_flag (mi, "$has_cal", TRUE);
+
+	camel_message_info_set_uid (mi, id->id);
+	camel_message_info_set_size (mi, e_ews_item_get_size (item));
+	camel_message_info_set_subject (mi, e_ews_item_get_subject (item));
+	camel_ews_message_info_set_item_type (CAMEL_EWS_MESSAGE_INFO (mi), item_type);
+	camel_ews_message_info_set_change_key (CAMEL_EWS_MESSAGE_INFO (mi), id->change_key);
+
+	camel_message_info_set_date_sent (mi, e_ews_item_get_date_sent (item));
+	camel_message_info_set_date_received (mi, e_ews_item_get_date_received (item));
+
+	from = e_ews_item_get_from (item);
+	if (!from)
+		from = e_ews_item_get_sender (item);
+	tmp = form_email_string_from_mb (cnc, from, cancellable);
+	camel_message_info_set_from (mi, tmp);
+	g_free (tmp);
+
+	tmp = form_recipient_list (cnc, e_ews_item_get_to_recipients (item), cancellable);
+	camel_message_info_set_to (mi, tmp);
+	g_free (tmp);
+
+	tmp = form_recipient_list (cnc, e_ews_item_get_cc_recipients (item), cancellable);
+	camel_message_info_set_cc (mi, tmp);
+	g_free (tmp);
+
+	e_ews_item_has_attachments (item, &has_attachments);
+	if (has_attachments)
+		camel_message_info_set_flags (mi, CAMEL_MESSAGE_ATTACHMENTS, CAMEL_MESSAGE_ATTACHMENTS);
+
+	ews_set_threading_data (mi, item);
+	server_flags = ews_utils_get_server_flags (item);
+	ews_utils_merge_server_user_flags (item, mi);
+
+	camel_message_info_set_flags (mi, server_flags, server_flags);
+	camel_ews_message_info_set_server_flags (CAMEL_EWS_MESSAGE_INFO (mi), server_flags);
+
+	camel_ews_utils_update_follow_up_flags (item, mi);
+	camel_ews_utils_update_read_receipt_flags (item, mi, server_flags, message_requests_read_receipt);
+
+	camel_message_info_set_abort_notifications (mi, FALSE);
+
+	return mi;
+}
+
 void
 camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
                                     EEwsConnection *cnc,
@@ -880,12 +990,6 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 		EEwsItem *item = (EEwsItem *) l->data;
 		CamelMessageInfo *mi;
 		const EwsId *id;
-		const EwsMailbox *from;
-		gchar *tmp;
-		EEwsItemType item_type;
-		const gchar *msg_headers;
-		gboolean has_attachments, found_property, message_requests_read_receipt = FALSE;
-		guint32 server_flags;
 
 		if (!item)
 			continue;
@@ -910,86 +1014,12 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 			continue;
 		}
 
-
-		/* PidTagTransportMessageHeaders */
-		found_property = FALSE;
-		msg_headers = e_ews_item_get_extended_property_as_string (item, NULL, 0x007D, &found_property);
-		if (!found_property)
-			msg_headers = NULL;
-
-		if (msg_headers && *msg_headers) {
-			CamelMimePart *part = camel_mime_part_new ();
-			CamelStream *stream;
-			CamelMimeParser *parser;
-
-			stream = camel_stream_mem_new_with_buffer (msg_headers, strlen (msg_headers));
-			parser = camel_mime_parser_new ();
-			camel_mime_parser_init_with_stream (parser, stream, NULL);
-			camel_mime_parser_scan_from (parser, FALSE);
-			g_object_unref (stream);
-
-			if (camel_mime_part_construct_from_parser_sync (part, parser, NULL, NULL)) {
-				mi = camel_folder_summary_info_new_from_headers (folder_summary, camel_medium_get_headers (CAMEL_MEDIUM (part)));
-				if (camel_medium_get_header (CAMEL_MEDIUM (part), "Disposition-Notification-To"))
-					message_requests_read_receipt = TRUE;
-			}
-
-			g_object_unref (parser);
-			g_object_unref (part);
+		mi = camel_ews_utils_item_to_message_info (ews_folder, cnc, item, cancellable);
+		if (!mi) {
+			g_warn_if_reached ();
+			g_object_unref (item);
+			continue;
 		}
-
-		if (!mi)
-			mi = camel_message_info_new (folder_summary);
-
-		camel_message_info_set_abort_notifications (mi, TRUE);
-
-		item_type = e_ews_item_get_item_type (item);
-		if (item_type == E_EWS_ITEM_TYPE_EVENT ||
-			 item_type == E_EWS_ITEM_TYPE_MEETING_MESSAGE ||
-			 item_type == E_EWS_ITEM_TYPE_MEETING_REQUEST ||
-			 item_type == E_EWS_ITEM_TYPE_MEETING_RESPONSE ||
-			 item_type == E_EWS_ITEM_TYPE_MEETING_RESPONSE)
-			camel_message_info_set_user_flag (mi, "$has_cal", TRUE);
-
-		camel_message_info_set_uid (mi, id->id);
-		camel_message_info_set_size (mi, e_ews_item_get_size (item));
-		camel_message_info_set_subject (mi, e_ews_item_get_subject (item));
-		camel_ews_message_info_set_item_type (CAMEL_EWS_MESSAGE_INFO (mi), item_type);
-		camel_ews_message_info_set_change_key (CAMEL_EWS_MESSAGE_INFO (mi), id->change_key);
-
-		camel_message_info_set_date_sent (mi, e_ews_item_get_date_sent (item));
-		camel_message_info_set_date_received (mi, e_ews_item_get_date_received (item));
-
-		from = e_ews_item_get_from (item);
-		if (!from)
-			from = e_ews_item_get_sender (item);
-		tmp = form_email_string_from_mb (cnc, from, cancellable);
-		camel_message_info_set_from (mi, tmp);
-		g_free (tmp);
-
-		tmp = form_recipient_list (cnc, e_ews_item_get_to_recipients (item), cancellable);
-		camel_message_info_set_to (mi, tmp);
-		g_free (tmp);
-
-		tmp = form_recipient_list (cnc, e_ews_item_get_cc_recipients (item), cancellable);
-		camel_message_info_set_cc (mi, tmp);
-		g_free (tmp);
-
-		e_ews_item_has_attachments (item, &has_attachments);
-		if (has_attachments)
-			camel_message_info_set_flags (mi, CAMEL_MESSAGE_ATTACHMENTS, CAMEL_MESSAGE_ATTACHMENTS);
-
-		ews_set_threading_data (mi, item);
-		server_flags = ews_utils_get_server_flags (item);
-		ews_utils_merge_server_user_flags (item, mi);
-
-		camel_message_info_set_flags (mi, server_flags, server_flags);
-		camel_ews_message_info_set_server_flags (CAMEL_EWS_MESSAGE_INFO (mi), server_flags);
-
-		camel_ews_utils_update_follow_up_flags (item, mi);
-		camel_ews_utils_update_read_receipt_flags (item, mi, server_flags, message_requests_read_receipt);
-
-		camel_message_info_set_abort_notifications (mi, FALSE);
 
 		camel_folder_summary_add (folder_summary, mi, FALSE);
 
