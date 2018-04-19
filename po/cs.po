@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=evolution-ews&keywords=I18N+L10N&component=Miscellaneous / EWS Core\n"
-"POT-Creation-Date: 2018-03-21 10:19+0000\n"
-"PO-Revision-Date: 2018-03-25 08:41+0200\n"
+"POT-Creation-Date: 2018-04-19 13:48+0000\n"
+"PO-Revision-Date: 2018-04-19 22:32+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -30,42 +30,42 @@ msgstr "Webové služby Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Pro přístup k serverům Exchange pomocí webových služeb"
 
-#: ../src/addressbook/e-book-backend-ews.c:2983
+#: ../src/addressbook/e-book-backend-ews.c:3059
 msgid "Failed to update GAL:"
 msgstr "Selhala aktualizace globálního seznamu adres:"
 
-#: ../src/addressbook/e-book-backend-ews.c:3144
+#: ../src/addressbook/e-book-backend-ews.c:3220
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Nelze uložit seznam kontaktů, je to podporováno jen na EWS Server 2010 nebo "
 "novějším"
 
-#: ../src/addressbook/e-book-backend-ews.c:3237
+#: ../src/addressbook/e-book-backend-ews.c:3313
 msgid "Failed to set contact photo:"
 msgstr "Selhalo nastavení fotografie kontaktu:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1650
+#: ../src/calendar/e-cal-backend-ews.c:1657
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Volný"
 
-#: ../src/calendar/e-cal-backend-ews.c:1653
+#: ../src/calendar/e-cal-backend-ews.c:1660
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Obsazený"
 
-#: ../src/calendar/e-cal-backend-ews.c:1655
+#: ../src/calendar/e-cal-backend-ews.c:1662
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Mimo kancelář"
 
-#: ../src/calendar/e-cal-backend-ews.c:1657
+#: ../src/calendar/e-cal-backend-ews.c:1664
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Předběžné"
 
-#: ../src/calendar/e-cal-backend-ews.c:3270
+#: ../src/calendar/e-cal-backend-ews.c:3277
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Uživatele „%s“ nelze nalézt mezi účastníky"
@@ -85,12 +85,12 @@ msgstr "Nelze vygenerovat analyzátor z obsahu MIME!"
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Nelze analyzovat uvítací požadavek z obsahu MIME!"
 
-#: ../src/camel/camel-ews-folder.c:451
+#: ../src/camel/camel-ews-folder.c:460 ../src/camel/camel-ews-folder.c:670
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Nelze vytvořit soubor pro mezipaměť"
 
-#: ../src/camel/camel-ews-folder.c:585 ../src/camel/camel-ews-folder.c:678
+#: ../src/camel/camel-ews-folder.c:787 ../src/camel/camel-ews-folder.c:908
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Nelze vytvořit cestu „%s“ pro mezipaměť: %s"
@@ -98,22 +98,22 @@ msgstr "Nelze vytvořit cestu „%s“ pro mezipaměť: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/camel/camel-ews-folder.c:692
+#: ../src/camel/camel-ews-folder.c:922
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Selhal přesun souboru s mezipamětí zpráv z „%s“ do „%s“: %s"
 
-#: ../src/camel/camel-ews-folder.c:1576
+#: ../src/camel/camel-ews-folder.c:1806
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Nelze získat přehled pro složku %s"
 
-#: ../src/camel/camel-ews-folder.c:2036
+#: ../src/camel/camel-ews-folder.c:2266
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Aktualizuje se složka „%s“"
 
-#: ../src/camel/camel-ews-folder.c:2216
+#: ../src/camel/camel-ews-folder.c:2446
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Akci na složce nelze provádět v režimu odpojení"
@@ -422,6 +422,18 @@ msgstr "Nelze určit vhodnou třídu složky pro novou složku s názvem „%s�
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Zdroj dat „%s“ se nenachází ve složce Exchange Web Services"
+
+#: ../src/configuration/e-book-config-ews.c:98
+msgid "Use only _primary contact email address"
+msgstr "Používat jen hlavní e-mailovou adresu kontaktu"
+
+#: ../src/configuration/e-book-config-ews.c:99
+msgid ""
+"When checked, the contacts looked up in the online Global Address List will "
+"contain only the primary email address"
+msgstr ""
+"Když je zaškrtnuto, budou kontakty vyhledané v globálním seznamu adres on-"
+"line obsahovat jen hlavní e-mailovou adresu"
 
 #: ../src/configuration/e-ews-config-lookup.c:192
 msgid "Exchange Web Services autodiscovery"
@@ -1234,7 +1246,7 @@ msgstr ""
 "Tato volba bude používat přístupový tiket OAuth 2.0 pro připojení k serveru "
 "Office365.com"
 
-#: ../src/server/e-ews-calendar-utils.c:1151
+#: ../src/server/e-ews-calendar-utils.c:1160
 #, c-format
 msgid ""
 "Cannot store this recurrence. Change it to simple single daily, weekly, "
