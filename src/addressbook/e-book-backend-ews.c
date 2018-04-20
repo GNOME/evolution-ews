@@ -57,6 +57,7 @@
 #define EDB_ERROR_EX(_code,_msg) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, _msg)
 
 #define X_EWS_ORIGINAL_VCARD "X-EWS-ORIGINAL-VCARD"
+#define X_EWS_PHOTO_CHECK_DATE "X-EWS-PHOTO-CHECK-DATE" /* YYYYMMDD of the last check for photo */
 
 #define EWS_MAX_FETCH_COUNT 500
 
@@ -82,6 +83,144 @@ struct _EBookBackendEwsPrivate {
 };
 
 G_DEFINE_TYPE (EBookBackendEws, e_book_backend_ews, E_TYPE_BOOK_META_BACKEND)
+
+static void
+ebb_ews_remove_x_attribute (EContact *contact,
+			    const gchar *xname)
+{
+	g_return_if_fail (E_IS_CONTACT (contact));
+	g_return_if_fail (xname != NULL);
+
+	e_vcard_remove_attributes (E_VCARD (contact), NULL, xname);
+}
+
+static void
+ebb_ews_store_x_attribute (EContact *contact,
+			   const gchar *xname,
+			   const gchar *value)
+{
+	EVCardAttribute *attr;
+
+	g_return_if_fail (E_IS_CONTACT (contact));
+	g_return_if_fail (xname != NULL);
+
+	ebb_ews_remove_x_attribute (contact, xname);
+
+	if (!value)
+		return;
+
+	attr = e_vcard_attribute_new ("", xname);
+	e_vcard_attribute_add_value (attr, value);
+	e_vcard_add_attribute (E_VCARD (contact), attr);
+}
+
+static const gchar *
+ebb_ews_get_x_attribute (EContact *contact,
+			 const gchar *xname)
+{
+	EVCardAttribute *attr;
+	GList *values = NULL;
+	const gchar *value;
+
+	g_return_val_if_fail (E_IS_CONTACT (contact), NULL);
+	g_return_val_if_fail (xname != NULL, NULL);
+
+	attr = e_vcard_get_attribute (E_VCARD (contact), xname);
+	if (!attr)
+		return NULL;
+
+	values = e_vcard_attribute_get_values (attr);
+	if (!values)
+		return NULL;
+
+	value = values->data;
+
+	if (value && *value)
+		return value;
+
+	return NULL;
+}
+
+static const gchar *
+ebb_ews_get_original_vcard (EContact *contact)
+{
+	g_return_val_if_fail (E_IS_CONTACT (contact), NULL);
+
+	return ebb_ews_get_x_attribute (contact, X_EWS_ORIGINAL_VCARD);
+}
+
+static void
+ebb_ews_store_original_vcard (EContact *contact)
+{
+	gchar *vcard_str;
+
+	g_return_if_fail (E_IS_CONTACT (contact));
+
+	vcard_str = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
+
+	ebb_ews_store_x_attribute (contact, X_EWS_ORIGINAL_VCARD, vcard_str);
+
+	g_free (vcard_str);
+}
+
+static gchar *
+ebb_ews_get_today_as_string (void)
+{
+	GDate date;
+
+	g_date_clear (&date, 1);
+	g_date_set_time_t (&date, time (NULL));
+
+	return g_strdup_printf ("%04d%02d%02d", g_date_get_year (&date), g_date_get_month (&date), g_date_get_day (&date));
+}
+
+static const gchar *
+ebb_ews_get_photo_check_date (EContact *contact)
+{
+	g_return_val_if_fail (E_IS_CONTACT (contact), NULL);
+
+	return ebb_ews_get_x_attribute (contact, X_EWS_PHOTO_CHECK_DATE);
+}
+
+static void
+ebb_ews_store_photo_check_date (EContact *contact,
+				const gchar *value)
+{
+	gchar *today_str = NULL;
+
+	g_return_if_fail (E_IS_CONTACT (contact));
+
+	if (!value) {
+		today_str = ebb_ews_get_today_as_string ();
+		value = today_str;
+	}
+
+	ebb_ews_store_x_attribute (contact, X_EWS_PHOTO_CHECK_DATE, value);
+
+	g_free (today_str);
+}
+
+static gboolean
+ebb_ews_can_check_user_photo (EContact *contact)
+{
+	const gchar *last_check;
+	gboolean can;
+
+	g_return_val_if_fail (E_IS_CONTACT (contact), FALSE);
+
+	last_check = ebb_ews_get_photo_check_date (contact);
+	if (last_check && *last_check) {
+		gchar *today_str;
+
+		today_str = ebb_ews_get_today_as_string ();
+		can = g_strcmp0 (last_check, today_str) != 0;
+		g_free (today_str);
+	} else {
+		can = TRUE;
+	}
+
+	return can;
+}
 
 static CamelEwsSettings *
 ebb_ews_get_collection_settings (EBookBackendEws *bbews)
@@ -2124,7 +2263,64 @@ ebb_ews_remove_old_gal_file (EBookCache *book_cache)
 	g_free (filename);
 }
 
+static gboolean
+ebb_ews_fetch_gal_photo_sync (EBookBackendEws *bbews,
+			      EContact *contact,
+			      GCancellable *cancellable,
+			      GError **error)
+{
+	const gchar *email;
+	gboolean success = FALSE;
+
+	g_return_val_if_fail (E_IS_BOOK_BACKEND_EWS (bbews), FALSE);
+	g_return_val_if_fail (E_IS_CONTACT (contact), FALSE);
+
+	email = e_contact_get_const (contact, E_CONTACT_EMAIL_1);
+	if (!email || !*email)
+		return FALSE;
+
+	g_rec_mutex_lock (&bbews->priv->cnc_lock);
+
+	if (bbews->priv->cnc) {
+		gchar *photo_base64 = NULL;
+		gboolean backoff_enabled;
+
+		backoff_enabled = e_ews_connection_get_backoff_enabled (bbews->priv->cnc);
+		e_ews_connection_set_backoff_enabled (bbews->priv->cnc, FALSE);
+
+		if (e_ews_connection_get_user_photo_sync (bbews->priv->cnc, EWS_PRIORITY_MEDIUM, email,
+		    E_EWS_SIZE_REQUESTED_96X96, &photo_base64, cancellable, error) && photo_base64) {
+			guchar *bytes;
+			gsize nbytes;
+
+			bytes = g_base64_decode (photo_base64, &nbytes);
+			if (bytes && nbytes > 0) {
+				EContactPhoto *photo;
+
+				photo = e_contact_photo_new ();
+				photo->type = E_CONTACT_PHOTO_TYPE_INLINED;
+				e_contact_photo_set_inlined (photo, bytes, nbytes);
+				e_contact_set (contact, E_CONTACT_PHOTO, photo);
+				e_contact_photo_free (photo);
+
+				success = TRUE;
+			}
+
+			g_free (photo_base64);
+			g_free (bytes);
+		}
+
+		e_ews_connection_set_backoff_enabled (bbews->priv->cnc, backoff_enabled);
+	}
+
+	g_rec_mutex_unlock (&bbews->priv->cnc_lock);
+
+	return success;
+}
+
 struct _db_data {
+	EBookBackendEws *bbews;
+	gboolean fetch_gal_photos;
 	GHashTable *uids;
 	GHashTable *sha1s;
 	gint unchanged;
@@ -2164,6 +2360,7 @@ ebb_ews_gal_store_contact (EContact *contact,
 			   const gchar *sha1,
 			   guint percent,
 			   gpointer user_data,
+			   GCancellable *cancellable,
 			   GError **error)
 {
 	struct _db_data *data = (struct _db_data *) user_data;
@@ -2173,6 +2370,19 @@ ebb_ews_gal_store_contact (EContact *contact,
 		EBookMetaBackendInfo *nfo;
 
 		e_contact_set (contact, E_CONTACT_REV, sha1);
+
+		if (data->fetch_gal_photos && !g_cancellable_is_cancelled (cancellable)) {
+			GError *local_error = NULL;
+
+			if (!ebb_ews_fetch_gal_photo_sync (data->bbews, contact, cancellable, &local_error))
+				ebb_ews_store_photo_check_date (contact, NULL);
+
+			/* The server can kick-off the flood of photo requests, then better stop it */
+			if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_SERVERBUSY))
+				data->fetch_gal_photos = FALSE;
+
+			g_clear_error (&local_error);
+		}
 
 		nfo = e_book_meta_backend_info_new (uid, sha1, NULL, NULL);
 		nfo->object = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
@@ -2230,6 +2440,7 @@ ebb_ews_check_gal_changes (EBookBackendEws *bbews,
 			   GCancellable *cancellable,
 			   GError **error)
 {
+	ESourceEwsFolder *ews_folder;
 	EwsOabDecoder *eod;
 	gboolean success = TRUE;
 	struct _db_data data;
@@ -2245,6 +2456,10 @@ ebb_ews_check_gal_changes (EBookBackendEws *bbews,
 	g_return_val_if_fail (out_modified_objects != NULL, FALSE);
 	g_return_val_if_fail (out_removed_objects != NULL, FALSE);
 
+	ews_folder = e_source_get_extension (e_backend_get_source (E_BACKEND (bbews)), E_SOURCE_EXTENSION_EWS_FOLDER);
+
+	data.bbews = bbews;
+	data.fetch_gal_photos = e_source_ews_folder_get_fetch_gal_photos (ews_folder);
 	data.created_objects = NULL;
 	data.modified_objects = NULL;
 	data.unchanged = data.changed = data.added = 0;
@@ -2295,61 +2510,6 @@ ebb_ews_check_gal_changes (EBookBackendEws *bbews,
 		g_propagate_error (error, local_error);
 
 	return success;
-}
-
-static void
-ebb_ews_remove_original_vcard (EContact *contact)
-{
-	g_return_if_fail (E_IS_CONTACT (contact));
-
-	e_vcard_remove_attributes (E_VCARD (contact), NULL, X_EWS_ORIGINAL_VCARD);
-}
-
-static void
-ebb_ews_store_original_vcard (EContact *contact)
-{
-	EVCard *vcard;
-	EVCardAttribute *attr;
-	gchar *vcard_str;
-
-	g_return_if_fail (E_IS_CONTACT (contact));
-
-	ebb_ews_remove_original_vcard (contact);
-
-	vcard = E_VCARD (contact);
-
-	vcard_str = e_vcard_to_string (vcard, EVC_FORMAT_VCARD_30);
-
-	attr = e_vcard_attribute_new ("", X_EWS_ORIGINAL_VCARD);
-	e_vcard_attribute_add_value (attr, vcard_str);
-	e_vcard_add_attribute (vcard, attr);
-
-	g_free (vcard_str);
-}
-
-static const gchar *
-ebb_ews_get_original_vcard (EContact *contact)
-{
-	EVCardAttribute *attr;
-	GList *values = NULL;
-	const gchar *vcard;
-
-	g_return_val_if_fail (E_IS_CONTACT (contact), NULL);
-
-	attr = e_vcard_get_attribute (E_VCARD (contact), X_EWS_ORIGINAL_VCARD);
-	if (!attr)
-		return NULL;
-
-	values = e_vcard_attribute_get_values (attr);
-	if (!values)
-		return NULL;
-
-	vcard = values->data;
-
-	if (vcard && *vcard)
-		return vcard;
-
-	return NULL;
 }
 
 typedef struct {
@@ -2601,18 +2761,20 @@ ebb_ews_update_cache_for_expression (EBookBackendEws *bbews,
 				EWS_SEARCH_AD, NULL, TRUE, &mailboxes, &contacts, &includes_last_item, cancellable, error);
 
 		if (success) {
+			EBookCache *book_cache;
 			ESourceEwsFolder *ews_folder;
 			gboolean use_primary_address;
 			GSList *mlink, *clink;
 
 			ews_folder = e_source_get_extension (e_backend_get_source (E_BACKEND (bbews)), E_SOURCE_EXTENSION_EWS_FOLDER);
 			use_primary_address = e_source_ews_folder_get_use_primary_address (ews_folder);
+			book_cache = e_book_meta_backend_ref_cache (meta_backend);
 
 			for (mlink = mailboxes, clink = contacts; mlink; mlink = g_slist_next (mlink), clink = g_slist_next (clink)) {
 				EwsMailbox *mb = mlink->data;
 				EEwsItem *contact_item = clink ? clink->data : NULL;
 				EBookMetaBackendInfo *nfo;
-				EContact *contact = NULL;
+				EContact *contact = NULL, *old_contact = NULL;
 				gboolean is_public_dl = FALSE, mailbox_address_set = FALSE;
 				const gchar *str;
 				gchar *fake_rev;
@@ -2699,6 +2861,25 @@ ebb_ews_update_cache_for_expression (EBookBackendEws *bbews,
 					}
 				}
 
+				/* Copy photo information, if any there */
+				if (e_book_cache_get_contact (book_cache, mb->email, FALSE, &old_contact, cancellable, NULL) && old_contact) {
+					EContactPhoto *photo;
+
+					photo = e_contact_get (old_contact, E_CONTACT_PHOTO);
+					if (photo) {
+						e_contact_set (contact, E_CONTACT_PHOTO, photo);
+						e_contact_photo_free (photo);
+					} else {
+						const gchar *photo_check_date;
+
+						photo_check_date = ebb_ews_get_photo_check_date (old_contact);
+						if (photo_check_date)
+							ebb_ews_store_photo_check_date (contact, photo_check_date);
+					}
+
+					g_clear_object (&old_contact);
+				}
+
 				ebb_ews_store_original_vcard (contact);
 
 				nfo = e_book_meta_backend_info_new (e_contact_get_const (contact, E_CONTACT_UID),
@@ -2709,6 +2890,8 @@ ebb_ews_update_cache_for_expression (EBookBackendEws *bbews,
 
 				g_object_unref (contact);
 			}
+
+			g_clear_object (&book_cache);
 		}
 
 		g_slist_free_full (mailboxes, (GDestroyNotify) e_ews_mailbox_free);
@@ -2776,6 +2959,25 @@ ebb_ews_verify_changes (EBookCache *book_cache,
 	return items;
 }
 
+static EBookMetaBackendInfo *
+ebb_ews_contact_to_info (EContact *contact)
+{
+	EBookMetaBackendInfo *nfo;
+
+	if (!E_IS_CONTACT (contact))
+		return NULL;
+
+	ebb_ews_store_original_vcard (contact);
+
+	nfo = e_book_meta_backend_info_new (
+		e_contact_get_const (contact, E_CONTACT_UID),
+		e_contact_get_const (contact, E_CONTACT_REV),
+		NULL, NULL);
+	nfo->object = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
+
+	return nfo;
+}
+
 static GSList * /* EBookMetaBackendInfo */
 ebb_ews_contacts_to_infos (const GSList *contacts) /* EContact * */
 {
@@ -2785,18 +2987,9 @@ ebb_ews_contacts_to_infos (const GSList *contacts) /* EContact * */
 		EContact *contact = link->data;
 		EBookMetaBackendInfo *nfo;
 
-		if (!E_IS_CONTACT (contact))
-			continue;
-
-		ebb_ews_store_original_vcard (contact);
-
-		nfo = e_book_meta_backend_info_new (
-			e_contact_get_const (contact, E_CONTACT_UID),
-			e_contact_get_const (contact, E_CONTACT_REV),
-			NULL, NULL);
-		nfo->object = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
-
-		nfos = g_slist_prepend (nfos, nfo);
+		nfo = ebb_ews_contact_to_info (contact);
+		if (nfo)
+			nfos = g_slist_prepend (nfos, nfo);
 	}
 
 	return nfos;
@@ -3369,14 +3562,71 @@ ebb_ews_search_sync (EBookMetaBackend *meta_backend,
 		     GCancellable *cancellable,
 		     GError **error)
 {
+	EBookBackendEws *bbews;
+
 	g_return_val_if_fail (E_IS_BOOK_BACKEND_EWS (meta_backend), FALSE);
 
+	bbews = E_BOOK_BACKEND_EWS (meta_backend);
+
 	/* Ignore errors, just try its best */
-	ebb_ews_update_cache_for_expression (E_BOOK_BACKEND_EWS (meta_backend), expr, cancellable, NULL);
+	ebb_ews_update_cache_for_expression (bbews, expr, cancellable, NULL);
 
 	/* Chain up to parent's method */
-	return E_BOOK_META_BACKEND_CLASS (e_book_backend_ews_parent_class)->search_sync (meta_backend, expr, meta_contact,
-		out_contacts, cancellable, error);
+	if (!E_BOOK_META_BACKEND_CLASS (e_book_backend_ews_parent_class)->search_sync (meta_backend, expr, meta_contact,
+		out_contacts, cancellable, error))
+		return FALSE;
+
+	if (bbews->priv->is_gal && !meta_contact && out_contacts && *out_contacts) {
+		ESourceEwsFolder *ews_folder;
+
+		ews_folder = e_source_get_extension (e_backend_get_source (E_BACKEND (bbews)), E_SOURCE_EXTENSION_EWS_FOLDER);
+		if (e_source_ews_folder_get_fetch_gal_photos (ews_folder)) {
+			g_rec_mutex_lock (&bbews->priv->cnc_lock);
+
+			if (bbews->priv->cnc && e_ews_connection_satisfies_server_version (bbews->priv->cnc, E_EWS_EXCHANGE_2013)) {
+				GSList *link, *modified = NULL;
+				gint count = 10;
+
+				/* Limit to first 10 without photo, no need to flood the server
+				   and slow the response too much */
+				for (link = *out_contacts; link && count > 0 && !g_cancellable_is_cancelled (cancellable); link = g_slist_next (link)) {
+					EContact *contact = link->data;
+					EBookMetaBackendInfo *nfo;
+					GError *local_error = NULL;
+
+					if (!contact || e_vcard_get_attribute (E_VCARD (contact), EVC_PHOTO) ||
+					    !ebb_ews_can_check_user_photo (contact))
+						continue;
+
+					count--;
+
+					if (!ebb_ews_fetch_gal_photo_sync (bbews, contact, cancellable, &local_error))
+						ebb_ews_store_photo_check_date (contact, NULL);
+
+					nfo = ebb_ews_contact_to_info (contact);
+					if (nfo)
+						modified = g_slist_prepend (modified, nfo);
+
+					/* Stop immediately when the server is busy */
+					if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_SERVERBUSY)) {
+						g_clear_error (&local_error);
+						break;
+					}
+
+					g_clear_error (&local_error);
+				}
+
+				if (modified) {
+					e_book_meta_backend_process_changes_sync (meta_backend, NULL, modified, NULL, cancellable, NULL);
+					g_slist_free_full (modified, e_book_meta_backend_info_free);
+				}
+			}
+
+			g_rec_mutex_unlock (&bbews->priv->cnc_lock);
+		}
+	}
+
+	return TRUE;
 }
 
 static gboolean

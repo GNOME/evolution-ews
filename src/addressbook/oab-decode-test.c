@@ -25,6 +25,7 @@ ews_test_store_contact (EContact *contact,
 			const gchar *sha1,
                         guint percent,
                         gpointer user_data,
+			GCancellable *cancellable,
                         GError **error)
 {
 	struct _db_data *data = (struct _db_data *) user_data;

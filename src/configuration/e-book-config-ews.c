@@ -95,16 +95,30 @@ book_config_ews_insert_widgets (ESourceConfigBackend *backend,
 		ESourceEwsFolder *ews_folder;
 		GtkWidget *checkbox;
 
+		ews_folder = e_source_get_extension (scratch_source, E_SOURCE_EXTENSION_EWS_FOLDER);
+
 		checkbox = gtk_check_button_new_with_mnemonic (_("Use only _primary contact email address"));
 		gtk_widget_set_tooltip_text (checkbox, _("When checked, the contacts looked up in the online Global Address List will contain only the primary email address"));
 		gtk_widget_show (checkbox);
 
-		ews_folder = e_source_get_extension (scratch_source, E_SOURCE_EXTENSION_EWS_FOLDER);
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbox), e_source_ews_folder_get_use_primary_address (ews_folder));
 
 		e_binding_bind_property (
 			checkbox, "active",
 			ews_folder, "use-primary-address",
+			G_BINDING_DEFAULT);
+
+		e_source_config_insert_widget (e_source_config_backend_get_config (backend), scratch_source, NULL, checkbox);
+
+		checkbox = gtk_check_button_new_with_mnemonic (_("_Fetch contact photos"));
+		gtk_widget_set_tooltip_text (checkbox, _("Tries to look up for user photo"));
+		gtk_widget_show (checkbox);
+
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbox), e_source_ews_folder_get_fetch_gal_photos (ews_folder));
+
+		e_binding_bind_property (
+			checkbox, "active",
+			ews_folder, "fetch-gal-photos",
 			G_BINDING_DEFAULT);
 
 		e_source_config_insert_widget (e_source_config_backend_get_config (backend), scratch_source, NULL, checkbox);

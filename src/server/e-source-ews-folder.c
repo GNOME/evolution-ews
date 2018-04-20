@@ -34,6 +34,7 @@ struct _ESourceEwsFolderPrivate {
 	guint freebusy_weeks_before;
 	guint freebusy_weeks_after;
 	gboolean use_primary_address;
+	gboolean fetch_gal_photos;
 };
 
 enum {
@@ -46,7 +47,8 @@ enum {
 	PROP_FREEBUSY_WEEKS_BEFORE,
 	PROP_FREEBUSY_WEEKS_AFTER,
 	PROP_PUBLIC,
-	PROP_USE_PRIMARY_ADDRESS
+	PROP_USE_PRIMARY_ADDRESS,
+	PROP_FETCH_GAL_PHOTOS
 };
 
 G_DEFINE_TYPE (
@@ -111,6 +113,12 @@ source_ews_folder_set_property (GObject *object,
 
 		case PROP_USE_PRIMARY_ADDRESS:
 			e_source_ews_folder_set_use_primary_address (
+				E_SOURCE_EWS_FOLDER (object),
+				g_value_get_boolean (value));
+			return;
+
+		case PROP_FETCH_GAL_PHOTOS:
+			e_source_ews_folder_set_fetch_gal_photos (
 				E_SOURCE_EWS_FOLDER (object),
 				g_value_get_boolean (value));
 			return;
@@ -186,6 +194,13 @@ source_ews_folder_get_property (GObject *object,
 			g_value_set_boolean (
 				value,
 				e_source_ews_folder_get_use_primary_address (
+				E_SOURCE_EWS_FOLDER (object)));
+			return;
+
+		case PROP_FETCH_GAL_PHOTOS:
+			g_value_set_boolean (
+				value,
+				e_source_ews_folder_get_fetch_gal_photos (
 				E_SOURCE_EWS_FOLDER (object)));
 			return;
 	}
@@ -337,6 +352,19 @@ e_source_ews_folder_class_init (ESourceEwsFolderClass *class)
 			"Use Primary Address",
 			"Whether online GAL should use only the primary contact address",
 			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS |
+			E_SOURCE_PARAM_SETTING));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_FETCH_GAL_PHOTOS,
+		g_param_spec_boolean (
+			"fetch-gal-photos",
+			"Fetch GAL Photos",
+			"Whether fetch photos for GAL contacts",
+			TRUE,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS |
@@ -646,4 +674,26 @@ e_source_ews_folder_set_use_primary_address (ESourceEwsFolder *extension,
 	extension->priv->use_primary_address = use_primary_address;
 
 	g_object_notify (G_OBJECT (extension), "use-primary-address");
+}
+
+gboolean
+e_source_ews_folder_get_fetch_gal_photos (ESourceEwsFolder *extension)
+{
+	g_return_val_if_fail (E_IS_SOURCE_EWS_FOLDER (extension), FALSE);
+
+	return extension->priv->fetch_gal_photos;
+}
+
+void
+e_source_ews_folder_set_fetch_gal_photos (ESourceEwsFolder *extension,
+					  gboolean fetch_gal_photos)
+{
+	g_return_if_fail (E_IS_SOURCE_EWS_FOLDER (extension));
+
+	if ((extension->priv->fetch_gal_photos ? 1 : 0) == (fetch_gal_photos ? 1 : 0))
+		return;
+
+	extension->priv->fetch_gal_photos = fetch_gal_photos;
+
+	g_object_notify (G_OBJECT (extension), "fetch-gal-photos");
 }

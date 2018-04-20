@@ -109,6 +109,11 @@ gboolean	e_source_ews_folder_get_use_primary_address
 void		e_source_ews_folder_set_use_primary_address
 						(ESourceEwsFolder *extension,
 						 gboolean use_primary_address);
+gboolean	e_source_ews_folder_get_fetch_gal_photos
+						(ESourceEwsFolder *extension);
+void		e_source_ews_folder_set_fetch_gal_photos
+						(ESourceEwsFolder *extension,
+						 gboolean fetch_gal_photos);
 
 G_END_DECLS
 

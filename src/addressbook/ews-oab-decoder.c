@@ -1047,7 +1047,7 @@ ews_decode_and_store_oab_records (EwsOabDecoder *eod,
 						   cancellable, error))
 			cb (contact, offset, sum_str,
 			    ((gfloat) (i + 1) / priv->total_records) * 100,
-			    user_data, error);
+			    user_data, cancellable, error);
 
 		g_object_unref (memstream);
 		g_object_unref (contact);

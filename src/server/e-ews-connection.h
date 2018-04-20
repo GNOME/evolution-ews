@@ -451,6 +451,11 @@ CamelEwsSettings *
 		e_ews_connection_ref_settings	(EEwsConnection *cnc);
 SoupSession *	e_ews_connection_ref_soup_session
 						(EEwsConnection *cnc);
+gboolean	e_ews_connection_get_backoff_enabled
+						(EEwsConnection *cnc);
+void		e_ews_connection_set_backoff_enabled
+						(EEwsConnection *cnc,
+						 gboolean enabled);
 EEwsConnection *e_ews_connection_find		(const gchar *uri,
 						 const gchar *username);
 GSList *	e_ews_connection_list_existing	(void); /* EEwsConnection * */

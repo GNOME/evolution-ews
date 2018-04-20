@@ -61,6 +61,7 @@ typedef void	(*EwsOabContactAddedCb)		(EContact *contact,
 						 const gchar *sha1,
 						 guint percent_complete,
 						 gpointer user_data,
+						 GCancellable *cancellable,
 						 GError **error);
 typedef gboolean (*EwsOabContactFilterCb)	(goffset offset,
 						 const gchar *sha1,

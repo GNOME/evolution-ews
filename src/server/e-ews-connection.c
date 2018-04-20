@@ -108,6 +108,7 @@ struct _EEwsConnectionPrivate {
 	GSList *subscribed_folders;
 
 	EEwsServerVersion version;
+	gboolean backoff_enabled;
 };
 
 enum {
@@ -943,7 +944,7 @@ ews_response_cb (SoupSession *session,
 		g_free (value);
 	}
 
-	if (wait_ms > 0) {
+	if (wait_ms > 0 && e_ews_connection_get_backoff_enabled (enode->cnc)) {
 		GCancellable *cancellable = enode->cancellable;
 		EFlag *flag;
 
@@ -2071,6 +2072,7 @@ e_ews_connection_init (EEwsConnection *cnc)
 
 	cnc->priv->soup_context = g_main_context_new ();
 	cnc->priv->soup_loop = g_main_loop_new (cnc->priv->soup_context, FALSE);
+	cnc->priv->backoff_enabled = TRUE;
 
 	cnc->priv->subscriptions = g_hash_table_new_full (
 			g_direct_hash, g_direct_equal,
@@ -2771,6 +2773,23 @@ e_ews_connection_ref_soup_session (EEwsConnection *cnc)
 	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
 
 	return g_object_ref (cnc->priv->soup_session);
+}
+
+gboolean
+e_ews_connection_get_backoff_enabled (EEwsConnection *cnc)
+{
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
+
+	return cnc->priv->backoff_enabled;
+}
+
+void
+e_ews_connection_set_backoff_enabled (EEwsConnection *cnc,
+				      gboolean enabled)
+{
+	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
+
+	cnc->priv->backoff_enabled = enabled;
 }
 
 static xmlDoc *
