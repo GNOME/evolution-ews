@@ -422,6 +422,24 @@ copy_ews_address_to_contact_address (EContactAddress *contact_addr,
 	contact_addr->code = g_strdup (address->postal_code);
 	contact_addr->country = g_strdup (address->country);
 }
+
+static gboolean
+ews_address_is_empty (const EwsAddress *address)
+{
+	if (!address)
+		return TRUE;
+
+#define is_empty_str(x) (!(x) || (!*(x)))
+
+	return is_empty_str (address->street) &&
+		is_empty_str (address->city) &&
+		is_empty_str (address->state) &&
+		is_empty_str (address->postal_code) &&
+		is_empty_str (address->country);
+
+#undef is_empty_str
+}
+
 static void
 set_address (EContact *contact,
              EContactField field,
@@ -431,7 +449,7 @@ set_address (EContact *contact,
 	const EwsAddress *address;
 
 	address = e_ews_item_get_physical_address (item, item_field);
-	if (address) {
+	if (address && !ews_address_is_empty (address)) {
 		EContactAddress *addr;
 
 		addr = g_new0 (EContactAddress, 1);
