@@ -2188,6 +2188,7 @@ ecb_ews_get_timezone_from_ical_component (ECalBackendEws *cbews,
 static gboolean
 ecb_ews_remove_item_sync (ECalBackendEws *cbews,
 			  ECalCache *cal_cache,
+			  GHashTable *removed_indexes,
 			  const gchar *uid,
 			  const gchar *rid,
 			  GCancellable *cancellable,
@@ -2196,7 +2197,7 @@ ecb_ews_remove_item_sync (ECalBackendEws *cbews,
 	ECalComponent *comp = NULL, *parent = NULL;
 	EwsId item_id = { 0 };
 	gint index = 0;
-	gboolean success;
+	gboolean success = TRUE;
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (cbews), FALSE);
 	g_return_val_if_fail (E_IS_CAL_CACHE (cal_cache), FALSE);
@@ -2219,7 +2220,7 @@ ecb_ews_remove_item_sync (ECalBackendEws *cbews,
 		g_propagate_error (error, EDC_ERROR_EX (OtherError, "Cannot determine EWS ItemId"));
 		success = FALSE;
 	} else {
-		if (parent && !comp) {
+		if (parent) {
 			index = e_cal_backend_ews_rid_to_index (
 				ecb_ews_get_timezone_from_ical_component (cbews,
 					e_cal_component_get_icalcomponent (parent)),
@@ -2227,12 +2228,19 @@ ecb_ews_remove_item_sync (ECalBackendEws *cbews,
 				e_cal_component_get_icalcomponent (parent),
 				error);
 			if (index == 0)
-				success = FALSE;
+				success = comp != NULL;
 		}
 
-		success = success && e_ews_connection_delete_item_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM, &item_id, index, EWS_HARD_DELETE,
-			ecb_ews_is_organizer (cbews, comp) ? EWS_SEND_TO_ALL_AND_SAVE_COPY : EWS_SEND_TO_NONE,
-			EWS_ALL_OCCURRENCES, cancellable, error);
+		if (index && removed_indexes && g_hash_table_contains (removed_indexes, GINT_TO_POINTER (index))) {
+			/* Do nothing, it's already deleted from the server */
+		} else {
+			if (removed_indexes && index)
+				g_hash_table_insert (removed_indexes, GINT_TO_POINTER (index), NULL);
+
+			success = success && e_ews_connection_delete_item_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM, &item_id, index, EWS_HARD_DELETE,
+				ecb_ews_is_organizer (cbews, comp) ? EWS_SEND_TO_ALL_AND_SAVE_COPY : EWS_SEND_TO_NONE,
+				EWS_ALL_OCCURRENCES, cancellable, error);
+		}
 	}
 
 	g_free (item_id.id);
@@ -2358,6 +2366,7 @@ ecb_ews_pick_all_tzids_out (ECalBackendEws *cbews,
 
 static gboolean
 ecb_ews_modify_item_sync (ECalBackendEws *cbews,
+			  GHashTable *removed_indexes,
 			  icalcomponent *old_icalcomp,
 			  icalcomponent *new_icalcomp,
 			  GCancellable *cancellable,
@@ -2474,7 +2483,10 @@ ecb_ews_modify_item_sync (ECalBackendEws *cbews,
 
 			if (index == 0) {
 				success = FALSE;
-			} else {
+			} else if (!removed_indexes || !g_hash_table_contains (removed_indexes, GINT_TO_POINTER (index))) {
+				if (removed_indexes)
+					g_hash_table_insert (removed_indexes, GINT_TO_POINTER (index), NULL);
+
 				success = e_ews_connection_delete_item_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM, &item_id, index,
 					EWS_HARD_DELETE, EWS_SEND_TO_NONE, EWS_ALL_OCCURRENCES, cancellable, error);
 			}
@@ -2598,13 +2610,17 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 			ecb_ews_filter_out_unchanged_instances (instances, existing, &changed_instances, &removed_instances);
 
 		if (success) {
+			GHashTable *removed_indexes;
+
+			removed_indexes = g_hash_table_new (g_direct_hash, g_direct_equal);
+
 			for (link = changed_instances; link && success; link = g_slist_next (link)) {
 				ChangeData *cd = link->data;
 
 				if (!cd)
 					continue;
 
-				success = ecb_ews_modify_item_sync (cbews,
+				success = ecb_ews_modify_item_sync (cbews, removed_indexes,
 					e_cal_component_get_icalcomponent (cd->old_component ? cd->old_component : master),
 					e_cal_component_get_icalcomponent (cd->new_component),
 					cancellable, error);
@@ -2620,10 +2636,12 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 				id = e_cal_component_get_id (comp);
 
 				if (id) {
-					success = ecb_ews_remove_item_sync (cbews, cal_cache, id->uid, id->rid, cancellable, error);
+					success = ecb_ews_remove_item_sync (cbews, cal_cache, removed_indexes, id->uid, id->rid, cancellable, error);
 					e_cal_component_free_id (id);
 				}
 			}
+
+			g_hash_table_destroy (removed_indexes);
 		}
 
 		if (success)
@@ -2633,6 +2651,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 		g_slist_free_full (changed_instances, change_data_free);
 		g_slist_free_full (removed_instances, g_object_unref);
 	} else {
+		GHashTable *removed_indexes;
 		EwsCalendarConvertData convert_data = { 0 };
 		EEwsItem *item = NULL;
 		const EwsId *ews_id = NULL;
@@ -2733,6 +2752,8 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 			}
 		}
 
+		removed_indexes = g_hash_table_new (g_direct_hash, g_direct_equal);
+
 		if (success && icalcomponent_get_first_property (icalcomp, ICAL_RRULE_PROPERTY)) {
 			GSList *exceptions = NULL;
 
@@ -2744,7 +2765,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 			}
 
 			for (link = exceptions; link && success; link = g_slist_next (link)) {
-				success = ecb_ews_remove_item_sync (cbews, cal_cache, uid, link->data, cancellable, error);
+				success = ecb_ews_remove_item_sync (cbews, cal_cache, removed_indexes, uid, link->data, cancellable, error);
 			}
 
 			g_slist_free_full (exceptions, g_free);
@@ -2758,7 +2779,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 
 			/* In case we have attendees and atachemnts we have to fake update items,
 			 * this is the only way to pass attachments in meeting invite mail */
-			success = ecb_ews_modify_item_sync (cbews, NULL, icalcomp, cancellable, error);
+			success = ecb_ews_modify_item_sync (cbews, removed_indexes, NULL, icalcomp, cancellable, error);
 		}
 
 		icalcomponent_free (icalcomp);
@@ -2772,7 +2793,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 
 			icalcomp = e_cal_component_get_icalcomponent (comp);
 
-			success = ecb_ews_modify_item_sync (cbews, NULL, icalcomp, cancellable, error);
+			success = ecb_ews_modify_item_sync (cbews, removed_indexes, NULL, icalcomp, cancellable, error);
 		}
 
 		if (success && items) {
@@ -2784,6 +2805,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 		}
 
 		g_slist_free_full (items, g_object_unref);
+		g_hash_table_destroy (removed_indexes);
 	}
 
 	g_rec_mutex_unlock (&cbews->priv->cnc_lock);
@@ -3509,7 +3531,7 @@ ecb_ews_receive_objects_sync (ECalBackendSync *sync_backend,
 				icalproperty_set_value_from_string (summary, split_subject[1] , "NO");
 				g_strfreev (split_subject);
 
-				success = ecb_ews_modify_item_sync (cbews, NULL, subcomp, cancellable, error);
+				success = ecb_ews_modify_item_sync (cbews, NULL, NULL, subcomp, cancellable, error);
 
 				do_refresh = TRUE;
 			}
