@@ -245,6 +245,8 @@ ecb_ews_unset_connection (ECalBackendEws *cbews)
 	g_rec_mutex_lock (&cbews->priv->cnc_lock);
 
 	if (cbews->priv->cnc) {
+		e_ews_connection_set_disconnected_flag (cbews->priv->cnc, TRUE);
+
 		g_signal_handlers_disconnect_by_func (cbews->priv->cnc, ecb_ews_server_notification_cb, cbews);
 
 		if (cbews->priv->subscription_key != 0) {

@@ -456,6 +456,11 @@ gboolean	e_ews_connection_get_backoff_enabled
 void		e_ews_connection_set_backoff_enabled
 						(EEwsConnection *cnc,
 						 gboolean enabled);
+gboolean	e_ews_connection_get_disconnected_flag
+						(EEwsConnection *cnc);
+void		e_ews_connection_set_disconnected_flag
+						(EEwsConnection *cnc,
+						 gboolean disconnected_flag);
 EEwsConnection *e_ews_connection_find		(const gchar *uri,
 						 const gchar *username);
 GSList *	e_ews_connection_list_existing	(void); /* EEwsConnection * */

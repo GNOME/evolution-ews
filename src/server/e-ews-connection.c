@@ -109,6 +109,9 @@ struct _EEwsConnectionPrivate {
 
 	EEwsServerVersion version;
 	gboolean backoff_enabled;
+
+	/* Set to TRUE when this connection had been disconnected and cannot be used anymore */
+	gboolean disconnected_flag;
 };
 
 enum {
@@ -1906,9 +1909,9 @@ ews_connection_dispose (GObject *object)
 	g_mutex_lock (&connecting);
 
 	/* remove the connection from the hash table */
-	if (loaded_connections_permissions != NULL) {
-		g_hash_table_remove (
-			loaded_connections_permissions, priv->hash_key);
+	if (loaded_connections_permissions != NULL &&
+	    g_hash_table_lookup (loaded_connections_permissions, priv->hash_key) == (gpointer) object) {
+		g_hash_table_remove (loaded_connections_permissions, priv->hash_key);
 		if (g_hash_table_size (loaded_connections_permissions) == 0) {
 			g_hash_table_destroy (loaded_connections_permissions);
 			loaded_connections_permissions = NULL;
@@ -2073,6 +2076,7 @@ e_ews_connection_init (EEwsConnection *cnc)
 	cnc->priv->soup_context = g_main_context_new ();
 	cnc->priv->soup_loop = g_main_loop_new (cnc->priv->soup_context, FALSE);
 	cnc->priv->backoff_enabled = TRUE;
+	cnc->priv->disconnected_flag = FALSE;
 
 	cnc->priv->subscriptions = g_hash_table_new_full (
 			g_direct_hash, g_direct_equal,
@@ -2338,7 +2342,8 @@ e_ews_connection_find (const gchar *uri,
 			loaded_connections_permissions, hash_key);
 		g_free (hash_key);
 
-		if (E_IS_EWS_CONNECTION (cnc)) {
+		if (E_IS_EWS_CONNECTION (cnc) &&
+		    !e_ews_connection_get_disconnected_flag (cnc)) {
 			g_object_ref (cnc);
 			g_mutex_unlock (&connecting);
 			return cnc;
@@ -2372,7 +2377,7 @@ e_ews_connection_list_existing (void)
 
 		g_hash_table_iter_init (&iter, loaded_connections_permissions);
 		while (g_hash_table_iter_next (&iter, NULL, &value)) {
-			if (value)
+			if (value && !e_ews_connection_get_disconnected_flag (value))
 				connections = g_slist_prepend (connections, g_object_ref (value));
 		}
 	}
@@ -2422,7 +2427,8 @@ e_ews_connection_new_full (ESource *source,
 		cnc = g_hash_table_lookup (
 			loaded_connections_permissions, hash_key);
 
-		if (E_IS_EWS_CONNECTION (cnc)) {
+		if (E_IS_EWS_CONNECTION (cnc) &&
+		    !e_ews_connection_get_disconnected_flag (cnc)) {
 			g_object_ref (cnc);
 
 			g_free (hash_key);
@@ -2790,6 +2796,23 @@ e_ews_connection_set_backoff_enabled (EEwsConnection *cnc,
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
 	cnc->priv->backoff_enabled = enabled;
+}
+
+gboolean
+e_ews_connection_get_disconnected_flag (EEwsConnection *cnc)
+{
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
+
+	return cnc->priv->disconnected_flag;
+}
+
+void
+e_ews_connection_set_disconnected_flag (EEwsConnection *cnc,
+					gboolean disconnected_flag)
+{
+	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
+
+	cnc->priv->disconnected_flag = disconnected_flag;
 }
 
 static xmlDoc *
