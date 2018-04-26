@@ -1913,6 +1913,8 @@ ebb_ews_unset_connection (EBookBackendEws *bbews)
 	g_rec_mutex_lock (&bbews->priv->cnc_lock);
 
 	if (bbews->priv->cnc) {
+		e_ews_connection_set_disconnected_flag (bbews->priv->cnc, TRUE);
+
 		g_signal_handlers_disconnect_by_func (bbews->priv->cnc, ebb_ews_server_notification_cb, bbews);
 
 		if (bbews->priv->subscription_key != 0) {

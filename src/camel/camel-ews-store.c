@@ -1396,6 +1396,7 @@ ews_store_unset_connection_locked (CamelEwsStore *ews_store)
 		}
 
 		e_ews_connection_set_password (ews_store->priv->connection, NULL);
+		e_ews_connection_set_disconnected_flag (ews_store->priv->connection, TRUE);
 		g_signal_handlers_disconnect_by_func (ews_store->priv->connection,
 			G_CALLBACK (camel_ews_store_password_will_expire_cb), ews_store);
 		g_object_unref (ews_store->priv->connection);
