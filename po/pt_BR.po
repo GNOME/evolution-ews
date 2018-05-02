@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?product"
 "=evolution-ews&keywords=I18N+L10N&component=Miscellaneous / EWS Core\n"
-"POT-Creation-Date: 2018-03-21 10:19+0000\n"
-"PO-Revision-Date: 2018-03-24 15:32-0200\n"
+"POT-Creation-Date: 2018-04-26 07:12+0000\n"
+"PO-Revision-Date: 2018-05-02 18:49-0200\n"
 "Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
 "Language: pt_BR\n"
@@ -32,42 +32,42 @@ msgstr "Web services do Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Para acessar servidores Exchange usando Web services"
 
-#: ../src/addressbook/e-book-backend-ews.c:2983
+#: ../src/addressbook/e-book-backend-ews.c:3272
 msgid "Failed to update GAL:"
 msgstr "Falha ao atualizar GAL:"
 
-#: ../src/addressbook/e-book-backend-ews.c:3144
+#: ../src/addressbook/e-book-backend-ews.c:3433
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Não foi possível salvar a lista de contatos, pois ela tem suporte apenas em "
 "servidor EWS 2010 ou posterior"
 
-#: ../src/addressbook/e-book-backend-ews.c:3237
+#: ../src/addressbook/e-book-backend-ews.c:3526
 msgid "Failed to set contact photo:"
 msgstr "Falha ao definir a foto de contato:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1650
+#: ../src/calendar/e-cal-backend-ews.c:1659
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Livre"
 
-#: ../src/calendar/e-cal-backend-ews.c:1653
+#: ../src/calendar/e-cal-backend-ews.c:1662
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Ocupado"
 
-#: ../src/calendar/e-cal-backend-ews.c:1655
+#: ../src/calendar/e-cal-backend-ews.c:1664
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Fora do escritório"
 
-#: ../src/calendar/e-cal-backend-ews.c:1657
+#: ../src/calendar/e-cal-backend-ews.c:1666
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Tentativa"
 
-#: ../src/calendar/e-cal-backend-ews.c:3270
+#: ../src/calendar/e-cal-backend-ews.c:3301
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Não foi possível localizar o usuário “%s” entre os participantes"
@@ -87,12 +87,12 @@ msgstr "Não foi possível gerar o analisador a partir do mimecontent!"
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Não foi possível analisar o mimecontent da solicitação de reunião!"
 
-#: ../src/camel/camel-ews-folder.c:451
+#: ../src/camel/camel-ews-folder.c:460 ../src/camel/camel-ews-folder.c:670
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Não foi possível criar o arquivo de cache"
 
-#: ../src/camel/camel-ews-folder.c:585 ../src/camel/camel-ews-folder.c:678
+#: ../src/camel/camel-ews-folder.c:787 ../src/camel/camel-ews-folder.c:908
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Não foi possível criar o caminho de cache “%s”: %s"
@@ -100,22 +100,22 @@ msgstr "Não foi possível criar o caminho de cache “%s”: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/camel/camel-ews-folder.c:692
+#: ../src/camel/camel-ews-folder.c:922
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Falha ao mover o arquivo de cache de mensagens de “%s” para “%s”: %s"
 
-#: ../src/camel/camel-ews-folder.c:1576
+#: ../src/camel/camel-ews-folder.c:1806
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Não foi possível carregar o resumo para %s"
 
-#: ../src/camel/camel-ews-folder.c:2036
+#: ../src/camel/camel-ews-folder.c:2266
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Atualizando a pasta “%s”"
 
-#: ../src/camel/camel-ews-folder.c:2216
+#: ../src/camel/camel-ews-folder.c:2446
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Não é possível executar ações na pasta no modo desconectado"
@@ -247,38 +247,38 @@ msgid_plural "Password will expire in %d days."
 msgstr[0] "A senha vai expirar em 1 dia."
 msgstr[1] "A senha vai expirar em %d dias."
 
-#: ../src/camel/camel-ews-store.c:1545
+#: ../src/camel/camel-ews-store.c:1546
 msgid "Updating foreign folder structure"
 msgstr "Atualizando estrutura de pasta externa"
 
-#: ../src/camel/camel-ews-store.c:1681
+#: ../src/camel/camel-ews-store.c:1682
 msgid "Updating foreign folders"
 msgstr "Atualizando pastas externas"
 
-#: ../src/camel/camel-ews-store.c:2075
+#: ../src/camel/camel-ews-store.c:2076
 #, c-format
 msgid "No such folder: %s"
 msgstr "Pasta inexistente: %s"
 
-#: ../src/camel/camel-ews-store.c:2373
+#: ../src/camel/camel-ews-store.c:2374
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Não é possível listar as pastas EWS públicas no modo desconectado"
 
-#: ../src/camel/camel-ews-store.c:2446
+#: ../src/camel/camel-ews-store.c:2447
 msgid "Cannot find any EWS public folders"
 msgstr "Não foi possível encontrar nenhuma pasta EWS pública"
 
-#: ../src/camel/camel-ews-store.c:2555
+#: ../src/camel/camel-ews-store.c:2556
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Não foi possível criar a pasta “%s”, pois ela já existe"
 
-#: ../src/camel/camel-ews-store.c:2570
+#: ../src/camel/camel-ews-store.c:2571
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "A pasta pai %s não existe"
 
-#: ../src/camel/camel-ews-store.c:2580
+#: ../src/camel/camel-ews-store.c:2581
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -286,113 +286,111 @@ msgstr ""
 "Não foi possível criar a pasta sob “%s”, pois ela é usada somente para "
 "pastas de outros usuários"
 
-#: ../src/camel/camel-ews-store.c:2590
+#: ../src/camel/camel-ews-store.c:2591
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "Não foi possível criar a pasta sob “%s”, pois ela é usada somente para "
 "pastas públicas"
 
-#: ../src/camel/camel-ews-store.c:2694
+#: ../src/camel/camel-ews-store.c:2695
 #, c-format
 msgid "Folder does not exist"
 msgstr "A pasta não existe"
 
-#: ../src/camel/camel-ews-store.c:2704
+#: ../src/camel/camel-ews-store.c:2705
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Não foi possível remover a pasta “%s”, pois ela é usada somente para pastas "
 "de outros usuários"
 
-#: ../src/camel/camel-ews-store.c:2715
+#: ../src/camel/camel-ews-store.c:2716
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr ""
 "Não foi possível remover a pasta “%s”, pois ela é usada somente para pastas "
 "públicas"
 
-#: ../src/camel/camel-ews-store.c:2874
+#: ../src/camel/camel-ews-store.c:2875
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "A pasta %s não existe"
 
-#: ../src/camel/camel-ews-store.c:2883
+#: ../src/camel/camel-ews-store.c:2884
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Nenhum registro de chave de mudança para a pasta %s"
 
-#: ../src/camel/camel-ews-store.c:2926
+#: ../src/camel/camel-ews-store.c:2927
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Não é possível renomear e mover uma pasta ao mesmo tempo"
 
-#: ../src/camel/camel-ews-store.c:2960
+#: ../src/camel/camel-ews-store.c:2961
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Não foi possível encontrar o ID de pasta para a pasta pai %s"
 
-#: ../src/camel/camel-ews-store.c:3012 ../src/camel/camel-ews-transport.c:318
+#: ../src/camel/camel-ews-store.c:3013 ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange server %s"
 msgstr "Servidor Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:3015
+#: ../src/camel/camel-ews-store.c:3016
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Serviço Exchange para %s em %s"
 
-#: ../src/camel/camel-ews-store.c:3059
+#: ../src/camel/camel-ews-store.c:3060
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Não foi possível localizar a pasta Lixeira"
 
-#: ../src/camel/camel-ews-store.c:3119
+#: ../src/camel/camel-ews-store.c:3120
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Não foi possível localizar a pasta Lixo eletrônico"
 
-#: ../src/camel/camel-ews-store.c:3310
+#: ../src/camel/camel-ews-store.c:3311
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr ""
 "Não é possível realizar a inscrição das pastas EWS no modo desconectado"
 
-#: ../src/camel/camel-ews-store.c:3333
+#: ../src/camel/camel-ews-store.c:3334
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 "Não foi possível realizar a inscrição da pasta “%s”, pois não há pasta "
 "pública disponível"
 
-#: ../src/camel/camel-ews-store.c:3343
+#: ../src/camel/camel-ews-store.c:3344
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr ""
 "Não é possível realizar a inscrição da pasta “%s”, pois ela não foi "
 "encontrada"
 
-#: ../src/camel/camel-ews-store.c:3434
+#: ../src/camel/camel-ews-store.c:3435
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr ""
 "Não é possível realizar o cancelamento da inscrição das pastas EWS no modo "
 "desconectado"
 
-#: ../src/camel/camel-ews-store.c:3551
+#: ../src/camel/camel-ews-store.c:3552
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Você precisa estar trabalhando online para completar essa operação"
 
-#: ../src/camel/camel-ews-store.c:3595 ../src/camel/camel-ews-store.c:3632
+#: ../src/camel/camel-ews-store.c:3596 ../src/camel/camel-ews-store.c:3633
 msgid "Unsetting the “Out of Office” status"
 msgstr "Desmarcando o estado de “Fora do escritório”"
 
 #: ../src/camel/camel-ews-store.h:56
-#| msgid "Updating foreign folders"
 msgid "Foreign Folders"
 msgstr "Pastas externas"
 
 #: ../src/camel/camel-ews-store.h:58
-#| msgid "Folder"
 msgid "Public Folders"
 msgstr "Pastas públicas"
 
@@ -437,6 +435,27 @@ msgstr ""
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr ""
 "Fonte de dados “%s” não representa uma pasta de Web Services do Exchange"
+
+#: ../src/configuration/e-book-config-ews.c:100
+msgid "Use only _primary contact email address"
+msgstr "Usar apenas o endereço de e-mail _primário do contato"
+
+#: ../src/configuration/e-book-config-ews.c:101
+msgid ""
+"When checked, the contacts looked up in the online Global Address List will "
+"contain only the primary email address"
+msgstr ""
+"Ao verificar, os contatos procurados na lista de endereços global online vai "
+"ter apenas endereços de e-mail primário"
+
+#: ../src/configuration/e-book-config-ews.c:113
+#| msgid "Failed to set contact photo:"
+msgid "_Fetch contact photos"
+msgstr "_Obter fotos de contato"
+
+#: ../src/configuration/e-book-config-ews.c:114
+msgid "Tries to look up for user photo"
+msgstr "Tenta procurar por foto do usuário"
 
 #: ../src/configuration/e-ews-config-lookup.c:192
 msgid "Exchange Web Services autodiscovery"
@@ -1259,7 +1278,7 @@ msgstr ""
 "Essa opção será usada em um token de acesso OAuth 2.0 para se conectar o "
 "servidor Office365.com"
 
-#: ../src/server/e-ews-calendar-utils.c:1151
+#: ../src/server/e-ews-calendar-utils.c:1160
 #, c-format
 msgid ""
 "Cannot store this recurrence. Change it to simple single daily, weekly, "
@@ -1273,20 +1292,20 @@ msgstr ""
 msgid "CreateItem call failed to return ID for new message"
 msgstr "A chamada CreateItem não retornou o ID para a mensagem nova"
 
-#: ../src/server/e-ews-connection.c:759
+#: ../src/server/e-ews-connection.c:763
 msgid "Operation Cancelled"
 msgstr "Operação cancelada"
 
-#: ../src/server/e-ews-connection.c:880
+#: ../src/server/e-ews-connection.c:884
 msgid "Authentication failed"
 msgstr "Falha na autenticação"
 
-#: ../src/server/e-ews-connection.c:902
+#: ../src/server/e-ews-connection.c:906
 #, c-format
 msgid "No response: %s"
 msgstr "Sem reposta: %s"
 
-#: ../src/server/e-ews-connection.c:965
+#: ../src/server/e-ews-connection.c:969
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -1297,7 +1316,7 @@ msgstr[1] ""
 "O servidor Exchange está ocupado, aguardando para tentar novamente (%d:%02d "
 "minutos)"
 
-#: ../src/server/e-ews-connection.c:971
+#: ../src/server/e-ews-connection.c:975
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -1308,54 +1327,54 @@ msgstr[1] ""
 "O servidor Exchange está ocupado, aguardando para tentar novamente (%d "
 "segundos)"
 
-#: ../src/server/e-ews-connection.c:2900
+#: ../src/server/e-ews-connection.c:2942
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Falha ao analisar XML de resposta da descoberta automática"
 
-#: ../src/server/e-ews-connection.c:2907
+#: ../src/server/e-ews-connection.c:2949
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Falha ao localizar o elemento <Autodiscover>"
 
-#: ../src/server/e-ews-connection.c:2918
+#: ../src/server/e-ews-connection.c:2960
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Falha ao localizar o elemento <Response>"
 
-#: ../src/server/e-ews-connection.c:2929
+#: ../src/server/e-ews-connection.c:2971
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Falha ao localizar o elemento <Account>"
 
-#: ../src/server/e-ews-connection.c:2954
+#: ../src/server/e-ews-connection.c:2996
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr ""
 "Falha ao localizar <ASUrl> e <OABUrl> na resposta da descoberta automática"
 
-#: ../src/server/e-ews-connection.c:3045
+#: ../src/server/e-ews-connection.c:3087
 msgid "URL cannot be NULL"
 msgstr "A URL não pode ser NULL"
 
-#: ../src/server/e-ews-connection.c:3053
+#: ../src/server/e-ews-connection.c:3095
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "A URL “%s” não é válida"
 
-#: ../src/server/e-ews-connection.c:3144
+#: ../src/server/e-ews-connection.c:3186
 msgid "Email address is missing a domain part"
 msgstr "O endereço de e-mail está sem a parte de domínio"
 
-#: ../src/server/e-ews-connection.c:3499
+#: ../src/server/e-ews-connection.c:3541
 msgid "Failed to parse oab XML"
 msgstr "Falha ao analisar o XML oab"
 
-#: ../src/server/e-ews-connection.c:3507
+#: ../src/server/e-ews-connection.c:3549
 msgid "Failed to find <OAB> element\n"
 msgstr "O elemento <OAB> não foi encontrado\n"
 
-#: ../src/server/e-ews-connection.c:4814
+#: ../src/server/e-ews-connection.c:4856
 msgid "No items found"
 msgstr "Nenhum item encontrado"
 
