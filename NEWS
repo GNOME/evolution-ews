@@ -1,3 +1,19 @@
+Evolution-EWS 3.28.2 2018-05-07
+-------------------------------
+
+Bug Fixes:
+	Bug 795076 - [Contacts] Use Display Name as File As when File As is missing (Milan Crha)
+	Bug 795329 - Fallback to message construction on ErrorMimeContentConversionFailed (Milan Crha)
+	Bug 795414 - Errors on delete of a detached instance (Milan Crha)
+
+Miscellaneous:
+	Crash when meeting invitation iCalendar part could not be parsed (Milan Crha)
+	Skip empty street addresses in contacts (Milan Crha)
+	Stale connection used after resume (Milan Crha)
+
+Translations:
+	Rūdolfs Mazurs (lv)
+
 Evolution-EWS 3.28.1 2018-04-09
 -------------------------------
 
