@@ -901,7 +901,7 @@ parse_recur_day_of_week_index (ESoapParameter *param)
 	value = e_soap_parameter_get_string_value (param);
 	if (!value || !*value) {
 		g_free (value);
-		return E_EWS_RECURRENCE_DAYS_OF_WEEK_UNKNOWN;
+		return E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_UNKNOWN;
 	}
 
 	/* Do not localize, these are values used in XML */
