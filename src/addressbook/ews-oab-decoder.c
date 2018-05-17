@@ -179,14 +179,22 @@ ews_populate_photo (EContact *contact,
 	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	const gchar *at;
 	GBytes *bytes = value;
-	EContactPhoto *photo = g_new0 (EContactPhoto, 1);
-	gchar *email = e_contact_get (contact, E_CONTACT_EMAIL_1);
+	EContactPhoto *photo;
+	gchar *email;
 	gchar *filename = NULL, *pic_name = NULL, *name;
 	gboolean success = TRUE;
 	GError *local_error = NULL;
 
 	if (!bytes)
 		return;
+
+	email = e_contact_get (contact, E_CONTACT_EMAIL_1);
+	if (!email || !strchr (email, '@')) {
+		g_free (email);
+		return;
+	}
+
+	photo = g_new0 (EContactPhoto, 1);
 
 	/* Rename the binary file to name.jpg */
 	at = strchr (email, '@');
@@ -201,7 +209,7 @@ ews_populate_photo (EContact *contact,
 		photo->type = E_CONTACT_PHOTO_TYPE_URI;
 		photo->data.uri = filename;
 
-		e_contact_set (contact, field, (gpointer) photo);
+		e_contact_set (contact, field, photo);
 	} else {
 		g_warning ("%s: Failed to store '%s': %s", G_STRFUNC, filename, local_error ? local_error->message : "Unknown error");
 	}
