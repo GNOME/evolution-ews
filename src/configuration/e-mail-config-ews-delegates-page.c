@@ -1539,7 +1539,7 @@ mail_config_ews_delegates_page_refresh_idle_cb (GObject *with_object,
 
 	} else {
 		EMailConfigEwsDelegatesPage *page = async_context->page;
-		GtkWidget *radio = page->priv->deliver_copy_me_radio;
+		GtkWidget *radio;
 		GtkTreeModel *model;
 		const GSList *iter;
 
@@ -1552,6 +1552,7 @@ mail_config_ews_delegates_page_refresh_idle_cb (GObject *with_object,
 		case EwsDelegateDeliver_DelegatesAndMe:
 			radio = page->priv->deliver_delegates_and_me_radio;
 			break;
+		default:
 		case EwsDelegateDeliver_DelegatesAndSendInformationToMe:
 			radio = page->priv->deliver_copy_me_radio;
 			break;

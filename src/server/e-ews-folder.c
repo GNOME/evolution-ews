@@ -147,21 +147,24 @@ e_ews_folder_set_from_soap_parameter (EEwsFolder *folder,
 	if (priv->folder_type == E_EWS_FOLDER_TYPE_MAILBOX) {
 		subparam = e_soap_parameter_get_first_child_by_name (node, "FolderClass");
 		if (subparam) {
+			EEwsFolderType folder_type;
 			gchar *folder_class = e_soap_parameter_get_string_value (subparam);
 
-			priv->folder_type = E_EWS_FOLDER_TYPE_UNKNOWN;
+			folder_type = E_EWS_FOLDER_TYPE_UNKNOWN;
 
 			if (g_strcmp0 (folder_class, "IPF.Note") == 0 || (folder_class && g_str_has_prefix (folder_class, "IPF.Note."))) {
-				priv->folder_type = E_EWS_FOLDER_TYPE_MAILBOX;
+				folder_type = E_EWS_FOLDER_TYPE_MAILBOX;
 			} else if (g_strcmp0 (folder_class, "IPF.Contact") == 0) {
-				priv->folder_type = E_EWS_FOLDER_TYPE_CONTACTS;
+				folder_type = E_EWS_FOLDER_TYPE_CONTACTS;
 			} else if (g_strcmp0 (folder_class, "IPF.Appointment") == 0) {
-				priv->folder_type = E_EWS_FOLDER_TYPE_CALENDAR;
+				folder_type = E_EWS_FOLDER_TYPE_CALENDAR;
 			} else if (g_strcmp0 (folder_class, "IPF.Task") == 0) {
-				priv->folder_type = E_EWS_FOLDER_TYPE_TASKS;
+				folder_type = E_EWS_FOLDER_TYPE_TASKS;
 			} else if (g_strcmp0 (folder_class, "IPF.StickyNote") == 0) {
-				priv->folder_type = E_EWS_FOLDER_TYPE_MEMOS;
+				folder_type = E_EWS_FOLDER_TYPE_MEMOS;
 			}
+
+			priv->folder_type = folder_type;
 
 			g_free (folder_class);
 		}

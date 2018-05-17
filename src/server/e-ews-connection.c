@@ -1392,8 +1392,9 @@ handle_get_items_response_cb (EwsAsyncData *async_data, ESoapParameter *param)
 		const gchar *name = (const gchar *) subparam->name;
 
 		if (g_str_has_suffix (name, "ResponseMessage")) {
-			/* coverity[unchecked_value] */
-			ews_get_response_status (subparam, &error);
+			if (ews_get_response_status (subparam, &error))
+				error = NULL;
+
 			ews_handle_items_param (subparam, async_data, error);
 		} else {
 			g_warning (
@@ -7333,6 +7334,7 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
 	GError *local_error = NULL;
 
 	g_return_if_fail (cnc != NULL);
+	g_return_if_fail (parent != NULL);
 
 	simple = g_simple_async_result_new (
 		G_OBJECT (cnc), callback, user_data,
@@ -7435,6 +7437,7 @@ e_ews_connection_create_attachments_sync (EEwsConnection *cnc,
 	gboolean ret;
 
 	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (parent != NULL, FALSE);
 
 	closure = e_async_closure_new ();
 

@@ -2684,7 +2684,9 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 		if (success && e_cal_component_has_attachments (master) > 0) {
 			GSList *info_attachments = NULL;
 
-			if (ecb_ews_extract_attachments (icalcomp, &info_attachments)) {
+			g_warn_if_fail (ews_id != NULL);
+
+			if (ews_id && ecb_ews_extract_attachments (icalcomp, &info_attachments)) {
 				GSList *ids = NULL;
 
 				success = e_ews_connection_create_attachments_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM,
