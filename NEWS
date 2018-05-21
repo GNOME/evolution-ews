@@ -1,3 +1,24 @@
+Evolution-EWS 3.29.2 2018-05-21
+-------------------------------
+
+Bug Fixes:
+	Bug 795329 - Fallback to message construction on ErrorMimeContentConversionFailed (Milan Crha)
+	Bug 795121 - Option for GAL: Use only primary contact email address (Milan Crha)
+	Bug 792653 - Use GetUserPhoto for GAL contacts (Milan Crha)
+	Bug 795414 - Errors on delete of a detached instance (Milan Crha)
+
+Miscellaneous:
+	Crash when meeting invitation iCalendar part could not be parsed (Milan Crha)
+	Skip empty street addresses in contacts (Milan Crha)
+	Stale connection used after resume (Milan Crha)
+	Address a clang warning (Milan Crha)
+	Address some of the compiler and static analyzers warnings (Milan Crha)
+
+Translations:
+	Marek Černocký (cs)
+	Piotr Drąg (pl)
+	Rafael Fontenelle (pt_BR)
+
 Evolution-EWS 3.29.1 2018-04-16
 -------------------------------
 
