@@ -55,7 +55,7 @@ typedef struct {
 } EwsCalendarConvertData;
 
 const gchar *e_ews_collect_organizer (icalcomponent *comp);
-void e_ews_collect_attendees (icalcomponent *comp, GSList **required, GSList **optional, GSList **resource);
+void e_ews_collect_attendees (icalcomponent *comp, GSList **required, GSList **optional, GSList **resource, gboolean *out_rsvp_requested);
 
 void ewscal_set_timezone (ESoapMessage *msg, const gchar *name, EEwsCalendarTimeZoneDefinition *tzd);
 void ewscal_set_meeting_timezone (ESoapMessage *msg, icaltimezone *icaltz);

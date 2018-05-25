@@ -222,12 +222,16 @@ void
 e_ews_collect_attendees (icalcomponent *comp,
                          GSList **required,
                          GSList **optional,
-                         GSList **resource)
+                         GSList **resource,
+			 gboolean *out_rsvp_requested)
 {
 	icalproperty *prop;
 	icalparameter *param;
 	const gchar *str = NULL;
 	const gchar *org_email_address = NULL;
+
+	if (out_rsvp_requested)
+		*out_rsvp_requested = TRUE;
 
 	/* we need to know who the orgenizer is so we wont duplicate him/her */
 	org_email_address = e_ews_collect_organizer (comp);
@@ -262,10 +266,26 @@ e_ews_collect_attendees (icalcomponent *comp,
 		switch (icalparameter_get_role (param)) {
 		case ICAL_ROLE_OPTPARTICIPANT:
 			*optional = g_slist_append (*optional, (gpointer)str);
+
+			if (out_rsvp_requested && *out_rsvp_requested) {
+				icalparameter *rsvp;
+
+				rsvp = icalproperty_get_first_parameter (prop, ICAL_RSVP_PARAMETER);
+				if (rsvp && icalparameter_get_rsvp (rsvp) == ICAL_RSVP_FALSE)
+					*out_rsvp_requested = FALSE;
+			}
 			break;
 		case ICAL_ROLE_CHAIR:
 		case ICAL_ROLE_REQPARTICIPANT:
 			*required = g_slist_append (*required, (gpointer)str);
+
+			if (out_rsvp_requested && *out_rsvp_requested) {
+				icalparameter *rsvp;
+
+				rsvp = icalproperty_get_first_parameter (prop, ICAL_RSVP_PARAMETER);
+				if (rsvp && icalparameter_get_rsvp (rsvp) == ICAL_RSVP_FALSE)
+					*out_rsvp_requested = FALSE;
+			}
 			break;
 		case ICAL_ROLE_NONPARTICIPANT:
 			*resource = g_slist_append (*resource, (gpointer)str);
@@ -1071,7 +1091,7 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	icaltimetype dtstart, dtend;
 	icaltimezone *tzid_start, *tzid_end;
 	icalproperty *prop;
-	gboolean has_alarms, satisfies;
+	gboolean has_alarms, satisfies, rsvp_requested = TRUE;
 	const gchar *ical_location_start, *ical_location_end, *value;
 	const gchar *msdn_location_start, *msdn_location_end;
 
@@ -1156,7 +1176,9 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 		e_ews_message_write_string_parameter (msg, "Location", NULL, value);
 
 	/* collect attendees */
-	e_ews_collect_attendees (icalcomp, &required, &optional, &resource);
+	e_ews_collect_attendees (icalcomp, &required, &optional, &resource, &rsvp_requested);
+
+	e_ews_message_write_string_parameter (msg, "IsResponseRequested", NULL, rsvp_requested ? "true" : "false");
 
 	if (required != NULL) {
 		add_attendees_list_to_message (msg, "RequiredAttendees", required);
@@ -1429,7 +1451,7 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 	gboolean has_alarms, has_alarms_old;
 	gboolean dt_start_changed = FALSE, dt_end_changed = FALSE, dt_changed;
 	gboolean dt_start_changed_timezone_name = FALSE, dt_end_changed_timezone_name = FALSE;
-	gboolean satisfies;
+	gboolean satisfies, rsvp_requested = TRUE;
 	gint alarm = 0, alarm_old = 0;
 	gchar *recid;
 
@@ -1620,7 +1642,10 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 			convert_vevent_property_to_updatexml (msg, "IsAllDayEvent", "false", "calendar", NULL, NULL);
 	}
 
-	e_ews_collect_attendees (icalcomp, &required, &optional, &resource);
+	e_ews_collect_attendees (icalcomp, &required, &optional, &resource, &rsvp_requested);
+
+	e_ews_message_write_string_parameter (msg, "IsResponseRequested", NULL, rsvp_requested ? "true" : "false");
+
 	if (required != NULL) {
 		e_ews_message_start_set_item_field (msg, "RequiredAttendees", "calendar", "CalendarItem");
 
