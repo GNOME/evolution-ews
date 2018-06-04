@@ -6,7 +6,7 @@ cmake_policy(VERSION 3.1)
 project(evolution-ews
 	VERSION 3.29.3
 	LANGUAGES C)
-set(PROJECT_BUGREPORT "http://bugzilla.gnome.org/enter_bug.cgi?product=evolution-ews")
+set(PROJECT_BUGREPORT "https://gitlab.gnome.org/GNOME/evolution-ews/issues/")
 
 # Required for FindIntltool module
 set(GETTEXT_PACKAGE ${PROJECT_NAME})
