@@ -24,9 +24,9 @@
 
   <maintainer>
     <foaf:Person>
-      <foaf:name>Chenthill Palanisamy</foaf:name>
-      <foaf:mbox rdf:resource="mailto:pchenthill@novell.com" />
-      <gnome:userid>pchen</gnome:userid>
+      <foaf:name>Milan Crha</foaf:name>
+      <foaf:mbox rdf:resource="mailto:mcrha@redhat.com" />
+      <gnome:userid>mcrha</gnome:userid>
     </foaf:Person>
   </maintainer>
 
