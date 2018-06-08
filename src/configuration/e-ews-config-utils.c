@@ -1198,7 +1198,18 @@ update_ews_source_entries_cb (EShellView *shell_view,
 
 	if (is_ews_source) {
 		if (!source || !e_source_has_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER))
-		    is_ews_source = FALSE;
+			is_ews_source = FALSE;
+
+		if (is_ews_source) {
+			ESource *clicked_source = NULL;
+
+			g_object_get (G_OBJECT (shell_view), "clicked-source", &clicked_source, NULL);
+
+			if (clicked_source && clicked_source != source)
+				is_ews_source = FALSE;
+
+			g_clear_object (&clicked_source);
+		}
 
 		if (is_ews_source) {
 			ESourceEwsFolder *ews_folder = e_source_get_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER);
