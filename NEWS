@@ -1,3 +1,13 @@
+Evolution-EWS 3.28.3 2018-06-18
+-------------------------------
+
+Bug Fixes:
+	Bug 796297 - Make it possible to not request RSVP (all-or-nothing) (Milan Crha)
+
+Miscellaneous:
+	Address some of the compiler and static analyzers warnings (Milan Crha)
+	Update bug URL and switch to https:// in the DOAP file (Milan Crha)
+
 Evolution-EWS 3.28.2 2018-05-07
 -------------------------------
 
