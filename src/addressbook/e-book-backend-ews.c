@@ -51,12 +51,23 @@
 #include "ews-oab-decoder.h"
 #include "ews-oab-decompress.h"
 
+#ifdef G_OS_WIN32
+#ifdef gmtime_r
+#undef gmtime_r
+#endif
+
+/* The gmtime() in Microsoft's C library is MT-safe */
+#define gmtime_r(tp,tmp) (gmtime(tp)?(*(tmp)=*gmtime(tp),(tmp)):0)
+#endif
+
 #define d(x)
 
 #define EDB_ERROR(_code) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, NULL)
 #define EDB_ERROR_EX(_code,_msg) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, _msg)
 
 #define X_EWS_ORIGINAL_VCARD "X-EWS-ORIGINAL-VCARD"
+#define X_EWS_CHANGEKEY "X-EWS-CHANGEKEY"
+#define X_EWS_GAL_SHA1 "X-EWS-GAL-SHA1"
 #define X_EWS_PHOTO_CHECK_DATE "X-EWS-PHOTO-CHECK-DATE" /* YYYYMMDD of the last check for photo */
 
 #define EWS_MAX_FETCH_COUNT 500
@@ -67,7 +78,7 @@
 /* passing field uris for PhysicalAddress, PhoneNumbers causes error, so we
  * use Default view to fetch them. Thus the summary props just have attachments
  * and some additional properties that are not return with Default view */
-#define CONTACT_ITEM_PROPS "item:Attachments item:HasAttachments item:Body contacts:Manager contacts:Department contacts:SpouseName contacts:AssistantName contacts:BusinessHomePage contacts:Birthday"
+#define CONTACT_ITEM_PROPS "item:Attachments item:HasAttachments item:Body item:LastModifiedTime contacts:Manager contacts:Department contacts:SpouseName contacts:AssistantName contacts:BusinessHomePage contacts:Birthday"
 
 struct _EBookBackendEwsPrivate {
 	GRecMutex cnc_lock;
@@ -326,6 +337,31 @@ static const struct phone_field_mapping {
 };
 
 static void
+ebews_populate_rev (EContact *contact,
+		    EEwsItem *item)
+{
+	struct tm stm;
+	time_t tt = 0;
+	gchar time_string[100] = { 0 };
+
+	g_return_if_fail (E_IS_CONTACT (contact));
+
+	if (item) {
+		g_return_if_fail (E_IS_EWS_ITEM (item));
+
+		tt = e_ews_item_get_last_modified_time (item);
+	}
+
+	if (tt <= 0)
+		tt = time (NULL);
+
+	gmtime_r (&tt, &stm);
+	strftime (time_string, 100, "%Y-%m-%dT%H:%M:%SZ", &stm);
+
+	e_contact_set (contact, E_CONTACT_REV, time_string);
+}
+
+static void
 ebews_populate_uid (EBookBackendEws *bbews,
 		    EContact *contact,
                     EEwsItem *item,
@@ -337,7 +373,8 @@ ebews_populate_uid (EBookBackendEws *bbews,
 	id = e_ews_item_get_id (item);
 	if (id) {
 		e_contact_set (contact, E_CONTACT_UID, id->id);
-		e_contact_set (contact, E_CONTACT_REV, id->change_key);
+		ebews_populate_rev (contact, item);
+		e_vcard_util_set_x_attribute (E_VCARD (contact), X_EWS_CHANGEKEY, id->change_key);
 	}
 }
 
@@ -1009,7 +1046,9 @@ set_photo (EBookBackendEws *bbews,
 	if (!item_id) {
 		id = g_new0 (EwsId, 1);
 		id->id = e_contact_get (contact, E_CONTACT_UID);
-		id->change_key = e_contact_get (contact, E_CONTACT_REV);
+		id->change_key = e_vcard_util_dup_x_attribute (E_VCARD (contact), X_EWS_CHANGEKEY);
+		if (!id->change_key)
+			id->change_key = e_contact_get (contact, E_CONTACT_REV);
 
 		item_id = id;
 	}
@@ -1598,15 +1637,24 @@ ebb_ews_convert_dl_to_updatexml_cb (ESoapMessage *msg,
 	ConvertData *cd = user_data;
 	EContact *old_contact = cd->old_contact;
 	EContact *new_contact = cd->new_contact;
+	gchar *change_key = NULL;
+
+	if (!cd->change_key) {
+		change_key = e_vcard_util_dup_x_attribute (E_VCARD (old_contact), X_EWS_CHANGEKEY);
+		if (!change_key)
+			change_key = e_contact_get (old_contact, E_CONTACT_REV);
+	}
 
 	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
 		e_contact_get_const (old_contact, E_CONTACT_UID),
-		cd->change_key ? cd->change_key : e_contact_get_const (old_contact, E_CONTACT_REV),
+		cd->change_key ? cd->change_key : change_key,
 		0);
 	e_ews_message_start_set_item_field (msg, "Members", "distributionlist", "DistributionList");
 	ebb_ews_write_dl_members (msg, new_contact);
 	e_ews_message_end_set_item_field (msg);
 	e_ews_message_end_item_change (msg);
+
+	g_free (change_key);
 
 	return TRUE;
 }
@@ -1620,6 +1668,7 @@ ebb_ews_convert_contact_to_updatexml_cb (ESoapMessage *msg,
 	EContact *old_contact = cd->old_contact;
 	EContact *new_contact = cd->new_contact;
 	gchar *value = NULL, *old_value = NULL;
+	gchar *change_key = NULL;
 	gint i, element_type;
 
 	/* Pre-flight, to update the ChangeKey if needed */
@@ -1641,9 +1690,15 @@ ebb_ews_convert_contact_to_updatexml_cb (ESoapMessage *msg,
 		}
 	}
 
+	if (!cd->change_key) {
+		change_key = e_vcard_util_dup_x_attribute (E_VCARD (old_contact), X_EWS_CHANGEKEY);
+		if (!change_key)
+			change_key = e_contact_get (old_contact, E_CONTACT_REV);
+	}
+
 	e_ews_message_start_item_change (msg, E_EWS_ITEMCHANGE_TYPE_ITEM,
 		e_contact_get_const (old_contact, E_CONTACT_UID),
-		cd->change_key ? cd->change_key : e_contact_get_const (old_contact, E_CONTACT_REV),
+		cd->change_key ? cd->change_key : change_key,
 		0);
 
 	/* Iterate for each field in contact */
@@ -1675,6 +1730,8 @@ ebb_ews_convert_contact_to_updatexml_cb (ESoapMessage *msg,
 	}
 
 	e_ews_message_end_item_change (msg);
+
+	g_free (change_key);
 
 	return TRUE;
 }
@@ -1841,6 +1898,7 @@ ebb_ews_traverse_dl (EBookBackendEws *bbews,
 
 static EContact *
 ebb_ews_get_dl_info (EBookBackendEws *bbews,
+		     EEwsItem *item,
 		     const EwsId *id,
 		     const gchar *d_name,
 		     GSList *members,
@@ -1853,7 +1911,8 @@ ebb_ews_get_dl_info (EBookBackendEws *bbews,
 
 	contact = e_contact_new ();
 	e_contact_set (contact, E_CONTACT_UID, id->id);
-	e_contact_set (contact, E_CONTACT_REV, id->change_key);
+	e_vcard_util_set_x_attribute (E_VCARD (contact), X_EWS_CHANGEKEY, id->change_key);
+	ebews_populate_rev (contact, item);
 
 	e_contact_set (contact, E_CONTACT_IS_LIST, GINT_TO_POINTER (TRUE));
 	e_contact_set (contact, E_CONTACT_LIST_SHOW_ADDRESSES, GINT_TO_POINTER (TRUE));
@@ -1905,6 +1964,7 @@ ebb_ews_get_dl_info_gal (EBookBackendEws *bbews,
 
 static gboolean
 ebb_ews_contacts_append_dl (EBookBackendEws *bbews,
+			    EEwsItem *item,
 			    const EwsId *id,
 			    const gchar *d_name,
 			    GSList *members,
@@ -1915,7 +1975,7 @@ ebb_ews_contacts_append_dl (EBookBackendEws *bbews,
 	EContact *contact;
 	EVCardAttribute *attr;
 
-	contact = ebb_ews_get_dl_info (bbews, id, d_name, members, cancellable, error);
+	contact = ebb_ews_get_dl_info (bbews, item, id, d_name, members, cancellable, error);
 	if (contact == NULL)
 		return FALSE;
 
@@ -2003,7 +2063,7 @@ ebb_ews_fetch_items_sync (EBookBackendEws *bbews,
 		if (e_ews_connection_expand_dl_sync (
 			bbews->priv->cnc, EWS_PRIORITY_MEDIUM, mb, &members,
 			&includes_last, cancellable, &local_error)) {
-			ret = ebb_ews_contacts_append_dl (bbews, id, d_name, members, contacts, cancellable, error);
+			ret = ebb_ews_contacts_append_dl (bbews, item, id, d_name, members, contacts, cancellable, error);
 			g_slist_free_full (members, (GDestroyNotify) e_ews_mailbox_free);
 		} else {
 			ret = g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NAMERESOLUTIONNORESULTS);
@@ -2389,7 +2449,8 @@ ebb_ews_gal_store_contact (EContact *contact,
 		const gchar *uid = e_contact_get_const (contact, E_CONTACT_UID);
 		EBookMetaBackendInfo *nfo;
 
-		e_contact_set (contact, E_CONTACT_REV, sha1);
+		ebews_populate_rev (contact, NULL);
+		e_vcard_util_set_x_attribute (E_VCARD (contact), X_EWS_GAL_SHA1, sha1);
 
 		if (data->fetch_gal_photos && !g_cancellable_is_cancelled (cancellable)) {
 			GError *local_error = NULL;
@@ -2404,7 +2465,7 @@ ebb_ews_gal_store_contact (EContact *contact,
 			g_clear_error (&local_error);
 		}
 
-		nfo = e_book_meta_backend_info_new (uid, sha1, NULL, NULL);
+		nfo = e_book_meta_backend_info_new (uid, e_contact_get_const (contact, E_CONTACT_REV), NULL, NULL);
 		nfo->object = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
 
 		if (g_hash_table_remove (data->uids, uid)) {
@@ -2434,18 +2495,27 @@ ebb_ews_gather_existing_uids_cb (EBookCache *book_cache,
 				 gpointer user_data)
 {
 	struct _db_data *data = user_data;
-	gchar *dup_uid, *dup_rev;
+	EVCard *vcard;
+	gchar *dup_uid, *dup_sha1 = NULL;
 
 	g_return_val_if_fail (data != NULL, FALSE);
 	g_return_val_if_fail (data->uids != NULL, FALSE);
 	g_return_val_if_fail (data->sha1s != NULL, FALSE);
+	g_return_val_if_fail (object != NULL, FALSE);
+
+	vcard = e_vcard_new_from_string (object);
+	if (vcard) {
+		dup_sha1 = e_vcard_util_dup_x_attribute (vcard, X_EWS_GAL_SHA1);
+		g_object_unref (vcard);
+	}
 
 	dup_uid = g_strdup (uid);
-	dup_rev = g_strdup (revision);
+	if (!dup_sha1)
+		dup_sha1 = g_strdup (revision);
 
-	g_hash_table_insert (data->uids, dup_uid, dup_rev);
-	if (dup_rev)
-		g_hash_table_insert (data->sha1s, dup_rev, dup_uid);
+	g_hash_table_insert (data->uids, dup_uid, dup_sha1);
+	if (dup_sha1)
+		g_hash_table_insert (data->sha1s, dup_sha1, dup_uid);
 
 	return TRUE;
 }
@@ -2797,7 +2867,6 @@ ebb_ews_update_cache_for_expression (EBookBackendEws *bbews,
 				EContact *contact = NULL, *old_contact = NULL;
 				gboolean is_public_dl = FALSE, mailbox_address_set = FALSE;
 				const gchar *str;
-				gchar *fake_rev;
 
 				if (g_strcmp0 (mb->mailbox_type, "PublicDL") == 0) {
 					contact = e_contact_new ();
@@ -2820,11 +2889,7 @@ ebb_ews_update_cache_for_expression (EBookBackendEws *bbews,
 
 				/* There is no ChangeKey provided either, thus make up some revision,
 				   to have the contact always updated in the local cache. */
-				fake_rev = e_util_generate_uid ();
-
-				e_contact_set (contact, E_CONTACT_REV, fake_rev);
-
-				g_free (fake_rev);
+				ebews_populate_rev (contact, NULL);
 
 				if (use_primary_address && !is_public_dl && mb->email &&
 				    (!mb->routing_type || g_ascii_strcasecmp (mb->routing_type, "SMTP") == 0)) {
@@ -2962,8 +3027,20 @@ ebb_ews_verify_changes (EBookCache *book_cache,
 			EContact *existing = NULL;
 
 			if (e_book_cache_get_contact (book_cache, id->id, TRUE, &existing, cancellable, NULL) &&
-			    existing && g_strcmp0 (e_contact_get_const (existing, E_CONTACT_REV), id->change_key) == 0) {
-				g_object_unref (item);
+			    existing) {
+				gchar *change_key;
+
+				change_key = e_vcard_util_dup_x_attribute (E_VCARD (existing), X_EWS_CHANGEKEY);
+				if (!change_key)
+					change_key = e_contact_get (existing, E_CONTACT_REV);
+
+				if (g_strcmp0 (change_key, id->change_key) == 0) {
+					g_object_unref (item);
+				} else {
+					items = g_slist_prepend (items, item);
+				}
+
+				g_free (change_key);
 			} else {
 				items = g_slist_prepend (items, item);
 			}

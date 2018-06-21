@@ -114,6 +114,7 @@ struct _EEwsItemPrivate {
 	time_t date_received;
 	time_t date_sent;
 	time_t date_created;
+	time_t last_modified_time;
 
 	gsize size;
 	gchar *msg_id;
@@ -1553,6 +1554,8 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 			priv->date_sent = ews_item_parse_date (subparam);
 		} else if (!g_ascii_strcasecmp (name, "DateTimeCreated")) {
 			priv->date_created = ews_item_parse_date (subparam);
+		} else if (!g_ascii_strcasecmp (name, "LastModifiedTime")) {
+			priv->last_modified_time = ews_item_parse_date (subparam);
 		} else if (!g_ascii_strcasecmp (name, "HasAttachments")) {
 			value = e_soap_parameter_get_string_value (subparam);
 			priv->has_attachments = (!g_ascii_strcasecmp (value, "true"));
@@ -1851,6 +1854,14 @@ e_ews_item_get_date_created (EEwsItem *item)
 	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
 
 	return item->priv->date_created;
+}
+
+time_t
+e_ews_item_get_last_modified_time (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
+
+	return item->priv->last_modified_time;
 }
 
 gboolean
