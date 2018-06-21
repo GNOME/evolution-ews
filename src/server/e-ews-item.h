@@ -190,6 +190,8 @@ const gchar *	e_ews_item_get_date_header	(EEwsItem *item);
 time_t		e_ews_item_get_date_received	(EEwsItem *item);
 time_t		e_ews_item_get_date_sent	(EEwsItem *item);
 time_t		e_ews_item_get_date_created	(EEwsItem *item);
+time_t		e_ews_item_get_last_modified_time
+						(EEwsItem *item);
 gboolean	e_ews_item_has_attachments	(EEwsItem *item,
 						 gboolean *has_attachments);
 gboolean	e_ews_item_is_read		(EEwsItem *item,
