@@ -87,6 +87,7 @@ struct _ECalBackendEwsPrivate {
 	" calendar:Resources" \
 	" calendar:ModifiedOccurrences" \
 	" calendar:IsMeeting" \
+	" calendar:IsResponseRequested" \
 	" calendar:MyResponseType" \
 	" calendar:RequiredAttendees" \
 	" calendar:OptionalAttendees"
@@ -679,6 +680,7 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 		item_id = e_ews_item_get_id (item);
 
 		if (e_ews_item_get_is_meeting (item)) {
+			gboolean is_response_requested = e_ews_item_get_is_response_requested (item);
 			gchar *user_email;
 
 			user_email = camel_ews_settings_dup_email (ews_settings);
@@ -717,6 +719,11 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 				}
 				icalproperty_add_parameter (icalprop, cu_type);
 				icalproperty_add_parameter (icalprop, param);
+
+				if (is_response_requested) {
+					param = icalparameter_new_rsvp (ICAL_RSVP_TRUE);
+					icalproperty_add_parameter (icalprop, param);
+				}
 
 				if (user_email && (email || attendee->mailbox->email) && e_ews_item_get_my_response_type (item) &&
 				    g_ascii_strcasecmp (email ? email : attendee->mailbox->email, user_email) == 0) {

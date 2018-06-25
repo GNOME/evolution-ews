@@ -218,6 +218,8 @@ EwsMailbox *
 void		e_ews_mailbox_free		(EwsMailbox *mailbox);
 
 gboolean	e_ews_item_get_is_meeting	(EEwsItem *item);
+gboolean	e_ews_item_get_is_response_requested
+						(EEwsItem *item);
 const GSList *	e_ews_item_get_modified_occurrences
 						(EEwsItem *item);
 gchar *		e_ews_embed_attachment_id_in_uri (const gchar *olduri, const gchar *attach_id);

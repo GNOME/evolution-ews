@@ -1600,7 +1600,7 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 
 	e_ews_collect_attendees (icalcomp, &required, &optional, &resource, &rsvp_requested);
 
-	e_ews_message_write_string_parameter (msg, "IsResponseRequested", NULL, rsvp_requested ? "true" : "false");
+	convert_vevent_property_to_updatexml (msg, "IsResponseRequested", rsvp_requested ? "true" : "false", "calendar", NULL, NULL);
 
 	if (required != NULL) {
 		e_ews_message_start_set_item_field (msg, "RequiredAttendees", "calendar", "CalendarItem");
