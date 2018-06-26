@@ -1775,6 +1775,14 @@ camel_ews_folder_new (CamelStore *store,
 	CamelFolder *folder;
 	CamelFolderSummary *folder_summary;
 	CamelEwsFolder *ews_folder;
+	CamelSettings *settings;
+	gboolean filter_inbox = FALSE;
+	gboolean filter_junk = FALSE;
+	gboolean filter_junk_inbox = FALSE;
+	gboolean offline_limit_by_age = FALSE;
+	CamelTimeUnit offline_limit_unit;
+	gint offline_limit_value = 0;
+	guint32 add_folder_flags = 0;
 	gchar *state_file;
 	const gchar *short_name;
 
@@ -1801,6 +1809,20 @@ camel_ews_folder_new (CamelStore *store,
 		return NULL;
 	}
 
+	settings = camel_service_ref_settings (CAMEL_SERVICE (store));
+
+	g_object_get (
+		settings,
+		"filter-inbox", &filter_inbox,
+		"filter-junk", &filter_junk,
+		"filter-junk-inbox", &filter_junk_inbox,
+		"limit-by-age", &offline_limit_by_age,
+		"limit-unit", &offline_limit_unit,
+		"limit-value", &offline_limit_value,
+		NULL);
+
+	g_clear_object (&settings);
+
 	camel_folder_take_folder_summary (folder, folder_summary);
 
 	/* set/load persistent state */
@@ -1816,22 +1838,7 @@ camel_ews_folder_new (CamelStore *store,
 	}
 
 	if (camel_offline_folder_can_downsync (CAMEL_OFFLINE_FOLDER (folder))) {
-		CamelSettings *settings;
-		gboolean offline_limit_by_age = FALSE;
-		CamelTimeUnit offline_limit_unit;
-		gint offline_limit_value;
 		time_t when = (time_t) 0;
-
-		settings = camel_service_ref_settings (CAMEL_SERVICE (store));
-
-		g_object_get (
-			settings,
-			"limit-by-age", &offline_limit_by_age,
-			"limit-unit", &offline_limit_unit,
-			"limit-value", &offline_limit_value,
-			NULL);
-
-		g_clear_object (&settings);
 
 		if (offline_limit_by_age)
 			when = camel_time_value_apply (when, offline_limit_unit, offline_limit_value);
@@ -1855,19 +1862,20 @@ camel_ews_folder_new (CamelStore *store,
 
 	if (!g_ascii_strcasecmp (folder_name, "Inbox") ||
 	    folder_has_inbox_type (CAMEL_EWS_STORE (store), folder_name)) {
-		CamelSettings *settings;
-		gboolean filter_inbox;
-
 		settings = camel_service_ref_settings (CAMEL_SERVICE (store));
 
-		filter_inbox = camel_store_settings_get_filter_inbox (
-			CAMEL_STORE_SETTINGS (settings));
-
 		if (filter_inbox)
-			camel_folder_set_flags (folder, camel_folder_get_flags (folder) | CAMEL_FOLDER_FILTER_RECENT);
+			add_folder_flags |= CAMEL_FOLDER_FILTER_RECENT;
 
-		g_object_unref (settings);
+		if (filter_junk)
+			add_folder_flags |= CAMEL_FOLDER_FILTER_JUNK;
+	} else {
+		if (filter_junk && !filter_junk_inbox)
+			add_folder_flags |= CAMEL_FOLDER_FILTER_JUNK;
 	}
+
+	if (add_folder_flags)
+		camel_folder_set_flags (folder, camel_folder_get_flags (folder) | add_folder_flags);
 
 	ews_folder->search = camel_ews_search_new (CAMEL_EWS_STORE (store));
 	if (!ews_folder->search) {
