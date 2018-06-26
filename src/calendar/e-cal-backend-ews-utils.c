@@ -1227,6 +1227,18 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	g_object_unref (comp);
 }
 
+static const gchar *
+ews_priority_to_string (gint priority)
+{
+	if (priority <= 3)
+		return "High";
+
+	if (priority >= 7)
+		return "Low";
+
+	return "Normal";
+}
+
 static void
 convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
                               gpointer user_data)
@@ -1247,6 +1259,14 @@ convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
 	e_ews_message_write_string_parameter_with_attribute (msg, "Body", NULL, icalcomponent_get_description (icalcomp), "BodyType", "Text");
 
 	convert_categories_calcomp_to_xml (msg, NULL, icalcomp);
+
+	prop = icalcomponent_get_first_property (icalcomp, ICAL_PRIORITY_PROPERTY);
+	if (prop) {
+		gint priority;
+
+		priority = icalproperty_get_priority (prop);
+		e_ews_message_write_string_parameter (msg, "Importance", NULL, ews_priority_to_string (priority));
+	}
 
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_DUE_PROPERTY);
 	if (prop) {
@@ -1790,6 +1810,14 @@ convert_vtodo_component_to_updatexml (ESoapMessage *msg,
 
 	/* Categories */
 	convert_component_categories_to_updatexml (convert_data->comp, msg, "Task");
+
+	prop = icalcomponent_get_first_property (icalcomp, ICAL_PRIORITY_PROPERTY);
+	if (prop) {
+		gint priority;
+
+		priority = icalproperty_get_priority (prop);
+		convert_vtodo_property_to_updatexml (msg, "Importance", ews_priority_to_string (priority), "item", NULL, NULL);
+	}
 
 	e_ews_message_end_item_change (msg);
 }
