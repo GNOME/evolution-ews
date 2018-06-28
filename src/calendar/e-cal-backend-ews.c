@@ -1108,32 +1108,25 @@ ecb_ews_get_items_sync (ECalBackendEws *cbews,
 
 	for (link = items; link; link = g_slist_next (link)) {
 		EEwsItem *item = link->data;
+		ECalComponent *comp;
+		GError *local_error = NULL;
 
-		if (!item)
+		if (!item || e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR)
 			continue;
 
-		if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR) {
-			g_propagate_error (error, g_error_copy (e_ews_item_get_error (item)));
+		comp = ecb_ews_item_to_component_sync (cbews, item, cancellable, &local_error);
+		if (!comp) {
+			if (!local_error)
+				continue;
+
+			g_propagate_error (error, local_error);
 			success = FALSE;
 			break;
-		} else {
-			ECalComponent *comp;
-			GError *local_error = NULL;
-
-			comp = ecb_ews_item_to_component_sync (cbews, item, cancellable, &local_error);
-			if (!comp) {
-				if (!local_error)
-					continue;
-
-				g_propagate_error (error, local_error);
-				success = FALSE;
-				break;
-			}
-
-			ecb_ews_store_original_comp (comp);
-
-			*out_components = g_slist_prepend (*out_components, comp);
 		}
+
+		ecb_ews_store_original_comp (comp);
+
+		*out_components = g_slist_prepend (*out_components, comp);
 	}
 
  exit:
