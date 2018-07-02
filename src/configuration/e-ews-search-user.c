@@ -360,7 +360,7 @@ search_term_changed_cb (GtkEntry *entry,
 		sid->cancellable = g_object_ref (pgu->cancellable);
 		sid->dialog = dialog;
 
-		gtk_label_set_text (GTK_LABEL (pgu->info_label), _("Searching..."));
+		gtk_label_set_text (GTK_LABEL (pgu->info_label), _("Searching…"));
 		pgu->schedule_search_id = e_named_timeout_add (333, schedule_search_cb, sid);
 	}
 }
@@ -469,7 +469,7 @@ e_ews_search_user_modal (GtkWindow *parent,
 	pgu->conn = g_object_ref (conn);
 
 	dialog = gtk_dialog_new_with_buttons (
-		_("Choose EWS user..."),
+		_("Choose EWS user…"),
 		parent,
 		GTK_DIALOG_DESTROY_WITH_PARENT,
 		GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE,

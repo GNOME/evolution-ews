@@ -274,7 +274,7 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		widget, "sensitive",
 		G_BINDING_SYNC_CREATE);
 
-	widget = gtk_button_new_with_mnemonic (_("S_earch..."));
+	widget = gtk_button_new_with_mnemonic (_("S_earch…"));
 	gtk_grid_attach (GTK_GRID (container), widget, 2, 4, 1, 1);
 	gtk_widget_show (widget);
 

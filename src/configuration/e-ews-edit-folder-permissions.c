@@ -262,7 +262,7 @@ edit_permissions_response_cb (GObject *dialog,
 
 	e_ews_config_utils_run_in_thread_with_feedback (
 		GTK_WINDOW (dialog), dialog,
-		_("Writing folder permissions, please wait..."),
+		_("Writing folder permissions, please wait…"),
 		write_folder_permissions_thread,
 		write_folder_permissions_idle,
 		write_permissions, (GDestroyNotify) g_slist_free);
@@ -924,7 +924,7 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
 	widgets->folder_type = folder_type;
 
 	widgets->dialog = gtk_dialog_new_with_buttons (
-		_("Edit EWS folder permissions..."),
+		_("Edit EWS folder permissions…"),
 		parent,
 		GTK_DIALOG_DESTROY_WITH_PARENT,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
@@ -1308,7 +1308,7 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
 
 	e_ews_config_utils_run_in_thread_with_feedback (
 		GTK_WINDOW (dialog), dialog,
-		_("Reading folder permissions, please wait..."),
+		_("Reading folder permissions, please wait…"),
 		read_folder_permissions_thread,
 		read_folder_permissions_idle,
 		found_permissions, folder_permissions_free_found_permissions);

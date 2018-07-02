@@ -593,7 +593,7 @@ subscribe_foreign_response_cb (GObject *dialog,
 		use_foldername = g_strdup ("tasks");
 	} else if (strlen (orig_foldername) > 13) {
 		/* if its a folder ID, then show only first 10 letters of it */
-		show_foldername = g_strdup_printf ("%.10s...", orig_foldername);
+		show_foldername = g_strdup_printf ("%.10s…", orig_foldername);
 	}
 
 	cffd = g_new0 (struct EEwsCheckForeignFolderData, 1);
@@ -606,7 +606,7 @@ subscribe_foreign_response_cb (GObject *dialog,
 	cffd->folder = NULL;
 
 	description = g_strdup_printf (
-		_("Testing availability of folder “%s” of user “%s”, please wait..."),
+		_("Testing availability of folder “%s” of user “%s”, please wait…"),
 		show_foldername ? show_foldername : cffd->orig_foldername, cffd->email);
 
 	e_ews_config_utils_run_in_thread_with_feedback (
@@ -762,7 +762,7 @@ e_ews_subscribe_foreign_folder (GtkWindow *parent,
 	g_return_if_fail (E_IS_CLIENT_CACHE (client_cache));
 
 	dialog = G_OBJECT (gtk_dialog_new_with_buttons (
-		_("Subscribe to folder of other EWS user..."),
+		_("Subscribe to folder of other EWS user…"),
 		parent,
 		GTK_DIALOG_DESTROY_WITH_PARENT,
 		GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE,
@@ -830,7 +830,7 @@ e_ews_subscribe_foreign_folder (GtkWindow *parent,
 		"vexpand", FALSE,
 		NULL);
 
-	widget = gtk_button_new_with_mnemonic (_("C_hoose..."));
+	widget = gtk_button_new_with_mnemonic (_("C_hoose…"));
 	g_object_set (
 		G_OBJECT (entry),
 		"hexpand", TRUE,

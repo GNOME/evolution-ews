@@ -1089,14 +1089,14 @@ ews_ui_enable_actions (GtkActionGroup *action_group,
 static GtkActionEntry mail_account_context_entries[] = {
 	{ "mail-ews-folder-sizes",
 	  NULL,
-	  N_("Folder Sizes..."),
+	  N_("Folder Sizes…"),
 	  NULL,
 	  NULL, /* XXX Add a tooltip! */
 	  G_CALLBACK (action_folder_sizes_cb) },
 
 	{ "mail-ews-subscribe-foreign-folder",
 	  NULL,
-	  N_("Subscribe to folder of other user..."),
+	  N_("Subscribe to folder of other user…"),
 	  NULL,
 	  NULL,  /* XXX Add a tooltip! */
 	  G_CALLBACK (action_subscribe_foreign_folder_cb) }
@@ -1105,7 +1105,7 @@ static GtkActionEntry mail_account_context_entries[] = {
 static GtkActionEntry mail_folder_context_entries[] = {
 	{ "mail-ews-folder-permissions",
 	  "folder-new",
-	  N_("Permissions..."),
+	  N_("Permissions…"),
 	  NULL,
 	  N_("Edit EWS folder permissions"),
 	  G_CALLBACK (action_folder_permissions_mail_cb) }
@@ -1441,7 +1441,7 @@ static GtkActionEntry calendar_context_entries[] = {
 
 	{ "calendar-ews-folder-permissions",
 	  "folder-new",
-	  N_("Permissions..."),
+	  N_("Permissions…"),
 	  NULL,
 	  N_("Edit EWS calendar permissions"),
 	  G_CALLBACK (action_folder_permissions_source_cb) }
@@ -1479,7 +1479,7 @@ static GtkActionEntry tasks_context_entries[] = {
 
 	{ "tasks-ews-folder-permissions",
 	  "folder-new",
-	  N_("Permissions..."),
+	  N_("Permissions…"),
 	  NULL,
 	  N_("Edit EWS tasks permissions"),
 	  G_CALLBACK (action_folder_permissions_source_cb) }
@@ -1517,7 +1517,7 @@ static GtkActionEntry memos_context_entries[] = {
 
 	{ "memos-ews-folder-permissions",
 	  "folder-new",
-	  N_("Permissions..."),
+	  N_("Permissions…"),
 	  NULL,
 	  N_("Edit EWS memos permissions"),
 	  G_CALLBACK (action_folder_permissions_source_cb) }
@@ -1555,7 +1555,7 @@ static GtkActionEntry contacts_context_entries[] = {
 
 	{ "contacts-ews-folder-permissions",
 	  "folder-new",
-	  N_("Permissions..."),
+	  N_("Permissions…"),
 	  NULL,
 	  N_("Edit EWS contacts permissions"),
 	  G_CALLBACK (action_folder_permissions_source_cb) }

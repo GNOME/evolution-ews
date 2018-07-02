@@ -902,7 +902,7 @@ add_button_clicked_cb (EMailConfigEwsDelegatesPage *page)
 			else
 				e_ews_config_utils_run_in_thread_with_feedback_modal (
 					parent, G_OBJECT (page),
-					_("Retrieving current user permissions, please wait..."),
+					_("Retrieving current user permissions, please wait…"),
 					retrieve_user_permissions_thread_cb,
 					retrieve_user_permissions_idle_cb,
 					di, (GDestroyNotify) ews_delegate_info_free);
