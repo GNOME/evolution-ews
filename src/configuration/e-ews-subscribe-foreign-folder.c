@@ -38,12 +38,18 @@
 #include "e-ews-search-user.h"
 #include "e-ews-subscribe-foreign-folder.h"
 
+#define STR_ACCOUNTS_COMBO		"e-ews-accounts-combo"
 #define STR_USER_NAME_SELECTOR_ENTRY	"e-ews-name-selector-entry"
 #define STR_FOLDER_NAME_COMBO		"e-ews-folder-name-combo"
 #define STR_SUBFOLDERS_CHECK		"e-ews-subfolders-check"
 #define STR_EWS_CAMEL_SESSION		"e-ews-camel-session"
-#define STR_EWS_CAMEL_STORE		"e-ews-camel-store"
 #define STR_EWS_DIRECT_EMAIL		"e-ews-direct-email"
+
+enum {
+	COLUMN_UID = 0,
+	COLUMN_DISPLAY_NAME,
+	COLUMN_STORE
+};
 
 static void
 announce_new_folder (CamelEwsStore *ews_store,
@@ -272,7 +278,7 @@ check_foreign_folder_thread (GObject *with_object,
 	if (!conn) {
 		g_set_error_literal (
 			perror, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NORESPONSE,
-			_("Cannot test foreign folder availability while in offline mode"));
+			_("Cannot test foreign folder availability when the account is offline"));
 		return;
 	}
 
@@ -289,9 +295,17 @@ check_foreign_folder_thread (GObject *with_object,
 		if (!e_ews_connection_resolve_names_sync (conn, G_PRIORITY_DEFAULT,
 			cffd->email, EWS_SEARCH_AD, NULL, FALSE,
 			&mailboxes, NULL, &includes_last_item,
-			cancellable, perror)) {
-			g_object_unref (conn);
-			return;
+			cancellable, &local_error)) {
+			if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NAMERESOLUTIONNORESULTS) ||
+			    g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_NAMERESOLUTIONNOMAILBOX)) {
+				g_clear_error (&local_error);
+				mailboxes = NULL;
+			} else {
+				if (local_error)
+					g_propagate_error (perror, local_error);
+				g_object_unref (conn);
+				return;
+			}
 		}
 
 		if (!mailboxes) {
@@ -490,6 +504,24 @@ check_foreign_folder_idle (GObject *with_object,
 	g_object_unref (settings);
 }
 
+static gpointer
+ref_selected_store (GObject *dialog)
+{
+	GtkComboBox *combo_box;
+	CamelStore *store = NULL;
+	GtkTreeIter iter;
+
+	combo_box = g_object_get_data (dialog, STR_ACCOUNTS_COMBO);
+	g_return_val_if_fail (combo_box != NULL, NULL);
+
+	if (gtk_combo_box_get_active_iter (combo_box, &iter)) {
+		gtk_tree_model_get (gtk_combo_box_get_model (combo_box), &iter,
+			COLUMN_STORE, &store, -1);
+	}
+
+	return store;
+}
+
 static void
 subscribe_foreign_response_cb (GObject *dialog,
                                gint response_id)
@@ -514,9 +546,10 @@ subscribe_foreign_response_cb (GObject *dialog,
 	entry = g_object_get_data (dialog, STR_USER_NAME_SELECTOR_ENTRY);
 	combo_text = g_object_get_data (dialog, STR_FOLDER_NAME_COMBO);
 	subfolders_check = g_object_get_data (dialog, STR_SUBFOLDERS_CHECK);
-	cstore = g_object_get_data (dialog, STR_EWS_CAMEL_STORE);
 
 	g_return_if_fail (entry != NULL);
+
+	cstore = ref_selected_store (dialog);
 	g_return_if_fail (cstore != NULL);
 
 	username = NULL;
@@ -587,6 +620,7 @@ subscribe_foreign_response_cb (GObject *dialog,
 
 	g_free (description);
 	g_free (show_foldername);
+	g_object_unref (cstore);
 }
 
 static void
@@ -601,19 +635,18 @@ pick_gal_user_clicked_cb (GtkButton *button,
 	g_return_if_fail (dialog != NULL);
 
 	entry = g_object_get_data (dialog, STR_USER_NAME_SELECTOR_ENTRY);
-	ews_store = g_object_get_data (dialog, STR_EWS_CAMEL_STORE);
 
 	g_return_if_fail (entry != NULL);
+
+	ews_store = ref_selected_store (dialog);
 	g_return_if_fail (ews_store != NULL);
 
 	text = g_strstrip (g_strdup (gtk_entry_get_text (entry)));
 	conn = camel_ews_store_ref_connection (ews_store);
 
-	if (e_ews_search_user_modal (GTK_WINDOW (dialog),
-				     conn,
-				     text,
-				     &display_name,
-				     &email)) {
+	if (!conn) {
+		e_notice (dialog, GTK_MESSAGE_ERROR, "%s", _("Cannot search for user when the account is offline"));
+	} else if (e_ews_search_user_modal (GTK_WINDOW (dialog), conn, text, &display_name, &email)) {
 		if (display_name && email && *email) {
 			gtk_entry_set_text (entry, display_name);
 			g_object_set_data_full (G_OBJECT (entry), STR_EWS_DIRECT_EMAIL, g_strdup (email), g_free);
@@ -623,7 +656,86 @@ pick_gal_user_clicked_cb (GtkButton *button,
 	g_free (text);
 	g_free (display_name);
 	g_free (email);
-	g_object_unref (conn);
+	g_object_unref (ews_store);
+	g_clear_object (&conn);
+}
+
+static gint
+sort_accounts_by_display_name_cb (gconstpointer ptr1,
+				  gconstpointer ptr2)
+{
+	CamelService *service1 = (CamelService *) ptr1;
+	CamelService *service2 = (CamelService *) ptr2;
+
+	return g_utf8_collate (camel_service_get_display_name (service1), camel_service_get_display_name (service2));
+}
+
+static GtkWidget *
+create_accounts_combo (CamelSession *session,
+		       EClientCache *client_cache,
+		       CamelStore *store)
+{
+	GtkListStore *list_store;
+	GtkTreeIter iter;
+	GtkComboBox *combo_box;
+	ESourceRegistry *registry;
+	GList *services, *link, *accounts = NULL;
+	GtkCellRenderer *renderer;
+
+	list_store = gtk_list_store_new (3,
+		G_TYPE_STRING,		/* COLUMN_UID - UID of the CamelEwsStore */
+		G_TYPE_STRING,		/* COLUMN_DISPLAY_NAME */
+		CAMEL_TYPE_EWS_STORE);	/* COLUMN_STORE */
+
+	registry = e_client_cache_ref_registry (client_cache);
+	services = camel_session_list_services (session);
+
+	for (link = services; link; link = g_list_next (link)) {
+		CamelService *service = link->data;
+
+		if (CAMEL_IS_EWS_STORE (service)) {
+			ESource *source;
+
+			source = e_source_registry_ref_source (registry, camel_service_get_uid (service));
+			if (source && e_source_registry_check_enabled (registry, source)) {
+				accounts = g_list_prepend (accounts, service);
+			}
+
+			g_clear_object (&source);
+		}
+	}
+
+	accounts = g_list_sort (accounts, sort_accounts_by_display_name_cb);
+
+	for (link = accounts; link; link = g_list_next (link)) {
+		CamelService *service = link->data;
+
+		gtk_list_store_append (list_store, &iter);
+		gtk_list_store_set (list_store, &iter,
+			COLUMN_UID, camel_service_get_uid (service),
+			COLUMN_DISPLAY_NAME, camel_service_get_display_name (service),
+			COLUMN_STORE, service,
+			-1);
+	}
+
+	g_list_free_full (services, g_object_unref);
+	g_list_free (accounts);
+	g_clear_object (&registry);
+
+	combo_box = GTK_COMBO_BOX (gtk_combo_box_new_with_model (GTK_TREE_MODEL (list_store)));
+	g_object_unref (list_store);
+
+	renderer = gtk_cell_renderer_text_new ();
+	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo_box), renderer, TRUE);
+	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo_box), renderer, "text", COLUMN_DISPLAY_NAME, NULL);
+
+	gtk_combo_box_set_id_column (combo_box, COLUMN_UID);
+	if (store)
+		gtk_combo_box_set_active_id (combo_box, camel_service_get_uid (CAMEL_SERVICE (store)));
+	else if (accounts)
+		gtk_combo_box_set_active (combo_box, 0);
+
+	return GTK_WIDGET (combo_box);
 }
 
 /* Opens dialog to subscribe to folders of other
@@ -634,20 +746,20 @@ e_ews_subscribe_foreign_folder (GtkWindow *parent,
                                 CamelStore *store,
                                 EClientCache *client_cache)
 {
-	PangoAttrList *attrs;
 	ENameSelector *name_selector;
 	ENameSelectorModel *name_selector_model;
 	ENameSelectorDialog *name_selector_dialog;
 	GObject *dialog;
 	GtkWidget *content;
-	GtkWidget *label, *widget, *entry, *check;
+	GtkWidget *label, *widget, *entry, *check, *accounts_combo;
 	GtkGrid *grid;
 	GtkComboBoxText *combo_text;
 	gint row;
 
 	g_return_if_fail (session != NULL);
-	g_return_if_fail (store != NULL);
-	g_return_if_fail (CAMEL_IS_EWS_STORE (store));
+	if (store)
+		g_return_if_fail (CAMEL_IS_EWS_STORE (store));
+	g_return_if_fail (E_IS_CLIENT_CACHE (client_cache));
 
 	dialog = G_OBJECT (gtk_dialog_new_with_buttons (
 		_("Subscribe to folder of other EWS user..."),
@@ -680,19 +792,14 @@ e_ews_subscribe_foreign_folder (GtkWindow *parent,
 		"halign", GTK_ALIGN_START,
 		NULL);
 
-	attrs = pango_attr_list_new ();
-	pango_attr_list_insert (attrs, pango_attr_weight_new (PANGO_WEIGHT_BOLD));
-	widget = gtk_label_new (camel_service_get_display_name (CAMEL_SERVICE (store)));
+	widget = create_accounts_combo (session, client_cache, store);
 	g_object_set (
 		G_OBJECT (widget),
 		"hexpand", TRUE,
 		"vexpand", FALSE,
-		"use-underline", FALSE,
-		"attributes", attrs,
-		"xalign", 0.0,
 		"halign", GTK_ALIGN_START,
 		NULL);
-	pango_attr_list_unref (attrs);
+	accounts_combo = widget;
 
 	gtk_grid_attach (grid, label, 0, row, 1, 1);
 	gtk_grid_attach (grid, widget, 1, row, 2, 1);
@@ -774,15 +881,16 @@ e_ews_subscribe_foreign_folder (GtkWindow *parent,
 	gtk_grid_attach (grid, check, 1, row, 2, 1);
 
 	/* remember widgets for later use */
+	g_object_set_data (dialog, STR_ACCOUNTS_COMBO, accounts_combo);
 	g_object_set_data (dialog, STR_USER_NAME_SELECTOR_ENTRY, entry);
 	g_object_set_data (dialog, STR_FOLDER_NAME_COMBO, widget);
 	g_object_set_data (dialog, STR_SUBFOLDERS_CHECK, check);
 
 	g_object_set_data_full (dialog, STR_EWS_CAMEL_SESSION, g_object_ref (session), g_object_unref);
-	g_object_set_data_full (dialog, STR_EWS_CAMEL_STORE, g_object_ref (store), g_object_unref);
 
 	g_signal_connect_swapped (entry, "changed", G_CALLBACK (name_entry_changed_cb), dialog);
 	g_signal_connect_swapped (combo_text, "changed", G_CALLBACK (folder_name_combo_changed_cb), dialog);
+	g_signal_connect_swapped (accounts_combo, "changed", G_CALLBACK (name_entry_changed_cb), dialog);
 
 	name_entry_changed_cb (dialog);
 
