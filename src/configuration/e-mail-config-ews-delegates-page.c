@@ -977,6 +977,7 @@ static GtkWidget *
 create_users_tree_view (EMailConfigEwsDelegatesPage *page)
 {
 	GtkTreeView *tree_view;
+	GtkTreeModel *model;
 	GtkTreeSelection *selection;
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
@@ -984,8 +985,9 @@ create_users_tree_view (EMailConfigEwsDelegatesPage *page)
 
 	g_return_val_if_fail (page != NULL, NULL);
 
-	tree_view = GTK_TREE_VIEW (gtk_tree_view_new_with_model (
-		GTK_TREE_MODEL (gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_POINTER))));
+	model = GTK_TREE_MODEL (gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_POINTER));
+	tree_view = GTK_TREE_VIEW (gtk_tree_view_new_with_model (model));
+	g_object_unref (model);
 	gtk_tree_view_set_headers_visible (tree_view, FALSE);
 
 	renderer = gtk_cell_renderer_text_new ();

@@ -854,6 +854,7 @@ create_permissions_tree_view (GObject *dialog,
                               struct EEwsPermissionsDialogWidgets *widgets)
 {
 	GtkTreeView *tree_view;
+	GtkTreeModel *model;
 	GtkTreeSelection *selection;
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
@@ -861,8 +862,9 @@ create_permissions_tree_view (GObject *dialog,
 
 	g_return_val_if_fail (widgets != NULL, NULL);
 
-	tree_view = GTK_TREE_VIEW (gtk_tree_view_new_with_model (
-		GTK_TREE_MODEL (gtk_list_store_new (5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER, G_TYPE_UINT, G_TYPE_BOOLEAN))));
+	model = GTK_TREE_MODEL (gtk_list_store_new (5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER, G_TYPE_UINT, G_TYPE_BOOLEAN));
+	tree_view = GTK_TREE_VIEW (gtk_tree_view_new_with_model (model));
+	g_object_unref (model);
 
 	renderer = gtk_cell_renderer_text_new ();
 	g_object_set (renderer, "editable", FALSE, NULL);
