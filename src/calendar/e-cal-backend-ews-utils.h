@@ -39,6 +39,7 @@ G_BEGIN_DECLS
 
 typedef struct {
 	EEwsConnection *connection;
+	ETimezoneCache *timezone_cache;
 	icaltimezone *default_zone;
 	gchar *user_email;
 	gchar *response_type; /* Accept */
@@ -62,7 +63,7 @@ void ewscal_set_meeting_timezone (ESoapMessage *msg, icaltimezone *icaltz);
 void ewscal_set_reccurence (ESoapMessage *msg, icalproperty *rrule, icaltimetype *dtstart);
 void ewscal_set_reccurence_exceptions (ESoapMessage *msg, icalcomponent *comp);
 gchar *e_ews_extract_attachment_id_from_uri (const gchar *uri);
-void ews_set_alarm (ESoapMessage *msg, ECalComponent *comp, gboolean with_due_by);
+void ews_set_alarm (ESoapMessage *msg, ECalComponent *comp, ETimezoneCache *timezone_cache, gboolean with_due_by);
 gint ews_get_alarm (ECalComponent *comp);
 void e_ews_clean_icalcomponent (icalcomponent *icalcomp);
 
@@ -78,6 +79,12 @@ gboolean e_cal_backend_ews_prepare_set_free_busy_status (ESoapMessage *msg,gpoin
 gboolean e_cal_backend_ews_prepare_accept_item_request (ESoapMessage *msg, gpointer user_data, GError **error);
 
 guint e_cal_backend_ews_rid_to_index (icaltimezone *timezone, const gchar *rid, icalcomponent *comp, GError **error);
+
+struct icaltimetype
+		e_cal_backend_ews_get_datetime_with_zone	(ETimezoneCache *timezone_cache,
+								 icalcomponent *comp,
+								 icalproperty_kind prop_kind,
+								 struct icaltimetype (* get_func) (const icalproperty *prop));
 
 G_END_DECLS
 

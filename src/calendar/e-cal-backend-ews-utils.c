@@ -329,6 +329,7 @@ ews_get_alarm (ECalComponent *comp)
 void
 ews_set_alarm (ESoapMessage *msg,
                ECalComponent *comp,
+	       ETimezoneCache *timezone_cache,
 	       gboolean with_due_by)
 {
 	/* We know there would be only a single alarm in EWS calendar item */
@@ -350,7 +351,8 @@ ews_set_alarm (ESoapMessage *msg,
 			if (with_due_by) {
 				struct icaltimetype dtstart;
 
-				dtstart = icalcomponent_get_dtstart (e_cal_component_get_icalcomponent (comp));
+				dtstart = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, e_cal_component_get_icalcomponent (comp),
+					ICAL_DTSTART_PROPERTY, icalproperty_get_dtstart);
 
 				if (!icaltime_is_null_time (dtstart)) {
 					e_ews_message_write_time_parameter (msg, "ReminderDueBy", NULL,
@@ -1119,16 +1121,16 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	/* set alarms */
 	has_alarms = e_cal_component_has_alarms (comp);
 	if (has_alarms)
-		ews_set_alarm (msg, comp, FALSE);
+		ews_set_alarm (msg, comp, convert_data->timezone_cache, FALSE);
 	else
 		e_ews_message_write_string_parameter (msg, "ReminderIsSet", NULL, "false");
 
 	/* start time, end time and meeting time zone */
-	dtstart = icalcomponent_get_dtstart (icalcomp);
+	dtstart = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, icalcomp, ICAL_DTSTART_PROPERTY, icalproperty_get_dtstart);
 	tzid_start = (icaltimezone *) (dtstart.zone ? dtstart.zone : convert_data->default_zone);
 	ical_location_start = icaltimezone_get_location (tzid_start);
 
-	dtend = icalcomponent_get_dtend (icalcomp);
+	dtend = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, icalcomp, ICAL_DTEND_PROPERTY, icalproperty_get_dtend);
 	tzid_end = (icaltimezone *) (dtend.zone ? dtend.zone : convert_data->default_zone);
 	ical_location_end = icaltimezone_get_location (tzid_end);
 
@@ -1286,7 +1288,7 @@ convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
 
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_DUE_PROPERTY);
 	if (prop) {
-		dt = icalproperty_get_due (prop);
+		dt = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, icalcomp, ICAL_DUE_PROPERTY, icalproperty_get_due);
 		e_ews_cal_utils_set_time (msg, "DueDate", &dt, TRUE);
 	}
 
@@ -1301,7 +1303,7 @@ convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
 
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_DTSTART_PROPERTY);
 	if (prop) {
-		dt = icalproperty_get_dtstart (prop);
+		dt = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, icalcomp, ICAL_DTSTART_PROPERTY, icalproperty_get_dtstart);
 		e_ews_cal_utils_set_time (msg, "StartDate", &dt, TRUE);
 	}
 
@@ -1324,7 +1326,7 @@ convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
 		ECalComponent *comp = e_cal_component_new_from_icalcomponent (icalcomponent_new_clone (icalcomp));
 
 		if (comp && e_cal_component_has_alarms (comp)) {
-			ews_set_alarm (msg, comp, TRUE);
+			ews_set_alarm (msg, comp, convert_data->timezone_cache, TRUE);
 		} else {
 			has_alarms = FALSE;
 		}
@@ -1578,8 +1580,8 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 
 	/* Update other properties allowed only for meeting organizers*/
 	/*meeting dates*/
-	dtstart = icalcomponent_get_dtstart (icalcomp);
-	dtstart_old = icalcomponent_get_dtstart (icalcomp_old);
+	dtstart = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, icalcomp, ICAL_DTSTART_PROPERTY, icalproperty_get_dtstart);
+	dtstart_old = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, icalcomp_old, ICAL_DTSTART_PROPERTY, icalproperty_get_dtstart);
 	dt_start_changed = icaltime_compare (dtstart, dtstart_old) != 0;
 	if (dtstart.zone != NULL) {
 		tzid_start = (icaltimezone *) dtstart.zone;
@@ -1590,8 +1592,8 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 			dt_start_changed_timezone_name = TRUE;
 	}
 
-	dtend = icalcomponent_get_dtend (icalcomp);
-	dtend_old = icalcomponent_get_dtend (icalcomp_old);
+	dtend = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, icalcomp, ICAL_DTEND_PROPERTY, icalproperty_get_dtend);
+	dtend_old = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, icalcomp_old, ICAL_DTEND_PROPERTY, icalproperty_get_dtend);
 	dt_end_changed = icaltime_compare (dtend, dtend_old) != 0;
 	if (dtend.zone != NULL) {
 		tzid_end = (icaltimezone *) dtend.zone;
@@ -1811,7 +1813,7 @@ convert_vtodo_component_to_updatexml (ESoapMessage *msg,
 
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_DUE_PROPERTY);
 	if (prop) {
-		dt = icalproperty_get_due (prop);
+		dt = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, icalcomp, ICAL_DUE_PROPERTY, icalproperty_get_due);
 		e_ews_message_start_set_item_field (msg, "DueDate", "task", "Task");
 		e_ews_cal_utils_set_time (msg, "DueDate", &dt, TRUE);
 		e_ews_message_end_set_item_field (msg);
@@ -1841,7 +1843,7 @@ convert_vtodo_component_to_updatexml (ESoapMessage *msg,
 
 	prop = icalcomponent_get_first_property (icalcomp, ICAL_DTSTART_PROPERTY);
 	if (prop) {
-		dt = icalproperty_get_dtstart (prop);
+		dt = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, icalcomp, ICAL_DTSTART_PROPERTY, icalproperty_get_dtstart);
 		e_ews_message_start_set_item_field (msg, "StartDate", "task", "Task");
 		e_ews_cal_utils_set_time (msg, "StartDate", &dt, TRUE);
 		e_ews_message_end_set_item_field (msg);
@@ -2079,4 +2081,42 @@ e_cal_backend_ews_prepare_accept_item_request (ESoapMessage *msg,
 	e_soap_message_end_element (msg);
 
 	return TRUE;
+}
+
+struct icaltimetype
+e_cal_backend_ews_get_datetime_with_zone (ETimezoneCache *timezone_cache,
+					  icalcomponent *comp,
+					  icalproperty_kind prop_kind,
+					  struct icaltimetype (* get_func) (const icalproperty *prop))
+{
+	struct icaltimetype dt = icaltime_null_time ();
+	icalproperty *prop;
+	icalparameter *param;
+	const gchar *tzid;
+
+	g_return_val_if_fail (E_IS_TIMEZONE_CACHE (timezone_cache), dt);
+	g_return_val_if_fail (comp != NULL, dt);
+	g_return_val_if_fail (get_func != NULL, dt);
+
+	prop = icalcomponent_get_first_property (comp, prop_kind);
+	if (!prop)
+		return dt;
+
+	dt = get_func (prop);
+
+	if (!icaltime_is_valid_time (dt) ||
+	    icaltime_is_null_time (dt))
+		return dt;
+
+	param = icalproperty_get_first_parameter (prop, ICAL_TZID_PARAMETER);
+	if (!param)
+		return dt;
+
+	tzid = icalparameter_get_tzid (param);
+	if (!tzid || !*tzid)
+		return dt;
+
+	dt.zone = e_timezone_cache_get_timezone (timezone_cache, tzid);
+
+	return dt;
 }
