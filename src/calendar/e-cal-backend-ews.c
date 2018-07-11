@@ -579,7 +579,7 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 			if (start_zone != NULL) {
 				icalcomp = icalcomponent_get_first_component (vcomp, kind);
 
-				dt = icalcomponent_get_dtstart (icalcomp);
+				dt = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, icalcomp, ICAL_DTSTART_PROPERTY, icalproperty_get_dtstart);
 				dt = icaltime_convert_to_zone (dt, start_zone);
 				icalcomponent_set_dtstart (icalcomp, dt);
 
@@ -587,7 +587,7 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 				e_timezone_cache_add_timezone (timezone_cache, start_zone);
 
 				if (end_zone != NULL) {
-					dt = icalcomponent_get_dtend (icalcomp);
+					dt = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, icalcomp, ICAL_DTEND_PROPERTY, icalproperty_get_dtend);
 					dt = icaltime_convert_to_zone (dt, end_zone);
 					icalcomponent_set_dtend (icalcomp, dt);
 
@@ -655,11 +655,11 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 				zone = icaltimezone_get_builtin_timezone (tzid);
 
 			if (zone != NULL) {
-				dt = icalcomponent_get_dtstart (icalcomp);
+				dt = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, icalcomp, ICAL_DTSTART_PROPERTY, icalproperty_get_dtstart);
 				dt = icaltime_convert_to_zone (dt, zone);
 				icalcomponent_set_dtstart (icalcomp, dt);
 
-				dt = icalcomponent_get_dtend (icalcomp);
+				dt = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, icalcomp, ICAL_DTEND_PROPERTY, icalproperty_get_dtend);
 				dt = icaltime_convert_to_zone (dt, zone);
 				icalcomponent_set_dtend (icalcomp, dt);
 			}
@@ -2447,6 +2447,7 @@ ecb_ews_modify_item_sync (ECalBackendEws *cbews,
 		ews_settings = ecb_ews_get_collection_settings (cbews);
 
 		convert_data.connection = cbews->priv->cnc;
+		convert_data.timezone_cache = E_TIMEZONE_CACHE (cbews);
 		convert_data.user_email = camel_ews_settings_dup_email (ews_settings);
 		convert_data.comp = comp;
 		convert_data.old_comp = oldcomp;
@@ -2628,6 +2629,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 		}
 
 		convert_data.connection = cbews->priv->cnc;
+		convert_data.timezone_cache = E_TIMEZONE_CACHE (cbews);
 		convert_data.icalcomp = icalcomp;
 		convert_data.default_zone = icaltimezone_get_utc_timezone ();
 
@@ -2843,6 +2845,8 @@ ecb_ews_discard_alarm_sync (ECalBackendSync *cal_backend_sync,
 		return;
 	}
 
+	convert_data.timezone_cache = E_TIMEZONE_CACHE (cbews);
+
 	if (e_cal_component_has_recurrences (comp)) {
 		gint *index;
 
@@ -2926,7 +2930,7 @@ ecb_ews_send_cancellation_email_sync (ECalBackendEws *cbews,
 	icalcomponent_add_property (vevent, icalproperty_new_status (ICAL_STATUS_CANCELLED));
 	prop = icalcomponent_get_first_property (vevent, ICAL_METHOD_PROPERTY);
 	if (prop != NULL) icalcomponent_remove_property (vevent, prop);
-	dt = icalcomponent_get_dtstart (vevent);
+	dt = e_cal_backend_ews_get_datetime_with_zone (E_TIMEZONE_CACHE (cbews), vevent, ICAL_DTSTART_PROPERTY, icalproperty_get_dtstart);
 	icaltz = (icaltimezone *)
 		(dt.zone ? dt.zone : ecb_ews_get_timezone_from_ical_component (cbews, vevent));
 	vtz = icaltimezone_get_component (icaltz);
@@ -2978,6 +2982,7 @@ ecb_ews_receive_objects_no_exchange_mail (ECalBackendEws *cbews,
 	EwsFolderId *fid;
 
 	convert_data.connection = cbews->priv->cnc;
+	convert_data.timezone_cache = E_TIMEZONE_CACHE (cbews);
 	convert_data.icalcomp = subcomp;
 	convert_data.default_zone = icaltimezone_get_utc_timezone ();
 
@@ -3257,6 +3262,7 @@ ecb_ews_do_method_request_publish_reply (ECalBackendEws *cbews,
 		} else {
 			EwsCalendarConvertData convert_data = { 0 };
 
+			convert_data.timezone_cache = E_TIMEZONE_CACHE (cbews);
 			convert_data.response_type = (gchar *) response_type;
 			convert_data.item_id = item_id;
 			convert_data.change_key = change_key;
@@ -3359,6 +3365,8 @@ ecb_ews_do_method_request_publish_reply (ECalBackendEws *cbews,
 					break;
 				}
 			}
+
+			convert_data.timezone_cache = E_TIMEZONE_CACHE (cbews);
 
 			e_ews_connection_update_items_sync (
 				cbews->priv->cnc,

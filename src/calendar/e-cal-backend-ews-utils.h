@@ -39,6 +39,7 @@ G_BEGIN_DECLS
 
 typedef struct {
 	EEwsConnection *connection;
+	ETimezoneCache *timezone_cache;
 	icaltimezone *default_zone;
 	gchar *user_email;
 	gchar *response_type; /* Accept */
@@ -78,6 +79,12 @@ void e_cal_backend_ews_prepare_set_free_busy_status (ESoapMessage *msg,gpointer 
 void e_cal_backend_ews_prepare_accept_item_request (ESoapMessage *msg, gpointer user_data);
 
 guint e_cal_backend_ews_rid_to_index (icaltimezone *timezone, const gchar *rid, icalcomponent *comp, GError **error);
+
+struct icaltimetype
+		e_cal_backend_ews_get_datetime_with_zone	(ETimezoneCache *timezone_cache,
+								 icalcomponent *comp,
+								 icalproperty_kind prop_kind,
+								 struct icaltimetype (* get_func) (const icalproperty *prop));
 
 G_END_DECLS
 
