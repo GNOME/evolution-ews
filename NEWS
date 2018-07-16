@@ -1,3 +1,14 @@
+Evolution-EWS 3.28.4 2018-07-16
+-------------------------------
+
+Bug Fixes:
+	Bug 796297 - Make it possible to not request RSVP (all-or-nothing) ][ (Milan Crha)
+	eds-I#12 - vCard REV attribute should be a timestamp (Milan Crha)
+	I#4 - Automatic junk filtering doesn't work (Milan Crha)
+	I#5 - Cannot set/change task priority (Milan Crha)
+	I#2 - Silently ignore broken items on fetch in calendars (Milan Crha)
+	I#7 - Event timezone not always properly set on the server (Milan Crha)
+
 Evolution-EWS 3.28.3 2018-06-18
 -------------------------------
 
