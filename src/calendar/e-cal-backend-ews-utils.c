@@ -1093,7 +1093,7 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	icaltimetype dtstart, dtend;
 	icaltimezone *tzid_start, *tzid_end;
 	icalproperty *prop;
-	gboolean has_alarms, satisfies, rsvp_requested = TRUE;
+	gboolean has_alarms, satisfies, rsvp_requested = TRUE, is_all_day_event;
 	const gchar *ical_location_start, *ical_location_end, *value;
 	const gchar *msdn_location_start, *msdn_location_end;
 
@@ -1150,19 +1150,21 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 			ical_location_end);
 	}
 
-	e_ews_cal_utils_set_time (msg, "Start", &dtstart, FALSE);
+	is_all_day_event = check_is_all_day_event (dtstart, tzid_start, dtend, tzid_end);
+
+	e_ews_cal_utils_set_time (msg, "Start", &dtstart, is_all_day_event && dtstart.is_date);
 
 	/* Cover components without DTEND */
 	if (icaltime_is_valid_time (dtend) &&
 	    !icaltime_is_null_time (dtend))
-		e_ews_cal_utils_set_time (msg, "End", &dtend, FALSE);
+		e_ews_cal_utils_set_time (msg, "End", &dtend, is_all_day_event && dtend.is_date);
 	else
-		e_ews_cal_utils_set_time (msg, "End", &dtstart, FALSE);
+		e_ews_cal_utils_set_time (msg, "End", &dtstart, is_all_day_event && dtstart.is_date);
 
 	/* We have to do the time zone(s) later, or the server rejects the request */
 
 	/* All day event ? */
-	if (check_is_all_day_event (dtstart, tzid_start, dtend, tzid_end))
+	if (is_all_day_event)
 		e_ews_message_write_string_parameter (msg, "IsAllDayEvent", NULL, "true");
 
 	/*freebusy*/
@@ -1473,7 +1475,7 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 	gboolean has_alarms, has_alarms_old;
 	gboolean dt_start_changed = FALSE, dt_end_changed = FALSE, dt_changed;
 	gboolean dt_start_changed_timezone_name = FALSE, dt_end_changed_timezone_name = FALSE;
-	gboolean satisfies, rsvp_requested = TRUE;
+	gboolean satisfies, rsvp_requested = TRUE, is_all_day_event = FALSE;
 	gint alarm = 0, alarm_old = 0;
 	gchar *recid;
 
@@ -1642,23 +1644,26 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 				ical_location_end);
 	}
 
+	dt_changed = dt_start_changed || dt_end_changed;
+
+	if (dt_changed)
+		is_all_day_event = check_is_all_day_event (dtstart, tzid_start, dtend, tzid_end);
+
 	if (dt_start_changed) {
 		e_ews_message_start_set_item_field (msg, "Start", "calendar","CalendarItem");
-		e_ews_cal_utils_set_time (msg, "Start", &dtstart, FALSE);
+		e_ews_cal_utils_set_time (msg, "Start", &dtstart, is_all_day_event && dtstart.is_date);
 		e_ews_message_end_set_item_field (msg);
 	}
 
 	if (dt_end_changed) {
 		e_ews_message_start_set_item_field (msg, "End", "calendar", "CalendarItem");
-		e_ews_cal_utils_set_time (msg, "End", &dtend, FALSE);
+		e_ews_cal_utils_set_time (msg, "End", &dtend, is_all_day_event && dtend.is_date);
 		e_ews_message_end_set_item_field (msg);
 	}
 
-	dt_changed = dt_start_changed || dt_end_changed;
-
 	/*Check for All Day Event*/
 	if (dt_changed) {
-		if (check_is_all_day_event (dtstart, tzid_start, dtend, tzid_end))
+		if (is_all_day_event)
 			convert_vevent_property_to_updatexml (msg, "IsAllDayEvent", "true", "calendar", NULL, NULL);
 		else
 			convert_vevent_property_to_updatexml (msg, "IsAllDayEvent", "false", "calendar", NULL, NULL);
