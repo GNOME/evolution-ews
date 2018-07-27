@@ -1898,6 +1898,7 @@ camel_ews_folder_new (CamelStore *store,
 static void
 sync_updated_items (CamelEwsFolder *ews_folder,
                     EEwsConnection *cnc,
+		    gboolean is_drafts_folder,
                     GSList *updated_items,
 		    CamelFolderChangeInfo *change_info,
                     GCancellable *cancellable,
@@ -1968,7 +1969,7 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 		EEwsAdditionalProps *add_props;
 
 		add_props = e_ews_additional_props_new ();
-		add_props->field_uri = g_strdup (SUMMARY_MESSAGE_FLAGS);
+		add_props->field_uri = g_strdup (is_drafts_folder ? SUMMARY_MESSAGE_PROPS : SUMMARY_MESSAGE_FLAGS);
 		add_props->extended_furis = ews_folder_get_summary_message_mapi_flags ();
 
 		e_ews_connection_get_items_sync (
@@ -1980,7 +1981,7 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 		e_ews_additional_props_free (add_props);
 	}
 
-	camel_ews_utils_sync_updated_items (ews_folder, items, change_info);
+	camel_ews_utils_sync_updated_items (ews_folder, cnc, is_drafts_folder, items, change_info, cancellable);
 	items = NULL;
 	if (local_error) {
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
@@ -1992,7 +1993,7 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 		EEwsAdditionalProps *add_props;
 
 		add_props = e_ews_additional_props_new ();
-		add_props->field_uri = g_strdup (SUMMARY_ITEM_FLAGS);
+		add_props->field_uri = g_strdup (is_drafts_folder ? SUMMARY_ITEM_PROPS : SUMMARY_ITEM_FLAGS);
 		add_props->extended_furis = ews_folder_get_summary_followup_mapi_flags ();
 
 		e_ews_connection_get_items_sync (
@@ -2003,7 +2004,7 @@ sync_updated_items (CamelEwsFolder *ews_folder,
 
 		e_ews_additional_props_free (add_props);
 	}
-	camel_ews_utils_sync_updated_items (ews_folder, items, change_info);
+	camel_ews_utils_sync_updated_items (ews_folder, cnc, is_drafts_folder, items, change_info, cancellable);
 
 	if (local_error) {
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
@@ -2022,9 +2023,20 @@ exit:
 	}
 }
 
+void
+camel_ews_folder_remove_cached_message (CamelEwsFolder *ews_folder,
+					const gchar *uid)
+{
+	g_return_if_fail (CAMEL_IS_EWS_FOLDER (ews_folder));
+	g_return_if_fail (uid != NULL);
+
+	ews_data_cache_remove (ews_folder->cache, "cur", uid, NULL);
+}
+
 static void
 sync_created_items (CamelEwsFolder *ews_folder,
                     EEwsConnection *cnc,
+		    gboolean is_drafts_folder,
                     GSList *created_items,
 		    GHashTable *updating_summary_uids,
 		    CamelFolderChangeInfo *change_info,
@@ -2112,7 +2124,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 		goto exit;
 	}
 
-	camel_ews_utils_sync_created_items (ews_folder, cnc, items, change_info, cancellable);
+	camel_ews_utils_sync_created_items (ews_folder, cnc, is_drafts_folder, items, change_info, cancellable);
 	items = NULL;
 
 
@@ -2138,7 +2150,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 		goto exit;
 	}
 
-	camel_ews_utils_sync_created_items (ews_folder, cnc, items, change_info, cancellable);
+	camel_ews_utils_sync_created_items (ews_folder, cnc, is_drafts_folder, items, change_info, cancellable);
 	items = NULL;
 
 	if (generic_item_ids) {
@@ -2157,7 +2169,7 @@ sync_created_items (CamelEwsFolder *ews_folder,
 		e_ews_additional_props_free (add_props);
 	}
 
-	camel_ews_utils_sync_created_items (ews_folder, cnc, items, change_info, cancellable);
+	camel_ews_utils_sync_created_items (ews_folder, cnc, is_drafts_folder, items, change_info, cancellable);
 
 	if (local_error) {
 		camel_ews_store_maybe_disconnect (ews_store, local_error);
@@ -2238,6 +2250,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 	gchar *id;
 	gchar *sync_state;
 	gboolean includes_last_item = FALSE;
+	gboolean is_drafts_folder;
 	gint64 last_folder_update_time;
 	GError *local_error = NULL;
 
@@ -2273,9 +2286,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 
 	camel_operation_push_message (cancellable, _("Refreshing folder “%s”"), camel_folder_get_display_name (folder));
 
-	if (camel_ews_summary_get_version (CAMEL_EWS_SUMMARY (folder_summary)) < CAMEL_EWS_SUMMARY_VERSION) {
-		updating_summary_uids = camel_folder_summary_get_hash (folder_summary);
-	}
+	is_drafts_folder = camel_ews_utils_folder_is_drafts_folder (ews_folder);
 
 	/* Sync folder items does not return the fields ToRecipients,
 	 * CCRecipients. With the item_type unknown, its not possible
@@ -2284,6 +2295,12 @@ ews_refresh_info_sync (CamelFolder *folder,
 	 * SyncFolderItem request and fetch the item using the
 	 * GetItem request. */
 	sync_state = camel_ews_summary_dup_sync_state (CAMEL_EWS_SUMMARY (folder_summary));
+
+	if (!sync_state ||
+	    camel_ews_summary_get_version (CAMEL_EWS_SUMMARY (folder_summary)) < CAMEL_EWS_SUMMARY_VERSION) {
+		updating_summary_uids = camel_folder_summary_get_hash (folder_summary);
+	}
+
 	do {
 		GSList *items_created = NULL, *items_updated = NULL;
 		GSList *items_deleted = NULL;
@@ -2322,7 +2339,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 			camel_ews_utils_sync_deleted_items (ews_folder, items_deleted, change_info);
 
 		if (items_created)
-			sync_created_items (ews_folder, cnc, items_created, updating_summary_uids, change_info, cancellable, &local_error);
+			sync_created_items (ews_folder, cnc, is_drafts_folder, items_created, updating_summary_uids, change_info, cancellable, &local_error);
 
 		if (local_error) {
 			if (items_updated) {
@@ -2334,7 +2351,7 @@ ews_refresh_info_sync (CamelFolder *folder,
 		}
 
 		if (items_updated)
-			sync_updated_items (ews_folder, cnc, items_updated, change_info, cancellable, &local_error);
+			sync_updated_items (ews_folder, cnc, is_drafts_folder, items_updated, change_info, cancellable, &local_error);
 
 		if (local_error)
 			break;

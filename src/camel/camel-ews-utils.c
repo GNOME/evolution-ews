@@ -70,6 +70,12 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store,
 
 	g_free (folder_name);
 
+	if ((fi->flags & CAMEL_FOLDER_TYPE_MASK) == CAMEL_FOLDER_TYPE_DRAFTS) {
+		/* Do not propagate the Drafts flag to Evolution, because
+		   it removes the Drafts icon in the folders tree when set */
+		fi->flags = fi->flags & (~CAMEL_FOLDER_TYPE_DRAFTS);
+	}
+
 	if (!(fi->flags & CAMEL_FOLDER_TYPE_MASK)) {
 		switch (camel_ews_store_summary_get_folder_type (ews_summary, fid, NULL)) {
 		case E_EWS_FOLDER_TYPE_CALENDAR:
@@ -794,10 +800,85 @@ camel_ews_utils_update_read_receipt_flags (EEwsItem *item,
 	return changed;
 }
 
+gboolean
+camel_ews_utils_folder_is_drafts_folder (CamelEwsFolder *ews_folder)
+{
+	CamelStore *parent_store;
+	CamelEwsStore *ews_store;
+	gchar *drafts_uid, *folder_uid;
+	gboolean is_drafts_folder;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_FOLDER (ews_folder), FALSE);
+
+	parent_store = camel_folder_get_parent_store (CAMEL_FOLDER (ews_folder));
+	if (!parent_store)
+		return FALSE;
+
+	ews_store = CAMEL_EWS_STORE (parent_store);
+	g_return_val_if_fail (ews_store != NULL, FALSE);
+
+	drafts_uid = camel_ews_store_summary_get_folder_id_from_folder_type (ews_store->summary, CAMEL_FOLDER_TYPE_DRAFTS);
+	if (!drafts_uid)
+		return FALSE;
+
+	folder_uid = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary,
+		camel_folder_get_full_name (CAMEL_FOLDER (ews_folder)));
+
+	is_drafts_folder = g_strcmp0 (drafts_uid, folder_uid) == 0;
+
+	g_free (drafts_uid);
+	g_free (folder_uid);
+
+	return is_drafts_folder;
+}
+
+static void
+ews_utils_copy_message_info (CamelMessageInfo *des_mi,
+			     const CamelMessageInfo *src_mi)
+{
+	gboolean had_cal;
+
+	g_return_if_fail (CAMEL_IS_MESSAGE_INFO (des_mi));
+	g_return_if_fail (CAMEL_IS_MESSAGE_INFO (src_mi));
+	g_return_if_fail (g_strcmp0 (camel_message_info_get_uid (des_mi), camel_message_info_get_uid (src_mi)) == 0);
+
+	camel_message_info_property_lock (des_mi);
+
+	had_cal = camel_message_info_get_user_flag (des_mi, "$has_cal");
+
+	camel_message_info_set_flags (des_mi, ~CAMEL_MESSAGE_FOLDER_FLAGGED, camel_message_info_get_flags (src_mi));
+	camel_message_info_take_user_flags (des_mi, camel_message_info_dup_user_flags (src_mi));
+	camel_message_info_take_user_tags (des_mi, camel_message_info_dup_user_tags (src_mi));
+	camel_message_info_set_subject (des_mi, camel_message_info_get_subject (src_mi));
+	camel_message_info_set_from (des_mi, camel_message_info_get_from (src_mi));
+	camel_message_info_set_to (des_mi, camel_message_info_get_to (src_mi));
+	camel_message_info_set_cc (des_mi, camel_message_info_get_cc (src_mi));
+	camel_message_info_set_mlist (des_mi, camel_message_info_get_mlist (src_mi));
+	camel_message_info_set_size (des_mi, camel_message_info_get_size (src_mi));
+	camel_message_info_set_date_sent (des_mi, camel_message_info_get_date_sent (src_mi));
+	camel_message_info_set_date_received (des_mi, camel_message_info_get_date_received (src_mi));
+	camel_message_info_set_message_id (des_mi, camel_message_info_get_message_id (src_mi));
+	camel_message_info_take_references (des_mi, camel_message_info_dup_references (src_mi));
+	camel_message_info_take_headers (des_mi, camel_message_info_dup_headers (src_mi));
+
+	if (had_cal)
+		camel_message_info_set_user_flag (des_mi, "$has_cal", TRUE);
+
+	if (CAMEL_IS_EWS_MESSAGE_INFO (des_mi) && CAMEL_IS_EWS_MESSAGE_INFO (src_mi)) {
+		camel_ews_message_info_set_change_key (CAMEL_EWS_MESSAGE_INFO (des_mi),
+			camel_ews_message_info_get_change_key (CAMEL_EWS_MESSAGE_INFO (src_mi)));
+	}
+
+	camel_message_info_property_unlock (des_mi);
+}
+
 void
 camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
+				    EEwsConnection *cnc,
+				    gboolean is_drafts_folder,
                                     GSList *items_updated,
-				    CamelFolderChangeInfo *change_info)
+				    CamelFolderChangeInfo *change_info,
+				    GCancellable *cancellable)
 {
 	CamelFolder *folder;
 	CamelFolderSummary *folder_summary;
@@ -824,33 +905,59 @@ camel_ews_utils_sync_updated_items (CamelEwsFolder *ews_folder,
 			continue;
 		}
 
-		mi = camel_folder_summary_get (folder_summary, id->id);
-		if (mi) {
-			guint32 server_flags;
-			gboolean changed, was_changed;
+		if (is_drafts_folder) {
+			mi = camel_folder_summary_get (folder_summary, id->id);
+			if (mi) {
+				CamelMessageInfo *tmp_mi;
 
-			camel_message_info_freeze_notifications (mi);
-			was_changed = camel_message_info_get_folder_flagged (mi);
+				if (g_strcmp0 (camel_ews_message_info_get_change_key (CAMEL_EWS_MESSAGE_INFO (mi)), id->change_key) != 0)
+					camel_ews_folder_remove_cached_message (ews_folder, id->id);
 
-			server_flags = ews_utils_get_server_flags (item);
-			ews_utils_merge_server_user_flags (item, mi);
-			changed = camel_ews_update_message_info_flags (folder_summary, mi, server_flags, NULL);
-			changed = camel_ews_utils_update_follow_up_flags (item, mi) || changed;
-			changed = camel_ews_utils_update_read_receipt_flags (item, mi, server_flags, FALSE) || changed;
+				/* There can changed also subject and other values in the Drafts folder,
+				   thus recreate it and update it. */
+				tmp_mi = camel_ews_utils_item_to_message_info (ews_folder, cnc, item, cancellable);
+				if (!tmp_mi) {
+					g_warn_if_reached ();
+					g_object_unref (mi);
+					g_object_unref (item);
+					continue;
+				}
 
-			if (changed)
+				ews_utils_copy_message_info (mi, tmp_mi);
+				camel_ews_message_info_set_change_key (CAMEL_EWS_MESSAGE_INFO (mi), id->change_key);
+
 				camel_folder_change_info_change_uid (change_info, id->id);
 
-			camel_ews_message_info_set_change_key (CAMEL_EWS_MESSAGE_INFO (mi), id->change_key);
-			if (!was_changed) {
-				/* do not save to the server what was just read, when did not change locally before */
-				camel_message_info_set_folder_flagged (mi, FALSE);
+				g_clear_object (&tmp_mi);
+				g_clear_object (&mi);
 			}
+		} else {
+			mi = camel_folder_summary_get (folder_summary, id->id);
+			if (mi) {
+				guint32 server_flags;
+				gboolean changed, was_changed;
 
-			camel_message_info_thaw_notifications (mi);
-			g_clear_object (&mi);
-			g_object_unref (item);
-			continue;
+				camel_message_info_freeze_notifications (mi);
+				was_changed = camel_message_info_get_folder_flagged (mi);
+
+				server_flags = ews_utils_get_server_flags (item);
+				ews_utils_merge_server_user_flags (item, mi);
+				changed = camel_ews_update_message_info_flags (folder_summary, mi, server_flags, NULL);
+				changed = camel_ews_utils_update_follow_up_flags (item, mi) || changed;
+				changed = camel_ews_utils_update_read_receipt_flags (item, mi, server_flags, FALSE) || changed;
+
+				if (changed)
+					camel_folder_change_info_change_uid (change_info, id->id);
+
+				camel_ews_message_info_set_change_key (CAMEL_EWS_MESSAGE_INFO (mi), id->change_key);
+				if (!was_changed) {
+					/* do not save to the server what was just read, when did not change locally before */
+					camel_message_info_set_folder_flagged (mi, FALSE);
+				}
+
+				camel_message_info_thaw_notifications (mi);
+				g_clear_object (&mi);
+			}
 		}
 
 		g_object_unref (item);
@@ -972,6 +1079,7 @@ camel_ews_utils_item_to_message_info (CamelEwsFolder *ews_folder,
 void
 camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
                                     EEwsConnection *cnc,
+				    gboolean is_drafts_folder,
                                     GSList *items_created,
 				    CamelFolderChangeInfo *change_info,
                                     GCancellable *cancellable)
@@ -988,7 +1096,7 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 
 	for (l = items_created; l != NULL; l = g_slist_next (l)) {
 		EEwsItem *item = (EEwsItem *) l->data;
-		CamelMessageInfo *mi;
+		CamelMessageInfo *mi, *tmp_mi;
 		const EwsId *id;
 
 		if (!item)
@@ -1008,33 +1116,46 @@ camel_ews_utils_sync_created_items (CamelEwsFolder *ews_folder,
 		}
 
 		mi = camel_folder_summary_get (folder_summary, id->id);
-		if (mi) {
+		/* If it didn't change, then skip it. */
+		if (mi && g_strcmp0 (camel_ews_message_info_get_change_key (CAMEL_EWS_MESSAGE_INFO (mi)), id->change_key) == 0) {
+			g_clear_object (&mi);
+			g_object_unref (item);
+			continue;
+		} else if (mi && is_drafts_folder) {
+			/* The message in the Drafts folder changed, thus reload also locally cached message */
+			camel_ews_folder_remove_cached_message (ews_folder, id->id);
+		}
+
+		tmp_mi = camel_ews_utils_item_to_message_info (ews_folder, cnc, item, cancellable);
+		if (!tmp_mi) {
+			g_warn_if_reached ();
 			g_clear_object (&mi);
 			g_object_unref (item);
 			continue;
 		}
 
-		mi = camel_ews_utils_item_to_message_info (ews_folder, cnc, item, cancellable);
-		if (!mi) {
-			g_warn_if_reached ();
-			g_object_unref (item);
-			continue;
+		if (mi) {
+			ews_utils_copy_message_info (mi, tmp_mi);
+			camel_ews_message_info_set_change_key (CAMEL_EWS_MESSAGE_INFO (mi), id->change_key);
+
+			camel_folder_change_info_change_uid (change_info, id->id);
+		} else {
+			camel_folder_summary_add (folder_summary, tmp_mi, FALSE);
+
+			/* camel_folder_summary_add() sets folder_flagged flag
+			 * on the message info, but this is a fresh item downloaded
+			 * from the server, thus unset it, to avoid resync up to the server
+			 * on folder leave/store
+			 */
+			camel_message_info_set_folder_flagged (tmp_mi, FALSE);
+
+			camel_folder_change_info_add_uid (change_info, id->id);
+			camel_folder_change_info_recent_uid (change_info, id->id);
 		}
 
-		camel_folder_summary_add (folder_summary, mi, FALSE);
-
-		/* camel_folder_summary_add() sets folder_flagged flag
-		 * on the message info, but this is a fresh item downloaded
-		 * from the server, thus unset it, to avoid resync up to the server
-		 * on folder leave/store
-		 */
-		camel_message_info_set_folder_flagged (mi, FALSE);
-
-		camel_folder_change_info_add_uid (change_info, id->id);
-		camel_folder_change_info_recent_uid (change_info, id->id);
-
-		g_object_unref (mi);
+		g_object_unref (tmp_mi);
 		g_object_unref (item);
+		g_clear_object (&mi);
 	}
 
 	g_slist_free (items_created);

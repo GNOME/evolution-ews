@@ -67,13 +67,17 @@ void		camel_ews_utils_sync_deleted_items
 void		camel_ews_utils_sync_created_items
 						(CamelEwsFolder *ews_folder,
 						 EEwsConnection *cnc,
+						 gboolean is_drafts_folder,
 						 GSList *items_created,
 						 CamelFolderChangeInfo *change_info,
 						 GCancellable *cancellable);
 void		camel_ews_utils_sync_updated_items
 						(CamelEwsFolder *ews_folder,
+						 EEwsConnection *cnc,
+						 gboolean is_drafts_folder,
 						 GSList *items_updated,
-						 CamelFolderChangeInfo *change_info);
+						 CamelFolderChangeInfo *change_info,
+						 GCancellable *cancellable);
 GSList *	ews_utils_gather_server_user_flags
 						(ESoapMessage *msg,
 						 CamelMessageInfo *mi);
@@ -94,6 +98,9 @@ CamelMessageInfo * /* (transfer full) */
 						 EEwsConnection *cnc,
 						 EEwsItem *item,
 						 GCancellable *cancellable);
+gboolean	camel_ews_utils_folder_is_drafts_folder
+						(CamelEwsFolder *ews_folder);
+
 
 G_END_DECLS
 

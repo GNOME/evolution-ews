@@ -73,6 +73,8 @@ GType camel_ews_folder_get_type (void);
 /* implemented */
 CamelFolder * camel_ews_folder_new (CamelStore *store, const gchar *folder_dir, const gchar *folder_name, GCancellable *cancellable, GError **error);
 void ews_update_summary ( CamelFolder *folder, GList *item_list, GCancellable *cancellable, GError **error);
+void		camel_ews_folder_remove_cached_message	(CamelEwsFolder *ews_folder,
+							 const gchar *uid);
 
 G_END_DECLS
 

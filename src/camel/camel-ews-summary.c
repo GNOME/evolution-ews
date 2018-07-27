@@ -115,6 +115,7 @@ summary_header_load (CamelFolderSummary *s,
 		     CamelFIRecord *mir)
 {
 	CamelEwsSummary *ews_summary = CAMEL_EWS_SUMMARY (s);
+	const gchar *sync_state = NULL;
 	gchar *part;
 
 	if (!CAMEL_FOLDER_SUMMARY_CLASS (camel_ews_summary_parent_class)->summary_header_load (s, mir))
@@ -129,10 +130,19 @@ summary_header_load (CamelFolderSummary *s,
 
 	if (part && part++ && strcmp (part, "(null)") &&
 	    ews_summary->priv->version >= CAMEL_EWS_SUMMARY_VERSION) {
-		camel_ews_summary_set_sync_state (ews_summary, part);
-	} else {
-		camel_ews_summary_set_sync_state (ews_summary, NULL);
+		sync_state = part;
 	}
+
+	/* Do not call camel_ews_summary_set_sync_state() here,
+	   to not mark the summary dirty after load. */
+	g_mutex_lock (&ews_summary->priv->property_lock);
+
+	if (g_strcmp0 (ews_summary->priv->sync_state, sync_state) != 0) {
+		g_free (ews_summary->priv->sync_state);
+		ews_summary->priv->sync_state = g_strdup (sync_state);
+	}
+
+	g_mutex_unlock (&ews_summary->priv->property_lock);
 
 	return TRUE;
 }
@@ -294,6 +304,8 @@ void
 camel_ews_summary_set_sync_state (CamelEwsSummary *ews_summary,
 				  const gchar *sync_state)
 {
+	gboolean changed = FALSE;
+
 	g_return_if_fail (CAMEL_IS_EWS_SUMMARY (ews_summary));
 
 	g_mutex_lock (&ews_summary->priv->property_lock);
@@ -301,9 +313,13 @@ camel_ews_summary_set_sync_state (CamelEwsSummary *ews_summary,
 	if (g_strcmp0 (ews_summary->priv->sync_state, sync_state) != 0) {
 		g_free (ews_summary->priv->sync_state);
 		ews_summary->priv->sync_state = g_strdup (sync_state);
+		changed = TRUE;
 	}
 
 	g_mutex_unlock (&ews_summary->priv->property_lock);
+
+	if (changed)
+		camel_folder_summary_touch (CAMEL_FOLDER_SUMMARY (ews_summary));
 }
 
 gchar *

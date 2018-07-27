@@ -1430,7 +1430,7 @@ static SystemFolder system_folder[] = {
 	{"calendar", CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_EVENTS},
 	{"contacts", CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_CONTACTS},
 	{"deleteditems", CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_TRASH},
-	{"drafts", CAMEL_FOLDER_SYSTEM},
+	{"drafts", CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_DRAFTS},
 	{"inbox", CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_INBOX},
 	{"journal", CAMEL_FOLDER_SYSTEM | CAMEL_EWS_FOLDER_TYPE_JOURNAL},
 	{"notes", CAMEL_FOLDER_SYSTEM | CAMEL_FOLDER_TYPE_MEMOS},
@@ -1867,13 +1867,21 @@ ews_authenticate_sync (CamelService *service,
 	if (!old_sync_state) {
 		initial_setup = TRUE;
 	} else {
-		gchar *inbox_folder_id;
+		gchar *folder_id;
 
-		inbox_folder_id = camel_ews_store_summary_get_folder_id_from_folder_type (ews_store->summary, CAMEL_FOLDER_TYPE_INBOX);
-		if (!inbox_folder_id || !*inbox_folder_id)
+		folder_id = camel_ews_store_summary_get_folder_id_from_folder_type (ews_store->summary, CAMEL_FOLDER_TYPE_INBOX);
+		if (!folder_id || !*folder_id)
 			initial_setup = TRUE;
 
-		g_free (inbox_folder_id);
+		g_free (folder_id);
+
+		if (!initial_setup) {
+			folder_id = camel_ews_store_summary_get_folder_id_from_folder_type (ews_store->summary, CAMEL_FOLDER_TYPE_DRAFTS);
+			if (!folder_id || !*folder_id)
+				initial_setup = TRUE;
+
+			g_free (folder_id);
+		}
 	}
 
 	e_ews_connection_sync_folder_hierarchy_sync (connection, EWS_PRIORITY_MEDIUM, old_sync_state,
