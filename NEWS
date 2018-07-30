@@ -1,3 +1,12 @@
+Evolution-EWS 3.28.5 2018-07-30
+-------------------------------
+
+Bug Fixes:
+	I#10 - All day event times broken after drag&drop in Work Week view (Milan Crha)
+
+Translations:
+	Bruce Cowan (en_GB)
+
 Evolution-EWS 3.28.4 2018-07-16
 -------------------------------
 
