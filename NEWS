@@ -1,3 +1,14 @@
+Evolution-EWS 3.29.90 2018-07-30
+--------------------------------
+
+Bug Fixes:
+	I#10 - All day event times broken after drag&drop in Work Week view (Milan Crha)
+	I#11 - Updated Draft message not re-downloaded (Milan Crha)
+
+Translations:
+	Bruce Cowan (en_GB)
+	Carles Ferrando Garcia (ca)
+
 Evolution-EWS 3.29.4 2018-07-16
 -------------------------------
 
