@@ -38,7 +38,7 @@ msgstr "Errada en actualitzar GAL:"
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
-"No és pot desar la llista de contactes, sols està suportat en servidors EWS "
+"No es pot desar la llista de contactes, sols està suportat en servidors EWS "
 "2010 o superiors"
 
 #: ../src/addressbook/e-book-backend-ews.c:3603
@@ -334,7 +334,7 @@ msgstr "No es pot canviar el nom i moure a una carpeta al mateix temps"
 #: ../src/camel/camel-ews-store.c:2961
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
-msgstr "No es pot trobar l'ID de la carpeta per al carpeta pare %s"
+msgstr "No es pot trobar l'ID de la carpeta per a la carpeta pare %s"
 
 #: ../src/camel/camel-ews-store.c:3013 ../src/camel/camel-ews-transport.c:318
 #, c-format
@@ -757,7 +757,7 @@ msgstr "Carpeta visible"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1311
 msgid "Reading folder permissions, please wait…"
-msgstr "S'estan llegint els permisos de la carpetes, espereu..."
+msgstr "S'estan llegint els permisos de les carpetes, espereu..."
 
 #: ../src/configuration/e-ews-ooo-notificator.c:182
 msgid "Unset on Server"
@@ -765,7 +765,7 @@ msgstr "No configurat al servidor"
 
 #: ../src/configuration/e-ews-ooo-notificator.c:183
 msgid "Unset the “Out of Office” status"
-msgstr "No configurat l'estat «Fora de la oficina»"
+msgstr "No configurat l'estat «Fora de l'oficina»"
 
 #: ../src/configuration/e-ews-search-user.c:206
 #, c-format
@@ -827,7 +827,7 @@ msgstr "No s'ha pogut afegir la carpeta, la carpeta existeix com «%s»"
 #, c-format
 msgctxt "ForeignFolder"
 msgid "Mailbox — %s"
-msgstr "Bustia — %s"
+msgstr "Bústia — %s"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:281
 msgid "Cannot test foreign folder availability when the account is offline"
@@ -962,7 +962,7 @@ msgstr "U_RL OAB:"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:243
 msgid "Open _Mailbox of other user"
-msgstr "Obre la _bustia per l'altre usuari"
+msgstr "Obre la _bústia per l'altre usuari"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:277
 #| msgid "S_earch..."
@@ -1015,7 +1015,7 @@ msgstr "L'ID de l'aplicació per defecte és «%s»"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:384
 msgid "_Redirect URI:"
-msgstr "_Redirecciona a URI:"
+msgstr "_Redirigeix a URI:"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:406
 #: ../src/configuration/e-mail-config-ews-backend.c:409
@@ -1044,7 +1044,7 @@ msgstr "L'ID de l'aplicació no pot estar buit"
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:417
 msgctxt "PermissionsLevel"
 msgid "Reviewer (can read items)"
-msgstr "Revisador ( pot llegir elements)"
+msgstr "Revisador (pot llegir elements)"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:418
 msgctxt "PermissionsLevel"
@@ -1067,7 +1067,7 @@ msgstr "C_alendari"
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:545
 msgid "_Delegate receives copies of meeting-related messages sent to me"
 msgstr ""
-"El _delegat rep copies dels missatges relacionats amb les reunions que m'han "
+"El _delegat rep còpies dels missatges relacionats amb les reunions que m'han "
 "enviat"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:550
@@ -1140,7 +1140,7 @@ msgstr ""
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1117
 msgid "My d_elegates only"
-msgstr "Sols els meu d_elegats"
+msgstr "Sols els meus d_elegats"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1124
 msgid "My delegates a_nd me"
@@ -1153,7 +1153,7 @@ msgstr "S'estan recuperant els paràmetres dels «delegats»"
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:193
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:257
 msgid "EWS Settings"
-msgstr "Configuració de EWS"
+msgstr "Configuració d'EWS"
 
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:200
 msgid "View the size of all Exchange folders"
@@ -1227,19 +1227,19 @@ msgstr "E_xterns:"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:552
 msgid "Message to be sent outside the organization"
-msgstr "Missatges a enviar fora de la organització"
+msgstr "Missatges a enviar fora de l'organització"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:562
 msgid "Do not reply to senders outside the organization"
-msgstr "No contesteu a remitents fora de la organització"
+msgstr "No contesteu a remitents fora de l'organització"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:565
 msgid "Reply only to known senders outside the organization"
-msgstr "Contesteu sols a remitents coneguts fora de la organització"
+msgstr "Contesteu sols a remitents coneguts fora de l'organització"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:568
 msgid "Reply to any sender outside the organization"
-msgstr "Contesteu a qualsevol remitent fora de la organització"
+msgstr "Contesteu a qualsevol remitent fora de l'organització"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:1005
 msgid "Retrieving “Out of Office” settings"
@@ -1269,7 +1269,7 @@ msgstr "Errada en recuperar els paràmetres de «Delegats»."
 #: ../src/configuration/module-ews-configuration.error.xml.h:6
 msgid "Your Exchange account “{0}” has the status set as “Out of Office”."
 msgstr ""
-"El vostre compte Exchange «{0}» té l'estat configurat com «Fora de l'oficina»"
+"El vostre compte Exchange «{0}» té l'estat configurat com «Fora de l'oficina»."
 
 #: ../src/server/camel-sasl-xoauth2-office365.c:23
 #| msgid "Out of Office"
@@ -1352,7 +1352,7 @@ msgstr "Errada en trobar l'element <Account>"
 #: ../src/server/e-ews-connection.c:2997
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
-msgstr "Errada em trobar <ASUrl> i <OABUrl> en la reposta autodescobreix"
+msgstr "Errada en trobar <ASUrl> i <OABUrl> en la reposta autodescobreix"
 
 #: ../src/server/e-ews-connection.c:3088
 msgid "URL cannot be NULL"
@@ -1382,7 +1382,7 @@ msgstr "No s'ha trobat cap element"
 #: ../src/server/e-ews-connection-utils.c:197
 #, c-format
 msgid "Password expired. Change password at “%s”."
-msgstr "La contrasenya ha caducat. Canvia la contrasenya en «%s»"
+msgstr "La contrasenya ha caducat. Canvia la contrasenya en «%s»."
 
 #: ../src/server/e-ews-connection-utils.c:200
 msgid "Password expired."
