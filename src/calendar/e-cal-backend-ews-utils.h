@@ -47,6 +47,7 @@ typedef struct {
 	ECalComponent *comp;
 	ECalComponent *old_comp;
 	icalcomponent *icalcomp;
+	icalcomponent *vcalendar; /* can be NULL, parent of icalcomp, where timezones can be eventually found */
 	gchar *item_id;
 	gchar *change_key;
 	EEwsItemChangeType change_type;
@@ -63,7 +64,7 @@ void ewscal_set_meeting_timezone (ESoapMessage *msg, icaltimezone *icaltz);
 void ewscal_set_reccurence (ESoapMessage *msg, icalproperty *rrule, icaltimetype *dtstart);
 void ewscal_set_reccurence_exceptions (ESoapMessage *msg, icalcomponent *comp);
 gchar *e_ews_extract_attachment_id_from_uri (const gchar *uri);
-void ews_set_alarm (ESoapMessage *msg, ECalComponent *comp, ETimezoneCache *timezone_cache, gboolean with_due_by);
+void ews_set_alarm (ESoapMessage *msg, ECalComponent *comp, ETimezoneCache *timezone_cache, icalcomponent *vcalendar, gboolean with_due_by);
 gint ews_get_alarm (ECalComponent *comp);
 void e_ews_clean_icalcomponent (icalcomponent *icalcomp);
 
@@ -82,6 +83,7 @@ guint e_cal_backend_ews_rid_to_index (icaltimezone *timezone, const gchar *rid, 
 
 struct icaltimetype
 		e_cal_backend_ews_get_datetime_with_zone	(ETimezoneCache *timezone_cache,
+								 icalcomponent *vcalendar,
 								 icalcomponent *comp,
 								 icalproperty_kind prop_kind,
 								 struct icaltimetype (* get_func) (const icalproperty *prop));

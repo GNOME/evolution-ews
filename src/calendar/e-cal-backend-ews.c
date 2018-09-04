@@ -499,7 +499,7 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 					icalcomponent *alarm_icalcomp;
 					struct icaltimetype dtstart, due_by;
 
-					dtstart = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, icalcomp, ICAL_DTSTART_PROPERTY, icalproperty_get_dtstart);
+					dtstart = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, NULL, icalcomp, ICAL_DTSTART_PROPERTY, icalproperty_get_dtstart);
 					due_by = icaltime_from_timet_with_zone (reminder_due_by, 0, utc_zone);
 
 					if (icaltime_is_null_time (dtstart)) {
@@ -638,7 +638,7 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 			if (start_zone != NULL) {
 				icalcomp = icalcomponent_get_first_component (vcomp, kind);
 
-				dt = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, icalcomp, ICAL_DTSTART_PROPERTY, icalproperty_get_dtstart);
+				dt = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, vcomp, icalcomp, ICAL_DTSTART_PROPERTY, icalproperty_get_dtstart);
 				dt = icaltime_convert_to_zone (dt, start_zone);
 				icalcomponent_set_dtstart (icalcomp, dt);
 
@@ -646,7 +646,7 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 				e_timezone_cache_add_timezone (timezone_cache, start_zone);
 
 				if (end_zone != NULL) {
-					dt = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, icalcomp, ICAL_DTEND_PROPERTY, icalproperty_get_dtend);
+					dt = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, vcomp, icalcomp, ICAL_DTEND_PROPERTY, icalproperty_get_dtend);
 					dt = icaltime_convert_to_zone (dt, end_zone);
 					icalcomponent_set_dtend (icalcomp, dt);
 
@@ -714,11 +714,11 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 				zone = icaltimezone_get_builtin_timezone (tzid);
 
 			if (zone != NULL) {
-				dt = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, icalcomp, ICAL_DTSTART_PROPERTY, icalproperty_get_dtstart);
+				dt = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, vcomp, icalcomp, ICAL_DTSTART_PROPERTY, icalproperty_get_dtstart);
 				dt = icaltime_convert_to_zone (dt, zone);
 				icalcomponent_set_dtstart (icalcomp, dt);
 
-				dt = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, icalcomp, ICAL_DTEND_PROPERTY, icalproperty_get_dtend);
+				dt = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, vcomp, icalcomp, ICAL_DTEND_PROPERTY, icalproperty_get_dtend);
 				dt = icaltime_convert_to_zone (dt, zone);
 				icalcomponent_set_dtend (icalcomp, dt);
 			}
@@ -2989,7 +2989,7 @@ ecb_ews_send_cancellation_email_sync (ECalBackendEws *cbews,
 	icalcomponent_add_property (vevent, icalproperty_new_status (ICAL_STATUS_CANCELLED));
 	prop = icalcomponent_get_first_property (vevent, ICAL_METHOD_PROPERTY);
 	if (prop != NULL) icalcomponent_remove_property (vevent, prop);
-	dt = e_cal_backend_ews_get_datetime_with_zone (E_TIMEZONE_CACHE (cbews), vevent, ICAL_DTSTART_PROPERTY, icalproperty_get_dtstart);
+	dt = e_cal_backend_ews_get_datetime_with_zone (E_TIMEZONE_CACHE (cbews), NULL, vevent, ICAL_DTSTART_PROPERTY, icalproperty_get_dtstart);
 	icaltz = (icaltimezone *)
 		(dt.zone ? dt.zone : ecb_ews_get_timezone_from_ical_component (cbews, vevent));
 	vtz = icaltimezone_get_component (icaltz);
@@ -3032,6 +3032,7 @@ ecb_ews_send_cancellation_email_sync (ECalBackendEws *cbews,
 
 static void
 ecb_ews_receive_objects_no_exchange_mail (ECalBackendEws *cbews,
+					  icalcomponent *vcalendar,
 					  icalcomponent *subcomp,
 					  GSList **ids,
 					  GCancellable *cancellable,
@@ -3043,6 +3044,7 @@ ecb_ews_receive_objects_no_exchange_mail (ECalBackendEws *cbews,
 	convert_data.connection = cbews->priv->cnc;
 	convert_data.timezone_cache = E_TIMEZONE_CACHE (cbews);
 	convert_data.icalcomp = subcomp;
+	convert_data.vcalendar = vcalendar;
 	convert_data.default_zone = icaltimezone_get_utc_timezone ();
 
 	fid = e_ews_folder_id_new (cbews->priv->folder_id, NULL, FALSE);
@@ -3287,6 +3289,7 @@ ecb_ews_get_item_accept_id (ECalComponent *comp,
 
 static gboolean
 ecb_ews_do_method_request_publish_reply (ECalBackendEws *cbews,
+					 icalcomponent *vcalendar,
 					 ECalComponent *comp,
 					 icalcomponent *subcomp,
 					 const gchar *response_type,
@@ -3317,7 +3320,7 @@ ecb_ews_do_method_request_publish_reply (ECalBackendEws *cbews,
 	while (pass < 2) {
 		/*in case we do not have item id we will create item with mime content only*/
 		if (!item_id || (response_type && g_ascii_strcasecmp (response_type, "NEEDS-ACTION") == 0)) {
-			ecb_ews_receive_objects_no_exchange_mail (cbews, subcomp, &ids, cancellable, &local_error);
+			ecb_ews_receive_objects_no_exchange_mail (cbews, vcalendar, subcomp, &ids, cancellable, &local_error);
 		} else {
 			EwsCalendarConvertData convert_data = { 0 };
 
@@ -3426,6 +3429,7 @@ ecb_ews_do_method_request_publish_reply (ECalBackendEws *cbews,
 			}
 
 			convert_data.timezone_cache = E_TIMEZONE_CACHE (cbews);
+			convert_data.vcalendar = vcalendar;
 
 			e_ews_connection_update_items_sync (
 				cbews->priv->cnc,
@@ -3511,7 +3515,7 @@ ecb_ews_receive_objects_sync (ECalBackendSync *sync_backend,
 
 			comp = e_cal_component_new_from_icalcomponent (icalcomponent_new_clone (subcomp));
 
-			success = ecb_ews_do_method_request_publish_reply (cbews, comp, subcomp, response_type, user_email, rsvp_requested, cancellable, error);
+			success = ecb_ews_do_method_request_publish_reply (cbews, icalcomp, comp, subcomp, response_type, user_email, rsvp_requested, cancellable, error);
 
 			do_refresh = TRUE;
 
