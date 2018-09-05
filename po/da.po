@@ -21,10 +21,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
-"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
-"product=evolution-ews&keywords=I18N+L10N&component=Miscellaneous / EWS Core\n"
-"POT-Creation-Date: 2018-03-06 21:19+0000\n"
-"PO-Revision-Date: 2018-03-08 10:04+0100\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
+"POT-Creation-Date: 2018-07-02 12:35+0000\n"
+"PO-Revision-Date: 2018-08-27 19:57+0200\n"
 "Last-Translator: Alan Mortensen <alanmortensen.am@gmail.com>\n"
 "Language-Team: Dansk-gruppen <dansk@dansk-gruppen.dk>\n"
 "Language: da\n"
@@ -32,7 +31,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.0.6\n"
+"X-Generator: Poedit 1.8.7.1\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/camel/camel-ews-provider.c:81
@@ -45,42 +44,42 @@ msgstr "Exchange Web-tjenester"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "For adgang til Exchangeservere der bruger internettjenester"
 
-#: ../src/addressbook/e-book-backend-ews.c:2971
+#: ../src/addressbook/e-book-backend-ews.c:3349
 msgid "Failed to update GAL:"
 msgstr "Kunne ikke opdatere GAL:"
 
-#: ../src/addressbook/e-book-backend-ews.c:3132
+#: ../src/addressbook/e-book-backend-ews.c:3510
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Kan ikke gemme kontaktliste. Dette er kun understøttet på EWS Server 2010 "
 "eller senere"
 
-#: ../src/addressbook/e-book-backend-ews.c:3225
+#: ../src/addressbook/e-book-backend-ews.c:3603
 msgid "Failed to set contact photo:"
 msgstr "Kunne ikke sætte kontaktfoto:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1591
+#: ../src/calendar/e-cal-backend-ews.c:1659
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Ledig"
 
-#: ../src/calendar/e-cal-backend-ews.c:1594
+#: ../src/calendar/e-cal-backend-ews.c:1662
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Optaget"
 
-#: ../src/calendar/e-cal-backend-ews.c:1596
+#: ../src/calendar/e-cal-backend-ews.c:1664
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Ikke på kontoret"
 
-#: ../src/calendar/e-cal-backend-ews.c:1598
+#: ../src/calendar/e-cal-backend-ews.c:1666
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Foreløbig"
 
-#: ../src/calendar/e-cal-backend-ews.c:3211
+#: ../src/calendar/e-cal-backend-ews.c:3303
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Kan ikke finde brugeren “%s” mellem deltagerne"
@@ -100,12 +99,12 @@ msgstr "Kan ikke oprette fortolker fra MIME-indhold (mimecontent)!"
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Kan ikke fortolke mødeanmodning fra MIME-indhold (mimecontent)!"
 
-#: ../src/camel/camel-ews-folder.c:451
+#: ../src/camel/camel-ews-folder.c:460 ../src/camel/camel-ews-folder.c:670
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Kan ikke oprette cachefil"
 
-#: ../src/camel/camel-ews-folder.c:585 ../src/camel/camel-ews-folder.c:678
+#: ../src/camel/camel-ews-folder.c:787 ../src/camel/camel-ews-folder.c:908
 #, c-format
 msgid "Unable to create cache path “%s”: %s"
 msgstr "Kan ikke oprette cachestien “%s”: %s"
@@ -113,22 +112,22 @@ msgstr "Kan ikke oprette cachestien “%s”: %s"
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/camel/camel-ews-folder.c:692
+#: ../src/camel/camel-ews-folder.c:922
 #, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Kunne ikke flytte beskedcachefilen fra “%s” til “%s”: %s"
 
-#: ../src/camel/camel-ews-folder.c:1570
+#: ../src/camel/camel-ews-folder.c:1814
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Kunne ikke indlæse referat for %s"
 
-#: ../src/camel/camel-ews-folder.c:2030
+#: ../src/camel/camel-ews-folder.c:2274
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Opdaterer mappen “%s”"
 
-#: ../src/camel/camel-ews-folder.c:2210
+#: ../src/camel/camel-ews-folder.c:2454
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Kan ikke udføre handlinger på mappen i frakoblet tilstand"
@@ -260,38 +259,38 @@ msgid_plural "Password will expire in %d days."
 msgstr[0] "Adgangskoden udløber om en dag."
 msgstr[1] "Adgangskoden udløber om %d dage."
 
-#: ../src/camel/camel-ews-store.c:1545
+#: ../src/camel/camel-ews-store.c:1546
 msgid "Updating foreign folder structure"
 msgstr "Opdaterer fremmed mappestruktur"
 
-#: ../src/camel/camel-ews-store.c:1681
+#: ../src/camel/camel-ews-store.c:1682
 msgid "Updating foreign folders"
 msgstr "Opdaterer fremmede mapper"
 
-#: ../src/camel/camel-ews-store.c:2075
+#: ../src/camel/camel-ews-store.c:2076
 #, c-format
 msgid "No such folder: %s"
 msgstr "Ingen sådan mappe: %s"
 
-#: ../src/camel/camel-ews-store.c:2373
+#: ../src/camel/camel-ews-store.c:2374
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Kan ikke vise offentlige EWS-mapper i frakoblet tilstand"
 
-#: ../src/camel/camel-ews-store.c:2446
+#: ../src/camel/camel-ews-store.c:2447
 msgid "Cannot find any EWS public folders"
 msgstr "Kan ikke finde offentlige EWS-mapper"
 
-#: ../src/camel/camel-ews-store.c:2555
+#: ../src/camel/camel-ews-store.c:2556
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Kan ikke oprette mappen “%s”. Mappen findes allerede"
 
-#: ../src/camel/camel-ews-store.c:2570
+#: ../src/camel/camel-ews-store.c:2571
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Overmappe %s findes ikke"
 
-#: ../src/camel/camel-ews-store.c:2580
+#: ../src/camel/camel-ews-store.c:2581
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -299,95 +298,103 @@ msgstr ""
 "Kan ikke oprette mappen under “%s”. Den bruges kun for mapper til andre "
 "brugere"
 
-#: ../src/camel/camel-ews-store.c:2590
+#: ../src/camel/camel-ews-store.c:2591
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "Kan ikke oprette mappen under “%s”. Den bruges kun for offentlige mapper"
 
-#: ../src/camel/camel-ews-store.c:2694
+#: ../src/camel/camel-ews-store.c:2695
 #, c-format
 msgid "Folder does not exist"
 msgstr "Mappe findes ikke"
 
-#: ../src/camel/camel-ews-store.c:2704
+#: ../src/camel/camel-ews-store.c:2705
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Kan ikke fjerne mappen “%s”. Den bruges kun for mapper til andre brugere"
 
-#: ../src/camel/camel-ews-store.c:2715
+#: ../src/camel/camel-ews-store.c:2716
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "Kan ikke fjerne mappen “%s”. Den bruges kun for offentlige mapper"
 
-#: ../src/camel/camel-ews-store.c:2871
+#: ../src/camel/camel-ews-store.c:2875
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Mappen %s findes ikke"
 
-#: ../src/camel/camel-ews-store.c:2880
+#: ../src/camel/camel-ews-store.c:2884
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Ingen change-nøglepost for mappe %s"
 
-#: ../src/camel/camel-ews-store.c:2923
+#: ../src/camel/camel-ews-store.c:2927
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Kan ikke både omdøbe og flytte en mappe på samme tid"
 
-#: ../src/camel/camel-ews-store.c:2957
+#: ../src/camel/camel-ews-store.c:2961
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Kan ikke finde mappe-ID for overmappe %s"
 
-#: ../src/camel/camel-ews-store.c:3009 ../src/camel/camel-ews-transport.c:318
+#: ../src/camel/camel-ews-store.c:3013 ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange server %s"
 msgstr "Exchangeserver %s"
 
 # på eller den?
-#: ../src/camel/camel-ews-store.c:3012
+#: ../src/camel/camel-ews-store.c:3016
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Exchangetjeneste for %s på %s"
 
-#: ../src/camel/camel-ews-store.c:3056
+#: ../src/camel/camel-ews-store.c:3060
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Kunne ikke finde papirkurvens mappe"
 
-#: ../src/camel/camel-ews-store.c:3116
+#: ../src/camel/camel-ews-store.c:3120
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Kunne ikke finde mappe for spam"
 
-#: ../src/camel/camel-ews-store.c:3307
+#: ../src/camel/camel-ews-store.c:3311
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Kan ikke abonnere på EWS-mapper i frakoblet tilstand"
 
-#: ../src/camel/camel-ews-store.c:3330
+#: ../src/camel/camel-ews-store.c:3334
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Kan ikke abonnere på mappen “%s”, ingen offentlig mappe tilgængelig"
 
-#: ../src/camel/camel-ews-store.c:3340
+#: ../src/camel/camel-ews-store.c:3344
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Kan ikke abonnere på mappen “%s”, mappen blev ikke fundet"
 
-#: ../src/camel/camel-ews-store.c:3431
+#: ../src/camel/camel-ews-store.c:3435
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Kan ikke fjerne abonnement for EWS-mapper i frakoblet tilstand"
 
-#: ../src/camel/camel-ews-store.c:3548
+#: ../src/camel/camel-ews-store.c:3552
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Du skal være på nettet for at fuldføre denne handling"
 
-#: ../src/camel/camel-ews-store.c:3592 ../src/camel/camel-ews-store.c:3629
+#: ../src/camel/camel-ews-store.c:3596 ../src/camel/camel-ews-store.c:3633
 msgid "Unsetting the “Out of Office” status"
 msgstr "Nulstil status for “Ikke på kontoret”"
+
+#: ../src/camel/camel-ews-store.h:56
+msgid "Foreign Folders"
+msgstr "Fremmede mapper"
+
+#: ../src/camel/camel-ews-store.h:58
+msgid "Public Folders"
+msgstr "Offentlige mapper"
 
 #: ../src/camel/camel-ews-transport.c:321
 #, c-format
@@ -426,6 +433,26 @@ msgstr ""
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Datakilden “%s” repræsenterer ikke en mappe for Exchange Web Services"
+
+#: ../src/configuration/e-book-config-ews.c:100
+msgid "Use only _primary contact email address"
+msgstr "Brug kun kontakts _primære e-mailadresse"
+
+#: ../src/configuration/e-book-config-ews.c:101
+msgid ""
+"When checked, the contacts looked up in the online Global Address List will "
+"contain only the primary email address"
+msgstr ""
+"Når markeret, vil kontakter slået op i den online globale adresseliste kun "
+"indeholde den primære e-mailadresse"
+
+#: ../src/configuration/e-book-config-ews.c:113
+msgid "_Fetch contact photos"
+msgstr "_Hent kontaktfotoer"
+
+#: ../src/configuration/e-book-config-ews.c:114
+msgid "Tries to look up for user photo"
+msgstr "Prøver at lede efter brugerens foto"
 
 #: ../src/configuration/e-ews-config-lookup.c:192
 msgid "Exchange Web Services autodiscovery"
@@ -476,44 +503,49 @@ msgstr "_Luk"
 msgid "Fetching folder list…"
 msgstr "Henter mappeliste …"
 
-#: ../src/configuration/e-ews-config-utils.c:924
+#: ../src/configuration/e-ews-config-utils.c:834
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:765
+msgid "Subscribe to folder of other EWS user…"
+msgstr "Abonner på mappe for anden EWS-bruger …"
+
+#: ../src/configuration/e-ews-config-utils.c:1015
 #, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr "Kan ikke redigere rettigheder for mappen “%s”. Vælg en anden mappe."
 
-#: ../src/configuration/e-ews-config-utils.c:1001
-msgid "Folder Sizes..."
+#: ../src/configuration/e-ews-config-utils.c:1092
+msgid "Folder Sizes…"
 msgstr "Mappestørrelser …"
 
-#: ../src/configuration/e-ews-config-utils.c:1008
-msgid "Subscribe to folder of other user..."
+#: ../src/configuration/e-ews-config-utils.c:1099
+msgid "Subscribe to folder of other user…"
 msgstr "Abonner på mappe for anden bruger …"
 
-#: ../src/configuration/e-ews-config-utils.c:1017
-#: ../src/configuration/e-ews-config-utils.c:1321
-#: ../src/configuration/e-ews-config-utils.c:1352
-#: ../src/configuration/e-ews-config-utils.c:1383
-#: ../src/configuration/e-ews-config-utils.c:1414
-msgid "Permissions..."
+#: ../src/configuration/e-ews-config-utils.c:1108
+#: ../src/configuration/e-ews-config-utils.c:1444
+#: ../src/configuration/e-ews-config-utils.c:1482
+#: ../src/configuration/e-ews-config-utils.c:1520
+#: ../src/configuration/e-ews-config-utils.c:1558
+msgid "Permissions…"
 msgstr "Rettigheder …"
 
-#: ../src/configuration/e-ews-config-utils.c:1019
+#: ../src/configuration/e-ews-config-utils.c:1110
 msgid "Edit EWS folder permissions"
 msgstr "Rediger EWS-mapperettigheder"
 
-#: ../src/configuration/e-ews-config-utils.c:1323
+#: ../src/configuration/e-ews-config-utils.c:1446
 msgid "Edit EWS calendar permissions"
 msgstr "Rediger EWS-kalenderrettigheder"
 
-#: ../src/configuration/e-ews-config-utils.c:1354
+#: ../src/configuration/e-ews-config-utils.c:1484
 msgid "Edit EWS tasks permissions"
 msgstr "Rediger EWS-opgaverettigheder"
 
-#: ../src/configuration/e-ews-config-utils.c:1385
+#: ../src/configuration/e-ews-config-utils.c:1522
 msgid "Edit EWS memos permissions"
 msgstr "Rediger EWS-memorettigheder"
 
-#: ../src/configuration/e-ews-config-utils.c:1416
+#: ../src/configuration/e-ews-config-utils.c:1560
 msgid "Edit EWS contacts permissions"
 msgstr "Rediger EWS-kontaktrettigheder"
 
@@ -582,7 +614,7 @@ msgid "Custom"
 msgstr "Tilpassede"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:265
-msgid "Writing folder permissions, please wait..."
+msgid "Writing folder permissions, please wait…"
 msgstr "Skriver mapperettigheder, vent venligst …"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:779
@@ -611,11 +643,11 @@ msgid "Permission level"
 msgstr "Rettighedsniveau"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:927
-msgid "Edit EWS folder permissions..."
+msgid "Edit EWS folder permissions…"
 msgstr "Rediger EWS-mapperettigheder …"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:952
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:674
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:786
 msgid "Account:"
 msgstr "Konto:"
 
@@ -724,7 +756,7 @@ msgid "Folder visible"
 msgstr "Mappe synlig"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:1311
-msgid "Reading folder permissions, please wait..."
+msgid "Reading folder permissions, please wait…"
 msgstr "Læser mapperettigheder, vent venligst …"
 
 #: ../src/configuration/e-ews-ooo-notificator.c:182
@@ -766,7 +798,7 @@ msgid "Search for a user"
 msgstr "Søg efter en bruger"
 
 #: ../src/configuration/e-ews-search-user.c:363
-msgid "Searching..."
+msgid "Searching…"
 msgstr "Søger …"
 
 #: ../src/configuration/e-ews-search-user.c:435
@@ -774,15 +806,15 @@ msgid "E-mail"
 msgstr "E-post"
 
 #: ../src/configuration/e-ews-search-user.c:472
-msgid "Choose EWS user..."
+msgid "Choose EWS user…"
 msgstr "Vælg EWS-bruger …"
 
 #: ../src/configuration/e-ews-search-user.c:495
 msgid "_Search:"
 msgstr "_Søg:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:97
-#: ../src/server/e-ews-folder.c:773
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:103
+#: ../src/server/e-ews-folder.c:776
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Kan ikke tilføje mappe. Mappe findes allerede som “%s”"
@@ -790,32 +822,33 @@ msgstr "Kan ikke tilføje mappe. Mappe findes allerede som “%s”"
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
 #. * Example result: "Mailbox — John Smith"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:107
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:113
 #, c-format
 msgctxt "ForeignFolder"
 msgid "Mailbox — %s"
 msgstr "Postkasse — %s"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:275
-msgid "Cannot test foreign folder availability while in offline mode"
-msgstr "Kan ikke teste tilgængelighed for fremmed mappe i frakoblet tilstand"
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:281
+msgid "Cannot test foreign folder availability when the account is offline"
+msgstr ""
+"Kan ikke teste tilgængelighed for fremmed mappe, når kontoen er offline"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:300
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:314
 #, c-format
 msgid "User “%s” was not found on the server"
 msgstr "Brugeren “%s” blev ikke fundet på serveren"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:336
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:350
 #, c-format
 msgid "User name “%s” is ambiguous, specify it more precisely, please"
 msgstr "Brugernavnet “%s” er tvetydigt. Angiv det mere præcist"
 
 #. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:374
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:388
 msgid "Availability"
 msgstr "Tilgængelighed"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:391
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:405
 #, c-format
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
@@ -824,7 +857,7 @@ msgstr ""
 "Mappen “%s” blev ikke fundet. Enten findes den ikke, eller du har ikke "
 "rettigheder til at tilgå den."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:410
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:424
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Kan ikke tilføje mappe, kan ikke bestemme mappens type"
 
@@ -833,70 +866,70 @@ msgstr "Kan ikke tilføje mappe, kan ikke bestemme mappens type"
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:455
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:469
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:549
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:759
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:582
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:866
 msgid "Inbox"
 msgstr "Indbakke"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:551
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:760
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:584
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:867
 msgid "Contacts"
 msgstr "Kontakter"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:553
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:761
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:586
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:868
 msgid "Calendar"
 msgstr "Kalender"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:555
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:762
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:588
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:869
 msgid "Free/Busy as Calendar"
 msgstr "Ledig/optaget som kalender"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:557
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:763
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:590
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:870
 msgid "Memos"
 msgstr "Memoer"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:559
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:764
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:592
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:871
 msgid "Tasks"
 msgstr "Opgaver"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:576
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:609
 #, c-format
-msgid "Testing availability of folder “%s” of user “%s”, please wait..."
+msgid "Testing availability of folder “%s” of user “%s”, please wait…"
 msgstr ""
 "Tester tilgængelighed for mappen “%s” for brugeren “%s”, vent venligst …"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:653
-msgid "Subscribe to folder of other EWS user..."
-msgstr "Abonner på mappe for anden EWS-bruger …"
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:648
+msgid "Cannot search for user when the account is offline"
+msgstr "Kan ikke søge efter brugeren, når kontoen er offline"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:704
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:811
 msgid "User"
 msgstr "Bruger"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:711
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:818
 msgid "_User:"
 msgstr "_Bruger:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:726
-msgid "C_hoose..."
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:833
+msgid "C_hoose…"
 msgstr "_Vælg …"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:742
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:849
 msgid "_Folder name:"
 msgstr "_Mappenavn:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:773
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:880
 msgid "Include _subfolders"
 msgstr "Inkluder _undermapper"
 
@@ -929,8 +962,8 @@ msgid "Open _Mailbox of other user"
 msgstr "Åbn _postkasse for anden bruger"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:277
-msgid "S_earch..."
-msgstr "_Søger …"
+msgid "S_earch…"
+msgstr "_Søg …"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:288
 msgid "Authentication"
@@ -1062,11 +1095,11 @@ msgid "Delegate can see my _private items"
 msgstr "Delegeret kan se mine _private punkter"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:905
-msgid "Retrieving current user permissions, please wait..."
+msgid "Retrieving current user permissions, please wait…"
 msgstr "Modtager nuværende brugerrettigheder, vent venligst …"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1026
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1648
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1649
 msgid "Delegates"
 msgstr "Delegerede"
 
@@ -1111,7 +1144,7 @@ msgstr "Kun mine _delegerede"
 msgid "My delegates a_nd me"
 msgstr "Mine delegerede og _mig"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1720
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1721
 msgid "Retrieving “Delegates” settings"
 msgstr "Modtager indstillinger for “Delegerede”"
 
@@ -1234,7 +1267,6 @@ msgid "Your Exchange account “{0}” has the status set as “Out of Office”
 msgstr "Din Exchangekonto “{0}” har statussen “Ikke på kontoret”."
 
 #: ../src/server/camel-sasl-xoauth2-office365.c:23
-#| msgid "Out of Office"
 msgid "OAuth2 (Office365)"
 msgstr "OAuth2 (Office365)"
 
@@ -1246,25 +1278,34 @@ msgstr ""
 "Denne indstilling vil bruge et OAuth 2.0-adgangssymbol til at forbinde til "
 "Office365-serveren"
 
-#: ../src/server/e-ews-camel-common.c:376
+#: ../src/server/e-ews-calendar-utils.c:1160
+#, c-format
+msgid ""
+"Cannot store this recurrence. Change it to simple single daily, weekly, "
+"monthly or yearly recurrence without exceptions and with start date."
+msgstr ""
+"Kan ikke gemme denne gentagelse. Ændr den til simpel enkel daglig, ugentlig, "
+"månedlig eller årlig gentagelse uden undtagelser og med begyndelsesdato."
+
+#: ../src/server/e-ews-camel-common.c:379
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "CreateItem-kald returnerede ikke ID for ny besked"
 
-#: ../src/server/e-ews-connection.c:759
+#: ../src/server/e-ews-connection.c:763
 msgid "Operation Cancelled"
 msgstr "Handling afbrudt"
 
-#: ../src/server/e-ews-connection.c:880
+#: ../src/server/e-ews-connection.c:884
 msgid "Authentication failed"
 msgstr "Godkendelse mislykkedes"
 
-#: ../src/server/e-ews-connection.c:902
+#: ../src/server/e-ews-connection.c:906
 #, c-format
 msgid "No response: %s"
 msgstr "Intet svar: %s"
 
-#: ../src/server/e-ews-connection.c:965
+#: ../src/server/e-ews-connection.c:969
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -1273,7 +1314,7 @@ msgstr[0] ""
 msgstr[1] ""
 "Exchange-serveren er optaget. Venter på at forsøge igen (%d:%02d minutter)"
 
-#: ../src/server/e-ews-connection.c:971
+#: ../src/server/e-ews-connection.c:975
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -1281,53 +1322,53 @@ msgstr[0] "Exchange-serveren er optaget. Venter på at forsøge igen (%d sekund)
 msgstr[1] ""
 "Exchange-serveren er optaget. Venter på at forsøge igen (%d sekunder)"
 
-#: ../src/server/e-ews-connection.c:2900
+#: ../src/server/e-ews-connection.c:2943
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Kunne ikke fortolke svar-XML for autodiscover"
 
-#: ../src/server/e-ews-connection.c:2907
+#: ../src/server/e-ews-connection.c:2950
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Kunne ikke finde <Autodiscover>-element"
 
-#: ../src/server/e-ews-connection.c:2918
+#: ../src/server/e-ews-connection.c:2961
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Kunne ikke finde <Response>-element"
 
-#: ../src/server/e-ews-connection.c:2929
+#: ../src/server/e-ews-connection.c:2972
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Kunne ikke finde <Account>-element"
 
-#: ../src/server/e-ews-connection.c:2954
+#: ../src/server/e-ews-connection.c:2997
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgstr "Kunne ikke finde <ASUrl> og <OABUrl> i autodiscoversvar"
 
-#: ../src/server/e-ews-connection.c:3045
+#: ../src/server/e-ews-connection.c:3088
 msgid "URL cannot be NULL"
 msgstr "Adresse kan ikke være NULL"
 
-#: ../src/server/e-ews-connection.c:3053
+#: ../src/server/e-ews-connection.c:3096
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "Adressen “%s” er ikke gyldig"
 
-#: ../src/server/e-ews-connection.c:3144
+#: ../src/server/e-ews-connection.c:3187
 msgid "Email address is missing a domain part"
 msgstr "E-post-adresse mangler en domænedel"
 
-#: ../src/server/e-ews-connection.c:3499
+#: ../src/server/e-ews-connection.c:3542
 msgid "Failed to parse oab XML"
 msgstr "Kunne ikke fortolke oab-XML"
 
-#: ../src/server/e-ews-connection.c:3507
+#: ../src/server/e-ews-connection.c:3550
 msgid "Failed to find <OAB> element\n"
 msgstr "Kunne ikke finde <OAB>-element\n"
 
-#: ../src/server/e-ews-connection.c:4814
+#: ../src/server/e-ews-connection.c:4857
 msgid "No items found"
 msgstr "Ingen punkter fundet"
 
@@ -1344,12 +1385,12 @@ msgstr "Adgangskode udløbet."
 msgid "Unknown error"
 msgstr "Ukendt fejl"
 
-#: ../src/server/e-ews-folder.c:728
+#: ../src/server/e-ews-folder.c:731
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Kan ikke tilføje mappe. Mappetype er ikke understøttet"
 
 # måske standardkilde
-#: ../src/server/e-ews-folder.c:733
+#: ../src/server/e-ews-folder.c:736
 msgid "Cannot add folder, master source not found"
 msgstr "Kan ikke tilføje mappe. Hovedkilde blev ikke fundet"
 
@@ -1358,3 +1399,12 @@ msgstr "Kan ikke tilføje mappe. Hovedkilde blev ikke fundet"
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office365"
+
+#~ msgid "Folder Sizes..."
+#~ msgstr "Mappestørrelser …"
+
+#~ msgid "Permissions..."
+#~ msgstr "Rettigheder …"
+
+#~ msgid "Edit EWS folder permissions..."
+#~ msgstr "Rediger EWS-mapperettigheder …"
