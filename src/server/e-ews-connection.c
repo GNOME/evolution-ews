@@ -847,8 +847,19 @@ ews_response_cb (SoupSession *session,
 	EwsNode *enode = (EwsNode *) data;
 	ESoapResponse *response;
 	ESoapParameter *param;
+	const gchar *persistent_auth;
 	gint log_level;
 	gint wait_ms = 0;
+
+	persistent_auth = soup_message_headers_get_one (msg->response_headers, "Persistent-Auth");
+	if (persistent_auth && g_ascii_strcasecmp (persistent_auth, "false") == 0) {
+		SoupSessionFeature *feature;
+
+		feature = soup_session_get_feature (session, SOUP_TYPE_AUTH_MANAGER);
+		if (feature) {
+			soup_auth_manager_clear_cached_credentials (SOUP_AUTH_MANAGER (feature));
+		}
+	}
 
 	if (g_cancellable_is_cancelled (enode->cancellable))
 		goto exit;
