@@ -4337,32 +4337,6 @@ e_ews_connection_sync_folder_items_sync (EEwsConnection *cnc,
 }
 
 static void
-ews_append_folder_id_to_msg (ESoapMessage *msg,
-                             const gchar *email,
-                             const EwsFolderId *fid)
-{
-	g_return_if_fail (msg != NULL);
-	g_return_if_fail (fid != NULL);
-
-	if (fid->is_distinguished_id)
-		e_soap_message_start_element (msg, "DistinguishedFolderId", NULL, NULL);
-	else
-		e_soap_message_start_element (msg, "FolderId", NULL, NULL);
-
-	e_soap_message_add_attribute (msg, "Id", fid->id, NULL, NULL);
-	if (fid->change_key)
-		e_soap_message_add_attribute (msg, "ChangeKey", fid->change_key, NULL, NULL);
-
-	if (fid->is_distinguished_id && email) {
-		e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
-		e_ews_message_write_string_parameter (msg, "EmailAddress", NULL, email);
-		e_soap_message_end_element (msg);
-	}
-
-	e_soap_message_end_element (msg);
-}
-
-static void
 ews_append_folder_ids_to_msg (ESoapMessage *msg,
                               const gchar *email,
                               GSList *folder_ids)
@@ -4372,7 +4346,7 @@ ews_append_folder_ids_to_msg (ESoapMessage *msg,
 	for (l = folder_ids; l != NULL; l = g_slist_next (l)) {
 		const EwsFolderId *fid = l->data;
 
-		ews_append_folder_id_to_msg (msg, email, fid);
+		e_ews_folder_id_append_to_msg (msg, email, fid);
 	}
 }
 
@@ -5579,7 +5553,7 @@ e_ews_connection_create_items (EEwsConnection *cnc,
 
 	if (fid) {
 		e_soap_message_start_element (msg, "SavedItemFolderId", "messages", NULL);
-		ews_append_folder_id_to_msg (msg, cnc->priv->email, fid);
+		e_ews_folder_id_append_to_msg (msg, cnc->priv->email, fid);
 		e_soap_message_end_element (msg);
 	}
 
@@ -8985,7 +8959,7 @@ e_ews_connection_get_folder_permissions (EEwsConnection *cnc,
 	e_soap_message_end_element (msg); /* FolderShape */
 
 	e_soap_message_start_element (msg, "FolderIds", "messages", NULL);
-	ews_append_folder_id_to_msg (msg, cnc->priv->email, folder_id);
+	e_ews_folder_id_append_to_msg (msg, cnc->priv->email, folder_id);
 	e_soap_message_end_element (msg);
 
 	e_ews_message_write_footer (msg);
@@ -9098,9 +9072,7 @@ e_ews_connection_set_folder_permissions (EEwsConnection *cnc,
 			TRUE);
 
 	e_soap_message_start_element (msg, "FolderChanges", "messages", NULL);
-	e_ews_message_start_item_change (
-		msg, E_EWS_ITEMCHANGE_TYPE_FOLDER,
-		folder_id->id, folder_id->change_key, 0);
+	e_ews_message_start_folder_change (msg, cnc->priv->email, folder_id);
 
 	e_soap_message_start_element (msg, "SetFolderField", NULL, NULL);
 	e_ews_message_write_string_parameter_with_attribute (msg, "FieldURI", NULL, NULL, "FieldURI", "folder:PermissionSet");
@@ -9520,7 +9492,7 @@ e_ews_connection_get_folder_info (EEwsConnection *cnc,
 	e_soap_message_end_element (msg); /* FolderShape */
 
 	e_soap_message_start_element (msg, "FolderIds", "messages", NULL);
-	ews_append_folder_id_to_msg (msg, mail_id, folder_id);
+	e_ews_folder_id_append_to_msg (msg, mail_id, folder_id);
 	e_soap_message_end_element (msg);
 
 	e_ews_message_write_footer (msg);

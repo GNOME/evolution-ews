@@ -993,49 +993,60 @@ static void
 action_folder_permissions_mail_cb (GtkAction *action,
                                    EShellView *shell_view)
 {
-	gchar *folder_path = NULL;
+	EShell *shell;
 	EShellWindow *shell_window;
+	ESourceRegistry *registry;
 	GtkWindow *parent;
 	CamelStore *store = NULL;
 	CamelEwsStore *ews_store;
-	gchar *str_folder_id;
+	EwsFolderId *folder_id = NULL;
+	gchar *folder_path = NULL;
 
 	if (!get_ews_store_from_folder_tree (shell_view, &folder_path, &store))
 		return;
 
 	ews_store = CAMEL_EWS_STORE (store);
 	g_return_if_fail (ews_store != NULL);
-	g_return_if_fail (folder_path != NULL);
 
 	shell_window = e_shell_view_get_shell_window (shell_view);
 	parent = GTK_WINDOW (shell_window);
+	shell = e_shell_window_get_shell (shell_window);
+	registry = e_shell_get_registry (shell);
 
-	str_folder_id = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, folder_path);
-	if (!str_folder_id) {
-		e_notice (parent, GTK_MESSAGE_ERROR, _("Cannot edit permissions of folder “%s”, choose other folder."), folder_path);
+	if (folder_path && *folder_path) {
+		gchar *str_folder_id = NULL;
+
+		str_folder_id = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, folder_path);
+		if (!str_folder_id) {
+			e_notice (parent, GTK_MESSAGE_ERROR, _("Cannot edit permissions of folder “%s”, choose other folder."), folder_path);
+		} else {
+			gchar *str_change_key;
+
+			str_change_key = camel_ews_store_summary_get_change_key (
+				ews_store->summary, str_folder_id, NULL);
+
+			folder_id = e_ews_folder_id_new (str_folder_id, str_change_key, FALSE);
+
+			g_free (str_change_key);
+		}
+
+		g_free (str_folder_id);
 	} else {
-		EShell *shell;
+		g_clear_pointer (&folder_path, g_free);
+
+		folder_id = e_ews_folder_id_new ("msgfolderroot", NULL, TRUE);
+	}
+
+	if (folder_id) {
 		ESource *source;
-		ESourceRegistry *registry;
 		CamelService *service;
 		CamelSettings *settings;
-		EwsFolderId *folder_id;
-		gchar *str_change_key;
 		const gchar *uid;
-
-		shell = e_shell_window_get_shell (shell_window);
-		registry = e_shell_get_registry (shell);
 
 		service = CAMEL_SERVICE (store);
 		uid = camel_service_get_uid (service);
 		source = e_source_registry_ref_source (registry, uid);
 		g_return_if_fail (source != NULL);
-
-		str_change_key = camel_ews_store_summary_get_change_key (
-			ews_store->summary, str_folder_id, NULL);
-
-		folder_id = e_ews_folder_id_new (
-			str_folder_id, str_change_key, FALSE);
 
 		settings = camel_service_ref_settings (service);
 
@@ -1045,20 +1056,17 @@ action_folder_permissions_mail_cb (GtkAction *action,
 			source,
 			CAMEL_EWS_SETTINGS (settings),
 			camel_service_get_display_name (service),
-			folder_path,
+			folder_path ? folder_path : camel_service_get_display_name (service),
 			folder_id,
 			E_EWS_FOLDER_TYPE_MAILBOX);
 
 		g_object_unref (settings);
-
 		g_object_unref (source);
-		g_free (str_folder_id);
-		g_free (str_change_key);
-		e_ews_folder_id_free (folder_id);
 	}
 
 	g_object_unref (store);
 	g_free (folder_path);
+	e_ews_folder_id_free (folder_id);
 }
 
 static void
@@ -1177,7 +1185,7 @@ ews_ui_update_actions_mail_cb (EShellView *shell_view,
 		g_object_unref (session);
 
 	ews_ui_enable_actions (action_group, mail_account_context_entries, G_N_ELEMENTS (mail_account_context_entries), account_node, online);
-	ews_ui_enable_actions (action_group, mail_folder_context_entries, G_N_ELEMENTS (mail_folder_context_entries), folder_node, online);
+	ews_ui_enable_actions (action_group, mail_folder_context_entries, G_N_ELEMENTS (mail_folder_context_entries), account_node || folder_node, online);
 	ews_ui_enable_actions (action_group, global_ews_entries, G_N_ELEMENTS (global_ews_entries), has_ews_account, online);
 }
 

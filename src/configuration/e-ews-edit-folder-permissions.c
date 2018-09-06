@@ -1002,28 +1002,30 @@ e_ews_edit_folder_permissions (GtkWindow *parent,
 
 	row++;
 
-	label = gtk_label_new (_("Folder ID:"));
-	g_object_set (
-		G_OBJECT (label),
-		"hexpand", FALSE,
-		"vexpand", FALSE,
-		"xalign", 0.0,
-		NULL);
+	if (!folder_id->is_distinguished_id) {
+		label = gtk_label_new (_("Folder ID:"));
+		g_object_set (
+			G_OBJECT (label),
+			"hexpand", FALSE,
+			"vexpand", FALSE,
+			"xalign", 0.0,
+			NULL);
 
-	widget = gtk_entry_new ();
-	g_object_set (
-		G_OBJECT (widget),
-		"hexpand", TRUE,
-		"vexpand", FALSE,
-		"xalign", 0.0,
-		"has-frame", FALSE,
-		"editable", FALSE,
-		"can-focus", FALSE,
-		"text", folder_id->id,
-		NULL);
+		widget = gtk_entry_new ();
+		g_object_set (
+			G_OBJECT (widget),
+			"hexpand", TRUE,
+			"vexpand", FALSE,
+			"xalign", 0.0,
+			"has-frame", FALSE,
+			"editable", FALSE,
+			"can-focus", FALSE,
+			"text", folder_id->id,
+			NULL);
 
-	gtk_grid_attach (grid, label, 0, row, 1, 1);
-	gtk_grid_attach (grid, widget, 1, row, 1, 1);
+		gtk_grid_attach (grid, label, 0, row, 1, 1);
+		gtk_grid_attach (grid, widget, 1, row, 1, 1);
+	}
 
 	row++;
 

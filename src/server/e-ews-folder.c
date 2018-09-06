@@ -364,6 +364,32 @@ e_ews_folder_id_is_equal (const EwsFolderId *a,
 	return TRUE;
 }
 
+void
+e_ews_folder_id_append_to_msg (ESoapMessage *msg,
+			       const gchar *email,
+			       const EwsFolderId *fid)
+{
+	g_return_if_fail (msg != NULL);
+	g_return_if_fail (fid != NULL);
+
+	if (fid->is_distinguished_id)
+		e_soap_message_start_element (msg, "DistinguishedFolderId", NULL, NULL);
+	else
+		e_soap_message_start_element (msg, "FolderId", NULL, NULL);
+
+	e_soap_message_add_attribute (msg, "Id", fid->id, NULL, NULL);
+	if (fid->change_key)
+		e_soap_message_add_attribute (msg, "ChangeKey", fid->change_key, NULL, NULL);
+
+	if (fid->is_distinguished_id && email) {
+		e_soap_message_start_element (msg, "Mailbox", NULL, NULL);
+		e_ews_message_write_string_parameter (msg, "EmailAddress", NULL, email);
+		e_soap_message_end_element (msg);
+	}
+
+	e_soap_message_end_element (msg);
+}
+
 const gchar *
 e_ews_folder_get_name (const EEwsFolder *folder)
 {
