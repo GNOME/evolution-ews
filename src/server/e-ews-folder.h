@@ -90,7 +90,9 @@ void		e_ews_folder_id_free (EwsFolderId *fid);
 gboolean	e_ews_folder_id_is_equal (const EwsFolderId *a,
 					  const EwsFolderId *b,
 					  gboolean check_change_key);
-
+void		e_ews_folder_id_append_to_msg (ESoapMessage *msg,
+					       const gchar *email,
+					       const EwsFolderId *fid);
 gchar *		e_ews_folder_utils_escape_name			(const gchar *folder_name);
 gchar *		e_ews_folder_utils_unescape_name		(const gchar *escaped_folder_name);
 

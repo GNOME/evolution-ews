@@ -27,6 +27,19 @@
 #include "e-ews-item-change.h"
 
 void
+e_ews_message_start_folder_change (ESoapMessage *msg,
+				   const gchar *email,
+				   const EwsFolderId *folder_id)
+{
+	g_return_if_fail (msg != NULL);
+	g_return_if_fail (folder_id != NULL);
+
+	e_soap_message_start_element (msg, "FolderChange", NULL, NULL);
+	e_ews_folder_id_append_to_msg (msg, email, folder_id);
+	e_soap_message_start_element (msg, "Updates", NULL, NULL);
+}
+
+void
 e_ews_message_start_item_change (ESoapMessage *msg,
                                  EEwsItemChangeType type,
                                  const gchar *itemid,

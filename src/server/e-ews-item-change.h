@@ -22,6 +22,7 @@
 #ifndef E_EWS_ITEM_CHANGE_H
 #define E_EWS_ITEM_CHANGE_H
 
+#include "e-ews-folder.h"
 #include "e-soap-message.h"
 #include "e-soap-response.h"
 
@@ -34,6 +35,7 @@ typedef enum {
 	E_EWS_ITEMCHANGE_TYPE_RECURRINGMASTER,
 } EEwsItemChangeType;
 
+void e_ews_message_start_folder_change (ESoapMessage *msg, const gchar *email, const EwsFolderId *folder_id);
 void e_ews_message_start_item_change (ESoapMessage *msg, EEwsItemChangeType type,
 				     const gchar *itemid, const gchar *changekey,
 				     gint instance_index);
