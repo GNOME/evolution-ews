@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
 "POT-Creation-Date: 2018-08-03 08:39+0000\n"
-"PO-Revision-Date: 2018-09-07 07:54+0200\n"
+"PO-Revision-Date: 2018-09-07 08:11+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -261,7 +261,7 @@ msgstr "Taková složka neexistuje: %s"
 
 #: ../src/camel/camel-ews-store.c:2382
 msgid "Cannot list EWS public folders in offline mode"
-msgstr "V režimu off-line nelze vypsat žádné veřejné složky EWS"
+msgstr "V režimu odpojení nelze vypsat žádné veřejné složky EWS"
 
 #: ../src/camel/camel-ews-store.c:2455
 msgid "Cannot find any EWS public folders"
@@ -351,7 +351,7 @@ msgstr "Nelze vyhledat složku Nevyžádaná pošta"
 
 #: ../src/camel/camel-ews-store.c:3319
 msgid "Cannot subscribe EWS folders in offline mode"
-msgstr "K odběru složek EWS se nelze přihlásit v režimu off-line"
+msgstr "K odběru složek EWS se nelze přihlásit v režimu odpojení"
 
 #: ../src/camel/camel-ews-store.c:3342
 #, c-format
@@ -366,7 +366,7 @@ msgstr "Nelze se přihlásit k odběru složky „%s“, složka nebyla nalezena
 
 #: ../src/camel/camel-ews-store.c:3443
 msgid "Cannot unsubscribe EWS folders in offline mode"
-msgstr "Z odběru složek EWS se nelze odhlásit v režimu off-line"
+msgstr "Z odběru složek EWS se nelze odhlásit v režimu odpojení"
 
 #: ../src/camel/camel-ews-store.c:3560
 #, c-format
@@ -817,7 +817,7 @@ msgstr "Schránka – %s"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:281
 msgid "Cannot test foreign folder availability when the account is offline"
-msgstr "Test dostupnosti vzdálené složky nelze provést v režimu off-line"
+msgstr "Test dostupnosti vzdálené složky nelze provést v režimu odpojení"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:314
 #, c-format
@@ -896,7 +896,7 @@ msgstr "Testuje se dostupnost složky „%s“ uživatele „%s“, čekejte pro
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:648
 msgid "Cannot search for user when the account is offline"
-msgstr ""
+msgstr "Nelze hledat uživatele, když je účet v režimu odpojení"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:811
 msgid "User"
