@@ -267,6 +267,7 @@ ews_search_process_criteria (CamelSExp *sexp,
 			e_ews_folder_id_free (fid);
 		}
 
+		g_clear_object (&connection);
 		g_free (folder_id);
 	}
 
