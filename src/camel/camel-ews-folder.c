@@ -1020,7 +1020,7 @@ exit:
 
 	if (mime_fname_new)
 		g_free (mime_fname_new);
-	g_object_unref (cnc);
+	g_clear_object (&cnc);
 
 	return message;
 }
