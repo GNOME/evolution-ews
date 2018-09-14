@@ -1352,7 +1352,7 @@ msgstr "Errada en trobar l'element <Account>"
 #: ../src/server/e-ews-connection.c:2997
 #, c-format
 msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
-msgstr "Errada en trobar <ASUrl> i <OABUrl> en la reposta autodescobreix"
+msgstr "Errada en trobar <ASUrl> i <OABUrl> en la resposta autodescobreix"
 
 #: ../src/server/e-ews-connection.c:3088
 msgid "URL cannot be NULL"
@@ -1361,7 +1361,7 @@ msgstr "L'URL no pot ser NULL"
 #: ../src/server/e-ews-connection.c:3096
 #, c-format
 msgid "URL “%s” is not valid"
-msgstr "L'URL «%s» no és valida"
+msgstr "L'URL «%s» no és vàlida"
 
 #: ../src/server/e-ews-connection.c:3187
 msgid "Email address is missing a domain part"
