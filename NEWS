@@ -1,3 +1,19 @@
+Evolution-EWS 3.30.1 2018-09-24
+-------------------------------
+
+Bug Fixes:
+	I#8 - Handle 'Persistent-Auth: false' when provided by the server (Milan Crha)
+	I#14 - Let edit Permissions of root message folder (Milan Crha)
+
+Miscellaneous:
+	Calendar invites added with the wrong time zone (Milan Crha)
+	Fix an invalid unref call and a memory leak of an EEwsConnection object (Milan Crha)
+
+Translations:
+	Balázs Meskó (hu)
+	Anders Jonsson (sv)
+	Marek Cernocky (cs)
+
 Evolution-EWS 3.30.0 2018-09-03
 -------------------------------
 
