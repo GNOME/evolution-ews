@@ -311,7 +311,7 @@ ecb_ews_responsetype_to_partstat (const gchar *responsetype)
 	else if (g_ascii_strcasecmp (responsetype, "NoResponseReceived") == 0)
 		param = icalparameter_new_partstat (ICAL_PARTSTAT_NEEDSACTION);
 	else if (g_ascii_strcasecmp (responsetype, "Unknown") == 0)
-		param = icalparameter_new_partstat (ICAL_PARTSTAT_NONE);
+		param = icalparameter_new_partstat (ICAL_PARTSTAT_NEEDSACTION);
 
 	if (!param)
 		param = icalparameter_new_partstat (ICAL_PARTSTAT_NONE);
