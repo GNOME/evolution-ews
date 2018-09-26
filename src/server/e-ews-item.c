@@ -726,7 +726,7 @@ ews_get_physical_address (ESoapParameter *param)
 	if (subparam)
 		address->state = e_soap_parameter_get_string_value (subparam);
 
-	subparam = e_soap_parameter_get_first_child_by_name (param, "Country");
+	subparam = e_soap_parameter_get_first_child_by_name (param, "CountryOrRegion");
 	if (subparam)
 		address->country = e_soap_parameter_get_string_value (subparam);
 
