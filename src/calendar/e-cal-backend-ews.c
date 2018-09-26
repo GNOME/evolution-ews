@@ -2657,7 +2657,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 		GHashTable *removed_indexes;
 		EwsCalendarConvertData convert_data = { 0 };
 		EEwsItem *item = NULL;
-		const EwsId *ews_id = NULL;
+		EwsId *ews_id = NULL;
 		const gchar *send_meeting_invitations;
 		icalcomponent *icalcomp;
 		icalproperty *prop;
@@ -2701,7 +2701,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 			if (item) {
 				g_object_ref (item);
 
-				ews_id = e_ews_item_get_id (item);
+				ews_id = e_ews_id_copy (e_ews_item_get_id (item));
 			}
 		}
 
@@ -2725,6 +2725,8 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 				g_clear_object (&item);
 
 				item = items_req->data;
+
+				e_ews_id_free (ews_id);
 				ews_id = NULL;
 
 				if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR) {
@@ -2733,7 +2735,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 					success = FALSE;
 				} else {
 					item = g_object_ref (item);
-					ews_id = e_ews_item_get_id (item);
+					ews_id = e_ews_id_copy (e_ews_item_get_id (item));
 				}
 			}
 
@@ -2748,13 +2750,21 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 			g_warn_if_fail (ews_id != NULL);
 
 			if (ews_id && ecb_ews_extract_attachments (icalcomp, &info_attachments)) {
+				gchar *changekey = NULL;
 				GSList *ids = NULL;
 
 				success = e_ews_connection_create_attachments_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM,
-					ews_id, info_attachments, FALSE, NULL, &ids, cancellable, error);
+					ews_id, info_attachments, FALSE, &changekey, &ids, cancellable, error);
 
 				g_slist_free_full (info_attachments, (GDestroyNotify) e_ews_attachment_info_free);
 				g_slist_free_full (ids, g_free);
+
+				if (success && changekey) {
+					g_free (ews_id->change_key);
+					ews_id->change_key = changekey;
+				} else {
+					g_free (changekey);
+				}
 			}
 		}
 
@@ -2789,6 +2799,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 		}
 
 		icalcomponent_free (icalcomp);
+		e_ews_id_free (ews_id);
 		g_clear_object (&item);
 
 		for (link = (GSList *) instances; link && success; link = g_slist_next (link)) {
