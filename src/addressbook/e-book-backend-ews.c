@@ -849,6 +849,7 @@ add_physical_address (ESoapMessage *msg,
 	e_ews_message_write_string_parameter (msg, "Street", NULL, contact_addr->street);
 	e_ews_message_write_string_parameter (msg, "City", NULL, contact_addr->locality);
 	e_ews_message_write_string_parameter (msg, "State", NULL, contact_addr->region);
+	e_ews_message_write_string_parameter (msg, "CountryOrRegion", NULL, contact_addr->country);
 	e_ews_message_write_string_parameter (msg, "PostalCode", NULL, contact_addr->code);
 
 	e_soap_message_end_element (msg);
@@ -1340,6 +1341,8 @@ compare_address (ESoapMessage *message,
 		convert_indexed_contact_property_to_updatexml_physical_address (message, "PhysicalAddress", "City", new_address->locality, "contacts", "PhysicalAddresses", key);
 	if (set || g_strcmp0 (new_address->region, old_address->region) != 0)
 		convert_indexed_contact_property_to_updatexml_physical_address (message, "PhysicalAddress", "State", new_address->region, "contacts", "PhysicalAddresses", key);
+	if (set || g_strcmp0 (new_address->country, old_address->country) != 0)
+		convert_indexed_contact_property_to_updatexml_physical_address (message, "PhysicalAddress", "CountryOrRegion", new_address->country, "contacts", "PhysicalAddresses", key);
 	if (set || g_strcmp0 (new_address->code, old_address->code) != 0)
 		convert_indexed_contact_property_to_updatexml_physical_address (message, "PhysicalAddress", "PostalCode", new_address->code, "contacts", "PhysicalAddresses", key);
 
