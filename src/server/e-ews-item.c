@@ -3223,3 +3223,28 @@ e_ews_item_util_strip_ex_address (const gchar *ex_address)
 
 	return ex_address;
 }
+
+EwsId *
+e_ews_id_copy (const EwsId *ews_id)
+{
+	EwsId *copy;
+
+	if (!ews_id)
+		return NULL;
+
+	copy = g_new0 (EwsId, 1);
+	copy->id = g_strdup (ews_id->id);
+	copy->change_key = g_strdup (ews_id->change_key);
+
+	return copy;
+}
+
+void
+e_ews_id_free (EwsId *ews_id)
+{
+	if (ews_id) {
+		g_free (ews_id->id);
+		g_free (ews_id->change_key);
+		g_free (ews_id);
+	}
+}

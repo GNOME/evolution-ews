@@ -477,6 +477,8 @@ void		e_ews_permissions_free (GSList *permissions);
 /* Utility functions */
 const gchar *	e_ews_item_util_strip_ex_address
 						(const gchar *ex_address);
+EwsId *		e_ews_id_copy			(const EwsId *ews_id);
+void		e_ews_id_free			(EwsId *ews_id);
 
 G_END_DECLS
 
