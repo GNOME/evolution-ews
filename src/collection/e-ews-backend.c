@@ -48,7 +48,7 @@ struct _EEwsBackendPrivate {
 
 	gboolean need_update_folders;
 
-	gulong notify_online_id;
+	gulong source_changed_id;
 };
 
 struct _SyncFoldersClosure {
@@ -647,15 +647,21 @@ static void
 ews_backend_dispose (GObject *object)
 {
 	EEwsBackendPrivate *priv;
+	ESource *source;
 
 	priv = E_EWS_BACKEND_GET_PRIVATE (object);
 
+	source = e_backend_get_source (E_BACKEND (object));
+	if (source && priv->source_changed_id) {
+		g_signal_handler_disconnect (source, priv->source_changed_id);
+		priv->source_changed_id = 0;
+	}
+
 	g_hash_table_remove_all (priv->folders);
 
-	if (priv->connection != NULL) {
-		g_object_unref (priv->connection);
-		priv->connection = NULL;
-	}
+	g_mutex_lock (&priv->connection_lock);
+	g_clear_object (&priv->connection);
+	g_mutex_unlock (&priv->connection_lock);
 
 	/* Chain up to parent's dispose() method. */
 	G_OBJECT_CLASS (e_ews_backend_parent_class)->dispose (object);
@@ -770,12 +776,8 @@ ews_backend_populate (ECollectionBackend *backend)
 
 	ews_backend->priv->need_update_folders = TRUE;
 
-	if (!ews_backend->priv->notify_online_id) {
-		ews_backend->priv->notify_online_id = g_signal_connect (
-			backend, "notify::online",
-			G_CALLBACK (ews_backend_populate), NULL);
-
-		g_signal_connect (
+	if (!ews_backend->priv->source_changed_id) {
+		ews_backend->priv->source_changed_id = g_signal_connect (
 			source, "changed",
 			G_CALLBACK (ews_backend_source_changed_cb), ews_backend);
 	}
