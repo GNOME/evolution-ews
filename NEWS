@@ -1,3 +1,27 @@
+Evolution-EWS 3.31.1 2018-10-08
+-------------------------------
+
+Bug Fixes:
+	I#8 - Handle 'Persistent-Auth: false' when provided by the server (Milan Crha)
+	I#14 - Let edit Permissions of root message folder (Milan Crha)
+	I#19 - Country is forgotten along the way to exchange server (Milan Crha)
+	I#21 - Meeting with attachment cannot be saved in 2010 (Milan Crha)
+
+Miscellaneous:
+	Calendar invites added with the wrong time zone (Milan Crha)
+	Fix an invalid unref call and a memory leak of an EEwsConnection object (Milan Crha)
+	Enable only Notification reminders in the calendar (Milan Crha)
+	Treat 'Unknown' ResponseType as Needs-Action (Milan Crha)
+	Collection backend schedules two 'populate' requests after going online (Milan Crha)
+
+Translations:
+	Balázs Meskó (hu)
+	Anders Jonsson (sv)
+	Alan Mortensen (da)
+	Marek Cernocky (cs)
+	Jordi Mas (ca)
+	Daniel Mustieles (es)
+
 Evolution-EWS 3.30.0 2018-09-03
 -------------------------------
 
