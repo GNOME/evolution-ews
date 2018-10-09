@@ -438,7 +438,7 @@ ews_node_new ()
 	return node;
 }
 
-static gboolean
+static void
 autodiscover_parse_protocol (xmlNode *node,
                              EwsUrls *urls)
 {
@@ -459,10 +459,21 @@ autodiscover_parse_protocol (xmlNode *node,
 
 		/* Once we find both, we can stop looking for the URLs */
 		if (urls->as_url && urls->oab_url)
-			return TRUE;
+			return;
+	}
+}
+
+static xmlChar *
+autodiscover_get_protocol_type (xmlNode *node)
+{
+	for (node = node->children; node; node = node->next) {
+		if (node->type == XML_ELEMENT_NODE &&
+		    !strcmp ((gchar *) node->name, "Type")) {
+			return xmlNodeGetContent (node);
+		}
 	}
 
-	return FALSE;
+	return NULL;
 }
 
 static gint
@@ -2896,6 +2907,22 @@ autodiscover_cancelled_cb (GCancellable *cancellable,
 	ews_connection_schedule_abort (cnc);
 }
 
+/* Frees only the content, not the 'urls' structure itself */
+static void
+ews_urls_free_content (EwsUrls *urls)
+{
+	if (!urls)
+		return;
+
+	if (urls->as_url)
+		xmlFree (urls->as_url);
+	urls->as_url = NULL;
+
+	if (urls->oab_url)
+		xmlFree (urls->oab_url);
+	urls->oab_url = NULL;
+}
+
 /* Called when each soup message completes */
 static void
 autodiscover_response_cb (SoupSession *session,
@@ -2905,13 +2932,15 @@ autodiscover_response_cb (SoupSession *session,
 {
 	GSimpleAsyncResult *simple = data;
 	struct _autodiscover_data *ad;
-	EwsUrls *urls = NULL;
+	EwsUrls exch_urls, expr_urls;
 	guint status = msg->status_code;
 	xmlDoc *doc;
 	xmlNode *node;
 	gint idx;
-	gboolean success = FALSE;
 	GError *error = NULL;
+
+	memset (&exch_urls, 0, sizeof (EwsUrls));
+	memset (&expr_urls, 0, sizeof (EwsUrls));
 
 	ad = g_simple_async_result_get_op_res_gpointer (simple);
 
@@ -2984,25 +3013,34 @@ autodiscover_response_cb (SoupSession *session,
 		goto failed;
 	}
 
-	urls = g_new0 (EwsUrls, 1);
 	for (node = node->children; node; node = node->next) {
 		if (node->type == XML_ELEMENT_NODE &&
 		    !strcmp ((gchar *) node->name, "Protocol")) {
-			success = autodiscover_parse_protocol (node, urls);
-			/* Since the server may send back multiple <Protocol> nodes
-			 * don't break unless we found the both URLs.
-			 */
-			if (success)
-				break;
+			xmlChar *protocol_type = autodiscover_get_protocol_type (node);
+
+			if (g_strcmp0 ((const gchar *) protocol_type, "EXCH") == 0) {
+				ews_urls_free_content (&exch_urls);
+				autodiscover_parse_protocol (node, &exch_urls);
+			} else if (g_strcmp0 ((const gchar *) protocol_type, "EXPR") == 0) {
+				ews_urls_free_content (&expr_urls);
+				autodiscover_parse_protocol (node, &expr_urls);
+
+				/* EXPR has precedence, thus stop once found both there */
+				if (expr_urls.as_url && expr_urls.oab_url) {
+					xmlFree (protocol_type);
+					break;
+				}
+			}
+
+			if (protocol_type)
+				xmlFree (protocol_type);
 		}
 	}
 
-	if (!success) {
-		if (urls->as_url != NULL)
-			xmlFree (urls->as_url);
-		if (urls->oab_url != NULL)
-			xmlFree (urls->oab_url);
-		g_free (urls);
+	/* Make the <OABUrl> optional */
+	if (!exch_urls.as_url && !expr_urls.as_url) {
+		ews_urls_free_content (&exch_urls);
+		ews_urls_free_content (&expr_urls);
 		g_set_error (
 			&error, EWS_CONNECTION_ERROR, -1,
 			_("Failed to find <ASUrl> and <OABUrl> in autodiscover response"));
@@ -3018,17 +3056,18 @@ autodiscover_response_cb (SoupSession *session,
 		}
 	}
 
-	if (urls->as_url != NULL) {
-		ad->as_url = g_strdup ((gchar *) urls->as_url);
-		xmlFree (urls->as_url);
-	}
+	if (expr_urls.as_url)
+		ad->as_url = g_strdup ((gchar *) expr_urls.as_url);
+	else if (exch_urls.as_url)
+		ad->as_url = g_strdup ((gchar *) exch_urls.as_url);
 
-	if (urls->oab_url != NULL) {
-		ad->oab_url = g_strdup ((gchar *) urls->oab_url);
-		xmlFree (urls->oab_url);
-	}
+	if (expr_urls.as_url && expr_urls.oab_url)
+		ad->oab_url = g_strdup ((gchar *) expr_urls.oab_url);
+	else if (!expr_urls.as_url && exch_urls.oab_url)
+		ad->oab_url = g_strdup ((gchar *) exch_urls.oab_url);
 
-	g_free (urls);
+	ews_urls_free_content (&exch_urls);
+	ews_urls_free_content (&expr_urls);
 
 	goto exit;
 
