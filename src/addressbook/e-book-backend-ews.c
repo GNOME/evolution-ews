@@ -65,6 +65,9 @@
 #define EDB_ERROR(_code) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, NULL)
 #define EDB_ERROR_EX(_code,_msg) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, _msg)
 
+#define EBB_EWS_DATA_VERSION 1
+#define EBB_EWS_DATA_VERSION_KEY "ews-data-version"
+
 #define X_EWS_ORIGINAL_VCARD "X-EWS-ORIGINAL-VCARD"
 #define X_EWS_CHANGEKEY "X-EWS-CHANGEKEY"
 #define X_EWS_GAL_SHA1 "X-EWS-GAL-SHA1"
@@ -166,6 +169,9 @@ ebb_ews_store_original_vcard (EContact *contact)
 	gchar *vcard_str;
 
 	g_return_if_fail (E_IS_CONTACT (contact));
+
+	/* This makes sure it's not saved also in the original vCard */
+	ebb_ews_remove_x_attribute (contact, X_EWS_ORIGINAL_VCARD);
 
 	vcard_str = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
 
@@ -3060,14 +3066,16 @@ ebb_ews_verify_changes (EBookCache *book_cache,
 }
 
 static EBookMetaBackendInfo *
-ebb_ews_contact_to_info (EContact *contact)
+ebb_ews_contact_to_info (EContact *contact,
+			 gboolean is_gal)
 {
 	EBookMetaBackendInfo *nfo;
 
 	if (!E_IS_CONTACT (contact))
 		return NULL;
 
-	ebb_ews_store_original_vcard (contact);
+	if (!is_gal)
+		ebb_ews_store_original_vcard (contact);
 
 	nfo = e_book_meta_backend_info_new (
 		e_contact_get_const (contact, E_CONTACT_UID),
@@ -3079,7 +3087,8 @@ ebb_ews_contact_to_info (EContact *contact)
 }
 
 static GSList * /* EBookMetaBackendInfo */
-ebb_ews_contacts_to_infos (const GSList *contacts) /* EContact * */
+ebb_ews_contacts_to_infos (const GSList *contacts, /* EContact * */
+			   gboolean is_gal)
 {
 	GSList *nfos = NULL, *link;
 
@@ -3087,12 +3096,85 @@ ebb_ews_contacts_to_infos (const GSList *contacts) /* EContact * */
 		EContact *contact = link->data;
 		EBookMetaBackendInfo *nfo;
 
-		nfo = ebb_ews_contact_to_info (contact);
+		nfo = ebb_ews_contact_to_info (contact, is_gal);
 		if (nfo)
 			nfos = g_slist_prepend (nfos, nfo);
 	}
 
 	return nfos;
+}
+
+typedef struct _MigrateData {
+	gint data_version;
+	gboolean is_gal;
+} MigrateData;
+
+static gboolean
+ebb_ews_migrate_data_cb (ECache *cache,
+			 const gchar *uid,
+			 const gchar *revision,
+			 const gchar *object,
+			 EOfflineState offline_state,
+			 gint ncols,
+			 const gchar *column_names[],
+			 const gchar *column_values[],
+			 gchar **out_revision,
+			 gchar **out_object,
+			 EOfflineState *out_offline_state,
+			 ECacheColumnValues **out_other_columns,
+			 gpointer user_data)
+{
+	MigrateData *md = user_data;
+
+	g_return_val_if_fail (md != NULL, FALSE);
+	g_return_val_if_fail (object != NULL, FALSE);
+	g_return_val_if_fail (out_object != NULL, FALSE);
+
+	if (md->data_version < 1) {
+		EContact *contact;
+
+		contact = e_contact_new_from_vcard (object);
+		if (contact) {
+			gchar *vcard;
+
+			if (md->is_gal) {
+				/* GAL doesn't store it, it's not writable */
+				ebb_ews_remove_x_attribute (contact, X_EWS_ORIGINAL_VCARD);
+			} else {
+				/* This updates the X_EWS_ORIGINAL_VCARD to not contain itself */
+				ebb_ews_store_original_vcard (contact);
+			}
+
+			vcard = e_vcard_to_string (E_VCARD (contact), EVC_FORMAT_VCARD_30);
+			if (vcard && *vcard)
+				*out_object = vcard;
+			else
+				g_free (vcard);
+
+			g_object_unref (contact);
+		}
+	}
+
+	return TRUE;
+}
+
+static gboolean
+ebb_ews_check_is_gal (EBookBackendEws *bbews)
+{
+	CamelEwsSettings *ews_settings;
+	ESource *source;
+	gchar *gal_uid;
+	gboolean is_gal;
+
+	g_return_val_if_fail (E_IS_BOOK_BACKEND_EWS (bbews), FALSE);
+
+	source = e_backend_get_source (E_BACKEND (bbews));
+	ews_settings = ebb_ews_get_collection_settings (bbews);
+	gal_uid = camel_ews_settings_dup_gal_uid (ews_settings);
+	is_gal = g_strcmp0 (e_source_get_uid (source), gal_uid) == 0;
+	g_free (gal_uid);
+
+	return is_gal;
 }
 
 static gboolean
@@ -3105,6 +3187,7 @@ ebb_ews_connect_sync (EBookMetaBackend *meta_backend,
 		      GError **error)
 {
 	EBookBackendEws *bbews;
+	EBookCache *book_cache;
 	CamelEwsSettings *ews_settings;
 	gchar *hosturl;
 	gboolean success = FALSE;
@@ -3124,6 +3207,28 @@ ebb_ews_connect_sync (EBookMetaBackend *meta_backend,
 		return TRUE;
 	}
 
+	book_cache = e_book_meta_backend_ref_cache (E_BOOK_META_BACKEND (bbews));
+	if (book_cache) {
+		ECache *cache = E_CACHE (book_cache);
+		gint data_version;
+
+		data_version = e_cache_get_key_int (cache, EBB_EWS_DATA_VERSION_KEY, NULL);
+
+		if (data_version != EBB_EWS_DATA_VERSION) {
+			MigrateData md;
+
+			e_cache_set_key_int (cache, EBB_EWS_DATA_VERSION_KEY, EBB_EWS_DATA_VERSION, NULL);
+
+			md.data_version = data_version;
+			md.is_gal = ebb_ews_check_is_gal (bbews);
+
+			if (e_cache_foreach_update (cache, E_CACHE_INCLUDE_DELETED, NULL, ebb_ews_migrate_data_cb, &md, cancellable, NULL))
+				e_cache_sqlite_exec (cache, "vacuum;", cancellable, NULL);
+		}
+
+		g_clear_object (&book_cache);
+	}
+
 	ews_settings = ebb_ews_get_collection_settings (bbews);
 	hosturl = camel_ews_settings_dup_hosturl (ews_settings);
 
@@ -3139,17 +3244,12 @@ ebb_ews_connect_sync (EBookMetaBackend *meta_backend,
 	if (*out_auth_result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
 		ESource *source = e_backend_get_source (E_BACKEND (bbews));
 		ESourceEwsFolder *ews_folder;
-		gchar *gal_uid;
 
 		ews_folder = e_source_get_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER);
 
 		g_free (bbews->priv->folder_id);
 		bbews->priv->folder_id = e_source_ews_folder_dup_id (ews_folder);
-
-		gal_uid = camel_ews_settings_dup_gal_uid (ews_settings);
-		bbews->priv->is_gal = g_strcmp0 (e_source_get_uid (source), gal_uid) == 0;
-
-		g_free (gal_uid);
+		bbews->priv->is_gal = ebb_ews_check_is_gal (bbews);
 
 		g_signal_connect_swapped (bbews->priv->cnc, "server-notification",
 			G_CALLBACK (ebb_ews_server_notification_cb), bbews);
@@ -3387,13 +3487,13 @@ ebb_ews_get_changes_sync (EBookMetaBackend *meta_backend,
 			if (items_created) {
 				success = ebb_ews_fetch_items_sync (bbews, items_created, &contacts_created, cancellable, error);
 				if (success)
-					*out_created_objects = ebb_ews_contacts_to_infos (contacts_created);
+					*out_created_objects = ebb_ews_contacts_to_infos (contacts_created, bbews->priv->is_gal);
 			}
 
 			if (items_modified) {
 				success = ebb_ews_fetch_items_sync (bbews, items_modified, &contacts_modified, cancellable, error);
 				if (success)
-					*out_modified_objects = ebb_ews_contacts_to_infos (contacts_modified);
+					*out_modified_objects = ebb_ews_contacts_to_infos (contacts_modified, bbews->priv->is_gal);
 			}
 
 			for (link = items_deleted; link; link = g_slist_next (link)) {
@@ -3703,7 +3803,7 @@ ebb_ews_search_sync (EBookMetaBackend *meta_backend,
 					if (!ebb_ews_fetch_gal_photo_sync (bbews, contact, cancellable, &local_error))
 						ebb_ews_store_photo_check_date (contact, NULL);
 
-					nfo = ebb_ews_contact_to_info (contact);
+					nfo = ebb_ews_contact_to_info (contact, bbews->priv->is_gal);
 					if (nfo)
 						modified = g_slist_prepend (modified, nfo);
 
