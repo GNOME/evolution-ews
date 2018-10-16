@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2018-09-03 15:26+0000\n"
-"PO-Revision-Date: 2018-09-05 11:53+0200\n"
+"POT-Creation-Date: 2018-10-09 12:16+0000\n"
+"PO-Revision-Date: 2018-10-16 21:45+0200\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -32,17 +32,17 @@ msgstr "Exchange Web Services"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "För att nå Exchange-servrar som använder Web Services"
 
-#: ../src/addressbook/e-book-backend-ews.c:3349
+#: ../src/addressbook/e-book-backend-ews.c:3352
 msgid "Failed to update GAL:"
 msgstr "Misslyckades med att uppdatera GAL:"
 
-#: ../src/addressbook/e-book-backend-ews.c:3510
+#: ../src/addressbook/e-book-backend-ews.c:3513
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Kan inte spara kontaktlista, det stöds bara i EWS Server 2010 eller senare"
 
-#: ../src/addressbook/e-book-backend-ews.c:3603
+#: ../src/addressbook/e-book-backend-ews.c:3606
 msgid "Failed to set contact photo:"
 msgstr "Misslyckades med att sätta kontaktbild:"
 
@@ -66,7 +66,7 @@ msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Preliminärt"
 
-#: ../src/calendar/e-cal-backend-ews.c:3308
+#: ../src/calendar/e-cal-backend-ews.c:3322
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Kan inte hitta deltagare ”%s” i listan över deltagare"
@@ -409,12 +409,12 @@ msgstr "Tjänst inte ansluten"
 msgid "Global Address List"
 msgstr "Global adresslista"
 
-#: ../src/collection/e-ews-backend.c:959
+#: ../src/collection/e-ews-backend.c:961
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr "Kunde inte bestämma en lämplig mappklass för en ny mapp vid namn ”%s”"
 
-#: ../src/collection/e-ews-backend.c:1047
+#: ../src/collection/e-ews-backend.c:1049
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Datakälla ”%s” representerar inte en Exchange Web Services-mapp"
@@ -493,44 +493,44 @@ msgstr "Hämtar mapplista…"
 msgid "Subscribe to folder of other EWS user…"
 msgstr "Prenumerera på mapp för annan EWS-användare…"
 
-#: ../src/configuration/e-ews-config-utils.c:1015
+#: ../src/configuration/e-ews-config-utils.c:1021
 #, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr "Kan inte redigera rättigheter för mapp ”%s”, välj en annan mapp."
 
-#: ../src/configuration/e-ews-config-utils.c:1092
+#: ../src/configuration/e-ews-config-utils.c:1100
 msgid "Folder Sizes…"
 msgstr "Mappstorlekar…"
 
-#: ../src/configuration/e-ews-config-utils.c:1099
+#: ../src/configuration/e-ews-config-utils.c:1107
 msgid "Subscribe to folder of other user…"
 msgstr "Prenumerera på mapp för en annan användare…"
 
-#: ../src/configuration/e-ews-config-utils.c:1108
-#: ../src/configuration/e-ews-config-utils.c:1444
-#: ../src/configuration/e-ews-config-utils.c:1482
-#: ../src/configuration/e-ews-config-utils.c:1520
-#: ../src/configuration/e-ews-config-utils.c:1558
+#: ../src/configuration/e-ews-config-utils.c:1116
+#: ../src/configuration/e-ews-config-utils.c:1452
+#: ../src/configuration/e-ews-config-utils.c:1490
+#: ../src/configuration/e-ews-config-utils.c:1528
+#: ../src/configuration/e-ews-config-utils.c:1566
 msgid "Permissions…"
 msgstr "Rättigheter…"
 
-#: ../src/configuration/e-ews-config-utils.c:1110
+#: ../src/configuration/e-ews-config-utils.c:1118
 msgid "Edit EWS folder permissions"
 msgstr "Redigera rättigheter för EWS-mapp"
 
-#: ../src/configuration/e-ews-config-utils.c:1446
+#: ../src/configuration/e-ews-config-utils.c:1454
 msgid "Edit EWS calendar permissions"
 msgstr "Redigera rättigheter för EWS-kalender"
 
-#: ../src/configuration/e-ews-config-utils.c:1484
+#: ../src/configuration/e-ews-config-utils.c:1492
 msgid "Edit EWS tasks permissions"
 msgstr "Redigera rättigheter för EWS-uppgifter"
 
-#: ../src/configuration/e-ews-config-utils.c:1522
+#: ../src/configuration/e-ews-config-utils.c:1530
 msgid "Edit EWS memos permissions"
 msgstr "Redigera rättigheter för EWS-memon"
 
-#: ../src/configuration/e-ews-config-utils.c:1560
+#: ../src/configuration/e-ews-config-utils.c:1568
 msgid "Edit EWS contacts permissions"
 msgstr "Redigera rättigheter för EWS-kontakter"
 
@@ -638,105 +638,105 @@ msgstr "Konto:"
 msgid "Folder name:"
 msgstr "Mappnamn:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1005
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1006
 msgid "Folder ID:"
 msgstr "Mapp-ID:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1069
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1071
 msgid "Permissions"
 msgstr "Rättigheter"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1091
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1093
 msgid "Permi_ssion level:"
 msgstr "Rättig_hetsnivå:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1125
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1127
 msgctxt "Permissions"
 msgid "Read"
 msgstr "Läs"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1137
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1204
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1139
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1206
 msgctxt "Permissions"
 msgid "None"
 msgstr "Inga"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1143
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1145
 msgctxt "Permissions"
 msgid "Free/Busy time"
 msgstr "Ledig/Upptagen-tid"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1148
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1150
 msgctxt "Permissions"
 msgid "Free/Busy time, subject, location"
 msgstr "Ledig/Upptagen-tid, ämne, plats"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1154
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1156
 msgctxt "Permissions"
 msgid "Full Details"
 msgstr "Fullständiga detaljer"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1160
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1162
 msgctxt "Permissions"
 msgid "Write"
 msgstr "Skriv"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1172
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1174
 msgctxt "Permissions"
 msgid "Create items"
 msgstr "Skapa objekt"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1176
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1178
 msgctxt "Permissions"
 msgid "Create subfolders"
 msgstr "Skapa undermappar"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1180
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1182
 msgctxt "Permissions"
 msgid "Edit own"
 msgstr "Redigera egna"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1184
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1186
 msgctxt "Permissions"
 msgid "Edit all"
 msgstr "Redigera alla"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1192
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1194
 msgctxt "Permissions"
 msgid "Delete items"
 msgstr "Ta bort objekt"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1209
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1211
 msgctxt "Permissions"
 msgid "Own"
 msgstr "Egna"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1214
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1216
 msgctxt "Permissions"
 msgid "All"
 msgstr "Alla"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1220
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1222
 msgctxt "Permissions"
 msgid "Other"
 msgstr "Andra"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1232
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1234
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "Mappägare"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1236
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1238
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "Mappkontakt"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1240
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1242
 msgctxt "Permissions"
 msgid "Folder visible"
 msgstr "Mappsynlighet"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1313
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1315
 msgid "Reading folder permissions, please wait…"
 msgstr "Läser mapprättigheter, vänta…"
 
@@ -795,7 +795,7 @@ msgid "_Search:"
 msgstr "_Sök:"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:103
-#: ../src/server/e-ews-folder.c:776
+#: ../src/server/e-ews-folder.c:802
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Kan inte lägga till mapp, mappen finns redan som ”%s”"
@@ -1271,20 +1271,20 @@ msgid "CreateItem call failed to return ID for new message"
 msgstr ""
 "Anrop till CreateItem misslyckades med att returnera ID för nytt meddelande"
 
-#: ../src/server/e-ews-connection.c:763
+#: ../src/server/e-ews-connection.c:774
 msgid "Operation Cancelled"
 msgstr "Operationen avbruten"
 
-#: ../src/server/e-ews-connection.c:884
+#: ../src/server/e-ews-connection.c:906
 msgid "Authentication failed"
 msgstr "Autentisering misslyckades"
 
-#: ../src/server/e-ews-connection.c:906
+#: ../src/server/e-ews-connection.c:928
 #, c-format
 msgid "No response: %s"
 msgstr "Inget svar: %s"
 
-#: ../src/server/e-ews-connection.c:969
+#: ../src/server/e-ews-connection.c:991
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -1293,7 +1293,7 @@ msgstr[0] ""
 msgstr[1] ""
 "Exchange-servern är upptagen, väntar med att försöka igen (%d:%02d minuter)"
 
-#: ../src/server/e-ews-connection.c:975
+#: ../src/server/e-ews-connection.c:997
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -1302,53 +1302,53 @@ msgstr[0] ""
 msgstr[1] ""
 "Exchange-servern är upptagen, väntar med att försöka igen (%d sekunder)"
 
-#: ../src/server/e-ews-connection.c:2943
+#: ../src/server/e-ews-connection.c:2983
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Misslyckades att tolka XML-svar från autodetektering"
 
-#: ../src/server/e-ews-connection.c:2950
+#: ../src/server/e-ews-connection.c:2990
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Misslyckades med att hitta <Autodiscover>-element"
 
-#: ../src/server/e-ews-connection.c:2961
+#: ../src/server/e-ews-connection.c:3001
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Misslyckades med att hitta <Response>-element"
 
-#: ../src/server/e-ews-connection.c:2972
+#: ../src/server/e-ews-connection.c:3012
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Misslyckades med att hitta <Account>-element"
 
-#: ../src/server/e-ews-connection.c:2997
+#: ../src/server/e-ews-connection.c:3046
 #, c-format
-msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
-msgstr "Kunde inte hitta <ASUrl> och <OABUrl> i svar för autodetektering"
+msgid "Failed to find <ASUrl> in autodiscover response"
+msgstr "Kunde inte hitta <ASUrl> i svar för autodetektering"
 
-#: ../src/server/e-ews-connection.c:3088
+#: ../src/server/e-ews-connection.c:3138
 msgid "URL cannot be NULL"
 msgstr "URL kan inte vara NULL"
 
-#: ../src/server/e-ews-connection.c:3096
+#: ../src/server/e-ews-connection.c:3146
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "URL ”%s” är inte giltig"
 
-#: ../src/server/e-ews-connection.c:3187
+#: ../src/server/e-ews-connection.c:3237
 msgid "Email address is missing a domain part"
 msgstr "E-postadress saknar en domändel"
 
-#: ../src/server/e-ews-connection.c:3542
+#: ../src/server/e-ews-connection.c:3592
 msgid "Failed to parse oab XML"
 msgstr "Misslyckades med att tolka oab-XML"
 
-#: ../src/server/e-ews-connection.c:3550
+#: ../src/server/e-ews-connection.c:3600
 msgid "Failed to find <OAB> element\n"
 msgstr "Misslyckades att hitta <OAB>-element\n"
 
-#: ../src/server/e-ews-connection.c:4857
+#: ../src/server/e-ews-connection.c:4881
 msgid "No items found"
 msgstr "Inga objekt hittades"
 
@@ -1365,11 +1365,11 @@ msgstr "Lösenord utgånget."
 msgid "Unknown error"
 msgstr "Okänt fel"
 
-#: ../src/server/e-ews-folder.c:731
+#: ../src/server/e-ews-folder.c:757
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Kan inte lägga till mapp, mapptyp stöds ej"
 
-#: ../src/server/e-ews-folder.c:736
+#: ../src/server/e-ews-folder.c:762
 msgid "Cannot add folder, master source not found"
 msgstr "Kan inte lägga till mapp, huvudkälla inte funnen"
 
