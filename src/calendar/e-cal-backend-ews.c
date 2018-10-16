@@ -981,6 +981,9 @@ ecb_ews_store_original_comp (ECalComponent *comp)
 
 	g_return_if_fail (E_IS_CAL_COMPONENT (comp));
 
+	/* This makes sure it's not saved also in the original component */
+	e_cal_util_remove_x_property (e_cal_component_get_icalcomponent (comp), X_EWS_ORIGINAL_COMP);
+
 	comp_str = e_cal_component_get_as_string (comp);
 	g_return_if_fail (comp_str != NULL);
 
