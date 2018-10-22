@@ -1,3 +1,20 @@
+Evolution-EWS 3.30.2 2018-10-22
+-------------------------------
+
+Bug Fixes:
+	I#18 - Crashes when reading EWS Global Address List (Milan Crha)
+	I#19 - Country is forgotten along the way to exchange server (Milan Crha)
+	I#21 - Meeting with attachment cannot be saved in 2010 (Milan Crha)
+	I#23 - Autodiscovery uses EXCH URLs instead of EXPR (Milan Crha)
+
+Miscellaneous:
+	Enable only Notification reminders in the calendar (Milan Crha)
+	Treat 'Unknown' ResponseType as Needs-Action (Milan Crha)
+	Collection backend schedules two 'populate' requests after going online (Milan Crha)
+
+Translations:
+	Daniel Mustieles (es)
+
 Evolution-EWS 3.30.1 2018-09-24
 -------------------------------
 
