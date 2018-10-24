@@ -29,6 +29,7 @@
 #include <glib/gstdio.h>
 
 #include <libemail-engine/libemail-engine.h>
+#include <e-util/e-util.h>
 
 #include "server/camel-ews-settings.h"
 #include "server/e-ews-camel-common.h"
@@ -387,6 +388,43 @@ camel_ews_utils_sync_deleted_items (CamelEwsFolder *ews_folder,
 }
 
 static const gchar *
+ews_utils_outlook_color_index_to_color_def (gint color_index)
+{
+	const gchar *colors_array[] = {
+		"#ff1a36", /* Red */
+		"#ff8c00", /* Orange */
+		"#f4b10b", /* Peach */
+		"#fff100", /* Yellow */
+		"#009e48", /* Green */
+		"#00b294", /* Teal */
+		"#89933f", /* Olive */
+		"#00bcf2", /* Blue */
+		"#8e69df", /* Purple */
+		"#f30092", /* Maroon */
+		"#6c7e9a", /* Steel */
+		"#425066", /* DarkSteel */
+		"#969696", /* Gray */
+		"#525552", /* DarkGray */
+		"#282828", /* Black */
+		"#a00023", /* DarkRed */
+		"#c45502", /* DarkOrange */
+		"#af7000", /* DarkPeach */
+		"#b59b02", /* DarkYellow */
+		"#176002", /* DarkGreen */
+		"#00725c", /* DarkTeal */
+		"#5c6022", /* DarkOlive */
+		"#036393", /* DarkBlue */
+		"#422f8e", /* DarkPurple */
+		"#960269"  /* DarkMaroon */
+	};
+
+	if (color_index >= 0 && color_index < G_N_ELEMENTS (colors_array))
+		return colors_array[color_index];
+
+	return NULL;
+}
+
+static const gchar *
 ews_utils_rename_label (const gchar *cat,
                         gboolean from_cat)
 {
@@ -428,6 +466,58 @@ ews_utils_is_system_user_flag (const gchar *name)
 		g_str_equal (name, "$has-cal");
 }
 
+/* From Exchange name (which allows spaces) to evolution-name */
+static gchar *
+camel_ews_utils_encode_category_name (const gchar *name)
+{
+	if (name && strchr (name, ' ')) {
+		GString *str;
+
+		str = g_string_sized_new (strlen (name) + 16);
+
+		while (*name) {
+			if (*name == '_')
+				g_string_append_c (str, '_');
+
+			g_string_append_c (str, *name == ' ' ? '_' : *name);
+
+			name++;
+		}
+
+		return g_string_free (str, FALSE);
+	}
+
+	return g_strdup (name);
+}
+
+/* From evolution-name to Exchange name (which allows spaces) */
+static gchar *
+camel_ews_utils_decode_category_name (const gchar *flag)
+{
+	if (flag && strchr (flag, '_')) {
+		GString *str = g_string_sized_new (strlen (flag));
+
+		while (*flag) {
+			if (*flag == '_') {
+				if (flag[1] == '_') {
+					g_string_append_c (str, '_');
+					flag++;
+				} else {
+					g_string_append_c (str, ' ');
+				}
+			} else {
+				g_string_append_c (str, *flag);
+			}
+
+			flag++;
+		}
+
+		return g_string_free (str, FALSE);
+	}
+
+	return g_strdup (flag);
+}
+
 /* free with g_slist_free_full (flags, g_free);
    the lists' members are values for the String xml element. */
 GSList *
@@ -447,6 +537,7 @@ ews_utils_gather_server_user_flags (ESoapMessage *msg,
 	 * array of strings */
 	for (ii = 0; ii < len; ii++) {
 		const gchar *n = ews_utils_rename_label (camel_named_flags_get (user_flags, ii), FALSE);
+
 		if (*n == '\0')
 			continue;
 
@@ -455,26 +546,7 @@ ews_utils_gather_server_user_flags (ESoapMessage *msg,
 		if (ews_utils_is_system_user_flag (n))
 			continue;
 
-		if (strchr (n, '_')) {
-			GString *str = g_string_sized_new (strlen (n));
-
-			while (*n) {
-				if (*n == '_') {
-					if (n[1] == '_')
-						g_string_append_c (str, '_');
-					else
-						g_string_append_c (str, ' ');
-				} else {
-					g_string_append_c (str, *n);
-				}
-
-				n++;
-			}
-
-			out_user_flags = g_slist_prepend (out_user_flags, g_string_free (str, FALSE));
-		} else {
-			out_user_flags = g_slist_prepend (out_user_flags, g_strdup (n));
-		}
+		out_user_flags = g_slist_prepend (out_user_flags, camel_ews_utils_decode_category_name (n));
 	}
 
 	camel_message_info_property_unlock (mi);
@@ -518,33 +590,17 @@ ews_utils_merge_server_user_flags (EEwsItem *item,
 
 	/* now transfer over all the categories */
 	for (p = e_ews_item_get_categories (item); p; p = p->next) {
-		const gchar *flag = ews_utils_rename_label (p->data, 1);
-		gchar *underscored = NULL;
+		const gchar *name = ews_utils_rename_label (p->data, 1);
+		gchar *flag;
 
-		if (!flag || !*flag)
+		if (!name || !*name)
 			continue;
 
-		if (strchr (flag, ' ')) {
-			GString *str;
-
-			str = g_string_sized_new (strlen (flag) + 16);
-
-			while (*flag) {
-				if (*flag == '_')
-					g_string_append_c (str, '_');
-
-				g_string_append_c (str, *flag == ' ' ? '_' : *flag);
-
-				flag++;
-			}
-
-			underscored = g_string_free (str, FALSE);
-			flag = underscored;
-		}
+		flag = camel_ews_utils_encode_category_name (name);
 
 		camel_message_info_set_user_flag (mi, flag, TRUE);
 
-		g_free (underscored);
+		g_free (flag);
 	}
 
 	camel_message_info_thaw_notifications (mi);
@@ -1401,4 +1457,254 @@ camel_ews_utils_ref_corresponding_source (CamelService *service,
 	g_clear_object (&registry);
 
 	return source;
+}
+
+static gboolean
+ews_util_equal_label_tag_cb (gconstpointer ptr1,
+			     gconstpointer ptr2)
+{
+	const gchar *evo_label_def = ptr1;
+	const gchar *tag = ptr2;
+	const gchar *pos;
+
+	if (!evo_label_def || !tag || !*tag)
+		return FALSE;
+
+	pos = g_strrstr (evo_label_def, tag);
+
+	return pos > evo_label_def && pos[-1] == '|' && !pos[strlen (tag)];
+}
+
+/* Returns whether had been done any changes */
+static gboolean
+ews_utils_save_category_changes (GHashTable *old_categories, /* gchar *guid ~> CamelEwsCategory * */
+				 GHashTable *new_categories) /* gchar *guid ~> CamelEwsCategory * */
+{
+	GHashTableIter iter;
+	GSettings *settings;
+	GPtrArray *evo_labels; /* gchar * (encoded label definition) */
+	gchar **strv;
+	gint ii;
+	gpointer value;
+	gboolean changed = FALSE;
+
+	if (!old_categories || !new_categories)
+		return new_categories != NULL;
+
+	evo_labels = g_ptr_array_new_full (5, g_free);
+
+	settings = e_util_ref_settings ("org.gnome.evolution.mail");
+	strv = g_settings_get_strv (settings, "labels");
+
+	for (ii = 0; strv && strv[ii]; ii++) {
+		g_ptr_array_add (evo_labels, g_strdup (strv[ii]));
+	}
+
+	g_strfreev (strv);
+
+	g_hash_table_iter_init (&iter, new_categories);
+	while (g_hash_table_iter_next (&iter, NULL, &value)) {
+		CamelEwsCategory *new_cat = value, *old_cat;
+		gchar *tag = NULL;
+
+		if (!new_cat)
+			continue;
+
+		old_cat = g_hash_table_lookup (old_categories, new_cat->guid);
+		if (old_cat) {
+			if (g_strcmp0 (old_cat->name, new_cat->name) != 0 ||
+			    g_strcmp0 (old_cat->color_def, new_cat->color_def) != 0) {
+				/* Old category changed name or color */
+				tag = camel_ews_utils_encode_category_name (new_cat->name);
+			}
+		} else {
+			/* This is a new category */
+			tag = camel_ews_utils_encode_category_name (new_cat->name);
+		}
+
+		if (tag && *tag) {
+			guint index = (guint) -1;
+			gchar *label_def;
+
+			changed = TRUE;
+
+			/* Sanitize value */
+			for (ii = 0; tag[ii]; ii++) {
+				if (tag[ii] == '|')
+					tag[ii] = '-';
+			}
+
+			if (old_cat && g_strcmp0 (old_cat->name, new_cat->name) != 0) {
+				gchar *old_tag = camel_ews_utils_encode_category_name (old_cat->name);
+
+				if (old_tag && *old_tag) {
+					if (!g_ptr_array_find_with_equal_func (evo_labels, old_tag, ews_util_equal_label_tag_cb, &index))
+						index = (guint) -1;
+				}
+
+				g_free (old_tag);
+			}
+
+			for (ii = 0; new_cat->name[ii]; ii++) {
+				if (new_cat->name[ii] == '|')
+					new_cat->name[ii] = '-';
+			}
+
+			if (index == (guint) -1 &&
+			    !g_ptr_array_find_with_equal_func (evo_labels, tag, ews_util_equal_label_tag_cb, &index))
+				index = (guint) -1;
+
+			label_def = g_strconcat (new_cat->name, "|", new_cat->color_def ? new_cat->color_def : "#FF0000", "|", tag, NULL);
+
+			if (index == (guint) -1 || index >= (gint) evo_labels->len) {
+				g_ptr_array_add (evo_labels, label_def);
+			} else {
+				g_free (evo_labels->pdata[index]);
+				evo_labels->pdata[index] = label_def;
+			}
+		}
+
+		g_hash_table_remove (old_categories, new_cat->guid);
+
+		g_free (tag);
+	}
+
+	if (g_hash_table_size (old_categories) > 0) {
+		/* Some categories had been removed */
+		changed = TRUE;
+
+		g_hash_table_iter_init (&iter, old_categories);
+		while (g_hash_table_iter_next (&iter, NULL, &value)) {
+			CamelEwsCategory *old_cat = value;
+			gchar *old_tag;
+			guint index;
+
+			if (!old_cat)
+				continue;
+
+			old_tag = camel_ews_utils_encode_category_name (old_cat->name);
+
+			for (ii = 0; old_tag && old_tag[ii]; ii++) {
+				if (old_tag[ii] == '|')
+					old_tag[ii] = '-';
+			}
+
+			if (old_tag &&
+			    g_ptr_array_find_with_equal_func (evo_labels, old_tag, ews_util_equal_label_tag_cb, &index))
+				g_ptr_array_remove_index (evo_labels, index);
+
+			g_free (old_tag);
+		}
+	}
+
+	if (changed) {
+		/* NULL-terminated array of strings */
+		g_ptr_array_add (evo_labels, NULL);
+
+		g_settings_set_strv (settings, "labels", (const gchar * const *) evo_labels->pdata);
+	}
+
+	g_ptr_array_free (evo_labels, TRUE);
+	g_object_unref (settings);
+
+	return changed;
+}
+
+void
+camel_ews_utils_merge_category_list (CamelEwsStore *ews_store,
+				     const guchar *xml_data,
+				     gsize xml_data_len)
+{
+	xmlDocPtr doc;
+	xmlXPathContextPtr xpath_ctx;
+
+	g_return_if_fail (CAMEL_IS_EWS_STORE (ews_store));
+	g_return_if_fail (xml_data != NULL);
+
+	doc = e_xml_parse_data (xml_data, xml_data_len);
+	if (!doc)
+		return;
+
+	xpath_ctx = e_xml_new_xpath_context_with_namespaces (doc, "C", "CategoryList.xsd", NULL);
+
+	if (xpath_ctx) {
+		xmlXPathObjectPtr xpath_obj_categories;
+
+		xpath_obj_categories = e_xml_xpath_eval (xpath_ctx, "%s", "/C:categories/C:category");
+
+		if (xpath_obj_categories) {
+			GHashTable *old_categories, *new_categories;
+			gint response_index, response_length;
+
+			new_categories = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, camel_ews_category_free);
+
+			response_length = xmlXPathNodeSetGetLength (xpath_obj_categories->nodesetval);
+
+			for (response_index = 0; response_index < response_length; response_index++) {
+				xmlXPathObjectPtr xpath_obj_category;
+
+				xpath_obj_category = e_xml_xpath_eval (xpath_ctx,
+					"/C:categories/C:category[%d]",
+					response_index + 1);
+
+				if (xpath_obj_category) {
+					gchar *name;
+
+					name = e_xml_xpath_eval_as_string (xpath_ctx, "/C:categories/C:category[%d]/@name", response_index + 1);
+
+					if (name && ews_utils_rename_label (name, 1) == name) {
+						const gchar *color_def = NULL;
+						gchar *color, *guid;
+						gint color_index = -1;
+
+						color = e_xml_xpath_eval_as_string (xpath_ctx, "/C:categories/C:category[%d]/@color", response_index + 1);
+						if (color) {
+							gchar *endptr = NULL;
+
+							color_index = (gint) g_ascii_strtoll (color, &endptr, 10);
+
+							if (endptr == color)
+								color_index = -1;
+						}
+
+						g_free (color);
+
+						if (color_index >= 0)
+							color_def = ews_utils_outlook_color_index_to_color_def (color_index);
+
+						guid = e_xml_xpath_eval_as_string (xpath_ctx, "/C:categories/C:category[%d]/@guid", response_index + 1);
+
+						if (guid && *guid) {
+							CamelEwsCategory *cat;
+
+							cat = camel_ews_category_new (guid, name, color_def);
+							if (cat)
+								g_hash_table_insert (new_categories, cat->guid, cat);
+						}
+
+						g_free (guid);
+					}
+
+					g_free (name);
+					xmlXPathFreeObject (xpath_obj_category);
+				}
+			}
+
+			xmlXPathFreeObject (xpath_obj_categories);
+
+			old_categories = camel_ews_store_summary_get_categories (ews_store->summary);
+
+			if (ews_utils_save_category_changes (old_categories, new_categories)) {
+				camel_ews_store_summary_set_categories (ews_store->summary, new_categories);
+				camel_ews_store_summary_save (ews_store->summary, NULL);
+			}
+
+			g_hash_table_destroy (new_categories);
+			g_hash_table_destroy (old_categories);
+		}
+	}
+
+	if (xpath_ctx)
+		xmlXPathFreeContext (xpath_ctx);
+	xmlFreeDoc (doc);
 }

@@ -673,6 +673,43 @@ ews_update_has_ooo_set (CamelSession *session,
 	g_clear_object (&oof_settings);
 }
 
+static void
+ews_exchange_server_categories_cb (CamelSession *session,
+				   GCancellable *cancellable,
+				   gpointer user_data,
+				   GError **error)
+{
+	CamelEwsStore *ews_store = user_data;
+	EEwsConnection *cnc;
+	EwsFolderId fid = { 0 };
+	gchar *properties = NULL;
+	GError *local_error = NULL;
+
+	cnc = camel_ews_store_ref_connection (ews_store);
+	if (!cnc)
+		return;
+
+	fid.id = (gchar *) "calendar";
+	fid.is_distinguished_id = TRUE;
+
+	if (e_ews_connection_get_user_configuration_sync (cnc, G_PRIORITY_DEFAULT, &fid, "CategoryList",
+		E_EWS_USER_CONFIGURATION_PROPERTIES_XMLDATA, &properties, cancellable, &local_error) && properties) {
+		guchar *data;
+		gsize data_len = 0;
+
+		data = g_base64_decode (properties, &data_len);
+
+		if (data && data_len > 0)
+			camel_ews_utils_merge_category_list (ews_store, data, data_len);
+
+		g_free (data);
+	}
+
+	g_clear_error (&local_error);
+	g_clear_object (&cnc);
+	g_free (properties);
+}
+
 struct ScheduleUpdateData
 {
 	GCancellable *cancellable;
@@ -1251,6 +1288,12 @@ ews_connect_sync (CamelService *service,
 				ews_update_has_ooo_set,
 				g_object_ref (ews_store),
 				g_object_unref);
+
+		camel_session_submit_job (
+			session, _("Look up Exchange server categories"),
+			ews_exchange_server_categories_cb,
+			g_object_ref (ews_store),
+			g_object_unref);
 
 		if (!priv->updates_cancellable)
 			priv->updates_cancellable = g_cancellable_new ();
@@ -2370,6 +2413,17 @@ ews_get_folder_info_sync (CamelStore *store,
 
 	ews_store = (CamelEwsStore *) store;
 	priv = ews_store->priv;
+
+	if ((flags & CAMEL_STORE_FOLDER_INFO_REFRESH) != 0 &&
+	    camel_offline_store_get_online (CAMEL_OFFLINE_STORE (ews_store))) {
+		CamelSession *session;
+
+		session = camel_service_ref_session (CAMEL_SERVICE (ews_store));
+		if (session) {
+			ews_exchange_server_categories_cb (session, cancellable, ews_store, NULL);
+			g_object_unref (session);
+		}
+	}
 
 	if ((flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIPTION_LIST) != 0) {
 		gboolean includes_last_folder = TRUE;

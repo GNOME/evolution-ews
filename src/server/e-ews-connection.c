@@ -152,7 +152,7 @@ struct _EwsAsyncData {
 	EwsDelegateDeliver deliver_to;
 	EEwsFolderType folder_type;
 	EEwsConnection *cnc;
-	gchar *user_photo; /* base64-encoded, as GetUserPhoto result */
+	gchar *custom_data; /* Can be re-used by operations, will be freed with g_free() */
 };
 
 struct _EwsNode {
@@ -197,7 +197,7 @@ ews_connection_error_quark (void)
 static void
 async_data_free (EwsAsyncData *async_data)
 {
-	g_free (async_data->user_photo);
+	g_free (async_data->custom_data);
 	g_free (async_data);
 }
 
@@ -10789,10 +10789,10 @@ get_user_photo_response_cb (ESoapResponse *response,
 		return;
 	}
 
-	async_data->user_photo = e_soap_parameter_get_string_value (param);
-	if (async_data->user_photo && !*async_data->user_photo) {
-		g_free (async_data->user_photo);
-		async_data->user_photo = NULL;
+	async_data->custom_data = e_soap_parameter_get_string_value (param);
+	if (async_data->custom_data && !*async_data->custom_data) {
+		g_free (async_data->custom_data);
+		async_data->custom_data = NULL;
 	}
 }
 
@@ -10877,11 +10877,11 @@ e_ews_connection_get_user_photo_finish (EEwsConnection *cnc,
 	if (g_simple_async_result_propagate_error (simple, error))
 		return FALSE;
 
-	if (!async_data->user_photo)
+	if (!async_data->custom_data)
 		return FALSE;
 
-	*out_picture_data = async_data->user_photo;
-	async_data->user_photo = NULL;
+	*out_picture_data = async_data->custom_data;
+	async_data->custom_data = NULL;
 
 	return TRUE;
 }
@@ -10909,6 +10909,231 @@ e_ews_connection_get_user_photo_sync (EEwsConnection *cnc,
 	result = e_async_closure_wait (closure);
 
 	success = e_ews_connection_get_user_photo_finish (cnc, result, out_picture_data, error);
+
+	e_async_closure_free (closure);
+
+	return success;
+}
+
+static void
+get_user_configuration_response_cb (ESoapResponse *response,
+				    GSimpleAsyncResult *simple)
+{
+	EwsAsyncData *async_data;
+	ESoapParameter *param, *subparam;
+	GError *error = NULL;
+
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	param = e_soap_response_get_first_parameter_by_name (response, "ResponseMessages", &error);
+
+	if (param) {
+		param = e_soap_parameter_get_first_child_by_name (param, "GetUserConfigurationResponseMessage");
+		if (!param) {
+			g_set_error (&error,
+				SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED,
+				"Missing <%s> in SOAP response", "GetUserConfigurationResponseMessage");
+		}
+	}
+
+	if (param) {
+		param = e_soap_parameter_get_first_child_by_name (param, "UserConfiguration");
+		if (!param) {
+			g_set_error (&error,
+				SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED,
+				"Missing <%s> in SOAP response", "UserConfiguration");
+		}
+	}
+
+	/* Sanity check */
+	g_return_if_fail (
+		(param != NULL && error == NULL) ||
+		(param == NULL && error != NULL));
+
+	if (error != NULL) {
+		g_simple_async_result_take_error (simple, error);
+		return;
+	}
+
+	subparam = e_soap_parameter_get_first_child_by_name (param, "ItemId");
+	if (subparam) {
+		gchar *id, *changekey;
+
+		id = e_soap_parameter_get_property (subparam, "Id");
+		changekey = e_soap_parameter_get_property (subparam, "ChangeKey");
+
+		/* Encoded as: Id + "\n" + ChangeKey */
+		async_data->custom_data = g_strconcat (id ? id : "", "\n", changekey, NULL);
+
+		g_free (changekey);
+		g_free (id);
+	}
+
+	if (!subparam) {
+		subparam = e_soap_parameter_get_first_child_by_name (param, "Dictionary");
+		if (subparam)
+			async_data->custom_data = e_soap_response_dump_parameter (response, subparam);
+	}
+
+	if (!subparam) {
+		subparam = e_soap_parameter_get_first_child_by_name (param, "XmlData");
+		if (subparam) {
+			async_data->custom_data = e_soap_parameter_get_string_value (subparam);
+		}
+	}
+
+	if (!subparam) {
+		subparam = e_soap_parameter_get_first_child_by_name (param, "BinaryData");
+		if (subparam) {
+			async_data->custom_data = e_soap_parameter_get_string_value (subparam);
+		}
+	}
+
+	if (async_data->custom_data && !*async_data->custom_data) {
+		g_free (async_data->custom_data);
+		async_data->custom_data = NULL;
+	}
+}
+
+void
+e_ews_connection_get_user_configuration (EEwsConnection *cnc,
+					 gint pri,
+					 const EwsFolderId *fid,
+					 const gchar *config_name,
+					 EEwsUserConfigurationProperties props,
+					 GCancellable *cancellable,
+					 GAsyncReadyCallback callback,
+					 gpointer user_data)
+{
+	ESoapMessage *msg;
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+	EwsFolderId local_fid;
+
+	g_return_if_fail (cnc != NULL);
+	g_return_if_fail (cnc->priv != NULL);
+	g_return_if_fail (fid != NULL);
+	g_return_if_fail (config_name != NULL);
+
+	simple = g_simple_async_result_new (G_OBJECT (cnc), callback, user_data, e_ews_connection_get_user_configuration);
+	async_data = g_new0 (EwsAsyncData, 1);
+	g_simple_async_result_set_op_res_gpointer (simple, async_data, (GDestroyNotify) async_data_free);
+
+	/* EWS server version earlier than 2010 doesn't support it. */
+	if (!e_ews_connection_satisfies_server_version (cnc, E_EWS_EXCHANGE_2010)) {
+		g_simple_async_result_complete_in_idle (simple);
+		g_object_unref (simple);
+		return;
+	}
+
+	local_fid = *fid;
+	local_fid.change_key = NULL;
+
+	msg = e_ews_message_new_with_header (
+		cnc->priv->settings,
+		cnc->priv->uri,
+		cnc->priv->impersonate_user,
+		"GetUserConfiguration",
+		NULL,
+		NULL,
+		cnc->priv->version,
+		E_EWS_EXCHANGE_2010,
+		FALSE,
+		TRUE);
+
+	e_soap_message_start_element (msg, "UserConfigurationName", "messages", NULL);
+	e_soap_message_add_attribute (msg, "Name", config_name, NULL, NULL);
+
+	e_ews_folder_id_append_to_msg (msg, cnc->priv->email, &local_fid);
+
+	e_soap_message_end_element (msg); /* UserConfigurationName */
+
+	e_soap_message_start_element (msg, "UserConfigurationProperties", "messages", NULL);
+
+	switch (props) {
+	case E_EWS_USER_CONFIGURATION_PROPERTIES_ID:
+		e_soap_message_write_string (msg, "Id");
+		break;
+	case E_EWS_USER_CONFIGURATION_PROPERTIES_DICTIONARY:
+		e_soap_message_write_string (msg, "Dictionary");
+		break;
+	case E_EWS_USER_CONFIGURATION_PROPERTIES_XMLDATA:
+		e_soap_message_write_string (msg, "XmlData");
+		break;
+	case E_EWS_USER_CONFIGURATION_PROPERTIES_BINARYDATA:
+		e_soap_message_write_string (msg, "BinaryData");
+		break;
+	/* case E_EWS_USER_CONFIGURATION_PROPERTIES_ALL:
+		e_soap_message_write_string (msg, "All");
+		break; */
+	default:
+		e_soap_message_write_string (msg, "Unknown");
+		break;
+	}
+
+	e_soap_message_end_element (msg); /* UserConfigurationProperties */
+
+	e_ews_message_write_footer (msg);
+
+	e_ews_connection_queue_request (cnc, msg, get_user_configuration_response_cb, pri, cancellable, simple);
+
+	g_object_unref (simple);
+}
+
+gboolean
+e_ews_connection_get_user_configuration_finish (EEwsConnection *cnc,
+						GAsyncResult *result,
+						gchar **out_properties,
+						GError **error)
+{
+	GSimpleAsyncResult *simple;
+	EwsAsyncData *async_data;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+	g_return_val_if_fail (
+		g_simple_async_result_is_valid (result, G_OBJECT (cnc), e_ews_connection_get_user_configuration),
+		FALSE);
+	g_return_val_if_fail (out_properties != NULL, FALSE);
+
+	simple = G_SIMPLE_ASYNC_RESULT (result);
+	async_data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		return FALSE;
+
+	if (!async_data->custom_data)
+		return FALSE;
+
+	*out_properties = async_data->custom_data;
+	async_data->custom_data = NULL;
+
+	return TRUE;
+}
+
+gboolean
+e_ews_connection_get_user_configuration_sync (EEwsConnection *cnc,
+					      gint pri,
+					      const EwsFolderId *fid,
+					      const gchar *config_name,
+					      EEwsUserConfigurationProperties props,
+					      gchar **out_properties,
+					      GCancellable *cancellable,
+					      GError **error)
+{
+	EAsyncClosure *closure;
+	GAsyncResult *result;
+	gboolean success;
+
+	g_return_val_if_fail (cnc != NULL, FALSE);
+
+	closure = e_async_closure_new ();
+
+	e_ews_connection_get_user_configuration (
+		cnc, pri, fid, config_name, props, cancellable, e_async_closure_callback, closure);
+
+	result = e_async_closure_wait (closure);
+
+	success = e_ews_connection_get_user_configuration_finish (cnc, result, out_properties, error);
 
 	e_async_closure_free (closure);
 

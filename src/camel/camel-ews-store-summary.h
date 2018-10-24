@@ -50,6 +50,12 @@
 
 G_BEGIN_DECLS
 
+typedef struct _CamelEwsCategory {
+	gchar *guid;
+	gchar *name;
+	gchar *color_def;
+} CamelEwsCategory;
+
 typedef struct _CamelEwsStoreSummary CamelEwsStoreSummary;
 typedef struct _CamelEwsStoreSummaryClass CamelEwsStoreSummaryClass;
 typedef struct _CamelEwsStoreSummaryPrivate CamelEwsStoreSummaryPrivate;
@@ -215,6 +221,17 @@ gchar *		camel_ews_store_summary_get_folder_id_from_folder_type
 gboolean	camel_ews_store_summary_has_folder
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *id);
+GHashTable *	camel_ews_store_summary_get_categories /* gchar *guid ~> CamelEwsCategory * */
+						(CamelEwsStoreSummary *ews_summary);
+void		camel_ews_store_summary_set_categories
+						(CamelEwsStoreSummary *ews_summary,
+						 GHashTable *categories); /* gchar *guid ~> CamelEwsCategory * */
+
+CamelEwsCategory *
+		camel_ews_category_new		(const gchar *guid,
+						 const gchar *name,
+						 const gchar *color_def);
+void		camel_ews_category_free		(gpointer ptr); /* CamelEwsCategory * */
 
 G_END_DECLS
 

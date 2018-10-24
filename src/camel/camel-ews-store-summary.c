@@ -31,6 +31,7 @@
 #define S_UNLOCK(x) (g_rec_mutex_unlock(&(x)->priv->s_lock))
 
 #define STORE_GROUP_NAME "##storepriv"
+#define CATEGORIES_KEY "Categories"
 #define CURRENT_SUMMARY_VERSION 3
 
 struct _CamelEwsStoreSummaryPrivate {
@@ -1046,4 +1047,160 @@ camel_ews_store_summary_has_folder (CamelEwsStoreSummary *ews_summary,
 	S_UNLOCK (ews_summary);
 
 	return ret;
+}
+
+static gchar *
+camel_ews_category_to_string (const CamelEwsCategory *cat)
+{
+	gchar *guid, *name, *color_def = NULL, *str;
+
+	g_return_val_if_fail (cat != NULL, NULL);
+
+	guid = g_uri_escape_string (cat->guid, NULL, TRUE);
+	name = g_uri_escape_string (cat->name, NULL, TRUE);
+
+	if (cat->color_def)
+		color_def = g_uri_escape_string (cat->color_def, NULL, TRUE);
+
+	str = g_strconcat (
+		guid ? guid : "", "\t",
+		name ? name : "", "\t",
+		color_def ? color_def : "",
+		NULL);
+
+	g_free (guid);
+	g_free (name);
+	g_free (color_def);
+
+	return str;
+}
+
+static CamelEwsCategory *
+camel_ews_category_from_string (const gchar *str)
+{
+	CamelEwsCategory *cat;
+	gchar **strv, *guid, *name, *color_def;
+
+	g_return_val_if_fail (str != NULL, NULL);
+
+	strv = g_strsplit (str, "\t", -1);
+	if (!strv || !strv[0] || !strv[1]) {
+		g_strfreev (strv);
+		return NULL;
+	}
+
+	guid = g_uri_unescape_string (strv[0], NULL);
+	name = g_uri_unescape_string (strv[1], NULL);
+	color_def = (strv[2] && strv[2][0]) ? g_uri_unescape_string (strv[2], NULL) : NULL;
+
+	cat = camel_ews_category_new (guid, name, color_def);
+
+	g_free (guid);
+	g_free (name);
+	g_free (color_def);
+	g_strfreev (strv);
+
+	return cat;
+}
+
+GHashTable * /* gchar *guid ~> CamelEwsCategory * */
+camel_ews_store_summary_get_categories (CamelEwsStoreSummary *ews_summary)
+{
+	GHashTable *categories;
+	gchar **strv;
+	g_return_val_if_fail (CAMEL_IS_EWS_STORE_SUMMARY (ews_summary), NULL);
+
+	S_LOCK (ews_summary);
+
+	strv = g_key_file_get_string_list (ews_summary->priv->key_file, STORE_GROUP_NAME, CATEGORIES_KEY, NULL, NULL);
+
+	S_UNLOCK (ews_summary);
+
+	categories = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, camel_ews_category_free);
+
+	if (strv) {
+		gint ii;
+
+		for (ii = 0; strv[ii]; ii++) {
+			CamelEwsCategory *cat;
+
+			cat = camel_ews_category_from_string (strv[ii]);
+			if (cat)
+				g_hash_table_insert (categories, cat->guid, cat);
+		}
+
+		g_strfreev (strv);
+	}
+
+	return categories;
+}
+
+void
+camel_ews_store_summary_set_categories (CamelEwsStoreSummary *ews_summary,
+					GHashTable *categories) /* gchar *guid ~> CamelEwsCategory * */
+{
+	GPtrArray *array;
+	GHashTableIter iter;
+	gpointer value;
+
+	g_return_if_fail (CAMEL_IS_EWS_STORE_SUMMARY (ews_summary));
+	g_return_if_fail (categories != NULL);
+
+	array = g_ptr_array_new_full (g_hash_table_size (categories), g_free);
+
+	g_hash_table_iter_init (&iter, categories);
+	while (g_hash_table_iter_next (&iter, NULL, &value)) {
+		CamelEwsCategory *cat = value;
+
+		if (cat) {
+			gchar *str;
+
+			str = camel_ews_category_to_string (cat);
+
+			if (str)
+				g_ptr_array_add (array, str);
+		}
+	}
+
+	S_LOCK (ews_summary);
+
+	g_key_file_set_string_list (ews_summary->priv->key_file, STORE_GROUP_NAME, CATEGORIES_KEY,
+		(const gchar * const *) array->pdata, array->len);
+
+	ews_summary->priv->dirty = TRUE;
+
+	S_UNLOCK (ews_summary);
+
+	g_ptr_array_free (array, TRUE);
+}
+
+CamelEwsCategory *
+camel_ews_category_new (const gchar *guid,
+			const gchar *name,
+			const gchar *color_def)
+{
+	CamelEwsCategory *cat;
+
+	g_return_val_if_fail (guid != NULL, NULL);
+	g_return_val_if_fail (name != NULL, NULL);
+
+	cat = g_new0 (CamelEwsCategory, 1);
+	cat->guid = g_strdup (guid);
+	cat->name = g_strdup (name);
+	cat->color_def = g_strdup (color_def);
+
+	return cat;
+}
+
+void
+camel_ews_category_free (gpointer ptr)
+{
+	CamelEwsCategory *cat = ptr;
+
+	if (cat) {
+		g_free (cat->guid);
+		g_free (cat->name);
+		g_free (cat->color_def);
+		g_free (cat);
+	}
 }

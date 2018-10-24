@@ -133,6 +133,15 @@ typedef enum {
 	E_EWS_SIZE_REQUESTED_648X648 = 648
 } EEwsSizeRequested;
 
+typedef enum {
+	E_EWS_USER_CONFIGURATION_PROPERTIES_UNKNOWN = -1,
+	E_EWS_USER_CONFIGURATION_PROPERTIES_ID,
+	E_EWS_USER_CONFIGURATION_PROPERTIES_DICTIONARY,
+	E_EWS_USER_CONFIGURATION_PROPERTIES_XMLDATA,
+	E_EWS_USER_CONFIGURATION_PROPERTIES_BINARYDATA /*,
+	E_EWS_USER_CONFIGURATION_PROPERTIES_ALL - skip it, be specific */
+} EEwsUserConfigurationProperties;
+
 typedef struct {
 	gchar *id;
 	gchar *dn;
@@ -1370,6 +1379,29 @@ gboolean	e_ews_connection_get_user_photo_sync
 						 const gchar *email,
 						 EEwsSizeRequested size_requested,
 						 gchar **out_picture_data, /* base64-encoded */
+						 GCancellable *cancellable,
+						 GError **error);
+void		e_ews_connection_get_user_configuration
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const EwsFolderId *fid,
+						 const gchar *config_name,
+						 EEwsUserConfigurationProperties props,
+						 GCancellable *cancellable,
+						 GAsyncReadyCallback callback,
+						 gpointer user_data);
+gboolean	e_ews_connection_get_user_configuration_finish
+						(EEwsConnection *cnc,
+						 GAsyncResult *result,
+						 gchar **out_properties,
+						 GError **error);
+gboolean	e_ews_connection_get_user_configuration_sync
+						(EEwsConnection *cnc,
+						 gint pri,
+						 const EwsFolderId *fid,
+						 const gchar *config_name,
+						 EEwsUserConfigurationProperties props,
+						 gchar **out_properties,
 						 GCancellable *cancellable,
 						 GError **error);
 

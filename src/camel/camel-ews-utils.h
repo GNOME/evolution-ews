@@ -100,7 +100,10 @@ CamelMessageInfo * /* (transfer full) */
 						 GCancellable *cancellable);
 gboolean	camel_ews_utils_folder_is_drafts_folder
 						(CamelEwsFolder *ews_folder);
-
+void		camel_ews_utils_merge_category_list
+						(CamelEwsStore *ews_store,
+						 const guchar *xml_data,
+						 gsize xml_data_len);
 
 G_END_DECLS
 

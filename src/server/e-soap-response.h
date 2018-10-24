@@ -101,6 +101,8 @@ ESoapParameter *
 						 const gchar *name);
 gint		e_soap_response_dump_response	(ESoapResponse *response,
 						 FILE *buffer);
+gchar *		e_soap_response_dump_parameter	(ESoapResponse *response,
+						 ESoapParameter *param);
 
 G_END_DECLS
 

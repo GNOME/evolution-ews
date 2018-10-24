@@ -685,3 +685,29 @@ e_soap_response_dump_response (ESoapResponse *response,
 
 	return ret;
 }
+
+gchar *
+e_soap_response_dump_parameter (ESoapResponse *response,
+				ESoapParameter *param)
+{
+	xmlBuffer *buffer;
+	gint len;
+	gchar *data;
+
+	g_return_val_if_fail (E_IS_SOAP_RESPONSE (response), NULL);
+	g_return_val_if_fail (param != NULL, NULL);
+
+	buffer = xmlBufferCreate ();
+	len = xmlNodeDump (buffer, response->priv->xmldoc, param, 0, 0);
+
+	if (len <= 0) {
+		xmlBufferFree (buffer);
+		return NULL;
+	}
+
+	data = g_strndup ((const gchar *) buffer->content, len);
+
+	xmlBufferFree (buffer);
+
+	return data;
+}
