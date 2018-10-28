@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-09 16:54+0200\n"
-"PO-Revision-Date: 2018-10-09 16:55+0200\n"
+"POT-Creation-Date: 2018-10-28 17:29+0100\n"
+"PO-Revision-Date: 2018-10-28 17:30+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -30,42 +30,42 @@ msgstr "Exchange Web Services"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Dostęp do serwerów Exchange za pomocą Web Services"
 
-#: ../src/addressbook/e-book-backend-ews.c:3352
+#: ../src/addressbook/e-book-backend-ews.c:3452
 msgid "Failed to update GAL:"
 msgstr "Zaktualizowanie GAL się nie powiodło:"
 
-#: ../src/addressbook/e-book-backend-ews.c:3513
+#: ../src/addressbook/e-book-backend-ews.c:3613
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Nie można zapisać listy kontaktów, jest to obsługiwane tylko w EWS Server "
 "2010 lub nowszym"
 
-#: ../src/addressbook/e-book-backend-ews.c:3606
+#: ../src/addressbook/e-book-backend-ews.c:3706
 msgid "Failed to set contact photo:"
 msgstr "Ustawienie zdjęcia kontaktu się nie powiodło:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1659
+#: ../src/calendar/e-cal-backend-ews.c:1662
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Wolny"
 
-#: ../src/calendar/e-cal-backend-ews.c:1662
+#: ../src/calendar/e-cal-backend-ews.c:1665
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Zajęty"
 
-#: ../src/calendar/e-cal-backend-ews.c:1664
+#: ../src/calendar/e-cal-backend-ews.c:1667
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Poza biurem"
 
-#: ../src/calendar/e-cal-backend-ews.c:1666
+#: ../src/calendar/e-cal-backend-ews.c:1669
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Wstępnie"
 
-#: ../src/calendar/e-cal-backend-ews.c:3322
+#: ../src/calendar/e-cal-backend-ews.c:3325
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Nie można odnaleźć użytkownika „%s” na liście uczestników"
@@ -228,12 +228,16 @@ msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:647 ../src/camel/camel-ews-store.c:1250
+#: ../src/camel/camel-ews-store.c:647 ../src/camel/camel-ews-store.c:1287
 msgid "Checking “Out of Office” settings"
 msgstr "Sprawdzanie ustawień obecności poza biurem"
 
+#: ../src/camel/camel-ews-store.c:1293
+msgid "Look up Exchange server categories"
+msgstr "Wyszukiwanie kategorii serwera Exchange"
+
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/camel/camel-ews-store.c:1320
+#: ../src/camel/camel-ews-store.c:1363
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
@@ -241,7 +245,7 @@ msgstr[0] "Hasło wygaśnie za %d dzień. Proszę je zmienić pod adresem %s."
 msgstr[1] "Hasło wygaśnie za %d dni. Proszę je zmienić pod adresem %s."
 msgstr[2] "Hasło wygaśnie za %d dni. Proszę je zmienić pod adresem %s."
 
-#: ../src/camel/camel-ews-store.c:1326
+#: ../src/camel/camel-ews-store.c:1369
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
@@ -249,38 +253,38 @@ msgstr[0] "Hasło wygaśnie za jeden dzień."
 msgstr[1] "Hasło wygaśnie za %d dni."
 msgstr[2] "Hasło wygaśnie za %d dni."
 
-#: ../src/camel/camel-ews-store.c:1546
+#: ../src/camel/camel-ews-store.c:1589
 msgid "Updating foreign folder structure"
 msgstr "Aktualizowanie obcej struktury katalogów"
 
-#: ../src/camel/camel-ews-store.c:1682
+#: ../src/camel/camel-ews-store.c:1725
 msgid "Updating foreign folders"
 msgstr "Aktualizowanie obcych katalogów"
 
-#: ../src/camel/camel-ews-store.c:2084
+#: ../src/camel/camel-ews-store.c:2127
 #, c-format
 msgid "No such folder: %s"
 msgstr "Nie ma takiego katalogu: %s"
 
-#: ../src/camel/camel-ews-store.c:2382
+#: ../src/camel/camel-ews-store.c:2436
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Nie można wyświetlić listy katalogów publicznych EWS w trybie offline"
 
-#: ../src/camel/camel-ews-store.c:2455
+#: ../src/camel/camel-ews-store.c:2509
 msgid "Cannot find any EWS public folders"
 msgstr "Nie można odnaleźć żadnych katalogów publicznych EWS"
 
-#: ../src/camel/camel-ews-store.c:2564
+#: ../src/camel/camel-ews-store.c:2618
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Nie można utworzyć katalogu „%s”. Katalog już istnieje"
 
-#: ../src/camel/camel-ews-store.c:2579
+#: ../src/camel/camel-ews-store.c:2633
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Katalog nadrzędny %s nie istnieje"
 
-#: ../src/camel/camel-ews-store.c:2589
+#: ../src/camel/camel-ews-store.c:2643
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -288,98 +292,98 @@ msgstr ""
 "Nie można utworzyć katalogu w „%s”, jest on używany tylko dla katalogów "
 "innych użytkowników"
 
-#: ../src/camel/camel-ews-store.c:2599
+#: ../src/camel/camel-ews-store.c:2653
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "Nie można utworzyć katalogu w „%s”, jest on używany tylko dla katalogów "
 "publicznych"
 
-#: ../src/camel/camel-ews-store.c:2703
+#: ../src/camel/camel-ews-store.c:2757
 #, c-format
 msgid "Folder does not exist"
 msgstr "Katalog nie istnieje"
 
-#: ../src/camel/camel-ews-store.c:2713
+#: ../src/camel/camel-ews-store.c:2767
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Nie można usunąć katalogu „%s”, jest on używany tylko dla katalogów innych "
 "użytkowników"
 
-#: ../src/camel/camel-ews-store.c:2724
+#: ../src/camel/camel-ews-store.c:2778
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr ""
 "Nie można usunąć katalogu „%s”, jest on używany tylko dla katalogów "
 "publicznych"
 
-#: ../src/camel/camel-ews-store.c:2883
+#: ../src/camel/camel-ews-store.c:2937
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Katalog %s nie istnieje"
 
-#: ../src/camel/camel-ews-store.c:2892
+#: ../src/camel/camel-ews-store.c:2946
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Brak wpisu klucza zmiany dla katalogu %s"
 
-#: ../src/camel/camel-ews-store.c:2935
+#: ../src/camel/camel-ews-store.c:2989
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Nie można zmienić nazwy i przenieść katalogu w tym samym czasie"
 
-#: ../src/camel/camel-ews-store.c:2969
+#: ../src/camel/camel-ews-store.c:3023
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nie można odnaleźć identyfikatora katalogu dla katalogu nadrzędnego %s"
 
-#: ../src/camel/camel-ews-store.c:3021 ../src/camel/camel-ews-transport.c:318
+#: ../src/camel/camel-ews-store.c:3075 ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange server %s"
 msgstr "Serwer Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:3024
+#: ../src/camel/camel-ews-store.c:3078
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Usługa Exchange dla %s na %s"
 
-#: ../src/camel/camel-ews-store.c:3068
+#: ../src/camel/camel-ews-store.c:3122
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Nie można ustalić położenia katalogu Kosz"
 
-#: ../src/camel/camel-ews-store.c:3128
+#: ../src/camel/camel-ews-store.c:3182
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Nie można ustalić położenia katalogu Niechciane"
 
-#: ../src/camel/camel-ews-store.c:3319
+#: ../src/camel/camel-ews-store.c:3373
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Nie można subskrybować katalogów EWS w trybie offline"
 
-#: ../src/camel/camel-ews-store.c:3342
+#: ../src/camel/camel-ews-store.c:3396
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 "Nie można subskrybować katalogu „%s”, żaden katalog publiczny nie jest "
 "dostępny"
 
-#: ../src/camel/camel-ews-store.c:3352
+#: ../src/camel/camel-ews-store.c:3406
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Nie można subskrybować katalogu „%s”, nie odnaleziono katalogu"
 
-#: ../src/camel/camel-ews-store.c:3443
+#: ../src/camel/camel-ews-store.c:3497
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Nie można usuwać subskrypcji katalogów EWS w trybie offline"
 
-#: ../src/camel/camel-ews-store.c:3560
+#: ../src/camel/camel-ews-store.c:3614
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Należy pracować w trybie online, aby ukończyć to działanie"
 
-#: ../src/camel/camel-ews-store.c:3604 ../src/camel/camel-ews-store.c:3641
+#: ../src/camel/camel-ews-store.c:3658 ../src/camel/camel-ews-store.c:3695
 msgid "Unsetting the “Out of Office” status"
 msgstr "Usuwanie ustawienia stanu obecności poza biurem"
 
