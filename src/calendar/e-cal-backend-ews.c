@@ -1044,28 +1044,66 @@ ecb_ews_get_items_sync (ECalBackendEws *cbews,
 			GCancellable *cancellable,
 			GError **error)
 {
-	GSList *items = NULL, *link;
-	gboolean success;
+	GSList *items = NULL, *link, *retry_ids = NULL;
+	gboolean success = TRUE;
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (cbews), FALSE);
 	g_return_val_if_fail (out_components != NULL, FALSE);
 
-	success = e_ews_connection_get_items_sync (
-		cbews->priv->cnc,
-		EWS_PRIORITY_MEDIUM,
-		item_ids,
-		default_props,
-		add_props,
-		FALSE,
-		NULL,
-		E_EWS_BODY_TYPE_TEXT,
-		&items,
-		NULL, NULL,
-		cancellable,
-		error);
+	while (success = success && !g_cancellable_set_error_if_cancelled (cancellable, error), success) {
+		GSList *received = NULL, *new_retry_ids = NULL, *ids_link;
+
+		success = e_ews_connection_get_items_sync (
+			cbews->priv->cnc,
+			EWS_PRIORITY_MEDIUM,
+			item_ids,
+			default_props,
+			add_props,
+			FALSE,
+			NULL,
+			E_EWS_BODY_TYPE_TEXT,
+			&received,
+			NULL, NULL,
+			cancellable,
+			error);
+
+		for (link = received, ids_link = (GSList *) item_ids; success && link && ids_link; link = g_slist_next (link), ids_link = g_slist_next (ids_link)) {
+			EEwsItem *item = link->data;
+
+			if (!item)
+				continue;
+
+			if (e_ews_item_get_item_type (item) == E_EWS_ITEM_TYPE_ERROR) {
+				const GError *item_error;
+
+				item_error = e_ews_item_get_error (item);
+				if (g_error_matches (item_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_BATCHPROCESSINGSTOPPED)) {
+					new_retry_ids = g_slist_prepend (new_retry_ids, g_strdup (ids_link->data));
+					g_object_unref (item);
+				} else {
+					items = g_slist_prepend (items, item);
+				}
+			} else {
+				items = g_slist_prepend (items, item);
+			}
+		}
+
+		g_slist_free_full (retry_ids, g_free);
+		g_slist_free (received);
+		retry_ids = new_retry_ids;
+
+		if (!retry_ids)
+			break;
+
+		item_ids = retry_ids;
+	}
+
+	g_slist_free_full (retry_ids, g_free);
+
+	items = g_slist_reverse (items);
 
 	if (!success)
-		return FALSE;
+		goto exit;
 
 	/* fetch modified occurrences */
 	for (link = items; link; link = g_slist_next (link)) {
