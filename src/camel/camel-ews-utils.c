@@ -1475,6 +1475,32 @@ ews_util_equal_label_tag_cb (gconstpointer ptr1,
 	return pos > evo_label_def && pos[-1] == '|' && !pos[strlen (tag)];
 }
 
+static gboolean
+ews_utils_find_in_ptr_array (GPtrArray *haystack,
+			     gconstpointer needle,
+			     GEqualFunc equal_func,
+			     guint *out_index)
+{
+	guint ii;
+
+	if (!haystack)
+		return FALSE;
+
+	if (!equal_func)
+		equal_func = g_direct_equal;
+
+	for (ii = 0; ii < haystack->len; ii++) {
+		if (equal_func (haystack->pdata[ii], needle)) {
+			if (out_index)
+				*out_index = ii;
+
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
 /* Returns whether had been done any changes */
 static gboolean
 ews_utils_save_category_changes (GHashTable *old_categories, /* gchar *guid ~> CamelEwsCategory * */
@@ -1538,7 +1564,7 @@ ews_utils_save_category_changes (GHashTable *old_categories, /* gchar *guid ~> C
 				gchar *old_tag = camel_ews_utils_encode_category_name (old_cat->name);
 
 				if (old_tag && *old_tag) {
-					if (!g_ptr_array_find_with_equal_func (evo_labels, old_tag, ews_util_equal_label_tag_cb, &index))
+					if (!ews_utils_find_in_ptr_array (evo_labels, old_tag, ews_util_equal_label_tag_cb, &index))
 						index = (guint) -1;
 				}
 
@@ -1551,7 +1577,7 @@ ews_utils_save_category_changes (GHashTable *old_categories, /* gchar *guid ~> C
 			}
 
 			if (index == (guint) -1 &&
-			    !g_ptr_array_find_with_equal_func (evo_labels, tag, ews_util_equal_label_tag_cb, &index))
+			    !ews_utils_find_in_ptr_array (evo_labels, tag, ews_util_equal_label_tag_cb, &index))
 				index = (guint) -1;
 
 			label_def = g_strconcat (new_cat->name, "|", new_cat->color_def ? new_cat->color_def : "#FF0000", "|", tag, NULL);
@@ -1590,7 +1616,7 @@ ews_utils_save_category_changes (GHashTable *old_categories, /* gchar *guid ~> C
 			}
 
 			if (old_tag &&
-			    g_ptr_array_find_with_equal_func (evo_labels, old_tag, ews_util_equal_label_tag_cb, &index))
+			    ews_utils_find_in_ptr_array (evo_labels, old_tag, ews_util_equal_label_tag_cb, &index))
 				g_ptr_array_remove_index (evo_labels, index);
 
 			g_free (old_tag);
