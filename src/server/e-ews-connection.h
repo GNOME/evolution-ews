@@ -436,9 +436,16 @@ ESourceAuthenticationResult
 		e_ews_connection_try_credentials_sync
 						(EEwsConnection *cnc,
 						 const ENamedParameters *credentials,
+						 ESource *use_source,
+						 gchar **out_certificate_pem,
+						 GTlsCertificateFlags *out_certificate_errors,
 						 GCancellable *cancellable,
 						 GError **error);
 ESource *	e_ews_connection_get_source	(EEwsConnection *cnc);
+gboolean	e_ews_connection_get_ssl_error_details
+						(EEwsConnection *cnc,
+						 gchar **out_certificate_pem,
+						 GTlsCertificateFlags *out_certificate_errors);
 const gchar *	e_ews_connection_get_uri	(EEwsConnection *cnc);
 ESoupAuthBearer *
 		e_ews_connection_ref_bearer_auth(EEwsConnection *cnc);
@@ -484,6 +491,8 @@ gboolean	e_ews_autodiscover_ws_url_sync	(ESource *source,
 						 CamelEwsSettings *settings,
 						 const gchar *email_address,
 						 const gchar *password,
+						 gchar **out_certificate_pem,
+						 GTlsCertificateFlags *out_certificate_errors,
 						 GCancellable *cancellable,
 						 GError **error);
 void		e_ews_autodiscover_ws_url	(ESource *source,
@@ -496,6 +505,8 @@ void		e_ews_autodiscover_ws_url	(ESource *source,
 gboolean	e_ews_autodiscover_ws_url_finish
 						(CamelEwsSettings *settings,
 						 GAsyncResult *result,
+						 gchar **out_certificate_pem,
+						 GTlsCertificateFlags *out_certificate_errors,
 						 GError **error);
 const gchar *	e_ews_connection_get_mailbox	(EEwsConnection *cnc);
 void		e_ews_connection_set_mailbox	(EEwsConnection *cnc,

@@ -63,6 +63,8 @@ EEwsConnection *
 		e_ews_backend_ref_connection_sync
 						(EEwsBackend *backend,
 						 ESourceAuthenticationResult *result,
+						 gchar **out_certificate_pem,
+						 GTlsCertificateFlags *out_certificate_errors,
 						 GCancellable *cancellable,
 						 GError **error);
 void		e_ews_backend_ref_connection	(EEwsBackend *backend,

@@ -112,6 +112,10 @@ struct _EEwsConnectionPrivate {
 
 	/* Set to TRUE when this connection had been disconnected and cannot be used anymore */
 	gboolean disconnected_flag;
+
+	gboolean ssl_info_set;
+	gchar *ssl_certificate_pem;
+	GTlsCertificateFlags ssl_certificate_errors;
 };
 
 enum {
@@ -848,6 +852,37 @@ ews_connection_credentials_failed (EEwsConnection *connection,
 	return expired;
 }
 
+static void
+ews_connection_check_ssl_error (EEwsConnection *connection,
+				SoupMessage *message)
+{
+	g_return_if_fail (E_IS_EWS_CONNECTION (connection));
+	g_return_if_fail (SOUP_IS_MESSAGE (message));
+
+	if (message->status_code == SOUP_STATUS_SSL_FAILED) {
+		GTlsCertificate *certificate = NULL;
+
+		g_mutex_lock (&connection->priv->property_lock);
+
+		g_clear_pointer (&connection->priv->ssl_certificate_pem, g_free);
+		connection->priv->ssl_info_set = FALSE;
+
+		g_object_get (G_OBJECT (message),
+			"tls-certificate", &certificate,
+			"tls-errors", &connection->priv->ssl_certificate_errors,
+			NULL);
+
+		if (certificate) {
+			g_object_get (certificate, "certificate-pem", &connection->priv->ssl_certificate_pem, NULL);
+			connection->priv->ssl_info_set = TRUE;
+
+			g_object_unref (certificate);
+		}
+
+		g_mutex_unlock (&connection->priv->property_lock);
+	}
+}
+
 /* Response callbacks */
 
 static void
@@ -875,7 +910,14 @@ ews_response_cb (SoupSession *session,
 	if (g_cancellable_is_cancelled (enode->cancellable))
 		goto exit;
 
+	ews_connection_check_ssl_error (enode->cnc, msg);
+
 	if (ews_connection_credentials_failed (enode->cnc, msg, enode->simple)) {
+		goto exit;
+	} else if (msg->status_code == SOUP_STATUS_SSL_FAILED) {
+		g_simple_async_result_set_error (
+			enode->simple, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED,
+			"%s", msg->reason_phrase);
 		goto exit;
 	} else if (msg->status_code == SOUP_STATUS_UNAUTHORIZED) {
 		if (msg->response_headers) {
@@ -1878,6 +1920,9 @@ ews_connection_constructed (GObject *object)
 	cnc->priv->soup_thread = g_thread_new (NULL, e_ews_soup_thread, cnc);
 
 	cnc->priv->soup_session = soup_session_async_new_with_options (
+		SOUP_SESSION_TIMEOUT, 90,
+		SOUP_SESSION_SSL_STRICT, TRUE,
+		SOUP_SESSION_SSL_USE_SYSTEM_CA_FILE, TRUE,
 		SOUP_SESSION_ASYNC_CONTEXT, cnc->priv->soup_context,
 		NULL);
 
@@ -1994,6 +2039,7 @@ ews_connection_finalize (GObject *object)
 	g_free (priv->email);
 	g_free (priv->hash_key);
 	g_free (priv->impersonate_user);
+	g_free (priv->ssl_certificate_pem);
 
 	g_clear_object (&priv->bearer_auth);
 
@@ -2581,10 +2627,15 @@ e_ews_connection_update_credentials (EEwsConnection *cnc,
 ESourceAuthenticationResult
 e_ews_connection_try_credentials_sync (EEwsConnection *cnc,
 				       const ENamedParameters *credentials,
+				       ESource *use_source,
+				       gchar **out_certificate_pem,
+				       GTlsCertificateFlags *out_certificate_errors,
 				       GCancellable *cancellable,
 				       GError **error)
 {
 	ESourceAuthenticationResult result;
+	ESource *source;
+	gboolean de_set_source;
 	EwsFolderId *fid = NULL;
 	GSList *ids = NULL;
 	GError *local_error = NULL;
@@ -2598,14 +2649,31 @@ e_ews_connection_try_credentials_sync (EEwsConnection *cnc,
 	fid->is_distinguished_id = TRUE;
 	ids = g_slist_append (ids, fid);
 
+	source = e_ews_connection_get_source (cnc);
+	if (use_source && use_source != source) {
+		cnc->priv->source = g_object_ref (use_source);
+		de_set_source = TRUE;
+	} else {
+		source = NULL;
+		de_set_source = FALSE;
+	}
+
 	e_ews_connection_get_folder_sync (
 		cnc, EWS_PRIORITY_MEDIUM, "Default",
 		NULL, ids, NULL, cancellable, &local_error);
+
+	if (de_set_source) {
+		g_clear_object (&cnc->priv->source);
+		cnc->priv->source = source;
+	}
 
 	g_slist_free_full (ids, (GDestroyNotify) e_ews_folder_id_free);
 
 	if (local_error == NULL) {
 		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
+	} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED) &&
+		   e_ews_connection_get_ssl_error_details (cnc, out_certificate_pem, out_certificate_errors)) {
+		result = E_SOURCE_AUTHENTICATION_ERROR_SSL_FAILED;
 	} else {
 		gboolean auth_failed;
 
@@ -2640,6 +2708,29 @@ e_ews_connection_get_source (EEwsConnection *cnc)
 	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
 
 	return cnc->priv->source;
+}
+
+gboolean
+e_ews_connection_get_ssl_error_details (EEwsConnection *cnc,
+					gchar **out_certificate_pem,
+					GTlsCertificateFlags *out_certificate_errors)
+{
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (out_certificate_pem != NULL, FALSE);
+	g_return_val_if_fail (out_certificate_errors != NULL, FALSE);
+
+	g_mutex_lock (&cnc->priv->property_lock);
+	if (!cnc->priv->ssl_info_set) {
+		g_mutex_unlock (&cnc->priv->property_lock);
+		return FALSE;
+	}
+
+	*out_certificate_pem = g_strdup (cnc->priv->ssl_certificate_pem);
+	*out_certificate_errors = cnc->priv->ssl_certificate_errors;
+
+	g_mutex_unlock (&cnc->priv->property_lock);
+
+	return TRUE;
 }
 
 const gchar *
@@ -2965,6 +3056,9 @@ autodiscover_response_cb (SoupSession *session,
 			g_set_error (
 				&error, SOUP_HTTP_ERROR, status,
 				"%d %s", status, msg->reason_phrase);
+
+			if (status == SOUP_STATUS_SSL_FAILED)
+				ews_connection_check_ssl_error (ad->cnc, msg);
 		}
 
 		g_free (service_url);
@@ -3125,7 +3219,8 @@ static void post_restarted (SoupMessage *msg, gpointer data)
 }
 
 static SoupMessage *
-e_ews_get_msg_for_url (CamelEwsSettings *settings,
+e_ews_get_msg_for_url (EEwsConnection *cnc,
+		       CamelEwsSettings *settings,
 		       const gchar *url,
                        xmlOutputBuffer *buf,
                        GError **error)
@@ -3146,6 +3241,9 @@ e_ews_get_msg_for_url (CamelEwsSettings *settings,
 			_("URL “%s” is not valid"), url);
 		return NULL;
 	}
+
+	if (cnc->priv->source)
+		e_soup_ssl_trust_connect (msg, cnc->priv->source);
 
 	e_ews_message_attach_chunk_allocator (msg);
 
@@ -3176,6 +3274,8 @@ e_ews_autodiscover_ws_url_sync (ESource *source,
 				CamelEwsSettings *settings,
                                 const gchar *email_address,
                                 const gchar *password,
+				gchar **out_certificate_pem,
+				GTlsCertificateFlags *out_certificate_errors,
                                 GCancellable *cancellable,
                                 GError **error)
 {
@@ -3194,7 +3294,7 @@ e_ews_autodiscover_ws_url_sync (ESource *source,
 
 	result = e_async_closure_wait (closure);
 
-	success = e_ews_autodiscover_ws_url_finish (settings, result, error);
+	success = e_ews_autodiscover_ws_url_finish (settings, result, out_certificate_pem, out_certificate_errors, error);
 
 	e_async_closure_free (closure);
 
@@ -3305,11 +3405,11 @@ e_ews_autodiscover_ws_url (ESource *source,
 		simple, ad, (GDestroyNotify) autodiscover_data_free);
 
 	/* Passing a NULL URL string returns NULL. */
-	ad->msgs[0] = e_ews_get_msg_for_url (settings, url1, buf, &error);
-	ad->msgs[1] = e_ews_get_msg_for_url (settings, url2, buf, NULL);
-	ad->msgs[2] = e_ews_get_msg_for_url (settings, url3, buf, NULL);
-	ad->msgs[3] = e_ews_get_msg_for_url (settings, url4, buf, NULL);
-	ad->msgs[4] = e_ews_get_msg_for_url (settings, url5, buf, NULL);
+	ad->msgs[0] = e_ews_get_msg_for_url (cnc, settings, url1, buf, &error);
+	ad->msgs[1] = e_ews_get_msg_for_url (cnc, settings, url2, buf, NULL);
+	ad->msgs[2] = e_ews_get_msg_for_url (cnc, settings, url3, buf, NULL);
+	ad->msgs[3] = e_ews_get_msg_for_url (cnc, settings, url4, buf, NULL);
+	ad->msgs[4] = e_ews_get_msg_for_url (cnc, settings, url5, buf, NULL);
 
 	/* These have to be submitted only after they're both set in ad->msgs[]
 	 * or there will be races with fast completion */
@@ -3369,10 +3469,13 @@ has_suffix_icmp (const gchar *text,
 gboolean
 e_ews_autodiscover_ws_url_finish (CamelEwsSettings *settings,
                                   GAsyncResult *result,
+				  gchar **out_certificate_pem,
+				  GTlsCertificateFlags *out_certificate_errors,
                                   GError **error)
 {
 	GSimpleAsyncResult *simple;
 	struct _autodiscover_data *ad;
+	GError *local_error = NULL;
 
 	g_return_val_if_fail (
 		g_simple_async_result_is_valid (
@@ -3382,8 +3485,20 @@ e_ews_autodiscover_ws_url_finish (CamelEwsSettings *settings,
 	simple = G_SIMPLE_ASYNC_RESULT (result);
 	ad = g_simple_async_result_get_op_res_gpointer (simple);
 
-	if (g_simple_async_result_propagate_error (simple, error))
+	if (g_simple_async_result_propagate_error (simple, &local_error)) {
+		if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED)) {
+			if (!e_ews_connection_get_ssl_error_details (ad->cnc, out_certificate_pem, out_certificate_errors)) {
+				if (out_certificate_pem)
+					*out_certificate_pem = NULL;
+				if (out_certificate_errors)
+					*out_certificate_errors = 0;
+			}
+		}
+
+		g_propagate_error (error, local_error);
+
 		return FALSE;
+	}
 
 	g_warn_if_fail (ad->as_url != NULL);
 	g_warn_if_fail (ad->oab_url != NULL);
@@ -3542,6 +3657,8 @@ oal_response_cb (SoupSession *soup_session,
 	simple = G_SIMPLE_ASYNC_RESULT (user_data);
 	data = g_simple_async_result_get_op_res_gpointer (simple);
 
+	ews_connection_check_ssl_error (data->cnc, soup_message);
+
 	if (ews_connection_credentials_failed (data->cnc, soup_message, simple)) {
 		goto exit;
 	} else if (soup_message->status_code != 200) {
@@ -3687,7 +3804,7 @@ e_ews_connection_get_oal_list (EEwsConnection *cnc,
 
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
-	soup_message = e_ews_get_msg_for_url (cnc->priv->settings, cnc->priv->uri, NULL, &error);
+	soup_message = e_ews_get_msg_for_url (cnc, cnc->priv->settings, cnc->priv->uri, NULL, &error);
 
 	simple = g_simple_async_result_new (
 		G_OBJECT (cnc), callback, user_data,
@@ -3808,7 +3925,7 @@ e_ews_connection_get_oal_detail (EEwsConnection *cnc,
 
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
-	soup_message = e_ews_get_msg_for_url (cnc->priv->settings, cnc->priv->uri, NULL, &error);
+	soup_message = e_ews_get_msg_for_url (cnc, cnc->priv->settings, cnc->priv->uri, NULL, &error);
 
 	simple = g_simple_async_result_new (
 		G_OBJECT (cnc), callback, user_data,
@@ -3894,6 +4011,8 @@ oal_download_response_cb (SoupSession *soup_session,
 
 	simple = G_SIMPLE_ASYNC_RESULT (user_data);
 	data = g_simple_async_result_get_op_res_gpointer (simple);
+
+	ews_connection_check_ssl_error (data->cnc, soup_message);
 
 	if (ews_connection_credentials_failed (data->cnc, soup_message, simple)) {
 		g_unlink (data->cache_filename);
@@ -4023,7 +4142,7 @@ e_ews_connection_download_oal_file (EEwsConnection *cnc,
 
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
-	soup_message = e_ews_get_msg_for_url (cnc->priv->settings, cnc->priv->uri, NULL, &error);
+	soup_message = e_ews_get_msg_for_url (cnc, cnc->priv->settings, cnc->priv->uri, NULL, &error);
 
 	simple = g_simple_async_result_new (
 		G_OBJECT (cnc), callback, user_data,

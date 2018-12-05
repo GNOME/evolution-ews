@@ -1874,6 +1874,8 @@ ews_authenticate_sync (CamelService *service,
 	const gchar *password;
 	gchar *hosturl;
 	gchar *old_sync_state = NULL, *new_sync_state = NULL;
+	gchar *certificate_pem = NULL;
+	GTlsCertificateFlags certificate_errors = 0;
 	GError *local_error = NULL;
 
 	ews_store = CAMEL_EWS_STORE (service);
@@ -2009,6 +2011,18 @@ ews_authenticate_sync (CamelService *service,
 	}
 
 	g_slist_free_full (created_folder_ids, g_free);
+
+	if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED) &&
+	    e_ews_connection_get_ssl_error_details (connection, &certificate_pem, &certificate_errors)) {
+		source = e_ews_connection_get_source (connection);
+
+		if (source) {
+			e_source_emit_credentials_required (source, E_SOURCE_CREDENTIALS_REASON_SSL_FAILED,
+				certificate_pem, certificate_errors, local_error);
+		}
+
+		g_free (certificate_pem);
+	}
 
 	if (local_error == NULL) {
 		result = CAMEL_AUTHENTICATION_ACCEPTED;

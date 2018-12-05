@@ -727,6 +727,15 @@ ews_backend_constructed (GObject *object)
 	/* Reset the connectable, it steals data from Authentication extension,
 	   where is written incorrect address */
 	e_backend_set_connectable (backend, NULL);
+
+	/* Eventually unset temporary SSL trust, but only once, when the process started.
+	   It might bee too often anywhere lease (like in the authenticate callback) */
+	if (e_source_has_extension (source, E_SOURCE_EXTENSION_WEBDAV_BACKEND)) {
+		ESourceWebdav *webdav_extension;
+
+		webdav_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_WEBDAV_BACKEND);
+		e_source_webdav_unset_temporary_ssl_trust (webdav_extension);
+	}
 }
 
 static void
@@ -930,7 +939,7 @@ ews_backend_create_resource_sync (ECollectionBackend *backend,
 	}
 
 	if (!success) {
-		connection = e_ews_backend_ref_connection_sync (E_EWS_BACKEND (backend), NULL, cancellable, error);
+		connection = e_ews_backend_ref_connection_sync (E_EWS_BACKEND (backend), NULL, NULL, NULL, cancellable, error);
 		if (connection == NULL)
 			return FALSE;
 
@@ -1037,7 +1046,7 @@ ews_backend_delete_resource_sync (ECollectionBackend *backend,
 	const gchar *extension_name;
 	gboolean success = FALSE;
 
-	connection = e_ews_backend_ref_connection_sync (E_EWS_BACKEND (backend), NULL, cancellable, error);
+	connection = e_ews_backend_ref_connection_sync (E_EWS_BACKEND (backend), NULL, NULL, NULL, cancellable, error);
 	if (connection == NULL)
 		return FALSE;
 
@@ -1142,7 +1151,7 @@ ews_backend_authenticate_sync (EBackend *backend,
 	ews_backend->priv->credentials = e_named_parameters_new_clone (credentials);
 	g_mutex_unlock (&ews_backend->priv->connection_lock);
 
-	connection = e_ews_backend_ref_connection_sync (ews_backend, &result, cancellable, error);
+	connection = e_ews_backend_ref_connection_sync (ews_backend, &result, out_certificate_pem, out_certificate_errors, cancellable, error);
 	g_clear_object (&connection);
 
 	if (result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
@@ -1223,7 +1232,7 @@ ews_backend_ref_connection_thread (GSimpleAsyncResult *simple,
 	EEwsConnection *connection;
 	GError *error = NULL;
 
-	connection = e_ews_backend_ref_connection_sync (E_EWS_BACKEND (object), NULL, cancellable, &error);
+	connection = e_ews_backend_ref_connection_sync (E_EWS_BACKEND (object), NULL, NULL, NULL, cancellable, &error);
 
 	/* Sanity check. */
 	g_return_if_fail (
@@ -1241,6 +1250,8 @@ ews_backend_ref_connection_thread (GSimpleAsyncResult *simple,
 EEwsConnection *
 e_ews_backend_ref_connection_sync (EEwsBackend *backend,
 				   ESourceAuthenticationResult *result,
+				   gchar **out_certificate_pem,
+				   GTlsCertificateFlags *out_certificate_errors,
                                    GCancellable *cancellable,
                                    GError **error)
 {
@@ -1272,7 +1283,8 @@ e_ews_backend_ref_connection_sync (EEwsBackend *backend,
 		connection, "proxy-resolver",
 		G_BINDING_SYNC_CREATE);
 
-	local_result = e_ews_connection_try_credentials_sync (connection, backend->priv->credentials, cancellable, error);
+	local_result = e_ews_connection_try_credentials_sync (connection, backend->priv->credentials, NULL,
+		out_certificate_pem, out_certificate_errors, cancellable, error);
 	if (result)
 		*result = local_result;
 
@@ -1413,7 +1425,7 @@ e_ews_backend_sync_folders_sync (EEwsBackend *backend,
 		return TRUE;
 	}
 
-	connection = e_ews_backend_ref_connection_sync (backend, NULL, cancellable, error);
+	connection = e_ews_backend_ref_connection_sync (backend, NULL, NULL, NULL, cancellable, error);
 
 	if (connection == NULL) {
 		backend->priv->need_update_folders = TRUE;

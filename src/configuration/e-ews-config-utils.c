@@ -317,7 +317,7 @@ ews_config_utils_try_credentials_sync (ECredentialsPrompter *prompter,
 	if (data->try_credentials_func)
 		auth_result = data->try_credentials_func (data->conn, credentials, data->user_data, cancellable, error);
 	else
-		auth_result = e_ews_connection_try_credentials_sync (data->conn, credentials, cancellable, error);
+		auth_result = e_ews_connection_try_credentials_sync (data->conn, credentials, NULL, NULL, NULL, cancellable, error);
 
 	if (auth_result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
 		*out_authenticated = TRUE;
@@ -377,7 +377,7 @@ e_ews_config_utils_open_connection_for (ESource *source,
 			if (try_credentials_func)
 				result = try_credentials_func (conn, NULL, user_data, cancellable, &local_error);
 			else
-				result = e_ews_connection_try_credentials_sync (conn, NULL, cancellable, &local_error);
+				result = e_ews_connection_try_credentials_sync (conn, NULL, NULL, NULL, NULL, cancellable, &local_error);
 
 			if (result != E_SOURCE_AUTHENTICATION_ACCEPTED) {
 				g_clear_object (&conn);

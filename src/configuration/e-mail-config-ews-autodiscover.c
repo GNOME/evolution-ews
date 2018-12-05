@@ -45,6 +45,8 @@ struct _AsyncContext {
 	ESource *source;
 	CamelEwsSettings *ews_settings;
 	gchar *email_address;
+	gchar *certificate_pem;
+	GTlsCertificateFlags certificate_errors;
 };
 
 enum {
@@ -67,6 +69,7 @@ async_context_free (gpointer ptr)
 	g_clear_object (&async_context->source);
 	g_clear_object (&async_context->ews_settings);
 	g_free (async_context->email_address);
+	g_free (async_context->certificate_pem);
 
 	g_slice_free (AsyncContext, async_context);
 }
@@ -85,6 +88,9 @@ mail_config_ews_autodiscover_finish (EMailConfigEwsAutodiscover *autodiscover,
 
 	return g_task_propagate_boolean (G_TASK (result), error);
 }
+
+static void
+mail_config_ews_autodiscover_run (EMailConfigEwsAutodiscover *autodiscover);
 
 static void
 mail_config_ews_autodiscover_run_cb (GObject *source_object,
@@ -111,17 +117,62 @@ mail_config_ews_autodiscover_run_cb (GObject *source_object,
 	g_object_thaw_notify (G_OBJECT (settings));
 
 	if (e_activity_handle_cancellation (async_context->activity, error)) {
-		g_error_free (error);
+		/* Do nothing, just free the error below */
+	} else if (g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED) &&
+		   async_context->certificate_pem && *async_context->certificate_pem && async_context->certificate_errors) {
+		ETrustPromptResponse response;
+		GtkWidget *parent;
+		const gchar *host;
 
+		parent = gtk_widget_get_toplevel (GTK_WIDGET (autodiscover));
+		if (!GTK_IS_WINDOW (parent))
+			parent = NULL;
+
+		host = camel_network_settings_get_host (CAMEL_NETWORK_SETTINGS (settings));
+
+		response = e_trust_prompt_run_modal (parent ? GTK_WINDOW (parent) : NULL,
+			E_SOURCE_EXTENSION_COLLECTION, _("Exchange Web Services"),
+			host, async_context->certificate_pem, async_context->certificate_errors,
+			error->message);
+
+		g_clear_error (&error);
+
+		if (response != E_TRUST_PROMPT_RESPONSE_UNKNOWN) {
+			GTlsCertificate *certificate;
+
+			certificate = g_tls_certificate_new_from_pem (async_context->certificate_pem, -1, &error);
+			if (certificate) {
+				ESourceWebdav *extension_webdav;
+
+				extension_webdav = e_source_get_extension (async_context->source, E_SOURCE_EXTENSION_WEBDAV_BACKEND);
+
+				e_source_webdav_update_ssl_trust (extension_webdav, host, certificate, response);
+
+				g_object_unref (certificate);
+			}
+
+			if (error) {
+				e_alert_submit (
+					alert_sink,
+					"ews:autodiscovery-error",
+					error->message, NULL);
+			}
+		}
+
+		if (response == E_TRUST_PROMPT_RESPONSE_ACCEPT ||
+		    response == E_TRUST_PROMPT_RESPONSE_ACCEPT_TEMPORARILY) {
+			mail_config_ews_autodiscover_run (autodiscover);
+		}
 	} else if (error != NULL) {
 		e_alert_submit (
 			alert_sink,
 			"ews:autodiscovery-error",
 			error->message, NULL);
-		g_error_free (error);
 	}
 
 	gtk_widget_set_sensitive (GTK_WIDGET (autodiscover), TRUE);
+
+	g_clear_error (&error);
 }
 
 static gboolean
@@ -141,6 +192,7 @@ mail_config_ews_autodiscover_sync (ECredentialsPrompter *prompter,
 		async_context->ews_settings, async_context->email_address,
 		credentials && e_named_parameters_get (credentials, E_SOURCE_CREDENTIAL_PASSWORD) ?
 		e_named_parameters_get (credentials, E_SOURCE_CREDENTIAL_PASSWORD) : "",
+		&async_context->certificate_pem, &async_context->certificate_errors,
 		cancellable, &local_error);
 
 	if (local_error == NULL) {
@@ -173,6 +225,7 @@ mail_config_ews_autodiscover_run_thread (GTask *task,
 		if (without_password) {
 			success = e_ews_autodiscover_ws_url_sync (async_context->source,
 				async_context->ews_settings, async_context->email_address, "",
+				&async_context->certificate_pem, &async_context->certificate_errors,
 				cancellable, &local_error);
 		}
 
@@ -236,6 +289,8 @@ mail_config_ews_autodiscover_run (EMailConfigEwsAutodiscover *autodiscover)
 	async_context->source = g_object_ref (source);
 	async_context->ews_settings = g_object_ref (settings);
 	async_context->email_address = g_strdup (e_mail_config_service_page_get_email_address (page));
+	async_context->certificate_pem = NULL;
+	async_context->certificate_errors = 0;
 
 	/*
 	 * The GTask will be run in a new thread, which will invoke

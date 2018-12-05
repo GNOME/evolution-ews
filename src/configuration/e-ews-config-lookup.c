@@ -344,9 +344,54 @@ ews_config_lookup_worker_run (EConfigLookupWorker *lookup_worker,
 
 	if (password) {
 		const gchar *servers;
+		gchar *certificate_host = NULL;
+		gchar *certificate_pem = NULL;
+		GTlsCertificateFlags certificate_errors = 0;
+		GError *local_error = NULL;
 
-		if (e_ews_autodiscover_ws_url_sync (source, ews_settings, email_address, password, cancellable, NULL)) {
+		if (e_named_parameters_exists (params, E_CONFIG_LOOKUP_PARAM_CERTIFICATE_PEM) &&
+		    e_named_parameters_exists (params, E_CONFIG_LOOKUP_PARAM_CERTIFICATE_TRUST) &&
+		    e_named_parameters_exists (params, E_CONFIG_LOOKUP_PARAM_CERTIFICATE_HOST)) {
+			GTlsCertificate *certificate;
+			const gchar *param_certificate_pem;
+
+			param_certificate_pem = e_named_parameters_get (params, E_CONFIG_LOOKUP_PARAM_CERTIFICATE_PEM);
+			certificate = g_tls_certificate_new_from_pem (param_certificate_pem, -1, NULL);
+
+			if (certificate) {
+				ETrustPromptResponse trust_response;
+
+				trust_response = e_config_lookup_decode_certificate_trust (
+					e_named_parameters_get (params, E_CONFIG_LOOKUP_PARAM_CERTIFICATE_TRUST));
+
+				if (trust_response != E_TRUST_PROMPT_RESPONSE_UNKNOWN) {
+					ESourceWebdav *webdav_extension;
+
+					webdav_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_WEBDAV_BACKEND);
+					e_source_webdav_update_ssl_trust (webdav_extension,
+						e_named_parameters_get (params, E_CONFIG_LOOKUP_PARAM_CERTIFICATE_HOST),
+						certificate, trust_response);
+				}
+
+				g_object_unref (certificate);
+			}
+		}
+
+		if (e_ews_autodiscover_ws_url_sync (source, ews_settings, email_address, password, &certificate_pem, &certificate_errors, cancellable, &local_error)) {
 			ews_config_lookup_worker_result_from_settings (lookup_worker, config_lookup, email_address, ews_settings, params);
+		} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED)) {
+			const gchar *hosturl;
+			SoupURI *suri;
+
+			hosturl = camel_ews_settings_get_hosturl (ews_settings);
+			suri = soup_uri_new (hosturl);
+			if (suri) {
+				certificate_host = g_strdup (soup_uri_get_host (suri));
+
+				soup_uri_free (suri);
+			}
+		} else {
+			g_clear_error (&local_error);
 		}
 
 		servers = e_named_parameters_get (params, E_CONFIG_LOOKUP_PARAM_SERVERS);
@@ -357,7 +402,7 @@ ews_config_lookup_worker_run (EConfigLookupWorker *lookup_worker,
 
 			servers_strv = g_strsplit (servers, ";", 0);
 
-			for (ii = 0; servers_strv && servers_strv[ii] && !g_cancellable_is_cancelled (cancellable); ii++) {
+			for (ii = 0; servers_strv && servers_strv[ii] && !g_cancellable_is_cancelled (cancellable) && !local_error; ii++) {
 				const gchar *server = servers_strv[ii];
 				gchar *tmp = NULL;
 
@@ -368,8 +413,21 @@ ews_config_lookup_worker_run (EConfigLookupWorker *lookup_worker,
 
 				camel_ews_settings_set_hosturl (ews_settings, server);
 
-				if (e_ews_autodiscover_ws_url_sync (source, ews_settings, email_address, password, cancellable, NULL)) {
+				if (e_ews_autodiscover_ws_url_sync (source, ews_settings, email_address, password, &certificate_pem, &certificate_errors, cancellable, &local_error)) {
 					ews_config_lookup_worker_result_from_settings (lookup_worker, config_lookup, email_address, ews_settings, params);
+				} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED)) {
+					const gchar *hosturl;
+					SoupURI *suri;
+
+					hosturl = camel_ews_settings_get_hosturl (ews_settings);
+					suri = soup_uri_new (hosturl);
+					if (suri) {
+						certificate_host = g_strdup (soup_uri_get_host (suri));
+
+						soup_uri_free (suri);
+					}
+				} else {
+					g_clear_error (&local_error);
 				}
 
 				g_free (tmp);
@@ -378,7 +436,31 @@ ews_config_lookup_worker_run (EConfigLookupWorker *lookup_worker,
 			g_strfreev (servers_strv);
 		}
 
-		if (out_restart_params)
+		if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED) &&
+		    certificate_pem && *certificate_pem && certificate_errors) {
+			gchar *description = e_trust_prompt_describe_certificate_errors (certificate_errors);
+
+			if (description) {
+				g_set_error_literal (error, E_CONFIG_LOOKUP_WORKER_ERROR,
+					E_CONFIG_LOOKUP_WORKER_ERROR_CERTIFICATE, description);
+
+				g_free (description);
+
+				if (out_restart_params) {
+					if (!*out_restart_params)
+						*out_restart_params = e_named_parameters_new_clone (params);
+
+					e_named_parameters_set (*out_restart_params, E_CONFIG_LOOKUP_PARAM_CERTIFICATE_PEM, certificate_pem);
+					e_named_parameters_set (*out_restart_params, E_CONFIG_LOOKUP_PARAM_CERTIFICATE_HOST, certificate_host);
+				}
+			}
+		}
+
+		g_clear_error (&local_error);
+		g_free (certificate_host);
+		g_free (certificate_pem);
+
+		if (out_restart_params && !*out_restart_params)
 			*out_restart_params = e_named_parameters_new_clone (params);
 	}
 

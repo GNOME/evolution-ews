@@ -522,7 +522,12 @@ e_ews_connection_utils_prepare_message (EEwsConnection *cnc,
 					GCancellable *cancellable)
 {
 	ESoupAuthBearer *using_bearer_auth;
+	ESource *source;
 	GError *local_error = NULL;
+
+	source = e_ews_connection_get_source (cnc);
+	if (source)
+		e_soup_ssl_trust_connect (message, source);
 
 	if (!ews_connection_utils_maybe_prepare_bearer_auth (cnc, message, cancellable))
 		return FALSE;

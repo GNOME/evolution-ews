@@ -1494,7 +1494,8 @@ ecb_ews_connect_sync (ECalMetaBackend *meta_backend,
 		cbews->priv->cnc, "proxy-resolver",
 		G_BINDING_SYNC_CREATE);
 
-	*out_auth_result = e_ews_connection_try_credentials_sync (cbews->priv->cnc, credentials, cancellable, error);
+	*out_auth_result = e_ews_connection_try_credentials_sync (cbews->priv->cnc, credentials, NULL,
+		out_certificate_pem, out_certificate_errors, cancellable, error);
 
 	if (*out_auth_result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
 		ESource *source = e_backend_get_source (E_BACKEND (cbews));
