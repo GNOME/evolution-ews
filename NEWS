@@ -1,3 +1,19 @@
+Evolution-EWS 3.31.3 2018-12-10
+-------------------------------
+
+Bug Fixes:
+	eds-I#54 - Enable 'Listen for server change notifications' by default (Milan Crha)
+	I#27 - SSL Certificates are not validated (Milan Crha)
+
+Miscellaneous:
+	Fix a build break with glib pre-2.54 and bump libsoup version to 2.58 (Milan Crha)
+	Correct how extra compiler warnings are used in the maintainer mode (Milan Crha)
+
+Translations:
+	Kukuh Syafaat (id)
+	Rafael Fontenelle (pt_BR)
+	Aurimas Černius (lt)
+
 Evolution-EWS 3.31.2 2018-11-12
 -------------------------------
 
