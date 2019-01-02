@@ -1,17 +1,17 @@
 # Swedish translation for evolution-ews.
-# Copyright © 2012-2018 Free Software Foundation, Inc.
+# Copyright © 2012-2019 Free Software Foundation, Inc.
 # This file is distributed under the same license as the evolution-ews package.
 # Daniel Nylander <po@danielnylander.se>, 2012.
 # Sebastian Rasmussen <sebras@gmail.com>, 2016.
 # Josef Andersson <josef.andersson@fripost.org>, 2016, 2017.
-# Anders Jonsson <anders.jonsson@norsjovallen.se>, 2018.
+# Anders Jonsson <anders.jonsson@norsjovallen.se>, 2018, 2019.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2018-10-09 12:16+0000\n"
-"PO-Revision-Date: 2018-10-16 21:45+0200\n"
+"POT-Creation-Date: 2018-11-12 08:43+0000\n"
+"PO-Revision-Date: 2019-01-02 21:07+0100\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.1.1\n"
+"X-Generator: Poedit 2.2\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/camel/camel-ews-provider.c:81
@@ -32,41 +32,41 @@ msgstr "Exchange Web Services"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "För att nå Exchange-servrar som använder Web Services"
 
-#: ../src/addressbook/e-book-backend-ews.c:3352
+#: ../src/addressbook/e-book-backend-ews.c:3452
 msgid "Failed to update GAL:"
 msgstr "Misslyckades med att uppdatera GAL:"
 
-#: ../src/addressbook/e-book-backend-ews.c:3513
+#: ../src/addressbook/e-book-backend-ews.c:3613
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Kan inte spara kontaktlista, det stöds bara i EWS Server 2010 eller senare"
 
-#: ../src/addressbook/e-book-backend-ews.c:3606
+#: ../src/addressbook/e-book-backend-ews.c:3706
 msgid "Failed to set contact photo:"
 msgstr "Misslyckades med att sätta kontaktbild:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1659
+#: ../src/calendar/e-cal-backend-ews.c:1700
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Tillgänglig"
 
-#: ../src/calendar/e-cal-backend-ews.c:1662
+#: ../src/calendar/e-cal-backend-ews.c:1703
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Upptagen"
 
-#: ../src/calendar/e-cal-backend-ews.c:1664
+#: ../src/calendar/e-cal-backend-ews.c:1705
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Ej på kontoret"
 
-#: ../src/calendar/e-cal-backend-ews.c:1666
+#: ../src/calendar/e-cal-backend-ews.c:1707
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Preliminärt"
 
-#: ../src/calendar/e-cal-backend-ews.c:3322
+#: ../src/calendar/e-cal-backend-ews.c:3363
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Kan inte hitta deltagare ”%s” i listan över deltagare"
@@ -227,57 +227,61 @@ msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:647 ../src/camel/camel-ews-store.c:1250
+#: ../src/camel/camel-ews-store.c:647 ../src/camel/camel-ews-store.c:1287
 msgid "Checking “Out of Office” settings"
 msgstr "Kontrollerar inställningar för ”Inte på kontoret”"
 
+#: ../src/camel/camel-ews-store.c:1293
+msgid "Look up Exchange server categories"
+msgstr "Slå upp Exchange-serverkategorier"
+
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/camel/camel-ews-store.c:1320
+#: ../src/camel/camel-ews-store.c:1363
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
 msgstr[0] "Lösenordet går ut om %d dag. Öppna ”%s” för att ändra det."
 msgstr[1] "Lösenordet går ut om %d dagar. Öppna ”%s” för att ändra det."
 
-#: ../src/camel/camel-ews-store.c:1326
+#: ../src/camel/camel-ews-store.c:1369
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
 msgstr[0] "Lösenordet går ut om en dag."
 msgstr[1] "Lösenordet går ut om %d dagar."
 
-#: ../src/camel/camel-ews-store.c:1546
+#: ../src/camel/camel-ews-store.c:1589
 msgid "Updating foreign folder structure"
 msgstr "Uppdaterar struktur för främmande mappar"
 
-#: ../src/camel/camel-ews-store.c:1682
+#: ../src/camel/camel-ews-store.c:1725
 msgid "Updating foreign folders"
 msgstr "Uppdaterar främmande mappar"
 
-#: ../src/camel/camel-ews-store.c:2084
+#: ../src/camel/camel-ews-store.c:2127
 #, c-format
 msgid "No such folder: %s"
 msgstr "Det finns ingen sådan mapp: %s"
 
-#: ../src/camel/camel-ews-store.c:2382
+#: ../src/camel/camel-ews-store.c:2436
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Kan inte lista EWS-publika mappar i frånkopplat läge"
 
-#: ../src/camel/camel-ews-store.c:2455
+#: ../src/camel/camel-ews-store.c:2509
 msgid "Cannot find any EWS public folders"
 msgstr "Kan inte hitta några EWS-publika mappar"
 
-#: ../src/camel/camel-ews-store.c:2564
+#: ../src/camel/camel-ews-store.c:2618
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Kan inte skapa mappen ”%s”, mappen finns redan"
 
-#: ../src/camel/camel-ews-store.c:2579
+#: ../src/camel/camel-ews-store.c:2633
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Föräldramappen %s existerar inte"
 
-#: ../src/camel/camel-ews-store.c:2589
+#: ../src/camel/camel-ews-store.c:2643
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -285,91 +289,91 @@ msgstr ""
 "Kan inte skapa mapp under ”%s”, den används endast för andra användares "
 "mappar"
 
-#: ../src/camel/camel-ews-store.c:2599
+#: ../src/camel/camel-ews-store.c:2653
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr "Kan inte skapa mapp under ”%s”, den används endast för publika mappar"
 
-#: ../src/camel/camel-ews-store.c:2703
+#: ../src/camel/camel-ews-store.c:2757
 #, c-format
 msgid "Folder does not exist"
 msgstr "Mappen finns inte"
 
-#: ../src/camel/camel-ews-store.c:2713
+#: ../src/camel/camel-ews-store.c:2767
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Kan inte ta bort mapp ”%s”, den används endast för andra användares mappar"
 
-#: ../src/camel/camel-ews-store.c:2724
+#: ../src/camel/camel-ews-store.c:2778
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "Kan inte ta bort mapp ”%s”, den används endast för publika mappar"
 
-#: ../src/camel/camel-ews-store.c:2883
+#: ../src/camel/camel-ews-store.c:2937
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Mappen %s finns inte"
 
-#: ../src/camel/camel-ews-store.c:2892
+#: ../src/camel/camel-ews-store.c:2946
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Ingen ändringsnyckelpost för mapp %s"
 
-#: ../src/camel/camel-ews-store.c:2935
+#: ../src/camel/camel-ews-store.c:2989
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Kan inte både byta namn på och flytta en mapp samtidigt"
 
-#: ../src/camel/camel-ews-store.c:2969
+#: ../src/camel/camel-ews-store.c:3023
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Kan inte hitta mapp-ID för föräldramapp %s"
 
-#: ../src/camel/camel-ews-store.c:3021 ../src/camel/camel-ews-transport.c:318
+#: ../src/camel/camel-ews-store.c:3075 ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange server %s"
 msgstr "Exchange server %s"
 
-#: ../src/camel/camel-ews-store.c:3024
+#: ../src/camel/camel-ews-store.c:3078
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Exchange-tjänst för %s på %s"
 
-#: ../src/camel/camel-ews-store.c:3068
+#: ../src/camel/camel-ews-store.c:3122
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Kunde inte hitta mappen Papperskorg"
 
-#: ../src/camel/camel-ews-store.c:3128
+#: ../src/camel/camel-ews-store.c:3182
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Kunde inte hitta mappen Skräppost"
 
-#: ../src/camel/camel-ews-store.c:3319
+#: ../src/camel/camel-ews-store.c:3373
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Kan inte prenumerera på EWS-mappar i frånkopplat läge"
 
-#: ../src/camel/camel-ews-store.c:3342
+#: ../src/camel/camel-ews-store.c:3396
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Kan inte prenumerera på mappen ”%s”, ingen publik mapp tillgänglig"
 
-#: ../src/camel/camel-ews-store.c:3352
+#: ../src/camel/camel-ews-store.c:3406
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Kan inte prenumerera på mappen ”%s”, mappen hittades inte"
 
-#: ../src/camel/camel-ews-store.c:3443
+#: ../src/camel/camel-ews-store.c:3497
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Kan inte avsluta prenumeration på EWS-mappar i frånkopplat läge"
 
-#: ../src/camel/camel-ews-store.c:3560
+#: ../src/camel/camel-ews-store.c:3614
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Du måste vara ansluten för att slutföra denna åtgärd"
 
-#: ../src/camel/camel-ews-store.c:3604 ../src/camel/camel-ews-store.c:3641
+#: ../src/camel/camel-ews-store.c:3658 ../src/camel/camel-ews-store.c:3695
 msgid "Unsetting the “Out of Office” status"
 msgstr "Stänger av status för ”Inte på kontoret”"
 
