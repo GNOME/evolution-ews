@@ -828,13 +828,12 @@ void
 e_soap_message_write_double (ESoapMessage *msg,
                              gdouble d)
 {
-	gchar *string;
+	gchar buffer[G_ASCII_DTOSTR_BUF_SIZE + 1];
 
 	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
 
-	string = g_strdup_printf ("%f", d);
-	e_soap_message_write_string (msg, string);
-	g_free (string);
+	g_ascii_dtostr (buffer, sizeof (buffer), d);
+	e_soap_message_write_string (msg, buffer);
 }
 
 /**
