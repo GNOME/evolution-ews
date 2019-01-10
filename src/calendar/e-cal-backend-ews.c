@@ -3606,6 +3606,47 @@ ecb_ews_receive_objects_sync (ECalBackendSync *sync_backend,
 			}
 		}
 		break;
+	case ICAL_METHOD_CANCEL: {
+		ECalObjModType mod_type = E_CAL_OBJ_MOD_ALL;
+		GSList *ids = NULL;
+
+		for (subcomp = icalcomponent_get_first_component (icalcomp, kind);
+		     subcomp && success;
+		     subcomp = icalcomponent_get_next_component (icalcomp, kind)) {
+			const gchar *uid = icalcomponent_get_uid (subcomp);
+			gchar *rid_str = NULL;
+
+			if (icalcomponent_get_first_property (subcomp, ICAL_RECURRENCEID_PROPERTY)) {
+				struct icaltimetype rid = icaltime_null_time ();
+
+				rid = icalcomponent_get_recurrenceid (subcomp);
+
+				rid_str = (icaltime_is_valid_time (rid) && !icaltime_is_null_time (rid)) ?
+					icaltime_as_ical_string_r (rid) : g_strdup ("0");
+
+				mod_type = E_CAL_OBJ_MOD_THIS;
+			}
+
+			ids = g_slist_prepend (ids, e_cal_component_id_new (uid, rid_str));
+
+			g_free (rid_str);
+		}
+
+		if (ids) {
+			GSList *old_comps = NULL, *new_comps = NULL;
+			GError *local_error = NULL;
+
+			e_cal_backend_sync_remove_objects (sync_backend, cal, cancellable, ids, mod_type, &old_comps, &new_comps, &local_error);
+
+			do_refresh = !local_error;
+
+			e_util_free_nullable_object_slist (old_comps);
+			e_util_free_nullable_object_slist (new_comps);
+			g_clear_error (&local_error);
+		}
+
+		g_slist_free_full (ids, (GDestroyNotify) e_cal_component_free_id);
+		} break;
 	default:
 		break;
 	}
