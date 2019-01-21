@@ -941,7 +941,7 @@ convert_indexed_contact_property_to_updatexml (ESoapMessage *message,
 {
 	gboolean delete_field = FALSE;
 
-	if (!value || g_strcmp0 (value, "") == 0)
+	if (!value || !*value)
 		delete_field = TRUE;
 	e_ews_message_start_set_indexed_item_field (message, name , prefix, "Contact", key, delete_field);
 
@@ -1295,7 +1295,7 @@ convert_indexed_contact_property_to_updatexml_physical_address (ESoapMessage *me
 	gchar * fielduri = NULL;
 	gboolean delete_field = FALSE;
 
-	if (!value || g_strcmp0 (value, "") == 0)
+	if (!value || !*value)
 		delete_field = TRUE;
 
 	fielduri = g_strconcat (name, ":", uri_element, NULL);
@@ -2718,7 +2718,8 @@ ebb_ews_func_contains (struct _ESExp *f,
 	propname = argv[0]->value.string;
 	str = argv[1]->value.string;
 
-	if (!strcmp (propname, "full_name") || !strcmp (propname, "email")) {
+	if (!g_ascii_strcasecmp (propname, "full_name") || !g_ascii_strcasecmp (propname, "email") ||
+	    (str && *str && !g_ascii_strcasecmp (propname, "x-evolution-any-field"))) {
 		if (!sdata->auto_comp_str) {
 			sdata->auto_comp_str = g_strdup (str);
 			sdata->is_autocompletion = TRUE;
@@ -2754,7 +2755,8 @@ ebb_ews_func_beginswith (struct _ESExp *f,
 	propname = argv[0]->value.string;
 	str = argv[1]->value.string;
 
-	if (!strcmp (propname, "full_name") || !strcmp (propname, "email")) {
+	if (!g_ascii_strcasecmp (propname, "full_name") || !g_ascii_strcasecmp (propname, "email") ||
+	    (str && *str && !g_ascii_strcasecmp (propname, "x-evolution-any-field"))) {
 		if (!sdata->auto_comp_str) {
 			sdata->auto_comp_str = g_strdup (str);
 			sdata->is_autocompletion = TRUE;
