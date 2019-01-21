@@ -742,6 +742,14 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 			gboolean is_response_requested = e_ews_item_get_is_response_requested (item);
 			gchar *user_email;
 
+			/* Remove any existing attendees first (as Office365.com (and possibly Exchange 2016) includes them) */
+			for (icalprop = icalcomponent_get_first_property (icalcomp, ICAL_ATTENDEE_PROPERTY);
+			     icalprop;
+			     icalprop = icalcomponent_get_first_property (icalcomp, ICAL_ATTENDEE_PROPERTY)) {
+				icalcomponent_remove_property (icalcomp, icalprop);
+				icalproperty_free (icalprop);
+			}
+
 			user_email = camel_ews_settings_dup_email (ews_settings);
 
 			/* Attendees */
