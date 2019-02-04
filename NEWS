@@ -1,3 +1,12 @@
+Evolution-EWS 3.30.5 2019-02-04
+-------------------------------
+
+Bug Fixes:
+	I#25 - Canceled meetings remain in the calendar with Canceled: title (Milan Crha)
+	I#30 - Double values should use dot as decimal separator in XML (Milan Crha)
+	I#31 - Duplicate attendees in meetings from Office365.com (Milan Crha)
+	I#32 - Run ResolveNames for "Any field contains" searches (Milan Crha)
+
 Evolution-EWS 3.30.3 2018-12-10
 -------------------------------
 
