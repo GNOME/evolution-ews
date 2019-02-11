@@ -2768,6 +2768,20 @@ ebb_ews_func_beginswith (struct _ESExp *f,
 	return r;
 }
 
+static ESExpResult *
+ebb_ews_func_exists (struct _ESExp *f,
+		     gint argc,
+		     struct _ESExpResult **argv,
+		     gpointer data)
+{
+	ESExpResult *r;
+
+	r = e_sexp_result_new (f, ESEXP_RES_BOOL);
+	r->value.boolean = FALSE;
+
+	return r;
+}
+
 static struct {
 	const gchar *name;
 	ESExpFunc *func;
@@ -2780,6 +2794,7 @@ static struct {
 	{ "is", ebb_ews_func_is, 0},
 	{ "beginswith", ebb_ews_func_beginswith, 0},
 	{ "endswith", ebb_ews_func_endswith, 0},
+	{ "exists", ebb_ews_func_exists, 0}
 };
 
 /* FIXME  build a complete filter from the query that can be used by find_items */
@@ -2787,7 +2802,6 @@ static gboolean
 ebb_ews_build_restriction (const gchar *query,
 			   gchar **auto_comp_str)
 {
-	ESExpResult *r;
 	ESExp *sexp;
 	EBookBackendEwsSExpData *sdata;
 	gboolean autocompletion = FALSE;
@@ -2807,18 +2821,25 @@ ebb_ews_build_restriction (const gchar *query,
 	}
 
 	e_sexp_input_text (sexp, query, strlen (query));
-	e_sexp_parse (sexp);
+	if (e_sexp_parse (sexp) == -1) {
+		const gchar *errstr = e_sexp_get_error (sexp);
 
-	r = e_sexp_eval (sexp);
-	if (r) {
-		autocompletion = sdata->is_autocompletion;
-		if (autocompletion)
-			*auto_comp_str = sdata->auto_comp_str;
-		else
-			g_free (sdata->auto_comp_str);
+		g_printerr ("%s: Failed to parse query '%s': %s\n", G_STRFUNC, query, errstr ? errstr : "Unknown error");
+	} else {
+		ESExpResult *r;
+
+		r = e_sexp_eval (sexp);
+		if (r) {
+			autocompletion = sdata->is_autocompletion;
+			if (autocompletion)
+				*auto_comp_str = sdata->auto_comp_str;
+			else
+				g_free (sdata->auto_comp_str);
+		}
+
+		e_sexp_result_free (sexp, r);
 	}
 
-	e_sexp_result_free (sexp, r);
 	g_object_unref (sexp);
 	g_free (sdata);
 
