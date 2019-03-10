@@ -1,0 +1,1393 @@
+# Dutch translation for evolution-ews.
+# Copyright (C) 2019 evolution-ews's COPYRIGHT HOLDER
+# This file is distributed under the same license as the evolution-ews package.
+# Nathan Follens <nthn@unseen.is>, 2019.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: evolution-ews master\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
+"POT-Creation-Date: 2019-02-18 08:32+0000\n"
+"PO-Revision-Date: 2019-03-05 11:15+0100\n"
+"Language-Team: Dutch <gnome-nl-list@gnome.org>\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Last-Translator: Nathan Follens <nthn@unseen.is>\n"
+"X-Generator: Poedit 2.2.1\n"
+
+#: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
+#: ../src/camel/camel-ews-provider.c:81
+#: ../src/configuration/e-ews-config-lookup.c:251
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:134
+msgid "Exchange Web Services"
+msgstr "Exchange-webdiensten"
+
+#: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
+#: ../src/camel/camel-ews-provider.c:83
+msgid "For accessing Exchange servers using Web Services"
+msgstr "Voor toegang tot Exchange-servers met webdiensten"
+
+#: ../src/addressbook/e-book-backend-ews.c:3476
+msgid "Failed to update GAL:"
+msgstr "Bijwerken van GAL mislukt:"
+
+#: ../src/addressbook/e-book-backend-ews.c:3637
+msgid ""
+"Cannot save contact list, it’s only supported on EWS Server 2010 or later"
+msgstr ""
+"Kan contactlijst niet opslaan, dit wordt enkel ondersteund door EWS Server "
+"2010 of recenter"
+
+#: ../src/addressbook/e-book-backend-ews.c:3730
+msgid "Failed to set contact photo:"
+msgstr "Instellen van contactfoto mislukt:"
+
+#: ../src/calendar/e-cal-backend-ews.c:1709
+msgctxt "FreeBusyType"
+msgid "Free"
+msgstr "Vrij"
+
+#: ../src/calendar/e-cal-backend-ews.c:1712
+msgctxt "FreeBusyType"
+msgid "Busy"
+msgstr "Bezet"
+
+#: ../src/calendar/e-cal-backend-ews.c:1714
+msgctxt "FreeBusyType"
+msgid "Out of Office"
+msgstr "Afwezig"
+
+#: ../src/calendar/e-cal-backend-ews.c:1716
+msgctxt "FreeBusyType"
+msgid "Tentative"
+msgstr "Voorlopig"
+
+#: ../src/calendar/e-cal-backend-ews.c:3372
+#, c-format
+msgid "Cannot find user “%s” between attendees"
+msgstr "Kan gebruiker ‘%s’ niet tussen aanwezigen vinden"
+
+#: ../src/camel/camel-ews-folder.c:375
+#, c-format
+msgid "Unable to open mimecontent temporary file!"
+msgstr "Kan tijdelijk mime-inhoudsbestand niet openen!"
+
+#: ../src/camel/camel-ews-folder.c:383
+#, c-format
+msgid "Unable to generate parser from mimecontent!"
+msgstr "Kan parser niet genereren uit mime-inhoud!"
+
+#: ../src/camel/camel-ews-folder.c:392
+#, c-format
+msgid "Unable to parse meeting request mimecontent!"
+msgstr "Kan mime-inhoud van afspraakverzoek niet ontleden!"
+
+#: ../src/camel/camel-ews-folder.c:460 ../src/camel/camel-ews-folder.c:670
+#, c-format
+msgid "Unable to create cache file"
+msgstr "Kan cachebestand niet aanmaken"
+
+#: ../src/camel/camel-ews-folder.c:787 ../src/camel/camel-ews-folder.c:908
+#, c-format
+msgid "Unable to create cache path “%s”: %s"
+msgstr "Kan cachepad ‘%s’ niet aanmaken: %s"
+
+#. Translators: The first %s consists of the source file name,
+#. the second %s of the destination file name and
+#. the third %s of the error message.
+#: ../src/camel/camel-ews-folder.c:922
+#, c-format
+msgid "Failed to move message cache file from “%s” to “%s”: %s"
+msgstr "Verplaatsen van berichtcachebestand van ‘%s’ naar ‘%s’ mislukt: %s"
+
+#: ../src/camel/camel-ews-folder.c:1814
+#, c-format
+msgid "Could not load summary for %s"
+msgstr "Kon overzicht voor %s niet laden"
+
+#: ../src/camel/camel-ews-folder.c:2287
+#, c-format
+msgid "Refreshing folder “%s”"
+msgstr "Verversen van map ‘%s’"
+
+#: ../src/camel/camel-ews-folder.c:2471
+#, c-format
+msgid "Cannot perform actions on the folder while in offline mode"
+msgstr "Kan acties op map niet uitvoeren in offlinemodus"
+
+#: ../src/camel/camel-ews-provider.c:47
+msgid "Checking for new mail"
+msgstr "Controleren op nieuwe e-mail"
+
+#: ../src/camel/camel-ews-provider.c:49
+msgid "C_heck for new messages in all folders"
+msgstr "Alle mappen op nieuwe berichten _controleren"
+
+#: ../src/camel/camel-ews-provider.c:51
+msgid "_Listen for server change notifications"
+msgstr "Naar wijzigingsnotificaties van server _luisteren"
+
+#: ../src/camel/camel-ews-provider.c:54
+msgid "Options"
+msgstr "Opties"
+
+#: ../src/camel/camel-ews-provider.c:56
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr ""
+"_Filters toepassen op alle nieuwe berichten in het Postvak IN op deze server"
+
+#: ../src/camel/camel-ews-provider.c:58
+msgid "Check new messages for _Junk contents"
+msgstr "Nieuwe berichten op _spam controleren"
+
+#: ../src/camel/camel-ews-provider.c:60
+msgid "Only check for Junk messages in the IN_BOX folder"
+msgstr "Alleen postvak _IN op spam controleren"
+
+#: ../src/camel/camel-ews-provider.c:62
+msgid "Synchroni_ze remote mail locally in all folders"
+msgstr "Lokaal synchroni_seren met e-mail op afstand in alle mappen"
+
+#: ../src/camel/camel-ews-provider.c:66
+msgid "Connection"
+msgstr "Verbinding"
+
+#. Translators: '%s' is preplaced with a widget, where "
+#. * user can select how long the timeout should be.
+#: ../src/camel/camel-ews-provider.c:70
+#, c-format
+msgid "Connection _timeout (in seconds) %s"
+msgstr "Verbindings_time-out (in seconden) %s"
+
+#: ../src/camel/camel-ews-provider.c:72
+msgid "Override _User-Agent header value"
+msgstr "Gebr_uikersagent-headerwaarde overschrijven"
+
+#: ../src/camel/camel-ews-provider.c:98
+msgid "NTLM"
+msgstr "NTLM"
+
+#: ../src/camel/camel-ews-provider.c:100
+msgid ""
+"This option will connect to the Exchange server using a plaintext password "
+"with NTLM authentication."
+msgstr ""
+"Deze optie zal bij het verbinden met de Exchange-server gebruik maken van "
+"een onversleuteld wachtwoord met NTLM-aanmeldingscontrole."
+
+#: ../src/camel/camel-ews-provider.c:108
+msgid "Basic"
+msgstr "Basic"
+
+#: ../src/camel/camel-ews-provider.c:110
+msgid ""
+"This option will connect to the Exchange server using a plaintext password "
+"with Basic authentication."
+msgstr ""
+"Deze optie zal bij het verbinden met de Exchange-server gebruik maken van "
+"een onversleuteld wachtwoord met Basic-aanmeldingscontrole."
+
+#: ../src/camel/camel-ews-provider.c:118
+msgid "Kerberos"
+msgstr "Kerberos"
+
+#: ../src/camel/camel-ews-provider.c:120
+msgid ""
+"This option will connect to the Exchange server using a Kerberos/GSSAPI "
+"authentication."
+msgstr ""
+"Deze optie zal bij het verbinden met de Exchange-server gebruik maken van "
+"Kerberos/GSSAPI-aanmeldingscontrole."
+
+#: ../src/camel/camel-ews-store.c:335
+#, c-format
+msgid "Session has no storage path"
+msgstr "Sessie heeft geen opslagpad"
+
+#. Translators: This composes a "Public Folders" folder name for case when
+#. * user has such in his store already. The %s is replaced with "Public Folders",
+#. * the %d with counter, thus it composes name like "Public Folders_1"
+#.
+#: ../src/camel/camel-ews-store.c:372
+#, c-format
+msgctxt "PublicFolders"
+msgid "%s_%d"
+msgstr "%s_%d"
+
+#. Translators: This composes a "Foreign Folders" folder name for case when
+#. * user has such in his store already. The %s is replaced with "Foreign Folders",
+#. * the %d with counter, thus it composes name like "Foreign Folders_1"
+#.
+#: ../src/camel/camel-ews-store.c:501
+#, c-format
+msgctxt "ForeignFolders"
+msgid "%s_%d"
+msgstr "%s_%d"
+
+#: ../src/camel/camel-ews-store.c:647 ../src/camel/camel-ews-store.c:1287
+msgid "Checking “Out of Office” settings"
+msgstr "‘Afwezig’-instellingen controleren"
+
+#: ../src/camel/camel-ews-store.c:1293
+msgid "Look up Exchange server categories"
+msgstr "Exchange-servercategorieën opzoeken"
+
+#. Translators: The "%s" is a service URL, provided by the server
+#: ../src/camel/camel-ews-store.c:1363
+#, c-format
+msgid "Password will expire in %d day. Open “%s” to change it."
+msgid_plural "Password will expire in %d days. Open “%s” to change it."
+msgstr[0] "Wachtwoord verloopt over %d dag. Open ‘%s’ om het te wijzigen."
+msgstr[1] "Wachtwoord verloopt over %d dagen. Open ‘%s’ om het te wijzigen."
+
+#: ../src/camel/camel-ews-store.c:1369
+#, c-format
+msgid "Password will expire in one day."
+msgid_plural "Password will expire in %d days."
+msgstr[0] "Wachtwoord verloopt over één dag."
+msgstr[1] "Wachtwoord verloopt over %d dagen."
+
+#: ../src/camel/camel-ews-store.c:1589
+msgid "Updating foreign folder structure"
+msgstr "Externe mapstructuur wordt bijgewerkt"
+
+#: ../src/camel/camel-ews-store.c:1725
+msgid "Updating foreign folders"
+msgstr "Externe mappen worden bijgewerkt"
+
+#: ../src/camel/camel-ews-store.c:2141
+#, c-format
+msgid "No such folder: %s"
+msgstr "Map bestaat niet: %s"
+
+#: ../src/camel/camel-ews-store.c:2450
+msgid "Cannot list EWS public folders in offline mode"
+msgstr "Kan openbare EWS-mappen niet oplijsten in offlinemodus"
+
+#: ../src/camel/camel-ews-store.c:2523
+msgid "Cannot find any EWS public folders"
+msgstr "Kan geen openbare EWS-mappen vinden"
+
+#: ../src/camel/camel-ews-store.c:2632
+#, c-format
+msgid "Cannot create folder “%s”, folder already exists"
+msgstr "Kan map ‘%s’ niet aanmaken, map bestaat al"
+
+#: ../src/camel/camel-ews-store.c:2647
+#, c-format
+msgid "Parent folder %s does not exist"
+msgstr "Bovenliggende map %s bestaat niet"
+
+#: ../src/camel/camel-ews-store.c:2657
+#, c-format
+msgid ""
+"Cannot create folder under “%s”, it is used for folders of other users only"
+msgstr ""
+"Kan map niet aanmaken onder ‘%s’, deze wordt enkel gebruikt voor mappen van "
+"andere gebruikers"
+
+#: ../src/camel/camel-ews-store.c:2667
+#, c-format
+msgid "Cannot create folder under “%s”, it is used for public folders only"
+msgstr ""
+"Kan map niet aanmaken onder ‘%s’, deze wordt enkel gebruikt voor openbare "
+"mappen"
+
+#: ../src/camel/camel-ews-store.c:2771
+#, c-format
+msgid "Folder does not exist"
+msgstr "Map bestaat niet"
+
+#: ../src/camel/camel-ews-store.c:2781
+#, c-format
+msgid "Cannot remove folder “%s”, it is used for folders of other users only"
+msgstr ""
+"Kan map ‘%s’ niet verwijderen, deze wordt enkel gebruikt voor mappen van "
+"andere gebruikers"
+
+#: ../src/camel/camel-ews-store.c:2792
+#, c-format
+msgid "Cannot remove folder “%s”, it is used for public folders only"
+msgstr ""
+"Kan map ‘%s’ niet verwijderen, deze wordt enkel gebruikt voor openbare mappen"
+
+#: ../src/camel/camel-ews-store.c:2951
+#, c-format
+msgid "Folder %s does not exist"
+msgstr "Map %s bestaat niet"
+
+#: ../src/camel/camel-ews-store.c:2960
+#, c-format
+msgid "No change key record for folder %s"
+msgstr "Geen vermelding van wijzigingssleutel voor map %s"
+
+#: ../src/camel/camel-ews-store.c:3003
+#, c-format
+msgid "Cannot both rename and move a folder at the same time"
+msgstr "Kan een map niet tegelijk hernoemen en verplaatsen"
+
+#: ../src/camel/camel-ews-store.c:3037
+#, c-format
+msgid "Cannot find folder ID for parent folder %s"
+msgstr "Kan map-ID voor bovenliggende map %s niet vinden"
+
+#: ../src/camel/camel-ews-store.c:3089 ../src/camel/camel-ews-transport.c:318
+#, c-format
+msgid "Exchange server %s"
+msgstr "Exchange-server %s"
+
+#: ../src/camel/camel-ews-store.c:3092
+#, c-format
+msgid "Exchange service for %s on %s"
+msgstr "Exchange-dienst voor %s op %s"
+
+#: ../src/camel/camel-ews-store.c:3136
+#, c-format
+msgid "Could not locate Trash folder"
+msgstr "Kan Prullenbak-map niet vinden"
+
+#: ../src/camel/camel-ews-store.c:3196
+#, c-format
+msgid "Could not locate Junk folder"
+msgstr "Kan Spam-map niet vinden"
+
+#: ../src/camel/camel-ews-store.c:3387
+msgid "Cannot subscribe EWS folders in offline mode"
+msgstr "Kan niet abonneren op EWS-mappen in offlinemodus"
+
+#: ../src/camel/camel-ews-store.c:3410
+#, c-format
+msgid "Cannot subscribe folder “%s”, no public folder available"
+msgstr "Kan niet abonneren op map ‘%s’, geen openbare map beschikbaar"
+
+#: ../src/camel/camel-ews-store.c:3420
+#, c-format
+msgid "Cannot subscribe folder “%s”, folder not found"
+msgstr "Kan niet abonneren op map ‘%s’, map niet gevonden"
+
+#: ../src/camel/camel-ews-store.c:3511
+msgid "Cannot unsubscribe EWS folders in offline mode"
+msgstr "Kan abonnement op EWS-mappen niet opzeggen in offlinemodus"
+
+#: ../src/camel/camel-ews-store.c:3628
+#, c-format
+msgid "You must be working online to complete this operation"
+msgstr "U moet online werken om deze bewerking te voltooien"
+
+#: ../src/camel/camel-ews-store.c:3672 ../src/camel/camel-ews-store.c:3709
+msgid "Unsetting the “Out of Office” status"
+msgstr "‘Afwezig’-status wordt uitgezet"
+
+#: ../src/camel/camel-ews-store.h:56
+msgid "Foreign Folders"
+msgstr "Externe mappen"
+
+#: ../src/camel/camel-ews-store.h:58
+msgid "Public Folders"
+msgstr "Openbare mappen"
+
+#: ../src/camel/camel-ews-transport.c:321
+#, c-format
+msgid "Exchange mail delivery via %s"
+msgstr "Exchange-postaflevering via %s"
+
+#: ../src/camel/camel-ews-transport.c:370
+msgid "Cannot send message with no From address"
+msgstr "Kan bericht niet versturen zonder afzenderadres"
+
+#: ../src/camel/camel-ews-transport.c:376
+msgid "Exchange server cannot send message with multiple From addresses"
+msgstr ""
+"Exchange-server kan geen bericht versturen met meerdere afzenderadressen"
+
+#: ../src/camel/camel-ews-transport.c:386
+msgid "Failed to read From address"
+msgstr "Lezen ‘Van’-adres is mislukt"
+
+#: ../src/camel/camel-ews-transport.c:396
+#, c-format
+msgid "Service not connected"
+msgstr "Dienst niet verbonden"
+
+#: ../src/collection/e-ews-backend.c:522
+#: ../src/configuration/e-mail-config-ews-gal.c:274
+msgid "Global Address List"
+msgstr "Globale adreslijst"
+
+#: ../src/collection/e-ews-backend.c:970
+#, c-format
+msgid "Could not determine a suitable folder class for a new folder named “%s”"
+msgstr ""
+"Kan geen geschikte mapklasse bepalen voor een nieuwe map met de naam ‘%s’"
+
+#: ../src/collection/e-ews-backend.c:1058
+#, c-format
+msgid "Data source “%s” does not represent an Exchange Web Services folder"
+msgstr "Gegevensbron ‘%s’ stelt geen Exchange-webdienstenmap voor"
+
+#: ../src/configuration/e-book-config-ews.c:100
+msgid "Use only _primary contact email address"
+msgstr "Enkel _primair e-mailadres van contact gebruiken"
+
+#: ../src/configuration/e-book-config-ews.c:101
+msgid ""
+"When checked, the contacts looked up in the online Global Address List will "
+"contain only the primary email address"
+msgstr ""
+"Indien ingeschakeld zullen de contacten opgezocht in de globale adreslijst "
+"enkel het primaire e-mailadres bevatten"
+
+#: ../src/configuration/e-book-config-ews.c:113
+msgid "_Fetch contact photos"
+msgstr "Contact_foto’s ophalen"
+
+#: ../src/configuration/e-book-config-ews.c:114
+msgid "Tries to look up for user photo"
+msgstr "Probeert gebruikersfoto’s op te zoeken"
+
+#: ../src/configuration/e-ews-config-lookup.c:192
+msgid "Exchange Web Services autodiscovery"
+msgstr "Exchange-webdiensten automatisch ontdekken"
+
+#: ../src/configuration/e-ews-config-lookup.c:235
+#, c-format
+msgid "User: %s"
+msgstr "Gebruiker: %s"
+
+#: ../src/configuration/e-ews-config-lookup.c:240
+#, c-format
+msgid "Host URL: %s"
+msgstr "Host-URL: %s"
+
+#: ../src/configuration/e-ews-config-lookup.c:245
+#, c-format
+msgid "OAB URL: %s"
+msgstr "OAB-URL: %s"
+
+#: ../src/configuration/e-ews-config-lookup.c:322
+#, c-format
+msgid "Requires user password to continue"
+msgstr "Vereist een gebruikerswachtwoord om verder te gaan"
+
+#: ../src/configuration/e-ews-config-utils.c:574
+msgid "Folder"
+msgstr "Map"
+
+#: ../src/configuration/e-ews-config-utils.c:584
+msgid "Size"
+msgstr "Grootte"
+
+#: ../src/configuration/e-ews-config-utils.c:622
+#: ../src/configuration/e-ews-config-utils.c:627
+msgid "Unable to retrieve folder size information"
+msgstr "Kan informatie over mapgrootte niet verkrijgen"
+
+#: ../src/configuration/e-ews-config-utils.c:754
+msgid "Folder Sizes"
+msgstr "Mapgroottes"
+
+#: ../src/configuration/e-ews-config-utils.c:757
+msgid "_Close"
+msgstr "Sl_uiten"
+
+#: ../src/configuration/e-ews-config-utils.c:771
+msgid "Fetching folder list…"
+msgstr "Maplijst ophalen…"
+
+#: ../src/configuration/e-ews-config-utils.c:834
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:765
+msgid "Subscribe to folder of other EWS user…"
+msgstr "Aanmelden bij map van andere EWS-gebruiker…"
+
+#: ../src/configuration/e-ews-config-utils.c:1021
+#, c-format
+msgid "Cannot edit permissions of folder “%s”, choose other folder."
+msgstr "Kan rechten van map ‘%s’ niet bewerken, kies een andere map."
+
+#: ../src/configuration/e-ews-config-utils.c:1100
+msgid "Folder Sizes…"
+msgstr "Mapgroottes…"
+
+#: ../src/configuration/e-ews-config-utils.c:1107
+msgid "Subscribe to folder of other user…"
+msgstr "Aanmelden bij map van andere gebruiker…"
+
+#: ../src/configuration/e-ews-config-utils.c:1116
+#: ../src/configuration/e-ews-config-utils.c:1452
+#: ../src/configuration/e-ews-config-utils.c:1490
+#: ../src/configuration/e-ews-config-utils.c:1528
+#: ../src/configuration/e-ews-config-utils.c:1566
+msgid "Permissions…"
+msgstr "Rechten…"
+
+#: ../src/configuration/e-ews-config-utils.c:1118
+msgid "Edit EWS folder permissions"
+msgstr "EWS-maprechten bewerken"
+
+#: ../src/configuration/e-ews-config-utils.c:1454
+msgid "Edit EWS calendar permissions"
+msgstr "EWS-agendarechten bewerken"
+
+#: ../src/configuration/e-ews-config-utils.c:1492
+msgid "Edit EWS tasks permissions"
+msgstr "EWS-takenrechten bewerken"
+
+#: ../src/configuration/e-ews-config-utils.c:1530
+msgid "Edit EWS memos permissions"
+msgstr "EWS-memorechten bewerken"
+
+#: ../src/configuration/e-ews-config-utils.c:1568
+msgid "Edit EWS contacts permissions"
+msgstr "EWS-contactrechten bewerken"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:85
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:416
+msgctxt "PermissionsLevel"
+msgid "None"
+msgstr "Geen"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:86
+msgctxt "PermissionsLevel"
+msgid "Owner"
+msgstr "Eigenaar"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:96
+msgctxt "PermissionsLevel"
+msgid "Publishing Editor"
+msgstr "Publicerende redacteur"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:105
+msgctxt "PermissionsLevel"
+msgid "Editor"
+msgstr "Redacteur"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:113
+msgctxt "PermissionsLevel"
+msgid "Publishing Author"
+msgstr "Publicerende auteur"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:120
+msgctxt "PermissionsLevel"
+msgid "Author"
+msgstr "Auteur"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:126
+msgctxt "PermissionsLevel"
+msgid "Nonediting Author"
+msgstr "Niet-redacterende auteur"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:131
+msgctxt "PermissionsLevel"
+msgid "Reviewer"
+msgstr "Tweede lezer"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:134
+msgctxt "PermissionsLevel"
+msgid "Contributor"
+msgstr "Bijdrager"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:137
+msgctxt "PermissionsLevel"
+msgid "Free/Busy time"
+msgstr "Vrij/bezet tijdstip"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:139
+msgctxt "PermissionsLevel"
+msgid "Free/Busy time, subject, location"
+msgstr "Vrij/bezet tijdstip, onderwerp, locatie"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:141
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:439
+msgctxt "PermissionsLevel"
+msgid "Custom"
+msgstr "Aangepast"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:265
+msgid "Writing folder permissions, please wait…"
+msgstr "Maprechten schrijven, even geduld…"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:779
+msgctxt "User"
+msgid "Anonymous"
+msgstr "Anoniem"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:782
+msgctxt "User"
+msgid "Default"
+msgstr "Standaard"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:788
+msgctxt "User"
+msgid "Unknown"
+msgstr "Onbekend"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:871
+#: ../src/configuration/e-ews-search-user.c:431
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:995
+msgid "Name"
+msgstr "Naam"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:877
+msgid "Permission level"
+msgstr "Rechtenniveau"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:929
+msgid "Edit EWS folder permissions…"
+msgstr "EWS-maprechten bewerken…"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:954
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:786
+msgid "Account:"
+msgstr "Account:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:982
+msgid "Folder name:"
+msgstr "Mapnaam:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1006
+msgid "Folder ID:"
+msgstr "Map-ID:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1071
+msgid "Permissions"
+msgstr "Rechten"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1093
+msgid "Permi_ssion level:"
+msgstr "Rechten_niveau:"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1127
+msgctxt "Permissions"
+msgid "Read"
+msgstr "Lezen"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1139
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1206
+msgctxt "Permissions"
+msgid "None"
+msgstr "Geen"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1145
+msgctxt "Permissions"
+msgid "Free/Busy time"
+msgstr "Vrij/bezet tijdstip"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1150
+msgctxt "Permissions"
+msgid "Free/Busy time, subject, location"
+msgstr "Vrij/bezet tijdstip, onderwerp, locatie"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1156
+msgctxt "Permissions"
+msgid "Full Details"
+msgstr "Volledige details"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1162
+msgctxt "Permissions"
+msgid "Write"
+msgstr "Schrijven"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1174
+msgctxt "Permissions"
+msgid "Create items"
+msgstr "Items aanmaken"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1178
+msgctxt "Permissions"
+msgid "Create subfolders"
+msgstr "Submappen aanmaken"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1182
+msgctxt "Permissions"
+msgid "Edit own"
+msgstr "Eigen bewerken"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1186
+msgctxt "Permissions"
+msgid "Edit all"
+msgstr "Alles bewerken"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1194
+msgctxt "Permissions"
+msgid "Delete items"
+msgstr "Items verwijderen"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1211
+msgctxt "Permissions"
+msgid "Own"
+msgstr "Eigen"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1216
+msgctxt "Permissions"
+msgid "All"
+msgstr "Alles"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1222
+msgctxt "Permissions"
+msgid "Other"
+msgstr "Overige"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1234
+msgctxt "Permissions"
+msgid "Folder owner"
+msgstr "Mapeigenaar"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1238
+msgctxt "Permissions"
+msgid "Folder contact"
+msgstr "Mapcontact"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1242
+msgctxt "Permissions"
+msgid "Folder visible"
+msgstr "Map zichtbaar"
+
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1315
+msgid "Reading folder permissions, please wait…"
+msgstr "Maprechten lezen, even geduld…"
+
+#: ../src/configuration/e-ews-ooo-notificator.c:182
+msgid "Unset on Server"
+msgstr "Uitzetten op server"
+
+#: ../src/configuration/e-ews-ooo-notificator.c:183
+msgid "Unset the “Out of Office” status"
+msgstr "Zet de ‘Afwezig’-status uit"
+
+#: ../src/configuration/e-ews-search-user.c:206
+#, c-format
+msgid "No users found, only one contact"
+msgid_plural "No users found, only %d contacts"
+msgstr[0] "Geen gebruikers gevonden, enkel één contact"
+msgstr[1] "Geen gebruikers gevonden, enkel %d contacten"
+
+#: ../src/configuration/e-ews-search-user.c:211
+msgid "No users found"
+msgstr "Geen gebruikers gevonden"
+
+#: ../src/configuration/e-ews-search-user.c:215
+#, c-format
+msgid "Found one user"
+msgid_plural "Found %d users"
+msgstr[0] "Eén gebruiker gevonden"
+msgstr[1] "%d gebruikers gevonden"
+
+#: ../src/configuration/e-ews-search-user.c:221
+#, c-format
+msgid "Found more than 100 users, but showing only first %d"
+msgid_plural "Found more than 100 users, but showing only first %d"
+msgstr[0] ""
+"Meer dan 100 gebruikers gevonden, enkel de eerste %d worden weergegeven"
+msgstr[1] ""
+"Meer dan 100 gebruikers gevonden, enkel de eerste %d worden weergegeven"
+
+#: ../src/configuration/e-ews-search-user.c:355
+#: ../src/configuration/e-ews-search-user.c:540
+msgid "Search for a user"
+msgstr "Zoeken naar een gebruiker"
+
+#: ../src/configuration/e-ews-search-user.c:363
+msgid "Searching…"
+msgstr "Bezig met zoeken…"
+
+#: ../src/configuration/e-ews-search-user.c:437
+msgid "E-mail"
+msgstr "E-mail"
+
+#: ../src/configuration/e-ews-search-user.c:474
+msgid "Choose EWS user…"
+msgstr "EWS-gebruiker kiezen…"
+
+#: ../src/configuration/e-ews-search-user.c:497
+msgid "_Search:"
+msgstr "_Zoeken:"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:103
+#: ../src/server/e-ews-folder.c:802
+#, c-format
+msgid "Cannot add folder, folder already exists as “%s”"
+msgstr "Kan map niet toevoegen, map bestaat al als ‘%s’"
+
+#. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
+#. * Example result: "Mailbox — John Smith"
+#.
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:113
+#, c-format
+msgctxt "ForeignFolder"
+msgid "Mailbox — %s"
+msgstr "Postbus — %s"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:281
+msgid "Cannot test foreign folder availability when the account is offline"
+msgstr ""
+"Kan beschikbaarheid van externe mappen niet testen wanneer de account "
+"offline is"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:314
+#, c-format
+msgid "User “%s” was not found on the server"
+msgstr "Gebruiker ‘%s’ niet gevonden op de server"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:350
+#, c-format
+msgid "User name “%s” is ambiguous, specify it more precisely, please"
+msgstr "Gebruikersnaam ‘%s’ is dubbelzinnig, specificeer deze preciezer"
+
+#. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:388
+msgid "Availability"
+msgstr "Beschikbaarheid"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:405
+#, c-format
+msgid ""
+"Folder “%s” not found. Either it does not exist or you do not have "
+"permission to access it."
+msgstr ""
+"Map ‘%s’ niet gevonden. Ofwel bestaat ze niet, ofwel heeft u er geen toegang "
+"toe."
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:424
+msgid "Cannot add folder, cannot determine folder’s type"
+msgstr "Kan map niet toevoegen, kan maptype niet bepalen"
+
+#. Translators: This is used to name foreign folder.
+#. * The first '%s' is replaced with user name to whom the folder belongs,
+#. * the second '%s' is replaced with folder name.
+#. * Example result: "John Smith — Calendar"
+#.
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:469
+#, c-format
+msgctxt "ForeignFolder"
+msgid "%s — %s"
+msgstr "%s — %s"
+
+#. convert well-known names to their non-localized form
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:582
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:866
+msgid "Inbox"
+msgstr "Postvak IN"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:584
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:867
+msgid "Contacts"
+msgstr "Contacten"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:586
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:868
+msgid "Calendar"
+msgstr "Agenda"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:588
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:869
+msgid "Free/Busy as Calendar"
+msgstr "Vrij/bezet als agenda"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:590
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:870
+msgid "Memos"
+msgstr "Memo’s"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:592
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:871
+msgid "Tasks"
+msgstr "Taken"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:609
+#, c-format
+msgid "Testing availability of folder “%s” of user “%s”, please wait…"
+msgstr ""
+"Beschikbaarheid van map ‘%s’ wordt getest voor gebruikt ‘%s’, even geduld…"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:648
+msgid "Cannot search for user when the account is offline"
+msgstr "Kan niet zoeken naar gebruiker wanneer de account offline is"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:811
+msgid "User"
+msgstr "Gebruiker"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:818
+msgid "_User:"
+msgstr "Gebr_uiker:"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:833
+msgid "C_hoose…"
+msgstr "_Kiezen…"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:849
+msgid "_Folder name:"
+msgstr "_Mapnaam:"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:880
+msgid "Include _subfolders"
+msgstr "Inclusief _submappen"
+
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:282
+msgid "Querying Autodiscover service"
+msgstr "Auto-ontdekkingsdienst opvragen"
+
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:381
+msgid "Fetch _URL"
+msgstr "Ophaal-_URL"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:178
+msgid "Configuration"
+msgstr "Configuratie"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:196
+msgid "User_name:"
+msgstr "Gebruikers_naam:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:210
+msgid "_Host URL:"
+msgstr "_Host-URL:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:229
+msgid "OAB U_RL:"
+msgstr "OAB-U_RL:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:243
+msgid "Open _Mailbox of other user"
+msgstr "Postbus va_n andere gebruiker openen"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:277
+msgid "S_earch…"
+msgstr "Zoek_en…"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:288
+msgid "Authentication"
+msgstr "Aanmeldingscontrole"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:315
+msgid "_Override Office365 OAuth2 settings"
+msgstr "Office365-OAuth2-instellingen _overschrijven"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:319
+msgid "Help…"
+msgstr "Hulp…"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/configuration/e-mail-config-ews-backend.c:328
+msgid "_Tenant:"
+msgstr "_Tenant:"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/configuration/e-mail-config-ews-backend.c:353
+msgid "There is not set any default tenant"
+msgstr "Er is geen standaard-tenant ingesteld"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/configuration/e-mail-config-ews-backend.c:356
+#, c-format
+msgid "Default tenant is “%s”"
+msgstr "Standaard-tenant is ‘%s’"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:358
+msgid "Application I_D:"
+msgstr "Toepassings-I_D:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:381
+msgid "There is not set any default application ID"
+msgstr "Er is geen standaard-toepassings-ID ingesteld"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:382
+#, c-format
+msgid "Default application ID is “%s”"
+msgstr "Standaard-toepassings-ID is ‘%s’"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:384
+msgid "_Redirect URI:"
+msgstr "Doo_rverwijzings-URI:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:406
+#: ../src/configuration/e-mail-config-ews-backend.c:409
+#, c-format
+msgid "Default redirect URI is “%s”"
+msgstr "Standaard-doorverwijzings-URI is ‘%s’"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:581
+msgid "Host URL cannot be empty"
+msgstr "Host-URL kan niet leeg zijn"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:586
+msgid "User name cannot be empty"
+msgstr "Gebruikersnaam kan niet leeg zijn"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/configuration/e-mail-config-ews-backend.c:604
+msgid "Tenant cannot be empty"
+msgstr "Tenant kan niet leeg zijn"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:609
+msgid "Application ID cannot be empty"
+msgstr "Toepassings-ID kan niet leeg zijn"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:417
+msgctxt "PermissionsLevel"
+msgid "Reviewer (can read items)"
+msgstr "Tweede lezer (kan items lezen)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:418
+msgctxt "PermissionsLevel"
+msgid "Author (can read and create items)"
+msgstr "Auteur (kan items lezen en bewerken)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:419
+msgctxt "PermissionsLevel"
+msgid "Editor (can read, create and modify items)"
+msgstr "Redacteur (kan items lezen, aanmaken en wijzigen)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:524
+msgid "Delegate permissions"
+msgstr "Rechten delegeren"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:542
+msgid "C_alendar"
+msgstr "_Agenda"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:545
+msgid "_Delegate receives copies of meeting-related messages sent to me"
+msgstr ""
+"Afgevaar_digde ontvangt kopieën van afspraak-gerelateerde berichten die naar "
+"mij worden verstuurd"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:550
+msgid "_Tasks"
+msgstr "_Taken"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:553
+msgid "_Inbox"
+msgstr "Postvak _IN"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:556
+msgid "C_ontacts"
+msgstr "C_ontacten"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:559
+msgid "_Notes"
+msgstr "_Notities"
+
+# Onduidelijk - Nathan
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:562
+msgid "_Journal"
+msgstr "_Journaal"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:565
+#, c-format
+msgid "Delegate “%s” has the following permissions"
+msgstr "Afgevaardigde ‘%s’ heeft volgende rechten"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:583
+msgid "Delegate can see my _private items"
+msgstr "Afgevaardigde kan mijn privé-items zien"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:905
+msgid "Retrieving current user permissions, please wait…"
+msgstr "Huidige gebruikersrechten worden opgehaald, even geduld…"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1028
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1651
+msgid "Delegates"
+msgstr "Afgevaardigden"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1052
+msgid ""
+"Delegates can send items on your behalf, including creating and responding "
+"to meeting requests. If you want to grant folder permissions without giving "
+"send-on-behalf-of permissions, close this dialog box, right-click the "
+"folder, click Permissions and change the options there."
+msgstr ""
+"Afgevaardigden kunnen in uw naam items versturen en afspraakverzoeken "
+"aanmaken en beantwoorden. Als u maprechten wilt toewijzen zonder rechten om "
+"in uw naam te versturen, sluit dan dit dialoogvenster, rechterklik op de "
+"map, klik op Rechten en pas daar de opties aan."
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1102
+msgid ""
+"Deliver meeting requests addressed to me and responses to meeting requests "
+"where I am the organizer to:"
+msgstr ""
+"Aan mij gerichte afspraakverzoeken en antwoorden op afspraakverzoeken "
+"waarvan ik de organisator ben afleveren aan:"
+
+#. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1112
+msgid ""
+"My delegates only, but _send a copy of meeting requests\n"
+"and responses to me (recommended)"
+msgstr ""
+"Enkel mijn afgevaardigden, maar _stuur mij een kopie van\n"
+"afspraakverzoeken en -antwoorden (aanbevolen)"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1119
+msgid "My d_elegates only"
+msgstr "_Enkel mijn afgevaardigden"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1126
+msgid "My delegates a_nd me"
+msgstr "Mij_n afgevaardigden en ik"
+
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1723
+msgid "Retrieving “Delegates” settings"
+msgstr "Bezig met verkrijgen van ‘Afgevaardigden’-instellingen"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:193
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:257
+msgid "EWS Settings"
+msgstr "EWS-instellingen"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:200
+msgid "View the size of all Exchange folders"
+msgstr "Toon de grootte van alle Exchange-mappen"
+
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:204
+msgid "Folder _Sizes"
+msgstr "Mapgrootte_s"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:222
+msgid "Locating offline address books"
+msgstr "Bezig met lokaliseren van offline adresboeken"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:301
+msgid "Cache o_ffline address book"
+msgstr "O_ffline adresboek opslaan in cachegeheugen"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:327
+msgid "Select ad_dress list:"
+msgstr "Selecteer een a_dreslijst:"
+
+#: ../src/configuration/e-mail-config-ews-gal.c:351
+msgid "Fetch List"
+msgstr "Lijst ophalen"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:396
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:933
+msgid "Out of Office"
+msgstr "Afwezig"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:412
+msgid ""
+"The messages specified below will be automatically sent to each internal and "
+"external person who sends a mail to you."
+msgstr ""
+"De hieronder opgegeven berichten zullen automatisch worden verzonden naar "
+"elke interne en externe persoon die u een e-mail stuurt."
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:421
+msgid "Do _not send Out of Office replies"
+msgstr "Gee_n ‘Afwezig’-antwoorden versturen"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:429
+msgid "_Send Out of Office replies"
+msgstr "‘Afwezig’-antwoorden ver_sturen"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:437
+msgid "Send Out of Office replies only _during this time period:"
+msgstr "‘Afwezig’-antwoorden enkel tij_dens deze tijdsperiode versturen:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:457
+msgid "_From:"
+msgstr "_Van:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:482
+msgid "_To:"
+msgstr "_Aan:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:507
+msgid "I_nternal:"
+msgstr "I_ntern:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:516
+msgid "Message to be sent within the organization"
+msgstr "Bericht om binnen de organisatie te verzenden"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:544
+msgid "E_xternal:"
+msgstr "E_xtern:"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:552
+msgid "Message to be sent outside the organization"
+msgstr "Bericht om buiten de organisatie te verzenden"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:562
+msgid "Do not reply to senders outside the organization"
+msgstr "Afzenders buiten de organisatie niet beantwoorden"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:565
+msgid "Reply only to known senders outside the organization"
+msgstr "Enkel bekende afzenders buiten de organisatie beantwoorden"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:568
+msgid "Reply to any sender outside the organization"
+msgstr "Alle afzenders buiten de organisatie beantwoorden"
+
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:1005
+msgid "Retrieving “Out of Office” settings"
+msgstr "Bezig met verkrijgen van ‘Afwezig’-instellingen"
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:1
+msgid "Autodiscovery query failed."
+msgstr "Auto-ontdekkingszoekopdracht mislukt."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:2
+msgid "The reported error was “{0}”."
+msgstr "De gerapporteerde fout was ‘{0}’."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:3
+msgid "Failed to locate offline address books."
+msgstr "Lokaliseren van offline adresboeken mislukt."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:4
+msgid "Failed to retrieve “Out of Office” settings."
+msgstr "Verkrijgen van ‘Afwezig’-instellingen mislukt."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:5
+msgid "Failed to retrieve “Delegates” settings."
+msgstr "Verkrijgen van ‘Afgevaardigden’-instellingen mislukt."
+
+#: ../src/configuration/module-ews-configuration.error.xml.h:6
+msgid "Your Exchange account “{0}” has the status set as “Out of Office”."
+msgstr "De status van uw Exchange-account ‘{0}’ is ingesteld op ‘Afwezig’."
+
+#: ../src/server/camel-sasl-xoauth2-office365.c:23
+msgid "OAuth2 (Office365)"
+msgstr "OAuth2 (Office365)"
+
+#: ../src/server/camel-sasl-xoauth2-office365.c:24
+msgid ""
+"This option will use an OAuth 2.0 access token to connect to the Office365."
+"com server"
+msgstr ""
+"Deze optie zal een OAuth 2.0-toegangstoken gebruiken om verbinding te maken "
+"met de Office365.com-server"
+
+#: ../src/server/e-ews-calendar-utils.c:1160
+#, c-format
+msgid ""
+"Cannot store this recurrence. Change it to simple single daily, weekly, "
+"monthly or yearly recurrence without exceptions and with start date."
+msgstr ""
+"Kan dit voorkomen niet opslaan. Pas het aan naar een eenvoudig enkel "
+"dagelijks, wekelijks, maandelijks of jaarlijks voorkomen zonder "
+"uitzonderingen en met begindatum."
+
+#: ../src/server/e-ews-camel-common.c:379
+#, c-format
+msgid "CreateItem call failed to return ID for new message"
+msgstr "CreateItem-oproep gaf geen ID voor nieuw bericht weer"
+
+#: ../src/server/e-ews-connection.c:778
+msgid "Operation Cancelled"
+msgstr "Bewerking geannuleerd"
+
+#: ../src/server/e-ews-connection.c:948
+msgid "Authentication failed"
+msgstr "Authenticatie mislukt"
+
+#: ../src/server/e-ews-connection.c:970
+#, c-format
+msgid "No response: %s"
+msgstr "Geen antwoord: %s"
+
+#: ../src/server/e-ews-connection.c:1033
+#, c-format
+msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
+msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
+msgstr[0] ""
+"Exchange-server is bezig, wachten om opnieuw te proberen (%d:%02d minuut)"
+msgstr[1] ""
+"Exchange-server is bezig, wachten om opnieuw te proberen (%d:%02d minuten)"
+
+#: ../src/server/e-ews-connection.c:1039
+#, c-format
+msgid "Exchange server is busy, waiting to retry (%d second)"
+msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
+msgstr[0] ""
+"Exchange-server is bezig, wachten om opnieuw te proberen (%d seconde)"
+msgstr[1] ""
+"Exchange-server is bezig, wachten om opnieuw te proberen (%d seconden)"
+
+#: ../src/server/e-ews-connection.c:3077
+#, c-format
+msgid "Failed to parse autodiscover response XML"
+msgstr "Ontleden van autodiscover-respons-XML is mislukt"
+
+#: ../src/server/e-ews-connection.c:3084
+#, c-format
+msgid "Failed to find <Autodiscover> element"
+msgstr "Kon <Autodiscover>-element niet vinden"
+
+#: ../src/server/e-ews-connection.c:3095
+#, c-format
+msgid "Failed to find <Response> element"
+msgstr "Kon <Response>-element niet vinden"
+
+#: ../src/server/e-ews-connection.c:3106
+#, c-format
+msgid "Failed to find <Account> element"
+msgstr "Kon <Account>-element niet vinden"
+
+#: ../src/server/e-ews-connection.c:3140
+#, c-format
+msgid "Failed to find <ASUrl> in autodiscover response"
+msgstr "Kon <ASUrl> niet vinden in autodiscover-respons"
+
+#: ../src/server/e-ews-connection.c:3233
+msgid "URL cannot be NULL"
+msgstr "URL kan niet NULL zijn"
+
+#: ../src/server/e-ews-connection.c:3241
+#, c-format
+msgid "URL “%s” is not valid"
+msgstr "URL ‘%s’ is ongeldig"
+
+#: ../src/server/e-ews-connection.c:3337
+msgid "Email address is missing a domain part"
+msgstr "Domein ontbreekt in e-mailadres"
+
+#: ../src/server/e-ews-connection.c:3709
+msgid "Failed to parse oab XML"
+msgstr "Ontleden van oab-XLM mislukt"
+
+#: ../src/server/e-ews-connection.c:3717
+msgid "Failed to find <OAB> element\n"
+msgstr "Kan <OAB>-element niet vinden\n"
+
+#: ../src/server/e-ews-connection.c:5000
+msgid "No items found"
+msgstr "Geen items gevonden"
+
+#: ../src/server/e-ews-connection-utils.c:197
+#, c-format
+msgid "Password expired. Change password at “%s”."
+msgstr "Wachtwoord verlopen. Wijzig het wachtwoord op ‘%s’."
+
+#: ../src/server/e-ews-connection-utils.c:200
+msgid "Password expired."
+msgstr "Wachtwoord verlopen."
+
+#: ../src/server/e-ews-connection-utils.c:427
+msgid "Unknown error"
+msgstr "Onbekende fout"
+
+#: ../src/server/e-ews-folder.c:757
+msgid "Cannot add folder, unsupported folder type"
+msgstr "Kan map niet toevoegen, maptype wordt niet ondersteund"
+
+#: ../src/server/e-ews-folder.c:762
+msgid "Cannot add folder, master source not found"
+msgstr "Kan map niet toevoegen, hoofdbron niet gevonden"
+
+#. Translators: This is a user-visible string, display name of an OAuth2 service.
+#: ../src/server/e-oauth2-service-office365.c:124
+msgctxt "OAuth2Service"
+msgid "Office365"
+msgstr "Office365"
