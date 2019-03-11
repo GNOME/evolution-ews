@@ -2581,6 +2581,19 @@ ecb_ews_modify_item_sync (ECalBackendEws *cbews,
 		g_free (convert_data.user_email);
 	}
 
+	if (success && icalcomponent_isa (new_icalcomp) == ICAL_VTODO_COMPONENT &&
+	    icalcomponent_count_properties (new_icalcomp, ICAL_RRULE_PROPERTY) > 0) {
+		icalproperty *prop;
+
+		prop = icalcomponent_get_first_property (new_icalcomp, ICAL_STATUS_PROPERTY);
+		if (prop && icalproperty_get_status (prop) == ICAL_STATUS_COMPLETED) {
+			/* Setting a recurring task completed will mark the existing task
+			   as completed and also add a new task, thus force refresh here,
+			   thus the user sees an up-to-date view of the server content. */
+			e_cal_meta_backend_schedule_refresh (E_CAL_META_BACKEND (cbews));
+		}
+	}
+
 	g_slist_free_full (added_attachments, (GDestroyNotify) e_ews_attachment_info_free);
 	g_clear_object (&oldcomp);
 	g_clear_object (&comp);
@@ -3855,6 +3868,7 @@ ecb_ews_get_backend_property (ECalBackend *cal_backend,
 			CAL_STATIC_CAPABILITY_TASK_DATE_ONLY,
 			CAL_STATIC_CAPABILITY_TASK_NO_ALARM,
 			CAL_STATIC_CAPABILITY_TASK_CAN_RECUR,
+			CAL_STATIC_CAPABILITY_TASK_HANDLE_RECUR,
 			e_cal_meta_backend_get_capabilities (E_CAL_META_BACKEND (cbews)),
 			NULL);
 	} else if (g_str_equal (prop_name, CAL_BACKEND_PROPERTY_CAL_EMAIL_ADDRESS)) {
