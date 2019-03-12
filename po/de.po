@@ -1,24 +1,26 @@
 # German evolution-ews translation.
 # Mario Blättermann <mario.blaettermann@gmail.com>, 2011-2012, 2015-2018.
+# Tim Sabsch <tim@sabsch.com>, 2019.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2018-07-27 14:36+0000\n"
-"PO-Revision-Date: 2018-08-03 10:37+0200\n"
-"Last-Translator: Mario Blättermann <mario.blaettermann@gmail.com>\n"
+"POT-Creation-Date: 2019-03-11 09:08+0000\n"
+"PO-Revision-Date: 2019-03-11 13:58+0100\n"
+"Last-Translator: Tim Sabsch <tim@sabsch.com>\n"
 "Language-Team: German <gnome-de@gnome.org>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.0.9\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/camel/camel-ews-provider.c:81
 #: ../src/configuration/e-ews-config-lookup.c:251
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:134
 msgid "Exchange Web Services"
 msgstr "Exchange-Webdienste"
 
@@ -27,42 +29,42 @@ msgstr "Exchange-Webdienste"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Für den Zugriff auf Exchange-Server über Webdienste"
 
-#: ../src/addressbook/e-book-backend-ews.c:3349
+#: ../src/addressbook/e-book-backend-ews.c:3476
 msgid "Failed to update GAL:"
 msgstr "GAL konnte nicht aktualisiert werden:"
 
-#: ../src/addressbook/e-book-backend-ews.c:3510
+#: ../src/addressbook/e-book-backend-ews.c:3637
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Kontaktliste kann nicht gespeichert werden. Das wird nur für Exchange-"
 "Webdienste-Server 2010 oder neuer unterstützt"
 
-#: ../src/addressbook/e-book-backend-ews.c:3603
+#: ../src/addressbook/e-book-backend-ews.c:3730
 msgid "Failed to set contact photo:"
 msgstr "Kontaktfoto konnte nicht festgelegt werden:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1659
+#: ../src/calendar/e-cal-backend-ews.c:1709
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Frei"
 
-#: ../src/calendar/e-cal-backend-ews.c:1662
+#: ../src/calendar/e-cal-backend-ews.c:1712
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Beschäftigt"
 
-#: ../src/calendar/e-cal-backend-ews.c:1664
+#: ../src/calendar/e-cal-backend-ews.c:1714
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Nicht im Büro"
 
-#: ../src/calendar/e-cal-backend-ews.c:1666
+#: ../src/calendar/e-cal-backend-ews.c:1716
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Vorläufig"
 
-#: ../src/calendar/e-cal-backend-ews.c:3308
+#: ../src/calendar/e-cal-backend-ews.c:3372
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Teilnehmer »%s« kann nicht in der Teilnehmerliste gefunden werden"
@@ -225,12 +227,16 @@ msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:647 ../src/camel/camel-ews-store.c:1250
+#: ../src/camel/camel-ews-store.c:647 ../src/camel/camel-ews-store.c:1287
 msgid "Checking “Out of Office” settings"
 msgstr "Abwesenheitseinstellungen werden geprüft"
 
+#: ../src/camel/camel-ews-store.c:1293
+msgid "Look up Exchange server categories"
+msgstr "Exchange-Server-Kategorien nachschlagen"
+
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/camel/camel-ews-store.c:1320
+#: ../src/camel/camel-ews-store.c:1363
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
@@ -238,47 +244,47 @@ msgstr[0] "Das Passwort läuft in %d Tag ab. Öffnen Sie »%s«, um es zu änder
 msgstr[1] ""
 "Das Passwort läuft in %d Tagen ab. Öffnen Sie »%s«, um es zu ändern."
 
-#: ../src/camel/camel-ews-store.c:1326
+#: ../src/camel/camel-ews-store.c:1369
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
 msgstr[0] "Das Passwort läuft in einem Tag ab."
 msgstr[1] "Das Passwort läuft in %d Tagen ab."
 
-#: ../src/camel/camel-ews-store.c:1546
+#: ../src/camel/camel-ews-store.c:1589
 msgid "Updating foreign folder structure"
 msgstr "Fremde Ordnerstruktur aktualisieren"
 
-#: ../src/camel/camel-ews-store.c:1682
+#: ../src/camel/camel-ews-store.c:1725
 msgid "Updating foreign folders"
 msgstr "Fremde Ordner aktualisieren"
 
-#: ../src/camel/camel-ews-store.c:2084
+#: ../src/camel/camel-ews-store.c:2141
 #, c-format
 msgid "No such folder: %s"
 msgstr "Ordner existiert nicht: %s"
 
-#: ../src/camel/camel-ews-store.c:2382
+#: ../src/camel/camel-ews-store.c:2450
 msgid "Cannot list EWS public folders in offline mode"
 msgstr ""
 "Öffentliche Ordner der Exchange-Webdienste können im Offline-Modus nicht "
 "aufgelistet werden"
 
-#: ../src/camel/camel-ews-store.c:2455
+#: ../src/camel/camel-ews-store.c:2523
 msgid "Cannot find any EWS public folders"
 msgstr "Öffentliche EWS-Ordner können nicht gefunden werden"
 
-#: ../src/camel/camel-ews-store.c:2564
+#: ../src/camel/camel-ews-store.c:2632
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Ordner »%s« kann nicht angelegt werden, der Ordner existiert bereits"
 
-#: ../src/camel/camel-ews-store.c:2579
+#: ../src/camel/camel-ews-store.c:2647
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Übergeordneter Ordner %s existiert nicht"
 
-#: ../src/camel/camel-ews-store.c:2589
+#: ../src/camel/camel-ews-store.c:2657
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -286,97 +292,97 @@ msgstr ""
 "Ordner unterhalb von »%s« kann nicht angelegt werden, er wird ausschließlich "
 "für Ordner anderer Benutzer verwendet"
 
-#: ../src/camel/camel-ews-store.c:2599
+#: ../src/camel/camel-ews-store.c:2667
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "Ordner unterhalb von »%s« kann nicht angelegt werden, er wird ausschließlich "
 "für öffentliche Ordner verwendet"
 
-#: ../src/camel/camel-ews-store.c:2703
+#: ../src/camel/camel-ews-store.c:2771
 #, c-format
 msgid "Folder does not exist"
 msgstr "Ordner existiert nicht"
 
-#: ../src/camel/camel-ews-store.c:2713
+#: ../src/camel/camel-ews-store.c:2781
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Ordner »%s« kann nicht entfernt werden, er wird ausschließlich für Ordner "
 "anderer Benutzer verwendet"
 
-#: ../src/camel/camel-ews-store.c:2724
+#: ../src/camel/camel-ews-store.c:2792
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr ""
 "Ordner »%s« kann nicht entfernt werden, er wird ausschließlich für "
 "öffentliche Ordner verwendet"
 
-#: ../src/camel/camel-ews-store.c:2883
+#: ../src/camel/camel-ews-store.c:2951
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Ordner »%s« existiert nicht"
 
-#: ../src/camel/camel-ews-store.c:2892
+#: ../src/camel/camel-ews-store.c:2960
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Keine Änderung des Schlüsseleintrags für Ordner %s"
 
-#: ../src/camel/camel-ews-store.c:2935
+#: ../src/camel/camel-ews-store.c:3003
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Ordner können nicht gleichzeitig umbenannt und verschoben werden"
 
-#: ../src/camel/camel-ews-store.c:2969
+#: ../src/camel/camel-ews-store.c:3037
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Kennung für übergeordneten Ordner %s kann nicht gefunden werden"
 
-#: ../src/camel/camel-ews-store.c:3021 ../src/camel/camel-ews-transport.c:318
+#: ../src/camel/camel-ews-store.c:3089 ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange server %s"
 msgstr "Exchange-Server %s"
 
-#: ../src/camel/camel-ews-store.c:3024
+#: ../src/camel/camel-ews-store.c:3092
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Exchange-Dienst für %s auf %s"
 
-#: ../src/camel/camel-ews-store.c:3068
+#: ../src/camel/camel-ews-store.c:3136
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Der Müllordner konnte nicht ermittelt werden"
 
-#: ../src/camel/camel-ews-store.c:3128
+#: ../src/camel/camel-ews-store.c:3196
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Der Unerwünscht-Ordner konnte nicht ermittelt werden"
 
-#: ../src/camel/camel-ews-store.c:3319
+#: ../src/camel/camel-ews-store.c:3387
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "EWS-Ordner können im Offline-Modus nicht abonniert werden"
 
-#: ../src/camel/camel-ews-store.c:3342
+#: ../src/camel/camel-ews-store.c:3410
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 "Ordner »%s« kann nicht abonniert werden, kein öffentlicher Ordner verfügbar"
 
-#: ../src/camel/camel-ews-store.c:3352
+#: ../src/camel/camel-ews-store.c:3420
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Ordner »%s« kann nicht abonniert werden, Ordner wurde nicht gefunden"
 
-#: ../src/camel/camel-ews-store.c:3443
+#: ../src/camel/camel-ews-store.c:3511
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "OEWS-Ordner können im Offline-Modus nicht abbestellt werden"
 
-#: ../src/camel/camel-ews-store.c:3560
+#: ../src/camel/camel-ews-store.c:3628
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Sie müssen online arbeiten, um diesen Vorgang abzuschließen"
 
-#: ../src/camel/camel-ews-store.c:3604 ../src/camel/camel-ews-store.c:3641
+#: ../src/camel/camel-ews-store.c:3672 ../src/camel/camel-ews-store.c:3709
 msgid "Unsetting the “Out of Office” status"
 msgstr "Abwesenheitseinstellungen werden deaktiviert"
 
@@ -417,14 +423,14 @@ msgstr "Dienst nicht verbunden"
 msgid "Global Address List"
 msgstr "Globale Adressliste"
 
-#: ../src/collection/e-ews-backend.c:959
+#: ../src/collection/e-ews-backend.c:970
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
 "Es konnte keine passende Ordnerklasse für einen neuen Ordner namens »%s« "
 "ermittelt werden"
 
-#: ../src/collection/e-ews-backend.c:1047
+#: ../src/collection/e-ews-backend.c:1058
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Die Datenquelle »%s« ist kein »Exchange Web Services«-Ordner"
@@ -503,46 +509,46 @@ msgstr "Ordnerliste wird abgerufen …"
 msgid "Subscribe to folder of other EWS user…"
 msgstr "Einen Ordner eines anderen EWS-Benutzers abonnieren …"
 
-#: ../src/configuration/e-ews-config-utils.c:1015
+#: ../src/configuration/e-ews-config-utils.c:1021
 #, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
 msgstr ""
 "Die Zugriffsrechte des Ordners »%s« können nicht bearbeitet werden, bitte "
 "wählen Sie einen anderen Ordner."
 
-#: ../src/configuration/e-ews-config-utils.c:1092
+#: ../src/configuration/e-ews-config-utils.c:1100
 msgid "Folder Sizes…"
 msgstr "Ordnergrößen …"
 
-#: ../src/configuration/e-ews-config-utils.c:1099
+#: ../src/configuration/e-ews-config-utils.c:1107
 msgid "Subscribe to folder of other user…"
 msgstr "Ordner eines anderen Benutzers abonnieren …"
 
-#: ../src/configuration/e-ews-config-utils.c:1108
-#: ../src/configuration/e-ews-config-utils.c:1444
-#: ../src/configuration/e-ews-config-utils.c:1482
-#: ../src/configuration/e-ews-config-utils.c:1520
-#: ../src/configuration/e-ews-config-utils.c:1558
+#: ../src/configuration/e-ews-config-utils.c:1116
+#: ../src/configuration/e-ews-config-utils.c:1452
+#: ../src/configuration/e-ews-config-utils.c:1490
+#: ../src/configuration/e-ews-config-utils.c:1528
+#: ../src/configuration/e-ews-config-utils.c:1566
 msgid "Permissions…"
 msgstr "Berechtigungen …"
 
-#: ../src/configuration/e-ews-config-utils.c:1110
+#: ../src/configuration/e-ews-config-utils.c:1118
 msgid "Edit EWS folder permissions"
 msgstr "EWS-Ordnerzugriffsrechte bearbeiten"
 
-#: ../src/configuration/e-ews-config-utils.c:1446
+#: ../src/configuration/e-ews-config-utils.c:1454
 msgid "Edit EWS calendar permissions"
 msgstr "EWS-Kalenderberechtigungen bearbeiten"
 
-#: ../src/configuration/e-ews-config-utils.c:1484
+#: ../src/configuration/e-ews-config-utils.c:1492
 msgid "Edit EWS tasks permissions"
 msgstr "EWS-Aufgaben-Zugriffsrechte"
 
-#: ../src/configuration/e-ews-config-utils.c:1522
+#: ../src/configuration/e-ews-config-utils.c:1530
 msgid "Edit EWS memos permissions"
 msgstr "EWS-Notizen-Zugriffsrechte"
 
-#: ../src/configuration/e-ews-config-utils.c:1560
+#: ../src/configuration/e-ews-config-utils.c:1568
 msgid "Edit EWS contacts permissions"
 msgstr "EWS-Kontakte-Zugriffsrechte"
 
@@ -650,105 +656,105 @@ msgstr "Konto:"
 msgid "Folder name:"
 msgstr "Ordnername:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1005
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1006
 msgid "Folder ID:"
 msgstr "Ordnerkennung:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1069
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1071
 msgid "Permissions"
 msgstr "Berechtigungen"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1091
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1093
 msgid "Permi_ssion level:"
 msgstr "_Berechtigungsstufe:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1125
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1127
 msgctxt "Permissions"
 msgid "Read"
 msgstr "Lesen"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1137
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1204
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1139
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1206
 msgctxt "Permissions"
 msgid "None"
 msgstr "Keine"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1143
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1145
 msgctxt "Permissions"
 msgid "Free/Busy time"
 msgstr "Verfügbarkeitsinformationen"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1148
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1150
 msgctxt "Permissions"
 msgid "Free/Busy time, subject, location"
 msgstr "Verfügbarkeitsinformationen, Betreff, Ort"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1154
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1156
 msgctxt "Permissions"
 msgid "Full Details"
 msgstr "Alle Details"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1160
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1162
 msgctxt "Permissions"
 msgid "Write"
 msgstr "Schreiben"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1172
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1174
 msgctxt "Permissions"
 msgid "Create items"
 msgstr "Objekte erstellen"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1176
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1178
 msgctxt "Permissions"
 msgid "Create subfolders"
 msgstr "Unterordner anlegen"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1180
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1182
 msgctxt "Permissions"
 msgid "Edit own"
 msgstr "Eigene bearbeiten"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1184
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1186
 msgctxt "Permissions"
 msgid "Edit all"
 msgstr "Alles bearbeiten"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1192
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1194
 msgctxt "Permissions"
 msgid "Delete items"
 msgstr "Objekte löschen"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1209
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1211
 msgctxt "Permissions"
 msgid "Own"
 msgstr "Eigene"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1214
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1216
 msgctxt "Permissions"
 msgid "All"
 msgstr "Alle"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1220
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1222
 msgctxt "Permissions"
 msgid "Other"
 msgstr "Andere"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1232
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1234
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "Besitzer des Ordners"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1236
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1238
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "Ordnerkontakt"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1240
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1242
 msgctxt "Permissions"
 msgid "Folder visible"
 msgstr "Ordner sichtbar"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1313
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1315
 msgid "Reading folder permissions, please wait…"
 msgstr "Zugriffsrechte des Ordners werden gelesen, bitte warten …"
 
@@ -809,7 +815,7 @@ msgid "_Search:"
 msgstr "_Suche:"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:103
-#: ../src/server/e-ews-folder.c:776
+#: ../src/server/e-ews-folder.c:802
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr ""
@@ -935,11 +941,11 @@ msgstr "_Ordnername:"
 msgid "Include _subfolders"
 msgstr "_Unterordner mit einschließen"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:229
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:282
 msgid "Querying Autodiscover service"
 msgstr "Autodiscover-Dienst wird abgefragt"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:326
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:381
 msgid "Fetch _URL"
 msgstr "Adresse _holen"
 
@@ -1294,20 +1300,20 @@ msgid "CreateItem call failed to return ID for new message"
 msgstr ""
 "CreateItem-Aufruf konnte die Kennung der neuen Nachricht nicht zurückgeben"
 
-#: ../src/server/e-ews-connection.c:763
+#: ../src/server/e-ews-connection.c:778
 msgid "Operation Cancelled"
 msgstr "Operation abgebrochen"
 
-#: ../src/server/e-ews-connection.c:884
+#: ../src/server/e-ews-connection.c:948
 msgid "Authentication failed"
 msgstr "Legitimation gescheitert"
 
-#: ../src/server/e-ews-connection.c:906
+#: ../src/server/e-ews-connection.c:970
 #, c-format
 msgid "No response: %s"
 msgstr "Keine Antwort: %s"
 
-#: ../src/server/e-ews-connection.c:969
+#: ../src/server/e-ews-connection.c:1033
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -1318,7 +1324,7 @@ msgstr[1] ""
 "Der Exchange-Server ist beschäftigt, Warten auf erneuten Versuch (%d:%02d "
 "Minuten)"
 
-#: ../src/server/e-ews-connection.c:975
+#: ../src/server/e-ews-connection.c:1039
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -1328,54 +1334,53 @@ msgstr[1] ""
 "Der Exchange-Server ist beschäftigt, Warten auf erneuten Versuch (%d "
 "Sekunden)"
 
-#: ../src/server/e-ews-connection.c:2943
+#: ../src/server/e-ews-connection.c:3077
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "XML der Autodiscover-Antwort konnte nicht verarbeitet werden"
 
-#: ../src/server/e-ews-connection.c:2950
+#: ../src/server/e-ews-connection.c:3084
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "<Autodiscover>-Element konnte nicht gefunden werden"
 
-#: ../src/server/e-ews-connection.c:2961
+#: ../src/server/e-ews-connection.c:3095
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "<Response>-Element konnte nicht gefunden werden"
 
-#: ../src/server/e-ews-connection.c:2972
+#: ../src/server/e-ews-connection.c:3106
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "<Account>-Element konnte nicht gefunden werden"
 
-#: ../src/server/e-ews-connection.c:2997
+#: ../src/server/e-ews-connection.c:3140
 #, c-format
-msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
-msgstr ""
-"<ASUrl> und <OABUrl> konnten in Autodiscover-Antwort nicht gefunden werden"
+msgid "Failed to find <ASUrl> in autodiscover response"
+msgstr "<ASUrl> konnte in Autodiscover-Antwort nicht gefunden werden"
 
-#: ../src/server/e-ews-connection.c:3088
+#: ../src/server/e-ews-connection.c:3233
 msgid "URL cannot be NULL"
 msgstr "Die Adresse darf nicht NULL sein"
 
-#: ../src/server/e-ews-connection.c:3096
+#: ../src/server/e-ews-connection.c:3241
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "Adresse »%s« ist ungültig"
 
-#: ../src/server/e-ews-connection.c:3187
+#: ../src/server/e-ews-connection.c:3337
 msgid "Email address is missing a domain part"
 msgstr "In der E-Mail-Adresse fehlt der Domain-Teil"
 
-#: ../src/server/e-ews-connection.c:3542
+#: ../src/server/e-ews-connection.c:3709
 msgid "Failed to parse oab XML"
 msgstr "OAB-XML konnte nicht verarbeitet werden"
 
-#: ../src/server/e-ews-connection.c:3550
+#: ../src/server/e-ews-connection.c:3717
 msgid "Failed to find <OAB> element\n"
 msgstr "<OAB>-Element konnte nicht gefunden werden\n"
 
-#: ../src/server/e-ews-connection.c:4857
+#: ../src/server/e-ews-connection.c:5000
 msgid "No items found"
 msgstr "Keine Objekte gefunden"
 
@@ -1392,12 +1397,12 @@ msgstr "Das Passwort ist abgelaufen."
 msgid "Unknown error"
 msgstr "Unbekannter Fehler"
 
-#: ../src/server/e-ews-folder.c:731
+#: ../src/server/e-ews-folder.c:757
 msgid "Cannot add folder, unsupported folder type"
 msgstr ""
 "Ordner konnte nicht hinzugefügt werden, der Ordnertyp wird nicht unterstützt"
 
-#: ../src/server/e-ews-folder.c:736
+#: ../src/server/e-ews-folder.c:762
 msgid "Cannot add folder, master source not found"
 msgstr "Ordner kann nicht hinzugefügt werden, Hauptquelle wurde nicht gefunden"
 
