@@ -56,6 +56,7 @@ struct _SyncFoldersClosure {
 	GSList *folders_created;
 	GSList *folders_deleted;
 	GSList *folders_updated;
+	GHashTable *old_sources; /* gchar *folder_id ~> ESource * */
 };
 
 G_DEFINE_DYNAMIC_TYPE (
@@ -76,6 +77,8 @@ sync_folders_closure_free (SyncFoldersClosure *closure)
 
 	/* List of EEwsFolder instances. */
 	g_slist_free_full (closure->folders_updated, g_object_unref);
+
+	g_hash_table_destroy (closure->old_sources);
 
 	g_slice_free (SyncFoldersClosure, closure);
 }
@@ -373,7 +376,8 @@ ews_backend_new_address_book (EEwsBackend *backend,
 
 static void
 ews_backend_sync_created_folders (EEwsBackend *backend,
-                                  GSList *list)
+				  GSList *list,
+				  GHashTable *old_sources)
 {
 	ECollectionBackend *collection_backend;
 	ESourceRegistryServer *server;
@@ -391,8 +395,10 @@ ews_backend_sync_created_folders (EEwsBackend *backend,
 		fid = e_ews_folder_get_id (folder);
 		if (!fid || !fid->id)
 			continue;  /* not a valid ID anyway */
-		if (ews_backend_folders_contains (backend, fid->id))
+		if (ews_backend_folders_contains (backend, fid->id)) {
+			g_hash_table_remove (old_sources, fid->id);
 			continue;
+		}
 
 		switch (e_ews_folder_get_folder_type (folder)) {
 			case E_EWS_FOLDER_TYPE_CALENDAR:
@@ -417,6 +423,9 @@ ews_backend_sync_created_folders (EEwsBackend *backend,
 
 		if (source != NULL) {
 			e_source_registry_server_add_source (server, source);
+
+			g_hash_table_remove (old_sources, fid->id);
+
 			g_object_unref (source);
 		}
 	}
@@ -426,7 +435,8 @@ ews_backend_sync_created_folders (EEwsBackend *backend,
 
 static void
 ews_backend_sync_deleted_folders (EEwsBackend *backend,
-                                  GSList *list)
+				  GSList *list,
+				  GHashTable *old_sources)
 {
 	GSList *link;
 
@@ -434,9 +444,10 @@ ews_backend_sync_deleted_folders (EEwsBackend *backend,
 		const gchar *folder_id = link->data;
 		ESource *source = NULL;
 
-		if (folder_id != NULL)
-			source = ews_backend_folders_lookup (
-				backend, folder_id);
+		if (folder_id) {
+			source = ews_backend_folders_lookup (backend, folder_id);
+			g_hash_table_remove (old_sources, folder_id);
+		}
 
 		if (source == NULL)
 			continue;
@@ -581,21 +592,22 @@ ews_backend_source_changed_cb (ESource *source,
 }
 
 static void
-add_remote_sources (EEwsBackend *backend)
+add_remote_sources (EEwsBackend *backend,
+		    GHashTable *old_sources)
 {
-	GList *old_sources, *iter;
+	GHashTableIter iter;
 	ESourceRegistryServer *registry;
 	const gchar *extension_name;
+	gpointer value;
 
 	registry = e_collection_backend_ref_server (
-		E_COLLECTION_BACKEND (backend));
-	old_sources = e_collection_backend_claim_all_resources (
 		E_COLLECTION_BACKEND (backend));
 
 	extension_name = E_SOURCE_EXTENSION_EWS_FOLDER;
 
-	for (iter = old_sources; iter; iter = iter->next) {
-		ESource *source = iter->data;
+	g_hash_table_iter_init (&iter, old_sources);
+	while (g_hash_table_iter_next (&iter, NULL, &value)) {
+		ESource *source = value;
 		ESourceEwsFolder *extension;
 
 		if (!e_source_has_extension (source, extension_name))
@@ -622,7 +634,6 @@ add_remote_sources (EEwsBackend *backend)
 		}
 	}
 
-	g_list_free_full (old_sources, g_object_unref);
 	g_object_unref (registry);
 }
 
@@ -634,11 +645,11 @@ ews_backend_sync_folders_idle_cb (gpointer user_data)
 	/* FIXME Handle updated folders. */
 
 	ews_backend_sync_deleted_folders (
-		closure->backend, closure->folders_deleted);
+		closure->backend, closure->folders_deleted, closure->old_sources);
 	ews_backend_sync_created_folders (
-		closure->backend, closure->folders_created);
+		closure->backend, closure->folders_created, closure->old_sources);
 
-	add_remote_sources (closure->backend);
+	add_remote_sources (closure->backend, closure->old_sources);
 
 	return FALSE;
 }
@@ -796,6 +807,7 @@ ews_backend_populate (ECollectionBackend *backend)
 		return;
 
 	ews_backend_add_gal_source (ews_backend);
+	ews_backend_claim_old_resources (backend);
 
 	if (e_backend_get_online (E_BACKEND (backend))) {
 		CamelEwsSettings *ews_settings;
@@ -809,8 +821,6 @@ ews_backend_populate (ECollectionBackend *backend)
 				E_SOURCE_CREDENTIALS_REASON_REQUIRED, NULL, 0, NULL,
 				NULL, NULL);
 		}
-	} else {
-		ews_backend_claim_old_resources (backend);
 	}
 }
 
@@ -1393,6 +1403,60 @@ ews_backend_forget_all_sources (EEwsBackend *backend)
 	g_list_free_full (sources, g_object_unref);
 }
 
+static void
+ews_backend_fill_known_sources (EEwsBackend *backend,
+				GHashTable *known_sources) /* gchar *folder_id ~> ESource * */
+{
+	ECollectionBackend *collection_backend;
+	CamelEwsSettings *settings;
+	GList *sources, *link;
+	gchar *gal_source_uid;
+
+	g_return_if_fail (E_IS_EWS_BACKEND (backend));
+	g_return_if_fail (known_sources != NULL);
+
+	settings = ews_backend_get_settings (backend);
+	gal_source_uid = camel_ews_settings_dup_gal_uid (settings);
+
+	collection_backend = E_COLLECTION_BACKEND (backend);
+
+	sources = e_collection_backend_list_calendar_sources (collection_backend);
+	for (link = sources; link; link = g_list_next (link)) {
+		ESource *source = link->data;
+
+		if (e_source_has_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER)) {
+			ESourceEwsFolder *extension;
+			gchar *folder_id;
+
+			extension = e_source_get_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER);
+			folder_id = e_source_ews_folder_dup_id (extension);
+			if (folder_id)
+				g_hash_table_insert (known_sources, folder_id, g_object_ref (source));
+		}
+	}
+	g_list_free_full (sources, g_object_unref);
+
+	sources = e_collection_backend_list_contacts_sources (collection_backend);
+	for (link = sources; link; link = g_list_next (link)) {
+		ESource *source = link->data;
+
+		/* Do not include GAL in known sources, there is always at least one */
+		if ((!gal_source_uid || g_strcmp0 (gal_source_uid, e_source_get_uid (source)) != 0) &&
+		    e_source_has_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER)) {
+			ESourceEwsFolder *extension;
+			gchar *folder_id;
+
+			extension = e_source_get_extension (source, E_SOURCE_EXTENSION_EWS_FOLDER);
+			folder_id = e_source_ews_folder_dup_id (extension);
+			if (folder_id)
+				g_hash_table_insert (known_sources, folder_id, g_object_ref (source));
+		}
+	}
+	g_list_free_full (sources, g_object_unref);
+
+	g_free (gal_source_uid);
+}
+
 gboolean
 e_ews_backend_sync_folders_sync (EEwsBackend *backend,
                                  GCancellable *cancellable,
@@ -1465,24 +1529,31 @@ e_ews_backend_sync_folders_sync (EEwsBackend *backend,
 
 	if (success) {
 		SyncFoldersClosure *closure;
+		gboolean had_sync_state;
 
 		/* This takes ownership of the folder lists. */
 		closure = g_slice_new0 (SyncFoldersClosure);
 		closure->backend = g_object_ref (backend);
+		closure->old_sources = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
 		closure->folders_created = folders_created;
 		closure->folders_deleted = folders_deleted;
 		closure->folders_updated = folders_updated;
+
+		g_mutex_lock (&backend->priv->sync_state_lock);
+		had_sync_state = backend->priv->sync_state && *(backend->priv->sync_state);
+
+		g_free (backend->priv->sync_state);
+		backend->priv->sync_state = g_strdup (new_sync_state);
+		g_mutex_unlock (&backend->priv->sync_state_lock);
+
+		if (!had_sync_state)
+			ews_backend_fill_known_sources (backend, closure->old_sources);
 
 		/* Process the results from an idle callback. */
 		g_idle_add_full (
 			G_PRIORITY_DEFAULT_IDLE,
 			ews_backend_sync_folders_idle_cb, closure,
 			(GDestroyNotify) sync_folders_closure_free);
-
-		g_mutex_lock (&backend->priv->sync_state_lock);
-		g_free (backend->priv->sync_state);
-		backend->priv->sync_state = g_strdup (new_sync_state);
-		g_mutex_unlock (&backend->priv->sync_state_lock);
 
 	} else {
 		/* Make sure we're not leaking anything. */
