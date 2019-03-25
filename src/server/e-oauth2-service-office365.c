@@ -252,7 +252,6 @@ eos_office365_prepare_authentication_uri_query (EOAuth2Service *service,
 	g_return_if_fail (uri_query != NULL);
 
 	e_oauth2_service_util_set_to_form (uri_query, "response_mode", "query");
-	e_oauth2_service_util_set_to_form (uri_query, "prompt", "login");
 	e_oauth2_service_util_set_to_form (uri_query, "scope", OFFICE365_SCOPE);
 	e_oauth2_service_util_set_to_form (uri_query, "resource", OFFICE365_RESOURCE);
 }
