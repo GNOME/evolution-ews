@@ -252,7 +252,6 @@ eos_office365_prepare_authentication_uri_query (EOAuth2Service *service,
 	g_return_if_fail (uri_query != NULL);
 
 	e_oauth2_service_util_set_to_form (uri_query, "response_mode", "query");
-	e_oauth2_service_util_set_to_form (uri_query, "scope", OFFICE365_SCOPE);
 	e_oauth2_service_util_set_to_form (uri_query, "resource", OFFICE365_RESOURCE);
 }
 
@@ -320,7 +319,6 @@ eos_office365_prepare_refresh_token_form (EOAuth2Service *service,
 {
 	g_return_if_fail (form != NULL);
 
-	e_oauth2_service_util_set_to_form (form, "scope", OFFICE365_SCOPE);
 	e_oauth2_service_util_set_to_form (form, "resource", OFFICE365_RESOURCE);
 	e_oauth2_service_util_set_to_form (form, "redirect_uri", e_oauth2_service_get_redirect_uri (service, source));
 }
