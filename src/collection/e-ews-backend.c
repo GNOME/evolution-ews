@@ -1479,6 +1479,7 @@ e_ews_backend_sync_folders_sync (EEwsBackend *backend,
 		/* This takes ownership of the folder lists. */
 		closure = g_slice_new0 (SyncFoldersClosure);
 		closure->backend = g_object_ref (backend);
+		closure->old_sources = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
 
 		/* Process the results from an idle callback. */
 		g_idle_add_full (
