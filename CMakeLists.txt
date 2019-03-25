@@ -180,7 +180,7 @@ endif(ENABLE_TESTS)
 add_printable_variable(WITH_OFFICE365_TENANT "Office365.com OAuth 2.0 tenant" "")
 
 if(WITH_OFFICE365_TENANT STREQUAL "")
-	set(WITH_OFFICE365_TENANT "")
+	set(WITH_OFFICE365_TENANT "common")
 endif(WITH_OFFICE365_TENANT STREQUAL "")
 
 add_printable_variable(WITH_OFFICE365_CLIENT_ID "Office365.com OAuth 2.0 client ID" "")

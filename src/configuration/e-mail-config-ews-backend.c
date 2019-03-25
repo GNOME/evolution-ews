@@ -348,9 +348,9 @@ mail_config_ews_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		G_BINDING_SYNC_CREATE);
 
 	mail_config_ews_backend_set_oauth2_tooltip (widget, OFFICE365_TENANT,
-		/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+		/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
 		   You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/ */
-		_("There is not set any default tenant"),
+		_("Default tenant is “common“"),
 		/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
 		   You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/ */
 		g_strdup_printf (_("Default tenant is “%s”"), OFFICE365_TENANT));
@@ -586,22 +586,13 @@ mail_config_ews_backend_check_complete (EMailConfigServiceBackend *backend)
 	e_util_set_entry_issue_hint (priv->user_entry, correct ? NULL : _("User name cannot be empty"));
 
 	if (correct && camel_ews_settings_get_auth_mechanism (ews_settings) == EWS_AUTH_TYPE_OAUTH2) {
-		const gchar *tenant, *client_id;
+		const gchar *client_id;
 
 		if (camel_ews_settings_get_override_oauth2 (ews_settings)) {
-			tenant = camel_ews_settings_get_oauth2_tenant (ews_settings);
 			client_id = camel_ews_settings_get_oauth2_client_id (ews_settings);
 		} else {
-			tenant = OFFICE365_TENANT;
 			client_id = OFFICE365_CLIENT_ID;
 		}
-
-		correct = tenant && *tenant;
-		complete = complete && correct;
-
-		/* Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-		   You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/ */
-		e_util_set_entry_issue_hint (priv->oauth2_tenant_entry, correct ? NULL : _("Tenant cannot be empty"));
 
 		correct = client_id && *client_id;
 		complete = complete && correct;
