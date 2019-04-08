@@ -1,3 +1,15 @@
+Evolution-EWS 3.32.1 2019-04-08
+-------------------------------
+
+Bug Fixes:
+	I#39 - Let handle recurring task completion by the server (Milan Crha)
+	I#41 - Unreachable EWS service causes Calendar(s) to disappear (Milan Crha)
+	M!1 - Do not pass 'scope' parameter in OAuth2 requests on outlook.office365.com server (Luca Boccassi)
+
+Translations:
+	Марко Костић (sr)
+	Tim Sabsch (de)
+
 Evolution-EWS 3.32.0 2019-03-11
 -------------------------------
 
