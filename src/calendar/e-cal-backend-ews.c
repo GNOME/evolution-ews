@@ -3248,7 +3248,7 @@ ecb_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
 		attendee_str = icalproperty_get_organizer (attendee);
 
 		if (attendee_str) {
-			if (!strncasecmp (attendee_str, "MAILTO:", 7))
+			if (!strncasecmp (attendee_str, "mailto:", 7))
 				attendee_mail = attendee_str + 7;
 			else
 				attendee_mail = attendee_str;
@@ -3265,7 +3265,7 @@ ecb_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
 		attendee_str = icalproperty_get_attendee (attendee);
 
 		if (attendee_str != NULL) {
-			if (!strncasecmp (attendee_str, "MAILTO:", 7))
+			if (!strncasecmp (attendee_str, "mailto:", 7))
 				attendee_mail = attendee_str + 7;
 			else
 				attendee_mail = attendee_str;
@@ -3738,7 +3738,7 @@ ecb_ews_send_objects_sync (ECalBackendSync *sync_backend,
 
 		org_prop = icalcomponent_get_first_property (subcomp, ICAL_ORGANIZER_PROPERTY);
 		org = icalproperty_get_organizer (org_prop);
-		if (!g_ascii_strncasecmp (org, "MAILTO:", 7))
+		if (!g_ascii_strncasecmp (org, "mailto:", 7))
 			org_email = (org) + 7;
 		else
 			org_email = org;

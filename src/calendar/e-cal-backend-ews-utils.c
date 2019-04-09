@@ -915,7 +915,7 @@ e_ews_collect_organizer (icalcomponent *comp)
 	if (!org)
 		return NULL;
 
-	if (g_ascii_strncasecmp (org, "MAILTO:", 7) == 0)
+	if (g_ascii_strncasecmp (org, "mailto:", 7) == 0)
 		org = org + 7;
 
 	org_email_address = org;
