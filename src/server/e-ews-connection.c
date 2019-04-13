@@ -3367,10 +3367,8 @@ e_ews_autodiscover_ws_url (ESource *source,
 		url2 = g_strdup_printf ("http%s://autodiscover.%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", host);
 
 		/* outlook.office365.com has its autodiscovery at outlook.com */
-		if (host && g_ascii_strcasecmp (host, "outlook.office365.com") == 0 &&
-		   domain && g_ascii_strcasecmp (host, "outlook.com") != 0) {
+		if (host && g_ascii_strcasecmp (host, "outlook.office365.com") == 0 && domain)
 			url5 = "https://outlook.com/autodiscover/autodiscover.xml";
-		}
 
 		soup_uri_free (soup_uri);
 	}
