@@ -3313,7 +3313,8 @@ e_ews_autodiscover_ws_url (ESource *source,
 	GSimpleAsyncResult *simple;
 	struct _autodiscover_data *ad;
 	xmlOutputBuffer *buf;
-	gchar *url1, *url2, *url3, *url4, *url5;
+	gchar *url1, *url2, *url3, *url4;
+	const gchar *url5;
 	gchar *domain;
 	xmlDoc *doc;
 	EEwsConnection *cnc;
@@ -3367,8 +3368,8 @@ e_ews_autodiscover_ws_url (ESource *source,
 
 		/* outlook.office365.com has its autodiscovery at outlook.com */
 		if (host && g_ascii_strcasecmp (host, "outlook.office365.com") == 0 &&
-		   domain && g_ascii_strcasecmp (host, "outlook.com") != 0) {
-			url5 = g_strdup_printf ("https://outlook.com/autodiscover/autodiscover.xml");
+		    domain && g_ascii_strcasecmp (domain, "outlook.com") != 0) {
+			url5 = "https://outlook.com/autodiscover/autodiscover.xml";
 		}
 
 		soup_uri_free (soup_uri);
