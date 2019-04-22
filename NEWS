@@ -1,3 +1,22 @@
+Evolution-EWS 3.33.1 2019-04-22
+-------------------------------
+Bug Fixes:
+	I#39 - Let handle recurring task completion by the server (Milan Crha)
+	I#41 - Unreachable EWS service causes Calendar(s) to disappear (Milan Crha)
+	M!1 - Simplify OAuth2 for outlook.office365.com server (Luca Boccassi)
+	M!2 - Correct memory leak and typo in e_ews_autodiscover_ws_url() (Дилян Палаузов)
+	eds-I#94 - Remove -Wabi from the default C++ warning flags (Milan Crha)
+
+Miscellaneous:
+	Use lower-case "mailto:" consistently in the code (Milan Crha)
+
+Translations:
+	Марко Костић (sr)
+	Tim Sabsch (de)
+	Rafael Fontenelle (pt_BR)
+	Piotr Drąg (pl)
+	Kukuh Syafaat (id)
+
 Evolution-EWS 3.32.0 2019-03-11
 -------------------------------
 
