@@ -40,9 +40,9 @@ const gchar *str_comp =
 	"SEQUENCE:2\n"
 	"SUMMARY:Test\n"
 	"CLASS:PUBLIC\n"
-	"ORGANIZER;CN=Someone:MAILTO:someone@provide.com\n"
+	"ORGANIZER;CN=Someone:mailto:someone@provide.com\n"
 	"ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;\n"
-	" RSVP=TRUE;CN=Someone;LANGUAGE=en:MAILTO:someone@provider.com\n"
+	" RSVP=TRUE;CN=Someone;LANGUAGE=en:mailto:someone@provider.com\n"
 	"END:VEVENT";
 
 /*
@@ -75,7 +75,7 @@ static const gchar *unknown_timezones[] = {
 	NULL
 };
 
-static icalarray *builtin_timezones = NULL;
+static ICalArray *builtin_timezones = NULL;
 
 static gboolean
 is_a_known_unknown_timezone (const gchar *zone)
@@ -117,14 +117,15 @@ static void
 test_libical_timezones_compatibility (gconstpointer user_data)
 {
 	gboolean retval = TRUE;
-	gint i;
+	guint ii, nelems;
 
-	for (i = 0; i < builtin_timezones->num_elements; i++) {
-		icaltimezone *zone;
+	nelems = i_cal_array_size (builtin_timezones);
+	for (ii = 0; ii < nelems; ii++) {
+		ICalTimezone *zone;
 		const gchar *zone_location;
 
-		zone = icalarray_element_at (builtin_timezones, i);
-		zone_location = icaltimezone_get_location (zone);
+		zone = i_cal_timezone_array_element_at (builtin_timezones, ii);
+		zone_location = i_cal_timezone_get_location (zone);
 
 		if (ical_to_msdn_equivalent (zone_location) == NULL) {
 			if (!is_a_known_unknown_timezone (zone_location)) {
@@ -132,6 +133,7 @@ test_libical_timezones_compatibility (gconstpointer user_data)
 				g_printerr ("\nMissing ical_tz_location: %s\n", zone_location);
 			}
 		}
+		g_object_unref (zone);
 	}
 
 	g_assert (retval == TRUE);
@@ -141,7 +143,7 @@ static void
 test_time_zones_sync (gconstpointer user_data)
 {
 	gboolean retval = FALSE;
-	gint i;
+	guint ii, nelems;
 	GError *error = NULL;
 	UhmServer *local_server;
 	EwsTestData *etd = (gpointer) user_data;
@@ -225,29 +227,32 @@ test_time_zones_sync (gconstpointer user_data)
 	}
 
 	convert_data.connection = etd->connection;
-	convert_data.default_zone = icaltimezone_get_utc_timezone ();
+	convert_data.default_zone = i_cal_timezone_get_utc_timezone ();
 
 	tokens = g_strsplit (str_comp, "ICAL_TIMEZONE", 0);
 
-	for (i = 0; i < builtin_timezones->num_elements; i++) {
+	nelems = i_cal_array_size (builtin_timezones);
+	for (ii = 0; ii < nelems; ii++) {
 		GSList *ll;
 		GSList *ids = NULL;
-		icaltimezone *zone;
+		ICalTimezone *zone;
 		ECalComponent *comp;
 		const gchar *zone_location;
 		gchar *str;
 
-		zone = icalarray_element_at (builtin_timezones, i);
-		zone_location = icaltimezone_get_location (zone);
+		zone = i_cal_timezone_array_element_at (builtin_timezones, ii);
+		zone_location = i_cal_timezone_get_location (zone);
 
-		if (is_a_known_unknown_timezone (zone_location))
+		if (is_a_known_unknown_timezone (zone_location)) {
+			g_object_unref (zone);
 			continue;
+		}
 
 		str = g_strdup_printf ("%s%s%s%s%s", tokens[0], zone_location, tokens[1], zone_location, tokens[2]);
 		comp = e_cal_component_new_from_string (str);
 		g_free (str);
 
-		convert_data.icalcomp = e_cal_component_get_icalcomponent (comp);
+		convert_data.icomp = e_cal_component_get_icalcomponent (comp);
 
 		e_ews_connection_create_items_sync (
 			etd->connection,
@@ -268,6 +273,7 @@ test_time_zones_sync (gconstpointer user_data)
 			g_clear_error (&error);
 
 			zone_location_errors = g_slist_append (zone_location_errors, g_strdup (zone_location));
+			g_object_unref (zone);
 			continue;
 		}
 
@@ -280,11 +286,13 @@ test_time_zones_sync (gconstpointer user_data)
 				g_clear_error (&error);
 
 				zone_location_errors = g_slist_append (zone_location_errors, g_strdup (zone_location));
+				g_object_unref (zone);
 				continue;
 			}
 		}
 
 		g_slist_free_full (ids, g_object_unref);
+		g_object_unref (zone);
 	}
 
 	retval = zone_location_errors == NULL;
@@ -370,7 +378,7 @@ int main (int argc,
 
 	/* Set handler of debug information */
 	populate_windows_zones ();
-	builtin_timezones = icaltimezone_get_builtin_timezones ();
+	builtin_timezones = i_cal_timezone_get_builtin_timezones ();
 
 	for (l = etds; l != NULL; l = l->next) {
 		EwsTestData *etd = l->data;
@@ -400,8 +408,7 @@ int main (int argc,
  exit:
 	if (module != NULL)
 		g_module_close (module);
-	if (builtin_timezones != NULL)
-		icalarray_free (builtin_timezones);
+	i_cal_timezone_free_builtin_timezones ();
 	ews_test_cleanup ();
 
 	return retval;

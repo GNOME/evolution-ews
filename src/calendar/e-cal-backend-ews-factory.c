@@ -64,7 +64,7 @@ e_cal_backend_ews_events_factory_class_init (ECalBackendFactoryClass *class)
 	backend_factory_class->share_subprocess = TRUE;
 
 	class->factory_name = FACTORY_NAME;
-	class->component_kind = ICAL_VEVENT_COMPONENT;
+	class->component_kind = I_CAL_VEVENT_COMPONENT;
 	class->backend_type = E_TYPE_CAL_BACKEND_EWS;
 }
 
@@ -88,7 +88,7 @@ e_cal_backend_ews_journal_factory_class_init (ECalBackendFactoryClass *class)
 	backend_factory_class->share_subprocess = TRUE;
 
 	class->factory_name = FACTORY_NAME;
-	class->component_kind = ICAL_VJOURNAL_COMPONENT;
+	class->component_kind = I_CAL_VJOURNAL_COMPONENT;
 	class->backend_type = E_TYPE_CAL_BACKEND_EWS;
 }
 
@@ -112,7 +112,7 @@ e_cal_backend_ews_todos_factory_class_init (ECalBackendFactoryClass *class)
 	backend_factory_class->share_subprocess = TRUE;
 
 	class->factory_name = FACTORY_NAME;
-	class->component_kind = ICAL_VTODO_COMPONENT;
+	class->component_kind = I_CAL_VTODO_COMPONENT;
 	class->backend_type = E_TYPE_CAL_BACKEND_EWS;
 }
 

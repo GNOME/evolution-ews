@@ -123,9 +123,9 @@ pkg_check_modules(CAMEL REQUIRED camel-1.2>=${eds_minimum_version})
 pkg_check_modules(EVOLUTION_DATA_SERVER REQUIRED evolution-data-server-1.2>=${eds_minimum_version})
 pkg_check_modules(LIBEBACKEND REQUIRED libebackend-1.2>=${eds_minimum_version})
 pkg_check_modules(LIBEBOOK REQUIRED libebook-1.2>=${eds_minimum_version})
-pkg_check_modules(LIBECAL REQUIRED libecal-1.2>=${eds_minimum_version})
+pkg_check_modules(LIBECAL REQUIRED libecal-2.0>=${eds_minimum_version})
 pkg_check_modules(LIBEDATABOOK REQUIRED libedata-book-1.2>=${eds_minimum_version})
-pkg_check_modules(LIBEDATACAL REQUIRED libedata-cal-1.2>=${eds_minimum_version})
+pkg_check_modules(LIBEDATACAL REQUIRED libedata-cal-2.0>=${eds_minimum_version})
 pkg_check_modules(LIBEDATASERVER REQUIRED libedataserver-1.2>=${eds_minimum_version})
 
 pkg_check_modules(EVOLUTION_SHELL REQUIRED evolution-shell-3.0>=${evo_minimum_version})
@@ -137,7 +137,6 @@ pkg_check_modules(GNOME_PLATFORM REQUIRED
 	gtk+-3.0>=${gdk_minimum_version}
 )
 
-pkg_check_modules(LIBICAL REQUIRED libical)
 pkg_check_modules(SOUP REQUIRED libsoup-2.4>=${soup_minimum_version})
 
 # ******************************
@@ -205,7 +204,7 @@ pkg_check_variable(errordir evolution-shell-3.0 errordir)
 pkg_check_variable(evo_privlibdir evolution-shell-3.0 privlibdir)
 pkg_check_variable(camel_providerdir camel-1.2 camel_providerdir)
 pkg_check_variable(ebook_backenddir libedata-book-1.2 backenddir)
-pkg_check_variable(ecal_backenddir libedata-cal-1.2 backenddir)
+pkg_check_variable(ecal_backenddir libedata-cal-2.0 backenddir)
 pkg_check_variable(eds_moduledir libebackend-1.2 moduledir)
 pkg_check_variable(evo_moduledir evolution-shell-3.0 moduledir)
 pkg_check_variable(ewsdatadir evolution-data-server-1.2 privdatadir)

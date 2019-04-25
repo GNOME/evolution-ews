@@ -353,9 +353,6 @@ time_t		e_ews_item_get_extended_property_as_time
 EEwsAttachmentInfo *
 e_ews_dump_file_attachment_from_soap_parameter (ESoapParameter *param, const gchar *cache, const gchar *comp_uid);
 
-gchar *
-e_ews_item_ical_dump (EEwsItem *item);
-
 EEwsAttachmentInfo *
 e_ews_item_dump_mime_content (EEwsItem *item, const gchar *cache);
 

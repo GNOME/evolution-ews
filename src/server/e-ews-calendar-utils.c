@@ -30,7 +30,7 @@
 
 static void
 e_ews_cal_util_encode_regeneration (EEwsRecurrence *in_recur,
-				    icalcomponent *out_comp) /* not 'out' as such */
+				    ICalComponent *out_comp) /* not 'out' as such */
 {
 	gchar chr = 0;
 
@@ -88,11 +88,11 @@ e_ews_cal_util_encode_regeneration (EEwsRecurrence *in_recur,
 				end_chr,
 				start_num,
 				end_num);
-			e_cal_util_set_x_property (out_comp, X_EWS_TASK_REGENERATION, value);
+			e_cal_util_component_set_x_property (out_comp, X_EWS_TASK_REGENERATION, value);
 			g_free (value);
 		}
 	} else {
-		e_cal_util_remove_x_property (out_comp, X_EWS_TASK_REGENERATION);
+		e_cal_util_component_remove_x_property (out_comp, X_EWS_TASK_REGENERATION);
 	}
 }
 
@@ -137,10 +137,10 @@ e_ews_cal_util_decode_regeneration_info_from_string (const gchar *value,
 }
 
 static void
-e_ews_cal_util_decode_regeneration (icalcomponent *in_comp,
+e_ews_cal_util_decode_regeneration (ICalComponent *in_comp,
 				    EEwsRecurrence *out_recur)
 {
-	const gchar *value;
+	gchar *value;
 	gchar recur_type_chr = 0, end_type_chr = 0;
 	gint interval = 0;
 	gint64 start_num = 0, end_num = 0;
@@ -148,7 +148,7 @@ e_ews_cal_util_decode_regeneration (icalcomponent *in_comp,
 	g_return_if_fail (in_comp != NULL);
 	g_return_if_fail (out_recur != NULL);
 
-	value = e_cal_util_get_x_property (in_comp, X_EWS_TASK_REGENERATION);
+	value = e_cal_util_component_dup_x_property (in_comp, X_EWS_TASK_REGENERATION);
 
 	if (e_ews_cal_util_decode_regeneration_info_from_string (value, &recur_type_chr, &interval, &end_type_chr, &start_num, &end_num)) {
 		EEwsRecurrenceType recur_type = E_EWS_RECURRENCE_UNKNOWN;
@@ -196,6 +196,8 @@ e_ews_cal_util_decode_regeneration (icalcomponent *in_comp,
 	} else if (value && *value) {
 		g_warning ("%s: Failed to decode value '%s'", G_STRFUNC, value);
 	}
+
+	g_free (value);
 }
 
 static const gchar *
@@ -212,13 +214,13 @@ number_to_weekday (gint num)
 
 static void
 ewscal_add_availability_rrule (ESoapMessage *msg,
-                               icalproperty *prop)
+                               ICalProperty *prop)
 {
-	struct icalrecurrencetype recur = icalproperty_get_rrule (prop);
+	ICalRecurrence *recur = i_cal_property_get_rrule (prop);
 	gchar buffer[16];
 	gint dayorder;
 
-	dayorder = icalrecurrencetype_day_position (recur.by_day[0]);
+	dayorder = i_cal_recurrence_day_position (i_cal_recurrence_get_by_day (recur, 0));
 	dayorder = dayorder % 5;
 	if (dayorder < 0)
 		dayorder += 5;
@@ -228,10 +230,12 @@ ewscal_add_availability_rrule (ESoapMessage *msg,
 	snprintf (buffer, 16, "%d", dayorder);
 	e_ews_message_write_string_parameter (msg, "DayOrder", NULL, buffer);
 
-	snprintf (buffer, 16, "%d", recur.by_month[0]);
+	snprintf (buffer, 16, "%d", i_cal_recurrence_get_by_month (recur, 0));
 	e_ews_message_write_string_parameter (msg, "Month", NULL, buffer);
 
-	e_ews_message_write_string_parameter (msg, "DayOfWeek", NULL, number_to_weekday (icalrecurrencetype_day_day_of_week (recur.by_day[0])));
+	e_ews_message_write_string_parameter (msg, "DayOfWeek", NULL, number_to_weekday (i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (recur, 0))));
+
+	g_clear_object (&recur);
 }
 
 static void
@@ -257,52 +261,56 @@ ewscal_add_availability_default_timechange (ESoapMessage *msg)
 
 static void
 ewscal_add_availability_timechange (ESoapMessage *msg,
-                                    icalcomponent *comp,
+                                    ICalComponent *comp,
                                     gint baseoffs)
 {
 	gchar buffer[16];
-	icalproperty *prop;
-	struct icaltimetype dtstart;
+	ICalProperty *prop;
+	ICalTime *dtstart;
 	gint utcoffs;
 
 	/* Calculate zone Offset from BaseOffset */
-	prop = icalcomponent_get_first_property (comp, ICAL_TZOFFSETTO_PROPERTY);
+	prop = i_cal_component_get_first_property (comp, I_CAL_TZOFFSETTO_PROPERTY);
 	if (prop) {
-		utcoffs = -icalproperty_get_tzoffsetto (prop) / 60;
+		utcoffs = -i_cal_property_get_tzoffsetto (prop) / 60;
 		utcoffs -= baseoffs;
 		snprintf (buffer, 16, "%d", utcoffs);
 		e_ews_message_write_string_parameter (msg, "Bias", NULL, buffer);
+		g_object_unref (prop);
 	}
 
-	prop = icalcomponent_get_first_property (comp, ICAL_DTSTART_PROPERTY);
+	prop = i_cal_component_get_first_property (comp, I_CAL_DTSTART_PROPERTY);
 	if (prop) {
-		dtstart = icalproperty_get_dtstart (prop);
-		snprintf (buffer, 16, "%02d:%02d:%02d", dtstart.hour, dtstart.minute, dtstart.second);
+		dtstart = i_cal_property_get_dtstart (prop);
+		snprintf (buffer, 16, "%02d:%02d:%02d", i_cal_time_get_hour (dtstart), i_cal_time_get_minute (dtstart), i_cal_time_get_second (dtstart));
 		e_ews_message_write_string_parameter (msg, "Time", NULL, buffer);
+		g_object_unref (dtstart);
+		g_object_unref (prop);
 	}
 
-	prop = icalcomponent_get_first_property (comp, ICAL_RRULE_PROPERTY);
-	if (prop)
+	prop = i_cal_component_get_first_property (comp, I_CAL_RRULE_PROPERTY);
+	if (prop) {
 		ewscal_add_availability_rrule (msg, prop);
+		g_object_unref (prop);
+	}
 }
 
 static void
 ewscal_set_availability_timezone (ESoapMessage *msg,
-                                  icaltimezone *icaltz)
+                                  ICalTimezone *icaltz)
 {
-	icalcomponent *comp;
-	icalproperty *prop;
-	icalcomponent *xstd, *xdaylight;
+	ICalComponent *comp;
+	ICalComponent *xstd, *xdaylight;
 	gint std_utcoffs;
 	gchar *offset;
 
 	if (!icaltz)
 		return;
 
-	comp = icaltimezone_get_component (icaltz);
+	comp = i_cal_timezone_get_component (icaltz);
 
-	xstd = icalcomponent_get_first_component (comp, ICAL_XSTANDARD_COMPONENT);
-	xdaylight = icalcomponent_get_first_component (comp, ICAL_XDAYLIGHT_COMPONENT);
+	xstd = i_cal_component_get_first_component (comp, I_CAL_XSTANDARD_COMPONENT);
+	xdaylight = i_cal_component_get_first_component (comp, I_CAL_XDAYLIGHT_COMPONENT);
 
 	/*TimeZone is the root element of GetUserAvailabilityRequest*/
 	e_soap_message_start_element (msg, "TimeZone", NULL, NULL);
@@ -310,8 +318,15 @@ ewscal_set_availability_timezone (ESoapMessage *msg,
 	/* Fetch the timezone offsets for the standard (or only) zone.
 	 * Negate it, because Exchange does it backwards */
 	if (xstd) {
-		prop = icalcomponent_get_first_property (xstd, ICAL_TZOFFSETTO_PROPERTY);
-		std_utcoffs = -icalproperty_get_tzoffsetto (prop) / 60;
+		ICalProperty *prop;
+
+		prop = i_cal_component_get_first_property (xstd, I_CAL_TZOFFSETTO_PROPERTY);
+		if (prop) {
+			std_utcoffs = -i_cal_property_get_tzoffsetto (prop) / 60;
+			g_object_unref (prop);
+		} else {
+			std_utcoffs = 0;
+		}
 	} else
 		std_utcoffs = 0;
 
@@ -338,6 +353,10 @@ ewscal_set_availability_timezone (ESoapMessage *msg,
 		ewscal_add_availability_default_timechange (msg);
 
 	e_soap_message_end_element (msg); /* "TimeZone" */
+
+	g_clear_object (&comp);
+	g_clear_object (&xstd);
+	g_clear_object (&xdaylight);
 }
 
 gboolean
@@ -346,8 +365,8 @@ e_ews_cal_utils_prepare_free_busy_request (ESoapMessage *msg,
 					   GError **error)
 {
 	const EEWSFreeBusyData *fbdata = user_data;
-	icaltimetype t_start, t_end;
-	icaltimezone *utc_zone = icaltimezone_get_utc_timezone ();
+	ICalTime *t_start, *t_end;
+	ICalTimezone *utc_zone = i_cal_timezone_get_utc_timezone ();
 	GSList *link;
 
 	g_return_val_if_fail (fbdata != NULL, FALSE);
@@ -375,12 +394,16 @@ e_ews_cal_utils_prepare_free_busy_request (ESoapMessage *msg,
 
 	e_soap_message_start_element (msg, "FreeBusyViewOptions", NULL, NULL);
 
+	t_start = i_cal_time_from_timet_with_zone (fbdata->period_start, 0, utc_zone);
+	t_end = i_cal_time_from_timet_with_zone (fbdata->period_end, 0, utc_zone);
+
 	e_soap_message_start_element (msg, "TimeWindow", NULL, NULL);
-	t_start = icaltime_from_timet_with_zone (fbdata->period_start, 0, utc_zone);
-	t_end = icaltime_from_timet_with_zone (fbdata->period_end, 0, utc_zone);
-	e_ews_cal_utils_set_time (msg, "StartTime", &t_start, FALSE);
-	e_ews_cal_utils_set_time (msg, "EndTime", &t_end, FALSE);
+	e_ews_cal_utils_set_time (msg, "StartTime", t_start, FALSE);
+	e_ews_cal_utils_set_time (msg, "EndTime", t_end, FALSE);
 	e_soap_message_end_element (msg); /* "TimeWindow" */
+
+	g_clear_object (&t_start);
+	g_clear_object (&t_end);
 
 	e_ews_message_write_string_parameter (msg, "MergedFreeBusyIntervalInMinutes", NULL, "60");
 	e_ews_message_write_string_parameter (msg, "RequestedView", NULL, "DetailedMerged");
@@ -393,23 +416,25 @@ e_ews_cal_utils_prepare_free_busy_request (ESoapMessage *msg,
 void
 e_ews_cal_utils_set_time (ESoapMessage *msg,
 			  const gchar *name,
-			  icaltimetype *tt,
+			  ICalTime *tt,
 			  gboolean with_timezone)
 {
-	struct icaltimetype local_tt;
+	ICalTime *local_tt = NULL;
 	gchar *str;
 	gchar *tz_ident = NULL;
 
 	g_return_if_fail (tt != NULL);
 
 	if (with_timezone) {
-		if (icaltime_is_utc (*tt) || !tt->zone || tt->zone == icaltimezone_get_utc_timezone () || tt->is_date) {
+		ICalTimezone *zone = i_cal_time_get_timezone (tt);
+
+		if (i_cal_time_is_utc (tt) || i_cal_time_is_date (tt) || !zone || zone == i_cal_timezone_get_utc_timezone ()) {
 			tz_ident = g_strdup ("Z");
 		} else {
 			gint offset, is_daylight, hrs, mins;
 
-			offset = icaltimezone_get_utc_offset (
-				icaltimezone_get_utc_timezone (), tt, &is_daylight);
+			offset = i_cal_timezone_get_utc_offset (
+				i_cal_timezone_get_utc_timezone (), tt, &is_daylight);
 
 			offset = offset * (-1);
 			hrs = offset / 60;
@@ -424,34 +449,45 @@ e_ews_cal_utils_set_time (ESoapMessage *msg,
 		}
 	}
 
-	if (tt->is_date) {
-		local_tt = *tt;
-		local_tt.zone = calendar_config_get_icaltimezone ();
-		local_tt = icaltime_from_timet_with_zone (icaltime_as_timet_with_zone (local_tt, local_tt.zone), FALSE, icaltimezone_get_utc_timezone ());
-		tt = &local_tt;
+	if (i_cal_time_is_date (tt)) {
+		ICalTimezone *cfg_zone;
+
+		cfg_zone = calendar_config_get_icaltimezone ();
+		local_tt = i_cal_time_from_timet_with_zone (i_cal_time_as_timet_with_zone (tt, cfg_zone), FALSE, i_cal_timezone_get_utc_timezone ());
+		tt = local_tt;
 	}
 
 	str = g_strdup_printf (
 		"%04d-%02d-%02dT%02d:%02d:%02d%s",
-		tt->year, tt->month, tt->day,
-		tt->hour, tt->minute, tt->second,
+		i_cal_time_get_year (tt),
+		i_cal_time_get_month (tt),
+		i_cal_time_get_day (tt),
+		i_cal_time_get_hour (tt),
+		i_cal_time_get_minute (tt),
+		i_cal_time_get_second (tt),
 		tz_ident ? tz_ident : "");
 
 	e_ews_message_write_string_parameter (msg, name, NULL, str);
 
+	g_clear_object (&local_tt);
 	g_free (tz_ident);
 	g_free (str);
 }
 
 static gint
-e_ews_cal_util_recurrence_count_by_xxx (gshort *field,
-					gint max_elements)
+e_ews_cal_util_recurrence_count_by_xxx_and_free (GArray *array)
 {
-	gint ii;
+	guint ii;
 
-	for (ii = 0; ii < max_elements; ii++)
-		if (field[ii] == ICAL_RECURRENCE_ARRAY_MAX)
+	if (!array)
+		return 0;
+
+	for (ii = 0; ii < array->len; ii++) {
+		if (g_array_index (array, gshort, ii) == I_CAL_RECURRENCE_ARRAY_MAX)
 			break;
+	}
+
+	g_array_unref (array);
 
 	return ii;
 }
@@ -528,76 +564,72 @@ e_ews_cal_util_month_num_to_day_of_week_index (gint month_num)
 }
 
 static gboolean
-e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
+e_ews_cal_utils_convert_recurrence (ICalComponent *icomp,
 				    EEwsRecurrence *out_recur,
 				    GError **error)
 {
-	icalproperty *prop;
-	struct icalrecurrencetype rrule;
+	ICalProperty *prop;
+	ICalRecurrence *rrule = NULL;
 	gint n_by_second, n_by_minute, n_by_hour;
 	gint n_by_day, n_by_month_day, n_by_year_day;
 	gint n_by_week_no, n_by_month, n_by_set_pos;
 
-	g_return_val_if_fail (icalcomp != NULL, FALSE);
+	g_return_val_if_fail (icomp != NULL, FALSE);
 	g_return_val_if_fail (out_recur != NULL, FALSE);
 
-	prop = icalcomponent_get_first_property (icalcomp, ICAL_RRULE_PROPERTY);
+	prop = i_cal_component_get_first_property (icomp, I_CAL_RRULE_PROPERTY);
 	if (!prop) {
-		e_ews_cal_util_decode_regeneration (icalcomp, out_recur);
+		e_ews_cal_util_decode_regeneration (icomp, out_recur);
 		return TRUE;
 	}
 
-	switch (icalcomponent_isa (icalcomp)) {
-	case ICAL_VEVENT_COMPONENT:
-	case ICAL_VTODO_COMPONENT:
-	case ICAL_VJOURNAL_COMPONENT:
+	switch (i_cal_component_isa (icomp)) {
+	case I_CAL_VEVENT_COMPONENT:
+	case I_CAL_VTODO_COMPONENT:
+	case I_CAL_VJOURNAL_COMPONENT:
 		break;
 	default:
+		g_object_unref (prop);
 		return TRUE;
 	}
 
 	out_recur->type = E_EWS_RECURRENCE_UNKNOWN;
 	out_recur->end_type = E_EWS_RECURRENCE_END_UNKNOWN;
 
-	if (icalcomponent_count_properties (icalcomp, ICAL_RRULE_PROPERTY) != 1 ||
-	    icalcomponent_count_properties (icalcomp, ICAL_RDATE_PROPERTY) != 0 ||
-	    icalcomponent_count_properties (icalcomp, ICAL_EXRULE_PROPERTY) != 0)
+	if (i_cal_component_count_properties (icomp, I_CAL_RRULE_PROPERTY) != 1 ||
+	    i_cal_component_count_properties (icomp, I_CAL_RDATE_PROPERTY) != 0 ||
+	    i_cal_component_count_properties (icomp, I_CAL_EXRULE_PROPERTY) != 0)
 		goto custom;
 
-	rrule = icalproperty_get_rrule (prop);
+	rrule = i_cal_property_get_rrule (prop);
 
-	switch (rrule.freq) {
-	case ICAL_DAILY_RECURRENCE:
-	case ICAL_WEEKLY_RECURRENCE:
-	case ICAL_MONTHLY_RECURRENCE:
-	case ICAL_YEARLY_RECURRENCE:
+	switch (i_cal_recurrence_get_freq (rrule)) {
+	case I_CAL_DAILY_RECURRENCE:
+	case I_CAL_WEEKLY_RECURRENCE:
+	case I_CAL_MONTHLY_RECURRENCE:
+	case I_CAL_YEARLY_RECURRENCE:
 		break;
 	default:
 		goto custom;
-
 	}
 
-#define N_HAS_BY(field) (e_ews_cal_util_recurrence_count_by_xxx (field, G_N_ELEMENTS (field)))
-
-	n_by_second = N_HAS_BY (rrule.by_second);
-	n_by_minute = N_HAS_BY (rrule.by_minute);
-	n_by_hour = N_HAS_BY (rrule.by_hour);
-	n_by_day = N_HAS_BY (rrule.by_day);
-	n_by_month_day = N_HAS_BY (rrule.by_month_day);
-	n_by_year_day = N_HAS_BY (rrule.by_year_day);
-	n_by_week_no = N_HAS_BY (rrule.by_week_no);
-	n_by_month = N_HAS_BY (rrule.by_month);
-	n_by_set_pos = N_HAS_BY (rrule.by_set_pos);
-
-#undef N_HAS_BY
+	n_by_second = e_ews_cal_util_recurrence_count_by_xxx_and_free (i_cal_recurrence_get_by_second_array (rrule));
+	n_by_minute = e_ews_cal_util_recurrence_count_by_xxx_and_free (i_cal_recurrence_get_by_minute_array (rrule));
+	n_by_hour = e_ews_cal_util_recurrence_count_by_xxx_and_free (i_cal_recurrence_get_by_hour_array (rrule));
+	n_by_day = e_ews_cal_util_recurrence_count_by_xxx_and_free (i_cal_recurrence_get_by_day_array (rrule));
+	n_by_month_day = e_ews_cal_util_recurrence_count_by_xxx_and_free (i_cal_recurrence_get_by_month_day_array (rrule));
+	n_by_year_day = e_ews_cal_util_recurrence_count_by_xxx_and_free (i_cal_recurrence_get_by_year_day_array (rrule));
+	n_by_week_no = e_ews_cal_util_recurrence_count_by_xxx_and_free (i_cal_recurrence_get_by_week_no_array (rrule));
+	n_by_month = e_ews_cal_util_recurrence_count_by_xxx_and_free (i_cal_recurrence_get_by_month_array (rrule));
+	n_by_set_pos = e_ews_cal_util_recurrence_count_by_xxx_and_free (i_cal_recurrence_get_by_set_pos_array (rrule));
 
 	if (n_by_second != 0 ||
 	    n_by_minute != 0 ||
 	    n_by_hour != 0)
 		goto custom;
 
-	switch (rrule.freq) {
-	case ICAL_DAILY_RECURRENCE:
+	switch (i_cal_recurrence_get_freq (rrule)) {
+	case I_CAL_DAILY_RECURRENCE:
 		if (n_by_day != 0 ||
 		    n_by_month_day != 0 ||
 		    n_by_year_day != 0 ||
@@ -606,13 +638,13 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 		    n_by_set_pos != 0)
 			goto custom;
 
-		if (rrule.interval > 0) {
+		if (i_cal_recurrence_get_interval (rrule) > 0) {
 			out_recur->type = E_EWS_RECURRENCE_DAILY;
-			out_recur->recur.interval = rrule.interval;
+			out_recur->recur.interval = i_cal_recurrence_get_interval (rrule);
 		}
 		break;
 
-	case ICAL_WEEKLY_RECURRENCE: {
+	case I_CAL_WEEKLY_RECURRENCE: {
 		gint ii, ndays;
 		guint8 day_mask;
 
@@ -625,42 +657,42 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 
 		day_mask = 0;
 
-		for (ii = 0; ii < 8 && rrule.by_day[ii] != ICAL_RECURRENCE_ARRAY_MAX; ii++) {
-			enum icalrecurrencetype_weekday weekday;
+		for (ii = 0; ii < 8 && i_cal_recurrence_get_by_day (rrule, ii) != I_CAL_RECURRENCE_ARRAY_MAX; ii++) {
+			ICalRecurrenceWeekday weekday;
 			gint pos;
 
-			weekday = icalrecurrencetype_day_day_of_week (rrule.by_day[ii]);
-			pos = icalrecurrencetype_day_position (rrule.by_day[ii]);
+			weekday = i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (rrule, ii));
+			pos = i_cal_recurrence_day_position (i_cal_recurrence_get_by_day (rrule, ii));
 
 			if (pos != 0)
 				goto custom;
 
 			switch (weekday) {
-			case ICAL_SUNDAY_WEEKDAY:
+			case I_CAL_SUNDAY_WEEKDAY:
 				day_mask |= 1 << 0;
 				break;
 
-			case ICAL_MONDAY_WEEKDAY:
+			case I_CAL_MONDAY_WEEKDAY:
 				day_mask |= 1 << 1;
 				break;
 
-			case ICAL_TUESDAY_WEEKDAY:
+			case I_CAL_TUESDAY_WEEKDAY:
 				day_mask |= 1 << 2;
 				break;
 
-			case ICAL_WEDNESDAY_WEEKDAY:
+			case I_CAL_WEDNESDAY_WEEKDAY:
 				day_mask |= 1 << 3;
 				break;
 
-			case ICAL_THURSDAY_WEEKDAY:
+			case I_CAL_THURSDAY_WEEKDAY:
 				day_mask |= 1 << 4;
 				break;
 
-			case ICAL_FRIDAY_WEEKDAY:
+			case I_CAL_FRIDAY_WEEKDAY:
 				day_mask |= 1 << 5;
 				break;
 
-			case ICAL_SATURDAY_WEEKDAY:
+			case I_CAL_SATURDAY_WEEKDAY:
 				day_mask |= 1 << 6;
 				break;
 
@@ -670,13 +702,14 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 		}
 
 		if (ii == 0) {
-			struct icaltimetype dtstart;
+			ICalTime *dtstart;
 
-			dtstart = icalcomponent_get_dtstart (icalcomp);
+			dtstart = i_cal_component_get_dtstart (icomp);
 
-			ii = icaltime_day_of_week (dtstart);
+			ii = dtstart ? i_cal_time_day_of_week (dtstart) : 0;
 			if (ii >= 1)
 				day_mask |= 1 << (ii - 1);
+			g_clear_object (&dtstart);
 		}
 
 		ndays = 0;
@@ -687,7 +720,7 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 		}
 
 		out_recur->type = E_EWS_RECURRENCE_WEEKLY;
-		out_recur->recur.weekly.interval = rrule.interval;
+		out_recur->recur.weekly.interval = i_cal_recurrence_get_interval (rrule);
 		out_recur->recur.weekly.days_of_week = 0;
 		out_recur->recur.weekly.first_day_of_week = G_DATE_BAD_WEEKDAY;
 
@@ -724,7 +757,7 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 		break;
 	}
 
-	case ICAL_MONTHLY_RECURRENCE: {
+	case I_CAL_MONTHLY_RECURRENCE: {
 		gint month_index = 1;
 		enum month_day_options month_day;
 		enum month_num_options month_num;
@@ -741,17 +774,19 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 			if (n_by_set_pos != 0)
 				goto custom;
 
-			nth = rrule.by_month_day[0];
+			nth = i_cal_recurrence_get_by_month_day (rrule, 0);
 			if (nth < 1 && nth != -1)
 				goto custom;
 
 			if (nth == -1) {
-				struct icaltimetype dtstart;
+				ICalTime *dtstart;
 
-				dtstart = icalcomponent_get_dtstart (icalcomp);
+				dtstart = i_cal_component_get_dtstart (icomp);
 
-				month_index = dtstart.day;
+				month_index = dtstart ? i_cal_time_get_day (dtstart) : 0;
 				month_num = MONTH_NUM_LAST;
+
+				g_clear_object (&dtstart);
 			} else {
 				month_index = nth;
 				month_num = MONTH_NUM_DAY;
@@ -759,46 +794,46 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 			month_day = MONTH_DAY_NTH;
 
 		} else if (n_by_day == 1) {
-			enum icalrecurrencetype_weekday weekday;
+			ICalRecurrenceWeekday weekday;
 			gint pos;
 
-			weekday = icalrecurrencetype_day_day_of_week (rrule.by_day[0]);
-			pos = icalrecurrencetype_day_position (rrule.by_day[0]);
+			weekday = i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (rrule, 0));
+			pos = i_cal_recurrence_day_position (i_cal_recurrence_get_by_day (rrule, 0));
 
 			if (pos == 0) {
 				if (n_by_set_pos != 1)
 					goto custom;
-				pos = rrule.by_set_pos[0];
+				pos = i_cal_recurrence_get_by_set_pos (rrule, 0);
 			} else if (pos < 0) {
 				goto custom;
 			}
 
 			switch (weekday) {
-			case ICAL_MONDAY_WEEKDAY:
+			case I_CAL_MONDAY_WEEKDAY:
 				month_day = MONTH_DAY_MON;
 				break;
 
-			case ICAL_TUESDAY_WEEKDAY:
+			case I_CAL_TUESDAY_WEEKDAY:
 				month_day = MONTH_DAY_TUE;
 				break;
 
-			case ICAL_WEDNESDAY_WEEKDAY:
+			case I_CAL_WEDNESDAY_WEEKDAY:
 				month_day = MONTH_DAY_WED;
 				break;
 
-			case ICAL_THURSDAY_WEEKDAY:
+			case I_CAL_THURSDAY_WEEKDAY:
 				month_day = MONTH_DAY_THU;
 				break;
 
-			case ICAL_FRIDAY_WEEKDAY:
+			case I_CAL_FRIDAY_WEEKDAY:
 				month_day = MONTH_DAY_FRI;
 				break;
 
-			case ICAL_SATURDAY_WEEKDAY:
+			case I_CAL_SATURDAY_WEEKDAY:
 				month_day = MONTH_DAY_SAT;
 				break;
 
-			case ICAL_SUNDAY_WEEKDAY:
+			case I_CAL_SUNDAY_WEEKDAY:
 				month_day = MONTH_DAY_SUN;
 				break;
 
@@ -813,46 +848,46 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 		} else if (n_by_day > 1 && n_by_set_pos == 1 && n_by_month_day == 0) {
 			gint ii, pos;
 
-			pos = rrule.by_set_pos[0];
+			pos = i_cal_recurrence_get_by_set_pos (rrule, 0);
 			if (pos == -1)
 				month_num = MONTH_NUM_LAST;
 			else
 				month_num = pos - 1;
 
 			out_recur->type = E_EWS_RECURRENCE_RELATIVE_MONTHLY;
-			out_recur->recur.relative_monthly.interval = rrule.interval;
+			out_recur->recur.relative_monthly.interval = i_cal_recurrence_get_interval (rrule);
 			out_recur->recur.relative_monthly.days_of_week = 0;
 			out_recur->recur.relative_monthly.day_of_week_index = e_ews_cal_util_month_num_to_day_of_week_index (month_num);
 
-			for (ii = 0; rrule.by_day[ii] != ICAL_RECURRENCE_ARRAY_MAX; ii++) {
-				enum icalrecurrencetype_weekday weekday;
+			for (ii = 0; i_cal_recurrence_get_by_day (rrule, ii) != I_CAL_RECURRENCE_ARRAY_MAX; ii++) {
+				ICalRecurrenceWeekday weekday;
 
-				weekday = icalrecurrencetype_day_day_of_week (rrule.by_day[ii]);
-				pos = icalrecurrencetype_day_position (rrule.by_day[ii]);
+				weekday = i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (rrule, ii));
+				pos = i_cal_recurrence_day_position (i_cal_recurrence_get_by_day (rrule, ii));
 
 				if (pos != 0)
 					goto custom;
 
 				switch (weekday) {
-				case ICAL_SUNDAY_WEEKDAY:
+				case I_CAL_SUNDAY_WEEKDAY:
 					out_recur->recur.relative_monthly.days_of_week |= E_EWS_RECURRENCE_DAYS_OF_WEEK_SUNDAY;
 					break;
-				case ICAL_MONDAY_WEEKDAY:
+				case I_CAL_MONDAY_WEEKDAY:
 					out_recur->recur.relative_monthly.days_of_week |= E_EWS_RECURRENCE_DAYS_OF_WEEK_MONDAY;
 					break;
-				case ICAL_TUESDAY_WEEKDAY:
+				case I_CAL_TUESDAY_WEEKDAY:
 					out_recur->recur.relative_monthly.days_of_week |= E_EWS_RECURRENCE_DAYS_OF_WEEK_TUESDAY;
 					break;
-				case ICAL_WEDNESDAY_WEEKDAY:
+				case I_CAL_WEDNESDAY_WEEKDAY:
 					out_recur->recur.relative_monthly.days_of_week |= E_EWS_RECURRENCE_DAYS_OF_WEEK_WEDNESDAY;
 					break;
-				case ICAL_THURSDAY_WEEKDAY:
+				case I_CAL_THURSDAY_WEEKDAY:
 					out_recur->recur.relative_monthly.days_of_week |= E_EWS_RECURRENCE_DAYS_OF_WEEK_THURSDAY;
 					break;
-				case ICAL_FRIDAY_WEEKDAY:
+				case I_CAL_FRIDAY_WEEKDAY:
 					out_recur->recur.relative_monthly.days_of_week |= E_EWS_RECURRENCE_DAYS_OF_WEEK_FRIDAY;
 					break;
-				case ICAL_SATURDAY_WEEKDAY:
+				case I_CAL_SATURDAY_WEEKDAY:
 					out_recur->recur.relative_monthly.days_of_week |= E_EWS_RECURRENCE_DAYS_OF_WEEK_SATURDAY;
 					break;
 				default:
@@ -866,7 +901,7 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 		}
 
 		out_recur->type = E_EWS_RECURRENCE_RELATIVE_MONTHLY;
-		out_recur->recur.relative_monthly.interval = rrule.interval;
+		out_recur->recur.relative_monthly.interval = i_cal_recurrence_get_interval (rrule);
 		out_recur->recur.relative_monthly.days_of_week = E_EWS_RECURRENCE_DAYS_OF_WEEK_UNKNOWN;
 		out_recur->recur.relative_monthly.day_of_week_index = E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_UNKNOWN;
 
@@ -877,7 +912,7 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 				out_recur->recur.relative_monthly.day_of_week_index = E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_LAST;
 			} else { /* month_num = MONTH_NUM_DAY; */
 				out_recur->type = E_EWS_RECURRENCE_ABSOLUTE_MONTHLY;
-				out_recur->recur.absolute_monthly.interval = rrule.interval;
+				out_recur->recur.absolute_monthly.interval = i_cal_recurrence_get_interval (rrule);
 				out_recur->recur.absolute_monthly.day_of_month = month_index;
 			}
 			break;
@@ -914,7 +949,7 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 		break;
 	}
 
-	case ICAL_YEARLY_RECURRENCE: {
+	case I_CAL_YEARLY_RECURRENCE: {
 		gint month_index = 1;
 		enum month_day_options month_day = MONTH_DAY_NTH;
 		enum month_num_options month_num = MONTH_NUM_DAY;
@@ -922,7 +957,7 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 		if (n_by_year_day != 0 ||
 		    n_by_week_no != 0 ||
 		    n_by_set_pos > 1 ||
-		    rrule.interval > 1)
+		    i_cal_recurrence_get_interval (rrule) > 1)
 			goto custom;
 
 		if (n_by_month_day == 1) {
@@ -931,17 +966,19 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 			if (n_by_set_pos != 0)
 				goto custom;
 
-			nth = rrule.by_month_day[0];
+			nth = i_cal_recurrence_get_by_month_day (rrule, 0);
 			if (nth < 1 && nth != -1)
 				goto custom;
 
 			if (nth == -1) {
-				struct icaltimetype dtstart;
+				ICalTime *dtstart;
 
-				dtstart = icalcomponent_get_dtstart (icalcomp);
+				dtstart = i_cal_component_get_dtstart (icomp);
 
-				month_index = dtstart.day;
+				month_index = dtstart ? i_cal_time_get_day (dtstart) : 0;
 				month_num = MONTH_NUM_LAST;
+
+				g_clear_object (&dtstart);
 			} else {
 				month_index = nth;
 				month_num = MONTH_NUM_DAY;
@@ -950,46 +987,46 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 		}
 
 		if (n_by_day == 1) {
-			enum icalrecurrencetype_weekday weekday;
+			ICalRecurrenceWeekday weekday;
 			gint pos;
 
-			weekday = icalrecurrencetype_day_day_of_week (rrule.by_day[0]);
-			pos = icalrecurrencetype_day_position (rrule.by_day[0]);
+			weekday = i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (rrule, 0));
+			pos = i_cal_recurrence_day_position (i_cal_recurrence_get_by_day (rrule, 0));
 
 			if (pos == 0) {
 				if (n_by_set_pos != 1)
 					goto custom;
-				pos = rrule.by_set_pos[0];
+				pos = i_cal_recurrence_get_by_set_pos (rrule, 0);
 			} else if (pos < 0) {
 				goto custom;
 			}
 
 			switch (weekday) {
-			case ICAL_MONDAY_WEEKDAY:
+			case I_CAL_MONDAY_WEEKDAY:
 				month_day = MONTH_DAY_MON;
 				break;
 
-			case ICAL_TUESDAY_WEEKDAY:
+			case I_CAL_TUESDAY_WEEKDAY:
 				month_day = MONTH_DAY_TUE;
 				break;
 
-			case ICAL_WEDNESDAY_WEEKDAY:
+			case I_CAL_WEDNESDAY_WEEKDAY:
 				month_day = MONTH_DAY_WED;
 				break;
 
-			case ICAL_THURSDAY_WEEKDAY:
+			case I_CAL_THURSDAY_WEEKDAY:
 				month_day = MONTH_DAY_THU;
 				break;
 
-			case ICAL_FRIDAY_WEEKDAY:
+			case I_CAL_FRIDAY_WEEKDAY:
 				month_day = MONTH_DAY_FRI;
 				break;
 
-			case ICAL_SATURDAY_WEEKDAY:
+			case I_CAL_SATURDAY_WEEKDAY:
 				month_day = MONTH_DAY_SAT;
 				break;
 
-			case ICAL_SUNDAY_WEEKDAY:
+			case I_CAL_SUNDAY_WEEKDAY:
 				month_day = MONTH_DAY_SUN;
 				break;
 
@@ -1006,7 +1043,7 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 		out_recur->type = E_EWS_RECURRENCE_RELATIVE_YEARLY;
 		out_recur->recur.relative_yearly.days_of_week = E_EWS_RECURRENCE_DAYS_OF_WEEK_UNKNOWN;
 		out_recur->recur.relative_yearly.day_of_week_index = E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_UNKNOWN;
-		out_recur->recur.relative_yearly.month = rrule.by_month[0];
+		out_recur->recur.relative_yearly.month = i_cal_recurrence_get_by_month (rrule, 0);
 
 		if (n_by_day > 1 &&
 		    n_by_month == 1 &&
@@ -1014,7 +1051,7 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 		    n_by_month_day == 0) {
 			gint ii, pos;
 
-			pos = rrule.by_set_pos[0];
+			pos = i_cal_recurrence_get_by_set_pos (rrule, 0);
 			if (pos == -1)
 				month_num = MONTH_NUM_LAST;
 			else
@@ -1022,35 +1059,35 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 
 			out_recur->recur.relative_yearly.day_of_week_index = e_ews_cal_util_month_num_to_day_of_week_index (month_num);
 
-			for (ii = 0; rrule.by_day[ii] != ICAL_RECURRENCE_ARRAY_MAX; ii++) {
-				enum icalrecurrencetype_weekday weekday;
+			for (ii = 0; i_cal_recurrence_get_by_day (rrule, ii) != I_CAL_RECURRENCE_ARRAY_MAX; ii++) {
+				ICalRecurrenceWeekday weekday;
 
-				weekday = icalrecurrencetype_day_day_of_week (rrule.by_day[ii]);
-				pos = icalrecurrencetype_day_position (rrule.by_day[ii]);
+				weekday = i_cal_recurrence_day_day_of_week (i_cal_recurrence_get_by_day (rrule, ii));
+				pos = i_cal_recurrence_day_position (i_cal_recurrence_get_by_day (rrule, ii));
 
 				if (pos != 0)
 					goto custom;
 
 				switch (weekday) {
-				case ICAL_SUNDAY_WEEKDAY:
+				case I_CAL_SUNDAY_WEEKDAY:
 					out_recur->recur.relative_yearly.days_of_week |= E_EWS_RECURRENCE_DAYS_OF_WEEK_SUNDAY;
 					break;
-				case ICAL_MONDAY_WEEKDAY:
+				case I_CAL_MONDAY_WEEKDAY:
 					out_recur->recur.relative_yearly.days_of_week |= E_EWS_RECURRENCE_DAYS_OF_WEEK_MONDAY;
 					break;
-				case ICAL_TUESDAY_WEEKDAY:
+				case I_CAL_TUESDAY_WEEKDAY:
 					out_recur->recur.relative_yearly.days_of_week |= E_EWS_RECURRENCE_DAYS_OF_WEEK_TUESDAY;
 					break;
-				case ICAL_WEDNESDAY_WEEKDAY:
+				case I_CAL_WEDNESDAY_WEEKDAY:
 					out_recur->recur.relative_yearly.days_of_week |= E_EWS_RECURRENCE_DAYS_OF_WEEK_WEDNESDAY;
 					break;
-				case ICAL_THURSDAY_WEEKDAY:
+				case I_CAL_THURSDAY_WEEKDAY:
 					out_recur->recur.relative_yearly.days_of_week |= E_EWS_RECURRENCE_DAYS_OF_WEEK_THURSDAY;
 					break;
-				case ICAL_FRIDAY_WEEKDAY:
+				case I_CAL_FRIDAY_WEEKDAY:
 					out_recur->recur.relative_yearly.days_of_week |= E_EWS_RECURRENCE_DAYS_OF_WEEK_FRIDAY;
 					break;
-				case ICAL_SATURDAY_WEEKDAY:
+				case I_CAL_SATURDAY_WEEKDAY:
 					out_recur->recur.relative_yearly.days_of_week |= E_EWS_RECURRENCE_DAYS_OF_WEEK_SATURDAY;
 					break;
 				default:
@@ -1068,7 +1105,7 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 				} else { /* month_num = MONTH_NUM_DAY; */
 					out_recur->type = E_EWS_RECURRENCE_ABSOLUTE_YEARLY;
 					out_recur->recur.absolute_yearly.day_of_month = month_index;
-					out_recur->recur.absolute_yearly.month = rrule.by_month[0];
+					out_recur->recur.absolute_yearly.month = i_cal_recurrence_get_by_month (rrule, 0);
 				}
 				break;
 			case MONTH_DAY_MON:
@@ -1109,20 +1146,24 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 			} else { /* month_num = MONTH_NUM_DAY; */
 				out_recur->type = E_EWS_RECURRENCE_ABSOLUTE_YEARLY;
 				out_recur->recur.absolute_yearly.day_of_month = month_index;
-				out_recur->recur.absolute_yearly.month = rrule.by_month[0];
+				out_recur->recur.absolute_yearly.month = i_cal_recurrence_get_by_month (rrule, 0);
 			}
 		} else if (n_by_day == 0 &&
 			   n_by_month_day == 0 &&
 			   n_by_month == 0) {
-			struct icaltimetype dtstart;
+			ICalTime *dtstart;
 
-			dtstart = icalcomponent_get_dtstart (icalcomp);
-			if (icaltime_is_null_time (dtstart))
+			dtstart = i_cal_component_get_dtstart (icomp);
+			if (!dtstart || i_cal_time_is_null_time (dtstart)) {
+				g_clear_object (&dtstart);
 				goto custom;
+			}
 
 			out_recur->type = E_EWS_RECURRENCE_ABSOLUTE_YEARLY;
-			out_recur->recur.absolute_yearly.day_of_month = dtstart.day;
-			out_recur->recur.absolute_yearly.month = dtstart.month;
+			out_recur->recur.absolute_yearly.day_of_month = i_cal_time_get_day (dtstart);
+			out_recur->recur.absolute_yearly.month = i_cal_time_get_month (dtstart);
+
+			g_object_unref (dtstart);
 		} else {
 			goto custom;
 		}
@@ -1133,28 +1174,42 @@ e_ews_cal_utils_convert_recurrence (icalcomponent *icalcomp,
 	}
 
 	if (out_recur->type != E_EWS_RECURRENCE_UNKNOWN) {
-		struct icaltimetype dtstart;
+		ICalTime *dtstart;
 
-		dtstart = icalcomponent_get_dtstart (icalcomp);
+		dtstart = i_cal_component_get_dtstart (icomp);
 
-		out_recur->utc_start_date = icaltime_as_timet_with_zone (dtstart, icaltimezone_get_utc_timezone ());
+		out_recur->utc_start_date = i_cal_time_as_timet_with_zone (dtstart, i_cal_timezone_get_utc_timezone ());
+		g_clear_object (&dtstart);
 
-		if (rrule.count) {
+		if (i_cal_recurrence_get_count (rrule)) {
 			out_recur->end_type = E_EWS_RECURRENCE_END_NUMBERED;
-			out_recur->end.number_of_occurrences = rrule.count;
-		} else if (rrule.until.year) {
-			rrule.until.is_date = 1;
-
-			out_recur->end_type = E_EWS_RECURRENCE_END_DATE;
-			out_recur->end.utc_end_date = icaltime_as_timet_with_zone (rrule.until, icaltimezone_get_utc_timezone ());
+			out_recur->end.number_of_occurrences = i_cal_recurrence_get_count (rrule);
 		} else {
-			out_recur->end_type = E_EWS_RECURRENCE_END_NO_END;
+			ICalTime *until;
+
+			until = i_cal_recurrence_get_until (rrule);
+			if (until && !i_cal_time_is_null_time (until) && i_cal_time_get_year (until)) {
+				i_cal_time_set_is_date (until, TRUE);
+
+				out_recur->end_type = E_EWS_RECURRENCE_END_DATE;
+				out_recur->end.utc_end_date = i_cal_time_as_timet_with_zone (until, i_cal_timezone_get_utc_timezone ());
+			} else {
+				out_recur->end_type = E_EWS_RECURRENCE_END_NO_END;
+			}
+
+			g_clear_object (&until);
 		}
 	}
+
+	g_clear_object (&rrule);
+	g_clear_object (&prop);
 
 	return TRUE;
 
  custom:
+
+	g_clear_object (&rrule);
+	g_clear_object (&prop);
 
 	g_set_error (error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_CALENDARINVALIDRECURRENCE,
 		_("Cannot store this recurrence. Change it to simple single daily, weekly, monthly or yearly recurrence without exceptions and with start date."));
@@ -1328,14 +1383,18 @@ e_ews_cal_util_write_utc_date (ESoapMessage *msg,
 			       const gchar *name,
 			       time_t utc_date)
 {
-	struct icaltimetype itt;
+	ICalTime *itt;
 	gchar *value;
 
 	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
 	g_return_if_fail (name != NULL);
 
-	itt = icaltime_from_timet_with_zone (utc_date, 1, icaltimezone_get_utc_timezone ());
-	value = g_strdup_printf ("%04d-%02d-%02dZ", itt.year, itt.month, itt.day);
+	itt = i_cal_time_from_timet_with_zone (utc_date, 1, i_cal_timezone_get_utc_timezone ());
+	value = g_strdup_printf ("%04d-%02d-%02dZ",
+		i_cal_time_get_year (itt),
+		i_cal_time_get_month (itt),
+		i_cal_time_get_day (itt));
+	g_clear_object (&itt);
 
 	e_soap_message_start_element (msg, name, NULL, NULL);
 	e_soap_message_write_string (msg, value);
@@ -1348,7 +1407,7 @@ e_ews_cal_util_write_utc_date (ESoapMessage *msg,
    cannot be transformed into Recurrence */
 gboolean
 e_ews_cal_utils_set_recurrence (ESoapMessage *msg,
-				icalcomponent *comp,
+				ICalComponent *comp,
 				gboolean server_satisfies_2013,
 				GError **error)
 {
@@ -1356,6 +1415,8 @@ e_ews_cal_utils_set_recurrence (ESoapMessage *msg,
 
 	g_return_val_if_fail (E_IS_SOAP_MESSAGE (msg), FALSE);
 	g_return_val_if_fail (comp != NULL, FALSE);
+
+	memset (&recur, 0, sizeof (EEwsRecurrence));
 
 	recur.type = E_EWS_RECURRENCE_UNKNOWN;
 	recur.end_type = E_EWS_RECURRENCE_END_UNKNOWN;
@@ -1519,20 +1580,20 @@ e_ews_cal_utils_set_recurrence (ESoapMessage *msg,
 }
 
 static void
-e_ews_cal_utils_days_of_week_to_rrule (struct icalrecurrencetype *rrule,
+e_ews_cal_utils_days_of_week_to_rrule (ICalRecurrence *rrule,
 				       guint32 days_of_week)
 {
 	struct _bits {
 		EEwsRecurrenceDaysOfWeek bit;
-		icalrecurrencetype_weekday week_day;
+		ICalRecurrenceWeekday week_day;
 	} bits[] = {
-		{ E_EWS_RECURRENCE_DAYS_OF_WEEK_SUNDAY, ICAL_SUNDAY_WEEKDAY },
-		{ E_EWS_RECURRENCE_DAYS_OF_WEEK_MONDAY, ICAL_MONDAY_WEEKDAY },
-		{ E_EWS_RECURRENCE_DAYS_OF_WEEK_TUESDAY, ICAL_TUESDAY_WEEKDAY },
-		{ E_EWS_RECURRENCE_DAYS_OF_WEEK_WEDNESDAY, ICAL_WEDNESDAY_WEEKDAY },
-		{ E_EWS_RECURRENCE_DAYS_OF_WEEK_THURSDAY, ICAL_THURSDAY_WEEKDAY },
-		{ E_EWS_RECURRENCE_DAYS_OF_WEEK_FRIDAY, ICAL_FRIDAY_WEEKDAY },
-		{ E_EWS_RECURRENCE_DAYS_OF_WEEK_SATURDAY, ICAL_SATURDAY_WEEKDAY }
+		{ E_EWS_RECURRENCE_DAYS_OF_WEEK_SUNDAY, I_CAL_SUNDAY_WEEKDAY },
+		{ E_EWS_RECURRENCE_DAYS_OF_WEEK_MONDAY, I_CAL_MONDAY_WEEKDAY },
+		{ E_EWS_RECURRENCE_DAYS_OF_WEEK_TUESDAY, I_CAL_TUESDAY_WEEKDAY },
+		{ E_EWS_RECURRENCE_DAYS_OF_WEEK_WEDNESDAY, I_CAL_WEDNESDAY_WEEKDAY },
+		{ E_EWS_RECURRENCE_DAYS_OF_WEEK_THURSDAY, I_CAL_THURSDAY_WEEKDAY },
+		{ E_EWS_RECURRENCE_DAYS_OF_WEEK_FRIDAY, I_CAL_FRIDAY_WEEKDAY },
+		{ E_EWS_RECURRENCE_DAYS_OF_WEEK_SATURDAY, I_CAL_SATURDAY_WEEKDAY }
 	};
 	gint ii, idx;
 
@@ -1552,16 +1613,16 @@ e_ews_cal_utils_days_of_week_to_rrule (struct icalrecurrencetype *rrule,
 
 	for (ii = 0; ii < G_N_ELEMENTS (bits); ii++) {
 		if ((days_of_week & bits[ii].bit) != 0) {
-			rrule->by_day[idx] = bits[ii].week_day;
+			i_cal_recurrence_set_by_day (rrule, idx, bits[ii].week_day);
 			idx++;
 		}
 	}
 
-	rrule->by_day[idx] = ICAL_RECURRENCE_ARRAY_MAX;
+	i_cal_recurrence_set_by_day (rrule, idx, I_CAL_RECURRENCE_ARRAY_MAX);
 }
 
 static void
-e_ews_cal_utils_day_of_week_index_to_rrule (struct icalrecurrencetype *rrule,
+e_ews_cal_utils_day_of_week_index_to_rrule (ICalRecurrence *rrule,
 					    EEwsRecurrenceDayOfWeekIndex day_of_week_index)
 {
 	g_return_if_fail (rrule != NULL);
@@ -1570,87 +1631,95 @@ e_ews_cal_utils_day_of_week_index_to_rrule (struct icalrecurrencetype *rrule,
 	case E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_UNKNOWN:
 		break;
 	case E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_FIRST:
-		rrule->by_set_pos[0] = 1;
-		rrule->by_set_pos[1] = ICAL_RECURRENCE_ARRAY_MAX;
+		i_cal_recurrence_set_by_set_pos (rrule, 0, 1);
+		i_cal_recurrence_set_by_set_pos (rrule, 1, I_CAL_RECURRENCE_ARRAY_MAX);
 		break;
 	case E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_SECOND:
-		rrule->by_set_pos[0] = 2;
-		rrule->by_set_pos[1] = ICAL_RECURRENCE_ARRAY_MAX;
+		i_cal_recurrence_set_by_set_pos (rrule, 0, 2);
+		i_cal_recurrence_set_by_set_pos (rrule, 1, I_CAL_RECURRENCE_ARRAY_MAX);
 		break;
 	case E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_THIRD:
-		rrule->by_set_pos[0] = 3;
-		rrule->by_set_pos[1] = ICAL_RECURRENCE_ARRAY_MAX;
+		i_cal_recurrence_set_by_set_pos (rrule, 0, 3);
+		i_cal_recurrence_set_by_set_pos (rrule, 1, I_CAL_RECURRENCE_ARRAY_MAX);
 		break;
 	case E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_FOURTH:
-		rrule->by_set_pos[0] = 4;
-		rrule->by_set_pos[1] = ICAL_RECURRENCE_ARRAY_MAX;
+		i_cal_recurrence_set_by_set_pos (rrule, 0, 4);
+		i_cal_recurrence_set_by_set_pos (rrule, 1, I_CAL_RECURRENCE_ARRAY_MAX);
 		break;
 	case E_EWS_RECURRENCE_DAY_OF_WEEK_INDEX_LAST:
-		rrule->by_set_pos[0] = -1;
-		rrule->by_set_pos[1] = ICAL_RECURRENCE_ARRAY_MAX;
+		i_cal_recurrence_set_by_set_pos (rrule, 0, -1);
+		i_cal_recurrence_set_by_set_pos (rrule, 1, I_CAL_RECURRENCE_ARRAY_MAX);
 		break;
 	}
 }
 
 static void
-e_ews_cal_utils_month_to_rrule (struct icalrecurrencetype *rrule,
+e_ews_cal_utils_month_to_rrule (ICalRecurrence *rrule,
 				GDateMonth month)
 {
 	g_return_if_fail (rrule != NULL);
 
 	if (month >= G_DATE_JANUARY && month <= G_DATE_DECEMBER) {
-		rrule->by_month[0] = month;
-		rrule->by_month[1] = ICAL_RECURRENCE_ARRAY_MAX;
+		i_cal_recurrence_set_by_month (rrule, 0, month);
+		i_cal_recurrence_set_by_month (rrule, 1, I_CAL_RECURRENCE_ARRAY_MAX);
 	}
 }
 
 /* Does nothing when the 'item' doesn't contain any recurrence */
 void
 e_ews_cal_utils_recurrence_to_rrule (EEwsItem *item,
-				     icalcomponent *comp)
+				     ICalComponent *comp)
 {
 	EEwsRecurrence recur;
-	struct icalrecurrencetype rrule;
-	struct icaltimetype recur_start;
+	ICalRecurrence *rrule;
+	ICalTime *recur_start, *itt;
 	gboolean usable = FALSE;
 
 	g_return_if_fail (E_IS_EWS_ITEM (item));
 	g_return_if_fail (comp != NULL);
 
-	e_cal_util_remove_property_by_kind (comp, ICAL_RRULE_PROPERTY, TRUE);
-	e_cal_util_remove_property_by_kind (comp, ICAL_RDATE_PROPERTY, TRUE);
-	e_cal_util_remove_property_by_kind (comp, ICAL_EXRULE_PROPERTY, TRUE);
-	e_cal_util_remove_property_by_kind (comp, ICAL_EXDATE_PROPERTY, TRUE);
-	e_cal_util_remove_x_property (comp, X_EWS_TASK_REGENERATION);
+	e_cal_util_component_remove_property_by_kind (comp, I_CAL_RRULE_PROPERTY, TRUE);
+	e_cal_util_component_remove_property_by_kind (comp, I_CAL_RDATE_PROPERTY, TRUE);
+	e_cal_util_component_remove_property_by_kind (comp, I_CAL_EXRULE_PROPERTY, TRUE);
+	e_cal_util_component_remove_property_by_kind (comp, I_CAL_EXDATE_PROPERTY, TRUE);
+	e_cal_util_component_remove_x_property (comp, X_EWS_TASK_REGENERATION);
 
 	if (!e_ews_item_get_recurrence (item, &recur))
 		return;
 
-	icalrecurrencetype_clear (&rrule);
-	recur_start = icaltime_from_timet_with_zone (recur.utc_start_date, 1, icaltimezone_get_utc_timezone ());
+	rrule = i_cal_recurrence_new ();
+	recur_start = i_cal_time_from_timet_with_zone (recur.utc_start_date, 1, i_cal_timezone_get_utc_timezone ());
 
 	switch (recur.end_type) {
 	case E_EWS_RECURRENCE_END_UNKNOWN:
 		break;
 	case E_EWS_RECURRENCE_END_NO_END:
-		rrule.until = icaltime_null_time ();
-		rrule.count = 0;
+		itt = i_cal_time_null_time ();
+		i_cal_recurrence_set_until (rrule, itt);
+		i_cal_recurrence_set_count (rrule, 0);
+		g_clear_object (&itt);
 		usable = TRUE;
 		break;
 	case E_EWS_RECURRENCE_END_DATE:
-		rrule.until = icaltime_from_timet_with_zone (recur.end.utc_end_date, 1, icaltimezone_get_utc_timezone ());
-		rrule.count = 0;
-		usable = !icaltime_is_null_time (rrule.until) && icaltime_is_valid_time (rrule.until);
+		itt = i_cal_time_from_timet_with_zone (recur.end.utc_end_date, 1, i_cal_timezone_get_utc_timezone ());
+		i_cal_recurrence_set_until (rrule, itt);
+		i_cal_recurrence_set_count (rrule, 0);
+		usable = !i_cal_time_is_null_time (itt) && i_cal_time_is_valid_time (itt);
+		g_clear_object (&itt);
 		break;
 	case E_EWS_RECURRENCE_END_NUMBERED:
-		rrule.until = icaltime_null_time ();
-		rrule.count = recur.end.number_of_occurrences;
-		usable = rrule.count > 0;
+		itt = i_cal_time_null_time ();
+		i_cal_recurrence_set_until (rrule, itt);
+		i_cal_recurrence_set_count (rrule, recur.end.number_of_occurrences);
+		g_clear_object (&itt);
+		usable = recur.end.number_of_occurrences > 0;
 		break;
 	}
 
 	if (!usable) {
 		g_warning ("%s: Cannot decode end condition in received recurrence", G_STRFUNC);
+		g_object_unref (recur_start);
+		g_object_unref (rrule);
 		return;
 	}
 
@@ -1661,75 +1730,76 @@ e_ews_cal_utils_recurrence_to_rrule (EEwsItem *item,
 		break;
 	case E_EWS_RECURRENCE_RELATIVE_YEARLY:
 		usable = TRUE;
-		rrule.freq = ICAL_YEARLY_RECURRENCE;
-		rrule.interval = 1;
-		e_ews_cal_utils_days_of_week_to_rrule (&rrule, recur.recur.relative_yearly.days_of_week);
-		e_ews_cal_utils_day_of_week_index_to_rrule (&rrule, recur.recur.relative_yearly.day_of_week_index);
-		e_ews_cal_utils_month_to_rrule (&rrule, recur.recur.relative_yearly.month);
+		i_cal_recurrence_set_freq (rrule, I_CAL_YEARLY_RECURRENCE);
+		i_cal_recurrence_set_interval (rrule, 1);
+		e_ews_cal_utils_days_of_week_to_rrule (rrule, recur.recur.relative_yearly.days_of_week);
+		e_ews_cal_utils_day_of_week_index_to_rrule (rrule, recur.recur.relative_yearly.day_of_week_index);
+		e_ews_cal_utils_month_to_rrule (rrule, recur.recur.relative_yearly.month);
 		break;
 	case E_EWS_RECURRENCE_ABSOLUTE_YEARLY:
 		usable = TRUE;
-		rrule.freq = ICAL_YEARLY_RECURRENCE;
-		rrule.interval = 1;
-		if (icaltime_is_valid_time (recur_start) &&
-		    recur_start.month == recur.recur.absolute_yearly.month &&
-		    recur_start.day == recur.recur.absolute_yearly.day_of_month) {
+		i_cal_recurrence_set_freq (rrule, I_CAL_YEARLY_RECURRENCE);
+		i_cal_recurrence_set_interval (rrule, 1);
+		if (i_cal_time_is_valid_time (recur_start) &&
+		    i_cal_time_get_month (recur_start) == recur.recur.absolute_yearly.month &&
+		    i_cal_time_get_day (recur_start) == recur.recur.absolute_yearly.day_of_month) {
 			/* This is how evolution uses it, derive date from the DTSTART */
 		} else {
-			rrule.by_month_day[0] = recur.recur.absolute_yearly.day_of_month;
-			rrule.by_month_day[1] = ICAL_RECURRENCE_ARRAY_MAX;
-			e_ews_cal_utils_month_to_rrule (&rrule, recur.recur.absolute_yearly.month);
+			i_cal_recurrence_set_by_month_day (rrule, 0, recur.recur.absolute_yearly.day_of_month);
+			i_cal_recurrence_set_by_month_day (rrule, 1, I_CAL_RECURRENCE_ARRAY_MAX);
+			e_ews_cal_utils_month_to_rrule (rrule, recur.recur.absolute_yearly.month);
 		}
 		break;
 	case E_EWS_RECURRENCE_RELATIVE_MONTHLY:
 		usable = TRUE;
-		rrule.freq = ICAL_MONTHLY_RECURRENCE;
-		rrule.interval = recur.recur.relative_monthly.interval;
-		e_ews_cal_utils_days_of_week_to_rrule (&rrule, recur.recur.relative_monthly.days_of_week);
-		e_ews_cal_utils_day_of_week_index_to_rrule (&rrule, recur.recur.relative_monthly.day_of_week_index);
+		i_cal_recurrence_set_freq (rrule, I_CAL_MONTHLY_RECURRENCE);
+		i_cal_recurrence_set_interval (rrule, recur.recur.relative_monthly.interval);
+		e_ews_cal_utils_days_of_week_to_rrule (rrule, recur.recur.relative_monthly.days_of_week);
+		e_ews_cal_utils_day_of_week_index_to_rrule (rrule, recur.recur.relative_monthly.day_of_week_index);
 		break;
 	case E_EWS_RECURRENCE_ABSOLUTE_MONTHLY:
 		usable = TRUE;
-		rrule.freq = ICAL_MONTHLY_RECURRENCE;
-		rrule.interval = recur.recur.absolute_monthly.interval;
-		rrule.by_month_day[0] = recur.recur.absolute_monthly.day_of_month;
-		rrule.by_month_day[1] = ICAL_RECURRENCE_ARRAY_MAX;
+		i_cal_recurrence_set_freq (rrule, I_CAL_MONTHLY_RECURRENCE);
+		i_cal_recurrence_set_interval (rrule, recur.recur.absolute_monthly.interval);
+		i_cal_recurrence_set_by_month_day (rrule, 0, recur.recur.absolute_monthly.day_of_month);
+		i_cal_recurrence_set_by_month_day (rrule, 1, I_CAL_RECURRENCE_ARRAY_MAX);
 		break;
 	case E_EWS_RECURRENCE_WEEKLY:
 		usable = TRUE;
-		rrule.freq = ICAL_WEEKLY_RECURRENCE;
-		rrule.interval = recur.recur.weekly.interval;
-		e_ews_cal_utils_days_of_week_to_rrule (&rrule, recur.recur.weekly.days_of_week);
+		i_cal_recurrence_set_freq (rrule, I_CAL_WEEKLY_RECURRENCE);
+		i_cal_recurrence_set_interval (rrule, recur.recur.weekly.interval);
+		e_ews_cal_utils_days_of_week_to_rrule (rrule, recur.recur.weekly.days_of_week);
 		break;
 	case E_EWS_RECURRENCE_DAILY:
 		usable = TRUE;
-		rrule.freq = ICAL_DAILY_RECURRENCE;
-		rrule.interval = recur.recur.interval;
+		i_cal_recurrence_set_freq (rrule, I_CAL_DAILY_RECURRENCE);
+		i_cal_recurrence_set_interval (rrule, recur.recur.interval);
 		break;
 	case E_EWS_RECURRENCE_DAILY_REGENERATION:
 	case E_EWS_RECURRENCE_WEEKLY_REGENERATION:
 	case E_EWS_RECURRENCE_MONTHLY_REGENERATION:
 	case E_EWS_RECURRENCE_YEARLY_REGENERATION:
 		e_ews_cal_util_encode_regeneration (&recur, comp);
+		g_object_unref (recur_start);
+		g_object_unref (rrule);
 		return;
 	}
 
 	if (usable) {
-		struct icaltimetype itt;
+		if (recur_start && !i_cal_time_is_null_time (recur_start) && i_cal_time_is_valid_time (recur_start)) {
+			ICalProperty *prop;
 
-		itt = icaltime_from_timet_with_zone (recur.utc_start_date, 1, icaltimezone_get_utc_timezone ());
+			i_cal_component_set_dtstart (comp, recur_start);
 
-		if (!icaltime_is_null_time (itt) && icaltime_is_valid_time (itt)) {
-			icalproperty *prop;
-
-			icalcomponent_set_dtstart (comp, itt);
-
-			prop = icalproperty_new_rrule (rrule);
-			icalcomponent_add_property (comp, prop);
+			prop = i_cal_property_new_rrule (rrule);
+			i_cal_component_take_property (comp, prop);
 		} else {
 			g_warning ("%s: Cannot decode start date in received recurrence", G_STRFUNC);
 		}
 	} else {
 		g_warning ("%s: Cannot decode received recurrence", G_STRFUNC);
 	}
+
+	g_object_unref (recur_start);
+	g_object_unref (rrule);
 }

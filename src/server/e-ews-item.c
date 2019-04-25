@@ -29,8 +29,8 @@
 #include <glib/gstdio.h>
 #include <glib/gprintf.h>
 #include <libsoup/soup-misc.h>
-#include <libical/ical.h>
 #include <libedataserver/libedataserver.h>
+#include <libecal/libecal.h>
 
 #include "e-ews-item.h"
 #include "e-ews-item-change.h"
@@ -400,16 +400,16 @@ ews_item_parse_date (ESoapParameter *param)
 		day = digit_at (dtstring, 6) * 10 + digit_at (dtstring, 7);
 
 		if (len == 11) {
-			struct icaltimetype itt;
+			ICalTime *itt;
 
-			itt = icaltime_null_time ();
-			itt.year = year;
-			itt.month = month;
-			itt.day = day;
-			itt.is_date = 1;
-			itt.zone = icaltimezone_get_utc_timezone ();
+			itt = i_cal_time_null_time ();
+			i_cal_time_set_date (itt, year, month, day);
+			i_cal_time_set_timezone (itt, i_cal_timezone_get_utc_timezone ());
+			i_cal_time_set_is_date (itt, TRUE);
 
-			t = icaltime_as_timet_with_zone (itt, icaltimezone_get_utc_timezone ());
+			t = i_cal_time_as_timet_with_zone (itt, i_cal_timezone_get_utc_timezone ());
+
+			g_object_unref (itt);
 		} else {
 			GDate date;
 			struct tm tt;
