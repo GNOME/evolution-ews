@@ -4049,7 +4049,7 @@ ecb_ews_get_backend_property (ECalBackend *cal_backend,
 	}
 
 	/* Chain up to parent's method. */
-	return E_CAL_BACKEND_CLASS (e_cal_backend_ews_parent_class)->get_backend_property (cal_backend, prop_name);
+	return E_CAL_BACKEND_CLASS (e_cal_backend_ews_parent_class)->impl_get_backend_property (cal_backend, prop_name);
 }
 
 static void
@@ -4233,7 +4233,7 @@ e_cal_backend_ews_class_init (ECalBackendEwsClass *klass)
 	cal_backend_sync_class->get_timezone_sync = ecb_ews_get_timezone_sync;
 
 	cal_backend_class = E_CAL_BACKEND_CLASS (klass);
-	cal_backend_class->get_backend_property = ecb_ews_get_backend_property;
+	cal_backend_class->impl_get_backend_property = ecb_ews_get_backend_property;
 
 	backend_class = E_BACKEND_CLASS (klass);
 	backend_class->get_destination_address = ecb_ews_get_destination_address;
