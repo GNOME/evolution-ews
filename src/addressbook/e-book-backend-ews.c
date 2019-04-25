@@ -62,8 +62,8 @@
 
 #define d(x)
 
-#define EDB_ERROR(_code) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, NULL)
-#define EDB_ERROR_EX(_code,_msg) e_data_book_create_error (E_DATA_BOOK_STATUS_ ## _code, _msg)
+#define EC_ERROR_EX(_code,_msg) e_client_error_create (_code, _msg)
+#define EBC_ERROR_EX(_code,_msg) e_book_client_error_create (_code, _msg)
 
 #define EBB_EWS_DATA_VERSION 1
 #define EBB_EWS_DATA_VERSION_KEY "ews-data-version"
@@ -268,27 +268,27 @@ ebb_ews_get_collection_settings (EBookBackendEws *bbews)
 }
 
 static void
-ebb_ews_convert_error_to_edb_error (GError **perror)
+ebb_ews_convert_error_to_client_error (GError **perror)
 {
 	GError *error = NULL;
 
-	if (!perror || !*perror || (*perror)->domain == E_DATA_BOOK_ERROR)
+	if (!perror || !*perror || (*perror)->domain == E_CLIENT_ERROR || (*perror)->domain == E_BOOK_CLIENT_ERROR)
 		return;
 
 	if ((*perror)->domain == EWS_CONNECTION_ERROR) {
 		switch ((*perror)->code) {
 		case EWS_CONNECTION_ERROR_AUTHENTICATION_FAILED:
-			error = EDB_ERROR_EX (AUTHENTICATION_FAILED, (*perror)->message);
+			error = EC_ERROR_EX (E_CLIENT_ERROR_AUTHENTICATION_FAILED, (*perror)->message);
 			break;
 		case EWS_CONNECTION_ERROR_FOLDERNOTFOUND:
 		case EWS_CONNECTION_ERROR_MANAGEDFOLDERNOTFOUND:
 		case EWS_CONNECTION_ERROR_PARENTFOLDERNOTFOUND:
 		case EWS_CONNECTION_ERROR_PUBLICFOLDERSERVERNOTFOUND:
-			error = EDB_ERROR_EX (NO_SUCH_BOOK, (*perror)->message);
+			error = EBC_ERROR_EX (E_BOOK_CLIENT_ERROR_NO_SUCH_BOOK, (*perror)->message);
 			break;
 		case EWS_CONNECTION_ERROR_EVENTNOTFOUND:
 		case EWS_CONNECTION_ERROR_ITEMNOTFOUND:
-			error = EDB_ERROR_EX (CONTACT_NOT_FOUND, (*perror)->message);
+			error = EBC_ERROR_EX (E_BOOK_CLIENT_ERROR_CONTACT_NOT_FOUND, (*perror)->message);
 			break;
 		case EWS_CONNECTION_ERROR_UNAVAILABLE:
 			g_set_error_literal (&error, G_IO_ERROR, G_IO_ERROR_HOST_NOT_FOUND, (*perror)->message);
@@ -296,7 +296,7 @@ ebb_ews_convert_error_to_edb_error (GError **perror)
 		}
 
 		if (!error)
-			error = EDB_ERROR_EX (OTHER_ERROR, (*perror)->message);
+			error = EC_ERROR_EX (E_CLIENT_ERROR_OTHER_ERROR, (*perror)->message);
 	}
 
 	if (error) {
@@ -312,7 +312,7 @@ ebb_ews_maybe_disconnect_sync (EBookBackendEws *bbews,
 {
 	g_return_if_fail (E_IS_BOOK_BACKEND_EWS (bbews));
 
-	if (in_perror && g_error_matches (*in_perror, E_DATA_BOOK_ERROR, E_DATA_BOOK_STATUS_AUTHENTICATION_FAILED)) {
+	if (in_perror && g_error_matches (*in_perror, E_CLIENT_ERROR, E_CLIENT_ERROR_AUTHENTICATION_FAILED)) {
 		e_book_meta_backend_disconnect_sync (E_BOOK_META_BACKEND (bbews), cancellable, NULL);
 		e_backend_schedule_credentials_required (E_BACKEND (bbews), E_SOURCE_CREDENTIALS_REASON_REJECTED, NULL, 0, NULL, NULL, G_STRFUNC);
 	}
@@ -2500,6 +2500,7 @@ ebb_ews_gather_existing_uids_cb (EBookCache *book_cache,
 				 const gchar *revision,
 				 const gchar *object,
 				 const gchar *extra,
+				 guint32 custom_flags,
 				 EOfflineState offline_state,
 				 gpointer user_data)
 {
@@ -3033,7 +3034,7 @@ ebb_ews_update_cache_for_expression (EBookBackendEws *bbews,
 
 	g_rec_mutex_unlock (&bbews->priv->cnc_lock);
 
-	ebb_ews_convert_error_to_edb_error (error);
+	ebb_ews_convert_error_to_client_error (error);
 	ebb_ews_maybe_disconnect_sync (bbews, error, cancellable);
 
 	return success;
@@ -3294,7 +3295,7 @@ ebb_ews_connect_sync (EBookMetaBackend *meta_backend,
 		e_book_backend_set_writable (E_BOOK_BACKEND (bbews), !bbews->priv->is_gal);
 		success = TRUE;
 	} else {
-		ebb_ews_convert_error_to_edb_error (error);
+		ebb_ews_convert_error_to_client_error (error);
 		g_clear_object (&bbews->priv->cnc);
 	}
 
@@ -3542,7 +3543,7 @@ ebb_ews_get_changes_sync (EBookMetaBackend *meta_backend,
 
 	g_rec_mutex_unlock (&bbews->priv->cnc_lock);
 
-	ebb_ews_convert_error_to_edb_error (error);
+	ebb_ews_convert_error_to_client_error (error);
 	ebb_ews_maybe_disconnect_sync (bbews, error, cancellable);
 
 	g_clear_object (&book_cache);
@@ -3598,7 +3599,7 @@ ebb_ews_load_contact_sync (EBookMetaBackend *meta_backend,
 
 	g_slist_free_full (items, g_object_unref);
 
-	ebb_ews_convert_error_to_edb_error (error);
+	ebb_ews_convert_error_to_client_error (error);
 	ebb_ews_maybe_disconnect_sync (bbews, error, cancellable);
 
 	return success;
@@ -3610,6 +3611,7 @@ ebb_ews_save_contact_sync (EBookMetaBackend *meta_backend,
 			   EConflictResolution conflict_resolution,
 			   /* const */ EContact *contact,
 			   const gchar *extra,
+			   guint32 opflags,
 			   gchar **out_new_uid,
 			   gchar **out_new_extra,
 			   GCancellable *cancellable,
@@ -3633,7 +3635,7 @@ ebb_ews_save_contact_sync (EBookMetaBackend *meta_backend,
 	if (e_contact_get (contact, E_CONTACT_IS_LIST)) {
 		if (!e_ews_connection_satisfies_server_version (bbews->priv->cnc, E_EWS_EXCHANGE_2010)) {
 			g_rec_mutex_unlock (&bbews->priv->cnc_lock);
-			g_propagate_error (error, EDB_ERROR_EX (NOT_SUPPORTED,
+			g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_NOT_SUPPORTED,
 				_("Cannot save contact list, it’s only supported on EWS Server 2010 or later")));
 			return FALSE;
 		}
@@ -3739,7 +3741,7 @@ ebb_ews_save_contact_sync (EBookMetaBackend *meta_backend,
 
 	g_rec_mutex_unlock (&bbews->priv->cnc_lock);
 
-	ebb_ews_convert_error_to_edb_error (error);
+	ebb_ews_convert_error_to_client_error (error);
 	ebb_ews_maybe_disconnect_sync (bbews, error, cancellable);
 
 	return success;
@@ -3751,6 +3753,7 @@ ebb_ews_remove_contact_sync (EBookMetaBackend *meta_backend,
 			     const gchar *uid,
 			     const gchar *extra,
 			     const gchar *object,
+			     guint32 opflags,
 			     GCancellable *cancellable,
 			     GError **error)
 {
@@ -3772,7 +3775,7 @@ ebb_ews_remove_contact_sync (EBookMetaBackend *meta_backend,
 
 	g_rec_mutex_unlock (&bbews->priv->cnc_lock);
 
-	ebb_ews_convert_error_to_edb_error (error);
+	ebb_ews_convert_error_to_client_error (error);
 	ebb_ews_maybe_disconnect_sync (bbews, error, cancellable);
 
 	return success;
@@ -3892,9 +3895,9 @@ ebb_ews_get_backend_property (EBookBackend *book_backend,
 			e_book_meta_backend_get_capabilities (E_BOOK_META_BACKEND (book_backend)),
 			(!bbews->priv->is_gal || camel_ews_settings_get_oab_offline (ews_settings)) ? "do-initial-query" : NULL,
 			NULL);
-	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_REQUIRED_FIELDS)) {
+	} else if (g_str_equal (prop_name, E_BOOK_BACKEND_PROPERTY_REQUIRED_FIELDS)) {
 		return g_strdup (e_contact_field_name (E_CONTACT_FILE_AS));
-	} else if (g_str_equal (prop_name, BOOK_BACKEND_PROPERTY_SUPPORTED_FIELDS)) {
+	} else if (g_str_equal (prop_name, E_BOOK_BACKEND_PROPERTY_SUPPORTED_FIELDS)) {
 		GString *buffer;
 		gchar *fields;
 		gint ii;
