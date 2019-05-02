@@ -402,7 +402,7 @@ ews_item_parse_date (ESoapParameter *param)
 		if (len == 11) {
 			ICalTime *itt;
 
-			itt = i_cal_time_null_time ();
+			itt = i_cal_time_new_null_time ();
 			i_cal_time_set_date (itt, year, month, day);
 			i_cal_time_set_timezone (itt, i_cal_timezone_get_utc_timezone ());
 			i_cal_time_set_is_date (itt, TRUE);

@@ -362,7 +362,7 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 		i_cal_component_take_property (icomp, prop);
 
 		/*date time created*/
-		itt = i_cal_time_from_timet_with_zone (e_ews_item_get_date_created (item), 0, utc_zone);
+		itt = i_cal_time_new_from_timet_with_zone (e_ews_item_get_date_created (item), 0, utc_zone);
 		prop = i_cal_property_new_created (itt);
 		i_cal_component_take_property (icomp, prop);
 		g_clear_object (&itt);
@@ -433,7 +433,7 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 			has_this_date = FALSE;
 			e_ews_item_task_has_start_date (item, &has_this_date);
 			if (has_this_date) {
-				itt = i_cal_time_from_timet_with_zone (e_ews_item_get_start_date (item), 0, user_timezone);
+				itt = i_cal_time_new_from_timet_with_zone (e_ews_item_get_start_date (item), 0, user_timezone);
 				i_cal_time_set_is_date (itt, TRUE);
 				prop = i_cal_property_new_dtstart (itt);
 				i_cal_component_take_property (icomp, prop);
@@ -463,7 +463,7 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 			/*due date*/
 			e_ews_item_task_has_due_date (item, &has_this_date);
 			if (has_this_date) {
-				itt = i_cal_time_from_timet_with_zone (e_ews_item_get_due_date (item), 0, user_timezone);
+				itt = i_cal_time_new_from_timet_with_zone (e_ews_item_get_due_date (item), 0, user_timezone);
 				i_cal_time_set_is_date (itt, TRUE);
 				prop = i_cal_property_new_due (itt);
 				i_cal_component_take_property (icomp, prop);
@@ -474,7 +474,7 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 			has_this_date = FALSE;
 			e_ews_item_task_has_complete_date (item, &has_this_date);
 			if (has_this_date) {
-				itt = i_cal_time_from_timet_with_zone (e_ews_item_get_complete_date (item), 0, user_timezone);
+				itt = i_cal_time_new_from_timet_with_zone (e_ews_item_get_complete_date (item), 0, user_timezone);
 				prop = i_cal_property_new_completed (itt);
 				i_cal_component_take_property (icomp, prop);
 				g_clear_object (&itt);
@@ -507,12 +507,12 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 					ICalComponent *alarm_icomp;
 
 					dtstart = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, NULL, icomp, I_CAL_DTSTART_PROPERTY, i_cal_property_get_dtstart);
-					due_by = i_cal_time_from_timet_with_zone (reminder_due_by, 0, utc_zone);
+					due_by = i_cal_time_new_from_timet_with_zone (reminder_due_by, 0, utc_zone);
 
 					if (!dtstart || i_cal_time_is_null_time (dtstart)) {
 						g_clear_object (&dtstart);
 
-						dtstart = i_cal_time_new_clone (due_by);
+						dtstart = i_cal_time_clone (due_by);
 						i_cal_time_set_is_date (dtstart, TRUE);
 
 						i_cal_component_set_dtstart (icomp, dtstart);
@@ -694,7 +694,7 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 					new_tzid = g_strconcat ("/evolution/ews/tzid/", i_cal_component_get_uid (icomp), NULL);
 
 					zone = i_cal_timezone_new ();
-					clone = i_cal_component_new_clone (vtimezone);
+					clone = i_cal_component_clone (vtimezone);
 					g_object_unref (vtimezone);
 					vtimezone = clone;
 
@@ -894,7 +894,7 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 		e_cal_util_component_set_x_property (icomp, "X-EVOLUTION-ITEMID", item_id->id);
 		e_cal_util_component_set_x_property (icomp, "X-EVOLUTION-CHANGEKEY", item_id->change_key);
 
-		res_component = e_cal_component_new_from_icalcomponent (i_cal_component_new_clone (icomp));
+		res_component = e_cal_component_new_from_icalcomponent (i_cal_component_clone (icomp));
 
 		/* Categories */
 		e_cal_component_set_categories_list (res_component, (GSList *) e_ews_item_get_categories (item));
@@ -1447,7 +1447,7 @@ ecb_ews_components_to_infos (ECalMetaBackend *meta_backend,
 		}
 
 		nfo = e_cal_meta_backend_info_new (uid, revision, NULL, itemid);
-		nfo->object = i_cal_component_as_ical_string_r (merged);
+		nfo->object = i_cal_component_as_ical_string (merged);
 
 		nfos = g_slist_prepend (nfos, nfo);
 
@@ -1730,9 +1730,9 @@ ecb_ews_get_changes_sync (ECalMetaBackend *meta_backend,
 						continue;
 
 					fb = i_cal_property_get_freebusy (fbprop);
-					id = i_cal_property_get_parameter_as_string_r (fbprop, "X-EWS-ID");
-					summary = i_cal_property_get_parameter_as_string_r (fbprop, "X-SUMMARY");
-					location = i_cal_property_get_parameter_as_string_r (fbprop, "X-LOCATION");
+					id = i_cal_property_get_parameter_as_string (fbprop, "X-EWS-ID");
+					summary = i_cal_property_get_parameter_as_string (fbprop, "X-SUMMARY");
+					location = i_cal_property_get_parameter_as_string (fbprop, "X-LOCATION");
 
 					vevent = i_cal_component_new_vevent ();
 
@@ -1742,11 +1742,11 @@ ecb_ews_get_changes_sync (ECalMetaBackend *meta_backend,
 						gchar *uid, *start, *end;
 
 						itt = i_cal_period_get_start (fb);
-						start = i_cal_time_as_ical_string_r (itt);
+						start = i_cal_time_as_ical_string (itt);
 						g_clear_object (&itt);
 
 						itt = i_cal_period_get_end (fb);
-						end = i_cal_time_as_ical_string_r (itt);
+						end = i_cal_time_as_ical_string (itt);
 						g_clear_object (&itt);
 
 						uid = g_strdup_printf ("%s-%s-%d", start, end, (gint) fbtype);
@@ -1768,7 +1768,7 @@ ecb_ews_get_changes_sync (ECalMetaBackend *meta_backend,
 					i_cal_component_set_dtend (vevent, itt);
 					g_clear_object (&itt);
 
-					itt = i_cal_time_current_time_with_zone (utc_zone);
+					itt = i_cal_time_new_current_with_zone (utc_zone);
 					i_cal_component_take_property (vevent, i_cal_property_new_created (itt));
 					g_clear_object (&itt);
 
@@ -1804,7 +1804,7 @@ ecb_ews_get_changes_sync (ECalMetaBackend *meta_backend,
 
 							nfo = e_cal_meta_backend_info_new (i_cal_component_get_uid (vevent), NULL, NULL, NULL);
 							nfo->revision = revision;
-							nfo->object = i_cal_component_as_ical_string_r (vevent);
+							nfo->object = i_cal_component_as_ical_string (vevent);
 
 							*out_created_objects = g_slist_prepend (*out_created_objects, nfo);
 						}
@@ -1818,7 +1818,7 @@ ecb_ews_get_changes_sync (ECalMetaBackend *meta_backend,
 
 						nfo = e_cal_meta_backend_info_new (i_cal_component_get_uid (vevent), NULL, NULL, NULL);
 						nfo->revision = revision;
-						nfo->object = i_cal_component_as_ical_string_r (vevent);
+						nfo->object = i_cal_component_as_ical_string (vevent);
 
 						*out_modified_objects = g_slist_prepend (*out_modified_objects, nfo);
 					}
@@ -1993,10 +1993,10 @@ ecb_ews_load_component_sync (ECalMetaBackend *meta_backend,
 						continue;
 
 					i_cal_component_take_component (*out_component,
-						i_cal_component_new_clone (e_cal_component_get_icalcomponent (comp)));
+						i_cal_component_clone (e_cal_component_get_icalcomponent (comp)));
 				}
 			} else {
-				*out_component = i_cal_component_new_clone (e_cal_component_get_icalcomponent (components->data));
+				*out_component = i_cal_component_clone (e_cal_component_get_icalcomponent (components->data));
 			}
 		} else {
 			success = FALSE;
@@ -2080,8 +2080,8 @@ ecb_ews_components_equal (ECalComponent *comp1,
 			if (i_cal_property_count_parameters (prop1) != i_cal_property_count_parameters (prop2))
 				continue;
 
-			str1 = i_cal_property_as_ical_string_r (prop1);
-			str2 = i_cal_property_as_ical_string_r (prop2);
+			str1 = i_cal_property_as_ical_string (prop1);
+			str2 = i_cal_property_as_ical_string (prop2);
 
 			same = g_strcmp0 (str1, str2) == 0;
 
@@ -2273,7 +2273,7 @@ ecb_ews_extract_attachments (ICalComponent *icomp,
 			g_free (decoded);
 		}
 
-		attachid = i_cal_property_get_parameter_as_string_r (prop, "X-EWS-ATTACHMENTID");
+		attachid = i_cal_property_get_parameter_as_string (prop, "X-EWS-ATTACHMENTID");
 		e_ews_attachment_info_set_id (info, attachid);
 		g_free (attachid);
 
@@ -2484,7 +2484,7 @@ tzid_cb (ICalParameter *param,
 	if (!new_comp)
 		return;
 
-	i_cal_component_take_component (cbd->comp, i_cal_component_new_clone (new_comp));
+	i_cal_component_take_component (cbd->comp, i_cal_component_clone (new_comp));
 
 	g_object_unref (new_comp);
 }
@@ -2521,7 +2521,7 @@ ecb_ews_modify_item_sync (ECalBackendEws *cbews,
 	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (cbews), FALSE);
 	g_return_val_if_fail (I_CAL_IS_COMPONENT (new_icomp), FALSE);
 
-	icomp = i_cal_component_new_clone (new_icomp);
+	icomp = i_cal_component_clone (new_icomp);
 
 	ecb_ews_pick_all_tzids_out (cbews, icomp);
 
@@ -2539,9 +2539,9 @@ ecb_ews_modify_item_sync (ECalBackendEws *cbews,
 	}
 
 	if (old_icomp) {
-		oldcomp = e_cal_component_new_from_icalcomponent (i_cal_component_new_clone (old_icomp));
+		oldcomp = e_cal_component_new_from_icalcomponent (i_cal_component_clone (old_icomp));
 	} else {
-		oldcomp = e_cal_component_new_from_icalcomponent (i_cal_component_new_clone (new_icomp));
+		oldcomp = e_cal_component_new_from_icalcomponent (i_cal_component_clone (new_icomp));
 	}
 
 	ecb_ews_pick_all_tzids_out (cbews, e_cal_component_get_icalcomponent (oldcomp));
@@ -2595,12 +2595,12 @@ ecb_ews_modify_item_sync (ECalBackendEws *cbews,
 		     g_object_unref (prop), prop = i_cal_component_get_next_property (new_icomp, I_CAL_EXDATE_PROPERTY)) {
 			gchar *new_rid;
 
-			new_rid = i_cal_property_get_value_as_string_r (prop);
+			new_rid = i_cal_property_get_value_as_string (prop);
 
 			for (old_prop = i_cal_component_get_first_property (old_icomp, I_CAL_EXDATE_PROPERTY);
 			     old_prop;
 			     g_object_unref (old_prop), old_prop = i_cal_component_get_next_property (old_icomp, I_CAL_EXDATE_PROPERTY)) {
-				gchar *old_rid = i_cal_property_get_value_as_string_r (old_prop);
+				gchar *old_rid = i_cal_property_get_value_as_string (old_prop);
 				if (g_strcmp0 (new_rid, old_rid) == 0) {
 					g_object_unref (old_prop);
 					g_free (old_rid);
@@ -2624,7 +2624,7 @@ ecb_ews_modify_item_sync (ECalBackendEws *cbews,
 
 			prop = link->data;
 
-			rid = i_cal_property_get_value_as_string_r (prop);
+			rid = i_cal_property_get_value_as_string (prop);
 			index = e_cal_backend_ews_rid_to_index (
 				ecb_ews_get_timezone_from_icomponent (cbews, new_icomp),
 				rid,
@@ -2829,7 +2829,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 		ICalProperty *prop;
 		GSList *items = NULL;
 
-		icomp = i_cal_component_new_clone (e_cal_component_get_icalcomponent (master));
+		icomp = i_cal_component_clone (e_cal_component_get_icalcomponent (master));
 
 		e_ews_clean_icomponent (icomp);
 
@@ -2943,7 +2943,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 			for (prop = i_cal_component_get_first_property (icomp, I_CAL_EXDATE_PROPERTY);
 			     prop;
 			     g_object_unref (prop), prop = i_cal_component_get_next_property (icomp, I_CAL_EXDATE_PROPERTY)) {
-				exceptions = g_slist_prepend (exceptions, i_cal_property_get_value_as_string_r (prop));
+				exceptions = g_slist_prepend (exceptions, i_cal_property_get_value_as_string (prop));
 			}
 
 			for (link = exceptions; link && success; link = g_slist_next (link)) {
@@ -3188,7 +3188,7 @@ ecb_ews_send_cancellation_email_sync (ECalBackendEws *cbews,
 	if (icaltz) {
 		vtz = i_cal_timezone_get_component (icaltz);
 		if (vtz)
-			i_cal_component_take_component (vcal, i_cal_component_new_clone (vtz));
+			i_cal_component_take_component (vcal, i_cal_component_clone (vtz));
 		g_clear_object (&vtz);
 	}
 
@@ -3203,7 +3203,7 @@ ecb_ews_send_cancellation_email_sync (ECalBackendEws *cbews,
 	mime_type = camel_data_wrapper_get_mime_type_field (CAMEL_DATA_WRAPPER (vcal_part));
 	camel_content_type_set_param (mime_type, "charset", "utf-8");
 	camel_content_type_set_param (mime_type, "method", "CANCEL");
-	ical_str = i_cal_component_as_ical_string_r (vcal);
+	ical_str = i_cal_component_as_ical_string (vcal);
 	camel_mime_part_set_content (vcal_part, ical_str, strlen (ical_str), "text/calendar; method=CANCEL");
 	g_free (ical_str);
 
@@ -3280,7 +3280,7 @@ find_attendee (ICalComponent *icomp,
 		gchar *attendee;
 		gchar *text;
 
-		attendee = i_cal_property_get_value_as_string_r (prop);
+		attendee = i_cal_property_get_value_as_string (prop);
 
 		 if (!attendee)
 			continue;
@@ -3403,7 +3403,7 @@ ecb_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
 
 			if (attendee_mail && current_user_mail && g_ascii_strcasecmp (attendee_mail, current_user_mail) == 0) {
 				g_free (response);
-				response = i_cal_property_get_parameter_as_string_r (attendee, "PARTSTAT");
+				response = i_cal_property_get_parameter_as_string (attendee, "PARTSTAT");
 				ecb_ews_get_rsvp (attendee, out_rsvp_requested);
 				found = TRUE;
 			}
@@ -3416,7 +3416,7 @@ ecb_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
 		attendee = i_cal_component_get_first_property (icomp, I_CAL_ATTENDEE_PROPERTY);
 		g_return_val_if_fail (attendee != NULL, NULL);
 
-		response = i_cal_property_get_parameter_as_string_r (attendee, "PARTSTAT");
+		response = i_cal_property_get_parameter_as_string (attendee, "PARTSTAT");
 		ecb_ews_get_rsvp (attendee, out_rsvp_requested);
 		found = TRUE;
 		g_clear_object (&attendee);
@@ -3425,7 +3425,7 @@ ecb_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
 		ECalComponent *comp;
 
 		registry = e_cal_backend_get_registry (E_CAL_BACKEND (cbews));
-		comp = e_cal_component_new_from_icalcomponent (i_cal_component_new_clone (icomp));
+		comp = e_cal_component_new_from_icalcomponent (i_cal_component_clone (icomp));
 		if (comp) {
 			gchar *my_address;
 
@@ -3436,7 +3436,7 @@ ecb_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
 				attendee = find_attendee_if_sentby (icomp, my_address);
 
 			if (attendee) {
-				response = i_cal_property_get_parameter_as_string_r (attendee, "PARTSTAT");
+				response = i_cal_property_get_parameter_as_string (attendee, "PARTSTAT");
 				ecb_ews_get_rsvp (attendee, out_rsvp_requested);
 				found = TRUE;
 				g_clear_object (&attendee);
@@ -3729,7 +3729,7 @@ ecb_ews_receive_objects_sync (ECalBackendSync *sync_backend,
 			/* getting a data for meeting request response */
 			response_type = ecb_ews_get_current_user_meeting_reponse (cbews, subcomp, user_email, &rsvp_requested);
 
-			comp = e_cal_component_new_from_icalcomponent (i_cal_component_new_clone (subcomp));
+			comp = e_cal_component_new_from_icalcomponent (i_cal_component_clone (subcomp));
 
 			success = ecb_ews_do_method_request_publish_reply (cbews, icomp, comp, subcomp, response_type, user_email, rsvp_requested, cancellable, error);
 
@@ -3894,7 +3894,7 @@ ecb_ews_send_objects_sync (ECalBackendSync *sync_backend,
 		org_prop = i_cal_component_get_first_property (subcomp, I_CAL_ORGANIZER_PROPERTY);
 		org = i_cal_property_get_organizer (org_prop);
 		org_email = itip_strip_mailto (org);
-		org_cn = i_cal_property_get_parameter_as_string_r (org_prop, "CN");
+		org_cn = i_cal_property_get_parameter_as_string (org_prop, "CN");
 
 		camel_internet_address_add (org_addr, org_cn, org_email);
 
@@ -3909,8 +3909,8 @@ ecb_ews_send_objects_sync (ECalBackendSync *sync_backend,
 			if (!attendee || g_ascii_strcasecmp (org_email, attendee) == 0)
 				continue;
 
-			subcalobj = i_cal_component_as_ical_string_r (subcomp);
-			att_cn = i_cal_property_get_parameter_as_string_r (prop, "CN");
+			subcalobj = i_cal_component_as_ical_string (subcomp);
+			att_cn = i_cal_property_get_parameter_as_string (prop, "CN");
 
 			camel_internet_address_add (attendee_addr, att_cn, attendee);
 
@@ -3991,7 +3991,7 @@ ecb_ews_get_free_busy_sync (ECalBackendSync *sync_backend,
 			i_cal_component_take_property (icomp, i_cal_property_new_attendee (mailto));
 			g_free (mailto);
 
-			*freebusyobjs = g_slist_prepend (*freebusyobjs, i_cal_component_as_ical_string_r (icomp));
+			*freebusyobjs = g_slist_prepend (*freebusyobjs, i_cal_component_as_ical_string (icomp));
 		}
 
 		*freebusyobjs = g_slist_reverse (*freebusyobjs);

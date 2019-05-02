@@ -482,8 +482,8 @@ ewscal_add_timechange (ESoapMessage *msg,
 
 		utcoffs = -i_cal_property_get_tzoffsetto (prop);
 		utcoffs -= baseoffs;
-		duration = i_cal_duration_from_int (utcoffs);
-		offset = i_cal_duration_as_ical_string_r (duration);
+		duration = i_cal_duration_new_from_int (utcoffs);
+		offset = i_cal_duration_as_ical_string (duration);
 		e_ews_message_write_string_parameter (msg, "Offset", NULL, offset);
 
 		g_clear_object (&duration);
@@ -713,8 +713,8 @@ ewscal_set_meeting_timezone (ESoapMessage *msg,
 	 * zones are offset from. It's redundant, but Exchange always sets it
 	 * to the offset of the Standard zone, and the Offset in the Standard
 	 * zone to zero. So try to avoid problems by doing the same. */
-	duration = i_cal_duration_from_int (std_utcoffs);
-	offset = i_cal_duration_as_ical_string_r (duration);
+	duration = i_cal_duration_new_from_int (std_utcoffs);
+	offset = i_cal_duration_as_ical_string (duration);
 	e_ews_message_write_string_parameter (msg, "BaseOffset", NULL, offset);
 	g_clear_object (&duration);
 	free (offset);
@@ -1078,7 +1078,7 @@ convert_categories_calcomp_to_xml (ESoapMessage *msg,
 	if (comp) {
 		g_object_ref (comp);
 	} else {
-		ICalComponent *clone = i_cal_component_new_clone (icomp);
+		ICalComponent *clone = i_cal_component_clone (icomp);
 
 		comp = e_cal_component_new_from_icalcomponent (clone);
 		if (!comp)
@@ -1152,7 +1152,7 @@ convert_vevent_calcomp_to_xml (ESoapMessage *msg,
 	const gchar *ical_location_start, *ical_location_end, *value;
 	const gchar *msdn_location_start, *msdn_location_end;
 
-	comp = e_cal_component_new_from_icalcomponent (i_cal_component_new_clone (icomp));
+	comp = e_cal_component_new_from_icalcomponent (i_cal_component_clone (icomp));
 	if (!comp)
 		return FALSE;
 
@@ -1394,7 +1394,7 @@ convert_vtodo_calcomp_to_xml (ESoapMessage *msg,
 
 	/* has_alarms = e_cal_util_component_has_property (icomp, I_CAL_VALARM_COMPONENT);
 	if (has_alarms) {
-		ECalComponent *comp = e_cal_component_new_from_icalcomponent (i_cal_component_new_clone (icomp));
+		ECalComponent *comp = e_cal_component_new_from_icalcomponent (i_cal_component_clone (icomp));
 
 		if (comp && e_cal_component_has_alarms (comp)) {
 			ews_set_alarm (msg, comp, convert_data->timezone_cache, convert_data->vcalendar, TRUE);
@@ -1555,7 +1555,7 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 		/* A single occurrence ? */
 		prop = i_cal_component_get_first_property (icomp, I_CAL_RECURRENCEID_PROPERTY);
 		if (prop != NULL) {
-			recid = i_cal_property_get_value_as_string_r (prop);
+			recid = i_cal_property_get_value_as_string (prop);
 			e_ews_message_start_item_change (
 				msg,
 				E_EWS_ITEMCHANGE_TYPE_OCCURRENCEITEM,
@@ -1790,13 +1790,13 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 	rrule_old_value = NULL;
 	prop = i_cal_component_get_first_property (icomp_old, I_CAL_RRULE_PROPERTY);
 	if (prop) {
-		rrule_old_value = i_cal_property_get_value_as_string_r (prop);
+		rrule_old_value = i_cal_property_get_value_as_string (prop);
 		g_object_unref (prop);
 	}
 
 	prop = i_cal_component_get_first_property (icomp, I_CAL_RRULE_PROPERTY);
 	if (prop)
-		rrule_value = i_cal_property_get_value_as_string_r (prop);
+		rrule_value = i_cal_property_get_value_as_string (prop);
 
 	if (prop && g_strcmp0 (rrule_value, rrule_old_value)) {
 		e_ews_message_start_set_item_field (msg, "Recurrence", "calendar", "CalendarItem");
@@ -2115,7 +2115,7 @@ e_cal_backend_ews_rid_to_index (ICalTimezone *timezone,
 	 * we set the timezone as we cannot identify if it has a valid timezone or not */
 	i_cal_time_set_timezone (dtstart, timezone);
 
-	o_time = i_cal_time_from_string (rid);
+	o_time = i_cal_time_new_from_string (rid);
 	i_cal_time_set_timezone (o_time, timezone);
 
 	ritr = i_cal_recur_iterator_new (rrule, dtstart);

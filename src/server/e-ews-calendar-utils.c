@@ -394,8 +394,8 @@ e_ews_cal_utils_prepare_free_busy_request (ESoapMessage *msg,
 
 	e_soap_message_start_element (msg, "FreeBusyViewOptions", NULL, NULL);
 
-	t_start = i_cal_time_from_timet_with_zone (fbdata->period_start, 0, utc_zone);
-	t_end = i_cal_time_from_timet_with_zone (fbdata->period_end, 0, utc_zone);
+	t_start = i_cal_time_new_from_timet_with_zone (fbdata->period_start, 0, utc_zone);
+	t_end = i_cal_time_new_from_timet_with_zone (fbdata->period_end, 0, utc_zone);
 
 	e_soap_message_start_element (msg, "TimeWindow", NULL, NULL);
 	e_ews_cal_utils_set_time (msg, "StartTime", t_start, FALSE);
@@ -453,7 +453,7 @@ e_ews_cal_utils_set_time (ESoapMessage *msg,
 		ICalTimezone *cfg_zone;
 
 		cfg_zone = calendar_config_get_icaltimezone ();
-		local_tt = i_cal_time_from_timet_with_zone (i_cal_time_as_timet_with_zone (tt, cfg_zone), FALSE, i_cal_timezone_get_utc_timezone ());
+		local_tt = i_cal_time_new_from_timet_with_zone (i_cal_time_as_timet_with_zone (tt, cfg_zone), FALSE, i_cal_timezone_get_utc_timezone ());
 		tt = local_tt;
 	}
 
@@ -1389,7 +1389,7 @@ e_ews_cal_util_write_utc_date (ESoapMessage *msg,
 	g_return_if_fail (E_IS_SOAP_MESSAGE (msg));
 	g_return_if_fail (name != NULL);
 
-	itt = i_cal_time_from_timet_with_zone (utc_date, 1, i_cal_timezone_get_utc_timezone ());
+	itt = i_cal_time_new_from_timet_with_zone (utc_date, 1, i_cal_timezone_get_utc_timezone ());
 	value = g_strdup_printf ("%04d-%02d-%02dZ",
 		i_cal_time_get_year (itt),
 		i_cal_time_get_month (itt),
@@ -1688,27 +1688,27 @@ e_ews_cal_utils_recurrence_to_rrule (EEwsItem *item,
 		return;
 
 	rrule = i_cal_recurrence_new ();
-	recur_start = i_cal_time_from_timet_with_zone (recur.utc_start_date, 1, i_cal_timezone_get_utc_timezone ());
+	recur_start = i_cal_time_new_from_timet_with_zone (recur.utc_start_date, 1, i_cal_timezone_get_utc_timezone ());
 
 	switch (recur.end_type) {
 	case E_EWS_RECURRENCE_END_UNKNOWN:
 		break;
 	case E_EWS_RECURRENCE_END_NO_END:
-		itt = i_cal_time_null_time ();
+		itt = i_cal_time_new_null_time ();
 		i_cal_recurrence_set_until (rrule, itt);
 		i_cal_recurrence_set_count (rrule, 0);
 		g_clear_object (&itt);
 		usable = TRUE;
 		break;
 	case E_EWS_RECURRENCE_END_DATE:
-		itt = i_cal_time_from_timet_with_zone (recur.end.utc_end_date, 1, i_cal_timezone_get_utc_timezone ());
+		itt = i_cal_time_new_from_timet_with_zone (recur.end.utc_end_date, 1, i_cal_timezone_get_utc_timezone ());
 		i_cal_recurrence_set_until (rrule, itt);
 		i_cal_recurrence_set_count (rrule, 0);
 		usable = !i_cal_time_is_null_time (itt) && i_cal_time_is_valid_time (itt);
 		g_clear_object (&itt);
 		break;
 	case E_EWS_RECURRENCE_END_NUMBERED:
-		itt = i_cal_time_null_time ();
+		itt = i_cal_time_new_null_time ();
 		i_cal_recurrence_set_until (rrule, itt);
 		i_cal_recurrence_set_count (rrule, recur.end.number_of_occurrences);
 		g_clear_object (&itt);

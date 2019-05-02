@@ -436,7 +436,7 @@ ews_update_mgtrequest_mime_calendar_itemid (const gchar *mime_fname,
 			i_cal_property_set_x_name (prop, "X-EVOLUTION-ACCEPT-ID");
 			i_cal_component_take_property (subcomp, prop);
 
-			calstring_new = i_cal_component_as_ical_string_r (icomp);
+			calstring_new = i_cal_component_as_ical_string (icomp);
 			if (calstring_new) {
 				camel_mime_part_set_content (
 					mimepart,
