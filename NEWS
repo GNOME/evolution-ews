@@ -1,3 +1,12 @@
+Evolution-EWS 3.32.2 2019-05-06
+-------------------------------
+
+Bug Fixes:
+	M!2 - Correct memory leak and typo in e_ews_autodiscover_ws_url() (Дилян Палаузов)
+
+Miscellaneous:
+	Use lower-case "mailto:" consistently in the code (Milan Crha)
+
 Evolution-EWS 3.32.1 2019-04-08
 -------------------------------
 
