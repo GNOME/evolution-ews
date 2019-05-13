@@ -7,14 +7,14 @@
 #
 # Javier Mazorra Rodríguez <mazi.debian@gmail.com>, 2012.
 # facundo Dario Illanes <fdillanes@gmail.com>, 2013.
-# Daniel Mustieles <daniel.mustieles@gmail.com>, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018.
+# Daniel Mustieles <daniel.mustieles@gmail.com>, 2011-2019.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2018-10-24 15:43+0000\n"
-"PO-Revision-Date: 2018-10-31 16:22+0100\n"
+"POT-Creation-Date: 2019-04-02 14:08+0000\n"
+"PO-Revision-Date: 2019-05-13 15:14+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: es <gnome-es-list@gnome.org>\n"
 "Language: es\n"
@@ -22,11 +22,12 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Gtranslator 2.91.7\n"
+"X-Generator: Gtranslator 3.32.0\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/camel/camel-ews-provider.c:81
 #: ../src/configuration/e-ews-config-lookup.c:251
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:134
 msgid "Exchange Web Services"
 msgstr "Servicios web Exchange"
 
@@ -35,42 +36,42 @@ msgstr "Servicios web Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Para acceder a servidores Exchange usando servicios web"
 
-#: ../src/addressbook/e-book-backend-ews.c:3452
+#: ../src/addressbook/e-book-backend-ews.c:3476
 msgid "Failed to update GAL:"
 msgstr "Falló al actualizar GAL:"
 
-#: ../src/addressbook/e-book-backend-ews.c:3613
+#: ../src/addressbook/e-book-backend-ews.c:3637
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "No se puede guardar la lista de contactos. Esto sólo se soporta en EWS "
 "server 2010 o posterior"
 
-#: ../src/addressbook/e-book-backend-ews.c:3706
+#: ../src/addressbook/e-book-backend-ews.c:3730
 msgid "Failed to set contact photo:"
 msgstr "Falló al establecer la foto del contacto:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1662
+#: ../src/calendar/e-cal-backend-ews.c:1709
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Libre"
 
-#: ../src/calendar/e-cal-backend-ews.c:1665
+#: ../src/calendar/e-cal-backend-ews.c:1712
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Ocupado"
 
-#: ../src/calendar/e-cal-backend-ews.c:1667
+#: ../src/calendar/e-cal-backend-ews.c:1714
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Fuera de la oficina"
 
-#: ../src/calendar/e-cal-backend-ews.c:1669
+#: ../src/calendar/e-cal-backend-ews.c:1716
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Provisional"
 
-#: ../src/calendar/e-cal-backend-ews.c:3325
+#: ../src/calendar/e-cal-backend-ews.c:3385
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "No se puede encontrar al usuario «%s» entre los asistentes"
@@ -240,7 +241,6 @@ msgid "Checking “Out of Office” settings"
 msgstr "Comprobando la configuración de «Estoy fuera de la oficina»"
 
 #: ../src/camel/camel-ews-store.c:1293
-#| msgid "Exchange server %s"
 msgid "Look up Exchange server categories"
 msgstr "Buscar categorías de servidor Exchange"
 
@@ -267,30 +267,30 @@ msgstr "Actualizando la estructura de carpetas externas"
 msgid "Updating foreign folders"
 msgstr "Actualizando carpetas externas"
 
-#: ../src/camel/camel-ews-store.c:2127
+#: ../src/camel/camel-ews-store.c:2141
 #, c-format
 msgid "No such folder: %s"
 msgstr "No existe la carpeta: %s"
 
-#: ../src/camel/camel-ews-store.c:2436
+#: ../src/camel/camel-ews-store.c:2450
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "No se pueden listar las carpetas EWS en modo desconectado"
 
-#: ../src/camel/camel-ews-store.c:2509
+#: ../src/camel/camel-ews-store.c:2523
 msgid "Cannot find any EWS public folders"
 msgstr "No se puede encontrar ninguna carpeta EWS pública"
 
-#: ../src/camel/camel-ews-store.c:2618
+#: ../src/camel/camel-ews-store.c:2632
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "No se puede crear la carpeta «%s», la carpeta ya existe"
 
-#: ../src/camel/camel-ews-store.c:2633
+#: ../src/camel/camel-ews-store.c:2647
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "La carpeta padre %s no existe"
 
-#: ../src/camel/camel-ews-store.c:2643
+#: ../src/camel/camel-ews-store.c:2657
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -298,95 +298,95 @@ msgstr ""
 "No se puede crear la carpeta bajo «%s», sólo la usan carpetas de otros "
 "usuarios"
 
-#: ../src/camel/camel-ews-store.c:2653
+#: ../src/camel/camel-ews-store.c:2667
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "No se puede crear la carpeta bajo «%s», se usa sólo para carpetas públicas"
 
-#: ../src/camel/camel-ews-store.c:2757
+#: ../src/camel/camel-ews-store.c:2771
 #, c-format
 msgid "Folder does not exist"
 msgstr "La carpeta no existe"
 
-#: ../src/camel/camel-ews-store.c:2767
+#: ../src/camel/camel-ews-store.c:2781
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "No se puede eliminar la carpeta «%s», sólo la usan carpetas de otros usuarios"
 
-#: ../src/camel/camel-ews-store.c:2778
+#: ../src/camel/camel-ews-store.c:2792
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "No se puede quitar la carpeta «%s», se usa sólo para carpetas públicas"
 
-#: ../src/camel/camel-ews-store.c:2937
+#: ../src/camel/camel-ews-store.c:2951
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "La carpeta %s no existe"
 
-#: ../src/camel/camel-ews-store.c:2946
+#: ../src/camel/camel-ews-store.c:2960
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "No hay cambios en registros clave de la carpeta %s"
 
-#: ../src/camel/camel-ews-store.c:2989
+#: ../src/camel/camel-ews-store.c:3003
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "No se puede renombrar y mover una carpeta al mismo tiempo"
 
-#: ../src/camel/camel-ews-store.c:3023
+#: ../src/camel/camel-ews-store.c:3037
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "No se puede encontrar el ID de carpeta para la carpeta padre %s"
 
-#: ../src/camel/camel-ews-store.c:3075 ../src/camel/camel-ews-transport.c:318
+#: ../src/camel/camel-ews-store.c:3089 ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange server %s"
 msgstr "Servidor Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:3078
+#: ../src/camel/camel-ews-store.c:3092
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Servicio Exchange para %s en %s"
 
-#: ../src/camel/camel-ews-store.c:3122
+#: ../src/camel/camel-ews-store.c:3136
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "No se pudo localizar la carpeta de la Papelera"
 
-#: ../src/camel/camel-ews-store.c:3182
+#: ../src/camel/camel-ews-store.c:3196
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "No se puedo encontrar la carpeta de Correo no deseado"
 
-#: ../src/camel/camel-ews-store.c:3373
+#: ../src/camel/camel-ews-store.c:3387
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "No se puede suscribir a las carpetas EWS en modo desconectado"
 
-#: ../src/camel/camel-ews-store.c:3396
+#: ../src/camel/camel-ews-store.c:3410
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 "No se puede suscribir a la carpeta «%s», no hay ninguna carpeta pública "
 "disponible"
 
-#: ../src/camel/camel-ews-store.c:3406
+#: ../src/camel/camel-ews-store.c:3420
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr ""
 "No se puede suscribir a la carpeta «%s», no se ha encontrado la carpeta"
 
-#: ../src/camel/camel-ews-store.c:3497
+#: ../src/camel/camel-ews-store.c:3511
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "No se puede desuscribir de las carpetas EWS en modo desconectado"
 
-#: ../src/camel/camel-ews-store.c:3614
+#: ../src/camel/camel-ews-store.c:3628
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Debe estar conectado para completar esta operación"
 
-#: ../src/camel/camel-ews-store.c:3658 ../src/camel/camel-ews-store.c:3695
+#: ../src/camel/camel-ews-store.c:3672 ../src/camel/camel-ews-store.c:3709
 msgid "Unsetting the “Out of Office” status"
 msgstr "Quitando el estado de «Estoy fuera de la oficina»."
 
@@ -421,19 +421,19 @@ msgstr "Falló al la dirección «Para»"
 msgid "Service not connected"
 msgstr "Servicio no conectado"
 
-#: ../src/collection/e-ews-backend.c:522
+#: ../src/collection/e-ews-backend.c:533
 #: ../src/configuration/e-mail-config-ews-gal.c:274
 msgid "Global Address List"
 msgstr "Lista global de direcciones"
 
-#: ../src/collection/e-ews-backend.c:961
+#: ../src/collection/e-ews-backend.c:980
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
 "No se pudo determinar una clase de carpeta apropiada para una nueva carpeta "
 "llamada «%s»"
 
-#: ../src/collection/e-ews-backend.c:1049
+#: ../src/collection/e-ews-backend.c:1068
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr ""
@@ -943,11 +943,11 @@ msgstr "Nombre de la _carpeta:"
 msgid "Include _subfolders"
 msgstr "Incluir _subcarpetas"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:229
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:282
 msgid "Querying Autodiscover service"
 msgstr "Consultando servicio de autodetección"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:326
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:381
 msgid "Fetch _URL"
 msgstr "Obtener _URL"
 
@@ -993,11 +993,12 @@ msgstr "Ayuda…"
 msgid "_Tenant:"
 msgstr "_Inquilino:"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/configuration/e-mail-config-ews-backend.c:353
-msgid "There is not set any default tenant"
-msgstr "No se ha establecido ningún inquilino predeterminado"
+#| msgid "Default tenant is “%s”"
+msgid "Default tenant is “common“"
+msgstr "El inquilino predeterminado es «common»"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
@@ -1037,13 +1038,7 @@ msgstr "El URL del equipo no puede estar vacío"
 msgid "User name cannot be empty"
 msgstr "El nombre de usuario no puede estar vacío"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/configuration/e-mail-config-ews-backend.c:604
-msgid "Tenant cannot be empty"
-msgstr "El inquilino no puede estar vacío"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:609
+#: ../src/configuration/e-mail-config-ews-backend.c:600
 msgid "Application ID cannot be empty"
 msgstr "El ID de la aplicación no puede estar vacío"
 
@@ -1304,20 +1299,20 @@ msgstr ""
 msgid "CreateItem call failed to return ID for new message"
 msgstr "CreateItem falló al devolver el ID para el mensaje nuevo"
 
-#: ../src/server/e-ews-connection.c:774
+#: ../src/server/e-ews-connection.c:778
 msgid "Operation Cancelled"
 msgstr "Operación cancelada"
 
-#: ../src/server/e-ews-connection.c:906
+#: ../src/server/e-ews-connection.c:948
 msgid "Authentication failed"
 msgstr "Falló la autenticación"
 
-#: ../src/server/e-ews-connection.c:928
+#: ../src/server/e-ews-connection.c:970
 #, c-format
 msgid "No response: %s"
 msgstr "Sin respuesta: %s"
 
-#: ../src/server/e-ews-connection.c:991
+#: ../src/server/e-ews-connection.c:1033
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -1328,7 +1323,7 @@ msgstr[1] ""
 "El servidor de Exchange está ocupado, esperando para reintentar (%d:%02d "
 "minutos)"
 
-#: ../src/server/e-ews-connection.c:997
+#: ../src/server/e-ews-connection.c:1039
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -1337,54 +1332,53 @@ msgstr[0] ""
 msgstr[1] ""
 "El servidor de Exchange está ocupado, esperando para reintentar (%d segundos)"
 
-#: ../src/server/e-ews-connection.c:2983
+#: ../src/server/e-ews-connection.c:3077
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Falló al analizar la respuesta XML de la autodetección"
 
-#: ../src/server/e-ews-connection.c:2990
+#: ../src/server/e-ews-connection.c:3084
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Falló al buscar el elemento <Autodiscover>"
 
-#: ../src/server/e-ews-connection.c:3001
+#: ../src/server/e-ews-connection.c:3095
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Falló al buscar el elemento<Response>"
 
-#: ../src/server/e-ews-connection.c:3012
+#: ../src/server/e-ews-connection.c:3106
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Falló al buscar el elemento <Account>"
 
-#: ../src/server/e-ews-connection.c:3046
+#: ../src/server/e-ews-connection.c:3140
 #, c-format
-#| msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Falló al buscar <ASUrl> en la respuesta de la autodetección"
 
-#: ../src/server/e-ews-connection.c:3138
+#: ../src/server/e-ews-connection.c:3233
 msgid "URL cannot be NULL"
 msgstr "El URL no puede ser NULL"
 
-#: ../src/server/e-ews-connection.c:3146
+#: ../src/server/e-ews-connection.c:3241
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "El URL «%s» no es válido"
 
-#: ../src/server/e-ews-connection.c:3237
+#: ../src/server/e-ews-connection.c:3337
 msgid "Email address is missing a domain part"
 msgstr "Falta el dominio en la dirección de correo-e"
 
-#: ../src/server/e-ews-connection.c:3592
+#: ../src/server/e-ews-connection.c:3709
 msgid "Failed to parse oab XML"
 msgstr "Falló al analizar el XML oab"
 
-#: ../src/server/e-ews-connection.c:3600
+#: ../src/server/e-ews-connection.c:3717
 msgid "Failed to find <OAB> element\n"
 msgstr "Falló al buscar el elemento <OAB>\n"
 
-#: ../src/server/e-ews-connection.c:4881
+#: ../src/server/e-ews-connection.c:5000
 msgid "No items found"
 msgstr "No se encontraron elementos"
 
@@ -1410,10 +1404,16 @@ msgid "Cannot add folder, master source not found"
 msgstr "No se puede añadir la carpeta, fuente principal no encontrada"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/server/e-oauth2-service-office365.c:124
+#: ../src/server/e-oauth2-service-office365.c:109
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office365"
+
+#~ msgid "There is not set any default tenant"
+#~ msgstr "No se ha establecido ningún inquilino predeterminado"
+
+#~ msgid "Tenant cannot be empty"
+#~ msgstr "El inquilino no puede estar vacío"
 
 #~ msgid "Folder Sizes..."
 #~ msgstr "Tamaño de carpetas…"
