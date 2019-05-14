@@ -52,6 +52,16 @@ cal_config_ews_allow_creation (ESourceConfigBackend *backend)
 }
 
 static void
+cal_config_ews_insert_widgets (ESourceConfigBackend *backend,
+			       ESource *scratch_source)
+{
+	if (!scratch_source)
+		return;
+
+	e_source_config_add_refresh_interval (e_source_config_backend_get_config (backend), scratch_source);
+}
+
+static void
 e_cal_config_ews_class_init (ECalConfigEwsClass *class)
 {
 	EExtensionClass *extension_class;
@@ -63,6 +73,7 @@ e_cal_config_ews_class_init (ECalConfigEwsClass *class)
 	backend_class = E_SOURCE_CONFIG_BACKEND_CLASS (class);
 	backend_class->backend_name = "ews";
 	backend_class->allow_creation = cal_config_ews_allow_creation;
+	backend_class->insert_widgets = cal_config_ews_insert_widgets;
 }
 
 static void

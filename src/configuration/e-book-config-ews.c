@@ -68,8 +68,8 @@ book_config_ews_allow_creation (ESourceConfigBackend *backend)
 }
 
 static void
-book_config_ews_insert_widgets (ESourceConfigBackend *backend,
-				ESource *scratch_source)
+book_config_ews_maybe_insert_gal_options (ESourceConfigBackend *backend,
+					  ESource *scratch_source)
 {
 	CamelEwsSettings *ews_settings;
 	ESource *source;
@@ -123,6 +123,18 @@ book_config_ews_insert_widgets (ESourceConfigBackend *backend,
 
 		e_source_config_insert_widget (e_source_config_backend_get_config (backend), scratch_source, NULL, checkbox);
 	}
+}
+
+static void
+book_config_ews_insert_widgets (ESourceConfigBackend *backend,
+				ESource *scratch_source)
+{
+	if (!scratch_source)
+		return;
+
+	book_config_ews_maybe_insert_gal_options (backend, scratch_source);
+
+	e_source_config_add_refresh_interval (e_source_config_backend_get_config (backend), scratch_source);
 }
 
 static void
