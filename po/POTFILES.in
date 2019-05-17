@@ -4,6 +4,7 @@
 org.gnome.Evolution-ews.metainfo.xml.in
 src/addressbook/e-book-backend-ews.c
 src/calendar/e-cal-backend-ews.c
+src/calendar/e-cal-backend-ews-utils.c
 src/camel/camel-ews-folder.c
 src/camel/camel-ews-provider.c
 src/camel/camel-ews-store.c
