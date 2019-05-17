@@ -28,10 +28,8 @@
 #include <errno.h>
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
-#include <libical/icalcomponent.h>
-#include <libical/icalproperty.h>
-#include <libical/ical.h>
 #include <libedataserver/libedataserver.h>
+#include <libecal/libecal.h>
 
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
@@ -8032,25 +8030,31 @@ ews_handle_free_busy_view (ESoapParameter *param,
 {
        /*parse the response to create a free_busy data
 	http://msdn.microsoft.com / en - us / library / aa564001 % 28v = EXCHG.140 % 29.aspx */
-	icalcomponent *vfb;
-	icalproperty *icalprop = NULL;
-	struct icalperiodtype ipt;
+	ICalComponent *vfb;
+	ICalProperty *prop = NULL;
 	ESoapParameter *viewparam, *eventarray, *event_param, *subparam;
 	GTimeVal t_val;
 	const gchar *name;
 	gchar *value, *new_val = NULL, *summary = NULL, *location = NULL, *id = NULL;
 
 	viewparam = e_soap_parameter_get_first_child_by_name (param, "FreeBusyView");
-	if (!viewparam) return;
-	vfb = icalcomponent_new_vfreebusy ();
+	if (!viewparam)
+		return;
+	vfb = i_cal_component_new_vfreebusy ();
 	eventarray = e_soap_parameter_get_first_child_by_name (viewparam, "CalendarEventArray");
 	for (event_param = eventarray ? e_soap_parameter_get_first_child (eventarray) : NULL;
 	     event_param != NULL;
-	     event_param = e_soap_parameter_get_next_child (event_param), icalprop = NULL) {
+	     event_param = e_soap_parameter_get_next_child (event_param)) {
+		ICalPeriod *ipt;
+
+		ipt = i_cal_period_new_null_period ();
+
 		for (subparam = e_soap_parameter_get_first_child (event_param); subparam != NULL; subparam = e_soap_parameter_get_next_child (subparam)) {
 			name = e_soap_parameter_get_name (subparam);
 
 			if (!g_ascii_strcasecmp (name, "StartTime")) {
+				ICalTime *itt;
+
 				value = e_soap_parameter_get_string_value (subparam);
 				/*We are sending UTC timezone and expect server to return in same*/
 
@@ -8067,9 +8071,13 @@ ews_handle_free_busy_view (ESoapParameter *param,
 				g_time_val_from_iso8601 (new_val, &t_val);
 				g_free (new_val);
 
-				ipt.start = icaltime_from_timet_with_zone (t_val.tv_sec, 0, NULL);
+				itt = i_cal_time_new_from_timet_with_zone (t_val.tv_sec, 0, NULL);
+				i_cal_period_set_start (ipt, itt);
+				g_clear_object (&itt);
 
 			} else if (!g_ascii_strcasecmp (name, "EndTime")) {
+				ICalTime *itt;
+
 				value = e_soap_parameter_get_string_value (subparam);
 				/*We are sending UTC timezone and expect server to return in same*/
 
@@ -8086,19 +8094,21 @@ ews_handle_free_busy_view (ESoapParameter *param,
 				g_time_val_from_iso8601 (new_val, &t_val);
 				g_free (new_val);
 
-				ipt.end = icaltime_from_timet_with_zone (t_val.tv_sec, 0, NULL);
+				itt = i_cal_time_new_from_timet_with_zone (t_val.tv_sec, 0, NULL);
+				i_cal_period_set_end (ipt, itt);
+				g_clear_object (&itt);
 
-				icalprop = icalproperty_new_freebusy (ipt);
+				prop = i_cal_property_new_freebusy (ipt);
 			} else if (!g_ascii_strcasecmp (name, "BusyType")) {
 				value = e_soap_parameter_get_string_value (subparam);
 				if (!strcmp (value, "Busy"))
-					icalproperty_set_parameter_from_string (icalprop, "FBTYPE", "BUSY");
+					i_cal_property_set_parameter_from_string (prop, "FBTYPE", "BUSY");
 				else if (!strcmp (value, "Tentative"))
-					icalproperty_set_parameter_from_string (icalprop, "FBTYPE", "BUSY-TENTATIVE");
+					i_cal_property_set_parameter_from_string (prop, "FBTYPE", "BUSY-TENTATIVE");
 				else if (!strcmp (value, "OOF"))
-					icalproperty_set_parameter_from_string (icalprop, "FBTYPE", "BUSY-UNAVAILABLE");
+					i_cal_property_set_parameter_from_string (prop, "FBTYPE", "BUSY-UNAVAILABLE");
 				else if (!strcmp (value, "Free"))
-					icalproperty_set_parameter_from_string (icalprop, "FBTYPE", "FREE");
+					i_cal_property_set_parameter_from_string (prop, "FBTYPE", "FREE");
 				g_free (value);
 			} else if (!g_ascii_strcasecmp (name, "CalendarEventDetails")) {
 				ESoapParameter *dparam;
@@ -8116,19 +8126,22 @@ ews_handle_free_busy_view (ESoapParameter *param,
 					location = e_soap_parameter_get_string_value (dparam);
 			}
 		}
-		if (icalprop != NULL) {
+
+		if (prop) {
 			if (id)
-				icalproperty_set_parameter_from_string (icalprop, "X-EWS-ID", id);
+				i_cal_property_set_parameter_from_string (prop, "X-EWS-ID", id);
 			if (summary)
-				icalproperty_set_parameter_from_string (icalprop, "X-SUMMARY", summary);
+				i_cal_property_set_parameter_from_string (prop, "X-SUMMARY", summary);
 			if (location)
-				icalproperty_set_parameter_from_string (icalprop, "X-LOCATION", location);
-			icalcomponent_add_property (vfb, icalprop);
+				i_cal_property_set_parameter_from_string (prop, "X-LOCATION", location);
+			i_cal_component_take_property (vfb, prop);
+			prop = NULL;
 		}
 
 		g_clear_pointer (&summary, g_free);
 		g_clear_pointer (&location, g_free);
 		g_clear_pointer (&id, g_free);
+		g_clear_object (&ipt);
 	}
 
 	async_data->items = g_slist_append (async_data->items, vfb);
@@ -8237,7 +8250,7 @@ e_ews_connection_get_free_busy (EEwsConnection *cnc,
 gboolean
 e_ews_connection_get_free_busy_finish (EEwsConnection *cnc,
                                        GAsyncResult *result,
-                                       GSList **free_busy,
+                                       GSList **free_busy, /* ICalComponent * */
                                        GError **error)
 {
 	GSimpleAsyncResult *simple;
@@ -8264,7 +8277,7 @@ e_ews_connection_get_free_busy_sync (EEwsConnection *cnc,
                                      gint pri,
                                      EEwsRequestCreationCallback free_busy_cb,
                                      gpointer free_busy_user_data,
-                                     GSList **free_busy,
+                                     GSList **free_busy, /* ICalComponent * */
                                      GCancellable *cancellable,
                                      GError **error)
 {

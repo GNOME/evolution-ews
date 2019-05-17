@@ -372,7 +372,7 @@ check_foreign_folder_thread (GObject *with_object,
 			e_ews_cal_utils_prepare_free_busy_request, &fbdata,
 			&free_busy, cancellable, perror);
 
-		g_slist_free_full (free_busy, (GDestroyNotify) icalcomponent_free);
+		g_slist_free_full (free_busy, g_object_unref);
 		g_slist_free (fbdata.user_mails);
 
 		if (!success) {

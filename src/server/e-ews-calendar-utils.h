@@ -21,7 +21,7 @@
 #define E_EWS_CALENDAR_UTILS_H
 
 #include <time.h>
-#include <libical/ical.h>
+#include <libecal/libecal.h>
 
 #include "server/e-soap-message.h"
 #include "server/e-ews-item.h"
@@ -44,15 +44,15 @@ gboolean	e_ews_cal_utils_prepare_free_busy_request
 						 GError **error);
 void		e_ews_cal_utils_set_time	(ESoapMessage *msg,
 						 const gchar *name,
-						 icaltimetype *tt,
+						 ICalTime *tt,
 						 gboolean with_timezone);
 gboolean	e_ews_cal_utils_set_recurrence	(ESoapMessage *msg,
-						 icalcomponent *comp,
+						 ICalComponent *comp,
 						 gboolean server_satisfies_2013,
 						 GError **error);
 void		e_ews_cal_utils_recurrence_to_rrule
 						(EEwsItem *item,
-						 icalcomponent *comp);
+						 ICalComponent *comp);
 
 G_END_DECLS
 

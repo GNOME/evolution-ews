@@ -1115,14 +1115,14 @@ void		e_ews_connection_get_free_busy	(EEwsConnection *cnc,
 gboolean	e_ews_connection_get_free_busy_finish
 						(EEwsConnection *cnc,
 						 GAsyncResult *result,
-						 GSList **free_busy,
+						 GSList **free_busy, /* ICalComponent * */
 						 GError **error);
 gboolean	e_ews_connection_get_free_busy_sync
 						(EEwsConnection *cnc,
 						 gint pri,
 						 EEwsRequestCreationCallback free_busy_cb,
 						 gpointer create_user_data,
-						 GSList **free_busy,
+						 GSList **free_busy, /* ICalComponent * */
 						 GCancellable *cancellable,
 						 GError **error);
 gboolean	e_ews_connection_download_oal_file_sync
