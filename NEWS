@@ -1,5 +1,20 @@
+Evolution-EWS 3.33.2 2019-05-20
+-------------------------------
+
+Bug Fixes:
+	eds-M!14 - Correct typo in a comment in the main CMakeLists.txt (Дилян Палаузов)
+
+Miscellaneous:
+	Add refresh interval options to non-mail sources (Milan Crha)
+	Port to libecal-2.0 and adapt to address book API changes (Milan Crha)
+
+Translations:
+	Daniel Mustieles (es)
+	Piotr Drąg (pl)
+
 Evolution-EWS 3.33.1 2019-04-22
 -------------------------------
+
 Bug Fixes:
 	I#39 - Let handle recurring task completion by the server (Milan Crha)
 	I#41 - Unreachable EWS service causes Calendar(s) to disappear (Milan Crha)
