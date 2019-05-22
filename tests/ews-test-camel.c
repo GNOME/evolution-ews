@@ -446,8 +446,8 @@ test_move_folder_to_msgfolderroot (gconstpointer user_data)
 	gboolean moved_to_msgfolderroot = FALSE;
 	GError *error = NULL;
 	GSList *folder_ids = NULL;
-	GSList *folders1;
-	GSList *folders2;
+	GSList *folders1 = NULL;
+	GSList *folders2 = NULL;
 	EEwsFolder *folder1;
 	EEwsFolder *folder2;
 	EwsFolderId *msgfolderroot;
@@ -517,7 +517,7 @@ test_move_folder_to_folder_that_has_subfolder_with_the_same_name (gconstpointer 
 	gboolean retval = TRUE;
 	gboolean move_failed = FALSE;
 	GError *error = NULL;
-	EwsFolderId *fid;
+	EwsFolderId *fid = NULL;
 	EwsTestData *etd = (gpointer) user_data;
 
 	local_server = ews_test_get_mock_server ();
@@ -572,8 +572,8 @@ test_move_folder_to_valid_folder (gconstpointer user_data)
 	gboolean moved_to_correct_folder = FALSE;
 	GError *error = NULL;
 	GSList *folder_ids = NULL;
-	GSList *folders1;
-	GSList *folders2;
+	GSList *folders1 = NULL;
+	GSList *folders2 = NULL;
 	EEwsFolder *folder1;
 	EEwsFolder *folder2;
 	EwsTestData *etd = (gpointer) user_data;
