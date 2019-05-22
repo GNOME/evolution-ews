@@ -80,7 +80,11 @@ e_cal_backend_ews_populate_windows_zones (void)
 		return;
 	}
 
-	filename = g_build_filename (EXCHANGE_EWS_DATADIR, "windowsZones.xml", NULL);
+	if (g_strcmp0 (g_getenv ("EWS_INTERNAL_TEST"), "1") == 0)
+		filename = g_build_filename (EXCHANGE_EWS_SRCDIR, "windowsZones.xml", NULL);
+	else
+		filename = g_build_filename (EXCHANGE_EWS_DATADIR, "windowsZones.xml", NULL);
+
 	doc = xmlReadFile (filename, NULL, 0);
 
 	if (doc == NULL) {

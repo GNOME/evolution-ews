@@ -17,10 +17,6 @@ macro(add_ews_test _name)
 		${DEPENDENCIES}
 	)
 
-	set_target_properties (${_name} PROPERTIES
-		BUILD_WITH_INSTALL_RPATH ON
-	)
-
 	target_compile_definitions(${_name} PRIVATE
 		-DG_LOG_DOMAIN=\"${_name}\"
 		-DTEST_FILE_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"

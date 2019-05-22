@@ -27,6 +27,7 @@
 void (* populate_windows_zones) (void);
 const gchar * (* ical_to_msdn_equivalent) (const gchar *);
 gboolean (* convert_calcomp_to_xml) (ESoapMessage *, gpointer, GError **);
+GType (* cal_backend_ews_get_type) (void);
 
 const gchar *str_comp =
 	"BEGIN:VEVENT\n"
@@ -72,6 +73,29 @@ static const gchar *unknown_timezones[] = {
 	"America/Adak",
 	"America/Metlakatla",
 	"Asia/Ho_Chi_Minh",
+	"Antarctica/Troll",
+	"America/Argentina/Buenos_Aires",
+	"America/Argentina/Cordoba",
+	"America/Argentina/Jujuy",
+	"America/Argentina/Catamarca",
+	"America/Argentina/Mendoza",
+	"America/Fort_Nelson",
+	"America/Punta_Arenas",
+	"Asia/Famagusta",
+	"Asia/Atyrau",
+	"Asia/Yangon",
+	"Asia/Kathmandu",
+	"Pacific/Bougainville",
+	"Europe/Kirov",
+	"Europe/Astrakhan",
+	"Europe/Saratov",
+	"Europe/Ulyanovsk",
+	"Asia/Barnaul",
+	"Asia/Tomsk",
+	"Asia/Chita",
+	"Asia/Srednekolymsk",
+	"America/Kentucky/Louisville",
+	"America/Indiana/Indianapolis",
 	NULL
 };
 
@@ -147,8 +171,10 @@ test_time_zones_sync (gconstpointer user_data)
 	GError *error = NULL;
 	UhmServer *local_server;
 	EwsTestData *etd = (gpointer) user_data;
-	EwsCalendarConvertData convert_data;
+	EwsCalendarConvertData convert_data = { 0, };
 	EwsFolderId *calendar_fid = NULL;
+	ESourceRegistry *registry;
+	ESource *dummy_source;
 	gboolean includes_last_folder = FALSE;
 	gchar *old_sync_state = NULL;
 	gchar **tokens;
@@ -169,9 +195,6 @@ test_time_zones_sync (gconstpointer user_data)
 		GSList *folders_deleted = NULL;
 		GSList *l;
 		gchar *new_sync_state = NULL;
-		gboolean found = FALSE;
-
-		old_sync_state = new_sync_state;
 
 		e_ews_connection_sync_folder_hierarchy_sync (
 			etd->connection,
@@ -199,11 +222,7 @@ test_time_zones_sync (gconstpointer user_data)
 
 				fid = e_ews_folder_get_id (folder);
 
-				calendar_fid = g_new0 (EwsFolderId, 1);
-				calendar_fid->id = g_strdup (fid->id);
-				calendar_fid->change_key = g_strdup (fid->change_key);
-
-				found = TRUE;
+				calendar_fid = e_ews_folder_id_new (fid->id, fid->change_key, fid->is_distinguished_id);
 				break;
 			}
 		}
@@ -213,9 +232,9 @@ test_time_zones_sync (gconstpointer user_data)
 		g_slist_free_full (folders_deleted, g_free);
 
 		g_free (old_sync_state);
-		old_sync_state = NULL;
+		old_sync_state = new_sync_state;
 
-		if (found) {
+		if (calendar_fid) {
 			g_free (new_sync_state);
 			break;
 		}
@@ -226,8 +245,19 @@ test_time_zones_sync (gconstpointer user_data)
 		goto exit;
 	}
 
+	registry = e_source_registry_new_sync (NULL, NULL);
+	dummy_source = e_source_new (NULL, NULL, NULL);
+
 	convert_data.connection = etd->connection;
 	convert_data.default_zone = i_cal_timezone_get_utc_timezone ();
+	convert_data.timezone_cache = g_object_new (cal_backend_ews_get_type (),
+		"registry", registry,
+		"source", dummy_source,
+		"kind", I_CAL_VEVENT_COMPONENT,
+		NULL);
+
+	g_clear_object (&dummy_source);
+	g_clear_object (&registry);
 
 	tokens = g_strsplit (str_comp, "ICAL_TIMEZONE", 0);
 
@@ -295,6 +325,9 @@ test_time_zones_sync (gconstpointer user_data)
 		g_object_unref (zone);
 	}
 
+	g_clear_object (&convert_data.timezone_cache);
+	g_strfreev (tokens);
+
 	retval = zone_location_errors == NULL;
 
  exit:
@@ -309,6 +342,7 @@ test_time_zones_sync (gconstpointer user_data)
 	}
 
 	uhm_server_end_trace (local_server);
+	e_ews_folder_id_free (calendar_fid);
 	g_clear_error (&error);
 
 	g_assert (retval == TRUE);
@@ -322,6 +356,7 @@ int main (int argc,
 	UhmServer *server;
 	const gchar *module_path;
 	GModule *module = NULL;
+	gpointer symbol = NULL;
 
 	retval = ews_test_init (argc, argv);
 
@@ -345,33 +380,37 @@ int main (int argc,
 		goto exit;
 	}
 
-	if (!g_module_symbol (
-		module,
-		"e_cal_backend_ews_populate_windows_zones",
-		(gpointer *) &populate_windows_zones)) {
-			g_printerr ("\n%s\n", g_module_error ());
-			retval = 3;
-			goto exit;
+	if (!g_module_symbol (module, "e_cal_backend_ews_populate_windows_zones", &symbol)) {
+		g_printerr ("\n%s\n", g_module_error ());
+		retval = 3;
+		goto exit;
 	}
 
-	if (!g_module_symbol (
-		module,
-		"e_cal_backend_ews_tz_util_get_msdn_equivalent",
-		(gpointer *) &ical_to_msdn_equivalent)) {
-			g_printerr ("\n%s\n", g_module_error ());
-			retval = 4;
-			goto exit;
+	populate_windows_zones = symbol;
+
+	if (!g_module_symbol (module, "e_cal_backend_ews_tz_util_get_msdn_equivalent", &symbol)) {
+		g_printerr ("\n%s\n", g_module_error ());
+		retval = 4;
+		goto exit;
 	}
 
-	if (!g_module_symbol (
-		module,
-		"e_cal_backend_ews_convert_calcomp_to_xml",
-		(gpointer *) &convert_calcomp_to_xml)) {
-			g_printerr ("\n%s\n", g_module_error ());
-			retval = 5;
-			goto exit;
+	ical_to_msdn_equivalent = symbol;
+
+	if (!g_module_symbol (module, "e_cal_backend_ews_convert_calcomp_to_xml", &symbol)) {
+		g_printerr ("\n%s\n", g_module_error ());
+		retval = 5;
+		goto exit;
 	}
 
+	convert_calcomp_to_xml = symbol;
+
+	if (!g_module_symbol (module, "e_cal_backend_ews_get_type", &symbol)) {
+		g_printerr ("\n%s\n", g_module_error ());
+		retval = 6;
+		goto exit;
+	}
+
+	cal_backend_ews_get_type = symbol;
 
 	server = ews_test_get_mock_server ();
 	etds = ews_test_get_test_data_list ();

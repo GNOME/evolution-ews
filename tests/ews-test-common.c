@@ -220,6 +220,7 @@ ews_test_init (gint argc,
 	g_test_bug_base ("http://bugzilla.gnome.org/show_bug.cgi?id=");
 
 	g_setenv ("EWS_DEBUG", "3", TRUE);
+	g_setenv ("EWS_INTERNAL_TEST", "1", TRUE);
 
 	mock_server = uhm_server_new ();
 	uhm_server_set_default_tls_certificate (mock_server);
