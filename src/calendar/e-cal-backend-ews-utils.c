@@ -2249,7 +2249,7 @@ e_cal_backend_ews_get_datetime_with_zone (ETimezoneCache *timezone_cache,
 
 	dt = get_func (prop);
 
-	if (dt || !i_cal_time_is_valid_time (dt) ||
+	if (!dt || !i_cal_time_is_valid_time (dt) ||
 	    i_cal_time_is_null_time (dt)) {
 		g_clear_object (&dt);
 		g_object_unref (prop);
@@ -2290,6 +2290,8 @@ e_cal_backend_ews_get_datetime_with_zone (ETimezoneCache *timezone_cache,
 
 	if (!zone)
 		zone = vcalendar ? i_cal_component_get_timezone (vcalendar, tzid) : NULL;
+	else
+		g_object_ref (zone);
 
 	i_cal_time_set_timezone (dt, zone);
 
