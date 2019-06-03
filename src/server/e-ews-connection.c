@@ -2956,7 +2956,7 @@ e_ews_autodiscover_ws_xml (const gchar *email_address)
 struct _autodiscover_data {
 	EEwsConnection *cnc;
 	xmlOutputBuffer *buf;
-	SoupMessage *msgs[5];
+	SoupMessage *msgs[6];
 
 	GCancellable *cancellable;
 	gulong cancel_id;
@@ -3034,11 +3034,11 @@ autodiscover_response_cb (SoupSession *session,
 
 	ad = g_simple_async_result_get_op_res_gpointer (simple);
 
-	for (idx = 0; idx < 5; idx++) {
+	for (idx = 0; idx < 6; idx++) {
 		if (ad->msgs[idx] == msg)
 			break;
 	}
-	if (idx == 5) {
+	if (idx == 6 || (idx == 5 && !ad->msgs[5])) {
 		/* We already got removed (cancelled). Do nothing */
 		goto unref;
 	}
@@ -3141,7 +3141,7 @@ autodiscover_response_cb (SoupSession *session,
 	}
 
 	/* We have a good response; cancel all the others */
-	for (idx = 0; idx < 5; idx++) {
+	for (idx = 0; idx < 6; idx++) {
 		if (ad->msgs[idx]) {
 			SoupMessage *m = ad->msgs[idx];
 			ad->msgs[idx] = NULL;
@@ -3165,7 +3165,7 @@ autodiscover_response_cb (SoupSession *session,
 	goto exit;
 
  failed:
-	for (idx = 0; idx < 5; idx++) {
+	for (idx = 0; idx < 6; idx++) {
 		if (ad->msgs[idx]) {
 			/* There's another request outstanding.
 			 * Hope that it has better luck. */
@@ -3268,6 +3268,67 @@ e_ews_get_msg_for_url (EEwsConnection *cnc,
 	return msg;
 }
 
+static void
+autodiscover_srv_record_resolved_cb (GObject *source,
+				     GAsyncResult *result,
+				     gpointer user_data)
+{
+	GList *targets, *link;
+	GSimpleAsyncResult *simple = user_data;
+	struct _autodiscover_data *ad;
+	gchar *new_uri = NULL;
+	gboolean success;
+
+	ad = g_simple_async_result_get_op_res_gpointer (simple);
+
+	g_return_if_fail (ad != NULL);
+
+	targets = g_resolver_lookup_service_finish (G_RESOLVER (source), result, NULL);
+
+	success = ad->msgs[5] && targets;
+
+	for (link = targets; link && success; link = g_list_next (link)) {
+		GSrvTarget *target = link->data;
+		const gchar *hostname;
+
+		hostname = g_srv_target_get_hostname (target);
+
+		switch (g_srv_target_get_port (target)) {
+		case 80:
+			link = NULL;
+			new_uri = g_strdup_printf ("http://%s/autodiscover/autodiscover.xml", hostname);
+			break;
+		case 443:
+			link = NULL;
+			new_uri = g_strdup_printf ("https://%s/autodiscover/autodiscover.xml", hostname);
+			break;
+		}
+	}
+
+	g_list_free_full (targets, (GDestroyNotify) g_srv_target_free);
+
+	if (new_uri && success) {
+		SoupURI *suri;
+
+		suri = soup_uri_new (new_uri);
+		if (suri) {
+			soup_message_set_uri (ad->msgs[5], suri);
+			/* The autodiscover_response_cb will free the 'simple' */
+			ews_connection_schedule_queue_message (ad->cnc, ad->msgs[5], autodiscover_response_cb, simple);
+			soup_uri_free (suri);
+		} else {
+			success = FALSE;
+		}
+	} else {
+		success = FALSE;
+	}
+
+	if (!success) {
+		/* The callback also frees the 'simple' */
+		autodiscover_response_cb (NULL, ad->msgs[5], simple);
+	}
+}
+
 gboolean
 e_ews_autodiscover_ws_url_sync (ESource *source,
 				CamelEwsSettings *settings,
@@ -3319,6 +3380,7 @@ e_ews_autodiscover_ws_url (ESource *source,
 	EEwsConnection *cnc;
 	SoupURI *soup_uri = NULL;
 	gboolean use_secure = TRUE;
+	gboolean is_outlook = FALSE;
 	const gchar *host_url;
 	GError *error = NULL;
 
@@ -3365,14 +3427,17 @@ e_ews_autodiscover_ws_url (ESource *source,
 		url1 = g_strdup_printf ("http%s://%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", host);
 		url2 = g_strdup_printf ("http%s://autodiscover.%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", host);
 
+		is_outlook = host && g_ascii_strcasecmp (host, "outlook.office365.com") == 0;
+
 		/* outlook.office365.com has its autodiscovery at outlook.com */
-		if (host && g_ascii_strcasecmp (host, "outlook.office365.com") == 0 &&
-		    domain && g_ascii_strcasecmp (domain, "outlook.com") != 0) {
+		if (is_outlook && g_ascii_strcasecmp (domain, "outlook.com") != 0) {
 			url5 = "https://outlook.com/autodiscover/autodiscover.xml";
 		}
 
 		soup_uri_free (soup_uri);
 	}
+
+	is_outlook = is_outlook || g_ascii_strcasecmp (domain, "outlook.com") == 0;
 
 	url3 = g_strdup_printf ("http%s://%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", domain);
 	url4 = g_strdup_printf ("http%s://autodiscover.%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", domain);
@@ -3410,6 +3475,24 @@ e_ews_autodiscover_ws_url (ESource *source,
 	ad->msgs[2] = e_ews_get_msg_for_url (cnc, settings, url3, buf, NULL);
 	ad->msgs[3] = e_ews_get_msg_for_url (cnc, settings, url4, buf, NULL);
 	ad->msgs[4] = e_ews_get_msg_for_url (cnc, settings, url5, buf, NULL);
+
+	if (!is_outlook && *domain && (ad->msgs[0] || ad->msgs[1] || ad->msgs[2] || ad->msgs[3] || ad->msgs[4])) {
+		gchar *tmp;
+
+		tmp = g_strdup_printf ("http%s://%s/", use_secure ? "s" : "", domain);
+
+		/* Fake SoupMessage, for the autodiscovery with SRV record help */
+		ad->msgs[5] = e_ews_get_msg_for_url (cnc, settings, tmp, buf, NULL);
+
+		if (ad->msgs[5]) {
+			g_resolver_lookup_service_async (g_resolver_get_default (), "autodiscover", "tcp", domain, ad->cancellable,
+				autodiscover_srv_record_resolved_cb, g_object_ref (simple));
+		}
+
+		g_free (tmp);
+	} else {
+		ad->msgs[5] = NULL;
+	}
 
 	/* These have to be submitted only after they're both set in ad->msgs[]
 	 * or there will be races with fast completion */
