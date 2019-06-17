@@ -1,3 +1,19 @@
+Evolution-EWS 3.33.3 2019-06-17
+-------------------------------
+
+Bug Fixes:
+	I#42 - Check also DNS SRV _autodiscover._tcp during autodiscover (Milan Crha)
+	I#49 - Test suite is failing (Milan Crha)
+	eds-I#120 - Fails to build with libasan using Clang (undefined symbols) (Milan Crha)
+	eds-M!15 - Fix typos in CMake modules (Дилян Палаузов)
+
+Miscellaneous:
+	Fix issues found during 'make check' (Milan Crha)
+	Fix some compiler warnings reported by Clang in the test code (Milan Crha)
+
+Translations:
+	Balázs Úr (hu)
+
 Evolution-EWS 3.33.2 2019-05-20
 -------------------------------
 
