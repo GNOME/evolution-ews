@@ -309,8 +309,13 @@ ewscal_set_availability_timezone (ESoapMessage *msg,
 
 	comp = i_cal_timezone_get_component (icaltz);
 
-	xstd = i_cal_component_get_first_component (comp, I_CAL_XSTANDARD_COMPONENT);
-	xdaylight = i_cal_component_get_first_component (comp, I_CAL_XDAYLIGHT_COMPONENT);
+	if (comp) {
+		xstd = i_cal_component_get_first_component (comp, I_CAL_XSTANDARD_COMPONENT);
+		xdaylight = i_cal_component_get_first_component (comp, I_CAL_XDAYLIGHT_COMPONENT);
+	} else {
+		xstd = NULL;
+		xdaylight = NULL;
+	}
 
 	/*TimeZone is the root element of GetUserAvailabilityRequest*/
 	e_soap_message_start_element (msg, "TimeZone", NULL, NULL);
