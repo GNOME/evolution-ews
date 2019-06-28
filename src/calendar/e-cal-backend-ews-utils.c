@@ -2091,9 +2091,9 @@ e_cal_backend_ews_rid_to_index (ICalTimezone *timezone,
 				GError **error)
 {
 	guint index = 1;
-	ICalProperty *prop = i_cal_component_get_first_property (comp, I_CAL_RRULE_PROPERTY);
-	ICalRecurrence *rrule = i_cal_property_get_rrule (prop);
-	ICalTime *dtstart = i_cal_component_get_dtstart (comp);
+	ICalProperty *prop;
+	ICalRecurrence *rrule;
+	ICalTime *dtstart;
 	ICalRecurIterator *ritr;
 	ICalTime *next, *o_time;
 
