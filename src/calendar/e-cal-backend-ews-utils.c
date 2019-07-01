@@ -1484,33 +1484,20 @@ convert_component_categories_to_updatexml (ECalComponent *comp,
 
 	categ_list = e_cal_component_get_categories_list (comp);
 
-	/* Categories cannot be empty, thus first verify they are not */
+	e_ews_message_start_set_item_field (msg, "Categories", "item", base_elem_name);
+	e_soap_message_start_element (msg, "Categories", NULL, NULL);
 
 	for (citer = categ_list; citer; citer = g_slist_next (citer)) {
 		const gchar *category = citer->data;
 
-		if (category && *category)
-			break;
+		if (!category || !*category)
+			continue;
+
+		e_ews_message_write_string_parameter (msg, "String", NULL, category);
 	}
 
-	if (citer) {
-		e_ews_message_start_set_item_field (msg, "Categories", "item", base_elem_name);
-		e_soap_message_start_element (msg, "Categories", NULL, NULL);
-
-		for (citer = categ_list; citer; citer = g_slist_next (citer)) {
-			const gchar *category = citer->data;
-
-			if (!category || !*category)
-				continue;
-
-			e_ews_message_write_string_parameter (msg, "String", NULL, category);
-		}
-
-		e_soap_message_end_element (msg); /* Categories */
-		e_ews_message_end_set_item_field (msg);
-	} else {
-		e_ews_message_add_delete_item_field (msg, "Categories", "item");
-	}
+	e_soap_message_end_element (msg); /* Categories */
+	e_ews_message_end_set_item_field (msg);
 
 	g_slist_free_full (categ_list, g_free);
 }
