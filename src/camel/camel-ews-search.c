@@ -250,7 +250,7 @@ ews_search_process_criteria (CamelSExp *sexp,
 
 			/* Close the 'and' */
 			if (words->len >= 2)
-				g_string_append (expression, ")");
+				g_string_append_c (expression, ')');
 
 			if (e_ews_connection_find_folder_items_sync (
 				connection, EWS_PRIORITY_MEDIUM,
