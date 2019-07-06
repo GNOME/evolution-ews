@@ -663,13 +663,13 @@ form_email_string_from_mb (EEwsConnection *cnc,
 		str = g_string_new ("");
 		if (mb->name && mb->name[0]) {
 			g_string_append (str, mb->name);
-			g_string_append (str, " ");
+			g_string_append_c (str, ' ');
 		}
 
 		if (mb->email || email) {
-			g_string_append (str, "<");
+			g_string_append_c (str, '<');
 			g_string_append (str, email ? email : mb->email);
-			g_string_append (str, ">");
+			g_string_append_c (str, '>');
 		}
 
 		return g_string_free (str, FALSE);

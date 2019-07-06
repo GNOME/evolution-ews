@@ -2174,12 +2174,12 @@ get_public_folder_full_name (EEwsFolder *folder,
 
 		folder = g_hash_table_lookup (folders_by_id, parent_fid->id);
 		if (folder) {
-			g_string_prepend (full_name, "/");
+			g_string_prepend_c (full_name, '/');
 			g_string_prepend (full_name, e_ews_folder_get_escaped_name (folder));
 		}
 	}
 
-	g_string_prepend (full_name, "/");
+	g_string_prepend_c (full_name, '/');
 	g_string_prepend (full_name, EWS_PUBLIC_FOLDER_ROOT_DISPLAY_NAME);
 
 	return g_string_free (full_name, FALSE);
