@@ -695,9 +695,9 @@ form_recipient_list (EEwsConnection *cnc,
 		if (!str)
 			str = g_string_new ("");
 		else
-			str = g_string_append (str, ", ");
+			g_string_append (str, ", ");
 
-		str = g_string_append (str, mb_str);
+		g_string_append (str, mb_str);
 
 		g_free (mb_str);
 	}
