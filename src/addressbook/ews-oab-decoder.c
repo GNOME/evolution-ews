@@ -442,7 +442,7 @@ ews_oab_read_upto (GInputStream *is,
 
 		len = get_pos (c, size, stop);
 		if (len)
-			str = g_string_append_len (str, c, len);
+			g_string_append_len (str, c, len);
 
 		g_free (c);
 
