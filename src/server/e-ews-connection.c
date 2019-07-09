@@ -479,6 +479,25 @@ autodiscover_get_protocol_type (xmlNode *node)
 	return NULL;
 }
 
+static gchar *
+autodiscover_dup_element_value (xmlNode *node,
+				const gchar *element_name)
+{
+	for (node = node->children; node; node = node->next) {
+		if (node->type == XML_ELEMENT_NODE &&
+		    !g_strcmp0 ((gchar *) node->name, element_name)) {
+			xmlChar *str = xmlNodeGetContent (node);
+			gchar *res;
+
+			res = g_strdup ((const gchar *) str);
+			xmlFree (str);
+			return res;
+		}
+	}
+
+	return NULL;
+}
+
 static gint
 comp_func (gconstpointer a,
            gconstpointer b)
@@ -2961,6 +2980,11 @@ struct _autodiscover_data {
 	GCancellable *cancellable;
 	gulong cancel_id;
 
+	GError *error;
+	gchar *redirect_addr;
+	gchar *redirect_url;
+	gint n_redirects;
+
 	/* Results */
 	gchar *as_url;
 	gchar *oab_url;
@@ -2984,6 +3008,10 @@ autodiscover_data_free (struct _autodiscover_data *ad)
 	   its worker thread. */
 	g_object_unref (ad->cnc);
 
+	g_clear_error (&ad->error);
+
+	g_free (ad->redirect_addr);
+	g_free (ad->redirect_url);
 	g_free (ad->as_url);
 	g_free (ad->oab_url);
 
@@ -3013,6 +3041,12 @@ ews_urls_free_content (EwsUrls *urls)
 	urls->oab_url = NULL;
 }
 
+static gboolean
+e_ews_discover_prepare_messages_and_send (GSimpleAsyncResult *simple,
+					  const gchar *email_address,
+					  const gchar *override_url,
+					  GError **error);
+
 /* Called when each soup message completes */
 static void
 autodiscover_response_cb (SoupSession *session,
@@ -3026,6 +3060,7 @@ autodiscover_response_cb (SoupSession *session,
 	guint status = msg->status_code;
 	xmlDoc *doc;
 	xmlNode *node;
+	gchar *str;
 	gint idx;
 	GError *error = NULL;
 
@@ -3106,6 +3141,18 @@ autodiscover_response_cb (SoupSession *session,
 		goto failed;
 	}
 
+	str = autodiscover_dup_element_value (node, "RedirectAddr");
+	if (str) {
+		g_free (ad->redirect_addr);
+		ad->redirect_addr = str;
+	}
+
+	str = autodiscover_dup_element_value (node, "RedirectUrl");
+	if (str) {
+		g_free (ad->redirect_url);
+		ad->redirect_url = str;
+	}
+
 	for (node = node->children; node; node = node->next) {
 		if (node->type == XML_ELEMENT_NODE &&
 		    !strcmp ((gchar *) node->name, "Protocol")) {
@@ -3149,15 +3196,25 @@ autodiscover_response_cb (SoupSession *session,
 		}
 	}
 
-	if (expr_urls.as_url)
+	if (expr_urls.as_url) {
+		if (ad->as_url)
+			g_free (ad->as_url);
 		ad->as_url = g_strdup ((gchar *) expr_urls.as_url);
-	else if (exch_urls.as_url)
+	} else if (exch_urls.as_url) {
+		if (ad->as_url)
+			g_free (ad->as_url);
 		ad->as_url = g_strdup ((gchar *) exch_urls.as_url);
+	}
 
-	if (expr_urls.as_url && expr_urls.oab_url)
+	if (expr_urls.as_url && expr_urls.oab_url) {
+		if (ad->oab_url)
+			g_free (ad->oab_url);
 		ad->oab_url = g_strdup ((gchar *) expr_urls.oab_url);
-	else if (!expr_urls.as_url && exch_urls.oab_url)
+	} else if (!expr_urls.as_url && exch_urls.oab_url) {
+		if (ad->oab_url)
+			g_free (ad->oab_url);
 		ad->oab_url = g_strdup ((gchar *) exch_urls.oab_url);
+	}
 
 	ews_urls_free_content (&exch_urls);
 	ews_urls_free_content (&expr_urls);
@@ -3167,18 +3224,102 @@ autodiscover_response_cb (SoupSession *session,
  failed:
 	for (idx = 0; idx < 6; idx++) {
 		if (ad->msgs[idx]) {
+			/* Preserve any Unauthorized/SSL failed errors */
+			if (!g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_NONE) &&
+			    !g_error_matches (ad->error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED) &&
+			    !g_error_matches (ad->error, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED) &&
+			    (!ad->error ||
+			    g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED) ||
+			    g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED) ||
+			    g_error_matches (ad->error, SOUP_HTTP_ERROR, SOUP_STATUS_NONE) ||
+			    g_error_matches (ad->error, SOUP_HTTP_ERROR, SOUP_STATUS_CANT_RESOLVE) ||
+			    g_error_matches (ad->error, SOUP_HTTP_ERROR, SOUP_STATUS_CANT_RESOLVE_PROXY) ||
+			    g_error_matches (ad->error, SOUP_HTTP_ERROR, SOUP_STATUS_CANT_CONNECT) ||
+			    g_error_matches (ad->error, SOUP_HTTP_ERROR, SOUP_STATUS_CANT_CONNECT_PROXY))) {
+				g_clear_error (&ad->error);
+				ad->error = error;
+				error = NULL;
+			} else {
+				g_clear_error (&error);
+			}
+
 			/* There's another request outstanding.
 			 * Hope that it has better luck. */
-			g_clear_error (&error);
 			goto unref;
 		}
+	}
+
+	/* Preserve any Unauthorized/SSL failed errors */
+	if (!g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_NONE) &&
+	    !g_error_matches (ad->error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED) &&
+	    !g_error_matches (ad->error, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED) &&
+	    (!ad->error ||
+	    g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED) ||
+	    g_error_matches (error, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED) ||
+	    g_error_matches (ad->error, SOUP_HTTP_ERROR, SOUP_STATUS_NONE) ||
+	    g_error_matches (ad->error, SOUP_HTTP_ERROR, SOUP_STATUS_CANT_RESOLVE) ||
+	    g_error_matches (ad->error, SOUP_HTTP_ERROR, SOUP_STATUS_CANT_RESOLVE_PROXY) ||
+	    g_error_matches (ad->error, SOUP_HTTP_ERROR, SOUP_STATUS_CANT_CONNECT) ||
+	    g_error_matches (ad->error, SOUP_HTTP_ERROR, SOUP_STATUS_CANT_CONNECT_PROXY))) {
+		g_clear_error (&ad->error);
+		ad->error = error;
+		error = NULL;
+	}
+
+	g_clear_error (&error);
+
+	if (!g_cancellable_is_cancelled (ad->cancellable) &&
+	    (!ad->as_url || !ad->oab_url) && ad->n_redirects < 11 &&
+	    (ad->redirect_url || ad->redirect_addr) &&
+	    !g_error_matches (ad->error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED) &&
+	    !g_error_matches (ad->error, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED)) {
+		CamelEwsSettings *settings = NULL;
+		gboolean re_scheduled;
+		const gchar *host_url;
+		gchar *redirect_addr, *redirect_url;
+		GError *local_error;
+
+		redirect_addr = ad->redirect_addr;
+		redirect_url = ad->redirect_url;
+		local_error = ad->error;
+
+		/* To avoid infinite recursion */
+		ad->redirect_addr = NULL;
+		ad->redirect_url = NULL;
+		ad->n_redirects++;
+		ad->error = NULL;
+
+		host_url = redirect_url;
+		settings = e_ews_connection_ref_settings (ad->cnc);
+
+		if (!host_url)
+			host_url = camel_ews_settings_get_hosturl (settings);
+
+		if (redirect_addr && *redirect_addr)
+			camel_network_settings_set_user (CAMEL_NETWORK_SETTINGS (settings), redirect_addr);
+
+		re_scheduled = e_ews_discover_prepare_messages_and_send (simple, redirect_addr, host_url, NULL);
+
+		g_clear_object (&settings);
+
+		g_free (redirect_addr);
+		g_free (redirect_url);
+
+		if (re_scheduled) {
+			g_clear_error (&local_error);
+			goto unref;
+		}
+
+		ad->error = local_error;
 	}
 
 	/* FIXME: We're actually returning the *last* error here,
 	 * and in some cases (stupid firewalls causing timeouts)
 	 * that's going to be the least interesting one. We probably
 	 * want the *first* error */
-	g_simple_async_result_take_error (simple, error);
+	g_simple_async_result_take_error (simple, ad->error);
+
+	ad->error = NULL;
 
  exit:
 	g_simple_async_result_complete_in_idle (simple);
@@ -3193,7 +3334,9 @@ autodiscover_response_cb (SoupSession *session,
 	e_ews_connection_utils_unref_in_thread (simple);
 }
 
-static void post_restarted (SoupMessage *msg, gpointer data)
+static void
+post_restarted (SoupMessage *msg,
+		gpointer data)
 {
 	xmlOutputBuffer *buf = data;
 
@@ -3219,12 +3362,12 @@ static void post_restarted (SoupMessage *msg, gpointer data)
 
 static SoupMessage *
 e_ews_get_msg_for_url (EEwsConnection *cnc,
-		       CamelEwsSettings *settings,
 		       const gchar *url,
                        xmlOutputBuffer *buf,
                        GError **error)
 {
 	SoupMessage *msg;
+	CamelEwsSettings *settings;
 
 	if (url == NULL) {
 		g_set_error_literal (
@@ -3246,7 +3389,9 @@ e_ews_get_msg_for_url (EEwsConnection *cnc,
 
 	e_ews_message_attach_chunk_allocator (msg);
 
+	settings = e_ews_connection_ref_settings (cnc);
 	e_ews_message_set_user_agent_header (msg, settings);
+	g_clear_object (&settings);
 
 	if (buf != NULL) {
 		soup_message_set_request (
@@ -3361,6 +3506,149 @@ e_ews_autodiscover_ws_url_sync (ESource *source,
 	return success;
 }
 
+static gboolean
+e_ews_discover_prepare_messages_and_send (GSimpleAsyncResult *simple,
+					  const gchar *email_address,
+					  const gchar *override_url,
+					  GError **error)
+{
+	SoupURI *soup_uri = NULL;
+	gboolean use_secure = TRUE;
+	gboolean is_outlook = FALSE;
+	gchar *url1, *url2, *url3, *url4;
+	const gchar *url5, *domain = NULL;
+	struct _autodiscover_data *ad;
+	GError *local_error = NULL;
+
+	ad = g_simple_async_result_get_op_res_gpointer (simple);
+	g_return_val_if_fail (ad != NULL, FALSE);
+
+	if (email_address) {
+		xmlDoc *doc;
+
+		if (ad->buf)
+			xmlOutputBufferClose (ad->buf);
+
+		doc = e_ews_autodiscover_ws_xml (email_address);
+		ad->buf = xmlAllocOutputBuffer (NULL);
+		xmlNodeDumpOutput (ad->buf, doc, xmlDocGetRootElement (doc), 0, 1, NULL);
+		xmlOutputBufferFlush (ad->buf);
+
+		xmlFreeDoc (doc);
+
+		domain = strchr (email_address, '@');
+		if (domain)
+			domain++;
+	}
+
+	g_return_val_if_fail (ad->buf != NULL, FALSE);
+	g_return_val_if_fail ((domain && *domain) || (override_url && *override_url), FALSE);
+
+	url1 = NULL;
+	url2 = NULL;
+	url3 = NULL;
+	url4 = NULL;
+	url5 = NULL;
+
+	if (override_url)
+		soup_uri = soup_uri_new (override_url);
+
+	if (soup_uri) {
+		const gchar *host = soup_uri_get_host (soup_uri);
+		const gchar *scheme = soup_uri_get_scheme (soup_uri);
+
+		use_secure = g_strcmp0 (scheme, "https") == 0;
+
+		url1 = g_strdup_printf ("http%s://%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", host);
+		url2 = g_strdup_printf ("http%s://autodiscover.%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", host);
+
+		is_outlook = host && g_ascii_strcasecmp (host, "outlook.office365.com") == 0;
+
+		/* outlook.office365.com has its autodiscovery at outlook.com */
+		if (is_outlook && domain && g_ascii_strcasecmp (domain, "outlook.com") != 0) {
+			url5 = "https://outlook.com/autodiscover/autodiscover.xml";
+		} else if (!is_outlook && domain) {
+			#define ON_MICROSOFT_COM_TEXT "onmicrosoft.com"
+			gint len = strlen (domain);
+			gint onmslen = strlen (ON_MICROSOFT_COM_TEXT);
+
+			if (len >= onmslen) {
+				const gchar *test_domain;
+
+				test_domain = domain + len - onmslen;
+
+				/* onmicrosoft.com addresses might be handled on the outlook.com/office365.com as well */
+				if (g_ascii_strcasecmp (test_domain, ON_MICROSOFT_COM_TEXT) == 0 &&
+				    (len == onmslen || (len > onmslen && domain[len - onmslen - 1] == '.')))
+					url5 = "https://outlook.com/autodiscover/autodiscover.xml";
+			}
+			#undef ON_MICROSOFT_COM_TEXT
+		}
+
+		soup_uri_free (soup_uri);
+	}
+
+	is_outlook = is_outlook || (domain && g_ascii_strcasecmp (domain, "outlook.com") == 0);
+
+	if (domain) {
+		url3 = g_strdup_printf ("http%s://%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", domain);
+		url4 = g_strdup_printf ("http%s://autodiscover.%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", domain);
+	}
+
+	/* Passing a NULL URL string returns NULL. */
+	ad->msgs[0] = e_ews_get_msg_for_url (ad->cnc, url1, ad->buf, &local_error);
+	ad->msgs[1] = e_ews_get_msg_for_url (ad->cnc, url2, ad->buf, local_error ? NULL : &local_error);
+	ad->msgs[2] = e_ews_get_msg_for_url (ad->cnc, url3, ad->buf, local_error ? NULL : &local_error);
+	ad->msgs[3] = e_ews_get_msg_for_url (ad->cnc, url4, ad->buf, local_error ? NULL : &local_error);
+	ad->msgs[4] = e_ews_get_msg_for_url (ad->cnc, url5, ad->buf, local_error ? NULL : &local_error);
+
+	if (!is_outlook && *domain && (ad->msgs[0] || ad->msgs[1] || ad->msgs[2] || ad->msgs[3] || ad->msgs[4])) {
+		gchar *tmp;
+
+		tmp = g_strdup_printf ("http%s://%s/", use_secure ? "s" : "", domain);
+
+		/* Fake SoupMessage, for the autodiscovery with SRV record help */
+		ad->msgs[5] = e_ews_get_msg_for_url (ad->cnc, tmp, ad->buf, local_error ? NULL : &local_error);
+
+		if (ad->msgs[5]) {
+			g_resolver_lookup_service_async (g_resolver_get_default (), "autodiscover", "tcp", domain, ad->cancellable,
+				autodiscover_srv_record_resolved_cb, g_object_ref (simple));
+		}
+
+		g_free (tmp);
+	} else {
+		ad->msgs[5] = NULL;
+	}
+
+	if (local_error && (ad->msgs[0] || ad->msgs[1] || ad->msgs[2] || ad->msgs[3] || ad->msgs[4]))
+		g_clear_error (&local_error);
+
+	/* These have to be submitted only after they're both set in ad->msgs[]
+	 * or there will be races with fast completion */
+	if (ad->msgs[0] != NULL)
+		ews_connection_schedule_queue_message (ad->cnc, ad->msgs[0], autodiscover_response_cb, g_object_ref (simple));
+	if (ad->msgs[1] != NULL)
+		ews_connection_schedule_queue_message (ad->cnc, ad->msgs[1], autodiscover_response_cb, g_object_ref (simple));
+	if (ad->msgs[2] != NULL)
+		ews_connection_schedule_queue_message (ad->cnc, ad->msgs[2], autodiscover_response_cb, g_object_ref (simple));
+	if (ad->msgs[3] != NULL)
+		ews_connection_schedule_queue_message (ad->cnc, ad->msgs[3], autodiscover_response_cb, g_object_ref (simple));
+	if (ad->msgs[4] != NULL)
+		ews_connection_schedule_queue_message (ad->cnc, ad->msgs[4], autodiscover_response_cb, g_object_ref (simple));
+
+	g_free (url1);
+	g_free (url2);
+	g_free (url3);
+	g_free (url4);
+
+	if (local_error) {
+		g_propagate_error (error, local_error);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 void
 e_ews_autodiscover_ws_url (ESource *source,
 			   CamelEwsSettings *settings,
@@ -3372,15 +3660,7 @@ e_ews_autodiscover_ws_url (ESource *source,
 {
 	GSimpleAsyncResult *simple;
 	struct _autodiscover_data *ad;
-	xmlOutputBuffer *buf;
-	gchar *url1, *url2, *url3, *url4;
-	const gchar *url5;
-	gchar *domain;
-	xmlDoc *doc;
-	EEwsConnection *cnc;
-	SoupURI *soup_uri = NULL;
-	gboolean use_secure = TRUE;
-	gboolean is_outlook = FALSE;
+	const gchar *domain;
 	const gchar *host_url;
 	GError *error = NULL;
 
@@ -3393,7 +3673,8 @@ e_ews_autodiscover_ws_url (ESource *source,
 		user_data, e_ews_autodiscover_ws_url);
 
 	domain = strchr (email_address, '@');
-	if (domain == NULL || *domain == '\0') {
+	/* if it's non-NULL, then domain[0] == '@' */
+	if (!domain || !domain[1]) {
 		g_simple_async_result_set_error (
 			simple, EWS_CONNECTION_ERROR, -1,
 			"%s", _("Email address is missing a domain part"));
@@ -3401,49 +3682,6 @@ e_ews_autodiscover_ws_url (ESource *source,
 		g_object_unref (simple);
 		return;
 	}
-	domain++;
-
-	doc = e_ews_autodiscover_ws_xml (email_address);
-	buf = xmlAllocOutputBuffer (NULL);
-	xmlNodeDumpOutput (buf, doc, xmlDocGetRootElement (doc), 0, 1, NULL);
-	xmlOutputBufferFlush (buf);
-
-	url1 = NULL;
-	url2 = NULL;
-	url3 = NULL;
-	url4 = NULL;
-	url5 = NULL;
-
-	host_url = camel_ews_settings_get_hosturl (settings);
-	if (host_url != NULL)
-		soup_uri = soup_uri_new (host_url);
-
-	if (soup_uri != NULL) {
-		const gchar *host = soup_uri_get_host (soup_uri);
-		const gchar *scheme = soup_uri_get_scheme (soup_uri);
-
-		use_secure = g_strcmp0 (scheme, "https") == 0;
-
-		url1 = g_strdup_printf ("http%s://%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", host);
-		url2 = g_strdup_printf ("http%s://autodiscover.%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", host);
-
-		is_outlook = host && g_ascii_strcasecmp (host, "outlook.office365.com") == 0;
-
-		/* outlook.office365.com has its autodiscovery at outlook.com */
-		if (is_outlook && g_ascii_strcasecmp (domain, "outlook.com") != 0) {
-			url5 = "https://outlook.com/autodiscover/autodiscover.xml";
-		}
-
-		soup_uri_free (soup_uri);
-	}
-
-	is_outlook = is_outlook || g_ascii_strcasecmp (domain, "outlook.com") == 0;
-
-	url3 = g_strdup_printf ("http%s://%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", domain);
-	url4 = g_strdup_printf ("http%s://autodiscover.%s/autodiscover/autodiscover.xml", use_secure ? "s" : "", domain);
-
-	cnc = e_ews_connection_new (source, url3, settings);
-	e_ews_connection_set_password (cnc, password);
 
 	/*
 	 * http://msdn.microsoft.com/en-us/library/ee332364.aspx says we are
@@ -3454,66 +3692,25 @@ e_ews_autodiscover_ws_url (ESource *source,
 	 * (successful) one win.
 	 */
 	ad = g_slice_new0 (struct _autodiscover_data);
-	ad->cnc = cnc;  /* takes ownership */
-	ad->buf = buf;  /* takes ownership */
+	ad->cnc = e_ews_connection_new (source, domain + 1, settings); /* Fake URI, it's not used here */
+	g_object_set (ad->cnc->priv->soup_session, SOUP_SESSION_TIMEOUT, 20, NULL);
+	e_ews_connection_set_password (ad->cnc, password);
 
 	if (G_IS_CANCELLABLE (cancellable)) {
 		ad->cancellable = g_object_ref (cancellable);
 		ad->cancel_id = g_cancellable_connect (
 			ad->cancellable,
 			G_CALLBACK (autodiscover_cancelled_cb),
-			g_object_ref (cnc),
+			g_object_ref (ad->cnc),
 			g_object_unref);
 	}
 
 	g_simple_async_result_set_op_res_gpointer (
 		simple, ad, (GDestroyNotify) autodiscover_data_free);
 
-	/* Passing a NULL URL string returns NULL. */
-	ad->msgs[0] = e_ews_get_msg_for_url (cnc, settings, url1, buf, &error);
-	ad->msgs[1] = e_ews_get_msg_for_url (cnc, settings, url2, buf, NULL);
-	ad->msgs[2] = e_ews_get_msg_for_url (cnc, settings, url3, buf, NULL);
-	ad->msgs[3] = e_ews_get_msg_for_url (cnc, settings, url4, buf, NULL);
-	ad->msgs[4] = e_ews_get_msg_for_url (cnc, settings, url5, buf, NULL);
+	host_url = camel_ews_settings_get_hosturl (settings);
 
-	if (!is_outlook && *domain && (ad->msgs[0] || ad->msgs[1] || ad->msgs[2] || ad->msgs[3] || ad->msgs[4])) {
-		gchar *tmp;
-
-		tmp = g_strdup_printf ("http%s://%s/", use_secure ? "s" : "", domain);
-
-		/* Fake SoupMessage, for the autodiscovery with SRV record help */
-		ad->msgs[5] = e_ews_get_msg_for_url (cnc, settings, tmp, buf, NULL);
-
-		if (ad->msgs[5]) {
-			g_resolver_lookup_service_async (g_resolver_get_default (), "autodiscover", "tcp", domain, ad->cancellable,
-				autodiscover_srv_record_resolved_cb, g_object_ref (simple));
-		}
-
-		g_free (tmp);
-	} else {
-		ad->msgs[5] = NULL;
-	}
-
-	/* These have to be submitted only after they're both set in ad->msgs[]
-	 * or there will be races with fast completion */
-	if (ad->msgs[0] != NULL)
-		ews_connection_schedule_queue_message (cnc, ad->msgs[0], autodiscover_response_cb, g_object_ref (simple));
-	if (ad->msgs[1] != NULL)
-		ews_connection_schedule_queue_message (cnc, ad->msgs[1], autodiscover_response_cb, g_object_ref (simple));
-	if (ad->msgs[2] != NULL)
-		ews_connection_schedule_queue_message (cnc, ad->msgs[2], autodiscover_response_cb, g_object_ref (simple));
-	if (ad->msgs[3] != NULL)
-		ews_connection_schedule_queue_message (cnc, ad->msgs[3], autodiscover_response_cb, g_object_ref (simple));
-	if (ad->msgs[4] != NULL)
-		ews_connection_schedule_queue_message (cnc, ad->msgs[4], autodiscover_response_cb, g_object_ref (simple));
-
-	xmlFreeDoc (doc);
-	g_free (url1);
-	g_free (url2);
-	g_free (url3);
-	g_free (url4);
-
-	if (error && !ad->msgs[0] && !ad->msgs[1] && !ad->msgs[2] && !ad->msgs[3] && !ad->msgs[4]) {
+	if (!e_ews_discover_prepare_messages_and_send (simple, email_address, host_url, &error)) {
 		g_simple_async_result_take_error (simple, error);
 		g_simple_async_result_complete_in_idle (simple);
 	} else {
@@ -3887,7 +4084,7 @@ e_ews_connection_get_oal_list (EEwsConnection *cnc,
 
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
-	soup_message = e_ews_get_msg_for_url (cnc, cnc->priv->settings, cnc->priv->uri, NULL, &error);
+	soup_message = e_ews_get_msg_for_url (cnc, cnc->priv->uri, NULL, &error);
 
 	simple = g_simple_async_result_new (
 		G_OBJECT (cnc), callback, user_data,
@@ -4008,7 +4205,7 @@ e_ews_connection_get_oal_detail (EEwsConnection *cnc,
 
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
-	soup_message = e_ews_get_msg_for_url (cnc, cnc->priv->settings, cnc->priv->uri, NULL, &error);
+	soup_message = e_ews_get_msg_for_url (cnc, cnc->priv->uri, NULL, &error);
 
 	simple = g_simple_async_result_new (
 		G_OBJECT (cnc), callback, user_data,
@@ -4225,7 +4422,7 @@ e_ews_connection_download_oal_file (EEwsConnection *cnc,
 
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
-	soup_message = e_ews_get_msg_for_url (cnc, cnc->priv->settings, cnc->priv->uri, NULL, &error);
+	soup_message = e_ews_get_msg_for_url (cnc, cnc->priv->uri, NULL, &error);
 
 	simple = g_simple_async_result_new (
 		G_OBJECT (cnc), callback, user_data,
