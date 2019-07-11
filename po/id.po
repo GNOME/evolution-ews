@@ -2,13 +2,13 @@
 # Copyright (C) 2012 evolution-ews' COPYRIGHT HOLDER
 # This file is distributed under the same license as the evolution-ews package.
 # Andika Triwidada <andika@gmail.com>, 2012, 2013, 2014, 2018.
-#
+# Kukuh Syafaat <kukuhsyafaat@gnome.org>, 2017, 2018, 2019.
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2019-04-02 14:08+0000\n"
-"PO-Revision-Date: 2019-04-12 16:32+0700\n"
+"POT-Creation-Date: 2019-07-09 08:21+0000\n"
+"PO-Revision-Date: 2019-07-11 14:00+0700\n"
 "Last-Translator: Kukuh Syafaat <kukuhsyafaat@gnome.org>\n"
 "Language-Team: Indonesian <gnome@i15n.org>\n"
 "Language: id\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.2.3\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/camel/camel-ews-provider.c:81
@@ -30,57 +30,66 @@ msgstr "Layanan Web Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Untuk mengakses server Exchange memakai Layanan Web"
 
-#: ../src/addressbook/e-book-backend-ews.c:3476
+#: ../src/addressbook/e-book-backend-ews.c:3477
 msgid "Failed to update GAL:"
 msgstr "Failed to update GAL:"
 
-#: ../src/addressbook/e-book-backend-ews.c:3637
+#: ../src/addressbook/e-book-backend-ews.c:3639
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Tak bisa menyimpan daftar kontak, itu hanya didukung pada EWS Server 2010 "
 "atau setelahnya"
 
-#: ../src/addressbook/e-book-backend-ews.c:3730
+#: ../src/addressbook/e-book-backend-ews.c:3732
 msgid "Failed to set contact photo:"
 msgstr "Gagal mengatur foto kontak:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1709
+#: ../src/calendar/e-cal-backend-ews.c:1776
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Luang"
 
-#: ../src/calendar/e-cal-backend-ews.c:1712
+#: ../src/calendar/e-cal-backend-ews.c:1779
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Sibuk"
 
-#: ../src/calendar/e-cal-backend-ews.c:1714
+#: ../src/calendar/e-cal-backend-ews.c:1781
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Keluar Kantor"
 
-#: ../src/calendar/e-cal-backend-ews.c:1716
+#: ../src/calendar/e-cal-backend-ews.c:1783
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Sementara"
 
-#: ../src/calendar/e-cal-backend-ews.c:3385
+#: ../src/calendar/e-cal-backend-ews.c:2358
+#: ../src/calendar/e-cal-backend-ews.c:2536
+msgid "Cannot determine EWS ItemId"
+msgstr "Tidak dapat menentukan ItemId EWS"
+
+#: ../src/calendar/e-cal-backend-ews.c:3522
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Tak bisa temukan pengguna “%s” diantara yang hadir"
 
-#: ../src/camel/camel-ews-folder.c:375
+#: ../src/calendar/e-cal-backend-ews-utils.c:2125
+msgid "Invalid occurrence ID"
+msgstr "ID kejadian tidak valid"
+
+#: ../src/camel/camel-ews-folder.c:374
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Tak bisa membuka berkas temporer mimecontent!"
 
-#: ../src/camel/camel-ews-folder.c:383
+#: ../src/camel/camel-ews-folder.c:382
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Tak bisa menghasilkan pengurai dari mimecontent!"
 
-#: ../src/camel/camel-ews-folder.c:392
+#: ../src/camel/camel-ews-folder.c:391
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Tak bisa mengura mimecontent permintaan rapat!"
@@ -175,7 +184,7 @@ msgid ""
 "with NTLM authentication."
 msgstr ""
 "Opsi ini akan menyambung ke server Exchange menggunakan sandi teks polos "
-"dengan otentikasi NTLM."
+"dengan autentikasi NTLM."
 
 #: ../src/camel/camel-ews-provider.c:108
 msgid "Basic"
@@ -187,7 +196,7 @@ msgid ""
 "with Basic authentication."
 msgstr ""
 "Opsi ini akan menyambung ke server Exchange menggunakan sandi teks polos "
-"dengan otentikasi Dasar."
+"dengan autentikasi Dasar."
 
 #: ../src/camel/camel-ews-provider.c:118
 msgid "Kerberos"
@@ -198,7 +207,7 @@ msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
 msgstr ""
-"Opsi ini akan menyambung ke server Exchange menggunakan otentikasi Kerberos/"
+"Opsi ini akan menyambung ke server Exchange menggunakan autentikasi Kerberos/"
 "GSSAPI."
 
 #: ../src/camel/camel-ews-store.c:335
@@ -948,7 +957,7 @@ msgstr "_Cari…"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:288
 msgid "Authentication"
-msgstr "Otentikasi"
+msgstr "Autentikasi"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:315
 msgid "_Override Office365 OAuth2 settings"
@@ -1249,7 +1258,7 @@ msgstr ""
 "Opsi ini akan memakai token akses OAuth 2.0 untuk menyambung ke server "
 "Office365.com"
 
-#: ../src/server/e-ews-calendar-utils.c:1160
+#: ../src/server/e-ews-calendar-utils.c:1220
 #, c-format
 msgid ""
 "Cannot store this recurrence. Change it to simple single daily, weekly, "
@@ -1264,80 +1273,80 @@ msgstr ""
 msgid "CreateItem call failed to return ID for new message"
 msgstr "Pemanggilan CreateItem gagal mengembalikan ID bagi pesan baru"
 
-#: ../src/server/e-ews-connection.c:778
+#: ../src/server/e-ews-connection.c:796
 msgid "Operation Cancelled"
 msgstr "Operasi Dibatalkan"
 
-#: ../src/server/e-ews-connection.c:948
+#: ../src/server/e-ews-connection.c:966
 msgid "Authentication failed"
-msgstr "Otentikasi gagal"
+msgstr "Autentikasi gagal"
 
-#: ../src/server/e-ews-connection.c:970
+#: ../src/server/e-ews-connection.c:988
 #, c-format
 msgid "No response: %s"
 msgstr "Tak ada respon: %s"
 
-#: ../src/server/e-ews-connection.c:1033
+#: ../src/server/e-ews-connection.c:1051
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] ""
 "Server Exchange sedang sibuk, menunggu untuk mencoba lagi (%d:%02d menit)"
 
-#: ../src/server/e-ews-connection.c:1039
+#: ../src/server/e-ews-connection.c:1057
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
 msgstr[0] ""
 "Server Exchange sedang sibuk, menunggu untuk mencoba lagi (%d detik)"
 
-#: ../src/server/e-ews-connection.c:3077
+#: ../src/server/e-ews-connection.c:3111
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Gagal mengurai XML respon autodiscover"
 
-#: ../src/server/e-ews-connection.c:3084
+#: ../src/server/e-ews-connection.c:3118
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Gagal menemukan elemen <Autodiscover>"
 
-#: ../src/server/e-ews-connection.c:3095
+#: ../src/server/e-ews-connection.c:3129
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Gagal menemukan elemen <Response>"
 
-#: ../src/server/e-ews-connection.c:3106
+#: ../src/server/e-ews-connection.c:3140
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Gagal menemukan elemen <Account>"
 
-#: ../src/server/e-ews-connection.c:3140
+#: ../src/server/e-ews-connection.c:3186
 #, c-format
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Gagal menemukan <ASUrl> dalam respon autodiscover"
 
-#: ../src/server/e-ews-connection.c:3233
+#: ../src/server/e-ews-connection.c:3375
 msgid "URL cannot be NULL"
 msgstr "URL tak boleh NULL"
 
-#: ../src/server/e-ews-connection.c:3241
+#: ../src/server/e-ews-connection.c:3383
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "URL “%s” tak valid"
 
-#: ../src/server/e-ews-connection.c:3337
+#: ../src/server/e-ews-connection.c:3680
 msgid "Email address is missing a domain part"
 msgstr "Alamat surel kurang bagian domain"
 
-#: ../src/server/e-ews-connection.c:3709
+#: ../src/server/e-ews-connection.c:3989
 msgid "Failed to parse oab XML"
 msgstr "Gagal mengurai XML oab"
 
-#: ../src/server/e-ews-connection.c:3717
+#: ../src/server/e-ews-connection.c:3997
 msgid "Failed to find <OAB> element\n"
 msgstr "Gagal menemukan elemen <OAB>\n"
 
-#: ../src/server/e-ews-connection.c:5000
+#: ../src/server/e-ews-connection.c:5280
 msgid "No items found"
 msgstr "Tak temukan butir"
 
