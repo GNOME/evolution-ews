@@ -1,3 +1,20 @@
+Evolution-EWS 3.33.4 2019-07-15
+-------------------------------
+
+Bug Fixes:
+	I#53 - Add support for "redirectAddr" in autodiscovery (Milan Crha)
+	M!3 - Prefer g_string_append_c() over g_string_append() (Дилян Палаузов)
+	M!4 - Ignore the return value of g_string_append() (Дилян Палаузов)
+
+Miscellaneous:
+	Fix few memory leaks in e_cal_backend_ews_rid_to_index() (Milan Crha)
+	Count with an ICalTimezone without internal component in ewscal_set_availability_timezone() (Milan Crha)
+	Categories property cannot be deleted (Milan Crha)
+
+Translations:
+	Daniel Mustieles (es)
+	Kukuh Syafaat (id)
+
 Evolution-EWS 3.33.3 2019-06-17
 -------------------------------
 
