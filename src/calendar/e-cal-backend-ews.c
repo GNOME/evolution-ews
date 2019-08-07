@@ -148,6 +148,41 @@ ecb_ews_get_collection_settings (ECalBackendEws *cbews)
 	return CAMEL_EWS_SETTINGS (settings);
 }
 
+static GHashTable *
+ecb_ews_get_mail_aliases (ECalBackendEws *cbews)
+{
+	ESource *source;
+	ESourceRegistry *registry;
+	GHashTable *aliases = NULL;
+	GList *identities, *link;
+	const gchar *parent_uid;
+
+	source = e_backend_get_source (E_BACKEND (cbews));
+	parent_uid = e_source_get_parent (source);
+
+	if (!parent_uid || !*parent_uid)
+		return NULL;
+
+	registry = e_cal_backend_get_registry (E_CAL_BACKEND (cbews));
+	identities = e_source_registry_list_enabled (registry, E_SOURCE_EXTENSION_MAIL_IDENTITY);
+
+	for (link = identities; link; link = g_list_next (link)) {
+		ESource *mail_identity = link->data;
+
+		if (g_strcmp0 (parent_uid, e_source_get_parent (mail_identity)) == 0) {
+			ESourceMailIdentity *extension;
+
+			extension = e_source_get_extension (mail_identity, E_SOURCE_EXTENSION_MAIL_IDENTITY);
+			aliases = e_source_mail_identity_get_aliases_as_hash_table (extension);
+			break;
+		}
+	}
+
+	g_list_free_full (identities, g_object_unref);
+
+	return aliases;
+}
+
 static void
 ecb_ews_convert_error_to_edc_error (GError **perror)
 {
@@ -3267,7 +3302,8 @@ ecb_ews_receive_objects_no_exchange_mail (ECalBackendEws *cbews,
 
 static ICalProperty *
 find_attendee (ICalComponent *icomp,
-               const gchar *address)
+	       const gchar *address,
+	       GHashTable *aliases)
 {
 	ICalProperty *prop;
 
@@ -3287,7 +3323,8 @@ find_attendee (ICalComponent *icomp,
 
 		text = g_strdup (itip_strip_mailto (attendee));
 		text = g_strstrip (text);
-		if (text && !g_ascii_strcasecmp (address, text)) {
+		if (text && ((!g_ascii_strcasecmp (address, text)) ||
+		    (aliases && g_hash_table_contains (aliases, text)))) {
 			g_free (text);
 			g_free (attendee);
 			break;
@@ -3301,7 +3338,8 @@ find_attendee (ICalComponent *icomp,
 
 static ICalProperty *
 find_attendee_if_sentby (ICalComponent *icomp,
-                         const gchar *address)
+			 const gchar *address,
+			 GHashTable *aliases)
 {
 	ICalProperty *prop;
 
@@ -3331,7 +3369,8 @@ find_attendee_if_sentby (ICalComponent *icomp,
 
 		g_object_unref (param);
 
-		if (text && !g_ascii_strcasecmp (address, text)) {
+		if (text && ((!g_ascii_strcasecmp (address, text)) ||
+		    (aliases && g_hash_table_contains (aliases, text)))) {
 			g_free (text);
 			break;
 		}
@@ -3365,6 +3404,7 @@ static gchar *
 ecb_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
 					  ICalComponent *icomp,
 					  const gchar *current_user_mail,
+					  GHashTable *aliases,
 					  gboolean *out_rsvp_requested)
 {
 	ICalProperty *attendee;
@@ -3383,7 +3423,8 @@ ecb_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
 		if (attendee_str) {
 			attendee_mail = itip_strip_mailto (attendee_str);
 
-			if (attendee_mail && current_user_mail && g_ascii_strcasecmp (attendee_mail, current_user_mail) == 0) {
+			if (attendee_mail && ((current_user_mail && g_ascii_strcasecmp (attendee_mail, current_user_mail) == 0) ||
+			    (aliases && g_hash_table_contains (aliases, attendee_mail)))) {
 				g_object_unref (attendee);
 				/* Empty string means it's an organizer, NULL is when not found */
 				return g_strdup ("");
@@ -3401,7 +3442,8 @@ ecb_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
 		if (attendee_str != NULL) {
 			attendee_mail = itip_strip_mailto (attendee_str);
 
-			if (attendee_mail && current_user_mail && g_ascii_strcasecmp (attendee_mail, current_user_mail) == 0) {
+			if (attendee_mail && ((current_user_mail && g_ascii_strcasecmp (attendee_mail, current_user_mail) == 0) ||
+			    (aliases && g_hash_table_contains (aliases, attendee_mail)))) {
 				g_free (response);
 				response = i_cal_property_get_parameter_as_string (attendee, "PARTSTAT");
 				ecb_ews_get_rsvp (attendee, out_rsvp_requested);
@@ -3431,9 +3473,9 @@ ecb_ews_get_current_user_meeting_reponse (ECalBackendEws *cbews,
 
 			my_address = itip_get_comp_attendee (registry, comp, NULL);
 
-			attendee = find_attendee (icomp, my_address);
+			attendee = find_attendee (icomp, my_address, aliases);
 			if (!attendee)
-				attendee = find_attendee_if_sentby (icomp, my_address);
+				attendee = find_attendee_if_sentby (icomp, my_address, aliases);
 
 			if (attendee) {
 				response = i_cal_property_get_parameter_as_string (attendee, "PARTSTAT");
@@ -3685,6 +3727,7 @@ ecb_ews_receive_objects_sync (ECalBackendSync *sync_backend,
 	CamelEwsSettings *ews_settings;
 	ICalComponent *icomp, *subcomp;
 	ICalComponentKind kind;
+	GHashTable *aliases;
 	gchar *user_email;
 	gboolean success = TRUE, do_refresh = FALSE;
 
@@ -3714,6 +3757,7 @@ ecb_ews_receive_objects_sync (ECalBackendSync *sync_backend,
 
 	ews_settings = ecb_ews_get_collection_settings (cbews);
 	user_email = camel_ews_settings_dup_email (ews_settings);
+	aliases = ecb_ews_get_mail_aliases (cbews);
 
 	switch (i_cal_component_get_method (icomp)) {
 	case I_CAL_METHOD_REQUEST:
@@ -3727,7 +3771,7 @@ ecb_ews_receive_objects_sync (ECalBackendSync *sync_backend,
 			gboolean rsvp_requested = FALSE;
 
 			/* getting a data for meeting request response */
-			response_type = ecb_ews_get_current_user_meeting_reponse (cbews, subcomp, user_email, &rsvp_requested);
+			response_type = ecb_ews_get_current_user_meeting_reponse (cbews, subcomp, user_email, aliases, &rsvp_requested);
 
 			comp = e_cal_component_new_from_icalcomponent (i_cal_component_clone (subcomp));
 
@@ -3752,7 +3796,7 @@ ecb_ews_receive_objects_sync (ECalBackendSync *sync_backend,
 			gchar *response_type;
 
 			/* getting a data for meeting request response */
-			response_type = ecb_ews_get_current_user_meeting_reponse (cbews, subcomp, user_email, NULL);
+			response_type = ecb_ews_get_current_user_meeting_reponse (cbews, subcomp, user_email, aliases, NULL);
 
 			if (g_strcmp0 (response_type, "ACCEPTED") == 0) {
 				gchar **split_subject;
@@ -3819,6 +3863,7 @@ ecb_ews_receive_objects_sync (ECalBackendSync *sync_backend,
 		break;
 	}
 
+	g_clear_pointer (&aliases, g_hash_table_unref);
 	g_object_unref (icomp);
 	g_free (user_email);
 
