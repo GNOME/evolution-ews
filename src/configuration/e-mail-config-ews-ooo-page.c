@@ -412,6 +412,7 @@ mail_config_ews_ooo_page_constructed (GObject *object)
 	text = _("The messages specified below will be automatically sent to "
 		 "each internal and external person who sends a mail to you.");
 	widget = gtk_label_new (text);
+	gtk_label_set_width_chars (GTK_LABEL (widget), 20);
 	gtk_label_set_max_width_chars (GTK_LABEL (widget), 80);
 	gtk_label_set_line_wrap (GTK_LABEL (widget), TRUE);
 	gtk_misc_set_alignment (GTK_MISC (widget), 0.0, 0.5);

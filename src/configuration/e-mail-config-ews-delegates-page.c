@@ -1053,6 +1053,7 @@ mail_config_ews_delegates_page_constructed (GObject *object)
 		"responding to meeting requests. If you want to grant folder "
 		"permissions without giving send-on-behalf-of permissions, close this "
 		"dialog box, right-click the folder, click Permissions and change the options there."));
+	gtk_label_set_width_chars (GTK_LABEL (widget), 20);
 	gtk_label_set_max_width_chars (GTK_LABEL (widget), 80);
 	gtk_label_set_line_wrap (GTK_LABEL (widget), TRUE);
 	gtk_misc_set_alignment (GTK_MISC (widget), 0.0, 0.5);
@@ -1101,6 +1102,7 @@ mail_config_ews_delegates_page_constructed (GObject *object)
 	widget = gtk_label_new (
 		_("Deliver meeting requests addressed to me and responses to meeting "
 		"requests where I am the organizer to:"));
+	gtk_label_set_width_chars (GTK_LABEL (widget), 20);
 	gtk_label_set_max_width_chars (GTK_LABEL (widget), 80);
 	gtk_label_set_line_wrap (GTK_LABEL (widget), TRUE);
 	gtk_misc_set_alignment (GTK_MISC (widget), 0.0, 0.5);
