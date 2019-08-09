@@ -103,7 +103,7 @@ prioritizing the client requests.
 Separate out the prioritizing client requests and make it common to all 
 providers.
 
-Is pipe-ling requests possible?
+Is pipe-lining requests possible?
 
 
 
