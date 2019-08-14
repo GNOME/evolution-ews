@@ -45,6 +45,7 @@ add_definitions(-DSOUP_VERSION_MIN_REQUIRED=${soup_encoded_version})
 set(eds_minimum_version ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 set(evo_minimum_version ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 set(mspack_minimum_version 0.4)
+set(libical_glib_minimum_version 3.0.5)
 
 # Load modules from the source tree
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
@@ -138,6 +139,8 @@ pkg_check_modules(GNOME_PLATFORM REQUIRED
 )
 
 pkg_check_modules(SOUP REQUIRED libsoup-2.4>=${soup_minimum_version})
+
+pkg_check_modules(LIBICAL_GLIB REQUIRED libical-glib>=${libical_glib_minimum_version})
 
 # ******************************
 # libmspack with OAB support

@@ -37,6 +37,10 @@
 #include <glib/gstdio.h>
 #include <glib/gi18n-lib.h>
 
+#define LIBICAL_GLIB_UNSTABLE_API
+#include <libical-glib/libical-glib.h>
+#undef LIBICAL_GLIB_UNSTABLE_API
+
 #include <libedata-book/libedata-book.h>
 
 #include "server/e-ews-item-change.h"
@@ -413,29 +417,38 @@ ebews_populate_nick_name (EBookBackendEws *bbews,
 }
 
 static void
+ebews_populate_date_value (EBookBackendEws *bbews,
+			   EContact *contact,
+			   EContactField field,
+			   time_t value)
+{
+	if (value > (time_t) 0) {
+		ICalTime *itt;
+
+		itt = i_cal_time_new_from_timet_with_zone (value, TRUE, i_cal_timezone_get_utc_timezone ());
+
+		if (itt && i_cal_time_is_valid_time (itt) && !i_cal_time_is_null_time (itt)) {
+			EContactDate edate = { 0 };
+
+			edate.year = i_cal_time_get_year (itt);
+			edate.month = i_cal_time_get_month (itt);
+			edate.day = i_cal_time_get_day (itt);
+
+			e_contact_set (contact, field, &edate);
+		}
+
+		g_clear_object (&itt);
+	}
+}
+
+static void
 ebews_populate_birth_date (EBookBackendEws *bbews,
 			   EContact *contact,
 			   EEwsItem *item,
 			   GCancellable *cancellable,
 			   GError **error)
 {
-	time_t bdate;
-	GDate date;
-	EContactDate edate;
-
-	bdate = e_ews_item_get_birthday (item);
-
-	if (bdate) {
-		g_date_clear (&date, 1);
-		g_date_set_time_t (&date, bdate);
-
-		edate.year = date.year;
-		edate.month = date.month;
-		edate.day = date.day;
-
-		if (g_date_valid (&date))
-			e_contact_set (contact, E_CONTACT_BIRTH_DATE, &edate);
-	}
+	ebews_populate_date_value (bbews, contact, E_CONTACT_BIRTH_DATE, e_ews_item_get_birthday (item));
 }
 
 static void
@@ -445,23 +458,7 @@ ebews_populate_anniversary (EBookBackendEws *bbews,
 			    GCancellable *cancellable,
 			    GError **error)
 {
-	time_t bdate;
-	GDate date;
-	EContactDate edate;
-
-	bdate = e_ews_item_get_wedding_anniversary (item);
-
-	if (bdate) {
-		g_date_clear (&date, 1);
-		g_date_set_time_t (&date, bdate);
-
-		edate.year = date.year;
-		edate.month = date.month;
-		edate.day = date.day;
-
-		if (g_date_valid (&date))
-			e_contact_set (contact, E_CONTACT_ANNIVERSARY, &edate);
-	}
+	ebews_populate_date_value (bbews, contact, E_CONTACT_ANNIVERSARY, e_ews_item_get_wedding_anniversary (item));
 }
 
 static EContactPhoto *
@@ -755,34 +752,41 @@ ebews_set_full_name (ESoapMessage *msg,
 	e_contact_name_free (name);
 }
 
-/* TODO Set birth and anniversary dates */
 static void
-ebews_set_birth_date (ESoapMessage *message,
-                      EContact *contact)
+ebews_set_date_value (ESoapMessage *message,
+		      EContact *contact,
+		      EContactField field,
+		      const gchar *element_name)
 {
 	EContactDate *date;
-	gchar *birthday;
+	gchar *value;
 
-	date = e_contact_get (contact, E_CONTACT_BIRTH_DATE);
+	date = e_contact_get (contact, field);
 
 	if (!date)
 		return;
 
-	birthday = g_strdup_printf (
-		"%04d-%02d-%02dT00:00:00",
+	value = g_strdup_printf ("%04d-%02d-%02dT00:00:00Z",
 		date->year, date->month, date->day);
 
-	e_ews_message_write_string_parameter (message, "Birthday", NULL, birthday);
+	e_ews_message_write_string_parameter (message, element_name, NULL, value);
 
-	g_free (birthday);
+	e_contact_date_free (date);
+	g_free (value);
+}
 
+static void
+ebews_set_birth_date (ESoapMessage *message,
+                      EContact *contact)
+{
+	ebews_set_date_value (message, contact, E_CONTACT_BIRTH_DATE, "Birthday");
 }
 
 static void
 ebews_set_anniversary (ESoapMessage *message,
                        EContact *contact)
 {
-
+	ebews_set_date_value (message, contact, E_CONTACT_ANNIVERSARY, "WeddingAnniversary");
 }
 
 static void
@@ -993,6 +997,40 @@ ebews_set_full_name_changes (EBookBackendEws *bbews,
 }
 
 static void
+ebews_set_date_value_changes (ESoapMessage *message,
+			      EContact *new,
+			      EContact *old,
+			      EContactField field,
+			      const gchar *element_name)
+{
+	EContactDate *new_date, *old_date;
+
+	if (!message)
+		return;
+
+	new_date = e_contact_get (new, field);
+	old_date = e_contact_get (old, field);
+
+	if (!e_contact_date_equal (new_date, old_date)) {
+		if (new_date) {
+			gchar *value;
+
+			value = g_strdup_printf ("%04d-%02d-%02dT00:00:00Z",
+				new_date->year, new_date->month, new_date->day);
+
+			convert_contact_property_to_updatexml (message, element_name, value, "contacts", NULL, NULL);
+
+			g_free (value);
+		} else {
+			e_ews_message_add_delete_item_field (message, element_name, "contacts");
+		}
+	}
+
+	e_contact_date_free (new_date);
+	e_contact_date_free (old_date);
+}
+
+static void
 ebews_set_birth_date_changes (EBookBackendEws *bbews,
 			      ESoapMessage *message,
 			      EContact *new,
@@ -1001,26 +1039,7 @@ ebews_set_birth_date_changes (EBookBackendEws *bbews,
 			      GCancellable *cancellable,
 			      GError **error)
 {
-	EContactDate *new_date, *old_date;
-	gchar *birthday;
-
-	if (!message)
-		return;
-
-	new_date = e_contact_get (new, E_CONTACT_BIRTH_DATE);
-	old_date = e_contact_get (old, E_CONTACT_BIRTH_DATE);
-
-	if (!e_contact_date_equal (new_date, old_date)) {
-		birthday = g_strdup_printf (
-			"%04d-%02d-%02dT00:00:00",
-			new_date->year, new_date->month, new_date->day);
-
-		convert_contact_property_to_updatexml (message, "Birthday", birthday, "contacts", NULL, NULL);
-		g_free (birthday);
-	}
-
-	e_contact_date_free (new_date);
-	e_contact_date_free (old_date);
+	ebews_set_date_value_changes (message, new, old, E_CONTACT_BIRTH_DATE, "Birthday");
 }
 
 static void
@@ -1032,7 +1051,7 @@ ebews_set_anniversary_changes (EBookBackendEws *bbews,
 			       GCancellable *cancellable,
 			       GError **error)
 {
-
+	ebews_set_date_value_changes (message, new, old, E_CONTACT_ANNIVERSARY, "WeddingAnniversary");
 }
 
 static void
@@ -1528,7 +1547,7 @@ static const struct field_element_mapping {
 	{ E_CONTACT_SPOUSE, ELEMENT_TYPE_SIMPLE, "SpouseName", e_ews_item_get_spouse_name},
 	{ E_CONTACT_FAMILY_NAME, ELEMENT_TYPE_SIMPLE, "Surname", e_ews_item_get_surname},
 	{ E_CONTACT_GIVEN_NAME, ELEMENT_TYPE_COMPLEX, "GivenName", NULL, ebews_populate_givenname, ebews_set_givenname, ebews_set_givenname_changes},
-	{ E_CONTACT_BIRTH_DATE, ELEMENT_TYPE_COMPLEX, "WeddingAnniversary", NULL,  ebews_populate_anniversary, ebews_set_anniversary, ebews_set_anniversary_changes },
+	{ E_CONTACT_ANNIVERSARY, ELEMENT_TYPE_COMPLEX, "WeddingAnniversary", NULL,  ebews_populate_anniversary, ebews_set_anniversary, ebews_set_anniversary_changes },
 	{ E_CONTACT_PHOTO, ELEMENT_TYPE_COMPLEX, "Photo", NULL,  ebews_populate_photo, ebews_set_photo, ebews_set_photo_changes },
 
 	/* Should take of uid and changekey (REV) */
@@ -3931,6 +3950,7 @@ ebb_ews_get_backend_property (EBookBackend *book_backend,
 			e_contact_field_name (E_CONTACT_ADDRESS_WORK),
 			e_contact_field_name (E_CONTACT_ADDRESS_HOME),
 			e_contact_field_name (E_CONTACT_ADDRESS_OTHER),
+			e_contact_field_name (E_CONTACT_ANNIVERSARY),
 			e_contact_field_name (E_CONTACT_BIRTH_DATE),
 			e_contact_field_name (E_CONTACT_NOTE),
 			e_contact_field_name (E_CONTACT_PHOTO),
