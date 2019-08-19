@@ -1,3 +1,12 @@
+Evolution-EWS 3.33.91 2019-08-19
+--------------------------------
+
+Bug Fixes:
+	I#55 - Consider mail aliases when searching for an attendee property (Milan Crha)
+	I#56 - README: Correct typo (bby-bishopclark)
+	I#57 - Birthday date of Contact depends on system timezone (Milan Crha)
+	evo-I#568 - Set GtkLabel's width-chars when using line-wrap (Milan Crha)
+
 Evolution-EWS 3.33.90 2019-08-05
 --------------------------------
 
