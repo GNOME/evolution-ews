@@ -1513,6 +1513,29 @@ ews_folder_is_of_type (CamelFolder *folder,
 }
 
 static gboolean
+ews_folder_is_public_or_foreign (CamelFolder *folder)
+{
+	CamelStore *parent_store;
+	CamelEwsStore *ews_store;
+	gboolean res;
+	gchar *folder_id;
+
+	g_return_val_if_fail (folder != NULL, FALSE);
+
+	parent_store = camel_folder_get_parent_store (folder);
+	ews_store = CAMEL_EWS_STORE (parent_store);
+
+	g_return_val_if_fail (ews_store != NULL, FALSE);
+
+	folder_id = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, camel_folder_get_full_name (folder));
+	res = folder_id && (camel_ews_store_summary_get_public (ews_store->summary, folder_id, NULL) ||
+		camel_ews_store_summary_get_foreign (ews_store->summary, folder_id, NULL));
+	g_free (folder_id);
+
+	return res;
+}
+
+static gboolean
 ews_move_to_special_folder (CamelFolder *folder,
 			    const GSList *uids,
 			    guint32 folder_type,
@@ -2764,6 +2787,9 @@ ews_delete_messages (CamelFolder *folder,
 
 	if (!camel_ews_store_connected (ews_store, cancellable, error))
 		return FALSE;
+
+	if (!expunge)
+		expunge = ews_folder_is_public_or_foreign (folder);
 
 	ews_delete_messages_from_server (
 		ews_store,
