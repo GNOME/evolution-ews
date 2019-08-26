@@ -395,7 +395,7 @@ camel_ews_store_ensure_virtual_folders (CamelEwsStore *ews_store)
 	if (!folders)
 		return;
 
-	children_count = g_hash_table_new (g_str_hash, g_str_equal);
+	children_count = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
 	for (iter = folders; iter; iter = iter->next) {
 		const gchar *fid = iter->data;
@@ -406,11 +406,11 @@ camel_ews_store_ensure_virtual_folders (CamelEwsStore *ews_store)
 
 		if (g_str_has_prefix (fid, "ForeignMailbox::") &&
 		    !g_hash_table_contains (children_count, fid))
-			g_hash_table_insert (children_count, (gpointer) fid, GINT_TO_POINTER (0));
+			g_hash_table_insert (children_count, g_strdup (fid), GINT_TO_POINTER (0));
 
 		if (g_str_equal (fid, EWS_PUBLIC_FOLDER_ROOT_ID) &&
 		    !g_hash_table_contains (children_count, fid))
-			g_hash_table_insert (children_count, (gpointer) fid, GINT_TO_POINTER (0));
+			g_hash_table_insert (children_count, g_strdup (fid), GINT_TO_POINTER (0));
 
 		if (!has_foreign && g_str_equal (fid, EWS_FOREIGN_FOLDER_ROOT_ID))
 			has_foreign = TRUE;
@@ -423,7 +423,9 @@ camel_ews_store_ensure_virtual_folders (CamelEwsStore *ews_store)
 			if (pfid && g_str_has_prefix (pfid, "ForeignMailbox::")) {
 				gint count = GPOINTER_TO_INT (g_hash_table_lookup (children_count, pfid));
 
-				g_hash_table_insert (children_count, (gpointer) pfid, GINT_TO_POINTER (count + 1));
+				g_hash_table_insert (children_count, pfid, GINT_TO_POINTER (count + 1));
+			} else {
+				g_free (pfid);
 			}
 		}
 
@@ -447,7 +449,9 @@ camel_ews_store_ensure_virtual_folders (CamelEwsStore *ews_store)
 					if (pfid && g_str_equal (pfid, EWS_PUBLIC_FOLDER_ROOT_ID)) {
 						gint count = GPOINTER_TO_INT (g_hash_table_lookup (children_count, pfid));
 
-						g_hash_table_insert (children_count, (gpointer) pfid, GINT_TO_POINTER (count + 1));
+						g_hash_table_insert (children_count, pfid, GINT_TO_POINTER (count + 1));
+					} else {
+						g_free (pfid);
 					}
 				}
 			}
