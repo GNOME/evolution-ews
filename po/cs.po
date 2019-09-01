@@ -2,25 +2,27 @@
 # Copyright (C) 2011 evolution-ews's COPYRIGHT HOLDER
 # This file is distributed under the same license as the evolution-ews package.
 # Marek Černocký <marek@manet.cz>, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018.
+# Jiri Eischmann <jiri@eischmann.cz>, 2019.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2018-10-24 15:43+0000\n"
-"PO-Revision-Date: 2018-10-27 07:42+0200\n"
-"Last-Translator: Marek Černocký <marek@manet.cz>\n"
-"Language-Team: čeština <gnome-cs-list@gnome.org>\n"
+"POT-Creation-Date: 2019-05-17 20:19+0000\n"
+"PO-Revision-Date: 2019-08-20 13:14+0200\n"
+"Last-Translator: Jiri Eischmann <jiri@eischmann.cz>\n"
+"Language-Team: čeština <>\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Gtranslator 2.91.7\n"
+"X-Generator: Gtranslator 3.32.1\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/camel/camel-ews-provider.c:81
 #: ../src/configuration/e-ews-config-lookup.c:251
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:134
 msgid "Exchange Web Services"
 msgstr "Webové služby Exchange"
 
@@ -29,57 +31,66 @@ msgstr "Webové služby Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Pro přístup k serverům Exchange pomocí webových služeb"
 
-#: ../src/addressbook/e-book-backend-ews.c:3452
+#: ../src/addressbook/e-book-backend-ews.c:3477
 msgid "Failed to update GAL:"
 msgstr "Selhala aktualizace globálního seznamu adres:"
 
-#: ../src/addressbook/e-book-backend-ews.c:3613
+#: ../src/addressbook/e-book-backend-ews.c:3639
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Nelze uložit seznam kontaktů, je to podporováno jen na EWS Server 2010 nebo "
 "novějším"
 
-#: ../src/addressbook/e-book-backend-ews.c:3706
+#: ../src/addressbook/e-book-backend-ews.c:3732
 msgid "Failed to set contact photo:"
 msgstr "Selhalo nastavení fotografie kontaktu:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1662
+#: ../src/calendar/e-cal-backend-ews.c:1776
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Volný"
 
-#: ../src/calendar/e-cal-backend-ews.c:1665
+#: ../src/calendar/e-cal-backend-ews.c:1779
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Obsazený"
 
-#: ../src/calendar/e-cal-backend-ews.c:1667
+#: ../src/calendar/e-cal-backend-ews.c:1781
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Mimo kancelář"
 
-#: ../src/calendar/e-cal-backend-ews.c:1669
+#: ../src/calendar/e-cal-backend-ews.c:1783
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Předběžné"
 
-#: ../src/calendar/e-cal-backend-ews.c:3325
+#: ../src/calendar/e-cal-backend-ews.c:2358
+#: ../src/calendar/e-cal-backend-ews.c:2536
+msgid "Cannot determine EWS ItemId"
+msgstr "Nelze určit EWS ItemId"
+
+#: ../src/calendar/e-cal-backend-ews.c:3522
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Uživatele „%s“ nelze nalézt mezi účastníky"
 
-#: ../src/camel/camel-ews-folder.c:375
+#: ../src/calendar/e-cal-backend-ews-utils.c:2134
+msgid "Invalid occurrence ID"
+msgstr "Neplatné ID výskytu"
+
+#: ../src/camel/camel-ews-folder.c:374
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Nelze otevřít dočasný soubor s obsahem MIME!"
 
-#: ../src/camel/camel-ews-folder.c:383
+#: ../src/camel/camel-ews-folder.c:382
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Nelze vygenerovat analyzátor z obsahu MIME!"
 
-#: ../src/camel/camel-ews-folder.c:392
+#: ../src/camel/camel-ews-folder.c:391
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Nelze analyzovat uvítací požadavek z obsahu MIME!"
@@ -258,30 +269,30 @@ msgstr "Aktualizuje se struktura vzdálených složek"
 msgid "Updating foreign folders"
 msgstr "Aktualizují se vzdálené složky"
 
-#: ../src/camel/camel-ews-store.c:2127
+#: ../src/camel/camel-ews-store.c:2141
 #, c-format
 msgid "No such folder: %s"
 msgstr "Taková složka neexistuje: %s"
 
-#: ../src/camel/camel-ews-store.c:2436
+#: ../src/camel/camel-ews-store.c:2450
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "V režimu odpojení nelze vypsat žádné veřejné složky EWS"
 
-#: ../src/camel/camel-ews-store.c:2509
+#: ../src/camel/camel-ews-store.c:2523
 msgid "Cannot find any EWS public folders"
 msgstr "Nelze najít žádné veřejné složky EWS"
 
-#: ../src/camel/camel-ews-store.c:2618
+#: ../src/camel/camel-ews-store.c:2632
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Nelze vytvořit složku „%s“, složka již existuje"
 
-#: ../src/camel/camel-ews-store.c:2633
+#: ../src/camel/camel-ews-store.c:2647
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Rodičovská složka %s neexistuje"
 
-#: ../src/camel/camel-ews-store.c:2643
+#: ../src/camel/camel-ews-store.c:2657
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -289,95 +300,95 @@ msgstr ""
 "Nelze vytvořit složku pod složkou „%s“, která se používá pouze pro složky "
 "ostatních uživatelů"
 
-#: ../src/camel/camel-ews-store.c:2653
+#: ../src/camel/camel-ews-store.c:2667
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "Nelze vytvořit složku pod složkou „%s“, která se používá pouze pro veřejné "
 "složky"
 
-#: ../src/camel/camel-ews-store.c:2757
+#: ../src/camel/camel-ews-store.c:2771
 #, c-format
 msgid "Folder does not exist"
 msgstr "Složka neexistuje"
 
-#: ../src/camel/camel-ews-store.c:2767
+#: ../src/camel/camel-ews-store.c:2781
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Nelze odstranit složku „%s“, která se používá pouze pro složky ostatních "
 "uživatelů"
 
-#: ../src/camel/camel-ews-store.c:2778
+#: ../src/camel/camel-ews-store.c:2792
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "Nelze odstranit složku „%s“, která se používá pouze pro veřejné složky"
 
-#: ../src/camel/camel-ews-store.c:2937
+#: ../src/camel/camel-ews-store.c:2951
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Složka %s neexistuje"
 
-#: ../src/camel/camel-ews-store.c:2946
+#: ../src/camel/camel-ews-store.c:2960
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Neexistuje záznam s klíčem o změně (ChangeKey) pro složku %s"
 
-#: ../src/camel/camel-ews-store.c:2989
+#: ../src/camel/camel-ews-store.c:3003
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Složku nelze naráz přejmenovat i přesunout"
 
-#: ../src/camel/camel-ews-store.c:3023
+#: ../src/camel/camel-ews-store.c:3037
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Nelze najít ID složky pro rodičovskou složku %s"
 
-#: ../src/camel/camel-ews-store.c:3075 ../src/camel/camel-ews-transport.c:318
+#: ../src/camel/camel-ews-store.c:3089 ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange server %s"
 msgstr "Server Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:3078
+#: ../src/camel/camel-ews-store.c:3092
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Služba Exchange pro uživatele %s na počítači %s"
 
-#: ../src/camel/camel-ews-store.c:3122
+#: ../src/camel/camel-ews-store.c:3136
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Nelze vyhledat složku Koš"
 
-#: ../src/camel/camel-ews-store.c:3182
+#: ../src/camel/camel-ews-store.c:3196
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Nelze vyhledat složku Nevyžádaná pošta"
 
-#: ../src/camel/camel-ews-store.c:3373
+#: ../src/camel/camel-ews-store.c:3387
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "K odběru složek EWS se nelze přihlásit v režimu odpojení"
 
-#: ../src/camel/camel-ews-store.c:3396
+#: ../src/camel/camel-ews-store.c:3410
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 "Nelze se přihlásit k odběru složky  „%s“, není dostupná žádná veřejná složka"
 
-#: ../src/camel/camel-ews-store.c:3406
+#: ../src/camel/camel-ews-store.c:3420
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Nelze se přihlásit k odběru složky „%s“, složka nebyla nalezena"
 
-#: ../src/camel/camel-ews-store.c:3497
+#: ../src/camel/camel-ews-store.c:3511
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Z odběru složek EWS se nelze odhlásit v režimu odpojení"
 
-#: ../src/camel/camel-ews-store.c:3614
+#: ../src/camel/camel-ews-store.c:3628
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "K dokončení této operace je nutné, abyste pracovali on-line"
 
-#: ../src/camel/camel-ews-store.c:3658 ../src/camel/camel-ews-store.c:3695
+#: ../src/camel/camel-ews-store.c:3672 ../src/camel/camel-ews-store.c:3709
 msgid "Unsetting the “Out of Office” status"
 msgstr "Ruší se nastavení stavu „Mimo kancelář“"
 
@@ -411,17 +422,17 @@ msgstr "Selhalo čtení adresy „Od“"
 msgid "Service not connected"
 msgstr "Služba není připojena"
 
-#: ../src/collection/e-ews-backend.c:522
+#: ../src/collection/e-ews-backend.c:533
 #: ../src/configuration/e-mail-config-ews-gal.c:274
 msgid "Global Address List"
 msgstr "Globální seznam adres"
 
-#: ../src/collection/e-ews-backend.c:961
+#: ../src/collection/e-ews-backend.c:980
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr "Nelze určit vhodnou třídu složky pro novou složku s názvem „%s“"
 
-#: ../src/collection/e-ews-backend.c:1049
+#: ../src/collection/e-ews-backend.c:1068
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Zdroj dat „%s“ se nenachází ve složce Exchange Web Services"
@@ -922,11 +933,11 @@ msgstr "Název _složky:"
 msgid "Include _subfolders"
 msgstr "Včetně pod_složek"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:229
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:282
 msgid "Querying Autodiscover service"
 msgstr "Dotazuje se služby automatického vyhledávání"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:326
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:381
 msgid "Fetch _URL"
 msgstr "Získat adresu _URL"
 
@@ -970,20 +981,21 @@ msgstr "Nápo_věda"
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/configuration/e-mail-config-ews-backend.c:328
 msgid "_Tenant:"
-msgstr "_Klient:"
+msgstr "_Tenant:"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/configuration/e-mail-config-ews-backend.c:353
-msgid "There is not set any default tenant"
-msgstr "Není nastavený žádný výchozí klient"
+#| msgid "Default tenant is “%s”"
+msgid "Default tenant is “common“"
+msgstr "Výchozí tenant je „common“"
 
 #. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
 #. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
 #: ../src/configuration/e-mail-config-ews-backend.c:356
 #, c-format
 msgid "Default tenant is “%s”"
-msgstr "Výchozí klient je „%s“"
+msgstr "Výchozí tenant je „%s“"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:358
 msgid "Application I_D:"
@@ -1016,13 +1028,7 @@ msgstr "Adresa URL hostitele nesmí být prázdná"
 msgid "User name cannot be empty"
 msgstr "Uživatelské jméno nesmí být prázdné"
 
-#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
-#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
-#: ../src/configuration/e-mail-config-ews-backend.c:604
-msgid "Tenant cannot be empty"
-msgstr "Označení klienta nesmí být prázdné"
-
-#: ../src/configuration/e-mail-config-ews-backend.c:609
+#: ../src/configuration/e-mail-config-ews-backend.c:600
 msgid "Application ID cannot be empty"
 msgstr "ID aplikace nesmí být prázdné"
 
@@ -1262,7 +1268,7 @@ msgstr ""
 "Tato volba bude používat přístupový tiket OAuth 2.0 pro připojení k serveru "
 "Office365.com"
 
-#: ../src/server/e-ews-calendar-utils.c:1160
+#: ../src/server/e-ews-calendar-utils.c:1215
 #, c-format
 msgid ""
 "Cannot store this recurrence. Change it to simple single daily, weekly, "
@@ -1277,20 +1283,20 @@ msgid "CreateItem call failed to return ID for new message"
 msgstr ""
 "Selhalo volání funkce CreateItem, provedené kvůli získání ID pro novou zprávu"
 
-#: ../src/server/e-ews-connection.c:774
+#: ../src/server/e-ews-connection.c:776
 msgid "Operation Cancelled"
 msgstr "Operace zrušena"
 
-#: ../src/server/e-ews-connection.c:906
+#: ../src/server/e-ews-connection.c:946
 msgid "Authentication failed"
 msgstr "Autentizace selhala"
 
-#: ../src/server/e-ews-connection.c:928
+#: ../src/server/e-ews-connection.c:968
 #, c-format
 msgid "No response: %s"
 msgstr "Bez odezvy: %s"
 
-#: ../src/server/e-ews-connection.c:991
+#: ../src/server/e-ews-connection.c:1031
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -1301,7 +1307,7 @@ msgstr[1] ""
 msgstr[2] ""
 "Server Exchange je zaneprázdněný, čeká se na opakování (%d:%02d minut)"
 
-#: ../src/server/e-ews-connection.c:997
+#: ../src/server/e-ews-connection.c:1037
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -1309,53 +1315,53 @@ msgstr[0] "Server Exchange je zaneprázdněný, čeká se na opakování (%d sek
 msgstr[1] "Server Exchange je zaneprázdněný, čeká se na opakování (%d sekundy)"
 msgstr[2] "Server Exchange je zaneprázdněný, čeká se na opakování (%d sekund)"
 
-#: ../src/server/e-ews-connection.c:2983
+#: ../src/server/e-ews-connection.c:3075
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Selhala analýza odpovědi XML na automatické nalezení"
 
-#: ../src/server/e-ews-connection.c:2990
+#: ../src/server/e-ews-connection.c:3082
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Selhalo vyhledání prvku <Autodiscover>"
 
-#: ../src/server/e-ews-connection.c:3001
+#: ../src/server/e-ews-connection.c:3093
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Selhalo vyhledání prvku <Response>"
 
-#: ../src/server/e-ews-connection.c:3012
+#: ../src/server/e-ews-connection.c:3104
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Selhalo vyhledání prvku <Account>"
 
-#: ../src/server/e-ews-connection.c:3046
+#: ../src/server/e-ews-connection.c:3138
 #, c-format
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Nezdařilo se najít <ASUrl> v odpovědi na automatické vyhledání"
 
-#: ../src/server/e-ews-connection.c:3138
+#: ../src/server/e-ews-connection.c:3231
 msgid "URL cannot be NULL"
 msgstr "Adresa URL nesmí být prázdná"
 
-#: ../src/server/e-ews-connection.c:3146
+#: ../src/server/e-ews-connection.c:3239
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "Adresa URL „%s“ není platná"
 
-#: ../src/server/e-ews-connection.c:3237
+#: ../src/server/e-ews-connection.c:3336
 msgid "Email address is missing a domain part"
 msgstr "U e-mailové adresy schází doménová část"
 
-#: ../src/server/e-ews-connection.c:3592
+#: ../src/server/e-ews-connection.c:3708
 msgid "Failed to parse oab XML"
 msgstr "Selhala analýza XML OAB"
 
-#: ../src/server/e-ews-connection.c:3600
+#: ../src/server/e-ews-connection.c:3716
 msgid "Failed to find <OAB> element\n"
 msgstr "Selhalo vyhledání prvku <OAB>\n"
 
-#: ../src/server/e-ews-connection.c:4881
+#: ../src/server/e-ews-connection.c:4999
 msgid "No items found"
 msgstr "Nenalezeny žádné položky"
 
@@ -1381,7 +1387,13 @@ msgid "Cannot add folder, master source not found"
 msgstr "Nelze přidat složku, nenalezen hlavní zdroj"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
-#: ../src/server/e-oauth2-service-office365.c:124
+#: ../src/server/e-oauth2-service-office365.c:109
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office365"
+
+#~ msgid "There is not set any default tenant"
+#~ msgstr "Není nastavený žádný výchozí klient"
+
+#~ msgid "Tenant cannot be empty"
+#~ msgstr "Označení klienta nesmí být prázdné"
