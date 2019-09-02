@@ -1,3 +1,17 @@
+Evolution-EWS 3.33.92 2019-09-02
+--------------------------------
+
+Bug Fixes:
+	I#60 - Messages deleted in public folders cannot be moved to Deleted Items (Milan Crha)
+
+Miscellaneous:
+	Fix a memory leak in camel_ews_store_ensure_virtual_folders() (Milan Crha)
+
+Translations:
+	Anders Jonsson (sv)
+	Bruce Cowan (en_GB)
+	Petr Kovář (cs)
+
 Evolution-EWS 3.33.91 2019-08-19
 --------------------------------
 
