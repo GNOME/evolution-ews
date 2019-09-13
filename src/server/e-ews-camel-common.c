@@ -124,6 +124,21 @@ create_mime_message_cb (ESoapMessage *msg,
 	if (create_data->info)
 		message_camel_flags = camel_message_info_get_flags (create_data->info);
 
+	if (create_data->is_send && !(message_camel_flags & CAMEL_MESSAGE_FLAGGED)) {
+		const gchar *value;
+
+		value = camel_medium_get_header (CAMEL_MEDIUM (create_data->message), "X-Priority");
+
+		if (g_strcmp0 (value, "1") == 0) {
+			message_camel_flags |= CAMEL_MESSAGE_FLAGGED;
+		} else {
+			value = camel_medium_get_header (CAMEL_MEDIUM (create_data->message), "Importance");
+
+			if (value && g_ascii_strcasecmp (value, "High") == 0)
+				message_camel_flags |= CAMEL_MESSAGE_FLAGGED;
+		}
+	}
+
 	e_soap_message_start_element (msg, "Message", NULL, NULL);
 	e_soap_message_start_element (msg, "MimeContent", NULL, NULL);
 
