@@ -96,6 +96,7 @@ static const gchar *unknown_timezones[] = {
 	"Asia/Srednekolymsk",
 	"America/Kentucky/Louisville",
 	"America/Indiana/Indianapolis",
+	"Asia/Qostanay",
 	NULL
 };
 
