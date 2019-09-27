@@ -2,7 +2,6 @@
 # Copyright (C) 2014 evolution-ews's COPYRIGHT HOLDER
 # This file is distributed under the same license as the evolution-ews package.
 #
-#
 # Irune Asumendi Mallea <iasurmendi@outlook.com>, 2014.
 # Arantzazu Azpillaga Landa <azpilla@gmail.com>, 2014.
 # Olatz Erdozia Ibañez <olatz8@yahoo.com>, 2014.
@@ -14,13 +13,14 @@
 # Elhuyar Hizkuntza Zerbitzuak <itzulpenak@elhuyar.com>, 2014.
 # Edurne Labaka <elabaka@uzei.com>, 2015.
 # Iñaki Larrañaga Murgoitio <dooteo@zundan.com>, 2014, 2015, 2017.
+# Asier Sarasua Garmendia <asier.sarasua@gmail.com>, 2019.
+#
 msgid ""
-msgstr ""
-"Project-Id-Version: evolution-ews master\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-05 11:46+0100\n"
-"PO-Revision-Date: 2017-03-04 20:01+0100\n"
-"Last-Translator: Iñaki Larrañaga Murgoitio <dooteo@zundan.com>\n"
+msgstr "Project-Id-Version: evolution-ews master\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
+"POT-Creation-Date: 2019-09-09 12:39+0000\n"
+"PO-Revision-Date: 2019-09-27 10:00+0100\n"
+"Last-Translator: Asier Sarasua Garmendia <asier.sarasua@gmail.com>\n"
 "Language-Team: Basque <librezale@librezale.eus>\n"
 "Language: eu\n"
 "MIME-Version: 1.0\n"
@@ -29,208 +29,191 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Lokalize 1.5\n"
 
-#: ../evolution-ews.metainfo.xml.in.h:1 ../src/camel/camel-ews-provider.c:79
+#: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
+#: ../src/camel/camel-ews-provider.c:81
+#: ../src/configuration/e-ews-config-lookup.c:251
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:134
 msgid "Exchange Web Services"
 msgstr "Exchange web-zerbitzuak"
 
-#: ../evolution-ews.metainfo.xml.in.h:2 ../src/camel/camel-ews-provider.c:81
+#: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
+#: ../src/camel/camel-ews-provider.c:83
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Exchange zerbitzarietara atzitzea, web-zerbitzuak erabiliz"
 
-#: ../src/addressbook/e-book-backend-ews.c:1503
-msgid "The backend does not support bulk additions"
-msgstr "Motorrak ez du gehitze masiborik onartzen"
+#: ../src/addressbook/e-book-backend-ews.c:3496
+msgid "Failed to update GAL:"
+msgstr "Huts egin du GAL eguneratzeak:"
 
-#: ../src/addressbook/e-book-backend-ews.c:1542
-#: ../src/addressbook/e-book-backend-ews.c:1909
-#, fuzzy
+#: ../src/addressbook/e-book-backend-ews.c:3658
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
-msgstr ""
-"Ezin da kontaktuen zerrenda gorde; EWS Server 2010 bertsioa edo berriagoa "
-"behar duzu horretarako"
+msgstr "Ezin da kontaktuen zerrenda gorde; EWS Server 2010 bertsioa edo berriagoa behar da horretarako"
 
-#: ../src/addressbook/e-book-backend-ews.c:1868
-msgid "The backend does not support bulk modifications"
-msgstr "Motorrak ez du aldaketa masiborik onartzen"
+#: ../src/addressbook/e-book-backend-ews.c:3751
+msgid "Failed to set contact photo:"
+msgstr "Huts egin du kontaktuko argazkia ezartzeak:"
 
-#: ../src/addressbook/e-book-backend-ews.c:2083
-msgid "Wait till syncing is done"
-msgstr "Itxaron sinkronizazioa amaitu arte"
+#: ../src/calendar/e-cal-backend-ews.c:1811
+msgctxt "FreeBusyType"
+msgid "Free"
+msgstr "Librea"
 
-#: ../src/addressbook/e-book-backend-ews.c:2566
+#: ../src/calendar/e-cal-backend-ews.c:1814
+msgctxt "FreeBusyType"
+msgid "Busy"
+msgstr "Lanpetuta"
+
+#: ../src/calendar/e-cal-backend-ews.c:1816
+msgctxt "FreeBusyType"
+msgid "Out of Office"
+msgstr "Bulegotik kanpo"
+
+#: ../src/calendar/e-cal-backend-ews.c:1818
+msgctxt "FreeBusyType"
+msgid "Tentative"
+msgstr "Behin-behinekoa"
+
+#: ../src/calendar/e-cal-backend-ews.c:2393
+#: ../src/calendar/e-cal-backend-ews.c:2571
+msgid "Cannot determine EWS ItemId"
+msgstr "Ezin da EWS ItemId-a zehaztu"
+
+#: ../src/calendar/e-cal-backend-ews.c:3564
 #, c-format
-msgid "Processing contacts in %s %d%% completed... "
-msgstr "%s(e)ko kontaktuen prozesua %%%d osatu da... "
-
-#: ../src/addressbook/e-book-backend-ews.c:3209
-msgid "Syncing contacts..."
-msgstr "Kontaktuak sinkronizatzen..."
-
-#: ../src/addressbook/e-book-backend-ews.c:3394
-#: ../src/configuration/e-ews-search-user.c:363
-msgid "Searching..."
-msgstr "Bilatzen..."
-
-#: ../src/addressbook/e-book-backend-ews.c:4398
-msgid "Requested to delete an unrelated cursor"
-msgstr "Zerikusirik ez duen kurtsorea ezabatzea eskatu da"
-
-#: ../src/calendar/e-cal-backend-ews.c:1346
-msgid "EWS does not support bulk removals"
-msgstr "EWS-k ez du kentze masiborik onartzen"
-
-#: ../src/calendar/e-cal-backend-ews.c:1525
-msgid "Unknown error"
-msgstr "Errore ezezaguna"
-
-#: ../src/calendar/e-cal-backend-ews.c:1774
-msgid "EWS does not support bulk additions"
-msgstr "EWS-k ez du gehitze masiborik onartzen"
-
-#: ../src/calendar/e-cal-backend-ews.c:1979
-msgid "EWS does not support bulk modifications"
-msgstr "EWS-k ez du aldaketa masibori k onartzen"
-
-#: ../src/calendar/e-cal-backend-ews.c:2433
-#, fuzzy, c-format
 msgid "Cannot find user “%s” between attendees"
-msgstr "Ezin da '%s' erabiltzailea bilatu azaldutakoen artean"
+msgstr "Ez da “%s” aurkitu partaideen zerrendan"
 
-#: ../src/camel/camel-ews-folder.c:375
+#: ../src/calendar/e-cal-backend-ews-utils.c:2125
+msgid "Invalid occurrence ID"
+msgstr "Agerraldiaren ID baliogabea"
+
+#: ../src/camel/camel-ews-folder.c:374
 #, c-format
 msgid "Unable to open mimecontent temporary file!"
 msgstr "Ezin da MIME edukia duen aldi baterako fitxategia ireki"
 
-#: ../src/camel/camel-ews-folder.c:383
+#: ../src/camel/camel-ews-folder.c:382
 #, c-format
 msgid "Unable to generate parser from mimecontent!"
 msgstr "Ezin da analizatzailea sortu MIME edukitik"
 
-#: ../src/camel/camel-ews-folder.c:392
+#: ../src/camel/camel-ews-folder.c:391
 #, c-format
 msgid "Unable to parse meeting request mimecontent!"
 msgstr "Ezin da bilera-eskaeraren MIME edukia analizatu"
 
-#: ../src/camel/camel-ews-folder.c:451
+#: ../src/camel/camel-ews-folder.c:460 ../src/camel/camel-ews-folder.c:670
 #, c-format
 msgid "Unable to create cache file"
 msgstr "Ezin da cacheko fitxategia sortu"
 
-#: ../src/camel/camel-ews-folder.c:585 ../src/camel/camel-ews-folder.c:677
-#, fuzzy, c-format
+#: ../src/camel/camel-ews-folder.c:787 ../src/camel/camel-ews-folder.c:908
+#, c-format
 msgid "Unable to create cache path “%s”: %s"
-msgstr "Ezin da cachearen '%s' bide-izena sortu: %s"
+msgstr "Ezin izan da “%s” cache-bidea sortu: %s"
 
 #. Translators: The first %s consists of the source file name,
 #. the second %s of the destination file name and
 #. the third %s of the error message.
-#: ../src/camel/camel-ews-folder.c:691
-#, fuzzy, c-format
+#: ../src/camel/camel-ews-folder.c:922
+#, c-format
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
-msgstr ""
-"Huts egin du mezuen cache-fitxategia '%s'(e)tik '%s'(e)ra lekuz aldatzean: %s"
+msgstr "Huts egin du mezuen cache-fitxategia “%s” kokalekutik “%s” kokalekura lekuz aldatzeak: %s"
 
-#: ../src/camel/camel-ews-folder.c:1498
+#: ../src/camel/camel-ews-folder.c:1837
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Ezin izan da %s(r)en laburpena kargatu"
 
-#: ../src/camel/camel-ews-folder.c:1942
-#, fuzzy, c-format
+#: ../src/camel/camel-ews-folder.c:2310
+#, c-format
 msgid "Refreshing folder “%s”"
-msgstr "'%s' karpeta freskatzen"
+msgstr "”%s” karpeta freskatzen"
 
-#: ../src/camel/camel-ews-folder.c:2088
+#: ../src/camel/camel-ews-folder.c:2494
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Ezin da karpetan ekintzarik landu lineaz kanpo moduan"
 
-#: ../src/camel/camel-ews-provider.c:45
+#: ../src/camel/camel-ews-provider.c:47
 msgid "Checking for new mail"
 msgstr "Mezu berririk badagoen begiratzen"
 
-#: ../src/camel/camel-ews-provider.c:47
-msgid "C_heck for new messages in all folders"
-msgstr "_Begiratu karpeta guztietan mezu berririk badagoen"
-
 #: ../src/camel/camel-ews-provider.c:49
-msgid "_Listen for server change notifications"
-msgstr "_Entzun jakinarazpenen zerbitzariaren aldaketak"
+msgid "C_heck for new messages in all folders"
+msgstr "_Begiratu karpeta guztietan mezu berririk dagoen"
 
-#: ../src/camel/camel-ews-provider.c:52
+#: ../src/camel/camel-ews-provider.c:51
+msgid "_Listen for server change notifications"
+msgstr "_Entzun zerbitzariaren aldaketen jakinarazpenak"
+
+#: ../src/camel/camel-ews-provider.c:54
 msgid "Options"
 msgstr "Aukerak"
 
-#: ../src/camel/camel-ews-provider.c:54
-msgid "_Apply filters to new messages in Inbox on this server"
-msgstr "_Aplikatu iragazkiak sarrerako ontziko mezu berriei zerbitzari honetan"
-
 #: ../src/camel/camel-ews-provider.c:56
-msgid "Check new messages for _Junk contents"
-msgstr "Begiratu mezu berriek eduki _baztergarria duten"
+msgid "_Apply filters to new messages in Inbox on this server"
+msgstr "_Aplikatu iragazkiak zerbitzari honetako 'Sarrera'ko ontziko mezu berriei"
 
 #: ../src/camel/camel-ews-provider.c:58
+msgid "Check new messages for _Junk contents"
+msgstr "Begiratu mezu berrietan eduki _Baztergarriak dituzten"
+
+#: ../src/camel/camel-ews-provider.c:60
 msgid "Only check for Junk messages in the IN_BOX folder"
 msgstr "_SARRERAKO ONTZIAn bakarrik begiratu mezu baztergarririk dagoen"
 
-#: ../src/camel/camel-ews-provider.c:60
-#, fuzzy
+#: ../src/camel/camel-ews-provider.c:62
 msgid "Synchroni_ze remote mail locally in all folders"
-msgstr "Sinkronizatu _automatikoki urruneko mezuak  lokalki"
+msgstr "_Sinkronizatu automatikoki urruneko mezuak lokalki karpeta guztietan"
 
-#: ../src/camel/camel-ews-provider.c:64
+#: ../src/camel/camel-ews-provider.c:66
 msgid "Connection"
 msgstr "Konexioa"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/camel/camel-ews-provider.c:68
+#: ../src/camel/camel-ews-provider.c:70
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "Konexioaren _iraungitze-denbora (segundotan) %s"
 
-#: ../src/camel/camel-ews-provider.c:70
+#: ../src/camel/camel-ews-provider.c:72
 msgid "Override _User-Agent header value"
 msgstr "Gainidatzi '_User-Agent' goiburuaren balioa"
 
-#: ../src/camel/camel-ews-provider.c:96
+#: ../src/camel/camel-ews-provider.c:98
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/camel/camel-ews-provider.c:98
+#: ../src/camel/camel-ews-provider.c:100
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
-msgstr ""
-"Aukera honekin, Exchange zerbitzarira konektatuko zara testu arrunteko "
-"pasahitz baten eta NTLM autentifikazioaren bidez."
+msgstr "Aukera honekin, Exchange zerbitzarira konektatuko zara testu arrunteko pasahitz baten eta NTLM autentifikazioaren bidez."
 
-#: ../src/camel/camel-ews-provider.c:106
+#: ../src/camel/camel-ews-provider.c:108
 msgid "Basic"
 msgstr "Oinarrizkoa"
 
-#: ../src/camel/camel-ews-provider.c:108
+#: ../src/camel/camel-ews-provider.c:110
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
-msgstr ""
-"Aukera honekin, Exchange zerbitzarira konektatuko zara testu arrunteko "
-"pasahitz baten eta oinarrizko autentifikazioaren bidez."
+msgstr "Aukera honekin, Exchange zerbitzarira konektatuko zara testu arrunteko pasahitz baten eta oinarrizko autentifikazioaren bidez."
 
-#: ../src/camel/camel-ews-provider.c:116
+#: ../src/camel/camel-ews-provider.c:118
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/camel/camel-ews-provider.c:118
+#: ../src/camel/camel-ews-provider.c:120
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
-msgstr ""
-"Aukera honekin, Exchange zerbitzarira konektatuko zara Kerberos/GSSAPI "
-"autentifikazioa erabiliz."
+msgstr "Aukera honekin, Exchange zerbitzarira konektatuko zara Kerberos/GSSAPI autentifikazioa erabiliz."
 
-#: ../src/camel/camel-ews-store.c:334
+#: ../src/camel/camel-ews-store.c:335
 #, c-format
 msgid "Session has no storage path"
 msgstr "Saioak ez du biltegiratze-biderik"
@@ -239,7 +222,7 @@ msgstr "Saioak ez du biltegiratze-biderik"
 #. * user has such in his store already. The %s is replaced with "Public Folders",
 #. * the %d with counter, thus it composes name like "Public Folders_1"
 #.
-#: ../src/camel/camel-ews-store.c:371
+#: ../src/camel/camel-ews-store.c:372
 #, c-format
 msgctxt "PublicFolders"
 msgid "%s_%d"
@@ -249,189 +232,245 @@ msgstr "%s_%d"
 #. * user has such in his store already. The %s is replaced with "Foreign Folders",
 #. * the %d with counter, thus it composes name like "Foreign Folders_1"
 #.
-#: ../src/camel/camel-ews-store.c:500
+#: ../src/camel/camel-ews-store.c:505
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:646 ../src/camel/camel-ews-store.c:1249
-#, fuzzy
+#: ../src/camel/camel-ews-store.c:651 ../src/camel/camel-ews-store.c:1291
 msgid "Checking “Out of Office” settings"
-msgstr "'Bulegotik kanpo'ren ezarpenak begiratzen"
+msgstr "“Bulegotik kanpo” egoeraren ezarpenak begiratzen"
 
-#: ../src/camel/camel-ews-store.c:1497
+#: ../src/camel/camel-ews-store.c:1297
+msgid "Look up Exchange server categories"
+msgstr "Kontsultatu Exchange zerbitzariaren kategoriak"
+
+#. Translators: The "%s" is a service URL, provided by the server
+#: ../src/camel/camel-ews-store.c:1367
+#, c-format
+msgid "Password will expire in %d day. Open “%s” to change it."
+msgid_plural "Password will expire in %d days. Open “%s” to change it."
+msgstr[0] "Pasahitza egun %dean iraungiko da. Ireki “%s” hori aldatzeko."
+msgstr[1] "Pasahitza %d egunetan iraungiko da. Ireki “%s” hori aldatzeko."
+
+#: ../src/camel/camel-ews-store.c:1373
+#, c-format
+msgid "Password will expire in one day."
+msgid_plural "Password will expire in %d days."
+msgstr[0] "Psahitza egun batean iraungiko da."
+msgstr[1] "Pasahitza %d egunetan iraungiko da."
+
+#: ../src/camel/camel-ews-store.c:1593
 msgid "Updating foreign folder structure"
 msgstr "Kanpoko karpeten egitura eguneratzen"
 
-#: ../src/camel/camel-ews-store.c:1633
+#: ../src/camel/camel-ews-store.c:1729
 msgid "Updating foreign folders"
 msgstr "Kanpoko karpetak eguneratzen"
 
-#: ../src/camel/camel-ews-store.c:2007
+#: ../src/camel/camel-ews-store.c:2145
 #, c-format
 msgid "No such folder: %s"
-msgstr "Ez dago karpeta hau: %s"
+msgstr "Karpeta ez dago: %s"
 
-#: ../src/camel/camel-ews-store.c:2305
+#: ../src/camel/camel-ews-store.c:2454
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Lineaz kanpo ezin dira EWS-ko karpeta publikoak zerrendatu"
 
-#: ../src/camel/camel-ews-store.c:2378
+#: ../src/camel/camel-ews-store.c:2527
 msgid "Cannot find any EWS public folders"
 msgstr "Ezin da EWS-ko karpeta publikorik aurkitu"
 
-#: ../src/camel/camel-ews-store.c:2487
-#, fuzzy, c-format
+#: ../src/camel/camel-ews-store.c:2636
+#, c-format
 msgid "Cannot create folder “%s”, folder already exists"
-msgstr "Ezin da '%s' karpeta sortu: karpeta hori badago lehendik"
+msgstr "Ezin da “%s” karpeta sortu, badago lehendik"
 
-#: ../src/camel/camel-ews-store.c:2502
+#: ../src/camel/camel-ews-store.c:2651
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Ez dago %s karpeta gurasorik"
 
-#: ../src/camel/camel-ews-store.c:2512
-#, fuzzy, c-format
+#: ../src/camel/camel-ews-store.c:2661
+#, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
-msgstr ""
-"Ezin da karpetarik  sortu '%s'(e)n: beste erabiltzaile batzuen karpetentzat "
-"soilik erabiltzen da"
+msgstr "Ezin da karpetarik  sortu “%s” kokalekuan, beste erabiltzaile batzuen karpetentzat soilik erabiltzen da"
 
-#: ../src/camel/camel-ews-store.c:2522
-#, fuzzy, c-format
+#: ../src/camel/camel-ews-store.c:2671
+#, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
-msgstr ""
-"Ezin da karpetarik sortu '%s'(e)n: karpeta publikoentzat soilik erabiltzen da"
+msgstr "Ezin da karpetarik  sortu “%s” kokalekuan, karpeta publikoentzat soilik erabiltzen da"
 
-#: ../src/camel/camel-ews-store.c:2626
+#: ../src/camel/camel-ews-store.c:2775
 #, c-format
 msgid "Folder does not exist"
 msgstr "Karpeta ez da existitzen"
 
-#: ../src/camel/camel-ews-store.c:2636
-#, fuzzy, c-format
+#: ../src/camel/camel-ews-store.c:2785
+#, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
-msgstr ""
-"Ezin da '%s' karpeta kendu: beste erabiltzaile batzuen karpetentzat soilik "
-"erabiltzen da"
+msgstr "Ezin da “%s” karpeta kendu, beste erabiltzaile batzuen karpetentzat soilik erabiltzen da"
 
-#: ../src/camel/camel-ews-store.c:2647
-#, fuzzy, c-format
+#: ../src/camel/camel-ews-store.c:2796
+#, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
-msgstr "Ezin da '%s' karpeta kendu: karpeta publikoentzat soilik erabiltzen da"
+msgstr "Ezin da “%s” karpeta kendu, karpeta publikoentzat soilik erabiltzen da"
 
-#: ../src/camel/camel-ews-store.c:2803
+#: ../src/camel/camel-ews-store.c:2955
 #, c-format
 msgid "Folder %s does not exist"
-msgstr "'%s' karpeta ez da existitzen"
+msgstr "%s karpeta ez da existitzen"
 
-#: ../src/camel/camel-ews-store.c:2812
+#: ../src/camel/camel-ews-store.c:2964
 #, c-format
 msgid "No change key record for folder %s"
-msgstr "Ez dago '%s' karpetaren gako-aldaketaren erregistrorik"
+msgstr "Ez dago %s karpetaren gako-aldaketaren erregistrorik"
 
-#: ../src/camel/camel-ews-store.c:2855
+#: ../src/camel/camel-ews-store.c:3007
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
-msgstr ""
-"Ezin da aldi berean karpeta baten izena aldatu eta karpeta lekuz aldatu"
+msgstr "Ezin da aldi berean karpeta baten izena aldatu eta karpeta lekuz aldatu"
 
-#: ../src/camel/camel-ews-store.c:2889
+#: ../src/camel/camel-ews-store.c:3041
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
-msgstr "Ezin da '%s' karpeta gurasoaren karpetaren IDa aurkitu"
+msgstr "Ezin da %s karpeta gurasoaren karpetaren IDa aurkitu"
 
-#: ../src/camel/camel-ews-store.c:2941 ../src/camel/camel-ews-transport.c:315
+#: ../src/camel/camel-ews-store.c:3093 ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange server %s"
 msgstr "%s Exchange zerbitzaria"
 
-#: ../src/camel/camel-ews-store.c:2944
+#: ../src/camel/camel-ews-store.c:3096
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Exchange zerbitzua %s(e)rako %s(e)n"
 
-#: ../src/camel/camel-ews-store.c:2988
+#: ../src/camel/camel-ews-store.c:3140
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Ezin izan da Zakarrontzia karpeta aurkitu"
 
-#: ../src/camel/camel-ews-store.c:3048
+#: ../src/camel/camel-ews-store.c:3200
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Ezin izan da Baztergarria karpeta aurkitu"
 
-#: ../src/camel/camel-ews-store.c:3239
+#: ../src/camel/camel-ews-store.c:3391
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Ezin dira EWS-ko karpetak harpidetu lineaz kanpo"
 
-#: ../src/camel/camel-ews-store.c:3262
-#, fuzzy, c-format
+#: ../src/camel/camel-ews-store.c:3414
+#, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
-msgstr ""
-"Ezin da '%s' karpetara harpidetu: ez dago karpeta publikorik erabilgarri"
+msgstr "Ezin da “%s” karpetara harpidetu, ez dago karpeta publikorik erabilgarri"
 
-#: ../src/camel/camel-ews-store.c:3272
-#, fuzzy, c-format
+#: ../src/camel/camel-ews-store.c:3424
+#, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
-msgstr "Ezin da '%s' karpetara harpidetu: ez da karpeta aurkitu"
+msgstr "Ezin da “%s” karpetara harpidetu, karpeta ez da aurkitu"
 
-#: ../src/camel/camel-ews-store.c:3363
+#: ../src/camel/camel-ews-store.c:3515
 msgid "Cannot unsubscribe EWS folders in offline mode"
-msgstr "Ezin da EWS-ko karpeten harpidetza eten lineaz kanpo"
+msgstr "Ezin da EWS karpeten harpidetza eten lineaz kanpo"
 
-#: ../src/camel/camel-ews-store.c:3480
+#: ../src/camel/camel-ews-store.c:3632
 #, c-format
 msgid "You must be working online to complete this operation"
-msgstr "Linean lan egin behar duzu eragiketa hau bukatzeko"
+msgstr "Linean jardun behar duzu lanean eragiketa hau bukatzeko"
 
-#: ../src/camel/camel-ews-store.c:3524 ../src/camel/camel-ews-store.c:3561
-#, fuzzy
+#: ../src/camel/camel-ews-store.c:3676 ../src/camel/camel-ews-store.c:3713
 msgid "Unsetting the “Out of Office” status"
-msgstr "'Bulegotik kanpo' egoera kentzen"
+msgstr "“Bulegotik kanpo” egoeraren ezarpena kentzen"
 
-#: ../src/camel/camel-ews-transport.c:318
+#: ../src/camel/camel-ews-store.h:56
+msgid "Foreign Folders"
+msgstr "Kanpoko karpetak"
+
+#: ../src/camel/camel-ews-store.h:58
+msgid "Public Folders"
+msgstr "Karpeta publikoak"
+
+#: ../src/camel/camel-ews-transport.c:321
 #, c-format
 msgid "Exchange mail delivery via %s"
 msgstr "Exchange mezuen banaketa %s bidez"
 
-#: ../src/camel/camel-ews-transport.c:367
+#: ../src/camel/camel-ews-transport.c:370
 msgid "Cannot send message with no From address"
 msgstr "Ezin da mezua bidali bidaltzailearen helbiderik gabe"
 
-#: ../src/camel/camel-ews-transport.c:373
+#: ../src/camel/camel-ews-transport.c:376
 msgid "Exchange server cannot send message with multiple From addresses"
-msgstr ""
-"Exchange zerbitzariak ezin du mezua bidali bidaltzaile-helbide bat baino "
-"gehiagorekin"
+msgstr "Exchange zerbitzariak ezin du mezua bidali bidaltzaile-helbide bat baino gehiagorekin"
 
-#: ../src/camel/camel-ews-transport.c:383
+#: ../src/camel/camel-ews-transport.c:386
 msgid "Failed to read From address"
-msgstr "Huts egin du bidaltzailearen helbidea irakurtzean"
+msgstr "Huts egin du 'Nork' helbidea irakurtzean"
 
-#: ../src/camel/camel-ews-transport.c:393
+#: ../src/camel/camel-ews-transport.c:396
 #, c-format
 msgid "Service not connected"
 msgstr "Zerbitzua ez dago konektatuta"
 
-#: ../src/collection/e-ews-backend.c:419
+#: ../src/collection/e-ews-backend.c:533
 #: ../src/configuration/e-mail-config-ews-gal.c:274
 msgid "Global Address List"
 msgstr "Helbide-zerrenda orokorra"
 
-#: ../src/collection/e-ews-backend.c:855
-#, fuzzy, c-format
+#: ../src/collection/e-ews-backend.c:980
+#, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
-msgstr ""
-"Ezin izan da karpeta klase egokirik zehaztu %s izeneko karpeta berri "
-"batentzat"
+msgstr "Ezin izan da karpeta klase egokirik zehaztu “%s” izeneko karpeta berri batentzat"
 
-#: ../src/collection/e-ews-backend.c:943
-#, fuzzy, c-format
+#: ../src/collection/e-ews-backend.c:1068
+#, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
-msgstr "'%s' datu-iturburua ez da Exchange web-zerbitzuetako karpeta bat"
+msgstr "“%s” datu-iturburuak ez du Exchange Web Services karpeta bat ordezkatzen"
+
+#: ../src/configuration/e-book-config-ews.c:100
+msgid "Use only _primary contact email address"
+msgstr "Erabili kontaktu helbide elektroniko _nagusia soilik"
+
+#: ../src/configuration/e-book-config-ews.c:101
+msgid ""
+"When checked, the contacts looked up in the online Global Address List will "
+"contain only the primary email address"
+msgstr "Markatuta badago, helbideen lineako zerrenda globalean kontsultatutako kontaktuek helbide elektroniko nagusia soilik izango dute"
+
+#: ../src/configuration/e-book-config-ews.c:113
+msgid "_Fetch contact photos"
+msgstr "_Lortu kontaktuen argazkia"
+
+#: ../src/configuration/e-book-config-ews.c:114
+msgid "Tries to look up for user photo"
+msgstr "Erabiltzaile-argazkia bilatzen saiatzen da"
+
+#: ../src/configuration/e-ews-config-lookup.c:192
+msgid "Exchange Web Services autodiscovery"
+msgstr "Exchange Web Services zerbitzuen aurkitze automatikoa"
+
+#: ../src/configuration/e-ews-config-lookup.c:235
+#, c-format
+msgid "User: %s"
+msgstr "Erabiltzailea: %s"
+
+#: ../src/configuration/e-ews-config-lookup.c:240
+#, c-format
+msgid "Host URL: %s"
+msgstr "Ostalariaren URLa: %s"
+
+#: ../src/configuration/e-ews-config-lookup.c:245
+#, c-format
+msgid "OAB URL: %s"
+msgstr "OAB URLa: %s"
+
+#: ../src/configuration/e-ews-config-lookup.c:322
+#, c-format
+msgid "Requires user password to continue"
+msgstr "Erabiltzaile-pasahitza behar da jarraitzeko"
 
 #: ../src/configuration/e-ews-config-utils.c:574
 msgid "Folder"
@@ -446,57 +485,61 @@ msgstr "Tamaina"
 msgid "Unable to retrieve folder size information"
 msgstr "Ezin da karpetaren tamainari buruzko informaziorik eskuratu"
 
-#: ../src/configuration/e-ews-config-utils.c:747
+#: ../src/configuration/e-ews-config-utils.c:754
 msgid "Folder Sizes"
 msgstr "Karpeten tamainak"
 
-#: ../src/configuration/e-ews-config-utils.c:750
+#: ../src/configuration/e-ews-config-utils.c:757
 msgid "_Close"
-msgstr "_Itxi"
+msgstr "It_xi"
 
-#: ../src/configuration/e-ews-config-utils.c:764
+#: ../src/configuration/e-ews-config-utils.c:771
 msgid "Fetching folder list…"
 msgstr "Karpeta-zerrenda eskuratzen…"
 
-#: ../src/configuration/e-ews-config-utils.c:917
-#, fuzzy, c-format
+#: ../src/configuration/e-ews-config-utils.c:834
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:765
+msgid "Subscribe to folder of other EWS user…"
+msgstr "Harpidetu beste EWS erabiltzaile baten karpetara…"
+
+#: ../src/configuration/e-ews-config-utils.c:1021
+#, c-format
 msgid "Cannot edit permissions of folder “%s”, choose other folder."
-msgstr ""
-"Ezin dira '%s' karpetaren baimenak editatu, aukeratu beste karpeta bat."
+msgstr "Ezin dira “%s” karpetaren baimenak editatu, aukeratu beste karpeta bat."
 
-#: ../src/configuration/e-ews-config-utils.c:994
-msgid "Folder Sizes..."
-msgstr "Karpeten tamainak..."
+#: ../src/configuration/e-ews-config-utils.c:1100
+msgid "Folder Sizes…"
+msgstr "Karpeten tamainak…"
 
-#: ../src/configuration/e-ews-config-utils.c:1001
-msgid "Subscribe to folder of other user..."
-msgstr "Harpidetu beste erabiltzaile baten karpetara..."
+#: ../src/configuration/e-ews-config-utils.c:1107
+msgid "Subscribe to folder of other user…"
+msgstr "Harpidetu beste erabiltzaile baten karpetara…"
 
-#: ../src/configuration/e-ews-config-utils.c:1010
-#: ../src/configuration/e-ews-config-utils.c:1314
-#: ../src/configuration/e-ews-config-utils.c:1345
-#: ../src/configuration/e-ews-config-utils.c:1376
-#: ../src/configuration/e-ews-config-utils.c:1407
-msgid "Permissions..."
-msgstr "Baimenak..."
+#: ../src/configuration/e-ews-config-utils.c:1116
+#: ../src/configuration/e-ews-config-utils.c:1452
+#: ../src/configuration/e-ews-config-utils.c:1490
+#: ../src/configuration/e-ews-config-utils.c:1528
+#: ../src/configuration/e-ews-config-utils.c:1566
+msgid "Permissions…"
+msgstr "Baimenak…"
 
-#: ../src/configuration/e-ews-config-utils.c:1012
+#: ../src/configuration/e-ews-config-utils.c:1118
 msgid "Edit EWS folder permissions"
 msgstr "Editatu EWS-ren karpeta-baimenak"
 
-#: ../src/configuration/e-ews-config-utils.c:1316
+#: ../src/configuration/e-ews-config-utils.c:1454
 msgid "Edit EWS calendar permissions"
 msgstr "Editatu EWS-ren egutegi-baimenak"
 
-#: ../src/configuration/e-ews-config-utils.c:1347
+#: ../src/configuration/e-ews-config-utils.c:1492
 msgid "Edit EWS tasks permissions"
 msgstr "Editatu EWS-ren zeregin-baimenak"
 
-#: ../src/configuration/e-ews-config-utils.c:1378
+#: ../src/configuration/e-ews-config-utils.c:1530
 msgid "Edit EWS memos permissions"
 msgstr "Editatu EWS-ren zirkular-baimenak"
 
-#: ../src/configuration/e-ews-config-utils.c:1409
+#: ../src/configuration/e-ews-config-utils.c:1568
 msgid "Edit EWS contacts permissions"
 msgstr "Editatu EWS-ren kontaktu-baimenak"
 
@@ -544,7 +587,7 @@ msgstr "Gainbegiratzailea"
 #: ../src/configuration/e-ews-edit-folder-permissions.c:134
 msgctxt "PermissionsLevel"
 msgid "Contributor"
-msgstr "Kolaboratzailea"
+msgstr "Laguntzailea"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:137
 msgctxt "PermissionsLevel"
@@ -560,11 +603,11 @@ msgstr "Libre/Lanpetuta, gaia, lekua"
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:439
 msgctxt "PermissionsLevel"
 msgid "Custom"
-msgstr "Pertsonalizatu"
+msgstr "Pertsonalizatua"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:265
-msgid "Writing folder permissions, please wait..."
-msgstr "Karpetaren baimenak idazten; itxaron..."
+msgid "Writing folder permissions, please wait…"
+msgstr "Karpetaren baimenak idazten, itxaron…"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:779
 msgctxt "User"
@@ -581,139 +624,138 @@ msgctxt "User"
 msgid "Unknown"
 msgstr "Ezezaguna"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:869
-#: ../src/configuration/e-ews-search-user.c:429
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:993
+#: ../src/configuration/e-ews-edit-folder-permissions.c:871
+#: ../src/configuration/e-ews-search-user.c:431
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:995
 msgid "Name"
 msgstr "Izena"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:875
+#: ../src/configuration/e-ews-edit-folder-permissions.c:877
 msgid "Permission level"
 msgstr "Baimen-maila"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:927
-msgid "Edit EWS folder permissions..."
-msgstr "Editatu EWS-ren karpeta-baimenak..."
+#: ../src/configuration/e-ews-edit-folder-permissions.c:929
+msgid "Edit EWS folder permissions…"
+msgstr "Editatu EWS karpeten baimenak…"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:952
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:636
+#: ../src/configuration/e-ews-edit-folder-permissions.c:954
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:786
 msgid "Account:"
 msgstr "Kontua:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:980
+#: ../src/configuration/e-ews-edit-folder-permissions.c:982
 msgid "Folder name:"
 msgstr "Karpeta-izena:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1003
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1006
 msgid "Folder ID:"
 msgstr "Karpetaren IDa:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1067
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1071
 msgid "Permissions"
 msgstr "Baimenak"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1089
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1093
 msgid "Permi_ssion level:"
 msgstr "_Baimen-maila:"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1123
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1127
 msgctxt "Permissions"
 msgid "Read"
 msgstr "Irakurri"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1135
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1202
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1139
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1206
 msgctxt "Permissions"
 msgid "None"
 msgstr "Bat ere ez"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1141
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1145
 msgctxt "Permissions"
 msgid "Free/Busy time"
 msgstr "Libre/Lanpetuta"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1146
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1150
 msgctxt "Permissions"
 msgid "Free/Busy time, subject, location"
 msgstr "Libre/Lanpetuta, gaia, lekua"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1152
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1156
 msgctxt "Permissions"
 msgid "Full Details"
 msgstr "Xehetasun guztiak"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1158
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1162
 msgctxt "Permissions"
 msgid "Write"
 msgstr "Idatzi"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1170
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1174
 msgctxt "Permissions"
 msgid "Create items"
 msgstr "Sortu elementuak"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1174
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1178
 msgctxt "Permissions"
 msgid "Create subfolders"
 msgstr "Sortu azpikarpetak"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1178
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1182
 msgctxt "Permissions"
 msgid "Edit own"
 msgstr "Editatu norberarena"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1182
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1186
 msgctxt "Permissions"
 msgid "Edit all"
 msgstr "Editatu denak"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1190
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1194
 msgctxt "Permissions"
 msgid "Delete items"
 msgstr "Ezabatu elementuak"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1207
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1211
 msgctxt "Permissions"
 msgid "Own"
 msgstr "Norberarenak"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1212
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1216
 msgctxt "Permissions"
 msgid "All"
 msgstr "Denak"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1218
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1222
 msgctxt "Permissions"
 msgid "Other"
 msgstr "Bestelakoa"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1230
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1234
 msgctxt "Permissions"
 msgid "Folder owner"
 msgstr "Karpetaren jabea"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1234
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1238
 msgctxt "Permissions"
 msgid "Folder contact"
 msgstr "Karpetaren kontaktua"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1238
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1242
 msgctxt "Permissions"
 msgid "Folder visible"
 msgstr "Karpeta ikusgai"
 
-#: ../src/configuration/e-ews-edit-folder-permissions.c:1311
-msgid "Reading folder permissions, please wait..."
-msgstr "Karpeta-baimenak irakurtzen, itxaron..."
+#: ../src/configuration/e-ews-edit-folder-permissions.c:1315
+msgid "Reading folder permissions, please wait…"
+msgstr "Karpeta-baimenak irakurtzen, itxaron…"
 
 #: ../src/configuration/e-ews-ooo-notificator.c:182
 msgid "Unset on Server"
 msgstr "Kendu zerbitzaritik"
 
 #: ../src/configuration/e-ews-ooo-notificator.c:183
-#, fuzzy
 msgid "Unset the “Out of Office” status"
-msgstr "Kendu 'bulegotik kanpo' egoera"
+msgstr "Kendu ezarpena “Bulegotik kanpo” egoerari"
 
 #: ../src/configuration/e-ews-search-user.c:206
 #, c-format
@@ -737,184 +779,243 @@ msgstr[1] "%d erabiltzaile aurkitu dira"
 #, c-format
 msgid "Found more than 100 users, but showing only first %d"
 msgid_plural "Found more than 100 users, but showing only first %d"
-msgstr[0] ""
-"100 erabiltzaile baino gehiago aurkitu dira, baina soilik lehenengo %d "
-"erakutsi da "
-msgstr[1] ""
-"100 erabiltzaile baino gehiago aurkitu dira, baina soilik lehenengo %d "
-"erakutsi dira"
+msgstr[0] "100 erabiltzaile baino gehiago aurkitu dira, baina soilik lehenengo %d erakutsi da"
+msgstr[1] "100 erabiltzaile baino gehiago aurkitu dira, baina soilik lehenengo %d erakutsi da"
 
 #: ../src/configuration/e-ews-search-user.c:355
-#: ../src/configuration/e-ews-search-user.c:538
+#: ../src/configuration/e-ews-search-user.c:540
 msgid "Search for a user"
 msgstr "Bilatu erabiltzailea"
 
-#: ../src/configuration/e-ews-search-user.c:435
+#: ../src/configuration/e-ews-search-user.c:363
+msgid "Searching…"
+msgstr "Bilatzen…"
+
+#: ../src/configuration/e-ews-search-user.c:437
 msgid "E-mail"
-msgstr "Helbide elektronikoa"
+msgstr "Helb. elek."
 
-#: ../src/configuration/e-ews-search-user.c:472
-msgid "Choose EWS user..."
-msgstr "Aukeratu EWS-ren erabiltzailea..."
+#: ../src/configuration/e-ews-search-user.c:474
+msgid "Choose EWS user…"
+msgstr "Hautatu EWS erabiltzailea…"
 
-#: ../src/configuration/e-ews-search-user.c:495
+#: ../src/configuration/e-ews-search-user.c:497
 msgid "_Search:"
 msgstr "_Bilatu:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:95
-#: ../src/server/e-ews-folder.c:748
-#, fuzzy, c-format
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:103
+#: ../src/server/e-ews-folder.c:802
+#, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
-msgstr "Ezin da karpeta gehitu, karpeta hori badago lehendik '%s' gisa"
+msgstr "Ezin da karpeta gehitu, karpeta hori badago lehendik “%s” gisa"
 
 #. Translators: The '%s' is replaced with user name, to whom the foreign mailbox belongs.
 #. * Example result: "Mailbox — John Smith"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:105
-#, fuzzy, c-format
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:113
+#, c-format
 msgctxt "ForeignFolder"
 msgid "Mailbox — %s"
-msgstr "Postontzia - %s"
+msgstr "Postontzia — %s"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:273
-msgid "Cannot test foreign folder availability while in offline mode"
-msgstr "Ezin da kanpoko karpeten erabilgarritasuna probatu lineaz kanpo"
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:281
+msgid "Cannot test foreign folder availability when the account is offline"
+msgstr "Ezin da kanpoko karpeten erabilgarritasuna probatu kontua lineaz kanpo badago"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:298
-#, fuzzy, c-format
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:314
+#, c-format
 msgid "User “%s” was not found on the server"
-msgstr "Ez da '%s' erabiltzailea aurkitu zerbitzarian"
+msgstr "Ez da “%s” erabiltzailea aurkitu zerbitzarian"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:334
-#, fuzzy, c-format
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:350
+#, c-format
 msgid "User name “%s” is ambiguous, specify it more precisely, please"
-msgstr "'%s' erabiltzaile-izena anbiguoa da, zehaztu"
+msgstr "“%s” erabiltzaile-izena anbiguoa da, zehaztu"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:356
-#, fuzzy, c-format
+#. Translators: This is used as a calendar name; it constructs "User Name - Availability" string shown in UI
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:388
+msgid "Availability"
+msgstr "Erabilgarritasuna"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:405
+#, c-format
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
 "permission to access it."
-msgstr ""
-"Ez da '%s' karpeta aurkitu. Edo ez da existitzen edo ez duzu hura irekitzeko "
-"baimenik."
+msgstr "Ez da “%s” karpeta aurkitu. Edo ez da existitzen edo ez duzu hura atzitzeko baimenik."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:374
-#, fuzzy
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:424
 msgid "Cannot add folder, cannot determine folder’s type"
-msgstr "Ezin da karpeta gehitu: ezin da karpeta mota zehaztu"
+msgstr "Ezin da karpeta gehitu, ezin da zehaztu karpetaren mota"
 
 #. Translators: This is used to name foreign folder.
 #. * The first '%s' is replaced with user name to whom the folder belongs,
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:419
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:469
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
-msgstr ""
+msgstr "%s — %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:513
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:721
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:582
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:866
 msgid "Inbox"
 msgstr "Sarrerako ontzia"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:515
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:722
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:584
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:867
 msgid "Contacts"
 msgstr "Kontaktuak"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:517
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:723
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:586
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:868
 msgid "Calendar"
 msgstr "Egutegia"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:519
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:724
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:588
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:869
+msgid "Free/Busy as Calendar"
+msgstr "Libre/lanpetuta egutegi gisa"
+
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:590
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:870
 msgid "Memos"
 msgstr "Zirkularrak"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:521
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:725
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:592
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:871
 msgid "Tasks"
 msgstr "Zereginak"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:538
-#, fuzzy, c-format
-msgid "Testing availability of folder “%s” of user “%s”, please wait..."
-msgstr ""
-"'%2$s' erabiltzailearen '%1$s' karpeta erabilgarri dagoen probatzen, "
-"itxaron..."
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:609
+#, c-format
+msgid "Testing availability of folder “%s” of user “%s”, please wait…"
+msgstr "“%s” karpeta (“%s” erabiltzailearena) erabilgarri dagoen probatzen, itxaron…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:615
-msgid "Subscribe to folder of other EWS user..."
-msgstr "Harpidetu EWS-ren beste erabiltzaile baten karpetara..."
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:648
+msgid "Cannot search for user when the account is offline"
+msgstr "Ezin da erabiltzailea bilatu kontua lineaz kanpo dagoenean"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:666
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:811
 msgid "User"
 msgstr "Erabiltzailea"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:673
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:818
 msgid "_User:"
 msgstr "_Erabiltzailea:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:688
-msgid "C_hoose..."
-msgstr "_Aukeratu..."
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:833
+msgid "C_hoose…"
+msgstr "_Aukeratu…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:704
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:849
 msgid "_Folder name:"
 msgstr "_Karpeta-izena:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:734
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:880
 msgid "Include _subfolders"
 msgstr "A_zpikarpetak barne"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:220
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:282
 msgid "Querying Autodiscover service"
 msgstr "Detekzio automatikoko zerbitzua kontsultatzen"
 
-#: ../src/configuration/e-mail-config-ews-autodiscover.c:317
+#: ../src/configuration/e-mail-config-ews-autodiscover.c:381
 msgid "Fetch _URL"
 msgstr "Eskuratu _URLa"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:138
+#: ../src/configuration/e-mail-config-ews-backend.c:178
 msgid "Configuration"
 msgstr "Konfigurazioa"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:156
+#: ../src/configuration/e-mail-config-ews-backend.c:196
 msgid "User_name:"
 msgstr "_Erabiltzaile-izena:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:170
+#: ../src/configuration/e-mail-config-ews-backend.c:210
 msgid "_Host URL:"
 msgstr "_Ostalariaren URLa:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:189
+#: ../src/configuration/e-mail-config-ews-backend.c:229
 msgid "OAB U_RL:"
 msgstr "OABren _URLa:"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:203
+#: ../src/configuration/e-mail-config-ews-backend.c:243
 msgid "Open _Mailbox of other user"
 msgstr "Ireki beste erabiltzaile baten _postontzia"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:237
-msgid "S_earch..."
-msgstr "_Bilatu..."
+#: ../src/configuration/e-mail-config-ews-backend.c:277
+msgid "S_earch…"
+msgstr "_Bilatu…"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:248
+#: ../src/configuration/e-mail-config-ews-backend.c:288
 msgid "Authentication"
 msgstr "Autentifikazioa"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:388
+#: ../src/configuration/e-mail-config-ews-backend.c:315
+msgid "_Override Office365 OAuth2 settings"
+msgstr "Gain_idatzi Office365 OAuth2 ezarpenak"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:319
+msgid "Help…"
+msgstr "Laguntza…"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/configuration/e-mail-config-ews-backend.c:328
+msgid "_Tenant:"
+msgstr "_Tenant:"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world. Same for 'common', it's a default URL path.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/configuration/e-mail-config-ews-backend.c:353
+msgid "Default tenant is “common“"
+msgstr "Tenant lehenetsia “common” da"
+
+#. Translators: 'Tenant' here means a term used by Microsoft to identify a company or organization in an Office 365 world.
+#. You probably do not want to translate it. More for example here: https://powerbi.microsoft.com/en-us/blog/what-is-a-tenant/
+#: ../src/configuration/e-mail-config-ews-backend.c:356
+#, c-format
+msgid "Default tenant is “%s”"
+msgstr "Tenant lehenetsia “%s” da."
+
+#: ../src/configuration/e-mail-config-ews-backend.c:358
+msgid "Application I_D:"
+msgstr "Aplikazioaren I_Da:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:381
+msgid "There is not set any default application ID"
+msgstr "Ez dago ezarrita aplikazioaren ID lehenetsirik"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:382
+#, c-format
+msgid "Default application ID is “%s”"
+msgstr "Aplikazioaren ID lehenetsia “%s” da"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:384
+msgid "_Redirect URI:"
+msgstr "_Berbideraketa URIa:"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:406
+#: ../src/configuration/e-mail-config-ews-backend.c:409
+#, c-format
+msgid "Default redirect URI is “%s”"
+msgstr "Berbideraketa URI lehenetsia “%s” da"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:581
 msgid "Host URL cannot be empty"
 msgstr "Ostalariaren URLa ezin da hutsa izan"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:393
+#: ../src/configuration/e-mail-config-ews-backend.c:586
 msgid "User name cannot be empty"
 msgstr "Erabiltzaile-izena ezin da hutsa izan"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:600
+msgid "Application ID cannot be empty"
+msgstr "Aplikazioaren IDak ezin du hutsik egon"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:417
 msgctxt "PermissionsLevel"
@@ -941,8 +1042,7 @@ msgstr "_Egutegia"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:545
 msgid "_Delegate receives copies of meeting-related messages sent to me"
-msgstr ""
-"_Ordezkariari bidaltzen zaizkio niri bidalitako bilerei buruzko mezuen kopiak"
+msgstr "_Ordezkariari bidaltzen zaizkio niri bidalitako bilerei buruzko mezuen kopiak"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:550
 msgid "_Tasks"
@@ -965,74 +1065,65 @@ msgid "_Journal"
 msgstr "_Egunkaria"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:565
-#, fuzzy, c-format
+#, c-format
 msgid "Delegate “%s” has the following permissions"
-msgstr "'%s' ordezkariak baimen hauek ditu"
+msgstr "“%s” ordezkariak honako baimenak ditu"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:583
 msgid "Delegate can see my _private items"
 msgstr "Ordezkariak nire elementu _pribatuak ikus ditzake"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:905
-msgid "Retrieving current user permissions, please wait..."
-msgstr "Erabiltzailearen uneko baimenak berreskuratzen, itxaron..."
+msgid "Retrieving current user permissions, please wait…"
+msgstr "Erabiltzailearen uneko baimenak berreskuratzen, itxaron…"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1025
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1645
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1028
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1653
 msgid "Delegates"
 msgstr "Ordezkariak"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1049
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1052
 msgid ""
 "Delegates can send items on your behalf, including creating and responding "
 "to meeting requests. If you want to grant folder permissions without giving "
 "send-on-behalf-of permissions, close this dialog box, right-click the "
 "folder, click Permissions and change the options there."
-msgstr ""
-"Ordezkariek elementuak bidal ditzake zure izenean, bilerak sortzea eta "
-"bilera-eskaerei erantzutea barne. Zure izenean bidaltzeko baimena ez beste "
-"baimen batzuk eman nahi badituzu, itxi elkarrizketa-koadro hau, egin klik "
-"eskuineko botoiarekin karpetan, egin klik Baimenak aukeran, eta aldatu "
-"aukerak."
+msgstr "Ordezkariek elementuak bidal ditzake zure izenean, bilerak sortzea eta bilera-eskaerei erantzutea barne. Zure izenean bidaltzeko baimena ez beste baimen batzuk eman nahi badituzu, itxi elkarrizketa-koadro hau, egin klik eskuineko botoiarekin karpetan, egin klik Baimenak aukeran, eta aldatu aukerak."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1099
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1103
 msgid ""
 "Deliver meeting requests addressed to me and responses to meeting requests "
 "where I am the organizer to:"
-msgstr ""
-"Bidali honako hauei niri zuzendutako bilera-eskaerak eta nik antolatutako "
-"bileren eskaerei emandako erantzunak:"
+msgstr "Bidali honako hauei niri zuzendutako bilera-eskaerak eta nik antolatutako bileren eskaerei emandako erantzunak:"
 
 #. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1109
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1114
 msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
-msgstr ""
-"Nire ordezkariei soilik, baina _bidali niri bilera-eskaeren\n"
+msgstr "Nire ordezkariei soilik, baina _bidali niri bilera-eskaeren\n"
 "eta erantzunen kopia bat (gomendatua)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1116
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1121
 msgid "My d_elegates only"
 msgstr "Nire _ordezkariei soilik"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1123
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1128
 msgid "My delegates a_nd me"
 msgstr "Nire ordezkariei eta _niri"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1717
-#, fuzzy
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1725
 msgid "Retrieving “Delegates” settings"
-msgstr "Ordezkarien ezarpenak eskuratzen"
+msgstr "“Ordezkariak” ezarpenak atzitzen"
 
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:193
-#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:255
+#: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:257
 msgid "EWS Settings"
-msgstr "EWS-ren ezarpenak"
+msgstr "EWS ezarpenak"
 
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:200
 msgid "View the size of all Exchange folders"
-msgstr "Ikusi Exchange-ko karpeta guztien tamaina"
+msgstr "Ikusi Exchange karpeta guztien tamaina"
 
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:204
 msgid "Folder _Sizes"
@@ -1054,189 +1145,216 @@ msgstr "Hautatu _helbide-zerrenda:"
 msgid "Fetch List"
 msgstr "Eskuratu zerrenda"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:394
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:929
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:396
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:934
 msgid "Out of Office"
 msgstr "Bulegotik kanpo"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:410
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:412
 msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
-msgstr ""
-"Behean adierazitako mezuak automatikoki bidaliko zaizkie mezu bat bidaltzen "
-"dizuten barruko eta kanpoko pertsona guztiei."
+msgstr "Behean adierazitako mezuak automatikoki bidaliko zaizkie mezu bat bidaltzen dizuten barruko eta kanpoko pertsona guztiei."
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:419
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:422
 msgid "Do _not send Out of Office replies"
 msgstr "_Ez bidali 'Bulegotik kanpo' erantzunik"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:427
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:430
 msgid "_Send Out of Office replies"
 msgstr "_Bidali 'Bulegotik kanpo' erantzunak"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:435
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:438
 msgid "Send Out of Office replies only _during this time period:"
 msgstr "Bidali 'Bulegotik kanpo' erantzunak _soilik denbora-tarte honetan:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:455
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:458
 msgid "_From:"
 msgstr "H_emendik:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:480
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:483
 msgid "_To:"
-msgstr "H_ona:"
+msgstr "Nor_i:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:505
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:508
 msgid "I_nternal:"
 msgstr "B_arrukoa:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:514
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:517
 msgid "Message to be sent within the organization"
 msgstr "Mezua erakunde barruan bidaliko da"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:542
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:545
 msgid "E_xternal:"
 msgstr "_Kanpokoa:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:550
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:553
 msgid "Message to be sent outside the organization"
 msgstr "Mezua erakundetik kanpo bidaliko da"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:560
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:563
 msgid "Do not reply to senders outside the organization"
 msgstr "Ez erantzun erakundetik kanpoko bidaltzaileei"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:563
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:566
 msgid "Reply only to known senders outside the organization"
 msgstr "Erantzun erakundetik kanpoko bidaltzaile ezagunei soilik"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:566
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:569
 msgid "Reply to any sender outside the organization"
 msgstr "Erantzun erakundetik kanpoko edozein bidaltzaileri"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:1001
-#, fuzzy
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:1006
 msgid "Retrieving “Out of Office” settings"
-msgstr "'Bulegotik kanpo'-ren ezarpenak eskuratzen"
+msgstr "“Bulegotik kanpo” egoeraren ezarpenak atzitzen"
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:1
 msgid "Autodiscovery query failed."
 msgstr "Huts egin du detekzio automatikoaren kontsultak."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:2
-#, fuzzy
 msgid "The reported error was “{0}”."
-msgstr "Jakinarazitako errorea: &quot;{0}&quot;."
+msgstr "Jakinarazitako errorea: “{0}“."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:3
 msgid "Failed to locate offline address books."
 msgstr "Huts egin du lineaz kanpoko helbide-liburuak bilatzean."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:4
-#, fuzzy
 msgid "Failed to retrieve “Out of Office” settings."
-msgstr ""
-"Huts egin du &quot;Bulegotik kanpo&quot; aukeraren ezarpenak eskuratzean."
+msgstr "Huts egin du “Bulegotik kanpo” egoeraren ezarpenak atzitzeak"
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:5
-#, fuzzy
 msgid "Failed to retrieve “Delegates” settings."
-msgstr "Huts egin du &quot;Ordezkariak&quot; aukeraren ezarpenak eskuratzean."
+msgstr "Huts egin du “Ordezkariak” ezarpenak atzitzeak"
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:6
-#, fuzzy
 msgid "Your Exchange account “{0}” has the status set as “Out of Office”."
-msgstr "Zure '{0}' Exchange kontua 'Bulegotik kanpo' egoeran dago."
+msgstr "Zure “{0}” Exchange kontua “Bulegotik kanpo” egoeran dago."
 
-#: ../src/server/e-ews-camel-common.c:376
+#: ../src/server/camel-sasl-xoauth2-office365.c:23
+msgid "OAuth2 (Office365)"
+msgstr "OAuth2 (Office365)"
+
+#: ../src/server/camel-sasl-xoauth2-office365.c:24
+msgid ""
+"This option will use an OAuth 2.0 access token to connect to the Office365."
+"com server"
+msgstr "Aukera honek OAuth 2.0 atzipen-token bat erabiliko du GoogleOffice365.com zerbitzariarekin konektatzeko"
+
+#: ../src/server/e-ews-calendar-utils.c:1220
+#, c-format
+msgid ""
+"Cannot store this recurrence. Change it to simple single daily, weekly, "
+"monthly or yearly recurrence without exceptions and with start date."
+msgstr "Ezin da agerraldi hau biltegiratu. Aldatu eguneko, asteko, hileko edo urteko agerraldi bakun sinplera, salbuespenik gabekoa eta hasiera-data duena."
+
+#: ../src/server/e-ews-camel-common.c:379
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "CreateItem deiak huts egin du mezu berriaren IDa itzultzean"
 
-#: ../src/server/e-ews-connection.c:722
+#: ../src/server/e-ews-connection.c:796
 msgid "Operation Cancelled"
 msgstr "Eragiketa bertan behera utzi da"
 
-#: ../src/server/e-ews-connection.c:788
+#: ../src/server/e-ews-connection.c:966
 msgid "Authentication failed"
-msgstr "Huts egin du autentifikatzean"
+msgstr "Autentifikazioak huts egin du"
 
-#: ../src/server/e-ews-connection.c:809
+#: ../src/server/e-ews-connection.c:988
 #, c-format
 msgid "No response: %s"
 msgstr "Erantzunik ez: %s"
 
-#: ../src/server/e-ews-connection.c:2528
+#: ../src/server/e-ews-connection.c:1051
+#, c-format
+msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
+msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
+msgstr[0] "Exchange zerbitzaria lanpetuta dago, berriro saiatzeko esperoan (minutu %d:%02d)"
+msgstr[1] "Exchange zerbitzaria lanpetuta dago, berriro saiatzeko esperoan (%d:%02d minutu)"
+
+#: ../src/server/e-ews-connection.c:1057
+#, c-format
+msgid "Exchange server is busy, waiting to retry (%d second)"
+msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
+msgstr[0] "Exchange zerbitzaria lanpetuta dago, berriro saiatzeko esperoan (segundo %d)"
+msgstr[1] "Exchange zerbitzaria lanpetuta dago, berriro saiatzeko esperoan (%d segundo)"
+
+#: ../src/server/e-ews-connection.c:3111
 #, c-format
 msgid "Failed to parse autodiscover response XML"
-msgstr "Huts egin du detekzio automatikoaren XML erantzuna analizatzean"
+msgstr "Huts egin du autodiscover (automatikoki ezagutu) XML erantzuna analizatzean"
 
-#: ../src/server/e-ews-connection.c:2535
+#: ../src/server/e-ews-connection.c:3118
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Huts egin du <Autodiscover> (detekzio automatikoa) elementua bilatzean"
 
-#: ../src/server/e-ews-connection.c:2546
+#: ../src/server/e-ews-connection.c:3129
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Huts egin du <Response> (erantzuna) elementua bilatzean"
 
-#: ../src/server/e-ews-connection.c:2557
+#: ../src/server/e-ews-connection.c:3140
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Huts egin du <Account> (kontua) elementua bilatzean"
 
-#: ../src/server/e-ews-connection.c:2582
+#: ../src/server/e-ews-connection.c:3186
 #, c-format
-msgid "Failed to find <ASUrl> and <OABUrl> in autodiscover response"
-msgstr ""
-"Huts egin du <ASUrl> eta <OABUrl> detekzio automatikoaren erantzunean "
-"bilatzean"
+msgid "Failed to find <ASUrl> in autodiscover response"
+msgstr "Huts egin du <ASUrl> detekzio automatikoaren erantzunean bilatzeak"
 
-#: ../src/server/e-ews-connection.c:2673
+#: ../src/server/e-ews-connection.c:3375
 msgid "URL cannot be NULL"
 msgstr "URLa ezin da NULL izan"
 
-#: ../src/server/e-ews-connection.c:2681
-#, fuzzy, c-format
+#: ../src/server/e-ews-connection.c:3383
+#, c-format
 msgid "URL “%s” is not valid"
-msgstr "'%s' ez da baliozko URLa"
+msgstr "“%s” URLa ez da baliozkoa"
 
-#: ../src/server/e-ews-connection.c:2771
+#: ../src/server/e-ews-connection.c:3680
 msgid "Email address is missing a domain part"
 msgstr "Helbide elektronikoari domeinuaren zatia falta zaio"
 
-#: ../src/server/e-ews-connection.c:3093
+#: ../src/server/e-ews-connection.c:3989
 msgid "Failed to parse oab XML"
 msgstr "Huts egin du OAB XML analizatzean"
 
-#: ../src/server/e-ews-connection.c:3101
+#: ../src/server/e-ews-connection.c:3997
 msgid "Failed to find <OAB> element\n"
 msgstr "Huts egin du <OAB> elementua bilatzean\n"
 
-#: ../src/server/e-ews-connection.c:4406
+#: ../src/server/e-ews-connection.c:5280
 msgid "No items found"
 msgstr "Ez da elementurik aurkitu"
 
-#: ../src/server/e-ews-folder.c:703
+#: ../src/server/e-ews-connection-utils.c:197
+#, c-format
+msgid "Password expired. Change password at “%s”."
+msgstr "Pasahitza iraungi da. Aldatu pasahitza hemen: “%s”."
+
+#: ../src/server/e-ews-connection-utils.c:200
+msgid "Password expired."
+msgstr "Pasahitza iraungi da."
+
+#: ../src/server/e-ews-connection-utils.c:427
+msgid "Unknown error"
+msgstr "Errore ezezaguna"
+
+#: ../src/server/e-ews-folder.c:757
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Ezin da karpeta gehitu, karpeta mota hori ez da onartzen"
 
-#: ../src/server/e-ews-folder.c:708
+#: ../src/server/e-ews-folder.c:762
 msgid "Cannot add folder, master source not found"
 msgstr "Ezin da karpeta gehitu, iturburu nagusia ez da aurkitu"
 
-#~ msgctxt "ForeignFolder"
-#~ msgid "%s - %s"
-#~ msgstr "%s - %s"
+#. Translators: This is a user-visible string, display name of an OAuth2 service.
+#: ../src/server/e-oauth2-service-office365.c:109
+msgctxt "OAuth2Service"
+msgid "Office365"
+msgstr "Office365"
 
-#~ msgid ""
-#~ "Exchange server cannot send message as '%s', when the account was "
-#~ "configured for address '%s'"
-#~ msgstr ""
-#~ "Exchange zerbitzariak ezin du mezurik %s gisa bidali, kontua %s "
-#~ "helbiderako konfiguratua badago"
-
-#~ msgid "Query for authentication types is not supported"
-#~ msgstr "Ez da autentifikazio moten kontsultarik onartzen"
