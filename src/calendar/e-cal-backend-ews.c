@@ -2698,7 +2698,8 @@ ecb_ews_modify_item_sync (ECalBackendEws *cbews,
 		convert_data.change_key = changekey;
 		convert_data.default_zone = i_cal_timezone_get_utc_timezone ();
 
-		if (e_cal_component_has_attendees (comp)) {
+		if (e_cal_component_has_attendees (comp) &&
+		    ecb_ews_is_organizer (cbews, comp)) {
 			send_meeting_invitations = "SendToAllAndSaveCopy";
 			send_or_save = "SendAndSaveCopy";
 		} else {
@@ -2879,7 +2880,8 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 		 * 3. dummy update meeting and send invites to all
 		 */
 		if (e_cal_component_has_attendees (master)) {
-			if (e_cal_component_has_attachments (master))
+			if (!ecb_ews_is_organizer (cbews, master) ||
+			    e_cal_component_has_attachments (master))
 				send_meeting_invitations = "SendToNone";
 			else
 				send_meeting_invitations = "SendToAllAndSaveCopy";
