@@ -892,6 +892,8 @@ static void
 ews_utils_copy_message_info (CamelMessageInfo *des_mi,
 			     const CamelMessageInfo *src_mi)
 {
+	gchar *had_color;
+	gchar *had_score;
 	gboolean had_cal;
 
 	g_return_if_fail (CAMEL_IS_MESSAGE_INFO (des_mi));
@@ -900,7 +902,10 @@ ews_utils_copy_message_info (CamelMessageInfo *des_mi,
 
 	camel_message_info_property_lock (des_mi);
 
+	/* Preserve custom information used by evolution */
 	had_cal = camel_message_info_get_user_flag (des_mi, "$has_cal");
+	had_color = camel_message_info_dup_user_tag (des_mi, "color");
+	had_score = camel_message_info_dup_user_tag (des_mi, "score");
 
 	camel_message_info_set_flags (des_mi, ~CAMEL_MESSAGE_FOLDER_FLAGGED, camel_message_info_get_flags (src_mi));
 	camel_message_info_take_user_flags (des_mi, camel_message_info_dup_user_flags (src_mi));
@@ -919,6 +924,10 @@ ews_utils_copy_message_info (CamelMessageInfo *des_mi,
 
 	if (had_cal)
 		camel_message_info_set_user_flag (des_mi, "$has_cal", TRUE);
+	if (had_color)
+		camel_message_info_set_user_tag (des_mi, "color", had_color);
+	if (had_score)
+		camel_message_info_set_user_tag (des_mi, "score", had_score);
 
 	if (CAMEL_IS_EWS_MESSAGE_INFO (des_mi) && CAMEL_IS_EWS_MESSAGE_INFO (src_mi)) {
 		camel_ews_message_info_set_change_key (CAMEL_EWS_MESSAGE_INFO (des_mi),
@@ -926,6 +935,9 @@ ews_utils_copy_message_info (CamelMessageInfo *des_mi,
 	}
 
 	camel_message_info_property_unlock (des_mi);
+
+	g_free (had_color);
+	g_free (had_score);
 }
 
 void
