@@ -3295,9 +3295,6 @@ autodiscover_response_cb (SoupSession *session,
 		if (!host_url)
 			host_url = camel_ews_settings_get_hosturl (settings);
 
-		if (redirect_addr && *redirect_addr)
-			camel_network_settings_set_user (CAMEL_NETWORK_SETTINGS (settings), redirect_addr);
-
 		re_scheduled = e_ews_discover_prepare_messages_and_send (simple, redirect_addr, host_url, NULL);
 
 		g_clear_object (&settings);
