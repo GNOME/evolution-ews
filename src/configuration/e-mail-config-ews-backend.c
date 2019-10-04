@@ -521,8 +521,10 @@ mail_config_ews_backend_setup_defaults (EMailConfigServiceBackend *backend)
 		camel_ews_settings_set_hosturl (ews_settings, hosturl);
 		camel_ews_settings_set_email (ews_settings, email_address);
 
+		/* Prefill email address as the user name, it's needed for office365.com
+		   server, but also on-premise servers support it. */
 		network_settings = CAMEL_NETWORK_SETTINGS (settings);
-		camel_network_settings_set_user (network_settings, parts[0]);
+		camel_network_settings_set_user (network_settings, email_address);
 
 		g_free (hosturl);
 	}
