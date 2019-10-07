@@ -1,3 +1,19 @@
+Evolution-EWS 3.34.1 2019-10-07
+-------------------------------
+
+Bug Fixes:
+	I#65 - "High priority" flag ignored on message send (Milan Crha)
+	I#66 - Update list of unknown timezones for a unit test (Milan Crha)
+	I#69 - Send meeting change notifications only if being the organizer (Milan Crha)
+	I#71 - Color/Score assigned by filter lost on message move (Milan Crha)
+
+Miscellaneous:
+	Prefill email address as user name when creating new account (Milan Crha)
+	Autodiscover: Do not change user name with RedirectAddr (Milan Crha)
+
+Translations:
+	Asier Sarasua Garmendia (eu)
+
 Evolution-EWS 3.34.0 2019-09-09
 -------------------------------
 
