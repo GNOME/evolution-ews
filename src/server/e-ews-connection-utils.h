@@ -53,6 +53,7 @@ void		e_ews_connection_utils_authenticate	(EEwsConnection *cnc,
 							 SoupAuth *auth,
 							 gboolean retrying);
 gboolean	e_ews_connection_utils_prepare_message	(EEwsConnection *cnc,
+							 SoupSession *session,
 							 SoupMessage *message,
 							 GCancellable *cancellable);
 
