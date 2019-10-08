@@ -539,7 +539,7 @@ ews_connection_scheduled_cb (gpointer user_data)
 
 	switch (sd->op) {
 	case EWS_SCHEDULE_OP_QUEUE_MESSAGE:
-		if (!e_ews_connection_utils_prepare_message (sd->cnc, sd->message, NULL)) {
+		if (!e_ews_connection_utils_prepare_message (sd->cnc, NULL, sd->message, NULL)) {
 			e_ews_debug_dump_raw_soup_request (sd->message);
 
 			if (sd->queue_callback) {
@@ -699,7 +699,7 @@ ews_next_request (gpointer _cnc)
 	if (cnc->priv->soup_session) {
 		SoupMessage *msg = SOUP_MESSAGE (node->msg);
 
-		if (!e_ews_connection_utils_prepare_message (cnc, msg, node->cancellable)) {
+		if (!e_ews_connection_utils_prepare_message (cnc, NULL, msg, node->cancellable)) {
 			e_ews_debug_dump_raw_soup_request (msg);
 			QUEUE_UNLOCK (cnc);
 

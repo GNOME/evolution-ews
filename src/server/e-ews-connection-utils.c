@@ -301,6 +301,7 @@ ews_connection_utils_ensure_bearer_auth_usage (SoupSession *session,
 
 static gboolean
 ews_connection_utils_setup_bearer_auth (EEwsConnection *cnc,
+					SoupSession *session,
 					SoupMessage *message,
 					gboolean is_in_authenticate_handler,
 					ESoupAuthBearer *bearer,
@@ -324,9 +325,10 @@ ews_connection_utils_setup_bearer_auth (EEwsConnection *cnc,
 		e_soup_auth_bearer_set_access_token (bearer, access_token, expires_in_seconds);
 
 		if (!is_in_authenticate_handler) {
-			SoupSession *session;
-
-			session = e_ews_connection_ref_soup_session (cnc);
+			if (session)
+				g_object_ref (session);
+			else
+				session = e_ews_connection_ref_soup_session (cnc);
 
 			ews_connection_utils_ensure_bearer_auth_usage (session, message, bearer);
 
@@ -341,6 +343,7 @@ ews_connection_utils_setup_bearer_auth (EEwsConnection *cnc,
 
 static gboolean
 ews_connection_utils_maybe_prepare_bearer_auth (EEwsConnection *cnc,
+						SoupSession *session,
 						SoupMessage *message,
 						GCancellable *cancellable)
 {
@@ -387,7 +390,7 @@ ews_connection_utils_maybe_prepare_bearer_auth (EEwsConnection *cnc,
 
 	using_bearer_auth = e_ews_connection_ref_bearer_auth (cnc);
 	if (using_bearer_auth) {
-		success = ews_connection_utils_setup_bearer_auth (cnc, message, FALSE, using_bearer_auth, cancellable, &local_error);
+		success = ews_connection_utils_setup_bearer_auth (cnc, session, message, FALSE, using_bearer_auth, cancellable, &local_error);
 		g_clear_object (&using_bearer_auth);
 	} else {
 		SoupAuth *soup_auth;
@@ -409,7 +412,7 @@ ews_connection_utils_maybe_prepare_bearer_auth (EEwsConnection *cnc,
 
 		soup_auth = g_object_new (E_TYPE_SOUP_AUTH_BEARER, SOUP_AUTH_HOST, soup_uri->host, NULL);
 
-		success = ews_connection_utils_setup_bearer_auth (cnc, message, FALSE, E_SOUP_AUTH_BEARER (soup_auth), cancellable, &local_error);
+		success = ews_connection_utils_setup_bearer_auth (cnc, session, message, FALSE, E_SOUP_AUTH_BEARER (soup_auth), cancellable, &local_error);
 		if (success)
 			e_ews_connection_set_bearer_auth (cnc, E_SOUP_AUTH_BEARER (soup_auth));
 
@@ -465,7 +468,7 @@ e_ews_connection_utils_authenticate (EEwsConnection *cnc,
 	if (using_bearer_auth) {
 		GError *local_error = NULL;
 
-		ews_connection_utils_setup_bearer_auth (cnc, msg, TRUE, E_SOUP_AUTH_BEARER (auth), NULL, &local_error);
+		ews_connection_utils_setup_bearer_auth (cnc, session, msg, TRUE, E_SOUP_AUTH_BEARER (auth), NULL, &local_error);
 
 		if (local_error)
 			soup_message_set_status_full (msg, SOUP_STATUS_IO_ERROR, local_error->message);
@@ -518,6 +521,7 @@ e_ews_connection_utils_authenticate (EEwsConnection *cnc,
 /* Returns whether succeeded */
 gboolean
 e_ews_connection_utils_prepare_message (EEwsConnection *cnc,
+					SoupSession *session,
 					SoupMessage *message,
 					GCancellable *cancellable)
 {
@@ -529,14 +533,14 @@ e_ews_connection_utils_prepare_message (EEwsConnection *cnc,
 	if (source)
 		e_soup_ssl_trust_connect (message, source);
 
-	if (!ews_connection_utils_maybe_prepare_bearer_auth (cnc, message, cancellable))
+	if (!ews_connection_utils_maybe_prepare_bearer_auth (cnc, session, message, cancellable))
 		return FALSE;
 
 	using_bearer_auth = e_ews_connection_ref_bearer_auth (cnc);
 
 	if (using_bearer_auth &&
 	    e_soup_auth_bearer_is_expired (using_bearer_auth) &&
-	    !ews_connection_utils_setup_bearer_auth (cnc, message, FALSE, using_bearer_auth, cancellable, &local_error)) {
+	    !ews_connection_utils_setup_bearer_auth (cnc, session, message, FALSE, using_bearer_auth, cancellable, &local_error)) {
 		if (local_error) {
 			soup_message_set_status_full (message, SOUP_STATUS_BAD_REQUEST, local_error->message);
 			g_clear_error (&local_error);
