@@ -1516,14 +1516,18 @@ ecb_ews_extract_item_id (ECalComponent *comp,
 }
 
 static gboolean
-ecb_ews_is_organizer (ECalBackendEws *cbews,
-		      ECalComponent *comp)
+ecb_ews_can_send_invitations (ECalBackendEws *cbews,
+			      guint32 opflags,
+			      ECalComponent *comp)
 {
 	ECalComponentOrganizer *organizer;
 	gboolean is_organizer = FALSE;
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (cbews), FALSE);
 	g_return_val_if_fail (E_IS_CAL_COMPONENT (comp), FALSE);
+
+	if ((opflags & E_CAL_OPERATION_FLAG_DISABLE_ITIP_MESSAGE) != 0)
+		return FALSE;
 
 	if (!e_cal_component_has_organizer (comp))
 		return FALSE;
@@ -2361,6 +2365,7 @@ ecb_ews_get_timezone_from_icomponent (ECalBackendEws *cbews,
 static gboolean
 ecb_ews_remove_item_sync (ECalBackendEws *cbews,
 			  ECalCache *cal_cache,
+			  guint32 opflags,
 			  GHashTable *removed_indexes,
 			  const gchar *uid,
 			  const gchar *rid,
@@ -2411,7 +2416,7 @@ ecb_ews_remove_item_sync (ECalBackendEws *cbews,
 				g_hash_table_insert (removed_indexes, GINT_TO_POINTER (index), NULL);
 
 			success = success && e_ews_connection_delete_item_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM, &item_id, index, EWS_HARD_DELETE,
-				ecb_ews_is_organizer (cbews, comp) ? EWS_SEND_TO_ALL_AND_SAVE_COPY : EWS_SEND_TO_NONE,
+				ecb_ews_can_send_invitations (cbews, opflags, comp) ? EWS_SEND_TO_ALL_AND_SAVE_COPY : EWS_SEND_TO_NONE,
 				EWS_ALL_OCCURRENCES, cancellable, error);
 		}
 	}
@@ -2541,6 +2546,7 @@ ecb_ews_pick_all_tzids_out (ECalBackendEws *cbews,
 
 static gboolean
 ecb_ews_modify_item_sync (ECalBackendEws *cbews,
+			  guint32 opflags,
 			  GHashTable *removed_indexes,
 			  ICalComponent *old_icomp,
 			  ICalComponent *new_icomp,
@@ -2698,8 +2704,9 @@ ecb_ews_modify_item_sync (ECalBackendEws *cbews,
 		convert_data.change_key = changekey;
 		convert_data.default_zone = i_cal_timezone_get_utc_timezone ();
 
-		if (e_cal_component_has_attendees (comp) &&
-		    ecb_ews_is_organizer (cbews, comp)) {
+		if (!(opflags & E_CAL_OPERATION_FLAG_DISABLE_ITIP_MESSAGE) &&
+		    e_cal_component_has_attendees (comp) &&
+		    ecb_ews_can_send_invitations (cbews, opflags, comp)) {
 			send_meeting_invitations = "SendToAllAndSaveCopy";
 			send_or_save = "SendAndSaveCopy";
 		} else {
@@ -2824,7 +2831,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 				if (!cd)
 					continue;
 
-				success = ecb_ews_modify_item_sync (cbews, removed_indexes,
+				success = ecb_ews_modify_item_sync (cbews, opflags, removed_indexes,
 					e_cal_component_get_icalcomponent (cd->old_component ? cd->old_component : master),
 					e_cal_component_get_icalcomponent (cd->new_component),
 					cancellable, error);
@@ -2840,7 +2847,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 				id = e_cal_component_get_id (comp);
 
 				if (id) {
-					success = ecb_ews_remove_item_sync (cbews, cal_cache, removed_indexes,
+					success = ecb_ews_remove_item_sync (cbews, cal_cache, opflags, removed_indexes,
 						e_cal_component_id_get_uid (id), e_cal_component_id_get_rid (id), cancellable, error);
 					e_cal_component_id_free (id);
 				}
@@ -2879,8 +2886,9 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 		 * 2. create attachments
 		 * 3. dummy update meeting and send invites to all
 		 */
-		if (e_cal_component_has_attendees (master)) {
-			if (!ecb_ews_is_organizer (cbews, master) ||
+		if (!(opflags & E_CAL_OPERATION_FLAG_DISABLE_ITIP_MESSAGE) &&
+		    e_cal_component_has_attendees (master)) {
+			if (!ecb_ews_can_send_invitations (cbews, opflags, master) ||
 			    e_cal_component_has_attachments (master))
 				send_meeting_invitations = "SendToNone";
 			else
@@ -2984,7 +2992,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 			}
 
 			for (link = exceptions; link && success; link = g_slist_next (link)) {
-				success = ecb_ews_remove_item_sync (cbews, cal_cache, removed_indexes, uid, link->data, cancellable, error);
+				success = ecb_ews_remove_item_sync (cbews, cal_cache, opflags, removed_indexes, uid, link->data, cancellable, error);
 			}
 
 			g_slist_free_full (exceptions, g_free);
@@ -2998,7 +3006,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 
 			/* In case we have attendees and atachemnts we have to fake update items,
 			 * this is the only way to pass attachments in meeting invite mail */
-			success = ecb_ews_modify_item_sync (cbews, removed_indexes, NULL, icomp, cancellable, error);
+			success = ecb_ews_modify_item_sync (cbews, opflags, removed_indexes, NULL, icomp, cancellable, error);
 		}
 
 		g_object_unref (icomp);
@@ -3013,7 +3021,7 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 
 			icomp = e_cal_component_get_icalcomponent (comp);
 
-			success = ecb_ews_modify_item_sync (cbews, removed_indexes, NULL, icomp, cancellable, error);
+			success = ecb_ews_modify_item_sync (cbews, opflags, removed_indexes, NULL, icomp, cancellable, error);
 		}
 
 		if (success && items) {
@@ -3070,7 +3078,7 @@ ecb_ews_remove_component_sync (ECalMetaBackend *meta_backend,
 	ecb_ews_extract_item_id (comp, &item_id.id, &item_id.change_key);
 
 	success = e_ews_connection_delete_item_sync (cbews->priv->cnc, EWS_PRIORITY_MEDIUM, &item_id, 0, EWS_HARD_DELETE,
-		ecb_ews_is_organizer (cbews, comp) ? EWS_SEND_TO_ALL_AND_SAVE_COPY : EWS_SEND_TO_NONE,
+		ecb_ews_can_send_invitations (cbews, opflags, comp) ? EWS_SEND_TO_ALL_AND_SAVE_COPY : EWS_SEND_TO_NONE,
 		EWS_ALL_OCCURRENCES, cancellable, error);
 
 	g_free (item_id.id);
@@ -3774,6 +3782,7 @@ ecb_ews_receive_objects_sync (ECalBackendSync *sync_backend,
 
 			/* getting a data for meeting request response */
 			response_type = ecb_ews_get_current_user_meeting_reponse (cbews, subcomp, user_email, aliases, &rsvp_requested);
+			rsvp_requested = rsvp_requested && !(opflags & E_CAL_OPERATION_FLAG_DISABLE_ITIP_MESSAGE);
 
 			comp = e_cal_component_new_from_icalcomponent (i_cal_component_clone (subcomp));
 
@@ -3814,7 +3823,7 @@ ecb_ews_receive_objects_sync (ECalBackendSync *sync_backend,
 					g_object_unref (summary);
 				}
 
-				success = ecb_ews_modify_item_sync (cbews, NULL, NULL, subcomp, cancellable, error);
+				success = ecb_ews_modify_item_sync (cbews, opflags, NULL, NULL, subcomp, cancellable, error);
 
 				do_refresh = TRUE;
 			}
