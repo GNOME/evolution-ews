@@ -2089,7 +2089,7 @@ e_cal_backend_ews_rid_to_index (ICalTimezone *timezone,
 		return index;
 
 	rrule = i_cal_property_get_rrule (prop);
-	if (rrule) {
+	if (!rrule) {
 		g_object_unref (prop);
 		return index;
 	}
@@ -2110,7 +2110,6 @@ e_cal_backend_ews_rid_to_index (ICalTimezone *timezone,
 	i_cal_time_set_timezone (o_time, timezone);
 
 	ritr = i_cal_recur_iterator_new (rrule, dtstart);
-	next = i_cal_recur_iterator_next (ritr);
 
 	for (next = i_cal_recur_iterator_next (ritr);
 	     next && !i_cal_time_is_null_time (next);
