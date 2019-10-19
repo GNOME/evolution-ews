@@ -324,7 +324,7 @@ msgstr "La carpeta %s no existeix"
 #: ../src/camel/camel-ews-store.c:2884
 #, c-format
 msgid "No change key record for folder %s"
-msgstr "No canviïs el registre de claus de la carpeta %s  "
+msgstr "No canviïs el registre de claus de la carpeta %s"
 
 #: ../src/camel/camel-ews-store.c:2927
 #, c-format
@@ -597,7 +597,7 @@ msgstr "Revisor"
 #: ../src/configuration/e-ews-edit-folder-permissions.c:134
 msgctxt "PermissionsLevel"
 msgid "Contributor"
-msgstr "Contribuïdor "
+msgstr "Contribuïdor"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:137
 msgctxt "PermissionsLevel"
@@ -607,7 +607,7 @@ msgstr "Temps lliure/ocupat"
 #: ../src/configuration/e-ews-edit-folder-permissions.c:139
 msgctxt "PermissionsLevel"
 msgid "Free/Busy time, subject, location"
-msgstr "Temps lliure/ocupat , tema, ubicació"
+msgstr "Temps lliure/ocupat, tema, ubicació"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:141
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:439
@@ -861,7 +861,7 @@ msgstr ""
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:424
 msgid "Cannot add folder, cannot determine folder’s type"
-msgstr "No es pot afegir la carpeta, no es pot determinar el tipus de carpeta "
+msgstr "No es pot afegir la carpeta, no es pot determinar el tipus de carpeta"
 
 #. Translators: This is used to name foreign folder.
 #. * The first '%s' is replaced with user name to whom the folder belongs,
