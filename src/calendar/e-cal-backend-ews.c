@@ -794,7 +794,8 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 
 		item_id = e_ews_item_get_id (item);
 
-		if (e_ews_item_get_is_meeting (item)) {
+		if (e_ews_item_get_is_meeting (item) ||
+		    e_ews_item_get_attendees (item)) {
 			const GSList *link;
 			gboolean is_response_requested = e_ews_item_get_is_response_requested (item);
 			gchar *user_email;
