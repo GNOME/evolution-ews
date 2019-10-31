@@ -1516,18 +1516,14 @@ ecb_ews_extract_item_id (ECalComponent *comp,
 }
 
 static gboolean
-ecb_ews_can_send_invitations (ECalBackendEws *cbews,
-			      guint32 opflags,
-			      ECalComponent *comp)
+ecb_ews_organizer_is_user (ECalBackendEws *cbews,
+			   ECalComponent *comp)
 {
 	ECalComponentOrganizer *organizer;
 	gboolean is_organizer = FALSE;
 
 	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (cbews), FALSE);
 	g_return_val_if_fail (E_IS_CAL_COMPONENT (comp), FALSE);
-
-	if ((opflags & E_CAL_OPERATION_FLAG_DISABLE_ITIP_MESSAGE) != 0)
-		return FALSE;
 
 	if (!e_cal_component_has_organizer (comp))
 		return FALSE;
@@ -1547,11 +1543,37 @@ ecb_ews_can_send_invitations (ECalBackendEws *cbews,
 		is_organizer = user_email && g_ascii_strcasecmp (email, user_email) == 0;
 
 		g_free (user_email);
+
+		if (!is_organizer) {
+			GHashTable *aliases;
+
+			aliases = ecb_ews_get_mail_aliases (cbews);
+
+			if (aliases) {
+				is_organizer = g_hash_table_contains (aliases, email);
+
+				g_hash_table_unref (aliases);
+			}
+		}
 	}
 
 	e_cal_component_organizer_free (organizer);
 
 	return is_organizer;
+}
+
+static gboolean
+ecb_ews_can_send_invitations (ECalBackendEws *cbews,
+			      guint32 opflags,
+			      ECalComponent *comp)
+{
+	g_return_val_if_fail (E_IS_CAL_BACKEND_EWS (cbews), FALSE);
+	g_return_val_if_fail (E_IS_CAL_COMPONENT (comp), FALSE);
+
+	if ((opflags & E_CAL_OPERATION_FLAG_DISABLE_ITIP_MESSAGE) != 0)
+		return FALSE;
+
+	return ecb_ews_organizer_is_user (cbews, comp);
 }
 
 static gboolean
@@ -2862,6 +2884,10 @@ ecb_ews_save_component_sync (ECalMetaBackend *meta_backend,
 		g_slist_free_full (existing, g_object_unref);
 		g_slist_free_full (changed_instances, change_data_free);
 		g_slist_free_full (removed_instances, g_object_unref);
+	} else if (e_cal_component_has_organizer (master) &&
+		   !ecb_ews_organizer_is_user (cbews, master)) {
+		success = FALSE;
+		g_propagate_error (error, EC_ERROR_EX (E_CLIENT_ERROR_PERMISSION_DENIED, _("Cannot create meetings organized by other users in an Exchange Web Services calendar.")));
 	} else {
 		GHashTable *removed_indexes;
 		EwsCalendarConvertData convert_data = { 0 };
