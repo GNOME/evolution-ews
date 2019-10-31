@@ -4035,11 +4035,7 @@ e_book_backend_ews_dispose (GObject *object)
 {
 	EBookBackendEws *bbews = E_BOOK_BACKEND_EWS (object);
 
-	g_rec_mutex_lock (&bbews->priv->cnc_lock);
-
-	g_clear_object (&bbews->priv->cnc);
-
-	g_rec_mutex_unlock (&bbews->priv->cnc_lock);
+	ebb_ews_unset_connection (bbews);
 
 	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (e_book_backend_ews_parent_class)->dispose (object);

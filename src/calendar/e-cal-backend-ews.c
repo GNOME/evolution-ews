@@ -4253,11 +4253,7 @@ ecb_ews_dispose (GObject *object)
 {
 	ECalBackendEws *cbews = E_CAL_BACKEND_EWS (object);
 
-	g_rec_mutex_lock (&cbews->priv->cnc_lock);
-
-	g_clear_object (&cbews->priv->cnc);
-
-	g_rec_mutex_unlock (&cbews->priv->cnc_lock);
+	ecb_ews_unset_connection (cbews);
 
 	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (e_cal_backend_ews_parent_class)->dispose (object);
