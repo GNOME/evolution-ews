@@ -7,16 +7,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2019-07-09 08:21+0000\n"
-"PO-Revision-Date: 2019-07-11 14:00+0700\n"
-"Last-Translator: Kukuh Syafaat <kukuhsyafaat@gnome.org>\n"
+"POT-Creation-Date: 2019-10-31 10:15+0000\n"
+"PO-Revision-Date: 2019-11-17 07:17+0700\n"
+"Last-Translator: Andika Triwidada <atriwidada@gnome.org>\n"
 "Language-Team: Indonesian <gnome@i15n.org>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 2.2.3\n"
+"Plural-Forms: nplurals=2; plural=n!=1;\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/camel/camel-ews-provider.c:81
@@ -30,52 +30,60 @@ msgstr "Layanan Web Exchange"
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Untuk mengakses server Exchange memakai Layanan Web"
 
-#: ../src/addressbook/e-book-backend-ews.c:3477
+#: ../src/addressbook/e-book-backend-ews.c:3496
 msgid "Failed to update GAL:"
 msgstr "Failed to update GAL:"
 
-#: ../src/addressbook/e-book-backend-ews.c:3639
+#: ../src/addressbook/e-book-backend-ews.c:3658
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Tak bisa menyimpan daftar kontak, itu hanya didukung pada EWS Server 2010 "
 "atau setelahnya"
 
-#: ../src/addressbook/e-book-backend-ews.c:3732
+#: ../src/addressbook/e-book-backend-ews.c:3751
 msgid "Failed to set contact photo:"
 msgstr "Gagal mengatur foto kontak:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1776
+#: ../src/calendar/e-cal-backend-ews.c:1837
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Luang"
 
-#: ../src/calendar/e-cal-backend-ews.c:1779
+#: ../src/calendar/e-cal-backend-ews.c:1840
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Sibuk"
 
-#: ../src/calendar/e-cal-backend-ews.c:1781
+#: ../src/calendar/e-cal-backend-ews.c:1842
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Keluar Kantor"
 
-#: ../src/calendar/e-cal-backend-ews.c:1783
+#: ../src/calendar/e-cal-backend-ews.c:1844
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Sementara"
 
-#: ../src/calendar/e-cal-backend-ews.c:2358
-#: ../src/calendar/e-cal-backend-ews.c:2536
+#: ../src/calendar/e-cal-backend-ews.c:2420
+#: ../src/calendar/e-cal-backend-ews.c:2599
 msgid "Cannot determine EWS ItemId"
 msgstr "Tidak dapat menentukan ItemId EWS"
 
-#: ../src/calendar/e-cal-backend-ews.c:3522
+#: ../src/calendar/e-cal-backend-ews.c:2890
+msgid ""
+"Cannot create meetings organized by other users in an Exchange Web Services "
+"calendar."
+msgstr ""
+"Tidak bisa membuat pertemuan yang diorganisasi oleh pengguna lain dalam "
+"kalender Exchange Web Services."
+
+#: ../src/calendar/e-cal-backend-ews.c:3600
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Tak bisa temukan pengguna “%s” diantara yang hadir"
 
-#: ../src/calendar/e-cal-backend-ews-utils.c:2125
+#: ../src/calendar/e-cal-backend-ews-utils.c:2124
 msgid "Invalid occurrence ID"
 msgstr "ID kejadian tidak valid"
 
@@ -112,17 +120,17 @@ msgstr "Tak bisa membuat path singgahan “%s”: %s"
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Gagal memindah berkas singgahan pesan dari “%s” to “%s”: %s"
 
-#: ../src/camel/camel-ews-folder.c:1814
+#: ../src/camel/camel-ews-folder.c:1837
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Tak bisa memuat ringkasan untuk %s"
 
-#: ../src/camel/camel-ews-folder.c:2287
+#: ../src/camel/camel-ews-folder.c:2310
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Menyegarkan folder “%s”"
 
-#: ../src/camel/camel-ews-folder.c:2471
+#: ../src/camel/camel-ews-folder.c:2494
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Tak bisa melakukan aksi pada folder ketika dalam mode luring"
@@ -229,66 +237,69 @@ msgstr "%s_%d"
 #. * user has such in his store already. The %s is replaced with "Foreign Folders",
 #. * the %d with counter, thus it composes name like "Foreign Folders_1"
 #.
-#: ../src/camel/camel-ews-store.c:501
+#: ../src/camel/camel-ews-store.c:505
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:647 ../src/camel/camel-ews-store.c:1287
+#: ../src/camel/camel-ews-store.c:651 ../src/camel/camel-ews-store.c:1291
 msgid "Checking “Out of Office” settings"
 msgstr "Memeriksa pengaturan \"Di Luar Kantor\""
 
-#: ../src/camel/camel-ews-store.c:1293
+#: ../src/camel/camel-ews-store.c:1297
 msgid "Look up Exchange server categories"
 msgstr "Mencari kategori server Exchange"
 
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/camel/camel-ews-store.c:1363
+#: ../src/camel/camel-ews-store.c:1367
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
 msgstr[0] ""
 "Kata sandi akan kedaluwarsa dalam %d hari. Buka \"%s\" untuk menggantinya."
+msgstr[1] ""
+"Kata sandi akan kedaluwarsa dalam %d hari. Buka \"%s\" untuk menggantinya."
 
-#: ../src/camel/camel-ews-store.c:1369
+#: ../src/camel/camel-ews-store.c:1373
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
-msgstr[0] "Kata sandi akan kedaluwarsa dalam %d hari."
+msgstr[0] "Kata sandi akan kedaluwarsa dalam satu hari."
+msgstr[1] "Kata sandi akan kedaluwarsa dalam %d hari."
 
-#: ../src/camel/camel-ews-store.c:1589
+#: ../src/camel/camel-ews-store.c:1593
 msgid "Updating foreign folder structure"
 msgstr "Memutakhirkan struktur folder asing"
 
-#: ../src/camel/camel-ews-store.c:1725
+#: ../src/camel/camel-ews-store.c:1729
 msgid "Updating foreign folders"
 msgstr "Memutakhirkan folder asing"
 
-#: ../src/camel/camel-ews-store.c:2141
+#: ../src/camel/camel-ews-store.c:2145
 #, c-format
 msgid "No such folder: %s"
 msgstr "Tak ada folder begitu: %s"
 
-#: ../src/camel/camel-ews-store.c:2450
+#: ../src/camel/camel-ews-store.c:2454
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Tak bisa membaca daftar folder publik EWS dalam mode luring"
 
-#: ../src/camel/camel-ews-store.c:2523
+#: ../src/camel/camel-ews-store.c:2527
 msgid "Cannot find any EWS public folders"
 msgstr "Tak bisa temukan folder publik EWS manapun"
 
-#: ../src/camel/camel-ews-store.c:2632
+#: ../src/camel/camel-ews-store.c:2636
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Tak bisa membuat folder “%s”, folder telah ada"
 
-#: ../src/camel/camel-ews-store.c:2647
+#: ../src/camel/camel-ews-store.c:2651
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Folder induk %s tidak ada"
 
-#: ../src/camel/camel-ews-store.c:2657
+#: ../src/camel/camel-ews-store.c:2661
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -296,92 +307,92 @@ msgstr ""
 "Tak bisa membuat folder di bawah “%s”, itu hanya dipakai bagi folder "
 "pengguna lain"
 
-#: ../src/camel/camel-ews-store.c:2667
+#: ../src/camel/camel-ews-store.c:2671
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "Tak bisa membuat folder di bawah “%s”, itu hanya dipakai bagi folder publik"
 
-#: ../src/camel/camel-ews-store.c:2771
+#: ../src/camel/camel-ews-store.c:2775
 #, c-format
 msgid "Folder does not exist"
 msgstr "Folder tidak ada"
 
-#: ../src/camel/camel-ews-store.c:2781
+#: ../src/camel/camel-ews-store.c:2785
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Tak bisa menghapus folder “%s”, itu hanya dipakai bagi folder pengguna lain"
 
-#: ../src/camel/camel-ews-store.c:2792
+#: ../src/camel/camel-ews-store.c:2796
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "Tak bisa menghapus folder “%s”, itu hanya dipakai bagi folder publik"
 
-#: ../src/camel/camel-ews-store.c:2951
+#: ../src/camel/camel-ews-store.c:2955
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Folder %s tidak ada"
 
-#: ../src/camel/camel-ews-store.c:2960
+#: ../src/camel/camel-ews-store.c:2964
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Tidak ada catatan kunci perubahan bagi folder %s"
 
-#: ../src/camel/camel-ews-store.c:3003
+#: ../src/camel/camel-ews-store.c:3007
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Tak bisa sekaligus mengubah nama dan memindah folder di saat yang sama"
 
-#: ../src/camel/camel-ews-store.c:3037
+#: ../src/camel/camel-ews-store.c:3041
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Tak bisa temukan ID folder bagi folder induk %s"
 
-#: ../src/camel/camel-ews-store.c:3089 ../src/camel/camel-ews-transport.c:318
+#: ../src/camel/camel-ews-store.c:3093 ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange server %s"
 msgstr "Server Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:3092
+#: ../src/camel/camel-ews-store.c:3096
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Layanan Exchange untuk %s pada %s"
 
-#: ../src/camel/camel-ews-store.c:3136
+#: ../src/camel/camel-ews-store.c:3140
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Tak bisa temukan folder Tong Sampah"
 
-#: ../src/camel/camel-ews-store.c:3196
+#: ../src/camel/camel-ews-store.c:3200
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Tak bisa temukan folder Sampah"
 
-#: ../src/camel/camel-ews-store.c:3387
+#: ../src/camel/camel-ews-store.c:3391
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Tak bisa berlangganan folder EWS dalam mode luring"
 
-#: ../src/camel/camel-ews-store.c:3410
+#: ../src/camel/camel-ews-store.c:3414
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Tak bisa berlangganan folder “%s”, tak ada folder publik yang tersedia"
 
-#: ../src/camel/camel-ews-store.c:3420
+#: ../src/camel/camel-ews-store.c:3424
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Tak bisa berlangganan folder “%s”, folder tak ditemukan"
 
-#: ../src/camel/camel-ews-store.c:3511
+#: ../src/camel/camel-ews-store.c:3515
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Tak bisa berhenti berlangganan folder EWS dalam mode luring"
 
-#: ../src/camel/camel-ews-store.c:3628
+#: ../src/camel/camel-ews-store.c:3632
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Anda mesti daring untuk menuntaskan operasi ini"
 
-#: ../src/camel/camel-ews-store.c:3672 ../src/camel/camel-ews-store.c:3709
+#: ../src/camel/camel-ews-store.c:3676 ../src/camel/camel-ews-store.c:3713
 msgid "Unsetting the “Out of Office” status"
 msgstr "Sedang menghapus status \"Di Luar Kantor\""
 
@@ -765,7 +776,8 @@ msgstr "Menghapus status \"Di Luar Kantor\""
 #, c-format
 msgid "No users found, only one contact"
 msgid_plural "No users found, only %d contacts"
-msgstr[0] "Tak ditemukan pengguna, hanya %d kontak"
+msgstr[0] "Tak ditemukan pengguna, hanya satu kontak"
+msgstr[1] "Tak ditemukan pengguna, hanya %d kontak"
 
 #: ../src/configuration/e-ews-search-user.c:211
 msgid "No users found"
@@ -775,13 +787,16 @@ msgstr "Tak ditemukan pengguna"
 #, c-format
 msgid "Found one user"
 msgid_plural "Found %d users"
-msgstr[0] "Ditemukan %d pengguna"
+msgstr[0] "Ditemukan satu pengguna"
+msgstr[1] "Ditemukan %d pengguna"
 
 #: ../src/configuration/e-ews-search-user.c:221
 #, c-format
 msgid "Found more than 100 users, but showing only first %d"
 msgid_plural "Found more than 100 users, but showing only first %d"
 msgstr[0] ""
+"Ditemukan lebih dari 100 pengguna, tapi hanya menampilkan %d pertama"
+msgstr[1] ""
 "Ditemukan lebih dari 100 pengguna, tapi hanya menampilkan %d pertama"
 
 #: ../src/configuration/e-ews-search-user.c:355
@@ -1009,15 +1024,15 @@ msgstr "U_RI pengalihan:"
 msgid "Default redirect URI is “%s”"
 msgstr "URI pengalihan baku adalah \"%s\""
 
-#: ../src/configuration/e-mail-config-ews-backend.c:581
+#: ../src/configuration/e-mail-config-ews-backend.c:583
 msgid "Host URL cannot be empty"
 msgstr "URL host tak boleh kosong"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:586
+#: ../src/configuration/e-mail-config-ews-backend.c:588
 msgid "User name cannot be empty"
 msgstr "Nama pengguna tak boleh kosong"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:600
+#: ../src/configuration/e-mail-config-ews-backend.c:602
 msgid "Application ID cannot be empty"
 msgstr "ID aplikasi tak boleh kosong"
 
@@ -1083,7 +1098,7 @@ msgid "Retrieving current user permissions, please wait…"
 msgstr "Mengambil info hak pengguna kini, harap tunggu…"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1028
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1651
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1653
 msgid "Delegates"
 msgstr "Delegasi"
 
@@ -1099,7 +1114,7 @@ msgstr ""
 "hak kirim-atas-nama, tutup kotak dialog ini, klik kanan pada folder, klik "
 "Hak, dan ubah opsi di sana."
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1102
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1103
 msgid ""
 "Deliver meeting requests addressed to me and responses to meeting requests "
 "where I am the organizer to:"
@@ -1108,7 +1123,7 @@ msgstr ""
 "rapat dimana saya adalah pengelolanya ke:"
 
 #. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1112
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1114
 msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
@@ -1116,15 +1131,15 @@ msgstr ""
 "Hanya delegasi saya, tapi kirim _salinan permintaan rapat\n"
 "dan respon ke saya (disarankan)"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1119
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1121
 msgid "My d_elegates only"
 msgstr "Hanya d_elegasi saya"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1126
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1128
 msgid "My delegates a_nd me"
 msgstr "Delegasi saya da_n saya"
 
-#: ../src/configuration/e-mail-config-ews-delegates-page.c:1723
+#: ../src/configuration/e-mail-config-ews-delegates-page.c:1725
 msgid "Retrieving “Delegates” settings"
 msgstr "Mengambil pengaturan \"Delegasi\""
 
@@ -1158,7 +1173,7 @@ msgid "Fetch List"
 msgstr "Ambil Daftar"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:396
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:933
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:934
 msgid "Out of Office"
 msgstr "Keluar Kantor"
 
@@ -1170,55 +1185,55 @@ msgstr ""
 "Pesan yang dinyatakan di bawah akan secara otomatis dikirim ke setiap orang "
 "internal dan eksternal yang mengirim surel ke Anda."
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:421
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:422
 msgid "Do _not send Out of Office replies"
 msgstr "Janga_n kirim jawaban Di Luar Kantor"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:429
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:430
 msgid "_Send Out of Office replies"
 msgstr "_Kirim jawaban Di Luar Kantor"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:437
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:438
 msgid "Send Out of Office replies only _during this time period:"
 msgstr "Kirim jawaban Di Luar Kantor hanya selama perio_da ini:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:457
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:458
 msgid "_From:"
 msgstr "_Dari:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:482
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:483
 msgid "_To:"
 msgstr "_Kepada:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:507
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:508
 msgid "I_nternal:"
 msgstr "I_nternal:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:516
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:517
 msgid "Message to be sent within the organization"
 msgstr "Pesan akan dikim di dalam organisasi"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:544
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:545
 msgid "E_xternal:"
 msgstr "E_ksternal:"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:552
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:553
 msgid "Message to be sent outside the organization"
 msgstr "Pesan akan dikim di luar organisasi"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:562
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:563
 msgid "Do not reply to senders outside the organization"
 msgstr "Jangan kirim jawaban ke pengirim di luar organisasi"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:565
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:566
 msgid "Reply only to known senders outside the organization"
 msgstr "Jawab hanya ke pengirim yang dikenal di luar organisasi"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:568
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:569
 msgid "Reply to any sender outside the organization"
 msgstr "Balas ke pengirim manapun di luar organisasi"
 
-#: ../src/configuration/e-mail-config-ews-ooo-page.c:1005
+#: ../src/configuration/e-mail-config-ews-ooo-page.c:1006
 msgid "Retrieving “Out of Office” settings"
 msgstr "Mengambail pengaturan \"Di Luar Kantor\""
 
@@ -1268,7 +1283,7 @@ msgstr ""
 "harian, mingguan, bulanan, atau tahunan tanpa pengecualian dan dengan "
 "tanggal mulai."
 
-#: ../src/server/e-ews-camel-common.c:379
+#: ../src/server/e-ews-camel-common.c:394
 #, c-format
 msgid "CreateItem call failed to return ID for new message"
 msgstr "Pemanggilan CreateItem gagal mengembalikan ID bagi pesan baru"
@@ -1292,12 +1307,16 @@ msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] ""
 "Server Exchange sedang sibuk, menunggu untuk mencoba lagi (%d:%02d menit)"
+msgstr[1] ""
+"Server Exchange sedang sibuk, menunggu untuk mencoba lagi (%d:%02d menit)"
 
 #: ../src/server/e-ews-connection.c:1057
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
 msgstr[0] ""
+"Server Exchange sedang sibuk, menunggu untuk mencoba lagi (%d detik)"
+msgstr[1] ""
 "Server Exchange sedang sibuk, menunggu untuk mencoba lagi (%d detik)"
 
 #: ../src/server/e-ews-connection.c:3111
@@ -1325,28 +1344,28 @@ msgstr "Gagal menemukan elemen <Account>"
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Gagal menemukan <ASUrl> dalam respon autodiscover"
 
-#: ../src/server/e-ews-connection.c:3375
+#: ../src/server/e-ews-connection.c:3372
 msgid "URL cannot be NULL"
 msgstr "URL tak boleh NULL"
 
-#: ../src/server/e-ews-connection.c:3383
+#: ../src/server/e-ews-connection.c:3380
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "URL “%s” tak valid"
 
-#: ../src/server/e-ews-connection.c:3680
+#: ../src/server/e-ews-connection.c:3677
 msgid "Email address is missing a domain part"
 msgstr "Alamat surel kurang bagian domain"
 
-#: ../src/server/e-ews-connection.c:3989
+#: ../src/server/e-ews-connection.c:3986
 msgid "Failed to parse oab XML"
 msgstr "Gagal mengurai XML oab"
 
-#: ../src/server/e-ews-connection.c:3997
+#: ../src/server/e-ews-connection.c:3994
 msgid "Failed to find <OAB> element\n"
 msgstr "Gagal menemukan elemen <OAB>\n"
 
-#: ../src/server/e-ews-connection.c:5280
+#: ../src/server/e-ews-connection.c:5277
 msgid "No items found"
 msgstr "Tak temukan butir"
 
@@ -1359,7 +1378,7 @@ msgstr "Kata sandi kedaluwarsa. Ganti kata sandi di \"%s\"."
 msgid "Password expired."
 msgstr "Kata sandi kedaluwarsa."
 
-#: ../src/server/e-ews-connection-utils.c:427
+#: ../src/server/e-ews-connection-utils.c:430
 msgid "Unknown error"
 msgstr "Galat tak dikenal"
 
@@ -1376,18 +1395,3 @@ msgstr "Tak bisa menambah folder, sumber induk tak ditemukan"
 msgctxt "OAuth2Service"
 msgid "Office365"
 msgstr "Office365"
-
-#~ msgid "There is not set any default tenant"
-#~ msgstr "Tidak diatur tenant baku apapun"
-
-#~ msgid "Tenant cannot be empty"
-#~ msgstr "Tenant tak boleh kosong"
-
-#~ msgid "Folder Sizes..."
-#~ msgstr "Ukuran Folder..."
-
-#~ msgid "Permissions..."
-#~ msgstr "Izin…"
-
-#~ msgid "Edit EWS folder permissions..."
-#~ msgstr "Sunting hak akses folder EWS…"
