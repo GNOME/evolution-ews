@@ -1,3 +1,14 @@
+Evolution-EWS 3.34.2 2019-11-22
+-------------------------------
+
+Bug Fixes:
+	I#64 - "Listen for server notifications" does not work with OAuth2 (Milan Crha)
+	I#70 - Fails to delete one instance of a recurring event (Milan Crha)
+
+Miscellaneous:
+	Some meetings shown as plain events (Milan Crha)
+	Disconnect signal handlers on connection object in dispose of book/calendar backend (Milan Crha)
+
 Evolution-EWS 3.34.1 2019-10-07
 -------------------------------
 
