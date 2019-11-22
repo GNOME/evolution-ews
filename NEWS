@@ -1,3 +1,22 @@
+Evolution-EWS 3.35.2 2019-11-22
+-------------------------------
+
+Bug Fixes:
+	I#52 - Disable iTip message send when copy/move meeting between calendars (Milan Crha)
+	I#70 - Fails to delete one instance of a recurring event (Milan Crha)
+
+Miscellaneous:
+	Reject creating meetings organized by other users (Milan Crha)
+	Some meetings shown as plain events (Milan Crha)
+	Disconnect signal handlers on connection object in dispose of book/calendar backend (Milan Crha)
+
+Translations:
+	Jordi Mas (ca)
+	Piotr Drąg (pl)
+	Daniel Mustieles (es)
+	Anders Jonsson (sv)
+	Andika Triwidada (id)
+
 Evolution-EWS 3.35.1 2019-10-11
 -------------------------------
 
