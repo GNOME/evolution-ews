@@ -41,6 +41,7 @@
 #define SUBFOLDER_DIR_NAME     "subfolders"
 #define SUBFOLDER_DIR_NAME_LEN 10
 
+#define EWS_MAPI_MSGFLAG_HASATTACH 0x10
 #define EWS_MAPI_MSGFLAG_RN_PENDING 0x100
 
 CamelFolderInfo *
@@ -643,7 +644,8 @@ ews_utils_get_server_flags (EEwsItem *item)
 	if ((msg_flags & EWS_MAPI_MSGFLAG_RN_PENDING) != 0)
 		server_flags |= CAMEL_EWS_MESSAGE_MSGFLAG_RN_PENDING;
 
-	/* TODO Update replied flags */
+	if ((msg_flags & EWS_MAPI_MSGFLAG_HASATTACH) != 0)
+		server_flags |= CAMEL_MESSAGE_ATTACHMENTS;
 
 	return server_flags;
 }
