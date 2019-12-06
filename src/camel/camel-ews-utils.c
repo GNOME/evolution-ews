@@ -1044,6 +1044,7 @@ camel_ews_utils_item_to_message_info (CamelEwsFolder *ews_folder,
 {
 	CamelFolderSummary *folder_summary;
 	CamelMessageInfo *mi = NULL;
+	CamelContentType *content_type = NULL;
 	const EwsId *id;
 	const EwsMailbox *from;
 	gchar *tmp;
@@ -1081,9 +1082,15 @@ camel_ews_utils_item_to_message_info (CamelEwsFolder *ews_folder,
 		g_object_unref (stream);
 
 		if (camel_mime_part_construct_from_parser_sync (part, parser, NULL, NULL)) {
+			CamelContentType *ct;
+
 			mi = camel_folder_summary_info_new_from_headers (folder_summary, camel_medium_get_headers (CAMEL_MEDIUM (part)));
 			if (camel_medium_get_header (CAMEL_MEDIUM (part), "Disposition-Notification-To"))
 				message_requests_read_receipt = TRUE;
+
+			ct = camel_mime_part_get_content_type (part);
+			if (ct)
+				content_type = camel_content_type_ref (ct);
 		}
 
 		g_object_unref (parser);
@@ -1135,13 +1142,43 @@ camel_ews_utils_item_to_message_info (CamelEwsFolder *ews_folder,
 	server_flags = ews_utils_get_server_flags (item);
 	ews_utils_merge_server_user_flags (item, mi);
 
-	camel_message_info_set_flags (mi, server_flags, server_flags);
+	/* It serves as "should inherit CAMEL_MESSAGE_ATTACHMENTS from server_flags" now */
+	has_attachments = !has_attachments;
+
+	if (has_attachments && (server_flags & CAMEL_MESSAGE_ATTACHMENTS) != 0 && content_type) {
+		/* The server can have set the attachment flag, even when there is no attachment.
+		   This will be fixed once the message is loaded, but let's fine tune the guess. */
+		if (!camel_content_type_is (content_type, "multipart", "*") ||
+		    camel_content_type_is (content_type, "multipart", "alternative")) {
+			has_attachments = FALSE;
+		} else if (camel_content_type_is (content_type, "multipart", "related")) {
+			const gchar *related_type;
+
+			related_type = camel_content_type_param (content_type, "type");
+			if (related_type && *related_type) {
+				CamelContentType *ct;
+
+				ct = camel_content_type_decode (related_type);
+				if (ct) {
+					if (camel_content_type_is (ct, "multipart", "alternative"))
+						has_attachments = FALSE;
+
+					camel_content_type_unref (ct);
+				}
+			}
+		}
+	}
+
+	camel_message_info_set_flags (mi, server_flags & ~(has_attachments ? 0 : CAMEL_MESSAGE_ATTACHMENTS), server_flags);
 	camel_ews_message_info_set_server_flags (CAMEL_EWS_MESSAGE_INFO (mi), server_flags);
 
 	camel_ews_utils_update_follow_up_flags (item, mi);
 	camel_ews_utils_update_read_receipt_flags (item, mi, server_flags, message_requests_read_receipt);
 
 	camel_message_info_set_abort_notifications (mi, FALSE);
+
+	if (content_type)
+		camel_content_type_unref (content_type);
 
 	return mi;
 }
