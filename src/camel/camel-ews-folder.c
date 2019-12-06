@@ -929,6 +929,7 @@ camel_ews_folder_get_message (CamelFolder *folder,
 	message = camel_ews_folder_get_message_from_cache (ews_folder, uid, cancellable, error);
 	if (message) {
 		CamelInternetAddress *from;
+		CamelMessageInfo *mi;
 		const gchar *email = NULL, *date_header;
 		gboolean resave = FALSE;
 
@@ -998,6 +999,23 @@ camel_ews_folder_get_message (CamelFolder *folder,
 				g_object_unref (cache_stream);
 			}
 			g_rec_mutex_unlock (&priv->cache_lock);
+		}
+
+		mi = camel_folder_summary_get (camel_folder_get_folder_summary (folder), uid);
+		if (mi) {
+			CamelMessageFlags flags;
+			gboolean has_attachment;
+
+			flags = camel_message_info_get_flags (mi);
+			has_attachment = camel_mime_message_has_attachment (message);
+			if (((flags & CAMEL_MESSAGE_ATTACHMENTS) && !has_attachment) ||
+			    ((flags & CAMEL_MESSAGE_ATTACHMENTS) == 0 && has_attachment)) {
+				camel_message_info_set_flags (
+					mi, CAMEL_MESSAGE_ATTACHMENTS,
+					has_attachment ? CAMEL_MESSAGE_ATTACHMENTS : 0);
+			}
+
+			g_clear_object (&mi);
 		}
 	}
 
