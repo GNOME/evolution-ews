@@ -1,3 +1,9 @@
+Evolution-EWS 3.34.3 2020-01-03
+-------------------------------
+
+Bug Fixes:
+	I#81 - Attachment flag not shown on messages with attachment (Milan Crha)
+
 Evolution-EWS 3.34.2 2019-11-22
 -------------------------------
 
