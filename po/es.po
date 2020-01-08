@@ -7,14 +7,14 @@
 #
 # Javier Mazorra Rodríguez <mazi.debian@gmail.com>, 2012.
 # facundo Dario Illanes <fdillanes@gmail.com>, 2013.
-# Daniel Mustieles <daniel.mustieles@gmail.com>, 2011-2019.
+# Daniel Mustieles <daniel.mustieles@gmail.com>, 2011-2020.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2019-10-31 10:15+0000\n"
-"PO-Revision-Date: 2019-11-05 15:06+0100\n"
+"POT-Creation-Date: 2020-01-08 14:57+0000\n"
+"PO-Revision-Date: 2020-01-08 16:46+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -51,33 +51,32 @@ msgstr ""
 msgid "Failed to set contact photo:"
 msgstr "Falló al establecer la foto del contacto:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1837
+#: ../src/calendar/e-cal-backend-ews.c:1838
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Libre"
 
-#: ../src/calendar/e-cal-backend-ews.c:1840
+#: ../src/calendar/e-cal-backend-ews.c:1841
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Ocupado"
 
-#: ../src/calendar/e-cal-backend-ews.c:1842
+#: ../src/calendar/e-cal-backend-ews.c:1843
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Fuera de la oficina"
 
-#: ../src/calendar/e-cal-backend-ews.c:1844
+#: ../src/calendar/e-cal-backend-ews.c:1845
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Provisional"
 
-#: ../src/calendar/e-cal-backend-ews.c:2420
-#: ../src/calendar/e-cal-backend-ews.c:2599
+#: ../src/calendar/e-cal-backend-ews.c:2421
+#: ../src/calendar/e-cal-backend-ews.c:2600
 msgid "Cannot determine EWS ItemId"
 msgstr "No se puede determinar el ItemId de EWS"
 
-#: ../src/calendar/e-cal-backend-ews.c:2890
-#| msgid "Data source “%s” does not represent an Exchange Web Services folder"
+#: ../src/calendar/e-cal-backend-ews.c:2891
 msgid ""
 "Cannot create meetings organized by other users in an Exchange Web Services "
 "calendar."
@@ -85,7 +84,7 @@ msgstr ""
 "No se pueden crear reuniones organizadas por otros usuarios en un calendario "
 "de servicios web de Exchange."
 
-#: ../src/calendar/e-cal-backend-ews.c:3600
+#: ../src/calendar/e-cal-backend-ews.c:3601
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "No se puede encontrar al usuario «%s» entre los asistentes"
@@ -127,17 +126,17 @@ msgstr "No se pudo crear la ruta de la caché «%s»: %s"
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Falló al mover el archivo de la caché de mensajes de «%s» a «%s»: %s"
 
-#: ../src/camel/camel-ews-folder.c:1837
+#: ../src/camel/camel-ews-folder.c:1855
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "No se pudo cargar el resumen para %s"
 
-#: ../src/camel/camel-ews-folder.c:2310
+#: ../src/camel/camel-ews-folder.c:2328
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Actualizando carpeta «%s»"
 
-#: ../src/camel/camel-ews-folder.c:2494
+#: ../src/camel/camel-ews-folder.c:2512
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr ""
@@ -1047,15 +1046,25 @@ msgstr "_Redireccionar URI:"
 msgid "Default redirect URI is “%s”"
 msgstr "El URI de redirección predeterminado es «%s»"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:583
+#: ../src/configuration/e-mail-config-ews-backend.c:592
+#| msgid "URL “%s” is not valid"
+msgid "Host URL is not valid"
+msgstr "El URL del equipo no es válido"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:596
 msgid "Host URL cannot be empty"
 msgstr "El URL del equipo no puede estar vacío"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:588
+#: ../src/configuration/e-mail-config-ews-backend.c:607
+#| msgid "URL “%s” is not valid"
+msgid "OAB URL is not valid"
+msgstr "El URL de OAB no es válido"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:617
 msgid "User name cannot be empty"
 msgstr "El nombre de usuario no puede estar vacío"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:602
+#: ../src/configuration/e-mail-config-ews-backend.c:631
 msgid "Application ID cannot be empty"
 msgstr "El ID de la aplicación no puede estar vacío"
 
