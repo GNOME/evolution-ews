@@ -747,6 +747,13 @@ ews_backend_constructed (GObject *object)
 		webdav_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_WEBDAV_BACKEND);
 		e_source_webdav_unset_temporary_ssl_trust (webdav_extension);
 	}
+
+	if (e_source_has_extension (source, E_SOURCE_EXTENSION_COLLECTION)) {
+		ESourceCollection *collection_extension;
+
+		collection_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_COLLECTION);
+		e_source_collection_set_allow_sources_rename (collection_extension, TRUE);
+	}
 }
 
 static void
