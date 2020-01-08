@@ -552,7 +552,7 @@ mail_config_ews_backend_check_complete (EMailConfigServiceBackend *backend)
 	CamelSettings *settings;
 	CamelEwsSettings *ews_settings;
 	CamelNetworkSettings *network_settings;
-	const gchar *hosturl;
+	const gchar *hosturl, *oaburl;
 	const gchar *user;
 	gboolean correct, complete = TRUE;
 
@@ -573,6 +573,7 @@ mail_config_ews_backend_check_complete (EMailConfigServiceBackend *backend)
 
 	ews_settings = CAMEL_EWS_SETTINGS (settings);
 	hosturl = camel_ews_settings_get_hosturl (ews_settings);
+	oaburl = camel_ews_settings_get_oaburl (ews_settings);
 
 	network_settings = CAMEL_NETWORK_SETTINGS (settings);
 	user = camel_network_settings_get_user (network_settings);
@@ -580,7 +581,35 @@ mail_config_ews_backend_check_complete (EMailConfigServiceBackend *backend)
 	correct = hosturl != NULL && *hosturl != '\0';
 	complete = complete && correct;
 
-	e_util_set_entry_issue_hint (priv->host_entry, correct ? NULL : _("Host URL cannot be empty"));
+	if (correct) {
+		SoupURI *suri;
+
+		suri = soup_uri_new (hosturl);
+		if (suri) {
+			soup_uri_free (suri);
+			e_util_set_entry_issue_hint (priv->host_entry, NULL);
+		} else {
+			e_util_set_entry_issue_hint (priv->host_entry, _("Host URL is not valid"));
+			complete = FALSE;
+		}
+	} else {
+		e_util_set_entry_issue_hint (priv->host_entry, _("Host URL cannot be empty"));
+	}
+
+	if (oaburl && *oaburl) {
+		SoupURI *suri;
+
+		suri = soup_uri_new (oaburl);
+		if (suri) {
+			soup_uri_free (suri);
+			e_util_set_entry_issue_hint (priv->oab_entry, NULL);
+		} else {
+			e_util_set_entry_issue_hint (priv->oab_entry, _("OAB URL is not valid"));
+			complete = FALSE;
+		}
+	} else {
+		e_util_set_entry_issue_hint (priv->oab_entry, NULL);
+	}
 
 	correct = user != NULL && *user != '\0';
 	complete = complete && correct;
