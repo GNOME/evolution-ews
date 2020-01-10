@@ -46,6 +46,7 @@ struct _EEwsFolderPrivate {
 	guint64 size;
 	gboolean foreign;
 	gchar *foreign_mail;
+	gboolean is_public;
 };
 
 static void
@@ -108,6 +109,7 @@ e_ews_folder_init (EEwsFolder *folder)
 	folder->priv->error = NULL;
 	folder->priv->folder_type = E_EWS_FOLDER_TYPE_UNKNOWN;
 	folder->priv->foreign = FALSE;
+	folder->priv->is_public = FALSE;
 }
 
 static gboolean
@@ -552,6 +554,23 @@ e_ews_folder_set_foreign_mail (EEwsFolder *folder,
 
 	g_free (folder->priv->foreign_mail);
 	folder->priv->foreign_mail = g_strdup (foreign_mail);
+}
+
+gboolean
+e_ews_folder_get_public (const EEwsFolder *folder)
+{
+	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), FALSE);
+
+	return folder->priv->is_public;
+}
+
+void
+e_ews_folder_set_public (EEwsFolder *folder,
+			 gboolean is_public)
+{
+	g_return_if_fail (E_IS_EWS_FOLDER (folder));
+
+	folder->priv->is_public = is_public;
 }
 
 /* escapes backslashes with \5C and forward slashes with \2F */

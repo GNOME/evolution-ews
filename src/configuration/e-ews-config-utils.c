@@ -675,7 +675,7 @@ ews_settings_get_folder_sizes_thread (gpointer user_data)
 		ext_uri->prop_type = g_strdup ("Integer");
 		add_props->extended_furis = g_slist_prepend (add_props->extended_furis, ext_uri);
 
-		ids = camel_ews_store_summary_get_folders (fsd->ews_store->summary, NULL);
+		ids = camel_ews_store_summary_get_folders (fsd->ews_store->summary, NULL, FALSE);
 		for (l = ids; l != NULL; l = l->next) {
 			EwsFolderId *fid;
 			fid = e_ews_folder_id_new (l->data, NULL, FALSE);

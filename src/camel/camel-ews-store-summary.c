@@ -124,7 +124,7 @@ load_id_fname_hash (CamelEwsStoreSummary *ews_summary)
 	g_hash_table_remove_all (ews_summary->priv->fname_id_hash);
 	g_hash_table_remove_all (ews_summary->priv->id_fname_hash);
 
-	folders = camel_ews_store_summary_get_folders (ews_summary, NULL);
+	folders = camel_ews_store_summary_get_folders (ews_summary, NULL, FALSE);
 
 	for (l = folders; l != NULL; l = g_slist_next (l)) {
 		gchar *id = l->data;
@@ -866,7 +866,8 @@ camel_ews_store_summary_get_string_val (CamelEwsStoreSummary *ews_summary,
 
 GSList *
 camel_ews_store_summary_get_folders (CamelEwsStoreSummary *ews_summary,
-                                     const gchar *prefix)
+				     const gchar *prefix,
+				     gboolean only_direct_subfolders)
 {
 	GSList *folders = NULL;
 	gchar **groups = NULL;
@@ -893,7 +894,8 @@ camel_ews_store_summary_get_folders (CamelEwsStoreSummary *ews_summary,
 				ews_summary->priv->id_fname_hash, groups[i]);
 
 			if (!fname || strncmp (fname, prefix, prefixlen) ||
-			    (fname[prefixlen] && fname[prefixlen] != '/'))
+			    (fname[prefixlen] && fname[prefixlen] != '/') ||
+			    (only_direct_subfolders && (!fname[prefixlen] || strchr (fname + prefixlen + 1, '/'))))
 				continue;
 		}
 		folders = g_slist_append (folders, g_strdup (groups[i]));
@@ -1011,7 +1013,7 @@ camel_ews_store_summary_get_folder_id_from_folder_type (CamelEwsStoreSummary *ew
 
 	S_LOCK (ews_summary);
 
-	folders = camel_ews_store_summary_get_folders (ews_summary, NULL);
+	folders = camel_ews_store_summary_get_folders (ews_summary, NULL, FALSE);
 
 	for (l = folders; l != NULL; l = g_slist_next (l)) {
 		gchar *id = l->data;

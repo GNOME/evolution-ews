@@ -34,6 +34,7 @@ struct _CamelEwsSettingsPrivate {
 	gboolean filter_junk_inbox;
 	gboolean oab_offline;
 	gboolean use_impersonation;
+	gboolean show_public_folders;
 	gchar *email;
 	gchar *gal_uid;
 	gchar *hosturl;
@@ -74,7 +75,8 @@ enum {
 	PROP_OVERRIDE_OAUTH2,
 	PROP_OAUTH2_TENANT,
 	PROP_OAUTH2_CLIENT_ID,
-	PROP_OAUTH2_REDIRECT_URI
+	PROP_OAUTH2_REDIRECT_URI,
+	PROP_SHOW_PUBLIC_FOLDERS
 };
 
 G_DEFINE_TYPE_WITH_CODE (
@@ -263,6 +265,12 @@ ews_settings_set_property (GObject *object,
 				CAMEL_EWS_SETTINGS (object),
 				g_value_get_string (value));
 			return;
+
+		case PROP_SHOW_PUBLIC_FOLDERS:
+			camel_ews_settings_set_show_public_folders (
+				CAMEL_EWS_SETTINGS (object),
+				g_value_get_boolean (value));
+			return;
 	}
 
 	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -440,6 +448,13 @@ ews_settings_get_property (GObject *object,
 			g_value_take_string (
 				value,
 				camel_ews_settings_dup_oauth2_redirect_uri (
+				CAMEL_EWS_SETTINGS (object)));
+			return;
+
+		case PROP_SHOW_PUBLIC_FOLDERS:
+			g_value_set_boolean (
+				value,
+				camel_ews_settings_get_show_public_folders (
 				CAMEL_EWS_SETTINGS (object)));
 			return;
 	}
@@ -737,6 +752,18 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 			"OAuth2 Redirect URI",
 			"OAuth2 Redirect URI to use, only if override-oauth2 is TRUE, otherwise the compile-time value is used",
 			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_SHOW_PUBLIC_FOLDERS,
+		g_param_spec_boolean (
+			"show-public-folders",
+			"Show Public Folders",
+			NULL,
+			FALSE,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
 			G_PARAM_STATIC_STRINGS));
@@ -1542,4 +1569,26 @@ camel_ews_settings_set_oauth2_redirect_uri (CamelEwsSettings *settings,
 	g_mutex_unlock (&settings->priv->property_lock);
 
 	g_object_notify (G_OBJECT (settings), "oauth2-redirect-uri");
+}
+
+gboolean
+camel_ews_settings_get_show_public_folders (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), FALSE);
+
+	return settings->priv->show_public_folders;
+}
+
+void
+camel_ews_settings_set_show_public_folders (CamelEwsSettings *settings,
+					    gboolean show_public_folders)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	if ((settings->priv->show_public_folders ? 1 : 0) == (show_public_folders ? 1 : 0))
+		return;
+
+	settings->priv->show_public_folders = show_public_folders;
+
+	g_object_notify (G_OBJECT (settings), "show-public-folders");
 }

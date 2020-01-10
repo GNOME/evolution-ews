@@ -378,11 +378,27 @@ ews_store_get_public_folders_name (CamelEwsStore *ews_store)
 	return use_name;
 }
 
+static gboolean
+ews_store_show_public_folders (CamelEwsStore *ews_store)
+{
+	CamelSettings *settings;
+	gboolean show;
+
+	settings = camel_service_ref_settings (CAMEL_SERVICE (ews_store));
+
+	show = settings && camel_ews_settings_get_show_public_folders (CAMEL_EWS_SETTINGS (settings));
+
+	g_clear_object (&settings);
+
+	return show;
+}
+
 void
 camel_ews_store_ensure_virtual_folders (CamelEwsStore *ews_store)
 {
 	gboolean needs_foreign = FALSE, has_foreign = FALSE;
 	gboolean needs_public = FALSE, has_public = FALSE;
+	gboolean show_public_folders;
 	CamelFolderInfo *fi;
 	GSList *folders, *iter;
 	GHashTable *children_count;
@@ -391,10 +407,11 @@ camel_ews_store_ensure_virtual_folders (CamelEwsStore *ews_store)
 
 	g_return_if_fail (CAMEL_IS_EWS_STORE (ews_store));
 
-	folders = camel_ews_store_summary_get_folders (ews_store->summary, NULL);
+	folders = camel_ews_store_summary_get_folders (ews_store->summary, NULL, FALSE);
 	if (!folders)
 		return;
 
+	show_public_folders = ews_store_show_public_folders (ews_store);
 	children_count = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
 	for (iter = folders; iter; iter = iter->next) {
@@ -442,7 +459,7 @@ camel_ews_store_ensure_virtual_folders (CamelEwsStore *ews_store)
 				guint64 fflags;
 
 				fflags = camel_ews_store_summary_get_folder_flags (ews_store->summary, fid, &error);
-				if ((fflags & CAMEL_FOLDER_SUBSCRIBED) != 0 && !error) {
+				if (show_public_folders || ((fflags & CAMEL_FOLDER_SUBSCRIBED) != 0 && !error)) {
 					needs_public = TRUE;
 
 					pfid = camel_ews_store_summary_get_parent_folder_id (ews_store->summary, fid, NULL);
@@ -460,12 +477,17 @@ camel_ews_store_ensure_virtual_folders (CamelEwsStore *ews_store)
 		g_clear_error (&error);
 	}
 
+	needs_public = needs_public || show_public_folders;
+
 	g_hash_table_iter_init (&tab_iter, children_count);
 	while (g_hash_table_iter_next (&tab_iter, &key, &value)) {
 		gint count = GPOINTER_TO_INT (value);
 
 		if (!count) {
 			CamelFolderInfo *fi;
+
+			if (needs_public && g_str_equal (key, EWS_PUBLIC_FOLDER_ROOT_ID))
+				continue;
 
 			if (has_foreign && g_str_equal (key, EWS_FOREIGN_FOLDER_ROOT_ID))
 				has_foreign = FALSE;
@@ -735,6 +757,171 @@ free_schedule_update_data (gpointer ptr)
 	g_free (sud);
 }
 
+static GHashTable * /* gchar *id ~> gchar *change_key */
+ews_store_get_existing_folders_in_path (CamelEwsStore *ews_store,
+					const gchar *in_path)
+{
+	GHashTable *folders;
+	GSList *stored_folders, *link;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_STORE (ews_store), NULL);
+	g_return_val_if_fail (in_path != NULL, NULL);
+
+	folders = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+
+	stored_folders = camel_ews_store_summary_get_folders (ews_store->summary, in_path, TRUE);
+
+	for (link = stored_folders; link; link = g_slist_next (link)) {
+		g_hash_table_insert (folders, link->data,
+			camel_ews_store_summary_get_change_key (ews_store->summary, link->data, NULL));
+	}
+
+	/* The ::data is used in 'folders', thus do not free it here */
+	g_slist_free (stored_folders);
+
+	return folders;
+}
+
+static gboolean
+ews_store_sync_public_folders (CamelEwsStore *ews_store,
+			       EEwsConnection *connection,
+			       const gchar *top,
+			       GSList **pfolders_created,
+			       GSList **pfolders_updated,
+			       GSList **pfolders_deleted,
+			       GCancellable *cancellable,
+			       GError **error)
+{
+	gboolean includes_last_folder = TRUE;
+	GHashTable *existing_folders;
+	GSList *folders = NULL;
+	gchar *fid_str;
+	EwsFolderId *folder_id;
+	GError *local_error = NULL;
+
+	g_return_val_if_fail (pfolders_created != NULL, FALSE);
+	g_return_val_if_fail (pfolders_updated != NULL, FALSE);
+	g_return_val_if_fail (pfolders_deleted != NULL, FALSE);
+
+	/* Read only explicit 'Public Folders' hierarchy, and not recursively,
+	   due to possibly deep/large Public Folders hierarchy */
+	if (!top || !*top || !g_str_has_prefix (top, EWS_PUBLIC_FOLDER_ROOT_DISPLAY_NAME))
+		return TRUE;
+
+	existing_folders = ews_store_get_existing_folders_in_path (ews_store, top);
+	fid_str = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary, top);
+
+	/* This should never be removed in this function */
+	g_hash_table_remove (existing_folders, EWS_PUBLIC_FOLDER_ROOT_ID);
+
+	if (!fid_str || g_strcmp0 (fid_str, EWS_PUBLIC_FOLDER_ROOT_ID) == 0)
+		folder_id = e_ews_folder_id_new ("publicfoldersroot", NULL, TRUE);
+	else
+		folder_id = e_ews_folder_id_new (fid_str, NULL, FALSE);
+
+	while (e_ews_connection_find_folder_sync (connection, EWS_PRIORITY_MEDIUM, folder_id, &includes_last_folder, &folders,
+		cancellable, &local_error) && !local_error &&
+		!g_cancellable_is_cancelled (cancellable)) {
+		GSList *fiter;
+
+		if (!folders)
+			break;
+
+		for (fiter = folders; fiter != NULL; fiter = fiter->next) {
+			EEwsFolder *folder = fiter->data;
+			const EwsFolderId *fid;
+			const gchar *existing_change_key;
+
+			if (!folder || e_ews_folder_is_error (folder))
+				continue;
+
+			fid = e_ews_folder_get_id (folder);
+
+			if (!fid)
+				continue;
+
+			if (!e_ews_folder_get_parent_id (folder)) {
+				if (!folder_id->is_distinguished_id) {
+					e_ews_folder_set_parent_id (folder,
+						e_ews_folder_id_new (folder_id->id, folder_id->change_key, folder_id->is_distinguished_id));
+				} else {
+					e_ews_folder_set_parent_id (folder, e_ews_folder_id_new (EWS_PUBLIC_FOLDER_ROOT_ID, NULL, FALSE));
+				}
+			}
+
+			e_ews_folder_set_public (folder, TRUE);
+
+			existing_change_key = g_hash_table_lookup (existing_folders, fid->id);
+
+			if (!existing_change_key) {
+				*pfolders_created = g_slist_prepend (*pfolders_created, g_object_ref (folder));
+			} else {
+				/* Always claim the folder as updated, thus the summary updates also folder
+				   flags with information about child folders */
+				*pfolders_updated = g_slist_prepend (*pfolders_updated, g_object_ref (folder));
+			}
+
+			g_hash_table_remove (existing_folders, fid->id);
+		}
+
+		g_slist_free_full (folders, g_object_unref);
+
+		if (includes_last_folder)
+			break;
+	}
+
+	e_ews_folder_id_free (folder_id);
+	g_free (fid_str);
+
+	if (!local_error && g_hash_table_size (existing_folders) > 0) {
+		GHashTableIter iter;
+		gpointer key;
+
+		g_hash_table_iter_init (&iter, existing_folders);
+
+		while (g_hash_table_iter_next (&iter, &key, NULL)) {
+			const gchar *id = key;
+			gchar *full_name;
+			GSList *removed_folders;
+
+			full_name = camel_ews_store_summary_get_folder_full_name (ews_store->summary, id, NULL);
+
+			if (!full_name) {
+				*pfolders_deleted = g_slist_prepend (*pfolders_deleted, g_strdup (id));
+				continue;
+			}
+
+			removed_folders = camel_ews_store_summary_get_folders (ews_store->summary, full_name, FALSE);
+
+			if (removed_folders)
+				*pfolders_deleted = g_slist_concat (*pfolders_deleted, removed_folders);
+
+			g_free (full_name);
+		}
+	}
+
+	g_hash_table_destroy (existing_folders);
+
+	if (local_error) {
+		if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_FOLDERNOTFOUND) &&
+		    !g_str_equal (top, EWS_PUBLIC_FOLDER_ROOT_DISPLAY_NAME)) {
+			GSList *removed_folders;
+
+			removed_folders = camel_ews_store_summary_get_folders (ews_store->summary, top, FALSE);
+
+			if (removed_folders)
+				*pfolders_deleted = g_slist_concat (*pfolders_deleted, removed_folders);
+		}
+
+		camel_ews_store_maybe_disconnect (ews_store, local_error);
+		g_propagate_error (error, local_error);
+
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 static gpointer
 camel_ews_folder_list_update_thread (gpointer user_data)
 {
@@ -778,6 +965,9 @@ camel_ews_folder_list_update_thread (gpointer user_data)
 
 		goto exit;
 	}
+
+	if (ews_store_show_public_folders (ews_store))
+		ews_store_sync_public_folders (ews_store, cnc, EWS_PUBLIC_FOLDER_ROOT_DISPLAY_NAME, &created, &updated, &deleted, sud->cancellable, NULL);
 
 	if (created != NULL || updated != NULL || deleted != NULL) {
 		ews_update_folder_hierarchy (
@@ -1506,8 +1696,10 @@ ews_store_set_flags (CamelEwsStore *ews_store,
 		if (folder && !e_ews_folder_is_error (folder)) {
 			fid = e_ews_folder_get_id (folder);
 
-			if (camel_ews_store_summary_has_folder (ews_store->summary, fid->id))
-				camel_ews_store_summary_set_folder_flags (ews_store->summary, fid->id, system_folder[n].info_flags);
+			if (camel_ews_store_summary_has_folder (ews_store->summary, fid->id)) {
+				camel_ews_store_summary_set_folder_flags (ews_store->summary, fid->id, system_folder[n].info_flags |
+					(camel_ews_store_summary_get_folder_flags (ews_store->summary, fid->id, NULL) & (CAMEL_FOLDER_CHILDREN | CAMEL_FOLDER_NOCHILDREN)));
+			}
 		}
 
 		temp = temp->next;
@@ -1526,7 +1718,7 @@ ews_store_forget_all_folders (CamelEwsStore *ews_store)
 
 	store = CAMEL_STORE (ews_store);
 	subscribable = CAMEL_SUBSCRIBABLE (ews_store);
-	folders = camel_ews_store_summary_get_folders (ews_store->summary, NULL);
+	folders = camel_ews_store_summary_get_folders (ews_store->summary, NULL, FALSE);
 
 	if (!folders)
 		return;
@@ -1630,7 +1822,7 @@ ews_store_update_foreign_subfolders (CamelSession *session,
 	if (!local_error && !g_cancellable_is_cancelled (cancellable)) {
 		gchar *full_name = camel_ews_store_summary_get_folder_full_name (ews_store->summary, euf->folder_id, NULL);
 		if (full_name) {
-			local_folders = camel_ews_store_summary_get_folders (ews_store->summary, full_name);
+			local_folders = camel_ews_store_summary_get_folders (ews_store->summary, full_name, FALSE);
 		}
 		g_free (full_name);
 	}
@@ -2215,6 +2407,38 @@ ews_store_has_as_parent_id (CamelEwsStoreSummary *ews_summary,
 	return found;
 }
 
+static gboolean
+ews_store_folder_is_direct_subfolder (CamelEwsStore *ews_store,
+				      const gchar *fid,
+				      const gchar *path)
+{
+	gchar *fid_path;
+	gboolean res;
+
+	g_return_val_if_fail (CAMEL_IS_EWS_STORE (ews_store), FALSE);
+	g_return_val_if_fail (fid != NULL, FALSE);
+	g_return_val_if_fail (path != NULL, FALSE);
+
+	fid_path = camel_ews_store_summary_get_folder_full_name (ews_store->summary, fid, NULL);
+
+	if (!fid_path)
+		return FALSE;
+
+	res = g_str_has_prefix (fid_path, path);
+
+	if (res) {
+		gint path_len;
+
+		path_len = strlen (path);
+
+		res = fid_path[path_len] == '/' && !strchr (fid_path + path_len + 1, '/');
+	}
+
+	g_free (fid_path);
+
+	return res;
+}
+
 static CamelFolderInfo *
 folder_info_from_store_summary (CamelEwsStore *store,
                                 const gchar *top,
@@ -2347,12 +2571,17 @@ folder_info_from_store_summary (CamelEwsStore *store,
 	} else {
 		GSList *folders, *fiter;
 		gchar *mailroot_fid = NULL, *inbox_fid;
+		gboolean show_public_folders, is_in_public_folders_root;
+		gboolean is_online;
 
 		ews_summary = store->summary;
-		folders = camel_ews_store_summary_get_folders (ews_summary, top);
+		folders = camel_ews_store_summary_get_folders (ews_summary, top, FALSE);
 		if (!folders)
 			return NULL;
 
+		show_public_folders = ews_store_show_public_folders (store);
+		is_in_public_folders_root = top && g_str_has_prefix (top, EWS_PUBLIC_FOLDER_ROOT_DISPLAY_NAME);
+		is_online = camel_offline_store_get_online (CAMEL_OFFLINE_STORE (store));
 		inbox_fid = camel_ews_store_summary_get_folder_id_from_folder_type (ews_summary, CAMEL_FOLDER_TYPE_INBOX);
 		if (inbox_fid) {
 			mailroot_fid = camel_ews_store_summary_get_parent_folder_id (ews_summary, inbox_fid, NULL);
@@ -2370,17 +2599,24 @@ folder_info_from_store_summary (CamelEwsStore *store,
 			if (ftype != E_EWS_FOLDER_TYPE_MAILBOX)
 				continue;
 
-			if (camel_ews_store_summary_get_public (ews_summary, fid, NULL)) {
-				guint64 fflags;
+			if (camel_ews_store_summary_get_public (ews_summary, fid, NULL) ||
+			    (show_public_folders && g_strcmp0 (fid, EWS_PUBLIC_FOLDER_ROOT_ID) == 0)) {
+				if (!show_public_folders || (!is_in_public_folders_root && g_strcmp0 (fid, EWS_PUBLIC_FOLDER_ROOT_ID) != 0)) {
+					guint64 fflags;
 
-				fflags = camel_ews_store_summary_get_folder_flags (ews_summary, fid, NULL);
-				if (!(fflags & CAMEL_FOLDER_SUBSCRIBED))
-					continue;
+					fflags = camel_ews_store_summary_get_folder_flags (ews_summary, fid, NULL);
+					if (!(fflags & CAMEL_FOLDER_SUBSCRIBED))
+						continue;
+				}
 			} else if (!camel_ews_store_summary_get_foreign (ews_summary, fid, NULL) &&
 				mailroot_fid && !ews_store_has_as_parent_id (ews_summary, fid, mailroot_fid)) {
 				/* Skip mail folders out of the msgfolderroot hierarchy */
 				continue;
 			}
+
+			if (is_in_public_folders_root && is_online && show_public_folders &&
+			    g_strcmp0 (fid, EWS_PUBLIC_FOLDER_ROOT_ID) != 0 && !ews_store_folder_is_direct_subfolder (store, fid, top))
+				continue;
 
 			fi = camel_ews_utils_build_folder_info (store, fid);
 			g_ptr_array_add (folder_infos, fi);
@@ -2549,12 +2785,13 @@ ews_get_folder_info_sync (CamelStore *store,
 	if (!old_sync_state)
 		initial_setup = TRUE;
 
-	if (!initial_setup && (flags & CAMEL_STORE_FOLDER_INFO_SUBSCRIBED) != 0) {
+	if (!initial_setup && (flags & CAMEL_STORE_FOLDER_INFO_REFRESH) != 0) {
 		time_t now = time (NULL);
 
 		g_free (old_sync_state);
 		if (now - priv->last_refresh_time > FINFO_REFRESH_INTERVAL && ews_refresh_finfo (ews_store))
 			ews_store->priv->last_refresh_time = time (NULL);
+		else
 
 		g_mutex_unlock (&priv->get_finfo_lock);
 		goto offline;
@@ -2579,6 +2816,9 @@ ews_get_folder_info_sync (CamelStore *store,
 			&new_sync_state, &includes_last_folder, &folders_created, &folders_updated, &folders_deleted,
 			cancellable, &local_error);
 	}
+
+	if (success && ews_store_show_public_folders (ews_store))
+		ews_store_sync_public_folders (ews_store, connection, top, &folders_created, &folders_updated, &folders_deleted, cancellable, NULL);
 
 	g_object_unref (connection);
 
@@ -3549,7 +3789,7 @@ ews_store_unsubscribe_folder_sync (CamelSubscribable *subscribable,
 			GSList *local_folders = NULL, *ii;
 			gchar *full_name = camel_ews_store_summary_get_folder_full_name (ews_store->summary, fid, NULL);
 			if (full_name) {
-				local_folders = camel_ews_store_summary_get_folders (ews_store->summary, full_name);
+				local_folders = camel_ews_store_summary_get_folders (ews_store->summary, full_name, FALSE);
 			}
 			g_free (full_name);
 

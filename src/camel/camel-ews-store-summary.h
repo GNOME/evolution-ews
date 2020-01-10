@@ -178,7 +178,8 @@ gboolean	camel_ews_store_summary_get_public
 
 GSList *	camel_ews_store_summary_get_folders
 						(CamelEwsStoreSummary *ews_summary,
-						 const gchar *prefix);
+						 const gchar *prefix,
+						 gboolean only_direct_subfolders);
 GSList *	camel_ews_store_summary_get_foreign_folders
 						(CamelEwsStoreSummary *ews_summary,
 						 const gchar *prefix);

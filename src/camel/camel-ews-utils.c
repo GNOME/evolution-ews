@@ -97,6 +97,9 @@ camel_ews_utils_build_folder_info (CamelEwsStore *store,
 		}
 	}
 
+	if (g_strcmp0 (fid, EWS_PUBLIC_FOLDER_ROOT_ID) == 0)
+		fi->flags |= CAMEL_FOLDER_CHILDREN;
+
 	return fi;
 }
 
@@ -254,6 +257,11 @@ sync_updated_folders (CamelEwsStore *store,
 			g_clear_error (&error);
 		}
  done:
+		if (e_ews_folder_get_public (ews_folder)) {
+			camel_ews_store_summary_set_folder_flags (ews_summary, fid->id,
+				e_ews_folder_get_child_count (ews_folder) > 0 ? CAMEL_FOLDER_CHILDREN : CAMEL_FOLDER_NOCHILDREN);
+		}
+
 		g_free (folder_name);
 		g_free (display_name);
 	}
@@ -269,6 +277,7 @@ add_folder_to_summary (CamelEwsStore *store,
 	const EwsFolderId *pfid, *fid;
 	const gchar *dname;
 	gint64 unread, total;
+	guint64 flags = 0;
 	EEwsFolderType ftype;
 
 	fid = e_ews_folder_get_id (folder);
@@ -277,13 +286,14 @@ add_folder_to_summary (CamelEwsStore *store,
 	total = e_ews_folder_get_total_count (folder);
 	unread = e_ews_folder_get_unread_count (folder);
 	ftype = e_ews_folder_get_folder_type (folder);
+	flags = e_ews_folder_get_child_count (folder) ? CAMEL_FOLDER_CHILDREN : CAMEL_FOLDER_NOCHILDREN;
 
 	camel_ews_store_summary_new_folder (
 		ews_summary, fid->id,
 		pfid ? pfid->id : NULL, fid->change_key,
-		dname, ftype, 0, total,
+		dname, ftype, flags, total,
 		e_ews_folder_get_foreign (folder),
-		FALSE);
+		e_ews_folder_get_public (folder));
 	camel_ews_store_summary_set_folder_unread (
 		ews_summary, fid->id, unread);
 }

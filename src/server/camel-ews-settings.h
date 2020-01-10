@@ -167,6 +167,11 @@ gchar *		camel_ews_settings_dup_oauth2_redirect_uri
 void		camel_ews_settings_set_oauth2_redirect_uri
 						(CamelEwsSettings *settings,
 						 const gchar *redirect_uri);
+gboolean	camel_ews_settings_get_show_public_folders
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_show_public_folders
+						(CamelEwsSettings *settings,
+						 gboolean show_public_folders);
 
 G_END_DECLS
 

@@ -61,6 +61,8 @@ static CamelProviderConfEntry ews_conf_entries[] = {
 	{ CAMEL_PROVIDER_CONF_CHECKBOX, "stay-synchronized", NULL,
 	  N_("Synchroni_ze remote mail locally in all folders"), "0" },
 	{ CAMEL_PROVIDER_CONF_PLACEHOLDER, "ews-limit-by-age-placeholder", NULL },
+	{ CAMEL_PROVIDER_CONF_CHECKBOX, "show-public-folders", NULL,
+	  N_("Show _Public Folders beside user folders"), "0" },
 	{ CAMEL_PROVIDER_CONF_SECTION_END },
 
 	{ CAMEL_PROVIDER_CONF_SECTION_START, "connection", NULL, N_("Connection") },

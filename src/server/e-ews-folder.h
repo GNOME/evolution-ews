@@ -82,6 +82,8 @@ gboolean	e_ews_folder_get_foreign (const EEwsFolder *folder);
 void		e_ews_folder_set_foreign (EEwsFolder *folder, gboolean is_foreign);
 const gchar *	e_ews_folder_get_foreign_mail (const EEwsFolder *folder);
 void		e_ews_folder_set_foreign_mail (EEwsFolder *folder, const gchar *foreign_mail);
+gboolean	e_ews_folder_get_public (const EEwsFolder *folder);
+void		e_ews_folder_set_public (EEwsFolder *folder, gboolean is_public);
 
 EwsFolderId *	e_ews_folder_id_new (const gchar *id,
 				     const gchar *change_key,
