@@ -13,8 +13,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2020-01-08 14:57+0000\n"
-"PO-Revision-Date: 2020-01-08 16:46+0100\n"
+"POT-Creation-Date: 2020-01-10 10:57+0000\n"
+"PO-Revision-Date: 2020-01-13 09:32+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -25,14 +25,14 @@ msgstr ""
 "X-Generator: Gtranslator 3.34.0\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
-#: ../src/camel/camel-ews-provider.c:81
+#: ../src/camel/camel-ews-provider.c:83
 #: ../src/configuration/e-ews-config-lookup.c:251
 #: ../src/configuration/e-mail-config-ews-autodiscover.c:134
 msgid "Exchange Web Services"
 msgstr "Servicios web Exchange"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
-#: ../src/camel/camel-ews-provider.c:83
+#: ../src/camel/camel-ews-provider.c:85
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Para acceder a servidores Exchange usando servicios web"
 
@@ -177,26 +177,30 @@ msgstr "Sólo verificar spam en la carpeta _Bandeja de entrada"
 msgid "Synchroni_ze remote mail locally in all folders"
 msgstr "Sincroni_zar automáticamente el correo remoto de manera local"
 
-#: ../src/camel/camel-ews-provider.c:66
+#: ../src/camel/camel-ews-provider.c:65
+msgid "Show _Public Folders beside user folders"
+msgstr "Mostrar carpeta _Público junto a las carpetas del usuario"
+
+#: ../src/camel/camel-ews-provider.c:68
 msgid "Connection"
 msgstr "Conexión"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/camel/camel-ews-provider.c:70
+#: ../src/camel/camel-ews-provider.c:72
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "_Tiempo de espera (en segundos) de la conexión %s"
 
-#: ../src/camel/camel-ews-provider.c:72
+#: ../src/camel/camel-ews-provider.c:74
 msgid "Override _User-Agent header value"
 msgstr "Omitir el valor de la cabecera _User-Agent"
 
-#: ../src/camel/camel-ews-provider.c:98
+#: ../src/camel/camel-ews-provider.c:100
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/camel/camel-ews-provider.c:100
+#: ../src/camel/camel-ews-provider.c:102
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -204,11 +208,11 @@ msgstr ""
 "Esta opción conectará al servidor de Exchange usando una contraseña de texto "
 "plano con autenticación NTLM."
 
-#: ../src/camel/camel-ews-provider.c:108
+#: ../src/camel/camel-ews-provider.c:110
 msgid "Basic"
 msgstr "Básica"
 
-#: ../src/camel/camel-ews-provider.c:110
+#: ../src/camel/camel-ews-provider.c:112
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -216,11 +220,11 @@ msgstr ""
 "Esta opción conectará al servidor de Exchange usando una contraseña de texto "
 "plano con autenticación básica."
 
-#: ../src/camel/camel-ews-provider.c:118
+#: ../src/camel/camel-ews-provider.c:120
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/camel/camel-ews-provider.c:120
+#: ../src/camel/camel-ews-provider.c:122
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -247,67 +251,67 @@ msgstr "%s_%d"
 #. * user has such in his store already. The %s is replaced with "Foreign Folders",
 #. * the %d with counter, thus it composes name like "Foreign Folders_1"
 #.
-#: ../src/camel/camel-ews-store.c:505
+#: ../src/camel/camel-ews-store.c:527
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:651 ../src/camel/camel-ews-store.c:1291
+#: ../src/camel/camel-ews-store.c:673 ../src/camel/camel-ews-store.c:1481
 msgid "Checking “Out of Office” settings"
 msgstr "Comprobando la configuración de «Estoy fuera de la oficina»"
 
-#: ../src/camel/camel-ews-store.c:1297
+#: ../src/camel/camel-ews-store.c:1487
 msgid "Look up Exchange server categories"
 msgstr "Buscar categorías de servidor Exchange"
 
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/camel/camel-ews-store.c:1367
+#: ../src/camel/camel-ews-store.c:1557
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
 msgstr[0] "La contraseña caducará en %d día. Abra «%s para cambiarla»."
 msgstr[1] "La contraseña caducará en %d días. Abra «%s para cambiarla»."
 
-#: ../src/camel/camel-ews-store.c:1373
+#: ../src/camel/camel-ews-store.c:1563
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
 msgstr[0] "La contraseña caducará en un día."
 msgstr[1] "La contraseña caducará en %d días."
 
-#: ../src/camel/camel-ews-store.c:1593
+#: ../src/camel/camel-ews-store.c:1785
 msgid "Updating foreign folder structure"
 msgstr "Actualizando la estructura de carpetas externas"
 
-#: ../src/camel/camel-ews-store.c:1729
+#: ../src/camel/camel-ews-store.c:1921
 msgid "Updating foreign folders"
 msgstr "Actualizando carpetas externas"
 
-#: ../src/camel/camel-ews-store.c:2145
+#: ../src/camel/camel-ews-store.c:2337
 #, c-format
 msgid "No such folder: %s"
 msgstr "No existe la carpeta: %s"
 
-#: ../src/camel/camel-ews-store.c:2454
+#: ../src/camel/camel-ews-store.c:2690
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "No se pueden listar las carpetas EWS en modo desconectado"
 
-#: ../src/camel/camel-ews-store.c:2527
+#: ../src/camel/camel-ews-store.c:2763
 msgid "Cannot find any EWS public folders"
 msgstr "No se puede encontrar ninguna carpeta EWS pública"
 
-#: ../src/camel/camel-ews-store.c:2636
+#: ../src/camel/camel-ews-store.c:2876
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "No se puede crear la carpeta «%s», la carpeta ya existe"
 
-#: ../src/camel/camel-ews-store.c:2651
+#: ../src/camel/camel-ews-store.c:2891
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "La carpeta padre %s no existe"
 
-#: ../src/camel/camel-ews-store.c:2661
+#: ../src/camel/camel-ews-store.c:2901
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -315,95 +319,95 @@ msgstr ""
 "No se puede crear la carpeta bajo «%s», sólo la usan carpetas de otros "
 "usuarios"
 
-#: ../src/camel/camel-ews-store.c:2671
+#: ../src/camel/camel-ews-store.c:2911
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "No se puede crear la carpeta bajo «%s», se usa sólo para carpetas públicas"
 
-#: ../src/camel/camel-ews-store.c:2775
+#: ../src/camel/camel-ews-store.c:3015
 #, c-format
 msgid "Folder does not exist"
 msgstr "La carpeta no existe"
 
-#: ../src/camel/camel-ews-store.c:2785
+#: ../src/camel/camel-ews-store.c:3025
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "No se puede eliminar la carpeta «%s», sólo la usan carpetas de otros usuarios"
 
-#: ../src/camel/camel-ews-store.c:2796
+#: ../src/camel/camel-ews-store.c:3036
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr "No se puede quitar la carpeta «%s», se usa sólo para carpetas públicas"
 
-#: ../src/camel/camel-ews-store.c:2955
+#: ../src/camel/camel-ews-store.c:3195
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "La carpeta %s no existe"
 
-#: ../src/camel/camel-ews-store.c:2964
+#: ../src/camel/camel-ews-store.c:3204
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "No hay cambios en registros clave de la carpeta %s"
 
-#: ../src/camel/camel-ews-store.c:3007
+#: ../src/camel/camel-ews-store.c:3247
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "No se puede renombrar y mover una carpeta al mismo tiempo"
 
-#: ../src/camel/camel-ews-store.c:3041
+#: ../src/camel/camel-ews-store.c:3281
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "No se puede encontrar el ID de carpeta para la carpeta padre %s"
 
-#: ../src/camel/camel-ews-store.c:3093 ../src/camel/camel-ews-transport.c:318
+#: ../src/camel/camel-ews-store.c:3333 ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange server %s"
 msgstr "Servidor Exchange %s"
 
-#: ../src/camel/camel-ews-store.c:3096
+#: ../src/camel/camel-ews-store.c:3336
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Servicio Exchange para %s en %s"
 
-#: ../src/camel/camel-ews-store.c:3140
+#: ../src/camel/camel-ews-store.c:3380
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "No se pudo localizar la carpeta de la Papelera"
 
-#: ../src/camel/camel-ews-store.c:3200
+#: ../src/camel/camel-ews-store.c:3440
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "No se puedo encontrar la carpeta de Correo no deseado"
 
-#: ../src/camel/camel-ews-store.c:3391
+#: ../src/camel/camel-ews-store.c:3631
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "No se puede suscribir a las carpetas EWS en modo desconectado"
 
-#: ../src/camel/camel-ews-store.c:3414
+#: ../src/camel/camel-ews-store.c:3654
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr ""
 "No se puede suscribir a la carpeta «%s», no hay ninguna carpeta pública "
 "disponible"
 
-#: ../src/camel/camel-ews-store.c:3424
+#: ../src/camel/camel-ews-store.c:3664
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr ""
 "No se puede suscribir a la carpeta «%s», no se ha encontrado la carpeta"
 
-#: ../src/camel/camel-ews-store.c:3515
+#: ../src/camel/camel-ews-store.c:3755
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "No se puede desuscribir de las carpetas EWS en modo desconectado"
 
-#: ../src/camel/camel-ews-store.c:3632
+#: ../src/camel/camel-ews-store.c:3872
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "Debe estar conectado para completar esta operación"
 
-#: ../src/camel/camel-ews-store.c:3676 ../src/camel/camel-ews-store.c:3713
+#: ../src/camel/camel-ews-store.c:3916 ../src/camel/camel-ews-store.c:3953
 msgid "Unsetting the “Out of Office” status"
 msgstr "Quitando el estado de «Estoy fuera de la oficina»."
 
@@ -443,14 +447,14 @@ msgstr "Servicio no conectado"
 msgid "Global Address List"
 msgstr "Lista global de direcciones"
 
-#: ../src/collection/e-ews-backend.c:980
+#: ../src/collection/e-ews-backend.c:987
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
 "No se pudo determinar una clase de carpeta apropiada para una nueva carpeta "
 "llamada «%s»"
 
-#: ../src/collection/e-ews-backend.c:1068
+#: ../src/collection/e-ews-backend.c:1075
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr ""
@@ -838,7 +842,7 @@ msgid "_Search:"
 msgstr "Bu_scar:"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:103
-#: ../src/server/e-ews-folder.c:802
+#: ../src/server/e-ews-folder.c:821
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "No se puede añadir la carpeta, la carpeta ya existe como «%s»"
@@ -1047,7 +1051,6 @@ msgid "Default redirect URI is “%s”"
 msgstr "El URI de redirección predeterminado es «%s»"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:592
-#| msgid "URL “%s” is not valid"
 msgid "Host URL is not valid"
 msgstr "El URL del equipo no es válido"
 
@@ -1056,7 +1059,6 @@ msgid "Host URL cannot be empty"
 msgstr "El URL del equipo no puede estar vacío"
 
 #: ../src/configuration/e-mail-config-ews-backend.c:607
-#| msgid "URL “%s” is not valid"
 msgid "OAB URL is not valid"
 msgstr "El URL de OAB no es válido"
 
@@ -1421,11 +1423,11 @@ msgstr "La contraseña ha caducado."
 msgid "Unknown error"
 msgstr "Error desconocido"
 
-#: ../src/server/e-ews-folder.c:757
+#: ../src/server/e-ews-folder.c:776
 msgid "Cannot add folder, unsupported folder type"
 msgstr "No se puede añadir la carpeta, tipo de carpeta no soportado"
 
-#: ../src/server/e-ews-folder.c:762
+#: ../src/server/e-ews-folder.c:781
 msgid "Cannot add folder, master source not found"
 msgstr "No se puede añadir la carpeta, fuente principal no encontrada"
 
