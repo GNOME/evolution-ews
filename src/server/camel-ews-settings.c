@@ -41,6 +41,7 @@ struct _CamelEwsSettingsPrivate {
 	gchar *oaburl;
 	gchar *oal_selected;
 	guint timeout;
+	guint concurrent_connections;
 	gchar *impersonate_user;
 	gboolean override_user_agent;
 	gchar *user_agent;
@@ -76,7 +77,8 @@ enum {
 	PROP_OAUTH2_TENANT,
 	PROP_OAUTH2_CLIENT_ID,
 	PROP_OAUTH2_REDIRECT_URI,
-	PROP_SHOW_PUBLIC_FOLDERS
+	PROP_SHOW_PUBLIC_FOLDERS,
+	PROP_CONCURRENT_CONNECTIONS
 };
 
 G_DEFINE_TYPE_WITH_CODE (
@@ -271,6 +273,12 @@ ews_settings_set_property (GObject *object,
 				CAMEL_EWS_SETTINGS (object),
 				g_value_get_boolean (value));
 			return;
+
+		case PROP_CONCURRENT_CONNECTIONS:
+			camel_ews_settings_set_concurrent_connections (
+				CAMEL_EWS_SETTINGS (object),
+				g_value_get_uint (value));
+			return;
 	}
 
 	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -455,6 +463,13 @@ ews_settings_get_property (GObject *object,
 			g_value_set_boolean (
 				value,
 				camel_ews_settings_get_show_public_folders (
+				CAMEL_EWS_SETTINGS (object)));
+			return;
+
+		case PROP_CONCURRENT_CONNECTIONS:
+			g_value_set_uint (
+				value,
+				camel_ews_settings_get_concurrent_connections (
 				CAMEL_EWS_SETTINGS (object)));
 			return;
 	}
@@ -766,6 +781,21 @@ camel_ews_settings_class_init (CamelEwsSettingsClass *class)
 			FALSE,
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_CONCURRENT_CONNECTIONS,
+		g_param_spec_uint (
+			"concurrent-connections",
+			"Concurrent Connections",
+			"Number of concurrent connections to use",
+			MIN_CONCURRENT_CONNECTIONS,
+			MAX_CONCURRENT_CONNECTIONS,
+			1,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_EXPLICIT_NOTIFY |
 			G_PARAM_STATIC_STRINGS));
 }
 
@@ -1591,4 +1621,31 @@ camel_ews_settings_set_show_public_folders (CamelEwsSettings *settings,
 	settings->priv->show_public_folders = show_public_folders;
 
 	g_object_notify (G_OBJECT (settings), "show-public-folders");
+}
+
+guint
+camel_ews_settings_get_concurrent_connections (CamelEwsSettings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_EWS_SETTINGS (settings), 1);
+
+	return settings->priv->concurrent_connections;
+}
+
+void
+camel_ews_settings_set_concurrent_connections (CamelEwsSettings *settings,
+					       guint concurrent_connections)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SETTINGS (settings));
+
+	concurrent_connections = CLAMP (
+		concurrent_connections,
+		MIN_CONCURRENT_CONNECTIONS,
+		MAX_CONCURRENT_CONNECTIONS);
+
+	if (settings->priv->concurrent_connections == concurrent_connections)
+		return;
+
+	settings->priv->concurrent_connections = concurrent_connections;
+
+	g_object_notify (G_OBJECT (settings), "concurrent-connections");
 }

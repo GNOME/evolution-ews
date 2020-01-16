@@ -40,6 +40,9 @@
 	(G_TYPE_INSTANCE_GET_CLASS \
 	((obj), CAMEL_TYPE_EWS_SETTINGS))
 
+#define MIN_CONCURRENT_CONNECTIONS 1
+#define MAX_CONCURRENT_CONNECTIONS 7
+
 G_BEGIN_DECLS
 
 typedef struct _CamelEwsSettings CamelEwsSettings;
@@ -172,6 +175,11 @@ gboolean	camel_ews_settings_get_show_public_folders
 void		camel_ews_settings_set_show_public_folders
 						(CamelEwsSettings *settings,
 						 gboolean show_public_folders);
+guint		camel_ews_settings_get_concurrent_connections
+						(CamelEwsSettings *settings);
+void		camel_ews_settings_set_concurrent_connections
+						(CamelEwsSettings *settings,
+						 guint concurrent_connections);
 
 G_END_DECLS
 

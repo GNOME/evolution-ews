@@ -49,9 +49,6 @@
 	(G_TYPE_INSTANCE_GET_PRIVATE \
 	((obj), E_TYPE_EWS_CONNECTION, EEwsConnectionPrivate))
 
-/* For the number of connections */
-#define EWS_CONNECTION_MAX_REQUESTS 1
-
 /* A chunk size limit when moving items in chunks. */
 #define EWS_MOVE_ITEMS_CHUNK_SIZE 500
 
@@ -87,6 +84,7 @@ struct _EEwsConnectionPrivate {
 	EEwsNotification *notification;
 
 	CamelEwsSettings *settings;
+	guint concurrent_connections;
 	GMutex property_lock;
 
 	/* Hash key for the loaded_connections_permissions table. */
@@ -121,7 +119,8 @@ enum {
 	PROP_PASSWORD,
 	PROP_PROXY_RESOLVER,
 	PROP_SETTINGS,
-	PROP_SOURCE
+	PROP_SOURCE,
+	PROP_CONCURRENT_CONNECTIONS
 };
 
 enum {
@@ -181,7 +180,39 @@ struct _EwsUrls {
 
 G_DEFINE_TYPE (EEwsConnection, e_ews_connection, G_TYPE_OBJECT)
 
-/* Static Functions */
+static guint
+ews_connection_get_concurrent_connections (EEwsConnection *cnc)
+{
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), 1);
+
+	return cnc->priv->concurrent_connections;
+}
+
+static void
+ews_connection_set_concurrent_connections (EEwsConnection *cnc,
+					   guint concurrent_connections)
+{
+	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
+
+	concurrent_connections = CLAMP (
+		concurrent_connections,
+		MIN_CONCURRENT_CONNECTIONS,
+		MAX_CONCURRENT_CONNECTIONS);
+
+	if (cnc->priv->concurrent_connections == concurrent_connections)
+		return;
+
+	cnc->priv->concurrent_connections = concurrent_connections;
+
+	if (cnc->priv->soup_session) {
+		g_object_set (G_OBJECT (cnc->priv->soup_session),
+			SOUP_SESSION_MAX_CONNS, concurrent_connections,
+			SOUP_SESSION_MAX_CONNS_PER_HOST, concurrent_connections,
+			NULL);
+	}
+
+	g_object_notify (G_OBJECT (cnc), "concurrent-connections");
+}
 
 GQuark
 ews_connection_error_quark (void)
@@ -683,7 +714,7 @@ ews_next_request (gpointer _cnc)
 
 	l = cnc->priv->jobs;
 
-	if (!l || g_slist_length (cnc->priv->active_job_queue) >= EWS_CONNECTION_MAX_REQUESTS) {
+	if (!l || g_slist_length (cnc->priv->active_job_queue) >= ews_connection_get_concurrent_connections (cnc)) {
 		QUEUE_UNLOCK (cnc);
 		return FALSE;
 	}
@@ -1839,6 +1870,10 @@ ews_connection_set_settings (EEwsConnection *connection,
 	g_return_if_fail (connection->priv->settings == NULL);
 
 	connection->priv->settings = g_object_ref (settings);
+
+	e_binding_bind_property (connection->priv->settings, "concurrent-connections",
+		connection, "concurrent-connections",
+		G_BINDING_DEFAULT | G_BINDING_SYNC_CREATE);
 }
 
 static void
@@ -1882,6 +1917,12 @@ ews_connection_set_property (GObject *object,
 				E_EWS_CONNECTION (object),
 				g_value_get_object (value));
 			return;
+
+		case PROP_CONCURRENT_CONNECTIONS:
+			ews_connection_set_concurrent_connections (
+				E_EWS_CONNECTION (object),
+				g_value_get_uint (value));
+			return;
 	}
 
 	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -1921,6 +1962,13 @@ ews_connection_get_property (GObject *object,
 				e_ews_connection_get_source (
 				E_EWS_CONNECTION (object)));
 			return;
+
+		case PROP_CONCURRENT_CONNECTIONS:
+			g_value_set_uint (
+				value,
+				ews_connection_get_concurrent_connections (
+				E_EWS_CONNECTION (object)));
+			return;
 	}
 
 	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -1942,6 +1990,8 @@ ews_connection_constructed (GObject *object)
 		SOUP_SESSION_SSL_STRICT, TRUE,
 		SOUP_SESSION_SSL_USE_SYSTEM_CA_FILE, TRUE,
 		SOUP_SESSION_ASYNC_CONTEXT, cnc->priv->soup_context,
+		SOUP_SESSION_MAX_CONNS, cnc->priv->concurrent_connections,
+		SOUP_SESSION_MAX_CONNS_PER_HOST, cnc->priv->concurrent_connections,
 		NULL);
 
 	/* Do not use G_BINDING_SYNC_CREATE because the property_lock is
@@ -2129,6 +2179,21 @@ e_ews_connection_class_init (EEwsConnectionClass *class)
 			G_PARAM_CONSTRUCT_ONLY |
 			G_PARAM_STATIC_STRINGS));
 
+	g_object_class_install_property (
+		object_class,
+		PROP_CONCURRENT_CONNECTIONS,
+		g_param_spec_uint (
+			"concurrent-connections",
+			"Concurrent Connections",
+			"Number of concurrent connections to use",
+			MIN_CONCURRENT_CONNECTIONS,
+			MAX_CONCURRENT_CONNECTIONS,
+			1,
+			/* Do not construct it, otherwise it overrides the value derived from CamelEwsSettings */
+			G_PARAM_READWRITE |
+			G_PARAM_EXPLICIT_NOTIFY |
+			G_PARAM_STATIC_STRINGS));
+
 	signals[SERVER_NOTIFICATION] = g_signal_new (
 		"server-notification",
 		G_OBJECT_CLASS_TYPE (object_class),
@@ -2164,6 +2229,7 @@ e_ews_connection_init (EEwsConnection *cnc)
 	cnc->priv->soup_loop = g_main_loop_new (cnc->priv->soup_context, FALSE);
 	cnc->priv->backoff_enabled = TRUE;
 	cnc->priv->disconnected_flag = FALSE;
+	cnc->priv->concurrent_connections = 1;
 
 	cnc->priv->subscriptions = g_hash_table_new_full (
 			g_direct_hash, g_direct_equal,
