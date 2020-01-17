@@ -393,11 +393,12 @@ check_foreign_folder_thread (GObject *with_object,
 	} else {
 		fid.id = (gchar *) (cffd->use_foldername ? cffd->use_foldername : cffd->orig_foldername);
 		fid.change_key = NULL;
-		fid.is_distinguished_id = cffd->use_foldername != NULL;
+		fid.is_distinguished_id = cffd->use_foldername != NULL || (cffd->orig_foldername && strlen (cffd->orig_foldername) < 40);
 
 		if (!e_ews_connection_get_folder_info_sync (conn, G_PRIORITY_DEFAULT,
 			cffd->email, &fid, &folder, cancellable, &local_error)) {
-			if (g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ITEMNOTFOUND) ||
+			if (!local_error ||
+			    g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ITEMNOTFOUND) ||
 			    g_error_matches (local_error, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_FOLDERNOTFOUND)) {
 				g_clear_error (&local_error);
 				local_error = g_error_new (

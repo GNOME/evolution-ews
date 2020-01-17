@@ -121,7 +121,8 @@ e_ews_folder_set_from_soap_parameter (EEwsFolder *folder,
 
 	g_return_val_if_fail (param != NULL, FALSE);
 
-	if (g_strcmp0 (e_soap_parameter_get_name (param), "Folder") == 0) {
+	if (g_strcmp0 (e_soap_parameter_get_name (param), "Folder") == 0 ||
+	    g_strcmp0 (e_soap_parameter_get_name (param), "SearchFolder") == 0 ) {
 		node = param;
 		priv->folder_type = E_EWS_FOLDER_TYPE_MAILBOX;
 	} else if (g_strcmp0 (e_soap_parameter_get_name (param), "CalendarFolder") == 0) {
@@ -133,7 +134,8 @@ e_ews_folder_set_from_soap_parameter (EEwsFolder *folder,
 	} else if (g_strcmp0 (e_soap_parameter_get_name (param), "TasksFolder") == 0) {
 		node = param;
 		priv->folder_type = E_EWS_FOLDER_TYPE_TASKS;
-	} else if ((node = e_soap_parameter_get_first_child_by_name (param, "Folder")))
+	} else if ((node = e_soap_parameter_get_first_child_by_name (param, "Folder")) ||
+		   (node = e_soap_parameter_get_first_child_by_name (param, "SearchFolder")))
 		priv->folder_type = E_EWS_FOLDER_TYPE_MAILBOX;
 	else if ((node = e_soap_parameter_get_first_child_by_name (param, "CalendarFolder")))
 		priv->folder_type = E_EWS_FOLDER_TYPE_CALENDAR;
