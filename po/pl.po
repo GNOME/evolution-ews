@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-12 17:21+0100\n"
-"PO-Revision-Date: 2020-01-12 17:22+0100\n"
+"POT-Creation-Date: 2020-01-19 13:12+0100\n"
+"PO-Revision-Date: 2020-01-19 13:13+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -20,14 +20,14 @@ msgstr ""
 "|| n%100>=20) ? 1 : 2);\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
-#: ../src/camel/camel-ews-provider.c:83
+#: ../src/camel/camel-ews-provider.c:85
 #: ../src/configuration/e-ews-config-lookup.c:251
 #: ../src/configuration/e-mail-config-ews-autodiscover.c:134
 msgid "Exchange Web Services"
 msgstr "Exchange Web Services"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
-#: ../src/camel/camel-ews-provider.c:85
+#: ../src/camel/camel-ews-provider.c:87
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Dostęp do serwerów Exchange za pomocą Web Services"
 
@@ -186,14 +186,18 @@ msgid "Connection _timeout (in seconds) %s"
 msgstr "_Czas oczekiwania na połączenie (w sekundach) %s"
 
 #: ../src/camel/camel-ews-provider.c:74
+msgid "Numbe_r of concurrent connections to use"
+msgstr "_Liczba równocześnie używanych połączeń"
+
+#: ../src/camel/camel-ews-provider.c:76
 msgid "Override _User-Agent header value"
 msgstr "Zastępowanie wartości nagłówka agenta _użytkownika"
 
-#: ../src/camel/camel-ews-provider.c:100
+#: ../src/camel/camel-ews-provider.c:102
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/camel/camel-ews-provider.c:102
+#: ../src/camel/camel-ews-provider.c:104
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -201,11 +205,11 @@ msgstr ""
 "Ta opcja spowoduje połączenie z serwerem Exchange używając hasła tekstowego "
 "za pomocą uwierzytelniania NTLM."
 
-#: ../src/camel/camel-ews-provider.c:110
+#: ../src/camel/camel-ews-provider.c:112
 msgid "Basic"
 msgstr "Podstawowe"
 
-#: ../src/camel/camel-ews-provider.c:112
+#: ../src/camel/camel-ews-provider.c:114
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -213,11 +217,11 @@ msgstr ""
 "Ta opcja spowoduje połączenie z serwerem Exchange używając hasła tekstowego "
 "za pomocą uwierzytelniania podstawowego."
 
-#: ../src/camel/camel-ews-provider.c:120
+#: ../src/camel/camel-ews-provider.c:122
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/camel/camel-ews-provider.c:122
+#: ../src/camel/camel-ews-provider.c:124
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -526,7 +530,7 @@ msgid "Fetching folder list…"
 msgstr "Pobieranie listy katalogów…"
 
 #: ../src/configuration/e-ews-config-utils.c:834
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:765
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:766
 msgid "Subscribe to folder of other EWS user…"
 msgstr "Subskrybuj katalog innego użytkownika EWS…"
 
@@ -668,7 +672,7 @@ msgid "Edit EWS folder permissions…"
 msgstr "Modyfikuj uprawnienia katalogu EWS…"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:954
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:786
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:787
 msgid "Account:"
 msgstr "Konto:"
 
@@ -839,7 +843,7 @@ msgid "_Search:"
 msgstr "Wy_szukiwanie:"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:103
-#: ../src/server/e-ews-folder.c:821
+#: ../src/server/e-ews-folder.c:823
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Nie można dodać katalogu. Katalog już istnieje jako „%s”"
@@ -875,7 +879,7 @@ msgstr ""
 msgid "Availability"
 msgstr "Dostępność"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:405
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:406
 #, c-format
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
@@ -884,7 +888,7 @@ msgstr ""
 "Nie odnaleziono katalogu „%s”. Nie istnieje lub brak uprawnień do jego "
 "dostępu."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:424
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:425
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Nie można dodać katalogu, nie można ustalić jego typu"
 
@@ -893,69 +897,69 @@ msgstr "Nie można dodać katalogu, nie można ustalić jego typu"
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:469
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:470
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:582
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:866
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:583
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:867
 msgid "Inbox"
 msgstr "Odebrane"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:584
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:867
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:585
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:868
 msgid "Contacts"
 msgstr "Kontakty"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:586
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:868
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:587
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:869
 msgid "Calendar"
 msgstr "Kalendarz"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:588
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:869
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:589
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:870
 msgid "Free/Busy as Calendar"
 msgstr "Informacje o zajętości według kalendarza"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:590
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:870
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:591
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:871
 msgid "Memos"
 msgstr "Notatki"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:592
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:871
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:593
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:872
 msgid "Tasks"
 msgstr "Zadania"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:609
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:610
 #, c-format
 msgid "Testing availability of folder “%s” of user “%s”, please wait…"
 msgstr "Testowanie dostępności katalogu „%s” użytkownika „%s”, proszę czekać…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:648
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:649
 msgid "Cannot search for user when the account is offline"
 msgstr "Nie można wyszukać użytkownika, kiedy konto jest w trybie offline"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:811
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:812
 msgid "User"
 msgstr "Użytkownik"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:818
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:819
 msgid "_User:"
 msgstr "_Użytkownik:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:833
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:834
 msgid "C_hoose…"
 msgstr "_Wybierz…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:849
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:850
 msgid "_Folder name:"
 msgstr "Nazwa _katalogu:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:880
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:881
 msgid "Include _subfolders"
 msgstr "Dołączenie po_dkatalogów"
 
@@ -1324,20 +1328,20 @@ msgstr ""
 "Zwrócenie identyfikatora dla nowej wiadomości przez wywołanie CreateItem się "
 "nie powiodło"
 
-#: ../src/server/e-ews-connection.c:796
+#: ../src/server/e-ews-connection.c:827
 msgid "Operation Cancelled"
 msgstr "Anulowano działanie"
 
-#: ../src/server/e-ews-connection.c:966
+#: ../src/server/e-ews-connection.c:997
 msgid "Authentication failed"
 msgstr "Uwierzytelnienie się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:988
+#: ../src/server/e-ews-connection.c:1019
 #, c-format
 msgid "No response: %s"
 msgstr "Brak odpowiedzi: %s"
 
-#: ../src/server/e-ews-connection.c:1051
+#: ../src/server/e-ews-connection.c:1082
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -1348,7 +1352,7 @@ msgstr[1] ""
 msgstr[2] ""
 "Serwer Exchange jest zajęty, oczekiwanie na ponowienie (%d∶%02d minut)"
 
-#: ../src/server/e-ews-connection.c:1057
+#: ../src/server/e-ews-connection.c:1088
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -1356,56 +1360,56 @@ msgstr[0] "Serwer Exchange jest zajęty, oczekiwanie na ponowienie (%d sekunda)"
 msgstr[1] "Serwer Exchange jest zajęty, oczekiwanie na ponowienie (%d sekundy)"
 msgstr[2] "Serwer Exchange jest zajęty, oczekiwanie na ponowienie (%d sekund)"
 
-#: ../src/server/e-ews-connection.c:3111
+#: ../src/server/e-ews-connection.c:3177
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr ""
 "Przetworzenie XML odpowiedzi automatycznego wykrywania się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:3118
+#: ../src/server/e-ews-connection.c:3184
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Odnalezienie elementu <Autodiscover> się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:3129
+#: ../src/server/e-ews-connection.c:3195
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Odnalezienie elementu <Response> się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:3140
+#: ../src/server/e-ews-connection.c:3206
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Odnalezienie elementu <Account> się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:3186
+#: ../src/server/e-ews-connection.c:3252
 #, c-format
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr ""
 "Odnalezienie elementu <ASUrl> w odpowiedzi automatycznego wykrywania się nie "
 "powiodło"
 
-#: ../src/server/e-ews-connection.c:3372
+#: ../src/server/e-ews-connection.c:3438
 msgid "URL cannot be NULL"
 msgstr "Adres URL nie może wynosić NULL"
 
-#: ../src/server/e-ews-connection.c:3380
+#: ../src/server/e-ews-connection.c:3446
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "Adres URL „%s” nie jest prawidłowy"
 
-#: ../src/server/e-ews-connection.c:3677
+#: ../src/server/e-ews-connection.c:3743
 msgid "Email address is missing a domain part"
 msgstr "W adresie e-mail brakuje części domeny"
 
-#: ../src/server/e-ews-connection.c:3986
+#: ../src/server/e-ews-connection.c:4052
 msgid "Failed to parse oab XML"
 msgstr "Przetworzenie XML „oab” się nie powiodło"
 
-#: ../src/server/e-ews-connection.c:3994
+#: ../src/server/e-ews-connection.c:4060
 msgid "Failed to find <OAB> element\n"
 msgstr "Odnalezienie elementu <OAB> się nie powiodło\n"
 
-#: ../src/server/e-ews-connection.c:5277
+#: ../src/server/e-ews-connection.c:5343
 msgid "No items found"
 msgstr "Nie odnaleziono elementów"
 
@@ -1422,11 +1426,11 @@ msgstr "Hasło wygasło."
 msgid "Unknown error"
 msgstr "Nieznany błąd"
 
-#: ../src/server/e-ews-folder.c:776
+#: ../src/server/e-ews-folder.c:778
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Nie można dodać katalogu. Nieobsługiwany typ katalogu"
 
-#: ../src/server/e-ews-folder.c:781
+#: ../src/server/e-ews-folder.c:783
 msgid "Cannot add folder, master source not found"
 msgstr "Nie można dodać katalogu. Nie odnaleziono głównego źródła"
 
