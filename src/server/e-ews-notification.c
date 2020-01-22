@@ -855,7 +855,7 @@ exit:
 	g_slist_free_full (td->folders, g_free);
 	g_object_unref (td->cancellable);
 	g_object_unref (td->notification);
-	g_free (td);
+	g_slice_free (EEwsNotificationThreadData, td);
 
 	return NULL;
 }
@@ -877,7 +877,7 @@ e_ews_notification_start_listening_sync (EEwsNotification *notification,
 
 	notification->priv->cancellable = g_cancellable_new ();
 
-	td = g_new0 (EEwsNotificationThreadData, 1);
+	td = g_slice_new0 (EEwsNotificationThreadData);
 	td->notification = g_object_ref (notification);
 	td->cancellable = g_object_ref (notification->priv->cancellable);
 	for (l = folders; l != NULL; l = l->next)

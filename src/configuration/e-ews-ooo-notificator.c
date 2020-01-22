@@ -88,7 +88,7 @@ e_ews_ooo_notificator_dispatcher_data_free (gpointer user_data)
 		g_object_unref (data->extension);
 	if (data->ews_store)
 		g_object_unref (data->ews_store);
-	g_free (data);
+	g_slice_free (EEwsOooNotificatorDispatcherData, data);
 }
 
 static void
@@ -162,7 +162,7 @@ e_ews_ooo_notificator_show_notification (EEwsOooNotificator *extension,
 	GtkAction *action;
 	const gchar *account_name;
 
-	data = g_new0 (EEwsOooNotificatorDispatcherData, 1);
+	data = g_slice_new0 (EEwsOooNotificatorDispatcherData);
 	data->extension = g_object_ref (extension);
 	data->ews_store = g_object_ref (ews_store);
 
@@ -267,7 +267,7 @@ e_ews_ooo_notificator_has_ooo_set_cb (EEwsOooNotificator *extension,
 {
 	EEwsOooNotificatorDispatcherData *data;
 
-	data = g_new0 (EEwsOooNotificatorDispatcherData, 1);
+	data = g_slice_new0 (EEwsOooNotificatorDispatcherData);
 	data->extension = g_object_ref (extension);
 	data->ews_store = g_object_ref (ews_store);
 
@@ -288,7 +288,7 @@ e_ews_ooo_notificator_service_disabled_cb (EEwsOooNotificator *extension,
 	if (!CAMEL_IS_EWS_STORE (service))
 		return;
 
-	data = g_new0 (EEwsOooNotificatorDispatcherData, 1);
+	data = g_slice_new0 (EEwsOooNotificatorDispatcherData);
 	data->extension = g_object_ref (extension);
 	data->ews_store = g_object_ref (CAMEL_EWS_STORE (service));
 
@@ -308,7 +308,7 @@ e_ews_ooo_notificator_service_removed_cb (EEwsOooNotificator *extension,
 	if (!CAMEL_IS_EWS_STORE (service))
 		return;
 
-	data = g_new0 (EEwsOooNotificatorDispatcherData, 1);
+	data = g_slice_new0 (EEwsOooNotificatorDispatcherData);
 	data->extension = g_object_ref (extension);
 	data->ews_store = g_object_ref (CAMEL_EWS_STORE (service));
 
@@ -348,7 +348,7 @@ e_ews_ooo_notificator_online_cb (EEwsOooNotificator* extension,
 	for (l = extension->priv->stores; l; l = l->next) {
 		EEwsOooNotificatorDispatcherData *data;
 
-		data = g_new0 (EEwsOooNotificatorDispatcherData, 1);
+		data = g_slice_new0 (EEwsOooNotificatorDispatcherData);
 		data->extension = g_object_ref (extension);
 		data->ews_store = g_object_ref (CAMEL_EWS_STORE (l->data));
 

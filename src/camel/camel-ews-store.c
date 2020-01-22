@@ -754,7 +754,7 @@ free_schedule_update_data (gpointer ptr)
 	g_clear_object (&sud->cancellable);
 	g_clear_object (&sud->ews_store);
 
-	g_free (sud);
+	g_slice_free (struct ScheduleUpdateData, sud);
 }
 
 static GHashTable * /* gchar *id ~> gchar *change_key */
@@ -1056,7 +1056,7 @@ run_update_thread (CamelEwsStore *ews_store,
 	g_return_if_fail (ews_store != NULL);
 	g_return_if_fail (cancellable != NULL);
 
-	sud = g_new0 (struct ScheduleUpdateData, 1);
+	sud = g_slice_new0 (struct ScheduleUpdateData);
 	sud->ews_store = g_object_ref (ews_store);
 	sud->cancellable = g_object_ref (cancellable);
 
@@ -1124,7 +1124,7 @@ schedule_folder_update (CamelEwsStore *ews_store,
 	if (ews_store->priv->update_folder_names == NULL)
 		goto exit;
 
-	sud = g_new0 (struct ScheduleUpdateData, 1);
+	sud = g_slice_new0 (struct ScheduleUpdateData);
 	sud->ews_store = g_object_ref (ews_store);
 	sud->cancellable = g_object_ref (ews_store->priv->updates_cancellable);
 
@@ -1188,7 +1188,7 @@ schedule_folder_list_update (CamelEwsStore *ews_store)
 	if (!ews_store->priv->updates_cancellable)
 		goto exit;
 
-	sud = g_new0 (struct ScheduleUpdateData, 1);
+	sud = g_slice_new0 (struct ScheduleUpdateData);
 	sud->ews_store = g_object_ref (ews_store);
 	sud->cancellable = g_object_ref (ews_store->priv->updates_cancellable);
 
@@ -1289,7 +1289,7 @@ handle_notifications_data_free (struct HandleNotificationsData *hnd)
 		g_object_unref (hnd->ews_store);
 
 	g_slist_free_full (hnd->folders, g_free);
-	g_free (hnd);
+	g_slice_free (struct HandleNotificationsData, hnd);
 }
 
 static gpointer
@@ -1373,7 +1373,7 @@ camel_ews_store_handle_notifications (CamelEwsStore *ews_store,
 		return;
 	}
 
-	hnd = g_new0 (struct HandleNotificationsData, 1);
+	hnd = g_slice_new0 (struct HandleNotificationsData);
 	hnd->ews_store = g_object_ref (ews_store);
 
 	if (!camel_ews_settings_get_check_all (ews_settings)) {
@@ -1754,7 +1754,7 @@ ews_update_foreign_subfolders_data_free (gpointer data)
 	if (euf) {
 		g_object_unref (euf->ews_store);
 		g_free (euf->folder_id);
-		g_free (euf);
+		g_slice_free (struct EwsUpdateForeignSubfoldersData, euf);
 	}
 }
 
@@ -1913,7 +1913,7 @@ camel_ews_store_update_foreign_subfolders (CamelEwsStore *ews_store,
 	session = camel_service_ref_session (CAMEL_SERVICE (ews_store));
 	g_return_if_fail (session != NULL);
 
-	euf = g_new0 (struct EwsUpdateForeignSubfoldersData, 1);
+	euf = g_slice_new0 (struct EwsUpdateForeignSubfoldersData);
 	euf->ews_store = g_object_ref (ews_store);
 	euf->folder_id = g_strdup (fid);
 
@@ -3223,7 +3223,7 @@ ews_rename_folder_sync (CamelStore *store,
 
 	if (strcmp (old_slash, new_slash)) {
 		gint parent_len = old_slash - old_name;
-		struct _rename_cb_data *rename_data;
+		struct _rename_cb_data rename_data;
 
 		/* Folder basename changed (i.e. UpdateFolder needed).
 		 * Therefore, we can only do it if the folder hasn't also
@@ -3248,21 +3248,18 @@ ews_rename_folder_sync (CamelStore *store,
 			goto out;
 		}
 
-		rename_data = g_new0 (struct _rename_cb_data, 1);
-		rename_data->display_name = new_slash;
-		rename_data->folder_id = fid;
-		rename_data->change_key = changekey;
+		rename_data.display_name = new_slash;
+		rename_data.folder_id = fid;
+		rename_data.change_key = changekey;
 
 		res = e_ews_connection_update_folder_sync (
 			connection, EWS_PRIORITY_MEDIUM,
-			rename_folder_cb, rename_data,
+			rename_folder_cb, &rename_data,
 			cancellable, &local_error);
 
 		if (!res) {
-			g_free (rename_data);
 			goto out;
 		}
-		g_free (rename_data);
 		camel_ews_store_summary_set_folder_name (ews_summary, fid, new_slash);
 	} else {
 		gchar *pfid = NULL;

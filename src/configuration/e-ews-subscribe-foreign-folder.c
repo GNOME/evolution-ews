@@ -251,7 +251,7 @@ e_ews_check_foreign_folder_data_free (gpointer ptr)
 	if (cffd->folder)
 		g_object_unref (cffd->folder);
 
-	g_free (cffd);
+	g_slice_free (struct EEwsCheckForeignFolderData, cffd);
 }
 
 static void
@@ -597,7 +597,7 @@ subscribe_foreign_response_cb (GObject *dialog,
 		show_foldername = g_strdup_printf ("%.10s…", orig_foldername);
 	}
 
-	cffd = g_new0 (struct EEwsCheckForeignFolderData, 1);
+	cffd = g_slice_new0 (struct EEwsCheckForeignFolderData);
 	cffd->dialog = GTK_WIDGET (dialog);
 	cffd->email = g_strdup (username ? username : "");
 	cffd->direct_email = g_strdup (g_object_get_data (G_OBJECT (entry), STR_EWS_DIRECT_EMAIL));

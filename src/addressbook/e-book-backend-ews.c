@@ -631,7 +631,7 @@ set_address (EContact *contact,
 	if (address && !ews_address_is_empty (address)) {
 		EContactAddress *addr;
 
-		addr = g_new0 (EContactAddress, 1);
+		addr = e_contact_address_new ();
 		copy_ews_address_to_contact_address (addr, address);
 		e_contact_set (contact, field, addr);
 		e_contact_address_free (addr);
@@ -1357,7 +1357,7 @@ compare_address (ESoapMessage *message,
 	if (!new_address && old_address)
 	{
 		set = TRUE;
-		new_address = g_new0 (EContactAddress, 1);
+		new_address = e_contact_address_new ();
 	}
 
 	if (set || g_strcmp0 (new_address->street, old_address->street) != 0)
@@ -2823,21 +2823,21 @@ ebb_ews_build_restriction (const gchar *query,
 			   gchar **auto_comp_str)
 {
 	ESExp *sexp;
-	EBookBackendEwsSExpData *sdata;
+	EBookBackendEwsSExpData sdata;
 	gboolean autocompletion = FALSE;
 	gint i;
 
 	*auto_comp_str = NULL;
 
 	sexp = e_sexp_new ();
-	sdata = g_new0 (EBookBackendEwsSExpData, 1);
-	sdata->is_autocompletion = FALSE;
+	memset (&sdata, 0, sizeof (EBookBackendEwsSExpData));
+	sdata.is_autocompletion = FALSE;
 
 	for (i = 0; i < G_N_ELEMENTS (symbols); i++) {
 		e_sexp_add_function (
 			sexp, 0, (gchar *) symbols[i].name,
 			symbols[i].func,
-			sdata);
+			&sdata);
 	}
 
 	e_sexp_input_text (sexp, query, strlen (query));
@@ -2850,18 +2850,17 @@ ebb_ews_build_restriction (const gchar *query,
 
 		r = e_sexp_eval (sexp);
 		if (r) {
-			autocompletion = sdata->is_autocompletion;
+			autocompletion = sdata.is_autocompletion;
 			if (autocompletion)
-				*auto_comp_str = sdata->auto_comp_str;
+				*auto_comp_str = sdata.auto_comp_str;
 			else
-				g_free (sdata->auto_comp_str);
+				g_free (sdata.auto_comp_str);
 		}
 
 		e_sexp_result_free (sexp, r);
 	}
 
 	g_object_unref (sexp);
-	g_free (sdata);
 
 	return autocompletion && *auto_comp_str;
 }

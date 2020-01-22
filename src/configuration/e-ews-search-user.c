@@ -65,7 +65,7 @@ e_ews_search_user_data_free (gpointer ptr)
 	}
 	g_object_unref (pgu->conn);
 	g_free (pgu->search_text);
-	g_free (pgu);
+	g_slice_free (struct EEwsSearchUserData, pgu);
 }
 
 struct EEwsSearchUser
@@ -127,7 +127,7 @@ e_ews_search_idle_data_free (gpointer ptr)
 	g_object_unref (sid->cancellable);
 	g_free (sid->search_text);
 	g_slist_free_full (sid->found_users, e_ews_search_user_free);
-	g_free (sid);
+	g_slice_free (struct EEwsSearchIdleData, sid);
 }
 
 static void
@@ -356,7 +356,7 @@ search_term_changed_cb (GtkEntry *entry,
 	} else {
 		struct EEwsSearchIdleData *sid;
 
-		sid = g_new0 (struct EEwsSearchIdleData, 1);
+		sid = g_slice_new0 (struct EEwsSearchIdleData);
 		sid->cancellable = g_object_ref (pgu->cancellable);
 		sid->dialog = dialog;
 
@@ -467,7 +467,7 @@ e_ews_search_user_modal (GtkWindow *parent,
 	g_return_val_if_fail (conn != NULL, FALSE);
 	g_return_val_if_fail (display_name || email, FALSE);
 
-	pgu = g_new0 (struct EEwsSearchUserData, 1);
+	pgu = g_slice_new0 (struct EEwsSearchUserData);
 	pgu->conn = g_object_ref (conn);
 
 	dialog = gtk_dialog_new_with_buttons (

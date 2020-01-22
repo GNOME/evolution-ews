@@ -91,7 +91,7 @@ ews_deffered_populate_physical_address (EwsDeferredSet *dset,
 	gchar *val = g_strdup ((gchar *) value);
 
 	if (!dset->addr)
-		dset->addr = g_new0 (EContactAddress, 1);
+		dset->addr = e_contact_address_new ();
 
 	switch (prop_id) {
 		case EWS_PT_STREET_ADDRESS:
@@ -179,7 +179,6 @@ ews_populate_photo (EContact *contact,
 	EwsOabDecoderPrivate *priv = GET_PRIVATE (eod);
 	const gchar *at;
 	GBytes *bytes = value;
-	EContactPhoto *photo;
 	gchar *email;
 	gchar *filename = NULL, *pic_name = NULL, *name;
 	gboolean success = TRUE;
@@ -194,8 +193,6 @@ ews_populate_photo (EContact *contact,
 		return;
 	}
 
-	photo = g_new0 (EContactPhoto, 1);
-
 	/* Rename the binary file to name.jpg */
 	at = strchr (email, '@');
 	name = g_strndup (email, at - email);
@@ -206,17 +203,19 @@ ews_populate_photo (EContact *contact,
 	success = g_file_set_contents (filename, g_bytes_get_data (bytes, NULL), g_bytes_get_size (bytes), &local_error);
 
 	if (success) {
-		photo->type = E_CONTACT_PHOTO_TYPE_URI;
-		photo->data.uri = filename;
+		EContactPhoto photo;
 
-		e_contact_set (contact, field, photo);
+		memset (&photo, 0, sizeof (EContactPhoto));
+		photo.type = E_CONTACT_PHOTO_TYPE_URI;
+		photo.data.uri = filename;
+
+		e_contact_set (contact, field, &photo);
 	} else {
 		g_warning ("%s: Failed to store '%s': %s", G_STRFUNC, filename, local_error ? local_error->message : "Unknown error");
 	}
 
 	g_clear_error (&local_error);
 
-	g_free (photo);
 	g_free (email);
 	g_free (name);
 	g_free (pic_name);

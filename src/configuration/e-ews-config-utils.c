@@ -82,7 +82,7 @@ free_run_with_feedback_data (gpointer ptr)
 
 	g_clear_error (&rfd->error);
 
-	g_free (rfd);
+	g_slice_free (struct RunWithFeedbackData, rfd);
 }
 
 static gboolean
@@ -193,7 +193,7 @@ e_ews_config_utils_run_in_thread_with_feedback_general (GtkWindow *parent,
 	gtk_container_add (GTK_CONTAINER (content), box);
 	gtk_container_set_border_width (GTK_CONTAINER (content), 12);
 
-	rfd = g_new0 (struct RunWithFeedbackData, 1);
+	rfd = g_slice_new0 (struct RunWithFeedbackData);
 	rfd->parent = parent;
 	rfd->dialog = dialog;
 	rfd->cancellable = g_cancellable_new ();
@@ -269,7 +269,7 @@ e_ews_config_utils_run_in_thread (GObject *with_object,
 	g_return_if_fail (with_object != NULL);
 	g_return_if_fail (thread_func != NULL);
 
-	rfd = g_new0 (struct RunWithFeedbackData, 1);
+	rfd = g_slice_new0 (struct RunWithFeedbackData);
 	rfd->parent = NULL;
 	rfd->dialog = NULL;
 	rfd->cancellable = cancellable ? g_object_ref (cancellable) : g_cancellable_new ();
@@ -641,7 +641,7 @@ cleanup:
 	g_object_unref (fsd->ews_store);
 	g_object_unref (fsd->cancellable);
 	g_clear_error (&fsd->error);
-	g_free (fsd);
+	g_slice_free (FolderSizeDialogData, fsd);
 
 	return FALSE;
 }
@@ -759,7 +759,7 @@ e_ews_config_utils_run_folder_sizes_dialog (GtkWindow *parent,
 
 	g_signal_connect (dialog, "response", G_CALLBACK (folder_sizes_dialog_response_cb), cancellable);
 
-	fsd = g_new0 (FolderSizeDialogData, 1);
+	fsd = g_slice_new0 (FolderSizeDialogData);
 	fsd->dialog = GTK_DIALOG (dialog);
 
 	gtk_window_set_default_size (GTK_WINDOW (fsd->dialog), 250, 300);

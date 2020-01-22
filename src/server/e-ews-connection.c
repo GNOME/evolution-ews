@@ -231,7 +231,7 @@ static void
 async_data_free (EwsAsyncData *async_data)
 {
 	g_free (async_data->custom_data);
-	g_free (async_data);
+	g_slice_free (EwsAsyncData, async_data);
 }
 
 EEwsNotificationEvent *
@@ -464,12 +464,9 @@ e_ews_additional_props_free (EEwsAdditionalProps *add_props)
 }
 
 static EwsNode *
-ews_node_new ()
+ews_node_new (void)
 {
-	EwsNode *node;
-
-	node = g_new0 (EwsNode, 1);
-	return node;
+	return g_slice_new0 (EwsNode);
 }
 
 static void
@@ -604,7 +601,7 @@ ews_connection_scheduled_cb (gpointer user_data)
 		g_object_unref (sd->message);
 	/* in case this is the last reference */
 	e_ews_connection_utils_unref_in_thread (sd->cnc);
-	g_free (sd);
+	g_slice_free (EwsScheduleData, sd);
 
 	return FALSE;
 }
@@ -621,7 +618,7 @@ ews_connection_schedule_queue_message (EEwsConnection *cnc,
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 	g_return_if_fail (SOUP_IS_MESSAGE (message));
 
-	sd = g_new0 (EwsScheduleData, 1);
+	sd = g_slice_new0 (EwsScheduleData);
 	sd->cnc = g_object_ref (cnc);
 	sd->message = g_object_ref (message);
 	sd->op = EWS_SCHEDULE_OP_QUEUE_MESSAGE;
@@ -645,7 +642,7 @@ ews_connection_schedule_cancel_message (EEwsConnection *cnc,
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 	g_return_if_fail (SOUP_IS_MESSAGE (message));
 
-	sd = g_new0 (EwsScheduleData, 1);
+	sd = g_slice_new0 (EwsScheduleData);
 	sd->cnc = g_object_ref (cnc);
 	sd->message = g_object_ref (message);
 	sd->op = EWS_SCHEDULE_OP_CANCEL;
@@ -665,7 +662,7 @@ ews_connection_schedule_abort (EEwsConnection *cnc)
 
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
-	sd = g_new0 (EwsScheduleData, 1);
+	sd = g_slice_new0 (EwsScheduleData);
 	sd->cnc = g_object_ref (cnc);
 	sd->op = EWS_SCHEDULE_OP_ABORT;
 
@@ -802,7 +799,7 @@ ews_active_job_done (EEwsConnection *cnc,
 		e_ews_connection_utils_unref_in_thread (ews_node->simple);
 	}
 
-	g_free (ews_node);
+	g_slice_free (EwsNode, ews_node);
 }
 
 static void
@@ -4752,7 +4749,7 @@ e_ews_connection_sync_folder_items (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_sync_folder_items);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -4969,7 +4966,7 @@ e_ews_connection_find_folder_items (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_find_folder_items);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -5086,7 +5083,7 @@ e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_sync_folder_hierarchy);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	async_data->cnc = cnc;
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
@@ -5307,7 +5304,7 @@ e_ews_connection_get_items (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_get_items);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -5517,7 +5514,7 @@ e_ews_connection_delete_items (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_delete_items);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -5595,7 +5592,7 @@ e_ews_connection_delete_item (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_delete_items);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -5901,7 +5898,7 @@ e_ews_connection_update_items (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_update_items);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -6070,7 +6067,7 @@ e_ews_connection_create_items (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_create_items);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -6235,7 +6232,7 @@ e_ews_connection_resolve_names (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_resolve_names);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -6532,7 +6529,7 @@ e_ews_connection_expand_dl (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_expand_dl);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -6679,7 +6676,7 @@ e_ews_connection_update_folder (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_update_folder);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -6831,7 +6828,7 @@ e_ews_connection_move_folder (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_move_folder);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -6938,7 +6935,7 @@ e_ews_connection_get_folder (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_get_folder);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	async_data->cnc = cnc;
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
@@ -7097,7 +7094,7 @@ e_ews_connection_create_folder (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_create_folder);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	async_data->folder_type = folder_type;
 
 	g_simple_async_result_set_op_res_gpointer (
@@ -7231,7 +7228,7 @@ e_ews_connection_move_items (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_move_items);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -7483,7 +7480,7 @@ e_ews_connection_delete_folder (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_delete_folder);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -7649,7 +7646,7 @@ e_ews_connection_empty_folder (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_empty_folder);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -7873,7 +7870,7 @@ e_ews_connection_create_attachments (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_create_attachments);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -8088,7 +8085,7 @@ e_ews_connection_delete_attachments (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_delete_attachments);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -8290,7 +8287,7 @@ e_ews_connection_get_attachments (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_get_attachments);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	async_data->directory = cache;
 	async_data->sync_state = (gchar *) uid;
 	g_simple_async_result_set_op_res_gpointer (
@@ -8573,7 +8570,7 @@ e_ews_connection_get_free_busy (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_get_free_busy);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -8861,7 +8858,7 @@ e_ews_connection_get_delegate (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_get_delegate);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -9072,7 +9069,7 @@ e_ews_connection_add_delegate (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_add_delegate);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -9184,7 +9181,7 @@ e_ews_connection_remove_delegate (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_remove_delegate);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -9324,7 +9321,7 @@ e_ews_connection_update_delegate (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_update_delegate);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -9484,7 +9481,7 @@ e_ews_connection_get_folder_permissions (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_get_folder_permissions);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -9710,7 +9707,7 @@ e_ews_connection_set_folder_permissions (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_set_folder_permissions);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -9840,7 +9837,7 @@ e_ews_connection_get_password_expiration (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_get_password_expiration);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -10017,7 +10014,7 @@ e_ews_connection_get_folder_info (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_get_folder_info);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -10218,7 +10215,7 @@ e_ews_connection_find_folder (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_find_folder);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -10405,7 +10402,7 @@ e_ews_connection_query_auth_methods (EEwsConnection *cnc,
 		G_OBJECT (cnc), callback, user_data,
 		e_ews_connection_query_auth_methods);
 
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (
 		simple, async_data, (GDestroyNotify) async_data_free);
 
@@ -11145,7 +11142,7 @@ e_ews_connection_get_server_time_zones (EEwsConnection *cnc,
 
 	simple = g_simple_async_result_new (
 		G_OBJECT (cnc), callback, user_data, e_ews_connection_get_server_time_zones);
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (simple, async_data, (GDestroyNotify) async_data_free);
 
 	/*
@@ -11292,7 +11289,7 @@ e_ews_connection_get_user_photo (EEwsConnection *cnc,
 	g_return_if_fail (email != NULL);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc), callback, user_data, e_ews_connection_get_user_photo);
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (simple, async_data, (GDestroyNotify) async_data_free);
 
 	/*
@@ -11493,7 +11490,7 @@ e_ews_connection_get_user_configuration (EEwsConnection *cnc,
 	g_return_if_fail (config_name != NULL);
 
 	simple = g_simple_async_result_new (G_OBJECT (cnc), callback, user_data, e_ews_connection_get_user_configuration);
-	async_data = g_new0 (EwsAsyncData, 1);
+	async_data = g_slice_new0 (EwsAsyncData);
 	g_simple_async_result_set_op_res_gpointer (simple, async_data, (GDestroyNotify) async_data_free);
 
 	/* EWS server version earlier than 2010 doesn't support it. */
