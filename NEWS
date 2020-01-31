@@ -1,3 +1,21 @@
+Evolution-EWS 3.35.90 2020-01-31
+--------------------------------
+
+Bug Fixes:
+	Bug 731454 - Add option to set number of concurrent connections to use (Milan Crha)
+	I#61 - Add option to show public folders beside user folders (Milan Crha)
+	I#67 - Be able to edit display name of a calendar (Milan Crha)
+	I#78 - Verify also URL validity in account settings (Milan Crha)
+
+Miscellaneous:
+	Allow enter distinguished folder names when subscribing to other user's folder (Milan Crha)
+	Prefer GSlice over heap allocation for short-lived structures (Milan Crha)
+
+Translations:
+	Daniel Mustieles (es)
+	Piotr Drąg (pl)
+	Kukuh Syafaat (id)
+
 Evolution-EWS 3.35.3 2020-01-03
 -------------------------------
 
