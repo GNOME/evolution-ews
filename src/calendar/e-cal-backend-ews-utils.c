@@ -1137,7 +1137,7 @@ check_is_all_day_event (const ICalTime *dtstart,
 	secs_end = (gint64) (zone_end ? i_cal_time_as_timet_with_zone (dtend, zone_end) : i_cal_time_as_timet (dtend));
 
 	/* takes whole day(s) and starts on midnight in the zone_start */
-	return ((secs_end - secs_start) % (24 * 60 * 60)) == 0 && (secs_start % 24 * 60 * 60) == 0;
+	return ((secs_end - secs_start) > 0) && ((secs_end - secs_start) % (24 * 60 * 60)) == 0 && (secs_start % 24 * 60 * 60) == 0;
 }
 
 static gboolean
