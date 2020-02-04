@@ -228,6 +228,7 @@ For terms of use, see http://www.unicode.org/copyright.html
 			<mapZone other="UTC" territory="001" type="Etc/GMT"/>
 			<mapZone other="UTC" territory="GL" type="America/Danmarkshavn"/>
 			<mapZone other="UTC" territory="ZZ" type="Etc/GMT"/>
+			<mapZone other="tzone://Microsoft/Utc" territory="002" type="UTC"/>
 
 			<!-- (UTC) Dublin, Edinburgh, Lisbon, London -->
 			<mapZone other="GMT Standard Time" territory="001" type="Europe/London"/>
