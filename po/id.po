@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2020-01-10 10:57+0000\n"
-"PO-Revision-Date: 2020-01-14 20:06+0700\n"
+"POT-Creation-Date: 2020-01-16 08:03+0000\n"
+"PO-Revision-Date: 2020-02-04 14:48+0700\n"
 "Last-Translator: Kukuh Syafaat <kukuhsyafaat@gnome.org>\n"
 "Language-Team: Indonesian <gnome@i15n.org>\n"
 "Language: id\n"
@@ -16,17 +16,17 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n!=1;\n"
-"X-Generator: Poedit 2.2.4\n"
+"X-Generator: Poedit 2.3\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
-#: ../src/camel/camel-ews-provider.c:83
+#: ../src/camel/camel-ews-provider.c:85
 #: ../src/configuration/e-ews-config-lookup.c:251
 #: ../src/configuration/e-mail-config-ews-autodiscover.c:134
 msgid "Exchange Web Services"
 msgstr "Layanan Web Exchange"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
-#: ../src/camel/camel-ews-provider.c:85
+#: ../src/camel/camel-ews-provider.c:87
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Untuk mengakses server Exchange memakai Layanan Web"
 
@@ -183,14 +183,18 @@ msgid "Connection _timeout (in seconds) %s"
 msgstr "Tenggang wak_tu koneksi (dalam detik) %s"
 
 #: ../src/camel/camel-ews-provider.c:74
+msgid "Numbe_r of concurrent connections to use"
+msgstr "Cacah koneksi be_rsamaan untuk digunakan"
+
+#: ../src/camel/camel-ews-provider.c:76
 msgid "Override _User-Agent header value"
 msgstr "Timpa nilai header _User-Agent"
 
-#: ../src/camel/camel-ews-provider.c:100
+#: ../src/camel/camel-ews-provider.c:102
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/camel/camel-ews-provider.c:102
+#: ../src/camel/camel-ews-provider.c:104
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -198,11 +202,11 @@ msgstr ""
 "Opsi ini akan menyambung ke server Exchange menggunakan sandi teks polos "
 "dengan autentikasi NTLM."
 
-#: ../src/camel/camel-ews-provider.c:110
+#: ../src/camel/camel-ews-provider.c:112
 msgid "Basic"
 msgstr "Dasar"
 
-#: ../src/camel/camel-ews-provider.c:112
+#: ../src/camel/camel-ews-provider.c:114
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -210,11 +214,11 @@ msgstr ""
 "Opsi ini akan menyambung ke server Exchange menggunakan sandi teks polos "
 "dengan autentikasi Dasar."
 
-#: ../src/camel/camel-ews-provider.c:120
+#: ../src/camel/camel-ews-provider.c:122
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/camel/camel-ews-provider.c:122
+#: ../src/camel/camel-ews-provider.c:124
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -1300,20 +1304,20 @@ msgstr ""
 msgid "CreateItem call failed to return ID for new message"
 msgstr "Pemanggilan CreateItem gagal mengembalikan ID bagi pesan baru"
 
-#: ../src/server/e-ews-connection.c:796
+#: ../src/server/e-ews-connection.c:827
 msgid "Operation Cancelled"
 msgstr "Operasi Dibatalkan"
 
-#: ../src/server/e-ews-connection.c:966
+#: ../src/server/e-ews-connection.c:997
 msgid "Authentication failed"
 msgstr "Autentikasi gagal"
 
-#: ../src/server/e-ews-connection.c:988
+#: ../src/server/e-ews-connection.c:1019
 #, c-format
 msgid "No response: %s"
 msgstr "Tak ada respon: %s"
 
-#: ../src/server/e-ews-connection.c:1051
+#: ../src/server/e-ews-connection.c:1082
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -1322,7 +1326,7 @@ msgstr[0] ""
 msgstr[1] ""
 "Server Exchange sedang sibuk, menunggu untuk mencoba lagi (%d:%02d menit)"
 
-#: ../src/server/e-ews-connection.c:1057
+#: ../src/server/e-ews-connection.c:1088
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -1331,53 +1335,53 @@ msgstr[0] ""
 msgstr[1] ""
 "Server Exchange sedang sibuk, menunggu untuk mencoba lagi (%d detik)"
 
-#: ../src/server/e-ews-connection.c:3111
+#: ../src/server/e-ews-connection.c:3177
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Gagal mengurai XML respon autodiscover"
 
-#: ../src/server/e-ews-connection.c:3118
+#: ../src/server/e-ews-connection.c:3184
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Gagal menemukan elemen <Autodiscover>"
 
-#: ../src/server/e-ews-connection.c:3129
+#: ../src/server/e-ews-connection.c:3195
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Gagal menemukan elemen <Response>"
 
-#: ../src/server/e-ews-connection.c:3140
+#: ../src/server/e-ews-connection.c:3206
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Gagal menemukan elemen <Account>"
 
-#: ../src/server/e-ews-connection.c:3186
+#: ../src/server/e-ews-connection.c:3252
 #, c-format
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Gagal menemukan <ASUrl> dalam respon autodiscover"
 
-#: ../src/server/e-ews-connection.c:3372
+#: ../src/server/e-ews-connection.c:3438
 msgid "URL cannot be NULL"
 msgstr "URL tak boleh NULL"
 
-#: ../src/server/e-ews-connection.c:3380
+#: ../src/server/e-ews-connection.c:3446
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "URL “%s” tak valid"
 
-#: ../src/server/e-ews-connection.c:3677
+#: ../src/server/e-ews-connection.c:3743
 msgid "Email address is missing a domain part"
 msgstr "Alamat surel kurang bagian domain"
 
-#: ../src/server/e-ews-connection.c:3986
+#: ../src/server/e-ews-connection.c:4052
 msgid "Failed to parse oab XML"
 msgstr "Gagal mengurai XML oab"
 
-#: ../src/server/e-ews-connection.c:3994
+#: ../src/server/e-ews-connection.c:4060
 msgid "Failed to find <OAB> element\n"
 msgstr "Gagal menemukan elemen <OAB>\n"
 
-#: ../src/server/e-ews-connection.c:5277
+#: ../src/server/e-ews-connection.c:5343
 msgid "No items found"
 msgstr "Tak temukan butir"
 
