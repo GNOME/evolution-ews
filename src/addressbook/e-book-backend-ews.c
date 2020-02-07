@@ -2160,14 +2160,16 @@ ebb_ews_server_notification_cb (EBookBackendEws *bbews,
 }
 
 static void
-ebb_ews_unset_connection (EBookBackendEws *bbews)
+ebb_ews_unset_connection (EBookBackendEws *bbews,
+			  gboolean is_disconnect)
 {
 	g_return_if_fail (E_IS_BOOK_BACKEND_EWS (bbews));
 
 	g_rec_mutex_lock (&bbews->priv->cnc_lock);
 
 	if (bbews->priv->cnc) {
-		e_ews_connection_set_disconnected_flag (bbews->priv->cnc, TRUE);
+		if (is_disconnect)
+			e_ews_connection_set_disconnected_flag (bbews->priv->cnc, TRUE);
 
 		g_signal_handlers_disconnect_by_func (bbews->priv->cnc, ebb_ews_server_notification_cb, bbews);
 
@@ -3335,7 +3337,7 @@ ebb_ews_disconnect_sync (EBookMetaBackend *meta_backend,
 
 	bbews = E_BOOK_BACKEND_EWS (meta_backend);
 
-	ebb_ews_unset_connection (bbews);
+	ebb_ews_unset_connection (bbews, TRUE);
 
 	return TRUE;
 }
@@ -4034,7 +4036,7 @@ e_book_backend_ews_dispose (GObject *object)
 {
 	EBookBackendEws *bbews = E_BOOK_BACKEND_EWS (object);
 
-	ebb_ews_unset_connection (bbews);
+	ebb_ews_unset_connection (bbews, FALSE);
 
 	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (e_book_backend_ews_parent_class)->dispose (object);

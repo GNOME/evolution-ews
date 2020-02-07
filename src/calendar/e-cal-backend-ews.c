@@ -277,14 +277,16 @@ ecb_ews_server_notification_cb (ECalBackendEws *cbews,
 }
 
 static void
-ecb_ews_unset_connection (ECalBackendEws *cbews)
+ecb_ews_unset_connection (ECalBackendEws *cbews,
+			  gboolean is_disconnect)
 {
 	g_return_if_fail (E_IS_CAL_BACKEND_EWS (cbews));
 
 	g_rec_mutex_lock (&cbews->priv->cnc_lock);
 
 	if (cbews->priv->cnc) {
-		e_ews_connection_set_disconnected_flag (cbews->priv->cnc, TRUE);
+		if (is_disconnect)
+			e_ews_connection_set_disconnected_flag (cbews->priv->cnc, TRUE);
 
 		g_signal_handlers_disconnect_by_func (cbews->priv->cnc, ecb_ews_server_notification_cb, cbews);
 
@@ -1670,7 +1672,7 @@ ecb_ews_disconnect_sync (ECalMetaBackend *meta_backend,
 
 	cbews = E_CAL_BACKEND_EWS (meta_backend);
 
-	ecb_ews_unset_connection (cbews);
+	ecb_ews_unset_connection (cbews, TRUE);
 
 	return TRUE;
 }
@@ -4253,7 +4255,7 @@ ecb_ews_dispose (GObject *object)
 {
 	ECalBackendEws *cbews = E_CAL_BACKEND_EWS (object);
 
-	ecb_ews_unset_connection (cbews);
+	ecb_ews_unset_connection (cbews, FALSE);
 
 	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (e_cal_backend_ews_parent_class)->dispose (object);

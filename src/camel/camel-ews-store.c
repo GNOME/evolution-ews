@@ -1597,7 +1597,8 @@ stop_pending_updates (CamelEwsStore *ews_store)
 }
 
 static void
-ews_store_unset_connection_locked (CamelEwsStore *ews_store)
+ews_store_unset_connection_locked (CamelEwsStore *ews_store,
+				   gboolean is_disconnect)
 {
 	g_return_if_fail (CAMEL_IS_EWS_STORE (ews_store));
 
@@ -1632,8 +1633,11 @@ ews_store_unset_connection_locked (CamelEwsStore *ews_store)
 			ews_store->priv->listen_notifications = FALSE;
 		}
 
-		e_ews_connection_set_password (ews_store->priv->connection, NULL);
-		e_ews_connection_set_disconnected_flag (ews_store->priv->connection, TRUE);
+		if (is_disconnect) {
+			e_ews_connection_set_password (ews_store->priv->connection, NULL);
+			e_ews_connection_set_disconnected_flag (ews_store->priv->connection, TRUE);
+		}
+
 		g_signal_handlers_disconnect_by_func (ews_store->priv->connection,
 			G_CALLBACK (camel_ews_store_password_will_expire_cb), ews_store);
 		g_object_unref (ews_store->priv->connection);
@@ -1651,7 +1655,7 @@ ews_disconnect_sync (CamelService *service,
 	CamelServiceClass *service_class;
 
 	g_mutex_lock (&ews_store->priv->connection_lock);
-	ews_store_unset_connection_locked (ews_store);
+	ews_store_unset_connection_locked (ews_store, TRUE);
 	g_mutex_unlock (&ews_store->priv->connection_lock);
 
 	service_class = CAMEL_SERVICE_CLASS (camel_ews_store_parent_class);
@@ -2154,7 +2158,7 @@ ews_authenticate_sync (CamelService *service,
 		GSList *foreign_fids, *ff;
 
 		g_mutex_lock (&ews_store->priv->connection_lock);
-		ews_store_unset_connection_locked (ews_store);
+		ews_store_unset_connection_locked (ews_store, FALSE);
 		ews_store->priv->connection = g_object_ref (connection);
 		g_signal_connect (ews_store->priv->connection, "password-will-expire",
 			G_CALLBACK (camel_ews_store_password_will_expire_cb), ews_store);
@@ -2179,7 +2183,7 @@ ews_authenticate_sync (CamelService *service,
 		g_slist_free_full (foreign_fids, g_free);
 	} else {
 		g_mutex_lock (&ews_store->priv->connection_lock);
-		ews_store_unset_connection_locked (ews_store);
+		ews_store_unset_connection_locked (ews_store, FALSE);
 		g_mutex_unlock (&ews_store->priv->connection_lock);
 
 		g_free (new_sync_state);
@@ -3975,7 +3979,7 @@ ews_store_dispose (GObject *object)
 	}
 
 	g_mutex_lock (&ews_store->priv->connection_lock);
-	ews_store_unset_connection_locked (ews_store);
+	ews_store_unset_connection_locked (ews_store, FALSE);
 	g_mutex_unlock (&ews_store->priv->connection_lock);
 
 	g_slist_free_full (ews_store->priv->update_folder_names, g_free);
