@@ -2035,16 +2035,14 @@ ews_connection_constructed (GObject *object)
 static void
 ews_connection_dispose (GObject *object)
 {
-	EEwsConnectionPrivate *priv;
-
-	priv = E_EWS_CONNECTION_GET_PRIVATE (object);
+	EEwsConnection *cnc = E_EWS_CONNECTION (object);
 
 	g_mutex_lock (&connecting);
 
 	/* remove the connection from the hash table */
 	if (loaded_connections_permissions != NULL &&
-	    g_hash_table_lookup (loaded_connections_permissions, priv->hash_key) == (gpointer) object) {
-		g_hash_table_remove (loaded_connections_permissions, priv->hash_key);
+	    g_hash_table_lookup (loaded_connections_permissions, cnc->priv->hash_key) == (gpointer) object) {
+		g_hash_table_remove (loaded_connections_permissions, cnc->priv->hash_key);
 		if (g_hash_table_size (loaded_connections_permissions) == 0) {
 			g_hash_table_destroy (loaded_connections_permissions);
 			loaded_connections_permissions = NULL;
@@ -2053,39 +2051,46 @@ ews_connection_dispose (GObject *object)
 
 	g_mutex_unlock (&connecting);
 
-	if (priv->soup_session) {
+	NOTIFICATION_LOCK (cnc);
+	if (cnc->priv->notification) {
+		e_ews_notification_stop_listening_sync (cnc->priv->notification);
+		g_clear_object (&cnc->priv->notification);
+	}
+	NOTIFICATION_UNLOCK (cnc);
+
+	if (cnc->priv->soup_session) {
 		g_signal_handlers_disconnect_by_func (
-			priv->soup_session,
+			cnc->priv->soup_session,
 			ews_connection_authenticate, object);
 
-		g_main_loop_quit (priv->soup_loop);
-		g_thread_join (priv->soup_thread);
-		priv->soup_thread = NULL;
+		g_main_loop_quit (cnc->priv->soup_loop);
+		g_thread_join (cnc->priv->soup_thread);
+		cnc->priv->soup_thread = NULL;
 
-		g_main_loop_unref (priv->soup_loop);
-		priv->soup_loop = NULL;
-		g_main_context_unref (priv->soup_context);
-		priv->soup_context = NULL;
+		g_main_loop_unref (cnc->priv->soup_loop);
+		cnc->priv->soup_loop = NULL;
+		g_main_context_unref (cnc->priv->soup_context);
+		cnc->priv->soup_context = NULL;
 	}
 
-	g_clear_object (&priv->proxy_resolver);
-	g_clear_object (&priv->source);
-	g_clear_object (&priv->settings);
+	g_clear_object (&cnc->priv->proxy_resolver);
+	g_clear_object (&cnc->priv->source);
+	g_clear_object (&cnc->priv->settings);
 
-	e_ews_connection_set_password (E_EWS_CONNECTION (object), NULL);
+	e_ews_connection_set_password (cnc, NULL);
 
-	g_slist_free (priv->jobs);
-	priv->jobs = NULL;
+	g_slist_free (cnc->priv->jobs);
+	cnc->priv->jobs = NULL;
 
-	g_slist_free (priv->active_job_queue);
-	priv->active_job_queue = NULL;
+	g_slist_free (cnc->priv->active_job_queue);
+	cnc->priv->active_job_queue = NULL;
 
-	g_slist_free_full (priv->subscribed_folders, g_free);
-	priv->subscribed_folders = NULL;
+	g_slist_free_full (cnc->priv->subscribed_folders, g_free);
+	cnc->priv->subscribed_folders = NULL;
 
-	if (priv->subscriptions != NULL) {
-		g_hash_table_destroy (priv->subscriptions);
-		priv->subscriptions = NULL;
+	if (cnc->priv->subscriptions != NULL) {
+		g_hash_table_destroy (cnc->priv->subscriptions);
+		cnc->priv->subscriptions = NULL;
 	}
 
 	/* Chain up to parent's dispose() method. */
