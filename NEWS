@@ -1,3 +1,10 @@
+Evolution-EWS 3.34.4 2020-02-14
+-------------------------------
+
+Bug Fixes:
+	I#84 - Fails to create event with no duration (Milan Crha)
+	I#85 - Map 'tzone://Microsoft/Utc' to libical's 'UTC' (Milan Crha)
+
 Evolution-EWS 3.34.3 2020-01-03
 -------------------------------
 
