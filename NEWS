@@ -1,3 +1,17 @@
+Evolution-EWS 3.35.91 2020-02-14
+--------------------------------
+
+Bug Fixes:
+	I#77 - Can sometimes stop listening for server notifications (Milan Crha)
+	I#84 - Fails to create event with no duration (Milan Crha)
+	I#85 - Map 'tzone://Microsoft/Utc' to libical's 'UTC' (Milan Crha)
+
+Miscellaneous:
+	Mark connection disconnected only when disconnecting backend/store (Milan Crha)
+
+Translations:
+	Kukuh Syafaat (id)
+
 Evolution-EWS 3.35.90 2020-01-31
 --------------------------------
 
