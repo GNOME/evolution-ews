@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2019-11-22 10:03+0000\n"
-"PO-Revision-Date: 2020-02-26 14:56+0100\n"
+"POT-Creation-Date: 2020-02-26 13:57+0000\n"
+"PO-Revision-Date: 2020-02-26 15:01+0100\n"
 "Last-Translator: Nathan Follens <nthn@unseen.is>\n"
 "Language-Team: Dutch <gnome-nl-list@gnome.org>\n"
 "Language: nl\n"
@@ -19,58 +19,66 @@ msgstr ""
 "X-Generator: Poedit 2.3\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
-#: ../src/camel/camel-ews-provider.c:81
+#: ../src/camel/camel-ews-provider.c:85
 #: ../src/configuration/e-ews-config-lookup.c:251
 #: ../src/configuration/e-mail-config-ews-autodiscover.c:134
 msgid "Exchange Web Services"
 msgstr "Exchange-webdiensten"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:2
-#: ../src/camel/camel-ews-provider.c:83
+#: ../src/camel/camel-ews-provider.c:87
 msgid "For accessing Exchange servers using Web Services"
 msgstr "Voor toegang tot Exchange-servers met webdiensten"
 
-#: ../src/addressbook/e-book-backend-ews.c:3496
+#: ../src/addressbook/e-book-backend-ews.c:3497
 msgid "Failed to update GAL:"
 msgstr "Bijwerken van GAL mislukt:"
 
-#: ../src/addressbook/e-book-backend-ews.c:3658
+#: ../src/addressbook/e-book-backend-ews.c:3659
 msgid ""
 "Cannot save contact list, it’s only supported on EWS Server 2010 or later"
 msgstr ""
 "Kan contactlijst niet opslaan, dit wordt enkel ondersteund door EWS Server "
 "2010 of recenter"
 
-#: ../src/addressbook/e-book-backend-ews.c:3751
+#: ../src/addressbook/e-book-backend-ews.c:3752
 msgid "Failed to set contact photo:"
 msgstr "Instellen van contactfoto mislukt:"
 
-#: ../src/calendar/e-cal-backend-ews.c:1812
+#: ../src/calendar/e-cal-backend-ews.c:1840
 msgctxt "FreeBusyType"
 msgid "Free"
 msgstr "Vrij"
 
-#: ../src/calendar/e-cal-backend-ews.c:1815
+#: ../src/calendar/e-cal-backend-ews.c:1843
 msgctxt "FreeBusyType"
 msgid "Busy"
 msgstr "Bezet"
 
-#: ../src/calendar/e-cal-backend-ews.c:1817
+#: ../src/calendar/e-cal-backend-ews.c:1845
 msgctxt "FreeBusyType"
 msgid "Out of Office"
 msgstr "Afwezig"
 
-#: ../src/calendar/e-cal-backend-ews.c:1819
+#: ../src/calendar/e-cal-backend-ews.c:1847
 msgctxt "FreeBusyType"
 msgid "Tentative"
 msgstr "Voorlopig"
 
-#: ../src/calendar/e-cal-backend-ews.c:2394
-#: ../src/calendar/e-cal-backend-ews.c:2572
+#: ../src/calendar/e-cal-backend-ews.c:2423
+#: ../src/calendar/e-cal-backend-ews.c:2602
 msgid "Cannot determine EWS ItemId"
 msgstr "Kan EWS-ItemId niet bepalen"
 
-#: ../src/calendar/e-cal-backend-ews.c:3567
+#: ../src/calendar/e-cal-backend-ews.c:2893
+msgid ""
+"Cannot create meetings organized by other users in an Exchange Web Services "
+"calendar."
+msgstr ""
+"Kan geen afspraken georganiseerd door andere gebruikers aanmaken in een "
+"Exchange-agenda."
+
+#: ../src/calendar/e-cal-backend-ews.c:3603
 #, c-format
 msgid "Cannot find user “%s” between attendees"
 msgstr "Kan gebruiker ‘%s’ niet tussen aanwezigen vinden"
@@ -112,17 +120,17 @@ msgstr "Kan cachepad ‘%s’ niet aanmaken: %s"
 msgid "Failed to move message cache file from “%s” to “%s”: %s"
 msgstr "Verplaatsen van berichtcachebestand van ‘%s’ naar ‘%s’ mislukt: %s"
 
-#: ../src/camel/camel-ews-folder.c:1837
+#: ../src/camel/camel-ews-folder.c:1855
 #, c-format
 msgid "Could not load summary for %s"
 msgstr "Kon overzicht voor %s niet laden"
 
-#: ../src/camel/camel-ews-folder.c:2310
+#: ../src/camel/camel-ews-folder.c:2328
 #, c-format
 msgid "Refreshing folder “%s”"
 msgstr "Verversen van map ‘%s’"
 
-#: ../src/camel/camel-ews-folder.c:2494
+#: ../src/camel/camel-ews-folder.c:2512
 #, c-format
 msgid "Cannot perform actions on the folder while in offline mode"
 msgstr "Kan acties op map niet uitvoeren in offlinemodus"
@@ -160,26 +168,34 @@ msgstr "Alleen postvak _IN op spam controleren"
 msgid "Synchroni_ze remote mail locally in all folders"
 msgstr "Lokaal synchroni_seren met e-mail op afstand in alle mappen"
 
-#: ../src/camel/camel-ews-provider.c:66
+#: ../src/camel/camel-ews-provider.c:65
+msgid "Show _Public Folders beside user folders"
+msgstr "O_penbare mappen oplijsten naast gebruikersmappen"
+
+#: ../src/camel/camel-ews-provider.c:68
 msgid "Connection"
 msgstr "Verbinding"
 
 #. Translators: '%s' is preplaced with a widget, where "
 #. * user can select how long the timeout should be.
-#: ../src/camel/camel-ews-provider.c:70
+#: ../src/camel/camel-ews-provider.c:72
 #, c-format
 msgid "Connection _timeout (in seconds) %s"
 msgstr "Verbindings_time-out (in seconden) %s"
 
-#: ../src/camel/camel-ews-provider.c:72
+#: ../src/camel/camel-ews-provider.c:74
+msgid "Numbe_r of concurrent connections to use"
+msgstr "Aantal gelijktijdig te geb_ruiken verbindingen"
+
+#: ../src/camel/camel-ews-provider.c:76
 msgid "Override _User-Agent header value"
 msgstr "Gebr_uikersagent-headerwaarde overschrijven"
 
-#: ../src/camel/camel-ews-provider.c:98
+#: ../src/camel/camel-ews-provider.c:102
 msgid "NTLM"
 msgstr "NTLM"
 
-#: ../src/camel/camel-ews-provider.c:100
+#: ../src/camel/camel-ews-provider.c:104
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with NTLM authentication."
@@ -187,11 +203,11 @@ msgstr ""
 "Deze optie zal bij het verbinden met de Exchange-server gebruik maken van "
 "een onversleuteld wachtwoord met NTLM-aanmeldingscontrole."
 
-#: ../src/camel/camel-ews-provider.c:108
+#: ../src/camel/camel-ews-provider.c:112
 msgid "Basic"
 msgstr "Basic"
 
-#: ../src/camel/camel-ews-provider.c:110
+#: ../src/camel/camel-ews-provider.c:114
 msgid ""
 "This option will connect to the Exchange server using a plaintext password "
 "with Basic authentication."
@@ -199,11 +215,11 @@ msgstr ""
 "Deze optie zal bij het verbinden met de Exchange-server gebruik maken van "
 "een onversleuteld wachtwoord met Basic-aanmeldingscontrole."
 
-#: ../src/camel/camel-ews-provider.c:118
+#: ../src/camel/camel-ews-provider.c:122
 msgid "Kerberos"
 msgstr "Kerberos"
 
-#: ../src/camel/camel-ews-provider.c:120
+#: ../src/camel/camel-ews-provider.c:124
 msgid ""
 "This option will connect to the Exchange server using a Kerberos/GSSAPI "
 "authentication."
@@ -230,67 +246,67 @@ msgstr "%s_%d"
 #. * user has such in his store already. The %s is replaced with "Foreign Folders",
 #. * the %d with counter, thus it composes name like "Foreign Folders_1"
 #.
-#: ../src/camel/camel-ews-store.c:505
+#: ../src/camel/camel-ews-store.c:527
 #, c-format
 msgctxt "ForeignFolders"
 msgid "%s_%d"
 msgstr "%s_%d"
 
-#: ../src/camel/camel-ews-store.c:651 ../src/camel/camel-ews-store.c:1291
+#: ../src/camel/camel-ews-store.c:673 ../src/camel/camel-ews-store.c:1481
 msgid "Checking “Out of Office” settings"
 msgstr "‘Afwezig’-instellingen controleren"
 
-#: ../src/camel/camel-ews-store.c:1297
+#: ../src/camel/camel-ews-store.c:1487
 msgid "Look up Exchange server categories"
 msgstr "Exchange-servercategorieën opzoeken"
 
 #. Translators: The "%s" is a service URL, provided by the server
-#: ../src/camel/camel-ews-store.c:1367
+#: ../src/camel/camel-ews-store.c:1557
 #, c-format
 msgid "Password will expire in %d day. Open “%s” to change it."
 msgid_plural "Password will expire in %d days. Open “%s” to change it."
 msgstr[0] "Wachtwoord verloopt over %d dag. Open ‘%s’ om het te wijzigen."
 msgstr[1] "Wachtwoord verloopt over %d dagen. Open ‘%s’ om het te wijzigen."
 
-#: ../src/camel/camel-ews-store.c:1373
+#: ../src/camel/camel-ews-store.c:1563
 #, c-format
 msgid "Password will expire in one day."
 msgid_plural "Password will expire in %d days."
 msgstr[0] "Wachtwoord verloopt over één dag."
 msgstr[1] "Wachtwoord verloopt over %d dagen."
 
-#: ../src/camel/camel-ews-store.c:1593
+#: ../src/camel/camel-ews-store.c:1789
 msgid "Updating foreign folder structure"
 msgstr "Externe mapstructuur wordt bijgewerkt"
 
-#: ../src/camel/camel-ews-store.c:1729
+#: ../src/camel/camel-ews-store.c:1925
 msgid "Updating foreign folders"
 msgstr "Externe mappen worden bijgewerkt"
 
-#: ../src/camel/camel-ews-store.c:2145
+#: ../src/camel/camel-ews-store.c:2341
 #, c-format
 msgid "No such folder: %s"
 msgstr "Map bestaat niet: %s"
 
-#: ../src/camel/camel-ews-store.c:2454
+#: ../src/camel/camel-ews-store.c:2694
 msgid "Cannot list EWS public folders in offline mode"
 msgstr "Kan openbare EWS-mappen niet oplijsten in offlinemodus"
 
-#: ../src/camel/camel-ews-store.c:2527
+#: ../src/camel/camel-ews-store.c:2767
 msgid "Cannot find any EWS public folders"
 msgstr "Kan geen openbare EWS-mappen vinden"
 
-#: ../src/camel/camel-ews-store.c:2636
+#: ../src/camel/camel-ews-store.c:2880
 #, c-format
 msgid "Cannot create folder “%s”, folder already exists"
 msgstr "Kan map ‘%s’ niet aanmaken, map bestaat al"
 
-#: ../src/camel/camel-ews-store.c:2651
+#: ../src/camel/camel-ews-store.c:2895
 #, c-format
 msgid "Parent folder %s does not exist"
 msgstr "Bovenliggende map %s bestaat niet"
 
-#: ../src/camel/camel-ews-store.c:2661
+#: ../src/camel/camel-ews-store.c:2905
 #, c-format
 msgid ""
 "Cannot create folder under “%s”, it is used for folders of other users only"
@@ -298,95 +314,95 @@ msgstr ""
 "Kan map niet aanmaken onder ‘%s’, deze wordt enkel gebruikt voor mappen van "
 "andere gebruikers"
 
-#: ../src/camel/camel-ews-store.c:2671
+#: ../src/camel/camel-ews-store.c:2915
 #, c-format
 msgid "Cannot create folder under “%s”, it is used for public folders only"
 msgstr ""
 "Kan map niet aanmaken onder ‘%s’, deze wordt enkel gebruikt voor openbare "
 "mappen"
 
-#: ../src/camel/camel-ews-store.c:2775
+#: ../src/camel/camel-ews-store.c:3019
 #, c-format
 msgid "Folder does not exist"
 msgstr "Map bestaat niet"
 
-#: ../src/camel/camel-ews-store.c:2785
+#: ../src/camel/camel-ews-store.c:3029
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for folders of other users only"
 msgstr ""
 "Kan map ‘%s’ niet verwijderen, deze wordt enkel gebruikt voor mappen van "
 "andere gebruikers"
 
-#: ../src/camel/camel-ews-store.c:2796
+#: ../src/camel/camel-ews-store.c:3040
 #, c-format
 msgid "Cannot remove folder “%s”, it is used for public folders only"
 msgstr ""
 "Kan map ‘%s’ niet verwijderen, deze wordt enkel gebruikt voor openbare mappen"
 
-#: ../src/camel/camel-ews-store.c:2955
+#: ../src/camel/camel-ews-store.c:3199
 #, c-format
 msgid "Folder %s does not exist"
 msgstr "Map %s bestaat niet"
 
-#: ../src/camel/camel-ews-store.c:2964
+#: ../src/camel/camel-ews-store.c:3208
 #, c-format
 msgid "No change key record for folder %s"
 msgstr "Geen vermelding van wijzigingssleutel voor map %s"
 
-#: ../src/camel/camel-ews-store.c:3007
+#: ../src/camel/camel-ews-store.c:3251
 #, c-format
 msgid "Cannot both rename and move a folder at the same time"
 msgstr "Kan een map niet tegelijk hernoemen en verplaatsen"
 
-#: ../src/camel/camel-ews-store.c:3041
+#: ../src/camel/camel-ews-store.c:3282
 #, c-format
 msgid "Cannot find folder ID for parent folder %s"
 msgstr "Kan map-ID voor bovenliggende map %s niet vinden"
 
-#: ../src/camel/camel-ews-store.c:3093 ../src/camel/camel-ews-transport.c:318
+#: ../src/camel/camel-ews-store.c:3334 ../src/camel/camel-ews-transport.c:318
 #, c-format
 msgid "Exchange server %s"
 msgstr "Exchange-server %s"
 
-#: ../src/camel/camel-ews-store.c:3096
+#: ../src/camel/camel-ews-store.c:3337
 #, c-format
 msgid "Exchange service for %s on %s"
 msgstr "Exchange-dienst voor %s op %s"
 
-#: ../src/camel/camel-ews-store.c:3140
+#: ../src/camel/camel-ews-store.c:3381
 #, c-format
 msgid "Could not locate Trash folder"
 msgstr "Kan Prullenbak-map niet vinden"
 
-#: ../src/camel/camel-ews-store.c:3200
+#: ../src/camel/camel-ews-store.c:3441
 #, c-format
 msgid "Could not locate Junk folder"
 msgstr "Kan Spam-map niet vinden"
 
-#: ../src/camel/camel-ews-store.c:3391
+#: ../src/camel/camel-ews-store.c:3632
 msgid "Cannot subscribe EWS folders in offline mode"
 msgstr "Kan niet abonneren op EWS-mappen in offlinemodus"
 
-#: ../src/camel/camel-ews-store.c:3414
+#: ../src/camel/camel-ews-store.c:3655
 #, c-format
 msgid "Cannot subscribe folder “%s”, no public folder available"
 msgstr "Kan niet abonneren op map ‘%s’, geen openbare map beschikbaar"
 
-#: ../src/camel/camel-ews-store.c:3424
+#: ../src/camel/camel-ews-store.c:3665
 #, c-format
 msgid "Cannot subscribe folder “%s”, folder not found"
 msgstr "Kan niet abonneren op map ‘%s’, map niet gevonden"
 
-#: ../src/camel/camel-ews-store.c:3515
+#: ../src/camel/camel-ews-store.c:3756
 msgid "Cannot unsubscribe EWS folders in offline mode"
 msgstr "Kan abonnement op EWS-mappen niet opzeggen in offlinemodus"
 
-#: ../src/camel/camel-ews-store.c:3632
+#: ../src/camel/camel-ews-store.c:3873
 #, c-format
 msgid "You must be working online to complete this operation"
 msgstr "U moet online werken om deze bewerking te voltooien"
 
-#: ../src/camel/camel-ews-store.c:3676 ../src/camel/camel-ews-store.c:3713
+#: ../src/camel/camel-ews-store.c:3917 ../src/camel/camel-ews-store.c:3954
 msgid "Unsetting the “Out of Office” status"
 msgstr "‘Afwezig’-status wordt uitgezet"
 
@@ -426,13 +442,13 @@ msgstr "Dienst niet verbonden"
 msgid "Global Address List"
 msgstr "Globale adreslijst"
 
-#: ../src/collection/e-ews-backend.c:980
+#: ../src/collection/e-ews-backend.c:987
 #, c-format
 msgid "Could not determine a suitable folder class for a new folder named “%s”"
 msgstr ""
 "Kan geen geschikte mapklasse bepalen voor een nieuwe map met de naam ‘%s’"
 
-#: ../src/collection/e-ews-backend.c:1068
+#: ../src/collection/e-ews-backend.c:1075
 #, c-format
 msgid "Data source “%s” does not represent an Exchange Web Services folder"
 msgstr "Gegevensbron ‘%s’ stelt geen Exchange-webdienstenmap voor"
@@ -507,7 +523,7 @@ msgid "Fetching folder list…"
 msgstr "Maplijst ophalen…"
 
 #: ../src/configuration/e-ews-config-utils.c:834
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:765
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:766
 msgid "Subscribe to folder of other EWS user…"
 msgstr "Aanmelden bij map van andere EWS-gebruiker…"
 
@@ -648,7 +664,7 @@ msgid "Edit EWS folder permissions…"
 msgstr "EWS-maprechten bewerken…"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:954
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:786
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:787
 msgid "Account:"
 msgstr "Account:"
 
@@ -815,7 +831,7 @@ msgid "_Search:"
 msgstr "_Zoeken:"
 
 #: ../src/configuration/e-ews-subscribe-foreign-folder.c:103
-#: ../src/server/e-ews-folder.c:802
+#: ../src/server/e-ews-folder.c:823
 #, c-format
 msgid "Cannot add folder, folder already exists as “%s”"
 msgstr "Kan map niet toevoegen, map bestaat al als ‘%s’"
@@ -850,7 +866,7 @@ msgstr "Gebruikersnaam ‘%s’ is dubbelzinnig, specificeer deze preciezer"
 msgid "Availability"
 msgstr "Beschikbaarheid"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:405
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:406
 #, c-format
 msgid ""
 "Folder “%s” not found. Either it does not exist or you do not have "
@@ -859,7 +875,7 @@ msgstr ""
 "Map ‘%s’ niet gevonden. Ofwel bestaat ze niet, ofwel heeft u er geen toegang "
 "toe."
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:424
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:425
 msgid "Cannot add folder, cannot determine folder’s type"
 msgstr "Kan map niet toevoegen, kan maptype niet bepalen"
 
@@ -868,70 +884,70 @@ msgstr "Kan map niet toevoegen, kan maptype niet bepalen"
 #. * the second '%s' is replaced with folder name.
 #. * Example result: "John Smith — Calendar"
 #.
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:469
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:470
 #, c-format
 msgctxt "ForeignFolder"
 msgid "%s — %s"
 msgstr "%s — %s"
 
 #. convert well-known names to their non-localized form
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:582
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:866
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:583
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:867
 msgid "Inbox"
 msgstr "Postvak IN"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:584
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:867
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:585
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:868
 msgid "Contacts"
 msgstr "Contacten"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:586
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:868
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:587
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:869
 msgid "Calendar"
 msgstr "Agenda"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:588
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:869
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:589
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:870
 msgid "Free/Busy as Calendar"
 msgstr "Vrij/bezet als agenda"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:590
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:870
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:591
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:871
 msgid "Memos"
 msgstr "Memo’s"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:592
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:871
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:593
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:872
 msgid "Tasks"
 msgstr "Taken"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:609
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:610
 #, c-format
 msgid "Testing availability of folder “%s” of user “%s”, please wait…"
 msgstr ""
 "Beschikbaarheid van map ‘%s’ wordt getest voor gebruikt ‘%s’, even geduld…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:648
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:649
 msgid "Cannot search for user when the account is offline"
 msgstr "Kan niet zoeken naar gebruiker wanneer de account offline is"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:811
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:812
 msgid "User"
 msgstr "Gebruiker"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:818
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:819
 msgid "_User:"
 msgstr "Gebr_uiker:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:833
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:834
 msgid "C_hoose…"
 msgstr "_Kiezen…"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:849
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:850
 msgid "_Folder name:"
 msgstr "_Mapnaam:"
 
-#: ../src/configuration/e-ews-subscribe-foreign-folder.c:880
+#: ../src/configuration/e-ews-subscribe-foreign-folder.c:881
 msgid "Include _subfolders"
 msgstr "Inclusief _submappen"
 
@@ -1021,15 +1037,23 @@ msgstr "Doo_rverwijzings-URI:"
 msgid "Default redirect URI is “%s”"
 msgstr "Standaard-doorverwijzings-URI is ‘%s’"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:583
+#: ../src/configuration/e-mail-config-ews-backend.c:592
+msgid "Host URL is not valid"
+msgstr "Host-URL is ongeldig"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:596
 msgid "Host URL cannot be empty"
 msgstr "Host-URL kan niet leeg zijn"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:588
+#: ../src/configuration/e-mail-config-ews-backend.c:607
+msgid "OAB URL is not valid"
+msgstr "OAB-URL is ongeldig"
+
+#: ../src/configuration/e-mail-config-ews-backend.c:617
 msgid "User name cannot be empty"
 msgstr "Gebruikersnaam kan niet leeg zijn"
 
-#: ../src/configuration/e-mail-config-ews-backend.c:602
+#: ../src/configuration/e-mail-config-ews-backend.c:631
 msgid "Application ID cannot be empty"
 msgstr "Toepassings-ID kan niet leeg zijn"
 
@@ -1287,20 +1311,20 @@ msgstr ""
 msgid "CreateItem call failed to return ID for new message"
 msgstr "CreateItem-oproep gaf geen ID voor nieuw bericht weer"
 
-#: ../src/server/e-ews-connection.c:796
+#: ../src/server/e-ews-connection.c:824
 msgid "Operation Cancelled"
 msgstr "Bewerking geannuleerd"
 
-#: ../src/server/e-ews-connection.c:966
+#: ../src/server/e-ews-connection.c:994
 msgid "Authentication failed"
 msgstr "Authenticatie mislukt"
 
-#: ../src/server/e-ews-connection.c:988
+#: ../src/server/e-ews-connection.c:1016
 #, c-format
 msgid "No response: %s"
 msgstr "Geen antwoord: %s"
 
-#: ../src/server/e-ews-connection.c:1051
+#: ../src/server/e-ews-connection.c:1079
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
@@ -1309,7 +1333,7 @@ msgstr[0] ""
 msgstr[1] ""
 "Exchange-server is bezig, wachten om opnieuw te proberen (%d:%02d minuten)"
 
-#: ../src/server/e-ews-connection.c:1057
+#: ../src/server/e-ews-connection.c:1085
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
@@ -1318,53 +1342,53 @@ msgstr[0] ""
 msgstr[1] ""
 "Exchange-server is bezig, wachten om opnieuw te proberen (%d seconden)"
 
-#: ../src/server/e-ews-connection.c:3111
+#: ../src/server/e-ews-connection.c:3179
 #, c-format
 msgid "Failed to parse autodiscover response XML"
 msgstr "Ontleden van autodiscover-respons-XML is mislukt"
 
-#: ../src/server/e-ews-connection.c:3118
+#: ../src/server/e-ews-connection.c:3186
 #, c-format
 msgid "Failed to find <Autodiscover> element"
 msgstr "Kon <Autodiscover>-element niet vinden"
 
-#: ../src/server/e-ews-connection.c:3129
+#: ../src/server/e-ews-connection.c:3197
 #, c-format
 msgid "Failed to find <Response> element"
 msgstr "Kon <Response>-element niet vinden"
 
-#: ../src/server/e-ews-connection.c:3140
+#: ../src/server/e-ews-connection.c:3208
 #, c-format
 msgid "Failed to find <Account> element"
 msgstr "Kon <Account>-element niet vinden"
 
-#: ../src/server/e-ews-connection.c:3186
+#: ../src/server/e-ews-connection.c:3254
 #, c-format
 msgid "Failed to find <ASUrl> in autodiscover response"
 msgstr "Kon <ASUrl> niet vinden in autodiscover-respons"
 
-#: ../src/server/e-ews-connection.c:3372
+#: ../src/server/e-ews-connection.c:3440
 msgid "URL cannot be NULL"
 msgstr "URL kan niet NULL zijn"
 
-#: ../src/server/e-ews-connection.c:3380
+#: ../src/server/e-ews-connection.c:3448
 #, c-format
 msgid "URL “%s” is not valid"
 msgstr "URL ‘%s’ is ongeldig"
 
-#: ../src/server/e-ews-connection.c:3677
+#: ../src/server/e-ews-connection.c:3745
 msgid "Email address is missing a domain part"
 msgstr "Domein ontbreekt in e-mailadres"
 
-#: ../src/server/e-ews-connection.c:3986
+#: ../src/server/e-ews-connection.c:4054
 msgid "Failed to parse oab XML"
 msgstr "Ontleden van oab-XLM mislukt"
 
-#: ../src/server/e-ews-connection.c:3994
+#: ../src/server/e-ews-connection.c:4062
 msgid "Failed to find <OAB> element\n"
 msgstr "Kan <OAB>-element niet vinden\n"
 
-#: ../src/server/e-ews-connection.c:5277
+#: ../src/server/e-ews-connection.c:5345
 msgid "No items found"
 msgstr "Geen items gevonden"
 
@@ -1381,11 +1405,11 @@ msgstr "Wachtwoord verlopen."
 msgid "Unknown error"
 msgstr "Onbekende fout"
 
-#: ../src/server/e-ews-folder.c:757
+#: ../src/server/e-ews-folder.c:778
 msgid "Cannot add folder, unsupported folder type"
 msgstr "Kan map niet toevoegen, maptype wordt niet ondersteund"
 
-#: ../src/server/e-ews-folder.c:762
+#: ../src/server/e-ews-folder.c:783
 msgid "Cannot add folder, master source not found"
 msgstr "Kan map niet toevoegen, hoofdbron niet gevonden"
 
