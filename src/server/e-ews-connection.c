@@ -8378,6 +8378,7 @@ ews_handle_free_busy_view (ESoapParameter *param,
 	http://msdn.microsoft.com / en - us / library / aa564001 % 28v = EXCHG.140 % 29.aspx */
 	ICalComponent *vfb;
 	ICalProperty *prop = NULL;
+	ICalTimezone *utc_zone = i_cal_timezone_get_utc_timezone ();
 	ESoapParameter *viewparam, *eventarray, *event_param, *subparam;
 	GTimeVal t_val;
 	const gchar *name;
@@ -8417,7 +8418,7 @@ ews_handle_free_busy_view (ESoapParameter *param,
 				g_time_val_from_iso8601 (new_val, &t_val);
 				g_free (new_val);
 
-				itt = i_cal_time_new_from_timet_with_zone (t_val.tv_sec, 0, NULL);
+				itt = i_cal_time_new_from_timet_with_zone (t_val.tv_sec, 0, utc_zone);
 				i_cal_period_set_start (ipt, itt);
 				g_clear_object (&itt);
 
@@ -8440,7 +8441,7 @@ ews_handle_free_busy_view (ESoapParameter *param,
 				g_time_val_from_iso8601 (new_val, &t_val);
 				g_free (new_val);
 
-				itt = i_cal_time_new_from_timet_with_zone (t_val.tv_sec, 0, NULL);
+				itt = i_cal_time_new_from_timet_with_zone (t_val.tv_sec, 0, utc_zone);
 				i_cal_period_set_end (ipt, itt);
 				g_clear_object (&itt);
 
