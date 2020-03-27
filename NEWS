@@ -1,3 +1,9 @@
+Evolution-EWS 3.36.1 2020-03-27
+-------------------------------
+
+Bug Fixes:
+	evo-I#831 - Free/Busy times are not in UTC (Milan Crha)
+
 Evolution-EWS 3.36.0 2020-03-06
 -------------------------------
 
