@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
 "POT-Creation-Date: 2020-03-12 09:00+0000\n"
-"PO-Revision-Date: 2020-03-30 00:20+0200\n"
+"PO-Revision-Date: 2020-03-30 13:59+0200\n"
 "Language-Team: Croatian <hr@li.org>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -1137,6 +1137,8 @@ msgid ""
 "Deliver meeting requests addressed to me and responses to meeting requests "
 "where I am the organizer to:"
 msgstr ""
+"Dostavi zahtjeve za sastanak adresirane na mene i odgovore na zahtjeve za "
+"sastanak gdje sam ja organizator:"
 
 #. new-line break, because GtkRadioButton doesn't allow wrapping of the inner label
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1114
@@ -1144,47 +1146,49 @@ msgid ""
 "My delegates only, but _send a copy of meeting requests\n"
 "and responses to me (recommended)"
 msgstr ""
+"Samo moji delegati, ali _pošalji kopije zahtjeva za\n"
+"sastanak i odgovore samo meni (preporučljivo)"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1121
 msgid "My d_elegates only"
-msgstr ""
+msgstr "Samo m_oji delegati"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1128
 msgid "My delegates a_nd me"
-msgstr ""
+msgstr "Moji delegati i j_a"
 
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:1725
 msgid "Retrieving “Delegates” settings"
-msgstr ""
+msgstr "Primenje \"Delegati\" postavki"
 
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:193
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:257
 msgid "EWS Settings"
-msgstr ""
+msgstr "EWU postavke"
 
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:200
 msgid "View the size of all Exchange folders"
-msgstr ""
+msgstr "Pogledaj veličinu svih Exchange mapa"
 
 #: ../src/configuration/e-mail-config-ews-folder-sizes-page.c:204
 msgid "Folder _Sizes"
-msgstr ""
+msgstr "Veličine _mapa"
 
 #: ../src/configuration/e-mail-config-ews-gal.c:222
 msgid "Locating offline address books"
-msgstr ""
+msgstr "Lociranje izvanmrežnog adresara"
 
 #: ../src/configuration/e-mail-config-ews-gal.c:301
 msgid "Cache o_ffline address book"
-msgstr ""
+msgstr "Prebaci i_zvanmrežni adresar u predmemoriju"
 
 #: ../src/configuration/e-mail-config-ews-gal.c:327
 msgid "Select ad_dress list:"
-msgstr ""
+msgstr "Odaberi po_pis adresa:"
 
 #: ../src/configuration/e-mail-config-ews-gal.c:351
 msgid "Fetch List"
-msgstr ""
+msgstr "Dohvati popis"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:396
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:934
@@ -1196,62 +1200,64 @@ msgid ""
 "The messages specified below will be automatically sent to each internal and "
 "external person who sends a mail to you."
 msgstr ""
+"Poruke navedene ispod biti će automatski poslane svakoj vanjskoj i "
+"unutrašnjoj osobi koja pošalje e-poštu vama."
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:422
 msgid "Do _not send Out of Office replies"
-msgstr ""
+msgstr "Ne _šalji odgovore Izvan ureda"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:430
 msgid "_Send Out of Office replies"
-msgstr ""
+msgstr "_Šalji odgovore Izvan ureda"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:438
 msgid "Send Out of Office replies only _during this time period:"
-msgstr ""
+msgstr "Šalji odgovore Izvan ureda samo _tijekom ovog razdoblja:"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:458
 msgid "_From:"
-msgstr ""
+msgstr "_Šalje:"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:483
 msgid "_To:"
-msgstr ""
+msgstr "_Prima:"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:508
 msgid "I_nternal:"
-msgstr ""
+msgstr "U_nutrašnja:"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:517
 msgid "Message to be sent within the organization"
-msgstr ""
+msgstr "Poruka koja će biti poslana unutar organizacije"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:545
 msgid "E_xternal:"
-msgstr ""
+msgstr "V_anjska:"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:553
 msgid "Message to be sent outside the organization"
-msgstr ""
+msgstr "Poruka koja će biti poslana izvan organizacije"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:563
 msgid "Do not reply to senders outside the organization"
-msgstr ""
+msgstr "Ne odgovaraj pošiljateljima izvan organizacije"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:566
 msgid "Reply only to known senders outside the organization"
-msgstr ""
+msgstr "Odgovaraj samo poznatim pošiljateljima izvan organizacije"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:569
 msgid "Reply to any sender outside the organization"
-msgstr ""
+msgstr "Odgovaraj svim pošiljateljima izvan organizacije"
 
 #: ../src/configuration/e-mail-config-ews-ooo-page.c:1006
 msgid "Retrieving “Out of Office” settings"
-msgstr ""
+msgstr "Primanje “Izvan ureda” postavke"
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:1
 msgid "Autodiscovery query failed."
-msgstr ""
+msgstr "Neuspjeli upit automatskog otkrivanja."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:2
 msgid "The reported error was “{0}”."
@@ -1259,29 +1265,31 @@ msgstr "Prijavljena greška je “{0}”."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:3
 msgid "Failed to locate offline address books."
-msgstr ""
+msgstr "Neuspjelo lociranje izvanmrežnih adresara."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:4
 msgid "Failed to retrieve “Out of Office” settings."
-msgstr ""
+msgstr "Neuspjelo primanje \"Izvan ureda\" postavki."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:5
 msgid "Failed to retrieve “Delegates” settings."
-msgstr ""
+msgstr "Neuspjelo primanje \"Delegati\" postavki."
 
 #: ../src/configuration/module-ews-configuration.error.xml.h:6
 msgid "Your Exchange account “{0}” has the status set as “Out of Office”."
-msgstr ""
+msgstr "Vaš Exchange \"{0}\" račun ima stanje postavljeno na \"Izvan ureda\"."
 
 #: ../src/server/camel-sasl-xoauth2-office365.c:23
 msgid "OAuth2 (Office365)"
-msgstr ""
+msgstr "OAuth2 (Office365)"
 
 #: ../src/server/camel-sasl-xoauth2-office365.c:24
 msgid ""
 "This option will use an OAuth 2.0 access token to connect to the Office365."
 "com server"
 msgstr ""
+"Ova mogućnost će koristiti OAuth 2.0 token pristupa za povezivanje sa "
+"Office365.com poslužiteljem"
 
 #: ../src/server/e-ews-calendar-utils.c:1220
 #, c-format
@@ -1289,6 +1297,9 @@ msgid ""
 "Cannot store this recurrence. Change it to simple single daily, weekly, "
 "monthly or yearly recurrence without exceptions and with start date."
 msgstr ""
+"Nemoguće je spremiti ovo ponavljanje. Promijenite ga u jednostavno "
+"pojedinačno dnevno, tjedno, mjesečno ili godišnje ponavljanje bez iznimki i "
+"s datumom početka."
 
 #: ../src/server/e-ews-camel-common.c:394
 #, c-format
@@ -1297,7 +1308,7 @@ msgstr "Stvaranje stavke poziva nije neuspjelo vratiti ID za novu poruku"
 
 #: ../src/server/e-ews-connection.c:824
 msgid "Operation Cancelled"
-msgstr ""
+msgstr "Radnja je prekinuta"
 
 #: ../src/server/e-ews-connection.c:994
 msgid "Authentication failed"
@@ -1306,23 +1317,29 @@ msgstr "Neuspjela ovjera"
 #: ../src/server/e-ews-connection.c:1016
 #, c-format
 msgid "No response: %s"
-msgstr ""
+msgstr "Nema odgovora: %s"
 
 #: ../src/server/e-ews-connection.c:1079
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d:%02d minute)"
 msgid_plural "Exchange server is busy, waiting to retry (%d:%02d minutes)"
 msgstr[0] ""
+"Exchange poslužitelj je zauzet, čekanje ponovnog pokušaja (%d:%02d minuta)"
 msgstr[1] ""
+"Exchange poslužitelj je zauzet, čekanje ponovnog pokušaja (%d:%02d minute)"
 msgstr[2] ""
+"Exchange poslužitelj je zauzet, čekanje ponovnog pokušaja (%d:%02d minuta)"
 
 #: ../src/server/e-ews-connection.c:1085
 #, c-format
 msgid "Exchange server is busy, waiting to retry (%d second)"
 msgid_plural "Exchange server is busy, waiting to retry (%d seconds)"
 msgstr[0] ""
+"Exchange poslužitelj je zauzet, čekanje ponovnog pokušaja (%d sekunda)"
 msgstr[1] ""
+"Exchange poslužitelj je zauzet, čekanje ponovnog pokušaja (%d sekunde)"
 msgstr[2] ""
+"Exchange poslužitelj je zauzet, čekanje ponovnog pokušaja (%d sekundi)"
 
 #: ../src/server/e-ews-connection.c:3179
 #, c-format
@@ -1342,46 +1359,46 @@ msgstr "Nemoguće je pronaći element <Odgovora>"
 #: ../src/server/e-ews-connection.c:3208
 #, c-format
 msgid "Failed to find <Account> element"
-msgstr ""
+msgstr "Nemoguće je pronaći <element> računa"
 
 #: ../src/server/e-ews-connection.c:3254
 #, c-format
 msgid "Failed to find <ASUrl> in autodiscover response"
-msgstr ""
+msgstr "Nemoguć pronalazak <ASUrl> u odgovoru automatskog otkrivanja"
 
 #: ../src/server/e-ews-connection.c:3440
 msgid "URL cannot be NULL"
-msgstr ""
+msgstr "URL ne može biti NIŠTA"
 
 #: ../src/server/e-ews-connection.c:3448
 #, c-format
 msgid "URL “%s” is not valid"
-msgstr ""
+msgstr "URL “%s” nije valjana"
 
 #: ../src/server/e-ews-connection.c:3745
 msgid "Email address is missing a domain part"
-msgstr ""
+msgstr "Adresi e-pošte nedostaje domena"
 
 #: ../src/server/e-ews-connection.c:4054
 msgid "Failed to parse oab XML"
-msgstr ""
+msgstr "Neuspjela oab XML-a"
 
 #: ../src/server/e-ews-connection.c:4062
 msgid "Failed to find <OAB> element\n"
-msgstr ""
+msgstr "Nemoguće pronalazak <OAB> elementa\n"
 
 #: ../src/server/e-ews-connection.c:5345
 msgid "No items found"
-msgstr ""
+msgstr "Nema pronađenih stavki stavki"
 
 #: ../src/server/e-ews-connection-utils.c:197
 #, c-format
 msgid "Password expired. Change password at “%s”."
-msgstr ""
+msgstr "Lozinka je istekla. Promijenite lozinku na “%s”."
 
 #: ../src/server/e-ews-connection-utils.c:200
 msgid "Password expired."
-msgstr ""
+msgstr "Lozinka je istekla."
 
 #: ../src/server/e-ews-connection-utils.c:430
 msgid "Unknown error"
@@ -1389,14 +1406,14 @@ msgstr "Nepoznata greška"
 
 #: ../src/server/e-ews-folder.c:778
 msgid "Cannot add folder, unsupported folder type"
-msgstr ""
+msgstr "Nemoguće dodavanje mape, nepodržana vrsta mape"
 
 #: ../src/server/e-ews-folder.c:783
 msgid "Cannot add folder, master source not found"
-msgstr ""
+msgstr "Nemoguće dodavanje mape, glavni izvor nije nađen"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
 #: ../src/server/e-oauth2-service-office365.c:109
 msgctxt "OAuth2Service"
 msgid "Office365"
-msgstr ""
+msgstr "Office365"
