@@ -7,8 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
-"POT-Creation-Date: 2020-03-12 09:00+0000\n"
-"PO-Revision-Date: 2020-03-30 14:06+0200\n"
+"POT-Creation-Date: 2020-03-30 12:07+0000\n"
+"PO-Revision-Date: 2020-03-30 15:16+0200\n"
+"Last-Translator: gogo <trebelnik2@gmail.com>\n"
 "Language-Team: Croatian <hr@li.org>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -16,14 +17,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"Last-Translator: gogo <trebelnik2@gmail.com>\n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.0.6\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/camel/camel-ews-provider.c:85
 #: ../src/configuration/e-ews-config-lookup.c:251
 #: ../src/configuration/e-mail-config-ews-autodiscover.c:134
-#, fuzzy
 msgid "Exchange Web Services"
 msgstr "Exchange web usluge"
 
@@ -627,7 +626,7 @@ msgstr "Slobodan/Zauzet vrijeme, predmet, mjesto"
 #: ../src/configuration/e-mail-config-ews-delegates-page.c:439
 msgctxt "PermissionsLevel"
 msgid "Custom"
-msgstr "Prilagođea"
+msgstr "Prilagođena"
 
 #: ../src/configuration/e-ews-edit-folder-permissions.c:265
 msgid "Writing folder permissions, please wait…"
