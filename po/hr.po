@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: evolution-ews master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/evolution-ews/issues\n"
 "POT-Creation-Date: 2020-03-12 09:00+0000\n"
-"PO-Revision-Date: 2020-03-30 13:59+0200\n"
+"PO-Revision-Date: 2020-03-30 14:03+0200\n"
 "Language-Team: Croatian <hr@li.org>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "Last-Translator: gogo <trebelnik2@gmail.com>\n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.0.6\n"
 
 #: ../org.gnome.Evolution-ews.metainfo.xml.in.h:1
 #: ../src/camel/camel-ews-provider.c:85
@@ -1364,7 +1364,7 @@ msgstr "Nemoguće je pronaći <element> računa"
 #: ../src/server/e-ews-connection.c:3254
 #, c-format
 msgid "Failed to find <ASUrl> in autodiscover response"
-msgstr "Nemoguć pronalazak <ASUrl> u odgovoru automatskog otkrivanja"
+msgstr "Nemoguć je pronaći <ASUrl> u odgovoru automatskog otkrivanja"
 
 #: ../src/server/e-ews-connection.c:3440
 msgid "URL cannot be NULL"
@@ -1381,7 +1381,7 @@ msgstr "Adresi e-pošte nedostaje domena"
 
 #: ../src/server/e-ews-connection.c:4054
 msgid "Failed to parse oab XML"
-msgstr "Neuspjela oab XML-a"
+msgstr "Neuspjela obrada oab XML-a"
 
 #: ../src/server/e-ews-connection.c:4062
 msgid "Failed to find <OAB> element\n"
@@ -1410,7 +1410,7 @@ msgstr "Nemoguće dodavanje mape, nepodržana vrsta mape"
 
 #: ../src/server/e-ews-folder.c:783
 msgid "Cannot add folder, master source not found"
-msgstr "Nemoguće dodavanje mape, glavni izvor nije nađen"
+msgstr "Nemoguće dodavanje mape, glavni izvor nije pronađen"
 
 #. Translators: This is a user-visible string, display name of an OAuth2 service.
 #: ../src/server/e-oauth2-service-office365.c:109
