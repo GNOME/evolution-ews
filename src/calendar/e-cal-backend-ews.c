@@ -85,6 +85,8 @@ struct _ECalBackendEwsPrivate {
 	" item:HasAttachments" \
 	" item:MimeContent" \
 	" calendar:UID" \
+	" calendar:Start" \
+	" calendar:End" \
 	" calendar:Resources" \
 	" calendar:ModifiedOccurrences" \
 	" calendar:IsMeeting" \
@@ -359,6 +361,41 @@ ecb_ews_responsetype_to_partstat (const gchar *responsetype)
 	return param;
 }
 
+static void
+ecb_ews_maybe_update_datetime (ETimezoneCache *timezone_cache,
+			       ICalComponent *vcomp,
+			       ICalComponent *icomp,
+			       ICalPropertyKind prop_kind,
+			       ICalTime * (* get_func) (ICalProperty *prop),
+			       void (* set_func) (ICalProperty *prop,
+						  ICalTime *v),
+			       time_t utc_value)
+{
+	ICalProperty *prop;
+	ICalTime *dt, *val;
+
+	g_return_if_fail (I_CAL_IS_COMPONENT (icomp));
+	g_return_if_fail (get_func != NULL);
+	g_return_if_fail (set_func != NULL);
+
+	if (utc_value == (time_t) -1)
+		return;
+
+	prop = i_cal_component_get_first_property (icomp, prop_kind);
+	if (!prop)
+		return;
+
+	dt = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, vcomp, icomp, prop_kind, get_func);
+
+	val = i_cal_time_new_from_timet_with_zone (utc_value, i_cal_time_is_date (dt), i_cal_timezone_get_utc_timezone ());
+	i_cal_time_convert_to_zone_inplace (val, i_cal_time_get_timezone (dt));
+	set_func (prop, val);
+
+	g_clear_object (&prop);
+	g_clear_object (&val);
+	g_clear_object (&dt);
+}
+
 static ECalComponent *
 ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 				EEwsItem *item,
@@ -629,6 +666,16 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 			return NULL;
 		}
 
+		icomp = i_cal_component_get_first_component (vcomp, kind);
+
+		ecb_ews_maybe_update_datetime (timezone_cache, vcomp, icomp,
+			I_CAL_DTSTART_PROPERTY, i_cal_property_get_dtstart, i_cal_property_set_dtstart,
+			e_ews_item_get_start (item));
+
+		ecb_ews_maybe_update_datetime (timezone_cache, vcomp, icomp,
+			I_CAL_DTEND_PROPERTY, i_cal_property_get_dtend, i_cal_property_set_dtend,
+			e_ews_item_get_end (item));
+
 		tzid = e_ews_item_get_tzid (item);
 		if (tzid == NULL) {
 			/*
@@ -680,8 +727,6 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 				evo_ews_end_tzid);
 
 			if (start_zone != NULL) {
-				icomp = i_cal_component_get_first_component (vcomp, kind);
-
 				dt = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, vcomp, icomp, I_CAL_DTSTART_PROPERTY, i_cal_property_get_dtstart);
 				i_cal_time_convert_to_zone_inplace (dt, start_zone);
 				i_cal_component_set_dtstart (icomp, dt);
@@ -698,8 +743,6 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 
 					e_timezone_cache_add_timezone (timezone_cache, end_zone);
 				}
-
-				g_clear_object (&icomp);
 			}
 
 			if (!timezone_set)
@@ -716,8 +759,6 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 			 */
 			ICalTimezone *zone;
 			gchar *new_tzid = NULL;
-
-			icomp = i_cal_component_get_first_component (vcomp, kind);
 
 			if (!i_cal_timezone_get_builtin_timezone (tzid) &&
 			    i_cal_component_get_uid (icomp)) {
@@ -780,9 +821,10 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 				g_object_unref (dt);
 			}
 
-			g_clear_object (&icomp);
 			g_free (new_tzid);
 		}
+
+		g_clear_object (&icomp);
 	}
 
 	/* Vevent or Vtodo */

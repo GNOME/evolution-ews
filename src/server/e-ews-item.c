@@ -126,6 +126,8 @@ struct _EEwsItemPrivate {
 
 	gchar *uid;
 	gchar *timezone;
+	time_t calendar_start;
+	time_t calendar_end;
 	gchar *start_timezone;
 	gchar *end_timezone;
 	gchar *contact_photo_id;
@@ -1648,6 +1650,10 @@ e_ews_item_set_from_soap_parameter (EEwsItem *item,
 			priv->calendar_item_accept_id = g_new0 (EwsId, 1);
 			priv->calendar_item_accept_id->id = e_soap_parameter_get_property (subparam, "Id");
 			priv->calendar_item_accept_id->change_key = e_soap_parameter_get_property (subparam, "ChangeKey");
+		} else if (!g_ascii_strcasecmp (name, "Start")) {
+			priv->calendar_start = ews_item_parse_date (subparam);
+		} else if (!g_ascii_strcasecmp (name, "End")) {
+			priv->calendar_end = ews_item_parse_date (subparam);
 		} else if (!g_ascii_strcasecmp (name, "StartTimeZone")) {
 			priv->start_timezone = e_soap_parameter_get_property (subparam, "Id");
 		} else if (!g_ascii_strcasecmp (name, "EndTimeZone")) {
@@ -2855,6 +2861,22 @@ e_ews_item_get_end_tzid (EEwsItem *item)
 
 	/* can be NULL */
 	return item->priv->end_timezone;
+}
+
+time_t
+e_ews_item_get_start (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
+
+	return item->priv->calendar_start;
+}
+
+time_t
+e_ews_item_get_end (EEwsItem *item)
+{
+	g_return_val_if_fail (E_IS_EWS_ITEM (item), -1);
+
+	return item->priv->calendar_end;
 }
 
 const gchar *

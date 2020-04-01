@@ -448,6 +448,8 @@ gboolean	e_ews_item_task_has_complete_date
 const gchar *	e_ews_item_get_tzid		(EEwsItem *item);
 const gchar *	e_ews_item_get_start_tzid	(EEwsItem *item);
 const gchar *	e_ews_item_get_end_tzid		(EEwsItem *item);
+time_t		e_ews_item_get_start		(EEwsItem *item);
+time_t		e_ews_item_get_end		(EEwsItem *item);
 const gchar *	e_ews_item_get_contact_photo_id	(EEwsItem *item);
 const gchar *	e_ews_item_get_iana_start_time_zone
 						(EEwsItem *item);
