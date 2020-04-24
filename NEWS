@@ -1,3 +1,13 @@
+Evolution-EWS 3.36.2 2020-04-24
+-------------------------------
+
+Bug Fixes:
+	I#45 - Event time shifted by an hour after edit for some time zones (Milan Crha)
+
+Translations:
+	Goran Vidović (hr)
+	Yuri Chornoivan (uk)
+
 Evolution-EWS 3.36.1 2020-03-27
 -------------------------------
 
