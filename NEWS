@@ -1,3 +1,15 @@
+Evolution-EWS 3.37.1 2020-04-24
+-------------------------------
+
+Bug Fixes:
+	I#45 - Event time shifted by an hour after edit for some time zones (Milan Crha)
+	evo-I#831 - Free/Busy times are not in UTC (Milan Crha)
+
+Translations:
+	Goran Vidović (hr)
+	Yuri Chornoivan (uk)
+	Aurimas Černius (lt)
+
 Evolution-EWS 3.36.0 2020-03-06
 -------------------------------
 
