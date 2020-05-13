@@ -1654,7 +1654,8 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 	/*meeting dates*/
 	dtstart = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, convert_data->vcalendar, icomp, I_CAL_DTSTART_PROPERTY, i_cal_property_get_dtstart);
 	dtstart_old = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, convert_data->vcalendar, icomp_old, I_CAL_DTSTART_PROPERTY, i_cal_property_get_dtstart);
-	dt_start_changed = dtstart != dtstart_old || (dtstart && dtstart_old && i_cal_time_compare (dtstart, dtstart_old) != 0);
+	dt_start_changed = ((!dtstart || !dtstart_old) && dtstart != dtstart_old) ||
+		(dtstart && dtstart_old && i_cal_time_compare (dtstart, dtstart_old) != 0);
 	tzid_start = dtstart ? i_cal_time_get_timezone (dtstart) : NULL;
 	if (tzid_start) {
 		ICalTimezone *zone;
@@ -1670,7 +1671,8 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 
 	dtend = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, convert_data->vcalendar, icomp, I_CAL_DTEND_PROPERTY, i_cal_property_get_dtend);
 	dtend_old = e_cal_backend_ews_get_datetime_with_zone (convert_data->timezone_cache, convert_data->vcalendar, icomp_old, I_CAL_DTEND_PROPERTY, i_cal_property_get_dtend);
-	dt_end_changed = dtend != dtend_old || (dtend && dtend_old && i_cal_time_compare (dtend, dtend_old) != 0);
+	dt_end_changed = ((!dtend || !dtend_old) && dtend != dtend_old) ||
+		(dtend && dtend_old && i_cal_time_compare (dtend, dtend_old) != 0);
 	tzid_end = dtend ? i_cal_time_get_timezone (dtend) : NULL;
 	if (tzid_end) {
 		ICalTimezone *zone;
@@ -1687,21 +1689,23 @@ convert_vevent_component_to_updatexml (ESoapMessage *msg,
 	satisfies = e_ews_connection_satisfies_server_version (convert_data->connection, E_EWS_EXCHANGE_2010);
 
 	if (satisfies) {
-		if (old_ical_location_start != NULL) {
+		if (old_ical_location_start)
 			old_msdn_location_start = e_cal_backend_ews_tz_util_get_msdn_equivalent (old_ical_location_start);
+
+		if (ical_location_start)
 			msdn_location_start = e_cal_backend_ews_tz_util_get_msdn_equivalent (ical_location_start);
 
-			if (g_strcmp0 (old_msdn_location_start, msdn_location_start) != 0)
-				dt_start_changed = TRUE;
-		}
+		if (g_strcmp0 (old_msdn_location_start, msdn_location_start) != 0)
+			dt_start_changed = TRUE;
 
-		if (old_ical_location_end != NULL) {
+		if (old_ical_location_end)
 			old_msdn_location_end = e_cal_backend_ews_tz_util_get_msdn_equivalent (old_ical_location_end);
+
+		if (ical_location_end)
 			msdn_location_end = e_cal_backend_ews_tz_util_get_msdn_equivalent (ical_location_end);
 
-			if (g_strcmp0 (old_msdn_location_end, msdn_location_end) != 0)
-				dt_end_changed = TRUE;
-		}
+		if (g_strcmp0 (old_msdn_location_end, msdn_location_end) != 0)
+			dt_end_changed = TRUE;
 
 		if ((dt_start_changed || dt_start_changed_timezone_name) && ical_location_start != NULL)
 			e_ews_message_add_set_item_field_extended_distinguished_name_string (

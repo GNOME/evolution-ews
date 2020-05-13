@@ -387,6 +387,12 @@ ecb_ews_maybe_update_datetime (ETimezoneCache *timezone_cache,
 
 	dt = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, vcomp, icomp, prop_kind, get_func);
 
+	if (i_cal_time_is_date (dt)) {
+		g_clear_object (&prop);
+		g_clear_object (&dt);
+		return;
+	}
+
 	val = i_cal_time_new_from_timet_with_zone (utc_value, i_cal_time_is_date (dt), i_cal_timezone_get_utc_timezone ());
 	i_cal_time_convert_to_zone_inplace (val, i_cal_time_get_timezone (dt));
 	set_func (prop, val);
@@ -728,8 +734,12 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 
 			if (start_zone != NULL) {
 				dt = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, vcomp, icomp, I_CAL_DTSTART_PROPERTY, i_cal_property_get_dtstart);
-				i_cal_time_convert_to_zone_inplace (dt, start_zone);
-				i_cal_component_set_dtstart (icomp, dt);
+
+				if (!i_cal_time_is_date (dt)) {
+					i_cal_time_convert_to_zone_inplace (dt, start_zone);
+					i_cal_component_set_dtstart (icomp, dt);
+				}
+
 				g_clear_object (&dt);
 
 				timezone_set = TRUE;
@@ -737,8 +747,12 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 
 				if (end_zone != NULL) {
 					dt = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, vcomp, icomp, I_CAL_DTEND_PROPERTY, i_cal_property_get_dtend);
-					i_cal_time_convert_to_zone_inplace (dt, end_zone);
-					i_cal_component_set_dtend (icomp, dt);
+
+					if (!i_cal_time_is_date (dt)) {
+						i_cal_time_convert_to_zone_inplace (dt, end_zone);
+						i_cal_component_set_dtend (icomp, dt);
+					}
+
 					g_clear_object (&dt);
 
 					e_timezone_cache_add_timezone (timezone_cache, end_zone);
@@ -811,13 +825,21 @@ ecb_ews_item_to_component_sync (ECalBackendEws *cbews,
 
 			if (zone != NULL) {
 				dt = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, vcomp, icomp, I_CAL_DTSTART_PROPERTY, i_cal_property_get_dtstart);
-				i_cal_time_convert_to_zone_inplace (dt, zone);
-				i_cal_component_set_dtstart (icomp, dt);
+
+				if (!i_cal_time_is_date (dt)) {
+					i_cal_time_convert_to_zone_inplace (dt, zone);
+					i_cal_component_set_dtstart (icomp, dt);
+				}
+
 				g_object_unref (dt);
 
 				dt = e_cal_backend_ews_get_datetime_with_zone (timezone_cache, vcomp, icomp, I_CAL_DTEND_PROPERTY, i_cal_property_get_dtend);
-				i_cal_time_convert_to_zone_inplace (dt, zone);
-				i_cal_component_set_dtend (icomp, dt);
+
+				if (!i_cal_time_is_date (dt)) {
+					i_cal_time_convert_to_zone_inplace (dt, zone);
+					i_cal_component_set_dtend (icomp, dt);
+				}
+
 				g_object_unref (dt);
 			}
 
