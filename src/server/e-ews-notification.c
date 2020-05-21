@@ -36,12 +36,20 @@ struct _EEwsNotificationPrivate {
 	GWeakRef connection_wk;
 	GByteArray *chunk;
 	GCancellable *cancellable;
+	gchar *last_subscription_id; /* guarded by the caller, because it can be set only after construct */
 };
 
 enum {
 	PROP_0,
 	PROP_CONNECTION
 };
+
+enum {
+	SUBSCRIPTION_ID_CHANGED,
+	LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL];
 
 static const gchar *default_events_names[] = {
 	"CopiedEvent",
@@ -91,13 +99,20 @@ ews_notification_authenticate (SoupSession *session,
 }
 
 EEwsNotification *
-e_ews_notification_new (EEwsConnection *connection)
+e_ews_notification_new (EEwsConnection *connection,
+			gchar *last_subscription_id)
 {
+	EEwsNotification *notif;
+
 	g_return_val_if_fail (E_IS_EWS_CONNECTION (connection), NULL);
 
-	return g_object_new (
+	notif = g_object_new (
 		E_TYPE_EWS_NOTIFICATION,
 		"connection", connection, NULL);
+
+	notif->priv->last_subscription_id = last_subscription_id;
+
+	return notif;
 }
 
 static void
@@ -203,6 +218,7 @@ ews_notification_finalize (GObject *object)
 	notif = E_EWS_NOTIFICATION (object);
 
 	g_weak_ref_clear (&notif->priv->connection_wk);
+	g_free (notif->priv->last_subscription_id);
 
 	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (e_ews_notification_parent_class)->finalize (object);
@@ -233,6 +249,15 @@ e_ews_notification_class_init (EEwsNotificationClass *class)
 			G_PARAM_READWRITE |
 			G_PARAM_CONSTRUCT_ONLY |
 			G_PARAM_STATIC_STRINGS));
+
+	signals[SUBSCRIPTION_ID_CHANGED] = g_signal_new (
+		"subscription-id-changed",
+		G_OBJECT_CLASS_TYPE (object_class),
+		G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+		0, NULL, NULL,
+		g_cclosure_marshal_VOID__STRING,
+		G_TYPE_NONE, 1,
+		G_TYPE_STRING);
 }
 
 static void
@@ -416,6 +441,9 @@ e_ews_notification_subscribe_folder_sync (EEwsNotification *notification,
 	}
 
 	g_object_unref (response);
+
+	g_signal_emit (notification, signals[SUBSCRIPTION_ID_CHANGED], 0, *subscription_id, NULL);
+
 	return TRUE;
 }
 
@@ -503,6 +531,8 @@ e_ews_notification_unsubscribe_folder_sync (EEwsNotification *notification,
 		g_error_free (error);
 		return FALSE;
 	}
+
+	g_signal_emit (notification, signals[SUBSCRIPTION_ID_CHANGED], 0, NULL, NULL);
 
 	return TRUE;
 }
@@ -897,6 +927,11 @@ e_ews_notification_get_events_thread (gpointer user_data)
 	g_return_val_if_fail (td != NULL, NULL);
 	g_return_val_if_fail (td->notification != NULL, NULL);
 	g_return_val_if_fail (td->folders != NULL, NULL);
+
+	if (td->notification->priv->last_subscription_id) {
+		e_ews_notification_unsubscribe_folder_sync (td->notification, td->notification->priv->last_subscription_id);
+		g_clear_pointer (&td->notification->priv->last_subscription_id, g_free);
+	}
 
 	if (!e_ews_notification_subscribe_folder_sync (td->notification, td->folders, &subscription_id, td->cancellable))
 		goto exit;

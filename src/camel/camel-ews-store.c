@@ -77,6 +77,12 @@ struct _CamelEwsStorePrivate {
 
 	gboolean listen_notifications;
 	guint subscription_key;
+
+	/* The subscription ID is not tight to the actual connection, it survives
+	   disconnects, thus remember it and pass it back to the new connection,
+	   thus it can eventually unsubscribe from it. */
+	gchar *last_subscription_id;
+
 	guint update_folder_id;
 	guint update_folder_list_id;
 	GCancellable *updates_cancellable;
@@ -1427,6 +1433,25 @@ camel_ews_store_check_all_cb (CamelEwsStore *ews_store,
 	camel_ews_store_handle_notifications (ews_store, ews_settings);
 }
 
+static void
+ews_camel_subscription_id_changed_cb (EEwsConnection *cnc,
+				      const gchar *subscription_id,
+				      gpointer user_data)
+{
+	CamelEwsStore *ews_store = user_data;
+
+	g_return_if_fail (CAMEL_IS_EWS_STORE (ews_store));
+
+	g_mutex_lock (&ews_store->priv->connection_lock);
+
+	if (g_strcmp0 (ews_store->priv->last_subscription_id, subscription_id) != 0) {
+		g_free (ews_store->priv->last_subscription_id);
+		ews_store->priv->last_subscription_id = g_strdup (subscription_id);
+	}
+
+	g_mutex_unlock (&ews_store->priv->connection_lock);
+}
+
 static gboolean
 ews_connect_sync (CamelService *service,
                   GCancellable *cancellable,
@@ -1506,6 +1531,12 @@ ews_connect_sync (CamelService *service,
 				"server-notification",
 				G_CALLBACK (camel_ews_store_server_notification_cb),
 				ews_store);
+
+			e_ews_connection_set_last_subscription_id (connection, ews_store->priv->last_subscription_id);
+
+			g_signal_connect_object (connection, "subscription-id-changed",
+				G_CALLBACK (ews_camel_subscription_id_changed_cb), ews_store, 0);
+
 			g_clear_object (&connection);
 		}
 	}
@@ -4000,6 +4031,7 @@ ews_store_finalize (GObject *object)
 	ews_store = CAMEL_EWS_STORE (object);
 
 	g_free (ews_store->storage_path);
+	g_free (ews_store->priv->last_subscription_id);
 	g_mutex_clear (&ews_store->priv->get_finfo_lock);
 	g_mutex_clear (&ews_store->priv->connection_lock);
 	g_rec_mutex_clear (&ews_store->priv->update_lock);

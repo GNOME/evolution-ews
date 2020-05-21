@@ -96,6 +96,11 @@ struct _EBookBackendEwsPrivate {
 
 	guint subscription_key;
 
+	/* The subscription ID is not tight to the actual connection, it survives
+	   disconnects, thus remember it and pass it back to the new connection,
+	   thus it can eventually unsubscribe from it. */
+	gchar *last_subscription_id;
+
 	/* used for storing attachments */
 	gchar *attachments_dir;
 };
@@ -3221,6 +3226,25 @@ ebb_ews_check_is_gal (EBookBackendEws *bbews)
 	return is_gal;
 }
 
+static void
+ebb_ews_subscription_id_changed_cb (EEwsConnection *cnc,
+				    const gchar *subscription_id,
+				    gpointer user_data)
+{
+	EBookBackendEws *bbews = user_data;
+
+	g_return_if_fail (E_IS_BOOK_BACKEND_EWS (bbews));
+
+	g_rec_mutex_lock (&bbews->priv->cnc_lock);
+
+	if (g_strcmp0 (bbews->priv->last_subscription_id, subscription_id) != 0) {
+		g_free (bbews->priv->last_subscription_id);
+		bbews->priv->last_subscription_id = g_strdup (subscription_id);
+	}
+
+	g_rec_mutex_unlock (&bbews->priv->cnc_lock);
+}
+
 static gboolean
 ebb_ews_connect_sync (EBookMetaBackend *meta_backend,
 		      const ENamedParameters *credentials,
@@ -3305,6 +3329,11 @@ ebb_ews_connect_sync (EBookMetaBackend *meta_backend,
 			GSList *folders = NULL;
 
 			folders = g_slist_prepend (folders, bbews->priv->folder_id);
+
+			e_ews_connection_set_last_subscription_id (bbews->priv->cnc, bbews->priv->last_subscription_id);
+
+			g_signal_connect_object (bbews->priv->cnc, "subscription-id-changed",
+				G_CALLBACK (ebb_ews_subscription_id_changed_cb), bbews, 0);
 
 			e_ews_connection_enable_notifications_sync (bbews->priv->cnc,
 				folders, &bbews->priv->subscription_key);
@@ -4049,6 +4078,7 @@ e_book_backend_ews_finalize (GObject *object)
 
 	g_free (bbews->priv->folder_id);
 	g_free (bbews->priv->attachments_dir);
+	g_free (bbews->priv->last_subscription_id);
 
 	g_rec_mutex_clear (&bbews->priv->cnc_lock);
 

@@ -82,6 +82,7 @@ struct _EEwsConnectionPrivate {
 	GMainContext *soup_context;
 	GProxyResolver *proxy_resolver;
 	EEwsNotification *notification;
+	guint notification_delay_id;
 
 	CamelEwsSettings *settings;
 	guint concurrent_connections;
@@ -102,6 +103,10 @@ struct _EEwsConnectionPrivate {
 
 	GHashTable *subscriptions;
 	GSList *subscribed_folders;
+	/* The subscription ID is not tight to the actual connection, it survives
+	   disconnects, thus remember it and unsubscribe from it, before adding
+	   a new subscription. */
+	gchar *last_subscription_id;
 
 	EEwsServerVersion version;
 	gboolean backoff_enabled;
@@ -126,7 +131,8 @@ enum {
 enum {
 	SERVER_NOTIFICATION,
 	PASSWORD_WILL_EXPIRE,
-	LAST_SIGNAL,
+	SUBSCRIPTION_ID_CHANGED,
+	LAST_SIGNAL
 };
 
 static guint signals[LAST_SIGNAL];
@@ -2052,6 +2058,11 @@ ews_connection_dispose (GObject *object)
 	g_mutex_unlock (&connecting);
 
 	NOTIFICATION_LOCK (cnc);
+	if (cnc->priv->notification_delay_id) {
+		g_source_remove (cnc->priv->notification_delay_id);
+		cnc->priv->notification_delay_id = 0;
+	}
+
 	if (cnc->priv->notification) {
 		e_ews_notification_stop_listening_sync (cnc->priv->notification);
 		g_clear_object (&cnc->priv->notification);
@@ -2110,6 +2121,7 @@ ews_connection_finalize (GObject *object)
 	g_free (priv->hash_key);
 	g_free (priv->impersonate_user);
 	g_free (priv->ssl_certificate_pem);
+	g_free (priv->last_subscription_id);
 
 	g_clear_object (&priv->bearer_auth);
 
@@ -2213,6 +2225,15 @@ e_ews_connection_class_init (EEwsConnectionClass *class)
 		NULL, NULL, NULL,
 		G_TYPE_NONE, 2,
 		G_TYPE_INT,
+		G_TYPE_STRING);
+
+	signals[SUBSCRIPTION_ID_CHANGED] = g_signal_new (
+		"subscription-id-changed",
+		G_OBJECT_CLASS_TYPE (object_class),
+		G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+		0, NULL, NULL,
+		g_cclosure_marshal_VOID__STRING,
+		G_TYPE_NONE, 1,
 		G_TYPE_STRING);
 }
 
@@ -3013,6 +3034,38 @@ e_ews_connection_set_disconnected_flag (EEwsConnection *cnc,
 	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
 
 	cnc->priv->disconnected_flag = disconnected_flag;
+}
+
+gchar *
+e_ews_connection_dup_last_subscription_id (EEwsConnection *cnc)
+{
+	gchar *res;
+
+	g_return_val_if_fail (E_IS_EWS_CONNECTION (cnc), NULL);
+
+	g_mutex_lock (&cnc->priv->property_lock);
+
+	res = g_strdup (cnc->priv->last_subscription_id);
+
+	g_mutex_unlock (&cnc->priv->property_lock);
+
+	return res;
+}
+
+void
+e_ews_connection_set_last_subscription_id (EEwsConnection *cnc,
+					   const gchar *subscription_id)
+{
+	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
+
+	g_mutex_lock (&cnc->priv->property_lock);
+
+	if (g_strcmp0 (subscription_id, cnc->priv->last_subscription_id) != 0) {
+		g_free (cnc->priv->last_subscription_id);
+		cnc->priv->last_subscription_id = g_strdup (subscription_id);
+	}
+
+	g_mutex_unlock (&cnc->priv->property_lock);
 }
 
 static xmlDoc *
@@ -10494,6 +10547,97 @@ ews_connection_build_subscribed_folders_list (gpointer key,
 	}
 }
 
+static void
+ews_connection_subscription_id_changed_cb (EEwsNotification *notification,
+					   const gchar *subscription_id,
+					   gpointer user_data)
+{
+	EEwsConnection *cnc = user_data;
+
+	g_return_if_fail (E_IS_EWS_CONNECTION (cnc));
+
+	NOTIFICATION_LOCK (cnc);
+
+	if (cnc->priv->notification == notification)
+		g_signal_emit (cnc, signals[SUBSCRIPTION_ID_CHANGED], 0, subscription_id, NULL);
+
+	NOTIFICATION_UNLOCK (cnc);
+}
+
+static gpointer
+ews_connection_notification_start_thread (gpointer user_data)
+{
+	GWeakRef *weakref = user_data;
+	EEwsConnection *cnc;
+
+	g_return_val_if_fail (weakref != NULL, NULL);
+
+	cnc = g_weak_ref_get (weakref);
+
+	if (cnc && !e_ews_connection_get_disconnected_flag (cnc)) {
+		gchar *last_subscription_id = e_ews_connection_dup_last_subscription_id (cnc);
+
+		NOTIFICATION_LOCK (cnc);
+
+		if (cnc->priv->subscribed_folders) {
+			g_warn_if_fail (cnc->priv->notification == NULL);
+			g_clear_object (&cnc->priv->notification);
+
+			cnc->priv->notification = e_ews_notification_new (cnc, last_subscription_id);
+
+			/* The 'notification' assumes ownership of the 'last_subscription_id' */
+			last_subscription_id = NULL;
+
+			g_signal_connect_object (cnc->priv->notification, "subscription-id-changed",
+				G_CALLBACK (ews_connection_subscription_id_changed_cb), cnc, 0);
+
+			e_ews_notification_start_listening_sync (cnc->priv->notification, cnc->priv->subscribed_folders);
+		}
+
+		NOTIFICATION_UNLOCK (cnc);
+
+		g_free (last_subscription_id);
+	}
+
+	g_clear_object (&cnc);
+	e_weak_ref_free (weakref);
+
+	return NULL;
+}
+
+static gboolean
+ews_connection_notification_delay_cb (gpointer user_data)
+{
+	GWeakRef *weakref = user_data;
+	EEwsConnection *cnc;
+
+	if (g_source_is_destroyed (g_main_current_source ()))
+		return FALSE;
+
+	g_return_val_if_fail (weakref != NULL, FALSE);
+
+	cnc = g_weak_ref_get (weakref);
+
+	if (cnc) {
+		NOTIFICATION_LOCK (cnc);
+
+		if (cnc->priv->notification_delay_id == g_source_get_id (g_main_current_source ())) {
+			cnc->priv->notification_delay_id = 0;
+
+			if (cnc->priv->subscribed_folders) {
+				g_thread_unref (g_thread_new (NULL, ews_connection_notification_start_thread,
+					e_weak_ref_new (cnc)));
+			}
+		}
+
+		NOTIFICATION_UNLOCK (cnc);
+
+		g_object_unref (cnc);
+	}
+
+	return FALSE;
+}
+
 /*
  * Enables server notification on a folder (or a set of folders).
  * The events we are listen for notifications are: Copied, Created, Deleted, Modified and Moved.
@@ -10521,7 +10665,7 @@ e_ews_connection_enable_notifications_sync (EEwsConnection *cnc,
 					    GSList *folders,
 					    guint *subscription_key)
 {
-	GSList *new_folders = NULL, *l;
+	GSList *new_folders = NULL, *l, *flink;
 	gint subscriptions_size;
 
 	g_return_if_fail (cnc != NULL);
@@ -10535,10 +10679,25 @@ e_ews_connection_enable_notifications_sync (EEwsConnection *cnc,
 	if (subscriptions_size == G_MAXUINT - 1)
 		goto exit;
 
-	if (subscriptions_size > 0) {
-		e_ews_notification_stop_listening_sync (cnc->priv->notification);
+	for (flink = folders; flink; flink = g_slist_next (flink)) {
+		for (l = cnc->priv->subscribed_folders; l; l = g_slist_next (l)) {
+			if (g_strcmp0 (l->data, flink->data) == 0)
+				break;
+		}
 
-		g_clear_object (&cnc->priv->notification);
+		if (!l)
+			break;
+	}
+
+	/* All requested folders are already subscribed */
+	if (!flink && cnc->priv->notification)
+		goto exit;
+
+	if (subscriptions_size > 0) {
+		if (cnc->priv->notification) {
+			e_ews_notification_stop_listening_sync (cnc->priv->notification);
+			g_clear_object (&cnc->priv->notification);
+		}
 
 		g_slist_free_full (cnc->priv->subscribed_folders, g_free);
 		cnc->priv->subscribed_folders = NULL;
@@ -10558,9 +10717,11 @@ e_ews_connection_enable_notifications_sync (EEwsConnection *cnc,
 
 	g_hash_table_foreach (cnc->priv->subscriptions, ews_connection_build_subscribed_folders_list, cnc);
 
-	cnc->priv->notification = e_ews_notification_new (cnc);
+	if (cnc->priv->notification_delay_id)
+		g_source_remove (cnc->priv->notification_delay_id);
 
-	e_ews_notification_start_listening_sync (cnc->priv->notification, cnc->priv->subscribed_folders);
+	cnc->priv->notification_delay_id = g_timeout_add_seconds_full (G_PRIORITY_DEFAULT, 5,
+		ews_connection_notification_delay_cb, e_weak_ref_new (cnc), (GDestroyNotify) e_weak_ref_free);
 
 exit:
 	*subscription_key = notification_key;
@@ -10591,7 +10752,7 @@ e_ews_connection_disable_notifications_sync (EEwsConnection *cnc,
 	cnc->priv->subscribed_folders = NULL;
 
 	g_hash_table_foreach (cnc->priv->subscriptions, ews_connection_build_subscribed_folders_list, cnc);
-	if (cnc->priv->subscribed_folders != NULL) {
+	if (cnc->priv->subscribed_folders != NULL && !e_ews_connection_get_disconnected_flag (cnc)) {
 		e_ews_notification_start_listening_sync (cnc->priv->notification, cnc->priv->subscribed_folders);
 	} else {
 		g_clear_object (&cnc->priv->notification);
