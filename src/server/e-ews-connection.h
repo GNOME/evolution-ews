@@ -477,6 +477,11 @@ gboolean	e_ews_connection_get_disconnected_flag
 void		e_ews_connection_set_disconnected_flag
 						(EEwsConnection *cnc,
 						 gboolean disconnected_flag);
+gchar *		e_ews_connection_dup_last_subscription_id
+						(EEwsConnection *cnc);
+void		e_ews_connection_set_last_subscription_id
+						(EEwsConnection *cnc,
+						 const gchar *subscription_id);
 EEwsConnection *e_ews_connection_find		(const gchar *uri,
 						 const gchar *username);
 GSList *	e_ews_connection_list_existing	(void); /* EEwsConnection * */

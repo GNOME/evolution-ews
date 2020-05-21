@@ -70,6 +70,12 @@ struct _ECalBackendEwsPrivate {
 	gchar *folder_id;
 
 	guint subscription_key;
+
+	/* The subscription ID is not tight to the actual connection, it survives
+	   disconnects, thus remember it and pass it back to the new connection,
+	   thus it can eventually unsubscribe from it. */
+	gchar *last_subscription_id;
+
 	gboolean is_freebusy_calendar;
 
 	gchar *attachments_dir;
@@ -1643,6 +1649,25 @@ ecb_ews_can_send_invitations (ECalBackendEws *cbews,
 	return ecb_ews_organizer_is_user (cbews, comp);
 }
 
+static void
+ecb_ews_subscription_id_changed_cb (EEwsConnection *cnc,
+				    const gchar *subscription_id,
+				    gpointer user_data)
+{
+	ECalBackendEws *cbews = user_data;
+
+	g_return_if_fail (E_IS_CAL_BACKEND_EWS (cbews));
+
+	g_rec_mutex_lock (&cbews->priv->cnc_lock);
+
+	if (g_strcmp0 (cbews->priv->last_subscription_id, subscription_id) != 0) {
+		g_free (cbews->priv->last_subscription_id);
+		cbews->priv->last_subscription_id = g_strdup (subscription_id);
+	}
+
+	g_rec_mutex_unlock (&cbews->priv->cnc_lock);
+}
+
 static gboolean
 ecb_ews_connect_sync (ECalMetaBackend *meta_backend,
 		      const ENamedParameters *credentials,
@@ -1704,6 +1729,11 @@ ecb_ews_connect_sync (ECalMetaBackend *meta_backend,
 			GSList *folders = NULL;
 
 			folders = g_slist_prepend (folders, cbews->priv->folder_id);
+
+			e_ews_connection_set_last_subscription_id (cbews->priv->cnc, cbews->priv->last_subscription_id);
+
+			g_signal_connect_object (cbews->priv->cnc, "subscription-id-changed",
+				G_CALLBACK (ecb_ews_subscription_id_changed_cb), cbews, 0);
 
 			e_ews_connection_enable_notifications_sync (cbews->priv->cnc,
 				folders, &cbews->priv->subscription_key);
@@ -4332,6 +4362,7 @@ ecb_ews_finalize (GObject *object)
 
 	g_free (cbews->priv->folder_id);
 	g_free (cbews->priv->attachments_dir);
+	g_free (cbews->priv->last_subscription_id);
 
 	g_rec_mutex_clear (&cbews->priv->cnc_lock);
 

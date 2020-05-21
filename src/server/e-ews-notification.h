@@ -53,7 +53,8 @@ struct _EEwsNotificationClass {
 
 GType		e_ews_notification_get_type	(void);
 EEwsNotification *
-		e_ews_notification_new		(EEwsConnection *connection);
+		e_ews_notification_new		(EEwsConnection *connection,
+						 gchar *last_subscription_id); /* assumes ownership of it */
 
 void		e_ews_notification_start_listening_sync
 						(EEwsNotification *notification,
