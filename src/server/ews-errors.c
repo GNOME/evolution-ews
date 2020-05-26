@@ -331,6 +331,9 @@ ews_get_error_code (const gchar *str)
 	gint error_code = EWS_CONNECTION_ERROR_UNKNOWN;
 	gpointer data;
 
+	if (!str)
+		return error_code;
+
 	g_once (&setup_error_once, setup_error_map, NULL);
 
 	data = g_hash_table_lookup (ews_error_hash, (gconstpointer) str);
