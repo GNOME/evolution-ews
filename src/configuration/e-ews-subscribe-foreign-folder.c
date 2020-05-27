@@ -308,48 +308,42 @@ check_foreign_folder_thread (GObject *with_object,
 			}
 		}
 
-		if (!mailboxes) {
-			g_set_error (
-				perror, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_MAILRECIPIENTNOTFOUND,
-				_("User “%s” was not found on the server"), cffd->email);
-			g_object_unref (conn);
-			return;
-		}
+		if (mailboxes) {
+			/* is there only one result? */
+			if (!mailboxes->next) {
+				mailbox = mailboxes->data;
+			} else {
+				GSList *iter;
 
-		/* is there only one result? */
-		if (mailboxes->next == NULL) {
-			mailbox = mailboxes->data;
-		} else {
-			GSList *iter;
+				for (iter = mailboxes; iter; iter = iter->next) {
+					EwsMailbox *mb = iter->data;
 
-			for (iter = mailboxes; iter; iter = iter->next) {
-				EwsMailbox *mb = iter->data;
+					if (!mb)
+						continue;
 
-				if (!mb)
-					continue;
-
-				if (mb->name && g_utf8_collate (mb->name, cffd->email) == 0) {
-					mailbox = mb;
-					break;
+					if (mb->name && g_utf8_collate (mb->name, cffd->email) == 0) {
+						mailbox = mb;
+						break;
+					}
 				}
 			}
-		}
 
-		if (mailbox) {
-			g_free (cffd->user_displayname);
-			cffd->user_displayname = g_strdup (mailbox->name);
-			g_free (cffd->email);
-			cffd->email = g_strdup (mailbox->email);
-		}
+			if (mailbox) {
+				g_free (cffd->user_displayname);
+				cffd->user_displayname = g_strdup (mailbox->name);
+				g_free (cffd->email);
+				cffd->email = g_strdup (mailbox->email);
+			}
 
-		g_slist_free_full (mailboxes, (GDestroyNotify) e_ews_mailbox_free);
+			g_slist_free_full (mailboxes, (GDestroyNotify) e_ews_mailbox_free);
 
-		if (!mailbox) {
-			g_set_error (
-				perror, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ITEMNOTFOUND,
-				_("User name “%s” is ambiguous, specify it more precisely, please"), cffd->email);
-			g_object_unref (conn);
-			return;
+			if (!mailbox) {
+				g_set_error (
+					perror, EWS_CONNECTION_ERROR, EWS_CONNECTION_ERROR_ITEMNOTFOUND,
+					_("User name “%s” is ambiguous, specify it more precisely, please"), cffd->email);
+				g_object_unref (conn);
+				return;
+			}
 		}
 	}
 
