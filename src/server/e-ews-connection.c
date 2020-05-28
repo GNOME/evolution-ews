@@ -1187,32 +1187,38 @@ sync_xxx_response_cb (ESoapParameter *subparam,
 		for (subparam1 = e_soap_parameter_get_first_child_by_name (node, "Create");
 		     subparam1 != NULL;
 		     subparam1 = e_soap_parameter_get_next_child_by_name (subparam1, "Create")) {
-			EEwsFolder *folder;
+			GObject *object;
 
-			folder = parser (subparam1);
-			if (folder)
-				items_created = g_slist_append (items_created, folder);
+			object = parser (subparam1);
+			if (object && (!E_IS_EWS_FOLDER (object) || !e_ews_folder_get_is_hidden (E_EWS_FOLDER (object))))
+				items_created = g_slist_append (items_created, object);
+			else
+				g_clear_object (&object);
 		}
 
 		for (subparam1 = e_soap_parameter_get_first_child_by_name (node, "Update");
 		     subparam1 != NULL;
 		     subparam1 = e_soap_parameter_get_next_child_by_name (subparam1, "Update")) {
-			EEwsFolder *folder;
+			GObject *object;
 
-			folder = parser (subparam1);
-			if (folder)
-				items_updated = g_slist_append (items_updated, folder);
+			object = parser (subparam1);
+			if (object && (!E_IS_EWS_FOLDER (object) || !e_ews_folder_get_is_hidden (E_EWS_FOLDER (object))))
+				items_updated = g_slist_append (items_updated, object);
+			else
+				g_clear_object (&object);
 		}
 		  /* Exchange 2007SP1 introduced <ReadFlagChange> which is basically identical
 		   * to <Update>; no idea why they thought it was a good idea. */
 		for (subparam1 = e_soap_parameter_get_first_child_by_name (node, "ReadFlagChange");
 		     subparam1 != NULL;
 		     subparam1 = e_soap_parameter_get_next_child_by_name (subparam1, "ReadFlagChange")) {
-			EEwsFolder *folder;
+			GObject *object;
 
-			folder = parser (subparam1);
-			if (folder)
-				items_updated = g_slist_append (items_updated, folder);
+			object = parser (subparam1);
+			if (object && (!E_IS_EWS_FOLDER (object) || !e_ews_folder_get_is_hidden (E_EWS_FOLDER (object))))
+				items_updated = g_slist_append (items_updated, object);
+			else
+				g_clear_object (&object);
 		}
 
 		for (subparam1 = e_soap_parameter_get_first_child_by_name (node, "Delete");
@@ -5130,7 +5136,13 @@ e_ews_connection_sync_folder_hierarchy (EEwsConnection *cnc,
 			TRUE);
 	e_soap_message_start_element (msg, "FolderShape", "messages", NULL);
 	e_ews_message_write_string_parameter (msg, "BaseShape", NULL, "AllProperties");
-	e_soap_message_end_element (msg);
+	e_soap_message_start_element (msg, "AdditionalProperties", NULL, NULL);
+	e_soap_message_start_element (msg, "ExtendedFieldURI", NULL, NULL);
+	e_soap_message_add_attribute (msg, "PropertyTag", "4340", NULL, NULL); /* PidTagAttributeHidden */
+	e_soap_message_add_attribute (msg, "PropertyType", "Boolean", NULL, NULL);
+	e_soap_message_end_element (msg); /* ExtendedFieldURI */
+	e_soap_message_end_element (msg); /* AdditionalProperties */
+	e_soap_message_end_element (msg); /* FolderShape */
 
 	if (sync_state)
 		e_ews_message_write_string_parameter (msg, "SyncState", "messages", sync_state);
