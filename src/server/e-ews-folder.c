@@ -47,6 +47,7 @@ struct _EEwsFolderPrivate {
 	gboolean foreign;
 	gchar *foreign_mail;
 	gboolean is_public;
+	gboolean is_hidden;
 };
 
 static void
@@ -110,6 +111,7 @@ e_ews_folder_init (EEwsFolder *folder)
 	folder->priv->folder_type = E_EWS_FOLDER_TYPE_UNKNOWN;
 	folder->priv->foreign = FALSE;
 	folder->priv->is_public = FALSE;
+	folder->priv->is_hidden = FALSE;
 }
 
 static gboolean
@@ -214,10 +216,19 @@ e_ews_folder_set_from_soap_parameter (EEwsFolder *folder,
 		subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "ExtendedFieldURI");
 		if (subparam1) {
 			prop_tag = e_soap_parameter_get_property (subparam1, "PropertyTag");
-			if (g_strcmp0 (prop_tag, "0xe08") == 0) {
+			if (prop_tag && g_ascii_strcasecmp (prop_tag, "0xe08") == 0) {
 				subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Value");
 				if (subparam1)
 					priv->size = e_soap_parameter_get_int_value (subparam1);
+			} else if (prop_tag && g_ascii_strcasecmp (prop_tag, "0x10f4") == 0) { /* PidTagAttributeHidden */
+				subparam1 = e_soap_parameter_get_first_child_by_name (subparam, "Value");
+				if (subparam1) {
+					gchar *value;
+
+					value = e_soap_parameter_get_string_value (subparam1);
+					priv->is_hidden = g_strcmp0 (value, "true") == 0;
+					g_free (value);
+				}
 			}
 			g_free (prop_tag);
 		}
@@ -472,6 +483,14 @@ e_ews_folder_set_parent_id (EEwsFolder *folder,
 	}
 
 	priv->parent_fid = parent_fid;
+}
+
+gboolean
+e_ews_folder_get_is_hidden (EEwsFolder *folder)
+{
+	g_return_val_if_fail (E_IS_EWS_FOLDER (folder), FALSE);
+
+	return folder->priv->is_hidden;
 }
 
 EEwsFolderType
