@@ -1,3 +1,16 @@
+Evolution-EWS 3.37.2 2020-05-29
+-------------------------------
+
+Bug Fixes:
+	I#99 - All-day events date shown by one day off (Milan Crha)
+	I#102 - Hidden folders are displayed normally in the UI (Milan Crha)
+	I#103 - Can't subscribe to a folder of a user whom is not in GAL (Milan Crha)
+
+Miscellaneous:
+	SetupBuildFlags.cmake: Use -Werror=implicit-function-declaration only for C code compilation (Milan Crha)
+	EEwsNotification: Change how subscription to server change notifications work (Milan Crha)
+	Add parameter check into ews_get_error_code() (Milan Crha)
+
 Evolution-EWS 3.37.1 2020-04-24
 -------------------------------
 
