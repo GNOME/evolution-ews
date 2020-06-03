@@ -22,6 +22,7 @@
 
 #include <libedata-cal/libedata-cal.h>
 
+#include "common/e-oauth2-service-office365.h"
 #include "common/e-source-o365-folder.h"
 
 #include "e-cal-backend-o365.h"
@@ -143,6 +144,7 @@ e_module_load (GTypeModule *type_module)
 
 	e_module = E_MODULE (type_module);
 
+	e_oauth2_service_office365_type_register (type_module);
 	e_source_o365_folder_type_register (type_module);
 
 	e_cal_backend_o365_events_factory_register_type (type_module);

@@ -14,8 +14,6 @@
 #include <glib/gi18n-lib.h>
 #include <gmodule.h>
 
-#include "server/camel-sasl-xoauth2-office365.h"
-
 #include "camel-ews-store.h"
 #include "camel-ews-transport.h"
 
@@ -127,8 +125,6 @@ camel_provider_module_init (void)
 
 	bindtextdomain (GETTEXT_PACKAGE, EXCHANGE_EWS_LOCALEDIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
-
-	g_type_ensure (CAMEL_TYPE_SASL_XOAUTH2_OFFICE365);
 
 	camel_provider_register (&ews_provider);
 }

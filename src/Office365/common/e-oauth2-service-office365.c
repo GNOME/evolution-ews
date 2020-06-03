@@ -9,16 +9,30 @@
 #include <glib/gi18n-lib.h>
 #include <libedataserver/libedataserver.h>
 
-#include "server/camel-ews-settings.h"
+#include "camel-o365-settings.h"
 
 #include "e-oauth2-service-office365.h"
 
 /* https://portal.azure.com/
+   https://docs.microsoft.com/en-us/graph/auth/
+
    https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-developers-guide
    https://tsmatz.wordpress.com/2016/10/07/application-permission-with-v2-endpoint-and-microsoft-graph/
 */
 
-#define OFFICE365_RESOURCE "https://outlook.office.com"
+#define OFFICE365_SCOPE	"Calendars.ReadWrite " \
+			"Calendars.ReadWrite.Shared " \
+			"Contacts.ReadWrite " \
+			"Contacts.ReadWrite.Shared " \
+			"Mail.ReadWrite " \
+			"Mail.ReadWrite.Shared " \
+			"Mail.Send " \
+			"Mail.Send.Shared " \
+			"Notes.Create " \
+			"Notes.ReadWrite.All " \
+			"offline_access " \
+			"Tasks.ReadWrite " \
+			"Tasks.ReadWrite.Shared "
 
 struct _EOAuth2ServiceOffice365Private
 {
@@ -30,7 +44,8 @@ struct _EOAuth2ServiceOffice365Private
 static void e_oauth2_service_office365_oauth2_service_init (EOAuth2ServiceInterface *iface);
 
 G_DEFINE_DYNAMIC_TYPE_EXTENDED (EOAuth2ServiceOffice365, e_oauth2_service_office365, E_TYPE_OAUTH2_SERVICE_BASE, 0,
-	G_IMPLEMENT_INTERFACE_DYNAMIC (E_TYPE_OAUTH2_SERVICE, e_oauth2_service_office365_oauth2_service_init))
+	G_IMPLEMENT_INTERFACE_DYNAMIC (E_TYPE_OAUTH2_SERVICE, e_oauth2_service_office365_oauth2_service_init)
+	G_ADD_PRIVATE_DYNAMIC (EOAuth2ServiceOffice365))
 
 static const gchar *
 eos_office365_cache_string (EOAuth2ServiceOffice365 *oauth2_office365,
@@ -61,7 +76,7 @@ eos_office365_cache_string (EOAuth2ServiceOffice365 *oauth2_office365,
 	return cached_str;
 }
 
-static CamelEwsSettings *
+static CamelO365Settings *
 eos_office365_get_camel_settings (ESource *source)
 {
 	ESourceCamel *extension;
@@ -71,9 +86,9 @@ eos_office365_get_camel_settings (ESource *source)
 
 	g_return_val_if_fail (E_IS_SOURCE (source), NULL);
 
-	extension = e_source_get_extension (source, e_source_camel_get_extension_name ("ews"));
+	extension = e_source_get_extension (source, e_source_camel_get_extension_name ("office365"));
 
-	return CAMEL_EWS_SETTINGS (e_source_camel_get_settings (extension));
+	return CAMEL_O365_SETTINGS (e_source_camel_get_settings (extension));
 }
 
 static gboolean
@@ -82,8 +97,7 @@ eos_office365_guess_can_process (EOAuth2Service *service,
 				 const gchar *hostname)
 {
 	return e_oauth2_services_is_supported () &&
-		protocol && g_ascii_strcasecmp (protocol, "ews") == 0 &&
-		hostname && e_util_utf8_strstrcase (hostname, "outlook.office365.com");
+		protocol && g_ascii_strcasecmp (protocol, "office365") == 0;
 }
 
 static const gchar *
@@ -104,11 +118,11 @@ eos_office365_get_client_id (EOAuth2Service *service,
 			     ESource *source)
 {
 	EOAuth2ServiceOffice365 *oauth2_office365 = E_OAUTH2_SERVICE_OFFICE365 (service);
-	CamelEwsSettings *ews_settings;
+	CamelO365Settings *o365_settings;
 
-	ews_settings = eos_office365_get_camel_settings (source);
-	if (ews_settings && camel_ews_settings_get_override_oauth2 (ews_settings)) {
-		gchar *client_id = camel_ews_settings_dup_oauth2_client_id (ews_settings);
+	o365_settings = eos_office365_get_camel_settings (source);
+	if (o365_settings && camel_o365_settings_get_override_oauth2 (o365_settings)) {
+		gchar *client_id = camel_o365_settings_dup_oauth2_client_id (o365_settings);
 
 		if (client_id && !*client_id) {
 			g_free (client_id);
@@ -134,21 +148,21 @@ eos_office365_get_authentication_uri (EOAuth2Service *service,
 				      ESource *source)
 {
 	EOAuth2ServiceOffice365 *oauth2_office365 = E_OAUTH2_SERVICE_OFFICE365 (service);
-	CamelEwsSettings *ews_settings;
+	CamelO365Settings *o365_settings;
 
-	ews_settings = eos_office365_get_camel_settings (source);
-	if (ews_settings && camel_ews_settings_get_override_oauth2 (ews_settings)) {
+	o365_settings = eos_office365_get_camel_settings (source);
+	if (o365_settings && camel_o365_settings_get_override_oauth2 (o365_settings)) {
 		gchar *tenant;
 		const gchar *res;
 
-		tenant = camel_ews_settings_dup_oauth2_tenant (ews_settings);
+		tenant = camel_o365_settings_dup_oauth2_tenant (o365_settings);
 		if (tenant && !*tenant) {
 			g_free (tenant);
 			tenant = NULL;
 		}
 
 		res = eos_office365_cache_string (oauth2_office365,
-			g_strdup_printf ("https://login.microsoftonline.com/%s/oauth2/authorize",
+			g_strdup_printf ("https://login.microsoftonline.com/%s/oauth2/v2.0/authorize",
 				tenant ? tenant : OFFICE365_TENANT));
 
 		g_free (tenant);
@@ -156,7 +170,7 @@ eos_office365_get_authentication_uri (EOAuth2Service *service,
 		return res;
 	}
 
-	return "https://login.microsoftonline.com/" OFFICE365_TENANT "/oauth2/authorize";
+	return "https://login.microsoftonline.com/" OFFICE365_TENANT "/oauth2/v2.0/authorize";
 }
 
 static const gchar *
@@ -164,21 +178,21 @@ eos_office365_get_refresh_uri (EOAuth2Service *service,
 			       ESource *source)
 {
 	EOAuth2ServiceOffice365 *oauth2_office365 = E_OAUTH2_SERVICE_OFFICE365 (service);
-	CamelEwsSettings *ews_settings;
+	CamelO365Settings *o365_settings;
 
-	ews_settings = eos_office365_get_camel_settings (source);
-	if (ews_settings && camel_ews_settings_get_override_oauth2 (ews_settings)) {
+	o365_settings = eos_office365_get_camel_settings (source);
+	if (o365_settings && camel_o365_settings_get_override_oauth2 (o365_settings)) {
 		gchar *tenant;
 		const gchar *res;
 
-		tenant = camel_ews_settings_dup_oauth2_tenant (ews_settings);
+		tenant = camel_o365_settings_dup_oauth2_tenant (o365_settings);
 		if (tenant && !*tenant) {
 			g_free (tenant);
 			tenant = NULL;
 		}
 
 		res = eos_office365_cache_string (oauth2_office365,
-			g_strdup_printf ("https://login.microsoftonline.com/%s/oauth2/token",
+			g_strdup_printf ("https://login.microsoftonline.com/%s/oauth2/v2.0/token",
 				tenant ? tenant : OFFICE365_TENANT));
 
 		g_free (tenant);
@@ -186,7 +200,7 @@ eos_office365_get_refresh_uri (EOAuth2Service *service,
 		return res;
 	}
 
-	return "https://login.microsoftonline.com/" OFFICE365_TENANT "/oauth2/token";
+	return "https://login.microsoftonline.com/" OFFICE365_TENANT "/oauth2/v2.0/token";
 }
 
 static const gchar *
@@ -194,14 +208,14 @@ eos_office365_get_redirect_uri (EOAuth2Service *service,
 				ESource *source)
 {
 	EOAuth2ServiceOffice365 *oauth2_office365 = E_OAUTH2_SERVICE_OFFICE365 (service);
-	CamelEwsSettings *ews_settings;
+	CamelO365Settings *o365_settings;
 	const gchar *res;
 
-	ews_settings = eos_office365_get_camel_settings (source);
-	if (ews_settings && camel_ews_settings_get_override_oauth2 (ews_settings)) {
+	o365_settings = eos_office365_get_camel_settings (source);
+	if (o365_settings && camel_o365_settings_get_override_oauth2 (o365_settings)) {
 		gchar *redirect_uri;
 
-		redirect_uri = camel_ews_settings_dup_oauth2_redirect_uri (ews_settings);
+		redirect_uri = camel_o365_settings_dup_oauth2_redirect_uri (o365_settings);
 
 		if (redirect_uri && !*redirect_uri) {
 			g_free (redirect_uri);
@@ -226,9 +240,10 @@ eos_office365_prepare_authentication_uri_query (EOAuth2Service *service,
 {
 	g_return_if_fail (uri_query != NULL);
 
+	e_oauth2_service_util_set_to_form (uri_query, "response_type", "code");
+	e_oauth2_service_util_set_to_form (uri_query, "scope", OFFICE365_SCOPE);
 	e_oauth2_service_util_set_to_form (uri_query, "response_mode", "query");
-	e_oauth2_service_util_set_to_form (uri_query, "prompt", "login");
-	e_oauth2_service_util_set_to_form (uri_query, "resource", OFFICE365_RESOURCE);
+	e_oauth2_service_util_set_to_form (uri_query, "login_hint", NULL);
 }
 
 static gboolean
@@ -295,7 +310,7 @@ eos_office365_prepare_refresh_token_form (EOAuth2Service *service,
 {
 	g_return_if_fail (form != NULL);
 
-	e_oauth2_service_util_set_to_form (form, "resource", OFFICE365_RESOURCE);
+	e_oauth2_service_util_set_to_form (form, "scope", OFFICE365_SCOPE);
 	e_oauth2_service_util_set_to_form (form, "redirect_uri", e_oauth2_service_get_redirect_uri (service, source));
 }
 
@@ -334,8 +349,6 @@ e_oauth2_service_office365_class_init (EOAuth2ServiceOffice365Class *klass)
 {
 	GObjectClass *object_class;
 
-	g_type_class_add_private (klass, sizeof (EOAuth2ServiceOffice365Private));
-
 	object_class = G_OBJECT_CLASS (klass);
 	object_class->finalize = eos_office365_finalize;
 }
@@ -348,7 +361,7 @@ e_oauth2_service_office365_class_finalize (EOAuth2ServiceOffice365Class *klass)
 static void
 e_oauth2_service_office365_init (EOAuth2ServiceOffice365 *oauth2_office365)
 {
-	oauth2_office365->priv = G_TYPE_INSTANCE_GET_PRIVATE (oauth2_office365, E_TYPE_OAUTH2_SERVICE_OFFICE365, EOAuth2ServiceOffice365Private);
+	oauth2_office365->priv = e_oauth2_service_office365_get_instance_private (oauth2_office365);
 
 	g_mutex_init (&oauth2_office365->priv->string_cache_lock);
 	oauth2_office365->priv->string_cache = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);

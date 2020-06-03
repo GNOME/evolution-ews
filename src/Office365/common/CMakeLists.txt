@@ -1,6 +1,10 @@
 set(SOURCES
+	camel-sasl-xoauth2-office365.c
+	camel-sasl-xoauth2-office365.h
 	camel-o365-settings.c
 	camel-o365-settings.h
+	e-oauth2-service-office365.c
+	e-oauth2-service-office365.h
 	e-source-o365-folder.c
 	e-source-o365-folder.h
 )

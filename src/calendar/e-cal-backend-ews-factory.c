@@ -11,7 +11,6 @@
 
 #include <libedata-cal/libedata-cal.h>
 
-#include "server/e-oauth2-service-office365.h"
 #include "server/e-source-ews-folder.h"
 
 #include "e-cal-backend-ews.h"
@@ -134,7 +133,6 @@ e_module_load (GTypeModule *type_module)
 	e_module = E_MODULE (type_module);
 
 	e_source_ews_folder_type_register (type_module);
-	e_oauth2_service_office365_type_register (type_module);
 
 	e_cal_backend_ews_events_factory_register_type (type_module);
 	e_cal_backend_ews_journal_factory_register_type (type_module);

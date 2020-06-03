@@ -19,6 +19,7 @@
 
 #include <glib/gi18n-lib.h>
 
+#include "common/e-oauth2-service-office365.h"
 #include "common/e-source-o365-folder.h"
 
 #include "e-o365-backend.h"
@@ -34,9 +35,11 @@ e_module_load (GTypeModule *type_module)
 	bindtextdomain (GETTEXT_PACKAGE, O365_LOCALEDIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 
+	e_oauth2_service_office365_type_register (type_module);
+	e_source_o365_folder_type_register (type_module);
+
 	e_o365_backend_type_register (type_module);
 	e_o365_backend_factory_type_register (type_module);
-	e_source_o365_folder_type_register (type_module);
 }
 
 G_MODULE_EXPORT void

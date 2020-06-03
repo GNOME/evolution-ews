@@ -22,6 +22,8 @@
 #include <glib/gi18n-lib.h>
 #include <gmodule.h>
 
+#include "common/camel-sasl-xoauth2-office365.h"
+
 #include "camel-o365-store.h"
 #include "camel-o365-transport.h"
 
@@ -90,6 +92,8 @@ camel_provider_module_init (void)
 	o365_provider.translation_domain = GETTEXT_PACKAGE;
 	o365_provider.object_types[CAMEL_PROVIDER_STORE] =  CAMEL_TYPE_O365_STORE;
 	o365_provider.object_types[CAMEL_PROVIDER_TRANSPORT] = CAMEL_TYPE_O365_TRANSPORT;
+
+	g_type_ensure (CAMEL_TYPE_SASL_XOAUTH2_OFFICE365);
 
 	camel_provider_register (&o365_provider);
 }

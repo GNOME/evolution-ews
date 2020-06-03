@@ -19,11 +19,13 @@
 
 #include <glib/gi18n-lib.h>
 
+#include "common/camel-sasl-xoauth2-office365.h"
+#include "common/e-oauth2-service-office365.h"
+#include "common/e-source-o365-folder.h"
+
 #include "e-cal-config-o365.h"
 #include "e-book-config-o365.h"
 #include "e-mail-config-o365-backend.h"
-
-#include "common/e-source-o365-folder.h"
 
 /* Module Entry Points */
 void e_module_load (GTypeModule *type_module);
@@ -35,6 +37,8 @@ e_module_load (GTypeModule *type_module)
 	bindtextdomain (GETTEXT_PACKAGE, O365_LOCALEDIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 
+	camel_sasl_xoauth2_office365_type_register (type_module);
+	e_oauth2_service_office365_type_register (type_module);
 	e_source_o365_folder_type_register (type_module);
 
 	e_cal_config_o365_type_register (type_module);
