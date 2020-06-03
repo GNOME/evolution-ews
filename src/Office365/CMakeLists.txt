@@ -1,6 +1,6 @@
-macro(add_simple_module _name _sourcesvar _depsvar _defsvar _cflagsvar _incdirsvar _ldflagsvar _destination)
+macro(add_simple_module_o365 _name _sourcesvar _depsvar _defsvar _cflagsvar _incdirsvar _ldflagsvar _destination)
 	set(DEPENDENCIES
-		evolution-ews
+		evolution-office365
 	)
 
 	set(SOURCES
@@ -22,7 +22,7 @@ macro(add_simple_module _name _sourcesvar _depsvar _defsvar _cflagsvar _incdirsv
 
 	target_compile_definitions(${_name} PRIVATE
 		-DG_LOG_DOMAIN=\"${_name}\"
-		-DEXCHANGE_EWS_LOCALEDIR=\"${LOCALE_INSTALL_DIR}\"
+		-DO365_LOCALEDIR=\"${LOCALE_INSTALL_DIR}\"
 		${${_defsvar}}
 	)
 
@@ -54,12 +54,11 @@ macro(add_simple_module _name _sourcesvar _depsvar _defsvar _cflagsvar _incdirsv
 	install(TARGETS ${_name}
 		DESTINATION ${_destination}
 	)
-endmacro(add_simple_module)
+endmacro(add_simple_module_o365)
 
 add_subdirectory(addressbook)
 add_subdirectory(calendar)
 add_subdirectory(camel)
-add_subdirectory(collection)
-add_subdirectory(configuration)
-add_subdirectory(server)
-add_subdirectory(Office365)
+add_subdirectory(common)
+add_subdirectory(evolution)
+add_subdirectory(registry)

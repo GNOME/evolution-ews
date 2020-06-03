@@ -1,0 +1,22 @@
+set(extra_deps)
+set(sources
+	module-o365-backend.c
+	e-o365-backend.c
+	e-o365-backend.h
+	e-o365-backend-factory.c
+	e-o365-backend-factory.h
+)
+set(extra_defines)
+set(extra_cflags)
+set(extra_incdirs)
+set(extra_ldflags)
+
+add_simple_module_o365(module-office365-backend
+	sources
+	extra_deps
+	extra_defines
+	extra_cflags
+	extra_incdirs
+	extra_ldflags
+	"${eds_moduledir}"
+)
