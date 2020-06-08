@@ -3,6 +3,10 @@ set(SOURCES
 	camel-sasl-xoauth2-office365.h
 	camel-o365-settings.c
 	camel-o365-settings.h
+	e-o365-connection.c
+	e-o365-connection.h
+	e-o365-message.c
+	e-o365-message.h
 	e-oauth2-service-office365.c
 	e-oauth2-service-office365.h
 	e-source-o365-folder.c
@@ -20,6 +24,7 @@ target_compile_definitions(evolution-office365 PRIVATE
 target_compile_options(evolution-office365 PUBLIC
 	${CAMEL_CFLAGS}
 	${EVOLUTION_CALENDAR_CFLAGS}
+	${JSON_GLIB_CFLAGS}
 	${LIBEBACKEND_CFLAGS}
 	${LIBECAL_CFLAGS}
 	${LIBEDATACAL_CFLAGS}
@@ -35,6 +40,7 @@ target_include_directories(evolution-office365 PUBLIC
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CAMEL_INCLUDE_DIRS}
 	${EVOLUTION_CALENDAR_INCLUDE_DIRS}
+	${JSON_GLIB_INCLUDE_DIRS}
 	${LIBEBACKEND_INCLUDE_DIRS}
 	${LIBECAL_INCLUDE_DIRS}
 	${LIBEDATACAL_INCLUDE_DIRS}
@@ -45,6 +51,7 @@ target_include_directories(evolution-office365 PUBLIC
 target_link_libraries(evolution-office365
 	${CAMEL_LDFLAGS}
 	${EVOLUTION_CALENDAR_LDFLAGS}
+	${JSON_GLIB_LDFLAGS}
 	${LIBEBACKEND_LDFLAGS}
 	${LIBECAL_LDFLAGS}
 	${LIBEDATACAL_LDFLAGS}

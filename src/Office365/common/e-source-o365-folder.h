@@ -39,7 +39,7 @@
 	(G_TYPE_INSTANCE_GET_CLASS \
 	((obj), E_TYPE_SOURCE_O365_FOLDER, ESourceO365FolderClass))
 
-#define E_SOURCE_EXTENSION_O365_FOLDER "Exchange Web Services Folder"
+#define E_SOURCE_EXTENSION_O365_FOLDER "Office365 Folder"
 
 G_BEGIN_DECLS
 
