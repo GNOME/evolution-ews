@@ -91,6 +91,9 @@ test_clicked_cb (GtkButton *button,
 	ESource *source;
 	EO365Connection *cnc;
 	GSList *folders = NULL, *link;
+	gboolean success;
+	static gchar *delta_link = NULL;
+	gchar *new_delta_link = NULL;
 	GError *error = NULL;
 
 	settings = e_mail_config_service_backend_get_settings (backend);
@@ -99,7 +102,15 @@ test_clicked_cb (GtkButton *button,
 	cnc = e_o365_connection_new (source, CAMEL_O365_SETTINGS (settings));
 	g_return_if_fail (cnc != NULL);
 
-	if (!e_o365_connection_list_folders_sync (cnc, NULL, NULL, NULL, &folders, NULL, &error)) {
+	//success = e_o365_connection_list_folders_sync (cnc, NULL, NULL, NULL, &folders, NULL, &error);
+	success = e_o365_connection_get_folders_delta_sync (cnc, NULL, NULL, delta_link, 0, &new_delta_link, &folders, NULL, &error);
+
+	if (success) {
+		g_free (delta_link);
+		delta_link = new_delta_link;
+	}
+
+	if (!success) {
 		printf ("%s: failed with error: %s\n", __FUNCTION__, error ? error->message : "none");
 	} else {
 		if (error) {
@@ -111,13 +122,16 @@ test_clicked_cb (GtkButton *button,
 		for (link = folders; link; link = g_slist_next (link)) {
 			JsonObject *folder = link->data;
 
-			printf ("   %p: '%s' childCount:%d total:%d unread:%d id:'%s' parent:'%s'\n", folder,
-				e_o365_mail_folder_get_display_name (folder),
-				e_o365_mail_folder_get_child_folder_count (folder),
-				e_o365_mail_folder_get_total_item_count (folder),
-				e_o365_mail_folder_get_unread_item_count (folder),
-				e_o365_mail_folder_get_id (folder),
-				e_o365_mail_folder_get_parent_folder_id (folder));
+			if (e_o365_delta_is_removed_object (folder))
+				printf ("   %p: removed folder id:'%s'\n", folder, e_o365_mail_folder_get_id (folder));
+			else
+				printf ("   %p: '%s' childCount:%d total:%d unread:%d id:'%s' parent:'%s'\n", folder,
+					e_o365_mail_folder_get_display_name (folder),
+					e_o365_mail_folder_get_child_folder_count (folder),
+					e_o365_mail_folder_get_total_item_count (folder),
+					e_o365_mail_folder_get_unread_item_count (folder),
+					e_o365_mail_folder_get_id (folder),
+					e_o365_mail_folder_get_parent_folder_id (folder));
 		}
 	}
 

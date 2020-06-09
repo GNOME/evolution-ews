@@ -159,6 +159,14 @@ e_o365_json_get_string_member (JsonObject *object,
 	return json_node_get_string (node);
 }
 
+/* https://docs.microsoft.com/en-us/graph/delta-query-overview */
+
+gboolean
+e_o365_delta_is_removed_object (JsonObject *object)
+{
+	return json_object_has_member (object, "@removed");
+}
+
 /* https://docs.microsoft.com/en-us/graph/api/resources/mailfolder?view=graph-rest-1.0 */
 
 const gchar *

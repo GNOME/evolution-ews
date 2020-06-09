@@ -42,6 +42,8 @@ const gchar *	e_o365_json_get_string_member		(JsonObject *object,
 							 const gchar *member_name,
 							 const gchar *default_value);
 
+gboolean	e_o365_delta_is_removed_object		(JsonObject *object);
+
 const gchar *	e_o365_mail_folder_get_display_name	(JsonObject *object);
 const gchar *	e_o365_mail_folder_get_id		(JsonObject *object);
 const gchar *	e_o365_mail_folder_get_parent_folder_id	(JsonObject *object);

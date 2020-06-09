@@ -17,6 +17,7 @@
 
 #include "evolution-ews-config.h"
 
+#include <string.h>
 #include <glib.h>
 #include <glib/gi18n-lib.h>
 #include <json-glib/json-glib.h>
@@ -1162,22 +1163,28 @@ e_o365_construct_uri (EO365Connection *cnc,
 	return g_string_free (uri, FALSE);
 }
 
+typedef struct _EO365ResponseData {
+	GSList **out_items; /* JsonObject * */
+	gchar **out_delta_link; /* set only if available and not NULL */
+} EO365ResponseData;
+
 static gboolean
-e_o365_list_folders_response_cb (EO365Connection *cnc,
-				 SoupMessage *message,
-				 GInputStream *input_stream,
-				 JsonNode *node,
-				 gpointer user_data,
-				 gchar **out_next_link,
-				 GCancellable *cancellable,
-				 GError **error)
+e_o365_read_valued_response_cb (EO365Connection *cnc,
+				SoupMessage *message,
+				GInputStream *input_stream,
+				JsonNode *node,
+				gpointer user_data,
+				gchar **out_next_link,
+				GCancellable *cancellable,
+				GError **error)
 {
+	EO365ResponseData *response_data = user_data;
 	JsonObject *object;
 	JsonArray *value;
-	GSList **out_folders = user_data;
+	const gchar *delta_link;
 	guint ii, len;
 
-	g_return_val_if_fail (out_folders != NULL, FALSE);
+	g_return_val_if_fail (response_data != NULL, FALSE);
 	g_return_val_if_fail (out_next_link != NULL, FALSE);
 	g_return_val_if_fail (JSON_NODE_HOLDS_OBJECT (node), FALSE);
 
@@ -1185,6 +1192,11 @@ e_o365_list_folders_response_cb (EO365Connection *cnc,
 	g_return_val_if_fail (object != NULL, FALSE);
 
 	*out_next_link = g_strdup (e_o365_json_get_string_member (object, "@odata.nextLink", NULL));
+
+	delta_link = e_o365_json_get_string_member (object, "@odata.deltaLink", NULL);
+
+	if (delta_link && response_data->out_delta_link)
+		*response_data->out_delta_link = g_strdup (delta_link);
 
 	value = e_o365_json_get_array_member (object, "value");
 	g_return_val_if_fail (value != NULL, FALSE);
@@ -1200,7 +1212,7 @@ e_o365_list_folders_response_cb (EO365Connection *cnc,
 			JsonObject *elem_object = json_node_get_object (elem);
 
 			if (elem_object)
-				*out_folders = g_slist_prepend (*out_folders, json_object_ref (elem_object));
+				*response_data->out_items = g_slist_prepend (*response_data->out_items, json_object_ref (elem_object));
 		}
 	}
 
@@ -1216,6 +1228,7 @@ e_o365_connection_list_folders_sync (EO365Connection *cnc,
 				     GCancellable *cancellable,
 				     GError **error)
 {
+	EO365ResponseData rd;
 	SoupMessage *message;
 	gchar *uri;
 	gboolean success;
@@ -1240,7 +1253,76 @@ e_o365_connection_list_folders_sync (EO365Connection *cnc,
 
 	g_free (uri);
 
-	success = o365_connection_send_request_sync (cnc, message, e_o365_list_folders_response_cb, out_folders, cancellable, error);
+	memset (&rd, 0, sizeof (EO365ResponseData));
+
+	rd.out_items = out_folders;
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_valued_response_cb, &rd, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+gboolean
+e_o365_connection_get_folders_delta_sync (EO365Connection *cnc,
+					  const gchar *user_override, /* for which user, NULL to use the account user */
+					  const gchar *select, /* fields to select, nullable */
+					  const gchar *delta_link, /* previous delta link */
+					  guint max_page_size, /* 0 for default by the server */
+					  gchar **out_delta_link,
+					  GSList **out_folders, /* JsonObject * - the returned mailFolder objects */
+					  GCancellable *cancellable,
+					  GError **error)
+{
+	EO365ResponseData rd;
+	SoupMessage *message = NULL;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (out_delta_link != NULL, FALSE);
+	g_return_val_if_fail (out_folders != NULL, FALSE);
+
+	if (delta_link)
+		message = soup_message_new (SOUP_METHOD_GET, delta_link);
+
+	if (!message) {
+		gchar *uri;
+
+		uri = e_o365_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+			"mailFolders",
+			"delta",
+			"$select", select,
+			NULL);
+
+		message = soup_message_new (SOUP_METHOD_GET, uri);
+
+		if (!message) {
+			g_set_error (error, SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED, _("Malformed URI: “%s”"), uri);
+			g_free (uri);
+
+			return FALSE;
+		}
+
+		g_free (uri);
+	}
+
+	if (max_page_size > 0) {
+		gchar *prefer_value;
+
+		prefer_value = g_strdup_printf ("odata.maxpagesize=%u", max_page_size);
+
+		soup_message_headers_append (message->request_headers, "Prefer", prefer_value);
+
+		g_free (prefer_value);
+	}
+
+	memset (&rd, 0, sizeof (EO365ResponseData));
+
+	rd.out_items = out_folders;
+	rd.out_delta_link = out_delta_link;
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_valued_response_cb, &rd, cancellable, error);
 
 	g_clear_object (&message);
 

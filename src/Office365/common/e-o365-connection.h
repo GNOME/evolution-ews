@@ -101,6 +101,16 @@ gboolean	e_o365_connection_list_folders_sync
 						 GSList **out_folders, /* JsonObject * - the returned mailFolder objects */
 						 GCancellable *cancellable,
 						 GError **error);
+gboolean	e_o365_connection_get_folders_delta_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *select, /* fields to select, nullable */
+						 const gchar *delta_link, /* previous delta link */
+						 guint max_page_size, /* 0 for default by the server */
+						 gchar **out_delta_link,
+						 GSList **out_folders, /* JsonObject * - the returned mailFolder objects */
+						 GCancellable *cancellable,
+						 GError **error);
 
 G_END_DECLS
 
