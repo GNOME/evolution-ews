@@ -93,6 +93,14 @@ ESoupAuthBearer *
 void		e_o365_connection_set_bearer_auth
 						(EO365Connection *cnc,
 						 ESoupAuthBearer *bearer_auth);
+gboolean	e_o365_connection_list_folders_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *from_path, /* path for the folder to read, NULL for top user folder */
+						 const gchar *select, /* fields to select, nullable */
+						 GSList **out_folders, /* JsonObject * - the returned mailFolder objects */
+						 GCancellable *cancellable,
+						 GError **error);
 
 G_END_DECLS
 

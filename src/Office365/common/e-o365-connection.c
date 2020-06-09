@@ -19,10 +19,17 @@
 
 #include <glib.h>
 #include <glib/gi18n-lib.h>
+#include <json-glib/json-glib.h>
 
 #include "camel-o365-settings.h"
+#include "e-o365-soup-logger.h"
 
 #include "e-o365-connection.h"
+
+typedef enum {
+	E_O365_API_V1_0,
+	E_O365_API_BETA
+} EO365ApiVersion;
 
 #define LOCK(x) g_rec_mutex_lock (&(x->priv->property_lock))
 #define UNLOCK(x) g_rec_mutex_unlock (&(x->priv->property_lock))
@@ -56,6 +63,17 @@ G_DEFINE_TYPE_WITH_PRIVATE (EO365Connection, e_o365_connection, G_TYPE_OBJECT)
 
 static GHashTable *opened_connections = NULL;
 G_LOCK_DEFINE_STATIC (opened_connections);
+
+static gboolean
+o365_log_enabled (void)
+{
+	static gint log_enabled = -1;
+
+	if (log_enabled == -1)
+		log_enabled = g_strcmp0 (g_getenv ("O365_DEBUG"), "1") == 0 ? 1 : 0;
+
+	return log_enabled == 1;
+}
 
 static SoupSession *
 o365_connection_ref_soup_session (EO365Connection *cnc)
@@ -393,15 +411,11 @@ static void
 o365_connection_constructed (GObject *object)
 {
 	EO365Connection *cnc = E_O365_CONNECTION (object);
-	static gint log_enabled = -1;
 
 	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (e_o365_connection_parent_class)->constructed (object);
 
-	if (log_enabled == -1)
-		log_enabled = g_strcmp0 (g_getenv ("O365_DEBUG"), "1") == 0 ? 1 : 0;
-
-	if (log_enabled) {
+	if (o365_log_enabled ()) {
 		SoupLogger *logger = soup_logger_new (SOUP_LOGGER_LOG_BODY, -1);
 
 		soup_session_add_feature (cnc->priv->soup_session, SOUP_SESSION_FEATURE (logger));
@@ -798,4 +812,433 @@ e_o365_connection_set_bearer_auth (EO365Connection *cnc,
 	}
 
 	UNLOCK (cnc);
+}
+
+static void
+o365_connection_request_cancelled_cb (GCancellable *cancellable,
+				      gpointer user_data)
+{
+	EFlag *flag = user_data;
+
+	g_return_if_fail (flag != NULL);
+
+	e_flag_set (flag);
+}
+
+typedef gboolean (* EO365ResponseFunc)	(EO365Connection *cnc,
+					 SoupMessage *message,
+					 GInputStream *input_stream,
+					 JsonNode *node,
+					 gpointer user_data,
+					 gchar **out_next_link,
+					 GCancellable *cancellable,
+					 GError **error);
+
+static gboolean
+o365_connection_send_request_sync (EO365Connection *cnc,
+				   SoupMessage *message,
+				   EO365ResponseFunc func,
+				   gpointer func_user_data,
+				   GCancellable *cancellable,
+				   GError **error)
+{
+	SoupSession *soup_session;
+	gint need_retry_seconds = 30;
+	gboolean success = FALSE, need_retry = TRUE;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (SOUP_IS_MESSAGE (message), FALSE);
+	g_return_val_if_fail (func != NULL, FALSE);
+
+	while (need_retry && !g_cancellable_is_cancelled (cancellable) && message->status_code != SOUP_STATUS_CANCELLED) {
+		need_retry = FALSE;
+
+		LOCK (cnc);
+
+		if (cnc->priv->backoff_for_usec) {
+			EFlag *flag;
+			gint64 wait_ms;
+			gulong handler_id = 0;
+
+			wait_ms = cnc->priv->backoff_for_usec / G_TIME_SPAN_MILLISECOND;
+
+			UNLOCK (cnc);
+
+			flag = e_flag_new ();
+
+			if (cancellable) {
+				handler_id = g_cancellable_connect (cancellable, G_CALLBACK (o365_connection_request_cancelled_cb),
+					flag, NULL);
+			}
+
+			while (wait_ms > 0 && !g_cancellable_is_cancelled (cancellable) && message->status_code != SOUP_STATUS_CANCELLED) {
+				gint64 now = g_get_monotonic_time ();
+				gint left_minutes, left_seconds;
+
+				left_minutes = wait_ms / 60000;
+				left_seconds = (wait_ms / 1000) % 60;
+
+				if (left_minutes > 0) {
+					camel_operation_push_message (cancellable,
+						g_dngettext (GETTEXT_PACKAGE,
+							"Office 365 server is busy, waiting to retry (%d:%02d minute)",
+							"Office 365 server is busy, waiting to retry (%d:%02d minutes)", left_minutes),
+						left_minutes, left_seconds);
+				} else {
+					camel_operation_push_message (cancellable,
+						g_dngettext (GETTEXT_PACKAGE,
+							"Office 365 server is busy, waiting to retry (%d second)",
+							"Office 365 server is busy, waiting to retry (%d seconds)", left_seconds),
+						left_seconds);
+				}
+
+				e_flag_wait_until (flag, now + (G_TIME_SPAN_MILLISECOND * (wait_ms > 1000 ? 1000 : wait_ms)));
+				e_flag_clear (flag);
+
+				now = g_get_monotonic_time () - now;
+				now = now / G_TIME_SPAN_MILLISECOND;
+
+				if (now >= wait_ms)
+					wait_ms = 0;
+				wait_ms -= now;
+
+				camel_operation_pop_message (cancellable);
+			}
+
+			if (handler_id)
+				g_cancellable_disconnect (cancellable, handler_id);
+
+			e_flag_free (flag);
+
+			LOCK (cnc);
+
+			cnc->priv->backoff_for_usec = 0;
+		}
+
+		if (g_cancellable_set_error_if_cancelled (cancellable, error)) {
+			UNLOCK (cnc);
+
+			soup_message_set_status (message, SOUP_STATUS_CANCELLED);
+
+			return FALSE;
+		}
+
+		soup_session = cnc->priv->soup_session ? g_object_ref (cnc->priv->soup_session) : NULL;
+
+		UNLOCK (cnc);
+
+		if (soup_session &&
+		    o365_connection_utils_prepare_message (cnc, soup_session, message, cancellable)) {
+			GInputStream *input_stream;
+
+			input_stream = soup_session_send (soup_session, message, cancellable, error);
+
+			success = input_stream != NULL;
+
+			if (success && o365_log_enabled ())
+				input_stream = e_o365_soup_logger_attach (message, input_stream);
+
+			/* Throttling - https://docs.microsoft.com/en-us/graph/throttling  */
+			if (message->status_code == 429 ||
+			    /* https://docs.microsoft.com/en-us/graph/best-practices-concept#handling-expected-errors */
+			    message->status_code == SOUP_STATUS_SERVICE_UNAVAILABLE) {
+				need_retry = TRUE;
+			}
+
+			if (need_retry) {
+				const gchar *retry_after_str;
+				gint64 retry_after;
+
+				retry_after_str = message->response_headers ? soup_message_headers_get_one (message->response_headers, "Retry-After") : NULL;
+
+				if (retry_after_str && *retry_after_str)
+					retry_after = g_ascii_strtoll (retry_after_str, NULL, 10);
+				else
+					retry_after = 0;
+
+				if (retry_after > 0)
+					need_retry_seconds = retry_after;
+				else if (need_retry_seconds < 120)
+					need_retry_seconds *= 2;
+
+				LOCK (cnc);
+
+				if (cnc->priv->backoff_for_usec < need_retry_seconds * G_USEC_PER_SEC)
+					cnc->priv->backoff_for_usec = need_retry_seconds * G_USEC_PER_SEC;
+
+				if (message->status_code == SOUP_STATUS_SERVICE_UNAVAILABLE)
+					soup_session_abort (soup_session);
+
+				UNLOCK (cnc);
+
+				success = FALSE;
+			} else if (success) {
+				JsonParser *json_parser = NULL;
+				const gchar *content_type;
+
+				content_type = message->response_headers ? soup_message_headers_get_content_type (message->response_headers, NULL) : NULL;
+
+				if (content_type && g_ascii_strcasecmp (content_type, "application/json") == 0) {
+					json_parser = json_parser_new_immutable ();
+
+					success = json_parser_load_from_stream (json_parser, input_stream, cancellable, error);
+				}
+
+				if (success) {
+					JsonNode *node;
+					gchar *next_link = NULL;
+
+					node = json_parser ? json_parser_get_root (json_parser) : NULL;
+
+					success = func (cnc, message, input_stream, node, func_user_data, &next_link, cancellable, error);
+
+					if (success && next_link && *next_link) {
+						SoupURI *suri;
+
+						suri = soup_uri_new (next_link);
+
+						/* Check whether the server returned correct nextLink URI */
+						g_warn_if_fail (suri != NULL);
+
+						if (suri) {
+							need_retry = TRUE;
+
+							soup_message_set_uri (message, suri);
+							soup_uri_free (suri);
+						}
+					}
+
+					g_free (next_link);
+				}
+
+				g_clear_object (&json_parser);
+			}
+
+			g_clear_object (&input_stream);
+		} else if (!message->status_code) {
+			soup_message_set_status (message, SOUP_STATUS_CANCELLED);
+		}
+
+		g_clear_object (&soup_session);
+
+		if (need_retry) {
+			success = FALSE;
+			g_clear_error (error);
+		}
+	}
+
+	return success;
+}
+
+/* Expects pair of parameters 'name', 'value'; if value is NULL, the parameter is skipped; the last parameter name should be NULL */
+static gchar *
+e_o365_construct_uri (EO365Connection *cnc,
+		      gboolean include_user,
+		      const gchar *user_override,
+		      EO365ApiVersion api_version,
+		      const gchar *api_part, /* NULL for 'users', empty string to skip */
+		      const gchar *resource,
+		      const gchar *path,
+		      ...) G_GNUC_NULL_TERMINATED;
+
+static gchar *
+e_o365_construct_uri (EO365Connection *cnc,
+		      gboolean include_user,
+		      const gchar *user_override,
+		      EO365ApiVersion api_version,
+		      const gchar *api_part,
+		      const gchar *resource,
+		      const gchar *path,
+		      ...)
+{
+	va_list args;
+	const gchar *name, *value;
+	gboolean first_param = TRUE;
+	GString *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), NULL);
+
+	if (!api_part)
+		api_part = "users";
+
+	uri = g_string_sized_new (128);
+
+	/* https://graph.microsoft.com/v1.0/users/XUSERX/mailFolders */
+
+	g_string_append (uri, "https://graph.microsoft.com");
+
+	switch (api_version) {
+	case E_O365_API_V1_0:
+		g_string_append_c (uri, '/');
+		g_string_append (uri, "v1.0");
+		break;
+	case E_O365_API_BETA:
+		g_string_append_c (uri, '/');
+		g_string_append (uri, "beta");
+		break;
+	}
+
+	if (*api_part) {
+		g_string_append_c (uri, '/');
+		g_string_append (uri, api_part);
+	}
+
+	if (include_user) {
+		if (user_override) {
+			gchar *encoded;
+
+			encoded = soup_uri_encode (user_override, NULL);
+
+			g_string_append_c (uri, '/');
+			g_string_append (uri, encoded);
+
+			g_free (encoded);
+		} else {
+			CamelO365Settings *settings;
+			gchar *user;
+
+			settings = e_o365_connection_get_settings (cnc);
+			user = camel_network_settings_dup_user (CAMEL_NETWORK_SETTINGS (settings));
+
+			if (user && *user) {
+				gchar *encoded;
+
+				encoded = soup_uri_encode (user, NULL);
+
+				g_string_append_c (uri, '/');
+				g_string_append (uri, encoded);
+
+				g_free (encoded);
+			}
+
+			g_free (user);
+		}
+	}
+
+	if (resource && *resource) {
+		g_string_append_c (uri, '/');
+		g_string_append (uri, resource);
+	}
+
+	if (path && *path) {
+		g_string_append_c (uri, '/');
+		g_string_append (uri, path);
+	}
+
+	va_start (args, path);
+
+	name = va_arg (args, const gchar *);
+
+	while (name) {
+		value = va_arg (args, const gchar *);
+
+		if (*name && value) {
+			g_string_append_c (uri, first_param ? '?' : '&');
+
+			g_string_append (uri, name);
+			g_string_append_c (uri, '=');
+
+			if (*value) {
+				gchar *encoded;
+
+				encoded = soup_uri_encode (value, NULL);
+
+				g_string_append (uri, encoded);
+
+				g_free (encoded);
+			}
+		}
+
+		name = va_arg (args, const gchar *);
+	}
+
+	va_end (args);
+
+	return g_string_free (uri, FALSE);
+}
+
+static gboolean
+e_o365_list_folders_response_cb (EO365Connection *cnc,
+				 SoupMessage *message,
+				 GInputStream *input_stream,
+				 JsonNode *node,
+				 gpointer user_data,
+				 gchar **out_next_link,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	JsonObject *object;
+	JsonArray *value;
+	GSList **out_folders = user_data;
+	guint ii, len;
+
+	g_return_val_if_fail (G_TYPE_CHECK_INSTANCE_TYPE (node, JSON_TYPE_NODE), FALSE);
+	g_return_val_if_fail (out_folders != NULL, FALSE);
+	g_return_val_if_fail (out_next_link != NULL, FALSE);
+	g_return_val_if_fail (JSON_NODE_HOLDS_OBJECT (node), FALSE);
+
+	object = json_node_get_object (node);
+	g_return_val_if_fail (object != NULL, FALSE);
+
+	*out_next_link = g_strdup (json_object_get_string_member (object, "@odata.nextLink"));
+
+	value = json_object_get_array_member (object, "value");
+	g_return_val_if_fail (value != NULL, FALSE);
+
+	len = json_array_get_length (value);
+
+	for (ii = 0; ii < len; ii++) {
+		JsonNode *elem = json_array_get_element (value, ii);
+
+		g_warn_if_fail (JSON_NODE_HOLDS_OBJECT (elem));
+
+		if (JSON_NODE_HOLDS_OBJECT (elem)) {
+			JsonObject *elem_object = json_node_get_object (elem);
+
+			if (elem_object)
+				*out_folders = g_slist_prepend (*out_folders, json_object_ref (elem_object));
+		}
+	}
+
+	return TRUE;
+}
+
+gboolean
+e_o365_connection_list_folders_sync (EO365Connection *cnc,
+				     const gchar *user_override, /* for which user, NULL to use the account user */
+				     const gchar *from_path, /* path for the folder to read, NULL for top user folder */
+				     const gchar *select, /* fields to select, nullable */
+				     GSList **out_folders, /* JsonObject * - the returned mailFolder objects */
+				     GCancellable *cancellable,
+				     GError **error)
+{
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (out_folders != NULL, FALSE);
+
+	uri = e_o365_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"mailFolders",
+		from_path,
+		"$select", select,
+		NULL);
+
+	message = soup_message_new (SOUP_METHOD_GET, uri);
+
+	if (!message) {
+		g_set_error (error, SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED, _("Malformed URI: “%s”"), uri);
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_list_folders_response_cb, out_folders, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
 }
