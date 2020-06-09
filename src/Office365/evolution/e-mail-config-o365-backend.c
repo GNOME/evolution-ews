@@ -26,6 +26,8 @@
 #include <mail/e-mail-config-receiving-page.h>
 
 #include "common/camel-o365-settings.h"
+#include "common/e-o365-connection.h"
+#include "common/e-o365-json-utils.h"
 
 #include "e-mail-config-o365-backend.h"
 
@@ -82,6 +84,49 @@ mail_config_o365_backend_set_oauth2_tooltip (GtkWidget *widget,
 }
 
 static void
+test_clicked_cb (GtkButton *button,
+		 EMailConfigServiceBackend *backend)
+{
+	CamelSettings *settings;
+	ESource *source;
+	EO365Connection *cnc;
+	GSList *folders = NULL, *link;
+	GError *error = NULL;
+
+	settings = e_mail_config_service_backend_get_settings (backend);
+	source = e_mail_config_service_backend_get_collection (backend);
+
+	cnc = e_o365_connection_new (source, CAMEL_O365_SETTINGS (settings));
+	g_return_if_fail (cnc != NULL);
+
+	if (!e_o365_connection_list_folders_sync (cnc, NULL, NULL, NULL, &folders, NULL, &error)) {
+		printf ("%s: failed with error: %s\n", __FUNCTION__, error ? error->message : "none");
+	} else {
+		if (error) {
+			printf ("%s: succeeded, but has set error: '%s'\n", __FUNCTION__, error->message);
+		}
+
+		printf ("%s: returned %d objects:\n", __FUNCTION__, g_slist_length (folders));
+
+		for (link = folders; link; link = g_slist_next (link)) {
+			JsonObject *folder = link->data;
+
+			printf ("   %p: '%s' childCount:%d total:%d unread:%d id:'%s' parent:'%s'\n", folder,
+				e_o365_mail_folder_get_display_name (folder),
+				e_o365_mail_folder_get_child_folder_count (folder),
+				e_o365_mail_folder_get_total_item_count (folder),
+				e_o365_mail_folder_get_unread_item_count (folder),
+				e_o365_mail_folder_get_id (folder),
+				e_o365_mail_folder_get_parent_folder_id (folder));
+		}
+	}
+
+	g_slist_free_full (folders, (GDestroyNotify) json_object_unref);
+	g_clear_error (&error);
+	g_clear_object (&cnc);
+}
+
+static void
 mail_config_o365_backend_insert_widgets (EMailConfigServiceBackend *backend,
 					 GtkBox *parent)
 {
@@ -89,6 +134,7 @@ mail_config_o365_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	EMailConfigServicePage *page;
 	ESource *source;
 	ESourceExtension *extension;
+	ESourceAuthentication *auth_extension;
 	CamelSettings *settings;
 	GtkLabel *label;
 	GtkWidget *widget;
@@ -304,6 +350,17 @@ mail_config_o365_backend_insert_widgets (EMailConfigServiceBackend *backend,
 		extension, "identity",
 		G_BINDING_BIDIRECTIONAL |
 		G_BINDING_SYNC_CREATE);
+
+	auth_extension = e_source_get_extension (source, E_SOURCE_EXTENSION_AUTHENTICATION);
+	e_source_authentication_set_host (auth_extension, "graph.microsoft.com");
+	e_source_authentication_set_port (auth_extension, 442);
+	e_source_authentication_set_method (auth_extension, "Office365");
+
+	/* The following is for easier debugging only */			
+	widget = gtk_button_new_with_mnemonic ("_Test");
+	g_signal_connect (widget, "clicked", G_CALLBACK (test_clicked_cb), o365_backend);
+	gtk_widget_show (widget);
+	gtk_box_pack_start (GTK_BOX (parent), widget, FALSE, FALSE, 0);
 }
 
 static void

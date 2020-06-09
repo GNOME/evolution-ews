@@ -21,40 +21,178 @@
 
 #include "e-o365-json-utils.h"
 
+JsonArray *
+e_o365_json_get_array_member (JsonObject *object,
+			      const gchar *member_name)
+{
+	JsonNode *node;
+
+	g_return_val_if_fail (object != NULL, NULL);
+	g_return_val_if_fail (member_name != NULL, NULL);
+
+	node = json_object_get_member (object, member_name);
+
+	if (!node)
+		return NULL;
+
+	g_return_val_if_fail (JSON_NODE_HOLDS_ARRAY (node), NULL);
+
+	return json_node_get_array (node);
+}
+
+gboolean
+e_o365_json_get_boolean_member (JsonObject *object,
+				const gchar *member_name,
+				gboolean default_value)
+{
+	JsonNode *node;
+
+	g_return_val_if_fail (object != NULL, default_value);
+	g_return_val_if_fail (member_name != NULL, default_value);
+
+	node = json_object_get_member (object, member_name);
+
+	if (!node)
+		return default_value;
+
+	g_return_val_if_fail (JSON_NODE_HOLDS_VALUE (node), default_value);
+
+	return json_node_get_boolean (node);
+}
+
+gdouble
+e_o365_json_get_double_member (JsonObject *object,
+			       const gchar *member_name,
+			       gdouble default_value)
+{
+	JsonNode *node;
+
+	g_return_val_if_fail (object != NULL, default_value);
+	g_return_val_if_fail (member_name != NULL, default_value);
+
+	node = json_object_get_member (object, member_name);
+
+	if (!node)
+		return default_value;
+
+	g_return_val_if_fail (JSON_NODE_HOLDS_VALUE (node), default_value);
+
+	return json_node_get_double (node);
+}
+
+gint64
+e_o365_json_get_int_member (JsonObject *object,
+			    const gchar *member_name,
+			    gint64 default_value)
+{
+	JsonNode *node;
+
+	g_return_val_if_fail (object != NULL, default_value);
+	g_return_val_if_fail (member_name != NULL, default_value);
+
+	node = json_object_get_member (object, member_name);
+
+	if (!node)
+		return default_value;
+
+	g_return_val_if_fail (JSON_NODE_HOLDS_VALUE (node), default_value);
+
+	return json_node_get_int (node);
+}
+
+gboolean
+e_o365_json_get_null_member (JsonObject *object,
+			     const gchar *member_name,
+			     gboolean default_value)
+{
+	JsonNode *node;
+
+	g_return_val_if_fail (object != NULL, default_value);
+	g_return_val_if_fail (member_name != NULL, default_value);
+
+	node = json_object_get_member (object, member_name);
+
+	if (!node)
+		return default_value;
+
+	g_return_val_if_fail (JSON_NODE_HOLDS_NULL (node), default_value);
+
+	return json_node_is_null (node);
+}
+
+JsonObject *
+e_o365_json_get_object_member (JsonObject *object,
+			       const gchar *member_name)
+{
+	JsonNode *node;
+
+	g_return_val_if_fail (object != NULL, NULL);
+	g_return_val_if_fail (member_name != NULL, NULL);
+
+	node = json_object_get_member (object, member_name);
+
+	if (!node)
+		return NULL;
+
+	g_return_val_if_fail (JSON_NODE_HOLDS_OBJECT (node), NULL);
+
+	return json_node_get_object (node);
+}
+
+const gchar *
+e_o365_json_get_string_member (JsonObject *object,
+			       const gchar *member_name,
+			       const gchar *default_value)
+{
+	JsonNode *node;
+
+	g_return_val_if_fail (object != NULL, default_value);
+	g_return_val_if_fail (member_name != NULL, default_value);
+
+	node = json_object_get_member (object, member_name);
+
+	if (!node)
+		return default_value;
+
+	g_return_val_if_fail (JSON_NODE_HOLDS_VALUE (node), default_value);
+
+	return json_node_get_string (node);
+}
+
 /* https://docs.microsoft.com/en-us/graph/api/resources/mailfolder?view=graph-rest-1.0 */
-s
+
 const gchar *
 e_o365_mail_folder_get_display_name (JsonObject *object)
 {
-	return json_object_get_string_member (object, "displayName");
+	return e_o365_json_get_string_member (object, "displayName", NULL);
 }
 
 const gchar *
 e_o365_mail_folder_get_id (JsonObject *object)
 {
-	return json_object_get_string_member (object, "id");
+	return e_o365_json_get_string_member (object, "id", NULL);
 }
 
 const gchar *
 e_o365_mail_folder_get_parent_folder_id (JsonObject *object)
 {
-	return json_object_get_string_member (object, "parentFolderId");
+	return e_o365_json_get_string_member (object, "parentFolderId", NULL);
 }
 
 gint32
 e_o365_mail_folder_get_child_folder_count (JsonObject *object)
 {
-	return (gint32) json_object_get_int_member (object, "childFolderCount");
+	return (gint32) e_o365_json_get_int_member (object, "childFolderCount", 0);
 }
 
 gint32
 e_o365_mail_folder_get_total_item_count (JsonObject *object)
 {
-	return (gint32) json_object_get_int_member (object, "totalItemCount");
+	return (gint32) e_o365_json_get_int_member (object, "totalItemCount", 0);
 }
 
 gint32
 e_o365_mail_folder_get_unread_item_count (JsonObject *object)
 {
-	return (gint32) json_object_get_int_member (object, "unreadItemCount");
+	return (gint32) e_o365_json_get_int_member (object, "unreadItemCount", 0);
 }

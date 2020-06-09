@@ -22,6 +22,26 @@
 
 G_BEGIN_DECLS
 
+JsonArray *	e_o365_json_get_array_member		(JsonObject *object,
+							 const gchar *member_name);
+gboolean	e_o365_json_get_boolean_member		(JsonObject *object,
+							 const gchar *member_name,
+							 gboolean default_value);
+gdouble		e_o365_json_get_double_member		(JsonObject *object,
+							 const gchar *member_name,
+							 gdouble default_value);
+gint64		e_o365_json_get_int_member		(JsonObject *object,
+							 const gchar *member_name,
+							 gint64 default_value);
+gboolean	e_o365_json_get_null_member		(JsonObject *object,
+							 const gchar *member_name,
+							 gboolean default_value);
+JsonObject *	e_o365_json_get_object_member		(JsonObject *object,
+							 const gchar *member_name);
+const gchar *	e_o365_json_get_string_member		(JsonObject *object,
+							 const gchar *member_name,
+							 const gchar *default_value);
+
 const gchar *	e_o365_mail_folder_get_display_name	(JsonObject *object);
 const gchar *	e_o365_mail_folder_get_id		(JsonObject *object);
 const gchar *	e_o365_mail_folder_get_parent_folder_id	(JsonObject *object);

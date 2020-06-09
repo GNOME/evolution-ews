@@ -22,6 +22,7 @@
 #include <json-glib/json-glib.h>
 
 #include "camel-o365-settings.h"
+#include "e-o365-json-utils.h"
 #include "e-o365-soup-logger.h"
 
 #include "e-o365-connection.h"
@@ -1015,8 +1016,12 @@ o365_connection_send_request_sync (EO365Connection *cnc,
 			}
 
 			g_clear_object (&input_stream);
-		} else if (!message->status_code) {
-			soup_message_set_status (message, SOUP_STATUS_CANCELLED);
+		} else {
+			if (!message->status_code)
+				soup_message_set_status (message, SOUP_STATUS_CANCELLED);
+
+			g_set_error_literal (error, SOUP_HTTP_ERROR, message->status_code,
+				message->reason_phrase ? message->reason_phrase : soup_status_get_phrase (message->status_code));
 		}
 
 		g_clear_object (&soup_session);
@@ -1172,7 +1177,6 @@ e_o365_list_folders_response_cb (EO365Connection *cnc,
 	GSList **out_folders = user_data;
 	guint ii, len;
 
-	g_return_val_if_fail (G_TYPE_CHECK_INSTANCE_TYPE (node, JSON_TYPE_NODE), FALSE);
 	g_return_val_if_fail (out_folders != NULL, FALSE);
 	g_return_val_if_fail (out_next_link != NULL, FALSE);
 	g_return_val_if_fail (JSON_NODE_HOLDS_OBJECT (node), FALSE);
@@ -1180,9 +1184,9 @@ e_o365_list_folders_response_cb (EO365Connection *cnc,
 	object = json_node_get_object (node);
 	g_return_val_if_fail (object != NULL, FALSE);
 
-	*out_next_link = g_strdup (json_object_get_string_member (object, "@odata.nextLink"));
+	*out_next_link = g_strdup (e_o365_json_get_string_member (object, "@odata.nextLink", NULL));
 
-	value = json_object_get_array_member (object, "value");
+	value = e_o365_json_get_array_member (object, "value");
 	g_return_val_if_fail (value != NULL, FALSE);
 
 	len = json_array_get_length (value);

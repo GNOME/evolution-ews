@@ -109,7 +109,7 @@ static void
 e_o365_soup_logger_print_data (EO365SoupLogger *logger)
 {
 	if (logger->data) {
-		g_print ("%s\n", logger->data->str);
+		g_print ("%s\n\n", logger->data->str);
 		g_string_free (logger->data, TRUE);
 		logger->data = NULL;
 	}
