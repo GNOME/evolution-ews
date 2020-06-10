@@ -827,6 +827,53 @@ o365_connection_request_cancelled_cb (GCancellable *cancellable,
 	e_flag_set (flag);
 }
 
+/* An example error response:
+
+  {
+    "error": {
+      "code": "BadRequest",
+      "message": "Parsing Select and Expand failed.",
+      "innerError": {
+        "request-id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+        "date": "2020-06-10T13:44:43"
+      }
+    }
+  }
+
+ */
+static gboolean
+o365_connection_extract_error (JsonNode *node,
+			       guint status_code,
+			       GError **error)
+{
+	JsonObject *object;
+	const gchar *code, *message;
+
+	if (!node || !JSON_NODE_HOLDS_OBJECT (node))
+		return FALSE;
+
+	object = e_o365_json_get_object_member (json_node_get_object (node), "error");
+
+	if (!object)
+		return FALSE;
+
+	code = e_o365_json_get_string_member (object, "code", NULL);
+	message = e_o365_json_get_string_member (object, "message", NULL);
+
+	if (!code && !message)
+		return FALSE;
+
+	if (!status_code || !SOUP_STATUS_IS_SUCCESSFUL (status_code))
+		status_code = SOUP_STATUS_MALFORMED;
+
+	if (code && message)
+		g_set_error (error, SOUP_HTTP_ERROR, status_code, "%s: %s", code, message);
+	else
+		g_set_error_literal (error, SOUP_HTTP_ERROR, status_code, code ? code : message);
+
+	return TRUE;
+}
+
 typedef gboolean (* EO365ResponseFunc)	(EO365Connection *cnc,
 					 SoupMessage *message,
 					 GInputStream *input_stream,
@@ -984,6 +1031,9 @@ o365_connection_send_request_sync (EO365Connection *cnc,
 					json_parser = json_parser_new_immutable ();
 
 					success = json_parser_load_from_stream (json_parser, input_stream, cancellable, error);
+
+					if (success && error && !*error)
+						success = !o365_connection_extract_error (json_parser_get_root (json_parser), message->status_code, error);
 				}
 
 				if (success) {
@@ -1011,6 +1061,14 @@ o365_connection_send_request_sync (EO365Connection *cnc,
 					}
 
 					g_free (next_link);
+				} else if (error && !*error && message->status_code && !SOUP_STATUS_IS_SUCCESSFUL (message->status_code)) {
+					if (message->status_code == SOUP_STATUS_CANCELLED) {
+						g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_CANCELLED,
+							message->reason_phrase ? message->reason_phrase : soup_status_get_phrase (message->status_code));
+					} else {
+						g_set_error_literal (error, SOUP_HTTP_ERROR, message->status_code,
+							message->reason_phrase ? message->reason_phrase : soup_status_get_phrase (message->status_code));
+					}
 				}
 
 				g_clear_object (&json_parser);
@@ -1021,8 +1079,13 @@ o365_connection_send_request_sync (EO365Connection *cnc,
 			if (!message->status_code)
 				soup_message_set_status (message, SOUP_STATUS_CANCELLED);
 
-			g_set_error_literal (error, SOUP_HTTP_ERROR, message->status_code,
-				message->reason_phrase ? message->reason_phrase : soup_status_get_phrase (message->status_code));
+			if (message->status_code == SOUP_STATUS_CANCELLED) {
+				g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_CANCELLED,
+					message->reason_phrase ? message->reason_phrase : soup_status_get_phrase (message->status_code));
+			} else {
+				g_set_error_literal (error, SOUP_HTTP_ERROR, message->status_code,
+					message->reason_phrase ? message->reason_phrase : soup_status_get_phrase (message->status_code));
+			}
 		}
 
 		g_clear_object (&soup_session);
@@ -1265,15 +1328,15 @@ e_o365_connection_list_folders_sync (EO365Connection *cnc,
 }
 
 gboolean
-e_o365_connection_get_folders_delta_sync (EO365Connection *cnc,
-					  const gchar *user_override, /* for which user, NULL to use the account user */
-					  const gchar *select, /* fields to select, nullable */
-					  const gchar *delta_link, /* previous delta link */
-					  guint max_page_size, /* 0 for default by the server */
-					  gchar **out_delta_link,
-					  GSList **out_folders, /* JsonObject * - the returned mailFolder objects */
-					  GCancellable *cancellable,
-					  GError **error)
+e_o365_connection_get_mail_folders_delta_sync (EO365Connection *cnc,
+					       const gchar *user_override, /* for which user, NULL to use the account user */
+					       const gchar *select, /* fields to select, nullable */
+					       const gchar *delta_link, /* previous delta link */
+					       guint max_page_size, /* 0 for default by the server */
+					       gchar **out_delta_link,
+					       GSList **out_folders, /* JsonObject * - the returned mailFolder objects */
+					       GCancellable *cancellable,
+					       GError **error)
 {
 	EO365ResponseData rd;
 	SoupMessage *message = NULL;

@@ -24,6 +24,7 @@
 #include <libsoup/soup.h>
 
 #include "camel-o365-settings.h"
+#include "e-o365-enums.h"
 
 /* Standard GObject macros */
 #define E_TYPE_O365_CONNECTION \
@@ -101,7 +102,7 @@ gboolean	e_o365_connection_list_folders_sync
 						 GSList **out_folders, /* JsonObject * - the returned mailFolder objects */
 						 GCancellable *cancellable,
 						 GError **error);
-gboolean	e_o365_connection_get_folders_delta_sync
+gboolean	e_o365_connection_get_mail_folders_delta_sync
 						(EO365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
 						 const gchar *select, /* fields to select, nullable */

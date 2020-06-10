@@ -1,3 +1,5 @@
+glib_mkenums(e-o365-enumtypes e-o365-enums.h E_O365_ENUMTYPES_H)
+
 set(SOURCES
 	camel-sasl-xoauth2-office365.c
 	camel-sasl-xoauth2-office365.h
@@ -5,6 +7,7 @@ set(SOURCES
 	camel-o365-settings.h
 	e-o365-connection.c
 	e-o365-connection.h
+	e-o365-enums.h
 	e-o365-json-utils.c
 	e-o365-json-utils.h
 	e-o365-soup-logger.c
@@ -13,6 +16,8 @@ set(SOURCES
 	e-oauth2-service-office365.h
 	e-source-o365-folder.c
 	e-source-o365-folder.h
+	${CMAKE_CURRENT_BINARY_DIR}/e-o365-enumtypes.c
+	${CMAKE_CURRENT_BINARY_DIR}/e-o365-enumtypes.h
 )
 
 add_library(evolution-office365 SHARED

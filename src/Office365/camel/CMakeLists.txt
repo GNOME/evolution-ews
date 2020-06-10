@@ -10,6 +10,8 @@ set(SOURCES
 	camel-o365-provider.c
 	camel-o365-store.c
 	camel-o365-store.h
+	camel-o365-store-summary.c
+	camel-o365-store-summary.h
 	camel-o365-transport.c
 	camel-o365-transport.h
 )
