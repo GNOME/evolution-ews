@@ -73,6 +73,8 @@ CamelEwsStore *
 		camel_ews_search_ref_store	(CamelEwsSearch *search);
 void		camel_ews_search_set_store	(CamelEwsSearch *search,
 						 CamelEwsStore *ews_store);
+void		camel_ews_search_clear_cached_results
+						(CamelEwsSearch *search);
 void		camel_ews_search_set_cancellable_and_error
 						(CamelEwsSearch *search,
 						 GCancellable *cancellable,

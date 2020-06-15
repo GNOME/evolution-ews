@@ -33,6 +33,7 @@ struct _CamelEwsSearchPrivate {
 	GWeakRef ews_store;
 	gint *local_data_search; /* not NULL, if testing whether all used headers are all locally available */
 
+	GHashTable *cached_results; /* gchar * (search description) ~> GHashTable { gchar * (uid {from string pool}) ~> NULL } */
 	GCancellable *cancellable; /* not referenced */
 	GError **error; /* not referenced */
 };
@@ -103,6 +104,7 @@ ews_search_finalize (GObject *object)
 	priv = CAMEL_EWS_SEARCH_GET_PRIVATE (object);
 
 	g_weak_ref_clear (&priv->ews_store);
+	g_hash_table_destroy (priv->cached_results);
 
 	/* Chain up to parent's finalize() method. */
 	G_OBJECT_CLASS (camel_ews_search_parent_class)->finalize (object);
@@ -183,6 +185,31 @@ ews_search_items_to_ptr_array (const GSList *items)
 	return matches;
 }
 
+static gchar *
+ews_search_describe_criteria (const GPtrArray *words)
+{
+	GString *desc;
+
+	desc = g_string_sized_new (64);
+
+	if (words && words->len) {
+		guint ii;
+
+		for (ii = 0; ii < words->len; ii++) {
+			const gchar *word = words->pdata[ii];
+
+			if (word) {
+				g_string_append (desc, word);
+				g_string_append_c (desc, '\n');
+			}
+		}
+	}
+
+	g_string_append_c (desc, '\n');
+
+	return g_string_free (desc, FALSE);
+}
+
 static CamelSExpResult *
 ews_search_process_criteria (CamelSExp *sexp,
 			     CamelFolderSearch *search,
@@ -191,108 +218,144 @@ ews_search_process_criteria (CamelSExp *sexp,
 {
 	CamelSExpResult *result;
 	CamelEwsSearch *ews_search = CAMEL_EWS_SEARCH (search);
-	CamelEwsFolder *ews_folder;
+	CamelMessageInfo *info;
+	GHashTable *cached_results;
+	gchar *criteria_desc;
 	GPtrArray *uids = NULL;
 	GError *local_error = NULL;
 
-	ews_folder = CAMEL_EWS_FOLDER (camel_folder_search_get_folder (search));
+	criteria_desc = ews_search_describe_criteria (words);
+	cached_results = g_hash_table_lookup (ews_search->priv->cached_results, criteria_desc);
 
-	/* Sanity check. */
-	g_return_val_if_fail (ews_folder != NULL, NULL);
+	if (!cached_results) {
+		CamelEwsFolder *ews_folder;
 
-	if (ews_folder != NULL) {
-		EEwsConnection *connection = NULL;
-		gchar *folder_id = NULL;
-		gboolean can_search;
+		ews_folder = CAMEL_EWS_FOLDER (camel_folder_search_get_folder (search));
 
-		/* there should always be one, held by one of the callers of this function */
-		g_warn_if_fail (ews_store != NULL);
+		/* Sanity check. */
+		g_return_val_if_fail (ews_folder != NULL, NULL);
 
-		can_search = ews_store != NULL && words != NULL;
+		if (ews_folder != NULL) {
+			EEwsConnection *connection = NULL;
+			gchar *folder_id = NULL;
+			gboolean can_search;
 
-		if (can_search) {
-			folder_id = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary,
-				camel_folder_get_full_name (CAMEL_FOLDER (ews_folder)));
-			if (!folder_id)
-				can_search = FALSE;
+			/* there should always be one, held by one of the callers of this function */
+			g_warn_if_fail (ews_store != NULL);
+
+			can_search = ews_store != NULL && words != NULL;
+
+			if (can_search) {
+				folder_id = camel_ews_store_summary_get_folder_id_from_name (ews_store->summary,
+					camel_folder_get_full_name (CAMEL_FOLDER (ews_folder)));
+				if (!folder_id)
+					can_search = FALSE;
+			}
+
+			if (can_search) {
+				connection = camel_ews_store_ref_connection (ews_store);
+				if (!connection)
+					can_search = FALSE;
+			}
+
+			if (can_search) {
+				EwsFolderId *fid;
+				GSList *found_items = NULL;
+				gboolean includes_last_item = FALSE;
+				GString *expression;
+				guint ii;
+
+				fid = e_ews_folder_id_new (folder_id, NULL, FALSE);
+				expression = g_string_new ("");
+
+				if (words->len >= 2)
+					g_string_append (expression, "(and ");
+
+				for (ii = 0; ii < words->len; ii++) {
+					GString *word;
+
+					word = e_str_replace_string (g_ptr_array_index (words, ii), "\"", "\\\"");
+
+					g_string_append (expression, "(body-contains \"");
+					g_string_append (expression, word->str);
+					g_string_append (expression, "\")");
+
+					g_string_free (word, TRUE);
+				}
+
+				/* Close the 'and' */
+				if (words->len >= 2)
+					g_string_append_c (expression, ')');
+
+				if (e_ews_connection_find_folder_items_sync (
+					connection, EWS_PRIORITY_MEDIUM,
+					fid, "IdOnly", NULL, NULL, expression->str, NULL,
+					E_EWS_FOLDER_TYPE_MAILBOX, &includes_last_item, &found_items,
+					e_ews_query_to_restriction,
+					ews_search->priv->cancellable, &local_error)) {
+
+					uids = ews_search_items_to_ptr_array (found_items);
+				}
+
+				g_slist_free_full (found_items, g_object_unref);
+				g_string_free (expression, TRUE);
+				e_ews_folder_id_free (fid);
+			}
+
+			g_clear_object (&connection);
+			g_free (folder_id);
 		}
 
-		if (can_search) {
-			connection = camel_ews_store_ref_connection (ews_store);
-			if (!connection)
-				can_search = FALSE;
-		}
+		if (local_error != NULL)
+			g_propagate_error (ews_search->priv->error, local_error);
 
-		if (can_search) {
-			EwsFolderId *fid;
-			GSList *found_items = NULL;
-			gboolean includes_last_item = FALSE;
-			GString *expression;
+		if (!uids) {
+			/* Make like we've got an empty result */
+			uids = g_ptr_array_new ();
+		}
+	}
+
+	if (!cached_results) {
+		cached_results = g_hash_table_new_full (g_str_hash, g_str_equal, (GDestroyNotify) camel_pstring_free, NULL);
+
+		if (uids) {
 			guint ii;
 
-			fid = e_ews_folder_id_new (folder_id, NULL, FALSE);
-			expression = g_string_new ("");
-
-			if (words->len >= 2)
-				g_string_append (expression, "(and ");
-
-			for (ii = 0; ii < words->len; ii++) {
-				GString *word;
-
-				word = e_str_replace_string (g_ptr_array_index (words, ii), "\"", "\\\"");
-
-				g_string_append (expression, "(body-contains \"");
-				g_string_append (expression, word->str);
-				g_string_append (expression, "\")");
-
-				g_string_free (word, TRUE);
+			for (ii = 0; ii < uids->len; ii++) {
+				g_hash_table_insert (cached_results, (gpointer) camel_pstring_strdup (uids->pdata[ii]), NULL);
 			}
-
-			/* Close the 'and' */
-			if (words->len >= 2)
-				g_string_append_c (expression, ')');
-
-			if (e_ews_connection_find_folder_items_sync (
-				connection, EWS_PRIORITY_MEDIUM,
-				fid, "IdOnly", NULL, NULL, expression->str, NULL,
-				E_EWS_FOLDER_TYPE_MAILBOX, &includes_last_item, &found_items,
-				e_ews_query_to_restriction,
-				ews_search->priv->cancellable, &local_error)) {
-
-				uids = ews_search_items_to_ptr_array (found_items);
-			}
-
-			g_slist_free_full (found_items, g_object_unref);
-			g_string_free (expression, TRUE);
-			e_ews_folder_id_free (fid);
 		}
 
-		g_clear_object (&connection);
-		g_free (folder_id);
-	}
-
-	/* Sanity check. */
-	g_warn_if_fail (
-		((uids != NULL) && (local_error == NULL)) ||
-		((uids == NULL) && (local_error != NULL)));
-
-	if (local_error != NULL)
-		g_propagate_error (ews_search->priv->error, local_error);
-
-	if (!uids) {
-		/* Make like we've got an empty result */
-		uids = g_ptr_array_new ();
-	}
-
-	if (camel_folder_search_get_current_message_info (search)) {
-		result = camel_sexp_result_new (sexp, CAMEL_SEXP_RES_BOOL);
-		result->value.boolean = (uids && uids->len > 0);
+		g_hash_table_insert (ews_search->priv->cached_results, criteria_desc, cached_results);
 	} else {
+		g_free (criteria_desc);
+	}
+
+	info = camel_folder_search_get_current_message_info (search);
+
+	if (info) {
+		result = camel_sexp_result_new (sexp, CAMEL_SEXP_RES_BOOL);
+		result->value.boolean = g_hash_table_contains (cached_results, camel_message_info_get_uid (info));
+	} else {
+		if (!uids) {
+			GHashTableIter iter;
+			gpointer key;
+
+			uids = g_ptr_array_sized_new (g_hash_table_size (cached_results));
+
+			g_hash_table_iter_init (&iter, cached_results);
+
+			while (g_hash_table_iter_next (&iter, &key, NULL)) {
+				g_ptr_array_add (uids, (gpointer) camel_pstring_strdup (key));
+			}
+		}
+
 		result = camel_sexp_result_new (sexp, CAMEL_SEXP_RES_ARRAY_PTR);
 		result->value.ptrarray = g_ptr_array_ref (uids);
 	}
 
-	g_ptr_array_unref (uids);
+	if (uids)
+		g_ptr_array_unref (uids);
 
 	return result;
 }
@@ -425,6 +488,7 @@ camel_ews_search_init (CamelEwsSearch *search)
 {
 	search->priv = CAMEL_EWS_SEARCH_GET_PRIVATE (search);
 	search->priv->local_data_search = NULL;
+	search->priv->cached_results = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_hash_table_destroy);
 
 	g_weak_ref_init (&search->priv->ews_store, NULL);
 }
@@ -502,6 +566,14 @@ camel_ews_search_set_store (CamelEwsSearch *search,
 	g_weak_ref_set (&search->priv->ews_store, ews_store);
 
 	g_object_notify (G_OBJECT (search), "store");
+}
+
+void
+camel_ews_search_clear_cached_results (CamelEwsSearch *search)
+{
+	g_return_if_fail (CAMEL_IS_EWS_SEARCH (search));
+
+	g_hash_table_remove_all (search->priv->cached_results);
 }
 
 /**
