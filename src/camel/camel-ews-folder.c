@@ -1141,11 +1141,13 @@ ews_folder_search_by_expression (CamelFolder *folder,
 	ews_search = CAMEL_EWS_SEARCH (ews_folder->search);
 
 	camel_folder_search_set_folder (ews_folder->search, folder);
+	camel_ews_search_clear_cached_results (ews_search);
 	camel_ews_search_set_cancellable_and_error (ews_search, cancellable, error);
 
 	matches = camel_folder_search_search (ews_folder->search, expression, NULL, cancellable, error);
 
 	camel_ews_search_set_cancellable_and_error (ews_search, NULL, NULL);
+	camel_ews_search_clear_cached_results (ews_search);
 
 	g_mutex_unlock (&priv->search_lock);
 
@@ -1171,11 +1173,13 @@ ews_folder_count_by_expression (CamelFolder *folder,
 	ews_search = CAMEL_EWS_SEARCH (ews_folder->search);
 
 	camel_folder_search_set_folder (ews_folder->search, folder);
+	camel_ews_search_clear_cached_results (ews_search);
 	camel_ews_search_set_cancellable_and_error (ews_search, cancellable, error);
 
 	matches = camel_folder_search_count (ews_folder->search, expression, cancellable, error);
 
 	camel_ews_search_set_cancellable_and_error (ews_search, NULL, NULL);
+	camel_ews_search_clear_cached_results (ews_search);
 
 	g_mutex_unlock (&priv->search_lock);
 
@@ -1205,11 +1209,13 @@ ews_folder_search_by_uids (CamelFolder *folder,
 	ews_search = CAMEL_EWS_SEARCH (ews_folder->search);
 
 	camel_folder_search_set_folder (ews_folder->search, folder);
+	camel_ews_search_clear_cached_results (ews_search);
 	camel_ews_search_set_cancellable_and_error (ews_search, cancellable, error);
 
 	matches = camel_folder_search_search (ews_folder->search, expression, uids, cancellable, error);
 
 	camel_ews_search_set_cancellable_and_error (ews_search, NULL, NULL);
+	camel_ews_search_clear_cached_results (ews_search);
 
 	g_mutex_unlock (&priv->search_lock);
 
