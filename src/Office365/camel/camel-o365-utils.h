@@ -15,23 +15,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef E_O365_ENUMS_H
-#define E_O365_ENUMS_H
+#ifndef CAMEL_O365_UTILS_H
+#define CAMEL_O365_UTILS_H
 
-#include <glib.h>
+#include <camel/camel.h>
 
-G_BEGIN_DECLS
+#include "common/e-o365-connection.h"
 
-typedef enum {
-	E_O365_FOLDER_KIND_UNKNOWN,
-	E_O365_FOLDER_KIND_MAIL,
-	E_O365_FOLDER_KIND_CALENDAR,
-	E_O365_FOLDER_KIND_CONTACTS,
-	E_O365_FOLDER_KIND_SEARCH,
-	E_O365_FOLDER_KIND_TASKS,
-	E_O365_FOLDER_KIND_MEMOS
-} EO365FolderKind;
+EO365Connection *
+		camel_o365_utils_new_connection	(CamelService *service,
+						 GCancellable *cancellable);
 
-G_END_DECLS
-
-#endif /* E_O365_ENUMS_H */
+#endif /* CAMEL_O365_UTILS_H */

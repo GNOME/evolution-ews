@@ -45,6 +45,10 @@ struct _EO365ConnectionPrivate {
 	GProxyResolver *proxy_resolver;
 	ESoupAuthBearer *bearer_auth;
 
+	gboolean ssl_info_set;
+	gchar *ssl_certificate_pem;
+	GTlsCertificateFlags ssl_certificate_errors;
+
 	gchar *hash_key; /* in the opened connections hash */
 
 	/* How many microseconds to wait, until can execute a new request.
@@ -489,6 +493,7 @@ o365_connection_finalize (GObject *object)
 	EO365Connection *cnc = E_O365_CONNECTION (object);
 
 	g_rec_mutex_clear (&cnc->priv->property_lock);
+	g_clear_pointer (&cnc->priv->ssl_certificate_pem, g_free);
 	g_free (cnc->priv->hash_key);
 
 	/* Chain up to parent's method. */
@@ -827,6 +832,35 @@ o365_connection_request_cancelled_cb (GCancellable *cancellable,
 	e_flag_set (flag);
 }
 
+static void
+o365_connection_extract_ssl_data (EO365Connection *cnc,
+				  SoupMessage *message)
+{
+	GTlsCertificate *certificate = NULL;
+
+	g_return_if_fail (E_IS_O365_CONNECTION (cnc));
+	g_return_if_fail (SOUP_IS_MESSAGE (message));
+
+	LOCK (cnc);
+
+	g_clear_pointer (&cnc->priv->ssl_certificate_pem, g_free);
+	cnc->priv->ssl_info_set = FALSE;
+
+	g_object_get (G_OBJECT (message),
+		"tls-certificate", &certificate,
+		"tls-errors", &cnc->priv->ssl_certificate_errors,
+		NULL);
+
+	if (certificate) {
+		g_object_get (certificate, "certificate-pem", &cnc->priv->ssl_certificate_pem, NULL);
+		cnc->priv->ssl_info_set = TRUE;
+
+		g_object_unref (certificate);
+	}
+
+	UNLOCK (cnc);
+}
+
 /* An example error response:
 
   {
@@ -863,8 +897,10 @@ o365_connection_extract_error (JsonNode *node,
 	if (!code && !message)
 		return FALSE;
 
-	if (!status_code || !SOUP_STATUS_IS_SUCCESSFUL (status_code))
+	if (!status_code || SOUP_STATUS_IS_SUCCESSFUL (status_code))
 		status_code = SOUP_STATUS_MALFORMED;
+	else if (g_strcmp0 (code, "ErrorInvalidUser") == 0)
+		status_code = SOUP_STATUS_UNAUTHORIZED;
 
 	if (code && message)
 		g_set_error (error, SOUP_HTTP_ERROR, status_code, "%s: %s", code, message);
@@ -974,6 +1010,10 @@ o365_connection_send_request_sync (EO365Connection *cnc,
 
 		soup_session = cnc->priv->soup_session ? g_object_ref (cnc->priv->soup_session) : NULL;
 
+		g_clear_pointer (&cnc->priv->ssl_certificate_pem, g_free);
+		cnc->priv->ssl_certificate_errors = 0;
+		cnc->priv->ssl_info_set = FALSE;
+
 		UNLOCK (cnc);
 
 		if (soup_session &&
@@ -992,6 +1032,8 @@ o365_connection_send_request_sync (EO365Connection *cnc,
 			    /* https://docs.microsoft.com/en-us/graph/best-practices-concept#handling-expected-errors */
 			    message->status_code == SOUP_STATUS_SERVICE_UNAVAILABLE) {
 				need_retry = TRUE;
+			} else if (message->status_code == SOUP_STATUS_SSL_FAILED) {
+				o365_connection_extract_ssl_data (cnc, message);
 			}
 
 			if (need_retry) {
@@ -1204,6 +1246,8 @@ e_o365_construct_uri (EO365Connection *cnc,
 		if (*name && value) {
 			g_string_append_c (uri, first_param ? '?' : '&');
 
+			first_param = FALSE;
+
 			g_string_append (uri, name);
 			g_string_append_c (uri, '=');
 
@@ -1227,6 +1271,9 @@ e_o365_construct_uri (EO365Connection *cnc,
 }
 
 typedef struct _EO365ResponseData {
+	EO365ConnectionCallFunc func;
+	gpointer func_user_data;
+	gboolean read_only_once; /* To be able to just try authentication */
 	GSList **out_items; /* JsonObject * */
 	gchar **out_delta_link; /* set only if available and not NULL */
 } EO365ResponseData;
@@ -1245,6 +1292,8 @@ e_o365_read_valued_response_cb (EO365Connection *cnc,
 	JsonObject *object;
 	JsonArray *value;
 	const gchar *delta_link;
+	GSList *items = NULL;
+	gboolean can_continue = TRUE;
 	guint ii, len;
 
 	g_return_val_if_fail (response_data != NULL, FALSE);
@@ -1254,7 +1303,8 @@ e_o365_read_valued_response_cb (EO365Connection *cnc,
 	object = json_node_get_object (node);
 	g_return_val_if_fail (object != NULL, FALSE);
 
-	*out_next_link = g_strdup (e_o365_json_get_string_member (object, "@odata.nextLink", NULL));
+	if (!response_data->read_only_once)
+		*out_next_link = g_strdup (e_o365_json_get_string_member (object, "@odata.nextLink", NULL));
 
 	delta_link = e_o365_json_get_string_member (object, "@odata.deltaLink", NULL);
 
@@ -1274,9 +1324,158 @@ e_o365_read_valued_response_cb (EO365Connection *cnc,
 		if (JSON_NODE_HOLDS_OBJECT (elem)) {
 			JsonObject *elem_object = json_node_get_object (elem);
 
-			if (elem_object)
-				*response_data->out_items = g_slist_prepend (*response_data->out_items, json_object_ref (elem_object));
+			if (elem_object) {
+				if (response_data->out_items)
+					*response_data->out_items = g_slist_prepend (*response_data->out_items, json_object_ref (elem_object));
+				else
+					items = g_slist_prepend (items, json_object_ref (elem_object));
+			}
 		}
+	}
+
+	if (response_data->func)
+		can_continue = response_data->func (cnc, items, response_data->func_user_data, cancellable, error);
+
+	g_slist_free_full (items, (GDestroyNotify) json_object_unref);
+
+	return can_continue;
+}
+
+gboolean
+e_o365_connection_get_ssl_error_details (EO365Connection *cnc,
+					 gchar **out_certificate_pem,
+					 GTlsCertificateFlags *out_certificate_errors)
+{
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (out_certificate_pem != NULL, FALSE);
+	g_return_val_if_fail (out_certificate_errors != NULL, FALSE);
+
+	LOCK (cnc);
+
+	if (!cnc->priv->ssl_info_set) {
+		UNLOCK (cnc);
+		return FALSE;
+	}
+
+	*out_certificate_pem = g_strdup (cnc->priv->ssl_certificate_pem);
+	*out_certificate_errors = cnc->priv->ssl_certificate_errors;
+
+	UNLOCK (cnc);
+
+	return TRUE;
+}
+
+ESourceAuthenticationResult
+e_o365_connection_authenticate_sync (EO365Connection *cnc,
+				     GCancellable *cancellable,
+				     GError **error)
+{
+	ESourceAuthenticationResult result = E_SOURCE_AUTHENTICATION_ERROR;
+	EO365ResponseData rd;
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+	GSList *folders = NULL;
+	GError *local_error = NULL;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), result);
+
+	/* Just pick an inexpensive operation */
+	uri = e_o365_construct_uri (cnc, TRUE, NULL, E_O365_API_V1_0, NULL,
+		"mailFolders",
+		NULL,
+		"$select", "displayName",
+		"$top", "1",
+		NULL);
+
+	message = soup_message_new (SOUP_METHOD_GET, uri);
+
+	if (!message) {
+		g_set_error (error, SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED, _("Malformed URI: “%s”"), uri);
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	memset (&rd, 0, sizeof (EO365ResponseData));
+
+	rd.read_only_once = TRUE;
+	rd.out_items = &folders;
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_valued_response_cb, &rd, cancellable, &local_error);
+
+	if (success) {
+		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
+	} else {
+		if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_CANCELLED)) {
+			local_error->domain = G_IO_ERROR;
+			local_error->code = G_IO_ERROR_CANCELLED;
+		} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_SSL_FAILED)) {
+			result = E_SOURCE_AUTHENTICATION_ERROR_SSL_FAILED;
+		} else if (g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
+			ESoupAuthBearer *bearer;
+
+			bearer = e_o365_connection_ref_bearer_auth (cnc);
+
+			if (bearer)
+				result = E_SOURCE_AUTHENTICATION_REJECTED;
+			else
+				result = E_SOURCE_AUTHENTICATION_REQUIRED;
+
+			g_clear_object (&bearer);
+			g_clear_error (&local_error);
+		}
+
+		if (local_error) {
+			g_propagate_error (error, local_error);
+			local_error = NULL;
+		}
+	}
+
+	g_slist_free_full (folders, (GDestroyNotify) json_object_unref);
+	g_clear_object (&message);
+	g_clear_error (&local_error);
+
+	return result;
+}
+
+gboolean
+e_o365_connection_disconnect_sync (EO365Connection *cnc,
+				   GCancellable *cancellable,
+				   GError **error)
+{
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+
+	LOCK (cnc);
+
+	soup_session_abort (cnc->priv->soup_session);
+
+	UNLOCK (cnc);
+
+	return TRUE;
+}
+
+/* This can be used as a EO365ConnectionCallFunc function, it only
+   copies items of 'results' into 'user_data', which is supposed
+   to be a pointer to a GSList *. */
+gboolean
+e_o365_connection_call_gather_into_slist (EO365Connection *cnc,
+					  const GSList *results, /* JsonObject * - the returned objects from the server */
+					  gpointer user_data, /* expects GSList **, aka pointer to a GSList *, where it copies the 'results' */
+					  GCancellable *cancellable,
+					  GError **error)
+{
+	GSList **out_results = user_data, *link;
+
+	g_return_val_if_fail (out_results != NULL, FALSE);
+
+	for (link = (GSList *) results; link; link = g_slist_next (link)) {
+		JsonObject *obj = link->data;
+
+		if (obj)
+			*out_results = g_slist_prepend (*out_results, json_object_ref (obj));
 	}
 
 	return TRUE;
@@ -1333,8 +1532,9 @@ e_o365_connection_get_mail_folders_delta_sync (EO365Connection *cnc,
 					       const gchar *select, /* fields to select, nullable */
 					       const gchar *delta_link, /* previous delta link */
 					       guint max_page_size, /* 0 for default by the server */
+					       EO365ConnectionCallFunc func, /* function to call with each result set */
+					       gpointer func_user_data, /* user data passed into the 'func' */
 					       gchar **out_delta_link,
-					       GSList **out_folders, /* JsonObject * - the returned mailFolder objects */
 					       GCancellable *cancellable,
 					       GError **error)
 {
@@ -1344,7 +1544,7 @@ e_o365_connection_get_mail_folders_delta_sync (EO365Connection *cnc,
 
 	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
 	g_return_val_if_fail (out_delta_link != NULL, FALSE);
-	g_return_val_if_fail (out_folders != NULL, FALSE);
+	g_return_val_if_fail (func != NULL, FALSE);
 
 	if (delta_link)
 		message = soup_message_new (SOUP_METHOD_GET, delta_link);
@@ -1382,7 +1582,8 @@ e_o365_connection_get_mail_folders_delta_sync (EO365Connection *cnc,
 
 	memset (&rd, 0, sizeof (EO365ResponseData));
 
-	rd.out_items = out_folders;
+	rd.func = func;
+	rd.func_user_data = func_user_data;
 	rd.out_delta_link = out_delta_link;
 
 	success = o365_connection_send_request_sync (cnc, message, e_o365_read_valued_response_cb, &rd, cancellable, error);

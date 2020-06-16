@@ -51,6 +51,13 @@ typedef struct _EO365Connection EO365Connection;
 typedef struct _EO365ConnectionClass EO365ConnectionClass;
 typedef struct _EO365ConnectionPrivate EO365ConnectionPrivate;
 
+/* Returns whether can continue */
+typedef gboolean (* EO365ConnectionCallFunc)	(EO365Connection *cnc,
+						 const GSList *results, /* JsonObject * - the returned objects from the server */
+						 gpointer user_data,
+						 GCancellable *cancellable,
+						 GError **error);
+
 struct _EO365Connection {
 	GObject parent;
 	EO365ConnectionPrivate *priv;
@@ -94,6 +101,25 @@ ESoupAuthBearer *
 void		e_o365_connection_set_bearer_auth
 						(EO365Connection *cnc,
 						 ESoupAuthBearer *bearer_auth);
+gboolean	e_o365_connection_get_ssl_error_details
+						(EO365Connection *cnc,
+						 gchar **out_certificate_pem,
+						 GTlsCertificateFlags *out_certificate_errors);
+ESourceAuthenticationResult
+		e_o365_connection_authenticate_sync
+						(EO365Connection *cnc,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_disconnect_sync
+						(EO365Connection *cnc,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_call_gather_into_slist
+						(EO365Connection *cnc,
+						 const GSList *results, /* JsonObject * - the returned objects from the server */
+						 gpointer user_data, /* expects GSList **, aka pointer to a GSList *, where it copies the 'results' */
+						 GCancellable *cancellable,
+						 GError **error);
 gboolean	e_o365_connection_list_folders_sync
 						(EO365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
@@ -108,8 +134,9 @@ gboolean	e_o365_connection_get_mail_folders_delta_sync
 						 const gchar *select, /* fields to select, nullable */
 						 const gchar *delta_link, /* previous delta link */
 						 guint max_page_size, /* 0 for default by the server */
+						 EO365ConnectionCallFunc func, /* function to call with each result set */
+						 gpointer func_user_data, /* user data passed into the 'func' */
 						 gchar **out_delta_link,
-						 GSList **out_folders, /* JsonObject * - the returned mailFolder objects */
 						 GCancellable *cancellable,
 						 GError **error);
 

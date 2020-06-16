@@ -103,7 +103,7 @@ test_clicked_cb (GtkButton *button,
 	g_return_if_fail (cnc != NULL);
 
 	//success = e_o365_connection_list_folders_sync (cnc, NULL, NULL, NULL, &folders, NULL, &error);
-	success = e_o365_connection_get_mail_folders_delta_sync (cnc, NULL, NULL, delta_link, 0, &new_delta_link, &folders, NULL, &error);
+	success = e_o365_connection_get_mail_folders_delta_sync (cnc, NULL, NULL, delta_link, 0, e_o365_connection_call_gather_into_slist, &folders, &new_delta_link, NULL, &error);
 
 	if (success) {
 		g_free (delta_link);

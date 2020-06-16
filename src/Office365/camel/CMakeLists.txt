@@ -14,6 +14,8 @@ set(SOURCES
 	camel-o365-store-summary.h
 	camel-o365-transport.c
 	camel-o365-transport.h
+	camel-o365-utils.c
+	camel-o365-utils.h
 )
 
 add_library(cameloffice365 MODULE
