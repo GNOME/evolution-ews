@@ -21,10 +21,15 @@
 #include <glib-object.h>
 
 #include <libebackend/libebackend.h>
+#include <json-glib/json-glib.h>
 #include <libsoup/soup.h>
 
 #include "camel-o365-settings.h"
 #include "e-o365-enums.h"
+
+/* Currently, as of 2020-06-17, there is a limitation to 20 requests:
+   https://docs.microsoft.com/en-us/graph/known-issues#json-batching */
+#define E_O365_BATCH_MAX_REQUESTS 20
 
 /* Standard GObject macros */
 #define E_TYPE_O365_CONNECTION \
@@ -46,6 +51,11 @@
 	((obj), E_TYPE_O365_CONNECTION))
 
 G_BEGIN_DECLS
+
+typedef enum {
+	E_O365_API_V1_0,
+	E_O365_API_BETA
+} EO365ApiVersion;
 
 typedef struct _EO365Connection EO365Connection;
 typedef struct _EO365ConnectionClass EO365ConnectionClass;
@@ -112,6 +122,26 @@ ESourceAuthenticationResult
 						 GError **error);
 gboolean	e_o365_connection_disconnect_sync
 						(EO365Connection *cnc,
+						 GCancellable *cancellable,
+						 GError **error);
+gchar *		e_o365_connection_construct_uri	(EO365Connection *cnc,
+						 gboolean include_user,
+						 const gchar *user_override,
+						 EO365ApiVersion api_version,
+						 const gchar *api_part, /* NULL for 'users', empty string to skip */
+						 const gchar *resource,
+						 const gchar *path,
+						 ...) G_GNUC_NULL_TERMINATED;
+gboolean	e_o365_connection_json_node_from_message
+						(SoupMessage *message,
+						 GInputStream *input_stream,
+						 JsonNode **out_node,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_batch_request_sync
+						(EO365Connection *cnc,
+						 EO365ApiVersion api_version,
+						 GPtrArray *requests, /* SoupMessage * */
 						 GCancellable *cancellable,
 						 GError **error);
 gboolean	e_o365_connection_call_gather_into_slist

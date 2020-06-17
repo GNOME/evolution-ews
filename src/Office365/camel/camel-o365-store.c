@@ -36,6 +36,7 @@ struct _CamelO365StorePrivate {
 	gchar *storage_path;
 	CamelO365StoreSummary *summary;
 	EO365Connection *cnc;
+	GHashTable *default_folders;
 };
 
 static void camel_o365_store_initable_init (GInitableIface *iface);
@@ -148,11 +149,113 @@ o365_store_get_name (CamelService *service,
 	gchar *name;
 
 	if (brief)
-		name = g_strdup (_("Office365 server"));
+		name = g_strdup (_("Office 365 server"));
 	else
-		name = g_strdup (_("Mail receive via Microsoft Office365"));
+		name = g_strdup (_("Mail receive via Microsoft Office 365"));
 
 	return name;
+}
+
+static gboolean
+o365_store_read_default_folders (CamelO365Store *o365_store,
+				 EO365Connection *cnc,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	struct _default_folders {
+		const gchar *name;
+		guint32 flags;
+	} default_folders[] = {
+		{ "archive",		CAMEL_FOLDER_TYPE_ARCHIVE },
+		{ "deleteditems",	CAMEL_FOLDER_TYPE_TRASH },
+		{ "drafts",		CAMEL_FOLDER_TYPE_DRAFTS },
+		{ "inbox",		CAMEL_FOLDER_TYPE_INBOX },
+		{ "junkemail",		CAMEL_FOLDER_TYPE_JUNK },
+		{ "outbox",		CAMEL_FOLDER_TYPE_OUTBOX },
+		{ "sentitems",		CAMEL_FOLDER_TYPE_SENT }
+	};
+	GPtrArray *requests;
+	gboolean success;
+	guint ii;
+
+	g_return_val_if_fail (CAMEL_IS_O365_STORE (o365_store), FALSE);
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+
+	LOCK (o365_store);
+
+	if (g_hash_table_size (o365_store->priv->default_folders)) {
+		UNLOCK (o365_store);
+		return TRUE;
+	}
+
+	UNLOCK (o365_store);
+
+	requests = g_ptr_array_new_full (G_N_ELEMENTS (default_folders), g_object_unref);
+
+	for (ii = 0; ii < G_N_ELEMENTS (default_folders); ii++) {
+		SoupMessage *message;
+		gchar *uri;
+
+		uri = e_o365_connection_construct_uri (cnc, TRUE, NULL, E_O365_API_V1_0, NULL,
+			"mailFolders",
+			default_folders[ii].name,
+			"$select", "id",
+			NULL);
+
+		message = soup_message_new (SOUP_METHOD_GET, uri);
+
+		if (!message) {
+			g_set_error (error, SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED, _("Malformed URI: “%s”"), uri);
+
+			g_ptr_array_unref (requests);
+			g_free (uri);
+
+			return FALSE;
+		}
+
+		g_free (uri);
+
+		g_ptr_array_add (requests, message);
+	}
+
+	success = e_o365_connection_batch_request_sync (cnc, E_O365_API_V1_0, requests, cancellable, error);
+
+	if (success) {
+		g_warn_if_fail (requests->len == G_N_ELEMENTS (default_folders));
+
+		LOCK (o365_store);
+
+		for (ii = 0; ii < requests->len; ii++) {
+			SoupMessage *message = g_ptr_array_index (requests, ii);
+			JsonNode *node = NULL;
+
+			if (message->status_code > 0 && SOUP_STATUS_IS_SUCCESSFUL (message->status_code) &&
+			    e_o365_connection_json_node_from_message (message, NULL, &node, cancellable, NULL) &&
+			    node && JSON_NODE_HOLDS_OBJECT (node)) {
+				JsonObject *object = json_node_get_object (node);
+
+				if (object) {
+					const gchar *id;
+
+					id = e_o365_json_get_string_member (object, "id", NULL);
+
+					if (id && *id) {
+						g_hash_table_insert (o365_store->priv->default_folders, g_strdup (id),
+							GUINT_TO_POINTER (default_folders[ii].flags));
+					}
+				}
+			}
+
+			if (node)
+				json_node_unref (node);
+		}
+
+		UNLOCK (o365_store);
+	}
+
+	g_ptr_array_unref (requests);
+
+	return success;
 }
 
 static EO365Connection *
@@ -247,9 +350,11 @@ o365_store_authenticate_sync (CamelService *service,
 			      GError **error)
 {
 	CamelAuthenticationResult result;
+	CamelO365Store *o365_store;
 	EO365Connection *cnc;
 
-	cnc = o365_store_ref_connection (CAMEL_O365_STORE (service));
+	o365_store = CAMEL_O365_STORE (service);
+	cnc = o365_store_ref_connection (o365_store);
 
 	if (!cnc)
 		return CAMEL_AUTHENTICATION_ERROR;
@@ -262,6 +367,8 @@ o365_store_authenticate_sync (CamelService *service,
 		break;
 	case E_SOURCE_AUTHENTICATION_ACCEPTED:
 		result = CAMEL_AUTHENTICATION_ACCEPTED;
+
+		o365_store_read_default_folders (o365_store, cnc, cancellable, NULL);
 		break;
 	case E_SOURCE_AUTHENTICATION_REJECTED:
 	case E_SOURCE_AUTHENTICATION_REQUIRED:
@@ -400,6 +507,8 @@ camel_o365_got_folders_delta_cb (EO365Connection *cnc,
 				old_full_name = camel_o365_store_summary_dup_folder_full_name (fdd->o365_store->priv->summary, id);
 
 			flags = e_o365_mail_folder_get_child_folder_count (object) ? CAMEL_STORE_INFO_FOLDER_CHILDREN : CAMEL_STORE_INFO_FOLDER_NOCHILDREN;
+
+			flags |= GPOINTER_TO_UINT (g_hash_table_lookup (fdd->o365_store->priv->default_folders, id));
 
 			camel_o365_store_summary_set_folder (fdd->o365_store->priv->summary, FALSE, id,
 				e_o365_mail_folder_get_parent_folder_id (object),
@@ -619,6 +728,8 @@ o365_store_finalize (GObject *object)
 	o365_store = CAMEL_O365_STORE (object);
 
 	g_rec_mutex_clear (&o365_store->priv->property_lock);
+	g_hash_table_destroy (o365_store->priv->default_folders);
+	g_free (o365_store->priv->storage_path);
 
 	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (camel_o365_store_parent_class)->finalize (object);
@@ -697,4 +808,5 @@ camel_o365_store_init (CamelO365Store *o365_store)
 	o365_store->priv = camel_o365_store_get_instance_private (o365_store);
 
 	g_rec_mutex_init (&o365_store->priv->property_lock);
+	o365_store->priv->default_folders = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 }

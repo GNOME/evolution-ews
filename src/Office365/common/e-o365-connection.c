@@ -28,13 +28,10 @@
 
 #include "e-o365-connection.h"
 
-typedef enum {
-	E_O365_API_V1_0,
-	E_O365_API_BETA
-} EO365ApiVersion;
-
 #define LOCK(x) g_rec_mutex_lock (&(x->priv->property_lock))
 #define UNLOCK(x) g_rec_mutex_unlock (&(x->priv->property_lock))
+
+#define X_EVO_O365_DATA "X-EVO-O365-DATA"
 
 struct _EO365ConnectionPrivate {
 	GRecMutex property_lock;
@@ -1052,6 +1049,78 @@ typedef gboolean (* EO365ResponseFunc)	(EO365Connection *cnc,
 					 GCancellable *cancellable,
 					 GError **error);
 
+/* (transfer full) (nullable): Free the *out_node with json_node_unref(), if not NULL;
+   It can return 'success', even when the *out_node is NULL. */
+gboolean
+e_o365_connection_json_node_from_message (SoupMessage *message,
+					  GInputStream *input_stream,
+					  JsonNode **out_node,
+					  GCancellable *cancellable,
+					  GError **error)
+{
+	JsonObject *message_json_object;
+	gboolean success = TRUE;
+	GError *local_error = NULL;
+
+	g_return_val_if_fail (SOUP_IS_MESSAGE (message), FALSE);
+	g_return_val_if_fail (out_node != NULL, FALSE);
+
+	*out_node = NULL;
+
+	message_json_object = g_object_get_data (G_OBJECT (message), X_EVO_O365_DATA);
+
+	if (message_json_object) {
+		*out_node = json_node_init_object (json_node_new (JSON_NODE_OBJECT), message_json_object);
+
+		success = !o365_connection_extract_error (*out_node, message->status_code, &local_error);
+	} else {
+		const gchar *content_type;
+
+		content_type = message->response_headers ? soup_message_headers_get_content_type (message->response_headers, NULL) : NULL;
+
+		if (content_type && g_ascii_strcasecmp (content_type, "application/json") == 0) {
+			JsonParser *json_parser;
+
+			json_parser = json_parser_new_immutable ();
+
+			if (input_stream) {
+				success = json_parser_load_from_stream (json_parser, input_stream, cancellable, error);
+			} else {
+				SoupBuffer *sbuffer;
+
+				sbuffer = soup_message_body_flatten (message->response_body);
+
+				if (sbuffer) {
+					success = json_parser_load_from_data (json_parser, sbuffer->data, sbuffer->length, error);
+					soup_buffer_free (sbuffer);
+				} else {
+					/* This should not happen, it's for safety check only, thus the string is not localized */
+					success = FALSE;
+					g_set_error_literal (&local_error, G_IO_ERROR, G_IO_ERROR_FAILED, "No JSON data found");
+				}
+			}
+
+			if (success) {
+				*out_node = json_parser_steal_root (json_parser);
+
+				success = !o365_connection_extract_error (*out_node, message->status_code, &local_error);
+			}
+
+			g_object_unref (json_parser);
+		}
+	}
+
+	if (!success && *out_node) {
+		json_node_unref (*out_node);
+		*out_node = NULL;
+	}
+
+	if (local_error)
+		g_propagate_error (error, local_error);
+
+	return success;
+}
+
 static gboolean
 o365_connection_send_request_sync (EO365Connection *cnc,
 				   SoupMessage *message,
@@ -1061,7 +1130,7 @@ o365_connection_send_request_sync (EO365Connection *cnc,
 				   GError **error)
 {
 	SoupSession *soup_session;
-	gint need_retry_seconds = 30;
+	gint need_retry_seconds = 5;
 	gboolean success = FALSE, need_retry = TRUE;
 
 	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
@@ -1197,25 +1266,12 @@ o365_connection_send_request_sync (EO365Connection *cnc,
 
 				success = FALSE;
 			} else if (success) {
-				JsonParser *json_parser = NULL;
-				const gchar *content_type;
+				JsonNode *node = NULL;
 
-				content_type = message->response_headers ? soup_message_headers_get_content_type (message->response_headers, NULL) : NULL;
-
-				if (content_type && g_ascii_strcasecmp (content_type, "application/json") == 0) {
-					json_parser = json_parser_new_immutable ();
-
-					success = json_parser_load_from_stream (json_parser, input_stream, cancellable, error);
-
-					if (success && error && !*error)
-						success = !o365_connection_extract_error (json_parser_get_root (json_parser), message->status_code, error);
-				}
+				success = e_o365_connection_json_node_from_message (message, input_stream, &node, cancellable, error);
 
 				if (success) {
-					JsonNode *node;
 					gchar *next_link = NULL;
-
-					node = json_parser ? json_parser_get_root (json_parser) : NULL;
 
 					success = func (cnc, message, input_stream, node, func_user_data, &next_link, cancellable, error);
 
@@ -1246,7 +1302,8 @@ o365_connection_send_request_sync (EO365Connection *cnc,
 					}
 				}
 
-				g_clear_object (&json_parser);
+				if (node)
+					json_node_unref (node);
 			}
 
 			g_clear_object (&input_stream);
@@ -1274,135 +1331,13 @@ o365_connection_send_request_sync (EO365Connection *cnc,
 	return success;
 }
 
-/* Expects pair of parameters 'name', 'value'; if value is NULL, the parameter is skipped; the last parameter name should be NULL */
-static gchar *
-e_o365_construct_uri (EO365Connection *cnc,
-		      gboolean include_user,
-		      const gchar *user_override,
-		      EO365ApiVersion api_version,
-		      const gchar *api_part, /* NULL for 'users', empty string to skip */
-		      const gchar *resource,
-		      const gchar *path,
-		      ...) G_GNUC_NULL_TERMINATED;
-
-static gchar *
-e_o365_construct_uri (EO365Connection *cnc,
-		      gboolean include_user,
-		      const gchar *user_override,
-		      EO365ApiVersion api_version,
-		      const gchar *api_part,
-		      const gchar *resource,
-		      const gchar *path,
-		      ...)
-{
-	va_list args;
-	const gchar *name, *value;
-	gboolean first_param = TRUE;
-	GString *uri;
-
-	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), NULL);
-
-	if (!api_part)
-		api_part = "users";
-
-	uri = g_string_sized_new (128);
-
-	/* https://graph.microsoft.com/v1.0/users/XUSERX/mailFolders */
-
-	g_string_append (uri, "https://graph.microsoft.com");
-
-	switch (api_version) {
-	case E_O365_API_V1_0:
-		g_string_append_c (uri, '/');
-		g_string_append (uri, "v1.0");
-		break;
-	case E_O365_API_BETA:
-		g_string_append_c (uri, '/');
-		g_string_append (uri, "beta");
-		break;
-	}
-
-	if (*api_part) {
-		g_string_append_c (uri, '/');
-		g_string_append (uri, api_part);
-	}
-
-	if (include_user) {
-		const gchar *use_user;
-
-		LOCK (cnc);
-
-		if (user_override)
-			use_user = user_override;
-		else if (cnc->priv->impersonate_user)
-			use_user = cnc->priv->impersonate_user;
-		else
-			use_user = cnc->priv->user;
-
-		if (use_user) {
-			gchar *encoded;
-
-			encoded = soup_uri_encode (use_user, NULL);
-
-			g_string_append_c (uri, '/');
-			g_string_append (uri, encoded);
-
-			g_free (encoded);
-		}
-
-		UNLOCK (cnc);
-	}
-
-	if (resource && *resource) {
-		g_string_append_c (uri, '/');
-		g_string_append (uri, resource);
-	}
-
-	if (path && *path) {
-		g_string_append_c (uri, '/');
-		g_string_append (uri, path);
-	}
-
-	va_start (args, path);
-
-	name = va_arg (args, const gchar *);
-
-	while (name) {
-		value = va_arg (args, const gchar *);
-
-		if (*name && value) {
-			g_string_append_c (uri, first_param ? '?' : '&');
-
-			first_param = FALSE;
-
-			g_string_append (uri, name);
-			g_string_append_c (uri, '=');
-
-			if (*value) {
-				gchar *encoded;
-
-				encoded = soup_uri_encode (value, NULL);
-
-				g_string_append (uri, encoded);
-
-				g_free (encoded);
-			}
-		}
-
-		name = va_arg (args, const gchar *);
-	}
-
-	va_end (args);
-
-	return g_string_free (uri, FALSE);
-}
-
 typedef struct _EO365ResponseData {
 	EO365ConnectionCallFunc func;
 	gpointer func_user_data;
 	gboolean read_only_once; /* To be able to just try authentication */
 	GSList **out_items; /* JsonObject * */
 	gchar **out_delta_link; /* set only if available and not NULL */
+	GPtrArray *inout_requests; /* SoupMessage *, for the batch request */
 } EO365ResponseData;
 
 static gboolean
@@ -1508,7 +1443,7 @@ e_o365_connection_authenticate_sync (EO365Connection *cnc,
 	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), result);
 
 	/* Just pick an inexpensive operation */
-	uri = e_o365_construct_uri (cnc, TRUE, NULL, E_O365_API_V1_0, NULL,
+	uri = e_o365_connection_construct_uri (cnc, TRUE, NULL, E_O365_API_V1_0, NULL,
 		"mailFolders",
 		NULL,
 		"$select", "displayName",
@@ -1594,6 +1529,464 @@ e_o365_connection_disconnect_sync (EO365Connection *cnc,
 	return TRUE;
 }
 
+/* Expects NULL-terminated pair of parameters 'name', 'value'; if 'value' is NULL, the parameter is skipped */
+gchar *
+e_o365_connection_construct_uri (EO365Connection *cnc,
+				 gboolean include_user,
+				 const gchar *user_override,
+				 EO365ApiVersion api_version,
+				 const gchar *api_part,
+				 const gchar *resource,
+				 const gchar *path,
+				 ...)
+{
+	va_list args;
+	const gchar *name, *value;
+	gboolean first_param = TRUE;
+	GString *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), NULL);
+
+	if (!api_part)
+		api_part = "users";
+
+	uri = g_string_sized_new (128);
+
+	/* https://graph.microsoft.com/v1.0/users/XUSERX/mailFolders */
+
+	g_string_append (uri, "https://graph.microsoft.com");
+
+	switch (api_version) {
+	case E_O365_API_V1_0:
+		g_string_append_c (uri, '/');
+		g_string_append (uri, "v1.0");
+		break;
+	case E_O365_API_BETA:
+		g_string_append_c (uri, '/');
+		g_string_append (uri, "beta");
+		break;
+	}
+
+	if (*api_part) {
+		g_string_append_c (uri, '/');
+		g_string_append (uri, api_part);
+	}
+
+	if (include_user) {
+		const gchar *use_user;
+
+		LOCK (cnc);
+
+		if (user_override)
+			use_user = user_override;
+		else if (cnc->priv->impersonate_user)
+			use_user = cnc->priv->impersonate_user;
+		else
+			use_user = cnc->priv->user;
+
+		if (use_user) {
+			gchar *encoded;
+
+			encoded = soup_uri_encode (use_user, NULL);
+
+			g_string_append_c (uri, '/');
+			g_string_append (uri, encoded);
+
+			g_free (encoded);
+		}
+
+		UNLOCK (cnc);
+	}
+
+	if (resource && *resource) {
+		g_string_append_c (uri, '/');
+		g_string_append (uri, resource);
+	}
+
+	if (path && *path) {
+		g_string_append_c (uri, '/');
+		g_string_append (uri, path);
+	}
+
+	va_start (args, path);
+
+	name = va_arg (args, const gchar *);
+
+	while (name) {
+		value = va_arg (args, const gchar *);
+
+		if (*name && value) {
+			g_string_append_c (uri, first_param ? '?' : '&');
+
+			first_param = FALSE;
+
+			g_string_append (uri, name);
+			g_string_append_c (uri, '=');
+
+			if (*value) {
+				gchar *encoded;
+
+				encoded = soup_uri_encode (value, NULL);
+
+				g_string_append (uri, encoded);
+
+				g_free (encoded);
+			}
+		}
+
+		name = va_arg (args, const gchar *);
+	}
+
+	va_end (args);
+
+	return g_string_free (uri, FALSE);
+}
+
+static void
+e_o365_fill_message_headers_cb (JsonObject *object,
+				const gchar *member_name,
+				JsonNode *member_node,
+				gpointer user_data)
+{
+	SoupMessage *message = user_data;
+
+	g_return_if_fail (message != NULL);
+	g_return_if_fail (member_name != NULL);
+	g_return_if_fail (member_node != NULL);
+
+	if (JSON_NODE_HOLDS_VALUE (member_node)) {
+		const gchar *value;
+
+		value = json_node_get_string (member_node);
+
+		if (value)
+			soup_message_headers_replace (message->response_headers, member_name, value);
+	}
+}
+
+static void
+e_o365_connection_fill_batch_response (SoupMessage *message,
+				       JsonObject *object)
+{
+	JsonObject *subobject;
+
+	g_return_if_fail (SOUP_IS_MESSAGE (message));
+	g_return_if_fail (object != NULL);
+
+	message->status_code = e_o365_json_get_int_member (object, "status", SOUP_STATUS_MALFORMED);
+
+	subobject = e_o365_json_get_object_member (object, "headers");
+
+	if (subobject)
+		json_object_foreach_member (subobject, e_o365_fill_message_headers_cb, message);
+
+	subobject = e_o365_json_get_object_member (object, "body");
+
+	if (subobject)
+		g_object_set_data_full (G_OBJECT (message), X_EVO_O365_DATA, json_object_ref (subobject), (GDestroyNotify) json_object_unref);
+}
+
+static gboolean
+e_o365_read_batch_response_cb (EO365Connection *cnc,
+			       SoupMessage *message,
+			       GInputStream *input_stream,
+			       JsonNode *node,
+			       gpointer user_data,
+			       gchar **out_next_link,
+			       GCancellable *cancellable,
+			       GError **error)
+{
+	GPtrArray *requests = user_data;
+	JsonObject *object;
+	JsonArray *responses;
+	guint ii, len;
+
+	g_return_val_if_fail (requests != NULL, FALSE);
+	g_return_val_if_fail (out_next_link != NULL, FALSE);
+	g_return_val_if_fail (JSON_NODE_HOLDS_OBJECT (node), FALSE);
+
+	object = json_node_get_object (node);
+	g_return_val_if_fail (object != NULL, FALSE);
+
+	*out_next_link = g_strdup (e_o365_json_get_string_member (object, "@odata.nextLink", NULL));
+
+	responses = e_o365_json_get_array_member (object, "responses");
+	g_return_val_if_fail (responses != NULL, FALSE);
+
+	len = json_array_get_length (responses);
+
+	for (ii = 0; ii < len; ii++) {
+		JsonNode *elem = json_array_get_element (responses, ii);
+
+		g_warn_if_fail (JSON_NODE_HOLDS_OBJECT (elem));
+
+		if (JSON_NODE_HOLDS_OBJECT (elem)) {
+			JsonObject *elem_object = json_node_get_object (elem);
+
+			if (elem_object) {
+				const gchar *id_str;
+
+				id_str = e_o365_json_get_string_member (elem_object, "id", NULL);
+
+				if (id_str) {
+					guint id;
+
+					id = (guint) g_ascii_strtoull (id_str, NULL, 10);
+
+					if (id < requests->len)
+						e_o365_connection_fill_batch_response (g_ptr_array_index (requests, id), elem_object);
+				}
+			}
+		}
+	}
+
+	return TRUE;
+}
+
+/* https://docs.microsoft.com/en-us/graph/json-batching */
+
+static gboolean
+e_o365_connection_batch_request_internal_sync (EO365Connection *cnc,
+					       EO365ApiVersion api_version,
+					       GPtrArray *requests, /* SoupMessage * */
+					       GCancellable *cancellable,
+					       GError **error)
+{
+	SoupMessage *message;
+	JsonBuilder *builder;
+	JsonGenerator *generator;
+	JsonNode *node;
+	gboolean success;
+	gchar *uri, buff[128], *data;
+	gsize data_length = 0;
+	guint ii;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (requests != NULL, FALSE);
+	g_return_val_if_fail (requests->len > 0, FALSE);
+	g_return_val_if_fail (requests->len <= E_O365_BATCH_MAX_REQUESTS, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, FALSE, NULL, api_version, "",
+		"$batch", NULL, NULL);
+
+	message = soup_message_new (SOUP_METHOD_POST, uri);
+
+	if (!message) {
+		g_set_error (error, SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED, _("Malformed URI: “%s”"), uri);
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	builder = json_builder_new_immutable ();
+
+	json_builder_begin_object (builder);
+
+	json_builder_set_member_name (builder, "requests");
+	json_builder_begin_array (builder);
+
+	for (ii = 0; ii < requests->len; ii++) {
+		SoupMessageHeadersIter iter;
+		SoupMessage *submessage;
+		SoupURI *suri;
+		gboolean has_headers = FALSE;
+		const gchar *hdr_name, *hdr_value, *use_uri;
+
+		submessage = g_ptr_array_index (requests, ii);
+
+		if (!submessage)
+			continue;
+
+		submessage->status_code = SOUP_STATUS_IO_ERROR;
+
+		suri = soup_message_get_uri (submessage);
+		uri = suri ? soup_uri_to_string (suri, TRUE) : NULL;
+
+		if (!uri) {
+			submessage->status_code = SOUP_STATUS_MALFORMED;
+			continue;
+		}
+
+		use_uri = uri;
+
+		/* The 'url' is without the API part, it is derived from the main request */
+		if (g_str_has_prefix (use_uri, "/v1.0/") ||
+		    g_str_has_prefix (use_uri, "/beta/"))
+			use_uri += 5;
+
+		g_snprintf (buff, sizeof (buff), "%d", ii);
+
+		json_builder_begin_object (builder);
+
+		json_builder_set_member_name (builder, "id");
+		json_builder_add_string_value (builder, buff);
+
+		json_builder_set_member_name (builder, "method");
+		json_builder_add_string_value (builder, submessage->method);
+
+		json_builder_set_member_name (builder, "url");
+		json_builder_add_string_value (builder, use_uri);
+
+		g_free (uri);
+
+		soup_message_headers_iter_init (&iter, submessage->request_headers);
+
+		while (soup_message_headers_iter_next (&iter, &hdr_name, &hdr_value)) {
+			if (hdr_name && *hdr_name && hdr_value) {
+				if (!has_headers) {
+					has_headers = TRUE;
+
+					json_builder_set_member_name (builder, "headers");
+					json_builder_begin_object (builder);
+				}
+
+				json_builder_set_member_name (builder, hdr_name);
+				json_builder_add_string_value (builder, hdr_value);
+			}
+		}
+
+		if (has_headers)
+			json_builder_end_object (builder);
+
+		if (submessage->request_body) {
+			SoupBuffer *sbuffer;
+
+			sbuffer = soup_message_body_flatten (submessage->request_body);
+
+			if (sbuffer && sbuffer->length > 0) {
+				json_builder_set_member_name (builder, "body");
+				json_builder_add_string_value (builder, sbuffer->data);
+			}
+
+			if (sbuffer)
+				soup_buffer_free (sbuffer);
+		}
+
+		json_builder_end_object (builder);
+	}
+
+	json_builder_end_array (builder);
+	json_builder_end_object (builder);
+
+	node = json_builder_get_root (builder);
+
+	generator = json_generator_new ();
+	json_generator_set_root (generator, node);
+
+	data = json_generator_to_data (generator, &data_length);
+
+	soup_message_headers_append (message->request_headers, "Content-Type", "application/json");
+	soup_message_headers_append (message->request_headers, "Accept", "application/json");
+
+	if (data)
+		soup_message_body_append_take (message->request_body, (guchar *) data, data_length);
+
+	json_node_unref (node);
+	g_object_unref (builder);
+	g_object_unref (generator);
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_batch_response_cb, requests, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* The 'requests' contains a SoupMessage * objects, from which are read
+   the request data and on success the SoupMessage's 'response' properties
+   are filled accordingly.
+ */
+gboolean
+e_o365_connection_batch_request_sync (EO365Connection *cnc,
+				      EO365ApiVersion api_version,
+				      GPtrArray *requests, /* SoupMessage * */
+				      GCancellable *cancellable,
+				      GError **error)
+{
+	GPtrArray *use_requests;
+	gint need_retry_seconds = 5;
+	gboolean success, need_retry = TRUE;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (requests != NULL, FALSE);
+	g_return_val_if_fail (requests->len > 0, FALSE);
+	g_return_val_if_fail (requests->len <= E_O365_BATCH_MAX_REQUESTS, FALSE);
+
+	use_requests = requests;
+
+	while (need_retry) {
+		need_retry = FALSE;
+
+		success = e_o365_connection_batch_request_internal_sync (cnc, api_version, use_requests, cancellable, error);
+
+		if (success) {
+			GPtrArray *new_requests = NULL;
+			gint delay_seconds = 0;
+			gint ii;
+
+			for (ii = 0; ii < use_requests->len; ii++) {
+				SoupMessage *message = g_ptr_array_index (use_requests, ii);
+
+				if (!message)
+					continue;
+
+				/* Throttling - https://docs.microsoft.com/en-us/graph/throttling  */
+				if (message->status_code == 429 ||
+				    /* https://docs.microsoft.com/en-us/graph/best-practices-concept#handling-expected-errors */
+				    message->status_code == SOUP_STATUS_SERVICE_UNAVAILABLE) {
+					const gchar *retry_after_str;
+					gint64 retry_after;
+
+					need_retry = TRUE;
+
+					if (!new_requests)
+						new_requests = g_ptr_array_sized_new (use_requests->len);
+
+					g_ptr_array_add (new_requests, message);
+
+					retry_after_str = message->response_headers ? soup_message_headers_get_one (message->response_headers, "Retry-After") : NULL;
+
+					if (retry_after_str && *retry_after_str)
+						retry_after = g_ascii_strtoll (retry_after_str, NULL, 10);
+					else
+						retry_after = 0;
+
+					if (retry_after > 0)
+						delay_seconds = MAX (delay_seconds, retry_after);
+					else
+						delay_seconds = MAX (delay_seconds, need_retry_seconds);
+				}
+			}
+
+			if (new_requests) {
+				if (delay_seconds)
+					need_retry_seconds = delay_seconds;
+				else if (need_retry_seconds < 120)
+					need_retry_seconds *= 2;
+
+				LOCK (cnc);
+
+				if (cnc->priv->backoff_for_usec < need_retry_seconds * G_USEC_PER_SEC)
+					cnc->priv->backoff_for_usec = need_retry_seconds * G_USEC_PER_SEC;
+
+				UNLOCK (cnc);
+
+				if (use_requests != requests)
+					g_ptr_array_free (use_requests, TRUE);
+
+				use_requests = new_requests;
+			}
+		}
+	}
+
+	if (use_requests != requests)
+		g_ptr_array_free (use_requests, TRUE);
+
+	return success;
+}
+
 /* This can be used as a EO365ConnectionCallFunc function, it only
    copies items of 'results' into 'user_data', which is supposed
    to be a pointer to a GSList *. */
@@ -1635,7 +2028,7 @@ e_o365_connection_list_folders_sync (EO365Connection *cnc,
 	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
 	g_return_val_if_fail (out_folders != NULL, FALSE);
 
-	uri = e_o365_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
 		"mailFolders",
 		from_path,
 		"$select", select,
@@ -1689,7 +2082,7 @@ e_o365_connection_get_mail_folders_delta_sync (EO365Connection *cnc,
 	if (!message) {
 		gchar *uri;
 
-		uri = e_o365_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
 			"mailFolders",
 			"delta",
 			"$select", select,

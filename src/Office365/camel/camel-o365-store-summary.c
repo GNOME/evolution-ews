@@ -64,6 +64,7 @@ o365_store_summary_encode_folder_name (const gchar *display_name)
 	return g_string_free (encoded, FALSE);
 }
 
+#if 0
 static gchar *
 o365_store_summary_decode_folder_name (gchar *pathpart)
 {
@@ -95,6 +96,7 @@ o365_store_summary_decode_folder_name (gchar *pathpart)
 
 	return pathpart;
 }
+#endif
 
 static void
 camel_o365_store_summary_migrate_data_locked (CamelO365StoreSummary *store_summary,
@@ -404,6 +406,8 @@ camel_o365_store_summary_rebuild_hashes (CamelO365StoreSummary *store_summary)
 		g_hash_table_destroy (covered);
 	}
 
+	g_hash_table_destroy (id_folder_name);
+	g_hash_table_destroy (id_parent_id);
 	g_strfreev (groups);
 
 	UNLOCK (store_summary);
@@ -501,13 +505,15 @@ camel_o365_store_summary_set_folder (CamelO365StoreSummary *store_summary,
 				     gboolean is_foreign,
 				     gboolean is_public)
 {
-	gboolean changed;
+	gboolean changed = FALSE;
 
 	g_return_if_fail (CAMEL_IS_O365_STORE_SUMMARY (store_summary));
 	g_return_if_fail (id != NULL);
 	g_return_if_fail (display_name != NULL);
 
 	LOCK (store_summary);
+
+	camel_o365_store_summary_update_folder (store_summary, with_hashes_update, id, parent_id, display_name, total_count, unread_count, -1);
 
 	camel_o365_store_summary_set_folder_parent_id (store_summary, id, parent_id);
 	camel_o365_store_summary_set_folder_total_count (store_summary, id, total_count);
@@ -534,6 +540,41 @@ camel_o365_store_summary_set_folder (CamelO365StoreSummary *store_summary,
 
 	if (changed)
 		store_summary->priv->dirty = TRUE;
+
+	UNLOCK (store_summary);
+}
+
+void
+camel_o365_store_summary_update_folder (CamelO365StoreSummary *store_summary,
+					gboolean with_hashes_update,
+					const gchar *id,
+					const gchar *parent_id,
+					const gchar *display_name,
+					gint32 total_count,
+					gint32 unread_count,
+					gint32 children_count)
+{
+	g_return_if_fail (CAMEL_IS_O365_STORE_SUMMARY (store_summary));
+	g_return_if_fail (id != NULL);
+	g_return_if_fail (display_name != NULL);
+
+	LOCK (store_summary);
+
+	camel_o365_store_summary_set_folder_parent_id (store_summary, id, parent_id);
+	camel_o365_store_summary_set_folder_total_count (store_summary, id, total_count);
+	camel_o365_store_summary_set_folder_unread_count (store_summary, id, unread_count);
+
+	if (children_count != -1) {
+		guint32 flags = camel_o365_store_summary_get_folder_flags (store_summary, id);
+
+		flags = (flags & (~(CAMEL_FOLDER_CHILDREN | CAMEL_FOLDER_NOCHILDREN))) |
+			(children_count ? CAMEL_FOLDER_CHILDREN : CAMEL_FOLDER_NOCHILDREN);
+
+		camel_o365_store_summary_set_folder_flags (store_summary, id, flags);
+	}
+
+	/* Set display name as the last, because it updates internal hashes and depends on the stored data */
+	camel_o365_store_summary_set_folder_display_name (store_summary, id, display_name, with_hashes_update);
 
 	UNLOCK (store_summary);
 }
