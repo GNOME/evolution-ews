@@ -33,6 +33,7 @@
 
 struct _EMailConfigO365BackendPrivate {
 	GtkWidget *user_entry;
+	GtkWidget *impersonate_user_entry;
 	GtkGrid *oauth2_settings_grid;
 	GtkWidget *oauth2_override_check;
 	GtkWidget *oauth2_tenant_entry;
@@ -203,6 +204,40 @@ mail_config_o365_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	gtk_grid_attach (GTK_GRID (container), widget, 1, 0, 2, 1);
 	o365_backend->priv->user_entry = widget;  /* do not reference */
 	gtk_widget_show (widget);
+
+	widget = gtk_check_button_new_with_mnemonic (_("Open _Mailbox of other user"));
+	gtk_grid_attach (GTK_GRID (container), widget, 1, 1, 1, 1);
+	gtk_widget_show (widget);
+
+	if (camel_o365_settings_get_use_impersonation (CAMEL_O365_SETTINGS (settings))) {
+		const gchar *impersonate_user = camel_o365_settings_get_impersonate_user (CAMEL_O365_SETTINGS (settings));
+
+		if (impersonate_user && !*impersonate_user) {
+			camel_o365_settings_set_impersonate_user (CAMEL_O365_SETTINGS (settings), NULL);
+			camel_o365_settings_set_use_impersonation (CAMEL_O365_SETTINGS (settings), FALSE);
+		}
+	}
+
+	e_binding_bind_property (
+		settings, "use-impersonation",
+		widget, "active",
+		G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
+
+	widget = gtk_entry_new ();
+	gtk_widget_set_hexpand (widget, TRUE);
+	gtk_grid_attach (GTK_GRID (container), widget, 1, 2, 1, 1);
+	gtk_widget_show (widget);
+	o365_backend->priv->impersonate_user_entry = widget;  /* do not reference */
+
+	e_binding_bind_object_text_property (
+		settings, "impersonate-user",
+		widget, "text",
+		G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
+
+	e_binding_bind_property (
+		settings, "use-impersonation",
+		widget, "sensitive",
+		G_BINDING_SYNC_CREATE);
 
 	text = _("Authentication");
 	markup = g_markup_printf_escaped ("<b>%s</b>", text);

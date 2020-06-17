@@ -24,12 +24,14 @@
 
 struct _CamelO365SettingsPrivate {
 	GMutex property_lock;
+	gboolean use_impersonation;
 	gboolean check_all;
 	gboolean filter_junk;
 	gboolean filter_junk_inbox;
 	gboolean override_oauth2;
 	guint timeout;
 	guint concurrent_connections;
+	gchar *impersonate_user;
 	gchar *email;
 	gchar *oauth2_tenant;
 	gchar *oauth2_client_id;
@@ -48,6 +50,8 @@ enum {
 	PROP_SECURITY_METHOD,
 	PROP_TIMEOUT,
 	PROP_USER,
+	PROP_USE_IMPERSONATION,
+	PROP_IMPERSONATE_USER,
 	PROP_OVERRIDE_OAUTH2,
 	PROP_OAUTH2_TENANT,
 	PROP_OAUTH2_CLIENT_ID,
@@ -123,6 +127,18 @@ o365_settings_set_property (GObject *object,
 		case PROP_USER:
 			camel_network_settings_set_user (
 				CAMEL_NETWORK_SETTINGS (object),
+				g_value_get_string (value));
+			return;
+
+		case PROP_USE_IMPERSONATION:
+			camel_o365_settings_set_use_impersonation (
+				CAMEL_O365_SETTINGS (object),
+				g_value_get_boolean (value));
+			return;
+
+		case PROP_IMPERSONATE_USER:
+			camel_o365_settings_set_impersonate_user (
+				CAMEL_O365_SETTINGS (object),
 				g_value_get_string (value));
 			return;
 
@@ -235,6 +251,20 @@ o365_settings_get_property (GObject *object,
 				value,
 				camel_network_settings_dup_user (
 				CAMEL_NETWORK_SETTINGS (object)));
+			return;
+
+		case PROP_USE_IMPERSONATION:
+			g_value_set_boolean (
+				value,
+				camel_o365_settings_get_use_impersonation (
+				CAMEL_O365_SETTINGS (object)));
+			return;
+
+		case PROP_IMPERSONATE_USER:
+			g_value_take_string (
+				value,
+				camel_o365_settings_dup_impersonate_user (
+				CAMEL_O365_SETTINGS (object)));
 			return;
 
 		case PROP_OVERRIDE_OAUTH2:
@@ -394,6 +424,30 @@ camel_o365_settings_class_init (CamelO365SettingsClass *class)
 
 	g_object_class_install_property (
 		object_class,
+		PROP_USE_IMPERSONATION,
+		g_param_spec_boolean (
+			"use-impersonation",
+			"Use Impersonation",
+			"Use Impersonation",
+			FALSE,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_IMPERSONATE_USER,
+		g_param_spec_string (
+			"impersonate-user",
+			"Impersonate User",
+			"Impersonate User",
+			NULL,
+			G_PARAM_READWRITE |
+			G_PARAM_CONSTRUCT |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
 		PROP_OVERRIDE_OAUTH2,
 		g_param_spec_boolean (
 			"override-oauth2",
@@ -498,6 +552,75 @@ camel_o365_settings_get_from_backend (struct _EBackend *backend,
 	g_object_unref (collection);
 
 	return CAMEL_O365_SETTINGS (settings);
+}
+
+gboolean
+camel_o365_settings_get_use_impersonation (CamelO365Settings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_O365_SETTINGS (settings), FALSE);
+
+	return settings->priv->use_impersonation;
+}
+
+void
+camel_o365_settings_set_use_impersonation (CamelO365Settings *settings,
+					   gboolean use_impersonation)
+{
+	g_return_if_fail (CAMEL_IS_O365_SETTINGS (settings));
+
+	if ((settings->priv->use_impersonation ? 1 : 0) == (use_impersonation ? 1 : 0))
+		return;
+
+	settings->priv->use_impersonation = use_impersonation;
+
+	g_object_notify (G_OBJECT (settings), "use-impersonation");
+}
+
+const gchar *
+camel_o365_settings_get_impersonate_user (CamelO365Settings *settings)
+{
+	g_return_val_if_fail (CAMEL_IS_O365_SETTINGS (settings), NULL);
+
+	return settings->priv->impersonate_user;
+}
+
+gchar *
+camel_o365_settings_dup_impersonate_user (CamelO365Settings *settings)
+{
+	const gchar *protected;
+	gchar *duplicate;
+
+	g_return_val_if_fail (CAMEL_IS_O365_SETTINGS (settings), NULL);
+
+	g_mutex_lock (&settings->priv->property_lock);
+
+	protected = camel_o365_settings_get_impersonate_user (settings);
+	duplicate = g_strdup (protected);
+
+	g_mutex_unlock (&settings->priv->property_lock);
+
+	return duplicate;
+}
+
+void
+camel_o365_settings_set_impersonate_user (CamelO365Settings *settings,
+					  const gchar *impersonate_user)
+{
+	g_return_if_fail (CAMEL_IS_O365_SETTINGS (settings));
+
+	g_mutex_lock (&settings->priv->property_lock);
+
+	if (g_strcmp0 (settings->priv->impersonate_user, impersonate_user) == 0) {
+		g_mutex_unlock (&settings->priv->property_lock);
+		return;
+	}
+
+	g_free (settings->priv->impersonate_user);
+	settings->priv->impersonate_user = e_util_strdup_strip (impersonate_user);
+
+	g_mutex_unlock (&settings->priv->property_lock);
+
+	g_object_notify (G_OBJECT (settings), "impersonate-user");
 }
 
 gboolean

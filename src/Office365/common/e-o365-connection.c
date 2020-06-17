@@ -45,6 +45,9 @@ struct _EO365ConnectionPrivate {
 	GProxyResolver *proxy_resolver;
 	ESoupAuthBearer *bearer_auth;
 
+	gchar *user; /* The default user for the URL */
+	gchar *impersonate_user;
+
 	gboolean ssl_info_set;
 	gchar *ssl_certificate_pem;
 	GTlsCertificateFlags ssl_certificate_errors;
@@ -62,7 +65,10 @@ enum {
 	PROP_PROXY_RESOLVER,
 	PROP_SETTINGS,
 	PROP_SOURCE,
-	PROP_CONCURRENT_CONNECTIONS
+	PROP_CONCURRENT_CONNECTIONS,
+	PROP_USER,			/* This one is hidden, write only */
+	PROP_USE_IMPERSONATION,		/* This one is hidden, write only */
+	PROP_IMPERSONATE_USER		/* This one is hidden, write only */
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (EO365Connection, e_o365_connection, G_TYPE_OBJECT)
@@ -326,6 +332,24 @@ o365_connection_set_settings (EO365Connection *cnc,
 	g_return_if_fail (cnc->priv->settings == NULL);
 
 	cnc->priv->settings = g_object_ref (settings);
+
+	e_binding_bind_property (
+		cnc->priv->settings, "user",
+		cnc, "user",
+		G_BINDING_DEFAULT |
+		G_BINDING_SYNC_CREATE);
+
+	e_binding_bind_property (
+		cnc->priv->settings, "use-impersonation",
+		cnc, "use-impersonation",
+		G_BINDING_DEFAULT |
+		G_BINDING_SYNC_CREATE);
+
+	/* No need to G_BINDING_SYNC_CREATE, because the 'use-impersonation' already updated the value */
+	e_binding_bind_property (
+		cnc->priv->settings, "impersonate-user",
+		cnc, "impersonate-user",
+		G_BINDING_DEFAULT);
 }
 
 static void
@@ -337,6 +361,62 @@ o365_connection_set_source (EO365Connection *cnc,
 	g_return_if_fail (cnc->priv->source == NULL);
 
 	cnc->priv->source = g_object_ref (source);
+}
+
+static void
+o365_connection_take_user (EO365Connection *cnc,
+			   gchar *user)
+{
+	g_return_if_fail (E_IS_O365_CONNECTION (cnc));
+
+	LOCK (cnc);
+
+	if (!user || !*user)
+		g_clear_pointer (&user, g_free);
+
+	g_free (cnc->priv->user);
+	cnc->priv->user = user;
+
+	UNLOCK (cnc);
+}
+
+static void
+o365_connection_take_impersonate_user (EO365Connection *cnc,
+				       gchar *impersonate_user)
+{
+	g_return_if_fail (E_IS_O365_CONNECTION (cnc));
+
+	LOCK (cnc);
+
+	if (!impersonate_user || !*impersonate_user ||
+	    !camel_o365_settings_get_use_impersonation (cnc->priv->settings)) {
+		g_clear_pointer (&impersonate_user, g_free);
+	}
+
+	if (g_strcmp0 (impersonate_user, cnc->priv->impersonate_user) != 0) {
+		g_free (cnc->priv->impersonate_user);
+		cnc->priv->impersonate_user = impersonate_user;
+	} else {
+		g_clear_pointer (&impersonate_user, g_free);
+	}
+
+	UNLOCK (cnc);
+}
+
+static void
+o365_connection_set_use_impersonation (EO365Connection *cnc,
+				       gboolean use_impersonation)
+{
+	g_return_if_fail (E_IS_O365_CONNECTION (cnc));
+
+	LOCK (cnc);
+
+	if (!use_impersonation)
+		o365_connection_take_impersonate_user (cnc, NULL);
+	else
+		o365_connection_take_impersonate_user (cnc, camel_o365_settings_dup_impersonate_user (cnc->priv->settings));
+
+	UNLOCK (cnc);
 }
 
 static void
@@ -368,6 +448,24 @@ o365_connection_set_property (GObject *object,
 			e_o365_connection_set_concurrent_connections (
 				E_O365_CONNECTION (object),
 				g_value_get_uint (value));
+			return;
+
+		case PROP_USER:
+			o365_connection_take_user (
+				E_O365_CONNECTION (object),
+				g_value_dup_string (value));
+			return;
+
+		case PROP_USE_IMPERSONATION:
+			o365_connection_set_use_impersonation (
+				E_O365_CONNECTION (object),
+				g_value_get_boolean (value));
+			return;
+
+		case PROP_IMPERSONATE_USER:
+			o365_connection_take_impersonate_user (
+				E_O365_CONNECTION (object),
+				g_value_dup_string (value));
 			return;
 	}
 
@@ -494,6 +592,8 @@ o365_connection_finalize (GObject *object)
 
 	g_rec_mutex_clear (&cnc->priv->property_lock);
 	g_clear_pointer (&cnc->priv->ssl_certificate_pem, g_free);
+	g_clear_pointer (&cnc->priv->user, g_free);
+	g_clear_pointer (&cnc->priv->impersonate_user, g_free);
 	g_free (cnc->priv->hash_key);
 
 	/* Chain up to parent's method. */
@@ -560,6 +660,39 @@ e_o365_connection_class_init (EO365ConnectionClass *class)
 			/* Do not construct it, otherwise it overrides the value derived from CamelO365Settings */
 			G_PARAM_READWRITE |
 			G_PARAM_EXPLICIT_NOTIFY |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_USER,
+		g_param_spec_string (
+			"user",
+			NULL,
+			NULL,
+			NULL,
+			G_PARAM_WRITABLE |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_USE_IMPERSONATION,
+		g_param_spec_boolean (
+			"use-impersonation",
+			NULL,
+			NULL,
+			FALSE,
+			G_PARAM_WRITABLE |
+			G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (
+		object_class,
+		PROP_IMPERSONATE_USER,
+		g_param_spec_string (
+			"impersonate-user",
+			NULL,
+			NULL,
+			NULL,
+			G_PARAM_WRITABLE |
 			G_PARAM_STATIC_STRINGS));
 }
 
@@ -1195,35 +1328,29 @@ e_o365_construct_uri (EO365Connection *cnc,
 	}
 
 	if (include_user) {
-		if (user_override) {
+		const gchar *use_user;
+
+		LOCK (cnc);
+
+		if (user_override)
+			use_user = user_override;
+		else if (cnc->priv->impersonate_user)
+			use_user = cnc->priv->impersonate_user;
+		else
+			use_user = cnc->priv->user;
+
+		if (use_user) {
 			gchar *encoded;
 
-			encoded = soup_uri_encode (user_override, NULL);
+			encoded = soup_uri_encode (use_user, NULL);
 
 			g_string_append_c (uri, '/');
 			g_string_append (uri, encoded);
 
 			g_free (encoded);
-		} else {
-			CamelO365Settings *settings;
-			gchar *user;
-
-			settings = e_o365_connection_get_settings (cnc);
-			user = camel_network_settings_dup_user (CAMEL_NETWORK_SETTINGS (settings));
-
-			if (user && *user) {
-				gchar *encoded;
-
-				encoded = soup_uri_encode (user, NULL);
-
-				g_string_append_c (uri, '/');
-				g_string_append (uri, encoded);
-
-				g_free (encoded);
-			}
-
-			g_free (user);
 		}
+
+		UNLOCK (cnc);
 	}
 
 	if (resource && *resource) {
@@ -1419,10 +1546,20 @@ e_o365_connection_authenticate_sync (EO365Connection *cnc,
 
 			bearer = e_o365_connection_ref_bearer_auth (cnc);
 
-			if (bearer)
-				result = E_SOURCE_AUTHENTICATION_REJECTED;
-			else
+			if (bearer) {
+				LOCK (cnc);
+
+				if (cnc->priv->impersonate_user) {
+					g_propagate_error (error, local_error);
+					local_error = NULL;
+				} else {
+					result = E_SOURCE_AUTHENTICATION_REJECTED;
+				}
+
+				UNLOCK (cnc);
+			} else {
 				result = E_SOURCE_AUTHENTICATION_REQUIRED;
+			}
 
 			g_clear_object (&bearer);
 			g_clear_error (&local_error);

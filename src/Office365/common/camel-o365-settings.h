@@ -66,6 +66,18 @@ CamelO365Settings *
 		camel_o365_settings_get_from_backend
 						(struct _EBackend *backend,
 						 struct _ESourceRegistry *registry);
+gboolean	camel_o365_settings_get_use_impersonation
+						(CamelO365Settings *settings);
+void		camel_o365_settings_set_use_impersonation
+						(CamelO365Settings *settings,
+						 gboolean use_impersonation);
+const gchar *	camel_o365_settings_get_impersonate_user
+						(CamelO365Settings *settings);
+gchar *		camel_o365_settings_dup_impersonate_user
+						(CamelO365Settings *settings);
+void		camel_o365_settings_set_impersonate_user
+						(CamelO365Settings *settings,
+						 const gchar *impersonate_user);
 gboolean	camel_o365_settings_get_check_all
 						(CamelO365Settings *settings);
 void		camel_o365_settings_set_check_all
