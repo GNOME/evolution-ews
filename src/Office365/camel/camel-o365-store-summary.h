@@ -108,6 +108,12 @@ gboolean	camel_o365_store_summary_get_folder	(CamelO365StoreSummary *store_summa
 gchar *		camel_o365_store_summary_dup_folder_full_name
 							(CamelO365StoreSummary *store_summary,
 							 const gchar *id);
+gchar *		camel_o365_store_summary_dup_folder_id_for_full_name
+							(CamelO365StoreSummary *store_summary,
+							 const gchar *full_name);
+gchar *		camel_o365_store_summary_dup_folder_id_for_type
+							(CamelO365StoreSummary *store_summary,
+							 guint32 folder_type); /* The CAMEL_FOLDER_TYPE_... of the CamelFolderInfoFlags */
 gboolean	camel_o365_store_summary_set_folder_display_name
 							(CamelO365StoreSummary *store_summary,
 							 const gchar *id,
@@ -144,6 +150,9 @@ void		camel_o365_store_summary_set_folder_flags
 guint32		camel_o365_store_summary_get_folder_flags
 							(CamelO365StoreSummary *store_summary,
 							 const gchar *id);
+guint32		camel_o365_store_summary_get_folder_flags_for_full_name
+							(CamelO365StoreSummary *store_summary,
+							 const gchar *full_name);
 EO365FolderKind	camel_o365_store_summary_get_folder_kind(CamelO365StoreSummary *store_summary,
 							 const gchar *id);
 gboolean	camel_o365_store_summary_get_folder_is_foreign
@@ -161,6 +170,9 @@ CamelFolderInfo *
 							(CamelO365StoreSummary *store_summary,
 							 const gchar *top,
 							 gboolean recursive);
+void		camel_o365_store_summary_connect_folder_summary
+							(CamelO365StoreSummary *store_summary,
+							 CamelFolderSummary *folder_summary);
 G_END_DECLS
 
 #endif /* CAMEL_O365_STORE_SUMMARY_H */

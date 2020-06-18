@@ -7,6 +7,12 @@ set(DEPENDENCIES
 )
 
 set(SOURCES
+	camel-o365-folder.c
+	camel-o365-folder.h
+	camel-o365-folder-summary.c
+	camel-o365-folder-summary.h
+	camel-o365-message-info.c
+	camel-o365-message-info.h
 	camel-o365-provider.c
 	camel-o365-store.c
 	camel-o365-store.h

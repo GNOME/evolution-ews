@@ -20,6 +20,9 @@
 
 #include <camel/camel.h>
 
+#include "common/e-o365-connection.h"
+#include "camel-o365-store-summary.h"
+
 /* Standard GObject macros */
 #define CAMEL_TYPE_O365_STORE \
 	(camel_o365_store_get_type ())
@@ -55,12 +58,21 @@ struct _CamelO365StoreClass {
 };
 
 GType		camel_o365_store_get_type	(void);
+
+CamelO365StoreSummary *
+		camel_o365_store_ref_store_summary
+						(CamelO365Store *store);
+EO365Connection *
+		camel_o365_store_ref_connection	(CamelO365Store *o365_store);
 gboolean	camel_o365_store_connected	(CamelO365Store *store,
 						 GCancellable *cancellable,
 						 GError **error);
 void		camel_o365_store_maybe_disconnect
 						(CamelO365Store *store,
 						 const GError *error);
+void		camel_o365_store_connect_folder_summary
+						(CamelO365Store *store,
+						 CamelFolderSummary *folder_summary);
 
 G_END_DECLS
 

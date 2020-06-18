@@ -258,23 +258,6 @@ o365_store_read_default_folders (CamelO365Store *o365_store,
 	return success;
 }
 
-static EO365Connection *
-o365_store_ref_connection (CamelO365Store *o365_store)
-{
-	EO365Connection *cnc = NULL;
-
-	g_return_val_if_fail (CAMEL_IS_O365_STORE (o365_store), NULL);
-
-	LOCK (o365_store);
-
-	if (o365_store->priv->cnc)
-		cnc = g_object_ref (o365_store->priv->cnc);
-
-	UNLOCK (o365_store);
-
-	return cnc;
-}
-
 static gboolean
 o365_store_connect_sync (CamelService *service,
 			 GCancellable *cancellable,
@@ -292,7 +275,7 @@ o365_store_connect_sync (CamelService *service,
 		return FALSE;
 
 	o365_store = CAMEL_O365_STORE (service);
-	cnc = o365_store_ref_connection (o365_store);
+	cnc = camel_o365_store_ref_connection (o365_store);
 
 	if (!cnc) {
 		LOCK (o365_store);
@@ -328,7 +311,7 @@ o365_store_disconnect_sync (CamelService *service,
 	EO365Connection *cnc;
 	gboolean success = TRUE;
 
-	cnc = o365_store_ref_connection (o365_store);
+	cnc = camel_o365_store_ref_connection (o365_store);
 
 	if (cnc) {
 		success = e_o365_connection_disconnect_sync (cnc, cancellable, error);
@@ -354,7 +337,7 @@ o365_store_authenticate_sync (CamelService *service,
 	EO365Connection *cnc;
 
 	o365_store = CAMEL_O365_STORE (service);
-	cnc = o365_store_ref_connection (o365_store);
+	cnc = camel_o365_store_ref_connection (o365_store);
 
 	if (!cnc)
 		return CAMEL_AUTHENTICATION_ERROR;
@@ -379,48 +362,6 @@ o365_store_authenticate_sync (CamelService *service,
 	g_clear_object (&cnc);
 
 	return result;
-}
-
-gboolean
-camel_o365_store_connected (CamelO365Store *o365_store,
-			    GCancellable *cancellable,
-			    GError **error)
-{
-	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (o365_store))) {
-		g_set_error (
-			error, CAMEL_SERVICE_ERROR,
-			CAMEL_SERVICE_ERROR_UNAVAILABLE,
-			_("You must be working online to complete this operation"));
-		return FALSE;
-	}
-
-	if (!camel_service_connect_sync ((CamelService *) o365_store, cancellable, error))
-		return FALSE;
-
-	return TRUE;
-}
-
-void
-camel_o365_store_maybe_disconnect (CamelO365Store *store,
-				   const GError *error)
-{
-	CamelService *service;
-
-	g_return_if_fail (store != NULL);
-
-	if (!error)
-		return;
-
-	service = CAMEL_SERVICE (store);
-
-	if (camel_service_get_connection_status (service) != CAMEL_SERVICE_CONNECTED)
-		return;
-
-#if 0
-	if (g_error_matches (error, O365_CONNECTION_ERROR, O365_CONNECTION_ERROR_NORESPONSE) ||
-	    g_error_matches (error, O365_CONNECTION_ERROR, O365_CONNECTION_ERROR_AUTHENTICATION_FAILED))
-		camel_service_disconnect_sync (service, FALSE, NULL, NULL);
-#endif
 }
 
 static void
@@ -565,7 +506,7 @@ o365_get_folder_info_sync (CamelStore *store,
 		if (refresh_online) {
 			EO365Connection *cnc;
 
-			cnc = o365_store_ref_connection (o365_store);
+			cnc = camel_o365_store_ref_connection (o365_store);
 
 			if (cnc) {
 				FoldersDeltaData fdd;
@@ -770,17 +711,17 @@ camel_o365_store_class_init (CamelO365StoreClass *class)
 
 	store_class = CAMEL_STORE_CLASS (class);
 #if 0
-	store_class->get_folder_sync = o365_get_folder_sync;
-	store_class->create_folder_sync = o365_create_folder_sync;
-	store_class->delete_folder_sync = o365_delete_folder_sync;
-	store_class->rename_folder_sync = o365_rename_folder_sync;
+	store_class->get_folder_sync = o365_store_get_folder_sync;
+	store_class->create_folder_sync = o365_store_create_folder_sync;
+	store_class->delete_folder_sync = o365_store_delete_folder_sync;
+	store_class->rename_folder_sync = o365_store_rename_folder_sync;
 #endif
 	store_class->get_folder_info_sync = o365_get_folder_info_sync;
 #if 0
-	store_class->initial_setup_sync = o365_initial_setup_sync;
-	store_class->get_trash_folder_sync = o365_get_trash_folder_sync;
-	store_class->get_junk_folder_sync = o365_get_junk_folder_sync;
-	store_class->can_refresh_folder = o365_can_refresh_folder;
+	store_class->initial_setup_sync = o365_store_initial_setup_sync;
+	store_class->get_trash_folder_sync = o365_store_get_trash_folder_sync;
+	store_class->get_junk_folder_sync = o365_store_get_junk_folder_sync;
+	store_class->can_refresh_folder = o365_store_can_refresh_folder;
 #endif
 }
 
@@ -809,4 +750,99 @@ camel_o365_store_init (CamelO365Store *o365_store)
 
 	g_rec_mutex_init (&o365_store->priv->property_lock);
 	o365_store->priv->default_folders = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+}
+
+CamelO365StoreSummary *
+camel_o365_store_ref_store_summary (CamelO365Store *store)
+{
+	CamelO365StoreSummary *summary;
+
+	g_return_val_if_fail (CAMEL_IS_O365_STORE (store), NULL);
+
+	LOCK (store);
+
+	summary = store->priv->summary;
+
+	if (summary)
+		g_object_ref (summary);
+
+	UNLOCK (store);
+
+	return summary;
+}
+
+EO365Connection *
+camel_o365_store_ref_connection (CamelO365Store *o365_store)
+{
+	EO365Connection *cnc = NULL;
+
+	g_return_val_if_fail (CAMEL_IS_O365_STORE (o365_store), NULL);
+
+	LOCK (o365_store);
+
+	if (o365_store->priv->cnc)
+		cnc = g_object_ref (o365_store->priv->cnc);
+
+	UNLOCK (o365_store);
+
+	return cnc;
+}
+
+gboolean
+camel_o365_store_connected (CamelO365Store *o365_store,
+			    GCancellable *cancellable,
+			    GError **error)
+{
+	g_return_val_if_fail (CAMEL_IS_O365_STORE (o365_store), FALSE);
+
+	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (o365_store))) {
+		g_set_error (
+			error, CAMEL_SERVICE_ERROR,
+			CAMEL_SERVICE_ERROR_UNAVAILABLE,
+			_("You must be working online to complete this operation"));
+		return FALSE;
+	}
+
+	if (!camel_service_connect_sync ((CamelService *) o365_store, cancellable, error))
+		return FALSE;
+
+	return TRUE;
+}
+
+void
+camel_o365_store_maybe_disconnect (CamelO365Store *store,
+				   const GError *error)
+{
+	CamelService *service;
+
+	g_return_if_fail (CAMEL_IS_O365_STORE (store));
+
+	if (!error)
+		return;
+
+	service = CAMEL_SERVICE (store);
+
+	if (camel_service_get_connection_status (service) != CAMEL_SERVICE_CONNECTED)
+		return;
+
+#if 0
+	if (g_error_matches (error, O365_CONNECTION_ERROR, O365_CONNECTION_ERROR_NORESPONSE) ||
+	    g_error_matches (error, O365_CONNECTION_ERROR, O365_CONNECTION_ERROR_AUTHENTICATION_FAILED))
+		camel_service_disconnect_sync (service, FALSE, NULL, NULL);
+#endif
+}
+
+void
+camel_o365_store_connect_folder_summary (CamelO365Store *store,
+					 CamelFolderSummary *folder_summary)
+{
+	g_return_if_fail (CAMEL_IS_O365_STORE (store));
+	g_return_if_fail (CAMEL_IS_FOLDER_SUMMARY (folder_summary));
+
+	LOCK (store);
+
+	if (store->priv->summary)
+		camel_o365_store_summary_connect_folder_summary (store->priv->summary, folder_summary);
+
+	UNLOCK (store);
 }

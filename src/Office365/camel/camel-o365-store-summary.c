@@ -647,6 +647,57 @@ camel_o365_store_summary_dup_folder_full_name (CamelO365StoreSummary *store_summ
 	return value;
 }
 
+gchar *
+camel_o365_store_summary_dup_folder_id_for_full_name (CamelO365StoreSummary *store_summary,
+						      const gchar *full_name)
+{
+	gchar *id;
+
+	g_return_val_if_fail (CAMEL_IS_O365_STORE_SUMMARY (store_summary), NULL);
+	g_return_val_if_fail (full_name != NULL, NULL);
+
+	LOCK (store_summary);
+
+	id = g_strdup (g_hash_table_lookup (store_summary->priv->full_name_id_hash, full_name));
+
+	UNLOCK (store_summary);
+
+	return id;
+}
+
+gchar *
+camel_o365_store_summary_dup_folder_id_for_type (CamelO365StoreSummary *store_summary,
+						 guint32 folder_type)
+{
+	GHashTableIter iter;
+	gpointer key;
+	gchar *id = NULL;
+
+	g_return_val_if_fail (CAMEL_IS_O365_STORE_SUMMARY (store_summary), NULL);
+
+	folder_type = folder_type & CAMEL_FOLDER_TYPE_MASK;
+	g_return_val_if_fail (folder_type != 0, NULL);
+
+	LOCK (store_summary);
+
+	g_hash_table_iter_init (&iter, store_summary->priv->id_full_name_hash);
+
+	while (g_hash_table_iter_next (&iter, &key, NULL)) {
+		guint32 flags;
+
+		flags = camel_o365_store_summary_get_folder_flags (store_summary, key);
+
+		if ((flags & CAMEL_FOLDER_TYPE_MASK) == folder_type) {
+			id = g_strdup (key);
+			break;
+		}
+	}
+
+	UNLOCK (store_summary);
+
+	return id;
+}
+
 typedef struct _IdFullNameData {
 	gchar *id;
 	gchar *full_name;
@@ -955,6 +1006,28 @@ camel_o365_store_summary_get_folder_flags (CamelO365StoreSummary *store_summary,
 	return value;
 }
 
+guint32
+camel_o365_store_summary_get_folder_flags_for_full_name (CamelO365StoreSummary *store_summary,
+							 const gchar *full_name)
+{
+	const gchar *id;
+	guint32 flags = 0;
+
+	g_return_val_if_fail (CAMEL_IS_O365_STORE_SUMMARY (store_summary), 0);
+	g_return_val_if_fail (full_name != NULL, 0);
+
+	LOCK (store_summary);
+
+	id = g_hash_table_lookup (store_summary->priv->full_name_id_hash, full_name);
+
+	if (id)
+		flags = camel_o365_store_summary_get_folder_flags (store_summary, id);
+
+	UNLOCK (store_summary);
+
+	return flags;
+}
+
 EO365FolderKind
 camel_o365_store_summary_get_folder_kind (CamelO365StoreSummary *store_summary,
 					  const gchar *id)
@@ -1089,4 +1162,52 @@ camel_o365_store_summary_build_folder_info (CamelO365StoreSummary *store_summary
 	g_ptr_array_free (gid.folder_infos, TRUE);
 
 	return info;
+}
+
+static void
+o365_store_summary_folder_count_notify_cb (CamelFolderSummary *folder_summary,
+					   GParamSpec *param,
+					   CamelO365StoreSummary *store_summary)
+{
+	CamelFolder *folder;
+	gchar *folder_id;
+	gint count;
+
+	g_return_if_fail (CAMEL_IS_FOLDER_SUMMARY (folder_summary));
+	g_return_if_fail (param != NULL);
+	g_return_if_fail (CAMEL_IS_O365_STORE_SUMMARY (store_summary));
+
+	folder = camel_folder_summary_get_folder (folder_summary);
+
+	if (!folder)
+		return;
+
+	folder_id = camel_o365_store_summary_dup_folder_id_for_full_name (store_summary, camel_folder_get_full_name (folder));
+
+	/* This can happen on folder delete/unsubscribe, after folder summary clear */
+	if (!folder_id)
+		return;
+
+	if (g_strcmp0 (g_param_spec_get_name (param), "saved-count") == 0) {
+		count = camel_folder_summary_get_saved_count (folder_summary);
+		camel_o365_store_summary_set_folder_total_count (store_summary, folder_id, count);
+	} else if (g_strcmp0 (g_param_spec_get_name (param), "unread-count") == 0) {
+		count = camel_folder_summary_get_unread_count (folder_summary);
+		camel_o365_store_summary_set_folder_unread_count (store_summary, folder_id, count);
+	} else {
+		g_warn_if_reached ();
+	}
+
+	g_free (folder_id);
+}
+
+void
+camel_o365_store_summary_connect_folder_summary (CamelO365StoreSummary *store_summary,
+						 CamelFolderSummary *folder_summary)
+{
+	g_return_if_fail (CAMEL_IS_O365_STORE_SUMMARY (store_summary));
+	g_return_if_fail (CAMEL_IS_FOLDER_SUMMARY (folder_summary));
+
+	g_signal_connect_object (folder_summary, "notify::saved-count", G_CALLBACK (o365_store_summary_folder_count_notify_cb), store_summary, 0);
+	g_signal_connect_object (folder_summary, "notify::unread-count", G_CALLBACK (o365_store_summary_folder_count_notify_cb), store_summary, 0);
 }
