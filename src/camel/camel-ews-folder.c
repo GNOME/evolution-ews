@@ -1915,8 +1915,6 @@ camel_ews_folder_new (CamelStore *store,
 
 	if (!g_ascii_strcasecmp (folder_name, "Inbox") ||
 	    folder_has_inbox_type (CAMEL_EWS_STORE (store), folder_name)) {
-		settings = camel_service_ref_settings (CAMEL_SERVICE (store));
-
 		if (filter_inbox)
 			add_folder_flags |= CAMEL_FOLDER_FILTER_RECENT;
 
