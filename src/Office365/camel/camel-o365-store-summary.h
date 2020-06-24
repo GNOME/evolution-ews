@@ -73,6 +73,8 @@ void		camel_o365_store_summary_set_delta_link	(CamelO365StoreSummary *store_summ
 gchar *		camel_o365_store_summary_dup_delta_link	(CamelO365StoreSummary *store_summary);
 gboolean	camel_o365_store_summary_has_folder	(CamelO365StoreSummary *store_summary,
 							 const gchar *id);
+gboolean	camel_o365_store_summary_has_full_name	(CamelO365StoreSummary *store_summary,
+							 const gchar *full_name);
 void		camel_o365_store_summary_remove_folder	(CamelO365StoreSummary *store_summary,
 							 const gchar *id);
 void		camel_o365_store_summary_set_folder	(CamelO365StoreSummary *store_summary,

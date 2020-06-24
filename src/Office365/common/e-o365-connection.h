@@ -178,6 +178,14 @@ gboolean	e_o365_connection_get_mail_folders_delta_sync
 						 gchar **out_delta_link,
 						 GCancellable *cancellable,
 						 GError **error);
+gboolean	e_o365_connection_create_mail_folder_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *parent_folder_id, /* NULL for the folder root */
+						 const gchar *display_name,
+						 EO365MailFolder **out_mail_folder,
+						 GCancellable *cancellable,
+						 GError **error);
 gboolean	e_o365_connection_get_mail_messages_delta_sync
 						(EO365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */

@@ -415,6 +415,100 @@ o365_store_save_summary_locked (CamelO365StoreSummary *summary,
 	g_clear_error (&error);
 }
 
+static CamelFolderInfo *
+o365_store_create_folder_sync (CamelStore *store,
+			       const gchar *parent_name,
+			       const gchar *folder_name,
+			       GCancellable *cancellable,
+			       GError **error)
+{
+	CamelO365Store *o365_store;
+	EO365MailFolder *mail_folder = NULL;
+	gchar *fid = NULL;
+	gchar *full_name;
+	EO365Connection *cnc;
+	CamelFolderInfo *fi = NULL;
+	guint32 flags;
+	gboolean success;
+	GError *local_error = NULL;
+
+	g_return_val_if_fail (CAMEL_IS_O365_STORE (store), NULL);
+
+	o365_store = CAMEL_O365_STORE (store);
+
+	if (parent_name && *parent_name)
+		full_name = g_strdup_printf ("%s/%s", parent_name, folder_name);
+	else
+		full_name = g_strdup (folder_name);
+
+	fid = camel_o365_store_summary_dup_folder_id_for_full_name (o365_store->priv->summary, full_name);
+
+	if (fid) {
+		g_free (fid);
+		g_set_error (
+			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+			_("Cannot create folder “%s”, folder already exists"),
+			full_name);
+		g_free (full_name);
+		return NULL;
+	}
+
+	g_free (full_name);
+
+	/* Get Parent folder ID */
+	if (parent_name && parent_name[0]) {
+		fid = camel_o365_store_summary_dup_folder_id_for_full_name (o365_store->priv->summary, parent_name);
+
+		if (!fid) {
+			g_set_error (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
+				_("Parent folder “%s” does not exist"),
+				parent_name);
+			return NULL;
+		}
+	}
+
+	if (!camel_o365_store_ensure_connected (o365_store, &cnc, cancellable, error)) {
+		g_free (fid);
+
+		return NULL;
+	}
+
+	success = e_o365_connection_create_mail_folder_sync (cnc, NULL, fid, folder_name, &mail_folder, cancellable, &local_error);
+
+	g_object_unref (cnc);
+	g_free (fid);
+
+	if (!success) {
+		camel_o365_store_maybe_disconnect (o365_store, local_error);
+		g_propagate_error (error, local_error);
+
+		return NULL;
+	}
+
+	flags = e_o365_mail_folder_get_child_folder_count (mail_folder) ? CAMEL_STORE_INFO_FOLDER_CHILDREN : CAMEL_STORE_INFO_FOLDER_NOCHILDREN;
+
+	camel_o365_store_summary_set_folder (o365_store->priv->summary, TRUE,
+		e_o365_mail_folder_get_id (mail_folder),
+		e_o365_mail_folder_get_parent_folder_id (mail_folder),
+		e_o365_mail_folder_get_display_name (mail_folder),
+		e_o365_mail_folder_get_total_item_count (mail_folder),
+		e_o365_mail_folder_get_unread_item_count (mail_folder),
+		flags, E_O365_FOLDER_KIND_MAIL, FALSE, FALSE);
+
+	fi = camel_o365_store_summary_build_folder_info_for_id (o365_store->priv->summary, e_o365_mail_folder_get_id (mail_folder));
+
+	camel_store_folder_created (store, fi);
+	camel_subscribable_folder_subscribed (CAMEL_SUBSCRIBABLE (o365_store), fi);
+
+	json_object_unref (mail_folder);
+
+	LOCK (o365_store);
+	o365_store_save_summary_locked (o365_store->priv->summary, G_STRFUNC);
+	UNLOCK (o365_store);
+
+	return fi;
+}
+
 typedef struct _FolderRenamedData {
 	gchar *id;
 	gchar *old_name;
@@ -845,6 +939,33 @@ o365_store_can_refresh_folder (CamelStore *store,
 	return CAMEL_STORE_CLASS (camel_o365_store_parent_class)->can_refresh_folder (store, info, error);
 }
 
+static gboolean
+o365_store_folder_is_subscribed (CamelSubscribable *subscribable,
+				 const gchar *folder_name)
+{
+	CamelO365Store *o365_store = CAMEL_O365_STORE (subscribable);
+
+	return camel_o365_store_summary_has_full_name (o365_store->priv->summary, folder_name);
+}
+
+static gboolean
+o365_store_subscribe_folder_sync (CamelSubscribable *subscribable,
+				  const gchar *folder_name,
+				  GCancellable *cancellable,
+				  GError **error)
+{
+	return TRUE;
+}
+
+static gboolean
+o365_store_unsubscribe_folder_sync (CamelSubscribable *subscribable,
+				    const gchar *folder_name,
+				    GCancellable *cancellable,
+				    GError **error)
+{
+	return TRUE;
+}
+
 static void
 o365_store_set_property (GObject *object,
 			 guint property_id,
@@ -956,8 +1077,8 @@ camel_o365_store_class_init (CamelO365StoreClass *class)
 
 	store_class = CAMEL_STORE_CLASS (class);
 	store_class->get_folder_sync = o365_store_get_folder_sync;
-#if 0
 	store_class->create_folder_sync = o365_store_create_folder_sync;
+#if 0
 	store_class->delete_folder_sync = o365_store_delete_folder_sync;
 	store_class->rename_folder_sync = o365_store_rename_folder_sync;
 #endif
@@ -979,11 +1100,9 @@ camel_o365_store_initable_init (GInitableIface *iface)
 static void
 camel_o365_subscribable_init (CamelSubscribableInterface *iface)
 {
-#if 0
 	iface->folder_is_subscribed = o365_store_folder_is_subscribed;
 	iface->subscribe_folder_sync = o365_store_subscribe_folder_sync;
 	iface->unsubscribe_folder_sync = o365_store_unsubscribe_folder_sync;
-#endif
 }
 
 static void

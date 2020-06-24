@@ -466,6 +466,24 @@ camel_o365_store_summary_has_folder (CamelO365StoreSummary *store_summary,
 	return has;
 }
 
+gboolean
+camel_o365_store_summary_has_full_name (CamelO365StoreSummary *store_summary,
+					const gchar *full_name)
+{
+	gboolean has;
+
+	g_return_val_if_fail (CAMEL_IS_O365_STORE_SUMMARY (store_summary), FALSE);
+	g_return_val_if_fail (full_name != NULL, FALSE);
+
+	LOCK (store_summary);
+
+	has = g_hash_table_contains (store_summary->priv->full_name_id_hash, full_name);
+
+	UNLOCK (store_summary);
+
+	return has;
+}
+
 void
 camel_o365_store_summary_remove_folder (CamelO365StoreSummary *store_summary,
 					const gchar *id)
@@ -852,6 +870,34 @@ camel_o365_store_summary_set_folder_display_name (CamelO365StoreSummary *store_s
 
 				g_slist_free_full (rpd.removed, id_full_name_data_free);
 				g_free (new_full_name);
+			} else {
+				gchar *parent_id, *encoded_folder_name, *id_copy, *new_full_name = NULL;
+
+				encoded_folder_name = o365_store_summary_encode_folder_name (display_name);
+
+				parent_id = camel_o365_store_summary_dup_folder_parent_id (store_summary, id);
+
+				if (parent_id && *parent_id) {
+					const gchar *parent_full_name;
+
+					parent_full_name = g_hash_table_lookup (store_summary->priv->id_full_name_hash, parent_id);
+
+					if (parent_full_name && *parent_full_name)
+						new_full_name = g_strconcat (parent_full_name, "/", encoded_folder_name, NULL);
+				}
+
+				if (!new_full_name) {
+					new_full_name = encoded_folder_name;
+					encoded_folder_name = NULL;
+				}
+
+				g_free (encoded_folder_name);
+				g_free (parent_id);
+
+				id_copy = g_strdup (id);
+
+				g_hash_table_insert (store_summary->priv->id_full_name_hash, id_copy, new_full_name);
+				g_hash_table_insert (store_summary->priv->full_name_id_hash, new_full_name, id_copy);
 			}
 		}
 	}
