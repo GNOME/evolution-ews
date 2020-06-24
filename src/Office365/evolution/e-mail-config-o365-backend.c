@@ -27,7 +27,6 @@
 
 #include "common/camel-o365-settings.h"
 #include "common/e-o365-connection.h"
-#include "common/e-o365-json-utils.h"
 
 #include "e-mail-config-o365-backend.h"
 
@@ -103,7 +102,7 @@ test_clicked_cb (GtkButton *button,
 	cnc = e_o365_connection_new (source, CAMEL_O365_SETTINGS (settings));
 	g_return_if_fail (cnc != NULL);
 
-	//success = e_o365_connection_list_folders_sync (cnc, NULL, NULL, NULL, &folders, NULL, &error);
+	//success = e_o365_connection_list_mail_folders_sync (cnc, NULL, NULL, NULL, &folders, NULL, &error);
 	success = e_o365_connection_get_mail_folders_delta_sync (cnc, NULL, NULL, delta_link, 0, e_o365_connection_call_gather_into_slist, &folders, &new_delta_link, NULL, &error);
 
 	if (success) {

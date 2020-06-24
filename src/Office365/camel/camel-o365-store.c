@@ -22,7 +22,7 @@
 
 #include "common/camel-o365-settings.h"
 #include "common/e-o365-connection.h"
-#include "common/e-o365-json-utils.h"
+#include "camel-o365-folder.h"
 #include "camel-o365-store-summary.h"
 #include "camel-o365-utils.h"
 
@@ -198,6 +198,7 @@ o365_store_read_default_folders (CamelO365Store *o365_store,
 
 		uri = e_o365_connection_construct_uri (cnc, TRUE, NULL, E_O365_API_V1_0, NULL,
 			"mailFolders",
+			NULL,
 			default_folders[ii].name,
 			"$select", "id",
 			NULL);
@@ -362,6 +363,44 @@ o365_store_authenticate_sync (CamelService *service,
 	g_clear_object (&cnc);
 
 	return result;
+}
+
+static CamelFolder *
+o365_store_get_folder_sync (CamelStore *store,
+			    const gchar *folder_name,
+			    guint32 flags,
+			    GCancellable *cancellable,
+			    GError **error)
+{
+	CamelO365Store *o365_store;
+	CamelFolder *folder = NULL;
+	gchar *fid, *folder_dir, *display_name;
+
+	o365_store = CAMEL_O365_STORE (store);
+
+	fid = camel_o365_store_summary_dup_folder_id_for_full_name (o365_store->priv->summary, folder_name);
+
+	if (!fid) {
+		g_set_error (
+			error, CAMEL_STORE_ERROR,
+			CAMEL_STORE_ERROR_NO_FOLDER,
+			_("No such folder: %s"), folder_name);
+		return NULL;
+	}
+
+	display_name = camel_o365_store_summary_dup_folder_display_name (o365_store->priv->summary, fid);
+	folder_dir = g_build_filename (o365_store->priv->storage_path, "folders", folder_name, NULL);
+
+	folder = camel_o365_folder_new (store, display_name, folder_name, folder_dir, cancellable, error);
+
+	g_free (display_name);
+	g_free (folder_dir);
+	g_free (fid);
+
+	if (folder && (flags & CAMEL_STORE_FOLDER_INFO_REFRESH) != 0)
+		camel_folder_prepare_content_refresh (folder);
+
+	return folder;
 }
 
 static void
@@ -600,6 +639,212 @@ o365_get_folder_info_sync (CamelStore *store,
 	return fi;
 }
 
+/* Hold the property lock before calling this function */
+static void
+o365_store_save_setup_folder_locked (CamelO365Store *o365_store,
+				     GHashTable *save_setup,
+				     guint32 folder_type, /* one of TYPE constants from CamelFolderInfoFlags */
+				     const gchar *property_name)
+{
+	gchar *folder_id;
+
+	g_return_if_fail (CAMEL_IS_O365_STORE (o365_store));
+	g_return_if_fail (save_setup != NULL);
+	g_return_if_fail (folder_type != 0);
+	g_return_if_fail (property_name != NULL);
+
+	folder_id = camel_o365_store_summary_dup_folder_id_for_type (o365_store->priv->summary, folder_type);
+
+	if (folder_id) {
+		gchar *fullname;
+
+		fullname = camel_o365_store_summary_dup_folder_full_name (o365_store->priv->summary, folder_id);
+
+		if (fullname && *fullname) {
+			g_hash_table_insert (save_setup,
+				g_strdup (property_name),
+				fullname);
+
+			fullname = NULL;
+		}
+
+		g_free (fullname);
+		g_free (folder_id);
+	}
+}
+
+static gboolean
+o365_store_initial_setup_with_connection_sync (CamelStore *store,
+					       GHashTable *save_setup,
+					       EO365Connection *cnc,
+					       GCancellable *cancellable,
+					       GError **error)
+{
+	CamelO365Store *o365_store;
+
+	g_return_val_if_fail (CAMEL_IS_O365_STORE (store), FALSE);
+
+	if (g_cancellable_set_error_if_cancelled (cancellable, error))
+		return FALSE;
+
+	o365_store = CAMEL_O365_STORE (store);
+
+	if (cnc) {
+		g_object_ref (cnc);
+	} else {
+		if (!camel_o365_store_ensure_connected (o365_store, &cnc, cancellable, error))
+			return FALSE;
+
+		g_return_val_if_fail (cnc != NULL, FALSE);
+	}
+
+	if (!o365_store_read_default_folders (o365_store, cnc, cancellable, error)) {
+		g_clear_object (&cnc);
+		return FALSE;
+	}
+
+	if (save_setup) {
+		LOCK (o365_store);
+
+		o365_store_save_setup_folder_locked (o365_store, save_setup, CAMEL_FOLDER_TYPE_SENT, CAMEL_STORE_SETUP_SENT_FOLDER);
+		o365_store_save_setup_folder_locked (o365_store, save_setup, CAMEL_FOLDER_TYPE_DRAFTS, CAMEL_STORE_SETUP_DRAFTS_FOLDER);
+		o365_store_save_setup_folder_locked (o365_store, save_setup, CAMEL_FOLDER_TYPE_ARCHIVE, CAMEL_STORE_SETUP_ARCHIVE_FOLDER);
+
+		UNLOCK (o365_store);
+	}
+
+	g_clear_object (&cnc);
+
+	return TRUE;
+}
+
+static gboolean
+o365_store_initial_setup_sync (CamelStore *store,
+			       GHashTable *save_setup,
+			       GCancellable *cancellable,
+			       GError **error)
+{
+	return o365_store_initial_setup_with_connection_sync (store, save_setup, NULL, cancellable, error);
+}
+
+static CamelFolder *
+o365_store_get_trash_folder_sync (CamelStore *store,
+				  GCancellable *cancellable,
+				  GError **error)
+{
+	CamelO365Store *o365_store;
+	CamelFolder *folder = NULL;
+	gchar *folder_id, *folder_name;
+
+	g_return_val_if_fail (CAMEL_IS_O365_STORE (store), NULL);
+
+	o365_store = CAMEL_O365_STORE (store);
+
+	LOCK (o365_store);
+
+	folder_id = camel_o365_store_summary_dup_folder_id_for_type (o365_store->priv->summary, CAMEL_FOLDER_TYPE_TRASH);
+
+	if (!folder_id) {
+		UNLOCK (o365_store);
+		g_set_error_literal (error, CAMEL_STORE_ERROR, CAMEL_STORE_ERROR_NO_FOLDER, _("Could not locate Trash folder"));
+		return NULL;
+	}
+
+	folder_name = camel_o365_store_summary_dup_folder_full_name (o365_store->priv->summary, folder_id);
+
+	UNLOCK (o365_store);
+
+	folder = camel_store_get_folder_sync (store, folder_name, 0, cancellable, error);
+
+	g_free (folder_name);
+	g_free (folder_id);
+
+	if (folder) {
+		GPtrArray *folders;
+		gboolean can = TRUE;
+		guint ii;
+
+		/* Save content of all opened folders, thus any messages deleted in them
+		   are moved to the Deleted Items folder first, thus in case of the trash
+		   folder instance being used to expunge messages will contain all of them.
+		*/
+		folders = camel_store_dup_opened_folders (store);
+
+		for (ii = 0; ii < folders->len; ii++) {
+			CamelFolder *secfolder = folders->pdata[ii];
+
+			if (secfolder != folder && can)
+				can = camel_folder_synchronize_sync (secfolder, FALSE, cancellable, NULL);
+
+			g_object_unref (secfolder);
+		}
+		g_ptr_array_free (folders, TRUE);
+
+		/* To return 'Deleted Items' folder with current content,
+		   not with possibly stale locally cached copy. */
+		camel_folder_refresh_info_sync (folder, cancellable, NULL);
+	}
+
+	return folder;
+}
+
+static CamelFolder *
+o365_store_get_junk_folder_sync (CamelStore *store,
+				 GCancellable *cancellable,
+				 GError **error)
+{
+	CamelO365Store *o365_store;
+	CamelFolder *folder = NULL;
+	gchar *folder_id, *folder_name;
+
+	g_return_val_if_fail (CAMEL_IS_O365_STORE (store), NULL);
+
+	o365_store = CAMEL_O365_STORE (store);
+
+	folder_id = camel_o365_store_summary_dup_folder_id_for_type (o365_store->priv->summary, CAMEL_FOLDER_TYPE_JUNK);
+
+	if (!folder_id) {
+		g_set_error_literal (error, CAMEL_STORE_ERROR, CAMEL_STORE_ERROR_NO_FOLDER, _("Could not locate Junk folder"));
+		return NULL;
+	}
+
+	folder_name = camel_o365_store_summary_dup_folder_full_name (o365_store->priv->summary, folder_id);
+
+	folder = camel_store_get_folder_sync (store, folder_name, 0, cancellable, error);
+
+	g_free (folder_name);
+	g_free (folder_id);
+
+	return folder;
+}
+
+static gboolean
+o365_store_can_refresh_folder (CamelStore *store,
+			       CamelFolderInfo *info,
+			       GError **error)
+{
+	CamelSettings *settings;
+	CamelO365Settings *o365_settings;
+	gboolean check_all;
+
+	/* Skip unselectable folders from automatic refresh */
+	if (info && (info->flags & CAMEL_FOLDER_NOSELECT) != 0)
+		return FALSE;
+
+	settings = camel_service_ref_settings (CAMEL_SERVICE (store));
+
+	o365_settings = CAMEL_O365_SETTINGS (settings);
+	check_all = camel_o365_settings_get_check_all (o365_settings);
+
+	g_object_unref (settings);
+
+	if (check_all)
+		return TRUE;
+
+	/* Delegate decision to parent class */
+	return CAMEL_STORE_CLASS (camel_o365_store_parent_class)->can_refresh_folder (store, info, error);
+}
+
 static void
 o365_store_set_property (GObject *object,
 			 guint property_id,
@@ -710,19 +955,17 @@ camel_o365_store_class_init (CamelO365StoreClass *class)
 	service_class->authenticate_sync = o365_store_authenticate_sync;
 
 	store_class = CAMEL_STORE_CLASS (class);
-#if 0
 	store_class->get_folder_sync = o365_store_get_folder_sync;
+#if 0
 	store_class->create_folder_sync = o365_store_create_folder_sync;
 	store_class->delete_folder_sync = o365_store_delete_folder_sync;
 	store_class->rename_folder_sync = o365_store_rename_folder_sync;
 #endif
 	store_class->get_folder_info_sync = o365_get_folder_info_sync;
-#if 0
 	store_class->initial_setup_sync = o365_store_initial_setup_sync;
 	store_class->get_trash_folder_sync = o365_store_get_trash_folder_sync;
 	store_class->get_junk_folder_sync = o365_store_get_junk_folder_sync;
 	store_class->can_refresh_folder = o365_store_can_refresh_folder;
-#endif
 }
 
 static void
@@ -789,22 +1032,33 @@ camel_o365_store_ref_connection (CamelO365Store *o365_store)
 }
 
 gboolean
-camel_o365_store_connected (CamelO365Store *o365_store,
-			    GCancellable *cancellable,
-			    GError **error)
+camel_o365_store_ensure_connected (CamelO365Store *o365_store,
+				   EO365Connection **out_cnc, /* out, nullable, transfer full */
+				   GCancellable *cancellable,
+				   GError **error)
 {
 	g_return_val_if_fail (CAMEL_IS_O365_STORE (o365_store), FALSE);
 
 	if (!camel_offline_store_get_online (CAMEL_OFFLINE_STORE (o365_store))) {
-		g_set_error (
-			error, CAMEL_SERVICE_ERROR,
-			CAMEL_SERVICE_ERROR_UNAVAILABLE,
+		g_set_error_literal (error, CAMEL_SERVICE_ERROR, CAMEL_SERVICE_ERROR_UNAVAILABLE,
 			_("You must be working online to complete this operation"));
+
 		return FALSE;
 	}
 
 	if (!camel_service_connect_sync ((CamelService *) o365_store, cancellable, error))
 		return FALSE;
+
+	if (out_cnc) {
+		*out_cnc = camel_o365_store_ref_connection (o365_store);
+
+		if (!*out_cnc) {
+			g_set_error_literal (error, CAMEL_SERVICE_ERROR, CAMEL_SERVICE_ERROR_UNAVAILABLE,
+				_("You must be working online to complete this operation"));
+
+			return FALSE;
+		}
+	}
 
 	return TRUE;
 }

@@ -26,6 +26,7 @@
 
 #include "camel-o365-settings.h"
 #include "e-o365-enums.h"
+#include "e-o365-json-utils.h"
 
 /* Currently, as of 2020-06-17, there is a limitation to 20 requests:
    https://docs.microsoft.com/en-us/graph/known-issues#json-batching */
@@ -62,8 +63,15 @@ typedef struct _EO365ConnectionClass EO365ConnectionClass;
 typedef struct _EO365ConnectionPrivate EO365ConnectionPrivate;
 
 /* Returns whether can continue */
-typedef gboolean (* EO365ConnectionCallFunc)	(EO365Connection *cnc,
+typedef gboolean (* EO365ConnectionJsonFunc)	(EO365Connection *cnc,
 						 const GSList *results, /* JsonObject * - the returned objects from the server */
+						 gpointer user_data,
+						 GCancellable *cancellable,
+						 GError **error);
+
+typedef gboolean (* EO365ConnectionRawDataFunc)	(EO365Connection *cnc,
+						 SoupMessage *message,
+						 GInputStream *raw_data_stream,
 						 gpointer user_data,
 						 GCancellable *cancellable,
 						 GError **error);
@@ -130,6 +138,7 @@ gchar *		e_o365_connection_construct_uri	(EO365Connection *cnc,
 						 EO365ApiVersion api_version,
 						 const gchar *api_part, /* NULL for 'users', empty string to skip */
 						 const gchar *resource,
+						 const gchar *id, /* NULL to skip */
 						 const gchar *path,
 						 ...) G_GNUC_NULL_TERMINATED;
 gboolean	e_o365_connection_json_node_from_message
@@ -150,23 +159,44 @@ gboolean	e_o365_connection_call_gather_into_slist
 						 gpointer user_data, /* expects GSList **, aka pointer to a GSList *, where it copies the 'results' */
 						 GCancellable *cancellable,
 						 GError **error);
-gboolean	e_o365_connection_list_folders_sync
+gboolean	e_o365_connection_list_mail_folders_sync
 						(EO365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
 						 const gchar *from_path, /* path for the folder to read, NULL for top user folder */
-						 const gchar *select, /* fields to select, nullable */
+						 const gchar *select, /* properties to select, nullable */
 						 GSList **out_folders, /* JsonObject * - the returned mailFolder objects */
 						 GCancellable *cancellable,
 						 GError **error);
 gboolean	e_o365_connection_get_mail_folders_delta_sync
 						(EO365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
-						 const gchar *select, /* fields to select, nullable */
+						 const gchar *select, /* properties to select, nullable */
 						 const gchar *delta_link, /* previous delta link */
 						 guint max_page_size, /* 0 for default by the server */
-						 EO365ConnectionCallFunc func, /* function to call with each result set */
+						 EO365ConnectionJsonFunc func, /* function to call with each result set */
 						 gpointer func_user_data, /* user data passed into the 'func' */
 						 gchar **out_delta_link,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_get_mail_messages_delta_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *folder_id, /* folder ID to get delta messages in */
+						 const gchar *select, /* properties to select, nullable */
+						 const gchar *delta_link, /* previous delta link */
+						 guint max_page_size, /* 0 for default by the server */
+						 EO365ConnectionJsonFunc func, /* function to call with each result set */
+						 gpointer func_user_data, /* user data passed into the 'func' */
+						 gchar **out_delta_link,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_get_mail_message_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *folder_id,
+						 const gchar *message_id,
+						 EO365ConnectionRawDataFunc func,
+						 gpointer func_user_data,
 						 GCancellable *cancellable,
 						 GError **error);
 

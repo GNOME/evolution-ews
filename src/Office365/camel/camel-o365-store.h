@@ -64,7 +64,9 @@ CamelO365StoreSummary *
 						(CamelO365Store *store);
 EO365Connection *
 		camel_o365_store_ref_connection	(CamelO365Store *o365_store);
-gboolean	camel_o365_store_connected	(CamelO365Store *store,
+gboolean	camel_o365_store_ensure_connected
+						(CamelO365Store *store,
+						 EO365Connection **out_cnc, /* out, nullable, trasnfer full */
 						 GCancellable *cancellable,
 						 GError **error);
 void		camel_o365_store_maybe_disconnect

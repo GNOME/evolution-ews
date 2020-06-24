@@ -1124,7 +1124,8 @@ e_o365_connection_json_node_from_message (SoupMessage *message,
 static gboolean
 o365_connection_send_request_sync (EO365Connection *cnc,
 				   SoupMessage *message,
-				   EO365ResponseFunc func,
+				   EO365ResponseFunc response_func,
+				   EO365ConnectionRawDataFunc raw_data_func,
 				   gpointer func_user_data,
 				   GCancellable *cancellable,
 				   GError **error)
@@ -1135,7 +1136,8 @@ o365_connection_send_request_sync (EO365Connection *cnc,
 
 	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
 	g_return_val_if_fail (SOUP_IS_MESSAGE (message), FALSE);
-	g_return_val_if_fail (func != NULL, FALSE);
+	g_return_val_if_fail (response_func != NULL || raw_data_func != NULL, FALSE);
+	g_return_val_if_fail (response_func == NULL || raw_data_func == NULL, FALSE);
 
 	while (need_retry && !g_cancellable_is_cancelled (cancellable) && message->status_code != SOUP_STATUS_CANCELLED) {
 		need_retry = FALSE;
@@ -1265,6 +1267,8 @@ o365_connection_send_request_sync (EO365Connection *cnc,
 				UNLOCK (cnc);
 
 				success = FALSE;
+			} else if (success && raw_data_func && SOUP_STATUS_IS_SUCCESSFUL (message->status_code)) {
+				success = raw_data_func (cnc, message, input_stream, func_user_data, cancellable, error);
 			} else if (success) {
 				JsonNode *node = NULL;
 
@@ -1273,7 +1277,7 @@ o365_connection_send_request_sync (EO365Connection *cnc,
 				if (success) {
 					gchar *next_link = NULL;
 
-					success = func (cnc, message, input_stream, node, func_user_data, &next_link, cancellable, error);
+					success = response_func && response_func (cnc, message, input_stream, node, func_user_data, &next_link, cancellable, error);
 
 					if (success && next_link && *next_link) {
 						SoupURI *suri;
@@ -1332,7 +1336,7 @@ o365_connection_send_request_sync (EO365Connection *cnc,
 }
 
 typedef struct _EO365ResponseData {
-	EO365ConnectionCallFunc func;
+	EO365ConnectionJsonFunc json_func;
 	gpointer func_user_data;
 	gboolean read_only_once; /* To be able to just try authentication */
 	GSList **out_items; /* JsonObject * */
@@ -1395,8 +1399,8 @@ e_o365_read_valued_response_cb (EO365Connection *cnc,
 		}
 	}
 
-	if (response_data->func)
-		can_continue = response_data->func (cnc, items, response_data->func_user_data, cancellable, error);
+	if (response_data->json_func)
+		can_continue = response_data->json_func (cnc, items, response_data->func_user_data, cancellable, error);
 
 	g_slist_free_full (items, (GDestroyNotify) json_object_unref);
 
@@ -1446,6 +1450,7 @@ e_o365_connection_authenticate_sync (EO365Connection *cnc,
 	uri = e_o365_connection_construct_uri (cnc, TRUE, NULL, E_O365_API_V1_0, NULL,
 		"mailFolders",
 		NULL,
+		NULL,
 		"$select", "displayName",
 		"$top", "1",
 		NULL);
@@ -1466,7 +1471,7 @@ e_o365_connection_authenticate_sync (EO365Connection *cnc,
 	rd.read_only_once = TRUE;
 	rd.out_items = &folders;
 
-	success = o365_connection_send_request_sync (cnc, message, e_o365_read_valued_response_cb, &rd, cancellable, &local_error);
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_valued_response_cb, NULL, &rd, cancellable, &local_error);
 
 	if (success) {
 		result = E_SOURCE_AUTHENTICATION_ACCEPTED;
@@ -1529,7 +1534,8 @@ e_o365_connection_disconnect_sync (EO365Connection *cnc,
 	return TRUE;
 }
 
-/* Expects NULL-terminated pair of parameters 'name', 'value'; if 'value' is NULL, the parameter is skipped */
+/* Expects NULL-terminated pair of parameters 'name', 'value'; if 'value' is NULL, the parameter is skipped.
+   An empty 'name' can add the 'value' into the path. These can be only before query parameters. */
 gchar *
 e_o365_connection_construct_uri (EO365Connection *cnc,
 				 gboolean include_user,
@@ -1537,6 +1543,7 @@ e_o365_connection_construct_uri (EO365Connection *cnc,
 				 EO365ApiVersion api_version,
 				 const gchar *api_part,
 				 const gchar *resource,
+				 const gchar *id,
 				 const gchar *path,
 				 ...)
 {
@@ -1603,6 +1610,11 @@ e_o365_connection_construct_uri (EO365Connection *cnc,
 		g_string_append (uri, resource);
 	}
 
+	if (id && *id) {
+		g_string_append_c (uri, '/');
+		g_string_append (uri, id);
+	}
+
 	if (path && *path) {
 		g_string_append_c (uri, '/');
 		g_string_append (uri, path);
@@ -1632,6 +1644,12 @@ e_o365_connection_construct_uri (EO365Connection *cnc,
 
 				g_free (encoded);
 			}
+		} else if (!*name && value && *value) {
+			/* Warn when adding path after additional query parameters */
+			g_warn_if_fail (first_param);
+
+			g_string_append_c (uri, '/');
+			g_string_append (uri, value);
 		}
 
 		name = va_arg (args, const gchar *);
@@ -1767,7 +1785,7 @@ e_o365_connection_batch_request_internal_sync (EO365Connection *cnc,
 	g_return_val_if_fail (requests->len <= E_O365_BATCH_MAX_REQUESTS, FALSE);
 
 	uri = e_o365_connection_construct_uri (cnc, FALSE, NULL, api_version, "",
-		"$batch", NULL, NULL);
+		"$batch", NULL, NULL, NULL);
 
 	message = soup_message_new (SOUP_METHOD_POST, uri);
 
@@ -1887,7 +1905,7 @@ e_o365_connection_batch_request_internal_sync (EO365Connection *cnc,
 	g_object_unref (builder);
 	g_object_unref (generator);
 
-	success = o365_connection_send_request_sync (cnc, message, e_o365_read_batch_response_cb, requests, cancellable, error);
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_batch_response_cb, NULL, requests, cancellable, error);
 
 	g_clear_object (&message);
 
@@ -1987,7 +2005,7 @@ e_o365_connection_batch_request_sync (EO365Connection *cnc,
 	return success;
 }
 
-/* This can be used as a EO365ConnectionCallFunc function, it only
+/* This can be used as a EO365ConnectionJsonFunc function, it only
    copies items of 'results' into 'user_data', which is supposed
    to be a pointer to a GSList *. */
 gboolean
@@ -2011,14 +2029,16 @@ e_o365_connection_call_gather_into_slist (EO365Connection *cnc,
 	return TRUE;
 }
 
+/* https://docs.microsoft.com/en-us/graph/api/user-list-mailfolders?view=graph-rest-1.0&tabs=http */
+
 gboolean
-e_o365_connection_list_folders_sync (EO365Connection *cnc,
-				     const gchar *user_override, /* for which user, NULL to use the account user */
-				     const gchar *from_path, /* path for the folder to read, NULL for top user folder */
-				     const gchar *select, /* fields to select, nullable */
-				     GSList **out_folders, /* JsonObject * - the returned mailFolder objects */
-				     GCancellable *cancellable,
-				     GError **error)
+e_o365_connection_list_mail_folders_sync (EO365Connection *cnc,
+					  const gchar *user_override, /* for which user, NULL to use the account user */
+					  const gchar *from_path, /* path for the folder to read, NULL for top user folder */
+					  const gchar *select, /* properties to select, nullable */
+					  GSList **out_folders, /* JsonObject * - the returned mailFolder objects */
+					  GCancellable *cancellable,
+					  GError **error)
 {
 	EO365ResponseData rd;
 	SoupMessage *message;
@@ -2030,6 +2050,7 @@ e_o365_connection_list_folders_sync (EO365Connection *cnc,
 
 	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
 		"mailFolders",
+		NULL,
 		from_path,
 		"$select", select,
 		NULL);
@@ -2049,7 +2070,7 @@ e_o365_connection_list_folders_sync (EO365Connection *cnc,
 
 	rd.out_items = out_folders;
 
-	success = o365_connection_send_request_sync (cnc, message, e_o365_read_valued_response_cb, &rd, cancellable, error);
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_valued_response_cb, NULL, &rd, cancellable, error);
 
 	g_clear_object (&message);
 
@@ -2059,10 +2080,10 @@ e_o365_connection_list_folders_sync (EO365Connection *cnc,
 gboolean
 e_o365_connection_get_mail_folders_delta_sync (EO365Connection *cnc,
 					       const gchar *user_override, /* for which user, NULL to use the account user */
-					       const gchar *select, /* fields to select, nullable */
+					       const gchar *select, /* properties to select, nullable */
 					       const gchar *delta_link, /* previous delta link */
 					       guint max_page_size, /* 0 for default by the server */
-					       EO365ConnectionCallFunc func, /* function to call with each result set */
+					       EO365ConnectionJsonFunc func, /* function to call with each result set */
 					       gpointer func_user_data, /* user data passed into the 'func' */
 					       gchar **out_delta_link,
 					       GCancellable *cancellable,
@@ -2084,6 +2105,7 @@ e_o365_connection_get_mail_folders_delta_sync (EO365Connection *cnc,
 
 		uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
 			"mailFolders",
+			NULL,
 			"delta",
 			"$select", select,
 			NULL);
@@ -2112,11 +2134,131 @@ e_o365_connection_get_mail_folders_delta_sync (EO365Connection *cnc,
 
 	memset (&rd, 0, sizeof (EO365ResponseData));
 
-	rd.func = func;
+	rd.json_func = func;
 	rd.func_user_data = func_user_data;
 	rd.out_delta_link = out_delta_link;
 
-	success = o365_connection_send_request_sync (cnc, message, e_o365_read_valued_response_cb, &rd, cancellable, error);
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_valued_response_cb, NULL, &rd, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/message-delta?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_get_mail_messages_delta_sync (EO365Connection *cnc,
+						const gchar *user_override, /* for which user, NULL to use the account user */
+						const gchar *folder_id, /* folder ID to get delta messages in */
+						const gchar *select, /* properties to select, nullable */
+						const gchar *delta_link, /* previous delta link */
+						guint max_page_size, /* 0 for default by the server */
+						EO365ConnectionJsonFunc func, /* function to call with each result set */
+						gpointer func_user_data, /* user data passed into the 'func' */
+						gchar **out_delta_link,
+						GCancellable *cancellable,
+						GError **error)
+{
+	EO365ResponseData rd;
+	SoupMessage *message = NULL;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (folder_id != NULL, FALSE);
+	g_return_val_if_fail (out_delta_link != NULL, FALSE);
+	g_return_val_if_fail (func != NULL, FALSE);
+
+	if (delta_link)
+		message = soup_message_new (SOUP_METHOD_GET, delta_link);
+
+	if (!message) {
+		gchar *uri;
+
+		uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+			"mailFolders",
+			folder_id,
+			"messages",
+			"", "delta",
+			"$select", select,
+			NULL);
+
+		message = soup_message_new (SOUP_METHOD_GET, uri);
+
+		if (!message) {
+			g_set_error (error, SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED, _("Malformed URI: “%s”"), uri);
+			g_free (uri);
+
+			return FALSE;
+		}
+
+		g_free (uri);
+	}
+
+	if (max_page_size > 0) {
+		gchar *prefer_value;
+
+		prefer_value = g_strdup_printf ("odata.maxpagesize=%u", max_page_size);
+
+		soup_message_headers_append (message->request_headers, "Prefer", prefer_value);
+
+		g_free (prefer_value);
+	}
+
+	memset (&rd, 0, sizeof (EO365ResponseData));
+
+	rd.json_func = func;
+	rd.func_user_data = func_user_data;
+	rd.out_delta_link = out_delta_link;
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_valued_response_cb, NULL, &rd, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/message-get?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_get_mail_message_sync (EO365Connection *cnc,
+					 const gchar *user_override, /* for which user, NULL to use the account user */
+					 const gchar *folder_id,
+					 const gchar *message_id,
+					 EO365ConnectionRawDataFunc func,
+					 gpointer func_user_data,
+					 GCancellable *cancellable,
+					 GError **error)
+{
+	SoupMessage *message = NULL;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (folder_id != NULL, FALSE);
+	g_return_val_if_fail (message_id != NULL, FALSE);
+	g_return_val_if_fail (func != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		/*"mailFolders",
+		folder_id,*/
+		"messages",
+		"", message_id,
+		"", "$value",
+		NULL);
+
+	message = soup_message_new (SOUP_METHOD_GET, uri);
+
+	if (!message) {
+		g_set_error (error, SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED, _("Malformed URI: “%s”"), uri);
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	success = o365_connection_send_request_sync (cnc, message, NULL, func, func_user_data, cancellable, error);
 
 	g_clear_object (&message);
 
