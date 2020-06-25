@@ -840,7 +840,7 @@ camel_o365_store_summary_set_folder_display_name (CamelO365StoreSummary *store_s
 				rpd.prefix_len = strlen (old_full_name);
 				rpd.removed = NULL;
 
-				g_hash_table_foreach_remove (store_summary->priv->id_full_name_hash, o365_remove_prefixed_cb, &rpd);
+				g_hash_table_foreach_steal (store_summary->priv->id_full_name_hash, o365_remove_prefixed_cb, &rpd);
 
 				new_full_name = o365_store_summary_build_new_full_name (old_full_name, display_name);
 				diff = strlen (new_full_name) - rpd.prefix_len;
@@ -1162,10 +1162,10 @@ o365_store_summary_gather_folder_infos (gpointer key,
 	g_return_if_fail (gid != NULL);
 
 	if (!gid->prefix_len || (g_str_has_prefix (full_name, gid->prefix) &&
-	    full_name[gid->prefix_len] == '/')) {
+	    (full_name[gid->prefix_len] == '/' || !full_name[gid->prefix_len]))) {
 		const gchar *without_prefix = full_name + gid->prefix_len + (gid->prefix_len > 0 ? 1 : 0);
 
-		if (gid->recursive || !strchr (without_prefix, '/')) {
+		if (gid->recursive || !*without_prefix) {
 			CamelFolderInfo *info;
 
 			info = camel_o365_store_summary_build_folder_info_for_id (gid->store_summary, id);
@@ -1201,7 +1201,7 @@ camel_o365_store_summary_build_folder_info (CamelO365StoreSummary *store_summary
 
 	g_hash_table_foreach (store_summary->priv->id_full_name_hash, o365_store_summary_gather_folder_infos, &gid);
 
-	info = camel_folder_info_build (gid.folder_infos, NULL, '/', TRUE);
+	info = camel_folder_info_build (gid.folder_infos, top, '/', TRUE);
 
 	UNLOCK (store_summary);
 

@@ -186,6 +186,29 @@ gboolean	e_o365_connection_create_mail_folder_sync
 						 EO365MailFolder **out_mail_folder,
 						 GCancellable *cancellable,
 						 GError **error);
+gboolean	e_o365_connection_delete_mail_folder_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *folder_id,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_copy_move_mail_folder_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *src_folder_id,
+						 const gchar *des_folder_id,
+						 gboolean do_copy,
+						 EO365MailFolder **out_mail_folder,
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_rename_mail_folder_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *folder_id,
+						 const gchar *display_name,
+						 EO365MailFolder **out_mail_folder,
+						 GCancellable *cancellable,
+						 GError **error);
 gboolean	e_o365_connection_get_mail_messages_delta_sync
 						(EO365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */

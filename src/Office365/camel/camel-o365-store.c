@@ -404,8 +404,8 @@ o365_store_get_folder_sync (CamelStore *store,
 }
 
 static void
-o365_store_save_summary_locked (CamelO365StoreSummary *summary,
-				const gchar *where)
+o365_store_save_summary (CamelO365StoreSummary *summary,
+			 const gchar *where)
 {
 	GError *error = NULL;
 
@@ -502,11 +502,334 @@ o365_store_create_folder_sync (CamelStore *store,
 
 	json_object_unref (mail_folder);
 
-	LOCK (o365_store);
-	o365_store_save_summary_locked (o365_store->priv->summary, G_STRFUNC);
-	UNLOCK (o365_store);
+	o365_store_save_summary (o365_store->priv->summary, G_STRFUNC);
 
 	return fi;
+}
+
+static void
+o365_store_notify_created_recursive (CamelStore *store,
+				     CamelFolderInfo *folder_info)
+{
+	while (folder_info) {
+		camel_store_folder_created (store, folder_info);
+		camel_subscribable_folder_subscribed (CAMEL_SUBSCRIBABLE (store), folder_info);
+
+		if (folder_info->child)
+			o365_store_notify_created_recursive (store, folder_info->child);
+
+		folder_info = folder_info->next;
+	}
+}
+
+static gboolean
+o365_store_move_mail_folder (CamelO365Store *o365_store,
+			     EO365Connection *cnc,
+			     const gchar *folder_id,
+			     const gchar *des_folder_id,
+			     GCancellable *cancellable,
+			     GError **error)
+{
+	EO365MailFolder *moved_mail_folder = NULL;
+	gboolean success;
+
+	g_return_val_if_fail (CAMEL_IS_O365_STORE (o365_store), FALSE);
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (folder_id != NULL, FALSE);
+	g_return_val_if_fail (des_folder_id != NULL, FALSE);
+	g_return_val_if_fail (g_strcmp0 (folder_id, des_folder_id) != 0, FALSE);
+
+	success = e_o365_connection_copy_move_mail_folder_sync (cnc, NULL, folder_id, des_folder_id, FALSE, &moved_mail_folder, cancellable, error);
+
+	if (success && moved_mail_folder) {
+		CamelFolderInfo *fi;
+		gchar *new_full_name;
+
+		fi = camel_o365_store_summary_build_folder_info_for_id (o365_store->priv->summary, folder_id);
+
+		camel_o365_store_summary_set_folder_parent_id (o365_store->priv->summary, folder_id, e_o365_mail_folder_get_parent_folder_id (moved_mail_folder));
+		camel_o365_store_summary_rebuild_hashes (o365_store->priv->summary);
+
+		camel_subscribable_folder_unsubscribed (CAMEL_SUBSCRIBABLE (o365_store), fi);
+		camel_store_folder_deleted (CAMEL_STORE (o365_store), fi);
+
+		camel_folder_info_free (fi);
+
+		new_full_name = camel_o365_store_summary_dup_folder_full_name (o365_store->priv->summary, folder_id);
+		g_warn_if_fail (new_full_name != NULL);
+
+		fi = camel_o365_store_summary_build_folder_info (o365_store->priv->summary, new_full_name, TRUE);
+
+		o365_store_notify_created_recursive (CAMEL_STORE (o365_store), fi);
+
+		json_object_unref (moved_mail_folder);
+		camel_folder_info_free (fi);
+		g_free (new_full_name);
+	}
+
+	return success;
+}
+
+static void
+o365_store_delete_folders_from_summary_recursive (CamelO365Store *o365_store,
+						  CamelFolderInfo *fi,
+						  gboolean send_signals)
+{
+	CamelStore *store = send_signals ? CAMEL_STORE (o365_store) : NULL;
+	CamelSubscribable *subscribable = send_signals ? CAMEL_SUBSCRIBABLE (o365_store) : NULL;
+
+	while (fi) {
+		gchar *folder_id;
+
+		if (fi->child)
+			o365_store_delete_folders_from_summary_recursive (o365_store, fi->child, send_signals);
+
+		folder_id = camel_o365_store_summary_dup_folder_id_for_full_name (o365_store->priv->summary, fi->full_name);
+		if (folder_id) {
+			camel_o365_store_summary_remove_folder (o365_store->priv->summary, folder_id);
+			g_free (folder_id);
+		}
+
+		if (send_signals) {
+			camel_subscribable_folder_unsubscribed (subscribable, fi);
+			camel_store_folder_deleted (store, fi);
+		}
+
+		fi = fi->next;
+	}
+}
+
+static gboolean
+o365_store_delete_folder_sync (CamelStore *store,
+			       const gchar *folder_name,
+			       GCancellable *cancellable,
+			       GError **error)
+{
+	CamelO365Store *o365_store;
+	CamelFolderInfo *folder_info;
+	EO365Connection *cnc = NULL;
+	gchar *folder_id;
+	gchar *trash_folder_id;
+	gchar *trash_full_name;
+	gboolean success;
+	gboolean is_under_trash_folder, claim_unsubscribe = TRUE;
+	GError *local_error = NULL;
+
+	g_return_val_if_fail (CAMEL_IS_O365_STORE (store), FALSE);
+
+	o365_store = CAMEL_O365_STORE (store);
+
+	folder_info = camel_store_get_folder_info_sync (store, folder_name,
+		CAMEL_STORE_FOLDER_INFO_RECURSIVE | CAMEL_STORE_FOLDER_INFO_SUBSCRIBED,
+		cancellable, &local_error);
+
+	if (!folder_info) {
+		if (local_error)
+			g_propagate_error (error, local_error);
+
+		return FALSE;
+	}
+
+	folder_id = camel_o365_store_summary_dup_folder_id_for_full_name (o365_store->priv->summary, folder_name);
+
+	if (!folder_id) {
+		camel_folder_info_free (folder_info);
+
+		g_set_error_literal (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC, _("Folder does not exist"));
+
+		return FALSE;
+	}
+
+	trash_folder_id = camel_o365_store_summary_dup_folder_id_for_type (o365_store->priv->summary, CAMEL_FOLDER_TYPE_TRASH);
+	trash_full_name = camel_o365_store_summary_dup_folder_full_name (o365_store->priv->summary, trash_folder_id);
+
+	if (!trash_full_name) {
+		camel_folder_info_free (folder_info);
+		g_free (trash_folder_id);
+		g_free (folder_id);
+
+		g_set_error_literal (error, CAMEL_ERROR, CAMEL_ERROR_GENERIC, _("Cannot find “Deleted Items” folder"));
+
+		return FALSE;
+	}
+
+	is_under_trash_folder = g_str_has_prefix (folder_name, trash_full_name);
+
+	if (is_under_trash_folder) {
+		gint len = strlen (trash_full_name);
+
+		is_under_trash_folder = len > 0 && (trash_full_name[len - 1] == '/' || folder_name[len] == '/');
+	}
+
+	g_free (trash_full_name);
+
+	if (!camel_o365_store_ensure_connected (o365_store, &cnc, cancellable, error)) {
+		camel_folder_info_free (folder_info);
+		g_free (trash_folder_id);
+		g_free (folder_id);
+
+		return FALSE;
+	}
+
+	if (camel_o365_store_summary_get_folder_is_foreign (o365_store->priv->summary, folder_id) ||
+	    camel_o365_store_summary_get_folder_is_public (o365_store->priv->summary, folder_id)) {
+		/* do not delete foreign or public folders,
+		 * only remove them from the local cache */
+		success = TRUE;
+	} else if (is_under_trash_folder) {
+		success = e_o365_connection_delete_mail_folder_sync (cnc, NULL, folder_id, cancellable, &local_error);
+	} else {
+		success = o365_store_move_mail_folder (o365_store, cnc, folder_id, "deleteditems", cancellable, &local_error);
+		claim_unsubscribe = FALSE;
+	}
+
+	g_clear_object (&cnc);
+
+	if (!success) {
+		camel_folder_info_free (folder_info);
+		g_free (trash_folder_id);
+		g_free (folder_id);
+
+		camel_o365_store_maybe_disconnect (o365_store, local_error);
+		g_propagate_error (error, local_error);
+
+		return FALSE;
+	}
+
+	if (is_under_trash_folder)
+		o365_store_delete_folders_from_summary_recursive (o365_store, folder_info, FALSE);
+
+	if (claim_unsubscribe) {
+		camel_subscribable_folder_unsubscribed (CAMEL_SUBSCRIBABLE (o365_store), folder_info);
+		camel_store_folder_deleted (store, folder_info);
+	}
+
+	camel_folder_info_free (folder_info);
+
+	o365_store_save_summary (o365_store->priv->summary, G_STRFUNC);
+
+	g_free (trash_folder_id);
+	g_free (folder_id);
+
+	return TRUE;
+}
+
+static gboolean
+o365_store_rename_folder_sync (CamelStore *store,
+			       const gchar *old_name,
+			       const gchar *new_name,
+			       GCancellable *cancellable,
+			       GError **error)
+{
+	CamelO365Store *o365_store;
+	EO365Connection *cnc;
+	const gchar *old_slash, *new_slash;
+	gint parent_len;
+	gchar *folder_id;
+	gboolean success = TRUE;
+	GError *local_error = NULL;
+
+	g_return_val_if_fail (CAMEL_IS_O365_STORE (store), FALSE);
+
+	if (!g_strcmp0 (old_name, new_name))
+		return TRUE;
+
+	o365_store = CAMEL_O365_STORE (store);
+	folder_id = camel_o365_store_summary_dup_folder_id_for_full_name (o365_store->priv->summary, old_name);
+
+	if (!folder_id) {
+		g_set_error (error, CAMEL_STORE_ERROR, CAMEL_STORE_ERROR_NO_FOLDER,
+			_("Folder “%s” does not exist"), old_name);
+
+		return FALSE;
+	}
+
+	if (!camel_o365_store_ensure_connected (o365_store, &cnc, cancellable, error)) {
+		g_free (folder_id);
+		return FALSE;
+	}
+
+	old_slash = g_strrstr (old_name, "/");
+	new_slash = g_strrstr (new_name, "/");
+
+	if (old_slash)
+		old_slash++;
+	else
+		old_slash = old_name;
+
+	if (new_slash)
+		new_slash++;
+	else
+		new_slash = new_name;
+
+	parent_len = old_slash - old_name;
+
+	/* First move the folder, if needed */
+	if (new_slash - new_name != parent_len ||
+	    strncmp (old_name, new_name, parent_len)) {
+		gchar *new_parent_id;
+
+		if (new_slash - new_name > 0) {
+			gchar *new_parent;
+
+			new_parent = g_strndup (new_name, new_slash - new_name - 1);
+			new_parent_id = camel_o365_store_summary_dup_folder_id_for_full_name (o365_store->priv->summary, new_parent);
+
+			if (!new_parent_id) {
+				g_set_error (error, CAMEL_STORE_ERROR, CAMEL_STORE_ERROR_NO_FOLDER,
+					_("Folder “%s” does not exist"), new_parent);
+
+				g_free (new_parent);
+				g_free (folder_id);
+
+				return FALSE;
+			}
+
+			g_free (new_parent);
+		} else {
+			new_parent_id = NULL;
+		}
+
+		success = o365_store_move_mail_folder (o365_store, cnc, folder_id, new_parent_id ? new_parent_id : "msgfolderroot", cancellable, &local_error);
+
+		g_free (new_parent_id);
+	}
+
+	/* Then rename the folder, if needed */
+	if (success && g_strcmp0 (old_slash, new_slash) != 0) {
+		EO365MailFolder *mail_folder = NULL;
+
+		success = e_o365_connection_rename_mail_folder_sync (cnc, NULL, folder_id, new_slash, &mail_folder, cancellable, &local_error);
+
+		if (mail_folder) {
+			camel_o365_store_summary_set_folder_display_name (o365_store->priv->summary, folder_id,
+				e_o365_mail_folder_get_display_name (mail_folder), TRUE);
+
+			json_object_unref (mail_folder);
+		}
+	}
+
+	if (success) {
+		CamelFolderInfo *fi;
+
+		fi = camel_o365_store_summary_build_folder_info_for_id (o365_store->priv->summary, folder_id);
+
+		if (fi) {
+			camel_store_folder_renamed (store, old_name, fi);
+			camel_folder_info_free (fi);
+		}
+	}
+
+	o365_store_save_summary (o365_store->priv->summary, G_STRFUNC);
+
+	if (!success && local_error) {
+		camel_o365_store_maybe_disconnect (o365_store, local_error);
+		g_propagate_error (error, local_error);
+	}
+
+	g_free (folder_id);
+
+	return success;
 }
 
 typedef struct _FolderRenamedData {
@@ -667,7 +990,7 @@ o365_get_folder_info_sync (CamelStore *store,
 					LOCK (o365_store);
 
 					camel_o365_store_summary_set_delta_link (o365_store->priv->summary, new_delta_link);
-					o365_store_save_summary_locked (o365_store->priv->summary, G_STRFUNC);
+					o365_store_save_summary (o365_store->priv->summary, G_STRFUNC);
 
 					fdd.added_ids = g_slist_reverse (fdd.added_ids);
 					fdd.renamed_data = g_slist_reverse (fdd.renamed_data);
@@ -1015,7 +1338,7 @@ o365_store_dispose (GObject *object)
 	LOCK (o365_store);
 
 	if (o365_store->priv->summary) {
-		o365_store_save_summary_locked (o365_store->priv->summary, G_STRFUNC);
+		o365_store_save_summary (o365_store->priv->summary, G_STRFUNC);
 		g_clear_object (&o365_store->priv->summary);
 	}
 
@@ -1078,10 +1401,8 @@ camel_o365_store_class_init (CamelO365StoreClass *class)
 	store_class = CAMEL_STORE_CLASS (class);
 	store_class->get_folder_sync = o365_store_get_folder_sync;
 	store_class->create_folder_sync = o365_store_create_folder_sync;
-#if 0
 	store_class->delete_folder_sync = o365_store_delete_folder_sync;
 	store_class->rename_folder_sync = o365_store_rename_folder_sync;
-#endif
 	store_class->get_folder_info_sync = o365_get_folder_info_sync;
 	store_class->initial_setup_sync = o365_store_initial_setup_sync;
 	store_class->get_trash_folder_sync = o365_store_get_trash_folder_sync;

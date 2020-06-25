@@ -84,63 +84,6 @@ mail_config_o365_backend_set_oauth2_tooltip (GtkWidget *widget,
 }
 
 static void
-test_clicked_cb (GtkButton *button,
-		 EMailConfigServiceBackend *backend)
-{
-	CamelSettings *settings;
-	ESource *source;
-	EO365Connection *cnc;
-	GSList *folders = NULL, *link;
-	gboolean success;
-	static gchar *delta_link = NULL;
-	gchar *new_delta_link = NULL;
-	GError *error = NULL;
-
-	settings = e_mail_config_service_backend_get_settings (backend);
-	source = e_mail_config_service_backend_get_collection (backend);
-
-	cnc = e_o365_connection_new (source, CAMEL_O365_SETTINGS (settings));
-	g_return_if_fail (cnc != NULL);
-
-	//success = e_o365_connection_list_mail_folders_sync (cnc, NULL, NULL, NULL, &folders, NULL, &error);
-	success = e_o365_connection_get_mail_folders_delta_sync (cnc, NULL, NULL, delta_link, 0, e_o365_connection_call_gather_into_slist, &folders, &new_delta_link, NULL, &error);
-
-	if (success) {
-		g_free (delta_link);
-		delta_link = new_delta_link;
-	}
-
-	if (!success) {
-		printf ("%s: failed with error: %s\n", __FUNCTION__, error ? error->message : "none");
-	} else {
-		if (error) {
-			printf ("%s: succeeded, but has set error: '%s'\n", __FUNCTION__, error->message);
-		}
-
-		printf ("%s: returned %d objects:\n", __FUNCTION__, g_slist_length (folders));
-
-		for (link = folders; link; link = g_slist_next (link)) {
-			JsonObject *folder = link->data;
-
-			if (e_o365_delta_is_removed_object (folder))
-				printf ("   %p: removed folder id:'%s'\n", folder, e_o365_mail_folder_get_id (folder));
-			else
-				printf ("   %p: '%s' childCount:%d total:%d unread:%d id:'%s' parent:'%s'\n", folder,
-					e_o365_mail_folder_get_display_name (folder),
-					e_o365_mail_folder_get_child_folder_count (folder),
-					e_o365_mail_folder_get_total_item_count (folder),
-					e_o365_mail_folder_get_unread_item_count (folder),
-					e_o365_mail_folder_get_id (folder),
-					e_o365_mail_folder_get_parent_folder_id (folder));
-		}
-	}
-
-	g_slist_free_full (folders, (GDestroyNotify) json_object_unref);
-	g_clear_error (&error);
-	g_clear_object (&cnc);
-}
-
-static void
 mail_config_o365_backend_insert_widgets (EMailConfigServiceBackend *backend,
 					 GtkBox *parent)
 {
@@ -403,12 +346,6 @@ mail_config_o365_backend_insert_widgets (EMailConfigServiceBackend *backend,
 	e_source_authentication_set_host (auth_extension, "graph.microsoft.com");
 	e_source_authentication_set_port (auth_extension, 442);
 	e_source_authentication_set_method (auth_extension, "Office365");
-
-	/* The following is for easier debugging only */			
-	widget = gtk_button_new_with_mnemonic ("_Test");
-	g_signal_connect (widget, "clicked", G_CALLBACK (test_clicked_cb), o365_backend);
-	gtk_widget_show (widget);
-	gtk_box_pack_start (GTK_BOX (parent), widget, FALSE, FALSE, 0);
 }
 
 static void

@@ -54,13 +54,13 @@ typedef enum _EO365ItemBodyContentTypeType {
 } EO365ItemBodyContentTypeType;
 
 /* Just for better readability */
-#define EO365MailFolder JsonObject
-#define EO365Recipient JsonObject
-#define EO365DateTimeWithZone JsonObject
-#define EO365FollowupFlag JsonObject
-#define EO365InternetMessageHeader JsonObject
-#define EO365ItemBody JsonObject
-#define EO365MailMessage JsonObject
+#define EO365DateTimeWithZone		JsonObject
+#define EO365FollowupFlag		JsonObject
+#define EO365InternetMessageHeader	JsonObject
+#define EO365ItemBody			JsonObject
+#define EO365MailFolder			JsonObject
+#define EO365MailMessage		JsonObject
+#define EO365Recipient			JsonObject
 
 JsonArray *	e_o365_json_get_array_member		(JsonObject *object,
 							 const gchar *member_name);

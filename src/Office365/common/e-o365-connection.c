@@ -1335,6 +1335,29 @@ o365_connection_send_request_sync (EO365Connection *cnc,
 	return success;
 }
 
+static gboolean
+e_o365_read_no_response_cb (EO365Connection *cnc,
+			    SoupMessage *message,
+			    GInputStream *raw_data_stream,
+			    gpointer user_data,
+			    GCancellable *cancellable,
+			    GError **error)
+{
+	/* This is used when no response is expected from the server.
+	   Read the data stream only if debugging is on, in case
+	   the server returns anything interesting. */
+
+	if (o365_log_enabled ()) {
+		gchar buffer[4096];
+
+		while (g_input_stream_read (raw_data_stream, buffer, sizeof (buffer), cancellable, error) > 0) {
+			/* Do nothing, just read it, thus it's shown in the debug output */
+		}
+	}
+
+	return TRUE;
+}
+
 typedef struct _EO365ResponseData {
 	EO365ConnectionJsonFunc json_func;
 	gpointer func_user_data;
@@ -1432,6 +1455,28 @@ e_o365_read_json_object_response_cb (EO365Connection *cnc,
 	return TRUE;
 }
 
+static SoupMessage *
+o365_connection_new_soup_message (const gchar *method,
+				  const gchar *uri,
+				  GError **error)
+{
+	SoupMessage *message;
+
+	g_return_val_if_fail (method != NULL, NULL);
+	g_return_val_if_fail (uri != NULL, NULL);
+
+	message = soup_message_new (method, uri);
+
+	if (message) {
+		soup_message_headers_append (message->request_headers, "Connection", "Keep-Alive");
+		soup_message_headers_append (message->request_headers, "User-Agent", "Evolution-O365/" VERSION);
+	} else {
+		g_set_error (error, SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED, _("Malformed URI: “%s”"), uri);
+	}
+
+	return message;
+}
+
 gboolean
 e_o365_connection_get_ssl_error_details (EO365Connection *cnc,
 					 gchar **out_certificate_pem,
@@ -1480,10 +1525,9 @@ e_o365_connection_authenticate_sync (EO365Connection *cnc,
 		"$top", "1",
 		NULL);
 
-	message = soup_message_new (SOUP_METHOD_GET, uri);
+	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, error);
 
 	if (!message) {
-		g_set_error (error, SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED, _("Malformed URI: “%s”"), uri);
 		g_free (uri);
 
 		return FALSE;
@@ -1837,10 +1881,9 @@ e_o365_connection_batch_request_internal_sync (EO365Connection *cnc,
 	uri = e_o365_connection_construct_uri (cnc, FALSE, NULL, api_version, "",
 		"$batch", NULL, NULL, NULL);
 
-	message = soup_message_new (SOUP_METHOD_POST, uri);
+	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, error);
 
 	if (!message) {
-		g_set_error (error, SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED, _("Malformed URI: “%s”"), uri);
 		g_free (uri);
 
 		return FALSE;
@@ -2094,10 +2137,9 @@ e_o365_connection_list_mail_folders_sync (EO365Connection *cnc,
 		"$select", select,
 		NULL);
 
-	message = soup_message_new (SOUP_METHOD_GET, uri);
+	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, error);
 
 	if (!message) {
-		g_set_error (error, SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED, _("Malformed URI: “%s”"), uri);
 		g_free (uri);
 
 		return FALSE;
@@ -2137,7 +2179,7 @@ e_o365_connection_get_mail_folders_delta_sync (EO365Connection *cnc,
 	g_return_val_if_fail (func != NULL, FALSE);
 
 	if (delta_link)
-		message = soup_message_new (SOUP_METHOD_GET, delta_link);
+		message = o365_connection_new_soup_message (SOUP_METHOD_GET, delta_link, NULL);
 
 	if (!message) {
 		gchar *uri;
@@ -2149,10 +2191,9 @@ e_o365_connection_get_mail_folders_delta_sync (EO365Connection *cnc,
 			"$select", select,
 			NULL);
 
-		message = soup_message_new (SOUP_METHOD_GET, uri);
+		message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, error);
 
 		if (!message) {
-			g_set_error (error, SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED, _("Malformed URI: “%s”"), uri);
 			g_free (uri);
 
 			return FALSE;
@@ -2211,10 +2252,155 @@ e_o365_connection_create_mail_folder_sync (EO365Connection *cnc,
 		parent_folder_id ? "childFolders" : NULL,
 		NULL);
 
-	message = soup_message_new (SOUP_METHOD_POST, uri);
+	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, error);
 
 	if (!message) {
-		g_set_error (error, SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED, _("Malformed URI: “%s”"), uri);
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	builder = json_builder_new_immutable ();
+
+	json_builder_begin_object (builder);
+	json_builder_set_member_name (builder, "displayName");
+	json_builder_add_string_value (builder, display_name);
+	json_builder_end_object (builder);
+
+	e_o365_connection_set_json_body (message, builder);
+
+	g_object_unref (builder);
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_json_object_response_cb, NULL, out_mail_folder, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/mailfolder-delete?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_delete_mail_folder_sync (EO365Connection *cnc,
+					   const gchar *user_override, /* for which user, NULL to use the account user */
+					   const gchar *folder_id,
+					   GCancellable *cancellable,
+					   GError **error)
+{
+	SoupMessage *message = NULL;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (folder_id != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"mailFolders", folder_id, NULL, NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_DELETE, uri, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	success = o365_connection_send_request_sync (cnc, message, NULL, e_o365_read_no_response_cb, NULL, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/mailfolder-copy?view=graph-rest-1.0&tabs=http
+   https://docs.microsoft.com/en-us/graph/api/mailfolder-move?view=graph-rest-1.0&tabs=http
+ */
+gboolean
+e_o365_connection_copy_move_mail_folder_sync (EO365Connection *cnc,
+					      const gchar *user_override, /* for which user, NULL to use the account user */
+					      const gchar *src_folder_id,
+					      const gchar *des_folder_id,
+					      gboolean do_copy,
+					      EO365MailFolder **out_mail_folder,
+					      GCancellable *cancellable,
+					      GError **error)
+{
+	SoupMessage *message = NULL;
+	JsonBuilder *builder;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (src_folder_id != NULL, FALSE);
+	g_return_val_if_fail (des_folder_id != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"mailFolders",
+		src_folder_id,
+		do_copy ? "copy" : "move",
+		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	builder = json_builder_new_immutable ();
+
+	json_builder_begin_object (builder);
+	json_builder_set_member_name (builder, "destinationId");
+	json_builder_add_string_value (builder, des_folder_id);
+	json_builder_end_object (builder);
+
+	e_o365_connection_set_json_body (message, builder);
+
+	g_object_unref (builder);
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_json_object_response_cb, NULL, out_mail_folder, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/mailfolder-update?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_rename_mail_folder_sync (EO365Connection *cnc,
+					   const gchar *user_override, /* for which user, NULL to use the account user */
+					   const gchar *folder_id,
+					   const gchar *display_name,
+					   EO365MailFolder **out_mail_folder,
+					   GCancellable *cancellable,
+					   GError **error)
+{
+	SoupMessage *message = NULL;
+	JsonBuilder *builder;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (folder_id != NULL, FALSE);
+	g_return_val_if_fail (display_name != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"mailFolders",
+		folder_id,
+		NULL,
+		NULL);
+
+	message = o365_connection_new_soup_message ("PATCH", uri, error);
+
+	if (!message) {
 		g_free (uri);
 
 		return FALSE;
@@ -2265,7 +2451,7 @@ e_o365_connection_get_mail_messages_delta_sync (EO365Connection *cnc,
 	g_return_val_if_fail (func != NULL, FALSE);
 
 	if (delta_link)
-		message = soup_message_new (SOUP_METHOD_GET, delta_link);
+		message = o365_connection_new_soup_message (SOUP_METHOD_GET, delta_link, NULL);
 
 	if (!message) {
 		gchar *uri;
@@ -2278,10 +2464,9 @@ e_o365_connection_get_mail_messages_delta_sync (EO365Connection *cnc,
 			"$select", select,
 			NULL);
 
-		message = soup_message_new (SOUP_METHOD_GET, uri);
+		message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, error);
 
 		if (!message) {
-			g_set_error (error, SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED, _("Malformed URI: “%s”"), uri);
 			g_free (uri);
 
 			return FALSE;
@@ -2342,10 +2527,9 @@ e_o365_connection_get_mail_message_sync (EO365Connection *cnc,
 		"", "$value",
 		NULL);
 
-	message = soup_message_new (SOUP_METHOD_GET, uri);
+	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, error);
 
 	if (!message) {
-		g_set_error (error, SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED, _("Malformed URI: “%s”"), uri);
 		g_free (uri);
 
 		return FALSE;
