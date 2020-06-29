@@ -22,6 +22,7 @@
 #include "camel-o365-store-summary.h"
 
 #define STORE_GROUP_NAME "##storepriv##"
+#define CATEGORIES_KEY "Categories"
 #define DATA_VERSION 1
 
 #define LOCK(_summary) g_rec_mutex_lock (&(_summary->priv->property_lock))
@@ -1256,4 +1257,162 @@ camel_o365_store_summary_connect_folder_summary (CamelO365StoreSummary *store_su
 
 	g_signal_connect_object (folder_summary, "notify::saved-count", G_CALLBACK (o365_store_summary_folder_count_notify_cb), store_summary, 0);
 	g_signal_connect_object (folder_summary, "notify::unread-count", G_CALLBACK (o365_store_summary_folder_count_notify_cb), store_summary, 0);
+}
+
+static gchar *
+camel_o365_category_to_string (const CamelO365Category *cat)
+{
+	gchar *id, *display_name, *color = NULL, *str;
+
+	g_return_val_if_fail (cat != NULL, NULL);
+
+	id = g_uri_escape_string (cat->id, NULL, TRUE);
+	display_name = g_uri_escape_string (cat->display_name, NULL, TRUE);
+
+	if (cat->color)
+		color = g_uri_escape_string (cat->color, NULL, TRUE);
+
+	str = g_strconcat (
+		id ? id : "", "\t",
+		display_name ? display_name : "", "\t",
+		color ? color : "",
+		NULL);
+
+	g_free (id);
+	g_free (display_name);
+	g_free (color);
+
+	return str;
+}
+
+static CamelO365Category *
+camel_o365_category_from_string (const gchar *str)
+{
+	CamelO365Category *cat;
+	gchar **strv, *id, *display_name, *color;
+
+	g_return_val_if_fail (str != NULL, NULL);
+
+	strv = g_strsplit (str, "\t", -1);
+	if (!strv || !strv[0] || !strv[1]) {
+		g_strfreev (strv);
+		return NULL;
+	}
+
+	id = g_uri_unescape_string (strv[0], NULL);
+	display_name = g_uri_unescape_string (strv[1], NULL);
+	color = (strv[2] && strv[2][0]) ? g_uri_unescape_string (strv[2], NULL) : NULL;
+
+	cat = camel_o365_category_new (id, display_name, color);
+
+	g_free (id);
+	g_free (display_name);
+	g_free (color);
+	g_strfreev (strv);
+
+	return cat;
+}
+
+GHashTable * /* gchar *id ~> CamelO365Category * */
+camel_o365_store_summary_get_categories (CamelO365StoreSummary *store_summary)
+{
+	GHashTable *categories;
+	gchar **strv;
+
+	g_return_val_if_fail (CAMEL_IS_O365_STORE_SUMMARY (store_summary), NULL);
+
+	LOCK (store_summary);
+
+	strv = g_key_file_get_string_list (store_summary->priv->key_file, STORE_GROUP_NAME, CATEGORIES_KEY, NULL, NULL);
+
+	UNLOCK (store_summary);
+
+	categories = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, camel_o365_category_free);
+
+	if (strv) {
+		gint ii;
+
+		for (ii = 0; strv[ii]; ii++) {
+			CamelO365Category *cat;
+
+			cat = camel_o365_category_from_string (strv[ii]);
+			if (cat)
+				g_hash_table_insert (categories, cat->id, cat);
+		}
+
+		g_strfreev (strv);
+	}
+
+	return categories;
+}
+
+void
+camel_o365_store_summary_set_categories (CamelO365StoreSummary *store_summary,
+					 GHashTable *categories) /* gchar *id ~> CamelO365Category * */
+{
+	GPtrArray *array;
+	GHashTableIter iter;
+	gpointer value;
+
+	g_return_if_fail (CAMEL_IS_O365_STORE_SUMMARY (store_summary));
+	g_return_if_fail (categories != NULL);
+
+	array = g_ptr_array_new_full (g_hash_table_size (categories), g_free);
+
+	g_hash_table_iter_init (&iter, categories);
+
+	while (g_hash_table_iter_next (&iter, NULL, &value)) {
+		CamelO365Category *cat = value;
+
+		if (cat) {
+			gchar *str;
+
+			str = camel_o365_category_to_string (cat);
+
+			if (str)
+				g_ptr_array_add (array, str);
+		}
+	}
+
+	LOCK (store_summary);
+
+	g_key_file_set_string_list (store_summary->priv->key_file, STORE_GROUP_NAME, CATEGORIES_KEY,
+		(const gchar * const *) array->pdata, array->len);
+
+	store_summary->priv->dirty = TRUE;
+
+	UNLOCK (store_summary);
+
+	g_ptr_array_free (array, TRUE);
+}
+
+CamelO365Category *
+camel_o365_category_new (const gchar *id,
+			 const gchar *display_name,
+			 const gchar *color)
+{
+	CamelO365Category *cat;
+
+	g_return_val_if_fail (id != NULL, NULL);
+	g_return_val_if_fail (display_name != NULL, NULL);
+
+	cat = g_slice_new0 (CamelO365Category);
+	cat->id = g_strdup (id);
+	cat->display_name = g_strdup (display_name);
+	cat->color = g_strdup (color);
+
+	return cat;
+}
+
+void
+camel_o365_category_free (gpointer ptr)
+{
+	CamelO365Category *cat = ptr;
+
+	if (cat) {
+		g_free (cat->id);
+		g_free (cat->display_name);
+		g_free (cat->color);
+		g_slice_free (CamelO365Category, cat);
+	}
 }

@@ -190,6 +190,69 @@ e_o365_delta_is_removed_object (JsonObject *object)
 	return json_object_has_member (object, "@removed");
 }
 
+/* https://docs.microsoft.com/en-us/graph/api/resources/outlookcategory?view=graph-rest-1.0 */
+
+const gchar *
+e_o365_category_get_display_name (EO365Category *category)
+{
+	return e_o365_json_get_string_member (category, "displayName", NULL);
+}
+
+const gchar *
+e_o365_category_get_id (EO365Category *category)
+{
+	return e_o365_json_get_string_member (category, "id", NULL);
+}
+
+const gchar *
+e_o365_category_get_color (EO365Category *category)
+{
+	const gchar *colors_array[] = {
+		"#ff1a36", /* Red */
+		"#ff8c00", /* Orange */
+		"#f4b10b", /* Peach */
+		"#fff100", /* Yellow */
+		"#009e48", /* Green */
+		"#00b294", /* Teal */
+		"#89933f", /* Olive */
+		"#00bcf2", /* Blue */
+		"#8e69df", /* Purple */
+		"#f30092", /* Maroon */
+		"#6c7e9a", /* Steel */
+		"#425066", /* DarkSteel */
+		"#969696", /* Gray */
+		"#525552", /* DarkGray */
+		"#282828", /* Black */
+		"#a00023", /* DarkRed */
+		"#c45502", /* DarkOrange */
+		"#af7000", /* DarkPeach */
+		"#b59b02", /* DarkYellow */
+		"#176002", /* DarkGreen */
+		"#00725c", /* DarkTeal */
+		"#5c6022", /* DarkOlive */
+		"#036393", /* DarkBlue */
+		"#422f8e", /* DarkPurple */
+		"#960269"  /* DarkMaroon */
+	};
+	const gchar *color_str;
+	gchar *enptr = NULL;
+	gint color_index;
+
+	color_str = e_o365_json_get_string_member (category, "color", NULL);
+
+	if (!color_str ||
+	    g_ascii_strcasecmp (color_str, "None") == 0 ||
+	    g_ascii_strncasecmp (color_str, "preset", 6) != 0)
+		return NULL;
+
+	color_index = (gint) g_ascii_strtoll (color_str + 6, &enptr, 10);
+
+	if (enptr != color_str && color_index >= 0 && color_index < G_N_ELEMENTS (colors_array))
+		return colors_array[color_index];
+
+	return NULL;
+}
+
 /* https://docs.microsoft.com/en-us/graph/api/resources/mailfolder?view=graph-rest-1.0 */
 
 const gchar *

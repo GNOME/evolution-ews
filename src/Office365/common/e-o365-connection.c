@@ -2111,6 +2111,50 @@ e_o365_connection_call_gather_into_slist (EO365Connection *cnc,
 	return TRUE;
 }
 
+/* https://docs.microsoft.com/en-us/graph/api/outlookuser-list-mastercategories?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_get_categories_sync (EO365Connection *cnc,
+				       const gchar *user_override,
+				       GSList **out_categories, /* EO365Category * */
+				       GCancellable *cancellable,
+				       GError **error)
+{
+	EO365ResponseData rd;
+	SoupMessage *message;
+	gchar *uri;
+	gboolean success;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (out_categories != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"outlook",
+		"masterCategories",
+		NULL,
+		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_GET, uri, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	memset (&rd, 0, sizeof (EO365ResponseData));
+
+	rd.out_items = out_categories;
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_valued_response_cb, NULL, &rd, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
 /* https://docs.microsoft.com/en-us/graph/api/user-list-mailfolders?view=graph-rest-1.0&tabs=http */
 
 gboolean
@@ -2118,7 +2162,7 @@ e_o365_connection_list_mail_folders_sync (EO365Connection *cnc,
 					  const gchar *user_override, /* for which user, NULL to use the account user */
 					  const gchar *from_path, /* path for the folder to read, NULL for top user folder */
 					  const gchar *select, /* properties to select, nullable */
-					  GSList **out_folders, /* JsonObject * - the returned mailFolder objects */
+					  GSList **out_folders, /* EO365MailFolder * - the returned mailFolder objects */
 					  GCancellable *cancellable,
 					  GError **error)
 {

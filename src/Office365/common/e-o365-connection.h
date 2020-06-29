@@ -159,12 +159,18 @@ gboolean	e_o365_connection_call_gather_into_slist
 						 gpointer user_data, /* expects GSList **, aka pointer to a GSList *, where it copies the 'results' */
 						 GCancellable *cancellable,
 						 GError **error);
+gboolean	e_o365_connection_get_categories_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override,
+						 GSList **out_categories, /* EO365Category * */
+						 GCancellable *cancellable,
+						 GError **error);
 gboolean	e_o365_connection_list_mail_folders_sync
 						(EO365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
 						 const gchar *from_path, /* path for the folder to read, NULL for top user folder */
 						 const gchar *select, /* properties to select, nullable */
-						 GSList **out_folders, /* JsonObject * - the returned mailFolder objects */
+						 GSList **out_folders, /* EO365MailFolder * - the returned mailFolder objects */
 						 GCancellable *cancellable,
 						 GError **error);
 gboolean	e_o365_connection_get_mail_folders_delta_sync

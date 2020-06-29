@@ -175,6 +175,25 @@ CamelFolderInfo *
 void		camel_o365_store_summary_connect_folder_summary
 							(CamelO365StoreSummary *store_summary,
 							 CamelFolderSummary *folder_summary);
+
+typedef struct _CamelO365Category {
+	gchar *id;
+	gchar *display_name;
+	gchar *color;
+} CamelO365Category;
+
+GHashTable *	camel_o365_store_summary_get_categories /* gchar *id ~> CamelO365Category * */
+						(CamelO365StoreSummary *store_summary);
+void		camel_o365_store_summary_set_categories
+						(CamelO365StoreSummary *store_summary,
+						 GHashTable *categories); /* gchar *id ~> CamelO365Category * */
+
+CamelO365Category *
+		camel_o365_category_new		(const gchar *id,
+						 const gchar *display_name,
+						 const gchar *color);
+void		camel_o365_category_free	(gpointer ptr); /* CamelO365Category * */
+
 G_END_DECLS
 
 #endif /* CAMEL_O365_STORE_SUMMARY_H */

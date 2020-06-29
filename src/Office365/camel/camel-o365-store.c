@@ -20,6 +20,8 @@
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 
+#include <e-util/e-util.h>
+
 #include "common/camel-o365-settings.h"
 #include "common/e-o365-connection.h"
 #include "camel-o365-folder.h"
@@ -260,6 +262,246 @@ o365_store_read_default_folders (CamelO365Store *o365_store,
 }
 
 static gboolean
+o365_store_equal_label_tag_cb (gconstpointer ptr1,
+			       gconstpointer ptr2)
+{
+	const gchar *evo_label_def = ptr1;
+	const gchar *tag = ptr2;
+	const gchar *pos;
+
+	if (!evo_label_def || !tag || !*tag)
+		return FALSE;
+
+	pos = g_strrstr (evo_label_def, tag);
+
+	return pos > evo_label_def && pos[-1] == '|' && !pos[strlen (tag)];
+}
+
+static gboolean
+o365_store_find_in_ptr_array (GPtrArray *haystack,
+			      gconstpointer needle,
+			      GEqualFunc equal_func,
+			      guint *out_index)
+{
+	guint ii;
+
+	if (!haystack)
+		return FALSE;
+
+	if (!equal_func)
+		equal_func = g_direct_equal;
+
+	for (ii = 0; ii < haystack->len; ii++) {
+		if (equal_func (haystack->pdata[ii], needle)) {
+			if (out_index)
+				*out_index = ii;
+
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
+/* Returns whether had been done any changes */
+static gboolean
+o365_store_save_category_changes (GHashTable *old_categories, /* gchar *id ~> CamelO365Category * */
+				  GHashTable *new_categories) /* gchar *id ~> CamelO365Category * */
+{
+	GHashTableIter iter;
+	GSettings *settings;
+	GPtrArray *evo_labels; /* gchar * (encoded label definition) */
+	gchar **strv;
+	gint ii;
+	gpointer value;
+	gboolean changed = FALSE;
+
+	if (!old_categories || !new_categories)
+		return new_categories != NULL;
+
+	evo_labels = g_ptr_array_new_full (5, g_free);
+
+	settings = e_util_ref_settings ("org.gnome.evolution.mail");
+	strv = g_settings_get_strv (settings, "labels");
+
+	for (ii = 0; strv && strv[ii]; ii++) {
+		g_ptr_array_add (evo_labels, g_strdup (strv[ii]));
+	}
+
+	g_strfreev (strv);
+
+	g_hash_table_iter_init (&iter, new_categories);
+	while (g_hash_table_iter_next (&iter, NULL, &value)) {
+		CamelO365Category *new_cat = value, *old_cat;
+		gchar *tag = NULL;
+
+		if (!new_cat)
+			continue;
+
+		old_cat = g_hash_table_lookup (old_categories, new_cat->id);
+		if (old_cat) {
+			if (g_strcmp0 (old_cat->display_name, new_cat->display_name) != 0 ||
+			    g_strcmp0 (old_cat->color, new_cat->color) != 0) {
+				/* Old category changed name or color */
+				tag = camel_o365_utils_encode_category_name (new_cat->display_name);
+			}
+		} else {
+			/* This is a new category */
+			tag = camel_o365_utils_encode_category_name (new_cat->display_name);
+		}
+
+		if (tag && *tag) {
+			guint index = (guint) -1;
+			gchar *label_def;
+
+			changed = TRUE;
+
+			/* Sanitize value */
+			for (ii = 0; tag[ii]; ii++) {
+				if (tag[ii] == '|')
+					tag[ii] = '-';
+			}
+
+			if (old_cat && g_strcmp0 (old_cat->display_name, new_cat->display_name) != 0) {
+				gchar *old_tag = camel_o365_utils_encode_category_name (old_cat->display_name);
+
+				if (old_tag && *old_tag) {
+					if (!o365_store_find_in_ptr_array (evo_labels, old_tag, o365_store_equal_label_tag_cb, &index))
+						index = (guint) -1;
+				}
+
+				g_free (old_tag);
+			}
+
+			for (ii = 0; new_cat->display_name[ii]; ii++) {
+				if (new_cat->display_name[ii] == '|')
+					new_cat->display_name[ii] = '-';
+			}
+
+			if (index == (guint) -1 &&
+			    !o365_store_find_in_ptr_array (evo_labels, tag, o365_store_equal_label_tag_cb, &index))
+				index = (guint) -1;
+
+			label_def = g_strconcat (new_cat->display_name, "|", new_cat->color ? new_cat->color : "#FF0000", "|", tag, NULL);
+
+			if (index == (guint) -1 || index >= (gint) evo_labels->len) {
+				g_ptr_array_add (evo_labels, label_def);
+			} else {
+				g_free (evo_labels->pdata[index]);
+				evo_labels->pdata[index] = label_def;
+			}
+		}
+
+		g_hash_table_remove (old_categories, new_cat->id);
+
+		g_free (tag);
+	}
+
+	if (g_hash_table_size (old_categories) > 0) {
+		/* Some categories had been removed */
+		changed = TRUE;
+
+		g_hash_table_iter_init (&iter, old_categories);
+		while (g_hash_table_iter_next (&iter, NULL, &value)) {
+			CamelO365Category *old_cat = value;
+			gchar *old_tag;
+			guint index;
+
+			if (!old_cat)
+				continue;
+
+			old_tag = camel_o365_utils_encode_category_name (old_cat->display_name);
+
+			for (ii = 0; old_tag && old_tag[ii]; ii++) {
+				if (old_tag[ii] == '|')
+					old_tag[ii] = '-';
+			}
+
+			if (old_tag &&
+			    o365_store_find_in_ptr_array (evo_labels, old_tag, o365_store_equal_label_tag_cb, &index))
+				g_ptr_array_remove_index (evo_labels, index);
+
+			g_free (old_tag);
+		}
+	}
+
+	if (changed) {
+		/* NULL-terminated array of strings */
+		g_ptr_array_add (evo_labels, NULL);
+
+		g_settings_set_strv (settings, "labels", (const gchar * const *) evo_labels->pdata);
+	}
+
+	g_ptr_array_free (evo_labels, TRUE);
+	g_object_unref (settings);
+
+	return changed;
+}
+
+static void
+o365_store_get_categories_cb (CamelSession *session,
+			      GCancellable *cancellable,
+			      gpointer user_data,
+			      GError **error)
+{
+	CamelO365Store *o365_store = user_data;
+	EO365Connection *cnc;
+	GSList *categories = NULL;
+
+	g_return_if_fail (CAMEL_IS_O365_STORE (o365_store));
+
+	cnc = camel_o365_store_ref_connection (o365_store);
+
+	if (!cnc)
+		return;
+
+	if (e_o365_connection_get_categories_sync (cnc, NULL, &categories, cancellable, error)) {
+		GHashTable *old_categories, *new_categories;
+		GSList *link;
+
+		new_categories = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, camel_o365_category_free);
+
+		for (link = categories; link; link = g_slist_next (link)) {
+			EO365Category *category = link->data;
+			CamelO365Category *cat;
+			const gchar *id, *display_name, *color;
+
+			if (!category)
+				continue;
+
+			id = e_o365_category_get_id (category);
+			display_name = e_o365_category_get_display_name (category);
+			color = e_o365_category_get_color (category);
+
+			if (!id || !display_name)
+				continue;
+
+			if (display_name != camel_o365_utils_rename_label (display_name, TRUE))
+				continue;
+
+			cat = camel_o365_category_new (id, display_name, color);
+
+			if (cat)
+				g_hash_table_insert (new_categories, cat->id, cat);
+		}
+
+		g_slist_free_full (categories, (GDestroyNotify) json_object_unref);
+
+		old_categories = camel_o365_store_summary_get_categories (o365_store->priv->summary);
+
+		if (o365_store_save_category_changes (old_categories, new_categories)) {
+			camel_o365_store_summary_set_categories (o365_store->priv->summary, new_categories);
+			camel_o365_store_summary_save (o365_store->priv->summary, NULL);
+		}
+
+		g_hash_table_destroy (new_categories);
+		g_hash_table_destroy (old_categories);
+	}
+
+	g_object_unref (cnc);
+}
+
+static gboolean
 o365_store_connect_sync (CamelService *service,
 			 GCancellable *cancellable,
 			 GError **error)
@@ -292,6 +534,14 @@ o365_store_connect_sync (CamelService *service,
 		session = camel_service_ref_session (service);
 
 		success = camel_session_authenticate_sync (session, service, "Office365", cancellable, error);
+
+		if (success) {
+			camel_session_submit_job (
+				session, _("Look up Office 365 categories"),
+				o365_store_get_categories_cb,
+				g_object_ref (o365_store),
+				g_object_unref);
+		}
 
 		g_clear_object (&session);
 		g_clear_object (&cnc);

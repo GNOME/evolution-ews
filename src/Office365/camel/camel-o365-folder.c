@@ -27,6 +27,7 @@
 #include "camel-o365-folder-summary.h"
 #include "camel-o365-store.h"
 #include "camel-o365-store-summary.h"
+#include "camel-o365-utils.h"
 
 #include "camel-o365-folder.h"
 
@@ -545,6 +546,95 @@ o365_folder_get_message_sync (CamelFolder *folder,
 }
 
 static gboolean
+o365_folder_is_system_user_flag (const gchar *name)
+{
+	if (!name)
+		return FALSE;
+
+	return g_str_equal (name, "receipt-handled") ||
+		g_str_equal (name, "$has-cal");
+}
+
+static gboolean
+o365_folder_merge_server_user_flags (CamelMessageInfo *mi,
+				     EO365MailMessage *mail)
+{
+	CamelFolderSummary *summary;
+	JsonArray *categories;
+	GHashTable *current_labels;
+	const CamelNamedFlags *user_flags;
+	guint ii, len;
+	gboolean changed = FALSE;
+
+	summary = camel_message_info_ref_summary (mi);
+	if (summary)
+		camel_folder_summary_lock (summary);
+	camel_message_info_property_lock (mi);
+	camel_message_info_freeze_notifications (mi);
+
+	current_labels = g_hash_table_new (g_str_hash, g_str_equal);
+
+	user_flags = camel_message_info_get_user_flags (mi);
+	len = camel_named_flags_get_length (user_flags);
+
+	/* transfer camel flags to a list */
+	for (ii = 0; ii < len; ii++) {
+		const gchar *name = camel_named_flags_get (user_flags, ii);
+
+		if (!o365_folder_is_system_user_flag (name))
+			g_hash_table_insert (current_labels, (gpointer) name, NULL);
+	}
+
+	categories = e_o365_mail_message_get_categories (mail);
+
+	if (categories) {
+		len = json_array_get_length (categories);
+
+		for (ii = 0; ii < len; ii++) {
+			const gchar *name = json_array_get_string_element (categories, ii);
+
+			name = camel_o365_utils_rename_label (name, TRUE);
+
+			if (name && *name) {
+				gchar *flag;
+
+				flag = camel_o365_utils_encode_category_name (name);
+
+				if (!g_hash_table_remove (current_labels, flag)) {
+					changed = TRUE;
+
+					camel_message_info_set_user_flag (mi, flag, TRUE);
+				}
+
+				g_free (flag);
+			}
+		}
+	}
+
+	/* Those left here are to be removed */
+	if (g_hash_table_size (current_labels)) {
+		GHashTableIter iter;
+		gpointer key;
+
+		changed = TRUE;
+
+		g_hash_table_iter_init (&iter, current_labels);
+
+		while (g_hash_table_iter_next (&iter, &key, NULL)) {
+			camel_message_info_set_user_flag (mi, key, FALSE);
+		}
+	}
+
+	camel_message_info_thaw_notifications (mi);
+	camel_message_info_property_unlock (mi);
+	if (summary)
+		camel_folder_summary_unlock (summary);
+	g_clear_object (&summary);
+
+	return changed;
+}
+
+static gboolean
 o365_folder_update_message_info (CamelMessageInfo *mi,
 				 EO365MailMessage *mail)
 {
@@ -582,6 +672,8 @@ o365_folder_update_message_info (CamelMessageInfo *mi,
 
 		changed = TRUE;
 	}
+
+	changed = o365_folder_merge_server_user_flags (mi, mail) || changed;
 
 	return changed;
 }

@@ -91,3 +91,88 @@ camel_o365_utils_new_connection (CamelService *service,
 
 	return cnc;
 }
+
+/* From Outlook name (which allows spaces) to Evolution name */
+gchar *
+camel_o365_utils_encode_category_name (const gchar *name)
+{
+	if (name && strchr (name, ' ')) {
+		GString *str;
+
+		str = g_string_sized_new (strlen (name) + 16);
+
+		while (*name) {
+			if (*name == '_')
+				g_string_append_c (str, '_');
+
+			g_string_append_c (str, *name == ' ' ? '_' : *name);
+
+			name++;
+		}
+
+		return g_string_free (str, FALSE);
+	}
+
+	return g_strdup (name);
+}
+
+/* From Evolution name to Outlook name (which allows spaces) */
+gchar *
+camel_o365_utils_decode_category_name (const gchar *flag)
+{
+	if (flag && strchr (flag, '_')) {
+		GString *str = g_string_sized_new (strlen (flag));
+
+		while (*flag) {
+			if (*flag == '_') {
+				if (flag[1] == '_') {
+					g_string_append_c (str, '_');
+					flag++;
+				} else {
+					g_string_append_c (str, ' ');
+				}
+			} else {
+				g_string_append_c (str, *flag);
+			}
+
+			flag++;
+		}
+
+		return g_string_free (str, FALSE);
+	}
+
+	return g_strdup (flag);
+}
+
+const gchar *
+camel_o365_utils_rename_label (const gchar *cat,
+			       gboolean from_cat)
+{
+	gint ii;
+
+	/* This is a mapping from Outlook categories to
+	 * Evolution labels based on the standard colors */
+	const gchar *labels[] = {
+		"Red Category", "$Labelimportant",
+		"Orange Category", "$Labelwork",
+		"Green Category", "$Labelpersonal",
+		"Blue Category", "$Labeltodo",
+		"Purple Category", "$Labellater",
+		NULL, NULL
+	};
+
+	if (!cat || !*cat)
+		return "";
+
+	for (ii = 0; labels[ii]; ii += 2) {
+		if (from_cat) {
+			if (!g_ascii_strcasecmp (cat, labels[ii]))
+				return labels[ii + 1];
+		} else {
+			if (!g_ascii_strcasecmp (cat, labels[ii + 1]))
+				return labels[ii];
+		}
+	}
+
+	return cat;
+}

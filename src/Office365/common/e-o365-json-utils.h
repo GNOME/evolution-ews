@@ -54,6 +54,7 @@ typedef enum _EO365ItemBodyContentTypeType {
 } EO365ItemBodyContentTypeType;
 
 /* Just for better readability */
+#define EO365Category			JsonObject
 #define EO365DateTimeWithZone		JsonObject
 #define EO365FollowupFlag		JsonObject
 #define EO365InternetMessageHeader	JsonObject
@@ -86,6 +87,10 @@ time_t		e_o365_get_date_time_offset_member	(JsonObject *object,
 							 const gchar *member_name);
 
 gboolean	e_o365_delta_is_removed_object		(JsonObject *object);
+
+const gchar *	e_o365_category_get_display_name	(EO365Category *category);
+const gchar *	e_o365_category_get_id			(EO365Category *category);
+const gchar *	e_o365_category_get_color		(EO365Category *category);
 
 const gchar *	e_o365_mail_folder_get_display_name	(EO365MailFolder *folder);
 const gchar *	e_o365_mail_folder_get_id		(EO365MailFolder *folder);

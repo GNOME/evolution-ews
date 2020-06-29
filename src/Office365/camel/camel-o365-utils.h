@@ -25,5 +25,12 @@
 EO365Connection *
 		camel_o365_utils_new_connection	(CamelService *service,
 						 GCancellable *cancellable);
+gchar *		camel_o365_utils_encode_category_name
+						(const gchar *name);
+gchar *		camel_o365_utils_decode_category_name
+						(const gchar *flag);
+const gchar *	camel_o365_utils_rename_label	(const gchar *cat,
+						 gboolean from_cat);
+
 
 #endif /* CAMEL_O365_UTILS_H */
