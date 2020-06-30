@@ -19,6 +19,7 @@
 
 #include <glib/gi18n-lib.h>
 
+#include "common/e-o365-connection.h"
 #include "common/e-source-o365-folder.h"
 #include "common/camel-o365-settings.h"
 
@@ -37,7 +38,6 @@ G_DEFINE_DYNAMIC_TYPE_EXTENDED (EO365Backend, e_o365_backend, E_TYPE_COLLECTION_
 
 static void o365_backend_populate (ECollectionBackend *backend);
 
-#if 0
 static void
 o365_backend_source_changed_cb (ESource *source,
 				EO365Backend *backend)
@@ -52,12 +52,10 @@ o365_backend_source_changed_cb (ESource *source,
 
 	o365_backend_populate (E_COLLECTION_BACKEND (backend));
 }
-#endif
 
 static void
 o365_backend_populate (ECollectionBackend *backend)
 {
-#if 0
 	ESource *source;
 	EO365Backend *o365_backend = E_O365_BACKEND (backend);
 
@@ -74,23 +72,8 @@ o365_backend_populate (ECollectionBackend *backend)
 	if (!e_source_get_enabled (source))
 		return;
 
-	o365_backend_add_gal_source (o365_backend);
-	o365_backend_claim_old_resources (backend);
-
-	if (e_backend_get_online (E_BACKEND (backend))) {
-		CamelO365Settings *o365_settings;
-
-		o365_settings = camel_o365_settings_get_from_backend (o365_backend, NULL);
-
-		if (e_o365_connection_utils_get_without_password (o365_settings)) {
-			e_backend_schedule_authenticate (E_BACKEND (backend), NULL);
-		} else {
-			e_backend_credentials_required_sync (E_BACKEND (backend),
-				E_SOURCE_CREDENTIALS_REASON_REQUIRED, NULL, 0, NULL,
-				NULL, NULL);
-		}
-	}
-#endif
+	if (e_backend_get_online (E_BACKEND (backend)))
+		e_backend_schedule_authenticate (E_BACKEND (backend), NULL);
 }
 
 static gchar *
@@ -395,36 +378,30 @@ o365_backend_authenticate_sync (EBackend *backend,
 				GCancellable *cancellable,
 				GError **error)
 {
-	/*EO365Backend *o365_backend;
-	EO365Connection *connection;*/
 	CamelO365Settings *o365_settings;
-	ESourceAuthenticationResult result = E_SOURCE_AUTHENTICATION_ERROR;
+	/*EO365Backend *o365_backend;*/
+	EO365Connection *cnc;
+	ESourceAuthenticationResult result;
 
 	g_return_val_if_fail (E_IS_O365_BACKEND (backend), E_SOURCE_AUTHENTICATION_ERROR);
 
 	o365_settings = camel_o365_settings_get_from_backend (backend, NULL);
 	g_return_val_if_fail (o365_settings != NULL, E_SOURCE_AUTHENTICATION_ERROR);
 
-	/*o365_backend = E_O365_BACKEND (backend);
-	g_mutex_lock (&o365_backend->priv->connection_lock);
-	g_clear_object (&o365_backend->priv->connection);
-	e_named_parameters_free (o365_backend->priv->credentials);
-	o365_backend->priv->credentials = e_named_parameters_new_clone (credentials);
-	g_mutex_unlock (&o365_backend->priv->connection_lock);
+	cnc = e_o365_connection_new (e_backend_get_source (backend), o365_settings);
 
-	connection = e_o365_backend_ref_connection_sync (o365_backend, &result, out_certificate_pem, out_certificate_errors, cancellable, error);
-	g_clear_object (&connection);
+	result = e_o365_connection_authenticate_sync (cnc, cancellable, error);
 
 	if (result == E_SOURCE_AUTHENTICATION_ACCEPTED) {
 		e_collection_backend_authenticate_children (E_COLLECTION_BACKEND (backend), credentials);
 
-		e_o365_backend_sync_folders (o365_backend, NULL, o365_backend_folders_synced_cb, NULL);
-	} else if (e_o365_connection_utils_get_without_password (o365_settings) &&
-		   result == E_SOURCE_AUTHENTICATION_REJECTED &&
+		/* e_o365_backend_sync_folders (o365_backend, NULL, o365_backend_folders_synced_cb, NULL); */
+	} else if (result == E_SOURCE_AUTHENTICATION_REJECTED &&
 		   !e_named_parameters_exists (credentials, E_SOURCE_CREDENTIAL_PASSWORD)) {
-		e_o365_connection_utils_force_off_ntlm_auth_check ();
 		result = E_SOURCE_AUTHENTICATION_REQUIRED;
-	}*/
+	}
+
+	g_clear_object (&cnc);
 
 	return result;
 }
