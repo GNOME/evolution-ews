@@ -40,6 +40,22 @@ e_o365_json_get_array_member (JsonObject *object,
 	return json_node_get_array (node);
 }
 
+void
+e_o365_json_begin_array_member (JsonBuilder *builder,
+				const gchar *member_name)
+{
+	if (member_name && *member_name)
+		json_builder_set_member_name (builder, member_name);
+
+	json_builder_begin_array (builder);
+}
+
+void
+e_o365_json_end_array_member (JsonBuilder *builder)
+{
+	json_builder_end_array (builder);
+}
+
 gboolean
 e_o365_json_get_boolean_member (JsonObject *object,
 				const gchar *member_name,
@@ -58,6 +74,17 @@ e_o365_json_get_boolean_member (JsonObject *object,
 	g_return_val_if_fail (JSON_NODE_HOLDS_VALUE (node), default_value);
 
 	return json_node_get_boolean (node);
+}
+
+void
+e_o365_json_add_boolean_member (JsonBuilder *builder,
+				const gchar *member_name,
+				gboolean value)
+{
+	g_return_if_fail (member_name && *member_name);
+
+	json_builder_set_member_name (builder, member_name);
+	json_builder_add_boolean_value (builder, value);
 }
 
 gdouble
@@ -80,6 +107,17 @@ e_o365_json_get_double_member (JsonObject *object,
 	return json_node_get_double (node);
 }
 
+void
+e_o365_json_add_double_member (JsonBuilder *builder,
+			       const gchar *member_name,
+			       gdouble value)
+{
+	g_return_if_fail (member_name && *member_name);
+
+	json_builder_set_member_name (builder, member_name);
+	json_builder_add_double_value (builder, value);
+}
+
 gint64
 e_o365_json_get_int_member (JsonObject *object,
 			    const gchar *member_name,
@@ -98,6 +136,17 @@ e_o365_json_get_int_member (JsonObject *object,
 	g_return_val_if_fail (JSON_NODE_HOLDS_VALUE (node), default_value);
 
 	return json_node_get_int (node);
+}
+
+void
+e_o365_json_add_int_member (JsonBuilder *builder,
+			    const gchar *member_name,
+			    gint64 value)
+{
+	g_return_if_fail (member_name && *member_name);
+
+	json_builder_set_member_name (builder, member_name);
+	json_builder_add_int_value (builder, value);
 }
 
 gboolean
@@ -120,6 +169,16 @@ e_o365_json_get_null_member (JsonObject *object,
 	return json_node_is_null (node);
 }
 
+void
+e_o365_json_add_null_member (JsonBuilder *builder,
+			     const gchar *member_name)
+{
+	g_return_if_fail (member_name && *member_name);
+
+	json_builder_set_member_name (builder, member_name);
+	json_builder_add_null_value (builder);
+}
+
 JsonObject *
 e_o365_json_get_object_member (JsonObject *object,
 			       const gchar *member_name)
@@ -137,6 +196,22 @@ e_o365_json_get_object_member (JsonObject *object,
 	g_return_val_if_fail (JSON_NODE_HOLDS_OBJECT (node), NULL);
 
 	return json_node_get_object (node);
+}
+
+void
+e_o365_json_begin_object_member (JsonBuilder *builder,
+				 const gchar *member_name)
+{
+	if (member_name && *member_name)
+		json_builder_set_member_name (builder, member_name);
+
+	json_builder_begin_object (builder);
+}
+
+void
+e_o365_json_end_object_member (JsonBuilder *builder)
+{
+	json_builder_end_object (builder);
 }
 
 const gchar *
@@ -157,6 +232,17 @@ e_o365_json_get_string_member (JsonObject *object,
 	g_return_val_if_fail (JSON_NODE_HOLDS_VALUE (node), default_value);
 
 	return json_node_get_string (node);
+}
+
+void
+e_o365_json_add_string_member (JsonBuilder *builder,
+			       const gchar *member_name,
+			       const gchar *value)
+{
+	g_return_if_fail (member_name && *member_name);
+
+	json_builder_set_member_name (builder, member_name);
+	json_builder_add_string_value (builder, value ? value : "");
 }
 
 time_t
@@ -180,6 +266,30 @@ e_o365_get_date_time_offset_member (JsonObject *object,
 	}
 
 	return res;
+}
+
+void
+e_o365_add_date_time_offset_member (JsonBuilder *builder,
+				    const gchar *member_name,
+				    time_t value)
+{
+	GDateTime *dt;
+	gchar *value_str;
+
+	if ((time_t) value <= 0) {
+		e_o365_json_add_null_member (builder, member_name);
+		return;
+	}
+
+	dt = g_date_time_new_from_unix_utc (value);
+	g_return_if_fail (dt != NULL);
+
+	value_str = g_date_time_format_iso8601 (dt);
+
+	e_o365_json_add_string_member (builder, member_name, value_str);
+
+	g_date_time_unref (dt);
+	g_free (value_str);
 }
 
 /* https://docs.microsoft.com/en-us/graph/delta-query-overview */
@@ -295,6 +405,19 @@ e_o365_mail_folder_get_unread_item_count (EO365MailFolder *folder)
    https://docs.microsoft.com/en-us/graph/api/resources/emailaddress?view=graph-rest-1.0
  */
 const gchar *
+e_o365_recipient_get_name (EO365Recipient *recipient)
+{
+	JsonObject *email_address;
+
+	email_address = e_o365_json_get_object_member (recipient, "emailAddress");
+
+	if (!email_address)
+		return NULL;
+
+	return e_o365_json_get_string_member (email_address, "name", NULL);
+}
+
+const gchar *
 e_o365_recipient_get_address (EO365Recipient *recipient)
 {
 	JsonObject *email_address;
@@ -307,17 +430,25 @@ e_o365_recipient_get_address (EO365Recipient *recipient)
 	return e_o365_json_get_string_member (email_address, "address", NULL);
 }
 
-const gchar *
-e_o365_recipient_get_name (EO365Recipient *recipient)
+void
+e_o365_add_recipient (JsonBuilder *builder,
+		      const gchar *member_name,
+		      const gchar *name,
+		      const gchar *address)
 {
-	JsonObject *email_address;
+	g_return_if_fail ((name && *name) || (address && *address));
 
-	email_address = e_o365_json_get_object_member (recipient, "emailAddress");
+	e_o365_json_begin_object_member (builder, member_name);
+	e_o365_json_begin_object_member (builder, "emailAddress");
 
-	if (!email_address)
-		return NULL;
+	if (name && *name)
+		e_o365_json_add_string_member (builder, "name", name);
 
-	return e_o365_json_get_string_member (email_address, "name", NULL);
+	if (address && *address)
+		e_o365_json_add_string_member (builder, "address", address);
+
+	e_o365_json_end_object_member (builder); /* emailAddress */
+	e_o365_json_end_object_member (builder); /* member_name */
 }
 
 /* https://docs.microsoft.com/en-us/graph/api/resources/datetimetimezone?view=graph-rest-1.0 */
@@ -334,6 +465,29 @@ e_o365_date_time_get_time_zone (EO365DateTimeWithZone *datetime)
 	return e_o365_json_get_string_member (datetime, "timeZone", NULL);
 }
 
+void
+e_o365_add_date_time (JsonBuilder *builder,
+		      const gchar *member_name,
+		      time_t date_time,
+		      const gchar *zone)
+{
+	g_return_if_fail (member_name != NULL);
+
+	if (date_time <= (time_t) 0) {
+		e_o365_json_add_null_member (builder, member_name);
+		return;
+	}
+
+	e_o365_json_begin_object_member (builder, member_name);
+
+	e_o365_add_date_time_offset_member (builder, "dateTime", date_time);
+
+	if (zone && *zone)
+		e_o365_json_add_string_member (builder, "timeZone", zone);
+
+	e_o365_json_end_object_member (builder);
+}
+
 /* https://docs.microsoft.com/en-us/graph/api/resources/internetmessageheader?view=graph-rest-1.0 */
 
 const gchar *
@@ -348,6 +502,25 @@ e_o365_internet_message_header_get_value (EO365InternetMessageHeader *header)
 	return e_o365_json_get_string_member (header, "value", NULL);
 }
 
+void
+e_o365_add_internet_message_header (JsonBuilder *builder,
+				    const gchar *name,
+				    const gchar *value)
+{
+	g_return_if_fail (name && *name);
+	g_return_if_fail (value);
+
+	json_builder_begin_object (builder);
+
+	if (value && (*value == ' ' || *value == '\t'))
+		value++;
+
+	e_o365_json_add_string_member (builder, "name", name);
+	e_o365_json_add_string_member (builder, "value", value);
+
+	json_builder_end_object (builder);
+}
+
 /* https://docs.microsoft.com/en-us/graph/api/resources/followupflag?view=graph-rest-1.0 */
 
 EO365DateTimeWithZone *
@@ -356,10 +529,26 @@ e_o365_followup_flag_get_completed_date_time (EO365FollowupFlag *flag)
 	return e_o365_json_get_object_member (flag, "completedDateTime");
 }
 
+void
+e_o365_followup_flag_add_completed_date_time (JsonBuilder *builder,
+					      time_t date_time,
+					      const gchar *zone)
+{
+	e_o365_add_date_time (builder, "completedDateTime", date_time, zone);
+}
+
 EO365DateTimeWithZone *
 e_o365_followup_flag_get_due_date_time (EO365FollowupFlag *flag)
 {
 	return e_o365_json_get_object_member (flag, "dueDateTime");
+}
+
+void
+e_o365_followup_flag_add_due_date_time (JsonBuilder *builder,
+					time_t date_time,
+					const gchar *zone)
+{
+	e_o365_add_date_time (builder, "dueDateTime", date_time, zone);
 }
 
 EO365FollowupFlagStatusType
@@ -372,22 +561,46 @@ e_o365_followup_flag_get_flag_status (EO365FollowupFlag *flag)
 	if (!status)
 		return E_O365_FOLLOWUP_FLAG_STATUS_NOT_SET;
 
-	if (g_strcmp0 (status, "notFlagged") == 0)
+	if (g_ascii_strcasecmp (status, "notFlagged") == 0)
 		return E_O365_FOLLOWUP_FLAG_STATUS_NOT_FLAGGED;
 
-	if (g_strcmp0 (status, "complete") == 0)
+	if (g_ascii_strcasecmp (status, "complete") == 0)
 		return E_O365_FOLLOWUP_FLAG_STATUS_COMPLETE;
 
-	if (g_strcmp0 (status, "flagged") == 0)
+	if (g_ascii_strcasecmp (status, "flagged") == 0)
 		return E_O365_FOLLOWUP_FLAG_STATUS_FLAGGED;
 
 	return E_O365_FOLLOWUP_FLAG_STATUS_UNKNOWN;
+}
+
+void
+e_o365_followup_flag_add_flag_status (JsonBuilder *builder,
+				      EO365FollowupFlagStatusType status)
+{
+	const gchar *value;
+
+	if (status == E_O365_FOLLOWUP_FLAG_STATUS_COMPLETE)
+		value = "complete";
+	else if (status == E_O365_FOLLOWUP_FLAG_STATUS_FLAGGED)
+		value = "flagged";
+	else
+		value = "notFlagged";
+
+	e_o365_json_add_string_member (builder, "flagStatus", value);
 }
 
 EO365DateTimeWithZone *
 e_o365_followup_flag_get_start_date_time (EO365FollowupFlag *flag)
 {
 	return e_o365_json_get_object_member (flag, "startDateTime");
+}
+
+void
+e_o365_followup_flag_add_start_date_time (JsonBuilder *builder,
+					  time_t date_time,
+					  const gchar *zone)
+{
+	e_o365_add_date_time (builder, "startDateTime", date_time, zone);
 }
 
 /* https://docs.microsoft.com/en-us/graph/api/resources/itembody?view=graph-rest-1.0 */
@@ -408,13 +621,46 @@ e_o365_item_body_get_content_type (EO365ItemBody *item_body)
 	if (!content_type)
 		return E_O365_ITEM_BODY_CONTENT_TYPE_NOT_SET;
 
-	if (g_strcmp0 (content_type, "text") == 0)
+	if (g_ascii_strcasecmp (content_type, "text") == 0)
 		return E_O365_ITEM_BODY_CONTENT_TYPE_TEXT;
 
-	if (g_strcmp0 (content_type, "html") == 0)
+	if (g_ascii_strcasecmp (content_type, "html") == 0)
 		return E_O365_ITEM_BODY_CONTENT_TYPE_HTML;
 
 	return E_O365_ITEM_BODY_CONTENT_TYPE_UNKNOWN;
+}
+
+void
+e_o365_add_item_body (JsonBuilder *builder,
+		      const gchar *member_name,
+		      EO365ItemBodyContentTypeType content_type,
+		      const gchar *content)
+{
+	const gchar *content_type_str;
+
+	g_return_if_fail (member_name != NULL);
+	g_return_if_fail (content != NULL);
+
+	switch (content_type) {
+	case E_O365_ITEM_BODY_CONTENT_TYPE_TEXT:
+		content_type_str = "text";
+		break;
+	case E_O365_ITEM_BODY_CONTENT_TYPE_HTML:
+		content_type_str = "html";
+		break;
+	default:
+		g_warn_if_reached ();
+
+		content_type_str = "text";
+		break;
+	}
+
+	e_o365_json_begin_object_member (builder, member_name);
+
+	e_o365_json_add_string_member (builder, "contentType", content_type_str);
+	e_o365_json_add_string_member (builder, "content", content);
+
+	e_o365_json_end_object_member (builder);
 }
 
 /* https://docs.microsoft.com/en-us/graph/api/resources/message?view=graph-rest-1.0 */
@@ -425,10 +671,30 @@ e_o365_mail_message_get_bcc_recipients (EO365MailMessage *mail)
 	return e_o365_json_get_array_member (mail, "bccRecipients");
 }
 
+void
+e_o365_mail_message_begin_bcc_recipients (JsonBuilder *builder)
+{
+	e_o365_json_begin_array_member (builder, "bccRecipients");
+}
+
+void
+e_o365_mail_message_end_bcc_recipients (JsonBuilder *builder)
+{
+	e_o365_json_end_array_member (builder);
+}
+
 EO365ItemBody *
 e_o365_mail_message_get_body (EO365MailMessage *mail)
 {
 	return e_o365_json_get_object_member (mail, "body");
+}
+
+void
+e_o365_mail_message_add_body (JsonBuilder *builder,
+			      EO365ItemBodyContentTypeType content_type,
+			      const gchar *content)
+{
+	e_o365_add_item_body (builder, "body", content_type, content);
 }
 
 const gchar *
@@ -443,10 +709,43 @@ e_o365_mail_message_get_categories (EO365MailMessage *mail)
 	return e_o365_json_get_array_member (mail, "categories");
 }
 
+void
+e_o365_mail_message_begin_categories (JsonBuilder *builder)
+{
+	e_o365_json_begin_array_member (builder, "categories");
+}
+
+void
+e_o365_mail_message_end_categories (JsonBuilder *builder)
+{
+	e_o365_json_end_array_member (builder);
+}
+
+void
+e_o365_mail_message_add_category (JsonBuilder *builder,
+				  const gchar *category)
+{
+	g_return_if_fail (category && *category);
+
+	json_builder_add_string_value (builder, category);
+}
+
 JsonArray * /* EO365Recipient * */
 e_o365_mail_message_get_cc_recipients (EO365MailMessage *mail)
 {
 	return e_o365_json_get_array_member (mail, "ccRecipients");
+}
+
+void
+e_o365_mail_message_begin_cc_recipients (JsonBuilder *builder)
+{
+	e_o365_json_begin_array_member (builder, "ccRecipients");
+}
+
+void
+e_o365_mail_message_end_cc_recipients (JsonBuilder *builder)
+{
+	e_o365_json_end_array_member (builder);
 }
 
 const gchar *
@@ -479,10 +778,30 @@ e_o365_mail_message_get_flag (EO365MailMessage *mail)
 	return e_o365_json_get_object_member (mail, "flag");
 }
 
+void
+e_o365_mail_message_begin_flag (JsonBuilder *builder)
+{
+	e_o365_json_begin_object_member (builder, "flag");
+}
+
+void
+e_o365_mail_message_end_flag (JsonBuilder *builder)
+{
+	e_o365_json_end_object_member (builder);
+}
+
 EO365Recipient *
 e_o365_mail_message_get_from (EO365MailMessage *mail)
 {
 	return e_o365_json_get_object_member (mail, "from");
+}
+
+void
+e_o365_mail_message_add_from (JsonBuilder *builder,
+			      const gchar *name,
+			      const gchar *address)
+{
+	e_o365_add_recipient (builder, "from", name, address);
 }
 
 gboolean
@@ -505,16 +824,39 @@ e_o365_mail_message_get_importance (EO365MailMessage *mail)
 	if (!value)
 		return E_O365_IMPORTANCE_NOT_SET;
 
-	if (g_strcmp0 (value, "Low") == 0)
+	if (g_ascii_strcasecmp (value, "low") == 0)
 		return E_O365_IMPORTANCE_LOW;
 
-	if (g_strcmp0 (value, "Normal") == 0)
+	if (g_ascii_strcasecmp (value, "normal") == 0)
 		return E_O365_IMPORTANCE_NORMAL;
 
-	if (g_strcmp0 (value, "High") == 0)
+	if (g_ascii_strcasecmp (value, "high") == 0)
 		return E_O365_IMPORTANCE_HIGH;
 
 	return E_O365_IMPORTANCE_UNKNOWN;
+}
+
+void
+e_o365_mail_message_add_importance (JsonBuilder *builder,
+				    EO365ImportanceType importance)
+{
+	const gchar *value = NULL;
+
+	switch (importance) {
+	case E_O365_IMPORTANCE_LOW:
+		value = "low";
+		break;
+	case E_O365_IMPORTANCE_NORMAL:
+		value = "normal";
+		break;
+	case E_O365_IMPORTANCE_HIGH:
+		value = "high";
+		break;
+	default:
+		return;
+	}
+
+	e_o365_json_add_string_member (builder, "importance", value);
 }
 
 EO365InferenceClassificationType
@@ -525,10 +867,10 @@ e_o365_mail_message_get_inference_classification (EO365MailMessage *mail)
 	if (!value)
 		return E_O365_INFERENCE_CLASSIFICATION_NOT_SET;
 
-	if (g_strcmp0 (value, "focused") == 0)
+	if (g_ascii_strcasecmp (value, "focused") == 0)
 		return E_O365_INFERENCE_CLASSIFICATION_FOCUSED;
 
-	if (g_strcmp0 (value, "other") == 0)
+	if (g_ascii_strcasecmp (value, "other") == 0)
 		return E_O365_INFERENCE_CLASSIFICATION_OTHER;
 
 	return E_O365_INFERENCE_CLASSIFICATION_UNKNOWN;
@@ -540,16 +882,43 @@ e_o365_mail_message_get_internet_message_headers (EO365MailMessage *mail)
 	return e_o365_json_get_array_member (mail, "internetMessageHeaders");
 }
 
+void
+e_o365_mail_message_begin_internet_message_headers (JsonBuilder *builder)
+{
+	e_o365_json_begin_array_member (builder, "internetMessageHeaders");
+}
+
+void
+e_o365_mail_message_end_internet_message_headers (JsonBuilder *builder)
+{
+	e_o365_json_end_array_member (builder);
+}
+
 const gchar *
 e_o365_mail_message_get_internet_message_id (EO365MailMessage *mail)
 {
 	return e_o365_json_get_string_member (mail, "internetMessageId", NULL);
 }
 
+void
+e_o365_mail_message_add_internet_message_id (JsonBuilder *builder,
+					     const gchar *message_id)
+{
+	if (message_id && *message_id)
+		e_o365_json_add_string_member (builder, "internetMessageId", message_id);
+}
+
 gboolean
 e_o365_mail_message_get_is_delivery_receipt_requested (EO365MailMessage *mail)
 {
 	return e_o365_json_get_boolean_member (mail, "isDeliveryReceiptRequested", FALSE);
+}
+
+void
+e_o365_mail_message_add_is_delivery_receipt_requested (JsonBuilder *builder,
+						       gboolean value)
+{
+	e_o365_json_add_boolean_member (builder, "isDeliveryReceiptRequested", value);
 }
 
 gboolean
@@ -564,10 +933,24 @@ e_o365_mail_message_get_is_read (EO365MailMessage *mail)
 	return e_o365_json_get_boolean_member (mail, "isRead", FALSE);
 }
 
+void
+e_o365_mail_message_add_is_read (JsonBuilder *builder,
+				 gboolean value)
+{
+	e_o365_json_add_boolean_member (builder, "isRead", value);
+}
+
 gboolean
 e_o365_mail_message_get_is_read_receipt_requested (EO365MailMessage *mail)
 {
 	return e_o365_json_get_boolean_member (mail, "isReadReceiptRequested", FALSE);
+}
+
+void
+e_o365_mail_message_add_is_read_receipt_requested (JsonBuilder *builder,
+						   gboolean value)
+{
+	e_o365_json_add_boolean_member (builder, "isReadReceiptRequested", value);
 }
 
 time_t
@@ -588,10 +971,29 @@ e_o365_mail_message_get_received_date_time (EO365MailMessage *mail)
 	return e_o365_get_date_time_offset_member (mail, "receivedDateTime");
 }
 
+void
+e_o365_mail_message_add_received_date_time (JsonBuilder *builder,
+					    time_t value)
+{
+	e_o365_add_date_time_offset_member (builder, "receivedDateTime", value);
+}
+
 JsonArray * /* EO365Recipient * */
 e_o365_mail_message_get_reply_to (EO365MailMessage *mail)
 {
 	return e_o365_json_get_array_member (mail, "replyTo");
+}
+
+void
+e_o365_mail_message_begin_reply_to (JsonBuilder *builder)
+{
+	e_o365_json_begin_array_member (builder, "replyTo");
+}
+
+void
+e_o365_mail_message_end_reply_to (JsonBuilder *builder)
+{
+	e_o365_json_end_array_member (builder);
 }
 
 EO365Recipient *
@@ -600,10 +1002,27 @@ e_o365_mail_message_get_sender (EO365MailMessage *mail)
 	return e_o365_json_get_object_member (mail, "sender");
 }
 
+void
+e_o365_mail_message_add_sender (JsonBuilder *builder,
+				const gchar *name,
+				const gchar *address)
+{
+	g_return_if_fail ((name && *name) || (address && *address));
+
+	e_o365_add_recipient (builder, "sender", name, address);
+}
+
 time_t
 e_o365_mail_message_get_sent_date_time (EO365MailMessage *mail)
 {
 	return e_o365_get_date_time_offset_member (mail, "sentDateTime");
+}
+
+void
+e_o365_mail_message_add_sent_date_time (JsonBuilder *builder,
+					time_t value)
+{
+	e_o365_add_date_time_offset_member (builder, "sentDateTime", value);
 }
 
 const gchar *
@@ -612,10 +1031,30 @@ e_o365_mail_message_get_subject (EO365MailMessage *mail)
 	return e_o365_json_get_string_member (mail, "subject", NULL);
 }
 
+void
+e_o365_mail_message_add_subject (JsonBuilder *builder,
+				 const gchar *subject)
+{
+	if (subject)
+		e_o365_json_add_string_member (builder, "subject", subject);
+}
+
 JsonArray * /* EO365Recipient * */
 e_o365_mail_message_get_to_recipients (EO365MailMessage *mail)
 {
 	return e_o365_json_get_array_member (mail, "toRecipients");
+}
+
+void
+e_o365_mail_message_begin_to_recipients (JsonBuilder *builder)
+{
+	e_o365_json_begin_array_member (builder, "toRecipients");
+}
+
+void
+e_o365_mail_message_end_to_recipients (JsonBuilder *builder)
+{
+	e_o365_json_end_array_member (builder);
 }
 
 EO365ItemBody *
@@ -628,4 +1067,147 @@ const gchar *
 e_o365_mail_message_get_web_link (EO365MailMessage *mail)
 {
 	return e_o365_json_get_string_member (mail, "webLink", NULL);
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/attachment?view=graph-rest-1.0 */
+
+EO365AttachmentDataType
+e_o365_attachment_get_data_type (EO365Attachment *attachment)
+{
+	const gchar *data_type;
+
+	data_type = e_o365_json_get_string_member (attachment, "@odata.type", NULL);
+
+	if (!data_type)
+		return E_O365_ATTACHMENT_DATA_TYPE_NOT_SET;
+
+	if (g_ascii_strcasecmp (data_type, "#microsoft.graph.fileAttachment") == 0)
+		return E_O365_ATTACHMENT_DATA_TYPE_FILE;
+
+	if (g_ascii_strcasecmp (data_type, "#microsoft.graph.itemAttachment") == 0)
+		return E_O365_ATTACHMENT_DATA_TYPE_ITEM;
+
+	if (g_ascii_strcasecmp (data_type, "#microsoft.graph.referenceAttachment") == 0)
+		return E_O365_ATTACHMENT_DATA_TYPE_REFERENCE;
+
+	return E_O365_ATTACHMENT_DATA_TYPE_UNKNOWN;
+}
+
+void
+e_o365_attachment_begin_attachment (JsonBuilder *builder,
+				    EO365AttachmentDataType data_type)
+{
+	e_o365_json_begin_object_member (builder, NULL);
+
+	if (data_type == E_O365_ATTACHMENT_DATA_TYPE_FILE)
+		e_o365_json_add_string_member (builder, "@odata.type", "#microsoft.graph.fileAttachment");
+	else if (data_type == E_O365_ATTACHMENT_DATA_TYPE_ITEM)
+		e_o365_json_add_string_member (builder, "@odata.type", "#microsoft.graph.itemAttachment");
+	else if (data_type == E_O365_ATTACHMENT_DATA_TYPE_REFERENCE)
+		e_o365_json_add_string_member (builder, "@odata.type", "#microsoft.graph.referenceAttachment");
+}
+
+void
+e_o365_attachment_end_attachment (JsonBuilder *builder)
+{
+	e_o365_json_end_object_member (builder);
+}
+
+const gchar *
+e_o365_attachment_get_content_type (EO365Attachment *attachment)
+{
+	return e_o365_json_get_string_member (attachment, "contentType", NULL);
+}
+
+void
+e_o365_attachment_add_content_type (JsonBuilder *builder,
+				    const gchar *value)
+{
+	e_o365_json_add_string_member (builder, "contentType", value);
+}
+
+const gchar *
+e_o365_attachment_get_id (EO365Attachment *attachment)
+{
+	return e_o365_json_get_string_member (attachment, "id", NULL);
+}
+
+gboolean
+e_o365_attachment_get_is_inline (EO365Attachment *attachment)
+{
+	return e_o365_json_get_boolean_member (attachment, "isInline", FALSE);
+}
+
+void
+e_o365_attachment_add_is_inline (JsonBuilder *builder,
+				 gboolean value)
+{
+	e_o365_json_add_boolean_member (builder, "isInline", value);
+}
+
+time_t
+e_o365_attachment_get_last_modified_date_time (EO365Attachment *attachment)
+{
+	return e_o365_get_date_time_offset_member (attachment, "lastModifiedDateTime");
+}
+
+void
+e_o365_attachment_add_last_modified_date_time (JsonBuilder *builder,
+					       time_t value)
+{
+	e_o365_add_date_time_offset_member (builder, "lastModifiedDateTime", value);
+}
+
+const gchar *
+e_o365_attachment_get_name (EO365Attachment *attachment)
+{
+	return e_o365_json_get_string_member (attachment, "name", NULL);
+}
+
+void
+e_o365_attachment_add_name (JsonBuilder *builder,
+			    const gchar *value)
+{
+	e_o365_json_add_string_member (builder, "name", value);
+}
+
+gint32
+e_o365_attachment_get_size (EO365Attachment *attachment)
+{
+	return (gint32) e_o365_json_get_int_member (attachment, "size", -1);
+}
+
+void
+e_o365_attachment_add_size (JsonBuilder *builder,
+			    gint32 value)
+{
+	e_o365_json_add_int_member (builder, "size", value);
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/resources/fileattachment?view=graph-rest-1.0 */
+
+const gchar * /* base64-encoded */
+e_o365_file_attachment_get_content_bytes (EO365Attachment *attachment)
+{
+	return e_o365_json_get_string_member (attachment, "contentBytes", NULL);
+}
+
+void
+e_o365_file_attachment_add_content_bytes (JsonBuilder *builder,
+					  const gchar *base64_value)
+{
+	e_o365_json_add_string_member (builder, "contentBytes", base64_value);
+}
+
+const gchar *
+e_o365_file_attachment_get_content_id (EO365Attachment *attachment)
+{
+	return e_o365_json_get_string_member (attachment, "contentId", NULL);
+}
+
+void
+e_o365_file_attachment_add_content_id (JsonBuilder *builder,
+				       const gchar *value)
+{
+	e_o365_json_add_string_member (builder, "contentId", value);
 }

@@ -64,6 +64,7 @@ CamelFolder *	camel_o365_folder_new		(CamelStore *store,
 						 const gchar *folder_dir,
 						 GCancellable *cancellable,
 						 GError **error);
+const gchar *	camel_o365_folder_get_id	(CamelO365Folder *o365_folder);
 
 G_END_DECLS
 

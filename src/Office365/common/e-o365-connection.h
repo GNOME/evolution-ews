@@ -236,6 +236,22 @@ gboolean	e_o365_connection_get_mail_message_sync
 						 gpointer func_user_data,
 						 GCancellable *cancellable,
 						 GError **error);
+gboolean	e_o365_connection_create_mail_message_sync
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *folder_id, /* if NULL, then goes to the Drafts folder */
+						 JsonBuilder *mail_message, /* filled mailMessage object */
+						 EO365MailMessage **out_appended_message, /* free with json_object_unref() */
+						 GCancellable *cancellable,
+						 GError **error);
+gboolean	e_o365_connection_add_mail_message_attachment
+						(EO365Connection *cnc,
+						 const gchar *user_override, /* for which user, NULL to use the account user */
+						 const gchar *message_id, /* the message to add it to */
+						 JsonBuilder *attachment, /* filled attachment object */
+						 gchar **out_attachment_id,
+						 GCancellable *cancellable,
+						 GError **error);
 
 G_END_DECLS
 

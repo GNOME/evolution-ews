@@ -29,8 +29,18 @@ gchar *		camel_o365_utils_encode_category_name
 						(const gchar *name);
 gchar *		camel_o365_utils_decode_category_name
 						(const gchar *flag);
+gboolean	camel_o365_utils_is_system_user_flag
+						(const gchar *name);
 const gchar *	camel_o365_utils_rename_label	(const gchar *cat,
 						 gboolean from_cat);
-
+gboolean	camel_o365_utils_create_message_sync
+						(EO365Connection *cnc,
+						 const gchar *folder_id,
+						 CamelMimeMessage *message,
+						 CamelMessageInfo *info,
+						 gboolean is_send,
+						 gchar **out_appended_uid,
+						 GCancellable *cancellable,
+						 GError **error);
 
 #endif /* CAMEL_O365_UTILS_H */

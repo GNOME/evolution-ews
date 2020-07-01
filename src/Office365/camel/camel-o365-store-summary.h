@@ -163,6 +163,7 @@ gboolean	camel_o365_store_summary_get_folder_is_foreign
 gboolean	camel_o365_store_summary_get_folder_is_public
 							(CamelO365StoreSummary *store_summary,
 							 const gchar *id);
+GSList *	camel_o365_store_summary_list_folder_ids(CamelO365StoreSummary *store_summary); /* gchar *folder_id */
 CamelFolderInfo *
 		camel_o365_store_summary_build_folder_info_for_id
 							(CamelO365StoreSummary *store_summary,

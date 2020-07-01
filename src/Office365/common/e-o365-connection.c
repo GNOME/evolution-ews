@@ -1468,7 +1468,7 @@ o365_connection_new_soup_message (const gchar *method,
 	message = soup_message_new (method, uri);
 
 	if (message) {
-		soup_message_headers_append (message->request_headers, "Connection", "Keep-Alive");
+		soup_message_headers_append (message->request_headers, "Connection", "Close");
 		soup_message_headers_append (message->request_headers, "User-Agent", "Evolution-O365/" VERSION);
 	} else {
 		g_set_error (error, SOUP_HTTP_ERROR, SOUP_STATUS_MALFORMED, _("Malformed URI: “%s”"), uri);
@@ -1893,10 +1893,8 @@ e_o365_connection_batch_request_internal_sync (EO365Connection *cnc,
 
 	builder = json_builder_new_immutable ();
 
-	json_builder_begin_object (builder);
-
-	json_builder_set_member_name (builder, "requests");
-	json_builder_begin_array (builder);
+	e_o365_json_begin_object_member (builder, NULL);
+	e_o365_json_begin_array_member (builder, "requests");
 
 	for (ii = 0; ii < requests->len; ii++) {
 		SoupMessageHeadersIter iter;
@@ -1929,16 +1927,11 @@ e_o365_connection_batch_request_internal_sync (EO365Connection *cnc,
 
 		g_snprintf (buff, sizeof (buff), "%d", ii);
 
-		json_builder_begin_object (builder);
+		e_o365_json_begin_object_member (builder, NULL);
 
-		json_builder_set_member_name (builder, "id");
-		json_builder_add_string_value (builder, buff);
-
-		json_builder_set_member_name (builder, "method");
-		json_builder_add_string_value (builder, submessage->method);
-
-		json_builder_set_member_name (builder, "url");
-		json_builder_add_string_value (builder, use_uri);
+		e_o365_json_add_string_member (builder, "id", buff);
+		e_o365_json_add_string_member (builder, "method", submessage->method);
+		e_o365_json_add_string_member (builder, "url", use_uri);
 
 		g_free (uri);
 
@@ -1949,17 +1942,15 @@ e_o365_connection_batch_request_internal_sync (EO365Connection *cnc,
 				if (!has_headers) {
 					has_headers = TRUE;
 
-					json_builder_set_member_name (builder, "headers");
-					json_builder_begin_object (builder);
+					e_o365_json_begin_object_member (builder, "headers");
 				}
 
-				json_builder_set_member_name (builder, hdr_name);
-				json_builder_add_string_value (builder, hdr_value);
+				e_o365_json_add_string_member (builder, hdr_name, hdr_value);
 			}
 		}
 
 		if (has_headers)
-			json_builder_end_object (builder);
+			e_o365_json_end_object_member (builder); /* headers */
 
 		if (submessage->request_body) {
 			SoupBuffer *sbuffer;
@@ -1967,19 +1958,18 @@ e_o365_connection_batch_request_internal_sync (EO365Connection *cnc,
 			sbuffer = soup_message_body_flatten (submessage->request_body);
 
 			if (sbuffer && sbuffer->length > 0) {
-				json_builder_set_member_name (builder, "body");
-				json_builder_add_string_value (builder, sbuffer->data);
+				e_o365_json_add_string_member (builder, "body", sbuffer->data);
 			}
 
 			if (sbuffer)
 				soup_buffer_free (sbuffer);
 		}
 
-		json_builder_end_object (builder);
+		e_o365_json_end_object_member (builder); /* unnamed object */
 	}
 
-	json_builder_end_array (builder);
-	json_builder_end_object (builder);
+	e_o365_json_end_array_member (builder);
+	e_o365_json_end_object_member (builder);
 
 	e_o365_connection_set_json_body (message, builder);
 
@@ -2308,10 +2298,9 @@ e_o365_connection_create_mail_folder_sync (EO365Connection *cnc,
 
 	builder = json_builder_new_immutable ();
 
-	json_builder_begin_object (builder);
-	json_builder_set_member_name (builder, "displayName");
-	json_builder_add_string_value (builder, display_name);
-	json_builder_end_object (builder);
+	e_o365_json_begin_object_member (builder, NULL);
+	e_o365_json_add_string_member (builder, "displayName", display_name);
+	e_o365_json_end_object_member (builder);
 
 	e_o365_connection_set_json_body (message, builder);
 
@@ -2400,10 +2389,9 @@ e_o365_connection_copy_move_mail_folder_sync (EO365Connection *cnc,
 
 	builder = json_builder_new_immutable ();
 
-	json_builder_begin_object (builder);
-	json_builder_set_member_name (builder, "destinationId");
-	json_builder_add_string_value (builder, des_folder_id);
-	json_builder_end_object (builder);
+	e_o365_json_begin_object_member (builder, NULL);
+	e_o365_json_add_string_member (builder, "destinationId", des_folder_id);
+	e_o365_json_end_object_member (builder);
 
 	e_o365_connection_set_json_body (message, builder);
 
@@ -2454,10 +2442,9 @@ e_o365_connection_rename_mail_folder_sync (EO365Connection *cnc,
 
 	builder = json_builder_new_immutable ();
 
-	json_builder_begin_object (builder);
-	json_builder_set_member_name (builder, "displayName");
-	json_builder_add_string_value (builder, display_name);
-	json_builder_end_object (builder);
+	e_o365_json_begin_object_member (builder, NULL);
+	e_o365_json_add_string_member (builder, "displayName", display_name);
+	e_o365_json_end_object_member (builder);
 
 	e_o365_connection_set_json_body (message, builder);
 
@@ -2582,6 +2569,100 @@ e_o365_connection_get_mail_message_sync (EO365Connection *cnc,
 	g_free (uri);
 
 	success = o365_connection_send_request_sync (cnc, message, NULL, func, func_user_data, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/user-post-messages?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_create_mail_message_sync (EO365Connection *cnc,
+					    const gchar *user_override, /* for which user, NULL to use the account user */
+					    const gchar *folder_id, /* if NULL, then goes to the Drafts folder */
+					    JsonBuilder *mail_message, /* filled mailMessage object */
+					    EO365MailMessage **out_appended_message, /* free with json_object_unref() */
+					    GCancellable *cancellable,
+					    GError **error)
+{
+	SoupMessage *message = NULL;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (mail_message != NULL, FALSE);
+	g_return_val_if_fail (out_appended_message != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		folder_id ? "mailFolders" : "messages",
+		folder_id,
+		folder_id ? "messages" : NULL,
+		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	e_o365_connection_set_json_body (message, mail_message);
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_json_object_response_cb, NULL, out_appended_message, cancellable, error);
+
+	g_clear_object (&message);
+
+	return success;
+}
+
+/* https://docs.microsoft.com/en-us/graph/api/message-post-attachments?view=graph-rest-1.0&tabs=http */
+
+gboolean
+e_o365_connection_add_mail_message_attachment (EO365Connection *cnc,
+					       const gchar *user_override, /* for which user, NULL to use the account user */
+					       const gchar *message_id, /* the message to add it to */
+					       JsonBuilder *attachment, /* filled attachment object */
+					       gchar **out_attachment_id,
+					       GCancellable *cancellable,
+					       GError **error)
+{
+	SoupMessage *message = NULL;
+	JsonObject *added_attachment = NULL;
+	gboolean success;
+	gchar *uri;
+
+	g_return_val_if_fail (E_IS_O365_CONNECTION (cnc), FALSE);
+	g_return_val_if_fail (attachment != NULL, FALSE);
+
+	uri = e_o365_connection_construct_uri (cnc, TRUE, user_override, E_O365_API_V1_0, NULL,
+		"messages",
+		message_id,
+		"attachments",
+		NULL);
+
+	message = o365_connection_new_soup_message (SOUP_METHOD_POST, uri, error);
+
+	if (!message) {
+		g_free (uri);
+
+		return FALSE;
+	}
+
+	g_free (uri);
+
+	e_o365_connection_set_json_body (message, attachment);
+
+	success = o365_connection_send_request_sync (cnc, message, e_o365_read_json_object_response_cb, NULL, &added_attachment, cancellable, error);
+
+	if (success && added_attachment && out_attachment_id)
+		*out_attachment_id = g_strdup (e_o365_attachment_get_id (added_attachment));
+
+	if (added_attachment)
+		json_object_unref (added_attachment);
 
 	g_clear_object (&message);
 

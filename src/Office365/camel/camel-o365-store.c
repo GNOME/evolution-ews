@@ -1176,12 +1176,44 @@ camel_o365_got_folders_delta_cb (EO365Connection *cnc,
 	return TRUE;
 }
 
+static void
+o365_store_forget_all_folders (CamelO365Store *o365_store)
+{
+	CamelStore *store;
+	CamelSubscribable *subscribable;
+	GSList *ids, *link;
+
+	g_return_if_fail (CAMEL_IS_O365_STORE (o365_store));
+
+	store = CAMEL_STORE (o365_store);
+	subscribable = CAMEL_SUBSCRIBABLE (o365_store);
+	ids = camel_o365_store_summary_list_folder_ids (o365_store->priv->summary);
+
+	if (!ids)
+		return;
+
+	for (link = ids; link; link = g_slist_next (link)) {
+		const gchar *id = link->data;
+		CamelFolderInfo *fi;
+
+		fi = camel_o365_store_summary_build_folder_info_for_id (o365_store->priv->summary, id);
+		camel_subscribable_folder_unsubscribed (subscribable, fi);
+		camel_store_folder_deleted (store, fi);
+		camel_folder_info_free (fi);
+	}
+
+	g_slist_free_full (ids, g_free);
+
+	camel_o365_store_summary_set_delta_link (o365_store->priv->summary, "");
+	camel_o365_store_summary_clear (o365_store->priv->summary);
+}
+
 static CamelFolderInfo *
-o365_get_folder_info_sync (CamelStore *store,
-			   const gchar *top,
-			   guint32 flags,
-			   GCancellable *cancellable,
-			   GError **error)
+o365_store_get_folder_info_sync (CamelStore *store,
+				 const gchar *top,
+				 guint32 flags,
+				 GCancellable *cancellable,
+				 GError **error)
 {
 	CamelO365Store *o365_store;
 	CamelFolderInfo *fi;
@@ -1217,6 +1249,7 @@ o365_get_folder_info_sync (CamelStore *store,
 			if (cnc) {
 				FoldersDeltaData fdd;
 				gchar *old_delta_link, *new_delta_link = NULL;
+				GError *local_error = NULL;
 
 				LOCK (o365_store);
 
@@ -1230,7 +1263,20 @@ o365_get_folder_info_sync (CamelStore *store,
 				fdd.removed_fis = NULL;
 
 				success = e_o365_connection_get_mail_folders_delta_sync (cnc, NULL, NULL, old_delta_link, 0,
-					camel_o365_got_folders_delta_cb, &fdd, &new_delta_link, cancellable, error);
+					camel_o365_got_folders_delta_cb, &fdd, &new_delta_link, cancellable, &local_error);
+
+				if (old_delta_link && *old_delta_link && g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
+					g_clear_pointer (&old_delta_link, g_free);
+					g_clear_error (&local_error);
+
+					o365_store_forget_all_folders (o365_store);
+
+					success = e_o365_connection_get_mail_folders_delta_sync (cnc, NULL, NULL, NULL, 0,
+						camel_o365_got_folders_delta_cb, &fdd, &new_delta_link, cancellable, error);
+				}
+
+				if (local_error)
+					g_propagate_error (error, local_error);
 
 				if (success) {
 					CamelSubscribable *subscribable = CAMEL_SUBSCRIBABLE (o365_store);
@@ -1653,7 +1699,7 @@ camel_o365_store_class_init (CamelO365StoreClass *class)
 	store_class->create_folder_sync = o365_store_create_folder_sync;
 	store_class->delete_folder_sync = o365_store_delete_folder_sync;
 	store_class->rename_folder_sync = o365_store_rename_folder_sync;
-	store_class->get_folder_info_sync = o365_get_folder_info_sync;
+	store_class->get_folder_info_sync = o365_store_get_folder_info_sync;
 	store_class->initial_setup_sync = o365_store_initial_setup_sync;
 	store_class->get_trash_folder_sync = o365_store_get_trash_folder_sync;
 	store_class->get_junk_folder_sync = o365_store_get_junk_folder_sync;

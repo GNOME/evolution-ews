@@ -12,6 +12,9 @@
 /* Package name for gettext */
 #define GETTEXT_PACKAGE "@GETTEXT_PACKAGE@"
 
+/* Configured with enabled maintainer mode */
+#cmakedefine ENABLE_MAINTAINER_MODE 1
+
 /* Define to add support for low level tests */
 #cmakedefine ENABLE_TESTS 1
 

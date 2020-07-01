@@ -58,6 +58,8 @@
 #define UNLOCK_SEARCH(_folder) g_mutex_unlock (&_folder->priv->search_lock)
 
 struct _CamelO365FolderPrivate {
+	gchar *id; /* folder ID; stays the same for the full life of the folder */
+
 	GRecMutex cache_lock;
 	CamelDataCache *cache;
 
@@ -215,6 +217,49 @@ o365_folder_save_summary (CamelO365Folder *o365_folder)
 
 		g_clear_error (&error);
 	}
+}
+
+static void
+o365_folder_forget_all_mails (CamelO365Folder *o365_folder)
+{
+	CamelFolder *folder;
+	CamelFolderChangeInfo *changes;
+	CamelFolderSummary *folder_summary;
+	GPtrArray *known_uids;
+	gint ii;
+
+	g_return_if_fail (CAMEL_IS_O365_FOLDER (o365_folder));
+
+	folder = CAMEL_FOLDER (o365_folder);
+	g_return_if_fail (folder != NULL);
+
+	known_uids = camel_folder_summary_get_array (camel_folder_get_folder_summary (folder));
+
+	if (!known_uids)
+		return;
+
+	changes = camel_folder_change_info_new ();
+	folder_summary = camel_folder_get_folder_summary (folder);
+
+	camel_folder_summary_lock (folder_summary);
+
+	for (ii = 0; ii < known_uids->len; ii++) {
+		const gchar *uid = g_ptr_array_index (known_uids, ii);
+
+		camel_folder_change_info_remove_uid (changes, uid);
+		o365_folder_cache_remove (o365_folder, uid, NULL);
+	}
+
+	camel_folder_summary_clear (folder_summary, NULL);
+	camel_folder_summary_unlock (folder_summary);
+
+	o365_folder_save_summary (o365_folder);
+
+	if (camel_folder_change_info_changed (changes))
+		camel_folder_changed (folder, changes);
+
+	camel_folder_change_info_free (changes);
+	camel_folder_summary_free_array (known_uids);
 }
 
 static guint32
@@ -440,12 +485,11 @@ o365_folder_get_message_sync (CamelFolder *folder,
 	CamelMimeMessage *message = NULL;
 	CamelO365Folder *o365_folder;
 	CamelO365Store *o365_store;
-	CamelO365StoreSummary *o365_store_summary;
 	CamelStore *parent_store;
 	CamelStream *cache_stream = NULL;
 	EO365Connection *cnc = NULL;
 	GError *local_error = NULL;
-	gchar *folder_id;
+	const gchar *folder_id;
 	gboolean success = TRUE, remove_from_hash = FALSE;
 
 	g_return_val_if_fail (CAMEL_IS_O365_FOLDER (folder), NULL);
@@ -453,8 +497,11 @@ o365_folder_get_message_sync (CamelFolder *folder,
 
 	parent_store = camel_folder_get_parent_store (folder);
 
-	if (!parent_store)
+	if (!parent_store) {
+		g_set_error_literal (error, CAMEL_FOLDER_ERROR, CAMEL_FOLDER_ERROR_INVALID_STATE,
+			_("Invalid folder state (missing parent store)"));
 		return NULL;
+	}
 
 	o365_folder = CAMEL_O365_FOLDER (folder);
 	o365_store = CAMEL_O365_STORE (parent_store);
@@ -462,20 +509,7 @@ o365_folder_get_message_sync (CamelFolder *folder,
 	if (!camel_o365_store_ensure_connected (o365_store, &cnc, cancellable, error))
 		return NULL;
 
-	o365_store_summary = camel_o365_store_ref_store_summary (o365_store);
-
-	folder_id = camel_o365_store_summary_dup_folder_id_for_full_name (o365_store_summary,
-		camel_folder_get_full_name (folder));
-
-	if (!folder_id) {
-		g_set_error (error, CAMEL_STORE_ERROR, CAMEL_STORE_ERROR_NO_FOLDER, _("No such folder: %s"),
-			camel_folder_get_full_name (folder));
-
-		g_clear_object (&o365_store_summary);
-		g_clear_object (&cnc);
-
-		return NULL;
-	}
+	folder_id = camel_o365_folder_get_id (o365_folder);
 
 	g_mutex_lock (&o365_folder->priv->get_message_lock);
 
@@ -530,10 +564,8 @@ o365_folder_get_message_sync (CamelFolder *folder,
 		}
 	}
 
-	g_clear_object (&o365_store_summary);
 	g_clear_object (&cache_stream);
 	g_clear_object (&cnc);
-	g_free (folder_id);
 
 	if (remove_from_hash) {
 		g_mutex_lock (&o365_folder->priv->get_message_lock);
@@ -546,13 +578,72 @@ o365_folder_get_message_sync (CamelFolder *folder,
 }
 
 static gboolean
-o365_folder_is_system_user_flag (const gchar *name)
+o365_folder_append_message_sync (CamelFolder *folder,
+				 CamelMimeMessage *message,
+				 CamelMessageInfo *info,
+				 gchar **appended_uid,
+				 GCancellable *cancellable,
+				 GError **error)
 {
-	if (!name)
+	/* Cannot put existing messages from other providers, because:
+	   1) those are always set as drafts
+	   2) the set sentDateTime property is not respected
+	   3) internetMessageHeaders is limited to 5! headers only:
+	      {
+		"error": {
+			"code": "InvalidInternetMessageHeaderCollection",
+			"message": "Maximum number of headers in one message should be less than or equal to 5.",
+			"innerError": {
+				"date": "2020-07-01T10:03:34",
+				"request-id": "a46da0ea-8933-43c6-932d-7c751f226516"
+			}
+		}
+	      }
+	   4) there are likely to be more limitations on the graph API, not spotted yet.
+
+	   There is opened a feture request, which may eventually fix this, but it's currently not done yet (as of 2020-07-01):
+	   https://microsoftgraph.uservoice.com/forums/920506-microsoft-graph-feature-requests/suggestions/35049175-put-edit-mime-email-content-with-microsoft-graph
+
+	   Thus just error out for now.
+	*/
+
+#ifdef ENABLE_MAINTAINER_MODE /* Only for easier testing */
+	CamelStore *parent_store;
+	CamelO365Store *o365_store;
+	EO365Connection *cnc = NULL;
+	gboolean success;
+	GError *local_error = NULL;
+
+	parent_store = camel_folder_get_parent_store (folder);
+
+	if (!CAMEL_IS_O365_STORE (parent_store)) {
+		g_set_error_literal (error, CAMEL_FOLDER_ERROR, CAMEL_FOLDER_ERROR_INVALID_STATE,
+			_("Invalid folder state (missing parent store)"));
+		return FALSE;
+	}
+
+	o365_store = CAMEL_O365_STORE (parent_store);
+
+	if (!camel_o365_store_ensure_connected (o365_store, &cnc, cancellable, error))
 		return FALSE;
 
-	return g_str_equal (name, "receipt-handled") ||
-		g_str_equal (name, "$has-cal");
+	success = camel_o365_utils_create_message_sync (cnc, camel_o365_folder_get_id (CAMEL_O365_FOLDER (folder)),
+		message, info, FALSE, appended_uid, cancellable, &local_error);
+
+	g_clear_object (&cnc);
+
+	if (!success)
+		camel_o365_store_maybe_disconnect (o365_store, local_error);
+
+	if (local_error)
+		g_propagate_error (error, local_error);
+
+	return success;
+#else
+	g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+		_("Cannot add messages into an Office 365 account from another account. Only messages from the same account can be moved/copied between the Office 365 folders."));
+	return FALSE;
+#endif
 }
 
 static gboolean
@@ -577,11 +668,10 @@ o365_folder_merge_server_user_flags (CamelMessageInfo *mi,
 	user_flags = camel_message_info_get_user_flags (mi);
 	len = camel_named_flags_get_length (user_flags);
 
-	/* transfer camel flags to a list */
 	for (ii = 0; ii < len; ii++) {
 		const gchar *name = camel_named_flags_get (user_flags, ii);
 
-		if (!o365_folder_is_system_user_flag (name))
+		if (!camel_o365_utils_is_system_user_flag (name))
 			g_hash_table_insert (current_labels, (gpointer) name, NULL);
 	}
 
@@ -720,6 +810,10 @@ o365_folder_new_message_info_from_mail_message (CamelFolder *folder,
 	CamelMessageInfo *mi = NULL;
 	CamelNameValueArray *headers = NULL;
 	JsonArray *json_headers;
+	EO365Recipient *from;
+	const gchar *ctmp;
+	time_t tt;
+	gchar *tmp;
 
 	g_return_val_if_fail (CAMEL_IS_FOLDER (folder), NULL);
 	g_return_val_if_fail (mail != NULL, NULL);
@@ -750,89 +844,80 @@ o365_folder_new_message_info_from_mail_message (CamelFolder *folder,
 		}
 	}
 
-	if (!mi) {
-		EO365Recipient *from;
-		const gchar *ctmp;
-		time_t tt;
-		gchar *tmp;
-
+	if (!mi)
 		mi = camel_message_info_new (camel_folder_get_folder_summary (folder));
 
-		camel_message_info_set_abort_notifications (mi, TRUE);
+	camel_message_info_set_abort_notifications (mi, TRUE);
 
-		ctmp = e_o365_mail_message_get_subject (mail);
+	ctmp = e_o365_mail_message_get_subject (mail);
 
-		if (ctmp)
-			camel_message_info_set_subject	(mi, ctmp);
+	if (ctmp)
+		camel_message_info_set_subject	(mi, ctmp);
 
-		from = e_o365_mail_message_get_from (mail);
+	from = e_o365_mail_message_get_from (mail);
 
-		if (from) {
-			const gchar *name, *address;
+	if (from) {
+		const gchar *name, *address;
 
-			name = e_o365_recipient_get_name (from);
-			address = e_o365_recipient_get_address (from);
+		name = e_o365_recipient_get_name (from);
+		address = e_o365_recipient_get_address (from);
 
-			if (address && *address) {
-				tmp = camel_internet_address_format_address (name, address);
+		if (address && *address) {
+			tmp = camel_internet_address_format_address (name, address);
 
-				if (tmp) {
-					camel_message_info_set_from (mi, tmp);
+			if (tmp) {
+				camel_message_info_set_from (mi, tmp);
 
-					g_free (tmp);
-				}
+				g_free (tmp);
 			}
 		}
-
-		tmp = o365_folder_recipients_as_string (e_o365_mail_message_get_to_recipients (mail));
-
-		if (tmp) {
-			camel_message_info_set_to (mi, tmp);
-			g_free (tmp);
-		}
-
-		tmp = o365_folder_recipients_as_string (e_o365_mail_message_get_cc_recipients (mail));
-
-		if (tmp) {
-			camel_message_info_set_cc (mi, tmp);
-			g_free (tmp);
-		}
-
-		tt = e_o365_mail_message_get_sent_date_time (mail);
-
-		if (tt)
-			camel_message_info_set_date_sent (mi, (gint64) tt);
-
-		tt = e_o365_mail_message_get_received_date_time (mail);
-
-		if (tt)
-			camel_message_info_set_date_received (mi, (gint64) tt);
-
-		ctmp = e_o365_mail_message_get_internet_message_id (mail);
-
-		if (ctmp && *ctmp) {
-			GChecksum *checksum;
-			CamelSummaryMessageID message_id;
-			guint8 *digest;
-			gsize length;
-
-			length = g_checksum_type_get_length (G_CHECKSUM_MD5);
-			digest = g_alloca (length);
-
-			checksum = g_checksum_new (G_CHECKSUM_MD5);
-			g_checksum_update (checksum, (const guchar *) ctmp, -1);
-			g_checksum_get_digest (checksum, digest, &length);
-			g_checksum_free (checksum);
-
-			memcpy (message_id.id.hash, digest, sizeof (message_id.id.hash));
-
-			camel_message_info_set_message_id (mi, message_id.id.id);
-		}
-
-		camel_message_info_set_abort_notifications (mi, FALSE);
 	}
 
-	camel_message_info_set_abort_notifications (mi, TRUE);
+	tmp = o365_folder_recipients_as_string (e_o365_mail_message_get_to_recipients (mail));
+
+	if (tmp) {
+		camel_message_info_set_to (mi, tmp);
+		g_free (tmp);
+	}
+
+	tmp = o365_folder_recipients_as_string (e_o365_mail_message_get_cc_recipients (mail));
+
+	if (tmp) {
+		camel_message_info_set_cc (mi, tmp);
+		g_free (tmp);
+	}
+
+	tt = e_o365_mail_message_get_sent_date_time (mail);
+
+	if (tt)
+		camel_message_info_set_date_sent (mi, (gint64) tt);
+
+	tt = e_o365_mail_message_get_received_date_time (mail);
+
+	if (tt)
+		camel_message_info_set_date_received (mi, (gint64) tt);
+
+	ctmp = e_o365_mail_message_get_internet_message_id (mail);
+
+	if (ctmp && *ctmp) {
+		GChecksum *checksum;
+		CamelSummaryMessageID message_id;
+		guint8 *digest;
+		gsize length;
+
+		length = g_checksum_type_get_length (G_CHECKSUM_MD5);
+		digest = g_alloca (length);
+
+		checksum = g_checksum_new (G_CHECKSUM_MD5);
+		g_checksum_update (checksum, (const guchar *) ctmp, -1);
+		g_checksum_get_digest (checksum, digest, &length);
+		g_checksum_free (checksum);
+
+		memcpy (message_id.id.hash, digest, sizeof (message_id.id.hash));
+
+		camel_message_info_set_message_id (mi, message_id.id.id);
+	}
+
 	camel_message_info_set_uid (mi, e_o365_mail_message_get_id (mail));
 
 	if (headers)
@@ -925,21 +1010,24 @@ o365_folder_refresh_info_sync (CamelFolder *folder,
 	CamelO365Folder *o365_folder;
 	CamelO365FolderSummary *o365_folder_summary;
 	CamelO365Store *o365_store;
-	CamelO365StoreSummary *o365_store_summary;
 	CamelFolderSummary *folder_summary;
 	CamelStore *parent_store;
 	EO365Connection *cnc = NULL;
 	SummaryDeltaData sdd;
 	GError *local_error = NULL;
-	gchar *folder_id, *curr_delta_link, *new_delta_link = NULL;
+	const gchar *folder_id;
+	gchar *curr_delta_link, *new_delta_link = NULL;
 	gboolean success;
 
 	g_return_val_if_fail (CAMEL_IS_O365_FOLDER (folder), FALSE);
 
 	parent_store = camel_folder_get_parent_store (folder);
 
-	if (!parent_store)
+	if (!parent_store) {
+		g_set_error_literal (error, CAMEL_FOLDER_ERROR, CAMEL_FOLDER_ERROR_INVALID_STATE,
+			_("Invalid folder state (missing parent store)"));
 		return FALSE;
+	}
 
 	o365_folder = CAMEL_O365_FOLDER (folder);
 	o365_store = CAMEL_O365_STORE (parent_store);
@@ -947,21 +1035,7 @@ o365_folder_refresh_info_sync (CamelFolder *folder,
 	if (!camel_o365_store_ensure_connected (o365_store, &cnc, cancellable, error))
 		return FALSE;
 
-	o365_store_summary = camel_o365_store_ref_store_summary (o365_store);
-
-	folder_id = camel_o365_store_summary_dup_folder_id_for_full_name (o365_store_summary,
-		camel_folder_get_full_name (folder));
-
-	if (!folder_id) {
-		g_set_error (error, CAMEL_STORE_ERROR, CAMEL_STORE_ERROR_NO_FOLDER, _("No such folder: %s"),
-			camel_folder_get_full_name (folder));
-
-		g_clear_object (&o365_store_summary);
-		g_clear_object (&cnc);
-
-		return FALSE;
-	}
-
+	folder_id = camel_o365_folder_get_id (o365_folder);
 	folder_summary = camel_folder_get_folder_summary (folder);
 	o365_folder_summary = CAMEL_O365_FOLDER_SUMMARY (folder_summary);
 
@@ -974,6 +1048,19 @@ o365_folder_refresh_info_sync (CamelFolder *folder,
 	success = e_o365_connection_get_mail_messages_delta_sync (cnc, NULL, folder_id, O365_FETCH_SUMMARY_PROPERTIES,
 		curr_delta_link, 0, o365_folder_got_summary_messages_cb, &sdd,
 		&new_delta_link, cancellable, &local_error);
+
+	if (curr_delta_link && g_error_matches (local_error, SOUP_HTTP_ERROR, SOUP_STATUS_UNAUTHORIZED)) {
+		g_clear_error (&local_error);
+		g_clear_pointer (&curr_delta_link, g_free);
+
+		camel_o365_folder_summary_set_delta_link (o365_folder_summary, NULL);
+
+		o365_folder_forget_all_mails (o365_folder);
+
+		success = e_o365_connection_get_mail_messages_delta_sync (cnc, NULL, folder_id, O365_FETCH_SUMMARY_PROPERTIES,
+			NULL, 0, o365_folder_got_summary_messages_cb, &sdd,
+			&new_delta_link, cancellable, &local_error);
+	}
 
 	if (success && new_delta_link)
 		camel_o365_folder_summary_set_delta_link (o365_folder_summary, new_delta_link);
@@ -1000,11 +1087,9 @@ o365_folder_refresh_info_sync (CamelFolder *folder,
 		success = FALSE;
 	}
 
-	g_clear_object (&o365_store_summary);
 	g_clear_object (&cnc);
 	g_free (curr_delta_link);
 	g_free (new_delta_link);
-	g_free (folder_id);
 
 	return success;
 }
@@ -1094,6 +1179,8 @@ o365_folder_finalize (GObject *object)
 
 	g_hash_table_destroy (o365_folder->priv->get_message_hash);
 
+	g_clear_pointer (&o365_folder->priv->id, g_free);
+
 	/* Chain up to parent's method. */
 	G_OBJECT_CLASS (camel_o365_folder_parent_class)->finalize (object);
 }
@@ -1117,9 +1204,7 @@ camel_o365_folder_class_init (CamelO365FolderClass *klass)
 	folder_class->search_by_uids = o365_folder_search_by_uids;
 	folder_class->search_free = o365_folder_search_free;
 	folder_class->cmp_uids = o365_folder_cmp_uids;
-#if 0
 	folder_class->append_message_sync = o365_folder_append_message_sync;
-#endif
 	folder_class->get_message_sync = o365_folder_get_message_sync;
 	folder_class->refresh_info_sync = o365_folder_refresh_info_sync;
 #if 0
@@ -1182,6 +1267,7 @@ camel_o365_folder_new (CamelStore *store,
 	CamelFolder *folder;
 	CamelFolderSummary *folder_summary;
 	CamelO365Folder *o365_folder;
+	CamelO365StoreSummary *o365_store_summary;
 	CamelSettings *settings;
 	gboolean filter_inbox = FALSE;
 	gboolean filter_junk = FALSE;
@@ -1191,6 +1277,17 @@ camel_o365_folder_new (CamelStore *store,
 	gint offline_limit_value = 0;
 	guint32 add_folder_flags = 0;
 	gchar *state_file;
+	gchar *folder_id;
+
+	o365_store_summary = camel_o365_store_ref_store_summary (CAMEL_O365_STORE (store));
+	folder_id = camel_o365_store_summary_dup_folder_id_for_full_name (o365_store_summary, full_name);
+	g_clear_object (&o365_store_summary);
+
+	if (!folder_id) {
+		g_set_error (error, CAMEL_FOLDER_ERROR, CAMEL_FOLDER_ERROR_INVALID_PATH,
+			_("Folder “%s” doesn't correspond to any known folder"), full_name);
+		return NULL;
+	}
 
 	folder = g_object_new (CAMEL_TYPE_O365_FOLDER,
 		"display_name", display_name,
@@ -1199,6 +1296,7 @@ camel_o365_folder_new (CamelStore *store,
 		NULL);
 
 	o365_folder = CAMEL_O365_FOLDER (folder);
+	o365_folder->priv->id = folder_id;
 
 	folder_summary = camel_o365_folder_summary_new (folder);
 
@@ -1206,7 +1304,7 @@ camel_o365_folder_new (CamelStore *store,
 		g_object_unref (folder);
 		g_set_error (
 			error, CAMEL_ERROR, CAMEL_ERROR_GENERIC,
-			_("Could not load summary for %s"), full_name);
+			_("Could not load summary for “%s”"), full_name);
 		return NULL;
 	}
 
@@ -1280,4 +1378,12 @@ camel_o365_folder_new (CamelStore *store,
 	o365_folder->priv->search = camel_folder_search_new ();
 
 	return folder;
+}
+
+const gchar *
+camel_o365_folder_get_id (CamelO365Folder *o365_folder)
+{
+	g_return_val_if_fail (CAMEL_IS_O365_FOLDER (o365_folder), NULL);
+
+	return o365_folder->priv->id;
 }

@@ -1111,6 +1111,38 @@ camel_o365_store_summary_get_folder_is_public (CamelO365StoreSummary *store_summ
 	return value;
 }
 
+GSList * /* gchar * */
+camel_o365_store_summary_list_folder_ids (CamelO365StoreSummary *store_summary)
+{
+	GSList *ids = NULL;
+	gchar **groups;
+	gint ii;
+
+	g_return_val_if_fail (CAMEL_IS_O365_STORE_SUMMARY (store_summary), NULL);
+
+	LOCK (store_summary);
+
+	groups = g_key_file_get_groups (store_summary->priv->key_file, NULL);
+
+	for (ii = 0; groups[ii]; ii++) {
+		gchar *group = groups[ii];
+
+		if (g_ascii_strcasecmp (group, STORE_GROUP_NAME) != 0 &&
+		    g_key_file_has_key (store_summary->priv->key_file, group, "DisplayName", NULL)) {
+			ids = g_slist_prepend (ids, group);
+		} else {
+			g_free (group);
+		}
+	}
+
+	UNLOCK (store_summary);
+
+	/* The array items are moved into the 'ids' GSList or freed */
+	g_free (groups);
+
+	return ids;
+}
+
 CamelFolderInfo *
 camel_o365_store_summary_build_folder_info_for_id (CamelO365StoreSummary *store_summary,
 						   const gchar *id)

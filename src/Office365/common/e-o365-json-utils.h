@@ -23,20 +23,13 @@
 
 G_BEGIN_DECLS
 
-typedef enum _EO365InferenceClassificationType {
-	E_O365_INFERENCE_CLASSIFICATION_NOT_SET,
-	E_O365_INFERENCE_CLASSIFICATION_UNKNOWN,
-	E_O365_INFERENCE_CLASSIFICATION_FOCUSED,
-	E_O365_INFERENCE_CLASSIFICATION_OTHER
-} EO365InferenceClassificationType;
-
-typedef enum _EO365ImportanceType {
-	E_O365_IMPORTANCE_NOT_SET,
-	E_O365_IMPORTANCE_UNKNOWN,
-	E_O365_IMPORTANCE_LOW,
-	E_O365_IMPORTANCE_NORMAL,
-	E_O365_IMPORTANCE_HIGH
-} EO365ImportanceType;
+typedef enum _EO365AttachmentDataType {
+	E_O365_ATTACHMENT_DATA_TYPE_NOT_SET,
+	E_O365_ATTACHMENT_DATA_TYPE_UNKNOWN,
+	E_O365_ATTACHMENT_DATA_TYPE_FILE,
+	E_O365_ATTACHMENT_DATA_TYPE_ITEM,
+	E_O365_ATTACHMENT_DATA_TYPE_REFERENCE
+} EO365AttachmentDataType;
 
 typedef enum _EO365FollowupFlagStatusType {
 	E_O365_FOLLOWUP_FLAG_STATUS_NOT_SET,
@@ -46,6 +39,21 @@ typedef enum _EO365FollowupFlagStatusType {
 	E_O365_FOLLOWUP_FLAG_STATUS_FLAGGED
 } EO365FollowupFlagStatusType;
 
+typedef enum _EO365ImportanceType {
+	E_O365_IMPORTANCE_NOT_SET,
+	E_O365_IMPORTANCE_UNKNOWN,
+	E_O365_IMPORTANCE_LOW,
+	E_O365_IMPORTANCE_NORMAL,
+	E_O365_IMPORTANCE_HIGH
+} EO365ImportanceType;
+
+typedef enum _EO365InferenceClassificationType {
+	E_O365_INFERENCE_CLASSIFICATION_NOT_SET,
+	E_O365_INFERENCE_CLASSIFICATION_UNKNOWN,
+	E_O365_INFERENCE_CLASSIFICATION_FOCUSED,
+	E_O365_INFERENCE_CLASSIFICATION_OTHER
+} EO365InferenceClassificationType;
+
 typedef enum _EO365ItemBodyContentTypeType {
 	E_O365_ITEM_BODY_CONTENT_TYPE_NOT_SET,
 	E_O365_ITEM_BODY_CONTENT_TYPE_UNKNOWN,
@@ -54,6 +62,7 @@ typedef enum _EO365ItemBodyContentTypeType {
 } EO365ItemBodyContentTypeType;
 
 /* Just for better readability */
+#define EO365Attachment			JsonObject
 #define EO365Category			JsonObject
 #define EO365DateTimeWithZone		JsonObject
 #define EO365FollowupFlag		JsonObject
@@ -65,26 +74,49 @@ typedef enum _EO365ItemBodyContentTypeType {
 
 JsonArray *	e_o365_json_get_array_member		(JsonObject *object,
 							 const gchar *member_name);
+void		e_o365_json_begin_array_member		(JsonBuilder *builder,
+							 const gchar *member_name);
+void		e_o365_json_end_array_member		(JsonBuilder *builder);
 gboolean	e_o365_json_get_boolean_member		(JsonObject *object,
 							 const gchar *member_name,
 							 gboolean default_value);
+void		e_o365_json_add_boolean_member		(JsonBuilder *builder,
+							 const gchar *member_name,
+							 gboolean value);
 gdouble		e_o365_json_get_double_member		(JsonObject *object,
 							 const gchar *member_name,
 							 gdouble default_value);
+void		e_o365_json_add_double_member		(JsonBuilder *builder,
+							 const gchar *member_name,
+							 gdouble value);
 gint64		e_o365_json_get_int_member		(JsonObject *object,
 							 const gchar *member_name,
 							 gint64 default_value);
+void		e_o365_json_add_int_member		(JsonBuilder *builder,
+							 const gchar *member_name,
+							 gint64 value);
 gboolean	e_o365_json_get_null_member		(JsonObject *object,
 							 const gchar *member_name,
 							 gboolean default_value);
+void		e_o365_json_add_null_member		(JsonBuilder *builder,
+							 const gchar *member_name);
 JsonObject *	e_o365_json_get_object_member		(JsonObject *object,
 							 const gchar *member_name);
+void		e_o365_json_begin_object_member		(JsonBuilder *builder,
+							 const gchar *member_name);
+void		e_o365_json_end_object_member		(JsonBuilder *builder);
 const gchar *	e_o365_json_get_string_member		(JsonObject *object,
 							 const gchar *member_name,
 							 const gchar *default_value);
+void		e_o365_json_add_string_member		(JsonBuilder *builder,
+							 const gchar *member_name,
+							 const gchar *value);
 
 time_t		e_o365_get_date_time_offset_member	(JsonObject *object,
 							 const gchar *member_name);
+void		e_o365_add_date_time_offset_member	(JsonBuilder *builder,
+							 const gchar *member_name,
+							 time_t value);
 
 gboolean	e_o365_delta_is_removed_object		(JsonObject *object);
 
@@ -100,34 +132,72 @@ gint32		e_o365_mail_folder_get_child_folder_count
 gint32		e_o365_mail_folder_get_total_item_count	(EO365MailFolder *folder);
 gint32		e_o365_mail_folder_get_unread_item_count(EO365MailFolder *folder);
 
-const gchar *	e_o365_recipient_get_address		(EO365Recipient *recipient);
 const gchar *	e_o365_recipient_get_name		(EO365Recipient *recipient);
+const gchar *	e_o365_recipient_get_address		(EO365Recipient *recipient);
+void		e_o365_add_recipient			(JsonBuilder *builder,
+							 const gchar *member_name,
+							 const gchar *name,
+							 const gchar *address);
 
 time_t		e_o365_date_time_get_date_time		(EO365DateTimeWithZone *datetime);
 const gchar *	e_o365_date_time_get_time_zone		(EO365DateTimeWithZone *datetime);
+void		e_o365_add_date_time			(JsonBuilder *builder,
+							 const gchar *member_name,
+							 time_t date_time,
+							 const gchar *zone);
 
 const gchar *	e_o365_internet_message_header_get_name	(EO365InternetMessageHeader *header);
 const gchar *	e_o365_internet_message_header_get_value(EO365InternetMessageHeader *header);
+void		e_o365_add_internet_message_header	(JsonBuilder *builder,
+							 const gchar *name,
+							 const gchar *value);
 
 EO365DateTimeWithZone *
 		e_o365_followup_flag_get_completed_date_time
 							(EO365FollowupFlag *flag);
+void		e_o365_followup_flag_add_completed_date_time
+							(JsonBuilder *builder,
+							 time_t date_time,
+							 const gchar *zone);
 EO365DateTimeWithZone *
 		e_o365_followup_flag_get_due_date_time	(EO365FollowupFlag *flag);
+void		e_o365_followup_flag_add_due_date_time	(JsonBuilder *builder,
+							 time_t date_time,
+							 const gchar *zone);
 EO365FollowupFlagStatusType
 		e_o365_followup_flag_get_flag_status	(EO365FollowupFlag *flag);
+void		e_o365_followup_flag_add_flag_status	(JsonBuilder *builder,
+							 EO365FollowupFlagStatusType status);
 EO365DateTimeWithZone *
 		e_o365_followup_flag_get_start_date_time(EO365FollowupFlag *flag);
+void		e_o365_followup_flag_add_start_date_time(JsonBuilder *builder,
+							 time_t date_time,
+							 const gchar *zone);
 
 const gchar *	e_o365_item_body_get_content		(EO365ItemBody *item_body);
 EO365ItemBodyContentTypeType
 		e_o365_item_body_get_content_type	(EO365ItemBody *item_body);
+void		e_o365_add_item_body			(JsonBuilder *builder,
+							 const gchar *member_name,
+							 EO365ItemBodyContentTypeType content_type,
+							 const gchar *content);
 
 JsonArray *	e_o365_mail_message_get_bcc_recipients	(EO365MailMessage *mail); /* EO365Recipient * */
+void		e_o365_mail_message_begin_bcc_recipients(JsonBuilder *builder);
+void		e_o365_mail_message_end_bcc_recipients	(JsonBuilder *builder);
 EO365ItemBody *	e_o365_mail_message_get_body		(EO365MailMessage *mail);
+void		e_o365_mail_message_add_body		(JsonBuilder *builder,
+							 EO365ItemBodyContentTypeType content_type,
+							 const gchar *content);
 const gchar *	e_o365_mail_message_get_body_preview	(EO365MailMessage *mail);
 JsonArray *	e_o365_mail_message_get_categories	(EO365MailMessage *mail); /* const gchar * */
+void		e_o365_mail_message_begin_categories	(JsonBuilder *builder);
+void		e_o365_mail_message_end_categories	(JsonBuilder *builder);
+void		e_o365_mail_message_add_category	(JsonBuilder *builder,
+							 const gchar *category);
 JsonArray *	e_o365_mail_message_get_cc_recipients	(EO365MailMessage *mail); /* EO365Recipient * */
+void		e_o365_mail_message_begin_cc_recipients	(JsonBuilder *builder);
+void		e_o365_mail_message_end_cc_recipients	(JsonBuilder *builder);
 const gchar *	e_o365_mail_message_get_change_key	(EO365MailMessage *mail);
 const gchar *	e_o365_mail_message_get_conversation_id	(EO365MailMessage *mail);
 JsonObject *	e_o365_mail_message_get_conversation_index
@@ -136,37 +206,103 @@ time_t		e_o365_mail_message_get_created_date_time
 							(EO365MailMessage *mail);
 EO365FollowupFlag *
 		e_o365_mail_message_get_flag		(EO365MailMessage *mail);
+void		e_o365_mail_message_begin_flag		(JsonBuilder *builder);
+void		e_o365_mail_message_end_flag		(JsonBuilder *builder);
 EO365Recipient *
 		e_o365_mail_message_get_from		(EO365MailMessage *mail);
+void		e_o365_mail_message_add_from		(JsonBuilder *builder,
+							 const gchar *name,
+							 const gchar *address);
 gboolean	e_o365_mail_message_get_has_attachments	(EO365MailMessage *mail);
 const gchar *	e_o365_mail_message_get_id		(EO365MailMessage *mail);
 EO365ImportanceType
 		e_o365_mail_message_get_importance	(EO365MailMessage *mail);
+void		e_o365_mail_message_add_importance	(JsonBuilder *builder,
+							 EO365ImportanceType importance);
 EO365InferenceClassificationType
 		e_o365_mail_message_get_inference_classification
 							(EO365MailMessage *mail);
 JsonArray *	e_o365_mail_message_get_internet_message_headers
 							(EO365MailMessage *mail); /* EO365InternetMessageHeader * */
+void		e_o365_mail_message_begin_internet_message_headers
+							(JsonBuilder *builder);
+void		e_o365_mail_message_end_internet_message_headers
+							(JsonBuilder *builder);
 const gchar *	e_o365_mail_message_get_internet_message_id
 							(EO365MailMessage *mail);
+void		e_o365_mail_message_add_internet_message_id
+							(JsonBuilder *builder,
+							 const gchar *message_id);
 gboolean	e_o365_mail_message_get_is_delivery_receipt_requested
 							(EO365MailMessage *mail);
+void		e_o365_mail_message_add_is_delivery_receipt_requested
+							(JsonBuilder *builder,
+							 gboolean value);
 gboolean	e_o365_mail_message_get_is_draft	(EO365MailMessage *mail);
 gboolean	e_o365_mail_message_get_is_read		(EO365MailMessage *mail);
+void		e_o365_mail_message_add_is_read		(JsonBuilder *builder,
+							 gboolean value);
 gboolean	e_o365_mail_message_get_is_read_receipt_requested
 							(EO365MailMessage *mail);
+void		e_o365_mail_message_add_is_read_receipt_requested
+							(JsonBuilder *builder,
+							 gboolean value);
 time_t		e_o365_mail_message_get_last_modified_date_time
 							(EO365MailMessage *mail);
 const gchar *	e_o365_mail_message_get_parent_folder_id(EO365MailMessage *mail);
 time_t		e_o365_mail_message_get_received_date_time
 							(EO365MailMessage *mail);
+void		e_o365_mail_message_add_received_date_time
+							(JsonBuilder *builder,
+							 time_t value);
 JsonArray *	e_o365_mail_message_get_reply_to	(EO365MailMessage *mail); /* EO365Recipient * */
+void		e_o365_mail_message_begin_reply_to	(JsonBuilder *builder);
+void		e_o365_mail_message_end_reply_to	(JsonBuilder *builder);
 EO365Recipient *e_o365_mail_message_get_sender		(EO365MailMessage *mail);
+void		e_o365_mail_message_add_sender		(JsonBuilder *builder,
+							 const gchar *name,
+							 const gchar *address);
 time_t		e_o365_mail_message_get_sent_date_time	(EO365MailMessage *mail);
+void		e_o365_mail_message_add_sent_date_time	(JsonBuilder *builder,
+							 time_t value);
 const gchar *	e_o365_mail_message_get_subject		(EO365MailMessage *mail);
+void		e_o365_mail_message_add_subject		(JsonBuilder *builder,
+							 const gchar *subject);
 JsonArray *	e_o365_mail_message_get_to_recipients	(EO365MailMessage *mail); /* EO365Recipient * */
+void		e_o365_mail_message_begin_to_recipients	(JsonBuilder *builder);
+void		e_o365_mail_message_end_to_recipients	(JsonBuilder *builder);
 EO365ItemBody *	e_o365_mail_message_get_unique_body	(EO365MailMessage *mail);
 const gchar *	e_o365_mail_message_get_web_link	(EO365MailMessage *mail);
+
+EO365AttachmentDataType
+		e_o365_attachment_get_data_type		(EO365Attachment *attachment);
+void		e_o365_attachment_begin_attachment	(JsonBuilder *builder,
+							 EO365AttachmentDataType data_type);
+void		e_o365_attachment_end_attachment	(JsonBuilder *builder);
+const gchar *	e_o365_attachment_get_content_type	(EO365Attachment *attachment);
+void		e_o365_attachment_add_content_type	(JsonBuilder *builder,
+							 const gchar *value);
+const gchar *	e_o365_attachment_get_id		(EO365Attachment *attachment);
+gboolean	e_o365_attachment_get_is_inline		(EO365Attachment *attachment);
+void		e_o365_attachment_add_is_inline		(JsonBuilder *builder,
+							 gboolean value);
+time_t		e_o365_attachment_get_last_modified_date_time
+							(EO365Attachment *attachment);
+void		e_o365_attachment_add_last_modified_date_time
+							(JsonBuilder *builder,
+							 time_t value);
+const gchar *	e_o365_attachment_get_name		(EO365Attachment *attachment);
+void		e_o365_attachment_add_name		(JsonBuilder *builder,
+							 const gchar *value);
+gint32		e_o365_attachment_get_size		(EO365Attachment *attachment);
+void		e_o365_attachment_add_size		(JsonBuilder *builder,
+							 gint32 value);
+const gchar *	e_o365_file_attachment_get_content_bytes(EO365Attachment *attachment); /* base64-encoded */
+void		e_o365_file_attachment_add_content_bytes(JsonBuilder *builder,
+							 const gchar *base64_value);
+const gchar *	e_o365_file_attachment_get_content_id	(EO365Attachment *attachment);
+void		e_o365_file_attachment_add_content_id	(JsonBuilder *builder,
+							 const gchar *value);
 
 G_END_DECLS
 
