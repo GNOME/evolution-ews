@@ -2621,13 +2621,13 @@ e_o365_connection_create_mail_message_sync (EO365Connection *cnc,
 /* https://docs.microsoft.com/en-us/graph/api/message-post-attachments?view=graph-rest-1.0&tabs=http */
 
 gboolean
-e_o365_connection_add_mail_message_attachment (EO365Connection *cnc,
-					       const gchar *user_override, /* for which user, NULL to use the account user */
-					       const gchar *message_id, /* the message to add it to */
-					       JsonBuilder *attachment, /* filled attachment object */
-					       gchar **out_attachment_id,
-					       GCancellable *cancellable,
-					       GError **error)
+e_o365_connection_add_mail_message_attachment_sync (EO365Connection *cnc,
+						    const gchar *user_override, /* for which user, NULL to use the account user */
+						    const gchar *message_id, /* the message to add it to */
+						    JsonBuilder *attachment, /* filled attachment object */
+						    gchar **out_attachment_id,
+						    GCancellable *cancellable,
+						    GError **error)
 {
 	SoupMessage *message = NULL;
 	JsonObject *added_attachment = NULL;

@@ -904,7 +904,7 @@ camel_o365_utils_create_message_sync (EO365Connection *cnc,
 
 			e_o365_json_end_object_member (builder);
 
-			success = e_o365_connection_add_mail_message_attachment (cnc, NULL, message_id, builder, NULL, cancellable, error);
+			success = e_o365_connection_add_mail_message_attachment_sync (cnc, NULL, message_id, builder, NULL, cancellable, error);
 
 			g_object_unref (builder);
 		}

@@ -244,7 +244,7 @@ gboolean	e_o365_connection_create_mail_message_sync
 						 EO365MailMessage **out_appended_message, /* free with json_object_unref() */
 						 GCancellable *cancellable,
 						 GError **error);
-gboolean	e_o365_connection_add_mail_message_attachment
+gboolean	e_o365_connection_add_mail_message_attachment_sync
 						(EO365Connection *cnc,
 						 const gchar *user_override, /* for which user, NULL to use the account user */
 						 const gchar *message_id, /* the message to add it to */
